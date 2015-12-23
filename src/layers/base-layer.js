@@ -42,7 +42,8 @@ export default class BaseLayer {
     this.height = opts.height || this._throwUndefinedError('height');
     this.layerIndex = opts.layerIndex || 0;
 
-    this.opacity = opts.opacity || 0.8;
+    // apply gamma to opacity to make it visually "linear"
+    this.opacity = Math.pow(opts.opacity || 0.8, 1 / 2.2);
     this.isPickable = opts.isPickable || false;
     this.numInstances = this.data.length || 1e5;
 

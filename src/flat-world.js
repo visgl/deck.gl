@@ -118,7 +118,7 @@ const flatWorld = module.exports = {
 
   getBlending: function getBlending() {
     return {
-      enable: false,
+      enable: true,
       blendFunc: ['SRC_ALPHA', 'ZERO'],
       blendEquation: 'FUNC_ADD'
     };
