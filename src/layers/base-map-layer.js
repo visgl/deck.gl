@@ -20,7 +20,7 @@
 
 import BaseLayer from './base-layer';
 import flatWorld from '../flat-world';
-import MercatorProjector from 'viewport-mercator-project';
+import ViewportMercator from 'viewport-mercator-project';
 
 export default class BaseMapLayer extends BaseLayer {
   /**
@@ -32,30 +32,46 @@ export default class BaseMapLayer extends BaseLayer {
    *
    * @class
    * @param {object} opts
-   * @param {string} opts.mapState - mapState from MapboxGL
+   * @param {number} opts.width - viewport width, synced with MapboxGL
+   * @param {number} opts.height - viewport width, synced with MapboxGL
+   * @param {string} opts.latitude - latitude of map center from MapboxGL
+   * @param {string} opts.longitude - longitude of map center from MapboxGL
+   * @param {string} opts.zoom - zoom level of map from MapboxGL
    */
   constructor(opts) {
     super(opts);
 
-    this.mapState = opts.mapState || this._throwUndefinedError('mapState');
-    this.mercator = MercatorProjector({
-      center: [opts.mapState.longitude, opts.mapState.latitude],
-      zoom: opts.mapState.zoom,
-      tileSize: 512,
-      dimensions: [opts.width, opts.height]
+    this.width = opts.width || this._throwUndefinedError('width');
+    this.height = opts.height || this._throwUndefinedError('height');
+    this.latitude = opts.latitude || this._throwUndefinedError('latitude');
+    this.longitude = opts.longitude || this._throwUndefinedError('longitude');
+    this.zoom = opts.zoom || this._throwUndefinedError('zoom');
+
+    this.cache = {
+      ...this.cache,
+      tileCoordinate: null,
+      initialLatitude: this.cache.initialLatitude || this.latitude,
+      initialLongitude: this.cache.initialLongitude || this.longitude,
+      initialZoom: this.cache.initialZoom || this.zoom
+    };
+
+    const {width, height, latitude, longitude, zoom} = this;
+    this._mercator = ViewportMercator({
+      width, height, latitude, longitude, zoom,
+      tileSize: 512
     });
-    this.cameraHeight = flatWorld.getCameraHeight();
   }
 
   project(latLng) {
-    const pixel = this.mercator.project([latLng[1], latLng[0]]);
-    return {
-      x: pixel[0],
-      y: pixel[1]
-    };
+    const [x, y] = this._mercator.project([latLng[1], latLng[0]]);
+    return {x, y};
   }
 
   screenToSpace(x, y) {
+    return flatWorld.screenToSpace(x, y, this.width, this.height);
+  }
+
+  tileToScreen(x, y) {
     return flatWorld.screenToSpace(x, y, this.width, this.height);
   }
 

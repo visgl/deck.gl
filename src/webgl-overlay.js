@@ -18,81 +18,137 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import React from 'react';
-import PhiloGLOverlay from './philogl-renderer';
+import React, {PropTypes} from 'react';
+import PhiloGLOverlay from './philogl-overlay-alt';
 import flatWorld from './flat-world';
+import where from 'lodash.where';
+import isEqual from 'lodash.isequal';
 
-const displayName = 'WebGLOverlay';
-
-const propTypes = {
-  width: React.PropTypes.number.isRequired,
-  height: React.PropTypes.number.isRequired,
-  layers: React.PropTypes.array.isRequired,
-  mapState: React.PropTypes.object,
-  onAfterRender: React.PropTypes.func
+const DISPLAY_NAME = 'WebGLOverlay';
+const PROP_TYPES = {
+  width: PropTypes.number.isRequired,
+  height: PropTypes.number.isRequired,
+  layers: PropTypes.array.isRequired,
+  onAfterRender: PropTypes.func
 };
 
-export default class WebGLOverlay extends React.Component {
+export default class PhiloGLOverlayManager extends React.Component {
+  static get displayName() {
+    return DISPLAY_NAME;
+  }
+
+  static get propTypes() {
+    return PROP_TYPES;
+  }
+
   constructor(props) {
     super(props);
     this.state = {};
+    this.needsRedraw = true;
 
+    // function bindings
     this._handleObjectHovered = this._handleObjectHovered.bind(this);
     this._handleObjectClicked = this._handleObjectClicked.bind(this);
+    this._checkIfNeedRedraw = this._checkIfNeedRedraw.bind(this);
+    this._onRendererInitialized = this._onRendererInitialized.bind(this);
   }
 
   componentWillReceiveProps(nextProps) {
-    if (!nextProps.mapState) {
+    const {renderer} = this.state;
+    if (!renderer) {
       return;
     }
 
-    if (nextProps.mapState.latitude !== this.props.latitude ||
-        nextProps.mapState.longitude !== this.props.longitude ||
-        nextProps.mapState.zoom !== this.props.zoom) {
-      this._needUpdate = true;
+    // clear scene and repopulate based on new layers
+    renderer.scene.models = [];
+
+    nextProps.layers.forEach(layer => {
+      // 1. given a new coming layer, find its matching layer
+      const matchingLayer = this._findMatchingLayer(layer);
+      // 2. copy over props and state from cache to new layer
+      if (matchingLayer.cache) {
+        layer.cache = matchingLayer.cache;
+      }
+      // 3. setup update flags, used to prevent unnecessary calculations
+      // TODO, remove || true, currently set for debugging
+      layer.dataChanged = !isEqual(matchingLayer.data, layer.data) || true;
+      layer.viewportChanged =
+        !isEqual(matchingLayer.width, layer.width) ||
+        !isEqual(matchingLayer.height, layer.height) ||
+        !isEqual(matchingLayer.latitude, layer.latitude) ||
+        !isEqual(matchingLayer.longitude, layer.longitude) ||
+        !isEqual(matchingLayer.zoom, layer.zoom);
+      // 4. update new layer
+      layer.updateLayer();
+      // 5. add updated model to scene
+      renderer.scene.add(layer.getLayerModel(renderer));
+      // 6. update redraw flag
+      this.needsRedraw = this.needsRedraw ||
+        layer.dataChanged || layer.viewportChanged;
+    });
+  }
+
+  _findMatchingLayer(layer) {
+    const candidates = where(this.props.layers, {id: layer.id});
+    if (candidates.length !== 1) {
+      throw new Error(layer + ' has other than one matching layers');
     }
+    return candidates[0];
+  }
+
+  _getInitialPrograms() {
+    return this.props.layers.map(layer => layer.program);
   }
 
   _handleObjectHovered(...args) {
-    const layers = this.props.layers;
+    const {layers} = this.props;
 
     for (let i = layers.length - 1; i >= 0; --i) {
       const layer = layers[i];
-      if (layer.onObjectHovered && layer.onObjectHovered(...args)) {
+      if (layer.onObjectHovered(...args)) {
         break;
       }
     }
   }
 
   _handleObjectClicked(...args) {
-    const layers = this.props.layers;
+    const {layers} = this.props;
 
     for (let i = layers.length - 1; i >= 0; --i) {
       const layer = layers[i];
-      if (layer.onObjectClicked && layer.onObjectClicked(...args)) {
+      if (layer.onObjectClicked(...args)) {
         break;
       }
     }
   }
 
-  _updateLayers(deep) {
-    return this.props.layers.map(layer => {
-      layer.update(deep);
+  _checkIfNeedRedraw() {
+    return this.needsRedraw;
+  }
 
-      return layer.getLayerProps();
+  _onRendererInitialized(renderer) {
+    this.props.layers.forEach(layer => {
+      layer.updateLayer();
+      renderer.scene.add(layer.getLayerModel(renderer));
     });
+
+    this.setState({renderer});
   }
 
   render() {
-    if (!this.props.layers || this.props.layers.length === 0) {
+    const {
+      width, height, layers, onBeforeRenderFrame, onAfterRenderFrame
+    } = this.props;
+
+    if (!layers || layers.length === 0) {
       return null;
     }
 
-    const globalProps = {
-      width: this.props.width,
-      height: this.props.height,
+    const props = {
+      width,
+      height,
 
-      viewport: flatWorld.getViewport(this.props.width, this.props.height),
+      viewport: flatWorld.getViewport(width, height),
       camera: flatWorld.getCamera(),
       lights: flatWorld.getLighting(),
       blending: flatWorld.getBlending(),
@@ -100,22 +156,18 @@ export default class WebGLOverlay extends React.Component {
 
       events: {
         onObjectHovered: this._handleObjectHovered,
-        onObjectClicked: this._handleObjectClicked,
-        onAfterRender: this.props.onAfterRender
-      }
+        onObjectClicked: this._handleObjectClicked
+      },
+
+      initialShaders: layers.map(layer => layer.getLayerShader()),
+
+      onBeforeRenderFrame,
+      onAfterRenderFrame,
+      needRedraw: this._checkIfNeedRedraw,
+      onRendererInitialized: this._onRendererInitialized
     };
 
-    const layerSpecificProps = {
-      layers: this._updateLayers(this._needUpdate)
-    };
-
-    this._needUpdate = false;
-    // allow layerSpecificProps to overwrite globalProps
-    const props = {...globalProps, ...layerSpecificProps};
     return <PhiloGLOverlay {...props} />;
   }
 
 }
-
-WebGLOverlay.displayName = displayName;
-WebGLOverlay.propTypes = propTypes;

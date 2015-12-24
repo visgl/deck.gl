@@ -19,21 +19,8 @@
 // THE SOFTWARE.
 
 import BaseMapLayer from '../base-map-layer';
-// Note: Shaders are inlined by the glslify browserify transform
+
 const glslify = require('glslify');
-
-function dist(a, b) {
-  const diffX = a[0] - b[0];
-  const diffY = a[1] - b[1];
-  return Math.sqrt(diffX * diffX + diffY * diffY);
-}
-
-function sub(a, b) {
-  return {
-    x: a[0] - b[0],
-    y: a[1] - b[1]
-  };
-}
 
 export default class HexagonLayer extends BaseMapLayer {
   /**
@@ -61,17 +48,26 @@ export default class HexagonLayer extends BaseMapLayer {
     this.onObjectClicked = opts.onHexagonClicked;
   }
 
-  update(deep) {
-    if (deep || this._positionNeedUpdate) {
-      this._allocateGlBuffers();
-      this._calculatePositions();
+  updateLayer() {
+    if (this.dataChanged) {
+      this._allocateGLBuffers();
+      this._calculateTileCoordinates();
+      this._calculatePickingColors();
     }
-    this._calculateColors();
-    this._calculateRadiusAndAngle();
-    this._calculatePickingColors();
+
+    if (this.viewportChanged || this.dataChanged) {
+      this._calculateScreenCoordinates();
+      this._calculateRadiusAndAngle();
+    }
+
+    this.setLayerUniforms();
+    this.setLayerAttributes();
+
+    this.dataChanged = false;
+    this.viewportChanged = false;
   }
 
-  _getPrograms() {
+  getLayerShader() {
     return {
       id: this.id,
       from: 'sources',
@@ -80,7 +76,7 @@ export default class HexagonLayer extends BaseMapLayer {
     };
   }
 
-  _getPrimitive() {
+  getLayerPrimitive() {
     const NUM_SEGMENTS = 6;
     const PI2 = Math.PI * 2;
 
@@ -102,69 +98,77 @@ export default class HexagonLayer extends BaseMapLayer {
     };
   }
 
-  _getUniforms() {
-    return {
-      radius: this.radius,
-      opacity: this.opacity,
-      angle: this.angle
+  setLayerUniforms() {
+    this._uniforms = {
+      ...this._uniforms,
+      radius: this.cache.radius,
+      angle: this.cache.angle
     };
   }
 
-  _getAttributes() {
-    return {
+  setLayerAttributes() {
+    this._attributes = {
+      ...this._attributes,
       positions: {
-        value: this.glBuffers.positions,
+        value: this.cache.glBuffers.positions,
         instanced: 1,
         size: 3
       },
       colors: {
-        value: this.glBuffers.colors,
+        value: this.cache.glBuffers.colors,
         instanced: 1,
         size: 3
-      },
-      pickingColors: this.isPickable ? {
-        value: this.glBuffers.pickingColors,
-        instanced: 1,
-        size: 3
-      } : null
+      }
+    };
+
+    if (!this.isPickable) {
+      return;
+    }
+
+    this._attributes.pickingColors = {
+      value: this.cache.glBuffers.pickingColors,
+      instanced: 1,
+      size: 3
     };
   }
 
-  _getOptions() {
-    return {
-      numInstances: this.numInstances,
-      isPickable: this.isPickable
-    };
+  _allocateGLBuffers() {
+    const N = this._numInstances;
+
+    this.cache.glBuffers.positions = new Float32Array(N * 3);
+    this.cache.glBuffers.colors = new Float32Array(N * 3);
+
+    if (!this.isPickable) {
+      return;
+    }
+
+    this.cache.glBuffers.pickingColors = new Float32Array(N * 3);
   }
 
-  _allocateGlBuffers(buffer) {
-    this.glBuffers = {};
-    this.glBuffers.positions = new Float32Array(this.numInstances * 3);
-    this.glBuffers.colors = new Float32Array(this.numInstances * 3);
-    this.glBuffers.pickingColors = new Float32Array(this.numInstances * 3);
+  _calculateTileCoordinates() {
+    this.cache.tileCoordinates = this.data.map(
+      hexagon => this.project([hexagon.centroid.x, hexagon.centroid.y])
+    );
   }
 
-  _calculatePositions() {
-    this.data.forEach((hexagon, i) => {
-      const centroid = hexagon.centroid;
-      // -> screen coords
-      const pixel = this.project([centroid.x, centroid.y]);
-      // -> world coordinates
-      const space = this.screenToSpace(pixel.x, pixel.y);
+  _calculateScreenCoordinates() {
+    if (!this.cache.tileCoordinates) {
+      this._calculateTileCoordinates();
+    }
 
-      this.glBuffers.positions[i * 3 + 0] = space.x;
-      this.glBuffers.positions[i * 3 + 1] = space.y;
-      this.glBuffers.positions[i * 3 + 2] = this.elevation;
+    this.cache.tileCoordinates.forEach((tileCoord, i) => {
+      const screenCoord = this.tileToScreen(tileCoord.x, tileCoord.y);
+      this.cache.glBuffers.positions[i * 3 + 0] = screenCoord.x;
+      this.cache.glBuffers.positions[i * 3 + 1] = screenCoord.y;
+      this.cache.glBuffers.positions[i * 3 + 2] = this.elevation;
     });
-
-    this._positionNeedUpdate = false;
   }
 
   _calculateColors() {
     this.data.forEach((hexagon, i) => {
-      this.glBuffers.colors[i * 3 + 0] = hexagon.color.r;
-      this.glBuffers.colors[i * 3 + 1] = hexagon.color.g;
-      this.glBuffers.colors[i * 3 + 2] = hexagon.color.b;
+      this.cache.glBuffers.colors[i * 3 + 0] = hexagon.color.r;
+      this.cache.glBuffers.colors[i * 3 + 1] = hexagon.color.g;
+      this.cache.glBuffers.colors[i * 3 + 2] = hexagon.color.b;
     });
   }
 
@@ -173,11 +177,12 @@ export default class HexagonLayer extends BaseMapLayer {
       return;
     }
 
-    for (let i = 0; i < this.numInstances; i++) {
-      this.glBuffers.pickingColors[i * 3 + 0] = (i + 1) % 256;
-      this.glBuffers.pickingColors[i * 3 + 1] = Math.floor((i + 1) / 256) % 256;
-      this.glBuffers.pickingColors[i * 3 + 2] = this.layerIndex;
-    }
+    this.data.forEach((hexagon, i) => {
+      this.cache.glBuffers.pickingColors[i * 3 + 0] = (i + 1) % 256;
+      this.cache.glBuffers.pickingColors[i * 3 + 1] =
+        Math.floor((i + 1) / 256) % 256;
+      this.cache.glBuffers.pickingColors[i * 3 + 2] = hexagon.color.b;
+    });
   }
 
   _calculateRadiusAndAngle() {
@@ -189,24 +194,24 @@ export default class HexagonLayer extends BaseMapLayer {
     const vertex0 = vertices[0];
     const vertex3 = vertices[3];
 
-    // transform to screen coords
-    const pixel0 = this.project([vertex0[0], vertex0[1]]);
-    const pixel3 = this.project([vertex3[0], vertex3[1]]);
+    // transform to tile coordinates
+    const tileCoord0 = this.project([vertex0[0], vertex0[1]]);
+    const tileCoord3 = this.project([vertex3[0], vertex3[1]]);
 
-    // map from screen coordinates to 3D world coordinates
-    const space0 = this.screenToSpace(pixel0.x, pixel0.y);
-    const space3 = this.screenToSpace(pixel3.x, pixel3.y);
+    // map from tile coordinates to screen coordinates
+    const screenCoord0 = this.tileToScreen(tileCoord0.x, tileCoord0.y);
+    const screenCoord3 = this.tileToScreen(tileCoord3.x, tileCoord3.y);
 
-    // Vector representing distance between two close centroids
-    // Minimum distance between two hexagon centroids
-    const subSpace = sub([space0.x, space0.y], [space3.x, space3.y]);
-    const distSpace = dist([space0.x, space0.y], [space3.x, space3.y]);
+    // distance between two close centroids
+    const dx = screenCoord0.x - screenCoord3.x;
+    const dy = screenCoord0.y - screenCoord3.y;
+    const dxy = Math.sqrt(dx * dx + dy * dy);
 
     // Calculate angle that the perpendicular hexagon vertex axis is tilted
-    this.angle = Math.acos(subSpace.x / distSpace) * -Math.sign(subSpace.y);
+    this.cache.angle = Math.acos(dx / dxy) * -Math.sign(dy);
 
     // Allow user to fine tune radius
-    this.radius = distSpace / 2 * Math.min(1, this.radius);
+    this.cache.radius = dxy / 2 * Math.min(1, this.radius);
   }
 
 }
