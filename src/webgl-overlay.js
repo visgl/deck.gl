@@ -22,7 +22,6 @@ import React, {PropTypes} from 'react';
 import WebGLRenderer from './webgl-renderer';
 import flatWorld from './flat-world';
 import where from 'lodash.where';
-import isEqual from 'lodash.isequal';
 
 const DISPLAY_NAME = 'WebGLOverlay';
 const PROP_TYPES = {
@@ -70,14 +69,15 @@ export default class WebGLOverlay extends React.Component {
         layer.cache = matchingLayer.cache;
       }
       // 3. setup update flags, used to prevent unnecessary calculations
-      // TODO, remove || true, currently set for debugging
-      layer.dataChanged = !isEqual(matchingLayer.data, layer.data) || true;
+      layer.dataChanged = matchingLayer.data.length !== layer.data.length;
+      // TODO remove, currently set for debugging
+      layer.dataChanged = true;
       layer.viewportChanged =
-        !isEqual(matchingLayer.width, layer.width) ||
-        !isEqual(matchingLayer.height, layer.height) ||
-        !isEqual(matchingLayer.latitude, layer.latitude) ||
-        !isEqual(matchingLayer.longitude, layer.longitude) ||
-        !isEqual(matchingLayer.zoom, layer.zoom);
+        matchingLayer.width !== layer.width ||
+        matchingLayer.height !== layer.height ||
+        matchingLayer.latitude !== layer.latitude ||
+        matchingLayer.longitude !== layer.longitude ||
+        matchingLayer.zoom !== layer.zoom;
       // 4. update new layer
       layer.updateLayer();
       // 5. add updated model to scene
