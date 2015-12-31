@@ -21,7 +21,7 @@
 /* global console */
 /* eslint-disable no-console */
 
-import PhiloGL from './philogl-import';
+import PhiloGL from 'philogl';
 import React, {PropTypes} from 'react';
 import ReactDOM from 'react-dom';
 import throttle from 'lodash.throttle';
@@ -58,7 +58,7 @@ const DEFAULT_PROPS = {
   onError: error => console.error('PhiloGL Error: ', error)
 };
 
-export default class PhiloGLOverlay extends React.Component {
+export default class WebGLRenderer extends React.Component {
   static get displayName() {
     return DISPLAY_NAME;
   }
@@ -135,57 +135,31 @@ export default class PhiloGLOverlay extends React.Component {
   _renderPickingScene(opt) {
     const renderer = this._renderer;
 
-    Object.keys(renderer.program).forEach(programId => {
-      const program = renderer.program[programId];
-
-      if (primitive.pickable) {
-        renderer.program[primitive.program].use();
-        renderer.program[primitive.program].setUniform('enablePicking', 1);
-        opt.o3dList.push(primitive);
+    renderer.scene.models.forEach(model => {
+      const program = renderer.program[model.program];
+      if (model.pickable) {
+        program.use();
+        program.setUniform('enablePicking', 1);
+        opt.o3dList.push(model);
       }
     });
 
     renderer.scene.renderToTexture('$picking');
 
-    Object.keys(renderer.primitives).forEach(key => {
-      const primitive = renderer.primitives[key];
-
-      if (primitive.pickable) {
-        renderer.program[primitive.program].use();
-        renderer.program[primitive.program].setUniform('enablePicking', 0);
+    renderer.scene.models.forEach(model => {
+      const program = renderer.program[model.program];
+      if (model.pickable) {
+        program.use();
+        program.setUniform('enablePicking', 0);
       }
     });
   }
 
   _onClick(e) {
     const renderer = this._renderer;
-
-    Object.keys(renderer.primitives).forEach(key => {
-      const primitive = renderer.primitives[key];
-
-      renderer.scene.pick(e.x, e.y, {
-        viewport: this.props.viewport,
-        pixelRatio: this.props.pixelRatio,
-        pickingProgram: renderer.program[primitive.program]
-      });
-
-      // popup selection
-      if (this.props.events.onObjectClicked) {
-        const program = renderer.program[primitive.program];
-        const selectedIndex = primitive.selectedIndex || program.selectedIndex;
-        if (selectedIndex >= 0) {
-          this.props.events.onObjectClicked(
-            selectedIndex,
-            primitive.selectedLayerIndex || program.selectedLayerIndex,
-            e
-          );
-        }
-      }
-    });
-  }
-
-  _onMouseMove(e) {
-    const renderer = this._renderer;
+    if (!renderer || !renderer.program) {
+      return;
+    }
 
     Object.keys(renderer.program).forEach(programId => {
       const program = renderer.program[programId];
@@ -197,14 +171,34 @@ export default class PhiloGLOverlay extends React.Component {
       });
 
       // popup selection
-      if (this.props.events.onObjectHovered) {
-        if (selectedIndex >= 0) {
-          this.props.events.onObjectHovered(
-            program.selectedIndex,
-            program.selectedLayerIndex,
-            e
-          );
-        }
+      if (this.props.events.onObjectClicked && program.selectedIndex >= 0) {
+        this.props.events.onObjectClicked(
+          program.selectedIndex, program.selectedLayerIndex, e
+        );
+      }
+    });
+  }
+
+  _onMouseMove(e) {
+    const renderer = this._renderer;
+    if (!renderer || !renderer.program) {
+      return;
+    }
+
+    Object.keys(renderer.program).forEach(programId => {
+      const program = renderer.program[programId];
+
+      renderer.scene.pick(e.x, e.y, {
+        viewport: this.props.viewport,
+        pixelRatio: this.props.pixelRatio,
+        pickingProgram: program
+      });
+
+      // popup selection
+      if (this.props.events.onObjectHovered && program.selectedIndex >= 0) {
+        this.props.events.onObjectHovered(
+          program.selectedIndex, program.selectedLayerIndex, e
+        );
       }
     });
   }
@@ -217,9 +211,9 @@ export default class PhiloGLOverlay extends React.Component {
     } = this.props;
 
     this._renderer = renderer;
-    //if (!needRedraw()) {
-    //  return;
-    //}
+    if (!needRedraw()) {
+      return;
+    }
 
     const gl = renderer.gl;
 

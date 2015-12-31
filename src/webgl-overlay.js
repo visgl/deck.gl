@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 
 import React, {PropTypes} from 'react';
-import PhiloGLOverlay from './philogl-overlay-alt';
+import WebGLRenderer from './webgl-renderer';
 import flatWorld from './flat-world';
 import where from 'lodash.where';
 import isEqual from 'lodash.isequal';
@@ -32,7 +32,7 @@ const PROP_TYPES = {
   onAfterRender: PropTypes.func
 };
 
-export default class PhiloGLOverlayManager extends React.Component {
+export default class WebGLOverlay extends React.Component {
   static get displayName() {
     return DISPLAY_NAME;
   }
@@ -167,7 +167,7 @@ export default class PhiloGLOverlayManager extends React.Component {
       onRendererInitialized: this._onRendererInitialized
     };
 
-    return <PhiloGLOverlay {...props} />;
+    return <WebGLRenderer {...props} />;
   }
 
 }
