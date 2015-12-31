@@ -209,7 +209,7 @@ export default class ChoroplethLayer extends BaseMapLayer {
   _calculateContourIndices(numVertices) {
     // use vertex pairs for gl.LINES => [0, 1, 1, 2, 2, ..., n-1, n-1, 0]
     let indices = [];
-    for (var i = 1; i < numVertices - 1; i++) {
+    for (let i = 1; i < numVertices - 1; i++) {
       indices = [...indices, i, i];
     }
     return [0, ...indices, 0];
