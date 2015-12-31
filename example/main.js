@@ -35,7 +35,6 @@ import MapboxGLMap from 'react-map-gl';
 import request from 'd3-request';
 import {
   WebGLOverlay,
-  ChoroplethLayer,
   ScatterplotLayer
 } from '../src';
 
@@ -159,20 +158,6 @@ class ExampleApp extends React.Component {
     };
   }
 
-  _renderChoroplethLayer() {
-    const {mapState, choropleths} = this.props;
-    return new ChoroplethLayer({
-      id: 'choroplethLayer',
-      width: window.innerWidth,
-      height: window.innerHeight,
-      data: choropleths,
-      mapState: mapState,
-      drawContour: true,
-      onChoroplethHovered: this._handleChoroplethHovered,
-      onChoroplethClicked: this._handleChoroplethClicked
-    });
-  }
-
   _renderScatterplotLayer() {
     const {viewport, points} = this.props;
 
@@ -214,8 +199,7 @@ class ExampleApp extends React.Component {
         width={window.innerWidth}
         height={window.innerHeight}
         layers={[
-          this._renderScatterplotLayer(),
-          this._renderChoroplethLayer()
+          this._renderScatterplotLayer()
         ]}
       />
     );
