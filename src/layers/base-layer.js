@@ -39,6 +39,7 @@ export default class BaseLayer {
    * @param {function} opts.onObjectHovered(index, e) - popup selected index
    * @param {function} opts.onObjectClicked(index, e) - popup selected index
    */
+  /* eslint-disable max-statements */
   constructor(opts) {
     this.id = opts.id || this._throwUndefinedError('id');
     this.data = opts.data || this._throwUndefinedError('data');
@@ -65,6 +66,7 @@ export default class BaseLayer {
     this.viewportChanged = true;
     this.needsRedraw = true;
   }
+  /* eslint-enable max-statements */
 
   /* ------------------------------------------------------------------ */
   /* override the following functions and fill in layer specific logic */
@@ -139,7 +141,6 @@ export default class BaseLayer {
       },
 
       uniforms: this._uniforms,
-
       attributes: this._attributes
     });
 
