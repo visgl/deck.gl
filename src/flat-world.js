@@ -122,17 +122,6 @@ const flatWorld = module.exports = {
       blendFunc: ['SRC_ALPHA', 'ZERO'],
       blendEquation: 'FUNC_ADD'
     };
-  },
-
-  // projects from screen coordinates to space coordinates
-  screenToSpace(x, y, width, height) {
-    const vp = flatWorld.getViewport(width, height);
-    // We're fixing the camera zoom to map [-size, size] to screen coords
-    return {
-      x: ((x - vp.x) / vp.width - 0.5) * flatWorld.size * 2,
-      y: -((y - vp.y) / vp.height - 0.5) * flatWorld.size * 2,
-      z: 0
-    };
   }
 
 };

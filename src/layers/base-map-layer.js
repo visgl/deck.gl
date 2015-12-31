@@ -67,12 +67,14 @@ export default class BaseMapLayer extends BaseLayer {
     return {x, y};
   }
 
+  // TODO deprecate: this funtion is only used for calculating radius now
   screenToSpace(x, y) {
-    return flatWorld.screenToSpace(x, y, this.width, this.height);
-  }
-
-  tileToScreen(x, y) {
-    return flatWorld.screenToSpace(x, y, this.width, this.height);
+    const vp = this._viewport;
+    return {
+      x: ((x - vp.x) / vp.width - 0.5) * flatWorld.size * 2,
+      y: ((y - vp.y) / vp.height - 0.5) * flatWorld.size * 2 * -1,
+      z: 0
+    };
   }
 
 }
