@@ -49,19 +49,28 @@ export default class BaseMapLayer extends BaseLayer {
 
     this.cache = {
       ...this.cache,
-      tileCoordinate: null,
       initialLatitude: this.cache.initialLatitude || this.latitude,
       initialLongitude: this.cache.initialLongitude || this.longitude,
       initialZoom: this.cache.initialZoom || this.zoom
     };
 
     const {width, height, latitude, longitude, zoom} = this;
+    this._viewport = flatWorld.getViewport(width, height);
+
+    const {x, y} = this._viewport;
+    this._uniforms = {
+      ...this._uniforms,
+      viewport: [x, y, width, height],
+      mapViewport: [longitude, latitude, zoom, flatWorld.size]
+    };
+
     this._mercator = ViewportMercator({
       width, height, latitude, longitude, zoom,
       tileSize: 512
     });
   }
 
+  // TODO deprecate: this funtion is only used for calculating radius now
   project(latLng) {
     const [x, y] = this._mercator.project([latLng[1], latLng[0]]);
     return {x, y};

@@ -176,8 +176,8 @@ class ExampleApp extends React.Component {
         const coords = coordString.slice(p0, p1).split(',');
         return {
           position: {
-            x: Number(coords[0]),
-            y: Number(coords[1]),
+            x: Number(coords[1]),
+            y: Number(coords[0]),
             z: 10
           },
           color: [35, 81, 128]

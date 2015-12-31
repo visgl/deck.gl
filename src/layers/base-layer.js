@@ -58,7 +58,7 @@ export default class BaseLayer {
     this._attributes = {};
     this._numInstances = this.data.length || 0;
 
-    this.cache = {glBuffers: {}};
+    this.cache = {};
     this.onObjectHovered = () => {};
     this.onObjectClicked = () => {};
 
