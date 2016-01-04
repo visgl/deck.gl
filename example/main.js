@@ -35,6 +35,7 @@ import MapboxGLMap from 'react-map-gl';
 import request from 'd3-request';
 import {
   WebGLOverlay,
+  HexagonLayer,
   ScatterplotLayer
 } from '../src';
 
@@ -48,6 +49,7 @@ const INITIAL_STATE = {
     zoom: 11.5
   },
   choropleths: null,
+  hexagons: null,
   points: null
 };
 
@@ -58,6 +60,10 @@ function updateMap(viewport) {
 
 function loadChoropleths(choropleths) {
   return {type: 'LOAD_CHOROPLETHS', choropleths};
+}
+
+function loadHexagons(hexagons) {
+  return {type: 'LOAD_HEXAGONS', hexagons};
 }
 
 function loadPoints(points) {
@@ -71,6 +77,8 @@ function reducer(state = INITIAL_STATE, action) {
     return {...state, viewport: action.viewport};
   case 'LOAD_CHOROPLETHS':
     return {...state, choropleths: action.choropleths};
+  case 'LOAD_HEXAGONS':
+    return {...state, hexagons: action.hexagons};
   case 'LOAD_POINTS':
     return {...state, points: action.points};
   default:
@@ -83,6 +91,7 @@ function mapStateToProps(state) {
   return {
     viewport: state.viewport,
     choropleths: state.choropleths,
+    hexagons: state.hexagons,
     points: state.points
   };
 }
@@ -97,6 +106,11 @@ class ExampleApp extends React.Component {
     this._handleChoroplethsLoaded = this._handleChoroplethsLoaded.bind(this);
     this._handleChoroplethHovered = this._handleChoroplethHovered.bind(this);
     this._handleChoroplethClicked = this._handleChoroplethClicked.bind(this);
+
+    this._handleHexagonsLoaded = this._handleHexagonsLoaded.bind(this);
+    this._handleHexagonHovered = this._handleHexagonHovered.bind(this);
+    this._handleHexagonClicked = this._handleHexagonClicked.bind(this);
+
     this._handlePointsLoaded = this._handlePointsLoaded.bind(this);
 
     this._renderOverlay = this._renderOverlay.bind(this);
@@ -105,6 +119,7 @@ class ExampleApp extends React.Component {
 
   componentWillMount() {
     this._loadJsonFile('./data/sf.zip.geo.json', this._handleChoroplethsLoaded);
+    this._loadCsvFile('./data/hexagons.csv', this._handleHexagonsLoaded);
     this._loadCsvFile('./data/sf.bike.parking.csv', this._handlePointsLoaded);
   }
 
@@ -142,6 +157,18 @@ class ExampleApp extends React.Component {
     console.log(choroplethsProps.name);
   }
 
+  _handleHexagonHovered(...args) {
+    console.log(...args);
+  }
+
+  _handleHexagonClicked(...args) {
+    console.log(...args);
+  }
+
+  _handleHexagonsLoaded(data) {
+    this.props.dispatch(loadHexagons(data));
+  }
+
   _handlePointsLoaded(data) {
     this.props.dispatch(loadPoints(data));
   }
@@ -156,6 +183,47 @@ class ExampleApp extends React.Component {
       y: Number(coords[1]),
       z: 10
     };
+  }
+
+  _renderHexagonLayer() {
+    const {viewport, hexagons} = this.props;
+
+    const values = hexagons.map(hexagon => Number(hexagon.value));
+    const maxValue = Math.max(...values);
+
+    const data = hexagons.map(hexagon => ({
+      centroid: {
+        x: Number(hexagon['centroid.x']),
+        y: Number(hexagon['centroid.y'])
+      },
+      vertices: [
+        [Number(hexagon['v0.x']), Number(hexagon['v0.y'])],
+        [Number(hexagon['v1.x']), Number(hexagon['v1.y'])],
+        [Number(hexagon['v2.x']), Number(hexagon['v2.y'])],
+        [Number(hexagon['v3.x']), Number(hexagon['v3.y'])],
+        [Number(hexagon['v4.x']), Number(hexagon['v4.y'])],
+        [Number(hexagon['v5.x']), Number(hexagon['v5.y'])]
+      ],
+      color: [
+        Number(hexagon.value) / maxValue * 255,
+        Number(hexagon.value) / maxValue * 128,
+        Number(hexagon.value) / maxValue * 64
+      ]
+    }));
+
+    return new HexagonLayer({
+      id: 'hexagonLayer',
+      width: window.innerWidth,
+      height: window.innerHeight,
+      latitude: viewport.latitude,
+      longitude: viewport.longitude,
+      zoom: viewport.zoom,
+      data,
+      isPickable: true,
+      layerIndex: 1,
+      onHexagonHovered: this._handleHexagonHovered,
+      onHexagonClicked: this._handleHexagonClicked
+    });
   }
 
   _renderScatterplotLayer() {
@@ -187,10 +255,10 @@ class ExampleApp extends React.Component {
   }
 
   _renderOverlay() {
-    const {choropleths, points} = this.props;
+    const {choropleths, hexagons, points} = this.props;
 
     // wait until data is ready before rendering
-    if (!choropleths || !points) {
+    if (!choropleths || !points || !hexagons) {
       return [];
     }
 
@@ -199,6 +267,7 @@ class ExampleApp extends React.Component {
         width={window.innerWidth}
         height={window.innerHeight}
         layers={[
+          this._renderHexagonLayer(),
           this._renderScatterplotLayer()
         ]}
       />

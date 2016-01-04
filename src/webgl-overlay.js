@@ -105,7 +105,7 @@ export default class WebGLOverlay extends React.Component {
 
     for (let i = layers.length - 1; i >= 0; --i) {
       const layer = layers[i];
-      if (layer.onObjectHovered(...args)) {
+      if (layer.onObjectHovered && layer.onObjectHovered(...args)) {
         break;
       }
     }
@@ -116,7 +116,7 @@ export default class WebGLOverlay extends React.Component {
 
     for (let i = layers.length - 1; i >= 0; --i) {
       const layer = layers[i];
-      if (layer.onObjectClicked(...args)) {
+      if (layer.onObjectClicked && layer.onObjectClicked(...args)) {
         break;
       }
     }

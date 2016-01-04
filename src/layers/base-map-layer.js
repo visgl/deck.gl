@@ -47,13 +47,6 @@ export default class BaseMapLayer extends BaseLayer {
     this.longitude = opts.longitude || this._throwUndefinedError('longitude');
     this.zoom = opts.zoom || this._throwUndefinedError('zoom');
 
-    this.cache = {
-      ...this.cache,
-      initialLatitude: this.cache.initialLatitude || this.latitude,
-      initialLongitude: this.cache.initialLongitude || this.longitude,
-      initialZoom: this.cache.initialZoom || this.zoom
-    };
-
     const {width, height, latitude, longitude, zoom} = this;
     this._viewport = flatWorld.getViewport(width, height);
 
