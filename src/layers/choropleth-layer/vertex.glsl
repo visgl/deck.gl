@@ -33,16 +33,48 @@ uniform vec3 selected;
 
 varying vec4 vColor;
 
+// viewport: [x, y, width, height]
+uniform vec4 viewport;
+// mapViewport: [longitude, latitude, zoom, worldSize]
+uniform vec4 mapViewport;
+
+const float TILE_SIZE = 512.0;
+const float PI = 3.1415926536;
+
+vec2 mercatorProject(vec2 lnglat, float zoom) {
+  float longitude = lnglat.x;
+  float latitude = lnglat.y;
+
+  float lamda = radians(lnglat.x);
+  float phi = radians(lnglat.y);
+  float scale = pow(2.0, zoom) * TILE_SIZE / (PI * 2.0);
+
+  float x = scale * (lamda + PI);
+  float y = scale * (PI - log(tan(PI * 0.25 + phi * 0.5)));
+
+  return vec2(x, y);
+}
+
+vec3 lnglatToScreen(vec3 position) {
+  // non-linear projection: lnglats => screen coordinates
+  vec2 mapCenter = mercatorProject(mapViewport.xy, mapViewport.z);
+  vec2 theVertex = mercatorProject(position.xy, mapViewport.z);
+  // linear transformation:
+  float canvasSize = max(viewport.z, viewport.w);
+  float worldSize = mapViewport.w;
+  // TODO further simplify: let worldSize = canvasSize
+  vec2 offsetXY = theVertex - mapCenter - viewport.xy + viewport.zw * 0.5;
+  vec2 scaledXY = offsetXY * (worldSize * 2.0 / canvasSize) - worldSize;
+  // flip y
+  vec2 xy = scaledXY * vec2(1.0, -1.0);
+
+  return vec3(xy, position.z);
+}
+
 void main(void) {
-  vec3 color = mix(colors / 255.0, pickingColors / 255.0, enablePicking);
-  float alpha = opacity;
+  vec3 p = lnglatToScreen(vertices);
+  gl_Position = projectionMatrix * worldMatrix * vec4(p, 1.0);
 
-  if (pickingColors.x == selected.x &&
-      pickingColors.y == selected.y &&
-      pickingColors.z == selected.z) {
-    alpha = 0.2;
-  }
-
-  gl_Position = projectionMatrix * worldMatrix * vec4(vertices, 1.0);
-  vColor = vec4(color, alpha);
+  float alpha = pickingColors == selected ? 0.5 : opacity;
+  vColor = vec4(mix(colors / 255., pickingColors / 255., enablePicking), alpha);
 }

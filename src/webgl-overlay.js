@@ -69,9 +69,8 @@ export default class WebGLOverlay extends React.Component {
         layer.cache = matchingLayer.cache;
       }
       // 3. setup update flags, used to prevent unnecessary calculations
+      // TODO non-instanced layer cannot use .data.length for equal check
       layer.dataChanged = matchingLayer.data.length !== layer.data.length;
-      // TODO remove, currently set for debugging
-      layer.dataChanged = true;
       layer.viewportChanged =
         matchingLayer.width !== layer.width ||
         matchingLayer.height !== layer.height ||

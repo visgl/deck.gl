@@ -24,6 +24,7 @@
   },
   "dependencies": {
     "earcut": "^2.0.6",
+    "geojson-normalize": "0.0.1",
     "global": "^4.3.0",
     "lodash.flattendeep": "^3.0.2",
     "lodash.isequal": "^3.0.4",

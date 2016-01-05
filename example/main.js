@@ -36,6 +36,7 @@ import request from 'd3-request';
 import {
   WebGLOverlay,
   HexagonLayer,
+  ChoroplethLayer,
   ScatterplotLayer
 } from '../src';
 
@@ -173,16 +174,21 @@ class ExampleApp extends React.Component {
     this.props.dispatch(loadPoints(data));
   }
 
-  // data dependent conversion
-  _convertCoordinates(coordString) {
-    const p0 = coordString.indexOf('(') + 1;
-    const p1 = coordString.indexOf(')');
-    const coords = coordString.slice(p0, p1).split(',');
-    return {
-      x: Number(coords[0]),
-      y: Number(coords[1]),
-      z: 10
-    };
+  _renderChoroplethLayer() {
+    const {viewport, choropleths} = this.props;
+
+    return new ChoroplethLayer({
+      id: 'choroplethLayer',
+      width: window.innerWidth,
+      height: window.innerHeight,
+      latitude: viewport.latitude,
+      longitude: viewport.longitude,
+      zoom: viewport.zoom,
+      data: choropleths,
+      isPickable: false,
+      drawContour: true,
+      layerIndex: 2
+    });
   }
 
   _renderHexagonLayer() {
@@ -236,7 +242,7 @@ class ExampleApp extends React.Component {
       latitude: viewport.latitude,
       longitude: viewport.longitude,
       zoom: viewport.zoom,
-      layerIndex: 2,
+      layerIndex: 3,
       data: points.map(point => {
         const coordString = point.COORDINATES;
         const p0 = coordString.indexOf('(') + 1;
@@ -267,6 +273,7 @@ class ExampleApp extends React.Component {
         width={window.innerWidth}
         height={window.innerHeight}
         layers={[
+          this._renderChoroplethLayer(),
           this._renderHexagonLayer(),
           this._renderScatterplotLayer()
         ]}
