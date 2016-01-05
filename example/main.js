@@ -37,7 +37,8 @@ import {
   WebGLOverlay,
   HexagonLayer,
   ChoroplethLayer,
-  ScatterplotLayer
+  ScatterplotLayer,
+  ArcLayer
 } from '../src';
 
 // ---- Default Settings ---- //
@@ -260,6 +261,47 @@ class ExampleApp extends React.Component {
     });
   }
 
+  _renderArcLayer() {
+    const {viewport, points} = this.props;
+
+    return new ArcLayer({
+      id: 'arcLayer',
+      width: window.innerWidth,
+      height: window.innerHeight,
+      latitude: viewport.latitude,
+      longitude: viewport.longitude,
+      zoom: viewport.zoom,
+      layerIndex: 4,
+      data: points.map((point, i) => {
+        if (i === points.length - 1) {
+          return {
+            position: {x0: 0, y0: 0, x1: 0, y1: 0},
+            color: [35, 81, 128]
+          };
+        }
+
+        const sourceCoordString = point.COORDINATES;
+        const targetCoordString = points[i + 1].COORDINATES;
+        const sourceP0 = sourceCoordString.indexOf('(') + 1;
+        const sourceP1 = sourceCoordString.indexOf(')');
+        const targetP0 = targetCoordString.indexOf('(') + 1;
+        const targetP1 = targetCoordString.indexOf(')');
+        const source = sourceCoordString.slice(sourceP0, sourceP1).split(',');
+        const target = targetCoordString.slice(targetP0, targetP1).split(',');
+
+        return {
+          position: {
+            x0: source[1], y0: source[0],
+            x1: target[1], y1: target[0]
+          },
+          colors: {
+            c0: [255, 0, 0], c1: [0, 0, 255]
+          }
+        };
+      })
+    });
+  }
+
   _renderOverlay() {
     const {choropleths, hexagons, points} = this.props;
 
@@ -275,7 +317,8 @@ class ExampleApp extends React.Component {
         layers={[
           this._renderChoroplethLayer(),
           this._renderHexagonLayer(),
-          this._renderScatterplotLayer()
+          this._renderScatterplotLayer(),
+          this._renderArcLayer()
         ]}
       />
     );
