@@ -55,10 +55,10 @@ vec2 mercatorProject(vec2 lnglat, float zoom) {
   return vec2(x, y);
 }
 
-vec3 lnglatToScreen(vec3 position) {
+vec2 lnglatToScreen(vec2 lnglat) {
   // non-linear projection: lnglats => screen coordinates
   vec2 mapCenter = mercatorProject(mapViewport.xy, mapViewport.z);
-  vec2 theVertex = mercatorProject(position.xy, mapViewport.z);
+  vec2 theVertex = mercatorProject(lnglat, mapViewport.z);
   // linear transformation:
   float canvasSize = max(viewport.z, viewport.w);
   float worldSize = mapViewport.w;
@@ -66,13 +66,11 @@ vec3 lnglatToScreen(vec3 position) {
   vec2 offsetXY = theVertex - mapCenter - viewport.xy + viewport.zw * 0.5;
   vec2 scaledXY = offsetXY * (worldSize * 2.0 / canvasSize) - worldSize;
   // flip y
-  vec2 xy = scaledXY * vec2(1.0, -1.0);
-
-  return vec3(xy, position.z);
+  return scaledXY * vec2(1.0, -1.0);
 }
 
 void main(void) {
-  vec3 p = lnglatToScreen(vertices);
+  vec3 p = vec3(lnglatToScreen(vertices.xy), vertices.z);
   gl_Position = projectionMatrix * worldMatrix * vec4(p, 1.0);
 
   float alpha = pickingColors == selected ? 0.5 : opacity;

@@ -89,7 +89,7 @@ export default class ScatterplotLayer extends BaseMapLayer {
   setLayerUniforms() {
     this._uniforms = {
       ...this._uniforms,
-      radius: this.radius
+      radius: this.cache.radius
     };
   }
 
@@ -163,6 +163,7 @@ export default class ScatterplotLayer extends BaseMapLayer {
   _calculateRadius() {
     // use radius if specified
     if (this.radius && this.radius !== 0) {
+      this.cache.radius = this.radius;
       return;
     }
 
@@ -175,7 +176,7 @@ export default class ScatterplotLayer extends BaseMapLayer {
     const dx = space0.x - space1.x;
     const dy = space0.y - space1.y;
 
-    this.radius = Math.max(Math.sqrt(dx * dx + dy * dy), 2.0);
+    this.cache.radius = Math.max(Math.sqrt(dx * dx + dy * dy), 2.0);
   }
 
 }
