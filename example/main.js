@@ -38,7 +38,8 @@ import {
   HexagonLayer,
   ChoroplethLayer,
   ScatterplotLayer,
-  ArcLayer
+  ArcLayer,
+  GridLayer
 } from '../src';
 
 // ---- Default Settings ---- //
@@ -175,6 +176,33 @@ class ExampleApp extends React.Component {
     this.props.dispatch(loadPoints(data));
   }
 
+  _renderGridLayer() {
+    const {viewport, points} = this.props;
+
+    return new GridLayer({
+      id: 'gridLayer',
+      width: window.innerWidth,
+      height: window.innerHeight,
+      latitude: viewport.latitude,
+      longitude: viewport.longitude,
+      zoom: viewport.zoom,
+      layerIndex: 0,
+      data: points.map(point => {
+        const coordString = point.COORDINATES;
+        const p0 = coordString.indexOf('(') + 1;
+        const p1 = coordString.indexOf(')');
+        const coords = coordString.slice(p0, p1).split(',');
+        return {
+          position: {
+            x: Number(coords[0]),
+            y: Number(coords[1]),
+            z: 10
+          }
+        };
+      })
+    });
+  }
+
   _renderChoroplethLayer() {
     const {viewport, choropleths} = this.props;
 
@@ -188,7 +216,7 @@ class ExampleApp extends React.Component {
       data: choropleths,
       isPickable: false,
       drawContour: true,
-      layerIndex: 2
+      layerIndex: 1
     });
   }
 
@@ -227,7 +255,7 @@ class ExampleApp extends React.Component {
       zoom: viewport.zoom,
       data,
       isPickable: true,
-      layerIndex: 1,
+      layerIndex: 2,
       onHexagonHovered: this._handleHexagonHovered,
       onHexagonClicked: this._handleHexagonClicked
     });
@@ -315,10 +343,11 @@ class ExampleApp extends React.Component {
         width={window.innerWidth}
         height={window.innerHeight}
         layers={[
+          this._renderGridLayer(),
           this._renderChoroplethLayer(),
-          this._renderHexagonLayer(),
-          this._renderScatterplotLayer(),
-          this._renderArcLayer()
+          // this._renderHexagonLayer(),
+          this._renderScatterplotLayer()
+          // this._renderArcLayer()
         ]}
       />
     );
