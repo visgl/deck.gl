@@ -21,7 +21,8 @@
 import BaseMapLayer from '../base-map-layer';
 import earcut from 'earcut';
 import flattenDeep from 'lodash.flattendeep';
-// Note: Shaders are inlined by the glslify browserify transform
+import normalize from 'geojson-normalize';
+
 const glslify = require('glslify');
 
 export default class ChoroplethLayer extends BaseMapLayer {
@@ -44,25 +45,25 @@ export default class ChoroplethLayer extends BaseMapLayer {
 
     this.onObjectHovered = this._onChoroplethHovered;
     this.onObjectClicked = this._onChoroplethClicked;
-
-    this.opts = {...opts};
   }
 
-  update(deep) {
-    if (deep || this._positionNeedUpdate) {
-      this._allocateGlBuffers();
-
+  updateLayer() {
+    if (this.dataChanged) {
+      this._allocateGLBuffers();
       this._extractChoropleths();
       this._calculateVertices();
       this._calculateIndices();
       this._calculateColors();
       this._calculatePickingColors();
-
-      this._positionNeedUpdate = false;
     }
+
+    // TODO change getters to setters
+    this._primitive = this.getLayerPrimitive();
+    this.setLayerUniforms();
+    this.setLayerAttributes();
   }
 
-  _getPrograms() {
+  getLayerShader() {
     return {
       id: this.id,
       from: 'sources',
@@ -71,101 +72,102 @@ export default class ChoroplethLayer extends BaseMapLayer {
     };
   }
 
-  _getPrimitive() {
+  getLayerPrimitive() {
+    if (!this.cache || !this.cache.indices) {
+      return {};
+    }
+
     return {
       id: this.id,
       drawType: this.drawContour ? 'LINES' : 'TRIANGLES',
-      indices: this.glBuffers.indices,
+      indices: this.cache.indices,
       instanced: false
     };
   }
 
-  _getUniforms() {
-    return {
+  setLayerUniforms() {
+    this._uniforms = {
+      ...this._uniforms,
       opacity: this.opacity
     };
   }
 
-  _getAttributes() {
-    return {
+  setLayerAttributes() {
+    this._attributes = {
+      ...this.attribute,
       vertices: {
-        value: this.glBuffers.vertices,
+        value: this.cache.vertices,
         size: 3
       },
       colors: {
-        value: this.glBuffers.colors,
-        size: 3
-      },
-      pickingColors: {
-        value: this.glBuffers.pickingColors,
+        value: this.cache.colors,
         size: 3
       }
     };
-  }
 
-  _getOptions() {
-    return {
-      numInstances: 0,
-      isPickable: this.isPickable
+    if (!this.isPickable) {
+      return;
+    }
+
+    this._attributes.pickingColors = {
+      value: this.cache.pickingColors,
+      instanced: 1,
+      size: 3
     };
   }
 
-  _allocateGlBuffers() {
-    this.glBuffers = {};
+  _allocateGLBuffers() {
+    const N = this._numInstances;
+
+    this.cache.positions = new Float32Array(N * 3);
+    this.cache.colors = new Float32Array(N * 3);
+
+    if (!this.isPickable) {
+      return;
+    }
+
+    this.cache.pickingColors = new Float32Array(N * 3);
   }
 
   _extractChoropleths() {
-    if (this.data.type === 'GeometryCollection') {
-      this.choropleths = this.data.geometries.map(choropleth => {
-        let coordinates = choropleth.coordinates;
-        // flatten nested polygons
-        if (coordinates.length === 1 && coordinates[0].length > 2) {
-          coordinates = coordinates[0];
-        }
-        return {
-          id: choropleth.zip,
-          name: choropleth.zip,
-          coordinates
-        };
-      });
-    } else if (this.data.type === 'FeatureCollection') {
-      this.choropleths = this.data.features.map(choropleth => {
-        let coordinates = choropleth.geometry.coordinates[0];
-        // flatten nested polygons
-        if (coordinates.length === 1 && coordinates[0].length > 2) {
-          coordinates = coordinates[0];
-        }
-        return {
-          id: choropleth.id,
-          name: choropleth.properties.name,
-          coordinates
-        };
-      });
+    if (this.cache.choropleths) {
+      return;
     }
+
+    const normalizedGeojson = normalize(this.data);
+
+    this.cache.choropleths = normalizedGeojson.features.map(choropleth => {
+      let coordinates = choropleth.geometry.coordinates[0];
+      // flatten nested polygons
+      if (coordinates.length === 1 && coordinates[0].length > 2) {
+        coordinates = coordinates[0];
+      }
+      return {
+        properties: choropleth.properties,
+        coordinates
+      };
+    });
   }
 
   _calculateVertices() {
-    this.vertices = this.choropleths.map(
+    this.cache.groupedVertices = this.cache.choropleths.map(
       choropleth => choropleth.coordinates.map(
-        coordinate => {
-          const pixel = this.project([coordinate[1], coordinate[0]]);
-          const space = this.screenToSpace(pixel.x, pixel.y);
-          return [space.x, space.y, 100];
-        }
+        coordinate => [coordinate[0], coordinate[1], 100]
       )
     );
 
-    this.glBuffers.vertices = new Float32Array(flattenDeep(this.vertices));
+    const vertices = flattenDeep(this.cache.groupedVertices);
+    this.cache.vertices = new Float32Array(vertices);
   }
 
   _calculateIndices() {
     // adjust index offset for multiple choropleths
-    const offsets = this.vertices.reduce(
+    const offsets = this.cache.groupedVertices.reduce(
       (acc, vertices) => [...acc, acc[acc.length - 1] + vertices.length],
       [0]
     );
 
-    const indices = this.vertices.map(
+    const indices = this.cache.groupedVertices.map(
       (vertices, choroplethIndex) => this.drawContour ?
         // 1. get sequentially ordered indices of each choropleth contour
         // 2. offset them by the number of indices in previous choropleths
@@ -179,21 +181,25 @@ export default class ChoroplethLayer extends BaseMapLayer {
         )
     );
 
-    this.glBuffers.indices = new Uint16Array(flattenDeep(indices));
+    this.cache.indices = new Uint16Array(flattenDeep(indices));
   }
 
   _calculateColors() {
-    const colors = this.vertices.map(
+    const colors = this.cache.groupedVertices.map(
       vertices => vertices.map(
         vertex => this.drawContour ? [0, 0, 0] : [128, 128, 128]
       )
     );
 
-    this.glBuffers.colors = new Float32Array(flattenDeep(colors));
+    this.cache.colors = new Float32Array(flattenDeep(colors));
   }
 
   _calculatePickingColors() {
-    const pickingColors = this.vertices.map(
+    if (!this.isPickable) {
+      return;
+    }
+
+    const pickingColors = this.cache.vertices.map(
       (vertices, choroplethIndex) => vertices.map(
         vertex => this.drawContour ? [-1, -1, -1] : [
           (choroplethIndex + 1) % 256,
@@ -203,13 +209,13 @@ export default class ChoroplethLayer extends BaseMapLayer {
       )
     );
 
-    this.glBuffers.pickingColors = new Float32Array(flattenDeep(pickingColors));
+    this.cache.pickingColors = new Float32Array(flattenDeep(pickingColors));
   }
 
   _calculateContourIndices(numVertices) {
     // use vertex pairs for gl.LINES => [0, 1, 1, 2, 2, ..., n-1, n-1, 0]
     let indices = [];
-    for (var i = 1; i < numVertices - 1; i++) {
+    for (let i = 1; i < numVertices - 1; i++) {
       indices = [...indices, i, i];
     }
     return [0, ...indices, 0];

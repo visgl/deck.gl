@@ -23,7 +23,7 @@ import 'babel-polyfill';
 import React from 'react';
 /* eslint-enable no-unused-vars */
 import test from 'tape';
-import utils from 'react-test-utils';
+// import utils from 'react-test-utils';
 
 import {
   WebGLOverlay
@@ -34,10 +34,10 @@ test('Test if unit test is working', assert => {
   assert.end();
 });
 
-test('Rendering WebGLOverlay', assert => {
-  const component = utils.renderComponent(
-    <WebGLOverlay width={100} height={100} layers={[]} />
-  );
-  assert.ok(component, 'WebGLOverlay is rendered.');
-  assert.end();
-});
+// test('Rendering WebGLOverlay', assert => {
+//   const component = utils.renderComponent(
+//     <WebGLOverlay width={100} height={100} layers={[]} />
+//   );
+//   assert.ok(component, 'WebGLOverlay is rendered.');
+//   assert.end();
+// });

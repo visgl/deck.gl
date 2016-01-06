@@ -20,7 +20,7 @@
 
 import BaseLayer from './base-layer';
 import flatWorld from '../flat-world';
-import MercatorProjector from 'viewport-mercator-project';
+import ViewportMercator from 'viewport-mercator-project';
 
 export default class BaseMapLayer extends BaseLayer {
   /**
@@ -32,31 +32,51 @@ export default class BaseMapLayer extends BaseLayer {
    *
    * @class
    * @param {object} opts
-   * @param {string} opts.mapState - mapState from MapboxGL
+   * @param {number} opts.width - viewport width, synced with MapboxGL
+   * @param {number} opts.height - viewport width, synced with MapboxGL
+   * @param {string} opts.latitude - latitude of map center from MapboxGL
+   * @param {string} opts.longitude - longitude of map center from MapboxGL
+   * @param {string} opts.zoom - zoom level of map from MapboxGL
    */
   constructor(opts) {
     super(opts);
 
-    this.mapState = opts.mapState || this._throwUndefinedError('mapState');
-    this.mercator = MercatorProjector({
-      center: [opts.mapState.longitude, opts.mapState.latitude],
-      zoom: opts.mapState.zoom,
-      tileSize: 512,
-      dimensions: [opts.width, opts.height]
-    });
-    this.cameraHeight = flatWorld.getCameraHeight();
-  }
+    this.width = opts.width || this._throwUndefinedError('width');
+    this.height = opts.height || this._throwUndefinedError('height');
+    this.latitude = opts.latitude || this._throwUndefinedError('latitude');
+    this.longitude = opts.longitude || this._throwUndefinedError('longitude');
+    this.zoom = opts.zoom || this._throwUndefinedError('zoom');
 
-  project(latLng) {
-    const pixel = this.mercator.project([latLng[1], latLng[0]]);
-    return {
-      x: pixel[0],
-      y: pixel[1]
+    const {width, height, latitude, longitude, zoom} = this;
+    this._viewport = flatWorld.getViewport(width, height);
+
+    const {x, y} = this._viewport;
+    this._uniforms = {
+      ...this._uniforms,
+      viewport: [x, y, width, height],
+      mapViewport: [longitude, latitude, zoom, flatWorld.size]
     };
+
+    this._mercator = ViewportMercator({
+      width, height, latitude, longitude, zoom,
+      tileSize: 512
+    });
   }
 
+  // TODO deprecate: this funtion is only used for calculating radius now
+  project(latLng) {
+    const [x, y] = this._mercator.project([latLng[1], latLng[0]]);
+    return {x, y};
+  }
+
+  // TODO deprecate: this funtion is only used for calculating radius now
   screenToSpace(x, y) {
-    return flatWorld.screenToSpace(x, y, this.width, this.height);
+    const vp = this._viewport;
+    return {
+      x: ((x - vp.x) / vp.width - 0.5) * flatWorld.size * 2,
+      y: ((y - vp.y) / vp.height - 0.5) * flatWorld.size * 2 * -1,
+      z: 0
+    };
   }
 
 }

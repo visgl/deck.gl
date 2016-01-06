@@ -34,22 +34,27 @@ export default class GridLayer extends BaseMapLayer {
    */
   constructor(opts) {
     super(opts);
-
     this.unitWidth = opts.unitWidth || 100;
     this.unitHeight = opts.unitHeight || 100;
-    this.opacity = opts.opacity || 0.01;
   }
 
-  update(deep) {
-    if (deep || this._positionNeedUpdate) {
-      this._allocateGlBuffers();
+  updateLayer() {
+    // dataChanged does not affect the generation of grid layout
+    if (this.dataChanged || true) {
+      this._allocateGLBuffers();
       this._calculatePositions();
       this._calculateColors();
       this._calculatePickingColors();
     }
+
+    this.setLayerUniforms();
+    this.setLayerAttributes();
+
+    this.dataChanged = false;
+    this.viewportChanged = false;
   }
 
-  _getPrograms() {
+  getLayerShader() {
     return {
       id: this.id,
       from: 'sources',
@@ -58,106 +63,94 @@ export default class GridLayer extends BaseMapLayer {
     };
   }
 
-  _getPrimitive() {
+  getLayerPrimitive() {
     return {
       id: this.id,
       drawType: 'TRIANGLE_FAN',
-      vertices: new Float32Array([-1, -1, 0, 1, -1, 0, 1, 1, 0, -1, 1, 0]),
+      vertices: new Float32Array([0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0]),
       instanced: true
     };
   }
 
-  _getUniforms() {
-    return {
-      opacity: this.opacity,
-      radius: this.unitWidth / 2 - 2,
-      scale: this.scale
+  setLayerUniforms() {
+    const margin = 2;
+
+    this._uniforms = {
+      ...this._uniforms,
+      scale: new Float32Array([
+        this.unitWidth - margin * 2, this.unitHeight - margin * 2, 1]),
+      maxCount: this.cache.maxCount
     };
   }
 
-  _getAttributes() {
-    return {
+  setLayerAttributes() {
+    this._attributes = {
+      ...this._attributes,
       positions: {
-        value: this.glBuffers.positions,
+        value: this.cache.positions,
         instanced: 1,
         size: 3
       },
       colors: {
-        value: this.glBuffers.colors,
+        value: this.cache.colors,
         instanced: 1,
         size: 3
-      },
-      pickingColors: this.isPickable ? {
-        value: this.glBuffers.pickingColors,
-        instanced: 1,
-        size: 3
-      } : null
+      }
     };
-  }
 
-  _getOptions() {
-    return {
-      numInstances: this.numInstances,
-      isPickable: this.isPickable
-    };
-  }
-
-  _allocateGlBuffers() {
-    const halfScreenWidth = this.width + this.unitWidth / 2;
-    const halfScreenHeight = this.height + this.unitHeight / 2;
-
-    this.numCol = Math.ceil(halfScreenWidth / this.unitWidth) * 2;
-    this.numRow = Math.ceil(halfScreenHeight / this.unitHeight) * 2;
-    this.numInstances = this.numCol * this.numRow;
-
-    this.glBuffers = {};
-    this.glBuffers.positions = new Float32Array(this.numInstances * 3);
-    this.glBuffers.colors = new Float32Array(this.numInstances * 3);
-    this.glBuffers.colors.fill(0);
-
-    if (this.isPickable) {
-      this.glBuffers.pickingColors = new Float32Array(this.numInstances * 3);
+    if (!this.isPickable) {
+      return;
     }
+
+    this._attributes.pickingColors = {
+      value: this.cache.pickingColors,
+      instanced: 1,
+      size: 3
+    };
+  }
+
+  _allocateGLBuffers() {
+    this.numCol = Math.ceil(this.width * 2 / this.unitWidth);
+    this.numRow = Math.ceil(this.height * 2 / this.unitHeight);
+
+    const N = this._numInstances = this.numCol * this.numRow;
+
+    this.cache.positions = new Float32Array(N * 3);
+    this.cache.colors = new Float32Array(N * 3);
+    this.cache.colors.fill(0.0);
+
+    if (!this.isPickable) {
+      return;
+    }
+
+    this.cache.pickingColors = new Float32Array(N * 3);
   }
 
   _calculatePositions() {
-    for (let y = 0; y < this.numRow; y++) {
-      for (let x = 0; x < this.numCol; x++) {
-        const i3 = (x + y * this.numCol) * 3;
-        this.glBuffers.positions[i3 + 0] = x * this.unitWidth - this.width;
-        this.glBuffers.positions[i3 + 1] = y * this.unitHeight - this.height;
-        this.glBuffers.positions[i3 + 2] = 0;
-      }
+    for (let i = 0; i < this._numInstances; i++) {
+      const x = i % this.numCol;
+      const y = Math.floor(i / this.numCol);
+      this.cache.positions[i * 3 + 0] = x * this.unitWidth - this.width;
+      this.cache.positions[i * 3 + 1] = y * this.unitHeight - this.height;
+      this.cache.positions[i * 3 + 2] = 0;
     }
-
-    this._positionNeedUpdate = false;
   }
 
   _calculateColors() {
     this.data.forEach(point => {
-      const position = point.position;
-      const pixel = this.project([position.x, point.position.y]);
+      const pixel = this.project([point.position.x, point.position.y]);
       const space = this.screenToSpace(pixel.x, pixel.y);
 
-      let xOffset = Math.abs(space.x) + this.unitWidth / 2;
-      let yOffset = Math.abs(space.y) + this.unitHeight / 2;
-
-      xOffset = space.x < 0 ? -xOffset : xOffset;
-      yOffset = space.y < 0 ? -yOffset : yOffset;
-
-      xOffset += this.width;
-      yOffset += this.height;
-
-      const colId = Math.floor(xOffset / this.unitWidth + 0.5);
-      const rowId = Math.floor(yOffset / this.unitHeight + 0.5);
+      const colId = Math.floor((space.x + this.width) / this.unitWidth);
+      const rowId = Math.floor((space.y + this.height) / this.unitHeight);
 
       const i3 = (colId + rowId * this.numCol) * 3;
-      this.glBuffers.colors[i3 + 0] += 1;
-      this.glBuffers.colors[i3 + 1] += 1;
-      this.glBuffers.colors[i3 + 2] += 1;
+      this.cache.colors[i3 + 0] += 1;
+      this.cache.colors[i3 + 1] += 5;
+      this.cache.colors[i3 + 2] += 1;
     });
 
-    this.scale = Math.max(...this.glBuffers.colors);
+    this.cache.maxCount = Math.max(...this.cache.colors);
   }
 
   _calculatePickingColors() {
@@ -165,14 +158,10 @@ export default class GridLayer extends BaseMapLayer {
       return;
     }
 
-    for (let y = 0; y < this.numRow; y++) {
-      for (let x = 0; x < this.numCol; x++) {
-        const i = x + y * this.numCol;
-        this.glBuffers.pickingColors[i * 3 + 0] = (i + 1) % 256;
-        this.glBuffers.pickingColors[i * 3 + 1] =
-          Math.floor((i + 1) / 256) % 256;
-        this.glBuffers.pickingColors[i * 3 + 2] = this.layerIndex;
-      }
+    for (let i = 0; i < this._numInstances; i++) {
+      this.cache.pickingColors[i * 3 + 0] = (i + 1) % 256;
+      this.cache.pickingColors[i * 3 + 1] = Math.floor((i + 1) / 256) % 256;
+      this.cache.pickingColors[i * 3 + 2] = this.layerIndex;
     }
   }
 
