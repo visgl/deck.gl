@@ -2,6 +2,8 @@
 
 A WebGL overlay suite consists of multiple layers.
 
+![screenshot](screenshot.png)
+
 ## Installation
 
 ```
@@ -46,8 +48,9 @@ calculation taking advantage of the react lifecycle functions.
   **Parameters**
   * `width` (number, required) width of the canvas
   * `height` (number, required) height of the canvas
-  * `mapState` [object, optional] viewport information, used to determine
-  whether a re-calcualtion should be triggered
+  * `longitude` (number, required) longitude of the map center
+  * `latitude` (number, required) latitude of the map center
+  * `zoom` (number, required) zoom level of the map
 
   **Callbacks**
   * `onAfterRender` [function, optional] callback after rendering is finished
@@ -64,6 +67,9 @@ renders it as interactive choropleths.
   * `id` (string, required): layer ID
   * `width` (number, required) width of the layer
   * `height` (number, required) height of the layer
+  * `longitude` (number, required) longitude of the map center
+  * `latitude` (number, required) latitude of the map center
+  * `zoom` (number, required) zoom level of the map
   * `opacity` (number, required) opacity of the layer
   * `layerIndex` [number, optional, default=0] index of the layer
   * `isPickable` [bool, optional, default=false] whether layer responses to

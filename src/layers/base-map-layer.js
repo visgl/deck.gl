@@ -65,7 +65,7 @@ export default class BaseMapLayer extends BaseLayer {
 
   // TODO deprecate: this funtion is only used for calculating radius now
   project(latLng) {
-    const [x, y] = this._mercator.project([latLng[1], latLng[0]]);
+    const [x, y] = this._mercator.project([latLng[0], latLng[1]]);
     return {x, y};
   }
 

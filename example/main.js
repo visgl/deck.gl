@@ -82,8 +82,25 @@ function reducer(state = INITIAL_STATE, action) {
     return {...state, choropleths: action.choropleths};
   case 'LOAD_HEXAGONS':
     return {...state, hexagons: action.hexagons};
-  case 'LOAD_POINTS':
-    return {...state, points: action.points};
+  case 'LOAD_POINTS': {
+    const points = action.points.map(point => {
+      const coordString = point.COORDINATES;
+      const p0 = coordString.indexOf('(') + 1;
+      const p1 = coordString.indexOf(')');
+      const coords = coordString.slice(p0, p1).split(',');
+      return {
+        position: {
+          x: Number(coords[1]),
+          y: Number(coords[0]),
+          z: 10
+        },
+        color: [88, 9, 124]
+      };
+    });
+
+    return {...state, points};
+  }
+
   default:
     return state;
   }
@@ -187,19 +204,7 @@ class ExampleApp extends React.Component {
       longitude: viewport.longitude,
       zoom: viewport.zoom,
       layerIndex: 0,
-      data: points.map(point => {
-        const coordString = point.COORDINATES;
-        const p0 = coordString.indexOf('(') + 1;
-        const p1 = coordString.indexOf(')');
-        const coords = coordString.slice(p0, p1).split(',');
-        return {
-          position: {
-            x: Number(coords[0]),
-            y: Number(coords[1]),
-            z: 10
-          }
-        };
-      })
+      data: points
     });
   }
 
@@ -272,20 +277,7 @@ class ExampleApp extends React.Component {
       longitude: viewport.longitude,
       zoom: viewport.zoom,
       layerIndex: 3,
-      data: points.map(point => {
-        const coordString = point.COORDINATES;
-        const p0 = coordString.indexOf('(') + 1;
-        const p1 = coordString.indexOf(')');
-        const coords = coordString.slice(p0, p1).split(',');
-        return {
-          position: {
-            x: Number(coords[1]),
-            y: Number(coords[0]),
-            z: 10
-          },
-          color: [35, 81, 128]
-        };
-      })
+      data: points
     });
   }
 
@@ -308,19 +300,13 @@ class ExampleApp extends React.Component {
           };
         }
 
-        const sourceCoordString = point.COORDINATES;
-        const targetCoordString = points[i + 1].COORDINATES;
-        const sourceP0 = sourceCoordString.indexOf('(') + 1;
-        const sourceP1 = sourceCoordString.indexOf(')');
-        const targetP0 = targetCoordString.indexOf('(') + 1;
-        const targetP1 = targetCoordString.indexOf(')');
-        const source = sourceCoordString.slice(sourceP0, sourceP1).split(',');
-        const target = targetCoordString.slice(targetP0, targetP1).split(',');
+        const source = point;
+        const target = points[i + 1];
 
         return {
           position: {
-            x0: source[1], y0: source[0],
-            x1: target[1], y1: target[0]
+            x0: source.position.x, y0: source.position.y,
+            x1: target.position.x, y1: target.position.y
           },
           colors: {
             c0: [255, 0, 0], c1: [0, 0, 255]

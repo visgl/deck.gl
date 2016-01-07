@@ -183,8 +183,8 @@ export default class HexagonLayer extends BaseMapLayer {
     const vertex3 = vertices[3];
 
     // transform to space coordinates
-    const spaceCoord0 = this.project([vertex0[1], vertex0[0]]);
-    const spaceCoord3 = this.project([vertex3[1], vertex3[0]]);
+    const spaceCoord0 = this.project([vertex0[0], vertex0[1]]);
+    const spaceCoord3 = this.project([vertex3[0], vertex3[1]]);
 
     // map from space coordinates to screen coordinates
     const screenCoord0 = this.screenToSpace(spaceCoord0.x, spaceCoord0.y);
