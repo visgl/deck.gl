@@ -167,8 +167,8 @@ export default class ScatterplotLayer extends BaseMapLayer {
       return;
     }
 
-    const pixel0 = this.project([37.5, -122]);
-    const pixel1 = this.project([37.5002, -122]);
+    const pixel0 = this.project([-122, 37.5]);
+    const pixel1 = this.project([-122, 37.5002]);
 
     const space0 = this.screenToSpace(pixel0.x, pixel0.y);
     const space1 = this.screenToSpace(pixel1.x, pixel1.y);
