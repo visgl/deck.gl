@@ -207,7 +207,8 @@ export default class WebGLRenderer extends React.Component {
     const {
       viewport: {x, y, width, height},
       blending: {enable, blendFunc, blendEquation},
-      needRedraw, onBeforeRenderFrame, onAfterRenderFrame
+      needRedraw, onBeforeRenderFrame, onAfterRenderFrame,
+      pixelRatio
     } = this.props;
 
     this._renderer = renderer;
@@ -222,7 +223,7 @@ export default class WebGLRenderer extends React.Component {
 
     // update viewport to latest props
     // (typically changed by app on browser resize etc)
-    gl.viewport(x, y, width, height);
+    gl.viewport(x * pixelRatio, y * pixelRatio, width * pixelRatio, height * pixelRatio);
 
     // setup bledning
     if (enable) {
@@ -250,11 +251,16 @@ export default class WebGLRenderer extends React.Component {
 
   render() {
     const {id, width, height, pixelRatio} = this.props;
+
     const props = {
       id,
       ref: 'overlay',
       width: width * pixelRatio || 1,
-      height: height * pixelRatio || 1
+      height: height * pixelRatio || 1,
+      style: {
+        width: width,
+        height: height
+      }
     };
 
     return <canvas {...props} />;
