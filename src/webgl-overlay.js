@@ -151,7 +151,7 @@ export default class WebGLOverlay extends React.Component {
       camera: flatWorld.getCamera(),
       lights: flatWorld.getLighting(),
       blending: flatWorld.getBlending(),
-      pixelRatio: flatWorld.getPixelRatio(),
+      pixelRatio: flatWorld.getPixelRatio(window.devicePixelRatio),
 
       events: {
         onObjectHovered: this._handleObjectHovered,
