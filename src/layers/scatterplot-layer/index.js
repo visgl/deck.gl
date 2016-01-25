@@ -34,6 +34,7 @@ export default class ScatterplotLayer extends BaseMapLayer {
   constructor(opts) {
     super(opts);
     this.radius = opts.radius;
+    this.radiusChanged = opts.radius !== this.cache.radius;
   }
 
   updateLayer() {
@@ -44,7 +45,7 @@ export default class ScatterplotLayer extends BaseMapLayer {
       this._calculatePickingColors();
     }
 
-    if (this.viewportChanged || this.dataChanged) {
+    if (this.viewportChanged || this.dataChanged || this.radiusChanged) {
       this._calculateRadius();
     }
 

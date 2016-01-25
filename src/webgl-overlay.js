@@ -22,6 +22,7 @@ import React, {PropTypes} from 'react';
 import WebGLRenderer from './webgl-renderer';
 import flatWorld from './flat-world';
 import where from 'lodash.where';
+import isEqual from 'lodash.isequal';
 
 const DISPLAY_NAME = 'WebGLOverlay';
 const PROP_TYPES = {
@@ -70,7 +71,8 @@ export default class WebGLOverlay extends React.Component {
       }
       // 3. setup update flags, used to prevent unnecessary calculations
       // TODO non-instanced layer cannot use .data.length for equal check
-      layer.dataChanged = matchingLayer.data.length !== layer.data.length;
+      layer.dataChanged = !isEqual(matchingLayer.data, layer.data);
+
       layer.viewportChanged =
         matchingLayer.width !== layer.width ||
         matchingLayer.height !== layer.height ||
