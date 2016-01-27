@@ -71,7 +71,11 @@ export default class WebGLOverlay extends React.Component {
       }
       // 3. setup update flags, used to prevent unnecessary calculations
       // TODO non-instanced layer cannot use .data.length for equal check
-      layer.dataChanged = !isEqual(matchingLayer.data, layer.data);
+      if (layer.deepCompare) {
+        layer.dataChanged = !isEqual(matchingLayer.data, layer.data);
+      } else {
+        layer.dataChanged = matchingLayer.data.length !== layer.data.length;
+      }
 
       layer.viewportChanged =
         matchingLayer.width !== layer.width ||
