@@ -50,6 +50,7 @@ export default class BaseLayer {
     // apply gamma to opacity to make it visually "linear"
     this.opacity = Math.pow(opts.opacity || 0.8, 1 / 2.2);
     this.isPickable = opts.isPickable || false;
+    this.deepCompare = opts.deepCompare || false;
 
     this._model = null;
     this._shader = this.getLayerShader();
