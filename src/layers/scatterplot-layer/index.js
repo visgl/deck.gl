@@ -35,6 +35,9 @@ export default class ScatterplotLayer extends BaseMapLayer {
     super(opts);
     this.radius = opts.radius;
     this.radiusChanged = opts.radius !== this.cache.radius;
+
+    this.onObjectHovered = opts.onObjectHovered;
+    this.onObjectClicked = opts.onObjectClicked;
   }
 
   updateLayer() {
