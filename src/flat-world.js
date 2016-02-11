@@ -101,8 +101,7 @@ const flatWorld = module.exports = {
   },
 
   getPixelRatio: function getPixelRatio(ratio) {
-    return 1;
-    // return ratio || 1;
+    return ratio || 1;
   },
 
   getLighting: function getLighting() {
