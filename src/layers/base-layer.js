@@ -18,8 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-/* global PhiloGL */
-const Model = PhiloGL.O3D.Model;
+import {Model} from 'lumagl';
 
 export default class BaseLayer {
   /**
@@ -96,13 +95,35 @@ export default class BaseLayer {
   /* -------------------------------------------------------------- */
 
   getLayerModel(renderer) {
-    const program = renderer.program[this._shader.id];
+    const program = renderer.programs[this._shader.id];
     const attributes = this._attributes;
     const primitive = this._primitive;
     const gl = renderer.gl;
 
+    if (this._primitive.vertices) {
+      this._attributes['vertices'] = {
+        value: this._primitive.vertices,
+        size: 3
+      }
+    }
+
+    if (this._primitive.normals) {
+      this._attributes['normals'] = {
+        value: this._primitive.normals,
+        size: 3
+      }
+    }
+
+    if (this._primitive.indices) {
+      this._attributes['indices'] = {
+        value: this._primitive.indices,
+        bufferType: gl.ELEMENT_ARRAY_BUFFER,
+        drawType: gl.STATIC_DRAW,
+        size: 1
+      }
+    }
+
     this._model = new Model({
-      // program id, used internally in PhiloGL to get program per model
       program: this._shader.id,
 
       // whether current layer responses to mouse events
@@ -110,20 +131,8 @@ export default class BaseLayer {
 
       // update buffer before rendering, -> shader attributes
       onBeforeRender() {
-
-        // set instanced attributes (positions, colors, pickingColors, etc.)
-        Object.keys(attributes).forEach(attrKey => {
-          program.use();
-          program.setBuffer(attrKey, attributes[attrKey]);
-        });
-
-        // set primitive attributes (vertices, normals, indices)
-        ['vertices', 'normals', 'indices'].forEach(primKey => {
-          if (primitive[primKey]) {
-            program.use();
-            program.setBuffer(primKey, {value: primitive[primKey]});
-          }
-        });
+        program.use();
+        this.setAttributes(program);
       },
 
       // get render function per primitive (instanced? indexed?)
@@ -144,30 +153,6 @@ export default class BaseLayer {
       uniforms: this._uniforms,
       attributes: this._attributes
     });
-
-    // set buffers
-    if (this._primitive.vertices) {
-      program.setBuffer('vertices', {
-        value: this._primitive.vertices,
-        size: 3
-      });
-    }
-
-    if (this._primitive.normals) {
-      program.setBuffer('normals', {
-        value: this._primitive.normals,
-        size: 3
-      });
-    }
-
-    if (this._primitive.indices) {
-      program.setBuffer('indices', {
-        value: this._primitive.indices,
-        bufferType: gl.ELEMENT_ARRAY_BUFFER,
-        drawType: gl.STATIC_DRAW,
-        size: 1
-      });
-    }
 
     return this._model;
   }

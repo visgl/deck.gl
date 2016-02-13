@@ -21,7 +21,7 @@
 /* global console */
 /* eslint-disable no-console */
 
-import PhiloGL from 'philogl';
+import {createGLContext, Program, PerspectiveCamera, Scene, Events, Fx} from 'lumagl';
 import React, {PropTypes} from 'react';
 import ReactDOM from 'react-dom';
 import throttle from 'lodash.throttle';
@@ -55,7 +55,7 @@ const DEFAULT_PROPS = {
   onBeforeRenderFrame: () => {},
   onAfterRenderFrame: () => {},
   onInitializationFailed: () => {},
-  onError: error => console.error('PhiloGL Error: ', error)
+  onError: error => console.error('LumaGL Error: ', error)
 };
 
 export default class WebGLRenderer extends React.Component {
@@ -78,58 +78,49 @@ export default class WebGLRenderer extends React.Component {
 
   componentDidMount() {
     const canvas = ReactDOM.findDOMNode(this);
-    this._initWebGL(canvas.id);
-  }
+    this._initWebGL(canvas);
+    this.props.onRendererInitialized(this._renderer);
+    this._animationLoop(this._renderer);
+}
 
   /**
-   * Initialize PhiloGL library and through it WebGL
+   * Initialize LumaGL library and through it WebGL
    * @param {string} canvasId
    */
-  _initWebGL(canvasId) {
-    let programs = this.props.initialShaders;
-    if (programs.length === 1) {
-      programs = [programs[0], programs[0]];
+  _initWebGL(canvas) {
+
+    const gl = this._gl = createGLContext(canvas);
+
+    this._programs = {};
+    for (let program of this.props.initialShaders) {
+      if (program.from === 'sources') {
+        this._programs[program.id] = new Program(gl, program.vs, program.fs);
+      } else {
+        throw new Error("Can't handle program.from === '" + program.from + "'");
+      }
     }
 
-    PhiloGL(canvasId, {
-      program: programs,
-      camera: this.props.camera,
-      scene: {
-        lights: this.props.lights,
-        renderPickingScene: this._renderPickingScene.bind(this)
-      },
-      events: {
-        cacheSize: false,
-        cachePosition: false,
-        centerOrigin: false,
-        onClick: this._onClick.bind(this),
-        onMouseMove: throttle(this._onMouseMove.bind(this), 100)
-      },
-      onLoad: this._onPhiloGLLoad.bind(this),
-      onError: this._onPhiloGLError.bind(this)
+    this._camera = new PerspectiveCamera(this.props.camera);
+
+    this._scene = new Scene(gl, this._programs, this._camera, {
+      lights: this.props.lights,
+      backgroundColor: {r:0,g:0,b:0,a:0}
     });
-  }
 
-  /**
-   * PhiloGL callback
-   * returns renderer when PhiloGL is loaded
-   * @param {PhiloGL.WebGL.Application} renderer
-   */
-  _onPhiloGLLoad(renderer) {
-    // check if webgl is properly initialized
-    if (!PhiloGL.hasWebGL() || !renderer.gl) {
-      this.props.onInitializationFailed();
-      return;
+    Events.create(canvas, {
+      cacheSize: false,
+      cachePosition: false,
+      centerOrigin: false,
+      onClick: this._onClick.bind(this),
+      onMouseMove: throttle(this._onMouseMove.bind(this), 100)
+    });
+
+    this._renderer = {
+      gl: this._gl,
+      programs: this._programs,
+      scene: this._scene
     }
 
-    // if yes, pop up renderer instance to webgl-overlay
-    this.props.onRendererInitialized(renderer);
-
-    this._animationLoop(renderer);
-  }
-
-  _onPhiloGLError(error) {
-    this.props.onError(error);
   }
 
   _renderPickingScene(opt) {
@@ -241,12 +232,11 @@ export default class WebGLRenderer extends React.Component {
 
   /**
    * Main WebGL animation loop
-   * @param {PhiloGL.WebGL.Application} renderer
    */
   _animationLoop(renderer) {
     this._renderFrame(renderer);
     // Keep registering ourselves for the next animation frame
-    PhiloGL.Fx.requestAnimationFrame(this._animationLoop.bind(this, renderer));
+    Fx.requestAnimationFrame(this._animationLoop.bind(this, renderer));
   }
 
   render() {
