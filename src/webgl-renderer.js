@@ -166,7 +166,7 @@ export default class WebGLRenderer extends React.Component {
 
       renderer.scene.pick(e.x, e.y, {
         viewport: this.props.viewport,
-        pixelRatio: this.props.pixelRatio,
+        pixelRatio: 1,
         pickingProgram: program
       });
 
@@ -190,7 +190,7 @@ export default class WebGLRenderer extends React.Component {
 
       renderer.scene.pick(e.x, e.y, {
         viewport: this.props.viewport,
-        pixelRatio: this.props.pixelRatio,
+        pixelRatio: 1,
         pickingProgram: program
       });
 
