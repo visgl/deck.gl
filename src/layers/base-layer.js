@@ -18,8 +18,16 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-/* global PhiloGL */
-const Model = PhiloGL.O3D.Model;
+import {Model} from 'luma.gl';
+import isEqual from 'lodash.isequal';
+
+const defaultOpts = {
+  layerIndex: 0,
+  isPickable: false,
+  deepCompare: false,
+  onObjectHovered: () => {},
+  onObjectClicked: () => {}
+};
 
 export default class BaseLayer {
   /**
@@ -35,39 +43,59 @@ export default class BaseLayer {
    * @param {number} opts.layerIndex - for colorPicking scene generation
    * @param {bool} opts.isPickable - whether layer response to mouse event
    * @param {bool} opts.opacity - opacity of the layer
-   *
-   * @param {function} opts.onObjectHovered(index, e) - popup selected index
-   * @param {function} opts.onObjectClicked(index, e) - popup selected index
    */
   /* eslint-disable max-statements */
   constructor(opts) {
-    this.id = opts.id || this._throwUndefinedError('id');
-    this.data = opts.data || this._throwUndefinedError('data');
-    this.width = opts.width || this._throwUndefinedError('width');
-    this.height = opts.height || this._throwUndefinedError('height');
+    this.checkParam(opts.id);
+    this.checkParam(opts.data);
+    this.checkParam(opts.width);
+    this.checkParam(opts.height);
 
-    this.layerIndex = opts.layerIndex || 0;
-    // apply gamma to opacity to make it visually "linear"
-    this.opacity = Math.pow(opts.opacity || 0.8, 1 / 2.2);
-    this.isPickable = opts.isPickable || false;
-    this.deepCompare = opts.deepCompare || false;
-
-    this._model = null;
-    this._shader = this.getLayerShader();
-    this._primitive = this.getLayerPrimitive();
-    this._uniforms = {opacity: this.opacity};
-    this._attributes = {};
-    this._numInstances = this.data.length || 0;
-
-    this.cache = {};
-    this.onObjectHovered = () => {};
-    this.onObjectClicked = () => {};
-
-    this.dataChanged = true;
-    this.viewportChanged = true;
-    this.needsRedraw = true;
+    this.props = {
+      ...defaultOpts,
+      ...opts
+    };
   }
   /* eslint-enable max-statements */
+
+  initializeState() {
+    Object.assign(this.state, {
+      model: null,
+      uniforms: {opacity: this.props.opacity},
+      attributes: {},
+      numInstances: this.props.data.length || 0,
+      dataChanged: true,
+      viewportChanged: true,
+      needsRedraw: true,
+      // apply gamma to opacity to make it visually "linear"
+      opacity: Math.pow(this.props.opacity || 0.8, 1 / 2.2)
+    });
+  }
+
+  updateState(newProps, oldProps, state) {
+    // 3. setup update flags, used to prevent unnecessary calculations
+    // TODO non-instanced layer cannot use .data.length for equal check
+    if (newProps.deepCompare) {
+      this.state.dataChanged = !isEqual(newProps.data, oldProps.data);
+    } else {
+      this.state.dataChanged = newProps.data.length !== oldProps.data.length;
+    }
+
+    this.state.viewportChanged =
+      newProps.width !== oldProps.width ||
+      newProps.height !== oldProps.height ||
+      newProps.latitude !== oldProps.latitude ||
+      newProps.longitude !== oldProps.longitude ||
+      newProps.zoom !== oldProps.zoom;
+
+    // 4. update new layer
+    layer.updateLayer();
+
+    // update redraw flag
+    this.state.needsRedraw = this.state.needsRedraw ||
+      this.state.dataChanged ||
+      this.state.viewportChanged;
+  }
 
   /* ------------------------------------------------------------------ */
   /* override the following functions and fill in layer specific logic */
@@ -76,58 +104,54 @@ export default class BaseLayer {
     this._throwNotImplementedError('updateLayer');
   }
 
-  getLayerShader() {
-    this._throwNotImplementedError('getLayerShader');
+  updateUniforms() {
+    this._throwNotImplementedError('updateUniforms');
   }
 
-  getLayerPrimitive() {
-    this._throwNotImplementedError('getLayerPrimitive');
-  }
-
-  setLayerUniforms() {
-    this._throwNotImplementedError('setLayerUniforms');
-  }
-
-  setLayerAttributes() {
-    this._throwNotImplementedError('setLayerAttributes');
+  updateAttributes() {
+    this._throwNotImplementedError('updateAttributes');
   }
 
   /* override the above functions and fill in layer specific logic */
   /* -------------------------------------------------------------- */
 
-  getLayerModel(renderer) {
-    const program = renderer.program[this._shader.id];
-    const attributes = this._attributes;
-    const primitive = this._primitive;
-    const gl = renderer.gl;
+  createModel({gl}) {
+    const {primitive, program, attributes, uniforms} = this.state;
 
-    this._model = new Model({
-      // program id, used internally in PhiloGL to get program per model
-      program: this._shader.id,
+    // Set up attributes relating to the primitive (not the instances)
+    /* eslint-disable dot-notation */
+    if (primitive.vertices) {
+      attributes['vertices'] = {value: primitive.vertices, size: 3};
+    }
 
+    if (primitive.normals) {
+      attributes['normals'] = {value: primitive.normals, size: 3};
+    }
+
+    if (primitive.indices) {
+      attributes['indices'] = {
+        value: primitive.indices,
+        bufferType: gl.ELEMENT_ARRAY_BUFFER,
+        drawType: gl.STATIC_DRAW,
+        size: 1
+      };
+    }
+    /* eslint-enable dot-notation */
+
+    this.state.model = new Model({
+      program: program,
+      attributes: attributes,
+      uniforms: uniforms,
       // whether current layer responses to mouse events
-      pickable: this.isPickable,
+      pickable: this.props.isPickable,
+      // get render function per primitive (instanced? indexed?)
+      render: this._getRenderFunction(gl),
 
       // update buffer before rendering, -> shader attributes
       onBeforeRender() {
-
-        // set instanced attributes (positions, colors, pickingColors, etc.)
-        Object.keys(attributes).forEach(attrKey => {
-          program.use();
-          program.setBuffer(attrKey, attributes[attrKey]);
-        });
-
-        // set primitive attributes (vertices, normals, indices)
-        ['vertices', 'normals', 'indices'].forEach(primKey => {
-          if (primitive[primKey]) {
-            program.use();
-            program.setBuffer(primKey, {value: primitive[primKey]});
-          }
-        });
+        program.use();
+        this.setAttributes(program);
       },
-
-      // get render function per primitive (instanced? indexed?)
-      render: this._getRenderFunction(gl),
 
       pick(point) {
         // z is used as layer index
@@ -139,56 +163,27 @@ export default class BaseLayer {
         program.setUniform('selected', target);
         program.selectedIndex = index - 1;
         program.selectedLayerIndex = z;
-      },
-
-      uniforms: this._uniforms,
-      attributes: this._attributes
+      }
     });
-
-    // set buffers
-    if (this._primitive.vertices) {
-      program.setBuffer('vertices', {
-        value: this._primitive.vertices,
-        size: 3
-      });
-    }
-
-    if (this._primitive.normals) {
-      program.setBuffer('normals', {
-        value: this._primitive.normals,
-        size: 3
-      });
-    }
-
-    if (this._primitive.indices) {
-      program.setBuffer('indices', {
-        value: this._primitive.indices,
-        bufferType: gl.ELEMENT_ARRAY_BUFFER,
-        drawType: gl.STATIC_DRAW,
-        size: 1
-      });
-    }
-
-    return this._model;
   }
 
   _getRenderFunction(gl) {
-    const drawType = this._primitive.drawType ?
-      gl.get(this._primitive.drawType) :
+    const drawType = this.state.primitive.drawType ?
+      gl.get(this.state.primitive.drawType) :
       gl.POINTS;
 
-    const numIndices = this._primitive.indices ?
-      this._primitive.indices.length :
+    const numIndices = this.state.primitive.indices ?
+      this.state.primitive.indices.length :
       0;
 
-    const numVertices = this._primitive.vertices ?
-      this._primitive.vertices.length :
+    const numVertices = this.state.primitive.vertices ?
+      this.state.primitive.vertices.length :
       0;
 
-    if (this._primitive.instanced) {
+    if (this.state.primitive.instanced) {
       const extension = gl.getExtension('ANGLE_instanced_arrays');
 
-      if (this._primitive.indices) {
+      if (this.state.primitive.indices) {
         return () => {
           extension.drawElementsInstancedANGLE(
             drawType, numIndices, gl.UNSIGNED_SHORT, 0, this._numInstances
@@ -205,20 +200,30 @@ export default class BaseLayer {
     }
 
     // else if this.primitive is not instanced
-    if (this._primitive.indices) {
-      return () => {
-        gl.drawElements(drawType, numIndices, gl.UNSIGNED_SHORT, 0);
-      };
+    if (this.state.primitive.indices) {
+      return () => gl.drawElements(drawType, numIndices, gl.UNSIGNED_SHORT, 0);
     }
     // else if this.primitive does not have indices
-    return () => {
-      gl.drawArrays(drawType, 0, this._numInstances);
-    };
+    return () => gl.drawArrays(drawType, 0, this.state.numInstances);
 
   }
 
-  _throwUndefinedError(property) {
-    throw new Error(property + ' is undefined in layer: ' + this.id);
+  _calculatePickingColors() {
+    if (!this.isPickable) {
+      return;
+    }
+
+    this.props.data.forEach((point, i) => {
+      this.state.pickingColors[i * 3 + 0] = (i + 1) % 256;
+      this.state.pickingColors[i * 3 + 1] = Math.floor((i + 1) / 256) % 256;
+      this.state.pickingColors[i * 3 + 2] = this.layerIndex;
+    });
+  }
+
+  checkParam(property, propertyName) {
+    if (!property) {
+      throw new Error(`${propertyName} is undefined in layer: ${this.id}`);
+    }
   }
 
   _throwNotImplementedError(funcName) {

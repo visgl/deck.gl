@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 
 import BaseMapLayer from '../base-map-layer';
-
+import {Program} from 'luma.gl';
 const glslify = require('glslify');
 
 export default class HexagonLayer extends BaseMapLayer {
@@ -37,41 +37,32 @@ export default class HexagonLayer extends BaseMapLayer {
    * @param {function} opts.onHexagonClicked(index, e) - popup selected index
    */
   constructor(opts) {
-    super(opts);
-
-    this.radius = opts.dotRadius || 10;
-    this.elevation = opts.elevation || 101;
+    super({
+      dotRadius: 10,
+      elevation: 101,
+      ...opts
+    });
 
     this.onObjectHovered = opts.onHexagonHovered;
     this.onObjectClicked = opts.onHexagonClicked;
   }
 
-  updateLayer() {
-    if (this.dataChanged) {
-      this._allocateGLBuffers();
-      this._calculatePositions();
-      this._calculateColors();
-      this._calculatePickingColors();
-    }
+  initializeState() {
+    super.initializeState();
 
-    if (this.viewportChanged || this.dataChanged) {
-      this._calculateRadiusAndAngle();
-    }
+    const {gl} = this.state;
 
-    this.setLayerUniforms();
-    this.setLayerAttributes();
+    const program = new Program(
+      gl,
+      glslify('./vertex.glsl'),
+      glslify('./fragment.glsl'),
+      'hexagon'
+    );
 
-    this.dataChanged = false;
-    this.viewportChanged = false;
-  }
-
-  getLayerShader() {
-    return {
-      id: this.id,
-      from: 'sources',
-      vs: glslify('./vertex.glsl'),
-      fs: glslify('./fragment.glsl')
-    };
+    Object.assign(this.state, {
+      program,
+      primitive: this.getLayerPrimitive()
+    });
   }
 
   getLayerPrimitive() {
@@ -96,35 +87,43 @@ export default class HexagonLayer extends BaseMapLayer {
     };
   }
 
-  setLayerUniforms() {
-    this._uniforms = {
-      ...this._uniforms,
-      radius: this.cache.radius,
-      angle: this.cache.angle
-    };
+  updateLayer() {
+    const {dataChanged, viewportChanged} = this.state;
+    if (dataChanged) {
+      this._allocateGLBuffers();
+      this._calculatePositions();
+      this._calculateColors();
+      this._calculatePickingColors();
+    }
+
+    if (viewportChanged || dataChanged) {
+      this._calculateRadiusAndAngle();
+    }
+
+    this.updateUniforms();
+    this.updateAttributes();
+
+    this.state.dataChanged = false;
+    this.state.viewportChanged = false;
   }
 
-  setLayerAttributes() {
-    this._attributes = {
-      ...this._attributes,
-      positions: {
-        value: this.cache.positions,
-        instanced: 1,
-        size: 3
-      },
-      colors: {
-        value: this.cache.colors,
-        instanced: 1,
-        size: 3
-      }
-    };
+  updateUniforms() {
+    const {uniforms} = this.state;
+    uniforms.radius = this.state.radius;
+    uniforms.angle = this.state.angle;
+  }
+
+  updateAttributes() {
+    const {attributes} = this.state;
+    attributes.positions = {value: this.state.positions, instanced: 1, size: 3};
+    attributes.colors = {value: this.state.colors, instanced: 1, size: 3};
 
     if (!this.isPickable) {
       return;
     }
 
-    this._attributes.pickingColors = {
-      value: this.cache.pickingColors,
+    attributes.pickingColors = {
+      value: this.state.pickingColors,
       instanced: 1,
       size: 3
     };
@@ -132,53 +131,40 @@ export default class HexagonLayer extends BaseMapLayer {
 
   _allocateGLBuffers() {
     const N = this._numInstances;
-
-    this.cache.positions = new Float32Array(N * 3);
-    this.cache.colors = new Float32Array(N * 3);
+    this.state.positions = new Float32Array(N * 3);
+    this.state.colors = new Float32Array(N * 3);
 
     if (!this.isPickable) {
       return;
     }
 
-    this.cache.pickingColors = new Float32Array(N * 3);
+    this.state.pickingColors = new Float32Array(N * 3);
   }
 
   _calculatePositions() {
-    this.data.forEach((hexagon, i) => {
-      this.cache.positions[i * 3 + 0] = hexagon.centroid.x;
-      this.cache.positions[i * 3 + 1] = hexagon.centroid.y;
-      this.cache.positions[i * 3 + 2] = this.elevation;
+    this.props.data.forEach((hexagon, i) => {
+      this.state.positions[i * 3 + 0] = hexagon.centroid.x;
+      this.state.positions[i * 3 + 1] = hexagon.centroid.y;
+      this.state.positions[i * 3 + 2] = this.elevation;
     });
   }
 
   _calculateColors() {
-    this.data.forEach((hexagon, i) => {
-      this.cache.colors[i * 3 + 0] = hexagon.color[0];
-      this.cache.colors[i * 3 + 1] = hexagon.color[1];
-      this.cache.colors[i * 3 + 2] = hexagon.color[2];
-    });
-  }
-
-  _calculatePickingColors() {
-    if (!this.isPickable) {
-      return;
-    }
-
-    this.data.forEach((_, i) => {
-      this.cache.pickingColors[i * 3 + 0] = (i + 1) % 256;
-      this.cache.pickingColors[i * 3 + 1] = Math.floor((i + 1) / 256) % 256;
-      this.cache.pickingColors[i * 3 + 2] = this.layerIndex;
+    this.props.data.forEach((hexagon, i) => {
+      this.state.colors[i * 3 + 0] = hexagon.color[0];
+      this.state.colors[i * 3 + 1] = hexagon.color[1];
+      this.state.colors[i * 3 + 2] = hexagon.color[2];
     });
   }
 
   // TODO this is the only place that uses hexagon vertices
   // consider move radius and angle calculation to the shader
   _calculateRadiusAndAngle() {
-    if (!this.data || this.data.length === 0) {
+    if (!this.props.data || this.props.data.length === 0) {
       return;
     }
 
-    const vertices = this.data[0].vertices;
+    const vertices = this.props.data[0].vertices;
     const vertex0 = vertices[0];
     const vertex3 = vertices[3];
 
@@ -196,10 +182,10 @@ export default class HexagonLayer extends BaseMapLayer {
     const dxy = Math.sqrt(dx * dx + dy * dy);
 
     // Calculate angle that the perpendicular hexagon vertex axis is tilted
-    this.cache.angle = Math.acos(dx / dxy) * -Math.sign(dy);
+    this.state.angle = Math.acos(dx / dxy) * -Math.sign(dy);
 
     // Allow user to fine tune radius
-    this.cache.radius = dxy / 2 * Math.min(1, this.radius);
+    this.state.radius = dxy / 2 * Math.min(1, this.radius);
   }
 
 }

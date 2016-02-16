@@ -95,13 +95,14 @@ const flatWorld = module.exports = {
       fov: flatWorld.fov,
       near: (cameraHeight + 1) / 100,
       far: cameraHeight + 1,
-      position: {x: 0, y: 0, z: cameraHeight},
+      position: [0,0,cameraHeight],
       aspect: 1
     };
   },
 
   getPixelRatio: function getPixelRatio(ratio) {
-    return ratio || 1;
+    return 1;
+    // return ratio || 1;
   },
 
   getLighting: function getLighting() {
@@ -111,7 +112,7 @@ const flatWorld = module.exports = {
       points: [{
         diffuse: {r: 0.8, g: 0.8, b: 0.8},
         specular: {r: 0.6, g: 0.6, b: 0.6},
-        position: {x: 0.5, y: 0.5, z: 3}
+        position: [0.5,0.5,3]
       }]
     };
   },

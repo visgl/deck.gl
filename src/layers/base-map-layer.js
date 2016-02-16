@@ -41,23 +41,25 @@ export default class BaseMapLayer extends BaseLayer {
   constructor(opts) {
     super(opts);
 
-    this.width = opts.width || this._throwUndefinedError('width');
-    this.height = opts.height || this._throwUndefinedError('height');
-    this.latitude = opts.latitude || this._throwUndefinedError('latitude');
-    this.longitude = opts.longitude || this._throwUndefinedError('longitude');
-    this.zoom = opts.zoom || this._throwUndefinedError('zoom');
+    this.checkParam(opts.width, 'width');
+    this.checkParam(opts.height, 'height');
+    this.checkParam(opts.latitude, 'latitude');
+    this.checkParam(opts.longitude, 'longitude');
+    this.checkParam(opts.zoom, 'zoom');
+  }
+
+  initializeState() {
+    super.initializeState();
 
     const {width, height, latitude, longitude, zoom} = this;
-    this._viewport = flatWorld.getViewport(width, height);
+    this.state.viewport = flatWorld.getViewport(width, height);
+    const {x, y} = this.state.viewport;
 
-    const {x, y} = this._viewport;
-    this._uniforms = {
-      ...this._uniforms,
-      viewport: [x, y, width, height],
-      mapViewport: [longitude, latitude, zoom, flatWorld.size]
-    };
+    this.state.uniforms.viewport = [x, y, width, height];
+    this.state.uniforms.mapViewport =
+      [longitude, latitude, zoom, flatWorld.size];
 
-    this._mercator = ViewportMercator({
+    this.state.mercator = ViewportMercator({
       width, height, latitude, longitude, zoom,
       tileSize: 512
     });
@@ -65,13 +67,13 @@ export default class BaseMapLayer extends BaseLayer {
 
   // TODO deprecate: this funtion is only used for calculating radius now
   project(latLng) {
-    const [x, y] = this._mercator.project([latLng[0], latLng[1]]);
+    const [x, y] = this.state.mercator.project([latLng[0], latLng[1]]);
     return {x, y};
   }
 
   // TODO deprecate: this funtion is only used for calculating radius now
   screenToSpace(x, y) {
-    const vp = this._viewport;
+    const vp = this.state.viewport;
     return {
       x: ((x - vp.x) / vp.width - 0.5) * flatWorld.size * 2,
       y: ((y - vp.y) / vp.height - 0.5) * flatWorld.size * 2 * -1,

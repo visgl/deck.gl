@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 
 import BaseMapLayer from '../base-map-layer';
-// Note: Shaders are inlined by the glslify browserify transform
+import {Program} from 'luma.gl';
 const glslify = require('glslify');
 
 export default class ScatterplotLayer extends BaseMapLayer {
@@ -33,39 +33,27 @@ export default class ScatterplotLayer extends BaseMapLayer {
    */
   constructor(opts) {
     super(opts);
-    this.radius = opts.radius;
-    this.radiusChanged = opts.radius !== this.cache.radius;
 
     this.onObjectHovered = opts.onObjectHovered;
     this.onObjectClicked = opts.onObjectClicked;
   }
 
-  updateLayer() {
-    if (this.dataChanged) {
-      this._allocateGLBuffers();
-      this._calculatePositions();
-      this._calculateColors();
-      this._calculatePickingColors();
-    }
+  initializeState() {
+    super.initializeState();
 
-    if (this.viewportChanged || this.dataChanged || this.radiusChanged) {
-      this._calculateRadius();
-    }
+    const {gl} = this.state;
 
-    this.setLayerUniforms();
-    this.setLayerAttributes();
+    const program = new Program(
+      gl,
+      glslify('./vertex.glsl'),
+      glslify('./fragment.glsl'),
+      'scatterplot'
+    );
 
-    this.dataChanged = false;
-    this.viewportChanged = false;
-  }
-
-  getLayerShader() {
-    return {
-      id: this.id,
-      from: 'sources',
-      vs: glslify('./vertex.glsl'),
-      fs: glslify('./fragment.glsl')
-    };
+    Object.assign(this.state, {
+      program,
+      primitive: this.getLayerPrimitive()
+    });
   }
 
   getLayerPrimitive() {
@@ -90,34 +78,45 @@ export default class ScatterplotLayer extends BaseMapLayer {
     };
   }
 
-  setLayerUniforms() {
-    this._uniforms = {
-      ...this._uniforms,
-      radius: this.cache.radius
-    };
+  updateLayer(newProps, oldProps) {
+    this.state.radiusChanged = newProps.radius !== oldProps.radius;
+
+    const {dataChanged, viewportChanged, radiusChanged} = this.state;
+    if (dataChanged) {
+      this._allocateGLBuffers();
+      this._calculatePositions();
+      this._calculateColors();
+      this._calculatePickingColors();
+    }
+
+    if (viewportChanged || dataChanged || radiusChanged) {
+      this._calculateRadius();
+    }
+
+    this.updateUniforms();
+    this.updateAttributes();
+
+    this.state.dataChanged = false;
+    this.state.viewportChanged = false;
+    this.state.radiusChanged = false;
   }
 
-  setLayerAttributes() {
-    this._attributes = {
-      ...this._attributes,
-      positions: {
-        value: this.cache.positions,
-        instanced: 1,
-        size: 3
-      },
-      colors: {
-        value: this.cache.colors,
-        instanced: 1,
-        size: 3
-      }
-    };
+  updateUniforms() {
+    const {uniforms} = this.state;
+    uniforms.radius = this.state.radius;
+  }
+
+  updateAttributes() {
+    const {attributes} = this.state;
+    attributes.positions = {value: this.state.positions, instanced: 1, size: 3};
+    attributes.colors = {value: this.state.colors, instanced: 1, size: 3};
 
     if (!this.isPickable) {
       return;
     }
 
-    this._attributes.pickingColors = {
-      value: this.cache.pickingColors,
+    attributes.pickingColors = {
+      value: this.state.pickingColors,
       instanced: 1,
       size: 3
     };
@@ -126,48 +125,36 @@ export default class ScatterplotLayer extends BaseMapLayer {
   _allocateGLBuffers() {
     const N = this._numInstances;
 
-    this.cache.positions = new Float32Array(N * 3);
-    this.cache.colors = new Float32Array(N * 3);
+    this.state.positions = new Float32Array(N * 3);
+    this.state.colors = new Float32Array(N * 3);
 
     if (!this.isPickable) {
       return;
     }
 
-    this.cache.pickingColors = new Float32Array(N * 3);
+    this.state.pickingColors = new Float32Array(N * 3);
   }
 
   _calculatePositions() {
-    this.data.forEach((point, i) => {
-      this.cache.positions[i * 3 + 0] = point.position.x;
-      this.cache.positions[i * 3 + 1] = point.position.y;
-      this.cache.positions[i * 3 + 2] = point.position.z;
+    this.props.data.forEach((point, i) => {
+      this.state.positions[i * 3 + 0] = point.position.x;
+      this.state.positions[i * 3 + 1] = point.position.y;
+      this.state.positions[i * 3 + 2] = point.position.z;
     });
   }
 
   _calculateColors() {
-    this.data.forEach((point, i) => {
-      this.cache.colors[i * 3 + 0] = point.color[0];
-      this.cache.colors[i * 3 + 1] = point.color[1];
-      this.cache.colors[i * 3 + 2] = point.color[2];
-    });
-  }
-
-  _calculatePickingColors() {
-    if (!this.isPickable) {
-      return;
-    }
-
-    this.data.forEach((point, i) => {
-      this.cache.pickingColors[i * 3 + 0] = (i + 1) % 256;
-      this.cache.pickingColors[i * 3 + 1] = Math.floor((i + 1) / 256) % 256;
-      this.cache.pickingColors[i * 3 + 2] = this.layerIndex;
+    this.props.data.forEach((point, i) => {
+      this.state.colors[i * 3 + 0] = point.color[0];
+      this.state.colors[i * 3 + 1] = point.color[1];
+      this.state.colors[i * 3 + 2] = point.color[2];
     });
   }
 
   _calculateRadius() {
     // use radius if specified
     if (this.radius && this.radius !== 0) {
-      this.cache.radius = this.radius;
+      this.state.radius = this.radius;
       return;
     }
 
@@ -180,7 +167,7 @@ export default class ScatterplotLayer extends BaseMapLayer {
     const dx = space0.x - space1.x;
     const dy = space0.y - space1.y;
 
-    this.cache.radius = Math.max(Math.sqrt(dx * dx + dy * dy), 2.0);
+    this.state.radius = Math.max(Math.sqrt(dx * dx + dy * dy), 2.0);
   }
 
 }

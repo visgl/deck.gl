@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 
 import BaseMapLayer from '../base-map-layer';
-// Note: Shaders are inlined by the glslify browserify transform
+import {Program} from 'luma.gl';
 const glslify = require('glslify');
 
 export default class ArcLayer extends BaseMapLayer {
@@ -34,26 +34,21 @@ export default class ArcLayer extends BaseMapLayer {
     super(opts);
   }
 
-  updateLayer() {
-    if (this.dataChanged) {
-      this._allocateGLBuffers();
-      this._calculatePositions();
-    }
+  initializeState() {
+    super.initializeState();
+    const {gl} = this.state;
 
-    this.setLayerUniforms();
-    this.setLayerAttributes();
+    const program = new Program(
+      gl,
+      glslify('./vertex.glsl'),
+      glslify('./fragment.glsl'),
+      'arc'
+    );
 
-    this.dataChanged = false;
-    this.viewportChanged = false;
-  }
-
-  getLayerShader() {
-    return {
-      id: this.id,
-      from: 'sources',
-      vs: glslify('./vertex.glsl'),
-      fs: glslify('./fragment.glsl')
-    };
+    Object.assign(this.state, {
+      program,
+      primitive: this.getLayerPrimitive()
+    });
   }
 
   getLayerPrimitive() {
@@ -71,40 +66,45 @@ export default class ArcLayer extends BaseMapLayer {
     };
   }
 
-  setLayerUniforms() {
-    if (!this.data || this.data.length === 0) {
-      return;
+  updateLayer() {
+    const {dataChanged} = this.state;
+    if (dataChanged) {
+      this._allocateGLBuffers();
+      this._calculatePositions();
     }
 
-    this._uniforms = {
-      ...this._uniforms,
-      color0: this.data[0].colors.c0,
-      color1: this.data[0].colors.c1
-    };
+    this.updateUniforms();
+    this.updateAttributes();
+
+    this.state.dataChanged = false;
+    this.state.viewportChanged = false;
   }
 
-  setLayerAttributes() {
-    this._attributes = {
-      ...this._attributes,
-      positions: {
-        value: this.cache.positions,
-        instanced: 1,
-        size: 4
-      }
-    };
+  updateUniforms() {
+    if (!this.props.data || this.props.data.length === 0) {
+      return;
+    }
+    const {uniforms} = this.state;
+    uniforms.color0 = this.props.data[0].colors.c0;
+    uniforms.color1 = this.props.data[0].colors.c1;
+  }
+
+  updateAttributes() {
+    const {attributes} = this.state;
+    attributes.positions = {value: this.state.positions, instanced: 1, size: 4};
   }
 
   _allocateGLBuffers() {
     const N = this._numInstances;
-    this.cache.positions = new Float32Array(N * 4);
+    this.state.positions = new Float32Array(N * 4);
   }
 
   _calculatePositions() {
-    this.data.forEach((arc, i) => {
-      this.cache.positions[i * 4 + 0] = arc.position.x0;
-      this.cache.positions[i * 4 + 1] = arc.position.y0;
-      this.cache.positions[i * 4 + 2] = arc.position.x1;
-      this.cache.positions[i * 4 + 3] = arc.position.y1;
+    this.props.data.forEach((arc, i) => {
+      this.state.positions[i * 4 + 0] = arc.position.x0;
+      this.state.positions[i * 4 + 1] = arc.position.y0;
+      this.state.positions[i * 4 + 2] = arc.position.x1;
+      this.state.positions[i * 4 + 3] = arc.position.y1;
     });
   }
 

@@ -18,13 +18,12 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+/* global window */
 import React, {PropTypes} from 'react';
 import WebGLRenderer from './webgl-renderer';
 import flatWorld from './flat-world';
 import where from 'lodash.where';
-import isEqual from 'lodash.isequal';
 
-const DISPLAY_NAME = 'WebGLOverlay';
 const PROP_TYPES = {
   width: PropTypes.number.isRequired,
   height: PropTypes.number.isRequired,
@@ -33,9 +32,6 @@ const PROP_TYPES = {
 };
 
 export default class WebGLOverlay extends React.Component {
-  static get displayName() {
-    return DISPLAY_NAME;
-  }
 
   static get propTypes() {
     return PROP_TYPES;
@@ -54,55 +50,44 @@ export default class WebGLOverlay extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    const {renderer} = this.state;
-    if (!renderer) {
+    const {gl, scene} = this.state;
+    if (!scene) {
       return;
     }
 
     // clear scene and repopulate based on new layers
-    renderer.scene.models = [];
+    scene.removeAll();
 
-    nextProps.layers.forEach(layer => {
+    for (const layer of nextProps.layers) {
       // 1. given a new coming layer, find its matching layer
       const matchingLayer = this._findMatchingLayer(layer);
-      // 2. copy over props and state from cache to new layer
-      if (matchingLayer.cache) {
-        layer.cache = matchingLayer.cache;
-      }
-      // 3. setup update flags, used to prevent unnecessary calculations
-      // TODO non-instanced layer cannot use .data.length for equal check
-      if (layer.deepCompare) {
-        layer.dataChanged = !isEqual(matchingLayer.data, layer.data);
+      if (matchingLayer && matchingLayer.state) {
+        // 2. copy over state to new layer
+        layer.state = matchingLayer.state;
+        // 3. update layer
+        layer.updateState(matchingLayer.props, layer.props, layer.state);
       } else {
-        layer.dataChanged = matchingLayer.data.length !== layer.data.length;
+        // New layer, it needs to initialize it's state
+        layer.state = {gl};
+        layer.initializeState();
+        // Create a model for the layer
+        layer.createModel({gl});
       }
-
-      layer.viewportChanged =
-        matchingLayer.width !== layer.width ||
-        matchingLayer.height !== layer.height ||
-        matchingLayer.latitude !== layer.latitude ||
-        matchingLayer.longitude !== layer.longitude ||
-        matchingLayer.zoom !== layer.zoom;
-      // 4. update new layer
-      layer.updateLayer();
-      // 5. add updated model to scene
-      renderer.scene.add(layer.getLayerModel(renderer));
-      // 6. update redraw flag
-      this.needsRedraw = this.needsRedraw ||
-        layer.dataChanged || layer.viewportChanged;
-    });
+      // Add model to scene
+      scene.add(layer.state.model);
+    }
   }
 
   _findMatchingLayer(layer) {
     const candidates = where(this.props.layers, {id: layer.id});
-    if (candidates.length !== 1) {
-      throw new Error(layer + ' has other than one matching layers');
+    if (candidates.length > 1) {
+      throw new Error(layer + ' has more than one matching layers');
     }
     return candidates[0];
   }
 
-  _getInitialPrograms() {
-    return this.props.layers.map(layer => layer.program);
+  _onRendererInitialized({gl, scene}) {
+    this.setState({gl, scene});
   }
 
   _handleObjectHovered(...args) {
@@ -128,16 +113,7 @@ export default class WebGLOverlay extends React.Component {
   }
 
   _checkIfNeedRedraw() {
-    return this.needsRedraw;
-  }
-
-  _onRendererInitialized(renderer) {
-    this.props.layers.forEach(layer => {
-      layer.updateLayer();
-      renderer.scene.add(layer.getLayerModel(renderer));
-    });
-
-    this.setState({renderer});
+    return this.state.needsRedraw;
   }
 
   render() {
@@ -145,34 +121,31 @@ export default class WebGLOverlay extends React.Component {
       width, height, layers, onBeforeRenderFrame, onAfterRenderFrame
     } = this.props;
 
-    if (!layers || layers.length === 0) {
+    if (!Array.isArray(layers) || layers.length === 0) {
       return null;
     }
 
-    const props = {
-      width,
-      height,
+    return (
+      <WebGLRenderer
+        width={ width }
+        height={ height }
 
-      viewport: flatWorld.getViewport(width, height),
-      camera: flatWorld.getCamera(),
-      lights: flatWorld.getLighting(),
-      blending: flatWorld.getBlending(),
-      pixelRatio: flatWorld.getPixelRatio(window.devicePixelRatio),
+        viewport={ flatWorld.getViewport(width, height) }
+        camera={ flatWorld.getCamera() }
+        lights={ flatWorld.getLighting() }
+        blending={ flatWorld.getBlending() }
+        pixelRatio={ flatWorld.getPixelRatio(window.devicePixelRatio) }
 
-      events: {
-        onObjectHovered: this._handleObjectHovered,
-        onObjectClicked: this._handleObjectClicked
-      },
+        events={ {
+          onObjectHovered: this._handleObjectHovered,
+          onObjectClicked: this._handleObjectClicked
+        } }
 
-      initialShaders: layers.map(layer => layer.getLayerShader()),
-
-      onBeforeRenderFrame,
-      onAfterRenderFrame,
-      needRedraw: this._checkIfNeedRedraw,
-      onRendererInitialized: this._onRendererInitialized
-    };
-
-    return <WebGLRenderer {...props} />;
+        onBeforeRenderFrame={ onBeforeRenderFrame }
+        onAfterRenderFrame={ onAfterRenderFrame }
+        needRedraw={ this._checkIfNeedRedraw }
+        onRendererInitialized={ this._onRendererInitialized }/>
+    );
   }
 
 }

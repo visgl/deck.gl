@@ -19,21 +19,16 @@
 // THE SOFTWARE.
 
 /* global console */
-/* eslint-disable no-console */
-
-import PhiloGL from 'philogl';
 import React, {PropTypes} from 'react';
 import ReactDOM from 'react-dom';
+import {createGLContext, PerspectiveCamera, Scene, Events, Fx} from 'luma.gl';
 import throttle from 'lodash.throttle';
 
-const DISPLAY_NAME = 'WebGLRenderer';
 const PROP_TYPES = {
   id: PropTypes.string,
 
   width: PropTypes.number.isRequired,
   height: PropTypes.number.isRequired,
-
-  initialShaders: PropTypes.array.isRequired,
 
   pixelRatio: PropTypes.number,
   viewport: PropTypes.object.isRequired,
@@ -55,13 +50,12 @@ const DEFAULT_PROPS = {
   onBeforeRenderFrame: () => {},
   onAfterRenderFrame: () => {},
   onInitializationFailed: () => {},
-  onError: error => console.error('PhiloGL Error: ', error)
+  /* eslint-disable no-console */
+  onError: error => console.error('LumaGL Error: ', error)
+  /* eslint-enable no-console */
 };
 
 export default class WebGLRenderer extends React.Component {
-  static get displayName() {
-    return DISPLAY_NAME;
-  }
 
   static get propTypes() {
     return PROP_TYPES;
@@ -73,100 +67,82 @@ export default class WebGLRenderer extends React.Component {
 
   constructor(props) {
     super(props);
-    this._renderer = null;
+    this.state = {
+      gl: null
+    };
+
+    this._onClick = this._onClick.bind(this);
+    this._onMouseMove = this._onMouseMove.bind(this);
+    this._animationLoop = this._animationLoop.bind(this);
   }
 
   componentDidMount() {
     const canvas = ReactDOM.findDOMNode(this);
-    this._initWebGL(canvas.id);
+    this._initWebGL(canvas);
+    this._animationLoop();
   }
 
   /**
-   * Initialize PhiloGL library and through it WebGL
-   * @param {string} canvasId
+   * Initialize LumaGL library and through it WebGL
+   * @param {string} canvas
    */
-  _initWebGL(canvasId) {
-    let programs = this.props.initialShaders;
-    if (programs.length === 1) {
-      programs = [programs[0], programs[0]];
-    }
+  _initWebGL(canvas) {
 
-    PhiloGL(canvasId, {
-      program: programs,
-      camera: this.props.camera,
-      scene: {
-        lights: this.props.lights,
-        renderPickingScene: this._renderPickingScene.bind(this)
-      },
-      events: {
-        cacheSize: false,
-        cachePosition: false,
-        centerOrigin: false,
-        onClick: this._onClick.bind(this),
-        onMouseMove: throttle(this._onMouseMove.bind(this), 100)
-      },
-      onLoad: this._onPhiloGLLoad.bind(this),
-      onError: this._onPhiloGLError.bind(this)
+    const gl = createGLContext(canvas);
+
+    Events.create(canvas, {
+      cacheSize: false,
+      cachePosition: false,
+      centerOrigin: false,
+      onClick: this._onClick,
+      onMouseMove: throttle(this._onMouseMove, 100)
     });
-  }
 
-  /**
-   * PhiloGL callback
-   * returns renderer when PhiloGL is loaded
-   * @param {PhiloGL.WebGL.Application} renderer
-   */
-  _onPhiloGLLoad(renderer) {
-    // check if webgl is properly initialized
-    if (!PhiloGL.hasWebGL() || !renderer.gl) {
-      this.props.onInitializationFailed();
-      return;
-    }
+    const camera = new PerspectiveCamera(this.props.camera);
 
-    // if yes, pop up renderer instance to webgl-overlay
-    this.props.onRendererInitialized(renderer);
+    // TODO - remove program parameter from scene, or move it into options
+    const scene = new Scene(gl, null, camera, {
+      lights: this.props.lights,
+      backgroundColor: {r: 0, g: 0, b: 0, a: 0}
+    });
 
-    this._animationLoop(renderer);
-  }
+    this.setState({gl, camera, scene});
 
-  _onPhiloGLError(error) {
-    this.props.onError(error);
+    this.props.onRendererInitialized({gl, camera, scene});
   }
 
   _renderPickingScene(opt) {
-    const renderer = this._renderer;
+    const {scene} = this.state;
 
-    renderer.scene.models.forEach(model => {
-      const program = renderer.program[model.program];
+    for (const model of scene.models) {
       if (model.pickable) {
+        const program = model.program;
         program.use();
         program.setUniform('enablePicking', 1);
         opt.o3dList.push(model);
       }
-    });
+    }
 
-    renderer.scene.renderToTexture('$picking');
+    scene.renderToTexture('$picking');
 
-    renderer.scene.models.forEach(model => {
-      const program = renderer.program[model.program];
+    for (const model of scene.models) {
+      const program = model.program;
       if (model.pickable) {
         program.use();
         program.setUniform('enablePicking', 0);
       }
-    });
+    }
   }
 
   _onClick(e) {
-    const renderer = this._renderer;
-    if (!renderer || !renderer.program) {
-      return;
-    }
+    const {scene} = this.state;
 
-    Object.keys(renderer.program).forEach(programId => {
-      const program = renderer.program[programId];
+    for (const model of scene.models) {
+      const program = model.program;
 
-      renderer.scene.pick(e.x, e.y, {
+      scene.pick(e.x, e.y, {
         viewport: this.props.viewport,
-        pixelRatio: 1,
+        pixelRatio: this.props.pixelRatio,
         pickingProgram: program
       });
 
@@ -176,21 +152,18 @@ export default class WebGLRenderer extends React.Component {
           program.selectedIndex, program.selectedLayerIndex, e
         );
       }
-    });
+    }
   }
 
   _onMouseMove(e) {
-    const renderer = this._renderer;
-    if (!renderer || !renderer.program) {
-      return;
-    }
+    const {scene} = this.state;
 
-    Object.keys(renderer.program).forEach(programId => {
-      const program = renderer.program[programId];
+    for (const model of scene.models) {
+      const program = model.program;
 
-      renderer.scene.pick(e.x, e.y, {
+      scene.pick(e.x, e.y, {
         viewport: this.props.viewport,
-        pixelRatio: 1,
+        pixelRatio: this.props.pixelRatio,
         pickingProgram: program
       });
 
@@ -200,30 +173,40 @@ export default class WebGLRenderer extends React.Component {
           program.selectedIndex, program.selectedLayerIndex, e
         );
       }
-    });
+    }
   }
 
-  _renderFrame(renderer) {
+  _renderFrame() {
     const {
       viewport: {x, y, width, height},
       blending: {enable, blendFunc, blendEquation},
-      needRedraw, onBeforeRenderFrame, onAfterRenderFrame,
+      needRedraw,
+      onBeforeRenderFrame,
+      onAfterRenderFrame,
       pixelRatio
     } = this.props;
 
-    this._renderer = renderer;
-    if (!needRedraw()) {
+    // TODO - restore
+    // if (!needRedraw()) {
+    //   return;
+    // }
+
+    const {gl, scene} = this.state;
+    if (!gl) {
       return;
     }
-
-    const gl = renderer.gl;
 
     // clear depth and color buffers
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
     // update viewport to latest props
     // (typically changed by app on browser resize etc)
-    gl.viewport(x * pixelRatio, y * pixelRatio, width * pixelRatio, height * pixelRatio);
+    gl.viewport(
+      x * pixelRatio,
+      y * pixelRatio,
+      width * pixelRatio,
+      height * pixelRatio
+    );
 
     // setup bledning
     if (enable) {
@@ -235,37 +218,29 @@ export default class WebGLRenderer extends React.Component {
     }
 
     onBeforeRenderFrame();
-    renderer.scene.render();
+    scene.render();
     onAfterRenderFrame();
   }
 
   /**
    * Main WebGL animation loop
-   * @param {PhiloGL.WebGL.Application} renderer
    */
-  _animationLoop(renderer) {
-    this._renderFrame(renderer);
+  _animationLoop() {
+    this._renderFrame();
     // Keep registering ourselves for the next animation frame
-    PhiloGL.Fx.requestAnimationFrame(this._animationLoop.bind(this, renderer));
+    Fx.requestAnimationFrame(this._animationLoop);
   }
 
   render() {
     const {id, width, height, pixelRatio} = this.props;
-
-    const props = {
-      id,
-      ref: 'overlay',
-      width: width * pixelRatio || 1,
-      height: height * pixelRatio || 1,
-      style: {
-        width: width,
-        height: height
-      }
-    };
-
-    return <canvas {...props} />;
+    return (
+      <canvas
+        id={ id }
+        ref={ 'webgl-renderer-overlay' }
+        width={ width * pixelRatio || 1 }
+        height={ height * pixelRatio || 1 }
+        style={ {width, height} }/>
+    );
   }
 
 }
-
-/* eslint-enable no-console */
