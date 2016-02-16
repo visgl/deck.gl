@@ -19,7 +19,8 @@
   "browserify": {
     "transform": [
       "babelify",
-      "glslify"
+      "glslify",
+      "envify"
     ]
   },
   "dependencies": {
@@ -31,18 +32,20 @@
     "lodash.isfunction": "^3.0.6",
     "lodash.throttle": "^3.0.4",
     "lodash.where": "^3.1.0",
-    "philogl": "git+https://github.com/philogb/philogl.git",
+    "luma.gl": "git://github.com/uber-common/luma.gl#",
     "viewport-mercator-project": "^2.0.1"
   },
   "devDependencies": {
     "babel-cli": "^6.3.15",
     "babel-eslint": "^4.1.6",
     "babel-polyfill": "^6.1.19",
+    "babel-plugin-transform-builtin-extend": "1.1.0",
     "babel-preset-es2015": "^6.3.13",
     "babel-preset-react": "^6.3.13",
     "babel-preset-stage-2": "^6.3.13",
     "babelify": "^7.2.0",
     "d3-request": "^0.2.2",
+    "envify": "^3.4.0",
     "eslint": "^1.10.3",
     "eslint-plugin-react": "^3.13.1",
     "faucet": "0.0.1",
@@ -50,10 +53,10 @@
     "http-server": "^0.8.5",
     "immutable": "^3.7.5",
     "r-dom": "^2.1.0",
-    "react-map-gl": "^0.6.0",
-    "react-redux": "^4.0.0",
     "react": "^0.14.0",
     "react-dom": "^0.14.0",
+    "react-map-gl": "^0.6.0",
+    "react-redux": "^4.0.0",
     "redux": "^3.0.4",
     "tape": "^4.0.0",
     "uber-standard": "^5.1.0",
@@ -66,9 +69,9 @@
   "scripts": {
     "lint": "uber-standard",
     "precommit": "npm run lint -s",
-    "server": "./node_modules/http-server/bin/http-server .",
+    "server": "./node_modules/http-server/bin/http-server -c-1 .",
     "start": "npm run watch & npm run server",
     "test": "babel-node test/index.js | faucet",
-    "watch": "watchify -o example/bundle.js example/main.js -v"
+    "watch": "watchify -d -o example/bundle.js example/main.js -v"
   }
 }
