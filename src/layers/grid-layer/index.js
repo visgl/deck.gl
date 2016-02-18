@@ -107,17 +107,19 @@ export default class GridLayer extends BaseMapLayer {
   _calculatePositions() {
     const {numCol} = this.props;
     const {numInstances} = this.state;
+    const {value} = this.state.attributes.positions;
     for (let i = 0; i < numInstances; i++) {
       const x = i % numCol;
       const y = Math.floor(i / numCol);
-      this.state.positions[i * 3 + 0] = x * this.unitWidth - this.width;
-      this.state.positions[i * 3 + 1] = y * this.unitHeight - this.height;
-      this.state.positions[i * 3 + 2] = 0;
+      value[i * 3 + 0] = x * this.unitWidth - this.width;
+      value[i * 3 + 1] = y * this.unitHeight - this.height;
+      value[i * 3 + 2] = 0;
     }
   }
 
   _calculateColors() {
     const {numCol} = this.props;
+    const {value} = this.state.attributes.colors;
     this.props.data.forEach(point => {
       const pixel = this.project([point.position.x, point.position.y]);
       const space = this.screenToSpace(pixel.x, pixel.y);
@@ -126,12 +128,12 @@ export default class GridLayer extends BaseMapLayer {
       const rowId = Math.floor((space.y + this.height) / this.unitHeight);
 
       const i3 = (colId + rowId * numCol) * 3;
-      this.state.colors[i3 + 0] += 1;
-      this.state.colors[i3 + 1] += 5;
-      this.state.colors[i3 + 2] += 1;
+      value[i3 + 0] += 1;
+      value[i3 + 1] += 5;
+      value[i3 + 2] += 1;
     });
 
-    this.state.maxCount = Math.max(...this.state.colors);
+    this.state.maxCount = Math.max(...this.state);
   }
 
 }

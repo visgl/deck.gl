@@ -78,6 +78,7 @@ export default class WebGLOverlay extends React.Component {
         // New layer, it needs to initialize it's state
         newLayer.state = {gl};
         newLayer.initializeState();
+        newLayer.initializeAttributes();
         // Create a model for the layer
         newLayer.createModel({gl});
         // 2. update state in old layer

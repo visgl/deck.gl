@@ -66,7 +66,7 @@ export default class BaseLayer {
       attributes: {},
       // instancedAttributes is a subset of attributes that updates with data
       instancedAttributes: {},
-      numInstances: this.props.data.length || 0,
+      numInstances: -1,
       dataChanged: true,
       viewportChanged: true,
       needsRedraw: true,
