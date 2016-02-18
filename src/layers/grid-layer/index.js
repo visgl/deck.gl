@@ -89,14 +89,15 @@ export default class GridLayer extends BaseMapLayer {
   }
 
   updateUniforms() {
-    const {uniforms} = this.state;
+    const {uniforms, maxCount} = this.state;
+    const {unitWidth, unitHeight} = this.props;
     const MARGIN = 2;
     uniforms.scale = new Float32Array([
-      this.unitWidth - MARGIN * 2,
-      this.unitHeight - MARGIN * 2,
+      unitWidth - MARGIN * 2,
+      unitHeight - MARGIN * 2,
       1
     ]);
-    uniforms.maxCount = this.state.maxCount;
+    uniforms.maxCount = maxCount;
   }
 
   updateAttributes() {
@@ -105,27 +106,27 @@ export default class GridLayer extends BaseMapLayer {
   }
 
   _calculatePositions() {
-    const {numCol} = this.props;
+    const {numCol, unitWidth, unitHeight, width, height} = this.props;
     const {numInstances} = this.state;
     const {value} = this.state.attributes.positions;
     for (let i = 0; i < numInstances; i++) {
       const x = i % numCol;
       const y = Math.floor(i / numCol);
-      value[i * 3 + 0] = x * this.unitWidth - this.width;
-      value[i * 3 + 1] = y * this.unitHeight - this.height;
+      value[i * 3 + 0] = x * unitWidth - width;
+      value[i * 3 + 1] = y * unitHeight - height;
       value[i * 3 + 2] = 0;
     }
   }
 
   _calculateColors() {
-    const {numCol} = this.props;
+    const {data, numCol, unitWidth, unitHeight, width, height} = this.props;
     const {value} = this.state.attributes.colors;
-    this.props.data.forEach(point => {
+    data.forEach(point => {
       const pixel = this.project([point.position.x, point.position.y]);
       const space = this.screenToSpace(pixel.x, pixel.y);
 
-      const colId = Math.floor((space.x + this.width) / this.unitWidth);
-      const rowId = Math.floor((space.y + this.height) / this.unitHeight);
+      const colId = Math.floor((space.x + width) / unitWidth);
+      const rowId = Math.floor((space.y + height) / unitHeight);
 
       const i3 = (colId + rowId * numCol) * 3;
       value[i3 + 0] += 1;
@@ -133,7 +134,7 @@ export default class GridLayer extends BaseMapLayer {
       value[i3 + 2] += 1;
     });
 
-    this.state.maxCount = Math.max(...this.state);
+    this.state.maxCount = Math.max(...value);
   }
 
 }

@@ -237,32 +237,27 @@ export default class BaseLayer {
   }
 
   _getRenderFunction(gl) {
-    const drawType = this.state.primitive.drawType ?
-      gl.get(this.state.primitive.drawType) :
-      gl.POINTS;
+    const {primitive} = this.state;
+    const drawType = primitive.drawType ?
+      gl.get(primitive.drawType) : gl.POINTS;
 
-    const numIndices = this.state.primitive.indices ?
-      this.state.primitive.indices.length :
-      0;
+    const numIndices = primitive.indices ? primitive.indices.length : 0;
+    const numVertices = primitive.vertices ? primitive.vertices.length : 0;
 
-    const numVertices = this.state.primitive.vertices ?
-      this.state.primitive.vertices.length :
-      0;
-
-    if (this.state.primitive.instanced) {
+    if (primitive.instanced) {
       const extension = gl.getExtension('ANGLE_instanced_arrays');
 
-      if (this.state.primitive.indices) {
+      if (primitive.indices) {
         return () => {
           extension.drawElementsInstancedANGLE(
-            drawType, numIndices, gl.UNSIGNED_SHORT, 0, this._numInstances
+            drawType, numIndices, gl.UNSIGNED_SHORT, 0, this.state.numInstances
           );
         };
       }
       // else if this.primitive does not have indices
       return () => {
         extension.drawArraysInstancedANGLE(
-          drawType, 0, numVertices / 3, this._numInstances
+          drawType, 0, numVertices / 3, this.state.numInstances
         );
       };
 
