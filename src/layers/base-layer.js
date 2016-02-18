@@ -79,6 +79,30 @@ export default class BaseLayer {
     );
   }
 
+  // Intention is to support ES6 containers that don't define length attribute
+  // Then the app needs to supply `numInstances` prop
+  getNumInstances() {
+    let {numInstances} = this.props;
+    if (numInstances === undefined) {
+      numInstances = this.props.data && this.props.data.length;
+    }
+    if (numInstances === undefined) {
+      numInstances = this.props.data && this.props.data.size;
+    }
+    if (numInstances === undefined) {
+      numInstances = 0;
+    }
+    return numInstances;
+  }
+
+  initializeAttributes() {
+    // Figure out data length
+    const numInstances = this.getNumInstances();
+    this._allocateGLBuffers(numInstances);
+    this.updateUniforms();
+    this.updateAttributes();
+  }
+
   preUpdateState(newProps) {
     const oldProps = this.props;
 
