@@ -20,6 +20,7 @@
 
 import {Model} from 'luma.gl';
 import isEqual from 'lodash.isequal';
+import assert from 'assert';
 
 const defaultOpts = {
   layerIndex: 0,
@@ -63,6 +64,8 @@ export default class BaseLayer {
       model: null,
       uniforms: {opacity: this.props.opacity},
       attributes: {},
+      // instancedAttributes is a subset of attributes that updates with data
+      instancedAttributes: {},
       numInstances: this.props.data.length || 0,
       dataChanged: true,
       viewportChanged: true,
@@ -70,16 +73,30 @@ export default class BaseLayer {
       // apply gamma to opacity to make it visually "linear"
       opacity: Math.pow(this.props.opacity || 0.8, 1 / 2.2)
     });
+
+    this.addInstancedAttributes(
+      {name: 'pickingColors', size: 3}
+    );
   }
 
-  updateState(newProps, oldProps, state) {
-    // 3. setup update flags, used to prevent unnecessary calculations
+  preUpdateState(newProps) {
+    const oldProps = this.props;
+
+    // Figure out data length
+    const numInstances =
+      newProps.numInstances || (newProps.data && newProps.data.length) || 0;
+
+    // Setup update flags, used to prevent unnecessary calculations
     // TODO non-instanced layer cannot use .data.length for equal check
     if (newProps.deepCompare) {
       this.state.dataChanged = !isEqual(newProps.data, oldProps.data);
     } else {
       this.state.dataChanged = newProps.data.length !== oldProps.data.length;
     }
+
+    // Allocate buffers
+    this.state.dataChanged =
+      this.state.dataChanged || this._allocateGLBuffers(numInstances);
 
     this.state.viewportChanged =
       newProps.width !== oldProps.width ||
@@ -88,55 +105,62 @@ export default class BaseLayer {
       newProps.longitude !== oldProps.longitude ||
       newProps.zoom !== oldProps.zoom;
 
-    // 4. update new layer
-    layer.updateLayer();
-
     // update redraw flag
     this.state.needsRedraw = this.state.needsRedraw ||
       this.state.dataChanged ||
       this.state.viewportChanged;
   }
 
+  updateState() {
+    this.updateUniforms();
+  }
+
   /* ------------------------------------------------------------------ */
   /* override the following functions and fill in layer specific logic */
 
-  updateLayer() {
-    this._throwNotImplementedError('updateLayer');
-  }
-
   updateUniforms() {
-    this._throwNotImplementedError('updateUniforms');
+    const {uniforms} = this.state;
+    uniforms.opacity = this.props.opacity;
   }
 
-  updateAttributes() {
-    this._throwNotImplementedError('updateAttributes');
+  addInstancedAttributes(...attributes) {
+    for (const attribute of attributes) {
+      assert(typeof attribute.name === 'string', 'Attribute name missing');
+      assert(typeof attribute.size === 'number', 'Attribute size missing');
+      const attributeObject = {
+        ...attribute,
+        value: null,
+        instanced: 1
+      };
+      this.state.attributes[attribute.name] = attributeObject;
+      this.state.instancedAttributes[attribute.name] = attributeObject;
+    }
   }
 
-  /* override the above functions and fill in layer specific logic */
+  _allocateGLBuffers(N) {
+    const {numInstances, instancedAttributes} = this.state;
+    if (N > numInstances) {
+      /* eslint-disable guard-for-in */
+      for (const attributeName in instancedAttributes) {
+        const attribute = instancedAttributes[attributeName];
+        const {size} = attribute;
+        attribute.value = new Float32Array(N * size);
+      }
+      /* eslint-enable guard-for-in */
+      this.state.numInstances = N;
+      return true;
+    }
+    return false;
+  }
+
+    /* override the above functions and fill in layer specific logic */
   /* -------------------------------------------------------------- */
 
   createModel({gl}) {
-    const {primitive, program, attributes, uniforms} = this.state;
+    const {program, attributes, uniforms} = this.state;
 
-    // Set up attributes relating to the primitive (not the instances)
-    /* eslint-disable dot-notation */
-    if (primitive.vertices) {
-      attributes['vertices'] = {value: primitive.vertices, size: 3};
-    }
-
-    if (primitive.normals) {
-      attributes['normals'] = {value: primitive.normals, size: 3};
-    }
-
-    if (primitive.indices) {
-      attributes['indices'] = {
-        value: primitive.indices,
-        bufferType: gl.ELEMENT_ARRAY_BUFFER,
-        drawType: gl.STATIC_DRAW,
-        size: 1
-      };
-    }
-    /* eslint-enable dot-notation */
+    // Add any primitive attributes
+    this._setPrimitiveAttributes();
 
     this.state.model = new Model({
       program: program,
@@ -165,6 +189,27 @@ export default class BaseLayer {
         program.selectedLayerIndex = z;
       }
     });
+  }
+
+  _setPrimitiveAttributes() {
+    const {gl, primitive, attributes} = this.state;
+    // Set up attributes relating to the primitive (not the instances)
+    if (primitive.vertices) {
+      attributes.vertices = {value: primitive.vertices, size: 3};
+    }
+
+    if (primitive.normals) {
+      attributes.normals = {value: primitive.normals, size: 3};
+    }
+
+    if (primitive.indices) {
+      attributes.indices = {
+        value: primitive.indices,
+        bufferType: gl.ELEMENT_ARRAY_BUFFER,
+        drawType: gl.STATIC_DRAW,
+        size: 1
+      };
+    }
   }
 
   _getRenderFunction(gl) {
@@ -209,15 +254,12 @@ export default class BaseLayer {
   }
 
   _calculatePickingColors() {
-    if (!this.isPickable) {
-      return;
+    const {attributes: {pickingColors: {value}}, numInstances} = this.state;
+    for (let i = 0; i < numInstances; i++) {
+      value[i * 3 + 0] = (i + 1) % 256;
+      value[i * 3 + 1] = Math.floor((i + 1) / 256) % 256;
+      value[i * 3 + 2] = this.layerIndex;
     }
-
-    this.props.data.forEach((point, i) => {
-      this.state.pickingColors[i * 3 + 0] = (i + 1) % 256;
-      this.state.pickingColors[i * 3 + 1] = Math.floor((i + 1) / 256) % 256;
-      this.state.pickingColors[i * 3 + 2] = this.layerIndex;
-    });
   }
 
   checkParam(property, propertyName) {

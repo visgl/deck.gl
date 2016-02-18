@@ -36,6 +36,7 @@ export default class GridLayer extends BaseMapLayer {
     super({
       unitWidth: 100,
       unitHeight: 100,
+      numCol: 100,
       ...opts
     });
   }
@@ -63,6 +64,11 @@ export default class GridLayer extends BaseMapLayer {
       program,
       primitive
     });
+
+    this.addInstancedAttributes(
+      {name: 'positions', size: 3},
+      {name: 'colors', size: 3}
+    );
   }
 
   updateLayer() {
@@ -94,41 +100,16 @@ export default class GridLayer extends BaseMapLayer {
   }
 
   updateAttributes() {
-    const {attributes} = this.state;
-    attributes.positions = {value: this.state.positions, instanced: 1, size: 3};
-    attributes.colors = {value: this.state.colors, instanced: 1, size: 3};
-
-    if (!this.isPickable) {
-      return;
-    }
-
-    this._attributes.pickingColors = {
-      value: this.state.pickingColors,
-      instanced: 1,
-      size: 3
-    };
-  }
-
-  _allocateGLBuffers() {
-    this.numCol = Math.ceil(this.width * 2 / this.unitWidth);
-    this.numRow = Math.ceil(this.height * 2 / this.unitHeight);
-
-    const N = this._numInstances = this.numCol * this.numRow;
-    this.state.positions = new Float32Array(N * 3);
-    this.state.colors = new Float32Array(N * 3);
-    this.state.colors.fill(0.0);
-
-    if (!this.isPickable) {
-      return;
-    }
-
-    this.state.pickingColors = new Float32Array(N * 3);
+    this._calculatePositions();
+    this._calculateColors();
   }
 
   _calculatePositions() {
-    for (let i = 0; i < this._numInstances; i++) {
-      const x = i % this.numCol;
-      const y = Math.floor(i / this.numCol);
+    const {numCol} = this.props;
+    const {numInstances} = this.state;
+    for (let i = 0; i < numInstances; i++) {
+      const x = i % numCol;
+      const y = Math.floor(i / numCol);
       this.state.positions[i * 3 + 0] = x * this.unitWidth - this.width;
       this.state.positions[i * 3 + 1] = y * this.unitHeight - this.height;
       this.state.positions[i * 3 + 2] = 0;
@@ -136,6 +117,7 @@ export default class GridLayer extends BaseMapLayer {
   }
 
   _calculateColors() {
+    const {numCol} = this.props;
     this.props.data.forEach(point => {
       const pixel = this.project([point.position.x, point.position.y]);
       const space = this.screenToSpace(pixel.x, pixel.y);
@@ -143,7 +125,7 @@ export default class GridLayer extends BaseMapLayer {
       const colId = Math.floor((space.x + this.width) / this.unitWidth);
       const rowId = Math.floor((space.y + this.height) / this.unitHeight);
 
-      const i3 = (colId + rowId * this.numCol) * 3;
+      const i3 = (colId + rowId * numCol) * 3;
       this.state.colors[i3 + 0] += 1;
       this.state.colors[i3 + 1] += 5;
       this.state.colors[i3 + 2] += 1;

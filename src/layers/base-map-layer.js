@@ -51,7 +51,7 @@ export default class BaseMapLayer extends BaseLayer {
   initializeState() {
     super.initializeState();
 
-    const {width, height, latitude, longitude, zoom} = this;
+    const {width, height, latitude, longitude, zoom} = this.props;
     this.state.viewport = flatWorld.getViewport(width, height);
     const {x, y} = this.state.viewport;
 

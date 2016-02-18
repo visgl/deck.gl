@@ -61,11 +61,11 @@ export default class HexagonLayer extends BaseMapLayer {
 
     Object.assign(this.state, {
       program,
-      primitive: this.getLayerPrimitive()
+      primitive: this.getPrimitive()
     });
   }
 
-  getLayerPrimitive() {
+  getPrimitive() {
     const NUM_SEGMENTS = 6;
     const PI2 = Math.PI * 2;
 

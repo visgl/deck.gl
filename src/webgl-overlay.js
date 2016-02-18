@@ -23,6 +23,7 @@ import React, {PropTypes} from 'react';
 import WebGLRenderer from './webgl-renderer';
 import flatWorld from './flat-world';
 import where from 'lodash.where';
+import assert from 'assert';
 
 const PROP_TYPES = {
   width: PropTypes.number.isRequired,
@@ -50,31 +51,53 @@ export default class WebGLOverlay extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    const {gl, scene} = this.state;
+    for (const newLayer of nextProps.layers) {
+      // 1. given a new coming layer, find its matching layer
+      const oldLayer = this._findMatchingLayer(newLayer);
+      if (oldLayer) {
+        assert(oldLayer.state);
+        // 2. update state in old layer
+        oldLayer.preUpdateState(newLayer.props);
+        oldLayer.updateState(newLayer.props);
+        // 3. copy over state to new layer
+        newLayer.state = oldLayer.state;
+        oldLayer.state = null;
+      }
+    }
+
+    this.initializeLayers(nextProps.layers);
+  }
+
+  initializeLayers(layers) {
+    const {gl} = this.state;
+    if (!gl) {
+      return;
+    }
+    for (const newLayer of layers) {
+      if (!newLayer.state) {
+        // New layer, it needs to initialize it's state
+        newLayer.state = {gl};
+        newLayer.initializeState();
+        // Create a model for the layer
+        newLayer.createModel({gl});
+        // 2. update state in old layer
+        newLayer.preUpdateState(newLayer.props);
+        newLayer.updateState(newLayer.props);
+      }
+    }
+    this.addLayersToScene(layers);
+  }
+
+  addLayersToScene(layers) {
+    const {scene} = this.state;
     if (!scene) {
       return;
     }
-
     // clear scene and repopulate based on new layers
     scene.removeAll();
-
-    for (const layer of nextProps.layers) {
-      // 1. given a new coming layer, find its matching layer
-      const matchingLayer = this._findMatchingLayer(layer);
-      if (matchingLayer && matchingLayer.state) {
-        // 2. copy over state to new layer
-        layer.state = matchingLayer.state;
-        // 3. update layer
-        layer.updateState(matchingLayer.props, layer.props, layer.state);
-      } else {
-        // New layer, it needs to initialize it's state
-        layer.state = {gl};
-        layer.initializeState();
-        // Create a model for the layer
-        layer.createModel({gl});
-      }
+    for (const newLayer of layers) {
       // Add model to scene
-      scene.add(layer.state.model);
+      scene.add(newLayer.state.model);
     }
   }
 
@@ -121,9 +144,11 @@ export default class WebGLOverlay extends React.Component {
       width, height, layers, onBeforeRenderFrame, onAfterRenderFrame
     } = this.props;
 
-    if (!Array.isArray(layers) || layers.length === 0) {
+    if (layers.length === 0) {
       return null;
     }
+
+    this.initializeLayers(layers);
 
     return (
       <WebGLRenderer

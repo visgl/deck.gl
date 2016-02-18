@@ -52,30 +52,8 @@ export default class ScatterplotLayer extends BaseMapLayer {
 
     Object.assign(this.state, {
       program,
-      primitive: this.getLayerPrimitive()
+      primitive: this.getPrimitive()
     });
-  }
-
-  getLayerPrimitive() {
-    const NUM_SEGMENTS = 16;
-    const PI2 = Math.PI * 2;
-
-    let vertices = [];
-    for (let i = 0; i < NUM_SEGMENTS; i++) {
-      vertices = [
-        ...vertices,
-        Math.cos(PI2 * i / NUM_SEGMENTS),
-        Math.sin(PI2 * i / NUM_SEGMENTS),
-        0
-      ];
-    }
-
-    return {
-      id: this.id,
-      drawType: 'TRIANGLE_FAN',
-      vertices: new Float32Array(vertices),
-      instanced: true
-    };
   }
 
   updateLayer(newProps, oldProps) {
@@ -119,6 +97,28 @@ export default class ScatterplotLayer extends BaseMapLayer {
       value: this.state.pickingColors,
       instanced: 1,
       size: 3
+    };
+  }
+
+  getPrimitive() {
+    const NUM_SEGMENTS = 16;
+    const PI2 = Math.PI * 2;
+
+    let vertices = [];
+    for (let i = 0; i < NUM_SEGMENTS; i++) {
+      vertices = [
+        ...vertices,
+        Math.cos(PI2 * i / NUM_SEGMENTS),
+        Math.sin(PI2 * i / NUM_SEGMENTS),
+        0
+      ];
+    }
+
+    return {
+      id: this.id,
+      drawType: 'TRIANGLE_FAN',
+      vertices: new Float32Array(vertices),
+      instanced: true
     };
   }
 
