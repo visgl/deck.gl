@@ -103,11 +103,11 @@ export default class WebGLOverlay extends React.Component {
   }
 
   _findMatchingLayer(layer) {
-    const candidates = where(this.props.layers, {id: layer.id});
+    const candidates = this.props.layers.filter(l => l.id === layer.id);
     if (candidates.length > 1) {
       throw new Error(layer + ' has more than one matching layers');
     }
-    return candidates[0];
+    return candidates.length > 0 && candidates[0];
   }
 
   _onRendererInitialized({gl, scene}) {

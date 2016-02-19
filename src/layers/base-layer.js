@@ -244,20 +244,22 @@ export default class BaseLayer {
     const numIndices = primitive.indices ? primitive.indices.length : 0;
     const numVertices = primitive.vertices ? primitive.vertices.length : 0;
 
+    // "Capture" state as it will be set to null when layer is disposed
+    const {state} = this;
     if (primitive.instanced) {
       const extension = gl.getExtension('ANGLE_instanced_arrays');
 
       if (primitive.indices) {
         return () => {
           extension.drawElementsInstancedANGLE(
-            drawType, numIndices, gl.UNSIGNED_SHORT, 0, this.state.numInstances
+            drawType, numIndices, gl.UNSIGNED_SHORT, 0, state.numInstances
           );
         };
       }
       // else if this.primitive does not have indices
       return () => {
         extension.drawArraysInstancedANGLE(
-          drawType, 0, numVertices / 3, this.state.numInstances
+          drawType, 0, numVertices / 3, state.numInstances
         );
       };
 
@@ -268,7 +270,7 @@ export default class BaseLayer {
       return () => gl.drawElements(drawType, numIndices, gl.UNSIGNED_SHORT, 0);
     }
     // else if this.primitive does not have indices
-    return () => gl.drawArrays(drawType, 0, this.state.numInstances);
+    return () => gl.drawArrays(drawType, 0, state.numInstances);
 
   }
 
