@@ -41,3 +41,5 @@ test('Test if unit test is working', assert => {
 //   assert.ok(component, 'WebGLOverlay is rendered.');
 //   assert.end();
 // });
+
+import './base-layer-spec';

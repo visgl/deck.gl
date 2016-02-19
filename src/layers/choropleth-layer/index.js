@@ -39,12 +39,11 @@ export default class ChoroplethLayer extends BaseMapLayer {
    * selected choropleth, together with the mouse event when mouse clicked
    */
   constructor(opts) {
-    super(opts);
-
-    this.drawContour = opts.drawContour;
-
-    this.onObjectHovered = this._onChoroplethHovered;
-    this.onObjectClicked = this._onChoroplethClicked;
+    super({
+      onChoroplethHover: () => {},
+      onChoroplethClick: () => {},
+      ...opts
+    });
   }
 
   initializeState() {
@@ -68,6 +67,11 @@ export default class ChoroplethLayer extends BaseMapLayer {
       program,
       primitive
     };
+
+    this.addInstancedAttributes(
+      {name: 'positions', size: 3},
+      {name: 'colors', size: 3}
+    );
   }
 
   updateLayer() {
@@ -82,7 +86,7 @@ export default class ChoroplethLayer extends BaseMapLayer {
     }
 
     // TODO change getters to setters
-    this.state.primitive = this.getLayerPrimitive();
+    this.state.primitive = this.getPrimitive();
     this.updateUniforms();
     this.updateAttributes();
 
@@ -95,40 +99,17 @@ export default class ChoroplethLayer extends BaseMapLayer {
   }
 
   updateAttributes() {
-    const {attributes} = this.state;
-    attributes.vertices = {value: this.state.vertices, size: 3};
-    attributes.colors = {value: this.state.colors, size: 3};
-
-    if (!this.isPickable) {
-      return;
-    }
-
-    attributes.pickingColors = {
-      value: this.state.pickingColors,
-      instanced: 1,
-      size: 3
-    };
-  }
-
-  _allocateGLBuffers() {
-    const N = this._numInstances;
-
-    this.state.positions = new Float32Array(N * 3);
-    this.state.colors = new Float32Array(N * 3);
-
-    if (!this.isPickable) {
-      return;
-    }
-
-    this.state.pickingColors = new Float32Array(N * 3);
+    this._extractChoropleths();
+    this._calculateVertices();
+    this._calculateIndices();
+    this._calculateColors();
+    this._calculatePickingColors();
+    this._calculateContourIndices();
   }
 
   _extractChoropleths() {
-    if (this.state.choropleths) {
-      return;
-    }
-
-    const normalizedGeojson = normalize(this.props.data);
+    const {data} = this.props;
+    const normalizedGeojson = normalize(data);
 
     this.state.choropleths = normalizedGeojson.features.map(choropleth => {
       let coordinates = choropleth.geometry.coordinates[0];
@@ -188,6 +169,7 @@ export default class ChoroplethLayer extends BaseMapLayer {
     this.state.colors = new Float32Array(flattenDeep(colors));
   }
 
+  // Override the default picking colors calculation
   _calculatePickingColors() {
     if (!this.isPickable) {
       return;
@@ -215,19 +197,21 @@ export default class ChoroplethLayer extends BaseMapLayer {
     return [0, ...indices, 0];
   }
 
-  _onChoroplethHovered(index, layerIndex, e) {
+  _onHover(index, layerIndex, e) {
+    const {data} = this.props;
     if (layerIndex !== this.layerIndex) {
       return;
     }
-    const choroplethProps = this.props.data.features[index].properties;
+    const choroplethProps = data.features[index].properties;
     this.props.onChoroplethHovered(choroplethProps, e);
   }
 
-  _onChoroplethClicked(index, layerIndex, e) {
+  _onClick(index, layerIndex, e) {
+    const {data} = this.props;
     if (layerIndex !== this.layerIndex) {
       return;
     }
-    const choroplethProps = this.props.data.features[index].properties;
+    const choroplethProps = data.features[index].properties;
     this.props.onChoroplethClicked(choroplethProps, e);
   }
 

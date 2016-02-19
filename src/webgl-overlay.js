@@ -22,8 +22,7 @@
 import React, {PropTypes} from 'react';
 import WebGLRenderer from './webgl-renderer';
 import flatWorld from './flat-world';
-import where from 'lodash.where';
-import assert from 'assert';
+import {matchLayers, initializeNewLayers} from './layers/layer-manager';
 
 const PROP_TYPES = {
   width: PropTypes.number.isRequired,
@@ -51,21 +50,8 @@ export default class WebGLOverlay extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    for (const newLayer of nextProps.layers) {
-      // 1. given a new coming layer, find its matching layer
-      const oldLayer = this._findMatchingLayer(newLayer);
-      if (oldLayer) {
-        assert(oldLayer.state);
-        // 2. update state in old layer
-        oldLayer.preUpdateState(newLayer.props);
-        oldLayer.updateState(newLayer.props);
-        // 3. copy over state to new layer
-        newLayer.state = oldLayer.state;
-        oldLayer.state = null;
-      }
-    }
-
-    this.initializeLayers(nextProps.layers);
+    matchLayers(this.props.layers, nextProps.layers);
+    this.initializeLayers();
   }
 
   initializeLayers(layers) {
@@ -73,19 +59,7 @@ export default class WebGLOverlay extends React.Component {
     if (!gl) {
       return;
     }
-    for (const newLayer of layers) {
-      if (!newLayer.state) {
-        // New layer, it needs to initialize it's state
-        newLayer.state = {gl};
-        newLayer.initializeState();
-        newLayer.initializeAttributes();
-        // Create a model for the layer
-        newLayer.createModel({gl});
-        // 2. update state in old layer
-        newLayer.preUpdateState(newLayer.props);
-        newLayer.updateState(newLayer.props);
-      }
-    }
+    initializeNewLayers(layers, gl);
     this.addLayersToScene(layers);
   }
 
@@ -100,14 +74,6 @@ export default class WebGLOverlay extends React.Component {
       // Add model to scene
       scene.add(newLayer.state.model);
     }
-  }
-
-  _findMatchingLayer(layer) {
-    const candidates = this.props.layers.filter(l => l.id === layer.id);
-    if (candidates.length > 1) {
-      throw new Error(layer + ' has more than one matching layers');
-    }
-    return candidates.length > 0 && candidates[0];
   }
 
   _onRendererInitialized({gl, scene}) {

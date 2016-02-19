@@ -71,7 +71,7 @@
     "precommit": "npm run lint -s",
     "server": "./node_modules/http-server/bin/http-server -c-1 .",
     "start": "npm run watch & npm run server",
-    "test": "babel-node test/index.js | faucet",
+    "test": "babel-node --only=deck.gl/test,deck.gl/src,luma.gl test/index.js | faucet",
     "watch": "watchify -d -o example/bundle.js example/main.js -v"
   }
 }

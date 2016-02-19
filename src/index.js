@@ -26,3 +26,6 @@ export {default as ChoroplethLayer} from './layers/choropleth-layer';
 export {default as ScatterplotLayer} from './layers/scatterplot-layer';
 export {default as GridLayer} from './layers/grid-layer';
 export {default as ArcLayer} from './layers/arc-layer';
+
+export {default as BaseLayer} from './layers/base-layer';
+export {default as BaseMapLayer} from './layers/base-map-layer';

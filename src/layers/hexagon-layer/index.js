@@ -63,6 +63,11 @@ export default class HexagonLayer extends BaseMapLayer {
       program,
       primitive: this.getPrimitive()
     });
+
+    this.addInstancedAttributes(
+      {name: 'positions', size: 3},
+      {name: 'colors', size: 3}
+    );
   }
 
   getPrimitive() {
@@ -90,14 +95,12 @@ export default class HexagonLayer extends BaseMapLayer {
   updateLayer() {
     const {dataChanged, viewportChanged} = this.state;
     if (dataChanged) {
-      this._allocateGLBuffers();
-      this._calculatePositions();
-      this._calculateColors();
-      this._calculatePickingColors();
+      this.calculatePositions();
+      this.calculateColors();
     }
 
     if (viewportChanged || dataChanged) {
-      this._calculateRadiusAndAngle();
+      this.calculateRadiusAndAngle();
     }
 
     this.updateUniforms();
@@ -114,57 +117,43 @@ export default class HexagonLayer extends BaseMapLayer {
   }
 
   updateAttributes() {
-    const {attributes} = this.state;
-    attributes.positions = {value: this.state.positions, instanced: 1, size: 3};
-    attributes.colors = {value: this.state.colors, instanced: 1, size: 3};
+    this.calculatePositions();
+    this.calculateColors();
+  }
 
-    if (!this.isPickable) {
-      return;
+  calculatePositions() {
+    const {data} = this.props;
+    const {value, size} = this.state.attributes.positions;
+    let i = 0;
+    for (const hexagon of data) {
+      value[i + 0] = hexagon.centroid.x;
+      value[i + 1] = hexagon.centroid.y;
+      value[i + 2] = this.elevation;
+      i += size;
     }
-
-    attributes.pickingColors = {
-      value: this.state.pickingColors,
-      instanced: 1,
-      size: 3
-    };
   }
 
-  _allocateGLBuffers() {
-    const N = this._numInstances;
-    this.state.positions = new Float32Array(N * 3);
-    this.state.colors = new Float32Array(N * 3);
-
-    if (!this.isPickable) {
-      return;
+  calculateColors() {
+    const {data} = this.props;
+    const {value} = this.state.attributes.colors;
+    let i = 0;
+    for (const hexagon of data) {
+      value[i + 0] = hexagon.color[0];
+      value[i + 1] = hexagon.color[1];
+      value[i + 2] = hexagon.color[2];
+      i += 3;
     }
-
-    this.state.pickingColors = new Float32Array(N * 3);
-  }
-
-  _calculatePositions() {
-    this.props.data.forEach((hexagon, i) => {
-      this.state.positions[i * 3 + 0] = hexagon.centroid.x;
-      this.state.positions[i * 3 + 1] = hexagon.centroid.y;
-      this.state.positions[i * 3 + 2] = this.elevation;
-    });
-  }
-
-  _calculateColors() {
-    this.props.data.forEach((hexagon, i) => {
-      this.state.colors[i * 3 + 0] = hexagon.color[0];
-      this.state.colors[i * 3 + 1] = hexagon.color[1];
-      this.state.colors[i * 3 + 2] = hexagon.color[2];
-    });
   }
 
   // TODO this is the only place that uses hexagon vertices
   // consider move radius and angle calculation to the shader
-  _calculateRadiusAndAngle() {
-    if (!this.props.data || this.props.data.length === 0) {
+  calculateRadiusAndAngle() {
+    const {data} = this.props;
+    if (!data || data.length === 0) {
       return;
     }
 
-    const vertices = this.props.data[0].vertices;
+    const vertices = data[0].vertices;
     const vertex0 = vertices[0];
     const vertex3 = vertices[3];
 

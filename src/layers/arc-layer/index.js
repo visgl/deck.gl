@@ -47,11 +47,15 @@ export default class ArcLayer extends BaseMapLayer {
 
     Object.assign(this.state, {
       program,
-      primitive: this.getLayerPrimitive()
+      primitive: this.getPrimitive()
     });
+
+    this.addInstancedAttributes(
+      {name: 'positions', size: 4}
+    );
   }
 
-  getLayerPrimitive() {
+  getPrimitive() {
     let vertices = [];
     const NUM_SEGMENTS = 50;
     for (let i = 0; i < NUM_SEGMENTS; i++) {
@@ -69,43 +73,42 @@ export default class ArcLayer extends BaseMapLayer {
   updateLayer() {
     const {dataChanged} = this.state;
     if (dataChanged) {
-      this._allocateGLBuffers();
-      this._calculatePositions();
+      this.calculatePositions();
     }
-
-    this.updateUniforms();
-    this.updateAttributes();
 
     this.state.dataChanged = false;
     this.state.viewportChanged = false;
   }
 
   updateUniforms() {
-    if (!this.props.data || this.props.data.length === 0) {
+    const {numInstances} = this.state;
+    if (numInstances === 0) {
       return;
     }
     const {uniforms} = this.state;
-    uniforms.color0 = this.props.data[0].colors.c0;
-    uniforms.color1 = this.props.data[0].colors.c1;
+    // Get colors from first object
+    const object = this.getFirstObject();
+    if (object) {
+      uniforms.color0 = object.colors.c0;
+      uniforms.color1 = object.colors.c1;
+    }
   }
 
   updateAttributes() {
-    const {attributes} = this.state;
-    attributes.positions = {value: this.state.positions, instanced: 1, size: 4};
+    this.calculatePositions();
   }
 
-  _allocateGLBuffers() {
-    const N = this._numInstances;
-    this.state.positions = new Float32Array(N * 4);
-  }
-
-  _calculatePositions() {
-    this.props.data.forEach((arc, i) => {
-      this.state.positions[i * 4 + 0] = arc.position.x0;
-      this.state.positions[i * 4 + 1] = arc.position.y0;
-      this.state.positions[i * 4 + 2] = arc.position.x1;
-      this.state.positions[i * 4 + 3] = arc.position.y1;
-    });
+  calculatePositions() {
+    const {data} = this.props;
+    const {value, size} = this.state.attributes.positions;
+    let i = 0;
+    for (const arc of data) {
+      value[i + 0] = arc.position.x0;
+      value[i + 1] = arc.position.y0;
+      value[i + 2] = arc.position.x1;
+      value[i + 3] = arc.position.y1;
+      i += size;
+    }
   }
 
 }

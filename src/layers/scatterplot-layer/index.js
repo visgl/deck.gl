@@ -22,17 +22,27 @@ import BaseMapLayer from '../base-map-layer';
 import {Program} from 'luma.gl';
 const glslify = require('glslify');
 
+const ATTRIBUTES = {
+  positions: {size: 3, '0': 'x', '1': 'y', '2': 'unused'},
+  colors: {size: 3, '0': 'red', '1': 'green', '2': 'blue'}
+};
+
 export default class ScatterplotLayer extends BaseMapLayer {
+
+  static get attributes() {
+    return ATTRIBUTES;
+  }
+
   /**
    * @classdesc
    * ScatterplotLayer
    *
    * @class
-   * @param {object} opts
-   * @param {number} opts.radius - point radius
+   * @param {object} props
+   * @param {number} props.radius - point radius
    */
-  constructor(opts) {
-    super(opts);
+  constructor(props) {
+    super(props);
 
     this.onObjectHovered = opts.onObjectHovered;
     this.onObjectClicked = opts.onObjectClicked;
@@ -62,8 +72,8 @@ export default class ScatterplotLayer extends BaseMapLayer {
     const {dataChanged, viewportChanged, radiusChanged} = this.state;
     if (dataChanged) {
       this._allocateGLBuffers();
-      this._calculatePositions();
-      this._calculateColors();
+      this.calculatePositions();
+      this.calculateColors();
       this._calculatePickingColors();
     }
 
@@ -80,24 +90,15 @@ export default class ScatterplotLayer extends BaseMapLayer {
   }
 
   updateUniforms() {
+    super.updateUniforms();
     const {uniforms} = this.state;
     uniforms.radius = this.state.radius;
   }
 
   updateAttributes() {
-    const {attributes} = this.state;
-    attributes.positions = {value: this.state.positions, instanced: 1, size: 3};
-    attributes.colors = {value: this.state.colors, instanced: 1, size: 3};
-
-    if (!this.isPickable) {
-      return;
-    }
-
-    attributes.pickingColors = {
-      value: this.state.pickingColors,
-      instanced: 1,
-      size: 3
-    };
+    super.updateAttributes();
+    this.calculatePositions();
+    this.calculateColors();
   }
 
   getPrimitive() {
@@ -122,39 +123,34 @@ export default class ScatterplotLayer extends BaseMapLayer {
     };
   }
 
-  _allocateGLBuffers() {
-    const N = this._numInstances;
-
-    this.state.positions = new Float32Array(N * 3);
-    this.state.colors = new Float32Array(N * 3);
-
-    if (!this.isPickable) {
-      return;
+  calculatePositions() {
+    const {data} = this.props;
+    const {value, size} = this.state.attributes.positions;
+    let i = 0;
+    for (const point of data) {
+      value[i + 0] = point.position.x;
+      value[i + 1] = point.position.y;
+      value[i + 2] = point.position.z;
+      i += size;
     }
-
-    this.state.pickingColors = new Float32Array(N * 3);
   }
 
-  _calculatePositions() {
-    this.props.data.forEach((point, i) => {
-      this.state.positions[i * 3 + 0] = point.position.x;
-      this.state.positions[i * 3 + 1] = point.position.y;
-      this.state.positions[i * 3 + 2] = point.position.z;
-    });
-  }
-
-  _calculateColors() {
-    this.props.data.forEach((point, i) => {
-      this.state.colors[i * 3 + 0] = point.color[0];
-      this.state.colors[i * 3 + 1] = point.color[1];
-      this.state.colors[i * 3 + 2] = point.color[2];
-    });
+  calculateColors() {
+    const {data} = this.props;
+    const {value, size} = this.state.attributes.colors;
+    let i = 0;
+    for (const point of data) {
+      value[i + 0] = point.color[0];
+      value[i + 1] = point.color[1];
+      value[i + 2] = point.color[2];
+      i += size;
+    }
   }
 
   _calculateRadius() {
     // use radius if specified
-    if (this.radius && this.radius !== 0) {
-      this.state.radius = this.radius;
+    if (this.props.radius) {
+      this.state.radius = this.props.radius;
       return;
     }
 
