@@ -18,11 +18,16 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import BaseMapLayer from '../base-map-layer';
+import MapLayer from '../map-layer';
+import autobind from 'autobind-decorator';
 import {Program} from 'luma.gl';
 const glslify = require('glslify');
 
-export default class ArcLayer extends BaseMapLayer {
+const ATTRIBUTES = {
+  positions: {size: 4, '0': 'x0', '1': 'y0', '2': 'x1', '3': 'y1'}
+};
+
+export default class ArcLayer extends MapLayer {
   /**
    * @classdesc
    * ArcLayer
@@ -45,14 +50,14 @@ export default class ArcLayer extends BaseMapLayer {
       'arc'
     );
 
-    Object.assign(this.state, {
+    this.setState({
       program,
       primitive: this.getPrimitive()
     });
 
-    this.addInstancedAttributes(
-      {name: 'positions', size: 4}
-    );
+    this.addInstancedAttributes(ATTRIBUTES, {
+      positions: {update: this.calculatePositions}
+    });
   }
 
   getPrimitive() {
@@ -81,23 +86,17 @@ export default class ArcLayer extends BaseMapLayer {
   }
 
   updateUniforms() {
-    const {numInstances} = this.state;
-    if (numInstances === 0) {
-      return;
-    }
-    const {uniforms} = this.state;
     // Get colors from first object
     const object = this.getFirstObject();
     if (object) {
-      uniforms.color0 = object.colors.c0;
-      uniforms.color1 = object.colors.c1;
+      this.setUniforms({
+        color0: object.colors.c0,
+        color1: object.colors.c1
+      });
     }
   }
 
-  updateAttributes() {
-    this.calculatePositions();
-  }
-
+  @autobind
   calculatePositions() {
     const {data} = this.props;
     const {value, size} = this.state.attributes.positions;

@@ -18,14 +18,14 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import BaseLayer from './base-layer';
+import InstancedLayer from './instanced-layer';
 import flatWorld from '../flat-world';
 import ViewportMercator from 'viewport-mercator-project';
 
-export default class BaseMapLayer extends BaseLayer {
+export default class MapLayer extends InstancedLayer {
   /**
    * @classdesc
-   * BaseMapLayer:
+   * MapLayer:
    * A map overlay that reacts to mapState: viewport, zoom level, etc.
    * The input data may include latitude & longitude coordinates, which
    * will be converted => screen coordinates using web-mercator projection
@@ -51,23 +51,47 @@ export default class BaseMapLayer extends BaseLayer {
   initializeState() {
     super.initializeState();
 
+    this.setViewport();
+  }
+
+  checkProps(oldProps, newProps) {
+    super.checkProps(oldProps, newProps);
+
+    this.state.viewportChanged =
+      newProps.width !== oldProps.width ||
+      newProps.height !== oldProps.height ||
+      newProps.latitude !== oldProps.latitude ||
+      newProps.longitude !== oldProps.longitude ||
+      newProps.zoom !== oldProps.zoom;
+  }
+
+  willReceiveProps() {
+    this.setViewport();
+  }
+
+  setViewport() {
     const {width, height, latitude, longitude, zoom} = this.props;
     this.state.viewport = flatWorld.getViewport(width, height);
     const {x, y} = this.state.viewport;
 
-    this.state.uniforms.viewport = [x, y, width, height];
-    this.state.uniforms.mapViewport =
-      [longitude, latitude, zoom, flatWorld.size];
-
-    this.state.mercator = ViewportMercator({
-      width, height, latitude, longitude, zoom,
-      tileSize: 512
+    this.setState({
+      viewportChanged: true,
+      needsRedraw: true,
+      mercator: ViewportMercator({
+        width, height, latitude, longitude, zoom,
+        tileSize: 512
+      })
+    });
+    this.setUniforms({
+      viewport: [x, y, width, height],
+      mapViewport: [longitude, latitude, zoom, flatWorld.size]
     });
   }
 
   // TODO deprecate: this funtion is only used for calculating radius now
   project(latLng) {
-    const [x, y] = this.state.mercator.project([latLng[0], latLng[1]]);
+    const {mercator} = this.state;
+    const [x, y] = mercator.project([latLng[0], latLng[1]]);
     return {x, y};
   }
 

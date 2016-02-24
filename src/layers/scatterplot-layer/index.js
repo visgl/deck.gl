@@ -18,7 +18,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import BaseMapLayer from '../base-map-layer';
+import MapLayer from '../map-layer';
+import autobind from 'autobind-decorator';
 import {Program} from 'luma.gl';
 const glslify = require('glslify');
 
@@ -27,7 +28,7 @@ const ATTRIBUTES = {
   colors: {size: 3, '0': 'red', '1': 'green', '2': 'blue'}
 };
 
-export default class ScatterplotLayer extends BaseMapLayer {
+export default class ScatterplotLayer extends MapLayer {
 
   static get attributes() {
     return ATTRIBUTES;
@@ -43,9 +44,6 @@ export default class ScatterplotLayer extends BaseMapLayer {
    */
   constructor(props) {
     super(props);
-
-    this.onObjectHovered = opts.onObjectHovered;
-    this.onObjectClicked = opts.onObjectClicked;
   }
 
   initializeState() {
@@ -123,6 +121,7 @@ export default class ScatterplotLayer extends BaseMapLayer {
     };
   }
 
+  @autobind
   calculatePositions() {
     const {data} = this.props;
     const {value, size} = this.state.attributes.positions;
@@ -135,6 +134,7 @@ export default class ScatterplotLayer extends BaseMapLayer {
     }
   }
 
+  @autobind
   calculateColors() {
     const {data} = this.props;
     const {value, size} = this.state.attributes.colors;

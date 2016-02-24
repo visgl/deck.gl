@@ -42,4 +42,4 @@ test('Test if unit test is working', assert => {
 //   assert.end();
 // });
 
-import './base-layer-spec';
+import './layer-spec';

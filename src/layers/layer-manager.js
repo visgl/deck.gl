@@ -26,30 +26,48 @@ export function matchLayers(oldLayers, newLayers) {
   for (const newLayer of newLayers) {
     // 1. given a new coming layer, find its matching layer
     const oldLayer = _findMatchingLayer(oldLayers, newLayer);
+
+    // Only transfer state at this stage. We must not generate exceptions
+    // until all layers' state have been transferred
     if (oldLayer) {
-      assert(oldLayer.state);
-      // 2. update state in old layer
-      oldLayer.preUpdateState(newLayer.props);
-      oldLayer.updateState(newLayer.props);
-      // 3. copy over state to new layer
-      newLayer.state = oldLayer.state;
-      oldLayer.state = null;
+      const {state, props} = oldLayer;
+      assert(state, 'Matching layer has lost state');
+      assert(oldLayer !== newLayer, 'Matching layer is same');
+      // Copy state
+      newLayer.state = state;
+      console.log(`matching layer ${newLayer.props.id} o->n`,
+        oldLayer, newLayer);
+      // Keep a temporary ref to the old props, for prop comparison
+      newLayer.oldProps = props;
+    }
+  }
+
+  // Unmatched layers still have state, it will be discarded
+  for (const layer of oldLayers) {
+    const {oldProps} = layer;
+    if (!oldProps) {
+      console.log(`finalizing layer ${layer.props.id}`);
+      layer.finalizeLayer();
     }
   }
 }
 
+// Update the old layers that were matched
+export function updateOldLayers(newLayers) {
+  for (const layer of newLayers) {
+    const {oldProps, props} = layer;
+    if (oldProps) {
+      layer.updateLayer(oldProps, props);
+    }
+  }
+}
+
+// Layers can't be initialized until gl context is available
 export function initializeNewLayers(layers, {gl}) {
-  for (const newLayer of layers) {
-    if (!newLayer.state) {
-      // New layer, it needs to initialize it's state
-      newLayer.state = {gl};
-      newLayer.initializeState();
-      newLayer.initializeAttributes();
-      // Create a model for the layer
-      newLayer.createModel({gl});
-      // 2. update state in old layer
-      newLayer.preUpdateState(newLayer.props);
-      newLayer.updateState(newLayer.props);
+  for (const layer of layers) {
+    if (!layer.state) {
+      // New layer, initialize it's state
+      layer.initializeLayer({gl});
     }
   }
 }

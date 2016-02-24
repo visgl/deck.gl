@@ -20,9 +20,12 @@
 
 /* global window */
 import React, {PropTypes} from 'react';
+import autobind from 'autobind-decorator';
+
 import WebGLRenderer from './webgl-renderer';
 import flatWorld from './flat-world';
-import {matchLayers, initializeNewLayers} from './layers/layer-manager';
+import {matchLayers, updateOldLayers, initializeNewLayers}
+  from './layers/layer-manager';
 
 const PROP_TYPES = {
   width: PropTypes.number.isRequired,
@@ -41,17 +44,12 @@ export default class WebGLOverlay extends React.Component {
     super(props);
     this.state = {};
     this.needsRedraw = true;
-
-    // function bindings
-    this._handleObjectHovered = this._handleObjectHovered.bind(this);
-    this._handleObjectClicked = this._handleObjectClicked.bind(this);
-    this._checkIfNeedRedraw = this._checkIfNeedRedraw.bind(this);
-    this._onRendererInitialized = this._onRendererInitialized.bind(this);
   }
 
   componentWillReceiveProps(nextProps) {
     matchLayers(this.props.layers, nextProps.layers);
-    this.initializeLayers();
+    updateOldLayers(nextProps.layers);
+    this.initializeLayers(nextProps.layers);
   }
 
   initializeLayers(layers) {
@@ -59,7 +57,7 @@ export default class WebGLOverlay extends React.Component {
     if (!gl) {
       return;
     }
-    initializeNewLayers(layers, gl);
+    initializeNewLayers(layers, {gl});
     this.addLayersToScene(layers);
   }
 
@@ -76,10 +74,13 @@ export default class WebGLOverlay extends React.Component {
     }
   }
 
+  @autobind
   _onRendererInitialized({gl, scene}) {
     this.setState({gl, scene});
+    initializeNewLayers(this.props.layers, {gl});
   }
 
+  @autobind
   _handleObjectHovered(...args) {
     const {layers} = this.props;
 
@@ -91,6 +92,7 @@ export default class WebGLOverlay extends React.Component {
     }
   }
 
+  @autobind
   _handleObjectClicked(...args) {
     const {layers} = this.props;
 
@@ -102,6 +104,7 @@ export default class WebGLOverlay extends React.Component {
     }
   }
 
+  @autobind
   _checkIfNeedRedraw() {
     return this.state.needsRedraw;
   }

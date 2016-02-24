@@ -1,4 +1,10 @@
-node_modules/
+build/*
+.project
+.DS_Store
+*.zip
+*.rar
+TODO
+_docs
+examples/winds/data/*.html
+node_modules
 npm-debug.log
-bundle.js
-.idea

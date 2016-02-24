@@ -1,0 +1,1 @@
+console.error("ReferenceError: Unknown plugin \"babel-plugin-transform-builtin-extend\" specified in \"/Users/ib/Documents/deck.gl/.babelrc\" at 0, attempted to resolve relative to \"/Users/ib/Documents/deck.gl\" while parsing file: /Users/ib/Documents/deck.gl/example/main.js");

@@ -18,11 +18,22 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import BaseMapLayer from '../base-map-layer';
+import MapLayer from '../map-layer';
+import autobind from 'autobind-decorator';
 import {Program} from 'luma.gl';
 const glslify = require('glslify');
 
-export default class GridLayer extends BaseMapLayer {
+const ATTRIBUTES = {
+  positions: {size: 3, '0': 'x', '1': 'y', '2': 'unused'},
+  colors: {size: 3, '0': 'red', '1': 'green', '2': 'blue'}
+};
+
+export default class GridLayer extends MapLayer {
+
+  static get attributes() {
+    return ATTRIBUTES;
+  }
+
   /**
    * @classdesc
    * GridLayer
@@ -60,54 +71,37 @@ export default class GridLayer extends BaseMapLayer {
       instanced: true
     };
 
-    Object.assign(this.state, {
+    this.setState({
       program,
       primitive
     });
 
-    this.addInstancedAttributes(
-      {name: 'positions', size: 3},
-      {name: 'colors', size: 3}
-    );
-  }
-
-  updateLayer() {
-    const {dataChanged} = this.state;
-
-    // dataChanged does not affect the generation of grid layout
-    if (dataChanged || true) {
-      this.calculatePositions();
-      this.calculateColors();
-      this._calculatePickingColors();
-    }
-
-    this.updateUniforms();
-    this.updateAttributes();
-
-    this.state.dataChanged = false;
+    this.addInstancedAttributes(ATTRIBUTES, {
+      positions: {update: this.calculatePositions},
+      colors: {update: this.calculateColors, post: this.postCalculateColors}
+    });
   }
 
   updateUniforms() {
-    const {uniforms, maxCount} = this.state;
-    const {unitWidth, unitHeight} = this.props;
+    super.updateUniforms();
     const MARGIN = 2;
-    uniforms.scale = new Float32Array([
-      unitWidth - MARGIN * 2,
-      unitHeight - MARGIN * 2,
-      1
-    ]);
-    uniforms.maxCount = maxCount;
+    const {maxCount} = this.state;
+    const {unitWidth, unitHeight} = this.props;
+    this.setUniforms({
+      maxCount,
+      scale: new Float32Array([
+        unitWidth - MARGIN * 2,
+        unitHeight - MARGIN * 2,
+        1
+      ])
+    });
   }
 
-  updateAttributes() {
-    this.calculatePositions();
-    this.calculateColors();
-  }
-
-  calculatePositions() {
+  @autobind
+  calculatePositions(attribute) {
     const {numCol, unitWidth, unitHeight, width, height} = this.props;
-    const {numInstances} = this.state;
-    const {value, size} = this.state.attributes.positions;
+    const {numInstances, attributes} = this.state;
+    const {value, size} = attributes.positions;
 
     for (let i = 0; i < numInstances; i++) {
       const x = i % numCol;
@@ -118,9 +112,14 @@ export default class GridLayer extends BaseMapLayer {
     }
   }
 
+  @autobind
   calculateColors() {
     const {data, numCol, unitWidth, unitHeight, width, height} = this.props;
     const {value, size} = this.state.attributes.colors;
+
+    for (let i = 0; i < value.length; i++) {
+      value[i] = 0;
+    }
 
     for (const point of data) {
       const pixel = this.project([point.position.x, point.position.y]);
@@ -134,7 +133,11 @@ export default class GridLayer extends BaseMapLayer {
       value[i3 + 1] += 5;
       value[i3 + 2] += 1;
     }
+  }
 
+  @autobind
+  postCalculateColors() {
+    const {value} = this.state.attributes.colors;
     this.state.maxCount = Math.max(...value);
   }
 

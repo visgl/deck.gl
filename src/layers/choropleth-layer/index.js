@@ -18,14 +18,15 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import BaseMapLayer from '../base-map-layer';
+import MapLayer from '../map-layer';
+import autobind from 'autobind-decorator';
 import earcut from 'earcut';
 import flattenDeep from 'lodash.flattendeep';
 import normalize from 'geojson-normalize';
 import {Program} from 'luma.gl';
 const glslify = require('glslify');
 
-export default class ChoroplethLayer extends BaseMapLayer {
+export default class ChoroplethLayer extends MapLayer {
   /**
    * @classdesc
    * ChoroplethLayer
@@ -63,10 +64,10 @@ export default class ChoroplethLayer extends BaseMapLayer {
       instanced: false
     };
 
-    this.state = {
+    this.setState({
       program,
       primitive
-    };
+    });
 
     this.addInstancedAttributes(
       {name: 'positions', size: 3},
@@ -94,8 +95,10 @@ export default class ChoroplethLayer extends BaseMapLayer {
   }
 
   updateUniforms() {
-    const {uniforms} = this.state;
-    uniforms.opacity = this.state.opacity;
+    const {opacity} = this.state;
+    this.setUniforms({
+      opacity
+    });
   }
 
   updateAttributes() {
@@ -159,6 +162,7 @@ export default class ChoroplethLayer extends BaseMapLayer {
     this.state.indices = new Uint16Array(flattenDeep(indices));
   }
 
+  @autobind
   _calculateColors() {
     const colors = this.state.groupedVertices.map(
       vertices => vertices.map(
@@ -170,6 +174,7 @@ export default class ChoroplethLayer extends BaseMapLayer {
   }
 
   // Override the default picking colors calculation
+  @autobind
   _calculatePickingColors() {
     if (!this.isPickable) {
       return;
@@ -188,6 +193,7 @@ export default class ChoroplethLayer extends BaseMapLayer {
     this.state.pickingColors = new Float32Array(flattenDeep(pickingColors));
   }
 
+  @autobind
   _calculateContourIndices(numVertices) {
     // use vertex pairs for gl.LINES => [0, 1, 1, 2, 2, ..., n-1, n-1, 0]
     let indices = [];
@@ -197,6 +203,7 @@ export default class ChoroplethLayer extends BaseMapLayer {
     return [0, ...indices, 0];
   }
 
+  @autobind
   _onHover(index, layerIndex, e) {
     const {data} = this.props;
     if (layerIndex !== this.layerIndex) {
@@ -206,6 +213,7 @@ export default class ChoroplethLayer extends BaseMapLayer {
     this.props.onChoroplethHovered(choroplethProps, e);
   }
 
+  @autobind
   _onClick(index, layerIndex, e) {
     const {data} = this.props;
     if (layerIndex !== this.layerIndex) {

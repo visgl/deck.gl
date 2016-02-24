@@ -95,7 +95,7 @@ const flatWorld = module.exports = {
       fov: flatWorld.fov,
       near: (cameraHeight + 1) / 100,
       far: cameraHeight + 1,
-      position: [0,0,cameraHeight],
+      position: [0, 0, cameraHeight],
       aspect: 1
     };
   },
@@ -112,7 +112,7 @@ const flatWorld = module.exports = {
       points: [{
         diffuse: {r: 0.8, g: 0.8, b: 0.8},
         specular: {r: 0.6, g: 0.6, b: 0.6},
-        position: [0.5,0.5,3]
+        position: [0.5, 0.5, 3]
       }]
     };
   },

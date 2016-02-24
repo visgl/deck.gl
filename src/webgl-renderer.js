@@ -21,6 +21,7 @@
 /* global console */
 import React, {PropTypes} from 'react';
 import ReactDOM from 'react-dom';
+import autobind from 'autobind-decorator';
 import {createGLContext, PerspectiveCamera, Scene, Events, Fx} from 'luma.gl';
 import throttle from 'lodash.throttle';
 
@@ -70,10 +71,6 @@ export default class WebGLRenderer extends React.Component {
     this.state = {
       gl: null
     };
-
-    this._onClick = this._onClick.bind(this);
-    this._onMouseMove = this._onMouseMove.bind(this);
-    this._animationLoop = this._animationLoop.bind(this);
   }
 
   componentDidMount() {
@@ -134,6 +131,7 @@ export default class WebGLRenderer extends React.Component {
     }
   }
 
+  @autobind
   _onClick(e) {
     const {scene} = this.state;
 
@@ -155,6 +153,7 @@ export default class WebGLRenderer extends React.Component {
     }
   }
 
+  @autobind
   _onMouseMove(e) {
     const {scene} = this.state;
 
@@ -225,6 +224,7 @@ export default class WebGLRenderer extends React.Component {
   /**
    * Main WebGL animation loop
    */
+  @autobind
   _animationLoop() {
     this._renderFrame();
     // Keep registering ourselves for the next animation frame

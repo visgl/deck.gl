@@ -30,6 +30,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import {createStore} from 'redux';
 import {Provider, connect} from 'react-redux';
+import autobind from 'autobind-decorator';
 
 import MapboxGLMap from 'react-map-gl';
 import request from 'd3-request';
@@ -120,27 +121,24 @@ function mapStateToProps(state) {
 class ExampleApp extends React.Component {
   constructor(props) {
     super(props);
-
-    this._handleViewportChanged = this._handleViewportChanged.bind(this);
-
-    this._handleChoroplethsLoaded = this._handleChoroplethsLoaded.bind(this);
-    this._handleChoroplethHovered = this._handleChoroplethHovered.bind(this);
-    this._handleChoroplethClicked = this._handleChoroplethClicked.bind(this);
-
-    this._handleHexagonsLoaded = this._handleHexagonsLoaded.bind(this);
-    this._handleHexagonHovered = this._handleHexagonHovered.bind(this);
-    this._handleHexagonClicked = this._handleHexagonClicked.bind(this);
-
-    this._handlePointsLoaded = this._handlePointsLoaded.bind(this);
-
-    this._renderOverlay = this._renderOverlay.bind(this);
-    this._renderMap = this._renderMap.bind(this);
   }
 
   componentWillMount() {
+    this.updateDimensions();
+    window.addEventListener('resize', this.updateDimensions);
+
     this._loadJsonFile('./data/sf.zip.geo.json', this._handleChoroplethsLoaded);
     this._loadCsvFile('./data/hexagons.csv', this._handleHexagonsLoaded);
     this._loadCsvFile('./data/sf.bike.parking.csv', this._handlePointsLoaded);
+  }
+
+  componentWillUnmount() {
+    window.removeEventListener('resize', this.updateDimensions);
+  }
+
+  @autobind
+  updateDimensions() {
+    this.setState({width: window.innerWidth, height: window.innerHeight});
   }
 
   _loadJsonFile(path, onDataLoaded) {
@@ -161,34 +159,42 @@ class ExampleApp extends React.Component {
     });
   }
 
+  @autobind
   _handleViewportChanged(viewport) {
     this.props.dispatch(updateMap(viewport));
   }
 
+  @autobind
   _handleChoroplethsLoaded(data) {
     this.props.dispatch(loadChoropleths(data));
   }
 
+  @autobind
   _handleChoroplethHovered(choroplethsProps, e) {
     console.log(choroplethsProps.name);
   }
 
+  @autobind
   _handleChoroplethClicked(choroplethsProps, e) {
     console.log(choroplethsProps.name);
   }
 
+  @autobind
   _handleHexagonHovered(...args) {
     console.log(...args);
   }
 
+  @autobind
   _handleHexagonClicked(...args) {
     console.log(...args);
   }
 
+  @autobind
   _handleHexagonsLoaded(data) {
     this.props.dispatch(loadHexagons(data));
   }
 
+  @autobind
   _handlePointsLoaded(data) {
     this.props.dispatch(loadPoints(data));
   }
@@ -331,9 +337,9 @@ class ExampleApp extends React.Component {
         layers={[
           this._renderGridLayer(),
           // this._renderChoroplethLayer(),
-          this._renderHexagonLayer(),
-          this._renderScatterplotLayer(),
-          this._renderArcLayer()
+          // this._renderHexagonLayer()
+          // this._renderScatterplotLayer(),
+          // this._renderArcLayer()
         ]}
       />
     );
@@ -341,12 +347,13 @@ class ExampleApp extends React.Component {
 
   _renderMap() {
     const {viewport} = this.props;
+    const {width, height} = this.state;
 
     return (
       <MapboxGLMap
         mapboxApiAccessToken={MAPBOX_ACCESS_TOKEN}
-        width={window.innerWidth}
-        height={window.innerHeight}
+        width={width}
+        height={height}
         latitude={viewport.latitude}
         longitude={viewport.longitude}
         zoom={viewport.zoom}

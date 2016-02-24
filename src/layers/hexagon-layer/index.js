@@ -18,11 +18,17 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import BaseMapLayer from '../base-map-layer';
+import MapLayer from '../map-layer';
+import autobind from 'autobind-decorator';
 import {Program} from 'luma.gl';
 const glslify = require('glslify');
 
-export default class HexagonLayer extends BaseMapLayer {
+const ATTRIBUTES = {
+  positions: {size: 3, '0': 'x', '1': 'y', '2': 'unused'},
+  colors: {size: 3, '0': 'red', '1': 'green', '2': 'blue'}
+};
+
+export default class HexagonLayer extends MapLayer {
   /**
    * @classdesc
    * HexagonLayer
@@ -64,63 +70,33 @@ export default class HexagonLayer extends BaseMapLayer {
       primitive: this.getPrimitive()
     });
 
-    this.addInstancedAttributes(
-      {name: 'positions', size: 3},
-      {name: 'colors', size: 3}
-    );
+    this.addInstancedAttributes(ATTRIBUTES, {
+      positions: {update: this.calculatePositions},
+      colors: {update: this.calculateColors}
+    });
   }
 
-  getPrimitive() {
-    const NUM_SEGMENTS = 6;
-    const PI2 = Math.PI * 2;
-
-    let vertices = [];
-    for (let i = 0; i < NUM_SEGMENTS; i++) {
-      vertices = [
-        ...vertices,
-        Math.cos(PI2 * i / NUM_SEGMENTS),
-        Math.sin(PI2 * i / NUM_SEGMENTS),
-        0
-      ];
-    }
-
-    return {
-      id: this.id,
-      drawType: 'TRIANGLE_FAN',
-      vertices: new Float32Array(vertices),
-      instanced: true
-    };
-  }
-
-  updateLayer() {
+  willReceiveProps(oldProps, newProps) {
     const {dataChanged, viewportChanged} = this.state;
-    if (dataChanged) {
-      this.calculatePositions();
-      this.calculateColors();
-    }
 
-    if (viewportChanged || dataChanged) {
+    if (dataChanged || viewportChanged) {
+      this.setAttributeNeedsUpdate('positions');
       this.calculateRadiusAndAngle();
     }
-
-    this.updateUniforms();
-    this.updateAttributes();
-
-    this.state.dataChanged = false;
-    this.state.viewportChanged = false;
+    if (dataChanged) {
+      this.setAttributeNeedsUpdate('colors');
+    }
   }
 
   updateUniforms() {
-    const {uniforms} = this.state;
-    uniforms.radius = this.state.radius;
-    uniforms.angle = this.state.angle;
+    const {radius, angle} = this.state;
+    this.setUniforms({
+      radius,
+      angle
+    });
   }
 
-  updateAttributes() {
-    this.calculatePositions();
-    this.calculateColors();
-  }
-
+  @autobind
   calculatePositions() {
     const {data} = this.props;
     const {value, size} = this.state.attributes.positions;
@@ -133,6 +109,7 @@ export default class HexagonLayer extends BaseMapLayer {
     }
   }
 
+  @autobind
   calculateColors() {
     const {data} = this.props;
     const {value} = this.state.attributes.colors;
@@ -175,6 +152,28 @@ export default class HexagonLayer extends BaseMapLayer {
 
     // Allow user to fine tune radius
     this.state.radius = dxy / 2 * Math.min(1, this.radius);
+  }
+
+  getPrimitive() {
+    const NUM_SEGMENTS = 6;
+    const PI2 = Math.PI * 2;
+
+    let vertices = [];
+    for (let i = 0; i < NUM_SEGMENTS; i++) {
+      vertices = [
+        ...vertices,
+        Math.cos(PI2 * i / NUM_SEGMENTS),
+        Math.sin(PI2 * i / NUM_SEGMENTS),
+        0
+      ];
+    }
+
+    return {
+      id: this.id,
+      drawType: 'TRIANGLE_FAN',
+      vertices: new Float32Array(vertices),
+      instanced: true
+    };
   }
 
 }
