@@ -58,9 +58,16 @@ export default class ScatterplotLayer extends MapLayer {
       'scatterplot'
     );
 
-    Object.assign(this.state, {
+    const primitive = this.getPrimitive();
+
+    this.setState({
       program,
-      primitive: this.getPrimitive()
+      primitive
+    });
+
+    this.addInstancedAttributes(ATTRIBUTES, {
+      positions: {update: this.calculatePositions},
+      colors: {update: this.calculateColors, post: this.postCalculateColors}
     });
   }
 
@@ -76,7 +83,6 @@ export default class ScatterplotLayer extends MapLayer {
     }
 
     if (viewportChanged || dataChanged || radiusChanged) {
-      this._calculateRadius();
     }
 
     this.updateUniforms();
@@ -89,8 +95,13 @@ export default class ScatterplotLayer extends MapLayer {
 
   updateUniforms() {
     super.updateUniforms();
-    const {uniforms} = this.state;
-    uniforms.radius = this.state.radius;
+
+    this._calculateRadius();
+
+    const {radius} = this.state;
+    this.setUniforms({
+      radius
+    });
   }
 
   updateAttributes() {
@@ -121,7 +132,6 @@ export default class ScatterplotLayer extends MapLayer {
     };
   }
 
-  @autobind
   calculatePositions() {
     const {data} = this.props;
     const {value, size} = this.state.attributes.positions;
@@ -134,7 +144,6 @@ export default class ScatterplotLayer extends MapLayer {
     }
   }
 
-  @autobind
   calculateColors() {
     const {data} = this.props;
     const {value, size} = this.state.attributes.colors;

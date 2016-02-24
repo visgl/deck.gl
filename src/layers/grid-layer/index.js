@@ -97,7 +97,6 @@ export default class GridLayer extends MapLayer {
     });
   }
 
-  @autobind
   calculatePositions(attribute) {
     const {numCol, unitWidth, unitHeight, width, height} = this.props;
     const {numInstances, attributes} = this.state;
@@ -112,7 +111,6 @@ export default class GridLayer extends MapLayer {
     }
   }
 
-  @autobind
   calculateColors() {
     const {data, numCol, unitWidth, unitHeight, width, height} = this.props;
     const {value, size} = this.state.attributes.colors;

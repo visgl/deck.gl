@@ -229,7 +229,6 @@ export default class InstancedLayer extends Layer {
     return count;
   }
 
-  @autobind
   calculatePickingColors() {
     const {numInstances} = this.state;
     const {value, size} = this.state.attributes.pickingColors;
@@ -353,12 +352,12 @@ export default class InstancedLayer extends Layer {
       const attribute = attributes[attributeName];
       const {update, post} = attribute;
       if (update) {
-        update();
+        update.call(this);
       } else {
         this.updateInstanceAttributeFromData(attribute);
       }
       if (post) {
-        post();
+        post.call(this);
       }
       attribute.needsUpdate = false;
     }

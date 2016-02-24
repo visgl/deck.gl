@@ -35,10 +35,11 @@ export function matchLayers(oldLayers, newLayers) {
       assert(oldLayer !== newLayer, 'Matching layer is same');
       // Copy state
       newLayer.state = state;
-      console.log(`matching layer ${newLayer.props.id} o->n`,
-        oldLayer, newLayer);
       // Keep a temporary ref to the old props, for prop comparison
       newLayer.oldProps = props;
+      oldLayer.state = null;
+      console.log(`matched layer ${newLayer.props.id} o->n`,
+        oldLayer, newLayer);
     }
   }
 
@@ -46,8 +47,9 @@ export function matchLayers(oldLayers, newLayers) {
   for (const layer of oldLayers) {
     const {oldProps} = layer;
     if (!oldProps) {
-      console.log(`finalizing layer ${layer.props.id}`);
       layer.finalizeLayer();
+      layer.state = null;
+      console.log(`finalized layer ${layer.props.id}`);
     }
   }
 }
