@@ -84,16 +84,20 @@ export default class GridLayer extends MapLayer {
 
   updateUniforms() {
     super.updateUniforms();
-    const MARGIN = 2;
+
     const {maxCount} = this.state;
+
     const {unitWidth, unitHeight} = this.props;
+    const MARGIN = 2;
+    const scale = new Float32Array([
+      unitWidth - MARGIN * 2,
+      unitHeight - MARGIN * 2,
+      1
+    ]);
+
     this.setUniforms({
       maxCount,
-      scale: new Float32Array([
-        unitWidth - MARGIN * 2,
-        unitHeight - MARGIN * 2,
-        1
-      ])
+      scale
     });
   }
 
@@ -133,7 +137,6 @@ export default class GridLayer extends MapLayer {
     }
   }
 
-  @autobind
   postCalculateColors() {
     const {value} = this.state.attributes.colors;
     this.state.maxCount = Math.max(...value);

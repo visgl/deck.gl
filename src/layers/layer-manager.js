@@ -45,8 +45,8 @@ export function matchLayers(oldLayers, newLayers) {
 
   // Unmatched layers still have state, it will be discarded
   for (const layer of oldLayers) {
-    const {oldProps} = layer;
-    if (!oldProps) {
+    const {state} = layer;
+    if (state) {
       layer.finalizeLayer();
       layer.state = null;
       console.log(`finalized layer ${layer.props.id}`);

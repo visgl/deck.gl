@@ -337,8 +337,8 @@ class ExampleApp extends React.Component {
         layers={[
           this._renderGridLayer(),
           // this._renderChoroplethLayer(),
-          // this._renderHexagonLayer()
-          // this._renderScatterplotLayer(),
+          this._renderHexagonLayer(),
+          this._renderScatterplotLayer()
           // this._renderArcLayer()
         ]}
       />

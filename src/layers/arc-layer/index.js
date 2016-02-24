@@ -75,16 +75,6 @@ export default class ArcLayer extends MapLayer {
     };
   }
 
-  updateLayer() {
-    const {dataChanged} = this.state;
-    if (dataChanged) {
-      this.calculatePositions();
-    }
-
-    this.state.dataChanged = false;
-    this.state.viewportChanged = false;
-  }
-
   updateUniforms() {
     // Get colors from first object
     const object = this.getFirstObject();
@@ -96,7 +86,6 @@ export default class ArcLayer extends MapLayer {
     }
   }
 
-  @autobind
   calculatePositions() {
     const {data} = this.props;
     const {value, size} = this.state.attributes.positions;

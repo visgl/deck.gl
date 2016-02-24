@@ -65,7 +65,7 @@ export default class HexagonLayer extends MapLayer {
       'hexagon'
     );
 
-    Object.assign(this.state, {
+    this.setState({
       program,
       primitive: this.getPrimitive()
     });
@@ -96,7 +96,6 @@ export default class HexagonLayer extends MapLayer {
     });
   }
 
-  @autobind
   calculatePositions() {
     const {data} = this.props;
     const {value, size} = this.state.attributes.positions;
@@ -109,7 +108,6 @@ export default class HexagonLayer extends MapLayer {
     }
   }
 
-  @autobind
   calculateColors() {
     const {data} = this.props;
     const {value} = this.state.attributes.colors;

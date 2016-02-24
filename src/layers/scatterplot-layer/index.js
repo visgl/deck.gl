@@ -71,33 +71,10 @@ export default class ScatterplotLayer extends MapLayer {
     });
   }
 
-  updateLayer(newProps, oldProps) {
-    this.state.radiusChanged = newProps.radius !== oldProps.radius;
-
-    const {dataChanged, viewportChanged, radiusChanged} = this.state;
-    if (dataChanged) {
-      this._allocateGLBuffers();
-      this.calculatePositions();
-      this.calculateColors();
-      this._calculatePickingColors();
-    }
-
-    if (viewportChanged || dataChanged || radiusChanged) {
-    }
-
-    this.updateUniforms();
-    this.updateAttributes();
-
-    this.state.dataChanged = false;
-    this.state.viewportChanged = false;
-    this.state.radiusChanged = false;
-  }
-
   updateUniforms() {
     super.updateUniforms();
 
     this._calculateRadius();
-
     const {radius} = this.state;
     this.setUniforms({
       radius

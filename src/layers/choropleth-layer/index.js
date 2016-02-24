@@ -162,7 +162,6 @@ export default class ChoroplethLayer extends MapLayer {
     this.state.indices = new Uint16Array(flattenDeep(indices));
   }
 
-  @autobind
   _calculateColors() {
     const colors = this.state.groupedVertices.map(
       vertices => vertices.map(
@@ -174,7 +173,6 @@ export default class ChoroplethLayer extends MapLayer {
   }
 
   // Override the default picking colors calculation
-  @autobind
   _calculatePickingColors() {
     if (!this.isPickable) {
       return;
@@ -193,7 +191,6 @@ export default class ChoroplethLayer extends MapLayer {
     this.state.pickingColors = new Float32Array(flattenDeep(pickingColors));
   }
 
-  @autobind
   _calculateContourIndices(numVertices) {
     // use vertex pairs for gl.LINES => [0, 1, 1, 2, 2, ..., n-1, n-1, 0]
     let indices = [];
@@ -203,7 +200,6 @@ export default class ChoroplethLayer extends MapLayer {
     return [0, ...indices, 0];
   }
 
-  @autobind
   _onHover(index, layerIndex, e) {
     const {data} = this.props;
     if (layerIndex !== this.layerIndex) {
@@ -213,7 +209,6 @@ export default class ChoroplethLayer extends MapLayer {
     this.props.onChoroplethHovered(choroplethProps, e);
   }
 
-  @autobind
   _onClick(index, layerIndex, e) {
     const {data} = this.props;
     if (layerIndex !== this.layerIndex) {

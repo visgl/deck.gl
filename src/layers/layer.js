@@ -129,10 +129,10 @@ export default class Layer {
 
   // Marks an attribute for update
   setAttributeNeedsUpdate(attributeName) {
-    const attributes = this.state;
+    const {attributes} = this.state;
     const attribute = attributes[attributeName];
     assert(attribute);
-    attribute.dirty = true;
+    attribute.needsUpdate = true;
     this.state.needsUpdate = true;
     this.state.needsRedraw = true;
   }
