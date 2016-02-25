@@ -44,6 +44,9 @@ export default class ScatterplotLayer extends MapLayer {
    */
   constructor(props) {
     super(props);
+
+    this.onObjectHovered = props.onScatterplotHovered;
+    this.onObjectClicked = props.onScatterplotClicked;
   }
 
   initializeState() {

@@ -44,7 +44,7 @@ import {
 } from '../src';
 
 // ---- Default Settings ---- //
-const MAPBOX_ACCESS_TOKEN = 'PUT_YOUR_TOKEN_HERE';
+const MAPBOX_ACCESS_TOKEN = process.env.MAPBOX_ACCESS_TOKEN || 'Set MAPBOX_ACCESS_TOKEN environment variable or put your token here.';
 
 const INITIAL_STATE = {
   viewport: {
@@ -181,12 +181,22 @@ class ExampleApp extends React.Component {
 
   @autobind
   _handleHexagonHovered(...args) {
-    console.log(...args);
+    console.log('Hexagon hovered:', ...args);
   }
 
   @autobind
   _handleHexagonClicked(...args) {
-    console.log(...args);
+    console.log('Hexagon clicked:', ...args);
+  }
+
+  @autobind
+  _handleScatterplotHovered(...args) {
+    console.log('Scatterplot hovered:', ...args);
+  }
+
+  @autobind
+  _handleScatterplotClicked(...args) {
+    console.log('Scatterplot clicked:', ...args);
   }
 
   @autobind
@@ -282,6 +292,9 @@ class ExampleApp extends React.Component {
       latitude: viewport.latitude,
       longitude: viewport.longitude,
       zoom: viewport.zoom,
+      isPickable: true,
+      onScatterplotClicked: this._handleScatterplotClicked,
+      onScatterplotHovered: this._handleScatterplotHovered,
       layerIndex: 3,
       data: points
     });
@@ -335,7 +348,7 @@ class ExampleApp extends React.Component {
         width={window.innerWidth}
         height={window.innerHeight}
         layers={[
-          this._renderGridLayer(),
+          // this._renderGridLayer(),
           // this._renderChoroplethLayer(),
           this._renderHexagonLayer(),
           this._renderScatterplotLayer()
