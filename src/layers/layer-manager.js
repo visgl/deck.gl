@@ -38,8 +38,8 @@ export function matchLayers(oldLayers, newLayers) {
       // Keep a temporary ref to the old props, for prop comparison
       newLayer.oldProps = props;
       oldLayer.state = null;
-      console.log(`matched layer ${newLayer.props.id} o->n`,
-        oldLayer, newLayer);
+      // console.log(`matched layer ${newLayer.props.id} o->n`,
+      //   oldLayer, newLayer);
     }
   }
 

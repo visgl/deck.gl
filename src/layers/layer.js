@@ -34,7 +34,6 @@ import assert from 'assert';
  */
 const DEFAULT_PROPS = {
   key: 0,
-  layerIndex: 0,
   opacity: 1
 };
 
@@ -247,20 +246,11 @@ export default class Layer {
       onBeforeRender() {
         program.use();
         this.setAttributes(program);
-      },
-
-      pick(point) {
-        // z is used as layer index
-        const [x, y, z] = point;
-        const index = x !== 0 || y !== 0 ? x + y * 256 : 0;
-        const target = index === 0 ? [-1, -1, -1] : [x, y, z];
-
-        program.use();
-        program.setUniform('selected', target);
-        program.selectedIndex = index - 1;
-        program.selectedLayerIndex = z;
       }
+
     });
+
+    this.state.model.layer = this;
   }
 
   _getRenderFunction(gl) {

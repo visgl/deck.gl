@@ -22,7 +22,7 @@
 import React, {PropTypes} from 'react';
 import ReactDOM from 'react-dom';
 import autobind from 'autobind-decorator';
-import {createGLContext, PerspectiveCamera, Scene, Events, Fx} from 'luma.gl';
+import {createGLContext, PerspectiveCamera, Scene, Events, Fx, Framebuffer} from 'luma.gl';
 import throttle from 'lodash.throttle';
 
 const PROP_TYPES = {
@@ -108,69 +108,79 @@ export default class WebGLRenderer extends React.Component {
     this.props.onRendererInitialized({gl, camera, scene});
   }
 
-  _renderPickingScene(opt) {
-    const {scene} = this.state;
+  _pick(x, y) {
+    const {gl, scene, camera} = this.state;
 
-    for (const model of scene.models) {
-      if (model.pickable) {
-        const program = model.program;
-        program.use();
-        program.setUniform('enablePicking', 1);
-        opt.o3dList.push(model);
-      }
+    if (this._pickingFBO === undefined) {
+      this._pickingFBO = new Framebuffer(gl, {
+        width: gl.canvas.width,
+        height: gl.canvas.height,
+      });
     }
 
-    scene.renderToTexture('$picking');
+    this._pickingFBO.bind();
+
+    gl.enable(gl.SCISSOR_TEST);
+    gl.scissor(x, gl.canvas.height - y, 1, 1);
+
+    const picked = [];
 
     for (const model of scene.models) {
+      if (!model.pickable) {
+        continue;
+      }
       const program = model.program;
-      if (model.pickable) {
-        program.use();
-        program.setUniform('enablePicking', 0);
-      }
+      program.use();
+      program.setUniform('enablePicking', 1);
+      model.onBeforeRender();
+      const {view} = camera;
+      const {matrix} = model;
+      const worldMatrix = view.mulMat4(matrix);
+
+      model.setState(program);
+
+      program.setUniform('worldMatrix', worldMatrix)
+
+      gl.clear(gl.COLOR_BUFFER_BIT);
+
+      model.render();
+
+      const pixel = new Uint8Array(4);
+      gl.readPixels(x, gl.canvas.height - y, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, pixel);
+
+      picked.push({
+        layer: model.layer,
+        data: pixel
+      })
+
+      program.setUniform('enablePicking', 0);
+
+      model.unsetState(program);
     }
+
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+    gl.disable(gl.SCISSOR_TEST);
+    return picked;
   }
+
+
 
   @autobind
   _onClick(e) {
-    const {scene} = this.state;
-
-    for (const model of scene.models) {
-      const program = model.program;
-
-      scene.pick(e.x, e.y, {
-        viewport: this.props.viewport,
-        pixelRatio: this.props.pixelRatio,
-        pickingProgram: program
-      });
-
-      // popup selection
-      if (this.props.events.onObjectClicked && program.selectedIndex >= 0) {
-        this.props.events.onObjectClicked(
-          program.selectedIndex, program.selectedLayerIndex, e
-        );
+    const picked = this._pick(e.x, e.y);
+    for (const item of picked) {
+      if (item.layer.onObjectClicked) {
+        item.layer.onObjectClicked(item.data);
       }
     }
   }
 
   @autobind
   _onMouseMove(e) {
-    const {scene} = this.state;
-
-    for (const model of scene.models) {
-      const program = model.program;
-
-      scene.pick(e.x, e.y, {
-        viewport: this.props.viewport,
-        pixelRatio: this.props.pixelRatio,
-        pickingProgram: program
-      });
-
-      // popup selection
-      if (this.props.events.onObjectHovered && program.selectedIndex >= 0) {
-        this.props.events.onObjectHovered(
-          program.selectedIndex, program.selectedLayerIndex, e
-        );
+    const picked = this._pick(e.x, e.y);
+    for (const item of picked) {
+      if (item.layer.onObjectHovered) {
+        item.layer.onObjectHovered(item.data);
       }
     }
   }
