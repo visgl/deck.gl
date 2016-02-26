@@ -359,19 +359,13 @@ export default class Layer {
       pickable: this.props.isPickable,
       // get render function per primitive (instanced? indexed?)
       render: this._getRenderFunction(gl)
-
-      // update buffer before rendering, -> shader attributes
-      // onBeforeRender() {
-      //   debugger
-      //   program.use();
-      //   this.setAttributes(program);
-      // }
-
     });
 
+    // TODO - why is this needed? Remove or comment...
     this.state.model.layer = this;
   }
 
+  // Should this be moved to program
   _getRenderFunction(gl) {
     // "Capture" state as it will be set to null when layer is disposed
     const {state} = this;

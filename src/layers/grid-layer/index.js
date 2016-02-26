@@ -79,9 +79,9 @@ export default class GridLayer extends MapLayer {
       primitive
     });
 
-    this.addInstanced(ATTRIBUTES, {
+    attributes.addInstanced(ATTRIBUTES, {
       positions: {update: this.calculatePositions},
-      colors: {update: this.calculateColors, post: this.postCalculateColors}
+      colors: {update: this.calculateColors}
     });
   }
 

@@ -39,7 +39,7 @@ export default class Attributes {
     if (clearFlag) {
       this.needsRedraw = false;
     }
-    log('NeedsRedraw', needsRedraw);
+    //log('NeedsRedraw', needsRedraw);
     return needsRedraw;
   }
 
@@ -143,10 +143,10 @@ export default class Attributes {
       const {update} = attribute;
       if (attribute.needsUpdate && attribute.autoUpdate) {
         if (update) {
-          log(`autoupdating ${attributeName} for ${this.id}`);
+          log(`autoupdating ${numInstances} ${attributeName} for ${this.id}`);
           update.call(context, attribute, numInstances);
         } else {
-          log(`autocalculating ${attributeName} for ${this.id}`);
+          log(`autocalculating ${numInstances} ${attributeName} for ${this.id}`);
           this._updateAttributeFromData(attribute, data, getValue);
         }
         attribute.needsUpdate = false;

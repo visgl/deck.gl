@@ -19,7 +19,6 @@
 // THE SOFTWARE.
 
 import MapLayer from '../map-layer';
-import autobind from 'autobind-decorator';
 import {Program} from 'luma.gl';
 const glslify = require('glslify');
 
@@ -44,9 +43,6 @@ export default class ScatterplotLayer extends MapLayer {
    */
   constructor(props) {
     super(props);
-
-    this.onObjectHovered = props.onScatterplotHovered;
-    this.onObjectClicked = props.onScatterplotClicked;
   }
 
   initializeState() {

@@ -123,7 +123,7 @@ export default class WebGLRenderer extends React.Component {
     if (this._pickingFBO === undefined) {
       this._pickingFBO = new Framebuffer(gl, {
         width: gl.canvas.width,
-        height: gl.canvas.height,
+        height: gl.canvas.height
       });
     }
 
@@ -135,38 +135,37 @@ export default class WebGLRenderer extends React.Component {
     const picked = [];
 
     for (const model of scene.models) {
-      if (!model.pickable) {
-        continue;
+      if (model.pickable) {
+        const program = model.program;
+        program.use();
+        program.setUniform('enablePicking', 1);
+        model.onBeforeRender();
+        const {view} = camera;
+        const {matrix} = model;
+        const worldMatrix = view.mulMat4(matrix);
+
+        model.setState(program);
+
+        program.setUniform('worldMatrix', worldMatrix);
+
+        gl.clear(gl.COLOR_BUFFER_BIT);
+
+        model.render();
+
+        const pixel = new Uint8Array(4);
+        gl.readPixels(
+          x, gl.canvas.height - y, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, pixel
+        );
+
+        picked.push({
+          layer: model.layer,
+          data: pixel
+        });
+
+        program.setUniform('enablePicking', 0);
+
+        model.unsetState(program);
       }
-      const program = model.program;
-      program.use();
-      program.setUniform('enablePicking', 1);
-      model.onBeforeRender();
-      const {view} = camera;
-      const {matrix} = model;
-      const worldMatrix = view.mulMat4(matrix);
-
-      model.setState(program);
-
-      program.setUniform('worldMatrix', worldMatrix);
-
-      gl.clear(gl.COLOR_BUFFER_BIT);
-
-      model.render();
-
-      const pixel = new Uint8Array(4);
-      gl.readPixels(
-        x, gl.canvas.height - y, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, pixel
-      );
-
-      picked.push({
-        layer: model.layer,
-        data: pixel
-      });
-
-      program.setUniform('enablePicking', 0);
-
-      model.unsetState(program);
     }
 
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
