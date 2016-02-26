@@ -19,7 +19,6 @@
 // THE SOFTWARE.
 
 import MapLayer from '../map-layer';
-import autobind from 'autobind-decorator';
 import {Program} from 'luma.gl';
 const glslify = require('glslify');
 
@@ -56,7 +55,7 @@ export default class HexagonLayer extends MapLayer {
   initializeState() {
     super.initializeState();
 
-    const {gl} = this.state;
+    const {gl, attributes} = this.state;
 
     const program = new Program(
       gl,
@@ -70,21 +69,21 @@ export default class HexagonLayer extends MapLayer {
       primitive: this.getPrimitive()
     });
 
-    this.addInstancedAttributes(ATTRIBUTES, {
+    attributes.addInstanced(ATTRIBUTES, {
       positions: {update: this.calculatePositions},
       colors: {update: this.calculateColors}
     });
   }
 
   willReceiveProps(oldProps, newProps) {
-    const {dataChanged, viewportChanged} = this.state;
+    const {dataChanged, viewportChanged, attributes} = this.state;
 
     if (dataChanged || viewportChanged) {
-      this.setAttributeNeedsUpdate('positions');
+      attributes.invalidate('positions');
       this.calculateRadiusAndAngle();
     }
     if (dataChanged) {
-      this.setAttributeNeedsUpdate('colors');
+      attributes.invalidate('colors');
     }
   }
 
@@ -96,9 +95,9 @@ export default class HexagonLayer extends MapLayer {
     });
   }
 
-  calculatePositions() {
+  calculatePositions(attribute) {
     const {data} = this.props;
-    const {value, size} = this.state.attributes.positions;
+    const {value, size} = attribute;
     let i = 0;
     for (const hexagon of data) {
       value[i + 0] = hexagon.centroid.x;
@@ -108,9 +107,9 @@ export default class HexagonLayer extends MapLayer {
     }
   }
 
-  calculateColors() {
+  calculateColors(attribute) {
     const {data} = this.props;
-    const {value} = this.state.attributes.colors;
+    const {value} = attribute;
     let i = 0;
     for (const hexagon of data) {
       value[i + 0] = hexagon.color[0];

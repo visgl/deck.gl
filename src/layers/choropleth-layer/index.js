@@ -26,6 +26,14 @@ import normalize from 'geojson-normalize';
 import {Program} from 'luma.gl';
 const glslify = require('glslify');
 
+const ATTRIBUTES = {
+  vertices: {size: 3, '0': 'x', '1': 'y', '2': 'unused'},
+  instances: {size: 3, '0': 'x', '1': 'y', '2': 'unused'},
+  colors: {size: 3, '0': 'red', '1': 'green', '2': 'blue'},
+  // Override picking colors to prevent auto allocation
+  pickingColors: {size: 3, '0': 'pickRed', '1': 'pickGreen', '2': 'pickBlue'}
+};
+
 export default class ChoroplethLayer extends MapLayer {
   /**
    * @classdesc
@@ -48,7 +56,16 @@ export default class ChoroplethLayer extends MapLayer {
   }
 
   initializeState() {
-    const {gl} = this.state;
+    super.initializeState();
+
+    this.addAttributes(ATTRIBUTES, {
+      // Primtive attributes
+      indices: {update: this.calculateIndices, noAlloc: true},
+      vertices: {update: this.calculateVertices, noAlloc: true},
+      colors: {update: this.calculateColors, noAlloc: true},
+      // Instanced attributes
+      pickingColors: {update: this.calculatePickingColors, noAlloc: true}
+    });
 
     const program = new Program(
       gl,
@@ -60,7 +77,7 @@ export default class ChoroplethLayer extends MapLayer {
     const primitive = {
       id: this.props.id,
       drawType: this.props.drawContour ? 'LINES' : 'TRIANGLES',
-      indices: this.state.indices,
+      indices: this.attributes.indices,
       instanced: false
     };
 
@@ -69,48 +86,79 @@ export default class ChoroplethLayer extends MapLayer {
       primitive
     });
 
-    this.addInstancedAttributes(
-      {name: 'positions', size: 3},
-      {name: 'colors', size: 3}
-    );
   }
 
-  updateLayer() {
-    const {dataChanged} = this.state;
-    if (dataChanged) {
-      this._allocateGLBuffers();
-      this._extractChoropleths();
-      this._calculateVertices();
-      this._calculateIndices();
-      this._calculateColors();
-      this._calculatePickingColors();
-    }
-
-    // TODO change getters to setters
-    this.state.primitive = this.getPrimitive();
-    this.updateUniforms();
-    this.updateAttributes();
-
-    this.state.dataChanged = false;
+  willReceiveProps() {
+    // const {dataChanged} = this.state;
+    // if (dataChanged) {
+    this.extractChoropleths();
+    this.calculateVertices();
+    this.calculateIndices();
+    this.calculateColors();
+    this.calculatePickingColors();
+    this.calculateContourIndices();
+    // }
   }
 
   updateUniforms() {
-    const {opacity} = this.state;
-    this.setUniforms({
-      opacity
-    });
+    super.setUniforms();
   }
 
-  updateAttributes() {
-    this._extractChoropleths();
-    this._calculateVertices();
-    this._calculateIndices();
-    this._calculateColors();
-    this._calculatePickingColors();
-    this._calculateContourIndices();
+  calculateVertices(attribute) {
+    const vertices = flattenDeep(this.state.groupedVertices);
+    attribute.value = new Float32Array(vertices);
   }
 
-  _extractChoropleths() {
+  calculateIndices(attribute) {
+    // adjust index offset for multiple choropleths
+    const offsets = this.state.groupedVertices.reduce(
+      (acc, vertices) => [...acc, acc[acc.length - 1] + vertices.length],
+      [0]
+    );
+
+    const indices = this.state.groupedVertices.map(
+      (vertices, choroplethIndex) => this.drawContour ?
+        // 1. get sequentially ordered indices of each choropleth contour
+        // 2. offset them by the number of indices in previous choropleths
+        this.calculateContourIndices(vertices.length).map(
+          index => index + offsets[choroplethIndex]
+        ) :
+        // 1. get triangulated indices for the internal areas
+        // 2. offset them by the number of indices in previous choropleths
+        earcut(flattenDeep(vertices), null, 3).map(
+          index => index + offsets[choroplethIndex]
+        )
+    );
+
+    attribute.value = new Uint16Array(flattenDeep(indices));
+  }
+
+  calculateColors(attribute) {
+    const colors = this.state.groupedVertices.map(
+      vertices => vertices.map(
+        vertex => this.drawContour ? [0, 0, 0] : [128, 128, 128]
+      )
+    );
+
+    attribute.value = new Float32Array(flattenDeep(colors));
+  }
+
+  // Override the default picking colors calculation
+  calculatePickingColors(attribute) {
+    const pickingColors = this.state.vertices.map(
+      (vertices, choroplethIndex) => vertices.map(
+        vertex => this.drawContour ? [-1, -1, -1] : [
+          (choroplethIndex + 1) % 256,
+          Math.floor((choroplethIndex + 1) / 256) % 256,
+          this.layerIndex
+        ]
+      )
+    );
+
+    attribute.value = new Float32Array(flattenDeep(pickingColors));
+  }
+
+  extractChoropleths() {
     const {data} = this.props;
     const normalizedGeojson = normalize(data);
 
@@ -125,73 +173,15 @@ export default class ChoroplethLayer extends MapLayer {
         coordinates
       };
     });
-  }
 
-  _calculateVertices() {
     this.state.groupedVertices = this.state.choropleths.map(
       choropleth => choropleth.coordinates.map(
         coordinate => [coordinate[0], coordinate[1], 100]
       )
     );
-
-    const vertices = flattenDeep(this.state.groupedVertices);
-    this.state.vertices = new Float32Array(vertices);
   }
 
-  _calculateIndices() {
-    // adjust index offset for multiple choropleths
-    const offsets = this.state.groupedVertices.reduce(
-      (acc, vertices) => [...acc, acc[acc.length - 1] + vertices.length],
-      [0]
-    );
-
-    const indices = this.state.groupedVertices.map(
-      (vertices, choroplethIndex) => this.drawContour ?
-        // 1. get sequentially ordered indices of each choropleth contour
-        // 2. offset them by the number of indices in previous choropleths
-        this._calculateContourIndices(vertices.length).map(
-          index => index + offsets[choroplethIndex]
-        ) :
-        // 1. get triangulated indices for the internal areas
-        // 2. offset them by the number of indices in previous choropleths
-        earcut(flattenDeep(vertices), null, 3).map(
-          index => index + offsets[choroplethIndex]
-        )
-    );
-
-    this.state.indices = new Uint16Array(flattenDeep(indices));
-  }
-
-  _calculateColors() {
-    const colors = this.state.groupedVertices.map(
-      vertices => vertices.map(
-        vertex => this.drawContour ? [0, 0, 0] : [128, 128, 128]
-      )
-    );
-
-    this.state.colors = new Float32Array(flattenDeep(colors));
-  }
-
-  // Override the default picking colors calculation
-  _calculatePickingColors() {
-    if (!this.isPickable) {
-      return;
-    }
-
-    const pickingColors = this.state.vertices.map(
-      (vertices, choroplethIndex) => vertices.map(
-        vertex => this.drawContour ? [-1, -1, -1] : [
-          (choroplethIndex + 1) % 256,
-          Math.floor((choroplethIndex + 1) / 256) % 256,
-          this.layerIndex
-        ]
-      )
-    );
-
-    this.state.pickingColors = new Float32Array(flattenDeep(pickingColors));
-  }
-
-  _calculateContourIndices(numVertices) {
+  calculateContourIndices(numVertices) {
     // use vertex pairs for gl.LINES => [0, 1, 1, 2, 2, ..., n-1, n-1, 0]
     let indices = [];
     for (let i = 1; i < numVertices - 1; i++) {

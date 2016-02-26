@@ -53,6 +53,7 @@ export default class ScatterplotLayer extends MapLayer {
     super.initializeState();
 
     const {gl} = this.state;
+    const {attributes} = this.state;
 
     const program = new Program(
       gl,
@@ -61,16 +62,20 @@ export default class ScatterplotLayer extends MapLayer {
       'scatterplot'
     );
 
-    const primitive = this.getPrimitive();
+    const primitive = {
+      id: this.id,
+      instanced: true,
+      ...this.getGeometry()
+    };
 
     this.setState({
       program,
       primitive
     });
 
-    this.addInstancedAttributes(ATTRIBUTES, {
+    attributes.addInstanced(ATTRIBUTES, {
       positions: {update: this.calculatePositions},
-      colors: {update: this.calculateColors, post: this.postCalculateColors}
+      colors: {update: this.calculateColors}
     });
   }
 
@@ -84,13 +89,7 @@ export default class ScatterplotLayer extends MapLayer {
     });
   }
 
-  updateAttributes() {
-    super.updateAttributes();
-    this.calculatePositions();
-    this.calculateColors();
-  }
-
-  getPrimitive() {
+  getGeometry() {
     const NUM_SEGMENTS = 16;
     const PI2 = Math.PI * 2;
 
@@ -105,16 +104,14 @@ export default class ScatterplotLayer extends MapLayer {
     }
 
     return {
-      id: this.id,
       drawType: 'TRIANGLE_FAN',
-      vertices: new Float32Array(vertices),
-      instanced: true
+      vertices: new Float32Array(vertices)
     };
   }
 
-  calculatePositions() {
+  calculatePositions(attribute) {
     const {data} = this.props;
-    const {value, size} = this.state.attributes.positions;
+    const {value, size} = attribute;
     let i = 0;
     for (const point of data) {
       value[i + 0] = point.position.x;
@@ -124,9 +121,9 @@ export default class ScatterplotLayer extends MapLayer {
     }
   }
 
-  calculateColors() {
+  calculateColors(attribute) {
     const {data} = this.props;
-    const {value, size} = this.state.attributes.colors;
+    const {value, size} = attribute;
     let i = 0;
     for (const point of data) {
       value[i + 0] = point.color[0];

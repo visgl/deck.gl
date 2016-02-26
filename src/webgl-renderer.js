@@ -40,20 +40,29 @@ const PROP_TYPES = {
 
   onRendererInitialized: PropTypes.func.isRequired,
   onInitializationFailed: PropTypes.func,
-  onError: PropTypes.func
+  onError: PropTypes.func,
+
+  onBeforeRenderFrame: PropTypes.func,
+  onAfterRenderFrame: PropTypes.func,
+  onBeforeRenderPickingScene: PropTypes.func,
+  onAfterRenderPickingScene: PropTypes.func,
+
+  onNeedRedraw: PropTypes.func
 };
 
 const DEFAULT_PROPS = {
   id: 'webgl-canvas',
-  onPostRender: () => {},
-  onBeforeRenderPickingScene: () => {},
-  onAfterRenderPickingScene: () => {},
-  onBeforeRenderFrame: () => {},
-  onAfterRenderFrame: () => {},
+  onRendererInitialized: () => {},
   onInitializationFailed: () => {},
   /* eslint-disable no-console */
-  onError: error => console.error('LumaGL Error: ', error)
+  onError: error => console.error('LumaGL Error: ', error),
   /* eslint-enable no-console */
+  onBeforeRenderFrame: () => {},
+  onAfterRenderFrame: () => {},
+  onBeforeRenderPickingScene: () => {},
+  onAfterRenderPickingScene: () => {},
+
+  onNeedRedraw: () => true
 };
 
 export default class WebGLRenderer extends React.Component {
@@ -139,19 +148,21 @@ export default class WebGLRenderer extends React.Component {
 
       model.setState(program);
 
-      program.setUniform('worldMatrix', worldMatrix)
+      program.setUniform('worldMatrix', worldMatrix);
 
       gl.clear(gl.COLOR_BUFFER_BIT);
 
       model.render();
 
       const pixel = new Uint8Array(4);
-      gl.readPixels(x, gl.canvas.height - y, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, pixel);
+      gl.readPixels(
+        x, gl.canvas.height - y, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, pixel
+      );
 
       picked.push({
         layer: model.layer,
         data: pixel
-      })
+      });
 
       program.setUniform('enablePicking', 0);
 
@@ -162,8 +173,6 @@ export default class WebGLRenderer extends React.Component {
     gl.disable(gl.SCISSOR_TEST);
     return picked;
   }
-
-
 
   @autobind
   _onClick(e) {
@@ -189,20 +198,20 @@ export default class WebGLRenderer extends React.Component {
     const {
       viewport: {x, y, width, height},
       blending: {enable, blendFunc, blendEquation},
-      needRedraw,
       onBeforeRenderFrame,
       onAfterRenderFrame,
+      onNeedRedraw,
       pixelRatio
     } = this.props;
-
-    // TODO - restore
-    // if (!needRedraw()) {
-    //   return;
-    // }
 
     const {gl, scene} = this.state;
     if (!gl) {
       return;
+    }
+
+    // Note: Do this after gl check, in case onNeedRedraw clears flags
+    if (!onNeedRedraw()) {
+      // return;
     }
 
     // clear depth and color buffers

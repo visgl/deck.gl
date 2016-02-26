@@ -19,7 +19,6 @@
 // THE SOFTWARE.
 
 import MapLayer from '../map-layer';
-import autobind from 'autobind-decorator';
 import {Program} from 'luma.gl';
 const glslify = require('glslify');
 
@@ -55,7 +54,7 @@ export default class GridLayer extends MapLayer {
   initializeState() {
     super.initializeState();
 
-    const {gl} = this.state;
+    const {gl, attributes} = this.state;
 
     const program = new Program(
       gl,
@@ -64,11 +63,15 @@ export default class GridLayer extends MapLayer {
       'grid'
     );
 
+    const geometry = {
+      drawType: 'TRIANGLE_FAN',
+      vertices: new Float32Array([0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0])
+    };
+
     const primitive = {
       id: this.props.id,
-      drawType: 'TRIANGLE_FAN',
-      vertices: new Float32Array([0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0]),
-      instanced: true
+      instanced: true,
+      ...geometry
     };
 
     this.setState({
@@ -76,10 +79,30 @@ export default class GridLayer extends MapLayer {
       primitive
     });
 
-    this.addInstancedAttributes(ATTRIBUTES, {
+    this.addInstanced(ATTRIBUTES, {
       positions: {update: this.calculatePositions},
       colors: {update: this.calculateColors, post: this.postCalculateColors}
     });
+  }
+
+  willReceiveProps(oldProps, newProps) {
+    const {attributes} = this.state;
+
+    const cellSizeChanged =
+      newProps.unitWidth !== oldProps.unitWidth ||
+      newProps.unitHeight !== oldProps.unitHeight;
+
+    if (cellSizeChanged || this.state.viewportChanged) {
+      const numCol = Math.ceil(this.width * 2 / this.unitWidth);
+      const numRow = Math.ceil(this.height * 2 / this.unitHeight);
+      this.setState({
+        numCol,
+        numRow,
+        numInstances: numCol * numRow
+      });
+    }
+
+    attributes.invalidateAll();
   }
 
   updateUniforms() {
@@ -101,10 +124,9 @@ export default class GridLayer extends MapLayer {
     });
   }
 
-  calculatePositions(attribute) {
+  calculatePositions(attribute, numInstances) {
     const {numCol, unitWidth, unitHeight, width, height} = this.props;
-    const {numInstances, attributes} = this.state;
-    const {value, size} = attributes.positions;
+    const {value, size} = attribute;
 
     for (let i = 0; i < numInstances; i++) {
       const x = i % numCol;
@@ -115,13 +137,11 @@ export default class GridLayer extends MapLayer {
     }
   }
 
-  calculateColors() {
+  calculateColors(attribute) {
     const {data, numCol, unitWidth, unitHeight, width, height} = this.props;
-    const {value, size} = this.state.attributes.colors;
+    const {value, size} = attribute;
 
-    for (let i = 0; i < value.length; i++) {
-      value[i] = 0;
-    }
+    value.fill(0.0);
 
     for (const point of data) {
       const pixel = this.project([point.position.x, point.position.y]);
@@ -135,10 +155,7 @@ export default class GridLayer extends MapLayer {
       value[i3 + 1] += 5;
       value[i3 + 2] += 1;
     }
-  }
 
-  postCalculateColors() {
-    const {value} = this.state.attributes.colors;
     this.state.maxCount = Math.max(...value);
   }
 

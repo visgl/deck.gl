@@ -19,7 +19,6 @@
 // THE SOFTWARE.
 
 import MapLayer from '../map-layer';
-import autobind from 'autobind-decorator';
 import {Program} from 'luma.gl';
 const glslify = require('glslify');
 
@@ -41,7 +40,7 @@ export default class ArcLayer extends MapLayer {
 
   initializeState() {
     super.initializeState();
-    const {gl} = this.state;
+    const {gl, attributes} = this.state;
 
     const program = new Program(
       gl,
@@ -50,28 +49,31 @@ export default class ArcLayer extends MapLayer {
       'arc'
     );
 
+    const primitive = {
+      id: this.id,
+      instanced: true,
+      ...this.getGeometry()
+    };
+
     this.setState({
       program,
-      primitive: this.getPrimitive()
+      primitive
     });
 
-    this.addInstancedAttributes(ATTRIBUTES, {
+    attributes.addInstanced(ATTRIBUTES, {
       positions: {update: this.calculatePositions}
     });
   }
 
-  getPrimitive() {
+  getGeometry() {
     let vertices = [];
     const NUM_SEGMENTS = 50;
     for (let i = 0; i < NUM_SEGMENTS; i++) {
       vertices = [...vertices, i, i, i];
     }
-
     return {
-      id: this.id,
       drawType: 'LINE_STRIP',
-      vertices: new Float32Array(vertices),
-      instanced: true
+      vertices: new Float32Array(vertices)
     };
   }
 
@@ -86,9 +88,9 @@ export default class ArcLayer extends MapLayer {
     }
   }
 
-  calculatePositions() {
+  calculatePositions(attribute) {
     const {data} = this.props;
-    const {value, size} = this.state.attributes.positions;
+    const {value, size} = attribute;
     let i = 0;
     for (const arc of data) {
       value[i + 0] = arc.position.x0;

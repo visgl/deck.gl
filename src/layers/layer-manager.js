@@ -74,6 +74,14 @@ export function initializeNewLayers(layers, {gl}) {
   }
 }
 
+export function layersNeedRedraw(layers, {clearFlag}) {
+  let needRedraw = false;
+  for (const layer of layers) {
+    needRedraw = needRedraw || layer.getNeedsRedraw({clearFlag});
+  }
+  return needRedraw;
+}
+
 function _findMatchingLayer(oldLayers, newLayer) {
   const candidates = oldLayers.filter(l => l.props.id === newLayer.props.id);
   if (candidates.length > 1) {

@@ -24,14 +24,13 @@ import autobind from 'autobind-decorator';
 
 import WebGLRenderer from './webgl-renderer';
 import flatWorld from './flat-world';
-import {matchLayers, updateOldLayers, initializeNewLayers}
+import {matchLayers, updateOldLayers, initializeNewLayers, layersNeedRedraw}
   from './layers/layer-manager';
 
 const PROP_TYPES = {
   width: PropTypes.number.isRequired,
   height: PropTypes.number.isRequired,
-  layers: PropTypes.array.isRequired,
-  onAfterRender: PropTypes.func
+  layers: PropTypes.array.isRequired
 };
 
 export default class WebGLOverlay extends React.Component {
@@ -106,22 +105,26 @@ export default class WebGLOverlay extends React.Component {
 
   @autobind
   _checkIfNeedRedraw() {
-    return this.state.needsRedraw;
+    const {layers} = this.props;
+    return layersNeedRedraw(layers, {clearFlag: true});
   }
 
-  render() {
-    const {
-      width, height, layers, onBeforeRenderFrame, onAfterRenderFrame
-    } = this.props;
+  // @autobind
+  // onAfterRender
 
-    if (layers.length === 0) {
-      return null;
-    }
+  render() {
+    const {width, height, layers, ...otherProps} = this.props;
+
+    // if (layers.length === 0) {
+    //   return null;
+    // }
 
     this.initializeLayers(layers);
 
     return (
       <WebGLRenderer
+        { ...otherProps }
+
         width={ width }
         height={ height }
 
@@ -136,10 +139,8 @@ export default class WebGLOverlay extends React.Component {
           onObjectClicked: this._handleObjectClicked
         } }
 
-        onBeforeRenderFrame={ onBeforeRenderFrame }
-        onAfterRenderFrame={ onAfterRenderFrame }
-        needRedraw={ this._checkIfNeedRedraw }
-        onRendererInitialized={ this._onRendererInitialized }/>
+        onRendererInitialized={ this._onRendererInitialized }
+        onNeedRedraw={ this._checkIfNeedRedraw }/>
     );
   }
 
