@@ -75,9 +75,15 @@ export default class ScatterplotLayer extends MapLayer {
     });
   }
 
-  updateUniforms() {
-    super.updateUniforms();
+  didMount() {
+    this.updateRadius();
+  }
 
+  willReceiveProps() {
+    this.updateRadius();
+  }
+
+  updateRadius() {
     this._calculateRadius();
     const {radius} = this.state;
     this.setUniforms({

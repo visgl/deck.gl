@@ -19,7 +19,6 @@
 // THE SOFTWARE.
 
 import MapLayer from '../map-layer';
-import autobind from 'autobind-decorator';
 import earcut from 'earcut';
 import flattenDeep from 'lodash.flattendeep';
 import normalize from 'geojson-normalize';
@@ -29,9 +28,9 @@ const glslify = require('glslify');
 const ATTRIBUTES = {
   vertices: {size: 3, '0': 'x', '1': 'y', '2': 'unused'},
   instances: {size: 3, '0': 'x', '1': 'y', '2': 'unused'},
-  colors: {size: 3, '0': 'red', '1': 'green', '2': 'blue'},
+  colors: {size: 3, '0': 'red', '1': 'green', '2': 'blue'}
   // Override picking colors to prevent auto allocation
-  pickingColors: {size: 3, '0': 'pickRed', '1': 'pickGreen', '2': 'pickBlue'}
+  // pickingColors: {size: 3, '0': 'pickRed', '1': 'pickGreen', '2': 'pickBlue'}
 };
 
 export default class ChoroplethLayer extends MapLayer {
@@ -49,20 +48,19 @@ export default class ChoroplethLayer extends MapLayer {
    */
   constructor(opts) {
     super({
-      onChoroplethHover: () => {},
-      onChoroplethClick: () => {},
       ...opts
     });
   }
 
   initializeState() {
     super.initializeState();
+    const {gl, attributes} = this.state;
 
-    this.addAttributes(ATTRIBUTES, {
+    attributes.addInstanced(ATTRIBUTES, {
       // Primtive attributes
-      indices: {update: this.calculateIndices, noAlloc: true},
-      vertices: {update: this.calculateVertices, noAlloc: true},
-      colors: {update: this.calculateColors, noAlloc: true},
+      indices: {update: this.calculateIndices},
+      vertices: {update: this.calculateVertices},
+      colors: {update: this.calculateColors},
       // Instanced attributes
       pickingColors: {update: this.calculatePickingColors, noAlloc: true}
     });
@@ -77,27 +75,24 @@ export default class ChoroplethLayer extends MapLayer {
     const primitive = {
       id: this.props.id,
       drawType: this.props.drawContour ? 'LINES' : 'TRIANGLES',
-      indices: this.attributes.indices,
       instanced: false
     };
 
     this.setState({
+      numInstances: 0,
       program,
       primitive
     });
 
+    this.extractChoropleths();
   }
 
   willReceiveProps() {
-    // const {dataChanged} = this.state;
-    // if (dataChanged) {
-    this.extractChoropleths();
-    this.calculateVertices();
-    this.calculateIndices();
-    this.calculateColors();
-    this.calculatePickingColors();
-    this.calculateContourIndices();
-    // }
+    const {dataChanged, attributes} = this.state;
+    if (dataChanged) {
+      this.extractChoropleths();
+      attributes.invalidateAll();
+    }
   }
 
   updateUniforms() {
@@ -145,17 +140,19 @@ export default class ChoroplethLayer extends MapLayer {
 
   // Override the default picking colors calculation
   calculatePickingColors(attribute) {
-    const pickingColors = this.state.vertices.map(
-      (vertices, choroplethIndex) => vertices.map(
-        vertex => this.drawContour ? [-1, -1, -1] : [
-          (choroplethIndex + 1) % 256,
-          Math.floor((choroplethIndex + 1) / 256) % 256,
-          this.layerIndex
-        ]
-      )
-    );
+    // const {attributes} = this.state;
+    // const {vertices: value} = attributes
+    // const pickingColors = this.state.groupedVer.map(
+    //   (vertices, choroplethIndex) => vertices.map(
+    //     vertex => this.drawContour ? [-1, -1, -1] : [
+    //       (choroplethIndex + 1) % 256,
+    //       Math.floor((choroplethIndex + 1) / 256) % 256,
+    //       this.layerIndex
+    //     ]
+    //   )
+    // );
 
-    attribute.value = new Float32Array(flattenDeep(pickingColors));
+    // attribute.value = new Float32Array(flattenDeep(pickingColors));
   }
 
   extractChoropleths() {

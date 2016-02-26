@@ -78,6 +78,8 @@ export default class ArcLayer extends MapLayer {
   }
 
   updateUniforms() {
+    super.updateUniforms();
+
     // Get colors from first object
     const object = this.getFirstObject();
     if (object) {

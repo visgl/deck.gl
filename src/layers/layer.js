@@ -101,7 +101,7 @@ export default class Layer {
       model: null,
       uniforms: {},
       needsRedraw: true,
-      numInstances: 0,
+      // numInstances: 0,
       dataChanged: true,
       superWasCalled: true
     });
@@ -173,7 +173,7 @@ export default class Layer {
   // - Auto-deduction via iteration
   getNumInstances() {
     // First check if the layer has set its own value
-    if (this.state && this.state.numInstances) {
+    if (this.state && this.state.numInstances !== undefined) {
       return this.state.numInstances;
     }
 

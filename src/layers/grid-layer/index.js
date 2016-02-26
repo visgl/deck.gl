@@ -46,7 +46,6 @@ export default class GridLayer extends MapLayer {
     super({
       unitWidth: 100,
       unitHeight: 100,
-      numCol: 100,
       ...opts
     });
   }
@@ -83,49 +82,47 @@ export default class GridLayer extends MapLayer {
       positions: {update: this.calculatePositions},
       colors: {update: this.calculateColors}
     });
+
+    this.updateCell();
   }
 
   willReceiveProps(oldProps, newProps) {
-    const {attributes} = this.state;
-
     const cellSizeChanged =
       newProps.unitWidth !== oldProps.unitWidth ||
       newProps.unitHeight !== oldProps.unitHeight;
 
     if (cellSizeChanged || this.state.viewportChanged) {
-      const numCol = Math.ceil(this.width * 2 / this.unitWidth);
-      const numRow = Math.ceil(this.height * 2 / this.unitHeight);
-      this.setState({
-        numCol,
-        numRow,
-        numInstances: numCol * numRow
-      });
+      this.updateCell();
     }
-
-    attributes.invalidateAll();
   }
 
-  updateUniforms() {
-    super.updateUniforms();
+  updateCell() {
+    const {width, height, unitWidth, unitHeight} = this.props;
 
-    const {maxCount} = this.state;
+    const numCol = Math.ceil(width * 2 / unitWidth);
+    const numRow = Math.ceil(height * 2 / unitHeight);
+    this.setState({
+      numCol,
+      numRow,
+      numInstances: numCol * numRow
+    });
 
-    const {unitWidth, unitHeight} = this.props;
+    const {attributes} = this.state;
+    attributes.invalidateAll();
+
     const MARGIN = 2;
     const scale = new Float32Array([
       unitWidth - MARGIN * 2,
       unitHeight - MARGIN * 2,
       1
     ]);
+    this.setUniforms({scale});
 
-    this.setUniforms({
-      maxCount,
-      scale
-    });
   }
 
   calculatePositions(attribute, numInstances) {
-    const {numCol, unitWidth, unitHeight, width, height} = this.props;
+    const {unitWidth, unitHeight, width, height} = this.props;
+    const {numCol} = this.state;
     const {value, size} = attribute;
 
     for (let i = 0; i < numInstances; i++) {
@@ -138,7 +135,8 @@ export default class GridLayer extends MapLayer {
   }
 
   calculateColors(attribute) {
-    const {data, numCol, unitWidth, unitHeight, width, height} = this.props;
+    const {data, unitWidth, unitHeight, width, height} = this.props;
+    const {numCol} = this.state;
     const {value, size} = attribute;
 
     value.fill(0.0);
@@ -156,7 +154,8 @@ export default class GridLayer extends MapLayer {
       value[i3 + 2] += 1;
     }
 
-    this.state.maxCount = Math.max(...value);
+    const maxCount = Math.max(...value);
+    this.setUniforms({maxCount});
   }
 
 }

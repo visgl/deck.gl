@@ -47,9 +47,6 @@ export default class HexagonLayer extends MapLayer {
       elevation: 101,
       ...opts
     });
-
-    this.onObjectHovered = opts.onHexagonHovered;
-    this.onObjectClicked = opts.onHexagonClicked;
   }
 
   initializeState() {
@@ -73,6 +70,8 @@ export default class HexagonLayer extends MapLayer {
       positions: {update: this.calculatePositions},
       colors: {update: this.calculateColors}
     });
+
+    this.calculateRadiusAndAngle();
   }
 
   willReceiveProps(oldProps, newProps) {
@@ -102,7 +101,8 @@ export default class HexagonLayer extends MapLayer {
     for (const hexagon of data) {
       value[i + 0] = hexagon.centroid.x;
       value[i + 1] = hexagon.centroid.y;
-      value[i + 2] = this.elevation;
+      value[i + 2] = 0;
+      // this.props.elevation;
       i += size;
     }
   }
@@ -144,11 +144,13 @@ export default class HexagonLayer extends MapLayer {
     const dy = screenCoord0.y - screenCoord3.y;
     const dxy = Math.sqrt(dx * dx + dy * dy);
 
-    // Calculate angle that the perpendicular hexagon vertex axis is tilted
-    this.state.angle = Math.acos(dx / dxy) * -Math.sign(dy);
+    this.setState({
+      // Calculate angle that the perpendicular hexagon vertex axis is tilted
+      angle: Math.acos(dx / dxy) * -Math.sign(dy),
+      // Allow user to fine tune radius
+      radius: dxy / 2 * Math.min(1, this.radius)
+    });
 
-    // Allow user to fine tune radius
-    this.state.radius = dxy / 2 * Math.min(1, this.radius);
   }
 
   getPrimitive() {

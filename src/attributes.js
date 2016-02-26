@@ -116,21 +116,22 @@ export default class Attributes {
   // Note: Only allocates buffers not set by setBuffer
   _allocateBuffers() {
     const {numInstances, allocedInstances, attributes} = this;
-    assert(numInstances);
+    assert(numInstances !== undefined);
 
     if (numInstances > allocedInstances) {
+      // Allocate at least one element to ensure a valid buffer
+      const allocCount = Math.max(numInstances, 1);
       for (const attributeName in attributes) {
         const attribute = attributes[attributeName];
         const {size, isExternalBuffer, autoUpdate} = attribute;
         if (!isExternalBuffer && autoUpdate) {
-          log(`autoallocated ${numInstances} for ${this.id}:${attributeName}`);
-          attribute.value = new Float32Array(size * numInstances);
+          log(`autoallocated ${allocCount} ${attributeName} for ${this.id}`);
+          attribute.value = new Float32Array(size * allocCount);
           attribute.needsUpdate = true;
         }
       }
+      this.allocedInstances = allocCount;
     }
-
-    this.allocedInstances = numInstances;
   }
 
   _updateBuffers({data, getValue, context}) {
@@ -146,7 +147,8 @@ export default class Attributes {
           log(`autoupdating ${numInstances} ${attributeName} for ${this.id}`);
           update.call(context, attribute, numInstances);
         } else {
-          log(`autocalculating ${numInstances} ${attributeName} for ${this.id}`);
+          log(
+            `autocalculating ${numInstances} ${attributeName} for ${this.id}`);
           this._updateAttributeFromData(attribute, data, getValue);
         }
         attribute.needsUpdate = false;
