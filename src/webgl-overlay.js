@@ -80,24 +80,24 @@ export default class WebGLOverlay extends React.Component {
   }
 
   @autobind
-  _handleObjectHovered(...args) {
+  _handleObjectHovered(info) {
     const {layers} = this.props;
 
     for (let i = layers.length - 1; i >= 0; --i) {
       const layer = layers[i];
-      if (layer.onObjectHovered && layer.onObjectHovered(...args)) {
+      if (layer.onHover({...info, props: layer.props})) {
         break;
       }
     }
   }
 
   @autobind
-  _handleObjectClicked(...args) {
+  _handleObjectClicked(info) {
     const {layers} = this.props;
 
     for (let i = layers.length - 1; i >= 0; --i) {
       const layer = layers[i];
-      if (layer.onObjectClicked && layer.onObjectClicked(...args)) {
+      if (layer.onClick({...info, props: layer.props})) {
         break;
       }
     }

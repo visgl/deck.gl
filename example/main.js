@@ -55,7 +55,8 @@ const INITIAL_STATE = {
   },
   choropleths: null,
   hexagons: null,
-  points: null
+  points: null,
+  arcs: null
 };
 
 // ---- Action ---- //
@@ -83,7 +84,9 @@ function reducer(state = INITIAL_STATE, action) {
   case 'LOAD_CHOROPLETHS':
     return {...state, choropleths: action.choropleths};
   case 'LOAD_HEXAGONS':
-    return {...state, hexagons: action.hexagons};
+    const {hexagons} = action;
+    const hexData = processHexagons(hexagons);
+    return {...state, hexagons, hexData};
   case 'LOAD_POINTS': {
     const points = action.points.map(point => {
       const coordString = point.COORDINATES;
@@ -100,7 +103,7 @@ function reducer(state = INITIAL_STATE, action) {
       };
     });
 
-    return {...state, points};
+    return {...state, points, arcs: pointsToArcs(points)};
   }
 
   default:
@@ -114,8 +117,62 @@ function mapStateToProps(state) {
     viewport: state.viewport,
     choropleths: state.choropleths,
     hexagons: state.hexagons,
-    points: state.points
+    points: state.points,
+    arcs: state.arcs,
+    hexData: state.hexData
   };
+}
+
+// ---- Helpers ---- //
+
+function processHexagons(hexagons) {
+  const values = hexagons.map(hexagon => Number(hexagon.value));
+  const maxValue = Math.max(...values);
+
+  const data = hexagons.map(hexagon => ({
+    centroid: {
+      x: Number(hexagon['centroid.x']),
+      y: Number(hexagon['centroid.y'])
+    },
+    vertices: [
+      [Number(hexagon['v0.x']), Number(hexagon['v0.y'])],
+      [Number(hexagon['v1.x']), Number(hexagon['v1.y'])],
+      [Number(hexagon['v2.x']), Number(hexagon['v2.y'])],
+      [Number(hexagon['v3.x']), Number(hexagon['v3.y'])],
+      [Number(hexagon['v4.x']), Number(hexagon['v4.y'])],
+      [Number(hexagon['v5.x']), Number(hexagon['v5.y'])]
+    ],
+    color: [
+      Number(hexagon.value) / maxValue * 255,
+      Number(hexagon.value) / maxValue * 128,
+      Number(hexagon.value) / maxValue * 64
+    ]
+  }));
+  return data;
+}
+
+function pointsToArcs(points) {
+  return points.map((point, i) => {
+    if (i === points.length - 1) {
+      return {
+        position: {x0: 0, y0: 0, x1: 0, y1: 0},
+        color: [35, 81, 128]
+      };
+    }
+
+    const source = point;
+    const target = points[i + 1];
+
+    return {
+      position: {
+        x0: source.position.x, y0: source.position.y,
+        x1: target.position.x, y1: target.position.y
+      },
+      colors: {
+        c0: [255, 0, 0], c1: [0, 0, 255]
+      }
+    };
+  });
 }
 
 // ---- View ---- //
@@ -156,6 +213,21 @@ class ExampleApp extends React.Component {
   }
 
   @autobind
+  _handleHexagonsLoaded(data) {
+    this.props.dispatch(loadHexagons(data));
+  }
+
+  @autobind
+  _handlePointsLoaded(data) {
+    this.props.dispatch(loadPoints(data));
+  }
+
+  @autobind
+  _handleChoroplethsLoaded(data) {
+    this.props.dispatch(loadChoropleths(data));
+  }
+
+  @autobind
   _handleResize() {
     this.setState({width: window.innerWidth, height: window.innerHeight});
   }
@@ -166,48 +238,35 @@ class ExampleApp extends React.Component {
   }
 
   @autobind
-  _handleChoroplethsLoaded(data) {
-    this.props.dispatch(loadChoropleths(data));
+  _handleChoroplethHovered(info) {
+    const {choroplethFeature} = info;
+    console.log(choroplethFeature.property.name);
   }
 
   @autobind
-  _handleChoroplethHovered(choroplethsProps, e) {
-    console.log(choroplethsProps.name);
+  _handleChoroplethClicked(info) {
+    const {choroplethFeature} = info;
+    console.log(choroplethFeature.property.name);
   }
 
   @autobind
-  _handleChoroplethClicked(choroplethsProps, e) {
-    console.log(choroplethsProps.name);
+  _handleHexagonHovered(info) {
+    console.log('Hexagon hovered:', info);
   }
 
   @autobind
-  _handleHexagonHovered(...args) {
-    console.log('Hexagon hovered:', ...args);
+  _handleHexagonClicked(info) {
+    console.log('Hexagon clicked:', info);
   }
 
   @autobind
-  _handleHexagonClicked(...args) {
-    console.log('Hexagon clicked:', ...args);
+  _handleScatterplotHovered(info) {
+    console.log('Scatterplot hovered:', info);
   }
 
   @autobind
-  _handleScatterplotHovered(...args) {
-    console.log('Scatterplot hovered:', ...args);
-  }
-
-  @autobind
-  _handleScatterplotClicked(...args) {
-    console.log('Scatterplot clicked:', ...args);
-  }
-
-  @autobind
-  _handleHexagonsLoaded(data) {
-    this.props.dispatch(loadHexagons(data));
-  }
-
-  @autobind
-  _handlePointsLoaded(data) {
-    this.props.dispatch(loadPoints(data));
+  _handleScatterplotClicked(info) {
+    console.log('Scatterplot clicked:', info);
   }
 
   _renderGridLayer() {
@@ -238,35 +297,14 @@ class ExampleApp extends React.Component {
       data: choropleths,
       isPickable: false,
       drawContour: true,
-      layerIndex: 1
+      layerIndex: 1,
+      onHover: this._handleChoroplethHovered,
+      onClick: this._handleChoroplethClicked
     });
   }
 
   _renderHexagonLayer() {
-    const {viewport, hexagons} = this.props;
-
-    const values = hexagons.map(hexagon => Number(hexagon.value));
-    const maxValue = Math.max(...values);
-
-    const data = hexagons.map(hexagon => ({
-      centroid: {
-        x: Number(hexagon['centroid.x']),
-        y: Number(hexagon['centroid.y'])
-      },
-      vertices: [
-        [Number(hexagon['v0.x']), Number(hexagon['v0.y'])],
-        [Number(hexagon['v1.x']), Number(hexagon['v1.y'])],
-        [Number(hexagon['v2.x']), Number(hexagon['v2.y'])],
-        [Number(hexagon['v3.x']), Number(hexagon['v3.y'])],
-        [Number(hexagon['v4.x']), Number(hexagon['v4.y'])],
-        [Number(hexagon['v5.x']), Number(hexagon['v5.y'])]
-      ],
-      color: [
-        Number(hexagon.value) / maxValue * 255,
-        Number(hexagon.value) / maxValue * 128,
-        Number(hexagon.value) / maxValue * 64
-      ]
-    }));
+    const {viewport, hexData} = this.props;
 
     return new HexagonLayer({
       id: 'hexagonLayer',
@@ -275,11 +313,11 @@ class ExampleApp extends React.Component {
       latitude: viewport.latitude,
       longitude: viewport.longitude,
       zoom: viewport.zoom,
-      data,
+      data: hexData,
       isPickable: true,
       layerIndex: 2,
-      onHexagonHovered: this._handleHexagonHovered,
-      onHexagonClicked: this._handleHexagonClicked
+      onHover: this._handleHexagonHovered,
+      onClick: this._handleHexagonClicked
     });
   }
 
@@ -294,15 +332,16 @@ class ExampleApp extends React.Component {
       longitude: viewport.longitude,
       zoom: viewport.zoom,
       isPickable: true,
-      onScatterplotClicked: this._handleScatterplotClicked,
-      onScatterplotHovered: this._handleScatterplotHovered,
       layerIndex: 3,
-      data: points
+      data: points,
+      onHover: this._handleScatterplotHovered,
+      onClick: this._handleScatterplotClicked
     });
   }
 
   _renderArcLayer() {
-    const {viewport, points} = this.props;
+
+    const {viewport, arcs} = this.props;
 
     return new ArcLayer({
       id: 'arcLayer',
@@ -312,27 +351,7 @@ class ExampleApp extends React.Component {
       longitude: viewport.longitude,
       zoom: viewport.zoom,
       layerIndex: 4,
-      data: points.map((point, i) => {
-        if (i === points.length - 1) {
-          return {
-            position: {x0: 0, y0: 0, x1: 0, y1: 0},
-            color: [35, 81, 128]
-          };
-        }
-
-        const source = point;
-        const target = points[i + 1];
-
-        return {
-          position: {
-            x0: source.position.x, y0: source.position.y,
-            x1: target.position.x, y1: target.position.y
-          },
-          colors: {
-            c0: [255, 0, 0], c1: [0, 0, 255]
-          }
-        };
-      })
+      data: arcs
     });
   }
 
