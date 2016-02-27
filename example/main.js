@@ -368,7 +368,7 @@ class ExampleApp extends React.Component {
         width={window.innerWidth}
         height={window.innerHeight}
         layers={[
-          this._renderGridLayer(),
+          // this._renderGridLayer(),
           // this._renderChoroplethLayer(),
           this._renderHexagonLayer(),
           this._renderScatterplotLayer(),

@@ -242,15 +242,6 @@ export default class Layer {
     throw new Error('Could not deduce numInstances');
   }
 
-  calculatePickingColors(attribute, numInstances) {
-    const {value, size} = attribute;
-    for (let i = 0; i < numInstances; i++) {
-      value[i * size + 0] = (i + 1) % 256;
-      value[i * size + 1] = Math.floor((i + 1) / 256) % 256;
-      value[i * size + 2] = this.layerIndex;
-    }
-  }
-
   // Internal Helpers
 
   checkProps(oldProps, newProps) {
@@ -348,12 +339,32 @@ export default class Layer {
     this.willUnmount();
   }
 
+  calculatePickingColors(attribute, numInstances) {
+    const {value, size} = attribute;
+    for (let i = 0; i < numInstances; i++) {
+      value[i * size + 0] = (i + 1) % 256;
+      value[i * size + 1] = Math.floor((i + 1) / 256) % 256;
+      value[i * size + 2] = this.layerIndex;
+    }
+  }
+
+  decodePickingColor(color) {
+    assert(color instanceof Uint8Array);
+    const [i1, i2, layerIndex] = color;
+    const index = i1 + i2 * 256;
+    return {index, layerIndex};
+  }
+
   onHover(info) {
-    this.props.onHover(info);
+    const {color} = info;
+    const {index} = this.decodePickingColor(color);
+    return this.props.onHover({index, ...info});
   }
 
   onClick(info) {
-    this.props.onClick(info);
+    const {color} = info;
+    const {index} = this.decodePickingColor(color);
+    return this.props.onClick({index, ...info});
   }
 
   // INTERNAL METHODS
@@ -402,9 +413,6 @@ export default class Layer {
       // get render function per primitive (instanced? indexed?)
       render: this._getRenderFunction(gl)
     });
-
-    // TODO - why is this needed? Remove or comment...
-    this.state.model.layer = this;
   }
 
   // Should this be moved to program

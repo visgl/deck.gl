@@ -48,7 +48,9 @@ const PROP_TYPES = {
   onBeforeRenderPickingScene: PropTypes.func,
   onAfterRenderPickingScene: PropTypes.func,
 
-  onNeedRedraw: PropTypes.func
+  onNeedRedraw: PropTypes.func,
+  onMouseMove: PropTypes.func,
+  onClick: PropTypes.func
 };
 
 const DEFAULT_PROPS = {
@@ -63,7 +65,9 @@ const DEFAULT_PROPS = {
   onBeforeRenderPickingScene: () => {},
   onAfterRenderPickingScene: () => {},
 
-  onNeedRedraw: () => true
+  onNeedRedraw: () => true,
+  onMouseMove: () => {},
+  onClick: () => {}
 };
 
 export default class WebGLRenderer extends React.Component {
@@ -105,6 +109,11 @@ export default class WebGLRenderer extends React.Component {
       onMouseMove: throttle(this._onMouseMove, 100)
     });
 
+    // events={ {
+    //   onObjectHovered: this._handleObjectHovered,
+    //   onObjectClicked: this._handleObjectClicked
+    // } }
+
     const camera = new PerspectiveCamera(this.props.camera);
 
     // TODO - remove program parameter from scene, or move it into options
@@ -118,6 +127,8 @@ export default class WebGLRenderer extends React.Component {
     this.props.onRendererInitialized({gl, camera, scene});
   }
 
+  // TODO - move this to luma.gl/pick.js or model.js?
+  /* eslint-disable max-statements */
   _pick(x, y) {
     const {gl, scene, camera} = this.state;
 
@@ -135,6 +146,7 @@ export default class WebGLRenderer extends React.Component {
 
     const picked = [];
 
+    // TODO - iterate in reverse order?
     for (const model of scene.models) {
       if (model.pickable) {
         const program = model.program;
@@ -153,15 +165,13 @@ export default class WebGLRenderer extends React.Component {
 
         model.render();
 
-        const pixel = new Uint8Array(4);
+        // Read the color in the central pixel, to be mapped with picking colors
+        const color = new Uint8Array(4);
         gl.readPixels(
-          x, gl.canvas.height - y, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, pixel
+          x, gl.canvas.height - y, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, color
         );
 
-        picked.push({
-          layer: model.layer,
-          data: pixel
-        });
+        picked.push({model, color});
 
         program.setUniform('enablePicking', 0);
 
@@ -175,23 +185,15 @@ export default class WebGLRenderer extends React.Component {
   }
 
   @autobind
-  _onClick(e) {
-    const picked = this._pick(e.x, e.y);
-    for (const item of picked) {
-      if (item.layer.onObjectClicked) {
-        item.layer.onObjectClicked(item.data);
-      }
-    }
+  _onClick(event) {
+    const picked = this._pick(event.x, event.y);
+    this.props.onClick({event, picked});
   }
 
   @autobind
-  _onMouseMove(e) {
-    const picked = this._pick(e.x, e.y);
-    for (const item of picked) {
-      if (item.layer.onObjectHovered) {
-        item.layer.onObjectHovered(item.data);
-      }
-    }
+  _onMouseMove(event) {
+    const picked = this._pick(event.x, event.y);
+    this.props.onMouseMove({event, picked});
   }
 
   _renderFrame() {

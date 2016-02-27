@@ -67,9 +67,12 @@ export default class WebGLOverlay extends React.Component {
     }
     // clear scene and repopulate based on new layers
     scene.removeAll();
-    for (const newLayer of layers) {
+    for (const layer of layers) {
+      // Save layer on model for picking purposes
+      // TODO - store on model.userData rather than directly on model
+      layer.state.model.layer = layer;
       // Add model to scene
-      scene.add(newLayer.state.model);
+      scene.add(layer.state.model);
     }
   }
 
@@ -79,26 +82,24 @@ export default class WebGLOverlay extends React.Component {
     initializeNewLayers(this.props.layers, {gl});
   }
 
+  // Route events to layers
   @autobind
-  _handleObjectHovered(info) {
-    const {layers} = this.props;
-
-    for (let i = layers.length - 1; i >= 0; --i) {
-      const layer = layers[i];
-      if (layer.onHover({...info, props: layer.props})) {
-        break;
+  _onClick(info) {
+    const {picked} = info;
+    for (const item of picked) {
+      if (item.model.layer.onClick({color: item.color, ...info})) {
+        return;
       }
     }
   }
 
+    // Route events to layers
   @autobind
-  _handleObjectClicked(info) {
-    const {layers} = this.props;
-
-    for (let i = layers.length - 1; i >= 0; --i) {
-      const layer = layers[i];
-      if (layer.onClick({...info, props: layer.props})) {
-        break;
+  _onMouseMove(info) {
+    const {picked} = info;
+    for (const item of picked) {
+      if (item.model.layer.onHover({color: item.color, ...info})) {
+        return;
       }
     }
   }
@@ -134,13 +135,10 @@ export default class WebGLOverlay extends React.Component {
         blending={ flatWorld.getBlending() }
         pixelRatio={ flatWorld.getPixelRatio(window.devicePixelRatio) }
 
-        events={ {
-          onObjectHovered: this._handleObjectHovered,
-          onObjectClicked: this._handleObjectClicked
-        } }
-
         onRendererInitialized={ this._onRendererInitialized }
-        onNeedRedraw={ this._checkIfNeedRedraw }/>
+        onNeedRedraw={ this._checkIfNeedRedraw }
+        onMouseMove={ this._onMouseMove }
+        onClick={ this._onClick }/>
     );
   }
 
