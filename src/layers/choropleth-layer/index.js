@@ -185,22 +185,18 @@ export default class ChoroplethLayer extends MapLayer {
     return [0, ...indices, 0];
   }
 
-  _onHover(index, layerIndex, e) {
+  onHover(info) {
+    const {index} = info;
     const {data} = this.props;
-    if (layerIndex !== this.layerIndex) {
-      return;
-    }
-    const choroplethProps = data.features[index].properties;
-    this.props.onChoroplethHovered(choroplethProps, e);
+    const feature = data.features[index];
+    this.props.onHover({...info, feature});
   }
 
-  _onClick(index, layerIndex, e) {
+  onClick(info) {
+    const {index} = info;
     const {data} = this.props;
-    if (layerIndex !== this.layerIndex) {
-      return;
-    }
-    const choroplethProps = data.features[index].properties;
-    this.props.onChoroplethClicked(choroplethProps, e);
+    const feature = data.features[index];
+    this.props.onClick({...info, feature});
   }
 
 }

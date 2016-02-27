@@ -36,7 +36,7 @@ import assert from 'assert';
  */
 const DEFAULT_PROPS = {
   key: 0,
-  opacity: 1,
+  opacity: 0.8,
   numInstances: undefined,
   attributes: {},
   data: [],
@@ -346,6 +346,14 @@ export default class Layer {
   // Note: not guaranteed to be called on application shutdown
   finalizeLayer() {
     this.willUnmount();
+  }
+
+  onHover(info) {
+    this.props.onHover(info);
+  }
+
+  onClick(info) {
+    this.props.onClick(info);
   }
 
   // INTERNAL METHODS
