@@ -22,7 +22,8 @@
 import React, {PropTypes} from 'react';
 import ReactDOM from 'react-dom';
 import autobind from 'autobind-decorator';
-import {createGLContext, PerspectiveCamera, Scene, Events, Fx, Framebuffer} from 'luma.gl';
+import {createGLContext, PerspectiveCamera, Scene, Events, Fx, Framebuffer}
+  from 'luma.gl';
 import throttle from 'lodash.throttle';
 
 const PROP_TYPES = {
@@ -96,7 +97,7 @@ export default class WebGLRenderer extends React.Component {
 
     const gl = createGLContext(canvas);
 
-    Events.create(canvas, {
+    const events = Events.create(canvas, {
       cacheSize: false,
       cachePosition: false,
       centerOrigin: false,
@@ -112,7 +113,7 @@ export default class WebGLRenderer extends React.Component {
       backgroundColor: {r: 0, g: 0, b: 0, a: 0}
     });
 
-    this.setState({gl, camera, scene});
+    this.setState({gl, camera, scene, events});
 
     this.props.onRendererInitialized({gl, camera, scene});
   }

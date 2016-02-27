@@ -75,6 +75,8 @@ export default class HexagonLayer extends MapLayer {
   }
 
   willReceiveProps(oldProps, newProps) {
+    super.willReceiveProps(oldProps, newProps);
+
     const {dataChanged, viewportChanged, attributes} = this.state;
 
     if (dataChanged || viewportChanged) {
@@ -84,14 +86,6 @@ export default class HexagonLayer extends MapLayer {
     if (dataChanged) {
       attributes.invalidate('colors');
     }
-  }
-
-  updateUniforms() {
-    const {radius, angle} = this.state;
-    this.setUniforms({
-      radius,
-      angle
-    });
   }
 
   calculatePositions(attribute) {
@@ -144,11 +138,11 @@ export default class HexagonLayer extends MapLayer {
     const dy = screenCoord0.y - screenCoord3.y;
     const dxy = Math.sqrt(dx * dx + dy * dy);
 
-    this.setState({
+    this.setUniforms({
       // Calculate angle that the perpendicular hexagon vertex axis is tilted
       angle: Math.acos(dx / dxy) * -Math.sign(dy),
       // Allow user to fine tune radius
-      radius: dxy / 2 * Math.min(1, this.radius)
+      radius: dxy / 2 * Math.min(1, this.props.dotRadius)
     });
 
   }

@@ -79,7 +79,8 @@ export default class ScatterplotLayer extends MapLayer {
     this.updateRadius();
   }
 
-  willReceiveProps() {
+  willReceiveProps(oldProps, newProps) {
+    super.willReceiveProps(oldProps, newProps);
     this.updateRadius();
   }
 

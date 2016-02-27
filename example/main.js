@@ -20,8 +20,7 @@
 
 /* eslint-disable func-style */
 /* eslint-disable no-console */
-/* global console */
-
+/* global console, process */
 import 'babel-polyfill';
 import document from 'global/document';
 import window from 'global/window';
@@ -44,7 +43,9 @@ import {
 } from '../src';
 
 // ---- Default Settings ---- //
-const MAPBOX_ACCESS_TOKEN = process.env.MAPBOX_ACCESS_TOKEN || 'Set MAPBOX_ACCESS_TOKEN environment variable or put your token here.';
+/* eslint-disable no-process-env */
+const MAPBOX_ACCESS_TOKEN = process.env.MAPBOX_ACCESS_TOKEN ||
+  'Set MAPBOX_ACCESS_TOKEN environment variable or put your token here.';
 
 const INITIAL_STATE = {
   viewport: {
@@ -124,8 +125,8 @@ class ExampleApp extends React.Component {
   }
 
   componentWillMount() {
-    this.updateDimensions();
-    window.addEventListener('resize', this.updateDimensions);
+    this._handleResize();
+    window.addEventListener('resize', this._handleResize);
 
     this._loadJsonFile('./data/sf.zip.geo.json', this._handleChoroplethsLoaded);
     this._loadCsvFile('./data/hexagons.csv', this._handleHexagonsLoaded);
@@ -133,12 +134,7 @@ class ExampleApp extends React.Component {
   }
 
   componentWillUnmount() {
-    window.removeEventListener('resize', this.updateDimensions);
-  }
-
-  @autobind
-  updateDimensions() {
-    this.setState({width: window.innerWidth, height: window.innerHeight});
+    window.removeEventListener('resize', this._handleResize);
   }
 
   _loadJsonFile(path, onDataLoaded) {
@@ -157,6 +153,11 @@ class ExampleApp extends React.Component {
       }
       onDataLoaded(data);
     });
+  }
+
+  @autobind
+  _handleResize() {
+    this.setState({width: window.innerWidth, height: window.innerHeight});
   }
 
   @autobind
@@ -350,9 +351,9 @@ class ExampleApp extends React.Component {
         layers={[
           this._renderGridLayer(),
           // this._renderChoroplethLayer(),
-          // this._renderHexagonLayer(),
-          this._renderScatterplotLayer()
-          // this._renderArcLayer()
+          this._renderHexagonLayer(),
+          this._renderScatterplotLayer(),
+          this._renderArcLayer()
         ]}
       />
     );

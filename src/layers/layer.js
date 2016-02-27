@@ -139,7 +139,12 @@ export default class Layer {
 
   getNeedsRedraw({clearFlag}) {
     const {attributes} = this.state;
-    return attributes.getNeedsRedraw({clearFlag});
+    let needsRedraw = attributes.getNeedsRedraw({clearFlag});
+    needsRedraw = needsRedraw || this.needsRedraw;
+    if (clearFlag) {
+      this.needsRedraw = false;
+    }
+    return needsRedraw;
   }
 
   // Updates selected state members and marks the object for redraw
@@ -149,9 +154,38 @@ export default class Layer {
   }
 
   // Updates selected state members and marks the object for redraw
-  setUniforms(updateObject) {
-    Object.assign(this.state.uniforms, updateObject);
+  setUniforms(uniformMap) {
+    this._checkUniforms(uniformMap);
+    Object.assign(this.state.uniforms, uniformMap);
     this.state.needsRedraw = true;
+  }
+
+  // TODO - Move into luma.gl, and check against definitions
+  _checkUniforms(uniformMap) {
+    for (const key in uniformMap) {
+      const value = uniformMap[key];
+      this._checkUniformValue(key, value);
+    }
+  }
+
+  _checkUniformValue(uniform, value) {
+    function isNumber(v) {
+      return !isNaN(v) && Number(v) === v && v !== undefined;
+    }
+
+    let ok = true;
+    if (Array.isArray(value) || value instanceof Float32Array) {
+      for (const element of value) {
+        if (!isNumber(element)) {
+          ok = false;
+        }
+      }
+    } else if (!isNumber(value)) {
+      ok = false;
+    }
+    if (!ok) {
+      console.error(`${this.props.id} Bad uniform ${uniform}`, value);
+    }
   }
 
   // Use iteration (the only required capability on data) to get first element

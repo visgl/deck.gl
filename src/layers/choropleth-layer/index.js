@@ -87,16 +87,14 @@ export default class ChoroplethLayer extends MapLayer {
     this.extractChoropleths();
   }
 
-  willReceiveProps() {
+  willReceiveProps(oldProps, newProps) {
+    super.willReceiveProps(oldProps, newProps);
+
     const {dataChanged, attributes} = this.state;
     if (dataChanged) {
       this.extractChoropleths();
       attributes.invalidateAll();
     }
-  }
-
-  updateUniforms() {
-    super.setUniforms();
   }
 
   calculateVertices(attribute) {

@@ -87,6 +87,8 @@ export default class GridLayer extends MapLayer {
   }
 
   willReceiveProps(oldProps, newProps) {
+    super.willReceiveProps(oldProps, newProps);
+
     const cellSizeChanged =
       newProps.unitWidth !== oldProps.unitWidth ||
       newProps.unitHeight !== oldProps.unitHeight;

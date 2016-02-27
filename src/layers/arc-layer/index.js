@@ -63,23 +63,16 @@ export default class ArcLayer extends MapLayer {
     attributes.addInstanced(ATTRIBUTES, {
       positions: {update: this.calculatePositions}
     });
+
+    this.updateColors();
   }
 
-  getGeometry() {
-    let vertices = [];
-    const NUM_SEGMENTS = 50;
-    for (let i = 0; i < NUM_SEGMENTS; i++) {
-      vertices = [...vertices, i, i, i];
-    }
-    return {
-      drawType: 'LINE_STRIP',
-      vertices: new Float32Array(vertices)
-    };
+  willReceiveProps(oldProps, nextProps) {
+    super.willReceiveProps(oldProps, nextProps);
+    this.updateColors();
   }
 
-  updateUniforms() {
-    super.updateUniforms();
-
+  updateColors() {
     // Get colors from first object
     const object = this.getFirstObject();
     if (object) {
@@ -101,6 +94,18 @@ export default class ArcLayer extends MapLayer {
       value[i + 3] = arc.position.y1;
       i += size;
     }
+  }
+
+  getGeometry() {
+    let vertices = [];
+    const NUM_SEGMENTS = 50;
+    for (let i = 0; i < NUM_SEGMENTS; i++) {
+      vertices = [...vertices, i, i, i];
+    }
+    return {
+      drawType: 'LINE_STRIP',
+      vertices: new Float32Array(vertices)
+    };
   }
 
 }
