@@ -71,7 +71,6 @@ renders it as interactive choropleths.
   * `latitude` (number, required) latitude of the map center
   * `zoom` (number, required) zoom level of the map
   * `opacity` (number, required) opacity of the layer
-  * `layerIndex` [number, optional, default=0] index of the layer
   * `isPickable` [bool, optional, default=false] whether layer responses to
   mouse events
 
@@ -98,7 +97,6 @@ renders it as interactive choropleths.
     * `width` (number, required) width of the layer
     * `height` (number, required) height of the layer
     * `opacity` (number, required) opacity of the layer
-    * `layerIndex` [number, optional, default=0] index of the layer
     * `isPickable` [bool, optional, default=false] whether layer responses to
     mouse events
 
@@ -128,7 +126,6 @@ renders it as interactive choropleths.
     * `width` (number, required) width of the layer
     * `height` (number, required) height of the layer
     * `opacity` (number, required) opacity of the layer
-    * `layerIndex` [number, optional, default=0] index of the layer
     * `isPickable` [bool, optional, default=false] whether layer responses to
     mouse events
 
@@ -147,7 +144,6 @@ renders it as interactive choropleths.
     * `width` (number, required) width of the layer
     * `height` (number, required) height of the layer
     * `opacity` (number, required) opacity of the layer
-    * `layerIndex` [number, optional, default=0] index of the layer
     * `isPickable` [bool, optional, default=false] whether layer responses to
     mouse events
 
@@ -166,7 +162,6 @@ renders it as interactive choropleths.
     * `width` (number, required) width of the layer
     * `height` (number, required) height of the layer
     * `opacity` (number, required) opacity of the layer
-    * `layerIndex` [number, optional, default=0] index of the layer
     * `isPickable` [bool, optional, default=false] whether layer responses to
     mouse events
 

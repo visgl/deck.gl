@@ -77,7 +77,6 @@
     "precommit": "npm run lint -s",
     "server": "./node_modules/http-server/bin/http-server -c-1 .",
     "start": "budo example/main.js:example/bundle.js -t babelify --live --open --port 3000 --watch-glob '**/*.{html,css,js}'",
-    "start2": "budo src/bundle.js:dist/deckgl.js -t babelify --live --open --port 3000 --watch-glob '**/*.{html,css,js}'",
     "test": "babel-node --only=deck.gl/test,deck.gl/src,luma.gl test/index.js | faucet"
   }
 }

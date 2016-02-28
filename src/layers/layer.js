@@ -101,7 +101,7 @@ export default class Layer {
       model: null,
       uniforms: {},
       needsRedraw: true,
-      // numInstances: 0,
+      numInstances: this.getNumInstances(),
       dataChanged: true,
       superWasCalled: true
     });
@@ -344,26 +344,26 @@ export default class Layer {
     for (let i = 0; i < numInstances; i++) {
       value[i * size + 0] = (i + 1) % 256;
       value[i * size + 1] = Math.floor((i + 1) / 256) % 256;
-      value[i * size + 2] = this.layerIndex;
+      value[i * size + 2] = Math.floor((i + 1) / 256 / 256) % 256;
     }
   }
 
   decodePickingColor(color) {
     assert(color instanceof Uint8Array);
-    const [i1, i2, layerIndex] = color;
-    const index = i1 + i2 * 256;
-    return {index, layerIndex};
+    const [i1, i2, i3] = color;
+    const index = i1 + i2 * 256 + i3 * 65536;
+    return index;
   }
 
   onHover(info) {
     const {color} = info;
-    const {index} = this.decodePickingColor(color);
+    const index = this.decodePickingColor(color);
     return this.props.onHover({index, ...info});
   }
 
   onClick(info) {
     const {color} = info;
-    const {index} = this.decodePickingColor(color);
+    const index = this.decodePickingColor(color);
     return this.props.onClick({index, ...info});
   }
 

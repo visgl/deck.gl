@@ -279,7 +279,7 @@ class ExampleApp extends React.Component {
       latitude: viewport.latitude,
       longitude: viewport.longitude,
       zoom: viewport.zoom,
-      layerIndex: 0,
+      opacity: 0.06,
       data: points
     });
   }
@@ -297,7 +297,6 @@ class ExampleApp extends React.Component {
       data: choropleths,
       isPickable: false,
       drawContour: true,
-      layerIndex: 1,
       onHover: this._handleChoroplethHovered,
       onClick: this._handleChoroplethClicked
     });
@@ -315,7 +314,7 @@ class ExampleApp extends React.Component {
       zoom: viewport.zoom,
       data: hexData,
       isPickable: true,
-      layerIndex: 2,
+      opacity: 0.1,
       onHover: this._handleHexagonHovered,
       onClick: this._handleHexagonClicked
     });
@@ -332,7 +331,6 @@ class ExampleApp extends React.Component {
       longitude: viewport.longitude,
       zoom: viewport.zoom,
       isPickable: true,
-      layerIndex: 3,
       data: points,
       onHover: this._handleScatterplotHovered,
       onClick: this._handleScatterplotClicked
@@ -350,7 +348,6 @@ class ExampleApp extends React.Component {
       latitude: viewport.latitude,
       longitude: viewport.longitude,
       zoom: viewport.zoom,
-      layerIndex: 4,
       data: arcs
     });
   }
@@ -370,9 +367,9 @@ class ExampleApp extends React.Component {
         layers={[
           this._renderGridLayer(),
           // this._renderChoroplethLayer(),
-          // this._renderHexagonLayer(),
-          // this._renderScatterplotLayer(),
-          // this._renderArcLayer()
+          this._renderHexagonLayer(),
+          this._renderScatterplotLayer(),
+          this._renderArcLayer()
         ]}
       />
     );
