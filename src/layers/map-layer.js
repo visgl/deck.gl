@@ -57,12 +57,14 @@ export default class MapLayer extends InstancedLayer {
   checkProps(oldProps, newProps) {
     super.checkProps(oldProps, newProps);
 
-    this.state.viewportChanged =
+    const viewportChanged =
       newProps.width !== oldProps.width ||
       newProps.height !== oldProps.height ||
       newProps.latitude !== oldProps.latitude ||
       newProps.longitude !== oldProps.longitude ||
       newProps.zoom !== oldProps.zoom;
+
+    this.setState({viewportChanged});
   }
 
   willReceiveProps() {
@@ -71,21 +73,19 @@ export default class MapLayer extends InstancedLayer {
 
   setViewport() {
     const {width, height, latitude, longitude, zoom} = this.props;
-    this.state.viewport = flatWorld.getViewport(width, height);
-    const {x, y} = this.state.viewport;
-
     this.setState({
-      viewportChanged: true,
-      needsRedraw: true,
+      viewport: new flatWorld.Viewport(width, height),
       mercator: ViewportMercator({
         width, height, latitude, longitude, zoom,
         tileSize: 512
       })
     });
+    const {x, y} = this.state.viewport;
     this.setUniforms({
       viewport: [x, y, width, height],
       mapViewport: [longitude, latitude, zoom, flatWorld.size]
     });
+    console.log(this.state.viewport, latitude, longitude, zoom);
   }
 
   // TODO deprecate: this funtion is only used for calculating radius now
@@ -97,12 +97,8 @@ export default class MapLayer extends InstancedLayer {
 
   // TODO deprecate: this funtion is only used for calculating radius now
   screenToSpace(x, y) {
-    const vp = this.state.viewport;
-    return {
-      x: ((x - vp.x) / vp.width - 0.5) * flatWorld.size * 2,
-      y: ((y - vp.y) / vp.height - 0.5) * flatWorld.size * 2 * -1,
-      z: 0
-    };
+    const {viewport} = this.state;
+    return viewport.screenToSpace(x, y);
   }
 
 }

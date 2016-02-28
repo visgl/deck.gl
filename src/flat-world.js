@@ -22,13 +22,49 @@
 const DEFAULT_FOV = 15;
 const DEFAULT_SIZE = 1000;
 
-const flatWorld = module.exports = {
+const flatWorld = {
 
   // World size
   size: DEFAULT_SIZE,
 
   // Field of view
   fov: DEFAULT_FOV,
+
+  Viewport: class Viewport {
+
+    /**
+     * @classdesc
+     * Calculate {x,y,with,height} of the WebGL viewport
+     * based on provided canvas width and height
+     *
+     * Note: The viewport will be set to a square that covers
+     * the canvas, and an offset will be applied to x or y
+     * as necessary to center the window in the viewport
+     * So that the camera will look at the center of the canvas
+     *
+     * @class
+     * @param {number} width
+     * @param {number} height
+     */
+    constructor(width, height) {
+      const xOffset = width > height ? 0 : (width - height) / 2;
+      const yOffset = height > width ? 0 : (height - width) / 2;
+      const size = Math.max(width, height);
+
+      this.x = xOffset;
+      this.y = yOffset;
+      this.width = size;
+      this.height = size;
+    }
+
+    screenToSpace(x, y) {
+      return {
+        x: ((x - this.x) / this.width - 0.5) * flatWorld.size * 2,
+        y: ((y - this.y) / this.height - 0.5) * flatWorld.size * 2 * -1,
+        z: 0
+      };
+    }
+  },
 
   getWorldSize() {
     return flatWorld.size;
@@ -63,32 +99,6 @@ const flatWorld = module.exports = {
     }
   },
 
-  /**
-   * Calculate {x,y,with,height} of the WebGL viewport
-   * based on provided canvas width and height
-   *
-   * Note: The viewport will be set to a square that covers
-   * the canvas, and an offset will be applied to x or y
-   * as necessary to center the window in the viewport
-   * So that the camera will look at the center of the canvas
-   *
-   * @param {number} width
-   * @param {number} height
-   * @returns {object}  x,y,width,height
-   */
-  getViewport(width, height) {
-    const xOffset = width > height ? 0 : (width - height) / 2;
-    const yOffset = height > width ? 0 : (height - width) / 2;
-    const size = Math.max(width, height);
-
-    return {
-      x: xOffset,
-      y: yOffset,
-      width: size,
-      height: size
-    };
-  },
-
   getCamera() {
     const cameraHeight = flatWorld.getCameraHeight();
     return {
@@ -100,12 +110,12 @@ const flatWorld = module.exports = {
     };
   },
 
-  getPixelRatio: function getPixelRatio(ratio) {
+  getPixelRatio(ratio) {
     return 1;
     // return ratio || 1;
   },
 
-  getLighting: function getLighting() {
+  getLighting() {
     return {
       enable: true,
       ambient: {r: 1.0, g: 1.0, b: 1.0},
@@ -117,7 +127,7 @@ const flatWorld = module.exports = {
     };
   },
 
-  getBlending: function getBlending() {
+  getBlending() {
     return {
       enable: true,
       blendFunc: ['SRC_ALPHA', 'ZERO'],

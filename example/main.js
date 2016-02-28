@@ -34,7 +34,7 @@ import autobind from 'autobind-decorator';
 import MapboxGLMap from 'react-map-gl';
 import request from 'd3-request';
 import {
-  WebGLOverlay,
+  DeckGLOverlay,
   HexagonLayer,
   ChoroplethLayer,
   ScatterplotLayer,
@@ -364,15 +364,15 @@ class ExampleApp extends React.Component {
     }
 
     return (
-      <WebGLOverlay
+      <DeckGLOverlay
         width={window.innerWidth}
         height={window.innerHeight}
         layers={[
-          // this._renderGridLayer(),
+          this._renderGridLayer(),
           // this._renderChoroplethLayer(),
-          this._renderHexagonLayer(),
-          this._renderScatterplotLayer(),
-          this._renderArcLayer()
+          // this._renderHexagonLayer(),
+          // this._renderScatterplotLayer(),
+          // this._renderArcLayer()
         ]}
       />
     );

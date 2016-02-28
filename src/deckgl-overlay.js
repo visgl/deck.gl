@@ -33,7 +33,7 @@ const PROP_TYPES = {
   layers: PropTypes.array.isRequired
 };
 
-export default class WebGLOverlay extends React.Component {
+export default class DeckGLOverlay extends React.Component {
 
   static get propTypes() {
     return PROP_TYPES;
@@ -129,7 +129,7 @@ export default class WebGLOverlay extends React.Component {
         width={ width }
         height={ height }
 
-        viewport={ flatWorld.getViewport(width, height) }
+        viewport={ new flatWorld.Viewport(width, height) }
         camera={ flatWorld.getCamera() }
         lights={ flatWorld.getLighting() }
         blending={ flatWorld.getBlending() }

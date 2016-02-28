@@ -95,8 +95,7 @@ export default class HexagonLayer extends MapLayer {
     for (const hexagon of data) {
       value[i + 0] = hexagon.centroid.x;
       value[i + 1] = hexagon.centroid.y;
-      value[i + 2] = 0;
-      // this.props.elevation;
+      value[i + 2] = this.props.elevation;
       i += size;
     }
   }

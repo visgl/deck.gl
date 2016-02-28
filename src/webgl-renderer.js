@@ -80,6 +80,16 @@ export default class WebGLRenderer extends React.Component {
     return DEFAULT_PROPS;
   }
 
+  /**
+   * @classdesc
+   * Small react component that uses Luma.GL to initialize a WebGL context.
+   *
+   * Returns a canvas, creates a basic WebGL context, a camera and a scene,
+   * sets up a renderloop, and registers some basic event handlers
+   *
+   * @class
+   * @param {Object} props - see propTypes documentation
+   */
   constructor(props) {
     super(props);
     this.state = {

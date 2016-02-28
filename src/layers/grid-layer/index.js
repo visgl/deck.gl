@@ -20,6 +20,7 @@
 
 import MapLayer from '../map-layer';
 import {Program} from 'luma.gl';
+import assert from 'assert';
 const glslify = require('glslify');
 
 const ATTRIBUTES = {
@@ -138,7 +139,7 @@ export default class GridLayer extends MapLayer {
 
   calculateColors(attribute) {
     const {data, unitWidth, unitHeight, width, height} = this.props;
-    const {numCol} = this.state;
+    const {numCol, numRow} = this.state;
     const {value, size} = attribute;
 
     value.fill(0.0);
@@ -149,11 +150,12 @@ export default class GridLayer extends MapLayer {
 
       const colId = Math.floor((space.x + width) / unitWidth);
       const rowId = Math.floor((space.y + height) / unitHeight);
-
-      const i3 = (colId + rowId * numCol) * size;
-      value[i3 + 0] += 1;
-      value[i3 + 1] += 5;
-      value[i3 + 2] += 1;
+      if (colId < numCol && rowId < numRow) {
+        const i3 = (colId + rowId * numCol) * size;
+        value[i3 + 0] += 1;
+        value[i3 + 1] += 5;
+        value[i3 + 2] += 1;
+      }
     }
 
     const maxCount = Math.max(...value);
