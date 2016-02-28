@@ -21,6 +21,7 @@
 // the new layer, while the old layer is discarded.
 
 import assert from 'assert';
+import log from '../log';
 
 export function matchLayers(oldLayers, newLayers) {
   for (const newLayer of newLayers) {
@@ -31,45 +32,49 @@ export function matchLayers(oldLayers, newLayers) {
     // until all layers' state have been transferred
     if (oldLayer) {
       const {state, props} = oldLayer;
-      assert(state, 'Matching layer has lost state');
+      assert(state, 'Matching layer has no state');
       assert(oldLayer !== newLayer, 'Matching layer is same');
       // Copy state
       newLayer.state = state;
       // Keep a temporary ref to the old props, for prop comparison
       newLayer.oldProps = props;
       oldLayer.state = null;
-      // console.log(`matched layer ${newLayer.props.id} o->n`,
-      //   oldLayer, newLayer);
+      log(3, `matched layer ${newLayer.props.id} o->n`, oldLayer, newLayer);
     }
   }
+}
 
+// Note: Layers can't be initialized until gl context is available
+export function initializeNewLayers(layers, {gl}) {
+  for (const layer of layers) {
+    if (!layer.state) {
+      // New layer, initialize it's state
+      log(1, `initializing layer ${layer.props.id}`);
+      layer.initializeLayer({gl});
+    }
+  }
+}
+
+// Update the matched layers
+export function updateMatchedLayers(newLayers) {
+  for (const layer of newLayers) {
+    const {oldProps, props} = layer;
+    if (oldProps) {
+      layer.updateLayer(oldProps, props);
+      log(2, `updating layer ${layer.props.id}`);
+    }
+  }
+}
+
+// Update the old layers that were matched
+export function finalizeOldLayers(oldLayers) {
   // Unmatched layers still have state, it will be discarded
   for (const layer of oldLayers) {
     const {state} = layer;
     if (state) {
       layer.finalizeLayer();
       layer.state = null;
-      console.log(`finalized layer ${layer.props.id}`);
-    }
-  }
-}
-
-// Update the old layers that were matched
-export function updateOldLayers(newLayers) {
-  for (const layer of newLayers) {
-    const {oldProps, props} = layer;
-    if (oldProps) {
-      layer.updateLayer(oldProps, props);
-    }
-  }
-}
-
-// Layers can't be initialized until gl context is available
-export function initializeNewLayers(layers, {gl}) {
-  for (const layer of layers) {
-    if (!layer.state) {
-      // New layer, initialize it's state
-      layer.initializeLayer({gl});
+      log(1, `finalizing layer ${layer.props.id}`);
     }
   }
 }

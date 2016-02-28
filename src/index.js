@@ -22,7 +22,6 @@
 export {default as DeckGLOverlay} from './deckgl-overlay';
 
 export {default as Layer} from './layers/layer';
-export {default as InstancedLayer} from './layers/instanced-layer';
 export {default as MapLayer} from './layers/map-layer';
 
 export {default as HexagonLayer} from './layers/hexagon-layer';

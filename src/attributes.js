@@ -1,4 +1,5 @@
 /* eslint-disable guard-for-in */
+import log from './log';
 import assert from 'assert';
 
 
@@ -25,6 +26,8 @@ export default class Attributes {
     this.numInstances = 0;
     this.allocedInstances = -1;
     this.needsRedraw = true;
+    this.userData = {};
+    // For debugging sanity, prevent uninitialized members
     Object.seal(this);
   }
 
@@ -39,13 +42,8 @@ export default class Attributes {
     if (clearFlag) {
       this.needsRedraw = false;
     }
-    //log('NeedsRedraw', needsRedraw);
     return needsRedraw;
   }
-
-  // [Symbol.iterator]() {
-  //   return this.attributes
-  // }
 
   add(attributes, updaters) {
     const newAttributes = this._add(attributes, updaters, {});
@@ -125,7 +123,7 @@ export default class Attributes {
         const attribute = attributes[attributeName];
         const {size, isExternalBuffer, autoUpdate} = attribute;
         if (!isExternalBuffer && autoUpdate) {
-          log(`autoallocated ${allocCount} ${attributeName} for ${this.id}`);
+          log(2, `autoallocated ${allocCount} ${attributeName} for ${this.id}`);
           attribute.value = new Float32Array(size * allocCount);
           attribute.needsUpdate = true;
         }
@@ -144,10 +142,11 @@ export default class Attributes {
       const {update} = attribute;
       if (attribute.needsUpdate && attribute.autoUpdate) {
         if (update) {
-          log(`autoupdating ${numInstances} ${attributeName} for ${this.id}`);
+          log(2,
+            `autoupdating ${numInstances} ${attributeName} for ${this.id}`);
           update.call(context, attribute, numInstances);
         } else {
-          log(
+          log(2,
             `autocalculating ${numInstances} ${attributeName} for ${this.id}`);
           this._updateAttributeFromData(attribute, data, getValue);
         }
@@ -268,10 +267,4 @@ export default class Attributes {
       `Attribute updater for ${attributeName} missing update method`);
   }
 
-}
-
-function log(...args) {
-  /* global console */
-  /* eslint-disable no-console */
-  console.log(...args);
 }

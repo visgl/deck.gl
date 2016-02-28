@@ -24,8 +24,10 @@ import autobind from 'autobind-decorator';
 
 import WebGLRenderer from './webgl-renderer';
 import flatWorld from './flat-world';
-import {matchLayers, updateOldLayers, initializeNewLayers, layersNeedRedraw}
-  from './layers/layer-manager';
+import {
+  matchLayers, finalizeOldLayers, updateMatchedLayers, initializeNewLayers,
+  layersNeedRedraw
+} from './layers/layer-manager';
 
 const PROP_TYPES = {
   width: PropTypes.number.isRequired,
@@ -47,7 +49,8 @@ export default class DeckGLOverlay extends React.Component {
 
   componentWillReceiveProps(nextProps) {
     matchLayers(this.props.layers, nextProps.layers);
-    updateOldLayers(nextProps.layers);
+    finalizeOldLayers(this.props.layers);
+    updateMatchedLayers(nextProps.layers);
     this.initializeLayers(nextProps.layers);
   }
 

@@ -18,11 +18,12 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import InstancedLayer from './instanced-layer';
+import Layer from './layer';
+import log from '../log';
 import flatWorld from '../flat-world';
 import ViewportMercator from 'viewport-mercator-project';
 
-export default class MapLayer extends InstancedLayer {
+export default class MapLayer extends Layer {
   /**
    * @classdesc
    * MapLayer:
@@ -41,11 +42,11 @@ export default class MapLayer extends InstancedLayer {
   constructor(opts) {
     super(opts);
 
-    this.checkParam(opts.width, 'width');
-    this.checkParam(opts.height, 'height');
-    this.checkParam(opts.latitude, 'latitude');
-    this.checkParam(opts.longitude, 'longitude');
-    this.checkParam(opts.zoom, 'zoom');
+    this.checkProp(opts.width, 'width');
+    this.checkProp(opts.height, 'height');
+    this.checkProp(opts.latitude, 'latitude');
+    this.checkProp(opts.longitude, 'longitude');
+    this.checkProp(opts.zoom, 'zoom');
   }
 
   initializeState() {
@@ -85,7 +86,7 @@ export default class MapLayer extends InstancedLayer {
       viewport: [x, y, width, height],
       mapViewport: [longitude, latitude, zoom, flatWorld.size]
     });
-    console.log(this.state.viewport, latitude, longitude, zoom);
+    log(3, this.state.viewport, latitude, longitude, zoom);
   }
 
   // TODO deprecate: this funtion is only used for calculating radius now

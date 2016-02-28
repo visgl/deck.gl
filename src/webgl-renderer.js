@@ -18,7 +18,6 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-/* global console */
 import React, {PropTypes} from 'react';
 import ReactDOM from 'react-dom';
 import autobind from 'autobind-decorator';
@@ -57,9 +56,9 @@ const DEFAULT_PROPS = {
   id: 'webgl-canvas',
   onRendererInitialized: () => {},
   onInitializationFailed: () => {},
-  /* eslint-disable no-console */
-  onError: error => console.error('LumaGL Error: ', error),
-  /* eslint-enable no-console */
+  onError: error => {
+    throw error;
+  },
   onBeforeRenderFrame: () => {},
   onAfterRenderFrame: () => {},
   onBeforeRenderPickingScene: () => {},

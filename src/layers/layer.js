@@ -81,10 +81,10 @@ export default class Layer {
       assert(props.data[Symbol.iterator], 'data prop must have an iterator');
     }
 
-    this.checkParam(props.data || props.buffers);
-    this.checkParam(props.id);
-    this.checkParam(props.width);
-    this.checkParam(props.height);
+    this.checkProp(props.data, 'data');
+    this.checkProp(props.id, 'id');
+    this.checkProp(props.width, 'width');
+    this.checkProp(props.height, 'height');
 
     this.props = props;
     this.count = count++;
@@ -184,7 +184,7 @@ export default class Layer {
       ok = false;
     }
     if (!ok) {
-      console.error(`${this.props.id} Bad uniform ${uniform}`, value);
+      throw new Error(`${this.props.id} Bad uniform ${uniform}`, value);
     }
   }
 
@@ -447,9 +447,9 @@ export default class Layer {
     return () => gl.drawArrays(drawType, 0, state.numInstances);
   }
 
-  checkParam(property, propertyName) {
+  checkProp(property, propertyName) {
     if (!property) {
-      throw new Error(`${propertyName} is undefined in layer: ${this.id}`);
+      throw new Error(`Property ${propertyName} undefined in layer ${this.id}`);
     }
   }
 

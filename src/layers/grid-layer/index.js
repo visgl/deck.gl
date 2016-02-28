@@ -20,7 +20,6 @@
 
 import MapLayer from '../map-layer';
 import {Program} from 'luma.gl';
-import assert from 'assert';
 const glslify = require('glslify');
 
 const ATTRIBUTES = {
@@ -158,8 +157,7 @@ export default class GridLayer extends MapLayer {
       }
     }
 
-    const maxCount = Math.max(...value);
-    this.setUniforms({maxCount});
+    this.setUniforms({maxCount: Math.max(...value)});
   }
 
 }

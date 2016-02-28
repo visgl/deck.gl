@@ -5,6 +5,5 @@
     ["babel-plugin-transform-builtin-extend", {
       "globals": ["Array"]
     }]
-  ],
-  "compact": false
+  ]
 }
