@@ -80,11 +80,12 @@
     "react-dom": "^0.14.0"
   },
   "scripts": {
-    "build": "npm run compile && npm run build-script && npm run build-script-min",
-    "build-script-min": "uglifyjs -o dist/deckgl.min.js dist/deckgl.js",
+    "build": "npm run build-compile && npm run build-copy-glsl-files && npm run build-script && npm run build-script-min",
     "build-script": "browserify src/bundle.js -o dist/deckgl.js",
-    "compile": "babel src -d dist --source-maps inline",
-    "prepublish": "npm run compile",
+    "build-script-min": "uglifyjs -o dist/deckgl.min.js dist/deckgl.js",
+    "build-compile": "babel src -d dist --source-maps inline",
+    "build-copy-glsl-files": "rsync -a --prune-empty-dirs --include '*/' --include '*.glsl' --exclude '*' src/ dist/",
+    "prepublish": "npm run build",
     "lint": "uber-standard",
     "precommit": "npm run lint -s",
     "test": "babel-node --only=deck.gl/src,deck.gl/test,luma.gl test/node.js | faucet",
