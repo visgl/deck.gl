@@ -18,6 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+import path from 'path';
 import MapLayer from '../map-layer';
 import earcut from 'earcut';
 import flattenDeep from 'lodash.flattendeep';
@@ -67,8 +68,8 @@ export default class ChoroplethLayer extends MapLayer {
 
     const program = new Program(
       gl,
-      glslify('./vertex.glsl'),
-      glslify('./fragment.glsl'),
+      glslify(path.join(__dirname, 'vertex.glsl')),
+      glslify(path.join(__dirname, 'fragment.glsl')),
       'choropleth'
     );
 

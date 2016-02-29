@@ -57,8 +57,8 @@ export default class GridLayer extends MapLayer {
 
     const program = new Program(
       gl,
-      glslify('./vertex.glsl'),
-      glslify('./fragment.glsl'),
+      glslify(__dirname + '/vertex.glsl'),
+      glslify(__dirname + '/fragment.glsl'),
       'grid'
     );
 
