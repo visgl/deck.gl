@@ -14,7 +14,7 @@
     "type": "git",
     "url": "https://github.com/uber-common/deck.gl.git"
   },
-  "main": "src/index.js",
+  "main": "dist/index.js",
   "license": "MIT",
   "browserify": {
     "transform": [
@@ -80,9 +80,11 @@
     "react-dom": "^0.14.0"
   },
   "scripts": {
-    "build": "npm run build-dev && npm run build-min",
-    "build-min": "browserify src/bundle.js | uglifyjs > dist/deckgl.min.js",
-    "build-dev": "browserify src/bundle.js -o dist/deckgl.js",
+    "build": "npm run compile && npm run build-script && npm run build-script-min",
+    "build-script-min": "uglifyjs -o dist/deckgl.min.js dist/deckgl.js",
+    "build-script": "browserify src/bundle.js -o dist/deckgl.js",
+    "compile": "babel src -d dist --source-maps inline",
+    "prepublish": "npm run compile",
     "lint": "uber-standard",
     "precommit": "npm run lint -s",
     "test": "babel-node --only=deck.gl/src,deck.gl/test,luma.gl test/node.js | faucet",
