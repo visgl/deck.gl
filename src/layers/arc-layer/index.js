@@ -44,8 +44,8 @@ export default class ArcLayer extends MapLayer {
 
     const program = new Program(
       gl,
-      glslify(__dirname + '/vertex.glsl'),
-      glslify(__dirname + '/fragment.glsl'),
+      glslify('./vertex.glsl'),
+      glslify('./fragment.glsl'),
       'arc'
     );
 

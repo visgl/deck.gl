@@ -1,7 +1,6 @@
 {
   "parser": "babel-eslint",
   "rules": {
-    "no-path-concat": 0,
     "no-class-assign": 2,
     "no-const-assign": 2,
     "no-continue": 2,

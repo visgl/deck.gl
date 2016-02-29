@@ -101,7 +101,8 @@ export default class Layer {
       model: null,
       uniforms: {},
       needsRedraw: true,
-      numInstances: this.getNumInstances(),
+      // numInstances: this.getNumInstances(this.props),
+      self: this,
       dataChanged: true,
       superWasCalled: true
     });
@@ -205,18 +206,20 @@ export default class Layer {
   // - Auto-deduction for Classic Arrays via the built-in length attribute
   // - Auto-deduction via arrays
   // - Auto-deduction via iteration
-  getNumInstances() {
+  getNumInstances(props) {
+    props = props || this.props;
+
     // First check if the layer has set its own value
     if (this.state && this.state.numInstances !== undefined) {
       return this.state.numInstances;
     }
 
     // Check if app has set an explicit value
-    if (this.props.numInstances) {
-      return this.props.numInstances;
+    if (props.numInstances) {
+      return props.numInstances;
     }
 
-    const {data} = this.props;
+    const {data} = props;
 
     // Check if array length attribute is set on data
     if (data && data.length !== undefined) {
@@ -250,9 +253,6 @@ export default class Layer {
     if (numInstances !== this.state.numInstances) {
       this.state.dataChanged = true;
     }
-    this.setState({
-      numInstances
-    });
 
     // Setup update flags, used to prevent unnecessary calculations
     // TODO non-instanced layer cannot use .data.length for equal check
@@ -263,14 +263,14 @@ export default class Layer {
     }
   }
 
-  updateAttributes() {
+  updateAttributes(props) {
     const {attributes} = this.state;
-    const numInstances = this.getNumInstances(this.props);
+    const numInstances = this.getNumInstances(props);
 
     // Figure out data length
     attributes.update({
       numInstances,
-      bufferMap: this.props,
+      bufferMap: props,
       context: this,
       // Don't worry about non-attribute props
       ignoreUnknownAttributes: true
@@ -304,7 +304,7 @@ export default class Layer {
     // TODO - the app must be able to override
 
     // Add any subclass attributes
-    this.updateAttributes();
+    this.updateAttributes(this.props);
     this.updateUniforms();
 
     // Create a model for the layer
@@ -324,7 +324,7 @@ export default class Layer {
       // Let the subclass mark what is needed for update
       this.willReceiveProps(oldProps, newProps);
       // Run the attribute updaters
-      this.updateAttributes();
+      this.updateAttributes(newProps);
       // Update the uniforms
       this.updateUniforms();
     }
@@ -420,6 +420,7 @@ export default class Layer {
     // "Capture" state as it will be set to null when layer is disposed
     const {state} = this;
     const {primitive} = state;
+    const {self} = state;
     const drawType = primitive.drawType ?
       gl.get(primitive.drawType) : gl.POINTS;
 
@@ -431,12 +432,12 @@ export default class Layer {
 
       if (primitive.indices) {
         return () => extension.drawElementsInstancedANGLE(
-          drawType, numIndices, gl.UNSIGNED_SHORT, 0, state.numInstances
+          drawType, numIndices, gl.UNSIGNED_SHORT, 0, self.getNumInstances()
         );
       }
       // else if this.primitive does not have indices
       return () => extension.drawArraysInstancedANGLE(
-        drawType, 0, numVertices / 3, state.numInstances
+        drawType, 0, numVertices / 3, self.getNumInstances()
       );
     }
 
@@ -444,7 +445,7 @@ export default class Layer {
       return () => gl.drawElements(drawType, numIndices, gl.UNSIGNED_SHORT, 0);
     }
     // else if this.primitive does not have indices
-    return () => gl.drawArrays(drawType, 0, state.numInstances);
+    return () => gl.drawArrays(drawType, 0, self.getNumInstances());
   }
 
   checkProp(property, propertyName) {

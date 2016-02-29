@@ -23,7 +23,6 @@ export default class Attributes {
     this.id = id;
     this.attributes = {};
     this.instancedAttributes = {};
-    this.numInstances = 0;
     this.allocedInstances = -1;
     this.needsRedraw = true;
     this.userData = {};
@@ -78,11 +77,10 @@ export default class Attributes {
 
   // Ensure all attribute buffers are updated from props or data
   update({numInstances, buffers = {}, context, data, getValue, ...opts} = {}) {
-    this.numInstances = numInstances;
     this._checkBuffers(buffers, opts);
     this._setBuffers(buffers);
-    this._allocateBuffers();
-    this._updateBuffers({context, data, getValue});
+    this._allocateBuffers({numInstances});
+    this._updateBuffers({numInstances, context, data, getValue});
   }
 
   // Set the buffers for the supplied attributes
@@ -112,8 +110,8 @@ export default class Attributes {
   // Auto allocates buffers for attributes
   // Note: To reduce allocations, only grows buffers
   // Note: Only allocates buffers not set by setBuffer
-  _allocateBuffers() {
-    const {numInstances, allocedInstances, attributes} = this;
+  _allocateBuffers({numInstances}) {
+    const {allocedInstances, attributes} = this;
     assert(numInstances !== undefined);
 
     if (numInstances > allocedInstances) {
@@ -132,8 +130,8 @@ export default class Attributes {
     }
   }
 
-  _updateBuffers({data, getValue, context}) {
-    const {attributes, numInstances} = this;
+  _updateBuffers({numInstances, data, getValue, context}) {
+    const {attributes} = this;
 
     // If app supplied all attributes, no need to iterate over data
 
