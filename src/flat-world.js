@@ -130,7 +130,7 @@ const flatWorld = {
   getBlending() {
     return {
       enable: true,
-      blendFunc: ['SRC_ALPHA', 'ZERO'],
+      blendFunc: ['SRC_ALPHA', 'ONE_MINUS_SRC_ALPHA'],
       blendEquation: 'FUNC_ADD'
     };
   }
