@@ -36130,9 +36130,9 @@ var _createClass = function () { function defineProperties(target, props) { for 
 
 var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
 
-var _mapLayer = require('../map-layer');
+var _layer = require('../layer');
 
-var _mapLayer2 = _interopRequireDefault(_mapLayer);
+var _layer2 = _interopRequireDefault(_layer);
 
 var _luma = require('luma.gl');
 
@@ -36170,8 +36170,8 @@ var ATTRIBUTES = {
   positions: { size: 4, '0': 'x0', '1': 'y0', '2': 'x1', '3': 'y1' }
 };
 
-var ArcLayer = function (_MapLayer) {
-  _inherits(ArcLayer, _MapLayer);
+var ArcLayer = function (_Layer) {
+  _inherits(ArcLayer, _Layer);
 
   /**
    * @classdesc
@@ -36285,11 +36285,11 @@ var ArcLayer = function (_MapLayer) {
   }]);
 
   return ArcLayer;
-}(_mapLayer2.default);
+}(_layer2.default);
 
 exports.default = ArcLayer;
 
-},{"../map-layer":423,"luma.gl":251}],418:[function(require,module,exports){
+},{"../layer":422,"luma.gl":251}],418:[function(require,module,exports){
 (function (__dirname){
 'use strict';
 
@@ -36304,13 +36304,9 @@ var _createClass = function () { function defineProperties(target, props) { for 
 
 var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
 
-var _path = require('path');
+var _layer = require('../layer');
 
-var _path2 = _interopRequireDefault(_path);
-
-var _mapLayer = require('../map-layer');
-
-var _mapLayer2 = _interopRequireDefault(_mapLayer);
+var _layer2 = _interopRequireDefault(_layer);
 
 var _earcut = require('earcut');
 
@@ -36325,6 +36321,10 @@ var _geojsonNormalize = require('geojson-normalize');
 var _geojsonNormalize2 = _interopRequireDefault(_geojsonNormalize);
 
 var _luma = require('luma.gl');
+
+var _path = require('path');
+
+var _path2 = _interopRequireDefault(_path);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -36364,8 +36364,8 @@ var ATTRIBUTES = {
   // pickingColors: {size: 3, '0': 'pickRed', '1': 'pickGreen', '2': 'pickBlue'}
 };
 
-var ChoroplethLayer = function (_MapLayer) {
-  _inherits(ChoroplethLayer, _MapLayer);
+var ChoroplethLayer = function (_Layer) {
+  _inherits(ChoroplethLayer, _Layer);
 
   /**
    * @classdesc
@@ -36555,12 +36555,12 @@ var ChoroplethLayer = function (_MapLayer) {
   }]);
 
   return ChoroplethLayer;
-}(_mapLayer2.default);
+}(_layer2.default);
 
 exports.default = ChoroplethLayer;
 
 }).call(this,"/src/layers/choropleth-layer")
-},{"../map-layer":423,"earcut":195,"geojson-normalize":223,"lodash.flattendeep":241,"luma.gl":251,"path":276}],419:[function(require,module,exports){
+},{"../layer":422,"earcut":195,"geojson-normalize":223,"lodash.flattendeep":241,"luma.gl":251,"path":276}],419:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -36574,9 +36574,9 @@ var _get = function get(object, property, receiver) { if (object === null) objec
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _mapLayer = require('../map-layer');
+var _layer = require('../layer');
 
-var _mapLayer2 = _interopRequireDefault(_mapLayer);
+var _layer2 = _interopRequireDefault(_layer);
 
 var _luma = require('luma.gl');
 
@@ -36615,8 +36615,8 @@ var ATTRIBUTES = {
   colors: { size: 3, '0': 'red', '1': 'green', '2': 'blue' }
 };
 
-var GridLayer = function (_MapLayer) {
-  _inherits(GridLayer, _MapLayer);
+var GridLayer = function (_Layer) {
+  _inherits(GridLayer, _Layer);
 
   _createClass(GridLayer, null, [{
     key: 'attributes',
@@ -36797,11 +36797,11 @@ var GridLayer = function (_MapLayer) {
   }]);
 
   return GridLayer;
-}(_mapLayer2.default);
+}(_layer2.default);
 
 exports.default = GridLayer;
 
-},{"../map-layer":423,"luma.gl":251}],420:[function(require,module,exports){
+},{"../layer":422,"luma.gl":251}],420:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -36815,9 +36815,9 @@ var _createClass = function () { function defineProperties(target, props) { for 
 
 var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
 
-var _mapLayer = require('../map-layer');
+var _layer = require('../layer');
 
-var _mapLayer2 = _interopRequireDefault(_mapLayer);
+var _layer2 = _interopRequireDefault(_layer);
 
 var _luma = require('luma.gl');
 
@@ -36856,8 +36856,8 @@ var ATTRIBUTES = {
   colors: { size: 3, '0': 'red', '1': 'green', '2': 'blue' }
 };
 
-var HexagonLayer = function (_MapLayer) {
-  _inherits(HexagonLayer, _MapLayer);
+var HexagonLayer = function (_Layer) {
+  _inherits(HexagonLayer, _Layer);
 
   /**
    * @classdesc
@@ -37054,11 +37054,11 @@ var HexagonLayer = function (_MapLayer) {
   }]);
 
   return HexagonLayer;
-}(_mapLayer2.default);
+}(_layer2.default);
 
 exports.default = HexagonLayer;
 
-},{"../map-layer":423,"luma.gl":251}],421:[function(require,module,exports){
+},{"../layer":422,"luma.gl":251}],421:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -37340,6 +37340,18 @@ var _assert = require('assert');
 
 var _assert2 = _interopRequireDefault(_assert);
 
+var _flatWorld = require('../flat-world');
+
+var _flatWorld2 = _interopRequireDefault(_flatWorld);
+
+var _viewportMercatorProject = require('viewport-mercator-project');
+
+var _viewportMercatorProject2 = _interopRequireDefault(_viewportMercatorProject);
+
+var _log = require('../log');
+
+var _log2 = _interopRequireDefault(_log);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -37371,7 +37383,7 @@ var ATTRIBUTES = {
   pickingColors: { size: 3, '0': 'pickRed', '1': 'pickGreen', '2': 'pickBlue' }
 };
 
-var count = 0;
+var counter = 0;
 
 var Layer = function () {
   _createClass(Layer, null, [{
@@ -37408,8 +37420,14 @@ var Layer = function () {
     this.checkProp(props.width, 'width');
     this.checkProp(props.height, 'height');
 
+    this.checkProp(props.width, 'width');
+    this.checkProp(props.height, 'height');
+    this.checkProp(props.latitude, 'latitude');
+    this.checkProp(props.longitude, 'longitude');
+    this.checkProp(props.zoom, 'zoom');
+
     this.props = props;
-    this.count = count++;
+    this.count = counter++;
   }
   /* eslint-enable max-statements */
 
@@ -37432,6 +37450,8 @@ var Layer = function () {
         dataChanged: true,
         superWasCalled: true
       });
+
+      this.setViewport();
 
       var attributes = this.state.attributes;
       // All instanced layers get pickingColors attribute by default
@@ -37615,7 +37635,6 @@ var Layer = function () {
     // - Auto-deduction for ES6 containers that define a size member
     // - Auto-deduction for Classic Arrays via the built-in length attribute
     // - Auto-deduction via arrays
-    // - Auto-deduction via iteration
 
   }, {
     key: 'getNumInstances',
@@ -37635,15 +37654,28 @@ var Layer = function () {
       var _props = props;
       var data = _props.data;
 
-      // Check if array length attribute is set on data
+      var _ref2 = data || {};
 
-      if (data && data.length !== undefined) {
-        return data.length;
+      var count = _ref2.count;
+      var size = _ref2.size;
+      var length = _ref2.length;
+
+      // Check if ES6 collection "size" attribute is set
+
+      if (typeof count === 'function') {
+        return count();
       }
 
       // Check if ES6 collection "size" attribute is set
-      if (data && data.size !== undefined) {
+      if (size) {
         return data.size;
+      }
+
+      // Check if array length attribute is set on data
+      // Note: checking this last since some ES6 collections (Immutable)
+      // emit profuse warnings when trying to access .length
+      if (length) {
+        return data.length;
       }
 
       // TODO - slow, we probably should not support this unless
@@ -37670,6 +37702,10 @@ var Layer = function () {
         // Figure out data length
         this.state.dataChanged = true;
       }
+
+      var viewportChanged = newProps.width !== oldProps.width || newProps.height !== oldProps.height || newProps.latitude !== oldProps.latitude || newProps.longitude !== oldProps.longitude || newProps.zoom !== oldProps.zoom;
+
+      this.setState({ viewportChanged: viewportChanged });
     }
   }, {
     key: 'updateAttributes',
@@ -37702,8 +37738,8 @@ var Layer = function () {
 
   }, {
     key: 'initializeLayer',
-    value: function initializeLayer(_ref2) {
-      var gl = _ref2.gl;
+    value: function initializeLayer(_ref3) {
+      var gl = _ref3.gl;
 
       (0, _assert2.default)(gl);
       this.state = { gl: gl };
@@ -37740,6 +37776,10 @@ var Layer = function () {
 
       // Check if any props have changed
       if (this.shouldUpdate(oldProps, newProps)) {
+        if (this.state.viewportChanged) {
+          this.setViewport();
+        }
+
         // Let the subclass mark what is needed for update
         this.willReceiveProps(oldProps, newProps);
         // Run the attribute updaters
@@ -37846,8 +37886,8 @@ var Layer = function () {
     }
   }, {
     key: '_createModel',
-    value: function _createModel(_ref3) {
-      var gl = _ref3.gl;
+    value: function _createModel(_ref4) {
+      var gl = _ref4.gl;
       var _state2 = this.state;
       var program = _state2.program;
       var attributes = _state2.attributes;
@@ -37919,6 +37959,63 @@ var Layer = function () {
         throw new Error('Property ' + propertyName + ' undefined in layer ' + this.id);
       }
     }
+
+    // MAP LAYER FUNCTIONALITY
+
+  }, {
+    key: 'setViewport',
+    value: function setViewport() {
+      var _props2 = this.props;
+      var width = _props2.width;
+      var height = _props2.height;
+      var latitude = _props2.latitude;
+      var longitude = _props2.longitude;
+      var zoom = _props2.zoom;
+
+      this.setState({
+        viewport: new _flatWorld2.default.Viewport(width, height),
+        mercator: (0, _viewportMercatorProject2.default)({
+          width: width, height: height, latitude: latitude, longitude: longitude, zoom: zoom,
+          tileSize: 512
+        })
+      });
+      var _state$viewport = this.state.viewport;
+      var x = _state$viewport.x;
+      var y = _state$viewport.y;
+
+      this.setUniforms({
+        viewport: [x, y, width, height],
+        mapViewport: [longitude, latitude, zoom, _flatWorld2.default.size]
+      });
+      (0, _log2.default)(3, this.state.viewport, latitude, longitude, zoom);
+    }
+
+    // TODO deprecate: this funtion is only used for calculating radius now
+
+  }, {
+    key: 'project',
+    value: function project(latLng) {
+      var mercator = this.state.mercator;
+
+      var _mercator$project = mercator.project([latLng[0], latLng[1]]);
+
+      var _mercator$project2 = _slicedToArray(_mercator$project, 2);
+
+      var x = _mercator$project2[0];
+      var y = _mercator$project2[1];
+
+      return { x: x, y: y };
+    }
+
+    // TODO deprecate: this funtion is only used for calculating radius now
+
+  }, {
+    key: 'screenToSpace',
+    value: function screenToSpace(x, y) {
+      var viewport = this.state.viewport;
+
+      return viewport.screenToSpace(x, y);
+    }
   }]);
 
   return Layer;
@@ -37926,7 +38023,7 @@ var Layer = function () {
 
 exports.default = Layer;
 
-},{"../attributes":412,"../util":426,"assert":2,"lodash.isequal":244,"luma.gl":251}],423:[function(require,module,exports){
+},{"../attributes":412,"../flat-world":415,"../log":425,"../util":426,"assert":2,"lodash.isequal":244,"luma.gl":251,"viewport-mercator-project":411}],423:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -38110,9 +38207,9 @@ var _get = function get(object, property, receiver) { if (object === null) objec
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _mapLayer = require('../map-layer');
+var _layer = require('../layer');
 
-var _mapLayer2 = _interopRequireDefault(_mapLayer);
+var _layer2 = _interopRequireDefault(_layer);
 
 var _luma = require('luma.gl');
 
@@ -38151,8 +38248,8 @@ var ATTRIBUTES = {
   colors: { size: 3, '0': 'red', '1': 'green', '2': 'blue' }
 };
 
-var ScatterplotLayer = function (_MapLayer) {
-  _inherits(ScatterplotLayer, _MapLayer);
+var ScatterplotLayer = function (_Layer) {
+  _inherits(ScatterplotLayer, _Layer);
 
   _createClass(ScatterplotLayer, null, [{
     key: 'attributes',
@@ -38335,11 +38432,11 @@ var ScatterplotLayer = function (_MapLayer) {
   }]);
 
   return ScatterplotLayer;
-}(_mapLayer2.default);
+}(_layer2.default);
 
 exports.default = ScatterplotLayer;
 
-},{"../map-layer":423,"luma.gl":251}],425:[function(require,module,exports){
+},{"../layer":422,"luma.gl":251}],425:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {

@@ -25,6 +25,9 @@ import {areEqualShallow} from '../util';
 import {addIterator} from '../util';
 import isDeepEqual from 'lodash.isequal';
 import assert from 'assert';
+import flatWorld from '../flat-world';
+import ViewportMercator from 'viewport-mercator-project';
+import log from '../log';
 
 /*
  * @param {string} props.id - layer name
@@ -51,7 +54,7 @@ const ATTRIBUTES = {
   pickingColors: {size: 3, '0': 'pickRed', '1': 'pickGreen', '2': 'pickBlue'}
 };
 
-let count = 0;
+let counter = 0;
 
 export default class Layer {
 
@@ -86,8 +89,14 @@ export default class Layer {
     this.checkProp(props.width, 'width');
     this.checkProp(props.height, 'height');
 
+    this.checkProp(props.width, 'width');
+    this.checkProp(props.height, 'height');
+    this.checkProp(props.latitude, 'latitude');
+    this.checkProp(props.longitude, 'longitude');
+    this.checkProp(props.zoom, 'zoom');
+
     this.props = props;
-    this.count = count++;
+    this.count = counter++;
   }
   /* eslint-enable max-statements */
 
@@ -106,6 +115,8 @@ export default class Layer {
       dataChanged: true,
       superWasCalled: true
     });
+
+    this.setViewport();
 
     const {attributes} = this.state;
     // All instanced layers get pickingColors attribute by default
@@ -219,7 +230,6 @@ export default class Layer {
   // - Auto-deduction for ES6 containers that define a size member
   // - Auto-deduction for Classic Arrays via the built-in length attribute
   // - Auto-deduction via arrays
-  // - Auto-deduction via iteration
   getNumInstances(props) {
     props = props || this.props;
 
@@ -234,15 +244,23 @@ export default class Layer {
     }
 
     const {data} = props;
+    const {count, size, length} = data || {};
 
-    // Check if array length attribute is set on data
-    if (data && data.length !== undefined) {
-      return data.length;
+    // Check if ES6 collection "size" attribute is set
+    if (typeof count === 'function') {
+      return count();
     }
 
     // Check if ES6 collection "size" attribute is set
-    if (data && data.size !== undefined) {
+    if (size) {
       return data.size;
+    }
+
+    // Check if array length attribute is set on data
+    // Note: checking this last since some ES6 collections (Immutable)
+    // emit profuse warnings when trying to access .length
+    if (length) {
+      return data.length;
     }
 
     // TODO - slow, we probably should not support this unless
@@ -267,6 +285,15 @@ export default class Layer {
       // Figure out data length
       this.state.dataChanged = true;
     }
+
+    const viewportChanged =
+      newProps.width !== oldProps.width ||
+      newProps.height !== oldProps.height ||
+      newProps.latitude !== oldProps.latitude ||
+      newProps.longitude !== oldProps.longitude ||
+      newProps.zoom !== oldProps.zoom;
+
+    this.setState({viewportChanged});
   }
 
   updateAttributes(props) {
@@ -327,6 +354,10 @@ export default class Layer {
 
     // Check if any props have changed
     if (this.shouldUpdate(oldProps, newProps)) {
+      if (this.state.viewportChanged) {
+        this.setViewport();
+      }
+
       // Let the subclass mark what is needed for update
       this.willReceiveProps(oldProps, newProps);
       // Run the attribute updaters
@@ -458,6 +489,38 @@ export default class Layer {
     if (!property) {
       throw new Error(`Property ${propertyName} undefined in layer ${this.id}`);
     }
+  }
+
+  // MAP LAYER FUNCTIONALITY
+
+  setViewport() {
+    const {width, height, latitude, longitude, zoom} = this.props;
+    this.setState({
+      viewport: new flatWorld.Viewport(width, height),
+      mercator: ViewportMercator({
+        width, height, latitude, longitude, zoom,
+        tileSize: 512
+      })
+    });
+    const {x, y} = this.state.viewport;
+    this.setUniforms({
+      viewport: [x, y, width, height],
+      mapViewport: [longitude, latitude, zoom, flatWorld.size]
+    });
+    log(3, this.state.viewport, latitude, longitude, zoom);
+  }
+
+  // TODO deprecate: this funtion is only used for calculating radius now
+  project(latLng) {
+    const {mercator} = this.state;
+    const [x, y] = mercator.project([latLng[0], latLng[1]]);
+    return {x, y};
+  }
+
+  // TODO deprecate: this funtion is only used for calculating radius now
+  screenToSpace(x, y) {
+    const {viewport} = this.state;
+    return viewport.screenToSpace(x, y);
   }
 
 }

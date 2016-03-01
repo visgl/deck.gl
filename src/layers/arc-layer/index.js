@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import MapLayer from '../map-layer';
+import Layer from '../layer';
 import {Program} from 'luma.gl';
 const glslify = require('glslify');
 
@@ -26,7 +26,7 @@ const ATTRIBUTES = {
   positions: {size: 4, '0': 'x0', '1': 'y0', '2': 'x1', '3': 'y1'}
 };
 
-export default class ArcLayer extends MapLayer {
+export default class ArcLayer extends Layer {
   /**
    * @classdesc
    * ArcLayer

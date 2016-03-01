@@ -18,12 +18,12 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import path from 'path';
-import MapLayer from '../map-layer';
+import Layer from '../layer';
 import earcut from 'earcut';
 import flattenDeep from 'lodash.flattendeep';
 import normalize from 'geojson-normalize';
 import {Program} from 'luma.gl';
+import path from 'path';
 const glslify = require('glslify');
 
 const ATTRIBUTES = {
@@ -34,7 +34,7 @@ const ATTRIBUTES = {
   // pickingColors: {size: 3, '0': 'pickRed', '1': 'pickGreen', '2': 'pickBlue'}
 };
 
-export default class ChoroplethLayer extends MapLayer {
+export default class ChoroplethLayer extends Layer {
   /**
    * @classdesc
    * ChoroplethLayer
