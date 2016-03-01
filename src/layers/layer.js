@@ -43,8 +43,8 @@ const DEFAULT_PROPS = {
   isPickable: false,
   deepCompare: false,
   getValue: x => x,
-  onObjectHovered: () => {},
-  onObjectClicked: () => {}
+  onHover: () => {},
+  onClick: () => {}
 };
 
 const ATTRIBUTES = {
@@ -120,7 +120,17 @@ export default class Layer {
 
   shouldUpdate(newProps) {
     const oldProps = this.props;
-    return !areEqualShallow(newProps, oldProps);
+    // If any props have changed
+    if (!areEqualShallow(newProps, oldProps)) {
+      return true;
+    }
+    if (newProps.deepCompare && !isDeepEqual(newProps.data, oldProps.data)) {
+      // Support optional deep compare of data
+      // Note: this is quite inefficient, app should use buffer props instead
+      this.setState({dataChanged: true});
+      return true;
+    }
+    return false;
   }
 
   // Default implementation, all attributes will be updated
@@ -248,18 +258,10 @@ export default class Layer {
   // Internal Helpers
 
   checkProps(oldProps, newProps) {
-    // Figure out data length
-    const numInstances = this.getNumInstances(newProps);
-    if (numInstances !== this.state.numInstances) {
+    // Note: dataChanged might already be set
+    if (newProps.data !== oldProps.data) {
+      // Figure out data length
       this.state.dataChanged = true;
-    }
-
-    // Setup update flags, used to prevent unnecessary calculations
-    // TODO non-instanced layer cannot use .data.length for equal check
-    if (newProps.deepCompare) {
-      this.state.dataChanged = !isDeepEqual(newProps.data, oldProps.data);
-    } else {
-      this.state.dataChanged = newProps.data.length !== oldProps.data.length;
     }
   }
 
