@@ -1,7 +1,7 @@
 {
   "name": "deck.gl",
   "description": "A WebGL overlay suite consists of multiple layers",
-  "version": "2.0.7",
+  "version": "2.0.8",
   "keywords": [
     "webgl",
     "visualization",
