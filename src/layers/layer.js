@@ -244,22 +244,21 @@ export default class Layer {
     }
 
     const {data} = props;
-    const {count, size, length} = data || {};
 
     // Check if ES6 collection "size" attribute is set
-    if (typeof count === 'function') {
-      return count();
+    if (data && typeof data.count === 'function') {
+      return data.count();
     }
 
     // Check if ES6 collection "size" attribute is set
-    if (size) {
+    if (data && data.size) {
       return data.size;
     }
 
     // Check if array length attribute is set on data
     // Note: checking this last since some ES6 collections (Immutable)
     // emit profuse warnings when trying to access .length
-    if (length) {
+    if (data && data.length) {
       return data.length;
     }
 

@@ -37654,27 +37654,21 @@ var Layer = function () {
       var _props = props;
       var data = _props.data;
 
-      var _ref2 = data || {};
-
-      var count = _ref2.count;
-      var size = _ref2.size;
-      var length = _ref2.length;
-
       // Check if ES6 collection "size" attribute is set
 
-      if (typeof count === 'function') {
-        return count();
+      if (data && typeof data.count === 'function') {
+        return data.count();
       }
 
       // Check if ES6 collection "size" attribute is set
-      if (size) {
+      if (data && data.size) {
         return data.size;
       }
 
       // Check if array length attribute is set on data
       // Note: checking this last since some ES6 collections (Immutable)
       // emit profuse warnings when trying to access .length
-      if (length) {
+      if (data && data.length) {
         return data.length;
       }
 
@@ -37738,8 +37732,8 @@ var Layer = function () {
 
   }, {
     key: 'initializeLayer',
-    value: function initializeLayer(_ref3) {
-      var gl = _ref3.gl;
+    value: function initializeLayer(_ref2) {
+      var gl = _ref2.gl;
 
       (0, _assert2.default)(gl);
       this.state = { gl: gl };
@@ -37886,8 +37880,8 @@ var Layer = function () {
     }
   }, {
     key: '_createModel',
-    value: function _createModel(_ref4) {
-      var gl = _ref4.gl;
+    value: function _createModel(_ref3) {
+      var gl = _ref3.gl;
       var _state2 = this.state;
       var program = _state2.program;
       var attributes = _state2.attributes;
