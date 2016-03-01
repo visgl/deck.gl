@@ -194,7 +194,12 @@ export default class Layer {
       ok = false;
     }
     if (!ok) {
-      throw new Error(`${this.props.id} Bad uniform ${uniform}`, value);
+      /* eslint-disable no-console */
+      /* global console */
+      // Value could be unprintable so write the object on console
+      console.error(`${this.props.id} Bad uniform ${uniform}`, value);
+      /* eslint-enable no-console */
+      throw new Error(`${this.props.id} Bad uniform ${uniform}`);
     }
   }
 
