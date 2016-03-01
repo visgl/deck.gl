@@ -118,8 +118,7 @@ export default class Layer {
   didMount() {
   }
 
-  shouldUpdate(newProps) {
-    const oldProps = this.props;
+  shouldUpdate(oldProps, newProps) {
     // If any props have changed
     if (!areEqualShallow(newProps, oldProps)) {
       return true;

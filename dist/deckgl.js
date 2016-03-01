@@ -35225,7 +35225,6 @@ var Attributes = function () {
     this.id = id;
     this.attributes = {};
     this.instancedAttributes = {};
-    this.numInstances = 0;
     this.allocedInstances = -1;
     this.needsRedraw = true;
     this.userData = {};
@@ -35309,11 +35308,10 @@ var Attributes = function () {
 
       var opts = _objectWithoutProperties(_ref3, ['numInstances', 'buffers', 'context', 'data', 'getValue']);
 
-      this.numInstances = numInstances;
       this._checkBuffers(buffers, opts);
       this._setBuffers(buffers);
-      this._allocateBuffers();
-      this._updateBuffers({ context: context, data: data, getValue: getValue });
+      this._allocateBuffers({ numInstances: numInstances });
+      this._updateBuffers({ numInstances: numInstances, context: context, data: data, getValue: getValue });
     }
 
     // Set the buffers for the supplied attributes
@@ -35350,8 +35348,8 @@ var Attributes = function () {
 
   }, {
     key: '_allocateBuffers',
-    value: function _allocateBuffers() {
-      var numInstances = this.numInstances;
+    value: function _allocateBuffers(_ref4) {
+      var numInstances = _ref4.numInstances;
       var allocedInstances = this.allocedInstances;
       var attributes = this.attributes;
 
@@ -35377,12 +35375,12 @@ var Attributes = function () {
     }
   }, {
     key: '_updateBuffers',
-    value: function _updateBuffers(_ref4) {
-      var data = _ref4.data;
-      var getValue = _ref4.getValue;
-      var context = _ref4.context;
+    value: function _updateBuffers(_ref5) {
+      var numInstances = _ref5.numInstances;
+      var data = _ref5.data;
+      var getValue = _ref5.getValue;
+      var context = _ref5.context;
       var attributes = this.attributes;
-      var numInstances = this.numInstances;
 
       // If app supplied all attributes, no need to iterate over data
 
@@ -37365,8 +37363,8 @@ var DEFAULT_PROPS = {
   getValue: function getValue(x) {
     return x;
   },
-  onObjectHovered: function onObjectHovered() {},
-  onObjectClicked: function onObjectClicked() {}
+  onHover: function onHover() {},
+  onClick: function onClick() {}
 };
 
 var ATTRIBUTES = {
@@ -37429,7 +37427,8 @@ var Layer = function () {
         model: null,
         uniforms: {},
         needsRedraw: true,
-        numInstances: this.getNumInstances(),
+        // numInstances: this.getNumInstances(this.props),
+        self: this,
         dataChanged: true,
         superWasCalled: true
       });
@@ -37449,9 +37448,18 @@ var Layer = function () {
     value: function didMount() {}
   }, {
     key: 'shouldUpdate',
-    value: function shouldUpdate(newProps) {
-      var oldProps = this.props;
-      return !(0, _util.areEqualShallow)(newProps, oldProps);
+    value: function shouldUpdate(oldProps, newProps) {
+      // If any props have changed
+      if (!(0, _util.areEqualShallow)(newProps, oldProps)) {
+        return true;
+      }
+      if (newProps.deepCompare && !(0, _lodash2.default)(newProps.data, oldProps.data)) {
+        // Support optional deep compare of data
+        // Note: this is quite inefficient, app should use buffer props instead
+        this.setState({ dataChanged: true });
+        return true;
+      }
+      return false;
     }
 
     // Default implementation, all attributes will be updated
@@ -37606,18 +37614,21 @@ var Layer = function () {
 
   }, {
     key: 'getNumInstances',
-    value: function getNumInstances() {
+    value: function getNumInstances(props) {
+      props = props || this.props;
+
       // First check if the layer has set its own value
       if (this.state && this.state.numInstances !== undefined) {
         return this.state.numInstances;
       }
 
       // Check if app has set an explicit value
-      if (this.props.numInstances) {
-        return this.props.numInstances;
+      if (props.numInstances) {
+        return props.numInstances;
       }
 
-      var data = this.props.data;
+      var _props = props;
+      var data = _props.data;
 
       // Check if array length attribute is set on data
 
@@ -37649,34 +37660,23 @@ var Layer = function () {
   }, {
     key: 'checkProps',
     value: function checkProps(oldProps, newProps) {
-      // Figure out data length
-      var numInstances = this.getNumInstances(newProps);
-      if (numInstances !== this.state.numInstances) {
+      // Note: dataChanged might already be set
+      if (newProps.data !== oldProps.data) {
+        // Figure out data length
         this.state.dataChanged = true;
-      }
-      this.setState({
-        numInstances: numInstances
-      });
-
-      // Setup update flags, used to prevent unnecessary calculations
-      // TODO non-instanced layer cannot use .data.length for equal check
-      if (newProps.deepCompare) {
-        this.state.dataChanged = !(0, _lodash2.default)(newProps.data, oldProps.data);
-      } else {
-        this.state.dataChanged = newProps.data.length !== oldProps.data.length;
       }
     }
   }, {
     key: 'updateAttributes',
-    value: function updateAttributes() {
+    value: function updateAttributes(props) {
       var attributes = this.state.attributes;
 
-      var numInstances = this.getNumInstances(this.props);
+      var numInstances = this.getNumInstances(props);
 
       // Figure out data length
       attributes.update({
         numInstances: numInstances,
-        bufferMap: this.props,
+        bufferMap: props,
         context: this,
         // Don't worry about non-attribute props
         ignoreUnknownAttributes: true
@@ -37715,7 +37715,7 @@ var Layer = function () {
       // TODO - the app must be able to override
 
       // Add any subclass attributes
-      this.updateAttributes();
+      this.updateAttributes(this.props);
       this.updateUniforms();
 
       // Create a model for the layer
@@ -37738,7 +37738,7 @@ var Layer = function () {
         // Let the subclass mark what is needed for update
         this.willReceiveProps(oldProps, newProps);
         // Run the attribute updaters
-        this.updateAttributes();
+        this.updateAttributes(newProps);
         // Update the uniforms
         this.updateUniforms();
       }
@@ -37868,6 +37868,7 @@ var Layer = function () {
       // "Capture" state as it will be set to null when layer is disposed
       var state = this.state;
       var primitive = state.primitive;
+      var self = state.self;
 
       var drawType = primitive.drawType ? gl.get(primitive.drawType) : gl.POINTS;
 
@@ -37881,14 +37882,14 @@ var Layer = function () {
           if (primitive.indices) {
             return {
               v: function v() {
-                return extension.drawElementsInstancedANGLE(drawType, numIndices, gl.UNSIGNED_SHORT, 0, state.numInstances);
+                return extension.drawElementsInstancedANGLE(drawType, numIndices, gl.UNSIGNED_SHORT, 0, self.getNumInstances());
               }
             };
           }
           // else if this.primitive does not have indices
           return {
             v: function v() {
-              return extension.drawArraysInstancedANGLE(drawType, 0, numVertices / 3, state.numInstances);
+              return extension.drawArraysInstancedANGLE(drawType, 0, numVertices / 3, self.getNumInstances());
             }
           };
         }();
@@ -37903,7 +37904,7 @@ var Layer = function () {
       }
       // else if this.primitive does not have indices
       return function () {
-        return gl.drawArrays(drawType, 0, state.numInstances);
+        return gl.drawArrays(drawType, 0, self.getNumInstances());
       };
     }
   }, {
