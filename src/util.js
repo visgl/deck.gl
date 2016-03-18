@@ -17,19 +17,31 @@ function* valueIterator(obj) {
 }
 
 function isPlainObject(o) {
-  return typeof o === 'object' && o.constructor === Object;
+  return o !== null && typeof o === 'object' && o.constructor === Object;
 }
 
 // Shallow compare
-
 export function areEqualShallow(a, b) {
+
+  if (a === b) {
+    return true;
+  }
+
+  if (typeof a !== 'object' || a === null || typeof b !== 'object' || b === null) {
+    return false;
+  }
+
+  if (Object.keys(a).length !== Object.keys(b).length) {
+    return false;
+  }
+
   for (const key in a) {
     if (!(key in b) || a[key] !== b[key]) {
       return false;
     }
   }
   for (const key in b) {
-    if (!(key in a) || a[key] !== b[key]) {
+    if (!(key in a)) {
       return false;
     }
   }

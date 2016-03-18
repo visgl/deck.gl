@@ -132,6 +132,10 @@ export default class Layer {
   shouldUpdate(oldProps, newProps) {
     // If any props have changed
     if (!areEqualShallow(newProps, oldProps)) {
+
+      if (newProps.data.length !== oldProps.data.length) {
+        this.setState({dataChanged: true});
+      }
       return true;
     }
     if (newProps.deepCompare && !isDeepEqual(newProps.data, oldProps.data)) {
@@ -146,7 +150,9 @@ export default class Layer {
   // Default implementation, all attributes will be updated
   willReceiveProps(newProps) {
     const {attributes} = this.state;
-    attributes.invalidateAll();
+    if (this.state.dataChanged){
+      attributes.invalidateAll();
+    }
   }
 
   // gl context still available
@@ -298,7 +304,6 @@ export default class Layer {
   updateAttributes(props) {
     const {attributes} = this.state;
     const numInstances = this.getNumInstances(props);
-
     // Figure out data length
     attributes.update({
       numInstances,
@@ -456,7 +461,7 @@ export default class Layer {
     // "Capture" state as it will be set to null when layer is disposed
     const {state} = this;
     const {primitive} = state;
-    const {self} = state;
+
     const drawType = primitive.drawType ?
       gl.get(primitive.drawType) : gl.POINTS;
 
@@ -468,12 +473,12 @@ export default class Layer {
 
       if (primitive.indices) {
         return () => extension.drawElementsInstancedANGLE(
-          drawType, numIndices, gl.UNSIGNED_SHORT, 0, self.getNumInstances()
+          drawType, numIndices, gl.UNSIGNED_SHORT, 0, state.layer.getNumInstances()
         );
       }
       // else if this.primitive does not have indices
       return () => extension.drawArraysInstancedANGLE(
-        drawType, 0, numVertices / 3, self.getNumInstances()
+        drawType, 0, numVertices / 3, state.layer.getNumInstances()
       );
     }
 
@@ -481,7 +486,7 @@ export default class Layer {
       return () => gl.drawElements(drawType, numIndices, gl.UNSIGNED_SHORT, 0);
     }
     // else if this.primitive does not have indices
-    return () => gl.drawArrays(drawType, 0, self.getNumInstances());
+    return () => gl.drawArrays(drawType, 0, state.layer.getNumInstances());
   }
 
   checkProp(property, propertyName) {
