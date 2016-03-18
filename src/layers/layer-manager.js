@@ -36,6 +36,7 @@ export function matchLayers(oldLayers, newLayers) {
       assert(oldLayer !== newLayer, 'Matching layer is same');
       // Copy state
       newLayer.state = state;
+      state.layer = newLayer;
       // Keep a temporary ref to the old props, for prop comparison
       newLayer.oldProps = props;
       oldLayer.state = null;
@@ -51,6 +52,7 @@ export function initializeNewLayers(layers, {gl}) {
       // New layer, initialize it's state
       log(1, `initializing layer ${layer.props.id}`);
       layer.initializeLayer({gl});
+      layer.state.layer = layer;
     }
   }
 }
