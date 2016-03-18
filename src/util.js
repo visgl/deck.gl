@@ -17,7 +17,7 @@ function* valueIterator(obj) {
 }
 
 function isPlainObject(o) {
-  return !isNull(o) && typeof o === 'object' && o.constructor === Object;
+  return o !== null && typeof o === 'object' && o.constructor === Object;
 }
 
 // Shallow compare
