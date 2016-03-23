@@ -126,7 +126,8 @@ export default class WebGLRenderer extends React.Component {
     const camera = new PerspectiveCamera(this.props.camera);
 
     // TODO - remove program parameter from scene, or move it into options
-    const scene = new Scene(gl, null, camera, {
+    const scene = new Scene(gl, {
+      camera,
       lights: this.props.lights,
       backgroundColor: {r: 0, g: 0, b: 0, a: 0}
     });
@@ -266,7 +267,6 @@ export default class WebGLRenderer extends React.Component {
     return (
       <canvas
         id={ id }
-        ref={ 'webgl-renderer-overlay' }
         width={ width * pixelRatio || 1 }
         height={ height * pixelRatio || 1 }
         style={ {width, height} }/>

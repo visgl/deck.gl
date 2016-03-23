@@ -14,7 +14,7 @@
     "type": "git",
     "url": "https://github.com/uber-common/deck.gl.git"
   },
-  "main": "dist/index.js",
+  "main": "src/index.js",
   "license": "MIT",
   "browserify": {
     "transform": [
@@ -33,6 +33,9 @@
   },
   "dependencies": {
     "autobind-decorator": "^1.3.3",
+    "babel-cli": "^6.3.15",
+    "babel-eslint": "^4.1.6",
+    "babelify": "^7.2.0",
     "babel-plugin-transform-builtin-extend": "1.1.0",
     "babel-plugin-transform-decorators-legacy": "^1.3.4",
     "babel-preset-es2015": "^6.3.13",
@@ -46,15 +49,12 @@
     "lodash.isfunction": "^3.0.6",
     "lodash.throttle": "^3.0.4",
     "lodash.where": "^3.1.0",
-    "luma.gl": "git://github.com/uber-common/luma.gl#v0.0.2",
+    "luma.gl": "git://github.com/uber-common/luma.gl#v0.0.3",
     "viewport-mercator-project": "^2.0.1"
   },
   "devDependencies": {
-    "babel-cli": "^6.3.15",
-    "babel-eslint": "^4.1.6",
-    "babel-polyfill": "^6.1.19",
-    "babelify": "^7.2.0",
     "budo": "^8.0.3",
+    "babel-polyfill": "^6.1.19",
     "d3-request": "^0.2.2",
     "envify": "^3.4.0",
     "eslint": "^1.10.3",
