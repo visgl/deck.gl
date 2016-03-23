@@ -36368,7 +36368,7 @@ var flatWorld = {
   getBlending: function getBlending() {
     return {
       enable: true,
-      blendFunc: ['SRC_ALPHA', 'ZERO'],
+      blendFunc: ['SRC_ALPHA', 'ONE_MINUS_SRC_ALPHA'],
       blendEquation: 'FUNC_ADD'
     };
   }
@@ -37464,6 +37464,7 @@ function matchLayers(oldLayers, newLayers) {
         (0, _assert2.default)(oldLayer !== newLayer, 'Matching layer is same');
         // Copy state
         newLayer.state = state;
+        state.layer = newLayer;
         // Keep a temporary ref to the old props, for prop comparison
         newLayer.oldProps = props;
         oldLayer.state = null;
@@ -37501,6 +37502,7 @@ function initializeNewLayers(layers, _ref) {
         // New layer, initialize it's state
         (0, _log2.default)(1, 'initializing layer ' + layer.props.id);
         layer.initializeLayer({ gl: gl });
+        layer.state.layer = layer;
       }
     }
   } catch (err) {
@@ -37812,6 +37814,10 @@ var Layer = function () {
     value: function shouldUpdate(oldProps, newProps) {
       // If any props have changed
       if (!(0, _util.areEqualShallow)(newProps, oldProps)) {
+
+        if (newProps.data.length !== oldProps.data.length) {
+          this.setState({ dataChanged: true });
+        }
         return true;
       }
       if (newProps.deepCompare && !(0, _lodash2.default)(newProps.data, oldProps.data)) {
@@ -37830,7 +37836,9 @@ var Layer = function () {
     value: function willReceiveProps(newProps) {
       var attributes = this.state.attributes;
 
-      attributes.invalidateAll();
+      if (this.state.dataChanged) {
+        attributes.invalidateAll();
+      }
     }
 
     // gl context still available
@@ -38048,7 +38056,6 @@ var Layer = function () {
       var attributes = this.state.attributes;
 
       var numInstances = this.getNumInstances(props);
-
       // Figure out data length
       attributes.update({
         numInstances: numInstances,
@@ -38140,6 +38147,7 @@ var Layer = function () {
     value: function calculatePickingColors(attribute, numInstances) {
       var value = attribute.value;
       var size = attribute.size;
+      // add 1 to index to seperate from no selection
 
       for (var i = 0; i < numInstances; i++) {
         value[i * size + 0] = (i + 1) % 256;
@@ -38157,8 +38165,9 @@ var Layer = function () {
       var i1 = _color[0];
       var i2 = _color[1];
       var i3 = _color[2];
+      // 1 was added to seperate from no selection
 
-      var index = i1 + i2 * 256 + i3 * 65536;
+      var index = i1 + i2 * 256 + i3 * 65536 - 1;
       return index;
     }
   }, {
@@ -38248,7 +38257,7 @@ var Layer = function () {
       // "Capture" state as it will be set to null when layer is disposed
       var state = this.state;
       var primitive = state.primitive;
-      var self = state.self;
+
 
       var drawType = primitive.drawType ? gl.get(primitive.drawType) : gl.POINTS;
 
@@ -38262,14 +38271,14 @@ var Layer = function () {
           if (primitive.indices) {
             return {
               v: function v() {
-                return extension.drawElementsInstancedANGLE(drawType, numIndices, gl.UNSIGNED_SHORT, 0, self.getNumInstances());
+                return extension.drawElementsInstancedANGLE(drawType, numIndices, gl.UNSIGNED_SHORT, 0, state.layer.getNumInstances());
               }
             };
           }
           // else if this.primitive does not have indices
           return {
             v: function v() {
-              return extension.drawArraysInstancedANGLE(drawType, 0, numVertices / 3, self.getNumInstances());
+              return extension.drawArraysInstancedANGLE(drawType, 0, numVertices / 3, state.layer.getNumInstances());
             }
           };
         }();
@@ -38284,7 +38293,7 @@ var Layer = function () {
       }
       // else if this.primitive does not have indices
       return function () {
-        return gl.drawArrays(drawType, 0, self.getNumInstances());
+        return gl.drawArrays(drawType, 0, state.layer.getNumInstances());
       };
     }
   }, {
@@ -38908,19 +38917,31 @@ function valueIterator(obj) {
 }
 
 function isPlainObject(o) {
-  return (typeof o === 'undefined' ? 'undefined' : _typeof(o)) === 'object' && o.constructor === Object;
+  return o !== null && (typeof o === 'undefined' ? 'undefined' : _typeof(o)) === 'object' && o.constructor === Object;
 }
 
 // Shallow compare
-
 function areEqualShallow(a, b) {
+
+  if (a === b) {
+    return true;
+  }
+
+  if ((typeof a === 'undefined' ? 'undefined' : _typeof(a)) !== 'object' || a === null || (typeof b === 'undefined' ? 'undefined' : _typeof(b)) !== 'object' || b === null) {
+    return false;
+  }
+
+  if (Object.keys(a).length !== Object.keys(b).length) {
+    return false;
+  }
+
   for (var _key in a) {
     if (!(_key in b) || a[_key] !== b[_key]) {
       return false;
     }
   }
   for (var _key2 in b) {
-    if (!(_key2 in a) || a[_key2] !== b[_key2]) {
+    if (!(_key2 in a)) {
       return false;
     }
   }
