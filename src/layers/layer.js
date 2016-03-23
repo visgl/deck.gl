@@ -382,6 +382,7 @@ export default class Layer {
 
   calculatePickingColors(attribute, numInstances) {
     const {value, size} = attribute;
+    // add 1 to index to seperate from no selection
     for (let i = 0; i < numInstances; i++) {
       value[i * size + 0] = (i + 1) % 256;
       value[i * size + 1] = Math.floor((i + 1) / 256) % 256;
@@ -392,7 +393,8 @@ export default class Layer {
   decodePickingColor(color) {
     assert(color instanceof Uint8Array);
     const [i1, i2, i3] = color;
-    const index = i1 + i2 * 256 + i3 * 65536;
+    // 1 was added to seperate from no selection
+    const index = i1 + i2 * 256 + i3 * 65536 - 1;
     return index;
   }
 
