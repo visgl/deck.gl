@@ -8,7 +8,7 @@ import {
   DeckGLOverlay
 } from '../src';
 
-test('Rendering DeckGlGLOverlay', t => {
+test('Rendering DeckGLOverlay', t => {
   const component = utils.renderComponent(
     <DeckGLOverlay width={100} height={100} layers={[]} />
   );

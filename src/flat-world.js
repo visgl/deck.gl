@@ -57,7 +57,7 @@ const flatWorld = {
       this.height = size;
     }
 
-    screenToSpace(x, y) {
+    screenToSpace({x, y}) {
       return {
         x: ((x - this.x) / this.width - 0.5) * flatWorld.size * 2,
         y: ((y - this.y) / this.height - 0.5) * flatWorld.size * 2 * -1,

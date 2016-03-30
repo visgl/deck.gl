@@ -32,15 +32,16 @@
     ]
   },
   "dependencies": {
+    "@uber/probe": "^2.0.0",
     "autobind-decorator": "^1.3.3",
     "babel-cli": "^6.3.15",
     "babel-eslint": "^4.1.6",
-    "babelify": "^7.2.0",
     "babel-plugin-transform-builtin-extend": "1.1.0",
     "babel-plugin-transform-decorators-legacy": "^1.3.4",
     "babel-preset-es2015": "^6.3.13",
     "babel-preset-react": "^6.3.13",
     "babel-preset-stage-2": "^6.3.13",
+    "babelify": "^7.2.0",
     "earcut": "^2.0.6",
     "geojson-normalize": "0.0.1",
     "global": "^4.3.0",
@@ -49,7 +50,7 @@
     "lodash.isfunction": "^3.0.6",
     "lodash.throttle": "^3.0.4",
     "lodash.where": "^3.1.0",
-    "luma.gl": "git://github.com/uber-common/luma.gl#v0.0.3",
+    "luma.gl": "git://github.com/uber-common/luma.gl#v0.1.1",
     "viewport-mercator-project": "^2.0.1"
   },
   "devDependencies": {
@@ -60,6 +61,7 @@
     "eslint": "^1.10.3",
     "eslint-plugin-react": "^3.13.1",
     "faucet": "0.0.1",
+    "electron-prebuilt": "^0.37.2",
     "glslify": "^5.0.0",
     "immutable": "^3.7.5",
     "r-dom": "^2.1.0",
@@ -70,8 +72,8 @@
     "react-test-utils": "^3.0.1",
     "redux": "^3.0.4",
     "tap-browser-color": "^0.1.2",
-    "tape": "^4.0.0",
     "tape-catch": "^1.0.4",
+    "testron": "^1.2.0",
     "uber-standard": "^5.1.0",
     "uglify-js": "^2.6.1"
   },
@@ -88,9 +90,11 @@
     "build-script-min": "uglifyjs -o dist/deckgl.min.js dist/deckgl.js",
     "prepublish": "npm run build",
     "lint": "uber-standard",
-    "precommit": "npm run lint -s",
-    "test": "babel-node --only=deck.gl/src,deck.gl/test,luma.gl test/node.js | faucet",
+    "precommit": "npm run lint -s && npm run test && npm run build",
+    "test": "npm run test-electron",
+    "test-nodes": "babel-node test/node.js | faucet",
     "test-browser": "budo test/browser.js:build/test-bundle.js --dir test -t babelify --live --open --port 3001 --watch-glob '**/*.{html,css,scss,js}'",
+    "test-electron": "browserify test/electron.js | testron | faucet",
     "start": "budo example/main.js:example/bundle.js -t babelify --live --open --port 3000 --watch-glob '**/*.{html,css,js}'"
   }
 }

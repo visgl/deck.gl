@@ -21,8 +21,7 @@
 /* eslint-disable block-scoped-var */
 export {default as DeckGLOverlay} from './deckgl-overlay';
 
-export {default as Layer} from './layers/layer';
-export {default as MapLayer} from './layers/map-layer';
+export {default as Layer} from './layer';
 
 export {default as HexagonLayer} from './layers/hexagon-layer';
 export {default as ChoroplethLayer} from './layers/choropleth-layer';

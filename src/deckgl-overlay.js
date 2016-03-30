@@ -27,7 +27,7 @@ import flatWorld from './flat-world';
 import {
   matchLayers, finalizeOldLayers, updateMatchedLayers, initializeNewLayers,
   layersNeedRedraw
-} from './layers/layer-manager';
+} from './layer-manager';
 
 const PROP_TYPES = {
   width: PropTypes.number.isRequired,
@@ -73,7 +73,7 @@ export default class DeckGLOverlay extends React.Component {
     for (const layer of layers) {
       // Save layer on model for picking purposes
       // TODO - store on model.userData rather than directly on model
-      layer.state.model.layer = layer;
+      layer.state.model.userData.layer = layer;
       // Add model to scene
       scene.add(layer.state.model);
     }
@@ -90,7 +90,7 @@ export default class DeckGLOverlay extends React.Component {
   _onClick(info) {
     const {picked} = info;
     for (const item of picked) {
-      if (item.model.layer.onClick({color: item.color, ...info})) {
+      if (item.model.userData.layer.onClick({color: item.color, ...info})) {
         return;
       }
     }
@@ -101,7 +101,7 @@ export default class DeckGLOverlay extends React.Component {
   _onMouseMove(info) {
     const {picked} = info;
     for (const item of picked) {
-      if (item.model.layer.onHover({color: item.color, ...info})) {
+      if (item.model.userData.layer.onHover({color: item.color, ...info})) {
         return;
       }
     }

@@ -21,8 +21,7 @@
 import React, {PropTypes} from 'react';
 import ReactDOM from 'react-dom';
 import autobind from 'autobind-decorator';
-import {createGLContext, PerspectiveCamera, Scene, Events, Fx, Framebuffer}
-  from 'luma.gl';
+import {createGLContext, PerspectiveCamera, Scene, Events, Fx} from 'luma.gl';
 import throttle from 'lodash.throttle';
 
 const PROP_TYPES = {
@@ -118,16 +117,10 @@ export default class WebGLRenderer extends React.Component {
       onMouseMove: throttle(this._onMouseMove, 100)
     });
 
-    // events={ {
-    //   onObjectHovered: this._handleObjectHovered,
-    //   onObjectClicked: this._handleObjectClicked
-    // } }
-
     const camera = new PerspectiveCamera(this.props.camera);
 
     // TODO - remove program parameter from scene, or move it into options
     const scene = new Scene(gl, {
-      camera,
       lights: this.props.lights,
       backgroundColor: {r: 0, g: 0, b: 0, a: 0}
     });
@@ -137,61 +130,14 @@ export default class WebGLRenderer extends React.Component {
     this.props.onRendererInitialized({gl, camera, scene});
   }
 
-  // TODO - move this to luma.gl/pick.js or model.js?
+  // TODO - move this back to luma.gl/scene.js
   /* eslint-disable max-statements */
   _pick(x, y) {
     const {gl, scene, camera} = this.state;
 
-    if (this._pickingFBO === undefined) {
-      this._pickingFBO = new Framebuffer(gl, {
-        width: gl.canvas.width,
-        height: gl.canvas.height
-      });
-    }
+    const pickedModels = scene.pickModels(gl, {camera, x, y});
 
-    this._pickingFBO.bind();
-
-    gl.enable(gl.SCISSOR_TEST);
-    gl.scissor(x, gl.canvas.height - y, 1, 1);
-
-    const picked = [];
-
-    // TODO - iterate in reverse order?
-    for (const model of scene.models) {
-      if (model.pickable) {
-        const program = model.program;
-        program.use();
-        program.setUniform('enablePicking', 1);
-        model.onBeforeRender();
-        const {view} = camera;
-        const {matrix} = model;
-        const worldMatrix = view.mulMat4(matrix);
-
-        model.setState(program);
-
-        program.setUniform('worldMatrix', worldMatrix);
-
-        gl.clear(gl.COLOR_BUFFER_BIT);
-
-        model.render();
-
-        // Read the color in the central pixel, to be mapped with picking colors
-        const color = new Uint8Array(4);
-        gl.readPixels(
-          x, gl.canvas.height - y, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, color
-        );
-
-        picked.push({model, color});
-
-        program.setUniform('enablePicking', 0);
-
-        model.unsetState(program);
-      }
-    }
-
-    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-    gl.disable(gl.SCISSOR_TEST);
-    return picked;
+    return pickedModels;
   }
 
   @autobind
@@ -216,14 +162,14 @@ export default class WebGLRenderer extends React.Component {
       pixelRatio
     } = this.props;
 
-    const {gl, scene} = this.state;
+    const {gl, scene, camera} = this.state;
     if (!gl) {
       return;
     }
 
     // Note: Do this after gl check, in case onNeedRedraw clears flags
     if (!onNeedRedraw()) {
-      // return;
+      return;
     }
 
     // clear depth and color buffers
@@ -248,7 +194,7 @@ export default class WebGLRenderer extends React.Component {
     }
 
     onBeforeRenderFrame();
-    scene.render();
+    scene.render(gl, {camera});
     onAfterRenderFrame();
   }
 
