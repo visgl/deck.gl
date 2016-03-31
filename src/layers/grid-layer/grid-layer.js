@@ -88,7 +88,8 @@ export default class GridLayer extends Layer {
         id: this.props.id,
         drawMode: 'TRIANGLE_FAN',
         vertices: new Float32Array([0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0])
-      })
+      }),
+      instanced: true
     });
   }
 
@@ -138,7 +139,7 @@ export default class GridLayer extends Layer {
     value.fill(0.0);
 
     for (const point of data) {
-      const pixel = this.project([point.position.x, point.position.y]);
+      const pixel = this.project([point.position.y, point.position.x]);
       const space = this.screenToSpace(pixel);
 
       const colId = Math.floor((space.x + width) / unitWidth);
