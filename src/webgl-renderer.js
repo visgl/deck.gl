@@ -18,6 +18,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+/* eslint-disable no-console */
+/* global console */
 import React, {PropTypes} from 'react';
 import ReactDOM from 'react-dom';
 import autobind from 'autobind-decorator';
@@ -54,7 +56,7 @@ const PROP_TYPES = {
 const DEFAULT_PROPS = {
   id: 'webgl-canvas',
   onRendererInitialized: () => {},
-  onInitializationFailed: () => {},
+  onInitializationFailed: error => console.error(error),
   onError: error => {
     throw error;
   },
@@ -107,7 +109,13 @@ export default class WebGLRenderer extends React.Component {
    */
   _initWebGL(canvas) {
 
-    const gl = createGLContext(canvas);
+    let gl;
+    try {
+      gl = createGLContext(canvas);
+    } catch (error) {
+      this.props.onInitializationFailed(error);
+      return;
+    }
 
     const events = Events.create(canvas, {
       cacheSize: false,
