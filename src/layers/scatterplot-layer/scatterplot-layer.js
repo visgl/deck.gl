@@ -46,8 +46,6 @@ export default class ScatterplotLayer extends Layer {
   }
 
   initializeState() {
-    super.initializeState();
-
     const {gl} = this.state;
     const {attributeManager} = this.state;
 
@@ -62,12 +60,12 @@ export default class ScatterplotLayer extends Layer {
   }
 
   didMount() {
-    this.updateRadius();
+    this.updateUniforms();
   }
 
   willReceiveProps(oldProps, newProps) {
     super.willReceiveProps(oldProps, newProps);
-    this.updateRadius();
+    this.updateUniforms();
   }
 
   getModel(gl) {
@@ -98,8 +96,8 @@ export default class ScatterplotLayer extends Layer {
     });
   }
 
-  updateRadius() {
-    this._calculateRadius();
+  updateUniforms() {
+    this.calculateRadius();
     const {radius} = this.state;
     this.setUniforms({
       radius
@@ -130,7 +128,7 @@ export default class ScatterplotLayer extends Layer {
     }
   }
 
-  _calculateRadius() {
+  calculateRadius() {
     // use radius if specified
     if (this.props.radius) {
       this.state.radius = this.props.radius;

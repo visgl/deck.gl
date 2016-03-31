@@ -53,7 +53,6 @@ export default class ChoroplethLayer extends Layer {
   }
 
   initializeState() {
-    super.initializeState();
     const {gl, attributeManager} = this.state;
 
     attributeManager.addInstanced(ATTRIBUTES, {

@@ -50,8 +50,6 @@ export default class HexagonLayer extends Layer {
   }
 
   initializeState() {
-    super.initializeState();
-
     const {gl, attributeManager} = this.state;
 
     this.setState({

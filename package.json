@@ -51,7 +51,7 @@
     "lodash.isfunction": "^3.0.6",
     "lodash.throttle": "^3.0.4",
     "lodash.where": "^3.1.0",
-    "luma.gl": "git://github.com/uber-common/luma.gl#v2.0.2",
+    "luma.gl": "git://github.com/uber-common/luma.gl#v2.0.3",
     "viewport-mercator-project": "^2.0.1"
   },
   "devDependencies": {
@@ -91,7 +91,7 @@
     "prepublish": "npm run build",
     "lint": "uber-standard",
     "precommit": "npm run lint -s && npm run test && npm run build",
-    "test": "npm run test-node",
+    "test": "npm run lint && npm run test-node",
     "test-node": "babel-node --only=luma.gl,deck.gl/src,deck.gl/test test/node.js | faucet",
     "test-browser": "budo test/browser.js:build/test-bundle.js --dir test -t babelify --live --open --port 3001 --watch-glob '**/*.{html,css,scss,js}'",
     "test-electron": "browserify test/electron.js | testron | faucet",

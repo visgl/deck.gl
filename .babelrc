@@ -6,5 +6,5 @@
       "globals": ["Array"]
     }]
   ],
-  compact: false
+  "compact": "false"
 }

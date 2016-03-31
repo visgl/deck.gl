@@ -370,16 +370,24 @@ export default class Layer {
     return index;
   }
 
-  onHover(info) {
+  // Override to add or modify info in sublayer
+  // The sublayer may know what lat,lon corresponds to using math etc
+  // even when picking does not work
+  onGetHoverInfo(info) {
     const {color} = info;
-    const index = this.decodePickingColor(color);
-    return this.props.onHover({index, ...info});
+    info.index = this.decodePickingColor(color);
+    info.geoCoords = this.unproject({x: info.x, y: info.y});
+    return info;
+  }
+
+  onHover(info) {
+    info = this.onGetHoverInfo(info);
+    return this.props.onHover(info);
   }
 
   onClick(info) {
-    const {color} = info;
-    const index = this.decodePickingColor(color);
-    return this.props.onClick({index, ...info});
+    info = this.onGetHoverInfo(info);
+    return this.props.onClick(info);
   }
 
   // INTERNAL METHODS
@@ -452,6 +460,14 @@ export default class Layer {
       mercator.project([latLng[1], latLng[0]]) :
       mercator.project([latLng.lon, latLng.lat]);
     return {x, y};
+  }
+
+  unproject(xy) {
+    const {mercator} = this.state;
+    const [lon, lat] = Array.isArray(xy) ?
+      mercator.unproject(xy) :
+      mercator.unproject([xy.x, xy.y]);
+    return {lat, lon};
   }
 
   screenToSpace({x, y}) {

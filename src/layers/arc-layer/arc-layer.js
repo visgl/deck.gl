@@ -39,7 +39,6 @@ export default class ArcLayer extends Layer {
   }
 
   initializeState() {
-    super.initializeState();
     const {gl, attributeManager} = this.state;
 
     this.setState({
