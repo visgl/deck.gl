@@ -24,7 +24,7 @@ const glslify = require('glslify');
 
 const ATTRIBUTES = {
   positions: {size: 3, '0': 'x', '1': 'y', '2': 'unused'},
-  colors: {size: 3, '0': 'red', '1': 'green', '2': 'blue'}
+  colors: {size: 4, '0': 'red', '1': 'green', '2': 'blue', '3': 'alpha'}
 };
 
 export default class GridLayer extends Layer {
@@ -145,10 +145,11 @@ export default class GridLayer extends Layer {
       const colId = Math.floor((space.x + width) / unitWidth);
       const rowId = Math.floor((space.y + height) / unitHeight);
       if (colId < numCol && rowId < numRow) {
-        const i3 = (colId + rowId * numCol) * size;
-        value[i3 + 0] += 1;
-        value[i3 + 1] += 5;
-        value[i3 + 2] += 1;
+        const i4 = (colId + rowId * numCol) * size;
+        value[i4 + 0] += 1;
+        value[i4 + 1] += 5;
+        value[i4 + 2] += 1;
+        value[i4 + 3] = 0.6;
       }
     }
 

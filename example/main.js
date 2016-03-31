@@ -279,6 +279,7 @@ class ExampleApp extends React.Component {
       latitude: viewport.latitude,
       longitude: viewport.longitude,
       zoom: viewport.zoom,
+      isPickable: false,
       opacity: 0.06,
       data: points
     });
