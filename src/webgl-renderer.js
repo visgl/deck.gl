@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-/* eslint-disable no-console */
+/* eslint-disable no-console, no-try-catch */
 /* global console */
 import React, {PropTypes} from 'react';
 import ReactDOM from 'react-dom';
