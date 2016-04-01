@@ -356,9 +356,10 @@ export default class Layer {
     const {value, size} = attribute;
     // add 1 to index to seperate from no selection
     for (let i = 0; i < numInstances; i++) {
-      value[i * size + 0] = (i + 1) % 256;
-      value[i * size + 1] = Math.floor((i + 1) / 256) % 256;
-      value[i * size + 2] = Math.floor((i + 1) / 256 / 256) % 256;
+      const pickingColor = this.encodePickingColor(i);
+      value[i * size + 0] = pickingColor[0];
+      value[i * size + 1] = pickingColor[1];
+      value[i * size + 2] = pickingColor[2];
     }
   }
 
@@ -368,6 +369,14 @@ export default class Layer {
     // 1 was added to seperate from no selection
     const index = i1 + i2 * 256 + i3 * 65536 - 1;
     return index;
+  }
+
+  encodePickingColor(i) {
+    return [
+      (i + 1) % 256,
+      Math.floor((i + 1) / 256) % 256,
+      Math.floor((i + 1) / 256 / 256) % 256
+    ];
   }
 
   // Override to add or modify info in sublayer
@@ -381,6 +390,13 @@ export default class Layer {
   }
 
   onHover(info) {
+    const {color} = info;
+    const selectedPickingColor = new Float32Array(3);
+    selectedPickingColor[0] = color[0];
+    selectedPickingColor[1] = color[1];
+    selectedPickingColor[2] = color[2];
+    this.setUniforms({selectedPickingColor});
+
     info = this.onGetHoverInfo(info);
     return this.props.onHover(info);
   }

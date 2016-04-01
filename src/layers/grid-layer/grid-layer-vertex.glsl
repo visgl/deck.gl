@@ -23,14 +23,14 @@
 
 attribute vec3 vertices;
 attribute vec3 positions;
-attribute vec3 colors;
+attribute vec4 colors;
 attribute vec3 pickingColors;
 
 uniform float maxCount;
 uniform float opacity;
 uniform float renderPickingBuffer;
 uniform vec3 scale;
-uniform vec3 selected;
+uniform vec3 selectedPickingColor;
 
 uniform mat4 worldMatrix;
 uniform mat4 projectionMatrix;
@@ -38,8 +38,8 @@ uniform mat4 projectionMatrix;
 varying vec4 vColor;
 
 void main(void) {
-  float alpha = pickingColors == selected ? 0.3 : opacity;
-  vColor = vec4(mix(colors / maxCount, pickingColors / 255., renderPickingBuffer), alpha);
+  float alpha = pickingColors == selectedPickingColor ? 1.5 * colors.w : colors.w;
+  vColor = vec4(mix(colors.xyz / maxCount, pickingColors / 255., renderPickingBuffer), alpha);
 
   vec3 p = positions + vertices * scale;
   gl_Position = projectionMatrix * worldMatrix * vec4(p, 1.0);
