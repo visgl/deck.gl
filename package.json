@@ -14,7 +14,7 @@
     "type": "git",
     "url": "https://github.com/uber-common/deck.gl.git"
   },
-  "main": "src/index.js",
+  "main": "dist/index.js",
   "license": "MIT",
   "browserify": {
     "transform": [
