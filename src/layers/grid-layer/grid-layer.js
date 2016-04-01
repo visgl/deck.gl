@@ -146,9 +146,8 @@ export default class GridLayer extends Layer {
       const rowId = Math.floor((space.y + height) / unitHeight);
       if (colId < numCol && rowId < numRow) {
         const i4 = (colId + rowId * numCol) * size;
-        value[i4 + 0] += 1;
+        value[i4 + 2] = value[i4 + 0] += 1;
         value[i4 + 1] += 5;
-        value[i4 + 2] += 1;
         value[i4 + 3] = 0.6;
       }
     }
