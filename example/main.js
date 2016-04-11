@@ -239,14 +239,12 @@ class ExampleApp extends React.Component {
 
   @autobind
   _handleChoroplethHovered(info) {
-    const {choroplethFeature} = info;
-    console.log(choroplethFeature.property.name);
+    console.log('choropleth hovered:', info);
   }
 
   @autobind
   _handleChoroplethClicked(info) {
-    const {choroplethFeature} = info;
-    console.log(choroplethFeature.property.name);
+    console.log('choropleth clicked:', info);
   }
 
   @autobind
@@ -295,6 +293,7 @@ class ExampleApp extends React.Component {
       longitude: viewport.longitude,
       zoom: viewport.zoom,
       data: choropleths,
+      opacity: 0.8,
       isPickable: false,
       drawContour: true,
       onHover: this._handleChoroplethHovered,
@@ -365,11 +364,11 @@ class ExampleApp extends React.Component {
         width={window.innerWidth}
         height={window.innerHeight}
         layers={[
-          // this._renderGridLayer(),
+          this._renderGridLayer(),
           this._renderChoroplethLayer(),
-          // this._renderHexagonLayer(),
-          // this._renderScatterplotLayer(),
-          // this._renderArcLayer()
+          this._renderHexagonLayer(),
+          this._renderScatterplotLayer(),
+          this._renderArcLayer()
         ]}
       />
     );

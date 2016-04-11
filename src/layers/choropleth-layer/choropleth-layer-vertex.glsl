@@ -75,6 +75,6 @@ void main(void) {
   vec3 p = vec3(lnglatToScreen(vertices.xy), vertices.z);
   gl_Position = projectionMatrix * worldMatrix * vec4(p, 1.0);
 
-  // float alpha = pickingColors == selectedPickingColor ? 0.5 : opacity;
-  vColor = vec4(mix(colors / 255., pickingColors / 255., renderPickingBuffer), 1);
+  float alpha = pickingColors == selectedPickingColor ? 0.5 : opacity;
+  vColor = vec4(mix(colors / 255., pickingColors / 255., renderPickingBuffer), alpha);
 }
