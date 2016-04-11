@@ -43,9 +43,7 @@ export default class AttributeManager {
   }
 
   add(attributes, updaters) {
-    const newAttributes = this._add(attributes, updaters, {
-      // autoUpdate: true
-    });
+    const newAttributes = this._add(attributes, updaters, {});
     // and instancedAttributes (for updating when data changes)
     Object.assign(this.attributes, newAttributes);
   }
