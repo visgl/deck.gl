@@ -24,7 +24,6 @@
 attribute vec3 vertices;
 attribute vec3 colors;
 attribute vec3 pickingColors;
-attribute vec3 indices;
 
 uniform mat4 projectionMatrix;
 uniform mat4 worldMatrix;
