@@ -287,7 +287,6 @@ class ExampleApp extends React.Component {
 
   _renderChoroplethLayer() {
     const {viewport, choropleths} = this.props;
-
     return new ChoroplethLayer({
       id: 'choroplethLayer',
       width: window.innerWidth,
@@ -331,7 +330,7 @@ class ExampleApp extends React.Component {
       latitude: viewport.latitude,
       longitude: viewport.longitude,
       zoom: viewport.zoom,
-      isPickable: true,
+      isPickable: false,
       data: points,
       onHover: this._handleScatterplotHovered,
       onClick: this._handleScatterplotClicked
@@ -366,11 +365,11 @@ class ExampleApp extends React.Component {
         width={window.innerWidth}
         height={window.innerHeight}
         layers={[
-          this._renderGridLayer(),
-          // this._renderChoroplethLayer(),
-          this._renderHexagonLayer(),
-          this._renderScatterplotLayer(),
-          this._renderArcLayer()
+          // this._renderGridLayer(),
+          this._renderChoroplethLayer(),
+          // this._renderHexagonLayer(),
+          // this._renderScatterplotLayer(),
+          // this._renderArcLayer()
         ]}
       />
     );

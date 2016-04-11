@@ -27,7 +27,8 @@ const glslify = require('glslify');
 
 const ATTRIBUTES = {
   vertices: {size: 3, '0': 'x', '1': 'y', '2': 'unused'},
-  instances: {size: 3, '0': 'x', '1': 'y', '2': 'unused'},
+  indices: {size: 1, '0': 'index'},
+  //instances: {size: 3, '0': 'x', '1': 'y', '2': 'unused'},
   colors: {size: 3, '0': 'red', '1': 'green', '2': 'blue'}
   // Override picking colors to prevent auto allocation
   // pickingColors: {size: 3, '0': 'pickRed', '1': 'pickGreen', '2': 'pickBlue'}
@@ -55,13 +56,13 @@ export default class ChoroplethLayer extends Layer {
   initializeState() {
     const {gl, attributeManager} = this.state;
 
-    attributeManager.addInstanced(ATTRIBUTES, {
+    attributeManager.add(ATTRIBUTES, {
       // Primtive attributes
       indices: {update: this.calculateIndices},
       vertices: {update: this.calculateVertices},
-      colors: {update: this.calculateColors},
+      colors: {update: this.calculateColors}
       // Instanced attributes
-      pickingColors: {update: this.calculatePickingColors, noAlloc: true}
+      // pickingColors: {update: this.calculatePickingColors, noAlloc: true}
     });
 
     this.setState({
@@ -78,6 +79,7 @@ export default class ChoroplethLayer extends Layer {
     const {dataChanged, attributeManager} = this.state;
     if (dataChanged) {
       this.extractChoropleths();
+
       attributeManager.invalidateAll();
     }
   }
@@ -92,16 +94,22 @@ export default class ChoroplethLayer extends Layer {
       geometry: new Geometry({
         id: this.props.id,
         drawMode: this.props.drawContour ? 'LINES' : 'TRIANGLES'
-      })
+      }),
+      vertexCount: 0,
+      isIndexed: true
     });
   }
 
   calculateVertices(attribute) {
+    console.log('calculate vertices');
     const vertices = flattenDeep(this.state.groupedVertices);
     attribute.value = new Float32Array(vertices);
+    console.log(attribute.value)
+    // this.state.model.setVertexCount(attribute.value.length / attribute.size);
   }
 
   calculateIndices(attribute) {
+    console.log('calculate Indices');
     // adjust index offset for multiple choropleths
     const offsets = this.state.groupedVertices.reduce(
       (acc, vertices) => [...acc, acc[acc.length - 1] + vertices.length],
@@ -123,9 +131,14 @@ export default class ChoroplethLayer extends Layer {
     );
 
     attribute.value = new Uint16Array(flattenDeep(indices));
+    console.log(attribute.value);
+    this.state.model.setVertexCount(attribute.value.length / attribute.size);
+
   }
 
   calculateColors(attribute) {
+    console.log('calcualte colors');
+
     const colors = this.state.groupedVertices.map(
       vertices => vertices.map(
         vertex => this.drawContour ? [0, 0, 0] : [128, 128, 128]
@@ -133,10 +146,25 @@ export default class ChoroplethLayer extends Layer {
     );
 
     attribute.value = new Float32Array(flattenDeep(colors));
+    // console.log(attribute.value)
   }
 
   // Override the default picking colors calculation
   calculatePickingColors(attribute) {
+    console.log('calcualte colors');
+
+    const colors = this.state.groupedVertices.map(
+      (vertices, choroplethIndex) => vertices.map(
+        vertex => this.drawContour ? [-1, -1, -1] : [
+         (choroplethIndex + 1) % 256,
+          Math.floor((choroplethIndex + 1) / 256) % 256,
+          Math.floor((choroplethIndex + 1) / 256 / 256) % 256]
+      )
+    );
+
+    attribute.value = new Float32Array(flattenDeep(colors));
+    console.log(attribute.value);
+
     // const {attributeManager} = this.state;
     // const {vertices: value} = attributeManager
     // const pickingColors = this.state.groupedVer.map(
@@ -153,6 +181,8 @@ export default class ChoroplethLayer extends Layer {
   }
 
   extractChoropleths() {
+    console.log('extract Choropleths');
+
     const {data} = this.props;
     const normalizedGeojson = normalize(data);
 
@@ -173,15 +203,23 @@ export default class ChoroplethLayer extends Layer {
         coordinate => [coordinate[0], coordinate[1], 100]
       )
     );
+    console.log('state choropleths')
+    console.log(this.state.choropleths);
+    console.log('state groupedVertices')
+    console.log(this.state.groupedVertices);
   }
 
   calculateContourIndices(numVertices) {
+    console.log('calculateContourIndices');
+
     // use vertex pairs for gl.LINES => [0, 1, 1, 2, 2, ..., n-1, n-1, 0]
     let indices = [];
     for (let i = 1; i < numVertices - 1; i++) {
       indices = [...indices, i, i];
     }
+    console.log([0, ...indices, 0]);
     return [0, ...indices, 0];
+
   }
 
   onHover(info) {

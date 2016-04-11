@@ -114,6 +114,7 @@ export default class ScatterplotLayer extends Layer {
       value[i + 2] = point.position.z;
       i += size;
     }
+    console.log(value);
   }
 
   calculateColors(attribute) {

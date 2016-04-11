@@ -24,13 +24,14 @@
 attribute vec3 vertices;
 attribute vec3 colors;
 attribute vec3 pickingColors;
+attribute vec3 indices;
 
 uniform mat4 projectionMatrix;
 uniform mat4 worldMatrix;
 
 uniform float opacity;
 uniform float renderPickingBuffer;
-uniform vec3 selected;
+uniform vec3 selectedPickingColor;
 
 varying vec4 vColor;
 
@@ -74,6 +75,6 @@ void main(void) {
   vec3 p = vec3(lnglatToScreen(vertices.xy), vertices.z);
   gl_Position = projectionMatrix * worldMatrix * vec4(p, 1.0);
 
-  float alpha = pickingColors == selected ? 0.5 : opacity;
-  vColor = vec4(mix(colors / 255., pickingColors / 255., renderPickingBuffer), alpha);
+  // float alpha = pickingColors == selectedPickingColor ? 0.5 : opacity;
+  vColor = vec4(mix(colors / 255., pickingColors / 255., renderPickingBuffer), 1);
 }
