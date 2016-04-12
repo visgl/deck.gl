@@ -53,7 +53,7 @@
     "lodash.isfunction": "^3.0.6",
     "lodash.throttle": "^3.0.4",
     "lodash.where": "^3.1.0",
-    "luma.gl": "git://github.com/uber-common/luma.gl#v2.0.3",
+    "luma.gl": "^2.0.4-0",
     "viewport-mercator-project": "^2.0.1"
   },
   "devDependencies": {
@@ -75,7 +75,6 @@
     "tap-browser-color": "^0.1.2",
     "tape-catch": "^1.0.4",
     "testron": "^1.2.0",
-    "uber-standard": "^5.1.0",
     "uglify-js": "^2.6.1"
   },
   "peerDependencies": {
@@ -88,9 +87,9 @@
     "build-compile": "babel src -d dist --source-maps inline --copy-files",
     "build-script": "browserify src/bundle.js -o dist/deckgl.js",
     "build-script-min": "uglifyjs -o dist/deckgl.min.js dist/deckgl.js",
+    "lint": "eslint src",
+    "precommit": "npm run lint -s && npm run test",
     "prepublish": "npm run build",
-    "lint": "uber-standard",
-    "precommit": "npm run lint -s && npm run test && npm run build",
     "test": "npm run lint && npm run test-node",
     "test-node": "babel-node --only=luma.gl,deck.gl/src,deck.gl/test test/node.js | faucet",
     "test-browser": "budo test/browser.js:build/test-bundle.js --dir test -t babelify --live --open --port 3001 --watch-glob '**/*.{html,css,scss,js}'",
