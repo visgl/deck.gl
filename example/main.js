@@ -239,14 +239,12 @@ class ExampleApp extends React.Component {
 
   @autobind
   _handleChoroplethHovered(info) {
-    const {choroplethFeature} = info;
-    console.log(choroplethFeature.property.name);
+    console.log('choropleth hovered:', info);
   }
 
   @autobind
   _handleChoroplethClicked(info) {
-    const {choroplethFeature} = info;
-    console.log(choroplethFeature.property.name);
+    console.log('choropleth clicked:', info);
   }
 
   @autobind
@@ -287,7 +285,6 @@ class ExampleApp extends React.Component {
 
   _renderChoroplethLayer() {
     const {viewport, choropleths} = this.props;
-
     return new ChoroplethLayer({
       id: 'choroplethLayer',
       width: window.innerWidth,
@@ -296,6 +293,7 @@ class ExampleApp extends React.Component {
       longitude: viewport.longitude,
       zoom: viewport.zoom,
       data: choropleths,
+      opacity: 0.8,
       isPickable: false,
       drawContour: true,
       onHover: this._handleChoroplethHovered,
@@ -331,7 +329,7 @@ class ExampleApp extends React.Component {
       latitude: viewport.latitude,
       longitude: viewport.longitude,
       zoom: viewport.zoom,
-      isPickable: true,
+      isPickable: false,
       data: points,
       onHover: this._handleScatterplotHovered,
       onClick: this._handleScatterplotClicked
@@ -367,7 +365,7 @@ class ExampleApp extends React.Component {
         height={window.innerHeight}
         layers={[
           this._renderGridLayer(),
-          // this._renderChoroplethLayer(),
+          this._renderChoroplethLayer(),
           this._renderHexagonLayer(),
           this._renderScatterplotLayer(),
           this._renderArcLayer()

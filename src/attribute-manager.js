@@ -48,6 +48,14 @@ export default class AttributeManager {
     Object.assign(this.attributes, newAttributes);
   }
 
+  addDynamic(attributes, updaters) {
+    const newAttributes = this._add(attributes, updaters, {
+      autoUpdate: true
+    });
+    // and instancedAttributes (for updating when data changes)
+    Object.assign(this.attributes, newAttributes);
+  }
+
   addInstanced(attributes, updaters) {
     const newAttributes = this._add(attributes, updaters, {
       instanced: 1,
@@ -255,6 +263,8 @@ export default class AttributeManager {
         size: attribute.size,
         value: attribute.value || null,
 
+        // buffer type
+        bufferType: undefined,
         ..._extraProps
       };
       // Sanity - no app fields on our attributes. Use userData instead.

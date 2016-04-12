@@ -27,10 +27,10 @@ const glslify = require('glslify');
 
 const ATTRIBUTES = {
   vertices: {size: 3, '0': 'x', '1': 'y', '2': 'unused'},
-  instances: {size: 3, '0': 'x', '1': 'y', '2': 'unused'},
-  colors: {size: 3, '0': 'red', '1': 'green', '2': 'blue'}
+  indices: {size: 1, '0': 'index'},
+  colors: {size: 3, '0': 'red', '1': 'green', '2': 'blue'},
   // Override picking colors to prevent auto allocation
-  // pickingColors: {size: 3, '0': 'pickRed', '1': 'pickGreen', '2': 'pickBlue'}
+  pickingColors: {size: 3, '0': 'pickRed', '1': 'pickGreen', '2': 'pickBlue'}
 };
 
 export default class ChoroplethLayer extends Layer {
@@ -39,23 +39,24 @@ export default class ChoroplethLayer extends Layer {
    * ChoroplethLayer
    *
    * @class
-   * @param {object} opts
-   * @param {bool} opts.drawContour - ? drawContour : drawArea
-   * @param {function} opts.onChoroplethHovered - provide proerties of the
+   * @param {object} props
+   * @param {bool} props.drawContour - ? drawContour : drawArea
+   * @param {function} props.onChoroplethHovered - provide proerties of the
    * selected choropleth, together with the mouse event when mouse hovered
-   * @param {function} opts.onChoroplethClicked - provide proerties of the
+   * @param {function} props.onChoroplethClicked - provide proerties of the
    * selected choropleth, together with the mouse event when mouse clicked
    */
-  constructor(opts) {
+  constructor(props) {
     super({
-      ...opts
+      opacity: 1,
+      ...props
     });
   }
 
   initializeState() {
     const {gl, attributeManager} = this.state;
 
-    attributeManager.addInstanced(ATTRIBUTES, {
+    attributeManager.addDynamic(ATTRIBUTES, {
       // Primtive attributes
       indices: {update: this.calculateIndices},
       vertices: {update: this.calculateVertices},
@@ -64,6 +65,7 @@ export default class ChoroplethLayer extends Layer {
       pickingColors: {update: this.calculatePickingColors, noAlloc: true}
     });
 
+    this.setUniforms({opacity: this.props.opacity});
     this.setState({
       numInstances: 0,
       model: this.getModel(gl)
@@ -78,7 +80,12 @@ export default class ChoroplethLayer extends Layer {
     const {dataChanged, attributeManager} = this.state;
     if (dataChanged) {
       this.extractChoropleths();
+
       attributeManager.invalidateAll();
+    }
+
+    if (oldProps.opacity !== newProps.opacity) {
+      this.setUniforms({opacity: newProps.opacity});
     }
   }
 
@@ -92,7 +99,9 @@ export default class ChoroplethLayer extends Layer {
       geometry: new Geometry({
         id: this.props.id,
         drawMode: this.props.drawContour ? 'LINES' : 'TRIANGLES'
-      })
+      }),
+      vertexCount: 0,
+      isIndexed: true
     });
   }
 
@@ -109,7 +118,7 @@ export default class ChoroplethLayer extends Layer {
     );
 
     const indices = this.state.groupedVertices.map(
-      (vertices, choroplethIndex) => this.drawContour ?
+      (vertices, choroplethIndex) => this.props.drawContour ?
         // 1. get sequentially ordered indices of each choropleth contour
         // 2. offset them by the number of indices in previous choropleths
         this.calculateContourIndices(vertices.length).map(
@@ -123,12 +132,14 @@ export default class ChoroplethLayer extends Layer {
     );
 
     attribute.value = new Uint16Array(flattenDeep(indices));
+    attribute.bufferType = this.state.gl.ELEMENT_ARRAY_BUFFER;
+    this.state.model.setVertexCount(attribute.value.length / attribute.size);
   }
 
   calculateColors(attribute) {
     const colors = this.state.groupedVertices.map(
       vertices => vertices.map(
-        vertex => this.drawContour ? [0, 0, 0] : [128, 128, 128]
+        vertex => this.props.drawContour ? [0, 0, 0] : [128, 128, 128]
       )
     );
 
@@ -137,19 +148,16 @@ export default class ChoroplethLayer extends Layer {
 
   // Override the default picking colors calculation
   calculatePickingColors(attribute) {
-    // const {attributeManager} = this.state;
-    // const {vertices: value} = attributeManager
-    // const pickingColors = this.state.groupedVer.map(
-    //   (vertices, choroplethIndex) => vertices.map(
-    //     vertex => this.drawContour ? [-1, -1, -1] : [
-    //       (choroplethIndex + 1) % 256,
-    //       Math.floor((choroplethIndex + 1) / 256) % 256,
-    //       this.layerIndex
-    //     ]
-    //   )
-    // );
+    const colors = this.state.groupedVertices.map(
+      (vertices, choroplethIndex) => vertices.map(
+        vertex => this.props.drawContour ? [-1, -1, -1] : [
+          (choroplethIndex + 1) % 256,
+          Math.floor((choroplethIndex + 1) / 256) % 256,
+          Math.floor((choroplethIndex + 1) / 256 / 256) % 256]
+      )
+    );
 
-    // attribute.value = new Float32Array(flattenDeep(pickingColors));
+    attribute.value = new Float32Array(flattenDeep(colors));
   }
 
   extractChoropleths() {
@@ -176,12 +184,14 @@ export default class ChoroplethLayer extends Layer {
   }
 
   calculateContourIndices(numVertices) {
+
     // use vertex pairs for gl.LINES => [0, 1, 1, 2, 2, ..., n-1, n-1, 0]
     let indices = [];
     for (let i = 1; i < numVertices - 1; i++) {
       indices = [...indices, i, i];
     }
     return [0, ...indices, 0];
+
   }
 
   onHover(info) {

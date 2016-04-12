@@ -33,7 +33,7 @@ export default class ScatterplotLayer extends Layer {
     return ATTRIBUTES;
   }
 
-  /**
+  /*
    * @classdesc
    * ScatterplotLayer
    *
