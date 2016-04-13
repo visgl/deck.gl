@@ -32,7 +32,8 @@ import {
 const PROP_TYPES = {
   width: PropTypes.number.isRequired,
   height: PropTypes.number.isRequired,
-  layers: PropTypes.array.isRequired
+  layers: PropTypes.array.isRequired,
+  blending: PropTypes.object
 };
 
 export default class DeckGLOverlay extends React.Component {
@@ -117,7 +118,7 @@ export default class DeckGLOverlay extends React.Component {
   // onAfterRender
 
   render() {
-    const {width, height, layers, ...otherProps} = this.props;
+    const {width, height, layers, blending, ...otherProps} = this.props;
 
     // if (layers.length === 0) {
     //   return null;
@@ -135,7 +136,7 @@ export default class DeckGLOverlay extends React.Component {
         viewport={ new flatWorld.Viewport(width, height) }
         camera={ flatWorld.getCamera() }
         lights={ flatWorld.getLighting() }
-        blending={ flatWorld.getBlending() }
+        blending={ blending || flatWorld.getBlending() }
         pixelRatio={ flatWorld.getPixelRatio(window.devicePixelRatio) }
 
         onRendererInitialized={ this._onRendererInitialized }
