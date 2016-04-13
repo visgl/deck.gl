@@ -1,17 +1,31 @@
 # deck.gl
 
-A WebGL overlay suite providing of multiple layers.
+A WebGL overlay suite for React providing a set of highly performant
+data visualization overlays.
 
 ![screenshot](screenshot.png)
 
 Design goals:
-- Enable highly performant WebGL overlays in 2 and 3 dimensions.
-- Support efficient WebGl in a data flow architecture application using React.
+- Provide overlays that plug directly into react-map-gl's overlay model,
+  enabling overlays to work on maps.
+- Provide highly performant data visualization overlays in 2 and 3 dimensions.
+- Provide tested, highly performant layers for basic data visualization
+  use cases, scatterplots, choropleths etc.
+- Allows easy creation of custom WebGL layers by subclassing `Layer`.
+- Support efficient WebGL rendering in "data flow architecture" applications
+  (i.e. React).
 - Special focus on buffer management, allowing both automatic buffer updates
   but also full application control of buffer allocation and management
-- Comes with tested, performant layers for basic data visualization use cases.
-- Allows easy creation of custom WebGL layers by subclassing `Layer`.
 
+
+Features:
+- Web Mercator projections are handled in shader on GPU. No projections are
+  done in JavaScript (unless needed for a uniform calculation or reverse
+  projection of e.g. picked coordinate etc). Specify your lat,lon once and
+  never touch it again.
+- Can accept data stored in any ES6 container
+  (supporting \[Symbol.iterator\] iteration).
+- Automatic and manual WebGL buffer management to support.
 
 ## Installation
 
@@ -181,11 +195,7 @@ renders it as interactive choropleths.
     * `unitHeight` [number, optional, default=100] unit height of the bins
 
 
-## Notes on data and buffer management
-
-deck.gl Layers were designed with data flow architectures like React in mind.
-
-### Data Management with Buffer update callbacks
+## Notes on data property
 
 The `data` property will accept any containers that can be iterated over using
 ES6 for-of iteration, this includes e.g. native Arrays, ES6 Sets and Maps,
@@ -193,16 +203,30 @@ all Immutable.js containers etc. The notable exception are native JavaScript
 object maps. It is recommended to use ES6 Maps instead.
 
 It is recommended, but not required, to use immutable data (containers AND
-objects) as it ensures that changes to `data` property trigger a rerender. 
+objects) as it ensures that changes to `data` property trigger a rerender.
 (See the notes on `rerenderCount` and `updateCount` properties.)
+
+
+## Notes on WebGL buffer management
+
+deck.gl Layers were designed with data flow architectures like React in mind.
+The challenge is of course that in the react model, every change to application
+state causes a full rerender. The rendering callbacks are then supposed to
+detect what changes were made a limit rerendering as appropriate. When you
+have a couple of 100K element WebGL buffers to update, this can become quite
+expensive unless change detection is well managed.
+
+
+### Data Management using automatic Buffer updates
 
 The layer will expect each object to provide a number of "attributes" that it
 can use to set the GL buffers. By default, the layer will look for these
 attributes to be available as fields directly on the objects during iteration
 over the supplied data set. To gain more control of attribute access and/or
-to do on-the-fly calculation of attributes, 
+to do on-the-fly calculation of attributes.
 
-#### Manual Buffer Management
+
+### Manual Buffer Management
 
 For ultimate performance and control of updates, the application can do its
 own management of the glbuffers. Each Layer can accept buffers directly as
@@ -222,7 +246,6 @@ increment the `updateCount` property.
 
 
 WebGL layers need to populate typed array buffers
-Callbacks will 
 
 
 ## Example

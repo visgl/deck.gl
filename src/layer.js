@@ -45,7 +45,17 @@ const DEFAULT_PROPS = {
   deepCompare: false,
   getValue: x => x,
   onHover: () => {},
-  onClick: () => {}
+  onClick: () => {},
+  // Update triggers: a key change detection mechanism in deck.gl
+  //
+  // The value of `updateTriggers` is a map with fields corresponding to
+  // attribute names (or `all`). Each field has a value which is an object,
+  // it can contain any amount of data. The data for each field is compared
+  // shallowly, and if a change is detected, the attribute is invalidated
+  // (all attributes are invalidated if the `all` key is used.)
+  // Note: updateTriggers are ignored by normal shallow comparison, so it is
+  // OK for the app to mint a new object on every render.
+  updateTriggers: {}
 };
 
 const ATTRIBUTES = {
@@ -110,9 +120,16 @@ export default class Layer {
   }
 
   shouldUpdate(oldProps, newProps) {
-    // If any props have changed
-    if (!areEqualShallow(newProps, oldProps)) {
-
+    // Check update triggers, and invalidate props accordingly
+    if (this.checkUpdateTriggers(oldProps, newProps)) {
+      return true;
+    }
+    // If any props have changed, ignoring updateTriggers objects
+    // (updateTriggers are expected to be reminted on every update)
+    const equalShallow = areEqualShallow(newProps, oldProps, {
+      ignore: {updateTriggers: true}
+    });
+    if (!equalShallow) {
       if (newProps.data !== oldProps.data) {
         this.setState({dataChanged: true});
       }
@@ -275,6 +292,27 @@ export default class Layer {
       // apply gamma to opacity to make it visually "linear"
       opacity: Math.pow(this.props.opacity || 0.8, 1 / 2.2)
     });
+  }
+
+  // Check if any update triggers have changed, and invalidate
+  // attributes accordingly.
+  checkUpdateTriggers(oldProps, newProps) {
+    let change = false;
+    const {attributeManager} = this.state;
+    for (const propName in newProps.updateTriggers) {
+      const oldTriggers = oldProps.updateTriggers[propName];
+      const newTriggers = newProps.updateTriggers[propName];
+      if (!areEqualShallow(oldTriggers, newTriggers)) {
+        if (propName === 'all') {
+          attributeManager.invalidateAll();
+          change = true;
+        } else {
+          attributeManager.invalidate(propName);
+          change = true;
+        }
+      }
+    }
+    return change;
   }
 
   // LAYER MANAGER API

@@ -22,7 +22,7 @@ function isPlainObject(o) {
 
 // Shallow compare
 /* eslint-disable complexity */
-export function areEqualShallow(a, b) {
+export function areEqualShallow(a, b, {ignore = {}}) {
 
   if (a === b) {
     return true;
@@ -38,12 +38,12 @@ export function areEqualShallow(a, b) {
   }
 
   for (const key in a) {
-    if (!(key in b) || a[key] !== b[key]) {
+    if (!(key in ignore) && (!(key in b) || a[key] !== b[key])) {
       return false;
     }
   }
   for (const key in b) {
-    if (!(key in a)) {
+    if (!(key in ignore) && (!(key in a))) {
       return false;
     }
   }

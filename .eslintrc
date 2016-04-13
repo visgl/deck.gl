@@ -41,6 +41,7 @@
         "after": true
       }
     ],
+    "guard-for-in": 0,
     "lines-around-comment": [
       0,
       {
