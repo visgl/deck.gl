@@ -44,9 +44,9 @@ export default class ArcLayer extends Layer {
   initializeState() {
     const {gl, attributeManager} = this.state;
 
-    this.setState({
-      model: this.createModel(gl)
-    });
+    const model = this.createModel(gl);
+    model.userData.strokeWidth = this.props.strokeWidth;
+    this.setState({model});
 
     attributeManager.addInstanced(ATTRIBUTES, {
       positions: {update: this.calculatePositions}
@@ -56,14 +56,9 @@ export default class ArcLayer extends Layer {
   }
 
   willReceiveProps(oldProps, nextProps) {
-    const {gl, model} = this.state;
 
     super.willReceiveProps(oldProps, nextProps);
-
-    if (nextProps.strokeWidth && oldProps.strokeWidth !== nextProps.strokeWidth) {
-      model.onBeforeRender = this.setLineWidth(gl, nextProps.strokeWidth);
-      model.onAfterRender = this.setOldLineWidth(gl);
-    }
+    this.state.model.userData.strokeWidth = nextProps.strokeWidth;
 
     this.updateColors();
   }
@@ -87,8 +82,15 @@ export default class ArcLayer extends Layer {
         vertices: new Float32Array(vertices)
       }),
       instanced: true,
-      onBeforeRender: this.setLineWidth(gl, this.props.strokeWidth),
-      onAfterRender: this.setOldLineWidth(gl)
+      onBeforeRender() {
+        const {gl} = this.program;
+        this.userData.oldStrokeWidth = gl.getParameter(gl.LINE_WIDTH);
+        gl.lineWidth(this.userData.strokeWidth || 1);
+      },
+      onAfterRender() {
+        const {gl} = this.program;
+        gl.lineWidth(this.userData.oldStrokeWidth) || 1;
+      }
     });
   }
 
