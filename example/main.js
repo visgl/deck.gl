@@ -347,7 +347,8 @@ class ExampleApp extends React.Component {
       latitude: viewport.latitude,
       longitude: viewport.longitude,
       zoom: viewport.zoom,
-      data: arcs
+      data: arcs,
+      strokeWidth: 2
     });
   }
 

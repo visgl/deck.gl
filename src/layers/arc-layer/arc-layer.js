@@ -35,7 +35,10 @@ export default class ArcLayer extends Layer {
    * @param {object} opts
    */
   constructor(opts) {
-    super(opts);
+    super({
+      strokeWidth: 1,
+      ...opts
+    });
   }
 
   initializeState() {
@@ -53,7 +56,15 @@ export default class ArcLayer extends Layer {
   }
 
   willReceiveProps(oldProps, nextProps) {
+    const {gl, model} = this.state;
+
     super.willReceiveProps(oldProps, nextProps);
+
+    if (nextProps.strokeWidth && oldProps.strokeWidth !== nextProps.strokeWidth) {
+      model.onBeforeRender = this.setLineWidth(gl, nextProps.strokeWidth);
+      model.onAfterRender = this.setOldLineWidth(gl);
+    }
+
     this.updateColors();
   }
 
@@ -75,8 +86,23 @@ export default class ArcLayer extends Layer {
         drawMode: 'LINE_STRIP',
         vertices: new Float32Array(vertices)
       }),
-      instanced: true
+      instanced: true,
+      onBeforeRender: this.setLineWidth(gl, this.props.strokeWidth),
+      onAfterRender: this.setOldLineWidth(gl)
     });
+  }
+
+  setLineWidth(gl, newWidth) {
+    return () => {
+      this.oldWidth = gl.getParameter(gl.LINE_WIDTH);
+      gl.lineWidth(newWidth);
+    };
+  }
+
+  setOldLineWidth(gl) {
+    return () => {
+      gl.lineWidth(this.oldWidth);
+    }
   }
 
   updateColors() {
