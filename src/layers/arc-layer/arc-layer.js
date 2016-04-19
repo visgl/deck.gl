@@ -89,7 +89,7 @@ export default class ArcLayer extends Layer {
       },
       onAfterRender() {
         const {gl} = this.program;
-        gl.lineWidth(this.userData.oldStrokeWidth) || 1;
+        gl.lineWidth(this.userData.oldStrokeWidth || 1);
       }
     });
   }
