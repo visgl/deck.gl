@@ -94,19 +94,6 @@ export default class ArcLayer extends Layer {
     });
   }
 
-  setLineWidth(gl, newWidth) {
-    return () => {
-      this.oldWidth = gl.getParameter(gl.LINE_WIDTH);
-      gl.lineWidth(newWidth);
-    };
-  }
-
-  setOldLineWidth(gl) {
-    return () => {
-      gl.lineWidth(this.oldWidth);
-    }
-  }
-
   updateColors() {
     // Get colors from first object
     const object = this.getFirstObject();
