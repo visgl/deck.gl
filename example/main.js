@@ -56,7 +56,8 @@ const INITIAL_STATE = {
   choropleths: null,
   hexagons: null,
   points: null,
-  arcs: null
+  arcs: null,
+  arcStrokeWidth: 1
 };
 
 // ---- Action ---- //
@@ -190,6 +191,11 @@ class ExampleApp extends React.Component {
     this._loadCsvFile('./data/sf.bike.parking.csv', this._handlePointsLoaded);
   }
 
+  componentDidMount() {
+    // update arc stroke width
+    window.setTimeout(this._updateArcStrokeWidth, 3000);
+  }
+
   componentWillUnmount() {
     window.removeEventListener('resize', this._handleResize);
   }
@@ -210,6 +216,12 @@ class ExampleApp extends React.Component {
       }
       onDataLoaded(data);
     });
+  }
+
+  @autobind
+  _updateArcStrokeWidth() {
+    console.log('update arc stroke width');
+    this.setState({arcStrokeWidth: 3});
   }
 
   @autobind
@@ -347,7 +359,8 @@ class ExampleApp extends React.Component {
       latitude: viewport.latitude,
       longitude: viewport.longitude,
       zoom: viewport.zoom,
-      data: arcs
+      data: arcs,
+      strokeWidth: this.state.arcStrokeWidth || 1
     });
   }
 

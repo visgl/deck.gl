@@ -35,15 +35,18 @@ export default class ArcLayer extends Layer {
    * @param {object} opts
    */
   constructor(opts) {
-    super(opts);
+    super({
+      strokeWidth: 1,
+      ...opts
+    });
   }
 
   initializeState() {
     const {gl, attributeManager} = this.state;
 
-    this.setState({
-      model: this.createModel(gl)
-    });
+    const model = this.createModel(gl);
+    model.userData.strokeWidth = this.props.strokeWidth;
+    this.setState({model});
 
     attributeManager.addInstanced(ATTRIBUTES, {
       positions: {update: this.calculatePositions}
@@ -53,7 +56,10 @@ export default class ArcLayer extends Layer {
   }
 
   willReceiveProps(oldProps, nextProps) {
+
     super.willReceiveProps(oldProps, nextProps);
+    this.state.model.userData.strokeWidth = nextProps.strokeWidth;
+
     this.updateColors();
   }
 
@@ -75,7 +81,16 @@ export default class ArcLayer extends Layer {
         drawMode: 'LINE_STRIP',
         vertices: new Float32Array(vertices)
       }),
-      instanced: true
+      instanced: true,
+      onBeforeRender() {
+        const {gl} = this.program;
+        this.userData.oldStrokeWidth = gl.getParameter(gl.LINE_WIDTH);
+        gl.lineWidth(this.userData.strokeWidth || 1);
+      },
+      onAfterRender() {
+        const {gl} = this.program;
+        gl.lineWidth(this.userData.oldStrokeWidth || 1);
+      }
     });
   }
 
