@@ -178,13 +178,12 @@ export default class ChoroplethLayer extends Layer {
 
     this.state.groupedVertices = this.state.choropleths.map(
       choropleth => choropleth.coordinates.map(
-        coordinate => [coordinate[0], coordinate[1], 100]
+        coordinate => [coordinate[0], coordinate[1], 0]
       )
     );
   }
 
   calculateContourIndices(numVertices) {
-
     // use vertex pairs for gl.LINES => [0, 1, 1, 2, 2, ..., n-1, n-1, 0]
     let indices = [];
     for (let i = 1; i < numVertices - 1; i++) {

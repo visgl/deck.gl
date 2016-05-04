@@ -44,7 +44,7 @@ export default class HexagonLayer extends Layer {
   constructor(opts) {
     super({
       dotRadius: 10,
-      elevation: 1,
+      elevation: 0,
       ...opts
     });
   }
