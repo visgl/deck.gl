@@ -41,6 +41,7 @@ import {
   ArcLayer,
   GridLayer
 } from '../src';
+import flatWorld, {getProjectionMatrix} from '../src/flat-world';
 
 // ---- Default Settings ---- //
 /* eslint-disable no-process-env */
@@ -98,7 +99,7 @@ function reducer(state = INITIAL_STATE, action) {
         position: {
           x: Number(coords[1]),
           y: Number(coords[0]),
-          z: 10
+          z: 0
         },
         color: [88, 9, 124]
       };
@@ -221,7 +222,7 @@ class ExampleApp extends React.Component {
   @autobind
   _updateArcStrokeWidth() {
     console.log('update arc stroke width');
-    this.setState({arcStrokeWidth: 3});
+    this.setState({arcStrokeWidth: 1});
   }
 
   @autobind
@@ -365,17 +366,22 @@ class ExampleApp extends React.Component {
   }
 
   _renderOverlay() {
-    const {choropleths, hexagons, points} = this.props;
+    const {choropleths, hexagons, points, viewport} = this.props;
+    const {width, height} = this.state;
 
     // wait until data is ready before rendering
     if (!choropleths || !points || !hexagons) {
       return [];
     }
 
+    // const {projectionMatrix} = viewport;
+    // const projectionMatrix = getProjectionMatrix(viewport);
+    const camera = flatWorld.getCamera({...viewport, width, height});
     return (
       <DeckGLOverlay
-        width={window.innerWidth}
-        height={window.innerHeight}
+        camera={camera}
+        width={width}
+        height={height}
         layers={[
           this._renderGridLayer(),
           this._renderChoroplethLayer(),
@@ -396,12 +402,9 @@ class ExampleApp extends React.Component {
         mapboxApiAccessToken={MAPBOX_ACCESS_TOKEN}
         width={width}
         height={height}
-        latitude={viewport.latitude}
-        longitude={viewport.longitude}
-        zoom={viewport.zoom}
-        startDragLngLat={viewport.startDragLngLat}
-        onChangeViewport={this._handleViewportChanged}
-        isDragging={viewport.isDragging}>
+        perspectiveEnabled={true}
+        { ...viewport }
+        onChangeViewport={this._handleViewportChanged}>
         { this._renderOverlay() }
       </MapboxGLMap>
     );

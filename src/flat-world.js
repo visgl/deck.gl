@@ -18,6 +18,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+import {PerspectiveCamera, Camera, Mat4} from 'luma.gl';
+import assert from 'assert';
+
 // A standard viewport implementation
 const DEFAULT_FOV = 15;
 const DEFAULT_SIZE = 1000;
@@ -29,6 +32,31 @@ const flatWorld = {
 
   // Field of view
   fov: DEFAULT_FOV,
+
+  getPixelRatio(ratio) {
+    return 1;
+    // return ratio || 1;
+  },
+
+  getLighting() {
+    return {
+      enable: true,
+      ambient: {r: 1.0, g: 1.0, b: 1.0},
+      points: [{
+        diffuse: {r: 0.8, g: 0.8, b: 0.8},
+        specular: {r: 0.6, g: 0.6, b: 0.6},
+        position: [0.5, 0.5, 3]
+      }]
+    };
+  },
+
+  getBlending() {
+    return {
+      enable: true,
+      blendFunc: ['SRC_ALPHA', 'ONE_MINUS_SRC_ALPHA'],
+      blendEquation: 'FUNC_ADD'
+    };
+  },
 
   Viewport: class Viewport {
 
@@ -55,6 +83,7 @@ const flatWorld = {
       this.y = yOffset;
       this.width = size;
       this.height = size;
+      this.size = Math.max(width, height);
     }
 
     screenToSpace({x, y}) {
@@ -63,6 +92,25 @@ const flatWorld = {
         y: ((y - this.y) / this.height - 0.5) * flatWorld.size * 2 * -1,
         z: 0
       };
+    }
+
+    // spaceToScreen({x, y}) {
+    //   return {
+    //     x:
+    //     x:
+    //   }
+    // }
+  },
+
+  WebMercatorCamera: class extends Camera {
+    constructor({projectionMatrix, ...opts}) {
+      super(opts);
+      this.projection = projectionMatrix;
+      this.update();
+    }
+    update() {
+      this.view.lookAt(this.position, this.target, this.up);
+      this._updateUniforms();
     }
   },
 
@@ -99,42 +147,86 @@ const flatWorld = {
     }
   },
 
-  getCamera() {
+  getCamera2({projectionMatrix}) {
+    assert(projectionMatrix, 'Needs projection matrix');
     const cameraHeight = flatWorld.getCameraHeight();
-    return {
+    return new flatWorld.WebMercatorCamera({
+      projectionMatrix,
       fov: flatWorld.fov,
       near: (cameraHeight + 1) / 100,
       far: cameraHeight + 1,
       position: [0, 0, cameraHeight],
       aspect: 1
-    };
+    });
   },
 
-  getPixelRatio(ratio) {
-    return 1;
-    // return ratio || 1;
-  },
+  getCamera({
+    projectionMatrix,
+    pitch = 0, bearing = 0, altitude = 1.5,
+    width, height
+  }) {
+    const fov = 2 * Math.atan((height / 2) / altitude);
+    const cameraHeight = flatWorld.getCameraHeight(flatWorld.size, fov);
+    const camHeight = cameraHeight * Math.cos(pitch / 180 * Math.PI);
+    const camDist = cameraHeight * Math.tan(pitch / 180 * Math.PI) /
+      Math.cos(pitch / 180 * Math.PI);
+    const camera = new PerspectiveCamera({
+      fov,
+      near: (cameraHeight + 1) / 100,
+      far: 10 * cameraHeight + 1,
+      position: [0, -camDist, camHeight],
+      target: [0, 0, 0],
+      aspect: 1
+    });
+    // camera.projection.$translate(0, 0, cameraHeight);
+    // camera.projection.$scale(1, -1, 1 / height);
+    // camera.projection.$rotateXYZ(pitch / 180 * Math.PI, 0, 0);
+    camera.projection.$rotateXYZ(0, 0, bearing / 180 * Math.PI);
+    camera.projection.$translate(0, 0, 0);
 
-  getLighting() {
-    return {
-      enable: true,
-      ambient: {r: 1.0, g: 1.0, b: 1.0},
-      points: [{
-        diffuse: {r: 0.8, g: 0.8, b: 0.8},
-        specular: {r: 0.6, g: 0.6, b: 0.6},
-        position: [0.5, 0.5, 3]
-      }]
-    };
-  },
-
-  getBlending() {
-    return {
-      enable: true,
-      blendFunc: ['SRC_ALPHA', 'ONE_MINUS_SRC_ALPHA'],
-      blendEquation: 'FUNC_ADD'
-    };
+    camera._updateUniforms();
+    return camera;
   }
-
 };
+
+import {mat4} from 'gl-matrix';
+
+export function getProjectionMatrix({
+  width, height,
+  latitude, longitude,
+  pitch = 0, bearing = 0, altitude = 1.5
+}) {
+  const m = new Float32Array(16);
+
+  // Find the distance from the center point to the center top in
+  // altitude units using law of sines.
+  const halfFov = Math.atan(0.5 / altitude);
+  const topHalfSurfaceDistance =
+    Math.sin(halfFov) * altitude / Math.sin(Math.PI / 2 - pitch - halfFov);
+
+  // Calculate z value of the farthest fragment that should be rendered.
+  const farZ =
+    Math.cos(Math.PI / 2 - pitch) * topHalfSurfaceDistance + altitude;
+
+  mat4.perspective(
+    m,
+    2 * Math.atan((height / 2) / altitude),
+    width / height,
+    0.1,
+    farZ
+  );
+
+  mat4.translate(m, m, [0, 0, -altitude]);
+
+  // After the rotateX, z values are in pixel units. Convert them to
+  // altitude units. 1 altitude unit = the screen height.
+  mat4.scale(m, m, [1, -1, 1 / height]);
+
+  mat4.rotateX(m, m, pitch);
+  mat4.rotateZ(m, m, bearing);
+  mat4.translate(m, m, [-x, -y, 0]);
+
+  return m;
+}
 
 export default flatWorld;

@@ -417,12 +417,15 @@ export default class Layer {
     ];
   }
 
-  // Override to add or modify info in sublayer
-  // The sublayer may know what lat,lon corresponds to using math etc
-  // even when picking does not work
+  // VIRTUAL METHOD - Override to add or modify `info` object in sublayer
+  // The sublayer may know what object e.g. lat,lon corresponds to using math
+  // etc even when picking does not work
   onGetHoverInfo(info) {
     const {color} = info;
     info.index = this.decodePickingColor(color);
+    if (Array.isArray(this.data)) {
+      info.object = this.data[info.index];
+    }
     info.geoCoords = this.unproject({x: info.x, y: info.y});
     return info;
   }
@@ -497,7 +500,10 @@ export default class Layer {
     const {x, y} = this.state.viewport;
     this.setUniforms({
       viewport: [x, y, width, height],
-      mapViewport: [longitude, latitude, zoom, flatWorld.size]
+      mapViewport: [longitude, latitude, zoom, flatWorld.size],
+      mercatorLngLat: [longitude, latitude],
+      mercatorZoom: zoom,
+      mercatorTileSize: flatWorld.size
     });
     log(3, this.state.viewport, latitude, longitude, zoom);
   }

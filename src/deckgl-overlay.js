@@ -23,6 +23,7 @@ import React, {PropTypes} from 'react';
 import autobind from 'autobind-decorator';
 
 import WebGLRenderer from './webgl-renderer';
+import {Scene} from 'luma.gl';
 import flatWorld from './flat-world';
 import {
   matchLayers, finalizeOldLayers, updateMatchedLayers, initializeNewLayers,
@@ -81,8 +82,14 @@ export default class DeckGLOverlay extends React.Component {
   }
 
   @autobind
-  _onRendererInitialized({gl, scene}) {
-    this.setState({gl, scene});
+  _onRendererInitialized({gl}) {
+    this.setState({
+      gl,
+      scene: new Scene(gl, {
+        lights: flatWorld.getLighting(),
+        backgroundColor: {r: 0, g: 0, b: 0, a: 0}
+      })
+    });
     initializeNewLayers(this.props.layers, {gl});
   }
 
@@ -114,15 +121,9 @@ export default class DeckGLOverlay extends React.Component {
     return layersNeedRedraw(layers, {clearFlag: true});
   }
 
-  // @autobind
-  // onAfterRender
-
   render() {
-    const {width, height, layers, blending, ...otherProps} = this.props;
-
-    // if (layers.length === 0) {
-    //   return null;
-    // }
+    const {width, height, layers, blending, camera, ...otherProps} = this.props;
+    const {scene} = this.state;
 
     this.initializeLayers(layers);
 
@@ -134,8 +135,8 @@ export default class DeckGLOverlay extends React.Component {
         height={ height }
 
         viewport={ new flatWorld.Viewport(width, height) }
-        camera={ flatWorld.getCamera() }
-        lights={ flatWorld.getLighting() }
+        camera={ camera }
+        scene={ scene }
         blending={ blending || flatWorld.getBlending() }
         pixelRatio={ flatWorld.getPixelRatio(window.devicePixelRatio) }
 

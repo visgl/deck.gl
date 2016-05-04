@@ -44,7 +44,7 @@ export default class HexagonLayer extends Layer {
   constructor(opts) {
     super({
       dotRadius: 10,
-      elevation: 101,
+      elevation: 1,
       ...opts
     });
   }
@@ -114,7 +114,7 @@ export default class HexagonLayer extends Layer {
     for (const hexagon of data) {
       value[i + 0] = hexagon.centroid.x;
       value[i + 1] = hexagon.centroid.y;
-      value[i + 2] = this.props.elevation;
+      value[i + 2] = 0;
       i += size;
     }
   }

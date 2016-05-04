@@ -207,6 +207,17 @@ objects) as it ensures that changes to `data` property trigger a rerender.
 (See the notes on `rerenderCount` and `updateCount` properties.)
 
 
+## Notes on picking
+
+**Note**: Because DeckGL layers are designed to take any type of iterable
+collection as data (which may not support "random access" array style
+references of its elements), the picking calculates and index but the
+actual object.
+
+FEATURE IDEA: The base layer could take an optional getObject(index) accessor
+and call it if supplied.
+
+
 ## Notes on WebGL buffer management
 
 deck.gl Layers were designed with data flow architectures like React in mind.
@@ -245,8 +256,33 @@ To force trigger a render after mutating buffers, simply increment the
 increment the `updateCount` property.
 
 
-WebGL layers need to populate typed array buffers
+## Notes on Blending Modes
 
+To get a handle on blending modes, it helps to consider that deck.gl
+renders in a separate transparent div on top of the map div,
+so it is actually the browser that blends the deck.gl output into the map,
+not WebGL, and the default blending in the browser typically does not give
+ideal effects.
+
+There is a CSS property `mix-blend-mode` in modern browsers
+that allows control over blending:
+```
+.overlays canvas {
+  mix-blend-mode: multiply;
+}
+```
+`multiply` blend mode is usually the right choice, as it only darkens.
+This will keep your overlay colors, but let map legends underneath
+remain black and legible.
+
+**Note:** that there is a caveat with setting `mix-blend-mode`:
+it can affect other peer HTML elements, especially other map children (perhaps
+controls or legends that are being rendered on top of the map).
+If this is an issue, set isolation CSS prop on the map (DeckGLOverlay parent)
+element.
+```
+     isolation: 'isolate'
+```
 
 ## Example
 ```

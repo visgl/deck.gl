@@ -23,7 +23,7 @@
 import React, {PropTypes} from 'react';
 import ReactDOM from 'react-dom';
 import autobind from 'autobind-decorator';
-import {createGLContext, PerspectiveCamera, Scene, Events, Fx} from 'luma.gl';
+import {createGLContext, Camera, Scene, Events, Fx} from 'luma.gl';
 import throttle from 'lodash.throttle';
 
 const PROP_TYPES = {
@@ -34,8 +34,8 @@ const PROP_TYPES = {
 
   pixelRatio: PropTypes.number,
   viewport: PropTypes.object.isRequired,
-  camera: PropTypes.object.isRequired,
-  lights: PropTypes.object,
+  camera: PropTypes.instanceOf(Camera).isRequired,
+  scene: PropTypes.instanceOf(Scene),
   blending: PropTypes.object,
   events: PropTypes.object,
 
@@ -55,6 +55,7 @@ const PROP_TYPES = {
 
 const DEFAULT_PROPS = {
   id: 'webgl-canvas',
+  scene: null,
   onRendererInitialized: () => {},
   onInitializationFailed: error => console.error(error),
   onError: error => {
@@ -125,23 +126,16 @@ export default class WebGLRenderer extends React.Component {
       onMouseMove: throttle(this._onMouseMove, 100)
     });
 
-    const camera = new PerspectiveCamera(this.props.camera);
+    this.setState({gl, events});
 
-    // TODO - remove program parameter from scene, or move it into options
-    const scene = new Scene(gl, {
-      lights: this.props.lights,
-      backgroundColor: {r: 0, g: 0, b: 0, a: 0}
-    });
-
-    this.setState({gl, camera, scene, events});
-
-    this.props.onRendererInitialized({gl, camera, scene});
+    this.props.onRendererInitialized({gl});
   }
 
   // TODO - move this back to luma.gl/scene.js
   /* eslint-disable max-statements */
   _pick(x, y) {
-    const {gl, scene, camera} = this.state;
+    const {gl} = this.state;
+    const {camera, scene} = this.props;
 
     const pickedModels = scene.pickModels(gl, {camera, x, y});
 
@@ -167,11 +161,13 @@ export default class WebGLRenderer extends React.Component {
       onBeforeRenderFrame,
       onAfterRenderFrame,
       onNeedRedraw,
-      pixelRatio
+      pixelRatio,
+      camera,
+      scene
     } = this.props;
 
-    const {gl, scene, camera} = this.state;
-    if (!gl) {
+    const {gl} = this.state;
+    if (!gl || !scene) {
       return;
     }
 
