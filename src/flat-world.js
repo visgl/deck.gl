@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {PerspectiveCamera, Camera, Mat4} from 'luma.gl';
+import {PerspectiveCamera, Camera, Mat4, Vec3} from 'luma.gl';
 import assert from 'assert';
 
 // A standard viewport implementation
@@ -166,25 +166,39 @@ const flatWorld = {
     width, height
   }) {
     const fov = 2 * Math.atan((height / 2) / altitude);
-    const cameraHeight = flatWorld.getCameraHeight(flatWorld.size, fov);
-    const camHeight = cameraHeight * Math.cos(pitch / 180 * Math.PI);
-    const camDist = cameraHeight * Math.tan(pitch / 180 * Math.PI) /
-      Math.cos(pitch / 180 * Math.PI);
+    const cameraHeight = 1.5 * flatWorld.size;
+      // flatWorld.getCameraHeight(flatWorld.size, fov);
+    // const camHeight = cameraHeight * Math.cos(pitch / 180 * Math.PI);
+    // const camDist = cameraHeight * Math.sin(pitch / 180 * Math.PI);
+    const position = Mat4.mulMat4(
+      new Mat4().$rotateXYZ(pitch / 180 * Math.PI, 0, 0),
+      new Mat4().$rotateXYZ(0, 0, bearing / 180 * Math.PI)
+    )
+    .$mulVec3(new Vec3(0, 0, cameraHeight * 24));
+
+    const up = new Mat4().$rotateXYZ(0, 0, -bearing / 180 * Math.PI)
+    // const up = Mat4.mulMat4(
+    //   new Mat4().$rotateXYZ(0, 0, -bearing / 180 * Math.PI),
+    //   new Mat4().$rotateXYZ(pitch / 180 * Math.PI, 0, 0)
+    // )
+    .$mulVec3(new Vec3(0, 1, 0));
+    console.log(bearing, pitch, position, up);
     const camera = new PerspectiveCamera({
       fov,
       near: (cameraHeight + 1) / 100,
-      far: 10 * cameraHeight + 1,
-      position: [0, -camDist, camHeight],
+      far: 10 * cameraHeight * 100 + 1,
+      position, // [0, -camDist, camHeight],
       target: [0, 0, 0],
+      up,
       aspect: 1
     });
     // camera.projection.$translate(0, 0, cameraHeight);
     // camera.projection.$scale(1, -1, 1 / height);
     // camera.projection.$rotateXYZ(pitch / 180 * Math.PI, 0, 0);
-    camera.projection.$rotateXYZ(0, 0, bearing / 180 * Math.PI);
-    camera.projection.$translate(0, 0, 0);
-
-    camera._updateUniforms();
+    // camera.projection
+    //   .$rotateXYZ(0, 0, bearing / 180 * Math.PI)
+    //   .$translate(0, 0, 0);
+    // camera._updateUniforms();
     return camera;
   }
 };

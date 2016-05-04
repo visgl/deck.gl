@@ -42,6 +42,7 @@ import {
   GridLayer
 } from '../src';
 import flatWorld, {getProjectionMatrix} from '../src/flat-world';
+import {Mat4} from 'luma.gl';
 
 // ---- Default Settings ---- //
 /* eslint-disable no-process-env */
@@ -52,7 +53,8 @@ const INITIAL_STATE = {
   viewport: {
     latitude: 37.751537058389985,
     longitude: -122.42694203247012,
-    zoom: 11.5
+    zoom: 11.5,
+    projectionMatrix: new Mat4()
   },
   choropleths: null,
   hexagons: null,
@@ -252,32 +254,32 @@ class ExampleApp extends React.Component {
 
   @autobind
   _handleChoroplethHovered(info) {
-    console.log('choropleth hovered:', info);
+    // console.log('choropleth hovered:', info);
   }
 
   @autobind
   _handleChoroplethClicked(info) {
-    console.log('choropleth clicked:', info);
+    // console.log('choropleth clicked:', info);
   }
 
   @autobind
   _handleHexagonHovered(info) {
-    console.log('Hexagon hovered:', info);
+    // console.log('Hexagon hovered:', info);
   }
 
   @autobind
   _handleHexagonClicked(info) {
-    console.log('Hexagon clicked:', info);
+    // console.log('Hexagon clicked:', info);
   }
 
   @autobind
   _handleScatterplotHovered(info) {
-    console.log('Scatterplot hovered:', info);
+    // console.log('Scatterplot hovered:', info);
   }
 
   @autobind
   _handleScatterplotClicked(info) {
-    console.log('Scatterplot clicked:', info);
+    // console.log('Scatterplot clicked:', info);
   }
 
   _renderGridLayer() {
@@ -376,7 +378,12 @@ class ExampleApp extends React.Component {
 
     // const {projectionMatrix} = viewport;
     // const projectionMatrix = getProjectionMatrix(viewport);
-    const camera = flatWorld.getCamera({...viewport, width, height});
+    const camera = flatWorld.getCamera({
+      ...viewport,
+      projectionMatrix: new Mat4(viewport.projectionMatrix),
+      width,
+      height
+    });
     return (
       <DeckGLOverlay
         camera={camera}
@@ -385,7 +392,7 @@ class ExampleApp extends React.Component {
         layers={[
           this._renderGridLayer(),
           this._renderChoroplethLayer(),
-          this._renderHexagonLayer(),
+          // this._renderHexagonLayer(),
           this._renderScatterplotLayer(),
           this._renderArcLayer()
         ]}

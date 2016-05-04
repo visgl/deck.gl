@@ -63,11 +63,11 @@ vec2 mercatorProject(vec2 lnglat, float zoom) {
 }
 
 // non-linear projection: lnglats => space/camera coordinates
-vec2 webMercatorProject(vec2 lnglat) {
+vec2 webMercatorProject(vec2 lnglat, float zoom) {
   // This is constant - could be projected in JS before calling shader
-  vec2 mapCenter = mercatorProject(mercatorLngLat, mercatorZoom);
+  vec2 mapCenter = mercatorProject(mercatorLngLat, zoom);
   // Project the vertex.
-  vec2 theVertex = mercatorProject(lnglat, mercatorZoom);
+  vec2 theVertex = mercatorProject(lnglat, zoom);
 
   float canvasSize = max(viewport.z, viewport.w);
   float worldSize = mercatorTileSize;
@@ -85,7 +85,7 @@ void main(void) {
   vec3 rotatedVertices = vec3(rotationMatrix * vertices.xy * radius, vertices.z);
   vec4 verticesPositions = worldMatrix * vec4(rotatedVertices, 1.0);
 
-  vec3 p = vec3(webMercatorProject(positions.xy), positions.z) + verticesPositions.xyz;
+  vec3 p = vec3(webMercatorProject(positions.xy, mercatorZoom), positions.z) + verticesPositions.xyz;
   gl_Position = projectionMatrix * vec4(p, 1.0);
 
   float alpha = pickingColors == selected ? 0.5 : opacity;
