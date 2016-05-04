@@ -20,6 +20,8 @@
 
 import {PerspectiveCamera, Camera, Mat4, Vec3} from 'luma.gl';
 import assert from 'assert';
+// import WebMercatorProjection from './web-mercator-projection';
+import ViewportMercatorProject from 'viewport-mercator-project';
 
 // A standard viewport implementation
 const DEFAULT_FOV = 15;
@@ -139,10 +141,10 @@ const flatWorld = {
     fov = fov || flatWorld.fov;
 
     switch (fov) {
-    case 15: return size * 7.595754112725151;
-    case 30: return size * 3.732050807568878;
-    case 45: return size * 2.414213562373095;
-    case 60: return size * 1.732050807568877;
+    // case 15: return size * 7.595754112725151;
+    // case 30: return size * 3.732050807568878;
+    // case 45: return size * 2.414213562373095;
+    // case 60: return size * 1.732050807568877;
     default: return size / Math.tan(fov / 2 * Math.PI / 180);
     }
   },
@@ -163,18 +165,34 @@ const flatWorld = {
   getCamera({
     projectionMatrix,
     pitch = 0, bearing = 0, altitude = 1.5,
-    width, height
+    width, height,
+    latitude, longitude, zoom
   }) {
-    const fov = 2 * Math.atan((height / 2) / altitude);
-    const cameraHeight = 1.5 * flatWorld.size;
-      // flatWorld.getCameraHeight(flatWorld.size, fov);
+    const mercator = ViewportMercatorProject({
+      width, height, latitude, longitude, zoom,
+      tileSize: 512
+    });
+    mercator.offsetX = 0;
+    mercator.offsetY = 0;
+
+    console.log(width, height);
+    const fov =
+      // 2 * Math.atan(0.5 / altitude);
+      2 * Math.atan((height / 2) / altitude);
+    const cameraHeight = flatWorld.getCameraHeight(height, fov);
+
+    const pitchRadians = pitch / 180 * Math.PI;
+
     // const camHeight = cameraHeight * Math.cos(pitch / 180 * Math.PI);
     // const camDist = cameraHeight * Math.sin(pitch / 180 * Math.PI);
     const position = Mat4.mulMat4(
       new Mat4().$rotateXYZ(pitch / 180 * Math.PI, 0, 0),
       new Mat4().$rotateXYZ(0, 0, bearing / 180 * Math.PI)
     )
-    .$mulVec3(new Vec3(0, 0, cameraHeight * 24));
+    .$mulVec3(new Vec3(0, 0, cameraHeight));
+    // .$scale(Math.cos(pitchRadians),
+    //   Math.cos(pitchRadians),
+    //   Math.cos(pitchRadians));
 
     const up = new Mat4().$rotateXYZ(0, 0, -bearing / 180 * Math.PI)
     // const up = Mat4.mulMat4(
@@ -182,16 +200,21 @@ const flatWorld = {
     //   new Mat4().$rotateXYZ(pitch / 180 * Math.PI, 0, 0)
     // )
     .$mulVec3(new Vec3(0, 1, 0));
-    console.log(bearing, pitch, position, up);
+
+    console.log(bearing, pitch, position, up, fov / Math.PI * 180);
     const camera = new PerspectiveCamera({
       fov,
-      near: (cameraHeight + 1) / 100,
+      near: (cameraHeight + 1) / 1000,
       far: 10 * cameraHeight * 100 + 1,
-      position, // [0, -camDist, camHeight],
+      position: [0, -0, cameraHeight],
       target: [0, 0, 0],
-      up,
+      // up,
       aspect: 1
     });
+
+    camera.view
+       .$rotateXYZ(-pitch / 180 * Math.PI, 0, 0)
+       .$rotateXYZ(0, 0, bearing / 180 * Math.PI);
     // camera.projection.$translate(0, 0, cameraHeight);
     // camera.projection.$scale(1, -1, 1 / height);
     // camera.projection.$rotateXYZ(pitch / 180 * Math.PI, 0, 0);
@@ -199,6 +222,7 @@ const flatWorld = {
     //   .$rotateXYZ(0, 0, bearing / 180 * Math.PI)
     //   .$translate(0, 0, 0);
     // camera._updateUniforms();
+
     return camera;
   }
 };
