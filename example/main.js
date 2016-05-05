@@ -39,9 +39,9 @@ import {
   ChoroplethLayer,
   ScatterplotLayer,
   ArcLayer,
-  GridLayer
+  GridLayer,
+  getCamera
 } from '../src';
-import flatWorld, {getProjectionMatrix} from '../src/flat-world';
 import {Mat4} from 'luma.gl';
 
 // ---- Default Settings ---- //
@@ -381,7 +381,7 @@ class ExampleApp extends React.Component {
 
     // const {projectionMatrix} = viewport;
     // const projectionMatrix = getProjectionMatrix(viewport);
-    const camera = flatWorld.getCamera({
+    const camera = getCamera({
       ...viewport,
       projectionMatrix: viewport.projectionMatrix,
       width,
@@ -395,7 +395,7 @@ class ExampleApp extends React.Component {
         layers={[
           // this._renderGridLayer(),
           this._renderChoroplethLayer(),
-          this._renderHexagonLayer(),
+          // this._renderHexagonLayer(),
           this._renderScatterplotLayer(),
           this._renderArcLayer()
         ]}

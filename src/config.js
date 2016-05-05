@@ -1,4 +1,4 @@
-// Copyright (c) 2015 Uber Technologies, Inc.
+// Copyright (c) 2016 Uber Technologies, Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -18,15 +18,20 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-/* eslint-disable block-scoped-var */
-export {default as DeckGLOverlay} from './deckgl-overlay';
+export const DEFAULT_LIGHTING = {
+  enable: true,
+  ambient: {r: 1.0, g: 1.0, b: 1.0},
+  points: [{
+    diffuse: {r: 0.8, g: 0.8, b: 0.8},
+    specular: {r: 0.6, g: 0.6, b: 0.6},
+    position: [0.5, 0.5, 3]
+  }]
+};
 
-export {default as Layer} from './layer';
+export const DEFAULT_BACKGROUND_COLOR = {r: 0, g: 0, b: 0, a: 0};
 
-export {default as HexagonLayer} from './layers/hexagon-layer';
-export {default as ChoroplethLayer} from './layers/choropleth-layer';
-export {default as ScatterplotLayer} from './layers/scatterplot-layer';
-export {default as GridLayer} from './layers/grid-layer';
-export {default as ArcLayer} from './layers/arc-layer';
-
-export {getCamera} from './viewport';
+export const DEFAULT_BLENDING = {
+  enable: true,
+  blendFunc: ['SRC_ALPHA', 'ONE_MINUS_SRC_ALPHA'],
+  blendEquation: 'FUNC_ADD'
+};

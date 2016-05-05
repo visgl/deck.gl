@@ -10,17 +10,17 @@ class Quaternion {
     this.quat = glquat || new quat();
   }
 
-  // Creates a new quat initialized with values from an existing quaternion
-  (static) clone(a) → {quat}
+  // // Creates a new quat initialized with values from an existing quaternion
+  // (static) clone(a) → {quat}
 
-  // Copy the values from one quat to another
-  (static) copy(out, a) → {quat}
+  // // Copy the values from one quat to another
+  // (static) copy(out, a) → {quat}
 
-  // Creates a new identity quat
-  (static) create() → {quat}
+  // // Creates a new identity quat
+  // (static) create() → {quat}
 
-  // Set a quat to the identity quaternion
-  (static) identity(out) → {quat}
+  // // Set a quat to the identity quaternion
+  // (static) identity(out) → {quat}
 
   toString() {
     return quat.str(this.quat);
@@ -115,60 +115,60 @@ class Quaternion {
     Number;
   }
 
-  // Adds two quat's
-  add(a, b) → {quat}
+  // // Adds two quat's
+  // add(a, b) → {quat}
 
-  // Calculates the W component of a quat from the X, Y, and Z components. Assumes that quaternion is 1 unit in length. Any existing W component will be ignored.
-  calculateW(out, a) → {quat}
+  // // Calculates the W component of a quat from the X, Y, and Z components. Assumes that quaternion is 1 unit in length. Any existing W component will be ignored.
+  // calculateW(out, a) → {quat}
 
-  // Calculates the conjugate of a quat If the quaternion is normalized, this function is faster than quat.inverse and produces the same result.
-  (static) conjugate(out, a) → {quat}
+  // // Calculates the conjugate of a quat If the quaternion is normalized, this function is faster than quat.inverse and produces the same result.
+  // (static) conjugate(out, a) → {quat}
 
-  // Calculates the dot product of two quat's
-  (static) dot(a, b) → {Number}
+  // // Calculates the dot product of two quat's
+  // (static) dot(a, b) → {Number}
 
-  // Creates a quaternion from the given 3x3 rotation matrix. NOTE: The resultant quaternion is not normalized, so you should be sure to renormalize the quaternion yourself where necessary.
-  (static) fromMat3(out, m) → {quat}
+  // // Creates a quaternion from the given 3x3 rotation matrix. NOTE: The resultant quaternion is not normalized, so you should be sure to renormalize the quaternion yourself where necessary.
+  // (static) fromMat3(out, m) → {quat}
 
-  // Creates a new quat initialized with the given values
-  (static) fromValues(x, y, z, w) → {quat}
+  // // Creates a new quat initialized with the given values
+  // (static) fromValues(x, y, z, w) → {quat}
 
-  // Gets the rotation axis and angle for a given quaternion. If a quaternion is created with setAxisAngle, this method will return the same values as providied in the original parameter list OR functionally equivalent values. Example: The quaternion formed by axis [0, 0, 1] and angle -90 is the same as the quaternion formed by [0, 0, 1] and 270. This method favors the latter.
-  (static) getAxisAngle(out_axis, q) → {Number}
+  // // Gets the rotation axis and angle for a given quaternion. If a quaternion is created with setAxisAngle, this method will return the same values as providied in the original parameter list OR functionally equivalent values. Example: The quaternion formed by axis [0, 0, 1] and angle -90 is the same as the quaternion formed by [0, 0, 1] and 270. This method favors the latter.
+  // (static) getAxisAngle(out_axis, q) → {Number}
 
-  // Calculates the inverse of a quat
-  (static) invert(out, a) → {quat}
+  // // Calculates the inverse of a quat
+  // (static) invert(out, a) → {quat}
 
-  // Performs a linear interpolation between two quat's
-  (static) lerp(out, a, b, t) → {quat}
+  // // Performs a linear interpolation between two quat's
+  // (static) lerp(out, a, b, t) → {quat}
 
-  // Alias for quat.multiply
-  (static) mul()
+  // // Alias for quat.multiply
+  // (static) mul()
 
-  // Multiplies two quat's
-  (static) multiply(out, a, b) → {quat}
+  // // Multiplies two quat's
+  // (static) multiply(out, a, b) → {quat}
 
-  // Normalize a quat
-  (static) normalize(out, a) → {quat}
+  // // Normalize a quat
+  // (static) normalize(out, a) → {quat}
 
-  // Rotates a quaternion by the given angle about the X axis
-  (static) rotateX(out, a, rad) → {quat}
+  // // Rotates a quaternion by the given angle about the X axis
+  // (static) rotateX(out, a, rad) → {quat}
 
-  // Rotates a quaternion by the given angle about the Y axis
-  (static) rotateY(out, a, rad) → {quat}
+  // // Rotates a quaternion by the given angle about the Y axis
+  // (static) rotateY(out, a, rad) → {quat}
 
-  // Rotates a quaternion by the given angle about the Z axis
-  (static) rotateZ(out, a, rad) → {quat}
+  // // Rotates a quaternion by the given angle about the Z axis
+  // (static) rotateZ(out, a, rad) → {quat}
 
-  // Scales a quat by a scalar number
-  (static) scale(out, a, b) → {quat}
+  // // Scales a quat by a scalar number
+  // (static) scale(out, a, b) → {quat}
 
-  // Set the components of a quat to the given values
-  (static) set(out, x, y, z, w) → {quat}
+  // // Set the components of a quat to the given values
+  // (static) set(out, x, y, z, w) → {quat}
 
-  // Sets a quat from the given angle and rotation axis, then returns it.
-  (static) setAxisAngle(out, axis, rad) → {quat}
+  // // Sets a quat from the given angle and rotation axis, then returns it.
+  // (static) setAxisAngle(out, axis, rad) → {quat}
 
-  // Performs a spherical linear interpolation between two quat
-  (static) slerp(out, a, b, t) → {quat}
+  // // Performs a spherical linear interpolation between two quat
+  // (static) slerp(out, a, b, t) → {quat}
 }

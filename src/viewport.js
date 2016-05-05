@@ -19,10 +19,75 @@
 // THE SOFTWARE.
 
 import {PerspectiveCamera, Camera, Mat4, Vec3} from 'luma.gl';
-import Matrix4 from './math/matrix4';
 import assert from 'assert';
-// import WebMercatorProjection from './web-mercator-projection';
 import MercatorProject from './shaderlib/mercator-project';
+
+export function getCamera({projectionMatrix, width, height}) {
+  assert(projectionMatrix, 'Needs projection matrix');
+
+  const camera = new PerspectiveCamera({
+    fov: 60,
+    near: (1 + 1) / 1000,
+    far: 10 * 1 * 100 + 1,
+    position: [0, -0, 1],
+    target: [0, 0, 0],
+    aspect: width / height
+  });
+
+  camera.view = new Mat4().id();
+
+  for (let i = 0; i < projectionMatrix.length; ++i) {
+    camera.projection[i] = projectionMatrix[i];
+  }
+
+  return camera;
+}
+
+export default class Viewport {
+
+  /**
+   * @classdesc
+   * Calculate {x,y,with,height} of the WebGL viewport
+   * based on provided canvas width and height
+   *
+   * Note: The viewport will be set to a square that covers
+   * the canvas, and an offset will be applied to x or y
+   * as necessary to center the window in the viewport
+   * So that the camera will look at the center of the canvas
+   *
+   * @class
+   * @param {number} width
+   * @param {number} height
+   */
+  constructor(width, height) {
+    const xOffset = width > height ? 0 : (width - height) / 2;
+    const yOffset = height > width ? 0 : (height - width) / 2;
+    const size = Math.max(width, height);
+
+    this.x = xOffset;
+    this.y = yOffset;
+    this.width = size;
+    this.height = size;
+    this.size = Math.max(width, height);
+  }
+
+  screenToSpace({x, y}) {
+    return {
+      x: ((x - this.x) / this.width - 0.5) * this.width * 2,
+      y: ((y - this.y) / this.height - 0.5) * this.height * 2 * -1,
+      z: 0
+    };
+  }
+
+  // spaceToScreen({x, y}) {
+  //   return {
+  //     x:
+  //     x:
+  //   }
+  // }
+}
+
+// TODO - delete
 
 // A standard viewport implementation
 const DEFAULT_FOV = 15;
@@ -39,70 +104,6 @@ const flatWorld = {
   getPixelRatio(ratio) {
     return 1;
     // return ratio || 1;
-  },
-
-  getLighting() {
-    return {
-      enable: true,
-      ambient: {r: 1.0, g: 1.0, b: 1.0},
-      points: [{
-        diffuse: {r: 0.8, g: 0.8, b: 0.8},
-        specular: {r: 0.6, g: 0.6, b: 0.6},
-        position: [0.5, 0.5, 3]
-      }]
-    };
-  },
-
-  getBlending() {
-    return {
-      enable: true,
-      blendFunc: ['SRC_ALPHA', 'ONE_MINUS_SRC_ALPHA'],
-      blendEquation: 'FUNC_ADD'
-    };
-  },
-
-  Viewport: class Viewport {
-
-    /**
-     * @classdesc
-     * Calculate {x,y,with,height} of the WebGL viewport
-     * based on provided canvas width and height
-     *
-     * Note: The viewport will be set to a square that covers
-     * the canvas, and an offset will be applied to x or y
-     * as necessary to center the window in the viewport
-     * So that the camera will look at the center of the canvas
-     *
-     * @class
-     * @param {number} width
-     * @param {number} height
-     */
-    constructor(width, height) {
-      const xOffset = width > height ? 0 : (width - height) / 2;
-      const yOffset = height > width ? 0 : (height - width) / 2;
-      const size = Math.max(width, height);
-
-      this.x = xOffset;
-      this.y = yOffset;
-      this.width = size;
-      this.height = size;
-      this.size = Math.max(width, height);
-    }
-
-    screenToSpace({x, y}) {
-      return {
-        x: ((x - this.x) / this.width - 0.5) * flatWorld.size * 2,
-        y: ((y - this.y) / this.height - 0.5) * flatWorld.size * 2 * -1,
-        z: 0
-      };
-    }
-
-    // spaceToScreen({x, y}) {
-    //   return {
-    //     x:
-    //     x:
-    //   }
-    // }
   },
 
   WebMercatorCamera: class extends Camera {
@@ -296,5 +297,3 @@ export function getProjectionMatrix({
 
   return m;
 }
-
-export default flatWorld;

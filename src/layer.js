@@ -20,7 +20,7 @@
 
 /* eslint-disable guard-for-in */
 import AttributeManager from './attribute-manager';
-import flatWorld from './flat-world';
+import Viewport from './viewport';
 import {areEqualShallow} from './util';
 import {addIterator} from './util';
 import log from './log';
@@ -491,15 +491,14 @@ export default class Layer {
   setViewport() {
     const {width, height, latitude, longitude, zoom} = this.props;
     this.setState({
-      viewport: new flatWorld.Viewport(width, height),
+      viewport: new Viewport(width, height),
       mercator: ViewportMercator({
         width, height, latitude, longitude, zoom,
         tileSize: 512
       })
     });
-    const {x, y} = this.state.viewport;
     this.setUniforms({
-      viewport: [x, y, width, height],
+      viewport: [0, 0, width, height],
       mercatorZoom: zoom,
       mercatorCenter: [longitude, latitude]
     });

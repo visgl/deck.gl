@@ -25,21 +25,31 @@ const atan = Math.atan;
 const exp = Math.exp;
 const DEGREES_TO_RADIANS = PI / 180;
 const RADIANS_TO_DEGREES = 180 / PI;
+
 function radians(value) {
   return value * DEGREES_TO_RADIANS;
 }
+
 function degrees(value) {
   return value * RADIANS_TO_DEGREES;
 }
+
 // see: https://en.wikipedia.org/wiki/Web_Mercator
-export default function WebMercatorProjection(opts) {
-  const scale = (opts.tileSize || 512) * 0.5 / PI * pow(2, opts.zoom);
-  const lamda = radians(opts.longitude);
-  const phi = radians(opts.latitude);
+export default function WebMercatorProjection({
+  tileSize = 512,
+  longitude,
+  latitude,
+  zoom,
+  width = 256,
+  height = 256
+}) {
+  const scale = (tileSize || 512) * 0.5 / PI * pow(2, zoom);
+  const lamda = radians(longitude);
+  const phi = radians(latitude);
   const x = scale * (lamda + PI);
   const y = scale * (PI - log(tan(PI * 0.25 + phi * 0.5)));
-  const offsetX = opts.width * 0.5 - x;
-  const offsetY = opts.height * 0.5 - y;
+  const offsetX = width * 0.5 - x;
+  const offsetY = height * 0.5 - y;
 
   function project(lnglat2) {
     const lamda2 = lnglat2[0] * DEGREES_TO_RADIANS;
@@ -84,11 +94,11 @@ export default function WebMercatorProjection(opts) {
 
   function viewportContains(lnglat2) {
     const xy = project(lnglat2);
-    const x = xy[0];
-    const y = xy[1];
+    const x1 = xy[0];
+    const y1 = xy[1];
     return (
-      x >= 0 && x <= opts.width &&
-      y >= 0 && y <= opts.height
+      x1 >= 0 && x1 <= opts.width &&
+      y1 >= 0 && y1 <= opts.height
     );
   }
 

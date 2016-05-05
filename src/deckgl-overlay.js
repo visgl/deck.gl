@@ -24,7 +24,10 @@ import autobind from 'autobind-decorator';
 
 import WebGLRenderer from './webgl-renderer';
 import {Scene} from 'luma.gl';
-import flatWorld from './flat-world';
+import {DEFAULT_LIGHTING, DEFAULT_BLENDING, DEFAULT_BACKGROUND_COLOR}
+  from './config';
+
+import Viewport from './viewport';
 import {
   matchLayers, finalizeOldLayers, updateMatchedLayers, initializeNewLayers,
   layersNeedRedraw
@@ -86,8 +89,8 @@ export default class DeckGLOverlay extends React.Component {
     this.setState({
       gl,
       scene: new Scene(gl, {
-        lights: flatWorld.getLighting(),
-        backgroundColor: {r: 0, g: 0, b: 0, a: 0}
+        lights: DEFAULT_LIGHTING,
+        backgroundColor: DEFAULT_BACKGROUND_COLOR
       })
     });
     initializeNewLayers(this.props.layers, {gl});
@@ -134,11 +137,11 @@ export default class DeckGLOverlay extends React.Component {
         width={ width }
         height={ height }
 
-        viewport={ new flatWorld.Viewport(width, height) }
+        viewport={ new Viewport(width, height) }
         camera={ camera }
         scene={ scene }
-        blending={ blending || flatWorld.getBlending() }
-        pixelRatio={ flatWorld.getPixelRatio(window.devicePixelRatio) }
+        blending={ blending || DEFAULT_BLENDING }
+        pixelRatio={ window.devicePixelRatio }
 
         onRendererInitialized={ this._onRendererInitialized }
         onNeedRedraw={ this._checkIfNeedRedraw }
