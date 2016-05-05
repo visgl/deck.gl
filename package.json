@@ -72,7 +72,7 @@
     "react": "^0.14.0",
     "react-addons-test-utils": "^0.14.0",
     "react-dom": "^0.14.0",
-    "react-map-gl": "1.0.0-beta-8",
+    "react-map-gl": "1.0.0-beta-9",
     "react-redux": "^4.0.0",
     "redux": "^3.0.4",
     "tap-browser-color": "^0.1.2",
