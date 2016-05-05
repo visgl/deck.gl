@@ -500,10 +500,8 @@ export default class Layer {
     const {x, y} = this.state.viewport;
     this.setUniforms({
       viewport: [x, y, width, height],
-      mapViewport: [longitude, latitude, zoom, height],
-      mercatorLngLat: [longitude, latitude],
       mercatorZoom: zoom,
-      mercatorTileSize: height
+      mercatorCenter: [longitude, latitude]
     });
     log(3, this.state.viewport, latitude, longitude, zoom);
   }

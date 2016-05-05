@@ -249,6 +249,9 @@ class ExampleApp extends React.Component {
 
   @autobind
   _handleViewportChanged(viewport) {
+    if (viewport.pitch > 60) {
+      viewport.pitch = 60;
+    }
     this.props.dispatch(updateMap(viewport));
   }
 
@@ -380,7 +383,7 @@ class ExampleApp extends React.Component {
     // const projectionMatrix = getProjectionMatrix(viewport);
     const camera = flatWorld.getCamera({
       ...viewport,
-      projectionMatrix: new Mat4(viewport.projectionMatrix),
+      projectionMatrix: viewport.projectionMatrix,
       width,
       height
     });
@@ -392,7 +395,7 @@ class ExampleApp extends React.Component {
         layers={[
           // this._renderGridLayer(),
           this._renderChoroplethLayer(),
-          // this._renderHexagonLayer(),
+          this._renderHexagonLayer(),
           this._renderScatterplotLayer(),
           this._renderArcLayer()
         ]}

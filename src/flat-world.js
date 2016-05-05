@@ -19,9 +19,10 @@
 // THE SOFTWARE.
 
 import {PerspectiveCamera, Camera, Mat4, Vec3} from 'luma.gl';
+import Matrix4 from './math/matrix4';
 import assert from 'assert';
 // import WebMercatorProjection from './web-mercator-projection';
-import ViewportMercatorProject from 'viewport-mercator-project';
+import MercatorProject from './shaderlib/mercator-project';
 
 // A standard viewport implementation
 const DEFAULT_FOV = 15;
@@ -137,49 +138,63 @@ const flatWorld = {
   // Camera height = size / Math.tan((fov/2) * Math.PI/180);
   //
   getCameraHeight(size, fov) {
-    size = size || flatWorld.size;
-    fov = fov || flatWorld.fov;
+    assert(size !== undefined);
+    assert(fov !== undefined);
 
-    switch (fov) {
+    // switch (fov) {
     // case 15: return size * 7.595754112725151;
     // case 30: return size * 3.732050807568878;
     // case 45: return size * 2.414213562373095;
     // case 60: return size * 1.732050807568877;
-    default: return size / Math.tan(fov / 2 * Math.PI / 180);
-    }
+    // }
+    const height = size / Math.tan(fov / 2 * Math.PI / 180);
+    console.log(`size: ${size} fov: ${fov} height: ${height}`);
+    return height;
   },
 
-  getCamera2({projectionMatrix}) {
+  getCamera({projectionMatrix}) {
     assert(projectionMatrix, 'Needs projection matrix');
-    const cameraHeight = flatWorld.getCameraHeight();
-    return new flatWorld.WebMercatorCamera({
-      projectionMatrix,
-      fov: flatWorld.fov,
-      near: (cameraHeight + 1) / 100,
-      far: cameraHeight + 1,
-      position: [0, 0, cameraHeight],
-      aspect: 1
+
+    const camera = new PerspectiveCamera({
+      fov: 60,
+      near: (1 + 1) / 1000,
+      far: 10 * 1 * 100 + 1,
+      position: [0, -0, 1],
+      target: [0, 0, 0],
+      aspect: 1 // width / height
     });
+
+    camera.view = new Mat4().id();
+
+    for (let i = 0; i < projectionMatrix.length; ++i) {
+      camera.projection[i] = projectionMatrix[i];
+    }
+
+    return camera;
   },
 
-  getCamera({
+  getCamera2({
     projectionMatrix,
     pitch = 0, bearing = 0, altitude = 1.5,
     width, height,
     latitude, longitude, zoom
   }) {
-    const mercator = ViewportMercatorProject({
+    assert(false, 'Dont use for now');
+    const mercator = MercatorProject({
       width, height, latitude, longitude, zoom,
       tileSize: 512
     });
     mercator.offsetX = 0;
     mercator.offsetY = 0;
 
+    pitch *= 0.9;
+
     console.log(width, height);
     const fov =
       // 2 * Math.atan(0.5 / altitude);
       2 * Math.atan((height / 2) / altitude);
-    const cameraHeight = flatWorld.getCameraHeight(height, fov);
+    // const cameraHeight = flatWorld.getCameraHeight(height, fov);
+    const cameraHeight = height * altitude;
 
     const pitchRadians = pitch / 180 * Math.PI;
 
@@ -201,27 +216,42 @@ const flatWorld = {
     // )
     .$mulVec3(new Vec3(0, 1, 0));
 
-    console.log(bearing, pitch, position, up, fov / Math.PI * 180);
+    console.log(bearing, pitch, position, up, fov / Math.PI * 180,
+      'height ratio', cameraHeight / height / altitude);
     const camera = new PerspectiveCamera({
       fov,
       near: (cameraHeight + 1) / 1000,
       far: 10 * cameraHeight * 100 + 1,
       position: [0, -0, cameraHeight],
       target: [0, 0, 0],
-      // up,
-      aspect: 1
+      aspect: 1 // width / height
     });
 
-    camera.view
-       .$rotateXYZ(-pitch / 180 * Math.PI, 0, 0)
-       .$rotateXYZ(0, 0, bearing / 180 * Math.PI);
-    // camera.projection.$translate(0, 0, cameraHeight);
-    // camera.projection.$scale(1, -1, 1 / height);
-    // camera.projection.$rotateXYZ(pitch / 180 * Math.PI, 0, 0);
-    // camera.projection
-    //   .$rotateXYZ(0, 0, bearing / 180 * Math.PI)
-    //   .$translate(0, 0, 0);
-    // camera._updateUniforms();
+    const halfFov = Math.atan(0.5 / altitude);
+    const topHalfSurfaceDistance =
+      Math.sin(halfFov) * 2 * cameraHeight /
+      Math.sin(Math.PI / 2 - pitch - halfFov);
+
+    // Calculate z value of the farthest fragment that should be rendered.
+    const farZ =
+      Math.cos(Math.PI / 2 - pitch) * topHalfSurfaceDistance + altitude;
+
+    camera.projection = Mat4.perspective(
+      camera.projection,
+      2 * Math.atan((height / 2) / altitude),
+      width / height,
+      0.0001,
+      farZ
+    );
+
+    const [x, y] = mercator.project([longitude, latitude]);
+
+    camera.projection
+      .$translate(0, 0, -altitude)
+      .$scale(1, -1, 1 / height)
+      .$rotateXYZ(pitch / 180 * Math.PI, 0, 0)
+      .$rotateXYZ(0, 0, bearing / 180 * Math.PI)
+      .$translate(x, y, 0);
 
     return camera;
   }

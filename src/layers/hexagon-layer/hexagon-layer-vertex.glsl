@@ -21,6 +21,12 @@
 /* fragment shader for the hexagon-layer */
 #define SHADER_NAME hexagon-layer-vs
 
+uniform float mercatorZoom;
+uniform vec2 mercatorCenter;
+uniform vec4 viewport; // viewport: [x, y, width, height]
+#pragma glslify: mercatorProject = require(../../shaderlib/mercator-project)
+#pragma glslify: mercatorProjectViewport = require(../../shaderlib/mercator-project-viewport)
+
 attribute vec3 vertices;
 attribute vec3 positions;
 attribute vec3 colors;
@@ -33,58 +39,19 @@ uniform float radius;
 uniform float opacity;
 uniform float angle;
 
-// viewport: [x, y, width, height]
-uniform vec4 viewport;
-// mercatorSettings: [longitude, latitude, zoom, worldSize]
-uniform vec4 mercatorSettings;
-uniform vec2 mercatorLngLat;
-uniform float mercatorZoom;
-uniform float mercatorTileSize;
-
 uniform float renderPickingBuffer;
 uniform vec3 selected;
 varying vec4 vColor;
-
-const float TILE_SIZE = 512.0;
-const float PI = 3.1415926536;
-
-vec2 mercatorProject(vec2 lnglat, float zoom) {
-  float longitude = lnglat.x;
-  float latitude = lnglat.y;
-
-  float lamda = radians(lnglat.x);
-  float phi = radians(lnglat.y);
-  float scale = pow(2.0, zoom) * TILE_SIZE / (PI * 2.0);
-
-  float x = scale * (lamda + PI);
-  float y = scale * (PI - log(tan(PI * 0.25 + phi * 0.5)));
-
-  return vec2(x, y);
-}
-
-// non-linear projection: lnglats => space/camera coordinates
-vec2 webMercatorProject(vec2 lnglat, float zoom) {
-  // This is constant - could be projected in JS before calling shader
-  vec2 mapCenter = mercatorProject(mercatorLngLat, zoom);
-  // Project the vertex.
-  vec2 theVertex = mercatorProject(lnglat, zoom);
-
-  float canvasSize = max(viewport.z, viewport.w);
-  float worldSize = mercatorTileSize;
-
-  // TODO further simplify: let worldSize = canvasSize
-  vec2 offsetXY = theVertex - mapCenter - viewport.xy + viewport.zw * 0.5;
-  vec2 scaledXY = offsetXY * (worldSize * 2.0 / canvasSize) - worldSize;
-
-  // flip y
-  return scaledXY * vec2(1.0, -1.0);
-}
 
 void main(void) {
   mat2 rotationMatrix = mat2(cos(angle), -sin(angle), sin(angle), cos(angle));
   vec3 rotatedVertices = vec3(rotationMatrix * vertices.xy * radius, vertices.z);
   vec4 verticesPositions = worldMatrix * vec4(rotatedVertices, 1.0);
-  vec4 centroidPositions = worldMatrix * vec4(webMercatorProject(positions.xy, mercatorZoom), positions.z, 0.0);
+
+  // vec2 pos = mercatorProjectViewport(positions.xy, mercatorZoom, mercatorCenter, viewport);
+  vec2 pos = mercatorProject(positions.xy, mercatorZoom);
+
+  vec4 centroidPositions = worldMatrix * vec4(pos.xy, positions.z, 0.0);
   vec3 p = centroidPositions.xyz + verticesPositions.xyz;
   gl_Position = projectionMatrix * vec4(p, 1.0);
 

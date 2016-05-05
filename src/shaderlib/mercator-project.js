@@ -17,8 +17,6 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-'use strict';
-
 const PI = Math.PI;
 const pow = Math.pow;
 const tan = Math.tan;
@@ -34,7 +32,7 @@ function degrees(value) {
   return value * RADIANS_TO_DEGREES;
 }
 // see: https://en.wikipedia.org/wiki/Web_Mercator
-function ViewportMercator(opts) {
+export default function WebMercatorProjection(opts) {
   const scale = (opts.tileSize || 512) * 0.5 / PI * pow(2, opts.zoom);
   const lamda = radians(opts.longitude);
   const phi = radians(opts.latitude);
@@ -48,10 +46,35 @@ function ViewportMercator(opts) {
     const phi2 = lnglat2[1] * DEGREES_TO_RADIANS;
     const x2 = scale * (lamda2 + PI);
     const y2 = scale * (PI - log(tan(PI * 0.25 + phi2 * 0.5)));
-    return [x2 + offsetX, y2 + offsetY];
+    return [x2, y2];
   }
 
   function unproject(xy) {
+    const x2 = xy[0];
+    const y2 = xy[1];
+    const lamda2 = x2 / scale - PI;
+    const phi2 = 2 * (atan(exp(PI - y2 / scale)) - PI * 0.25);
+    return [degrees(lamda2), degrees(phi2)];
+  }
+
+  function getViewMatrix4() {
+    return [
+      1, 0, 0, -offsetX,
+      0, 1, 0, -offsetY,
+      0, 0, 1, 0,
+      0, 0, 0, 1
+    ];
+  }
+
+  function projectViewport(lnglat2) {
+    const lamda2 = lnglat2[0] * DEGREES_TO_RADIANS;
+    const phi2 = lnglat2[1] * DEGREES_TO_RADIANS;
+    const x2 = scale * (lamda2 + PI);
+    const y2 = scale * (PI - log(tan(PI * 0.25 + phi2 * 0.5)));
+    return [x2 + offsetX, y2 + offsetY];
+  }
+
+  function unprojectViewport(xy) {
     const x2 = xy[0] - offsetX;
     const y2 = xy[1] - offsetY;
     const lamda2 = x2 / scale - PI;
@@ -59,7 +82,7 @@ function ViewportMercator(opts) {
     return [degrees(lamda2), degrees(phi2)];
   }
 
-  function contains(lnglat2) {
+  function viewportContains(lnglat2) {
     const xy = project(lnglat2);
     const x = xy[0];
     const y = xy[1];
@@ -69,7 +92,12 @@ function ViewportMercator(opts) {
     );
   }
 
-  return {project: project, unproject: unproject, contains: contains};
+  return {
+    project,
+    unproject,
+    getViewMatrix4,
+    projectViewport,
+    unprojectViewport,
+    viewportContains
+  };
 }
-
-module.exports = ViewportMercator;
