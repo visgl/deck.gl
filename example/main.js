@@ -32,6 +32,7 @@ import {Provider, connect} from 'react-redux';
 import autobind from 'autobind-decorator';
 
 import MapboxGLMap from 'react-map-gl';
+import {PerspectiveCamera, Mat4} from 'luma.gl';
 import request from 'd3-request';
 import {
   DeckGLOverlay,
@@ -39,10 +40,8 @@ import {
   ChoroplethLayer,
   ScatterplotLayer,
   ArcLayer,
-  GridLayer,
-  getCamera
+  GridLayer
 } from '../src';
-import {Mat4} from 'luma.gl';
 
 // ---- Default Settings ---- //
 /* eslint-disable no-process-env */
@@ -50,7 +49,7 @@ const MAPBOX_ACCESS_TOKEN = process.env.MAPBOX_ACCESS_TOKEN ||
   'Set MAPBOX_ACCESS_TOKEN environment variable or put your token here.';
 
 const INITIAL_STATE = {
-  viewport: {
+  mapGeoViewport: {
     latitude: 37.751537058389985,
     longitude: -122.42694203247012,
     zoom: 11.5,
@@ -64,8 +63,8 @@ const INITIAL_STATE = {
 };
 
 // ---- Action ---- //
-function updateMap(viewport) {
-  return {type: 'UPDATE_MAP', viewport};
+function updateMap(mapGeoViewport) {
+  return {type: 'UPDATE_MAP', mapGeoViewport};
 }
 
 function loadChoropleths(choropleths) {
@@ -84,7 +83,7 @@ function loadPoints(points) {
 function reducer(state = INITIAL_STATE, action) {
   switch (action.type) {
   case 'UPDATE_MAP':
-    return {...state, viewport: action.viewport};
+    return {...state, mapGeoViewport: action.mapGeoViewport};
   case 'LOAD_CHOROPLETHS':
     return {...state, choropleths: action.choropleths};
   case 'LOAD_HEXAGONS':
@@ -118,7 +117,7 @@ function reducer(state = INITIAL_STATE, action) {
 // redux states -> react props
 function mapStateToProps(state) {
   return {
-    viewport: state.viewport,
+    mapGeoViewport: state.mapGeoViewport,
     choropleths: state.choropleths,
     hexagons: state.hexagons,
     points: state.points,
@@ -196,7 +195,7 @@ class ExampleApp extends React.Component {
 
   componentDidMount() {
     // update arc stroke width
-    window.setTimeout(this._updateArcStrokeWidth, 3000);
+    // window.setTimeout(this._updateArcStrokeWidth, 3000);
   }
 
   componentWillUnmount() {
@@ -248,11 +247,11 @@ class ExampleApp extends React.Component {
   }
 
   @autobind
-  _handleViewportChanged(viewport) {
-    if (viewport.pitch > 60) {
-      viewport.pitch = 60;
+  _handleViewportChanged(mapGeoViewport) {
+    if (mapGeoViewport.pitch > 60) {
+      mapGeoViewport.pitch = 60;
     }
-    this.props.dispatch(updateMap(viewport));
+    this.props.dispatch(updateMap(mapGeoViewport));
   }
 
   @autobind
@@ -286,15 +285,15 @@ class ExampleApp extends React.Component {
   }
 
   _renderGridLayer() {
-    const {viewport, points} = this.props;
+    const {mapGeoViewport, points} = this.props;
 
     return new GridLayer({
       id: 'gridLayer',
       width: window.innerWidth,
       height: window.innerHeight,
-      latitude: viewport.latitude,
-      longitude: viewport.longitude,
-      zoom: viewport.zoom,
+      latitude: mapGeoViewport.latitude,
+      longitude: mapGeoViewport.longitude,
+      zoom: mapGeoViewport.zoom,
       isPickable: false,
       opacity: 0.06,
       data: points
@@ -302,14 +301,14 @@ class ExampleApp extends React.Component {
   }
 
   _renderChoroplethLayer() {
-    const {viewport, choropleths} = this.props;
+    const {mapGeoViewport, choropleths} = this.props;
     return new ChoroplethLayer({
       id: 'choroplethLayer',
       width: window.innerWidth,
       height: window.innerHeight,
-      latitude: viewport.latitude,
-      longitude: viewport.longitude,
-      zoom: viewport.zoom,
+      latitude: mapGeoViewport.latitude,
+      longitude: mapGeoViewport.longitude,
+      zoom: mapGeoViewport.zoom,
       data: choropleths,
       opacity: 0.8,
       isPickable: false,
@@ -320,15 +319,15 @@ class ExampleApp extends React.Component {
   }
 
   _renderHexagonLayer() {
-    const {viewport, hexData} = this.props;
+    const {mapGeoViewport, hexData} = this.props;
 
     return new HexagonLayer({
       id: 'hexagonLayer',
       width: window.innerWidth,
       height: window.innerHeight,
-      latitude: viewport.latitude,
-      longitude: viewport.longitude,
-      zoom: viewport.zoom,
+      latitude: mapGeoViewport.latitude,
+      longitude: mapGeoViewport.longitude,
+      zoom: mapGeoViewport.zoom,
       data: hexData,
       isPickable: true,
       opacity: 0.1,
@@ -338,15 +337,15 @@ class ExampleApp extends React.Component {
   }
 
   _renderScatterplotLayer() {
-    const {viewport, points} = this.props;
+    const {mapGeoViewport, points} = this.props;
 
     return new ScatterplotLayer({
       id: 'scatterplotLayer',
       width: window.innerWidth,
       height: window.innerHeight,
-      latitude: viewport.latitude,
-      longitude: viewport.longitude,
-      zoom: viewport.zoom,
+      latitude: mapGeoViewport.latitude,
+      longitude: mapGeoViewport.longitude,
+      zoom: mapGeoViewport.zoom,
       isPickable: false,
       data: points,
       onHover: this._handleScatterplotHovered,
@@ -355,23 +354,22 @@ class ExampleApp extends React.Component {
   }
 
   _renderArcLayer() {
-
-    const {viewport, arcs} = this.props;
+    const {mapGeoViewport, arcs} = this.props;
 
     return new ArcLayer({
       id: 'arcLayer',
       width: window.innerWidth,
       height: window.innerHeight,
-      latitude: viewport.latitude,
-      longitude: viewport.longitude,
-      zoom: viewport.zoom,
+      latitude: mapGeoViewport.latitude,
+      longitude: mapGeoViewport.longitude,
+      zoom: mapGeoViewport.zoom,
       data: arcs,
       strokeWidth: this.state.arcStrokeWidth || 1
     });
   }
 
   _renderOverlay() {
-    const {choropleths, hexagons, points, viewport} = this.props;
+    const {choropleths, hexagons, points, mapGeoViewport} = this.props;
     const {width, height} = this.state;
 
     // wait until data is ready before rendering
@@ -379,23 +377,23 @@ class ExampleApp extends React.Component {
       return [];
     }
 
-    // const {projectionMatrix} = viewport;
-    // const projectionMatrix = getProjectionMatrix(viewport);
-    const camera = getCamera({
-      ...viewport,
-      projectionMatrix: viewport.projectionMatrix,
-      width,
-      height
-    });
+    // ---- creating camera from projectionMatrix ---- //
+    const camera = new PerspectiveCamera();
+    camera.view = new Mat4().id();
+    for (let i = 0; i < mapGeoViewport.projectionMatrix.length; ++i) {
+      camera.projection[i] = mapGeoViewport.projectionMatrix[i];
+    }
+    // ---- TODO move this to luma.gl ---------------- //
+
     return (
       <DeckGLOverlay
         camera={camera}
         width={width}
         height={height}
         layers={[
-          // this._renderGridLayer(),
+          this._renderGridLayer(),
           this._renderChoroplethLayer(),
-          // this._renderHexagonLayer(),
+          this._renderHexagonLayer(),
           this._renderScatterplotLayer(),
           this._renderArcLayer()
         ]}
@@ -404,7 +402,7 @@ class ExampleApp extends React.Component {
   }
 
   _renderMap() {
-    const {viewport} = this.props;
+    const {mapGeoViewport} = this.props;
     const {width, height} = this.state;
 
     return (
@@ -413,7 +411,7 @@ class ExampleApp extends React.Component {
         width={width}
         height={height}
         perspectiveEnabled={true}
-        { ...viewport }
+        { ...mapGeoViewport }
         onChangeViewport={this._handleViewportChanged}>
         { this._renderOverlay() }
       </MapboxGLMap>

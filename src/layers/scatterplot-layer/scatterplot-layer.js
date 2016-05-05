@@ -138,11 +138,8 @@ export default class ScatterplotLayer extends Layer {
     const pixel0 = this.project({lon: -122, lat: 37.5});
     const pixel1 = this.project({lon: -122, lat: 37.5002});
 
-    const space0 = this.screenToSpace(pixel0);
-    const space1 = this.screenToSpace(pixel1);
-
-    const dx = space0.x - space1.x;
-    const dy = space0.y - space1.y;
+    const dx = pixel0.x - pixel1.x;
+    const dy = pixel0.y - pixel1.y;
 
     this.state.radius = Math.max(Math.sqrt(dx * dx + dy * dy), 2.0);
   }

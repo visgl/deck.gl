@@ -140,10 +140,8 @@ export default class GridLayer extends Layer {
 
     for (const point of data) {
       const pixel = this.project([point.position.y, point.position.x]);
-      const space = this.screenToSpace(pixel);
-
-      const colId = Math.floor((space.x + width) / unitWidth);
-      const rowId = Math.floor((space.y + height) / unitHeight);
+      const colId = Math.floor((pixel.x + width) / unitWidth);
+      const rowId = Math.floor((pixel.y + height) / unitHeight);
       if (colId < numCol && rowId < numRow) {
         const i4 = (colId + rowId * numCol) * size;
         value[i4 + 2] = value[i4 + 0] += 1;

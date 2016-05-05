@@ -20,7 +20,6 @@
 
 /* eslint-disable guard-for-in */
 import AttributeManager from './attribute-manager';
-import Viewport from './viewport';
 import {areEqualShallow} from './util';
 import {addIterator} from './util';
 import log from './log';
@@ -491,7 +490,12 @@ export default class Layer {
   setViewport() {
     const {width, height, latitude, longitude, zoom} = this.props;
     this.setState({
-      viewport: new Viewport(width, height),
+      viewport: {
+        x: 0,
+        y: 0,
+        width,
+        height
+      },
       mercator: ViewportMercator({
         width, height, latitude, longitude, zoom,
         tileSize: 512
@@ -526,10 +530,4 @@ export default class Layer {
       mercator.unproject([xy.x, xy.y]);
     return {lat, lon};
   }
-
-  screenToSpace({x, y}) {
-    const {viewport} = this.state;
-    return viewport.screenToSpace({x, y});
-  }
-
 }

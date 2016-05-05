@@ -26,11 +26,9 @@ import WebGLRenderer from './webgl-renderer';
 import {Scene} from 'luma.gl';
 import {DEFAULT_LIGHTING, DEFAULT_BLENDING, DEFAULT_BACKGROUND_COLOR}
   from './config';
-
-import Viewport from './viewport';
 import {
-  matchLayers, finalizeOldLayers, updateMatchedLayers, initializeNewLayers,
-  layersNeedRedraw
+  matchLayers, finalizeOldLayers, updateMatchedLayers,
+  initializeNewLayers, layersNeedRedraw
 } from './layer-manager';
 
 const PROP_TYPES = {
@@ -127,6 +125,11 @@ export default class DeckGLOverlay extends React.Component {
   render() {
     const {width, height, layers, blending, camera, ...otherProps} = this.props;
     const {scene} = this.state;
+    const viewport = {
+      x: 0,
+      y: 0,
+      width, height
+    };
 
     this.initializeLayers(layers);
 
@@ -137,7 +140,7 @@ export default class DeckGLOverlay extends React.Component {
         width={ width }
         height={ height }
 
-        viewport={ new Viewport(width, height) }
+        viewport={ viewport }
         camera={ camera }
         scene={ scene }
         blending={ blending || DEFAULT_BLENDING }

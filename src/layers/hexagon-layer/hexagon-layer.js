@@ -147,13 +147,9 @@ export default class HexagonLayer extends Layer {
     const spaceCoord0 = this.project({lat: vertex0[1], lon: vertex0[0]});
     const spaceCoord3 = this.project({lat: vertex3[1], lon: vertex3[0]});
 
-    // map from space coordinates to screen coordinates
-    const screenCoord0 = this.screenToSpace(spaceCoord0);
-    const screenCoord3 = this.screenToSpace(spaceCoord3);
-
     // distance between two close centroids
-    const dx = screenCoord0.x - screenCoord3.x;
-    const dy = screenCoord0.y - screenCoord3.y;
+    const dx = spaceCoord0.x - spaceCoord3.x;
+    const dy = spaceCoord0.y - spaceCoord3.y;
     const dxy = Math.sqrt(dx * dx + dy * dy);
 
     this.setUniforms({

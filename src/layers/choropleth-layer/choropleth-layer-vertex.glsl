@@ -41,7 +41,6 @@ uniform vec3 selectedPickingColor;
 varying vec4 vColor;
 
 void main(void) {
-  // vec2 pos = mercatorProjectViewport(vertices.xy, mercatorZoom, mercatorCenter, viewport);
   vec2 pos = mercatorProject(vertices.xy, mercatorZoom);
   vec3 p = vec3(pos.xy, vertices.z);
   gl_Position = projectionMatrix * worldMatrix * vec4(p, 1.0);
