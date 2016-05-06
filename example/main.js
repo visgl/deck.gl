@@ -49,7 +49,7 @@ const MAPBOX_ACCESS_TOKEN = process.env.MAPBOX_ACCESS_TOKEN ||
   'Set MAPBOX_ACCESS_TOKEN environment variable or put your token here.';
 
 const INITIAL_STATE = {
-  mapGeoViewport: {
+  mapViewState: {
     latitude: 37.751537058389985,
     longitude: -122.42694203247012,
     zoom: 11.5,
@@ -63,8 +63,8 @@ const INITIAL_STATE = {
 };
 
 // ---- Action ---- //
-function updateMap(mapGeoViewport) {
-  return {type: 'UPDATE_MAP', mapGeoViewport};
+function updateMap(mapViewState) {
+  return {type: 'UPDATE_MAP', mapViewState};
 }
 
 function loadChoropleths(choropleths) {
@@ -83,7 +83,7 @@ function loadPoints(points) {
 function reducer(state = INITIAL_STATE, action) {
   switch (action.type) {
   case 'UPDATE_MAP':
-    return {...state, mapGeoViewport: action.mapGeoViewport};
+    return {...state, mapViewState: action.mapViewState};
   case 'LOAD_CHOROPLETHS':
     return {...state, choropleths: action.choropleths};
   case 'LOAD_HEXAGONS':
@@ -117,7 +117,7 @@ function reducer(state = INITIAL_STATE, action) {
 // redux states -> react props
 function mapStateToProps(state) {
   return {
-    mapGeoViewport: state.mapGeoViewport,
+    mapViewState: state.mapViewState,
     choropleths: state.choropleths,
     hexagons: state.hexagons,
     points: state.points,
@@ -247,11 +247,11 @@ class ExampleApp extends React.Component {
   }
 
   @autobind
-  _handleViewportChanged(mapGeoViewport) {
-    if (mapGeoViewport.pitch > 60) {
-      mapGeoViewport.pitch = 60;
+  _handleViewportChanged(mapViewState) {
+    if (mapViewState.pitch > 60) {
+      mapViewState.pitch = 60;
     }
-    this.props.dispatch(updateMap(mapGeoViewport));
+    this.props.dispatch(updateMap(mapViewState));
   }
 
   @autobind
@@ -285,15 +285,15 @@ class ExampleApp extends React.Component {
   }
 
   _renderGridLayer() {
-    const {mapGeoViewport, points} = this.props;
+    const {mapViewState, points} = this.props;
 
     return new GridLayer({
       id: 'gridLayer',
       width: window.innerWidth,
       height: window.innerHeight,
-      latitude: mapGeoViewport.latitude,
-      longitude: mapGeoViewport.longitude,
-      zoom: mapGeoViewport.zoom,
+      latitude: mapViewState.latitude,
+      longitude: mapViewState.longitude,
+      zoom: mapViewState.zoom,
       isPickable: false,
       opacity: 0.06,
       data: points
@@ -301,14 +301,14 @@ class ExampleApp extends React.Component {
   }
 
   _renderChoroplethLayer() {
-    const {mapGeoViewport, choropleths} = this.props;
+    const {mapViewState, choropleths} = this.props;
     return new ChoroplethLayer({
       id: 'choroplethLayer',
       width: window.innerWidth,
       height: window.innerHeight,
-      latitude: mapGeoViewport.latitude,
-      longitude: mapGeoViewport.longitude,
-      zoom: mapGeoViewport.zoom,
+      latitude: mapViewState.latitude,
+      longitude: mapViewState.longitude,
+      zoom: mapViewState.zoom,
       data: choropleths,
       opacity: 0.8,
       isPickable: false,
@@ -319,15 +319,15 @@ class ExampleApp extends React.Component {
   }
 
   _renderHexagonLayer() {
-    const {mapGeoViewport, hexData} = this.props;
+    const {mapViewState, hexData} = this.props;
 
     return new HexagonLayer({
       id: 'hexagonLayer',
       width: window.innerWidth,
       height: window.innerHeight,
-      latitude: mapGeoViewport.latitude,
-      longitude: mapGeoViewport.longitude,
-      zoom: mapGeoViewport.zoom,
+      latitude: mapViewState.latitude,
+      longitude: mapViewState.longitude,
+      zoom: mapViewState.zoom,
       data: hexData,
       isPickable: true,
       opacity: 0.1,
@@ -337,15 +337,15 @@ class ExampleApp extends React.Component {
   }
 
   _renderScatterplotLayer() {
-    const {mapGeoViewport, points} = this.props;
+    const {mapViewState, points} = this.props;
 
     return new ScatterplotLayer({
       id: 'scatterplotLayer',
       width: window.innerWidth,
       height: window.innerHeight,
-      latitude: mapGeoViewport.latitude,
-      longitude: mapGeoViewport.longitude,
-      zoom: mapGeoViewport.zoom,
+      latitude: mapViewState.latitude,
+      longitude: mapViewState.longitude,
+      zoom: mapViewState.zoom,
       isPickable: false,
       data: points,
       onHover: this._handleScatterplotHovered,
@@ -354,22 +354,22 @@ class ExampleApp extends React.Component {
   }
 
   _renderArcLayer() {
-    const {mapGeoViewport, arcs} = this.props;
+    const {mapViewState, arcs} = this.props;
 
     return new ArcLayer({
       id: 'arcLayer',
       width: window.innerWidth,
       height: window.innerHeight,
-      latitude: mapGeoViewport.latitude,
-      longitude: mapGeoViewport.longitude,
-      zoom: mapGeoViewport.zoom,
+      latitude: mapViewState.latitude,
+      longitude: mapViewState.longitude,
+      zoom: mapViewState.zoom,
       data: arcs,
       strokeWidth: this.state.arcStrokeWidth || 1
     });
   }
 
   _renderOverlay() {
-    const {choropleths, hexagons, points, mapGeoViewport} = this.props;
+    const {choropleths, hexagons, points, mapViewState} = this.props;
     const {width, height} = this.state;
 
     // wait until data is ready before rendering
@@ -377,19 +377,14 @@ class ExampleApp extends React.Component {
       return [];
     }
 
-    // ---- creating camera from projectionMatrix ---- //
-    const camera = new PerspectiveCamera();
-    camera.view = new Mat4().id();
-    for (let i = 0; i < mapGeoViewport.projectionMatrix.length; ++i) {
-      camera.projection[i] = mapGeoViewport.projectionMatrix[i];
-    }
-    // ---- TODO move this to luma.gl ---------------- //
+    // TODO - we should just pass mapViewState to DeckGL, no need to mention
+    // the projectionMatrix.
 
     return (
       <DeckGLOverlay
-        camera={camera}
         width={width}
         height={height}
+        projectionMatrix={ mapViewState.projectionMatrix }
         layers={[
           this._renderGridLayer(),
           this._renderChoroplethLayer(),
@@ -402,7 +397,7 @@ class ExampleApp extends React.Component {
   }
 
   _renderMap() {
-    const {mapGeoViewport} = this.props;
+    const {mapViewState} = this.props;
     const {width, height} = this.state;
 
     return (
@@ -411,7 +406,7 @@ class ExampleApp extends React.Component {
         width={width}
         height={height}
         perspectiveEnabled={true}
-        { ...mapGeoViewport }
+        { ...mapViewState }
         onChangeViewport={this._handleViewportChanged}>
         { this._renderOverlay() }
       </MapboxGLMap>

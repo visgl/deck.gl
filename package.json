@@ -1,7 +1,7 @@
 {
   "name": "deck.gl",
   "description": "A suite of 3D-enabled data visualization overlays for react-map-gl",
-  "version": "3.0.0-beta1",
+  "version": "3.0.0-beta2",
   "keywords": [
     "webgl",
     "visualization",

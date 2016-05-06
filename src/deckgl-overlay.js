@@ -23,7 +23,7 @@ import React, {PropTypes} from 'react';
 import autobind from 'autobind-decorator';
 
 import WebGLRenderer from './webgl-renderer';
-import {Scene} from 'luma.gl';
+import {Scene, Camera, PerspectiveCamera, Mat4} from 'luma.gl';
 import {DEFAULT_LIGHTING, DEFAULT_BLENDING, DEFAULT_BACKGROUND_COLOR}
   from './config';
 import {
@@ -31,17 +31,32 @@ import {
   initializeNewLayers, layersNeedRedraw
 } from './layer-manager';
 
+import assert from 'assert';
+
 const PROP_TYPES = {
   width: PropTypes.number.isRequired,
   height: PropTypes.number.isRequired,
   layers: PropTypes.array.isRequired,
-  blending: PropTypes.object
+  blending: PropTypes.object,
+  camera: PropTypes.instanceOf(Camera),
+  // TODO - replace with actual map view state props, build matrix from those
+  projectionMatrix: PropTypes.any
+};
+
+const DEFAULT_PROPS = {
+  blending: DEFAULT_BLENDING,
+  camera: null,
+  pronectionMatrix: null
 };
 
 export default class DeckGLOverlay extends React.Component {
 
   static get propTypes() {
     return PROP_TYPES;
+  }
+
+  static get defaultProps() {
+    return DEFAULT_PROPS;
   }
 
   constructor(props) {
@@ -123,15 +138,33 @@ export default class DeckGLOverlay extends React.Component {
   }
 
   render() {
-    const {width, height, layers, blending, camera, ...otherProps} = this.props;
+    const {
+      width, height, layers, blending, projectionMatrix, ...otherProps
+    } = this.props;
+    let {camera} = this.props;
     const {scene} = this.state;
+
+    this.initializeLayers(layers);
+
+    // creating camera from projectionMatrix
+    // TODO move this to react-map-gl utility
+    // TODO should be able to build matrix from
+    // standard mabox props: lat/lon/zoom/pitch/bearing/altitude
+    if (!camera) {
+      assert(projectionMatrix,
+        'DeckGLOverlay needs either camera or projectionMatrix');
+      camera = new PerspectiveCamera();
+      camera.view = new Mat4().id();
+      for (let i = 0; i < projectionMatrix.length; ++i) {
+        camera.projection[i] = projectionMatrix[i];
+      }
+    }
+
     const viewport = {
       x: 0,
       y: 0,
       width, height
     };
-
-    this.initializeLayers(layers);
 
     return (
       <WebGLRenderer
@@ -143,7 +176,7 @@ export default class DeckGLOverlay extends React.Component {
         viewport={ viewport }
         camera={ camera }
         scene={ scene }
-        blending={ blending || DEFAULT_BLENDING }
+        blending={ blending }
         pixelRatio={ window.devicePixelRatio }
 
         onRendererInitialized={ this._onRendererInitialized }
