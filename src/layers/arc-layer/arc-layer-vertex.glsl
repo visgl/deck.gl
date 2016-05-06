@@ -21,11 +21,8 @@
 /* vertex shader for the arc-layer */
 #define SHADER_NAME arc-layer-vs
 
+#pragma glslify: mercatorProject = require(../../../shaderlib/mercator-project)
 uniform float mercatorZoom;
-uniform vec2 mercatorCenter;
-uniform vec4 viewport; // viewport: [x, y, width, height]
-#pragma glslify: mercatorProject = require(../../shaderlib/mercator-project)
-#pragma glslify: mercatorProjectViewport = require(../../shaderlib/mercator-project-viewport)
 
 const float N = 49.0;
 
@@ -49,9 +46,6 @@ float paraboloid(vec2 source, vec2 target, float index) {
 }
 
 void main(void) {
-  // vec2 source = mercatorProjectViewport(positions.xy, mercatorZoom, mercatorCenter, viewport);
-  // vec2 target = mercatorProjectViewport(positions.zw, mercatorZoom, mercatorCenter, viewport);
-
   vec2 source = mercatorProject(positions.xy, mercatorZoom);
   vec2 target = mercatorProject(positions.zw, mercatorZoom);
 

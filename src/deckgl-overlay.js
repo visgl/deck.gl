@@ -46,7 +46,7 @@ const PROP_TYPES = {
 const DEFAULT_PROPS = {
   blending: DEFAULT_BLENDING,
   camera: null,
-  pronectionMatrix: null
+  projectionMatrix: null
 };
 
 export default class DeckGLOverlay extends React.Component {
@@ -151,12 +151,17 @@ export default class DeckGLOverlay extends React.Component {
     // TODO should be able to build matrix from
     // standard mabox props: lat/lon/zoom/pitch/bearing/altitude
     if (!camera) {
-      assert(projectionMatrix,
-        'DeckGLOverlay needs either camera or projectionMatrix');
       camera = new PerspectiveCamera();
-      camera.view = new Mat4().id();
-      for (let i = 0; i < projectionMatrix.length; ++i) {
-        camera.projection[i] = projectionMatrix[i];
+      if (!projectionMatrix) {
+        /* eslint-disable no-console */
+        /* global console */
+        console.warn('DeckGLOverlay needs either camera or projectionMatrix');
+        /* eslint-enable no-console */
+      } else {
+        camera.view = new Mat4().id();
+        for (let i = 0; i < projectionMatrix.length; ++i) {
+          camera.projection[i] = projectionMatrix[i];
+        }
       }
     }
 

@@ -1,6 +1,7 @@
 {
   "name": "deck.gl",
   "description": "A suite of 3D-enabled data visualization overlays for react-map-gl",
+  "license": "MIT",
   "version": "3.0.0-beta2",
   "keywords": [
     "webgl",
@@ -15,7 +16,7 @@
     "url": "https://github.com/uber-common/deck.gl.git"
   },
   "main": "dist/index.js",
-  "license": "MIT",
+  "files": ["dist", "shaderlib", "src"],
   "browserify": {
     "transform": [
       "babelify",
@@ -31,27 +32,13 @@
       "**/Documents/**"
     ]
   },
-  "files": [
-    "src", "dist"
-  ],
   "dependencies": {
     "autobind-decorator": "^1.3.3",
-    "babel-cli": "^6.3.15",
-    "babel-core": "6.5.1",
-    "babel-eslint": "^4.1.6",
-    "babel-plugin-transform-builtin-extend": "1.1.0",
-    "babel-plugin-transform-decorators-legacy": "^1.3.4",
-    "babel-preset-es2015": "^6.3.13",
-    "babel-preset-react": "^6.3.13",
-    "babel-preset-stage-2": "^6.3.13",
-    "babelify": "^7.2.0",
-    "browserify": "^13.0.0",
+    "babel-core": "^6.7.7",
     "earcut": "^2.0.6",
-    "envify": "^3.4.0",
     "geojson-normalize": "0.0.1",
     "get-pixels": "^3.3.0",
     "global": "^4.3.0",
-    "glslify": "^5.0.0",
     "lodash.flattendeep": "^3.0.2",
     "lodash.isequal": "^3.0.4",
     "lodash.isfunction": "^3.0.6",
@@ -64,6 +51,17 @@
   "devDependencies": {
     "babel-plugin-glslify": "^1.0.0",
     "babel-polyfill": "^6.1.19",
+    "babel-cli": "^6.3.15",
+    "babel-eslint": "^4.1.6",
+    "babel-plugin-transform-builtin-extend": "1.1.0",
+    "babel-plugin-transform-decorators-legacy": "^1.3.4",
+    "babel-preset-es2015": "^6.3.13",
+    "babel-preset-react": "^6.3.13",
+    "babel-preset-stage-2": "^6.3.13",
+    "babelify": "^7.2.0",
+    "browserify": "^13.0.0",
+    "envify": "^3.4.0",
+    "glslify": "^5.0.0",
     "budo": "^8.0.3",
     "d3-request": "^0.2.2",
     "electron-prebuilt": "^0.37.2",

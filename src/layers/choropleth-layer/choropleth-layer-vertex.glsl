@@ -21,11 +21,8 @@
 /* vertex shader for the choropleth-layer */
 #define SHADER_NAME choropleth-layer-vertex-shader
 
+#pragma glslify: mercatorProject = require(../../../shaderlib/mercator-project)
 uniform float mercatorZoom;
-uniform vec2 mercatorCenter;
-uniform vec4 viewport; // viewport: [x, y, width, height]
-#pragma glslify: mercatorProject = require(../../shaderlib/mercator-project)
-#pragma glslify: mercatorProjectViewport = require(../../shaderlib/mercator-project-viewport)
 
 attribute vec3 vertices;
 attribute vec3 colors;

@@ -21,11 +21,8 @@
 /* fragment shader for the hexagon-layer */
 #define SHADER_NAME hexagon-layer-vs
 
+#pragma glslify: mercatorProject = require(../../../shaderlib/mercator-project)
 uniform float mercatorZoom;
-uniform vec2 mercatorCenter;
-uniform vec4 viewport; // viewport: [x, y, width, height]
-#pragma glslify: mercatorProject = require(../../shaderlib/mercator-project)
-#pragma glslify: mercatorProjectViewport = require(../../shaderlib/mercator-project-viewport)
 
 attribute vec3 vertices;
 attribute vec3 positions;
@@ -48,7 +45,6 @@ void main(void) {
   vec3 rotatedVertices = vec3(rotationMatrix * vertices.xy * radius, vertices.z);
   vec4 verticesPositions = worldMatrix * vec4(rotatedVertices, 1.0);
 
-  // vec2 pos = mercatorProjectViewport(positions.xy, mercatorZoom, mercatorCenter, viewport);
   vec2 pos = mercatorProject(positions.xy, mercatorZoom);
 
   vec4 centroidPositions = worldMatrix * vec4(pos.xy, positions.z, 0.0);

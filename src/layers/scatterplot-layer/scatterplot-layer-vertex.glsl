@@ -21,11 +21,8 @@
 /* vertex shader for the scatterplot-layer */
 #define SHADER_NAME scatterplot-layer-vs
 
+#pragma glslify: mercatorProject = require(../../../shaderlib/mercator-project)
 uniform float mercatorZoom;
-uniform vec2 mercatorCenter;
-uniform vec4 viewport; // viewport: [x, y, width, height]
-#pragma glslify: mercatorProject = require(../../shaderlib/mercator-project)
-#pragma glslify: mercatorProjectViewport = require(../../shaderlib/mercator-project-viewport)
 
 attribute vec3 vertices;
 attribute vec3 positions;
