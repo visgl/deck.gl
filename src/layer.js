@@ -216,40 +216,29 @@ export default class Layer {
       return this.state.numInstances;
     }
 
-    // Check if app has set an explicit value
-    if (props.numInstances) {
+    // Check if app has provided an explicit value
+    if (props.numInstances !== undefined) {
       return props.numInstances;
     }
 
     const {data} = props;
 
-    // Check if ES6 collection "size" attribute is set
+    // Check if ES6 collection "count" function is available
     if (data && typeof data.count === 'function') {
       return data.count();
     }
 
     // Check if ES6 collection "size" attribute is set
-    if (data && data.size) {
+    if (data && data.size !== undefined) {
       return data.size;
     }
 
-    // Check if array length attribute is set on data
-    // Note: checking this last since some ES6 collections (Immutable)
-    // emit profuse warnings when trying to access .length
-    if (data && data.length) {
+    // Check if array length attribute is set
+    // Note: checking this last since some ES6 collections (Immutable.js)
+    // emit profuse warnings when trying to access `length` attribute
+    if (data && data.length !== undefined) {
       return data.length;
     }
-
-    // TODO - slow, we probably should not support this unless
-    // we limit the number of invocations
-    //
-    // Use iteration to count objects
-    // let count = 0;
-    // /* eslint-disable no-unused-vars */
-    // for (const object of data) {
-    //   count++;
-    // }
-    // return count;
 
     throw new Error('Could not deduce numInstances');
   }
