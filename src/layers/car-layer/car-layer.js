@@ -35,26 +35,6 @@ const ATTRIBUTES = {
   colors: {size: 3, '0': 'red', '1': 'green', '2': 'blue'}
 };
 
-function loadObj(url, cb) {
-  d3.text(url, function(error, text) {
-    if (error) throw error;
-    const mesh = new OBJ.Mesh(text);
-    cb(mesh);
-  });
-}
-
-function blobToFile(blob, name) {
-  blob.lastModifiedDate = new Date();
-  blob.name = name;
-  return blob;
-}
-
-function getFileObject(path, cb) {
-  request(path, cb)
-    .responseType('blob')
-    .response(blobToFile);
-}
-
 export default class CarLayer extends Layer {
 
   static get attributes() {

@@ -1,6 +1,7 @@
 dist/*
 build/*
 .project
+.idea
 .DS_Store
 *.zip
 *.rar
