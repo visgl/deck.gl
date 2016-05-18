@@ -18,14 +18,33 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-/* eslint-disable block-scoped-var */
-export {default as DeckGLOverlay} from './deckgl-overlay';
+/* vertex shader for the scatterplot-layer */
+#define SHADER_NAME scatterplot-layer-vs
 
-export {default as Layer} from './layer';
+uniform float mercatorZoom;
+uniform vec2 mercatorCenter;
+uniform vec4 viewport; // viewport: [x, y, width, height]
+#pragma glslify: mercatorProject = require(../../shaderlib/mercator-project)
+#pragma glslify: mercatorProjectViewport = require(../../shaderlib/mercator-project-viewport)
 
-export {default as HexagonLayer} from './layers/hexagon-layer';
-export {default as ChoroplethLayer} from './layers/choropleth-layer';
-export {default as ScatterplotLayer} from './layers/scatterplot-layer';
-export {default as GridLayer} from './layers/grid-layer';
-export {default as ArcLayer} from './layers/arc-layer';
-export {default as CarLayer} from './layers/car-layer';
+attribute vec3 vertices;
+attribute vec3 positions;
+attribute vec3 colors;
+
+uniform float radius;
+
+uniform mat4 worldMatrix;
+uniform mat4 projectionMatrix;
+
+varying vec3 vColor;
+attribute vec3 pickingColors;
+uniform float renderPickingBuffer;
+
+void main(void) {
+  vColor = mix(colors / 255.0, pickingColors / 255.0, renderPickingBuffer);
+
+  // vec2 pos = mercatorProjectViewport(positions.xy, mercatorZoom, mercatorCenter, viewport);
+  vec2 pos = mercatorProject(positions.xy, mercatorZoom);
+  vec3 p = vec3(pos, positions.z) + vertices * radius;
+  gl_Position = projectionMatrix * worldMatrix * vec4(p, 1.0);
+}

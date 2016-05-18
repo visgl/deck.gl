@@ -18,14 +18,16 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-/* eslint-disable block-scoped-var */
-export {default as DeckGLOverlay} from './deckgl-overlay';
+/* fragment shader for the scatterplot-layer */
+#define SHADER_NAME scatterplot-layer-fs
 
-export {default as Layer} from './layer';
+#ifdef GL_ES
+precision highp float;
+#endif
 
-export {default as HexagonLayer} from './layers/hexagon-layer';
-export {default as ChoroplethLayer} from './layers/choropleth-layer';
-export {default as ScatterplotLayer} from './layers/scatterplot-layer';
-export {default as GridLayer} from './layers/grid-layer';
-export {default as ArcLayer} from './layers/arc-layer';
-export {default as CarLayer} from './layers/car-layer';
+varying vec3 vColor;
+uniform float opacity;
+
+void main(void) {
+  gl_FragColor = vec4(vColor, opacity);
+}
