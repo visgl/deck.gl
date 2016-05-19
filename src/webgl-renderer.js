@@ -21,7 +21,6 @@
 /* eslint-disable no-console, no-try-catch */
 /* global console */
 import React, {PropTypes} from 'react';
-import ReactDOM from 'react-dom';
 import autobind from 'autobind-decorator';
 import {createGLContext, Camera, Scene, Events, Fx, glGet} from 'luma.gl';
 import throttle from 'lodash.throttle';
@@ -151,7 +150,7 @@ export default class WebGLRenderer extends React.Component {
   @autobind
   _onMouseMove(event) {
     const picked = this._pick(event.x, event.y);
-    this.props.onMouseMove({...event, picked});
+    this.props.onMouseMove({...event, picked});git 
   }
 
   _renderFrame() {
