@@ -40,8 +40,7 @@ import {
   ChoroplethLayer,
   ScatterplotLayer,
   ArcLayer,
-  GridLayer,
-  CarLayer
+  GridLayer
 } from '../src';
 
 // ---- Default Settings ---- //
@@ -354,23 +353,6 @@ class ExampleApp extends React.Component {
     });
   }
 
-  _renderCarLayer() {
-    const {mapViewState, points} = this.props;
-
-    return new CarLayer({
-      id: 'carLayer',
-      width: window.innerWidth,
-      height: window.innerHeight,
-      latitude: mapViewState.latitude,
-      longitude: mapViewState.longitude,
-      zoom: mapViewState.zoom,
-      isPickable: false,
-      data: points,
-      onHover: this._handleScatterplotHovered,
-      onClick: this._handleScatterplotClicked
-    });
-  }
-
   _renderArcLayer() {
     const {mapViewState, arcs} = this.props;
 
@@ -408,7 +390,6 @@ class ExampleApp extends React.Component {
           this._renderChoroplethLayer(),
           this._renderHexagonLayer(),
           this._renderScatterplotLayer(),
-          this._renderCarLayer(),
           this._renderArcLayer()
         ]}
       />
