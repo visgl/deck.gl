@@ -341,9 +341,6 @@ export default class Layer {
     assert(this.state.model, 'Model must be set in initializeState');
     this.setViewport();
 
-    // Add any primitive attributes
-    this._initializePrimitiveAttributes();
-
     // TODO - the app must be able to override
 
     // Add any subclass attributes
@@ -447,28 +444,6 @@ export default class Layer {
   }
 
   // INTERNAL METHODS
-
-  // Set up attributes relating to the primitive itself (not the instances)
-  _initializePrimitiveAttributes() {
-    const {gl, model, attributeManager} = this.state;
-
-    // TODO - this unpacks and repacks the attributes, seems unnecessary
-    //if (model.geometry.hasAttribute('vertices')) {
-    //  const vertices = model.geometry.getArray('vertices');
-    //  attributeManager.addVertices(vertices);
-    //}
-    //
-    //if (model.geometry.hasAttribute('normals')) {
-    //  const normals = model.geometry.getArray('normals');
-    //  attributeManager.addNormals(normals);
-    //}
-    //
-    //if (model.geometry.hasAttribute('indices')) {
-    //  const indices = model.geometry.getArray('indices');
-    //  attributeManager.addIndices(indices, gl);
-    //}
-  }
-
   _updateModel({gl}) {
     const {model, attributeManager, uniforms} = this.state;
 
