@@ -23,13 +23,10 @@ import d3 from 'd3';
 import {Model, Program, Geometry} from 'luma.gl';
 const glslify = require('glslify');
 
-import request from 'd3-request';
-import parseOBJ from 'parse-obj';
 import OBJ from 'webgl-obj-loader';
 import Car from './car';
 const carMesh = new OBJ.Mesh(Car);
 
-console.log(carMesh);
 const ATTRIBUTES = {
   positions: {size: 3, '0': 'x', '1': 'y', '2': 'unused'},
   colors: {size: 3, '0': 'red', '1': 'green', '2': 'blue'}
