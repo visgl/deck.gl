@@ -50,7 +50,7 @@
     "lodash.isfunction": "^3.0.6",
     "lodash.throttle": "^3.0.4",
     "lodash.where": "^3.1.0",
-    "parse-obj": "0.0.0",
+    "luma.gl": "^2.0.4-0",
     "save-pixels": "^2.3.0",
     "viewport-mercator-project": "^2.0.1",
     "webgl-obj-loader": "^0.1.1"
