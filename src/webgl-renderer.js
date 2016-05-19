@@ -25,7 +25,7 @@ import ReactDOM from 'react-dom';
 import autobind from 'autobind-decorator';
 import {createGLContext, Camera, Scene, Events, Fx, glGet} from 'luma.gl';
 import throttle from 'lodash.throttle';
-console.log(glGet);
+
 const PROP_TYPES = {
   id: PropTypes.string,
 
@@ -99,7 +99,7 @@ export default class WebGLRenderer extends React.Component {
   }
 
   componentDidMount() {
-    const canvas = ReactDOM.findDOMNode(this);
+    const canvas = this.refs.overlay;
     this._initWebGL(canvas);
     this._animationLoop();
   }
@@ -216,6 +216,7 @@ export default class WebGLRenderer extends React.Component {
     const {id, width, height, pixelRatio} = this.props;
     return (
       <canvas
+        ref={ 'overlay' }
         id={ id }
         width={ width * pixelRatio || 1 }
         height={ height * pixelRatio || 1 }

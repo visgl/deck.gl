@@ -404,12 +404,12 @@ class ExampleApp extends React.Component {
         height={height}
         projectionMatrix={ mapViewState.projectionMatrix }
         layers={[
-          // this._renderGridLayer(),
-          // this._renderChoroplethLayer(),
-          // this._renderHexagonLayer(),
-          // this._renderScatterplotLayer(),
-          this._renderCarLayer()
-          // this._renderArcLayer()
+          this._renderGridLayer(),
+          this._renderChoroplethLayer(),
+          this._renderHexagonLayer(),
+          this._renderScatterplotLayer(),
+          this._renderCarLayer(),
+          this._renderArcLayer()
         ]}
       />
     );
