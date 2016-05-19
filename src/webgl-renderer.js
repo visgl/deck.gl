@@ -21,9 +21,8 @@
 /* eslint-disable no-console, no-try-catch */
 /* global console */
 import React, {PropTypes} from 'react';
-import ReactDOM from 'react-dom';
 import autobind from 'autobind-decorator';
-import {createGLContext, Camera, Scene, Events, Fx} from 'luma.gl';
+import {createGLContext, Camera, Scene, Events, Fx, glGet} from 'luma.gl';
 import throttle from 'lodash.throttle';
 
 const PROP_TYPES = {
@@ -99,7 +98,7 @@ export default class WebGLRenderer extends React.Component {
   }
 
   componentDidMount() {
-    const canvas = ReactDOM.findDOMNode(this);
+    const canvas = this.refs.overlay;
     this._initWebGL(canvas);
     this._animationLoop();
   }
@@ -191,14 +190,14 @@ export default class WebGLRenderer extends React.Component {
     // setup bledning
     if (enable) {
       gl.enable(gl.BLEND);
-      gl.blendFunc(...blendFunc.map(s => gl.get(s)));
-      gl.blendEquation(gl.get(blendEquation));
+      gl.blendFunc(...blendFunc.map(s => glGet(gl, s)));
+      gl.blendEquation(glGet(gl, blendEquation));
     } else {
       gl.disable(gl.BLEND);
     }
 
     onBeforeRenderFrame();
-    scene.render(gl, {camera});
+    scene.render({camera});
     onAfterRenderFrame();
   }
 
@@ -216,6 +215,7 @@ export default class WebGLRenderer extends React.Component {
     const {id, width, height, pixelRatio} = this.props;
     return (
       <canvas
+        ref={ 'overlay' }
         id={ id }
         width={ width * pixelRatio || 1 }
         height={ height * pixelRatio || 1 }
