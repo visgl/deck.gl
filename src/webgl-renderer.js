@@ -150,7 +150,7 @@ export default class WebGLRenderer extends React.Component {
   @autobind
   _onMouseMove(event) {
     const picked = this._pick(event.x, event.y);
-    this.props.onMouseMove({...event, picked});git
+    this.props.onMouseMove({...event, picked});
   }
 
   _renderFrame() {
