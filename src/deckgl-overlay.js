@@ -31,8 +31,6 @@ import {
   initializeNewLayers, layersNeedRedraw
 } from './layer-manager';
 
-import assert from 'assert';
-
 const PROP_TYPES = {
   width: PropTypes.number.isRequired,
   height: PropTypes.number.isRequired,
