@@ -365,7 +365,7 @@ class ExampleApp extends React.Component {
       longitude: mapViewState.longitude,
       zoom: mapViewState.zoom,
       isPickable: false,
-      data: [points[0]],
+      data: points,
       onHover: this._handleScatterplotHovered,
       onClick: this._handleScatterplotClicked
     });

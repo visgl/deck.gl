@@ -31,7 +31,7 @@ attribute vec3 vertices;
 attribute vec3 positions;
 attribute vec3 colors;
 
-uniform float radius;
+uniform float scale;
 
 uniform mat4 worldMatrix;
 uniform mat4 projectionMatrix;
@@ -45,6 +45,6 @@ void main(void) {
 
   // vec2 pos = mercatorProjectViewport(positions.xy, mercatorZoom, mercatorCenter, viewport);
   vec2 pos = mercatorProject(positions.xy, mercatorZoom);
-  vec3 p = vec3(pos, positions.z) + vertices * radius;
+  vec3 p = vec3(pos, positions.z) + vertices * scale;
   gl_Position = projectionMatrix * worldMatrix * vec4(p, 1.0);
 }

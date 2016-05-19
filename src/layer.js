@@ -453,20 +453,20 @@ export default class Layer {
     const {gl, model, attributeManager} = this.state;
 
     // TODO - this unpacks and repacks the attributes, seems unnecessary
-    if (model.geometry.hasAttribute('vertices')) {
-      const vertices = model.geometry.getArray('vertices');
-      attributeManager.addVertices(vertices);
-    }
-
-    if (model.geometry.hasAttribute('normals')) {
-      const normals = model.geometry.getArray('normals');
-      attributeManager.addNormals(normals);
-    }
-
-    if (model.geometry.hasAttribute('indices')) {
-      const indices = model.geometry.getArray('indices');
-      attributeManager.addIndices(indices, gl);
-    }
+    //if (model.geometry.hasAttribute('vertices')) {
+    //  const vertices = model.geometry.getArray('vertices');
+    //  attributeManager.addVertices(vertices);
+    //}
+    //
+    //if (model.geometry.hasAttribute('normals')) {
+    //  const normals = model.geometry.getArray('normals');
+    //  attributeManager.addNormals(normals);
+    //}
+    //
+    //if (model.geometry.hasAttribute('indices')) {
+    //  const indices = model.geometry.getArray('indices');
+    //  attributeManager.addIndices(indices, gl);
+    //}
   }
 
   _updateModel({gl}) {

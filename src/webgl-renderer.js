@@ -23,9 +23,9 @@
 import React, {PropTypes} from 'react';
 import ReactDOM from 'react-dom';
 import autobind from 'autobind-decorator';
-import {createGLContext, Camera, Scene, Events, Fx} from 'luma.gl';
+import {createGLContext, Camera, Scene, Events, Fx, glGet} from 'luma.gl';
 import throttle from 'lodash.throttle';
-
+console.log(glGet);
 const PROP_TYPES = {
   id: PropTypes.string,
 
@@ -191,14 +191,14 @@ export default class WebGLRenderer extends React.Component {
     // setup bledning
     if (enable) {
       gl.enable(gl.BLEND);
-      gl.blendFunc(...blendFunc.map(s => gl.get(s)));
-      gl.blendEquation(gl.get(blendEquation));
+      gl.blendFunc(...blendFunc.map(s => glGet(gl, s)));
+      gl.blendEquation(glGet(gl, blendEquation));
     } else {
       gl.disable(gl.BLEND);
     }
 
     onBeforeRenderFrame();
-    scene.render(gl, {camera});
+    scene.render({camera});
     onAfterRenderFrame();
   }
 
