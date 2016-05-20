@@ -51,6 +51,6 @@ void main(void) {
   vec3 p = centroidPositions.xyz + verticesPositions.xyz;
   gl_Position = projectionMatrix * vec4(p, 1.0);
 
-  float alpha = pickingColors == selected ? 0.5 : opacity;
+  float alpha = mix(opacity, 1.0, renderPickingBuffer);
   vColor = vec4(mix(colors / 255., pickingColors / 255., renderPickingBuffer), alpha);
 }

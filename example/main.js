@@ -32,7 +32,9 @@ import {Provider, connect} from 'react-redux';
 import autobind from 'autobind-decorator';
 
 import MapboxGLMap from 'react-map-gl';
-import {PerspectiveCamera, Mat4} from 'luma.gl';
+import {Mat4} from 'luma.gl';
+import OverlayControl from './overlay-control';
+
 import request from 'd3-request';
 import {
   DeckGLOverlay,
@@ -182,6 +184,11 @@ function pointsToArcs(points) {
 class ExampleApp extends React.Component {
   constructor(props) {
     super(props);
+    this.state = {
+      selectedHexagons: [],
+      hoveredItem: null,
+      clickedItem: null
+    };
   }
 
   componentWillMount() {
@@ -222,7 +229,6 @@ class ExampleApp extends React.Component {
 
   @autobind
   _updateArcStrokeWidth() {
-    console.log('update arc stroke width');
     this.setState({arcStrokeWidth: 1});
   }
 
@@ -256,32 +262,45 @@ class ExampleApp extends React.Component {
 
   @autobind
   _handleChoroplethHovered(info) {
-    // console.log('choropleth hovered:', info);
+    this.setState({hoveredItem: info});
   }
 
   @autobind
   _handleChoroplethClicked(info) {
-    // console.log('choropleth clicked:', info);
+    this.setState({clickedItem: info});
   }
 
   @autobind
   _handleHexagonHovered(info) {
-    // console.log('Hexagon hovered:', info);
+
+    const {hexData} = this.props;
+    let selectedHexagons = [];
+    if (info.index >= 0) {
+      selectedHexagons = [{
+        ...hexData[info.index],
+        color: [0, 0, 255]
+      }];
+    }
+
+    this.setState({
+      hoveredItem: info,
+      selectedHexagons
+    });
   }
 
   @autobind
   _handleHexagonClicked(info) {
-    // console.log('Hexagon clicked:', info);
+    this.setState({clickedItem: info});
   }
 
   @autobind
   _handleScatterplotHovered(info) {
-    // console.log('Scatterplot hovered:', info);
+    this.setState({hoveredItem: info});
   }
 
   @autobind
   _handleScatterplotClicked(info) {
-    // console.log('Scatterplot clicked:', info);
+    this.setState({clickedItem: info});
   }
 
   _renderGridLayer() {
@@ -329,6 +348,25 @@ class ExampleApp extends React.Component {
       longitude: mapViewState.longitude,
       zoom: mapViewState.zoom,
       data: hexData,
+      isPickable: true,
+      opacity: 0.1,
+      onHover: this._handleHexagonHovered,
+      onClick: this._handleHexagonClicked
+    });
+  }
+
+  _renderHexagonSelectionLayer() {
+    const {mapViewState} = this.props;
+    const {selectedHexagons} = this.state;
+
+    return new HexagonLayer({
+      id: 'hexagonSelectionLayer',
+      width: window.innerWidth,
+      height: window.innerHeight,
+      latitude: mapViewState.latitude,
+      longitude: mapViewState.longitude,
+      zoom: mapViewState.zoom,
+      data: selectedHexagons,
       isPickable: true,
       opacity: 0.1,
       onHover: this._handleHexagonHovered,
@@ -389,6 +427,7 @@ class ExampleApp extends React.Component {
           this._renderGridLayer(),
           this._renderChoroplethLayer(),
           this._renderHexagonLayer(),
+          this._renderHexagonSelectionLayer(),
           this._renderScatterplotLayer(),
           this._renderArcLayer()
         ]}
@@ -405,7 +444,7 @@ class ExampleApp extends React.Component {
         mapboxApiAccessToken={MAPBOX_ACCESS_TOKEN}
         width={width}
         height={height}
-        perspectiveEnabled={true}
+        perspectiveEnabled
         { ...mapViewState }
         onChangeViewport={this._handleViewportChanged}>
         { this._renderOverlay() }
@@ -414,9 +453,16 @@ class ExampleApp extends React.Component {
   }
 
   render() {
+    const {hoveredItem, clickedItem} = this.state;
+
     return (
       <div>
         { this._renderMap() }
+
+        <OverlayControl
+          hoveredItem={ hoveredItem }
+          clickedItem={ clickedItem }/>
+
       </div>
     );
   }
