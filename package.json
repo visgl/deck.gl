@@ -2,7 +2,7 @@
   "name": "deck.gl",
   "description": "A suite of 3D-enabled data visualization overlays for react-map-gl",
   "license": "MIT",
-  "version": "3.0.0-beta6",
+  "version": "3.0.0-beta7",
   "keywords": [
     "webgl",
     "visualization",
@@ -21,13 +21,6 @@
     "shaderlib",
     "src"
   ],
-  "browserify": {
-    "transform": [
-      "babelify",
-      "glslify",
-      "envify"
-    ]
-  },
   "standard": {
     "ignore": [
       "**/build/**",
@@ -50,7 +43,7 @@
     "lodash.isfunction": "^3.0.6",
     "lodash.throttle": "^3.0.4",
     "lodash.where": "^3.1.0",
-    "luma.gl": "2.0.0-beta2",
+    "luma.gl": "2.0.0-beta5",
     "save-pixels": "^2.3.0",
     "viewport-mercator-project": "^2.0.1",
     "webgl-obj-loader": "^0.1.1"
@@ -95,15 +88,15 @@
     "build": "npm run build-clean && npm run build-compile && npm run build-script && npm run build-script-min",
     "build-clean": "rm -fr dist/*",
     "build-compile": "babel src -d dist --source-maps inline --copy-files",
-    "build-script": "browserify src/bundle.js -o dist/deckgl.js",
+    "build-script": "browserify src/bundle.js -o dist/deckgl.js -t babelify -t glslify",
     "build-script-min": "uglifyjs dist/deckgl.js -o dist/deckgl.min.js",
     "lint": "eslint src",
     "precommit": "npm run lint -s && npm run test",
     "prepublish": "npm run build",
     "test": "npm run lint && npm run test-node",
     "test-node": "babel-node --only=luma.gl,deck.gl/src,deck.gl/test test/node.js | faucet",
-    "test-browser": "budo test/browser.js:build/test-bundle.js --dir test -t babelify --live --open --port 3001 --watch-glob '**/*.{html,css,scss,js}'",
+    "test-browser": "budo test/browser.js:build/test-bundle.js --dir test -t babelify --live --open --port 3001 --watch-glob '**/*.{html,css,scss,js}' -- -t babelify -t glslify",
     "test-electron": "browserify test/electron.js | testron | faucet",
-    "start": "budo example/main.js:example/bundle.js -t babelify --live --open --port 3000 --watch-glob '**/*.{html,css,js}'"
+    "start": "budo example/main.js:example/bundle.js --live --open --port 3000 --watch-glob '**/*.{html,css,js}' -- -t babelify -t glslify -t envify"
   }
 }
