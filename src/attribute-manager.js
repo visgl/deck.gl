@@ -28,12 +28,12 @@ export default class AttributeManager {
     Object.seal(this);
   }
 
-  // Returns attributes in a format suitable for use with Luma.gl objects
-  //
+  // Returns attributes in a format suitable for use with Luma.gl Model/Program
   getAttributes() {
     return this.attributes;
   }
 
+  // Returns the redraw flag
   getNeedsRedraw({clearFlag}) {
     const needsRedraw = this.needsRedraw;
     if (clearFlag) {
@@ -42,55 +42,29 @@ export default class AttributeManager {
     return needsRedraw;
   }
 
+  // Adds a static attribute (that is not auto updated)
   add(attributes, updaters) {
     const newAttributes = this._add(attributes, updaters, {});
-    // and instancedAttributes (for updating when data changes)
     Object.assign(this.attributes, newAttributes);
   }
 
+  // Adds a dynamic attribute, that is autoupdated
   addDynamic(attributes, updaters) {
     const newAttributes = this._add(attributes, updaters, {
       autoUpdate: true
     });
-    // and instancedAttributes (for updating when data changes)
     Object.assign(this.attributes, newAttributes);
   }
 
+  // Adds an instanced attribute that is autoupdated
   addInstanced(attributes, updaters) {
     const newAttributes = this._add(attributes, updaters, {
       instanced: 1,
       autoUpdate: true
     });
     Object.assign(this.attributes, newAttributes);
+    // and instancedAttributes (for updating when data changes)
     Object.assign(this.instancedAttributes, newAttributes);
-  }
-
-  addVertices(vertexArray) {
-    assert(vertexArray instanceof Float32Array);
-    this.add({
-      vertices: {value: vertexArray, size: 3, '0': 'x', '1': 'y', '2': 'z'}
-    });
-  }
-
-  addNormals(normalArray) {
-    assert(normalArray instanceof Float32Array);
-    this.add({
-      normals: {value: normalArray, size: 3, '0': 'x', '1': 'y', '2': 'z'}
-    });
-  }
-
-  addIndices(indexArray, gl) {
-    assert(indexArray instanceof Uint16Array);
-    assert(gl);
-    this.add({
-      indices: {
-        value: indexArray,
-        size: 1,
-        bufferType: gl.ELEMENT_ARRAY_BUFFER,
-        drawMode: gl.STATIC_DRAW,
-        '0': 'index'
-      }
-    });
   }
 
   // Marks an attribute for update

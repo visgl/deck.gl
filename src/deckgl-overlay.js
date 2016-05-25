@@ -38,13 +38,15 @@ const PROP_TYPES = {
   blending: PropTypes.object,
   camera: PropTypes.instanceOf(Camera),
   // TODO - replace with actual map view state props, build matrix from those
-  projectionMatrix: PropTypes.any
+  projectionMatrix: PropTypes.any,
+  onWebGLInitialized: PropTypes.func
 };
 
 const DEFAULT_PROPS = {
   blending: DEFAULT_BLENDING,
   camera: null,
-  projectionMatrix: null
+  projectionMatrix: null,
+  onWebGLInitialized: () => {}
 };
 
 export default class DeckGLOverlay extends React.Component {
@@ -97,6 +99,7 @@ export default class DeckGLOverlay extends React.Component {
 
   @autobind
   _onRendererInitialized({gl}) {
+    this.props.onWebGLInitialized(gl);
     this.setState({
       gl,
       scene: new Scene(gl, {

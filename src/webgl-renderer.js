@@ -111,7 +111,7 @@ export default class WebGLRenderer extends React.Component {
 
     let gl;
     try {
-      gl = createGLContext(canvas);
+      gl = createGLContext(canvas, {preserveDrawingBuffer: true});
     } catch (error) {
       this.props.onInitializationFailed(error);
       return;

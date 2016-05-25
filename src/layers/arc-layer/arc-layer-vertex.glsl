@@ -51,6 +51,7 @@ void main(void) {
   vec2 source = mercatorProject(instancePositions.xy, mercatorZoom);
   vec2 target = mercatorProject(instancePositions.zw, mercatorZoom);
 
+  // TODO - are we only using x coordinate?
   float segmentIndex = vertices.x;
   vec3 p = vec3(
     // xy: linear interpolation of source & target

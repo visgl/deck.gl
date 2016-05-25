@@ -26,8 +26,8 @@ import {Model, Program, Geometry} from 'luma.gl';
 const glslify = require('glslify');
 
 const ATTRIBUTES = {
-  vertices: {size: 3, '0': 'x', '1': 'y', '2': 'unused'},
   indices: {size: 1, '0': 'index'},
+  positions: {size: 3, '0': 'x', '1': 'y', '2': 'unused'},
   colors: {size: 3, '0': 'red', '1': 'green', '2': 'blue'},
   // Override picking colors to prevent auto allocation
   pickingColors: {size: 3, '0': 'pickRed', '1': 'pickGreen', '2': 'pickBlue'}
@@ -59,7 +59,7 @@ export default class ChoroplethLayer extends Layer {
     attributeManager.addDynamic(ATTRIBUTES, {
       // Primtive attributes
       indices: {update: this.calculateIndices},
-      vertices: {update: this.calculateVertices},
+      positions: {update: this.calculatePositions},
       colors: {update: this.calculateColors},
       // Instanced attributes
       pickingColors: {update: this.calculatePickingColors, noAlloc: true}
@@ -105,7 +105,7 @@ export default class ChoroplethLayer extends Layer {
     });
   }
 
-  calculateVertices(attribute) {
+  calculatePositions(attribute) {
     const vertices = flattenDeep(this.state.groupedVertices);
     attribute.value = new Float32Array(vertices);
   }

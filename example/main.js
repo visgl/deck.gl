@@ -65,6 +65,7 @@ const INITIAL_STATE = {
   hexagons: null,
   points: null,
   arcs: null,
+  arcs2: null,
   arcStrokeWidth: 1
 };
 
@@ -112,7 +113,10 @@ function reducer(state = INITIAL_STATE, action) {
       };
     });
 
-    return {...state, points, arcs: pointsToArcs(points)};
+    const arcs = pointsToArcs(points);
+    const arcs1 = arcs.slice(0, arcs.length / 2);
+    const arcs2 = arcs.slice(arcs.length / 2);
+    return {...state, points, arcs: arcs1, arcs2};
   }
 
   default:
@@ -128,6 +132,7 @@ function mapStateToProps(state) {
     hexagons: state.hexagons,
     points: state.points,
     arcs: state.arcs,
+    arcs2: state.arcs2,
     hexData: state.hexData
   };
 }
@@ -410,6 +415,28 @@ class ExampleApp extends React.Component {
       zoom: mapViewState.zoom,
       data: arcs,
       strokeWidth: this.state.arcStrokeWidth || 1,
+      color0: [0, 0, 255],
+      color1: [0, 0, 255],
+      isPickable: true,
+      onHover: this._handleArcHovered,
+      onClick: this._handleArcClicked
+    });
+  }
+
+  _renderArcLayer2() {
+    const {mapViewState, arcs2} = this.props;
+
+    return new ArcLayer({
+      id: 'arcLayer2',
+      width: window.innerWidth,
+      height: window.innerHeight,
+      latitude: mapViewState.latitude,
+      longitude: mapViewState.longitude,
+      zoom: mapViewState.zoom,
+      data: arcs2,
+      strokeWidth: this.state.arcStrokeWidth || 1,
+      color0: [0, 255, 0],
+      color1: [0, 255, 0],
       isPickable: true,
       onHover: this._handleArcHovered,
       onClick: this._handleArcClicked
@@ -434,15 +461,22 @@ class ExampleApp extends React.Component {
         height={height}
         projectionMatrix={ mapViewState.projectionMatrix }
         layers={[
-          // this._renderGridLayer(),
-          this._renderChoroplethLayer(),
+          this._renderGridLayer(),
           this._renderHexagonLayer(),
           this._renderHexagonSelectionLayer(),
+          this._renderArcLayer(),
+          this._renderArcLayer2(),
           this._renderScatterplotLayer(),
-          this._renderArcLayer()
+          this._renderChoroplethLayer()
         ]}
+        onWebGLInitialized={ this._onWebGLInitialized }
       />
     );
+  }
+
+  @autobind _onWebGLInitialized(gl) {
+    gl.enable(gl.DEPTH_TEST);
+    gl.depthFunc(gl.LEQUAL);
   }
 
   _renderMap() {
