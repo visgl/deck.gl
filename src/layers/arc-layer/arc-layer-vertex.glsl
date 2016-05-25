@@ -27,12 +27,14 @@ uniform float mercatorZoom;
 const float N = 49.0;
 
 attribute vec3 vertices;
-attribute vec4 positions;
+attribute vec4 instancePositions;
+attribute vec3 instancePickingColors;
 
 uniform mat4 worldMatrix;
 uniform mat4 projectionMatrix;
 
 varying float ratio;
+varying vec3 pickingColor;
 
 float paraboloid(vec2 source, vec2 target, float index) {
   float ratio = index / N;
@@ -46,8 +48,8 @@ float paraboloid(vec2 source, vec2 target, float index) {
 }
 
 void main(void) {
-  vec2 source = mercatorProject(positions.xy, mercatorZoom);
-  vec2 target = mercatorProject(positions.zw, mercatorZoom);
+  vec2 source = mercatorProject(instancePositions.xy, mercatorZoom);
+  vec2 target = mercatorProject(instancePositions.zw, mercatorZoom);
 
   float segmentIndex = vertices.x;
   vec3 p = vec3(
@@ -61,4 +63,5 @@ void main(void) {
 
   // map arc distance to color in fragment shader
   ratio = clamp(distance(source, target) / 1000.0, 0.0, 1.0);
+  pickingColor = instancePickingColors;
 }

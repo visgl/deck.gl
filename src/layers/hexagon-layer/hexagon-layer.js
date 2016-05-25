@@ -19,12 +19,13 @@
 // THE SOFTWARE.
 
 import Layer from '../../layer';
-import {Model, Program, Geometry} from 'luma.gl';
+import {Model, Program, Geometry, CylinderGeometry} from 'luma.gl';
 const glslify = require('glslify');
 
 const ATTRIBUTES = {
-  positions: {size: 3, '0': 'x', '1': 'y', '2': 'unused'},
-  colors: {size: 3, '0': 'red', '1': 'green', '2': 'blue'}
+  instancePositions: {size: 2, '0': 'x', '1': 'y'},
+  instanceElevations: {size: 1, '0': 'z'},
+  instanceColors: {size: 3, '0': 'red', '1': 'green', '2': 'blue'}
 };
 
 export default class HexagonLayer extends Layer {
@@ -44,7 +45,7 @@ export default class HexagonLayer extends Layer {
   constructor(opts) {
     super({
       dotRadius: 10,
-      elevation: 0,
+      elevation: 100,
       ...opts
     });
   }
@@ -57,8 +58,9 @@ export default class HexagonLayer extends Layer {
     });
 
     attributeManager.addInstanced(ATTRIBUTES, {
-      positions: {update: this.calculatePositions},
-      colors: {update: this.calculateColors}
+      instancePositions: {update: this.calculateInstancePositions},
+      instanceElevations: {update: this.calculateInstanceElevations},
+      instanceColors: {update: this.calculateInstanceColors}
     });
 
     this.calculateRadiusAndAngle();
@@ -70,27 +72,44 @@ export default class HexagonLayer extends Layer {
     const {dataChanged, viewportChanged, attributeManager} = this.state;
 
     if (dataChanged || viewportChanged) {
-      attributeManager.invalidate('positions');
       this.calculateRadiusAndAngle();
     }
     if (dataChanged) {
-      attributeManager.invalidate('colors');
+      attributeManager.invalidateAll();
     }
   }
 
   getModel(gl) {
-    const NUM_SEGMENTS = 6;
-    const PI2 = Math.PI * 2;
+    const geometry = new CylinderGeometry({
+      id: this.props.id,
+      radius: 1,
+      topRadius: 1,
+      bottomRadius: 1,
+      topCap: true,
+      bottomCap: true,
+      height: 1,
+      nradial: 6,
+      nvertical: 1
+    });
 
-    let vertices = [];
-    for (let i = 0; i < NUM_SEGMENTS; i++) {
-      vertices = [
-        ...vertices,
-        Math.cos(PI2 * i / NUM_SEGMENTS),
-        Math.sin(PI2 * i / NUM_SEGMENTS),
-        0
-      ];
-    }
+    // const NUM_SEGMENTS = 6;
+    // const PI2 = Math.PI * 2;
+
+    // let vertices = [];
+    // for (let i = 0; i < NUM_SEGMENTS; i++) {
+    //   vertices = [
+    //     ...vertices,
+    //     Math.cos(PI2 * i / NUM_SEGMENTS),
+    //     Math.sin(PI2 * i / NUM_SEGMENTS),
+    //     0
+    //   ];
+    // }
+
+    // const geometry = new Geometry({
+    //   id: this.props.id,
+    //   drawMode: 'TRIANGLE_FAN',
+    //   vertices: new Float32Array(vertices)
+    // });
 
     return new Model({
       program: new Program(gl, {
@@ -98,28 +117,34 @@ export default class HexagonLayer extends Layer {
         fs: glslify('./hexagon-layer-fragment.glsl'),
         id: 'hexagon'
       }),
-      geometry: new Geometry({
-        id: this.props.id,
-        drawMode: 'TRIANGLE_FAN',
-        vertices: new Float32Array(vertices)
-      }),
+      geometry,
       instanced: true
+      // indexed: true
     });
   }
 
-  calculatePositions(attribute) {
+  calculateInstancePositions(attribute) {
     const {data} = this.props;
     const {value, size} = attribute;
     let i = 0;
     for (const hexagon of data) {
       value[i + 0] = hexagon.centroid.x;
       value[i + 1] = hexagon.centroid.y;
-      value[i + 2] = 0;
       i += size;
     }
   }
 
-  calculateColors(attribute) {
+  calculateInstanceElevations(attribute) {
+    const {data} = this.props;
+    const {value, size} = attribute;
+    let i = 0;
+    for (const hexagon of data) {
+      value[i + 0] = hexagon.elevation || 0;
+      i += size;
+    }
+  }
+
+  calculateInstanceColors(attribute) {
     const {data} = this.props;
     const {value} = attribute;
     let i = 0;
@@ -154,9 +179,10 @@ export default class HexagonLayer extends Layer {
 
     this.setUniforms({
       // Calculate angle that the perpendicular hexagon vertex axis is tilted
-      angle: Math.acos(dx / dxy) * -Math.sign(dy),
+      angle: Math.acos(dx / dxy) * -Math.sign(dy) + Math.PI / 2,
       // Allow user to fine tune radius
-      radius: dxy / 2 * Math.min(1, this.props.dotRadius)
+      radius: dxy / 2 * Math.min(1, this.props.dotRadius),
+      elevation: this.props.elevation
     });
 
   }

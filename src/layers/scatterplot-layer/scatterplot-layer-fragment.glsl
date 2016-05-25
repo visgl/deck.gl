@@ -25,9 +25,8 @@
 precision highp float;
 #endif
 
-varying vec3 vColor;
-uniform float opacity;
+varying vec4 vColor;
 
 void main(void) {
-  gl_FragColor = vec4(vColor, opacity);
+  gl_FragColor = vColor;
 }

@@ -244,7 +244,7 @@ own management of the glbuffers. Each Layer can accept buffers directly as
 props.
 
 **Note:** The application can provide some buffers and let others be managed
-by the layer. As an example management of the `pickingColors` buffer is
+by the layer. As an example management of the `instancePickingColors` buffer is
 normally left to the layer.
 
 **Note**: A layer only renders when a property change is detected. For

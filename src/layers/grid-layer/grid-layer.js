@@ -23,8 +23,8 @@ import {Model, Program, Geometry} from 'luma.gl';
 const glslify = require('glslify');
 
 const ATTRIBUTES = {
-  positions: {size: 3, '0': 'x', '1': 'y', '2': 'unused'},
-  colors: {size: 4, '0': 'red', '1': 'green', '2': 'blue', '3': 'alpha'}
+  instancePositions: {size: 3, '0': 'x', '1': 'y', '2': 'unused'},
+  instanceColors: {size: 4, '0': 'red', '1': 'green', '2': 'blue', '3': 'alpha'}
 };
 
 export default class GridLayer extends Layer {
@@ -58,8 +58,8 @@ export default class GridLayer extends Layer {
     });
 
     attributeManager.addInstanced(ATTRIBUTES, {
-      positions: {update: this.calculatePositions},
-      colors: {update: this.calculateColors}
+      instancePositions: {update: this.calculateInstancePositions},
+      instanceColors: {update: this.calculateInstanceColors}
     });
 
     this.updateCell();
@@ -117,7 +117,7 @@ export default class GridLayer extends Layer {
 
   }
 
-  calculatePositions(attribute, numInstances) {
+  calculateInstancePositions(attribute, numInstances) {
     const {unitWidth, unitHeight, width, height} = this.props;
     const {numCol} = this.state;
     const {value, size} = attribute;
@@ -131,7 +131,7 @@ export default class GridLayer extends Layer {
     }
   }
 
-  calculateColors(attribute) {
+  calculateInstanceColors(attribute) {
     const {data, unitWidth, unitHeight, width, height} = this.props;
     const {numCol, numRow} = this.state;
     const {value, size} = attribute;

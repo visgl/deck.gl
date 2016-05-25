@@ -23,7 +23,7 @@ import {Model, Program, Geometry} from 'luma.gl';
 const glslify = require('glslify');
 
 const ATTRIBUTES = {
-  positions: {size: 4, '0': 'x0', '1': 'y0', '2': 'x1', '3': 'y1'}
+  instancePositions: {size: 4, '0': 'x0', '1': 'y0', '2': 'x1', '3': 'y1'}
 };
 
 export default class ArcLayer extends Layer {
@@ -49,7 +49,7 @@ export default class ArcLayer extends Layer {
     this.setState({model});
 
     attributeManager.addInstanced(ATTRIBUTES, {
-      positions: {update: this.calculatePositions}
+      instancePositions: {update: this.calculateInstancePositions}
     });
 
     this.updateColors();
@@ -83,13 +83,11 @@ export default class ArcLayer extends Layer {
       }),
       instanced: true,
       onBeforeRender() {
-        const {gl} = this.program;
         this.userData.oldStrokeWidth = gl.getParameter(gl.LINE_WIDTH);
-        gl.lineWidth(this.userData.strokeWidth || 1);
+        this.program.gl.lineWidth(this.userData.strokeWidth || 1);
       },
       onAfterRender() {
-        const {gl} = this.program;
-        gl.lineWidth(this.userData.oldStrokeWidth || 1);
+        this.program.gl.lineWidth(this.userData.oldStrokeWidth || 1);
       }
     });
   }
@@ -105,7 +103,7 @@ export default class ArcLayer extends Layer {
     }
   }
 
-  calculatePositions(attribute) {
+  calculateInstancePositions(attribute) {
     const {data} = this.props;
     const {value, size} = attribute;
     let i = 0;

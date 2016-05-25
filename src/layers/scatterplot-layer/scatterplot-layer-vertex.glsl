@@ -25,23 +25,25 @@
 uniform float mercatorZoom;
 
 attribute vec3 vertices;
-attribute vec3 positions;
-attribute vec3 colors;
+attribute vec3 instancePositions;
+attribute vec3 instanceColors;
+attribute vec3 instancePickingColors;
 
 uniform float radius;
+uniform float opacity;
 
 uniform mat4 worldMatrix;
 uniform mat4 projectionMatrix;
 
-varying vec3 vColor;
-attribute vec3 pickingColors;
+varying vec4 vColor;
 uniform float renderPickingBuffer;
 
 void main(void) {
-  vColor = mix(colors / 255.0, pickingColors / 255.0, renderPickingBuffer);
-
-  // vec2 pos = mercatorProjectViewport(positions.xy, mercatorZoom, mercatorCenter, viewport);
-  vec2 pos = mercatorProject(positions.xy, mercatorZoom);
-  vec3 p = vec3(pos, positions.z) + vertices * radius;
+  vec2 pos = mercatorProject(instancePositions.xy, mercatorZoom);
+  vec3 p = vec3(pos, instancePositions.z) + vertices * radius;
   gl_Position = projectionMatrix * worldMatrix * vec4(p, 1.0);
+
+  vec4 color = vec4(instanceColors / 255.0, 1.);
+  vec4 pickingColor = vec4(instancePickingColors / 255.0, 1.);
+  vColor = mix(color, pickingColor, renderPickingBuffer);
 }

@@ -22,9 +22,9 @@
 #define SHADER_NAME grid-layer-vs
 
 attribute vec3 vertices;
-attribute vec3 positions;
-attribute vec4 colors;
-attribute vec3 pickingColors;
+attribute vec3 instancePositions;
+attribute vec4 instanceColors;
+attribute vec3 instancePickingColors;
 
 uniform float maxCount;
 uniform float opacity;
@@ -38,9 +38,9 @@ uniform mat4 projectionMatrix;
 varying vec4 vColor;
 
 void main(void) {
-  float alpha = pickingColors == selectedPickingColor ? 1.5 * colors.w : colors.w;
-  vColor = vec4(mix(colors.xyz / maxCount, pickingColors / 255., renderPickingBuffer), alpha);
+  float alpha = instancePickingColors == selectedPickingColor ? 1.5 * instanceColors.w : instanceColors.w;
+  vColor = vec4(mix(instanceColors.xyz / maxCount, instancePickingColors / 255., renderPickingBuffer), alpha);
 
-  vec3 p = positions + vertices * scale;
+  vec3 p = instancePositions + vertices * scale;
   gl_Position = projectionMatrix * worldMatrix * vec4(p, 1.0);
 }
