@@ -42,6 +42,7 @@ const PROP_TYPES = {
   // TODO - replace with actual map view state props, build matrix from those
   projectionMatrix: PropTypes.any,
   pixelRatio: PropTypes.number
+  onWebGLInitialized: PropTypes.func
 };
 
 const DEFAULT_PROPS = {
@@ -49,6 +50,7 @@ const DEFAULT_PROPS = {
   camera: null,
   projectionMatrix: null,
   pixelRatio: DEFAULT_PIXEL_RATIO
+  onWebGLInitialized: () => {}
 };
 
 export default class DeckGLOverlay extends React.Component {
@@ -101,6 +103,7 @@ export default class DeckGLOverlay extends React.Component {
 
   @autobind
   _onRendererInitialized({gl}) {
+    this.props.onWebGLInitialized(gl);
     this.setState({
       gl,
       scene: new Scene(gl, {

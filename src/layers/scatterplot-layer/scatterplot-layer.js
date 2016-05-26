@@ -23,8 +23,8 @@ import {Model, Program, Geometry} from 'luma.gl';
 const glslify = require('glslify');
 
 const ATTRIBUTES = {
-  positions: {size: 3, '0': 'x', '1': 'y', '2': 'unused'},
-  colors: {size: 3, '0': 'red', '1': 'green', '2': 'blue'}
+  instancePositions: {size: 3, '0': 'x', '1': 'y', '2': 'unused'},
+  instanceColors: {size: 3, '0': 'red', '1': 'green', '2': 'blue'}
 };
 
 export default class ScatterplotLayer extends Layer {
@@ -54,8 +54,8 @@ export default class ScatterplotLayer extends Layer {
     });
 
     attributeManager.addInstanced(ATTRIBUTES, {
-      positions: {update: this.calculatePositions},
-      colors: {update: this.calculateColors}
+      instancePositions: {update: this.calculateInstancePositions},
+      instanceColors: {update: this.calculateInstanceColors}
     });
   }
 
@@ -104,7 +104,7 @@ export default class ScatterplotLayer extends Layer {
     });
   }
 
-  calculatePositions(attribute) {
+  calculateInstancePositions(attribute) {
     const {data} = this.props;
     const {value, size} = attribute;
     let i = 0;
@@ -116,7 +116,7 @@ export default class ScatterplotLayer extends Layer {
     }
   }
 
-  calculateColors(attribute) {
+  calculateInstanceColors(attribute) {
     const {data} = this.props;
     const {value, size} = attribute;
     let i = 0;

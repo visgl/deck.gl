@@ -58,7 +58,8 @@ const DEFAULT_PROPS = {
 };
 
 const ATTRIBUTES = {
-  pickingColors: {size: 3, '0': 'pickRed', '1': 'pickGreen', '2': 'pickBlue'}
+  instancePickingColors:
+    {size: 3, '0': 'pickRed', '1': 'pickGreen', '2': 'pickBlue'}
 };
 
 let counter = 0;
@@ -319,10 +320,10 @@ export default class Layer {
     });
 
     const {attributeManager} = this.state;
-    // All instanced layers get pickingColors attribute by default
+    // All instanced layers get instancePickingColors attribute by default
     // Their shaders can use it to render a picking scene
     attributeManager.addInstanced(ATTRIBUTES, {
-      pickingColors: {update: this.calculatePickingColors}
+      instancePickingColors: {update: this.calculateInstancePickingColors}
     });
 
     this.setViewport();
@@ -375,7 +376,7 @@ export default class Layer {
     this.willUnmount();
   }
 
-  calculatePickingColors(attribute, numInstances) {
+  calculateInstancePickingColors(attribute, numInstances) {
     const {value, size} = attribute;
     // add 1 to index to seperate from no selection
     for (let i = 0; i < numInstances; i++) {
@@ -408,8 +409,9 @@ export default class Layer {
   onGetHoverInfo(info) {
     const {color} = info;
     info.index = this.decodePickingColor(color);
-    if (Array.isArray(this.data)) {
-      info.object = this.data[info.index];
+    // If props.data is an indexable array, get the object
+    if (Array.isArray(this.props.data)) {
+      info.object = this.props.data[info.index];
     }
     info.geoCoords = this.unproject({x: info.x, y: info.y});
     return info;
@@ -417,6 +419,7 @@ export default class Layer {
 
   onHover(info) {
     const {color} = info;
+
     const selectedPickingColor = new Float32Array(3);
     selectedPickingColor[0] = color[0];
     selectedPickingColor[1] = color[1];
@@ -454,12 +457,7 @@ export default class Layer {
   setViewport() {
     const {width, height, latitude, longitude, zoom} = this.props;
     this.setState({
-      viewport: {
-        x: 0,
-        y: 0,
-        width,
-        height
-      },
+      viewport: {x: 0, y: 0, width, height},
       mercator: ViewportMercator({
         width, height, latitude, longitude, zoom,
         tileSize: 512

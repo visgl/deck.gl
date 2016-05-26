@@ -23,7 +23,7 @@ import {Model, Program, Geometry} from 'luma.gl';
 const glslify = require('glslify');
 
 const ATTRIBUTES = {
-  positions: {size: 4, '0': 'x0', '1': 'y0', '2': 'x1', '3': 'y1'}
+  instancePositions: {size: 4, '0': 'x0', '1': 'y0', '2': 'x1', '3': 'y1'}
 };
 
 export default class ArcLayer extends Layer {
@@ -34,9 +34,16 @@ export default class ArcLayer extends Layer {
    * @class
    * @param {object} opts
    */
-  constructor(opts) {
+  constructor({
+    strokeWidth = 1,
+    color0 = [255, 0, 0],
+    color1 = [0, 0, 255],
+    ...opts
+  } = {}) {
     super({
-      strokeWidth: 1,
+      strokeWidth,
+      color0,
+      color1,
       ...opts
     });
   }
@@ -49,25 +56,23 @@ export default class ArcLayer extends Layer {
     this.setState({model});
 
     attributeManager.addInstanced(ATTRIBUTES, {
-      positions: {update: this.calculatePositions}
+      instancePositions: {update: this.calculateInstancePositions}
     });
 
     this.updateColors();
   }
 
   willReceiveProps(oldProps, nextProps) {
-
     super.willReceiveProps(oldProps, nextProps);
     this.state.model.userData.strokeWidth = nextProps.strokeWidth;
-
     this.updateColors();
   }
 
   createModel(gl) {
-    let vertices = [];
+    let positions = [];
     const NUM_SEGMENTS = 50;
     for (let i = 0; i < NUM_SEGMENTS; i++) {
-      vertices = [...vertices, i, i, i];
+      positions = [...positions, i, i, i];
     }
 
     return new Model({
@@ -79,33 +84,27 @@ export default class ArcLayer extends Layer {
       geometry: new Geometry({
         id: 'arc',
         drawMode: 'LINE_STRIP',
-        vertices: new Float32Array(vertices)
+        vertices: new Float32Array(positions)
       }),
       instanced: true,
       onBeforeRender() {
-        const {gl} = this.program;
         this.userData.oldStrokeWidth = gl.getParameter(gl.LINE_WIDTH);
-        gl.lineWidth(this.userData.strokeWidth || 1);
+        this.program.gl.lineWidth(this.userData.strokeWidth || 1);
       },
       onAfterRender() {
-        const {gl} = this.program;
-        gl.lineWidth(this.userData.oldStrokeWidth || 1);
+        this.program.gl.lineWidth(this.userData.oldStrokeWidth || 1);
       }
     });
   }
 
   updateColors() {
-    // Get colors from first object
-    const object = this.getFirstObject();
-    if (object) {
-      this.setUniforms({
-        color0: object.colors.c0,
-        color1: object.colors.c1
-      });
-    }
+    this.setUniforms({
+      color0: this.props.color0,
+      color1: this.props.color1
+    });
   }
 
-  calculatePositions(attribute) {
+  calculateInstancePositions(attribute) {
     const {data} = this.props;
     const {value, size} = attribute;
     let i = 0;

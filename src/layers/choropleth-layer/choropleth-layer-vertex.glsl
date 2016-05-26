@@ -24,7 +24,7 @@
 #pragma glslify: mercatorProject = require(../../../shaderlib/mercator-project)
 uniform float mercatorZoom;
 
-attribute vec3 vertices;
+attribute vec3 positions;
 attribute vec3 colors;
 attribute vec3 pickingColors;
 
@@ -37,11 +37,21 @@ uniform vec3 selectedPickingColor;
 
 varying vec4 vColor;
 
-void main(void) {
-  vec2 pos = mercatorProject(vertices.xy, mercatorZoom);
-  vec3 p = vec3(pos.xy, vertices.z);
-  gl_Position = projectionMatrix * worldMatrix * vec4(p, 1.0);
+vec4 getColor(vec4 color, float opacity, vec3 pickingColor, float renderPickingBuffer) {
+  vec4 color4 = vec4(color.xyz / 255., color.w / 255. * opacity);
+  vec4 pickingColor4 = vec4(pickingColor / 255., 1.);
+  return mix(color4, pickingColor4, renderPickingBuffer);
+}
 
-  float alpha = pickingColors == selectedPickingColor ? 0.5 : opacity;
-  vColor = vec4(mix(colors / 255., pickingColors / 255., renderPickingBuffer), alpha);
+void main(void) {
+  vec2 pos = mercatorProject(positions.xy, mercatorZoom);
+  vec3 p = vec3(pos.xy, positions.z);
+  gl_Position = projectionMatrix * worldMatrix * vec4(p, 1.);
+
+  vec4 color = vec4(colors / 255., opacity);
+  vec4 pickingColor = vec4(pickingColors / 255., 1.);
+  vColor = mix(color, pickingColor, renderPickingBuffer);
+
+  // float alpha = pickingColors == selectedPickingColor ? 0.5 : opacity;
+  // vColor = vec4(mix(colors / 255., pickingColors / 255., renderPickingBuffer), alpha);
 }

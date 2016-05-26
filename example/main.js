@@ -32,7 +32,9 @@ import {Provider, connect} from 'react-redux';
 import autobind from 'autobind-decorator';
 
 import MapboxGLMap from 'react-map-gl';
-import {PerspectiveCamera, Mat4} from 'luma.gl';
+import {Mat4} from 'luma.gl';
+import OverlayControl from './overlay-control';
+
 import request from 'd3-request';
 import {
   DeckGLOverlay,
@@ -48,6 +50,10 @@ import {
 const MAPBOX_ACCESS_TOKEN = process.env.MAPBOX_ACCESS_TOKEN ||
   'Set MAPBOX_ACCESS_TOKEN environment variable or put your token here.';
 
+const CHOROPLETHS_FILE = './example/data/sf.zip.geo.json';
+const HEXAGONS_FILE = './example/data/hexagons.csv';
+const POINTS_FILE = './example/data/sf.bike.parking.csv';
+
 const INITIAL_STATE = {
   mapViewState: {
     latitude: 37.751537058389985,
@@ -59,6 +65,7 @@ const INITIAL_STATE = {
   hexagons: null,
   points: null,
   arcs: null,
+  arcs2: null,
   arcStrokeWidth: 1
 };
 
@@ -106,7 +113,10 @@ function reducer(state = INITIAL_STATE, action) {
       };
     });
 
-    return {...state, points, arcs: pointsToArcs(points)};
+    const arcs = pointsToArcs(points);
+    const arcs1 = arcs.slice(0, arcs.length / 2);
+    const arcs2 = arcs.slice(arcs.length / 2);
+    return {...state, points, arcs: arcs1, arcs2};
   }
 
   default:
@@ -122,6 +132,7 @@ function mapStateToProps(state) {
     hexagons: state.hexagons,
     points: state.points,
     arcs: state.arcs,
+    arcs2: state.arcs2,
     hexData: state.hexData
   };
 }
@@ -149,7 +160,9 @@ function processHexagons(hexagons) {
       Number(hexagon.value) / maxValue * 255,
       Number(hexagon.value) / maxValue * 128,
       Number(hexagon.value) / maxValue * 64
-    ]
+    ],
+    elevation: Number(hexagon.value) / maxValue * 100
+
   }));
   return data;
 }
@@ -182,20 +195,20 @@ function pointsToArcs(points) {
 class ExampleApp extends React.Component {
   constructor(props) {
     super(props);
+    this.state = {
+      selectedHexagons: [],
+      hoverItem: null,
+      clickItem: null
+    };
   }
 
   componentWillMount() {
     this._handleResize();
     window.addEventListener('resize', this._handleResize);
 
-    this._loadJsonFile('./data/sf.zip.geo.json', this._handleChoroplethsLoaded);
-    this._loadCsvFile('./data/hexagons.csv', this._handleHexagonsLoaded);
-    this._loadCsvFile('./data/sf.bike.parking.csv', this._handlePointsLoaded);
-  }
-
-  componentDidMount() {
-    // update arc stroke width
-    // window.setTimeout(this._updateArcStrokeWidth, 3000);
+    this._loadJsonFile(CHOROPLETHS_FILE, this._handleChoroplethsLoaded);
+    this._loadCsvFile(HEXAGONS_FILE, this._handleHexagonsLoaded);
+    this._loadCsvFile(POINTS_FILE, this._handlePointsLoaded);
   }
 
   componentWillUnmount() {
@@ -220,68 +233,84 @@ class ExampleApp extends React.Component {
     });
   }
 
-  @autobind
-  _updateArcStrokeWidth() {
-    console.log('update arc stroke width');
+  @autobind _updateArcStrokeWidth() {
     this.setState({arcStrokeWidth: 1});
   }
 
-  @autobind
-  _handleHexagonsLoaded(data) {
+  @autobind _handleHexagonsLoaded(data) {
     this.props.dispatch(loadHexagons(data));
   }
 
-  @autobind
-  _handlePointsLoaded(data) {
+  @autobind _handlePointsLoaded(data) {
     this.props.dispatch(loadPoints(data));
   }
 
-  @autobind
-  _handleChoroplethsLoaded(data) {
+  @autobind _handleChoroplethsLoaded(data) {
     this.props.dispatch(loadChoropleths(data));
   }
 
-  @autobind
-  _handleResize() {
+  @autobind _handleResize() {
     this.setState({width: window.innerWidth, height: window.innerHeight});
   }
 
-  @autobind
-  _handleViewportChanged(mapViewState) {
+  @autobind _handleViewportChanged(mapViewState) {
     if (mapViewState.pitch > 60) {
       mapViewState.pitch = 60;
     }
     this.props.dispatch(updateMap(mapViewState));
   }
 
-  @autobind
-  _handleChoroplethHovered(info) {
-    // console.log('choropleth hovered:', info);
+  @autobind _handleChoroplethHovered(info) {
+    info.type = 'choropleth';
+    this.setState({hoverItem: info});
   }
 
-  @autobind
-  _handleChoroplethClicked(info) {
-    // console.log('choropleth clicked:', info);
+  @autobind _handleChoroplethClicked(info) {
+    info.type = 'choropleth';
+    this.setState({clickItem: info});
   }
 
-  @autobind
-  _handleHexagonHovered(info) {
-    // console.log('Hexagon hovered:', info);
+  @autobind _handleHexagonHovered(info) {
+    info.type = 'hexagon';
+
+    const {hexData} = this.props;
+    let selectedHexagons = [];
+    if (info.index >= 0) {
+      selectedHexagons = [{
+        ...hexData[info.index],
+        color: [0, 0, 255]
+      }];
+    }
+
+    // this.setState({
+    //   hoverItem: info,
+    //   selectedHexagons
+    // });
   }
 
-  @autobind
-  _handleHexagonClicked(info) {
-    // console.log('Hexagon clicked:', info);
+  @autobind _handleHexagonClicked(info) {
+    // info.type = 'hexagon';
+    // this.setState({clickItem: info});
   }
 
-  @autobind
-  _handleScatterplotHovered(info) {
-    // console.log('Scatterplot hovered:', info);
+  @autobind _handleScatterplotHovered(info) {
+    info.type = 'point';
+    this.setState({hoverItem: info});
   }
 
-  @autobind
-  _handleScatterplotClicked(info) {
-    // console.log('Scatterplot clicked:', info);
+  @autobind _handleScatterplotClicked(info) {
+    info.type = 'point';
+    this.setState({clickItem: info});
+  }
+
+  @autobind _handleArcHovered(info) {
+    info.type = 'arc';
+    this.setState({hoverItem: info});
+  }
+
+  @autobind _handleArcClicked(info) {
+    info.type = 'arc';
+    this.setState({clickItem: info});
   }
 
   _renderGridLayer() {
@@ -329,8 +358,29 @@ class ExampleApp extends React.Component {
       longitude: mapViewState.longitude,
       zoom: mapViewState.zoom,
       data: hexData,
+      opacity: 0.5,
+      elevation: 10,
       isPickable: true,
+      onHover: this._handleHexagonHovered,
+      onClick: this._handleHexagonClicked
+    });
+  }
+
+  _renderHexagonSelectionLayer() {
+    const {mapViewState} = this.props;
+    const {selectedHexagons} = this.state;
+
+    return new HexagonLayer({
+      id: 'hexagonSelectionLayer',
+      width: window.innerWidth,
+      height: window.innerHeight,
+      latitude: mapViewState.latitude,
+      longitude: mapViewState.longitude,
+      zoom: mapViewState.zoom,
+      data: selectedHexagons,
       opacity: 0.1,
+      elevation: 10,
+      isPickable: true,
       onHover: this._handleHexagonHovered,
       onClick: this._handleHexagonClicked
     });
@@ -346,8 +396,8 @@ class ExampleApp extends React.Component {
       latitude: mapViewState.latitude,
       longitude: mapViewState.longitude,
       zoom: mapViewState.zoom,
-      isPickable: false,
       data: points,
+      isPickable: true,
       onHover: this._handleScatterplotHovered,
       onClick: this._handleScatterplotClicked
     });
@@ -364,7 +414,32 @@ class ExampleApp extends React.Component {
       longitude: mapViewState.longitude,
       zoom: mapViewState.zoom,
       data: arcs,
-      strokeWidth: this.state.arcStrokeWidth || 1
+      strokeWidth: this.state.arcStrokeWidth || 1,
+      color0: [0, 0, 255],
+      color1: [0, 0, 255],
+      isPickable: true,
+      onHover: this._handleArcHovered,
+      onClick: this._handleArcClicked
+    });
+  }
+
+  _renderArcLayer2() {
+    const {mapViewState, arcs2} = this.props;
+
+    return new ArcLayer({
+      id: 'arcLayer2',
+      width: window.innerWidth,
+      height: window.innerHeight,
+      latitude: mapViewState.latitude,
+      longitude: mapViewState.longitude,
+      zoom: mapViewState.zoom,
+      data: arcs2,
+      strokeWidth: this.state.arcStrokeWidth || 1,
+      color0: [0, 255, 0],
+      color1: [0, 255, 0],
+      isPickable: true,
+      onHover: this._handleArcHovered,
+      onClick: this._handleArcClicked
     });
   }
 
@@ -387,13 +462,21 @@ class ExampleApp extends React.Component {
         projectionMatrix={ mapViewState.projectionMatrix }
         layers={[
           this._renderGridLayer(),
-          this._renderChoroplethLayer(),
           this._renderHexagonLayer(),
+          this._renderHexagonSelectionLayer(),
+          this._renderArcLayer(),
+          this._renderArcLayer2(),
           this._renderScatterplotLayer(),
-          this._renderArcLayer()
+          this._renderChoroplethLayer()
         ]}
+        onWebGLInitialized={ this._onWebGLInitialized }
       />
     );
+  }
+
+  @autobind _onWebGLInitialized(gl) {
+    gl.enable(gl.DEPTH_TEST);
+    gl.depthFunc(gl.LEQUAL);
   }
 
   _renderMap() {
@@ -405,7 +488,7 @@ class ExampleApp extends React.Component {
         mapboxApiAccessToken={MAPBOX_ACCESS_TOKEN}
         width={width}
         height={height}
-        perspectiveEnabled={true}
+        perspectiveEnabled
         { ...mapViewState }
         onChangeViewport={this._handleViewportChanged}>
         { this._renderOverlay() }
@@ -414,9 +497,16 @@ class ExampleApp extends React.Component {
   }
 
   render() {
+    const {hoverItem, clickItem} = this.state;
+
     return (
       <div>
         { this._renderMap() }
+
+        <OverlayControl
+          hoverItem={ hoverItem }
+          clickItem={ clickItem }/>
+
       </div>
     );
   }
@@ -426,11 +516,14 @@ class ExampleApp extends React.Component {
 const store = createStore(reducer);
 const App = connect(mapStateToProps)(ExampleApp);
 
+const container = document.createElement('div');
+document.body.appendChild(container);
+
 ReactDOM.render(
   <Provider store={store}>
     <App />
   </Provider>,
-  document.getElementById('app')
+  container
 );
 
 /* eslint-enable func-style */

@@ -111,7 +111,7 @@ export default class WebGLRenderer extends React.Component {
 
     let gl;
     try {
-      gl = createGLContext(canvas);
+      gl = createGLContext(canvas, {preserveDrawingBuffer: true});
     } catch (error) {
       this.props.onInitializationFailed(error);
       return;
@@ -136,7 +136,7 @@ export default class WebGLRenderer extends React.Component {
     const {gl} = this.state;
     const {camera, scene} = this.props;
 
-    const pickedModels = scene.pickModels(gl, {camera, x, y});
+    const pickedModels = scene.pickModels(gl, {camera, x: x * 2, y: y * 2});
 
     return pickedModels;
   }
