@@ -31,6 +31,8 @@ import {
   initializeNewLayers, layersNeedRedraw
 } from './layer-manager';
 
+const DEFAULT_PIXEL_RATIO = typeof window !== 'undefined' ? window.devicePixelRatio : 1;
+
 const PROP_TYPES = {
   width: PropTypes.number.isRequired,
   height: PropTypes.number.isRequired,
@@ -39,6 +41,7 @@ const PROP_TYPES = {
   camera: PropTypes.instanceOf(Camera),
   // TODO - replace with actual map view state props, build matrix from those
   projectionMatrix: PropTypes.any,
+  pixelRatio: PropTypes.number,
   onWebGLInitialized: PropTypes.func
 };
 
@@ -46,6 +49,7 @@ const DEFAULT_PROPS = {
   blending: DEFAULT_BLENDING,
   camera: null,
   projectionMatrix: null,
+  pixelRatio: DEFAULT_PIXEL_RATIO,
   onWebGLInitialized: () => {}
 };
 
@@ -140,7 +144,7 @@ export default class DeckGLOverlay extends React.Component {
 
   render() {
     const {
-      width, height, layers, blending, projectionMatrix, ...otherProps
+      width, height, layers, blending, projectionMatrix, pixelRatio, ...otherProps
     } = this.props;
     let {camera} = this.props;
     const {scene} = this.state;
@@ -183,7 +187,7 @@ export default class DeckGLOverlay extends React.Component {
         camera={ camera }
         scene={ scene }
         blending={ blending }
-        pixelRatio={ window.devicePixelRatio }
+        pixelRatio={ pixelRatio }
 
         onRendererInitialized={ this._onRendererInitialized }
         onNeedRedraw={ this._checkIfNeedRedraw }
