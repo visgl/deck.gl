@@ -44,7 +44,8 @@ const PROP_TYPES = {
 const DEFAULT_PROPS = {
   blending: DEFAULT_BLENDING,
   camera: null,
-  projectionMatrix: null
+  projectionMatrix: null,
+  pixelRatio: typeof window !== 'undefined' ? window.devicePixelRatio : 1
 };
 
 export default class DeckGLOverlay extends React.Component {
@@ -137,7 +138,7 @@ export default class DeckGLOverlay extends React.Component {
 
   render() {
     const {
-      width, height, layers, blending, projectionMatrix, ...otherProps
+      width, height, layers, blending, projectionMatrix, pixelRatio, ...otherProps
     } = this.props;
     let {camera} = this.props;
     const {scene} = this.state;
@@ -180,7 +181,7 @@ export default class DeckGLOverlay extends React.Component {
         camera={ camera }
         scene={ scene }
         blending={ blending }
-        pixelRatio={ window.devicePixelRatio }
+        pixelRatio={ pixelRatio }
 
         onRendererInitialized={ this._onRendererInitialized }
         onNeedRedraw={ this._checkIfNeedRedraw }
