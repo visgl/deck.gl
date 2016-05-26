@@ -38,7 +38,8 @@ const PROP_TYPES = {
   blending: PropTypes.object,
   camera: PropTypes.instanceOf(Camera),
   // TODO - replace with actual map view state props, build matrix from those
-  projectionMatrix: PropTypes.any
+  projectionMatrix: PropTypes.any,
+  pixelRatio: PropTypes.number
 };
 
 const DEFAULT_PROPS = {
