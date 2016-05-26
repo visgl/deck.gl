@@ -42,11 +42,13 @@ const PROP_TYPES = {
   pixelRatio: PropTypes.number
 };
 
+const DEFAULT_PIXEL_RATIO = typeof window !== 'undefined' ? window.devicePixelRatio : 1;
+
 const DEFAULT_PROPS = {
   blending: DEFAULT_BLENDING,
   camera: null,
   projectionMatrix: null,
-  pixelRatio: typeof window !== 'undefined' ? window.devicePixelRatio : 1
+  pixelRatio: DEFAULT_PIXEL_RATIO
 };
 
 export default class DeckGLOverlay extends React.Component {
