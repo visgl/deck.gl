@@ -41,7 +41,7 @@ const PROP_TYPES = {
   camera: PropTypes.instanceOf(Camera),
   // TODO - replace with actual map view state props, build matrix from those
   projectionMatrix: PropTypes.any,
-  pixelRatio: PropTypes.number
+  pixelRatio: PropTypes.number,
   onWebGLInitialized: PropTypes.func
 };
 
@@ -49,7 +49,7 @@ const DEFAULT_PROPS = {
   blending: DEFAULT_BLENDING,
   camera: null,
   projectionMatrix: null,
-  pixelRatio: DEFAULT_PIXEL_RATIO
+  pixelRatio: DEFAULT_PIXEL_RATIO,
   onWebGLInitialized: () => {}
 };
 
