@@ -134,9 +134,13 @@ export default class WebGLRenderer extends React.Component {
   /* eslint-disable max-statements */
   _pick(x, y) {
     const {gl} = this.state;
-    const {camera, scene} = this.props;
+    const {camera, scene, pixelRatio} = this.props;
 
-    const pickedModels = scene.pickModels(gl, {camera, x: x * 2, y: y * 2});
+    const pickedModels = scene.pickModels(gl, {
+      camera,
+      x: x * pixelRatio,
+      y: y * pixelRatio
+    });
 
     return pickedModels;
   }

@@ -197,7 +197,10 @@ class ExampleApp extends React.Component {
     super(props);
     this.state = {
       selectedHexagons: [],
-      hoverItem: null,
+      hoverHexagon: null,
+      hoverPoint: null,
+      hoverArc: null,
+      hoverChoropleth: null,
       clickItem: null
     };
   }
@@ -262,7 +265,7 @@ class ExampleApp extends React.Component {
 
   @autobind _handleChoroplethHovered(info) {
     info.type = 'choropleth';
-    this.setState({hoverItem: info});
+    this.setState({hoverChoropleth: info});
   }
 
   @autobind _handleChoroplethClicked(info) {
@@ -282,20 +285,20 @@ class ExampleApp extends React.Component {
       }];
     }
 
-    // this.setState({
-    //   hoverItem: info,
-    //   selectedHexagons
-    // });
+    this.setState({
+      hoverHexagon: info,
+      selectedHexagons
+    });
   }
 
   @autobind _handleHexagonClicked(info) {
-    // info.type = 'hexagon';
-    // this.setState({clickItem: info});
+    info.type = 'hexagon';
+    this.setState({clickItem: info});
   }
 
   @autobind _handleScatterplotHovered(info) {
     info.type = 'point';
-    this.setState({hoverItem: info});
+    this.setState({hoverPoint: info});
   }
 
   @autobind _handleScatterplotClicked(info) {
@@ -305,7 +308,7 @@ class ExampleApp extends React.Component {
 
   @autobind _handleArcHovered(info) {
     info.type = 'arc';
-    this.setState({hoverItem: info});
+    this.setState({hoverArc: info});
   }
 
   @autobind _handleArcClicked(info) {
@@ -497,16 +500,10 @@ class ExampleApp extends React.Component {
   }
 
   render() {
-    const {hoverItem, clickItem} = this.state;
-
     return (
       <div>
         { this._renderMap() }
-
-        <OverlayControl
-          hoverItem={ hoverItem }
-          clickItem={ clickItem }/>
-
+        <OverlayControl { ...this.state }/>
       </div>
     );
   }

@@ -2,8 +2,13 @@
 /* eslint-disable no-inline-comments */
 import React from 'react';
 
-function OverlayControl({hoverItem, clickItem}) {
-  const hoverCoords = hoverItem && hoverItem.geoCoords;
+function OverlayControl({
+  hoverChoropleth,
+  hoverHexagon,
+  hoverPoint,
+  hoverArc,
+  clickItem
+}) {
   const clickCoords = clickItem && clickItem.geoCoords;
 
   return (
@@ -21,12 +26,28 @@ function OverlayControl({hoverItem, clickItem}) {
         width: 300
       } }>
         <div>
-          Hover
-          { hoverItem && ` ${hoverItem.type}=${hoverItem.index}` }
-          { hoverCoords &&
-            ` (${hoverCoords.lat.toFixed(4)} ${hoverCoords.lon.toFixed(4)})` }
+          { hoverHexagon && hoverHexagon.geoCoords &&
+            ` (${hoverHexagon.geoCoords.lat.toFixed(4)} `
+            `${hoverHexagon.geoCoords.lon.toFixed(4)})` }
         </div>
         <div>
+          Hexagon
+          { hoverHexagon && ` ${hoverHexagon.type}=${hoverHexagon.index}` }
+        </div>
+        <div>
+          Point
+          { hoverPoint && ` ${hoverPoint.type}=${hoverPoint.index}` }
+        </div>
+        <div>
+          Arc
+          { hoverArc && ` ${hoverArc.type}=${hoverArc.index}` }
+        </div>
+        <div>
+          Choropleth
+          { hoverChoropleth &&
+            ` ${hoverChoropleth.type}=${hoverChoropleth.index}` }
+        </div>
+        <div>````
           Click
           { clickItem && ` ${clickItem.type}=${clickItem.index}` }
           { clickCoords &&
