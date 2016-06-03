@@ -1,4 +1,15 @@
 language: node_js
+os: linux
+sudo: required
+dist: trusty
+addons:
+  apt:
+    packages:
+    - mesa-utils
+    - xvfb
+    - libgl1-mesa-dri
+    - libglapi-mesa
+    - libosmesa6
 node_js:
   - '5'
 before_script:
