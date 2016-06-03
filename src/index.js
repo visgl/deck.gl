@@ -18,13 +18,22 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-/* eslint-disable block-scoped-var */
-export {default as DeckGLOverlay} from './deckgl-overlay';
+import DeckGLOverlay from './deckgl-overlay';
 
-export {default as Layer} from './layer';
+import Layer from './layer';
 
-export {default as HexagonLayer} from './layers/hexagon-layer';
-export {default as ChoroplethLayer} from './layers/choropleth-layer';
-export {default as ScatterplotLayer} from './layers/scatterplot-layer';
-export {default as GridLayer} from './layers/grid-layer';
-export {default as ArcLayer} from './layers/arc-layer';
+import HexagonLayer from './layers/hexagon-layer';
+import ChoroplethLayer from './layers/choropleth-layer';
+import ScatterplotLayer from './layers/scatterplot-layer';
+import GridLayer from './layers/grid-layer';
+import ArcLayer from './layers/arc-layer';
+
+module.exports = {
+  DeckGLOverlay,
+  Layer,
+  HexagonLayer,
+  ChoroplethLayer,
+  ScatterplotLayer,
+  GridLayer,
+  ArcLayer
+};

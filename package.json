@@ -2,7 +2,7 @@
   "name": "deck.gl",
   "description": "A suite of 3D-enabled data visualization overlays for react-map-gl",
   "license": "MIT",
-  "version": "3.0.0-beta8",
+  "version": "3.0.0-beta9",
   "keywords": [
     "webgl",
     "visualization",
@@ -33,7 +33,6 @@
     "autobind-decorator": "^1.3.3",
     "babel-core": "^6.7.7",
     "babel-polyfill": "^6.1.19",
-    "babel-plugin-transform-builtin-extend": "^1.1.0",
     "earcut": "^2.0.6",
     "geojson-normalize": "0.0.1",
     "get-pixels": "^3.3.0",
@@ -43,7 +42,6 @@
     "lodash.isfunction": "^3.0.6",
     "lodash.throttle": "^3.0.4",
     "lodash.where": "^3.1.0",
-    "luma.gl": "2.0.0-beta5",
     "save-pixels": "^2.3.0",
     "viewport-mercator-project": "^2.0.1",
     "webgl-obj-loader": "^0.1.1"
@@ -61,6 +59,7 @@
     "browserify": "^13.0.0",
     "envify": "^3.4.0",
     "glslify": "^5.0.0",
+    "gl": "^4.0.1",
     "budo": "^8.0.3",
     "d3-request": "^0.2.2",
     "electron-prebuilt": "^0.37.2",
@@ -68,7 +67,7 @@
     "eslint-plugin-react": "^3.13.1",
     "faucet": "0.0.1",
     "immutable": "^3.7.5",
-    "r-dom": "^2.1.0",
+    "luma.gl": "2.0.0-beta6",
     "react": "^15.0.2",
     "react-addons-test-utils": "^15.0.2",
     "react-dom": "^15.0.2",
@@ -82,7 +81,10 @@
   },
   "peerDependencies": {
     "react": "0.14.x - 15.x",
-    "react-dom": "0.14.x - 15.x"
+    "react-dom": "0.14.x - 15.x",
+    "luma.gl": "2.0.0-beta6",
+    "react-map-gl": "1.0.0-beta-9",
+    "gl": "^4.0.1"
   },
   "scripts": {
     "build": "npm run build-clean && npm run build-compile && npm run build-script && npm run build-script-min",
@@ -94,7 +96,7 @@
     "precommit": "npm run lint -s && npm run test",
     "prepublish": "npm run build",
     "test": "npm run lint && npm run test-node",
-    "test-node": "babel-node --only=luma.gl,deck.gl/src,deck.gl/test test/node.js | faucet",
+    "test-node": "babel-node --include='' test/node.js",
     "test-browser": "budo test/browser.js:build/test-bundle.js --dir test --live --open --port 3001 --watch-glob '**/*.{html,css,scss,js,glsl}' -- -t babelify",
     "test-electron": "browserify test/electron.js | testron | faucet",
     "start": "budo example/main.js:example/bundle.js --live --open --port 3000 --css example/main.css --title 'deck.gl' --watch-glob '**/*.{html,css,js,glsl}' -- -t babelify -t envify"

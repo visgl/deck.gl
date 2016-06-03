@@ -1,5 +1,5 @@
 import test from 'tape-catch';
-import {Layer} from '../src';
+import Layer from '../src/layer';
 
 const dataVariants = [
   {data: ['a', 'b', 'c'], size: 3}
