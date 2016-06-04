@@ -146,7 +146,7 @@ const FIXTURE = {
 //   });
 // }
 
-test('_renderGridLayer', t => {
+test('GridLayer#constructor', t => {
   const {window, mapViewState, points} = FIXTURE;
 
   const layer = new GridLayer({
@@ -165,7 +165,7 @@ test('_renderGridLayer', t => {
   t.end();
 });
 
-test('_renderChoroplethLayer', t => {
+test('ChoroplethLayer#constructor', t => {
   const {window, mapViewState, choropleths} = FIXTURE;
   const layer = new ChoroplethLayer({
     id: 'choroplethLayer',
@@ -177,9 +177,7 @@ test('_renderChoroplethLayer', t => {
     data: choropleths,
     opacity: 0.8,
     isPickable: false,
-    drawContour: true,
-    // onHover: this._handleChoroplethHovered,
-    // onClick: this._handleChoroplethClicked
+    drawContour: true
   });
 
   t.ok(layer, 'ChoroplethLayer created');
