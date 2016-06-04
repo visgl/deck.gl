@@ -19,3 +19,4 @@
 // THE SOFTWARE.
 
 import './layer-spec';
+import './layers-spec';

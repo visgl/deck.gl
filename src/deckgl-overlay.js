@@ -31,7 +31,8 @@ import {
   initializeNewLayers, layersNeedRedraw
 } from './layer-manager';
 
-const DEFAULT_PIXEL_RATIO = typeof window !== 'undefined' ? window.devicePixelRatio : 1;
+const DEFAULT_PIXEL_RATIO =
+  typeof window !== 'undefined' ? window.devicePixelRatio : 1;
 
 const PROP_TYPES = {
   width: PropTypes.number.isRequired,

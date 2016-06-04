@@ -4,9 +4,7 @@ import React from 'react';
 
 import utils from 'react-addons-test-utils';
 
-import {
-  DeckGLOverlay
-} from '../src';
+import {DeckGLOverlay} from '../src';
 
 test('Rendering DeckGLOverlay', t => {
   const component = utils.renderIntoDocument(
