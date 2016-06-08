@@ -58,8 +58,7 @@ const INITIAL_STATE = {
   mapViewState: {
     latitude: 37.751537058389985,
     longitude: -122.42694203247012,
-    zoom: 11.5,
-    projectionMatrix: new Mat4()
+    zoom: 11.5
   },
   choropleths: null,
   hexagons: null,
@@ -459,7 +458,7 @@ class ExampleApp extends React.Component {
       <DeckGLOverlay
         width={width}
         height={height}
-        projectionMatrix={ mapViewState.projectionMatrix }
+        {...mapViewState}
         layers={[
           this._renderGridLayer(),
           this._renderHexagonLayer(),
