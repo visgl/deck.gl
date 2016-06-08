@@ -30,6 +30,7 @@ import {
   matchLayers, finalizeOldLayers, updateMatchedLayers,
   initializeNewLayers, layersNeedRedraw
 } from './layer-manager';
+import projectToMatrix from './projection';
 
 const DEFAULT_PIXEL_RATIO =
   typeof window !== 'undefined' ? window.devicePixelRatio : 1;
@@ -145,7 +146,9 @@ export default class DeckGLOverlay extends React.Component {
 
   render() {
     const {
-      width, height, layers, blending, projectionMatrix, pixelRatio, ...otherProps
+      width, height, layers, blending, pixelRatio,
+      latitude, longitude, zoom, pitch, bearing, altitude,
+      ...otherProps
     } = this.props;
     let {camera} = this.props;
     const {scene} = this.state;
@@ -158,16 +161,14 @@ export default class DeckGLOverlay extends React.Component {
     // standard mabox props: lat/lon/zoom/pitch/bearing/altitude
     if (!camera) {
       camera = new PerspectiveCamera();
-      if (!projectionMatrix) {
-        /* eslint-disable no-console */
-        /* global console */
-        console.warn('DeckGLOverlay needs either camera or projectionMatrix');
-        /* eslint-enable no-console */
-      } else {
-        camera.view = new Mat4().id();
-        for (let i = 0; i < projectionMatrix.length; ++i) {
-          camera.projection[i] = projectionMatrix[i];
-        }
+
+      const projectionMatrix = projectToMatrix({
+        width, height, latitude, longitude, zoom, pitch, bearing, altitude
+      });
+
+      camera.view = new Mat4().id();
+      for (let i = 0; i < projectionMatrix.length; ++i) {
+        camera.projection[i] = projectionMatrix[i];
       }
     }
 
