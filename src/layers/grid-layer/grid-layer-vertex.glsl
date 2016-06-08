@@ -26,6 +26,8 @@ attribute vec3 instancePositions;
 attribute vec4 instanceColors;
 attribute vec3 instancePickingColors;
 
+uniform float mercatorScale;
+
 uniform float maxCount;
 uniform float opacity;
 uniform float renderPickingBuffer;
@@ -41,6 +43,6 @@ void main(void) {
   float alpha = instancePickingColors == selectedPickingColor ? 1.5 * instanceColors.w : instanceColors.w;
   vColor = vec4(mix(instanceColors.xyz / maxCount, instancePickingColors / 255., renderPickingBuffer), alpha);
 
-  vec3 p = instancePositions + vertices * scale;
+  vec3 p = instancePositions + vertices * scale / mercatorScale;
   gl_Position = projectionMatrix * worldMatrix * vec4(p, 1.0);
 }

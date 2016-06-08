@@ -36,6 +36,7 @@
     "earcut": "^2.0.6",
     "geojson-normalize": "0.0.1",
     "get-pixels": "^3.3.0",
+    "gl-matrix": "^2.3.2",
     "global": "^4.3.0",
     "lodash.flattendeep": "^3.0.2",
     "lodash.isequal": "^3.0.4",
@@ -72,7 +73,7 @@
     "react": "^15.0.2",
     "react-addons-test-utils": "^15.0.2",
     "react-dom": "^15.0.2",
-    "react-map-gl": "1.0.0-beta-9",
+    "react-map-gl": "1.0.0-beta-11",
     "react-redux": "^4.0.0",
     "redux": "^3.0.4",
     "tap-browser-color": "^0.1.2",
@@ -83,7 +84,8 @@
   "peerDependencies": {
     "react": "0.14.x - 15.x",
     "react-dom": "0.14.x - 15.x",
-    "luma.gl": "2.0.0-beta6"
+    "luma.gl": "2.0.0-beta6",
+    "gl": "^4.0.1"
   },
   "scripts": {
     "build": "npm run build-clean && npm run build-compile && npm run build-script && npm run build-script-min",

@@ -22,7 +22,7 @@
 #define SHADER_NAME hexagon-layer-vs
 
 #pragma glslify: mercatorProject = require(../../../shaderlib/mercator-project)
-uniform float mercatorZoom;
+uniform float mercatorScale;
 
 attribute vec3 vertices;
 
@@ -45,30 +45,17 @@ varying vec4 vColor;
 
 void main(void) {
   mat2 rotationMatrix = mat2(cos(angle), -sin(angle), sin(angle), cos(angle));
-  vec2 rotatedVertices = vec2(rotationMatrix * vertices.xz * radius);
-  vec4 verticesPositions = worldMatrix * vec4(rotatedVertices, 0., 1.);
+  vec2 rotatedVertices = vec2(rotationMatrix * vertices.xz * radius / mercatorScale);
+  vec4 verticesPositions = vec4(rotatedVertices, 0., 1.);
 
-  vec2 pos = mercatorProject(instancePositions.xy, mercatorZoom);
+  vec2 pos = mercatorProject(instancePositions.xy);
 
-  vec4 centroidPositions = worldMatrix * vec4(pos.xy, instanceElevations * (vertices.y + 0.5) * elevation, 0.0);
+  vec4 centroidPositions =
+    vec4(pos.xy, instanceElevations * (vertices.y + 0.5) * elevation / mercatorScale, 0.0);
   vec3 p = centroidPositions.xyz + verticesPositions.xyz;
   gl_Position = projectionMatrix * vec4(p, 1.0);
 
   vec4 color = vec4(instanceColors / 255.0, opacity);
   vec4 pickingColor = vec4(instancePickingColors / 255.0, 1.);
   vColor = mix(color, pickingColor, renderPickingBuffer);
-
-  // mat2 rotationMatrix = mat2(cos(angle), -sin(angle), sin(angle), cos(angle));
-  // vec3 rotatedPosition = vec3(rotationMatrix * vertices.xy * radius, vertices.z * elevation);
-  // vec4 verticesPositions = worldMatrix * vec4(rotatedPosition, 1.0);
-
-  // vec2 pos = mercatorProject(instancePositions.xy + verticesPositions.xy, mercatorZoom);
-  // vec3 p = vec3(pos.xy, instanceElevations + verticesPositions.z);
-  // gl_Position = projectionMatrix * vec4(p, 1.0);
-
-  // vec2 pos = mercatorProject(vertexPosition.xy, mercatorZoom);
-  // vec4 centroidPositions = worldMatrix * vec4(pos.xy, positions.z, 0.0);
-  // vec3 p = centroidPositions.xyz + verticesPositions.xyz;
-  // vec3 elevatedPos = vec3(p.xy, max(0.01, positions.z * elevation));
-  // gl_Position = projectionMatrix * vec4(elevatedPos, 1.0);
 }

@@ -55,10 +55,11 @@ export default class HexagonLayer extends Layer {
     super({
       dotRadius,
       elevation,
+      vertices,
       getCentroid,
       getElevation,
       getColor,
-      vertices,
+      getVertices,
       ...opts
     });
   }

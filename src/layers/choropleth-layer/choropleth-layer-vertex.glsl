@@ -22,7 +22,7 @@
 #define SHADER_NAME choropleth-layer-vertex-shader
 
 #pragma glslify: mercatorProject = require(../../../shaderlib/mercator-project)
-uniform float mercatorZoom;
+uniform float mercatorScale;
 
 attribute vec3 positions;
 attribute vec3 colors;
@@ -44,9 +44,9 @@ vec4 getColor(vec4 color, float opacity, vec3 pickingColor, float renderPickingB
 }
 
 void main(void) {
-  vec2 pos = mercatorProject(positions.xy, mercatorZoom);
+  vec2 pos = mercatorProject(positions.xy);
   vec3 p = vec3(pos.xy, positions.z);
-  gl_Position = projectionMatrix * worldMatrix * vec4(p, 1.);
+  gl_Position = projectionMatrix * vec4(p, 1.);
 
   vec4 color = vec4(colors / 255., opacity);
   vec4 pickingColor = vec4(pickingColors / 255., 1.);

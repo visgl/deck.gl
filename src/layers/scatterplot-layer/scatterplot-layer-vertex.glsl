@@ -22,7 +22,7 @@
 #define SHADER_NAME scatterplot-layer-vs
 
 #pragma glslify: mercatorProject = require(../../../shaderlib/mercator-project)
-uniform float mercatorZoom;
+uniform float mercatorScale;
 
 attribute vec3 vertices;
 attribute vec3 instancePositions;
@@ -39,9 +39,9 @@ varying vec4 vColor;
 uniform float renderPickingBuffer;
 
 void main(void) {
-  vec2 pos = mercatorProject(instancePositions.xy, mercatorZoom);
-  vec3 p = vec3(pos, instancePositions.z) + vertices * radius;
-  gl_Position = projectionMatrix * worldMatrix * vec4(p, 1.0);
+  vec2 pos = mercatorProject(instancePositions.xy);
+  vec3 p = vec3(pos, instancePositions.z) + vertices * radius / mercatorScale;
+  gl_Position = projectionMatrix * vec4(p, 1.0);
 
   vec4 color = vec4(instanceColors / 255.0, 1.);
   vec4 pickingColor = vec4(instancePickingColors / 255.0, 1.);

@@ -473,7 +473,7 @@ export default class Layer {
     });
     this.setUniforms({
       viewport: [0, 0, width, height],
-      mercatorZoom: zoom,
+      mercatorScale: Math.pow(2, zoom),
       mercatorCenter: [longitude, latitude]
     });
     log(3, this.state.viewport, latitude, longitude, zoom);

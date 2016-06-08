@@ -22,7 +22,7 @@
 #define SHADER_NAME arc-layer-vs
 
 #pragma glslify: mercatorProject = require(../../../shaderlib/mercator-project)
-uniform float mercatorZoom;
+uniform float mercatorScale;
 
 const float N = 49.0;
 
@@ -36,6 +36,7 @@ uniform mat4 projectionMatrix;
 varying float ratio;
 varying vec3 pickingColor;
 
+
 float paraboloid(vec2 source, vec2 target, float index) {
   float ratio = index / N;
 
@@ -48,8 +49,8 @@ float paraboloid(vec2 source, vec2 target, float index) {
 }
 
 void main(void) {
-  vec2 source = mercatorProject(instancePositions.xy, mercatorZoom);
-  vec2 target = mercatorProject(instancePositions.zw, mercatorZoom);
+  vec2 source = mercatorProject(instancePositions.xy);
+  vec2 target = mercatorProject(instancePositions.zw);
 
   // TODO - are we only using x coordinate?
   float segmentIndex = vertices.x;
@@ -60,7 +61,7 @@ void main(void) {
     sqrt(paraboloid(source, target, segmentIndex))
   );
 
-  gl_Position = projectionMatrix * worldMatrix * vec4(p, 1.0);
+  gl_Position = projectionMatrix * vec4(p, 1.0);
 
   // map arc distance to color in fragment shader
   ratio = clamp(distance(source, target) / 1000.0, 0.0, 1.0);

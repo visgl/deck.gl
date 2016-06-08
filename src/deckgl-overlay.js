@@ -27,6 +27,8 @@ import {Scene, Camera, PerspectiveCamera, Mat4} from 'luma.gl';
 import {DEFAULT_LIGHTING, DEFAULT_BLENDING, DEFAULT_BACKGROUND_COLOR}
   from './config';
 import {updateLayers, layersNeedRedraw} from './layer-manager';
+// TODO move this to react-map-gl utility
+import Viewport, {MapboxTransform} from './viewport';
 
 const DEFAULT_PIXEL_RATIO =
   typeof window !== 'undefined' ? window.devicePixelRatio : 1;
@@ -37,8 +39,6 @@ const PROP_TYPES = {
   layers: PropTypes.array.isRequired,
   blending: PropTypes.object,
   camera: PropTypes.instanceOf(Camera),
-  // TODO - replace with actual map view state props, build matrix from those
-  projectionMatrix: PropTypes.any,
   pixelRatio: PropTypes.number,
   onWebGLInitialized: PropTypes.func
 };
@@ -46,7 +46,6 @@ const PROP_TYPES = {
 const DEFAULT_PROPS = {
   blending: DEFAULT_BLENDING,
   camera: null,
-  projectionMatrix: null,
   pixelRatio: DEFAULT_PIXEL_RATIO,
   onWebGLInitialized: () => {}
 };
@@ -124,32 +123,29 @@ export default class DeckGLOverlay extends React.Component {
 
   render() {
     const {
-      width, height, layers, blending, projectionMatrix, pixelRatio,
+      width, height, layers, blending, pixelRatio,
+      latitude, longitude, zoom, pitch, bearing, altitude,
       ...otherProps
     } = this.props;
     let {camera} = this.props;
     const {scene} = this.state;
 
-    // creating camera from projectionMatrix
-    // TODO move this to react-map-gl utility
-    // TODO should be able to build matrix from
-    // standard mabox props: lat/lon/zoom/pitch/bearing/altitude
-    if (!camera) {
-      camera = new PerspectiveCamera();
-      if (!projectionMatrix) {
-        /* eslint-disable no-console */
-        /* global console */
-        console.warn('DeckGLOverlay needs either camera or projectionMatrix');
-        /* eslint-enable no-console */
-      } else {
-        camera.view = new Mat4().id();
-        for (let i = 0; i < projectionMatrix.length; ++i) {
-          camera.projection[i] = projectionMatrix[i];
-        }
+    function convertToMat4(toMatrix, fromMatrix) {
+      for (let i = 0; i < fromMatrix.length; ++i) {
+        toMatrix[i] = fromMatrix[i];
       }
     }
 
-    const viewport = {x: 0, y: 0, width, height};
+    // Create a "disposable" camera and overwrite matrices
+    if (!camera) {
+      const viewport = new Viewport({
+        width, height, latitude, longitude, zoom, pitch, bearing, altitude
+      });
+
+      camera = new PerspectiveCamera();
+      camera.view = new Mat4().id();
+      convertToMat4(camera.projection, viewport.getProjectionMatrix());
+    }
 
     return (
       <WebGLRenderer
@@ -158,7 +154,7 @@ export default class DeckGLOverlay extends React.Component {
         width={ width }
         height={ height }
 
-        viewport={ viewport }
+        viewport={ {x: 0, y: 0, width, height} }
         camera={ camera }
         scene={ scene }
         blending={ blending }
