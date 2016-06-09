@@ -84,7 +84,6 @@
     "react": "0.14.x - 15.x",
     "react-dom": "0.14.x - 15.x",
     "luma.gl": "2.0.0-beta6",
-    "react-map-gl": "1.0.0-beta-9",
     "gl": "^4.0.1"
   },
   "scripts": {
