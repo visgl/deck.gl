@@ -1,17 +1,18 @@
 // NOTE: Transform is not a public API so we should be careful to always lock
 // down mapbox-gl to a specific major, minor, and patch version.
-import Transform from 'mapbox-gl/js/geo/transform';
-import LngLat from 'mapbox-gl/js/geo/lng_lat';
+import Transform from './simple-transform';
 
 export default function projectMapViewStateToMatrix(mapViewState) {
-  const transform = new Transform(0, 20);
-  transform.width = mapViewState.width;
-  transform.height = mapViewState.height;
-  transform.zoom = mapViewState.zoom;
-  transform.center = new LngLat(mapViewState.longitude, mapViewState.latitude);
-  transform.angle = mapViewState.angle;
-  transform.altitude = mapViewState.altitude || 1.5;
-  transform.pitch = mapViewState.pitch;
-  transform.bearing = mapViewState.bearing;
+  const transform = new Transform({
+    width: mapViewState.width,
+    height: mapViewState.height,
+    zoom: mapViewState.zoom,
+    centerLng: mapViewState.longitude,
+    centerLat: mapViewState.latitude,
+    angle: mapViewState.angle,
+    altitude: mapViewState.altitude,
+    pitch: mapViewState.pitch,
+    bearing: mapViewState.bearing
+  });
   return transform.projMatrix;
 }
