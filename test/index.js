@@ -19,4 +19,4 @@
 // THE SOFTWARE.
 
 import './layer-spec';
-import './projection';
+import './viewport';

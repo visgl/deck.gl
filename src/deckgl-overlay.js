@@ -30,7 +30,7 @@ import {
   matchLayers, finalizeOldLayers, updateMatchedLayers,
   initializeNewLayers, layersNeedRedraw
 } from './layer-manager';
-import projectToMatrix from './projection';
+import Viewport from './viewport';
 
 const DEFAULT_PIXEL_RATIO = typeof window !== 'undefined' ? window.devicePixelRatio : 1;
 
@@ -161,9 +161,9 @@ export default class DeckGLOverlay extends React.Component {
     if (!camera) {
       camera = new PerspectiveCamera();
 
-      const projectionMatrix = projectToMatrix({
+      const projectionMatrix = new Viewport({
         width, height, latitude, longitude, zoom, pitch, bearing, altitude
-      });
+      }).getProjectionMatrix();
 
       camera.view = new Mat4().id();
       for (let i = 0; i < projectionMatrix.length; ++i) {

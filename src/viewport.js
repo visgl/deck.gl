@@ -1,6 +1,29 @@
-// Paired down version of https://github.com/mapbox/mapbox-gl-js/blob/033043254d30a99a00b95660e296445a1ade2d01/js/geo/transform.js
-
 import {mat2, mat4} from 'gl-matrix';
+
+export default class Viewport {
+  constructor({
+    /*
+    Map state
+     */
+    width = 0,
+    height = 0,
+    latitude = 0,
+    longitude = 0,
+    zoom = 0,
+    angle = 0,
+    altitude = 1.5,
+    pitch = 0,
+    bearing = 0
+  }) {
+    this._transform = new SimpleTransform({
+      width, height, longitude, latitude, zoom, angle, altitude, pitch, bearing
+    })
+  }
+
+  getProjectionMatrix() {
+    return this._transform.projMatrix;
+  }
+}
 
 /**
  * Create a longitude, latitude object from a given longitude and latitude pair in degrees.
@@ -31,18 +54,20 @@ function LngLat(lng, lat) {
   }
 }
 
+// Paired down version of https://github.com/mapbox/mapbox-gl-js/blob/033043254d30a99a00b95660e296445a1ade2d01/js/geo/transform.js
+
 /**
  * A single transform, generally used for a single tile to be
  * scaled, rotated, and zoomed.
  */
-export default class SimpleTransform {
+class SimpleTransform {
 
   /* eslint-disable max-statements */
   constructor ({
     width = 0,
     height = 0,
-    centerLat = 0,
-    centerLng = 0,
+    latitude = 0,
+    longitude = 0,
     zoom = 0,
     angle = 0,
     altitude = 1.5,
@@ -62,7 +87,7 @@ export default class SimpleTransform {
     this.width = width;
     this.height = height;
     this.zoom = zoom;
-    this.center = new LngLat(centerLng, centerLat);
+    this.center = new LngLat(longitude, latitude);
     this.angle = angle;
     this.altitude = altitude;
     this.pitch = pitch;

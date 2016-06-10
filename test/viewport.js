@@ -1,5 +1,5 @@
 import test from 'tape-catch';
-import project from '../src/projection';
+import Viewport from '../src/viewport';
 
 test('Basic functionality', t => {
   const mapViewState = {
@@ -20,7 +20,9 @@ test('Basic functionality', t => {
     -390.6996450744531, 4421.318644674351, 1.5, 1.5
   ];
 
-  t.deepEqual(project(mapViewState), expectedResult, 'Gets expected result');
+  const projectionMatrix = new Viewport(mapViewState).getProjectionMatrix();
+
+  t.deepEqual(projectionMatrix, expectedResult, 'Gets expected result');
   t.end();
 });
 
