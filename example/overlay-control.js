@@ -27,7 +27,7 @@ function OverlayControl({
       } }>
         <div>
           { hoverHexagon && hoverHexagon.geoCoords &&
-            ` (${hoverHexagon.geoCoords.lat.toFixed(4)} `
+            ` (${hoverHexagon.geoCoords.lat.toFixed(4)} ` +
             `${hoverHexagon.geoCoords.lon.toFixed(4)})` }
         </div>
         <div>

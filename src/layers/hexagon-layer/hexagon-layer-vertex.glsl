@@ -45,12 +45,12 @@ varying vec4 vColor;
 
 void main(void) {
   mat2 rotationMatrix = mat2(cos(angle), -sin(angle), sin(angle), cos(angle));
-  vec3 rotatedVertices = vec3(rotationMatrix * vertices.xz * radius, vertices.y * elevation);
-  vec4 verticesPositions = worldMatrix * vec4(rotatedVertices, 1.0);
+  vec2 rotatedVertices = vec2(rotationMatrix * vertices.xz * radius);
+  vec4 verticesPositions = worldMatrix * vec4(rotatedVertices, 0., 1.);
 
   vec2 pos = mercatorProject(instancePositions.xy, mercatorZoom);
 
-  vec4 centroidPositions = worldMatrix * vec4(pos.xy, instanceElevations, 0.0);
+  vec4 centroidPositions = worldMatrix * vec4(pos.xy, instanceElevations * (vertices.y + 0.5) * elevation, 0.0);
   vec3 p = centroidPositions.xyz + verticesPositions.xyz;
   gl_Position = projectionMatrix * vec4(p, 1.0);
 

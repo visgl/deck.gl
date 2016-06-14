@@ -161,6 +161,12 @@ export default class Layer {
 
   // Public API
 
+  setNeedsRedraw() {
+    if (this.state) {
+      this.state.needsRedraw = true;
+    }
+  }
+
   getNeedsRedraw({clearFlag}) {
     // this method may be called by the render loop as soon a the layer
     // has been created, so guard against uninitialized state
@@ -363,7 +369,9 @@ export default class Layer {
       // Update the uniforms
       this.updateBaseUniforms();
 
-      this.state.model.setInstanceCount(this.getNumInstances());
+      if (this.state.model) {
+        this.state.model.setInstanceCount(this.getNumInstances());
+      }
     }
 
     this.state.dataChanged = false;

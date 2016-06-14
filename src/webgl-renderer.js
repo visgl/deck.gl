@@ -100,7 +100,6 @@ export default class WebGLRenderer extends React.Component {
   componentDidMount() {
     const canvas = this.refs.overlay;
     this._initWebGL(canvas);
-    this._animationLoop();
   }
 
   /**
@@ -108,7 +107,6 @@ export default class WebGLRenderer extends React.Component {
    * @param {string} canvas
    */
   _initWebGL(canvas) {
-
     let gl;
     try {
       gl = createGLContext(canvas, {preserveDrawingBuffer: true});
@@ -127,6 +125,9 @@ export default class WebGLRenderer extends React.Component {
 
     this.setState({gl, events});
 
+    this._animationLoop();
+
+    // Call callback last, in case it throws
     this.props.onRendererInitialized({gl});
   }
 

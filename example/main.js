@@ -144,10 +144,10 @@ function processHexagons(hexagons) {
   const maxValue = Math.max(...values);
 
   const data = hexagons.map(hexagon => ({
-    centroid: {
-      x: Number(hexagon['centroid.x']),
-      y: Number(hexagon['centroid.y'])
-    },
+    centroid: [
+      hexagon['centroid.x'],
+      hexagon['centroid.y']
+    ],
     vertices: [
       [Number(hexagon['v0.x']), Number(hexagon['v0.y'])],
       [Number(hexagon['v1.x']), Number(hexagon['v1.y'])],
@@ -161,7 +161,7 @@ function processHexagons(hexagons) {
       Number(hexagon.value) / maxValue * 128,
       Number(hexagon.value) / maxValue * 64
     ],
-    elevation: Number(hexagon.value) / maxValue * 100
+    elevation: Number(hexagon.value) / maxValue
 
   }));
   return data;
@@ -362,7 +362,7 @@ class ExampleApp extends React.Component {
       zoom: mapViewState.zoom,
       data: hexData,
       opacity: 0.5,
-      elevation: 10,
+      elevation: 200,
       isPickable: true,
       onHover: this._handleHexagonHovered,
       onClick: this._handleHexagonClicked
@@ -382,7 +382,7 @@ class ExampleApp extends React.Component {
       zoom: mapViewState.zoom,
       data: selectedHexagons,
       opacity: 0.1,
-      elevation: 10,
+      elevation: 200,
       isPickable: true,
       onHover: this._handleHexagonHovered,
       onClick: this._handleHexagonClicked

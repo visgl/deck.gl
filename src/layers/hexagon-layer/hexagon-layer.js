@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 
 import Layer from '../../layer';
-import {Model, Program, Geometry, CylinderGeometry} from 'luma.gl';
+import {Model, Program, CylinderGeometry} from 'luma.gl';
 const glslify = require('glslify');
 
 const ATTRIBUTES = {
@@ -42,10 +42,20 @@ export default class HexagonLayer extends Layer {
    * @param {function} opts.onHexagonHovered(index, e) - popup selected index
    * @param {function} opts.onHexagonClicked(index, e) - popup selected index
    */
-  constructor(opts) {
+  constructor({
+    dotRadius = 10,
+    elevation = 100,
+    getCentroid = x => x.centroid,
+    getElevation = x => x.elevation || 0,
+    getColor = x => x.color || [255, 0, 0],
+    ...opts
+  } = {}) {
     super({
-      dotRadius: 10,
-      elevation: 100,
+      dotRadius,
+      elevation,
+      getCentroid,
+      getElevation,
+      getColor,
       ...opts
     });
   }
@@ -64,6 +74,10 @@ export default class HexagonLayer extends Layer {
     });
 
     this.calculateRadiusAndAngle();
+
+    this.setUniforms({
+      elevation: this.props.elevation
+    });
   }
 
   willReceiveProps(oldProps, newProps) {
@@ -77,6 +91,10 @@ export default class HexagonLayer extends Layer {
     if (dataChanged) {
       attributeManager.invalidateAll();
     }
+
+    this.setUniforms({
+      elevation: this.props.elevation
+    });
   }
 
   getModel(gl) {
@@ -124,34 +142,37 @@ export default class HexagonLayer extends Layer {
   }
 
   calculateInstancePositions(attribute) {
-    const {data} = this.props;
+    const {data, getCentroid} = this.props;
     const {value, size} = attribute;
     let i = 0;
     for (const hexagon of data) {
-      value[i + 0] = hexagon.centroid.x;
-      value[i + 1] = hexagon.centroid.y;
+      const centroid = getCentroid(hexagon);
+      value[i + 0] = centroid[0];
+      value[i + 1] = centroid[1];
       i += size;
     }
   }
 
   calculateInstanceElevations(attribute) {
-    const {data} = this.props;
+    const {data, getElevation} = this.props;
     const {value, size} = attribute;
     let i = 0;
     for (const hexagon of data) {
-      value[i + 0] = hexagon.elevation || 0;
+      const elevation = getElevation(hexagon) || 0;
+      value[i + 0] = elevation;
       i += size;
     }
   }
 
   calculateInstanceColors(attribute) {
-    const {data} = this.props;
+    const {data, getColor} = this.props;
     const {value} = attribute;
     let i = 0;
     for (const hexagon of data) {
-      value[i + 0] = hexagon.color[0];
-      value[i + 1] = hexagon.color[1];
-      value[i + 2] = hexagon.color[2];
+      const color = getColor(hexagon);
+      value[i + 0] = color[0];
+      value[i + 1] = color[1];
+      value[i + 2] = color[2];
       i += 3;
     }
   }
@@ -163,8 +184,8 @@ export default class HexagonLayer extends Layer {
     if (!data || data.length === 0) {
       return;
     }
-
-    const vertices = data[0].vertices;
+    const firstHexagon = this.getFirstObject();
+    const {vertices} = firstHexagon;
     const vertex0 = vertices[0];
     const vertex3 = vertices[3];
 
@@ -182,9 +203,7 @@ export default class HexagonLayer extends Layer {
       angle: Math.acos(dx / dxy) * -Math.sign(dy) + Math.PI / 2,
       // Allow user to fine tune radius
       radius: dxy / 2 * Math.min(1, this.props.dotRadius),
-      elevation: this.props.elevation
     });
-
   }
 
 }

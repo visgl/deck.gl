@@ -26,10 +26,7 @@ import WebGLRenderer from './webgl-renderer';
 import {Scene, Camera, PerspectiveCamera, Mat4} from 'luma.gl';
 import {DEFAULT_LIGHTING, DEFAULT_BLENDING, DEFAULT_BACKGROUND_COLOR}
   from './config';
-import {
-  matchLayers, finalizeOldLayers, updateMatchedLayers,
-  initializeNewLayers, layersNeedRedraw
-} from './layer-manager';
+import {updateLayers, layersNeedRedraw} from './layer-manager';
 
 const DEFAULT_PIXEL_RATIO =
   typeof window !== 'undefined' ? window.devicePixelRatio : 1;
@@ -71,53 +68,37 @@ export default class DeckGLOverlay extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    matchLayers(this.props.layers, nextProps.layers);
-    finalizeOldLayers(this.props.layers);
-    updateMatchedLayers(nextProps.layers);
-    this.initializeLayers(nextProps.layers);
+    const {gl, scene} = this.state;
+    updateLayers({
+      oldLayers: this.props.layers,
+      newLayers: nextProps.layers,
+      gl,
+      scene
+    });
   }
 
-  initializeLayers(layers) {
-    const {gl} = this.state;
-    if (!gl) {
-      return;
-    }
-    initializeNewLayers(layers, {gl});
-    this.addLayersToScene(layers);
-  }
-
-  addLayersToScene(layers) {
-    const {scene} = this.state;
-    if (!scene) {
-      return;
-    }
-    // clear scene and repopulate based on new layers
-    scene.removeAll();
-    for (const layer of layers) {
-      // Save layer on model for picking purposes
-      // TODO - store on model.userData rather than directly on model
-      layer.state.model.userData.layer = layer;
-      // Add model to scene
-      scene.add(layer.state.model);
-    }
-  }
-
-  @autobind
-  _onRendererInitialized({gl}) {
+  @autobind _onRendererInitialized({gl}) {
     this.props.onWebGLInitialized(gl);
+    const scene = new Scene(gl, {
+      lights: DEFAULT_LIGHTING,
+      backgroundColor: DEFAULT_BACKGROUND_COLOR
+    });
+    // Note: Triggers React component update, rerending updated layers
     this.setState({
       gl,
-      scene: new Scene(gl, {
-        lights: DEFAULT_LIGHTING,
-        backgroundColor: DEFAULT_BACKGROUND_COLOR
-      })
+      scene
     });
-    initializeNewLayers(this.props.layers, {gl});
+    // Note: throws on error, don't adjust state after this call
+    updateLayers({
+      oldLayers: [],
+      newLayers: this.props.layers,
+      gl,
+      scene
+    });
   }
 
   // Route events to layers
-  @autobind
-  _onClick(info) {
+  @autobind _onClick(info) {
     const {picked} = info;
     for (const item of picked) {
       if (item.model.userData.layer.onClick({color: item.color, ...info})) {
@@ -127,8 +108,7 @@ export default class DeckGLOverlay extends React.Component {
   }
 
     // Route events to layers
-  @autobind
-  _onMouseMove(info) {
+  @autobind _onMouseMove(info) {
     const {picked} = info;
     for (const item of picked) {
       if (item.model.userData.layer.onHover({color: item.color, ...info})) {
@@ -137,20 +117,18 @@ export default class DeckGLOverlay extends React.Component {
     }
   }
 
-  @autobind
-  _checkIfNeedRedraw() {
+  @autobind _checkIfNeedRedraw() {
     const {layers} = this.props;
     return layersNeedRedraw(layers, {clearFlag: true});
   }
 
   render() {
     const {
-      width, height, layers, blending, projectionMatrix, pixelRatio, ...otherProps
+      width, height, layers, blending, projectionMatrix, pixelRatio,
+      ...otherProps
     } = this.props;
     let {camera} = this.props;
     const {scene} = this.state;
-
-    this.initializeLayers(layers);
 
     // creating camera from projectionMatrix
     // TODO move this to react-map-gl utility
@@ -171,11 +149,7 @@ export default class DeckGLOverlay extends React.Component {
       }
     }
 
-    const viewport = {
-      x: 0,
-      y: 0,
-      width, height
-    };
+    const viewport = {x: 0, y: 0, width, height};
 
     return (
       <WebGLRenderer
