@@ -36,6 +36,7 @@
     "earcut": "^2.0.6",
     "geojson-normalize": "0.0.1",
     "get-pixels": "^3.3.0",
+    "gl": "^4.0.2",
     "global": "^4.3.0",
     "lodash.flattendeep": "^3.0.2",
     "lodash.isequal": "^3.0.4",
@@ -47,6 +48,7 @@
     "webgl-obj-loader": "^0.1.1"
   },
   "devDependencies": {
+    "assert": "^1.4.1",
     "babel-cli": "^6.3.15",
     "babel-eslint": "^4.1.6",
     "babel-plugin-glslify": "^1.0.0",
@@ -58,8 +60,10 @@
     "babelify": "^7.2.0",
     "browserify": "^13.0.0",
     "budo": "^8.0.3",
+    "csv-parser": "^1.9.3",
     "d3-request": "^0.2.2",
-    "electron-prebuilt": "^0.37.2",
+    "electron-prebuilt": "^1.2.2",
+    "electron-recorder": "^1.0.0",
     "envify": "^3.4.0",
     "eslint": "^1.10.3",
     "eslint-plugin-react": "^3.13.1",
@@ -100,6 +104,7 @@
     "test-headless": "babel-node --only= test/headless.js | faucet",
     "test-browser": "budo test/browser.js:build/test-bundle.js --dir test --live --open --port 3001 --watch-glob '**/*.{html,css,scss,js,glsl}' -- -t babelify",
     "test-electron": "browserify test/electron.js | testron | faucet",
-    "start": "budo example/main.js:example/bundle.js --live --open --port 3000 --css example/main.css --title 'deck.gl' --watch-glob '**/*.{html,css,js,glsl}' -- -t babelify -t envify"
+    "start": "budo example/main.js:example/bundle.js --live --open --port 3000 --css example/main.css --title 'deck.gl' --watch-glob '**/*.{html,css,js,glsl}' -- -t babelify -t envify",
+    "movie": "browserify --debug --ignore-missing --bare example/movie.js > example/movie-bundle.js -t babelify -t envify && electron example/movie.html"
   }
 }
