@@ -45,9 +45,11 @@ export default class HexagonLayer extends Layer {
   constructor({
     dotRadius = 10,
     elevation = 100,
+    vertices,
     getCentroid = x => x.centroid,
     getElevation = x => x.elevation || 0,
     getColor = x => x.color || [255, 0, 0],
+    getVertices = x => x.vertices,
     ...opts
   } = {}) {
     super({
@@ -56,6 +58,7 @@ export default class HexagonLayer extends Layer {
       getCentroid,
       getElevation,
       getColor,
+      vertices,
       ...opts
     });
   }
@@ -180,12 +183,17 @@ export default class HexagonLayer extends Layer {
   // TODO this is the only place that uses hexagon vertices
   // consider move radius and angle calculation to the shader
   calculateRadiusAndAngle() {
-    const {data} = this.props;
+    const {data, getVertices} = this.props;
     if (!data || data.length === 0) {
       return;
     }
-    const firstHexagon = this.getFirstObject();
-    const {vertices} = firstHexagon;
+
+    // Either get vertices from prop, or from first hexagon
+    let {vertices} = this.props;
+    if (!vertices) {
+      const firstHexagon = this.getFirstObject();
+      vertices = getVertices(firstHexagon);
+    }
     const vertex0 = vertices[0];
     const vertex3 = vertices[3];
 
@@ -202,8 +210,7 @@ export default class HexagonLayer extends Layer {
       // Calculate angle that the perpendicular hexagon vertex axis is tilted
       angle: Math.acos(dx / dxy) * -Math.sign(dy) + Math.PI / 2,
       // Allow user to fine tune radius
-      radius: dxy / 2 * Math.min(1, this.props.dotRadius),
+      radius: dxy / 2 * Math.min(1, this.props.dotRadius)
     });
   }
-
 }
