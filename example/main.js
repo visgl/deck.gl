@@ -38,11 +38,7 @@ import OverlayControl from './overlay-control';
 import request from 'd3-request';
 import {
   DeckGLOverlay,
-  HexagonLayer,
-  ChoroplethLayer,
-  ScatterplotLayer,
-  ArcLayer,
-  GridLayer
+  ArcLayer
 } from '../src';
 
 // ---- Default Settings ---- //
@@ -50,22 +46,14 @@ import {
 const MAPBOX_ACCESS_TOKEN = process.env.MAPBOX_ACCESS_TOKEN ||
   'Set MAPBOX_ACCESS_TOKEN environment variable or put your token here.';
 
-const CHOROPLETHS_FILE = './example/data/sf.zip.geo.json';
-const HEXAGONS_FILE = './example/data/hexagons.csv';
-const POINTS_FILE = './example/data/sf.bike.parking.csv';
-
+const GEO_JSON_FILE = './example/data/your.geo.json';
 const INITIAL_STATE = {
   mapViewState: {
-    latitude: 37.751537058389985,
-    longitude: -122.42694203247012,
+    latitude: 21.1250,
+    longitude: -101.6860,
     zoom: 11.5
   },
-  choropleths: null,
-  hexagons: null,
-  points: null,
-  arcs: null,
-  arcs2: null,
-  arcStrokeWidth: 1
+  arcs: null
 };
 
 // ---- Action ---- //
@@ -73,12 +61,8 @@ function updateMap(mapViewState) {
   return {type: 'UPDATE_MAP', mapViewState};
 }
 
-function loadChoropleths(choropleths) {
-  return {type: 'LOAD_CHOROPLETHS', choropleths};
-}
-
-function loadHexagons(hexagons) {
-  return {type: 'LOAD_HEXAGONS', hexagons};
+function loadGeoJson(data) {
+  return {type: 'LOAD_GEO_JSON', geoJson: data};
 }
 
 function loadPoints(points) {
@@ -90,33 +74,22 @@ function reducer(state = INITIAL_STATE, action) {
   switch (action.type) {
   case 'UPDATE_MAP':
     return {...state, mapViewState: action.mapViewState};
-  case 'LOAD_CHOROPLETHS':
-    return {...state, choropleths: action.choropleths};
-  case 'LOAD_HEXAGONS':
-    const {hexagons} = action;
-    const hexData = processHexagons(hexagons);
-    return {...state, hexagons, hexData};
-  case 'LOAD_POINTS': {
-    const points = action.points.map(point => {
-      const coordString = point.COORDINATES;
-      const p0 = coordString.indexOf('(') + 1;
-      const p1 = coordString.indexOf(')');
-      const coords = coordString.slice(p0, p1).split(',');
+  case 'LOAD_GEO_JSON':
+    const arcs = action.geoJson.features.map(f => {
+      const coordinates = f.geometry.coordinates;
       return {
         position: {
-          x: Number(coords[1]),
-          y: Number(coords[0]),
-          z: 0
+          x0: coordinates[0][0],
+          y0: coordinates[0][1],
+          x1: coordinates[1][0],
+          y1: coordinates[1][1]
         },
-        color: [88, 9, 124]
+        colors: {
+          c0: [255, 0, 0], c1: [0, 0, 255]
+        }
       };
     });
-
-    const arcs = pointsToArcs(points);
-    const arcs1 = arcs.slice(0, arcs.length / 2);
-    const arcs2 = arcs.slice(arcs.length / 2);
-    return {...state, points, arcs: arcs1, arcs2};
-  }
+    return {...state, arcs};
 
   default:
     return state;
@@ -127,67 +100,8 @@ function reducer(state = INITIAL_STATE, action) {
 function mapStateToProps(state) {
   return {
     mapViewState: state.mapViewState,
-    choropleths: state.choropleths,
-    hexagons: state.hexagons,
-    points: state.points,
-    arcs: state.arcs,
-    arcs2: state.arcs2,
-    hexData: state.hexData
+    arcs: state.arcs
   };
-}
-
-// ---- Helpers ---- //
-
-function processHexagons(hexagons) {
-  const values = hexagons.map(hexagon => Number(hexagon.value));
-  const maxValue = Math.max(...values);
-
-  const data = hexagons.map(hexagon => ({
-    centroid: [
-      hexagon['centroid.x'],
-      hexagon['centroid.y']
-    ],
-    vertices: [
-      [Number(hexagon['v0.x']), Number(hexagon['v0.y'])],
-      [Number(hexagon['v1.x']), Number(hexagon['v1.y'])],
-      [Number(hexagon['v2.x']), Number(hexagon['v2.y'])],
-      [Number(hexagon['v3.x']), Number(hexagon['v3.y'])],
-      [Number(hexagon['v4.x']), Number(hexagon['v4.y'])],
-      [Number(hexagon['v5.x']), Number(hexagon['v5.y'])]
-    ],
-    color: [
-      Number(hexagon.value) / maxValue * 255,
-      Number(hexagon.value) / maxValue * 128,
-      Number(hexagon.value) / maxValue * 64
-    ],
-    elevation: Number(hexagon.value) / maxValue
-
-  }));
-  return data;
-}
-
-function pointsToArcs(points) {
-  return points.map((point, i) => {
-    if (i === points.length - 1) {
-      return {
-        position: {x0: 0, y0: 0, x1: 0, y1: 0},
-        color: [35, 81, 128]
-      };
-    }
-
-    const source = point;
-    const target = points[i + 1];
-
-    return {
-      position: {
-        x0: source.position.x, y0: source.position.y,
-        x1: target.position.x, y1: target.position.y
-      },
-      colors: {
-        c0: [255, 0, 0], c1: [0, 0, 255]
-      }
-    };
-  });
 }
 
 // ---- View ---- //
@@ -195,12 +109,7 @@ class ExampleApp extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      selectedHexagons: [],
-      hoverHexagon: null,
-      hoverPoint: null,
-      hoverArc: null,
-      hoverChoropleth: null,
-      clickItem: null
+      hoverArc: null
     };
   }
 
@@ -208,9 +117,7 @@ class ExampleApp extends React.Component {
     this._handleResize();
     window.addEventListener('resize', this._handleResize);
 
-    this._loadJsonFile(CHOROPLETHS_FILE, this._handleChoroplethsLoaded);
-    this._loadCsvFile(HEXAGONS_FILE, this._handleHexagonsLoaded);
-    this._loadCsvFile(POINTS_FILE, this._handlePointsLoaded);
+    this._loadJsonFile(GEO_JSON_FILE, this._handleGeoJsonLoaded);
   }
 
   componentWillUnmount() {
@@ -226,29 +133,8 @@ class ExampleApp extends React.Component {
     });
   }
 
-  _loadCsvFile(path, onDataLoaded) {
-    request.csv(path, function loadJson(error, data) {
-      if (error) {
-        console.error(error);
-      }
-      onDataLoaded(data);
-    });
-  }
-
-  @autobind _updateArcStrokeWidth() {
-    this.setState({arcStrokeWidth: 1});
-  }
-
-  @autobind _handleHexagonsLoaded(data) {
-    this.props.dispatch(loadHexagons(data));
-  }
-
-  @autobind _handlePointsLoaded(data) {
-    this.props.dispatch(loadPoints(data));
-  }
-
-  @autobind _handleChoroplethsLoaded(data) {
-    this.props.dispatch(loadChoropleths(data));
+  @autobind _handleGeoJsonLoaded(data) {
+    this.props.dispatch(loadGeoJson(data));
   }
 
   @autobind _handleResize() {
@@ -262,49 +148,6 @@ class ExampleApp extends React.Component {
     this.props.dispatch(updateMap(mapViewState));
   }
 
-  @autobind _handleChoroplethHovered(info) {
-    info.type = 'choropleth';
-    this.setState({hoverChoropleth: info});
-  }
-
-  @autobind _handleChoroplethClicked(info) {
-    info.type = 'choropleth';
-    this.setState({clickItem: info});
-  }
-
-  @autobind _handleHexagonHovered(info) {
-    info.type = 'hexagon';
-
-    const {hexData} = this.props;
-    let selectedHexagons = [];
-    if (info.index >= 0) {
-      selectedHexagons = [{
-        ...hexData[info.index],
-        color: [0, 0, 255]
-      }];
-    }
-
-    this.setState({
-      hoverHexagon: info,
-      selectedHexagons
-    });
-  }
-
-  @autobind _handleHexagonClicked(info) {
-    info.type = 'hexagon';
-    this.setState({clickItem: info});
-  }
-
-  @autobind _handleScatterplotHovered(info) {
-    info.type = 'point';
-    this.setState({hoverPoint: info});
-  }
-
-  @autobind _handleScatterplotClicked(info) {
-    info.type = 'point';
-    this.setState({clickItem: info});
-  }
-
   @autobind _handleArcHovered(info) {
     info.type = 'arc';
     this.setState({hoverArc: info});
@@ -313,96 +156,6 @@ class ExampleApp extends React.Component {
   @autobind _handleArcClicked(info) {
     info.type = 'arc';
     this.setState({clickItem: info});
-  }
-
-  _renderGridLayer() {
-    const {mapViewState, points} = this.props;
-
-    return new GridLayer({
-      id: 'gridLayer',
-      width: window.innerWidth,
-      height: window.innerHeight,
-      latitude: mapViewState.latitude,
-      longitude: mapViewState.longitude,
-      zoom: mapViewState.zoom,
-      isPickable: false,
-      opacity: 0.06,
-      data: points
-    });
-  }
-
-  _renderChoroplethLayer() {
-    const {mapViewState, choropleths} = this.props;
-    return new ChoroplethLayer({
-      id: 'choroplethLayer',
-      width: window.innerWidth,
-      height: window.innerHeight,
-      latitude: mapViewState.latitude,
-      longitude: mapViewState.longitude,
-      zoom: mapViewState.zoom,
-      data: choropleths,
-      opacity: 0.8,
-      isPickable: false,
-      drawContour: true,
-      onHover: this._handleChoroplethHovered,
-      onClick: this._handleChoroplethClicked
-    });
-  }
-
-  _renderHexagonLayer() {
-    const {mapViewState, hexData} = this.props;
-
-    return new HexagonLayer({
-      id: 'hexagonLayer',
-      width: window.innerWidth,
-      height: window.innerHeight,
-      latitude: mapViewState.latitude,
-      longitude: mapViewState.longitude,
-      zoom: mapViewState.zoom,
-      data: hexData,
-      opacity: 0.5,
-      elevation: 200,
-      isPickable: true,
-      onHover: this._handleHexagonHovered,
-      onClick: this._handleHexagonClicked
-    });
-  }
-
-  _renderHexagonSelectionLayer() {
-    const {mapViewState} = this.props;
-    const {selectedHexagons} = this.state;
-
-    return new HexagonLayer({
-      id: 'hexagonSelectionLayer',
-      width: window.innerWidth,
-      height: window.innerHeight,
-      latitude: mapViewState.latitude,
-      longitude: mapViewState.longitude,
-      zoom: mapViewState.zoom,
-      data: selectedHexagons,
-      opacity: 0.1,
-      elevation: 200,
-      isPickable: true,
-      onHover: this._handleHexagonHovered,
-      onClick: this._handleHexagonClicked
-    });
-  }
-
-  _renderScatterplotLayer() {
-    const {mapViewState, points} = this.props;
-
-    return new ScatterplotLayer({
-      id: 'scatterplotLayer',
-      width: window.innerWidth,
-      height: window.innerHeight,
-      latitude: mapViewState.latitude,
-      longitude: mapViewState.longitude,
-      zoom: mapViewState.zoom,
-      data: points,
-      isPickable: true,
-      onHover: this._handleScatterplotHovered,
-      onClick: this._handleScatterplotClicked
-    });
   }
 
   _renderArcLayer() {
@@ -425,32 +178,11 @@ class ExampleApp extends React.Component {
     });
   }
 
-  _renderArcLayer2() {
-    const {mapViewState, arcs2} = this.props;
-
-    return new ArcLayer({
-      id: 'arcLayer2',
-      width: window.innerWidth,
-      height: window.innerHeight,
-      latitude: mapViewState.latitude,
-      longitude: mapViewState.longitude,
-      zoom: mapViewState.zoom,
-      data: arcs2,
-      strokeWidth: this.state.arcStrokeWidth || 1,
-      color0: [0, 255, 0],
-      color1: [0, 255, 0],
-      isPickable: true,
-      onHover: this._handleArcHovered,
-      onClick: this._handleArcClicked
-    });
-  }
-
   _renderOverlay() {
-    const {choropleths, hexagons, points, mapViewState} = this.props;
+    const {arcs, mapViewState} = this.props;
     const {width, height} = this.state;
 
-    // wait until data is ready before rendering
-    if (!choropleths || !points || !hexagons) {
+    if (!arcs) {
       return [];
     }
 
@@ -460,13 +192,7 @@ class ExampleApp extends React.Component {
         height={height}
         {...mapViewState}
         layers={[
-          // this._renderGridLayer(),
-          this._renderHexagonLayer(),
-          this._renderHexagonSelectionLayer(),
-          this._renderArcLayer(),
-          this._renderArcLayer2(),
-          this._renderScatterplotLayer(),
-          this._renderChoroplethLayer()
+          this._renderArcLayer()
         ]}
         onWebGLInitialized={ this._onWebGLInitialized }
       />
@@ -487,7 +213,7 @@ class ExampleApp extends React.Component {
         mapboxApiAccessToken={MAPBOX_ACCESS_TOKEN}
         width={width}
         height={height}
-        perspectiveEnabled
+        perspectiveEnabled={true}
         { ...mapViewState }
         onChangeViewport={this._handleViewportChanged}>
         { this._renderOverlay() }
