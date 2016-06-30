@@ -27,15 +27,16 @@ uniform float mercatorScale;
 const float N = 49.0;
 
 attribute vec3 vertices;
+attribute vec3 instanceColors;
 attribute vec4 instancePositions;
 attribute vec3 instancePickingColors;
 
 uniform mat4 worldMatrix;
 uniform mat4 projectionMatrix;
+uniform float opacity;
+uniform float renderPickingBuffer;
 
-varying float ratio;
-varying vec3 pickingColor;
-
+varying vec4 vColor;
 
 float paraboloid(vec2 source, vec2 target, float index) {
   float ratio = index / N;
@@ -63,7 +64,7 @@ void main(void) {
 
   gl_Position = projectionMatrix * vec4(p, 1.0);
 
-  // map arc distance to color in fragment shader
-  ratio = clamp(distance(source, target) / 1000.0, 0.0, 1.0);
-  pickingColor = instancePickingColors;
+  vec4 color = vec4(instanceColors / 255.0, opacity);
+  vec4 pickingColor = vec4(instancePickingColors / 255.0, opacity);
+  vColor = mix(color, pickingColor, renderPickingBuffer);
 }

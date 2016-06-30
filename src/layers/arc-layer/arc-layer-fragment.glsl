@@ -25,15 +25,8 @@
 precision highp float;
 #endif
 
-uniform vec3 color0;
-uniform vec3 color1;
-uniform float opacity;
-uniform float renderPickingBuffer;
-
-varying float ratio;
-varying vec3 pickingColor;
+varying vec4 vColor;
 
 void main(void) {
-  vec4 color = vec4(mix(color0 / 255.0, color1 / 255.0, ratio), opacity);
-  gl_FragColor = mix(color, vec4(pickingColor / 255., 1.), renderPickingBuffer);
+  gl_FragColor = vColor;
 }

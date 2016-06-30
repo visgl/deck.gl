@@ -23,7 +23,8 @@ import {Model, Program, Geometry} from 'luma.gl';
 const glslify = require('glslify');
 
 const ATTRIBUTES = {
-  instancePositions: {size: 4, '0': 'x0', '1': 'y0', '2': 'x1', '3': 'y1'}
+  instancePositions: {size: 4, '0': 'x0', '1': 'y0', '2': 'x1', '3': 'y1'},
+  instanceColors: {size: 3, '0': 'red', '1': 'green', '2': 'blue'}
 };
 
 export default class ArcLayer extends Layer {
@@ -56,7 +57,8 @@ export default class ArcLayer extends Layer {
     this.setState({model});
 
     attributeManager.addInstanced(ATTRIBUTES, {
-      instancePositions: {update: this.calculateInstancePositions}
+      instancePositions: {update: this.calculateInstancePositions},
+      instanceColors: {update: this.calculateInstanceColors}
     });
 
     this.updateColors();
@@ -113,6 +115,18 @@ export default class ArcLayer extends Layer {
       value[i + 1] = arc.position.y0;
       value[i + 2] = arc.position.x1;
       value[i + 3] = arc.position.y1;
+      i += size;
+    }
+  }
+
+  calculateInstanceColors(attribute) {
+    const {data} = this.props;
+    const {value, size} = attribute;
+    let i = 0;
+    for (const point of data) {
+      value[i + 0] = point.color[0];
+      value[i + 1] = point.color[1];
+      value[i + 2] = point.color[2];
       i += size;
     }
   }

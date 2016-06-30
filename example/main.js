@@ -183,9 +183,11 @@ function pointsToArcs(points) {
         x0: source.position.x, y0: source.position.y,
         x1: target.position.x, y1: target.position.y
       },
-      colors: {
-        c0: [255, 0, 0], c1: [0, 0, 255]
-      }
+      color: [
+        i % 255,
+        255 - i % 255,
+        Math.floor(i / 255) % 255
+      ]
     };
   });
 }
