@@ -16,10 +16,42 @@ const LAYER_PROPS = {
   zoom: 1,
   data: []
 };
+const LAYER_PROPS_ZEROES = {
+  id: 'testLayer',
+  width: 0,
+  height: 0,
+  latitude: 0,
+  longitude: 0,
+  zoom: 0,
+  data: []
+};
+const LAYER_PROPS_MISSING = {
+  id: 'testLayer',
+  width: 1,
+  // height: 1,
+  longitude: 1,
+  zoom: 1,
+  data: []
+}
 
 test('Layer#constructor', t => {
   const layer = new Layer(LAYER_PROPS);
   t.ok(layer, 'Layer created');
+  t.end();
+});
+
+test('Layer#constructor with zeroes', t => {
+  const layer = new Layer(LAYER_PROPS_ZEROES);
+  t.ok(layer, 'Layer created');
+  t.end();
+});
+
+test('Layer#constructor with missing props', t => {
+  t.throws(
+    () => new Layer(LAYER_PROPS_MISSING),
+    /Property height undefined in layer testLayer/,
+    'Expected missing props to throw an error'
+  );
   t.end();
 });
 

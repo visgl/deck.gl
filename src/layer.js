@@ -92,6 +92,8 @@ export default class Layer {
       assert(props.data[Symbol.iterator], 'data prop must have an iterator');
     }
 
+    this.props = props;
+
     this.checkProp(props.data, 'data');
     this.checkProp(props.id, 'id');
     this.checkProp(props.width, 'width');
@@ -103,7 +105,6 @@ export default class Layer {
     this.checkProp(props.longitude, 'longitude');
     this.checkProp(props.zoom, 'zoom');
 
-    this.props = props;
     this.count = counter++;
   }
   /* eslint-enable max-statements */
@@ -455,8 +456,8 @@ export default class Layer {
   }
 
   checkProp(property, propertyName) {
-    if (!property) {
-      throw new Error(`Property ${propertyName} undefined in layer ${this.id}`);
+    if (property === undefined || property === null) {
+      throw new Error(`Property ${propertyName} undefined in layer ${this.props.id}`);
     }
   }
 
