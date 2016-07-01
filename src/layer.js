@@ -456,7 +456,7 @@ export default class Layer {
   }
 
   checkProp(property, propertyName) {
-    if (typeof property === 'undefined' || property === null) {
+    if (property === undefined || property === null) {
       throw new Error(`Property ${propertyName} undefined in layer ${this.props.id}`);
     }
   }
