@@ -21,10 +21,12 @@
 /* vertex shader for the scatterplot-layer */
 #define SHADER_NAME scatterplot-layer-vs
 
+#pragma glslify: random = require(../../../shaderlib/random)
+
 #pragma glslify: mercatorProject = require(../../../shaderlib/mercator-project)
 uniform float mercatorScale;
 
-attribute vec3 vertices;
+attribute vec3 positions;
 attribute vec3 instancePositions;
 attribute vec3 instanceColors;
 attribute vec3 instancePickingColors;
@@ -39,8 +41,18 @@ varying vec4 vColor;
 uniform float renderPickingBuffer;
 
 void main(void) {
-  vec2 pos = mercatorProject(instancePositions.xy);
-  vec3 p = vec3(pos, instancePositions.z) + vertices * radius / mercatorScale;
+  // vec2 pos = mercatorProject(instancePositions.xy);
+  // vec3 p = vec3(pos, instancePositions.z) + positions * radius;
+  // // gl_Position = projectionMatrix * vec4(p, 1.0);
+  // // float rand = random(pos);
+  // // gl_Position = vec4(rand, rand, 0, 1.);
+
+  // vec4 color = vec4(instanceColors / 255.0, 1.);
+  // vec4 pickingColor = vec4(instancePickingColors / 255.0, 1.);
+  // vColor = mix(color, pickingColor, renderPickingBuffer);
+
+  vec2 pos = mercatorProject(instancePositions.xy, mercatorScale);
+  vec3 p = vec3(pos, instancePositions.z) + positions * radius;
   gl_Position = projectionMatrix * vec4(p, 1.0);
 
   vec4 color = vec4(instanceColors / 255.0, 1.);

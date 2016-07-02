@@ -26,7 +26,7 @@ import {Model, Program, Geometry} from 'luma.gl';
 const glslify = require('glslify');
 
 const ATTRIBUTES = {
-  indices: {size: 1, '0': 'index'},
+  indices: {size: 1, '0': 'index', isIndexed: true},
   positions: {size: 3, '0': 'x', '1': 'y', '2': 'unused'},
   colors: {size: 3, '0': 'red', '1': 'green', '2': 'blue'},
   // Override picking colors to prevent auto allocation
@@ -132,7 +132,7 @@ export default class ChoroplethLayer extends Layer {
     );
 
     attribute.value = new Uint16Array(flattenDeep(indices));
-    attribute.bufferType = this.state.gl.ELEMENT_ARRAY_BUFFER;
+    attribute.target = this.state.gl.ELEMENT_ARRAY_BUFFER;
     this.state.model.setVertexCount(attribute.value.length / attribute.size);
   }
 

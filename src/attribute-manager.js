@@ -238,7 +238,7 @@ export default class AttributeManager {
         value: attribute.value || null,
 
         // buffer type
-        bufferType: undefined,
+        target: undefined,
         ..._extraProps
       };
       // Sanity - no app fields on our attributes. Use userData instead.

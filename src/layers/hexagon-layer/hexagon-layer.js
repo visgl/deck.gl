@@ -43,6 +43,7 @@ export default class HexagonLayer extends Layer {
    * @param {function} opts.onHexagonClicked(index, e) - popup selected index
    */
   constructor({
+    id = 'hexagon-layer',
     dotRadius = 10,
     elevation = 100,
     vertices,
@@ -53,6 +54,7 @@ export default class HexagonLayer extends Layer {
     ...opts
   } = {}) {
     super({
+      id,
       dotRadius,
       elevation,
       vertices,
@@ -103,7 +105,6 @@ export default class HexagonLayer extends Layer {
 
   getModel(gl) {
     const geometry = new CylinderGeometry({
-      id: this.props.id,
       radius: 1,
       topRadius: 1,
       bottomRadius: 1,
@@ -134,14 +135,14 @@ export default class HexagonLayer extends Layer {
     // });
 
     return new Model({
+      id: this.props.id,
       program: new Program(gl, {
         vs: glslify('./hexagon-layer-vertex.glsl'),
         fs: glslify('./hexagon-layer-fragment.glsl'),
         id: 'hexagon'
       }),
       geometry,
-      instanced: true
-      // indexed: true
+      isInstanced: true
     });
   }
 

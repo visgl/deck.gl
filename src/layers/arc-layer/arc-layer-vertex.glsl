@@ -26,7 +26,7 @@ uniform float mercatorScale;
 
 const float N = 49.0;
 
-attribute vec3 vertices;
+attribute vec3 positions;
 attribute vec3 instanceColors;
 attribute vec4 instancePositions;
 attribute vec3 instancePickingColors;
@@ -50,11 +50,11 @@ float paraboloid(vec2 source, vec2 target, float index) {
 }
 
 void main(void) {
-  vec2 source = mercatorProject(instancePositions.xy);
-  vec2 target = mercatorProject(instancePositions.zw);
+  vec2 source = mercatorProject(instancePositions.xy, mercatorScale);
+  vec2 target = mercatorProject(instancePositions.zw, mercatorScale);
 
   // TODO - are we only using x coordinate?
-  float segmentIndex = vertices.x;
+  float segmentIndex = positions.x;
   vec3 p = vec3(
     // xy: linear interpolation of source & target
     mix(source, target, segmentIndex / N),

@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import Layer from '../../layer';
+import Layer from '../layer';
 import {Model, Program, Geometry} from 'luma.gl';
 const glslify = require('glslify');
 
@@ -27,7 +27,7 @@ const ATTRIBUTES = {
   instanceColors: {size: 3, '0': 'red', '1': 'green', '2': 'blue'}
 };
 
-export default class ScatterplotLayer extends Layer {
+export default class TestLayer extends Layer {
 
   static get attributes() {
     return ATTRIBUTES;
@@ -35,14 +35,24 @@ export default class ScatterplotLayer extends Layer {
 
   /*
    * @classdesc
-   * ScatterplotLayer
+   * TestLayer
    *
    * @class
    * @param {object} props
    * @param {number} props.radius - point radius
    */
-  constructor(props) {
-    super(props);
+  constructor({
+    getPosition = x => x.position,
+    getElevation = x => x.elevation || 0,
+    getColor = x => x.color || [255, 0, 0],
+    ...props
+  }) {
+    super({
+      getPosition,
+      getElevation,
+      getColor,
+      ...props
+    });
   }
 
   initializeState() {
@@ -84,15 +94,15 @@ export default class ScatterplotLayer extends Layer {
 
     return new Model({
       program: new Program(gl, {
-        vs: glslify('./scatterplot-layer-vertex.glsl'),
-        fs: glslify('./scatterplot-layer-fragment.glsl'),
-        id: 'scatterplot'
+        vs: glslify('./test-layer-vertex.glsl'),
+        fs: glslify('./test-layer-fragment.glsl'),
+        id: 'test'
       }),
       geometry: new Geometry({
         drawMode: 'TRIANGLE_FAN',
         positions: new Float32Array(positions)
       }),
-      isInstanced: true
+      // isInstanced: true
     });
   }
 
@@ -105,25 +115,28 @@ export default class ScatterplotLayer extends Layer {
   }
 
   calculateInstancePositions(attribute) {
-    const {data} = this.props;
+    const {data, getPosition, getElevation} = this.props;
     const {value, size} = attribute;
     let i = 0;
     for (const point of data) {
-      value[i + 0] = point.position.x;
-      value[i + 1] = point.position.y;
-      value[i + 2] = point.position.z;
+      const position = getPosition(point);
+      const elevation = getElevation(point);
+      value[i + 0] = position[0] || 0;
+      value[i + 1] = position[1] || 0;
+      value[i + 2] = elevation || 0;
       i += size;
     }
   }
 
   calculateInstanceColors(attribute) {
-    const {data} = this.props;
+    const {data, getColor} = this.props;
     const {value, size} = attribute;
     let i = 0;
     for (const point of data) {
-      value[i + 0] = point.color[0];
-      value[i + 1] = point.color[1];
-      value[i + 2] = point.color[2];
+      const color = getColor(point);
+      value[i + 0] = color[0] || 255;
+      value[i + 1] = color[1] || 0;
+      value[i + 2] = color[2] || 0;
       i += size;
     }
   }

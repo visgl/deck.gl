@@ -89,7 +89,7 @@ export default class GridLayer extends Layer {
         drawMode: 'TRIANGLE_FAN',
         vertices: new Float32Array([0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0])
       }),
-      instanced: true
+      isInstanced: true
     });
   }
 

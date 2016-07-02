@@ -28,8 +28,9 @@ import {DEFAULT_LIGHTING, DEFAULT_BLENDING, DEFAULT_BACKGROUND_COLOR}
   from './config';
 import {updateLayers, layersNeedRedraw} from './layer-manager';
 // TODO move this to react-map-gl utility
-import Viewport, {MapboxTransform} from './viewport';
+import Viewport from './viewport';
 
+// TODO - move default to WebGL renderer
 const DEFAULT_PIXEL_RATIO =
   typeof window !== 'undefined' ? window.devicePixelRatio : 1;
 

@@ -86,9 +86,9 @@ export default class ArcLayer extends Layer {
       geometry: new Geometry({
         id: 'arc',
         drawMode: 'LINE_STRIP',
-        vertices: new Float32Array(positions)
+        positions: new Float32Array(positions)
       }),
-      instanced: true,
+      isInstanced: true,
       onBeforeRender() {
         this.userData.oldStrokeWidth = gl.getParameter(gl.LINE_WIDTH);
         this.program.gl.lineWidth(this.userData.strokeWidth || 1);

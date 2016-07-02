@@ -22,7 +22,7 @@
 /* global console */
 import React, {PropTypes} from 'react';
 import autobind from 'autobind-decorator';
-import {createGLContext, Camera, Scene, Events, Fx, glGet} from 'luma.gl';
+import {createGLContext, Camera, Scene, addEvents, Fx, glGet} from 'luma.gl';
 import throttle from 'lodash.throttle';
 
 const PROP_TYPES = {
@@ -31,6 +31,7 @@ const PROP_TYPES = {
   width: PropTypes.number.isRequired,
   height: PropTypes.number.isRequired,
 
+  gl: PropTypes.object,
   pixelRatio: PropTypes.number,
   viewport: PropTypes.object.isRequired,
   camera: PropTypes.instanceOf(Camera).isRequired,
@@ -53,8 +54,10 @@ const PROP_TYPES = {
 };
 
 const DEFAULT_PROPS = {
+  gl: null,
   id: 'webgl-canvas',
   scene: null,
+
   onRendererInitialized: () => {},
   onInitializationFailed: error => console.error(error),
   onError: error => {
@@ -107,15 +110,17 @@ export default class WebGLRenderer extends React.Component {
    * @param {string} canvas
    */
   _initWebGL(canvas) {
-    let gl;
-    try {
-      gl = createGLContext(canvas, {preserveDrawingBuffer: true});
-    } catch (error) {
-      this.props.onInitializationFailed(error);
-      return;
+    let {gl} = this.props;
+    if (!gl) {
+      try {
+        gl = createGLContext({canvas, preserveDrawingBuffer: true});
+      } catch (error) {
+        this.props.onInitializationFailed(error);
+        return;
+      }
     }
 
-    const events = Events.create(canvas, {
+    const events = addEvents(canvas, {
       cacheSize: false,
       cachePosition: false,
       centerOrigin: false,
@@ -162,9 +167,6 @@ export default class WebGLRenderer extends React.Component {
     const {
       viewport: {x, y, width, height},
       blending: {enable, blendFunc, blendEquation},
-      onBeforeRenderFrame,
-      onAfterRenderFrame,
-      onNeedRedraw,
       pixelRatio,
       camera,
       scene
@@ -176,7 +178,7 @@ export default class WebGLRenderer extends React.Component {
     }
 
     // Note: Do this after gl check, in case onNeedRedraw clears flags
-    if (!onNeedRedraw()) {
+    if (!this.props.onNeedRedraw()) {
       return;
     }
 
@@ -201,9 +203,9 @@ export default class WebGLRenderer extends React.Component {
       gl.disable(gl.BLEND);
     }
 
-    onBeforeRenderFrame();
+    this.props.onBeforeRenderFrame();
     scene.render({camera});
-    onAfterRenderFrame();
+    this.props.onAfterRenderFrame();
   }
 
   /**

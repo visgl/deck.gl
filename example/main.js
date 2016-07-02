@@ -32,8 +32,8 @@ import {Provider, connect} from 'react-redux';
 import autobind from 'autobind-decorator';
 
 import MapboxGLMap from 'react-map-gl';
-import {Mat4} from 'luma.gl';
 import OverlayControl from './overlay-control';
+import {Mat4} from 'luma.gl';
 
 import request from 'd3-request';
 import {
@@ -44,6 +44,8 @@ import {
   ArcLayer,
   GridLayer
 } from '../src';
+
+import {TestLayer, TriangleLayer} from '../src/test-layers';
 
 // ---- Default Settings ---- //
 /* eslint-disable no-process-env */
@@ -469,6 +471,28 @@ class ExampleApp extends React.Component {
           this._renderArcLayer2(),
           this._renderScatterplotLayer(),
           this._renderChoroplethLayer()
+          // new TriangleLayer({
+          //   id: 'triangle-layer',
+          //   width: window.innerWidth,
+          //   height: window.innerHeight,
+          //   latitude: mapViewState.latitude,
+          //   longitude: mapViewState.longitude,
+          //   zoom: mapViewState.zoom
+          // })
+          // new TestLayer({
+          //   id: 'test-layer',
+          //   width: window.innerWidth,
+          //   height: window.innerHeight,
+          //   latitude: mapViewState.latitude,
+          //   longitude: mapViewState.longitude,
+          //   zoom: mapViewState.zoom,
+          //   data: [
+          //     {position: [-0.2, -0.2]},
+          //     {position: [-0.3, 0.3]},
+          //     {position: [0.2, -0.4]},
+          //     {position: [0.2, 0.3]}
+          //   ]
+          // })
         ]}
         onWebGLInitialized={ this._onWebGLInitialized }
       />

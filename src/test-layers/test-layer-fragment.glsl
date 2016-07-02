@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 
 /* fragment shader for the scatterplot-layer */
-#define SHADER_NAME scatterplot-layer-fs
+#define SHADER_NAME test-layer-fs
 
 #ifdef GL_ES
 precision highp float;

@@ -44,7 +44,7 @@ vec4 getColor(vec4 color, float opacity, vec3 pickingColor, float renderPickingB
 }
 
 void main(void) {
-  vec2 pos = mercatorProject(positions.xy);
+  vec2 pos = mercatorProject(positions.xy, mercatorScale);
   vec3 p = vec3(pos.xy, positions.z);
   gl_Position = projectionMatrix * vec4(p, 1.);
 

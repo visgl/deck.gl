@@ -2,7 +2,7 @@
   "name": "deck.gl",
   "description": "A suite of 3D-enabled data visualization overlays, suitable for react-map-gl",
   "license": "MIT",
-  "version": "3.0.0-beta12",
+  "version": "2.2.0",
   "keywords": [
     "webgl",
     "visualization",
@@ -69,11 +69,11 @@
     "glslify": "^5.0.0",
     "immutable": "^3.7.5",
     "jsdom": "^9.2.1",
-    "luma.gl": "2.0.0-beta6",
+    "luma.gl": "^2.2.0",
     "react": "^15.0.2",
     "react-addons-test-utils": "^15.0.2",
     "react-dom": "^15.0.2",
-    "react-map-gl": "1.0.0-beta-11",
+    "react-map-gl": "^1.0.0",
     "react-redux": "^4.0.0",
     "redux": "^3.0.4",
     "tap-browser-color": "^0.1.2",
@@ -84,8 +84,7 @@
   "peerDependencies": {
     "react": "0.14.x - 15.x",
     "react-dom": "0.14.x - 15.x",
-    "luma.gl": "2.0.0-beta6",
-    "gl": "^4.0.1"
+    "luma.gl": "^2.2.0"
   },
   "scripts": {
     "build": "npm run build-clean && npm run build-compile && npm run build-script && npm run build-script-min",
@@ -97,7 +96,7 @@
     "precommit": "npm run lint -s && npm run test",
     "prepublish": "npm run build",
     "test": "npm run lint && npm run test-headless",
-    "test-headless": "babel-node --only=deck.gl/test,deck.gl/src test/headless.js | faucet",
+    "test-headless": "babel-node --only=deck.gl/test,deck.gl/src test/headless.js",
     "test-browser": "budo test/browser.js:build/test-bundle.js --dir test --live --open --port 3001 --watch-glob '**/*.{html,css,scss,js,glsl}' -- -t babelify",
     "test-electron": "browserify test/electron.js | testron | faucet",
     "start": "budo example/main.js:example/bundle.js --live --open --port 3000 --css example/main.css --title 'deck.gl' --watch-glob '**/*.{html,css,js,glsl}' -- -t babelify -t envify"

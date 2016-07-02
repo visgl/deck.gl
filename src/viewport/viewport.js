@@ -196,7 +196,7 @@ export default class Viewport {
     mat4.rotateX(m, m, this.pitchRadians);
     mat4.rotateZ(m, m, -this.bearingRadians);
     mat4.translate(m, m, [-this.centerX, -this.centerY, 0]);
-    mat4.scale(m, m, [this.scale, this.scale, this.scale]);
+    // mat4.scale(m, m, [this.scale, this.scale, this.scale]);
 
     return m;
   }

@@ -314,6 +314,7 @@ export default class Layer {
   // LAYER MANAGER API
 
   // Called by layer manager when a new layer is found
+  /* eslint-disable max-statements */
   initializeLayer({gl}) {
     assert(gl);
     this.state = {gl};
@@ -343,7 +344,12 @@ export default class Layer {
     // Add any subclass attributes
     this.updateAttributes(this.props);
     this.updateBaseUniforms();
-    this.state.model.setInstanceCount(this.getNumInstances());
+
+    const {model} = this.state;
+    model.setInstanceCount(this.getNumInstances());
+    model.id = `${this.props.id}-model`;
+    model.program.id = `${this.props.id}-program`;
+    model.geometry.id = `${this.props.id}-geometry`;
 
     // Create a model for the layer
     this._updateModel({gl});
@@ -351,6 +357,7 @@ export default class Layer {
     // Call life cycle method
     this.didMount();
   }
+  /* eslint-enable max-statements */
 
   // Called by layer manager when existing layer is getting new props
   updateLayer(oldProps, newProps) {

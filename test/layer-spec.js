@@ -32,7 +32,7 @@ const LAYER_PROPS_MISSING = {
   longitude: 1,
   zoom: 1,
   data: []
-}
+};
 
 test('Layer#constructor', t => {
   const layer = new Layer(LAYER_PROPS);
