@@ -52,7 +52,8 @@ void main(void) {
   // vColor = mix(color, pickingColor, renderPickingBuffer);
 
   vec2 pos = mercatorProject(instancePositions.xy, mercatorScale);
-  vec3 p = vec3(pos, instancePositions.z) + positions * radius;
+  // For some reason, need to add one to elevation to show up in untilted mode
+  vec3 p = vec3(pos, instancePositions.z + 1.) + positions * radius;
   gl_Position = projectionMatrix * vec4(p, 1.0);
 
   vec4 color = vec4(instanceColors / 255.0, 1.);

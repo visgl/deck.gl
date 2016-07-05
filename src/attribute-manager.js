@@ -222,6 +222,13 @@ export default class AttributeManager {
 
       // Initialize the attribute descriptor, with WebGL and metadata fields
       const attributeData = {
+        // Ensure that fields are present before Object.seal()
+        target: undefined,
+        isIndexed: false,
+
+        // Reserved for application
+        userData: {},
+
         // Metadata
         ...attribute,
         ...updater,
@@ -230,15 +237,10 @@ export default class AttributeManager {
         isExternalBuffer: false,
         needsUpdate: true,
 
-        // Reserved for application
-        userData: {},
-
         // WebGL fields
         size: attribute.size,
         value: attribute.value || null,
 
-        // buffer type
-        target: undefined,
         ..._extraProps
       };
       // Sanity - no app fields on our attributes. Use userData instead.
