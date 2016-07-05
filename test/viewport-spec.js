@@ -76,7 +76,7 @@ test('Viewport projection matrix', t => {
     const viewport = new Viewport(testData.mapState);
     const projectionMatrix = viewport.getProjectionMatrix();
 
-    t.ok(mat4.equals(projectionMatrix, testData.matrixWorld),
+    t.ok(mat4.equals(projectionMatrix, testData.matrixZoomed),
       'Viewport gets expected matrix');
   }
   t.end();

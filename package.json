@@ -93,7 +93,7 @@
     "build-script": "browserify src/bundle.js -o dist/deckgl.js -t babelify -t glslify",
     "build-script-min": "uglifyjs dist/deckgl.js -o dist/deckgl.min.js",
     "lint": "eslint src",
-    "precommit": "npm run lint -s && npm run test",
+    "precommit": "npm test",
     "prepublish": "npm run build",
     "test": "npm run lint && npm run test-headless",
     "test-headless": "babel-node --only=deck.gl/test,deck.gl/src test/headless.js",
