@@ -33,7 +33,6 @@ import autobind from 'autobind-decorator';
 
 import MapboxGLMap from 'react-map-gl';
 import OverlayControl from './overlay-control';
-import {Mat4} from 'luma.gl';
 
 import request from 'd3-request';
 import {
@@ -45,7 +44,10 @@ import {
   GridLayer
 } from '../src';
 
-import {TestLayer, TriangleLayer} from '../src/test-layers';
+// import {TestLayer, TriangleLayer} from '../src/test-layers';
+
+const BLUE = [0, 0, 255];
+const GREEN = [0, 255, 0];
 
 // ---- Default Settings ---- //
 /* eslint-disable no-process-env */
@@ -64,6 +66,7 @@ const INITIAL_STATE = {
   },
   choropleths: null,
   hexagons: null,
+  hexagons2: null,
   points: null,
   arcs: null,
   arcs2: null,
@@ -87,6 +90,10 @@ function loadPoints(points) {
   return {type: 'LOAD_POINTS', points};
 }
 
+function swapData() {
+  return {type: 'SWAP_DATA'};
+}
+
 // ---- Reducer ---- //
 function reducer(state = INITIAL_STATE, action) {
   switch (action.type) {
@@ -94,10 +101,12 @@ function reducer(state = INITIAL_STATE, action) {
     return {...state, mapViewState: action.mapViewState};
   case 'LOAD_CHOROPLETHS':
     return {...state, choropleths: action.choropleths};
-  case 'LOAD_HEXAGONS':
+  case 'LOAD_HEXAGONS': {
     const {hexagons} = action;
-    const hexData = processHexagons(hexagons);
-    return {...state, hexagons, hexData};
+    const hexData2 = processHexagons(hexagons);
+    const hexData = hexData2.slice(hexData2.length / 2);
+    return {...state, hexagons, hexData, hexData2};
+  }
   case 'LOAD_POINTS': {
     const points = action.points.map(point => {
       const coordString = point.COORDINATES;
@@ -119,7 +128,11 @@ function reducer(state = INITIAL_STATE, action) {
     const arcs2 = arcs.slice(arcs.length / 2);
     return {...state, points, arcs: arcs1, arcs2};
   }
-
+  case 'SWAP_DATA': {
+    const hexData2 = state.hexData2;
+    const hexData = state.hexData2;
+    return {...state, hexData, hexData2};
+  }
   default:
     return state;
   }
@@ -134,7 +147,8 @@ function mapStateToProps(state) {
     points: state.points,
     arcs: state.arcs,
     arcs2: state.arcs2,
-    hexData: state.hexData
+    hexData: state.hexData,
+    hexData2: state.hexData2
   };
 }
 
@@ -297,6 +311,7 @@ class ExampleApp extends React.Component {
   @autobind _handleHexagonClicked(info) {
     info.type = 'hexagon';
     this.setState({clickItem: info});
+    this.props.dispatch(swapData());
   }
 
   @autobind _handleScatterplotHovered(info) {
@@ -421,8 +436,8 @@ class ExampleApp extends React.Component {
       zoom: mapViewState.zoom,
       data: arcs,
       strokeWidth: this.state.arcStrokeWidth || 1,
-      color0: [0, 0, 255],
-      color1: [0, 0, 255],
+      color0: BLUE,
+      color1: BLUE,
       isPickable: true,
       onHover: this._handleArcHovered,
       onClick: this._handleArcClicked
@@ -441,8 +456,8 @@ class ExampleApp extends React.Component {
       zoom: mapViewState.zoom,
       data: arcs2,
       strokeWidth: this.state.arcStrokeWidth || 1,
-      color0: [0, 255, 0],
-      color1: [0, 255, 0],
+      color0: GREEN,
+      color1: GREEN,
       isPickable: true,
       onHover: this._handleArcHovered,
       onClick: this._handleArcClicked
