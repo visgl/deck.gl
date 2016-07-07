@@ -27,6 +27,9 @@ const ATTRIBUTES = {
   instanceColors: {size: 3, '0': 'red', '1': 'green', '2': 'blue'}
 };
 
+const RED = [255, 0, 0];
+const BLUE = [0, 0, 255];
+
 export default class ArcLayer extends Layer {
   /**
    * @classdesc
@@ -37,8 +40,8 @@ export default class ArcLayer extends Layer {
    */
   constructor({
     strokeWidth = 1,
-    color0 = [255, 0, 0],
-    color1 = [0, 0, 255],
+    color0 = RED,
+    color1 = BLUE,
     ...opts
   } = {}) {
     super({

@@ -271,7 +271,7 @@ export default class Layer {
   }
 
   updateAttributes(props) {
-    const {attributeManager} = this.state;
+    const {attributeManager, model} = this.state;
     const numInstances = this.getNumInstances(props);
     // Figure out data length
     attributeManager.update({
@@ -281,6 +281,9 @@ export default class Layer {
       // Don't worry about non-attribute props
       ignoreUnknownAttributes: true
     });
+    if (model) {
+      model.setAttributes(attributeManager.getAttributes());
+    }
   }
 
   updateBaseUniforms() {

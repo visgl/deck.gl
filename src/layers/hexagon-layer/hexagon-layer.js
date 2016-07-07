@@ -17,6 +17,7 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
+/* eslint-disable func-style */
 
 import Layer from '../../layer';
 import {Model, Program, CylinderGeometry} from 'luma.gl';
@@ -27,6 +28,11 @@ const ATTRIBUTES = {
   instanceElevations: {size: 1, '0': 'z'},
   instanceColors: {size: 3, '0': 'red', '1': 'green', '2': 'blue'}
 };
+
+const _getCentroid = x => x.centroid;
+const _getElevation = x => x.elevation || 0;
+const _getColor = x => x.color || [255, 0, 0];
+const _getVertices = x => x.vertices;
 
 export default class HexagonLayer extends Layer {
   /**
@@ -47,10 +53,10 @@ export default class HexagonLayer extends Layer {
     dotRadius = 10,
     elevation = 100,
     vertices,
-    getCentroid = x => x.centroid,
-    getElevation = x => x.elevation || 0,
-    getColor = x => x.color || [255, 0, 0],
-    getVertices = x => x.vertices,
+    getCentroid = _getCentroid,
+    getElevation = _getElevation,
+    getColor = _getColor,
+    getVertices = _getVertices,
     ...opts
   } = {}) {
     super({
