@@ -40,12 +40,12 @@ export function updateLayers({oldLayers, newLayers, gl, scene}) {
   }
 }
 
-export function layersNeedRedraw(layers, {clearFlag}) {
-  let needRedraw = false;
+export function layersNeedRedraw(layers, {clearRedrawFlags = false} = {}) {
+  let redraw = false;
   for (const layer of layers) {
-    needRedraw = needRedraw || layer.getNeedsRedraw({clearFlag});
+    redraw = redraw || layer.getNeedsRedraw({clearRedrawFlags});
   }
-  return needRedraw;
+  return redraw;
 }
 
 function layerName(layer) {

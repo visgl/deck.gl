@@ -1,4 +1,5 @@
 import test from 'tape-catch';
+import 'luma.gl/headless';
 import {Layer} from '../src';
 
 const dataVariants = [

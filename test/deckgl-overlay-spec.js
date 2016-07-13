@@ -1,8 +1,9 @@
 /* eslint-disable no-unused-vars */
 import test from 'tape-catch';
 import React from 'react';
-
 import utils from 'react-addons-test-utils';
+
+import 'luma.gl/headless';
 
 import {DeckGLOverlay} from '../src';
 

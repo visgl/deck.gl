@@ -39,6 +39,8 @@ const PROP_TYPES = {
   height: PropTypes.number.isRequired,
   layers: PropTypes.array.isRequired,
   blending: PropTypes.object,
+  gl: PropTypes.object,
+  debug: PropTypes.bool,
   camera: PropTypes.instanceOf(Camera),
   pixelRatio: PropTypes.number,
   onWebGLInitialized: PropTypes.func
@@ -48,6 +50,8 @@ const DEFAULT_PROPS = {
   blending: DEFAULT_BLENDING,
   camera: null,
   pixelRatio: DEFAULT_PIXEL_RATIO,
+  gl: null,
+  debug: false,
   onWebGLInitialized: () => {}
 };
 
@@ -119,13 +123,14 @@ export default class DeckGLOverlay extends React.Component {
 
   @autobind _checkIfNeedRedraw() {
     const {layers} = this.props;
-    return layersNeedRedraw(layers, {clearFlag: true});
+    return layersNeedRedraw(layers, {clearRedrawFlags: true});
   }
 
   render() {
     const {
       width, height, layers, blending, pixelRatio,
       latitude, longitude, zoom, pitch, bearing, altitude,
+      gl, debug,
       ...otherProps
     } = this.props;
     let {camera} = this.props;
@@ -155,6 +160,8 @@ export default class DeckGLOverlay extends React.Component {
         width={ width }
         height={ height }
 
+        gl={ gl }
+        debug={ debug }
         viewport={ {x: 0, y: 0, width, height} }
         camera={ camera }
         scene={ scene }
