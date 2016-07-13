@@ -31,13 +31,14 @@ const PROP_TYPES = {
   width: PropTypes.number.isRequired,
   height: PropTypes.number.isRequired,
 
-  gl: PropTypes.object,
   pixelRatio: PropTypes.number,
   viewport: PropTypes.object.isRequired,
   camera: PropTypes.instanceOf(Camera).isRequired,
   scene: PropTypes.instanceOf(Scene),
   blending: PropTypes.object,
   events: PropTypes.object,
+  gl: PropTypes.object,
+  debug: PropTypes.bool,
 
   onRendererInitialized: PropTypes.func.isRequired,
   onInitializationFailed: PropTypes.func,
@@ -54,9 +55,11 @@ const PROP_TYPES = {
 };
 
 const DEFAULT_PROPS = {
-  gl: null,
   id: 'webgl-canvas',
   scene: null,
+
+  gl: null,
+  debug: false,
 
   onRendererInitialized: () => {},
   onInitializationFailed: error => console.error(error),
@@ -110,10 +113,15 @@ export default class WebGLRenderer extends React.Component {
    * @param {string} canvas
    */
   _initWebGL(canvas) {
+    const {debug} = this.props;
     let {gl} = this.props;
     if (!gl) {
       try {
-        gl = createGLContext({canvas, preserveDrawingBuffer: true});
+        gl = createGLContext({
+          canvas,
+          debug,
+          preserveDrawingBuffer: true
+        });
       } catch (error) {
         this.props.onInitializationFailed(error);
         return;

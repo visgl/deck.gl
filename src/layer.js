@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 
 /* eslint-disable guard-for-in */
-import AttributeManager from './attribute-manager';
+import {AttributeManager} from 'luma.gl';
 import {areEqualShallow} from './util';
 import {addIterator} from './util';
 import log from './log';
@@ -146,7 +146,7 @@ export default class Layer {
   }
 
   // Default implementation, all attributeManager will be updated
-  willReceiveProps(newProps) {
+  willReceiveProps(oldProps, newProps) {
     const {attributeManager} = this.state;
     if (this.state.dataChanged) {
       attributeManager.invalidateAll();
@@ -162,26 +162,29 @@ export default class Layer {
 
   // Public API
 
-  setNeedsRedraw() {
+  setNeedsRedraw(redraw = true) {
     if (this.state) {
-      this.state.needsRedraw = true;
+      this.state.needsRedraw = redraw;
     }
   }
 
-  getNeedsRedraw({clearFlag}) {
+  // Checks state of attributes and model
+  // TODO - is attribute manager needed? - Model should be enough.
+  getNeedsRedraw({clearRedrawFlags = false} = {}) {
     // this method may be called by the render loop as soon a the layer
     // has been created, so guard against uninitialized state
     if (!this.state) {
       return false;
     }
 
-    const {attributeManager} = this.state;
-    let needsRedraw = attributeManager.getNeedsRedraw({clearFlag});
-    needsRedraw = needsRedraw || this.state.needsRedraw;
-    if (clearFlag) {
-      this.state.needsRedraw = false;
-    }
-    return needsRedraw;
+    const {attributeManager, model} = this.state;
+    let redraw = false;
+    redraw = redraw || this.state.needsRedraw;
+    this.state.needsRedraw = this.state.needsRedraw && !clearRedrawFlags;
+
+    redraw = redraw || attributeManager.getNeedsRedraw({clearRedrawFlags});
+    redraw = redraw || model.getNeedsRedraw({clearRedrawFlags});
+    return redraw;
   }
 
   // Updates selected state members and marks the object for redraw
@@ -282,7 +285,9 @@ export default class Layer {
       ignoreUnknownAttributes: true
     });
     if (model) {
-      model.setAttributes(attributeManager.getAttributes());
+      const changedAttributes =
+        attributeManager.getChangedAttributes({clearChangedFlags: true});
+      model.setAttributes(changedAttributes);
     }
   }
 
@@ -350,7 +355,7 @@ export default class Layer {
 
     const {model} = this.state;
     model.setInstanceCount(this.getNumInstances());
-    model.id = `${this.props.id}-model`;
+    model.id = this.props.id;
     model.program.id = `${this.props.id}-program`;
     model.geometry.id = `${this.props.id}-geometry`;
 

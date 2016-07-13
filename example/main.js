@@ -66,7 +66,6 @@ const INITIAL_STATE = {
   },
   choropleths: null,
   hexagons: null,
-  hexagons2: null,
   points: null,
   arcs: null,
   arcs2: null,
@@ -90,6 +89,7 @@ function loadPoints(points) {
   return {type: 'LOAD_POINTS', points};
 }
 
+// Swaps data props when clicked to trigger WebGLBuffer updates
 function swapData() {
   return {type: 'SWAP_DATA'};
 }
@@ -129,9 +129,12 @@ function reducer(state = INITIAL_STATE, action) {
     return {...state, points, arcs: arcs1, arcs2};
   }
   case 'SWAP_DATA': {
-    const hexData2 = state.hexData2;
-    const hexData = state.hexData2;
-    return {...state, hexData, hexData2};
+    state = {
+      ...state,
+      hexData: state.hexData2,
+      hexData2: state.hexData
+    };
+    return state;
   }
   default:
     return state;
@@ -401,9 +404,7 @@ class ExampleApp extends React.Component {
       data: selectedHexagons,
       opacity: 0.1,
       elevation: 200,
-      isPickable: true,
-      onHover: this._handleHexagonHovered,
-      onClick: this._handleHexagonClicked
+      isPickable: false
     });
   }
 
