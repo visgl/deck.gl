@@ -69,7 +69,7 @@
     "glslify": "^5.0.0",
     "immutable": "^3.7.5",
     "jsdom": "^9.2.1",
-    "luma.gl": "^2.2.0",
+    "luma.gl": "^2.4.1",
     "react": "^15.0.2",
     "react-addons-test-utils": "^15.0.2",
     "react-dom": "^15.0.2",
@@ -77,6 +77,7 @@
     "react-redux": "^4.0.0",
     "redux": "^3.0.4",
     "tap-browser-color": "^0.1.2",
+    "tape": "^4.6.0",
     "tape-catch": "^1.0.4",
     "testron": "^1.2.0",
     "uglify-js": "^2.6.1"
@@ -84,7 +85,7 @@
   "peerDependencies": {
     "react": "0.14.x - 15.x",
     "react-dom": "0.14.x - 15.x",
-    "luma.gl": "^2.2.0"
+    "luma.gl": "^2.4.0"
   },
   "scripts": {
     "build": "npm run build-clean && npm run build-compile && npm run build-script && npm run build-script-min",
