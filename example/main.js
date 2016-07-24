@@ -75,19 +75,24 @@ function reducer(state = INITIAL_STATE, action) {
   case 'UPDATE_MAP':
     return {...state, mapViewState: action.mapViewState};
   case 'LOAD_GEO_JSON':
-    const arcs = action.geoJson.features.map(f => {
+    const arcs = [];
+    action.geoJson.features.forEach(f => {
       const coordinates = f.geometry.coordinates;
-      return {
-        position: {
-          x0: coordinates[0][0],
-          y0: coordinates[0][1],
-          x1: coordinates[1][0],
-          y1: coordinates[1][1]
-        },
-        colors: {
-          c0: [255, 0, 0], c1: [0, 0, 255]
-        }
-      };
+      let prev = coordinates[0];
+      coordinates.slice(1).forEach(c => {
+	arcs.push({
+	  position: {
+	    x0: prev[0],
+	    y0: prev[1],
+	    x1: c[0],
+	    y1: c[1]
+	  },
+	  colors: {
+	    c0: [255, 0, 0], c1: [0, 0, 255]
+	  }
+	});
+	prev = c;
+      });
     });
     return {...state, arcs};
 
