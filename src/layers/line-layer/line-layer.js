@@ -27,27 +27,20 @@ const ATTRIBUTES = {
   instanceColors: {size: 3, '0': 'red', '1': 'green', '2': 'blue'}
 };
 
-const RED = [255, 0, 0];
-const BLUE = [0, 0, 255];
-
-export default class ArcLayer extends Layer {
+export default class LineLayer extends Layer {
   /**
    * @classdesc
-   * ArcLayer
+   * LineLayer
    *
    * @class
    * @param {object} opts
    */
   constructor({
     strokeWidth = 1,
-    color0 = RED,
-    color1 = BLUE,
     ...opts
   } = {}) {
     super({
       strokeWidth,
-      color0,
-      color1,
       ...opts
     });
   }
@@ -63,31 +56,24 @@ export default class ArcLayer extends Layer {
       instancePositions: {update: this.calculateInstancePositions},
       instanceColors: {update: this.calculateInstanceColors}
     });
-
-    this.updateColors();
   }
 
   willReceiveProps(oldProps, nextProps) {
     super.willReceiveProps(oldProps, nextProps);
     this.state.model.userData.strokeWidth = nextProps.strokeWidth;
-    this.updateColors();
   }
 
   createModel(gl) {
-    let positions = [];
-    const NUM_SEGMENTS = 50;
-    for (let i = 0; i < NUM_SEGMENTS; i++) {
-      positions = [...positions, i, i, i];
-    }
+    let positions = [0, 0, 0, 1, 1, 1];
 
     return new Model({
       program: new Program(gl, {
-        vs: glslify('./arc-layer-vertex.glsl'),
-        fs: glslify('./arc-layer-fragment.glsl'),
-        id: 'arc'
+        vs: glslify('./line-layer-vertex.glsl'),
+        fs: glslify('./line-layer-fragment.glsl'),
+        id: 'line'
       }),
       geometry: new Geometry({
-        id: 'arc',
+        id: 'line',
         drawMode: 'LINE_STRIP',
         positions: new Float32Array(positions)
       }),
@@ -102,22 +88,15 @@ export default class ArcLayer extends Layer {
     });
   }
 
-  updateColors() {
-    this.setUniforms({
-      color0: this.props.color0,
-      color1: this.props.color1
-    });
-  }
-
   calculateInstancePositions(attribute) {
     const {data} = this.props;
     const {value, size} = attribute;
     let i = 0;
-    for (const arc of data) {
-      value[i + 0] = arc.position.x0;
-      value[i + 1] = arc.position.y0;
-      value[i + 2] = arc.position.x1;
-      value[i + 3] = arc.position.y1;
+    for (const line of data) {
+      value[i + 0] = line.position.x0;
+      value[i + 1] = line.position.y0;
+      value[i + 2] = line.position.x1;
+      value[i + 3] = line.position.y1;
       i += size;
     }
   }

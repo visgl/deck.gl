@@ -27,6 +27,7 @@ import ChoroplethLayer from './layers/choropleth-layer';
 import ScatterplotLayer from './layers/scatterplot-layer';
 import GridLayer from './layers/grid-layer';
 import ArcLayer from './layers/arc-layer';
+import LineLayer from './layers/line-layer';
 
 module.exports = {
   DeckGLOverlay,
@@ -35,5 +36,6 @@ module.exports = {
   ChoroplethLayer,
   ScatterplotLayer,
   GridLayer,
-  ArcLayer
+  ArcLayer,
+  LineLayer
 };

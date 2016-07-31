@@ -18,13 +18,11 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-/* vertex shader for the arc-layer */
-#define SHADER_NAME arc-layer-vs
+/* vertex shader for the line-layer */
+#define SHADER_NAME line-layer-vs
 
 #pragma glslify: mercatorProject = require(../../../shaderlib/mercator-project)
 uniform float mercatorScale;
-
-const float N = 49.0;
 
 attribute vec3 positions;
 attribute vec3 instanceColors;
@@ -38,28 +36,18 @@ uniform float renderPickingBuffer;
 
 varying vec4 vColor;
 
-float paraboloid(vec2 source, vec2 target, float index) {
-  float ratio = index / N;
-
-  vec2 x = mix(source, target, ratio);
-  vec2 center = mix(source, target, 0.5);
-
-  float dSourceCenter = distance(source, center);
-  float dXCenter = distance(x, center);
-  return (dSourceCenter + dXCenter) * (dSourceCenter - dXCenter);
-}
-
 void main(void) {
   vec2 source = mercatorProject(instancePositions.xy, mercatorScale);
   vec2 target = mercatorProject(instancePositions.zw, mercatorScale);
 
-  // TODO - are we only using x coordinate?
   float segmentIndex = positions.x;
   vec3 p = vec3(
     // xy: linear interpolation of source & target
-    mix(source, target, segmentIndex / N),
-    // z: paraboloid interpolate of source & target
-    sqrt(paraboloid(source, target, segmentIndex))
+    mix(source, target, segmentIndex),
+    // As per similar comment in choropleth-layer-vertex.glsl
+    // For some reason, need to add one to elevation to show up in untilted mode
+    // This seems to be only a problem on a Mac and not in Windows.
+    1.0
   );
 
   gl_Position = projectionMatrix * vec4(p, 1.0);
