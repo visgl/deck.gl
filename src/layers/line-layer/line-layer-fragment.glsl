@@ -18,24 +18,15 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import DeckGLOverlay from './deckgl-overlay';
+/* fragment shader for the line-layer */
+#define SHADER_NAME line-layer-fs
 
-import Layer from './layer';
+#ifdef GL_ES
+precision highp float;
+#endif
 
-import HexagonLayer from './layers/hexagon-layer';
-import ChoroplethLayer from './layers/choropleth-layer';
-import ScatterplotLayer from './layers/scatterplot-layer';
-import GridLayer from './layers/grid-layer';
-import ArcLayer from './layers/arc-layer';
-import LineLayer from './layers/line-layer';
+varying vec4 vColor;
 
-module.exports = {
-  DeckGLOverlay,
-  Layer,
-  HexagonLayer,
-  ChoroplethLayer,
-  ScatterplotLayer,
-  GridLayer,
-  ArcLayer,
-  LineLayer
-};
+void main(void) {
+  gl_FragColor = vColor;
+}

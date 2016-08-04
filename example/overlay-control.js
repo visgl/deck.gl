@@ -7,6 +7,7 @@ function OverlayControl({
   hoverHexagon,
   hoverPoint,
   hoverArc,
+  hoverLine,
   clickItem
 }) {
   const clickCoords = clickItem && clickItem.geoCoords;
@@ -41,6 +42,10 @@ function OverlayControl({
         <div>
           Arc
           { hoverArc && ` ${hoverArc.type}=${hoverArc.index}` }
+        </div>
+        <div>
+          Line
+          { hoverLine && ` ${hoverLine.type}=${hoverLine.index}` }
         </div>
         <div>
           Choropleth

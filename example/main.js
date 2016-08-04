@@ -41,6 +41,7 @@ import {
   ChoroplethLayer,
   ScatterplotLayer,
   ArcLayer,
+  LineLayer,
   GridLayer
 } from '../src';
 
@@ -69,6 +70,7 @@ const INITIAL_STATE = {
   points: null,
   arcs: null,
   arcs2: null,
+  lines: null,
   arcStrokeWidth: 1
 };
 
@@ -126,7 +128,8 @@ function reducer(state = INITIAL_STATE, action) {
     const arcs = pointsToArcs(points);
     const arcs1 = arcs.slice(0, arcs.length / 2);
     const arcs2 = arcs.slice(arcs.length / 2);
-    return {...state, points, arcs: arcs1, arcs2};
+    const lines = pointsToLines(points);
+    return {...state, points, arcs: arcs1, arcs2, lines};
   }
   case 'SWAP_DATA': {
     state = {
@@ -150,6 +153,7 @@ function mapStateToProps(state) {
     points: state.points,
     arcs: state.arcs,
     arcs2: state.arcs2,
+    lines: state.lines,
     hexData: state.hexData,
     hexData2: state.hexData2
   };
@@ -207,6 +211,28 @@ function pointsToArcs(points) {
         255 - i % 255,
         Math.floor(i / 255) % 255
       ]
+    };
+  });
+}
+
+function pointsToLines(points) {
+  return points.map((point, i) => {
+    if (i === points.length - 1) {
+      return {
+        position: {x0: 0, y0: 0, x1: 0, y1: 0},
+        color: [35, 81, 128]
+      };
+    }
+
+    const source = point;
+    const target = points[i + 1];
+
+    return {
+      position: {
+        x0: source.position.x, y0: source.position.y,
+        x1: target.position.x, y1: target.position.y
+      },
+      color: [0, 0, 255]
     };
   });
 }
@@ -334,6 +360,16 @@ class ExampleApp extends React.Component {
 
   @autobind _handleArcClicked(info) {
     info.type = 'arc';
+    this.setState({clickItem: info});
+  }
+
+  @autobind _handleLineHovered(info) {
+    info.type = 'line';
+    this.setState({hoverLine: info});
+  }
+
+  @autobind _handleLineClicked(info) {
+    info.type = 'line';
     this.setState({clickItem: info});
   }
 
@@ -465,6 +501,24 @@ class ExampleApp extends React.Component {
     });
   }
 
+  _renderLineLayer() {
+    const {mapViewState, lines} = this.props;
+
+    return new LineLayer({
+      id: 'lineLayer',
+      width: window.innerWidth,
+      height: window.innerHeight,
+      latitude: mapViewState.latitude,
+      longitude: mapViewState.longitude,
+      zoom: mapViewState.zoom,
+      data: lines,
+      strokeWidth: this.state.lineStrokeWidth || 1,
+      isPickable: true,
+      onHover: this._handleLineHovered,
+      onClick: this._handleLineClicked
+    });
+  }
+
   _renderOverlay() {
     const {choropleths, hexagons, points, mapViewState} = this.props;
     const {width, height} = this.state;
@@ -485,6 +539,7 @@ class ExampleApp extends React.Component {
           this._renderHexagonSelectionLayer(),
           this._renderArcLayer(),
           this._renderArcLayer2(),
+          this._renderLineLayer(),
           this._renderScatterplotLayer(),
           this._renderChoroplethLayer()
           // new TriangleLayer({
