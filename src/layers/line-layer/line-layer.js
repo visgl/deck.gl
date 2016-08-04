@@ -36,7 +36,7 @@ export default class LineLayer extends Layer {
    * @param {object} opts
    */
   constructor({
-    strokeWidth = 1,
+    strokeWidth = 9,
     ...opts
   } = {}) {
     super({
