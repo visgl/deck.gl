@@ -137,9 +137,9 @@ export default class ChoroplethLayer extends Layer {
   }
 
   calculateColors(attribute) {
-    const colors = this.state.groupedVertices.map(
+    const colors = this.state.groupedVerticesColors.map(
       vertices => vertices.map(
-        vertex => this.props.drawContour ? [0, 0, 0] : [128, 128, 128]
+        vertex => this.props.drawContour ? [0, 0, 0] : [vertex[0], vertex[1], vertex[2]]
       )
     );
 
@@ -179,6 +179,11 @@ export default class ChoroplethLayer extends Layer {
     this.state.groupedVertices = this.state.choropleths.map(
       choropleth => choropleth.coordinates.map(
         coordinate => [coordinate[0], coordinate[1], 0]
+      )
+    );
+    this.state.groupedVerticesColors = this.state.choropleths.map(
+      choropleth => choropleth.coordinates.map(
+        coordinate => choropleth.properties.color || [128, 128, 128]
       )
     );
   }
