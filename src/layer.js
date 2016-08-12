@@ -42,6 +42,7 @@ const DEFAULT_PROPS = {
   data: [],
   isPickable: false,
   deepCompare: false,
+  disableMercatorProjector: false,
   getValue: x => x,
   onHover: () => {},
   onClick: () => {},
@@ -477,9 +478,12 @@ export default class Layer {
   }
 
   // MAP LAYER FUNCTIONALITY
-
   setViewport() {
-    const {width, height, latitude, longitude, zoom} = this.props;
+    const {
+      width, height, latitude, longitude, zoom,
+      disableMercatorProjector
+    } = this.props;
+
     this.setState({
       viewport: {x: 0, y: 0, width, height},
       mercator: ViewportMercator({
@@ -487,11 +491,14 @@ export default class Layer {
         tileSize: 512
       })
     });
+
     this.setUniforms({
       viewport: [0, 0, width, height],
       mercatorScale: Math.pow(2, zoom),
-      mercatorCenter: [longitude, latitude]
+      mercatorCenter: [longitude, latitude],
+      disableMercatorProjector
     });
+
     log(3, this.state.viewport, latitude, longitude, zoom);
   }
 
