@@ -20,9 +20,7 @@
 
 /* eslint-disable guard-for-in */
 import {AttributeManager} from 'luma.gl';
-import {areEqualShallow} from './util';
-import {addIterator} from './util';
-import log from './log';
+import {addIterator, areEqualShallow, log} from '../utils';
 import isDeepEqual from 'lodash.isequal';
 import assert from 'assert';
 import ViewportMercator from 'viewport-mercator-project';
@@ -65,7 +63,7 @@ const ATTRIBUTES = {
 
 let counter = 0;
 
-export default class Layer {
+export default class BaseLayer {
 
   static get attributes() {
     return ATTRIBUTES;

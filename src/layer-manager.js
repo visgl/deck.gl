@@ -23,7 +23,7 @@
 /* eslint-disable no-try-catch */
 /* eslint-disable no-console */
 /* global console */
-import log from './log';
+import {log} from './utils';
 import assert from 'assert';
 
 export function updateLayers({oldLayers, newLayers, gl, scene}) {

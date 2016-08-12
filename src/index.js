@@ -20,7 +20,8 @@
 
 import DeckGLOverlay from './deckgl-overlay';
 
-import Layer from './layer';
+import Layer from './layers/base-layer';
+import BaseLayer from './layers/base-layer';
 
 import HexagonLayer from './layers/hexagon-layer';
 import ChoroplethLayer from './layers/choropleth-layer';
@@ -31,6 +32,7 @@ import LineLayer from './layers/line-layer';
 
 module.exports = {
   DeckGLOverlay,
+  BaseLayer,
   Layer,
   HexagonLayer,
   ChoroplethLayer,

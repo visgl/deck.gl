@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import Layer from '../../layer';
+import BaseLayer from '../base-layer';
 import earcut from 'earcut';
 import flattenDeep from 'lodash.flattendeep';
 import normalize from 'geojson-normalize';
@@ -33,7 +33,7 @@ const ATTRIBUTES = {
   pickingColors: {size: 3, '0': 'pickRed', '1': 'pickGreen', '2': 'pickBlue'}
 };
 
-export default class ChoroplethLayer extends Layer {
+export default class ChoroplethLayer extends BaseLayer {
   /**
    * @classdesc
    * ChoroplethLayer

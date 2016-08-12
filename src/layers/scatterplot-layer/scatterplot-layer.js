@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import Layer from '../../layer';
+import BaseLayer from '../base-layer';
 import {Model, Program, Geometry} from 'luma.gl';
 const glslify = require('glslify');
 
@@ -27,7 +27,7 @@ const ATTRIBUTES = {
   instanceColors: {size: 3, '0': 'red', '1': 'green', '2': 'blue'}
 };
 
-export default class ScatterplotLayer extends Layer {
+export default class ScatterplotLayer extends BaseLayer {
 
   static get attributes() {
     return ATTRIBUTES;

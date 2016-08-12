@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import Layer from '../../layer';
+import BaseLayer from '../base-layer';
 import {Model, Program, Geometry} from 'luma.gl';
 const glslify = require('glslify');
 
@@ -30,7 +30,7 @@ const ATTRIBUTES = {
 const RED = [255, 0, 0];
 const BLUE = [0, 0, 255];
 
-export default class ArcLayer extends Layer {
+export default class ArcLayer extends BaseLayer {
   /**
    * @classdesc
    * ArcLayer
