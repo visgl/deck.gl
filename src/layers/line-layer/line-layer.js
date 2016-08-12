@@ -64,7 +64,7 @@ export default class LineLayer extends Layer {
   }
 
   createModel(gl) {
-    let positions = [0, 0, 0, 1, 1, 1];
+    const positions = [0, 0, 0, 1, 1, 1];
 
     return new Model({
       program: new Program(gl, {
