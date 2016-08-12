@@ -18,11 +18,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-/* vertex shader for the line-layer */
-#define SHADER_NAME line-layer-vs
+#define SHADER_NAME line-layer-vertex-shader
 
-#pragma glslify: mercatorProject = require(../../../shaderlib/mercator-project)
-uniform float mercatorScale;
+#pragma glslify: project = require(../../../shaderlib/project)
 
 attribute vec3 positions;
 attribute vec3 instanceColors;
@@ -37,8 +35,8 @@ uniform float renderPickingBuffer;
 varying vec4 vColor;
 
 void main(void) {
-  vec2 source = mercatorProject(instancePositions.xy, mercatorScale);
-  vec2 target = mercatorProject(instancePositions.zw, mercatorScale);
+  vec2 source = project(instancePositions.xy);
+  vec2 target = project(instancePositions.zw);
 
   float segmentIndex = positions.x;
   vec3 p = vec3(

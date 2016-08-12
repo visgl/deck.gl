@@ -18,8 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-/* fragment shader for the line-layer */
-#define SHADER_NAME line-layer-fs
+#define SHADER_NAME line-layer-fragment-shader
 
 #ifdef GL_ES
 precision highp float;
