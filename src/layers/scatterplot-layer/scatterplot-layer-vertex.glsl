@@ -18,42 +18,26 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-/* vertex shader for the scatterplot-layer */
-#define SHADER_NAME scatterplot-layer-vs
+#define SHADER_NAME scatterplot-layer-vertex-shader
 
-#pragma glslify: random = require(../../../shaderlib/random)
-
-#pragma glslify: mercatorProject = require(../../../shaderlib/mercator-project)
-uniform float mercatorScale;
+#pragma glslify: project = require(../../../shaderlib/project)
 
 attribute vec3 positions;
 attribute vec3 instancePositions;
 attribute vec3 instanceColors;
 attribute vec3 instancePickingColors;
 
-uniform float radius;
-uniform float opacity;
-
 uniform mat4 worldMatrix;
 uniform mat4 projectionMatrix;
-
-varying vec4 vColor;
+uniform float opacity;
+uniform float radius;
 uniform float renderPickingBuffer;
 
+varying vec4 vColor;
+
 void main(void) {
-  // vec2 pos = mercatorProject(instancePositions.xy);
-  // vec3 p = vec3(pos, instancePositions.z) + positions * radius;
-  // // gl_Position = projectionMatrix * vec4(p, 1.0);
-  // // float rand = random(pos);
-  // // gl_Position = vec4(rand, rand, 0, 1.);
-
-  // vec4 color = vec4(instanceColors / 255.0, 1.);
-  // vec4 pickingColor = vec4(instancePickingColors / 255.0, 1.);
-  // vColor = mix(color, pickingColor, renderPickingBuffer);
-
-  vec2 pos = mercatorProject(instancePositions.xy, mercatorScale);
   // For some reason, need to add one to elevation to show up in untilted mode
-  vec3 p = vec3(pos, instancePositions.z + 1.) + positions * radius;
+  vec3 p = vec3(project(instancePositions.xy), instancePositions.z + 1.0) + positions * radius;
   gl_Position = projectionMatrix * vec4(p, 1.0);
 
   vec4 color = vec4(instanceColors / 255.0, 1.);

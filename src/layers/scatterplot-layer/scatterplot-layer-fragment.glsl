@@ -18,8 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-/* fragment shader for the scatterplot-layer */
-#define SHADER_NAME scatterplot-layer-fs
+#define SHADER_NAME scatterplot-layer-fragment-shader
 
 #ifdef GL_ES
 precision highp float;
