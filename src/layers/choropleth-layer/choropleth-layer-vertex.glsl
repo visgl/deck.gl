@@ -18,11 +18,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-/* vertex shader for the choropleth-layer */
 #define SHADER_NAME choropleth-layer-vertex-shader
 
-#pragma glslify: mercatorProject = require(../../../shaderlib/mercator-project)
-uniform float mercatorScale;
+#pragma glslify: project = require(../../../shaderlib/project)
 
 attribute vec3 positions;
 attribute vec3 colors;
@@ -44,15 +42,11 @@ vec4 getColor(vec4 color, float opacity, vec3 pickingColor, float renderPickingB
 }
 
 void main(void) {
-  vec2 pos = mercatorProject(positions.xy, mercatorScale);
   // For some reason, need to add one to elevation to show up in untilted mode
-  vec3 p = vec3(pos.xy, positions.z + 1.);
+  vec3 p = vec3(project(positions.xy), positions.z + 1.0);
   gl_Position = projectionMatrix * vec4(p, 1.);
 
   vec4 color = vec4(colors / 255., opacity);
   vec4 pickingColor = vec4(pickingColors / 255., 1.);
   vColor = mix(color, pickingColor, renderPickingBuffer);
-
-  // float alpha = pickingColors == selectedPickingColor ? 0.5 : opacity;
-  // vColor = vec4(mix(colors / 255., pickingColors / 255., renderPickingBuffer), alpha);
 }

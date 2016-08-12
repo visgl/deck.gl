@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-/* fragment shader for the choropleth-layer */
+#define SHADER_NAME choropleth-layer-fragment-shader
 
 #ifdef GL_ES
 precision highp float;
