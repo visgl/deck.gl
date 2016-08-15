@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 
 /* fragment shader for the hexagon-layer */
-#define SHADER_NAME hexagon-layer-fs
+#define SHADER_NAME hexagon-layer-fragment-shader
 
 #ifdef GL_ES
 precision highp float;

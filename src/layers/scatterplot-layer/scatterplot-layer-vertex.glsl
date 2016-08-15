@@ -37,8 +37,10 @@ varying vec4 vColor;
 
 void main(void) {
   // For some reason, need to add one to elevation to show up in untilted mode
-  vec3 p = vec3(project(instancePositions.xy), instancePositions.z + 1.0) + positions * radius;
-  gl_Position = projectionMatrix * vec4(p, 1.0);
+  vec3 center = vec3(project(instancePositions.xy), instancePositions.z + 1.0);
+  vec3 vertex = positions * radius;
+  gl_Position = projectionMatrix * vec4(center, 1.0) +
+                projectionMatrix * vec4(vertex, 0.0);
 
   vec4 color = vec4(instanceColors / 255.0, 1.);
   vec4 pickingColor = vec4(instancePickingColors / 255.0, 1.);

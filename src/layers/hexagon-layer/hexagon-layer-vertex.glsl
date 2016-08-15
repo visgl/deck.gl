@@ -19,13 +19,11 @@
 // THE SOFTWARE.
 
 /* fragment shader for the hexagon-layer */
-#define SHADER_NAME hexagon-layer-vs
+#define SHADER_NAME hexagon-layer-vertex-shader
 
-#pragma glslify: mercatorProject = require(../../../shaderlib/mercator-project)
-uniform float mercatorScale;
+#pragma glslify: project = require(../../../shaderlib/project)
 
 attribute vec3 positions;
-
 attribute vec2 instancePositions;
 attribute float instanceElevations;
 attribute vec3 instanceColors;
@@ -45,18 +43,14 @@ varying vec4 vColor;
 
 void main(void) {
   mat2 rotationMatrix = mat2(cos(angle), -sin(angle), sin(angle), cos(angle));
-  vec4 rotatedPosition = vec4(
-    vec2(rotationMatrix * positions.xz * radius),
-    0.,
-    1.
+  vec3 vertex = vec3(vec2(rotationMatrix * positions.xz * radius), 0.0);
+  vec3 center = vec3(
+    project(instancePositions),
+    instanceElevations * (positions.y + 0.5) * elevation
   );
 
-  vec2 pos = mercatorProject(instancePositions.xy, mercatorScale);
-
-  vec4 centroidPosition =
-    vec4(pos.xy, instanceElevations * (positions.y + 0.5) * elevation, 0.0);
-  vec3 p = centroidPosition.xyz + rotatedPosition.xyz;
-  gl_Position = projectionMatrix * vec4(p, 1.0);
+  gl_Position = projectionMatrix * vec4(center, 1.0) +
+                projectionMatrix * vec4(vertex, 0.0);
 
   vec4 color = vec4(instanceColors / 255.0, opacity);
   vec4 pickingColor = vec4(instancePickingColors / 255.0, 1.);
