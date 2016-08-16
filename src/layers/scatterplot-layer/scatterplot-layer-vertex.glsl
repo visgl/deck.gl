@@ -23,7 +23,7 @@
 #pragma glslify: project = require(../../../shaderlib/project)
 
 attribute vec3 positions;
-attribute vec3 instancePositions;
+attribute vec4 instancePositions;
 attribute vec3 instanceColors;
 attribute vec3 instancePickingColors;
 
@@ -38,7 +38,7 @@ varying vec4 vColor;
 void main(void) {
   // For some reason, need to add one to elevation to show up in untilted mode
   vec3 center = vec3(project(instancePositions.xy), instancePositions.z + 1.0);
-  vec3 vertex = positions * radius;
+  vec3 vertex = positions * radius * instancePositions.w;
   gl_Position = projectionMatrix * vec4(center, 1.0) +
                 projectionMatrix * vec4(vertex, 0.0);
 

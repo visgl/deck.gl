@@ -121,7 +121,8 @@ function reducer(state = INITIAL_STATE, action) {
           y: Number(coords[0]),
           z: 0
         },
-        color: [88, 9, 124]
+        color: [88, 9, 124],
+        radius: (Math.random() * (15 - 5 + 1) + 5) / 10  // [0.5, 1.5]
       };
     });
 

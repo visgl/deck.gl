@@ -154,8 +154,8 @@ renders it as interactive choropleths.
 
     **Layer-specific Parameters**
 
-    * `data` (array, required) array of objects: [{ position, color }, ...]
-    * `radius` [number, optional, default=10] radius of each marker
+    * `data` (array, required) array of objects: [{ position, color, radius }, ...]
+    * `radius` [number, optional, default=10] global radius across all markers
 
 * #### Arc Layer
   The Arc Layer takes in paired latitude and longitude coordinated points and

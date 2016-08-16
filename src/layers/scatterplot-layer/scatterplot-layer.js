@@ -23,8 +23,9 @@ import {Model, Program, Geometry} from 'luma.gl';
 const glslify = require('glslify');
 
 const ATTRIBUTES = {
-  instancePositions: {size: 3, '0': 'x', '1': 'y', '2': 'unused'},
-  instanceColors: {size: 3, '0': 'red', '1': 'green', '2': 'blue'}
+  // pack the radius of each instance into the instancePositions
+  instancePositions: {size: 4, 0: 'x', 1: 'y', 2: 'z', 3: 'radius'},
+  instanceColors: {size: 3, 0: 'red', 1: 'green', 2: 'blue'}
 };
 
 export default class ScatterplotLayer extends BaseLayer {
@@ -112,6 +113,7 @@ export default class ScatterplotLayer extends BaseLayer {
       value[i + 0] = point.position.x;
       value[i + 1] = point.position.y;
       value[i + 2] = point.position.z;
+      value[i + 3] = point.radius || 1;
       i += size;
     }
   }
