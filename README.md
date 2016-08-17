@@ -11,7 +11,7 @@ Design goals:
 - Provide highly performant data visualization overlays in 2 and 3 dimensions.
 - Provide tested, highly performant layers for basic data visualization
   use cases, scatterplots, choropleths etc.
-- Allows easy creation of custom WebGL layers by subclassing `Layer`.
+- Allows easy creation of custom WebGL layers by subclassing `BaseLayer`.
 - Support efficient WebGL rendering in "data flow architecture" applications
   (i.e. React).
 - Special focus on buffer management, allowing both automatic buffer updates
@@ -57,27 +57,31 @@ const mapState = {
 ```
 ---
 
-### WebGLOverlay:
+### DeckGLOverlay:
 
-* **webgl-overlay**
+* **deckgl-overlay**
 A react component that takes in viewport parameters, layer instances and
 generates an overlay consists of single/multiple layers sharing the same
-rendering context. Internally, the webgl-overlay initializes a WebGL context
+rendering context. Internally, the deckgl-overlay initializes a WebGL context
 attached to a canvas element, sets up the animation loop and calls provided
-callbacks on initial load and for each rendering frames. The webgl-overlay
+callbacks on initial load and for each rendering frames. The deckgl-overlay
 also handles events propagation across layers, and prevents unnecessary
 calculation taking advantage of the react lifecycle functions.
 
   **Parameters**
+  * `id` (string, optional) canvas ID for customizing styling
   * `width` (number, required) width of the canvas
   * `height` (number, required) height of the canvas
-  * `longitude` (number, required) longitude of the map center
-  * `latitude` (number, required) latitude of the map center
-  * `zoom` (number, required) zoom level of the map
+  * `layers` (array, required) the list of layers to be rendered
+  * `blending` (object, optional) blending settings
+  * `gl` (object, optional) gl context
+  * `debug` (bool, optional) boolean flag for enabling debug mode
+  * `camera` (Camera, optional) a luma.gl camera instance
+  * `style` (object, optional) css styles for the deckgl-canvas
+  * `pixelRatio` (number, optional) pixelRatio, will use device ratio by default
 
   **Callbacks**
-  * `onAfterRender` [function, optional] callback after rendering is finished
-  for the current frame
+  * `onWebGLInitialized` [function, optional] callback on initiating gl-context
 
 ### Supported Layers:
 

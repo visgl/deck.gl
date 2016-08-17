@@ -35,6 +35,7 @@ const DEFAULT_PIXEL_RATIO =
   typeof window !== 'undefined' ? window.devicePixelRatio : 1;
 
 const PROP_TYPES = {
+  id: PropTypes.string,
   width: PropTypes.number.isRequired,
   height: PropTypes.number.isRequired,
   layers: PropTypes.array.isRequired,
@@ -42,16 +43,19 @@ const PROP_TYPES = {
   gl: PropTypes.object,
   debug: PropTypes.bool,
   camera: PropTypes.instanceOf(Camera),
+  style: PropTypes.object,
   pixelRatio: PropTypes.number,
   onWebGLInitialized: PropTypes.func
 };
 
 const DEFAULT_PROPS = {
+  id: 'deckgl-overlay',
   blending: DEFAULT_BLENDING,
   camera: null,
-  pixelRatio: DEFAULT_PIXEL_RATIO,
-  gl: null,
   debug: false,
+  gl: null,
+  pixelRatio: DEFAULT_PIXEL_RATIO,
+  style: {},
   onWebGLInitialized: () => {}
 };
 

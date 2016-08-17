@@ -26,10 +26,11 @@ import {createGLContext, Camera, Scene, addEvents, Fx, glGet} from 'luma.gl';
 import throttle from 'lodash.throttle';
 
 const PROP_TYPES = {
-  id: PropTypes.string,
+  id: PropTypes.string.isRequired,
 
   width: PropTypes.number.isRequired,
   height: PropTypes.number.isRequired,
+  style: PropTypes.object,
 
   pixelRatio: PropTypes.number,
   viewport: PropTypes.object.isRequired,
@@ -55,7 +56,7 @@ const PROP_TYPES = {
 };
 
 const DEFAULT_PROPS = {
-  id: 'webgl-canvas',
+  style: {},
   scene: null,
 
   gl: null,

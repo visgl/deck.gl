@@ -45,8 +45,6 @@ import {
   GridLayer
 } from '../src';
 
-// import {TestLayer, TriangleLayer} from '../src/test-layers';
-
 const BLUE = [0, 0, 255];
 const GREEN = [0, 255, 0];
 
@@ -531,6 +529,7 @@ class ExampleApp extends React.Component {
 
     return (
       <DeckGLOverlay
+        id="default-deckgl-overlay"
         width={width}
         height={height}
         {...mapViewState}
@@ -543,28 +542,6 @@ class ExampleApp extends React.Component {
           this._renderLineLayer(),
           this._renderScatterplotLayer(),
           this._renderChoroplethLayer()
-          // new TriangleLayer({
-          //   id: 'triangle-layer',
-          //   width: window.innerWidth,
-          //   height: window.innerHeight,
-          //   latitude: mapViewState.latitude,
-          //   longitude: mapViewState.longitude,
-          //   zoom: mapViewState.zoom
-          // })
-          // new TestLayer({
-          //   id: 'test-layer',
-          //   width: window.innerWidth,
-          //   height: window.innerHeight,
-          //   latitude: mapViewState.latitude,
-          //   longitude: mapViewState.longitude,
-          //   zoom: mapViewState.zoom,
-          //   data: [
-          //     {position: [-0.2, -0.2]},
-          //     {position: [-0.3, 0.3]},
-          //     {position: [0.2, -0.4]},
-          //     {position: [0.2, 0.3]}
-          //   ]
-          // })
         ]}
         onWebGLInitialized={ this._onWebGLInitialized }
       />
