@@ -37,7 +37,7 @@ npm install --save deck.gl
 
 ```
 import {
-  WebGLOverlay,
+  DeckGLOverlay,
   /* import layers here */
 } from 'deck.gl';
 
@@ -48,7 +48,7 @@ const mapState = {
   ...
 }
 
-<WebGLOverlay
+<DeckGLOverlay
   width={1920}
   height={1080}
   mapState={mapState},  // optional
