@@ -227,14 +227,14 @@ export default class WebGLRenderer extends React.Component {
   }
 
   render() {
-    const {id, width, height, pixelRatio} = this.props;
+    const {id, width, height, pixelRatio, style} = this.props;
     return (
       <canvas
         ref={ 'overlay' }
         id={ id }
         width={ width * pixelRatio || 1 }
         height={ height * pixelRatio || 1 }
-        style={ {width, height} }/>
+        style={ {...style, width, height} }/>
     );
   }
 
