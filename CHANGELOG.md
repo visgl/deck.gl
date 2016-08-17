@@ -19,8 +19,11 @@ All notable changes to deck.gl will be documented in this file.
 - An updated new documentation page(s) to replace the current readme.md
 - High-precision (64-bit) floating point calculation support
 
-#### [2.4.3] - 2016-08-17
+#### [2.4.4] - 2016-08-17
 - Added deckgl-overlay canvas ID and customize style support
+
+#### [2.4.3] - 2016-08-16
+- Fix document / add customize style support to the canvas (@contra)
 
 #### [2.4.2] - 2016-08-16
 - Added per point radius support for the scatterplot-layer
