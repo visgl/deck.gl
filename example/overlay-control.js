@@ -12,6 +12,9 @@ function OverlayControl({
 }) {
   const clickCoords = clickItem && clickItem.geoCoords;
 
+  const choroplethId = hoverChoropleth && hoverChoropleth.feature &&
+    hoverChoropleth.feature.properties && hoverChoropleth.feature.properties.ID;
+
   return (
     <div id="overlay-control" style={ {
       position: 'absolute',
@@ -49,11 +52,10 @@ function OverlayControl({
         </div>
         <div>
           Choropleth
-          { hoverChoropleth &&
-            ` ${hoverChoropleth.type}=${hoverChoropleth.index}` }
+          { hoverChoropleth && ` ${hoverChoropleth.type}=${choroplethId}` }
         </div>
-        <div>````
-          Click
+        <div>
+          - Click
           { clickItem && ` ${clickItem.type}=${clickItem.index}` }
           { clickCoords &&
             ` (${clickCoords.lat.toFixed(4)} ${clickCoords.lon.toFixed(4)})` }

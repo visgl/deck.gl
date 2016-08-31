@@ -19,6 +19,9 @@ All notable changes to deck.gl will be documented in this file.
 - An updated new documentation page(s) to replace the current readme.md
 - High-precision (64-bit) floating point calculation support
 
+#### [2.4.5] - 2016-08-31
+- Fixed picking for the choropleth layer
+
 #### [2.4.4] - 2016-08-17
 - Added deckgl-overlay canvas ID and customize style support
 

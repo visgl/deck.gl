@@ -388,6 +388,21 @@ class ExampleApp extends React.Component {
     });
   }
 
+  _renderChoroplethContourLayer() {
+    const {mapViewState, choropleths} = this.props;
+    return new ChoroplethLayer({
+      id: 'choroplethContourLayer',
+      width: window.innerWidth,
+      height: window.innerHeight,
+      latitude: mapViewState.latitude,
+      longitude: mapViewState.longitude,
+      zoom: mapViewState.zoom,
+      data: choropleths,
+      opacity: 0.8,
+      drawContour: true
+    });
+  }
+
   _renderChoroplethLayer() {
     const {mapViewState, choropleths} = this.props;
     return new ChoroplethLayer({
@@ -398,9 +413,8 @@ class ExampleApp extends React.Component {
       longitude: mapViewState.longitude,
       zoom: mapViewState.zoom,
       data: choropleths,
-      opacity: 0.8,
-      isPickable: false,
-      drawContour: true,
+      opacity: 0.01,
+      isPickable: true,
       onHover: this._handleChoroplethHovered,
       onClick: this._handleChoroplethClicked
     });
@@ -541,7 +555,8 @@ class ExampleApp extends React.Component {
           this._renderArcLayer2(),
           this._renderLineLayer(),
           this._renderScatterplotLayer(),
-          this._renderChoroplethLayer()
+          this._renderChoroplethLayer(),
+          this._renderChoroplethContourLayer()
         ]}
         onWebGLInitialized={ this._onWebGLInitialized }
       />

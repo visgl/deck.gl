@@ -26,11 +26,11 @@ import {Model, Program, Geometry} from 'luma.gl';
 const glslify = require('glslify');
 
 const ATTRIBUTES = {
-  indices: {size: 1, '0': 'index', isIndexed: true},
-  positions: {size: 3, '0': 'x', '1': 'y', '2': 'unused'},
-  colors: {size: 3, '0': 'red', '1': 'green', '2': 'blue'},
+  indices: {size: 1, 0: 'index', isIndexed: true},
+  positions: {size: 3, 0: 'x', 1: 'y', 2: 'unused'},
+  colors: {size: 3, 0: 'red', 1: 'green', 2: 'blue'},
   // Override picking colors to prevent auto allocation
-  pickingColors: {size: 3, '0': 'pickRed', '1': 'pickGreen', '2': 'pickBlue'}
+  pickingColors: {size: 3, 0: 'pickRed', 1: 'pickGreen', 2: 'pickBlue'}
 };
 
 export default class ChoroplethLayer extends BaseLayer {
@@ -199,14 +199,16 @@ export default class ChoroplethLayer extends BaseLayer {
   }
 
   onHover(info) {
-    const {index} = info;
+    const {color} = info;
+    const index = color[0] + color[1] * 256 + color[2] * 256 * 256 - 1;
     const {data} = this.props;
     const feature = data.features[index];
     this.props.onHover({...info, feature});
   }
 
   onClick(info) {
-    const {index} = info;
+    const {color} = info;
+    const index = color[0] + color[1] * 256 + color[2] * 256 * 256 - 1;
     const {data} = this.props;
     const feature = data.features[index];
     this.props.onClick({...info, feature});
