@@ -206,17 +206,17 @@ export default class HexagonLayer extends BaseLayer {
     const vertex3 = vertices[3];
 
     // transform to space coordinates
-    const spaceCoord0 = this.project({lat: vertex0[1], lon: vertex0[0]});
-    const spaceCoord3 = this.project({lat: vertex3[1], lon: vertex3[0]});
+    const spaceCoord0 = this.project(vertex0);
+    const spaceCoord3 = this.project(vertex3);
 
     // distance between two close centroids
-    const dx = spaceCoord0.x - spaceCoord3.x;
-    const dy = spaceCoord0.y - spaceCoord3.y;
+    const dy = spaceCoord0[0] - spaceCoord3[0];
+    const dx = spaceCoord0[1] - spaceCoord3[1];
     const dxy = Math.sqrt(dx * dx + dy * dy);
 
     this.setUniforms({
       // Calculate angle that the perpendicular hexagon vertex axis is tilted
-      angle: Math.acos(dx / dxy) * -Math.sign(dy) + Math.PI / 2,
+      angle: Math.acos(dx / dxy) * Math.sign(dy) + Math.PI / 2,
       // Allow user to fine tune radius
       radius: dxy / 2 * Math.min(1, this.props.dotRadius)
     });

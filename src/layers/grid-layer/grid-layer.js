@@ -139,9 +139,9 @@ export default class GridLayer extends BaseLayer {
     value.fill(0.0);
 
     for (const point of data) {
-      const pixel = this.project([point.position.y, point.position.x]);
-      const colId = Math.floor((pixel.x + width) / unitWidth);
-      const rowId = Math.floor((pixel.y + height) / unitHeight);
+      const pixel = this.project([point.position.x, point.position.y]);
+      const colId = Math.floor((pixel[0] + width) / unitWidth);
+      const rowId = Math.floor((pixel[1] + height) / unitHeight);
       if (colId < numCol && rowId < numRow) {
         const i4 = (colId + rowId * numCol) * size;
         value[i4 + 2] = value[i4 + 0] += 1;

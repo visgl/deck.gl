@@ -148,8 +148,8 @@ export default class TestLayer extends Layer {
       return;
     }
 
-    const pixel0 = this.project({lon: -122, lat: 37.5});
-    const pixel1 = this.project({lon: -122, lat: 37.5002});
+    const pixel0 = this.project([-122, 37.5]);
+    const pixel1 = this.project([-122, 37.5002]);
 
     const dx = pixel0.x - pixel1.x;
     const dy = pixel0.y - pixel1.y;
