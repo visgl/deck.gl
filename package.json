@@ -44,7 +44,6 @@
     "lodash.throttle": "^3.0.4",
     "lodash.where": "^3.1.0",
     "save-pixels": "^2.3.0",
-    "viewport-mercator-project": "^2.0.1",
     "webgl-obj-loader": "^0.1.1"
   },
   "devDependencies": {
@@ -80,7 +79,8 @@
     "tape": "^4.6.0",
     "tape-catch": "^1.0.4",
     "testron": "^1.2.0",
-    "uglify-js": "^2.6.1"
+    "uglify-js": "^2.6.1",
+    "viewport-mercator-project": "^2.0.1"
   },
   "peerDependencies": {
     "react": "0.14.x - 15.x",

@@ -23,7 +23,6 @@ import {AttributeManager} from 'luma.gl';
 import {addIterator, areEqualShallow, log} from '../utils';
 import isDeepEqual from 'lodash.isequal';
 import assert from 'assert';
-import ViewportMercator from 'viewport-mercator-project';
 import {Viewport} from '../viewport';
 
 /*
@@ -487,11 +486,6 @@ export default class BaseLayer {
     } = this.props;
 
     this.setState({
-      viewport: {x: 0, y: 0, width, height},
-      // mercator: ViewportMercator({
-      //   width, height, latitude, longitude, zoom,
-      //   tileSize: 512
-      // })
       mercator: new Viewport({
         width, height, latitude, longitude, zoom, pitch, bearing, altitude,
         tileSize: 512
