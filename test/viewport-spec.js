@@ -92,7 +92,7 @@ test('Viewport.project#2D', t => {
     const vmp = new ViewportMercatorProject(mapState);
     const xy = viewport.project([mapState.longitude, mapState.latitude]);
     const xy2 = vmp.project([mapState.longitude, mapState.latitude]);
-    t.comment(`[${xy2}] [${xy}]`);
+    t.comment(`Comparing [${xy2}] [${xy}]`);
     t.ok(vec2.equals(xy, xy2));
   }
   t.end();
@@ -103,7 +103,6 @@ test('Viewport.project#3D', t => {
     const {mapState} = testData;
     const viewport = new Viewport(mapState);
     const xy = viewport.project([mapState.longitude, mapState.latitude]);
-    t.comment(xy);
     t.ok(vec2.equals(xy, [mapState.width / 2,mapState.height / 2]));
   }
   t.end();

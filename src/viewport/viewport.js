@@ -25,28 +25,41 @@ const PI_4 = PI / 4;
 const DEGREES_TO_RADIANS = PI / 180;
 const RADIANS_TO_DEGREES = 180 / PI;
 const TILE_SIZE = 512;
-const WORLD_SCALE = TILE_SIZE / ( 2 * PI);
+const WORLD_SCALE = TILE_SIZE / (2 * PI);
+
+export const DEFAULT_MAP_STATE = {
+  latitude: 37,
+  longitude: -122,
+  zoom: 11,
+  pitch: 0,
+  bearing: 0,
+  altitude: 1.5
+};
 
 export default class Viewport {
   /* eslint-disable max-statements */
   constructor({
     // Map state
-    width = 0,
-    height = 0,
-    latitude = 0,
-    longitude = 0,
-    zoom = 0,
-    pitch = 0,
-    bearing = 0,
-    altitude = 1.5
+    width,
+    height,
+    latitude,
+    longitude,
+    zoom,
+    pitch,
+    bearing,
+    altitude
   }) {
-    // Viewport
-    this.width = width;
-    this.height = height;
-    this.zoom = zoom;
-    this.latitude = latitude;
-    this.longitude = longitude;
-    this.bearing = bearing;
+    // Viewport - support undefined arguments
+    /* eslint-disable max-len */
+    this.width = width !== undefined ? width : DEFAULT_MAP_STATE.width;
+    this.height = height !== undefined ? height : DEFAULT_MAP_STATE.height;
+    this.zoom = zoom !== undefined ? zoom : DEFAULT_MAP_STATE.zoom;
+    this.latitude = latitude !== undefined ? latitude : DEFAULT_MAP_STATE.latitude;
+    this.longitude = longitude !== undefined ? longitude : DEFAULT_MAP_STATE.longitude;
+    bearing = bearing !== undefined ? bearing : DEFAULT_MAP_STATE.bearing;
+    pitch = pitch !== undefined ? pitch : DEFAULT_MAP_STATE.pitch;
+    altitude = altitude !== undefined ? altitude : DEFAULT_MAP_STATE.altitude;
+    /* eslint-enable max-len */
 
     // Scale
     this.scale = Math.pow(2, zoom);
@@ -74,7 +87,6 @@ export default class Viewport {
     const y = 180 / Math.PI *
       Math.log(Math.tan(Math.PI / 4 + latitude * Math.PI / 360));
 
-    this.center0 = this.projectToWorld([longitude, latitude], 1);
     this.center = this.projectToWorld([longitude, latitude]);
     this.centerX = this.center[0];
     this.centerY = this.center[1];
