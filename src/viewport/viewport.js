@@ -25,7 +25,7 @@ const PI_4 = PI / 4;
 const DEGREES_TO_RADIANS = PI / 180;
 const RADIANS_TO_DEGREES = 180 / PI;
 const TILE_SIZE = 512;
-const WORLD_SCALE = TILE_SIZE / PI_2;
+const WORLD_SCALE = TILE_SIZE / ( 2 * PI);
 
 export default class Viewport {
   /* eslint-disable max-statements */
@@ -74,10 +74,10 @@ export default class Viewport {
     const y = 180 / Math.PI *
       Math.log(Math.tan(Math.PI / 4 + latitude * Math.PI / 360));
 
-    this.centerX0 = (180 + longitude) / 360 * TILE_SIZE;
-    this.centerY0 = (180 - y) / 360 * TILE_SIZE;
-    this.centerX = this.centerX0 * this.scale;
-    this.centerY = this.centerY0 * this.scale;
+    this.center0 = this.projectToWorld([longitude, latitude], 1);
+    this.center = this.projectToWorld([longitude, latitude]);
+    this.centerX = this.center[0];
+    this.centerY = this.center[1];
 
     // Find the distance from the center point to the center top
     // in altitude units using law of sines.
@@ -90,16 +90,24 @@ export default class Viewport {
     this.farZ = Math.cos(Math.PI / 2 - this.pitchRadians) *
       this.topHalfSurfaceDistance + this.altitude;
 
-    this._precomputeMatrices();
+    this._glProjectionMatrix = this._calculateGLProjectionMatrix();
+    this._pixelProjectionMatrix = null;
+    this._pixelUnprojectionMatrix = null;
+
+    Object.seal(this);
   }
   /* eslint-enable max-statements */
 
   project(lngLatZ) {
-    const [x, y] = this.projectZoom0(lngLatZ);
-    const v = vec4.fromValues(x, y, lngLatZ[2] || 0, 1);
-    vec4.transformMat4(v, v, this.viewMatrix);
-    vec4.transformMat4(v, v, this.projectionMatrix);
-    // vec4.transformMat4(v, v, this.viewportMatrix);
+    this._precomputePixelProjectionMatrices();
+    const [x, y] = this.projectToWorld(lngLatZ);
+    const v = [x, y, lngLatZ[2] || 0, 1];
+    // vec4.sub(v, v, [this.centerX, this.centerY, 0, 0]);
+    vec4.transformMat4(v, v, this._pixelProjectionMatrix);
+    // Divide by w
+    const scale = 1 / v[3];
+    vec4.multiply(v, v, [scale, scale, scale, scale]);
+    return v;
   }
 
   /**
@@ -112,16 +120,17 @@ export default class Viewport {
    *   Specifies a point on the sphere to project onto the map.
    * @return {Array} [x,y] coordinates.
    */
-  projectZoom0([lng, lat]) {
+  projectToWorld([lng, lat], scale = this.scale) {
+    scale = scale * WORLD_SCALE;
     const lambda2 = lng * DEGREES_TO_RADIANS;
     const phi2 = lat * DEGREES_TO_RADIANS;
-    const x = WORLD_SCALE * (lambda2 + PI);
-    const y = WORLD_SCALE * (PI - Math.log(Math.tan(PI_4 + phi2 * 0.5)));
+    const x = scale * (lambda2 + PI);
+    const y = scale * (PI - Math.log(Math.tan(PI_4 + phi2 * 0.5)));
     return [x, y];
   }
 
   /**
-   * Unproject point {x,y} on map onto {lat, lon} on sphere
+   * Unproject pixel point [x,y] on map onto {lat, lon} on sphere
    *
    * @param {object|Vector} xy - object with {x,y} members
    *  representing point on projected map plane
@@ -129,9 +138,27 @@ export default class Viewport {
    *   Has toArray method if you need a GeoJSON Array.
    *   Per cartographic tradition, lat and lon are specified as degrees.
    */
-  unprojectZoom0([x, y]) {
-    const lambda2 = x / WORLD_SCALE - PI;
-    const phi2 = 2 * (Math.atan(Math.exp(PI - y / WORLD_SCALE)) - PI_4);
+  unproject([x, y]) {
+    this._precomputePixelProjectionMatrices();
+    const v = [x, y, 0, 1];
+    vec4.transformMat4(v, v, this._pixelUnprojectionMatrix);
+    return v;
+  }
+
+
+  /**
+   * Unproject world point [x,y] on map onto {lat, lon} on sphere
+   *
+   * @param {object|Vector} xy - object with {x,y} members
+   *  representing point on projected map plane
+   * @return {GeoCoordinates} - object with {lat,lon} of point on sphere.
+   *   Has toArray method if you need a GeoJSON Array.
+   *   Per cartographic tradition, lat and lon are specified as degrees.
+   */
+  unprojectToWorld([x, y], scale = this.scale) {
+    scale = scale * WORLD_SCALE;
+    const lambda2 = x / scale - PI;
+    const phi2 = 2 * (Math.atan(Math.exp(PI - y / scale)) - PI_4);
     return [lambda2 * RADIANS_TO_DEGREES, phi2 * RADIANS_TO_DEGREES];
   }
 
@@ -162,22 +189,33 @@ export default class Viewport {
   //   };
   // }
 
-  _precomputeMatrices() {
-    this._glProjectionMatrix = this._calculateGLProjectionMatrix();
+  _precomputePixelProjectionMatrices() {
+    if (this._pixelProjectionMatrix && this._pixelUnprojectionMatrix) {
+      return;
+    }
 
-    const m = mat4.create();
-    mat4.translate(m, m, [0.5, 0.5, 0]);
+    // const glProjectionMatrix = this._glProjectionMatrix;
+    const glProjectionMatrix =
+      this._calculateGLProjectionMatrix(this._createMat4())
+
+    const m = this._createMat4();
+    // Scale with pixel width and height
     mat4.scale(m, m, [this.width, this.height, 1]);
-    mat4.multiply(m, m, this._glProjectionMatrix);
+    // Convert to (0, 1)
+    mat4.translate(m, m, [0.5, 0.5, 0]);
+    mat4.scale(m, m, [0.5, 0.5, 0])
+    // Project to clip space (-1, 1)
+    mat4.multiply(m, m, glProjectionMatrix);
     this._pixelProjectionMatrix = m;
 
     const mInverse = mat4.clone(m);
     mat4.invert(mInverse, mInverse);
+    this._pixelUnprojectionMatrix = mInverse;
   }
 
   // Transforms from Web Mercator Tile 0 [0-512,0-512] to "clip space"
-  _calculateGLProjectionMatrix() {
-    const m = mat4.create();
+  _calculateGLProjectionMatrix(m) {
+    m = m || mat4.create();
 
     mat4.perspective(m,
       2 * Math.atan((this.height / 2) / this.altitude),
@@ -201,19 +239,9 @@ export default class Viewport {
     return m;
   }
 
-}
+  _createMat4() {
+    // return mat4.create();
+    return [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
+  }
 
-/* xiaoji's shader
-uniform mat4 projMatrix;
-uniform float zoom;
-// convert (lng, lat) to screen positions in clip space.
-// mapbox-gl/js/geo/transform.js
-vec2 project(vec2 pt) {
-  float worldSize = 512.0 * pow(2.0, zoom);
-  float lngX = (180.0 + pt.x) / 360.0  * worldSize;
-  float latY = (180.0 - degrees(log(tan(radians(pt.y + 90.0)/2.0)))) / 360.0
-  * worldSize;
-  vec4 p = vec4(lngX, latY, 0, 1.0) * projMatrix;
-  return vec2(p.x/p.z, p.y/p.z);
 }
-*/

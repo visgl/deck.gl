@@ -24,6 +24,7 @@ import {addIterator, areEqualShallow, log} from '../utils';
 import isDeepEqual from 'lodash.isequal';
 import assert from 'assert';
 import ViewportMercator from 'viewport-mercator-project';
+import {Viewport} from '../viewport';
 
 /*
  * @param {string} props.id - layer name
@@ -436,7 +437,10 @@ export default class BaseLayer {
     if (Array.isArray(this.props.data)) {
       info.object = this.props.data[info.index];
     }
-    info.geoCoords = this.unproject({x: info.x, y: info.y});
+    info.pixel = [info.x, info.y];
+    info.lngLat = this.unproject(info.pixel);
+    // Backwards compatibility...
+    info.geoCoords = {lat: info.lngLat[1], lon: info.lngLat[0]};
     return info;
   }
 
@@ -478,14 +482,18 @@ export default class BaseLayer {
   // MAP LAYER FUNCTIONALITY
   setViewport() {
     const {
-      width, height, latitude, longitude, zoom,
+      width, height, latitude, longitude, zoom, pitch, bearing, altitude,
       disableMercatorProjector
     } = this.props;
 
     this.setState({
       viewport: {x: 0, y: 0, width, height},
-      mercator: ViewportMercator({
-        width, height, latitude, longitude, zoom,
+      // mercator: ViewportMercator({
+      //   width, height, latitude, longitude, zoom,
+      //   tileSize: 512
+      // })
+      mercator: new Viewport({
+        width, height, latitude, longitude, zoom, pitch, bearing, altitude,
         tileSize: 512
       })
     });
@@ -501,24 +509,24 @@ export default class BaseLayer {
   }
 
   /**
-   * Position conversion is done in shader, so in many cases there is no need
+   * Projects a point with current map state (lat, lon, zoom, pitch, bearing)
+   *
+   * Note: Position conversion is done in shader, so in many cases there is no need
    * for this function
-   * @param {Object|Array} latLng - Either [lat,lng] or {lat, lon}
-   * @return {Object} - x, y
+   * @param {Array|Typed Array} lngLat - long and lat values
+   * @return {Array|Typed Array} - x, y coordinates
    */
-  project(latLng) {
+  project(lngLat) {
     const {mercator} = this.state;
-    const [x, y] = Array.isArray(latLng) ?
-      mercator.project([latLng[1], latLng[0]]) :
-      mercator.project([latLng.lon, latLng.lat]);
-    return {x, y};
+    assert(Array.isArray(lngLat), 'Layer.project needs [lng,lat]');
+    // TODO - consider disableMercatorProject
+    return mercator.project(lngLat);
   }
 
   unproject(xy) {
     const {mercator} = this.state;
-    const [lon, lat] = Array.isArray(xy) ?
-      mercator.unproject(xy) :
-      mercator.unproject([xy.x, xy.y]);
-    return {lat, lon};
+    assert(Array.isArray(xy), 'Layer.unproject needs [x,y]');
+    // TODO - consider disableMercatorProject
+    return mercator.unproject(xy);
   }
 }

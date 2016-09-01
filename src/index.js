@@ -30,14 +30,20 @@ import GridLayer from './layers/grid-layer';
 import ArcLayer from './layers/arc-layer';
 import LineLayer from './layers/line-layer';
 
+import {Viewport} from './viewport';
+
 module.exports = {
   DeckGLOverlay,
+
   BaseLayer,
   Layer,
+
   HexagonLayer,
   ChoroplethLayer,
   ScatterplotLayer,
   GridLayer,
   ArcLayer,
-  LineLayer
+  LineLayer,
+
+  Viewport
 };
