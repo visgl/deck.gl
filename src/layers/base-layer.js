@@ -56,19 +56,9 @@ const DEFAULT_PROPS = {
   updateTriggers: {}
 };
 
-const ATTRIBUTES = {
-  instancePickingColors:
-    {size: 3, '0': 'pickRed', '1': 'pickGreen', '2': 'pickBlue'}
-};
-
 let counter = 0;
 
 export default class BaseLayer {
-
-  static get attributes() {
-    return ATTRIBUTES;
-  }
-
   /**
    * @classdesc
    * Base Layer class
@@ -337,8 +327,9 @@ export default class BaseLayer {
     const {attributeManager} = this.state;
     // All instanced layers get instancePickingColors attribute by default
     // Their shaders can use it to render a picking scene
-    attributeManager.addInstanced(ATTRIBUTES, {
-      instancePickingColors: {update: this.calculateInstancePickingColors}
+    attributeManager.addInstanced({
+      instancePickingColors:
+        {size: 3, update: this.calculateInstancePickingColors}
     });
 
     this.setViewport();

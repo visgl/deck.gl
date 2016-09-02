@@ -23,8 +23,6 @@ import {Model, Program, Geometry} from 'luma.gl';
 const glslify = require('glslify');
 
 const ATTRIBUTES = {
-  instancePositions: {size: 4, '0': 'x0', '1': 'y0', '2': 'x1', '3': 'y1'},
-  instanceColors: {size: 3, '0': 'red', '1': 'green', '2': 'blue'}
 };
 
 export default class LineLayer extends BaseLayer {
@@ -52,9 +50,9 @@ export default class LineLayer extends BaseLayer {
     model.userData.strokeWidth = this.props.strokeWidth;
     this.setState({model});
 
-    attributeManager.addInstanced(ATTRIBUTES, {
-      instancePositions: {update: this.calculateInstancePositions},
-      instanceColors: {update: this.calculateInstanceColors}
+    attributeManager.addInstanced({
+      instancePositions: {size: 4, update: this.calculateInstancePositions},
+      instanceColors: {size: 3, update: this.calculateInstanceColors}
     });
   }
 

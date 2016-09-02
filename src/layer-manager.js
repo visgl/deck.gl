@@ -70,7 +70,7 @@ function matchLayers(oldLayers, newLayers) {
       }
     } catch (err) {
       console.error(
-        `deck.gl error during matching of ${layerName(newLayer)}`, err);
+        `deck.gl error during matching of ${layerName(newLayer)} ${err}`, err);
       // Save first error
       error = error || err;
     }
@@ -121,7 +121,8 @@ function initializeNewLayers(layers, {gl}) {
         layer.initializeLayer({gl});
       } catch (err) {
         console.error(
-          `deck.gl error during initialization of ${layerName(layer)}`, err);
+          `deck.gl error during initialization of ${layerName(layer)} ${err}`,
+          err);
         // Save first error
         error = error || err;
       }

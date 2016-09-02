@@ -22,17 +22,7 @@ import BaseLayer from '../base-layer';
 import {Model, Program, Geometry} from 'luma.gl';
 const glslify = require('glslify');
 
-const ATTRIBUTES = {
-  instancePositions: {size: 3, '0': 'x', '1': 'y', '2': 'unused'},
-  instanceColors: {size: 4, '0': 'red', '1': 'green', '2': 'blue', '3': 'alpha'}
-};
-
 export default class GridLayer extends BaseLayer {
-
-  static get attributes() {
-    return ATTRIBUTES;
-  }
-
   /**
    * @classdesc
    * GridLayer
@@ -57,9 +47,9 @@ export default class GridLayer extends BaseLayer {
       model: this.getModel(gl)
     });
 
-    attributeManager.addInstanced(ATTRIBUTES, {
-      instancePositions: {update: this.calculateInstancePositions},
-      instanceColors: {update: this.calculateInstanceColors}
+    attributeManager.addInstanced({
+      instancePositions: {size: 3, update: this.calculateInstancePositions},
+      instanceColors: {size: 4, update: this.calculateInstanceColors}
     });
 
     this.updateCell();
