@@ -30,10 +30,7 @@
       }
     ],
     "constructor-super": 2,
-    "func-style": [
-      2,
-      "declaration"
-    ],
+    "func-style": 0,
     "generator-star-spacing": [
       2,
       {

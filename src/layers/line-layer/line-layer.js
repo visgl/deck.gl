@@ -25,6 +25,10 @@ const glslify = require('glslify');
 const ATTRIBUTES = {
 };
 
+const defaultGetPosition0 = x => x.position0;
+const defaultGetPosition1 = x => x.position1;
+const defaultGetColor = x => x.color;
+
 export default class LineLayer extends BaseLayer {
   /**
    * @classdesc
@@ -35,10 +39,16 @@ export default class LineLayer extends BaseLayer {
    */
   constructor({
     strokeWidth = 9,
+    getPosition0 = defaultGetPosition0,
+    getPosition1 = defaultGetPosition1,
+    getColor = defaultGetColor,
     ...opts
   } = {}) {
     super({
       strokeWidth,
+      getPosition0,
+      getPosition1,
+      getColor,
       ...opts
     });
   }
@@ -87,26 +97,29 @@ export default class LineLayer extends BaseLayer {
   }
 
   calculateInstancePositions(attribute) {
-    const {data} = this.props;
+    const {data, getPosition0, getPosition1} = this.props;
     const {value, size} = attribute;
     let i = 0;
-    for (const line of data) {
-      value[i + 0] = line.position.x0;
-      value[i + 1] = line.position.y0;
-      value[i + 2] = line.position.x1;
-      value[i + 3] = line.position.y1;
+    for (const object of data) {
+      const position0 = getPosition0(object);
+      const position1 = getPosition1(object);
+      value[i + 0] = position0[0];
+      value[i + 1] = position0[1];
+      value[i + 2] = position1[0];
+      value[i + 3] = position1[1];
       i += size;
     }
   }
 
   calculateInstanceColors(attribute) {
-    const {data} = this.props;
+    const {data, getColor} = this.props;
     const {value, size} = attribute;
     let i = 0;
-    for (const point of data) {
-      value[i + 0] = point.color[0];
-      value[i + 1] = point.color[1];
-      value[i + 2] = point.color[2];
+    for (const object of data) {
+      const color = getColor(object);
+      value[i + 0] = color[0];
+      value[i + 1] = color[1];
+      value[i + 2] = color[2];
       i += size;
     }
   }

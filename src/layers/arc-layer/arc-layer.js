@@ -25,25 +25,35 @@ const glslify = require('glslify');
 const RED = [255, 0, 0];
 const BLUE = [0, 0, 255];
 
+const defaultGetPosition0 = x => x.position0;
+const defaultGetPosition1 = x => x.position1;
+const defaultGetColor = x => x.color;
+
 export default class ArcLayer extends BaseLayer {
   /**
    * @classdesc
    * ArcLayer
    *
    * @class
-   * @param {object} opts
+   * @param {object} props
    */
   constructor({
     strokeWidth = 1,
     color0 = RED,
     color1 = BLUE,
-    ...opts
+    getPosition0 = defaultGetPosition0,
+    getPosition1 = defaultGetPosition1,
+    getColor = defaultGetColor,
+    ...props
   } = {}) {
     super({
       strokeWidth,
       color0,
       color1,
-      ...opts
+      getPosition0,
+      getPosition1,
+      getColor,
+      ...props
     });
   }
 
@@ -105,26 +115,29 @@ export default class ArcLayer extends BaseLayer {
   }
 
   calculateInstancePositions(attribute) {
-    const {data} = this.props;
+    const {data, getPosition0, getPosition1} = this.props;
     const {value, size} = attribute;
     let i = 0;
-    for (const arc of data) {
-      value[i + 0] = arc.position.x0;
-      value[i + 1] = arc.position.y0;
-      value[i + 2] = arc.position.x1;
-      value[i + 3] = arc.position.y1;
+    for (const object of data) {
+      const position0 = getPosition0(object);
+      const position1 = getPosition1(object);
+      value[i + 0] = position0[0];
+      value[i + 1] = position0[1];
+      value[i + 2] = position1[0];
+      value[i + 3] = position1[1];
       i += size;
     }
   }
 
   calculateInstanceColors(attribute) {
-    const {data} = this.props;
+    const {data, getColor} = this.props;
     const {value, size} = attribute;
     let i = 0;
-    for (const point of data) {
-      value[i + 0] = point.color[0];
-      value[i + 1] = point.color[1];
-      value[i + 2] = point.color[2];
+    for (const object of data) {
+      const color = getColor(object);
+      value[i + 0] = color[0];
+      value[i + 1] = color[1];
+      value[i + 2] = color[2];
       i += size;
     }
   }

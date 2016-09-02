@@ -201,10 +201,8 @@ function pointsToArcs(points) {
     const target = points[i + 1];
 
     return {
-      position: {
-        x0: source.position.x, y0: source.position.y,
-        x1: target.position.x, y1: target.position.y
-      },
+      position0: [source.position.x, source.position.y],
+      position1: [target.position.x, target.position.y],
       color: [
         i % 255,
         255 - i % 255,
@@ -227,10 +225,8 @@ function pointsToLines(points) {
     const target = points[i + 1];
 
     return {
-      position: {
-        x0: source.position.x, y0: source.position.y,
-        x1: target.position.x, y1: target.position.y
-      },
+      position0: [source.position.x, source.position.y],
+      position1: [target.position.x, target.position.y],
       color: [0, 0, 255]
     };
   });
