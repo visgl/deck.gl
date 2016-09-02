@@ -192,7 +192,8 @@ function pointsToArcs(points) {
   return points.map((point, i) => {
     if (i === points.length - 1) {
       return {
-        position: {x0: 0, y0: 0, x1: 0, y1: 0},
+        position0: [0, 0],
+        position1: [0, 0],
         color: [35, 81, 128]
       };
     }
@@ -216,7 +217,8 @@ function pointsToLines(points) {
   return points.map((point, i) => {
     if (i === points.length - 1) {
       return {
-        position: {x0: 0, y0: 0, x1: 0, y1: 0},
+        position0: [0, 0],
+        position1: [0, 0],
         color: [35, 81, 128]
       };
     }
