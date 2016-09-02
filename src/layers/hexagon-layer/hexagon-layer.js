@@ -23,12 +23,6 @@ import BaseLayer from '../base-layer';
 import {Model, Program, CylinderGeometry} from 'luma.gl';
 const glslify = require('glslify');
 
-const ATTRIBUTES = {
-  instancePositions: {size: 2, '0': 'x', '1': 'y'},
-  instanceElevations: {size: 1, '0': 'z'},
-  instanceColors: {size: 3, '0': 'red', '1': 'green', '2': 'blue'}
-};
-
 const _getCentroid = x => x.centroid;
 const _getElevation = x => x.elevation || 0;
 const _getColor = x => x.color || [255, 0, 0];
@@ -79,10 +73,10 @@ export default class HexagonLayer extends BaseLayer {
       model: this.getModel(gl)
     });
 
-    attributeManager.addInstanced(ATTRIBUTES, {
-      instancePositions: {update: this.calculateInstancePositions},
-      instanceElevations: {update: this.calculateInstanceElevations},
-      instanceColors: {update: this.calculateInstanceColors}
+    attributeManager.addInstanced({
+      instancePositions: {size: 2, update: this.calculateInstancePositions},
+      instanceElevations: {size: 1, update: this.calculateInstanceElevations},
+      instanceColors: {size: 3, update: this.calculateInstanceColors}
     });
 
     this.calculateRadiusAndAngle();
@@ -120,25 +114,6 @@ export default class HexagonLayer extends BaseLayer {
       nradial: 6,
       nvertical: 1
     });
-
-    // const NUM_SEGMENTS = 6;
-    // const PI2 = Math.PI * 2;
-
-    // let vertices = [];
-    // for (let i = 0; i < NUM_SEGMENTS; i++) {
-    //   vertices = [
-    //     ...vertices,
-    //     Math.cos(PI2 * i / NUM_SEGMENTS),
-    //     Math.sin(PI2 * i / NUM_SEGMENTS),
-    //     0
-    //   ];
-    // }
-
-    // const geometry = new Geometry({
-    //   id: this.props.id,
-    //   drawMode: 'TRIANGLE_FAN',
-    //   vertices: new Float32Array(vertices)
-    // });
 
     return new Model({
       id: this.props.id,

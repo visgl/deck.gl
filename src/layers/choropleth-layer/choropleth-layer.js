@@ -25,14 +25,6 @@ import normalize from 'geojson-normalize';
 import {Model, Program, Geometry} from 'luma.gl';
 const glslify = require('glslify');
 
-const ATTRIBUTES = {
-  indices: {size: 1, 0: 'index', isIndexed: true},
-  positions: {size: 3, 0: 'x', 1: 'y', 2: 'unused'},
-  colors: {size: 3, 0: 'red', 1: 'green', 2: 'blue'},
-  // Override picking colors to prevent auto allocation
-  pickingColors: {size: 3, 0: 'pickRed', 1: 'pickGreen', 2: 'pickBlue'}
-};
-
 export default class ChoroplethLayer extends BaseLayer {
   /**
    * @classdesc
@@ -56,13 +48,14 @@ export default class ChoroplethLayer extends BaseLayer {
   initializeState() {
     const {gl, attributeManager} = this.state;
 
-    attributeManager.addDynamic(ATTRIBUTES, {
+    attributeManager.addDynamic({
       // Primtive attributes
-      indices: {update: this.calculateIndices},
-      positions: {update: this.calculatePositions},
-      colors: {update: this.calculateColors},
+      indices: {size: 1, update: this.calculateIndices, isIndexed: true},
+      positions: {size: 3, update: this.calculatePositions},
+      colors: {size: 3, update: this.calculateColors},
       // Instanced attributes
-      pickingColors: {update: this.calculatePickingColors, noAlloc: true}
+      pickingColors: {size: 3, update: this.calculatePickingColors,
+        noAlloc: true}
     });
 
     this.setUniforms({opacity: this.props.opacity});

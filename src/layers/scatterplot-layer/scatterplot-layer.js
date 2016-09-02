@@ -22,18 +22,7 @@ import BaseLayer from '../base-layer';
 import {Model, Program, Geometry} from 'luma.gl';
 const glslify = require('glslify');
 
-const ATTRIBUTES = {
-  // pack the radius of each instance into the instancePositions
-  instancePositions: {size: 4, 0: 'x', 1: 'y', 2: 'z', 3: 'radius'},
-  instanceColors: {size: 3, 0: 'red', 1: 'green', 2: 'blue'}
-};
-
 export default class ScatterplotLayer extends BaseLayer {
-
-  static get attributes() {
-    return ATTRIBUTES;
-  }
-
   /*
    * @classdesc
    * ScatterplotLayer
@@ -54,9 +43,9 @@ export default class ScatterplotLayer extends BaseLayer {
       model: this.getModel(gl)
     });
 
-    attributeManager.addInstanced(ATTRIBUTES, {
-      instancePositions: {update: this.calculateInstancePositions},
-      instanceColors: {update: this.calculateInstanceColors}
+    attributeManager.addInstanced({
+      instancePositions: {size: 4, update: this.calculateInstancePositions},
+      instanceColors: {size: 3, update: this.calculateInstanceColors}
     });
   }
 
