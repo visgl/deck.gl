@@ -66,8 +66,8 @@ const FIXTURE = {
 
   choropleths: [], // CHOROPLETHS,
   hexagons: [],
-  points: [{position: {x: 100, y: 100}, color:[255, 0, 0]}],
-  arcs: [{position: {x0: 0, y0: 0, x1: 1, y1: 3}, color:[255, 0, 0]}]
+  points: [{position: [100, 100], color:[255, 0, 0]}],
+  arcs: [{startPosition: [0, 0], targetPosition: [1, 3], color:[255, 0, 0]}]
 
 };
 
