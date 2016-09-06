@@ -25,6 +25,7 @@
 /* global console */
 import {log} from './utils';
 import assert from 'assert';
+import Layer from './layers/base-layer';
 
 export function updateLayers({oldLayers, newLayers, gl, scene}) {
   // Match all layers, checking for caught errors
@@ -49,9 +50,13 @@ export function layersNeedRedraw(layers, {clearRedrawFlags = false} = {}) {
 }
 
 function layerName(layer) {
-  return layer ?
-    `${layer.constructor.name}{id:'${layer.props.id}'}` :
-    'null layer';
+  if (layer instanceof Layer) {
+    return `${layer.constructor.name}{id:'${layer.props.id}'}`;
+  }
+  if (!layer) {
+    return 'null layer';
+  }
+  return `invalid layer`;
 }
 
 function matchLayers(oldLayers, newLayers) {
