@@ -61,14 +61,13 @@ const FIXTURE = {
   mapState: {
     latitude: 37.751537058389985,
     longitude: -122.42694203247012,
-    zoom: 11.5,
-    projectionMatrix: new Mat4()
+    zoom: 11.5
   },
 
   choropleths: [], // CHOROPLETHS,
   hexagons: [],
   points: [{position: {x: 100, y: 100}, color:[255, 0, 0]}],
-  arcs: []
+  arcs: [{position: {x0: 0, y0: 0, x1: 1, y1: 3}, color:[255, 0, 0]}]
 
 };
 
@@ -135,13 +134,13 @@ test('ScatterplotLayer#constructor', t => {
 });
 
 test('ArcLayer#constructor', t => {
-  const {mapSize, mapState, points} = FIXTURE;
+  const {mapSize, mapState, arcs} = FIXTURE;
 
   const layer = new ArcLayer({
     id: 'arcLayer',
     ...mapSize,
     ...mapState,
-    data: [[[0,0], [1,1]], [[2,2], [3,3]]],
+    data: arcs,
     isPickable: true
   });
   t.ok(layer instanceof ArcLayer, 'ArcLayer created');
@@ -155,20 +154,22 @@ test('ArcLayer#constructor', t => {
   });
   t.ok(emptyLayer instanceof ArcLayer, 'Empty ArcLayer created');
 
-  const nullLayer = new ArcLayer({
-    id: 'arcLayer',
-    ...mapSize,
-    ...mapState,
-    data: null,
-    isPickable: true
-  });
-  t.ok(nullLayer instanceof ArcLayer, 'Null ArcLayer created');
+  t.throws(
+    () => new ArcLayer({
+      id: 'arcLayer',
+      ...mapSize,
+      ...mapState,
+      data: null,
+      isPickable: true
+    }),
+    'Null ArcLayer threw exception'
+  );
 
   const {layerState} = FIXTURE;
   t.doesNotThrow(
     () => updateLayers({
       ...layerState,
-      newLayers: [layer, emptyLayer, nullLayer]
+      newLayers: [layer, emptyLayer]
     }),
     undefined,
     'ArcLayer update does not throw');
