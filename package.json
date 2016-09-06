@@ -66,7 +66,11 @@
     "gl": "^4.0.1",
     "immutable": "^3.7.5",
     "jsdom": "^9.2.1",
+<<<<<<< 346910c290fca933656dc170b8845da874e67a6b
     "luma.gl": "^2.5.0",
+=======
+    "luma.gl": "3.0.0-beta1",
+>>>>>>> wip
     "react": "^15.0.2",
     "react-addons-test-utils": "^15.0.2",
     "react-dom": "^15.0.2",
@@ -83,7 +87,11 @@
   "peerDependencies": {
     "react": "0.14.x - 15.x",
     "react-dom": "0.14.x - 15.x",
+<<<<<<< 346910c290fca933656dc170b8845da874e67a6b
     "luma.gl": "^2.5.0"
+=======
+    "luma.gl": "3.0.0-beta1"
+>>>>>>> wip
   },
   "scripts": {
     "build": "npm run build-clean && npm run build-compile && npm run build-script && npm run build-script-min",
