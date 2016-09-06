@@ -68,7 +68,6 @@ const FIXTURE = {
   hexagons: [],
   points: [{position: [100, 100]}],
   arcs: [{sourcePosition: [0, 0], targetPosition: [1, 3]}]
-
 };
 
 test('GridLayer#constructor', t => {
