@@ -20,3 +20,5 @@
 
 import './layer-spec';
 import './viewport-spec';
+
+import './layers-spec';
