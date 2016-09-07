@@ -19,6 +19,17 @@ All notable changes to deck.gl will be documented in this file.
 - An updated new documentation page(s) to replace the current readme.md
 - High-precision (64-bit) floating point calculation support
 
+### Beta Releases
+
+### [3.0.0-beta13] - 2016-09-06
+- Remove separate attribute definitions, simplifying layer subclass creation
+- Standar
+
+#### [2.4.6] - 2016-09-06
+- Fix issue where 0 opacity is interpreted as default opacity
+- Fix issue with printing of layerName in debug messages crashes
+
+
 #### [2.4.5] - 2016-08-31
 - Fixed picking for the choropleth layer
 
