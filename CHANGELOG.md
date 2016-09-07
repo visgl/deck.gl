@@ -25,6 +25,9 @@ All notable changes to deck.gl will be documented in this file.
 - Remove separate attribute definitions, simplifying layer subclass creation
 - Standar
 
+#### [2.4.8] - TBD
+- Move glslify to "core" dependencies in package.json
+
 #### [2.4.7] - 2016-09-06
 - Fix issue of disableMercatorProjector not working on Linux
 
