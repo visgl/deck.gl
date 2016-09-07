@@ -26,7 +26,7 @@ All notable changes to deck.gl will be documented in this file.
 - Standar
 
 #### [2.4.8] - TBD
-- Move glslify to "core" dependencies in package.json
+- Move glslify to "dependencies" in package.json
 
 #### [2.4.7] - 2016-09-06
 - Fix issue of disableMercatorProjector not working on Linux
