@@ -51,11 +51,11 @@ export default class ChoroplethLayer extends BaseLayer {
     attributeManager.addDynamic({
       // Primtive attributes
       indices: {size: 1, update: this.calculateIndices, isIndexed: true},
-      positions: {size: 3, update: this.calculateInstancePositions},
-      colors: {size: 3, update: this.calculateInstanceColors},
+      positions: {size: 3, update: this.calculatePositions},
+      colors: {size: 3, update: this.calculateColors},
       // Instanced attributes
       pickingColors:
-		{size: 3, update: this.calculateInstancePickingColors, noAlloc: true}
+        {size: 3, update: this.calculatePickingColors, noAlloc: true}
     });
 
     this.setUniforms({opacity: this.props.opacity});
@@ -162,12 +162,12 @@ export default class ChoroplethLayer extends BaseLayer {
     this.state.model.setVertexCount(attribute.value.length / attribute.size);
   }
 
-  calculateInstancePositions(attribute) {
+  calculatePositions(attribute) {
     const vertices = flattenDeep(this.state.groupedVertices);
     attribute.value = new Float32Array(vertices);
   }
 
-  calculateInstanceColors(attribute) {
+  calculateColors(attribute) {
     const colors = this.state.groupedVerticesColors.map(
       colors => colors.map(
         color => this.props.drawContour ?
@@ -180,7 +180,7 @@ export default class ChoroplethLayer extends BaseLayer {
   }
 
   // Override the default picking colors calculation
-  calculateInstancePickingColors(attribute) {
+  calculatePickingColors(attribute) {
     const colors = this.state.groupedVertices.map(
       (vertices, choroplethIndex) => vertices.map(
         vertex => this.props.drawContour ? [-1, -1, -1] : [

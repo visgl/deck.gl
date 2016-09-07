@@ -21,9 +21,11 @@ import BaseLayer from '../base-layer';
 import {Model, Program, Geometry} from 'luma.gl';
 const glslify = require('glslify');
 
+const DEFAULT_COLOR = [255, 0, 255];
+
 const defaultGetPosition = x => x.position;
 const defaultGetRadius = x => x.radius;
-const defaultGetColor = x => x.color;
+const defaultGetColor = x => x.color || DEFAULT_COLOR;
 
 export default class ScatterplotLayer extends BaseLayer {
   /*

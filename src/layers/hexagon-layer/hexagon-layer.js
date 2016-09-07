@@ -21,9 +21,11 @@ import BaseLayer from '../base-layer';
 import {Model, Program, CylinderGeometry} from 'luma.gl';
 const glslify = require('glslify');
 
+const DEFAULT_COLOR = [255, 0, 0];
+
 const _getCentroid = x => x.centroid;
 const _getElevation = x => x.elevation || 0;
-const _getColor = x => x.color || [255, 0, 0];
+const _getColor = x => x.color || DEFAULT_COLOR;
 const _getVertices = x => x.vertices;
 
 export default class HexagonLayer extends BaseLayer {

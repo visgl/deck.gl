@@ -114,13 +114,9 @@ function reducer(state = INITIAL_STATE, action) {
       const p1 = coordString.indexOf(')');
       const coords = coordString.slice(p0, p1).split(',');
       return {
-        position: {
-          x: Number(coords[1]),
-          y: Number(coords[0]),
-          z: 0
-        },
+        position: [Number(coords[1]), Number(coords[0]), 0],
         color: [88, 9, 124],
-        radius: (Math.random() * (15 - 5 + 1) + 5) / 10  // [0.5, 1.5]
+        radius: (Math.random() * (15 - 5 + 1) + 5) / 10
       };
     });
 
@@ -192,8 +188,8 @@ function pointsToArcs(points) {
   return points.map((point, i) => {
     if (i === points.length - 1) {
       return {
-        position0: [0, 0],
-        position1: [0, 0],
+        sourcePosition: [0, 0],
+        targetPosition: [0, 0],
         color: [35, 81, 128]
       };
     }
@@ -202,8 +198,8 @@ function pointsToArcs(points) {
     const target = points[i + 1];
 
     return {
-      position0: [source.position.x, source.position.y],
-      position1: [target.position.x, target.position.y],
+      sourcePosition: source.position,
+      targetPosition: target.position,
       color: [
         i % 255,
         255 - i % 255,
@@ -217,8 +213,8 @@ function pointsToLines(points) {
   return points.map((point, i) => {
     if (i === points.length - 1) {
       return {
-        position0: [0, 0],
-        position1: [0, 0],
+        sourcePosition: [0, 0],
+        targetPosition: [0, 0],
         color: [35, 81, 128]
       };
     }
@@ -227,8 +223,8 @@ function pointsToLines(points) {
     const target = points[i + 1];
 
     return {
-      position0: [source.position.x, source.position.y],
-      position1: [target.position.x, target.position.y],
+      sourcePosition: source.position,
+      targetPosition: target.position,
       color: [0, 0, 255]
     };
   });

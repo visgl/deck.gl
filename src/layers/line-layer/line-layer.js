@@ -22,12 +22,11 @@ import BaseLayer from '../base-layer';
 import {Model, Program, Geometry} from 'luma.gl';
 const glslify = require('glslify');
 
-const ATTRIBUTES = {
-};
+const DEFAULT_COLOR = [0, 255, 0];
 
-const defaultGetPosition0 = x => x.position0;
-const defaultGetPosition1 = x => x.position1;
-const defaultGetColor = x => x.color;
+const defaultGetSourcePosition = x => x.sourcePosition;
+const defaultGetTargetPosition = x => x.targetPosition;
+const defaultGetColor = x => x.color || DEFAULT_COLOR;
 
 export default class LineLayer extends BaseLayer {
   /**
@@ -39,15 +38,15 @@ export default class LineLayer extends BaseLayer {
    */
   constructor({
     strokeWidth = 9,
-    getPosition0 = defaultGetPosition0,
-    getPosition1 = defaultGetPosition1,
+    getSourcePosition = defaultGetSourcePosition,
+    getTargetPosition = defaultGetTargetPosition,
     getColor = defaultGetColor,
     ...opts
   } = {}) {
     super({
       strokeWidth,
-      getPosition0,
-      getPosition1,
+      getSourcePosition,
+      getTargetPosition,
       getColor,
       ...opts
     });
@@ -97,16 +96,16 @@ export default class LineLayer extends BaseLayer {
   }
 
   calculateInstancePositions(attribute) {
-    const {data, getPosition0, getPosition1} = this.props;
+    const {data, getSourcePosition, getTargetPosition} = this.props;
     const {value, size} = attribute;
     let i = 0;
     for (const object of data) {
-      const position0 = getPosition0(object);
-      const position1 = getPosition1(object);
-      value[i + 0] = position0[0];
-      value[i + 1] = position0[1];
-      value[i + 2] = position1[0];
-      value[i + 3] = position1[1];
+      const sourcePosition = getSourcePosition(object);
+      const targetPosition = getTargetPosition(object);
+      value[i + 0] = sourcePosition[0];
+      value[i + 1] = sourcePosition[1];
+      value[i + 2] = targetPosition[0];
+      value[i + 3] = targetPosition[1];
       i += size;
     }
   }

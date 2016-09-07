@@ -22,11 +22,10 @@ import BaseLayer from '../base-layer';
 import {Model, Program, Geometry} from 'luma.gl';
 const glslify = require('glslify');
 
-const RED = [255, 0, 0];
-const BLUE = [0, 0, 255];
+const DEFAULT_COLOR = [0, 0, 255];
 
-const defaultGetPosition0 = x => x.position0;
-const defaultGetPosition1 = x => x.position1;
+const defaultGetSourcePosition = x => x.sourcePosition;
+const defaultGetTargetPosition = x => x.targetPosition;
 const defaultGetColor = x => x.color;
 
 export default class ArcLayer extends BaseLayer {
@@ -39,19 +38,15 @@ export default class ArcLayer extends BaseLayer {
    */
   constructor({
     strokeWidth = 1,
-    color0 = RED,
-    color1 = BLUE,
-    getPosition0 = defaultGetPosition0,
-    getPosition1 = defaultGetPosition1,
+    getSourcePosition = defaultGetSourcePosition,
+    getTargetPosition = defaultGetTargetPosition,
     getColor = defaultGetColor,
     ...props
   } = {}) {
     super({
       strokeWidth,
-      color0,
-      color1,
-      getPosition0,
-      getPosition1,
+      getSourcePosition,
+      getTargetPosition,
       getColor,
       ...props
     });
@@ -68,14 +63,11 @@ export default class ArcLayer extends BaseLayer {
       instancePositions: {size: 4, update: this.calculateInstancePositions},
       instanceColors: {size: 3, update: this.calculateInstanceColors}
     });
-
-    this.updateColors();
   }
 
   willReceiveProps(oldProps, nextProps) {
     super.willReceiveProps(oldProps, nextProps);
     this.state.model.userData.strokeWidth = nextProps.strokeWidth;
-    this.updateColors();
   }
 
   createModel(gl) {
@@ -107,24 +99,17 @@ export default class ArcLayer extends BaseLayer {
     });
   }
 
-  updateColors() {
-    this.setUniforms({
-      color0: this.props.color0,
-      color1: this.props.color1
-    });
-  }
-
   calculateInstancePositions(attribute) {
-    const {data, getPosition0, getPosition1} = this.props;
+    const {data, getSourcePosition, getTargetPosition} = this.props;
     const {value, size} = attribute;
     let i = 0;
     for (const object of data) {
-      const position0 = getPosition0(object);
-      const position1 = getPosition1(object);
-      value[i + 0] = position0[0];
-      value[i + 1] = position0[1];
-      value[i + 2] = position1[0];
-      value[i + 3] = position1[1];
+      const sourcePosition = getSourcePosition(object);
+      const targetPosition = getTargetPosition(object);
+      value[i + 0] = sourcePosition[0];
+      value[i + 1] = sourcePosition[1];
+      value[i + 2] = targetPosition[0];
+      value[i + 3] = targetPosition[1];
       i += size;
     }
   }
@@ -134,7 +119,7 @@ export default class ArcLayer extends BaseLayer {
     const {value, size} = attribute;
     let i = 0;
     for (const object of data) {
-      const color = getColor(object);
+      const color = getColor(object) || DEFAULT_COLOR;
       value[i + 0] = color[0];
       value[i + 1] = color[1];
       value[i + 2] = color[2];
