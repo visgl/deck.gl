@@ -22,8 +22,11 @@ import BaseLayer from '../base-layer';
 import {Model, Program, Geometry} from 'luma.gl';
 const glslify = require('glslify');
 
-const ATTRIBUTES = {
-};
+const DEFAULT_COLOR = [0, 255, 0];
+
+const defaultGetSourcePosition = x => x.sourcePosition;
+const defaultGetTargetPosition = x => x.targetPosition;
+const defaultGetColor = x => x.color || DEFAULT_COLOR;
 
 export default class LineLayer extends BaseLayer {
   /**
@@ -35,10 +38,16 @@ export default class LineLayer extends BaseLayer {
    */
   constructor({
     strokeWidth = 9,
+    getSourcePosition = defaultGetSourcePosition,
+    getTargetPosition = defaultGetTargetPosition,
+    getColor = defaultGetColor,
     ...opts
   } = {}) {
     super({
       strokeWidth,
+      getSourcePosition,
+      getTargetPosition,
+      getColor,
       ...opts
     });
   }
@@ -87,26 +96,29 @@ export default class LineLayer extends BaseLayer {
   }
 
   calculateInstancePositions(attribute) {
-    const {data} = this.props;
+    const {data, getSourcePosition, getTargetPosition} = this.props;
     const {value, size} = attribute;
     let i = 0;
-    for (const line of data) {
-      value[i + 0] = line.position.x0;
-      value[i + 1] = line.position.y0;
-      value[i + 2] = line.position.x1;
-      value[i + 3] = line.position.y1;
+    for (const object of data) {
+      const sourcePosition = getSourcePosition(object);
+      const targetPosition = getTargetPosition(object);
+      value[i + 0] = sourcePosition[0];
+      value[i + 1] = sourcePosition[1];
+      value[i + 2] = targetPosition[0];
+      value[i + 3] = targetPosition[1];
       i += size;
     }
   }
 
   calculateInstanceColors(attribute) {
-    const {data} = this.props;
+    const {data, getColor} = this.props;
     const {value, size} = attribute;
     let i = 0;
-    for (const point of data) {
-      value[i + 0] = point.color[0];
-      value[i + 1] = point.color[1];
-      value[i + 2] = point.color[2];
+    for (const object of data) {
+      const color = getColor(object);
+      value[i + 0] = color[0];
+      value[i + 1] = color[1];
+      value[i + 2] = color[2];
       i += size;
     }
   }

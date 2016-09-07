@@ -17,10 +17,15 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-
 import BaseLayer from '../base-layer';
 import {Model, Program, Geometry} from 'luma.gl';
 const glslify = require('glslify');
+
+const DEFAULT_COLOR = [255, 0, 255];
+
+const defaultGetPosition = x => x.position;
+const defaultGetRadius = x => x.radius;
+const defaultGetColor = x => x.color || DEFAULT_COLOR;
 
 export default class ScatterplotLayer extends BaseLayer {
   /*
@@ -31,8 +36,18 @@ export default class ScatterplotLayer extends BaseLayer {
    * @param {object} props
    * @param {number} props.radius - point radius
    */
-  constructor(props) {
-    super(props);
+  constructor({
+    getPosition = defaultGetPosition,
+    getRadius = defaultGetRadius,
+    getColor = defaultGetColor,
+    ...props
+  }) {
+    super({
+      getPosition,
+      getRadius,
+      getColor,
+      ...props
+    });
   }
 
   initializeState() {
@@ -94,31 +109,6 @@ export default class ScatterplotLayer extends BaseLayer {
     });
   }
 
-  calculateInstancePositions(attribute) {
-    const {data} = this.props;
-    const {value, size} = attribute;
-    let i = 0;
-    for (const point of data) {
-      value[i + 0] = point.position.x;
-      value[i + 1] = point.position.y;
-      value[i + 2] = point.position.z;
-      value[i + 3] = point.radius || 1;
-      i += size;
-    }
-  }
-
-  calculateInstanceColors(attribute) {
-    const {data} = this.props;
-    const {value, size} = attribute;
-    let i = 0;
-    for (const point of data) {
-      value[i + 0] = point.color[0];
-      value[i + 1] = point.color[1];
-      value[i + 2] = point.color[2];
-      i += size;
-    }
-  }
-
   calculateRadius() {
     // use radius if specified
     if (this.props.radius) {
@@ -135,4 +125,31 @@ export default class ScatterplotLayer extends BaseLayer {
     this.state.radius = Math.max(Math.sqrt(dx * dx + dy * dy), 2.0);
   }
 
+  calculateInstancePositions(attribute) {
+    const {data, getPosition, getRadius} = this.props;
+    const {value, size} = attribute;
+    let i = 0;
+    for (const point of data) {
+      const position = getPosition(point);
+      const radius = getRadius(point) || 1;
+      value[i + 0] = position[0];
+      value[i + 1] = position[1];
+      value[i + 2] = position[2];
+      value[i + 3] = radius;
+      i += size;
+    }
+  }
+
+  calculateInstanceColors(attribute) {
+    const {data, getColor} = this.props;
+    const {value, size} = attribute;
+    let i = 0;
+    for (const point of data) {
+      const color = getColor(point);
+      value[i + 0] = color[0];
+      value[i + 1] = color[1];
+      value[i + 2] = color[2];
+      i += size;
+    }
+  }
 }

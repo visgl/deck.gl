@@ -54,8 +54,8 @@ export default class ChoroplethLayer extends BaseLayer {
       positions: {size: 3, update: this.calculatePositions},
       colors: {size: 3, update: this.calculateColors},
       // Instanced attributes
-      pickingColors: {size: 3, update: this.calculatePickingColors,
-        noAlloc: true}
+      pickingColors:
+        {size: 3, update: this.calculatePickingColors, noAlloc: true}
     });
 
     this.setUniforms({opacity: this.props.opacity});
@@ -98,61 +98,6 @@ export default class ChoroplethLayer extends BaseLayer {
     });
   }
 
-  calculatePositions(attribute) {
-    const vertices = flattenDeep(this.state.groupedVertices);
-    attribute.value = new Float32Array(vertices);
-  }
-
-  calculateIndices(attribute) {
-    // adjust index offset for multiple choropleths
-    const offsets = this.state.groupedVertices.reduce(
-      (acc, vertices) => [...acc, acc[acc.length - 1] + vertices.length],
-      [0]
-    );
-
-    const indices = this.state.groupedVertices.map(
-      (vertices, choroplethIndex) => this.props.drawContour ?
-        // 1. get sequentially ordered indices of each choropleth contour
-        // 2. offset them by the number of indices in previous choropleths
-        this.calculateContourIndices(vertices.length).map(
-          index => index + offsets[choroplethIndex]
-        ) :
-        // 1. get triangulated indices for the internal areas
-        // 2. offset them by the number of indices in previous choropleths
-        earcut(flattenDeep(vertices), null, 3).map(
-          index => index + offsets[choroplethIndex]
-        )
-    );
-
-    attribute.value = new Uint16Array(flattenDeep(indices));
-    attribute.target = this.state.gl.ELEMENT_ARRAY_BUFFER;
-    this.state.model.setVertexCount(attribute.value.length / attribute.size);
-  }
-
-  calculateColors(attribute) {
-    const colors = this.state.groupedVerticesColors.map(
-      colors => colors.map(
-        color => this.props.drawContour ? [0, 0, 0] : [color[0], color[1], color[2]]
-      )
-    );
-
-    attribute.value = new Float32Array(flattenDeep(colors));
-  }
-
-  // Override the default picking colors calculation
-  calculatePickingColors(attribute) {
-    const colors = this.state.groupedVertices.map(
-      (vertices, choroplethIndex) => vertices.map(
-        vertex => this.props.drawContour ? [-1, -1, -1] : [
-          (choroplethIndex + 1) % 256,
-          Math.floor((choroplethIndex + 1) / 256) % 256,
-          Math.floor((choroplethIndex + 1) / 256 / 256) % 256]
-      )
-    );
-
-    attribute.value = new Float32Array(flattenDeep(colors));
-  }
-
   extractChoropleths() {
     const {data} = this.props;
     const normalizedGeojson = normalize(data);
@@ -189,6 +134,63 @@ export default class ChoroplethLayer extends BaseLayer {
     }
     return [0, ...indices, 0];
 
+  }
+
+  calculateIndices(attribute) {
+    // adjust index offset for multiple choropleths
+    const offsets = this.state.groupedVertices.reduce(
+      (acc, vertices) => [...acc, acc[acc.length - 1] + vertices.length],
+      [0]
+    );
+
+    const indices = this.state.groupedVertices.map(
+      (vertices, choroplethIndex) => this.props.drawContour ?
+        // 1. get sequentially ordered indices of each choropleth contour
+        // 2. offset them by the number of indices in previous choropleths
+        this.calculateContourIndices(vertices.length).map(
+          index => index + offsets[choroplethIndex]
+        ) :
+        // 1. get triangulated indices for the internal areas
+        // 2. offset them by the number of indices in previous choropleths
+        earcut(flattenDeep(vertices), null, 3).map(
+          index => index + offsets[choroplethIndex]
+        )
+    );
+
+    attribute.value = new Uint16Array(flattenDeep(indices));
+    attribute.target = this.state.gl.ELEMENT_ARRAY_BUFFER;
+    this.state.model.setVertexCount(attribute.value.length / attribute.size);
+  }
+
+  calculatePositions(attribute) {
+    const vertices = flattenDeep(this.state.groupedVertices);
+    attribute.value = new Float32Array(vertices);
+  }
+
+  calculateColors(attribute) {
+    const colors = this.state.groupedVerticesColors.map(
+      colors => colors.map(
+        color => this.props.drawContour ?
+          // TODO - why destructure and rebuild array?
+          [0, 0, 0] : [color[0], color[1], color[2]]
+      )
+    );
+
+    attribute.value = new Float32Array(flattenDeep(colors));
+  }
+
+  // Override the default picking colors calculation
+  calculatePickingColors(attribute) {
+    const colors = this.state.groupedVertices.map(
+      (vertices, choroplethIndex) => vertices.map(
+        vertex => this.props.drawContour ? [-1, -1, -1] : [
+          (choroplethIndex + 1) % 256,
+          Math.floor((choroplethIndex + 1) / 256) % 256,
+          Math.floor((choroplethIndex + 1) / 256 / 256) % 256]
+      )
+    );
+
+    attribute.value = new Float32Array(flattenDeep(colors));
   }
 
   onHover(info) {

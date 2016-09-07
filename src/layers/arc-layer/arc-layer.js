@@ -22,8 +22,11 @@ import BaseLayer from '../base-layer';
 import {Model, Program, Geometry} from 'luma.gl';
 const glslify = require('glslify');
 
-const RED = [255, 0, 0];
-const BLUE = [0, 0, 255];
+const DEFAULT_COLOR = [0, 0, 255];
+
+const defaultGetSourcePosition = x => x.sourcePosition;
+const defaultGetTargetPosition = x => x.targetPosition;
+const defaultGetColor = x => x.color;
 
 export default class ArcLayer extends BaseLayer {
   /**
@@ -31,19 +34,21 @@ export default class ArcLayer extends BaseLayer {
    * ArcLayer
    *
    * @class
-   * @param {object} opts
+   * @param {object} props
    */
   constructor({
     strokeWidth = 1,
-    color0 = RED,
-    color1 = BLUE,
-    ...opts
+    getSourcePosition = defaultGetSourcePosition,
+    getTargetPosition = defaultGetTargetPosition,
+    getColor = defaultGetColor,
+    ...props
   } = {}) {
     super({
       strokeWidth,
-      color0,
-      color1,
-      ...opts
+      getSourcePosition,
+      getTargetPosition,
+      getColor,
+      ...props
     });
   }
 
@@ -58,14 +63,11 @@ export default class ArcLayer extends BaseLayer {
       instancePositions: {size: 4, update: this.calculateInstancePositions},
       instanceColors: {size: 3, update: this.calculateInstanceColors}
     });
-
-    this.updateColors();
   }
 
   willReceiveProps(oldProps, nextProps) {
     super.willReceiveProps(oldProps, nextProps);
     this.state.model.userData.strokeWidth = nextProps.strokeWidth;
-    this.updateColors();
   }
 
   createModel(gl) {
@@ -97,34 +99,30 @@ export default class ArcLayer extends BaseLayer {
     });
   }
 
-  updateColors() {
-    this.setUniforms({
-      color0: this.props.color0,
-      color1: this.props.color1
-    });
-  }
-
   calculateInstancePositions(attribute) {
-    const {data} = this.props;
+    const {data, getSourcePosition, getTargetPosition} = this.props;
     const {value, size} = attribute;
     let i = 0;
-    for (const arc of data) {
-      value[i + 0] = arc.position.x0;
-      value[i + 1] = arc.position.y0;
-      value[i + 2] = arc.position.x1;
-      value[i + 3] = arc.position.y1;
+    for (const object of data) {
+      const sourcePosition = getSourcePosition(object);
+      const targetPosition = getTargetPosition(object);
+      value[i + 0] = sourcePosition[0];
+      value[i + 1] = sourcePosition[1];
+      value[i + 2] = targetPosition[0];
+      value[i + 3] = targetPosition[1];
       i += size;
     }
   }
 
   calculateInstanceColors(attribute) {
-    const {data} = this.props;
+    const {data, getColor} = this.props;
     const {value, size} = attribute;
     let i = 0;
-    for (const point of data) {
-      value[i + 0] = point.color[0];
-      value[i + 1] = point.color[1];
-      value[i + 2] = point.color[2];
+    for (const object of data) {
+      const color = getColor(object) || DEFAULT_COLOR;
+      value[i + 0] = color[0];
+      value[i + 1] = color[1];
+      value[i + 2] = color[2];
       i += size;
     }
   }

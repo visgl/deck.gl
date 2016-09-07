@@ -17,15 +17,15 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-/* eslint-disable func-style */
-
 import BaseLayer from '../base-layer';
 import {Model, Program, CylinderGeometry} from 'luma.gl';
 const glslify = require('glslify');
 
+const DEFAULT_COLOR = [255, 0, 0];
+
 const _getCentroid = x => x.centroid;
 const _getElevation = x => x.elevation || 0;
-const _getColor = x => x.color || [255, 0, 0];
+const _getColor = x => x.color || DEFAULT_COLOR;
 const _getVertices = x => x.vertices;
 
 export default class HexagonLayer extends BaseLayer {
