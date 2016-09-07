@@ -487,7 +487,7 @@ export default class BaseLayer {
       viewport: [0, 0, width, height],
       mercatorScale: Math.pow(2, zoom),
       mercatorCenter: [longitude, latitude],
-      disableMercatorProjector
+      disableMercatorProjector: disableMercatorProjector ? 1 : 0
     });
 
     log(3, this.state.viewport, latitude, longitude, zoom);
