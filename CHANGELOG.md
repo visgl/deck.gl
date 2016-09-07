@@ -25,10 +25,12 @@ All notable changes to deck.gl will be documented in this file.
 - Remove separate attribute definitions, simplifying layer subclass creation
 - Standar
 
+#### [2.4.7] - 2016-09-06
+- Fix issue of disableMercatorProjector not working on Linux
+
 #### [2.4.6] - 2016-09-06
 - Fix issue where 0 opacity is interpreted as default opacity
 - Fix issue with printing of layerName in debug messages crashes
-
 
 #### [2.4.5] - 2016-08-31
 - Fixed picking for the choropleth layer
