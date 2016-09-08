@@ -32,6 +32,10 @@ Features:
 ```
 npm install --save deck.gl
 ```
+Note: deck.gl has a dependency on node version 0.12 or higher. If you use an older version, use a separate shell to install and build deck.gl
+```
+nvm install 0.12 && nvm use 0.12
+```
 
 ## Usage
 
