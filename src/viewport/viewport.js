@@ -18,6 +18,7 @@
 // ------
 
 import {mat2, mat4, vec4} from 'gl-matrix';
+import assert from 'assert';
 
 const PI = Math.PI;
 const PI_2 = PI / 2;
@@ -61,6 +62,10 @@ export default class Viewport {
     altitude = altitude !== undefined ? altitude : DEFAULT_MAP_STATE.altitude;
     /* eslint-enable max-len */
 
+    // Silently allow apps to send in 0,0
+    this.width = this.width || 1;
+    this.height = this.height || 1;
+
     // Scale
     this.scale = Math.pow(2, zoom);
     this.worldSize = TILE_SIZE * this.scale;
@@ -101,6 +106,9 @@ export default class Viewport {
     // Calculate z value of the farthest fragment that should be rendered.
     this.farZ = Math.cos(Math.PI / 2 - this.pitchRadians) *
       this.topHalfSurfaceDistance + this.altitude;
+
+    // TODO - this could be postponed until needed
+    this._calculateDistanceScales();
 
     this._glProjectionMatrix = this._calculateGLProjectionMatrix();
     this._pixelProjectionMatrix = null;
@@ -201,6 +209,55 @@ export default class Viewport {
   //   };
   // }
 
+  // Calculate distance scales in meters around current lat/lon, both for
+  // degrees and pixels
+  // The distance scales vary wildly with latitude
+  _calculateDistanceScales() {
+    // Approximately 111km per degree at equator
+    const METERS_PER_DEGREE = 111000;
+    const {latitude: lat, longitude: lon} = this;
+
+    const metersPerDegreeLat = Math.cos(lat / 180 * Math.PI);
+    const metersPerDegreeLon = METERS_PER_DEGREE;
+    const metersPerDegreeAvg = (metersPerDegreeLat + metersPerDegreeLon) / 2;
+
+    // Calculate number of pixels occupied by one degree longitude
+    // around current lat/lon, divide by number of meters per degree.
+    // compensate for spherical shortening
+    const pixelsPerMeterX =
+      (this.project([lon + 0.5, lat]) - this.project([lon - 0.5, lat])) /
+      (METERS_PER_DEGREE * Math.cos(lat / 180 * Math.PI));
+
+    // Calculate number of pixels occupied by one degree latitude
+    // around current lat/lon, divide by number of meters per degree.
+    const pixelsPerMeterY =
+      (this.project([lon, lat + 0.5]) - this.project([lon, lat - 0.5])) /
+       METERS_PER_DEGREE;
+
+    const pixelsPerMeterAvg = (pixelsPerMeterX + pixelsPerMeterY) / 2;
+
+    this.metersPerLatLon = [
+      metersPerDegreeLat,
+      metersPerDegreeLon,
+      metersPerDegreeAvg
+    ];
+    this.latLonPerMeter = [
+      1 / metersPerDegreeLat,
+      1 / metersPerDegreeLon,
+      1 / metersPerDegreeAvg
+    ];
+    this.pixelsPerMeterX = [
+      pixelsPerMeterX,
+      pixelsPerMeterY,
+      pixelsPerMeterAvg
+    ];
+    this.metersPerPixel = [
+      1 / pixelsPerMeterX,
+      1 / pixelsPerMeterY,
+      1 / pixelsPerMeterAvg
+    ];
+  }
+
   _precomputePixelProjectionMatrices() {
     if (this._pixelProjectionMatrix && this._pixelUnprojectionMatrix) {
       return;
@@ -248,6 +305,8 @@ export default class Viewport {
     mat4.translate(m, m, [-this.centerX, -this.centerY, 0]);
     // mat4.scale(m, m, [this.scale, this.scale, this.scale]);
 
+    validateMatrix(m);
+
     return m;
   }
 
@@ -256,4 +315,18 @@ export default class Viewport {
     return [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
   }
 
+}
+
+// TODO - move to luma math library
+function validateMatrix(m) {
+  const validMatrix =
+    Number.isFinite(m[0]) && Number.isFinite(m[1]) &&
+    Number.isFinite(m[2]) && Number.isFinite(m[3]) &&
+    Number.isFinite(m[4]) && Number.isFinite(m[5]) &&
+    Number.isFinite(m[6]) && Number.isFinite(m[7]) &&
+    Number.isFinite(m[8]) && Number.isFinite(m[9]) &&
+    Number.isFinite(m[10]) && Number.isFinite(m[11]) &&
+    Number.isFinite(m[12]) && Number.isFinite(m[13]) &&
+    Number.isFinite(m[14]) && Number.isFinite(m[15]);
+  assert(validMatrix, `Bad gl projection matrix ${mat4.str(m)}`);
 }

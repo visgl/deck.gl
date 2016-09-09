@@ -182,7 +182,9 @@ export default class WebGLRenderer extends React.Component {
     } = this.props;
 
     const {gl} = this.state;
-    if (!gl || !scene) {
+
+    // Check for reasons not to draw
+    if (!gl || !scene || !(width > 0) || !(height > 0)) {
       return;
     }
 
@@ -232,6 +234,7 @@ export default class WebGLRenderer extends React.Component {
     return (
       <canvas
         ref={ 'overlay' }
+        key={ 'overlay' }
         id={ id }
         width={ width * pixelRatio || 1 }
         height={ height * pixelRatio || 1 }
