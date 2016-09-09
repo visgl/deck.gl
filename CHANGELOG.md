@@ -21,12 +21,16 @@ All notable changes to deck.gl will be documented in this file.
 
 ### Beta Releases
 
+### [3.0.0-beta14] - 2016-09-09
+- Revert to 2-series luma.gl (no longer need beta release)
+- Viewport fixes
+
 ### [3.0.0-beta13] - 2016-09-06
 - Remove separate attribute definitions, simplifying layer subclass creation
-- Standar
 
 #### [2.4.8] - TBD
 - Move glslify to "dependencies" in package.json
+- Fix bool uniform that webgl in certain environment handles it differently
 
 #### [2.4.7] - 2016-09-06
 - Fix issue of disableMercatorProjector not working on Linux
