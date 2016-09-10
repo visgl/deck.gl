@@ -96,7 +96,7 @@
     "prepublish": "npm run build",
     "test": "npm run lint && npm run test-headless",
     "test-headless": "babel-node --only=deck.gl/test,deck.gl/src test/headless.js",
-    "test-browser": "budo test/browser.js:build/test-bundle.js --dir test --live --open --port 3001 --watch-glob '**/*.{html,css,scss,js,glsl}' -- -t babelify",
+    "test-browser": "budo test/browser.js:build/test-bundle.js --dir test --live --open --port 3001 --watch-glob '**/*.{html,css,scss,js,glsl}' -- -t babelify -t glslify",
     "test-electron": "browserify test/electron.js | testron | faucet",
     "start": "budo example/main.js:example/bundle.js --live --open --port 3000 --css example/main.css --title 'deck.gl' --watch-glob '**/*.{html,css,js,glsl}' -- -t babelify -t envify"
   }

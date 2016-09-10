@@ -51,7 +51,7 @@ export function layersNeedRedraw(layers, {clearRedrawFlags = false} = {}) {
 
 function layerName(layer) {
   if (layer instanceof Layer) {
-    return `${layer.constructor.name}{id:'${layer.props.id}'}`;
+    return `<${layer.constructor.name}:'${layer.props.id}'>`;
   }
   if (!layer) {
     return 'null layer';

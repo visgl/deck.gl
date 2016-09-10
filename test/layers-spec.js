@@ -17,11 +17,8 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
+/* eslint-disable func-style, no-console, max-len */
 import test from 'tape-catch';
-
-/* eslint-disable func-style */
-/* eslint-disable no-console */
-
 import 'luma.gl/headless';
 import {Mat4, Scene, createGLContext} from 'luma.gl';
 
@@ -67,7 +64,7 @@ const FIXTURE = {
   choropleths: [], // CHOROPLETHS,
   hexagons: [],
   points: [{position: [100, 100], color:[255, 0, 0]}],
-  arcs: [{startPosition: [0, 0], targetPosition: [1, 3], color:[255, 0, 0]}]
+  arcs: [{sourcePosition: [0, 0], targetPosition: [1, 3], color:[255, 0, 0]}]
 };
 
 test('GridLayer#constructor', t => {
@@ -115,7 +112,7 @@ test('ScatterplotLayer#constructor', t => {
   t.ok(layer instanceof ScatterplotLayer, 'ScatterplotLayer created');
 
   const emptyLayer = new ScatterplotLayer({
-    id: 'scatterplotLayer',
+    id: 'emptyScatterplotLayer',
     ...mapSize,
     ...mapState,
     data: [],
@@ -123,10 +120,20 @@ test('ScatterplotLayer#constructor', t => {
   });
   t.ok(emptyLayer instanceof ScatterplotLayer, 'Empty ScatterplotLayer created');
 
+  t.throws(
+    () => new ScatterplotLayer({
+      id: 'nullScatterplotLayer',
+      ...mapSize,
+      ...mapState,
+      data: null,
+      isPickable: true
+    }),
+    'Null ScatterplotLayer threw exception'
+  );
+
   const {layerState} = FIXTURE;
   t.doesNotThrow(
     () => updateLayers({...layerState, newLayers: [layer, emptyLayer]}),
-    undefined,
     'ScatterplotLayer update does not throw');
 
   t.end();
@@ -145,7 +152,7 @@ test('ArcLayer#constructor', t => {
   t.ok(layer instanceof ArcLayer, 'ArcLayer created');
 
   const emptyLayer = new ArcLayer({
-    id: 'arcLayer',
+    id: 'emptyArcLayer',
     ...mapSize,
     ...mapState,
     data: [],
@@ -155,7 +162,7 @@ test('ArcLayer#constructor', t => {
 
   t.throws(
     () => new ArcLayer({
-      id: 'arcLayer',
+      id: 'nullArcLayer',
       ...mapSize,
       ...mapState,
       data: null,
@@ -166,11 +173,7 @@ test('ArcLayer#constructor', t => {
 
   const {layerState} = FIXTURE;
   t.doesNotThrow(
-    () => updateLayers({
-      ...layerState,
-      newLayers: [layer, emptyLayer]
-    }),
-    undefined,
+    () => updateLayers({...layerState, newLayers: [layer, emptyLayer]}),
     'ArcLayer update does not throw');
 
   t.end();
