@@ -97,9 +97,6 @@ export default class BaseLayer {
     this.checkProp(props.id, 'id');
     this.checkProp(props.width, 'width');
     this.checkProp(props.height, 'height');
-
-    this.checkProp(props.width, 'width');
-    this.checkProp(props.height, 'height');
     this.checkProp(props.latitude, 'latitude');
     this.checkProp(props.longitude, 'longitude');
     this.checkProp(props.zoom, 'zoom');
