@@ -45,9 +45,6 @@ import {
   GridLayer
 } from '../src';
 
-const BLUE = [0, 0, 255];
-const GREEN = [0, 255, 0];
-
 // ---- Default Settings ---- //
 /* eslint-disable no-process-env */
 const MAPBOX_ACCESS_TOKEN = process.env.MAPBOX_ACCESS_TOKEN ||
@@ -486,8 +483,6 @@ class ExampleApp extends React.Component {
       zoom: mapViewState.zoom,
       data: arcs,
       strokeWidth: this.state.arcStrokeWidth || 1,
-      color0: BLUE,
-      color1: BLUE,
       isPickable: true,
       onHover: this._handleArcHovered,
       onClick: this._handleArcClicked
@@ -506,8 +501,6 @@ class ExampleApp extends React.Component {
       zoom: mapViewState.zoom,
       data: arcs2,
       strokeWidth: this.state.arcStrokeWidth || 1,
-      color0: GREEN,
-      color1: GREEN,
       isPickable: true,
       onHover: this._handleArcHovered,
       onClick: this._handleArcClicked
