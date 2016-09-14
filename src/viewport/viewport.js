@@ -1,23 +1,26 @@
 // View and Projection Matrix calculations for mapbox-js style
 // map view properties
-
+//
+// ATTRIBUTION:
+// The projection matrix creation algorithms are intentionally
+// based on and kept compatible with the mapbox-gl-js implementation to
+// ensure that seamless interoperation with mapbox and react-map-gl.
+//
 /* eslint-disable max-len */
-// ATTRIBUTION: Matrix creation algos are based on mapbox-gl-js source code
-// This is intentionally closely mapped to mapbox-gl-js implementation to
-// ensure seamless interoperation with react-map-gl
-// https://github.com/mapbox/mapbox-gl-js/blob/033043254d30a99a00b95660e296445a1ade2d01/js/geo/transform.js
-/* elsint-enable */
+// See: https://github.com/mapbox/mapbox-gl-js/blob/033043254d30a99a00b95660e296445a1ade2d01/js/geo/transform.js
+/* elsint-enable max-len */
 
 // We define a couple of coordinate systems:
 // ------
-// LatLon             [lng, lat] = [-180 - 180, -81 - 81]
-// World (zoom 0)     [x, y] = [0-512, y: 0-512]
-// Zoomed (zoom N)    [x, y] = [0 - 512*2**N, 0 - 512*2**N]
-// Translated         [x, y] = zero centered
-// View (Camera)      unit cube around view
+// LatLon                      [lng, lat] = [-180 - 180, -81 - 81]
+// Mercator World (zoom 0)     [x, y] = [0-512, y: 0-512]
+// Mercator Zoomed (zoom N)    [x, y] = [0 - 512*2**N, 0 - 512*2**N]
+// Translated                  [x, y] = zero centered
+// Clip Space                  unit cube around view
 // ------
 
 import {mat2, mat4, vec4} from 'gl-matrix';
+import autobind from 'autobind-decorator';
 import assert from 'assert';
 
 const PI = Math.PI;
@@ -38,6 +41,35 @@ export const DEFAULT_MAP_STATE = {
 };
 
 export default class Viewport {
+  /**
+   * @classdesc
+   * Manages coordinate system transformations for deck.gl
+   *
+   * @param {Object} opt - options
+   * @param {Boolean} mercator=true - Whether to use mercator projection
+   *
+   * @param {Number} opt.width=1 - Width of "viewport" or window
+   * @param {Number} opt.height=1 - Height of "viewport" or window
+   * @param {Array} opt.center=[0, 0] - Center of viewport
+   *   [longitude, latitude] or [x, y]
+   * @param {Number} opt.scale=1 - Either use scale or zoom
+   * @param {Number} opt.pitch=0 - Camera angle in degrees (0 is straight down)
+   * @param {Number} opt.bearing=0 - Map rotation in degrees (0 means north is up)
+   * @param {Number} opt.altitude= - Altitude of camera in screen units
+   *
+   * Web mercator projection short-hand parameters
+   * @param {Number} opt.latitude - Center of viewport on map (alternative to opt.center)
+   * @param {Number} opt.longitude - Center of viewport on map (alternative to opt.center)
+   * @param {Number} opt.zoom - Scale = Math.pow(2,zoom) on map (alternative to opt.scale)
+
+   * Notes:
+   *  - Only one of center or [latitude, longitude] can be specified
+   *  - [latitude, longitude] can only be specified when "mercator" is true
+   *  - Altitude has a default value that matches assumptions in mapbox-gl
+   *  - width and height are forced to 1 if supplied as 0, to avoid
+   *    division by zero. This is intended to reduce the burden of apps to
+   *    to check values before instantiating a Viewport.
+   */
   /* eslint-disable max-statements */
   constructor({
     // Map state
@@ -92,7 +124,7 @@ export default class Viewport {
     const y = 180 / Math.PI *
       Math.log(Math.tan(Math.PI / 4 + latitude * Math.PI / 360));
 
-    this.center = this.projectToWorld([longitude, latitude]);
+    this.center = this.projectToMercatorFlat([longitude, latitude]);
     this.centerX = this.center[0];
     this.centerY = this.center[1];
 
@@ -118,16 +150,51 @@ export default class Viewport {
   }
   /* eslint-enable max-statements */
 
-  project(lngLatZ) {
+  /**
+   * Projects latitude and longitude to pixel coordinates in window
+   * using viewport projection parameters
+   * - [longitude, latitude] to [x, y]
+   * - [longitude, latitude, Z] => [x, y, z]
+   * Note: By default, returns top-left coordinates for canvas/SVG type render
+   *
+   * @param {Array} lngLatZ - [lng, lat] or [lng, lat, Z]
+   * @param {Object} opts - options
+   * @param {Object} opts.topLeft=true - Whether projected coords are top left
+   * @return {Array} - [x, y] or [x, y, z] in top left coords
+   */
+  @autobind
+  project(lngLatZ, {topLeft = true}) {
     this._precomputePixelProjectionMatrices();
-    const [x, y] = this.projectToWorld(lngLatZ);
+    const [x, y] = this.mercator ?
+      this.projectToMercatorFlat(lngLatZ) : lngLatZ;
     const v = [x, y, lngLatZ[2] || 0, 1];
     // vec4.sub(v, v, [this.centerX, this.centerY, 0, 0]);
     vec4.transformMat4(v, v, this._pixelProjectionMatrix);
     // Divide by w
     const scale = 1 / v[3];
     vec4.multiply(v, v, [scale, scale, scale, scale]);
-    return v;
+    const [x, y, z] = v;
+    const y2 = topLeft ? this.height - 1 - y : y;
+    return lngLatZ.length === 2 ? [x, y2] : [x, y2, z];
+  }
+
+  /**
+   * Unproject pixel coordinates on screen onto [lon, lat] on map.
+   * - [x, y] => [lng, lat]
+   * - [x, y, z] => [lng, lat, Z]
+   * @param {Array} xyz -
+   * @return {Array} - [lng, lat, Z] or [X, Y, Z]
+   */
+  @autobind
+  unproject(xyz, {topLeft = true}) {
+    this._precomputePixelProjectionMatrices();
+    const [x = 0, y = 0, z = 0] = xyz;
+    const y2 = topLeft ? this.height - 1 - y : y;
+    const v = [x, y2, z, 1];
+    vec4.transformMat4(v, v, this._pixelUnprojectionMatrix);
+    const [x0, y0] = this.unprojectFromMercatorFlat(v);
+    const [, , z0] = v;
+    return xyz.length === 2 ? [x0, y0] : [x0, y0, z0];
   }
 
   /**
@@ -140,7 +207,8 @@ export default class Viewport {
    *   Specifies a point on the sphere to project onto the map.
    * @return {Array} [x,y] coordinates.
    */
-  projectToWorld([lng, lat], scale = this.scale) {
+  @autobind
+  projectToMercatorFlat([lng, lat], scale = this.scale) {
     scale = scale * WORLD_SCALE;
     const lambda2 = lng * DEGREES_TO_RADIANS;
     const phi2 = lat * DEGREES_TO_RADIANS;
@@ -148,23 +216,6 @@ export default class Viewport {
     const y = scale * (PI - Math.log(Math.tan(PI_4 + phi2 * 0.5)));
     return [x, y];
   }
-
-  /**
-   * Unproject pixel point [x,y] on map onto {lat, lon} on sphere
-   *
-   * @param {object|Vector} xy - object with {x,y} members
-   *  representing point on projected map plane
-   * @return {GeoCoordinates} - object with {lat,lon} of point on sphere.
-   *   Has toArray method if you need a GeoJSON Array.
-   *   Per cartographic tradition, lat and lon are specified as degrees.
-   */
-  unproject([x, y]) {
-    this._precomputePixelProjectionMatrices();
-    const v = [x, y, 0, 1];
-    vec4.transformMat4(v, v, this._pixelUnprojectionMatrix);
-    return v;
-  }
-
 
   /**
    * Unproject world point [x,y] on map onto {lat, lon} on sphere
@@ -175,13 +226,19 @@ export default class Viewport {
    *   Has toArray method if you need a GeoJSON Array.
    *   Per cartographic tradition, lat and lon are specified as degrees.
    */
-  unprojectToWorld([x, y], scale = this.scale) {
+  @autobind
+  unprojectFromMercatorFlat([x, y], scale = this.scale) {
     scale = scale * WORLD_SCALE;
     const lambda2 = x / scale - PI;
     const phi2 = 2 * (Math.atan(Math.exp(PI - y / scale)) - PI_4);
     return [lambda2 * RADIANS_TO_DEGREES, phi2 * RADIANS_TO_DEGREES];
   }
 
+  /**
+   * Returns a projection matrix suitable for shaders
+   * @return {Float32Array} - 4x4 projection matrix that can be used in shaders
+   */
+  @autobind
   getProjectionMatrix() {
     return this._glProjectionMatrix;
   }

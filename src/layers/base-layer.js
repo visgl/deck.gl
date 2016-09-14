@@ -81,8 +81,6 @@ export default class BaseLayer {
       assert(props.data[Symbol.iterator], 'data prop must have an iterator');
     }
 
-    this.props = props;
-
     this.checkProp(props.data, 'data');
     this.checkProp(props.id, 'id');
     this.checkProp(props.width, 'width');
@@ -91,6 +89,16 @@ export default class BaseLayer {
     this.checkProp(props.longitude, 'longitude');
     this.checkProp(props.zoom, 'zoom');
 
+    // TODO - improve props checking
+    // this.checkProp(typeof props.id === 'string' && props.id, 'id');
+    // this.checkProp(Number.isFinite(props.width), 'width');
+    // this.checkProp(Number.isFinite(props.height), 'height');
+
+    // this.checkProp(Number.isFinite(props.latitude), 'latitude');
+    // this.checkProp(Number.isFinite(props.longitude), 'longitude');
+    // this.checkProp(Number.isFinite(props.zoom), 'zoom');
+
+    this.props = props;
     this.count = counter++;
   }
   /* eslint-enable max-statements */

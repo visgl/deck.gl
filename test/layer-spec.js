@@ -47,12 +47,43 @@ test('Layer#constructor with zeroes', t => {
   t.end();
 });
 
-test('Layer#constructor with missing props', t => {
+test('Layer#constructor with bad or missing props', t => {
   t.throws(
     () => new Layer(LAYER_PROPS_MISSING),
     /Property height undefined in layer testLayer/,
     'Expected missing props to throw an error'
   );
+
+  t.throws(
+    () => new Layer({...LAYER_PROPS, width: undefined}),
+    /Property height undefined in layer testLayer/,
+    'Expected invalid prop to throw an error'
+  );
+
+  t.throws(
+    () => new Layer({...LAYER_PROPS, width: undefined}),
+    /Property height undefined in layer testLayer/,
+    'Expected invalid prop to throw an error'
+  );
+
+  t.throws(
+    () => new Layer({...LAYER_PROPS, width: undefined}),
+    /Property height undefined in layer testLayer/,
+    'Expected invalid prop to throw an error'
+  );
+
+  t.throws(
+    () => new Layer({...LAYER_PROPS, width: undefined}),
+    /Property height undefined in layer testLayer/,
+    'Expected invalid prop to throw an error'
+  );
+
+  t.throws(
+    () => new Layer({...LAYER_PROPS, width: undefined}),
+    /Property height undefined in layer testLayer/,
+    'Expected invalid prop to throw an error'
+  );
+
   t.end();
 });
 
