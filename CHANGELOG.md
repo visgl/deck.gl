@@ -19,14 +19,24 @@ All notable changes to deck.gl will be documented in this file.
 - An updated new documentation page(s) to replace the current readme.md
 - High-precision (64-bit) floating point calculation support
 
-### Beta Releases
+### Beta-3.0.0 Releases
 
-### [3.0.0-beta14] - 2016-09-09
+#### [3.0.0-beta15] - Merge 2.4.9 fixes
+
+#### [3.0.0-beta14] - Viewport improvements
 - Revert to 2-series luma.gl (no longer need beta release)
-- Viewport fixes
+- Viewport improvements
 
-### [3.0.0-beta13] - 2016-09-06
-- Remove separate attribute definitions, simplifying layer subclass creation
+#### [3.0.0-beta13] -
+- Breaking Change: Standardize parameters in layers to always expect arrays.
+- Remove separate attribute updater definitions to simplify layer subclass
+  creation
+
+### Official Releases
+
+#### [2.4.9] - FIX: Picking of instanced layers restored
+- Layer.calculateInstancePickingColors now gets correct numInstances argument.
+- Bumps luma.gl to include Linux fix.
 
 #### [2.4.8] - TBD
 - Move glslify to "dependencies" in package.json
@@ -87,7 +97,8 @@ All notable changes to deck.gl will be documented in this file.
 #### [2.0.0] - 2016-02-29
 - Retina display support
 - Performance refactoring
-- Switched the underlying rendering framework to [luma.gl](https://github.com/uber/luma.gl)
+- Switched the underlying rendering framework to
+  [luma.gl](https://github.com/uber/luma.gl)
 - Fixed picking on retina/regular display
 
 #### [1.0.0] - 2016-01-06

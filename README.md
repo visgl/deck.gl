@@ -32,6 +32,10 @@ Features:
 ```
 npm install --save deck.gl
 ```
+Note: deck.gl has a dependency on node version 0.12 or higher. If you use an older version, you can install a node version manager like nvm and use a separate shell to install and build deck.gl
+```
+npm install -g nvm && nvm install 0.12 && nvm use 0.12
+```
 
 ## Usage
 
@@ -123,6 +127,9 @@ renders it as interactive choropleths.
     * `id` (string, required): layer ID
     * `width` (number, required) width of the layer
     * `height` (number, required) height of the layer
+    * `longitude` (number, required) longitude of the map center
+    * `latitude` (number, required) latitude of the map center
+    * `zoom` (number, required) zoom level of the map
     * `opacity` (number, required) opacity of the layer
     * `isPickable` [bool, optional, default=false] whether layer responses to
     mouse events
@@ -152,6 +159,9 @@ renders it as interactive choropleths.
     * `id` (string, required): layer ID
     * `width` (number, required) width of the layer
     * `height` (number, required) height of the layer
+    * `longitude` (number, required) longitude of the map center
+    * `latitude` (number, required) latitude of the map center
+    * `zoom` (number, required) zoom level of the map
     * `opacity` (number, required) opacity of the layer
     * `isPickable` [bool, optional, default=false] whether layer responses to
     mouse events
@@ -170,6 +180,9 @@ renders it as interactive choropleths.
     * `id` (string, required): layer ID
     * `width` (number, required) width of the layer
     * `height` (number, required) height of the layer
+    * `longitude` (number, required) longitude of the map center
+    * `latitude` (number, required) latitude of the map center
+    * `zoom` (number, required) zoom level of the map
     * `opacity` (number, required) opacity of the layer
     * `isPickable` [bool, optional, default=false] whether layer responses to
     mouse events
@@ -188,6 +201,9 @@ renders it as interactive choropleths.
     * `id` (string, required): layer ID
     * `width` (number, required) width of the layer
     * `height` (number, required) height of the layer
+    * `longitude` (number, required) longitude of the map center
+    * `latitude` (number, required) latitude of the map center
+    * `zoom` (number, required) zoom level of the map
     * `opacity` (number, required) opacity of the layer
     * `isPickable` [bool, optional, default=false] whether layer responses to
     mouse events

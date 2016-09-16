@@ -87,9 +87,6 @@ export default class BaseLayer {
     this.checkProp(props.id, 'id');
     this.checkProp(props.width, 'width');
     this.checkProp(props.height, 'height');
-
-    this.checkProp(props.width, 'width');
-    this.checkProp(props.height, 'height');
     this.checkProp(props.latitude, 'latitude');
     this.checkProp(props.longitude, 'longitude');
     this.checkProp(props.zoom, 'zoom');
@@ -393,7 +390,7 @@ export default class BaseLayer {
     this.willUnmount();
   }
 
-  calculateInstancePickingColors(attribute, numInstances) {
+  calculateInstancePickingColors(attribute, {numInstances}) {
     const {value, size} = attribute;
     // add 1 to index to seperate from no selection
     for (let i = 0; i < numInstances; i++) {
