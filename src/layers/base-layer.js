@@ -396,7 +396,7 @@ export default class BaseLayer {
     this.willUnmount();
   }
 
-  calculateInstancePickingColors(attribute, numInstances) {
+  calculateInstancePickingColors(attribute, {numInstances}) {
     const {value, size} = attribute;
     // add 1 to index to seperate from no selection
     for (let i = 0; i < numInstances; i++) {
