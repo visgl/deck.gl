@@ -1,1 +1,2 @@
-module.exports = require('./dist/index.js');
+import * as deckgl from './dist/index';
+module.exports = deckgl;

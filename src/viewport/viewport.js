@@ -165,9 +165,9 @@ export default class Viewport {
   @autobind
   project(lngLatZ, {topLeft = true}) {
     this._precomputePixelProjectionMatrices();
-    const [x, y] = this.mercator ?
+    const [X, Y] = this.mercator ?
       this.projectToMercatorFlat(lngLatZ) : lngLatZ;
-    const v = [x, y, lngLatZ[2] || 0, 1];
+    const v = [X, Y, lngLatZ[2] || 0, 1];
     // vec4.sub(v, v, [this.centerX, this.centerY, 0, 0]);
     vec4.transformMat4(v, v, this._pixelProjectionMatrix);
     // Divide by w
