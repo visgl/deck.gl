@@ -17,47 +17,49 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-
 import {BaseLayer} from '../../../lib';
 import {Model, Program, Geometry} from 'luma.gl';
-const glslify = require('glslify');
 
-const DEFAULT_COLOR = [0, 0, 255];
+import VERTEX_SHADER from './scatterplot-layer-vertex';
+import FRAGMENT_SHADER from './scatterplot-layer-fragment';
 
-const defaultGetSourcePosition = x => x.sourcePosition;
-const defaultGetTargetPosition = x => x.targetPosition;
-const defaultGetColor = x => x.color;
 
-export default class ArcLayer extends BaseLayer {
-  /**
+const DEFAULT_COLOR = [255, 0, 255];
+
+const defaultGetPosition = x => x.position;
+const defaultGetRadius = x => x.radius;
+const defaultGetColor = x => x.color || DEFAULT_COLOR;
+
+export default class ScatterplotLayer extends BaseLayer {
+  /*
    * @classdesc
-   * ArcLayer
+   * ScatterplotLayer
    *
    * @class
    * @param {object} props
+   * @param {number} props.radius - point radius
    */
   constructor({
-    strokeWidth = 1,
-    getSourcePosition = defaultGetSourcePosition,
-    getTargetPosition = defaultGetTargetPosition,
+    getPosition = defaultGetPosition,
+    getRadius = defaultGetRadius,
     getColor = defaultGetColor,
     ...props
-  } = {}) {
+  }) {
     super({
-      strokeWidth,
-      getSourcePosition,
-      getTargetPosition,
+      getPosition,
+      getRadius,
       getColor,
       ...props
     });
   }
 
   initializeState() {
-    const {gl, attributeManager} = this.state;
+    const {gl} = this.state;
+    const {attributeManager} = this.state;
 
-    const model = this.createModel(gl);
-    model.userData.strokeWidth = this.props.strokeWidth;
-    this.setState({model});
+    this.setState({
+      model: this.getModel(gl)
+    });
 
     attributeManager.addInstanced({
       instancePositions: {size: 4, update: this.calculateInstancePositions},
@@ -65,51 +67,78 @@ export default class ArcLayer extends BaseLayer {
     });
   }
 
-  willReceiveProps(oldProps, nextProps) {
-    super.willReceiveProps(oldProps, nextProps);
-    this.state.model.userData.strokeWidth = nextProps.strokeWidth;
+  didMount() {
+    this.updateUniforms();
   }
 
-  createModel(gl) {
+  willReceiveProps(oldProps, newProps) {
+    super.willReceiveProps(oldProps, newProps);
+    this.updateUniforms();
+  }
+
+  getModel(gl) {
+    const NUM_SEGMENTS = 16;
+    const PI2 = Math.PI * 2;
+
     let positions = [];
-    const NUM_SEGMENTS = 50;
     for (let i = 0; i < NUM_SEGMENTS; i++) {
-      positions = [...positions, i, i, i];
+      positions = [
+        ...positions,
+        Math.cos(PI2 * i / NUM_SEGMENTS),
+        Math.sin(PI2 * i / NUM_SEGMENTS),
+        0
+      ];
     }
 
     return new Model({
       program: new Program(gl, {
-        vs: glslify('./arc-layer-vertex.glsl'),
-        fs: glslify('./arc-layer-fragment.glsl'),
-        id: 'arc'
+        vs: VERTEX_SHADER,
+        fs: FRAGMENT_SHADER,
+        id: 'scatterplot'
       }),
       geometry: new Geometry({
-        id: 'arc',
-        drawMode: 'LINE_STRIP',
+        drawMode: 'TRIANGLE_FAN',
         positions: new Float32Array(positions)
       }),
-      isInstanced: true,
-      onBeforeRender() {
-        this.userData.oldStrokeWidth = gl.getParameter(gl.LINE_WIDTH);
-        this.program.gl.lineWidth(this.userData.strokeWidth || 1);
-      },
-      onAfterRender() {
-        this.program.gl.lineWidth(this.userData.oldStrokeWidth || 1);
-      }
+      isInstanced: true
     });
   }
 
+  updateUniforms() {
+    this.calculateRadius();
+    const {radius} = this.state;
+    this.setUniforms({
+      radius
+    });
+  }
+
+  calculateRadius() {
+    // use radius if specified
+    if (this.props.radius) {
+      this.state.radius = this.props.radius;
+      return;
+    }
+
+    const pixel0 = this.project([-122, 37.5]);
+    const pixel1 = this.project([-122, 37.5002]);
+
+    const dx = pixel0[0] - pixel1[0];
+    const dy = pixel0[1] - pixel1[1];
+
+    this.state.radius = Math.max(Math.sqrt(dx * dx + dy * dy), 2.0);
+  }
+
   calculateInstancePositions(attribute) {
-    const {data, getSourcePosition, getTargetPosition} = this.props;
+    const {data, getPosition, getRadius} = this.props;
     const {value, size} = attribute;
     let i = 0;
-    for (const object of data) {
-      const sourcePosition = getSourcePosition(object);
-      const targetPosition = getTargetPosition(object);
-      value[i + 0] = sourcePosition[0];
-      value[i + 1] = sourcePosition[1];
-      value[i + 2] = targetPosition[0];
-      value[i + 3] = targetPosition[1];
+    for (const point of data) {
+      const position = getPosition(point);
+      const radius = getRadius(point) || 1;
+      value[i + 0] = position[0];
+      value[i + 1] = position[1];
+      value[i + 2] = position[2];
+      value[i + 3] = radius;
       i += size;
     }
   }
@@ -118,13 +147,12 @@ export default class ArcLayer extends BaseLayer {
     const {data, getColor} = this.props;
     const {value, size} = attribute;
     let i = 0;
-    for (const object of data) {
-      const color = getColor(object) || DEFAULT_COLOR;
+    for (const point of data) {
+      const color = getColor(point);
       value[i + 0] = color[0];
       value[i + 1] = color[1];
       value[i + 2] = color[2];
       i += size;
     }
   }
-
 }

@@ -1,4 +1,4 @@
-import {Layer} from 'deck.gl';
+import {Layer} from '../../../lib';
 import {GL, Model, Program, Geometry} from 'luma.gl';
 
 import VERTEX_SHADER from './point-cloud-layer-vertex';

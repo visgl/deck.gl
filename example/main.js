@@ -35,15 +35,8 @@ import MapboxGLMap from 'react-map-gl';
 import OverlayControl from './overlay-control';
 
 import request from 'd3-request';
-import {
-  DeckGLOverlay,
-  HexagonLayer,
-  ChoroplethLayer,
-  ScatterplotLayer,
-  ArcLayer,
-  LineLayer,
-  GridLayer
-} from '../src';
+import SAMPLE_LAYERS from './sample-layers';
+import {DeckGLOverlay} from '../src';
 
 // ---- Default Settings ---- //
 /* eslint-disable no-process-env */
@@ -363,160 +356,27 @@ class ExampleApp extends React.Component {
     this.setState({clickItem: info});
   }
 
-  _renderGridLayer() {
-    const {mapViewState, points} = this.props;
-
-    return new GridLayer({
-      id: 'gridLayer',
-      width: window.innerWidth,
-      height: window.innerHeight,
-      latitude: mapViewState.latitude,
-      longitude: mapViewState.longitude,
-      zoom: mapViewState.zoom,
-      isPickable: false,
-      opacity: 0.06,
-      data: points
-    });
-  }
-
-  _renderChoroplethContourLayer() {
-    const {mapViewState, choropleths} = this.props;
-    return new ChoroplethLayer({
-      id: 'choroplethContourLayer',
-      width: window.innerWidth,
-      height: window.innerHeight,
-      latitude: mapViewState.latitude,
-      longitude: mapViewState.longitude,
-      zoom: mapViewState.zoom,
-      data: choropleths,
-      opacity: 0.8,
-      drawContour: true
-    });
-  }
-
-  _renderChoroplethLayer() {
-    const {mapViewState, choropleths} = this.props;
-    return new ChoroplethLayer({
-      id: 'choroplethLayer',
-      width: window.innerWidth,
-      height: window.innerHeight,
-      latitude: mapViewState.latitude,
-      longitude: mapViewState.longitude,
-      zoom: mapViewState.zoom,
-      data: choropleths,
-      opacity: 0.01,
-      isPickable: true,
-      onHover: this._handleChoroplethHovered,
-      onClick: this._handleChoroplethClicked
-    });
-  }
-
-  _renderHexagonLayer() {
-    const {mapViewState, hexData} = this.props;
-
-    return new HexagonLayer({
-      id: 'hexagonLayer',
-      width: window.innerWidth,
-      height: window.innerHeight,
-      latitude: mapViewState.latitude,
-      longitude: mapViewState.longitude,
-      zoom: mapViewState.zoom,
-      data: hexData,
-      opacity: 0.5,
-      elevation: 200,
-      isPickable: true,
-      onHover: this._handleHexagonHovered,
-      onClick: this._handleHexagonClicked
-    });
-  }
-
-  _renderHexagonSelectionLayer() {
-    const {mapViewState} = this.props;
-    const {selectedHexagons} = this.state;
-
-    return new HexagonLayer({
-      id: 'hexagonSelectionLayer',
-      width: window.innerWidth,
-      height: window.innerHeight,
-      latitude: mapViewState.latitude,
-      longitude: mapViewState.longitude,
-      zoom: mapViewState.zoom,
-      data: selectedHexagons,
-      opacity: 0.1,
-      elevation: 200,
-      isPickable: false
-    });
-  }
-
-  _renderScatterplotLayer() {
-    const {mapViewState, points} = this.props;
-
-    return new ScatterplotLayer({
-      id: 'scatterplotLayer',
-      width: window.innerWidth,
-      height: window.innerHeight,
-      latitude: mapViewState.latitude,
-      longitude: mapViewState.longitude,
-      zoom: mapViewState.zoom,
-      data: points,
-      isPickable: true,
-      onHover: this._handleScatterplotHovered,
-      onClick: this._handleScatterplotClicked
-    });
-  }
-
-  _renderArcLayer() {
-    const {mapViewState, arcs} = this.props;
-
-    return new ArcLayer({
-      id: 'arcLayer',
-      width: window.innerWidth,
-      height: window.innerHeight,
-      latitude: mapViewState.latitude,
-      longitude: mapViewState.longitude,
-      zoom: mapViewState.zoom,
-      data: arcs,
-      strokeWidth: this.state.arcStrokeWidth || 1,
-      isPickable: true,
-      onHover: this._handleArcHovered,
-      onClick: this._handleArcClicked
-    });
-  }
-
-  _renderArcLayer2() {
-    const {mapViewState, arcs2} = this.props;
-
-    return new ArcLayer({
-      id: 'arcLayer2',
-      width: window.innerWidth,
-      height: window.innerHeight,
-      latitude: mapViewState.latitude,
-      longitude: mapViewState.longitude,
-      zoom: mapViewState.zoom,
-      data: arcs2,
-      strokeWidth: this.state.arcStrokeWidth || 1,
-      isPickable: true,
-      onHover: this._handleArcHovered,
-      onClick: this._handleArcClicked
-    });
-  }
-
-  _renderLineLayer() {
-    const {mapViewState, lines} = this.props;
-
-    return new LineLayer({
-      id: 'lineLayer',
-      width: window.innerWidth,
-      height: window.innerHeight,
-      latitude: mapViewState.latitude,
-      longitude: mapViewState.longitude,
-      zoom: mapViewState.zoom,
-      data: lines,
-      strokeWidth: this.state.lineStrokeWidth || 1,
-      isPickable: true,
-      onHover: this._handleLineHovered,
-      onClick: this._handleLineClicked
-    });
+  _renderExamples() {
+    const props = {
+      ...this.props,
+      ...this.state,
+      onChoroplethHovered: this._handleChoroplethHovered,
+      onChoroplethClicked: this._handleChoroplethClicked,
+      onHexagonHovered: this._handleHexagonHovered,
+      onHexagonClicked: this._handleHexagonClicked,
+      onScatterplotHovered: this._handleScatterplotHovered,
+      onScatterplotClicked: this._handleScatterplotClicked,
+      onArcHovered: this._handleArcHovered,
+      onArcClicked: this._handleArcClicked,
+      onLineHovered: this._handleLineHovered,
+      onLineClicked: this._handleLineClicked
+    };
+    const layers = [];
+    for (const exampleName of Object.keys(SAMPLE_LAYERS)) {
+      const example = SAMPLE_LAYERS[exampleName];
+      layers.push(example(props));
+    }
+    return layers;
   }
 
   _renderOverlay() {
@@ -534,17 +394,7 @@ class ExampleApp extends React.Component {
         width={width}
         height={height}
         {...mapViewState}
-        layers={[
-          // this._renderGridLayer(),
-          this._renderHexagonLayer(),
-          this._renderHexagonSelectionLayer(),
-          this._renderArcLayer(),
-          this._renderArcLayer2(),
-          this._renderLineLayer(),
-          this._renderScatterplotLayer(),
-          this._renderChoroplethLayer(),
-          this._renderChoroplethContourLayer()
-        ]}
+        layers={this._renderExamples()}
         onWebGLInitialized={ this._onWebGLInitialized }
       />
     );

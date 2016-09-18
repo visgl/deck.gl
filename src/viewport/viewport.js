@@ -70,7 +70,6 @@ export default class Viewport {
    *    division by zero. This is intended to reduce the burden of apps to
    *    to check values before instantiating a Viewport.
    */
-  /* eslint-disable max-statements */
   constructor({
     // Map state
     width,
@@ -80,8 +79,9 @@ export default class Viewport {
     zoom,
     pitch,
     bearing,
-    altitude
-  }) {
+    altitude,
+    mercatorEnabled
+  } = {}) {
     // Viewport - support undefined arguments
     /* eslint-disable max-len */
     this.width = width !== undefined ? width : DEFAULT_MAP_STATE.width;
@@ -89,66 +89,19 @@ export default class Viewport {
     this.zoom = zoom !== undefined ? zoom : DEFAULT_MAP_STATE.zoom;
     this.latitude = latitude !== undefined ? latitude : DEFAULT_MAP_STATE.latitude;
     this.longitude = longitude !== undefined ? longitude : DEFAULT_MAP_STATE.longitude;
-    bearing = bearing !== undefined ? bearing : DEFAULT_MAP_STATE.bearing;
-    pitch = pitch !== undefined ? pitch : DEFAULT_MAP_STATE.pitch;
-    altitude = altitude !== undefined ? altitude : DEFAULT_MAP_STATE.altitude;
+    this.bearing = bearing !== undefined ? bearing : DEFAULT_MAP_STATE.bearing;
+    this.pitch = pitch !== undefined ? pitch : DEFAULT_MAP_STATE.pitch;
+    this.altitude = altitude !== undefined ? altitude : DEFAULT_MAP_STATE.altitude;
+    this.mercatorEnabled = mercatorEnabled !== undefined ? mercatorEnabled : true;
     /* eslint-enable max-len */
 
     // Silently allow apps to send in 0,0
     this.width = this.width || 1;
     this.height = this.height || 1;
 
-    // Scale
-    this.scale = Math.pow(2, zoom);
-    this.worldSize = TILE_SIZE * this.scale;
-    this.tileZoom = Math.floor(zoom);
-    this.zoomFraction = zoom - Math.floor(zoom);
-
-    // Bearing
-    this.bearingRadians = bearing / 180 * Math.PI;
-    this.bearingRotationMatrix = mat2.create();
-    mat2.rotate(
-      this.bearingRotationMatrix, this.bearingRotationMatrix, this.bearing
-    );
-
-    // Pitch
-    this.originalPitch = pitch;
-    this.pitch = Math.min(60, pitch);
-    this.pitchRadians = Math.min(60, pitch) / 180 * Math.PI;
-
-    // Altitude
-    this.originalAltitude = altitude;
-    this.altitude = Math.max(0.75, altitude);
-
-    // Center x, y
-    const y = 180 / Math.PI *
-      Math.log(Math.tan(Math.PI / 4 + latitude * Math.PI / 360));
-
-    this.center = this.projectToMercatorFlat([longitude, latitude]);
-    this.centerX = this.center[0];
-    this.centerY = this.center[1];
-
-    // Find the distance from the center point to the center top
-    // in altitude units using law of sines.
-    this.halfFov = Math.atan(0.5 / this.altitude);
-    this.topHalfSurfaceDistance =
-      Math.sin(this.halfFov) * this.altitude /
-      Math.sin(Math.PI / 2 - this.pitchRadians - this.halfFov);
-
-    // Calculate z value of the farthest fragment that should be rendered.
-    this.farZ = Math.cos(Math.PI / 2 - this.pitchRadians) *
-      this.topHalfSurfaceDistance + this.altitude;
-
-    // TODO - this could be postponed until needed
-    this._calculateDistanceScales();
-
-    this._glProjectionMatrix = this._calculateGLProjectionMatrix();
-    this._pixelProjectionMatrix = null;
-    this._pixelUnprojectionMatrix = null;
-
-    Object.seal(this);
+    this._initialize();
   }
-  /* eslint-enable max-statements */
+
 
   /**
    * Projects latitude and longitude to pixel coordinates in window
@@ -163,9 +116,9 @@ export default class Viewport {
    * @return {Array} - [x, y] or [x, y, z] in top left coords
    */
   @autobind
-  project(lngLatZ, {topLeft = true}) {
+  project(lngLatZ, {topLeft = true} = {}) {
     this._precomputePixelProjectionMatrices();
-    const [X, Y] = this.mercator ?
+    const [X, Y] = this.mercatorEnabled ?
       this.projectToMercatorFlat(lngLatZ) : lngLatZ;
     const v = [X, Y, lngLatZ[2] || 0, 1];
     // vec4.sub(v, v, [this.centerX, this.centerY, 0, 0]);
@@ -174,7 +127,8 @@ export default class Viewport {
     const scale = 1 / v[3];
     vec4.multiply(v, v, [scale, scale, scale, scale]);
     const [x, y, z] = v;
-    const y2 = topLeft ? this.height - 1 - y : y;
+    // const y2 = topLeft ? this.height - 1 - y : y;
+    const y2 = topLeft ? this.height - y : y;
     return lngLatZ.length === 2 ? [x, y2] : [x, y2, z];
   }
 
@@ -186,10 +140,11 @@ export default class Viewport {
    * @return {Array} - [lng, lat, Z] or [X, Y, Z]
    */
   @autobind
-  unproject(xyz, {topLeft = true}) {
+  unproject(xyz, {topLeft = true} = {}) {
     this._precomputePixelProjectionMatrices();
     const [x = 0, y = 0, z = 0] = xyz;
-    const y2 = topLeft ? this.height - 1 - y : y;
+    // const y2 = topLeft ? this.height - 1 - y : y;
+    const y2 = topLeft ? this.height - y : y;
     const v = [x, y2, z, 1];
     vec4.transformMat4(v, v, this._pixelUnprojectionMatrix);
     const [x0, y0] = this.unprojectFromMercatorFlat(v);
@@ -243,6 +198,11 @@ export default class Viewport {
     return this._glProjectionMatrix;
   }
 
+  @autobind
+  getProjectionMatrixUncentered() {
+    return this._glProjectionMatrixUncentered;
+  }
+
   // fitBounds(lnglatSE, lnglatNW, {padding = 0} = {}) {
   //   const bounds = new LngLatBounds(
   //     [_bounds[0].reverse(),
@@ -265,6 +225,62 @@ export default class Viewport {
   //     zoom
   //   };
   // }
+
+  // INTERNAL METHODS
+
+  /* eslint-disable max-statements */
+  _initialize() {
+    // Scale
+    this.scale = Math.pow(2, this.zoom);
+    this.worldSize = TILE_SIZE * this.scale;
+    this.tileZoom = Math.floor(this.zoom);
+    this.zoomFraction = this.zoom - Math.floor(this.zoom);
+
+    // Bearing
+    this.bearingRadians = this.bearing / 180 * Math.PI;
+    this.bearingRotationMatrix = mat2.create();
+    mat2.rotate(
+      this.bearingRotationMatrix, this.bearingRotationMatrix, this.bearing
+    );
+
+    // Pitch
+    this.originalPitch = this.pitch;
+    this.pitch = Math.min(60, this.pitch);
+    this.pitchRadians = this.pitch / 180 * Math.PI;
+
+    // Altitude
+    this.originalAltitude = this.altitude;
+    this.altitude = Math.max(0.75, this.altitude);
+
+    // Center x, y
+    const y = 180 / Math.PI *
+      Math.log(Math.tan(Math.PI / 4 + this.latitude * Math.PI / 360));
+
+    this.center = this.projectToMercatorFlat([this.longitude, this.latitude]);
+    this.centerX = this.center[0];
+    this.centerY = this.center[1];
+
+    // Find the distance from the center point to the center top
+    // in altitude units using law of sines.
+    this.halfFov = Math.atan(0.5 / this.altitude);
+    this.topHalfSurfaceDistance =
+      Math.sin(this.halfFov) * this.altitude /
+      Math.sin(Math.PI / 2 - this.pitchRadians - this.halfFov);
+
+    // Calculate z value of the farthest fragment that should be rendered.
+    this.farZ = Math.cos(Math.PI / 2 - this.pitchRadians) *
+      this.topHalfSurfaceDistance + this.altitude;
+
+    // TODO - this could be postponed until needed
+    this._calculateDistanceScales();
+
+    this._calculateGLProjectionMatrix();
+    this._pixelProjectionMatrix = null;
+    this._pixelUnprojectionMatrix = null;
+
+    // bject.seal(this);
+  }
+  /* eslint-enable max-statements */
 
   // Calculate distance scales in meters around current lat/lon, both for
   // degrees and pixels
@@ -320,9 +336,7 @@ export default class Viewport {
       return;
     }
 
-    // const glProjectionMatrix = this._glProjectionMatrix;
-    const glProjectionMatrix =
-      this._calculateGLProjectionMatrix(this._createMat4())
+    this._calculateGLProjectionMatrix()
 
     const m = this._createMat4();
     // Scale with pixel width and height
@@ -331,7 +345,7 @@ export default class Viewport {
     mat4.translate(m, m, [0.5, 0.5, 0]);
     mat4.scale(m, m, [0.5, 0.5, 0])
     // Project to clip space (-1, 1)
-    mat4.multiply(m, m, glProjectionMatrix);
+    mat4.multiply(m, m, this._glProjectionMatrix);
     this._pixelProjectionMatrix = m;
 
     const mInverse = mat4.clone(m);
@@ -341,7 +355,10 @@ export default class Viewport {
 
   // Transforms from Web Mercator Tile 0 [0-512,0-512] to "clip space"
   _calculateGLProjectionMatrix(m) {
-    m = m || mat4.create();
+    if (this._glProjectionMatrix) {
+      return;
+    }
+    m = m || this._createMat4();
 
     mat4.perspective(m,
       2 * Math.atan((this.height / 2) / this.altitude),
@@ -359,17 +376,27 @@ export default class Viewport {
 
     mat4.rotateX(m, m, this.pitchRadians);
     mat4.rotateZ(m, m, -this.bearingRadians);
-    mat4.translate(m, m, [-this.centerX, -this.centerY, 0]);
+    // Including translation kills in a 32 bit
+    // matrix kills the dynamic range, do it separately in the shader
+    // mat4.translate(m, m, [-this.centerX, -this.centerY, 0]);
     // mat4.scale(m, m, [this.scale, this.scale, this.scale]);
 
     validateMatrix(m);
 
-    return m;
+    this._glProjectionMatrixUncentered = m;
+
+    m = this._cloneMat4(m);
+    mat4.translate(m, m, [-this.centerX, -this.centerY, 0]);
+    this._glProjectionMatrix = m;
   }
 
   _createMat4() {
     // return mat4.create();
     return [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
+  }
+
+  _cloneMat4(m) {
+    return new Array(...m);
   }
 
 }

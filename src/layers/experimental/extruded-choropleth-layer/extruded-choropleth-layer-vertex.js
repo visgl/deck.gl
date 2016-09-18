@@ -1,4 +1,4 @@
-import mercatorProject from '../shaderlib/mercator-project';
+import mercatorProject from '../../shaderlib/mercator-project';
 
 export default `
 #define SHADER_NAME extruded-choropleth-layer-vertex-shader

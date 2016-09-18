@@ -20,35 +20,37 @@
 
 import {BaseLayer} from '../../../lib';
 import {Model, Program, Geometry} from 'luma.gl';
-const glslify = require('glslify');
 
-const DEFAULT_COLOR = [0, 255, 0];
+import VERTEX_SHADER from './arc-layer-vertex';
+import FRAGMENT_SHADER from './arc-layer-fragment';
+
+const DEFAULT_COLOR = [0, 0, 255];
 
 const defaultGetSourcePosition = x => x.sourcePosition;
 const defaultGetTargetPosition = x => x.targetPosition;
-const defaultGetColor = x => x.color || DEFAULT_COLOR;
+const defaultGetColor = x => x.color;
 
-export default class LineLayer extends BaseLayer {
+export default class ArcLayer extends BaseLayer {
   /**
    * @classdesc
-   * LineLayer
+   * ArcLayer
    *
    * @class
-   * @param {object} opts
+   * @param {object} props
    */
   constructor({
-    strokeWidth = 9,
+    strokeWidth = 1,
     getSourcePosition = defaultGetSourcePosition,
     getTargetPosition = defaultGetTargetPosition,
     getColor = defaultGetColor,
-    ...opts
+    ...props
   } = {}) {
     super({
       strokeWidth,
       getSourcePosition,
       getTargetPosition,
       getColor,
-      ...opts
+      ...props
     });
   }
 
@@ -71,16 +73,20 @@ export default class LineLayer extends BaseLayer {
   }
 
   createModel(gl) {
-    const positions = [0, 0, 0, 1, 1, 1];
+    let positions = [];
+    const NUM_SEGMENTS = 50;
+    for (let i = 0; i < NUM_SEGMENTS; i++) {
+      positions = [...positions, i, i, i];
+    }
 
     return new Model({
       program: new Program(gl, {
-        vs: glslify('./line-layer-vertex.glsl'),
-        fs: glslify('./line-layer-fragment.glsl'),
-        id: 'line'
+        vs: VERTEX_SHADER,
+        fs: FRAGMENT_SHADER,
+        id: 'arc'
       }),
       geometry: new Geometry({
-        id: 'line',
+        id: 'arc',
         drawMode: 'LINE_STRIP',
         positions: new Float32Array(positions)
       }),
@@ -115,7 +121,7 @@ export default class LineLayer extends BaseLayer {
     const {value, size} = attribute;
     let i = 0;
     for (const object of data) {
-      const color = getColor(object);
+      const color = getColor(object) || DEFAULT_COLOR;
       value[i + 0] = color[0];
       value[i + 1] = color[1];
       value[i + 2] = color[2];

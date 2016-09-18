@@ -1,9 +1,8 @@
-import mercatorProject from './mercator-project';
+import mercatorProject from '../../shaderlib/mercator-project';
 
 export default `
 #define SHADER_NAME enhanced-hexagon-layer-vs
 
-uniform float mercatorScale;
 ${mercatorProject}
 
 // Standard matrix uniforms

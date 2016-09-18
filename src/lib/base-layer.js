@@ -40,7 +40,7 @@ const DEFAULT_PROPS = {
   data: [],
   isPickable: false,
   deepCompare: false,
-  disableMercatorProjector: false,
+  mercatorEnabled: false,
   getValue: x => x,
   onHover: () => {},
   onClick: () => {},
@@ -80,23 +80,23 @@ export default class BaseLayer {
       addIterator(props.data);
       assert(props.data[Symbol.iterator], 'data prop must have an iterator');
     }
-
-    this.checkProp(props.data, 'data');
-    this.checkProp(props.id, 'id');
-    this.checkProp(props.width, 'width');
-    this.checkProp(props.height, 'height');
-    this.checkProp(props.latitude, 'latitude');
-    this.checkProp(props.longitude, 'longitude');
-    this.checkProp(props.zoom, 'zoom');
+    this.id = props.id || '';
+    this._checkProp(props.data, 'data');
+    this._checkProp(props.id, 'id');
+    this._checkProp(props.width, 'width');
+    this._checkProp(props.height, 'height');
+    this._checkProp(props.latitude, 'latitude');
+    this._checkProp(props.longitude, 'longitude');
+    this._checkProp(props.zoom, 'zoom');
 
     // TODO - improve props checking
-    // this.checkProp(typeof props.id === 'string' && props.id, 'id');
-    // this.checkProp(Number.isFinite(props.width), 'width');
-    // this.checkProp(Number.isFinite(props.height), 'height');
+    // this._checkProp(typeof props.id === 'string' && props.id, 'id');
+    // this._checkProp(Number.isFinite(props.width), 'width');
+    // this._checkProp(Number.isFinite(props.height), 'height');
 
-    // this.checkProp(Number.isFinite(props.latitude), 'latitude');
-    // this.checkProp(Number.isFinite(props.longitude), 'longitude');
-    // this.checkProp(Number.isFinite(props.zoom), 'zoom');
+    // this._checkProp(Number.isFinite(props.latitude), 'latitude');
+    // this._checkProp(Number.isFinite(props.longitude), 'longitude');
+    // this._checkProp(Number.isFinite(props.zoom), 'zoom');
 
     this.props = props;
     this.count = counter++;
@@ -116,7 +116,7 @@ export default class BaseLayer {
 
   shouldUpdate(oldProps, newProps) {
     // Check update triggers, and invalidate props accordingly
-    if (this.checkUpdateTriggers(oldProps, newProps)) {
+    if (this._checkUpdateTriggers(oldProps, newProps)) {
       return true;
     }
     // If any props have changed, ignoring updateTriggers objects
@@ -206,6 +206,28 @@ export default class BaseLayer {
     return null;
   }
 
+  /**
+   * Projects a point with current map state (lat, lon, zoom, pitch, bearing)
+   *
+   * Note: Position conversion is done in shader, so in many cases there is no need
+   * for this function
+   * @param {Array|Typed Array} lngLat - long and lat values
+   * @return {Array|Typed Array} - x, y coordinates
+   */
+  project(lngLat) {
+    const {mercator} = this.state;
+    assert(Array.isArray(lngLat), 'Layer.project needs [lng,lat]');
+    // TODO - consider disableMercatorProject
+    return mercator.project(lngLat);
+  }
+
+  unproject(xy) {
+    const {mercator} = this.state;
+    assert(Array.isArray(xy), 'Layer.unproject needs [x,y]');
+    // TODO - consider disableMercatorProject
+    return mercator.unproject(xy);
+  }
+
   // INTERNAL METHODS
 
   // Deduces numer of instances. Intention is to support:
@@ -248,71 +270,6 @@ export default class BaseLayer {
     throw new Error('Could not deduce numInstances');
   }
 
-  // Internal Helpers
-
-  checkProps(oldProps, newProps) {
-    // Note: dataChanged might already be set
-    if (newProps.data !== oldProps.data) {
-      // Figure out data length
-      this.state.dataChanged = true;
-    }
-
-    const viewportChanged =
-      newProps.width !== oldProps.width ||
-      newProps.height !== oldProps.height ||
-      newProps.latitude !== oldProps.latitude ||
-      newProps.longitude !== oldProps.longitude ||
-      newProps.zoom !== oldProps.zoom;
-
-    this.setState({viewportChanged});
-  }
-
-  updateAttributes(props) {
-    const {attributeManager, model} = this.state;
-    const numInstances = this.getNumInstances(props);
-    // Figure out data length
-    attributeManager.update({
-      numInstances,
-      bufferMap: props,
-      context: this,
-      // Don't worry about non-attribute props
-      ignoreUnknownAttributes: true
-    });
-    if (model) {
-      const changedAttributes =
-        attributeManager.getChangedAttributes({clearChangedFlags: true});
-      model.setAttributes(changedAttributes);
-    }
-  }
-
-  updateBaseUniforms() {
-    this.setUniforms({
-      // apply gamma to opacity to make it visually "linear"
-      opacity: Math.pow(this.props.opacity, 1 / 2.2)
-    });
-  }
-
-  // Check if any update triggers have changed, and invalidate
-  // attributes accordingly.
-  checkUpdateTriggers(oldProps, newProps) {
-    let change = false;
-    const {attributeManager} = this.state;
-    for (const propName in newProps.updateTriggers) {
-      const oldTriggers = oldProps.updateTriggers[propName];
-      const newTriggers = newProps.updateTriggers[propName];
-      if (!areEqualShallow(oldTriggers, newTriggers)) {
-        if (propName === 'all') {
-          attributeManager.invalidateAll();
-          change = true;
-        } else {
-          attributeManager.invalidate(propName);
-          change = true;
-        }
-      }
-    }
-    return change;
-  }
-
   // LAYER MANAGER API
 
   // Called by layer manager when a new layer is found
@@ -340,16 +297,16 @@ export default class BaseLayer {
         {size: 3, update: this.calculateInstancePickingColors}
     });
 
-    this.setViewport();
+    this._setViewport();
     this.initializeState();
     assert(this.state.model, 'Model must be set in initializeState');
-    this.setViewport();
+    this._setViewport();
 
     // TODO - the app must be able to override
 
     // Add any subclass attributes
-    this.updateAttributes(this.props);
-    this.updateBaseUniforms();
+    this._updateAttributes(this.props);
+    this._updateBaseUniforms();
 
     const {model} = this.state;
     model.setInstanceCount(this.getNumInstances());
@@ -368,20 +325,20 @@ export default class BaseLayer {
   // Called by layer manager when existing layer is getting new props
   updateLayer(oldProps, newProps) {
     // Calculate standard change flags
-    this.checkProps(oldProps, newProps);
+    this._checkForChangedProps(oldProps, newProps);
 
     // Check if any props have changed
     if (this.shouldUpdate(oldProps, newProps)) {
       if (this.state.viewportChanged) {
-        this.setViewport();
+        this._setViewport();
       }
 
       // Let the subclass mark what is needed for update
       this.willReceiveProps(oldProps, newProps);
       // Run the attribute updaters
-      this.updateAttributes(newProps);
+      this._updateAttributes(newProps);
       // Update the uniforms
-      this.updateBaseUniforms();
+      this._updateBaseUniforms();
 
       if (this.state.model) {
         this.state.model.setInstanceCount(this.getNumInstances());
@@ -460,6 +417,70 @@ export default class BaseLayer {
     return this.props.onClick(info);
   }
 
+  // Internal Helpers
+  _checkForChangedProps(oldProps, newProps) {
+    // Note: dataChanged might already be set
+    if (newProps.data !== oldProps.data) {
+      // Figure out data length
+      this.state.dataChanged = true;
+    }
+
+    const viewportChanged =
+      newProps.width !== oldProps.width ||
+      newProps.height !== oldProps.height ||
+      newProps.latitude !== oldProps.latitude ||
+      newProps.longitude !== oldProps.longitude ||
+      newProps.zoom !== oldProps.zoom;
+
+    this.setState({viewportChanged});
+  }
+
+  _updateAttributes(props) {
+    const {attributeManager, model} = this.state;
+    const numInstances = this.getNumInstances(props);
+    // Figure out data length
+    attributeManager.update({
+      numInstances,
+      bufferMap: props,
+      context: this,
+      // Don't worry about non-attribute props
+      ignoreUnknownAttributes: true
+    });
+    if (model) {
+      const changedAttributes =
+        attributeManager.getChangedAttributes({clearChangedFlags: true});
+      model.setAttributes(changedAttributes);
+    }
+  }
+
+  _updateBaseUniforms() {
+    this.setUniforms({
+      // apply gamma to opacity to make it visually "linear"
+      opacity: Math.pow(this.props.opacity, 1 / 2.2)
+    });
+  }
+
+  // Check if any update triggers have changed, and invalidate
+  // attributes accordingly.
+  _checkUpdateTriggers(oldProps, newProps) {
+    let change = false;
+    const {attributeManager} = this.state;
+    for (const propName in newProps.updateTriggers) {
+      const oldTriggers = oldProps.updateTriggers[propName];
+      const newTriggers = newProps.updateTriggers[propName];
+      if (!areEqualShallow(oldTriggers, newTriggers)) {
+        if (propName === 'all') {
+          attributeManager.invalidateAll();
+          change = true;
+        } else {
+          attributeManager.invalidate(propName);
+          change = true;
+        }
+      }
+    }
+    return change;
+  }
+
   // INTERNAL METHODS
   _updateModel({gl}) {
     const {model, attributeManager, uniforms} = this.state;
@@ -471,55 +492,38 @@ export default class BaseLayer {
     model.setPickable(this.props.isPickable);
   }
 
-  checkProp(property, propertyName) {
+  _checkProp(property, propertyName) {
     if (property === undefined || property === null) {
-      throw new Error(`Property ${propertyName} undefined in layer ${this.props.id}`);
+      throw new Error(`Property ${propertyName} undefined in layer ${this.id}`);
     }
   }
 
   // MAP LAYER FUNCTIONALITY
-  setViewport() {
+  _setViewport() {
     const {
       width, height, latitude, longitude, zoom, pitch, bearing, altitude,
-      disableMercatorProjector
+      mercatorEnabled = true, disableMercatorProject
     } = this.props;
 
-    this.setState({
-      mercator: new Viewport({
-        width, height, latitude, longitude, zoom, pitch, bearing, altitude,
-        tileSize: 512
-      })
+    if (disableMercatorProject !== undefined) {
+      throw new Error('disableMercatorProject renamed to mercatorEnabled');
+    }
+
+    // TODO - pass in as prop so we don't have to recalculate in every layer
+    const viewport = new Viewport({
+      width, height, latitude, longitude, zoom, pitch, bearing, altitude,
+      tileSize: 512
     });
 
+    this.setState({mercator: viewport});
+
+    // TODO - "private" viewport.center member...
     this.setUniforms({
-      viewport: [0, 0, width, height],
+      mercatorEnabled: mercatorEnabled ? 1 : 0,
       mercatorScale: Math.pow(2, zoom),
-      mercatorCenter: [longitude, latitude],
-      disableMercatorProjector: disableMercatorProjector ? 1 : 0
+      mercatorCenter: viewport.center
     });
 
     log(3, this.state.viewport, latitude, longitude, zoom);
-  }
-
-  /**
-   * Projects a point with current map state (lat, lon, zoom, pitch, bearing)
-   *
-   * Note: Position conversion is done in shader, so in many cases there is no need
-   * for this function
-   * @param {Array|Typed Array} lngLat - long and lat values
-   * @return {Array|Typed Array} - x, y coordinates
-   */
-  project(lngLat) {
-    const {mercator} = this.state;
-    assert(Array.isArray(lngLat), 'Layer.project needs [lng,lat]');
-    // TODO - consider disableMercatorProject
-    return mercator.project(lngLat);
-  }
-
-  unproject(xy) {
-    const {mercator} = this.state;
-    assert(Array.isArray(xy), 'Layer.unproject needs [x,y]');
-    // TODO - consider disableMercatorProject
-    return mercator.unproject(xy);
   }
 }

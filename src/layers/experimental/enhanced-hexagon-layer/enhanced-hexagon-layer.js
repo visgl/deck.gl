@@ -1,4 +1,4 @@
-import {Layer} from 'deck.gl';
+import {Layer} from '../../../lib';
 import {Geometry, Program, Model} from 'luma.gl';
 import assert from 'assert';
 
@@ -8,9 +8,8 @@ import FRAGMENT_SHADER from './enhanced-hexagon-layer-fragment';
 function positionsAreEqual(v1, v2) {
   // Hex positions are expected to change entirely, not to maintain some
   // positions and change others. Right now we only check a single vertex,
-  // because H3 guarantees order, but even if that wasn't true, this would only
-  // return a false positive for adjacent hexagons, which is close enough for
-  // our purposes.
+  // This would only return a false positive for adjacent hexagons,
+  // which is close enough for our purposes.
   return v1 === v2 || (
     v1 && v2 && v1[0][0] === v2[0][0] && v1[0][1] === v2[0][1]
   );

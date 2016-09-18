@@ -1,4 +1,4 @@
-import {Layer} from 'deck.gl';
+import {Layer} from '../../../lib';
 import earcut from 'earcut';
 import flattenDeep from 'lodash.flattendeep';
 import normalize from 'geojson-normalize';

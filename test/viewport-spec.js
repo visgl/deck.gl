@@ -72,6 +72,13 @@ test('MapboxTransform projection matrix', t => {
   t.end();
 });
 
+test('Viewport#constructor', t => {
+  t.ok(new Viewport() instanceof Viewport,
+    'Created new Viewport with default args');
+  t.end();
+});
+
+
 test('Viewport projection matrix', t => {
   for (const testData of VIEWPORT_TEST_DATA) {
     const viewport = new Viewport(testData.mapState);

@@ -17,9 +17,16 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
+export default `\
+#define SHADER_NAME scatterplot-layer-fragment-shader
 
-import './imports-spec';
-import './layer-spec';
-import './viewport-spec';
+#ifdef GL_ES
+precision highp float;
+#endif
 
-import './layers-spec';
+varying vec4 vColor;
+
+void main(void) {
+  gl_FragColor = vColor;
+}
+`;

@@ -34,7 +34,7 @@ import {
 } from '../src';
 
 // Import private method to test that layers can successfully be updated
-import {updateLayers} from '../src/layer-manager';
+import {updateLayers} from '../src/lib';
 
 import CHOROPLETHS from '../example/data/sf.zip.geo.json';
 // const HEXAGONS_FILE = './example/data/hexagons.csv';
