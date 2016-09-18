@@ -2,7 +2,7 @@
 /* eslint-disable no-inline-comments */
 import React from 'react';
 
-function OverlayControl({
+export default function LayerInfo({
   hoverChoropleth,
   hoverHexagon,
   hoverPoint,
@@ -64,5 +64,3 @@ function OverlayControl({
     </div>
   );
 }
-
-export default OverlayControl;

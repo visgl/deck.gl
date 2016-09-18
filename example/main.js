@@ -32,7 +32,7 @@ import {Provider, connect} from 'react-redux';
 import autobind from 'autobind-decorator';
 
 import MapboxGLMap from 'react-map-gl';
-import OverlayControl from './overlay-control';
+import LayerInfo from './layer-info';
 
 import request from 'd3-request';
 import SAMPLE_LAYERS from './sample-layers';
@@ -426,7 +426,7 @@ class ExampleApp extends React.Component {
     return (
       <div>
         { this._renderMap() }
-        <OverlayControl { ...this.state }/>
+        <LayerInfo { ...this.state }/>
       </div>
     );
   }
