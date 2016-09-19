@@ -1,10 +1,9 @@
-import mercatorProject from '../../shaderlib/mercator-project';
+import project from '../../shaderlib/project';
 
 export default `
 #define SHADER_NAME extruded-choropleth-layer-vertex-shader
 
-uniform float mercatorScale;
-${mercatorProject}
+${project}
 
 attribute vec3 positions;
 attribute vec3 colors;
@@ -28,7 +27,7 @@ vec4 getColor(
 }
 
 void main(void) {
-  vec2 pos = mercatorProject(positions.xy, mercatorScale);
+  vec2 pos = project(positions.xy);
   vec3 p = vec3(pos, positions.z + 1.);
   gl_Position = projectionMatrix * worldMatrix * vec4(p, 1.);
 

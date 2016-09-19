@@ -1,9 +1,9 @@
-import mercatorProject from '../../shaderlib/mercator-project';
+import project from '../../shaderlib/project';
 
 export default `
 #define SHADER_NAME enhanced-hexagon-layer-vs
 
-${mercatorProject}
+${project}
 
 // Standard matrix uniforms
 uniform mat4 projectionMatrix;

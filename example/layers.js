@@ -7,6 +7,11 @@ import {
   GridLayer
 } from '../src';
 
+import {
+  ExtrudedChoroplethLayer,
+  ExperimentalScatterplotLayer
+} from '../src/layers/experimental';
+
 export function GridLayerExample(props) {
   const {mapViewState, points} = props;
 
@@ -102,7 +107,7 @@ export function ScatterplotLayerExample(props) {
     latitude: mapViewState.latitude,
     longitude: mapViewState.longitude,
     zoom: mapViewState.zoom,
-    // data: points,
+    data: points,
     isPickable: true,
     onHover: props.onScatterplotHovered,
     onClick: props.onScatterplotClicked
@@ -163,6 +168,41 @@ export function LineLayerExample(props) {
   });
 }
 
+export function ExtrudedChoroplethLayerExample(props) {
+  const {mapViewState, choropleths} = props;
+  return new ExtrudedChoroplethLayer({
+    id: 'extruded-choroplethLayer',
+    width: window.innerWidth,
+    height: window.innerHeight,
+    latitude: mapViewState.latitude,
+    longitude: mapViewState.longitude,
+    zoom: mapViewState.zoom,
+    data: choropleths,
+    opacity: 0.01,
+    isPickable: true,
+    onHover: props.onChoroplethHovered,
+    lick: props.onChoroplethClicked
+  });
+}
+
+export function ExperimentalScatterplotLayerExample(props) {
+  const {mapViewState, points} = props;
+
+  return new ExperimentalScatterplotLayer({
+    id: 'experimentalScatterplotLayer',
+    width: window.innerWidth,
+    height: window.innerHeight,
+    latitude: mapViewState.latitude,
+    longitude: mapViewState.longitude,
+    zoom: mapViewState.zoom,
+    data: points,
+    opacity: 0.5,
+    isPickable: true,
+    onHover: props.onScatterplotHovered,
+    onClick: props.onScatterplotClicked
+  });
+}
+
 export default {
   GridLayer: GridLayerExample,
   ChoroplethContourLayer: ChoroplethContourLayerExample,
@@ -170,7 +210,15 @@ export default {
   HexagonLayer: HexagonLayerExample,
   HexagonSelectionLayer: HexagonSelectionLayerExample,
   ScatterplotLayer: ScatterplotLayerExample,
+  LineLayer: LineLayerExample,
   ArcLayer: ArcLayerExample,
   ArcLayer2: ArcLayer2Example,
-  LineLayer: LineLayerExample
+
+  ExtrudedChoroplethLayer: ExtrudedChoroplethLayerExample,
+  ExperimentalScatterplotLayer: ExperimentalScatterplotLayerExample
+};
+
+export const DEFAULT_ACTIVE_LAYERS = {
+  ScatterplotLayer,
+  ExperimentalScatterplotLayer
 };

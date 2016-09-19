@@ -32,10 +32,11 @@ import {Provider, connect} from 'react-redux';
 import autobind from 'autobind-decorator';
 
 import MapboxGLMap from 'react-map-gl';
+import LayerSelector from './layer-selector';
 import LayerInfo from './layer-info';
 
 import request from 'd3-request';
-import SAMPLE_LAYERS from './sample-layers';
+import LAYERS, {DEFAULT_ACTIVE_LAYERS} from './layers';
 import {DeckGLOverlay} from '../src';
 
 // ---- Default Settings ---- //
@@ -225,6 +226,7 @@ class ExampleApp extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
+      activeExamples: DEFAULT_ACTIVE_LAYERS,
       selectedHexagons: [],
       hoverHexagon: null,
       hoverPoint: null,
@@ -372,9 +374,11 @@ class ExampleApp extends React.Component {
       onLineClicked: this._handleLineClicked
     };
     const layers = [];
-    for (const exampleName of Object.keys(SAMPLE_LAYERS)) {
-      const example = SAMPLE_LAYERS[exampleName];
-      layers.push(example(props));
+    for (const exampleName of Object.keys(LAYERS)) {
+      if (this.state.activeExamples[exampleName]) {
+        const example = LAYERS[exampleName];
+        layers.push(example(props));
+      }
     }
     return layers;
   }
@@ -405,6 +409,12 @@ class ExampleApp extends React.Component {
     gl.depthFunc(gl.LEQUAL);
   }
 
+  @autobind _onChangeLayers(exampleName) {
+    const {activeExamples} = this.state;
+    activeExamples[exampleName] = !activeExamples[exampleName];
+    this.setState({activeExamples});
+  }
+
   _renderMap() {
     const {mapViewState} = this.props;
     const {width, height} = this.state;
@@ -426,6 +436,9 @@ class ExampleApp extends React.Component {
     return (
       <div>
         { this._renderMap() }
+        <LayerSelector { ...this.state }
+          examples={LAYERS}
+          onChange={this._onChangeLayers}/>
         <LayerInfo { ...this.state }/>
       </div>
     );

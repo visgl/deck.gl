@@ -1,9 +1,9 @@
-import mercatorProject from '../../shaderlib/mercator-project';
+import project from '../../shaderlib/project';
 
 export default `
 #define SHADER_NAME point-cloud-layer-vs
 
-${mercatorProject}
+${project}
 
 uniform float pixelPerMeter;
 

@@ -20,11 +20,11 @@ export default function LayerInfo({
       position: 'absolute',
       bottom: 20,
       left: 20,
-      zIndex: 99
+      zIndex: 99,
+      pointerEvents: 'none'
     } }>
 
       <div style={ {
-        background: 'white',
         padding: '1em',
         marginBottom: '1em',
         width: 300

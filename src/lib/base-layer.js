@@ -521,7 +521,8 @@ export default class BaseLayer {
     this.setUniforms({
       mercatorEnabled: mercatorEnabled ? 1 : 0,
       mercatorScale: Math.pow(2, zoom),
-      mercatorCenter: viewport.center
+      mercatorCenter: viewport.center,
+      ...viewport.getUniforms()
     });
 
     log(3, this.state.viewport, latitude, longitude, zoom);

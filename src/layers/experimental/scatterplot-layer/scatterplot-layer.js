@@ -94,7 +94,7 @@ export default class ScatterplotLayer extends BaseLayer {
       program: new Program(gl, {
         vs: VERTEX_SHADER,
         fs: FRAGMENT_SHADER,
-        id: 'scatterplot'
+        id: 'experimental-scatterplot'
       }),
       geometry: new Geometry({
         drawMode: 'TRIANGLE_FAN',

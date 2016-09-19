@@ -203,6 +203,14 @@ export default class Viewport {
     return this._glProjectionMatrixUncentered;
   }
 
+  @autobind
+  getUniforms() {
+    return {
+      projectionMatrix: this._glProjectionMatrix,
+      projectionMatrixUncentered: this._glProjectionMatrixUncentered
+    };
+  }
+
   // fitBounds(lnglatSE, lnglatNW, {padding = 0} = {}) {
   //   const bounds = new LngLatBounds(
   //     [_bounds[0].reverse(),
@@ -348,7 +356,7 @@ export default class Viewport {
     mat4.multiply(m, m, this._glProjectionMatrix);
     this._pixelProjectionMatrix = m;
 
-    const mInverse = mat4.clone(m);
+    const mInverse = this._cloneMat4(m);
     mat4.invert(mInverse, mInverse);
     this._pixelUnprojectionMatrix = mInverse;
   }
@@ -390,8 +398,8 @@ export default class Viewport {
     this._glProjectionMatrix = m;
   }
 
+  // Avoid 32 bit matrices from mat4.create();
   _createMat4() {
-    // return mat4.create();
     return [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
   }
 

@@ -17,12 +17,12 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-import mercatorProject from '../../shaderlib/mercator-project';
+import project from '../../shaderlib/project';
 
 export default `\
 #define SHADER_NAME scatterplot-layer-vertex-shader
 
-${mercatorProject}
+${project}
 
 attribute vec3 positions;
 attribute vec4 instancePositions;
@@ -31,6 +31,7 @@ attribute vec3 instancePickingColors;
 
 uniform mat4 worldMatrix;
 uniform mat4 projectionMatrix;
+uniform mat4 projectionMatrixUncentered;
 uniform float opacity;
 uniform float radius;
 uniform float renderPickingBuffer;
@@ -39,12 +40,12 @@ varying vec4 vColor;
 
 void main(void) {
   // For some reason, need to add one to elevation to show up in untilted mode
-  vec3 center = vec3(project(instancePositions.xy), instancePositions.z + 1.0);
+  vec3 center = vec3(projectAndCenter(instancePositions.xy), instancePositions.z + 1.0);
   vec3 vertex = positions * radius * instancePositions.w;
-  gl_Position = projectionMatrix * vec4(center, 1.0) +
-                projectionMatrix * vec4(vertex, 0.0);
+  gl_Position = projectionMatrixUncentered * vec4(center, 1.0) +
+                projectionMatrixUncentered * vec4(vertex, 0.0);
 
-  vec4 color = vec4(instanceColors / 255.0, 1.);
+  vec4 color = vec4(instanceColors / 255.0, opacity);
   vec4 pickingColor = vec4(instancePickingColors / 255.0, 1.);
   vColor = mix(color, pickingColor, renderPickingBuffer);
 }
