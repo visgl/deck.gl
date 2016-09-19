@@ -217,15 +217,25 @@ export default class BaseLayer {
   project(lngLat) {
     const {mercator} = this.state;
     assert(Array.isArray(lngLat), 'Layer.project needs [lng,lat]');
-    // TODO - consider disableMercatorProject
     return mercator.project(lngLat);
   }
 
   unproject(xy) {
     const {mercator} = this.state;
     assert(Array.isArray(xy), 'Layer.unproject needs [x,y]');
-    // TODO - consider disableMercatorProject
     return mercator.unproject(xy);
+  }
+
+  projectFlat(lngLat) {
+    const {mercator} = this.state;
+    assert(Array.isArray(lngLat), 'Layer.project needs [lng,lat]');
+    return mercator.projectFlat(lngLat);
+  }
+
+  unprojectFlat(xy) {
+    const {mercator} = this.state;
+    assert(Array.isArray(xy), 'Layer.unproject needs [x,y]');
+    return mercator.unprojectFlat(xy);
   }
 
   // INTERNAL METHODS
@@ -430,7 +440,10 @@ export default class BaseLayer {
       newProps.height !== oldProps.height ||
       newProps.latitude !== oldProps.latitude ||
       newProps.longitude !== oldProps.longitude ||
-      newProps.zoom !== oldProps.zoom;
+      newProps.zoom !== oldProps.zoom ||
+      newProps.bearing !== oldProps.bearing ||
+      newProps.pitch !== oldProps.pitch ||
+      newProps.altitude !== oldProps.altitude;
 
     this.setState({viewportChanged});
   }

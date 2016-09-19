@@ -24,7 +24,7 @@ test('Top-level imports', t0 => {
     t.ok(GridLayer, 'GridLayer symbol imported');
     t.ok(ArcLayer, 'ArcLayer symbol imported');
     t.ok(LineLayer, 'LineLayer symbol imported');
-    t.ok(Viewport2, 'Viewport symbol imported');
+    t.ok(Viewport, 'Viewport symbol imported');
     t.end();
   });
 

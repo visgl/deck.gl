@@ -45,6 +45,7 @@ export default class Viewport {
    * @classdesc
    * Manages coordinate system transformations for deck.gl
    *
+   * @class
    * @param {Object} opt - options
    * @param {Boolean} mercator=true - Whether to use mercator projection
    *
@@ -119,7 +120,7 @@ export default class Viewport {
   project(lngLatZ, {topLeft = true} = {}) {
     this._precomputePixelProjectionMatrices();
     const [X, Y] = this.mercatorEnabled ?
-      this.projectToMercatorFlat(lngLatZ) : lngLatZ;
+      this.projectFlat(lngLatZ) : lngLatZ;
     const v = [X, Y, lngLatZ[2] || 0, 1];
     // vec4.sub(v, v, [this.centerX, this.centerY, 0, 0]);
     vec4.transformMat4(v, v, this._pixelProjectionMatrix);
@@ -147,7 +148,7 @@ export default class Viewport {
     const y2 = topLeft ? this.height - y : y;
     const v = [x, y2, z, 1];
     vec4.transformMat4(v, v, this._pixelUnprojectionMatrix);
-    const [x0, y0] = this.unprojectFromMercatorFlat(v);
+    const [x0, y0] = this.unprojectFlat(v);
     const [, , z0] = v;
     return xyz.length === 2 ? [x0, y0] : [x0, y0, z0];
   }
@@ -163,7 +164,7 @@ export default class Viewport {
    * @return {Array} [x,y] coordinates.
    */
   @autobind
-  projectToMercatorFlat([lng, lat], scale = this.scale) {
+  projectFlat([lng, lat], scale = this.scale) {
     scale = scale * WORLD_SCALE;
     const lambda2 = lng * DEGREES_TO_RADIANS;
     const phi2 = lat * DEGREES_TO_RADIANS;
@@ -182,7 +183,7 @@ export default class Viewport {
    *   Per cartographic tradition, lat and lon are specified as degrees.
    */
   @autobind
-  unprojectFromMercatorFlat([x, y], scale = this.scale) {
+  unprojectFlat([x, y], scale = this.scale) {
     scale = scale * WORLD_SCALE;
     const lambda2 = x / scale - PI;
     const phi2 = 2 * (Math.atan(Math.exp(PI - y / scale)) - PI_4);
@@ -207,6 +208,7 @@ export default class Viewport {
   getUniforms() {
     return {
       projectionMatrix: this._glProjectionMatrix,
+      projectionMatrixCentered: this._glProjectionMatrix,
       projectionMatrixUncentered: this._glProjectionMatrixUncentered
     };
   }
@@ -264,7 +266,7 @@ export default class Viewport {
     const y = 180 / Math.PI *
       Math.log(Math.tan(Math.PI / 4 + this.latitude * Math.PI / 360));
 
-    this.center = this.projectToMercatorFlat([this.longitude, this.latitude]);
+    this.center = this.projectFlat([this.longitude, this.latitude]);
     this.centerX = this.center[0];
     this.centerY = this.center[1];
 
@@ -290,9 +292,12 @@ export default class Viewport {
   }
   /* eslint-enable max-statements */
 
-  // Calculate distance scales in meters around current lat/lon, both for
-  // degrees and pixels
-  // The distance scales vary wildly with latitude
+  /**
+   * TODO: WIP
+   * Calculate distance scales in meters around current lat/lon, both for
+   * degrees and pixels
+   * The distance scales vary wildly with latitude
+   */
   _calculateDistanceScales() {
     // Approximately 111km per degree at equator
     const METERS_PER_DEGREE = 111000;
@@ -339,6 +344,16 @@ export default class Viewport {
     ];
   }
 
+  /**
+   * Builds matrices that converts preprojected lngLats to screen pixels
+   * and vice versa.
+   *
+   * Note: Currently return bottom-left coordinates!
+   * Note: Starts with the GL projection matrix and adds steps to the
+   *       scale and translate that matrix onto the window.
+   * Note: WebGL controls clip space to screen projection with gl.viewport
+   *       and does not need this step.
+   */
   _precomputePixelProjectionMatrices() {
     if (this._pixelProjectionMatrix && this._pixelUnprojectionMatrix) {
       return;
@@ -347,7 +362,7 @@ export default class Viewport {
     this._calculateGLProjectionMatrix()
 
     const m = this._createMat4();
-    // Scale with pixel width and height
+    // Scale with viewport window's width and height in pixels
     mat4.scale(m, m, [this.width, this.height, 1]);
     // Convert to (0, 1)
     mat4.translate(m, m, [0.5, 0.5, 0]);
@@ -356,18 +371,23 @@ export default class Viewport {
     mat4.multiply(m, m, this._glProjectionMatrix);
     this._pixelProjectionMatrix = m;
 
-    const mInverse = this._cloneMat4(m);
-    mat4.invert(mInverse, mInverse);
+    const mInverse = this._createMat4();
+    mat4.invert(mInverse, m);
     this._pixelUnprojectionMatrix = mInverse;
   }
 
-  // Transforms from Web Mercator Tile 0 [0-512,0-512] to "clip space"
+  /**
+   * GL clip space = [-1 - 1, -1 - 1]
+   * After conversion to Float32Array this can be used as a WebGL
+   * projectionMatrix
+   */
   _calculateGLProjectionMatrix(m) {
     if (this._glProjectionMatrix) {
       return;
     }
     m = m || this._createMat4();
 
+    // Note: As usual, matrix operation order should be read in reverse
     mat4.perspective(m,
       2 * Math.atan((this.height / 2) / this.altitude),
       this.width / this.height,
@@ -382,34 +402,35 @@ export default class Viewport {
     // altitude units. 1 altitude unit = the screen height.
     mat4.scale(m, m, [1, -1, 1 / this.height]);
 
+    // Rotate by bearing, and then by pitch (which tilts the view)
     mat4.rotateX(m, m, this.pitchRadians);
     mat4.rotateZ(m, m, -this.bearingRadians);
-    // Including translation kills in a 32 bit
-    // matrix kills the dynamic range, do it separately in the shader
+
+    // We want to be protect the dynamic range of our 32 bit matrix
+
+    // Perform translation separately in the shader's projection function
     // mat4.translate(m, m, [-this.centerX, -this.centerY, 0]);
+
+    // Scaling is done in shader's project function
     // mat4.scale(m, m, [this.scale, this.scale, this.scale]);
 
     validateMatrix(m);
 
+    // TODO - remove
     this._glProjectionMatrixUncentered = m;
 
-    m = this._cloneMat4(m);
-    mat4.translate(m, m, [-this.centerX, -this.centerY, 0]);
-    this._glProjectionMatrix = m;
+    const m2 = this._createMat4();
+    // TODO - remove this step
+    mat4.translate(m2, m, [-this.centerX, -this.centerY, 0]);
+    this._glProjectionMatrix = m2;
   }
 
   // Avoid 32 bit matrices from mat4.create();
   _createMat4() {
     return [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
   }
-
-  _cloneMat4(m) {
-    return new Array(...m);
-  }
-
 }
 
-// TODO - move to luma math library
 function validateMatrix(m) {
   const validMatrix =
     Number.isFinite(m[0]) && Number.isFinite(m[1]) &&

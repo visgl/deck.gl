@@ -119,14 +119,15 @@ export default class ScatterplotLayer extends BaseLayer {
       return;
     }
 
-    const pixel0 = this.project([-122, 37.5]);
-    const pixel1 = this.project([-122, 37.5002]);
+    const pixel0 = this.projectFlat([-122, 37.5]);
+    const pixel1 = this.projectFlat([-122, 37.5002]);
 
     const dx = pixel0[0] - pixel1[0];
     const dy = pixel0[1] - pixel1[1];
 
     this.state.radius = Math.max(Math.sqrt(dx * dx + dy * dy), 2.0);
   }
+
 
   calculateInstancePositions(attribute) {
     const {data, getPosition, getRadius} = this.props;

@@ -52,7 +52,9 @@ const INITIAL_STATE = {
   mapViewState: {
     latitude: 37.751537058389985,
     longitude: -122.42694203247012,
-    zoom: 11.5
+    zoom: 11.5,
+    pitch: 0,
+    bearing: 0
   },
   choropleths: null,
   hexagons: null,
@@ -358,6 +360,17 @@ class ExampleApp extends React.Component {
     this.setState({clickItem: info});
   }
 
+  @autobind _onChangeLayers(exampleName) {
+    const {activeExamples} = this.state;
+    activeExamples[exampleName] = !activeExamples[exampleName];
+    this.setState({activeExamples});
+  }
+
+  @autobind _onWebGLInitialized(gl) {
+    gl.enable(gl.DEPTH_TEST);
+    gl.depthFunc(gl.LEQUAL);
+  }
+
   _renderExamples() {
     const props = {
       ...this.props,
@@ -402,17 +415,6 @@ class ExampleApp extends React.Component {
         onWebGLInitialized={ this._onWebGLInitialized }
       />
     );
-  }
-
-  @autobind _onWebGLInitialized(gl) {
-    gl.enable(gl.DEPTH_TEST);
-    gl.depthFunc(gl.LEQUAL);
-  }
-
-  @autobind _onChangeLayers(exampleName) {
-    const {activeExamples} = this.state;
-    activeExamples[exampleName] = !activeExamples[exampleName];
-    this.setState({activeExamples});
   }
 
   _renderMap() {

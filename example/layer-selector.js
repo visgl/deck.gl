@@ -35,13 +35,14 @@ export default function LayerSelector({examples, activeExamples, onChange}) {
     <div id="example-selector" style={{
       position: 'absolute',
       top: 20,
+      bottom: 20,
       right: 20,
       zIndex: 98
     }}>
       <div style={ {
         padding: 0,
-        width: 400,
-        height: 500,
+        width: 250,
+        height: '100%',
         overflowX: 'hidden',
         overflowY: 'scroll'
       } }>

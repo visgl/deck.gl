@@ -17,7 +17,6 @@ input[type=checkbox] {
 	-webkit-font-smoothing: antialiased;
 	text-shadow: 0px 1px grey;
 	text-align: center;
-	margin-bottom: 50px;
 }
 
 .checkbox {
@@ -31,7 +30,7 @@ input[type=checkbox] {
 	background: -ms-linear-gradient(top, #fcfff4 0%, #dfe5d7 40%, #b3bead 100%);
 	background: linear-gradient(top, #fcfff4 0%, #dfe5d7 40%, #b3bead 100%);
 	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#fcfff4', endColorstr='#b3bead',GradientType=0 );
-	margin: 20px auto;
+	margin: 20px;
 
 	-webkit-border-radius: 50px;
 	-moz-border-radius: 50px;
