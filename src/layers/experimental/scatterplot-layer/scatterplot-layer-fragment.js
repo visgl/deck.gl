@@ -17,16 +17,16 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
+export default `\
+#define SHADER_NAME scatterplot-layer-fragment-shader
 
-export {default as DeckGLOverlay} from './react/deckgl-overlay';
+#ifdef GL_ES
+precision highp float;
+#endif
 
-export {Layer, BaseLayer} from './lib';
+varying vec4 vColor;
 
-export {default as HexagonLayer} from './layers/core/hexagon-layer';
-export {default as ChoroplethLayer} from './layers/core/choropleth-layer';
-export {default as ScatterplotLayer} from './layers/core/scatterplot-layer';
-export {default as GridLayer} from './layers/core/grid-layer';
-export {default as ArcLayer} from './layers/core/arc-layer';
-export {default as LineLayer} from './layers/core/line-layer';
-
-export {Viewport} from './viewport';
+void main(void) {
+  gl_FragColor = vColor;
+}
+`;

@@ -21,6 +21,15 @@ All notable changes to deck.gl will be documented in this file.
 
 ### Beta-3.0.0 Releases
 
+#### [3.0.0-beta16] -
+ - Breaking change - rename `disableMercatorProject` prop to `mercatorEnabled`
+ - Add experimental layers folder
+ - Add separate import files for experimental layers and viewport
+   import {PointCloudLayer, ...} from 'deck.gl/experimental'
+   import Viewport from 'deck.gl/viewport'
+- Add test cases for top-level exports
+- Code reorganization
+
 #### [3.0.0-beta15] - Merge 2.4.9 fixes
 
 #### [3.0.0-beta14] - Viewport improvements
@@ -43,7 +52,7 @@ All notable changes to deck.gl will be documented in this file.
 - Fix bool uniform that webgl in certain environment handles it differently
 
 #### [2.4.7] - 2016-09-06
-- Fix issue of disableMercatorProjector not working on Linux
+- Fix issue of mercatorEnabled not working on Linux
 
 #### [2.4.6] - 2016-09-06
 - Fix issue where 0 opacity is interpreted as default opacity

@@ -18,15 +18,35 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-export {default as DeckGLOverlay} from './react/deckgl-overlay';
+#define SHADER_NAME choropleth-layer-vertex-shader
 
-export {Layer, BaseLayer} from './lib';
+#pragma glslify: project = require(../../../../shaderlib/project)
 
-export {default as HexagonLayer} from './layers/core/hexagon-layer';
-export {default as ChoroplethLayer} from './layers/core/choropleth-layer';
-export {default as ScatterplotLayer} from './layers/core/scatterplot-layer';
-export {default as GridLayer} from './layers/core/grid-layer';
-export {default as ArcLayer} from './layers/core/arc-layer';
-export {default as LineLayer} from './layers/core/line-layer';
+attribute vec3 positions;
+attribute vec3 colors;
+attribute vec3 pickingColors;
 
-export {Viewport} from './viewport';
+uniform mat4 projectionMatrix;
+uniform mat4 worldMatrix;
+
+uniform float opacity;
+uniform float renderPickingBuffer;
+uniform vec3 selectedPickingColor;
+
+varying vec4 vColor;
+
+vec4 getColor(vec4 color, float opacity, vec3 pickingColor, float renderPickingBuffer) {
+  vec4 color4 = vec4(color.xyz / 255., color.w / 255. * opacity);
+  vec4 pickingColor4 = vec4(pickingColor / 255., 1.);
+  return mix(color4, pickingColor4, renderPickingBuffer);
+}
+
+void main(void) {
+  // For some reason, need to add one to elevation to show up in untilted mode
+  vec3 p = vec3(project(positions.xy), positions.z + 1.0);
+  gl_Position = projectionMatrix * vec4(p, 1.);
+
+  vec4 color = vec4(colors / 255., opacity);
+  vec4 pickingColor = vec4(pickingColors / 255., 1.);
+  vColor = mix(color, pickingColor, renderPickingBuffer);
+}

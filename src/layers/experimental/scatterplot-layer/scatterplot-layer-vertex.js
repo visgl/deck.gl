@@ -17,16 +17,36 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
+import project from '../../shaderlib/project';
 
-export {default as DeckGLOverlay} from './react/deckgl-overlay';
+export default `\
+#define SHADER_NAME scatterplot-layer-vertex-shader
 
-export {Layer, BaseLayer} from './lib';
+${project}
 
-export {default as HexagonLayer} from './layers/core/hexagon-layer';
-export {default as ChoroplethLayer} from './layers/core/choropleth-layer';
-export {default as ScatterplotLayer} from './layers/core/scatterplot-layer';
-export {default as GridLayer} from './layers/core/grid-layer';
-export {default as ArcLayer} from './layers/core/arc-layer';
-export {default as LineLayer} from './layers/core/line-layer';
+attribute vec3 positions;
+attribute vec4 instancePositions;
+attribute vec3 instanceColors;
+attribute vec3 instancePickingColors;
 
-export {Viewport} from './viewport';
+uniform mat4 worldMatrix;
+uniform mat4 projectionMatrix;
+uniform mat4 projectionMatrixUncentered;
+uniform float opacity;
+uniform float radius;
+uniform float renderPickingBuffer;
+
+varying vec4 vColor;
+
+void main(void) {
+  // For some reason, need to add one to elevation to show up in untilted mode
+  vec3 center = vec3(projectAndCenter(instancePositions.xy), instancePositions.z + 1.0);
+  vec3 vertex = positions * radius * instancePositions.w;
+  gl_Position = projectionMatrixUncentered * vec4(center, 1.0) +
+                projectionMatrixUncentered * vec4(vertex, 0.0);
+
+  vec4 color = vec4(instanceColors / 255.0, opacity);
+  vec4 pickingColor = vec4(instancePickingColors / 255.0, 1.);
+  vColor = mix(color, pickingColor, renderPickingBuffer);
+}
+`;
