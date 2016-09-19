@@ -1,2 +1,1 @@
-import * as deckgl from './dist/index';
-module.exports = deckgl;
+module.exports = require('./dist/index');

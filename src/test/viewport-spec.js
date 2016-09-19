@@ -1,6 +1,7 @@
 import test from 'tape-catch';
 import {mat4, vec2} from 'gl-matrix';
-import Viewport, {MapboxTransform} from '../src/viewport';
+import Viewport from '../../viewport';
+import {MapboxTransform} from '../viewport';
 import ViewportMercatorProject from 'viewport-mercator-project';
 
 /* eslint-disable max-len */

@@ -5,13 +5,13 @@ import {
   HexagonLayer, ChoroplethLayer, ScatterplotLayer,
   GridLayer, ArcLayer, LineLayer,
   Viewport
-} from '..';
+} from '../..';
 
 import {
   PointCloudLayer, ExtrudedChoroplethLayer, EnhancedHexagonLayer
-} from '../experimental';
+} from '../../experimental';
 
-import Viewport2 from '../viewport';
+import Viewport2 from '../../viewport';
 
 test('Top-level imports', t0 => {
   t0.test('import "deck.gl"', t => {

@@ -31,12 +31,12 @@ import {
   ScatterplotLayer,
   ArcLayer,
   GridLayer
-} from '../src';
+} from '../..';
 
 // Import private method to test that layers can successfully be updated
-import {updateLayers} from '../src/lib';
+import {updateLayers} from '../lib';
 
-import CHOROPLETHS from '../example/data/sf.zip.geo.json';
+import CHOROPLETHS from '../../example/data/sf.zip.geo.json';
 // const HEXAGONS_FILE = './example/data/hexagons.csv';
 // const POINTS_FILE = './example/data/sf.bike.parking.csv';
 
