@@ -1,5 +1,5 @@
 import test from 'tape-catch';
-import {mat4} from 'gl-matrix';
+import {mat4, vec2} from 'gl-matrix';
 import Viewport, {MapboxTransform} from '../../viewport';
 
 /* eslint-disable */
@@ -71,6 +71,12 @@ test('MapboxTransform projection matrix', t => {
   t.end();
 });
 
+test('Viewport#constructor', t => {
+  t.ok(new Viewport() instanceof Viewport,
+    'Created new Viewport with default args');
+  t.end();
+});
+
 test('Viewport projection matrix', t => {
   for (const testData of VIEWPORT_TEST_DATA) {
     const viewport = new Viewport(testData.mapState);
@@ -82,3 +88,26 @@ test('Viewport projection matrix', t => {
   t.end();
 });
 
+// test('Viewport.projectFlat', t => {
+//   for (const testData of VIEWPORT_TEST_DATA) {
+//     // Remove bearing pitch and altitude
+//     const {mapState: {...mapState}} = testData;
+//     const viewport = new Viewport(mapState);
+//     const vmp = new ViewportMercatorProject(mapState);
+//     const xy = viewport.projectFlat([mapState.longitude, mapState.latitude]);
+//     const xy2 = vmp.project([mapState.longitude, mapState.latitude]);
+//     t.comment(`Comparing [${xy2}] [${xy}]`);
+//     t.ok(vec2.equals(xy, xy2));
+//   }
+//   t.end();
+// });
+
+test('Viewport.project#3D', t => {
+  for (const testData of VIEWPORT_TEST_DATA) {
+    const {mapState} = testData;
+    const viewport = new Viewport(mapState);
+    const xy = viewport.project([mapState.longitude, mapState.latitude]);
+    t.ok(vec2.equals(xy, [mapState.width / 2, mapState.height / 2]));
+  }
+  t.end();
+});
