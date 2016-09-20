@@ -18,7 +18,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-/* eslint-disable no-var, max-statements */
+// TODO - need to clean up this code to follow lint rules, disable for now
+/* eslint-disable */
 import 'babel-polyfill';
 import {document, window} from 'global';
 import {Buffer, createGLContext, Program, glGetDebugInfo} from 'luma.gl';

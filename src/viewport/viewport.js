@@ -24,7 +24,6 @@ import autobind from 'autobind-decorator';
 import assert from 'assert';
 
 const PI = Math.PI;
-const PI_2 = PI / 2;
 const PI_4 = PI / 4;
 const DEGREES_TO_RADIANS = PI / 180;
 const RADIANS_TO_DEGREES = 180 / PI;
@@ -74,6 +73,7 @@ export default class Viewport {
    *    division by zero. This is intended to reduce the burden of apps to
    *    to check values before instantiating a Viewport.
    */
+  /* eslint-disable complexity */
   constructor({
     // Map state
     width,
@@ -108,7 +108,7 @@ export default class Viewport {
     // Object.seal(this);
     // Object.freeze(this);
   }
-
+  /* eslint-enable complexity */
 
   /**
    * Projects latitude and longitude to pixel coordinates in window
@@ -269,9 +269,6 @@ export default class Viewport {
     this.altitude = Math.max(0.75, this.altitude);
 
     // Center x, y
-    const y = 180 / Math.PI *
-      Math.log(Math.tan(Math.PI / 4 + this.latitude * Math.PI / 360));
-
     this.center = this.projectFlat([this.longitude, this.latitude]);
     this.centerX = this.center[0];
     this.centerY = this.center[1];
@@ -363,14 +360,15 @@ export default class Viewport {
       return;
     }
 
-    this._calculateGLProjectionMatrix()
+    this._calculateGLProjectionMatrix();
 
     const m = this._createMat4();
+
     // Scale with viewport window's width and height in pixels
     mat4.scale(m, m, [this.width, this.height, 1]);
     // Convert to (0, 1)
     mat4.translate(m, m, [0.5, 0.5, 0]);
-    mat4.scale(m, m, [0.5, 0.5, 0])
+    mat4.scale(m, m, [0.5, 0.5, 0]);
     // Project to clip space (-1, 1)
     mat4.multiply(m, m, this._glProjectionMatrix);
     this._pixelProjectionMatrix = m;
@@ -380,7 +378,7 @@ export default class Viewport {
     this._pixelUnprojectionMatrix = mInverse;
   }
 
-  /**
+  /*
    * GL clip space = [-1 - 1, -1 - 1]
    * After conversion to Float32Array this can be used as a WebGL
    * projectionMatrix

@@ -176,7 +176,7 @@ export default class ChoroplethLayer extends BaseLayer {
   }
 
   calculateColors(attribute) {
-    const colors = this.state.groupedVerticesColors.map(
+    const nestedColors = this.state.groupedVerticesColors.map(
       colors => colors.map(
         color => this.props.drawContour ?
           // TODO - why destructure and rebuild array?
@@ -184,7 +184,7 @@ export default class ChoroplethLayer extends BaseLayer {
       )
     );
 
-    attribute.value = new Float32Array(flattenDeep(colors));
+    attribute.value = new Float32Array(flattenDeep(nestedColors));
   }
 
   // Override the default picking colors calculation

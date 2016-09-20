@@ -23,7 +23,6 @@ import {Model, Program, Geometry} from 'luma.gl';
 import VERTEX_SHADER from './scatterplot-layer-vertex';
 import FRAGMENT_SHADER from './scatterplot-layer-fragment';
 
-
 const DEFAULT_COLOR = [255, 0, 255];
 
 const defaultGetPosition = x => x.position;
@@ -127,7 +126,6 @@ export default class ScatterplotLayer extends BaseLayer {
 
     this.state.radius = Math.max(Math.sqrt(dx * dx + dy * dy), 2.0);
   }
-
 
   calculateInstancePositions(attribute) {
     const {data, getPosition, getRadius} = this.props;

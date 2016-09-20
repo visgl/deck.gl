@@ -27,7 +27,6 @@ const defaultGetPosition = x => x.position;
 const defaultGetRadius = x => x.radius;
 const defaultGetColor = x => x.color || DEFAULT_COLOR;
 
-
 export default class ScatterplotLayer extends BaseLayer {
   /*
    * @classdesc
@@ -95,15 +94,15 @@ export default class ScatterplotLayer extends BaseLayer {
       ];
     }
 
-    let nvidiaDef = '';
+    let nvidiaFlag = '';
 
     if (glGetDebugInfo(gl).vendor.match(/NVIDIA/)) {
-      nvidiaDef += '#define NVIDIA_WORKAROUND 1';
+      nvidiaFlag += '#define NVIDIA_WORKAROUND 1\n';
     }
 
     return new Model({
       program: new Program(gl, {
-        vs: nvidiaDef + glslify('./scatterplot-layer-vertex.glsl'),
+        vs: nvidiaFlag + glslify('./scatterplot-layer-vertex.glsl'),
         fs: glslify('./scatterplot-layer-fragment.glsl'),
         id: 'fp64-scatterplot'
       }),
@@ -116,19 +115,18 @@ export default class ScatterplotLayer extends BaseLayer {
   }
 
   df64ify(a) {
-    const a_hi = Math.fround(a);
-    const a_lo = a - Math.fround(a);
-    return [a_hi, a_lo];
+    const hiPart = Math.fround(a);
+    const loPart = a - Math.fround(a);
+    return [hiPart, loPart];
   }
 
   updateUniforms() {
     this.calculateZoomRadius();
-    this.calculate
     const {zoomRadiusFP64} = this.state;
     const {zoom} = this.props;
 
     this.setUniforms({
-      zoomRadiusFP64: zoomRadiusFP64,
+      zoomRadiusFP64,
       mercatorScaleFP64: this.df64ify(Math.pow(2, zoom))
     });
   }
@@ -193,7 +191,7 @@ export default class ScatterplotLayer extends BaseLayer {
     const dx = pixel0[0] - pixel1[0];
     const dy = pixel0[1] - pixel1[1];
 
-    const tmp_radius = Math.max(Math.sqrt(dx * dx + dy * dy), 2.0);
-    this.state.zoomRadiusFP64 = this.df64ify(tmp_radius);
+    const radius = Math.max(Math.sqrt(dx * dx + dy * dy), 2.0);
+    this.state.zoomRadiusFP64 = this.df64ify(radius);
   }
 }

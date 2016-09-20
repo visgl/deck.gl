@@ -40,6 +40,13 @@ react-map-gl
 
 ### Beta-3.0.0 Releases
 
+#### [3.0.0-beta17] - 64bit layers and more.
+ - FEATURE: New GLSL library: 64bit emulated floating point
+ - FEATURE: New layer: ScatterplotLayer64: Sample 64-bit, high precision layer
+ - FEATUREY: ArcLayer can now specify separate start end end color for each arc.
+ - FIX: Add high precision version of `tan` as Intel GPU workaround.
+ - MISC: eslint now uses stronger rules. Fixes new eslint warnings.
+
 #### [3.0.0-beta16] -
  - Breaking change - rename `disableMercatorProject` prop to `mercatorEnabled`
  - Add experimental layers folder

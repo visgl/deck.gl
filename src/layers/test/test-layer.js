@@ -23,8 +23,8 @@ import {Model, Program, Geometry} from 'luma.gl';
 const glslify = require('glslify');
 
 const ATTRIBUTES = {
-  instancePositions: {size: 3, '0': 'x', '1': 'y', '2': 'unused'},
-  instanceColors: {size: 3, '0': 'red', '1': 'green', '2': 'blue'}
+  instancePositions: {size: 3, 0: 'x', 1: 'y', 2: 'unused'},
+  instanceColors: {size: 3, 0: 'red', 1: 'green', 2: 'blue'}
 };
 
 export default class TestLayer extends Layer {
@@ -101,7 +101,7 @@ export default class TestLayer extends Layer {
       geometry: new Geometry({
         drawMode: 'TRIANGLE_FAN',
         positions: new Float32Array(positions)
-      }),
+      })
       // isInstanced: true
     });
   }
