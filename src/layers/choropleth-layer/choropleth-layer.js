@@ -65,10 +65,13 @@ export default class ChoroplethLayer extends BaseLayer {
       pickingColors: {update: this.calculatePickingColors, noAlloc: true}
     });
 
+    const model = this.createModel(gl);
+    model.userData.strokeWidth = this.props.strokeWidth;
+
     this.setUniforms({opacity: this.props.opacity});
     this.setState({
       numInstances: 0,
-      model: this.getModel(gl)
+      model
     });
 
     this.extractChoropleths();
@@ -87,9 +90,11 @@ export default class ChoroplethLayer extends BaseLayer {
     if (oldProps.opacity !== newProps.opacity) {
       this.setUniforms({opacity: newProps.opacity});
     }
+
+    this.state.model.userData.strokeWidth = newProps.strokeWidth;
   }
 
-  getModel(gl) {
+  createModel(gl) {
     return new Model({
       program: new Program(gl, {
         vs: glslify('./choropleth-layer-vertex.glsl'),
@@ -101,7 +106,14 @@ export default class ChoroplethLayer extends BaseLayer {
         drawMode: this.props.drawContour ? 'LINES' : 'TRIANGLES'
       }),
       vertexCount: 0,
-      isIndexed: true
+      isIndexed: true,
+      onBeforeRender() {
+        this.userData.oldStrokeWidth = gl.getParameter(gl.LINE_WIDTH);
+        this.program.gl.lineWidth(this.userData.strokeWidth || 1);
+      },
+      onAfterRender() {
+        this.program.gl.lineWidth(this.userData.oldStrokeWidth || 1);
+      }
     });
   }
 
