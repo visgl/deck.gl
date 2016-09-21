@@ -1,3 +1,4 @@
+
 // Copyright (c) 2015 Uber Technologies, Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -18,15 +19,22 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-float check_error(vec2 result, vec2 ref, float EPSILON)
-{
-  float pass = 0.0;
+#ifdef NVIDIA_WORKAROUND
 
-  if (abs((result.x - ref.x) / ref.x) < EPSILON) pass += 2.0;
-  if (abs((result.y - ref.y) / ref.y) < EPSILON) pass += 1.0;
-
-  pass = pass / 3.0;
-  return pass;
+vec2 quickTwoSum(float a, float b) {
+  float sum = (a + b) * ONE;
+  float err = b - (sum - a) * ONE;
+  return vec2(sum, err);
 }
-#pragma glslify: export(check_error)
+#else
 
+vec2 quickTwoSum(float a, float b) {
+  float sum = a + b;
+  float err = b - (sum - a);
+  return vec2(sum, err);
+}
+
+#endif
+
+
+#pragma glslify: export(quickTwoSum)

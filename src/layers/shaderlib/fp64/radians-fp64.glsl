@@ -18,11 +18,13 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-#pragma glslify: mul_fp64 = require(./mul-fp64)
+#pragma glslify: mul_fp64 = require(./mul-fp64, ONE=ONE)
+#pragma glslify: div_fp64 = require(./div-fp64, ONE=ONE)
+
 const vec2 PI_fp64 = vec2(3.1415927410125732, -8.742278012618954e-8);
 
 vec2 radians_fp64(vec2 degree) {
-  return mul_fp64(degree, PI_fp64) / 180.0;
+  return div_fp64(mul_fp64(degree, PI_fp64), vec2(180.0, 0.0));
 }
 
 #pragma glslify: export(radians_fp64)

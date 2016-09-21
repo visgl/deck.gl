@@ -18,7 +18,7 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-#pragma glslify: sum_fp64 = require(./sum-fp64)
+#pragma glslify: sum_fp64 = require(./sum-fp64, ONE=ONE)
 
 void vec4_sum_fp64(vec2 a[4], vec2 b[4], out vec2 out_val[4]) {
   for (int i = 0; i < 4; i++) {

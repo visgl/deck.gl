@@ -18,15 +18,25 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-#pragma glslify: sum_fp64 = require(./sum-fp64, ONE=ONE)
-#pragma glslify: mul_fp64 = require(./mul-fp64, ONE=ONE)
 
-// TODO could be further simplified
-void vec4_scalar_mul_fp64(vec2 a[4], vec2 b, out vec2 out_val[4]) {
-  out_val[0] = mul_fp64(a[0], b);
-  out_val[1] = mul_fp64(a[1], b);
-  out_val[2] = mul_fp64(a[2], b);
-  out_val[3] = mul_fp64(a[3], b);
+#ifdef NVIDIA_WORKAROUND
+
+vec2 twoSum(float a, float b) {
+  float s = (a + b) * ONE;
+  float v = (s - a) * ONE;
+  float err = (a - (s - v)) + (b - v) * ONE;
+  return vec2(s, err);
 }
 
-#pragma glslify: export(vec4_scalar_mul_fp64)
+#else
+
+vec2 twoSum(float a, float b) {
+  float s = a + b;
+  float v = s - a;
+  float err = (a - (s - v)) + (b - v);
+  return vec2(s, err);
+}
+
+#endif
+
+#pragma glslify: export(twoSum)

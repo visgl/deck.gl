@@ -17,30 +17,15 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-#pragma glslify: sum_fp64 = require(./sum-fp64)
-#pragma glslify: sub_fp64 = require(./sub-fp64)
-#pragma glslify: mul_fp64 = require(./mul-fp64)
 
-vec2 split(float a) {
-  const float SPLIT = 4097.0;
-  float t = a * SPLIT;
-  float a_hi = t - (t - a);
-  float a_lo = a - a_hi;
-  return vec2(a_hi, a_lo);
-}
 
-vec2 twoProd(float a, float b) {
-  float prod = a * b;
-  vec2 a_fp64 = split(a);
-  vec2 b_fp64 = split(b);
-  float err = ((a_fp64.x * b_fp64.x - prod) + a_fp64.x * b_fp64.y +
-    a_fp64.y * b_fp64.x) + a_fp64.y * b_fp64.y;
-  return vec2(prod, err);
-}
+#pragma glslify: twoProd = require(./twoProd, ONE=ONE)
+#pragma glslify: sum_fp64 = require(./sum-fp64, ONE=ONE)
+#pragma glslify: sub_fp64 = require(./sub-fp64, ONE=ONE)
+#pragma glslify: mul_fp64 = require(./mul-fp64, ONE=ONE)
 
 vec2 div_fp64(vec2 a, vec2 b) {
   float xn = 1.0 / b.x;
-  // there is an error in Thall's paper, check the original one by Karp
   vec2 yn = a * xn;
   float diff = (sub_fp64(a, mul_fp64(b, yn))).x;
   vec2 prod = twoProd(xn, diff);

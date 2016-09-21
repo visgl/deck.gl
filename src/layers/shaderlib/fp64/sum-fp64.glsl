@@ -18,28 +18,18 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-vec2 quickTwoSum(float a, float b) {
-  float sum = a + b;
-  float err = b - (sum - a);
-  return vec2(sum, err);
-}
-
-// ri: real and imaginary components in vec2
-vec4 twoSumComp(vec2 a_ri, vec2 b_ri) {
-  vec2 sum = a_ri + b_ri;
-  vec2 v = sum - a_ri;
-  vec2 err = (a_ri - (sum - v)) + (b_ri - v);
-  return vec4(sum.x, err.x, sum.y, err.y);
-}
+#pragma glslify: twoSum = require(./twoSum, ONE=ONE)
+#pragma glslify: quickTwoSum = require(./quickTwoSum, ONE=ONE)
 
 vec2 sum_fp64(vec2 a, vec2 b) {
-  vec4 st;
-  st = twoSumComp(a, b);
-  st.y += st.z;
-  st.xy = quickTwoSum(st.x, st.y);
-  st.y += st.w;
-  st.xy = quickTwoSum(st.x, st.y);
-  return st.xy;
+  vec2 s, t;
+  s = twoSum(a.x, b.x);
+  t = twoSum(a.y, b.y);
+  s.y += t.x;
+  s = quickTwoSum(s.x, s.y);
+  s.y += t.y;
+  s = quickTwoSum(s.x, s.y);
+  return s;
 }
 
 #pragma glslify: export(sum_fp64)
