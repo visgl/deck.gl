@@ -21,8 +21,20 @@
 
     npm install --save luma.gl deck.gl
 
-Provides tested, highly performant layers for basic data visualization
-use cases, scatterplots, choropleths etc in 2 and 3 dimensions.
+Provides tested, highly performant layers for data visualization
+use cases, such scatterplots, choropleths etc in 2 and 3 dimensions.
+
+
+## Installation
+
+```
+npm install --save deck.gl
+```
+Note: deck.gl has a dependency on node version 0.12 or higher. If you use an older version, you can install a node version manager like nvm and use a separate shell to install and build deck.gl
+```
+npm install -g nvm && nvm install 0.12 && nvm use 0.12
+```
+---
 
 ## Example
 
@@ -36,7 +48,8 @@ use cases, scatterplots, choropleths etc in 2 and 3 dimensions.
 
     <DeckGL width={1920} height={1080} layers={[flights]} />
 
-Take a look at the [docs website](https://uber.github.io/deck.gl) or browse the [docs folder](./docs).
+Take a look at the [docs website](https://uber.github.io/deck.gl)
+or browse the [docs folder](./docs).
 
 ## Developing
 
@@ -44,17 +57,24 @@ Take a look at the [docs website](https://uber.github.io/deck.gl) or browse the 
     npm test
     npm start
 
-Note: **Building** deck.gl (not importing) has a dependency on node
+
+### Node Version Requirement
+
+Building deck.gl from source has a dependency on node
 version 0.12 or higher. If you use an older version, you can install
 a node version manager like nvm and use a separate shell to install
 and build deck.gl.
 
     npm install -g nvm && nvm install 0.12 && nvm use 0.122
 
+This is not an issue when installing deck.gl, only
+when building it from source.
+
 ## Contributing
 
-PRs and bug reports are welcome. Note that you once you open a PR your will be asked to
-register as a contributor by filling in a small form.
+PRs and bug reports are welcome. Note that you once your PR is
+about to be merged, your will be asked to register as a contributor
+by filling in a short form.
 
 ## Data sources
 

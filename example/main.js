@@ -17,11 +17,10 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-
 /* eslint-disable func-style */
 /* eslint-disable no-console */
 /* global console, process */
-/* global global, window */
+/* global document, window */
 import 'babel-polyfill';
 
 import React from 'react';
@@ -490,6 +489,5 @@ ReactDOM.render(
   </Provider>,
   container
 );
-
 /* eslint-enable func-style */
 /* eslint-enable no-console */
