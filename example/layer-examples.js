@@ -12,6 +12,10 @@ import {
   ExperimentalScatterplotLayer
 } from '../src/layers/experimental';
 
+import {
+  ScatterplotLayer64
+} from '../src/layers/fp64'
+
 export function GridLayerExample(props) {
   const {mapViewState, points} = props;
 
@@ -96,6 +100,7 @@ export function ScatterplotLayerExample(props) {
     height: window.innerHeight,
     ...mapViewState,
     data: points,
+    opacity: 0.5,
     isPickable: true,
     onHover: props.onScatterplotHovered,
     onClick: props.onScatterplotClicked
@@ -252,6 +257,11 @@ export default {
     ExperimentalScatterplotLayer: ExperimentalScatterplotLayerExample
   },
 
+  'FP64 Layers': {
+    'ScatterplotLayer64': ScatterplotLayer64Example
+  },
+
+
   'Performance Tests': {
     'ScatterplotLayer 1M': [ScatterplotLayerExample, make1MPoints],
     'ScatterplotLayer 10M': [ScatterplotLayerExample, make10MPoints]
@@ -260,5 +270,5 @@ export default {
 
 export const DEFAULT_ACTIVE_LAYERS = {
   'ChoroplethLayer (Contour)': true,
-  'ScatterplotLayer': true
+  'ScatterplotLayer64': true
 };
