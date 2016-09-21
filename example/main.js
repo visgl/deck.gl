@@ -396,7 +396,8 @@ class ExampleApp extends React.Component {
       zoom: mapViewState.zoom,
       data: choropleths,
       opacity: 0.8,
-      drawContour: true
+      drawContour: true,
+      strokeWidth: 2
     });
   }
 

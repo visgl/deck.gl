@@ -104,6 +104,7 @@ renders it as interactive choropleths.
   * `opacity` (number, required) opacity of the layer
   * `isPickable` [bool, optional, default=false] whether layer responses to
   mouse events
+  * `lineWidth` [number, optional, default=1] the line width of the contour
 
   **Layer-specific Parameters**
 
