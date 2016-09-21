@@ -17,8 +17,8 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-#pragma glslify: vec4_dot_fp64 = require(./vec4-dot-fp64)
-#pragma glslify: mul_fp64 = require(./mul-fp64)
+#pragma glslify: vec4_dot_fp64 = require(./vec4-dot-fp64, ONE=ONE)
+#pragma glslify: mul_fp64 = require(./mul-fp64, ONE=ONE)
 
 void mat4_vec4_mul_fp64(vec2 b[16], vec2 a[4], out vec2 out_val[4]) {
   vec2 tmp[4];

@@ -17,9 +17,9 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-#pragma glslify: sum_fp64 = require(./sum-fp64)
-#pragma glslify: mul_fp64 = require(./mul-fp64)
-#pragma glslify: radians_fp64 = require(./radians-fp64)
+#pragma glslify: sum_fp64 = require(./sum-fp64, ONE=ONE)
+#pragma glslify: mul_fp64 = require(./mul-fp64, ONE=ONE)
+#pragma glslify: radians_fp64 = require(./radians-fp64, ONE=ONE)
 
 const float TILE_SIZE = 512.0;
 const float PI = 3.1415926536;

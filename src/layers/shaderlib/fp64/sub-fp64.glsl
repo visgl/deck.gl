@@ -17,10 +17,19 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-#pragma glslify: sum_fp64 = require(./sum-fp64)
+
+#pragma glslify: twoSub = require(./twoSub, ONE=ONE)
+#pragma glslify: quickTwoSum = require(./quickTwoSum, ONE=ONE)
 
 vec2 sub_fp64(vec2 a, vec2 b) {
-  return sum_fp64(a, -b);
+  vec2 s, t;
+  s = twoSub(a.x, b.x);
+  t = twoSub(a.y, b.y);
+  s.y += t.x;
+  s = quickTwoSum(s.x, s.y);
+  s.y += t.y;
+  s = quickTwoSum(s.x, s.y);
+  return s;
 }
 
 #pragma glslify: export(sub_fp64)
