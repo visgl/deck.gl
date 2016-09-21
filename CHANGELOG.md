@@ -28,6 +28,9 @@ For details see [What's New](docs/whats-new.md)
 
 ### deck.gl v2
 
+#### [2.4.10] - 2016-09-20
+- Added line width support to the choropleth layer.
+
 #### [2.4.9] - FIX: Picking of instanced layers restored
 - Layer.calculateInstancePickingColors now gets correct numInstances argument.
 - Bumps luma.gl to include Linux fix.
