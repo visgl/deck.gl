@@ -158,8 +158,8 @@ export default class DeckGLOverlay extends React.Component {
       for (let i = 0; i < 4; ++i)
         for (let j = 0; j < 4; ++j)
         {
-          let row_major_index = j * 4 + i;
-          let column_major_index = (i * 4 + j) * 2;
+          const row_major_index = j * 4 + i;
+          const column_major_index = (i * 4 + j) * 2;
 
           [toMatrixArray[column_major_index], toMatrixArray[column_major_index + 1]] = df64ify(fromMatrix[row_major_index]);
 
