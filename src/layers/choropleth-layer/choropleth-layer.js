@@ -21,6 +21,7 @@
 import BaseLayer from '../base-layer';
 import earcut from 'earcut';
 import flattenDeep from 'lodash.flattendeep';
+import geojsonCoords from 'geojson-coords';
 import normalize from 'geojson-normalize';
 import {Model, Program, Geometry} from 'luma.gl';
 const glslify = require('glslify');
@@ -177,14 +178,9 @@ export default class ChoroplethLayer extends BaseLayer {
     const normalizedGeojson = normalize(data);
 
     this.state.choropleths = normalizedGeojson.features.map(choropleth => {
-      let coordinates = choropleth.geometry.coordinates[0];
-      // flatten nested polygons
-      if (coordinates.length === 1 && coordinates[0].length > 2) {
-        coordinates = coordinates[0];
-      }
       return {
         properties: choropleth.properties,
-        coordinates
+        coordinates: geojsonCoords(choropleth.geometry)
       };
     });
 
