@@ -36,7 +36,7 @@ import LayerSelector from './layer-selector';
 import LayerInfo from './layer-info';
 
 import request from 'd3-request';
-import LAYERS, {DEFAULT_ACTIVE_LAYERS} from './layers';
+import LAYER_CATEGORIES, {DEFAULT_ACTIVE_LAYERS} from './layer-examples';
 import {DeckGLOverlay} from '../src';
 
 // ---- Default Settings ---- //
@@ -387,10 +387,26 @@ class ExampleApp extends React.Component {
       onLineClicked: this._handleLineClicked
     };
     const layers = [];
-    for (const exampleName of Object.keys(LAYERS)) {
-      if (this.state.activeExamples[exampleName]) {
-        const example = LAYERS[exampleName];
-        layers.push(example(props));
+    for (const categoryName of Object.keys(LAYER_CATEGORIES)) {
+      for (const exampleName of Object.keys(LAYER_CATEGORIES[categoryName])) {
+        if (this.state.activeExamples[exampleName]) {
+          // An example can be a function returning a deck.gl layer instance
+          // or an array of such a function and a prop generating function
+          let example = LAYER_CATEGORIES[categoryName][exampleName];
+          let layerProps = props;
+          /* eslint-disable max-depth */
+          if (Array.isArray(example)) {
+            const makeProps = example[1];
+            example = example[0]
+            layerProps = {
+              ...props,
+              ...makeProps(),
+              id: exampleName
+            };
+          }
+          /* eslint-enable max-depth */
+          layers.push(example(layerProps));
+        }
       }
     }
     return layers;
@@ -439,7 +455,7 @@ class ExampleApp extends React.Component {
       <div>
         { this._renderMap() }
         <LayerSelector { ...this.state }
-          examples={LAYERS}
+          examples={LAYER_CATEGORIES}
           onChange={this._onChangeLayers}/>
         <LayerInfo { ...this.state }/>
       </div>

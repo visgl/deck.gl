@@ -132,10 +132,10 @@ export default class ScatterplotLayer extends BaseLayer {
     for (const point of data) {
       const position = getPosition(point);
       const radius = getRadius(point) || 1;
-      value[i + 0] = position[0];
-      value[i + 1] = position[1];
-      value[i + 2] = position[2];
-      value[i + 3] = radius;
+      value[i + 0] = position[0] || 0;
+      value[i + 1] = position[1] || 0;
+      value[i + 2] = position[2] || 0;
+      value[i + 3] = radius || 1;
       i += size;
     }
   }
@@ -146,9 +146,9 @@ export default class ScatterplotLayer extends BaseLayer {
     let i = 0;
     for (const point of data) {
       const color = getColor(point);
-      value[i + 0] = color[0];
-      value[i + 1] = color[1];
-      value[i + 2] = color[2];
+      value[i + 0] = color[0] || 0;
+      value[i + 1] = color[1] || 0;
+      value[i + 2] = color[2] || 0;
       i += size;
     }
   }

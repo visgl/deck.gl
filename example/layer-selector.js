@@ -30,24 +30,38 @@ function renderExampleButtons({examples, activeExamples, onChange}) {
   return children;
 }
 
+function renderExampleCategories({examples, activeExamples, onChange}) {
+  const children = [];
+  for (const categoryName of Object.keys(examples)) {
+    const category = examples[categoryName];
+    children.push(
+      <div key={categoryName}>
+        { categoryName }
+        { renderExampleButtons({examples: category, activeExamples, onChange}) }
+      </div>
+    );
+  }
+  return children;
+}
+
 export default function LayerSelector({examples, activeExamples, onChange}) {
   return (
     <div id="example-selector" style={{
       position: 'absolute',
       top: 20,
       bottom: 20,
-      right: 20,
+      right: 0,
       zIndex: 98
     }}>
       <div style={ {
         padding: 0,
-        width: 250,
+        width: 280,
         height: '100%',
         overflowX: 'hidden',
         overflowY: 'scroll'
       } }>
       {
-        renderExampleButtons({examples, activeExamples, onChange})
+        renderExampleCategories({examples, activeExamples, onChange})
       }
       </div>
     </div>
