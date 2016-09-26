@@ -145,6 +145,26 @@ export default class DeckGLOverlay extends React.Component {
       }
     }
 
+    function convertToMat4FP64(toMatrixArray, fromMatrix) {
+      function df64ify(a) {
+        const a_hi = Math.fround(a);
+        const a_lo = a - Math.fround(a);
+        return [a_hi, a_lo];
+      }
+
+      // Transpose the projection matrix to column major for GLSL.
+
+      for (let i = 0; i < 4; ++i)
+        for (let j = 0; j < 4; ++j)
+        {
+          const row_major_index = j * 4 + i;
+          const column_major_index = (i * 4 + j) * 2;
+
+          [toMatrixArray[column_major_index], toMatrixArray[column_major_index + 1]] = df64ify(fromMatrix[row_major_index]);
+
+        }
+    }
+
     // Create a "disposable" camera and overwrite matrices
     if (!camera) {
       const viewport = new Viewport({
@@ -154,6 +174,8 @@ export default class DeckGLOverlay extends React.Component {
       camera = new PerspectiveCamera();
       camera.view = new Mat4().id();
       convertToMat4(camera.projection, viewport.getProjectionMatrix());
+      convertToMat4FP64(camera.projectionFP64, viewport.getProjectionMatrix());
+
     }
 
     return (
