@@ -146,7 +146,7 @@ export default class DeckGLOverlay extends React.Component {
     }
 
     function convertToMat4FP64(toMatrixArray, fromMatrix) {
-    function df64ify(a) {
+      function df64ify(a) {
         const a_hi = Math.fround(a);
         const a_lo = a - Math.fround(a);
         return [a_hi, a_lo];
