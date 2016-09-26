@@ -22,17 +22,14 @@
 #pragma glslify: mul_fp64 = require(./mul-fp64)
 
 void vec4_dot_fp64(vec2 a[4], vec2 b[4], out vec2 out_val) {
-
   vec2 v[4];
+
   v[0] = mul_fp64(a[0], b[0]);
   v[1] = mul_fp64(a[1], b[1]);
   v[2] = mul_fp64(a[2], b[2]);
   v[3] = mul_fp64(a[3], b[3]);
 
   out_val = sum_fp64(sum_fp64(v[0], v[1]), sum_fp64(v[2], v[3]));
-
-  return;
-
 }
 
 #pragma glslify: export(vec4_dot_fp64)

@@ -22,7 +22,6 @@
 
 
 void vec4_fp64(vec4 a, out vec2 out_val[4]) {
-
   out_val[0].x = a[0];
   out_val[0].y = 0.0;
 
@@ -34,7 +33,6 @@ void vec4_fp64(vec4 a, out vec2 out_val[4]) {
 
   out_val[3].x = a[3];
   out_val[3].y = 0.0;
-
 }
 
 #pragma glslify: export(vec4_fp64)

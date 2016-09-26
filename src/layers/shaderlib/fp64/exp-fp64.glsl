@@ -23,8 +23,6 @@
 
 vec2 exp_fp64(vec2 a) {
 
-//   //float threshold = 1e-20 * exp(a.x);
-
   vec2 t;
   vec2 p;
   vec2 f;
@@ -54,16 +52,6 @@ vec2 exp_fp64(vec2 a) {
   }
 
   return sum_fp64(s, t);
-
-  // vec2 tmp_result = vec2(1.0, 0.0);
-
-  // for (int i = 20; i > 0; --i)
-  // {
-  //   tmp_result = sum_fp64(vec2(1.0, 0.0), div_fp64(mul_fp64(a, tmp_result), vec2(i, 0.0)));
-  // }
-
-  // return tmp_result;
-
 }
 #pragma glslify: export(exp_fp64)
 

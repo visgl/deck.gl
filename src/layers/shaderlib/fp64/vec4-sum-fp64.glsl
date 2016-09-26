@@ -21,12 +21,8 @@
 #pragma glslify: sum_fp64 = require(./sum-fp64)
 
 void vec4_sum_fp64(vec2 a[4], vec2 b[4], out vec2 out_val[4]) {
-
-  for (int i = 0; i < 4; i++)
-  {
+  for (int i = 0; i < 4; i++) {
     out_val[i] = sum_fp64(a[i], b[i]);
   }
-
-  return;
 }
 #pragma glslify: export(vec4_sum_fp64)

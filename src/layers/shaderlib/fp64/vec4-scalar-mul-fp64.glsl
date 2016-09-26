@@ -21,14 +21,12 @@
 #pragma glslify: sum_fp64 = require(./sum-fp64)
 #pragma glslify: mul_fp64 = require(./mul-fp64)
 
-// TODO could be further simplified, will do after the UT
+// TODO could be further simplified
 void vec4_scalar_mul_fp64(vec2 a[4], vec2 b, out vec2 out_val[4]) {
   out_val[0] = mul_fp64(a[0], b);
   out_val[1] = mul_fp64(a[1], b);
   out_val[2] = mul_fp64(a[2], b);
   out_val[3] = mul_fp64(a[3], b);
-
-  return;
 }
 
 #pragma glslify: export(vec4_scalar_mul_fp64)

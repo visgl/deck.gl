@@ -27,6 +27,7 @@ const defaultGetPosition = x => x.position;
 const defaultGetRadius = x => x.radius;
 const defaultGetColor = x => x.color || DEFAULT_COLOR;
 
+
 export default class ScatterplotLayer extends BaseLayer {
   /*
    * @classdesc
@@ -59,7 +60,7 @@ export default class ScatterplotLayer extends BaseLayer {
     });
 
     attributeManager.addInstanced({
-      instancePositions: {size: 4, update: this.calculateInstancePositions},
+      instancePositionsFP64: {size: 4, update: this.calculateInstancePositions},
       instanceRadius: {size: 1, update: this.calculateInstanceRadius},
       layerHeight: {size: 2, update: this.calculateLayerHeight},
       instanceColors: {size: 3, update: this.calculateInstanceColors}
@@ -104,22 +105,21 @@ export default class ScatterplotLayer extends BaseLayer {
   }
 
   df64ify(a) {
-    const a_hi = new Float32Array([a])[0];
-    const a_lo = a - a_hi;
+    const a_hi = Math.fround(a);
+    const a_lo = a - Math.fround(a);
     return [a_hi, a_lo];
   }
 
   updateUniforms() {
-    this.calculateZoomRadiusFP64();
+    this.calculateZoomRadius();
     this.calculate
-    const {zoomRadius} = this.state;
+    const {zoomRadiusFP64} = this.state;
     const {zoom} = this.props;
 
     this.setUniforms({
-      zoomRadius: zoomRadius,
+      zoomRadiusFP64: zoomRadiusFP64,
       mercatorScaleFP64: this.df64ify(Math.pow(2, zoom))
     });
-
   }
 
   calculateInstancePositions(attribute) {
@@ -132,8 +132,8 @@ export default class ScatterplotLayer extends BaseLayer {
       [value[i + 2], value[i + 3]] = this.df64ify(position[1]);
       i += size;
     }
-
   }
+
   calculateLayerHeight(attribute) {
     const {data, getPosition} = this.props;
     const {value, size} = attribute;
@@ -143,7 +143,6 @@ export default class ScatterplotLayer extends BaseLayer {
       [value[i + 0], value[i + 1]] = this.df64ify(position[2]);
       i += size;
     }
-
   }
 
   calculateInstanceRadius(attribute) {
@@ -156,6 +155,7 @@ export default class ScatterplotLayer extends BaseLayer {
       i += size;
     }
   }
+
   calculateInstanceColors(attribute) {
     const {data, getColor} = this.props;
     const {value, size} = attribute;
@@ -169,15 +169,10 @@ export default class ScatterplotLayer extends BaseLayer {
     }
   }
 
-  calcualteMercatorScaleFP64() {
-
-
-  }
-
-  calculateZoomRadiusFP64() {
+  calculateZoomRadius() {
     // use radius if specified
     if (this.props.radius) {
-      this.state.zoomRadius = this.df64ify(this.props.radius);
+      this.state.zoomRadiusFP64 = this.df64ify(this.props.radius);
       return;
     }
 
@@ -188,8 +183,6 @@ export default class ScatterplotLayer extends BaseLayer {
     const dy = pixel0[1] - pixel1[1];
 
     const tmp_radius = Math.max(Math.sqrt(dx * dx + dy * dy), 2.0);
-    this.state.zoomRadius = this.df64ify(tmp_radius);
-
+    this.state.zoomRadiusFP64 = this.df64ify(tmp_radius);
   }
-
 }

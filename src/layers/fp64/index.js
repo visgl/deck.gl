@@ -1,5 +1,5 @@
-import FP64ScatterplotLayer from './scatterplot-layer';
+import ScatterplotLayer64 from './scatterplot-layer';
 
 module.exports = {
-  FP64ScatterplotLayer
+  ScatterplotLayer64
 };

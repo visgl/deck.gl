@@ -186,6 +186,22 @@ export function ExperimentalScatterplotLayerExample(props) {
   });
 }
 
+export function ScatterplotLayer64Example(props) {
+  const {mapViewState, points} = props;
+
+  return new ScatterplotLayer64({
+    id: props.id || 'scatterplotLayer64',
+    width: window.innerWidth,
+    height: window.innerHeight,
+    ...mapViewState,
+    data: points,
+    isPickable: true,
+    onHover: props.onScatterplotHovered,
+    onClick: props.onScatterplotClicked
+  });
+}
+
+
 // Returns new array N times larger than input array
 // filled with duplicate elements
 // Avoids Array.concat (which generates temporary huge arrays)
@@ -213,7 +229,8 @@ function makePoints(N = 1e6, color = [88, 220, 124]) {
     points[i] = {
       position: [
         center[0] + (Math.random() - 0.5) * spread,
-        center[1] + (Math.random() - 0.5) * spread
+        center[1] + (Math.random() - 0.5) * spread,
+        0.0
       ],
       color,
       radius: Math.random() + 0.5
@@ -230,11 +247,18 @@ function make1MPoints() {
 
 let points10M = null;
 function make10MPoints() {
-  points10M = points10M || duplicateArray(makePoints(1e6, [124, 88, 220]), 10);
+  points10M = points10M || duplicateArray(makePoints(1e6, [124, 200, 10]), 10);
   // Too slow
   // points10M = makePoints(1e7, [124, 88, 220]);
   return {points: points10M, isPickable: false};
 }
+
+let points100K = null;
+function make100KPoints() {
+  points100K = points100K || makePoints(1e5);
+  return {points: points100K, isPickable: false};
+}
+
 
 export default {
   'Core Layers': {
@@ -264,11 +288,14 @@ export default {
 
   'Performance Tests': {
     'ScatterplotLayer 1M': [ScatterplotLayerExample, make1MPoints],
-    'ScatterplotLayer 10M': [ScatterplotLayerExample, make10MPoints]
+    'ScatterplotLayer 10M': [ScatterplotLayerExample, make10MPoints],
+    'ScatterplotLayer64 100K': [ScatterplotLayer64Example, make100KPoints],
+    'ScatterplotLayer64 1M': [ScatterplotLayer64Example, make1MPoints],
+    'ScatterplotLayer64 10M': [ScatterplotLayer64Example, make10MPoints]
   }
 };
 
 export const DEFAULT_ACTIVE_LAYERS = {
   'ChoroplethLayer (Contour)': true,
-  'ScatterplotLayer64': true
+//  'ScatterplotLayer64 10M': true
 };

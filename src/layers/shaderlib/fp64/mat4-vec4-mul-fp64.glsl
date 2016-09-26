@@ -21,7 +21,6 @@
 #pragma glslify: mul_fp64 = require(./mul-fp64)
 
 void mat4_vec4_mul_fp64(vec2 b[16], vec2 a[4], out vec2 out_val[4]) {
-
   vec2 tmp[4];
 
   for (int i = 0; i < 4; i++)
@@ -32,8 +31,6 @@ void mat4_vec4_mul_fp64(vec2 b[16], vec2 a[4], out vec2 out_val[4]) {
     }
     vec4_dot_fp64(a, tmp, out_val[i]);
   }
-
-  return;
 }
 
 #pragma glslify: export(mat4_vec4_mul_fp64)

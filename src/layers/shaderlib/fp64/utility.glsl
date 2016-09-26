@@ -18,8 +18,6 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-//const float EPSILON = 1.2e-7; // precision ~pow(2,-24)
-
 float check_error(vec2 result, vec2 ref, float EPSILON)
 {
   float pass = 0.0;
@@ -29,7 +27,6 @@ float check_error(vec2 result, vec2 ref, float EPSILON)
 
   pass = pass / 3.0;
   return pass;
-
 }
 #pragma glslify: export(check_error)
 

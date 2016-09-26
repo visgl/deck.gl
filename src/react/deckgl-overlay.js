@@ -146,14 +146,13 @@ export default class DeckGLOverlay extends React.Component {
     }
 
     function convertToMat4FP64(toMatrixArray, fromMatrix) {
-
-      function df64ify(a) {
-        const a_hi = new Float32Array([a])[0];
-        const a_lo = a - a_hi;
+    function df64ify(a) {
+        const a_hi = Math.fround(a);
+        const a_lo = a - Math.fround(a);
         return [a_hi, a_lo];
       }
 
-      // Transpose the projection matrix to column major for GLSL
+      // Transpose the projection matrix to column major for GLSL.
 
       for (let i = 0; i < 4; ++i)
         for (let j = 0; j < 4; ++j)

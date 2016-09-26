@@ -27,7 +27,7 @@
 #pragma glslify: mat4_vec4_mul_fp64 = require(../../shaderlib/fp64/mat4-vec4-mul-fp64)
 
 attribute vec3 positions;
-attribute vec4 instancePositions;
+attribute vec4 instancePositionsFP64;
 attribute vec2 layerHeight;
 attribute float instanceRadius;
 attribute vec3 instanceColors;
@@ -37,7 +37,7 @@ uniform mat4 projectionMatrix;
 // Only one-dimensional arrays may be declared in GLSL ES 1.0. specs p.24
 uniform vec2 projectionFP64[16];
 uniform float opacity;
-uniform vec2 zoomRadius;
+uniform vec2 zoomRadiusFP64;
 uniform float renderPickingBuffer;
 
 varying vec4 vColor;
@@ -45,13 +45,13 @@ void main(void) {
   // For some reason, need to add one to elevation to show up in untilted mode
 
   vec2 projected_coord_xy[2];
-  project_fp64(instancePositions, projected_coord_xy);
+  project_fp64(instancePositionsFP64, projected_coord_xy);
 
   vec2 pos_mul_radius[4];
   vec4_fp64(vec4(positions * instanceRadius, 0.0), pos_mul_radius);
 
   vec2 vertex_pos_localspace[4];
-  vec4_scalar_mul_fp64(pos_mul_radius, zoomRadius, vertex_pos_localspace);
+  vec4_scalar_mul_fp64(pos_mul_radius, zoomRadiusFP64, vertex_pos_localspace);
 
   vec2 vertex_pos_modelspace[4];
 
