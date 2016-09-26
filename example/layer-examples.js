@@ -16,7 +16,7 @@ export function GridLayerExample(props) {
   const {mapViewState, points} = props;
 
   return new GridLayer({
-    id: 'gridLayer',
+    id: props.id || 'gridLayer',
     width: window.innerWidth,
     height: window.innerHeight,
     ...mapViewState,
@@ -29,7 +29,7 @@ export function GridLayerExample(props) {
 export function ChoroplethContourLayerExample(props) {
   const {mapViewState, choropleths} = props;
   return new ChoroplethLayer({
-    id: 'choroplethContourLayer',
+    id: props.id || 'choroplethContourLayer',
     width: window.innerWidth,
     height: window.innerHeight,
     ...mapViewState,
@@ -42,7 +42,7 @@ export function ChoroplethContourLayerExample(props) {
 export function ChoroplethLayerExample(props) {
   const {mapViewState, choropleths} = props;
   return new ChoroplethLayer({
-    id: 'choroplethLayer',
+    id: props.id || 'choroplethLayer',
     width: window.innerWidth,
     height: window.innerHeight,
     ...mapViewState,
@@ -58,7 +58,7 @@ export function HexagonLayerExample(props) {
   const {mapViewState, hexData} = props;
 
   return new HexagonLayer({
-    id: 'hexagonLayer',
+    id: props.id || 'hexagonLayer',
     width: window.innerWidth,
     height: window.innerHeight,
     ...mapViewState,
@@ -76,7 +76,7 @@ export function HexagonSelectionLayerExample(props) {
   const {selectedHexagons} = props;
 
   return new HexagonLayer({
-    id: 'hexagonSelectionLayer',
+    id: props.id || 'hexagonSelectionLayer',
     width: window.innerWidth,
     height: window.innerHeight,
     ...mapViewState,
@@ -91,7 +91,7 @@ export function ScatterplotLayerExample(props) {
   const {mapViewState, points} = props;
 
   return new ScatterplotLayer({
-    id: 'scatterplotLayer',
+    id: props.id || 'scatterplotLayer',
     width: window.innerWidth,
     height: window.innerHeight,
     ...mapViewState,
@@ -106,7 +106,7 @@ export function ArcLayerExample(props) {
   const {mapViewState, arcs} = props;
 
   return new ArcLayer({
-    id: 'arcLayer',
+    id: props.id || 'arcLayer',
     width: window.innerWidth,
     height: window.innerHeight,
     ...mapViewState,
@@ -122,7 +122,7 @@ export function ArcLayer2Example(props) {
   const {mapViewState, arcs2} = props;
 
   return new ArcLayer({
-    id: 'arcLayer2',
+    id: props.id || 'arcLayer2',
     width: window.innerWidth,
     height: window.innerHeight,
     ...mapViewState,
@@ -138,7 +138,7 @@ export function LineLayerExample(props) {
   const {mapViewState, lines} = props;
 
   return new LineLayer({
-    id: 'lineLayer',
+    id: props.id || 'lineLayer',
     width: window.innerWidth,
     height: window.innerHeight,
     ...mapViewState,
@@ -153,7 +153,7 @@ export function LineLayerExample(props) {
 export function ExtrudedChoroplethLayerExample(props) {
   const {mapViewState, choropleths} = props;
   return new ExtrudedChoroplethLayer({
-    id: 'extruded-choroplethLayer',
+    id: props.id || 'extruded-choroplethLayer',
     width: window.innerWidth,
     height: window.innerHeight,
     ...mapViewState,
@@ -169,7 +169,7 @@ export function ExperimentalScatterplotLayerExample(props) {
   const {mapViewState, points} = props;
 
   return new ExperimentalScatterplotLayer({
-    id: 'experimentalScatterplotLayer',
+    id: props.id || 'experimentalScatterplotLayer',
     width: window.innerWidth,
     height: window.innerHeight,
     ...mapViewState,
@@ -181,22 +181,84 @@ export function ExperimentalScatterplotLayerExample(props) {
   });
 }
 
-export default {
-  GridLayer: GridLayerExample,
-  ChoroplethContourLayer: ChoroplethContourLayerExample,
-  ChoroplethLayer: ChoroplethLayerExample,
-  HexagonLayer: HexagonLayerExample,
-  HexagonSelectionLayer: HexagonSelectionLayerExample,
-  ScatterplotLayer: ScatterplotLayerExample,
-  LineLayer: LineLayerExample,
-  ArcLayer: ArcLayerExample,
-  ArcLayer2: ArcLayer2Example,
+// Returns new array N times larger than input array
+// filled with duplicate elements
+// Avoids Array.concat (which generates temporary huge arrays)
+// Avoids Array.push (which keeps reallocating the array)
+function duplicateArray(array, N = 10) {
+  const length = array.length;
+  const newArray = Array(N * length);
+  for (let i = 0; i < N; ++i) {
+    for (let j = 0; j < array.length; ++j) {
+      newArray[i * length + j] = array[j];
+    }
+  }
+  return newArray;
+}
 
-  ExtrudedChoroplethLayer: ExtrudedChoroplethLayerExample,
-  ExperimentalScatterplotLayer: ExperimentalScatterplotLayerExample
+function makePoints(N = 1e6, color = [88, 220, 124]) {
+  const center = [
+    -122.42694203247012,
+    37.751537058389985
+  ];
+  const spread = 2;
+
+  const points = Array(N);
+  for (let i = 0; i < N; ++i) {
+    points[i] = {
+      position: [
+        center[0] + (Math.random() - 0.5) * spread,
+        center[1] + (Math.random() - 0.5) * spread
+      ],
+      color,
+      radius: Math.random() + 0.5
+    };
+  }
+  return points;
+}
+
+let points1M = null;
+function make1MPoints() {
+  points1M = points1M || makePoints(1e6);
+  return {points: points1M, isPickable: false};
+}
+
+let points10M = null;
+function make10MPoints() {
+  points10M = points10M || duplicateArray(makePoints(1e6, [124, 88, 220]), 10);
+  // Too slow
+  // points10M = makePoints(1e7, [124, 88, 220]);
+  return {points: points10M, isPickable: false};
+}
+
+export default {
+  'Core Layers': {
+    GridLayer: GridLayerExample,
+    'ChoroplethLayer (Solid)': ChoroplethLayerExample,
+    'ChoroplethLayer (Contour)': ChoroplethContourLayerExample,
+    HexagonLayer: HexagonLayerExample,
+    ScatterplotLayer: ScatterplotLayerExample,
+    LineLayer: LineLayerExample,
+    ArcLayer: ArcLayerExample
+  },
+
+  'Core Layers (Additional)': {
+    HexagonSelectionLayer: HexagonSelectionLayerExample,
+    ArcLayer2: ArcLayer2Example
+  },
+
+  'Experimental Layers': {
+    ExtrudedChoroplethLayer: ExtrudedChoroplethLayerExample,
+    ExperimentalScatterplotLayer: ExperimentalScatterplotLayerExample
+  },
+
+  'Performance Tests': {
+    'ScatterplotLayer 1M': [ScatterplotLayerExample, make1MPoints],
+    'ScatterplotLayer 10M': [ScatterplotLayerExample, make10MPoints]
+  }
 };
 
 export const DEFAULT_ACTIVE_LAYERS = {
-  ScatterplotLayer,
-  ExperimentalScatterplotLayer
+  'ChoroplethLayer (Contour)': true,
+  'ScatterplotLayer': true
 };

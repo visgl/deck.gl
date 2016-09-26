@@ -43,7 +43,10 @@ export const DEFAULT_MAP_STATE = {
 export default class Viewport {
   /**
    * @classdesc
-   * Manages coordinate system transformations for deck.gl
+   * Manages coordinate system transformations for deck.gl.
+   *
+   * Note: The Viewport is immutable in the sense that it only has accessors.
+   * A new viewport instance should be created if any parameters have changed.
    *
    * @class
    * @param {Object} opt - options
@@ -101,6 +104,9 @@ export default class Viewport {
     this.height = this.height || 1;
 
     this._initialize();
+
+    // Object.seal(this);
+    // Object.freeze(this);
   }
 
 
@@ -287,8 +293,6 @@ export default class Viewport {
     this._calculateGLProjectionMatrix();
     this._pixelProjectionMatrix = null;
     this._pixelUnprojectionMatrix = null;
-
-    // bject.seal(this);
   }
   /* eslint-enable max-statements */
 
