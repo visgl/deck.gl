@@ -41,15 +41,15 @@ function glEnumToString(gl, value) {
 };
 
 function addSpan(contents, div) {
-    if (div == undefined) {
-      var divs = document.body.getElementsByClassName("testInfo");
-      var lastDiv = divs[divs.length - 1];
-      div = lastDiv;
-    }
+  if (div == undefined) {
+    var divs = document.body.getElementsByClassName("testInfo");
+    var lastDiv = divs[divs.length - 1];
+    div = lastDiv;
+  }
 
-    var span = document.createElement("span");
-    div.appendChild(span);
-    span.innerHTML = contents + '<br />';
+  var span = document.createElement("span");
+  div.appendChild(span);
+  span.innerHTML = contents + '<br />';
 }
 
 function addDiv(contents) {
@@ -61,22 +61,22 @@ function addDiv(contents) {
 }
 
 function logToConsole(msg) {
-    if (window.console)
-      window.console.log(msg);
+  if (window.console)
+    window.console.log(msg);
 }
 
 function escapeHTML(text) {
-    return text.replace(/&/g, "&amp;").replace(/</g, "&lt;");
+  return text.replace(/&/g, "&amp;").replace(/</g, "&lt;");
 }
 
 function testPassed(msg) {
-    addSpan('<span><span class="pass" style="color:green">PASS</span> ' + escapeHTML(msg) + '</span>');
-    logToConsole('PASS ' + msg);
+  addSpan('<span><span class="pass" style="color:green">PASS</span> ' + escapeHTML(msg) + '</span>');
+  logToConsole('PASS ' + msg);
 }
 
 function testFailed(msg) {
-    addSpan('<span><span class="fail" style="color:red">FAIL</span> ' + escapeHTML(msg) + '</span>');
-    logToConsole('FAIL ' + msg);
+  addSpan('<span><span class="fail" style="color:red">FAIL</span> ' + escapeHTML(msg) + '</span>');
+  logToConsole('FAIL ' + msg);
 }
 
 function glErrorShouldBe(gl, glErrors, opt_msg) {
@@ -516,7 +516,7 @@ window.onload = () => {
 
   var idx0;
   var test_no = 0;
-  let loop = 10;
+  const loop = 10;
 
   for (idx0 = 0; idx0 < loop; idx0++) {
 
