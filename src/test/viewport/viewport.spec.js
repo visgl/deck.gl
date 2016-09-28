@@ -60,6 +60,12 @@ const VIEWPORT_TEST_DATA = [
   }
 ];
 
+test('Viewport#constructor', t => {
+  t.ok(new Viewport() instanceof Viewport,
+    'Created new Viewport with default args');
+  t.end();
+});
+
 test('MapboxTransform projection matrix', t => {
   for (const testData of VIEWPORT_TEST_DATA) {
     const viewport = new MapboxTransform(testData.mapState);
@@ -71,13 +77,18 @@ test('MapboxTransform projection matrix', t => {
   t.end();
 });
 
-test('Viewport#constructor', t => {
-  t.ok(new Viewport() instanceof Viewport,
-    'Created new Viewport with default args');
+test('Viewport#constructor - 0 width/height', t => {
+  const viewport = new Viewport({
+    ...VIEWPORT_TEST_DATA.mapState,
+    width: 0,
+    height: 0
+  });
+  t.ok(viewport instanceof Viewport,
+    'Viewport constructed successfully with 0 width and height');
   t.end();
 });
 
-test('Viewport projection matrix', t => {
+test('Viewport#projection matrix', t => {
   for (const testData of VIEWPORT_TEST_DATA) {
     const viewport = new Viewport(testData.mapState);
     const projectionMatrix = viewport.getProjectionMatrix();
@@ -107,7 +118,24 @@ test('Viewport.project#3D', t => {
     const {mapState} = testData;
     const viewport = new Viewport(mapState);
     const xy = viewport.project([mapState.longitude, mapState.latitude]);
-    t.ok(vec2.equals(xy, [mapState.width / 2, mapState.height / 2]));
+    const target = [mapState.width / 2, mapState.height / 2];
+    t.comment(`Comparing [${xy}] to [${target}]`);
+    t.ok(vec2.equals(xy, target));
   }
   t.end();
 });
+
+// test('Viewport.project', t => {
+//   for (const testData of VIEWPORT_TEST_DATA) {
+//     // Remove bearing pitch and altitude
+//     const {mapState: {...mapState}} = testData;
+//     const viewport = new Viewport(mapState);
+//     const vmp = new ViewportMercatorProject(mapState);
+//     const xy = viewport.project(
+//       [mapState.longitude, mapState.latitude], {});
+//     const xy2 = vmp.project([mapState.longitude, mapState.latitude]);
+//     t.comment(`Comparing [${xy2}] [${xy}]`);
+//     t.ok(vec2.equals(xy, xy2));
+//   }
+//   t.end();
+// });

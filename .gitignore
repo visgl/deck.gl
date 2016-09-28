@@ -10,3 +10,4 @@ _docs
 examples/winds/data/*.html
 node_modules
 npm-debug.log
+.exit_code

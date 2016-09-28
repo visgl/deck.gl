@@ -304,8 +304,9 @@ export default class Viewport {
     const METERS_PER_DEGREE = 111000;
     const {latitude: lat, longitude: lon} = this;
 
-    const metersPerDegreeLat = Math.cos(lat / 180 * Math.PI);
     const metersPerDegreeLon = METERS_PER_DEGREE;
+    const metersPerDegreeLat =
+      Math.cos(lat / 180 * Math.PI) * METERS_PER_DEGREE;
     const metersPerDegreeAvg = (metersPerDegreeLat + metersPerDegreeLon) / 2;
 
     // Calculate number of pixels occupied by one degree longitude
@@ -324,13 +325,13 @@ export default class Viewport {
     const pixelsPerMeterAvg = (pixelsPerMeterX + pixelsPerMeterY) / 2;
 
     this.metersPerLatLon = [
-      metersPerDegreeLat,
       metersPerDegreeLon,
+      metersPerDegreeLat,
       metersPerDegreeAvg
     ];
     this.latLonPerMeter = [
-      1 / metersPerDegreeLat,
       1 / metersPerDegreeLon,
+      1 / metersPerDegreeLat,
       1 / metersPerDegreeAvg
     ];
     this.pixelsPerMeterX = [

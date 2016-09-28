@@ -34,4 +34,3 @@ the results will be good.
 
 See common deck.gl layer properties below for more information on inherited
 props.
-
