@@ -53,11 +53,11 @@ function addSpan(contents, div) {
 }
 
 function addDiv(contents) {
-    var testInfoDiv = document.createElement("div");
-    document.body.appendChild(testInfoDiv);
-    testInfoDiv.setAttribute("class", "testInfo");
+  var testInfoDiv = document.createElement("div");
+  document.body.appendChild(testInfoDiv);
+  testInfoDiv.setAttribute("class", "testInfo");
 
-    return testInfoDiv;
+  return testInfoDiv;
 }
 
 function logToConsole(msg) {

@@ -95,7 +95,7 @@ export default class ScatterplotLayer extends BaseLayer {
       ];
     }
 
-    var nv_ifdef = '';
+    let nv_ifdef = '';
     console.log(glGetDebugInfo(gl).vendor);
 
     if (glGetDebugInfo(gl).vendor.match(/NVIDIA/)) {
