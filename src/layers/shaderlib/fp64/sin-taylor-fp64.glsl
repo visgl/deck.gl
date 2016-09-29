@@ -1,4 +1,4 @@
-// Copyright (c) 2015 Uber Technologies, Inc.
+// Copyright (c) 2016 Uber Technologies, Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -20,11 +20,10 @@
 #pragma glslify: sum_fp64 = require(./sum-fp64, ONE=ONE)
 #pragma glslify: mul_fp64 = require(./mul-fp64, ONE=ONE)
 
-const vec2 inv_fact0 = vec2(1.666666716337204e-01, -4.967053879312289e-09);
-const vec2 inv_fact2 = vec2(8.333333767950535e-03, -4.34617203337595e-10);
-const vec2 inv_fact4 = vec2(1.9841270113829523e-04,  -2.725596874933456e-12);
-const vec2 inv_fact6 = vec2(2.75573188446287533e-06, 3.7935713937038186e-14);
-const vec2 inv_fact8 = vec2(2.5052107943679403e-08, 4.4176231769972645e-16);
+const vec2 INVERSE_FACTORIAL_3 = vec2(1.666666716337204e-01, -4.967053879312289e-09); // 1/3!
+const vec2 INVERSE_FACTORIAL_5 = vec2(8.333333767950535e-03, -4.34617203337595e-10); // 1/5!
+const vec2 INVERSE_FACTORIAL_7 = vec2(1.9841270113829523e-04,  -2.725596874933456e-12); // 1/7!
+const vec2 INVERSE_FACTORIAL_9 = vec2(2.75573188446287533e-06, 3.7935713937038186e-14); // 1/9!
 
 vec2 sin_taylor_fp64(vec2 a) {
   vec2 r, s, t, x;
@@ -38,19 +37,19 @@ vec2 sin_taylor_fp64(vec2 a) {
   r = a;
 
   r = mul_fp64(r, x);
-  t = mul_fp64(r, inv_fact0);
+  t = mul_fp64(r, INVERSE_FACTORIAL_3);
   s = sum_fp64(s, t);
 
   r = mul_fp64(r, x);
-  t = mul_fp64(r, inv_fact2);
+  t = mul_fp64(r, INVERSE_FACTORIAL_5);
   s = sum_fp64(s, t);
 
   r = mul_fp64(r, x);
-  t = mul_fp64(r, inv_fact4);
+  t = mul_fp64(r, INVERSE_FACTORIAL_7);
   s = sum_fp64(s, t);
 
   r = mul_fp64(r, x);
-  t = mul_fp64(r, inv_fact6);
+  t = mul_fp64(r, INVERSE_FACTORIAL_9);
   s = sum_fp64(s, t);
 
   return s;
