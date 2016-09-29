@@ -24,7 +24,7 @@
 #pragma glslify: sin_taylor_fp64 = require(./sin-taylor-fp64, ONE=ONE)
 #pragma glslify: cos_taylor_fp64 = require(./cos-taylor-fp64, ONE=ONE)
 #pragma glslify: sincos_taylor_fp64 = require(./sincos-taylor-fp64, ONE=ONE)
-#pragma glslify: quickTwoSum = require(./quickTwoSum, ONE=ONE)
+#pragma glslify: nint_fp64 = require(./nint-fp64, ONE=ONE)
 
 const vec2 TWO_PI = vec2(6.2831854820251465, -1.7484556025237907e-7);
 const vec2 PI_2 = vec2(1.5707963705062866, -4.371139006309477e-8);
@@ -41,29 +41,6 @@ const vec2 COS_TABLE_0 = vec2(0.9807852506637573, 2.9739473106360492e-8);
 const vec2 COS_TABLE_1 = vec2(0.9238795042037964, 2.8307490351764386e-8);
 const vec2 COS_TABLE_2 = vec2(0.8314695954322815, 1.6870263741530778e-8);
 const vec2 COS_TABLE_3 = vec2(0.7071067690849304, 1.2101617152815436e-8);
-
-float nint(float d)
-{
-    if (d == floor(d)) return d;
-    return floor(d + 0.5);
-}
-
-vec2 nint_fp64(vec2 a) {
-    float hi = nint(a.x);
-    float lo;
-    vec2 tmp;
-    if (hi == a.x) {
-        lo = nint(a.y);
-        tmp = quickTwoSum(hi, lo);
-    } else {
-        lo = 0.0;
-        if (abs(hi - a.x) == 0.5 && a.y < 0.0) {
-            hi -= 1.0;
-        }
-        tmp = vec2(hi, lo);
-    }
-    return tmp;
-}
 
 vec2 sin_fp64(vec2 a) {
     if (a.x == 0.0 && a.y == 0.0) {
@@ -87,6 +64,18 @@ vec2 sin_fp64(vec2 a) {
     q = floor(t.x / PI_16.x + 0.5);
     int k = int(q);
 
+    if (k == 0) {
+        if (j == 0) {
+            return sin_taylor_fp64(t);
+        } else if (j == 1) {
+            return cos_taylor_fp64(t);
+        } else if (j == -1) {
+            return -cos_taylor_fp64(t);
+        } else {
+            return -sin_taylor_fp64(t);
+        }
+    }
+
     int abs_k = int(abs(float(k)));
 
     // We just can't get PI/16 * 3.0 very accurately.
@@ -101,17 +90,6 @@ vec2 sin_fp64(vec2 a) {
         t = sub_fp64(t, mul_fp64(PI_16, vec2(q, 0.0)));
     }
 
-    if (k == 0) {
-        if (j == 0) {
-            return sin_taylor_fp64(t);
-        } else if (j == 1) {
-            return cos_taylor_fp64(t);
-        } else if (j == -1) {
-            return -cos_taylor_fp64(t);
-        } else {
-            return -sin_taylor_fp64(t);
-        }
-    }
     vec2 u = vec2(0.0, 0.0);
     vec2 v = vec2(0.0, 0.0);
 

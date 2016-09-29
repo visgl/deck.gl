@@ -21,8 +21,6 @@
 #pragma glslify: sub_fp64 = require(./sub-fp64, ONE=ONE)
 #pragma glslify: mul_fp64 = require(./mul-fp64, ONE=ONE)
 #pragma glslify: div_fp64 = require(./div-fp64, ONE=ONE)
-#pragma glslify: sin_taylor_fp64 = require(./sin-taylor-fp64, ONE=ONE)
-#pragma glslify: cos_taylor_fp64 = require(./cos-taylor-fp64, ONE=ONE)
 #pragma glslify: sincos_taylor_fp64 = require(./sincos-taylor-fp64, ONE=ONE)
 #pragma glslify: nint_fp64 = require(./nint-fp64, ONE=ONE)
 
@@ -42,9 +40,12 @@ const vec2 COS_TABLE_1 = vec2(0.9238795042037964, 2.8307490351764386e-8);
 const vec2 COS_TABLE_2 = vec2(0.8314695954322815, 1.6870263741530778e-8);
 const vec2 COS_TABLE_3 = vec2(0.7071067690849304, 1.2101617152815436e-8);
 
-vec2 cos_fp64(vec2 a) {
+vec2 tan_fp64(vec2 a) {
+    vec2 sin_a;
+    vec2 cos_a;
+
     if (a.x == 0.0 && a.y == 0.0) {
-        return vec2(1.0, 0.0);
+        return vec2(0.0, 0.0);
     }
 
     // 2pi range reduction
@@ -63,20 +64,7 @@ vec2 cos_fp64(vec2 a) {
 
     q = floor(t.x / PI_16.x + 0.5);
     int k = int(q);
-
-    if (k == 0) {
-        if (j == 0) {
-            return cos_taylor_fp64(t);
-        } else if (j == 1) {
-            return -sin_taylor_fp64(t);
-        } else if (j == -1) {
-            return sin_taylor_fp64(t);
-        } else {
-            return -cos_taylor_fp64(t);
-        }
-    }
-
-        int abs_k = int(abs(float(k)));
+    int abs_k = int(abs(float(k)));
 
     // We just can't get PI/16 * 3.0 very accurately.
     // so let's just store it
@@ -90,54 +78,54 @@ vec2 cos_fp64(vec2 a) {
         t = sub_fp64(t, mul_fp64(PI_16, vec2(q, 0.0)));
     }
 
+
     vec2 u = vec2(0.0, 0.0);
     vec2 v = vec2(0.0, 0.0);
 
-    if (abs_k == 1) {
-        u = COS_TABLE_0;
-        v = SIN_TABLE_0;
-    } else if (abs_k == 2) {
-        u = COS_TABLE_1;
-        v = SIN_TABLE_1;
-    } else if (abs_k == 3) {
-        u = COS_TABLE_2;
-        v = SIN_TABLE_2;
-    } else {
-        u = COS_TABLE_3;
-        v = SIN_TABLE_3;
-    }
-
     vec2 sin_t, cos_t;
+    vec2 s, c;
     sincos_taylor_fp64(t, sin_t, cos_t);
 
-
-    vec2 result = vec2(0.0, 0.0);
-    if (j == 0) {
-        if (k > 0) {
-            result = sub_fp64(mul_fp64(u, cos_t), mul_fp64(v, sin_t));
-        } else {
-            result = sum_fp64(mul_fp64(u, cos_t), mul_fp64(v, sin_t));
-        }
-    } else if (j == 1) {
-        if (k > 0) {
-            result = -sum_fp64(mul_fp64(u, sin_t), mul_fp64(v, cos_t));
-        } else {
-            result = sub_fp64(mul_fp64(v, cos_t), mul_fp64(u, sin_t));
-        }
-    } else if (j == -1) {
-        if (k > 0) {
-            result = sum_fp64(mul_fp64(u, sin_t), mul_fp64(v, cos_t));
-        } else {
-            result = sub_fp64(mul_fp64(u, sin_t), mul_fp64(v, cos_t));
-        }
+    if (k == 0) {
+        s = sin_t;
+        c = cos_t;
     } else {
-        if (k > 0) {
-            result = sub_fp64(mul_fp64(v, sin_t), mul_fp64(u, cos_t));
+        if (abs_k == 1) {
+            u = COS_TABLE_0;
+            v = SIN_TABLE_0;
+        } else if (abs_k == 2) {
+            u = COS_TABLE_1;
+            v = SIN_TABLE_1;
+        } else if (abs_k == 3) {
+            u = COS_TABLE_2;
+            v = SIN_TABLE_2;
         } else {
-            result = -sum_fp64(mul_fp64(u, cos_t), mul_fp64(v, sin_t));
+            u = COS_TABLE_3;
+            v = SIN_TABLE_3;
+        }
+
+        if (k > 0) {
+            s = sum_fp64(mul_fp64(u, sin_t), mul_fp64(v, cos_t));
+            c = sub_fp64(mul_fp64(u, cos_t), mul_fp64(v, sin_t));
+        } else {
+            s = sub_fp64(mul_fp64(u, sin_t), mul_fp64(v, cos_t));
+            c = sum_fp64(mul_fp64(u, cos_t), mul_fp64(v, sin_t));
         }
     }
 
-    return result;
+    if (j == 0) {
+        sin_a = s;
+        cos_a = c;
+    } else if (j == 1) {
+        sin_a = c;
+        cos_a = -s;
+    } else if (j == -1) {
+        sin_a = -c;
+        cos_a = s;
+    } else {
+        sin_a = -s;
+        cos_a = -c;
+    }
+    return div_fp64(sin_a, cos_a);
 }
-#pragma glslify: export(cos_fp64)
+#pragma glslify: export(tan_fp64)
