@@ -1,4 +1,3 @@
-
 // Copyright (c) 2015 Uber Technologies, Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -19,26 +18,40 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 #pragma glslify: sum_fp64 = require(./sum-fp64, ONE=ONE)
-#pragma glslify: sub_fp64 = require(./sub-fp64, ONE=ONE)
 #pragma glslify: mul_fp64 = require(./mul-fp64, ONE=ONE)
-#pragma glslify: twoProd = require(./twoProd, ONE=ONE)
-#pragma glslify: twoSqr = require(./twoSqr, ONE=ONE)
 
+const vec2 inv_fact1 = vec2(4.16666679084301e-02, -1.2417634698280722e-09);
+const vec2 inv_fact3 = vec2(1.3888889225199819e-03, -3.3631094437103215e-11);
+const vec2 inv_fact5 = vec2(2.4801587642286904e-05, -3.406996025904184e-13);
+const vec2 inv_fact7 = vec2(2.755731998149713e-07, -7.575112367869873e-15);
 
-vec2 sqrt_fp64(vec2 a) {
+vec2 cos_taylor_fp64(vec2 a) {
+  vec2 r, s, t, x;
 
-  if (a.x == 0.0 && a.y == 0.0) return vec2(0.0, 0.0);
-  if (a.x < 0.0) return vec2(0.0 / 0.0, 0.0 / 0.0);
+  if (a.x == 0.0 && a.y == 0.0) {
+    return vec2(1.0, 0.0);
+  }
 
-  float x = 1.0 / sqrt(a.x);
-  float yn = a.x * x;
-  vec2 yn_sqr = twoSqr(yn);
+  x = -mul_fp64(a, a);
+  r = x;
+  s = sum_fp64(vec2(1.0, 0.0), r * 0.5);
 
-  float diff = sub_fp64(a, yn_sqr).x;
-  vec2 prod = twoProd(x * 0.5, diff);
-  return sum_fp64(vec2(yn, 0.0), prod);
+  r = mul_fp64(r, x);
+  t = mul_fp64(r, inv_fact1);
+  s = sum_fp64(s, t);
 
+  r = mul_fp64(r, x);
+  t = mul_fp64(r, inv_fact3);
+  s = sum_fp64(s, t);
+
+  r = mul_fp64(r, x);
+  t = mul_fp64(r, inv_fact5);
+  s = sum_fp64(s, t);
+
+  r = mul_fp64(r, x);
+  t = mul_fp64(r, inv_fact7);
+  s = sum_fp64(s, t);
+
+  return s;
 }
-
-#pragma glslify: export(sqrt_fp64)
-
+#pragma glslify: export(cos_taylor_fp64)
