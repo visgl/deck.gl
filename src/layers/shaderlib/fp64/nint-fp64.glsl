@@ -1,4 +1,3 @@
-
 // Copyright (c) 2015 Uber Technologies, Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -18,27 +17,30 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-#pragma glslify: sum_fp64 = require(./sum-fp64, ONE=ONE)
-#pragma glslify: sub_fp64 = require(./sub-fp64, ONE=ONE)
-#pragma glslify: mul_fp64 = require(./mul-fp64, ONE=ONE)
-#pragma glslify: twoProd = require(./twoProd, ONE=ONE)
-#pragma glslify: twoSqr = require(./twoSqr, ONE=ONE)
 
+#pragma glslify: quickTwoSum = require(./quickTwoSum, ONE=ONE)
 
-vec2 sqrt_fp64(vec2 a) {
-
-  if (a.x == 0.0 && a.y == 0.0) return vec2(0.0, 0.0);
-  if (a.x < 0.0) return vec2(0.0 / 0.0, 0.0 / 0.0);
-
-  float x = 1.0 / sqrt(a.x);
-  float yn = a.x * x;
-  vec2 yn_sqr = twoSqr(yn);
-
-  float diff = sub_fp64(a, yn_sqr).x;
-  vec2 prod = twoProd(x * 0.5, diff);
-  return sum_fp64(vec2(yn, 0.0), prod);
-
+float nint(float d)
+{
+    if (d == floor(d)) return d;
+    return floor(d + 0.5);
 }
 
-#pragma glslify: export(sqrt_fp64)
+vec2 nint_fp64(vec2 a) {
+    float hi = nint(a.x);
+    float lo;
+    vec2 tmp;
+    if (hi == a.x) {
+        lo = nint(a.y);
+        tmp = quickTwoSum(hi, lo);
+    } else {
+        lo = 0.0;
+        if (abs(hi - a.x) == 0.5 && a.y < 0.0) {
+            hi -= 1.0;
+        }
+        tmp = vec2(hi, lo);
+    }
+    return tmp;
+}
 
+#pragma glslify: export(nint_fp64)

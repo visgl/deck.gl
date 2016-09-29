@@ -189,8 +189,14 @@ function checkError(result, reference)
   addSpan("------------------------", currentDiv);
   line = 'CPU output: (' + reference[0].toString() + ',' + reference[1].toString() + ")<br>";
   addSpan(line, currentDiv);
-  line = "GPU output: (" + result[0].toString() + ',' + result[1].toString() + ")<br>";
+  line = "GPU output: (" + result[0].toString() + ',' + result[1].toString() + ',' + result[2].toString() + ',' + result[3].toString() + ")<br>";
   addSpan(line, currentDiv);
+
+  console.log(reference[0]);
+  console.log(reference[1]);
+
+  console.log(result[0]);
+  console.log(result[1]);
 
   var referenceBits = new Int32Array(reference.buffer);
   var resultBits = new Int32Array(result.buffer);
@@ -500,6 +506,120 @@ function test_float_log(gl, testName) {
   return float_ref_vec2;
 }
 
+
+function test_float_sin(gl, testName) {
+  var currentDiv = addDiv();
+  addSpan(testName, currentDiv);
+
+ // sin
+  const float0 = getFloat64(2);
+  const float_ref = Math.sin(float0);
+
+  const float0_vec2 = df64ify(float0);
+  const float_ref_vec2 = df64ify(float_ref);
+
+  var nv_ifdef = '';
+  if (glGetDebugInfo(gl).vendor.match(/NVIDIA/)) {
+    nv_ifdef += '#define NVIDIA_WORKAROUND 1';
+  }
+
+  const program = new Program(gl, {
+    vs: nv_ifdef + glslify('./test_shader/vs_float_sin.glsl'),
+    fs: glslify('./test_shader/fs.glsl')
+  });
+
+  program.use();
+  program.setBuffers({
+    positions: new Buffer(gl).setData({
+      data: new Float32Array([1, 1, -1, 1, 1, -1, -1, -1]),
+      size: 2
+    })
+  }).setUniforms({
+    a: float0_vec2,
+    ONE: 1.0
+  });
+
+  var line;
+  line = "sin(" + float0_vec2.toString() + ')<br>';
+  addSpan(line, currentDiv);
+  return float_ref_vec2;
+}
+
+function test_float_cos(gl, testName) {
+  var currentDiv = addDiv();
+  addSpan(testName, currentDiv);
+
+ // cos
+  const float0 = getFloat64(2);
+  const float_ref = Math.cos(float0);
+
+  const float0_vec2 = df64ify(float0);
+  const float_ref_vec2 = df64ify(float_ref);
+
+  var nv_ifdef = '';
+  if (glGetDebugInfo(gl).vendor.match(/NVIDIA/)) {
+    nv_ifdef += '#define NVIDIA_WORKAROUND 1';
+  }
+
+  const program = new Program(gl, {
+    vs: nv_ifdef + glslify('./test_shader/vs_float_cos.glsl'),
+    fs: glslify('./test_shader/fs.glsl')
+  });
+
+  program.use();
+  program.setBuffers({
+    positions: new Buffer(gl).setData({
+      data: new Float32Array([1, 1, -1, 1, 1, -1, -1, -1]),
+      size: 2
+    })
+  }).setUniforms({
+    a: float0_vec2,
+    ONE: 1.0
+  });
+
+  var line;
+  line = "cos(" + float0_vec2.toString() + ')<br>';
+  addSpan(line, currentDiv);
+  return float_ref_vec2;
+}
+
+function test_float_tan(gl, testName) {
+  var currentDiv = addDiv();
+  addSpan(testName, currentDiv);
+
+ // tan
+  const float0 = getFloat64(2);
+  const float_ref = Math.tan(float0);
+
+  const float0_vec2 = df64ify(float0);
+  const float_ref_vec2 = df64ify(float_ref);
+
+  var nv_ifdef = '';
+  if (glGetDebugInfo(gl).vendor.match(/NVIDIA/)) {
+    nv_ifdef += '#define NVIDIA_WORKAROUND 1';
+  }
+
+  const program = new Program(gl, {
+    vs: nv_ifdef + glslify('./test_shader/vs_float_tan.glsl'),
+    fs: glslify('./test_shader/fs.glsl')
+  });
+
+  program.use();
+  program.setBuffers({
+    positions: new Buffer(gl).setData({
+      data: new Float32Array([1, 1, -1, 1, 1, -1, -1, -1]),
+      size: 2
+    })
+  }).setUniforms({
+    a: float0_vec2,
+    ONE: 1.0
+  });
+
+  var line;
+  line = "tan(" + float0_vec2.toString() + ')<br>';
+  addSpan(line, currentDiv);
+  return float_ref_vec2;
+}
 // Main entrance
 
 window.onload = () => {
@@ -516,15 +636,131 @@ window.onload = () => {
 
   var idx0;
   var test_no = 0;
-  const loop = 10;
+  const loop = 30;
 
+  // for (idx0 = 0; idx0 < loop; idx0++) {
+
+  //   var currentDiv = addDiv();
+  //   addSpan("------------------------", currentDiv);
+  //   addSpan("Loop No. " + test_no++, currentDiv);
+
+  //   var cpu_result = test_float_add(gl, "Float addition test");
+
+  //   render(gl);
+
+  //   var gpu_result = getGPUOutput(gl);
+
+  //   checkError(gpu_result, cpu_result);
+
+  //   addSpan("------------------------", currentDiv);
+
+  // }
+  // for (idx0 = 0; idx0 < loop; idx0++) {
+
+  //   var currentDiv = addDiv();
+  //   addSpan("------------------------", currentDiv);
+  //   addSpan("Loop No. " + test_no++, currentDiv);
+
+  //   var cpu_result = test_float_sub(gl, "Float subtraction test");
+
+  //   render(gl);
+
+  //   var gpu_result = getGPUOutput(gl);
+
+  //   checkError(gpu_result, cpu_result);
+
+  //   addSpan("------------------------", currentDiv);
+
+  // }
+  // for (idx0 = 0; idx0 < loop; idx0++) {
+  //   var currentDiv = addDiv();
+  //   addSpan("------------------------", currentDiv);
+  //   addSpan("Loop No. " + test_no++, currentDiv);
+
+  //   var cpu_result = test_float_mul(gl, "Float multiplication test");
+
+  //   render(gl);
+
+  //   var gpu_result = getGPUOutput(gl);
+
+  //   checkError(gpu_result, cpu_result);
+
+  //   addSpan("------------------------", currentDiv);
+
+  // }
+
+  // for (idx0 = 0; idx0 < loop; idx0++) {
+  //   var currentDiv = addDiv();
+  //   addSpan("------------------------", currentDiv);
+  //   addSpan("Loop No. " + test_no++, currentDiv);
+
+  //   var cpu_result = test_float_div(gl, "Float division test");
+
+  //   render(gl);
+
+  //   var gpu_result = getGPUOutput(gl);
+
+  //   checkError(gpu_result, cpu_result);
+
+  //   addSpan("------------------------", currentDiv);
+  // }
+
+  // for (idx0 = 0; idx0 < loop; idx0++) {
+  //   var currentDiv = addDiv();
+  //   addSpan("------------------------", currentDiv);
+  //   addSpan("Loop No. " + test_no++, currentDiv);
+
+  //   var cpu_result = test_float_sqrt(gl, "Float sqrt test");
+
+  //   render(gl);
+
+  //   var gpu_result = getGPUOutput(gl);
+
+  //   checkError(gpu_result, cpu_result);
+
+  //   addSpan("------------------------", currentDiv);
+
+  // }
+
+  // for (idx0 = 0; idx0 < loop; idx0++) {
+  //   var currentDiv = addDiv();
+  //   addSpan("------------------------", currentDiv);
+  //   addSpan("Loop No. " + test_no++, currentDiv);
+
+  //   var cpu_result = test_float_exp(gl, "Float exp test");
+
+  //   render(gl);
+
+  //   var gpu_result = getGPUOutput(gl);
+
+  //   checkError(gpu_result, cpu_result);
+
+  //   addSpan("------------------------", currentDiv);
+
+  // }
+
+  // for (idx0 = 0; idx0 < loop; idx0++) {
+  //   var currentDiv = addDiv();
+  //   addSpan("------------------------", currentDiv);
+  //   addSpan("Loop No. " + test_no++, currentDiv);
+
+  //   var cpu_result = test_float_log(gl, "Float log test");
+
+  //   render(gl);
+
+  //   var gpu_result = getGPUOutput(gl);
+
+  //   checkError(gpu_result, cpu_result);
+
+  //   addSpan("------------------------", currentDiv);
+
+  // }
   for (idx0 = 0; idx0 < loop; idx0++) {
-
     var currentDiv = addDiv();
     addSpan("------------------------", currentDiv);
     addSpan("Loop No. " + test_no++, currentDiv);
 
-    var cpu_result = test_float_add(gl, "Float addition test");
+    var cpu_result = test_float_sin(gl, "Float sin test");
 
     render(gl);
 
@@ -536,12 +772,11 @@ window.onload = () => {
 
   }
   for (idx0 = 0; idx0 < loop; idx0++) {
-
     var currentDiv = addDiv();
     addSpan("------------------------", currentDiv);
     addSpan("Loop No. " + test_no++, currentDiv);
 
-    var cpu_result = test_float_sub(gl, "Float subtraction test");
+    var cpu_result = test_float_cos(gl, "Float cos test");
 
     render(gl);
 
@@ -557,7 +792,7 @@ window.onload = () => {
     addSpan("------------------------", currentDiv);
     addSpan("Loop No. " + test_no++, currentDiv);
 
-    var cpu_result = test_float_mul(gl, "Float multiplication test");
+    var cpu_result = test_float_tan(gl, "Float tan test");
 
     render(gl);
 
@@ -568,73 +803,5 @@ window.onload = () => {
     addSpan("------------------------", currentDiv);
 
   }
-
-  for (idx0 = 0; idx0 < loop; idx0++) {
-    var currentDiv = addDiv();
-    addSpan("------------------------", currentDiv);
-    addSpan("Loop No. " + test_no++, currentDiv);
-
-    var cpu_result = test_float_div(gl, "Float division test");
-
-    render(gl);
-
-    var gpu_result = getGPUOutput(gl);
-
-    checkError(gpu_result, cpu_result);
-
-    addSpan("------------------------", currentDiv);
-  }
-
-  for (idx0 = 0; idx0 < loop; idx0++) {
-    var currentDiv = addDiv();
-    addSpan("------------------------", currentDiv);
-    addSpan("Loop No. " + test_no++, currentDiv);
-
-    var cpu_result = test_float_sqrt(gl, "Float sqrt test");
-
-    render(gl);
-
-    var gpu_result = getGPUOutput(gl);
-
-    checkError(gpu_result, cpu_result);
-
-    addSpan("------------------------", currentDiv);
-
-  }
-
-  for (idx0 = 0; idx0 < loop; idx0++) {
-    var currentDiv = addDiv();
-    addSpan("------------------------", currentDiv);
-    addSpan("Loop No. " + test_no++, currentDiv);
-
-    var cpu_result = test_float_exp(gl, "Float exp test");
-
-    render(gl);
-
-    var gpu_result = getGPUOutput(gl);
-
-    checkError(gpu_result, cpu_result);
-
-    addSpan("------------------------", currentDiv);
-
-  }
-
-  for (idx0 = 0; idx0 < loop; idx0++) {
-    var currentDiv = addDiv();
-    addSpan("------------------------", currentDiv);
-    addSpan("Loop No. " + test_no++, currentDiv);
-
-    var cpu_result = test_float_log(gl, "Float log test");
-
-    render(gl);
-
-    var gpu_result = getGPUOutput(gl);
-
-    checkError(gpu_result, cpu_result);
-
-    addSpan("------------------------", currentDiv);
-
-  }
-
 
 }
