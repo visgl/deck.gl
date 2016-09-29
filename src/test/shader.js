@@ -192,12 +192,6 @@ function checkError(result, reference)
   line = "GPU output: (" + result[0].toString() + ',' + result[1].toString() + ',' + result[2].toString() + ',' + result[3].toString() + ")<br>";
   addSpan(line, currentDiv);
 
-  console.log(reference[0]);
-  console.log(reference[1]);
-
-  console.log(result[0]);
-  console.log(result[1]);
-
   var referenceBits = new Int32Array(reference.buffer);
   var resultBits = new Int32Array(result.buffer);
 
@@ -620,8 +614,8 @@ function test_float_tan(gl, testName) {
   addSpan(line, currentDiv);
   return float_ref_vec2;
 }
-// Main entrance
 
+// Main entrance
 window.onload = () => {
   const canvas = document.createElement('canvas');
   document.body.appendChild(canvas);
@@ -638,129 +632,12 @@ window.onload = () => {
   var test_no = 0;
   const loop = 30;
 
-  // for (idx0 = 0; idx0 < loop; idx0++) {
-
-  //   var currentDiv = addDiv();
-  //   addSpan("------------------------", currentDiv);
-  //   addSpan("Loop No. " + test_no++, currentDiv);
-
-  //   var cpu_result = test_float_add(gl, "Float addition test");
-
-  //   render(gl);
-
-  //   var gpu_result = getGPUOutput(gl);
-
-  //   checkError(gpu_result, cpu_result);
-
-  //   addSpan("------------------------", currentDiv);
-
-  // }
-  // for (idx0 = 0; idx0 < loop; idx0++) {
-
-  //   var currentDiv = addDiv();
-  //   addSpan("------------------------", currentDiv);
-  //   addSpan("Loop No. " + test_no++, currentDiv);
-
-  //   var cpu_result = test_float_sub(gl, "Float subtraction test");
-
-  //   render(gl);
-
-  //   var gpu_result = getGPUOutput(gl);
-
-  //   checkError(gpu_result, cpu_result);
-
-  //   addSpan("------------------------", currentDiv);
-
-  // }
-  // for (idx0 = 0; idx0 < loop; idx0++) {
-  //   var currentDiv = addDiv();
-  //   addSpan("------------------------", currentDiv);
-  //   addSpan("Loop No. " + test_no++, currentDiv);
-
-  //   var cpu_result = test_float_mul(gl, "Float multiplication test");
-
-  //   render(gl);
-
-  //   var gpu_result = getGPUOutput(gl);
-
-  //   checkError(gpu_result, cpu_result);
-
-  //   addSpan("------------------------", currentDiv);
-
-  // }
-
-  // for (idx0 = 0; idx0 < loop; idx0++) {
-  //   var currentDiv = addDiv();
-  //   addSpan("------------------------", currentDiv);
-  //   addSpan("Loop No. " + test_no++, currentDiv);
-
-  //   var cpu_result = test_float_div(gl, "Float division test");
-
-  //   render(gl);
-
-  //   var gpu_result = getGPUOutput(gl);
-
-  //   checkError(gpu_result, cpu_result);
-
-  //   addSpan("------------------------", currentDiv);
-  // }
-
-  // for (idx0 = 0; idx0 < loop; idx0++) {
-  //   var currentDiv = addDiv();
-  //   addSpan("------------------------", currentDiv);
-  //   addSpan("Loop No. " + test_no++, currentDiv);
-
-  //   var cpu_result = test_float_sqrt(gl, "Float sqrt test");
-
-  //   render(gl);
-
-  //   var gpu_result = getGPUOutput(gl);
-
-  //   checkError(gpu_result, cpu_result);
-
-  //   addSpan("------------------------", currentDiv);
-
-  // }
-
-  // for (idx0 = 0; idx0 < loop; idx0++) {
-  //   var currentDiv = addDiv();
-  //   addSpan("------------------------", currentDiv);
-  //   addSpan("Loop No. " + test_no++, currentDiv);
-
-  //   var cpu_result = test_float_exp(gl, "Float exp test");
-
-  //   render(gl);
-
-  //   var gpu_result = getGPUOutput(gl);
-
-  //   checkError(gpu_result, cpu_result);
-
-  //   addSpan("------------------------", currentDiv);
-
-  // }
-
-  // for (idx0 = 0; idx0 < loop; idx0++) {
-  //   var currentDiv = addDiv();
-  //   addSpan("------------------------", currentDiv);
-  //   addSpan("Loop No. " + test_no++, currentDiv);
-
-  //   var cpu_result = test_float_log(gl, "Float log test");
-
-  //   render(gl);
-
-  //   var gpu_result = getGPUOutput(gl);
-
-  //   checkError(gpu_result, cpu_result);
-
-  //   addSpan("------------------------", currentDiv);
-
-  // }
   for (idx0 = 0; idx0 < loop; idx0++) {
     var currentDiv = addDiv();
     addSpan("------------------------", currentDiv);
     addSpan("Loop No. " + test_no++, currentDiv);
 
-    var cpu_result = test_float_sin(gl, "Float sin test");
+    var cpu_result = test_float_add(gl, "Float addition test");
 
     render(gl);
 
@@ -769,8 +646,154 @@ window.onload = () => {
     checkError(gpu_result, cpu_result);
 
     addSpan("------------------------", currentDiv);
+  }
+
+  for (idx0 = 0; idx0 < loop; idx0++) {
+    var currentDiv = addDiv();
+    addSpan("------------------------", currentDiv);
+    addSpan("Loop No. " + test_no++, currentDiv);
+
+    var cpu_result = test_float_sub(gl, "Float subtraction test");
+
+    render(gl);
+
+    var gpu_result = getGPUOutput(gl);
+
+    checkError(gpu_result, cpu_result);
+
+    addSpan("------------------------", currentDiv);
+  }
+
+  for (idx0 = 0; idx0 < loop; idx0++) {
+    var currentDiv = addDiv();
+    addSpan("------------------------", currentDiv);
+    addSpan("Loop No. " + test_no++, currentDiv);
+
+    var cpu_result = test_float_mul(gl, "Float multiplication test");
+
+    render(gl);
+
+    var gpu_result = getGPUOutput(gl);
+
+    checkError(gpu_result, cpu_result);
+
+    addSpan("------------------------", currentDiv);
+  }
+
+  for (idx0 = 0; idx0 < loop; idx0++) {
+    var currentDiv = addDiv();
+    addSpan("------------------------", currentDiv);
+    addSpan("Loop No. " + test_no++, currentDiv);
+
+    var cpu_result = test_float_div(gl, "Float division test");
+
+    render(gl);
+
+    var gpu_result = getGPUOutput(gl);
+
+    checkError(gpu_result, cpu_result);
+
+    addSpan("------------------------", currentDiv);
+  }
+
+  for (idx0 = 0; idx0 < loop; idx0++) {
+    var currentDiv = addDiv();
+    addSpan("------------------------", currentDiv);
+    addSpan("Loop No. " + test_no++, currentDiv);
+
+    var cpu_result = test_float_sqrt(gl, "Float sqrt test");
+
+    render(gl);
+
+    var gpu_result = getGPUOutput(gl);
+
+    checkError(gpu_result, cpu_result);
+
+    addSpan("------------------------", currentDiv);
+  }
+
+  for (idx0 = 0; idx0 < loop; idx0++) {
+    var currentDiv = addDiv();
+    addSpan("------------------------", currentDiv);
+    addSpan("Loop No. " + test_no++, currentDiv);
+
+    var cpu_result = test_float_exp(gl, "Float exp test");
+
+    render(gl);
+
+    var gpu_result = getGPUOutput(gl);
+
+    checkError(gpu_result, cpu_result);
+
+    addSpan("------------------------", currentDiv);
+  }
+
+  for (idx0 = 0; idx0 < loop; idx0++) {
+    var currentDiv = addDiv();
+    addSpan("------------------------", currentDiv);
+    addSpan("Loop No. " + test_no++, currentDiv);
+
+    var cpu_result = test_float_log(gl, "Float log test");
+
+    render(gl);
+
+    var gpu_result = getGPUOutput(gl);
+
+    checkError(gpu_result, cpu_result);
+
+    addSpan("------------------------", currentDiv);
+  }
+  for (idx0 = 0; idx0 < loop; idx0++) {
+    var currentDiv = addDiv();
+    addSpan("------------------------", currentDiv);
+    addSpan("Loop No. " + test_no++, currentDiv);
+
+    var cpu_result = test_float_sin(gl, "Float sin test");
+
+  //   render(gl);
+
+  //   var gpu_result = getGPUOutput(gl);
+
+  //   checkError(gpu_result, cpu_result);
+
+  //   addSpan("------------------------", currentDiv);
 
   }
+  for (idx0 = 0; idx0 < loop; idx0++) {
+    var currentDiv = addDiv();
+    addSpan("------------------------", currentDiv);
+    addSpan("Loop No. " + test_no++, currentDiv);
+
+    var cpu_result = test_float_cos(gl, "Float cos test");
+
+  //   render(gl);
+
+  //   var gpu_result = getGPUOutput(gl);
+
+  //   checkError(gpu_result, cpu_result);
+
+  //   addSpan("------------------------", currentDiv);
+
+
+  }
+
+  for (idx0 = 0; idx0 < loop; idx0++) {
+    var currentDiv = addDiv();
+    addSpan("------------------------", currentDiv);
+    addSpan("Loop No. " + test_no++, currentDiv);
+
+
+    var cpu_result = test_float_tan(gl, "Float tan test");
+
+    render(gl);
+
+    var gpu_result = getGPUOutput(gl);
+
+    checkError(gpu_result, cpu_result);
+
+    addSpan("------------------------", currentDiv);
+  }
+
   for (idx0 = 0; idx0 < loop; idx0++) {
     var currentDiv = addDiv();
     addSpan("------------------------", currentDiv);
@@ -785,8 +808,8 @@ window.onload = () => {
     checkError(gpu_result, cpu_result);
 
     addSpan("------------------------", currentDiv);
-
   }
+
   for (idx0 = 0; idx0 < loop; idx0++) {
     var currentDiv = addDiv();
     addSpan("------------------------", currentDiv);
@@ -801,7 +824,6 @@ window.onload = () => {
     checkError(gpu_result, cpu_result);
 
     addSpan("------------------------", currentDiv);
-
   }
 
 }

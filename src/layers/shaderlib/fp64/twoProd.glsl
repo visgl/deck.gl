@@ -1,4 +1,4 @@
-// Copyright (c) 2015 Uber Technologies, Inc.
+// Copyright (c) 2016 Uber Technologies, Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -26,7 +26,7 @@ vec2 twoProd(float a, float b) {
   float prod = a * b;
   vec2 a_fp64 = split(a);
   vec2 b_fp64 = split(b);
-  float err =  a_fp64.y * b_fp64.y - (((prod - a_fp64.x * b_fp64.x) * ONE - a_fp64.x * b_fp64.y) * ONE -
+  float err =  a_fp64.y * b_fp64.y * ONE - (((prod - a_fp64.x * b_fp64.x) * ONE - a_fp64.x * b_fp64.y) * ONE -
     a_fp64.y * b_fp64.x) * ONE;
   return vec2(prod, err);
 }

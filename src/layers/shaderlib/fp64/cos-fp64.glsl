@@ -1,4 +1,4 @@
-// Copyright (c) 2015 Uber Technologies, Inc.
+// Copyright (c) 2016 Uber Technologies, Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -76,10 +76,8 @@ vec2 cos_fp64(vec2 a) {
         }
     }
 
-        int abs_k = int(abs(float(k)));
+    int abs_k = int(abs(float(k)));
 
-    // We just can't get PI/16 * 3.0 very accurately.
-    // so let's just store it
     if (abs_k > 4) {
         return vec2(0.0 / 0.0, 0.0 / 0.0);
     } else if (k == 3) {

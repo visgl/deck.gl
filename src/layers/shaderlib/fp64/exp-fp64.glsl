@@ -1,4 +1,4 @@
-// Copyright (c) 2015 Uber Technologies, Inc.
+// Copyright (c) 2016 Uber Technologies, Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -25,11 +25,11 @@
 const vec2 E = vec2(2.7182817459106445e+00, 8.254840366817007e-08);
 const vec2 LOG2 = vec2(0.6931471824645996e+00, -1.9046542121259336e-09);
 
-const vec2 inv_fact0 = vec2(1.666666716337204e-01, -4.967053879312289e-09);
-const vec2 inv_fact1 = vec2(4.16666679084301e-02, -1.2417634698280722e-09);
-const vec2 inv_fact2 = vec2(8.333333767950535e-03, -4.34617203337595e-10);
-const vec2 inv_fact3 = vec2(1.3888889225199819e-03, -3.3631094437103215e-11);
-const vec2 inv_fact4 = vec2(1.9841270113829523e-04,  -2.725596874933456e-12);
+const vec2 INVERSE_FACTORIAL_3 = vec2(1.666666716337204e-01, -4.967053879312289e-09); // 1/3!
+const vec2 INVERSE_FACTORIAL_4 = vec2(4.16666679084301e-02, -1.2417634698280722e-09); // 1/4!
+const vec2 INVERSE_FACTORIAL_5 = vec2(8.333333767950535e-03, -4.34617203337595e-10); // 1/5!
+const vec2 INVERSE_FACTORIAL_6 = vec2(1.3888889225199819e-03, -3.3631094437103215e-11); // 1/6!
+const vec2 INVERSE_FACTORIAL_7 = vec2(1.9841270113829523e-04,  -2.725596874933456e-12); // 1/7!
 
 vec2 exp_fp64(vec2 a) {
 
@@ -53,23 +53,23 @@ vec2 exp_fp64(vec2 a) {
   p = mul_fp64(r, r);
   s = sum_fp64(r, p * 0.5);
   p = mul_fp64(p, r);
-  t = mul_fp64(p, inv_fact0);
+  t = mul_fp64(p, INVERSE_FACTORIAL_3);
 
   s = sum_fp64(s, t);
   p = mul_fp64(p, r);
-  t = mul_fp64(p, inv_fact1);
+  t = mul_fp64(p, INVERSE_FACTORIAL_4);
 
   s = sum_fp64(s, t);
   p = mul_fp64(p, r);
-  t = mul_fp64(p, inv_fact2);
+  t = mul_fp64(p, INVERSE_FACTORIAL_5);
 
   s = sum_fp64(s, t);
   p = mul_fp64(p, r);
-  t = mul_fp64(p, inv_fact3);
+  t = mul_fp64(p, INVERSE_FACTORIAL_6);
 
   s = sum_fp64(s, t);
   p = mul_fp64(p, r);
-  t = mul_fp64(p, inv_fact4);
+  t = mul_fp64(p, INVERSE_FACTORIAL_7);
 
   s = sum_fp64(s, t);
 

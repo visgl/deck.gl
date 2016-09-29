@@ -1,5 +1,4 @@
-
-// Copyright (c) 2015 Uber Technologies, Inc.
+// Copyright (c) 2016 Uber Technologies, Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -24,7 +23,7 @@
 vec2 twoSum(float a, float b) {
   float s = (a + b) * ONE;
   float v = (s - a) * ONE;
-  float err = (a - (s - v)) + (b - v) * ONE;
+  float err = (a - (s - v))  * ONE + (b - v) * ONE;
   return vec2(s, err);
 }
 

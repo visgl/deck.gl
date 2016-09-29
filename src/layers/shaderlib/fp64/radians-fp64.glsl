@@ -1,5 +1,4 @@
-
-// Copyright (c) 2015 Uber Technologies, Inc.
+// Copyright (c) 2016 Uber Technologies, Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -21,10 +20,10 @@
 #pragma glslify: mul_fp64 = require(./mul-fp64, ONE=ONE)
 #pragma glslify: div_fp64 = require(./div-fp64, ONE=ONE)
 
-const vec2 PI_fp64 = vec2(3.1415927410125732, -8.742278012618954e-8);
+const vec2 PI_FP64 = vec2(3.1415927410125732, -8.742278012618954e-8);
 
 vec2 radians_fp64(vec2 degree) {
-  return div_fp64(mul_fp64(degree, PI_fp64), vec2(180.0, 0.0));
+  return mul_fp64(div_fp64(degree, vec2(180.0, 0.0)), PI_FP64);
 }
 
 #pragma glslify: export(radians_fp64)
