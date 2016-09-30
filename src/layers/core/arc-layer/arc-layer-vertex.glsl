@@ -25,7 +25,8 @@
 const float N = 49.0;
 
 attribute vec3 positions;
-attribute vec3 instanceColors;
+attribute vec3 instanceSourceColors;
+attribute vec3 instanceTargetColors;
 attribute vec4 instancePositions;
 attribute vec3 instancePickingColors;
 
@@ -61,7 +62,7 @@ void main(void) {
 
   gl_Position = projectionMatrix * vec4(p, 1.0);
 
-  vec4 color = vec4(instanceColors / 255.0, opacity);
+  vec4 color = vec4(mix(instanceSourceColors, instanceTargetColors, segmentIndex / N) / 255.0, opacity);
   vec4 pickingColor = vec4(instancePickingColors / 255.0, opacity);
   vColor = mix(color, pickingColor, renderPickingBuffer);
 }

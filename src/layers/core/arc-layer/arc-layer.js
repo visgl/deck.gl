@@ -40,7 +40,8 @@ export default class ArcLayer extends BaseLayer {
     strokeWidth = 1,
     getSourcePosition = defaultGetSourcePosition,
     getTargetPosition = defaultGetTargetPosition,
-    getColor = defaultGetColor,
+    getSourceColor = defaultGetColor,
+    getTargetColor = defaultGetColor,
     ...props
   } = {}) {
     super({
@@ -61,7 +62,8 @@ export default class ArcLayer extends BaseLayer {
 
     attributeManager.addInstanced({
       instancePositions: {size: 4, update: this.calculateInstancePositions},
-      instanceColors: {size: 3, update: this.calculateInstanceColors}
+      instanceSourceColors: {size: 3, update: this.calculateInstanceSourceColors},
+      instanceTargetColors: {size: 3, update: this.calculateInstanceTargetColors}
     });
   }
 
@@ -114,12 +116,25 @@ export default class ArcLayer extends BaseLayer {
     }
   }
 
-  calculateInstanceColors(attribute) {
-    const {data, getColor} = this.props;
+  calculateInstanceSourceColors(attribute) {
+    const {data, getSourceColor} = this.props;
     const {value, size} = attribute;
     let i = 0;
     for (const object of data) {
-      const color = getColor(object) || DEFAULT_COLOR;
+      const color = getSourceColor(object) || DEFAULT_COLOR;
+      value[i + 0] = color[0];
+      value[i + 1] = color[1];
+      value[i + 2] = color[2];
+      i += size;
+    }
+  }
+
+  calculateInstanceTargetColors(attribute) {
+    const {data, getTargetColor} = this.props;
+    const {value, size} = attribute;
+    let i = 0;
+    for (const object of data) {
+      const color = getTargetColor(object) || DEFAULT_COLOR;
       value[i + 0] = color[0];
       value[i + 1] = color[1];
       value[i + 2] = color[2];
