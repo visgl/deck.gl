@@ -48,7 +48,8 @@ export default class ArcLayer extends BaseLayer {
       strokeWidth,
       getSourcePosition,
       getTargetPosition,
-      getColor,
+      getSourceColor,
+      getTargetColor,
       ...props
     });
   }
