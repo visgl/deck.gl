@@ -162,18 +162,19 @@ export default class ChoroplethLayer extends BaseLayer {
   calculateContourIndices(vertices) {
     let offset = 0;
 
-    return vertices.map(polygon => {
+    return vertices.reduce((acc, polygon) => {
       const numVertices = polygon.length;
 
       // use vertex pairs for gl.LINES => [0, 1, 1, 2, 2, ..., n-1, n-1, 0]
-      let indices = [];
+      let indices = [...acc, offset];
       for (let i = 1; i < numVertices - 1; i++) {
-        indices = [...indices, i + offset, i + offset];
+        indices.push(i + offset, i + offset);
       }
+      indices.push(offset);
 
       offset += numVertices;
-      return [offset, ...indices, offset];
-    });
+      return indices;
+    }, []);
   }
 
   calculateSurfaceIndices(vertices) {
