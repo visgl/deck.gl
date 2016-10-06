@@ -67,9 +67,13 @@ export default class ChoroplethLayer extends BaseLayer {
         {size: 3, update: this.calculatePickingColors, noAlloc: true}
     });
 
+    const indexType = gl.getExtension('OES_element_index_uint') ?
+      Uint32Array : Uint16Array;
+
     this.setUniforms({opacity: this.props.opacity});
     this.setState({
       numInstances: 0,
+      indexType,
       model
     });
 
@@ -192,6 +196,10 @@ export default class ChoroplethLayer extends BaseLayer {
         vertices.reduce((count, polygon) => count + polygon.length, 0)],
       [0]
     );
+    const {indexType} = this.state;
+    if(indexType === Uint16Array && offsets[offsets.length - 1] > 65535) {
+      throw new Error('Vertex count exceeds browser\'s limit');
+    }
 
     const indices = this.state.groupedVertices.map(
       (vertices, choroplethIndex) => this.props.drawContour ?
@@ -207,7 +215,7 @@ export default class ChoroplethLayer extends BaseLayer {
         )
     );
 
-    attribute.value = new Uint16Array(flattenDeep(indices));
+    attribute.value = new indexType(flattenDeep(indices));
     attribute.target = this.state.gl.ELEMENT_ARRAY_BUFFER;
     this.state.model.setVertexCount(attribute.value.length / attribute.size);
   }
