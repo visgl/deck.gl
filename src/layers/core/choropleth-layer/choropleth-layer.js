@@ -158,7 +158,7 @@ export default class ChoroplethLayer extends BaseLayer {
       const numVertices = polygon.length;
 
       // use vertex pairs for gl.LINES => [0, 1, 1, 2, 2, ..., n-1, n-1, 0]
-      let indices = [...acc, offset];
+      const indices = [...acc, offset];
       for (let i = 1; i < numVertices - 1; i++) {
         indices.push(i + offset, i + offset);
       }
