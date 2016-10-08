@@ -96,7 +96,7 @@ export default class ScatterplotLayer extends BaseLayer {
     }
 
     let nv_ifdef = '';
-    console.log(glGetDebugInfo(gl).vendor);
+    //console.log(glGetDebugInfo(gl).vendor);
 
     if (glGetDebugInfo(gl).vendor.match(/NVIDIA/)) {
       nv_ifdef += '#define NVIDIA_WORKAROUND 1';

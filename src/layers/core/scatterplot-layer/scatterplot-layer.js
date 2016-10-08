@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 import {BaseLayer} from '../../../lib';
-import {Model, Program, Geometry} from 'luma.gl';
+import {Model, Program, Geometry, glGetDebugInfo} from 'luma.gl';
 const glslify = require('glslify');
 
 const DEFAULT_COLOR = [255, 0, 255];
@@ -87,9 +87,15 @@ export default class ScatterplotLayer extends BaseLayer {
       ];
     }
 
+    let intel_ifdef = '';
+
+    if (glGetDebugInfo(gl).vendor.match(/Intel/)) {
+      intel_ifdef += '#define INTEL_WORKAROUND 1\n';
+    }
+
     return new Model({
       program: new Program(gl, {
-        vs: glslify('./scatterplot-layer-vertex.glsl'),
+        vs: intel_ifdef + glslify('./scatterplot-layer-vertex.glsl'),
         fs: glslify('./scatterplot-layer-fragment.glsl'),
         id: 'scatterplot'
       }),

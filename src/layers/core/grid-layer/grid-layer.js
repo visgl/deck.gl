@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 
 import {BaseLayer} from '../../../lib';
-import {Model, Program, Geometry} from 'luma.gl';
+import {Model, Program, Geometry, glGetDebugInfo} from 'luma.gl';
 const glslify = require('glslify');
 
 export default class GridLayer extends BaseLayer {
@@ -68,9 +68,15 @@ export default class GridLayer extends BaseLayer {
   }
 
   getModel(gl) {
+    let intel_ifdef = '';
+
+    if (glGetDebugInfo(gl).vendor.match(/Intel/)) {
+      intel_ifdef += '#define INTEL_WORKAROUND 1\n';
+    }
+
     return new Model({
       program: new Program(gl, {
-        vs: glslify('./grid-layer-vertex.glsl'),
+        vs: intel_ifdef + glslify('./grid-layer-vertex.glsl'),
         fs: glslify('./grid-layer-fragment.glsl'),
         id: 'grid'
       }),

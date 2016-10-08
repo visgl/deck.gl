@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 
 import {BaseLayer} from '../../../lib';
-import {Model, Program, Geometry} from 'luma.gl';
+import {Model, Program, Geometry, glGetDebugInfo} from 'luma.gl';
 const glslify = require('glslify');
 
 const DEFAULT_COLOR = [0, 255, 0];
@@ -72,10 +72,15 @@ export default class LineLayer extends BaseLayer {
 
   createModel(gl) {
     const positions = [0, 0, 0, 1, 1, 1];
+    let intel_ifdef = '';
+
+    if (glGetDebugInfo(gl).vendor.match(/Intel/)) {
+      intel_ifdef += '#define INTEL_WORKAROUND 1\n';
+    }
 
     return new Model({
       program: new Program(gl, {
-        vs: glslify('./line-layer-vertex.glsl'),
+        vs: intel_ifdef + glslify('./line-layer-vertex.glsl'),
         fs: glslify('./line-layer-fragment.glsl'),
         id: 'line'
       }),
