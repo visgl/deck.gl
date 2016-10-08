@@ -117,8 +117,10 @@ export default class HexagonLayer extends BaseLayer {
 
     let intel_ifdef = '';
 
-    if (glGetDebugInfo(gl).vendor.match(/Intel/)) {
-      intel_ifdef += '#define INTEL_WORKAROUND 1\n';
+    if (glGetDebugInfo(gl) !== null) {
+      if (glGetDebugInfo(gl).vendor.match(/Intel/)) {
+        intel_ifdef += '#define INTEL_WORKAROUND 1\n';
+      }
     }
 
     return new Model({
