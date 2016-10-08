@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 import {BaseLayer} from '../../../lib';
-import {Model, Program, CylinderGeometry} from 'luma.gl';
+import {Model, Program, CylinderGeometry, glGetDebugInfo} from 'luma.gl';
 const glslify = require('glslify');
 
 const DEFAULT_COLOR = [255, 0, 0];
@@ -115,10 +115,18 @@ export default class HexagonLayer extends BaseLayer {
       nvertical: 1
     });
 
+    let IntelDef = '';
+
+    if (glGetDebugInfo(gl) !== null) {
+      if (glGetDebugInfo(gl).vendor.match(/Intel/)) {
+        IntelDef += '#define INTEL_WORKAROUND 1\n';
+      }
+    }
+
     return new Model({
       id: this.props.id,
       program: new Program(gl, {
-        vs: glslify('./hexagon-layer-vertex.glsl'),
+        vs: IntelDef + glslify('./hexagon-layer-vertex.glsl'),
         fs: glslify('./hexagon-layer-fragment.glsl'),
         id: 'hexagon'
       }),

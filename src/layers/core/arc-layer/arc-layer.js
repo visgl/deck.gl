@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 
 import {BaseLayer} from '../../../lib';
-import {Model, Program, Geometry} from 'luma.gl';
+import {Model, Program, Geometry, glGetDebugInfo} from 'luma.gl';
 const glslify = require('glslify');
 
 const DEFAULT_COLOR = [0, 0, 255];
@@ -80,9 +80,17 @@ export default class ArcLayer extends BaseLayer {
       positions = [...positions, i, i, i];
     }
 
+    let intelDef = '';
+
+    if (glGetDebugInfo(gl) !== null) {
+      if (glGetDebugInfo(gl).vendor.match(/Intel/)) {
+        intelDef += '#define INTEL_WORKAROUND 1\n';
+      }
+    }
+
     return new Model({
       program: new Program(gl, {
-        vs: glslify('./arc-layer-vertex.glsl'),
+        vs: intelDef + glslify('./arc-layer-vertex.glsl'),
         fs: glslify('./arc-layer-fragment.glsl'),
         id: 'arc'
       }),

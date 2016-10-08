@@ -22,7 +22,7 @@ import {BaseLayer} from '../../../lib';
 import earcut from 'earcut';
 import flattenDeep from 'lodash.flattendeep';
 import normalize from 'geojson-normalize';
-import {Model, Program, Geometry} from 'luma.gl';
+import {Model, Program, Geometry, glGetDebugInfo} from 'luma.gl';
 const glslify = require('glslify');
 
 export default class ChoroplethLayer extends BaseLayer {
@@ -83,9 +83,17 @@ export default class ChoroplethLayer extends BaseLayer {
   }
 
   getModel(gl) {
+    let IntelDef = '';
+
+    if (glGetDebugInfo(gl) !== null) {
+      if (glGetDebugInfo(gl).vendor.match(/Intel/)) {
+        IntelDef += '#define INTEL_WORKAROUND 1\n';
+      }
+    }
+
     return new Model({
       program: new Program(gl, {
-        vs: glslify('./choropleth-layer-vertex.glsl'),
+        vs: IntelDef + glslify('./choropleth-layer-vertex.glsl'),
         fs: glslify('./choropleth-layer-fragment.glsl'),
         id: 'choropleth'
       }),
