@@ -95,16 +95,15 @@ export default class ScatterplotLayer extends BaseLayer {
       ];
     }
 
-    let nv_ifdef = '';
-    //console.log(glGetDebugInfo(gl).vendor);
+    let nvidiaDef = '';
 
     if (glGetDebugInfo(gl).vendor.match(/NVIDIA/)) {
-      nv_ifdef += '#define NVIDIA_WORKAROUND 1';
+      nvidiaDef += '#define NVIDIA_WORKAROUND 1';
     }
 
     return new Model({
       program: new Program(gl, {
-        vs: nv_ifdef + glslify('./scatterplot-layer-vertex.glsl'),
+        vs: nvidiaDef + glslify('./scatterplot-layer-vertex.glsl'),
         fs: glslify('./scatterplot-layer-fragment.glsl'),
         id: 'fp64-scatterplot'
       }),

@@ -87,17 +87,17 @@ export default class ScatterplotLayer extends BaseLayer {
       ];
     }
 
-    let intel_ifdef = '';
+    let IntelDef = '';
 
     if (glGetDebugInfo(gl) !== null) {
       if (glGetDebugInfo(gl).vendor.match(/Intel/)) {
-        intel_ifdef += '#define INTEL_WORKAROUND 1\n';
+        IntelDef += '#define INTEL_WORKAROUND 1\n';
       }
     }
 
     return new Model({
       program: new Program(gl, {
-        vs: intel_ifdef + glslify('./scatterplot-layer-vertex.glsl'),
+        vs: IntelDef + glslify('./scatterplot-layer-vertex.glsl'),
         fs: glslify('./scatterplot-layer-fragment.glsl'),
         id: 'scatterplot'
       }),

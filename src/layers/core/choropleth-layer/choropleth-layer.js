@@ -83,17 +83,17 @@ export default class ChoroplethLayer extends BaseLayer {
   }
 
   getModel(gl) {
-    let intel_ifdef = '';
+    let IntelDef = '';
 
     if (glGetDebugInfo(gl) !== null) {
       if (glGetDebugInfo(gl).vendor.match(/Intel/)) {
-        intel_ifdef += '#define INTEL_WORKAROUND 1\n';
+        IntelDef += '#define INTEL_WORKAROUND 1\n';
       }
     }
 
     return new Model({
       program: new Program(gl, {
-        vs: intel_ifdef + glslify('./choropleth-layer-vertex.glsl'),
+        vs: IntelDef + glslify('./choropleth-layer-vertex.glsl'),
         fs: glslify('./choropleth-layer-fragment.glsl'),
         id: 'choropleth'
       }),

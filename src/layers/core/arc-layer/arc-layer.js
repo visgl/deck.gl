@@ -80,17 +80,17 @@ export default class ArcLayer extends BaseLayer {
       positions = [...positions, i, i, i];
     }
 
-    let intel_ifdef = '';
+    let intelDef = '';
 
     if (glGetDebugInfo(gl) !== null) {
       if (glGetDebugInfo(gl).vendor.match(/Intel/)) {
-        intel_ifdef += '#define INTEL_WORKAROUND 1\n';
+        intelDef += '#define INTEL_WORKAROUND 1\n';
       }
     }
 
     return new Model({
       program: new Program(gl, {
-        vs: intel_ifdef + glslify('./arc-layer-vertex.glsl'),
+        vs: intelDef + glslify('./arc-layer-vertex.glsl'),
         fs: glslify('./arc-layer-fragment.glsl'),
         id: 'arc'
       }),

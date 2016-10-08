@@ -68,17 +68,17 @@ export default class GridLayer extends BaseLayer {
   }
 
   getModel(gl) {
-    let intel_ifdef = '';
+    let IntelDef = '';
 
     if (glGetDebugInfo(gl) !== null) {
       if (glGetDebugInfo(gl).vendor.match(/Intel/)) {
-        intel_ifdef += '#define INTEL_WORKAROUND 1\n';
+        IntelDef += '#define INTEL_WORKAROUND 1\n';
       }
     }
 
     return new Model({
       program: new Program(gl, {
-        vs: intel_ifdef + glslify('./grid-layer-vertex.glsl'),
+        vs: IntelDef + glslify('./grid-layer-vertex.glsl'),
         fs: glslify('./grid-layer-fragment.glsl'),
         id: 'grid'
       }),

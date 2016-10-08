@@ -72,17 +72,17 @@ export default class LineLayer extends BaseLayer {
 
   createModel(gl) {
     const positions = [0, 0, 0, 1, 1, 1];
-    let intel_ifdef = '';
+    let IntelDef = '';
 
     if (glGetDebugInfo(gl) !== null) {
       if (glGetDebugInfo(gl).vendor.match(/Intel/)) {
-        intel_ifdef += '#define INTEL_WORKAROUND 1\n';
+        IntelDef += '#define INTEL_WORKAROUND 1\n';
       }
     }
 
     return new Model({
       program: new Program(gl, {
-        vs: intel_ifdef + glslify('./line-layer-vertex.glsl'),
+        vs: IntelDef + glslify('./line-layer-vertex.glsl'),
         fs: glslify('./line-layer-fragment.glsl'),
         id: 'line'
       }),

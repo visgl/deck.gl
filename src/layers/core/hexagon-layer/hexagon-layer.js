@@ -115,18 +115,18 @@ export default class HexagonLayer extends BaseLayer {
       nvertical: 1
     });
 
-    let intel_ifdef = '';
+    let IntelDef = '';
 
     if (glGetDebugInfo(gl) !== null) {
       if (glGetDebugInfo(gl).vendor.match(/Intel/)) {
-        intel_ifdef += '#define INTEL_WORKAROUND 1\n';
+        IntelDef += '#define INTEL_WORKAROUND 1\n';
       }
     }
 
     return new Model({
       id: this.props.id,
       program: new Program(gl, {
-        vs: intel_ifdef + glslify('./hexagon-layer-vertex.glsl'),
+        vs: IntelDef + glslify('./hexagon-layer-vertex.glsl'),
         fs: glslify('./hexagon-layer-fragment.glsl'),
         id: 'hexagon'
       }),
