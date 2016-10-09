@@ -128,14 +128,29 @@ export default class ChoroplethLayer extends BaseLayer {
     normalizedGeojson.features.map((feature, featureIndex) => {
       const {properties, geometry} = feature;
       const {coordinates, type} = geometry;
-      if (type === 'MultiPolygon') {
+      switch(type) {
+      case 'MultiPolygon': {
         const choropleths = coordinates.map(coords => ({
           coordinates: coords,
           featureIndex
         }));
         this.state.choropleths.push(...choropleths);
-      } else if (type === 'Polygon') {
+        break;
+        }
+      case 'Polygon':
         this.state.choropleths.push({coordinates, featureIndex});
+        break;
+      case 'LineString':
+        this.state.choropleths.push({coordinates: [coordinates], featureIndex});
+        break;
+      case 'MultiLineString': {
+        const choropleths = coordinates.map(coords => ({
+          coordinates: [coords],
+          featureIndex
+        }));
+        this.state.choropleths.push(...choropleths);
+        break;
+        }
       }
     });
 
@@ -143,7 +158,7 @@ export default class ChoroplethLayer extends BaseLayer {
       choropleth => {
         return choropleth.coordinates.map(
           polygon => polygon.map(
-            coordinate => [coordinate[0], coordinate[1], 0]
+            coordinate => [coordinate[0], coordinate[1], coordinate[2] || 0]
           )
         );
       }
@@ -157,12 +172,12 @@ export default class ChoroplethLayer extends BaseLayer {
     return vertices.reduce((acc, polygon) => {
       const numVertices = polygon.length;
 
-      // use vertex pairs for gl.LINES => [0, 1, 1, 2, 2, ..., n-1, n-1, 0]
+      // use vertex pairs for gl.LINES => [0, 1, 1, 2, 2, ..., n-2, n-2, n-1]
       const indices = [...acc, offset];
       for (let i = 1; i < numVertices - 1; i++) {
         indices.push(i + offset, i + offset);
       }
-      indices.push(offset);
+      indices.push(offset + numVertices - 1);
 
       offset += numVertices;
       return indices;
