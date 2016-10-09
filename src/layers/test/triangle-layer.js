@@ -87,23 +87,6 @@ export default class TestLayer extends Layer {
       }
     });
 
-    var squareGeometry = new Geometry({
-      positions: new Float32Array([
-        1,   1, 0,
-        -1,  1, 0,
-        1,  -1, 0,
-        -1, -1, 0]),
-      colors: {
-        value: new Float32Array([
-          0.5, 0.5, 1, 1,
-          0.5, 0.5, 1, 1,
-          0.5, 0.5, 1, 1,
-          0.5, 0.5, 1, 1
-        ]),
-        size: 4
-      }
-    });
-
     var program = new Program(gl, {
       vs: VERTEX_SHADER,
       fs: FRAGMENT_SHADER
@@ -111,11 +94,6 @@ export default class TestLayer extends Layer {
 
     var triangle = new Model({
       geometry: triangleGeometry,
-      program
-    });
-
-    var square = new Model({
-      geometry: squareGeometry,
       program
     });
 

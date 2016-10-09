@@ -1,4 +1,4 @@
-/* eslint-disable max-len */
+/* eslint-disable */
 // Paired down version of https://github.com/mapbox/mapbox-gl-js/blob/033043254d30a99a00b95660e296445a1ade2d01/js/geo/transform.js
 
 import {mat2, mat4} from 'gl-matrix';

@@ -31,7 +31,7 @@ export function updateLayers({oldLayers, newLayers, gl, scene}) {
   // Match all layers, checking for caught errors
   const error1 = matchLayers(oldLayers, newLayers);
   const error2 = finalizeOldLayers(oldLayers);
-  const error3 = updateMatchedLayers(newLayers)
+  const error3 = updateMatchedLayers(newLayers);
   const error4 = initializeNewLayers(newLayers, {gl});
   addLayersToScene(newLayers, scene);
   // Throw first error found, if any
@@ -56,7 +56,7 @@ function layerName(layer) {
   if (!layer) {
     return 'null layer';
   }
-  return `invalid layer`;
+  return 'invalid layer';
 }
 
 function matchLayers(oldLayers, newLayers) {
@@ -107,7 +107,6 @@ function _transferLayerState(oldLayer, newLayer) {
   newLayer.oldProps = props;
   oldLayer.state = null;
 }
-
 
 // Note: Layers can't be initialized until gl context is available
 // Therefore this method can be called repeatedly

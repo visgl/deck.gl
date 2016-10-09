@@ -211,8 +211,8 @@ export default class BaseLayer {
    *
    * Note: Position conversion is done in shader, so in many cases there is no need
    * for this function
-   * @param {Array|Typed Array} lngLat - long and lat values
-   * @return {Array|Typed Array} - x, y coordinates
+   * @param {Array|TypedArray} lngLat - long and lat values
+   * @return {Array|TypedArray} - x, y coordinates
    */
   project(lngLat) {
     const {mercator} = this.state;

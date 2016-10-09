@@ -20,13 +20,9 @@
 /* eslint-disable func-style, no-console, max-len */
 import test from 'tape-catch';
 import 'luma.gl/headless';
-import {Mat4, Scene, createGLContext} from 'luma.gl';
+import {Scene, createGLContext} from 'luma.gl';
 
 import {
-  Layer,
-
-  // DeckGLOverlay,
-  // HexagonLayer,
   ChoroplethLayer,
   ScatterplotLayer,
   ArcLayer,
@@ -36,7 +32,7 @@ import {
 // Import private method to test that layers can successfully be updated
 import {updateLayers} from '../lib';
 
-import CHOROPLETHS from '../../example/data/sf.zip.geo.json';
+// import CHOROPLETHS from '../../example/data/sf.zip.geo.json';
 // const HEXAGONS_FILE = './example/data/hexagons.csv';
 // const POINTS_FILE = './example/data/sf.bike.parking.csv';
 
@@ -61,10 +57,10 @@ const FIXTURE = {
     zoom: 11.5
   },
 
-  choropleths: [], // CHOROPLETHS,
+  choropleths: [],
   hexagons: [],
-  points: [{position: [100, 100], color:[255, 0, 0]}],
-  arcs: [{sourcePosition: [0, 0], targetPosition: [1, 3], color:[255, 0, 0]}]
+  points: [{position: [100, 100], color: [255, 0, 0]}],
+  arcs: [{sourcePosition: [0, 0], targetPosition: [1, 3], color: [255, 0, 0]}]
 };
 
 test('GridLayer#constructor', t => {
@@ -89,7 +85,7 @@ test('ChoroplethLayer#constructor', t => {
     id: 'choroplethLayer',
     ...mapSize,
     ...mapState,
-    data: [],
+    data: choropleths,
     opacity: 0.8,
     isPickable: false,
     drawContour: true
