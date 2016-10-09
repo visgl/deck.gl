@@ -67,17 +67,17 @@ export default class ChoroplethLayer extends BaseLayer {
         {size: 3, update: this.calculatePickingColors, noAlloc: true}
     });
 
-    const indexType = gl.getExtension('OES_element_index_uint') ?
+    const IndexType = gl.getExtension('OES_element_index_uint') ?
       Uint32Array : Uint16Array;
 
     this.setUniforms({opacity: this.props.opacity});
     this.setState({
       numInstances: 0,
-      indexType,
+      IndexType,
       model
     });
 
-    this.extractChoropleths();
+    this.state.choropleths = extractChoropleths(this.props.data);
   }
 
   willReceiveProps(oldProps, newProps) {
@@ -85,7 +85,7 @@ export default class ChoroplethLayer extends BaseLayer {
 
     const {dataChanged, attributeManager} = this.state;
     if (dataChanged) {
-      this.extractChoropleths();
+      this.state.choropleths = extractChoropleths(newProps.data);
 
       attributeManager.invalidateAll();
     }
@@ -93,7 +93,7 @@ export default class ChoroplethLayer extends BaseLayer {
     if (oldProps.opacity !== newProps.opacity) {
       this.setUniforms({opacity: newProps.opacity});
     }
-    this.state.model.userData.strokeWidth = newProps.strokeWidth;
+    this.state.model.userData.strokeWidth = newProps.strokeWidth || 1;
   }
 
   getModel(gl) {
@@ -119,137 +119,60 @@ export default class ChoroplethLayer extends BaseLayer {
       isIndexed: true,
       onBeforeRender() {
         this.userData.oldStrokeWidth = gl.getParameter(gl.LINE_WIDTH);
-        this.program.gl.lineWidth(this.userData.strokeWidth || 1);
+        this.program.gl.lineWidth(this.userData.strokeWidth);
       },
       onAfterRender() {
-        this.program.gl.lineWidth(this.userData.oldStrokeWidth || 1);
+        this.program.gl.lineWidth(this.userData.oldStrokeWidth);
       }
     });
-  }
-
-  extractChoropleths() {
-    const {data} = this.props;
-    const normalizedGeojson = normalize(data);
-
-    this.state.choropleths = [];
-
-    normalizedGeojson.features.map((feature, featureIndex) => {
-      const {properties, geometry} = feature;
-      const {coordinates, type} = geometry;
-      switch(type) {
-      case 'MultiPolygon': {
-        const choropleths = coordinates.map(coords => ({
-          coordinates: coords,
-          featureIndex
-        }));
-        this.state.choropleths.push(...choropleths);
-        break;
-        }
-      case 'Polygon':
-        this.state.choropleths.push({coordinates, featureIndex});
-        break;
-      case 'LineString':
-        this.state.choropleths.push({coordinates: [coordinates], featureIndex});
-        break;
-      case 'MultiLineString': {
-        const choropleths = coordinates.map(coords => ({
-          coordinates: [coords],
-          featureIndex
-        }));
-        this.state.choropleths.push(...choropleths);
-        break;
-        }
-      }
-    });
-
-    this.state.groupedVertices = this.state.choropleths.map(
-      choropleth => {
-        return choropleth.coordinates.map(
-          polygon => polygon.map(
-            coordinate => [coordinate[0], coordinate[1], coordinate[2] || 0]
-          )
-        );
-      }
-    );
-
-  }
-
-  calculateContourIndices(vertices) {
-    let offset = 0;
-
-    return vertices.reduce((acc, polygon) => {
-      const numVertices = polygon.length;
-
-      // use vertex pairs for gl.LINES => [0, 1, 1, 2, 2, ..., n-2, n-2, n-1]
-      const indices = [...acc, offset];
-      for (let i = 1; i < numVertices - 1; i++) {
-        indices.push(i + offset, i + offset);
-      }
-      indices.push(offset + numVertices - 1);
-
-      offset += numVertices;
-      return indices;
-    }, []);
-  }
-
-  calculateSurfaceIndices(vertices) {
-    let holes = null;
-
-    if (vertices.length > 1) {
-      holes = vertices.reduce(
-        (acc, polygon) => [...acc, acc[acc.length - 1] + polygon.length],
-        [0]
-      ).slice(1, vertices.length);
-    }
-
-    return earcut(flattenDeep(vertices), holes, 3);
   }
 
   calculateIndices(attribute) {
     // adjust index offset for multiple choropleths
-    const offsets = this.state.groupedVertices.reduce(
-      (acc, vertices) => [...acc, acc[acc.length - 1] +
-        vertices.reduce((count, polygon) => count + polygon.length, 0)],
+    const offsets = this.state.choropleths.reduce(
+      (acc, choropleth) => [...acc, acc[acc.length - 1] +
+        choropleth.reduce((count, polygon) => count + polygon.length, 0)],
       [0]
     );
-    const {indexType} = this.state;
-    if(indexType === Uint16Array && offsets[offsets.length - 1] > 65535) {
+    const {IndexType} = this.state;
+    if(IndexType === Uint16Array && offsets[offsets.length - 1] > 65535) {
       throw new Error('Vertex count exceeds browser\'s limit');
     }
 
-    const indices = this.state.groupedVertices.map(
-      (vertices, choroplethIndex) => this.props.drawContour ?
+    const indices = this.state.choropleths.map(
+      (choropleth, choroplethIndex) => this.props.drawContour ?
         // 1. get sequentially ordered indices of each choropleth contour
         // 2. offset them by the number of indices in previous choropleths
-        this.calculateContourIndices(vertices).map(
+        calculateContourIndices(choropleth).map(
           index => index + offsets[choroplethIndex]
         ) :
         // 1. get triangulated indices for the internal areas
         // 2. offset them by the number of indices in previous choropleths
-        this.calculateSurfaceIndices(vertices).map(
+        calculateSurfaceIndices(choropleth).map(
           index => index + offsets[choroplethIndex]
         )
     );
 
-    attribute.value = new indexType(flattenDeep(indices));
+    attribute.value = new IndexType(flattenDeep(indices));
     attribute.target = this.state.gl.ELEMENT_ARRAY_BUFFER;
     this.state.model.setVertexCount(attribute.value.length / attribute.size);
   }
 
   calculatePositions(attribute) {
-    const vertices = flattenDeep(this.state.groupedVertices);
+    const vertices = flattenDeep(this.state.choropleths);
     attribute.value = new Float32Array(vertices);
   }
 
   calculateColors(attribute) {
     const {data: {features}, getColor} = this.props;
 
-    const colors = this.state.groupedVertices.map(
-      (vertices, choroplethIndex) => {
-        const choropleth = this.state.choropleths[choroplethIndex];
+    const colors = this.state.choropleths.map(
+      (choropleth, choroplethIndex) => {
         const feature = features[choropleth.featureIndex];
         const color = getColor(feature) || DEFAULT_COLOR;
-        return vertices.map(polygon => polygon.map(vertex => color));
+        return choropleth.map(polygon =>
+          polygon.map(vertex => color)
+        );
       }
     );
 
@@ -259,15 +182,16 @@ export default class ChoroplethLayer extends BaseLayer {
   // Override the default picking colors calculation
   calculatePickingColors(attribute) {
 
-    const colors = this.state.groupedVertices.map(
-      (vertices, choroplethIndex) => {
-        const choropleth = this.state.choropleths[choroplethIndex];
+    const colors = this.state.choropleths.map(
+      (choropleth, choroplethIndex) => {
         const {featureIndex} = choropleth;
         const color = this.props.drawContour ? [-1, -1, -1] : [
           (featureIndex + 1) % 256,
           Math.floor((featureIndex + 1) / 256) % 256,
           Math.floor((featureIndex + 1) / 256 / 256) % 256];
-        return vertices.map(polygon => polygon.map(vertex => color));
+        return choropleth.map(polygon =>
+          polygon.map(vertex => color)
+        );
       }
     );
 
@@ -290,4 +214,90 @@ export default class ChoroplethLayer extends BaseLayer {
     this.props.onClick({...info, feature});
   }
 
+}
+
+// convert geojson to choropleths
+// @param {object} data - geojson object
+// @returns {array.array.array.point} array of geojson polygon-like coordinates
+function extractChoropleths(data) {
+  const normalizedGeojson = normalize(data);
+  const result = [];
+
+  normalizedGeojson.features.map((feature, featureIndex) => {
+    const choropleths = featureToChoropleths(feature);
+    choropleths.forEach(choropleth => {
+      choropleth.featureIndex = featureIndex;
+    });
+    result.push(...choropleths);
+  });
+  return result;
+}
+
+// normalize the coordinates array of a geojson feature
+// @param {object} feature - geojson feature object
+// @returns {array.array.array.point} array of geojson polygon-like coordinates
+function featureToChoropleths(feature) {
+  const {coordinates, type} = feature.geometry;
+  let choropleths;
+
+  switch(type) {
+  case 'MultiPolygon':
+    choropleths = coordinates;
+    break;
+  case 'Polygon':
+    choropleths = [coordinates];
+    break;
+  case 'LineString':
+    choropleths = [[coordinates]];
+    break;
+  case 'MultiLineString':
+    choropleths = coordinates.map(coords => [coords]);
+    break;
+  default:
+    choropleths = [];
+  }
+  return choropleths.map(
+    choropleth => choropleth.map(
+      polygon => polygon.map(
+        coordinate => [coordinate[0], coordinate[1], coordinate[2] || 0]
+      )
+    )
+  );
+}
+
+// get vertex indices for drawing choropleth contour
+// @param {array.array.point} choropleth
+// @returns {array.number} indices
+function calculateContourIndices(choropleth) {
+  let offset = 0;
+
+  return choropleth.reduce((acc, polygon) => {
+    const numVertices = polygon.length;
+
+    // use vertex pairs for gl.LINES => [0, 1, 1, 2, 2, ..., n-2, n-2, n-1]
+    const indices = [...acc, offset];
+    for (let i = 1; i < numVertices - 1; i++) {
+      indices.push(i + offset, i + offset);
+    }
+    indices.push(offset + numVertices - 1);
+
+    offset += numVertices;
+    return indices;
+  }, []);
+}
+
+// get vertex indices for drawing choropleth mesh
+// @param {array.array.point} choropleth
+// @returns {array.number} indices
+function calculateSurfaceIndices(choropleth) {
+  let holes = null;
+
+  if (choropleth.length > 1) {
+    holes = choropleth.reduce(
+      (acc, polygon) => [...acc, acc[acc.length - 1] + polygon.length],
+      [0]
+    ).slice(1, choropleth.length);
+  }
+
+  return earcut(flattenDeep(choropleth), holes, 3);
 }
