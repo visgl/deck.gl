@@ -216,9 +216,12 @@ export default class ChoroplethLayer extends BaseLayer {
 
 }
 
-// convert geojson to choropleths
-// @param {object} data - geojson object
-// @returns {array.array.array.point} array of geojson polygon-like coordinates
+/*
+ * converts list of features from a GeoJSON object to a list of GeoJSON
+ * polygon-style coordinates
+ * @param {Object} data - geojson object
+ * @returns {[Number,Number,Number][][][]} array of choropleths
+ */
 function extractChoropleths(data) {
   const normalizedGeojson = normalize(data);
   const result = [];
@@ -233,9 +236,12 @@ function extractChoropleths(data) {
   return result;
 }
 
-// normalize the coordinates array of a geojson feature
-// @param {object} feature - geojson feature object
-// @returns {array.array.array.point} array of geojson polygon-like coordinates
+/*
+ * converts one GeoJSON features from object to a list of GeoJSON polygon-style
+ * coordinates
+ * @param {Object} data - geojson object
+ * @returns {[Number,Number,Number][][][]} array of choropleths
+ */
 function featureToChoropleths(feature) {
   const {coordinates, type} = feature.geometry;
   let choropleths;
@@ -248,6 +254,7 @@ function featureToChoropleths(feature) {
     choropleths = [coordinates];
     break;
   case 'LineString':
+    // create a LineStringLayer for LineString and MultiLineString?
     choropleths = [[coordinates]];
     break;
   case 'MultiLineString':
@@ -265,9 +272,11 @@ function featureToChoropleths(feature) {
   );
 }
 
-// get vertex indices for drawing choropleth contour
-// @param {array.array.point} choropleth
-// @returns {array.number} indices
+/*
+ * get vertex indices for drawing choropleth contour
+ * @param {[Number,Number,Number][][]} choropleth
+ * @returns {[Number]} indices
+ */
 function calculateContourIndices(choropleth) {
   let offset = 0;
 
@@ -286,9 +295,11 @@ function calculateContourIndices(choropleth) {
   }, []);
 }
 
-// get vertex indices for drawing choropleth mesh
-// @param {array.array.point} choropleth
-// @returns {array.number} indices
+/*
+ * get vertex indices for drawing choropleth mesh
+ * @param {[Number,Number,Number][][]} choropleth
+ * @returns {[Number]} indices
+ */
 function calculateSurfaceIndices(choropleth) {
   let holes = null;
 
