@@ -33,7 +33,6 @@ export function updateLayers({oldLayers, newLayers, gl, scene}) {
   const error2 = finalizeOldLayers(oldLayers);
   const error3 = updateMatchedLayers(newLayers);
   const error4 = initializeNewLayers(newLayers, {gl});
-  addLayersToScene(newLayers, scene);
   // Throw first error found, if any
   const error = error1 || error2 || error3 || error4;
   if (error) {
@@ -41,12 +40,42 @@ export function updateLayers({oldLayers, newLayers, gl, scene}) {
   }
 }
 
+// TODO - this won't work with multiple deck.gl overlays
+let drewLayers = false;
+
 export function layersNeedRedraw(layers, {clearRedrawFlags = false} = {}) {
   let redraw = false;
+
+  // Make sure that buffer is cleared once when layer list becomes empty
+  if (layers.length === 0 && drewLayers) {
+    redraw = true;
+  }
+
+  drewLayers = false;
   for (const layer of layers) {
     redraw = redraw || layer.getNeedsRedraw({clearRedrawFlags});
+    drewLayers = true;
   }
+
   return redraw;
+}
+
+export function drawLayers({layers = [], uniforms = {}} = {}) {
+  for (const layer of layers) {
+    if (layer.props.visible) {
+      layer.draw(uniforms);
+    }
+  }
+}
+
+export function getLayerPickingModels(layers) {
+  const models = [];
+  for (const layer of layers) {
+    if (layer.props.visible && layer.props.isPickable && layer.state.model) {
+      models.push(layer.state.model);
+    }
+  }
+  return models;
 }
 
 function layerName(layer) {
@@ -184,18 +213,4 @@ function finalizeOldLayers(oldLayers) {
     }
   }
   return error;
-}
-
-function addLayersToScene(layers, scene) {
-  if (!scene) {
-    return;
-  }
-  // clear scene and repopulate based on new layers
-  scene.removeAll();
-  for (const layer of layers) {
-    // Add model to scene
-    if (layer.state.model) {
-      scene.add(layer.state.model);
-    }
-  }
 }

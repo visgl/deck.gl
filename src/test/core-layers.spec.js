@@ -116,7 +116,7 @@ test('ScatterplotLayer#constructor', t => {
   });
   t.ok(emptyLayer instanceof ScatterplotLayer, 'Empty ScatterplotLayer created');
 
-  t.throws(
+  t.doesNotThrow(
     () => new ScatterplotLayer({
       id: 'nullScatterplotLayer',
       ...mapSize,
@@ -124,7 +124,7 @@ test('ScatterplotLayer#constructor', t => {
       data: null,
       isPickable: true
     }),
-    'Null ScatterplotLayer threw exception'
+    'Null ScatterplotLayer did not throw exception'
   );
 
   const {layerState} = FIXTURE;
@@ -156,7 +156,7 @@ test('ArcLayer#constructor', t => {
   });
   t.ok(emptyLayer instanceof ArcLayer, 'Empty ArcLayer created');
 
-  t.throws(
+  t.doesNotThrow(
     () => new ArcLayer({
       id: 'nullArcLayer',
       ...mapSize,
@@ -164,7 +164,7 @@ test('ArcLayer#constructor', t => {
       data: null,
       isPickable: true
     }),
-    'Null ArcLayer threw exception'
+    'Null ArcLayer did not throw exception'
   );
 
   const {layerState} = FIXTURE;

@@ -23,11 +23,13 @@ import React, {PropTypes} from 'react';
 import autobind from 'autobind-decorator';
 
 import WebGLRenderer from './webgl-renderer';
-import {Scene, Camera, PerspectiveCamera, Mat4} from 'luma.gl';
-import {DEFAULT_LIGHTING, DEFAULT_BLENDING, DEFAULT_BACKGROUND_COLOR}
-  from './config';
-import {updateLayers, layersNeedRedraw} from '../lib';
+import {Group} from 'luma.gl';
+// import {pickModels} from 'luma.gl';
+import {pickModels} from '../lib/pick-models';
+import {DEFAULT_BLENDING} from './config';
 import Viewport from '../viewport';
+import {updateLayers, drawLayers, layersNeedRedraw, getLayerPickingModels}
+  from '../lib';
 
 // TODO - move default to WebGL renderer
 const DEFAULT_PIXEL_RATIO =
@@ -41,7 +43,6 @@ const PROP_TYPES = {
   blending: PropTypes.object,
   gl: PropTypes.object,
   debug: PropTypes.bool,
-  camera: PropTypes.instanceOf(Camera),
   style: PropTypes.object,
   pixelRatio: PropTypes.number,
   onWebGLInitialized: PropTypes.func
@@ -50,7 +51,6 @@ const PROP_TYPES = {
 const DEFAULT_PROPS = {
   id: 'deckgl-overlay',
   blending: DEFAULT_BLENDING,
-  camera: null,
   debug: false,
   gl: null,
   pixelRatio: DEFAULT_PIXEL_RATIO,
@@ -75,38 +75,30 @@ export default class DeckGLOverlay extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    const {gl, scene} = this.state;
+    const {gl} = this.state;
     updateLayers({
       oldLayers: this.props.layers,
       newLayers: nextProps.layers,
-      gl,
-      scene
+      gl
     });
   }
 
   @autobind _onRendererInitialized({gl}) {
     this.props.onWebGLInitialized(gl);
-    const scene = new Scene(gl, {
-      lights: DEFAULT_LIGHTING,
-      backgroundColor: DEFAULT_BACKGROUND_COLOR
-    });
     // Note: Triggers React component update, rerending updated layers
-    this.setState({
-      gl,
-      scene
-    });
+    this.setState({gl});
     // Note: throws on error, don't adjust state after this call
     updateLayers({
       oldLayers: [],
       newLayers: this.props.layers,
-      gl,
-      scene
+      gl
     });
   }
 
   // Route events to layers
-  @autobind _onClick(info) {
-    const {picked} = info;
+  @autobind _onClick(event) {
+    const picked = this._pick(event.x, event.y);
+    const info = {picked, ...event};
     for (const item of picked) {
       if (item.model.userData.layer.onClick({color: item.color, ...info})) {
         return;
@@ -114,9 +106,10 @@ export default class DeckGLOverlay extends React.Component {
     }
   }
 
-    // Route events to layers
-  @autobind _onMouseMove(info) {
-    const {picked} = info;
+  // Route events to layers
+  @autobind _onMouseMove(event) {
+    const picked = this._pick(event.x, event.y);
+    const info = {picked, ...event};
     for (const item of picked) {
       if (item.model.userData.layer.onHover({color: item.color, ...info})) {
         return;
@@ -124,80 +117,65 @@ export default class DeckGLOverlay extends React.Component {
     }
   }
 
-  @autobind _checkIfNeedRedraw() {
+  @autobind _onNeedRedraw() {
     const {layers} = this.props;
     return layersNeedRedraw(layers, {clearRedrawFlags: true});
   }
 
+  @autobind _onRenderFrame() {
+    const {layers} = this.props;
+    return drawLayers({layers, uniforms: this._getUniforms()});
+  }
+
+  _pick(x, y) {
+    const {gl} = this.state;
+    const {layers, pixelRatio} = this.props;
+
+    const pickedModels = pickModels(gl, {
+      x: x * pixelRatio,
+      y: y * pixelRatio,
+      group: new Group({children: getLayerPickingModels(layers)}),
+      uniforms: this._getUniforms()
+    });
+
+    return pickedModels;
+  }
+
+  _getUniforms() {
+    const {
+      width, height, latitude, longitude, zoom, pitch, bearing, altitude
+    } = this.props;
+
+    const viewport = new Viewport({
+      width, height, latitude, longitude, zoom, pitch, bearing, altitude
+    });
+
+    return viewport.getUniforms();
+  }
+
   render() {
     const {
-      width, height, blending, pixelRatio,
-      latitude, longitude, zoom, pitch, bearing, altitude,
-      gl, debug,
-      ...otherProps
+      width, height, blending, pixelRatio, gl, debug, ...otherProps
     } = this.props;
-    let {camera} = this.props;
-    const {scene} = this.state;
-
-    function convertToMat4(toMatrix, fromMatrix) {
-      for (let i = 0; i < fromMatrix.length; ++i) {
-        toMatrix[i] = fromMatrix[i];
-      }
-    }
-
-    function convertToMat4FP64(toMatrixArray, fromMatrix) {
-      function df64ify(a) {
-        const hiPart = Math.fround(a);
-        const loPart = a - Math.fround(a);
-        return [hiPart, loPart];
-      }
-
-      // Transpose the projection matrix to column major for GLSL.
-
-      for (let i = 0; i < 4; ++i) {
-        for (let j = 0; j < 4; ++j) {
-          const rowMajorIndex = j * 4 + i;
-          const columnMajorIndex = (i * 4 + j) * 2;
-          [
-            toMatrixArray[columnMajorIndex],
-            toMatrixArray[columnMajorIndex + 1]
-          ] = df64ify(fromMatrix[rowMajorIndex]);
-        }
-      }
-    }
-
-    // Create a "disposable" camera and overwrite matrices
-    if (!camera) {
-      const viewport = new Viewport({
-        width, height, latitude, longitude, zoom, pitch, bearing, altitude
-      });
-
-      camera = new PerspectiveCamera();
-      camera.view = new Mat4().id();
-      convertToMat4(camera.projection, viewport.getProjectionMatrix());
-      convertToMat4FP64(camera.projectionFP64, viewport.getProjectionMatrix());
-
-    }
 
     return (
       <WebGLRenderer
-        { ...otherProps }
+        {...otherProps}
 
-        width={ width }
-        height={ height }
+        width={width}
+        height={height}
 
-        gl={ gl }
-        debug={ debug }
-        viewport={ {x: 0, y: 0, width, height} }
-        camera={ camera }
-        scene={ scene }
-        blending={ blending }
-        pixelRatio={ pixelRatio }
+        gl={gl}
+        debug={debug}
+        viewport={{x: 0, y: 0, width, height}}
+        blending={blending}
+        pixelRatio={pixelRatio}
 
-        onRendererInitialized={ this._onRendererInitialized }
-        onNeedRedraw={ this._checkIfNeedRedraw }
-        onMouseMove={ this._onMouseMove }
-        onClick={ this._onClick }/>
+        onRendererInitialized={this._onRendererInitialized}
+        onNeedRedraw={this._onNeedRedraw}
+        onRenderFrame={this._onRenderFrame}
+        onMouseMove={this._onMouseMove}
+        onClick={this._onClick}/>
     );
   }
 

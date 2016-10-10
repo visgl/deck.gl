@@ -22,7 +22,7 @@
 /* global console */
 import React, {PropTypes} from 'react';
 import autobind from 'autobind-decorator';
-import {createGLContext, Camera, Scene, addEvents, Fx, glGet} from 'luma.gl';
+import {createGLContext, addEvents, Fx, glGet} from 'luma.gl';
 import throttle from 'lodash.throttle';
 
 const PROP_TYPES = {
@@ -34,8 +34,6 @@ const PROP_TYPES = {
 
   pixelRatio: PropTypes.number,
   viewport: PropTypes.object.isRequired,
-  camera: PropTypes.instanceOf(Camera).isRequired,
-  scene: PropTypes.instanceOf(Scene),
   blending: PropTypes.object,
   events: PropTypes.object,
   gl: PropTypes.object,
@@ -45,8 +43,10 @@ const PROP_TYPES = {
   onInitializationFailed: PropTypes.func,
   onError: PropTypes.func,
 
+  onRenderFrame: PropTypes.func,
   onBeforeRenderFrame: PropTypes.func,
   onAfterRenderFrame: PropTypes.func,
+  onRenderPickingScene: PropTypes.func,
   onBeforeRenderPickingScene: PropTypes.func,
   onAfterRenderPickingScene: PropTypes.func,
 
@@ -57,7 +57,6 @@ const PROP_TYPES = {
 
 const DEFAULT_PROPS = {
   style: {},
-  scene: null,
 
   gl: null,
   debug: false,
@@ -67,8 +66,10 @@ const DEFAULT_PROPS = {
   onError: error => {
     throw error;
   },
+  onRenderFrame: () => {},
   onBeforeRenderFrame: () => {},
   onAfterRenderFrame: () => {},
+  onRenderPickingScene: () => {},
   onBeforeRenderPickingScene: () => {},
   onAfterRenderPickingScene: () => {},
 
@@ -91,7 +92,7 @@ export default class WebGLRenderer extends React.Component {
    * @classdesc
    * Small react component that uses Luma.GL to initialize a WebGL context.
    *
-   * Returns a canvas, creates a basic WebGL context, a camera and a scene,
+   * Returns a canvas, creates a basic WebGL context
    * sets up a renderloop, and registers some basic event handlers
    *
    * @class
@@ -145,46 +146,28 @@ export default class WebGLRenderer extends React.Component {
     this.props.onRendererInitialized({gl});
   }
 
-  // TODO - move this back to luma.gl/scene.js
-  /* eslint-disable max-statements */
-  _pick(x, y) {
-    const {gl} = this.state;
-    const {camera, scene, pixelRatio} = this.props;
-
-    const pickedModels = scene.pickModels(gl, {
-      camera,
-      x: x * pixelRatio,
-      y: y * pixelRatio
-    });
-
-    return pickedModels;
-  }
-
   @autobind
   _onClick(event) {
-    const picked = this._pick(event.x, event.y);
-    this.props.onClick({...event, picked});
+    this.props.onClick(event);
   }
 
   @autobind
   _onMouseMove(event) {
-    const picked = this._pick(event.x, event.y);
-    this.props.onMouseMove({...event, picked});
+    this.props.onMouseMove(event);
   }
 
+  /* eslint-disable max-statements */
   _renderFrame() {
     const {
       viewport: {x, y, width, height},
       blending: {enable, blendFunc, blendEquation},
-      pixelRatio,
-      camera,
-      scene
+      pixelRatio
     } = this.props;
 
     const {gl} = this.state;
 
     // Check for reasons not to draw
-    if (!gl || !scene || !(width > 0) || !(height > 0)) {
+    if (!gl || !(width > 0) || !(height > 0)) {
       return;
     }
 
@@ -214,10 +197,11 @@ export default class WebGLRenderer extends React.Component {
       gl.disable(gl.BLEND);
     }
 
-    this.props.onBeforeRenderFrame();
-    scene.render({camera});
-    this.props.onAfterRenderFrame();
+    this.props.onBeforeRenderFrame({gl});
+    this.props.onRenderFrame({gl});
+    this.props.onAfterRenderFrame({gl});
   }
+  /* eslint-enable max-statements */
 
   /**
    * Main WebGL animation loop
@@ -233,12 +217,12 @@ export default class WebGLRenderer extends React.Component {
     const {id, width, height, pixelRatio, style} = this.props;
     return (
       <canvas
-        ref={ 'overlay' }
-        key={ 'overlay' }
-        id={ id }
-        width={ width * pixelRatio || 1 }
-        height={ height * pixelRatio || 1 }
-        style={ {...style, width, height} }/>
+        ref={'overlay'}
+        key={'overlay'}
+        id={id}
+        width={width * pixelRatio || 1}
+        height={height * pixelRatio || 1}
+        style={{...style, width, height}}/>
     );
   }
 

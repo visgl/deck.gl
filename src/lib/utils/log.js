@@ -10,6 +10,7 @@ export default function log(priority, ...args) {
 }
 
 log.priority = 0;
+log.log = log;
 
 // Expose to browser
 if (typeof window !== 'undefined') {
