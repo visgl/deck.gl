@@ -71,7 +71,8 @@ export function drawLayers({layers = [], uniforms = {}} = {}) {
 export function getLayerPickingModels(layers) {
   const models = [];
   for (const layer of layers) {
-    if (layer.props.visible && layer.props.isPickable && layer.state.model) {
+    const {visible, pickable, isPickable} = layer.props;
+    if (visible && (pickable || isPickable) && layer.state.model) {
       models.push(layer.state.model);
     }
   }

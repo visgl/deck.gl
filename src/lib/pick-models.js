@@ -28,24 +28,22 @@ export function pickModels(gl, {
   }, () => {
     for (let i = group.children.length - 1; i >= 0; --i) {
       const model = group.children[i];
-      if (model.isPickable()) {
 
-        // Clear the frame buffer, render and sample
-        gl.clear(GL.COLOR_BUFFER_BIT | GL.DEPTH_BUFFER_BIT);
-        model.render(gl, {...uniforms, renderPickingBuffer: 1});
+      // Clear the frame buffer, render and sample
+      gl.clear(GL.COLOR_BUFFER_BIT | GL.DEPTH_BUFFER_BIT);
+      model.render(gl, {...uniforms, renderPickingBuffer: 1});
 
-        // Read color in the central pixel, to be mapped with picking colors
-        const color = new Uint8Array(4);
-        gl.readPixels(
-          x, gl.canvas.height - y, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, color
-        );
+      // Read color in the central pixel, to be mapped with picking colors
+      const color = new Uint8Array(4);
+      gl.readPixels(
+        x, gl.canvas.height - y, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, color
+      );
 
-        const isPicked =
-          color[0] !== 0 || color[1] !== 0 || color[2] !== 0 || color[3] !== 0;
+      const isPicked =
+        color[0] !== 0 || color[1] !== 0 || color[2] !== 0 || color[3] !== 0;
 
-        // Add the information to the stack
-        picked.push({model, color, isPicked});
-      }
+      // Add the information to the stack
+      picked.push({model, color, isPicked});
     }
   });
 

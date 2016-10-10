@@ -38,7 +38,9 @@ const DEFAULT_PROPS = {
   opacity: 0.8,
   numInstances: undefined,
   data: [],
-  isVisible: true,
+  visible: true,
+  pickable: false,
+  // Deprecated: isPickable
   isPickable: false,
   deepCompare: false,
   mercatorEnabled: false,
@@ -73,7 +75,7 @@ export default class BaseLayer {
     props = {
       ...DEFAULT_PROPS,
       ...props,
-      visible: props.visible === undefined ? true : props.visible,
+      // Accept null as data - otherwise apps will need to add ugly checks
       data: props.data || []
     };
 
