@@ -17,35 +17,18 @@ All notable changes to deck.gl will be documented in this file.
 #### [Ongoing]
 - Tutorials of using deck.gl
 
-### Beta-3.0.0 CHECKLIST
-deck.gl
-- [ ] New documentation on gh-pages to replace the current API docs in README.MD
-- [ ] High-precision (64-bit) versions of core layers
-- [ ] Add performance test layers
-- [ ] Fix broken HexagonLayer angle
-- [ ] Grid layer, fix or remove
-- [ ] Point Cloud layer example
-- [ ] Viewport class - fitbounds replacement
-- [ ] Viewport class supported as input parameter to all layers (possibly
-      through react context)
-luma.gl
-- [ ] High-precision (64-bit) floating point calculation support
-- [ ] New logging library with performance instrumentation
-react-map-gl
-- [ ] Viewport class exported from deck.gl and react-map-gl layers able to use it.
-- [ ] Map layers use new projects
-- [ ] All dependencies on mapbox transform removed
-- [ ] map-interactions independent of react-map-gl, used to control deck.gl
-      visualizations without maps?
 
 ### Beta-3.0.0 Releases
+
+#### [dev] -
+ - BREAKING: No longer use Camera/Scene to render. Enabler for issue #5.
 
 #### [3.0.0-beta17] - 64bit layers and more.
  - FEATURE: New GLSL library: 64bit emulated floating point
  - FEATURE: New layer: ScatterplotLayer64: Sample 64-bit, high precision layer
  - FEATUREY: ArcLayer can now specify separate start end end color for each arc.
  - FIX: Add high precision version of `tan` as Intel GPU workaround.
- - MISC: eslint now uses stronger rules. Fixes new eslint warnings.
+ - INTERNAL: eslint now uses stronger rules. Fix new eslint warnings.
 
 #### [3.0.0-beta16] -
  - Breaking change - rename `disableMercatorProject` prop to `mercatorEnabled`

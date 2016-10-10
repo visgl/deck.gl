@@ -1,8 +1,2 @@
-import {addIterator, areEqualShallow} from './util';
-import log from './log';
-
-export {
-  addIterator,
-  areEqualShallow,
-  log
-};
+export * from './util';
+export {default as log} from './log';

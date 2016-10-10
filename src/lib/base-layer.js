@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 
 /* eslint-disable guard-for-in */
-import {AttributeManager} from 'luma.gl';
+import AttributeManager from './attribute-manager';
 import {addIterator, areEqualShallow, log} from './utils';
 import isDeepEqual from 'lodash.isequal';
 import assert from 'assert';
@@ -38,6 +38,9 @@ const DEFAULT_PROPS = {
   opacity: 0.8,
   numInstances: undefined,
   data: [],
+  visible: true,
+  pickable: false,
+  // Deprecated: isPickable
   isPickable: false,
   deepCompare: false,
   mercatorEnabled: false,
@@ -71,7 +74,9 @@ export default class BaseLayer {
 
     props = {
       ...DEFAULT_PROPS,
-      ...props
+      ...props,
+      // Accept null as data - otherwise apps will need to add ugly checks
+      data: props.data || []
     };
 
     // Add iterator to objects
@@ -239,6 +244,13 @@ export default class BaseLayer {
   }
 
   // INTERNAL METHODS
+
+  draw(uniforms = {}) {
+    const {model} = this.state;
+    if (model) {
+      model.render(uniforms);
+    }
+  }
 
   // Deduces numer of instances. Intention is to support:
   // - Explicit setting of numInstances

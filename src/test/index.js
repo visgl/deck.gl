@@ -24,4 +24,4 @@ import './imports-spec';
 import './layer-spec';
 import './viewport-spec';
 
-import './layers-spec';
+import './core-layers.spec';

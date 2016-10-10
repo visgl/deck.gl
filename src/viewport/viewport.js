@@ -18,7 +18,6 @@
 // Translated                  [x, y] = zero centered
 // Clip Space                  unit cube around view
 // ------
-
 import {mat2, mat4, vec4} from 'gl-matrix';
 import autobind from 'autobind-decorator';
 import assert from 'assert';
