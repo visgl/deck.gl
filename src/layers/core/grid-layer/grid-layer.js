@@ -115,7 +115,7 @@ export default class GridLayer extends BaseLayer {
 
   }
 
-  calculateInstancePositions(attribute, numInstances) {
+  calculateInstancePositions(attribute, {numInstances}) {
     const {unitWidth, unitHeight, width, height} = this.props;
     const {numCol} = this.state;
     const {value, size} = attribute;
