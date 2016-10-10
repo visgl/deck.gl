@@ -43,6 +43,5 @@ void main(void) {
   float alpha = instancePickingColors == selectedPickingColor ? 1.5 * instanceColors.w : instanceColors.w;
   vColor = vec4(mix(instanceColors.xyz / maxCount, instancePickingColors / 255., renderPickingBuffer), alpha);
 
-  vec3 p = instancePositions + vertices * scale / mercatorScale;
-  gl_Position = projectionMatrix * worldMatrix * vec4(p, 1.0);
+  gl_Position = vec4(instancePositions + vertices * scale, 1.0);
 }
