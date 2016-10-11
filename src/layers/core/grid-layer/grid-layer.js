@@ -108,7 +108,7 @@ export default class GridLayer extends BaseLayer {
     const MARGIN = 2;
     const scale = new Float32Array([
       (unitWidth - MARGIN) / width * 2,
-      - (unitHeight - MARGIN) / height * 2,
+      -(unitHeight - MARGIN) / height * 2,
       1
     ]);
     this.setUniforms({scale});
@@ -130,7 +130,7 @@ export default class GridLayer extends BaseLayer {
   }
 
   calculateInstanceColors(attribute) {
-    const {data, unitWidth, unitHeight, width, height} = this.props;
+    const {data, unitWidth, unitHeight} = this.props;
     const {numCol, numRow} = this.state;
     const {value, size} = attribute;
 

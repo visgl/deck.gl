@@ -135,7 +135,7 @@ export default class ChoroplethLayer extends BaseLayer {
       [0]
     );
     const {IndexType} = this.state;
-    if(IndexType === Uint16Array && offsets[offsets.length - 1] > 65535) {
+    if (IndexType === Uint16Array && offsets[offsets.length - 1] > 65535) {
       throw new Error('Vertex count exceeds browser\'s limit');
     }
 
@@ -176,7 +176,7 @@ export default class ChoroplethLayer extends BaseLayer {
       }
     );
 
-    attribute.value = new Float32Array(flattenDeep(nestedColors));
+    attribute.value = new Float32Array(flattenDeep(colors));
   }
 
   // Override the default picking colors calculation
@@ -246,7 +246,7 @@ function featureToChoropleths(feature) {
   const {coordinates, type} = feature.geometry;
   let choropleths;
 
-  switch(type) {
+  switch (type) {
   case 'MultiPolygon':
     choropleths = coordinates;
     break;
