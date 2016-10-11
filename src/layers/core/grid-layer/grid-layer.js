@@ -94,8 +94,8 @@ export default class GridLayer extends BaseLayer {
   updateCell() {
     const {width, height, unitWidth, unitHeight} = this.props;
 
-    const numCol = Math.ceil(width * 2 / unitWidth);
-    const numRow = Math.ceil(height * 2 / unitHeight);
+    const numCol = Math.ceil(width / unitWidth);
+    const numRow = Math.ceil(height / unitHeight);
     this.setState({
       numCol,
       numRow,
@@ -107,15 +107,15 @@ export default class GridLayer extends BaseLayer {
 
     const MARGIN = 2;
     const scale = new Float32Array([
-      unitWidth - MARGIN * 2,
-      unitHeight - MARGIN * 2,
+      (unitWidth - MARGIN) / width * 2,
+      -(unitHeight - MARGIN) / height * 2,
       1
     ]);
     this.setUniforms({scale});
 
   }
 
-  calculateInstancePositions(attribute, numInstances) {
+  calculateInstancePositions(attribute, {numInstances}) {
     const {unitWidth, unitHeight, width, height} = this.props;
     const {numCol} = this.state;
     const {value, size} = attribute;
@@ -123,14 +123,14 @@ export default class GridLayer extends BaseLayer {
     for (let i = 0; i < numInstances; i++) {
       const x = i % numCol;
       const y = Math.floor(i / numCol);
-      value[i * size + 0] = x * unitWidth - width;
-      value[i * size + 1] = y * unitHeight - height;
+      value[i * size + 0] = x * unitWidth / width * 2 - 1;
+      value[i * size + 1] = 1 - y * unitHeight / height * 2;
       value[i * size + 2] = 0;
     }
   }
 
   calculateInstanceColors(attribute) {
-    const {data, unitWidth, unitHeight, width, height} = this.props;
+    const {data, unitWidth, unitHeight} = this.props;
     const {numCol, numRow} = this.state;
     const {value, size} = attribute;
 
@@ -138,9 +138,9 @@ export default class GridLayer extends BaseLayer {
 
     for (const point of data) {
       const pixel = this.project([point.position.x, point.position.y]);
-      const colId = Math.floor((pixel[0] + width) / unitWidth);
-      const rowId = Math.floor((pixel[1] + height) / unitHeight);
-      if (colId < numCol && rowId < numRow) {
+      const colId = Math.floor(pixel[0] / unitWidth);
+      const rowId = Math.floor(pixel[1] / unitHeight);
+      if (colId >= 0 && colId < numCol && rowId >= 0 && rowId < numRow) {
         const i4 = (colId + rowId * numCol) * size;
         value[i4 + 2] = value[i4 + 0] += 1;
         value[i4 + 1] += 5;
