@@ -1,1 +1,1 @@
-module.exports = require('./dist/react/deckgl-overlay').default;
+module.exports = require('./dist/react/deckgl').default;

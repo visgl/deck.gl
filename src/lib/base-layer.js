@@ -81,30 +81,27 @@ export default class BaseLayer {
 
     // Add iterator to objects
     // TODO - Modifying props is an anti-pattern
+    // TODO - allow app to supply dataIterator prop?
     if (props.data) {
       addIterator(props.data);
       assert(props.data[Symbol.iterator], 'data prop must have an iterator');
     }
-    this.id = props.id || '';
-    this._checkProp(props.data, 'data');
-    this._checkProp(props.id, 'id');
-    this._checkProp(props.width, 'width');
-    this._checkProp(props.height, 'height');
-    this._checkProp(props.latitude, 'latitude');
-    this._checkProp(props.longitude, 'longitude');
-    this._checkProp(props.zoom, 'zoom');
-
-    // TODO - improve props checking
-    // this._checkProp(typeof props.id === 'string' && props.id, 'id');
-    // this._checkProp(Number.isFinite(props.width), 'width');
-    // this._checkProp(Number.isFinite(props.height), 'height');
-
-    // this._checkProp(Number.isFinite(props.latitude), 'latitude');
-    // this._checkProp(Number.isFinite(props.longitude), 'longitude');
-    // this._checkProp(Number.isFinite(props.zoom), 'zoom');
 
     this.props = props;
+    this.id = props.id;
     this.count = counter++;
+
+    this.checkRequiredProp('data');
+    this.checkRequiredProp('id', x => typeof x === 'string');
+
+    // TODO - inject viewport from overlay instead of creating for each layer?
+    this.checkRequiredProp('width', Number.isFinite);
+    this.checkRequiredProp('height', Number.isFinite);
+    this.checkRequiredProp('latitude', Number.isFinite);
+    this.checkRequiredProp('longitude', Number.isFinite);
+    this.checkRequiredProp('zoom', Number.isFinite);
+    this.checkOptionalProp('pitch', Number.isFinite);
+    this.checkOptionalProp('bearing', Number.isFinite);
   }
   /* eslint-enable max-statements */
 
@@ -506,6 +503,23 @@ export default class BaseLayer {
     return change;
   }
 
+  checkOptionalProp(propertyName, condition) {
+    const value = this.props[propertyName];
+    if (value !== undefined && !condition(value)) {
+      throw new Error(`Bad property ${propertyName} in layer ${this.id}`);
+    }
+  }
+
+  checkRequiredProp(propertyName, condition) {
+    const value = this.props[propertyName];
+    if (value === undefined) {
+      throw new Error(`Property ${propertyName} undefined in layer ${this.id}`);
+    }
+    if (condition && !condition(value)) {
+      throw new Error(`Bad property ${propertyName} in layer ${this.id}`);
+    }
+  }
+
   // INTERNAL METHODS
   _updateModel({gl}) {
     const {model, attributeManager, uniforms} = this.state;
@@ -515,12 +529,6 @@ export default class BaseLayer {
     model.setUniforms(uniforms);
     // whether current layer responds to mouse events
     model.setPickable(this.props.isPickable);
-  }
-
-  _checkProp(property, propertyName) {
-    if (property === undefined || property === null) {
-      throw new Error(`Property ${propertyName} undefined in layer ${this.id}`);
-    }
   }
 
   // MAP LAYER FUNCTIONALITY
