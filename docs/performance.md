@@ -67,11 +67,15 @@ As a very rough rule of thumb, on the GPU:
 - Native 64 bit computations are ~4 times slower than 32 bit computations
 - Emulated 64 bit computations are ~10 times slower than 32 bit computations
 
-Unfortunately, WebGL does not expose native 64 bit support so deck.gl
-uses emulated 64 bit computations. If your data sets are modest in size (<100K)
-you will probably not run into performance issues with 64 bit layers,
-but if you have larger data sets you will want to do some
-testing before moving to 64 bit layers.
+Since WebGL does not expose native 64 bit floating point support to shaders,
+deck.gl uses emulated 64 bit floating point in its 64 bit shaders. Now the
+amount of time spent in the vertex shader doing 64 bit calculation is only
+a part of the rendering pipeline, so the performance impact will be limited
+but not non-existent.
+
+If your data sets are modest in size (<100K) you will probably not run into
+performance issues with 64 bit layers, but if you have larger data sets you
+may want to do some testing before moving to 64 bit layers.
 
 
 ## Instrumentation
