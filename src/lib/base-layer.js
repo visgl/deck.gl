@@ -24,7 +24,7 @@ import {addIterator, areEqualShallow, log} from './utils';
 import isDeepEqual from 'lodash.isequal';
 import assert from 'assert';
 import {Viewport} from '../viewport';
-
+import {df64ify} from '../lib/utils/fp64';
 /*
  * @param {string} props.id - layer name
  * @param {array}  props.data - array of data instances
@@ -549,11 +549,11 @@ export default class BaseLayer {
     });
 
     this.setState({mercator: viewport});
-
     // TODO - "private" viewport.center member...
     this.setUniforms({
       mercatorEnabled: mercatorEnabled ? 1 : 0,
       mercatorScale: Math.pow(2, zoom),
+      mercatorScaleFP64: df64ify(Math.pow(2, zoom)),
       mercatorCenter: viewport.center,
       ...viewport.getUniforms()
     });

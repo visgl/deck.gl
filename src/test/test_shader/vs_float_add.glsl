@@ -5,7 +5,7 @@ uniform vec2 b;
 uniform float ONE;
 varying vec4 vColor;
 
-#pragma glslify: sum_fp64 = require(../../layers/shaderlib/fp64/sum-fp64, ONE=ONE)
+#pragma glslify: sum_fp64 = require(../../../shaderlib/fp64/sum-fp64, ONE=ONE)
 
 void main(void) {
 

@@ -8,7 +8,8 @@ import {
 } from '../src';
 
 import {
-  ScatterplotLayer64
+  ScatterplotLayer64,
+  ArcLayer64
 } from '../src/layers/fp64';
 
 import {
@@ -202,6 +203,21 @@ export function ScatterplotLayer64Example(props) {
   });
 }
 
+export function ArcLayer64Example(props) {
+  const {mapViewState, arcs} = props;
+
+  return new ArcLayer64({
+    id: props.id || 'arcLayer64',
+    width: window.innerWidth,
+    height: window.innerHeight,
+    ...mapViewState,
+    data: arcs,
+    strokeWidth: props.arcStrokeWidth || 1,
+    isPickable: true,
+    onHover: props.onArcHovered,
+    onClick: props.onArcClicked
+  });
+}
 
 // Returns new array N times larger than input array
 // filled with duplicate elements
@@ -271,7 +287,9 @@ export default {
   },
 
   '64-bit Layers': {
-    ScatterplotLayer64: ScatterplotLayer64Example
+    ScatterplotLayer64: ScatterplotLayer64Example,
+    ArcLayer64: ArcLayer64Example
+
   },
 
   'Sample Layers': {
@@ -295,7 +313,5 @@ export default {
 };
 
 export const DEFAULT_ACTIVE_LAYERS = {
-  'ChoroplethLayer (Contour)': true,
-  ScatterplotLayer: true
-  // 'ScatterplotLayer64 10M': true
+  'ChoroplethLayer (Contour)': true
 };

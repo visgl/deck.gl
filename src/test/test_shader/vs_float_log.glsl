@@ -5,7 +5,7 @@ uniform float ONE;
 
 varying vec4 vColor;
 
-#pragma glslify: log_fp64 = require(../../layers/shaderlib/fp64/log-fp64, ONE=ONE)
+#pragma glslify: log_fp64 = require(../../../shaderlib/fp64/log-fp64, ONE=ONE)
 
 void main(void) {
 

@@ -6,7 +6,7 @@ uniform float mercatorEnable;
 uniform float mercatorScale;
 
 #ifdef INTEL_WORKAROUND
-#pragma glslify: tan_fp64 = require(../src/layers/shaderlib/fp64/tan-fp64)
+#pragma glslify: tan_fp64 = require(./fp64/tan-fp64)
 #endif
 
 // non-linear projection: lnglats => unit tile [0-1, 0-1]
