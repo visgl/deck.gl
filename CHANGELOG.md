@@ -22,6 +22,9 @@ All notable changes to deck.gl will be documented in this file.
 
 #### [dev] -
  - BREAKING: No longer use Camera/Scene to render. Enabler for issue #5.
+ - BREAKING: Sample layers now available through `import 'deck.gl/samples';
+ - FEATURE: FP64 layers now exported by default import 'deck.gl'
+ - BREAKING: DeckGLOverlay renamed to DeckGL: `import DeckGL from 'deck.gl/react';`
 
 #### [3.0.0-beta17] - 64bit layers and more.
  - FEATURE: New GLSL library: 64bit emulated floating point

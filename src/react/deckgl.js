@@ -58,7 +58,7 @@ const DEFAULT_PROPS = {
   onWebGLInitialized: () => {}
 };
 
-export default class DeckGLOverlay extends React.Component {
+export default class DeckGL extends React.Component {
 
   static get propTypes() {
     return PROP_TYPES;
@@ -178,5 +178,4 @@ export default class DeckGLOverlay extends React.Component {
         onClick={this._onClick}/>
     );
   }
-
 }

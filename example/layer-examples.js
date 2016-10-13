@@ -10,7 +10,7 @@ import {
 import {
   ExtrudedChoroplethLayer,
   ExperimentalScatterplotLayer
-} from '../src/layers/experimental';
+} from '../src/layers/samples';
 
 import {
   ScatterplotLayer64

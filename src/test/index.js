@@ -21,7 +21,6 @@
 import 'babel-polyfill';
 
 import './imports-spec';
-import './layer-spec';
-import './viewport-spec';
-
-import './core-layers.spec';
+import './viewport';
+import './lib';
+import './layers';
