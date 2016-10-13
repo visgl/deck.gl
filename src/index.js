@@ -18,15 +18,14 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-export {default as DeckGLOverlay} from './react/deckgl-overlay';
+export {Layer} from './lib';
 
-export {Layer, BaseLayer} from './lib';
-
-export {default as HexagonLayer} from './layers/core/hexagon-layer';
-export {default as ChoroplethLayer} from './layers/core/choropleth-layer';
-export {default as ScatterplotLayer} from './layers/core/scatterplot-layer';
-export {default as GridLayer} from './layers/core/grid-layer';
-export {default as ArcLayer} from './layers/core/arc-layer';
-export {default as LineLayer} from './layers/core/line-layer';
+export * from './layers/core';
+export * from './layers/fp64';
 
 export {Viewport} from './viewport';
+
+// Deprecated
+export {BaseLayer} from './lib';
+export {default as DeckGL} from './react/deckgl';
+export {default as DeckGLOverlay} from './react/deckgl';

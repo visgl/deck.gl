@@ -1,6 +1,6 @@
 import test from 'tape-catch';
 import {mat4} from 'gl-matrix';
-import Viewport, {MapboxTransform} from '../viewport';
+import Viewport, {MapboxTransform} from '../../viewport';
 
 /* eslint-disable */
 const VIEWPORT_TEST_DATA = [

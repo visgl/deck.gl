@@ -37,7 +37,7 @@ import LayerInfo from './layer-info';
 
 import request from 'd3-request';
 import LAYER_CATEGORIES, {DEFAULT_ACTIVE_LAYERS} from './layer-examples';
-import {DeckGLOverlay} from '../src';
+import DeckGL from '../react';
 
 // ---- Default Settings ---- //
 /* eslint-disable no-process-env */
@@ -422,13 +422,13 @@ class ExampleApp extends React.Component {
     }
 
     return (
-      <DeckGLOverlay
+      <DeckGL
         id="default-deckgl-overlay"
         width={width}
         height={height}
         {...mapViewState}
-        layers={this._renderExamples()}
         onWebGLInitialized={ this._onWebGLInitialized }
+        layers={this._renderExamples()}
       />
     );
   }

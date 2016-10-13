@@ -30,7 +30,7 @@ import {
 } from '../..';
 
 // Import private method to test that layers can successfully be updated
-import {updateLayers} from '../lib';
+import {updateLayers} from '../../lib';
 
 // import CHOROPLETHS from '../../example/data/sf.zip.geo.json';
 // const HEXAGONS_FILE = './example/data/hexagons.csv';
