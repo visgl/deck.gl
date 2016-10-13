@@ -21,7 +21,7 @@
 import {mat2, mat4, vec4} from 'gl-matrix';
 import autobind from 'autobind-decorator';
 import assert from 'assert';
-
+import {df64ify} from '../lib/utils/fp64';
 const PI = Math.PI;
 const PI_4 = PI / 4;
 const DEGREES_TO_RADIANS = PI / 180;
@@ -205,6 +205,11 @@ export default class Viewport {
     return this._glProjectionMatrix;
   }
 
+@autobind
+  getProjectionFP64() {
+    return this._glProjectionFP64;
+  }
+
   @autobind
   getProjectionMatrixUncentered() {
     return this._glProjectionMatrixUncentered;
@@ -214,6 +219,7 @@ export default class Viewport {
   getUniforms() {
     return {
       projectionMatrix: this._glProjectionMatrix,
+      projectionFP64: this._glProjectionFP64,
       projectionMatrixCentered: this._glProjectionMatrix,
       projectionMatrixUncentered: this._glProjectionMatrixUncentered
     };
@@ -288,6 +294,7 @@ export default class Viewport {
     this._calculateDistanceScales();
 
     this._calculateGLProjectionMatrix();
+    this._dy64ifyProjectionMatrix();
     this._pixelProjectionMatrix = null;
     this._pixelUnprojectionMatrix = null;
   }
@@ -426,12 +433,27 @@ export default class Viewport {
     // TODO - remove this step
     mat4.translate(m2, m, [-this.centerX, -this.centerY, 0]);
     this._glProjectionMatrix = m2;
+
+    this._glProjectionFP64 = new Float32Array(32);
   }
 
   // Avoid 32 bit matrices from mat4.create();
   _createMat4() {
     return [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
   }
+
+  _dy64ifyProjectionMatrix() {
+    // Transpose the projection matrix to column major for GLSL.
+    for (let i = 0; i < 4; ++i) {
+      for (let j = 0; j < 4; ++j) {
+        [
+          this._glProjectionFP64[(i * 4 + j) * 2],
+          this._glProjectionFP64[(i * 4 + j) * 2 + 1]
+        ] = df64ify(this._glProjectionMatrix[j * 4 + i]);
+      }
+    }
+  }
+
 }
 
 function validateMatrix(m) {

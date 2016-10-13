@@ -20,37 +20,40 @@
 
 import {BaseLayer} from '../../../lib';
 import {Model, Program, Geometry, glGetDebugInfo} from 'luma.gl';
+import {df64ify} from '../../../lib/utils/fp64';
 import {checkRendererVendor} from '../../../lib/utils/check-renderer-vendor';
 
 const glslify = require('glslify');
 
-const DEFAULT_COLOR = [0, 255, 0];
+const DEFAULT_COLOR = [0, 0, 255];
 
 const defaultGetSourcePosition = x => x.sourcePosition;
 const defaultGetTargetPosition = x => x.targetPosition;
-const defaultGetColor = x => x.color || DEFAULT_COLOR;
+const defaultGetColor = x => x.color;
 
-export default class LineLayer extends BaseLayer {
+export default class ArcLayer extends BaseLayer {
   /**
    * @classdesc
-   * LineLayer
+   * ArcLayer
    *
    * @class
-   * @param {object} opts
+   * @param {object} props
    */
   constructor({
-    strokeWidth = 9,
+    strokeWidth = 1,
     getSourcePosition = defaultGetSourcePosition,
     getTargetPosition = defaultGetTargetPosition,
-    getColor = defaultGetColor,
-    ...opts
+    getSourceColor = defaultGetColor,
+    getTargetColor = defaultGetColor,
+    ...props
   } = {}) {
     super({
       strokeWidth,
       getSourcePosition,
       getTargetPosition,
-      getColor,
-      ...opts
+      getSourceColor,
+      getTargetColor,
+      ...props
     });
   }
 
@@ -63,7 +66,10 @@ export default class LineLayer extends BaseLayer {
 
     attributeManager.addInstanced({
       instancePositions: {size: 4, update: this.calculateInstancePositions},
-      instanceColors: {size: 3, update: this.calculateInstanceColors}
+      instanceSourceColors: {size: 3, update: this.calculateInstanceSourceColors},
+      instanceTargetColors: {size: 3, update: this.calculateInstanceTargetColors},
+      instanceSourcePositionsFP64: {size: 4, update: this.calculateInstanceSourcePositions},
+      instanceTargetPositionsFP64: {size: 4, update: this.calculateInstanceTargetPositions}
     });
   }
 
@@ -73,22 +79,27 @@ export default class LineLayer extends BaseLayer {
   }
 
   createModel(gl) {
-    const positions = [0, 0, 0, 1, 1, 1];
-    let intelDef = '';
+    let positions = [];
+    const NUM_SEGMENTS = 50;
+    for (let i = 0; i < NUM_SEGMENTS; i++) {
+      positions = [...positions, i, i, i];
+    }
+
+    let nvidiaDef = '';
     const debugInfo = glGetDebugInfo(gl);
 
-    if (checkRendererVendor(debugInfo, 'intel')) {
-      intelDef += '#define INTEL_WORKAROUND 1\n';
+    if (checkRendererVendor(debugInfo, 'nvidia')) {
+      nvidiaDef += '#define NVIDIA_WORKAROUND 1\n';
     }
 
     return new Model({
       program: new Program(gl, {
-        vs: intelDef + glslify('./line-layer-vertex.glsl'),
-        fs: glslify('./line-layer-fragment.glsl'),
-        id: 'line'
+        vs: nvidiaDef + glslify('./arc-layer-vertex.glsl'),
+        fs: glslify('./arc-layer-fragment.glsl'),
+        id: 'arc-fp64'
       }),
       geometry: new Geometry({
-        id: 'line',
+        id: 'arc-fp64',
         drawMode: 'LINE_STRIP',
         positions: new Float32Array(positions)
       }),
@@ -118,12 +129,49 @@ export default class LineLayer extends BaseLayer {
     }
   }
 
-  calculateInstanceColors(attribute) {
-    const {data, getColor} = this.props;
+  calculateInstanceSourcePositions(attribute) {
+    const {data, getSourcePosition} = this.props;
     const {value, size} = attribute;
     let i = 0;
     for (const object of data) {
-      const color = getColor(object);
+      const sourcePosition = getSourcePosition(object);
+      [value[i + 0], value[i + 1]] = df64ify(sourcePosition[0]);
+      [value[i + 2], value[i + 3]] = df64ify(sourcePosition[1]);
+      i += size;
+    }
+  }
+
+  calculateInstanceTargetPositions(attribute) {
+    const {data, getTargetPosition} = this.props;
+    const {value, size} = attribute;
+    let i = 0;
+    for (const object of data) {
+      const targetPosition = getTargetPosition(object);
+      [value[i + 0], value[i + 1]] = df64ify(targetPosition[0]);
+      [value[i + 2], value[i + 3]] = df64ify(targetPosition[1]);
+      i += size;
+    }
+  }
+
+  calculateInstanceSourceColors(attribute) {
+    const {data, getSourceColor} = this.props;
+    const {value, size} = attribute;
+    let i = 0;
+    for (const object of data) {
+      const color = getSourceColor(object) || DEFAULT_COLOR;
+      value[i + 0] = color[0];
+      value[i + 1] = color[1];
+      value[i + 2] = color[2];
+      i += size;
+    }
+  }
+
+  calculateInstanceTargetColors(attribute) {
+    const {data, getTargetColor} = this.props;
+    const {value, size} = attribute;
+    let i = 0;
+    for (const object of data) {
+      const color = getTargetColor(object) || DEFAULT_COLOR;
       value[i + 0] = color[0];
       value[i + 1] = color[1];
       value[i + 2] = color[2];

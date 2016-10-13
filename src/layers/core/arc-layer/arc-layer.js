@@ -20,6 +20,8 @@
 
 import {BaseLayer} from '../../../lib';
 import {Model, Program, Geometry, glGetDebugInfo} from 'luma.gl';
+import {checkRendererVendor} from '../../../lib/utils/check-renderer-vendor';
+
 const glslify = require('glslify');
 
 const DEFAULT_COLOR = [0, 0, 255];
@@ -81,11 +83,10 @@ export default class ArcLayer extends BaseLayer {
     }
 
     let intelDef = '';
+    const debugInfo = glGetDebugInfo(gl);
 
-    if (glGetDebugInfo(gl) !== null) {
-      if (glGetDebugInfo(gl).vendor.match(/Intel/)) {
-        intelDef += '#define INTEL_WORKAROUND 1\n';
-      }
+    if (checkRendererVendor(debugInfo, 'intel')) {
+      intelDef += '#define NVIDIA_WORKAROUND 1\n';
     }
 
     return new Model({

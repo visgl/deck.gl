@@ -19,6 +19,8 @@
 // THE SOFTWARE.
 import {BaseLayer} from '../../../lib';
 import {Model, Program, CylinderGeometry, glGetDebugInfo} from 'luma.gl';
+import {checkRendererVendor} from '../../../lib/utils/check-renderer-vendor';
+
 const glslify = require('glslify');
 
 const DEFAULT_COLOR = [255, 0, 0];
@@ -115,18 +117,17 @@ export default class HexagonLayer extends BaseLayer {
       nvertical: 1
     });
 
-    let IntelDef = '';
+    let intelDef = '';
+    const debugInfo = glGetDebugInfo(gl);
 
-    if (glGetDebugInfo(gl) !== null) {
-      if (glGetDebugInfo(gl).vendor.match(/Intel/)) {
-        IntelDef += '#define INTEL_WORKAROUND 1\n';
-      }
+    if (checkRendererVendor(debugInfo, 'intel')) {
+      intelDef += '#define INTEL_WORKAROUND 1\n';
     }
 
     return new Model({
       id: this.props.id,
       program: new Program(gl, {
-        vs: IntelDef + glslify('./hexagon-layer-vertex.glsl'),
+        vs: intelDef + glslify('./hexagon-layer-vertex.glsl'),
         fs: glslify('./hexagon-layer-fragment.glsl'),
         id: 'hexagon'
       }),

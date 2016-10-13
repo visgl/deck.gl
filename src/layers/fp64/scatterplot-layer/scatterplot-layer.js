@@ -19,6 +19,8 @@
 // THE SOFTWARE.
 import {BaseLayer} from '../../../lib';
 import {Model, Program, Geometry, glGetDebugInfo} from 'luma.gl';
+import {df64ify} from '../../../lib/utils/fp64';
+import {checkRendererVendor} from '../../../lib/utils/check-renderer-vendor';
 
 const glslify = require('glslify');
 const DEFAULT_COLOR = [255, 0, 255];
@@ -94,17 +96,18 @@ export default class ScatterplotLayer extends BaseLayer {
       ];
     }
 
-    let nvidiaFlag = '';
+    let nvidiaDef = '';
+    const debugInfo = glGetDebugInfo(gl);
 
-    if (glGetDebugInfo(gl).vendor.match(/NVIDIA/)) {
-      nvidiaFlag += '#define NVIDIA_WORKAROUND 1\n';
+    if (checkRendererVendor(debugInfo, 'nvidia')) {
+      nvidiaDef += '#define INTEL_WORKAROUND 1\n';
     }
 
     return new Model({
       program: new Program(gl, {
-        vs: nvidiaFlag + glslify('./scatterplot-layer-vertex.glsl'),
+        vs: nvidiaDef + glslify('./scatterplot-layer-vertex.glsl'),
         fs: glslify('./scatterplot-layer-fragment.glsl'),
-        id: 'fp64-scatterplot'
+        id: 'scatterplot-fp64'
       }),
       geometry: new Geometry({
         drawMode: 'TRIANGLE_FAN',
@@ -114,12 +117,6 @@ export default class ScatterplotLayer extends BaseLayer {
     });
   }
 
-  df64ify(a) {
-    const hiPart = Math.fround(a);
-    const loPart = a - Math.fround(a);
-    return [hiPart, loPart];
-  }
-
   updateUniforms() {
     this.calculateZoomRadius();
     const {zoomRadiusFP64} = this.state;
@@ -127,7 +124,7 @@ export default class ScatterplotLayer extends BaseLayer {
 
     this.setUniforms({
       zoomRadiusFP64,
-      mercatorScaleFP64: this.df64ify(Math.pow(2, zoom))
+      mercatorScaleFP64: df64ify(Math.pow(2, zoom))
     });
   }
 
@@ -137,8 +134,8 @@ export default class ScatterplotLayer extends BaseLayer {
     let i = 0;
     for (const point of data) {
       const position = getPosition(point);
-      [value[i + 0], value[i + 1]] = this.df64ify(position[0]);
-      [value[i + 2], value[i + 3]] = this.df64ify(position[1]);
+      [value[i + 0], value[i + 1]] = df64ify(position[0]);
+      [value[i + 2], value[i + 3]] = df64ify(position[1]);
       i += size;
     }
   }
@@ -149,7 +146,7 @@ export default class ScatterplotLayer extends BaseLayer {
     let i = 0;
     for (const point of data) {
       const position = getPosition(point);
-      [value[i + 0], value[i + 1]] = this.df64ify(position[2]);
+      [value[i + 0], value[i + 1]] = df64ify(position[2]);
       i += size;
     }
   }
@@ -181,7 +178,7 @@ export default class ScatterplotLayer extends BaseLayer {
   calculateZoomRadius() {
     // use radius if specified
     if (this.props.radius) {
-      this.state.zoomRadiusFP64 = this.df64ify(this.props.radius);
+      this.state.zoomRadiusFP64 = df64ify(this.props.radius);
       return;
     }
 
@@ -192,6 +189,6 @@ export default class ScatterplotLayer extends BaseLayer {
     const dy = pixel0[1] - pixel1[1];
 
     const radius = Math.max(Math.sqrt(dx * dx + dy * dy), 2.0);
-    this.state.zoomRadiusFP64 = this.df64ify(radius);
+    this.state.zoomRadiusFP64 = df64ify(radius);
   }
 }
