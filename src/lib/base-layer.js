@@ -88,6 +88,8 @@ export default class BaseLayer {
     }
 
     this.props = props;
+    this.id = props.id;
+    this.count = counter++;
 
     this.checkRequiredProp('data');
     this.checkRequiredProp('id', x => typeof x === 'string');
@@ -96,13 +98,10 @@ export default class BaseLayer {
     this.checkRequiredProp('width', Number.isFinite);
     this.checkRequiredProp('height', Number.isFinite);
     this.checkRequiredProp('latitude', Number.isFinite);
-    this.checkRequiredProp('latitude', Number.isFinite);
+    this.checkRequiredProp('longitude', Number.isFinite);
     this.checkRequiredProp('zoom', Number.isFinite);
     this.checkOptionalProp('pitch', Number.isFinite);
     this.checkOptionalProp('bearing', Number.isFinite);
-
-    this.id = props.id;
-    this.count = counter++;
   }
   /* eslint-enable max-statements */
 
@@ -506,7 +505,7 @@ export default class BaseLayer {
 
   checkOptionalProp(propertyName, condition) {
     const value = this.props[propertyName];
-    if (!condition(value)) {
+    if (value !== undefined && !condition(value)) {
       throw new Error(`Bad property ${propertyName} in layer ${this.id}`);
     }
   }
@@ -514,7 +513,7 @@ export default class BaseLayer {
   checkRequiredProp(propertyName, condition) {
     const value = this.props[propertyName];
     if (value === undefined) {
-      throw new Error(`Undefined property ${propertyName} in layer ${this.id}`);
+      throw new Error(`Property ${propertyName} undefined in layer ${this.id}`);
     }
     if (condition && !condition(value)) {
       throw new Error(`Bad property ${propertyName} in layer ${this.id}`);

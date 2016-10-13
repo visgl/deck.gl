@@ -41,17 +41,12 @@ export const DEFAULT_MAP_STATE = {
 export default class Viewport {
   /**
    * @classdesc
-<<<<<<< 30912ac1941c6885cc8230171450c3e106e7f988
    * Manages coordinate system transformations for deck.gl.
    *
    * Note: The Viewport is immutable in the sense that it only has accessors.
    * A new viewport instance should be created if any parameters have changed.
    *
    * @class
-=======
-   * Manages coordinate system transformations for deck.gl
-   *
->>>>>>> Added docs folder with initial copy
    * @param {Object} opt - options
    * @param {Boolean} mercator=true - Whether to use mercator projection
    *
@@ -77,6 +72,7 @@ export default class Viewport {
    *    division by zero. This is intended to reduce the burden of apps to
    *    to check values before instantiating a Viewport.
    */
+  /* eslint-disable complexity */
   constructor({
     // Map state
     width,
@@ -111,6 +107,7 @@ export default class Viewport {
     // Object.seal(this);
     // Object.freeze(this);
   }
+  /* eslint-enable complexity */
 
   /**
    * Projects latitude and longitude to pixel coordinates in window

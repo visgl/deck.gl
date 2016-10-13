@@ -1,5 +1,5 @@
+/* global window */
 import {
-  HexagonLayer,
   ChoroplethLayer,
   ScatterplotLayer,
   ArcLayer,
@@ -8,13 +8,14 @@ import {
 } from '../src';
 
 import {
+  ScatterplotLayer64
+} from '../src/layers/fp64';
+
+import {
+  HexagonLayer,
   ExtrudedChoroplethLayer,
   ExperimentalScatterplotLayer
 } from '../src/layers/samples';
-
-import {
-  ScatterplotLayer64
-} from '../src/layers/fp64'
 
 export function GridLayerExample(props) {
   const {mapViewState, points} = props;
@@ -259,32 +260,30 @@ function make100KPoints() {
   return {points: points100K, isPickable: false};
 }
 
-
 export default {
   'Core Layers': {
-    GridLayer: GridLayerExample,
+    ArcLayer: ArcLayerExample,
     'ChoroplethLayer (Solid)': ChoroplethLayerExample,
     'ChoroplethLayer (Contour)': ChoroplethContourLayerExample,
-    HexagonLayer: HexagonLayerExample,
-    ScatterplotLayer: ScatterplotLayerExample,
+    GridLayer: GridLayerExample,
     LineLayer: LineLayerExample,
-    ArcLayer: ArcLayerExample
+    ScatterplotLayer: ScatterplotLayerExample
+  },
+
+  '64-bit Layers': {
+    ScatterplotLayer64: ScatterplotLayer64Example
+  },
+
+  'Sample Layers': {
+    HexagonLayer: HexagonLayerExample,
+    ExtrudedChoroplethLayer: ExtrudedChoroplethLayerExample,
+    ExperimentalScatterplotLayer: ExperimentalScatterplotLayerExample
   },
 
   'Core Layers (Additional)': {
     HexagonSelectionLayer: HexagonSelectionLayerExample,
     ArcLayer2: ArcLayer2Example
   },
-
-  'Experimental Layers': {
-    ExtrudedChoroplethLayer: ExtrudedChoroplethLayerExample,
-    ExperimentalScatterplotLayer: ExperimentalScatterplotLayerExample
-  },
-
-  'FP64 Layers': {
-    'ScatterplotLayer64': ScatterplotLayer64Example
-  },
-
 
   'Performance Tests': {
     'ScatterplotLayer 1M': [ScatterplotLayerExample, make1MPoints],
@@ -297,5 +296,6 @@ export default {
 
 export const DEFAULT_ACTIVE_LAYERS = {
   'ChoroplethLayer (Contour)': true,
-//  'ScatterplotLayer64 10M': true
+  ScatterplotLayer: true
+  // 'ScatterplotLayer64 10M': true
 };
