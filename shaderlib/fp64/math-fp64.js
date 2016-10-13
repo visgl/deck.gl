@@ -1,3 +1,22 @@
+// Copyright (c) 2016 Uber Technologies, Inc.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+// THE SOFTWARE.
 export default `\
 uniform float ONE;
 
@@ -649,6 +668,53 @@ vec2 radians_fp64(vec2 degree) {
   return mul_fp64(div_fp64(degree, vec2(180.0, 0.0)), PI_FP64);
 }
 
+// Vector functions
+// vec2 functions
+void vec2_sub_fp64(vec2 a[2], vec2 b[2], out vec2 out_val[2]) {
+  for (int i = 0; i < 2; i++) {
+    out_val[i] = sub_fp64(a[i], b[i]);
+  }
+}
+
+void vec2_mix_fp64(vec2 x[2], vec2 y[2], float a, out vec2 out_val[2]) {
+  out_val[0] = sum_fp64(mul_fp64(x[0], vec2((1.0 - a), 0.0)), mul_fp64(y[0], vec2(a, 0.0)));
+  out_val[1] = sum_fp64(mul_fp64(x[1], vec2((1.0 - a), 0.0)), mul_fp64(y[1], vec2(a, 0.0)));
+}
+
+vec2 vec2_length_fp64(vec2 x[2]) {
+  return sqrt_fp64(sum_fp64(mul_fp64(x[0], x[0]), mul_fp64(x[1], x[1])));
+}
+
+vec2 vec2_distance_fp64(vec2 x[2], vec2 y[2]) {
+  vec2 diff[2];
+  vec2_sub_fp64(x, y, diff);
+  return vec2_length_fp64(diff);
+}
+
+// vec3 functions
+void vec3_sub_fp64(vec2 a[3], vec2 b[3], out vec2 out_val[3]) {
+  for (int i = 0; i < 3; i++) {
+    out_val[i] = sum_fp64(a[i], b[i]);
+  }
+}
+
+void vec3_sum_fp64(vec2 a[3], vec2 b[3], out vec2 out_val[3]) {
+  for (int i = 0; i < 3; i++) {
+    out_val[i] = sum_fp64(a[i], b[i]);
+  }
+}
+
+vec2 vec3_length_fp64(vec2 x[3]) {
+  return sqrt_fp64(sum_fp64(sum_fp64(mul_fp64(x[0], x[0]), mul_fp64(x[1], x[1])), mul_fp64(x[2], x[2])));
+}
+
+vec2 vec3_distance_fp64(vec2 x[3], vec2 y[3]) {
+  vec2 diff[3];
+  vec3_sub_fp64(x, y, diff);
+  return vec3_length_fp64(diff);
+}
+
+// vec4 functions
 void vec4_fp64(vec4 a, out vec2 out_val[4]) {
   out_val[0].x = a[0];
   out_val[0].y = 0.0;
@@ -710,5 +776,4 @@ void mercator_project_fp64(vec4 position_fp64, vec2 mercatorScaleFP64, out vec2 
   out_val[1] = mul_fp64(y_fp64, WORLD_SCALE_FP64);
   return;
 }
-
 `;

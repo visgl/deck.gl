@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 #pragma glslify: sum_fp64 = require(./sum-fp64, ONE=ONE)
 
-void vec3_sub_fp64(vec2 a[3], vec2 b[3], out vec2 out_val[3]) {
+void vec3_sum_fp64(vec2 a[3], vec2 b[3], out vec2 out_val[3]) {
   for (int i = 0; i < 3; i++) {
     out_val[i] = sum_fp64(a[i], b[i]);
   }
