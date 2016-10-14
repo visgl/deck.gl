@@ -17,10 +17,11 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-
 #define SHADER_NAME arc-layer-vertex-shader
 
-#pragma glslify: project = require(../../../../shaderlib/project)
+// #pragma glslify: preproject = require(../../../../shaderlib/preproject)
+// #pragma glslify: scale = require(../../../../shaderlib/scale)
+// #pragma glslify: project = require(../../../../shaderlib/project)
 
 const float N = 49.0;
 
@@ -30,8 +31,6 @@ attribute vec3 instanceTargetColors;
 attribute vec4 instancePositions;
 attribute vec3 instancePickingColors;
 
-uniform mat4 worldMatrix;
-uniform mat4 projectionMatrix;
 uniform float opacity;
 uniform float renderPickingBuffer;
 
@@ -49,8 +48,8 @@ float paraboloid(vec2 source, vec2 target, float index) {
 }
 
 void main(void) {
-  vec2 source = project(instancePositions.xy);
-  vec2 target = project(instancePositions.zw);
+  vec2 source = preproject(instancePositions.xy);
+  vec2 target = preproject(instancePositions.zw);
 
   float segmentIndex = positions.x;
   vec3 p = vec3(
@@ -60,7 +59,7 @@ void main(void) {
     sqrt(paraboloid(source, target, segmentIndex))
   );
 
-  gl_Position = projectionMatrix * vec4(p, 1.0);
+  gl_Position = project(vec4(p, 1.0));
 
   vec4 color = vec4(mix(instanceSourceColors, instanceTargetColors, segmentIndex / N) / 255.0, opacity);
   vec4 pickingColor = vec4(instancePickingColors / 255.0, opacity);

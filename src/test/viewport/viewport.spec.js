@@ -1,6 +1,6 @@
 import test from 'tape-catch';
 import {mat4, vec2} from 'gl-matrix';
-import Viewport, {MapboxTransform} from '../../viewport';
+import Viewport from '../../viewport';
 
 /* eslint-disable */
 const VIEWPORT_TEST_DATA = [
@@ -63,17 +63,6 @@ const VIEWPORT_TEST_DATA = [
 test('Viewport#constructor', t => {
   t.ok(new Viewport() instanceof Viewport,
     'Created new Viewport with default args');
-  t.end();
-});
-
-test('MapboxTransform projection matrix', t => {
-  for (const testData of VIEWPORT_TEST_DATA) {
-    const viewport = new MapboxTransform(testData.mapState);
-    const projectionMatrix = viewport.projMatrix;
-
-    t.ok(mat4.equals(projectionMatrix, testData.matrixZoomed),
-      'MapboxTransform gets expected matrix');
-  }
   t.end();
 });
 

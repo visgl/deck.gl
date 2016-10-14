@@ -18,10 +18,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {BaseLayer} from '../../../lib';
-import {Model, Program, Geometry, glGetDebugInfo} from 'luma.gl';
-import {checkRendererVendor} from '../../../lib/utils/check-renderer-vendor';
-
+import {BaseLayer, assembleShader} from '../../../lib';
+import {Model, Program, Geometry} from 'luma.gl';
 const glslify = require('glslify');
 
 const DEFAULT_COLOR = [0, 0, 255];
@@ -82,16 +80,9 @@ export default class ArcLayer extends BaseLayer {
       positions = [...positions, i, i, i];
     }
 
-    let intelDef = '';
-    const debugInfo = glGetDebugInfo(gl);
-
-    if (checkRendererVendor(debugInfo, 'intel')) {
-      intelDef += '#define NVIDIA_WORKAROUND 1\n';
-    }
-
     return new Model({
       program: new Program(gl, {
-        vs: intelDef + glslify('./arc-layer-vertex.glsl'),
+        vs: assembleShader(gl, {vs: glslify('./arc-layer-vertex.glsl')}),
         fs: glslify('./arc-layer-fragment.glsl'),
         id: 'arc'
       }),

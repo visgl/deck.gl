@@ -17,11 +17,8 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-
-import {BaseLayer} from '../../../lib';
-import {Model, Program, Geometry, glGetDebugInfo} from 'luma.gl';
-import {checkRendererVendor} from '../../../lib/utils/check-renderer-vendor';
-
+import {BaseLayer, assembleShader} from '../../../lib';
+import {Model, Program, Geometry} from 'luma.gl';
 const glslify = require('glslify');
 
 const DEFAULT_COLOR = [0, 255, 0];
@@ -74,16 +71,10 @@ export default class LineLayer extends BaseLayer {
 
   createModel(gl) {
     const positions = [0, 0, 0, 1, 1, 1];
-    let intelDef = '';
-    const debugInfo = glGetDebugInfo(gl);
-
-    if (checkRendererVendor(debugInfo, 'intel')) {
-      intelDef += '#define INTEL_WORKAROUND 1\n';
-    }
 
     return new Model({
       program: new Program(gl, {
-        vs: intelDef + glslify('./line-layer-vertex.glsl'),
+        vs: assembleShader(gl, {vs: glslify('./line-layer-vertex.glsl')}),
         fs: glslify('./line-layer-fragment.glsl'),
         id: 'line'
       }),

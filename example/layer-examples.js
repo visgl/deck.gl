@@ -14,8 +14,8 @@ import {
 
 import {
   HexagonLayer,
-  ExtrudedChoroplethLayer,
-  ExperimentalScatterplotLayer
+  EnhancedChoroplethLayer,
+  PointCloudLayer
 } from '../src/layers/samples';
 
 export function GridLayerExample(props) {
@@ -125,22 +125,6 @@ export function ArcLayerExample(props) {
   });
 }
 
-export function ArcLayer2Example(props) {
-  const {mapViewState, arcs2} = props;
-
-  return new ArcLayer({
-    id: props.id || 'arcLayer2',
-    width: window.innerWidth,
-    height: window.innerHeight,
-    ...mapViewState,
-    data: arcs2,
-    strokeWidth: props.arcStrokeWidth || 1,
-    isPickable: true,
-    onHover: props.onArcHovered,
-    onClick: props.onArcClicked
-  });
-}
-
 export function LineLayerExample(props) {
   const {mapViewState, lines} = props;
 
@@ -157,10 +141,10 @@ export function LineLayerExample(props) {
   });
 }
 
-export function ExtrudedChoroplethLayerExample(props) {
+export function EnhancedChoroplethLayerExample(props) {
   const {mapViewState, choropleths} = props;
-  return new ExtrudedChoroplethLayer({
-    id: props.id || 'extruded-choroplethLayer',
+  return new EnhancedChoroplethLayer({
+    id: props.id || 'enhanced-choroplethLayer',
     width: window.innerWidth,
     height: window.innerHeight,
     ...mapViewState,
@@ -172,10 +156,10 @@ export function ExtrudedChoroplethLayerExample(props) {
   });
 }
 
-export function ExperimentalScatterplotLayerExample(props) {
+export function PointCloudLayerExample(props) {
   const {mapViewState, points} = props;
 
-  return new ExperimentalScatterplotLayer({
+  return new PointCloudLayer({
     id: props.id || 'experimentalScatterplotLayer',
     width: window.innerWidth,
     height: window.innerHeight,
@@ -294,13 +278,12 @@ export default {
 
   'Sample Layers': {
     HexagonLayer: HexagonLayerExample,
-    ExtrudedChoroplethLayer: ExtrudedChoroplethLayerExample,
-    ExperimentalScatterplotLayer: ExperimentalScatterplotLayerExample
+    EnhancedChoroplethLayer: EnhancedChoroplethLayerExample,
+    PointCloudLayer: PointCloudLayerExample
   },
 
   'Core Layers (Additional)': {
-    HexagonSelectionLayer: HexagonSelectionLayerExample,
-    ArcLayer2: ArcLayer2Example
+    HexagonSelectionLayer: HexagonSelectionLayerExample
   },
 
   'Performance Tests': {
@@ -313,5 +296,7 @@ export default {
 };
 
 export const DEFAULT_ACTIVE_LAYERS = {
-  'ChoroplethLayer (Contour)': true
+  // 'ChoroplethLayer (Contour)': true,
+  // ScatterplotLayer: true
+  // 'ScatterplotLayer64 10M': true
 };

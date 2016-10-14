@@ -17,10 +17,8 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-import {BaseLayer} from '../../../lib';
-import {Model, Program, CylinderGeometry, glGetDebugInfo} from 'luma.gl';
-import {checkRendererVendor} from '../../../lib/utils/check-renderer-vendor';
-
+import {BaseLayer, assembleShader} from '../../../lib';
+import {Model, Program, CylinderGeometry} from 'luma.gl';
 const glslify = require('glslify');
 
 const DEFAULT_COLOR = [255, 0, 0];
@@ -117,17 +115,10 @@ export default class HexagonLayer extends BaseLayer {
       nvertical: 1
     });
 
-    let intelDef = '';
-    const debugInfo = glGetDebugInfo(gl);
-
-    if (checkRendererVendor(debugInfo, 'intel')) {
-      intelDef += '#define INTEL_WORKAROUND 1\n';
-    }
-
     return new Model({
       id: this.props.id,
       program: new Program(gl, {
-        vs: intelDef + glslify('./hexagon-layer-vertex.glsl'),
+        vs: assembleShader(gl, {vs: glslify('./hexagon-layer-vertex.glsl')}),
         fs: glslify('./hexagon-layer-fragment.glsl'),
         id: 'hexagon'
       }),

@@ -38,6 +38,17 @@ export const DEFAULT_MAP_STATE = {
   altitude: 1.5
 };
 
+import {vec2} from 'gl-matrix';
+
+export const COORDINATE_SYSTEM = {
+  // Positions are interpreted as [lng,lat,elevation], distances as meters
+  LNGLAT: 1.0,
+  // Positions are interpreted as meter offsets, distances as meters
+  METERS: 2.0,
+  // Positions and distances are not transformed
+  IDENTITY: 0.0
+};
+
 export default class Viewport {
   /**
    * @classdesc
@@ -216,15 +227,30 @@ export default class Viewport {
   }
 
   @autobind
-  getUniforms() {
+  getUniforms({
+    projectionMode = COORDINATE_SYSTEM.LNGLAT,
+    projectionCenter = [0, 0]
+  } = {}) {
+    projectionCenter = vec2.subtract([],
+      this.projectFlat(projectionCenter),
+      this.center
+    );
+
+    // TODO - clean up, not all of these are used
     return {
+      projectionMode,
       projectionMatrix: this._glProjectionMatrix,
       projectionFP64: this._glProjectionFP64,
+      projectionScale: this.scale,
+      projectionScaleFP64: df64ify(this.scale),
+      projectionCenter,
+      projectionPixelsPerUnit: this.pixelsPerMeter,
       projectionMatrixCentered: this._glProjectionMatrix,
       projectionMatrixUncentered: this._glProjectionMatrixUncentered
     };
   }
 
+  // TODO - implement perspective correct fitBounds
   // fitBounds(lnglatSE, lnglatNW, {padding = 0} = {}) {
   //   const bounds = new LngLatBounds(
   //     [_bounds[0].reverse(),
@@ -303,54 +329,52 @@ export default class Viewport {
   /**
    * TODO: WIP
    * Calculate distance scales in meters around current lat/lon, both for
-   * degrees and pixels
-   * The distance scales vary wildly with latitude
+   * degrees and pixels. The distance scales vary significantly with latitude
    */
   _calculateDistanceScales() {
     // Approximately 111km per degree at equator
     const METERS_PER_DEGREE = 111000;
-    const {latitude: lat, longitude: lon} = this;
+    const {latitude, longitude} = this;
 
-    const metersPerDegreeLon = METERS_PER_DEGREE;
-    const metersPerDegreeLat =
-      Math.cos(lat / 180 * Math.PI) * METERS_PER_DEGREE;
-    const metersPerDegreeAvg = (metersPerDegreeLat + metersPerDegreeLon) / 2;
+    const latCosine = Math.cos(latitude * Math.PI / 180);
+
+    const metersPerDegree = METERS_PER_DEGREE * latCosine;
 
     // Calculate number of pixels occupied by one degree longitude
-    // around current lat/lon, divide by number of meters per degree.
-    // compensate for spherical shortening
-    const pixelsPerMeterX =
-      (this.project([lon + 0.5, lat]) - this.project([lon - 0.5, lat])) /
-      (METERS_PER_DEGREE * Math.cos(lat / 180 * Math.PI));
-
+    // around current lat/lon
+    const pixelsPerDegreeX = vec2.distance(
+      this.projectFlat([longitude + 0.5, latitude]),
+      this.projectFlat([longitude - 0.5, latitude])
+    );
     // Calculate number of pixels occupied by one degree latitude
-    // around current lat/lon, divide by number of meters per degree.
-    const pixelsPerMeterY =
-      (this.project([lon, lat + 0.5]) - this.project([lon, lat - 0.5])) /
-       METERS_PER_DEGREE;
+    // around current lat/lon
+    const pixelsPerDegreeY = vec2.distance(
+      this.projectFlat([longitude, latitude + 0.5]),
+      this.projectFlat([longitude, latitude - 0.5])
+    );
 
-    const pixelsPerMeterAvg = (pixelsPerMeterX + pixelsPerMeterY) / 2;
+    const pixelsPerMeterX = pixelsPerDegreeX / metersPerDegree;
+    const pixelsPerMeterY = pixelsPerDegreeY / metersPerDegree;
+    const pixelsPerMeterZ = (pixelsPerMeterX + pixelsPerMeterY) / 2;
 
-    this.metersPerLatLon = [
-      metersPerDegreeLon,
-      metersPerDegreeLat,
-      metersPerDegreeAvg
+    // const scale = 0.95;
+    // const pixelsPerMeter = [
+    //   pixelsPerMeterX * scale, pixelsPerMeterY * scale, pixelsPerMeterZ * scale
+    // ];
+    const altPixelsPerMeter = this.worldSize / (4e7 * latCosine);
+    const pixelsPerMeter = [
+      altPixelsPerMeter, altPixelsPerMeter, altPixelsPerMeter
     ];
-    this.latLonPerMeter = [
-      1 / metersPerDegreeLon,
-      1 / metersPerDegreeLat,
-      1 / metersPerDegreeAvg
+    const metersPerPixel = [
+      1 / pixelsPerMeterX, 1 / pixelsPerMeterY, 1 / pixelsPerMeterZ
     ];
-    this.pixelsPerMeterX = [
-      pixelsPerMeterX,
-      pixelsPerMeterY,
-      pixelsPerMeterAvg
-    ];
-    this.metersPerPixel = [
-      1 / pixelsPerMeterX,
-      1 / pixelsPerMeterY,
-      1 / pixelsPerMeterAvg
-    ];
+
+    // Main results, used for scaling offsets
+    this.pixelsPerMeter = pixelsPerMeter;
+    // Additional results
+    this.metersPerPixel = metersPerPixel;
+    // metersPerDegree,
+    // degreesPerMeter: 1 / metersPerDegree
   }
 
   /**

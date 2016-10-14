@@ -17,10 +17,8 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-import {BaseLayer} from '../../../lib';
-import {Model, Program, Geometry, glGetDebugInfo} from 'luma.gl';
-import {checkRendererVendor} from '../../../lib/utils/check-renderer-vendor';
-
+import {BaseLayer, assembleShader} from '../../../lib';
+import {Model, Program, Geometry} from 'luma.gl';
 const glslify = require('glslify');
 
 const DEFAULT_COLOR = [255, 0, 255];
@@ -36,18 +34,20 @@ export default class ScatterplotLayer extends BaseLayer {
    *
    * @class
    * @param {object} props
-   * @param {number} props.radius - point radius
+   * @param {number} props.radius - point radius in meters
    */
   constructor({
     getPosition = defaultGetPosition,
     getRadius = defaultGetRadius,
     getColor = defaultGetColor,
+    radius = 30,
     ...props
   }) {
     super({
       getPosition,
       getRadius,
       getColor,
+      radius,
       ...props
     });
   }
@@ -89,16 +89,11 @@ export default class ScatterplotLayer extends BaseLayer {
       ];
     }
 
-    let intelDef = '';
-    const debugInfo = glGetDebugInfo(gl);
-
-    if (checkRendererVendor(debugInfo, 'intel')) {
-      intelDef += '#define NVIDIA_WORKAROUND 1\n';
-    }
-
     return new Model({
       program: new Program(gl, {
-        vs: intelDef + glslify('./scatterplot-layer-vertex.glsl'),
+        vs: assembleShader(gl, {
+          vs: glslify('./scatterplot-layer-vertex.glsl')
+        }),
         fs: glslify('./scatterplot-layer-fragment.glsl'),
         id: 'scatterplot'
       }),
@@ -111,10 +106,8 @@ export default class ScatterplotLayer extends BaseLayer {
   }
 
   updateUniforms() {
-    this.calculateRadius();
-    const {radius} = this.state;
     this.setUniforms({
-      radius
+      radius: this.props.radius
     });
   }
 
@@ -125,13 +118,11 @@ export default class ScatterplotLayer extends BaseLayer {
       return;
     }
 
-    const pixel0 = this.projectFlat([-122, 37.5]);
-    const pixel1 = this.projectFlat([-122, 37.5002]);
+    // const pixel0 = this.projectFlat([-122, 37.5]);
+    // const pixel1 = this.projectFlat([-122, 37.5002]);
 
-    const dx = pixel0[0] - pixel1[0];
-    const dy = pixel0[1] - pixel1[1];
-
-    this.state.radius = Math.max(Math.sqrt(dx * dx + dy * dy), 2.0);
+    // const dx = pixel0[0] - pixel1[0];
+    // const dy = pixel0[1] - pixel1[1];
   }
 
   calculateInstancePositions(attribute) {

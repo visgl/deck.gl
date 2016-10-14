@@ -42,6 +42,7 @@
     "babel-cli": "^6.3.15",
     "babel-eslint": "^6.0.0",
     "babel-plugin-glslify": "^1.0.0",
+    "babel-plugin-static-fs": "^1.1.0",
     "babel-plugin-transform-builtin-extend": "1.1.0",
     "babel-plugin-transform-decorators-legacy": "^1.3.4",
     "babel-preset-es2015": "^6.3.13",
@@ -82,11 +83,11 @@
     "luma.gl": "^2.9.0"
   },
   "scripts": {
-    "build": "npm run build-clean && npm run build-compile && npm run build-script && npm run build-script-min",
+    "build": "npm run build-clean && npm run build-src && npm run build-shaderlib && npm run build-script",
     "build-clean": "rm -fr dist/*",
-    "build-compile": "babel src -d dist --source-maps inline --copy-files",
-    "build-script": "browserify src/bundle.js -o dist/deckgl.js -t babelify -t glslify",
-    "build-script-min": "uglifyjs dist/deckgl.js -o dist/deckgl.min.js",
+    "build-src": "babel src -d dist --source-maps inline --copy-files",
+    "build-shaderlib": "babel shaderlib -d dist/shaderlib --source-maps inline",
+    "build-script": "browserify src/bundle.js -t babelify -t glslify | uglifyjs > dist/deckgl.min.js",
     "lint": "eslint src",
     "precommit": "npm test",
     "prepublish": "npm run build",

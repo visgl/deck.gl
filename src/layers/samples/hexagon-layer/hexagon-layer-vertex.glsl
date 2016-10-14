@@ -21,16 +21,15 @@
 /* fragment shader for the hexagon-layer */
 #define SHADER_NAME hexagon-layer-vertex-shader
 
-#pragma glslify: project = require(../../../../shaderlib/project)
+// #pragma glslify: preproject = require(../../../../shaderlib/preproject)
+// #pragma glslify: scale = require(../../../../shaderlib/scale)
+// #pragma glslify: project = require(../../../../shaderlib/project)
 
 attribute vec3 positions;
 attribute vec2 instancePositions;
 attribute float instanceElevations;
 attribute vec3 instanceColors;
 attribute vec3 instancePickingColors;
-
-uniform mat4 worldMatrix;
-uniform mat4 projectionMatrix;
 
 uniform float radius;
 uniform float opacity;
@@ -45,12 +44,12 @@ void main(void) {
   mat2 rotationMatrix = mat2(cos(angle), -sin(angle), sin(angle), cos(angle));
   vec3 vertex = vec3(vec2(rotationMatrix * positions.xz * radius), 0.0);
   vec3 center = vec3(
-    project(instancePositions),
+    preproject(instancePositions),
     instanceElevations * (positions.y + 0.5) * elevation
   );
 
-  gl_Position = projectionMatrix * vec4(center, 1.0) +
-                projectionMatrix * vec4(vertex, 0.0);
+  gl_Position = project(vec4(center, 1.0)) +
+                project(vec4(vertex, 0.0));
 
   vec4 color = vec4(instanceColors / 255.0, opacity);
   vec4 pickingColor = vec4(instancePickingColors / 255.0, 1.);
