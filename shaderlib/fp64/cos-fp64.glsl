@@ -91,6 +91,21 @@ vec2 cos_fp64(vec2 a) {
     vec2 u = vec2(0.0, 0.0);
     vec2 v = vec2(0.0, 0.0);
 
+#ifdef NVIDIA_WORKAROUND
+    if (abs(float(abs_k) - 1.0) < 0.5) {
+        u = COS_TABLE_0;
+        v = SIN_TABLE_0;
+    } else if (abs(float(abs_k) - 2.0) < 0.5) {
+        u = COS_TABLE_1;
+        v = SIN_TABLE_1;
+    } else if (abs(float(abs_k) - 3.0) < 0.5) {
+        u = COS_TABLE_2;
+        v = SIN_TABLE_2;
+    } else if (abs(float(abs_k) - 4.0) < 0.5) {
+        u = COS_TABLE_3;
+        v = SIN_TABLE_3;
+    }
+#else
     if (abs_k == 1) {
         u = COS_TABLE_0;
         v = SIN_TABLE_0;
@@ -100,10 +115,11 @@ vec2 cos_fp64(vec2 a) {
     } else if (abs_k == 3) {
         u = COS_TABLE_2;
         v = SIN_TABLE_2;
-    } else {
+    } else if (abs_k == 4) {
         u = COS_TABLE_3;
         v = SIN_TABLE_3;
     }
+#endif
 
     vec2 sin_t, cos_t;
     sincos_taylor_fp64(t, sin_t, cos_t);

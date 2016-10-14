@@ -22,8 +22,8 @@
 vec2 split(float a) {
   const float SPLIT = 4097.0;
   float t = a * SPLIT;
-  float a_hi = t - (t - a) * ONE;
-  float a_lo = a - a_hi * ONE;
+  float a_hi = t * ONE - (t - a);
+  float a_lo = a * ONE - a_hi;
   return vec2(a_hi, a_lo);
 }
 #else

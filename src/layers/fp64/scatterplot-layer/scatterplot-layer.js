@@ -100,7 +100,7 @@ export default class ScatterplotLayer extends BaseLayer {
     const debugInfo = glGetDebugInfo(gl);
 
     if (checkRendererVendor(debugInfo, 'nvidia')) {
-      nvidiaDef += '#define INTEL_WORKAROUND 1\n';
+      nvidiaDef += '#define NVIDIA_WORKAROUND 1\n';
     }
 
     return new Model({

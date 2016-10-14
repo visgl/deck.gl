@@ -478,7 +478,8 @@ export default class BaseLayer {
   _updateBaseUniforms() {
     this.setUniforms({
       // apply gamma to opacity to make it visually "linear"
-      opacity: Math.pow(this.props.opacity, 1 / 2.2)
+      opacity: Math.pow(this.props.opacity, 1 / 2.2),
+      ONE: 1.0
     });
   }
 

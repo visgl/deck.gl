@@ -38,14 +38,12 @@ uniform float ONE; // nvidia workaround
 
 varying vec4 vColor;
 
-
 #pragma glslify: vec4_fp64 = require(../../../../shaderlib/fp64/vec4-fp64, ONE=ONE)
 #pragma glslify: sum_fp64 = require(../../../../shaderlib/fp64/sum-fp64, ONE=ONE)
 #pragma glslify: mul_fp64 = require(../../../../shaderlib/fp64/mul-fp64, ONE=ONE)
 #pragma glslify: project_fp64 = require(../../../../shaderlib/fp64/project-fp64, ONE=ONE)
 #pragma glslify: vec4_scalar_mul_fp64 = require(../../../../shaderlib/fp64/vec4-scalar-mul-fp64, ONE=ONE)
 #pragma glslify: mat4_vec4_mul_fp64 = require(../../../../shaderlib/fp64/mat4-vec4-mul-fp64, ONE=ONE)
-
 
 void main(void) {
   // For some reason, need to add one to elevation to show up in untilted mode

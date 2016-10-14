@@ -26,7 +26,7 @@ vec2 twoSqr(float a) {
   float prod = a * a;
   vec2 a_fp64 = split(a);
 
-  float err = ((a_fp64.x * a_fp64.x - prod) + 2.0 * a_fp64.x * a_fp64.y) + a_fp64.y * a_fp64.y;
+  float err = ((a_fp64.x * a_fp64.x - prod) * ONE + 2.0 * a_fp64.x * a_fp64.y * ONE * ONE) + a_fp64.y * a_fp64.y * ONE * ONE * ONE;
   return vec2(prod, err);
 }
 
