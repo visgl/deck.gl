@@ -5,8 +5,8 @@ import normalize from 'geojson-normalize';
 import {Model, Program, Geometry} from 'luma.gl';
 import extrudePolyline from 'extrude-polyline';
 
-import VERTEX_SHADER from './extruded-choropleth-layer-vertex';
-import FRAGMENT_SHADER from './extruded-choropleth-layer-fragment';
+import VERTEX_SHADER from './enhanced-choropleth-layer-vertex';
+import FRAGMENT_SHADER from './enhanced-choropleth-layer-fragment';
 
 export default class ChoroplethLayer extends Layer {
   /**
@@ -17,12 +17,12 @@ export default class ChoroplethLayer extends Layer {
    * @param {object} props
    * @param {bool} props.drawContour - ? drawContour : drawArea
    * @param {function} props.onChoroplethHovered - provide properties of the
-   * selected choropleth, together with the mouse event when mouse hovered
+   *     selected choropleth, together with the mouse event when mouse hovered
    * @param {function} props.onChoroplethClicked - provide properties of the
-   * selected choropleth, together with the mouse event when mouse clicked
+   *     selected choropleth, together with the mouse event when mouse clicked
    */
   constructor({
-    id = 'extruded-choropleth-layer',
+    id = 'enhanced-choropleth-layer',
     drawContour = true,
     opacity = 1,
     strokeColor = [0, 0, 0],

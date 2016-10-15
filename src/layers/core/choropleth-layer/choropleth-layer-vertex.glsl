@@ -17,17 +17,15 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-
 #define SHADER_NAME choropleth-layer-vertex-shader
 
-#pragma glslify: project = require(../../../../shaderlib/project)
+// #pragma glslify: preproject = require(../../../../shaderlib/preproject)
+// #pragma glslify: scale = require(../../../../shaderlib/scale)
+// #pragma glslify: project = require(../../../../shaderlib/project)
 
 attribute vec3 positions;
 attribute vec3 colors;
 attribute vec3 pickingColors;
-
-uniform mat4 projectionMatrix;
-uniform mat4 worldMatrix;
 
 uniform float opacity;
 uniform float renderPickingBuffer;
@@ -43,8 +41,8 @@ vec4 getColor(vec4 color, float opacity, vec3 pickingColor, float renderPickingB
 
 void main(void) {
   // For some reason, need to add one to elevation to show up in untilted mode
-  vec3 p = vec3(project(positions.xy), positions.z + 1.0);
-  gl_Position = projectionMatrix * vec4(p, 1.);
+  vec3 p = preproject(positions);
+  gl_Position = project(vec4(p, 1.));
 
   vec4 color = vec4(colors / 255., opacity);
   vec4 pickingColor = vec4(pickingColors / 255., 1.);

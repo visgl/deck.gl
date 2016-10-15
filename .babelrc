@@ -2,6 +2,7 @@
   "presets": ["es2015", "stage-2", "react"],
   "plugins": [
   	"glslify",
+  	"static-fs",
     "transform-decorators-legacy",
     ["babel-plugin-transform-builtin-extend", {
       "globals": ["Array"]

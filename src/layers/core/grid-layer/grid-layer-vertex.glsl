@@ -21,21 +21,20 @@
 /* vertex shader for the grid-layer */
 #define SHADER_NAME grid-layer-vs
 
+// #pragma glslify: preproject = require(../../../../shaderlib/preproject)
+// #pragma glslify: scale = require(../../../../shaderlib/scale)
+// #pragma glslify: project = require(../../../../shaderlib/project)
+
 attribute vec3 vertices;
 attribute vec3 instancePositions;
 attribute vec4 instanceColors;
 attribute vec3 instancePickingColors;
-
-uniform float mercatorScale;
 
 uniform float maxCount;
 uniform float opacity;
 uniform float renderPickingBuffer;
 uniform vec3 scale;
 uniform vec3 selectedPickingColor;
-
-uniform mat4 worldMatrix;
-uniform mat4 projectionMatrix;
 
 varying vec4 vColor;
 

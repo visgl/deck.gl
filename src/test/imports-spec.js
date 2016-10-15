@@ -8,7 +8,7 @@ import {
 } from '../..';
 
 import {
-  PointCloudLayer, ExtrudedChoroplethLayer, HexagonLayer, EnhancedHexagonLayer
+  PointCloudLayer, EnhancedChoroplethLayer, HexagonLayer, EnhancedHexagonLayer
 } from '../../samples';
 
 import Viewport2 from '../../viewport';
@@ -29,8 +29,8 @@ test('Top-level imports', t0 => {
 
   t0.test('import "deck.gl/samples"', t => {
     t.ok(PointCloudLayer, 'PointCloudLayer symbol imported');
-    t.ok(ExtrudedChoroplethLayer, 'ExtrudedChoroplethLayer symbol imported');
     t.ok(HexagonLayer, 'HexagonLayer symbol imported');
+    t.ok(EnhancedChoroplethLayer, 'EnhancedChoroplethLayer symbol imported');
     t.ok(EnhancedHexagonLayer, 'EnhancedHexagonLayer symbol imported');
     t.end();
   });

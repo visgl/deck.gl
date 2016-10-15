@@ -1,12 +1,9 @@
-import project from '../../shaderlib/project';
+import project from '../../../../shaderlib/projection';
 
 export default `
 #define SHADER_NAME enhanced-hexagon-layer-vs
 
 ${project}
-
-// Standard matrix uniforms
-uniform mat4 projectionMatrix;
 
 attribute vec3 positions;
 
@@ -26,9 +23,8 @@ uniform vec3 invisibleColor;
 varying vec4 vColor;
 
 void main(void) {
-  vec2 mercatorPos =
-  	mercatorProject(instancePositions.xy + positions.xy, mercatorScale);
-  gl_Position = projectionMatrix * vec4(mercatorPos.xy, 1., 1.);
+  vec2 mercatorPos = preproject(instancePositions.xy + positions.xy);
+  gl_Position = project(vec4(mercatorPos.xy, 0., 1.));
 
   // Hide hexagon if set to invisibleColor
   float alpha = instanceColors.rgb == invisibleColor ? 0. : opacity;

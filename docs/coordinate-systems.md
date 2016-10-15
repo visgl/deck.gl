@@ -1,25 +1,27 @@
 # Coordinate Systems
 
-deck.gl is designed to work seamlessly with the WebMercatorProjection, which
-is arguably the de facto standard for computer maps.
-
-In addition to built-in support for the WebMercatorProjection, deck.gl also
-supports working in a standard linear coordinate system.
-
-
+A core feature of deck.gl is that all layers automatically support
+coordinates specified in the
+[web mercator](https://en.wikipedia.org/wiki/Web_Mercator) projection,
+the de facto standard projection for computer maps. Such coordinates will
+be projected correctly onto the map.
 
 A deck.gl layer can be configured to work with positions specified in
 different units:
 
 How positions supplied by the application are interpreted.
 
-- **LNG_LAT_Z** - positions are interpreted as Web Mercator coordinates:
+- **LNGLATZ** - positions are interpreted as Web Mercator coordinates:
   [longitude, latitude, altitude]. Longitude and latitude
   are specified in degrees from Greenwich meridian / equator respectively,
   and altitude is specified in meters above sea level.
 - **METERS** - positions are given in meter offsets from a reference point
   that is specified separately.
 
+Note: deck.gl can also supports working in a standard (i.e. unprojected) linear
+coordinate system (suitable when using deck.gl layers without underlying maps)
+although the support for specifying scales and extents is still rudimentary.
+This will be improved in future versions.
 
 
 ## deck.gl Coordinate System concepts
@@ -44,7 +46,7 @@ processed differently so carefully consider
 each attribute and uniform and decide whether it is a position or a distance,
 perhaps even making it clear in the variable's name.
 
-- All positions must be passed through the `project` function
+- All positions must be passed through the `preproject` function
   (available both in JavaScript and GLSL) to convert non-linear web-mercator
   coordinates to linear mercator "world" or "pixel" coordinates,
   that can be passed to the projection matrix.
@@ -64,7 +66,7 @@ perhaps even making it clear in the variable's name.
   most closely corresponds to [x, y, z] coords.
 
 ## Map Changes
-- **center**: 
+- **center**:
 - **zoom**: At zoom 0, the world is 512 pixels wide.
   Every zoom level magnifies by a factor of 2. Maps typically support zoom
   levels 0 (world) to 20 (sub meter pixels).
@@ -92,7 +94,7 @@ modes, latlon (default), meters and neutral. By always using three shader
 functions (preproject, scale and project) for handling projections and scaling,
 a single layer class can support all three modes (app selects via a layer prop).
 
-The new meters mode is perfect for some of our high resolution data sets
+The new meters mode is perfect for high resolution data sets
 which are typically specified in sets of coordinates in meters offset from
 a single lat/lon (“simplified UTM”). Such data can now be supplied directly
 to deck.gl layers (i.e. to the GPU) without any JavaScript transformation.
@@ -167,18 +169,6 @@ returns
 
 
 
-// View and Projection Matrix calculations for mapbox-js style
-// map view properties
-//
-// ATTRIBUTION:
-// The projection matrix creation algorithms are intentionally
-// based on and kept compatible with the mapbox-gl-js implementation to
-// ensure that seamless interoperation with mapbox and react-map-gl.
-//
-/* eslint-disable max-len */
-// See: https://github.com/mapbox/mapbox-gl-js/blob/033043254d30a99a00b95660e296445a1ade2d01/js/geo/transform.js
-/* elsint-enable max-len */
-
 // We define a couple of coordinate systems:
 // ------
 // LatLon                      [lng, lat] = [-180 - 180, -81 - 81]
@@ -188,28 +178,7 @@ returns
 // Clip Space                  unit cube around view
 // ------
 
-import {mat2, mat4, vec4} from 'gl-matrix';
-import autobind from 'autobind-decorator';
-import assert from 'assert';
-
-const PI = Math.PI;
-const PI_2 = PI / 2;
-const PI_4 = PI / 4;
-const DEGREES_TO_RADIANS = PI / 180;
-const RADIANS_TO_DEGREES = 180 / PI;
-const TILE_SIZE = 512;
-const WORLD_SCALE = TILE_SIZE / (2 * PI);
-
-export const DEFAULT_MAP_STATE = {
-  latitude: 37,
-  longitude: -122,
-  zoom: 11,
-  pitch: 0,
-  bearing: 0,
-  altitude: 1.5
-};
-
-export default class Viewport {
+constructor
   /**
    * @classdesc
    * Manages coordinate system transformations for deck.gl.
@@ -243,42 +212,9 @@ export default class Viewport {
    *    division by zero. This is intended to reduce the burden of apps to
    *    to check values before instantiating a Viewport.
    */
-  constructor({
-    // Map state
-    width,
-    height,
-    latitude,
-    longitude,
-    zoom,
-    pitch,
-    bearing,
-    altitude,
-    mercatorEnabled
-  } = {}) {
-    // Viewport - support undefined arguments
-    /* eslint-disable max-len */
-    this.width = width !== undefined ? width : DEFAULT_MAP_STATE.width;
-    this.height = height !== undefined ? height : DEFAULT_MAP_STATE.height;
-    this.zoom = zoom !== undefined ? zoom : DEFAULT_MAP_STATE.zoom;
-    this.latitude = latitude !== undefined ? latitude : DEFAULT_MAP_STATE.latitude;
-    this.longitude = longitude !== undefined ? longitude : DEFAULT_MAP_STATE.longitude;
-    this.bearing = bearing !== undefined ? bearing : DEFAULT_MAP_STATE.bearing;
-    this.pitch = pitch !== undefined ? pitch : DEFAULT_MAP_STATE.pitch;
-    this.altitude = altitude !== undefined ? altitude : DEFAULT_MAP_STATE.altitude;
-    this.mercatorEnabled = mercatorEnabled !== undefined ? mercatorEnabled : true;
-    /* eslint-enable max-len */
-
-    // Silently allow apps to send in 0,0
-    this.width = this.width || 1;
-    this.height = this.height || 1;
-
-    this._initialize();
-
-    // Object.seal(this);
-    // Object.freeze(this);
-  }
 
 
+  project(lngLatZ, {topLeft = true} = {}) {
   /**
    * Projects latitude and longitude to pixel coordinates in window
    * using viewport projection parameters
@@ -291,31 +227,7 @@ export default class Viewport {
    * @param {Object} opts.topLeft=true - Whether projected coords are top left
    * @return {Array} - [x, y] or [x, y, z] in top left coords
    */
-  @autobind
-  project(lngLatZ, {topLeft = true} = {}) {
-    this._precomputePixelProjectionMatrices();
-    const [X, Y] = this.mercatorEnabled ?
-      this.projectFlat(lngLatZ) : lngLatZ;
-    const v = [X, Y, lngLatZ[2] || 0, 1];
-    // vec4.sub(v, v, [this.centerX, this.centerY, 0, 0]);
-    vec4.transformMat4(v, v, this._pixelProjectionMatrix);
-    // Divide by w
-    const scale = 1 / v[3];
-    vec4.multiply(v, v, [scale, scale, scale, scale]);
-    const [x, y, z] = v;
-    // const y2 = topLeft ? this.height - 1 - y : y;
-    const y2 = topLeft ? this.height - y : y;
-    return lngLatZ.length === 2 ? [x, y2] : [x, y2, z];
-  }
 
-  /**
-   * Unproject pixel coordinates on screen onto [lon, lat] on map.
-   * - [x, y] => [lng, lat]
-   * - [x, y, z] => [lng, lat, Z]
-   * @param {Array} xyz -
-   * @return {Array} - [lng, lat, Z] or [X, Y, Z]
-   */
-  @autobind
   unproject(xyz, {topLeft = true} = {}) {
     this._precomputePixelProjectionMatrices();
     const [x = 0, y = 0, z = 0] = xyz;
@@ -327,7 +239,22 @@ export default class Viewport {
     const [, , z0] = v;
     return xyz.length === 2 ? [x0, y0] : [x0, y0, z0];
   }
+  /**
+   * Unproject pixel coordinates on screen onto [lon, lat] on map.
+   * - [x, y] => [lng, lat]
+   * - [x, y, z] => [lng, lat, Z]
+   * @param {Array} xyz -
+   * @return {Array} - [lng, lat, Z] or [X, Y, Z]
+   */
 
+  projectFlat([lng, lat], scale = this.scale) {
+    scale = scale * WORLD_SCALE;
+    const lambda2 = lng * DEGREES_TO_RADIANS;
+    const phi2 = lat * DEGREES_TO_RADIANS;
+    const x = scale * (lambda2 + PI);
+    const y = scale * (PI - Math.log(Math.tan(PI_4 + phi2 * 0.5)));
+    return [x, y];
+  }
   /**
    * Project [lng,lat] on sphere onto [x,y] on 512*512 Mercator Zoom 0 tile.
    * Performs the nonlinear part of the web mercator projection.
@@ -338,14 +265,12 @@ export default class Viewport {
    *   Specifies a point on the sphere to project onto the map.
    * @return {Array} [x,y] coordinates.
    */
-  @autobind
-  projectFlat([lng, lat], scale = this.scale) {
+
+  unprojectFlat([x, y], scale = this.scale) {
     scale = scale * WORLD_SCALE;
-    const lambda2 = lng * DEGREES_TO_RADIANS;
-    const phi2 = lat * DEGREES_TO_RADIANS;
-    const x = scale * (lambda2 + PI);
-    const y = scale * (PI - Math.log(Math.tan(PI_4 + phi2 * 0.5)));
-    return [x, y];
+    const lambda2 = x / scale - PI;
+    const phi2 = 2 * (Math.atan(Math.exp(PI - y / scale)) - PI_4);
+    return [lambda2 * RADIANS_TO_DEGREES, phi2 * RADIANS_TO_DEGREES];
   }
 
   /**
@@ -357,181 +282,6 @@ export default class Viewport {
    *   Has toArray method if you need a GeoJSON Array.
    *   Per cartographic tradition, lat and lon are specified as degrees.
    */
-  @autobind
-  unprojectFlat([x, y], scale = this.scale) {
-    scale = scale * WORLD_SCALE;
-    const lambda2 = x / scale - PI;
-    const phi2 = 2 * (Math.atan(Math.exp(PI - y / scale)) - PI_4);
-    return [lambda2 * RADIANS_TO_DEGREES, phi2 * RADIANS_TO_DEGREES];
-  }
-
-  /**
-   * Returns a projection matrix suitable for shaders
-   * @return {Float32Array} - 4x4 projection matrix that can be used in shaders
-   */
-  @autobind
-  getProjectionMatrix() {
-    return this._glProjectionMatrix;
-  }
-
-  @autobind
-  getProjectionMatrixUncentered() {
-    return this._glProjectionMatrixUncentered;
-  }
 
   @autobind
   getUniforms() {
-    return {
-      projectionMatrix: this._glProjectionMatrix,
-      projectionMatrixCentered: this._glProjectionMatrix,
-      projectionMatrixUncentered: this._glProjectionMatrixUncentered
-    };
-  }
-
-  // fitBounds(lnglatSE, lnglatNW, {padding = 0} = {}) {
-  //   const bounds = new LngLatBounds(
-  //     [_bounds[0].reverse(),
-  //     _bounds[1].reverse()]
-  //   );
-  //   const offset = Point.convert([0, 0]);
-  //   const nw = this.project(lnglatNW);
-  //   const se = this.project(lnglatSE);
-  //   const size = se.sub(nw);
-  //   const scaleX =
-  //     (this.width - padding * 2 - Math.abs(offset.x) * 2) / size.x;
-  //   const scaleY =
-  //     (this.height - padding * 2 - Math.abs(offset.y) * 2) / size.y;
-
-  //   const center = this.unproject(nw.add(se).div(2));
-  //   const zoom = this.scaleZoom(this.scale * Math.min(scaleX, scaleY));
-  //   return {
-  //     latitude: center.lat,
-  //     longitude: center.lng,
-  //     zoom
-  //   };
-  // }
-
-  // INTERNAL METHODS
-
-  /* eslint-disable max-statements */
-  _initialize() {
-    // Scale
-    this.scale = Math.pow(2, this.zoom);
-    this.worldSize = TILE_SIZE * this.scale;
-    this.tileZoom = Math.floor(this.zoom);
-    this.zoomFraction = this.zoom - Math.floor(this.zoom);
-
-    // Bearing
-    this.bearingRadians = this.bearing / 180 * Math.PI;
-    this.bearingRotationMatrix = mat2.create();
-    mat2.rotate(
-      this.bearingRotationMatrix, this.bearingRotationMatrix, this.bearing
-    );
-
-    // Pitch
-    this.originalPitch = this.pitch;
-    this.pitch = Math.min(60, this.pitch);
-    this.pitchRadians = this.pitch / 180 * Math.PI;
-
-    // Altitude
-    this.originalAltitude = this.altitude;
-    this.altitude = Math.max(0.75, this.altitude);
-
-    // Center x, y
-    const y = 180 / Math.PI *
-      Math.log(Math.tan(Math.PI / 4 + this.latitude * Math.PI / 360));
-
-    this.center = this.projectFlat([this.longitude, this.latitude]);
-    this.centerX = this.center[0];
-    this.centerY = this.center[1];
-
-    // Find the distance from the center point to the center top
-    // in altitude units using law of sines.
-    this.halfFov = Math.atan(0.5 / this.altitude);
-    this.topHalfSurfaceDistance =
-      Math.sin(this.halfFov) * this.altitude /
-      Math.sin(Math.PI / 2 - this.pitchRadians - this.halfFov);
-
-    // Calculate z value of the farthest fragment that should be rendered.
-    this.farZ = Math.cos(Math.PI / 2 - this.pitchRadians) *
-      this.topHalfSurfaceDistance + this.altitude;
-
-    // TODO - this could be postponed until needed
-    this._calculateDistanceScales();
-
-    this._calculateGLProjectionMatrix();
-    this._pixelProjectionMatrix = null;
-    this._pixelUnprojectionMatrix = null;
-  }
-  /* eslint-enable max-statements */
-
-  /**
-   * TODO: WIP
-   * Calculate distance scales in meters around current lat/lon, both for
-   * degrees and pixels
-   * The distance scales vary wildly with latitude
-   */
-  _calculateDistanceScales() {
-    // Approximately 111km per degree at equator
-    const METERS_PER_DEGREE = 111000;
-    const {latitude: lat, longitude: lon} = this;
-
-    const metersPerDegreeLon = METERS_PER_DEGREE;
-    const metersPerDegreeLat =
-      Math.cos(lat / 180 * Math.PI) * METERS_PER_DEGREE;
-    const metersPerDegreeAvg = (metersPerDegreeLat + metersPerDegreeLon) / 2;
-
-    // Calculate number of pixels occupied by one degree longitude
-    // around current lat/lon, divide by number of meters per degree.
-    // compensate for spherical shortening
-    const pixelsPerMeterX =
-      (this.project([lon + 0.5, lat]) - this.project([lon - 0.5, lat])) /
-      (METERS_PER_DEGREE * Math.cos(lat / 180 * Math.PI));
-
-    // Calculate number of pixels occupied by one degree latitude
-    // around current lat/lon, divide by number of meters per degree.
-    const pixelsPerMeterY =
-      (this.project([lon, lat + 0.5]) - this.project([lon, lat - 0.5])) /
-       METERS_PER_DEGREE;
-
-    const pixelsPerMeterAvg = (pixelsPerMeterX + pixelsPerMeterY) / 2;
-
-    this.metersPerLatLon = [
-      metersPerDegreeLon,
-      metersPerDegreeLat,
-      metersPerDegreeAvg
-    ];
-    this.latLonPerMeter = [
-      1 / metersPerDegreeLon,
-      1 / metersPerDegreeLat,
-      1 / metersPerDegreeAvg
-    ];
-    this.pixelsPerMeterX = [
-      pixelsPerMeterX,
-      pixelsPerMeterY,
-      pixelsPerMeterAvg
-    ];
-    this.metersPerPixel = [
-      1 / pixelsPerMeterX,
-      1 / pixelsPerMeterY,
-      1 / pixelsPerMeterAvg
-    ];
-  }
-
-  /**
-   * Builds matrices that converts preprojected lngLats to screen pixels
-   * and vice versa.
-   *
-   * Note: Currently return bottom-left coordinates!
-   * Note: Starts with the GL projection matrix and adds steps to the
-   *       scale and translate that matrix onto the window.
-   * Note: WebGL controls clip space to screen projection with gl.viewport
-   *       and does not need this step.
-   */
-
-
-  /**
-   * GL clip space = [-1 - 1, -1 - 1]
-   * After conversion to Float32Array this can be used as a WebGL
-   * projectionMatrix
-   */

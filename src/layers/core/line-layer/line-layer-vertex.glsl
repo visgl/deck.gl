@@ -17,38 +17,31 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-
 #define SHADER_NAME line-layer-vertex-shader
 
-#pragma glslify: project = require(../../../../shaderlib/project)
+// #pragma glslify: preproject = require(../../../../shaderlib/preproject)
+// #pragma glslify: scale = require(../../../../shaderlib/scale)
+// #pragma glslify: project = require(../../../../shaderlib/project)
 
 attribute vec3 positions;
 attribute vec3 instanceColors;
 attribute vec4 instancePositions;
 attribute vec3 instancePickingColors;
 
-uniform mat4 worldMatrix;
-uniform mat4 projectionMatrix;
 uniform float opacity;
 uniform float renderPickingBuffer;
 
 varying vec4 vColor;
 
 void main(void) {
-  vec2 source = project(instancePositions.xy);
-  vec2 target = project(instancePositions.zw);
+  vec2 source = preproject(instancePositions.xy);
+  vec2 target = preproject(instancePositions.zw);
 
   float segmentIndex = positions.x;
-  vec3 p = vec3(
-    // xy: linear interpolation of source & target
-    mix(source, target, segmentIndex),
-    // As per similar comment in choropleth-layer-vertex.glsl
-    // For some reason, need to add one to elevation to show up in untilted mode
-    // This seems to be only a problem on a Mac and not in Windows.
-    1.0
-  );
+  // xy: linear interpolation of source & target
+  vec2 p = mix(source, target, segmentIndex);
 
-  gl_Position = projectionMatrix * vec4(p, 1.0);
+  gl_Position = project(vec4(p, 0., 1.));
 
   vec4 color = vec4(instanceColors / 255.0, opacity);
   vec4 pickingColor = vec4(instancePickingColors / 255.0, opacity);

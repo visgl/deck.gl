@@ -19,7 +19,6 @@
 // THE SOFTWARE.
 #define SHADER_NAME scatterplot-layer-vertex-shader
 
-
 attribute vec3 positions;
 attribute vec4 instancePositionsFP64;
 attribute vec2 layerHeight;
