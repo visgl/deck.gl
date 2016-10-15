@@ -26,6 +26,8 @@ vec2 log_fp64(vec2 a)
 {
   if (a.x == 1.0 && a.y == 0.0) return vec2(0.0, 0.0);
   if (a.x <= 0.0) return vec2(0.0 / 0.0, 0.0 / 0.0);
+  // The log function used here is accurate on AMD but not on NVIDIA
+  // So on NVIDIA machines, log_fp64 only has 32-bit accuracy.
   vec2 x = vec2(log(a.x), 0.0);
   x = sub_fp64(sum_fp64(x, mul_fp64(a, exp_fp64(-x))), vec2(1.0, 0.0));
   return x;

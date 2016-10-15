@@ -33,7 +33,6 @@ const vec2 INVERSE_FACTORIAL_7 = vec2(1.9841270113829523e-04,  -2.72559687493345
 
 vec2 exp_fp64(vec2 a) {
 
-
   const float k = 512.0;
   const float inv_k = 1.0 / k;
 

@@ -22,8 +22,8 @@
 
 vec2 twoSum(float a, float b) {
   float s = (a + b) * ONE;
-  float v = (s - a) * ONE;
-  float err = (a - (s - v))  * ONE + (b - v) * ONE;
+  float v = (s - a);
+  float err = (a - (s - v) * ONE) * ONE + (b - v);
   return vec2(s, err);
 }
 

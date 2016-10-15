@@ -20,6 +20,8 @@
 
 #define SHADER_NAME arc-layer-vertex-shader
 
+uniform float ONE; // nvidia workaround
+
 #pragma glslify: sum_fp64 = require(../../../../shaderlib/fp64/sum-fp64, ONE=ONE)
 #pragma glslify: sub_fp64 = require(../../../../shaderlib/fp64/sub-fp64, ONE=ONE)
 #pragma glslify: mul_fp64 = require(../../../../shaderlib/fp64/mul-fp64, ONE=ONE)
@@ -28,6 +30,8 @@
 #pragma glslify: vec2_mix_fp64 = require(../../../../shaderlib/fp64/vec2-mix-fp64, ONE=ONE)
 #pragma glslify: vec2_distance_fp64 = require(../../../../shaderlib/fp64/vec2-distance-fp64, ONE=ONE)
 #pragma glslify: mat4_vec4_mul_fp64 = require(../../../../shaderlib/fp64/mat4-vec4-mul-fp64, ONE=ONE)
+
+#pragma glslify: project = require(../../../../shaderlib/project, ONE=ONE)
 
 const float N = 49.0;
 

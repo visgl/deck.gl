@@ -23,6 +23,7 @@
 import 'babel-polyfill';
 import {document, window} from 'global';
 import {Buffer, createGLContext, Program, glGetDebugInfo} from 'luma.gl';
+import {checkRendererVendor} from '../lib/utils/check-renderer-vendor';
 
 const glslify = require('glslify');
 
@@ -188,36 +189,44 @@ function checkError(result, reference)
   var currentDiv = addDiv();
   var line;
   addSpan("------------------------", currentDiv);
-  line = 'CPU output: (' + reference[0].toString() + ',' + reference[1].toString() + ")<br>";
+
+  let referece64 = reference[0] + reference[1];
+  let result64 = result[0] + result[1];
+
+  line = 'CPU output: (' + reference[0].toString() + ',' + reference[1].toString() + ') = ' + referece64.toString() + '<br>';
   addSpan(line, currentDiv);
-  line = "GPU output: (" + result[0].toString() + ',' + result[1].toString() + ',' + result[2].toString() + ',' + result[3].toString() + ")<br>";
+  line = "GPU output: (" + result[0].toString() + ',' + result[1].toString() + ',' + result[2].toString() + ',' + result[3].toString() + ') = ' + result64.toString() + '<br>';
   addSpan(line, currentDiv);
 
-  var referenceBits = new Int32Array(reference.buffer);
-  var resultBits = new Int32Array(result.buffer);
-
-  var refHiExp = (referenceBits[0] & 0x7F800000) >>> 23;
-  var refLoExp = (referenceBits[1] & 0x7F800000) >>> 23;
-  var resHiExp = (resultBits[0] & 0x7F800000) >>> 23;
-  var resLoExp = (resultBits[1] & 0x7F800000) >>> 23;
-
-  var refHiMan = referenceBits[0] & 0x007FFFFF;
-  var refLoMan = referenceBits[1] & 0x007FFFFF;
-  var resHiMan = resultBits[0] & 0x007FFFFF;
-  var resLoMan = resultBits[1] & 0x007FFFFF;
-
-  if (refHiExp !== resHiExp || refLoExp !== resLoExp)
-  {
-    line = "High 8-bit exponent error: " + Math.abs(refHiExp - resHiExp).toString() + " ulp<br>";
-    addSpan(line, currentDiv);
-    line = "Low 8-bit exponent error: " + Math.abs(refLoExp - resLoExp).toString() + " ulp<br>";
-    addSpan(line, currentDiv);
-  }
-
-  line = "High 24-bit mantissa reference: " + refHiMan.toString(2) + " result: " + resHiMan.toString(2) + " error: " + Math.abs(refHiMan - resHiMan).toString() + " ulp<br>";
+  line = "error: " + Math.abs((referece64 - result64) / referece64) + '<br>';
   addSpan(line, currentDiv);
-  line = "Low 24-bit mantissa reference: " + refLoMan.toString(2) + " result: " + resLoMan.toString(2) + " error: " + Math.abs(refLoMan - resLoMan).toString() + " ulp<br>";
-  addSpan(line, currentDiv);
+
+
+  // var referenceBits = new Int32Array(reference.buffer);
+  // var resultBits = new Int32Array(result.buffer);
+
+  // var refHiExp = (referenceBits[0] & 0x7F800000) >>> 23;
+  // var refLoExp = (referenceBits[1] & 0x7F800000) >>> 23;
+  // var resHiExp = (resultBits[0] & 0x7F800000) >>> 23;
+  // var resLoExp = (resultBits[1] & 0x7F800000) >>> 23;
+
+  // var refHiMan = referenceBits[0] & 0x007FFFFF;
+  // var refLoMan = referenceBits[1] & 0x007FFFFF;
+  // var resHiMan = resultBits[0] & 0x007FFFFF;
+  // var resLoMan = resultBits[1] & 0x007FFFFF;
+
+  // if (refHiExp !== resHiExp || refLoExp !== resLoExp)
+  // {
+  //   line = "High 8-bit exponent error: " + Math.abs(refHiExp - resHiExp).toString() + " ulp<br>";
+  //   addSpan(line, currentDiv);
+  //   line = "Low 8-bit exponent error: " + Math.abs(refLoExp - resLoExp).toString() + " ulp<br>";
+  //   addSpan(line, currentDiv);
+  // }
+
+  // line = "High 24-bit mantissa reference: " + refHiMan.toString(2) + " result: " + resHiMan.toString(2) + " error: " + Math.abs(refHiMan - resHiMan).toString() + " ulp<br>";
+  // addSpan(line, currentDiv);
+  // line = "Low 24-bit mantissa reference: " + refLoMan.toString(2) + " result: " + resLoMan.toString(2) + " error: " + Math.abs(refLoMan - resLoMan).toString() + " ulp<br>";
+  // addSpan(line, currentDiv);
 }
 
 // Actual tests for different arithmetic functions
@@ -235,13 +244,15 @@ function test_float_add(gl, testName) {
   const float1_vec2 = df64ify(float1);
   const float_ref_vec2 = df64ify(float_ref);
 
-  var nv_ifdef = '';
-  if (glGetDebugInfo(gl).vendor.match(/NVIDIA/)) {
-    nv_ifdef += '#define NVIDIA_WORKAROUND 1';
+  let nvidiaDef = '';
+  const debugInfo = glGetDebugInfo(gl);
+
+  if (checkRendererVendor(debugInfo, 'nvidia')) {
+    nvidiaDef += '#define NVIDIA_WORKAROUND 1\n';
   }
 
   const program = new Program(gl, {
-    vs: nv_ifdef + glslify('./test_shader/vs_float_add.glsl'),
+    vs: nvidiaDef + glslify('./test_shader/vs_float_add.glsl'),
     fs: glslify('./test_shader/fs.glsl')
   });
 
@@ -276,13 +287,15 @@ function test_float_sub(gl, testName) {
   const float1_vec2 = df64ify(float1);
   const float_ref_vec2 = df64ify(float_ref);
 
-  var nv_ifdef = '';
-  if (glGetDebugInfo(gl).vendor.match(/NVIDIA/)) {
-    nv_ifdef += '#define NVIDIA_WORKAROUND 1';
+  let nvidiaDef = '';
+  const debugInfo = glGetDebugInfo(gl);
+
+  if (checkRendererVendor(debugInfo, 'nvidia')) {
+    nvidiaDef += '#define NVIDIA_WORKAROUND 1\n';
   }
 
   const program = new Program(gl, {
-    vs: nv_ifdef + glslify('./test_shader/vs_float_sub.glsl'),
+    vs: nvidiaDef + glslify('./test_shader/vs_float_sub.glsl'),
     fs: glslify('./test_shader/fs.glsl')
   });
 
@@ -317,13 +330,15 @@ function test_float_mul(gl, testName) {
   const float1_vec2 = df64ify(float1);
   const float_ref_vec2 = df64ify(float_ref);
 
-  var nv_ifdef = '';
-  if (glGetDebugInfo(gl).vendor.match(/NVIDIA/)) {
-    nv_ifdef += '#define NVIDIA_WORKAROUND 1';
+  let nvidiaDef = '';
+  const debugInfo = glGetDebugInfo(gl);
+
+  if (checkRendererVendor(debugInfo, 'nvidia')) {
+    nvidiaDef += '#define NVIDIA_WORKAROUND 1\n';
   }
 
   const program = new Program(gl, {
-    vs: nv_ifdef + glslify('./test_shader/vs_float_mul.glsl'),
+    vs: nvidiaDef + glslify('./test_shader/vs_float_mul.glsl'),
     fs: glslify('./test_shader/fs.glsl')
   });
 
@@ -358,13 +373,15 @@ function test_float_div(gl, testName) {
   const float1_vec2 = df64ify(float1);
   const float_ref_vec2 = df64ify(float_ref);
 
-  var nv_ifdef = '';
-  if (glGetDebugInfo(gl).vendor.match(/NVIDIA/)) {
-    nv_ifdef += '#define NVIDIA_WORKAROUND 1';
+  let nvidiaDef = '';
+  const debugInfo = glGetDebugInfo(gl);
+
+  if (checkRendererVendor(debugInfo, 'nvidia')) {
+    nvidiaDef += '#define NVIDIA_WORKAROUND 1\n';
   }
 
   const program = new Program(gl, {
-    vs: nv_ifdef + glslify('./test_shader/vs_float_div.glsl'),
+    vs: nvidiaDef + glslify('./test_shader/vs_float_div.glsl'),
     fs: glslify('./test_shader/fs.glsl')
   });
 
@@ -397,13 +414,15 @@ function test_float_sqrt(gl, testName) {
   const float0_vec2 = df64ify(float0);
   const float_ref_vec2 = df64ify(float_ref);
 
-  var nv_ifdef = '';
-  if (glGetDebugInfo(gl).vendor.match(/NVIDIA/)) {
-    nv_ifdef += '#define NVIDIA_WORKAROUND 1';
+  let nvidiaDef = '';
+  const debugInfo = glGetDebugInfo(gl);
+
+  if (checkRendererVendor(debugInfo, 'nvidia')) {
+    nvidiaDef += '#define NVIDIA_WORKAROUND 1\n';
   }
 
   const program = new Program(gl, {
-    vs: nv_ifdef +glslify('./test_shader/vs_float_sqrt.glsl'),
+    vs: nvidiaDef +glslify('./test_shader/vs_float_sqrt.glsl'),
     fs: glslify('./test_shader/fs.glsl')
   });
 
@@ -436,13 +455,15 @@ function test_float_exp(gl, testName) {
   const float_ref_vec2 = df64ify(float_ref);
 
   const vendor = gl.getParameter(gl.VENDOR);
-  var nv_ifdef = '';
-  if (vendor.match(/NVIDIA/)) {
-    nv_ifdef += '#define NVIDIA_WORKAROUND 1';
+  let nvidiaDef = '';
+  const debugInfo = glGetDebugInfo(gl);
+
+  if (checkRendererVendor(debugInfo, 'nvidia')) {
+    nvidiaDef += '#define NVIDIA_WORKAROUND 1\n';
   }
 
   const program = new Program(gl, {
-    vs: nv_ifdef + glslify('./test_shader/vs_float_exp.glsl'),
+    vs: nvidiaDef + glslify('./test_shader/vs_float_exp.glsl'),
     fs: glslify('./test_shader/fs.glsl')
   });
 
@@ -474,13 +495,15 @@ function test_float_log(gl, testName) {
   const float0_vec2 = df64ify(float0);
   const float_ref_vec2 = df64ify(float_ref);
 
-  var nv_ifdef = '';
-  if (glGetDebugInfo(gl).vendor.match(/NVIDIA/)) {
-    nv_ifdef += '#define NVIDIA_WORKAROUND 1';
+  let nvidiaDef = '';
+  const debugInfo = glGetDebugInfo(gl);
+
+  if (checkRendererVendor(debugInfo, 'nvidia')) {
+    nvidiaDef += '#define NVIDIA_WORKAROUND 1\n';
   }
 
   const program = new Program(gl, {
-    vs: nv_ifdef + glslify('./test_shader/vs_float_log.glsl'),
+    vs: nvidiaDef + glslify('./test_shader/vs_float_log.glsl'),
     fs: glslify('./test_shader/fs.glsl')
   });
 
@@ -513,13 +536,15 @@ function test_float_sin(gl, testName) {
   const float0_vec2 = df64ify(float0);
   const float_ref_vec2 = df64ify(float_ref);
 
-  var nv_ifdef = '';
-  if (glGetDebugInfo(gl).vendor.match(/NVIDIA/)) {
-    nv_ifdef += '#define NVIDIA_WORKAROUND 1';
+  let nvidiaDef = '';
+  const debugInfo = glGetDebugInfo(gl);
+
+  if (checkRendererVendor(debugInfo, 'nvidia')) {
+    nvidiaDef += '#define NVIDIA_WORKAROUND 1\n';
   }
 
   const program = new Program(gl, {
-    vs: nv_ifdef + glslify('./test_shader/vs_float_sin.glsl'),
+    vs: nvidiaDef + glslify('./test_shader/vs_float_sin.glsl'),
     fs: glslify('./test_shader/fs.glsl')
   });
 
@@ -551,13 +576,15 @@ function test_float_cos(gl, testName) {
   const float0_vec2 = df64ify(float0);
   const float_ref_vec2 = df64ify(float_ref);
 
-  var nv_ifdef = '';
-  if (glGetDebugInfo(gl).vendor.match(/NVIDIA/)) {
-    nv_ifdef += '#define NVIDIA_WORKAROUND 1';
+  let nvidiaDef = '';
+  const debugInfo = glGetDebugInfo(gl);
+
+  if (checkRendererVendor(debugInfo, 'nvidia')) {
+    nvidiaDef += '#define NVIDIA_WORKAROUND 1\n';
   }
 
   const program = new Program(gl, {
-    vs: nv_ifdef + glslify('./test_shader/vs_float_cos.glsl'),
+    vs: nvidiaDef + glslify('./test_shader/vs_float_cos.glsl'),
     fs: glslify('./test_shader/fs.glsl')
   });
 
@@ -589,13 +616,15 @@ function test_float_tan(gl, testName) {
   const float0_vec2 = df64ify(float0);
   const float_ref_vec2 = df64ify(float_ref);
 
-  var nv_ifdef = '';
-  if (glGetDebugInfo(gl).vendor.match(/NVIDIA/)) {
-    nv_ifdef += '#define NVIDIA_WORKAROUND 1';
+  let nvidiaDef = '';
+  const debugInfo = glGetDebugInfo(gl);
+
+  if (checkRendererVendor(debugInfo, 'nvidia')) {
+    nvidiaDef += '#define NVIDIA_WORKAROUND 1\n';
   }
 
   const program = new Program(gl, {
-    vs: nv_ifdef + glslify('./test_shader/vs_float_tan.glsl'),
+    vs: nvidiaDef + glslify('./test_shader/vs_float_tan.glsl'),
     fs: glslify('./test_shader/fs.glsl')
   });
 
@@ -633,117 +662,118 @@ window.onload = () => {
   var test_no = 0;
   const loop = 30;
 
-  for (idx0 = 0; idx0 < loop; idx0++) {
-    var currentDiv = addDiv();
-    addSpan("------------------------", currentDiv);
-    addSpan("Loop No. " + test_no++, currentDiv);
+  // for (idx0 = 0; idx0 < loop; idx0++) {
+  //   var currentDiv = addDiv();
+  //   addSpan("------------------------", currentDiv);
+  //   addSpan("Loop No. " + test_no++, currentDiv);
 
-    var cpu_result = test_float_add(gl, "Float addition test");
+  //   var cpu_result = test_float_add(gl, "Float addition test");
 
-    render(gl);
+  //   render(gl);
 
-    var gpu_result = getGPUOutput(gl);
+  //   var gpu_result = getGPUOutput(gl);
 
-    checkError(gpu_result, cpu_result);
+  //   checkError(gpu_result, cpu_result);
 
-    addSpan("------------------------", currentDiv);
-  }
+  //   addSpan("------------------------", currentDiv);
+  // }
 
-  for (idx0 = 0; idx0 < loop; idx0++) {
-    var currentDiv = addDiv();
-    addSpan("------------------------", currentDiv);
-    addSpan("Loop No. " + test_no++, currentDiv);
+  // for (idx0 = 0; idx0 < loop; idx0++) {
+  //   var currentDiv = addDiv();
+  //   addSpan("------------------------", currentDiv);
+  //   addSpan("Loop No. " + test_no++, currentDiv);
 
-    var cpu_result = test_float_sub(gl, "Float subtraction test");
+  //   var cpu_result = test_float_sub(gl, "Float subtraction test");
 
-    render(gl);
+  //   render(gl);
 
-    var gpu_result = getGPUOutput(gl);
+  //   var gpu_result = getGPUOutput(gl);
 
-    checkError(gpu_result, cpu_result);
+  //   checkError(gpu_result, cpu_result);
 
-    addSpan("------------------------", currentDiv);
-  }
+  //   addSpan("------------------------", currentDiv);
+  // }
 
-  for (idx0 = 0; idx0 < loop; idx0++) {
-    var currentDiv = addDiv();
-    addSpan("------------------------", currentDiv);
-    addSpan("Loop No. " + test_no++, currentDiv);
+  // for (idx0 = 0; idx0 < loop; idx0++) {
+  //   var currentDiv = addDiv();
+  //   addSpan("------------------------", currentDiv);
+  //   addSpan("Loop No. " + test_no++, currentDiv);
 
-    var cpu_result = test_float_mul(gl, "Float multiplication test");
+  //   var cpu_result = test_float_mul(gl, "Float multiplication test");
 
-    render(gl);
+  //   render(gl);
 
-    var gpu_result = getGPUOutput(gl);
+  //   var gpu_result = getGPUOutput(gl);
 
-    checkError(gpu_result, cpu_result);
+  //   checkError(gpu_result, cpu_result);
 
-    addSpan("------------------------", currentDiv);
-  }
+  //   addSpan("------------------------", currentDiv);
+  // }
 
-  for (idx0 = 0; idx0 < loop; idx0++) {
-    var currentDiv = addDiv();
-    addSpan("------------------------", currentDiv);
-    addSpan("Loop No. " + test_no++, currentDiv);
+  // for (idx0 = 0; idx0 < loop; idx0++) {
+  //   var currentDiv = addDiv();
+  //   addSpan("------------------------", currentDiv);
+  //   addSpan("Loop No. " + test_no++, currentDiv);
 
-    var cpu_result = test_float_div(gl, "Float division test");
+  //   var cpu_result = test_float_div(gl, "Float division test");
 
-    render(gl);
+  //   render(gl);
 
-    var gpu_result = getGPUOutput(gl);
+  //   var gpu_result = getGPUOutput(gl);
 
-    checkError(gpu_result, cpu_result);
+  //   checkError(gpu_result, cpu_result);
 
-    addSpan("------------------------", currentDiv);
-  }
+  //   addSpan("------------------------", currentDiv);
+  // }
 
-  for (idx0 = 0; idx0 < loop; idx0++) {
-    var currentDiv = addDiv();
-    addSpan("------------------------", currentDiv);
-    addSpan("Loop No. " + test_no++, currentDiv);
+  // for (idx0 = 0; idx0 < loop; idx0++) {
+  //   var currentDiv = addDiv();
+  //   addSpan("------------------------", currentDiv);
+  //   addSpan("Loop No. " + test_no++, currentDiv);
 
-    var cpu_result = test_float_sqrt(gl, "Float sqrt test");
+  //   var cpu_result = test_float_sqrt(gl, "Float sqrt test");
 
-    render(gl);
+  //   render(gl);
 
-    var gpu_result = getGPUOutput(gl);
+  //   var gpu_result = getGPUOutput(gl);
 
-    checkError(gpu_result, cpu_result);
+  //   checkError(gpu_result, cpu_result);
 
-    addSpan("------------------------", currentDiv);
-  }
+  //   addSpan("------------------------", currentDiv);
+  // }
 
-  for (idx0 = 0; idx0 < loop; idx0++) {
-    var currentDiv = addDiv();
-    addSpan("------------------------", currentDiv);
-    addSpan("Loop No. " + test_no++, currentDiv);
+  // for (idx0 = 0; idx0 < loop; idx0++) {
+  //   var currentDiv = addDiv();
+  //   addSpan("------------------------", currentDiv);
+  //   addSpan("Loop No. " + test_no++, currentDiv);
 
-    var cpu_result = test_float_exp(gl, "Float exp test");
+  //   var cpu_result = test_float_exp(gl, "Float exp test");
 
-    render(gl);
+  //   render(gl);
 
-    var gpu_result = getGPUOutput(gl);
+  //   var gpu_result = getGPUOutput(gl);
 
-    checkError(gpu_result, cpu_result);
+  //   checkError(gpu_result, cpu_result);
 
-    addSpan("------------------------", currentDiv);
-  }
+  //   addSpan("------------------------", currentDiv);
+  // }
 
-  for (idx0 = 0; idx0 < loop; idx0++) {
-    var currentDiv = addDiv();
-    addSpan("------------------------", currentDiv);
-    addSpan("Loop No. " + test_no++, currentDiv);
+  // for (idx0 = 0; idx0 < loop; idx0++) {
+  //   var currentDiv = addDiv();
+  //   addSpan("------------------------", currentDiv);
+  //   addSpan("Loop No. " + test_no++, currentDiv);
 
-    var cpu_result = test_float_log(gl, "Float log test");
+  //   var cpu_result = test_float_log(gl, "Float log test");
 
-    render(gl);
+  //   render(gl);
 
-    var gpu_result = getGPUOutput(gl);
+  //   var gpu_result = getGPUOutput(gl);
 
-    checkError(gpu_result, cpu_result);
+  //   checkError(gpu_result, cpu_result);
 
-    addSpan("------------------------", currentDiv);
-  }
+  //   addSpan("------------------------", currentDiv);
+  // }
+
   for (idx0 = 0; idx0 < loop; idx0++) {
     var currentDiv = addDiv();
     addSpan("------------------------", currentDiv);
@@ -751,41 +781,6 @@ window.onload = () => {
 
     var cpu_result = test_float_sin(gl, "Float sin test");
 
-  //   render(gl);
-
-  //   var gpu_result = getGPUOutput(gl);
-
-  //   checkError(gpu_result, cpu_result);
-
-  //   addSpan("------------------------", currentDiv);
-
-  }
-  for (idx0 = 0; idx0 < loop; idx0++) {
-    var currentDiv = addDiv();
-    addSpan("------------------------", currentDiv);
-    addSpan("Loop No. " + test_no++, currentDiv);
-
-    var cpu_result = test_float_cos(gl, "Float cos test");
-
-  //   render(gl);
-
-  //   var gpu_result = getGPUOutput(gl);
-
-  //   checkError(gpu_result, cpu_result);
-
-  //   addSpan("------------------------", currentDiv);
-
-
-  }
-
-  for (idx0 = 0; idx0 < loop; idx0++) {
-    var currentDiv = addDiv();
-    addSpan("------------------------", currentDiv);
-    addSpan("Loop No. " + test_no++, currentDiv);
-
-
-    var cpu_result = test_float_tan(gl, "Float tan test");
-
     render(gl);
 
     var gpu_result = getGPUOutput(gl);
@@ -793,7 +788,7 @@ window.onload = () => {
     checkError(gpu_result, cpu_result);
 
     addSpan("------------------------", currentDiv);
-  }
+   }
 
   for (idx0 = 0; idx0 < loop; idx0++) {
     var currentDiv = addDiv();
@@ -809,12 +804,15 @@ window.onload = () => {
     checkError(gpu_result, cpu_result);
 
     addSpan("------------------------", currentDiv);
+
+
   }
 
   for (idx0 = 0; idx0 < loop; idx0++) {
     var currentDiv = addDiv();
     addSpan("------------------------", currentDiv);
     addSpan("Loop No. " + test_no++, currentDiv);
+
 
     var cpu_result = test_float_tan(gl, "Float tan test");
 
