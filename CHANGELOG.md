@@ -20,6 +20,11 @@ All notable changes to deck.gl will be documented in this file.
 
 ### Beta-3.0.0 Releases
 
+#### [3.0.0-beta19] -
+ - BREAKING - New GLSL projection methods and assembleShader function.
+   All layers updated.
+ - FIX - ArcLayer64 flickering fixed by high precision workaround.
+
 #### [3.0.0-beta18] -
  - BREAKING: No longer use Camera/Scene to render. Enabler for issue #5.
  - BREAKING: Sample layers now available through `import 'deck.gl/samples';
