@@ -1,7 +1,7 @@
 import {glGetDebugInfo} from 'luma.gl';
 
 // Load shader chunks
-import SHADER_CHUNKS from '../../shaderlib/shader-chunks';
+import SHADER_CHUNKS from '../../dist/shaderlib/shader-chunks';
 
 function getPlatformPrologue(gl) {
   let defines = '';

@@ -3,19 +3,22 @@
 A core feature of deck.gl is that all layers automatically support
 coordinates specified in the
 [web mercator](https://en.wikipedia.org/wiki/Web_Mercator) projection,
-the de facto standard projection for computer maps. Such coordinates will
-be projected correctly onto the map.
+the de facto standard carotgraphic projection for computer maps.
+Such coordinates will be correctly projected onto the map if the layer
+is set to the right projection mode.
 
 A deck.gl layer can be configured to work with positions specified in
 different units:
 
 How positions supplied by the application are interpreted.
 
-- **LNGLATZ** - positions are interpreted as Web Mercator coordinates:
+- **longitude/latitude/altitude** (`LNGLAT`) -
+  positions are interpreted as Web Mercator coordinates:
   [longitude, latitude, altitude]. Longitude and latitude
   are specified in degrees from Greenwich meridian / equator respectively,
   and altitude is specified in meters above sea level.
-- **METERS** - positions are given in meter offsets from a reference point
+- **meter offsets** (`METERS`) -
+  positions are given in meter offsets from a reference point
   that is specified separately.
 
 Note: deck.gl can also supports working in a standard (i.e. unprojected) linear
@@ -178,110 +181,85 @@ returns
 // Clip Space                  unit cube around view
 // ------
 
-constructor
-  /**
-   * @classdesc
-   * Manages coordinate system transformations for deck.gl.
-   *
-   * Note: The Viewport is immutable in the sense that it only has accessors.
-   * A new viewport instance should be created if any parameters have changed.
-   *
-   * @class
-   * @param {Object} opt - options
-   * @param {Boolean} mercator=true - Whether to use mercator projection
-   *
-   * @param {Number} opt.width=1 - Width of "viewport" or window
-   * @param {Number} opt.height=1 - Height of "viewport" or window
-   * @param {Array} opt.center=[0, 0] - Center of viewport
-   *   [longitude, latitude] or [x, y]
-   * @param {Number} opt.scale=1 - Either use scale or zoom
-   * @param {Number} opt.pitch=0 - Camera angle in degrees (0 is straight down)
-   * @param {Number} opt.bearing=0 - Map rotation in degrees (0 means north is up)
-   * @param {Number} opt.altitude= - Altitude of camera in screen units
-   *
-   * Web mercator projection short-hand parameters
-   * @param {Number} opt.latitude - Center of viewport on map (alternative to opt.center)
-   * @param {Number} opt.longitude - Center of viewport on map (alternative to opt.center)
-   * @param {Number} opt.zoom - Scale = Math.pow(2,zoom) on map (alternative to opt.scale)
+### constructor
 
-   * Notes:
-   *  - Only one of center or [latitude, longitude] can be specified
-   *  - [latitude, longitude] can only be specified when "mercator" is true
-   *  - Altitude has a default value that matches assumptions in mapbox-gl
-   *  - width and height are forced to 1 if supplied as 0, to avoid
-   *    division by zero. This is intended to reduce the burden of apps to
-   *    to check values before instantiating a Viewport.
-   */
+Manages coordinate system transformations for deck.gl.
+
+Note: The Viewport is immutable in the sense that it only has accessors.
+A new viewport instance should be created if any parameters have changed.
+
+@class
+@param {Object} opt - options
+@param {Boolean} mercator=true - Whether to use mercator projection
+
+@param {Number} opt.width=1 - Width of "viewport" or window
+@param {Number} opt.height=1 - Height of "viewport" or window
+@param {Array} opt.center=[0, 0] - Center of viewport
+  [longitude, latitude] or [x, y]
+@param {Number} opt.scale=1 - Either use scale or zoom
+@param {Number} opt.pitch=0 - Camera angle in degrees (0 is straight down)
+@param {Number} opt.bearing=0 - Map rotation in degrees (0 means north is up)
+@param {Number} opt.altitude= - Altitude of camera in screen units
+
+Web mercator projection short-hand parameters
+@param {Number} opt.latitude - Center of viewport on map (alternative to opt.center)
+@param {Number} opt.longitude - Center of viewport on map (alternative to opt.center)
+@param {Number} opt.zoom - Scale = Math.pow(2,zoom) on map (alternative to opt.scale)
+
+Notes:
+ - Only one of center or [latitude, longitude] can be specified
+ - [latitude, longitude] can only be specified when "mercator" is true
+ - Altitude has a default value that matches assumptions in mapbox-gl
+ - width and height are forced to 1 if supplied as 0, to avoid
+   division by zero. This is intended to reduce the burden of apps to
+   to check values before instantiating a Viewport.
 
 
-  project(lngLatZ, {topLeft = true} = {}) {
-  /**
-   * Projects latitude and longitude to pixel coordinates in window
-   * using viewport projection parameters
-   * - [longitude, latitude] to [x, y]
-   * - [longitude, latitude, Z] => [x, y, z]
-   * Note: By default, returns top-left coordinates for canvas/SVG type render
-   *
-   * @param {Array} lngLatZ - [lng, lat] or [lng, lat, Z]
-   * @param {Object} opts - options
-   * @param {Object} opts.topLeft=true - Whether projected coords are top left
-   * @return {Array} - [x, y] or [x, y, z] in top left coords
-   */
+### project(lngLatZ, {topLeft = true} = {})
 
-  unproject(xyz, {topLeft = true} = {}) {
-    this._precomputePixelProjectionMatrices();
-    const [x = 0, y = 0, z = 0] = xyz;
-    // const y2 = topLeft ? this.height - 1 - y : y;
-    const y2 = topLeft ? this.height - y : y;
-    const v = [x, y2, z, 1];
-    vec4.transformMat4(v, v, this._pixelUnprojectionMatrix);
-    const [x0, y0] = this.unprojectFlat(v);
-    const [, , z0] = v;
-    return xyz.length === 2 ? [x0, y0] : [x0, y0, z0];
-  }
-  /**
-   * Unproject pixel coordinates on screen onto [lon, lat] on map.
-   * - [x, y] => [lng, lat]
-   * - [x, y, z] => [lng, lat, Z]
-   * @param {Array} xyz -
-   * @return {Array} - [lng, lat, Z] or [X, Y, Z]
-   */
+Projects latitude and longitude to pixel coordinates in window
+using viewport projection parameters
+- [longitude, latitude] to [x, y]
+- [longitude, latitude, Z] => [x, y, z]
+Note: By default, returns top-left coordinates for canvas/SVG type render
 
-  projectFlat([lng, lat], scale = this.scale) {
-    scale = scale * WORLD_SCALE;
-    const lambda2 = lng * DEGREES_TO_RADIANS;
-    const phi2 = lat * DEGREES_TO_RADIANS;
-    const x = scale * (lambda2 + PI);
-    const y = scale * (PI - Math.log(Math.tan(PI_4 + phi2 * 0.5)));
-    return [x, y];
-  }
-  /**
-   * Project [lng,lat] on sphere onto [x,y] on 512*512 Mercator Zoom 0 tile.
-   * Performs the nonlinear part of the web mercator projection.
-   * Remaining projection is done with 4x4 matrices which also handles
-   * perspective.
-   *
-   * @param {Array} lngLat - [lng, lat] coordinates
-   *   Specifies a point on the sphere to project onto the map.
-   * @return {Array} [x,y] coordinates.
-   */
+@param {Array} lngLatZ - [lng, lat] or [lng, lat, Z]
+@param {Object} opts - options
+@param {Object} opts.topLeft=true - Whether projected coords are top left
+@return {Array} - [x, y] or [x, y, z] in top left coords
 
-  unprojectFlat([x, y], scale = this.scale) {
-    scale = scale * WORLD_SCALE;
-    const lambda2 = x / scale - PI;
-    const phi2 = 2 * (Math.atan(Math.exp(PI - y / scale)) - PI_4);
-    return [lambda2 * RADIANS_TO_DEGREES, phi2 * RADIANS_TO_DEGREES];
-  }
 
-  /**
-   * Unproject world point [x,y] on map onto {lat, lon} on sphere
-   *
-   * @param {object|Vector} xy - object with {x,y} members
-   *  representing point on projected map plane
-   * @return {GeoCoordinates} - object with {lat,lon} of point on sphere.
-   *   Has toArray method if you need a GeoJSON Array.
-   *   Per cartographic tradition, lat and lon are specified as degrees.
-   */
+### unproject(xyz, {topLeft = true} = {})
 
-  @autobind
-  getUniforms() {
+Unproject pixel coordinates on screen onto [lon, lat] on map.
+- [x, y] => [lng, lat]
+- [x, y, z] => [lng, lat, Z]
+@param {Array} xyz -
+@return {Array} - [lng, lat, Z] or [X, Y, Z]
+
+
+### projectFlat([lng, lat], scale = this.scale)
+
+Project [lng,lat] on sphere onto [x,y] on 512*512 Mercator Zoom 0 tile.
+Performs the nonlinear part of the web mercator projection.
+Remaining projection is done with 4x4 matrices which also handles
+perspective.
+
+@param {Array} lngLat - [lng, lat] coordinates
+  Specifies a point on the sphere to project onto the map.
+@return {Array} [x,y] coordinates.
+
+
+### unprojectFlat([x, y], scale = this.scale)
+
+Unproject world point [x,y] on map onto {lat, lon} on sphere
+
+@param {object|Vector} xy - object with {x,y} members
+ representing point on projected map plane
+@return {GeoCoordinates} - object with {lat,lon} of point on sphere.
+  Has toArray method if you need a GeoJSON Array.
+  Per cartographic tradition, lat and lon are specified as degrees.
+
+
+
+### getUniforms()

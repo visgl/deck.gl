@@ -51,40 +51,29 @@ FEATURE IDEA: The base layer could take an optional getObject(index) accessor
 and call it if supplied.
 
 
-## Notes on WebGL buffer management
+## Debugging and Instrumentation
 
-deck.gl Layers were designed with data flow architectures like React in mind.
-The challenge is of course that in the react model, every change to application
-state causes a full rerender. The rendering callbacks are then supposed to
-detect what changes were made a limit rerendering as appropriate. When you
-have a couple of 100K element WebGL buffers to update, this can become quite
-expensive unless change detection is well managed.
+deck.gl is built on luma.gl which has extensive debugging and instrumentation
+support.
+
+* Automatic checks are performed on your uniforms and attributes.
+  Passing an `undefined` value to a uniform is a common JavaScript mistake
+  that normally results in no warnings and no output from the shaders,
+  often causing simple errors to be time consuming to debug, however in
+  deck.gl will immediately generate a descriptive exception.
+
+* The DeckGL react component has a debug flag which instructs luma.gl
+  to instruments the gl context (this has a performance cost) which allows
+  tracing all calls, see below on luma debug priority levels.
+  It also generates exceptions immediately when a WebGL operation fails,
+  allowing you to pinpoint exactly where in the code the issue
+  happened. Due to the asynchronous nature of WebGL, you would normally
+  receive these errors as warning at a later time during code execution.
 
 
-### Data Management using automatic Buffer updates
-
-The layer will expect each object to provide a number of "attributes" that it
-can use to set the GL buffers. By default, the layer will look for these
-attributes to be available as fields directly on the objects during iteration
-over the supplied data set. To gain more control of attribute access and/or
-to do on-the-fly calculation of attributes.
-
-
-### Manual Buffer Management
-
-For ultimate performance and control of updates, the application can do its
-own management of the glbuffers. Each Layer can accept buffers directly as
-props.
-
-**Note:** The application can provide some buffers and let others be managed
-by the layer. As an example management of the `instancePickingColors` buffer is
-normally left to the layer.
-
-**Note**: A layer only renders when a property change is detected. For
-performance reasons, property change detection uses shallow compare,
-which means that mutating an element inside a buffer or a mutable data array
-does not register as a property change, and thus does not trigger a rerender.
-To force trigger a render after mutating buffers, simply increment the
-`renderCount` property. To force trigger a buffer update after mutating data,
-increment the `updateCount` property.
-
+* In the browser console, setting `luma.log.priority` to various values will
+  enable increasing levels of debugging.
+    - **Level 3** will display all uniforms and attributes before each draw
+      call, allowing you to be confident in what values your shaders are
+      actually working on.
+    - **Level 4** will trace every single gl call.
