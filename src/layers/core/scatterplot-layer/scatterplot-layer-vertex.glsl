@@ -32,7 +32,7 @@ uniform float renderPickingBuffer;
 varying vec4 vColor;
 
 void main(void) {
-  vec3 center = preproject(instancePositions);
+  vec3 center = preproject(instancePositions.xyz);
   vec3 vertex = positions * scale(radius * instancePositions.w);
   gl_Position = project(vec4(center, 1.0)) +
                 project(vec4(vertex, 0.0));
