@@ -26,18 +26,26 @@ export function getPlatformShaderDefines(gl) {
   const debugInfo = glGetDebugInfo(gl);
 
   if (checkRendererVendor(debugInfo, 'nvidia')) {
-    platformDefines += '#define NVIDIA_GPU \n \
-    #define NVIDIA_FP64_WORKAROUND 1\n \
-    #define NVIDIA_EQUATION_WORKAROUND 1';
+    platformDefines += `\
+#define NVIDIA_GPU
+#define NVIDIA_FP64_WORKAROUND 1
+#define NVIDIA_EQUATION_WORKAROUND 1
+`;
   } else if (checkRendererVendor(debugInfo, 'intel')) {
-    platformDefines += '#define INTEL_GPU \n \
-    #define INTEL_FP64_WORKAROUND 1\n \
-    #define NVIDIA_EQUATION_WORKAROUND 1\n \
-    #define INTEL_LOG_WORKAROUND 1';
+    platformDefines += `\
+#define INTEL_GPU
+#define INTEL_FP64_WORKAROUND 1
+#define NVIDIA_EQUATION_WORKAROUND 1\n \
+#define INTEL_LOG_WORKAROUND 1
+`;
   } else if (checkRendererVendor(debugInfo, 'amd')) {
-    platformDefines += '#define AMD_GPU \n';
+    platformDefines += `\
+#define AMD_GPU
+`;
   } else {
-    platformDefines += '#define DEFAULT_GPU \n';
+    platformDefines += `\
+#define DEFAULT_GPU
+`;
   }
 
   return platformDefines;
@@ -45,16 +53,6 @@ export function getPlatformShaderDefines(gl) {
 
 // Load shader chunks
 import SHADER_CHUNKS from '../../dist/shaderlib/shader-chunks';
-
-function getPlatformPrologue(gl) {
-  let defines = '';
-  if (glGetDebugInfo(gl) !== null) {
-    if (glGetDebugInfo(gl).vendor.match(/Intel/)) {
-      defines += '#define INTEL_WORKAROUND 1\n';
-    }
-  }
-  return defines;
-}
 
 export default function assembleShader(gl, {
   vs,

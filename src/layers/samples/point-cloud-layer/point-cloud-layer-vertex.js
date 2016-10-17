@@ -1,5 +1,3 @@
-import project from '../../../../shaderlib/projection';
-
 export default `
 #define SHADER_NAME point-cloud-layer-vs
 

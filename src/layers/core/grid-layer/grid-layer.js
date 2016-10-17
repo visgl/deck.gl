@@ -20,7 +20,6 @@
 
 import {BaseLayer, assembleShader} from '../../../lib';
 import {Model, Program, Geometry} from 'luma.gl';
-import {getPlatformShaderDefines} from '../../../shader-utils/get-platform-shader-defines';
 
 const glslify = require('glslify');
 

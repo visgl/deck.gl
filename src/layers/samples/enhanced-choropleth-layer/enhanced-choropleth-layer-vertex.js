@@ -1,5 +1,3 @@
-import project from '../../../../shaderlib/projection';
-
 export default `
 #define SHADER_NAME enhanced-choropleth-layer-vertex-shader
 
