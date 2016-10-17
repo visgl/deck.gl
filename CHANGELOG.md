@@ -20,6 +20,10 @@ All notable changes to deck.gl will be documented in this file.
 
 ### Beta-3.0.0 Releases
 
+#### [3.0.0-betac20] -
+ - DOCUMENTATION: Article updates
+ - FIX: Fix broken shader export in beta19
+
 #### [3.0.0-beta19] -
  - BREAKING - New GLSL projection methods and assembleShader function.
    All layers updated.
