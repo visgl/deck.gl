@@ -19,7 +19,6 @@
 // THE SOFTWARE.
 import {BaseLayer, assembleShader} from '../../../lib';
 import {Model, Program, Geometry} from 'luma.gl';
-import {getPlatformShaderDefines} from '../../../lib/utils/get-platform-shader-defines';
 
 const glslify = require('glslify');
 
@@ -76,8 +75,7 @@ export default class LineLayer extends BaseLayer {
 
     return new Model({
       program: new Program(gl, {
-        vs: assembleShader(gl, {vs: glslify('./line-layer-vertex.glsl')},
-          getPlatformShaderDefines(gl)),
+        vs: assembleShader(gl, {vs: glslify('./line-layer-vertex.glsl')}),
         fs: glslify('./line-layer-fragment.glsl'),
         id: 'line'
       }),

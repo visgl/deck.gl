@@ -17,10 +17,9 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-import {BaseLayer} from '../../../lib';
+import {BaseLayer, assembleShader} from '../../../lib';
 import {Model, Program, Geometry} from 'luma.gl';
 import {df64ify} from '../../../lib/utils/fp64';
-import {getPlatformShaderDefines} from '../../../lib/utils/get-platform-shader-defines';
 
 const glslify = require('glslify');
 const DEFAULT_COLOR = [255, 0, 255];
@@ -98,7 +97,7 @@ export default class ScatterplotLayer extends BaseLayer {
 
     return new Model({
       program: new Program(gl, {
-        vs: getPlatformShaderDefines(gl) + glslify('./scatterplot-layer-vertex.glsl'),
+        vs: assembleShader(gl, {vs: glslify('./scatterplot-layer-vertex.glsl')}),
         fs: glslify('./scatterplot-layer-fragment.glsl'),
         id: 'scatterplot-fp64'
       }),

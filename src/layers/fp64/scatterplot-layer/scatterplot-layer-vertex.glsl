@@ -26,7 +26,6 @@ attribute float instanceRadius;
 attribute vec3 instanceColors;
 attribute vec3 instancePickingColors;
 
-uniform mat4 projectionMatrix;
 // Only one-dimensional arrays may be declared in GLSL ES 1.0. specs p.24
 uniform vec2 projectionFP64[16];
 uniform float opacity;

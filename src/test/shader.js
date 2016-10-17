@@ -23,7 +23,7 @@
 import 'babel-polyfill';
 import {document, window} from 'global';
 import {Buffer, createGLContext, Program} from 'luma.gl';
-import {getPlatformShaderDefines} from '../lib/utils/get-platform-shader-defines';
+import {getPlatformShaderDefines} from '../shader-utils/assemble-shader';
 
 const glslify = require('glslify');
 
@@ -414,8 +414,7 @@ function test_float_exp(gl, testName) {
   addSpan(testName, currentDiv);
 
  // exp
-  // const float0 = getFloat64(4);
-  const float0 = 11.232254028320312;
+  const float0 = getFloat64(4);
   const float_ref = Math.exp(float0);
 
   const float0_vec2 = df64ify(float0);

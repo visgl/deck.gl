@@ -91,7 +91,7 @@ vec2 cos_fp64(vec2 a) {
     vec2 u = vec2(0.0, 0.0);
     vec2 v = vec2(0.0, 0.0);
 
-#ifdef NVIDIA_EQUATION_WA
+#if defined(NVIDIA_EQUATION_WORKAROUND) || defined(INTEL_EQUATION_WORKAROUND)
     if (abs(float(abs_k) - 1.0) < 0.5) {
         u = COS_TABLE_0;
         v = SIN_TABLE_0;

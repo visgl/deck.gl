@@ -31,8 +31,6 @@ uniform float ONE; // fp64 workaround
 #pragma glslify: vec2_distance_fp64 = require(../../../../shaderlib/fp64/vec2-distance-fp64, ONE=ONE)
 #pragma glslify: mat4_vec4_mul_fp64 = require(../../../../shaderlib/fp64/mat4-vec4-mul-fp64, ONE=ONE)
 
-#pragma glslify: project = require(../../../../shaderlib/project, ONE=ONE)
-
 const float N = 49.0;
 
 attribute vec3 positions;
@@ -44,7 +42,6 @@ attribute vec4 instanceSourcePositionsFP64;
 attribute vec4 instanceTargetPositionsFP64;
 
 uniform mat4 worldMatrix;
-uniform mat4 projectionMatrix;
 uniform vec2 projectionFP64[16];
 uniform float opacity;
 uniform float renderPickingBuffer;

@@ -19,7 +19,6 @@
 // THE SOFTWARE.
 import {BaseLayer, assembleShader} from '../../../lib';
 import {Model, Program, Geometry} from 'luma.gl';
-import {getPlatformShaderDefines} from '../../../lib/utils/get-platform-shader-defines';
 
 const glslify = require('glslify');
 
@@ -93,9 +92,7 @@ export default class ScatterplotLayer extends BaseLayer {
 
     return new Model({
       program: new Program(gl, {
-        vs: assembleShader(gl, {
-          vs: getPlatformShaderDefines(gl) + glslify('./scatterplot-layer-vertex.glsl')
-        }),
+        vs: assembleShader(gl, {vs: glslify('./scatterplot-layer-vertex.glsl')}),
         fs: glslify('./scatterplot-layer-fragment.glsl'),
         id: 'scatterplot'
       }),

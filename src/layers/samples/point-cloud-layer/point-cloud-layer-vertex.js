@@ -1,9 +1,5 @@
-import project from '../../../../shaderlib/projection';
-
 export default `
 #define SHADER_NAME point-cloud-layer-vs
-
-${project}
 
 attribute vec3 pointPositions;
 attribute vec3 pointColors;

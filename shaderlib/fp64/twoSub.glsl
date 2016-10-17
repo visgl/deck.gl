@@ -18,15 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#ifdef NVIDIA_FP64_WA
-vec2 twoSub(float a, float b) {
-  float s = (a - b) * ONE;
-  float v = (s - a);
-  float err = (a - (s - v) * ONE) * ONE - (b + v);
-  return vec2(s, err);
-}
-#else
-#ifdef INTEL_FP64_WA
+#if defined(NVIDIA_EQUATION_WORKAROUND) || defined(INTEL_EQUATION_WORKAROUND)
 vec2 twoSub(float a, float b) {
   float s = (a - b) * ONE;
   float v = (s - a);
@@ -40,7 +32,6 @@ vec2 twoSub(float a, float b) {
   float err = (a - (s - v)) - (b + v);
   return vec2(s, err);
 }
-#endif
 #endif
 
 #pragma glslify: export(twoSub)

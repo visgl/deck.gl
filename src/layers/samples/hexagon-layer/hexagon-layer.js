@@ -19,7 +19,6 @@
 // THE SOFTWARE.
 import {BaseLayer, assembleShader} from '../../../lib';
 import {Model, Program, CylinderGeometry} from 'luma.gl';
-import {getPlatformShaderDefines} from '../../../lib/utils/get-platform-shader-defines';
 
 const glslify = require('glslify');
 
@@ -120,8 +119,7 @@ export default class HexagonLayer extends BaseLayer {
     return new Model({
       id: this.props.id,
       program: new Program(gl, {
-        vs: assembleShader(gl, {vs: glslify('./hexagon-layer-vertex.glsl')},
-          getPlatformShaderDefines(gl)),
+        vs: assembleShader(gl, {vs: glslify('./hexagon-layer-vertex.glsl')}),
         fs: glslify('./hexagon-layer-fragment.glsl'),
         id: 'hexagon'
       }),

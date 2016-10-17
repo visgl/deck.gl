@@ -55,16 +55,7 @@ float nint(float d) {
     return floor(d + 0.5);
 }
 
-#ifdef NVIDIA_FP64_WA
-vec2 split(float a) {
-  const float SPLIT = 4097.0;
-  float t = a * SPLIT;
-  float a_hi = t * ONE - (t - a);
-  float a_lo = a * ONE - a_hi;
-  return vec2(a_hi, a_lo);
-}
-#else
-#ifdef INTEL_FP64_WA
+#if defined(NVIDIA_FP64_WORKAROUND) || defined(INTEL_FP64_WORKAROUND)
 vec2 split(float a) {
   const float SPLIT = 4097.0;
   float t = a * SPLIT;
@@ -81,16 +72,8 @@ vec2 split(float a) {
   return vec2(a_hi, a_lo);
 }
 #endif
-#endif
 
-#ifdef NVIDIA_FP64_WA
-vec2 quickTwoSum(float a, float b) {
-  float sum = (a + b) * ONE;
-  float err = b - (sum - a) * ONE;
-  return vec2(sum, err);
-}
-#else
-#ifdef INTEL_FP64_WA
+#if defined(NVIDIA_EQUATION_WORKAROUND) || defined(INTEL_EQUATION_WORKAROUND)
 vec2 quickTwoSum(float a, float b) {
   float sum = (a + b) * ONE;
   float err = b - (sum - a) * ONE;
@@ -102,7 +85,6 @@ vec2 quickTwoSum(float a, float b) {
   float err = b - (sum - a);
   return vec2(sum, err);
 }
-#endif
 #endif
 
 vec2 nint_fp64(vec2 a) {
@@ -122,15 +104,7 @@ vec2 nint_fp64(vec2 a) {
     return tmp;
 }
 
-#ifdef NVIDIA_FP64_WA
-vec2 twoSum(float a, float b) {
-  float s = (a + b) * ONE;
-  float v = (s - a);
-  float err = (a - (s - v) * ONE) * ONE + (b - v);
-  return vec2(s, err);
-}
-#else
-#ifdef INTEL_FP64_WA
+#if defined(NVIDIA_EQUATION_WORKAROUND) || defined(INTEL_EQUATION_WORKAROUND)
 vec2 twoSum(float a, float b) {
   float s = (a + b) * ONE;
   float v = (s - a);
@@ -145,19 +119,10 @@ vec2 twoSum(float a, float b) {
   return vec2(s, err);
 }
 #endif
-#endif
 
 #ifdef NVIDIA_WORKAROUND
 
-#ifdef NVIDIA_FP64_WA
-vec2 twoSub(float a, float b) {
-  float s = (a - b) * ONE;
-  float v = (s - a);
-  float err = (a - (s - v) * ONE) * ONE - (b + v);
-  return vec2(s, err);
-}
-#else
-#ifdef INTEL_FP64_WA
+#if defined(NVIDIA_EQUATION_WORKAROUND) || defined(INTEL_EQUATION_WORKAROUND)
 vec2 twoSub(float a, float b) {
   float s = (a - b) * ONE;
   float v = (s - a);
@@ -172,7 +137,6 @@ vec2 twoSub(float a, float b) {
   return vec2(s, err);
 }
 #endif
-#endif
 
 vec2 twoProd(float a, float b) {
   float prod = a * b;
@@ -183,16 +147,7 @@ vec2 twoProd(float a, float b) {
   return vec2(prod, err);
 }
 
-#ifdef NVIDIA_FP64_WA
-vec2 twoSqr(float a) {
-  float prod = a * a;
-  vec2 a_fp64 = split(a);
-
-  float err = ((a_fp64.x * a_fp64.x - prod) * ONE + 2.0 * a_fp64.x * a_fp64.y * ONE * ONE) + a_fp64.y * a_fp64.y * ONE * ONE * ONE;
-  return vec2(prod, err);
-}
-#else
-#ifdef INTEL_FP64_WA
+#if defined(NVIDIA_EQUATION_WORKAROUND) || defined(INTEL_EQUATION_WORKAROUND)
 vec2 twoSqr(float a) {
   float prod = a * a;
   vec2 a_fp64 = split(a);
@@ -208,7 +163,6 @@ vec2 twoSqr(float a) {
   float err = ((a_fp64.x * a_fp64.x - prod) + 2.0 * a_fp64.x * a_fp64.y) + a_fp64.y * a_fp64.y;
   return vec2(prod, err);
 }
-#endif
 #endif
 
 vec2 sum_fp64(vec2 a, vec2 b) {
@@ -257,14 +211,10 @@ vec2 sqrt_fp64(vec2 a) {
 
   float x = 1.0 / sqrt(a.x);
   float yn = a.x * x;
-#ifdef NVIDIA_FP64_WA
-  vec2 yn_sqr = twoSqr(yn) * ONE;
-#else
-#ifdef INTEL_FP64_WA
+#if defined(NVIDIA_FP64_WORKAROUND) || defined(INTEL_FP64_WORKAROUND)
   vec2 yn_sqr = twoSqr(yn) * ONE;
 #else
   vec2 yn_sqr = twoSqr(yn);
-#endif
 #endif
   float diff = sub_fp64(a, yn_sqr).x;
   vec2 prod = twoProd(x * 0.5, diff);
@@ -325,7 +275,7 @@ vec2 exp_fp64(vec2 a) {
   s = sum_fp64(s * 2.0, mul_fp64(s, s));
   s = sum_fp64(s * 2.0, mul_fp64(s, s));
 
-#ifdef INTEL_FP64_WA
+#if defined(NVIDIA_FP64_WORKAROUND) || defined(INTEL_FP64_WORKAROUND)
   s = sum_fp64(s, vec2(1.0, 0.0) * ONE);
 #else
   s = sum_fp64(s, vec2(1.0, 0.0));
@@ -463,7 +413,7 @@ vec2 sin_fp64(vec2 a) {
     vec2 u = vec2(0.0, 0.0);
     vec2 v = vec2(0.0, 0.0);
 
-#ifdef NVIDIA_EQUATION_WA
+#if defined(NVIDIA_EQUATION_WORKAROUND) || defined(INTEL_EQUATION_WORKAROUND)
     if (abs(float(abs_k) - 1.0) < 0.5) {
         u = COS_TABLE_0;
         v = SIN_TABLE_0;
@@ -575,7 +525,7 @@ vec2 cos_fp64(vec2 a) {
     vec2 u = vec2(0.0, 0.0);
     vec2 v = vec2(0.0, 0.0);
 
-#ifdef NVIDIA_EQUATION_WA
+#if defined(NVIDIA_EQUATION_WORKAROUND) || defined(INTEL_EQUATION_WORKAROUND)
     if (abs(float(abs_k) - 1.0) < 0.5) {
         u = COS_TABLE_0;
         v = SIN_TABLE_0;
@@ -689,7 +639,7 @@ vec2 tan_fp64(vec2 a) {
         s = sin_t;
         c = cos_t;
     } else {
-#ifdef NVIDIA_EQUATION_WA
+#if defined(NVIDIA_EQUATION_WORKAROUND) || defined(INTEL_EQUATION_WORKAROUND)
         if (abs(float(abs_k) - 1.0) < 0.5) {
             u = COS_TABLE_0;
             v = SIN_TABLE_0;

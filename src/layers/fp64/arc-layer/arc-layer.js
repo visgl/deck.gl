@@ -18,10 +18,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {BaseLayer} from '../../../lib';
+import {BaseLayer, assembleShader} from '../../../lib';
 import {Model, Program, Geometry} from 'luma.gl';
 import {df64ify} from '../../../lib/utils/fp64';
-import {getPlatformShaderDefines} from '../../../lib/utils/get-platform-shader-defines';
 
 const glslify = require('glslify');
 
@@ -87,7 +86,7 @@ export default class ArcLayer extends BaseLayer {
 
     return new Model({
       program: new Program(gl, {
-        vs: getPlatformShaderDefines(gl) + glslify('./arc-layer-vertex.glsl'),
+        vs: assembleShader(gl, {vs: glslify('./arc-layer-vertex.glsl')}),
         fs: glslify('./arc-layer-fragment.glsl'),
         id: 'arc-fp64'
       }),
