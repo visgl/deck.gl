@@ -19,9 +19,9 @@
 // THE SOFTWARE.
 
 import {BaseLayer} from '../../../lib';
-import {Model, Program, Geometry, glGetDebugInfo} from 'luma.gl';
+import {Model, Program, Geometry} from 'luma.gl';
 import {df64ify} from '../../../lib/utils/fp64';
-import {checkRendererVendor} from '../../../lib/utils/check-renderer-vendor';
+import {getPlatformShaderDefines} from '../../../lib/utils/get-platform-shader-defines';
 
 const glslify = require('glslify');
 
@@ -85,16 +85,9 @@ export default class ArcLayer extends BaseLayer {
       positions = [...positions, i, i, i];
     }
 
-    let nvidiaDef = '';
-    const debugInfo = glGetDebugInfo(gl);
-
-    if (checkRendererVendor(debugInfo, 'nvidia')) {
-      nvidiaDef += '#define NVIDIA_WORKAROUND 1\n';
-    }
-
     return new Model({
       program: new Program(gl, {
-        vs: nvidiaDef + glslify('./arc-layer-vertex.glsl'),
+        vs: getPlatformShaderDefines(gl) + glslify('./arc-layer-vertex.glsl'),
         fs: glslify('./arc-layer-fragment.glsl'),
         id: 'arc-fp64'
       }),

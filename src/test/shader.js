@@ -22,8 +22,8 @@
 /* eslint-disable */
 import 'babel-polyfill';
 import {document, window} from 'global';
-import {Buffer, createGLContext, Program, glGetDebugInfo} from 'luma.gl';
-import {checkRendererVendor} from '../lib/utils/check-renderer-vendor';
+import {Buffer, createGLContext, Program} from 'luma.gl';
+import {getPlatformShaderDefines} from '../lib/utils/get-platform-shader-defines';
 
 const glslify = require('glslify');
 
@@ -244,15 +244,8 @@ function test_float_add(gl, testName) {
   const float1_vec2 = df64ify(float1);
   const float_ref_vec2 = df64ify(float_ref);
 
-  let nvidiaDef = '';
-  const debugInfo = glGetDebugInfo(gl);
-
-  if (checkRendererVendor(debugInfo, 'nvidia')) {
-    nvidiaDef += '#define NVIDIA_WORKAROUND 1\n';
-  }
-
   const program = new Program(gl, {
-    vs: nvidiaDef + glslify('./test_shader/vs_float_add.glsl'),
+    vs: getPlatformShaderDefines(gl) + glslify('./test_shader/vs_float_add.glsl'),
     fs: glslify('./test_shader/fs.glsl')
   });
 
@@ -287,15 +280,8 @@ function test_float_sub(gl, testName) {
   const float1_vec2 = df64ify(float1);
   const float_ref_vec2 = df64ify(float_ref);
 
-  let nvidiaDef = '';
-  const debugInfo = glGetDebugInfo(gl);
-
-  if (checkRendererVendor(debugInfo, 'nvidia')) {
-    nvidiaDef += '#define NVIDIA_WORKAROUND 1\n';
-  }
-
   const program = new Program(gl, {
-    vs: nvidiaDef + glslify('./test_shader/vs_float_sub.glsl'),
+    vs: getPlatformShaderDefines(gl) + glslify('./test_shader/vs_float_sub.glsl'),
     fs: glslify('./test_shader/fs.glsl')
   });
 
@@ -324,21 +310,15 @@ function test_float_mul(gl, testName) {
  // float x
   const float0 = getFloat64(128);
   const float1 = getFloat64(128);
+
   const float_ref = float0 * float1;
 
   const float0_vec2 = df64ify(float0);
   const float1_vec2 = df64ify(float1);
   const float_ref_vec2 = df64ify(float_ref);
 
-  let nvidiaDef = '';
-  const debugInfo = glGetDebugInfo(gl);
-
-  if (checkRendererVendor(debugInfo, 'nvidia')) {
-    nvidiaDef += '#define NVIDIA_WORKAROUND 1\n';
-  }
-
   const program = new Program(gl, {
-    vs: nvidiaDef + glslify('./test_shader/vs_float_mul.glsl'),
+    vs: getPlatformShaderDefines(gl) + glslify('./test_shader/vs_float_mul.glsl'),
     fs: glslify('./test_shader/fs.glsl')
   });
 
@@ -373,15 +353,8 @@ function test_float_div(gl, testName) {
   const float1_vec2 = df64ify(float1);
   const float_ref_vec2 = df64ify(float_ref);
 
-  let nvidiaDef = '';
-  const debugInfo = glGetDebugInfo(gl);
-
-  if (checkRendererVendor(debugInfo, 'nvidia')) {
-    nvidiaDef += '#define NVIDIA_WORKAROUND 1\n';
-  }
-
   const program = new Program(gl, {
-    vs: nvidiaDef + glslify('./test_shader/vs_float_div.glsl'),
+    vs: getPlatformShaderDefines(gl) + glslify('./test_shader/vs_float_div.glsl'),
     fs: glslify('./test_shader/fs.glsl')
   });
 
@@ -414,15 +387,8 @@ function test_float_sqrt(gl, testName) {
   const float0_vec2 = df64ify(float0);
   const float_ref_vec2 = df64ify(float_ref);
 
-  let nvidiaDef = '';
-  const debugInfo = glGetDebugInfo(gl);
-
-  if (checkRendererVendor(debugInfo, 'nvidia')) {
-    nvidiaDef += '#define NVIDIA_WORKAROUND 1\n';
-  }
-
   const program = new Program(gl, {
-    vs: nvidiaDef +glslify('./test_shader/vs_float_sqrt.glsl'),
+    vs: getPlatformShaderDefines(gl) + glslify('./test_shader/vs_float_sqrt.glsl'),
     fs: glslify('./test_shader/fs.glsl')
   });
 
@@ -448,22 +414,15 @@ function test_float_exp(gl, testName) {
   addSpan(testName, currentDiv);
 
  // exp
-  const float0 = getFloat64(4);
+  // const float0 = getFloat64(4);
+  const float0 = 11.232254028320312;
   const float_ref = Math.exp(float0);
 
   const float0_vec2 = df64ify(float0);
   const float_ref_vec2 = df64ify(float_ref);
 
-  const vendor = gl.getParameter(gl.VENDOR);
-  let nvidiaDef = '';
-  const debugInfo = glGetDebugInfo(gl);
-
-  if (checkRendererVendor(debugInfo, 'nvidia')) {
-    nvidiaDef += '#define NVIDIA_WORKAROUND 1\n';
-  }
-
   const program = new Program(gl, {
-    vs: nvidiaDef + glslify('./test_shader/vs_float_exp.glsl'),
+    vs: getPlatformShaderDefines(gl) + glslify('./test_shader/vs_float_exp.glsl'),
     fs: glslify('./test_shader/fs.glsl')
   });
 
@@ -495,15 +454,8 @@ function test_float_log(gl, testName) {
   const float0_vec2 = df64ify(float0);
   const float_ref_vec2 = df64ify(float_ref);
 
-  let nvidiaDef = '';
-  const debugInfo = glGetDebugInfo(gl);
-
-  if (checkRendererVendor(debugInfo, 'nvidia')) {
-    nvidiaDef += '#define NVIDIA_WORKAROUND 1\n';
-  }
-
   const program = new Program(gl, {
-    vs: nvidiaDef + glslify('./test_shader/vs_float_log.glsl'),
+    vs: getPlatformShaderDefines(gl) + glslify('./test_shader/vs_float_log.glsl'),
     fs: glslify('./test_shader/fs.glsl')
   });
 
@@ -536,15 +488,8 @@ function test_float_sin(gl, testName) {
   const float0_vec2 = df64ify(float0);
   const float_ref_vec2 = df64ify(float_ref);
 
-  let nvidiaDef = '';
-  const debugInfo = glGetDebugInfo(gl);
-
-  if (checkRendererVendor(debugInfo, 'nvidia')) {
-    nvidiaDef += '#define NVIDIA_WORKAROUND 1\n';
-  }
-
   const program = new Program(gl, {
-    vs: nvidiaDef + glslify('./test_shader/vs_float_sin.glsl'),
+    vs: getPlatformShaderDefines(gl) + glslify('./test_shader/vs_float_sin.glsl'),
     fs: glslify('./test_shader/fs.glsl')
   });
 
@@ -576,15 +521,8 @@ function test_float_cos(gl, testName) {
   const float0_vec2 = df64ify(float0);
   const float_ref_vec2 = df64ify(float_ref);
 
-  let nvidiaDef = '';
-  const debugInfo = glGetDebugInfo(gl);
-
-  if (checkRendererVendor(debugInfo, 'nvidia')) {
-    nvidiaDef += '#define NVIDIA_WORKAROUND 1\n';
-  }
-
   const program = new Program(gl, {
-    vs: nvidiaDef + glslify('./test_shader/vs_float_cos.glsl'),
+    vs: getPlatformShaderDefines(gl) + glslify('./test_shader/vs_float_cos.glsl'),
     fs: glslify('./test_shader/fs.glsl')
   });
 
@@ -616,15 +554,8 @@ function test_float_tan(gl, testName) {
   const float0_vec2 = df64ify(float0);
   const float_ref_vec2 = df64ify(float_ref);
 
-  let nvidiaDef = '';
-  const debugInfo = glGetDebugInfo(gl);
-
-  if (checkRendererVendor(debugInfo, 'nvidia')) {
-    nvidiaDef += '#define NVIDIA_WORKAROUND 1\n';
-  }
-
   const program = new Program(gl, {
-    vs: nvidiaDef + glslify('./test_shader/vs_float_tan.glsl'),
+    vs: getPlatformShaderDefines(gl) + glslify('./test_shader/vs_float_tan.glsl'),
     fs: glslify('./test_shader/fs.glsl')
   });
 
@@ -662,117 +593,117 @@ window.onload = () => {
   var test_no = 0;
   const loop = 30;
 
-  // for (idx0 = 0; idx0 < loop; idx0++) {
-  //   var currentDiv = addDiv();
-  //   addSpan("------------------------", currentDiv);
-  //   addSpan("Loop No. " + test_no++, currentDiv);
+  for (idx0 = 0; idx0 < loop; idx0++) {
+    var currentDiv = addDiv();
+    addSpan("------------------------", currentDiv);
+    addSpan("Loop No. " + test_no++, currentDiv);
 
-  //   var cpu_result = test_float_add(gl, "Float addition test");
+    var cpu_result = test_float_add(gl, "Float addition test");
 
-  //   render(gl);
+    render(gl);
 
-  //   var gpu_result = getGPUOutput(gl);
+    var gpu_result = getGPUOutput(gl);
 
-  //   checkError(gpu_result, cpu_result);
+    checkError(gpu_result, cpu_result);
 
-  //   addSpan("------------------------", currentDiv);
-  // }
+    addSpan("------------------------", currentDiv);
+  }
 
-  // for (idx0 = 0; idx0 < loop; idx0++) {
-  //   var currentDiv = addDiv();
-  //   addSpan("------------------------", currentDiv);
-  //   addSpan("Loop No. " + test_no++, currentDiv);
+  for (idx0 = 0; idx0 < loop; idx0++) {
+    var currentDiv = addDiv();
+    addSpan("------------------------", currentDiv);
+    addSpan("Loop No. " + test_no++, currentDiv);
 
-  //   var cpu_result = test_float_sub(gl, "Float subtraction test");
+    var cpu_result = test_float_sub(gl, "Float subtraction test");
 
-  //   render(gl);
+    render(gl);
 
-  //   var gpu_result = getGPUOutput(gl);
+    var gpu_result = getGPUOutput(gl);
 
-  //   checkError(gpu_result, cpu_result);
+    checkError(gpu_result, cpu_result);
 
-  //   addSpan("------------------------", currentDiv);
-  // }
+    addSpan("------------------------", currentDiv);
+  }
 
-  // for (idx0 = 0; idx0 < loop; idx0++) {
-  //   var currentDiv = addDiv();
-  //   addSpan("------------------------", currentDiv);
-  //   addSpan("Loop No. " + test_no++, currentDiv);
+  for (idx0 = 0; idx0 < loop; idx0++) {
+    var currentDiv = addDiv();
+    addSpan("------------------------", currentDiv);
+    addSpan("Loop No. " + test_no++, currentDiv);
 
-  //   var cpu_result = test_float_mul(gl, "Float multiplication test");
+    var cpu_result = test_float_mul(gl, "Float multiplication test");
 
-  //   render(gl);
+    render(gl);
 
-  //   var gpu_result = getGPUOutput(gl);
+    var gpu_result = getGPUOutput(gl);
 
-  //   checkError(gpu_result, cpu_result);
+    checkError(gpu_result, cpu_result);
 
-  //   addSpan("------------------------", currentDiv);
-  // }
+    addSpan("------------------------", currentDiv);
+  }
 
-  // for (idx0 = 0; idx0 < loop; idx0++) {
-  //   var currentDiv = addDiv();
-  //   addSpan("------------------------", currentDiv);
-  //   addSpan("Loop No. " + test_no++, currentDiv);
+  for (idx0 = 0; idx0 < loop; idx0++) {
+    var currentDiv = addDiv();
+    addSpan("------------------------", currentDiv);
+    addSpan("Loop No. " + test_no++, currentDiv);
 
-  //   var cpu_result = test_float_div(gl, "Float division test");
+    var cpu_result = test_float_div(gl, "Float division test");
 
-  //   render(gl);
+    render(gl);
 
-  //   var gpu_result = getGPUOutput(gl);
+    var gpu_result = getGPUOutput(gl);
 
-  //   checkError(gpu_result, cpu_result);
+    checkError(gpu_result, cpu_result);
 
-  //   addSpan("------------------------", currentDiv);
-  // }
+    addSpan("------------------------", currentDiv);
+  }
 
-  // for (idx0 = 0; idx0 < loop; idx0++) {
-  //   var currentDiv = addDiv();
-  //   addSpan("------------------------", currentDiv);
-  //   addSpan("Loop No. " + test_no++, currentDiv);
+  for (idx0 = 0; idx0 < loop; idx0++) {
+    var currentDiv = addDiv();
+    addSpan("------------------------", currentDiv);
+    addSpan("Loop No. " + test_no++, currentDiv);
 
-  //   var cpu_result = test_float_sqrt(gl, "Float sqrt test");
+    var cpu_result = test_float_sqrt(gl, "Float sqrt test");
 
-  //   render(gl);
+    render(gl);
 
-  //   var gpu_result = getGPUOutput(gl);
+    var gpu_result = getGPUOutput(gl);
 
-  //   checkError(gpu_result, cpu_result);
+    checkError(gpu_result, cpu_result);
 
-  //   addSpan("------------------------", currentDiv);
-  // }
+    addSpan("------------------------", currentDiv);
+  }
 
-  // for (idx0 = 0; idx0 < loop; idx0++) {
-  //   var currentDiv = addDiv();
-  //   addSpan("------------------------", currentDiv);
-  //   addSpan("Loop No. " + test_no++, currentDiv);
+  for (idx0 = 0; idx0 < loop; idx0++) {
+    var currentDiv = addDiv();
+    addSpan("------------------------", currentDiv);
+    addSpan("Loop No. " + test_no++, currentDiv);
 
-  //   var cpu_result = test_float_exp(gl, "Float exp test");
+    var cpu_result = test_float_exp(gl, "Float exp test");
 
-  //   render(gl);
+    render(gl);
 
-  //   var gpu_result = getGPUOutput(gl);
+    var gpu_result = getGPUOutput(gl);
 
-  //   checkError(gpu_result, cpu_result);
+    checkError(gpu_result, cpu_result);
 
-  //   addSpan("------------------------", currentDiv);
-  // }
+    addSpan("------------------------", currentDiv);
+  }
 
-  // for (idx0 = 0; idx0 < loop; idx0++) {
-  //   var currentDiv = addDiv();
-  //   addSpan("------------------------", currentDiv);
-  //   addSpan("Loop No. " + test_no++, currentDiv);
+  for (idx0 = 0; idx0 < loop; idx0++) {
+    var currentDiv = addDiv();
+    addSpan("------------------------", currentDiv);
+    addSpan("Loop No. " + test_no++, currentDiv);
 
-  //   var cpu_result = test_float_log(gl, "Float log test");
+    var cpu_result = test_float_log(gl, "Float log test");
 
-  //   render(gl);
+    render(gl);
 
-  //   var gpu_result = getGPUOutput(gl);
+    var gpu_result = getGPUOutput(gl);
 
-  //   checkError(gpu_result, cpu_result);
+    checkError(gpu_result, cpu_result);
 
-  //   addSpan("------------------------", currentDiv);
-  // }
+    addSpan("------------------------", currentDiv);
+  }
 
   for (idx0 = 0; idx0 < loop; idx0++) {
     var currentDiv = addDiv();

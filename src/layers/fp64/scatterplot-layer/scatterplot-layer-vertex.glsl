@@ -33,7 +33,7 @@ uniform float opacity;
 uniform vec2 zoomRadiusFP64;
 uniform float renderPickingBuffer;
 
-uniform float ONE; // nvidia workaround
+uniform float ONE; // fp64 workaround
 
 varying vec4 vColor;
 

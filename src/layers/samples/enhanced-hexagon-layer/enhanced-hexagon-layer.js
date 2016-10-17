@@ -1,5 +1,7 @@
 import {Layer} from '../../../lib';
 import {Geometry, Program, Model} from 'luma.gl';
+import {getPlatformShaderDefines} from '../../../lib/utils/get-platform-shader-defines';
+
 import assert from 'assert';
 
 import VERTEX_SHADER from './enhanced-hexagon-layer-vertex';
@@ -156,7 +158,7 @@ export default class EnhancedHexagonLayer extends Layer {
     return new Model({
       id: 'enhanced-hexagon-layer',
       program: new Program(gl, {
-        vs: VERTEX_SHADER,
+        vs: getPlatformShaderDefines(gl) + VERTEX_SHADER,
         fs: FRAGMENT_SHADER
       }),
       geometry: new Geometry({

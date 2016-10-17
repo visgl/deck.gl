@@ -3,6 +3,8 @@ import earcut from 'earcut';
 import flattenDeep from 'lodash.flattendeep';
 import normalize from 'geojson-normalize';
 import {Model, Program, Geometry} from 'luma.gl';
+import {getPlatformShaderDefines} from '../../../lib/utils/get-platform-shader-defines';
+
 import extrudePolyline from 'extrude-polyline';
 
 import VERTEX_SHADER from './enhanced-choropleth-layer-vertex';
@@ -92,7 +94,7 @@ export default class ChoroplethLayer extends Layer {
       id: this.props.id,
       program: new Program(gl, {
         /* eslint-disable max-len */
-        vs: VERTEX_SHADER,
+        vs: getPlatformShaderDefines(gl) + VERTEX_SHADER,
         fs: FRAGMENT_SHADER
         /* eslint-enable max-len */
       }),

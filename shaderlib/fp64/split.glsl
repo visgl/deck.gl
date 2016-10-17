@@ -18,7 +18,16 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#ifdef NVIDIA_WORKAROUND
+#ifdef NVIDIA_FP64_WA
+vec2 split(float a) {
+  const float SPLIT = 4097.0;
+  float t = a * SPLIT;
+  float a_hi = t * ONE - (t - a);
+  float a_lo = a * ONE - a_hi;
+  return vec2(a_hi, a_lo);
+}
+#else
+#ifdef INTEL_FP64_WA
 vec2 split(float a) {
   const float SPLIT = 4097.0;
   float t = a * SPLIT;
@@ -35,5 +44,5 @@ vec2 split(float a) {
   return vec2(a_hi, a_lo);
 }
 #endif
-
+#endif
 #pragma glslify: export(split)
