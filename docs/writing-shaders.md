@@ -52,6 +52,29 @@ and ensure that you return the picking color when `renderPickingColors`
 uniform is set. Alternatively call the `layerColor` method on your
 fragment color before assigning to `gl_FragColor`.
 
+Note that the picking color must be rendered exactly as is with an alpha
+channel of 1. Beware blending in opacity as it can result in the rendered
+color not matching the picking color, causing the wrong index to be picked.
+
+Compare (bad)
+```
+   gl_FragColor = vec4(
+     mix(
+   	  instanceColor.rgb,
+   	  instancePickingColor,
+   	  renderPickingBuffer
+     ),
+     opacity
+   );
+```
+vs (good)
+```
+   gl_FragColor = mix(
+   	vec4(instanceColor.rgb, instanceColor.a * opacity),
+   	vec4(instancePickingColor, 1.),
+   	renderPickingBuffer
+   );
+```
 
 ## Optional Features
 

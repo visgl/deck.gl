@@ -23,85 +23,168 @@
 /* eslint-disable no-try-catch */
 /* eslint-disable no-console */
 /* global console */
+import Layer from './layer';
+import {Viewport} from '../viewport';
+import {fp64ify} from '../lib/utils/fp64';
 import {log} from './utils';
 import assert from 'assert';
-import Layer from './base-layer';
 
-export function updateLayers({oldLayers, newLayers, gl, scene}) {
+export default class LayerManager {
+  constructor({gl}) {
+    this.prevLayers = [];
+    this.layers = [];
+    // Tracks if any layers were drawn last update
+    // Needed to ensure that screen is cleared when no layers are shown
+    this.drewLayers = false;
+    this.context = {gl};
+  }
+
+  setContext({
+    viewport,
+    width, height, latitude, longitude, zoom, pitch, bearing, altitude
+  }) {
+    viewport = viewport || new Viewport({
+      width, height, latitude, longitude, zoom, pitch, bearing, altitude,
+      tileSize: 512
+    });
+
+    this.context = {
+      ...this.context,
+      viewport,
+      mercatorScale: Math.pow(2, zoom),
+      mercatorCenter: viewport.center,
+      mercatorScaleFP64: fp64ify(Math.pow(2, zoom)),
+      ...viewport.getUniforms()
+    };
+    Object.freeze(this.context);
+
+    log(3, viewport, latitude, longitude, zoom);
+    return this;
+  }
+
+  updateLayers({newLayers}) {
+    this.prevLayers = this.layers;
+    const {error, generatedLayers} = _updateLayers({
+      oldLayers: this.prevLayers,
+      newLayers,
+      context: this.context
+    });
+    this.layers = generatedLayers;
+    // Throw first error found, if any
+    if (error) {
+      throw error;
+    }
+    return this;
+  }
+
+  drawLayers() {
+    const {viewport} = this.context;
+    for (const layer of this.layers) {
+      if (layer.props.visible) {
+        // Get the right uniforms for the layers projection mode
+        const uniforms = viewport.getUniforms(layer.props);
+        layer.draw({uniforms});
+      }
+    }
+    return this;
+  }
+
+  getLayerPickingModels() {
+    const models = [];
+    for (const layer of this.layers) {
+      const {visible, pickable, isPickable} = layer.props;
+      if (visible && (pickable || isPickable) && layer.state.model) {
+        models.push(layer.state.model);
+      }
+    }
+    return models;
+  }
+
+  needsRedraw(layers, {clearRedrawFlags = false} = {}) {
+    let redraw = false;
+
+    // Make sure that buffer is cleared once when layer list becomes empty
+    if (layers.length === 0 && this.drewLayers) {
+      redraw = true;
+    }
+
+    this.drewLayers = false;
+    for (const layer of this.layers) {
+      redraw = redraw || layer.getNeedsRedraw({clearRedrawFlags});
+      this.drewLayers = true;
+    }
+
+    return redraw;
+  }
+}
+
+export function _updateLayers({oldLayers, newLayers, context}) {
   // Match all layers, checking for caught errors
-  const error1 = matchLayers(oldLayers, newLayers);
+  // To avoid having an exception in one layer disrupt other layers
+  const {error, generatedLayers} = matchLayers(oldLayers, newLayers, context);
   const error2 = finalizeOldLayers(oldLayers);
-  const error3 = updateMatchedLayers(newLayers);
-  const error4 = initializeNewLayers(newLayers, {gl});
-  // Throw first error found, if any
-  const error = error1 || error2 || error3 || error4;
-  if (error) {
-    throw error;
-  }
-}
-
-// TODO - this won't work with multiple deck.gl overlays
-let drewLayers = false;
-
-export function layersNeedRedraw(layers, {clearRedrawFlags = false} = {}) {
-  let redraw = false;
-
-  // Make sure that buffer is cleared once when layer list becomes empty
-  if (layers.length === 0 && drewLayers) {
-    redraw = true;
-  }
-
-  drewLayers = false;
-  for (const layer of layers) {
-    redraw = redraw || layer.getNeedsRedraw({clearRedrawFlags});
-    drewLayers = true;
-  }
-
-  return redraw;
-}
-
-export function drawLayers({layers = [], uniforms = {}} = {}) {
-  for (const layer of layers) {
-    if (layer.props.visible) {
-      layer.draw(uniforms);
-    }
-  }
-}
-
-export function getLayerPickingModels(layers) {
-  const models = [];
-  for (const layer of layers) {
-    const {visible, pickable, isPickable} = layer.props;
-    if (visible && (pickable || isPickable) && layer.state.model) {
-      models.push(layer.state.model);
-    }
-  }
-  return models;
+  const error3 = updateMatchedLayers(generatedLayers);
+  const error4 = initializeNewLayers(generatedLayers);
+  const firstError = error || error2 || error3 || error4;
+  return {error: firstError, generatedLayers};
 }
 
 function layerName(layer) {
   if (layer instanceof Layer) {
     return `<${layer.constructor.name}:'${layer.props.id}'>`;
   }
-  if (!layer) {
-    return 'null layer';
-  }
-  return 'invalid layer';
+  return !layer ? 'null layer' : 'invalid layer';
 }
 
-function matchLayers(oldLayers, newLayers) {
+function matchLayers(oldLayers, newLayers, context) {
+  // set context
+  for (const newLayer of newLayers) {
+    newLayer.context = context;
+  }
+
+  // Create old layer map
+  const oldLayerMap = {};
+  for (const oldLayer of oldLayers) {
+    if (oldLayerMap[oldLayer.id]) {
+      throw new Error('Multipe old layers with same id');
+    }
+    oldLayerMap[oldLayer.id] = oldLayer;
+  }
+
+  const generatedLayers = [];
+  const error = matchSublayers({newLayers, oldLayerMap, generatedLayers});
+  return {generatedLayers, error};
+}
+
+/* eslint-disable max-statements */
+function matchSublayers({newLayers, oldLayerMap, generatedLayers}) {
   let error = null;
   for (const newLayer of newLayers) {
     try {
       // 1. given a new coming layer, find its matching layer
-      const oldLayer = _findMatchingLayer(oldLayers, newLayer);
+      const oldLayer = oldLayerMap[newLayer.id];
+      oldLayerMap[newLayer.id] = null;
 
       // Only transfer state at this stage. We must not generate exceptions
       // until all layers' state have been transferred
       if (oldLayer) {
         log(3, `matched ${layerName(newLayer)}`, oldLayer, '=>', newLayer);
-
         _transferLayerState(oldLayer, newLayer);
+      }
+
+      generatedLayers.push(newLayer);
+
+      // Call layer lifecycle method: render sublayers
+      let sublayers = newLayer.renderSublayers();
+      // End layer lifecycle method: render sublayers
+
+      if (sublayers) {
+        sublayers = Array.isArray(sublayers) ? sublayers : [sublayers];
+        matchSublayers({
+          newLayers: sublayers,
+          oldLayerMap,
+          generatedLayers
+        });
       }
     } catch (err) {
       console.error(
@@ -111,15 +194,6 @@ function matchLayers(oldLayers, newLayers) {
     }
   }
   return error;
-}
-
-function _findMatchingLayer(oldLayers, newLayer) {
-  const candidates = oldLayers.filter(l => l.props.id === newLayer.props.id);
-  if (candidates.length > 1) {
-    throw new Error(
-      `deck.gl error layer has more than one match ${layerName(newLayer)}`);
-  }
-  return candidates.length > 0 && candidates[0];
 }
 
 function _transferLayerState(oldLayer, newLayer) {
@@ -141,18 +215,14 @@ function _transferLayerState(oldLayer, newLayer) {
 // Note: Layers can't be initialized until gl context is available
 // Therefore this method can be called repeatedly
 // This is a hack and should be cleaned up in calling code
-function initializeNewLayers(layers, {gl}) {
-  if (!gl) {
-    return null;
-  }
-
+function initializeNewLayers(layers) {
   let error = null;
   for (const layer of layers) {
     // Check if new layer, and initialize it's state
-    if (!layer.state) {
+    if (!layer.state && layer.context.gl) {
       log(1, `initializing ${layerName(layer)}`);
       try {
-        layer.initializeLayer({gl});
+        layer.initializeLayer();
       } catch (err) {
         console.error(
           `deck.gl error during initialization of ${layerName(layer)} ${err}`,

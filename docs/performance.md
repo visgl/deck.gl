@@ -16,16 +16,19 @@ at 1GB), most layers will crash during WebGL buffer generation somewhere
 between 10M and 100M items. You would need to break up your data into chunks
 and use multiple deck.gl layers to get past this limit.
 
+Modern phones (recent iPhones and higher-end Android phones) are
+surprisingly capable in terms of rendering performance, but are considerably
+more sensitive to memory pressure than laptops.
+
 In addition to rendering performance, another consideration is deck.gl's
 automatic WebGL buffer generation which takes some time to complete
 whenever data changes.
+
 While often imperceptible for small, non-changing data sets, this step can take
 multiple seconds for multi-million item layers, and if your data set is updated
 frequently, buffer generation can cause "stutter" in e.g. animations,
 even for layers with just a few thousand items. It is possible to overcome
-these issues using special techniques, but it will require extra work.
-
-TBA - test results on MacBook Air and iPhone
+these issues using special techniques, but it can require extra work.
 
 
 ## Layer Update Performance

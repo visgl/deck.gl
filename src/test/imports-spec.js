@@ -1,7 +1,11 @@
 import test from 'tape-catch';
 import 'luma.gl/headless';
+
+import DeckGL from '../../react';
+
 import {
-  DeckGL, Layer, BaseLayer,
+  DeckGLOverlay,
+  Layer,
   ChoroplethLayer, ScatterplotLayer,
   GridLayer, ArcLayer, LineLayer,
   Viewport
@@ -15,9 +19,10 @@ import Viewport2 from '../../viewport';
 
 test('Top-level imports', t0 => {
   t0.test('import "deck.gl"', t => {
-    t.ok(DeckGL, 'DeckGLOverlay symbol imported');
+    t.ok(DeckGL, 'DeckGL symbol imported from /react');
+    t.ok(!DeckGLOverlay, 'DeckGLOverlay symbol NOT imported from index');
     t.ok(Layer, 'Layer symbol imported');
-    t.ok(BaseLayer, 'BaseLayer symbol imported');
+    t.ok(Layer, 'Layer symbol imported');
     t.ok(ChoroplethLayer, 'ChoroplethLayer symbol imported');
     t.ok(ScatterplotLayer, 'ScatterplotLayer symbol imported');
     t.ok(GridLayer, 'GridLayer symbol imported');

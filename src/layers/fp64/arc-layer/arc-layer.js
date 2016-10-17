@@ -18,8 +18,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {BaseLayer, assembleShader} from '../../../lib';
-import {Model, Program, Geometry} from 'luma.gl';
+import {Layer, assembleShader} from '../../../lib';
+import {GL, Model, Program, Geometry} from 'luma.gl';
 import {fp64ify} from '../../../lib/utils/fp64';
 
 const glslify = require('glslify');
@@ -30,7 +30,7 @@ const defaultGetSourcePosition = x => x.sourcePosition;
 const defaultGetTargetPosition = x => x.targetPosition;
 const defaultGetColor = x => x.color;
 
-export default class ArcLayer extends BaseLayer {
+export default class ArcLayer extends Layer {
   /**
    * @classdesc
    * ArcLayer
@@ -97,7 +97,7 @@ export default class ArcLayer extends BaseLayer {
       }),
       isInstanced: true,
       onBeforeRender() {
-        this.userData.oldStrokeWidth = gl.getParameter(gl.LINE_WIDTH);
+        this.userData.oldStrokeWidth = gl.getParameter(GL.LINE_WIDTH);
         this.program.gl.lineWidth(this.userData.strokeWidth || 1);
       },
       onAfterRender() {

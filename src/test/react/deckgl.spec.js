@@ -5,11 +5,11 @@ import utils from 'react-addons-test-utils';
 
 import 'luma.gl/headless';
 
-import {DeckGLOverlay} from '../../../react';
+import DeckGL from '../../../react';
 
-test('Rendering DeckGLOverlay', t => {
+test('Rendering DeckGL overlay', t => {
   const component = utils.renderIntoDocument(
-    <DeckGLOverlay width={100} height={100} layers={[]} />
+    <DeckGL width={100} height={100} layers={[]} />
   );
   t.ok(component, 'WebGLOverlay is rendered.');
   t.end();

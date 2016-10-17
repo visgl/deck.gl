@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {BaseLayer, assembleShader} from '../../../lib';
+import {Layer, assembleShader} from '../../../lib';
 import {Model, Program, Geometry} from 'luma.gl';
 
 const glslify = require('glslify');
@@ -29,7 +29,7 @@ const defaultGetSourcePosition = x => x.sourcePosition;
 const defaultGetTargetPosition = x => x.targetPosition;
 const defaultGetColor = x => x.color;
 
-export default class ArcLayer extends BaseLayer {
+export default class ArcLayer extends Layer {
   /**
    * @classdesc
    * ArcLayer
@@ -56,12 +56,10 @@ export default class ArcLayer extends BaseLayer {
   }
 
   initializeState() {
-    const {gl, attributeManager} = this.state;
+    const {gl} = this.context;
+    this.setState({model: this._createModel(gl)});
 
-    const model = this.createModel(gl);
-    model.userData.strokeWidth = this.props.strokeWidth;
-    this.setState({model});
-
+    const {attributeManager} = this.state;
     attributeManager.addInstanced({
       instancePositions: {size: 4, update: this.calculateInstancePositions},
       instanceSourceColors: {size: 3, update: this.calculateInstanceSourceColors},
@@ -69,12 +67,20 @@ export default class ArcLayer extends BaseLayer {
     });
   }
 
-  willReceiveProps(oldProps, nextProps) {
-    super.willReceiveProps(oldProps, nextProps);
-    this.state.model.userData.strokeWidth = nextProps.strokeWidth;
+  finalizeState() {
+    this.state.model.destroy();
   }
 
-  createModel(gl) {
+  draw({uniforms}) {
+    this.state.model.render(
+      uniforms,
+      {
+        lineWidth: this.props.strokeWidth || 1
+      }
+    );
+  }
+
+  _createModel(gl) {
     let positions = [];
     const NUM_SEGMENTS = 50;
     for (let i = 0; i < NUM_SEGMENTS; i++) {
@@ -92,14 +98,7 @@ export default class ArcLayer extends BaseLayer {
         drawMode: 'LINE_STRIP',
         positions: new Float32Array(positions)
       }),
-      isInstanced: true,
-      onBeforeRender() {
-        this.userData.oldStrokeWidth = gl.getParameter(gl.LINE_WIDTH);
-        this.program.gl.lineWidth(this.userData.strokeWidth || 1);
-      },
-      onAfterRender() {
-        this.program.gl.lineWidth(this.userData.oldStrokeWidth || 1);
-      }
+      isInstanced: true
     });
   }
 
@@ -143,5 +142,4 @@ export default class ArcLayer extends BaseLayer {
       i += size;
     }
   }
-
 }

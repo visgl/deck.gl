@@ -30,7 +30,7 @@ import {
 } from '../..';
 
 // Import private method to test that layers can successfully be updated
-import {updateLayers} from '../../lib';
+import {LayerManager} from '../../lib';
 
 // import CHOROPLETHS from '../../example/data/sf.zip.geo.json';
 // const HEXAGONS_FILE = './example/data/hexagons.csv';
@@ -127,10 +127,12 @@ test('ScatterplotLayer#constructor', t => {
     'Null ScatterplotLayer did not throw exception'
   );
 
-  const {layerState} = FIXTURE;
+  const layerManager = new LayerManager({gl})
+    .setContext({...mapState, ...mapSize});
   t.doesNotThrow(
-    () => updateLayers({...layerState, newLayers: [layer, emptyLayer]}),
-    'ScatterplotLayer update does not throw');
+    () => layerManager.updateLayers({newLayers: [layer, emptyLayer]}),
+    'ScatterplotLayer update does not throw'
+  );
 
   t.end();
 });
@@ -167,9 +169,10 @@ test('ArcLayer#constructor', t => {
     'Null ArcLayer did not throw exception'
   );
 
-  const {layerState} = FIXTURE;
+  const layerManager = new LayerManager({gl})
+    .setContext({...mapState, ...mapSize});
   t.doesNotThrow(
-    () => updateLayers({...layerState, newLayers: [layer, emptyLayer]}),
+    () => layerManager.updateLayers({newLayers: [layer, emptyLayer]}),
     'ArcLayer update does not throw');
 
   t.end();

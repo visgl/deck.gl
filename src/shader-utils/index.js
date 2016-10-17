@@ -1,1 +1,1 @@
-export {default as assembleShader} from './assemble-shader';
+export * from './assemble-shaders';

@@ -18,12 +18,12 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {BaseLayer, assembleShader} from '../../../lib';
+import {Layer, assembleShader} from '../../../lib';
 import {Model, Program, Geometry} from 'luma.gl';
 
 const glslify = require('glslify');
 
-export default class GridLayer extends BaseLayer {
+export default class GridLayer extends Layer {
   /**
    * @classdesc
    * GridLayer
@@ -42,18 +42,20 @@ export default class GridLayer extends BaseLayer {
   }
 
   initializeState() {
-    const {gl, attributeManager} = this.state;
-
-    this.setState({
-      model: this.getModel(gl)
-    });
-
+    const {attributeManager} = this.state;
     attributeManager.addInstanced({
       instancePositions: {size: 3, update: this.calculateInstancePositions},
       instanceColors: {size: 4, update: this.calculateInstanceColors}
     });
 
+    const {gl} = this.context;
+    this.setState({model: this.getModel(gl)});
+
     this.updateCell();
+  }
+
+  finalizeState() {
+    this.state.model.destroy();
   }
 
   willReceiveProps(oldProps, newProps) {
@@ -66,6 +68,11 @@ export default class GridLayer extends BaseLayer {
     if (cellSizeChanged || this.state.viewportChanged) {
       this.updateCell();
     }
+  }
+
+  draw(uniforms) {
+    const {model, scale, maxCount} = this.state;
+    model.render({...uniforms, scale, maxCount});
   }
 
   getModel(gl) {
@@ -87,9 +94,17 @@ export default class GridLayer extends BaseLayer {
   updateCell() {
     const {width, height, unitWidth, unitHeight} = this.props;
 
+    const MARGIN = 2;
+    const cellScale = new Float32Array([
+      (unitWidth - MARGIN) / width * 2,
+      -(unitHeight - MARGIN) / height * 2,
+      1
+    ]);
     const numCol = Math.ceil(width / unitWidth);
     const numRow = Math.ceil(height / unitHeight);
+
     this.setState({
+      cellScale,
       numCol,
       numRow,
       numInstances: numCol * numRow
@@ -97,15 +112,6 @@ export default class GridLayer extends BaseLayer {
 
     const {attributeManager} = this.state;
     attributeManager.invalidateAll();
-
-    const MARGIN = 2;
-    const scale = new Float32Array([
-      (unitWidth - MARGIN) / width * 2,
-      -(unitHeight - MARGIN) / height * 2,
-      1
-    ]);
-    this.setUniforms({scale});
-
   }
 
   calculateInstancePositions(attribute, {numInstances}) {
@@ -141,7 +147,6 @@ export default class GridLayer extends BaseLayer {
       }
     }
 
-    this.setUniforms({maxCount: Math.max(...value)});
+    this.setState({maxCount: Math.max(...value)});
   }
-
 }

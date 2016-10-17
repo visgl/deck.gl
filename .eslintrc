@@ -1,0 +1,14 @@
+{
+  "parser": "babel-eslint",
+  "plugins": [
+    "react"
+  ],
+  "extends": [
+    "eslint-config-uber-jsx",
+    "eslint-config-uber-es2015"
+  ],
+  "rules": {
+    "guard-for-in": 0
+  }
+}
+

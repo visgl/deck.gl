@@ -17,8 +17,8 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-import {BaseLayer, assembleShader} from '../../../lib';
-import {Model, Program, Geometry} from 'luma.gl';
+import {Layer, assembleShader} from '../../../lib';
+import {GL, Model, Program, Geometry} from 'luma.gl';
 
 const glslify = require('glslify');
 
@@ -28,7 +28,7 @@ const defaultGetSourcePosition = x => x.sourcePosition;
 const defaultGetTargetPosition = x => x.targetPosition;
 const defaultGetColor = x => x.color || DEFAULT_COLOR;
 
-export default class LineLayer extends BaseLayer {
+export default class LineLayer extends Layer {
   /**
    * @classdesc
    * LineLayer
@@ -53,12 +53,10 @@ export default class LineLayer extends BaseLayer {
   }
 
   initializeState() {
-    const {gl, attributeManager} = this.state;
+    const {gl} = this.context;
+    this.setState({model: this.createModel(gl)});
 
-    const model = this.createModel(gl);
-    model.userData.strokeWidth = this.props.strokeWidth;
-    this.setState({model});
-
+    const {attributeManager} = this.state;
     attributeManager.addInstanced({
       instancePositions: {size: 4, update: this.calculateInstancePositions},
       instanceColors: {size: 3, update: this.calculateInstanceColors}
@@ -68,6 +66,19 @@ export default class LineLayer extends BaseLayer {
   willReceiveProps(oldProps, nextProps) {
     super.willReceiveProps(oldProps, nextProps);
     this.state.model.userData.strokeWidth = nextProps.strokeWidth;
+  }
+
+  didUnmount() {
+    this.state.model.destroy();
+  }
+
+  draw({uniforms}) {
+    this.state.model.render(
+      uniforms,
+      {
+        lineWidth: this.props.strokeWidth
+      }
+    );
   }
 
   createModel(gl) {
@@ -86,7 +97,7 @@ export default class LineLayer extends BaseLayer {
       }),
       isInstanced: true,
       onBeforeRender() {
-        this.userData.oldStrokeWidth = gl.getParameter(gl.LINE_WIDTH);
+        this.userData.oldStrokeWidth = gl.getParameter(GL.LINE_WIDTH);
         this.program.gl.lineWidth(this.userData.strokeWidth || 1);
       },
       onAfterRender() {

@@ -1,19 +1,23 @@
 import {glGetDebugInfo} from 'luma.gl';
 
-export function checkRendererVendor(debugInfo, vendor) {
-  let result = false;
-  switch (vendor) {
+// Load shader chunks
+// import SHADER_CHUNKS from '../../dist/shaderlib/shader-chunks';
+import SHADER_CHUNKS from './shader-chunks';
+
+export function checkRendererVendor(debugInfo, gpuVendor) {
+  const {vendor, renderer} = debugInfo;
+  let result;
+  switch (gpuVendor) {
   case 'nvidia':
-    result = debugInfo.vendor.match(/NVIDIA/i) || debugInfo.renderer.match(/NVIDIA/i);
+    result = vendor.match(/NVIDIA/i) || renderer.match(/NVIDIA/i);
     break;
   case 'intel':
-    result = debugInfo.vendor.match(/INTEL/i) || debugInfo.renderer.match(/INTEL/i);
+    result = vendor.match(/INTEL/i) || renderer.match(/INTEL/i);
     break;
   case 'amd':
-    result = debugInfo.vendor.match(/AMD/i) ||
-    debugInfo.renderer.match(/AMD/i) ||
-    debugInfo.vendor.match(/ATI/i) ||
-    debugInfo.renderer.match(/ATI/i);
+    result =
+      vendor.match(/AMD/i) || renderer.match(/AMD/i) ||
+      vendor.match(/ATI/i) || renderer.match(/ATI/i);
     break;
   default:
     result = false;
@@ -51,24 +55,30 @@ export function getPlatformShaderDefines(gl) {
   return platformDefines;
 }
 
-// Load shader chunks
-import SHADER_CHUNKS from '../../dist/shaderlib/shader-chunks';
-
-export default function assembleShader(gl, {
+export function assembleShader(gl, {
   vs,
-  projection = true,
+  fs,
+  project = true,
   ...opts
 }) {
   let source = `${getPlatformShaderDefines(gl)}\n`;
-  // Add predefined chunks
-  if (projection) {
-    source += `${SHADER_CHUNKS.projection}\n`;
-  }
+  opts = {...opts, project};
   for (const chunkName of Object.keys(SHADER_CHUNKS)) {
     if (opts[chunkName]) {
-      source += `${SHADER_CHUNKS[chunkName]}\n`;
+      source += `${SHADER_CHUNKS[chunkName].source}\n`;
     }
   }
   source += vs;
   return source;
+}
+
+export function assembleShaders(gl, {
+  vs,
+  fs,
+  ...opts
+}) {
+  return {
+    vs: assembleShader(gl, {...opts, vs}),
+    fs
+  };
 }

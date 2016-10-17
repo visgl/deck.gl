@@ -17,7 +17,7 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-import {BaseLayer, assembleShader} from '../../../lib';
+import {Layer, assembleShader} from '../../../lib';
 import {Model, Program, CylinderGeometry} from 'luma.gl';
 
 const glslify = require('glslify');
@@ -29,7 +29,7 @@ const _getElevation = x => x.elevation || 0;
 const _getColor = x => x.color || DEFAULT_COLOR;
 const _getVertices = x => x.vertices;
 
-export default class HexagonLayer extends BaseLayer {
+export default class HexagonLayer extends Layer {
   /**
    * @classdesc
    * HexagonLayer

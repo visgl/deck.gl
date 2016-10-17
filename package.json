@@ -91,11 +91,11 @@
     "build": "npm run build-clean && npm run build-src && npm run build-shaderlib && npm run build-script",
     "build-clean": "rm -fr dist/*",
     "build-src": "babel src -d dist --source-maps inline --copy-files",
-    "build-shaderlib": "babel shaderlib -d dist/shaderlib --source-maps inline",
+    "build-shaderlib": "babel shaderlib -d dist/shaderlib --source-maps inline --copy-files",
     "build-script": "browserify src/bundle.js -t babelify -t glslify | uglifyjs > dist/deckgl.min.js",
     "lint": "eslint src",
     "precommit": "npm test",
-    "prepublish": "npm run build",
+    "publish": "npm run build && npm test && npm publish",
     "test": "npm run lint && npm run test-headless",
     "test-headless": "node dist/test/headless.js",
     "test-headless-src": "babel-node --only=deck.gl/test,deck.gl/src,deck.gl/shaderlib src/test/headless.js",
@@ -104,18 +104,5 @@
     "profile-disc": "browserify src/bundle.js --full-paths -t babelify -t glslify | uglifyjs | discify --open",
     "start": "budo example/main.js:example/bundle.js --live --open --port 3000 --css example/main.css --title 'deck.gl' --watch-glob '**/*.{html,css,js,glsl}' -- -t babelify -t envify",
     "test-shader": "budo src/test/shader.js:build/test-bundle.js --dir test --live --open --port 3001 --watch-glob '**/*.{html,css,scss,js,glsl}' -- -t babelify -t glslify"
-  },
-  "eslintConfig": {
-    "parser": "babel-eslint",
-    "plugins": [
-      "react"
-    ],
-    "extends": [
-      "eslint-config-uber-jsx",
-      "eslint-config-uber-es2015"
-    ],
-    "rules": {
-      "guard-for-in": 0
-    }
   }
 }

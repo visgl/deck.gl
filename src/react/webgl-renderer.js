@@ -22,7 +22,7 @@
 /* global console */
 import React, {PropTypes} from 'react';
 import autobind from 'autobind-decorator';
-import {createGLContext, addEvents, Fx, glGet} from 'luma.gl';
+import {GL, createGLContext, addEvents, Fx, glGet} from 'luma.gl';
 import throttle from 'lodash.throttle';
 
 const PROP_TYPES = {
@@ -177,7 +177,7 @@ export default class WebGLRenderer extends React.Component {
     }
 
     // clear depth and color buffers
-    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+    gl.clear(GL.COLOR_BUFFER_BIT | GL.DEPTH_BUFFER_BIT);
 
     // update viewport to latest props
     // (typically changed by app on browser resize etc)
@@ -190,11 +190,11 @@ export default class WebGLRenderer extends React.Component {
 
     // setup bledning
     if (enable) {
-      gl.enable(gl.BLEND);
+      gl.enable(GL.BLEND);
       gl.blendFunc(...blendFunc.map(s => glGet(gl, s)));
       gl.blendEquation(glGet(gl, blendEquation));
     } else {
-      gl.disable(gl.BLEND);
+      gl.disable(GL.BLEND);
     }
 
     this.props.onBeforeRenderFrame({gl});

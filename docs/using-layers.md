@@ -54,3 +54,4 @@ objects) as it ensures that changes to `data` property trigger a rerender.
 collection as data (which may not support "random access" array style
 references of its elements), the picking calculates and index but the
 actual object.
+

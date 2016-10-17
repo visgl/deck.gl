@@ -367,9 +367,4 @@ export default {
   }
 };
 
-export const DEFAULT_ACTIVE_LAYERS = {
-  VoronoiLayer: true
-  // 'ChoroplethLayer (Contour)': true,
-  // ScatterplotLayer: true
-  // 'ScatterplotLayer64 10M': true
-};
+export const DEFAULT_ACTIVE_LAYERS = {};

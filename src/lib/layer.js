@@ -34,34 +34,24 @@ import {fp64ify} from '../lib/utils/fp64';
  * @param {bool} props.opacity - opacity of the layer
  */
 const DEFAULT_PROPS = {
-  key: 0,
-  opacity: 0.8,
-  numInstances: undefined,
   data: [],
+  dataIterator: null,
+  numInstances: undefined,
+  deepCompare: false,
   visible: true,
   pickable: false,
-  // Deprecated: isPickable
-  isPickable: false,
-  deepCompare: false,
-  mercatorEnabled: false,
-  getValue: x => x,
+  opacity: 0.8,
   onHover: () => {},
   onClick: () => {},
+  getValue: x => x,
   // Update triggers: a key change detection mechanism in deck.gl
-  //
-  // The value of `updateTriggers` is a map with fields corresponding to
-  // attribute names (or `all`). Each field has a value which is an object,
-  // it can contain any amount of data. The data for each field is compared
-  // shallowly, and if a change is detected, the attribute is invalidated
-  // (all attributes are invalidated if the `all` key is used.)
-  // Note: updateTriggers are ignored by normal shallow comparison, so it is
-  // OK for the app to mint a new object on every render.
+  // See layer documentation
   updateTriggers: {}
 };
 
 let counter = 0;
 
-export default class BaseLayer {
+export default class Layer {
   /**
    * @classdesc
    * Base Layer class
@@ -110,10 +100,10 @@ export default class BaseLayer {
 
   // Called once to set up the initial state
   initializeState() {
+    throw new Error(`Layer ${this.id} has not defined initializeState`);
   }
 
-  // gl context is now available
-  didMount() {
+  finalizeState() {
   }
 
   shouldUpdate(oldProps, newProps) {
@@ -149,8 +139,19 @@ export default class BaseLayer {
     }
   }
 
-  // gl context still available
-  willUnmount() {
+  // Implement to generate sublayers
+  renderSublayers() {
+    return null;
+  }
+
+  // If state has a model, draw it with supplied uniforms
+  draw(uniforms = {}) {
+    const {model} = this.state;
+    if (model) {
+      // TODO - the viewport uniforms should be derived outside this function
+      const viewportUniforms = this.state.mercator.getUniforms(this.props);
+      model.render({...uniforms, ...viewportUniforms});
+    }
   }
 
   // END LIFECYCLE METHODS
@@ -242,14 +243,6 @@ export default class BaseLayer {
 
   // INTERNAL METHODS
 
-  draw(uniforms = {}) {
-    const {model} = this.state;
-    if (model) {
-      const viewportUniforms = this.state.mercator.getUniforms(this.props);
-      model.render({...uniforms, ...viewportUniforms});
-    }
-  }
-
   // Deduces numer of instances. Intention is to support:
   // - Explicit setting of numInstances
   // - Auto-deduction for ES6 containers that define a size member
@@ -294,9 +287,10 @@ export default class BaseLayer {
 
   // Called by layer manager when a new layer is found
   /* eslint-disable max-statements */
-  initializeLayer({gl}) {
-    assert(gl);
-    this.state = {gl};
+  initializeLayer() {
+    assert(this.context.gl);
+    // TODO - remove
+    this.state = {gl: this.context.gl};
 
     // Initialize state only once
     this.setState({
@@ -318,7 +312,11 @@ export default class BaseLayer {
     });
 
     this._setViewport();
+
+    // Call subclass lifecycle method
     this.initializeState();
+    // End subclass lifecycle method
+
     assert(this.state.model, 'Model must be set in initializeState');
     this._setViewport();
 
@@ -329,16 +327,13 @@ export default class BaseLayer {
     this._updateBaseUniforms();
 
     const {model} = this.state;
+    assert(model);
     model.setInstanceCount(this.getNumInstances());
     model.id = this.props.id;
     model.program.id = `${this.props.id}-program`;
     model.geometry.id = `${this.props.id}-geometry`;
-
-    // Create a model for the layer
-    this._updateModel({gl});
-
-    // Call life cycle method
-    this.didMount();
+    model.setAttributes(attributeManager.getAttributes());
+    model.setPickable(this.props.isPickable);
   }
   /* eslint-enable max-statements */
 
@@ -372,7 +367,9 @@ export default class BaseLayer {
   // Called by manager when layer is about to be disposed
   // Note: not guaranteed to be called on application shutdown
   finalizeLayer() {
-    this.willUnmount();
+    // Call subclass lifecycle method
+    this.finalizeState();
+    // End subclass lifecycle method
   }
 
   calculateInstancePickingColors(attribute, {numInstances}) {
@@ -520,17 +517,6 @@ export default class BaseLayer {
     if (condition && !condition(value)) {
       throw new Error(`Bad property ${propertyName} in layer ${this.id}`);
     }
-  }
-
-  // INTERNAL METHODS
-  _updateModel({gl}) {
-    const {model, attributeManager, uniforms} = this.state;
-
-    assert(model);
-    model.setAttributes(attributeManager.getAttributes());
-    model.setUniforms(uniforms);
-    // whether current layer responds to mouse events
-    model.setPickable(this.props.isPickable);
   }
 
   // MAP LAYER FUNCTIONALITY

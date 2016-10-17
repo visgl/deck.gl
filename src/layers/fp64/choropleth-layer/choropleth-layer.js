@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {BaseLayer, assembleShader} from '../../../lib';
+import {Layer, assembleShader} from '../../../lib';
 import {Model, Program, Geometry} from 'luma.gl';
 import {fp64ify} from '../../../lib/utils/fp64';
 
@@ -32,7 +32,7 @@ const DEFAULT_COLOR = [0, 0, 255];
 
 const defaultGetColor = feature => feature.properties.color;
 
-export default class ChoroplethLayer64 extends BaseLayer {
+export default class ChoroplethLayer64 extends Layer {
   /**
    * @classdesc
    * ChoroplethLayer
