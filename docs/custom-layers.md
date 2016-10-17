@@ -27,3 +27,12 @@ made available to your shader.
 - Will you support altitude?
 - Do you need 64 bit support?
 - Do you want to opt in to deck.gl's lighting system?
+
+
+### Differences between React and deck.gl Lifecycles
+
+deck.gl uses a simpler lifecycle model than React. React backs each instance
+with a separate component, whereas deck.gl layers just "share" state.
+
+
+

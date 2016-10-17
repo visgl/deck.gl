@@ -1,15 +1,23 @@
 # Using deck.gl with React
 
-deck.gl was intentionally designed to be a perfect match for React
-applications. deck.gl fits directly into React's component render flow by
-enabling you to instantiate new copies of your layers whenever your
-component tree is rendered, and just like React does for DOM components,
-intelligently compares properties and only updates WebGL state when needed.
+deck.gl was designed to be a perfect match for
+[React](https://facebook.github.io/react/) applications.
+deck.gl layers fit directly into React's component render flow.
 
-To use deck.gl with [React](https://facebook.github.io/react/),
-import the `DeckGLOverlay` React component, which accepts an array of deck.gl
-layers.
+To use deck.gl with React, import the `DeckGL` React component and render
+it as a child of the map component you want it to render on top of.
 
+The `layers` propertry is the key to using the DeckGL React component.
+This is where you pass in an array of `deck.gl` layers. This array is
+expected to be an array of newly allocated instances of your
+deck.gl layers, created with updated properties derived from the current
+application state.
+
+To achive the overlay effect, the `DeckGL` component creates a transparent
+`canvas` DOM element, into which the deck.gl layers passed in the `layers`
+prop will render (using WebGL). Since this canvas is transparent, any
+other component you have underneath (typically a map) will visible behind
+the layers.
 
 ```
 import MapGL from 'react-map-gl';
@@ -33,23 +41,12 @@ import {ScatterplotLayer} from 'deck.gl';
 
 ```
 
-## About react-map-gl
+## About performance
 
-As shown in the example, the DeckGL component works especially well as
-the child of a React component that displays a map using parameters similar
-to the deck.gl Viewport (i.e. latitude, longitude, zoom etc). In this
-configuration your layers will render a geospatial overlay over the underlying
-map.
-
-While an application could use its own Map component,
-deck.gl has been developed side-by-side with (and extensively tested with)
-the [react-map-gl](https://uber.github.io/react-map-gl/#/) component,
-which is essentially a React wrapper around mapbox-gl.
-
-It is possible to use deck.gl without react-map-gl, but the application
-would have to implement its own event handling as all deck.gl examples
-currently relies on react-map-gl in that regard.
-
+When the DeckGl component tree is drawn to screen, it matches the new Layer
+instances with the instances from the previous render call, and intelligently
+compares the new properties and only update WebGL state when needed
+(just like React does for DOM components).
 
 ## Using deck.gl without React
 

@@ -58,46 +58,28 @@ will be drawn twice when panning and hovering.
 ## Layer Precision
 
 32 bit precision in many layers means that there is a limit to precision
-at high zoom levels.
+at high zoom levels, unless using an offset mode around a local center.
 
 
 ### About 64-bit Layer Performance
+
+Since WebGL does not expose native 64 bit floating point support to shaders,
+deck.gl includes a library (fp64) emulating 64 bit floating point to allow
+creation of "64 bit" layers.
 
 As a very rough rule of thumb, on the GPU:
 - Native 64 bit computations are ~4 times slower than 32 bit computations
 - Emulated 64 bit computations are ~10 times slower than 32 bit computations
 
-Since WebGL does not expose native 64 bit floating point support to shaders,
-deck.gl uses emulated 64 bit floating point in its 64 bit shaders. Now the
-amount of time spent in the vertex shader doing 64 bit calculation is only
-a part of the rendering pipeline, so the performance impact will be limited
-but not non-existent.
+Now the amount of time spent in the vertex shader is only one part of
+the rendering pipeline, and even a 64 bit vertex shader does not always perform
+only 64 bit math, so the performance impact of using 64-bit calculations
+will normally be significantly less than 10x.
 
-If your data sets are modest in size (<100K) you will probably not run into
-performance issues with 64 bit layers, but if you have larger data sets you
+There will also be a memory impact, in that all positions will require two
+positions in your Float32Arrays. Usually a layer has some attributes that
+are not positions, so the total memory impact normally be somewhat less than 2x.
+
+If your data sets are modest in size (<100K) you will are unlikely to run into
+performance issues with 64-bit layers, but if you have larger data sets you
 may want to do some testing before moving to 64 bit layers.
-
-
-## Instrumentation
-
-deck.gl is built on luma.gl which has extensive debugging and instrumentation
-support.
-
-TBA
-
-
-## Implementation notes:
-
-Possible performance improvements:
-
-- Picking performance improvement: It might be helpful to allow the
-  application to control what type of picking a layer supports
-  (e.g. hover vs. click vs. none) - as hovering over a large layer will
-  cause a noticeable lag.
-- Picking performance improvement: It might be helpful to disable picking
-  during pan and zoom operations.
-- Layer rendering, memory use and buffer creation time:
-  Experiment with packing colors as Uint8s instead of Float32s
-- Layer rendering: Experiment with creating single interleaved buffers with
-  offsets and strides.
-- Rewrite layer matching to handle many layers more efficiently.

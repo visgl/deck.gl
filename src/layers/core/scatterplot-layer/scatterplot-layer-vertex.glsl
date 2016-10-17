@@ -32,9 +32,7 @@ uniform float renderPickingBuffer;
 varying vec4 vColor;
 
 void main(void) {
-  // For some reason, need to add one to elevation to show up in untilted mode
-  vec3 fixupPosition = vec3(instancePositions.xy, instancePositions.z + 1.0);
-  vec3 center = preproject(fixupPosition);
+  vec3 center = preproject(instancePositions);
   vec3 vertex = positions * scale(radius * instancePositions.w);
   gl_Position = project(vec4(center, 1.0)) +
                 project(vec4(vertex, 0.0));
