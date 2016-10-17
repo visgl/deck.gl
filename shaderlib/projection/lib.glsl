@@ -1,3 +1,7 @@
+#ifdef INTEL_LOG_WORKAROUND
+#pragma glslify: tan_fp64 = require(./fp64/tan-fp64, ONE=ONE)
+#endif
+
 const float TILE_SIZE = 512.0;
 const float PI = 3.1415926536;
 const float WORLD_SCALE = TILE_SIZE / (PI * 2.0);
@@ -60,7 +64,11 @@ vec4 scale(vec4 meters) {
 vec2 mercatorProject(vec2 lnglat) {
   return vec2(
     radians(lnglat.x) + PI,
-    PI - log(tan(PI * 0.25 + radians(lnglat.y) * 0.5))
+#ifdef INTEL_LOG_WORKAROUND
+        PI - log(tan_fp64(vec2(PI * 0.25 + radians(lnglat.y) * 0.5, 0.0)).x)
+#else
+        PI - log(tan(PI * 0.25 + radians(lnglat.y) * 0.5))
+#endif
   );
 }
 

@@ -3,8 +3,6 @@ import project from '../../../../shaderlib/projection';
 export default `
 #define SHADER_NAME enhanced-choropleth-layer-vertex-shader
 
-${project}
-
 attribute vec3 positions;
 attribute vec3 colors;
 attribute vec3 pickingColors;

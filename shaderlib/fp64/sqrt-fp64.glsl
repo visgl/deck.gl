@@ -31,14 +31,10 @@ vec2 sqrt_fp64(vec2 a) {
 
   float x = 1.0 / sqrt(a.x);
   float yn = a.x * x;
-#ifdef NVIDIA_FP64_WA
-  vec2 yn_sqr = twoSqr(yn) * ONE;
-#else
-#ifdef INTEL_FP64_WA
+#if defined(NVIDIA_FP64_WORKAROUND) || defined(INTEL_FP64_WORKAROUND)
   vec2 yn_sqr = twoSqr(yn) * ONE;
 #else
   vec2 yn_sqr = twoSqr(yn);
-#endif
 #endif
   float diff = sub_fp64(a, yn_sqr).x;
   vec2 prod = twoProd(x * 0.5, diff);

@@ -18,9 +18,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {BaseLayer} from '../../../lib';
+import {BaseLayer, assembleShader} from '../../../lib';
 import {Model, Program, Geometry} from 'luma.gl';
-import {getPlatformShaderDefines} from '../../../lib/utils/get-platform-shader-defines';
+import {getPlatformShaderDefines} from '../../../shader-utils/get-platform-shader-defines';
 
 const glslify = require('glslify');
 
@@ -72,7 +72,7 @@ export default class GridLayer extends BaseLayer {
   getModel(gl) {
     return new Model({
       program: new Program(gl, {
-        vs: getPlatformShaderDefines(gl) + glslify('./grid-layer-vertex.glsl'),
+        vs: assembleShader(gl, {vs: glslify('./grid-layer-vertex.glsl')}),
         fs: glslify('./grid-layer-fragment.glsl'),
         id: 'grid'
       }),

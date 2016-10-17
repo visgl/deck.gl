@@ -85,7 +85,11 @@ vec2 exp_fp64(vec2 a) {
   s = sum_fp64(s * 2.0, mul_fp64(s, s));
   s = sum_fp64(s * 2.0, mul_fp64(s, s));
 
+#if defined(NVIDIA_FP64_WORKAROUND) || defined(INTEL_FP64_WORKAROUND)
   s = sum_fp64(s, vec2(1.0, 0.0) * ONE);
+#else
+  s = sum_fp64(s, vec2(1.0, 0.0));
+#endif
 
   return s * pow(2.0, m);
 }

@@ -20,7 +20,6 @@
 
 import {BaseLayer, assembleShader} from '../../../lib';
 import {Model, Program, Geometry} from 'luma.gl';
-import {getPlatformShaderDefines} from '../../../lib/utils/get-platform-shader-defines';
 
 const glslify = require('glslify');
 
@@ -102,8 +101,7 @@ export default class ChoroplethLayer extends BaseLayer {
   getModel(gl) {
     return new Model({
       program: new Program(gl, {
-        vs: assembleShader(gl, {vs: glslify('./choropleth-layer-vertex.glsl')},
-          getPlatformShaderDefines(gl)),
+        vs: assembleShader(gl, {vs: glslify('./choropleth-layer-vertex.glsl')}),
         fs: glslify('./choropleth-layer-fragment.glsl'),
         id: 'choropleth'
       }),

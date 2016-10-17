@@ -3,8 +3,6 @@ import project from '../../../../shaderlib/projection';
 export default `
 #define SHADER_NAME enhanced-hexagon-layer-vs
 
-${project}
-
 attribute vec3 positions;
 
 attribute vec3 instancePositions;

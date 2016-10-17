@@ -20,16 +20,7 @@
 
 #pragma glslify: split = require(./split, ONE=ONE)
 
-#ifdef NVIDIA_FP64_WA
-vec2 twoSqr(float a) {
-  float prod = a * a;
-  vec2 a_fp64 = split(a);
-
-  float err = ((a_fp64.x * a_fp64.x - prod) * ONE + 2.0 * a_fp64.x * a_fp64.y * ONE * ONE) + a_fp64.y * a_fp64.y * ONE * ONE * ONE;
-  return vec2(prod, err);
-}
-#else
-#ifdef INTEL_FP64_WA
+#if defined(NVIDIA_EQUATION_WORKAROUND) || defined(INTEL_EQUATION_WORKAROUND)
 vec2 twoSqr(float a) {
   float prod = a * a;
   vec2 a_fp64 = split(a);
@@ -45,6 +36,5 @@ vec2 twoSqr(float a) {
   float err = ((a_fp64.x * a_fp64.x - prod) + 2.0 * a_fp64.x * a_fp64.y) + a_fp64.y * a_fp64.y;
   return vec2(prod, err);
 }
-#endif
 #endif
 #pragma glslify: export(twoSqr)

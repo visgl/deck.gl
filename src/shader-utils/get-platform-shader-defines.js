@@ -27,10 +27,10 @@ export function getPlatformShaderDefines(gl) {
 
   if (checkRendererVendor(debugInfo, 'nvidia')) {
     platformDefines += '#define NVIDIA_GPU \n' +
-    '#define NVIDIA_FP64_WA 1\n' +
-    '#define NVIDIA_EQUATION_WA 1';
+    '#define NVIDIA_FP64_WORKAROUND 1\n' +
+    '#define NVIDIA_EQUATION_WORKAROUND 1';
   } else if (checkRendererVendor(debugInfo, 'intel')) {
-    platformDefines += '#define INTEL_GPU \n #define INTEL_FP64_WA 1\n #define INTEL_LOG_WA 1';
+    platformDefines += '#define INTEL_GPU \n #define INTEL_FP64_WORKAROUND 1\n #define INTEL_LOG_WORKAROUND 1';
   } else if (checkRendererVendor(debugInfo, 'amd')) {
     platformDefines += '#define AMD_GPU \n';
   } else {

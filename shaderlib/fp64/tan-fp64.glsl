@@ -90,7 +90,7 @@ vec2 tan_fp64(vec2 a) {
         s = sin_t;
         c = cos_t;
     } else {
-#ifdef NVIDIA_EQUATION_WA
+#if defined(NVIDIA_EQUATION_WORKAROUND) || defined(INTEL_EQUATION_WORKAROUND)
         if (abs(float(abs_k) - 1.0) < 0.5) {
             u = COS_TABLE_0;
             v = SIN_TABLE_0;
