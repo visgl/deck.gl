@@ -20,7 +20,7 @@
 
 #define SHADER_NAME arc-layer-vertex-shader
 
-uniform float ONE; // nvidia workaround
+uniform float ONE; // fp64 workaround
 
 #pragma glslify: sum_fp64 = require(../../../../shaderlib/fp64/sum-fp64, ONE=ONE)
 #pragma glslify: sub_fp64 = require(../../../../shaderlib/fp64/sub-fp64, ONE=ONE)

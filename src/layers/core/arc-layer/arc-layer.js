@@ -20,6 +20,8 @@
 
 import {BaseLayer, assembleShader} from '../../../lib';
 import {Model, Program, Geometry} from 'luma.gl';
+import {getPlatformShaderDefines} from '../../../lib/utils/get-platform-shader-defines';
+
 const glslify = require('glslify');
 
 const DEFAULT_COLOR = [0, 0, 255];
@@ -82,7 +84,8 @@ export default class ArcLayer extends BaseLayer {
 
     return new Model({
       program: new Program(gl, {
-        vs: assembleShader(gl, {vs: glslify('./arc-layer-vertex.glsl')}),
+        vs: assembleShader(gl, {vs: glslify('./arc-layer-vertex.glsl')},
+          getPlatformShaderDefines(gl)),
         fs: glslify('./arc-layer-fragment.glsl'),
         id: 'arc'
       }),

@@ -18,22 +18,26 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#ifdef NVIDIA_WORKAROUND
-
+#ifdef NVIDIA_FP64_WA
 vec2 quickTwoSum(float a, float b) {
   float sum = (a + b) * ONE;
   float err = b - (sum - a) * ONE;
   return vec2(sum, err);
 }
 #else
-
+#ifdef INTEL_FP64_WA
+vec2 quickTwoSum(float a, float b) {
+  float sum = (a + b) * ONE;
+  float err = b - (sum - a) * ONE;
+  return vec2(sum, err);
+}
+#else
 vec2 quickTwoSum(float a, float b) {
   float sum = a + b;
   float err = b - (sum - a);
   return vec2(sum, err);
 }
-
 #endif
-
+#endif
 
 #pragma glslify: export(quickTwoSum)

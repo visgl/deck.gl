@@ -51,46 +51,43 @@ vec2 exp_fp64(vec2 a) {
 
   p = mul_fp64(r, r);
   s = sum_fp64(r, p * 0.5);
+
   p = mul_fp64(p, r);
   t = mul_fp64(p, INVERSE_FACTORIAL_3);
-
   s = sum_fp64(s, t);
+
   p = mul_fp64(p, r);
   t = mul_fp64(p, INVERSE_FACTORIAL_4);
-
   s = sum_fp64(s, t);
+
   p = mul_fp64(p, r);
   t = mul_fp64(p, INVERSE_FACTORIAL_5);
-
   s = sum_fp64(s, t);
+
   p = mul_fp64(p, r);
   t = mul_fp64(p, INVERSE_FACTORIAL_6);
-
   s = sum_fp64(s, t);
+
   p = mul_fp64(p, r);
   t = mul_fp64(p, INVERSE_FACTORIAL_7);
-
   s = sum_fp64(s, t);
 
-  // At this point, s = exp(r) - 1; but after following 4 recursions, we will get exp(r) ^ 512 - 1.
+  // At this point, s = exp(r) - 1; but after following 9 recursions, we will get exp(r) ^ 512 - 1.
 
   s = sum_fp64(s * 2.0, mul_fp64(s, s));
   s = sum_fp64(s * 2.0, mul_fp64(s, s));
   s = sum_fp64(s * 2.0, mul_fp64(s, s));
   s = sum_fp64(s * 2.0, mul_fp64(s, s));
 
-  // We can add more iterations here and increase k.
   s = sum_fp64(s * 2.0, mul_fp64(s, s));
   s = sum_fp64(s * 2.0, mul_fp64(s, s));
   s = sum_fp64(s * 2.0, mul_fp64(s, s));
   s = sum_fp64(s * 2.0, mul_fp64(s, s));
   s = sum_fp64(s * 2.0, mul_fp64(s, s));
 
-  s = sum_fp64(s, vec2(1.0, 0.0));
+  s = sum_fp64(s, vec2(1.0, 0.0) * ONE);
 
   return s * pow(2.0, m);
-//   return r;
-
 }
 #pragma glslify: export(exp_fp64)
 

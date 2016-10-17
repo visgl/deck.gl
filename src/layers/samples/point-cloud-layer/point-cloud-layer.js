@@ -1,5 +1,6 @@
 import {Layer} from '../../../lib';
 import {GL, Model, Program, Geometry} from 'luma.gl';
+import {getPlatformShaderDefines} from '../../../lib/utils/get-platform-shader-defines';
 
 import VERTEX_SHADER from './point-cloud-layer-vertex';
 import FRAGMENT_SHADER from './point-cloud-layer-fragment';
@@ -46,7 +47,7 @@ export default class PointCloudLayer extends Layer {
   getModel(gl) {
     const model = new Model({
       program: new Program(gl, {
-        vs: VERTEX_SHADER,
+        vs: getPlatformShaderDefines(gl) + VERTEX_SHADER,
         fs: FRAGMENT_SHADER,
         id: 'scatterplot'
       }),

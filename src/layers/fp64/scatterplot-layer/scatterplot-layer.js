@@ -18,9 +18,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 import {BaseLayer} from '../../../lib';
-import {Model, Program, Geometry, glGetDebugInfo} from 'luma.gl';
+import {Model, Program, Geometry} from 'luma.gl';
 import {df64ify} from '../../../lib/utils/fp64';
-import {checkRendererVendor} from '../../../lib/utils/check-renderer-vendor';
+import {getPlatformShaderDefines} from '../../../lib/utils/get-platform-shader-defines';
 
 const glslify = require('glslify');
 const DEFAULT_COLOR = [255, 0, 255];
@@ -96,16 +96,9 @@ export default class ScatterplotLayer extends BaseLayer {
       ];
     }
 
-    let nvidiaDef = '';
-    const debugInfo = glGetDebugInfo(gl);
-
-    if (checkRendererVendor(debugInfo, 'nvidia')) {
-      nvidiaDef += '#define NVIDIA_WORKAROUND 1\n';
-    }
-
     return new Model({
       program: new Program(gl, {
-        vs: nvidiaDef + glslify('./scatterplot-layer-vertex.glsl'),
+        vs: getPlatformShaderDefines(gl) + glslify('./scatterplot-layer-vertex.glsl'),
         fs: glslify('./scatterplot-layer-fragment.glsl'),
         id: 'scatterplot-fp64'
       }),
