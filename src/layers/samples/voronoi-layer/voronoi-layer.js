@@ -129,15 +129,17 @@ export default class VoronoiLayer extends BaseLayer {
   }
 
   calculateInstanceColors(attribute) {
-    const {data} = this.props;
+    const {data, getColor} = this.props;
     const {value, size} = attribute;
     let i = 0;
     for (const point of data) {
+      const color = getColor(point);
       // use random colors for demostration
-      value[i + 0] = Math.random() * 255;
-      value[i + 1] = Math.random() * 255;
-      value[i + 2] = Math.random() * 255;
+      value[i + 0] = Math.random() * 255 || color[0];
+      value[i + 1] = Math.random() * 255 || color[1];
+      value[i + 2] = Math.random() * 255 || color[2];
       i += size;
     }
   }
+
 }
