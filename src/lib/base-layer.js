@@ -245,7 +245,8 @@ export default class BaseLayer {
   draw(uniforms = {}) {
     const {model} = this.state;
     if (model) {
-      model.render(uniforms);
+      const viewportUniforms = this.state.mercator.getUniforms(this.props);
+      model.render({...uniforms, ...viewportUniforms});
     }
   }
 
@@ -556,7 +557,7 @@ export default class BaseLayer {
       mercatorScale: Math.pow(2, zoom),
       mercatorScaleFP64: df64ify(Math.pow(2, zoom)),
       mercatorCenter: viewport.center,
-      ...viewport.getUniforms()
+      ...viewport.getUniforms(this.props)
     });
 
     log(3, this.state.viewport, latitude, longitude, zoom);
