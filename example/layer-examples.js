@@ -19,21 +19,23 @@ import {
   VoronoiLayer
 } from '../src/layers/samples';
 
-export function GridLayerExample(props) {
-  const {mapViewState, points} = props;
+export function ArcLayerExample(props) {
+  const {mapViewState, arcs} = props;
 
-  return new GridLayer({
-    id: props.id || 'gridLayer',
+  return new ArcLayer({
+    id: props.id || 'arcLayer',
     width: window.innerWidth,
     height: window.innerHeight,
     ...mapViewState,
-    isPickable: false,
-    opacity: 0.06,
-    data: points
+    data: arcs,
+    strokeWidth: props.arcStrokeWidth || 1,
+    isPickable: true,
+    onHover: props.onArcHovered,
+    onClick: props.onArcClicked
   });
 }
 
-export function ChoroplethContourLayerExample(props) {
+export function ChoroplethLayerContourExample(props) {
   const {mapViewState, choropleths} = props;
   return new ChoroplethLayer({
     id: props.id || 'choroplethContourLayer',
@@ -61,36 +63,33 @@ export function ChoroplethLayerExample(props) {
   });
 }
 
-export function HexagonLayerExample(props) {
-  const {mapViewState, hexData} = props;
+export function GridLayerExample(props) {
+  const {mapViewState, points} = props;
 
-  return new HexagonLayer({
-    id: props.id || 'hexagonLayer',
+  return new GridLayer({
+    id: props.id || 'gridLayer',
     width: window.innerWidth,
     height: window.innerHeight,
     ...mapViewState,
-    data: hexData,
-    opacity: 0.5,
-    elevation: 200,
-    isPickable: true,
-    onHover: props.onHexagonHovered,
-    onClick: props.onHexagonClicked
+    isPickable: false,
+    opacity: 0.06,
+    data: points
   });
 }
 
-export function HexagonSelectionLayerExample(props) {
-  const {mapViewState} = props;
-  const {selectedHexagons} = props;
+export function LineLayerExample(props) {
+  const {mapViewState, lines} = props;
 
-  return new HexagonLayer({
-    id: props.id || 'hexagonSelectionLayer',
+  return new LineLayer({
+    id: props.id || 'lineLayer',
     width: window.innerWidth,
     height: window.innerHeight,
     ...mapViewState,
-    data: selectedHexagons,
-    opacity: 0.1,
-    elevation: 200,
-    isPickable: false
+    data: lines,
+    strokeWidth: props.lineStrokeWidth || 1,
+    isPickable: true,
+    onHover: props.onLineHovered,
+    onClick: props.onLineClicked
   });
 }
 
@@ -110,11 +109,52 @@ export function ScatterplotLayerExample(props) {
   });
 }
 
-export function ArcLayerExample(props) {
+export function ScatterplotLayerMeterExample(props) {
+  const {mapViewState} = props;
+
+  return new ScatterplotLayer({
+    id: props.id || 'scatterplotLayer-meters',
+    width: window.innerWidth,
+    height: window.innerHeight,
+    ...mapViewState,
+    projectionMode: 2,
+    projectionCenter: [mapViewState.longitude, mapViewState.latitude],
+    data: [
+      {position: [0, 0]},
+      {position: [20, 20]},
+      {position: [100, 100]},
+      {position: [-50, 200]},
+      {position: [1000, 1000]}
+    ],
+    opacity: 0.5,
+    isPickable: true,
+    onHover: props.onScatterplotHovered,
+    onClick: props.onScatterplotClicked
+  });
+}
+
+// 64 BIT LAYER EXAMPLES
+
+export function ScatterplotLayer64Example(props) {
+  const {mapViewState, points} = props;
+
+  return new ScatterplotLayer64({
+    id: props.id || 'scatterplotLayer64',
+    width: window.innerWidth,
+    height: window.innerHeight,
+    ...mapViewState,
+    data: points,
+    isPickable: true,
+    onHover: props.onScatterplotHovered,
+    onClick: props.onScatterplotClicked
+  });
+}
+
+export function ArcLayer64Example(props) {
   const {mapViewState, arcs} = props;
 
-  return new ArcLayer({
-    id: props.id || 'arcLayer',
+  return new ArcLayer64({
+    id: props.id || 'arcLayer64',
     width: window.innerWidth,
     height: window.innerHeight,
     ...mapViewState,
@@ -126,21 +166,7 @@ export function ArcLayerExample(props) {
   });
 }
 
-export function LineLayerExample(props) {
-  const {mapViewState, lines} = props;
-
-  return new LineLayer({
-    id: props.id || 'lineLayer',
-    width: window.innerWidth,
-    height: window.innerHeight,
-    ...mapViewState,
-    data: lines,
-    strokeWidth: props.lineStrokeWidth || 1,
-    isPickable: true,
-    onHover: props.onLineHovered,
-    onClick: props.onLineClicked
-  });
-}
+// SAMPLE LAYER EXAMPLES
 
 export function EnhancedChoroplethLayerExample(props) {
   const {mapViewState, choropleths} = props;
@@ -173,34 +199,36 @@ export function PointCloudLayerExample(props) {
   });
 }
 
-export function ScatterplotLayer64Example(props) {
-  const {mapViewState, points} = props;
+export function HexagonLayerExample(props) {
+  const {mapViewState, hexData} = props;
 
-  return new ScatterplotLayer64({
-    id: props.id || 'scatterplotLayer64',
+  return new HexagonLayer({
+    id: props.id || 'hexagonLayer',
     width: window.innerWidth,
     height: window.innerHeight,
     ...mapViewState,
-    data: points,
+    data: hexData,
+    opacity: 0.5,
+    elevation: 200,
     isPickable: true,
-    onHover: props.onScatterplotHovered,
-    onClick: props.onScatterplotClicked
+    onHover: props.onHexagonHovered,
+    onClick: props.onHexagonClicked
   });
 }
 
-export function ArcLayer64Example(props) {
-  const {mapViewState, arcs} = props;
+export function HexagonLayerSelectionExample(props) {
+  const {mapViewState} = props;
+  const {selectedHexagons} = props;
 
-  return new ArcLayer64({
-    id: props.id || 'arcLayer64',
+  return new HexagonLayer({
+    id: props.id || 'hexagonSelectionLayer',
     width: window.innerWidth,
     height: window.innerHeight,
     ...mapViewState,
-    data: arcs,
-    strokeWidth: props.arcStrokeWidth || 1,
-    isPickable: true,
-    onHover: props.onArcHovered,
-    onClick: props.onArcClicked
+    data: selectedHexagons,
+    opacity: 0.1,
+    elevation: 200,
+    isPickable: false
   });
 }
 
@@ -279,27 +307,24 @@ export default {
   'Core Layers': {
     ArcLayer: ArcLayerExample,
     'ChoroplethLayer (Solid)': ChoroplethLayerExample,
-    'ChoroplethLayer (Contour)': ChoroplethContourLayerExample,
+    'ChoroplethLayer (Contour)': ChoroplethLayerContourExample,
     GridLayer: GridLayerExample,
     LineLayer: LineLayerExample,
-    ScatterplotLayer: ScatterplotLayerExample
+    ScatterplotLayer: ScatterplotLayerExample,
+    'ScatterplotLayer (meters)': ScatterplotLayerMeterExample
   },
 
   '64-bit Layers': {
     ScatterplotLayer64: ScatterplotLayer64Example,
     ArcLayer64: ArcLayer64Example
-
   },
 
   'Sample Layers': {
     HexagonLayer: HexagonLayerExample,
+    'HexagonLayer (selection)': HexagonLayerSelectionExample,
     EnhancedChoroplethLayer: EnhancedChoroplethLayerExample,
     PointCloudLayer: PointCloudLayerExample,
     VoronoiLayer: VoronoiLayerExample
-  },
-
-  'Core Layers (Additional)': {
-    HexagonSelectionLayer: HexagonSelectionLayerExample
   },
 
   'Performance Tests': {

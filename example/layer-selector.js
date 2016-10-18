@@ -5,17 +5,16 @@ import React from 'react';
 function renderExampleButtons({examples, activeExamples, onChange}) {
   const children = [];
   for (const exampleName of Object.keys(examples)) {
-    const example = examples[exampleName];
     children.push(
       <div key={ exampleName } className="checkbox"
           style={{pointerEvents: 'auto'}}>
         <input
           type="checkbox"
-          id={ exampleName }
+          id={exampleName}
           name="layerStatus"
-          value={ exampleName }
-          checked={ activeExamples[exampleName] }
-          onChange={ e => onChange(exampleName) }
+          value={exampleName || ''}
+          checked={activeExamples[exampleName] || ''}
+          onChange={e => onChange(exampleName)}
         />
         <label htmlFor={ exampleName } style={{display: 'inline-block'}}>
           <div style={{marginLeft: 30}}>

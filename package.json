@@ -2,7 +2,7 @@
   "name": "deck.gl",
   "description": "A suite of 3D-enabled data visualization overlays, suitable for react-map-gl",
   "license": "MIT",
-  "version": "3.0.0-beta20",
+  "version": "3.0.0-beta21",
   "keywords": [
     "webgl",
     "visualization",
@@ -17,7 +17,11 @@
   "files": [
     "dist",
     "shaderlib",
-    "src"
+    "src",
+    "index.js",
+    "react.js",
+    "viewport.js",
+    "samples.js"
   ],
   "dependencies": {
     "autobind-decorator": "^1.3.3",
@@ -52,6 +56,7 @@
     "browserify": "13.0.0",
     "budo": "^8.0.3",
     "d3-request": "^0.2.2",
+    "discify": "^1.2.0",
     "electron-prebuilt": "^0.37.2",
     "envify": "^3.4.0",
     "eslint": "^2.0.0",
@@ -96,6 +101,7 @@
     "test-headless-src": "babel-node --only=deck.gl/test,deck.gl/src,deck.gl/shaderlib src/test/headless.js",
     "test-browser": "budo src/test/browser.js:build/test-bundle.js --dir test --live --open --port 3001 --watch-glob '**/*.{html,css,scss,js,glsl}' -- -t babelify -t glslify",
     "test-electron": "browserify dist/test/electron.js | testron | faucet",
+    "profile-disc": "browserify src/bundle.js --full-paths -t babelify -t glslify | uglifyjs | discify --open",
     "start": "budo example/main.js:example/bundle.js --live --open --port 3000 --css example/main.css --title 'deck.gl' --watch-glob '**/*.{html,css,js,glsl}' -- -t babelify -t envify",
     "test-shader": "budo src/test/shader.js:build/test-bundle.js --dir test --live --open --port 3001 --watch-glob '**/*.{html,css,scss,js,glsl}' -- -t babelify -t glslify"
   },

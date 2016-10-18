@@ -20,7 +20,10 @@ All notable changes to deck.gl will be documented in this file.
 
 ### Beta-3.0.0 Releases
 
-#### [3.0.0-betac20] -
+#### [3.0.0-beta21] -
+ - FIX: Now takes layer props into account when generating projection uniforms 
+
+#### [3.0.0-beta20] -
  - DOCUMENTATION: Article updates
  - FIX: Fix broken shader export in beta19
 
