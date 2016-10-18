@@ -9,7 +9,8 @@ import {
 
 import {
   ScatterplotLayer64,
-  ArcLayer64
+  ArcLayer64,
+  ChoroplethLayer64
 } from '../src/layers/fp64';
 
 import {
@@ -166,6 +167,34 @@ export function ArcLayer64Example(props) {
   });
 }
 
+export function ChoroplethLayer64ContourExample(props) {
+  const {mapViewState, choropleths} = props;
+  return new ChoroplethLayer64({
+    id: props.id || 'choroplethContourLayer64',
+    width: window.innerWidth,
+    height: window.innerHeight,
+    ...mapViewState,
+    data: choropleths,
+    opacity: 0.8,
+    drawContour: true
+  });
+}
+
+export function ChoroplethLayer64SolidExample(props) {
+  const {mapViewState, choropleths} = props;
+  return new ChoroplethLayer({
+    id: props.id || 'choroplethLayer',
+    width: window.innerWidth,
+    height: window.innerHeight,
+    ...mapViewState,
+    data: choropleths,
+    opacity: 0.01,
+    isPickable: true,
+    onHover: props.onChoroplethHovered,
+    lick: props.onChoroplethClicked
+  });
+}
+
 // SAMPLE LAYER EXAMPLES
 
 export function EnhancedChoroplethLayerExample(props) {
@@ -316,7 +345,9 @@ export default {
 
   '64-bit Layers': {
     ScatterplotLayer64: ScatterplotLayer64Example,
-    ArcLayer64: ArcLayer64Example
+    ArcLayer64: ArcLayer64Example,
+    'ChoroplethLayer64 (Solid)': ChoroplethLayer64SolidExample,
+    'ChoroplethLayer64 (Contour)': ChoroplethLayer64ContourExample,
   },
 
   'Sample Layers': {

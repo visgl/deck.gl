@@ -17,59 +17,51 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-#define SHADER_NAME scatterplot-layer-64-vertex-shader
+#define SHADER_NAME choropleth-layer-64-vertex-shader
+
+attribute vec4 positionsFP64;
+attribute vec2 heightsFP64;
 
 attribute vec3 positions;
-attribute vec4 instancePositionsFP64;
-attribute vec2 layerHeight;
-attribute float instanceRadius;
-attribute vec3 instanceColors;
-attribute vec3 instancePickingColors;
-
-// Only one-dimensional arrays may be declared in GLSL ES 1.0. specs p.24
-uniform vec2 projectionFP64[16];
-uniform float opacity;
-uniform vec2 zoomRadiusFP64;
-uniform float renderPickingBuffer;
+attribute vec3 colors;
+attribute vec3 pickingColors;
 
 uniform float ONE; // fp64 workaround
 
+uniform float opacity;
+uniform float renderPickingBuffer;
+uniform vec3 selectedPickingColor;
+uniform vec2 projectionFP64[16];
+
 varying vec4 vColor;
 
-#pragma glslify: vec4_fp64 = require(../../../../shaderlib/fp64/vec4-fp64, ONE=ONE)
-#pragma glslify: sum_fp64 = require(../../../../shaderlib/fp64/sum-fp64, ONE=ONE)
-#pragma glslify: mul_fp64 = require(../../../../shaderlib/fp64/mul-fp64, ONE=ONE)
 #pragma glslify: project_fp64 = require(../../../../shaderlib/fp64/project-fp64, ONE=ONE)
-#pragma glslify: vec4_scalar_mul_fp64 = require(../../../../shaderlib/fp64/vec4-scalar-mul-fp64, ONE=ONE)
 #pragma glslify: mat4_vec4_mul_fp64 = require(../../../../shaderlib/fp64/mat4-vec4-mul-fp64, ONE=ONE)
+
+vec4 getColor(vec4 color, float opacity, vec3 pickingColor, float renderPickingBuffer) {
+  vec4 color4 = vec4(color.xyz / 255., color.w / 255. * opacity);
+  vec4 pickingColor4 = vec4(pickingColor / 255., 1.);
+  return mix(color4, pickingColor4, renderPickingBuffer);
+}
 
 void main(void) {
   // For some reason, need to add one to elevation to show up in untilted mode
-
-  vec2 projected_coord_xy[2];
-  project_fp64(instancePositionsFP64, projected_coord_xy);
-
-  vec2 pos_mul_radius[4];
-  vec4_fp64(vec4(positions * instanceRadius, 0.0), pos_mul_radius);
-
-  vec2 vertex_pos_localspace[4];
-  vec4_scalar_mul_fp64(pos_mul_radius, zoomRadiusFP64, vertex_pos_localspace);
+  vec2 projectedCoord[2];
+  project_fp64(positionsFP64, projectedCoord);
 
   vec2 vertex_pos_modelspace[4];
-
-  vertex_pos_modelspace[0] = sum_fp64(vertex_pos_localspace[0], projected_coord_xy[0]);
-  vertex_pos_modelspace[1] = sum_fp64(vertex_pos_localspace[1], projected_coord_xy[1]);
-  vertex_pos_modelspace[2] = sum_fp64(vertex_pos_localspace[2], vec2(layerHeight.x + 1.0, layerHeight.y));
-  vertex_pos_modelspace[3] = vec2(1.0, 0.0);
-
   vec2 vertex_pos_clipspace[4];
+
+  vertex_pos_modelspace[0] = projectedCoord[0];
+  vertex_pos_modelspace[1] = projectedCoord[1];
+  vertex_pos_modelspace[2] = heightsFP64;
+  vertex_pos_modelspace[3] = vec2(1.0, 0.0);
 
   mat4_vec4_mul_fp64(projectionFP64, vertex_pos_modelspace, vertex_pos_clipspace);
 
   gl_Position = vec4(vertex_pos_clipspace[0].x, vertex_pos_clipspace[1].x, vertex_pos_clipspace[2].x, vertex_pos_clipspace[3].x);
 
-  vec4 color = vec4(instanceColors / 255.0, opacity);
-
-  vec4 pickingColor = vec4(instancePickingColors / 255.0, 1.);
+  vec4 color = vec4(colors / 255., opacity);
+  vec4 pickingColor = vec4(pickingColors / 255., 1.);
   vColor = mix(color, pickingColor, renderPickingBuffer);
 }
