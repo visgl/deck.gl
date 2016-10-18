@@ -15,7 +15,8 @@ import {
 import {
   HexagonLayer,
   EnhancedChoroplethLayer,
-  PointCloudLayer
+  PointCloudLayer,
+  VoronoiLayer
 } from '../src/layers/samples';
 
 export function GridLayerExample(props) {
@@ -203,6 +204,20 @@ export function ArcLayer64Example(props) {
   });
 }
 
+// let points100K = null;
+export function VoronoiLayerExample(props) {
+  const {mapViewState, points} = props;
+
+  return new VoronoiLayer({
+    id: props.id || 'voronoiLayer',
+    width: window.innerWidth,
+    height: window.innerHeight,
+    ...mapViewState,
+    data: points,
+    opacity: 1
+  });
+}
+
 // Returns new array N times larger than input array
 // filled with duplicate elements
 // Avoids Array.concat (which generates temporary huge arrays)
@@ -279,7 +294,8 @@ export default {
   'Sample Layers': {
     HexagonLayer: HexagonLayerExample,
     EnhancedChoroplethLayer: EnhancedChoroplethLayerExample,
-    PointCloudLayer: PointCloudLayerExample
+    PointCloudLayer: PointCloudLayerExample,
+    VoronoiLayer: VoronoiLayerExample
   },
 
   'Core Layers (Additional)': {
@@ -296,6 +312,7 @@ export default {
 };
 
 export const DEFAULT_ACTIVE_LAYERS = {
+  VoronoiLayer: true
   // 'ChoroplethLayer (Contour)': true,
   // ScatterplotLayer: true
   // 'ScatterplotLayer64 10M': true

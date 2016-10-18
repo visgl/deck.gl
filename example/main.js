@@ -397,7 +397,7 @@ class ExampleApp extends React.Component {
           /* eslint-disable max-depth */
           if (Array.isArray(example)) {
             const makeProps = example[1];
-            example = example[0]
+            example = example[0];
             layerProps = {
               ...props,
               ...makeProps(),
