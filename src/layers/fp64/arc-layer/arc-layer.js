@@ -20,7 +20,7 @@
 
 import {BaseLayer, assembleShader} from '../../../lib';
 import {Model, Program, Geometry} from 'luma.gl';
-import {df64ify} from '../../../lib/utils/fp64';
+import {fp64ify} from '../../../lib/utils/fp64';
 
 const glslify = require('glslify');
 
@@ -127,8 +127,8 @@ export default class ArcLayer extends BaseLayer {
     let i = 0;
     for (const object of data) {
       const sourcePosition = getSourcePosition(object);
-      [value[i + 0], value[i + 1]] = df64ify(sourcePosition[0]);
-      [value[i + 2], value[i + 3]] = df64ify(sourcePosition[1]);
+      [value[i + 0], value[i + 1]] = fp64ify(sourcePosition[0]);
+      [value[i + 2], value[i + 3]] = fp64ify(sourcePosition[1]);
       i += size;
     }
   }
@@ -139,8 +139,8 @@ export default class ArcLayer extends BaseLayer {
     let i = 0;
     for (const object of data) {
       const targetPosition = getTargetPosition(object);
-      [value[i + 0], value[i + 1]] = df64ify(targetPosition[0]);
-      [value[i + 2], value[i + 3]] = df64ify(targetPosition[1]);
+      [value[i + 0], value[i + 1]] = fp64ify(targetPosition[0]);
+      [value[i + 2], value[i + 3]] = fp64ify(targetPosition[1]);
       i += size;
     }
   }
