@@ -237,6 +237,7 @@ export default class Viewport {
     );
 
     // TODO - clean up, not all of these are used
+    // _ONE uniform is a hack to make tan_fp64() callable in existing 32-bit layers
     return {
       projectionMode,
       projectionMatrix: this._glProjectionMatrix,
@@ -246,7 +247,8 @@ export default class Viewport {
       projectionCenter,
       projectionPixelsPerUnit: this.pixelsPerMeter,
       projectionMatrixCentered: this._glProjectionMatrix,
-      projectionMatrixUncentered: this._glProjectionMatrixUncentered
+      projectionMatrixUncentered: this._glProjectionMatrixUncentered,
+      _ONE: 1.0
     };
   }
 
