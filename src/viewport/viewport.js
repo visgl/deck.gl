@@ -21,7 +21,7 @@
 import {mat2, mat4, vec4} from 'gl-matrix';
 import autobind from 'autobind-decorator';
 import assert from 'assert';
-import {df64ify} from '../lib/utils/fp64';
+import {fp64ify} from '../lib/utils/fp64';
 const PI = Math.PI;
 const PI_4 = PI / 4;
 const DEGREES_TO_RADIANS = PI / 180;
@@ -242,7 +242,7 @@ export default class Viewport {
       projectionMatrix: this._glProjectionMatrix,
       projectionFP64: this._glProjectionFP64,
       projectionScale: this.scale,
-      projectionScaleFP64: df64ify(this.scale),
+      projectionScaleFP64: fp64ify(this.scale),
       projectionCenter,
       projectionPixelsPerUnit: this.pixelsPerMeter,
       projectionMatrixCentered: this._glProjectionMatrix,
@@ -473,7 +473,7 @@ export default class Viewport {
         [
           this._glProjectionFP64[(i * 4 + j) * 2],
           this._glProjectionFP64[(i * 4 + j) * 2 + 1]
-        ] = df64ify(this._glProjectionMatrix[j * 4 + i]);
+        ] = fp64ify(this._glProjectionMatrix[j * 4 + i]);
       }
     }
   }

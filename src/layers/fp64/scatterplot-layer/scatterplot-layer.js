@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 import {BaseLayer, assembleShader} from '../../../lib';
 import {Model, Program, Geometry} from 'luma.gl';
-import {df64ify} from '../../../lib/utils/fp64';
+import {fp64ify} from '../../../lib/utils/fp64';
 
 const glslify = require('glslify');
 const DEFAULT_COLOR = [255, 0, 255];
@@ -116,7 +116,7 @@ export default class ScatterplotLayer extends BaseLayer {
 
     this.setUniforms({
       zoomRadiusFP64,
-      mercatorScaleFP64: df64ify(Math.pow(2, zoom))
+      mercatorScaleFP64: fp64ify(Math.pow(2, zoom))
     });
   }
 
@@ -126,8 +126,8 @@ export default class ScatterplotLayer extends BaseLayer {
     let i = 0;
     for (const point of data) {
       const position = getPosition(point);
-      [value[i + 0], value[i + 1]] = df64ify(position[0]);
-      [value[i + 2], value[i + 3]] = df64ify(position[1]);
+      [value[i + 0], value[i + 1]] = fp64ify(position[0]);
+      [value[i + 2], value[i + 3]] = fp64ify(position[1]);
       i += size;
     }
   }
@@ -138,7 +138,7 @@ export default class ScatterplotLayer extends BaseLayer {
     let i = 0;
     for (const point of data) {
       const position = getPosition(point);
-      [value[i + 0], value[i + 1]] = df64ify(position[2]);
+      [value[i + 0], value[i + 1]] = fp64ify(position[2]);
       i += size;
     }
   }
@@ -170,7 +170,7 @@ export default class ScatterplotLayer extends BaseLayer {
   calculateZoomRadius() {
     // use radius if specified
     if (this.props.radius) {
-      this.state.zoomRadiusFP64 = df64ify(this.props.radius);
+      this.state.zoomRadiusFP64 = fp64ify(this.props.radius);
       return;
     }
 
@@ -181,6 +181,6 @@ export default class ScatterplotLayer extends BaseLayer {
     const dy = pixel0[1] - pixel1[1];
 
     const radius = Math.max(Math.sqrt(dx * dx + dy * dy), 2.0);
-    this.state.zoomRadiusFP64 = df64ify(radius);
+    this.state.zoomRadiusFP64 = fp64ify(radius);
   }
 }

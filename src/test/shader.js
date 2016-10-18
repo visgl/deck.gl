@@ -104,7 +104,7 @@ function glErrorShouldBe(gl, glErrors, opt_msg) {
 
 // Special utility functions for df64 tests
 
-function df64ify(a) {
+function fp64ify(a) {
   const a_hi = Math.fround(a);
   const a_lo = a - Math.fround(a);
   return new Float32Array([a_hi, a_lo]);
@@ -240,9 +240,9 @@ function test_float_add(gl, testName) {
   const float1 = getFloat64();
   const float_ref = float0 + float1;
 
-  const float0_vec2 = df64ify(float0);
-  const float1_vec2 = df64ify(float1);
-  const float_ref_vec2 = df64ify(float_ref);
+  const float0_vec2 = fp64ify(float0);
+  const float1_vec2 = fp64ify(float1);
+  const float_ref_vec2 = fp64ify(float_ref);
 
   const program = new Program(gl, {
     vs: getPlatformShaderDefines(gl) + glslify('./test_shader/vs_float_add.glsl'),
@@ -276,9 +276,9 @@ function test_float_sub(gl, testName) {
   const float1 = getFloat64();
   const float_ref = float0 - float1;
 
-  const float0_vec2 = df64ify(float0);
-  const float1_vec2 = df64ify(float1);
-  const float_ref_vec2 = df64ify(float_ref);
+  const float0_vec2 = fp64ify(float0);
+  const float1_vec2 = fp64ify(float1);
+  const float_ref_vec2 = fp64ify(float_ref);
 
   const program = new Program(gl, {
     vs: getPlatformShaderDefines(gl) + glslify('./test_shader/vs_float_sub.glsl'),
@@ -313,9 +313,9 @@ function test_float_mul(gl, testName) {
 
   const float_ref = float0 * float1;
 
-  const float0_vec2 = df64ify(float0);
-  const float1_vec2 = df64ify(float1);
-  const float_ref_vec2 = df64ify(float_ref);
+  const float0_vec2 = fp64ify(float0);
+  const float1_vec2 = fp64ify(float1);
+  const float_ref_vec2 = fp64ify(float_ref);
 
   const program = new Program(gl, {
     vs: getPlatformShaderDefines(gl) + glslify('./test_shader/vs_float_mul.glsl'),
@@ -349,9 +349,9 @@ function test_float_div(gl, testName) {
   const float1 = getFloat64(128);
   const float_ref = float0 / float1;
 
-  const float0_vec2 = df64ify(float0);
-  const float1_vec2 = df64ify(float1);
-  const float_ref_vec2 = df64ify(float_ref);
+  const float0_vec2 = fp64ify(float0);
+  const float1_vec2 = fp64ify(float1);
+  const float_ref_vec2 = fp64ify(float_ref);
 
   const program = new Program(gl, {
     vs: getPlatformShaderDefines(gl) + glslify('./test_shader/vs_float_div.glsl'),
@@ -384,8 +384,8 @@ function test_float_sqrt(gl, testName) {
   const float0 = getFloat64(128);
   const float_ref = Math.sqrt(float0);
 
-  const float0_vec2 = df64ify(float0);
-  const float_ref_vec2 = df64ify(float_ref);
+  const float0_vec2 = fp64ify(float0);
+  const float_ref_vec2 = fp64ify(float_ref);
 
   const program = new Program(gl, {
     vs: getPlatformShaderDefines(gl) + glslify('./test_shader/vs_float_sqrt.glsl'),
@@ -417,8 +417,8 @@ function test_float_exp(gl, testName) {
   const float0 = getFloat64(4);
   const float_ref = Math.exp(float0);
 
-  const float0_vec2 = df64ify(float0);
-  const float_ref_vec2 = df64ify(float_ref);
+  const float0_vec2 = fp64ify(float0);
+  const float_ref_vec2 = fp64ify(float_ref);
 
   const program = new Program(gl, {
     vs: getPlatformShaderDefines(gl) + glslify('./test_shader/vs_float_exp.glsl'),
@@ -450,8 +450,8 @@ function test_float_log(gl, testName) {
   const float0 = getFloat64(24);
   const float_ref = Math.log(float0);
 
-  const float0_vec2 = df64ify(float0);
-  const float_ref_vec2 = df64ify(float_ref);
+  const float0_vec2 = fp64ify(float0);
+  const float_ref_vec2 = fp64ify(float_ref);
 
   const program = new Program(gl, {
     vs: getPlatformShaderDefines(gl) + glslify('./test_shader/vs_float_log.glsl'),
@@ -484,8 +484,8 @@ function test_float_sin(gl, testName) {
   const float0 = getFloat64(2);
   const float_ref = Math.sin(float0);
 
-  const float0_vec2 = df64ify(float0);
-  const float_ref_vec2 = df64ify(float_ref);
+  const float0_vec2 = fp64ify(float0);
+  const float_ref_vec2 = fp64ify(float_ref);
 
   const program = new Program(gl, {
     vs: getPlatformShaderDefines(gl) + glslify('./test_shader/vs_float_sin.glsl'),
@@ -517,8 +517,8 @@ function test_float_cos(gl, testName) {
   const float0 = getFloat64(2);
   const float_ref = Math.cos(float0);
 
-  const float0_vec2 = df64ify(float0);
-  const float_ref_vec2 = df64ify(float_ref);
+  const float0_vec2 = fp64ify(float0);
+  const float_ref_vec2 = fp64ify(float_ref);
 
   const program = new Program(gl, {
     vs: getPlatformShaderDefines(gl) + glslify('./test_shader/vs_float_cos.glsl'),
@@ -550,8 +550,8 @@ function test_float_tan(gl, testName) {
   const float0 = getFloat64(2);
   const float_ref = Math.tan(float0);
 
-  const float0_vec2 = df64ify(float0);
-  const float_ref_vec2 = df64ify(float_ref);
+  const float0_vec2 = fp64ify(float0);
+  const float_ref_vec2 = fp64ify(float_ref);
 
   const program = new Program(gl, {
     vs: getPlatformShaderDefines(gl) + glslify('./test_shader/vs_float_tan.glsl'),
