@@ -62,7 +62,8 @@ export default class VoronoiLayer extends BaseLayer {
     });
 
     attributeManager.addInstanced({
-      instancePositions: {size: 4, update: this.calculateInstancePositions}
+      instancePositions: {size: 4, update: this.calculateInstancePositions},
+      instanceColors: {size: 3, update: this.calculateInstanceColors}
     });
   }
 
@@ -76,7 +77,7 @@ export default class VoronoiLayer extends BaseLayer {
   }
 
   getModel(gl) {
-    const NUM_SEGMENTS = 16;
+    const NUM_SEGMENTS = 32;
     const PI2 = Math.PI * 2;
 
     let positions = [];
@@ -127,12 +128,16 @@ export default class VoronoiLayer extends BaseLayer {
     }
   }
 
-  // override picking color generation rule
-  encodePickingColor(i) {
-    return [
-      (i * 199 + 1) % 256,
-      Math.floor((i * 199 + 1) / 256) % 256,
-      Math.floor((i * 199 + 1) / 256 / 256) % 256
-    ];
+  calculateInstanceColors(attribute) {
+    const {data} = this.props;
+    const {value, size} = attribute;
+    let i = 0;
+    for (const point of data) {
+      // use random colors for demostration
+      value[i + 0] = Math.random() * 255;
+      value[i + 1] = Math.random() * 255;
+      value[i + 2] = Math.random() * 255;
+      i += size;
+    }
   }
 }

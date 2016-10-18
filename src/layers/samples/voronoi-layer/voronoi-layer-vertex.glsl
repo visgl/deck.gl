@@ -23,23 +23,22 @@
 attribute vec3 positions;
 
 attribute vec4 instancePositions;
-// attribute vec3 instanceColors;
+attribute vec3 instanceColors;
 attribute vec3 instancePickingColors;
 
-// uniform float opacity;
+uniform float opacity;
 uniform float radius;
-// uniform float renderPickingBuffer;
+uniform float renderPickingBuffer;
 
 varying vec4 vColor;
 
 void main(void) {
-  // For some reason, need to add one to elevation to show up in untilted mode
-  vec3 fixupPosition = vec3(instancePositions.xy, instancePositions.z + 1.0);
-  vec3 center = preproject(fixupPosition);
-  vec3 vertex = positions * scale(radius);
-  gl_Position = project(vec4(center, 1.0)) + project(vec4(vertex, 0.0));
+  vec3 center = preproject(instancePositions.xyz);
+  vec3 vertex = positions * scale(radius * instancePositions.w);
+  gl_Position = project(vec4(center, 1.0)) +
+                project(vec4(vertex, 0.0));
 
-  // vec4 color = vec4(instanceColors / 255.0, 1.0);
+  vec4 color = vec4(instanceColors / 255.0, opacity);
   vec4 pickingColor = vec4(instancePickingColors / 255.0, 1.);
-  vColor = pickingColor;
+  vColor = mix(color, pickingColor, renderPickingBuffer);
 }

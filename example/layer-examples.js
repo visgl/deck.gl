@@ -16,8 +16,7 @@ import {
   HexagonLayer,
   EnhancedChoroplethLayer,
   PointCloudLayer,
-  VoronoiLayer,
-  LineDistanceFieldLayer
+  VoronoiLayer
 } from '../src/layers/samples';
 
 export function GridLayerExample(props) {
@@ -214,19 +213,8 @@ export function VoronoiLayerExample(props) {
     width: window.innerWidth,
     height: window.innerHeight,
     ...mapViewState,
-    data: points
-  });
-}
-
-export function LineDistanceFieldLayerExample(props) {
-  const {mapViewState, lines} = props;
-
-  return new LineLayer({
-    id: props.id || 'lineDistanceFieldLayer',
-    width: window.innerWidth,
-    height: window.innerHeight,
-    ...mapViewState,
-    data: lines.slice(0, 3)
+    data: points,
+    opacity: 1
   });
 }
 
@@ -307,8 +295,7 @@ export default {
     HexagonLayer: HexagonLayerExample,
     EnhancedChoroplethLayer: EnhancedChoroplethLayerExample,
     PointCloudLayer: PointCloudLayerExample,
-    VoronoiLayer: VoronoiLayerExample,
-    LineDistanceFieldLayer: LineDistanceFieldLayerExample
+    VoronoiLayer: VoronoiLayerExample
   },
 
   'Core Layers (Additional)': {
@@ -325,8 +312,7 @@ export default {
 };
 
 export const DEFAULT_ACTIVE_LAYERS = {
-  // VoronoiLayer: true,
-  LineDistanceFieldLayer: true
+  VoronoiLayer: true
   // 'ChoroplethLayer (Contour)': true,
   // ScatterplotLayer: true
   // 'ScatterplotLayer64 10M': true
