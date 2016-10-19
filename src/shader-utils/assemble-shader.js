@@ -36,7 +36,7 @@ export function getPlatformShaderDefines(gl) {
 #define INTEL_GPU
 #define INTEL_FP64_WORKAROUND 1
 #define NVIDIA_EQUATION_WORKAROUND 1\n \
-#define INTEL_LOG_WORKAROUND 1
+#define INTEL_TAN_WORKAROUND 1
 `;
   } else if (checkRendererVendor(debugInfo, 'amd')) {
     platformDefines += `\
