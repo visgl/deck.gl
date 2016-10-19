@@ -428,7 +428,7 @@ export default class Viewport {
       2 * Math.atan((this.height / 2) / this.altitude),
       this.width / this.height,
       0.1,
-      this.farZ
+      this.farZ * 10.0
     );
 
     // Move camera to altitude
