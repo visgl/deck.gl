@@ -60,7 +60,7 @@ export function ChoroplethLayerExample(props) {
     opacity: 0.01,
     isPickable: true,
     onHover: props.onChoroplethHovered,
-    lick: props.onChoroplethClicked
+    onClick: props.onChoroplethClicked
   });
 }
 
@@ -191,7 +191,7 @@ export function ChoroplethLayer64SolidExample(props) {
     opacity: 0.01,
     isPickable: true,
     onHover: props.onChoroplethHovered,
-    lick: props.onChoroplethClicked
+    onClick: props.onChoroplethClicked
   });
 }
 
@@ -208,7 +208,7 @@ export function EnhancedChoroplethLayerExample(props) {
     opacity: 0.01,
     isPickable: true,
     onHover: props.onChoroplethHovered,
-    lick: props.onChoroplethClicked
+    onClick: props.onChoroplethClicked
   });
 }
 
