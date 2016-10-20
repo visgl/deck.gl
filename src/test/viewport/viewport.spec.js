@@ -1,5 +1,5 @@
 import test from 'tape-catch';
-import {mat4, vec2} from 'gl-matrix';
+import {vec2} from 'gl-matrix';
 import Viewport from '../../viewport';
 
 /* eslint-disable */
@@ -51,16 +51,16 @@ test('Viewport#constructor - 0 width/height', t => {
   t.end();
 });
 
-test('Viewport#projection matrix', t => {
-  for (const testData of VIEWPORT_TEST_DATA) {
-    const viewport = new Viewport(testData.mapState);
-    const projectionMatrix = viewport.getProjectionMatrix();
+// test('Viewport#projection matrix', t => {
+//   for (const testData of VIEWPORT_TEST_DATA) {
+//     const viewport = new Viewport(testData.mapState);
+//     const projectionMatrix = viewport.getProjectionMatrix();
 
-    t.ok(mat4.equals(projectionMatrix, testData.matrixZoomed),
-      'Viewport gets expected matrix');
-  }
-  t.end();
-});
+//     t.ok(mat4.equals(projectionMatrix, testData.matrixZoomed),
+//       'Viewport gets expected matrix');
+//   }
+//   t.end();
+// });
 
 test('Viewport.project#3D', t => {
   for (const testData of VIEWPORT_TEST_DATA) {
