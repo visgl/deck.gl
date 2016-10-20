@@ -20,8 +20,15 @@ All notable changes to deck.gl will be documented in this file.
 
 ### Beta-3.0.0 Releases
 
+#### [3.0.0-beta22] -
+ - FIX: Perspective projection matrix "far plane" now covers negative Z coords
+ - FEATURE: Improved precision trigonometry library for Intel GPUs
+ - FEATURE: ChoroplethLayer64
+ - FEATURE: Experimental "Cone Based" VoronoiLayer
+ - CHANGE: shaderAssembler system reorganization
+
 #### [3.0.0-beta21] -
- - FIX: Now takes layer props into account when generating projection uniforms 
+ - FIX: Now takes layer props into account when generating projection uniforms
 
 #### [3.0.0-beta20] -
  - DOCUMENTATION: Article updates
