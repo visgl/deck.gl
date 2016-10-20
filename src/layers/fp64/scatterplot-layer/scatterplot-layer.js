@@ -17,7 +17,7 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-import {BaseLayer, assembleShader} from '../../../lib';
+import {Layer, assembleShaders} from '../../../lib';
 import {Model, Program, Geometry} from 'luma.gl';
 import {fp64ify} from '../../../lib/utils/fp64';
 
@@ -28,7 +28,7 @@ const defaultGetPosition = x => x.position;
 const defaultGetRadius = x => x.radius;
 const defaultGetColor = x => x.color || DEFAULT_COLOR;
 
-export default class ScatterplotLayer extends BaseLayer {
+export default class ScatterplotLayer extends Layer {
   /*
    * @classdesc
    * ScatterplotLayer
@@ -52,7 +52,7 @@ export default class ScatterplotLayer extends BaseLayer {
   }
 
   initializeState() {
-    const {gl} = this.state;
+    const {gl} = this.context;
     const {attributeManager} = this.state;
 
     this.setState({
@@ -96,11 +96,11 @@ export default class ScatterplotLayer extends BaseLayer {
     }
 
     return new Model({
-      program: new Program(gl, {
-        vs: assembleShader(gl, {vs: glslify('./scatterplot-layer-vertex.glsl')}),
-        fs: glslify('./scatterplot-layer-fragment.glsl'),
-        id: 'scatterplot-fp64'
-      }),
+      id: this.props.id,
+      program: new Program(gl, assembleShaders(gl, {
+        vs: glslify('./scatterplot-layer-vertex.glsl'),
+        fs: glslify('./scatterplot-layer-fragment.glsl')
+      })),
       geometry: new Geometry({
         drawMode: 'TRIANGLE_FAN',
         positions: new Float32Array(positions)

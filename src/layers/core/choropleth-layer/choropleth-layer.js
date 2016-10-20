@@ -18,8 +18,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {BaseLayer, assembleShader} from '../../../lib';
-import {Model, Program, Geometry} from 'luma.gl';
+import {Layer, assembleShaders} from '../../../lib';
+import {GL, Model, Program, Geometry} from 'luma.gl';
 
 const glslify = require('glslify');
 
@@ -31,7 +31,7 @@ const DEFAULT_COLOR = [0, 0, 255];
 
 const defaultGetColor = feature => feature.properties.color;
 
-export default class ChoroplethLayer extends BaseLayer {
+export default class ChoroplethLayer extends Layer {
   /**
    * @classdesc
    * ChoroplethLayer
@@ -54,11 +54,12 @@ export default class ChoroplethLayer extends BaseLayer {
   }
 
   initializeState() {
-    const {gl, attributeManager} = this.state;
+    const {gl} = this.context;
 
     const model = this.getModel(gl);
     model.userData.strokeWidth = this.props.strokeWidth;
 
+    const {attributeManager} = this.state;
     attributeManager.addDynamic({
       // Primtive attributes
       indices: {size: 1, update: this.calculateIndices, isIndexed: true},
@@ -100,19 +101,18 @@ export default class ChoroplethLayer extends BaseLayer {
 
   getModel(gl) {
     return new Model({
-      program: new Program(gl, {
-        vs: assembleShader(gl, {vs: glslify('./choropleth-layer-vertex.glsl')}),
-        fs: glslify('./choropleth-layer-fragment.glsl'),
-        id: 'choropleth'
-      }),
+      id: this.props.id,
+      program: new Program(gl, assembleShaders(gl, {
+        vs: glslify('./choropleth-layer-vertex.glsl'),
+        fs: glslify('./choropleth-layer-fragment.glsl')
+      })),
       geometry: new Geometry({
-        id: this.props.id,
         drawMode: this.props.drawContour ? 'LINES' : 'TRIANGLES'
       }),
       vertexCount: 0,
       isIndexed: true,
       onBeforeRender() {
-        this.userData.oldStrokeWidth = gl.getParameter(gl.LINE_WIDTH);
+        this.userData.oldStrokeWidth = gl.getParameter(GL.LINE_WIDTH);
         this.program.gl.lineWidth(this.userData.strokeWidth);
       },
       onAfterRender() {
@@ -148,7 +148,7 @@ export default class ChoroplethLayer extends BaseLayer {
     );
 
     attribute.value = new IndexType(flattenDeep(indices));
-    attribute.target = this.state.gl.ELEMENT_ARRAY_BUFFER;
+    attribute.target = GL.ELEMENT_ARRAY_BUFFER;
     this.state.model.setVertexCount(attribute.value.length / attribute.size);
   }
 

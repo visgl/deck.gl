@@ -17,7 +17,7 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-import {BaseLayer, assembleShader} from '../../../lib';
+import {Layer, assembleShaders} from '../../../lib';
 import {Model, Program, CylinderGeometry} from 'luma.gl';
 
 const glslify = require('glslify');
@@ -29,7 +29,7 @@ const _getElevation = x => x.elevation || 0;
 const _getColor = x => x.color || DEFAULT_COLOR;
 const _getVertices = x => x.vertices;
 
-export default class HexagonLayer extends BaseLayer {
+export default class HexagonLayer extends Layer {
   /**
    * @classdesc
    * HexagonLayer
@@ -44,7 +44,6 @@ export default class HexagonLayer extends BaseLayer {
    * @param {function} opts.onHexagonClicked(index, e) - popup selected index
    */
   constructor({
-    id = 'hexagon-layer',
     dotRadius = 10,
     elevation = 100,
     vertices,
@@ -55,7 +54,6 @@ export default class HexagonLayer extends BaseLayer {
     ...opts
   } = {}) {
     super({
-      id,
       dotRadius,
       elevation,
       vertices,
@@ -68,7 +66,8 @@ export default class HexagonLayer extends BaseLayer {
   }
 
   initializeState() {
-    const {gl, attributeManager} = this.state;
+    const {gl} = this.context;
+    const {attributeManager} = this.state;
 
     this.setState({
       model: this.getModel(gl)
@@ -105,25 +104,22 @@ export default class HexagonLayer extends BaseLayer {
   }
 
   getModel(gl) {
-    const geometry = new CylinderGeometry({
-      radius: 1,
-      topRadius: 1,
-      bottomRadius: 1,
-      topCap: true,
-      bottomCap: true,
-      height: 1,
-      nradial: 6,
-      nvertical: 1
-    });
-
     return new Model({
       id: this.props.id,
-      program: new Program(gl, {
-        vs: assembleShader(gl, {vs: glslify('./hexagon-layer-vertex.glsl')}),
-        fs: glslify('./hexagon-layer-fragment.glsl'),
-        id: 'hexagon'
+      program: new Program(gl, assembleShaders(gl, {
+        vs: glslify('./hexagon-layer-vertex.glsl'),
+        fs: glslify('./hexagon-layer-fragment.glsl')
+      })),
+      geometry: new CylinderGeometry({
+        radius: 1,
+        topRadius: 1,
+        bottomRadius: 1,
+        topCap: true,
+        bottomCap: true,
+        height: 1,
+        nradial: 6,
+        nvertical: 1
       }),
-      geometry,
       isInstanced: true
     });
   }

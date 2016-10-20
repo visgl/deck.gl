@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {BaseLayer, assembleShader} from '../../../lib';
+import {Layer, assembleShaders} from '../../../lib';
 import {Model, Program, Geometry} from 'luma.gl';
 const glslify = require('glslify');
 
@@ -28,7 +28,7 @@ const defaultGetPosition = x => x.position;
 const defaultGetRadius = x => x.radius;
 const defaultGetColor = x => x.color || DEFAULT_COLOR;
 
-export default class VoronoiLayer extends BaseLayer {
+export default class VoronoiLayer extends Layer {
   /*
    * @classdesc
    * VoronoiLayer
@@ -54,7 +54,7 @@ export default class VoronoiLayer extends BaseLayer {
   }
 
   initializeState() {
-    const {gl} = this.state;
+    const {gl} = this.context;
     const {attributeManager} = this.state;
 
     this.setState({
@@ -94,11 +94,11 @@ export default class VoronoiLayer extends BaseLayer {
     positions = [0, 0, 1, ...positions, 1, 0, 0];
 
     return new Model({
-      program: new Program(gl, {
-        id: 'voronoi',
-        vs: assembleShader(gl, {vs: glslify('./voronoi-layer-vertex.glsl')}),
+      id: this.props.id,
+      program: new Program(gl, assembleShaders(gl, {
+        vs: glslify('./voronoi-layer-vertex.glsl'),
         fs: glslify('./voronoi-layer-fragment.glsl')
-      }),
+      })),
       geometry: new Geometry({
         drawMode: 'TRIANGLE_FAN',
         positions: new Float32Array(positions)

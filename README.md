@@ -11,7 +11,7 @@ Design goals:
 - Provide highly performant data visualization overlays in 2 and 3 dimensions.
 - Provide tested, highly performant layers for basic data visualization
   use cases, scatterplots, choropleths etc.
-- Allows easy creation of custom WebGL layers by subclassing `BaseLayer`.
+- Allows easy creation of custom WebGL layers by subclassing `Layer`.
 - Support efficient WebGL rendering in "data flow architecture" applications
   (i.e. React).
 - Special focus on buffer management, allowing both automatic buffer updates

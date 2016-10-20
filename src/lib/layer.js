@@ -23,8 +23,7 @@ import AttributeManager from './attribute-manager';
 import {addIterator, areEqualShallow, log} from './utils';
 import isDeepEqual from 'lodash.isequal';
 import assert from 'assert';
-import {Viewport} from '../viewport';
-import {fp64ify} from '../lib/utils/fp64';
+
 /*
  * @param {string} props.id - layer name
  * @param {array}  props.data - array of data instances
@@ -34,34 +33,24 @@ import {fp64ify} from '../lib/utils/fp64';
  * @param {bool} props.opacity - opacity of the layer
  */
 const DEFAULT_PROPS = {
-  key: 0,
-  opacity: 0.8,
-  numInstances: undefined,
   data: [],
+  dataIterator: null,
+  numInstances: undefined,
+  deepCompare: false,
   visible: true,
   pickable: false,
-  // Deprecated: isPickable
-  isPickable: false,
-  deepCompare: false,
-  mercatorEnabled: false,
-  getValue: x => x,
+  opacity: 0.8,
   onHover: () => {},
   onClick: () => {},
+  getValue: x => x,
   // Update triggers: a key change detection mechanism in deck.gl
-  //
-  // The value of `updateTriggers` is a map with fields corresponding to
-  // attribute names (or `all`). Each field has a value which is an object,
-  // it can contain any amount of data. The data for each field is compared
-  // shallowly, and if a change is detected, the attribute is invalidated
-  // (all attributes are invalidated if the `all` key is used.)
-  // Note: updateTriggers are ignored by normal shallow comparison, so it is
-  // OK for the app to mint a new object on every render.
+  // See layer documentation
   updateTriggers: {}
 };
 
 let counter = 0;
 
-export default class BaseLayer {
+export default class Layer {
   /**
    * @classdesc
    * Base Layer class
@@ -76,7 +65,8 @@ export default class BaseLayer {
       ...DEFAULT_PROPS,
       ...props,
       // Accept null as data - otherwise apps will need to add ugly checks
-      data: props.data || []
+      data: props.data || [],
+      id: props.id || this.constructor.name
     };
 
     // Add iterator to objects
@@ -87,21 +77,32 @@ export default class BaseLayer {
       assert(props.data[Symbol.iterator], 'data prop must have an iterator');
     }
 
-    this.props = props;
     this.id = props.id;
     this.count = counter++;
+    this.props = props;
+    this.oldProps = null;
+    this.state = null;
+    this.context = null;
+    Object.seal(this);
 
     this.checkRequiredProp('data');
     this.checkRequiredProp('id', x => typeof x === 'string');
 
     // TODO - inject viewport from overlay instead of creating for each layer?
-    this.checkRequiredProp('width', Number.isFinite);
-    this.checkRequiredProp('height', Number.isFinite);
-    this.checkRequiredProp('latitude', Number.isFinite);
-    this.checkRequiredProp('longitude', Number.isFinite);
-    this.checkRequiredProp('zoom', Number.isFinite);
-    this.checkOptionalProp('pitch', Number.isFinite);
-    this.checkOptionalProp('bearing', Number.isFinite);
+    const hasViewportProps =
+      props.width !== undefined ||
+      props.height !== undefined ||
+      props.latitude !== undefined ||
+      props.longitude !== undefined ||
+      props.zoom !== undefined ||
+      props.pitch !== undefined ||
+      props.bearing !== undefined;
+    if (hasViewportProps) {
+      /* eslint-disable no-console */
+      // /* global console */
+      // console.warn(
+      //   `deck.gl v3 no longer needs viewport props in Layer ${this.id}`);
+    }
   }
   /* eslint-enable max-statements */
 
@@ -110,10 +111,10 @@ export default class BaseLayer {
 
   // Called once to set up the initial state
   initializeState() {
+    throw new Error(`Layer ${this.id} has not defined initializeState`);
   }
 
-  // gl context is now available
-  didMount() {
+  finalizeState() {
   }
 
   shouldUpdate(oldProps, newProps) {
@@ -149,8 +150,17 @@ export default class BaseLayer {
     }
   }
 
-  // gl context still available
-  willUnmount() {
+  // Implement to generate sublayers
+  renderSublayers() {
+    return null;
+  }
+
+  // If state has a model, draw it with supplied uniforms
+  draw(uniforms = {}) {
+    const {model} = this.state;
+    if (model) {
+      model.render(uniforms);
+    }
   }
 
   // END LIFECYCLE METHODS
@@ -179,7 +189,7 @@ export default class BaseLayer {
     this.state.needsRedraw = this.state.needsRedraw && !clearRedrawFlags;
 
     redraw = redraw || attributeManager.getNeedsRedraw({clearRedrawFlags});
-    redraw = redraw || model.getNeedsRedraw({clearRedrawFlags});
+    redraw = redraw || (model && model.getNeedsRedraw({clearRedrawFlags}));
     return redraw;
   }
 
@@ -217,37 +227,39 @@ export default class BaseLayer {
    * @return {Array|TypedArray} - x, y coordinates
    */
   project(lngLat) {
-    const {mercator} = this.state;
+    const {viewport} = this.context;
     assert(Array.isArray(lngLat), 'Layer.project needs [lng,lat]');
-    return mercator.project(lngLat);
+    return viewport.project(lngLat);
   }
 
   unproject(xy) {
-    const {mercator} = this.state;
+    const {viewport} = this.context;
     assert(Array.isArray(xy), 'Layer.unproject needs [x,y]');
-    return mercator.unproject(xy);
+    return viewport.unproject(xy);
   }
 
   projectFlat(lngLat) {
-    const {mercator} = this.state;
+    const {viewport} = this.context;
     assert(Array.isArray(lngLat), 'Layer.project needs [lng,lat]');
-    return mercator.projectFlat(lngLat);
+    return viewport.projectFlat(lngLat);
   }
 
   unprojectFlat(xy) {
-    const {mercator} = this.state;
+    const {viewport} = this.context;
     assert(Array.isArray(xy), 'Layer.unproject needs [x,y]');
-    return mercator.unprojectFlat(xy);
+    return viewport.unprojectFlat(xy);
   }
 
   // INTERNAL METHODS
 
-  draw(uniforms = {}) {
-    const {model} = this.state;
-    if (model) {
-      const viewportUniforms = this.state.mercator.getUniforms(this.props);
-      model.render({...uniforms, ...viewportUniforms});
-    }
+  // Calculates uniforms
+  drawLayer(uniforms = {}) {
+    assert(this.context.viewport, 'Layer missing context.viewport');
+    const viewportUniforms = this.context.viewport.getUniforms(this.props);
+    uniforms = {...uniforms, ...viewportUniforms};
+    // Call lifecycle method
+    this.draw(uniforms);
+    // End lifecycle method
   }
 
   // Deduces numer of instances. Intention is to support:
@@ -294,9 +306,8 @@ export default class BaseLayer {
 
   // Called by layer manager when a new layer is found
   /* eslint-disable max-statements */
-  initializeLayer({gl}) {
-    assert(gl);
-    this.state = {gl};
+  initializeLayer() {
+    assert(this.context.gl);
 
     // Initialize state only once
     this.setState({
@@ -317,28 +328,23 @@ export default class BaseLayer {
         {size: 3, update: this.calculateInstancePickingColors}
     });
 
-    this._setViewport();
+    // Call subclass lifecycle method
     this.initializeState();
-    assert(this.state.model, 'Model must be set in initializeState');
-    this._setViewport();
-
-    // TODO - the app must be able to override
+    // End subclass lifecycle method
 
     // Add any subclass attributes
     this._updateAttributes(this.props);
     this._updateBaseUniforms();
 
     const {model} = this.state;
-    model.setInstanceCount(this.getNumInstances());
-    model.id = this.props.id;
-    model.program.id = `${this.props.id}-program`;
-    model.geometry.id = `${this.props.id}-geometry`;
-
-    // Create a model for the layer
-    this._updateModel({gl});
-
-    // Call life cycle method
-    this.didMount();
+    if (model) {
+      model.setInstanceCount(this.getNumInstances());
+      model.id = this.props.id;
+      model.program.id = `${this.props.id}-program`;
+      model.geometry.id = `${this.props.id}-geometry`;
+      model.setAttributes(attributeManager.getAttributes());
+      model.setPickable(this.props.isPickable);
+    }
   }
   /* eslint-enable max-statements */
 
@@ -349,10 +355,6 @@ export default class BaseLayer {
 
     // Check if any props have changed
     if (this.shouldUpdate(oldProps, newProps)) {
-      if (this.state.viewportChanged) {
-        this._setViewport();
-      }
-
       // Let the subclass mark what is needed for update
       this.willReceiveProps(oldProps, newProps);
       // Run the attribute updaters
@@ -372,7 +374,9 @@ export default class BaseLayer {
   // Called by manager when layer is about to be disposed
   // Note: not guaranteed to be called on application shutdown
   finalizeLayer() {
-    this.willUnmount();
+    // Call subclass lifecycle method
+    this.finalizeState();
+    // End subclass lifecycle method
   }
 
   calculateInstancePickingColors(attribute, {numInstances}) {
@@ -445,17 +449,7 @@ export default class BaseLayer {
       this.state.dataChanged = true;
     }
 
-    const viewportChanged =
-      newProps.width !== oldProps.width ||
-      newProps.height !== oldProps.height ||
-      newProps.latitude !== oldProps.latitude ||
-      newProps.longitude !== oldProps.longitude ||
-      newProps.zoom !== oldProps.zoom ||
-      newProps.bearing !== oldProps.bearing ||
-      newProps.pitch !== oldProps.pitch ||
-      newProps.altitude !== oldProps.altitude;
-
-    this.setState({viewportChanged});
+    this.setState({viewportChanged: this.context.viewportChanged});
   }
 
   _updateAttributes(props) {
@@ -522,44 +516,33 @@ export default class BaseLayer {
     }
   }
 
-  // INTERNAL METHODS
-  _updateModel({gl}) {
-    const {model, attributeManager, uniforms} = this.state;
-
-    assert(model);
-    model.setAttributes(attributeManager.getAttributes());
-    model.setUniforms(uniforms);
-    // whether current layer responds to mouse events
-    model.setPickable(this.props.isPickable);
-  }
-
   // MAP LAYER FUNCTIONALITY
-  _setViewport() {
-    const {
-      width, height, latitude, longitude, zoom, pitch, bearing, altitude,
-      mercatorEnabled = true, disableMercatorProject
-    } = this.props;
+  // _setViewport() {
+  //   const {
+  //     width, height, latitude, longitude, zoom, pitch, bearing, altitude,
+  //     mercatorEnabled = true, disableMercatorProject
+  //   } = this.props;
 
-    if (disableMercatorProject !== undefined) {
-      throw new Error('disableMercatorProject renamed to mercatorEnabled');
-    }
+  //   if (disableMercatorProject !== undefined) {
+  //     throw new Error('disableMercatorProject renamed to mercatorEnabled');
+  //   }
 
-    // TODO - pass in as prop so we don't have to recalculate in every layer
-    const viewport = new Viewport({
-      width, height, latitude, longitude, zoom, pitch, bearing, altitude,
-      tileSize: 512
-    });
+  //   // TODO - pass in as prop so we don't have to recalculate in every layer
+  //   const viewport = new Viewport({
+  //     width, height, latitude, longitude, zoom, pitch, bearing, altitude,
+  //     tileSize: 512
+  //   });
 
-    this.setState({mercator: viewport});
-    // TODO - "private" viewport.center member...
-    this.setUniforms({
-      mercatorEnabled: mercatorEnabled ? 1 : 0,
-      mercatorScale: Math.pow(2, zoom),
-      mercatorScaleFP64: fp64ify(Math.pow(2, zoom)),
-      mercatorCenter: viewport.center,
-      ...viewport.getUniforms(this.props)
-    });
+  //   this.setState({mercator: viewport});
+  //   // TODO - "private" viewport.center member...
+  //   this.setUniforms({
+  //     mercatorEnabled: mercatorEnabled ? 1 : 0,
+  //     mercatorScale: Math.pow(2, zoom),
+  //     mercatorScaleFP64: fp64ify(Math.pow(2, zoom)),
+  //     mercatorCenter: viewport.center,
+  //     ...viewport.getUniforms(this.props)
+  //   });
 
-    log(3, this.state.viewport, latitude, longitude, zoom);
-  }
+  //   log(3, this.state.viewport, latitude, longitude, zoom);
+  // }
 }

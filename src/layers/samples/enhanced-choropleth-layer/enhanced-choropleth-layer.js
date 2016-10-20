@@ -1,8 +1,8 @@
-import {Layer, assembleShader} from '../../../lib';
+import {Layer, assembleShaders} from '../../../lib';
 import earcut from 'earcut';
 import flattenDeep from 'lodash.flattendeep';
 import normalize from 'geojson-normalize';
-import {Model, Program, Geometry} from 'luma.gl';
+import {GL, Model, Program, Geometry} from 'luma.gl';
 
 import extrudePolyline from 'extrude-polyline';
 
@@ -23,7 +23,6 @@ export default class ChoroplethLayer extends Layer {
    *     selected choropleth, together with the mouse event when mouse clicked
    */
   constructor({
-    id = 'enhanced-choropleth-layer',
     drawContour = true,
     opacity = 1,
     strokeColor = [0, 0, 0],
@@ -34,7 +33,6 @@ export default class ChoroplethLayer extends Layer {
     ...props
   }) {
     super({
-      id,
       drawContour,
       opacity,
       strokeColor,
@@ -47,7 +45,8 @@ export default class ChoroplethLayer extends Layer {
   }
 
   initializeState() {
-    const {gl, attributeManager} = this.state;
+    const {gl} = this.context;
+    const {attributeManager} = this.state;
 
     attributeManager.add({
       positions: {size: 3, 0: 'x', 1: 'y', 2: 'unused'},
@@ -91,17 +90,11 @@ export default class ChoroplethLayer extends Layer {
   getModel(gl) {
     return new Model({
       id: this.props.id,
-      program: new Program(gl, {
-        /* eslint-disable max-len */
-
-        vs: assembleShader(gl, {vs: VERTEX_SHADER}),
+      program: new Program(gl, assembleShaders(gl, {
+        vs: VERTEX_SHADER,
         fs: FRAGMENT_SHADER
-        /* eslint-enable max-len */
-      }),
-      geometry: new Geometry({
-        // drawMode: this.props.drawContour ? 'LINES' : 'TRIANGLES'
-        drawMode: 'TRIANGLES'
-      }),
+      })),
+      geometry: new Geometry({drawMode: 'TRIANGLES'}),
       vertexCount: 0,
       isIndexed: true
     });
@@ -145,7 +138,7 @@ export default class ChoroplethLayer extends Layer {
       );
 
     attribute.value = new Uint16Array(flattenDeep(indices));
-    attribute.target = this.state.gl.ELEMENT_ARRAY_BUFFER;
+    attribute.target = GL.ELEMENT_ARRAY_BUFFER;
     // attribute.isIndexed = true;
 
     this.state.model.setVertexCount(attribute.value.length / attribute.size);

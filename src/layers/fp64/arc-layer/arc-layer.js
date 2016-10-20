@@ -18,8 +18,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {BaseLayer, assembleShader} from '../../../lib';
-import {Model, Program, Geometry} from 'luma.gl';
+import {Layer, assembleShaders} from '../../../lib';
+import {GL, Model, Program, Geometry} from 'luma.gl';
 import {fp64ify} from '../../../lib/utils/fp64';
 
 const glslify = require('glslify');
@@ -30,7 +30,7 @@ const defaultGetSourcePosition = x => x.sourcePosition;
 const defaultGetTargetPosition = x => x.targetPosition;
 const defaultGetColor = x => x.color;
 
-export default class ArcLayer extends BaseLayer {
+export default class ArcLayer extends Layer {
   /**
    * @classdesc
    * ArcLayer
@@ -57,7 +57,8 @@ export default class ArcLayer extends BaseLayer {
   }
 
   initializeState() {
-    const {gl, attributeManager} = this.state;
+    const {gl} = this.context;
+    const {attributeManager} = this.state;
 
     const model = this.createModel(gl);
     model.userData.strokeWidth = this.props.strokeWidth;
@@ -83,21 +84,19 @@ export default class ArcLayer extends BaseLayer {
     for (let i = 0; i < NUM_SEGMENTS; i++) {
       positions = [...positions, i, i, i];
     }
-
     return new Model({
-      program: new Program(gl, {
-        vs: assembleShader(gl, {vs: glslify('./arc-layer-vertex.glsl')}),
-        fs: glslify('./arc-layer-fragment.glsl'),
-        id: 'arc-fp64'
-      }),
+      id: this.props.id,
+      program: new Program(gl, assembleShaders(gl, {
+        vs: glslify('./arc-layer-vertex.glsl'),
+        fs: glslify('./arc-layer-fragment.glsl')
+      })),
       geometry: new Geometry({
-        id: 'arc-fp64',
         drawMode: 'LINE_STRIP',
         positions: new Float32Array(positions)
       }),
       isInstanced: true,
       onBeforeRender() {
-        this.userData.oldStrokeWidth = gl.getParameter(gl.LINE_WIDTH);
+        this.userData.oldStrokeWidth = gl.getParameter(GL.LINE_WIDTH);
         this.program.gl.lineWidth(this.userData.strokeWidth || 1);
       },
       onAfterRender() {

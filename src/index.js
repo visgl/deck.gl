@@ -24,8 +24,3 @@ export * from './layers/core';
 export * from './layers/fp64';
 
 export {Viewport} from './viewport';
-
-// Deprecated
-export {BaseLayer} from './lib';
-export {default as DeckGL} from './react/deckgl';
-export {default as DeckGLOverlay} from './react/deckgl';

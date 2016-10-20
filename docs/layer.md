@@ -1,30 +1,74 @@
 # Layer Class
 
-The `Layer` class is the base class of all deck.gl layers. It defines
-the life cycle of the layers, and provides a number of methods
+The `Layer` class is the base class of all deck.gl layers, and it provides
+a number of **base properties** which all layers support.
+
+Note: The properties of the `Layer` class (which is what matters to the user
+of a layer) are described in this document.
+The layer class also defines the lifecycle methods of the layers, as well as
+a a couple of support methods which the lifecycle methods can use. These are
+important only when subclassing layers and are therefore described separetely.
 
 
-## Common Parameters
+## `Layer` Properties
 
 
-### `id` (string, required): layer ID
+### `id` (string, optional): layer id
+
+The id must be unique among all your layers. The layer's id defaults to the
+`Layer` class name. If you have more than one instance of the same
+`Layer` subclass you must supply unique id strings.
+
+Note that for sublayers, the actual layer id is going to be the supplied
+layer id appended to the parent layer's (i.e. the composite layer's) id,
+which helps avoid id collisions in this case.
+
+E.g. assuming a composite GeoJsonLayer layer that renders two sublayers,
+choropleths and lines, with those ids:
+```
+   new GeoJsonLayer({id: 'street-grid'});
+```
+Will generate the following layers and ids:
+```
+   GeoJsonLayer:'street-grid'
+   ChoroplethLayer:'street-grid-choropleth'
+   LineLayer:'street-grid-choropleth'
+```
+
+React Note: `id` is similar to the `key` property used in React to match
+components between rendering calls.
 
 
-### `viewport` (Viewport, optional, default=injected)
+### `viewport` (Viewport, optional, default=injected from context)
 
-Viewport
+Viewport can be supplied to override the context supplied viewport.
 
 
 ### `pickable` [bool, optional, default=false]
 
-Whether layer responds to mouse events
+Whether layer responds to mouse events.
 
 
 ### `visible` [bool, optional, default=true] whether layer is drawn
 
-For performance reasons it is sometimes better to control layer visibility
-with a flag rather than not rendering them, as the latter approach will cause
-the layer state to be destroyed and regenerated.
+For performance reasons it is often better to control layer visibility
+with the `visible` prop rather than through conditional rendering.
+
+Compare:
+```
+   const layers = [
+   	 new MyLayer({visible: showMyLayer});
+   ];
+```
+with
+```
+   const layers = [];
+   if (showMyLayer) {
+   	 new MyLayer({visible: showMyLayer});
+   }
+```
+In the second example (conditional rendering) the layer state will
+be destroyed and regenerated every time the showMyLayer flag changes.
 
 
 ### `opacity` (number, required)
@@ -33,28 +77,113 @@ The opacity of the layer. deck.gl automatically applies gamma to the opacity
 in an attempt to make opacity changes appear linear (i.e. the opacity is
 visually proportional to the value of the prop.)
 
-It is up to each layer's fragment shader to implement support for opacity.
+Note: While it is a recommended convention that all deck.gl layers should
+support the opacity prop, it is up to each layer's fragment shader
+to implement support for opacity.
 
 
-### data
+### `projectionMode` (number, optional)
 
-The data prop contains an iterable JavaScript container, see [Symbol.iterator].
+Specifies how layer positions and offsets should be interpreted.
+
+The default is to interpret positions as latitude and longitude, however it
+is also possible to interpret positions as meter offsets from the
+`projectionCenter` prop.
+
+See the article on Coordinate Systems for details.
 
 
-### dataIterator
+### `projectionCenter` ([Number, Number], optional)
 
-Normally the iterator for data is extracted by looking at [Symbol.iterator]
-field of the supplied container. Sometimes it is valuable
+Required when the `projectionMode` is in meter offsets.
 
-deck.gl supplies an object iterator making it possible to use objects directly
-as `data` props in deck.gl, even though the JavaScript language not providing
-such facilities.
+Specifies a longitude and a latitude from which meter offsets are calculated.
 
-### deepEqual
+See the article on Coordinate Systems for details
+
+
+### `viewMatrix` (Number[16], optional)
+
+An optional 4x4 matrix that is premultiplied into the affine projection
+matrices used by shader `project` GLSL function and the Viewport's `project`
+and `unproject` JavaScript function.
+
+Allows local coordinate system transformations to be applied to a layer,
+which is useful when composing data from multiple sources that use
+different coordinate systems.
+
+Note that the matrix projection is applied after the non-linear mercator
+projection calculations are resolved, so be careful when using view matrices
+with lng/lat encoded coordinates.
+
+
+### data (Iterable Object or Array, optional)
+
+The data prop should contain an iterable JavaScript container,
+please see JavaScript `[Symbol.iterator]`.
+
+Note: To avoid forcing applications to add checks during rendering
+while e.g. initializing asynchronous data, deck.gl allows data to be
+omitted or supplied as null (or undefined). These cases are treated
+as if an empty array had been supplied.
+
+
+### dataIterator (ES6 Iterator, optional)
+
+Normally the iterator for data is extracted by looking at the
+`[Symbol.iterator]` field of the supplied container. Sometimes
+`[Symbol.iterator]` is not defined, or doesn't provide the desired
+iteration order, so deck.gl allows you to supply your own iterator.
+
+Note: deck.gl even supplies an object iterator (`objectValueIterator`)
+making it possible to use objects directly as `data` props in deck.gl
+without first converting them to arrays.
+
+```
+   import {ScatterplotLayer, objectValueIterator} from `deck.gl`;
+   new ScatterplotLayer({
+     data: {element1: [0, 0], element2: [1, 1]},
+     dataIterator: objectValueIterator
+   });
+```
+
+
+### deepEqual (Boolean, optional, false)
 
 This prop causes the `data` prop to be compared using deep equality.
-This has a considerable performance impact and should only be used
-for small data sets.
+This has considerable performance impact and should only be used
+as a temporary solution for small data sets until the application can be
+refactored to avoid the need for it.
+
+
+### numInstances (Number, optional)
+
+deck.gl is often able to autodetect the number of objects in your `data` prop,
+however in special situations it can be useful to control this directly.
+
+
+### onHover (Function, optional)
+
+This callback will be called when the mouse hovers over a feature drawn
+by the layer (assuming it is not occluded by any succeeding layers).
+
+The function will be called with a single parameter `info`, which is an
+object that contains a variety of fields describing the hover event and
+what was hovered.
+
+Requires 'pickable' to be true.
+
+
+### onClick (Function, optional)
+
+This callback will be called when the mouse hovers over a feature drawn
+by the layer (assuming it is not occluded by any succeeding layers).
+
+The function will be called with a single parameter `info`, which is an
+object that contains a variety of fields describing the click event and
+what was hovered.
+
+Requires 'pickable' to be true.
 
 
 ### updateTriggers
@@ -67,6 +196,15 @@ attribute will be invalidated.
 This way, if an attribute update depends on properties other than data,
 the layer can ensure that the attribute gets autoupdated when those props
 change.
+
+The value of `updateTriggers` is a map with fields corresponding to
+attribute names (or `all`). Each field has a value which is an object,
+it can contain any amount of data. The data for each field is compared
+shallowly, and if a change is detected, the attribute is invalidated
+(all attributes are invalidated if the `all` key is used.)
+
+Note: updateTriggers are ignored by the normal shallow comparison, so it is
+OK for the app to mint a new object on every render.
 
 
 ### "attributes" properties
@@ -88,5 +226,3 @@ This allows an application to supply its own buffers properties.
 If attributes are shared between layers, a useful technique is to create
 a separate AttributeManager and calculate the attributes once, and then
 pass them in as "overrides" to the layers.
-
-

@@ -22,7 +22,7 @@
 /* global console */
 import React, {PropTypes} from 'react';
 import autobind from 'autobind-decorator';
-import {createGLContext, addEvents, Fx, glGet} from 'luma.gl';
+import {GL, createGLContext, addEvents, Fx, glGet} from 'luma.gl';
 import throttle from 'lodash.throttle';
 
 const PROP_TYPES = {
@@ -44,20 +44,12 @@ const PROP_TYPES = {
   onError: PropTypes.func,
 
   onRenderFrame: PropTypes.func,
-  onBeforeRenderFrame: PropTypes.func,
-  onAfterRenderFrame: PropTypes.func,
-  onRenderPickingScene: PropTypes.func,
-  onBeforeRenderPickingScene: PropTypes.func,
-  onAfterRenderPickingScene: PropTypes.func,
-
-  onNeedRedraw: PropTypes.func,
   onMouseMove: PropTypes.func,
   onClick: PropTypes.func
 };
 
 const DEFAULT_PROPS = {
   style: {},
-
   gl: null,
   debug: false,
 
@@ -67,13 +59,6 @@ const DEFAULT_PROPS = {
     throw error;
   },
   onRenderFrame: () => {},
-  onBeforeRenderFrame: () => {},
-  onAfterRenderFrame: () => {},
-  onRenderPickingScene: () => {},
-  onBeforeRenderPickingScene: () => {},
-  onAfterRenderPickingScene: () => {},
-
-  onNeedRedraw: () => true,
   onMouseMove: () => {},
   onClick: () => {}
 };
@@ -171,14 +156,6 @@ export default class WebGLRenderer extends React.Component {
       return;
     }
 
-    // Note: Do this after gl check, in case onNeedRedraw clears flags
-    if (!this.props.onNeedRedraw()) {
-      return;
-    }
-
-    // clear depth and color buffers
-    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-
     // update viewport to latest props
     // (typically changed by app on browser resize etc)
     gl.viewport(
@@ -190,16 +167,14 @@ export default class WebGLRenderer extends React.Component {
 
     // setup bledning
     if (enable) {
-      gl.enable(gl.BLEND);
+      gl.enable(GL.BLEND);
       gl.blendFunc(...blendFunc.map(s => glGet(gl, s)));
       gl.blendEquation(glGet(gl, blendEquation));
     } else {
-      gl.disable(gl.BLEND);
+      gl.disable(GL.BLEND);
     }
 
-    this.props.onBeforeRenderFrame({gl});
     this.props.onRenderFrame({gl});
-    this.props.onAfterRenderFrame({gl});
   }
   /* eslint-enable max-statements */
 

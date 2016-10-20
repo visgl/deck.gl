@@ -17,7 +17,7 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-import {BaseLayer, assembleShader} from '../../../lib';
+import {Layer, assembleShaders} from '../../../lib';
 import {Model, Program, Geometry} from 'luma.gl';
 
 const glslify = require('glslify');
@@ -28,7 +28,7 @@ const defaultGetPosition = x => x.position;
 const defaultGetRadius = x => x.radius;
 const defaultGetColor = x => x.color || DEFAULT_COLOR;
 
-export default class ScatterplotLayer extends BaseLayer {
+export default class ScatterplotLayer extends Layer {
   /*
    * @classdesc
    * ScatterplotLayer
@@ -54,29 +54,28 @@ export default class ScatterplotLayer extends BaseLayer {
   }
 
   initializeState() {
-    const {gl} = this.state;
+    const {gl} = this.context;
+    this.setState({model: this._getModel(gl)});
+
     const {attributeManager} = this.state;
-
-    this.setState({
-      model: this.getModel(gl)
-    });
-
     attributeManager.addInstanced({
       instancePositions: {size: 4, update: this.calculateInstancePositions},
       instanceColors: {size: 3, update: this.calculateInstanceColors}
     });
   }
 
-  didMount() {
-    this.updateUniforms();
-  }
-
   willReceiveProps(oldProps, newProps) {
     super.willReceiveProps(oldProps, newProps);
-    this.updateUniforms();
   }
 
-  getModel(gl) {
+  draw({uniforms}) {
+    this.state.model.render({
+      ...uniforms,
+      radius: this.props.radius
+    });
+  }
+
+  _getModel(gl) {
     const NUM_SEGMENTS = 16;
     const PI2 = Math.PI * 2;
 
@@ -91,37 +90,19 @@ export default class ScatterplotLayer extends BaseLayer {
     }
 
     return new Model({
-      program: new Program(gl, {
-        vs: assembleShader(gl, {vs: glslify('./scatterplot-layer-vertex.glsl')}),
-        fs: glslify('./scatterplot-layer-fragment.glsl'),
-        id: 'scatterplot'
-      }),
+      id: 'scatterplot',
+      program: new Program(gl,
+        assembleShaders(gl, {
+          vs: glslify('./scatterplot-layer-vertex.glsl'),
+          fs: glslify('./scatterplot-layer-fragment.glsl')
+        })
+      ),
       geometry: new Geometry({
         drawMode: 'TRIANGLE_FAN',
         positions: new Float32Array(positions)
       }),
       isInstanced: true
     });
-  }
-
-  updateUniforms() {
-    this.setUniforms({
-      radius: this.props.radius
-    });
-  }
-
-  calculateRadius() {
-    // use radius if specified
-    if (this.props.radius) {
-      this.state.radius = this.props.radius;
-      return;
-    }
-
-    // const pixel0 = this.projectFlat([-122, 37.5]);
-    // const pixel1 = this.projectFlat([-122, 37.5002]);
-
-    // const dx = pixel0[0] - pixel1[0];
-    // const dy = pixel0[1] - pixel1[1];
   }
 
   calculateInstancePositions(attribute) {

@@ -52,6 +52,37 @@ and ensure that you return the picking color when `renderPickingColors`
 uniform is set. Alternatively call the `layerColor` method on your
 fragment color before assigning to `gl_FragColor`.
 
+Note that the picking color must be rendered exactly as is with an alpha
+channel of 1. Beware blending in opacity as it can result in the rendered
+color not matching the picking color, causing the wrong index to be picked.
+
+Compare (bad)
+```
+   gl_FragColor = vec4(
+     mix(
+   	  instanceColor.rgb,
+   	  instancePickingColor,
+   	  renderPickingBuffer
+     ),
+     opacity
+   );
+```
+vs (good)
+```
+   gl_FragColor = mix(
+   	vec4(instanceColor.rgb, instanceColor.a * opacity),
+   	vec4(instancePickingColor, 1.),
+   	renderPickingBuffer
+   );
+```
+
+## Build Concerns
+
+You need to decide how to organize your shader code. If you decide to use
+the [glslify](https://github.com/stackgl/glslify) tool you will need to
+install that module and add the required transform or plugin to your
+application build process.
+
 
 ## Optional Features
 
@@ -126,4 +157,6 @@ fixes for) graphics cards from both
 ### math
 
 Contains basic math functions
+
+
 

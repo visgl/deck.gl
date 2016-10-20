@@ -23,13 +23,13 @@ import React, {PropTypes} from 'react';
 import autobind from 'autobind-decorator';
 
 import WebGLRenderer from './webgl-renderer';
-import {Group} from 'luma.gl';
+import {GL, Group} from 'luma.gl';
 // import {pickModels} from 'luma.gl';
-import {pickModels} from '../lib/pick-models';
 import {DEFAULT_BLENDING} from './config';
-import Viewport from '../viewport';
-import {updateLayers, drawLayers, layersNeedRedraw, getLayerPickingModels}
-  from '../lib';
+import {LayerManager} from '../lib';
+// TODO - picking needs to be better integrated
+import {pickModels} from '../lib/pick-models';
+import {log} from '../lib/utils';
 
 // TODO - move default to WebGL renderer
 const DEFAULT_PIXEL_RATIO =
@@ -75,24 +75,34 @@ export default class DeckGL extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    const {gl} = this.state;
-    updateLayers({
-      oldLayers: this.props.layers,
-      newLayers: nextProps.layers,
-      gl
-    });
+    this._updateLayers(nextProps);
+  }
+
+  _updateLayers(nextProps) {
+    const {
+      width, height, latitude, longitude, zoom, pitch, bearing, altitude
+    } = nextProps;
+    const {layerManager} = this.state;
+
+    if (layerManager) {
+      layerManager
+        .updateLayers({newLayers: nextProps.layers})
+        .setContext({
+          width, height, latitude, longitude, zoom, pitch, bearing, altitude
+        });
+    }
   }
 
   @autobind _onRendererInitialized({gl}) {
     this.props.onWebGLInitialized(gl);
-    // Note: Triggers React component update, rerending updated layers
-    this.setState({gl});
-    // Note: throws on error, don't adjust state after this call
-    updateLayers({
-      oldLayers: [],
-      newLayers: this.props.layers,
-      gl
-    });
+
+    // Note: set state now in case updateLayers throws on error
+    // Note: setState triggers React component update, rerending updated layers
+    // TODO - is the second comment relevant?
+    const layerManager = new LayerManager({gl});
+    this.setState({layerManager, gl});
+    layerManager.updateLayers({newLayers: this.props.layers});
+    this._updateLayers(this.props);
   }
 
   // Route events to layers
@@ -117,40 +127,31 @@ export default class DeckGL extends React.Component {
     }
   }
 
-  @autobind _onNeedRedraw() {
-    const {layers} = this.props;
-    return layersNeedRedraw(layers, {clearRedrawFlags: true});
-  }
+  @autobind _onRenderFrame({gl}) {
+    const {layerManager} = this.state;
+    // Note: Do this after gl check, in case onNeedRedraw clears flags
 
-  @autobind _onRenderFrame() {
-    const {layers} = this.props;
-    return drawLayers({layers, uniforms: this._getUniforms()});
+    if (!layerManager.needsRedraw({clearRedrawFlags: true})) {
+      return;
+    }
+
+    log(1, 'rendering frame');
+
+    // clear depth and color buffers
+    gl.clear(GL.COLOR_BUFFER_BIT | GL.DEPTH_BUFFER_BIT);
+
+    layerManager.drawLayers();
   }
 
   _pick(x, y) {
-    const {gl} = this.state;
-    const {layers, pixelRatio} = this.props;
-
+    const {pixelRatio} = this.props;
+    const {gl, layerManager} = this.state;
     const pickedModels = pickModels(gl, {
       x: x * pixelRatio,
       y: y * pixelRatio,
-      group: new Group({children: getLayerPickingModels(layers)}),
-      uniforms: this._getUniforms()
+      group: new Group({children: layerManager.getLayerPickingModels()})
     });
-
     return pickedModels;
-  }
-
-  _getUniforms() {
-    const {
-      width, height, latitude, longitude, zoom, pitch, bearing, altitude
-    } = this.props;
-
-    const viewport = new Viewport({
-      width, height, latitude, longitude, zoom, pitch, bearing, altitude
-    });
-
-    return viewport.getUniforms();
   }
 
   render() {

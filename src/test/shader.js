@@ -245,8 +245,8 @@ function test_float_add(gl, testName) {
   const float_ref_vec2 = fp64ify(float_ref);
 
   const program = new Program(gl, {
-    vs: getPlatformShaderDefines(gl) + glslify('./test_shader/vs_float_add.glsl'),
-    fs: glslify('./test_shader/fs.glsl')
+    vs: getPlatformShaderDefines(gl) + glslify('./shader-tests/vs_float_add.glsl'),
+    fs: glslify('./shader-tests/fs.glsl')
   });
 
   program.use();
@@ -281,8 +281,8 @@ function test_float_sub(gl, testName) {
   const float_ref_vec2 = fp64ify(float_ref);
 
   const program = new Program(gl, {
-    vs: getPlatformShaderDefines(gl) + glslify('./test_shader/vs_float_sub.glsl'),
-    fs: glslify('./test_shader/fs.glsl')
+    vs: getPlatformShaderDefines(gl) + glslify('./shader-tests/vs_float_sub.glsl'),
+    fs: glslify('./shader-tests/fs.glsl')
   });
 
   program.use();
@@ -318,8 +318,8 @@ function test_float_mul(gl, testName) {
   const float_ref_vec2 = fp64ify(float_ref);
 
   const program = new Program(gl, {
-    vs: getPlatformShaderDefines(gl) + glslify('./test_shader/vs_float_mul.glsl'),
-    fs: glslify('./test_shader/fs.glsl')
+    vs: getPlatformShaderDefines(gl) + glslify('./shader-tests/vs_float_mul.glsl'),
+    fs: glslify('./shader-tests/fs.glsl')
   });
 
   program.use();
@@ -354,8 +354,8 @@ function test_float_div(gl, testName) {
   const float_ref_vec2 = fp64ify(float_ref);
 
   const program = new Program(gl, {
-    vs: getPlatformShaderDefines(gl) + glslify('./test_shader/vs_float_div.glsl'),
-    fs: glslify('./test_shader/fs.glsl')
+    vs: getPlatformShaderDefines(gl) + glslify('./shader-tests/vs_float_div.glsl'),
+    fs: glslify('./shader-tests/fs.glsl')
   });
 
   program.use();
@@ -388,8 +388,8 @@ function test_float_sqrt(gl, testName) {
   const float_ref_vec2 = fp64ify(float_ref);
 
   const program = new Program(gl, {
-    vs: getPlatformShaderDefines(gl) + glslify('./test_shader/vs_float_sqrt.glsl'),
-    fs: glslify('./test_shader/fs.glsl')
+    vs: getPlatformShaderDefines(gl) + glslify('./shader-tests/vs_float_sqrt.glsl'),
+    fs: glslify('./shader-tests/fs.glsl')
   });
 
   program.use();
@@ -421,8 +421,8 @@ function test_float_exp(gl, testName) {
   const float_ref_vec2 = fp64ify(float_ref);
 
   const program = new Program(gl, {
-    vs: getPlatformShaderDefines(gl) + glslify('./test_shader/vs_float_exp.glsl'),
-    fs: glslify('./test_shader/fs.glsl')
+    vs: getPlatformShaderDefines(gl) + glslify('./shader-tests/vs_float_exp.glsl'),
+    fs: glslify('./shader-tests/fs.glsl')
   });
 
   program.use();
@@ -454,8 +454,8 @@ function test_float_log(gl, testName) {
   const float_ref_vec2 = fp64ify(float_ref);
 
   const program = new Program(gl, {
-    vs: getPlatformShaderDefines(gl) + glslify('./test_shader/vs_float_log.glsl'),
-    fs: glslify('./test_shader/fs.glsl')
+    vs: getPlatformShaderDefines(gl) + glslify('./shader-tests/vs_float_log.glsl'),
+    fs: glslify('./shader-tests/fs.glsl')
   });
 
   program.use();
@@ -488,8 +488,8 @@ function test_float_sin(gl, testName) {
   const float_ref_vec2 = fp64ify(float_ref);
 
   const program = new Program(gl, {
-    vs: getPlatformShaderDefines(gl) + glslify('./test_shader/vs_float_sin.glsl'),
-    fs: glslify('./test_shader/fs.glsl')
+    vs: getPlatformShaderDefines(gl) + glslify('./shader-tests/vs_float_sin.glsl'),
+    fs: glslify('./shader-tests/fs.glsl')
   });
 
   program.use();
@@ -521,8 +521,8 @@ function test_float_cos(gl, testName) {
   const float_ref_vec2 = fp64ify(float_ref);
 
   const program = new Program(gl, {
-    vs: getPlatformShaderDefines(gl) + glslify('./test_shader/vs_float_cos.glsl'),
-    fs: glslify('./test_shader/fs.glsl')
+    vs: getPlatformShaderDefines(gl) + glslify('./shader-tests/vs_float_cos.glsl'),
+    fs: glslify('./shader-tests/fs.glsl')
   });
 
   program.use();
@@ -554,8 +554,8 @@ function test_float_tan(gl, testName) {
   const float_ref_vec2 = fp64ify(float_ref);
 
   const program = new Program(gl, {
-    vs: getPlatformShaderDefines(gl) + glslify('./test_shader/vs_float_tan.glsl'),
-    fs: glslify('./test_shader/fs.glsl')
+    vs: getPlatformShaderDefines(gl) + glslify('./shader-tests/vs_float_tan.glsl'),
+    fs: glslify('./shader-tests/fs.glsl')
   });
 
   program.use();

@@ -1,1 +1,1 @@
-import './base-layer.spec';
+import './layer.spec';

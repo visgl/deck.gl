@@ -1,5 +1,5 @@
-import {Layer, assembleShader} from '../../../lib';
-import {GL, Model, Program, Geometry} from 'luma.gl';
+import {Layer, assembleShaders} from '../../../lib';
+import {Model, Program, Geometry} from 'luma.gl';
 
 import VERTEX_SHADER from './point-cloud-layer-vertex';
 import FRAGMENT_SHADER from './point-cloud-layer-fragment';
@@ -18,7 +18,7 @@ export default class PointCloudLayer extends Layer {
   }
 
   initializeState() {
-    const {gl} = this.state;
+    const {gl} = this.context;
     const {attributeManager} = this.state;
 
     this.setState({
@@ -44,19 +44,14 @@ export default class PointCloudLayer extends Layer {
   }
 
   getModel(gl) {
-    const model = new Model({
-      program: new Program(gl, {
-        vs: assembleShader(gl, {vs: VERTEX_SHADER}),
-        fs: FRAGMENT_SHADER,
-        id: 'scatterplot'
-      }),
-      geometry: new Geometry({
-        drawMode: 'POINTS'
-      })
-      // vertexCount: 0,
+    return new Model({
+      id: this.props.id,
+      program: new Program(gl, assembleShaders(gl, {
+        vs: VERTEX_SHADER,
+        fs: FRAGMENT_SHADER
+      })),
+      geometry: new Geometry({drawMode: 'POINTS'})
     });
-    model.geometry.drawMode = GL.POINTS;
-    return model;
   }
 
   updateUniforms() {

@@ -17,8 +17,8 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-import {BaseLayer, assembleShader} from '../../../lib';
-import {Model, Program, Geometry} from 'luma.gl';
+import {Layer, assembleShaders} from '../../../lib';
+import {GL, Model, Program, Geometry} from 'luma.gl';
 
 const glslify = require('glslify');
 
@@ -28,7 +28,7 @@ const defaultGetSourcePosition = x => x.sourcePosition;
 const defaultGetTargetPosition = x => x.targetPosition;
 const defaultGetColor = x => x.color || DEFAULT_COLOR;
 
-export default class LineLayer extends BaseLayer {
+export default class LineLayer extends Layer {
   /**
    * @classdesc
    * LineLayer
@@ -53,12 +53,10 @@ export default class LineLayer extends BaseLayer {
   }
 
   initializeState() {
-    const {gl, attributeManager} = this.state;
+    const {gl} = this.context;
+    this.setState({model: this.createModel(gl)});
 
-    const model = this.createModel(gl);
-    model.userData.strokeWidth = this.props.strokeWidth;
-    this.setState({model});
-
+    const {attributeManager} = this.state;
     attributeManager.addInstanced({
       instancePositions: {size: 4, update: this.calculateInstancePositions},
       instanceColors: {size: 3, update: this.calculateInstanceColors}
@@ -70,23 +68,31 @@ export default class LineLayer extends BaseLayer {
     this.state.model.userData.strokeWidth = nextProps.strokeWidth;
   }
 
+  draw({uniforms}) {
+    this.state.model.render(
+      uniforms,
+      {
+        lineWidth: this.props.strokeWidth
+      }
+    );
+  }
+
   createModel(gl) {
     const positions = [0, 0, 0, 1, 1, 1];
 
     return new Model({
-      program: new Program(gl, {
-        vs: assembleShader(gl, {vs: glslify('./line-layer-vertex.glsl')}),
-        fs: glslify('./line-layer-fragment.glsl'),
-        id: 'line'
-      }),
+      id: this.props.id,
+      program: new Program(gl, assembleShaders(gl, {
+        vs: glslify('./line-layer-vertex.glsl'),
+        fs: glslify('./line-layer-fragment.glsl')
+      })),
       geometry: new Geometry({
-        id: 'line',
         drawMode: 'LINE_STRIP',
         positions: new Float32Array(positions)
       }),
       isInstanced: true,
       onBeforeRender() {
-        this.userData.oldStrokeWidth = gl.getParameter(gl.LINE_WIDTH);
+        this.userData.oldStrokeWidth = gl.getParameter(GL.LINE_WIDTH);
         this.program.gl.lineWidth(this.userData.strokeWidth || 1);
       },
       onAfterRender() {

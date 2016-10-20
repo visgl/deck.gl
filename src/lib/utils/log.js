@@ -14,5 +14,5 @@ log.log = log;
 
 // Expose to browser
 if (typeof window !== 'undefined') {
-  window.log = log;
+  window.deck = window.deck || {log};
 }

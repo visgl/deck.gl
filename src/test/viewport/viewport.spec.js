@@ -1,35 +1,9 @@
 import test from 'tape-catch';
-import {mat4, vec2} from 'gl-matrix';
+import {vec2} from 'gl-matrix';
 import Viewport from '../../viewport';
 
 /* eslint-disable */
 const VIEWPORT_TEST_DATA = [
-// {
-//   mapState: {
-//     height: 389,
-//     width: 1821,
-//     latitude: 37.751537058389985,
-//     longitude: -122.42694203247012,
-//     zoom: 11.5,
-//     bearing: 0,
-//     pitch: 0,
-//     altitude: 1.5
-//   },
-//   matrixZoomed: new Float32Array([
-//     0.0016474464579901227, 0, 0, 0,
-//     0, -0.0077120822622108315, 0, 0,
-//     0, 0, -0.0029379360998898277, -0.002570694087403599,
-//     -390.6996450744531, 4421.318644674351, 1.5, 1.5
-//   ]),
-//   matrixWorld: new Float32Array([
-//     7.816546440124512, -5.682946681976318, -1.9806208610534668,
-//     -1.808401107788086,
-//     -7.678424835205078, -5.785172939300537, -2.0162487030029297,
-//     -1.8409311771392822,
-//     0, 7.7417097091674805, -2.9606006145477295, -2.703169345855713,
-//     879.8411865234375, 1610.45068359375, 562.7077026367188, 513.97021484375
-//   ])
-// },
   {
     mapState: {
       width: 793,
@@ -77,27 +51,13 @@ test('Viewport#constructor - 0 width/height', t => {
   t.end();
 });
 
-test('Viewport#projection matrix', t => {
-  for (const testData of VIEWPORT_TEST_DATA) {
-    const viewport = new Viewport(testData.mapState);
-    const projectionMatrix = viewport.getProjectionMatrix();
-
-    t.ok(mat4.equals(projectionMatrix, testData.matrixZoomed),
-      'Viewport gets expected matrix');
-  }
-  t.end();
-});
-
-// test('Viewport.projectFlat', t => {
+// test('Viewport#projection matrix', t => {
 //   for (const testData of VIEWPORT_TEST_DATA) {
-//     // Remove bearing pitch and altitude
-//     const {mapState: {...mapState}} = testData;
-//     const viewport = new Viewport(mapState);
-//     const vmp = new ViewportMercatorProject(mapState);
-//     const xy = viewport.projectFlat([mapState.longitude, mapState.latitude]);
-//     const xy2 = vmp.project([mapState.longitude, mapState.latitude]);
-//     t.comment(`Comparing [${xy2}] [${xy}]`);
-//     t.ok(vec2.equals(xy, xy2));
+//     const viewport = new Viewport(testData.mapState);
+//     const projectionMatrix = viewport.getProjectionMatrix();
+
+//     t.ok(mat4.equals(projectionMatrix, testData.matrixZoomed),
+//       'Viewport gets expected matrix');
 //   }
 //   t.end();
 // });
@@ -113,18 +73,3 @@ test('Viewport.project#3D', t => {
   }
   t.end();
 });
-
-// test('Viewport.project', t => {
-//   for (const testData of VIEWPORT_TEST_DATA) {
-//     // Remove bearing pitch and altitude
-//     const {mapState: {...mapState}} = testData;
-//     const viewport = new Viewport(mapState);
-//     const vmp = new ViewportMercatorProject(mapState);
-//     const xy = viewport.project(
-//       [mapState.longitude, mapState.latitude], {});
-//     const xy2 = vmp.project([mapState.longitude, mapState.latitude]);
-//     t.comment(`Comparing [${xy2}] [${xy}]`);
-//     t.ok(vec2.equals(xy, xy2));
-//   }
-//   t.end();
-// });
