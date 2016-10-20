@@ -57,7 +57,8 @@ export default class ArcLayer extends Layer {
   }
 
   initializeState() {
-    const {gl, attributeManager} = this.state;
+    const {gl} = this.context;
+    const {attributeManager} = this.state;
 
     const model = this.createModel(gl);
     model.userData.strokeWidth = this.props.strokeWidth;

@@ -23,7 +23,6 @@ export default class ChoroplethLayer extends Layer {
    *     selected choropleth, together with the mouse event when mouse clicked
    */
   constructor({
-    id = 'enhanced-choropleth-layer',
     drawContour = true,
     opacity = 1,
     strokeColor = [0, 0, 0],
@@ -34,7 +33,6 @@ export default class ChoroplethLayer extends Layer {
     ...props
   }) {
     super({
-      id,
       drawContour,
       opacity,
       strokeColor,
@@ -47,7 +45,8 @@ export default class ChoroplethLayer extends Layer {
   }
 
   initializeState() {
-    const {gl, attributeManager} = this.state;
+    const {gl} = this.context;
+    const {attributeManager} = this.state;
 
     attributeManager.add({
       positions: {size: 3, 0: 'x', 1: 'y', 2: 'unused'},

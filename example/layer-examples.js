@@ -1,4 +1,3 @@
-/* global window */
 import {
   ChoroplethLayer,
   ScatterplotLayer,
@@ -14,112 +13,72 @@ import {
 } from '../src/layers/fp64';
 
 import {
+  GeoJsonLayer,
   HexagonLayer,
   EnhancedChoroplethLayer,
   PointCloudLayer,
   VoronoiLayer
 } from '../src/layers/samples';
 
-export function ArcLayerExample(props) {
-  const {mapViewState, arcs} = props;
-
-  return new ArcLayer({
-    id: props.id || 'arcLayer',
-    width: window.innerWidth,
-    height: window.innerHeight,
-    ...mapViewState,
-    data: arcs,
+const ArcLayerExample = props =>
+  new ArcLayer({
+    data: props.arcs,
     strokeWidth: props.arcStrokeWidth || 1,
-    isPickable: true,
+    pickable: true,
     onHover: props.onArcHovered,
     onClick: props.onArcClicked
   });
-}
 
-export function ChoroplethLayerContourExample(props) {
-  const {mapViewState, choropleths} = props;
-  return new ChoroplethLayer({
+const ChoroplethLayerContourExample = props =>
+  new ChoroplethLayer({
     id: props.id || 'choroplethContourLayer',
-    width: window.innerWidth,
-    height: window.innerHeight,
-    ...mapViewState,
-    data: choropleths,
+    data: props.choropleths,
     opacity: 0.8,
     drawContour: true
   });
-}
 
-export function ChoroplethLayerExample(props) {
-  const {mapViewState, choropleths} = props;
-  return new ChoroplethLayer({
-    id: props.id || 'choroplethLayer',
-    width: window.innerWidth,
-    height: window.innerHeight,
-    ...mapViewState,
-    data: choropleths,
+const ChoroplethLayerExample = props =>
+  new ChoroplethLayer({
+    data: props.choropleths,
     opacity: 0.01,
-    isPickable: true,
+    pickable: true,
     onHover: props.onChoroplethHovered,
     onClick: props.onChoroplethClicked
   });
-}
 
-export function GridLayerExample(props) {
-  const {mapViewState, points} = props;
-
-  return new GridLayer({
-    id: props.id || 'gridLayer',
-    width: window.innerWidth,
-    height: window.innerHeight,
-    ...mapViewState,
-    isPickable: false,
-    opacity: 0.06,
-    data: points
+const GridLayerExample = props =>
+  new GridLayer({
+    data: props.points,
+    pickable: false,
+    opacity: 0.06
   });
-}
 
-export function LineLayerExample(props) {
-  const {mapViewState, lines} = props;
-
-  return new LineLayer({
-    id: props.id || 'lineLayer',
-    width: window.innerWidth,
-    height: window.innerHeight,
-    ...mapViewState,
-    data: lines,
+const LineLayerExample = props =>
+  new LineLayer({
+    data: props.lines,
     strokeWidth: props.lineStrokeWidth || 1,
-    isPickable: true,
+    pickable: true,
     onHover: props.onLineHovered,
     onClick: props.onLineClicked
   });
-}
 
-export function ScatterplotLayerExample(props) {
-  const {mapViewState, points} = props;
-
-  return new ScatterplotLayer({
-    id: props.id || 'scatterplotLayer',
-    width: window.innerWidth,
-    height: window.innerHeight,
-    ...mapViewState,
-    data: points,
+const ScatterplotLayerExample = props =>
+  new ScatterplotLayer({
+    data: props.points,
     opacity: 0.5,
-    isPickable: true,
+    pickable: true,
     onHover: props.onScatterplotHovered,
     onClick: props.onScatterplotClicked
   });
-}
 
-export function ScatterplotLayerMeterExample(props) {
-  const {mapViewState} = props;
-
-  return new ScatterplotLayer({
+const ScatterplotLayerMeterExample = props =>
+  new ScatterplotLayer({
     id: props.id || 'scatterplotLayer-meters',
-    width: window.innerWidth,
-    height: window.innerHeight,
-    ...mapViewState,
     projectionMode: 2,
-    projectionCenter: [mapViewState.longitude, mapViewState.latitude],
+    projectionCenter: [
+      props.mapViewState.longitude,
+      props.mapViewState.latitude
+    ],
     data: [
       {position: [0, 0]},
       {position: [20, 20]},
@@ -128,152 +87,104 @@ export function ScatterplotLayerMeterExample(props) {
       {position: [1000, 1000]}
     ],
     opacity: 0.5,
-    isPickable: true,
+    pickable: true,
     onHover: props.onScatterplotHovered,
     onClick: props.onScatterplotClicked
   });
-}
+
+const GeoJsonLayerExample = props =>
+  new GeoJsonLayer({
+    id: props.id || 'geoJsonLayer',
+    data: props.choropleths,
+    opacity: 0.6,
+    pickable: true,
+    onHover: props.onChoroplethHovered,
+    onClick: props.onChoroplethClicked
+  });
 
 // 64 BIT LAYER EXAMPLES
 
-export function ScatterplotLayer64Example(props) {
-  const {mapViewState, points} = props;
-
-  return new ScatterplotLayer64({
+const ScatterplotLayer64Example = props =>
+  new ScatterplotLayer64({
     id: props.id || 'scatterplotLayer64',
-    width: window.innerWidth,
-    height: window.innerHeight,
-    ...mapViewState,
-    data: points,
-    isPickable: true,
+    data: props.points,
+    pickable: true,
     onHover: props.onScatterplotHovered,
     onClick: props.onScatterplotClicked
   });
-}
 
-export function ArcLayer64Example(props) {
-  const {mapViewState, arcs} = props;
-
-  return new ArcLayer64({
-    id: props.id || 'arcLayer64',
-    width: window.innerWidth,
-    height: window.innerHeight,
-    ...mapViewState,
-    data: arcs,
+const ArcLayer64Example = props =>
+  new ArcLayer64({
+    data: props.arcs,
     strokeWidth: props.arcStrokeWidth || 1,
-    isPickable: true,
+    pickable: true,
     onHover: props.onArcHovered,
     onClick: props.onArcClicked
   });
-}
 
-export function ChoroplethLayer64ContourExample(props) {
-  const {mapViewState, choropleths} = props;
-  return new ChoroplethLayer64({
+const ChoroplethLayer64ContourExample = props =>
+  new ChoroplethLayer64({
     id: props.id || 'choroplethContourLayer64',
-    width: window.innerWidth,
-    height: window.innerHeight,
-    ...mapViewState,
-    data: choropleths,
+    data: props.choropleths,
     opacity: 0.8,
     drawContour: true
   });
-}
 
-export function ChoroplethLayer64SolidExample(props) {
-  const {mapViewState, choropleths} = props;
-  return new ChoroplethLayer({
+const ChoroplethLayer64SolidExample = props =>
+  new ChoroplethLayer64({
     id: props.id || 'choroplethLayer64',
-    width: window.innerWidth,
-    height: window.innerHeight,
-    ...mapViewState,
-    data: choropleths,
+    data: props.choropleths,
     opacity: 0.01,
-    isPickable: true,
+    pickable: true,
     onHover: props.onChoroplethHovered,
     onClick: props.onChoroplethClicked
   });
-}
 
 // SAMPLE LAYER EXAMPLES
 
-export function EnhancedChoroplethLayerExample(props) {
-  const {mapViewState, choropleths} = props;
-  return new EnhancedChoroplethLayer({
-    id: props.id || 'enhanced-choroplethLayer',
-    width: window.innerWidth,
-    height: window.innerHeight,
-    ...mapViewState,
-    data: choropleths,
+const EnhancedChoroplethLayerExample = props =>
+  new EnhancedChoroplethLayer({
+    data: props.choropleths,
     opacity: 0.01,
-    isPickable: true,
+    pickable: true,
     onHover: props.onChoroplethHovered,
     onClick: props.onChoroplethClicked
   });
-}
 
-export function PointCloudLayerExample(props) {
-  const {mapViewState, points} = props;
-
-  return new PointCloudLayer({
-    id: props.id || 'experimentalScatterplotLayer',
-    width: window.innerWidth,
-    height: window.innerHeight,
-    ...mapViewState,
-    data: points,
+const PointCloudLayerExample = props =>
+  new PointCloudLayer({
+    data: props.points,
     opacity: 0.5,
-    isPickable: true,
+    pickable: true,
     onHover: props.onScatterplotHovered,
     onClick: props.onScatterplotClicked
   });
-}
 
-export function HexagonLayerExample(props) {
-  const {mapViewState, hexData} = props;
-
-  return new HexagonLayer({
-    id: props.id || 'hexagonLayer',
-    width: window.innerWidth,
-    height: window.innerHeight,
-    ...mapViewState,
-    data: hexData,
+const HexagonLayerExample = props =>
+  new HexagonLayer({
+    data: props.hexData,
     opacity: 0.5,
     elevation: 200,
-    isPickable: true,
+    pickable: true,
     onHover: props.onHexagonHovered,
     onClick: props.onHexagonClicked
   });
-}
 
-export function HexagonLayerSelectionExample(props) {
-  const {mapViewState} = props;
-  const {selectedHexagons} = props;
-
-  return new HexagonLayer({
+const HexagonLayerSelectionExample = props =>
+  new HexagonLayer({
     id: props.id || 'hexagonSelectionLayer',
-    width: window.innerWidth,
-    height: window.innerHeight,
-    ...mapViewState,
-    data: selectedHexagons,
+    data: props.selectedHexagons,
     opacity: 0.1,
     elevation: 200,
-    isPickable: false
+    pickable: false
   });
-}
 
 // let points100K = null;
-export function VoronoiLayerExample(props) {
-  const {mapViewState, points} = props;
-
-  return new VoronoiLayer({
-    id: props.id || 'voronoiLayer',
-    width: window.innerWidth,
-    height: window.innerHeight,
-    ...mapViewState,
-    data: points,
+const VoronoiLayerExample = props =>
+  new VoronoiLayer({
+    data: props.points,
     opacity: 1
   });
-}
 
 // Returns new array N times larger than input array
 // filled with duplicate elements
@@ -315,7 +226,7 @@ function makePoints(N = 1e6, color = [88, 220, 124]) {
 let points1M = null;
 function make1MPoints() {
   points1M = points1M || makePoints(1e6);
-  return {points: points1M, isPickable: false};
+  return {points: points1M, pickable: false};
 }
 
 let points10M = null;
@@ -323,13 +234,13 @@ function make10MPoints() {
   points10M = points10M || duplicateArray(makePoints(1e6, [124, 200, 10]), 10);
   // Too slow
   // points10M = makePoints(1e7, [124, 88, 220]);
-  return {points: points10M, isPickable: false};
+  return {points: points10M, pickable: false};
 }
 
 let points100K = null;
 function make100KPoints() {
   points100K = points100K || makePoints(1e5);
-  return {points: points100K, isPickable: false};
+  return {points: points100K, pickable: false};
 }
 
 export default {
@@ -351,6 +262,7 @@ export default {
   },
 
   'Sample Layers': {
+    GeoJsonLayer: GeoJsonLayerExample,
     HexagonLayer: HexagonLayerExample,
     'HexagonLayer (selection)': HexagonLayerSelectionExample,
     EnhancedChoroplethLayer: EnhancedChoroplethLayerExample,

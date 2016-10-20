@@ -108,11 +108,11 @@ export default class LayerManager {
     return models;
   }
 
-  needsRedraw(layers, {clearRedrawFlags = false} = {}) {
+  needsRedraw({clearRedrawFlags = false} = {}) {
     let redraw = false;
 
     // Make sure that buffer is cleared once when layer list becomes empty
-    if (layers.length === 0 && this.drewLayers) {
+    if (this.layers.length === 0 && this.drewLayers) {
       redraw = true;
     }
 
@@ -130,9 +130,12 @@ export function _updateLayers({oldLayers, newLayers, context}) {
   // Match all layers, checking for caught errors
   // To avoid having an exception in one layer disrupt other layers
   const {error, generatedLayers} = matchLayers(oldLayers, newLayers, context);
+  for (const layer of generatedLayers) {
+    layer.context = context;
+  }
   const error2 = finalizeOldLayers(oldLayers);
   const error3 = updateMatchedLayers(generatedLayers);
-  const error4 = initializeNewLayers(generatedLayers);
+  const error4 = initializeNewLayers(generatedLayers, context);
   const firstError = error || error2 || error3 || error4;
   return {error: firstError, generatedLayers};
 }
@@ -145,11 +148,6 @@ function layerName(layer) {
 }
 
 function matchLayers(oldLayers, newLayers, context) {
-  // set context
-  for (const newLayer of newLayers) {
-    newLayer.context = context;
-  }
-
   // Create old layer map
   const oldLayerMap = {};
   for (const oldLayer of oldLayers) {
@@ -160,14 +158,17 @@ function matchLayers(oldLayers, newLayers, context) {
   }
 
   const generatedLayers = [];
-  const error = matchSublayers({newLayers, oldLayerMap, generatedLayers});
+  const error = matchSublayers({
+    newLayers, oldLayerMap, generatedLayers, context
+  });
   return {generatedLayers, error};
 }
 
 /* eslint-disable max-statements */
-function matchSublayers({newLayers, oldLayerMap, generatedLayers}) {
+function matchSublayers({newLayers, oldLayerMap, generatedLayers, context}) {
   let error = null;
   for (const newLayer of newLayers) {
+    newLayer.context = context;
     try {
       // 1. given a new coming layer, find its matching layer
       const oldLayer = oldLayerMap[newLayer.id];
@@ -180,6 +181,7 @@ function matchSublayers({newLayers, oldLayerMap, generatedLayers}) {
         _transferLayerState(oldLayer, newLayer);
       }
 
+      initializeNewLayer(newLayer);
       generatedLayers.push(newLayer);
 
       // Call layer lifecycle method: render sublayers
@@ -191,7 +193,8 @@ function matchSublayers({newLayers, oldLayerMap, generatedLayers}) {
         matchSublayers({
           newLayers: sublayers,
           oldLayerMap,
-          generatedLayers
+          generatedLayers,
+          context
         });
       }
     } catch (err) {
@@ -226,28 +229,35 @@ function _transferLayerState(oldLayer, newLayer) {
 function initializeNewLayers(layers) {
   let error = null;
   for (const layer of layers) {
-    // Check if new layer, and initialize it's state
-    if (!layer.state && layer.context.gl) {
-      log(1, `initializing ${layerName(layer)}`);
-      try {
-        layer.state = {};
-        layer.initializeLayer();
-      } catch (err) {
-        console.error(
-          `deck.gl error during initialization of ${layerName(layer)} ${err}`,
-          err);
-        // Save first error
-        error = error || err;
-      }
-      // Set back pointer (used in picking)
-      if (layer.state) {
-        layer.state.layer = layer;
-        // Save layer on model for picking purposes
-        // TODO - store on model.userData rather than directly on model
-      }
-      if (layer.state && layer.state.model) {
-        layer.state.model.userData.layer = layer;
-      }
+    const layerError = initializeNewLayer(layer);
+    error = error || layerError;
+  }
+  return error;
+}
+
+function initializeNewLayer(layer) {
+  let error = null;
+  // Check if new layer, and initialize it's state
+  if (!layer.state) {
+    log(1, `initializing ${layerName(layer)}`);
+    try {
+      layer.state = {};
+      layer.initializeLayer();
+    } catch (err) {
+      console.error(
+        `deck.gl error during initialization of ${layerName(layer)} ${err}`,
+        err);
+      // Save first error
+      error = error || err;
+    }
+    // Set back pointer (used in picking)
+    if (layer.state) {
+      layer.state.layer = layer;
+      // Save layer on model for picking purposes
+      // TODO - store on model.userData rather than directly on model
+    }
+    if (layer.state && layer.state.model) {
+      layer.state.model.userData.layer = layer;
     }
   }
   return error;

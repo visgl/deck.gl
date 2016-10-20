@@ -32,7 +32,6 @@ export default class EnhancedHexagonLayer extends Layer {
    * @param {number} props.elevation - hexagon height
    */
   constructor({
-    id = 'enhanced-hexagon-layer',
     radius = 1,
     angle = 0,
     hexagonVertices,
@@ -49,7 +48,6 @@ export default class EnhancedHexagonLayer extends Layer {
   } = {}) {
     assert(hexagonVertices, 'hexagonVertices must be supplied');
     super({
-      id,
       radius,
       angle,
       hexagonVertices,
@@ -71,7 +69,8 @@ export default class EnhancedHexagonLayer extends Layer {
    * Essentially a deferred constructor
    */
   initializeState() {
-    const {gl, attributeManager} = this.state;
+    const {gl} = this.context;
+    const {attributeManager} = this.state;
 
     this.setState({
       model: this.getModel(gl)

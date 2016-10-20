@@ -44,7 +44,6 @@ export default class HexagonLayer extends Layer {
    * @param {function} opts.onHexagonClicked(index, e) - popup selected index
    */
   constructor({
-    id = 'hexagon-layer',
     dotRadius = 10,
     elevation = 100,
     vertices,
@@ -55,7 +54,6 @@ export default class HexagonLayer extends Layer {
     ...opts
   } = {}) {
     super({
-      id,
       dotRadius,
       elevation,
       vertices,
@@ -68,7 +66,8 @@ export default class HexagonLayer extends Layer {
   }
 
   initializeState() {
-    const {gl, attributeManager} = this.state;
+    const {gl} = this.context;
+    const {attributeManager} = this.state;
 
     this.setState({
       model: this.getModel(gl)

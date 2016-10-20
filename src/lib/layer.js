@@ -65,7 +65,8 @@ export default class Layer {
       ...DEFAULT_PROPS,
       ...props,
       // Accept null as data - otherwise apps will need to add ugly checks
-      data: props.data || []
+      data: props.data || [],
+      id: props.id || this.constructor.name
     };
 
     // Add iterator to objects
@@ -88,13 +89,20 @@ export default class Layer {
     this.checkRequiredProp('id', x => typeof x === 'string');
 
     // TODO - inject viewport from overlay instead of creating for each layer?
-    this.checkRequiredProp('width', Number.isFinite);
-    this.checkRequiredProp('height', Number.isFinite);
-    this.checkRequiredProp('latitude', Number.isFinite);
-    this.checkRequiredProp('longitude', Number.isFinite);
-    this.checkRequiredProp('zoom', Number.isFinite);
-    this.checkOptionalProp('pitch', Number.isFinite);
-    this.checkOptionalProp('bearing', Number.isFinite);
+    const hasViewportProps =
+      props.width !== undefined ||
+      props.height !== undefined ||
+      props.latitude !== undefined ||
+      props.longitude !== undefined ||
+      props.zoom !== undefined ||
+      props.pitch !== undefined ||
+      props.bearing !== undefined;
+    if (hasViewportProps) {
+      /* eslint-disable no-console */
+      // /* global console */
+      // console.warn(
+      //   `deck.gl v3 no longer needs viewport props in Layer ${this.id}`);
+    }
   }
   /* eslint-enable max-statements */
 
@@ -181,7 +189,7 @@ export default class Layer {
     this.state.needsRedraw = this.state.needsRedraw && !clearRedrawFlags;
 
     redraw = redraw || attributeManager.getNeedsRedraw({clearRedrawFlags});
-    redraw = redraw || model.getNeedsRedraw({clearRedrawFlags});
+    redraw = redraw || (model && model.getNeedsRedraw({clearRedrawFlags}));
     return redraw;
   }
 
@@ -329,13 +337,14 @@ export default class Layer {
     this._updateBaseUniforms();
 
     const {model} = this.state;
-    assert(model);
-    model.setInstanceCount(this.getNumInstances());
-    model.id = this.props.id;
-    model.program.id = `${this.props.id}-program`;
-    model.geometry.id = `${this.props.id}-geometry`;
-    model.setAttributes(attributeManager.getAttributes());
-    model.setPickable(this.props.isPickable);
+    if (model) {
+      model.setInstanceCount(this.getNumInstances());
+      model.id = this.props.id;
+      model.program.id = `${this.props.id}-program`;
+      model.geometry.id = `${this.props.id}-geometry`;
+      model.setAttributes(attributeManager.getAttributes());
+      model.setPickable(this.props.isPickable);
+    }
   }
   /* eslint-enable max-statements */
 
