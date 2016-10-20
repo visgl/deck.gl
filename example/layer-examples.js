@@ -183,7 +183,7 @@ export function ChoroplethLayer64ContourExample(props) {
 export function ChoroplethLayer64SolidExample(props) {
   const {mapViewState, choropleths} = props;
   return new ChoroplethLayer({
-    id: props.id || 'choroplethLayer',
+    id: props.id || 'choroplethLayer64',
     width: window.innerWidth,
     height: window.innerHeight,
     ...mapViewState,
