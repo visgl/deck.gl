@@ -2,50 +2,62 @@
 /* eslint-disable max-statements, no-try-catch */
 import {GL, glContextWithState, FramebufferObject} from 'luma.gl';
 
+/* eslint-disable max-depth */
 export function pickModels(gl, {
-  group,
+  layers,
   uniforms = {},
   x,
   y,
-  pickingFBO = null,
-  pickingProgram = null,
-  pickingColors = null
+  pixelRatio,
+  type
 }) {
   // Set up a frame buffer if needed
   // TODO - cache picking fbo (needs to be resized)?
-  pickingFBO = pickingFBO || new FramebufferObject(gl, {
+  const pickingFBO = new FramebufferObject(gl, {
     width: gl.canvas.width,
     height: gl.canvas.height
   });
 
-  const picked = [];
+  // Convert from canvas top-left to WebGL bottom-left coordinates
+  // And compensate for pixelRatio
+  x *= pixelRatio;
+  y = gl.canvas.height - y * pixelRatio;
+
+  // TODO - just return glContextWithState once luma updates
+  let value = null;
 
   // Make sure we clear scissor test and fbo bindings in case of exceptions
+  // We are only interested in one pixel, no need to render anything else
   glContextWithState(gl, {
     frameBuffer: pickingFBO,
-    // We are only interested in one pixel, no need to render anything else
-    scissorTest: {x, y: gl.canvas.height - y, w: 1, h: 1}
+    framebuffer: pickingFBO,
+    scissorTest: {x, y, w: 1, h: 1}
   }, () => {
-    for (let i = group.children.length - 1; i >= 0; --i) {
-      const model = group.children[i];
+    for (let i = layers.length - 1; i >= 0; --i) {
+      const layer = layers[i];
 
-      // Clear the frame buffer, render and sample
-      gl.clear(GL.COLOR_BUFFER_BIT | GL.DEPTH_BUFFER_BIT);
-      model.render(gl, {...uniforms, renderPickingBuffer: 1});
-
-      // Read color in the central pixel, to be mapped with picking colors
-      const color = new Uint8Array(4);
-      gl.readPixels(
-        x, gl.canvas.height - y, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, color
-      );
-
-      const isPicked =
-        color[0] !== 0 || color[1] !== 0 || color[2] !== 0 || color[3] !== 0;
-
-      // Add the information to the stack
-      picked.push({model, color, isPicked});
+      if (layer.props.pickable) {
+        // Clear the frame buffer, render and sample
+        gl.clear(GL.COLOR_BUFFER_BIT | GL.DEPTH_BUFFER_BIT);
+        const info = layer.pickLayer({uniforms, x, y});
+        if (info) {
+          info.layer = layer;
+          info.x = x;
+          info.y = y;
+          info.pixelRatio = pixelRatio;
+          switch (type) {
+          case 'click': layer.onClick(info); break;
+          case 'hover': layer.onHover(info); break;
+          default: break;
+          }
+          value = info;
+          return info;
+        }
+      }
     }
+    return null;
   });
 
-  return picked;
+  return value;
 }
+/* eslint-enable max-depth */

@@ -10,20 +10,10 @@ const dataVariants = [
 
 const LAYER_PROPS = {
   id: 'testLayer',
-  width: 1,
-  height: 1,
-  latitude: 1,
-  longitude: 1,
-  zoom: 1,
   data: []
 };
 const LAYER_PROPS_ZEROES = {
   id: 'testLayer',
-  width: 0,
-  height: 0,
-  latitude: 0,
-  longitude: 0,
-  zoom: 0,
   data: []
 };
 
