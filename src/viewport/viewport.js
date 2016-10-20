@@ -247,8 +247,7 @@ export default class Viewport {
       projectionCenter,
       projectionPixelsPerUnit: this.pixelsPerMeter,
       projectionMatrixCentered: this._glProjectionMatrix,
-      projectionMatrixUncentered: this._glProjectionMatrixUncentered,
-      _ONE: 1.0
+      projectionMatrixUncentered: this._glProjectionMatrixUncentered
     };
   }
 

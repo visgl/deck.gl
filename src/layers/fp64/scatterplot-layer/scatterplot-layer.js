@@ -109,14 +109,20 @@ export default class ScatterplotLayer extends Layer {
     });
   }
 
-  updateUniforms() {
-    this.calculateZoomRadius();
-    const {zoomRadiusFP64} = this.state;
-    const {zoom} = this.props;
+  // updateUniforms() {
+  //   this.calculateZoomRadius();
+  //   const {zoomRadiusFP64} = this.state;
+  //   const {zoom} = this.props;
 
-    this.setUniforms({
-      zoomRadiusFP64,
-      mercatorScaleFP64: fp64ify(Math.pow(2, zoom))
+  //   this.setUniforms({
+  //     zoomRadiusFP64
+  //   });
+  // }
+  draw({uniforms}) {
+    this.calculateZoomRadius();
+    this.state.model.render({
+      ...uniforms,
+      zoomRadiusFP64: this.state.zoomRadiusFP64
     });
   }
 
@@ -169,10 +175,6 @@ export default class ScatterplotLayer extends Layer {
 
   calculateZoomRadius() {
     // use radius if specified
-    if (this.props.radius) {
-      this.state.zoomRadiusFP64 = fp64ify(this.props.radius);
-      return;
-    }
 
     const pixel0 = this.projectFlat([-122, 37.5]);
     const pixel1 = this.projectFlat([-122, 37.5002]);
