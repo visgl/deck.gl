@@ -67,10 +67,6 @@ export default class ArcLayer extends Layer {
     });
   }
 
-  finalizeState() {
-    this.state.model.destroy();
-  }
-
   draw({uniforms}) {
     this.state.model.render(
       uniforms,

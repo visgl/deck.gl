@@ -37,7 +37,7 @@ import LayerInfo from './layer-info';
 
 import request from 'd3-request';
 import LAYER_CATEGORIES, {DEFAULT_ACTIVE_LAYERS} from './layer-examples';
-import DeckGL from '../react';
+import DeckGL from '../src/react/deckgl';
 
 // ---- Default Settings ---- //
 /* eslint-disable no-process-env */

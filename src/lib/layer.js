@@ -148,9 +148,7 @@ export default class Layer {
   draw(uniforms = {}) {
     const {model} = this.state;
     if (model) {
-      // TODO - the viewport uniforms should be derived outside this function
-      const viewportUniforms = this.state.mercator.getUniforms(this.props);
-      model.render({...uniforms, ...viewportUniforms});
+      model.render(uniforms);
     }
   }
 
@@ -218,30 +216,40 @@ export default class Layer {
    * @return {Array|TypedArray} - x, y coordinates
    */
   project(lngLat) {
-    const {mercator} = this.state;
+    const {viewport} = this.context;
     assert(Array.isArray(lngLat), 'Layer.project needs [lng,lat]');
-    return mercator.project(lngLat);
+    return viewport.project(lngLat);
   }
 
   unproject(xy) {
-    const {mercator} = this.state;
+    const {viewport} = this.context;
     assert(Array.isArray(xy), 'Layer.unproject needs [x,y]');
-    return mercator.unproject(xy);
+    return viewport.unproject(xy);
   }
 
   projectFlat(lngLat) {
-    const {mercator} = this.state;
+    const {viewport} = this.context;
     assert(Array.isArray(lngLat), 'Layer.project needs [lng,lat]');
-    return mercator.projectFlat(lngLat);
+    return viewport.projectFlat(lngLat);
   }
 
   unprojectFlat(xy) {
-    const {mercator} = this.state;
+    const {viewport} = this.context;
     assert(Array.isArray(xy), 'Layer.unproject needs [x,y]');
-    return mercator.unprojectFlat(xy);
+    return viewport.unprojectFlat(xy);
   }
 
   // INTERNAL METHODS
+
+  // Calculates uniforms
+  drawLayer(uniforms = {}) {
+    assert(this.context.viewport, 'Layer missing context.viewport');
+    const viewportUniforms = this.context.viewport.getUniforms(this.props);
+    uniforms = {...uniforms, ...viewportUniforms};
+    // Call lifecycle method
+    this.draw(uniforms);
+    // End lifecycle method
+  }
 
   // Deduces numer of instances. Intention is to support:
   // - Explicit setting of numInstances
@@ -311,16 +319,9 @@ export default class Layer {
         {size: 3, update: this.calculateInstancePickingColors}
     });
 
-    this._setViewport();
-
     // Call subclass lifecycle method
     this.initializeState();
     // End subclass lifecycle method
-
-    assert(this.state.model, 'Model must be set in initializeState');
-    this._setViewport();
-
-    // TODO - the app must be able to override
 
     // Add any subclass attributes
     this._updateAttributes(this.props);
@@ -344,10 +345,6 @@ export default class Layer {
 
     // Check if any props have changed
     if (this.shouldUpdate(oldProps, newProps)) {
-      if (this.state.viewportChanged) {
-        this._setViewport();
-      }
-
       // Let the subclass mark what is needed for update
       this.willReceiveProps(oldProps, newProps);
       // Run the attribute updaters
@@ -520,32 +517,32 @@ export default class Layer {
   }
 
   // MAP LAYER FUNCTIONALITY
-  _setViewport() {
-    const {
-      width, height, latitude, longitude, zoom, pitch, bearing, altitude,
-      mercatorEnabled = true, disableMercatorProject
-    } = this.props;
+  // _setViewport() {
+  //   const {
+  //     width, height, latitude, longitude, zoom, pitch, bearing, altitude,
+  //     mercatorEnabled = true, disableMercatorProject
+  //   } = this.props;
 
-    if (disableMercatorProject !== undefined) {
-      throw new Error('disableMercatorProject renamed to mercatorEnabled');
-    }
+  //   if (disableMercatorProject !== undefined) {
+  //     throw new Error('disableMercatorProject renamed to mercatorEnabled');
+  //   }
 
-    // TODO - pass in as prop so we don't have to recalculate in every layer
-    const viewport = new Viewport({
-      width, height, latitude, longitude, zoom, pitch, bearing, altitude,
-      tileSize: 512
-    });
+  //   // TODO - pass in as prop so we don't have to recalculate in every layer
+  //   const viewport = new Viewport({
+  //     width, height, latitude, longitude, zoom, pitch, bearing, altitude,
+  //     tileSize: 512
+  //   });
 
-    this.setState({mercator: viewport});
-    // TODO - "private" viewport.center member...
-    this.setUniforms({
-      mercatorEnabled: mercatorEnabled ? 1 : 0,
-      mercatorScale: Math.pow(2, zoom),
-      mercatorScaleFP64: fp64ify(Math.pow(2, zoom)),
-      mercatorCenter: viewport.center,
-      ...viewport.getUniforms(this.props)
-    });
+  //   this.setState({mercator: viewport});
+  //   // TODO - "private" viewport.center member...
+  //   this.setUniforms({
+  //     mercatorEnabled: mercatorEnabled ? 1 : 0,
+  //     mercatorScale: Math.pow(2, zoom),
+  //     mercatorScaleFP64: fp64ify(Math.pow(2, zoom)),
+  //     mercatorCenter: viewport.center,
+  //     ...viewport.getUniforms(this.props)
+  //   });
 
-    log(3, this.state.viewport, latitude, longitude, zoom);
-  }
+  //   log(3, this.state.viewport, latitude, longitude, zoom);
+  // }
 }

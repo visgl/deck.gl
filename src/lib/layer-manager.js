@@ -36,7 +36,8 @@ export default class LayerManager {
     // Tracks if any layers were drawn last update
     // Needed to ensure that screen is cleared when no layers are shown
     this.drewLayers = false;
-    this.context = {gl};
+    this.context = {gl, viewport: null, uniforms: {}};
+    Object.seal(this.context);
   }
 
   setContext({
@@ -48,17 +49,15 @@ export default class LayerManager {
       tileSize: 512
     });
 
-    this.context = {
-      ...this.context,
-      viewport,
+    this.context.viewport = viewport;
+    this.context.uniforms = {
       mercatorScale: Math.pow(2, zoom),
       mercatorCenter: viewport.center,
       mercatorScaleFP64: fp64ify(Math.pow(2, zoom)),
       ...viewport.getUniforms()
     };
-    Object.freeze(this.context);
 
-    log(3, viewport, latitude, longitude, zoom);
+    // log(3, viewport, latitude, longitude, zoom);
     return this;
   }
 
@@ -78,12 +77,10 @@ export default class LayerManager {
   }
 
   drawLayers() {
-    const {viewport} = this.context;
+    const {uniforms} = this.context;
     for (const layer of this.layers) {
       if (layer.props.visible) {
-        // Get the right uniforms for the layers projection mode
-        const uniforms = viewport.getUniforms(layer.props);
-        layer.draw({uniforms});
+        layer.drawLayer({uniforms});
       }
     }
     return this;

@@ -54,10 +54,6 @@ export default class GridLayer extends Layer {
     this.updateCell();
   }
 
-  finalizeState() {
-    this.state.model.destroy();
-  }
-
   willReceiveProps(oldProps, newProps) {
     super.willReceiveProps(oldProps, newProps);
 

@@ -68,10 +68,6 @@ export default class LineLayer extends Layer {
     this.state.model.userData.strokeWidth = nextProps.strokeWidth;
   }
 
-  didUnmount() {
-    this.state.model.destroy();
-  }
-
   draw({uniforms}) {
     this.state.model.render(
       uniforms,
