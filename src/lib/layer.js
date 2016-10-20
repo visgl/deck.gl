@@ -23,8 +23,7 @@ import AttributeManager from './attribute-manager';
 import {addIterator, areEqualShallow, log} from './utils';
 import isDeepEqual from 'lodash.isequal';
 import assert from 'assert';
-import {Viewport} from '../viewport';
-import {fp64ify} from '../lib/utils/fp64';
+
 /*
  * @param {string} props.id - layer name
  * @param {array}  props.data - array of data instances
@@ -77,9 +76,13 @@ export default class Layer {
       assert(props.data[Symbol.iterator], 'data prop must have an iterator');
     }
 
-    this.props = props;
     this.id = props.id;
     this.count = counter++;
+    this.props = props;
+    this.oldProps = null;
+    this.state = null;
+    this.context = null;
+    Object.seal(this);
 
     this.checkRequiredProp('data');
     this.checkRequiredProp('id', x => typeof x === 'string');
@@ -297,8 +300,6 @@ export default class Layer {
   /* eslint-disable max-statements */
   initializeLayer() {
     assert(this.context.gl);
-    // TODO - remove
-    this.state = {gl: this.context.gl};
 
     // Initialize state only once
     this.setState({
@@ -439,17 +440,7 @@ export default class Layer {
       this.state.dataChanged = true;
     }
 
-    const viewportChanged =
-      newProps.width !== oldProps.width ||
-      newProps.height !== oldProps.height ||
-      newProps.latitude !== oldProps.latitude ||
-      newProps.longitude !== oldProps.longitude ||
-      newProps.zoom !== oldProps.zoom ||
-      newProps.bearing !== oldProps.bearing ||
-      newProps.pitch !== oldProps.pitch ||
-      newProps.altitude !== oldProps.altitude;
-
-    this.setState({viewportChanged});
+    this.setState({viewportChanged: this.context.viewportChanged});
   }
 
   _updateAttributes(props) {

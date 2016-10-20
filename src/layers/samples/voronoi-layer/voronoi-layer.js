@@ -54,7 +54,7 @@ export default class VoronoiLayer extends Layer {
   }
 
   initializeState() {
-    const {gl} = this.state;
+    const {gl} = this.context;
     const {attributeManager} = this.state;
 
     this.setState({

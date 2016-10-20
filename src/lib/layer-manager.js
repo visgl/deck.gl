@@ -36,20 +36,31 @@ export default class LayerManager {
     // Tracks if any layers were drawn last update
     // Needed to ensure that screen is cleared when no layers are shown
     this.drewLayers = false;
-    this.context = {gl, viewport: null, uniforms: {}};
+    this.context = {gl, viewport: null, uniforms: {}, viewportChanged: true};
     Object.seal(this.context);
   }
 
   setContext({
-    viewport,
     width, height, latitude, longitude, zoom, pitch, bearing, altitude
   }) {
-    viewport = viewport || new Viewport({
+    const oldViewport = this.context.viewport;
+    const viewportChanged = !oldViewport ||
+      width !== oldViewport.width ||
+      height !== oldViewport.height ||
+      latitude !== oldViewport.latitude ||
+      longitude !== oldViewport.longitude ||
+      zoom !== oldViewport.zoom ||
+      bearing !== oldViewport.bearing ||
+      pitch !== oldViewport.pitch ||
+      altitude !== oldViewport.altitude;
+
+    const viewport = new Viewport({
       width, height, latitude, longitude, zoom, pitch, bearing, altitude,
       tileSize: 512
     });
 
     this.context.viewport = viewport;
+    this.context.viewportChanged = viewportChanged;
     this.context.uniforms = {
       mercatorScale: Math.pow(2, zoom),
       mercatorCenter: viewport.center,
@@ -219,6 +230,7 @@ function initializeNewLayers(layers) {
     if (!layer.state && layer.context.gl) {
       log(1, `initializing ${layerName(layer)}`);
       try {
+        layer.state = {};
         layer.initializeLayer();
       } catch (err) {
         console.error(

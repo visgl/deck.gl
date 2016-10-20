@@ -18,7 +18,7 @@ export default class PointCloudLayer extends Layer {
   }
 
   initializeState() {
-    const {gl} = this.state;
+    const {gl} = this.context;
     const {attributeManager} = this.state;
 
     this.setState({

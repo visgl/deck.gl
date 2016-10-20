@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 
 import {Layer, assembleShader} from '../../../lib';
-import {Model, Program, Geometry} from 'luma.gl';
+import {GL, Model, Program, Geometry} from 'luma.gl';
 import {fp64ify} from '../../../lib/utils/fp64';
 
 const glslify = require('glslify');
@@ -55,7 +55,8 @@ export default class ChoroplethLayer64 extends Layer {
   }
 
   initializeState() {
-    const {gl, attributeManager} = this.state;
+    const {gl} = this.context;
+    const {attributeManager} = this.state;
 
     const model = this.getModel(gl);
     model.userData.strokeWidth = this.props.strokeWidth;
@@ -150,7 +151,7 @@ export default class ChoroplethLayer64 extends Layer {
     );
 
     attribute.value = new IndexType(flattenDeep(indices));
-    attribute.target = this.state.gl.ELEMENT_ARRAY_BUFFER;
+    attribute.target = GL.ELEMENT_ARRAY_BUFFER;
     this.state.model.setVertexCount(attribute.value.length / attribute.size);
   }
 

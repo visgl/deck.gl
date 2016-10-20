@@ -2,7 +2,7 @@ import {Layer, assembleShader} from '../../../lib';
 import earcut from 'earcut';
 import flattenDeep from 'lodash.flattendeep';
 import normalize from 'geojson-normalize';
-import {Model, Program, Geometry} from 'luma.gl';
+import {GL, Model, Program, Geometry} from 'luma.gl';
 
 import extrudePolyline from 'extrude-polyline';
 
@@ -145,7 +145,7 @@ export default class ChoroplethLayer extends Layer {
       );
 
     attribute.value = new Uint16Array(flattenDeep(indices));
-    attribute.target = this.state.gl.ELEMENT_ARRAY_BUFFER;
+    attribute.target = GL.ELEMENT_ARRAY_BUFFER;
     // attribute.isIndexed = true;
 
     this.state.model.setVertexCount(attribute.value.length / attribute.size);
