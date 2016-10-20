@@ -17,7 +17,7 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-import {Layer, assembleShader} from '../../../lib';
+import {Layer, assembleShaders} from '../../../lib';
 import {GL, Model, Program, Geometry} from 'luma.gl';
 
 const glslify = require('glslify');
@@ -81,13 +81,12 @@ export default class LineLayer extends Layer {
     const positions = [0, 0, 0, 1, 1, 1];
 
     return new Model({
-      program: new Program(gl, {
-        vs: assembleShader(gl, {vs: glslify('./line-layer-vertex.glsl')}),
-        fs: glslify('./line-layer-fragment.glsl'),
-        id: 'line'
-      }),
+      id: this.props.id,
+      program: new Program(gl, assembleShaders(gl, {
+        vs: glslify('./line-layer-vertex.glsl'),
+        fs: glslify('./line-layer-fragment.glsl')
+      })),
       geometry: new Geometry({
-        id: 'line',
         drawMode: 'LINE_STRIP',
         positions: new Float32Array(positions)
       }),

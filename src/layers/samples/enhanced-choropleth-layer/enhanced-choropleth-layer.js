@@ -1,4 +1,4 @@
-import {Layer, assembleShader} from '../../../lib';
+import {Layer, assembleShaders} from '../../../lib';
 import earcut from 'earcut';
 import flattenDeep from 'lodash.flattendeep';
 import normalize from 'geojson-normalize';
@@ -90,17 +90,11 @@ export default class ChoroplethLayer extends Layer {
   getModel(gl) {
     return new Model({
       id: this.props.id,
-      program: new Program(gl, {
-        /* eslint-disable max-len */
-
-        vs: assembleShader(gl, {vs: VERTEX_SHADER}),
+      program: new Program(gl, assembleShaders(gl, {
+        vs: VERTEX_SHADER,
         fs: FRAGMENT_SHADER
-        /* eslint-enable max-len */
-      }),
-      geometry: new Geometry({
-        // drawMode: this.props.drawContour ? 'LINES' : 'TRIANGLES'
-        drawMode: 'TRIANGLES'
-      }),
+      })),
+      geometry: new Geometry({drawMode: 'TRIANGLES'}),
       vertexCount: 0,
       isIndexed: true
     });

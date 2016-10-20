@@ -20,6 +20,10 @@ similar ideas. In particular, experience with the React lifecycle should help
 you understand how to leverage the `shouldUpdate` and `willReceiveProps`
 methods.
 
+**Implementation Note**: deck.gl uses a simpler lifecycle model than React.
+While React backs instance with a separate component, deck.gl just transfers
+the old layers' state objects to any new matched layers.
+
 
 ## Properties and Methods
 

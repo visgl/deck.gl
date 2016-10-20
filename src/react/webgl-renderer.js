@@ -44,20 +44,12 @@ const PROP_TYPES = {
   onError: PropTypes.func,
 
   onRenderFrame: PropTypes.func,
-  onBeforeRenderFrame: PropTypes.func,
-  onAfterRenderFrame: PropTypes.func,
-  onRenderPickingScene: PropTypes.func,
-  onBeforeRenderPickingScene: PropTypes.func,
-  onAfterRenderPickingScene: PropTypes.func,
-
-  onNeedRedraw: PropTypes.func,
   onMouseMove: PropTypes.func,
   onClick: PropTypes.func
 };
 
 const DEFAULT_PROPS = {
   style: {},
-
   gl: null,
   debug: false,
 
@@ -67,13 +59,6 @@ const DEFAULT_PROPS = {
     throw error;
   },
   onRenderFrame: () => {},
-  onBeforeRenderFrame: () => {},
-  onAfterRenderFrame: () => {},
-  onRenderPickingScene: () => {},
-  onBeforeRenderPickingScene: () => {},
-  onAfterRenderPickingScene: () => {},
-
-  onNeedRedraw: () => true,
   onMouseMove: () => {},
   onClick: () => {}
 };
@@ -171,14 +156,6 @@ export default class WebGLRenderer extends React.Component {
       return;
     }
 
-    // Note: Do this after gl check, in case onNeedRedraw clears flags
-    if (!this.props.onNeedRedraw()) {
-      return;
-    }
-
-    // clear depth and color buffers
-    gl.clear(GL.COLOR_BUFFER_BIT | GL.DEPTH_BUFFER_BIT);
-
     // update viewport to latest props
     // (typically changed by app on browser resize etc)
     gl.viewport(
@@ -197,9 +174,7 @@ export default class WebGLRenderer extends React.Component {
       gl.disable(GL.BLEND);
     }
 
-    this.props.onBeforeRenderFrame({gl});
     this.props.onRenderFrame({gl});
-    this.props.onAfterRenderFrame({gl});
   }
   /* eslint-enable max-statements */
 

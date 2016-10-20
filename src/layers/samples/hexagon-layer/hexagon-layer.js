@@ -17,7 +17,7 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-import {Layer, assembleShader} from '../../../lib';
+import {Layer, assembleShaders} from '../../../lib';
 import {Model, Program, CylinderGeometry} from 'luma.gl';
 
 const glslify = require('glslify');
@@ -104,25 +104,22 @@ export default class HexagonLayer extends Layer {
   }
 
   getModel(gl) {
-    const geometry = new CylinderGeometry({
-      radius: 1,
-      topRadius: 1,
-      bottomRadius: 1,
-      topCap: true,
-      bottomCap: true,
-      height: 1,
-      nradial: 6,
-      nvertical: 1
-    });
-
     return new Model({
       id: this.props.id,
-      program: new Program(gl, {
-        vs: assembleShader(gl, {vs: glslify('./hexagon-layer-vertex.glsl')}),
-        fs: glslify('./hexagon-layer-fragment.glsl'),
-        id: 'hexagon'
+      program: new Program(gl, assembleShaders(gl, {
+        vs: glslify('./hexagon-layer-vertex.glsl'),
+        fs: glslify('./hexagon-layer-fragment.glsl')
+      })),
+      geometry: new CylinderGeometry({
+        radius: 1,
+        topRadius: 1,
+        bottomRadius: 1,
+        topCap: true,
+        bottomCap: true,
+        height: 1,
+        nradial: 6,
+        nvertical: 1
       }),
-      geometry,
       isInstanced: true
     });
   }

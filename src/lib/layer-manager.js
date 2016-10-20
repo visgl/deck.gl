@@ -68,7 +68,7 @@ export default class LayerManager {
       ...viewport.getUniforms()
     };
 
-    // log(3, viewport, latitude, longitude, zoom);
+    log(1, viewport, latitude, longitude, zoom);
     return this;
   }
 

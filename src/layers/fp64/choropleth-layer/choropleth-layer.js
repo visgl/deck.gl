@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {Layer, assembleShader} from '../../../lib';
+import {Layer, assembleShaders} from '../../../lib';
 import {GL, Model, Program, Geometry} from 'luma.gl';
 import {fp64ify} from '../../../lib/utils/fp64';
 
@@ -103,13 +103,12 @@ export default class ChoroplethLayer64 extends Layer {
 
   getModel(gl) {
     return new Model({
-      program: new Program(gl, {
-        vs: assembleShader(gl, {vs: glslify('./choropleth-layer-vertex.glsl')}),
-        fs: glslify('./choropleth-layer-fragment.glsl'),
-        id: 'choropleth'
-      }),
+      id: this.props.id,
+      program: new Program(gl, assembleShaders(gl, {
+        vs: glslify('./choropleth-layer-vertex.glsl'),
+        fs: glslify('./choropleth-layer-fragment.glsl')
+      })),
       geometry: new Geometry({
-        id: this.props.id,
         drawMode: this.props.drawContour ? 'LINES' : 'TRIANGLES'
       }),
       vertexCount: 0,

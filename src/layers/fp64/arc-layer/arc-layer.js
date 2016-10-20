@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {Layer, assembleShader} from '../../../lib';
+import {Layer, assembleShaders} from '../../../lib';
 import {GL, Model, Program, Geometry} from 'luma.gl';
 import {fp64ify} from '../../../lib/utils/fp64';
 
@@ -84,15 +84,13 @@ export default class ArcLayer extends Layer {
     for (let i = 0; i < NUM_SEGMENTS; i++) {
       positions = [...positions, i, i, i];
     }
-
     return new Model({
-      program: new Program(gl, {
-        vs: assembleShader(gl, {vs: glslify('./arc-layer-vertex.glsl')}),
-        fs: glslify('./arc-layer-fragment.glsl'),
-        id: 'arc-fp64'
-      }),
+      id: this.props.id,
+      program: new Program(gl, assembleShaders(gl, {
+        vs: glslify('./arc-layer-vertex.glsl'),
+        fs: glslify('./arc-layer-fragment.glsl')
+      })),
       geometry: new Geometry({
-        id: 'arc-fp64',
         drawMode: 'LINE_STRIP',
         positions: new Float32Array(positions)
       }),

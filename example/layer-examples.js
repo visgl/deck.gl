@@ -3,7 +3,7 @@ import {
   ScatterplotLayer,
   ArcLayer,
   LineLayer,
-  GridLayer
+  ScreenGridLayer
 } from '../src';
 
 import {
@@ -46,8 +46,8 @@ const ChoroplethLayerExample = props =>
     onClick: props.onChoroplethClicked
   });
 
-const GridLayerExample = props =>
-  new GridLayer({
+const ScreenGridLayerExample = props =>
+  new ScreenGridLayer({
     data: props.points,
     pickable: false,
     opacity: 0.06
@@ -248,17 +248,17 @@ export default {
     ArcLayer: ArcLayerExample,
     'ChoroplethLayer (Solid)': ChoroplethLayerExample,
     'ChoroplethLayer (Contour)': ChoroplethLayerContourExample,
-    GridLayer: GridLayerExample,
     LineLayer: LineLayerExample,
     ScatterplotLayer: ScatterplotLayerExample,
-    'ScatterplotLayer (meters)': ScatterplotLayerMeterExample
+    'ScatterplotLayer (meters)': ScatterplotLayerMeterExample,
+    ScreenGridLayer: ScreenGridLayerExample
   },
 
   '64-bit Layers': {
     ScatterplotLayer64: ScatterplotLayer64Example,
     ArcLayer64: ArcLayer64Example,
     'ChoroplethLayer64 (Solid)': ChoroplethLayer64SolidExample,
-    'ChoroplethLayer64 (Contour)': ChoroplethLayer64ContourExample,
+    'ChoroplethLayer64 (Contour)': ChoroplethLayer64ContourExample
   },
 
   'Sample Layers': {

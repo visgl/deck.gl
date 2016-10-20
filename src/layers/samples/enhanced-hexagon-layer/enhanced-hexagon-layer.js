@@ -1,4 +1,4 @@
-import {Layer, assembleShader} from '../../../lib';
+import {Layer, assembleShaders} from '../../../lib';
 import {Geometry, Program, Model} from 'luma.gl';
 
 import assert from 'assert';
@@ -154,13 +154,12 @@ export default class EnhancedHexagonLayer extends Layer {
 
   getModel(gl) {
     return new Model({
-      id: 'enhanced-hexagon-layer',
-      program: new Program(gl, {
-        vs: assembleShader(gl, {vs: VERTEX_SHADER}),
+      id: this.props.id,
+      program: new Program(gl, assembleShaders(gl, {
+        vs: VERTEX_SHADER,
         fs: FRAGMENT_SHADER
-      }),
+      })),
       geometry: new Geometry({
-        id: this.id,
         drawMode: 'TRIANGLE_FAN',
         positions: this.getPositions()
       }),

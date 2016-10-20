@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {Layer, assembleShader} from '../../../lib';
+import {Layer, assembleShaders} from '../../../lib';
 import {Model, Program, Geometry} from 'luma.gl';
 
 const glslify = require('glslify');
@@ -70,9 +70,7 @@ export default class ArcLayer extends Layer {
   draw({uniforms}) {
     this.state.model.render(
       uniforms,
-      {
-        lineWidth: this.props.strokeWidth || 1
-      }
+      {lineWidth: this.props.strokeWidth || 1}
     );
   }
 
@@ -84,13 +82,11 @@ export default class ArcLayer extends Layer {
     }
 
     return new Model({
-      program: new Program(gl, {
-        vs: assembleShader(gl, {vs: glslify('./arc-layer-vertex.glsl')}),
-        fs: glslify('./arc-layer-fragment.glsl'),
-        id: 'arc'
-      }),
+      program: new Program(gl, assembleShaders(gl, {
+        vs: glslify('./arc-layer-vertex.glsl'),
+        fs: glslify('./arc-layer-fragment.glsl')
+      })),
       geometry: new Geometry({
-        id: 'arc',
         drawMode: 'LINE_STRIP',
         positions: new Float32Array(positions)
       }),

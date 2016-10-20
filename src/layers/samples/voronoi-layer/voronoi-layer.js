@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {Layer, assembleShader} from '../../../lib';
+import {Layer, assembleShaders} from '../../../lib';
 import {Model, Program, Geometry} from 'luma.gl';
 const glslify = require('glslify');
 
@@ -94,11 +94,11 @@ export default class VoronoiLayer extends Layer {
     positions = [0, 0, 1, ...positions, 1, 0, 0];
 
     return new Model({
-      program: new Program(gl, {
-        id: 'voronoi',
-        vs: assembleShader(gl, {vs: glslify('./voronoi-layer-vertex.glsl')}),
+      id: this.props.id,
+      program: new Program(gl, assembleShaders(gl, {
+        vs: glslify('./voronoi-layer-vertex.glsl'),
         fs: glslify('./voronoi-layer-fragment.glsl')
-      }),
+      })),
       geometry: new Geometry({
         drawMode: 'TRIANGLE_FAN',
         positions: new Float32Array(positions)

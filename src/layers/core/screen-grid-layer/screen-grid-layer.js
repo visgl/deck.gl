@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {Layer, assembleShader} from '../../../lib';
+import {Layer, assembleShaders} from '../../../lib';
 import {Model, Program, Geometry} from 'luma.gl';
 
 const glslify = require('glslify');
@@ -73,13 +73,12 @@ export default class GridLayer extends Layer {
 
   getModel(gl) {
     return new Model({
-      program: new Program(gl, {
-        vs: assembleShader(gl, {vs: glslify('./grid-layer-vertex.glsl')}),
-        fs: glslify('./grid-layer-fragment.glsl'),
-        id: 'grid'
-      }),
+      id: this.props.id,
+      program: new Program(gl, assembleShaders(gl, {
+        vs: glslify('./screen-grid-layer-vertex.glsl'),
+        fs: glslify('./screen-grid-layer-fragment.glsl')
+      })),
       geometry: new Geometry({
-        id: this.props.id,
         drawMode: 'TRIANGLE_FAN',
         vertices: new Float32Array([0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0])
       }),

@@ -55,7 +55,7 @@ export function getPlatformShaderDefines(gl) {
   return platformDefines;
 }
 
-export function assembleShader(gl, {
+function assembleShader(gl, {
   vs,
   fs,
   project = true,

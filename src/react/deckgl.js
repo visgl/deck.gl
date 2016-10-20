@@ -23,12 +23,13 @@ import React, {PropTypes} from 'react';
 import autobind from 'autobind-decorator';
 
 import WebGLRenderer from './webgl-renderer';
-import {Group} from 'luma.gl';
+import {GL, Group} from 'luma.gl';
 // import {pickModels} from 'luma.gl';
 import {DEFAULT_BLENDING} from './config';
 import {LayerManager} from '../lib';
 // TODO - picking needs to be better integrated
 import {pickModels} from '../lib/pick-models';
+import {log} from '../lib/utils';
 
 // TODO - move default to WebGL renderer
 const DEFAULT_PIXEL_RATIO =
@@ -80,7 +81,7 @@ export default class DeckGL extends React.Component {
   _updateLayers(nextProps) {
     const {
       width, height, latitude, longitude, zoom, pitch, bearing, altitude
-    } = this.props;
+    } = nextProps;
     const {layerManager} = this.state;
 
     if (layerManager) {
@@ -126,14 +127,20 @@ export default class DeckGL extends React.Component {
     }
   }
 
-  @autobind _onNeedRedraw() {
+  @autobind _onRenderFrame({gl}) {
     const {layerManager} = this.state;
-    return layerManager.needsRedraw({clearRedrawFlags: true});
-  }
+    // Note: Do this after gl check, in case onNeedRedraw clears flags
 
-  @autobind _onRenderFrame() {
-    const {layerManager} = this.state;
-    return layerManager.drawLayers();
+    if (!layerManager.needsRedraw({clearRedrawFlags: true})) {
+      return;
+    }
+
+    log(1, 'rendering frame');
+
+    // clear depth and color buffers
+    gl.clear(GL.COLOR_BUFFER_BIT | GL.DEPTH_BUFFER_BIT);
+
+    layerManager.drawLayers();
   }
 
   _pick(x, y) {
