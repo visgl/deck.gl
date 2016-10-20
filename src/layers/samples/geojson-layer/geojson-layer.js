@@ -36,16 +36,11 @@ const getTargetPosition = segment => segment[1];
 export default class GeoJsonLayer extends Layer {
   /**
    * @classdesc
-   * HexagonLayer
+   * GeoJsonLayer
    *
    * @class
    * @param {object} opts
-   *
-   * @param {number} opts.dotRadius - hexagon radius
    * @param {number} opts.elevation - hexagon height
-   *
-   * @param {function} opts.onHexagonHovered(index, e) - popup selected index
-   * @param {function} opts.onHexagonClicked(index, e) - popup selected index
    */
   constructor({
     id = 'hexagon-layer',
@@ -109,18 +104,6 @@ export default class GeoJsonLayer extends Layer {
       case 'LineString':
         throw new Error(
           'LineString not implemented, use non-standard LineSegments instead');
-        // TODO - need to cache following data, otherwise too expensive
-        // Create a LineString layer?
-        /*
-        const {coordinates} = feature.geometry;
-        const segments = [];
-        for (let i = 0; i < coordinates.length - 2; ++i) {
-          segments.push({
-            sourcePosition: coordinates[i],
-            targetPosition: coordinates[i + 1]
-          });
-        }
-        */
 
       // NON STANDARD LINE SEGMENTS - remove once LineString is implemented
       case 'LineSegments':
