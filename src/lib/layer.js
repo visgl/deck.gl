@@ -17,9 +17,8 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-
-/* eslint-disable guard-for-in */
 import AttributeManager from './attribute-manager';
+import {GL} from 'luma.gl';
 import {addIterator, areEqualShallow, log} from './utils';
 import isDeepEqual from 'lodash.isequal';
 import assert from 'assert';
@@ -27,9 +26,6 @@ import assert from 'assert';
 /*
  * @param {string} props.id - layer name
  * @param {array}  props.data - array of data instances
- * @param {number} props.width - viewport width, synced with MapboxGL
- * @param {number} props.height - viewport width, synced with MapboxGL
- * @param {bool} props.isPickable - whether layer response to mouse event
  * @param {bool} props.opacity - opacity of the layer
  */
 const DEFAULT_PROPS = {
@@ -58,7 +54,6 @@ export default class Layer {
    * @class
    * @param {object} props - See docs above
    */
-  /* eslint-disable max-statements */
   constructor(props) {
 
     props = {
@@ -88,20 +83,28 @@ export default class Layer {
     this.checkRequiredProp('data');
     this.checkRequiredProp('id', x => typeof x === 'string');
 
+    this._checkDeprecatedProps();
+  }
+
+  _checkDeprecatedProps() {
+    if (this.props.isPickable !== undefined) {
+      throw new Error('No isPickable prop in deckgl v3 - use pickable instead');
+    }
+
     // TODO - inject viewport from overlay instead of creating for each layer?
     const hasViewportProps =
-      props.width !== undefined ||
-      props.height !== undefined ||
-      props.latitude !== undefined ||
-      props.longitude !== undefined ||
-      props.zoom !== undefined ||
-      props.pitch !== undefined ||
-      props.bearing !== undefined;
+      this.props.width !== undefined ||
+      this.props.height !== undefined ||
+      this.props.latitude !== undefined ||
+      this.props.longitude !== undefined ||
+      this.props.zoom !== undefined ||
+      this.props.pitch !== undefined ||
+      this.props.bearing !== undefined;
     if (hasViewportProps) {
       /* eslint-disable no-console */
       // /* global console */
-      // console.warn(
-      //   `deck.gl v3 no longer needs viewport props in Layer ${this.id}`);
+      throw new Error(
+        `deck.gl v3 no longer needs viewport props in Layer ${this.id}`);
     }
   }
   /* eslint-enable max-statements */
@@ -161,6 +164,29 @@ export default class Layer {
     if (model) {
       model.render(uniforms);
     }
+  }
+
+  // If state has a model, draw it with supplied uniforms
+  pick({uniforms, x, y}) {
+    const {gl} = this.context;
+    const {model} = this.state;
+
+    if (model) {
+      model.render(uniforms);
+
+      // Read color in the central pixel, to be mapped with picking colors
+      const color = new Uint8Array(4);
+      gl.readPixels(x, y, 1, 1, GL.RGBA, GL.UNSIGNED_BYTE, color);
+
+      const index = this.decodePickingColor(color);
+
+      if (index >= 0) {
+        // Return an info object
+        return {index, color};
+      }
+    }
+
+    return null;
   }
 
   // END LIFECYCLE METHODS
@@ -262,6 +288,14 @@ export default class Layer {
     // End lifecycle method
   }
 
+  pickLayer(uniforms = {}) {
+    const viewportUniforms = this.context.viewport.getUniforms(this.props);
+    uniforms = {...uniforms, ...viewportUniforms, renderPickingBuffer: true};
+    // Call lifecycle method
+    return this.pick(uniforms);
+    // End lifecycle method
+  }
+
   // Deduces numer of instances. Intention is to support:
   // - Explicit setting of numInstances
   // - Auto-deduction for ES6 containers that define a size member
@@ -343,7 +377,6 @@ export default class Layer {
       model.program.id = `${this.props.id}-program`;
       model.geometry.id = `${this.props.id}-geometry`;
       model.setAttributes(attributeManager.getAttributes());
-      model.setPickable(this.props.isPickable);
     }
   }
   /* eslint-enable max-statements */
@@ -410,8 +443,6 @@ export default class Layer {
   // The sublayer may know what object e.g. lat,lon corresponds to using math
   // etc even when picking does not work
   onGetHoverInfo(info) {
-    const {color} = info;
-    info.index = this.decodePickingColor(color);
     // If props.data is an indexable array, get the object
     if (Array.isArray(this.props.data)) {
       info.object = this.props.data[info.index];
@@ -426,6 +457,7 @@ export default class Layer {
   onHover(info) {
     const {color} = info;
 
+    // TODO - selectedPickingColor should be removed?
     const selectedPickingColor = new Float32Array(3);
     selectedPickingColor[0] = color[0];
     selectedPickingColor[1] = color[1];

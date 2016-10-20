@@ -68,7 +68,7 @@ test('ScreenGridLayer#constructor', t => {
 
   const layer = new ScreenGridLayer({
     data: points,
-    isPickable: false,
+    pickable: false,
     opacity: 0.06
   });
 
@@ -82,7 +82,7 @@ test('ChoroplethLayer#constructor', t => {
   const layer = new ChoroplethLayer({
     data: choropleths,
     opacity: 0.8,
-    isPickable: false,
+    pickable: false,
     drawContour: true
   });
 
@@ -95,14 +95,14 @@ test('ScatterplotLayer#constructor', t => {
 
   const layer = new ScatterplotLayer({
     data: points,
-    isPickable: true
+    pickable: true
   });
   t.ok(layer instanceof ScatterplotLayer, 'ScatterplotLayer created');
 
   const emptyLayer = new ScatterplotLayer({
     id: 'emptyScatterplotLayer',
     data: [],
-    isPickable: true
+    pickable: true
   });
   t.ok(emptyLayer instanceof ScatterplotLayer, 'Empty ScatterplotLayer created');
 
@@ -110,7 +110,7 @@ test('ScatterplotLayer#constructor', t => {
     () => new ScatterplotLayer({
       id: 'nullScatterplotLayer',
       data: null,
-      isPickable: true
+      pickable: true
     }),
     'Null ScatterplotLayer did not throw exception'
   );
@@ -131,14 +131,14 @@ test('ArcLayer#constructor', t => {
   const layer = new ArcLayer({
     id: 'arcLayer',
     data: arcs,
-    isPickable: true
+    pickable: true
   });
   t.ok(layer instanceof ArcLayer, 'ArcLayer created');
 
   const emptyLayer = new ArcLayer({
     id: 'emptyArcLayer',
     data: [],
-    isPickable: true
+    pickable: true
   });
   t.ok(emptyLayer instanceof ArcLayer, 'Empty ArcLayer created');
 
@@ -146,7 +146,7 @@ test('ArcLayer#constructor', t => {
     () => new ArcLayer({
       id: 'nullArcLayer',
       data: null,
-      isPickable: true
+      pickable: true
     }),
     'Null ArcLayer did not throw exception'
   );

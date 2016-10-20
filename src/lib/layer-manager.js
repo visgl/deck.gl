@@ -28,6 +28,7 @@ import {Viewport} from '../viewport';
 import {fp64ify} from '../lib/utils/fp64';
 import {log} from './utils';
 import assert from 'assert';
+import {pickModels} from './pick-models';
 
 export default class LayerManager {
   constructor({gl}) {
@@ -97,15 +98,16 @@ export default class LayerManager {
     return this;
   }
 
-  getLayerPickingModels() {
-    const models = [];
-    for (const layer of this.layers) {
-      const {visible, pickable, isPickable} = layer.props;
-      if (visible && (pickable || isPickable) && layer.state.model) {
-        models.push(layer.state.model);
-      }
-    }
-    return models;
+  pickLayer({x, y, pixelRatio, type}) {
+    const {gl, uniforms} = this.context;
+    return pickModels(gl, {
+      x,
+      y,
+      pixelRatio,
+      uniforms,
+      layers: this.layers,
+      type
+    });
   }
 
   needsRedraw({clearRedrawFlags = false} = {}) {

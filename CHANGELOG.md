@@ -21,6 +21,7 @@ All notable changes to deck.gl will be documented in this file.
 ### Beta-3.0.0 Releases
 
 #### [dev] -
+ - FEATURE: `Layer.pick` lifecycle method - Let's layers take control of picking
  - FEATURE: Support for Composite Layers
  - FEATURE: new GeoJsonLayer - Initial composite layer, only Polygons for now.
  - BREAKING: Introducing `context` that is shared between layers.

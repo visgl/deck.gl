@@ -23,13 +23,9 @@ import React, {PropTypes} from 'react';
 import autobind from 'autobind-decorator';
 
 import WebGLRenderer from './webgl-renderer';
-import {GL, Group} from 'luma.gl';
-// import {pickModels} from 'luma.gl';
+import {GL} from 'luma.gl';
 import {DEFAULT_BLENDING} from './config';
 import {LayerManager} from '../lib';
-// TODO - picking needs to be better integrated
-import {pickModels} from '../lib/pick-models';
-import {log} from '../lib/utils';
 
 // TODO - move default to WebGL renderer
 const DEFAULT_PIXEL_RATIO =
@@ -107,24 +103,16 @@ export default class DeckGL extends React.Component {
 
   // Route events to layers
   @autobind _onClick(event) {
-    const picked = this._pick(event.x, event.y);
-    const info = {picked, ...event};
-    for (const item of picked) {
-      if (item.model.userData.layer.onClick({color: item.color, ...info})) {
-        return;
-      }
-    }
+    const {x, y} = event;
+    const {pixelRatio} = this.props;
+    this.state.layerManager.pickLayer({x, y, pixelRatio, type: 'click'});
   }
 
   // Route events to layers
   @autobind _onMouseMove(event) {
-    const picked = this._pick(event.x, event.y);
-    const info = {picked, ...event};
-    for (const item of picked) {
-      if (item.model.userData.layer.onHover({color: item.color, ...info})) {
-        return;
-      }
-    }
+    const {x, y} = event;
+    const {pixelRatio} = this.props;
+    this.state.layerManager.pickLayer({x, y, pixelRatio, type: 'hover'});
   }
 
   @autobind _onRenderFrame({gl}) {
@@ -135,23 +123,10 @@ export default class DeckGL extends React.Component {
       return;
     }
 
-    log(1, 'rendering frame');
-
     // clear depth and color buffers
     gl.clear(GL.COLOR_BUFFER_BIT | GL.DEPTH_BUFFER_BIT);
 
     layerManager.drawLayers();
-  }
-
-  _pick(x, y) {
-    const {pixelRatio} = this.props;
-    const {gl, layerManager} = this.state;
-    const pickedModels = pickModels(gl, {
-      x: x * pixelRatio,
-      y: y * pixelRatio,
-      group: new Group({children: layerManager.getLayerPickingModels()})
-    });
-    return pickedModels;
   }
 
   render() {
