@@ -50,9 +50,9 @@ vec2 paraboloid_fp64(vec2 source[2], vec2 target[2], float index) {
 
 void main(void) {
   vec2 projectedSourceCoord[2];
-  preproject_fp64(instanceSourcePositionsFP64, projectedSourceCoord);
+  project_position_fp64(instanceSourcePositionsFP64, projectedSourceCoord);
   vec2 projectedTargetCoord[2];
-  preproject_fp64(instanceTargetPositionsFP64, projectedTargetCoord);
+  project_position_fp64(instanceTargetPositionsFP64, projectedTargetCoord);
 
   float segmentIndex = positions.x;
 
