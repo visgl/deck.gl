@@ -27,8 +27,7 @@
 const vec2 PI_FP64 = vec2(3.1415927410125732, -8.742278012618954e-8);
 const vec2 WORLD_SCALE_FP64 = vec2(81.4873275756836, 0.0000032873668232014097);
 
-uniform bool disableMercatorProjector;
-uniform vec2 mercatorScaleFP64;
+uniform vec2 projectionScaleFP64;
 
 // non-linear projection: lnglats => unit tile [0-1, 0-1]
 void mercatorProject_fp64(vec4 lnglat_fp64, out vec2 out_val[2]) { //longitude: lnglat_fp64.xy; latitude: lnglat_fp64.zw
@@ -38,17 +37,14 @@ void mercatorProject_fp64(vec4 lnglat_fp64, out vec2 out_val[2]) { //longitude: 
   return;
 }
 void project_fp64(vec4 position_fp64, out vec2 out_val[2]) {
-  if (disableMercatorProjector) {
-    // return (position + vec2(TILE_SIZE / 2.0)) * mercatorScale;
-  } else {
 
-    vec2 pos_fp64[2];
-    mercatorProject_fp64(position_fp64, pos_fp64);
-    vec2 x_fp64 = mul_fp64(pos_fp64[0], mercatorScaleFP64);
-    vec2 y_fp64 = mul_fp64(pos_fp64[1], mercatorScaleFP64);
-    out_val[0] = mul_fp64(x_fp64, WORLD_SCALE_FP64);
-    out_val[1] = mul_fp64(y_fp64, WORLD_SCALE_FP64);
-  }
+  vec2 pos_fp64[2];
+  mercatorProject_fp64(position_fp64, pos_fp64);
+  vec2 x_fp64 = mul_fp64(pos_fp64[0], projectionScaleFP64);
+  vec2 y_fp64 = mul_fp64(pos_fp64[1], projectionScaleFP64);
+  out_val[0] = mul_fp64(x_fp64, WORLD_SCALE_FP64);
+  out_val[1] = mul_fp64(y_fp64, WORLD_SCALE_FP64);
+
   return;
 }
 

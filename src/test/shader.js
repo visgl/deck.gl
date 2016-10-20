@@ -23,7 +23,7 @@
 import 'babel-polyfill';
 import {document, window} from 'global';
 import {Buffer, createGLContext, Program} from 'luma.gl';
-import {getPlatformShaderDefines} from '../shader-utils/assemble-shader';
+import {getPlatformShaderDefines} from '../shader-utils/assemble-shaders';
 
 const glslify = require('glslify');
 
