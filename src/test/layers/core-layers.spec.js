@@ -26,7 +26,7 @@ import {
   ChoroplethLayer,
   ScatterplotLayer,
   ArcLayer,
-  GridLayer
+  ScreenGridLayer
 } from '../..';
 
 // Import private method to test that layers can successfully be updated
@@ -63,28 +63,23 @@ const FIXTURE = {
   arcs: [{sourcePosition: [0, 0], targetPosition: [1, 3], color: [255, 0, 0]}]
 };
 
-test('GridLayer#constructor', t => {
-  const {mapSize, mapState, points} = FIXTURE;
+test('ScreenGridLayer#constructor', t => {
+  const {points} = FIXTURE;
 
-  const layer = new GridLayer({
-    id: 'gridLayer',
-    ...mapSize,
-    ...mapState,
+  const layer = new ScreenGridLayer({
+    data: points,
     isPickable: false,
-    opacity: 0.06,
-    data: points
+    opacity: 0.06
   });
 
-  t.ok(layer, 'GridLayer created');
+  t.ok(layer, 'ScreenGridLayer created');
   t.end();
 });
 
 test('ChoroplethLayer#constructor', t => {
-  const {mapSize, mapState, choropleths} = FIXTURE;
+  const {choropleths} = FIXTURE;
+
   const layer = new ChoroplethLayer({
-    id: 'choroplethLayer',
-    ...mapSize,
-    ...mapState,
     data: choropleths,
     opacity: 0.8,
     isPickable: false,
@@ -99,9 +94,6 @@ test('ScatterplotLayer#constructor', t => {
   const {mapSize, mapState, points} = FIXTURE;
 
   const layer = new ScatterplotLayer({
-    id: 'scatterplotLayer',
-    ...mapSize,
-    ...mapState,
     data: points,
     isPickable: true
   });
@@ -109,8 +101,6 @@ test('ScatterplotLayer#constructor', t => {
 
   const emptyLayer = new ScatterplotLayer({
     id: 'emptyScatterplotLayer',
-    ...mapSize,
-    ...mapState,
     data: [],
     isPickable: true
   });
@@ -119,8 +109,6 @@ test('ScatterplotLayer#constructor', t => {
   t.doesNotThrow(
     () => new ScatterplotLayer({
       id: 'nullScatterplotLayer',
-      ...mapSize,
-      ...mapState,
       data: null,
       isPickable: true
     }),
@@ -142,8 +130,6 @@ test('ArcLayer#constructor', t => {
 
   const layer = new ArcLayer({
     id: 'arcLayer',
-    ...mapSize,
-    ...mapState,
     data: arcs,
     isPickable: true
   });
@@ -151,8 +137,6 @@ test('ArcLayer#constructor', t => {
 
   const emptyLayer = new ArcLayer({
     id: 'emptyArcLayer',
-    ...mapSize,
-    ...mapState,
     data: [],
     isPickable: true
   });
@@ -161,8 +145,6 @@ test('ArcLayer#constructor', t => {
   t.doesNotThrow(
     () => new ArcLayer({
       id: 'nullArcLayer',
-      ...mapSize,
-      ...mapState,
       data: null,
       isPickable: true
     }),

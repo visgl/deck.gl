@@ -23,10 +23,10 @@ import {Model, Program, Geometry} from 'luma.gl';
 
 const glslify = require('glslify');
 
-export default class GridLayer extends Layer {
+export default class ScreenGridLayer extends Layer {
   /**
    * @classdesc
-   * GridLayer
+   * ScreenGridLayer
    *
    * @class
    * @param {object} opts

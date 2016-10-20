@@ -20,6 +20,16 @@ All notable changes to deck.gl will be documented in this file.
 
 ### Beta-3.0.0 Releases
 
+#### [dev] -
+ - FEATURE: Support for Composite Layers
+ - FEATURE: new GeoJsonLayer - Initial composite layer, only Polygons for now.
+ - BREAKING: GridLayer renamed to ScreenGridLayer
+ - BREAKING: All layers now use `assembleShaders`
+ - BREAKING: GLSL `project` package - shader functions renamed to have
+   `project` prefix, in line with conventions for new shader package system.
+ - MISC: Documentation updates.
+ - MISC: WebGLRenderer/DeckGl react component cleanup, removed unusued methods.
+
 #### [3.0.0-beta22] -
  - FIX: Perspective projection matrix "far plane" now covers negative Z coords
  - FEATURE: Improved precision trigonometry library for Intel GPUs

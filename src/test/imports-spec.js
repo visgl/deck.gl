@@ -7,7 +7,7 @@ import {
   DeckGLOverlay,
   Layer,
   ChoroplethLayer, ScatterplotLayer,
-  GridLayer, ArcLayer, LineLayer,
+  ScreenGridLayer, ArcLayer, LineLayer,
   Viewport
 } from '../..';
 
@@ -25,7 +25,7 @@ test('Top-level imports', t0 => {
     t.ok(Layer, 'Layer symbol imported');
     t.ok(ChoroplethLayer, 'ChoroplethLayer symbol imported');
     t.ok(ScatterplotLayer, 'ScatterplotLayer symbol imported');
-    t.ok(GridLayer, 'GridLayer symbol imported');
+    t.ok(ScreenGridLayer, 'ScreenGridLayer symbol imported');
     t.ok(ArcLayer, 'ArcLayer symbol imported');
     t.ok(LineLayer, 'LineLayer symbol imported');
     t.ok(Viewport, 'Viewport symbol imported');
