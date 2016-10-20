@@ -23,6 +23,10 @@ All notable changes to deck.gl will be documented in this file.
 #### [dev] -
  - FEATURE: Support for Composite Layers
  - FEATURE: new GeoJsonLayer - Initial composite layer, only Polygons for now.
+ - BREAKING: Introducing `context` that is shared between layers.
+    gl and viewport moved from state to context. This implies that apps
+    no longer need to pass {lng,lat,zoom,pitch,bearing} to each layer, only
+    to the `DeckGL` react component.
  - BREAKING: GridLayer renamed to ScreenGridLayer
  - BREAKING: All layers now use `assembleShaders`
  - BREAKING: GLSL `project` package - shader functions renamed to have
