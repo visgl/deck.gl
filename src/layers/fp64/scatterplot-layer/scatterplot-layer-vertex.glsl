@@ -27,27 +27,17 @@ attribute vec3 instanceColors;
 attribute vec3 instancePickingColors;
 
 // Only one-dimensional arrays may be declared in GLSL ES 1.0. specs p.24
-uniform vec2 projectionFP64[16];
 uniform float opacity;
 uniform vec2 zoomRadiusFP64;
 uniform float renderPickingBuffer;
 
-// uniform float ONE; // fp64 workaround
-
 varying vec4 vColor;
-
-// #pragma glslify: vec4_fp64 = require(../../../../shaderlib/fp64/vec4-fp64, ONE=ONE)
-// #pragma glslify: sum_fp64 = require(../../../../shaderlib/fp64/sum-fp64, ONE=ONE)
-// #pragma glslify: mul_fp64 = require(../../../../shaderlib/fp64/mul-fp64, ONE=ONE)
-// #pragma glslify: project_fp64 = require(../../../../shaderlib/fp64/project-fp64, ONE=ONE)
-// #pragma glslify: vec4_scalar_mul_fp64 = require(../../../../shaderlib/fp64/vec4-scalar-mul-fp64, ONE=ONE)
-// #pragma glslify: mat4_vec4_mul_fp64 = require(../../../../shaderlib/fp64/mat4-vec4-mul-fp64, ONE=ONE)
 
 void main(void) {
   // For some reason, need to add one to elevation to show up in untilted mode
 
   vec2 projected_coord_xy[2];
-  project_fp64(instancePositionsFP64, projected_coord_xy);
+  preproject_fp64(instancePositionsFP64, projected_coord_xy);
 
   vec2 pos_mul_radius[4];
   vec4_fp64(vec4(positions * instanceRadius, 0.0), pos_mul_radius);
@@ -64,12 +54,11 @@ void main(void) {
 
   vec2 vertex_pos_clipspace[4];
 
-  mat4_vec4_mul_fp64(projectionFP64, vertex_pos_modelspace, vertex_pos_clipspace);
+  project_to_clipspace_fp64(vertex_pos_modelspace, vertex_pos_clipspace);
 
   gl_Position = vec4(vertex_pos_clipspace[0].x, vertex_pos_clipspace[1].x, vertex_pos_clipspace[2].x, vertex_pos_clipspace[3].x);
 
   vec4 color = vec4(instanceColors / 255.0, opacity);
-
   vec4 pickingColor = vec4(instancePickingColors / 255.0, 1.);
   vColor = mix(color, pickingColor, renderPickingBuffer);
 }

@@ -1,6 +1,7 @@
 const vec2 WORLD_SCALE_FP64 = vec2(81.4873275756836, 0.0000032873668232014097);
 
 uniform vec2 projectionScaleFP64;
+uniform vec2 projectionFP64[16];
 
 void mercatorProject_fp64(vec4 lnglat_fp64, out vec2 out_val[2]) { //longitude: lnglat_fp64.xy; latitude: lnglat_fp64.zw
 
@@ -9,7 +10,7 @@ void mercatorProject_fp64(vec4 lnglat_fp64, out vec2 out_val[2]) { //longitude: 
   return;
 }
 
-void project_fp64(vec4 position_fp64, out vec2 out_val[2]) {
+void preproject_fp64(vec4 position_fp64, out vec2 out_val[2]) {
 
   vec2 pos_fp64[2];
   mercatorProject_fp64(position_fp64, pos_fp64);
@@ -19,4 +20,8 @@ void project_fp64(vec4 position_fp64, out vec2 out_val[2]) {
   out_val[1] = mul_fp64(y_fp64, WORLD_SCALE_FP64);
 
   return;
+}
+
+void project_to_clipspace_fp64(vec2 vertex_pos_modelspace[4], out vec2 vertex_pos_clipspace[4]) {
+  mat4_vec4_mul_fp64(projectionFP64, vertex_pos_modelspace, vertex_pos_clipspace);
 }

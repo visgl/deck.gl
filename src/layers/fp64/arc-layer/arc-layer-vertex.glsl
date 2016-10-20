@@ -30,7 +30,6 @@ attribute vec3 instancePickingColors;
 attribute vec4 instanceSourcePositionsFP64;
 attribute vec4 instanceTargetPositionsFP64;
 
-uniform vec2 projectionFP64[16];
 uniform float opacity;
 uniform float renderPickingBuffer;
 
@@ -51,9 +50,9 @@ vec2 paraboloid_fp64(vec2 source[2], vec2 target[2], float index) {
 
 void main(void) {
   vec2 projectedSourceCoord[2];
-  project_fp64(instanceSourcePositionsFP64, projectedSourceCoord);
+  preproject_fp64(instanceSourcePositionsFP64, projectedSourceCoord);
   vec2 projectedTargetCoord[2];
-  project_fp64(instanceTargetPositionsFP64, projectedTargetCoord);
+  preproject_fp64(instanceTargetPositionsFP64, projectedTargetCoord);
 
   float segmentIndex = positions.x;
 
@@ -69,7 +68,7 @@ void main(void) {
   vertex_pos_modelspace[2] = sqrt_fp64(paraboloid_fp64(projectedSourceCoord, projectedTargetCoord, segmentIndex));
   vertex_pos_modelspace[3] = vec2(1.0, 0.0);
 
-  mat4_vec4_mul_fp64(projectionFP64, vertex_pos_modelspace, vertex_pos_clipspace);
+  project_to_clipspace_fp64(vertex_pos_modelspace, vertex_pos_clipspace);
 
   gl_Position = vec4(vertex_pos_clipspace[0].x, vertex_pos_clipspace[1].x, vertex_pos_clipspace[2].x, vertex_pos_clipspace[3].x);
 
