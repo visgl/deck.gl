@@ -88,7 +88,9 @@ export default class ArcLayer extends Layer {
       id: this.props.id,
       program: new Program(gl, assembleShaders(gl, {
         vs: glslify('./arc-layer-vertex.glsl'),
-        fs: glslify('./arc-layer-fragment.glsl')
+        fs: glslify('./arc-layer-fragment.glsl'),
+        fp64: true,
+        project64: true
       })),
       geometry: new Geometry({
         drawMode: 'LINE_STRIP',

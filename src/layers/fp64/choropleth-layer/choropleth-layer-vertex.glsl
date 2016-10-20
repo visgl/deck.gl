@@ -26,17 +26,11 @@ attribute vec3 positions;
 attribute vec3 colors;
 attribute vec3 pickingColors;
 
-uniform float ONE; // fp64 workaround
-
 uniform float opacity;
 uniform float renderPickingBuffer;
 uniform vec3 selectedPickingColor;
-uniform vec2 projectionFP64[16];
 
 varying vec4 vColor;
-
-#pragma glslify: project_fp64 = require(../../../../shaderlib/fp64/project-fp64, ONE=ONE)
-#pragma glslify: mat4_vec4_mul_fp64 = require(../../../../shaderlib/fp64/mat4-vec4-mul-fp64, ONE=ONE)
 
 vec4 getColor(vec4 color, float opacity, vec3 pickingColor, float renderPickingBuffer) {
   vec4 color4 = vec4(color.xyz / 255., color.w / 255. * opacity);
@@ -47,7 +41,7 @@ vec4 getColor(vec4 color, float opacity, vec3 pickingColor, float renderPickingB
 void main(void) {
   // For some reason, need to add one to elevation to show up in untilted mode
   vec2 projectedCoord[2];
-  project_fp64(positionsFP64, projectedCoord);
+  preproject_fp64(positionsFP64, projectedCoord);
 
   vec2 vertex_pos_modelspace[4];
   vec2 vertex_pos_clipspace[4];
@@ -57,7 +51,7 @@ void main(void) {
   vertex_pos_modelspace[2] = heightsFP64;
   vertex_pos_modelspace[3] = vec2(1.0, 0.0);
 
-  mat4_vec4_mul_fp64(projectionFP64, vertex_pos_modelspace, vertex_pos_clipspace);
+  project_to_clipspace_fp64(vertex_pos_modelspace, vertex_pos_clipspace);
 
   gl_Position = vec4(vertex_pos_clipspace[0].x, vertex_pos_clipspace[1].x, vertex_pos_clipspace[2].x, vertex_pos_clipspace[3].x);
 

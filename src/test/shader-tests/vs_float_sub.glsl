@@ -2,11 +2,7 @@ attribute vec3 positions;
 
 uniform vec2 a;
 uniform vec2 b;
-uniform float ONE;
-
 varying vec4 vColor;
-
-#pragma glslify: sub_fp64 = require(../../../shaderlib/fp64/sub-fp64, ONE=ONE)
 
 void main(void) {
 

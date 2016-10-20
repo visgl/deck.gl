@@ -58,11 +58,16 @@ export function getPlatformShaderDefines(gl) {
 function assembleShader(gl, {
   vs,
   fs,
+  fp64 = false,
   project = true,
+  project64 = false,
   ...opts
 }) {
+  if (project64 === true) {
+    fp64 = true;
+  }
   let source = `${getPlatformShaderDefines(gl)}\n`;
-  opts = {...opts, project};
+  opts = {...opts, project, project64, fp64};
   for (const chunkName of Object.keys(SHADER_CHUNKS)) {
     if (opts[chunkName]) {
       source += `${SHADER_CHUNKS[chunkName].source}\n`;
