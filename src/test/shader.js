@@ -23,7 +23,7 @@
 import 'babel-polyfill';
 import {document, window} from 'global';
 import {Buffer, createGLContext, Program} from 'luma.gl';
-import {getPlatformShaderDefines} from '../shader-utils/assemble-shaders';
+import {assembleShaders} from '../shader-utils/assemble-shaders';
 
 const glslify = require('glslify');
 
@@ -243,12 +243,12 @@ function test_float_add(gl, testName) {
   const float0_vec2 = fp64ify(float0);
   const float1_vec2 = fp64ify(float1);
   const float_ref_vec2 = fp64ify(float_ref);
-
-  const program = new Program(gl, {
-    vs: getPlatformShaderDefines(gl) + glslify('./shader-tests/vs_float_add.glsl'),
-    fs: glslify('./shader-tests/fs.glsl')
-  });
-
+  const program = new Program(gl, assembleShaders(gl, {
+        vs: glslify('./shader-tests/vs_float_add.glsl'),
+        fs: glslify('./shader-tests/fs.glsl'),
+        fp64: true,
+        project64: true
+      }));
   program.use();
   program.setBuffers({
     positions: new Buffer(gl).setData({
@@ -280,10 +280,12 @@ function test_float_sub(gl, testName) {
   const float1_vec2 = fp64ify(float1);
   const float_ref_vec2 = fp64ify(float_ref);
 
-  const program = new Program(gl, {
-    vs: getPlatformShaderDefines(gl) + glslify('./shader-tests/vs_float_sub.glsl'),
-    fs: glslify('./shader-tests/fs.glsl')
-  });
+  const program = new Program(gl, assembleShaders(gl, {
+        vs: glslify('./shader-tests/vs_float_sub.glsl'),
+        fs: glslify('./shader-tests/fs.glsl'),
+        fp64: true,
+        project64: true
+      }));
 
   program.use();
   program.setBuffers({
@@ -317,10 +319,12 @@ function test_float_mul(gl, testName) {
   const float1_vec2 = fp64ify(float1);
   const float_ref_vec2 = fp64ify(float_ref);
 
-  const program = new Program(gl, {
-    vs: getPlatformShaderDefines(gl) + glslify('./shader-tests/vs_float_mul.glsl'),
-    fs: glslify('./shader-tests/fs.glsl')
-  });
+  const program = new Program(gl, assembleShaders(gl, {
+        vs: glslify('./shader-tests/vs_float_mul.glsl'),
+        fs: glslify('./shader-tests/fs.glsl'),
+        fp64: true,
+        project64: true
+      }));
 
   program.use();
   program.setBuffers({
@@ -353,10 +357,12 @@ function test_float_div(gl, testName) {
   const float1_vec2 = fp64ify(float1);
   const float_ref_vec2 = fp64ify(float_ref);
 
-  const program = new Program(gl, {
-    vs: getPlatformShaderDefines(gl) + glslify('./shader-tests/vs_float_div.glsl'),
-    fs: glslify('./shader-tests/fs.glsl')
-  });
+  const program = new Program(gl, assembleShaders(gl, {
+        vs: glslify('./shader-tests/vs_float_div.glsl'),
+        fs: glslify('./shader-tests/fs.glsl'),
+        fp64: true,
+        project64: true
+      }))
 
   program.use();
   program.setBuffers({
@@ -387,10 +393,12 @@ function test_float_sqrt(gl, testName) {
   const float0_vec2 = fp64ify(float0);
   const float_ref_vec2 = fp64ify(float_ref);
 
-  const program = new Program(gl, {
-    vs: getPlatformShaderDefines(gl) + glslify('./shader-tests/vs_float_sqrt.glsl'),
-    fs: glslify('./shader-tests/fs.glsl')
-  });
+  const program = new Program(gl, assembleShaders(gl, {
+        vs: glslify('./shader-tests/vs_float_sqrt.glsl'),
+        fs: glslify('./shader-tests/fs.glsl'),
+        fp64: true,
+        project64: true
+      }));
 
   program.use();
   program.setBuffers({
@@ -420,10 +428,12 @@ function test_float_exp(gl, testName) {
   const float0_vec2 = fp64ify(float0);
   const float_ref_vec2 = fp64ify(float_ref);
 
-  const program = new Program(gl, {
-    vs: getPlatformShaderDefines(gl) + glslify('./shader-tests/vs_float_exp.glsl'),
-    fs: glslify('./shader-tests/fs.glsl')
-  });
+  const program = new Program(gl, assembleShaders(gl, {
+        vs: glslify('./shader-tests/vs_float_exp.glsl'),
+        fs: glslify('./shader-tests/fs.glsl'),
+        fp64: true,
+        project64: true
+      }));
 
   program.use();
   program.setBuffers({
@@ -453,10 +463,12 @@ function test_float_log(gl, testName) {
   const float0_vec2 = fp64ify(float0);
   const float_ref_vec2 = fp64ify(float_ref);
 
-  const program = new Program(gl, {
-    vs: getPlatformShaderDefines(gl) + glslify('./shader-tests/vs_float_log.glsl'),
-    fs: glslify('./shader-tests/fs.glsl')
-  });
+  const program = new Program(gl, assembleShaders(gl, {
+        vs: glslify('./shader-tests/vs_float_log.glsl'),
+        fs: glslify('./shader-tests/fs.glsl'),
+        fp64: true,
+        project64: true
+      }));
 
   program.use();
   program.setBuffers({
@@ -487,10 +499,12 @@ function test_float_sin(gl, testName) {
   const float0_vec2 = fp64ify(float0);
   const float_ref_vec2 = fp64ify(float_ref);
 
-  const program = new Program(gl, {
-    vs: getPlatformShaderDefines(gl) + glslify('./shader-tests/vs_float_sin.glsl'),
-    fs: glslify('./shader-tests/fs.glsl')
-  });
+  const program = new Program(gl, assembleShaders(gl, {
+        vs: glslify('./shader-tests/vs_float_sin.glsl'),
+        fs: glslify('./shader-tests/fs.glsl'),
+        fp64: true,
+        project64: true
+      }));
 
   program.use();
   program.setBuffers({
@@ -520,10 +534,12 @@ function test_float_cos(gl, testName) {
   const float0_vec2 = fp64ify(float0);
   const float_ref_vec2 = fp64ify(float_ref);
 
-  const program = new Program(gl, {
-    vs: getPlatformShaderDefines(gl) + glslify('./shader-tests/vs_float_cos.glsl'),
-    fs: glslify('./shader-tests/fs.glsl')
-  });
+  const program = new Program(gl, assembleShaders(gl, {
+        vs: glslify('./shader-tests/vs_float_cos.glsl'),
+        fs: glslify('./shader-tests/fs.glsl'),
+        fp64: true,
+        project64: true
+      }));
 
   program.use();
   program.setBuffers({
@@ -553,10 +569,12 @@ function test_float_tan(gl, testName) {
   const float0_vec2 = fp64ify(float0);
   const float_ref_vec2 = fp64ify(float_ref);
 
-  const program = new Program(gl, {
-    vs: getPlatformShaderDefines(gl) + glslify('./shader-tests/vs_float_tan.glsl'),
-    fs: glslify('./shader-tests/fs.glsl')
-  });
+  const program = new Program(gl, assembleShaders(gl, {
+        vs: glslify('./shader-tests/vs_float_tan.glsl'),
+        fs: glslify('./shader-tests/fs.glsl'),
+        fp64: true,
+        project64: true
+      }));
 
   program.use();
   program.setBuffers({

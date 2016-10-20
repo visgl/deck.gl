@@ -99,7 +99,9 @@ export default class ScatterplotLayer extends Layer {
       id: this.props.id,
       program: new Program(gl, assembleShaders(gl, {
         vs: glslify('./scatterplot-layer-vertex.glsl'),
-        fs: glslify('./scatterplot-layer-fragment.glsl')
+        fs: glslify('./scatterplot-layer-fragment.glsl'),
+        fp64: true,
+        project64: true
       })),
       geometry: new Geometry({
         drawMode: 'TRIANGLE_FAN',

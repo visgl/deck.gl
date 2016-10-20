@@ -26,17 +26,12 @@ attribute vec3 positions;
 attribute vec3 colors;
 attribute vec3 pickingColors;
 
-uniform float ONE; // fp64 workaround
-
+uniform vec2 projectionFP64[16];
 uniform float opacity;
 uniform float renderPickingBuffer;
 uniform vec3 selectedPickingColor;
-uniform vec2 projectionFP64[16];
 
 varying vec4 vColor;
-
-#pragma glslify: project_fp64 = require(../../../../shaderlib/fp64/project-fp64, ONE=ONE)
-#pragma glslify: mat4_vec4_mul_fp64 = require(../../../../shaderlib/fp64/mat4-vec4-mul-fp64, ONE=ONE)
 
 vec4 getColor(vec4 color, float opacity, vec3 pickingColor, float renderPickingBuffer) {
   vec4 color4 = vec4(color.xyz / 255., color.w / 255. * opacity);

@@ -1,11 +1,7 @@
 attribute vec3 positions;
 
 uniform vec2 a;
-uniform float ONE;
-
 varying vec4 vColor;
-
-#pragma glslify: sqrt_fp64 = require(../../../shaderlib/fp64/sqrt-fp64, ONE=ONE)
 
 void main(void) {
 

@@ -4,7 +4,7 @@ import project from '../../dist/shaderlib/project';
 import project64 from '../../dist/shaderlib/project64';
 
 module.exports = {
+  ...fp64,
   ...project,
-  ...project64,
-  ...fp64
+  ...project64
 };

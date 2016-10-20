@@ -17,13 +17,10 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-export default `\
 uniform float ONE;
 
 const vec2 E = vec2(2.7182817459106445e+00, 8.254840366817007e-08);
 const vec2 LOG2 = vec2(0.6931471824645996e+00, -1.9046542121259336e-09);
-const vec2 WORLD_SCALE_FP64 = vec2(81.4873275756836, 0.0000032873668232014097);
-
 const vec2 PI_FP64 = vec2(3.1415927410125732, -8.742278012618954e-8);
 const vec2 TWO_PI = vec2(6.2831854820251465, -1.7484556025237907e-7);
 const vec2 PI_2 = vec2(1.5707963705062866, -4.371139006309477e-8);
@@ -119,8 +116,6 @@ vec2 twoSum(float a, float b) {
   return vec2(s, err);
 }
 #endif
-
-#ifdef NVIDIA_WORKAROUND
 
 #if defined(NVIDIA_EQUATION_WORKAROUND) || defined(INTEL_EQUATION_WORKAROUND)
 vec2 twoSub(float a, float b) {
@@ -795,15 +790,3 @@ void mat4_vec4_mul_fp64(vec2 b[16], vec2 a[4], out vec2 out_val[4]) {
     vec4_dot_fp64(a, tmp, out_val[i]);
   }
 }
-
-void mercator_project_fp64(vec4 position_fp64, vec2 mercatorScaleFP64, out vec2 out_val[2]) {
-  vec2 pos_fp64[2];
-  pos_fp64[0] = sum_fp64(radians_fp64(position_fp64.xy), PI_FP64);
-  pos_fp64[1] = sub_fp64(PI_FP64, log_fp64(tan_fp64(sum_fp64(PI_FP64 * 0.25, radians_fp64(position_fp64.zw) * 0.5))));
-  vec2 x_fp64 = mul_fp64(pos_fp64[0], mercatorScaleFP64);
-  vec2 y_fp64 = mul_fp64(pos_fp64[1], mercatorScaleFP64);
-  out_val[0] = mul_fp64(x_fp64, WORLD_SCALE_FP64);
-  out_val[1] = mul_fp64(y_fp64, WORLD_SCALE_FP64);
-  return;
-}
-`;

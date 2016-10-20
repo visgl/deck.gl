@@ -106,7 +106,9 @@ export default class ChoroplethLayer64 extends Layer {
       id: this.props.id,
       program: new Program(gl, assembleShaders(gl, {
         vs: glslify('./choropleth-layer-vertex.glsl'),
-        fs: glslify('./choropleth-layer-fragment.glsl')
+        fs: glslify('./choropleth-layer-fragment.glsl'),
+        fp64: true,
+        project64: true
       })),
       geometry: new Geometry({
         drawMode: this.props.drawContour ? 'LINES' : 'TRIANGLES'

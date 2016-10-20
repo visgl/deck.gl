@@ -20,17 +20,6 @@
 
 #define SHADER_NAME arc-layer-64-vertex-shader
 
-uniform float ONE; // fp64 workaround
-
-#pragma glslify: sum_fp64 = require(../../../../shaderlib/fp64/sum-fp64, ONE=ONE)
-#pragma glslify: sub_fp64 = require(../../../../shaderlib/fp64/sub-fp64, ONE=ONE)
-#pragma glslify: mul_fp64 = require(../../../../shaderlib/fp64/mul-fp64, ONE=ONE)
-#pragma glslify: sqrt_fp64 = require(../../../../shaderlib/fp64/sqrt-fp64, ONE=ONE)
-#pragma glslify: project_fp64 = require(../../../../shaderlib/fp64/project-fp64, ONE=ONE)
-#pragma glslify: vec2_mix_fp64 = require(../../../../shaderlib/fp64/vec2-mix-fp64, ONE=ONE)
-#pragma glslify: vec2_distance_fp64 = require(../../../../shaderlib/fp64/vec2-distance-fp64, ONE=ONE)
-#pragma glslify: mat4_vec4_mul_fp64 = require(../../../../shaderlib/fp64/mat4-vec4-mul-fp64, ONE=ONE)
-
 const float N = 49.0;
 
 attribute vec3 positions;
@@ -41,7 +30,6 @@ attribute vec3 instancePickingColors;
 attribute vec4 instanceSourcePositionsFP64;
 attribute vec4 instanceTargetPositionsFP64;
 
-uniform mat4 worldMatrix;
 uniform vec2 projectionFP64[16];
 uniform float opacity;
 uniform float renderPickingBuffer;
