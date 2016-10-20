@@ -26,14 +26,6 @@ const LAYER_PROPS_ZEROES = {
   zoom: 0,
   data: []
 };
-const LAYER_PROPS_MISSING = {
-  id: 'testLayer',
-  width: 1,
-  // height: 1,
-  longitude: 1,
-  zoom: 1,
-  data: []
-};
 
 test('Layer#constructor', t => {
   const layer = new Layer(LAYER_PROPS);
@@ -47,45 +39,15 @@ test('Layer#constructor with zeroes', t => {
   t.end();
 });
 
-test('Layer#constructor with bad or missing props', t => {
-  t.throws(
-    () => new Layer(LAYER_PROPS_MISSING),
-    /Property height undefined in layer testLayer/,
-    'Expected missing props to throw an error'
-  );
+// test('Layer#constructor with bad or missing props', t => {
+//   t.throws(
+//     () => new Layer({...LAYER_PROPS, zoom: undefined}),
+//     /Property zoom undefined in layer testLayer/,
+//     'Expected invalid prop to throw an error'
+//   );
 
-  t.throws(
-    () => new Layer({...LAYER_PROPS, width: undefined}),
-    /Property width undefined in layer testLayer/,
-    'Expected invalid prop to throw an error'
-  );
-
-  t.throws(
-    () => new Layer({...LAYER_PROPS, height: undefined}),
-    /Property height undefined in layer testLayer/,
-    'Expected invalid prop to throw an error'
-  );
-
-  t.throws(
-    () => new Layer({...LAYER_PROPS, latitude: undefined}),
-    /Property latitude undefined in layer testLayer/,
-    'Expected invalid prop to throw an error'
-  );
-
-  t.throws(
-    () => new Layer({...LAYER_PROPS, longitude: undefined}),
-    /Property longitude undefined in layer testLayer/,
-    'Expected invalid prop to throw an error'
-  );
-
-  t.throws(
-    () => new Layer({...LAYER_PROPS, zoom: undefined}),
-    /Property zoom undefined in layer testLayer/,
-    'Expected invalid prop to throw an error'
-  );
-
-  t.end();
-});
+//   t.end();
+// });
 
 test('Layer#getNumInstances', t => {
   for (const dataVariant of dataVariants) {

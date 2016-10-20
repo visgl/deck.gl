@@ -13,11 +13,15 @@ important only when subclassing layers and are therefore described separetely.
 ## `Layer` Properties
 
 
-### `id` (string, required): layer id
+### `id` (string, optional): layer id
 
+The id must be unique among all your layers. The layer's id defaults to the
+`Layer` class name. If you have more than one instance of the same
+`Layer` subclass you must supply unique id strings.
 
 Note that for sublayers, the actual layer id is going to be the supplied
-layer id appended to the parent layer's (i.e. the composite layer's) id.
+layer id appended to the parent layer's (i.e. the composite layer's) id,
+which helps avoid id collisions in this case.
 
 E.g. assuming a composite GeoJsonLayer layer that renders two sublayers,
 choropleths and lines, with those ids:
@@ -32,8 +36,7 @@ Will generate the following layers and ids:
 ```
 
 React Note: `id` is similar to the `key` property used in React to match
-components between rendering calls, but in deck.gl, `id` is always required
-and again has to be globally unique among all layers.
+components between rendering calls.
 
 
 ### `viewport` (Viewport, optional, default=injected from context)

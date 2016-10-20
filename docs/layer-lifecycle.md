@@ -27,13 +27,9 @@ methods.
 
 The `id` property is used to match layers. Every time you create a new layer
 with the same `id` property as a layer you rendered last time,
-those layers will be matched up and share the same state. We can consider the
-new layer instance an "update" of the old instance.
-It is similar to React's `key` property with these exceptions:
-* 'id' is currently always required
-* it also needs to be globally unique among all your layers.
-Just make sure that every layer has a unique `id` property so that deck.gl
-can match your new layers with previously rendered ones.
+those layers will be matched up and share the same state. Once matched
+deck.gl consider the new layer instance an "update" of the old instance, and
+the new matching layer will now have access to the `state` of the old layer.
 
 
 ### Initialization: Layer.initializeState()
