@@ -17,58 +17,51 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-
 import {Layer, assembleShaders} from '../../../lib';
 import {GL, Model, Program, Geometry} from 'luma.gl';
 import {fp64ify} from '../../../lib/utils/fp64';
 
 const glslify = require('glslify');
 
-const DEFAULT_COLOR = [0, 0, 255];
+const DEFAULT_COLOR = [0, 255, 0];
 
 const defaultGetSourcePosition = x => x.sourcePosition;
 const defaultGetTargetPosition = x => x.targetPosition;
-const defaultGetColor = x => x.color;
+const defaultGetColor = x => x.color || DEFAULT_COLOR;
 
-export default class ArcLayer extends Layer {
+export default class LineLayer extends Layer {
   /**
    * @classdesc
-   * ArcLayer
+   * LineLayer
    *
    * @class
-   * @param {object} props
+   * @param {object} opts
    */
   constructor({
-    strokeWidth = 1,
+    strokeWidth = 9,
     getSourcePosition = defaultGetSourcePosition,
     getTargetPosition = defaultGetTargetPosition,
-    getSourceColor = defaultGetColor,
-    getTargetColor = defaultGetColor,
-    ...props
+    getColor = defaultGetColor,
+    ...opts
   } = {}) {
     super({
       strokeWidth,
       getSourcePosition,
       getTargetPosition,
-      getSourceColor,
-      getTargetColor,
-      ...props
+      getColor,
+      ...opts
     });
   }
 
   initializeState() {
     const {gl} = this.context;
+    this.setState({model: this.createModel(gl)});
+
     const {attributeManager} = this.state;
-
-    const model = this.createModel(gl);
-    model.userData.strokeWidth = this.props.strokeWidth;
-    this.setState({model});
-
     attributeManager.addInstanced({
-      instanceSourceColors: {size: 3, update: this.calculateInstanceSourceColors},
-      instanceTargetColors: {size: 3, update: this.calculateInstanceTargetColors},
       instanceSourcePositionsFP64: {size: 4, update: this.calculateInstanceSourcePositions},
-      instanceTargetPositionsFP64: {size: 4, update: this.calculateInstanceTargetPositions}
+      instanceTargetPositionsFP64: {size: 4, update: this.calculateInstanceTargetPositions},
+      instanceColors: {size: 3, update: this.calculateInstanceColors}
     });
   }
 
@@ -77,17 +70,23 @@ export default class ArcLayer extends Layer {
     this.state.model.userData.strokeWidth = nextProps.strokeWidth;
   }
 
+  draw({uniforms}) {
+    this.state.model.render(
+      uniforms,
+      {
+        lineWidth: this.props.strokeWidth
+      }
+    );
+  }
+
   createModel(gl) {
-    let positions = [];
-    const NUM_SEGMENTS = 50;
-    for (let i = 0; i < NUM_SEGMENTS; i++) {
-      positions = [...positions, i, i, i];
-    }
+    const positions = [0, 0, 0, 1, 1, 1];
+
     return new Model({
       id: this.props.id,
       program: new Program(gl, assembleShaders(gl, {
-        vs: glslify('./arc-layer-vertex.glsl'),
-        fs: glslify('./arc-layer-fragment.glsl'),
+        vs: glslify('./line-layer-vertex.glsl'),
+        fs: glslify('./line-layer-fragment.glsl'),
         fp64: true,
         project64: true
       })),
@@ -130,25 +129,12 @@ export default class ArcLayer extends Layer {
     }
   }
 
-  calculateInstanceSourceColors(attribute) {
-    const {data, getSourceColor} = this.props;
+  calculateInstanceColors(attribute) {
+    const {data, getColor} = this.props;
     const {value, size} = attribute;
     let i = 0;
     for (const object of data) {
-      const color = getSourceColor(object) || DEFAULT_COLOR;
-      value[i + 0] = color[0];
-      value[i + 1] = color[1];
-      value[i + 2] = color[2];
-      i += size;
-    }
-  }
-
-  calculateInstanceTargetColors(attribute) {
-    const {data, getTargetColor} = this.props;
-    const {value, size} = attribute;
-    let i = 0;
-    for (const object of data) {
-      const color = getTargetColor(object) || DEFAULT_COLOR;
+      const color = getColor(object);
       value[i + 0] = color[0];
       value[i + 1] = color[1];
       value[i + 2] = color[2];

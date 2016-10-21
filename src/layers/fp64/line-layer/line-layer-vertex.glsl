@@ -17,35 +17,18 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-
-#define SHADER_NAME arc-layer-64-vertex-shader
-
-const float N = 49.0;
+#define SHADER_NAME line-layer-64-vertex-shader
 
 attribute vec3 positions;
-attribute vec3 instanceSourceColors;
-attribute vec3 instanceTargetColors;
-attribute vec3 instancePickingColors;
+attribute vec3 instanceColors;
 attribute vec4 instanceSourcePositionsFP64;
 attribute vec4 instanceTargetPositionsFP64;
+attribute vec3 instancePickingColors;
 
 uniform float opacity;
 uniform float renderPickingBuffer;
 
 varying vec4 vColor;
-
-vec2 paraboloid_fp64(vec2 source[2], vec2 target[2], float index) {
-  float ratio = index / N;
-
-  vec2 x[2];
-  vec2_mix_fp64(source, target, ratio, x);
-  vec2 center[2];
-  vec2_mix_fp64(source, target, 0.5, center);
-
-  vec2 dSourceCenter = vec2_distance_fp64(source, center);
-  vec2 dXCenter = vec2_distance_fp64(x, center);
-  return mul_fp64(sum_fp64(dSourceCenter, dXCenter), sub_fp64(dSourceCenter, dXCenter));
-}
 
 void main(void) {
   vec2 projectedSourceCoord[2];
@@ -54,24 +37,23 @@ void main(void) {
   project_position_fp64(instanceTargetPositionsFP64, projectedTargetCoord);
 
   float segmentIndex = positions.x;
-
   vec2 mixed_temp[2];
 
-  vec2_mix_fp64(projectedSourceCoord, projectedTargetCoord, segmentIndex / N, mixed_temp);
+  vec2_mix_fp64(projectedSourceCoord, projectedTargetCoord, segmentIndex, mixed_temp);
 
   vec2 vertex_pos_modelspace[4];
   vec2 vertex_pos_clipspace[4];
 
   vertex_pos_modelspace[0] = mixed_temp[0];
   vertex_pos_modelspace[1] = mixed_temp[1];
-  vertex_pos_modelspace[2] = sqrt_fp64(paraboloid_fp64(projectedSourceCoord, projectedTargetCoord, segmentIndex));
+  vertex_pos_modelspace[2] = vec2(0.0, 0.0);
   vertex_pos_modelspace[3] = vec2(1.0, 0.0);
 
   project_to_clipspace_fp64(vertex_pos_modelspace, vertex_pos_clipspace);
 
   gl_Position = vec4(vertex_pos_clipspace[0].x, vertex_pos_clipspace[1].x, vertex_pos_clipspace[2].x, vertex_pos_clipspace[3].x);
 
-  vec4 color = vec4(mix(instanceSourceColors, instanceTargetColors, segmentIndex / N) / 255.0, opacity);
+  vec4 color = vec4(instanceColors / 255.0, opacity);
   vec4 pickingColor = vec4(instancePickingColors / 255.0, opacity);
   vColor = mix(color, pickingColor, renderPickingBuffer);
 }

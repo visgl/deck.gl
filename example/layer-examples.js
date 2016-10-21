@@ -10,7 +10,8 @@ import {
   ScatterplotLayer64,
   ArcLayer64,
   ChoroplethLayer64,
-  ExtrudedChoroplethLayer64
+  ExtrudedChoroplethLayer64,
+  LineLayer64
 } from '../src/layers/fp64';
 
 import {
@@ -154,6 +155,15 @@ new ExtrudedChoroplethLayer64({
   pickable: true
 });
 
+const LineLayer64Example = props =>
+  new LineLayer64({
+    data: props.arcs,
+    strokeWidth: props.arcStrokeWidth || 1,
+    pickable: true,
+    onHover: props.onArcHovered,
+    onClick: props.onArcClicked
+  });
+
 // SAMPLE LAYER EXAMPLES
 
 const EnhancedChoroplethLayerExample = props =>
@@ -273,7 +283,8 @@ export default {
     ArcLayer64: ArcLayer64Example,
     'ChoroplethLayer64 (Solid)': ChoroplethLayer64SolidExample,
     'ChoroplethLayer64 (Contour)': ChoroplethLayer64ContourExample,
-    ExtrudedChoroplethLayer64: ExtrudedChoroplethLayer64Example
+    ExtrudedChoroplethLayer64: ExtrudedChoroplethLayer64Example,
+    LineLayer64: LineLayer64Example
   },
 
   'Sample Layers': {
