@@ -88,7 +88,7 @@ export default class ExtrudedChoroplethLayer extends Layer {
 
     this.setUniforms({
       elevation: Number.isFinite(elevation) ? elevation : 1,
-      colors: color || [128, 128, 128],
+      colors: color || [180, 180, 200],
       uAmbientColor: ambientColor || [255, 255, 255],
       uPointLightAmbientCoefficient: pointLightAmbientCoefficient || 0.1,
       uPointLightLocation: pointLightLocation || [40.4406, -79.9959, 100],
@@ -134,7 +134,6 @@ export default class ExtrudedChoroplethLayer extends Layer {
         project64: true
       })),
       geometry: new Geometry({
-        id: this.props.id,
         drawMode: this.props.drawWireframe ? GL.LINES : GL.TRIANGLES
       }),
       vertexCount: 0,
@@ -151,7 +150,6 @@ export default class ExtrudedChoroplethLayer extends Layer {
   // each top vertex is on 3 surfaces
   // each bottom vertex is on 2 surfaces
   calculatePositions(attribute) {
-
     let {positions} = this.state;
     if (!positions) {
       positions = flattenDeep(this.state.groupedVertices.map(
@@ -266,43 +264,7 @@ export default class ExtrudedChoroplethLayer extends Layer {
           [topColors, topColors, topColors, baseColors, baseColors];
       }
     );
-
     attribute.value = new Float32Array(flattenDeep(colors));
-  }
-
-  extractBuildingsOld() {
-    const {data} = this.props;
-
-    this.state.buildings = [];
-
-    data.features.map(building => {
-      const {properties, geometry} = building;
-      const {coordinates, type} = geometry;
-      if (type === 'MultiPolygon') {
-        const buildings = coordinates.map(coords => ({
-          coordinates: coords,
-          properties
-        }));
-        this.state.buildings.push(...buildings);
-      } else if (type === 'Polygon') {
-        this.state.buildings.push({coordinates, properties});
-      }
-      // TODO - ignoring points
-    });
-    try {
-      this.state.groupedVertices = this.state.buildings.map(
-        building => {
-          const height = building.properties.height || 5;
-          return building.coordinates.map(
-            polygon => polygon.map(
-              coordinate => [coordinate[0], coordinate[1], height]
-            )
-          );
-        }
-      );
-    } catch (err) {
-      // console.log(err);
-    }
   }
 
   extractExtrudedChoropleth() {
@@ -311,6 +273,9 @@ export default class ExtrudedChoroplethLayer extends Layer {
     this.state.buildings = [];
     for (const building of data.features) {
       const {properties, geometry: {coordinates, type}} = building;
+      if (!properties.height) {
+        properties.height = Math.random() * 1000;
+      }
       switch (type) {
       case 'MultiPolygon':
         // Maps to multiple buildings

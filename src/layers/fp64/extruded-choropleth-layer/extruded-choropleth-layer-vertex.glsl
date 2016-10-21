@@ -68,15 +68,7 @@ void main(void) {
   vertex_pos_modelspace[2] = sum_fp64(scaled_height, vec2(1.0, 0.0));
   vertex_pos_modelspace[3] = vec2(1.0, 0.0);
 
-  vec2 vertex_pos_clipspace[4];
-  project_to_clipspace_fp64(vertex_pos_modelspace, vertex_pos_clipspace);
-
-  gl_Position = vec4(
-  	vertex_pos_clipspace[0].x,
-  	vertex_pos_clipspace[1].x,
-  	vertex_pos_clipspace[2].x,
-  	vertex_pos_clipspace[3].x
-  );
+  gl_Position = project_to_clipspace_fp64(vertex_pos_modelspace);
 
   vec3 color = applyLighting(
   	vec3(

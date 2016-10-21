@@ -44,16 +44,13 @@ void main(void) {
   project_position_fp64(positionsFP64, projectedCoord);
 
   vec2 vertex_pos_modelspace[4];
-  vec2 vertex_pos_clipspace[4];
 
   vertex_pos_modelspace[0] = projectedCoord[0];
   vertex_pos_modelspace[1] = projectedCoord[1];
   vertex_pos_modelspace[2] = heightsFP64;
   vertex_pos_modelspace[3] = vec2(1.0, 0.0);
 
-  project_to_clipspace_fp64(vertex_pos_modelspace, vertex_pos_clipspace);
-
-  gl_Position = vec4(vertex_pos_clipspace[0].x, vertex_pos_clipspace[1].x, vertex_pos_clipspace[2].x, vertex_pos_clipspace[3].x);
+  gl_Position = project_to_clipspace_fp64(vertex_pos_modelspace);
 
   vec4 color = vec4(colors / 255., opacity);
   vec4 pickingColor = vec4(pickingColors / 255., 1.);

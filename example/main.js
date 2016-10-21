@@ -45,7 +45,7 @@ const MAPBOX_ACCESS_TOKEN = process.env.MAPBOX_ACCESS_TOKEN ||
   'Set MAPBOX_ACCESS_TOKEN environment variable or put your token here.';
 
 const CHOROPLETHS_FILE = './example/data/sf.zip.geo.json';
-const EXTRUDED_CHOROPLETHS_FILE = './example/data/sfo.buildings.zoom13.json';
+const EXTRUDED_CHOROPLETHS_FILE = './example/data/sf.zip.geo.json';
 const HEXAGONS_FILE = './example/data/hexagons.csv';
 const POINTS_FILE = './example/data/sf.bike.parking.csv';
 

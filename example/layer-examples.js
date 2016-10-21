@@ -117,6 +117,7 @@ const ScatterplotLayer64Example = props =>
 
 const ArcLayer64Example = props =>
   new ArcLayer64({
+    id: props.id || 'arcLayer64',
     data: props.arcs,
     strokeWidth: props.arcStrokeWidth || 1,
     pickable: true,
@@ -126,7 +127,7 @@ const ArcLayer64Example = props =>
 
 const ChoroplethLayer64ContourExample = props =>
   new ChoroplethLayer64({
-    id: props.id || 'choroplethContourLayer64',
+
     data: props.choropleths,
     opacity: 0.8,
     drawContour: true
@@ -149,14 +150,15 @@ new ExtrudedChoroplethLayer64({
   pointLightLocation: [
     props.mapViewState.longitude,
     props.mapViewState.latitude,
-    1000
+    1e4
   ],
-  opacity: 0.8,
+  opacity: 1.0,
   pickable: true
 });
 
 const LineLayer64Example = props =>
   new LineLayer64({
+    id: props.id || 'lineLayer64',
     data: props.arcs,
     strokeWidth: props.arcStrokeWidth || 1,
     pickable: true,

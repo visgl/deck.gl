@@ -60,16 +60,13 @@ void main(void) {
   vec2_mix_fp64(projectedSourceCoord, projectedTargetCoord, segmentIndex / N, mixed_temp);
 
   vec2 vertex_pos_modelspace[4];
-  vec2 vertex_pos_clipspace[4];
 
   vertex_pos_modelspace[0] = mixed_temp[0];
   vertex_pos_modelspace[1] = mixed_temp[1];
   vertex_pos_modelspace[2] = sqrt_fp64(paraboloid_fp64(projectedSourceCoord, projectedTargetCoord, segmentIndex));
   vertex_pos_modelspace[3] = vec2(1.0, 0.0);
 
-  project_to_clipspace_fp64(vertex_pos_modelspace, vertex_pos_clipspace);
-
-  gl_Position = vec4(vertex_pos_clipspace[0].x, vertex_pos_clipspace[1].x, vertex_pos_clipspace[2].x, vertex_pos_clipspace[3].x);
+  gl_Position = project_to_clipspace_fp64(vertex_pos_modelspace);
 
   vec4 color = vec4(mix(instanceSourceColors, instanceTargetColors, segmentIndex / N) / 255.0, opacity);
   vec4 pickingColor = vec4(instancePickingColors / 255.0, opacity);
