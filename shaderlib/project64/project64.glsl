@@ -10,7 +10,7 @@ void mercatorProject_fp64(vec4 lnglat_fp64, out vec2 out_val[2]) { //longitude: 
   return;
 }
 
-void preproject_fp64(vec4 position_fp64, out vec2 out_val[2]) {
+void project_position_fp64(vec4 position_fp64, out vec2 out_val[2]) {
 
   vec2 pos_fp64[2];
   mercatorProject_fp64(position_fp64, pos_fp64);

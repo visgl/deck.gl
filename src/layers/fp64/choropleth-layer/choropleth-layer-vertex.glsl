@@ -41,7 +41,7 @@ vec4 getColor(vec4 color, float opacity, vec3 pickingColor, float renderPickingB
 void main(void) {
   // For some reason, need to add one to elevation to show up in untilted mode
   vec2 projectedCoord[2];
-  preproject_fp64(positionsFP64, projectedCoord);
+  project_position_fp64(positionsFP64, projectedCoord);
 
   vec2 vertex_pos_modelspace[4];
   vec2 vertex_pos_clipspace[4];

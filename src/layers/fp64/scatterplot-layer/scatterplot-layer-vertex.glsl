@@ -37,7 +37,7 @@ void main(void) {
   // For some reason, need to add one to elevation to show up in untilted mode
 
   vec2 projected_coord_xy[2];
-  preproject_fp64(instancePositionsFP64, projected_coord_xy);
+  project_position_fp64(instancePositionsFP64, projected_coord_xy);
 
   vec2 pos_mul_radius[4];
   vec4_fp64(vec4(positions * instanceRadius, 0.0), pos_mul_radius);
