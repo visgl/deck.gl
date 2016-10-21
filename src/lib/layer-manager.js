@@ -25,7 +25,6 @@
 /* global console */
 import Layer from './layer';
 import {Viewport} from '../viewport';
-import {fp64ify} from '../lib/utils/fp64';
 import {log} from './utils';
 import assert from 'assert';
 import {pickModels} from './pick-models';
@@ -65,7 +64,6 @@ export default class LayerManager {
     this.context.uniforms = {
       mercatorScale: Math.pow(2, zoom),
       mercatorCenter: viewport.center,
-      mercatorScaleFP64: fp64ify(Math.pow(2, zoom)),
       ...viewport.getUniforms()
     };
 

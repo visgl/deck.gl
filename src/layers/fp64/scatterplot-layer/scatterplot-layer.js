@@ -65,20 +65,6 @@ export default class ScatterplotLayer extends Layer {
       layerHeight: {size: 2, update: this.calculateLayerHeight},
       instanceColors: {size: 3, update: this.calculateInstanceColors}
     });
-
-    // NVIDIA workaround
-    this.setUniforms({
-      ONE: 1.0
-    });
-  }
-
-  didMount() {
-    this.updateUniforms();
-  }
-
-  willReceiveProps(oldProps, newProps) {
-    super.willReceiveProps(oldProps, newProps);
-    this.updateUniforms();
   }
 
   getModel(gl) {
@@ -111,15 +97,6 @@ export default class ScatterplotLayer extends Layer {
     });
   }
 
-  // updateUniforms() {
-  //   this.calculateZoomRadius();
-  //   const {zoomRadiusFP64} = this.state;
-  //   const {zoom} = this.props;
-
-  //   this.setUniforms({
-  //     zoomRadiusFP64
-  //   });
-  // }
   draw({uniforms}) {
     this.calculateZoomRadius();
     this.state.model.render({

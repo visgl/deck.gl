@@ -9,7 +9,8 @@ import {
 import {
   ScatterplotLayer64,
   ArcLayer64,
-  ChoroplethLayer64
+  ChoroplethLayer64,
+  ExtrudedChoroplethLayer64
 } from '../src/layers/fp64';
 
 import {
@@ -140,6 +141,19 @@ const ChoroplethLayer64SolidExample = props =>
     onClick: props.onChoroplethClicked
   });
 
+const ExtrudedChoroplethLayer64Example = props =>
+new ExtrudedChoroplethLayer64({
+  id: props.id || 'extrudedChoroplethLayer64',
+  data: props.extrudedChoropleths,
+  pointLightLocation: [
+    props.mapViewState.longitude,
+    props.mapViewState.latitude,
+    1000
+  ],
+  opacity: 0.8,
+  pickable: true
+});
+
 // SAMPLE LAYER EXAMPLES
 
 const EnhancedChoroplethLayerExample = props =>
@@ -258,7 +272,8 @@ export default {
     ScatterplotLayer64: ScatterplotLayer64Example,
     ArcLayer64: ArcLayer64Example,
     'ChoroplethLayer64 (Solid)': ChoroplethLayer64SolidExample,
-    'ChoroplethLayer64 (Contour)': ChoroplethLayer64ContourExample
+    'ChoroplethLayer64 (Contour)': ChoroplethLayer64ContourExample,
+    ExtrudedChoroplethLayer64: ExtrudedChoroplethLayer64Example
   },
 
   'Sample Layers': {

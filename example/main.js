@@ -45,6 +45,7 @@ const MAPBOX_ACCESS_TOKEN = process.env.MAPBOX_ACCESS_TOKEN ||
   'Set MAPBOX_ACCESS_TOKEN environment variable or put your token here.';
 
 const CHOROPLETHS_FILE = './example/data/sf.zip.geo.json';
+const EXTRUDED_CHOROPLETHS_FILE = './example/data/sfo.buildings.zoom13.json';
 const HEXAGONS_FILE = './example/data/hexagons.csv';
 const POINTS_FILE = './example/data/sf.bike.parking.csv';
 
@@ -57,6 +58,7 @@ const INITIAL_STATE = {
     bearing: 0
   },
   choropleths: null,
+  extrudedChoropleths: null,
   hexagons: null,
   points: null,
   arcs: null,
@@ -72,6 +74,10 @@ function updateMap(mapViewState) {
 
 function loadChoropleths(choropleths) {
   return {type: 'LOAD_CHOROPLETHS', choropleths};
+}
+
+function loadExtrudedChoropleths(extrudedChoropleths) {
+  return {type: 'LOAD_EXTRUDED_CHOROPLETHS', extrudedChoropleths};
 }
 
 function loadHexagons(hexagons) {
@@ -94,6 +100,8 @@ function reducer(state = INITIAL_STATE, action) {
     return {...state, mapViewState: action.mapViewState};
   case 'LOAD_CHOROPLETHS':
     return {...state, choropleths: action.choropleths};
+  case 'LOAD_EXTRUDED_CHOROPLETHS':
+    return {...state, extrudedChoropleths: action.extrudedChoropleths};
   case 'LOAD_HEXAGONS': {
     const {hexagons} = action;
     const hexData2 = processHexagons(hexagons);
@@ -137,6 +145,7 @@ function mapStateToProps(state) {
   return {
     mapViewState: state.mapViewState,
     choropleths: state.choropleths,
+    extrudedChoropleths: state.extrudedChoropleths,
     hexagons: state.hexagons,
     points: state.points,
     arcs: state.arcs,
@@ -243,6 +252,7 @@ class ExampleApp extends React.Component {
     window.addEventListener('resize', this._handleResize);
 
     this._loadJsonFile(CHOROPLETHS_FILE, this._handleChoroplethsLoaded);
+    this._loadJsonFile(EXTRUDED_CHOROPLETHS_FILE, this._handleExtrudedChoroplethsLoaded);
     this._loadCsvFile(HEXAGONS_FILE, this._handleHexagonsLoaded);
     this._loadCsvFile(POINTS_FILE, this._handlePointsLoaded);
   }
@@ -283,6 +293,10 @@ class ExampleApp extends React.Component {
 
   @autobind _handleChoroplethsLoaded(data) {
     this.props.dispatch(loadChoropleths(data));
+  }
+
+  @autobind _handleExtrudedChoroplethsLoaded(data) {
+    this.props.dispatch(loadExtrudedChoropleths(data));
   }
 
   @autobind _handleResize() {
@@ -413,11 +427,11 @@ class ExampleApp extends React.Component {
   }
 
   _renderOverlay() {
-    const {choropleths, hexagons, points, mapViewState} = this.props;
+    const {choropleths, extrudedChoropleths, hexagons, points, mapViewState} = this.props;
     const {width, height} = this.state;
 
     // wait until data is ready before rendering
-    if (!choropleths || !points || !hexagons) {
+    if (!extrudedChoropleths || !choropleths || !points || !hexagons) {
       return [];
     }
 

@@ -75,7 +75,6 @@ export default class ChoroplethLayer64 extends Layer {
     const IndexType = gl.getExtension('OES_element_index_uint') ?
       Uint32Array : Uint16Array;
 
-    this.setUniforms({opacity: this.props.opacity});
     this.setState({
       numInstances: 0,
       IndexType,
