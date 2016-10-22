@@ -77,6 +77,14 @@ export default class ArcLayer extends Layer {
     this.state.model.userData.strokeWidth = nextProps.strokeWidth;
   }
 
+  draw({uniforms}) {
+    const {gl} = this.context;
+    const oldStrokeWidth = gl.getParameter(GL.LINE_WIDTH);
+    gl.lineWidth(this.props.strokeWidth || 1);
+    this.state.model.render(uniforms);
+    gl.lineWidth(oldStrokeWidth || 1);
+  }
+
   createModel(gl) {
     let positions = [];
     const NUM_SEGMENTS = 50;
@@ -95,14 +103,7 @@ export default class ArcLayer extends Layer {
         drawMode: 'LINE_STRIP',
         positions: new Float32Array(positions)
       }),
-      isInstanced: true,
-      onBeforeRender() {
-        this.userData.oldStrokeWidth = gl.getParameter(GL.LINE_WIDTH);
-        this.program.gl.lineWidth(this.userData.strokeWidth || 1);
-      },
-      onAfterRender() {
-        this.program.gl.lineWidth(this.userData.oldStrokeWidth || 1);
-      }
+      isInstanced: true
     });
   }
 

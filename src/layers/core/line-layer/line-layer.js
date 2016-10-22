@@ -74,10 +74,6 @@ export default class LineLayer extends Layer {
     gl.lineWidth(this.props.strokeWidth || 1);
     this.state.model.render(uniforms);
     gl.lineWidth(oldStrokeWidth || 1);
-
-    this.state.model.render(
-      uniforms
-    );
   }
 
   createModel(gl) {

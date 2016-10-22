@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 import {Layer, assembleShaders} from '../../../lib';
-import {Model, Program, Geometry} from 'luma.gl';
+import {GL, Model, Program, Geometry} from 'luma.gl';
 import {fp64ify} from '../../../lib/utils/fp64';
 
 const glslify = require('glslify');
@@ -71,12 +71,11 @@ export default class LineLayer extends Layer {
   }
 
   draw({uniforms}) {
-    this.state.model.render(
-      uniforms,
-      {
-        lineWidth: this.props.strokeWidth
-      }
-    );
+    const {gl} = this.context;
+    const oldStrokeWidth = gl.getParameter(GL.LINE_WIDTH);
+    gl.lineWidth(this.props.strokeWidth || 1);
+    this.state.model.render(uniforms);
+    gl.lineWidth(oldStrokeWidth || 1);
   }
 
   createModel(gl) {
