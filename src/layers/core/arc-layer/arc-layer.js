@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 
 import {Layer, assembleShaders} from '../../../lib';
-import {Model, Program, Geometry} from 'luma.gl';
+import {GL, Model, Program, Geometry} from 'luma.gl';
 
 const glslify = require('glslify');
 
@@ -68,10 +68,11 @@ export default class ArcLayer extends Layer {
   }
 
   draw({uniforms}) {
-    this.state.model.render(
-      uniforms,
-      {lineWidth: this.props.strokeWidth || 1}
-    );
+    const {gl} = this.context;
+    const oldStrokeWidth = gl.getParameter(GL.LINE_WIDTH);
+    gl.lineWidth(this.props.strokeWidth || 1);
+    this.state.model.render(uniforms);
+    gl.lineWidth(oldStrokeWidth || 1);
   }
 
   _createModel(gl) {

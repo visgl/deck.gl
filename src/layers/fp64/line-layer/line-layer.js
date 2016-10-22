@@ -19,6 +19,7 @@
 // THE SOFTWARE.
 import {Layer, assembleShaders} from '../../../lib';
 import {GL, Model, Program, Geometry} from 'luma.gl';
+import {fp64ify} from '../../../lib/utils/fp64';
 
 const glslify = require('glslify');
 
@@ -58,7 +59,8 @@ export default class LineLayer extends Layer {
 
     const {attributeManager} = this.state;
     attributeManager.addInstanced({
-      instancePositions: {size: 4, update: this.calculateInstancePositions},
+      instanceSourcePositionsFP64: {size: 4, update: this.calculateInstanceSourcePositions},
+      instanceTargetPositionsFP64: {size: 4, update: this.calculateInstanceTargetPositions},
       instanceColors: {size: 3, update: this.calculateInstanceColors}
     });
   }
@@ -83,34 +85,38 @@ export default class LineLayer extends Layer {
       id: this.props.id,
       program: new Program(gl, assembleShaders(gl, {
         vs: glslify('./line-layer-vertex.glsl'),
-        fs: glslify('./line-layer-fragment.glsl')
+        fs: glslify('./line-layer-fragment.glsl'),
+        fp64: true,
+        project64: true
       })),
       geometry: new Geometry({
         drawMode: 'LINE_STRIP',
         positions: new Float32Array(positions)
       }),
-      isInstanced: true,
-      onBeforeRender() {
-        this.userData.oldStrokeWidth = gl.getParameter(GL.LINE_WIDTH);
-        this.program.gl.lineWidth(this.userData.strokeWidth || 1);
-      },
-      onAfterRender() {
-        this.program.gl.lineWidth(this.userData.oldStrokeWidth || 1);
-      }
+      isInstanced: true
     });
   }
 
-  calculateInstancePositions(attribute) {
-    const {data, getSourcePosition, getTargetPosition} = this.props;
+  calculateInstanceSourcePositions(attribute) {
+    const {data, getSourcePosition} = this.props;
     const {value, size} = attribute;
     let i = 0;
     for (const object of data) {
       const sourcePosition = getSourcePosition(object);
+      [value[i + 0], value[i + 1]] = fp64ify(sourcePosition[0]);
+      [value[i + 2], value[i + 3]] = fp64ify(sourcePosition[1]);
+      i += size;
+    }
+  }
+
+  calculateInstanceTargetPositions(attribute) {
+    const {data, getTargetPosition} = this.props;
+    const {value, size} = attribute;
+    let i = 0;
+    for (const object of data) {
       const targetPosition = getTargetPosition(object);
-      value[i + 0] = sourcePosition[0];
-      value[i + 1] = sourcePosition[1];
-      value[i + 2] = targetPosition[0];
-      value[i + 3] = targetPosition[1];
+      [value[i + 0], value[i + 1]] = fp64ify(targetPosition[0]);
+      [value[i + 2], value[i + 3]] = fp64ify(targetPosition[1]);
       i += size;
     }
   }

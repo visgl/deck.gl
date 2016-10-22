@@ -17,42 +17,40 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-#define SHADER_NAME choropleth-layer-64-vertex-shader
-
-attribute vec4 positionsFP64;
-attribute vec2 heightsFP64;
+#define SHADER_NAME line-layer-64-vertex-shader
 
 attribute vec3 positions;
-attribute vec3 colors;
-attribute vec3 pickingColors;
+attribute vec3 instanceColors;
+attribute vec4 instanceSourcePositionsFP64;
+attribute vec4 instanceTargetPositionsFP64;
+attribute vec3 instancePickingColors;
 
 uniform float opacity;
 uniform float renderPickingBuffer;
-uniform vec3 selectedPickingColor;
 
 varying vec4 vColor;
 
-vec4 getColor(vec4 color, float opacity, vec3 pickingColor, float renderPickingBuffer) {
-  vec4 color4 = vec4(color.xyz / 255., color.w / 255. * opacity);
-  vec4 pickingColor4 = vec4(pickingColor / 255., 1.);
-  return mix(color4, pickingColor4, renderPickingBuffer);
-}
-
 void main(void) {
-  // For some reason, need to add one to elevation to show up in untilted mode
-  vec2 projectedCoord[2];
-  project_position_fp64(positionsFP64, projectedCoord);
+  vec2 projectedSourceCoord[2];
+  project_position_fp64(instanceSourcePositionsFP64, projectedSourceCoord);
+  vec2 projectedTargetCoord[2];
+  project_position_fp64(instanceTargetPositionsFP64, projectedTargetCoord);
+
+  float segmentIndex = positions.x;
+  vec2 mixed_temp[2];
+
+  vec2_mix_fp64(projectedSourceCoord, projectedTargetCoord, segmentIndex, mixed_temp);
 
   vec2 vertex_pos_modelspace[4];
 
-  vertex_pos_modelspace[0] = projectedCoord[0];
-  vertex_pos_modelspace[1] = projectedCoord[1];
-  vertex_pos_modelspace[2] = heightsFP64;
+  vertex_pos_modelspace[0] = mixed_temp[0];
+  vertex_pos_modelspace[1] = mixed_temp[1];
+  vertex_pos_modelspace[2] = vec2(0.0, 0.0);
   vertex_pos_modelspace[3] = vec2(1.0, 0.0);
 
   gl_Position = project_to_clipspace_fp64(vertex_pos_modelspace);
 
-  vec4 color = vec4(colors / 255., opacity);
-  vec4 pickingColor = vec4(pickingColors / 255., 1.);
+  vec4 color = vec4(instanceColors / 255.0, opacity);
+  vec4 pickingColor = vec4(instancePickingColors / 255.0, opacity);
   vColor = mix(color, pickingColor, renderPickingBuffer);
 }

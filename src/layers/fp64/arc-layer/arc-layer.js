@@ -65,7 +65,6 @@ export default class ArcLayer extends Layer {
     this.setState({model});
 
     attributeManager.addInstanced({
-      instancePositions: {size: 4, update: this.calculateInstancePositions},
       instanceSourceColors: {size: 3, update: this.calculateInstanceSourceColors},
       instanceTargetColors: {size: 3, update: this.calculateInstanceTargetColors},
       instanceSourcePositionsFP64: {size: 4, update: this.calculateInstanceSourcePositions},
@@ -76,6 +75,14 @@ export default class ArcLayer extends Layer {
   willReceiveProps(oldProps, nextProps) {
     super.willReceiveProps(oldProps, nextProps);
     this.state.model.userData.strokeWidth = nextProps.strokeWidth;
+  }
+
+  draw({uniforms}) {
+    const {gl} = this.context;
+    const oldStrokeWidth = gl.getParameter(GL.LINE_WIDTH);
+    gl.lineWidth(this.props.strokeWidth || 1);
+    this.state.model.render(uniforms);
+    gl.lineWidth(oldStrokeWidth || 1);
   }
 
   createModel(gl) {
@@ -96,30 +103,8 @@ export default class ArcLayer extends Layer {
         drawMode: 'LINE_STRIP',
         positions: new Float32Array(positions)
       }),
-      isInstanced: true,
-      onBeforeRender() {
-        this.userData.oldStrokeWidth = gl.getParameter(GL.LINE_WIDTH);
-        this.program.gl.lineWidth(this.userData.strokeWidth || 1);
-      },
-      onAfterRender() {
-        this.program.gl.lineWidth(this.userData.oldStrokeWidth || 1);
-      }
+      isInstanced: true
     });
-  }
-
-  calculateInstancePositions(attribute) {
-    const {data, getSourcePosition, getTargetPosition} = this.props;
-    const {value, size} = attribute;
-    let i = 0;
-    for (const object of data) {
-      const sourcePosition = getSourcePosition(object);
-      const targetPosition = getTargetPosition(object);
-      value[i + 0] = sourcePosition[0];
-      value[i + 1] = sourcePosition[1];
-      value[i + 2] = targetPosition[0];
-      value[i + 3] = targetPosition[1];
-      i += size;
-    }
   }
 
   calculateInstanceSourcePositions(attribute) {

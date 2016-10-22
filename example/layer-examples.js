@@ -9,7 +9,9 @@ import {
 import {
   ScatterplotLayer64,
   ArcLayer64,
-  ChoroplethLayer64
+  ChoroplethLayer64,
+  ExtrudedChoroplethLayer64,
+  LineLayer64
 } from '../src/layers/fp64';
 
 import {
@@ -115,6 +117,7 @@ const ScatterplotLayer64Example = props =>
 
 const ArcLayer64Example = props =>
   new ArcLayer64({
+    id: props.id || 'arcLayer64',
     data: props.arcs,
     strokeWidth: props.arcStrokeWidth || 1,
     pickable: true,
@@ -124,7 +127,7 @@ const ArcLayer64Example = props =>
 
 const ChoroplethLayer64ContourExample = props =>
   new ChoroplethLayer64({
-    id: props.id || 'choroplethContourLayer64',
+
     data: props.choropleths,
     opacity: 0.8,
     drawContour: true
@@ -138,6 +141,29 @@ const ChoroplethLayer64SolidExample = props =>
     pickable: true,
     onHover: props.onChoroplethHovered,
     onClick: props.onChoroplethClicked
+  });
+
+const ExtrudedChoroplethLayer64Example = props =>
+new ExtrudedChoroplethLayer64({
+  id: props.id || 'extrudedChoroplethLayer64',
+  data: props.extrudedChoropleths,
+  pointLightLocation: [
+    props.mapViewState.longitude,
+    props.mapViewState.latitude,
+    1e4
+  ],
+  opacity: 1.0,
+  pickable: true
+});
+
+const LineLayer64Example = props =>
+  new LineLayer64({
+    id: props.id || 'lineLayer64',
+    data: props.arcs,
+    strokeWidth: props.arcStrokeWidth || 1,
+    pickable: true,
+    onHover: props.onArcHovered,
+    onClick: props.onArcClicked
   });
 
 // SAMPLE LAYER EXAMPLES
@@ -258,7 +284,9 @@ export default {
     ScatterplotLayer64: ScatterplotLayer64Example,
     ArcLayer64: ArcLayer64Example,
     'ChoroplethLayer64 (Solid)': ChoroplethLayer64SolidExample,
-    'ChoroplethLayer64 (Contour)': ChoroplethLayer64ContourExample
+    'ChoroplethLayer64 (Contour)': ChoroplethLayer64ContourExample,
+    ExtrudedChoroplethLayer64: ExtrudedChoroplethLayer64Example,
+    LineLayer64: LineLayer64Example
   },
 
   'Sample Layers': {

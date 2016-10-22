@@ -22,6 +22,13 @@ void project_position_fp64(vec4 position_fp64, out vec2 out_val[2]) {
   return;
 }
 
-void project_to_clipspace_fp64(vec2 vertex_pos_modelspace[4], out vec2 vertex_pos_clipspace[4]) {
+vec4 project_to_clipspace_fp64(vec2 vertex_pos_modelspace[4]) {
+  vec2 vertex_pos_clipspace[4];
   mat4_vec4_mul_fp64(projectionFP64, vertex_pos_modelspace, vertex_pos_clipspace);
+  return vec4(
+    vertex_pos_clipspace[0].x,
+    vertex_pos_clipspace[1].x,
+    vertex_pos_clipspace[2].x,
+    vertex_pos_clipspace[3].x
+    );
 }
