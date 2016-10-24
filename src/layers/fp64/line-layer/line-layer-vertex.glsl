@@ -51,6 +51,6 @@ void main(void) {
   gl_Position = project_to_clipspace_fp64(vertex_pos_modelspace);
 
   vec4 color = vec4(instanceColors / 255.0, opacity);
-  vec4 pickingColor = vec4(instancePickingColors / 255.0, opacity);
+  vec4 pickingColor = vec4(instancePickingColors / 255.0, 1.);
   vColor = mix(color, pickingColor, renderPickingBuffer);
 }

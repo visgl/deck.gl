@@ -21,6 +21,13 @@ All notable changes to deck.gl will be documented in this file.
 ### Beta-3.0.0 Releases
 
 #### [3.0.0-beta23] -
+- FIX: Initialization of sublayers
+- Exports more symbols from lib
+- 64 bit ExtrudedChoroplethLayer
+- 64 bit layers in place
+- GLSL library alignement 64 bit projections
+
+#### [3.0.0-beta23] -
  - FEATURE: `Layer.pick` lifecycle method - Let's layers take control of picking
  - FEATURE: Support for Composite Layers
  - FEATURE: new GeoJsonLayer - Initial composite layer, only Polygons for now.

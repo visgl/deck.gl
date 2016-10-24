@@ -39,8 +39,11 @@ uniform vec3 selectedPickingColor;
 varying vec4 vColor;
 
 void main(void) {
-  float alpha = instancePickingColors == selectedPickingColor ? 1.5 * instanceColors.w : instanceColors.w;
-  vColor = vec4(mix(instanceColors.xyz / maxCount, instancePickingColors / 255., renderPickingBuffer), alpha);
+  vColor = mix(
+  	vec4(instanceColors.xyz / maxCount, instanceColors.w / 255. * opacity),
+  	vec4(instancePickingColors / 255., 1.),
+  	renderPickingBuffer
+  );
 
   gl_Position = vec4(instancePositions + vertices * cellScale, 1.0);
 }

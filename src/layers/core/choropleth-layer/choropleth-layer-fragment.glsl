@@ -23,8 +23,14 @@
 precision highp float;
 #endif
 
-varying vec4 vColor;
+// PICKING
+// uniform bool pickingEnabled;
+varying vec4 vPickingColor;
+vec4 picking_getColor() {
+  return vPickingColor;
+}
+// PICKING
 
 void main(void) {
-  gl_FragColor = vColor;
+  gl_FragColor = picking_getColor();
 }
