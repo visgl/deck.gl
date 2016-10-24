@@ -167,16 +167,18 @@ export default class Layer {
   }
 
   // If state has a model, draw it with supplied uniforms
-  pick({uniforms, x, y}) {
+  pick({uniforms, deviceX, deviceY}) {
     const {gl} = this.context;
     const {model} = this.state;
 
     if (model) {
+      model.setUniforms({renderPickingBuffer: 1, pickingEnabled: 1});
       model.render(uniforms);
+      model.setUniforms({renderPickingBuffer: 0, pickingEnabled: 0});
 
       // Read color in the central pixel, to be mapped with picking colors
       const color = new Uint8Array(4);
-      gl.readPixels(x, y, 1, 1, GL.RGBA, GL.UNSIGNED_BYTE, color);
+      gl.readPixels(deviceX, deviceY, 1, 1, GL.RGBA, GL.UNSIGNED_BYTE, color);
 
       const index = this.decodePickingColor(color);
 

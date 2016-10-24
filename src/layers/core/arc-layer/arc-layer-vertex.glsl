@@ -62,6 +62,6 @@ void main(void) {
   gl_Position = project(vec4(p, 1.0));
 
   vec4 color = vec4(mix(instanceSourceColors, instanceTargetColors, segmentIndex / N) / 255.0, opacity);
-  vec4 pickingColor = vec4(instancePickingColors / 255.0, opacity);
+  vec4 pickingColor = vec4(instancePickingColors / 255.0, 1.);
   vColor = mix(color, pickingColor, renderPickingBuffer);
 }

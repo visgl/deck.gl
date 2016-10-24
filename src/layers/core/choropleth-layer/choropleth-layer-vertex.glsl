@@ -31,20 +31,31 @@ uniform float opacity;
 uniform float renderPickingBuffer;
 uniform vec3 selectedPickingColor;
 
-varying vec4 vColor;
-
-vec4 getColor(vec4 color, float opacity, vec3 pickingColor, float renderPickingBuffer) {
-  vec4 color4 = vec4(color.xyz / 255., color.w / 255. * opacity);
-  vec4 pickingColor4 = vec4(pickingColor / 255., 1.);
-  return mix(color4, pickingColor4, renderPickingBuffer);
+// PICKING
+uniform float pickingEnabled;
+varying vec4 vPickingColor;
+void picking_setPickColor(vec3 pickingColor) {
+  vPickingColor = vec4(pickingColor,  1.);
 }
+vec4 picking_setNormalAndPickColors(vec4 color, vec3 pickingColor) {
+  vec4 pickingColor4 = vec4(pickingColor.rgb, 1.);
+  vPickingColor = mix(color, pickingColor4, pickingEnabled);
+  return vPickingColor;
+}
+// PICKING
+
+// vec4 getColor(vec4 color, float opacity, vec3 pickingColor, float renderPickingBuffer) {
+//   vec4 color4 = vec4(color.xyz / 255., color.w / 255. * opacity);
+//   vec4 pickingColor4 = vec4(pickingColor / 255., 1.);
+//   return mix(color4, pickingColor4, renderPickingBuffer);
+// }
 
 void main(void) {
-  // For some reason, need to add one to elevation to show up in untilted mode
-  vec3 p = preproject(positions);
-  gl_Position = project(vec4(p, 1.));
+  picking_setNormalAndPickColors(
+    vec4(colors.rgb / 255., opacity),
+    pickingColors / 255.
+  );
 
-  vec4 color = vec4(colors / 255., opacity);
-  vec4 pickingColor = vec4(pickingColors / 255., 1.);
-  vColor = mix(color, pickingColor, renderPickingBuffer);
+  vec3 p = project_position(positions);
+  gl_Position = project_to_clipspace(vec4(p, 1.));
 }

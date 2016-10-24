@@ -20,8 +20,8 @@ export function pickModels(gl, {
 
   // Convert from canvas top-left to WebGL bottom-left coordinates
   // And compensate for pixelRatio
-  x *= pixelRatio;
-  y = gl.canvas.height - y * pixelRatio;
+  const deviceX = x * pixelRatio;
+  const deviceY = gl.canvas.height - y * pixelRatio;
 
   // TODO - just return glContextWithState once luma updates
   let value = null;
@@ -31,7 +31,7 @@ export function pickModels(gl, {
   glContextWithState(gl, {
     frameBuffer: pickingFBO,
     framebuffer: pickingFBO,
-    scissorTest: {x, y, w: 1, h: 1}
+    scissorTest: {x: deviceX, y: deviceY, w: 1, h: 1}
   }, () => {
     for (let i = layers.length - 1; i >= 0; --i) {
       const layer = layers[i];
@@ -39,16 +39,21 @@ export function pickModels(gl, {
       if (layer.props.pickable) {
         // Clear the frame buffer, render and sample
         gl.clear(GL.COLOR_BUFFER_BIT | GL.DEPTH_BUFFER_BIT);
-        const info = layer.pickLayer({uniforms, x, y});
+        const info = layer.pickLayer({uniforms, x, y, deviceX, deviceY});
         if (info) {
-          info.layer = layer;
-          info.x = x;
-          info.y = y;
-          info.pixelRatio = pixelRatio;
+          // Assign potentially useful props to the "info" object
+          Object.assign(info, {
+            layer,
+            x,
+            y,
+            deviceX,
+            deviceY,
+            pixelRatio
+          });
           switch (type) {
           case 'click': layer.onClick(info); break;
           case 'hover': layer.onHover(info); break;
-          default: break;
+          default: throw new Error('unknown pick type');
           }
           value = info;
           return info;
