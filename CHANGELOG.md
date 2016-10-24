@@ -31,6 +31,7 @@ All notable changes to deck.gl will be documented in this file.
 #### [v3.0.0-beta25] -
 - FEATURE: Adds drawOutline option to ScatterplotLayer.
 - FIX: update context.viewport issue #128
+- BREAKING: deepCompare prop changed to dataComparator. lodash.isequal dependency removed.
 
 #### [3.0.0-beta24] -
 - FIX: Picking in most layers
