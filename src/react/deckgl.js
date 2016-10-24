@@ -96,9 +96,9 @@ export default class DeckGL extends React.Component {
     // Note: setState triggers React component update, rerending updated layers
     // TODO - is the second comment relevant?
     const layerManager = new LayerManager({gl});
-    this.setState({layerManager, gl});
-    layerManager.updateLayers({newLayers: this.props.layers});
-    this._updateLayers(this.props);
+    this.setState({layerManager, gl}, () => {
+      this._updateLayers(this.props);
+    });
   }
 
   // Route events to layers
