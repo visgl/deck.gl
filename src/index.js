@@ -19,8 +19,9 @@
 // THE SOFTWARE.
 
 export * from './lib';
-
 export * from './viewport';
+export * from './shader-utils';
 
+// Default layers
 export * from './layers/core';
 export * from './layers/fp64';

@@ -1,4 +1,5 @@
-import {Layer, assembleShaders} from '../../../lib';
+import {Layer} from '../../../lib';
+import {assembleShaders} from '../../../shader-utils';
 import {Model, Program, Geometry} from 'luma.gl';
 
 import VERTEX_SHADER from './point-cloud-layer-vertex';

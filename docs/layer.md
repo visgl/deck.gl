@@ -135,7 +135,7 @@ Normally the iterator for data is extracted by looking at the
 `[Symbol.iterator]` is not defined, or doesn't provide the desired
 iteration order, so deck.gl allows you to supply your own iterator.
 
-Note: deck.gl even supplies an object iterator (`objectValueIterator`)
+Note: deck.gl even supplies an object iterator (`makeObjectValueIterator`)
 making it possible to use objects directly as `data` props in deck.gl
 without first converting them to arrays.
 
@@ -143,17 +143,24 @@ without first converting them to arrays.
    import {ScatterplotLayer, objectValueIterator} from `deck.gl`;
    new ScatterplotLayer({
      data: {element1: [0, 0], element2: [1, 1]},
-     dataIterator: objectValueIterator
+     dataIterator: makeObjectValueIterator(data)
    });
 ```
 
 
-### deepEqual (Boolean, optional, false)
+### dataComparator (Function, optional, null)
 
-This prop causes the `data` prop to be compared using deep equality.
-This has considerable performance impact and should only be used
-as a temporary solution for small data sets until the application can be
-refactored to avoid the need for it.
+This prop causes the `data` prop to be compared using a custom comparison
+function. The comparison function is called with the old data and the new
+data objects, and is expected to return true if they compare equally.
+
+Used to override the default shallow comparison of the `data` object.
+
+As an illustration, the app could set this to e.g. 'lodash.isequal',
+enabling deep comparison of the data structure. This particular examples
+would obviously have considerable performance impact and should only
+be used as a temporary solution for small data sets until the application
+can be refactored to avoid the need.
 
 
 ### numInstances (Number, optional)

@@ -130,7 +130,7 @@ export default class GeoJsonLayer extends Layer {
     this.setState({features});
   }
 
-  renderSublayers() {
+  renderLayers() {
     const {props} = this;
 
     let count = 0;

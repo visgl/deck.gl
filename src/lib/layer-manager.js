@@ -2,23 +2,31 @@
 // IMLEMENTATION NOTES: Why new layers are created on every render
 //
 // The key here is to understand the declarative / functional
-// programming nature of React.
+// programming nature of "reactive" applications.
 //
-// - In React, the a representation of the entire "UI tree" is re-rendered
-//   every time something changes.
-// - React then diffs the rendered tree of "ReactElements" against the
-// previous tree and makes optimized changes to the DOM.
+// - In a reactive application, the entire "UI tree"
+//   is re-rendered every time something in the application changes.
 //
-// - Due the difficulty of making non-DOM elements in React 14, our Layers
-// are a "pseudo-react" construct. So, the render function will indeed create
-// new layers every render call, however the new layers are immediately
+// - The UI framework (such as React or deck.gl) then diffs the rendered
+//   tree of UI elements (React Elements or deck.gl Layers) against the
+//   previously tree and makes optimized changes (to the DOM or to WebGL state).
+//
+// - Deck.gl layers are not based on React.
+//   But it should be possible to wrap deck.gl layers in React components to
+//   enable use of JSX.
+//
+// The render function will create
+// new layers every render call, however the new layers are efficiently
 // matched against existing layers using layer index/layer id.
-// A new layers only has a props field pointing to the unmodified props
+//
+// A new layer only has a props field pointing to the unmodified props
 // object supplied by the app on creation.
+//
 // All calculated state (programs, attributes etc) are stored in a state object
 // and this state object is moved forward to the new layer every render.
 // The new layer ends up with the state of the old layer but the props of
 // the new layer, while the old layer is discarded.
+//
 
 /* eslint-disable no-try-catch */
 /* eslint-disable no-console */
@@ -185,7 +193,7 @@ function matchSublayers({newLayers, oldLayerMap, generatedLayers, context}) {
       generatedLayers.push(newLayer);
 
       // Call layer lifecycle method: render sublayers
-      let sublayers = newLayer.renderSublayers();
+      let sublayers = newLayer.renderLayers();
       // End layer lifecycle method: render sublayers
 
       if (sublayers) {

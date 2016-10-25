@@ -19,8 +19,7 @@
 // THE SOFTWARE.
 import AttributeManager from './attribute-manager';
 import {GL} from 'luma.gl';
-import {addIterator, areEqualShallow, log} from './utils';
-import isDeepEqual from 'lodash.isequal';
+import {addIterator, compareProps, log} from './utils';
 import assert from 'assert';
 
 /*
@@ -31,8 +30,8 @@ import assert from 'assert';
 const DEFAULT_PROPS = {
   data: [],
   dataIterator: null,
+  dataComparator: null,
   numInstances: undefined,
-  deepCompare: false,
   visible: true,
   pickable: false,
   opacity: 0.8,
@@ -80,69 +79,28 @@ export default class Layer {
     this.context = null;
     Object.seal(this);
 
-    this.checkRequiredProp('data');
-    this.checkRequiredProp('id', x => typeof x === 'string');
+    this.validateRequiredProp('data');
+    this.validateRequiredProp('id', x => typeof x === 'string');
 
-    this._checkDeprecatedProps();
+    this._validateDeprecatedProps();
   }
-
-  _checkDeprecatedProps() {
-    if (this.props.isPickable !== undefined) {
-      throw new Error('No isPickable prop in deckgl v3 - use pickable instead');
-    }
-
-    // TODO - inject viewport from overlay instead of creating for each layer?
-    const hasViewportProps =
-      this.props.width !== undefined ||
-      this.props.height !== undefined ||
-      this.props.latitude !== undefined ||
-      this.props.longitude !== undefined ||
-      this.props.zoom !== undefined ||
-      this.props.pitch !== undefined ||
-      this.props.bearing !== undefined;
-    if (hasViewportProps) {
-      /* eslint-disable no-console */
-      // /* global console */
-      throw new Error(
-        `deck.gl v3 no longer needs viewport props in Layer ${this.id}`);
-    }
-  }
-  /* eslint-enable max-statements */
 
   // //////////////////////////////////////////////////
   // LIFECYCLE METHODS, overridden by the layer subclasses
 
   // Called once to set up the initial state
+  // App can create WebGL resources
   initializeState() {
     throw new Error(`Layer ${this.id} has not defined initializeState`);
   }
 
+  // Called once when layer is no longer matched and state will be discarded
+  // App can destroy WebGL resources
   finalizeState() {
   }
 
-  shouldUpdate(oldProps, newProps) {
-    // Check update triggers, and invalidate props accordingly
-    if (this._checkUpdateTriggers(oldProps, newProps)) {
-      return true;
-    }
-    // If any props have changed, ignoring updateTriggers objects
-    // (updateTriggers are expected to be reminted on every update)
-    const equalShallow = areEqualShallow(newProps, oldProps, {
-      ignore: {updateTriggers: true}
-    });
-    if (!equalShallow) {
-      if (newProps.data !== oldProps.data) {
-        this.setState({dataChanged: true});
-      }
-      return true;
-    }
-    if (newProps.deepCompare && !isDeepEqual(newProps.data, oldProps.data)) {
-      // Support optional deep compare of data
-      // Note: this is quite inefficient, app should use buffer props instead
-      this.setState({dataChanged: true});
-      return true;
-    }
-    return false;
+  shouldUpdate(oldProps, newProps, changeFlags) {
+    return changeFlags.propsChanged;
   }
 
   // Default implementation, all attributeManager will be updated
@@ -154,7 +112,7 @@ export default class Layer {
   }
 
   // Implement to generate sublayers
-  renderSublayers() {
+  renderLayers() {
     return null;
   }
 
@@ -385,13 +343,17 @@ export default class Layer {
 
   // Called by layer manager when existing layer is getting new props
   updateLayer(oldProps, newProps) {
-    // Calculate standard change flags
-    this._checkForChangedProps(oldProps, newProps);
+    // Calculate change flags to simplify for layer
+    const changeFlags = this._checkChangedProps(oldProps, newProps);
+
+    // Set them on state
+    // TODO remove in favor of argument to shouldUpdate/willReceiveProps
+    this.setState(changeFlags);
 
     // Check if any props have changed
-    if (this.shouldUpdate(oldProps, newProps)) {
+    if (this.shouldUpdate(oldProps, newProps, changeFlags)) {
       // Let the subclass mark what is needed for update
-      this.willReceiveProps(oldProps, newProps);
+      this.willReceiveProps(oldProps, newProps, changeFlags);
       // Run the attribute updaters
       this._updateAttributes(newProps);
       // Update the uniforms
@@ -402,8 +364,12 @@ export default class Layer {
       }
     }
 
-    this.state.dataChanged = false;
-    this.state.viewportChanged = false;
+    // Reset change flags
+    // TODO - remove, see above
+    this.setState({
+      dataChanged: false,
+      viewportChanged: false
+    });
   }
 
   // Called by manager when layer is about to be disposed
@@ -476,16 +442,110 @@ export default class Layer {
   }
 
   // Internal Helpers
-  _checkForChangedProps(oldProps, newProps) {
-    // Note: dataChanged might already be set
-    if (newProps.data !== oldProps.data) {
-      // Figure out data length
-      this.state.dataChanged = true;
+  _checkChangedProps(oldProps, newProps) {
+    // If any props have changed, ignoring updateTriggers objects
+    // (updateTriggers are expected to be a new object on every update)
+    const inequalReason = compareProps({
+      newProps,
+      oldProps,
+      ignoreProps: {data: null, updateTriggers: null}
+    });
+    if (inequalReason) {
+      return true;
     }
 
-    this.setState({viewportChanged: this.context.viewportChanged});
+    return {
+      propsChanged: Boolean(inequalReason),
+      dataChanged: this._checkDataChanged(oldProps, newProps),
+      viewportChanged: this.context.viewportChanged
+    };
   }
 
+  // The comparison of the data prop has some special handling
+  _checkDataChanged(oldProps, newProps) {
+    // Support optional app defined comparison of data
+    const {dataComparator} = newProps;
+    if (dataComparator) {
+      if (!dataComparator(newProps.data, oldProps.data)) {
+        return true;
+      }
+    // Otherwise, do a shallow equal on props
+    } else if (newProps.data !== oldProps.data) {
+      return true;
+    }
+
+    // If data hasn't changed, check update triggers
+    // these will indicate if accessors will return diffferent values
+    if (this._checkUpdateTriggers(oldProps, newProps)) {
+      return true;
+    }
+
+    return false;
+  }
+
+  // Check if any update triggers have changed, and invalidate
+  // attributes accordingly.
+  _checkUpdateTriggers(oldProps, newProps) {
+    let change = false;
+    const {attributeManager} = this.state;
+    for (const propName in newProps.updateTriggers) {
+      const oldTriggers = oldProps.updateTriggers[propName];
+      const newTriggers = newProps.updateTriggers[propName];
+      const unequalReason = compareProps(oldTriggers, newTriggers);
+      if (unequalReason) {
+        if (propName === 'all') {
+          attributeManager.invalidateAll();
+          change = true;
+        } else {
+          attributeManager.invalidate(propName);
+          change = true;
+        }
+      }
+    }
+    return change;
+  }
+
+  validateOptionalProp(propertyName, condition) {
+    const value = this.props[propertyName];
+    if (value !== undefined && !condition(value)) {
+      throw new Error(`Bad property ${propertyName} in layer ${this.id}`);
+    }
+  }
+
+  validateRequiredProp(propertyName, condition) {
+    const value = this.props[propertyName];
+    if (value === undefined) {
+      throw new Error(`Property ${propertyName} undefined in layer ${this.id}`);
+    }
+    if (condition && !condition(value)) {
+      throw new Error(`Bad property ${propertyName} in layer ${this.id}`);
+    }
+  }
+
+  _validateDeprecatedProps() {
+    if (this.props.isPickable !== undefined) {
+      throw new Error('No isPickable prop in deckgl v3 - use pickable instead');
+    }
+
+    // TODO - inject viewport from overlay instead of creating for each layer?
+    const hasViewportProps =
+      this.props.width !== undefined ||
+      this.props.height !== undefined ||
+      this.props.latitude !== undefined ||
+      this.props.longitude !== undefined ||
+      this.props.zoom !== undefined ||
+      this.props.pitch !== undefined ||
+      this.props.bearing !== undefined;
+    if (hasViewportProps) {
+      /* eslint-disable no-console */
+      // /* global console */
+      throw new Error(
+        `deck.gl v3 no longer needs viewport props in Layer ${this.id}`);
+    }
+  }
+  /* eslint-enable max-statements */
+
+  // Calls attribute manager to update any WebGL attributes
   _updateAttributes(props) {
     const {attributeManager, model} = this.state;
     const numInstances = this.getNumInstances(props);
@@ -511,72 +571,4 @@ export default class Layer {
       ONE: 1.0
     });
   }
-
-  // Check if any update triggers have changed, and invalidate
-  // attributes accordingly.
-  _checkUpdateTriggers(oldProps, newProps) {
-    let change = false;
-    const {attributeManager} = this.state;
-    for (const propName in newProps.updateTriggers) {
-      const oldTriggers = oldProps.updateTriggers[propName];
-      const newTriggers = newProps.updateTriggers[propName];
-      if (!areEqualShallow(oldTriggers, newTriggers)) {
-        if (propName === 'all') {
-          attributeManager.invalidateAll();
-          change = true;
-        } else {
-          attributeManager.invalidate(propName);
-          change = true;
-        }
-      }
-    }
-    return change;
-  }
-
-  checkOptionalProp(propertyName, condition) {
-    const value = this.props[propertyName];
-    if (value !== undefined && !condition(value)) {
-      throw new Error(`Bad property ${propertyName} in layer ${this.id}`);
-    }
-  }
-
-  checkRequiredProp(propertyName, condition) {
-    const value = this.props[propertyName];
-    if (value === undefined) {
-      throw new Error(`Property ${propertyName} undefined in layer ${this.id}`);
-    }
-    if (condition && !condition(value)) {
-      throw new Error(`Bad property ${propertyName} in layer ${this.id}`);
-    }
-  }
-
-  // MAP LAYER FUNCTIONALITY
-  // _setViewport() {
-  //   const {
-  //     width, height, latitude, longitude, zoom, pitch, bearing, altitude,
-  //     mercatorEnabled = true, disableMercatorProject
-  //   } = this.props;
-
-  //   if (disableMercatorProject !== undefined) {
-  //     throw new Error('disableMercatorProject renamed to mercatorEnabled');
-  //   }
-
-  //   // TODO - pass in as prop so we don't have to recalculate in every layer
-  //   const viewport = new Viewport({
-  //     width, height, latitude, longitude, zoom, pitch, bearing, altitude,
-  //     tileSize: 512
-  //   });
-
-  //   this.setState({mercator: viewport});
-  //   // TODO - "private" viewport.center member...
-  //   this.setUniforms({
-  //     mercatorEnabled: mercatorEnabled ? 1 : 0,
-  //     mercatorScale: Math.pow(2, zoom),
-  //     mercatorScaleFP64: fp64ify(Math.pow(2, zoom)),
-  //     mercatorCenter: viewport.center,
-  //     ...viewport.getUniforms(this.props)
-  //   });
-
-  //   log(3, this.state.viewport, latitude, longitude, zoom);
-  // }
 }

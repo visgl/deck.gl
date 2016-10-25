@@ -1,4 +1,5 @@
-import {Layer, assembleShaders} from '../../../lib';
+import {Layer} from '../../../lib';
+import {assembleShaders} from '../../../shader-utils';
 import {Geometry, Program, Model} from 'luma.gl';
 
 import assert from 'assert';

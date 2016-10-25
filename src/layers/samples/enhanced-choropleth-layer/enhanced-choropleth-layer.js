@@ -1,4 +1,5 @@
-import {Layer, assembleShaders} from '../../../lib';
+import {Layer} from '../../../lib';
+import {assembleShaders} from '../../../shader-utils';
 import earcut from 'earcut';
 import flattenDeep from 'lodash.flattendeep';
 import normalize from 'geojson-normalize';

@@ -76,16 +76,16 @@ new data prop which will cause attributes to update if it has changed, or
 any of the updateTriggers have changed.
 
 
-### Decomposing: renderSublayers()
+### Decomposing: renderLayers()
 
 Allows a layer to "render" one or more Layers passing in its own state as props.
 The layers will be rendered after the rendering layer, but before the next
-layer in the list. `renderSublayers` will be called on the new layers,
+layer in the list. `renderLayers` will be called on the new layers,
 allowing a recursive decomposition of the drawing of a complex data set
 into primitive layers.
 
 A layer can return null, a single layer, or an array of layers. The default
-implementation of `renderSublayers` returns null.
+implementation of `renderLayers` returns null.
 
 
 ### Drawing: draw({uniforms})
@@ -97,11 +97,16 @@ and calls `draw` on that model.
 TBA
 
 
-### Picking: getPickingModels()
+### Picking: pick(uniforms, deviceX, deviceY)
+
+The pick method should return an object with optional fields about
+what was picked. This `info` object is then populated with additional
+information by deck.gl and finally passed to the layer's `onHover` or
+`onPick` callbacks.
 
 The default implementation looks for a variable `model` in the layer's
 state (which is expected to be an instance of the luma.gl `Model` class)
-uses that model for picking.
-
-TBD - this is not the best interface for enabling custom picking.
+uses that model for picking, and renders that model with attributes set
+that allow the layer shaders to render picking colors instead of normal
+colors.
 
