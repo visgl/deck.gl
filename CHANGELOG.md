@@ -20,8 +20,9 @@ All notable changes to deck.gl will be documented in this file.
 
 ### Beta-3.0.0 Releases
 
-#### [dev] -
+#### [v3.0.0-beta25] -
 - FEATURE: Adds drawOutline option to ScatterplotLayer.
+- FIX: update context.viewport issue #128
 
 #### [3.0.0-beta24] -
 - FIX: Picking in most layers
