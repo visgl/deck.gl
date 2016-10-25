@@ -55,7 +55,9 @@ export default class ScatterplotLayer extends Layer {
 
   initializeState() {
     const {gl} = this.context;
-    this.setState({model: this._getModel(gl)});
+    const model = this._getModel(gl, this.props.outlineMode ? 'LINE_LOOP' : 'TRIANGLE_FAN');
+    model.userData.outlineStrokeWidth = this.props.outlineStrokeWidth;
+    this.setState({model});
 
     const {attributeManager} = this.state;
     attributeManager.addInstanced({
@@ -65,6 +67,16 @@ export default class ScatterplotLayer extends Layer {
   }
 
   willReceiveProps(oldProps, newProps) {
+    if (oldProps.outlineMode !== newProps.outlineMode) {
+      const {gl} = this.state;
+      const model = this._getModel(gl, newProps.outlineMode ? 'LINE_LOOP' : 'TRIANGLE_FAN');
+
+      this.state.model = model;
+    }
+    if (newProps.outlineMode) {
+      this.state.model.userData.outlineStrokeWidth = newProps.outlineStrokeWidth;
+    }
+    this.updateUniforms(newProps);
     super.willReceiveProps(oldProps, newProps);
   }
 
@@ -75,7 +87,7 @@ export default class ScatterplotLayer extends Layer {
     });
   }
 
-  _getModel(gl) {
+  _getModel(gl, drawMode) {
     const NUM_SEGMENTS = 16;
     const PI2 = Math.PI * 2;
 
@@ -98,10 +110,17 @@ export default class ScatterplotLayer extends Layer {
         })
       ),
       geometry: new Geometry({
-        drawMode: 'TRIANGLE_FAN',
+        drawMode: drawMode || 'TRIANGLE_FAN',
         positions: new Float32Array(positions)
       }),
-      isInstanced: true
+      isInstanced: true,
+      onBeforeRender() {
+        this.userData.oldOutlineStrokeWidth = gl.getParameter(gl.LINE_WIDTH);
+        gl.lineWidth(this.userData.outlineStrokeWidth || 1);
+      },
+      onAfterRender() {
+        gl.lineWidth(this.userData.oldOutlineStrokeWidth || 1);
+      }
     });
   }
 

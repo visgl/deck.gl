@@ -68,6 +68,8 @@ const ScatterplotLayerExample = props =>
   new ScatterplotLayer({
     data: props.points,
     opacity: 0.5,
+    outlineMode: true,
+    outlineStrokeWidth: 2,
     pickable: true,
     onHover: props.onScatterplotHovered,
     onClick: props.onScatterplotClicked
@@ -89,6 +91,7 @@ const ScatterplotLayerMeterExample = props =>
       {position: [1000, 1000]}
     ],
     opacity: 0.5,
+    outlineMode: true,
     pickable: true,
     onHover: props.onScatterplotHovered,
     onClick: props.onScatterplotClicked
