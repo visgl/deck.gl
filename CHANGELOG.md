@@ -21,6 +21,9 @@ All notable changes to deck.gl will be documented in this file.
 ### Beta-3.0.0 Releases
 
 #### [3.0.0-beta23] -
+- FEATURE: Adds drawOutline option to ScatterplotLayer.
+
+#### [3.0.0-beta23] -
 - FIX: Initialization of sublayers
 - Exports more symbols from lib
 - 64 bit ExtrudedChoroplethLayer

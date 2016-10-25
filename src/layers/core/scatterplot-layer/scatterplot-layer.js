@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 import {Layer, assembleShaders} from '../../../lib';
-import {Model, Program, Geometry} from 'luma.gl';
+import {GL, Model, Program, Geometry} from 'luma.gl';
 
 const glslify = require('glslify');
 
@@ -55,7 +55,9 @@ export default class ScatterplotLayer extends Layer {
 
   initializeState() {
     const {gl} = this.context;
-    this.setState({model: this._getModel(gl)});
+    const drawMode = this.props.drawOutline ? GL.LINE_LOOP : GL.TRIANGLE_FAN;
+    const model = this._getModel(gl, drawMode);
+    this.setState({model});
 
     const {attributeManager} = this.state;
     attributeManager.addInstanced({
@@ -65,17 +67,28 @@ export default class ScatterplotLayer extends Layer {
   }
 
   willReceiveProps(oldProps, newProps) {
+    if (oldProps.drawOutline !== newProps.drawOutline) {
+      const {gl} = this.state;
+      const drawMode = newProps.drawOutline ? GL.LINE_LOOP : GL.TRIANGLE_FAN;
+      const model = this._getModel(gl, drawMode);
+
+      this.state.model = model;
+    }
     super.willReceiveProps(oldProps, newProps);
   }
 
   draw({uniforms}) {
+    const {gl} = this.context;
+    const oldStrokeWidth = gl.getParameter(GL.LINE_WIDTH);
+    gl.lineWidth(this.props.strokeWidth || 1);
     this.state.model.render({
       ...uniforms,
       radius: this.props.radius
     });
+    gl.lineWidth(oldStrokeWidth || 1);
   }
 
-  _getModel(gl) {
+  _getModel(gl, drawMode) {
     const NUM_SEGMENTS = 16;
     const PI2 = Math.PI * 2;
 
@@ -98,7 +111,7 @@ export default class ScatterplotLayer extends Layer {
         })
       ),
       geometry: new Geometry({
-        drawMode: 'TRIANGLE_FAN',
+        drawMode: drawMode || GL.TRIANGLE_FAN,
         positions: new Float32Array(positions)
       }),
       isInstanced: true

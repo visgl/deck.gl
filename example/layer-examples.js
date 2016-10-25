@@ -67,7 +67,9 @@ const LineLayerExample = props =>
 const ScatterplotLayerExample = props =>
   new ScatterplotLayer({
     data: props.points,
+    drawOutline: true,
     opacity: 0.5,
+    strokeWidth: 2,
     pickable: true,
     onHover: props.onScatterplotHovered,
     onClick: props.onScatterplotClicked
