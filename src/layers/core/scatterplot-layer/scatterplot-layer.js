@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 import {Layer, assembleShaders} from '../../../lib';
-import {Model, Program, Geometry} from 'luma.gl';
+import {GL, Model, Program, Geometry} from 'luma.gl';
 
 const glslify = require('glslify');
 
@@ -55,8 +55,8 @@ export default class ScatterplotLayer extends Layer {
 
   initializeState() {
     const {gl} = this.context;
-    const model = this._getModel(gl, this.props.outlineMode ? 'LINE_LOOP' : 'TRIANGLE_FAN');
-    model.userData.outlineStrokeWidth = this.props.outlineStrokeWidth;
+    const drawMode = this.props.drawOutline ? GL.LINE_LOOP : GL.TRIANGLE_FAN;
+    const model = this._getModel(gl, drawMode);
     this.setState({model});
 
     const {attributeManager} = this.state;
@@ -67,24 +67,25 @@ export default class ScatterplotLayer extends Layer {
   }
 
   willReceiveProps(oldProps, newProps) {
-    if (oldProps.outlineMode !== newProps.outlineMode) {
+    if (oldProps.drawOutline !== newProps.drawOutline) {
       const {gl} = this.state;
-      const model = this._getModel(gl, newProps.outlineMode ? 'LINE_LOOP' : 'TRIANGLE_FAN');
+      const drawMode = newProps.drawOutline ? GL.LINE_LOOP : GL.TRIANGLE_FAN;
+      const model = this._getModel(gl, drawMode);
 
       this.state.model = model;
     }
-    if (newProps.outlineMode) {
-      this.state.model.userData.outlineStrokeWidth = newProps.outlineStrokeWidth;
-    }
-    this.updateUniforms(newProps);
     super.willReceiveProps(oldProps, newProps);
   }
 
   draw({uniforms}) {
+    const {gl} = this.context;
+    const oldStrokeWidth = gl.getParameter(GL.LINE_WIDTH);
+    gl.lineWidth(this.props.strokeWidth || 1);
     this.state.model.render({
       ...uniforms,
       radius: this.props.radius
     });
+    gl.lineWidth(oldStrokeWidth || 1);
   }
 
   _getModel(gl, drawMode) {
@@ -110,17 +111,10 @@ export default class ScatterplotLayer extends Layer {
         })
       ),
       geometry: new Geometry({
-        drawMode: drawMode || 'TRIANGLE_FAN',
+        drawMode: drawMode || GL.TRIANGLE_FAN,
         positions: new Float32Array(positions)
       }),
-      isInstanced: true,
-      onBeforeRender() {
-        this.userData.oldOutlineStrokeWidth = gl.getParameter(gl.LINE_WIDTH);
-        gl.lineWidth(this.userData.outlineStrokeWidth || 1);
-      },
-      onAfterRender() {
-        gl.lineWidth(this.userData.oldOutlineStrokeWidth || 1);
-      }
+      isInstanced: true
     });
   }
 
