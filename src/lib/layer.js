@@ -76,10 +76,18 @@ export default class Layer {
     // TODO - allow app to supply dataIterator prop?
     if (props.data) {
       addIterator(props.data);
-      log.once(0, props.data[Symbol.iterator], 'data prop must have iterator');
+      if (!props.data[Symbol.iterator]) {
+        log.once(0, 'data prop must have iterator');
+      }
     }
 
     this._validateDeprecatedProps();
+  }
+
+  toString() {
+    const className = this.constructor.name;
+    return (className !== this.props.id) ?
+      `<${className}:'${this.props.id}'>` : `<${className}>`;
   }
 
   // //////////////////////////////////////////////////
@@ -96,12 +104,12 @@ export default class Layer {
   finalizeState() {
   }
 
-  shouldUpdateState({oldProps, newProps, oldContext, newContext, changeFlags}) {
+  shouldUpdateState({oldProps, props, oldContext, context, changeFlags}) {
     return changeFlags.somethingChanged;
   }
 
   // Default implementation, all attributeManager will be updated
-  updateState({oldProps, newProps, oldContext, newContext, changeFlags}) {
+  updateState({oldProps, props, oldContext, context, changeFlags}) {
     if (this.state.dataChanged && this.state.attributeManager) {
       this.state.attributeManager.invalidateAll();
     }
@@ -144,29 +152,15 @@ export default class Layer {
     return null;
   }
 
-  // DEPRECATED LIFECYCLE METHODS
-
-  shouldUpdate(oldProps, newProps, changeFlags) {
-    return changeFlags.propsChanged;
-  }
-
-  // Default implementation, all attributeManager will be updated
-  willReceiveProps(oldProps, newProps) {
-    const {attributeManager} = this.state;
-    if (this.state.dataChanged) {
-      attributeManager.invalidateAll();
-    }
-  }
-
   // END LIFECYCLE METHODS
   // //////////////////////////////////////////////////
 
   // Public API
-  toString() {
-    const className = this.constructor.name;
-    return (className !== this.props.id) ?
-      `<${className}:'${this.props.id}'>` :
-      `<${className}>`;
+
+  // Updates selected state members and marks the object for redraw
+  setState(updateObject) {
+    Object.assign(this.state, updateObject);
+    this.state.needsRedraw = true;
   }
 
   setNeedsRedraw(redraw = true) {
@@ -192,12 +186,6 @@ export default class Layer {
     redraw = redraw || attributeManager.getNeedsRedraw({clearRedrawFlags});
     redraw = redraw || (model && model.getNeedsRedraw({clearRedrawFlags}));
     return redraw;
-  }
-
-  // Updates selected state members and marks the object for redraw
-  setState(updateObject) {
-    Object.assign(this.state, updateObject);
-    this.state.needsRedraw = true;
   }
 
   // Updates selected state members and marks the object for redraw
@@ -253,24 +241,6 @@ export default class Layer {
 
   // INTERNAL METHODS
 
-  // Calculates uniforms
-  drawLayer(uniforms = {}) {
-    assert(this.context.viewport, 'Layer missing context.viewport');
-    const viewportUniforms = this.context.viewport.getUniforms(this.props);
-    uniforms = {...uniforms, ...viewportUniforms};
-    // Call lifecycle method
-    this.draw(uniforms);
-    // End lifecycle method
-  }
-
-  pickLayer(uniforms = {}) {
-    const viewportUniforms = this.context.viewport.getUniforms(this.props);
-    uniforms = {...uniforms, ...viewportUniforms, renderPickingBuffer: true};
-    // Call lifecycle method
-    return this.pick(uniforms);
-    // End lifecycle method
-  }
-
   // Deduces numer of instances. Intention is to support:
   // - Explicit setting of numInstances
   // - Auto-deduction for ES6 containers that define a size member
@@ -309,90 +279,6 @@ export default class Layer {
     }
 
     throw new Error('Could not deduce numInstances');
-  }
-
-  // LAYER MANAGER API
-
-  // Called by layer manager when a new layer is found
-  /* eslint-disable max-statements */
-  initializeLayer() {
-    assert(this.context.gl);
-
-    // Initialize state only once
-    this.setState({
-      attributeManager: new AttributeManager({id: this.props.id}),
-      model: null,
-      needsRedraw: true,
-      dataChanged: true
-    });
-
-    // Add attribute manager loggers if provided
-    this.state.attributeManager.setLogFunctions(this.props);
-
-    const {attributeManager} = this.state;
-    // All instanced layers get instancePickingColors attribute by default
-    // Their shaders can use it to render a picking scene
-    attributeManager.addInstanced({
-      instancePickingColors:
-        {size: 3, update: this.calculateInstancePickingColors}
-    });
-
-    // Call subclass lifecycle method
-    this.initializeState();
-    // End subclass lifecycle method
-
-    // Add any subclass attributes
-    this._updateAttributes(this.props);
-    this._updateBaseUniforms();
-
-    const {model} = this.state;
-    if (model) {
-      model.setInstanceCount(this.getNumInstances());
-      model.id = this.props.id;
-      model.program.id = `${this.props.id}-program`;
-      model.geometry.id = `${this.props.id}-geometry`;
-      model.setAttributes(attributeManager.getAttributes());
-    }
-  }
-  /* eslint-enable max-statements */
-
-  // Called by layer manager when existing layer is getting new props
-  updateLayer(oldProps, newProps) {
-    // Calculate change flags to simplify for layer
-    const changeFlags = this._checkChangedProps(oldProps, newProps);
-
-    // Set them on state
-    // TODO remove in favor of argument to shouldUpdate/willReceiveProps
-    this.setState(changeFlags);
-
-    // Check if any props have changed
-    if (this.shouldUpdate(oldProps, newProps, changeFlags)) {
-      // Let the subclass mark what is needed for update
-      this.willReceiveProps(oldProps, newProps, changeFlags);
-      // Run the attribute updaters
-      this._updateAttributes(newProps);
-      // Update the uniforms
-      this._updateBaseUniforms();
-
-      if (this.state.model) {
-        this.state.model.setInstanceCount(this.getNumInstances());
-      }
-    }
-
-    // Reset change flags
-    // TODO - remove, see above
-    this.setState({
-      dataChanged: false,
-      viewportChanged: false
-    });
-  }
-
-  // Called by manager when layer is about to be disposed
-  // Note: not guaranteed to be called on application shutdown
-  finalizeLayer() {
-    // Call subclass lifecycle method
-    this.finalizeState();
-    // End subclass lifecycle method
   }
 
   calculateInstancePickingColors(attribute, {numInstances}) {
@@ -456,8 +342,125 @@ export default class Layer {
     return this.props.onClick(info);
   }
 
-  // Internal Helpers
-  _checkChangedProps(oldProps, newProps) {
+  // LAYER MANAGER API
+  // Should only be called by the deck.gl LayerManager class
+
+  // Called by layer manager when a new layer is found
+  /* eslint-disable max-statements */
+  initializeLayer(updateParams) {
+    assert(this.context.gl);
+    assert(!this.state);
+
+    this.state = {};
+
+    // Initialize state only once
+    this.setState({
+      attributeManager: new AttributeManager({id: this.props.id}),
+      model: null,
+      needsRedraw: true,
+      dataChanged: true
+    });
+
+    // Add attribute manager loggers if provided
+    this.state.attributeManager.setLogFunctions(this.props);
+
+    const {attributeManager} = this.state;
+    // All instanced layers get instancePickingColors attribute by default
+    // Their shaders can use it to render a picking scene
+    attributeManager.addInstanced({
+      instancePickingColors:
+        {size: 3, update: this.calculateInstancePickingColors}
+    });
+
+    // Call subclass lifecycle methods
+    this.initializeState();
+    this.updateState(updateParams);
+    // End subclass lifecycle methods
+
+    // Add any subclass attributes
+    this._updateAttributes(this.props);
+    this._updateBaseUniforms();
+
+    const {model} = this.state;
+    if (model) {
+      model.setInstanceCount(this.getNumInstances());
+      model.id = this.props.id;
+      model.program.id = `${this.props.id}-program`;
+      model.geometry.id = `${this.props.id}-geometry`;
+      model.setAttributes(attributeManager.getAttributes());
+    }
+  }
+  /* eslint-enable max-statements */
+
+  // Called by layer manager when existing layer is getting new props
+  updateLayer(updateParams) {
+    // Check for deprecated method
+    if (this.shouldUpdate) {
+      log.once(`deck.gl v3 shouldUpdate: use shouldUpdateState ${this}`);
+    }
+
+    // Call subclass lifecycle method
+    const stateNeedsUpdate = this.shouldUpdateState(updateParams);
+    // End lifecycle method
+
+    if (stateNeedsUpdate) {
+
+      // Call deprecated lifecycle method if defined
+      if (this.willReceiveProps) {
+        log.once(
+          `deck.gl v3 willReceiveProps deprecated. Use updateState ${this}`);
+        const {oldProps, newProps, changeFlags} = updateParams;
+        this.setState(changeFlags);
+        this.willReceiveProps(oldProps, newProps, changeFlags);
+        this.setState({
+          dataChanged: false,
+          viewportChanged: false
+        });
+      }
+      // End lifecycle method
+
+      // Call subclass lifecycle method
+      this.updateState(updateParams);
+      // End lifecycle method
+
+      // Run the attribute updaters
+      this._updateAttributes(updateParams.newProps);
+      // Update the uniforms
+      this._updateBaseUniforms();
+
+      if (this.state.model) {
+        this.state.model.setInstanceCount(this.getNumInstances());
+      }
+    }
+  }
+
+  // Called by manager when layer is about to be disposed
+  // Note: not guaranteed to be called on application shutdown
+  finalizeLayer() {
+    // Call subclass lifecycle method
+    this.finalizeState();
+    // End lifecycle method
+  }
+
+  // Calculates uniforms
+  drawLayer(uniforms = {}) {
+    assert(this.context.viewport, 'Layer missing context.viewport');
+    const viewportUniforms = this.context.viewport.getUniforms(this.props);
+    uniforms = {...uniforms, ...viewportUniforms};
+    // Call subclass lifecycle method
+    this.draw(uniforms);
+    // End lifecycle method
+  }
+
+  pickLayer(uniforms = {}) {
+    const viewportUniforms = this.context.viewport.getUniforms(this.props);
+    uniforms = {...uniforms, ...viewportUniforms, renderPickingBuffer: true};
+    // Call subclass lifecycle method
+    return this.pick(uniforms);
+    // End lifecycle method
+  }
+
+  diffProps(oldProps, newProps, context) {
     // If any props have changed, ignoring updateTriggers objects
     // (updateTriggers are expected to be a new object on every update)
     const inequalReason = compareProps({
@@ -465,19 +468,19 @@ export default class Layer {
       oldProps,
       ignoreProps: {data: null, updateTriggers: null}
     });
-    if (inequalReason) {
-      return true;
-    }
 
     return {
       propsChanged: Boolean(inequalReason),
-      dataChanged: this._checkDataChanged(oldProps, newProps),
-      viewportChanged: this.context.viewportChanged
+      dataChanged: this._diffDataProps(oldProps, newProps),
+      viewportChanged: context.viewportChanged,
+      reason: inequalReason
     };
   }
 
+  // PRIVATE METHODS
+
   // The comparison of the data prop has some special handling
-  _checkDataChanged(oldProps, newProps) {
+  _diffDataProps(oldProps, newProps) {
     // Support optional app defined comparison of data
     const {dataComparator} = newProps;
     if (dataComparator) {
@@ -491,7 +494,7 @@ export default class Layer {
 
     // If data hasn't changed, check update triggers
     // these will indicate if accessors will return diffferent values
-    if (this._checkUpdateTriggers(oldProps, newProps)) {
+    if (this._diffUpdateTriggers(oldProps, newProps)) {
       return true;
     }
 
@@ -500,7 +503,7 @@ export default class Layer {
 
   // Check if any update triggers have changed, and invalidate
   // attributes accordingly.
-  _checkUpdateTriggers(oldProps, newProps) {
+  _diffUpdateTriggers(oldProps, newProps) {
     let change = false;
     const {attributeManager} = this.state;
     for (const propName in newProps.updateTriggers) {

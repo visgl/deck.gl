@@ -15,17 +15,16 @@
 //   But it should be possible to wrap deck.gl layers in React components to
 //   enable use of JSX.
 //
-// The render function will create
-// new layers every render call, however the new layers are efficiently
-// matched against existing layers using layer index/layer id.
-//
-// A new layer only has a props field pointing to the unmodified props
-// object supplied by the app on creation.
+// The deck.gl model that for the app creates a new set of on layers on every
+// render.
+// Internally, the new layers are efficiently matched against existing layers
+// using layer ids.
 //
 // All calculated state (programs, attributes etc) are stored in a state object
-// and this state object is moved forward to the new layer every render.
-// The new layer ends up with the state of the old layer but the props of
-// the new layer, while the old layer is discarded.
+// and this state object is moved forward to the match layer on every render
+// cycle.  The new layer ends up with the state of the old layer (and the
+// props of the new layer), while the old layer is simply discarded for
+// garbage collecion.
 //
 
 /* eslint-disable no-try-catch */
@@ -86,11 +85,14 @@ export default class LayerManager {
   }
 
   updateLayers({newLayers}) {
+    for (const layer of newLayers) {
+      layer.context = this.context;
+    }
+
     this.prevLayers = this.layers;
-    const {error, generatedLayers} = _updateLayers({
+    const {error, generatedLayers} = this._updateLayers({
       oldLayers: this.prevLayers,
-      newLayers,
-      context: this.context
+      newLayers
     });
     this.layers = generatedLayers;
     // Throw first error found, if any
@@ -138,20 +140,202 @@ export default class LayerManager {
 
     return redraw;
   }
-}
 
-export function _updateLayers({oldLayers, newLayers, context}) {
-  // Match all layers, checking for caught errors
-  // To avoid having an exception in one layer disrupt other layers
-  const {error, generatedLayers} = matchLayers(oldLayers, newLayers, context);
-  for (const layer of generatedLayers) {
-    layer.context = context;
+  // PRIVATE METHODS
+
+  _updateLayers({oldLayers, newLayers}) {
+    // Match all layers, checking for caught errors
+    // To avoid having an exception in one layer disrupt other layers
+    const {error, generatedLayers} =
+      this._matchLayers(oldLayers, newLayers);
+    const error2 = this._finalizeOldLayers(oldLayers);
+    const error3 = this._updateMatchedLayers(generatedLayers);
+    const error4 = this._initializeNewLayers(generatedLayers);
+    const firstError = error || error2 || error3 || error4;
+    return {error: firstError, generatedLayers};
   }
-  const error2 = finalizeOldLayers(oldLayers);
-  const error3 = updateMatchedLayers(generatedLayers);
-  const error4 = initializeNewLayers(generatedLayers, context);
-  const firstError = error || error2 || error3 || error4;
-  return {error: firstError, generatedLayers};
+
+  _matchLayers(oldLayers, newLayers) {
+    // Create old layer map
+    const oldLayerMap = {};
+    for (const oldLayer of oldLayers) {
+      if (oldLayerMap[oldLayer.id]) {
+        throw new Error('Multipe old layers with same id');
+      }
+      oldLayerMap[oldLayer.id] = oldLayer;
+    }
+
+    const generatedLayers = [];
+    const error = this._matchSublayers({
+      newLayers, oldLayerMap, generatedLayers
+    });
+    return {generatedLayers, error};
+  }
+
+  /* eslint-disable max-statements */
+  _matchSublayers({newLayers, oldLayerMap, generatedLayers}) {
+    let error = null;
+    for (const newLayer of newLayers) {
+      try {
+        // 1. given a new coming layer, find its matching layer
+        const oldLayer = oldLayerMap[newLayer.id];
+        oldLayerMap[newLayer.id] = null;
+
+        // Only transfer state at this stage. We must not generate exceptions
+        // until all layers' state have been transferred
+        if (oldLayer) {
+          log(3, `matched ${layerName(newLayer)}`, oldLayer, '=>', newLayer);
+          this._transferLayerState(oldLayer, newLayer);
+        }
+
+        this._initializeNewLayer(newLayer);
+        generatedLayers.push(newLayer);
+
+        // Call layer lifecycle method: render sublayers
+        let sublayers = newLayer.renderLayers();
+        // End layer lifecycle method: render sublayers
+
+        if (sublayers) {
+          sublayers = Array.isArray(sublayers) ? sublayers : [sublayers];
+          this._matchSublayers({
+            newLayers: sublayers,
+            oldLayerMap,
+            generatedLayers
+          });
+        }
+      } catch (err) {
+        console.error(
+          `deck.gl error during matching of ${layerName(newLayer)} ${err}`, err);
+        // Save first error
+        error = error || err;
+      }
+    }
+    return error;
+  }
+
+  _transferLayerState(oldLayer, newLayer) {
+    const {state, props} = oldLayer;
+    assert(state, 'Matching layer has no state');
+    assert(oldLayer !== newLayer, 'Matching layer is same');
+    // Move state
+    newLayer.state = state;
+    state.layer = newLayer;
+    // Update model layer reference
+    if (state.model) {
+      state.model.userData.layer = newLayer;
+    }
+    // Keep a temporary ref to the old props, for prop comparison
+    newLayer.oldProps = props;
+    oldLayer.state = null;
+  }
+
+  // Note: Layers can't be initialized until gl context is available
+  // Therefore this method can be called repeatedly
+  // This is a hack and should be cleaned up in calling code
+  _initializeNewLayers(layers) {
+    let error = null;
+    for (const layer of layers) {
+      const layerError = this._initializeNewLayer(layer);
+      error = error || layerError;
+    }
+    return error;
+  }
+
+  // Update the matched layers
+  _updateMatchedLayers(newLayers) {
+    let error = null;
+    for (const layer of newLayers) {
+      error = error || this._updateLayer(layer);
+    }
+    return error;
+  }
+
+  // Update the old layers that were matched
+  _finalizeOldLayers(oldLayers) {
+    let error = null;
+    // Unmatched layers still have state, it will be discarded
+    for (const layer of oldLayers) {
+      error = error || this._finalizeLayer(layer);
+    }
+    return error;
+  }
+
+  // Initializes a single layer, calling layer methods
+  _initializeNewLayer(layer) {
+    let error = null;
+    // Check if new layer, and initialize it's state
+    if (!layer.state) {
+      log(1, `initializing ${layerName(layer)}`);
+      try {
+        layer.initializeLayer({
+          oldProps: {},
+          props: layer.props,
+          oldContext: this.oldContext,
+          context: this.context,
+          changeFlags: layer.diffProps({}, layer.props, this.context)
+        });
+      } catch (err) {
+        console.error(
+          `deck.gl error during initialization of ${layerName(layer)} ${err}`,
+          err);
+        // Save first error
+        error = error || err;
+      }
+      // Set back pointer (used in picking)
+      if (layer.state) {
+        layer.state.layer = layer;
+        // Save layer on model for picking purposes
+        // TODO - store on model.userData rather than directly on model
+      }
+      if (layer.state && layer.state.model) {
+        layer.state.model.userData.layer = layer;
+      }
+    }
+    return error;
+  }
+
+  // Updates a single layer, calling layer methods
+  _updateLayer(layer) {
+    const {oldProps, props} = layer;
+    let error = null;
+    if (oldProps) {
+      try {
+        layer.updateLayer({
+          oldProps,
+          props,
+          context: this.context,
+          oldContext: this.oldContext,
+          changeFlags: layer.diffProps(oldProps, layer.props, this.context)
+        });
+      } catch (err) {
+        console.error(
+          `deck.gl error during update of ${layerName(layer)}`, err);
+        // Save first error
+        error = err;
+      }
+      log(2, `updating ${layerName(layer)}`);
+    }
+    return error;
+  }
+
+  // Finalizes a single layer
+  _finalizeLayer(layer) {
+    let error = null;
+    const {state} = layer;
+    if (state) {
+      try {
+        layer.finalizeLayer();
+      } catch (err) {
+        console.error(
+          `deck.gl error during finalization of ${layerName(layer)}`, err);
+        // Save first error
+        error = err;
+      }
+      layer.state = null;
+      log(1, `finalizing ${layerName(layer)}`);
+    }
+    return error;
+  }
 }
 
 function layerName(layer) {
@@ -161,160 +345,3 @@ function layerName(layer) {
   return !layer ? 'null layer' : 'invalid layer';
 }
 
-function matchLayers(oldLayers, newLayers, context) {
-  // Create old layer map
-  const oldLayerMap = {};
-  for (const oldLayer of oldLayers) {
-    if (oldLayerMap[oldLayer.id]) {
-      throw new Error('Multipe old layers with same id');
-    }
-    oldLayerMap[oldLayer.id] = oldLayer;
-  }
-
-  const generatedLayers = [];
-  const error = matchSublayers({
-    newLayers, oldLayerMap, generatedLayers, context
-  });
-  return {generatedLayers, error};
-}
-
-/* eslint-disable max-statements */
-function matchSublayers({newLayers, oldLayerMap, generatedLayers, context}) {
-  let error = null;
-  for (const newLayer of newLayers) {
-    newLayer.context = context;
-    try {
-      // 1. given a new coming layer, find its matching layer
-      const oldLayer = oldLayerMap[newLayer.id];
-      oldLayerMap[newLayer.id] = null;
-
-      // Only transfer state at this stage. We must not generate exceptions
-      // until all layers' state have been transferred
-      if (oldLayer) {
-        log(3, `matched ${layerName(newLayer)}`, oldLayer, '=>', newLayer);
-        _transferLayerState(oldLayer, newLayer);
-      }
-
-      initializeNewLayer(newLayer);
-      generatedLayers.push(newLayer);
-
-      // Call layer lifecycle method: render sublayers
-      let sublayers = newLayer.renderLayers();
-      // End layer lifecycle method: render sublayers
-
-      if (sublayers) {
-        sublayers = Array.isArray(sublayers) ? sublayers : [sublayers];
-        matchSublayers({
-          newLayers: sublayers,
-          oldLayerMap,
-          generatedLayers,
-          context
-        });
-      }
-    } catch (err) {
-      console.error(
-        `deck.gl error during matching of ${layerName(newLayer)} ${err}`, err);
-      // Save first error
-      error = error || err;
-    }
-  }
-  return error;
-}
-
-function _transferLayerState(oldLayer, newLayer) {
-  const {state, props} = oldLayer;
-  assert(state, 'Matching layer has no state');
-  assert(oldLayer !== newLayer, 'Matching layer is same');
-  // Move state
-  newLayer.state = state;
-  state.layer = newLayer;
-  // Update model layer reference
-  if (state.model) {
-    state.model.userData.layer = newLayer;
-  }
-  // Keep a temporary ref to the old props, for prop comparison
-  newLayer.oldProps = props;
-  oldLayer.state = null;
-}
-
-// Note: Layers can't be initialized until gl context is available
-// Therefore this method can be called repeatedly
-// This is a hack and should be cleaned up in calling code
-function initializeNewLayers(layers) {
-  let error = null;
-  for (const layer of layers) {
-    const layerError = initializeNewLayer(layer);
-    error = error || layerError;
-  }
-  return error;
-}
-
-function initializeNewLayer(layer) {
-  let error = null;
-  // Check if new layer, and initialize it's state
-  if (!layer.state) {
-    log(1, `initializing ${layerName(layer)}`);
-    try {
-      layer.state = {};
-      layer.initializeLayer();
-    } catch (err) {
-      console.error(
-        `deck.gl error during initialization of ${layerName(layer)} ${err}`,
-        err);
-      // Save first error
-      error = error || err;
-    }
-    // Set back pointer (used in picking)
-    if (layer.state) {
-      layer.state.layer = layer;
-      // Save layer on model for picking purposes
-      // TODO - store on model.userData rather than directly on model
-    }
-    if (layer.state && layer.state.model) {
-      layer.state.model.userData.layer = layer;
-    }
-  }
-  return error;
-}
-
-// Update the matched layers
-function updateMatchedLayers(newLayers) {
-  let error = null;
-  for (const layer of newLayers) {
-    const {oldProps, props} = layer;
-    if (oldProps) {
-      try {
-        layer.updateLayer(oldProps, props);
-      } catch (err) {
-        console.error(
-          `deck.gl error during update of ${layerName(layer)}`, err);
-        // Save first error
-        error = error || err;
-      }
-      log(2, `updating ${layerName(layer)}`);
-    }
-  }
-  return error;
-}
-
-// Update the old layers that were matched
-function finalizeOldLayers(oldLayers) {
-  let error = null;
-  // Unmatched layers still have state, it will be discarded
-  for (const layer of oldLayers) {
-    const {state} = layer;
-    if (state) {
-      try {
-        layer.finalizeLayer();
-      } catch (err) {
-        console.error(
-          `deck.gl error during finalization of ${layerName(layer)}`, err);
-        // Save first error
-        error = error || err;
-      }
-      layer.state = null;
-      log(1, `finalizing ${layerName(layer)}`);
-    }
-  }
-  return error;
-}
