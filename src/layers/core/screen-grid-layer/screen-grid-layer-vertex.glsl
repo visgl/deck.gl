@@ -27,11 +27,13 @@
 
 attribute vec3 vertices;
 attribute vec3 instancePositions;
-attribute vec4 instanceColors;
+attribute float instanceCount;
 attribute vec3 instancePickingColors;
 
 uniform float maxCount;
 uniform float opacity;
+uniform vec4 minColor;
+uniform vec4 maxColor;
 uniform float renderPickingBuffer;
 uniform vec3 cellScale;
 uniform vec3 selectedPickingColor;
@@ -39,8 +41,10 @@ uniform vec3 selectedPickingColor;
 varying vec4 vColor;
 
 void main(void) {
+  vec4 instanceColor = mix(minColor, maxColor, instanceCount / maxCount);
+
   vColor = mix(
-  	vec4(instanceColors.xyz / maxCount, instanceColors.w / 255. * opacity),
+  	vec4(instanceColor.xyz / maxCount, instanceColor.w / 255. * opacity),
   	vec4(instancePickingColors / 255., 1.),
   	renderPickingBuffer
   );
