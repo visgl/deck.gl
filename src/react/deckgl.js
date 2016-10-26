@@ -18,39 +18,28 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-/* global window */
 import React, {PropTypes} from 'react';
 import autobind from 'autobind-decorator';
 
 import WebGLRenderer from './webgl-renderer';
-import {GL} from 'luma.gl';
-import {DEFAULT_BLENDING} from './config';
 import {LayerManager} from '../lib';
-
-// TODO - move default to WebGL renderer
-const DEFAULT_PIXEL_RATIO =
-  typeof window !== 'undefined' ? window.devicePixelRatio : 1;
+import {GL, addEvents} from 'luma.gl';
+import throttle from 'lodash.throttle';
 
 const PROP_TYPES = {
   id: PropTypes.string,
   width: PropTypes.number.isRequired,
   height: PropTypes.number.isRequired,
   layers: PropTypes.array.isRequired,
-  blending: PropTypes.object,
   gl: PropTypes.object,
   debug: PropTypes.bool,
-  style: PropTypes.object,
-  pixelRatio: PropTypes.number,
   onWebGLInitialized: PropTypes.func
 };
 
 const DEFAULT_PROPS = {
   id: 'deckgl-overlay',
-  blending: DEFAULT_BLENDING,
   debug: false,
   gl: null,
-  pixelRatio: DEFAULT_PIXEL_RATIO,
-  style: {},
   onWebGLInitialized: () => {}
 };
 
@@ -68,6 +57,7 @@ export default class DeckGL extends React.Component {
     super(props);
     this.state = {};
     this.needsRedraw = true;
+    this.layerManager = null;
   }
 
   componentWillReceiveProps(nextProps) {
@@ -78,10 +68,9 @@ export default class DeckGL extends React.Component {
     const {
       width, height, latitude, longitude, zoom, pitch, bearing, altitude
     } = nextProps;
-    const {layerManager} = this.state;
 
-    if (layerManager) {
-      layerManager
+    if (this.layerManager) {
+      this.layerManager
         .updateLayers({newLayers: nextProps.layers})
         .setContext({
           width, height, latitude, longitude, zoom, pitch, bearing, altitude
@@ -89,15 +78,19 @@ export default class DeckGL extends React.Component {
     }
   }
 
-  @autobind _onRendererInitialized({gl}) {
+  @autobind _onRendererInitialized({gl, canvas}) {
     this.props.onWebGLInitialized(gl);
 
-    // Note: set state now in case updateLayers throws on error
-    // Note: setState triggers React component update, rerending updated layers
-    // TODO - is the second comment relevant?
-    const layerManager = new LayerManager({gl});
-    this.setState({layerManager, gl}, () => {
-      this._updateLayers(this.props);
+    // Note: avoid React setState due GL animation loop / setState timing issue
+    this.layerManager = new LayerManager({gl});
+    this._updateLayers(this.props);
+
+    this.events = addEvents(canvas, {
+      cacheSize: false,
+      cachePosition: false,
+      centerOrigin: false,
+      onClick: this._onClick,
+      onMouseMove: throttle(this._onMouseMove, 100)
     });
   }
 
@@ -105,34 +98,27 @@ export default class DeckGL extends React.Component {
   @autobind _onClick(event) {
     const {x, y} = event;
     const {pixelRatio} = this.props;
-    this.state.layerManager.pickLayer({x, y, pixelRatio, type: 'click'});
+    this.layerManager.pickLayer({x, y, pixelRatio, type: 'click'});
   }
 
   // Route events to layers
   @autobind _onMouseMove(event) {
     const {x, y} = event;
     const {pixelRatio} = this.props;
-    this.state.layerManager.pickLayer({x, y, pixelRatio, type: 'hover'});
+    this.layerManager.pickLayer({x, y, pixelRatio, type: 'hover'});
   }
 
   @autobind _onRenderFrame({gl}) {
-    const {layerManager} = this.state;
-    // Note: Do this after gl check, in case onNeedRedraw clears flags
-
-    if (!layerManager.needsRedraw({clearRedrawFlags: true})) {
+    if (!this.layerManager.needsRedraw({clearRedrawFlags: true})) {
       return;
     }
-
     // clear depth and color buffers
     gl.clear(GL.COLOR_BUFFER_BIT | GL.DEPTH_BUFFER_BIT);
-
-    layerManager.drawLayers();
+    this.layerManager.drawLayers();
   }
 
   render() {
-    const {
-      width, height, blending, pixelRatio, gl, debug, ...otherProps
-    } = this.props;
+    const {width, height, gl, debug, ...otherProps} = this.props;
 
     return (
       <WebGLRenderer
@@ -144,8 +130,6 @@ export default class DeckGL extends React.Component {
         gl={gl}
         debug={debug}
         viewport={{x: 0, y: 0, width, height}}
-        blending={blending}
-        pixelRatio={pixelRatio}
 
         onRendererInitialized={this._onRendererInitialized}
         onNeedRedraw={this._onNeedRedraw}

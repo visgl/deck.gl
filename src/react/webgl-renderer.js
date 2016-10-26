@@ -18,12 +18,14 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-/* eslint-disable no-console, no-try-catch */
-/* global console */
+/* global window */
 import React, {PropTypes} from 'react';
 import autobind from 'autobind-decorator';
-import {GL, createGLContext, addEvents, Fx, glGet} from 'luma.gl';
-import throttle from 'lodash.throttle';
+import {createGLContext} from 'luma.gl';
+/* global requestAnimationFrame, cancelAnimationFrame */
+
+const DEFAULT_PIXEL_RATIO =
+  (typeof window !== 'undefined' && window.devicePixelRatio) || 1;
 
 const PROP_TYPES = {
   id: PropTypes.string.isRequired,
@@ -37,6 +39,7 @@ const PROP_TYPES = {
   blending: PropTypes.object,
   events: PropTypes.object,
   gl: PropTypes.object,
+  glOptions: PropTypes.object,
   debug: PropTypes.bool,
 
   onRendererInitialized: PropTypes.func.isRequired,
@@ -51,16 +54,18 @@ const PROP_TYPES = {
 const DEFAULT_PROPS = {
   style: {},
   gl: null,
+  glOptions: {preserveDrawingBuffer: true},
   debug: false,
+  pixelRatio: DEFAULT_PIXEL_RATIO,
 
   onRendererInitialized: () => {},
-  onInitializationFailed: error => console.error(error),
+  onInitializationFailed: error => {
+    throw error;
+  },
   onError: error => {
     throw error;
   },
-  onRenderFrame: () => {},
-  onMouseMove: () => {},
-  onClick: () => {}
+  onRenderFrame: () => {}
 };
 
 export default class WebGLRenderer extends React.Component {
@@ -88,11 +93,17 @@ export default class WebGLRenderer extends React.Component {
     this.state = {
       gl: null
     };
+    this._animationFrame = null;
   }
 
   componentDidMount() {
     const canvas = this.refs.overlay;
     this._initWebGL(canvas);
+    this._animationLoop();
+  }
+
+  componentWillUnmount() {
+    this._cancelAnimationLoop();
   }
 
   /**
@@ -100,83 +111,24 @@ export default class WebGLRenderer extends React.Component {
    * @param {string} canvas
    */
   _initWebGL(canvas) {
-    const {debug} = this.props;
-    let {gl} = this.props;
+    const {debug, glOptions} = this.props;
+
+    // Create context if not supplied
+    let gl = this.props.gl;
     if (!gl) {
       try {
-        gl = createGLContext({
-          canvas,
-          debug,
-          preserveDrawingBuffer: true
-        });
+        gl = createGLContext({canvas, debug, ...glOptions});
       } catch (error) {
         this.props.onInitializationFailed(error);
         return;
       }
     }
 
-    const events = addEvents(canvas, {
-      cacheSize: false,
-      cachePosition: false,
-      centerOrigin: false,
-      onClick: this._onClick,
-      onMouseMove: throttle(this._onMouseMove, 100)
-    });
-
-    this.setState({gl, events});
-
-    this._animationLoop();
+    this.setState({gl});
 
     // Call callback last, in case it throws
-    this.props.onRendererInitialized({gl});
+    this.props.onRendererInitialized({canvas, gl});
   }
-
-  @autobind
-  _onClick(event) {
-    this.props.onClick(event);
-  }
-
-  @autobind
-  _onMouseMove(event) {
-    this.props.onMouseMove(event);
-  }
-
-  /* eslint-disable max-statements */
-  _renderFrame() {
-    const {
-      viewport: {x, y, width, height},
-      blending: {enable, blendFunc, blendEquation},
-      pixelRatio
-    } = this.props;
-
-    const {gl} = this.state;
-
-    // Check for reasons not to draw
-    if (!gl || !(width > 0) || !(height > 0)) {
-      return;
-    }
-
-    // update viewport to latest props
-    // (typically changed by app on browser resize etc)
-    gl.viewport(
-      x * pixelRatio,
-      y * pixelRatio,
-      width * pixelRatio,
-      height * pixelRatio
-    );
-
-    // setup bledning
-    if (enable) {
-      gl.enable(GL.BLEND);
-      gl.blendFunc(...blendFunc.map(s => glGet(gl, s)));
-      gl.blendEquation(glGet(gl, blendEquation));
-    } else {
-      gl.disable(GL.BLEND);
-    }
-
-    this.props.onRenderFrame({gl});
-  }
-  /* eslint-enable max-statements */
 
   /**
    * Main WebGL animation loop
@@ -185,7 +137,31 @@ export default class WebGLRenderer extends React.Component {
   _animationLoop() {
     this._renderFrame();
     // Keep registering ourselves for the next animation frame
-    Fx.requestAnimationFrame(this._animationLoop);
+    if (typeof window !== 'undefined') {
+      this._animationFrame = requestAnimationFrame(this._animationLoop);
+    }
+  }
+
+  _cancelAnimationLoop() {
+    if (this._animationFrame) {
+      cancelAnimationFrame(this._animationFrame);
+    }
+  }
+
+  _renderFrame() {
+    const {viewport: {x, y, width, height}, pixelRatio: dpr} = this.props;
+    const {gl} = this.state;
+
+    // Check for reasons not to draw
+    if (!gl || !(width > 0) || !(height > 0)) {
+      return;
+    }
+
+    // update viewport to latest props
+    gl.viewport(x * dpr, y * dpr, width * dpr, height * dpr);
+
+    // Call render callback
+    this.props.onRenderFrame({gl});
   }
 
   render() {
@@ -195,10 +171,9 @@ export default class WebGLRenderer extends React.Component {
         ref={'overlay'}
         key={'overlay'}
         id={id}
-        width={width * pixelRatio || 1}
-        height={height * pixelRatio || 1}
+        width={width * pixelRatio}
+        height={height * pixelRatio}
         style={{...style, width, height}}/>
     );
   }
-
 }
