@@ -44,6 +44,7 @@ export default class LayerManager {
     // Tracks if any layers were drawn last update
     // Needed to ensure that screen is cleared when no layers are shown
     this.drewLayers = false;
+    this.oldContext = {};
     this.context = {gl, viewport: null, uniforms: {}, viewportChanged: true};
     Object.seal(this.context);
   }
@@ -62,20 +63,25 @@ export default class LayerManager {
       pitch !== oldViewport.pitch ||
       altitude !== oldViewport.altitude;
 
-    const viewport = new Viewport({
-      width, height, latitude, longitude, zoom, pitch, bearing, altitude,
-      tileSize: 512
-    });
+    if (viewportChanged || !this.context.viewport) {
+      Object.assign(this.oldContext, this.context);
 
-    this.context.viewport = viewport;
-    this.context.viewportChanged = viewportChanged;
-    this.context.uniforms = {
-      mercatorScale: Math.pow(2, zoom),
-      mercatorCenter: viewport.center,
-      ...viewport.getUniforms()
-    };
+      const viewport = new Viewport({
+        width, height, latitude, longitude, zoom, pitch, bearing, altitude,
+        tileSize: 512
+      });
 
-    log(1, viewport, latitude, longitude, zoom);
+      this.context.viewport = viewport;
+      this.context.viewportChanged = viewportChanged;
+      this.context.uniforms = {
+        mercatorScale: Math.pow(2, zoom),
+        mercatorCenter: viewport.center,
+        ...viewport.getUniforms()
+      };
+
+      log(1, viewport, latitude, longitude, zoom);
+    }
+
     return this;
   }
 
@@ -150,7 +156,7 @@ export function _updateLayers({oldLayers, newLayers, context}) {
 
 function layerName(layer) {
   if (layer instanceof Layer) {
-    return `<${layer.constructor.name}:'${layer.props.id}'>`;
+    return `${layer}'>`;
   }
   return !layer ? 'null layer' : 'invalid layer';
 }

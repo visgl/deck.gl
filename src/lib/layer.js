@@ -63,14 +63,6 @@ export default class Layer {
       id: props.id || this.constructor.name
     };
 
-    // Add iterator to objects
-    // TODO - Modifying props is an anti-pattern
-    // TODO - allow app to supply dataIterator prop?
-    if (props.data) {
-      addIterator(props.data);
-      assert(props.data[Symbol.iterator], 'data prop must have an iterator');
-    }
-
     this.id = props.id;
     this.count = counter++;
     this.props = props;
@@ -79,8 +71,13 @@ export default class Layer {
     this.context = null;
     Object.seal(this);
 
-    this.validateRequiredProp('data');
     this.validateRequiredProp('id', x => typeof x === 'string');
+    this.validateRequiredProp('data');
+    // TODO - allow app to supply dataIterator prop?
+    if (props.data) {
+      addIterator(props.data);
+      log.once(0, props.data[Symbol.iterator], 'data prop must have iterator');
+    }
 
     this._validateDeprecatedProps();
   }
@@ -91,7 +88,7 @@ export default class Layer {
   // Called once to set up the initial state
   // App can create WebGL resources
   initializeState() {
-    throw new Error(`Layer ${this.id} has not defined initializeState`);
+    throw new Error(`Layer ${this} has not defined initializeState`);
   }
 
   // Called once when layer is no longer matched and state will be discarded
@@ -99,15 +96,14 @@ export default class Layer {
   finalizeState() {
   }
 
-  shouldUpdate(oldProps, newProps, changeFlags) {
-    return changeFlags.propsChanged;
+  shouldUpdateState({oldProps, newProps, oldContext, newContext, changeFlags}) {
+    return changeFlags.somethingChanged;
   }
 
   // Default implementation, all attributeManager will be updated
-  willReceiveProps(oldProps, newProps) {
-    const {attributeManager} = this.state;
-    if (this.state.dataChanged) {
-      attributeManager.invalidateAll();
+  updateState({oldProps, newProps, oldContext, newContext, changeFlags}) {
+    if (this.state.dataChanged && this.state.attributeManager) {
+      this.state.attributeManager.invalidateAll();
     }
   }
 
@@ -118,21 +114,20 @@ export default class Layer {
 
   // If state has a model, draw it with supplied uniforms
   draw(uniforms = {}) {
-    const {model} = this.state;
-    if (model) {
-      model.render(uniforms);
+    if (this.state.model) {
+      this.state.model.render(uniforms);
     }
   }
 
   // If state has a model, draw it with supplied uniforms
-  pick({uniforms, deviceX, deviceY}) {
+  pick({uniforms, pickEnableUniforms, pickDisableUniforms, deviceX, deviceY}) {
     const {gl} = this.context;
     const {model} = this.state;
 
     if (model) {
-      model.setUniforms({renderPickingBuffer: 1, pickingEnabled: 1});
+      model.setUniforms(pickEnableUniforms);
       model.render(uniforms);
-      model.setUniforms({renderPickingBuffer: 0, pickingEnabled: 0});
+      model.setUniforms(pickDisableUniforms);
 
       // Read color in the central pixel, to be mapped with picking colors
       const color = new Uint8Array(4);
@@ -149,10 +144,30 @@ export default class Layer {
     return null;
   }
 
+  // DEPRECATED LIFECYCLE METHODS
+
+  shouldUpdate(oldProps, newProps, changeFlags) {
+    return changeFlags.propsChanged;
+  }
+
+  // Default implementation, all attributeManager will be updated
+  willReceiveProps(oldProps, newProps) {
+    const {attributeManager} = this.state;
+    if (this.state.dataChanged) {
+      attributeManager.invalidateAll();
+    }
+  }
+
   // END LIFECYCLE METHODS
   // //////////////////////////////////////////////////
 
   // Public API
+  toString() {
+    const className = this.constructor.name;
+    return (className !== this.props.id) ?
+      `<${className}:'${this.props.id}'>` :
+      `<${className}>`;
+  }
 
   setNeedsRedraw(redraw = true) {
     if (this.state) {
@@ -508,17 +523,17 @@ export default class Layer {
   validateOptionalProp(propertyName, condition) {
     const value = this.props[propertyName];
     if (value !== undefined && !condition(value)) {
-      throw new Error(`Bad property ${propertyName} in layer ${this.id}`);
+      throw new Error(`Bad property ${propertyName} in layer ${this}`);
     }
   }
 
   validateRequiredProp(propertyName, condition) {
     const value = this.props[propertyName];
     if (value === undefined) {
-      throw new Error(`Property ${propertyName} undefined in layer ${this.id}`);
+      throw new Error(`Property ${propertyName} undefined in layer ${this}`);
     }
     if (condition && !condition(value)) {
-      throw new Error(`Bad property ${propertyName} in layer ${this.id}`);
+      throw new Error(`Bad property ${propertyName} in layer ${this}`);
     }
   }
 
@@ -540,7 +555,7 @@ export default class Layer {
       /* eslint-disable no-console */
       // /* global console */
       throw new Error(
-        `deck.gl v3 no longer needs viewport props in Layer ${this.id}`);
+        `deck.gl v3 no longer needs viewport props in Layer ${this}`);
     }
   }
   /* eslint-enable max-statements */

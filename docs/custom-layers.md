@@ -8,7 +8,7 @@ There are a couple of ways to build a layer in deck.gl
 * **Single-primitive, instanced layer** - This is type of layer renders
   the same geometry many times. Usually the simplest way to go
   when creating layers that renders a lot of similar objects (think
-  ScatterplotLayer, HexagonLayer etc).
+  ScatterplotLayer, ArcLayers etc).
 * **Single-primitive, dynamic geometry layer** - This is needed when
   dealing with data that needs to be rendered as unique, comples geometries,
   such as polygons.

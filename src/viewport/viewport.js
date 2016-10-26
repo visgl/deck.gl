@@ -2,26 +2,17 @@
 // map view properties
 //
 // ATTRIBUTION:
-// The projection matrix creation algorithms are intentionally
-// based on and kept compatible with the mapbox-gl-js implementation to
-// ensure that seamless interoperation with mapbox and react-map-gl.
-//
-/* eslint-disable max-len */
-// See: https://github.com/mapbox/mapbox-gl-js/blob/033043254d30a99a00b95660e296445a1ade2d01/js/geo/transform.js
-/* elsint-enable max-len */
+// Projection matrix creation are intentionally kept compatible with
+// mapbox-gl's implementation to ensure that seamless interoperation
+// with mapbox and react-map-gl.
+// See: transform.js in https://github.com/mapbox/mapbox-gl-js
 
-// We define a couple of coordinate systems:
-// ------
-// LatLon                      [lng, lat] = [-180 - 180, -81 - 81]
-// Mercator World (zoom 0)     [x, y] = [0-512, y: 0-512]
-// Mercator Zoomed (zoom N)    [x, y] = [0 - 512*2**N, 0 - 512*2**N]
-// Translated                  [x, y] = zero centered
-// Clip Space                  unit cube around view
-// ------
-import {mat2, mat4, vec4} from 'gl-matrix';
 import autobind from 'autobind-decorator';
-import assert from 'assert';
 import {fp64ify} from '../lib/utils/fp64';
+import {mat2, mat4, vec2, vec4} from 'gl-matrix';
+
+// CONSTANTS
+
 const PI = Math.PI;
 const PI_4 = PI / 4;
 const DEGREES_TO_RADIANS = PI / 180;
@@ -29,7 +20,7 @@ const RADIANS_TO_DEGREES = 180 / PI;
 const TILE_SIZE = 512;
 const WORLD_SCALE = TILE_SIZE / (2 * PI);
 
-export const DEFAULT_MAP_STATE = {
+const DEFAULT_MAP_STATE = {
   latitude: 37,
   longitude: -122,
   zoom: 11,
@@ -38,7 +29,7 @@ export const DEFAULT_MAP_STATE = {
   altitude: 1.5
 };
 
-import {vec2} from 'gl-matrix';
+// EXPORTS
 
 export const COORDINATE_SYSTEM = {
   // Positions are interpreted as [lng,lat,elevation], distances as meters
@@ -251,30 +242,6 @@ export default class Viewport {
     };
   }
 
-  // TODO - implement perspective correct fitBounds
-  // fitBounds(lnglatSE, lnglatNW, {padding = 0} = {}) {
-  //   const bounds = new LngLatBounds(
-  //     [_bounds[0].reverse(),
-  //     _bounds[1].reverse()]
-  //   );
-  //   const offset = Point.convert([0, 0]);
-  //   const nw = this.project(lnglatNW);
-  //   const se = this.project(lnglatSE);
-  //   const size = se.sub(nw);
-  //   const scaleX =
-  //     (this.width - padding * 2 - Math.abs(offset.x) * 2) / size.x;
-  //   const scaleY =
-  //     (this.height - padding * 2 - Math.abs(offset.y) * 2) / size.y;
-
-  //   const center = this.unproject(nw.add(se).div(2));
-  //   const zoom = this.scaleZoom(this.scale * Math.min(scaleX, scaleY));
-  //   return {
-  //     latitude: center.lat,
-  //     longitude: center.lng,
-  //     zoom
-  //   };
-  // }
-
   // INTERNAL METHODS
 
   /* eslint-disable max-statements */
@@ -441,16 +408,6 @@ export default class Viewport {
     mat4.rotateX(m, m, this.pitchRadians);
     mat4.rotateZ(m, m, -this.bearingRadians);
 
-    // We want to be protect the dynamic range of our 32 bit matrix
-
-    // Perform translation separately in the shader's projection function
-    // mat4.translate(m, m, [-this.centerX, -this.centerY, 0]);
-
-    // Scaling is done in shader's project function
-    // mat4.scale(m, m, [this.scale, this.scale, this.scale]);
-
-    validateMatrix(m);
-
     // TODO - remove
     this._glProjectionMatrixUncentered = m;
 
@@ -478,18 +435,4 @@ export default class Viewport {
       }
     }
   }
-
-}
-
-function validateMatrix(m) {
-  const validMatrix =
-    Number.isFinite(m[0]) && Number.isFinite(m[1]) &&
-    Number.isFinite(m[2]) && Number.isFinite(m[3]) &&
-    Number.isFinite(m[4]) && Number.isFinite(m[5]) &&
-    Number.isFinite(m[6]) && Number.isFinite(m[7]) &&
-    Number.isFinite(m[8]) && Number.isFinite(m[9]) &&
-    Number.isFinite(m[10]) && Number.isFinite(m[11]) &&
-    Number.isFinite(m[12]) && Number.isFinite(m[13]) &&
-    Number.isFinite(m[14]) && Number.isFinite(m[15]);
-  assert(validMatrix, `Bad gl projection matrix ${mat4.str(m)}`);
 }
