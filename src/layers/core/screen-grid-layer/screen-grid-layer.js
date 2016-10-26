@@ -37,6 +37,10 @@ export default class ScreenGridLayer extends Layer {
     super({
       unitWidth: 100,
       unitHeight: 100,
+      minColor: [0, 0, 0, 255],
+      maxColor: [0, 255, 0, 255],
+      getPosition: d => d.position,
+      getWeight: d => 1,
       ...opts
     });
   }
@@ -45,7 +49,7 @@ export default class ScreenGridLayer extends Layer {
     const {attributeManager} = this.state;
     attributeManager.addInstanced({
       instancePositions: {size: 3, update: this.calculateInstancePositions},
-      instanceColors: {size: 4, update: this.calculateInstanceColors}
+      instanceCount: {size: 1, update: this.calculateInstanceCount}
     });
 
     const {gl} = this.context;
@@ -67,8 +71,9 @@ export default class ScreenGridLayer extends Layer {
   }
 
   draw(uniforms) {
-    const {model, scale, maxCount} = this.state;
-    model.render({...uniforms, scale, maxCount});
+    const {minColor, maxColor} = this.props;
+    const {model, cellScale, maxCount} = this.state;
+    model.render({...uniforms, minColor, maxColor, cellScale, maxCount});
   }
 
   getModel(gl) {
@@ -87,7 +92,8 @@ export default class ScreenGridLayer extends Layer {
   }
 
   updateCell() {
-    const {width, height, unitWidth, unitHeight} = this.props;
+    const {width, height} = this.context.viewport;
+    const {unitWidth, unitHeight} = this.props;
 
     const MARGIN = 2;
     const cellScale = new Float32Array([
@@ -110,7 +116,8 @@ export default class ScreenGridLayer extends Layer {
   }
 
   calculateInstancePositions(attribute, {numInstances}) {
-    const {unitWidth, unitHeight, width, height} = this.props;
+    const {width, height} = this.context.viewport;
+    const {unitWidth, unitHeight} = this.props;
     const {numCol} = this.state;
     const {value, size} = attribute;
 
@@ -123,25 +130,27 @@ export default class ScreenGridLayer extends Layer {
     }
   }
 
-  calculateInstanceColors(attribute) {
-    const {data, unitWidth, unitHeight} = this.props;
+  calculateInstanceCount(attribute) {
+    const {data, unitWidth, unitHeight, getPosition, getWeight} = this.props;
     const {numCol, numRow} = this.state;
-    const {value, size} = attribute;
+    const {value} = attribute;
+    let maxCount = 0;
 
     value.fill(0.0);
 
     for (const point of data) {
-      const pixel = this.project([point.position.x, point.position.y]);
+      const pixel = this.project(getPosition(point));
       const colId = Math.floor(pixel[0] / unitWidth);
       const rowId = Math.floor(pixel[1] / unitHeight);
       if (colId >= 0 && colId < numCol && rowId >= 0 && rowId < numRow) {
-        const i4 = (colId + rowId * numCol) * size;
-        value[i4 + 2] = value[i4 + 0] += 1;
-        value[i4 + 1] += 5;
-        value[i4 + 3] = 0.6;
+        const i = colId + rowId * numCol;
+        value[i] += getWeight(point);
+        if (value[i] > maxCount) {
+          maxCount = value[i];
+        }
       }
     }
 
-    this.setState({maxCount: Math.max(...value)});
+    this.setState({maxCount});
   }
 }

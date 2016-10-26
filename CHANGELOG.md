@@ -16,7 +16,9 @@ All notable changes to deck.gl will be documented in this file.
 
 #### [Ongoing]
 - Tutorials of using deck.gl
-
+- FIX: ScreenGridLayer
+- FEATURE: ScreenGridLayer now have accessors (getPosition, getWeight) and custom
+    color ramps (minColor, maxColor)
 
 ### Beta-3.0.0 Releases
 
