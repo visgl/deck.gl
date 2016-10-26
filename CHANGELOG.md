@@ -20,6 +20,12 @@ All notable changes to deck.gl will be documented in this file.
 
 ### Beta-3.0.0 Releases
 
+#### [dev] -
+- FIX: New fix for context.viewport initialization order
+- FIX: `DeckGL` component now cancels animation loop on unmount.
+- BREAKING: Removed `blending` prop from react components.
+
+
 #### [v3.0.0-beta25] -
 - FEATURE: Adds drawOutline option to ScatterplotLayer.
 - FIX: update context.viewport issue #128
