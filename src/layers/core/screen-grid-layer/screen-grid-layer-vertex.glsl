@@ -41,10 +41,10 @@ uniform vec3 selectedPickingColor;
 varying vec4 vColor;
 
 void main(void) {
-  vec4 instanceColor = mix(minColor, maxColor, instanceCount / maxCount);
+  vec4 color = mix(minColor, maxColor, instanceCount / maxCount) / 255.;
 
   vColor = mix(
-  	vec4(instanceColor.xyz / maxCount, instanceColor.w / 255. * opacity),
+  	vec4(color.xyz, color.w * opacity),
   	vec4(instancePickingColors / 255., 1.),
   	renderPickingBuffer
   );
