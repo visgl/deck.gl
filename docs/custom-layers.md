@@ -59,6 +59,27 @@ A layer is discarded when a new set of layers are rendered and none of
 them match (have the same `id` prop) as your old layer.
 
 
+## Change Detection
+
+Before reading the description of each life cycle method, it is helpful
+to consider change detection to understant what work a layer typically
+needs to do in response to changes.
+
+* `data` - Typically if a layer is rerendered with a changed `data` prop,
+  all WebGL attributes must be regenerated and the layer needs to be redrawn.
+  The default is to do exactly that, but sometimes a layer can be smarter
+  and limit updates, or more work needs to be done.
+
+* If the viewport has changed, the layer will automatically be rerendered.
+  Many layers can thus ignore viewport changes, however, if the layer has
+  any dependencies on the viewport (such as a layer
+  that calculates extents or positions in screen space rather than world space)
+  it would need to update state or uniforms whenever the viewport changes.
+
+* If other props change, it would typically mean that the layer needs to
+  update some uniform or state so that rendering is affected appropriately.
+
+
 ### Handling property updates
 
 The key to writing good, performant deck.gl layers lies in understanding

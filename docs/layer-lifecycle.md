@@ -6,27 +6,6 @@ is initialized and finalized, if and how it should react to property changes,
 and how it should draw and pick the layer.
 
 
-## Change Detection
-
-Before reading the description of each life cycle method, it is helpful
-to consider change detection to understant what work a layer typically
-needs to do in response to changes.
-
-* `data` - Typically if a layer is rerendered with a changed `data` prop,
-  all WebGL attributes must be regenerated and the layer needs to be redrawn.
-  The default is to do exactly that, but sometimes a layer can be smarter
-  and limit updates, or more work needs to be done.
-
-* If the viewport has changed, the layer will automatically be rerendered.
-  Many layers can thus ignore viewport changes, however, if the layer has
-  any dependencies on the viewport (such as a layer
-  that calculates extents or positions in screen space rather than world space)
-  it would need to update state or uniforms whenever the viewport changes.
-
-* If other props change, it would typically mean that the layer needs to
-  update some uniform or state so that rendering is affected appropriately.
-
-
 ## Properties and Methods
 
 ### `id` property
@@ -56,7 +35,7 @@ is released.
 This is a good time to destroy any layer specific WebGL resources etc.
 
 
-### Updating: shouldUpdateState({oldProps, newProps, oldContext, newContext, changeFlags})
+### Updating: shouldUpdateState({oldProps, props, oldContext, context, changeFlags})
 
 Called when a new layer has been matched with a layer from the previous
 render cycle (resulting in new props being passed to that layer),
@@ -72,7 +51,7 @@ prop can be supplied additional checks. See the documentation of those
 props in the Layer API.
 
 
-### Updating: updateState({oldProps, newProps, oldContext, newContext, changeFlags})
+### Updating: updateState({oldProps, props, oldContext, context, changeFlags})
 
 Called when a new layer has been matched with a layer from the previous
 render cycle (resulting in new props being passed to that layer),
