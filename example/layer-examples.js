@@ -179,41 +179,6 @@ const EnhancedChoroplethLayerExample = props =>
     onClick: props.onChoroplethClicked
   });
 
-const PointCloudLayerExample = props =>
-  new PointCloudLayer({
-    data: props.points,
-    opacity: 0.5,
-    pickable: true,
-    onHover: props.onScatterplotHovered,
-    onClick: props.onScatterplotClicked
-  });
-
-const HexagonLayerExample = props =>
-  new HexagonLayer({
-    data: props.hexData,
-    opacity: 0.5,
-    elevation: 200,
-    pickable: true,
-    onHover: props.onHexagonHovered,
-    onClick: props.onHexagonClicked
-  });
-
-const HexagonLayerSelectionExample = props =>
-  new HexagonLayer({
-    id: props.id || 'hexagonSelectionLayer',
-    data: props.selectedHexagons,
-    opacity: 0.1,
-    elevation: 200,
-    pickable: false
-  });
-
-// let points100K = null;
-const VoronoiLayerExample = props =>
-  new VoronoiLayer({
-    data: props.points,
-    opacity: 1
-  });
-
 // Returns new array N times larger than input array
 // filled with duplicate elements
 // Avoids Array.concat (which generates temporary huge arrays)
@@ -293,11 +258,7 @@ export default {
 
   'Sample Layers': {
     GeoJsonLayer: GeoJsonLayerExample,
-    HexagonLayer: HexagonLayerExample,
-    'HexagonLayer (selection)': HexagonLayerSelectionExample,
-    EnhancedChoroplethLayer: EnhancedChoroplethLayerExample,
-    PointCloudLayer: PointCloudLayerExample,
-    VoronoiLayer: VoronoiLayerExample
+    EnhancedChoroplethLayer: EnhancedChoroplethLayerExample
   },
 
   'Performance Tests': {
