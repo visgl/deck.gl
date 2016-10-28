@@ -39,7 +39,13 @@ export function pickModels(gl, {
       if (layer.props.pickable) {
         // Clear the frame buffer, render and sample
         gl.clear(GL.COLOR_BUFFER_BIT | GL.DEPTH_BUFFER_BIT);
-        const info = layer.pickLayer({uniforms, x, y, deviceX, deviceY});
+        const info = layer.pickLayer({
+          uniforms,
+          pickEnableUniforms: {renderPickingBuffer: 1, pickingEnabled: 1},
+          pickDisableUniforms: {renderPickingBuffer: 0, pickingEnabled: 0},
+          x, y,
+          deviceX, deviceY
+        });
         if (info) {
           // Assign potentially useful props to the "info" object
           Object.assign(info, {

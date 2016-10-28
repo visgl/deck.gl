@@ -18,8 +18,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {Layer, assembleShaders} from '../../../lib';
-import {GL, Model, Program, Geometry} from 'luma.gl';
+import {Layer} from '../../../lib';
+import {assembleShaders} from '../../../shader-utils';
+import {GL, Model, Geometry} from 'luma.gl';
 
 const glslify = require('glslify');
 
@@ -30,6 +31,9 @@ const defaultGetTargetPosition = x => x.targetPosition;
 const defaultGetColor = x => x.color;
 
 export default class ArcLayer extends Layer {
+
+  static layerName = 'ArcLayer';
+
   /**
    * @classdesc
    * ArcLayer
@@ -69,10 +73,11 @@ export default class ArcLayer extends Layer {
 
   draw({uniforms}) {
     const {gl} = this.context;
-    const oldStrokeWidth = gl.getParameter(GL.LINE_WIDTH);
-    gl.lineWidth(this.props.strokeWidth || 1);
+    const lineWidth = this.screenToDevicePixels(this.props.strokeWidth);
+    const oldLineWidth = gl.getParameter(GL.LINE_WIDTH);
+    gl.lineWidth(lineWidth);
     this.state.model.render(uniforms);
-    gl.lineWidth(oldStrokeWidth || 1);
+    gl.lineWidth(oldLineWidth);
   }
 
   _createModel(gl) {
@@ -83,12 +88,13 @@ export default class ArcLayer extends Layer {
     }
 
     return new Model({
-      program: new Program(gl, assembleShaders(gl, {
+      gl,
+      ...assembleShaders(gl, {
         vs: glslify('./arc-layer-vertex.glsl'),
         fs: glslify('./arc-layer-fragment.glsl')
-      })),
+      }),
       geometry: new Geometry({
-        drawMode: 'LINE_STRIP',
+        drawMode: GL.LINE_STRIP,
         positions: new Float32Array(positions)
       }),
       isInstanced: true

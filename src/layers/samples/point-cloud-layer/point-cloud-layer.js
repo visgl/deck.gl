@@ -1,10 +1,14 @@
-import {Layer, assembleShaders} from '../../../lib';
-import {Model, Program, Geometry} from 'luma.gl';
+import {Layer} from '../../../lib';
+import {assembleShaders} from '../../../shader-utils';
+import {GL, Model, Geometry} from 'luma.gl';
 
 import VERTEX_SHADER from './point-cloud-layer-vertex';
 import FRAGMENT_SHADER from './point-cloud-layer-fragment';
 
 export default class PointCloudLayer extends Layer {
+
+  static layerName = 'PointCloudLayer';
+
   /*
    * @classdesc
    * ScatterplotLayer
@@ -21,10 +25,6 @@ export default class PointCloudLayer extends Layer {
     const {gl} = this.context;
     const {attributeManager} = this.state;
 
-    this.setState({
-      model: this.getModel(gl)
-    });
-
     attributeManager.add({
       pointPositions: {size: 3, 0: 'x', 1: 'y', 2: 'z'},
       pointColors: {size: 3, 0: 'red', 1: 'green', 2: 'blue'}
@@ -32,29 +32,11 @@ export default class PointCloudLayer extends Layer {
       pointPositions: {update: this.calculatePointPositions},
       pointColors: {update: this.calculatePointColors}
     });
+
+    this.setState({model: this.getModel(gl)});
   }
 
-  didMount() {
-    this.updateUniforms();
-  }
-
-  willReceiveProps(oldProps, newProps) {
-    super.willReceiveProps(oldProps, newProps);
-    this.updateUniforms();
-  }
-
-  getModel(gl) {
-    return new Model({
-      id: this.props.id,
-      program: new Program(gl, assembleShaders(gl, {
-        vs: VERTEX_SHADER,
-        fs: FRAGMENT_SHADER
-      })),
-      geometry: new Geometry({drawMode: 'POINTS'})
-    });
-  }
-
-  updateUniforms() {
+  updateState() {
     this.calculateUniforms();
     const {radius, pixelPerMeter} = this.state;
     const {width, height, pointSize = 10} = this.props;
@@ -62,6 +44,18 @@ export default class PointCloudLayer extends Layer {
       radius: [radius / width * 2, radius / height * 2],
       pixelPerMeter,
       pointSize
+    });
+  }
+
+  getModel(gl) {
+    return new Model({
+      gl,
+      id: this.props.id,
+      ...assembleShaders(gl, {
+        vs: VERTEX_SHADER,
+        fs: FRAGMENT_SHADER
+      }),
+      geometry: new Geometry({drawMode: GL.POINTS})
     });
   }
 

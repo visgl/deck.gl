@@ -17,10 +17,10 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
+/* global window */
 import AttributeManager from './attribute-manager';
 import {GL} from 'luma.gl';
-import {addIterator, areEqualShallow, log} from './utils';
-import isDeepEqual from 'lodash.isequal';
+import {addIterator, compareProps, log} from './utils';
 import assert from 'assert';
 
 /*
@@ -31,8 +31,8 @@ import assert from 'assert';
 const DEFAULT_PROPS = {
   data: [],
   dataIterator: null,
+  dataComparator: null,
   numInstances: undefined,
-  deepCompare: false,
   visible: true,
   pickable: false,
   opacity: 0.8,
@@ -61,16 +61,8 @@ export default class Layer {
       ...props,
       // Accept null as data - otherwise apps will need to add ugly checks
       data: props.data || [],
-      id: props.id || this.constructor.name
+      id: props.id || this.constructor.layerName
     };
-
-    // Add iterator to objects
-    // TODO - Modifying props is an anti-pattern
-    // TODO - allow app to supply dataIterator prop?
-    if (props.data) {
-      addIterator(props.data);
-      assert(props.data[Symbol.iterator], 'data prop must have an iterator');
-    }
 
     this.id = props.id;
     this.count = counter++;
@@ -80,101 +72,71 @@ export default class Layer {
     this.context = null;
     Object.seal(this);
 
-    this.checkRequiredProp('data');
-    this.checkRequiredProp('id', x => typeof x === 'string');
-
-    this._checkDeprecatedProps();
-  }
-
-  _checkDeprecatedProps() {
-    if (this.props.isPickable !== undefined) {
-      throw new Error('No isPickable prop in deckgl v3 - use pickable instead');
+    this.validateRequiredProp('id', x => typeof x === 'string');
+    this.validateRequiredProp('data');
+    // TODO - allow app to supply dataIterator prop?
+    if (props.data) {
+      addIterator(props.data);
+      if (!props.data[Symbol.iterator]) {
+        log.once(0, 'data prop must have iterator');
+      }
     }
 
-    // TODO - inject viewport from overlay instead of creating for each layer?
-    const hasViewportProps =
-      this.props.width !== undefined ||
-      this.props.height !== undefined ||
-      this.props.latitude !== undefined ||
-      this.props.longitude !== undefined ||
-      this.props.zoom !== undefined ||
-      this.props.pitch !== undefined ||
-      this.props.bearing !== undefined;
-    if (hasViewportProps) {
-      /* eslint-disable no-console */
-      // /* global console */
-      throw new Error(
-        `deck.gl v3 no longer needs viewport props in Layer ${this.id}`);
-    }
+    this._validateDeprecatedProps();
   }
-  /* eslint-enable max-statements */
+
+  toString() {
+    const className = this.constructor.name;
+    return (className !== this.props.id) ?
+      `<${className}:'${this.props.id}'>` : `<${className}>`;
+  }
 
   // //////////////////////////////////////////////////
   // LIFECYCLE METHODS, overridden by the layer subclasses
 
   // Called once to set up the initial state
+  // App can create WebGL resources
   initializeState() {
-    throw new Error(`Layer ${this.id} has not defined initializeState`);
+    throw new Error(`Layer ${this} has not defined initializeState`);
   }
 
+  // Called once when layer is no longer matched and state will be discarded
+  // App can destroy WebGL resources
   finalizeState() {
   }
 
-  shouldUpdate(oldProps, newProps) {
-    // Check update triggers, and invalidate props accordingly
-    if (this._checkUpdateTriggers(oldProps, newProps)) {
-      return true;
-    }
-    // If any props have changed, ignoring updateTriggers objects
-    // (updateTriggers are expected to be reminted on every update)
-    const equalShallow = areEqualShallow(newProps, oldProps, {
-      ignore: {updateTriggers: true}
-    });
-    if (!equalShallow) {
-      if (newProps.data !== oldProps.data) {
-        this.setState({dataChanged: true});
-      }
-      return true;
-    }
-    if (newProps.deepCompare && !isDeepEqual(newProps.data, oldProps.data)) {
-      // Support optional deep compare of data
-      // Note: this is quite inefficient, app should use buffer props instead
-      this.setState({dataChanged: true});
-      return true;
-    }
-    return false;
+  shouldUpdateState({oldProps, props, oldContext, context, changeFlags}) {
+    return changeFlags.somethingChanged;
   }
 
   // Default implementation, all attributeManager will be updated
-  willReceiveProps(oldProps, newProps) {
-    const {attributeManager} = this.state;
-    if (this.state.dataChanged) {
-      attributeManager.invalidateAll();
+  updateState({oldProps, props, oldContext, context, changeFlags}) {
+    if (this.state.dataChanged && this.state.attributeManager) {
+      this.state.attributeManager.invalidateAll();
     }
   }
 
   // Implement to generate sublayers
-  renderSublayers() {
+  renderLayers() {
     return null;
   }
 
   // If state has a model, draw it with supplied uniforms
   draw(uniforms = {}) {
-    const {model} = this.state;
-    if (model) {
-      model.render(uniforms);
+    if (this.state.model) {
+      this.state.model.render(uniforms);
     }
   }
 
   // If state has a model, draw it with supplied uniforms
-  pick({uniforms, deviceX, deviceY}) {
+  pick({uniforms, pickEnableUniforms, pickDisableUniforms, deviceX, deviceY}) {
     const {gl} = this.context;
     const {model} = this.state;
 
     if (model) {
-      model.setUniforms({renderPickingBuffer: 1, pickingEnabled: 1});
+      model.setUniforms(pickEnableUniforms);
       model.render(uniforms);
-      model.setUniforms({renderPickingBuffer: 0, pickingEnabled: 0});
+      model.setUniforms(pickDisableUniforms);
 
       // Read color in the central pixel, to be mapped with picking colors
       const color = new Uint8Array(4);
@@ -191,10 +153,50 @@ export default class Layer {
     return null;
   }
 
+  // VIRTUAL METHOD - Override to add or modify `info` object in sublayer
+  // The sublayer may know what object e.g. lat,lon corresponds to using math
+  // etc even when picking does not work
+  onGetHoverInfo(info) {
+    // If props.data is an indexable array, get the object
+    if (Array.isArray(this.props.data)) {
+      info.object = this.props.data[info.index];
+    }
+    info.pixel = [info.x, info.y];
+    info.lngLat = this.unproject(info.pixel);
+    // Backwards compatibility...
+    info.geoCoords = {lat: info.lngLat[1], lon: info.lngLat[0]};
+    return info;
+  }
+
+  onHover(info) {
+    const {color} = info;
+
+    // TODO - selectedPickingColor should be removed?
+    const selectedPickingColor = new Float32Array(3);
+    selectedPickingColor[0] = color[0];
+    selectedPickingColor[1] = color[1];
+    selectedPickingColor[2] = color[2];
+    this.setUniforms({selectedPickingColor});
+
+    info = this.onGetHoverInfo(info);
+    return this.props.onHover(info);
+  }
+
+  onClick(info) {
+    info = this.onGetHoverInfo(info);
+    return this.props.onClick(info);
+  }
+
   // END LIFECYCLE METHODS
   // //////////////////////////////////////////////////
 
   // Public API
+
+  // Updates selected state members and marks the object for redraw
+  setState(updateObject) {
+    Object.assign(this.state, updateObject);
+    this.state.needsRedraw = true;
+  }
 
   setNeedsRedraw(redraw = true) {
     if (this.state) {
@@ -219,12 +221,6 @@ export default class Layer {
     redraw = redraw || attributeManager.getNeedsRedraw({clearRedrawFlags});
     redraw = redraw || (model && model.getNeedsRedraw({clearRedrawFlags}));
     return redraw;
-  }
-
-  // Updates selected state members and marks the object for redraw
-  setState(updateObject) {
-    Object.assign(this.state, updateObject);
-    this.state.needsRedraw = true;
   }
 
   // Updates selected state members and marks the object for redraw
@@ -280,24 +276,6 @@ export default class Layer {
 
   // INTERNAL METHODS
 
-  // Calculates uniforms
-  drawLayer(uniforms = {}) {
-    assert(this.context.viewport, 'Layer missing context.viewport');
-    const viewportUniforms = this.context.viewport.getUniforms(this.props);
-    uniforms = {...uniforms, ...viewportUniforms};
-    // Call lifecycle method
-    this.draw(uniforms);
-    // End lifecycle method
-  }
-
-  pickLayer(uniforms = {}) {
-    const viewportUniforms = this.context.viewport.getUniforms(this.props);
-    uniforms = {...uniforms, ...viewportUniforms, renderPickingBuffer: true};
-    // Call lifecycle method
-    return this.pick(uniforms);
-    // End lifecycle method
-  }
-
   // Deduces numer of instances. Intention is to support:
   // - Explicit setting of numInstances
   // - Auto-deduction for ES6 containers that define a size member
@@ -338,80 +316,10 @@ export default class Layer {
     throw new Error('Could not deduce numInstances');
   }
 
-  // LAYER MANAGER API
-
-  // Called by layer manager when a new layer is found
-  /* eslint-disable max-statements */
-  initializeLayer() {
-    assert(this.context.gl);
-
-    // Initialize state only once
-    this.setState({
-      attributeManager: new AttributeManager({id: this.props.id}),
-      model: null,
-      needsRedraw: true,
-      dataChanged: true
-    });
-
-    // Add attribute manager loggers if provided
-    this.state.attributeManager.setLogFunctions(this.props);
-
-    const {attributeManager} = this.state;
-    // All instanced layers get instancePickingColors attribute by default
-    // Their shaders can use it to render a picking scene
-    attributeManager.addInstanced({
-      instancePickingColors:
-        {size: 3, update: this.calculateInstancePickingColors}
-    });
-
-    // Call subclass lifecycle method
-    this.initializeState();
-    // End subclass lifecycle method
-
-    // Add any subclass attributes
-    this._updateAttributes(this.props);
-    this._updateBaseUniforms();
-
-    const {model} = this.state;
-    if (model) {
-      model.setInstanceCount(this.getNumInstances());
-      model.id = this.props.id;
-      model.program.id = `${this.props.id}-program`;
-      model.geometry.id = `${this.props.id}-geometry`;
-      model.setAttributes(attributeManager.getAttributes());
-    }
-  }
-  /* eslint-enable max-statements */
-
-  // Called by layer manager when existing layer is getting new props
-  updateLayer(oldProps, newProps) {
-    // Calculate standard change flags
-    this._checkForChangedProps(oldProps, newProps);
-
-    // Check if any props have changed
-    if (this.shouldUpdate(oldProps, newProps)) {
-      // Let the subclass mark what is needed for update
-      this.willReceiveProps(oldProps, newProps);
-      // Run the attribute updaters
-      this._updateAttributes(newProps);
-      // Update the uniforms
-      this._updateBaseUniforms();
-
-      if (this.state.model) {
-        this.state.model.setInstanceCount(this.getNumInstances());
-      }
-    }
-
-    this.state.dataChanged = false;
-    this.state.viewportChanged = false;
-  }
-
-  // Called by manager when layer is about to be disposed
-  // Note: not guaranteed to be called on application shutdown
-  finalizeLayer() {
-    // Call subclass lifecycle method
-    this.finalizeState();
-    // End subclass lifecycle method
+  screenToDevicePixels(screenPixels) {
+    const devicePixelRatio = typeof window !== 'undefined' ?
+      window.devicePixelRatio : 1;
+    return screenPixels * devicePixelRatio;
   }
 
   calculateInstancePickingColors(attribute, {numInstances}) {
@@ -441,51 +349,244 @@ export default class Layer {
     ];
   }
 
-  // VIRTUAL METHOD - Override to add or modify `info` object in sublayer
-  // The sublayer may know what object e.g. lat,lon corresponds to using math
-  // etc even when picking does not work
-  onGetHoverInfo(info) {
-    // If props.data is an indexable array, get the object
-    if (Array.isArray(this.props.data)) {
-      info.object = this.props.data[info.index];
+  // LAYER MANAGER API
+  // Should only be called by the deck.gl LayerManager class
+
+  // Called by layer manager when a new layer is found
+  /* eslint-disable max-statements */
+  initializeLayer(updateParams) {
+    assert(this.context.gl);
+    assert(!this.state);
+
+    this.state = {};
+
+    // Initialize state only once
+    this.setState({
+      attributeManager: new AttributeManager({id: this.props.id}),
+      model: null,
+      needsRedraw: true,
+      dataChanged: true
+    });
+
+    // Add attribute manager loggers if provided
+    this.state.attributeManager.setLogFunctions(this.props);
+
+    const {attributeManager} = this.state;
+    // All instanced layers get instancePickingColors attribute by default
+    // Their shaders can use it to render a picking scene
+    attributeManager.addInstanced({
+      instancePickingColors:
+        {size: 3, update: this.calculateInstancePickingColors}
+    });
+
+    // Call subclass lifecycle methods
+    this.initializeState();
+    this.updateState(updateParams);
+    // End subclass lifecycle methods
+
+    // Add any subclass attributes
+    this._updateAttributes(this.props);
+    this._updateBaseUniforms();
+
+    const {model} = this.state;
+    if (model) {
+      model.setInstanceCount(this.getNumInstances());
+      model.id = this.props.id;
+      model.program.id = `${this.props.id}-program`;
+      model.geometry.id = `${this.props.id}-geometry`;
+      model.setAttributes(attributeManager.getAttributes());
     }
-    info.pixel = [info.x, info.y];
-    info.lngLat = this.unproject(info.pixel);
-    // Backwards compatibility...
-    info.geoCoords = {lat: info.lngLat[1], lon: info.lngLat[0]};
-    return info;
   }
 
-  onHover(info) {
-    const {color} = info;
-
-    // TODO - selectedPickingColor should be removed?
-    const selectedPickingColor = new Float32Array(3);
-    selectedPickingColor[0] = color[0];
-    selectedPickingColor[1] = color[1];
-    selectedPickingColor[2] = color[2];
-    this.setUniforms({selectedPickingColor});
-
-    info = this.onGetHoverInfo(info);
-    return this.props.onHover(info);
-  }
-
-  onClick(info) {
-    info = this.onGetHoverInfo(info);
-    return this.props.onClick(info);
-  }
-
-  // Internal Helpers
-  _checkForChangedProps(oldProps, newProps) {
-    // Note: dataChanged might already be set
-    if (newProps.data !== oldProps.data) {
-      // Figure out data length
-      this.state.dataChanged = true;
+  // Called by layer manager when existing layer is getting new props
+  updateLayer(updateParams) {
+    // Check for deprecated method
+    if (this.shouldUpdate) {
+      log.once(0,
+        `deck.gl v3 shouldUpdate deprecated. Use shouldUpdateState in ${this}`);
     }
 
-    this.setState({viewportChanged: this.context.viewportChanged});
+    // Call subclass lifecycle method
+    const stateNeedsUpdate = this.shouldUpdateState(updateParams);
+    // End lifecycle method
+
+    if (stateNeedsUpdate) {
+
+      // Call deprecated lifecycle method if defined
+      const hasRedefinedMethod = this.willReceiveProps &&
+        this.willReceiveProps !== Layer.prototype.willReceiveProps;
+      if (hasRedefinedMethod) {
+        log.once(0,
+          `deck.gl v3 willReceiveProps deprecated. Use updateState in ${this}`);
+        const {oldProps, props, changeFlags} = updateParams;
+        this.setState(changeFlags);
+        this.willReceiveProps(oldProps, props, changeFlags);
+        this.setState({
+          dataChanged: false,
+          viewportChanged: false
+        });
+      }
+      // End lifecycle method
+
+      // Call subclass lifecycle method
+      this.updateState(updateParams);
+      // End lifecycle method
+
+      // Run the attribute updaters
+      this._updateAttributes(updateParams.newProps);
+      // Update the uniforms
+      this._updateBaseUniforms();
+
+      if (this.state.model) {
+        this.state.model.setInstanceCount(this.getNumInstances());
+      }
+    }
+  }
+  /* eslint-enable max-statements */
+
+  // Called by manager when layer is about to be disposed
+  // Note: not guaranteed to be called on application shutdown
+  finalizeLayer() {
+    // Call subclass lifecycle method
+    this.finalizeState();
+    // End lifecycle method
   }
 
+  // Calculates uniforms
+  drawLayer(uniforms = {}) {
+    assert(this.context.viewport, 'Layer missing context.viewport');
+    const viewportUniforms = this.context.viewport.getUniforms(this.props);
+    uniforms = {...uniforms, ...viewportUniforms};
+    // Call subclass lifecycle method
+    this.draw(uniforms);
+    // End lifecycle method
+  }
+
+  pickLayer(uniforms = {}) {
+    const viewportUniforms = this.context.viewport.getUniforms(this.props);
+    uniforms = {...uniforms, ...viewportUniforms, renderPickingBuffer: true};
+    // Call subclass lifecycle method
+    return this.pick(uniforms);
+    // End lifecycle method
+  }
+
+  diffProps(oldProps, newProps, context) {
+    // If any props have changed, ignoring updateTriggers objects
+    // (updateTriggers are expected to be a new object on every update)
+    const inequalReason = compareProps({
+      newProps,
+      oldProps,
+      ignoreProps: {data: null, updateTriggers: null}
+    });
+
+    const propsChanged = Boolean(inequalReason);
+    const dataChanged = this._diffDataProps(oldProps, newProps);
+    const viewportChanged = context.viewportChanged;
+    const somethingChanged =
+      propsChanged || dataChanged || viewportChanged;
+
+    return {
+      propsChanged,
+      dataChanged,
+      viewportChanged,
+      somethingChanged,
+      reason: inequalReason
+    };
+  }
+
+  // DEPRECATED METHODS
+  // shouldUpdate() {}
+
+  willReceiveProps() {
+  }
+
+  // PRIVATE METHODS
+
+  // The comparison of the data prop has some special handling
+  _diffDataProps(oldProps, newProps) {
+    // Support optional app defined comparison of data
+    const {dataComparator} = newProps;
+    if (dataComparator) {
+      if (!dataComparator(newProps.data, oldProps.data)) {
+        return true;
+      }
+    // Otherwise, do a shallow equal on props
+    } else if (newProps.data !== oldProps.data) {
+      return true;
+    }
+
+    // If data hasn't changed, check update triggers
+    // these will indicate if accessors will return diffferent values
+    if (this._diffUpdateTriggers(oldProps, newProps)) {
+      return true;
+    }
+
+    return false;
+  }
+
+  // Check if any update triggers have changed, and invalidate
+  // attributes accordingly.
+  _diffUpdateTriggers(oldProps, newProps) {
+    let change = false;
+    const {attributeManager} = this.state;
+    for (const propName in newProps.updateTriggers) {
+      const oldTriggers = oldProps.updateTriggers[propName];
+      const newTriggers = newProps.updateTriggers[propName];
+      const unequalReason = compareProps(oldTriggers, newTriggers);
+      if (unequalReason) {
+        if (propName === 'all') {
+          attributeManager.invalidateAll();
+          change = true;
+        } else {
+          attributeManager.invalidate(propName);
+          change = true;
+        }
+      }
+    }
+    return change;
+  }
+
+  validateOptionalProp(propertyName, condition) {
+    const value = this.props[propertyName];
+    if (value !== undefined && !condition(value)) {
+      throw new Error(`Bad property ${propertyName} in layer ${this}`);
+    }
+  }
+
+  validateRequiredProp(propertyName, condition) {
+    const value = this.props[propertyName];
+    if (value === undefined) {
+      throw new Error(`Property ${propertyName} undefined in layer ${this}`);
+    }
+    if (condition && !condition(value)) {
+      throw new Error(`Bad property ${propertyName} in layer ${this}`);
+    }
+  }
+
+  _validateDeprecatedProps() {
+    if (this.props.isPickable !== undefined) {
+      throw new Error('No isPickable prop in deckgl v3 - use pickable instead');
+    }
+
+    // TODO - inject viewport from overlay instead of creating for each layer?
+    const hasViewportProps =
+      this.props.width !== undefined ||
+      this.props.height !== undefined ||
+      this.props.latitude !== undefined ||
+      this.props.longitude !== undefined ||
+      this.props.zoom !== undefined ||
+      this.props.pitch !== undefined ||
+      this.props.bearing !== undefined;
+    if (hasViewportProps) {
+      /* eslint-disable no-console */
+      // /* global console */
+      throw new Error(
+        `deck.gl v3 no longer needs viewport props in Layer ${this}`);
+    }
+  }
+  /* eslint-enable max-statements */
+
+  // Calls attribute manager to update any WebGL attributes
   _updateAttributes(props) {
     const {attributeManager, model} = this.state;
     const numInstances = this.getNumInstances(props);
@@ -511,72 +612,4 @@ export default class Layer {
       ONE: 1.0
     });
   }
-
-  // Check if any update triggers have changed, and invalidate
-  // attributes accordingly.
-  _checkUpdateTriggers(oldProps, newProps) {
-    let change = false;
-    const {attributeManager} = this.state;
-    for (const propName in newProps.updateTriggers) {
-      const oldTriggers = oldProps.updateTriggers[propName];
-      const newTriggers = newProps.updateTriggers[propName];
-      if (!areEqualShallow(oldTriggers, newTriggers)) {
-        if (propName === 'all') {
-          attributeManager.invalidateAll();
-          change = true;
-        } else {
-          attributeManager.invalidate(propName);
-          change = true;
-        }
-      }
-    }
-    return change;
-  }
-
-  checkOptionalProp(propertyName, condition) {
-    const value = this.props[propertyName];
-    if (value !== undefined && !condition(value)) {
-      throw new Error(`Bad property ${propertyName} in layer ${this.id}`);
-    }
-  }
-
-  checkRequiredProp(propertyName, condition) {
-    const value = this.props[propertyName];
-    if (value === undefined) {
-      throw new Error(`Property ${propertyName} undefined in layer ${this.id}`);
-    }
-    if (condition && !condition(value)) {
-      throw new Error(`Bad property ${propertyName} in layer ${this.id}`);
-    }
-  }
-
-  // MAP LAYER FUNCTIONALITY
-  // _setViewport() {
-  //   const {
-  //     width, height, latitude, longitude, zoom, pitch, bearing, altitude,
-  //     mercatorEnabled = true, disableMercatorProject
-  //   } = this.props;
-
-  //   if (disableMercatorProject !== undefined) {
-  //     throw new Error('disableMercatorProject renamed to mercatorEnabled');
-  //   }
-
-  //   // TODO - pass in as prop so we don't have to recalculate in every layer
-  //   const viewport = new Viewport({
-  //     width, height, latitude, longitude, zoom, pitch, bearing, altitude,
-  //     tileSize: 512
-  //   });
-
-  //   this.setState({mercator: viewport});
-  //   // TODO - "private" viewport.center member...
-  //   this.setUniforms({
-  //     mercatorEnabled: mercatorEnabled ? 1 : 0,
-  //     mercatorScale: Math.pow(2, zoom),
-  //     mercatorScaleFP64: fp64ify(Math.pow(2, zoom)),
-  //     mercatorCenter: viewport.center,
-  //     ...viewport.getUniforms(this.props)
-  //   });
-
-  //   log(3, this.state.viewport, latitude, longitude, zoom);
-  // }
 }

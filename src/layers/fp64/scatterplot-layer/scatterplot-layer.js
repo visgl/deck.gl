@@ -17,8 +17,9 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-import {Layer, assembleShaders} from '../../../lib';
-import {Model, Program, Geometry} from 'luma.gl';
+import {Layer} from '../../../lib';
+import {assembleShaders} from '../../../shader-utils';
+import {GL, Model, Geometry} from 'luma.gl';
 import {fp64ify} from '../../../lib/utils/fp64';
 
 const glslify = require('glslify');
@@ -28,7 +29,10 @@ const defaultGetPosition = x => x.position;
 const defaultGetRadius = x => x.radius;
 const defaultGetColor = x => x.color || DEFAULT_COLOR;
 
-export default class ScatterplotLayer extends Layer {
+export default class ScatterplotLayer64 extends Layer {
+
+  static layerName = 'ScatterplotLayer64';
+
   /*
    * @classdesc
    * ScatterplotLayer
@@ -67,6 +71,14 @@ export default class ScatterplotLayer extends Layer {
     });
   }
 
+  draw({uniforms}) {
+    this.calculateZoomRadius();
+    this.state.model.render({
+      ...uniforms,
+      zoomRadiusFP64: this.state.zoomRadiusFP64
+    });
+  }
+
   getModel(gl) {
     const NUM_SEGMENTS = 16;
     const PI2 = Math.PI * 2;
@@ -82,26 +94,19 @@ export default class ScatterplotLayer extends Layer {
     }
 
     return new Model({
+      gl,
       id: this.props.id,
-      program: new Program(gl, assembleShaders(gl, {
+      ...assembleShaders(gl, {
         vs: glslify('./scatterplot-layer-vertex.glsl'),
         fs: glslify('./scatterplot-layer-fragment.glsl'),
         fp64: true,
         project64: true
-      })),
+      }),
       geometry: new Geometry({
-        drawMode: 'TRIANGLE_FAN',
+        drawMode: GL.TRIANGLE_FAN,
         positions: new Float32Array(positions)
       }),
       isInstanced: true
-    });
-  }
-
-  draw({uniforms}) {
-    this.calculateZoomRadius();
-    this.state.model.render({
-      ...uniforms,
-      zoomRadiusFP64: this.state.zoomRadiusFP64
     });
   }
 
@@ -153,8 +158,6 @@ export default class ScatterplotLayer extends Layer {
   }
 
   calculateZoomRadius() {
-    // use radius if specified
-
     const pixel0 = this.projectFlat([-122, 37.5]);
     const pixel1 = this.projectFlat([-122, 37.5002]);
 

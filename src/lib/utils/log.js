@@ -9,8 +9,18 @@ export default function log(priority, ...args) {
   }
 }
 
+const cache = {};
+
+function once(priority, arg, ...args) {
+  if (!cache[arg]) {
+    log(priority, arg, ...args);
+  }
+  cache[arg] = true;
+}
+
 log.priority = 0;
 log.log = log;
+log.once = once;
 
 // Expose to browser
 if (typeof window !== 'undefined') {

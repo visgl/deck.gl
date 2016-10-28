@@ -1,8 +1,10 @@
+// Set up deck.gl global state
 import './init';
 
+// Export core objects
 export {default as Layer} from './layer';
 export {default as AttributeManager} from './attribute-manager';
 export {default as LayerManager} from './layer-manager';
 
-export * from '../shader-utils';
-
+// Object iteration helper
+export * from './utils/object-iterator';

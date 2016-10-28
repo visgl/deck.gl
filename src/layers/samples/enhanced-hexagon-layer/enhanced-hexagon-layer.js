@@ -1,5 +1,6 @@
-import {Layer, assembleShaders} from '../../../lib';
-import {Geometry, Program, Model} from 'luma.gl';
+import {Layer} from '../../../lib';
+import {assembleShaders} from '../../../shader-utils';
+import {GL, Geometry, Model} from 'luma.gl';
 
 import assert from 'assert';
 
@@ -72,10 +73,6 @@ export default class EnhancedHexagonLayer extends Layer {
     const {gl} = this.context;
     const {attributeManager} = this.state;
 
-    this.setState({
-      model: this.getModel(gl)
-    });
-
     attributeManager.add({
       instancePositions: {size: 3, instanced: 1,
         0: 'lon', 1: 'lat', 2: 'unused'},
@@ -86,22 +83,20 @@ export default class EnhancedHexagonLayer extends Layer {
       instanceColors: {update: this.calculateInstanceColors}
     });
 
-    this.updateUniforms();
+    this.setState({model: this.getModel(gl)});
   }
 
-  willReceiveProps(oldProps, newProps) {
-    super.willReceiveProps(oldProps, newProps);
+  updateState({oldProps, props, changeFlags}) {
+    const {model, attributeManager} = this.state;
 
-    const {model, dataChanged, attributeManager} = this.state;
-
-    if (dataChanged) {
+    if (changeFlags.dataChanged) {
       attributeManager.invalidateAll();
     }
 
     // Update the positions in the model if they've changes
     if (
       model &&
-      !positionsAreEqual(oldProps.hexagonVertices, newProps.hexagonVertices)
+      !positionsAreEqual(oldProps.hexagonVertices, props.hexagonVertices)
     ) {
       this.updatePrimitiveHexagon();
     }
@@ -154,13 +149,14 @@ export default class EnhancedHexagonLayer extends Layer {
 
   getModel(gl) {
     return new Model({
+      gl,
       id: this.props.id,
-      program: new Program(gl, assembleShaders(gl, {
+      ...assembleShaders(gl, {
         vs: VERTEX_SHADER,
         fs: FRAGMENT_SHADER
-      })),
+      }),
       geometry: new Geometry({
-        drawMode: 'TRIANGLE_FAN',
+        drawMode: GL.TRIANGLE_FAN,
         positions: this.getPositions()
       }),
       isInstanced: true

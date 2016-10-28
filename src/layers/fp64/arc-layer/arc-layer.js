@@ -18,8 +18,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {Layer, assembleShaders} from '../../../lib';
-import {GL, Model, Program, Geometry} from 'luma.gl';
+import {Layer} from '../../../lib';
+import {assembleShaders} from '../../../shader-utils';
+import {GL, Model, Geometry} from 'luma.gl';
 import {fp64ify} from '../../../lib/utils/fp64';
 
 const glslify = require('glslify');
@@ -30,7 +31,10 @@ const defaultGetSourcePosition = x => x.sourcePosition;
 const defaultGetTargetPosition = x => x.targetPosition;
 const defaultGetColor = x => x.color;
 
-export default class ArcLayer extends Layer {
+export default class ArcLayer64 extends Layer {
+
+  static layerName = 'ArcLayer64';
+
   /**
    * @classdesc
    * ArcLayer
@@ -60,29 +64,23 @@ export default class ArcLayer extends Layer {
     const {gl} = this.context;
     const {attributeManager} = this.state;
 
-    const model = this.createModel(gl);
-    model.userData.strokeWidth = this.props.strokeWidth;
-    this.setState({model});
-
     attributeManager.addInstanced({
       instanceSourceColors: {size: 3, update: this.calculateInstanceSourceColors},
       instanceTargetColors: {size: 3, update: this.calculateInstanceTargetColors},
       instanceSourcePositionsFP64: {size: 4, update: this.calculateInstanceSourcePositions},
       instanceTargetPositionsFP64: {size: 4, update: this.calculateInstanceTargetPositions}
     });
-  }
 
-  willReceiveProps(oldProps, nextProps) {
-    super.willReceiveProps(oldProps, nextProps);
-    this.state.model.userData.strokeWidth = nextProps.strokeWidth;
+    this.setState({model: this.createModel(gl)});
   }
 
   draw({uniforms}) {
     const {gl} = this.context;
-    const oldStrokeWidth = gl.getParameter(GL.LINE_WIDTH);
-    gl.lineWidth(this.props.strokeWidth || 1);
+    const lineWidth = this.screenToDevicePixels(this.props.strokeWidth);
+    const oldLineWidth = gl.getParameter(GL.LINE_WIDTH);
+    gl.lineWidth(lineWidth);
     this.state.model.render(uniforms);
-    gl.lineWidth(oldStrokeWidth || 1);
+    gl.lineWidth(oldLineWidth);
   }
 
   createModel(gl) {
@@ -92,15 +90,16 @@ export default class ArcLayer extends Layer {
       positions = [...positions, i, i, i];
     }
     return new Model({
+      gl,
       id: this.props.id,
-      program: new Program(gl, assembleShaders(gl, {
+      ...assembleShaders(gl, {
         vs: glslify('./arc-layer-vertex.glsl'),
         fs: glslify('./arc-layer-fragment.glsl'),
         fp64: true,
         project64: true
-      })),
+      }),
       geometry: new Geometry({
-        drawMode: 'LINE_STRIP',
+        drawMode: GL.LINE_STRIP,
         positions: new Float32Array(positions)
       }),
       isInstanced: true

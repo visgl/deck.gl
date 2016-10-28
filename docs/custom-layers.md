@@ -8,7 +8,7 @@ There are a couple of ways to build a layer in deck.gl
 * **Single-primitive, instanced layer** - This is type of layer renders
   the same geometry many times. Usually the simplest way to go
   when creating layers that renders a lot of similar objects (think
-  ScatterplotLayer, HexagonLayer etc).
+  ScatterplotLayer, ArcLayers etc).
 * **Single-primitive, dynamic geometry layer** - This is needed when
   dealing with data that needs to be rendered as unique, comples geometries,
   such as polygons.
@@ -57,6 +57,27 @@ directly, rather than waiting for the garbage collector to do it.
 
 A layer is discarded when a new set of layers are rendered and none of
 them match (have the same `id` prop) as your old layer.
+
+
+## Change Detection
+
+Before reading the description of each life cycle method, it is helpful
+to consider change detection to understant what work a layer typically
+needs to do in response to changes.
+
+* `data` - Typically if a layer is rerendered with a changed `data` prop,
+  all WebGL attributes must be regenerated and the layer needs to be redrawn.
+  The default is to do exactly that, but sometimes a layer can be smarter
+  and limit updates, or more work needs to be done.
+
+* If the viewport has changed, the layer will automatically be rerendered.
+  Many layers can thus ignore viewport changes, however, if the layer has
+  any dependencies on the viewport (such as a layer
+  that calculates extents or positions in screen space rather than world space)
+  it would need to update state or uniforms whenever the viewport changes.
+
+* If other props change, it would typically mean that the layer needs to
+  update some uniform or state so that rendering is affected appropriately.
 
 
 ### Handling property updates

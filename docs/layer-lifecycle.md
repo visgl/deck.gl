@@ -5,25 +5,6 @@ at certain points in its lifecycle. The layer can specify how its state
 is initialized and finalized, if and how it should react to property changes,
 and how it should draw and pick the layer.
 
-The key to creating (and using) deck.gl layers in the most efficient way
-is to understand how the `shouldComponentUpdate` and `willReceiveProps`
-methods collaborate to minimize state updates, as long as they are fed the
-right type of props.
-
-
-## Comparison with React's Lifecycle
-
-If you are familiar with React and the
-[React component lifecycle](https://facebook.github.io/react/docs/component-specs.html)
-you will quickly understand the deck.gl layer lifecycle as it is based on
-similar ideas. In particular, experience with the React lifecycle should help
-you understand how to leverage the `shouldUpdate` and `willReceiveProps`
-methods.
-
-**Implementation Note**: deck.gl uses a simpler lifecycle model than React.
-While React backs instance with a separate component, deck.gl just transfers
-the old layers' state objects to any new matched layers.
-
 
 ## Properties and Methods
 
@@ -45,47 +26,54 @@ deck.gl will already have created the `state` object at this time, and
 added the `gl` context and the `attributeManager` context.
 
 
-### Finalization: Layer.finalizeSate()
+### Finalization: Layer.finalizeState()
 
 Called on layers from previous rendering cycle that did not get matched
 with new layers. Called just before the reference to the state of that layer
 is released.
 
-This is the right time to destroy WebGL resources etc.
+This is a good time to destroy any layer specific WebGL resources etc.
 
 
-### Updating: shouldUpdate(oldProps, newProps)
+### Updating: shouldUpdateState({oldProps, props, oldContext, context, changeFlags})
 
-Called when a new layer has been matched with an old one. If this function
-return false, willReceiveProps will never be called.
+Called when a new layer has been matched with a layer from the previous
+render cycle (resulting in new props being passed to that layer),
+or when context has changed and layers are about to be drawn.
+
+If this function return false, `updateState` will never be called.
+
 The default implementation essentially does a shallow equal comparison
 on the props and returns false if no properties have changed.
 
-There are some exceptions, the `deepEqual` prop and the `updateTriggers`
+There are some exceptions, the `dataComparator` prop and the `updateTriggers`
 prop can be supplied additional checks. See the documentation of those
 props in the Layer API.
 
 
-### Updating: willReceiveProps(oldProps, newProps)
+### Updating: updateState({oldProps, props, oldContext, context, changeFlags})
 
 Called when a new layer has been matched with a layer from the previous
-render cycle.
+render cycle (resulting in new props being passed to that layer),
+or when context has changed and layers are about to be drawn.
 
-The default implementation, the attributeManager will be updated with the
-new data prop which will cause attributes to update if it has changed, or
-any of the updateTriggers have changed.
+For information about changeFlags, see `shouldUpdateState`
+
+The default implementation will invalidate all attributeManager attributes
+if any change has been detected to the `data` prop.
 
 
-### Decomposing: renderSublayers()
+### Decomposing: renderLayers()
 
-Allows a layer to "render" one or more Layers passing in its own state as props.
+Allows a layer to "render" or generate one or more deck.gl Layers
+passing in its own state as props.
 The layers will be rendered after the rendering layer, but before the next
-layer in the list. `renderSublayers` will be called on the new layers,
-allowing a recursive decomposition of the drawing of a complex data set
-into primitive layers.
+layer in the list. `renderLayers` will be called on the new layers,
+allowing the decomposition of the drawing of a complex data set
+into "primitive" layers.
 
 A layer can return null, a single layer, or an array of layers. The default
-implementation of `renderSublayers` returns null.
+implementation of `renderLayers` returns null.
 
 
 ### Drawing: draw({uniforms})
@@ -97,11 +85,50 @@ and calls `draw` on that model.
 TBA
 
 
-### Picking: getPickingModels()
+### Picking: pick(uniforms, deviceX, deviceY)
+
+The pick method should return an object with optional fields about
+what was picked. This `info` object is then populated with additional
+information by deck.gl and finally passed to the layer's `onHover` or
+`onPick` callbacks.
 
 The default implementation looks for a variable `model` in the layer's
 state (which is expected to be an instance of the luma.gl `Model` class)
-uses that model for picking.
+uses that model for picking, and renders that model with attributes set
+that allow the layer shaders to render picking colors instead of normal
+colors.
 
-TBD - this is not the best interface for enabling custom picking.
 
+## Comparison with React's Lifecycle
+
+If you are familiar with React and the
+[React component lifecycle](https://facebook.github.io/react/docs/component-specs.html)
+you will quickly understand the deck.gl layer lifecycle as it is based on
+similar ideas. In particular, experience with the React lifecycle should help
+you understand property change management and how to use the
+`shouldUpdateState` and `updateState` methods.
+
+Still, there are a couple of notable differences between the lifecycle
+methods provided by the two frameworks which are good to be aware of:
+
+- deck.gl performs preliminary analysis on certain props and context and
+  provides a `changeFlags` object to your `shouldUpdateState` and
+  `updateState`.
+
+- deck.gl's `updateState` method is called both on layer initialization and
+  on when props or context is updated. This is different from React's
+  `willReceiveProps` that is not called when the component is initially created,
+  The deck.gl model avoids requiring the same property checks to be performed
+  twice.
+
+- deck.gl has both `draw` and `renderLayers` where React just has `render`.
+
+- deck.gl's `pick` method has not correspondence in React's lifecycle.
+
+**Note**: deck.gl uses a simpler component model than React.
+  While React backs instance with a separate component, deck.gl just transfers
+  the old layers' state objects to any new matched layers.
+
+**Note**: the data prop, attribute props and the viewport context are
+  central to deck.gl layers and get special handling. React is more generic
+  and leaves the interpretation of most props to the component.
