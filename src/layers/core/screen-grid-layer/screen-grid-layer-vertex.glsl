@@ -49,5 +49,5 @@ void main(void) {
   	renderPickingBuffer
   );
 
-  gl_Position = vec4(instancePositions + vertices * cellScale, 1.0);
+  gl_Position = vec4(instancePositions + vertices * cellScale, 1.);
 }

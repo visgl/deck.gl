@@ -19,18 +19,20 @@
 // THE SOFTWARE.
 import {Layer} from '../../../lib';
 import {assembleShaders} from '../../../shader-utils';
-import {Model, Program, CylinderGeometry} from 'luma.gl';
-
+import {Model, CylinderGeometry} from 'luma.gl';
 const glslify = require('glslify');
 
 const DEFAULT_COLOR = [255, 0, 0];
 
-const _getCentroid = x => x.centroid;
-const _getElevation = x => x.elevation || 0;
-const _getColor = x => x.color || DEFAULT_COLOR;
-const _getVertices = x => x.vertices;
+const defaultGetCentroid = x => x.centroid;
+const defaultGetElevation = x => x.elevation || 0;
+const defaultGetColor = x => x.color || DEFAULT_COLOR;
+const defaultGetVertices = x => x.vertices;
 
 export default class HexagonLayer extends Layer {
+
+  static layerName = 'HexagonLayer';
+
   /**
    * @classdesc
    * HexagonLayer
@@ -48,10 +50,10 @@ export default class HexagonLayer extends Layer {
     dotRadius = 10,
     elevation = 100,
     vertices,
-    getCentroid = _getCentroid,
-    getElevation = _getElevation,
-    getColor = _getColor,
-    getVertices = _getVertices,
+    getCentroid = defaultGetCentroid,
+    getElevation = defaultGetElevation,
+    getColor = defaultGetColor,
+    getVertices = defaultGetVertices,
     ...opts
   } = {}) {
     super({
@@ -70,32 +72,21 @@ export default class HexagonLayer extends Layer {
     const {gl} = this.context;
     const {attributeManager} = this.state;
 
-    this.setState({
-      model: this.getModel(gl)
-    });
-
     attributeManager.addInstanced({
       instancePositions: {size: 2, update: this.calculateInstancePositions},
       instanceElevations: {size: 1, update: this.calculateInstanceElevations},
       instanceColors: {size: 3, update: this.calculateInstanceColors}
     });
 
-    this.calculateRadiusAndAngle();
-
-    this.setUniforms({
-      elevation: this.props.elevation
-    });
+    this.setState({model: this.getModel(gl)});
   }
 
-  willReceiveProps(oldProps, newProps) {
-    super.willReceiveProps(oldProps, newProps);
-
-    const {dataChanged, viewportChanged, attributeManager} = this.state;
-
-    if (dataChanged || viewportChanged) {
+  updateState({oldProps, newProps, changeFlags}) {
+    if (changeFlags.dataChanged || changeFlags.viewportChanged) {
       this.calculateRadiusAndAngle();
     }
-    if (dataChanged) {
+    if (changeFlags.dataChanged) {
+      const {attributeManager} = this.state;
       attributeManager.invalidateAll();
     }
 
@@ -106,11 +97,12 @@ export default class HexagonLayer extends Layer {
 
   getModel(gl) {
     return new Model({
+      gl,
       id: this.props.id,
-      program: new Program(gl, assembleShaders(gl, {
+      ...assembleShaders(gl, {
         vs: glslify('./hexagon-layer-vertex.glsl'),
         fs: glslify('./hexagon-layer-fragment.glsl')
-      })),
+      }),
       geometry: new CylinderGeometry({
         radius: 1,
         topRadius: 1,
@@ -122,6 +114,40 @@ export default class HexagonLayer extends Layer {
         nvertical: 1
       }),
       isInstanced: true
+    });
+  }
+
+  // TODO this is the only place that uses hexagon vertices
+  // consider move radius and angle calculation to the shader
+  calculateRadiusAndAngle() {
+    const {data, getVertices} = this.props;
+    if (!data || data.length === 0) {
+      return;
+    }
+
+    // Either get vertices from prop, or from first hexagon
+    let {vertices} = this.props;
+    if (!vertices) {
+      const firstHexagon = this.getFirstObject();
+      vertices = getVertices(firstHexagon);
+    }
+    const vertex0 = vertices[0];
+    const vertex3 = vertices[3];
+
+    // transform to space coordinates
+    const spaceCoord0 = this.project(vertex0);
+    const spaceCoord3 = this.project(vertex3);
+
+    // distance between two close centroids
+    const dy = spaceCoord0[0] - spaceCoord3[0];
+    const dx = spaceCoord0[1] - spaceCoord3[1];
+    const dxy = Math.sqrt(dx * dx + dy * dy);
+
+    this.setUniforms({
+      // Calculate angle that the perpendicular hexagon vertex axis is tilted
+      angle: Math.acos(dx / dxy) * Math.sign(dy) + Math.PI / 2,
+      // Allow user to fine tune radius
+      radius: dxy / 2 * Math.min(1, this.props.dotRadius)
     });
   }
 
@@ -159,39 +185,5 @@ export default class HexagonLayer extends Layer {
       value[i + 2] = color[2];
       i += 3;
     }
-  }
-
-  // TODO this is the only place that uses hexagon vertices
-  // consider move radius and angle calculation to the shader
-  calculateRadiusAndAngle() {
-    const {data, getVertices} = this.props;
-    if (!data || data.length === 0) {
-      return;
-    }
-
-    // Either get vertices from prop, or from first hexagon
-    let {vertices} = this.props;
-    if (!vertices) {
-      const firstHexagon = this.getFirstObject();
-      vertices = getVertices(firstHexagon);
-    }
-    const vertex0 = vertices[0];
-    const vertex3 = vertices[3];
-
-    // transform to space coordinates
-    const spaceCoord0 = this.project(vertex0);
-    const spaceCoord3 = this.project(vertex3);
-
-    // distance between two close centroids
-    const dy = spaceCoord0[0] - spaceCoord3[0];
-    const dx = spaceCoord0[1] - spaceCoord3[1];
-    const dxy = Math.sqrt(dx * dx + dy * dy);
-
-    this.setUniforms({
-      // Calculate angle that the perpendicular hexagon vertex axis is tilted
-      angle: Math.acos(dx / dxy) * Math.sign(dy) + Math.PI / 2,
-      // Allow user to fine tune radius
-      radius: dxy / 2 * Math.min(1, this.props.dotRadius)
-    });
   }
 }

@@ -17,6 +17,7 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
+/* global window */
 import AttributeManager from './attribute-manager';
 import {GL} from 'luma.gl';
 import {addIterator, compareProps, log} from './utils';
@@ -60,7 +61,7 @@ export default class Layer {
       ...props,
       // Accept null as data - otherwise apps will need to add ugly checks
       data: props.data || [],
-      id: props.id || this.constructor.name
+      id: props.id || this.constructor.layerName
     };
 
     this.id = props.id;
@@ -150,6 +151,40 @@ export default class Layer {
     }
 
     return null;
+  }
+
+  // VIRTUAL METHOD - Override to add or modify `info` object in sublayer
+  // The sublayer may know what object e.g. lat,lon corresponds to using math
+  // etc even when picking does not work
+  onGetHoverInfo(info) {
+    // If props.data is an indexable array, get the object
+    if (Array.isArray(this.props.data)) {
+      info.object = this.props.data[info.index];
+    }
+    info.pixel = [info.x, info.y];
+    info.lngLat = this.unproject(info.pixel);
+    // Backwards compatibility...
+    info.geoCoords = {lat: info.lngLat[1], lon: info.lngLat[0]};
+    return info;
+  }
+
+  onHover(info) {
+    const {color} = info;
+
+    // TODO - selectedPickingColor should be removed?
+    const selectedPickingColor = new Float32Array(3);
+    selectedPickingColor[0] = color[0];
+    selectedPickingColor[1] = color[1];
+    selectedPickingColor[2] = color[2];
+    this.setUniforms({selectedPickingColor});
+
+    info = this.onGetHoverInfo(info);
+    return this.props.onHover(info);
+  }
+
+  onClick(info) {
+    info = this.onGetHoverInfo(info);
+    return this.props.onClick(info);
   }
 
   // END LIFECYCLE METHODS
@@ -281,6 +316,12 @@ export default class Layer {
     throw new Error('Could not deduce numInstances');
   }
 
+  screenToDevicePixels(screenPixels) {
+    const devicePixelRatio = typeof window !== 'undefined' ?
+      window.devicePixelRatio : 1;
+    return screenPixels * devicePixelRatio;
+  }
+
   calculateInstancePickingColors(attribute, {numInstances}) {
     const {value, size} = attribute;
     // add 1 to index to seperate from no selection
@@ -306,40 +347,6 @@ export default class Layer {
       Math.floor((i + 1) / 256) % 256,
       Math.floor((i + 1) / 256 / 256) % 256
     ];
-  }
-
-  // VIRTUAL METHOD - Override to add or modify `info` object in sublayer
-  // The sublayer may know what object e.g. lat,lon corresponds to using math
-  // etc even when picking does not work
-  onGetHoverInfo(info) {
-    // If props.data is an indexable array, get the object
-    if (Array.isArray(this.props.data)) {
-      info.object = this.props.data[info.index];
-    }
-    info.pixel = [info.x, info.y];
-    info.lngLat = this.unproject(info.pixel);
-    // Backwards compatibility...
-    info.geoCoords = {lat: info.lngLat[1], lon: info.lngLat[0]};
-    return info;
-  }
-
-  onHover(info) {
-    const {color} = info;
-
-    // TODO - selectedPickingColor should be removed?
-    const selectedPickingColor = new Float32Array(3);
-    selectedPickingColor[0] = color[0];
-    selectedPickingColor[1] = color[1];
-    selectedPickingColor[2] = color[2];
-    this.setUniforms({selectedPickingColor});
-
-    info = this.onGetHoverInfo(info);
-    return this.props.onHover(info);
-  }
-
-  onClick(info) {
-    info = this.onGetHoverInfo(info);
-    return this.props.onClick(info);
   }
 
   // LAYER MANAGER API
@@ -390,13 +397,13 @@ export default class Layer {
       model.setAttributes(attributeManager.getAttributes());
     }
   }
-  /* eslint-enable max-statements */
 
   // Called by layer manager when existing layer is getting new props
   updateLayer(updateParams) {
     // Check for deprecated method
     if (this.shouldUpdate) {
-      log.once(`deck.gl v3 shouldUpdate: use shouldUpdateState ${this}`);
+      log.once(0,
+        `deck.gl v3 shouldUpdate deprecated. Use shouldUpdateState in ${this}`);
     }
 
     // Call subclass lifecycle method
@@ -406,12 +413,14 @@ export default class Layer {
     if (stateNeedsUpdate) {
 
       // Call deprecated lifecycle method if defined
-      if (this.willReceiveProps) {
-        log.once(
-          `deck.gl v3 willReceiveProps deprecated. Use updateState ${this}`);
-        const {oldProps, newProps, changeFlags} = updateParams;
+      const hasRedefinedMethod = this.willReceiveProps &&
+        this.willReceiveProps !== Layer.prototype.willReceiveProps;
+      if (hasRedefinedMethod) {
+        log.once(0,
+          `deck.gl v3 willReceiveProps deprecated. Use updateState in ${this}`);
+        const {oldProps, props, changeFlags} = updateParams;
         this.setState(changeFlags);
-        this.willReceiveProps(oldProps, newProps, changeFlags);
+        this.willReceiveProps(oldProps, props, changeFlags);
         this.setState({
           dataChanged: false,
           viewportChanged: false
@@ -433,6 +442,7 @@ export default class Layer {
       }
     }
   }
+  /* eslint-enable max-statements */
 
   // Called by manager when layer is about to be disposed
   // Note: not guaranteed to be called on application shutdown
@@ -469,12 +479,25 @@ export default class Layer {
       ignoreProps: {data: null, updateTriggers: null}
     });
 
+    const propsChanged = Boolean(inequalReason);
+    const dataChanged = this._diffDataProps(oldProps, newProps);
+    const viewportChanged = context.viewportChanged;
+    const somethingChanged =
+      propsChanged || dataChanged || viewportChanged;
+
     return {
-      propsChanged: Boolean(inequalReason),
-      dataChanged: this._diffDataProps(oldProps, newProps),
-      viewportChanged: context.viewportChanged,
+      propsChanged,
+      dataChanged,
+      viewportChanged,
+      somethingChanged,
       reason: inequalReason
     };
+  }
+
+  // DEPRECATED METHODS
+  // shouldUpdate() {}
+
+  willReceiveProps() {
   }
 
   // PRIVATE METHODS

@@ -20,25 +20,19 @@
 
 import {Layer} from '../../../lib';
 import {assembleShaders} from '../../../shader-utils';
-import {GL, Model, Program, Geometry} from 'luma.gl';
+import {GL, Model, Geometry} from 'luma.gl';
 import {fp64ify} from '../../../lib/utils/fp64';
-
-const glslify = require('glslify');
-
 import {vec3} from 'gl-matrix';
 
 import earcut from 'earcut';
 import flattenDeep from 'lodash.flattendeep';
 
-const ATTRIBUTES = {
-  indices: {size: 1, 0: 'index', isIndexed: true},
-  positions: {size: 4, 0: 'x', 2: 'y'},
-  heights: {size: 2, 0: 'height'},
-  normals: {size: 3, 0: 'x', 1: 'y', 2: 'z'},
-  colors: {size: 3, 0: 'red', 1: 'green', 2: 'blue'}
-};
+const glslify = require('glslify');
 
-export default class ExtrudedChoroplethLayer extends Layer {
+export default class ExtrudedChoroplethLayer64 extends Layer {
+
+  static layerName = 'ExtrudedChoroplethLayer64';
+
   /**
    * @classdesc
    * BuildingLayer
@@ -73,7 +67,13 @@ export default class ExtrudedChoroplethLayer extends Layer {
       pointLightAttenuation, materialSpecularColor, materialShininess
     } = this.props;
 
-    attributeManager.addDynamic(ATTRIBUTES, {
+    attributeManager.addDynamic({
+      indices: {size: 1, 0: 'index', isIndexed: true},
+      positions: {size: 4, 0: 'x', 2: 'y'},
+      heights: {size: 2, 0: 'height'},
+      normals: {size: 3, 0: 'x', 1: 'y', 2: 'z'},
+      colors: {size: 3, 0: 'red', 1: 'green', 2: 'blue'}
+    }, {
       // Primtive attributes
       indices: {update: this.calculateIndices},
       positions: {update: this.calculatePositions},
@@ -98,18 +98,34 @@ export default class ExtrudedChoroplethLayer extends Layer {
       uMaterialSpecularColor: materialSpecularColor || [255, 255, 255],
       uMaterialShininess: materialShininess || 1
     });
-
-    this.extractExtrudedChoropleth();
   }
 
-  willReceiveProps(oldProps, newProps) {
-    super.willReceiveProps(oldProps, newProps);
-
-    const {dataChanged, attributeManager} = this.state;
-    if (dataChanged) {
+  updateState({changeFlags}) {
+    const {attributeManager} = this.state;
+    if (changeFlags.dataChanged) {
       this.extractExtrudedChoropleth();
       attributeManager.invalidateAll();
     }
+  }
+
+  draw({uniforms}) {
+    this.state.model.render({
+      ...uniforms
+    });
+  }
+
+  onHover(info) {
+    const {index} = info;
+    const {data} = this.props;
+    const feature = data.features[index];
+    this.props.onHover({...info, feature});
+  }
+
+  onClick(info) {
+    const {index} = info;
+    const {data} = this.props;
+    const feature = data.features[index];
+    this.props.onClick({...info, feature});
   }
 
   getModel(gl) {
@@ -127,24 +143,19 @@ export default class ExtrudedChoroplethLayer extends Layer {
     gl.depthFunc(GL.LEQUAL);
 
     return new Model({
+      gl,
       id: this.props.id,
-      program: new Program(gl, assembleShaders(gl, {
+      ...assembleShaders(gl, {
         vs: glslify('./extruded-choropleth-layer-vertex.glsl'),
         fs: glslify('./extruded-choropleth-layer-fragment.glsl'),
         fp64: true,
         project64: true
-      })),
+      }),
       geometry: new Geometry({
         drawMode: this.props.drawWireframe ? GL.LINES : GL.TRIANGLES
       }),
       vertexCount: 0,
       isIndexed: true
-    });
-  }
-
-  draw({uniforms}) {
-    this.state.model.render({
-      ...uniforms
     });
   }
 
@@ -369,20 +380,6 @@ export default class ExtrudedChoroplethLayer extends Layer {
     function drawRectangle(i) {
       return quad.map(v => i + v[0] + stride * v[1] + offset);
     }
-  }
-
-  onHover(info) {
-    const {index} = info;
-    const {data} = this.props;
-    const feature = data.features[index];
-    this.props.onHover({...info, feature});
-  }
-
-  onClick(info) {
-    const {index} = info;
-    const {data} = this.props;
-    const feature = data.features[index];
-    this.props.onClick({...info, feature});
   }
 }
 

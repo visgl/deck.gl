@@ -20,11 +20,14 @@
 
 import {Layer} from '../../../lib';
 import {assembleShaders} from '../../../shader-utils';
-import {Model, Program, Geometry} from 'luma.gl';
+import {GL, Model, Geometry} from 'luma.gl';
 
 const glslify = require('glslify');
 
 export default class ScreenGridLayer extends Layer {
+
+  static layerName = 'ScreenGridLayer';
+
   /**
    * @classdesc
    * ScreenGridLayer
@@ -55,18 +58,14 @@ export default class ScreenGridLayer extends Layer {
 
     const {gl} = this.context;
     this.setState({model: this.getModel(gl)});
-
-    this.updateCell();
   }
 
-  willReceiveProps(oldProps, newProps) {
-    super.willReceiveProps(oldProps, newProps);
-
+  updateState({oldProps, props, changeFlags}) {
     const cellSizeChanged =
-      newProps.unitWidth !== oldProps.unitWidth ||
-      newProps.unitHeight !== oldProps.unitHeight;
+      props.unitWidth !== oldProps.unitWidth ||
+      props.unitHeight !== oldProps.unitHeight;
 
-    if (cellSizeChanged || this.state.viewportChanged) {
+    if (cellSizeChanged || changeFlags.viewportChanged) {
       this.updateCell();
     }
   }
@@ -74,18 +73,23 @@ export default class ScreenGridLayer extends Layer {
   draw(uniforms) {
     const {minColor, maxColor} = this.props;
     const {model, cellScale, maxCount} = this.state;
+    const {gl} = this.context;
+    const depthWriteMask = gl.getParameter(GL.DEPTH_WRITEMASK);
+    gl.depthMask(true);
     model.render({...uniforms, minColor, maxColor, cellScale, maxCount});
+    gl.depthMask(depthWriteMask);
   }
 
   getModel(gl) {
     return new Model({
+      gl,
       id: this.props.id,
-      program: new Program(gl, assembleShaders(gl, {
+      ...assembleShaders(gl, {
         vs: glslify('./screen-grid-layer-vertex.glsl'),
         fs: glslify('./screen-grid-layer-fragment.glsl')
-      })),
+      }),
       geometry: new Geometry({
-        drawMode: 'TRIANGLE_FAN',
+        drawMode: GL.TRIANGLE_FAN,
         vertices: new Float32Array([0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0])
       }),
       isInstanced: true

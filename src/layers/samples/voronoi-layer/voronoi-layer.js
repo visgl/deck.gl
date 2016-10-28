@@ -19,7 +19,8 @@
 // THE SOFTWARE.
 import {Layer} from '../../../lib';
 import {assembleShaders} from '../../../shader-utils';
-import {Model, Program, Geometry} from 'luma.gl';
+import {GL, Model, Geometry} from 'luma.gl';
+
 const glslify = require('glslify');
 
 const DEFAULT_COLOR = [255, 0, 255];
@@ -29,6 +30,8 @@ const defaultGetRadius = x => x.radius;
 const defaultGetColor = x => x.color || DEFAULT_COLOR;
 
 export default class VoronoiLayer extends Layer {
+
+  static layerName = 'VoronoiLayer';
   /*
    * @classdesc
    * VoronoiLayer
@@ -57,23 +60,18 @@ export default class VoronoiLayer extends Layer {
     const {gl} = this.context;
     const {attributeManager} = this.state;
 
-    this.setState({
-      model: this.getModel(gl)
-    });
-
     attributeManager.addInstanced({
       instancePositions: {size: 4, update: this.calculateInstancePositions},
       instanceColors: {size: 3, update: this.calculateInstanceColors}
     });
+
+    this.setState({model: this.getModel(gl)});
   }
 
-  didMount() {
-    this.updateUniforms();
-  }
-
-  willReceiveProps(oldProps, newProps) {
-    super.willReceiveProps(oldProps, newProps);
-    this.updateUniforms();
+  updateState({oldProps, props}) {
+    this.setUniforms({
+      radius: this.props.radius
+    });
   }
 
   getModel(gl) {
@@ -94,22 +92,17 @@ export default class VoronoiLayer extends Layer {
     positions = [0, 0, 1, ...positions, 1, 0, 0];
 
     return new Model({
+      gl,
       id: this.props.id,
-      program: new Program(gl, assembleShaders(gl, {
+      ...assembleShaders(gl, {
         vs: glslify('./voronoi-layer-vertex.glsl'),
         fs: glslify('./voronoi-layer-fragment.glsl')
-      })),
+      }),
       geometry: new Geometry({
-        drawMode: 'TRIANGLE_FAN',
+        drawMode: GL.TRIANGLE_FAN,
         positions: new Float32Array(positions)
       }),
       isInstanced: true
-    });
-  }
-
-  updateUniforms() {
-    this.setUniforms({
-      radius: this.props.radius
     });
   }
 

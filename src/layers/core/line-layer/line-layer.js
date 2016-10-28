@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 import {Layer} from '../../../lib';
 import {assembleShaders} from '../../../shader-utils';
-import {GL, Model, Program, Geometry} from 'luma.gl';
+import {GL, Model, Geometry} from 'luma.gl';
 
 const glslify = require('glslify');
 
@@ -30,6 +30,9 @@ const defaultGetTargetPosition = x => x.targetPosition;
 const defaultGetColor = x => x.color || DEFAULT_COLOR;
 
 export default class LineLayer extends Layer {
+
+  static layerName = 'LineLayer';
+
   /**
    * @classdesc
    * LineLayer
@@ -64,40 +67,30 @@ export default class LineLayer extends Layer {
     });
   }
 
-  willReceiveProps(oldProps, nextProps) {
-    super.willReceiveProps(oldProps, nextProps);
-    this.state.model.userData.strokeWidth = nextProps.strokeWidth;
-  }
-
   draw({uniforms}) {
     const {gl} = this.context;
-    const oldStrokeWidth = gl.getParameter(GL.LINE_WIDTH);
-    gl.lineWidth(this.props.strokeWidth || 1);
+    const lineWidth = this.screenToDevicePixels(this.props.strokeWidth);
+    const oldLineWidth = gl.getParameter(GL.LINE_WIDTH);
+    gl.lineWidth(lineWidth);
     this.state.model.render(uniforms);
-    gl.lineWidth(oldStrokeWidth || 1);
+    gl.lineWidth(oldLineWidth);
   }
 
   createModel(gl) {
     const positions = [0, 0, 0, 1, 1, 1];
 
     return new Model({
+      gl,
       id: this.props.id,
-      program: new Program(gl, assembleShaders(gl, {
+      ...assembleShaders(gl, {
         vs: glslify('./line-layer-vertex.glsl'),
         fs: glslify('./line-layer-fragment.glsl')
-      })),
+      }),
       geometry: new Geometry({
-        drawMode: 'LINE_STRIP',
+        drawMode: GL.LINE_STRIP,
         positions: new Float32Array(positions)
       }),
-      isInstanced: true,
-      onBeforeRender() {
-        this.userData.oldStrokeWidth = gl.getParameter(GL.LINE_WIDTH);
-        this.program.gl.lineWidth(this.userData.strokeWidth || 1);
-      },
-      onAfterRender() {
-        this.program.gl.lineWidth(this.userData.oldStrokeWidth || 1);
-      }
+      isInstanced: true
     });
   }
 

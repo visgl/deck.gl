@@ -28,8 +28,6 @@
 //
 
 /* eslint-disable no-try-catch */
-/* eslint-disable no-console */
-/* global console */
 import Layer from './layer';
 import {Viewport} from '../viewport';
 import {log} from './utils';
@@ -44,7 +42,12 @@ export default class LayerManager {
     // Needed to ensure that screen is cleared when no layers are shown
     this.drewLayers = false;
     this.oldContext = {};
-    this.context = {gl, viewport: null, uniforms: {}, viewportChanged: true};
+    this.context = {
+      gl,
+      viewport: null,
+      viewportChanged: true,
+      uniforms: {}
+    };
     Object.seal(this.context);
   }
 
@@ -132,12 +135,15 @@ export default class LayerManager {
       redraw = true;
     }
 
+    if (this.context.viewportChanged) {
+      redraw = true;
+    }
+
     this.drewLayers = false;
     for (const layer of this.layers) {
       redraw = redraw || layer.getNeedsRedraw({clearRedrawFlags});
       this.drewLayers = true;
     }
-
     return redraw;
   }
 
@@ -160,9 +166,10 @@ export default class LayerManager {
     const oldLayerMap = {};
     for (const oldLayer of oldLayers) {
       if (oldLayerMap[oldLayer.id]) {
-        throw new Error('Multipe old layers with same id');
+        log.once(0, `Multipe old layers with same id ${layerName(oldLayer)}`);
+      } else {
+        oldLayerMap[oldLayer.id] = oldLayer;
       }
-      oldLayerMap[oldLayer.id] = oldLayer;
     }
 
     const generatedLayers = [];
@@ -176,10 +183,16 @@ export default class LayerManager {
   _matchSublayers({newLayers, oldLayerMap, generatedLayers}) {
     let error = null;
     for (const newLayer of newLayers) {
+      newLayer.context = this.context;
+
       try {
         // 1. given a new coming layer, find its matching layer
         const oldLayer = oldLayerMap[newLayer.id];
         oldLayerMap[newLayer.id] = null;
+
+        if (oldLayer === null) {
+          log.once(0, `Multipe new layers with same id ${layerName(newLayer)}`);
+        }
 
         // Only transfer state at this stage. We must not generate exceptions
         // until all layers' state have been transferred
@@ -204,7 +217,7 @@ export default class LayerManager {
           });
         }
       } catch (err) {
-        console.error(
+        log.once(0,
           `deck.gl error during matching of ${layerName(newLayer)} ${err}`, err);
         // Save first error
         error = error || err;
@@ -215,11 +228,17 @@ export default class LayerManager {
 
   _transferLayerState(oldLayer, newLayer) {
     const {state, props} = oldLayer;
-    assert(state, 'Matching layer has no state');
-    assert(oldLayer !== newLayer, 'Matching layer is same');
+
+    // sanity check
+    assert(state,
+      'deck.gl sanity check - Matching layer has no state');
+    assert(oldLayer !== newLayer,
+      'deck.gl sanity check - Matching layer is same');
+
     // Move state
     newLayer.state = state;
     state.layer = newLayer;
+
     // Update model layer reference
     if (state.model) {
       state.model.userData.layer = newLayer;
@@ -275,7 +294,7 @@ export default class LayerManager {
           changeFlags: layer.diffProps({}, layer.props, this.context)
         });
       } catch (err) {
-        console.error(
+        log.once(0,
           `deck.gl error during initialization of ${layerName(layer)} ${err}`,
           err);
         // Save first error
@@ -308,7 +327,7 @@ export default class LayerManager {
           changeFlags: layer.diffProps(oldProps, layer.props, this.context)
         });
       } catch (err) {
-        console.error(
+        log.once(0,
           `deck.gl error during update of ${layerName(layer)}`, err);
         // Save first error
         error = err;
@@ -326,7 +345,7 @@ export default class LayerManager {
       try {
         layer.finalizeLayer();
       } catch (err) {
-        console.error(
+        log.once(0,
           `deck.gl error during finalization of ${layerName(layer)}`, err);
         // Save first error
         error = err;
@@ -344,4 +363,3 @@ function layerName(layer) {
   }
   return !layer ? 'null layer' : 'invalid layer';
 }
-

@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 import {Layer} from '../../../lib';
 import {assembleShaders} from '../../../shader-utils';
-import {GL, Model, Program, Geometry} from 'luma.gl';
+import {GL, Model, Geometry} from 'luma.gl';
 
 const glslify = require('glslify');
 
@@ -30,6 +30,9 @@ const defaultGetRadius = x => x.radius;
 const defaultGetColor = x => x.color || DEFAULT_COLOR;
 
 export default class ScatterplotLayer extends Layer {
+
+  static layerName = 'ScatterplotLayer';
+
   /*
    * @classdesc
    * ScatterplotLayer
@@ -67,26 +70,25 @@ export default class ScatterplotLayer extends Layer {
     });
   }
 
-  willReceiveProps(oldProps, newProps) {
-    if (oldProps.drawOutline !== newProps.drawOutline) {
+  updateState({oldProps, props}) {
+    if (oldProps.drawOutline !== props.drawOutline) {
       const {gl} = this.state;
-      const drawMode = newProps.drawOutline ? GL.LINE_LOOP : GL.TRIANGLE_FAN;
+      const drawMode = props.drawOutline ? GL.LINE_LOOP : GL.TRIANGLE_FAN;
       const model = this._getModel(gl, drawMode);
-
       this.state.model = model;
     }
-    super.willReceiveProps(oldProps, newProps);
   }
 
   draw({uniforms}) {
     const {gl} = this.context;
-    const oldStrokeWidth = gl.getParameter(GL.LINE_WIDTH);
-    gl.lineWidth(this.props.strokeWidth || 1);
+    const lineWidth = this.screenToDevicePixels(this.props.strokeWidth);
+    const oldLineWidth = gl.getParameter(GL.LINE_WIDTH);
+    gl.lineWidth(lineWidth);
     this.state.model.render({
       ...uniforms,
       radius: this.props.radius
     });
-    gl.lineWidth(oldStrokeWidth || 1);
+    gl.lineWidth(oldLineWidth);
   }
 
   _getModel(gl, drawMode) {
@@ -104,13 +106,12 @@ export default class ScatterplotLayer extends Layer {
     }
 
     return new Model({
+      gl,
       id: 'scatterplot',
-      program: new Program(gl,
-        assembleShaders(gl, {
-          vs: glslify('./scatterplot-layer-vertex.glsl'),
-          fs: glslify('./scatterplot-layer-fragment.glsl')
-        })
-      ),
+      ...assembleShaders(gl, {
+        vs: glslify('./scatterplot-layer-vertex.glsl'),
+        fs: glslify('./scatterplot-layer-fragment.glsl')
+      }),
       geometry: new Geometry({
         drawMode: drawMode || GL.TRIANGLE_FAN,
         positions: new Float32Array(positions)

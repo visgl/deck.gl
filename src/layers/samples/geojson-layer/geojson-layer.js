@@ -32,6 +32,9 @@ const defaultGetColor = x => x.properties.color || DEFAULT_COLOR;
 // const getTargetPosition = segment => segment[1];
 
 export default class GeoJsonLayer extends Layer {
+
+  static layerName = 'GeoJsonLayer';
+
   /**
    * @classdesc
    * GeoJsonLayer
@@ -59,12 +62,10 @@ export default class GeoJsonLayer extends Layer {
   }
 
   initializeState() {
-    this._breakGeoJsonIntoSublayerProps();
   }
 
-  willReceiveProps(oldProps, newProps) {
-    super.willReceiveProps(oldProps, newProps);
-    if (this.state.dataChanged) {
+  updateState({oldProps, props, changeFlags}) {
+    if (changeFlags.dataChanged) {
       this._breakGeoJsonIntoSublayerProps();
     }
   }

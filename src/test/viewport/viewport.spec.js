@@ -14,23 +14,7 @@ const VIEWPORT_TEST_DATA = [
       bearing: -44.48928121059271,
       pitch: 43.670797287818566
       // altitude: undefined
-    },
-    matrixZoomed: new Float32Array([
-      0.0026987954042851925, -0.001962133916094899, -0.0006838429835624993,
-      -0.0006243811803869903,
-      -0.0026511065661907196, -0.0019974291790276766, -0.0006961441249586642,
-      -0.0006356127560138702,
-      0, 0.0026729567907750607, -0.001022197655402124, -0.0009333151392638683,
-      879.8411865234375, 1610.45068359375, 562.7077026367188, 513.97021484375
-    ]),
-    matrixWorld: new Float32Array([
-      7.816546440124512, -5.682946681976318, -1.9806208610534668,
-      -1.808401107788086,
-      -7.678424835205078, -5.785172939300537, -2.0162487030029297,
-      -1.8409311771392822,
-      0, 7.7417097091674805, -2.9606006145477295, -2.703169345855713,
-      879.8411865234375, 1610.45068359375, 562.7077026367188, 513.97021484375
-    ])
+    }
   }
 ];
 
@@ -51,25 +35,29 @@ test('Viewport#constructor - 0 width/height', t => {
   t.end();
 });
 
-// test('Viewport#projection matrix', t => {
-//   for (const testData of VIEWPORT_TEST_DATA) {
-//     const viewport = new Viewport(testData.mapState);
-//     const projectionMatrix = viewport.getProjectionMatrix();
-
-//     t.ok(mat4.equals(projectionMatrix, testData.matrixZoomed),
-//       'Viewport gets expected matrix');
-//   }
-//   t.end();
-// });
-
-test('Viewport.project#3D', t => {
-  for (const testData of VIEWPORT_TEST_DATA) {
-    const {mapState} = testData;
+test('Viewport.projectFlat', t => {
+  for (const tc of VIEWPORT_TEST_DATA) {
+    const {mapState} = tc;
     const viewport = new Viewport(mapState);
-    const xy = viewport.project([mapState.longitude, mapState.latitude]);
-    const target = [mapState.width / 2, mapState.height / 2];
-    t.comment(`Comparing [${xy}] to [${target}]`);
-    t.ok(vec2.equals(xy, target));
+    const lnglatIn = [tc.mapState.longitude + 5, tc.mapState.latitude + 5];
+    const xy = viewport.projectFlat(lnglatIn);
+    const lnglat = viewport.unprojectFlat(xy);
+    t.comment(`Comparing [${lnglatIn}] to [${lnglat}]`);
+    t.ok(vec2.equals(lnglatIn, lnglat));
   }
   t.end();
 });
+
+
+// test('Viewport.project#3D', t => {
+//   for (const tc of VIEWPORT_TEST_DATA) {
+//     const {mapState} = tc;
+//     const viewport = new Viewport(mapState);
+//     const lnglatIn = [tc.mapState.longitude + 5, tc.mapState.latitude + 5];
+//     const xy = viewport.project(lnglatIn);
+//     const lnglat = viewport.unproject(xy);
+//     t.comment(`Comparing [${lnglatIn}] to [${lnglat}]`);
+//     t.ok(vec2.equals(lnglatIn, lnglat));
+//   }
+//   t.end();
+// });

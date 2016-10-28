@@ -3,14 +3,17 @@ import {assembleShaders} from '../../../shader-utils';
 import earcut from 'earcut';
 import flattenDeep from 'lodash.flattendeep';
 import normalize from 'geojson-normalize';
-import {GL, Model, Program, Geometry} from 'luma.gl';
+import {GL, Model, Geometry} from 'luma.gl';
 
 import extrudePolyline from 'extrude-polyline';
 
 import VERTEX_SHADER from './enhanced-choropleth-layer-vertex';
 import FRAGMENT_SHADER from './enhanced-choropleth-layer-fragment';
 
-export default class ChoroplethLayer extends Layer {
+export default class EnhancedChoroplethLayer extends Layer {
+
+  static layerName = 'EnhancedChoroplethLayer';
+
   /**
    * @classdesc
    * ChoroplethLayer
@@ -64,38 +67,47 @@ export default class ChoroplethLayer extends Layer {
       pickingColors: {update: this.calculatePickingColors, noAlloc: true}
     });
 
-    this.setUniforms({opacity: this.props.opacity});
     this.setState({
       numInstances: 0,
       model: this.getModel(gl)
     });
-
-    this.extractChoropleths();
   }
 
-  willReceiveProps(oldProps, newProps) {
-    super.willReceiveProps(oldProps, newProps);
-
-    const {dataChanged, attributeManager} = this.state;
-    if (dataChanged || oldProps.strokeWidth !== newProps.strokeWidth) {
+  updateState({oldProps, props, changeFlags}) {
+    const {attributeManager} = this.state;
+    if (changeFlags.dataChanged || oldProps.strokeWidth !== props.strokeWidth) {
       this.extractChoropleths();
-
       attributeManager.invalidateAll();
     }
 
-    if (oldProps.opacity !== newProps.opacity) {
-      this.setUniforms({opacity: newProps.opacity});
+    if (oldProps.opacity !== props.opacity) {
+      this.setUniforms({opacity: props.opacity});
     }
+  }
+
+  onHover(info) {
+    const {index} = info;
+    const {data} = this.props;
+    const feature = data.features[index];
+    this.props.onHover({...info, feature});
+  }
+
+  onClick(info) {
+    const {index} = info;
+    const {data} = this.props;
+    const feature = data.features[index];
+    this.props.onClick({...info, feature});
   }
 
   getModel(gl) {
     return new Model({
+      gl,
       id: this.props.id,
-      program: new Program(gl, assembleShaders(gl, {
+      ...assembleShaders(gl, {
         vs: VERTEX_SHADER,
         fs: FRAGMENT_SHADER
-      })),
-      geometry: new Geometry({drawMode: 'TRIANGLES'}),
+      }),
+      geometry: new Geometry({drawMode: GL.TRIANGLES}),
       vertexCount: 0,
       isIndexed: true
     });
@@ -228,19 +240,4 @@ export default class ChoroplethLayer extends Layer {
       );
     }
   }
-
-  onHover(info) {
-    const {index} = info;
-    const {data} = this.props;
-    const feature = data.features[index];
-    this.props.onHover({...info, feature});
-  }
-
-  onClick(info) {
-    const {index} = info;
-    const {data} = this.props;
-    const feature = data.features[index];
-    this.props.onClick({...info, feature});
-  }
-
 }

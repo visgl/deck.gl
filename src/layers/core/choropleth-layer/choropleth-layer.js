@@ -20,7 +20,7 @@
 
 import {Layer} from '../../../lib';
 import {assembleShaders} from '../../../shader-utils';
-import {GL, Model, Program, Geometry} from 'luma.gl';
+import {GL, Model, Geometry} from 'luma.gl';
 
 const glslify = require('glslify');
 
@@ -33,6 +33,9 @@ const DEFAULT_COLOR = [0, 0, 255];
 const defaultGetColor = feature => feature.properties.color;
 
 export default class ChoroplethLayer extends Layer {
+
+  static layerName = 'ChoroplethLayer';
+
   /**
    * @classdesc
    * ChoroplethLayer
@@ -57,9 +60,6 @@ export default class ChoroplethLayer extends Layer {
   initializeState() {
     const {gl} = this.context;
 
-    const model = this.getModel(gl);
-    model.userData.strokeWidth = this.props.strokeWidth;
-
     const {attributeManager} = this.state;
     attributeManager.addDynamic({
       // Primtive attributes
@@ -74,51 +74,63 @@ export default class ChoroplethLayer extends Layer {
     const IndexType = gl.getExtension('OES_element_index_uint') ?
       Uint32Array : Uint16Array;
 
-    this.setUniforms({opacity: this.props.opacity});
     this.setState({
+      model: this.getModel(gl),
       numInstances: 0,
-      IndexType,
-      model
+      IndexType
     });
-
-    this.state.choropleths = extractChoropleths(this.props.data);
   }
 
-  willReceiveProps(oldProps, newProps) {
-    super.willReceiveProps(oldProps, newProps);
-
-    const {dataChanged, attributeManager} = this.state;
-    if (dataChanged) {
-      this.state.choropleths = extractChoropleths(newProps.data);
-
+  updateState({oldProps, props, changeFlags}) {
+    const {attributeManager} = this.state;
+    if (changeFlags.dataChanged) {
+      this.state.choropleths = extractChoropleths(props.data);
       attributeManager.invalidateAll();
     }
 
-    if (oldProps.opacity !== newProps.opacity) {
-      this.setUniforms({opacity: newProps.opacity});
+    if (oldProps.opacity !== props.opacity) {
+      this.setUniforms({opacity: props.opacity});
     }
-    this.state.model.userData.strokeWidth = newProps.strokeWidth || 1;
+  }
+
+  draw({uniforms}) {
+    const {gl} = this.context;
+    const lineWidth = this.screenToDevicePixels(this.props.strokeWidth);
+    const oldLineWidth = gl.getParameter(GL.LINE_WIDTH);
+    gl.lineWidth(lineWidth);
+    this.state.model.render(uniforms);
+    gl.lineWidth(oldLineWidth);
+  }
+
+  onHover(info) {
+    const {color} = info;
+    const index = color[0] + color[1] * 256 + color[2] * 256 * 256 - 1;
+    const {data} = this.props;
+    const feature = data.features[index];
+    this.props.onHover({...info, feature});
+  }
+
+  onClick(info) {
+    const {color} = info;
+    const index = color[0] + color[1] * 256 + color[2] * 256 * 256 - 1;
+    const {data} = this.props;
+    const feature = data.features[index];
+    this.props.onClick({...info, feature});
   }
 
   getModel(gl) {
     return new Model({
+      gl,
       id: this.props.id,
-      program: new Program(gl, assembleShaders(gl, {
+      ...assembleShaders(gl, {
         vs: glslify('./choropleth-layer-vertex.glsl'),
         fs: glslify('./choropleth-layer-fragment.glsl')
-      })),
+      }),
       geometry: new Geometry({
-        drawMode: this.props.drawContour ? 'LINES' : 'TRIANGLES'
+        drawMode: this.props.drawContour ? GL.LINES : GL.TRIANGLES
       }),
       vertexCount: 0,
-      isIndexed: true,
-      onBeforeRender() {
-        this.userData.oldStrokeWidth = gl.getParameter(GL.LINE_WIDTH);
-        this.program.gl.lineWidth(this.userData.strokeWidth);
-      },
-      onAfterRender() {
-        this.program.gl.lineWidth(this.userData.oldStrokeWidth);
-      }
+      isIndexed: true
     });
   }
 
@@ -192,23 +204,6 @@ export default class ChoroplethLayer extends Layer {
 
     attribute.value = new Float32Array(flattenDeep(colors));
   }
-
-  onHover(info) {
-    const {color} = info;
-    const index = color[0] + color[1] * 256 + color[2] * 256 * 256 - 1;
-    const {data} = this.props;
-    const feature = data.features[index];
-    this.props.onHover({...info, feature});
-  }
-
-  onClick(info) {
-    const {color} = info;
-    const index = color[0] + color[1] * 256 + color[2] * 256 * 256 - 1;
-    const {data} = this.props;
-    const feature = data.features[index];
-    this.props.onClick({...info, feature});
-  }
-
 }
 
 /*

@@ -125,12 +125,12 @@ export default class Viewport {
    */
   @autobind
   project(lngLatZ, {topLeft = true} = {}) {
-    this._precomputePixelProjectionMatrices();
     const [X, Y] = this.mercatorEnabled || this.mercator ?
       this.projectFlat(lngLatZ) : lngLatZ;
     const v = [X, Y, lngLatZ[2] || 0, 1];
 
     // vec4.sub(v, v, [this.centerX, this.centerY, 0, 0]);
+    this._precomputePixelProjectionMatrices();
     vec4.transformMat4(v, v, this._pixelProjectionMatrix);
     // Divide by w
     const scale = 1 / v[3];
@@ -150,12 +150,14 @@ export default class Viewport {
    */
   @autobind
   unproject(xyz, {topLeft = true} = {}) {
-    this._precomputePixelProjectionMatrices();
     const [x = 0, y = 0, z = 0] = xyz;
     // const y2 = topLeft ? this.height - 1 - y : y;
     const y2 = topLeft ? this.height - y : y;
     const v = [x, y2, z, 1];
+    this._precomputePixelProjectionMatrices();
     vec4.transformMat4(v, v, this._pixelUnprojectionMatrix);
+    const scale = 1 / v[3];
+    vec4.multiply(v, v, [scale, scale, scale, scale]);
     const [x0, y0] = this.unprojectFlat(v);
     const [, , z0] = v;
     return xyz.length === 2 ? [x0, y0] : [x0, y0, z0];
