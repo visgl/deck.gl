@@ -12,7 +12,7 @@ import {
 } from '../..';
 
 import {
-  PointCloudLayer, EnhancedChoroplethLayer, HexagonLayer, EnhancedHexagonLayer
+  EnhancedChoroplethLayer, GeoJsonLayer
 } from '../../samples';
 
 import Viewport2 from '../../viewport';
@@ -33,10 +33,8 @@ test('Top-level imports', t0 => {
   });
 
   t0.test('import "deck.gl/samples"', t => {
-    t.ok(PointCloudLayer, 'PointCloudLayer symbol imported');
-    t.ok(HexagonLayer, 'HexagonLayer symbol imported');
     t.ok(EnhancedChoroplethLayer, 'EnhancedChoroplethLayer symbol imported');
-    t.ok(EnhancedHexagonLayer, 'EnhancedHexagonLayer symbol imported');
+    t.ok(GeoJsonLayer, 'GeoJsonLayer symbol imported');
     t.end();
   });
 
