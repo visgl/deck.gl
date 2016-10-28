@@ -22,10 +22,12 @@ All notable changes to deck.gl will be documented in this file.
 
 ### Beta-3.0.0 Releases
 
-#### [dev] -
-- FIX: New fix for context.viewport initialization order
+#### [v3.0.0-beta26] -
+- FEATURE: line width now takes device pixel ratio into account
+- FEATURE: New life cycle methods, old methods deprecated
+- FIX: Fix for context.viewport initialization order
 - FIX: `DeckGL` component now cancels animation loop on unmount.
-- BREAKING: Removed `blending` prop from react components.
+- BREAKING: Removed `blending` prop from react components
 
 
 #### [v3.0.0-beta25] -
