@@ -14,13 +14,14 @@ Ref: http://keepachangelog.com/en/0.3.0/
 ### Change Log
 All notable changes to deck.gl will be documented in this file.
 
-#### [Ongoing]
-- Tutorials of using deck.gl
-- FIX: ScreenGridLayer
-- FEATURE: ScreenGridLayer now have accessors (getPosition, getWeight) and custom
-    color ramps (minColor, maxColor)
-
 ### Beta-3.0.0 Releases
+
+#### [v3.0.0-beta27] -
+- BREAKING CHANGE: Picking API final version. Fixes #115. Fixes #116.
+- FIX: Ignore null layers
+- FIX: Warns once instead of throws on deprecated props.
+- FIX: Pinned babel-plugin-glslify version to avoid broken release
+- Remove broken layers (HexagonLayer and PointCloudLayer).
 
 #### [v3.0.0-beta26] -
 - FEATURE: line width now takes device pixel ratio into account
@@ -28,7 +29,9 @@ All notable changes to deck.gl will be documented in this file.
 - FIX: Fix for context.viewport initialization order
 - FIX: `DeckGL` component now cancels animation loop on unmount.
 - BREAKING: Removed `blending` prop from react components
-
+- FIX: ScreenGridLayer
+- FEATURE: ScreenGridLayer now have accessors (getPosition, getWeight) and custom
+    color ramps (minColor, maxColor)
 
 #### [v3.0.0-beta25] -
 - FEATURE: Adds drawOutline option to ScatterplotLayer.
