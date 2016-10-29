@@ -23,6 +23,9 @@ All notable changes to deck.gl will be documented in this file.
 - FIX: Pinned babel-plugin-glslify version to avoid broken release
 - Remove broken layers (HexagonLayer and PointCloudLayer).
 
+#### [v3.0.0-beta27] - Broken
+- npm publish failed, no dist
+
 #### [v3.0.0-beta26] -
 - FEATURE: line width now takes device pixel ratio into account
 - FEATURE: New life cycle methods, old methods deprecated

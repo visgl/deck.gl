@@ -2,7 +2,7 @@
   "name": "deck.gl",
   "description": "A suite of 3D-enabled data visualization overlays, suitable for react-map-gl",
   "license": "MIT",
-  "version": "3.0.0-beta27",
+  "version": "3.0.0-beta28",
   "keywords": [
     "webgl",
     "visualization",
@@ -96,7 +96,7 @@
     "build-script": "browserify src/bundle.js -t babelify -t glslify | uglifyjs > dist/deckgl.min.js",
     "lint": "eslint src",
     "precommit": "npm test",
-    "publish-deckgl": "npm run build && npm run test-fast && npm publish",
+    "mypublish": "npm run build && npm run test-fast && npm publish",
     "test": "npm run lint && npm run build && npm run test-headless",
     "test-fast": "npm run lint && npm run test-headless",
     "test-headless": "node dist/test/headless.js",
