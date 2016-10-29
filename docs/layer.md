@@ -10,7 +10,7 @@ a a couple of support methods which the lifecycle methods can use. These are
 important only when subclassing layers and are therefore described separetely.
 
 
-## `Layer` Properties
+## Layer Properties
 
 
 ### `id` (string, optional): layer id
@@ -233,3 +233,10 @@ This allows an application to supply its own buffers properties.
 If attributes are shared between layers, a useful technique is to create
 a separate AttributeManager and calculate the attributes once, and then
 pass them in as "overrides" to the layers.
+
+
+## Layer Methods
+
+Note: Layer methods are designed to support the creation of new layers through
+layer subclassing and are not intended to be called by applications.
+Layer methods are therefore documented in the article about custom layers.

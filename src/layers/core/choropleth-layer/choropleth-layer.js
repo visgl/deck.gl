@@ -102,20 +102,11 @@ export default class ChoroplethLayer extends Layer {
     gl.lineWidth(oldLineWidth);
   }
 
-  onHover(info) {
-    const {color} = info;
-    const index = color[0] + color[1] * 256 + color[2] * 256 * 256 - 1;
-    const {data} = this.props;
-    const feature = data.features[index];
-    this.props.onHover({...info, feature});
-  }
-
-  onClick(info) {
-    const {color} = info;
-    const index = color[0] + color[1] * 256 + color[2] * 256 * 256 - 1;
-    const {data} = this.props;
-    const feature = data.features[index];
-    this.props.onClick({...info, feature});
+  pickInfo(info) {
+    const index = this.decodePickingColor(info.color);
+    const feature = this.props.data.features[index];
+    info.feature = feature;
+    info.object = feature;
   }
 
   getModel(gl) {

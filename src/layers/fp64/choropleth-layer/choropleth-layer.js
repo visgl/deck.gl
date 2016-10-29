@@ -104,20 +104,11 @@ export default class ChoroplethLayer64 extends Layer {
     gl.lineWidth(oldLineWidth);
   }
 
-  onHover(info) {
-    const {color} = info;
-    const index = color[0] + color[1] * 256 + color[2] * 256 * 256 - 1;
-    const {data} = this.props;
-    const feature = data.features[index];
-    this.props.onHover({...info, feature});
-  }
-
-  onClick(info) {
-    const {color} = info;
-    const index = color[0] + color[1] * 256 + color[2] * 256 * 256 - 1;
-    const {data} = this.props;
-    const feature = data.features[index];
-    this.props.onClick({...info, feature});
+  pickInfo(info) {
+    const index = this.decodePickingColor(info.color);
+    const feature = this.props.data.features[index];
+    info.feature = feature;
+    info.object = feature;
   }
 
   getModel(gl) {
@@ -217,10 +208,9 @@ export default class ChoroplethLayer64 extends Layer {
     const colors = this.state.choropleths.map(
       (choropleth, choroplethIndex) => {
         const {featureIndex} = choropleth;
-        const color = this.props.drawContour ? [-1, -1, -1] : [
-          (featureIndex + 1) % 256,
-          Math.floor((featureIndex + 1) / 256) % 256,
-          Math.floor((featureIndex + 1) / 256 / 256) % 256];
+        const color = this.props.drawContour ?
+          this.nullPickingColor() :
+          this.encodePickingColor(featureIndex);
         return choropleth.map(polygon =>
           polygon.map(vertex => color)
         );

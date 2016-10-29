@@ -32,7 +32,7 @@ import Layer from './layer';
 import {Viewport} from '../viewport';
 import {log} from './utils';
 import assert from 'assert';
-import {pickModels} from './pick-models';
+import {pickLayers} from './pick-layers';
 
 export default class LayerManager {
   constructor({gl}) {
@@ -88,6 +88,9 @@ export default class LayerManager {
   }
 
   updateLayers({newLayers}) {
+    // Filter out any null layers
+    newLayers = newLayers.filter(newLayer => Boolean(newLayer));
+
     for (const layer of newLayers) {
       layer.context = this.context;
     }
@@ -115,12 +118,11 @@ export default class LayerManager {
     return this;
   }
 
-  pickLayer({x, y, pixelRatio, type}) {
+  pickLayer({x, y, type}) {
     const {gl, uniforms} = this.context;
-    return pickModels(gl, {
+    return pickLayers(gl, {
       x,
       y,
-      pixelRatio,
       uniforms,
       layers: this.layers,
       type
@@ -181,6 +183,9 @@ export default class LayerManager {
 
   /* eslint-disable max-statements */
   _matchSublayers({newLayers, oldLayerMap, generatedLayers}) {
+    // Filter out any null layers
+    newLayers = newLayers.filter(newLayer => Boolean(newLayer));
+
     let error = null;
     for (const newLayer of newLayers) {
       newLayer.context = this.context;

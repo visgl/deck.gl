@@ -4,23 +4,26 @@
 ## Notes on WebGL buffer management
 
 deck.gl layers were designed with "data flow architectures" like React in mind.
-The challenge is of course that in the react model, every change to application
-state causes a full rerender, while in WebGL, potentially huge memory buffers
-describing the geometry (so called vertex attribute, or just attributes) must
-be prepared in advance of any draw calls.
+The challenge is of course that in the "reactive" model, every change to
+application state causes a full rerender, while in WebGL, potentially
+huge memory buffers describing the geometry (so called "vertex attributes",
+or just "attributes" for short) must be prepared in advance of any draw calls.
 
-Obviously, creating new WebGL buffers before every draw call would quickly lead
+Ccreating new WebGL buffers before every draw call would quickly lead
 to unacceptable performance. Just like in React (which "renders" to the
-browser's DOM) the challenge becomes to detect exactly what changes were made
-to each layer's properties and then limit both attribute recalculation and
-rerendering as appropriate.
+browser's slow-updating DOM) the challenge becomes to detect exactly what
+changes were made to each layer's properties and then limit both attribute
+recalculation and rerendering to the minimum needed to ensure that the
+next draw cycle correctly reflects the changes.
 
-When you have a couple of 100K element WebGL buffers to update,
-this can become quite expensive unless change detection is well managed.
-
-While it is possible for a layer to use custom code to manage attribute
-updates, it is such a common use case that deck.gl provides an
+Since the length of attributes are usually proportional of to the number of
+data elements being visualized (hundreds of thousands or even millions of
+elements are not uncommon in big data visualizations), efficient attribute
+updates is critical. It is such an important use case that deck.gl provides an
 `AttributeManager` class to simplify layer creation.
+
+Note that it is possible for a layer to use custom code to manage attribute
+updates, however most layers rely on the AttributeManager class.
 
 
 ## About Automatic Attribute Generation
@@ -45,6 +48,7 @@ that data array (or iterable) and fill in the attribute's typed array.
 Note that the attribute manager intentionally does not do advanced
 change detection, but instead makes it easy to build such detection
 by offering the ability to "invalidate" each attribute separately.
+
 
 ### Accessors, Shallow Comparisons and updateTriggers
 

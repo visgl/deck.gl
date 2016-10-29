@@ -83,6 +83,7 @@ export function assembleShaders(gl, {
   ...opts
 }) {
   return {
+    gl,
     vs: assembleShader(gl, {...opts, vs}),
     fs
   };
