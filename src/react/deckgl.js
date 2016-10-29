@@ -97,15 +97,13 @@ export default class DeckGL extends React.Component {
   // Route events to layers
   @autobind _onClick(event) {
     const {x, y} = event;
-    const {pixelRatio} = this.props;
-    this.layerManager.pickLayer({x, y, pixelRatio, type: 'click'});
+    this.layerManager.pickLayer({x, y, type: 'click'});
   }
 
   // Route events to layers
   @autobind _onMouseMove(event) {
     const {x, y} = event;
-    const {pixelRatio} = this.props;
-    this.layerManager.pickLayer({x, y, pixelRatio, type: 'hover'});
+    this.layerManager.pickLayer({x, y, type: 'hover'});
   }
 
   @autobind _onRenderFrame({gl}) {

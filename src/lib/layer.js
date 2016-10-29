@@ -153,22 +153,14 @@ export default class Layer {
     return null;
   }
 
-  // VIRTUAL METHOD - Override to add or modify `info` object in sublayer
+  // VIRTUAL METHOD - Override to add props to `info` object in sublayer
   // The sublayer may know what object e.g. lat,lon corresponds to using math
-  // etc even when picking does not work
-  onGetHoverInfo(info) {
-    // If props.data is an indexable array, get the object
-    if (Array.isArray(this.props.data)) {
-      info.object = this.props.data[info.index];
-    }
-    info.pixel = [info.x, info.y];
-    info.lngLat = this.unproject(info.pixel);
-    // Backwards compatibility...
-    info.geoCoords = {lat: info.lngLat[1], lon: info.lngLat[0]};
-    return info;
+  // etc even when color picking does not work
+  pickInfo(info) {
   }
 
-  onHover(info) {
+  // Undocumented/Unsupported lifecycle method - called on hover
+  hover(info) {
     const {color} = info;
 
     // TODO - selectedPickingColor should be removed?
@@ -178,12 +170,11 @@ export default class Layer {
     selectedPickingColor[2] = color[2];
     this.setUniforms({selectedPickingColor});
 
-    info = this.onGetHoverInfo(info);
     return this.props.onHover(info);
   }
 
-  onClick(info) {
-    info = this.onGetHoverInfo(info);
+  // Undocumented/Unsupported lifecycle method - called on click
+  click(info) {
     return this.props.onClick(info);
   }
 
@@ -204,43 +195,7 @@ export default class Layer {
     }
   }
 
-  // Checks state of attributes and model
-  // TODO - is attribute manager needed? - Model should be enough.
-  getNeedsRedraw({clearRedrawFlags = false} = {}) {
-    // this method may be called by the render loop as soon a the layer
-    // has been created, so guard against uninitialized state
-    if (!this.state) {
-      return false;
-    }
-
-    const {attributeManager, model} = this.state;
-    let redraw = false;
-    redraw = redraw || this.state.needsRedraw;
-    this.state.needsRedraw = this.state.needsRedraw && !clearRedrawFlags;
-
-    redraw = redraw || attributeManager.getNeedsRedraw({clearRedrawFlags});
-    redraw = redraw || (model && model.getNeedsRedraw({clearRedrawFlags}));
-    return redraw;
-  }
-
-  // Updates selected state members and marks the object for redraw
-  setUniforms(uniformMap) {
-    if (this.state.model) {
-      this.state.model.setUniforms(uniformMap);
-    }
-    // TODO - set needsRedraw on the model?
-    this.state.needsRedraw = true;
-    log(3, 'layer.setUniforms', uniformMap);
-  }
-
-  // Use iteration (the only required capability on data) to get first element
-  getFirstObject() {
-    const {data} = this.props;
-    for (const object of data) {
-      return object;
-    }
-    return null;
-  }
+  // PROJECTION METHODS
 
   /**
    * Projects a point with current map state (lat, lon, zoom, pitch, bearing)
@@ -272,6 +227,70 @@ export default class Layer {
     const {viewport} = this.context;
     assert(Array.isArray(xy), 'Layer.unproject needs [x,y]');
     return viewport.unprojectFlat(xy);
+  }
+
+  screenToDevicePixels(screenPixels) {
+    const devicePixelRatio = typeof window !== 'undefined' ?
+      window.devicePixelRatio : 1;
+    return screenPixels * devicePixelRatio;
+  }
+
+  /**
+   * Returns the picking color that doesn't match any subfeature
+   * Use if some graphics do not belong to any pickable subfeature
+   * @return {Number[3]} - a black color
+   */
+  nullPickingColor() {
+    return [0, 0, 0];
+  }
+
+  /**
+   * Returns the picking color that doesn't match any subfeature
+   * Use if some graphics do not belong to any pickable subfeature
+   * @return {Number[3]} - a black color
+   */
+  encodePickingColor(i) {
+    return [
+      (i + 1) % 256,
+      Math.floor((i + 1) / 256) % 256,
+      Math.floor((i + 1) / 256 / 256) % 256
+    ];
+  }
+
+  /**
+   * Returns the picking color that doesn't match any subfeature
+   * Use if some graphics do not belong to any pickable subfeature
+   * @return {Number[3]} - a black color
+   */
+  decodePickingColor(color) {
+    assert(color instanceof Uint8Array);
+    const [i1, i2, i3] = color;
+    // 1 was added to seperate from no selection
+    const index = i1 + i2 * 256 + i3 * 65536 - 1;
+    return index;
+  }
+
+  calculateInstancePickingColors(attribute, {numInstances}) {
+    const {value, size} = attribute;
+    // add 1 to index to seperate from no selection
+    for (let i = 0; i < numInstances; i++) {
+      const pickingColor = this.encodePickingColor(i);
+      value[i * size + 0] = pickingColor[0];
+      value[i * size + 1] = pickingColor[1];
+      value[i * size + 2] = pickingColor[2];
+    }
+  }
+
+  // DATA ACCESS API
+  // Data can use iterators and may not be random access
+
+  // Use iteration (the only required capability on data) to get first element
+  getFirstObject() {
+    const {data} = this.props;
+    for (const object of data) {
+      return object;
+    }
+    return null;
   }
 
   // INTERNAL METHODS
@@ -314,39 +333,6 @@ export default class Layer {
     }
 
     throw new Error('Could not deduce numInstances');
-  }
-
-  screenToDevicePixels(screenPixels) {
-    const devicePixelRatio = typeof window !== 'undefined' ?
-      window.devicePixelRatio : 1;
-    return screenPixels * devicePixelRatio;
-  }
-
-  calculateInstancePickingColors(attribute, {numInstances}) {
-    const {value, size} = attribute;
-    // add 1 to index to seperate from no selection
-    for (let i = 0; i < numInstances; i++) {
-      const pickingColor = this.encodePickingColor(i);
-      value[i * size + 0] = pickingColor[0];
-      value[i * size + 1] = pickingColor[1];
-      value[i * size + 2] = pickingColor[2];
-    }
-  }
-
-  decodePickingColor(color) {
-    assert(color instanceof Uint8Array);
-    const [i1, i2, i3] = color;
-    // 1 was added to seperate from no selection
-    const index = i1 + i2 * 256 + i3 * 65536 - 1;
-    return index;
-  }
-
-  encodePickingColor(i) {
-    return [
-      (i + 1) % 256,
-      Math.floor((i + 1) / 256) % 256,
-      Math.floor((i + 1) / 256 / 256) % 256
-    ];
   }
 
   // LAYER MANAGER API
@@ -462,11 +448,11 @@ export default class Layer {
     // End lifecycle method
   }
 
-  pickLayer(uniforms = {}) {
+  pickLayer({uniforms = {}, ...opts}) {
     const viewportUniforms = this.context.viewport.getUniforms(this.props);
     uniforms = {...uniforms, ...viewportUniforms, renderPickingBuffer: true};
     // Call subclass lifecycle method
-    return this.pick(uniforms);
+    return this.pick({uniforms, ...opts});
     // End lifecycle method
   }
 
@@ -494,10 +480,23 @@ export default class Layer {
     };
   }
 
-  // DEPRECATED METHODS
-  // shouldUpdate() {}
+  // Checks state of attributes and model
+  // TODO - is attribute manager needed? - Model should be enough.
+  getNeedsRedraw({clearRedrawFlags = false} = {}) {
+    // this method may be called by the render loop as soon a the layer
+    // has been created, so guard against uninitialized state
+    if (!this.state) {
+      return false;
+    }
 
-  willReceiveProps() {
+    const {attributeManager, model} = this.state;
+    let redraw = false;
+    redraw = redraw || this.state.needsRedraw;
+    this.state.needsRedraw = this.state.needsRedraw && !clearRedrawFlags;
+
+    redraw = redraw || attributeManager.getNeedsRedraw({clearRedrawFlags});
+    redraw = redraw || (model && model.getNeedsRedraw({clearRedrawFlags}));
+    return redraw;
   }
 
   // PRIVATE METHODS
@@ -556,29 +555,6 @@ export default class Layer {
     }
   }
 
-  _validateDeprecatedProps() {
-    if (this.props.isPickable !== undefined) {
-      log.once(0, 'No isPickable prop in deckgl v3 - use pickable instead');
-    }
-
-    // TODO - inject viewport from overlay instead of creating for each layer?
-    const hasViewportProps =
-      this.props.width !== undefined ||
-      this.props.height !== undefined ||
-      this.props.latitude !== undefined ||
-      this.props.longitude !== undefined ||
-      this.props.zoom !== undefined ||
-      this.props.pitch !== undefined ||
-      this.props.bearing !== undefined;
-    if (hasViewportProps) {
-      /* eslint-disable no-console */
-      // /* global console */
-      log.once(0,
-        `deck.gl v3 no longer needs viewport props in Layer ${this}`);
-    }
-  }
-  /* eslint-enable max-statements */
-
   // Calls attribute manager to update any WebGL attributes
   _updateAttributes(props) {
     const {attributeManager, model} = this.state;
@@ -604,5 +580,43 @@ export default class Layer {
       opacity: Math.pow(this.props.opacity, 1 / 2.2),
       ONE: 1.0
     });
+  }
+
+  // DEPRECATED METHODS
+  // shouldUpdate() {}
+
+  willReceiveProps() {
+  }
+
+  // Updates selected state members and marks the object for redraw
+  setUniforms(uniformMap) {
+    if (this.state.model) {
+      this.state.model.setUniforms(uniformMap);
+    }
+    // TODO - set needsRedraw on the model?
+    this.state.needsRedraw = true;
+    log(3, 'layer.setUniforms', uniformMap);
+  }
+
+  _validateDeprecatedProps() {
+    if (this.props.isPickable !== undefined) {
+      log.once(0, 'No isPickable prop in deckgl v3 - use pickable instead');
+    }
+
+    // TODO - inject viewport from overlay instead of creating for each layer?
+    const hasViewportProps =
+      this.props.width !== undefined ||
+      this.props.height !== undefined ||
+      this.props.latitude !== undefined ||
+      this.props.longitude !== undefined ||
+      this.props.zoom !== undefined ||
+      this.props.pitch !== undefined ||
+      this.props.bearing !== undefined;
+    if (hasViewportProps) {
+      /* eslint-disable no-console */
+      // /* global console */
+      log.once(0,
+        `deck.gl v3 no longer needs viewport props in Layer ${this}`);
+    }
   }
 }

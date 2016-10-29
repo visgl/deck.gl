@@ -1,14 +1,12 @@
-// TODO - this is the new picking for deck.gl
-/* eslint-disable max-statements, no-try-catch */
+/* global window */
 import {GL, glContextWithState, FramebufferObject} from 'luma.gl';
 
-/* eslint-disable max-depth */
-export function pickModels(gl, {
+/* eslint-disable max-depth, max-statements */
+export function pickLayers(gl, {
   layers,
   uniforms = {},
   x,
   y,
-  pixelRatio,
   type
 }) {
   // Set up a frame buffer if needed
@@ -20,6 +18,8 @@ export function pickModels(gl, {
 
   // Convert from canvas top-left to WebGL bottom-left coordinates
   // And compensate for pixelRatio
+  const pixelRatio = typeof window !== 'undefined' ?
+    window.devicePixelRatio : 1;
   const deviceX = x * pixelRatio;
   const deviceY = gl.canvas.height - y * pixelRatio;
 
@@ -28,7 +28,7 @@ export function pickModels(gl, {
 
   // Make sure we clear scissor test and fbo bindings in case of exceptions
   // We are only interested in one pixel, no need to render anything else
-  glContextWithState(gl, {
+  return glContextWithState(gl, {
     frameBuffer: pickingFBO,
     framebuffer: pickingFBO,
     scissorTest: {x: deviceX, y: deviceY, w: 1, h: 1}
@@ -48,17 +48,36 @@ export function pickModels(gl, {
         });
         if (info) {
           // Assign potentially useful props to the "info" object
+
+          const pixel = [x, y];
+          const devicePixel = [deviceX, deviceY];
+          const lngLat = layer.unproject(pixel);
+
           Object.assign(info, {
             layer,
             x,
             y,
             deviceX,
             deviceY,
-            pixelRatio
+            pixel,
+            devicePixel,
+            pixelRatio,
+            lngLat,
+            // Backwards compatibility...
+            geoCoords: {lon: lngLat[0], lng: lngLat[0], lat: lngLat[1]}
           });
+
+          // Give layer a chance to add details and modify index
+          layer.pickInfo(info);
+
+          // If props.data is an indexable array, get the object
+          if (Array.isArray(layer.props.data)) {
+            info.object = layer.props.data[info.index];
+          }
+
           switch (type) {
-          case 'click': layer.onClick(info); break;
-          case 'hover': layer.onHover(info); break;
+          case 'click': layer.click(info); break;
+          case 'hover': layer.hover(info); break;
           default: throw new Error('unknown pick type');
           }
           value = info;
@@ -67,8 +86,6 @@ export function pickModels(gl, {
       }
     }
     return null;
-  });
-
-  return value;
+  }) || value;
 }
-/* eslint-enable max-depth */
+/* eslint-enable max-depth, max-statements */

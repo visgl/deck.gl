@@ -35,7 +35,7 @@ export default class ExtrudedChoroplethLayer64 extends Layer {
 
   /**
    * @classdesc
-   * BuildingLayer
+   * Elevated Choropleth
    *
    * @class
    * @param {object} props
@@ -114,18 +114,11 @@ export default class ExtrudedChoroplethLayer64 extends Layer {
     });
   }
 
-  onHover(info) {
-    const {index} = info;
-    const {data} = this.props;
-    const feature = data.features[index];
-    this.props.onHover({...info, feature});
-  }
-
-  onClick(info) {
-    const {index} = info;
-    const {data} = this.props;
-    const feature = data.features[index];
-    this.props.onClick({...info, feature});
+  pickInfo(info) {
+    const index = this.decodePickingColor(info.color);
+    const feature = this.props.data.features[index];
+    info.feature = feature;
+    info.object = feature;
   }
 
   getModel(gl) {

@@ -91,6 +91,27 @@ learning more about those frameworks can be helpful as a way to get a
 better understanding of how to use these concepts in the best way.
 
 
+## Implementing Picking
+
+Picking can be controlled by leveraging or overriding two
+lifecycle functions, `pick` and `getPickInfo`.
+
+To take full control of picking, override `pick`. To leverage the
+built-in picking while adding layer specific selection information, override
+`getPickInfo`.
+
+Technical Note: The default picking implementation uses picking colors.
+The layer is rendered
+with a special uniform set to 1, which causes it to render into a
+off-screen framebuffer using `pickingColor` or `instancePickingColor`
+attributes instead of using
+its normal color calculation.
+
+
+See `Layer.encodePickingColor
+
+
+
 ## Defining your vertex attributes.
 
 See the separate article on Attribute Managemement.
@@ -119,3 +140,100 @@ to import the `project` package in your shader file and the functions will be
 made available to your shader.
 
 
+## Layer Methods
+
+Layer methods are designed to support the creation of new layers through
+layer subclassing and are not intended to be called by applications.
+
+## General Methods
+
+
+### Layer.setState()
+
+Used to update the layers state object, which allows a layer to store
+information that will be available to the next matching layer.
+
+
+## Layer Projection Methods
+
+While most projection is handled "automatically" in the layers vertex
+shader, it is occasionally useful to be able to work in the projected
+coordinates in JavaScript while calculating uniforms etc.
+
+
+### Layer.project(lngLatZ, {topLeft = true})
+
+Projects a map coordinate using the current viewport settings.
+
+
+### Layer.unproject(xyz, {topLeft = true})
+
+Projects a pixel coordinate using the current viewport settings.
+
+
+### Layer.projectFlat(lngLatZ, {topLeft = true})
+
+Projects a map coordinate using the current viewport settings, ignoring any
+perspective tilt. Can be useful to calculate screen space distances.
+
+
+### Layer.unprojectFlat(xyz, {topLeft = true})
+
+Unrojects a pixel coordinate using the current viewport settings, ignoring any
+perspective tilt (meaning that the pixel was projected).
+
+
+### Layer.screenToDevicePixels(pixels: Number)
+
+Simply multiplies `pixels` parameter with `window.devicePixelRatio` if
+available.
+
+Useful to adjust e.g. line widths to get more consistent visuals between
+low and high resolution displays.
+
+
+## Layer Picking Methods
+
+While deck.gl allows applications to implement picking however they want
+(by overriding the `pick` lifecycle method), special support is provided
+for the built-in "picking color" based picking system, which most layers
+use.
+
+
+### Layer.nullPickingColor()
+
+Returns the "null" picking color which is equal the the color of pixels
+not covered by the layer. This color is guaranteed not to match any index value
+greater than or equal to zero.
+
+
+### Layer.encodePickingColor(index : Number)
+
+Returns a color that encodes the supplied "subfeature index" number.
+This color can be decoded later using `Layer.decodePickingColor`.
+
+To get a color that does not correspond to any "subfeature", use
+`Layer.nullPickingColor`.
+
+Notes:
+* indices to be encoded must be integers larger than or equal to 0.
+* Picking colors are 24 bit values and can thus encode up to 16 million indices.
+
+
+### Layer.decodePickingColor(color: Number[3])
+
+Returns the number that was used to encode the supplied picking color.
+See `Layer.encodePickingColor`. The null picking color (See
+`Layer.nullPickingColor`) will be decoded as -1.
+
+Note: The null picking color is returned when a pixel is picked that is not
+covered by the layer, or when they layer has selected to render a pixel
+using the null picking color to make it unpickable.
+
+
+### Layer.calculateInstancePickingColors
+
+A default picking colors attribute generator that is used for most
+instanced layers. It simply sets the picking color of each instance to
+the colors that directly encodes the the index of the instance in the
+`data` property.
