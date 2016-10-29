@@ -546,13 +546,6 @@ export default class Layer {
     return change;
   }
 
-  validateOptionalProp(propertyName, condition) {
-    const value = this.props[propertyName];
-    if (value !== undefined && !condition(value)) {
-      throw new Error(`Bad property ${propertyName} in layer ${this}`);
-    }
-  }
-
   validateRequiredProp(propertyName, condition) {
     const value = this.props[propertyName];
     if (value === undefined) {
@@ -565,7 +558,7 @@ export default class Layer {
 
   _validateDeprecatedProps() {
     if (this.props.isPickable !== undefined) {
-      throw new Error('No isPickable prop in deckgl v3 - use pickable instead');
+      log.once(0, 'No isPickable prop in deckgl v3 - use pickable instead');
     }
 
     // TODO - inject viewport from overlay instead of creating for each layer?
@@ -580,7 +573,7 @@ export default class Layer {
     if (hasViewportProps) {
       /* eslint-disable no-console */
       // /* global console */
-      throw new Error(
+      log.once(0,
         `deck.gl v3 no longer needs viewport props in Layer ${this}`);
     }
   }

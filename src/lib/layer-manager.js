@@ -88,6 +88,9 @@ export default class LayerManager {
   }
 
   updateLayers({newLayers}) {
+    // Filter out any null layers
+    newLayers = newLayers.filter(newLayer => Boolean(newLayer));
+
     for (const layer of newLayers) {
       layer.context = this.context;
     }
@@ -181,6 +184,9 @@ export default class LayerManager {
 
   /* eslint-disable max-statements */
   _matchSublayers({newLayers, oldLayerMap, generatedLayers}) {
+    // Filter out any null layers
+    newLayers = newLayers.filter(newLayer => Boolean(newLayer));
+
     let error = null;
     for (const newLayer of newLayers) {
       newLayer.context = this.context;
