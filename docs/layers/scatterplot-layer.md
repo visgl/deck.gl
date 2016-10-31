@@ -1,8 +1,45 @@
-## Scatterplot Layer
+# Scatterplot Layer
 
-In addition to default layer properties:
+The Scatterplot Layer takes in paride latitude and longitude coordinated points and render them as circles with a certain radius.
 
-* `data` (array, required) array of objects: [{ position, color, radius }, ...]
-* `drawOutline` [boolean, optional, false] only draw outline of dot
-* `radius` [number, optional, default=10] global radius across all markers
-* `strokeWidth` [number, optional, default=1] width of stroke if only drawing outline
+Inherits from all [Base Layer properties](/docs/layer.md).
+
+## Layer-specific Properties
+
+##### `strokeWidth` (Number, optional)
+
+- Default: `1`
+
+Width of stroke if drawing outline.
+
+##### `drawOutline` (Boolean, optional)
+
+- Default: `false`
+
+Only draw outline of dot.
+
+##### `radius` (Number, optional)
+
+- Default: `30`
+
+Global radius across all markers.
+
+##### `getPosition` (Function, optional)
+
+- Default: `object => object.position`
+
+Method called to retrieve the position of each object.
+
+##### `getRadius` (Function, optional)
+
+- Default: `object => object.radius`
+
+Method called to retrieve the radius of each object.
+
+##### `getColor` (Function, optional)
+
+- Default: `object => object.color`
+
+Method called to retrieve the color of each object.
+
+Fallback to `[255, 0, 255]` if the object doesn't have a color property
