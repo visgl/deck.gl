@@ -90,11 +90,6 @@ export default class GeoJsonLayer extends Layer {
         throw new Error(`GeoJsonLayer: ${type} not implemented`);
 
       case 'Polygon':
-        feature.properties.color = [
-          Math.random() * 255,
-          Math.random() * 255,
-          Math.random() * 255
-        ];
         features.push({type: 'FeatureCollection', features: [feature]});
         break;
 

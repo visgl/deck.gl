@@ -151,19 +151,9 @@ export default class LayerManager {
 
   // PRIVATE METHODS
 
+  // Match all layers, checking for caught errors
+  // To avoid having an exception in one layer disrupt other layers
   _updateLayers({oldLayers, newLayers}) {
-    // Match all layers, checking for caught errors
-    // To avoid having an exception in one layer disrupt other layers
-    const {error, generatedLayers} =
-      this._matchLayers(oldLayers, newLayers);
-    const error2 = this._finalizeOldLayers(oldLayers);
-    const error3 = this._updateMatchedLayers(generatedLayers);
-    const error4 = this._initializeNewLayers(generatedLayers);
-    const firstError = error || error2 || error3 || error4;
-    return {error: firstError, generatedLayers};
-  }
-
-  _matchLayers(oldLayers, newLayers) {
     // Create old layer map
     const oldLayerMap = {};
     for (const oldLayer of oldLayers) {
@@ -174,11 +164,20 @@ export default class LayerManager {
       }
     }
 
+    // Allocate array for generated layers
     const generatedLayers = [];
+
+    // Match sublayers
     const error = this._matchSublayers({
       newLayers, oldLayerMap, generatedLayers
     });
-    return {generatedLayers, error};
+
+    const error2 = this._finalizeOldLayers(oldLayers);
+    const firstError = error || error2;
+    return {error: firstError, generatedLayers};
+  }
+
+  _matchLayers(oldLayers, newLayers) {
   }
 
   /* eslint-disable max-statements */
@@ -204,9 +203,9 @@ export default class LayerManager {
         if (oldLayer) {
           log(3, `matched ${layerName(newLayer)}`, oldLayer, '=>', newLayer);
           this._transferLayerState(oldLayer, newLayer);
+        } else {
+          this._initializeNewLayer(newLayer);
         }
-
-        this._initializeNewLayer(newLayer);
         generatedLayers.push(newLayer);
 
         // Call layer lifecycle method: render sublayers
@@ -253,33 +252,14 @@ export default class LayerManager {
     oldLayer.state = null;
   }
 
-  // Note: Layers can't be initialized until gl context is available
-  // Therefore this method can be called repeatedly
-  // This is a hack and should be cleaned up in calling code
-  _initializeNewLayers(layers) {
-    let error = null;
-    for (const layer of layers) {
-      const layerError = this._initializeNewLayer(layer);
-      error = error || layerError;
-    }
-    return error;
-  }
-
-  // Update the matched layers
-  _updateMatchedLayers(newLayers) {
-    let error = null;
-    for (const layer of newLayers) {
-      error = error || this._updateLayer(layer);
-    }
-    return error;
-  }
-
-  // Update the old layers that were matched
+  // Update the old layers that were not matched
   _finalizeOldLayers(oldLayers) {
     let error = null;
     // Unmatched layers still have state, it will be discarded
     for (const layer of oldLayers) {
-      error = error || this._finalizeLayer(layer);
+      if (layer.state) {
+        error = error || this._finalizeLayer(layer);
+      }
     }
     return error;
   }

@@ -97,6 +97,11 @@ const GeoJsonLayerExample = props =>
   new GeoJsonLayer({
     id: props.id || 'geoJsonLayer',
     data: props.choropleths,
+    getColor: x => [
+      Math.random() * 255,
+      Math.random() * 255,
+      Math.random() * 255
+    ],
     opacity: 0.6,
     pickable: true,
     onHover: props.onChoroplethHovered,
