@@ -63,7 +63,11 @@ void main(void) {
 
   vertex_pos_modelspace[0] = mixed_temp[0];
   vertex_pos_modelspace[1] = mixed_temp[1];
-  vertex_pos_modelspace[2] = sqrt_fp64(paraboloid_fp64(projectedSourceCoord, projectedTargetCoord, segmentIndex));
+
+  vec2 vertex_height = paraboloid_fp64(projectedSourceCoord, projectedTargetCoord, segmentIndex);
+  if (vertex_height.x < 0.0 || (vertex_height.x == 0.0 && vertex_height.y <= 0.0)) vertex_height = vec2(0.0, 0.0);
+
+  vertex_pos_modelspace[2] = sqrt_fp64(vertex_height);
   vertex_pos_modelspace[3] = vec2(1.0, 0.0);
 
   gl_Position = project_to_clipspace_fp64(vertex_pos_modelspace);
