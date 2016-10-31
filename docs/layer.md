@@ -9,11 +9,9 @@ The layer class also defines the lifecycle methods of the layers, as well as
 a a couple of support methods which the lifecycle methods can use. These are
 important only when subclassing layers and are therefore described separetely.
 
-
 ## Layer Properties
 
-
-### `id` (string, optional): layer id
+##### `id` (String, optional)
 
 The id must be unique among all your layers. The layer's id defaults to the
 `Layer` class name. If you have more than one instance of the same
@@ -25,53 +23,56 @@ which helps avoid id collisions in this case.
 
 E.g. assuming a composite GeoJsonLayer layer that renders two sublayers,
 choropleths and lines, with those ids:
-```
-   new GeoJsonLayer({id: 'street-grid'});
-```
+
+    new GeoJsonLayer({id: 'street-grid'});
+
 Will generate the following layers and ids:
-```
-   GeoJsonLayer:'street-grid'
-   ChoroplethLayer:'street-grid-choropleth'
-   LineLayer:'street-grid-choropleth'
-```
+
+    GeoJsonLayer: 'street-grid'
+    ChoroplethLayer: 'street-grid-choropleth'
+    LineLayer: 'street-grid-choropleth'
 
 React Note: `id` is similar to the `key` property used in React to match
 components between rendering calls.
 
+##### `viewport` (Viewport, optional)
 
-### `viewport` (Viewport, optional, default=injected from context)
+- Default: Injected from context
 
 Viewport can be supplied to override the context supplied viewport.
 
+##### `pickable` (Boolean, optional)
 
-### `pickable` [bool, optional, default=false]
+- Default: `false`
 
 Whether layer responds to mouse events.
 
+##### `visible` (Boolean, optional)
 
-### `visible` [bool, optional, default=true] whether layer is drawn
+- Default: `true`
+
+Whether layer is drawn.
 
 For performance reasons it is often better to control layer visibility
 with the `visible` prop rather than through conditional rendering.
 
 Compare:
-```
-   const layers = [
-   	 new MyLayer({visible: showMyLayer});
-   ];
-```
+
+    const layers = [
+      new MyLayer({visible: showMyLayer});
+    ];
+
 with
-```
-   const layers = [];
-   if (showMyLayer) {
-   	 new MyLayer({visible: showMyLayer});
-   }
-```
+
+    const layers = [];
+    if (showMyLayer) {
+      new MyLayer({visible: showMyLayer});
+    }
+
 In the second example (conditional rendering) the layer state will
 be destroyed and regenerated every time the showMyLayer flag changes.
 
-
-### `opacity` (number, required)
+##### `opacity` (Number, required)
 
 The opacity of the layer. deck.gl automatically applies gamma to the opacity
 in an attempt to make opacity changes appear linear (i.e. the opacity is
@@ -81,8 +82,7 @@ Note: While it is a recommended convention that all deck.gl layers should
 support the opacity prop, it is up to each layer's fragment shader
 to implement support for opacity.
 
-
-### `projectionMode` (number, optional)
+##### `projectionMode` (Number, optional)
 
 Specifies how layer positions and offsets should be interpreted.
 
@@ -92,8 +92,7 @@ is also possible to interpret positions as meter offsets from the
 
 See the article on Coordinate Systems for details.
 
-
-### `projectionCenter` ([Number, Number], optional)
+##### `projectionCenter` ([Number, Number], optional)
 
 Required when the `projectionMode` is in meter offsets.
 
@@ -101,8 +100,7 @@ Specifies a longitude and a latitude from which meter offsets are calculated.
 
 See the article on Coordinate Systems for details
 
-
-### `viewMatrix` (Number[16], optional)
+##### `viewMatrix` (Number[16], optional)
 
 An optional 4x4 matrix that is premultiplied into the affine projection
 matrices used by shader `project` GLSL function and the Viewport's `project`
@@ -116,8 +114,7 @@ Note that the matrix projection is applied after the non-linear mercator
 projection calculations are resolved, so be careful when using view matrices
 with lng/lat encoded coordinates.
 
-
-### data (Iterable Object or Array, optional)
+##### `data` (Iterable Object or Array, optional)
 
 The data prop should contain an iterable JavaScript container,
 please see JavaScript `[Symbol.iterator]`.
@@ -127,8 +124,7 @@ while e.g. initializing asynchronous data, deck.gl allows data to be
 omitted or supplied as null (or undefined). These cases are treated
 as if an empty array had been supplied.
 
-
-### dataIterator (ES6 Iterator, optional)
+##### `dataIterator` (ES6 Iterator, optional)
 
 Normally the iterator for data is extracted by looking at the
 `[Symbol.iterator]` field of the supplied container. Sometimes
@@ -139,16 +135,14 @@ Note: deck.gl even supplies an object iterator (`makeObjectValueIterator`)
 making it possible to use objects directly as `data` props in deck.gl
 without first converting them to arrays.
 
-```
-   import {ScatterplotLayer, objectValueIterator} from `deck.gl`;
-   new ScatterplotLayer({
-     data: {element1: [0, 0], element2: [1, 1]},
-     dataIterator: makeObjectValueIterator(data)
-   });
-```
 
+    import {ScatterplotLayer, objectValueIterator} from `deck.gl`;
+    new ScatterplotLayer({
+      data: {element1: [0, 0], element2: [1, 1]},
+      dataIterator: makeObjectValueIterator(data)
+    });
 
-### dataComparator (Function, optional, null)
+##### `dataComparator` (Function, optional)
 
 This prop causes the `data` prop to be compared using a custom comparison
 function. The comparison function is called with the old data and the new
@@ -162,14 +156,12 @@ would obviously have considerable performance impact and should only
 be used as a temporary solution for small data sets until the application
 can be refactored to avoid the need.
 
-
-### numInstances (Number, optional)
+##### `numInstances` (Number, optional)
 
 deck.gl is often able to autodetect the number of objects in your `data` prop,
 however in special situations it can be useful to control this directly.
 
-
-### onHover (Function, optional)
+##### `onHover` (Function, optional)
 
 This callback will be called when the mouse hovers over a feature drawn
 by the layer (assuming it is not occluded by any succeeding layers).
@@ -178,10 +170,9 @@ The function will be called with a single parameter `info`, which is an
 object that contains a variety of fields describing the hover event and
 what was hovered.
 
-Requires 'pickable' to be true.
+**Requires `pickable` to be true.**
 
-
-### onClick (Function, optional)
+##### `onClick` (Function, optional)
 
 This callback will be called when the mouse hovers over a feature drawn
 by the layer (assuming it is not occluded by any succeeding layers).
@@ -190,10 +181,9 @@ The function will be called with a single parameter `info`, which is an
 object that contains a variety of fields describing the click event and
 what was hovered.
 
-Requires 'pickable' to be true.
+**Requires `pickable` to be true.**
 
-
-### updateTriggers
+##### `updateTriggers`
 
 This prop expects an object with keys matching attribute names.
 Each attributeName will contain an object with keys representing property names.
@@ -211,10 +201,9 @@ shallowly, and if a change is detected, the attribute is invalidated
 (all attributes are invalidated if the `all` key is used.)
 
 Note: updateTriggers are ignored by the normal shallow comparison, so it is
-OK for the app to mint a new object on every render.
+ok for the app to mint a new object on every render.
 
-
-### "attributes" properties
+##### "attributes" properties
 
 The layer will look for properties with names matching its attributes,
 and if present, assume their contents is a typed array or WebGLBuffer,
@@ -233,7 +222,6 @@ This allows an application to supply its own buffers properties.
 If attributes are shared between layers, a useful technique is to create
 a separate AttributeManager and calculate the attributes once, and then
 pass them in as "overrides" to the layers.
-
 
 ## Layer Methods
 

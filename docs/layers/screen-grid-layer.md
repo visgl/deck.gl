@@ -1,4 +1,4 @@
-## ScreenGridLayer
+# ScreenGridLayer
 
 The ScreenGridLayer takes in an array of latitude and longitude
 coordinated points, aggregates them into histogram bins and
@@ -9,9 +9,42 @@ needs to be reaggregated by the layer whenever the map is zoomed or panned.
 This means that this layer is best used with small data set, however the
 visuals when used with the right data set can be quite effective.
 
+Inherits from all [Base Layer properties](/docs/layer.md).
 
-**Layer-specific Parameters**
+## Layer-specific Properties
 
-* `data` (array, required) array of objects: [{ position, color }, ...]
-* `unitWidth` [number, optional, default=100] unit width of the bins
-* `unitHeight` [number, optional, default=100] unit height of the bins
+##### `unitWidth` (Number, optional)
+
+- Default: `100`
+
+Unit width of the bins.
+
+##### `unitHeight` (Number, optional)
+
+- Default: `100`
+
+Unit height of the bins.
+
+#### `minColor` (Number[4], optional)
+
+- Default: `[0, 0, 0, 255]`
+
+Expressed as an rgba array, minimal color that could be rendered by a tile.
+
+#### `maxColor` (Number[4], optional)
+
+- Default: `[0, 255, 0, 255]`
+
+Expressed as an rgba array, maximal color that could be rendered by a tile.
+
+#### `getPosition` (Function, optional)
+
+- Default: `object => object.position`
+
+Method called to retrieve the position of each object.
+
+#### `getWeight` (Function, optional)
+
+- Default: `object => 1`
+
+Method called to retrieve the weight of each object.
