@@ -52,11 +52,14 @@ void main(void) {
   vec2 target = preproject(instancePositions.zw);
 
   float segmentIndex = positions.x;
+
+  float vertex_height = paraboloid(source, target, segmentIndex);
+  if (vertex_height < 0.0) vertex_height = 0.0;
   vec3 p = vec3(
     // xy: linear interpolation of source & target
     mix(source, target, segmentIndex / N),
     // z: paraboloid interpolate of source & target
-    sqrt(paraboloid(source, target, segmentIndex))
+    sqrt(vertex_height)
   );
 
   gl_Position = project(vec4(p, 1.0));
