@@ -489,13 +489,16 @@ export default class Layer {
       return false;
     }
 
-    const {attributeManager, model} = this.state;
     let redraw = false;
     redraw = redraw || this.state.needsRedraw;
     this.state.needsRedraw = this.state.needsRedraw && !clearRedrawFlags;
 
-    redraw = redraw || attributeManager.getNeedsRedraw({clearRedrawFlags});
-    redraw = redraw || (model && model.getNeedsRedraw({clearRedrawFlags}));
+    const {attributeManager, model} = this.state;
+    redraw = redraw ||
+      (attributeManager && attributeManager.getNeedsRedraw({clearRedrawFlags}));
+    redraw = redraw ||
+      (model && model.getNeedsRedraw({clearRedrawFlags}));
+
     return redraw;
   }
 
@@ -526,8 +529,13 @@ export default class Layer {
   // Check if any update triggers have changed, and invalidate
   // attributes accordingly.
   _diffUpdateTriggers(oldProps, newProps) {
-    let change = false;
     const {attributeManager} = this.state;
+    if (!attributeManager) {
+      return false;
+    }
+
+    let change = false;
+
     for (const propName in newProps.updateTriggers) {
       const oldTriggers = oldProps.updateTriggers[propName];
       const newTriggers = newProps.updateTriggers[propName];
@@ -542,6 +550,7 @@ export default class Layer {
         }
       }
     }
+
     return change;
   }
 
@@ -558,6 +567,10 @@ export default class Layer {
   // Calls attribute manager to update any WebGL attributes
   _updateAttributes(props) {
     const {attributeManager, model} = this.state;
+    if (!attributeManager) {
+      return;
+    }
+
     const numInstances = this.getNumInstances(props);
     // Figure out data length
     attributeManager.update({

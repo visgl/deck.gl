@@ -7,9 +7,11 @@
 // with mapbox and react-map-gl.
 // See: transform.js in https://github.com/mapbox/mapbox-gl-js
 
-import autobind from 'autobind-decorator';
-import {fp64ify} from '../lib/utils/fp64';
+// gl-matrix is a large dependency for a small module.
+// However since it is used by mapbox etc, it should already be present
+// in most target application bundles.
 import {mat2, mat4, vec2, vec4} from 'gl-matrix';
+import autobind from 'autobind-decorator';
 
 // CONSTANTS
 
@@ -130,8 +132,7 @@ export default class Viewport {
     const v = [X, Y, lngLatZ[2] || 0, 1];
 
     // vec4.sub(v, v, [this.centerX, this.centerY, 0, 0]);
-    this._precomputePixelProjectionMatrices();
-    vec4.transformMat4(v, v, this._pixelProjectionMatrix);
+    vec4.transformMat4(v, v, this.pixelProjectionMatrix);
     // Divide by w
     const scale = 1 / v[3];
     vec4.multiply(v, v, [scale, scale, scale, scale]);
@@ -154,8 +155,7 @@ export default class Viewport {
     // const y2 = topLeft ? this.height - 1 - y : y;
     const y2 = topLeft ? this.height - y : y;
     const v = [x, y2, z, 1];
-    this._precomputePixelProjectionMatrices();
-    vec4.transformMat4(v, v, this._pixelUnprojectionMatrix);
+    vec4.transformMat4(v, v, this.pixelUnprojectionMatrix);
     const scale = 1 / v[3];
     vec4.multiply(v, v, [scale, scale, scale, scale]);
     const [x0, y0] = this.unprojectFlat(v);
@@ -200,47 +200,22 @@ export default class Viewport {
     return [lambda2 * RADIANS_TO_DEGREES, phi2 * RADIANS_TO_DEGREES];
   }
 
-  /**
-   * Returns a projection matrix suitable for shaders
-   * @return {Float32Array} - 4x4 projection matrix that can be used in shaders
-   */
   @autobind
-  getProjectionMatrix() {
-    return this._glProjectionMatrix;
-  }
-
-@autobind
-  getProjectionFP64() {
-    return this._glProjectionFP64;
-  }
-
-  @autobind
-  getProjectionMatrixUncentered() {
-    return this._glProjectionMatrixUncentered;
-  }
-
-  @autobind
-  getUniforms({
-    projectionMode = COORDINATE_SYSTEM.LNGLAT,
-    projectionCenter = [0, 0]
-  } = {}) {
-    projectionCenter = vec2.subtract([],
-      this.projectFlat(projectionCenter),
-      this.center
-    );
-
-    // TODO - clean up, not all of these are used
-    // _ONE uniform is a hack to make tan_fp64() callable in existing 32-bit layers
+  getProjections() {
     return {
-      projectionMode,
-      projectionMatrix: this._glProjectionMatrix,
-      projectionFP64: this._glProjectionFP64,
-      projectionScale: this.scale,
-      projectionScaleFP64: fp64ify(this.scale),
-      projectionCenter,
-      projectionPixelsPerUnit: this.pixelsPerMeter,
-      projectionMatrixCentered: this._glProjectionMatrix,
-      projectionMatrixUncentered: this._glProjectionMatrixUncentered
+      pixelProjectionMatrix: this.pixelProjectionMatrix,
+      pixelUnprojectionMatrix: this.pixelUnprojectionMatrix,
+      viewProjectionMatrix: this.viewProjectionMatrix,
+      viewMatrix: this.viewMatrix,
+      projectionMatrix: this.projectionMatrix
+    };
+  }
+
+  @autobind
+  getDistanceScales() {
+    return {
+      pixelsPerMeter: this.pixelsPerMeter,
+      metersPerPixel: this.metersPerPixel
     };
   }
 
@@ -286,20 +261,18 @@ export default class Viewport {
     this.farZ = Math.cos(Math.PI / 2 - this.pitchRadians) *
       this.topHalfSurfaceDistance + this.altitude;
 
-    // TODO - this could be postponed until needed
+    // Calculate matrices and scales needed for projection
     this._calculateDistanceScales();
-
-    this._calculateGLProjectionMatrix();
-    this._dy64ifyProjectionMatrix();
-    this._pixelProjectionMatrix = null;
-    this._pixelUnprojectionMatrix = null;
+    this._calculateTransformationMatrices();
+    this._calculateWebGLMatrices();
   }
   /* eslint-enable max-statements */
 
   /**
-   * TODO: WIP
    * Calculate distance scales in meters around current lat/lon, both for
-   * degrees and pixels. The distance scales vary significantly with latitude
+   * degrees and pixels.
+   * In mercator projection mode, the distance scales vary significantly
+   * with latitude.
    */
   _calculateDistanceScales() {
     // Approximately 111km per degree at equator
@@ -347,23 +320,45 @@ export default class Viewport {
     // degreesPerMeter: 1 / metersPerDegree
   }
 
-  /**
-   * Builds matrices that converts preprojected lngLats to screen pixels
-   * and vice versa.
-   *
-   * Note: Currently return bottom-left coordinates!
-   * Note: Starts with the GL projection matrix and adds steps to the
-   *       scale and translate that matrix onto the window.
-   * Note: WebGL controls clip space to screen projection with gl.viewport
-   *       and does not need this step.
-   */
-  _precomputePixelProjectionMatrices() {
-    if (this._pixelProjectionMatrix && this._pixelUnprojectionMatrix) {
-      return;
-    }
+  // Note: As usual, matrix operation orders should be read in reverse
+  // since vectors will be multiplied in from the right during transformation
+  /* eslint-disable max-statements */
+  _calculateTransformationMatrices() {
+    // PROJECTION MATRIX: PROJECTS FROM CAMERA SPACE TO CLIPSPACE
+    /* eslint-disable no-inline-comments */
+    this.projectionMatrix = mat4.perspective(
+      this._createMat4(),
+      2 * Math.atan((this.height / 2) / this.altitude), // fov in radians
+      this.width / this.height,                         // aspect ratio
+      0.1,                                              // near plane
+      this.farZ * 10.0                                  // far plane
+    );
+    /* eslint-enable no-inline-comments */
 
-    this._calculateGLProjectionMatrix();
+    // VIEW MATRIX: PROJECTS FROM VIRTUAL PIXELS TO CAMERA SPACE
+    const vm = this._createMat4();
 
+    // Move camera to altitude
+    mat4.translate(vm, vm, [0, 0, -this.altitude]);
+
+    // After the rotateX, z values are in pixel units. Convert them to
+    // altitude units. 1 altitude unit = the screen height.
+    mat4.scale(vm, vm, [1, -1, 1 / this.height]);
+
+    // Rotate by bearing, and then by pitch (which tilts the view)
+    mat4.rotateX(vm, vm, this.pitchRadians);
+    mat4.rotateZ(vm, vm, -this.bearingRadians);
+
+    this.viewMatrix = this._createMat4();
+    mat4.translate(this.viewMatrix, vm, [-this.centerX, -this.centerY, 0]);
+
+    const vpm = this._createMat4();
+    mat4.multiply(vpm, vpm, this.projectionMatrix);
+    mat4.multiply(vpm, vpm, this.viewMatrix);
+
+    this.viewProjectionMatrix = vpm;
+
+    // PIXEL PROJECTION MATRIX
     const m = this._createMat4();
 
     // Scale with viewport window's width and height in pixels
@@ -372,69 +367,44 @@ export default class Viewport {
     mat4.translate(m, m, [0.5, 0.5, 0]);
     mat4.scale(m, m, [0.5, 0.5, 0]);
     // Project to clip space (-1, 1)
-    mat4.multiply(m, m, this._glProjectionMatrix);
-    this._pixelProjectionMatrix = m;
+    mat4.multiply(m, m, this.viewProjectionMatrix);
+    this.pixelProjectionMatrix = m;
 
     const mInverse = this._createMat4();
     mat4.invert(mInverse, m);
-    this._pixelUnprojectionMatrix = mInverse;
+    this.pixelUnprojectionMatrix = mInverse;
   }
+  /* eslint-enable max-statements */
 
-  /*
-   * GL clip space = [-1 - 1, -1 - 1]
-   * After conversion to Float32Array this can be used as a WebGL
-   * projectionMatrix
+  /**
+   * Builds matrices that converts preprojected lngLats to screen pixels
+   * and vice versa.
+   *
+   * Note: Currently returns bottom-left coordinates!
+   * Note: Starts with the GL projection matrix and adds steps to the
+   *       scale and translate that matrix onto the window.
+   * Note: WebGL controls clip space to screen projection with gl.viewport
+   *       and does not need this step.
    */
-  _calculateGLProjectionMatrix(m) {
-    if (this._glProjectionMatrix) {
-      return;
-    }
-    m = m || this._createMat4();
+  _calculatePixelProjectionMatrices() {
+    const m = this._createMat4();
 
-    // Note: As usual, matrix operation order should be read in reverse
-    mat4.perspective(m,
-      2 * Math.atan((this.height / 2) / this.altitude),
-      this.width / this.height,
-      0.1,
-      this.farZ * 10.0
-    );
+    // Scale with viewport window's width and height in pixels
+    mat4.scale(m, m, [this.width, this.height, 1]);
+    // Convert to (0, 1)
+    mat4.translate(m, m, [0.5, 0.5, 0]);
+    mat4.scale(m, m, [0.5, 0.5, 0]);
+    // Project to clip space (-1, 1)
+    mat4.multiply(m, m, this.viewProjectionMatrix);
+    this.pixelProjectionMatrix = m;
 
-    // Move camera to altitude
-    mat4.translate(m, m, [0, 0, -this.altitude]);
-
-    // After the rotateX, z values are in pixel units. Convert them to
-    // altitude units. 1 altitude unit = the screen height.
-    mat4.scale(m, m, [1, -1, 1 / this.height]);
-
-    // Rotate by bearing, and then by pitch (which tilts the view)
-    mat4.rotateX(m, m, this.pitchRadians);
-    mat4.rotateZ(m, m, -this.bearingRadians);
-
-    // TODO - remove
-    this._glProjectionMatrixUncentered = m;
-
-    const m2 = this._createMat4();
-    // TODO - remove this step
-    mat4.translate(m2, m, [-this.centerX, -this.centerY, 0]);
-    this._glProjectionMatrix = m2;
-
-    this._glProjectionFP64 = new Float32Array(32);
+    const mInverse = this._createMat4();
+    mat4.invert(mInverse, m);
+    this.pixelUnprojectionMatrix = mInverse;
   }
 
-  // Avoid 32 bit matrices from mat4.create();
+  // Helper, avoids low-precision 32 bit matrices from mat4.create();
   _createMat4() {
     return [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
-  }
-
-  _dy64ifyProjectionMatrix() {
-    // Transpose the projection matrix to column major for GLSL.
-    for (let i = 0; i < 4; ++i) {
-      for (let j = 0; j < 4; ++j) {
-        [
-          this._glProjectionFP64[(i * 4 + j) * 2],
-          this._glProjectionFP64[(i * 4 + j) * 2 + 1]
-        ] = fp64ify(this._glProjectionMatrix[j * 4 + i]);
-      }
-    }
   }
 }

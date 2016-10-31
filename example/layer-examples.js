@@ -16,10 +16,7 @@ import {
 
 import {
   GeoJsonLayer,
-  HexagonLayer,
-  EnhancedChoroplethLayer,
-  PointCloudLayer,
-  VoronoiLayer
+  EnhancedChoroplethLayer
 } from '../src/layers/samples';
 
 const ArcLayerExample = props =>
