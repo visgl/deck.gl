@@ -1,7 +1,8 @@
 # Coordinate Systems
 
-By default deck.gl's interpretats positions as Web Mercator
-it also support positions specified in other coordinate systems.
+By default deck.gl's interprets positions in the Web Mercator
+coordinate system, however deck.gl  also support positions
+specified in several other coordinate systems.
 
 
 ## Overview
@@ -26,6 +27,9 @@ Remarks:
   and shared by all layers, so they will always pan zoom and tilt
   together, regardless of what coordinate system their positions
   are specified in.
+* Most of deck.gl's coordinate system handling has been broken out
+  into the [viewport-mercator-project](https://github.com/uber-common/viewport-mercator-project) module. See the README file there for more
+  information and documentation of the `Viewport` class.
 
 
 ## Supported Coordinate Systems
@@ -38,7 +42,8 @@ Remarks:
   positions are given in linear coordinates from a numeric
   reference point, with a range indicating zoom level 0 extents.
 
-### Web Mercator Projection
+
+### Web Mercator Projection Mode
 
 A core feature of deck.gl is that all layers automatically by default
 accept latitude and longitude coordinates specified in the
@@ -52,20 +57,40 @@ are specified in degrees from Greenwich meridian / equator respectively,
 and altitude is specified in meters above sea level.
 
 
-### Meter Offset Projection
+### Meter Offset Projection Mode
 
   positions are given in meter offsets [Δx, Δy, Δz] from a [lng/lat/z] reference point. The reference point is specified in a separate prop.
 
 Such coordinates will be correctly projected onto the map if the layer
 is set to the right projection mode.
 
+Remarks:
+* UTM - Note that the Meters Offset Projection Mode uses arbitrary
+  reference points, rather than the predefined reference points
+  set by UTM. The meters mode can simplify working with UTM coordinates
+  but should not be used directly as such.
 
-### Mathematical Projection
 
-Note: deck.gl can also supports working in a standard (i.e. unprojected)
-linear coordinate system (suitable when using deck.gl layers without
-underlying maps) although the support for specifying scales and extents
-is still rudimentary.
+### Mathematical/Linear Projection Mode
+
+Note: deck.gl can also supports working in a standard mathematical
+(i.e. cartographically unprojected) linear coordinate system
+(suitable when using deck.gl layers without underlying maps)
+
+In this mode, which does not offer any synchronization with maps, the
+application specifies its world size (the number of pixels that the world
+occupies
+
+At zoom 0, one world unit represents one pixel unit.
+deck.gl can create a projection matrix from zoom level and center,
+(as well as pitch, bearing and altiude), to move around in the map.
+The interaction layer handles this by default.
+
+You can of course supply your own projectionMatrix and scaling uniforms
+to deck.gl.
+
+Remarks:
+*The support for specifying scales and extents is still rudimentary.
 
 
 ## Coordinate System Concepts
@@ -119,20 +144,6 @@ perhaps even making it clear in the variable's name.
   levels 0 (world) to 20 (sub meter pixels).
 
 
-## Linear Coordinate System
-
-In this mode, which does not offer any synchronization with maps, the
-application specifies its world size (the number of pixels that the world
-occupies
-
-At zoom 0, one world unit represents one pixel unit.
-deck.gl can create a projection matrix from zoom level and center,
-(as well as pitch, bearing and altiude), to move around in the map.
-The interaction layer handles this by default.
-
-You can of course supply your own projectionMatrix and scaling uniforms
-to deck.gl.
-
 
 ## Making a vertex shader work with deck.gl's coordinate systems.
 
@@ -149,19 +160,4 @@ to deck.gl layers (i.e. to the GPU) without any JavaScript transformation.
 A great side effect is that the new meters projection mode uses small numeric
 deltas in projection and therefore does not lose precision under extreme zoom
 levels even when using faster 32 bit floating point.
-
-Note that our new 64 bit floating point library is still the general solution
-to handling extreme zoom. For lat/lon projection under high zoom levels FP64
-is still necessary.
-
-A number of layers have been forked and rewritten to support meters projection.
-Expect to fold these back into deck.gl before releasing v3.
-
-
-Manages coordinate system transformations.
-
-Remarks:
-* Most of deck.gl's coordinate system handling has been broken out
-  into the [viewport-mercator-project](https://github.com/uber-common/viewport-mercator-project) module. See the README file there for more
-  information and documentation of the `Viewport` class.
 

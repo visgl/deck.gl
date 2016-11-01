@@ -35,7 +35,7 @@ is released.
 This is a good time to destroy any layer specific WebGL resources etc.
 
 
-### Updating: shouldUpdateState({oldProps, props, oldContext, context, changeFlags})
+### Updating: shouldUpdateState({props, oldProps, context, oldContext, changeFlags})
 
 Called when a new layer has been matched with a layer from the previous
 render cycle (resulting in new props being passed to that layer),
@@ -51,7 +51,7 @@ prop can be supplied additional checks. See the documentation of those
 props in the Layer API.
 
 
-### Updating: updateState({oldProps, props, oldContext, context, changeFlags})
+### Updating: updateState({props, oldProps, context, oldContext, changeFlags})
 
 Called when a new layer has been matched with a layer from the previous
 render cycle (resulting in new props being passed to that layer),
@@ -82,10 +82,8 @@ The default implementation looks for a variable `model` in the layer's
 state (which is expected to be an instance of the luma.gl `Model` class)
 and calls `draw` on that model.
 
-TBA
 
-
-### Picking: pick(uniforms, deviceX, deviceY)
+### Picking: pick({uniforms, deviceX, deviceY})
 
 The pick method should return an object with optional fields about
 what was picked. This `info` object is then populated with additional
@@ -99,6 +97,11 @@ that allow the layer shaders to render picking colors instead of normal
 colors.
 
 
+### Picking: pickInfo(info)
+
+Allows a layer to add additional context to a picked object
+
+
 ## Comparison with React's Lifecycle
 
 If you are familiar with React and the
@@ -109,7 +112,7 @@ you understand property change management and how to use the
 `shouldUpdateState` and `updateState` methods.
 
 Still, there are a couple of notable differences between the lifecycle
-methods provided by the two frameworks which are good to be aware of:
+methods provided by the two frameworks:
 
 - deck.gl performs preliminary analysis on certain props and context and
   provides a `changeFlags` object to your `shouldUpdateState` and
@@ -119,11 +122,13 @@ methods provided by the two frameworks which are good to be aware of:
   on when props or context is updated. This is different from React's
   `willReceiveProps` that is not called when the component is initially created,
   The deck.gl model avoids requiring the same property checks to be performed
-  twice.
+  twice in both the constructor and `willReceiveProps`.
 
-- deck.gl has both `draw` and `renderLayers` where React just has `render`.
+- deck.gl separates rendering into the `draw` and `renderLayers` methods,
+  where React just needs `render`.
 
-- deck.gl's `pick` method has not correspondence in React's lifecycle.
+- deck.gl's `pick` and `pickInfo` methods have no correspondence in
+  React's lifecycle.
 
 **Note**: deck.gl uses a simpler component model than React.
   While React backs instance with a separate component, deck.gl just transfers
