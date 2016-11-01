@@ -1,3 +1,4 @@
+import assert from 'assert';
 
 /**
  * Performs equality by iterating through keys on an object and returning false
@@ -10,8 +11,10 @@
  */
 /* eslint-disable max-statements, complexity */
 export function compareProps({oldProps, newProps, ignoreProps = {}} = {}) {
+  assert(oldProps !== undefined && newProps !== undefined, 'compareProps args');
+
   if (oldProps === newProps) {
-    return true;
+    return null;
   }
 
   if (typeof oldProps !== 'object' || oldProps === null) {
