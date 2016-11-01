@@ -530,6 +530,7 @@ export default class Layer {
 
   // Check if any update triggers have changed, and invalidate
   // attributes accordingly.
+  /* eslint-disable max-statements */
   _diffUpdateTriggers(oldProps, newProps) {
     const {attributeManager} = this.state;
     if (!attributeManager) {
@@ -562,6 +563,7 @@ export default class Layer {
 
     return change;
   }
+  /* eslint-enable max-statements */
 
   validateRequiredProp(propertyName, condition) {
     const value = this.props[propertyName];
