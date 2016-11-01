@@ -3,7 +3,6 @@
 The `Layer` class is the base class of all deck.gl layers, and it provides
 a number of **base properties** which are availabe in all layers.
 
-
 ## Common Layer Properties
 
 ### Basic Properties

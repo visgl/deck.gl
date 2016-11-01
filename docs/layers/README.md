@@ -2,12 +2,10 @@
 
 The deck.gl layer catalog is organized into a couple of sections.
 
-
 ## Base Layer
 
 All deck.gl layers inherit from the `Layer` base class and
 all its props are available to all layers unless otherwise documented.
-
 
 ## Core Layers
 
@@ -15,12 +13,10 @@ Core layers are the most stable and supported deck.gl layers. They are
 intended to represent a small set of widely applicable data visualization
 building blocks.
 
-
 ## 64-bit Layers
 
 Core Layers have 64 bit counterparts that can be used to achieve
 higher precision, particularly under high zoom levels.
-
 
 ## Sample Layers
 

@@ -5,6 +5,8 @@ renders it as interactive choropleths.
 
 Inherits from all [Base Layer properties](/docs/layers/base-layer.md).
 
+    import {ChoroplethLayer} from 'deck.gl';
+
 ## Layer-specific Properties
 
 ##### `drawContour` (Boolean, optional)
@@ -20,7 +22,7 @@ Provides selected choropleth properties along with mouse event when the chorople
 ##### `onChoroplethClicked` (Function, optional)
 
 Provides selected choropleth properties along with mouse event when the choropleth is clicked.
-  
+
 #### Additional notes
 
 By supplying a GeoJson `FeatureCollection` you can add multiple polygons.

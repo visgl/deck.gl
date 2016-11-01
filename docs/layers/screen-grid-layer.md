@@ -9,6 +9,8 @@ needs to be reaggregated by the layer whenever the map is zoomed or panned.
 This means that this layer is best used with small data set, however the
 visuals when used with the right data set can be quite effective.
 
+    import {ScreenGridLayer} from 'deck.gl';
+
 Inherits from all [Base Layer properties](/docs/layers/base-layer.md).
 
 ## Layer-specific Properties

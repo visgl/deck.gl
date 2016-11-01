@@ -19,7 +19,7 @@
 
 [![docs](http://i.imgur.com/mvfvgf0.jpg)](https://uber.github.io/deck.gl)
 
-    npm install --save deck.gl
+    npm install --save luma.gl deck.gl
 
 Provides tested, highly performant layers for basic data visualization
 use cases, scatterplots, choropleths etc in 2 and 3 dimensions.
