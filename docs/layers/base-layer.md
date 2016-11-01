@@ -6,6 +6,8 @@ a number of **base properties** which are availabe in all layers.
 
 ## Common Layer Properties
 
+### Basic Properties
+
 ##### `id` (String, optional)
 
 The id must be unique among all your layers. The layer's id defaults to the
@@ -29,18 +31,6 @@ Will generate the following layers and ids:
 
 React Note: `id` is similar to the `key` property used in React to match
 components between rendering calls.
-
-##### `viewport` (Viewport, optional)
-
-- Default: Injected from context
-
-Viewport can be supplied to override the context supplied viewport.
-
-##### `pickable` (Boolean, optional)
-
-- Default: `false`
-
-Whether layer responds to mouse events.
 
 ##### `visible` (Boolean, optional)
 
@@ -77,6 +67,46 @@ Note: While it is a recommended convention that all deck.gl layers should
 support the opacity prop, it is up to each layer's fragment shader
 to implement support for opacity.
 
+
+### Interaction Properties
+
+Layers can be interacted with using these properties.
+
+##### `pickable` (Boolean, optional)
+
+- Default: `false`
+
+Whether layer responds to mouse events.
+
+##### `onHover` (Function, optional)
+
+This callback will be called when the mouse hovers over a feature drawn
+by the layer (assuming it is not occluded by any succeeding layers).
+
+The function will be called with a single parameter `info`, which is an
+object that contains a variety of fields describing the hover event and
+what was hovered.
+
+**Requires `pickable` to be true.**
+
+##### `onClick` (Function, optional)
+
+This callback will be called when the mouse hovers over a feature drawn
+by the layer (assuming it is not occluded by any succeeding layers).
+
+The function will be called with a single parameter `info`, which is an
+object that contains a variety of fields describing the click event and
+what was hovered.
+
+**Requires `pickable` to be true.**
+
+
+## Coordinate System Properties
+
+Normally only used when the application wants to work with coordinates
+that are not Web Mercator projected longitudes/latitudes.
+
+
 ##### `projectionMode` (Number, optional)
 
 Specifies how layer positions and offsets should be interpreted.
@@ -98,18 +128,26 @@ See the article on Coordinate Systems for details
 ##### `viewMatrix` (Number[16], optional)
 
 An optional 4x4 matrix that is premultiplied into the affine projection
-matrices used by shader `project` GLSL function and the Viewport's `project`
-and `unproject` JavaScript function.
+matrices used by shader `project` GLSL function and the
+Viewport's `project` and `unproject` JavaScript function.
 
 Allows local coordinate system transformations to be applied to a layer,
 which is useful when composing data from multiple sources that use
 different coordinate systems.
 
 Note that the matrix projection is applied after the non-linear mercator
-projection calculations are resolved, so be careful when using view matrices
-with lng/lat encoded coordinates.
+projection calculations are resolved, so be careful when using view matrices with lng/lat encoded coordinates.
+
+
+### Data Properties
+
+While many applications only use the `data` property, there are a number
+of additional properties that provide extra control over data
+iteration, comparison and update.
 
 ##### `data` (Iterable Object or Array, optional)
+
+Default: []
 
 The data prop should contain an iterable JavaScript container,
 please see JavaScript `[Symbol.iterator]`.
@@ -155,28 +193,6 @@ can be refactored to avoid the need.
 
 deck.gl is often able to autodetect the number of objects in your `data` prop,
 however in special situations it can be useful to control this directly.
-
-##### `onHover` (Function, optional)
-
-This callback will be called when the mouse hovers over a feature drawn
-by the layer (assuming it is not occluded by any succeeding layers).
-
-The function will be called with a single parameter `info`, which is an
-object that contains a variety of fields describing the hover event and
-what was hovered.
-
-**Requires `pickable` to be true.**
-
-##### `onClick` (Function, optional)
-
-This callback will be called when the mouse hovers over a feature drawn
-by the layer (assuming it is not occluded by any succeeding layers).
-
-The function will be called with a single parameter `info`, which is an
-object that contains a variety of fields describing the click event and
-what was hovered.
-
-**Requires `pickable` to be true.**
 
 ##### `updateTriggers`
 
