@@ -16,7 +16,14 @@ All notable changes to deck.gl will be documented in this file.
 
 ### Beta-3.0.0 Releases
 
-#### [v3.0.0-beta27] -
+#### [v3.0.0-beta29] -
+- FIX: ArcLayer flickering last segments
+- FIX: Scatterplot Layer exception
+- FIX: Layer lifecycle - initialization/update of sublayers
+- Doc update of Layers
+
+
+#### [v3.0.0-beta28] -
 - BREAKING CHANGE: Picking API final version. Fixes #115. Fixes #116.
 - FIX: Ignore null layers
 - FIX: Warns once instead of throws on deprecated props.
