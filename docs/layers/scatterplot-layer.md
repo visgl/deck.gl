@@ -4,6 +4,8 @@ The Scatterplot Layer takes in paride latitude and longitude coordinated points 
 
 Inherits from all [Base Layer properties](/docs/layers/base-layer.md).
 
+    import {ScatterplotLayer} from 'deck.gl';
+
 ## Layer-specific Properties
 
 ##### `strokeWidth` (Number, optional)

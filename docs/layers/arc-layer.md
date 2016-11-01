@@ -3,6 +3,8 @@
 The Arc Layer takes in paired latitude and longitude coordinated points and
 render them as arcs that links the starting and ending points.
 
+    import {ArcLayer} from 'deck.gl';
+
 Inherits from all [Base Layer properties](/docs/layers/base-layer.md).
 
 ## Layer-specific Properties

@@ -1,4 +1,4 @@
-# ExtrudedChoroplethLayer
+# ExtrudedChoroplethLayer64
 
 A layer that extrudes lines in Choropleth polygons by tesselating them into
 long, thin triangles. This provides control over line thickness
@@ -9,9 +9,9 @@ regard.
 case needs more work, but for "modest" angles (e.g. 60 degrees in hexagons)
 the results will be good.
 
+    import {ExtrudedChoroplethLayer64} from 'deck.gl';
+
 Inherits from all [Base Layer properties](/docs/layers/base-layer.md).
-
-
 
 ##### `drawContour` (Boolean, optional)
 
