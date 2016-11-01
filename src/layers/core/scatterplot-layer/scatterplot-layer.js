@@ -72,7 +72,7 @@ export default class ScatterplotLayer extends Layer {
 
   updateState({oldProps, props}) {
     if (oldProps.drawOutline !== props.drawOutline) {
-      const {gl} = this.state;
+      const {gl} = this.context;
       const drawMode = props.drawOutline ? GL.LINE_LOOP : GL.TRIANGLE_FAN;
       const model = this._getModel(gl, drawMode);
       this.state.model = model;
