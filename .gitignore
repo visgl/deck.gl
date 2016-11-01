@@ -1,4 +1,5 @@
 dist/*
+demo/dist/*
 build/*
 example/bundle.js
 .project

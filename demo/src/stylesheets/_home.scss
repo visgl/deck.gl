@@ -1,0 +1,128 @@
+.home-wrapper {
+  h1 {
+    font-size: 5em;
+    text-transform: uppercase;
+    letter-spacing: 4px;
+    font-weight: 700;
+    margin: 96px 0 8px;
+  }
+  h2 {
+    font-size: 2em;
+    font-weight: 700;
+    margin: 48px 0 8px;
+  }
+  h3 {
+    font-size: 1.2em;
+    font-weight: 500;
+    margin: 32px 0 8px;
+  }
+  h4 {
+    font-size: 0.833em;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin: 24px 0 8px;
+    opacity: 0.4;
+  }
+  h5 {
+    font-weight: 700;
+    font-size: 14px;
+    line-height: 24px;
+    margin: 8px 0;
+  }
+
+  section {
+    padding: 72px 0;
+    position: relative;
+  }
+}
+.home-wrapper.top {
+  header {
+    background: rgba(red($black), green($black), blue($black), 0.8);
+  }
+}
+
+#banner {
+  background-image: url('images/header-bg.jpg');
+  background-size: cover;
+  background-position: center;
+  color: $white;
+
+  >.hero {
+    position: absolute;
+    top: 0;
+  }
+  >.container {
+    position: relative;
+  }
+
+  p {
+    font-size: 16px;
+    color: $white-40;
+  }
+  button {
+    font-size: 12px;
+    letter-spacing: 2px;
+    border: 2px solid transparent;
+    @include linearGradientH(border-image, $primary, $secondary);
+    border-image-slice: 2;
+    border-radius: 2px;
+    background: rgba(0, 173, 230, 0.1);
+    width: 214px;
+    height: 52px;
+    margin: 56px 0;
+    transition: background 500ms;
+  }
+  button:hover {
+    background: rgba(0, 173, 230, 0.3);
+  }
+}
+
+#features {
+  .container >div {
+    max-width: 50%;
+    width: 480px;
+  }
+  .image {
+    position: absolute;
+    height: 110%;
+    width: 50%;
+    top: 0;
+    right: 0;
+    z-index: 1;
+    border-top: solid 120px transparent;
+    background-image: url(images/maps.png);
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: right top;
+  }
+
+  h2, h3 {
+    color: $black-20;
+  }
+
+}
+
+#highlights {
+  img {
+    margin: 32px auto 16px;
+  }
+  .col-1-3 {
+    padding: 0 24px;
+  }
+}
+#footer {
+  background-image: url('images/footer-pattern.gif');
+  background-size: 32px;
+  background-repeat: repeat;
+  color: $white;
+
+  .logo {
+    font-size: 16px;
+  }
+
+  h4 {
+    font-size: 12px;
+    margin-bottom: 24px;
+    font-weight: 300;
+  }
+}
