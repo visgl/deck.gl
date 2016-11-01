@@ -420,7 +420,6 @@ export default class Layer {
 
       // Run the attribute updaters
       this._updateAttributes(updateParams.newProps);
-      // Update the uniforms
       this._updateBaseUniforms();
 
       if (this.state.model) {
@@ -459,14 +458,16 @@ export default class Layer {
   diffProps(oldProps, newProps, context) {
     // If any props have changed, ignoring updateTriggers objects
     // (updateTriggers are expected to be a new object on every update)
-    const inequalReason = compareProps({
+    const propsChangedReason = compareProps({
       newProps,
       oldProps,
       ignoreProps: {data: null, updateTriggers: null}
     });
 
-    const propsChanged = Boolean(inequalReason);
-    const dataChanged = this._diffDataProps(oldProps, newProps);
+    const dataChangedReason = this._diffDataProps(oldProps, newProps);
+
+    const propsChanged = Boolean(propsChangedReason);
+    const dataChanged = Boolean(dataChangedReason);
     const viewportChanged = context.viewportChanged;
     const somethingChanged =
       propsChanged || dataChanged || viewportChanged;
@@ -474,6 +475,8 @@ export default class Layer {
     // If data hasn't changed, check update triggers
     if (!dataChanged) {
       this._diffUpdateTriggers(oldProps, newProps);
+    } else {
+      log.log(1, `dataChanged: ${dataChanged}`);
     }
 
     return {
@@ -481,7 +484,7 @@ export default class Layer {
       dataChanged,
       viewportChanged,
       somethingChanged,
-      reason: inequalReason
+      reason: dataChangedReason || propsChangedReason
     };
   }
 
@@ -515,18 +518,19 @@ export default class Layer {
     const {dataComparator} = newProps;
     if (dataComparator) {
       if (!dataComparator(newProps.data, oldProps.data)) {
-        return true;
+        return 'Data comparator detected a change';
       }
     // Otherwise, do a shallow equal on props
     } else if (newProps.data !== oldProps.data) {
-      return true;
+      return 'A new data container was supplied';
     }
 
-    return false;
+    return null;
   }
 
   // Check if any update triggers have changed, and invalidate
   // attributes accordingly.
+  /* eslint-disable max-statements */
   _diffUpdateTriggers(oldProps, newProps) {
     const {attributeManager} = this.state;
     if (!attributeManager) {
@@ -538,15 +542,19 @@ export default class Layer {
     for (const propName in newProps.updateTriggers) {
       const oldTriggers = oldProps.updateTriggers[propName];
       const newTriggers = newProps.updateTriggers[propName];
-      const unequalReason = compareProps({
+      const diffReason = compareProps({
         oldProps: oldTriggers,
         newProps: newTriggers
       });
-      if (unequalReason) {
+      if (diffReason) {
         if (propName === 'all') {
+          log.log(1,
+            `updateTriggers invalidating all attributes: ${diffReason}`);
           attributeManager.invalidateAll();
           change = true;
         } else {
+          log.log(1,
+            `updateTriggers invalidating attribute ${propName}: ${diffReason}`);
           attributeManager.invalidate(propName);
           change = true;
         }
@@ -555,6 +563,7 @@ export default class Layer {
 
     return change;
   }
+  /* eslint-enable max-statements */
 
   validateRequiredProp(propertyName, condition) {
     const value = this.props[propertyName];

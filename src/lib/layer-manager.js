@@ -44,10 +44,11 @@ export default class LayerManager {
     this.oldContext = {};
     this.context = {
       gl,
+      uniforms: {},
       viewport: null,
-      viewportChanged: true,
-      uniforms: {}
+      viewportChanged: true
     };
+    this.redrawNeeded = true;
     Object.seal(this.context);
   }
 
@@ -81,13 +82,16 @@ export default class LayerManager {
         ...viewport.getUniforms()
       };
 
-      log(1, viewport, latitude, longitude, zoom);
+      log(4, viewport, latitude, longitude, zoom);
     }
 
     return this;
   }
 
   updateLayers({newLayers}) {
+    assert(this.context.viewport,
+      'LayerManager.updateLayers: viewport not set');
+
     // Filter out any null layers
     newLayers = newLayers.filter(newLayer => Boolean(newLayer));
 
@@ -109,12 +113,15 @@ export default class LayerManager {
   }
 
   drawLayers() {
+    assert(this.context.viewport, 'LayerManager.drawLayers: viewport not set');
+
     const {uniforms} = this.context;
     for (const layer of this.layers) {
       if (layer.props.visible) {
         layer.drawLayer({uniforms});
       }
     }
+
     return this;
   }
 
@@ -130,18 +137,23 @@ export default class LayerManager {
   }
 
   needsRedraw({clearRedrawFlags = false} = {}) {
+    if (!this.context.viewport) {
+      return false;
+    }
+
     let redraw = false;
 
     // Make sure that buffer is cleared once when layer list becomes empty
     if (this.layers.length === 0 && this.drewLayers) {
       redraw = true;
+      return true;
     }
 
-    if (this.context.viewportChanged) {
+    if (this.redrawNeeded) {
+      this.redrawNeeded = false;
       redraw = true;
     }
 
-    this.drewLayers = false;
     for (const layer of this.layers) {
       redraw = redraw || layer.getNeedsRedraw({clearRedrawFlags});
       this.drewLayers = true;
@@ -177,9 +189,6 @@ export default class LayerManager {
     return {error: firstError, generatedLayers};
   }
 
-  _matchLayers(oldLayers, newLayers) {
-  }
-
   /* eslint-disable max-statements */
   _matchSublayers({newLayers, oldLayerMap, generatedLayers}) {
     // Filter out any null layers
@@ -203,6 +212,7 @@ export default class LayerManager {
         if (oldLayer) {
           log(3, `matched ${layerName(newLayer)}`, oldLayer, '=>', newLayer);
           this._transferLayerState(oldLayer, newLayer);
+          this._updateLayer(newLayer);
         } else {
           this._initializeNewLayer(newLayer);
         }
@@ -344,7 +354,7 @@ export default class LayerManager {
 
 function layerName(layer) {
   if (layer instanceof Layer) {
-    return `${layer}'>`;
+    return `${layer}`;
   }
   return !layer ? 'null layer' : 'invalid layer';
 }

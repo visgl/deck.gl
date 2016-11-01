@@ -37,22 +37,14 @@ export default class ChoroplethLayer extends Layer {
   static layerName = 'ChoroplethLayer';
 
   /**
-   * @classdesc
-   * ChoroplethLayer
-   *
    * @class
    * @param {object} props
-   * @param {bool} props.drawContour - ? drawContour : drawArea
-   * @param {function} props.onChoroplethHovered - provide properties of the
-   * selected choropleth, together with the mouse event when mouse hovered
-   * @param {function} props.onChoroplethClicked - provide properties of the
-   * selected choropleth, together with the mouse event when mouse clicked
    */
   constructor(props) {
     super({
-      strokeWidth: 1,
-      opacity: 1,
       getColor: defaultGetColor,
+      drawCountour: false,
+      strokeWidth: 1,
       ...props
     });
   }

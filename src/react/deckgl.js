@@ -71,10 +71,10 @@ export default class DeckGL extends React.Component {
 
     if (this.layerManager) {
       this.layerManager
-        .updateLayers({newLayers: nextProps.layers})
         .setContext({
           width, height, latitude, longitude, zoom, pitch, bearing, altitude
-        });
+        })
+        .updateLayers({newLayers: nextProps.layers});
     }
   }
 

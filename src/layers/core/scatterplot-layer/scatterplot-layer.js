@@ -46,12 +46,16 @@ export default class ScatterplotLayer extends Layer {
     getRadius = defaultGetRadius,
     getColor = defaultGetColor,
     radius = 30,
+    drawOutline = false,
+    strokeWidth = 1,
     ...props
   }) {
     super({
       getPosition,
       getRadius,
       getColor,
+      drawOutline,
+      strokeWidth,
       radius,
       ...props
     });

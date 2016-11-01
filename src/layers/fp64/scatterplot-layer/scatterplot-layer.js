@@ -45,12 +45,18 @@ export default class ScatterplotLayer64 extends Layer {
     getPosition = defaultGetPosition,
     getRadius = defaultGetRadius,
     getColor = defaultGetColor,
+    radius = 30,
+    drawOutline = false,
+    strokeWidth = 1,
     ...props
   }) {
     super({
       getPosition,
       getRadius,
       getColor,
+      radius,
+      drawOutline,
+      strokeWidth,
       ...props
     });
   }

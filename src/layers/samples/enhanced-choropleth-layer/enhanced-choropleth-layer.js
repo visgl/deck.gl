@@ -27,22 +27,20 @@ export default class EnhancedChoroplethLayer extends Layer {
    *     selected choropleth, together with the mouse event when mouse clicked
    */
   constructor({
-    drawContour = true,
-    opacity = 1,
-    strokeColor = [0, 0, 0],
-    fillColor = [128, 128, 128],
-    strokeWidth = 3,
     getColor = null,
+    fillColor = [128, 128, 128],
+    drawContour = true,
+    strokeWidth = 3,
+    strokeColor = [0, 0, 0],
     elevation = 0,
     ...props
   }) {
     super({
-      drawContour,
-      opacity,
-      strokeColor,
-      fillColor,
-      strokeWidth,
       getColor,
+      fillColor,
+      drawContour,
+      strokeWidth,
+      strokeColor,
       elevation,
       ...props
     });
@@ -78,10 +76,6 @@ export default class EnhancedChoroplethLayer extends Layer {
     if (changeFlags.dataChanged || oldProps.strokeWidth !== props.strokeWidth) {
       this.extractChoropleths();
       attributeManager.invalidateAll();
-    }
-
-    if (oldProps.opacity !== props.opacity) {
-      this.setUniforms({opacity: props.opacity});
     }
   }
 
