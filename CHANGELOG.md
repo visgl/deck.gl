@@ -16,6 +16,10 @@ All notable changes to deck.gl will be documented in this file.
 
 ### Beta-3.0.0 Releases
 
+#### [v3.0.0-beta30] - Perf fixes - significantly reduce GPU load.
+- FIX: compareProps and updateTriggers fixes
+- Doc updates
+
 #### [v3.0.0-beta29] -
 - FIX: ArcLayer flickering last segments
 - FIX: Scatterplot Layer exception
