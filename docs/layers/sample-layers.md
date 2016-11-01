@@ -11,7 +11,7 @@ If a production application wants to use one of these layers, we recommend
 copying these layers rather than importing them into to your application to
 avoid being affected by changes when updating to new versions of deck.gl.
 
-Inherits from all [Base Layer properties](/docs/layer.md).
+Inherits from all [Base Layer properties](/docs/layers/base-layer.md).
 
 ### ExtrudedChoroplethLayer
 
