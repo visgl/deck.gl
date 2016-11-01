@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg width="91px" height="91px" viewBox="0 0 91 91" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 40.3 (33839) - http://www.bohemiancoding.com/sketch -->
+    <title>Icon 01</title>
+    <desc>Created with Sketch.</desc>
+    <defs>
+        <linearGradient x1="21.4661737%" y1="9.07149733%" x2="49.9016193%" y2="99.6864909%" id="linearGradient-1">
+            <stop stop-color="#00ADE7" offset="0%"></stop>
+            <stop stop-color="#04E3D5" offset="100%"></stop>
+        </linearGradient>
+        <circle id="path-2" cx="45.5" cy="45.5" r="45.5"></circle>
+        <mask id="mask-3" maskContentUnits="userSpaceOnUse" maskUnits="objectBoundingBox" x="0" y="0" width="91" height="91" fill="white">
+            <use xlink:href="#path-2"></use>
+        </mask>
+        <linearGradient x1="21.4661737%" y1="9.07149733%" x2="100%" y2="100%" id="linearGradient-4">
+            <stop stop-color="#00ADE7" offset="0%"></stop>
+            <stop stop-color="#04E3D5" offset="100%"></stop>
+        </linearGradient>
+    </defs>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Deck.gl-Large-Header" transform="translate(-278.000000, -1488.000000)">
+            <g id="SECTION-2" transform="translate(1.000000, 1317.000000)">
+                <g id="Icon-01" transform="translate(277.000000, 171.000000)">
+                    <use id="Oval-2" stroke="url(#linearGradient-1)" mask="url(#mask-3)" stroke-width="2" xlink:href="#path-2"></use>
+                    <g id="ic_flash_on_black_24px" transform="translate(29.000000, 29.000000)">
+                        <g id="Group">
+                            <polygon id="Shape" points="0 0 34 0 34 34 0 34"></polygon>
+                            <polygon id="Shape" stroke="url(#linearGradient-4)" stroke-width="1.4" points="9.91666667 2.83333333 9.91666667 18.4166667 14.1666667 18.4166667 14.1666667 31.1666667 24.0833333 14.1666667 18.4166667 14.1666667 24.0833333 2.83333333"></polygon>
+                        </g>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>
