@@ -1,6 +1,20 @@
-# deck.gl
+<p align="right">
+  <a href="https://npmjs.org/package/deck.gl">
+    <img src="https://img.shields.io/npm/v/deck.gl.svg?style=flat-square" alt="version" />
+  </a>
+  <a href="https://travis-ci.org/uber/deck.gl">
+    <img src="https://img.shields.io/travis/uber/deck.gl/master.svg?style=flat-square" alt="build" />
+  </a>
+  <a href="https://npmjs.org/package/deck.gl">
+    <img src="https://img.shields.io/npm/dm/deck.gl.svg?style=flat-square" alt="downloads" />
+  </a>
+  <a href="http://starveller.sigsev.io/uber/deck.gl">
+    <img src="http://starveller.sigsev.io/api/repos/uber/deck.gl/badge" alt="stars" />
+  </a>
+</p>
 
-> A WebGL overlay suite for React providing a set of highly performant data visualization overlays.
+<h1 align="center">deck.gl</h1>
+<p align="center">A WebGL overlay suite for React providing a set of highly performant data visualization overlays.</p>
 
 ![screenshot](screenshot.png)
 
