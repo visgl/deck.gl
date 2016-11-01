@@ -35,7 +35,7 @@ import MapboxGLMap from 'react-map-gl';
 import LayerSelector from './layer-selector';
 import LayerInfo from './layer-info';
 
-import request from 'd3-request';
+import * as request from 'd3-request';
 import LAYER_CATEGORIES, {DEFAULT_ACTIVE_LAYERS} from './layer-examples';
 import DeckGL from '../src/react/deckgl';
 
