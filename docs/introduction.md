@@ -20,7 +20,7 @@ challenges, such as:
 * Interactive event handling such as picking
 * Cartographic Projections and integration with underlying map
 * Selection of proven, well-tested layers
-* Ability for the user to create new layers and customize existing Layers
+* Ability for the user to create new layers and customize existing layers
 
 
 ## Ecosystem
