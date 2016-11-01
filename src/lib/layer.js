@@ -471,6 +471,11 @@ export default class Layer {
     const somethingChanged =
       propsChanged || dataChanged || viewportChanged;
 
+    // If data hasn't changed, check update triggers
+    if (!dataChanged) {
+      this._diffUpdateTriggers(oldProps, newProps);
+    }
+
     return {
       propsChanged,
       dataChanged,
@@ -517,12 +522,6 @@ export default class Layer {
       return true;
     }
 
-    // If data hasn't changed, check update triggers
-    // these will indicate if accessors will return diffferent values
-    if (this._diffUpdateTriggers(oldProps, newProps)) {
-      return true;
-    }
-
     return false;
   }
 
@@ -539,7 +538,10 @@ export default class Layer {
     for (const propName in newProps.updateTriggers) {
       const oldTriggers = oldProps.updateTriggers[propName];
       const newTriggers = newProps.updateTriggers[propName];
-      const unequalReason = compareProps(oldTriggers, newTriggers);
+      const unequalReason = compareProps({
+        oldProps: oldTriggers,
+        newProps: newTriggers
+      });
       if (unequalReason) {
         if (propName === 'all') {
           attributeManager.invalidateAll();
