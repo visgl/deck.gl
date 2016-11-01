@@ -21,10 +21,10 @@ shaders need to follow a few rules.
 
 The projection shaderlib package makes it easy to write vertex shaders that
 follow deck.gl's projection methods, enabling your layer to accept coordinates
-in both [longitude,latitude,altitude] or [metersX, metersY,metersZ] format.
+in both [longitude,latitude,altitude] or [metersX,metersY,metersZ] format.
 
 The projection package is included by default by the `assembleShaders` function,
-and offers three functions `preproject`, `scale` and `project`.
+and offers three functions `project_position`, `project_scale` and `project_to_clipspace`.
 
 ```glsl
 attribute vec3 positions;
@@ -32,9 +32,9 @@ attribute vec3 instancePositions;
 attribute float instanceRadius;
 
 void main(void) {
-  vec3 center = preproject(instancePositions);
-  vec3 vertex = positions * scale(radius * instanceRadius);
-  gl_Position = project(center + vertex);
+  vec3 center = project_position(instancePositions);
+  vec3 vertex = positions * project_scale(radius * instanceRadius);
+  gl_Position = project_to_clipspace(center + vertex);
 }
 
 ```
@@ -107,19 +107,14 @@ Faster and leaves the depth buffer unaffected.
 ### Lighting (Vertex and Fragment Shaders)
 
 A simple lighting package is provided in deck.gl, supporting a single
-directional light in addition to ambient light. As is usually the case
-with lighting calculations, he package requires normals to be defined
-for each vertex.
+directional light in addition to ambient light. Turning on lighting requires
+normals to be provided for each vertex.
 
 
 ### Animation (Vertex Shader)
 
-A powerful capability of deck.g is the ability to create layers that animate
-objects using the GPU instead of the CPU.
-
-Updating the positions of thousands of objects in JavaScript
-between each frame can be slow, and moving those calculations to the GPU
-can lead to significant speedups.
+A powerful capability of deck.gl is to render layers with thousands of
+animated and/or interactive objects with the computing power of GPUs.
 
 Creating an animated layer can be as easy as having the application supply
 start and end positions for every object, and a time interval over which
@@ -138,27 +133,26 @@ other modules are included based on flags to `assembleShaders`, and finally
 your shader code is added.
 
 **Note**: Your code can be run through another glsl code assembler like
-`glslify` before you pass it to `assembleShaders`. You can use multiple
+`glslify` before you pass it to `assembleShaders`. The `assembleShaders` function
+does NOT do any kind of syntax analysis so is not able to prevent naming conflicts
+when variable or function names from different modules. You can use multiple
 techniques to organize your shader code to fit your project needs.
 
 
 ### Platform defines
 
-This "virtual" module is a dynamically generated prologue containing
-#defines describing your graphics card and platform. It is automatically
-injected by `assembleShaders` before any modules are included.
+This "virtual" module is a dynamically generated prologue containing #defines describing
+your graphics card and platform. It is designed to work around certain platform-specific
+issues to allow the same rendering results are different GPUs and platforms. It is
+automatically injected by `assembleShaders` before any modules are included.
 
 
 ### fp64
 
-A core feature of deck.gl are the math libraries. These both provide
-emulated 64-bit floating point, to compensate for the lack of 64-bit
-floating point in WebGL. Note that this library is tested on (and contains
-fixes for) graphics cards from both
-
-### math
-
-Contains basic math functions
-
-
-
+A core feature of deck.gl is the fp64 shader math library that can be used leveraged by
+developers to conduct numerical computations that requires high numerical accuracy.
+This shader math libary uses "muliple precision" algorithms to emulate 64-bit double
+precision floating point numbers, with some limitations, using two 32-bit single
+precision floating point numbers. To use it, just set the "fp64" key to "true" when
+calling `assembleShaders`. Please refer to the "64-bit layers" section in the document
+for more information.

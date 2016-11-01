@@ -422,7 +422,7 @@ function test_float_exp(gl, testName) {
   addSpan(testName, currentDiv);
 
  // exp
-  const float0 = getFloat64(4);
+  const float0 = getFloat64(6);
   const float_ref = Math.exp(float0);
 
   const float0_vec2 = fp64ify(float0);
@@ -493,7 +493,7 @@ function test_float_sin(gl, testName) {
   addSpan(testName, currentDiv);
 
  // sin
-  const float0 = getFloat64(2);
+  const float0 = getFloat64(3);
   const float_ref = Math.sin(float0);
 
   const float0_vec2 = fp64ify(float0);
@@ -528,7 +528,7 @@ function test_float_cos(gl, testName) {
   addSpan(testName, currentDiv);
 
  // cos
-  const float0 = getFloat64(2);
+  const float0 = getFloat64(3);
   const float_ref = Math.cos(float0);
 
   const float0_vec2 = fp64ify(float0);
@@ -563,7 +563,7 @@ function test_float_tan(gl, testName) {
   addSpan(testName, currentDiv);
 
  // tan
-  const float0 = getFloat64(2);
+  const float0 = getFloat64(3);
   const float_ref = Math.tan(float0);
 
   const float0_vec2 = fp64ify(float0);
@@ -608,7 +608,7 @@ window.onload = () => {
 
   var idx0;
   var test_no = 0;
-  const loop = 30;
+  const loop = 100;
 
   for (idx0 = 0; idx0 < loop; idx0++) {
     var currentDiv = addDiv();
