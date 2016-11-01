@@ -44,10 +44,11 @@ export default class LayerManager {
     this.oldContext = {};
     this.context = {
       gl,
+      uniforms: {},
       viewport: null,
-      viewportChanged: true,
-      uniforms: {}
+      viewportChanged: true
     };
+    this.redrawNeeded = true;
     Object.seal(this.context);
   }
 
@@ -120,6 +121,7 @@ export default class LayerManager {
         layer.drawLayer({uniforms});
       }
     }
+
     return this;
   }
 
@@ -144,13 +146,14 @@ export default class LayerManager {
     // Make sure that buffer is cleared once when layer list becomes empty
     if (this.layers.length === 0 && this.drewLayers) {
       redraw = true;
+      return true;
     }
 
-    if (this.context.viewportChanged) {
+    if (this.redrawNeeded) {
+      this.redrawNeeded = false;
       redraw = true;
     }
 
-    this.drewLayers = false;
     for (const layer of this.layers) {
       redraw = redraw || layer.getNeedsRedraw({clearRedrawFlags});
       this.drewLayers = true;
