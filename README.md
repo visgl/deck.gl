@@ -13,29 +13,43 @@
   </a>
 </p>
 
-<h1 align="center">deck.gl</h1>
-<p align="center">A WebGL overlay suite for React providing a set of highly performant data visualization overlays.</p>
+<h1 align="center">deck.gl | <a href="https://uber.github.io/deck.gl">Docs</a></h1>
 
-![screenshot](screenshot.png)
+<h5 align="center">A WebGL overlay suite for React providing a set of highly performant data visualization overlays</h5>
+
+[![docs](http://i.imgur.com/mvfvgf0.jpg)](https://uber.github.io/deck.gl)
 
     npm install --save deck.gl
 
 Provides tested, highly performant layers for basic data visualization
 use cases, scatterplots, choropleths etc in 2 and 3 dimensions.
 
+## Example
+
+    import DeckGL from 'deck.gl/react'
+    import {ArcLayer} from 'deck.gl';
+
+    const flights = new ArcLayer({
+      id: 'flights',
+      data: [] // Some flight points
+    });
+
+    <DeckGL width={1920} height={1080} layers={[flights]} />
+
+Take a look at the [docs website](https://uber.github.io/deck.gl) or browse the [docs folder](./docs).
+
 ## Developing
 
     npm install
     npm test
     npm start
-    
 
 Note: **Building** deck.gl (not importing) has a dependency on node
 version 0.12 or higher. If you use an older version, you can install
 a node version manager like nvm and use a separate shell to install
 and build deck.gl.
 
-    npm install -g nvm && nvm install 0.12 && nvm use 0.12
+    npm install -g nvm && nvm install 0.12 && nvm use 0.122
 
 ## Contributing
 
