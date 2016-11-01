@@ -63,7 +63,7 @@ export const docPages = generatePath([
     children: [
       {
         name: 'Introduction',
-        content: getGithubUrl('introduction.md')
+        content: getGithubUrl('README.md')
       },
       {
         name: 'Getting Started',
@@ -153,7 +153,7 @@ export const layerDocPages = generatePath([
     children: [
       {
         name: 'Overview',
-        content: getGithubUrl('layers/layer-catalog.md')
+        content: getGithubUrl('layers/README.md')
       }
     ]
   },
