@@ -11,7 +11,7 @@ Inherits from all [Base Layer properties](/docs/layers/base-layer.md).
 
 ##### `strokeWidth` (Number, optional)
 
-- Default: `9`
+- Default: `1`
 
 The stroke width used to draw each line.
 
