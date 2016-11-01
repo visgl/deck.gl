@@ -41,17 +41,17 @@ export default class LineLayer extends Layer {
    * @param {object} opts
    */
   constructor({
-    strokeWidth = 9,
     getSourcePosition = defaultGetSourcePosition,
     getTargetPosition = defaultGetTargetPosition,
     getColor = defaultGetColor,
+    strokeWidth = 1,
     ...opts
   } = {}) {
     super({
-      strokeWidth,
       getSourcePosition,
       getTargetPosition,
       getColor,
+      strokeWidth,
       ...opts
     });
   }

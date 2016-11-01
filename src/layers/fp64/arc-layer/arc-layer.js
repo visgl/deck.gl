@@ -43,19 +43,19 @@ export default class ArcLayer64 extends Layer {
    * @param {object} props
    */
   constructor({
-    strokeWidth = 1,
     getSourcePosition = defaultGetSourcePosition,
     getTargetPosition = defaultGetTargetPosition,
     getSourceColor = defaultGetColor,
     getTargetColor = defaultGetColor,
+    strokeWidth = 1,
     ...props
   } = {}) {
     super({
-      strokeWidth,
       getSourcePosition,
       getTargetPosition,
       getSourceColor,
       getTargetColor,
+      strokeWidth,
       ...props
     });
   }
