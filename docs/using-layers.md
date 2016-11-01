@@ -9,7 +9,7 @@ Every time some state in your application that affects visualization
 changes, you simply create new Layer instances with updated properties
 and render them.
 
-This constant creation and disposal of Layer instances may seem quite wasteful,
+The constant creation and disposal of Layer instances may seem wasteful,
 however the creation and recycling of JavaScript objects is quite efficient
 in modern JavaScript environments.
 

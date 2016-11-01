@@ -1,5 +1,7 @@
 # Writing Layer Shaders
 
+Note: This documentation is a Work-in-Progress.
+
 ## Instanced vs non-instanced rendering
 
 When doing instanced rendering your vertex shader will be called once for

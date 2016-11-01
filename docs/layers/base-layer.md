@@ -1,15 +1,10 @@
-# Layer Class
+# Layer Base Class
 
 The `Layer` class is the base class of all deck.gl layers, and it provides
-a number of **base properties** which all layers support.
+a number of **base properties** which are availabe in all layers.
 
-Note: The properties of the `Layer` class (which is what matters to the user
-of a layer) are described in this document.
-The layer class also defines the lifecycle methods of the layers, as well as
-a a couple of support methods which the lifecycle methods can use. These are
-important only when subclassing layers and are therefore described separetely.
 
-## Layer Properties
+## Common Layer Properties
 
 ##### `id` (String, optional)
 
@@ -222,9 +217,3 @@ This allows an application to supply its own buffers properties.
 If attributes are shared between layers, a useful technique is to create
 a separate AttributeManager and calculate the attributes once, and then
 pass them in as "overrides" to the layers.
-
-## Layer Methods
-
-Note: Layer methods are designed to support the creation of new layers through
-layer subclassing and are not intended to be called by applications.
-Layer methods are therefore documented in the article about custom layers.

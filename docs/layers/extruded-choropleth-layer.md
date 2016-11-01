@@ -1,19 +1,4 @@
-# Sample Layers
-
-Deck.gl provides a number of sample layers intended to illustrate
-various ideas and approaches to how layers can be designed.
-
-**Warning**:
-The sample layers are not actively supported, and could even have breaking
-changes between minor releases of deck.gl.
-
-If a production application wants to use one of these layers, we recommend
-copying these layers rather than importing them into to your application to
-avoid being affected by changes when updating to new versions of deck.gl.
-
-Inherits from all [Base Layer properties](/docs/layers/base-layer.md).
-
-### ExtrudedChoroplethLayer
+# ExtrudedChoroplethLayer
 
 A layer that extrudes lines in Choropleth polygons by tesselating them into
 long, thin triangles. This provides control over line thickness
@@ -23,6 +8,10 @@ regard.
 **Note:** Very sharp angles can generate very long miters and handling of this
 case needs more work, but for "modest" angles (e.g. 60 degrees in hexagons)
 the results will be good.
+
+Inherits from all [Base Layer properties](/docs/layers/base-layer.md).
+
+
 
 ##### `drawContour` (Boolean, optional)
 

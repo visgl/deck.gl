@@ -1,23 +1,12 @@
 # Using deck.gl with React
 
-deck.gl was designed to be a perfect match for
-[React](https://facebook.github.io/react/) applications.
-deck.gl layers fit directly into React's component render flow.
+deck.gl is a perfect match for
+[React](https://facebook.github.io/react/) applications, since
+deck.gl layers fit naturally into React's component render flow.
 
-To use deck.gl with React, import the `DeckGL` React component and render
-it as a child of the map component you want it to render on top of.
-
-The `layers` propertry is the key to using the DeckGL React component.
-This is where you pass in an array of `deck.gl` layers. This array is
-expected to be an array of newly allocated instances of your
-deck.gl layers, created with updated properties derived from the current
-application state.
-
-To achive the overlay effect, the `DeckGL` component creates a transparent
-`canvas` DOM element, into which the deck.gl layers passed in the `layers`
-prop will render (using WebGL). Since this canvas is transparent, any
-other component you have underneath (typically a map) will visible behind
-the layers.
+To use deck.gl with React, simply import the `DeckGL` React component and
+render it as a child of another component, passing in your list of deck.gl
+layers as a property.
 
 ```
 import MapGL from 'react-map-gl';
@@ -41,36 +30,46 @@ import {ScatterplotLayer} from 'deck.gl';
 
 ```
 
-## About performance
+Remarks
 
-When the DeckGl component tree is drawn to screen, it matches the new Layer
-instances with the instances from the previous render call, and intelligently
-compares the new properties and only update WebGL state when needed
-(just like React does for DOM components).
+* The `DeckGL` component is typically rendered as a child of a
+  map component like
+  [react-map-gl](https://uber.github.io/react-map-gl/#/),
+  but could be rendered as a child
+  of any React component that you want to overlay your layers on top of.
 
-## Using deck.gl without React
+* To achive the overlay effect, the `DeckGL` component creates a transparent
+  `canvas` DOM element, into which the deck.gl layers passed in the `layers`
+  prop will render (using WebGL). Since this canvas is transparent, any
+  other component you have underneath (typically a map) will visible behind
+  the layers.
 
-deck.gl in itself (i.e. the core library and the layers) is
-completely independent of React (and could be used with any JavaScript
-framework). While no such support is provided, such integrations are not
-expected to be particularly difficult.
+* When the deck.gl layer list is drawn to screen, it matches the new Layer
+  instances with the instances from the previous render call, and intelligently
+  compares the new properties and only update WebGL state when needed
+  (just like React does for DOM components).
+
+* Internally, the `DeckGL` component initializes a WebGL context
+  attached to a canvas element, sets up the animation loop and calls provided
+  callbacks on initial load and for each rendering frames. The `DeckGL`
+  component also handles events propagation across layers, and prevents
+  unnecessary calculations using React and deck.gl lifecycle functions.
 
 
 ## DeckGL React Component API
 
-A React component that takes in viewport parameters, layer instances and
-generates an overlay consists of single/multiple layers sharing the same
-rendering context. Internally, the deckgl-overlay initializes a WebGL context
-attached to a canvas element, sets up the animation loop and calls provided
-callbacks on initial load and for each rendering frames. The deckgl-overlay
-also handles events propagation across layers, and prevents unnecessary
-calculation taking advantage of the react lifecycle functions.
+`DeckGL` is a React component that takes deck.gl layer instances and
+viewport parameters, and renders those layers as a transparent overlay.
 
-**Props**
+### Properties
 * `id` (string, optional) canvas ID for customizing styling
 * `width` (number, required) width of the canvas
 * `height` (number, required) height of the canvas
-* `layers` (array, required) the list of layers to be rendered
+* `layers` (array, required)
+  The array of `deck.gl` layers to be rendered. This array is
+  expected to be an array of newly allocated instances of your
+  deck.gl layers, created with updated properties derived from the current
+  application state.
 * `blending` (object, optional) blending settings
 * `style` (object, optional) css styles for the deckgl-canvas
 * `pixelRatio` (number, optional) pixelRatio, will use device ratio by default
