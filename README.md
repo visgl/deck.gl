@@ -26,7 +26,7 @@ use cases, scatterplots, choropleths etc in 2 and 3 dimensions.
 
 ## Example
 
-    import DeckGL from 'deck.gl/react'
+    import DeckGL from 'deck.gl/react';
     import {ArcLayer} from 'deck.gl';
 
     const flights = new ArcLayer({
