@@ -23,9 +23,12 @@
 Provides tested, highly performant layers for basic data visualization
 use cases, scatterplots, choropleths etc in 2 and 3 dimensions.
 
-## Running
+## Developing
 
-    npm run start
+    npm install
+    npm test
+    npm start
+    
 
 Note: **Building** deck.gl (not importing) has a dependency on node
 version 0.12 or higher. If you use an older version, you can install
