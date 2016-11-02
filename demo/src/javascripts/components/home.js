@@ -40,10 +40,11 @@ class Home extends Component {
       {
         ...data[0],
         url: 'data/hero-data-3.txt'
-      }
+      },
+      data[1]
     ]);
 
-    updateMap({...viewport, latitude: 40.7, pitch: 40});
+    updateMap({...viewport, longitude: -74.01, latitude: 40.707, pitch: 40, zoom: 14});
     this.cameraAnimation.start();
   }
 

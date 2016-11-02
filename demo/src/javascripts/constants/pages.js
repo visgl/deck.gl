@@ -17,7 +17,7 @@ function generatePath(tree) {
 
 export const examplePages = generatePath([
   {
-    name: 'Master List',
+    name: 'Overview',
     content: 'docs/examples.md'
   },
   {
