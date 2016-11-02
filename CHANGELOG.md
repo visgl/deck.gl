@@ -16,15 +16,20 @@ All notable changes to deck.gl will be documented in this file.
 
 ### Beta-3.0.0 Releases
 
+#### [dev] -
+- PERF: Enable Uint8Array attributes
+  - Layer.instancePickingColors and Scatterplot.instanceColors now Uint8Arrays
+
 #### [v3.0.0-beta31] - Stabilization/Performance round
-- FIX to lineWidth warning
+- FIX: Scatterplot lineWidth warning
 - FIX: context.viewport = null in draw
 - FIX: opacity prop.
 - FEATURE: Enables prop diff tracing (deck.log.priority = 1)
-- FIX: Defeat spurious redraws
+- PERF: Defeat spurious redraws
 
 #### [v3.0.0-beta30] - Perf fixes - significantly reduce GPU load.
 - FIX: compareProps and updateTriggers fixes
+- PERF: reduce unnecessary updates
 - Doc updates
 
 #### [v3.0.0-beta29] -

@@ -1,4 +1,5 @@
 /* eslint-disable guard-for-in */
+import {GL, glArrayFromType} from 'luma.gl';
 import {log} from './utils';
 import assert from 'assert';
 function noop() {}
@@ -406,7 +407,7 @@ export default class AttributeManager {
 
       // Allocate a new typed array if needed
       if (attribute.needsAlloc) {
-        const ArrayType = attribute.type || Float32Array;
+        const ArrayType = glArrayFromType(attribute.type || GL.FLOAT);
         attribute.value = new ArrayType(attribute.size * allocCount);
         this.onLog(2, `${this.id}:${attributeName} allocated ${allocCount}`);
         attribute.needsAlloc = false;

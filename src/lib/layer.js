@@ -360,9 +360,13 @@ export default class Layer {
     const {attributeManager} = this.state;
     // All instanced layers get instancePickingColors attribute by default
     // Their shaders can use it to render a picking scene
+    // TODO - this slows down non instanced layers
     attributeManager.addInstanced({
-      instancePickingColors:
-        {size: 3, update: this.calculateInstancePickingColors}
+      instancePickingColors: {
+        type: GL.UNSIGNED_BYTE,
+        size: 3,
+        update: this.calculateInstancePickingColors
+      }
     });
 
     // Call subclass lifecycle methods
