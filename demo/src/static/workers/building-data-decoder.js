@@ -18,6 +18,7 @@ onmessage = function(e) {
         coordinates: parts.slice(1).map(function(str) {
           var coords = decodePolyline(str);
           triangleCount += coords.length * 3 - 2;
+          coords.push(coords[0]);
           return [coords];
         })
       },

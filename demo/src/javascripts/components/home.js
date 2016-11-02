@@ -21,7 +21,7 @@ class Home extends Component {
     this.cameraAnimation = ViewportAnimation.fly(
       {bearing: 0},
       {bearing: -15},
-      59000,
+      29000,
       this.props.updateMap
     ).easing(ViewportAnimation.Easing.Sinusoidal.InOut)
     .repeat(Infinity)
@@ -39,9 +39,12 @@ class Home extends Component {
     loadData('Home', [
       {
         ...data[0],
-        url: 'data/hero-data-3.txt'
+        url: 'data/hero-data-s.txt'
       },
-      data[1]
+      {
+        ...data[1],
+        url: 'data/building-data-s.txt'
+      }
     ]);
 
     updateMap({...viewport, longitude: -74.01, latitude: 40.707, pitch: 40, zoom: 14});
