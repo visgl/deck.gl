@@ -105,7 +105,9 @@ class Home extends Component {
           <div className="container">
             <h1>deck.gl</h1>
             <p>Large-scale WebGL-powered Data Visualization</p>
-            <button>Get started</button>
+            <a href="/#/documentation/overview/getting-started">
+              <button>Get started</button>
+            </a>
           </div>
           <div ref="fps" className="fps" />
         </section>

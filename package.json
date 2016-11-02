@@ -63,7 +63,7 @@
     "discify": "^1.2.0",
     "electron-prebuilt": "^0.37.2",
     "envify": "^3.4.0",
-    "eslint": "^2.0.0",
+    "eslint": "^3.9.1",
     "eslint-config-uber-es2015": "^2.0.0",
     "eslint-config-uber-jsx": "^2.0.0",
     "eslint-plugin-react": "^5.0.0",

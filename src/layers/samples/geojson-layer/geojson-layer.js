@@ -76,9 +76,9 @@ export default class GeoJsonLayer extends Layer {
     // So that rerendering the SubLayers becomes trivial
     const features = [];
 
-    let count = 0;
+    // let count = 0;
     for (const feature of this.props.data) {
-      count++;
+      // count++;
 
       const {type} = feature.geometry;
       switch (type) {

@@ -1,5 +1,5 @@
 function getGithubUrl(filename) {
-  return `https://raw.githubusercontent.com/uber/deck.gl/dev/docs/${filename}`
+  return `https://raw.githubusercontent.com/uber/deck.gl/dev/docs/${filename}`;
 }
 
 function generatePath(tree) {
