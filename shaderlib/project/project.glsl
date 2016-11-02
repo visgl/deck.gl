@@ -68,7 +68,7 @@ float sin_taylor_fp32(float a) {
 void sincos_taylor_fp32(float a, out float sin_t, out float cos_t) {
   if (a == 0.0) {
     sin_t = 0.0;
-    cos_t = 0.0;
+    cos_t = 1.0;
   }
   sin_t = sin_taylor_fp32(a);
   cos_t = sqrt(1.0 - sin_t * sin_t);
@@ -96,14 +96,14 @@ float tan_fp32(float a) {
 
     t = r - PI_2 * q;
 
-    q = floor(t.x / PI_16.x + 0.5);
+    q = floor(t / PI_16 + 0.5);
     int k = int(q);
     int abs_k = int(abs(float(k)));
 
     if (abs_k > 4) {
         return 0.0 / 0.0;
     } else {
-        t = t - PI_16 * k;
+        t = t - PI_16 * q;
     }
 
     float u = 0.0;
@@ -132,9 +132,9 @@ float tan_fp32(float a) {
         }
         if (k > 0) {
             s = u * sin_t + v * cos_t;
-            c = u * cos_t + v * sin_t;
+            c = u * cos_t - v * sin_t;
         } else {
-            s = u * sin_t + v * cos_t;
+            s = u * sin_t - v * cos_t;
             c = u * cos_t + v * sin_t;
         }
     }

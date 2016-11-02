@@ -19,33 +19,34 @@
 // THE SOFTWARE.
 uniform float ONE;
 
-const vec2 E = vec2(2.7182817459106445e+00, 8.254840366817007e-08);
-const vec2 LOG2 = vec2(0.6931471824645996e+00, -1.9046542121259336e-09);
+const vec2 E_FP64 = vec2(2.7182817459106445e+00, 8.254840366817007e-08);
+const vec2 LOG2_FP64 = vec2(0.6931471824645996e+00, -1.9046542121259336e-09);
 const vec2 PI_FP64 = vec2(3.1415927410125732, -8.742278012618954e-8);
-const vec2 TWO_PI = vec2(6.2831854820251465, -1.7484556025237907e-7);
-const vec2 PI_2 = vec2(1.5707963705062866, -4.371139006309477e-8);
-const vec2 PI_16 = vec2(0.19634954631328583, -5.463923757886846e-9);
-const vec2 PI_16_2 = vec2(0.39269909262657166, -1.0927847515773692e-8);
-const vec2 PI_16_3 = vec2(0.5890486240386963, -1.4906100798128818e-9);
+const vec2 TWO_PI_FP64 = vec2(6.2831854820251465, -1.7484556025237907e-7);
+const vec2 PI_2_FP64 = vec2(1.5707963705062866, -4.371139006309477e-8);
+const vec2 PI_4_FP64 = vec2(0.7853981852531433, -2.1855695031547384e-8);
+const vec2 PI_16_FP64 = vec2(0.19634954631328583, -5.463923757886846e-9);
+const vec2 PI_16_2_FP64 = vec2(0.39269909262657166, -1.0927847515773692e-8);
+const vec2 PI_16_3_FP64 = vec2(0.5890486240386963, -1.4906100798128818e-9);
 
-const vec2 SIN_TABLE_0 = vec2(0.19509032368659973, -1.6704714833615242e-9);
-const vec2 SIN_TABLE_1 = vec2(0.3826834261417389, 6.22335089017767e-9);
-const vec2 SIN_TABLE_2 = vec2(0.5555702447891235, -1.1769521357507529e-8);
-const vec2 SIN_TABLE_3 = vec2(0.7071067690849304, 1.2101617041793133e-8);
+const vec2 SIN_TABLE_0_FP64 = vec2(0.19509032368659973, -1.6704714833615242e-9);
+const vec2 SIN_TABLE_1_FP64 = vec2(0.3826834261417389, 6.22335089017767e-9);
+const vec2 SIN_TABLE_2_FP64 = vec2(0.5555702447891235, -1.1769521357507529e-8);
+const vec2 SIN_TABLE_3_FP64 = vec2(0.7071067690849304, 1.2101617041793133e-8);
 
-const vec2 COS_TABLE_0 = vec2(0.9807852506637573, 2.9739473106360492e-8);
-const vec2 COS_TABLE_1 = vec2(0.9238795042037964, 2.8307490351764386e-8);
-const vec2 COS_TABLE_2 = vec2(0.8314695954322815, 1.6870263741530778e-8);
-const vec2 COS_TABLE_3 = vec2(0.7071067690849304, 1.2101617152815436e-8);
+const vec2 COS_TABLE_0_FP64 = vec2(0.9807852506637573, 2.9739473106360492e-8);
+const vec2 COS_TABLE_1_FP64 = vec2(0.9238795042037964, 2.8307490351764386e-8);
+const vec2 COS_TABLE_2_FP64 = vec2(0.8314695954322815, 1.6870263741530778e-8);
+const vec2 COS_TABLE_3_FP64 = vec2(0.7071067690849304, 1.2101617152815436e-8);
 
-const vec2 INVERSE_FACTORIAL_3 = vec2(1.666666716337204e-01, -4.967053879312289e-09); // 1/3!
-const vec2 INVERSE_FACTORIAL_4 = vec2(4.16666679084301e-02, -1.2417634698280722e-09); // 1/4!
-const vec2 INVERSE_FACTORIAL_5 = vec2(8.333333767950535e-03, -4.34617203337595e-10); // 1/5!
-const vec2 INVERSE_FACTORIAL_6 = vec2(1.3888889225199819e-03, -3.3631094437103215e-11); // 1/6!
-const vec2 INVERSE_FACTORIAL_7 = vec2(1.9841270113829523e-04,  -2.725596874933456e-12); // 1/7!
-const vec2 INVERSE_FACTORIAL_8 = vec2(2.4801587642286904e-05, -3.406996025904184e-13); // 1/8!
-const vec2 INVERSE_FACTORIAL_9 = vec2(2.75573188446287533e-06, 3.7935713937038186e-14); // 1/9!
-const vec2 INVERSE_FACTORIAL_10 = vec2(2.755731998149713e-07, -7.575112367869873e-15); // 1/10!
+const vec2 INVERSE_FACTORIAL_3_FP64 = vec2(1.666666716337204e-01, -4.967053879312289e-09); // 1/3!
+const vec2 INVERSE_FACTORIAL_4_FP64 = vec2(4.16666679084301e-02, -1.2417634698280722e-09); // 1/4!
+const vec2 INVERSE_FACTORIAL_5_FP64 = vec2(8.333333767950535e-03, -4.34617203337595e-10); // 1/5!
+const vec2 INVERSE_FACTORIAL_6_FP64 = vec2(1.3888889225199819e-03, -3.3631094437103215e-11); // 1/6!
+const vec2 INVERSE_FACTORIAL_7_FP64 = vec2(1.9841270113829523e-04,  -2.725596874933456e-12); // 1/7!
+const vec2 INVERSE_FACTORIAL_8_FP64 = vec2(2.4801587642286904e-05, -3.406996025904184e-13); // 1/8!
+const vec2 INVERSE_FACTORIAL_9_FP64 = vec2(2.75573188446287533e-06, 3.7935713937038186e-14); // 1/9!
+const vec2 INVERSE_FACTORIAL_10_FP64 = vec2(2.755731998149713e-07, -7.575112367869873e-15); // 1/10!
 
 float nint(float d) {
     if (d == floor(d)) return d;
@@ -223,36 +224,36 @@ vec2 exp_fp64(vec2 a) {
   if (a.x <= -88.0) return vec2(0.0, 0.0);
   if (a.x >= 88.0) return vec2(1.0 / 0.0, 1.0 / 0.0);
   if (a.x == 0.0 && a.y == 0.0) return vec2(1.0, 0.0);
-  if (a.x == 1.0 && a.y == 0.0) return E;
+  if (a.x == 1.0 && a.y == 0.0) return E_FP64;
 
   // Range reduction using assume a = kr + m * log(2), k and m being integers.
   // Set k = 9 (we can choose other k to trade accuracy with performance.
   // we only need to calculate exp(r) and using exp(a) = 2^m * exp(r)^k
 
-  float m = floor(a.x / LOG2.x + 0.5);
-  vec2 r = sub_fp64(a, mul_fp64(LOG2, vec2(m, 0.0))) * inv_k;
+  float m = floor(a.x / LOG2_FP64.x + 0.5);
+  vec2 r = sub_fp64(a, mul_fp64(LOG2_FP64, vec2(m, 0.0))) * inv_k;
   vec2 s, t, p;
 
   p = mul_fp64(r, r);
   s = sum_fp64(r, p * 0.5);
   p = mul_fp64(p, r);
-  t = mul_fp64(p, INVERSE_FACTORIAL_3);
+  t = mul_fp64(p, INVERSE_FACTORIAL_3_FP64);
 
   s = sum_fp64(s, t);
   p = mul_fp64(p, r);
-  t = mul_fp64(p, INVERSE_FACTORIAL_4);
+  t = mul_fp64(p, INVERSE_FACTORIAL_4_FP64);
 
   s = sum_fp64(s, t);
   p = mul_fp64(p, r);
-  t = mul_fp64(p, INVERSE_FACTORIAL_5);
+  t = mul_fp64(p, INVERSE_FACTORIAL_5_FP64);
 
   s = sum_fp64(s, t);
   p = mul_fp64(p, r);
-  t = mul_fp64(p, INVERSE_FACTORIAL_6);
+  t = mul_fp64(p, INVERSE_FACTORIAL_6_FP64);
 
   s = sum_fp64(s, t);
   p = mul_fp64(p, r);
-  t = mul_fp64(p, INVERSE_FACTORIAL_7);
+  t = mul_fp64(p, INVERSE_FACTORIAL_7_FP64);
 
   s = sum_fp64(s, t);
 
@@ -301,19 +302,19 @@ vec2 sin_taylor_fp64(vec2 a) {
   r = a;
 
   r = mul_fp64(r, x);
-  t = mul_fp64(r, INVERSE_FACTORIAL_3);
+  t = mul_fp64(r, INVERSE_FACTORIAL_3_FP64);
   s = sum_fp64(s, t);
 
   r = mul_fp64(r, x);
-  t = mul_fp64(r, INVERSE_FACTORIAL_5);
+  t = mul_fp64(r, INVERSE_FACTORIAL_5_FP64);
   s = sum_fp64(s, t);
 
   r = mul_fp64(r, x);
-  t = mul_fp64(r, INVERSE_FACTORIAL_7);
+  t = mul_fp64(r, INVERSE_FACTORIAL_7_FP64);
   s = sum_fp64(s, t);
 
   r = mul_fp64(r, x);
-  t = mul_fp64(r, INVERSE_FACTORIAL_9);
+  t = mul_fp64(r, INVERSE_FACTORIAL_9_FP64);
   s = sum_fp64(s, t);
 
   return s;
@@ -331,19 +332,19 @@ vec2 cos_taylor_fp64(vec2 a) {
   s = sum_fp64(vec2(1.0, 0.0), r * 0.5);
 
   r = mul_fp64(r, x);
-  t = mul_fp64(r, INVERSE_FACTORIAL_4);
+  t = mul_fp64(r, INVERSE_FACTORIAL_4_FP64);
   s = sum_fp64(s, t);
 
   r = mul_fp64(r, x);
-  t = mul_fp64(r, INVERSE_FACTORIAL_6);
+  t = mul_fp64(r, INVERSE_FACTORIAL_6_FP64);
   s = sum_fp64(s, t);
 
   r = mul_fp64(r, x);
-  t = mul_fp64(r, INVERSE_FACTORIAL_8);
+  t = mul_fp64(r, INVERSE_FACTORIAL_8_FP64);
   s = sum_fp64(s, t);
 
   r = mul_fp64(r, x);
-  t = mul_fp64(r, INVERSE_FACTORIAL_10);
+  t = mul_fp64(r, INVERSE_FACTORIAL_10_FP64);
   s = sum_fp64(s, t);
 
   return s;
@@ -365,20 +366,20 @@ vec2 sin_fp64(vec2 a) {
     }
 
     // 2pi range reduction
-    vec2 z = nint_fp64(div_fp64(a, TWO_PI));
-    vec2 r = sub_fp64(a, mul_fp64(TWO_PI, z));
+    vec2 z = nint_fp64(div_fp64(a, TWO_PI_FP64));
+    vec2 r = sub_fp64(a, mul_fp64(TWO_PI_FP64, z));
 
     vec2 t;
-    float q = floor(r.x / PI_2.x + 0.5);
+    float q = floor(r.x / PI_2_FP64.x + 0.5);
     int j = int(q);
 
     if (j < -2 || j > 2) {
         return vec2(0.0 / 0.0, 0.0 / 0.0);
     }
 
-    t = sub_fp64(r, mul_fp64(PI_2, vec2(q, 0.0)));
+    t = sub_fp64(r, mul_fp64(PI_2_FP64, vec2(q, 0.0)));
 
-    q = floor(t.x / PI_16.x + 0.5);
+    q = floor(t.x / PI_16_FP64.x + 0.5);
     int k = int(q);
 
     if (k == 0) {
@@ -398,11 +399,11 @@ vec2 sin_fp64(vec2 a) {
     if (abs_k > 4) {
         return vec2(0.0 / 0.0, 0.0 / 0.0);
     } else if (k == 3) {
-        t = sub_fp64(t, PI_16_3);
+        t = sub_fp64(t, PI_16_3_FP64);
     } else if (k == -3) {
-        t = sum_fp64(t, PI_16_3);
+        t = sum_fp64(t, PI_16_3_FP64);
     } else {
-        t = sub_fp64(t, mul_fp64(PI_16, vec2(q, 0.0)));
+        t = sub_fp64(t, mul_fp64(PI_16_FP64, vec2(q, 0.0)));
     }
 
     vec2 u = vec2(0.0, 0.0);
@@ -410,31 +411,31 @@ vec2 sin_fp64(vec2 a) {
 
 #if defined(NVIDIA_EQUATION_WORKAROUND) || defined(INTEL_EQUATION_WORKAROUND)
     if (abs(float(abs_k) - 1.0) < 0.5) {
-        u = COS_TABLE_0;
-        v = SIN_TABLE_0;
+        u = COS_TABLE_0_FP64;
+        v = SIN_TABLE_0_FP64;
     } else if (abs(float(abs_k) - 2.0) < 0.5) {
-        u = COS_TABLE_1;
-        v = SIN_TABLE_1;
+        u = COS_TABLE_1_FP64;
+        v = SIN_TABLE_1_FP64;
     } else if (abs(float(abs_k) - 3.0) < 0.5) {
-        u = COS_TABLE_2;
-        v = SIN_TABLE_2;
+        u = COS_TABLE_2_FP64;
+        v = SIN_TABLE_2_FP64;
     } else if (abs(float(abs_k) - 4.0) < 0.5) {
-        u = COS_TABLE_3;
-        v = SIN_TABLE_3;
+        u = COS_TABLE_3_FP64;
+        v = SIN_TABLE_3_FP64;
     }
 #else
     if (abs_k == 1) {
-        u = COS_TABLE_0;
-        v = SIN_TABLE_0;
+        u = COS_TABLE_0_FP64;
+        v = SIN_TABLE_0_FP64;
     } else if (abs_k == 2) {
-        u = COS_TABLE_1;
-        v = SIN_TABLE_1;
+        u = COS_TABLE_1_FP64;
+        v = SIN_TABLE_1_FP64;
     } else if (abs_k == 3) {
-        u = COS_TABLE_2;
-        v = SIN_TABLE_2;
+        u = COS_TABLE_2_FP64;
+        v = SIN_TABLE_2_FP64;
     } else if (abs_k == 4) {
-        u = COS_TABLE_3;
-        v = SIN_TABLE_3;
+        u = COS_TABLE_3_FP64;
+        v = SIN_TABLE_3_FP64;
     }
 #endif
 
@@ -477,20 +478,20 @@ vec2 cos_fp64(vec2 a) {
     }
 
     // 2pi range reduction
-    vec2 z = nint_fp64(div_fp64(a, TWO_PI));
-    vec2 r = sub_fp64(a, mul_fp64(TWO_PI, z));
+    vec2 z = nint_fp64(div_fp64(a, TWO_PI_FP64));
+    vec2 r = sub_fp64(a, mul_fp64(TWO_PI_FP64, z));
 
     vec2 t;
-    float q = floor(r.x / PI_2.x + 0.5);
+    float q = floor(r.x / PI_2_FP64.x + 0.5);
     int j = int(q);
 
     if (j < -2 || j > 2) {
         return vec2(0.0 / 0.0, 0.0 / 0.0);
     }
 
-    t = sub_fp64(r, mul_fp64(PI_2, vec2(q, 0.0)));
+    t = sub_fp64(r, mul_fp64(PI_2_FP64, vec2(q, 0.0)));
 
-    q = floor(t.x / PI_16.x + 0.5);
+    q = floor(t.x / PI_16_FP64.x + 0.5);
     int k = int(q);
 
     if (k == 0) {
@@ -510,11 +511,11 @@ vec2 cos_fp64(vec2 a) {
     if (abs_k > 4) {
         return vec2(0.0 / 0.0, 0.0 / 0.0);
     } else if (k == 3) {
-        t = sub_fp64(t, PI_16_3);
+        t = sub_fp64(t, PI_16_3_FP64);
     } else if (k == -3) {
-        t = sum_fp64(t, PI_16_3);
+        t = sum_fp64(t, PI_16_3_FP64);
     } else {
-        t = sub_fp64(t, mul_fp64(PI_16, vec2(q, 0.0)));
+        t = sub_fp64(t, mul_fp64(PI_16_FP64, vec2(q, 0.0)));
     }
 
     vec2 u = vec2(0.0, 0.0);
@@ -522,37 +523,36 @@ vec2 cos_fp64(vec2 a) {
 
 #if defined(NVIDIA_EQUATION_WORKAROUND) || defined(INTEL_EQUATION_WORKAROUND)
     if (abs(float(abs_k) - 1.0) < 0.5) {
-        u = COS_TABLE_0;
-        v = SIN_TABLE_0;
+        u = COS_TABLE_0_FP64;
+        v = SIN_TABLE_0_FP64;
     } else if (abs(float(abs_k) - 2.0) < 0.5) {
-        u = COS_TABLE_1;
-        v = SIN_TABLE_1;
+        u = COS_TABLE_1_FP64;
+        v = SIN_TABLE_1_FP64;
     } else if (abs(float(abs_k) - 3.0) < 0.5) {
-        u = COS_TABLE_2;
-        v = SIN_TABLE_2;
+        u = COS_TABLE_2_FP64;
+        v = SIN_TABLE_2_FP64;
     } else if (abs(float(abs_k) - 4.0) < 0.5) {
-        u = COS_TABLE_3;
-        v = SIN_TABLE_3;
+        u = COS_TABLE_3_FP64;
+        v = SIN_TABLE_3_FP64;
     }
 #else
     if (abs_k == 1) {
-        u = COS_TABLE_0;
-        v = SIN_TABLE_0;
+        u = COS_TABLE_0_FP64;
+        v = SIN_TABLE_0_FP64;
     } else if (abs_k == 2) {
-        u = COS_TABLE_1;
-        v = SIN_TABLE_1;
+        u = COS_TABLE_1_FP64;
+        v = SIN_TABLE_1_FP64;
     } else if (abs_k == 3) {
-        u = COS_TABLE_2;
-        v = SIN_TABLE_2;
+        u = COS_TABLE_2_FP64;
+        v = SIN_TABLE_2_FP64;
     } else if (abs_k == 4) {
-        u = COS_TABLE_3;
-        v = SIN_TABLE_3;
+        u = COS_TABLE_3_FP64;
+        v = SIN_TABLE_3_FP64;
     }
 #endif
 
     vec2 sin_t, cos_t;
     sincos_taylor_fp64(t, sin_t, cos_t);
-
 
     vec2 result = vec2(0.0, 0.0);
     if (j == 0) {
@@ -593,20 +593,21 @@ vec2 tan_fp64(vec2 a) {
     }
 
     // 2pi range reduction
-    vec2 z = nint_fp64(div_fp64(a, TWO_PI));
-    vec2 r = sub_fp64(a, mul_fp64(TWO_PI, z));
+    vec2 z = nint_fp64(div_fp64(a, TWO_PI_FP64));
+    vec2 r = sub_fp64(a, mul_fp64(TWO_PI_FP64, z));
 
     vec2 t;
-    float q = floor(r.x / PI_2.x + 0.5);
+    float q = floor(r.x / PI_2_FP64.x + 0.5);
     int j = int(q);
+
 
     if (j < -2 || j > 2) {
         return vec2(0.0 / 0.0, 0.0 / 0.0);
     }
 
-    t = sub_fp64(r, mul_fp64(PI_2, vec2(q, 0.0)));
+    t = sub_fp64(r, mul_fp64(PI_2_FP64, vec2(q, 0.0)));
 
-    q = floor(t.x / PI_16.x + 0.5);
+    q = floor(t.x / PI_16_FP64.x + 0.5);
     int k = int(q);
     int abs_k = int(abs(float(k)));
 
@@ -615,11 +616,11 @@ vec2 tan_fp64(vec2 a) {
     if (abs_k > 4) {
         return vec2(0.0 / 0.0, 0.0 / 0.0);
     } else if (k == 3) {
-        t = sub_fp64(t, PI_16_3);
+        t = sub_fp64(t, PI_16_3_FP64);
     } else if (k == -3) {
-        t = sum_fp64(t, PI_16_3);
+        t = sum_fp64(t, PI_16_3_FP64);
     } else {
-        t = sub_fp64(t, mul_fp64(PI_16, vec2(q, 0.0)));
+        t = sub_fp64(t, mul_fp64(PI_16_FP64, vec2(q, 0.0)));
     }
 
 
@@ -636,34 +637,33 @@ vec2 tan_fp64(vec2 a) {
     } else {
 #if defined(NVIDIA_EQUATION_WORKAROUND) || defined(INTEL_EQUATION_WORKAROUND)
         if (abs(float(abs_k) - 1.0) < 0.5) {
-            u = COS_TABLE_0;
-            v = SIN_TABLE_0;
+            u = COS_TABLE_0_FP64;
+            v = SIN_TABLE_0_FP64;
         } else if (abs(float(abs_k) - 2.0) < 0.5) {
-            u = COS_TABLE_1;
-            v = SIN_TABLE_1;
+            u = COS_TABLE_1_FP64;
+            v = SIN_TABLE_1_FP64;
         } else if (abs(float(abs_k) - 3.0) < 0.5) {
-            u = COS_TABLE_2;
-            v = SIN_TABLE_2;
+            u = COS_TABLE_2_FP64;
+            v = SIN_TABLE_2_FP64;
         } else if (abs(float(abs_k) - 4.0) < 0.5) {
-            u = COS_TABLE_3;
-            v = SIN_TABLE_3;
+            u = COS_TABLE_3_FP64;
+            v = SIN_TABLE_3_FP64;
         }
 #else
         if (abs_k == 1) {
-            u = COS_TABLE_0;
-            v = SIN_TABLE_0;
+            u = COS_TABLE_0_FP64;
+            v = SIN_TABLE_0_FP64;
         } else if (abs_k == 2) {
-            u = COS_TABLE_1;
-            v = SIN_TABLE_1;
+            u = COS_TABLE_1_FP64;
+            v = SIN_TABLE_1_FP64;
         } else if (abs_k == 3) {
-            u = COS_TABLE_2;
-            v = SIN_TABLE_2;
+            u = COS_TABLE_2_FP64;
+            v = SIN_TABLE_2_FP64;
         } else if (abs_k == 4) {
-            u = COS_TABLE_3;
-            v = SIN_TABLE_3;
+            u = COS_TABLE_3_FP64;
+            v = SIN_TABLE_3_FP64;
         }
 #endif
-
         if (k > 0) {
             s = sum_fp64(mul_fp64(u, sin_t), mul_fp64(v, cos_t));
             c = sub_fp64(mul_fp64(u, cos_t), mul_fp64(v, sin_t));
@@ -690,7 +690,7 @@ vec2 tan_fp64(vec2 a) {
 }
 
 vec2 radians_fp64(vec2 degree) {
-  return mul_fp64(div_fp64(degree, vec2(180.0, 0.0)), PI_FP64);
+  return div_fp64(mul_fp64(degree, PI_FP64), vec2(180.0, 0.0));
 }
 
 // Vector functions
