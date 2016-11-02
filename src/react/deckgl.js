@@ -17,14 +17,13 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-
 import React, {PropTypes} from 'react';
 import autobind from 'autobind-decorator';
-
 import WebGLRenderer from './webgl-renderer';
 import {LayerManager} from '../lib';
 import {GL, addEvents} from 'luma.gl';
-import throttle from 'lodash.throttle';
+
+function noop() {}
 
 const PROP_TYPES = {
   id: PropTypes.string,
@@ -33,14 +32,18 @@ const PROP_TYPES = {
   layers: PropTypes.array.isRequired,
   gl: PropTypes.object,
   debug: PropTypes.bool,
-  onWebGLInitialized: PropTypes.func
+  onWebGLInitialized: noop,
+  onLayerClick: noop,
+  onLayerHover: noop
 };
 
 const DEFAULT_PROPS = {
   id: 'deckgl-overlay',
   debug: false,
   gl: null,
-  onWebGLInitialized: () => {}
+  onWebGLInitialized: noop,
+  onLayerClick: noop,
+  onLayerHover: noop
 };
 
 export default class DeckGL extends React.Component {
@@ -90,20 +93,24 @@ export default class DeckGL extends React.Component {
       cachePosition: false,
       centerOrigin: false,
       onClick: this._onClick,
-      onMouseMove: throttle(this._onMouseMove, 100)
+      onMouseMove: this._onMouseMove
     });
   }
 
   // Route events to layers
   @autobind _onClick(event) {
     const {x, y} = event;
-    this.layerManager.pickLayer({x, y, type: 'click'});
+    const selectedInfos = this.layerManager.pickLayer({x, y, mode: 'click'});
+    const firstInfo = selectedInfos.length > 0 ? selectedInfos[0] : null;
+    this.props.onLayerClick(firstInfo, selectedInfos);
   }
 
   // Route events to layers
   @autobind _onMouseMove(event) {
     const {x, y} = event;
-    this.layerManager.pickLayer({x, y, type: 'hover'});
+    const selectedInfos = this.layerManager.pickLayer({x, y, mode: 'hover'});
+    const firstInfo = selectedInfos.length > 0 ? selectedInfos[0] : null;
+    this.props.onLayerHover(firstInfo, selectedInfos);
   }
 
   @autobind _onRenderFrame({gl}) {

@@ -38,12 +38,14 @@ These WebGL buffers are saved and matched with any future changes.
 
 The `data` property will accept any containers that can be iterated over using
 ES6 for-of iteration, this includes e.g. native Arrays, ES6 Sets and Maps,
-all Immutable.js containers, etc. One notable exception is the native JavaScript
-object maps. It is recommended to use ES6 Maps instead.
+all [Immutable.js](https://facebook.github.io/immutable-js/)
+containers, etc. Even native JavaScript objects can be passed in as data containers to deck.gl, by supplying the `dataIterator` prop to enable
+teration over object values.
 
-Also, it is recommended, but not required, to use immutable data (containers AND
-objects) as it ensures that changes to `data` property trigger a re-render.
-(See the notes on `rerenderCount` and `updateCount` properties.)
+As a side note, use of Immutable containers and data structures is fairly
+common in applications that follow the Reactive architecture. While using
+them is by no means required, their use does ensure that deep changes to
+the `data` property always triggers a re-render.
 
 
 ## Notes on picking

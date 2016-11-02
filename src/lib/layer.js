@@ -55,7 +55,6 @@ export default class Layer {
    * @param {object} props - See docs above
    */
   constructor(props) {
-
     props = {
       ...DEFAULT_PROPS,
       ...props,
@@ -129,7 +128,8 @@ export default class Layer {
   }
 
   // If state has a model, draw it with supplied uniforms
-  pick({uniforms, pickEnableUniforms, pickDisableUniforms, deviceX, deviceY}) {
+  /* eslint-disable max-statements */
+  pick({info, uniforms, pickEnableUniforms, pickDisableUniforms, mode}) {
     const {gl} = this.context;
     const {model} = this.state;
 
@@ -139,44 +139,25 @@ export default class Layer {
       model.setUniforms(pickDisableUniforms);
 
       // Read color in the central pixel, to be mapped with picking colors
+      const [x, y] = info.devicePixel;
       const color = new Uint8Array(4);
-      gl.readPixels(deviceX, deviceY, 1, 1, GL.RGBA, GL.UNSIGNED_BYTE, color);
+      gl.readPixels(x, y, 1, 1, GL.RGBA, GL.UNSIGNED_BYTE, color);
 
-      const index = this.decodePickingColor(color);
+      // Index < 0 means nothing selected
+      info.index = this.decodePickingColor(color);
+      info.color = color;
 
-      if (index >= 0) {
-        // Return an info object
-        return {index, color};
+      // TODO - selectedPickingColor should be removed?
+      if (mode === 'hover') {
+        const selectedPickingColor = new Float32Array(3);
+        selectedPickingColor[0] = color[0];
+        selectedPickingColor[1] = color[1];
+        selectedPickingColor[2] = color[2];
+        this.setUniforms({selectedPickingColor});
       }
     }
-
-    return null;
   }
-
-  // VIRTUAL METHOD - Override to add props to `info` object in sublayer
-  // The sublayer may know what object e.g. lat,lon corresponds to using math
-  // etc even when color picking does not work
-  pickInfo(info) {
-  }
-
-  // Undocumented/Unsupported lifecycle method - called on hover
-  hover(info) {
-    const {color} = info;
-
-    // TODO - selectedPickingColor should be removed?
-    const selectedPickingColor = new Float32Array(3);
-    selectedPickingColor[0] = color[0];
-    selectedPickingColor[1] = color[1];
-    selectedPickingColor[2] = color[2];
-    this.setUniforms({selectedPickingColor});
-
-    return this.props.onHover(info);
-  }
-
-  // Undocumented/Unsupported lifecycle method - called on click
-  click(info) {
-    return this.props.onClick(info);
-  }
+  /* eslint-enable max-statements */
 
   // END LIFECYCLE METHODS
   // //////////////////////////////////////////////////

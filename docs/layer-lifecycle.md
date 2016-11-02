@@ -88,10 +88,6 @@ uses that model for picking, and renders that model with attributes set
 that allow the layer shaders to render picking colors instead of normal
 colors.
 
-##### Picking: pickInfo(info)
-
-Allows a layer to add additional context to a picked object
-
 ### Comparison with React's Lifecycle
 
 If you are familiar with React and the

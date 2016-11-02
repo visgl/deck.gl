@@ -114,9 +114,11 @@ export default class ExtrudedChoroplethLayer64 extends Layer {
     });
   }
 
-  pickInfo(info) {
+  pick(opts) {
+    super.pick(opts);
+    const {info} = opts;
     const index = this.decodePickingColor(info.color);
-    const feature = this.props.data.features[index];
+    const feature = index >= 0 ? this.props.data.features[index] : null;
     info.feature = feature;
     info.object = feature;
   }

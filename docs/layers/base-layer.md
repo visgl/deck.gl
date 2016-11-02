@@ -78,23 +78,32 @@ Whether layer responds to mouse events.
 
 ##### `onHover` (Function, optional)
 
-This callback will be called when the mouse hovers over a feature drawn
-by the layer (assuming it is not occluded by any succeeding layers).
+This callback will be called when the mouse hovers over the deck.gl
+viewport. The callback will be called for every layer that has
+both `visible` and `picking` properties set. When hovering over a
+feature drawn by the layer will be detected and mapped to an index.
 
 The function will be called with a single parameter `info`, which is an
-object that contains a variety of fields describing the hover event and
-what was hovered.
+object that contains a variety of fields describing the mouse or touch
+event and what was hovered.
+
+If index is -1, no feature was matched for this layer
 
 **Requires `pickable` to be true.**
 
 ##### `onClick` (Function, optional)
 
-This callback will be called when the mouse hovers over a feature drawn
-by the layer (assuming it is not occluded by any succeeding layers).
+This callback will be called when the mouse clicks on the deck.gl
+viewport. The callback will be called for every layer that has
+both `visible` and `picking` properties set. When clicking on a
+feature drawn by the layer this will be detected and mapped to an
+index in the data prop.
 
 The function will be called with a single parameter `info`, which is an
-object that contains a variety of fields describing the click event and
-what was hovered.
+object that contains a variety of fields describing the mouse or touch
+event and what was clicked.
+
+If index is -1, no feature was matched for this layer
 
 **Requires `pickable` to be true.**
 

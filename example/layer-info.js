@@ -4,7 +4,6 @@ import React from 'react';
 
 export default function LayerInfo({
   hoverChoropleth,
-  hoverHexagon,
   hoverPoint,
   hoverArc,
   hoverLine,
@@ -29,15 +28,6 @@ export default function LayerInfo({
         marginBottom: '1em',
         width: 300
       } }>
-        <div>
-          { hoverHexagon && hoverHexagon.geoCoords &&
-            ` (${hoverHexagon.geoCoords.lat.toFixed(4)} ` +
-            `${hoverHexagon.geoCoords.lon.toFixed(4)})` }
-        </div>
-        <div>
-          Hexagon
-          { hoverHexagon && ` ${hoverHexagon.type}=${hoverHexagon.index}` }
-        </div>
         <div>
           Point
           { hoverPoint && ` ${hoverPoint.type}=${hoverPoint.index}` }

@@ -102,9 +102,11 @@ export default class ChoroplethLayer extends Layer {
     gl.lineWidth(oldLineWidth);
   }
 
-  pickInfo(info) {
+  pick(opts) {
+    super.pick(opts);
+    const {info} = opts;
     const index = this.decodePickingColor(info.color);
-    const feature = this.props.data.features[index];
+    const feature = index >= 0 ? this.props.data.features[index] : null;
     info.feature = feature;
     info.object = feature;
   }
@@ -179,7 +181,7 @@ export default class ChoroplethLayer extends Layer {
       }
     );
 
-    attribute.value = new Float32Array(flattenDeep(colors));
+    attribute.value = new Uint8Array(flattenDeep(colors));
   }
 
   // Override the default picking colors calculation
@@ -188,7 +190,7 @@ export default class ChoroplethLayer extends Layer {
     const colors = this.state.choropleths.map(
       (choropleth, choroplethIndex) => {
         const {featureIndex} = choropleth;
-        const color = this.props.drawContour ? [-1, -1, -1] : [
+        const color = this.props.drawContour ? [0, 0, 0] : [
           (featureIndex + 1) % 256,
           Math.floor((featureIndex + 1) / 256) % 256,
           Math.floor((featureIndex + 1) / 256 / 256) % 256];
