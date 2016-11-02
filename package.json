@@ -63,7 +63,7 @@
     "discify": "^1.2.0",
     "electron-prebuilt": "^0.37.2",
     "envify": "^3.4.0",
-    "eslint": "^2.0.0",
+    "eslint": "^3.9.1",
     "eslint-config-uber-es2015": "^2.0.0",
     "eslint-config-uber-jsx": "^2.0.0",
     "eslint-plugin-react": "^5.0.0",
@@ -104,17 +104,14 @@
     "build-src": "babel src -d dist --source-maps inline --copy-files",
     "build-shaderlib": "babel shaderlib -d dist/shaderlib --source-maps inline --copy-files",
     "build-script": "browserify src/bundle.js -t babelify -t glslify | uglifyjs > dist/deckgl.min.js",
-
     "build-watch": "npm run build-clean && npm run build-src-watch && npm run build-shaderlib-watch",
     "build-src-watch": "babel src -d dist --source-maps inline --copy-files --watch &",
     "build-shaderlib-watch": "babel shaderlib -d dist/shaderlib --source-maps inline --copy-files --watch &",
-
     "demo-start": "budo demo/src/javascripts/main.js:main.min.js --dir demo/src/static/ --open --  -t sassify -t babelify -t glslify",
     "demo-build": "npm run demo-build-clean && npm run demo-build-copy && npm run demo-build-script",
     "demo-build-clean": "test -d demo/dist || mkdir -p demo/dist && rm -fr demo/dist/*",
     "demo-build-copy": "cp -R demo/src/static/* demo/dist/",
     "demo-build-script": "NODE_ENV=production browserify demo/src/javascripts/main.js -o -t sassify -t babelify -t glslify | uglifyjs > demo/dist/main.min.js",
-
     "lint": "eslint src",
     "precommit": "npm test",
     "mypublish": "npm run build && npm run test-fast && npm publish",
@@ -126,7 +123,6 @@
     "test-electron": "browserify dist/test/electron.js | testron | faucet",
     "test-shader": "npm run build-dist && budo src/test/shader.js:build/test-bundle.js --dir test --live --open --port 3001 --watch-glob '**/*.{html,css,scss,js,glsl}' -- -t babelify -t glslify",
     "profile-disc": "browserify src/bundle.js --full-paths -t babelify -t glslify | uglifyjs | discify --open",
-
     "start": "npm run build-watch && budo example/main.js:example/bundle.js --live --open --port 3000 --css example/main.css --title 'deck.gl' --watch-glob '**/*.{html,css,js,glsl}' -- -t babelify -t envify"
   }
 }

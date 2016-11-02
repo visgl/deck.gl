@@ -1,17 +1,14 @@
 # Introduction
 
-Deck.gl is a WebGL-powered framework that features an instancing and layering
-paradigm. It is specifically designed for composing and visualizing data sets
-at scale. With its reactive API design, deck.gl makes visual analytics of Big
-Data simple. It enables users to quickly prototype and get impresssive results,
-while gradually unlocking more flexibility and power as users climb the
-learning curve.
+deck.gl is designed for composing and visualizing large data sets simple.
+It enables users to quickly prototype and get impressive results while gradually
+unlocking more flexibility and power as users climb the learning curve.
 
 
 ## Brief Overview
 
-The basic idea of using deck.gl is to render a stack of [visual] overlays,
-usually (sbut not necessarily) over maps.
+The basic idea of using deck.gl is to render a stack of visual overlays,
+usually (but not always) over maps.
 
 While the concept may sound simple, to do this right, deck.gl handles a number of
 challenges, such as:
@@ -25,7 +22,7 @@ challenges, such as:
 
 ## Ecosystem
 
-Deck.gl has been developed in parallel with a number of companion modules:
+deck.gl has been developed in parallel with a number of companion modules:
 
 * [luma.gl](https://uber.github.io/luma.gl/#/) -
   A general purpose WebGL library designed to be interoperable both with the
