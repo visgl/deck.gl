@@ -100,7 +100,7 @@ export default class WebGLViewport extends Viewport {
         [
           this.glProjectionMatrixFP64[(i * 4 + j) * 2],
           this.glProjectionMatrixFP64[(i * 4 + j) * 2 + 1]
-        ] = fp64ify(this.glProjectionMatrix[j * 4 + i]);
+        ] = fp64ify(this.viewProjectionMatrix[j * 4 + i]);
       }
     }
   }
