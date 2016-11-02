@@ -34,8 +34,7 @@ uniform float renderPickingBuffer;
 
 varying vec4 vColor;
 
-vec2 paraboloid_fp64(vec2 source[2], vec2 target[2], float index) {
-  float ratio = index / N;
+vec2 paraboloid_fp64(vec2 source[2], vec2 target[2], float ratio) {
 
   vec2 x[2];
   vec2_mix_fp64(source, target, ratio, x);
@@ -53,18 +52,18 @@ void main(void) {
   vec2 projectedTargetCoord[2];
   project_position_fp64(instanceTargetPositionsFP64, projectedTargetCoord);
 
-  float segmentIndex = positions.x;
+  float segmentRatio = smoothstep(0.0, 1.0, positions.x / N);
 
   vec2 mixed_temp[2];
 
-  vec2_mix_fp64(projectedSourceCoord, projectedTargetCoord, segmentIndex / N, mixed_temp);
+  vec2_mix_fp64(projectedSourceCoord, projectedTargetCoord, segmentRatio, mixed_temp);
 
   vec2 vertex_pos_modelspace[4];
 
   vertex_pos_modelspace[0] = mixed_temp[0];
   vertex_pos_modelspace[1] = mixed_temp[1];
 
-  vec2 vertex_height = paraboloid_fp64(projectedSourceCoord, projectedTargetCoord, segmentIndex);
+  vec2 vertex_height = paraboloid_fp64(projectedSourceCoord, projectedTargetCoord, segmentRatio);
   if (vertex_height.x < 0.0 || (vertex_height.x == 0.0 && vertex_height.y <= 0.0)) vertex_height = vec2(0.0, 0.0);
 
   vertex_pos_modelspace[2] = sqrt_fp64(vertex_height);
@@ -72,7 +71,7 @@ void main(void) {
 
   gl_Position = project_to_clipspace_fp64(vertex_pos_modelspace);
 
-  vec4 color = vec4(mix(instanceSourceColors, instanceTargetColors, segmentIndex / N) / 255.0, opacity);
+  vec4 color = vec4(mix(instanceSourceColors, instanceTargetColors, segmentRatio) / 255.0, opacity);
   vec4 pickingColor = vec4(instancePickingColors / 255.0, 1.);
   vColor = mix(color, pickingColor, renderPickingBuffer);
 }
