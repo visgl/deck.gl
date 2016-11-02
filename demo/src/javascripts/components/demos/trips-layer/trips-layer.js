@@ -61,6 +61,9 @@ export default class TripsLayer extends Layer {
         gl.enable(gl.BLEND);
         gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
         gl.blendEquation(gl.FUNC_ADD);
+      },
+      onAfterRender: () => {
+        gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
       }
     });
   }

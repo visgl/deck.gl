@@ -32,6 +32,7 @@ body {
   text-transform: uppercase;
 }
 a {
+  outline: none;
   text-decoration: none;
   display: inline-block;
   cursor: pointer;
@@ -119,14 +120,11 @@ hr.short {
   }
 }
 .layout {
-  display: table;
+  display: table-row;
   width: 100%;
 
-  >div {
+  >* {
     display: table-cell !important;
-  }
-  >div:not(:first-child) {
-    margin-left: 48px;
   }
   .col-1-3 {
     width: 33.33%;
@@ -164,4 +162,85 @@ hr.short {
 }
 .text-right {
   text-align: right;
+}
+.bg-black {
+  background: $black;
+  color: $white;
+}
+.thumb {
+  padding: 8px;
+  cursor: pointer;
+  position: relative;
+  width: 32%;
+  display: inline-block;
+
+  img {
+    transition: opacity 0.4s;
+  }
+  >div:before, >div:after {
+    display: block;
+    z-index: 1;
+    position: absolute;
+    transition: opacity 0.4s;
+    opacity: 0;
+    text-align: center;
+    pointer-events: none;
+  }
+  >div:before {
+    content: attr(data-title);
+    font-size: 1.5em;
+    font-weight: 100;
+    width: 80%;
+    height: 80%;
+    margin: 10%;
+    padding: 30% 5%;
+    top: 0;
+    left: 0;
+    border: solid 2px;
+    @include linearGradientV(border-image, $primary, $secondary);
+    border-image-slice: 2;
+    box-sizing: border-box;
+  }
+  >div:after {
+    font-size: 0.833em;
+    content: attr(data-name);
+    bottom: 30%;
+    left: 0;
+    width: 100%;
+  }
+  >div:hover img {
+    opacity: 0.2;
+  }
+  >div:hover:before, >div:hover:after {
+    opacity: 1;
+  }
+
+}
+
+@media screen and (max-width: 1200px) {
+  .thumb {
+    width: 49%;
+  }
+}
+@media screen and (max-width: 900px) {
+  .thumb {
+    width: 100%;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .layout {
+    >* {
+      display: block !important;
+      width: 100% !important;
+    }
+  }
+  .flexbox--row {
+    flex-direction: column;
+    height: 100%;
+
+    .flexbox-item {
+      height: auto;
+    }
+  }
 }

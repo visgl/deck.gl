@@ -18,7 +18,7 @@ function generatePath(tree) {
 export const examplePages = generatePath([
   {
     name: 'Master List',
-    content: 'docs/overview.md'
+    content: 'docs/examples.md'
   },
   {
     name: 'ScatterplotLayer',
@@ -42,7 +42,7 @@ export const examplePages = generatePath([
     }
   },
   {
-    name: 'GridLayer',
+    name: 'ScreenGridLayer',
     content: {
       demo: 'GridDemo',
       code: 'docs/grid.md'

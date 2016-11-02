@@ -46,16 +46,14 @@ export default class ChoroplethDemo extends Component {
     return (
       <div>
         <h3>Regions With GDP Over 100 Billion US Dollars</h3>
-        <p>
-          <div className="layout">
-          {legendBlocks.map((background, i) => (
-              <div key={i} className="legend" style={{background, width}} />
-            ))}
-          </div>
-          <div className="layout">
-            <div className="col-1-2">$100B</div>
-            <div className="col-1-2 text-right">$3,000B</div>
-          </div>
+        <div className="layout">
+        {legendBlocks.map((background, i) => (
+            <div key={i} className="legend" style={{background, width}} />
+          ))}
+        </div>
+        <p className="layout">
+          <span className="col-1-2">$100B</span>
+          <span className="col-1-2 text-right">$3,000B</span>
         </p>
         <p>Source:&nbsp;
           <a href="https://en.wikipedia.org/wiki/List_of_country_subdivisions_by_GDP_over_100_billion_US_dollars">
