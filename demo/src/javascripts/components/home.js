@@ -1,4 +1,5 @@
 import 'babel-polyfill';
+import Stats from 'stats.js';
 import React, {Component} from 'react';
 import {connect} from 'react-redux';
 
@@ -35,6 +36,18 @@ class Home extends Component {
     this._onScroll();
     this._resizeMap();
 
+    this._stats = new Stats();
+    this._stats.showPanel(0);
+    this.refs.fps.appendChild(this._stats.dom);
+
+    const calcFPS = () => {
+      this._stats.begin();
+      this._stats.end();
+      this._animateRef = requestAnimationFrame(calcFPS);
+    }
+
+    this._animateRef = requestAnimationFrame(calcFPS);
+
     const {data, viewport} = HeroDemo;
     loadData('Home', [
       {
@@ -51,6 +64,7 @@ class Home extends Component {
     window.onscroll = null;
     window.onresize = null;
     this.cameraAnimation.stop();
+    cancelAnimationFrame(this._animateRef);
   }
 
   _resizeMap() {
@@ -73,9 +87,7 @@ class Home extends Component {
       <div className="hero">
         <MapGL mapboxApiAccessToken={MAPBOX_ACCESS_TOKEN}
           { ...viewport } >
-
           <HeroDemo viewport={viewport} data={dataLoaded} />
-
         </MapGL>
       </div>
     );
@@ -95,6 +107,7 @@ class Home extends Component {
             <p>Large-scale WebGL-powered Data Visualization</p>
             <button>Get started</button>
           </div>
+          <div ref="fps" className="fps" />
         </section>
 
         <section id="features">

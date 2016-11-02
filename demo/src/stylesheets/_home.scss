@@ -46,7 +46,15 @@
   background-size: cover;
   background-position: center;
   color: $white;
+  position: relative;
 
+  > .fps > div {
+    position: absolute !important;
+    bottom: 10px !important;
+    right: 10px !important;
+    top: inherit !important;
+    left: inherit !important;
+  }
   >.hero {
     position: absolute;
     top: 0;
