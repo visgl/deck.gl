@@ -36,8 +36,7 @@ uniform float renderPickingBuffer;
 
 varying vec4 vColor;
 
-float paraboloid(vec2 source, vec2 target, float index) {
-  float ratio = index / N;
+float paraboloid(vec2 source, vec2 target, float ratio) {
 
   vec2 x = mix(source, target, ratio);
   vec2 center = mix(source, target, 0.5);
@@ -51,20 +50,20 @@ void main(void) {
   vec2 source = preproject(instancePositions.xy);
   vec2 target = preproject(instancePositions.zw);
 
-  float segmentIndex = positions.x;
+  float segmentRatio = smoothstep(0.0, 1.0, positions.x / N);
 
-  float vertex_height = paraboloid(source, target, segmentIndex);
+  float vertex_height = paraboloid(source, target, segmentRatio);
   if (vertex_height < 0.0) vertex_height = 0.0;
   vec3 p = vec3(
     // xy: linear interpolation of source & target
-    mix(source, target, segmentIndex / N),
+    mix(source, target, segmentRatio),
     // z: paraboloid interpolate of source & target
     sqrt(vertex_height)
   );
 
   gl_Position = project(vec4(p, 1.0));
 
-  vec4 color = vec4(mix(instanceSourceColors, instanceTargetColors, segmentIndex / N) / 255.0, opacity);
+  vec4 color = vec4(mix(instanceSourceColors, instanceTargetColors, segmentRatio) / 255.0, opacity);
   vec4 pickingColor = vec4(instancePickingColors / 255.0, 1.);
   vColor = mix(color, pickingColor, renderPickingBuffer);
 }
