@@ -1,26 +1,13 @@
 # Getting Started
 
-## Learning deck.gl
-
-How you approach learning deck.gl will probably depend on your previous
-knowledge and how you want to use it.
-
-### Understanding WebGL
-
-
-### Understanding Reactive / Dataflow Architecture
-
-The key to writing good, performant deck.gl layers lies in understanding
-how to minimize updates of any calculated data, such as WebGL.
-
 ## Installation
 
     npm install --save luma.gl deck.gl
 
-Making luma.gl a peerDependency rather than a deck.gl dependency allows you
-to be more flexible about it.
+As a peerDependency, luma.gl will not be automatically installed with deck.gl after npm@3,
+explicitly install it to ensure only one copy of luma.gl is being used.
 
-## Example
+## Basic Usage
 
     import DeckGL from 'deck.gl/react';
     import {ArcLayer} from 'deck.gl';
@@ -31,3 +18,7 @@ to be more flexible about it.
     });
 
     <DeckGL width={1920} height={1080} layers={[flights]} />
+
+## Example
+
+Check out the example page for more.
