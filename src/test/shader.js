@@ -608,7 +608,7 @@ window.onload = () => {
 
   var idx0;
   var test_no = 0;
-  const loop = 100;
+  const loop = 20;
 
   for (idx0 = 0; idx0 < loop; idx0++) {
     var currentDiv = addDiv();
