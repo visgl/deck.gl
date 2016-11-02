@@ -1,6 +1,7 @@
 importScripts('./util.js');
-var FLUSH_LIMIT = 6000;
+var FLUSH_LIMIT = 10000;
 var result = [];
+var index = 0;
 var count = 0;
 var vertexCount = 0;
 
@@ -8,26 +9,29 @@ onmessage = function(e) {
   var lines = e.data.text.split('\n');
 
   lines.forEach(function(line) {
-    if (!line) return;
-    var parts = line.split('\x01');
 
-    var feature = {
-      type: 'Feature',
-      geometry: {
-        type: 'MultiPolygon',
-        coordinates: parts.slice(1).map(function(str) {
-          var coords = decodePolyline(str);
-          vertexCount += coords.length;
-          return [coords];
-        })
-      },
-      properties: {
-        value: parts[0] * 1
-      }
-    };
+    line.split('\x01').forEach(function(str) {
+      if (!str) return;
 
-    result.push(feature);
-    count++;
+      var coords = decodePolyline(str);
+      vertexCount += coords.length;
+      coords.push(coords[0]);
+
+      var feature = {
+        type: 'Feature',
+        geometry: {
+          type: 'Polygon',
+          coordinates: [coords]
+        },
+        properties: {
+          value: index
+        }
+      };
+      result.push(feature);
+      count++;
+    });
+
+    index++;
 
     if (result.length >= FLUSH_LIMIT) {
       flush();

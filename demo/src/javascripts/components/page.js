@@ -144,6 +144,11 @@ class Page extends Component {
     return (
       <ul className="tabs">
         {
+          activeTab === 'demo' &&
+          <li><span className="bg-black tip">Hold down shift key to rotate map</span></li>
+
+        }
+        {
           Object.keys(tabs).map(tabName => (
             <li key={tabName} className={`${tabName === activeTab ? 'active' : ''}`}>
               <button onClick={ () => this.setState({activeTab: tabName}) }>

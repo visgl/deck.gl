@@ -3,6 +3,7 @@ import React, {Component} from 'react';
 import {ScreenGridLayer} from '../../../../../index';
 import DeckGL from '../../../../../react';
 
+import {readableInteger} from '../../utils/format-utils';
 import {MAPBOX_STYLES} from '../../constants/defaults';
 
 export default class GridDemo extends Component {
@@ -36,8 +37,9 @@ export default class GridDemo extends Component {
     return (
       <div>
         <h3>Public Transit Accessibility In California</h3>
-        <p>Distribution of public transportation stops. <i>Source: OpenStreetMaps</i></p>
-        <div className="stat">Samples<b>{ meta.count || 0 }</b></div>
+        <p>Distribution of public transportation stops.</p>
+        <p>Data source: <a href="http://openstreetmap.org">OpenStreetMaps</a></p>
+        <div className="stat">Samples<b>{ readableInteger(meta.count || 0) }</b></div>
       </div>
     );
   }
@@ -52,6 +54,7 @@ export default class GridDemo extends Component {
     const layer = new ScreenGridLayer({
       id: 'grid',
       data: data,
+      minColor: [0, 0, 0, 0],
       unitWidth: params.cellSize.value,
       unitHeight: params.cellSize.value
     });

@@ -6,7 +6,8 @@
   height: 100vh;
 }
 .page {
-  position: relative;
+  position: absolute;
+  width: 100%;
   height: 100%;
 }
 .toc {
@@ -79,6 +80,10 @@
   margin: 24px;
   z-index: 99;
   list-style: none;
+
+  .tip {
+    padding: 4px 8px;
+  }
 
   li {
     display: inline;

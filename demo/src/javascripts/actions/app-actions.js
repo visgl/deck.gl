@@ -10,7 +10,7 @@ export function loadContent(filename) {
     }
     dispatch(loadContentStart(filename));
     text(filename, (error, response) => {
-      dispatch(loadContentSuccess(filename, error ? error : response));
+      dispatch(loadContentSuccess(filename, error ? error.target.response : response));
     });
   }
 }

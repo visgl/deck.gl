@@ -1,4 +1,72 @@
-import {Layer, assembleShaders} from '../../../../../../index';
+```
+import React, {Component} from 'react';
+import DeckGL from 'deck.gl/react';
+import {ExtrudedChoroplethLayer64} from 'deck.gl';
+import TripsLayer from './trips-layer';
+import TWEEN from 'tween.js';
+
+export default class HeroDemo extends Component {
+
+  constructor(props) {
+    super(props);
+
+    const thisDemo = this;
+
+    this.state = {
+      time: 0
+    };
+    this.tween = new TWEEN.Tween({time: 0})
+      .to({time: 3600}, 120000)
+      .onUpdate(function() { thisDemo.setState(this) })
+      .repeat(Infinity);
+  }
+
+  componentDidMount() {
+    const thisDemo = this;
+    this.tween.start();
+  }
+
+  componentWillUnmount() {
+    this.tween.stop();
+  }
+
+  render() {
+    const {viewport, tripsData, buildingData} = this.props;
+
+    if (!data) {
+      return null;
+    }
+    const layers = [
+      tripsData && new TripsLayer({
+        id: 'trips',
+        data: tripsData,
+        getPath: d => d.segments,
+        getColor: d => d.vendor === 0 ? [253,128,93] : [23,184,190],
+        opacity: 0.3,
+        strokeWidth: 2,
+        trailLength: 180,
+        currentTime: this.state.time
+      }),
+      buildingData && new ExtrudedChoroplethLayer64({
+        id: 'building',
+        data: buildingData,
+        color: [74, 80, 87],
+        opacity: 0.5
+      })
+    ].filter(Boolean);
+
+    return (
+      <DeckGL {...viewport} layers={ layers } />
+    );
+  }
+}
+
+```
+
+trips-layer.js:
+
+```
+import {Layer, assembleShaders} from 'deck.gl';
 import {Model, Program, Geometry, glGetDebugInfo} from 'luma.gl';
 
 const glslify = require('glslify');
@@ -151,3 +219,49 @@ export default class TripsLayer extends Layer {
   }
 
 }
+
+```
+
+trips-layer-vertex.glsl:
+
+```
+#define SHADER_NAME trips-layer-vertex-shader
+
+attribute vec3 positions;
+attribute vec3 colors;
+
+uniform float opacity;
+uniform float currentTime;
+uniform float trailLength;
+
+varying float vTime;
+varying vec4 vColor;
+
+void main(void) {
+  vec2 p = preproject(positions.xy);
+  gl_Position = project(vec4(p, 1., 1.));
+
+  vColor = vec4(colors / 255.0, opacity);
+  vTime = 1.0 - (currentTime - positions.z) / trailLength;
+}
+```
+
+trips-layer-fragment.glsl:
+
+```
+#define SHADER_NAME trips-layer-fragment-shader
+
+#ifdef GL_ES
+precision highp float;
+#endif
+
+varying float vTime;
+varying vec4 vColor;
+
+void main(void) {
+  if (vTime > 1.0 || vTime < 0.0) {
+    discard;
+  }
+  gl_FragColor = vec4(vColor.rgb, vColor.a * vTime);
+}
+```

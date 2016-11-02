@@ -7,12 +7,6 @@ import {MAPBOX_STYLES} from '../../constants/defaults';
 import {readableInteger} from '../../utils/format-utils';
 import ViewportAnimation from '../../utils/map-utils';
 
-const BLENDING = {
-  enable: true,
-  blendFunc: ['SRC_ALPHA', 'ONE_MINUS_SRC_ALPHA'],
-  blendEquation: 'FUNC_ADD'
-};
-
 export default class HeroDemo extends Component {
 
   static get data() {
@@ -106,12 +100,6 @@ export default class HeroDemo extends Component {
       return null;
     }
     const layers = [].concat(
-      data[1] && data[1].map((d, i) => new ExtrudedChoroplethLayer64({
-        id: `building=${i}`,
-        data: d,
-        color: [72, 72, 72],
-        opacity: 0.5
-      })),
       data[0] && data[0].map((layerData, layerIndex) => new TripsLayer({
           id: `trips-${layerIndex}`,
           data: layerData,
@@ -122,13 +110,18 @@ export default class HeroDemo extends Component {
           trailLength: 180,
           currentTime: this.state.time
         })
-      )
+      ),
+      data[1] && data[1].map((d, i) => new ExtrudedChoroplethLayer64({
+        id: `building=${i}`,
+        data: d,
+        // color: [72, 72, 72],
+        color: [74, 80, 87],
+        opacity: 0.5
+      }))
     ).filter(Boolean);
 
     return (
-      <DeckGL {...viewport} layers={ layers }
-        blending={BLENDING}
-       />
+      <DeckGL {...viewport} layers={ layers } />
     );
   }
 }

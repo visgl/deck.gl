@@ -1,5 +1,6 @@
 importScripts('./util.js');
 var COORDINATE_PRECISION = 5;
+var total = 0;
 
 onmessage = function(e) {
   var lines = e.data.text.split('\n');
@@ -11,11 +12,16 @@ onmessage = function(e) {
     var coords = decodePolyline(line.slice(2));
     for (var i = 0; i < coords.length; i++) {
       var c = coords[i];
-      var p = { position: {x: c[0], y: c[1]} };
+      var p = { position: c };
       for (var j = 0; j < count; j++) {
         result.push(p);
+        total++;
       }
     }
   });
-  postMessage({action: 'add', data: result});
+  postMessage({
+    action: 'add',
+    data: result,
+    meta: {count: total}
+  });
 };

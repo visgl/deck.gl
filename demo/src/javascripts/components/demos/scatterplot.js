@@ -40,6 +40,7 @@ export default class ScatterPlotDemo extends Component {
       <div>
         <h3>Every Person in New York City</h3>
         <p>Each dot accounts for 10 people. Density per tract from 2015 census data.</p>
+        <p>Data source: <a href="http://www.census.gov">US Census Bureau</a></p>
         <div className="stat">Instances
           <b>{ readableInteger(meta.points || 0) }</b>
         </div>

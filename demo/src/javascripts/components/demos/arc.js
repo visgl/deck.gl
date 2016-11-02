@@ -45,7 +45,7 @@ export default class ArcDemo extends Component {
 
   static get parameters() {
     return {
-      lineWidth: {displayName: 'Width', type: 'number', value: 1, step: 1, min: 1}
+      lineWidth: {displayName: 'Width', type: 'number', value: 2, step: 1, min: 1}
     };
   }
 
@@ -55,7 +55,7 @@ export default class ArcDemo extends Component {
       longitude: -100,
       latitude: 40.7,
       zoom: 3,
-      maxZoom: 16,
+      maxZoom: 15,
       pitch: 30,
       bearing: 30
     };
@@ -67,17 +67,17 @@ export default class ArcDemo extends Component {
         <h3>United States County-to-county Migration</h3>
         <p>People moving in and out of <b>{meta.sourceName}</b> between 2009-2013</p>
 
-        <p>
-          <div className="layout">
-            {colorRamp.map((c, i) => (
-                <div key={i} className="legend" style={{background: c, width: `${100 / colorRamp.length}%`}} />
-              ))}
-          </div>
-          <div className="layout">
-            <div className="col-1-2">Net gain</div>
-            <div className="col-1-2 text-right">Net loss</div>
-          </div>
+        <div className="layout">
+          {colorRamp.map((c, i) => (
+              <div key={i} className="legend" style={{background: c, width: `${100 / colorRamp.length}%`}} />
+            ))}
+        </div>
+        <p className="layout">
+          <span className="col-1-2">Net gain</span>
+          <span className="col-1-2 text-right">Net loss</span>
         </p>
+
+        <p>Data source: <a href="http://www.census.gov">US Census Bureau</a></p>
 
         <div className="layout">
           <div className="stat col-1-2">
