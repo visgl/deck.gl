@@ -5,10 +5,9 @@ at certain points in its lifecycle. The layer can specify how its state
 is initialized and finalized, if and how it should react to property changes,
 and how it should draw and pick the layer.
 
-
 ## Properties and Methods
 
-### `id` property
+##### `id` property
 
 The `id` property is used to match layers. Every time you create a new layer
 with the same `id` property as a layer you rendered last time,
@@ -16,8 +15,7 @@ those layers will be matched up and share the same state. Once matched
 deck.gl consider the new layer instance an "update" of the old instance, and
 the new matching layer will now have access to the `state` of the old layer.
 
-
-### Initialization: Layer.initializeState()
+##### Initialization: Layer.initializeState()
 
 This method is called only once for each layer (as defined by the `id`
 property), to set up the initial state for that layer.
@@ -25,8 +23,7 @@ property), to set up the initial state for that layer.
 deck.gl will already have created the `state` object at this time, and
 added the `gl` context and the `attributeManager` context.
 
-
-### Finalization: Layer.finalizeState()
+##### Finalization: Layer.finalizeState()
 
 Called on layers from previous rendering cycle that did not get matched
 with new layers. Called just before the reference to the state of that layer
@@ -34,8 +31,7 @@ is released.
 
 This is a good time to destroy any layer specific WebGL resources etc.
 
-
-### Updating: shouldUpdateState({props, oldProps, context, oldContext, changeFlags})
+##### Updating: shouldUpdateState({props, oldProps, context, oldContext, changeFlags})
 
 Called when a new layer has been matched with a layer from the previous
 render cycle (resulting in new props being passed to that layer),
@@ -50,8 +46,7 @@ There are some exceptions, the `dataComparator` prop and the `updateTriggers`
 prop can be supplied additional checks. See the documentation of those
 props in the Layer API.
 
-
-### Updating: updateState({props, oldProps, context, oldContext, changeFlags})
+##### Updating: updateState({props, oldProps, context, oldContext, changeFlags})
 
 Called when a new layer has been matched with a layer from the previous
 render cycle (resulting in new props being passed to that layer),
@@ -62,8 +57,7 @@ For information about changeFlags, see `shouldUpdateState`
 The default implementation will invalidate all attributeManager attributes
 if any change has been detected to the `data` prop.
 
-
-### Decomposing: renderLayers()
+##### Decomposing: renderLayers()
 
 Allows a layer to "render" or generate one or more deck.gl Layers
 passing in its own state as props.
@@ -75,15 +69,13 @@ into "primitive" layers.
 A layer can return null, a single layer, or an array of layers. The default
 implementation of `renderLayers` returns null.
 
-
-### Drawing: draw({uniforms})
+##### Drawing: draw({uniforms})
 
 The default implementation looks for a variable `model` in the layer's
 state (which is expected to be an instance of the luma.gl `Model` class)
 and calls `draw` on that model.
 
-
-### Picking: pick({uniforms, deviceX, deviceY})
+##### Picking: pick({uniforms, deviceX, deviceY})
 
 The pick method should return an object with optional fields about
 what was picked. This `info` object is then populated with additional
@@ -96,13 +88,11 @@ uses that model for picking, and renders that model with attributes set
 that allow the layer shaders to render picking colors instead of normal
 colors.
 
-
-### Picking: pickInfo(info)
+##### Picking: pickInfo(info)
 
 Allows a layer to add additional context to a picked object
 
-
-## Comparison with React's Lifecycle
+### Comparison with React's Lifecycle
 
 If you are familiar with React and the
 [React component lifecycle](https://facebook.github.io/react/docs/component-specs.html)

@@ -4,7 +4,8 @@ import {highlight} from 'highlight.js';
 import React, {Component, PropTypes} from 'react';
 
 const urlRewrites = {
-  '/docs/layers/base-layer.md': '#/layers/base-layer/layer'
+  '/docs/layers/base-layer.md': '#/layers/base-layer/layer',
+  '/docs/custom-layers.md#layerencodepickingcolorindex--number': false
 };
 
 export default class MarkdownPage extends Component {
@@ -23,7 +24,8 @@ export default class MarkdownPage extends Component {
     const renderer = new marked.Renderer();
 
     renderer.link = (href, title, text) => {
-      const to = urlRewrites[href] || href;
+      const to = urlRewrites[href] === undefined ? href : urlRewrites[href];
+      if (to === false) { return `<span>${text}</span>`; }
       return `<a href=${to} title=${title}>${text}</a>`;
     };
 

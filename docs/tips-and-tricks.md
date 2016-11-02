@@ -10,11 +10,11 @@ ideal effects.
 
 There is a CSS property `mix-blend-mode` in modern browsers
 that allows control over blending:
-```
-.overlays canvas {
-  mix-blend-mode: multiply;
-}
-```
+
+    .overlays canvas {
+      mix-blend-mode: multiply;
+    }
+
 `multiply` blend mode is usually the right choice, as it only darkens.
 This will keep your overlay colors, but let map legends underneath
 remain black and legible.
@@ -24,9 +24,8 @@ it can affect other peer HTML elements, especially other map children (perhaps
 controls or legends that are being rendered on top of the map).
 If this is an issue, set isolation CSS prop on the map (DeckGLOverlay parent)
 element.
-```
-     isolation: 'isolate'
-```
+
+    isolation: 'isolate';
 
 ## Notes on data property
 
@@ -39,7 +38,6 @@ It is recommended, but not required, to use immutable data (containers AND
 objects) as it ensures that changes to `data` property trigger a rerender.
 (See the notes on `rerenderCount` and `updateCount` properties.)
 
-
 ## Notes on picking
 
 **Note**: Because DeckGL layers are designed to take any type of iterable
@@ -47,9 +45,8 @@ collection as data (which may not support "random access" array style
 references of its elements), the picking calculates and index but the
 actual object.
 
-FEATURE IDEA: The base layer could take an optional getObject(index) accessor
+**Feature Idea**: The base layer could take an optional getObject(index) accessor
 and call it if supplied.
-
 
 ## Debugging and Instrumentation
 
@@ -69,7 +66,6 @@ support.
   allowing you to pinpoint exactly where in the code the issue
   happened. Due to the asynchronous nature of WebGL, you would normally
   receive these errors as warning at a later time during code execution.
-
 
 * In the browser console, setting `luma.log.priority` to various values will
   enable increasing levels of debugging.
