@@ -23,7 +23,7 @@ import {GL, Model, Geometry} from 'luma.gl';
 
 const glslify = require('glslify');
 
-const DEFAULT_COLOR = [0, 255, 0];
+const DEFAULT_COLOR = [0, 255, 0, 255];
 
 const defaultGetSourcePosition = x => x.sourcePosition;
 const defaultGetTargetPosition = x => x.targetPosition;
@@ -63,7 +63,11 @@ export default class LineLayer extends Layer {
     const {attributeManager} = this.state;
     attributeManager.addInstanced({
       instancePositions: {size: 4, update: this.calculateInstancePositions},
-      instanceColors: {size: 3, update: this.calculateInstanceColors}
+      instanceColors: {
+        type: GL.UNSIGNED_BYTE,
+        size: 4,
+        update: this.calculateInstanceColors
+      }
     });
   }
 
@@ -118,6 +122,7 @@ export default class LineLayer extends Layer {
       value[i + 0] = color[0];
       value[i + 1] = color[1];
       value[i + 2] = color[2];
+      value[i + 3] = isNaN(color[3]) ? DEFAULT_COLOR[3] : color[3];
       i += size;
     }
   }

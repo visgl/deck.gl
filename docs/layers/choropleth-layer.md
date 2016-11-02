@@ -27,8 +27,10 @@ Provides selected choropleth properties along with mouse event when the chorople
 
 By supplying a GeoJson `FeatureCollection` you can add multiple polygons.
 Each Feature has an optional "properties" object. The layer will look for an
-optional property "color", which is expected to be a 3 element array of values
-between 0 and 255, representing the RGB values for the color of that `Feature`
+optional property `color`, which is expected to be a 4 element array of values
+between 0 and 255, representing the rgba values for the color of that `Feature`.
+
+If not provided, the default rgba will be `[0, 0, 255, 255]`.
 
 
     {
@@ -48,7 +50,7 @@ between 0 and 255, representing the RGB values for the color of that `Feature`
             ]
           },
           "properties": {
-            "color": [255, 0, 0],
+            "color": [255, 0, 0, 255],
             "prop1": 0.0
           }
         },
@@ -61,7 +63,7 @@ between 0 and 255, representing the RGB values for the color of that `Feature`
             ]
           },
           "properties": {
-            "color": [255, 255, 0],
+            "color": [255, 255, 0, 255],
             "prop1": {"application": "defined"}
           }
         }

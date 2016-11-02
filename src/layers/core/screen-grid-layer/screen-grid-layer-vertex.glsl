@@ -44,9 +44,9 @@ void main(void) {
   vec4 color = mix(minColor, maxColor, instanceCount / maxCount) / 255.;
 
   vColor = mix(
-  	vec4(color.xyz, color.w * opacity),
-  	vec4(instancePickingColors / 255., 1.),
-  	renderPickingBuffer
+    vec4(color.rgb, color.a * opacity),
+    vec4(instancePickingColors / 255., 1.),
+    renderPickingBuffer
   );
 
   gl_Position = vec4(instancePositions + vertices * cellScale, 1.);

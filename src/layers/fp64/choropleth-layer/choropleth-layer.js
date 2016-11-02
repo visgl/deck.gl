@@ -29,7 +29,7 @@ import earcut from 'earcut';
 import flattenDeep from 'lodash.flattendeep';
 import normalize from 'geojson-normalize';
 
-const DEFAULT_COLOR = [0, 0, 255];
+const DEFAULT_COLOR = [0, 0, 255, 255];
 
 const defaultGetColor = feature => feature.properties.color;
 
@@ -59,7 +59,11 @@ export default class ChoroplethLayer64 extends Layer {
       indices: {size: 1, update: this.calculateIndices, isIndexed: true},
       positionsFP64: {size: 4, update: this.calculatePositionsFP64},
       heightsFP64: {size: 2, update: this.calculateHeightsFP64},
-      colors: {size: 3, update: this.calculateColors},
+      colors: {
+        size: 4,
+        type: GL.UNSIGNED_BYTE,
+        update: this.calculateColors
+      },
       // Instanced attributes
       pickingColors:
         {size: 3, update: this.calculatePickingColors, noAlloc: true}
@@ -185,6 +189,11 @@ export default class ChoroplethLayer64 extends Layer {
       (choropleth, choroplethIndex) => {
         const feature = features[choropleth.featureIndex];
         const color = getColor(feature) || DEFAULT_COLOR;
+
+        if (isNaN(color[3])) {
+          color[3] = DEFAULT_COLOR[3];
+        }
+
         return choropleth.map(polygon =>
           polygon.map(vertex => color)
         );

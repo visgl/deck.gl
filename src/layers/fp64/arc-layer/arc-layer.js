@@ -25,7 +25,7 @@ import {fp64ify} from '../../../lib/utils/fp64';
 
 const glslify = require('glslify');
 
-const DEFAULT_COLOR = [0, 0, 255];
+const DEFAULT_COLOR = [0, 0, 255, 255];
 
 const defaultGetSourcePosition = x => x.sourcePosition;
 const defaultGetTargetPosition = x => x.targetPosition;
@@ -65,8 +65,16 @@ export default class ArcLayer64 extends Layer {
     const {attributeManager} = this.state;
 
     attributeManager.addInstanced({
-      instanceSourceColors: {size: 3, update: this.calculateInstanceSourceColors},
-      instanceTargetColors: {size: 3, update: this.calculateInstanceTargetColors},
+      instanceSourceColors: {
+        size: 4,
+        type: GL.UNSIGNED_BYTE,
+        update: this.calculateInstanceSourceColors
+      },
+      instanceTargetColors: {
+        size: 4,
+        type: GL.UNSIGNED_BYTE,
+        update: this.calculateInstanceTargetColors
+      },
       instanceSourcePositionsFP64: {size: 4, update: this.calculateInstanceSourcePositions},
       instanceTargetPositionsFP64: {size: 4, update: this.calculateInstanceTargetPositions}
     });
@@ -139,6 +147,7 @@ export default class ArcLayer64 extends Layer {
       value[i + 0] = color[0];
       value[i + 1] = color[1];
       value[i + 2] = color[2];
+      value[i + 3] = isNaN(color[3]) ? DEFAULT_COLOR[3] : color[3];
       i += size;
     }
   }
@@ -152,6 +161,7 @@ export default class ArcLayer64 extends Layer {
       value[i + 0] = color[0];
       value[i + 1] = color[1];
       value[i + 2] = color[2];
+      value[i + 3] = isNaN(color[3]) ? DEFAULT_COLOR[3] : color[3];
       i += size;
     }
   }

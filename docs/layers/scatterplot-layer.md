@@ -42,6 +42,8 @@ Method called to retrieve the radius of each object.
 
 - Default: `object => object.color`
 
-Method called to retrieve the color of each object.
+Method called to retrieve the rgba color of each object. If the alpha parameter
+is not provided, it will be set to `255`.
 
-Fallback to `[255, 0, 255]` if the object doesn't have a color property
+If the method does not return a value for the given object, fallback to
+`[255, 0, 255, 255]`.

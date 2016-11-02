@@ -23,8 +23,8 @@
 const float N = 49.0;
 
 attribute vec3 positions;
-attribute vec3 instanceSourceColors;
-attribute vec3 instanceTargetColors;
+attribute vec4 instanceSourceColors;
+attribute vec4 instanceTargetColors;
 attribute vec3 instancePickingColors;
 attribute vec4 instanceSourcePositionsFP64;
 attribute vec4 instanceTargetPositionsFP64;
@@ -71,7 +71,11 @@ void main(void) {
 
   gl_Position = project_to_clipspace_fp64(vertex_pos_modelspace);
 
-  vec4 color = vec4(mix(instanceSourceColors, instanceTargetColors, segmentRatio) / 255.0, opacity);
-  vec4 pickingColor = vec4(instancePickingColors / 255.0, 1.);
-  vColor = mix(color, pickingColor, renderPickingBuffer);
+  vec4 color = mix(instanceSourceColors, instanceTargetColors, segmentRatio) / 255.;
+
+  vColor = mix(
+    vec4(color.rgb, color.a * opacity),
+    vec4(instancePickingColors / 255., 1.),
+    renderPickingBuffer
+  );
 }
