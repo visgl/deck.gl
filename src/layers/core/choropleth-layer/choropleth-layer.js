@@ -57,10 +57,18 @@ export default class ChoroplethLayer extends Layer {
       // Primtive attributes
       indices: {size: 1, update: this.calculateIndices, isIndexed: true},
       positions: {size: 3, update: this.calculatePositions},
-      colors: {size: 3, update: this.calculateColors},
+      colors: {
+        type: GL.UNSIGNED_BYTE,
+        size: 3,
+        update: this.calculateColors
+      },
       // Instanced attributes
-      pickingColors:
-        {size: 3, update: this.calculatePickingColors, noAlloc: true}
+      pickingColors: {
+        type: GL.UNSIGNED_BYTE,
+        size: 3,
+        update: this.calculatePickingColors,
+        noAlloc: true
+      }
     });
 
     const IndexType = gl.getExtension('OES_element_index_uint') ?
@@ -185,7 +193,7 @@ export default class ChoroplethLayer extends Layer {
       }
     );
 
-    attribute.value = new Float32Array(flattenDeep(colors));
+    attribute.value = new Uint8Array(flattenDeep(colors));
   }
 }
 

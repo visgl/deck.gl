@@ -63,23 +63,24 @@ export default class ScatterplotLayer extends Layer {
 
   initializeState() {
     const {gl} = this.context;
-    const drawMode = this.props.drawOutline ? GL.LINE_LOOP : GL.TRIANGLE_FAN;
-    const model = this._getModel(gl, drawMode);
+    const model = this._getModel(gl);
     this.setState({model});
 
     const {attributeManager} = this.state;
     attributeManager.addInstanced({
       instancePositions: {size: 4, update: this.calculateInstancePositions},
-      instanceColors: {size: 3, update: this.calculateInstanceColors}
+      instanceColors: {
+        type: GL.UNSIGNED_BYTE,
+        size: 3,
+        update: this.calculateInstanceColors
+      }
     });
   }
 
-  updateState({oldProps, props}) {
-    if (oldProps.drawOutline !== props.drawOutline) {
-      const {gl} = this.context;
-      const drawMode = props.drawOutline ? GL.LINE_LOOP : GL.TRIANGLE_FAN;
-      const model = this._getModel(gl, drawMode);
-      this.state.model = model;
+  updateState({props, oldProps}) {
+    if (props.drawOutline !== oldProps.drawOutline) {
+      this.state.model.geometry.drawMode =
+        props.drawOutline ? GL.LINE_LOOP : GL.TRIANGLE_FAN;
     }
   }
 
@@ -95,7 +96,7 @@ export default class ScatterplotLayer extends Layer {
     gl.lineWidth(oldLineWidth);
   }
 
-  _getModel(gl, drawMode) {
+  _getModel(gl) {
     const NUM_SEGMENTS = 16;
     const PI2 = Math.PI * 2;
 
@@ -117,7 +118,7 @@ export default class ScatterplotLayer extends Layer {
         fs: glslify('./scatterplot-layer-fragment.glsl')
       }),
       geometry: new Geometry({
-        drawMode: drawMode || GL.TRIANGLE_FAN,
+        drawMode: GL.TRIANGLE_FAN,
         positions: new Float32Array(positions)
       }),
       isInstanced: true
