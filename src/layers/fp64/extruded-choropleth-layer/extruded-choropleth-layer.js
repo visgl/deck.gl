@@ -207,8 +207,8 @@ export default class ExtrudedChoroplethLayer64 extends Layer {
         const sideNormalsBackward = sideNormals.map(n => n[1]);
 
         return this.props.drawWireframe ? [topNormals, topNormals] :
-          [topNormals, sideNormalsForward, sideNormalsBackward,
-            sideNormalsForward, sideNormalsBackward];
+        [topNormals, sideNormalsForward, sideNormalsBackward,
+          sideNormalsForward, sideNormalsBackward];
       }
     );
 

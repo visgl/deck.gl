@@ -238,7 +238,7 @@ export default class Layer {
   /**
    * Returns the picking color that doesn't match any subfeature
    * Use if some graphics do not belong to any pickable subfeature
-   * @return {Number[3]} - a black color
+   * @return {Array} - a black color
    */
   nullPickingColor() {
     return [0, 0, 0];
@@ -247,7 +247,8 @@ export default class Layer {
   /**
    * Returns the picking color that doesn't match any subfeature
    * Use if some graphics do not belong to any pickable subfeature
-   * @return {Number[3]} - a black color
+   * @param {int} i - index to be decoded
+   * @return {Array} - the decoded color
    */
   encodePickingColor(i) {
     return [
@@ -260,7 +261,8 @@ export default class Layer {
   /**
    * Returns the picking color that doesn't match any subfeature
    * Use if some graphics do not belong to any pickable subfeature
-   * @return {Number[3]} - a black color
+   * @param {Uint8Array} color - color array to be decoded
+   * @return {Array} - the decoded picking color
    */
   decodePickingColor(color) {
     assert(color instanceof Uint8Array);
