@@ -7,10 +7,6 @@ import {readableInteger} from '../../utils/format-utils';
 import {MAPBOX_STYLES} from '../../constants/defaults';
 
 export default class ChoroplethDemo extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {};
-  }
 
   static get data() {
     return {
@@ -79,7 +75,7 @@ export default class ChoroplethDemo extends Component {
     }
 
     const layers = data.map((d, i) => new ChoroplethLayer({
-      id: `buildings-${i}`,
+      id: `choropleth-${i}`,
       data: d,
       opacity: Math.min(1, Math.max(0, 3 - viewport.zoom / 3)),
       getColor: f => {

@@ -52,7 +52,7 @@ export const examplePages = generatePath([
     name: 'Trip Routes',
     content: {
       demo: 'HeroDemo',
-      code: 'docs/grid.md'
+      code: 'docs/trips.md'
     }
   }
 ]);
