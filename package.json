@@ -35,7 +35,7 @@
     "glslify": "^5.0.0",
     "lodash.flattendeep": "^3.0.2",
     "save-pixels": "^2.3.0",
-    "viewport-mercator-project": "3.0.0-beta1",
+    "viewport-mercator-project": "3.0.0-beta2",
     "webgl-obj-loader": "^0.1.1"
   },
   "devDependencies": {
