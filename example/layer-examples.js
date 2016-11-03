@@ -77,22 +77,25 @@ const ScatterplotLayerExample = props =>
     onClick: props.onScatterplotClicked
   });
 
-const ScatterplotLayerMeterExample = props =>
+const METER_PLOT = [
+  {position: [0, 0], radius: 1},
+  {position: [20, 20], radius: 2},
+  {position: [100, 100], radius: 3},
+  {position: [-50, 200], radius: 0.5},
+  {position: [1000, 1000], radius: 0.1}
+];
+
+const ScatterplotLayerMetersExample = props =>
   new ScatterplotLayer({
     ...props,
-    drawOutline: true,
+    id: 'scatterplot-meters',
     projectionMode: 2,
     projectionCenter: [
       props.mapViewState.longitude,
       props.mapViewState.latitude
     ],
-    data: [
-      {position: [0, 0]},
-      {position: [20, 20]},
-      {position: [100, 100]},
-      {position: [-50, 200]},
-      {position: [1000, 1000]}
-    ],
+    data: METER_PLOT,
+    getColor: x => [0, 0, 255],
     opacity: 0.5,
     pickable: true,
     onHover: props.onScatterplotHovered,
@@ -115,15 +118,6 @@ const GeoJsonLayerExample = props =>
   });
 
 // 64 BIT LAYER EXAMPLES
-
-const ScatterplotLayer64Example = props =>
-  new ScatterplotLayer64({
-    ...props,
-    data: props.points,
-    pickable: true,
-    onHover: props.onScatterplotHovered,
-    onClick: props.onScatterplotClicked
-  });
 
 const ArcLayer64Example = props =>
   new ArcLayer64({
@@ -174,6 +168,33 @@ const LineLayer64Example = props =>
     pickable: true,
     onHover: props.onArcHovered,
     onClick: props.onArcClicked
+  });
+
+
+const ScatterplotLayer64Example = props =>
+  new ScatterplotLayer64({
+    ...props,
+    data: props.points,
+    pickable: true,
+    onHover: props.onScatterplotHovered,
+    onClick: props.onScatterplotClicked
+  });
+
+const ScatterplotLayer64MetersExample = props =>
+  new ScatterplotLayer({
+    ...props,
+    // id: 'scatterplot-64-meters',
+    projectionMode: 2,
+    projectionCenter: [
+      props.mapViewState.longitude,
+      props.mapViewState.latitude
+    ],
+    data: METER_PLOT,
+    getColor: x => [0, 0, 255],
+    opacity: 0.5,
+    pickable: true,
+    onHover: props.onScatterplotHovered,
+    onClick: props.onScatterplotClicked
   });
 
 // SAMPLE LAYER EXAMPLES
@@ -252,16 +273,17 @@ export default {
     'ChoroplethLayer (Contour)': ChoroplethLayerContourExample,
     LineLayer: LineLayerExample,
     ScatterplotLayer: ScatterplotLayerExample,
-    'ScatterplotLayer (meters)': ScatterplotLayerMeterExample,
+    'ScatterplotLayer (meters)': ScatterplotLayerMetersExample,
     ScreenGridLayer: ScreenGridLayerExample
   },
 
   '64-bit Layers': {
-    ScatterplotLayer64: ScatterplotLayer64Example,
     ArcLayer64: ArcLayer64Example,
     'ChoroplethLayer64 (Solid)': ChoroplethLayer64SolidExample,
     'ChoroplethLayer64 (Contour)': ChoroplethLayer64ContourExample,
     ExtrudedChoroplethLayer64: ExtrudedChoroplethLayer64Example,
+    ScatterplotLayer64: ScatterplotLayer64Example,
+    'ScatterplotLayer64 (meters)': ScatterplotLayer64MetersExample,
     LineLayer64: LineLayer64Example
   },
 

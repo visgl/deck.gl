@@ -71,7 +71,7 @@
     "react": "^15.3.2",
     "react-addons-test-utils": "^15.0.2",
     "react-dom": "^15.3.2",
-    "react-map-gl": "^1.6.1",
+    "react-map-gl": "^1.7.2",
     "react-redux": "^4.4.5",
     "react-router": "^2.8.1",
     "redux": "^3.6.0",

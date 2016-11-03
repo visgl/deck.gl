@@ -16,7 +16,15 @@ All notable changes to deck.gl will be documented in this file.
 
 ### Beta-3.0.0 Releases
 
-#### [dev] -
+#### [v3.0.0-rc2] -
+- FIX to ChoroplethLayer64 colors
+- FIX: METERS MODE
+- Viewport now imported from viewport-mercator-project
+- Dependency cleanup - several no longer needed dependencies removed
+- Doc now serves locally from relative directories
+
+
+#### [v3.0.0-rc1] - First Release Candidate, Final API changes
 - BREAKING: Removed pickInfo life cycle method - can be handled by pick
 - FEATURE: Add `onLayerClick` and `onLayerHover` methods to deck.gl wrapper.
 - FIX: Restore multilayer picking. Fixes #136.

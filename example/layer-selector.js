@@ -17,7 +17,7 @@ function renderExampleButtons({examples, activeExamples, onChange}) {
           onChange={e => onChange(exampleName)}
         />
         <label htmlFor={ exampleName } style={{display: 'inline-block'}}>
-          <div style={{marginLeft: 30}}>
+          <div style={{marginLeft: 30, whiteSpace: 'nowrap'}}>
             { exampleName }
           </div>
         </label>
@@ -54,7 +54,7 @@ export default function LayerSelector({examples, activeExamples, onChange}) {
     }}>
       <div style={ {
         padding: 0,
-        width: 280,
+        width: 270,
         height: '100%',
         overflowX: 'hidden',
         overflowY: 'scroll'
