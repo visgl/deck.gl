@@ -23,7 +23,7 @@ import {GL, Model, Geometry} from 'luma.gl';
 
 const glslify = require('glslify');
 
-const DEFAULT_COLOR = [255, 0, 255];
+const DEFAULT_COLOR = [255, 0, 255, 255];
 
 const defaultGetPosition = x => x.position;
 const defaultGetRadius = x => x.radius;
@@ -71,7 +71,7 @@ export default class ScatterplotLayer extends Layer {
       instancePositions: {size: 4, update: this.calculateInstancePositions},
       instanceColors: {
         type: GL.UNSIGNED_BYTE,
-        size: 3,
+        size: 4,
         update: this.calculateInstanceColors
       }
     });
@@ -149,6 +149,7 @@ export default class ScatterplotLayer extends Layer {
       value[i + 0] = color[0] || 0;
       value[i + 1] = color[1] || 0;
       value[i + 2] = color[2] || 0;
+      value[i + 3] = isNaN(color[3]) ? DEFAULT_COLOR[3] : color[3];
       i += size;
     }
   }

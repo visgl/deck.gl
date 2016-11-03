@@ -24,7 +24,7 @@ import {GL, Model, Geometry} from 'luma.gl';
 
 const glslify = require('glslify');
 
-const DEFAULT_COLOR = [0, 0, 255];
+const DEFAULT_COLOR = [0, 0, 255, 255];
 
 const defaultGetSourcePosition = x => x.sourcePosition;
 const defaultGetTargetPosition = x => x.targetPosition;
@@ -66,8 +66,16 @@ export default class ArcLayer extends Layer {
     const {attributeManager} = this.state;
     attributeManager.addInstanced({
       instancePositions: {size: 4, update: this.calculateInstancePositions},
-      instanceSourceColors: {size: 3, update: this.calculateInstanceSourceColors},
-      instanceTargetColors: {size: 3, update: this.calculateInstanceTargetColors}
+      instanceSourceColors: {
+        type: GL.UNSIGNED_BYTE,
+        size: 4,
+        update: this.calculateInstanceSourceColors
+      },
+      instanceTargetColors: {
+        type: GL.UNSIGNED_BYTE,
+        size: 4,
+        update: this.calculateInstanceTargetColors
+      }
     });
   }
 
@@ -125,6 +133,7 @@ export default class ArcLayer extends Layer {
       value[i + 0] = color[0];
       value[i + 1] = color[1];
       value[i + 2] = color[2];
+      value[i + 3] = isNaN(color[3]) ? DEFAULT_COLOR[3] : color[3];
       i += size;
     }
   }
@@ -138,6 +147,7 @@ export default class ArcLayer extends Layer {
       value[i + 0] = color[0];
       value[i + 1] = color[1];
       value[i + 2] = color[2];
+      value[i + 3] = isNaN(color[3]) ? DEFAULT_COLOR[3] : color[3];
       i += size;
     }
   }

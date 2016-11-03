@@ -23,7 +23,7 @@ attribute vec4 positionsFP64;
 attribute vec2 heightsFP64;
 
 attribute vec3 positions;
-attribute vec3 colors;
+attribute vec4 colors;
 attribute vec3 pickingColors;
 
 uniform float opacity;
@@ -52,7 +52,12 @@ void main(void) {
 
   gl_Position = project_to_clipspace_fp64(vertex_pos_modelspace);
 
-  vec4 color = vec4(colors / 255., opacity);
+  vec4 color = vec4(colors.rgb, colors.a * opacity) / 255.;
   vec4 pickingColor = vec4(pickingColors / 255., 1.);
-  vColor = mix(color, pickingColor, renderPickingBuffer);
+
+  vColor = mix(
+    color,
+    pickingColor,
+    renderPickingBuffer
+  );
 }

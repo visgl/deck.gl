@@ -24,7 +24,7 @@
 // #pragma glslify: project = require(../../../../shaderlib/project)
 
 attribute vec3 positions;
-attribute vec3 colors;
+attribute vec4 colors;
 attribute vec3 pickingColors;
 
 uniform float opacity;
@@ -51,8 +51,11 @@ vec4 picking_setNormalAndPickColors(vec4 color, vec3 pickingColor) {
 // }
 
 void main(void) {
+
+  vec4 color = vec4(colors.rgb, colors.a * opacity) / 255.;
+
   picking_setNormalAndPickColors(
-    vec4(colors.rgb / 255., opacity),
+    color,
     pickingColors / 255.
   );
 

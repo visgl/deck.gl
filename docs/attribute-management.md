@@ -99,13 +99,14 @@ Takes a map of attribute descriptor objects
 * attribute.instanced=0 - is this is an instanced attribute (a.k.a. divisor)
 * attribute.noAlloc=false - if this attribute should not be allocated
 
-```
-attributeManager.add({
-  positions: {size: 2, update: calculatePositions}
-  colors: {size: 3, update: calculateColors}
-});
-```
-
+    attributeManager.add({
+      positions: {size: 2, update: calculatePositions}
+      colors: {
+        size: 4,
+        type: GL.UNSIGNED_BYTE,
+        update: calculateColors
+      }
+    });
 
 ### AttributeManager.setLogFunctions
 
