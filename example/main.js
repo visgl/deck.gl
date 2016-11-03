@@ -21,9 +21,8 @@
 /* eslint-disable func-style */
 /* eslint-disable no-console */
 /* global console, process */
+/* global global, window */
 import 'babel-polyfill';
-import document from 'global/document';
-import window from 'global/window';
 
 import React from 'react';
 import ReactDOM from 'react-dom';

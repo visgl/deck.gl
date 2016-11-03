@@ -4,8 +4,7 @@
   	"glslify",
   	"static-fs",
     "transform-class-properties",
-    "transform-decorators-legacy",
-    ["babel-plugin-transform-builtin-extend", {"globals": ["Array"]}]
+    "transform-decorators-legacy"
   ],
   "compact": "false"
 }
