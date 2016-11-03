@@ -2,7 +2,7 @@
 
 deck.gl is designed to make visualization of large data sets simple.
 It enables users to quickly get impressive visual results with limited effort
-through composition existing layers, while offering a complete architecture
+through composition of existing layers, while offering a complete architecture
 for packaging advanced WebGL based visualizations as reusable JavaScript
 layers.
 

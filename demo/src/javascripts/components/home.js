@@ -143,7 +143,7 @@ class Home extends Component {
               <h3>Interoperability with Mapbox</h3>
               <p>
               deck.gl is interoperable with Mapbox GL. We coordinate
-              with Mapbox's camera system to provide compelling 2D and 3D
+              with the Mapbox camera system to provide compelling 2D and 3D
               visualizations on top of your Mapbox based maps.
               </p>
 
