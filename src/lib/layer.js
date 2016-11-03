@@ -430,7 +430,7 @@ export default class Layer {
     const viewportUniforms = this.context.viewport.getUniforms(this.props);
     uniforms = {...uniforms, ...viewportUniforms};
     // Call subclass lifecycle method
-    this.draw(uniforms);
+    this.draw({uniforms});
     // End lifecycle method
   }
 

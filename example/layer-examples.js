@@ -88,11 +88,12 @@ const METER_PLOT = [
 const ScatterplotLayerMetersExample = props =>
   new ScatterplotLayer({
     ...props,
-    id: 'scatterplot-meters',
+    id: props.id || 'scatterplotLayerMeter',
+    drawOutline: true,
     projectionMode: 2,
-    projectionCenter: [
-      props.mapViewState.longitude,
-      props.mapViewState.latitude
+    positionOrigin: [
+        -122.42694203247012,
+        37.751537058389985
     ],
     data: METER_PLOT,
     getColor: x => [0, 0, 255],
