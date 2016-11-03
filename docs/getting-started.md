@@ -2,10 +2,9 @@
 
 ## Installation
 
-    npm install --save luma.gl deck.gl
+    npm install --save deck.gl luma.gl
 
-As a peerDependency, luma.gl will not be automatically installed with deck.gl after npm@3,
-explicitly install it to ensure only one copy of luma.gl is being used.
+For more info about `luma.gl`, see remarks section.
 
 ## Basic Usage
 
@@ -19,6 +18,14 @@ explicitly install it to ensure only one copy of luma.gl is being used.
 
     <DeckGL width={1920} height={1080} layers={[flights]} />
 
-## Example
+## Examples
 
-Check out the example page for more.
+Check out the source code tabs in the examples page, or clone the
+deck.gl repository and run `npm start`.
+
+## Remarks
+
+* `luma.gl` will not be automatically installed with deck.gl. The reason is that an application must only include one copy of luma.gl. If you are using npm v3, please explicitly install `luma.gl` with your app. This is similar
+to React, where components will typically only have peer dependencies on React,
+and it is the application's responsibility to actually select and install
+a specific React version.

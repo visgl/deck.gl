@@ -1,4 +1,4 @@
-# deck.gl Performance Notes
+# Performance Notes
 
 
 ## General Expectations
@@ -30,7 +30,6 @@ frequently, buffer generation can cause "stutter" in e.g. animations,
 even for layers with just a few thousand items. It is possible to overcome
 these issues using special techniques, but it can require extra work.
 
-
 ## Layer Update Performance
 
 When the `data` prop changes, deck.gl will recalculate its webgl buffers.
@@ -40,13 +39,11 @@ Note that deck.gl will call the accessors you supply to the layer for
 every object, so normally you would want the accessors to be trivial functions
 that just return alreay precomputed/transformed data.
 
-
 ## Layer Rendering Performance
 
 Layer rendering performance is essentially proportional to the number of items
 in the layer's `data` prop (plus some overhead for setting up the GPU draw
 call).
-
 
 ## Layer Picking Performance
 
@@ -56,7 +53,6 @@ Recommendation: Enabling picking has a performance penalty so make sure
 deck.gl performs picking by drawing the layer into an off screen
 picking buffer. This essentially means that every layer that supports picking
 will be drawn twice when panning and hovering.
-
 
 ## Layer Precision
 

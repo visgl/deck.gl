@@ -1,5 +1,6 @@
-function getGithubUrl(filename) {
-  return `https://raw.githubusercontent.com/uber/deck.gl/dev/docs/${filename}`;
+function getDocUrl(filename) {
+  // return `https://raw.githubusercontent.com/uber/deck.gl/dev/docs/${filename}`;
+  return `docs/${filename}`;
 }
 
 function generatePath(tree) {
@@ -24,35 +25,35 @@ export const examplePages = generatePath([
     name: 'ScatterplotLayer',
     content: {
       demo: 'ScatterplotDemo',
-      code: 'docs/scatterplot.md'
+      code: 'code-markdown/scatterplot.md'
     }
   },
   {
     name: 'ArcLayer',
     content: {
       demo: 'ArcDemo',
-      code: 'docs/arc.md'
+      code: 'code-markdown/arc.md'
     }
   },
   {
     name: 'ChoroplethLayer',
     content: {
       demo: 'ChoroplethDemo',
-      code: 'docs/choropleth.md'
+      code: 'code-markdown/choropleth.md'
     }
   },
   {
     name: 'ScreenGridLayer',
     content: {
       demo: 'GridDemo',
-      code: 'docs/grid.md'
+      code: 'code-markdown/grid.md'
     }
   },
   {
     name: 'Trip Routes',
     content: {
       demo: 'HeroDemo',
-      code: 'docs/trips.md'
+      code: 'code-markdown/trips.md'
     }
   }
 ]);
@@ -63,15 +64,15 @@ export const docPages = generatePath([
     children: [
       {
         name: 'Introduction',
-        content: getGithubUrl('README.md')
+        content: getDocUrl('README.md')
       },
       {
         name: 'Getting Started',
-        content: getGithubUrl('getting-started.md')
+        content: getDocUrl('getting-started.md')
       },
       {
-        name: 'Using Layers',
-        content: getGithubUrl('using-layers.md')
+        name: 'What\'s New',
+        content: getDocUrl('whats-new.md')
       }
     ]
   },
@@ -79,20 +80,24 @@ export const docPages = generatePath([
     name: 'Usage',
     children: [
       {
+        name: 'Using Layers',
+        content: getDocUrl('using-layers.md')
+      },
+      {
         name: 'Using With React',
-        content: getGithubUrl('using-with-react.md')
+        content: getDocUrl('using-with-react.md')
       },
       {
         name: 'Using With Mapbox GL',
-        content: getGithubUrl('using-with-mapbox-gl.md')
+        content: getDocUrl('using-with-mapbox-gl.md')
       },
       {
         name: 'Using Standalone',
-        content: getGithubUrl('using-standalone.md')
+        content: getDocUrl('using-standalone.md')
       },
       {
         name: 'Tips and Tricks',
-        content: getGithubUrl('tips-and-tricks.md')
+        content: getDocUrl('tips-and-tricks.md')
       }
     ]
   },
@@ -101,20 +106,20 @@ export const docPages = generatePath([
     children: [
       {
         name: 'Custom Layers',
-        content: getGithubUrl('custom-layers.md')
+        content: getDocUrl('custom-layers.md')
       },
       {
         name: 'Layer Lifecycle',
-        content: getGithubUrl('layer-lifecycle.md')
+        content: getDocUrl('layer-lifecycle.md')
       },
       {
         name: 'Attribute Management',
-        content: getGithubUrl('attribute-management.md')
+        content: getDocUrl('attribute-management.md')
       }
       // WIP
       // {
       //   name: 'Writing Shaders',
-      //   content: getGithubUrl('writing-shaders.md')
+      //   content: getDocUrl('writing-shaders.md')
       // }
     ]
   },
@@ -123,15 +128,15 @@ export const docPages = generatePath([
     children: [
       {
         name: 'Coordinate Systems',
-        content: getGithubUrl('coordinate-systems.md')
+        content: getDocUrl('coordinate-systems.md')
       },
       {
         name: 'Performance',
-        content: getGithubUrl('performance.md')
+        content: getDocUrl('performance.md')
       },
       {
         name: '64 bit Layers',
-        content: getGithubUrl('64-bits.md')
+        content: getDocUrl('64-bits.md')
       }
     ]
   }
@@ -141,7 +146,7 @@ export const docPages = generatePath([
   //   children: [
   //     {
   //       name: 'Release History',
-  //       content: getGithubUrl('release-history.md')
+  //       content: getDocUrl('release-history.md')
   //     }
   //   ]
   // }
@@ -153,7 +158,7 @@ export const layerDocPages = generatePath([
     children: [
       {
         name: 'Overview',
-        content: getGithubUrl('layers/README.md')
+        content: getDocUrl('layers/README.md')
       }
     ]
   },
@@ -162,7 +167,7 @@ export const layerDocPages = generatePath([
     children: [
       {
         name: 'Layer',
-        content: getGithubUrl('layers/base-layer.md')
+        content: getDocUrl('layers/base-layer.md')
       }
     ]
   },
@@ -171,23 +176,23 @@ export const layerDocPages = generatePath([
     children: [
       {
         name: 'ArcLayer',
-        content: getGithubUrl('layers/arc-layer.md')
+        content: getDocUrl('layers/arc-layer.md')
       },
       {
         name: 'ChoroplethLayer',
-        content: getGithubUrl('layers/choropleth-layer.md')
+        content: getDocUrl('layers/choropleth-layer.md')
       },
       {
         name: 'LineLayer',
-        content: getGithubUrl('layers/line-layer.md')
+        content: getDocUrl('layers/line-layer.md')
       },
       {
         name: 'ScatterplotLayer',
-        content: getGithubUrl('layers/scatterplot-layer.md')
+        content: getDocUrl('layers/scatterplot-layer.md')
       },
       {
         name: 'ScreenGridLayer',
-        content: getGithubUrl('layers/screen-grid-layer.md')
+        content: getDocUrl('layers/screen-grid-layer.md')
       }
     ]
   },
@@ -196,19 +201,19 @@ export const layerDocPages = generatePath([
     children: [
       {
         name: 'ArcLayer64',
-        content: getGithubUrl('layers/arc-layer-64.md')
+        content: getDocUrl('layers/arc-layer-64.md')
       },
       {
         name: 'ChoroplethLayer64',
-        content: getGithubUrl('layers/choropleth-layer-64.md')
+        content: getDocUrl('layers/choropleth-layer-64.md')
       },
       {
         name: 'LineLayer64',
-        content: getGithubUrl('layers/line-layer-64.md')
+        content: getDocUrl('layers/line-layer-64.md')
       },
       {
         name: 'ScatterplotLayer64',
-        content: getGithubUrl('layers/scatterplot-layer-64.md')
+        content: getDocUrl('layers/scatterplot-layer-64.md')
       }
     ]
   },
@@ -217,7 +222,7 @@ export const layerDocPages = generatePath([
     children: [
       {
         name: 'ExtrudedChoroplethLayer',
-        content: getGithubUrl('layers/extruded-choropleth-layer.md')
+        content: getDocUrl('layers/extruded-choropleth-layer.md')
       }
     ]
   }
