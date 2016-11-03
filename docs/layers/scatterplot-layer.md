@@ -2,9 +2,9 @@
 
 The Scatterplot Layer takes in paride latitude and longitude coordinated points and render them as circles with a certain radius.
 
-Inherits from all [Base Layer properties](/docs/layers/base-layer.md).
-
     import {ScatterplotLayer} from 'deck.gl';
+
+Inherits from all [Base Layer](/docs/layers/base-layer.md) properties.
 
 ## Layer-specific Properties
 

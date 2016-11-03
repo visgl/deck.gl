@@ -3,9 +3,9 @@
 The Choropleth Layer takes in [GeoJson](http://geojson.org/) formatted data and
 renders it as interactive choropleths.
 
-Inherits from all [Base Layer properties](/docs/layers/base-layer.md).
-
     import {ChoroplethLayer} from 'deck.gl';
+
+Inherits from all [Base Layer properties](/docs/layers/base-layer.md).
 
 ## Layer-specific Properties
 

@@ -14,7 +14,12 @@ import React, {Component, PropTypes} from 'react';
  */
 const urlRewrites = {
   '/docs/layers/base-layer.md': '#/layers/base-layer/layer',
-  '/docs/custom-layers.md#layerencodepickingcolorindex--number': false
+  '/docs/custom-layers.md#layerencodepickingcolorindex--number': false,
+  '/docs/layers/arc-layer.md': '#/layers/core-layers/arc-layer',
+  '/docs/layers/line-layer.md': '#/layers/core-layers/line-layer',
+  '/docs/layers/choropleth-layer.md': '#/layers/core-layers/choropleth-layer',
+  '/docs/layers/scatterplot-layer.md': '#/layers/core-layers/scatterplot-layer',
+  '/docs/64-bits.md': '#/documentation/advanced-topics/64-layers'
 };
 
 export default class MarkdownPage extends Component {

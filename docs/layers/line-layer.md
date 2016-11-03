@@ -3,9 +3,9 @@
 The Line Layer takes in paired latitude and longitude coordinated points and
 render them as arcs that links the starting and ending points.
 
-Inherits from all [Base Layer properties](/docs/layers/base-layer.md).
-
     import {LineLayer} from 'deck.gl';
+
+Inherits from all [Base Layer](/docs/layers/base-layer.md) properties.
 
 ## Layer-specific Properties
 
