@@ -3,6 +3,15 @@ import marked from 'marked';
 import {highlight} from 'highlight.js';
 import React, {Component, PropTypes} from 'react';
 
+/**
+ * This map allows you to rewrite urls present in the markdown files
+ * to be rewritted to point to other targets. It is useful so that
+ * links can works both by browsing the docs using the Github explorer
+ * and on the website.
+ *
+ * If you specify a value of false, it will transform the link to a simple
+ * text, in case you don't want this link to point to anything.
+ */
 const urlRewrites = {
   '/docs/layers/base-layer.md': '#/layers/base-layer/layer',
   '/docs/custom-layers.md#layerencodepickingcolorindex--number': false

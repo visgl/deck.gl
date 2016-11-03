@@ -45,9 +45,6 @@ collection as data (which may not support "random access" array style
 references of its elements), the picking calculates and index but the
 actual object.
 
-**Feature Idea**: The base layer could take an optional getObject(index) accessor
-and call it if supplied.
-
 ## Debugging and Instrumentation
 
 deck.gl is built on luma.gl which has extensive debugging and instrumentation
