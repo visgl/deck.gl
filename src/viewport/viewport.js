@@ -58,16 +58,22 @@ export default class WebGLViewport extends Viewport {
   @autobind
   getUniforms({
     projectionMode = COORDINATE_SYSTEM.LNGLAT,
-    projectionCenter = [0, 0],
+    positionOrigin = [0, 0],
     modelMatrix = null
   } = {}) {
-    projectionCenter = vec2.subtract([],
-      this.projectFlat(projectionCenter),
-      this.center
-    );
+    // TODO: move the following line to initialization so that it's done only once
+    const positionOriginPixels = this.projectFlat(positionOrigin);
+
+    const delta = vec2.subtract([],
+       positionOriginPixels,
+       this.center
+     );
+
+    const projectionCenter = vec2.add([],
+      this.center,
+      delta);
 
     const projections = this.getProjections();
-
     const projectionMatrix = projections._viewProjectionMatrix;
     // If necessary add modelMatrix to clipSpace projection
     if (modelMatrix) {
