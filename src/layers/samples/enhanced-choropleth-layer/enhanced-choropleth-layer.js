@@ -79,9 +79,11 @@ export default class EnhancedChoroplethLayer extends Layer {
     }
   }
 
-  pickInfo(info) {
+  pick(opts) {
+    super.pick(opts);
+    const {info} = opts;
     const index = this.decodePickingColor(info.color);
-    const feature = this.props.data.features[index];
+    const feature = index >= 0 ? this.props.data.features[index] : null;
     info.feature = feature;
     info.object = feature;
   }
@@ -175,7 +177,7 @@ export default class EnhancedChoroplethLayer extends Layer {
     const colors = this.props.drawContour ?
       this.state.meshes.map(
         (mesh, i) => mesh.positions.map(
-          pos => [-1, -1, -1]
+          pos => [0, 0, 0]
         )
       ) :
       this.state.groupedVertices.map(

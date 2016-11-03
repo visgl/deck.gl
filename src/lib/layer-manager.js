@@ -26,7 +26,6 @@
 // props of the new layer), while the old layer is simply discarded for
 // garbage collecion.
 //
-
 /* eslint-disable no-try-catch */
 import Layer from './layer';
 import {Viewport} from '../viewport';
@@ -125,14 +124,14 @@ export default class LayerManager {
     return this;
   }
 
-  pickLayer({x, y, type}) {
+  pickLayer({x, y, mode}) {
     const {gl, uniforms} = this.context;
     return pickLayers(gl, {
       x,
       y,
       uniforms,
       layers: this.layers,
-      type
+      mode
     });
   }
 

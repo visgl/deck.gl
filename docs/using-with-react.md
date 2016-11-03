@@ -98,4 +98,36 @@ to keep track of GPU state.
 
 ##### `onWebGLInitialized` (Function, optional)
 
-Callback once gl-context has been initiated.
+Callback, called once the WebGL context has been initiated
+
+Callback arguments:
+- opts.gl - the WebGL context.
+
+##### `onLayerHover` (Function, optional)
+
+Callback - called when the mouse moves over the layers.
+
+Arguments:
+- `info` - the `info` object of the topmost
+- `pickedInfos` - an array of info objects for all visible layers that
+matched the picked coordinate, in top to bottom order.
+
+##### `onLayerClick` (Function, optional)
+
+Callback - called when the mouse moves over the layers.
+
+Arguments:
+- `info` - the `info` object of the topmost
+- `pickedInfos` - an array of info objects for all visible layers that
+matched the picked coordinate, in top to bottom order.
+
+## Remarks
+
+* Picking: The info objects have a number of fields, most interesting are
+  perhaps `layer` and `index`. If the data prop is an `Array`, `info.object`
+  will contain the selected object in the array.
+* Layers can add additional fields to the picking `info` object, check the
+  documentation of each layer.
+* Picking happens in top-to-bottom order (reverse of rendering), i.e.
+  deck.gl traverses the layer list backwards during picking.
+
