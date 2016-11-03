@@ -1,6 +1,5 @@
 # Creating Custom Layers
 
-
 ## Choosing the Type of Layer
 
 There are a couple of ways to build a layer in deck.gl
@@ -25,9 +24,7 @@ Note that there is no strict division between layers that draw and composite
 layers, a layer could do both. That said, it often makes sense to keep your
 layers simple.
 
-
 ## Implementing the Layer Lifecycle Functions
-
 
 ### Creating, Destroying and Drawing Layers
 
@@ -58,7 +55,6 @@ directly, rather than waiting for the garbage collector to do it.
 A layer is discarded when a new set of layers are rendered and none of
 them match (have the same `id` prop) as your old layer.
 
-
 ## Change Detection
 
 Before reading the description of each life cycle method, it is helpful
@@ -79,7 +75,6 @@ needs to do in response to changes.
 * If other props change, it would typically mean that the layer needs to
   update some uniform or state so that rendering is affected appropriately.
 
-
 ### Handling property updates
 
 The key to writing good, performant deck.gl layers lies in understanding
@@ -89,7 +84,6 @@ The ideas used here are very similar to (and directly inspired by)
 those used in the React/Redux/Flux/Immutable.js communities, and
 learning more about those frameworks can be helpful as a way to get a
 better understanding of how to use these concepts in the best way.
-
 
 ## Implementing Picking
 
@@ -101,16 +95,11 @@ built-in picking while adding layer specific selection information, override
 `getPickInfo`.
 
 Technical Note: The default picking implementation uses picking colors.
-The layer is rendered
-with a special uniform set to 1, which causes it to render into a
-off-screen framebuffer using `pickingColor` or `instancePickingColor`
-attributes instead of using
-its normal color calculation.
+The layer is rendered with a special uniform set to 1, which causes it to
+render into a off-screen framebuffer using `pickingColor` or
+`instancePickingColor` attributes instead of using its normal color calculation.
 
-
-See `Layer.encodePickingColor
-
-
+See [`Layer.encodePickingColor`](/docs/custom-layers.md#layerencodepickingcolorindex--number).
 
 ## Defining your vertex attributes.
 
@@ -121,11 +110,9 @@ Some questions to ask yourself.
 - Do you need 64 bit support?
 - Do you want to opt in to deck.gl's lighting system?
 
-
 ## Writing the Shaders
 
 For details, please see the separate article on shaders.
-
 
 ### Supporting Map Coordinates
 
@@ -139,7 +126,6 @@ Deck.gl makes it easy to make your own layers work this way too. You just need
 to import the `project` package in your shader file and the functions will be
 made available to your shader.
 
-
 ## Layer Methods
 
 Layer methods are designed to support the creation of new layers through
@@ -147,12 +133,10 @@ layer subclassing and are not intended to be called by applications.
 
 ## General Methods
 
-
-### Layer.setState()
+##### Layer.setState()
 
 Used to update the layers state object, which allows a layer to store
 information that will be available to the next matching layer.
-
 
 ## Layer Projection Methods
 
@@ -160,37 +144,31 @@ While most projection is handled "automatically" in the layers vertex
 shader, it is occasionally useful to be able to work in the projected
 coordinates in JavaScript while calculating uniforms etc.
 
-
-### Layer.project(lngLatZ, {topLeft = true})
+##### Layer.project(lngLatZ, {topLeft = true})
 
 Projects a map coordinate using the current viewport settings.
 
-
-### Layer.unproject(xyz, {topLeft = true})
+##### Layer.unproject(xyz, {topLeft = true})
 
 Projects a pixel coordinate using the current viewport settings.
 
-
-### Layer.projectFlat(lngLatZ, {topLeft = true})
+##### Layer.projectFlat(lngLatZ, {topLeft = true})
 
 Projects a map coordinate using the current viewport settings, ignoring any
 perspective tilt. Can be useful to calculate screen space distances.
 
-
-### Layer.unprojectFlat(xyz, {topLeft = true})
+##### Layer.unprojectFlat(xyz, {topLeft = true})
 
 Unrojects a pixel coordinate using the current viewport settings, ignoring any
 perspective tilt (meaning that the pixel was projected).
 
-
-### Layer.screenToDevicePixels(pixels: Number)
+##### Layer.screenToDevicePixels(pixels: Number)
 
 Simply multiplies `pixels` parameter with `window.devicePixelRatio` if
 available.
 
 Useful to adjust e.g. line widths to get more consistent visuals between
 low and high resolution displays.
-
 
 ## Layer Picking Methods
 
@@ -199,15 +177,13 @@ While deck.gl allows applications to implement picking however they want
 for the built-in "picking color" based picking system, which most layers
 use.
 
-
-### Layer.nullPickingColor()
+##### Layer.nullPickingColor()
 
 Returns the "null" picking color which is equal the the color of pixels
 not covered by the layer. This color is guaranteed not to match any index value
 greater than or equal to zero.
 
-
-### Layer.encodePickingColor(index : Number)
+##### Layer.encodePickingColor(index : Number)
 
 Returns a color that encodes the supplied "subfeature index" number.
 This color can be decoded later using `Layer.decodePickingColor`.
@@ -219,8 +195,7 @@ Notes:
 * indices to be encoded must be integers larger than or equal to 0.
 * Picking colors are 24 bit values and can thus encode up to 16 million indices.
 
-
-### Layer.decodePickingColor(color: Number[3])
+##### Layer.decodePickingColor(color: Number[3])
 
 Returns the number that was used to encode the supplied picking color.
 See `Layer.encodePickingColor`. The null picking color (See
@@ -230,8 +205,7 @@ Note: The null picking color is returned when a pixel is picked that is not
 covered by the layer, or when they layer has selected to render a pixel
 using the null picking color to make it unpickable.
 
-
-### Layer.calculateInstancePickingColors
+##### Layer.calculateInstancePickingColors
 
 A default picking colors attribute generator that is used for most
 instanced layers. It simply sets the picking color of each instance to

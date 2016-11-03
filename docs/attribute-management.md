@@ -1,6 +1,5 @@
 # Attribute Management
 
-
 ## Overview
 
 deck.gl layers were designed with "data flow architectures" like React in mind.
@@ -8,7 +7,6 @@ The challenge is of course that in the "reactive" model, every change to
 application state causes a full rerender, while in WebGL, potentially
 huge memory buffers describing the geometry (so called "vertex attributes",
 or just "attributes" for short) must be prepared in advance of any draw calls.
-
 
 ## WebGL Performance Challenges
 
@@ -27,7 +25,6 @@ updates is critical. It is such an important use case that deck.gl provides an
 
 Note that it is possible for a layer to use custom code to manage attribute
 updates, however most layers rely on the AttributeManager class.
-
 
 ## Automatic Attribute Generation
 
@@ -52,7 +49,6 @@ Note that the attribute manager intentionally does not do advanced
 change detection, but instead makes it easy to build such detection
 by offering the ability to "invalidate" each attribute separately.
 
-
 ### Accessors, Shallow Comparisons and updateTriggers
 
 The layer will expect each object to provide a number of "attributes" that it
@@ -69,8 +65,6 @@ To force trigger a render after mutating buffers, simply increment the
 `renderCount` property. To force trigger a buffer update after mutating data,
 increment the `updateCount` property.
 
-
-
 ## The AttributeManager Class
 
 The `AttributeManager` class automated attribute allocation and updates.
@@ -86,12 +80,10 @@ Limitations:
   There are currently no provisions for only invalidating a range of
   indices in an attribute.
 
-
-
 ### Constructor
+
 * opts (Object) - named parameters
 * opts.id (String, not required) - identifier (for debugging)
-
 
 ### AttributeManager.add
 
@@ -128,9 +120,7 @@ so hooks are provided for update start and end.
 * opts.onUpdateStart= (Function) - callback, called before update() starts
 * opts.onUpdateEnd= (Function) - callback, called after update() ends
 
-
 ## Advanced Topics
-
 
 ### Manual Buffer Management
 

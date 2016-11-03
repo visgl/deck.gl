@@ -66,7 +66,6 @@ Note: While it is a recommended convention that all deck.gl layers should
 support the opacity prop, it is up to each layer's fragment shader
 to implement support for opacity.
 
-
 ### Interaction Properties
 
 Layers can be interacted with using these properties.
@@ -99,12 +98,10 @@ what was hovered.
 
 **Requires `pickable` to be true.**
 
-
 ## Coordinate System Properties
 
 Normally only used when the application wants to work with coordinates
 that are not Web Mercator projected longitudes/latitudes.
-
 
 ##### `projectionMode` (Number, optional)
 
@@ -137,7 +134,6 @@ different coordinate systems.
 Note that the matrix projection is applied after the non-linear mercator
 projection calculations are resolved, so be careful when using view matrices with lng/lat encoded coordinates.
 
-
 ### Data Properties
 
 While many applications only use the `data` property, there are a number
@@ -146,7 +142,7 @@ iteration, comparison and update.
 
 ##### `data` (Iterable Object or Array, optional)
 
-Default: []
+- Default: `[]`
 
 The data prop should contain an iterable JavaScript container,
 please see JavaScript `[Symbol.iterator]`.
@@ -166,7 +162,6 @@ iteration order, so deck.gl allows you to supply your own iterator.
 Note: deck.gl even supplies an object iterator (`makeObjectValueIterator`)
 making it possible to use objects directly as `data` props in deck.gl
 without first converting them to arrays.
-
 
     import {ScatterplotLayer, objectValueIterator} from `deck.gl`;
     new ScatterplotLayer({
