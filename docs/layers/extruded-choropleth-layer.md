@@ -1,4 +1,4 @@
-# ExtrudedChoroplethLayer64
+# ExtrudedChoropleth Layer 64
 
 A layer that extrudes lines in Choropleth polygons by tesselating them into
 long, thin triangles. This provides control over line thickness
