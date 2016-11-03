@@ -226,13 +226,6 @@ vec4 project_position(vec4 position) {
 //
 
 vec4 project_to_clipspace(vec4 position) {
-  if (projectionMode == PROJECT_LINEAR) {
-    return projectionMatrix * position;
-  }
-  if (projectionMode == PROJECT_MERCATOR_OFFSETS) {
-    return projectionMatrixUncentered * position;
-  }
-  // projectionMode == PROJECT_MERCATOR
   return projectionMatrix * position;
 }
 
