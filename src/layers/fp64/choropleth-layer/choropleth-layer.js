@@ -202,7 +202,7 @@ export default class ChoroplethLayer64 extends Layer {
       }
     );
 
-    attribute.value = new Float32Array(flattenDeep(colors));
+    attribute.value = new Uint8Array(flattenDeep(colors));
   }
 
   // Override the default picking colors calculation
@@ -220,7 +220,7 @@ export default class ChoroplethLayer64 extends Layer {
       }
     );
 
-    attribute.value = new Float32Array(flattenDeep(colors));
+    attribute.value = new Uint8Array(flattenDeep(colors));
   }
 }
 
