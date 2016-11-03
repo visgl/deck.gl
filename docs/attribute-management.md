@@ -2,7 +2,8 @@
 
 ## Overview
 
-deck.gl layers were designed with "data flow architectures" like React in mind.
+deck.gl layers were designed to be used with a Reactive programming
+paradigm.
 The challenge is of course that in the "reactive" model, every change to
 application state causes a full rerender, while in WebGL, potentially
 huge memory buffers describing the geometry (so called "vertex attributes",

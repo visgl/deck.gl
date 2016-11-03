@@ -1,13 +1,15 @@
-### On 64-bit Layers and their performance
+# About 64-bit Layers
 
 From version `3.0.0`, deck.gl begins to provide basic 64-bit math support
 in GPU shaders. 64-bit maths are used in various 64-bit layers that are provided
 with deck.gl. Please find the sample usage of them in the examples section.
 
+## Precision
+
 Using 64-bit layers, deck.gl is able to visualize data with extremely high
 dynamic range interactively. Points covering a whole city and accurate down
 to centimeter level at the same time can be processed and drawn to canvas
-on-th-fly. Since WebGL does not expose native 64-bit floating point number
+on-the-fly. Since WebGL does not expose native 64-bit floating point number
 support of certain modern desktop GPUs to developers, deck.gl uses two 32-bit
 native floating point number to extend and perserve significant digits and
 uses algorithms similar to those used in many multiple precision math libraries
@@ -28,6 +30,9 @@ Exponential: ~2.6 ulps
 Logarithm: ~11.6 ulps (depends on the accuracy of native log() function)
 Trigonometry: ~5 ulps
 ```
+Note: `ulp` = [unit of least precision](https://en.wikipedia.org/wiki/Unit_in_the_last_place)
+
+## Performance Implications
 
 Since the 64-bit floating point maths are emulated using the multiple precision
 arithmetics, it costs much more GPU cycles than native 32-bit math (more than an
@@ -46,6 +51,8 @@ total memory impact normally be somewhat less than 2x.
 If your data sets are modest in size (<100K) you will are unlikely to run into
 performance issues with 64-bit layers on modern GPUs, but if you have larger data
 sets you may want to do some testing before moving to 64-bit layers.
+
+## References
 
 - http://crd-legacy.lbl.gov/~dhbailey/mpdist
 - https://gmplib.org

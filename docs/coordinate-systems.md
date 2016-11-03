@@ -42,7 +42,6 @@ Remarks:
   positions are given in linear coordinates from a numeric
   reference point, with a range indicating zoom level 0 extents.
 
-
 ### Web Mercator Projection Mode
 
 A core feature of deck.gl is that all layers automatically by default
@@ -56,6 +55,13 @@ encoded data.
 are specified in degrees from Greenwich meridian / equator respectively,
 and altitude is specified in meters above sea level.
 
+- Unless otherwise noted, angles are specified in degrees, not radians.
+- Coordinates are specified in "long-lat" format [lng, lat, z] format which
+  most closely corresponds to [x, y, z] coords.
+
+- **zoom**: At zoom 0, the world is 512 pixels wide.
+  Every zoom level magnifies by a factor of 2. Maps typically support zoom
+  levels 0 (world) to 20 (sub meter pixels).
 
 ### Meter Offset Projection Mode
 
@@ -64,12 +70,19 @@ and altitude is specified in meters above sea level.
 Such coordinates will be correctly projected onto the map if the layer
 is set to the right projection mode.
 
+The meters mode is perfect for high resolution data sets
+which are typically specified in sets of coordinates in meters offset from
+a single lat/lon (“simplified UTM”). Such data can now be supplied directly
+to deck.gl layers (i.e. to the GPU) without any JavaScript transformation.
+
 Remarks:
 * UTM - Note that the Meters Offset Projection Mode uses arbitrary
   reference points, rather than the predefined reference points
   set by UTM. The meters mode can simplify working with UTM coordinates
   but should not be used directly as such.
-
+* A nice side effect is that the meters projection mode uses small numeric
+  deltas in projection and therefore does not lose precision under extrem
+  zoom levels even when using faster 32 bit floating point.
 
 ### Mathematical/Linear Projection Mode
 
@@ -128,22 +141,7 @@ perhaps even making it clear in the variable's name.
   to world coordinates (note that that distance scales are latitude dependent
   under web mercator projection
   [see](http://wiki.openstreetmap.org/wiki/Zoom_levels),
-  so scaling will depend on the viewport center and should only be expected to
-  be locally correct.
-
-# Conventions
-
-- Unless otherwise noted, angles are specified in degrees, not radians.
-- Coordinates are specified in "long-lat" format [lng, lat, z] format which
-  most closely corresponds to [x, y, z] coords.
-
-## Map Changes
-- **center**:
-- **zoom**: At zoom 0, the world is 512 pixels wide.
-  Every zoom level magnifies by a factor of 2. Maps typically support zoom
-  levels 0 (world) to 20 (sub meter pixels).
-
-
+  so scaling will depend on the viewport center and should only be expected to be locally correct.
 
 ## Making a vertex shader work with deck.gl's coordinate systems.
 
@@ -151,13 +149,3 @@ A family of GLSL projection methods that support three different projection
 modes, latlon (default), meters and neutral. By always using three shader
 functions (preproject, scale and project) for handling projections and scaling,
 a single layer class can support all three modes (app selects via a layer prop).
-
-The new meters mode is perfect for high resolution data sets
-which are typically specified in sets of coordinates in meters offset from
-a single lat/lon (“simplified UTM”). Such data can now be supplied directly
-to deck.gl layers (i.e. to the GPU) without any JavaScript transformation.
-
-A great side effect is that the new meters projection mode uses small numeric
-deltas in projection and therefore does not lose precision under extreme zoom
-levels even when using faster 32 bit floating point.
-

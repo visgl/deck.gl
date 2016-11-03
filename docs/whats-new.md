@@ -1,131 +1,139 @@
-# deck.gl v3 - November 8, 2016
+# deck.gl v3
+
+Release date: November, 2016
 
 ## Highlights
-  - New demo website!
-  - Comprehensive documentation!
-  -
-  - Support for Multi-Primitive Layers
-  - Support for Composite Layers (Somewhat Experimental)
-
-- Streamlined life cycle methods. The life cycle methods are now
-  optimized for deck.gl's needs and no longer try to mimic React.
-  Limited compatibility is provided but it is strongly recommended
-  to update layers to the new methods
-
-
-## React integration improvements
-  - DeckGL (was DeckGLOverlay) component now a separate import, to
-    allow deck.gl to be used by non-React applications.
-  - Adds `onLayerClick` and `onLayerHover` methods to deck.gl wrapper.
-  - DeckGL component no longer manages blending, as this is better done
-    directly in layers.
-  - FIX: `DeckGL` component now cancels animation loop on unmount,
-    important when creating/destroying deck.gl components.
-
-  Context
-- FIX: update context.viewport
-
-
-- Misc
-  - Property diff tracing (deck.log.priority = 1), makes it easy
-    to see what is causing your layers to rerender.
-
- - FIX: Perspective projection matrix "far plane" now covers negative Z coords
-
-
-- Layer fixes
-- Breaking Change: Standardize parameters in layers to always expect arrays.
-- Remove separate attribute updater definitions to simplify layer subclass
-  creation
-  General:
-  - line width now takes device pixel ratio into account for more consistent look between displays
-  - Color attributes are now Uint8 encoded for significant GPU memory savings.
- - BREAKING: Introducing `context` that is shared between layers.
-    gl and viewport moved from state to context. This implies that apps
-    no longer need to pass {lng,lat,zoom,pitch,bearing} to each layer, only
-    to the `DeckGL` react component.
-
-  - Base Layer
-    - `deepCompare` prop replaced with more flexible `dataComparator`
-
-  - ArcLayer
-    - Fix to flickering last segments
-    - Renders smoother arcs, especially close to map
-
-  - ScatterplotLayer.
-    - Adds drawOutline option.
-
-  - ScreenGridLayer (renamed GridLayer)
-    - Now have accessors (getPosition, getWeight) and custom
-      color ramps (minColor, maxColor)
-
- - ChoroplethLayer
-   - now renders MultiPolygons and Polygons with holes
-
-- 64bit layers
-
- - FIX - ArcLayer64 flickering fixed by high precision workaround.
-
- - FEATURE: ChoroplethLayer64
-
-- 64 bit ExtrudedChoroplethLayer
-  - Great for rendering 3D buildings on top of maps
-  - Includes a basic shading model
-
- - new GeoJsonLayer - Initial composite layer, only Polygons for now.
-
-
-#### [3.0.0-beta23] -
- - BREAKING: All layers now use `assembleShaders`
- - BREAKING: GLSL `project` package - shader functions renamed to have
-   `project` prefix, in line with conventions for new shader package system.
- - FEATURE: Improved precision trigonometry library for Intel GPUs
-
- - BREAKING: No longer use Camera/Scene to render.
- - BREAKING: Sample layers now available through `import 'deck.gl/samples';
-
- - FEATURE: New GLSL library: 64bit emulated floating point
- - FEATURE: New layer: ScatterplotLayer64: Sample 64-bit, high precision layer
- - FEATURE: ArcLayer can now specify separate start end end color for each arc.
- - FIX: Add high precision version of `tan` as Intel GPU workaround.
-
- - Add separate import files for experimental layers and viewport
-   import {PointCloudLayer, ...} from 'deck.gl/experimental'
-   import Viewport from 'deck.gl/viewport'
-
-
-# deck.gl v2 - May 2016
-
-## Highlights
-- 3D Perspective Mode, 3D camera support
-- Performance Improvements
-- Automatic attribute management
-- Linux fixes - deck.gl and luma.gl now work on Linux.
-- Adopts [luma.gl](https://github.com/uber/luma.gl) as default WebGL framework.
-- Retina display support (picking on retina/regular display)
+  - New [website](http://uber.github.io/deck.gl/)
+  - Comprehensive [documentation](http://uber.github.io/deck.gl/#/documentation/overview/introduction)
+  - All Core Layers updated (API, features, performance)
+  - 64-bit Layers (High Precision)
+  - METERS projection mode (High Precision)
+  - Multi-Primitive Layer Support
+  - Composite Layer Support
 
 ## React Integration
-- Added deckgl-overlay canvas ID and customize style support
-- Fix document / add customize style support to the canvas (@contra)
+- `DeckGL` (`DeckGLOverlay` in v2) component now requires a separate
+  import (`import DeckGL from 'deck.gl/react'`). This allows the core
+  deck.gl library to be imported by non-React applications without
+  pulling in React.
+- Adds `onLayerClick` and `onLayerHover` props to the `DeckGL` React
+  component.
+- The `DeckGL` component now cancels animation loop on unmount,
+  important when repeatedly creating/destroying deck.gl components.
+- The `DeckGL` component no longer manages WebGL blending modes,
+  as this is better done directly by layers.
 
 ## Layers
-- ScatterplotLayer
-  - Per point radius support for the scatterplot-layer
-  - Added per point color support for the scatterplot-layer
-  - Fixed primitive distortion bug
-- HexagonLayer
-  - Fixed primitive distortion bug for hexagon-layer
-- LineLayer (NEW)
 
-## General
+- All layers now support accessors, removing the need for applications to
+  transform data before passing it to deck.gl.
+- Layer props and accessors now always expect arrays (e.g. colors
+  are expected as `[r,g,b,a]` instead of `{r,g,b,a}` etc).
+- line widths now takes device pixel ratio into account for more consistent
+  look between displays
+- METERS projection mode allows specifying positions in meter offsets in
+  addition to longitude/latitude.
+- Layers now receive viewport information from the `DeckGL` component.
+  This implies that apps no longer need to pass the `width`, `height`,
+  `longitude`, `latitude`, `zoom`, `pitch`, `bearing` and `bearing`
+  props to each layer.
+  These properties only need to be passed to the `DeckGL` react component.
+
+#### Base Layer
+- `deepCompare` prop replaced with more flexible `dataComparator`
+
+#### ArcLayer
+- Specify separate start and end color for each arc.
+- Renders smoother arcs, especially for bottom arc segments close to map
+- Fixes flickering last segments
+
+#### ScatterplotLayer.
+- Adds drawOutline option.
+
+#### ScreenGridLayer
+- New name for deck.gl v2 GridLayer
+- Now have accessors (getPosition, getWeight)
+- Custom color ramps (minColor, maxColor)
+
+#### ChoroplethLayer
+- Now renders MultiPolygons and Polygons with holes
+
+#### HexagonLayer (REMOVED)
+- The v2 HexagonLayer has not yet been ported to v3.
+
+### 64bit layers
+
+A set of new high precision layers that support extreme zoom levels
+
+#### ArcLayer64 (NEW)
+
+#### ChoroplethLayer64 (NEW)
+
+#### ScatterplotLayer64 (NEW)
+
+#### 64 bit ExtrudedChoroplethLayer (NEW)
+- Great for rendering 3D buildings on top of maps
+- Includes a basic shading model
+
+### Sample Layers
+
+Sample layers now available through `import 'deck.gl/samples';
+
+### GeoJsonLayer (NEW, EXPERIMENTAL)
+- Initial composite layer, only Polygons for now.
+
+
+## Changes affecting Custom Layers
+
+### Streamlined life cycle methods
+- The Layer life cycle methods are now optimized for deck.gl's needs
+  and no longer try to mimic React.
+- Limited compatibility with deck.gl v2 is provided but it is strongly
+  recommended to update layers to the new methods
+
+### Optimizations
+- `Uint8Array` encoding is now supported for color and picking color
+   attributes, which provides significant GPU memory savings.
+
+### GLSL package manager and modules
+- All layers now use `assembleShaders` to inject GLSL packages and platform
+  fixes
+- GLSL `project` package -
+- GLSL `fp64` emulated double precision floating point package
+- GLSL `fp32` package - 32bit improved precision library
+    - Adds high precision version of trigonometry functions and `tan`
+    - Especially for Intel GPUs
+
+
+# deck.gl v2
+
+Release date: May 2016
+
+## Highlights
+- 3D Perspective Mode
+- Performance: Huge under the hood refactor of layer update logic
+- Automatic attribute management (`AttributeManager` class)
+- Linux fixes - deck.gl and luma.gl now work on Linux.
+- Adopts [luma.gl](https://github.com/uber/luma.gl) as default WebGL framework.
+- Retina display support
+- Support for disabling mercator project (experimental)
+
+## React Integration
+- Ability to specify canvas ID and customize styles
+
+## Layers
 - Added data deep comparison support
-- Added better uniform error message support
-- Changed default blending function (ZERO -> ONE_MINUS_SRC_ALPHA)
 
-## Misc
-- Experimental support for disabling mercator project.
+### ScatterplotLayer
+- Add per point radius support for the scatterplot-layer
+- Added per point color support for the scatterplot-layer
+- Fixed primitive distortion bug
+
+### LineLayer (NEW)
 
 
-# deck.gl v1 - Dec 17, 2015
+# deck.gl v1
 
-Initial open-source version of deck.gl, with 5 sample layers.
+Original release date: December 2015
+
+Initial open-source version of deck.gl, with five sample layers.

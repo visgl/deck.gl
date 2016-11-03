@@ -10,12 +10,10 @@ every vertex in the primitive geometry, for every instance.
 By convention deck.gl names all instanced attributes with the prefix
 `instance`.
 
-
 ## Mandatory shader features
 
 To support the basic features expected of a deck.gl layer, your new layer's
 shaders need to follow a few rules.
-
 
 ### Projection (Vertex Shader)
 
