@@ -8,7 +8,7 @@ const float PROJECT_MERCATOR_OFFSETS = 2.;
 
 uniform float projectionMode;
 uniform float projectionScale;
-uniform vec2 projectionCenter;
+uniform vec4 projectionCenter;
 uniform vec3 projectionPixelsPerUnit;
 uniform mat4 projectionMatrix;
 uniform mat4 projectionMatrixUncentered;
@@ -209,7 +209,7 @@ vec2 project_position(vec2 position) {
     return (position + vec2(TILE_SIZE / 2.0)) * projectionScale;
   }
   if (projectionMode == PROJECT_MERCATOR_OFFSETS) {
-    return project_scale(position) + projectionCenter;
+    return project_scale(position);
   }
   // Covers projectionMode == PROJECT_MERCATOR
   return project_mercator_(position) * WORLD_SCALE * projectionScale;
@@ -226,6 +226,9 @@ vec4 project_position(vec4 position) {
 //
 
 vec4 project_to_clipspace(vec4 position) {
+  if (projectionMode == PROJECT_MERCATOR_OFFSETS) {
+    return projectionMatrix * vec4(position.xy, 0.0, 0.0) + projectionCenter;
+  }
   return projectionMatrix * position;
 }
 
