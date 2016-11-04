@@ -16,7 +16,8 @@ All notable changes to deck.gl will be documented in this file.
 
 ### Beta-3.0.0 Releases
 
-#### [v3.0.0-rc3] -
+#### [v3.0.0-rc4] -
+- REMOVED unfinished GeoJson layer
 - FIX: gl.viewport only called when view size changes
 - FIX: METERS mode high precision restored
 
