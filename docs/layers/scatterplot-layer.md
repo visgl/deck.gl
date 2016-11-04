@@ -1,3 +1,7 @@
+<div align="center">
+  <img height="300" src="https://github.com/uber/deck.gl/raw/dev/demo/src/static/images/demo-thumb-choropleth.jpg" />
+</div>
+
 # Scatterplot Layer
 
 The Scatterplot Layer takes in paride latitude and longitude coordinated points and render them as circles with a certain radius.
