@@ -90,10 +90,9 @@ export default class WebGLRenderer extends React.Component {
    */
   constructor(props) {
     super(props);
-    this.state = {
-      gl: null
-    };
+    this.state = {};
     this._animationFrame = null;
+    this._gl = null;
   }
 
   componentDidMount() {
@@ -124,7 +123,7 @@ export default class WebGLRenderer extends React.Component {
       }
     }
 
-    this.setState({gl});
+    this._gl = gl;
 
     // Call callback last, in case it throws
     this.props.onRendererInitialized({canvas, gl});
@@ -148,17 +147,37 @@ export default class WebGLRenderer extends React.Component {
     }
   }
 
+  // Updates WebGL viewport to latest props
+  // for clean logging, only calls gl.viewport if props have changed
+  _updateGLViewport() {
+    let {viewport: {x, y, width: w, height: h}} = this.props;
+    const {pixelRatio: dpr} = this.props;
+    const {gl} = this._gl;
+
+    x = x * dpr;
+    y = y * dpr;
+    w = w * dpr;
+    h = h * dpr;
+
+    if (x !== this.x || y !== this.y || w !== this.w || h !== this.h) {
+      gl.viewport(x, y, w, h);
+      this.x = x;
+      this.y = y;
+      this.w = w;
+      this.h = h;
+    }
+  }
+
   _renderFrame() {
-    const {viewport: {x, y, width, height}, pixelRatio: dpr} = this.props;
-    const {gl} = this.state;
+    const {viewport: {width, height}} = this.props;
+    const {gl} = this._gl;
 
     // Check for reasons not to draw
     if (!gl || !(width > 0) || !(height > 0)) {
       return;
     }
 
-    // update viewport to latest props
-    gl.viewport(x * dpr, y * dpr, width * dpr, height * dpr);
+    this._updateGLViewport();
 
     // Call render callback
     this.props.onRenderFrame({gl});

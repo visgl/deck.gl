@@ -171,7 +171,6 @@ const LineLayer64Example = props =>
     onClick: props.onArcClicked
   });
 
-
 const ScatterplotLayer64Example = props =>
   new ScatterplotLayer64({
     ...props,
