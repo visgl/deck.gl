@@ -92,7 +92,7 @@ export default class WebGLRenderer extends React.Component {
     super(props);
     this.state = {};
     this._animationFrame = null;
-    this._gl = null;
+    this.gl = null;
   }
 
   componentDidMount() {
@@ -123,7 +123,7 @@ export default class WebGLRenderer extends React.Component {
       }
     }
 
-    this._gl = gl;
+    this.gl = gl;
 
     // Call callback last, in case it throws
     this.props.onRendererInitialized({canvas, gl});
@@ -152,7 +152,7 @@ export default class WebGLRenderer extends React.Component {
   _updateGLViewport() {
     let {viewport: {x, y, width: w, height: h}} = this.props;
     const {pixelRatio: dpr} = this.props;
-    const {gl} = this._gl;
+    const {gl} = this;
 
     x = x * dpr;
     y = y * dpr;
@@ -170,7 +170,7 @@ export default class WebGLRenderer extends React.Component {
 
   _renderFrame() {
     const {viewport: {width, height}} = this.props;
-    const {gl} = this._gl;
+    const {gl} = this;
 
     // Check for reasons not to draw
     if (!gl || !(width > 0) || !(height > 0)) {

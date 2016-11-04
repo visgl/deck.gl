@@ -439,6 +439,7 @@ class ExampleApp extends React.Component {
         id="default-deckgl-overlay"
         width={width}
         height={height}
+        debug
         {...mapViewState}
         onWebGLInitialized={ this._onWebGLInitialized }
         layers={this._renderExamples()}
