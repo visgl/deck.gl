@@ -1,5 +1,5 @@
 <div align="center">
-  <img height="300" src="https://github.com/uber/deck.gl/raw/dev/demo/src/static/images/demo-thumb-scatterplot.jpg" />
+  <img height="300" src="https://github.com/uber/deck.gl/raw/dev/demo/src/static/images/demo-thumb-choropleth.jpg" />
 </div>
 
 # Choropleth Layer (64 bit)
