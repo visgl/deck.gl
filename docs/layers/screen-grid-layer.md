@@ -1,3 +1,7 @@
+<div align="center">
+  <img height="300" src="https://github.com/uber/deck.gl/raw/dev/demo/src/static/images/demo-thumb-screengrid.jpg" />
+</div>
+
 # ScreenGridLayer
 
 The ScreenGridLayer takes in an array of latitude and longitude

@@ -1,3 +1,7 @@
+<div align="center">
+  <img height="300" src="https://github.com/uber/deck.gl/raw/dev/demo/src/static/images/demo-thumb-line.jpg" />
+</div>
+
 # Line Layer (64 bit)
 
 The Line Layer takes in paired latitude and longitude coordinated points and

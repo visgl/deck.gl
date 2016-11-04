@@ -1,3 +1,7 @@
+<div align="center">
+  <img height="300" src="https://github.com/uber/deck.gl/raw/dev/demo/src/static/images/demo-thumb-arc.jpg" />
+</div>
+
 # Arc Layer
 
 The Arc Layer takes in paired latitude and longitude coordinated points and
