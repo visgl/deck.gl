@@ -131,10 +131,9 @@ class Home extends Component {
               <p>
               deck.gl allows complex visualizations to be constructed by
               composing existing layers, and makes it easy to package and
-              share new visulizations as reusable layers.
-              We already offer a
-              <a href="/#/layers/catalog/overview">catalog of proven layers</a>
-              and we have many more in the works.
+              share new visulizations as reusable layers. We already offer
+              a <a href="/#/layers/catalog/overview">catalog of proven layers</a> and
+              we have many more in the works.
               </p>
 
               <h3>High-Precision Computations in the GPU</h3>
