@@ -9,7 +9,7 @@
   h2 {
     font-size: 2em;
     font-weight: 700;
-    margin: 48px 0 8px;
+    margin: 0 0 8px;
   }
   h3 {
     font-size: 1.2em;
@@ -107,15 +107,31 @@
   h2, h3 {
     color: $black-20;
   }
-
 }
-
 #highlights {
   img {
     margin: 32px auto 16px;
   }
   .col-1-3 {
     padding: 0 24px;
+  }
+}
+#buttons {
+  button {
+    font-size: 12px;
+    letter-spacing: 2px;
+    border: 2px solid transparent;
+    @include linearGradientH(border-image, $primary, $secondary);
+    border-image-slice: 2;
+    border-radius: 2px;
+    background: rgba(0, 173, 230, 0.1);
+    width: 214px;
+    height: 52px;
+    margin: 56px 0;
+    transition: background 500ms;
+  }
+  button:hover {
+    background: rgba(0, 173, 230, 0.3);
   }
 }
 #footer {

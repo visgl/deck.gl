@@ -121,7 +121,7 @@ export default class Layer {
   }
 
   // If state has a model, draw it with supplied uniforms
-  draw(uniforms = {}) {
+  draw({uniforms = {}}) {
     if (this.state.model) {
       this.state.model.render(uniforms);
     }
