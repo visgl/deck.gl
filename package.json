@@ -2,7 +2,7 @@
   "name": "deck.gl",
   "description": "A suite of 3D-enabled data visualization overlays, suitable for react-map-gl",
   "license": "MIT",
-  "version": "3.0.0-rc2",
+  "version": "3.0.0-rc3",
   "keywords": [
     "webgl",
     "visualization",
@@ -96,7 +96,7 @@
     "build-dist": "npm run build-clean && npm run build-src && npm run build-shaderlib",
     "build-src": "babel src -d dist --source-maps inline --copy-files",
     "build-shaderlib": "babel shaderlib -d dist/shaderlib --source-maps inline --copy-files",
-    "build-script": "browserify src/bundle.js -t glslify | uglifyjs > dist/deckgl.min.js",
+    "build-script": "browserify src/bundle.js -t babelify -t glslify | uglifyjs > dist/deckgl.min.js",
     "build-watch": "npm run build-clean && npm run build-src-watch && npm run build-shaderlib-watch",
     "build-src-watch": "babel src -d dist --source-maps inline --copy-files --watch &",
     "build-shaderlib-watch": "babel shaderlib -d dist/shaderlib --source-maps inline --copy-files --watch &",

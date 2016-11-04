@@ -16,6 +16,9 @@ All notable changes to deck.gl will be documented in this file.
 
 ### Beta-3.0.0 Releases
 
+#### [v3.0.0-rc3] -
+- FIX: Uniforms arg on Layer.draw()
+
 #### [v3.0.0-rc2] -
 - FIX to ChoroplethLayer64 colors
 - FIX: METERS MODE
