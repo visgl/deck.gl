@@ -141,7 +141,7 @@ class Home extends Component {
               rendering datasets with unparalleled accuracy and performance.
               </p>
 
-              <h3>React and Mapbox integrations</h3>
+              <h3>React and Mapbox GL integrations</h3>
               <p>
               deck.gl is a particularly good match with React, supporting efficient WebGL
               rendering under the Reactive programming paradigm. It is also coordinated
