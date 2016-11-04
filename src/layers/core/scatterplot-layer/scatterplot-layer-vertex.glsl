@@ -34,7 +34,7 @@ varying vec4 vColor;
 void main(void) {
   vec3 center = project_position(instancePositions.xyz);
   vec3 vertex = positions * project_scale(radius * instancePositions.w);
-  gl_Position = project(vec4(center + vertex, 1.0));
+  gl_Position = project_to_clipspace(vec4(center + vertex, 1.0));
   vec4 color = vec4(instanceColors.rgb, instanceColors.a * opacity) / 255.;
   vec4 pickingColor = vec4(instancePickingColors / 255., 1.);
 

@@ -11,7 +11,7 @@ import Viewport, {COORDINATE_SYSTEM}
   // from 'viewport-mercator-project/perspective';
   from './old-viewport';
 import autobind from 'autobind-decorator';
-import {mat4} from 'gl-matrix';
+import {mat4, vec4} from 'gl-matrix';
 
 export {COORDINATE_SYSTEM}
   from 'viewport-mercator-project/perspective';
@@ -70,29 +70,7 @@ export default class WebGLViewport extends Viewport {
 
     const projectionCenter = [0.0, 0.0, 0.0, 0.0];
 
-    projectionCenter[0] =
-      projectionMatrix[0] * projectedPositionOrigin[0] +
-      projectionMatrix[4] * projectedPositionOrigin[1] +
-      projectionMatrix[8] * projectedPositionOrigin[2] +
-      projectionMatrix[12] * projectedPositionOrigin[3];
-
-    projectionCenter[1] =
-      projectionMatrix[1] * projectedPositionOrigin[0] +
-      projectionMatrix[5] * projectedPositionOrigin[1] +
-      projectionMatrix[9] * projectedPositionOrigin[2] +
-      projectionMatrix[13] * projectedPositionOrigin[3];
-
-    projectionCenter[2] =
-      projectionMatrix[2] * projectedPositionOrigin[0] +
-      projectionMatrix[6] * projectedPositionOrigin[1] +
-      projectionMatrix[10] * projectedPositionOrigin[2] +
-      projectionMatrix[14] * projectedPositionOrigin[3];
-
-    projectionCenter[3] =
-      projectionMatrix[3] * projectedPositionOrigin[0] +
-      projectionMatrix[7] * projectedPositionOrigin[1] +
-      projectionMatrix[11] * projectedPositionOrigin[2] +
-      projectionMatrix[15] * projectedPositionOrigin[3];
+    vec4.transformMat4(projectionCenter, projectedPositionOrigin, projectionMatrix);
 
     // If necessary add modelMatrix to clipSpace projection
     if (modelMatrix) {
