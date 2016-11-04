@@ -70,7 +70,7 @@ export default class ScreenGridLayer extends Layer {
     }
   }
 
-  draw(uniforms) {
+  draw({uniforms}) {
     const {minColor, maxColor} = this.props;
     const {model, cellScale, maxCount} = this.state;
     const {gl} = this.context;

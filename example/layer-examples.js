@@ -80,7 +80,7 @@ const ScatterplotLayerExample = props =>
 const METER_PLOT = [
   {position: [0, 0], radius: 1},
   {position: [20, 20], radius: 2},
-  {position: [100, 100], radius: 3},
+  {position: [-100, -100], radius: 3},
   {position: [-50, 200], radius: 0.5},
   {position: [1000, 1000], radius: 0.1}
 ];
@@ -92,8 +92,8 @@ const ScatterplotLayerMetersExample = props =>
     drawOutline: true,
     projectionMode: 2,
     positionOrigin: [
-        -122.42694203247012,
-        37.751537058389985
+      -122.42694203247012,
+      37.751537058389985
     ],
     data: METER_PLOT,
     getColor: x => [0, 0, 255],
@@ -184,7 +184,7 @@ const ScatterplotLayer64Example = props =>
 const ScatterplotLayer64MetersExample = props =>
   new ScatterplotLayer({
     ...props,
-    // id: 'scatterplot-64-meters',
+    id: 'scatterplot-64-meters',
     projectionMode: 2,
     projectionCenter: [
       props.mapViewState.longitude,
