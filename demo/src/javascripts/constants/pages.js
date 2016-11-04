@@ -1,5 +1,4 @@
 function getDocUrl(filename) {
-  // return `https://raw.githubusercontent.com/uber/deck.gl/dev/docs/${filename}`;
   return `docs/${filename}`;
 }
 
