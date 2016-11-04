@@ -19,7 +19,7 @@ function generatePath(tree) {
 export const examplePages = generatePath([
   {
     name: 'Overview',
-    content: 'docs/examples.md'
+    content: 'code-markdown/examples.md'
   },
   {
     name: 'ScatterplotLayer',
