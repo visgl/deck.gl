@@ -8,8 +8,7 @@
 // See: transform.js in https://github.com/mapbox/mapbox-gl-js
 
 import Viewport, {COORDINATE_SYSTEM}
-  // from 'viewport-mercator-project/perspective';
-  from './old-viewport';
+  from 'viewport-mercator-project/perspective';
 import autobind from 'autobind-decorator';
 import {mat4, vec4} from 'gl-matrix';
 

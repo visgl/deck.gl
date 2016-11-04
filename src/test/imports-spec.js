@@ -12,7 +12,7 @@ import {
 } from '../..';
 
 import {
-  EnhancedChoroplethLayer, GeoJsonLayer
+  EnhancedChoroplethLayer
 } from '../../samples';
 
 import Viewport2 from '../../viewport';
@@ -34,7 +34,6 @@ test('Top-level imports', t0 => {
 
   t0.test('import "deck.gl/samples"', t => {
     t.ok(EnhancedChoroplethLayer, 'EnhancedChoroplethLayer symbol imported');
-    t.ok(GeoJsonLayer, 'GeoJsonLayer symbol imported');
     t.end();
   });
 
