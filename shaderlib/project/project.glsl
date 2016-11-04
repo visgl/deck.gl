@@ -227,7 +227,7 @@ vec4 project_position(vec4 position) {
 
 vec4 project_to_clipspace(vec4 position) {
   if (projectionMode == PROJECT_MERCATOR_OFFSETS) {
-    return projectionMatrix * vec4(position.xy, 0.0, 0.0) + projectionCenter;
+    return projectionMatrix * vec4(position.xyz, 0.0) + projectionCenter;
   }
   return projectionMatrix * position;
 }
