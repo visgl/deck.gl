@@ -26,9 +26,9 @@ export default class ChoroplethDemo extends Component {
   static get viewport() {
     return {
       mapStyle: MAPBOX_STYLES.LIGHT,
-      latitude: 37.7749295,
-      longitude: -122.4194155,
-      zoom: 11,
+      latitude: 41.87,
+      longitude: -87.62,
+      zoom: 13,
       maxZoom: 16,
       pitch: 0,
       bearing: 0
@@ -46,7 +46,8 @@ export default class ChoroplethDemo extends Component {
 
     return (
       <div>
-        <h3>San Francisco Building Heights</h3>
+        <h3>Chicago Building Ages</h3>
+        <p>Age of Chicago Downtown Buildings</p>
         <div className="layout">
         {legendBlocks.map((background, i) => (
             <div key={i} className="legend" style={{background, width}} />
@@ -54,11 +55,11 @@ export default class ChoroplethDemo extends Component {
         </div>
         <p className="layout">
           <span className="col-1-3">0</span>
-          <span className="col-1-3 text-center">75m</span>
-          <span className="col-1-3 text-right">300m</span>
+          <span className="col-1-3 text-center">80</span>
+          <span className="col-1-3 text-right">160</span>
         </p>
         <p>Source:&nbsp;
-          <a href="http://sf-planning.org/">SF County Planning Department</a>
+          <a href="https://data.cityofchicago.org/">City of Chicago</a>
         </p>
         <div className="layout">
           <div className="stat col-1-2">
@@ -83,7 +84,7 @@ export default class ChoroplethDemo extends Component {
       id: `choropleth-${i}`,
       data: d,
       getColor: f => {
-        const r = Math.sqrt(f.properties.value / 300);
+        const r = f.properties.value / 160;
         return colorScale(r);
       }
     }));

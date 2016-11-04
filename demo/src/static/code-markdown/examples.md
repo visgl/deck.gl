@@ -14,7 +14,7 @@
     </div>
   </div>
   <div class="thumb">
-    <div data-title="San Francisco Building Heights" data-name="ChoroplethLayer">
+    <div data-title="Chicago Building Ages" data-name="ChoroplethLayer">
       <a href="#/examples/choropleth-layer">
         <img src="images/demo-thumb-choropleth.jpg" />
       </a>
