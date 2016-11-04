@@ -2,7 +2,7 @@
   "name": "deck.gl",
   "description": "A suite of 3D-enabled data visualization overlays, suitable for react-map-gl",
   "license": "MIT",
-  "version": "3.0.0-rc3",
+  "version": "3.0.0-rc4",
   "keywords": [
     "webgl",
     "visualization",

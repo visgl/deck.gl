@@ -15,7 +15,6 @@ import {
 } from '../src/layers/fp64';
 
 import {
-  GeoJsonLayer,
   EnhancedChoroplethLayer
 } from '../src/layers/samples';
 
@@ -101,21 +100,6 @@ const ScatterplotLayerMetersExample = props =>
     pickable: true,
     onHover: props.onScatterplotHovered,
     onClick: props.onScatterplotClicked
-  });
-
-const GeoJsonLayerExample = props =>
-  new GeoJsonLayer({
-    ...props,
-    data: props.choropleths,
-    getColor: x => [
-      Math.random() * 255,
-      Math.random() * 255,
-      Math.random() * 255
-    ],
-    opacity: 0.6,
-    pickable: true,
-    onHover: props.onChoroplethHovered,
-    onClick: props.onChoroplethClicked
   });
 
 // 64 BIT LAYER EXAMPLES
@@ -288,7 +272,6 @@ export default {
   },
 
   'Sample Layers': {
-    GeoJsonLayer: GeoJsonLayerExample,
     EnhancedChoroplethLayer: EnhancedChoroplethLayerExample
   },
 
