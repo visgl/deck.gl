@@ -425,7 +425,7 @@ export default class Layer {
   }
 
   // Calculates uniforms
-  drawLayer(uniforms = {}) {
+  drawLayer({uniforms = {}}) {
     assert(this.context.viewport, 'Layer missing context.viewport');
     const viewportUniforms = this.context.viewport.getUniforms(this.props);
     uniforms = {...uniforms, ...viewportUniforms};
@@ -616,8 +616,8 @@ export default class Layer {
 
     // TODO - inject viewport from overlay instead of creating for each layer?
     const hasViewportProps =
-      this.props.width !== undefined ||
-      this.props.height !== undefined ||
+      // this.props.width !== undefined ||
+      // this.props.height !== undefined ||
       this.props.latitude !== undefined ||
       this.props.longitude !== undefined ||
       this.props.zoom !== undefined ||

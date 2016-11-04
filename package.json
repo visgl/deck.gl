@@ -66,7 +66,7 @@
     "gl": "^4.0.1",
     "highlight.js": "^9.7.0",
     "immutable": "^3.7.5",
-    "luma.gl": "3.0.0-beta6",
+    "luma.gl": "^2.10.0",
     "marked": "^0.3.6",
     "react": "^15.3.2",
     "react-addons-test-utils": "^15.0.2",
@@ -88,7 +88,7 @@
   "peerDependencies": {
     "react": "0.14.x - 15.x",
     "react-dom": "0.14.x - 15.x",
-    "luma.gl": "3.0.0-beta6"
+    "luma.gl": "^2.10.0"
   },
   "scripts": {
     "build": "npm run build-dist && npm run build-script",
