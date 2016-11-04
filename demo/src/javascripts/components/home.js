@@ -125,42 +125,40 @@ class Home extends Component {
               </h2>
               <hr className="short" />
 
-              <h3>A Layered Approach to Visualization</h3>
+              <h3>
+                A layered approach with <a href="/#/layers/catalog/overview">growing catalog</a>
+              </h3>
               <p>
-              Based on the notion of layers and instancing deck.gl is
-              suitable to reason about and display data, perform
-              on-the-fly aggregations and visually explore large datasets.
+              deck.gl allows complex visualizations to be constructed by reusing and composing
+              layers, and provides an architecture enabling users to easily create and share
+              new layers. We already offer a catalog of proven layers and we have many more in
+              the works.
               </p>
 
-              <h3>Growing Layer Catalog</h3>
+              <h3>High-precision computations in the GPU</h3>
               <p>
-              deck.gl defines an architecture for packaging high performance
-              WebGL visualizations as reusable JavaScript layers. We already
-              offer a catalog of proven layers and we have many more in the
-              works.
+              By emulating 64 bit floating point computations in the GPU, deck.gl supports
+              rendering datasets with unparalleled accuracy and performance.
               </p>
 
-              <h3>Interoperability with Mapbox</h3>
+              <h3>React and Mapbox GL integrations</h3>
               <p>
-              deck.gl is interoperable with Mapbox GL. We coordinate
-              with the Mapbox camera system to provide compelling 2D and 3D
-              visualizations on top of your Mapbox based maps.
+              deck.gl is a particularly good match with React, supporting efficient WebGL
+              rendering under the Reactive programming paradigm. It is also coordinated
+              with the Mapbox camera system to provide compelling 2D and 3D visualizations
+              on top of your Mapbox based maps.
               </p>
 
-              <h3>Strong React Integration</h3>
-              <p>
-              deck.gl is a particularly good match with React, supporting
-              efficient WebGL rendering under the Reactive programming
-              paradigm.
-              </p>
             </div>
           </div>
-          <div className="image" />
+          <a href="#/layers/catalog/overview">
+            <div className="image" />
+          </a>
         </section>
 
         <hr />
 
-        <section id="highlights">
+        {/* <section id="highlights">
           <div className="container text-center">
             <h4>Highlights</h4>
             <hr className="short" />
@@ -196,12 +194,10 @@ class Home extends Component {
               </div>
             </div>
           </div>
-        </section>
+        </section> */}
 
         <section id="footer">
-          <div className="container text-center">
-            <div className="logo">deck.gl</div>
-            <hr className="short" />
+          <div className="container">
             <h4>Made by</h4>
             <img src="images/uber-logo.png" />
           </div>
