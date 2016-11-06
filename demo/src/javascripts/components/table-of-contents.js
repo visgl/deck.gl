@@ -30,10 +30,10 @@ export default class TableOfContents extends Component {
   }
 
   render() {
-    const {pages, parentRoute} = this.props;
+    const {pages, parentRoute, isOpen} = this.props;
 
     return (
-      <div className="toc">
+      <div className={`toc ${isOpen ? 'open' : ''}`}>
         <div>
           { pages.map(this._renderPage.bind(this, parentRoute)) }
         </div>
@@ -43,6 +43,7 @@ export default class TableOfContents extends Component {
 }
 
 TableOfContents.propTypes = {
+  isOpen: PropTypes.bool,
   parentRoute: PropTypes.string.isRequired,
   pages: PropTypes.array.isRequired
 };

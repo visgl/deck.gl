@@ -45,7 +45,7 @@ export default class ArcDemo extends Component {
 
   static get parameters() {
     return {
-      lineWidth: {displayName: 'Width', type: 'number', value: 2, step: 1, min: 1}
+      lineWidth: {displayName: 'Width', type: 'number', value: 1, step: 1, min: 1}
     };
   }
 
@@ -157,7 +157,7 @@ export default class ArcDemo extends Component {
         id: 'choropleth',
         data: data[0],
         opacity: 0,
-        getColor: () => [255, 255, 255],
+        getColor: () => [0, 0, 0, 0],
         onClick: this._onClickFeature.bind(this),
         pickable: true
       }),

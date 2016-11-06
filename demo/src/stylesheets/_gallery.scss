@@ -13,10 +13,11 @@
 .toc {
   width: 240px;
   height: 100%;
-  box-shadow: 2px 0 2px rgba(0,0,0,0.15);
-  position: relative;
+  background: #fff;
   overflow-y: auto;
+  box-shadow: 2px 0 4px rgba(0,0,0,0.15);
   z-index: 1;
+  transition: all 300ms;
 
   >div {
     padding-top: 20px;
@@ -37,11 +38,14 @@
     padding-left: 28px;
     color: $black-20;
     background: transparent;
-    border-left: solid 4px transparent;
+    border-style: solid;
+    border-width: 0 0 0 4px;
+    border-color: transparent;
   }
   .link.active {
     color: $primary;
     font-weight: bold;
+    border-color: $primary;
     @include linearGradientV(border-image, $primary, $secondary);
     border-image-slice: 2;
   }
@@ -60,25 +64,12 @@
     max-height: 0 !important;
   }
 }
-
-@media (max-width: 768px) {
-  .flexbox--row {
-    display: block;
-  }
-  .toc {
-    width: 100%;
-  }
-  .toc ul {
-    background: white;
-    z-index: 98;
-  }
-}
 .tabs {
   position: absolute;
   bottom: 0;
   right: 0;
   margin: 24px;
-  z-index: 99;
+  z-index: 1;
   list-style: none;
 
   .tip {
@@ -125,9 +116,6 @@
   width: 284px;
   background: #fff;
   box-shadow: 0 0 4px rgba(0, 0, 0, 0.15);
-  position: absolute;
-  top: 0;
-  right: 0;
   margin: 24px;
   padding: 12px 24px;
 
@@ -161,9 +149,6 @@
   a {
     display: inline;
   }
-  a, a:visited {
-    color: $primary;
-  }
 
   p {
     margin-bottom: 16px;
@@ -176,4 +161,48 @@
 }
 code {
   font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace !important;
+}
+
+@media (max-width: 576px) {
+  .flexbox--row {
+    display: block;
+  }
+  .toc {
+    position: absolute;
+    width: 100vw;
+    height: 0;
+    z-index: 9;
+  }
+  .toc.open {
+    height: 100%;
+    padding-top: 128px;
+  }
+  .options-panel {
+    width: 100%;
+    margin: 0;
+  }
+  .options-panel:not(.focus) {
+    cursor: pointer;
+    >div > *, hr, .input {
+      display: none;
+    }
+    >div:before {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      color: $white-40;
+      font-size: 24px;
+      font-family: 'deckgl';
+      content: "\e906";
+    }
+    h3 {
+      display: block;
+    }
+  }
+  .tabs .tip {
+    display: none;
+  }
+  .markdown {
+    padding: 40px 12px 96px;
+  }
 }

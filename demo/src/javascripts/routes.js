@@ -1,9 +1,10 @@
 import 'babel-polyfill';
 
 import React from 'react';
-import {Router, Route, IndexRedirect, useRouterHistory} from 'react-router'
+import {Router, Route, IndexRoute, IndexRedirect, useRouterHistory} from 'react-router'
 import { createHashHistory } from 'history';
 
+import App from './components/app';
 import Home from './components/home';
 import Gallery from './components/gallery';
 import Page from './components/page';
@@ -14,10 +15,13 @@ const appHistory = useRouterHistory(createHashHistory)({ queryKey: false })
 
 export default () => (
   <Router history={appHistory}>
-    { renderRouteGroup('examples', examplePages) }
-    { renderRouteGroup('documentation', docPages) }
-    { renderRouteGroup('layers', layerDocPages) }
-    <Route path="*" component={Home} />
+    <Route path="/" component={App}>
+      <IndexRoute component={Home} />
+      { renderRouteGroup('examples', examplePages) }
+      { renderRouteGroup('documentation', docPages) }
+      { renderRouteGroup('layers', layerDocPages) }
+      <Route path="*" component={Home} />
+    </Route>
   </Router>
 );
 

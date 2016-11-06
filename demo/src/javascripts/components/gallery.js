@@ -1,23 +1,20 @@
 import 'babel-polyfill';
 import React, {Component} from 'react';
-
-import Header from './header';
+import {connect} from 'react-redux';
 import TableOfContents from './table-of-contents';
-import stylesheet from '../constants/styles';
+import autobind from 'autobind-decorator';
 
-export default class Gallery extends Component {
+class Gallery extends Component {
 
   render() {
-    const {children, route: {path, pages}} = this.props;
+    const {children, route: {path, pages}, isMenuOpen} = this.props;
 
     return (
       <div className="gallery-wrapper">
-        <style>{ stylesheet }</style>
-        <Header />
         <div className="fullheight">
           <div className="flexbox--row">
             <div className="flexbox-item">
-              <TableOfContents parentRoute={path} pages={pages} />
+              <TableOfContents parentRoute={path} pages={pages} isOpen={isMenuOpen} />
             </div>
             <div className={`flexbox-item flexbox-item--fill`}>
               { children }
@@ -28,3 +25,5 @@ export default class Gallery extends Component {
     );
   }
 }
+
+export default connect(state => state.app)(Gallery);

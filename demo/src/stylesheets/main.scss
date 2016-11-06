@@ -1,6 +1,7 @@
 @import 'highlight';
 @import 'markdown';
 @import 'mixins';
+@import 'icon';
 
 $primary: #00ADE6;
 $secondary: #05E3D5;
@@ -26,7 +27,7 @@ body {
   box-sizing: border-box;
 }
 .logo {
-  color: $white;
+  color: $white !important;
   font-weight: 700;
   letter-spacing: 4px;
   text-transform: uppercase;
@@ -37,8 +38,12 @@ a {
   display: inline-block;
   cursor: pointer;
 }
-button {
+a, a:visited {
+  color: $primary;
+}
+button, .btn {
   color: #aaa;
+  text-align: center;
   background: $white;
   padding: 4px 8px;
   border: solid 1px #ccc;
@@ -47,16 +52,33 @@ button {
 }
 
 header {
-  background: $black;
+  white-space: nowrap;
   position: relative;
-  z-index: 99;
+  z-index: 10001;
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
-  height: 64px;
-  transition: background 500ms;
+  transition: all 300ms;
+  max-height: 64px;
   line-height: 64px;
+  overflow: hidden;
+
+  .bg {
+    position: absolute;
+    z-index: -1;
+    width: 100%;
+    height: 100%;
+    background: $black;
+  }
+
+  .links-toggle {
+    font-size: 24px;
+    color: $white;
+    float: right;
+    cursor: pointer;
+    display: none;
+  }
 
   .links {
     float: right;
@@ -66,13 +88,16 @@ header {
       color: $white-40;
       text-transform: uppercase;
       margin-left: 40px;
-      border-top: solid 3px transparent;
+      border-style: solid;
+      border-width: 3px 0 0 0;
+      border-color: transparent;
     }
     a:hover {
-      border-top-color: $white-40;
+      border-color: $white-40;
     }
     a.active {
       color: $white;
+      border-color: $primary;
       @include linearGradientH(border-image, $primary, $secondary);
       border-image-slice: 2;
     }
@@ -88,6 +113,9 @@ button:focus, input:focus {
   max-width: 1280px;
   width: 100%;
   overflow: hidden;
+}
+.container.soft-left {
+  padding-left: 72px;
 }
 hr {
   border: none;
@@ -133,29 +161,15 @@ hr.short {
     width: 50%;
   }
 }
-.position--relative {
-  position: relative;
-}
-.position--absolute {
+.top-left {
   position: absolute;
-}
-.left-top {
   left: 0;
   top: 0;
 }
-.left-bottom {
-  left: 0;
-  bottom: 0;
-}
-.left-center {
-  left: 0;
-  top: 50%;
-  transform: translateY(-50%);
-}
-.right-center {
+.top-right {
+  position: absolute;
   right: 0;
-  top: 50%;
-  transform: translateY(-50%);
+  top: 0;
 }
 .text-center {
   text-align: center;
@@ -204,7 +218,7 @@ hr.short {
   >div:after {
     font-size: 0.833em;
     content: attr(data-name);
-    bottom: 30%;
+    bottom: 25%;
     left: 0;
     width: 100%;
   }
@@ -215,6 +229,11 @@ hr.short {
     opacity: 1;
   }
 
+}
+.mapboxgl-ctrl-attrib {
+  position: absolute;
+  bottom: 0;
+  right: 0;
 }
 
 @media screen and (max-width: 1200px) {
@@ -227,20 +246,33 @@ hr.short {
     width: 100%;
   }
 }
+@media screen and (max-width: 576px) {
+  .container {
+    padding: 0 12px;
+  }
 
-@media screen and (max-width: 768px) {
-  .layout {
-    >* {
-      display: block !important;
-      width: 100% !important;
+  header {
+    .links-toggle {
+      display: block;
+    }
+    .links {
+      display: none;
+      margin-right: 40px;
+      a {
+        display: block;
+        border-width: 0;
+        border-style: none;
+      }
     }
   }
-  .flexbox--row {
-    flex-direction: column;
-    height: 100%;
-
-    .flexbox-item {
-      height: auto;
+  header.open {
+    max-height: 192px;
+    .bg {
+      opacity: 1 !important;
+    }
+    .links {
+      display: block;
     }
   }
+
 }

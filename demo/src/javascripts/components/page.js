@@ -1,6 +1,7 @@
 import 'babel-polyfill';
 import React, {Component} from 'react';
 import {connect} from 'react-redux';
+import autobind from 'autobind-decorator';
 import MapGL from 'react-map-gl';
 
 import MarkdownPage from '../components/markdown-page';
@@ -14,6 +15,7 @@ class Page extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      mapFocus: true,
       ...this._loadContent(props.route.content)
     };
   }
@@ -61,6 +63,13 @@ class Page extends Component {
     };
   }
 
+  @autobind
+  _onUpdateMap(viewport) {
+    this.setState({mapFocus: true});
+    this.props.updateMap(viewport);
+  }
+
+  @autobind
   _resizeMap() {
     const w = window.innerWidth;
     const h = window.innerHeight;
@@ -71,7 +80,7 @@ class Page extends Component {
   }
 
   _renderMap() {
-    const {viewport, app: {params, owner, data}, updateMeta} = this.props;
+    const {viewport, vis: {params, owner, data}, updateMeta} = this.props;
     const {tabs: {demo}} = this.state;
     const DemoComponent = Demos[demo];
     const dataLoaded = owner === demo ? data : null;
@@ -81,7 +90,7 @@ class Page extends Component {
         mapboxApiAccessToken={MAPBOX_ACCESS_TOKEN}
         perspectiveEnabled={true}
         { ...viewport }
-        onChangeViewport={ this.props.updateMap }>
+        onChangeViewport={ this._onUpdateMap }>
 
         <DemoComponent ref="demo" viewport={viewport} params={params}
           onStateChange={updateMeta}
@@ -92,13 +101,14 @@ class Page extends Component {
   }
 
   _renderOptions() {
-    const {app: {params, owner, meta}} = this.props;
-    const {tabs: {demo}} = this.state;
+    const {vis: {params, owner, meta}} = this.props;
+    const {tabs: {demo}, mapFocus} = this.state;
     const DemoComponent = Demos[demo];
     const metaLoaded = owner === demo ? meta : {};
 
     return (
-      <div className="options-panel">
+      <div className={`options-panel top-right ${mapFocus ? '' : 'focus'}`}
+        onClick={ () => this.setState({mapFocus: false}) }>
         { DemoComponent.renderInfo(metaLoaded) }
         { Object.keys(params).length > 0 && <hr /> }
         {

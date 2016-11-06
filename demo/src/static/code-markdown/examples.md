@@ -1,4 +1,4 @@
-<div class="container">
+<div>
   <div class="thumb">
     <div data-title="Every Person in NYC" data-name="ScatterplotLayer">
       <a href="#/examples/scatterplot-layer">

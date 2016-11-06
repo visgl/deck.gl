@@ -32,7 +32,7 @@ export function updateMap(viewport) {
 export function loadData(owner, dataArr) {
 
   return (dispatch, getState) => {
-    if (getState().app.owner === owner) {
+    if (getState().vis.owner === owner) {
       // already loading / loaded
       return;
     }
@@ -88,4 +88,12 @@ export function updateParam(name, value) {
 
 export function useParams(params) {
   return {type: 'USE_PARAMS', params};
+}
+
+export function toggleMenu(isOpen) {
+  return {type: 'TOGGLE_MENU', isOpen};
+}
+
+export function setHeaderOpacity(opacity) {
+  return {type: 'SET_HEADER_OPACITY', opacity};
 }

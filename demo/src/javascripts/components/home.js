@@ -4,12 +4,10 @@ import React, {Component} from 'react';
 import {connect} from 'react-redux';
 
 import {HeroDemo} from './demos';
-import {loadData, updateMap} from '../actions/app-actions';
+import {loadData, updateMap, setHeaderOpacity} from '../actions/app-actions';
 import MapGL from 'react-map-gl';
-import Header from './header';
 
 import ViewportAnimation from '../utils/map-utils';
-import stylesheet from '../constants/styles';
 import {MAPBOX_ACCESS_TOKEN, MAPBOX_STYLES} from '../constants/defaults';
 
 const DEMO_TAB = 0;
@@ -80,11 +78,12 @@ class Home extends Component {
 
   _onScroll() {
     const y = window.pageYOffset;
-    this.setState({atTop: y < 168});
+    const opacity = Math.max(0, Math.min(1, (y - 168) / 20));
+    this.props.setHeaderOpacity(opacity);
   }
 
   _renderDemo() {
-    const {viewport, app: {owner, data}} = this.props;
+    const {viewport, vis: {owner, data}} = this.props;
     const dataLoaded = owner === 'Home' ? data : null;
 
     return dataLoaded && (
@@ -101,23 +100,20 @@ class Home extends Component {
     const {atTop} = this.state;
     return (
       <div className={`home-wrapper ${atTop ? 'top' : ''}`}>
-        <style>{ stylesheet }</style>
-        <Header />
 
         <section ref="banner" id="banner">
           { this._renderDemo() }
-          <div className="container">
+          <div className="container soft-left">
             <h1>deck.gl</h1>
             <p>Large-scale WebGL-powered Data Visualization</p>
-            <a href="/#/documentation/overview/getting-started">
-              <button>Get started</button>
-            </a>
+            <a href="#/documentation/overview/getting-started" className="btn">Get started</a>
           </div>
           <div ref="fps" className="fps" />
         </section>
 
         <section id="features">
-          <div className="container">
+          <div className="image" />
+          <div className="container soft-left texts">
             <div>
               <h2>
                 deck.gl is a WebGL-powered framework for visual exploratory
@@ -126,24 +122,31 @@ class Home extends Component {
               <hr className="short" />
 
               <h3>
-              A Layered Approach to Data Visualization
+                <img src="images/icon-layers.svg" />
+                A Layered Approach to Data Visualization
               </h3>
               <p>
               deck.gl allows complex visualizations to be constructed by
               composing existing layers, and makes it easy to package and
               share new visulizations as reusable layers. We already offer
-              a <a href="/#/layers/catalog/overview">catalog of proven layers</a> and
+              a <a href="#/layers/catalog/overview">catalog of proven layers</a> and
               we have many more in the works.
               </p>
 
-              <h3>High-Precision Computations in the GPU</h3>
+              <h3>
+                <img src="images/icon-high-precision.svg" />
+                High-Precision Computations in the GPU
+              </h3>
               <p>
               By emulating 64 bit floating point computations in the GPU,
               deck.gl renders datasets with unparalleled accuracy and
               performance.
               </p>
 
-              <h3>React and Mapbox GL Integrations</h3>
+              <h3>
+                <img src="images/icon-react.svg" />
+                React and Mapbox GL Integrations
+              </h3>
               <p>
               deck.gl is a great match with React, supporting
               efficient WebGL rendering under the Reactive programming
@@ -152,26 +155,29 @@ class Home extends Component {
               compelling 2D and 3D visualizations on top of your Mapbox
               based maps.
               </p>
-
             </div>
           </div>
-          <a href="#/layers/catalog/overview">
-            <div className="image" />
-          </a>
+
+          <div className="container text-center buttons">
+            <a href="#/documentation/overview/getting-started" className="btn">
+              Get Started <i className="icon icon-arrow-right" />
+            </a>
+            <a href="https://github.com/uber/deck.gl" className="btn">
+              View on Github <i className="icon icon-github" />
+            </a>
+            <a href="#/examples" className="btn">
+              See examples <i className="icon icon-gallery" />
+            </a>
+          </div>
         </section>
 
-        <section id="buttons">
-          <a href="https://github.com/uber/deck.gl/">
-            <button>Github</button>
-          </a>
-        </section>
 
         <hr />
 
         <section id="footer">
-          <div className="container">
+          <div className="container soft-left">
             <h4>Made by</h4>
-            <img src="images/uber-logo.png" />
+            <i className="icon icon-uber-logo" />
           </div>
         </section>
 
@@ -180,4 +186,7 @@ class Home extends Component {
   }
 }
 
-export default connect(state => state, {loadData, updateMap})(Home);
+export default connect(
+  state => state,
+  {loadData, updateMap, setHeaderOpacity}
+)(Home);
