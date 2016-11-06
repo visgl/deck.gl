@@ -28,19 +28,12 @@ onmessage = function(e) {
       segments = decodeSegments(l);
     } else {
       var trip = decodeTrip(l, segments);
-      result.push(trip);
-      tripsCount++;
-      vertexCount += trip.segments.length;
+      var trip_offset = 0;
+      addTrip(sliceTrip(trip, -TRAIL_LENGTH, LOOP_LENGTH));
 
       while (trip.endTime > LOOP_LENGTH - TRAIL_LENGTH) {
         trip = shiftTrip(trip, -LOOP_LENGTH);
-        result.push(trip);
-        tripsCount++;
-        vertexCount += trip.segments.length;
-      }
-
-      if (result.length >= FLUSH_LIMIT) {
-        flush();
+        addTrip(sliceTrip(trip, -TRAIL_LENGTH, LOOP_LENGTH));
       }
     }
   });
@@ -51,6 +44,16 @@ onmessage = function(e) {
   }
 };
 
+function addTrip(trip) {
+  result.push(trip);
+  tripsCount++;
+  vertexCount += trip.segments.length;
+
+  if (result.length >= FLUSH_LIMIT) {
+    flush();
+  }
+}
+
 function flush() {
   postMessage({
     action: 'add',
@@ -60,13 +63,33 @@ function flush() {
   result = [];
 }
 
+function sliceTrip(trip, start, end) {
+  var i, startIndex = -1, endIndex = -1;
+  for(i = 0; i < trip.segments.length; i++) {
+    var t = trip.segments[i][2];
+    if (t > start && startIndex === -1) {
+      startIndex = Math.max(0, i - 1);
+    }
+    if (t > end && endIndex === -1) {
+      i++;
+      break;
+    }
+  }
+  endIndex = i;
+
+  return {
+    vendor: trip.vendor,
+    startTime: trip.startTime,
+    endTime: trip.endTime,
+    segments: trip.segments.slice(startIndex, endIndex)
+  };
+}
+
 function shiftTrip(trip, offset) {
   var cutoffIndex = 0;
   var segments = trip.segments.map(function(p, i) {
-    var t = p[2] + offset;
-    if (t < -TRAIL_LENGTH) cutoffIndex = i;
-    return [p[0], p[1], t];
-  }).slice(cutoffIndex);
+    return [p[0], p[1], p[2] + offset];
+  });
 
   return {
     vendor: trip.vendor,
@@ -83,12 +106,9 @@ function decodeTrip(str, segments) {
   var segs = decodeSegmentsArray(str.slice(5), segments);
 
   var projectedTimes = segs.reduce(function(acc, seg, i) {
-    var t = 0;
-    if (i > 0) {
-      t = acc[i - 1] + seg[seg.length - 1][2];
-    }
+    var t = acc[i] + seg[seg.length - 1][2];
     return acc.concat(t);
-  }, []);
+  }, [0]);
   var rT = (endTime - startTime) / projectedTimes[projectedTimes.length - 1];
 
   return {
@@ -136,6 +156,7 @@ function decodeSegments(str) {
       return [c[0], c[1], distances[j] / D * T];
     });
   }
+
   return result;
 }
 

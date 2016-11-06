@@ -34,23 +34,27 @@
     padding: 72px 0;
     position: relative;
   }
-}
-.home-wrapper.top {
-  header {
-    background: rgba(red($black), green($black), blue($black), 0.8);
+
+  .btn {
+    background: transparent;
+    font-size: 12px;
+    letter-spacing: 2px;
+    line-height: 44px;
+    border: 2px solid transparent;
+    width: 214px;
+    margin: 56px 0;
+    transition: background 500ms;
   }
 }
 
 #banner {
-  background-image: url('images/header-bg.jpg');
-  background-size: cover;
-  background-position: center;
+  background: $black-20;
   color: $white;
   position: relative;
 
   > .fps > div {
     position: absolute !important;
-    bottom: 10px !important;
+    bottom: 24px !important;
     right: 10px !important;
     top: inherit !important;
     left: inherit !important;
@@ -59,7 +63,7 @@
     position: absolute;
     top: 0;
   }
-  >.container {
+  > .container {
     position: relative;
   }
 
@@ -67,26 +71,20 @@
     font-size: 16px;
     color: $white-40;
   }
-  button {
-    font-size: 12px;
-    letter-spacing: 2px;
-    border: 2px solid transparent;
+  .btn {
+    border: solid 2px $primary;
     @include linearGradientH(border-image, $primary, $secondary);
     border-image-slice: 2;
-    border-radius: 2px;
-    background: rgba(0, 173, 230, 0.1);
-    width: 214px;
-    height: 52px;
-    margin: 56px 0;
-    transition: background 500ms;
   }
-  button:hover {
+  .btn:hover {
     background: rgba(0, 173, 230, 0.3);
   }
 }
 
 #features {
-  .container >div {
+  position: relative;
+
+  .texts >div {
     max-width: 50%;
     width: 480px;
   }
@@ -96,9 +94,9 @@
     width: 50%;
     top: 0;
     right: 0;
-    z-index: 1;
+    z-index: -1;
     border-top: solid 200px transparent;
-    background-image: url(images/maps.png);
+    background-image: url(images/maps.jpg);
     background-size: contain;
     background-repeat: no-repeat;
     background-position: right top;
@@ -106,32 +104,35 @@
 
   h2, h3 {
     color: $black-20;
+    position: relative;
   }
-}
-#highlights {
-  img {
-    margin: 32px auto 16px;
+  h3 > img {
+    position: absolute;
+    top: -4px;
+    width: 36px;
+    left: -48px;
   }
-  .col-1-3 {
-    padding: 0 24px;
+  .buttons {
+    margin-top: 48px;
+
+    .btn .icon {
+      font-size: 20px;
+      margin-left: 4px;
+      opacity: 0.5;
+      vertical-align: middle;
+    }
+    .btn:hover .icon {
+      opacity: 1;
+    }
   }
-}
-#buttons {
-  button {
-    font-size: 12px;
-    letter-spacing: 2px;
-    border: 2px solid transparent;
-    @include linearGradientH(border-image, $primary, $secondary);
-    border-image-slice: 2;
-    border-radius: 2px;
-    background: rgba(0, 173, 230, 0.1);
-    width: 214px;
-    height: 52px;
-    margin: 56px 0;
-    transition: background 500ms;
+  .btn {
+    border-color: $black;
+    margin: 12px;
+    color: $black;
   }
-  button:hover {
-    background: rgba(0, 173, 230, 0.3);
+  .btn:hover {
+    background: $black;
+    color: $white;
   }
 }
 #footer {
@@ -140,13 +141,31 @@
   background-repeat: repeat;
   color: $white;
 
-  .logo {
-    font-size: 16px;
+  .icon-uber-logo {
+    font-size: 24px;
   }
 
   h4 {
     font-size: 12px;
     margin-bottom: 24px;
     font-weight: 300;
+  }
+}
+@media screen and (max-width: 576px) {
+  #features {
+    .container >div {
+      max-width: 100%;
+      width: 100%;
+    }
+    .image {
+      position: static;
+      border: none;
+      height: 300px;
+      width: 100%;
+    }
+    .btn {
+      padding: 0 24px;
+      width: auto;
+    }
   }
 }

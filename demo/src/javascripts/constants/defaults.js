@@ -20,9 +20,14 @@ export const DEFAULT_VIEWPORT_STATE = {
   pitch: 0
 };
 
-export const DEFAULT_APP_STATE = {
+export const DEFAULT_VIS_STATE = {
   owner: null,
   meta: {},
   data: null,
   params: {}
+};
+
+export const DEFAULT_APP_STATE = {
+  headerOpacity: 1,
+  isMenuOpen: false
 };
