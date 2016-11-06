@@ -115,9 +115,11 @@ export default class LayerManager {
     assert(this.context.viewport, 'LayerManager.drawLayers: viewport not set');
 
     const {uniforms} = this.context;
+    let drawCount = 0;
     for (const layer of this.layers) {
       if (layer.props.visible) {
-        layer.drawLayer({uniforms});
+        layer.drawLayer({uniforms, drawCount});
+        drawCount++;
       }
     }
 

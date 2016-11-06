@@ -425,10 +425,10 @@ export default class Layer {
   }
 
   // Calculates uniforms
-  drawLayer({uniforms = {}}) {
+  drawLayer({uniforms = {}, drawCount = 0}) {
     assert(this.context.viewport, 'Layer missing context.viewport');
     const viewportUniforms = this.context.viewport.getUniforms(this.props);
-    uniforms = {...uniforms, ...viewportUniforms};
+    uniforms = {...uniforms, ...viewportUniforms, drawCount};
     // Call subclass lifecycle method
     this.draw({uniforms});
     // End lifecycle method
@@ -499,7 +499,8 @@ export default class Layer {
 
   // PRIVATE METHODS
 
-  // The comparison of the data prop has some special handling
+  // The comparison of the data prop requires special handling
+  // the dataComparator should be used if supplied
   _diffDataProps(oldProps, newProps) {
     // Support optional app defined comparison of data
     const {dataComparator} = newProps;
@@ -515,7 +516,7 @@ export default class Layer {
     return null;
   }
 
-  // Check if any update triggers have changed, and invalidate
+  // Checks if any update triggers have changed, and invalidate
   // attributes accordingly.
   /* eslint-disable max-statements */
   _diffUpdateTriggers(oldProps, newProps) {
