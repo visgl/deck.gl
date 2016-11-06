@@ -128,6 +128,7 @@
   .btn {
     border-color: $black;
     margin: 12px;
+    min-width: 214px;
     color: $black;
   }
   .btn:hover {
@@ -152,16 +153,26 @@
   }
 }
 @media screen and (max-width: 576px) {
+  .home-wrapper {
+    h1 {
+      font-size: 3.6em;
+    }
+    h2 {
+      font-size: 1.6em;
+    }
+  }
+  #banner {
+    p {
+      font-size: 12px;
+    }
+  }
   #features {
     .container >div {
       max-width: 100%;
       width: 100%;
     }
     .image {
-      position: static;
-      border: none;
-      height: 300px;
-      width: 100%;
+      display: none;
     }
     .btn {
       padding: 0 24px;

@@ -12,7 +12,7 @@ export default class Header extends Component {
         <div className="bg" style={{opacity}} />
         <div className="container">
           <a className="logo" href="#">deck.gl</a>
-          <div className="links-toggle" onClick={ () => toggleMenu(!isMenuOpen) }>
+          <div className="menu-toggle" onClick={ () => toggleMenu(!isMenuOpen) }>
             <i className={`icon icon-${isMenuOpen ? 'close' : 'menu'}`} />
           </div>
           <div className="links">

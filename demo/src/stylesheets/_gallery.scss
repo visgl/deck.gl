@@ -101,7 +101,8 @@
 .markdown {
   padding: 40px 36px 96px;
   height: 100%;
-  overflow-y: auto;
+  overflow-y: scroll;
+  -webkit-overflow-scrolling: touch;
 }
 .stat {
   text-transform: uppercase;
@@ -172,10 +173,13 @@ code {
     width: 100vw;
     height: 0;
     z-index: 9;
+
+    >div {
+      padding-top: 128px;
+    }
   }
   .toc.open {
     height: 100%;
-    padding-top: 128px;
   }
   .options-panel {
     width: 100%;
