@@ -164,23 +164,6 @@ const ScatterplotLayer64Example = props =>
     onClick: props.onScatterplotClicked
   });
 
-const ScatterplotLayer64MetersExample = props =>
-  new ScatterplotLayer({
-    ...props,
-    id: 'scatterplot-64-meters',
-    projectionMode: 2,
-    projectionCenter: [
-      props.mapViewState.longitude,
-      props.mapViewState.latitude
-    ],
-    data: METER_PLOT,
-    getColor: x => [0, 0, 255],
-    opacity: 0.5,
-    pickable: true,
-    onHover: props.onScatterplotHovered,
-    onClick: props.onScatterplotClicked
-  });
-
 // SAMPLE LAYER EXAMPLES
 
 const EnhancedChoroplethLayerExample = props =>
@@ -267,7 +250,6 @@ export default {
     'ChoroplethLayer64 (Contour)': ChoroplethLayer64ContourExample,
     ExtrudedChoroplethLayer64: ExtrudedChoroplethLayer64Example,
     ScatterplotLayer64: ScatterplotLayer64Example,
-    'ScatterplotLayer64 (meters)': ScatterplotLayer64MetersExample,
     LineLayer64: LineLayer64Example
   },
 
