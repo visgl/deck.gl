@@ -425,10 +425,10 @@ export default class Layer {
   }
 
   // Calculates uniforms
-  drawLayer({uniforms = {}, drawCount = 0}) {
+  drawLayer({uniforms = {}, layerIndex = 0}) {
     assert(this.context.viewport, 'Layer missing context.viewport');
     const viewportUniforms = this.context.viewport.getUniforms(this.props);
-    uniforms = {...uniforms, ...viewportUniforms, drawCount};
+    uniforms = {...uniforms, ...viewportUniforms, layerIndex};
     // Call subclass lifecycle method
     this.draw({uniforms});
     // End lifecycle method
