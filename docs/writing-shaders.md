@@ -37,14 +37,21 @@ void main(void) {
 
 ```
 
+## Uniforms
 
-### Opacity (Fragment Shader)
+### `layerIndex` uniform
+
+The layerIndex is a small integer that starts at zero and is incremented
+for each layer that is rendered. It can be used to add small offsets to
+the z coordinate of layers to resolve z-fighting between overlapping
+layers.
+
+### `opacity` uniform
 
 In the fragment shader, multiply the fragment color with the opacity
-uniform or call the `layerColor` method.
+uniform.
 
-
-### Picking (Fragment Shader)
+### `picking` uniforms
 
 If you choose to implement picking through picking colors, make sure
 the `pickingColors` or `instancePickingColors` attribute is correctly set up,
