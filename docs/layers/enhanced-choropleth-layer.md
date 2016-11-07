@@ -1,6 +1,13 @@
-# Extruded Choropleth Layer (64 bit)
+# Enhanced Choropleth Layer (64 bit)
 
-Choropleth Layer with Elevation
+A layer that extrudes lines in Choropleth polygons by tesselating them into
+long, thin triangles. This provides control over line thickness
+while ensuring good line mitering, overcoming WebGL's limitations in this
+regard.
+
+**Note:** Very sharp angles can generate very long miters and handling of this
+case needs more work, but for "modest" angles (e.g. 60 degrees in hexagons)
+the results will be good.
 
     import {ExtrudedChoroplethLayer64} from 'deck.gl';
 

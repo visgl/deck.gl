@@ -158,14 +158,9 @@ export const layerDocPages = generatePath([
       {
         name: 'Overview',
         content: getDocUrl('layers/README.md')
-      }
-    ]
-  },
-  {
-    name: 'Base Layer',
-    children: [
+      },
       {
-        name: 'Layer',
+        name: 'Layer Base Class',
         content: getDocUrl('layers/base-layer.md')
       }
     ]
@@ -215,14 +210,14 @@ export const layerDocPages = generatePath([
         content: getDocUrl('layers/scatterplot-layer-64.md')
       }
     ]
-  },
-  {
-    name: 'Sample Layers',
-    children: [
-      {
-        name: 'ExtrudedChoroplethLayer',
-        content: getDocUrl('layers/extruded-choropleth-layer.md')
-      }
-    ]
   }
+  // {
+  //   name: 'Sample Layers',
+  //   children: [
+  //     {
+  //       name: 'ExtrudedChoroplethLayer',
+  //       content: getDocUrl('layers/extruded-choropleth-layer.md')
+  //     }
+  //   ]
+  // }
 ]);

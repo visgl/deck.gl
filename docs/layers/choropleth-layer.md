@@ -1,11 +1,11 @@
-<div align="center">
-  <img height="300" src="https://github.com/uber/deck.gl/raw/dev/demo/src/static/images/demo-thumb-choropleth.jpg" />
-</div>
-
 # Choropleth Layer
 
 The Choropleth Layer takes in [GeoJson](http://geojson.org/) formatted data and
 renders it as interactive choropleths.
+
+<div align="center">
+  <img height="300" src="https://github.com/uber/deck.gl/raw/dev/demo/src/static/images/demo-thumb-choropleth.jpg" />
+</div>
 
     import {ChoroplethLayer} from 'deck.gl';
 
