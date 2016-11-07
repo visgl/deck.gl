@@ -337,8 +337,8 @@ export default class Viewport {
       this._createMat4(),
       2 * Math.atan((this.height / 2) / this.altitude), // fov in radians
       this.width / this.height,                         // aspect ratio
-      0.1,                                              // near plane
-      this.farZ * 10.0                                  // far plane
+      0.2,                                              // near plane
+      this.farZ * 2                                     // far plane
     );
     /* eslint-enable no-inline-comments */
 

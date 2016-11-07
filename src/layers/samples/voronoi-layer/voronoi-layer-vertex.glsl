@@ -1,4 +1,4 @@
-// Copyright (c) 2015 Uber Technologies, Inc.
+// Copyright (c) 2016 Uber Technologies, Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -29,14 +29,23 @@ attribute vec3 instancePickingColors;
 uniform float opacity;
 uniform float radius;
 uniform float renderPickingBuffer;
+uniform mat4 flatMatrix;
 
 varying vec4 vColor;
+varying float vFragDepth;
 
 void main(void) {
-  vec3 center = preproject(instancePositions.xyz);
+  vec3 center = project_position(instancePositions.xyz);
   vec3 vertex = positions * scale(radius * instancePositions.w);
-  gl_Position = project(vec4(center, 1.0)) +
-                project(vec4(vertex, 0.0));
+  vec4 position =
+    project_to_clipspace(vec4(center, 1.0)) +
+    project_to_clipspace(vec4(vertex, 0.0));
+  vec4 positionFlat =
+    project_to_clipspace(vec4(center.xy, 0.0, 1.0)) +
+    project_to_clipspace(vec4(vertex.xy, 0.0, 0.0));
+
+  gl_Position = positionFlat;
+  vFragDepth = position.z / position.w;
 
   vec4 color = vec4(instanceColors / 255.0, opacity);
   vec4 pickingColor = vec4(instancePickingColors / 255.0, 1.);

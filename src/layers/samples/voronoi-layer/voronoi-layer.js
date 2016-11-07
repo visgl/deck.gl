@@ -20,8 +20,8 @@
 import {Layer} from '../../../lib';
 import {assembleShaders} from '../../../shader-utils';
 import {GL, Model, Geometry} from 'luma.gl';
-
-const glslify = require('glslify');
+import {readFileSync} from 'fs';
+import {join} from 'path';
 
 const DEFAULT_COLOR = [255, 0, 255];
 
@@ -65,6 +65,10 @@ export default class VoronoiLayer extends Layer {
       instanceColors: {size: 3, update: this.calculateInstanceColors}
     });
 
+    if (!gl.getExtension('EXT_frag_depth')) {
+      throw new Error('Voronoi needs gl_FragDepth');
+    }
+
     this.setState({model: this.getModel(gl)});
   }
 
@@ -72,6 +76,10 @@ export default class VoronoiLayer extends Layer {
     this.setUniforms({
       radius: this.props.radius
     });
+  }
+
+  draw({uniforms}) {
+    this.state.model.render(uniforms);
   }
 
   getModel(gl) {
@@ -95,8 +103,8 @@ export default class VoronoiLayer extends Layer {
       gl,
       id: this.props.id,
       ...assembleShaders(gl, {
-        vs: glslify('./voronoi-layer-vertex.glsl'),
-        fs: glslify('./voronoi-layer-fragment.glsl')
+        vs: readFileSync(join(__dirname, './voronoi-layer-vertex.glsl')),
+        fs: readFileSync(join(__dirname, './voronoi-layer-fragment.glsl'))
       }),
       geometry: new Geometry({
         drawMode: GL.TRIANGLE_FAN,

@@ -15,7 +15,8 @@ import {
 } from '../src/layers/fp64';
 
 import {
-  EnhancedChoroplethLayer
+  EnhancedChoroplethLayer,
+  VoronoiLayer
 } from '../src/layers/samples';
 
 const ArcLayerExample = props =>
@@ -193,6 +194,15 @@ const EnhancedChoroplethLayerExample = props =>
     onClick: props.onChoroplethClicked
   });
 
+const VoronoiLayerExample = props =>
+  new VoronoiLayer({
+    ...props,
+    data: props.points,
+    pickable: true,
+    onHover: props.onScatterplotHovered,
+    onClick: props.onScatterplotClicked
+  });
+
 // Returns new array N times larger than input array
 // filled with duplicate elements
 // Avoids Array.concat (which generates temporary huge arrays)
@@ -272,7 +282,8 @@ export default {
   },
 
   'Sample Layers': {
-    EnhancedChoroplethLayer: EnhancedChoroplethLayerExample
+    EnhancedChoroplethLayer: EnhancedChoroplethLayerExample,
+    VoronoiLayer: VoronoiLayerExample
   },
 
   'Performance Tests': {

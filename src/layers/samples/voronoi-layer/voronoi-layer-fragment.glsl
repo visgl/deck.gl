@@ -1,4 +1,4 @@
-// Copyright (c) 2015 Uber Technologies, Inc.
+// Copyright (c) 2016 Uber Technologies, Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -20,12 +20,16 @@
 
 #define SHADER_NAME voronoi-layer-fragment-shader
 
+#extension GL_EXT_frag_depth : enable
+
 #ifdef GL_ES
 precision highp float;
 #endif
 
 varying vec4 vColor;
+varying float vFragDepth;
 
 void main(void) {
   gl_FragColor = vColor;
+  gl_FragDepthEXT = vFragDepth;
 }
