@@ -18,7 +18,7 @@ dynamic range interactively. Points covering a whole city and accurate down
 to centimeter level at the same time can be processed and drawn to canvas
 on-the-fly. Since WebGL does not expose native 64-bit floating point number
 support of certain modern desktop GPUs to developers, deck.gl uses two 32-bit
-native floating point number to extend and perserve significant digits and
+native floating point number to extend and preserve significant digits and
 uses algorithms similar to those used in many multiple precision math libraries
 to achieve precision close to what IEEE-754 double precision floating point
 numbers provide. Generally speaking, this mechanism provide 46 significant

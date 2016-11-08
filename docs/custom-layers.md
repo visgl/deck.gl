@@ -24,7 +24,7 @@ Note that there is no strict division between layers that draw and composite
 layers, a layer could do both. That said, it often makes sense to keep your
 layers simple.
 
-## Implementing the Layer Life-cycle Functions
+## Implementing the Layer Lifecycle Functions
 
 ### Creating, Destroying and Drawing Layers
 
@@ -173,7 +173,7 @@ low and high resolution displays.
 ## Layer Picking Methods
 
 While deck.gl allows applications to implement picking however they want
-(by overriding the `pick` life-cycle method), special support is provided
+(by overriding the `pick` lifecycle method), special support is provided
 for the built-in "picking color" based picking system, which most layers
 use.
 

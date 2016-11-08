@@ -5,7 +5,7 @@
 deck.gl layers were designed to be used with a Reactive programming
 paradigm.
 The challenge is of course that in the "reactive" model, every change to
-application state causes a full rerender, while in WebGL, potentially
+application state causes a full re-render, while in WebGL, potentially
 huge memory buffers describing the geometry (so called "vertex attributes",
 or just "attributes" for short) must be prepared in advance of any draw calls.
 
