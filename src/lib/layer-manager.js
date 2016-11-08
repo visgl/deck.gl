@@ -75,11 +75,7 @@ export default class LayerManager {
 
       this.context.viewport = viewport;
       this.context.viewportChanged = viewportChanged;
-      this.context.uniforms = {
-        mercatorScale: Math.pow(2, zoom),
-        mercatorCenter: viewport.center,
-        ...viewport.getUniforms()
-      };
+      this.context.uniforms = {};
 
       log(4, viewport, latitude, longitude, zoom);
     }
