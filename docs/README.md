@@ -53,7 +53,7 @@ The key to writing good, performant deck.gl layers lies in understanding
 how to minimize updates and redundant calculations.
 
 It is important to understand the implications of the shallow equality
-comparisons deck.gl performs on layer properties, and how this impllies that
+comparisons deck.gl performs on layer properties, and how this implies that
 new data and property objects must only be created when the underlying
 data actually changes in order to prevent unnecessary updates.
 
@@ -65,7 +65,7 @@ mostly on your application architecture choices.
 ### Understanding WebGL
 
 This is only needed if you want to create custom layers in deck.gl.
-Note that while trying out a new ambitous rendering approach for a
+Note that while trying out a new ambitious rendering approach for a
 new layer will likely require deeper knowledge, it is often possible to modify
 or extend existing deck.gl layers (including modifying the shader code) with
 a surprisingly limited amount of WebGL knowledge.

@@ -102,7 +102,7 @@ visualization. A useful technique in these cases is to use brushing
 
 Sometimes, being able to filter out a specific color, or range of colors,
 from the data without modifying the data container itself can be helpful
-for performance or just code simplication reasons. This is also a feature
+for performance or just code simplification reasons. This is also a feature
 that can easily be added to a deck.gl shader.
 
 **Tip:** Use `discard` in the fragment shader instead of 0 alpha.
@@ -156,7 +156,7 @@ automatically injected by `assembleShaders` before any modules are included.
 
 A core feature of deck.gl is the fp64 shader math library that can be used leveraged by
 developers to conduct numerical computations that requires high numerical accuracy.
-This shader math libary uses "muliple precision" algorithms to emulate 64-bit double
+This shader math library uses "multiple precision" algorithms to emulate 64-bit double
 precision floating point numbers, with some limitations, using two 32-bit single
 precision floating point numbers. To use it, just set the "fp64" key to "true" when
 calling `assembleShaders`. Please refer to the "64-bit layers" section in the document

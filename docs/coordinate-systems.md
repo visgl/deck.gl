@@ -1,7 +1,7 @@
 # Coordinate Systems
 
 By default deck.gl's interprets positions in the Web Mercator
-coordinate system, however deck.gl  also support positions
+coordinate system, however deck.gl also support positions
 specified in several other coordinate systems.
 
 
@@ -47,7 +47,7 @@ Remarks:
 A core feature of deck.gl is that all layers automatically by default
 accept latitude and longitude coordinates specified in the
 [web mercator](https://en.wikipedia.org/wiki/Web_Mercator) projection,
-the de facto standard carotgraphic projection for computer maps,
+the de facto standard cartographic projection for computer maps,
 making it very easy for applications to visualize latitude/longitude
 encoded data.
 
@@ -81,7 +81,7 @@ Remarks:
   set by UTM. The meters mode can simplify working with UTM coordinates
   but should not be used directly as such.
 * A nice side effect is that the meters projection mode uses small numeric
-  deltas in projection and therefore does not lose precision under extrem
+  deltas in projection and therefore does not lose precision under extreme
   zoom levels even when using faster 32 bit floating point.
 
 ### Mathematical/Linear Projection Mode
@@ -96,7 +96,7 @@ occupies
 
 At zoom 0, one world unit represents one pixel unit.
 deck.gl can create a projection matrix from zoom level and center,
-(as well as pitch, bearing and altiude), to move around in the map.
+(as well as pitch, bearing and altitude), to move around in the map.
 The interaction layer handles this by default.
 
 You can of course supply your own projectionMatrix and scaling uniforms
@@ -119,7 +119,7 @@ deck.gl works with two concepts:
   meters in mercator mode, and simply in world coordinate deltas in
   linear mode).
 
-As a deck.gl user, you should mainly make sure to scan a layer defintion to
+As a deck.gl user, you should mainly make sure to scan a layer definition to
 make sure you understand where you are expect to pass in [lng, lat] coordinates.
 
 

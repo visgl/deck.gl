@@ -35,7 +35,7 @@ all Immutable.js containers etc. The notable exception are native JavaScript
 object maps. It is recommended to use ES6 Maps instead.
 
 It is recommended, but not required, to use immutable data (containers AND
-objects) as it ensures that changes to `data` property trigger a rerender.
+objects) as it ensures that changes to `data` property trigger a re-render.
 (See the notes on `rerenderCount` and `updateCount` properties.)
 
 ## Notes on picking

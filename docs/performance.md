@@ -32,12 +32,12 @@ these issues using special techniques, but it can require extra work.
 
 ## Layer Update Performance
 
-When the `data` prop changes, deck.gl will recalculate its webgl buffers.
+When the `data` prop changes, deck.gl will recalculate its WebGL buffers.
 The time required for this is proportional to the number of items in your
 `data` prop.
 Note that deck.gl will call the accessors you supply to the layer for
 every object, so normally you would want the accessors to be trivial functions
-that just return alreay precomputed/transformed data.
+that just return already precomputed/transformed data.
 
 ## Layer Rendering Performance
 

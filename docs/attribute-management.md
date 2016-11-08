@@ -11,11 +11,11 @@ or just "attributes" for short) must be prepared in advance of any draw calls.
 
 ## WebGL Performance Challenges
 
-Ccreating new WebGL buffers before every draw call would quickly lead
+Creating new WebGL buffers before every draw call would quickly lead
 to unacceptable performance. Just like in React (which "renders" to the
 browser's slow-updating DOM) the challenge becomes to detect exactly what
 changes were made to each layer's properties and then limit both attribute
-recalculation and rerendering to the minimum needed to ensure that the
+recalculation and re-rendering to the minimum needed to ensure that the
 next draw cycle correctly reflects the changes.
 
 Since the length of attributes are usually proportional of to the number of
@@ -61,7 +61,7 @@ to do on-the-fly calculation of attributes.
 **Note**: A layer only renders when a property change is detected. For
 performance reasons, property change detection uses shallow compare,
 which means that mutating an element inside a buffer or a mutable data array
-does not register as a property change, and thus does not trigger a rerender.
+does not register as a property change, and thus does not trigger a re-render.
 To force trigger a render after mutating buffers, simply increment the
 `renderCount` property. To force trigger a buffer update after mutating data,
 increment the `updateCount` property.
@@ -89,7 +89,7 @@ Limitations:
 ### AttributeManager.add
 
 Adds attribute descriptions to the AttributeManager that describe
-the attributes that should be autocalculated.
+the attributes that should be auto-calculated.
 
 Takes a map of attribute descriptor objects
 - keys are attribute names
@@ -198,4 +198,3 @@ point.
 If you are new to these concepts, we have found that a great way to learn more
 is simply to copy an existing deck.gl layer and start extending/modifying
 its functionality.
-
