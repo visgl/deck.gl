@@ -104,6 +104,12 @@ For details see [What's New](docs/whats-new.md)
 
 ### Beta-3.0.0 Releases
 
+#### [v3.0.0-rc6] -
+- Support layerIndex uniform to solve z-fighting
+- gl_FragDepth extension to fix Voronoi Layer (#186)
+- Remove Scatterplot64(Meters) Layer for now (#188)
+- FIX: Made Viewport.getUniforms() overridable and more debuggable
+
 #### [v3.0.0-rc5] -
 - FIX: METERS mode high precision z coordinate restored
 
