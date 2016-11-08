@@ -1,6 +1,6 @@
 # Using deck.gl Standalone
 
-The deck.gl core library and layers have no dependecies on React or
+The deck.gl core library and layers have no dependencies on React or
 Mapbox GL and can be used by any JavaScript application.
 
 Note: This is a brief introduction to how an application might

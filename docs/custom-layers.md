@@ -9,7 +9,7 @@ There are a couple of ways to build a layer in deck.gl
   when creating layers that renders a lot of similar objects (think
   ScatterplotLayer, ArcLayers etc).
 * **Single-primitive, dynamic geometry layer** - This is needed when
-  dealing with data that needs to be rendered as unique, comples geometries,
+  dealing with data that needs to be rendered as unique, complies geometries,
   such as polygons.
 * Multi-primitive layer - it sometimes desirable to have a single layer
   render using multiple primitives. Note that it often useful to keep
@@ -37,7 +37,7 @@ during rendering and picking etc meaning that you don't have to do anything
 more to get a working layer.
 
 `draw` - If you want to use custom uniforms or settings when drawing, you would
-typicall implement the `draw` method and pass those to your render call.
+typical implement the `draw` method and pass those to your render call.
 Note that `draw` is called with viewport uniforms that you need to pass
 to your shader, but you can of course add any layer
 specific uniforms to that.
@@ -46,7 +46,7 @@ Note: the reason that the supplied uniforms need to be passed on to your
 shaders is to enable your shader to use deck.gl's GLSL shaderlibs such as
 `project` or `project64` etc). If you don't use these shaderlibs, you
 would obviously not need to supply these uniforms, but you would have to
-implement features like cartographi projection etc on your own.
+implement features like cartographic projection etc on your own.
 
 `finalizeState` - If implemented, this method is called when your layer
 state is discarded. Use it e.g. to destroy non-shared WebGL resources
@@ -58,15 +58,15 @@ them match (have the same `id` prop) as your old layer.
 ## Change Detection
 
 Before reading the description of each life cycle method, it is helpful
-to consider change detection to understant what work a layer typically
+to consider change detection to understand what work a layer typically
 needs to do in response to changes.
 
-* `data` - Typically if a layer is rerendered with a changed `data` prop,
+* `data` - Typically if a layer is re-rendered with a changed `data` prop,
   all WebGL attributes must be regenerated and the layer needs to be redrawn.
   The default is to do exactly that, but sometimes a layer can be smarter
   and limit updates, or more work needs to be done.
 
-* If the viewport has changed, the layer will automatically be rerendered.
+* If the viewport has changed, the layer will automatically be re-rendered.
   Many layers can thus ignore viewport changes, however, if the layer has
   any dependencies on the viewport (such as a layer
   that calculates extents or positions in screen space rather than world space)
@@ -96,14 +96,14 @@ built-in picking while adding layer specific selection information, override
 
 Technical Note: The default picking implementation uses picking colors.
 The layer is rendered with a special uniform set to 1, which causes it to
-render into a off-screen framebuffer using `pickingColor` or
+render into a off-screen frame buffer using `pickingColor` or
 `instancePickingColor` attributes instead of using its normal color calculation.
 
 See [`Layer.encodePickingColor`](/docs/custom-layers.md#layerencodepickingcolorindex--number).
 
 ## Defining your vertex attributes.
 
-See the separate article on Attribute Managemement.
+See the separate article on Attribute Management.
 
 Some questions to ask yourself.
 - Will you support altitude?
@@ -129,7 +129,7 @@ made available to your shader.
 ## Layer Methods
 
 Layer methods are designed to support the creation of new layers through
-layer subclassing and are not intended to be called by applications.
+layer sub-classing and are not intended to be called by applications.
 
 ## General Methods
 
@@ -185,10 +185,10 @@ greater than or equal to zero.
 
 ##### Layer.encodePickingColor(index : Number)
 
-Returns a color that encodes the supplied "subfeature index" number.
+Returns a color that encodes the supplied "sub-feature index" number.
 This color can be decoded later using `Layer.decodePickingColor`.
 
-To get a color that does not correspond to any "subfeature", use
+To get a color that does not correspond to any "sub-feature", use
 `Layer.nullPickingColor`.
 
 Notes:

@@ -40,7 +40,7 @@ The `data` property will accept any containers that can be iterated over using
 ES6 for-of iteration, this includes e.g. native Arrays, ES6 Sets and Maps,
 all [Immutable.js](https://facebook.github.io/immutable-js/)
 containers, etc. Even native JavaScript objects can be passed in as data containers to deck.gl, by supplying the `dataIterator` prop to enable
-teration over object values.
+iteration over object values.
 
 As a side note, use of Immutable containers and data structures is fairly
 common in applications that follow the Reactive architecture. While using
