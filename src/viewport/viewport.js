@@ -54,7 +54,6 @@ export default class WebGLViewport extends Viewport {
     };
   }
 
-  @autobind
   getUniforms({
     projectionMode = COORDINATE_SYSTEM.LNGLAT,
     positionOrigin = [0, 0],
@@ -63,33 +62,37 @@ export default class WebGLViewport extends Viewport {
     // TODO: move the following line to initialization so that it's done only once
     const positionOriginPixels = this.projectFlat(positionOrigin);
 
-    const projectedPositionOrigin = [positionOriginPixels[0], positionOriginPixels[1], 0.0, 1.0];
+    const projectedPositionOrigin =
+      [positionOriginPixels[0], positionOriginPixels[1], 0.0, 1.0];
     const projections = this.getProjections();
-    const projectionMatrix = projections.viewProjectionMatrix;
+    const {viewProjectionMatrix} = projections;
 
-    const projectionCenter = [0.0, 0.0, 0.0, 0.0];
-
-    vec4.transformMat4(projectionCenter, projectedPositionOrigin, projectionMatrix);
+    const projectionCenter =
+      vec4.transformMat4([], projectedPositionOrigin, viewProjectionMatrix);
 
     // If necessary add modelMatrix to clipSpace projection
     if (modelMatrix) {
-      mat4.multiply(projectionMatrix, projectionMatrix, modelMatrix);
+      mat4.multiply(viewProjectionMatrix, viewProjectionMatrix, modelMatrix);
     }
 
-    // this._dy64ifyProjectionMatrix();
-
-    // TODO - clean up, not all of these are used
-    // _ONE uniform is a hack to make tan_fp64() callable in existing 32-bit layers
     return {
+      // Projection mode values
       projectionMode,
+      projectionCenter,
+
+      // Main projection matrices
       projectionMatrix: this.glProjectionMatrix,
       projectionFP64: this.glProjectionMatrixFP64,
+      projectionPixelsPerUnit: this.pixelsPerMeter,
       projectionScale: this.scale,
       projectionScaleFP64: fp64ify(this.scale),
-      projectionCenter,
-      projectionPixelsPerUnit: this.pixelsPerMeter
+
+      // TODO - deprecated, remove
+      mercatorScale: Math.pow(2, this.zoom),
+      mercatorCenter: this.center
       // projectionMatrixCentered: this.glProjectionMatrix,
       // projectionMatrixUncentered: this.glProjectionMatrixUncentered
+      // _ONE uniform is hack: make tan_fp64() callable in existing 32bit layers
     };
   }
 
