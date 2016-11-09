@@ -34,7 +34,7 @@ void main(void) {
   vec2 p = preproject(positions.xy);
   gl_Position = project(vec4(p, 1., 1.)) +
     // the magic de-flickering factor
-    vec4(0., 0., (900. - positions.z) * 1e-4, 0.);
+    vec4(0., 0., mod(positions.z, trailLength) * 1e-4, 0.);
 
   vColor = vec4(colors / 255.0, opacity);
   vTime = 1.0 - (currentTime - positions.z) / trailLength;
