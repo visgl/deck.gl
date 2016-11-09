@@ -35,6 +35,7 @@ onmessage = function(e) {
         trip = shiftTrip(trip, -LOOP_LENGTH);
         addTrip(sliceTrip(trip, -TRAIL_LENGTH, LOOP_LENGTH));
       }
+      tripsCount++;
     }
   });
 
@@ -46,7 +47,6 @@ onmessage = function(e) {
 
 function addTrip(trip) {
   result.push(trip);
-  tripsCount++;
   vertexCount += trip.segments.length;
 
   if (result.length >= FLUSH_LIMIT) {
