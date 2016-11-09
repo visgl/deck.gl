@@ -203,7 +203,8 @@ function pointsToArcs(points) {
       color: [
         i % 255,
         255 - i % 255,
-        Math.floor(i / 255) % 255
+        Math.floor(i / 255) % 255,
+        255
       ]
     };
   });
