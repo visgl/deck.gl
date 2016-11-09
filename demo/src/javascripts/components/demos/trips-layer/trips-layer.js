@@ -59,11 +59,14 @@ export default class TripsLayer extends Layer {
       isIndexed: true,
       onBeforeRender: () => {
         gl.enable(gl.BLEND);
+        gl.enable(gl.POLYGON_OFFSET_FILL);
+        gl.polygonOffset(2.0, 1.0);
         gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
         gl.blendEquation(gl.FUNC_ADD);
       },
       onAfterRender: () => {
         gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+        gl.disable(gl.POLYGON_OFFSET_FILL);
       }
     });
   }
