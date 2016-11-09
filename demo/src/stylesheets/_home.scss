@@ -51,6 +51,7 @@
   background: $black-20;
   color: $white;
   position: relative;
+  @include venderPrefix(user-select, none);
 
   > .fps > div {
     position: absolute !important;

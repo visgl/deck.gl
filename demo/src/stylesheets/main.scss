@@ -57,6 +57,7 @@ header {
   max-height: 64px;
   line-height: 64px;
   overflow: hidden;
+  @include venderPrefix(user-select, none);
 
   .bg {
     position: absolute;
