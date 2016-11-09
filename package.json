@@ -107,6 +107,7 @@
     "demo-build-copy": " mkdir -p dist-demo/docs && cp -R demo/src/static/* dist-demo/ && cp -R docs dist-demo",
     "demo-build-script": "NODE_ENV=production browserify demo/src/javascripts/main.js -o -t babelify -t sassify -t glslify | uglifyjs > dist-demo/main.min.js",
     "demo-gh-pages": "git subtree push --prefix dist-demo origin gh-pages",
+    "demo-gh-pages-force": "git push origin `git subtree split --prefix dist-demo dev`:gh-pages --force",
     "demo-publish": "npm run build && npm run demo-build && git add dist-demo -f && git commit -m 'UPDATE DOCS' --no-verify && npm run demo-gh-pages",
     "lint": "eslint src",
     "precommit": "npm test",
