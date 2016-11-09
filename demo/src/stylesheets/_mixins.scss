@@ -15,3 +15,11 @@
     #{$property_name}: -ms-linear-gradient(left,  $left 0%,$right 100%); /* IE10+ */
     #{$property_name}: linear-gradient(to right,  $left 0%,$right 100%); /* W3C */
 }
+
+@mixin venderPrefix($property_name, $value) {
+  #{$property_name}: $value;
+  -webkit-#{$property_name}: $value;
+  -moz-#{$property_name}: $value;
+  -ms-#{$property_name}: $value;
+  -o-#{$property_name}: $value;
+}
