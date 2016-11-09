@@ -32,7 +32,6 @@ Note: deck.gl has a dependency on node version 0.12 or higher. If you use an old
 ```
 npm install -g nvm && nvm install 0.12 && nvm use 0.12
 ```
----
 
 ## Example
 
@@ -56,7 +55,7 @@ or browse the [docs folder](./docs).
     npm start
 
 
-### Node Version Requirement
+#### Node Version Requirement
 
 Building deck.gl from source has a dependency on node
 version 0.12 or higher. If you use an older version, you can install
@@ -77,3 +76,5 @@ by filling in a short form.
 ## Data sources
 
 [SF OpenData](https://data.sfgov.org)
+[TLC Trip Record Data](http://www.nyc.gov/html/tlc/html/about/trip_record_data.shtml)
+[Mapzen](https://mapzen.com/)
