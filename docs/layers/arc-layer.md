@@ -4,7 +4,7 @@ The Arc Layer takes in paired latitude and longitude coordinated points and
 render them as arcs that links the starting and ending points.
 
 <div align="center">
-  <img height="300" src="images/demo-thumb-arc.jpg" />
+  <img height="300" src="/demo/src/static/images/demo-thumb-arc.jpg" />
 </div>
 
     import {ArcLayer} from 'deck.gl';

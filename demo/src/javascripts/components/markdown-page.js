@@ -22,6 +22,11 @@ const urlRewrites = {
   '/docs/64-bits.md': '#/documentation/advanced-topics/64-layers'
 };
 
+/**
+ * Same as above, but for image src's
+ */
+const imageRewrites = {};
+
 export default class MarkdownPage extends Component {
 
   render() {
@@ -43,9 +48,19 @@ export default class MarkdownPage extends Component {
       return `<a href=${to} title=${title}>${text}</a>`;
     };
 
+    renderer.image = (href, title, text) => {
+      const src = imageRewrites[href] || href;
+      return `<img src=${src} title=${title} alt=${text} />`;
+    };
+
+    // Since some images are embedded as html, it won't be processed by
+    // the renderer image override. So hard replace it globally.
+    const __html = marked(content, {renderer})
+      .replace(/\/demo\/src\/static\/images/g, 'images');
+
     return (
       <div className="markdown">
-        <div className="markdown-body" dangerouslySetInnerHTML={{__html: marked(content, {renderer})}} />
+        <div className="markdown-body" dangerouslySetInnerHTML={{__html}} />
       </div>
     );
   }

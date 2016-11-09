@@ -4,7 +4,7 @@ The Line Layer takes in paired latitude and longitude coordinated points and
 render them as arcs that links the starting and ending points.
 
 <div align="center">
-  <img height="300" src="images/demo-thumb-line.jpg" />
+  <img height="300" src="/demo/src/static/images/demo-thumb-line.jpg" />
 </div>
 
     import {LineLayer} from 'deck.gl';
