@@ -1,5 +1,5 @@
 import 'babel-polyfill';
-import React, {Component} from 'react';
+import React, {Component, PropTypes} from 'react';
 import {connect} from 'react-redux';
 import autobind from 'autobind-decorator';
 import MapGL from 'react-map-gl';
@@ -16,7 +16,7 @@ class Page extends Component {
     super(props);
     this.state = {
       mapFocus: true,
-      ...this._loadContent(props.route.content)
+      tabs: this._loadContent(props.route.content)
     };
   }
 
@@ -29,7 +29,7 @@ class Page extends Component {
     const {route} = nextProps;
     if (this.props.route !== route) {
       this.setState({
-        ...this._loadContent(route.content)
+        tabs: this._loadContent(route.content)
       });
     }
   }
@@ -61,10 +61,7 @@ class Page extends Component {
       }
     });
 
-    return {
-      activeTab: ('demo' in content) ? 'demo' : Object.keys(content)[0],
-      tabs: content
-    };
+    return content;
   }
 
   @autobind
@@ -81,6 +78,11 @@ class Page extends Component {
       width: w <= 768 ? w : w - 240,
       height: h - 64
     });
+  }
+
+  _setActiveTab(tabName) {
+    const {location: {pathname}} = this.props;
+    this.context.router.replace(`${pathname}?tab=${tabName}`);
   }
 
   _renderMap() {
@@ -126,8 +128,9 @@ class Page extends Component {
   }
 
   _renderTabContent(tabName, tab) {
-    const {contents} = this.props;
-    const {activeTab, tabs} = this.state;
+    const {contents, location} = this.props;
+    const {tabs} = this.state;
+    const activeTab = location.query.tab || Object.keys(tabs)[0];
 
     return Object.keys(tabs).map(tabName => {
       const tab = tabs[tabName];
@@ -155,7 +158,9 @@ class Page extends Component {
   }
 
   _renderTabs() {
-    const {activeTab, tabs} = this.state;
+    const {location} = this.props;
+    const {tabs} = this.state;
+    const activeTab = location.query.tab || Object.keys(tabs)[0];
 
     return (
       <ul className="tabs">
@@ -167,7 +172,7 @@ class Page extends Component {
         {
           Object.keys(tabs).map(tabName => (
             <li key={tabName} className={`${tabName === activeTab ? 'active' : ''}`}>
-              <button onClick={ () => this.setState({activeTab: tabName}) }>
+              <button onClick={ this._setActiveTab.bind(this, tabName) }>
                 { tabName }
               </button>
             </li>
@@ -188,5 +193,9 @@ class Page extends Component {
     );
   }
 }
+
+Page.contextTypes = {
+  router: PropTypes.object
+};
 
 export default connect(state => state, appActions)(Page);
