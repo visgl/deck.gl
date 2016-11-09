@@ -12,8 +12,7 @@ Github Markdown Stylesheet (c) Sindre Sorhus <sindresorhus@gmail.com> (sindresor
   -webkit-text-size-adjust: 100%;
   line-height: 1.5;
   color: #333;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
-  font-size: 16px;
+  font-size: 14px;
   line-height: 1.5;
   word-wrap: break-word;
 }
@@ -154,13 +153,6 @@ Github Markdown Stylesheet (c) Sindre Sorhus <sindresorhus@gmail.com> (sindresor
   overflow: hidden;
 }
 
-.markdown-body code,
-.markdown-body kbd,
-.markdown-body pre {
-  font-family: monospace, monospace;
-  font-size: 1em;
-}
-
 .markdown-body hr {
   box-sizing: content-box;
   height: 0;
@@ -192,7 +184,6 @@ Github Markdown Stylesheet (c) Sindre Sorhus <sindresorhus@gmail.com> (sindresor
 }
 
 .markdown-body a {
-  color: #4078c0;
   text-decoration: none;
 }
 
@@ -315,7 +306,7 @@ Github Markdown Stylesheet (c) Sindre Sorhus <sindresorhus@gmail.com> (sindresor
 .markdown-body pre {
   margin-top: 0;
   margin-bottom: 0;
-  font: 12px Consolas, "Liberation Mono", Menlo, Courier, monospace;
+  font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;
 }
 
 .markdown-body .octicon {
@@ -553,7 +544,6 @@ Github Markdown Stylesheet (c) Sindre Sorhus <sindresorhus@gmail.com> (sindresor
   padding-top: 0.2em;
   padding-bottom: 0.2em;
   margin: 0;
-  font-size: 85%;
   background-color: rgba(0,0,0,0.04);
   border-radius: 3px;
 }
@@ -571,7 +561,6 @@ Github Markdown Stylesheet (c) Sindre Sorhus <sindresorhus@gmail.com> (sindresor
 .markdown-body pre>code {
   padding: 0;
   margin: 0;
-  font-size: 100%;
   word-break: normal;
   white-space: pre;
   background: transparent;

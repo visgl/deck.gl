@@ -15,7 +15,7 @@ $white-40: #8D9BA3;
 @import 'gallery';
 
 body {
-  font-family: ff-clan-web-pro, "Helvetica Neue", Helvetica, sans-serif!important;
+  font-family: ff-clan-web-pro, "Helvetica Neue", Helvetica, sans-serif !important;
   font-size: 12px;
   line-height: 1.833;
   overflow-y: auto;
@@ -25,12 +25,6 @@ body {
   padding: 0;
   margin: 0;
   box-sizing: border-box;
-}
-.logo {
-  color: $white !important;
-  font-weight: 700;
-  letter-spacing: 4px;
-  text-transform: uppercase;
 }
 a {
   outline: none;
@@ -71,8 +65,14 @@ header {
     height: 100%;
     background: $black;
   }
-
-  .links-toggle {
+  .logo {
+    color: $white !important;
+    float: left;
+    font-weight: 700;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+  }
+  .menu-toggle {
     font-size: 24px;
     color: $white;
     float: right;
@@ -199,28 +199,32 @@ hr.short {
     opacity: 0;
     text-align: center;
     pointer-events: none;
+    box-sizing: border-box;
   }
   >div:before {
     content: attr(data-title);
-    font-size: 1.5em;
+    font-size: 1.4em;
     font-weight: 100;
+    width: 100%;
+    padding: 12%;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+  >div:after {
+    font-size: 0.833em;
+    content: attr(data-name);
+    padding: 5%;
+    left: 0;
     width: 80%;
     height: 80%;
     margin: 10%;
-    padding: 30% 5%;
     top: 0;
     left: 0;
     border: solid 2px;
     @include linearGradientV(border-image, $primary, $secondary);
     border-image-slice: 2;
     box-sizing: border-box;
-  }
-  >div:after {
-    font-size: 0.833em;
-    content: attr(data-name);
-    bottom: 25%;
-    left: 0;
-    width: 100%;
   }
   >div:hover img {
     opacity: 0.2;
@@ -241,7 +245,7 @@ hr.short {
     width: 49%;
   }
 }
-@media screen and (max-width: 900px) {
+@media screen and (max-width: 800px) {
   .thumb {
     width: 100%;
   }
@@ -252,7 +256,7 @@ hr.short {
   }
 
   header {
-    .links-toggle {
+    .menu-toggle {
       display: block;
     }
     .links {
@@ -260,6 +264,7 @@ hr.short {
       margin-right: 40px;
       a {
         display: block;
+        line-height: 64px;
         border-width: 0;
         border-style: none;
       }
