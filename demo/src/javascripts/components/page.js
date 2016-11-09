@@ -39,7 +39,7 @@ class Page extends Component {
   }
 
   _loadContent(content) {
-    if (typeof content === 'string') {
+    if (typeof content !== 'object') {
       content = {content};
     }
     const {demo, ...docs} = content;
@@ -55,7 +55,11 @@ class Page extends Component {
     }
 
     // grab text contents
-    Object.values(docs).forEach(url => loadContent(url));
+    Object.values(docs).forEach(src => {
+      if (typeof src === 'string') {
+        loadContent(src);
+      }
+    });
 
     return {
       activeTab: ('demo' in content) ? 'demo' : Object.keys(content)[0],
@@ -136,8 +140,10 @@ class Page extends Component {
             { this._renderOptions() }
           </div>
         )
-      } else {
+      } else if (typeof tab === 'string') {
         child = <MarkdownPage content={contents[tab]} />;
+      } else {
+        child = React.createElement(tab);
       }
 
       return (
