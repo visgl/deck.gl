@@ -238,6 +238,7 @@ hr.short {
   position: absolute;
   bottom: 0;
   right: 0;
+  z-index: 9;
 }
 
 @media screen and (max-width: 1200px) {
