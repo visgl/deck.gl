@@ -83,8 +83,8 @@ export default class ScreenGridLayer extends Layer {
     model.render({...uniforms, minColor, maxColor, cellScale, maxCount});
     gl.depthMask(depthWriteMask);
     if (!blend) {
-			gl.disable(GL.BLEND)
-		}
+      gl.disable(GL.BLEND);
+    }
     gl.blendEquation(blendEquation);
   }
 
