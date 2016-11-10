@@ -4,7 +4,7 @@ Choropleth Layer with Elevation
 
     import {ExtrudedChoroplethLayer64} from 'deck.gl';
 
-Inherits from all [Base Layer properties](/docs/layers/base-layer.md).
+Inherits from all [Base Layer](/docs/layers/base-layer.md) properties.
 
 ##### `drawContour` (Boolean, optional)
 

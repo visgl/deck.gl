@@ -15,7 +15,7 @@ visuals when used with the right data set can be quite effective.
 
     import {ScreenGridLayer} from 'deck.gl';
 
-Inherits from all [Base Layer properties](/docs/layers/base-layer.md).
+Inherits from all [Base Layer](/docs/layers/base-layer.md) properties.
 
 ## Layer-specific Properties
 

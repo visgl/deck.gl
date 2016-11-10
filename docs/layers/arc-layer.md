@@ -9,7 +9,7 @@ render them as arcs that links the starting and ending points.
 
     import {ArcLayer} from 'deck.gl';
 
-Inherits from all [Base Layer properties](/docs/layers/base-layer.md).
+Inherits from all [Base Layer](/docs/layers/base-layer.md) properties.
 
 ## Layer-specific Properties
 

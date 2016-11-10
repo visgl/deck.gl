@@ -13,7 +13,7 @@ import React, {Component, PropTypes} from 'react';
  * text, in case you don't want this link to point to anything.
  */
 const urlRewrites = {
-  '/docs/layers/base-layer.md': '#/layers/base-layer/layer',
+  '/docs/layers/base-layer.md': '#/layers/catalog/layer-base-class',
   '/docs/custom-layers.md#layerencodepickingcolorindex--number': false,
   '/docs/layers/arc-layer.md': '#/layers/core-layers/arc-layer',
   '/docs/layers/line-layer.md': '#/layers/core-layers/line-layer',
