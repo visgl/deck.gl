@@ -63,7 +63,7 @@ export default class LineLayer64 extends Layer {
       instanceSourcePositionsFP64: {size: 4, update: this.calculateInstanceSourcePositions},
       instanceTargetPositionsFP64: {size: 4, update: this.calculateInstanceTargetPositions},
       instanceColors: {
-        size: 3,
+        size: 4,
         type: GL.UNSIGNED_BYTE,
         update: this.calculateInstanceColors
       }
