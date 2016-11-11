@@ -40,7 +40,7 @@ import DeckGL from '../src/react/deckgl';
 // ---- Default Settings ---- //
 /* eslint-disable no-process-env */
 const MAPBOX_ACCESS_TOKEN = process.env.MAPBOX_ACCESS_TOKEN ||
-  'Set MAPBOX_ACCESS_TOKEN environment variable or put your token here.';
+  'pk.eyJ1IjoidWJlcnZpc3B1YmxpYyIsImEiOiJjaXRrY3QxNnMwYWk4MnRtazYwODAxMXp5In0.tfzIQkC6mKPR7meww3nquw';
 
 const CHOROPLETHS_FILE = './example/data/sf.zip.geo.json';
 const EXTRUDED_CHOROPLETHS_FILE = './example/data/sf.zip.geo.json';

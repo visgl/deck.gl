@@ -75,9 +75,17 @@ export default class ScreenGridLayer extends Layer {
     const {model, cellScale, maxCount} = this.state;
     const {gl} = this.context;
     const depthWriteMask = gl.getParameter(GL.DEPTH_WRITEMASK);
+    const blend = gl.isEnabled(GL.BLEND);
+    const blendEquation = gl.getParameter(GL.BLEND_EQUATION);
     gl.depthMask(true);
+    gl.enable(GL.BLEND);
+    gl.blendFunc(GL.SRC_ALPHA, GL.ONE_MINUS_SRC_ALPHA);
     model.render({...uniforms, minColor, maxColor, cellScale, maxCount});
     gl.depthMask(depthWriteMask);
+    if (!blend) {
+      gl.disable(GL.BLEND);
+    }
+    gl.blendEquation(blendEquation);
   }
 
   getModel(gl) {
