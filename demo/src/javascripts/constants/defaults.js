@@ -1,9 +1,7 @@
 export const MAPBOX_STYLES = {
-  LIGHT: 'mapbox://styles/ubervispublic/citx7uply008i2hlbno8edv8r',
-  DARK: 'mapbox://styles/ubervispublic/citx7v64n00am2io6n8ycriaf'
+  LIGHT: 'mapbox://styles/uberdata/cive48w2e001a2imn5mcu2vrs',
+  DARK: 'mapbox://styles/uberdata/cive485h000192imn6c6cc8fc'
 };
-
-export const MAPBOX_ACCESS_TOKEN = 'pk.eyJ1IjoidWJlcnZpc3B1YmxpYyIsImEiOiJjaXRrY3QxNnMwYWk4MnRtazYwODAxMXp5In0.tfzIQkC6mKPR7meww3nquw';
 
 export const DEFAULT_VIEWPORT_STATE = {
   mapStyle: MAPBOX_STYLES.LIGHT,

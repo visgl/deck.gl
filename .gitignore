@@ -3,6 +3,7 @@ dist-demo/*
 demo/dist/*
 build/*
 example/bundle.js
+mapbox-token.js
 .project
 .idea
 .DS_Store

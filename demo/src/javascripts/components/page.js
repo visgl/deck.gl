@@ -9,7 +9,8 @@ import GenericInput from './input';
 import * as Demos from './demos';
 import * as appActions from '../actions/app-actions';
 import ViewportAnimation from '../utils/map-utils';
-import {MAPBOX_ACCESS_TOKEN, MAPBOX_STYLES} from '../constants/defaults';
+import {MAPBOX_STYLES} from '../constants/defaults';
+import MAPBOX_ACCESS_TOKEN from '../constants/mapbox-token';
 
 class Page extends Component {
   constructor(props) {

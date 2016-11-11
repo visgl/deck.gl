@@ -8,7 +8,8 @@ import {loadData, updateMap, setHeaderOpacity} from '../actions/app-actions';
 import MapGL from 'react-map-gl';
 
 import ViewportAnimation from '../utils/map-utils';
-import {MAPBOX_ACCESS_TOKEN, MAPBOX_STYLES} from '../constants/defaults';
+import {MAPBOX_STYLES} from '../constants/defaults';
+import MAPBOX_ACCESS_TOKEN from '../constants/mapbox-token';
 
 const DEMO_TAB = 0;
 const CONTENT_TAB = 1;
