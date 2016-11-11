@@ -4,12 +4,10 @@ From version `3.0.0`, deck.gl begins to provide basic 64-bit math support
 in GPU shaders. 64-bit maths are used in various 64-bit layers that are provided
 with deck.gl. Please find the sample usage of them in the examples section.
 
-<div align="center">
-  <img src="images/demo-mandelbrot.gif" />
-</div>
+![Mandelbrot comparison animation](../demo/src/static/images/demo-mandelbrot.gif)
 
-<center>Mandelbrot set rendered on GPU using native 32-bit (left) math and 64-bit (right)
-math library provided by deck.gl.</center>
+Mandelbrot set rendered on GPU using native 32-bit (left) math and 64-bit (right)
+math library provided by deck.gl.
 
 ## Precision
 
