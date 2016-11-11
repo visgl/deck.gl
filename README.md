@@ -35,15 +35,17 @@ npm install -g nvm && nvm install 0.12 && nvm use 0.12
 
 ## Example
 
-    import DeckGL from 'deck.gl/react';
-    import {ArcLayer} from 'deck.gl';
+```javascript
+import DeckGL from 'deck.gl/react';
+import {ArcLayer} from 'deck.gl';
 
-    const flights = new ArcLayer({
-      id: 'flights',
-      data: [] // Some flight points
-    });
+const flights = new ArcLayer({
+  id: 'flights',
+  data: [] // Some flight points
+});
 
-    <DeckGL width={1920} height={1080} layers={[flights]} />
+<DeckGL width={1920} height={1080} layers={[flights]} />
+```
 
 Take a look at the [docs website](https://uber.github.io/deck.gl)
 or browse the [docs folder](./docs).
