@@ -82,6 +82,9 @@ export default class DeckGL extends React.Component {
   }
 
   @autobind _onRendererInitialized({gl, canvas}) {
+    gl.enable(GL.BLEND)
+    gl.blendFunc(GL.SRC_ALPHA, GL.ONE_MINUS_SRC_ALPHA);
+    
     this.props.onWebGLInitialized(gl);
 
     // Note: avoid React setState due GL animation loop / setState timing issue
