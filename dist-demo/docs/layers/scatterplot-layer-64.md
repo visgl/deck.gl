@@ -4,7 +4,7 @@ The Scatterplot Layer takes in paride latitude and longitude coordinated
 points and render them as circles with a certain radius.
 
 <div align="center">
-  <img height="300" src="images/demo-thumb-scatterplot.jpg" />
+  <img height="300" src="/demo/src/static/images/demo-thumb-scatterplot.jpg" />
 </div>
 
 Check out the [64 bit about page](/docs/64-bits.md) for more info.
