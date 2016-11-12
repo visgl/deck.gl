@@ -2,6 +2,7 @@ import 'babel-polyfill';
 import marked from 'marked';
 import {highlight} from 'highlight.js';
 import React, {Component, PropTypes} from 'react';
+import pureRender from 'pure-render-decorator';
 
 /**
  * This map allows you to rewrite urls present in the markdown files
@@ -27,6 +28,7 @@ const urlRewrites = {
  */
 const imageRewrites = {};
 
+@pureRender
 export default class MarkdownPage extends Component {
 
   render() {

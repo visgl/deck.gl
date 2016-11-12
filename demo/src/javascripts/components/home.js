@@ -3,13 +3,11 @@ import Stats from 'stats.js';
 import React, {Component} from 'react';
 import {connect} from 'react-redux';
 
-import {HeroDemo} from './demos';
+import Demos from './demos';
 import {loadData, updateMap, setHeaderOpacity} from '../actions/app-actions';
-import MapGL from 'react-map-gl';
+import Map from './map';
 
 import ViewportAnimation from '../utils/map-utils';
-import {MAPBOX_STYLES} from '../constants/defaults';
-import MAPBOX_ACCESS_TOKEN from '../constants/mapbox-token';
 
 const DEMO_TAB = 0;
 const CONTENT_TAB = 1;
@@ -47,7 +45,7 @@ class Home extends Component {
 
     this._animateRef = requestAnimationFrame(calcFPS);
 
-    const {data, viewport} = HeroDemo;
+    const {data, viewport} = Demos.Home;
     loadData('Home', [
       {
         ...data[0],
@@ -83,27 +81,15 @@ class Home extends Component {
     this.props.setHeaderOpacity(opacity);
   }
 
-  _renderDemo() {
-    const {viewport, vis: {owner, data}} = this.props;
-    const dataLoaded = owner === 'Home' ? data : null;
-
-    return dataLoaded && (
-      <div className="hero">
-        <MapGL mapboxApiAccessToken={MAPBOX_ACCESS_TOKEN}
-          { ...viewport } >
-          <HeroDemo viewport={viewport} data={dataLoaded} />
-        </MapGL>
-      </div>
-    );
-  }
-
   render() {
     const {atTop} = this.state;
     return (
       <div className={`home-wrapper ${atTop ? 'top' : ''}`}>
 
         <section ref="banner" id="banner">
-          { this._renderDemo() }
+          <div className="hero">
+            <Map demo="Home" isInteractive={false} />
+          </div>
           <div className="container soft-left">
             <h1>deck.gl</h1>
             <p>Large-scale WebGL-powered Data Visualization</p>

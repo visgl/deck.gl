@@ -2,15 +2,13 @@ import 'babel-polyfill';
 import React, {Component, PropTypes} from 'react';
 import {connect} from 'react-redux';
 import autobind from 'autobind-decorator';
-import MapGL from 'react-map-gl';
 
-import MarkdownPage from '../components/markdown-page';
-import GenericInput from './input';
-import * as Demos from './demos';
+import Map from './map';
+import InfoPanel from './info-panel';
+import MarkdownPage from './markdown-page';
+import Demos from './demos';
 import * as appActions from '../actions/app-actions';
 import ViewportAnimation from '../utils/map-utils';
-import {MAPBOX_STYLES} from '../constants/defaults';
-import MAPBOX_ACCESS_TOKEN from '../constants/mapbox-token';
 
 class Page extends Component {
   constructor(props) {
@@ -66,12 +64,6 @@ class Page extends Component {
   }
 
   @autobind
-  _onUpdateMap(viewport) {
-    this.setState({mapFocus: true});
-    this.props.updateMap(viewport);
-  }
-
-  @autobind
   _resizeMap() {
     const w = window.innerWidth;
     const h = window.innerHeight;
@@ -81,56 +73,19 @@ class Page extends Component {
     });
   }
 
+  @autobind
+  _setMapFocus(state) {
+    this.setState({mapFocus: state});
+  }
+
   _setActiveTab(tabName) {
     const {location: {pathname}} = this.props;
     this.context.router.replace(`${pathname}?tab=${tabName}`);
   }
 
-  _renderMap() {
-    const {viewport, vis: {params, owner, data}, updateMeta} = this.props;
-    const {tabs: {demo}} = this.state;
-    const DemoComponent = Demos[demo];
-    const dataLoaded = owner === demo ? data : null;
-
-    return (
-      <MapGL
-        mapboxApiAccessToken={MAPBOX_ACCESS_TOKEN}
-        perspectiveEnabled={true}
-        { ...viewport }
-        onChangeViewport={ this._onUpdateMap }>
-
-        <DemoComponent ref="demo" viewport={viewport} params={params}
-          onStateChange={updateMeta}
-          data={dataLoaded} />
-
-      </MapGL>
-    )
-  }
-
-  _renderOptions() {
-    const {vis: {params, owner, meta}} = this.props;
-    const {tabs: {demo}, mapFocus} = this.state;
-    const DemoComponent = Demos[demo];
-    const metaLoaded = owner === demo ? meta : {};
-
-    return (
-      <div className={`options-panel top-right ${mapFocus ? '' : 'focus'}`}
-        onClick={ () => this.setState({mapFocus: false}) }>
-        { DemoComponent.renderInfo(metaLoaded) }
-        { Object.keys(params).length > 0 && <hr /> }
-        {
-          Object.keys(params).map((name, i) => (
-            <GenericInput key={i} name={name} {...params[name]}
-              onChange={this.props.updateParam} />
-          ))
-        }
-      </div>
-    );
-  }
-
   _renderTabContent(tabName, tab) {
     const {contents, location} = this.props;
-    const {tabs} = this.state;
+    const {tabs, mapFocus} = this.state;
     const activeTab = location.query.tab || Object.keys(tabs)[0];
 
     return Object.keys(tabs).map(tabName => {
@@ -140,8 +95,10 @@ class Page extends Component {
       if (tabName === 'demo') {
         child = (
           <div>
-            { this._renderMap() }
-            { this._renderOptions() }
+            <Map demo={tab} 
+              onInteract={ this._setMapFocus.bind(this, true) } />
+            <InfoPanel demo={tab} hasFocus={!mapFocus}
+              onInteract={ this._setMapFocus.bind(this, false) } />
           </div>
         )
       } else if (typeof tab === 'string') {

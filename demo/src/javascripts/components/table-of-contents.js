@@ -1,7 +1,9 @@
 import 'babel-polyfill';
+import pureRender from 'pure-render-decorator';
 import React, {Component, PropTypes} from 'react';
 import {Link} from 'react-router'
 
+@pureRender
 export default class TableOfContents extends Component {
 
   _renderPage(parentRoute, page, i) {
