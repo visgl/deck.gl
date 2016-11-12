@@ -5,7 +5,7 @@ in GPU shaders. 64-bit maths are used in various 64-bit layers that are provided
 with deck.gl. Please find the sample usage of them in the examples section.
 
 <div align="center">
-  <img src="images/demo-mandelbrot.gif" />
+  <img src="/demo/src/static/images/demo-mandelbrot.gif" />
 </div>
 
 <center>Mandelbrot set rendered on GPU using native 32-bit (left) math and 64-bit (right)
