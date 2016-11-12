@@ -1,6 +1,8 @@
 import 'babel-polyfill';
+import pureRender from 'pure-render-decorator';
 import React, {Component} from 'react';
 
+@pureRender
 export default class GenericInput extends Component {
 
   render() {

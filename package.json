@@ -70,6 +70,7 @@
     "luma.gl": "^2.10.0",
     "marked": "^0.3.6",
     "react": "^15.3.2",
+    "react-addons-pure-render-mixin": "^15.3.2",
     "react-addons-test-utils": "^15.0.2",
     "react-dom": "^15.3.2",
     "react-map-gl": "^1.7.2",
