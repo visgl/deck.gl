@@ -29,9 +29,13 @@ use cases, such as scatterplots, choropleths etc in 2 and 3 dimensions.
 npm install --save deck.gl
 ```
 Note: deck.gl has a dependency on node version 0.12 or higher. If you use an older version, you can install a node version manager like nvm and use a separate shell to install and build deck.gl
+
+Please refer to [this](https://github.com/creationix/nvm#installation) 
+to install nvm, then you can run:
 ```
-npm install -g nvm && nvm install 0.12 && nvm use 0.12
+nvm install 0.12
 ```
+It will use this node version automatically for your current shell.
 
 ## Example
 
@@ -64,7 +68,12 @@ version 0.12 or higher. If you use an older version, you can install
 a node version manager like nvm and use a separate shell to install
 and build deck.gl.
 
-    npm install -g nvm && nvm install 0.12 && nvm use 0.122
+Please refer to [this](https://github.com/creationix/nvm#installation) 
+to install nvm, then you can run:
+```
+nvm install 0.12
+```
+It will use this node version automatically for your current shell.
 
 This is not an issue when installing deck.gl, only
 when building it from source.
