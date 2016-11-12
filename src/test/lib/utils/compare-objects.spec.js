@@ -1,5 +1,5 @@
 import test from 'tape-catch';
-import {compareProps} from './compare-objects';
+import {compareProps} from '../../../lib/utils/compare-objects';
 
 const SAME = 'equal';
 const NOT_SAME = 'not equal';

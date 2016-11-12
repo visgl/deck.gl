@@ -22,6 +22,5 @@ import 'babel-polyfill';
 
 import './imports-spec';
 import './viewport';
-import '../lib/utils/compare-objects.spec';
 import './lib';
 import './layers';
