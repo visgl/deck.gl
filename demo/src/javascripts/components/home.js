@@ -4,9 +4,8 @@ import React, {Component} from 'react';
 import {connect} from 'react-redux';
 
 import Demos from './demos';
-import {loadData, updateMap, setHeaderOpacity} from '../actions/app-actions';
+import {updateMap, setHeaderOpacity} from '../actions/app-actions';
 import Map from './map';
-
 import ViewportAnimation from '../utils/map-utils';
 
 const DEMO_TAB = 0;
@@ -27,7 +26,6 @@ class Home extends Component {
   }
 
   componentDidMount() {
-    const {loadData, updateMap} = this.props;
     window.onscroll = this._onScroll.bind(this);
     window.onresize = this._resizeMap.bind(this);
     this._onScroll();
@@ -45,19 +43,6 @@ class Home extends Component {
 
     this._animateRef = requestAnimationFrame(calcFPS);
 
-    const {data, viewport} = Demos.Home;
-    loadData('Home', [
-      {
-        ...data[0],
-        url: 'data/hero-data-s.txt'
-      },
-      {
-        ...data[1],
-        url: 'data/building-data-s.txt'
-      }
-    ]);
-
-    updateMap({...viewport, longitude: -74.01, latitude: 40.707, pitch: 40, zoom: 14});
     this.cameraAnimation.start();
   }
 
@@ -88,7 +73,7 @@ class Home extends Component {
 
         <section ref="banner" id="banner">
           <div className="hero">
-            <Map demo="Home" isInteractive={false} />
+            <Map demo="HomeDemo" isInteractive={false} />
           </div>
           <div className="container soft-left">
             <h1>deck.gl</h1>
@@ -174,6 +159,6 @@ class Home extends Component {
 }
 
 export default connect(
-  state => state,
-  {loadData, updateMap, setHeaderOpacity}
+  state => ({}),
+  {updateMap, setHeaderOpacity}
 )(Home);
