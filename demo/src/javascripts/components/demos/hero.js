@@ -23,7 +23,9 @@ export default class HeroDemo extends Component {
   }
 
   static get parameters() {
-    return {};
+    return {
+      trail: {displayName: 'Trail', type: 'number', value: 180, step: 10, min: 10, max: 180}
+    };
   }
 
   static get viewport() {
@@ -91,7 +93,7 @@ export default class HeroDemo extends Component {
   }
 
   render() {
-    const {viewport, data} = this.props;
+    const {viewport, data, params} = this.props;
 
     if (!data) {
       return null;
@@ -104,7 +106,7 @@ export default class HeroDemo extends Component {
           getColor: d => d.vendor === 0 ? [253,128,93] : [23,184,190],
           opacity: 0.3,
           strokeWidth: 2,
-          trailLength: 180,
+          trailLength: params.trail.value,
           currentTime: this.state.time
         })
       ),

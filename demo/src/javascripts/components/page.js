@@ -6,9 +6,7 @@ import autobind from 'autobind-decorator';
 import Map from './map';
 import InfoPanel from './info-panel';
 import MarkdownPage from './markdown-page';
-import Demos from './demos';
-import * as appActions from '../actions/app-actions';
-import ViewportAnimation from '../utils/map-utils';
+import {loadContent, updateMap} from '../actions/app-actions';
 
 class Page extends Component {
   constructor(props) {
@@ -42,16 +40,7 @@ class Page extends Component {
       content = {content};
     }
     const {demo, ...docs} = content;
-    const {viewport, loadData, useParams, updateMap, loadContent} = this.props;
-    const DemoComponent = Demos[demo];
-
-    if (DemoComponent) {
-      loadData(demo, DemoComponent.data);
-      useParams(DemoComponent.parameters);
-      ViewportAnimation.fly(viewport, DemoComponent.viewport, 1000, updateMap)
-        .easing(ViewportAnimation.Easing.Exponential.Out)
-        .start();
-    }
+    const {loadContent} = this.props;
 
     // grab text contents
     Object.values(docs).forEach(src => {
@@ -156,4 +145,10 @@ Page.contextTypes = {
   router: PropTypes.object
 };
 
-export default connect(state => state, appActions)(Page);
+function mapStateToProps(state) {
+  return {
+    contents: state.contents
+  }
+}
+
+export default connect(mapStateToProps, {loadContent, updateMap})(Page);
