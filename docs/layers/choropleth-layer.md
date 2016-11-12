@@ -4,12 +4,12 @@ The Choropleth Layer takes in [GeoJson](http://geojson.org/) formatted data and
 renders it as interactive choropleths.
 
 <div align="center">
-  <img height="300" src="images/demo-thumb-choropleth.jpg" />
+  <img height="300" src="/demo/src/static/images/demo-thumb-choropleth.jpg" />
 </div>
 
     import {ChoroplethLayer} from 'deck.gl';
 
-Inherits from all [Base Layer properties](/docs/layers/base-layer.md).
+Inherits from all [Base Layer](/docs/layers/base-layer.md) properties.
 
 ## Layer-specific Properties
 

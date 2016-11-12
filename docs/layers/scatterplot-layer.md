@@ -4,7 +4,7 @@ The Scatterplot Layer takes in paired latitude and longitude coordinated
 points and renders them as circles with a certain radius.
 
 <div align="center">
-  <img height="300" src="images/demo-thumb-scatterplot.jpg" />
+  <img height="300" src="/demo/src/static/images/demo-thumb-scatterplot.jpg" />
 </div>
 
     import {ScatterplotLayer} from 'deck.gl';

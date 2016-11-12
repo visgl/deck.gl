@@ -10,12 +10,12 @@ This means that this layer is best used with small data set, however the
 visuals when used with the right data set can be quite effective.
 
 <div align="center">
-  <img height="300" src="images/demo-thumb-screengrid.jpg" />
+  <img height="300" src="/demo/src/static/images/demo-thumb-screengrid.jpg" />
 </div>
 
     import {ScreenGridLayer} from 'deck.gl';
 
-Inherits from all [Base Layer properties](/docs/layers/base-layer.md).
+Inherits from all [Base Layer](/docs/layers/base-layer.md) properties.
 
 ## Layer-specific Properties
 
