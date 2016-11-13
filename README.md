@@ -22,16 +22,7 @@
 Provides tested, highly performant layers for data visualization
 use cases, such as scatterplots, choropleths etc in 2 and 3 dimensions.
 
-
-## Installation
-
-```
-npm install --save deck.gl
-```
-Note: deck.gl has a dependency on node version 0.12 or higher. If you use an older version, you can install a node version manager like nvm and use a separate shell to install and build deck.gl
-```
-npm install -g nvm && nvm install 0.12 && nvm use 0.12
-```
+    npm install --save deck.gl
 
 ## Example
 
@@ -56,18 +47,10 @@ or browse the [docs folder](./docs).
     npm test
     npm start
 
-
 #### Node Version Requirement
 
-Building deck.gl from source has a dependency on node
-version 0.12 or higher. If you use an older version, you can install
-a node version manager like nvm and use a separate shell to install
-and build deck.gl.
-
-    npm install -g nvm && nvm install 0.12 && nvm use 0.122
-
-This is not an issue when installing deck.gl, only
-when building it from source.
+Building deck.gl from source has a dependency on node `0.12` or higher.
+Either upgrade to a newest version, or install something like [nvm](https://github.com/creationix/nvm).
 
 ## Contributing
 
