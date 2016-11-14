@@ -1,21 +1,15 @@
 /* global window */
-import {GL, glContextWithState, FramebufferObject} from 'luma.gl';
+import {GL, glContextWithState} from 'luma.gl';
 
 /* eslint-disable max-depth, max-statements */
 export function pickLayers(gl, {
   layers,
+  pickingFBO,
   uniforms = {},
   x,
   y,
   mode
 }) {
-  // Set up a frame buffer if needed
-  // TODO - cache picking fbo (needs to be resized)?
-  const pickingFBO = new FramebufferObject(gl, {
-    width: gl.canvas.width,
-    height: gl.canvas.height
-  });
-
   // Convert from canvas top-left to WebGL bottom-left coordinates
   // And compensate for pixelRatio
   const pixelRatio = typeof window !== 'undefined' ?
