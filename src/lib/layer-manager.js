@@ -32,6 +32,7 @@ import {Viewport} from '../viewport';
 import {log} from './utils';
 import assert from 'assert';
 import {pickLayers} from './pick-layers';
+import {FramebufferObject} from 'luma.gl';
 
 export default class LayerManager {
   constructor({gl}) {
@@ -45,7 +46,8 @@ export default class LayerManager {
       gl,
       uniforms: {},
       viewport: null,
-      viewportChanged: true
+      viewportChanged: true,
+      pickingFBO: null
     };
     this.redrawNeeded = true;
     Object.seal(this.context);
@@ -124,12 +126,23 @@ export default class LayerManager {
 
   pickLayer({x, y, mode}) {
     const {gl, uniforms} = this.context;
+
+    // Set up a frame buffer if needed
+    if (this.context.pickingFBO === null ||
+    gl.canvas.width !== this.context.pickingFBO.width ||
+    gl.canvas.height !== this.context.pickingFBO.height) {
+      this.context.pickingFBO = new FramebufferObject(gl, {
+        width: gl.canvas.width,
+        height: gl.canvas.height
+      });
+    }
     return pickLayers(gl, {
       x,
       y,
       uniforms,
       layers: this.layers,
-      mode
+      mode,
+      pickingFBO: this.context.pickingFBO
     });
   }
 
