@@ -20,7 +20,7 @@
 
 import {Layer} from '../../../lib';
 import {assembleShaders} from '../../../shader-utils';
-import {GL, Model, Geometry} from 'luma.gl';
+import {GL, Model, Geometry, Framebuffer, Texture2D} from 'luma.gl';
 
 const glslify = require('glslify');
 
@@ -74,9 +74,17 @@ export default class ReflectionLayer extends Layer {
     const IndexType = gl.getExtension('OES_element_index_uint') ?
       Uint32Array : Uint16Array;
 
+    const framebuffer = new Framebuffer(gl, {
+      width: this.context.viewport.width,
+      height: this.context.viewport.height,
+      minFilter: gl.LINEAR,
+      magFilter: gl.LINEAR
+    });
+
     this.setState({
       model: this.getModel(gl),
       numInstances: 0,
+      framebuffer: framebuffer,
       IndexType
     });
   }
@@ -90,6 +98,14 @@ export default class ReflectionLayer extends Layer {
 
     if (oldProps.opacity !== props.opacity) {
       this.setUniforms({opacity: props.opacity});
+    }
+    
+    if (this.context.viewport.width != this.state.framebuffer.width || this.context.viewport.height != this.state.framebuffer.height) {
+      const {gl} = this.context;
+      this.state.framebuffer.resize({
+        width: this.context.viewport.width,
+        height: this.context.viewport.height,
+      });
     }
   }
 
