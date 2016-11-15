@@ -110,7 +110,7 @@ export default class Layer {
 
   // Default implementation, all attributeManager will be updated
   updateState({oldProps, props, oldContext, context, changeFlags}) {
-    if (this.state.dataChanged && this.state.attributeManager) {
+    if (changeFlags.dataChanged && this.state.attributeManager) {
       this.state.attributeManager.invalidateAll();
     }
   }
