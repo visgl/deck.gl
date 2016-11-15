@@ -22,6 +22,10 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ### deck.gl v3
 
+#### [3.0.5] - 2016-11-14
+
+- Performance optimization: prevent redundant data calculation (#222)
+
 #### [3.0.3] - 2016-11-14
 
 - Bug fixes for ScatterplotLayer not being updated with new data prop (#215)
