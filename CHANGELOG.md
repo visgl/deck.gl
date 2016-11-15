@@ -22,6 +22,10 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ### deck.gl v3
 
+#### [3.0.6] - 2016-11-14
+
+- Bug fix for picking not returning x, y coordinates (#220)
+
 #### [3.0.5] - 2016-11-14
 
 - Performance optimization: prevent redundant data calculation (#222)
