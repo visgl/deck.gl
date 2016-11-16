@@ -105,7 +105,8 @@ export default class DeckGL extends React.Component {
     const {x, y} = event;
     const selectedInfos = this.layerManager.pickLayer({x, y, mode: 'click'});
     const firstInfo = selectedInfos.length > 0 ? selectedInfos[0] : null;
-    this.props.onLayerClick(firstInfo, selectedInfos);
+    // Event.event holds the original MouseEvent object
+    this.props.onLayerClick(firstInfo, selectedInfos, event.event);
   }
 
   // Route events to layers
@@ -113,7 +114,8 @@ export default class DeckGL extends React.Component {
     const {x, y} = event;
     const selectedInfos = this.layerManager.pickLayer({x, y, mode: 'hover'});
     const firstInfo = selectedInfos.length > 0 ? selectedInfos[0] : null;
-    this.props.onLayerHover(firstInfo, selectedInfos);
+    // Event.event holds the original MouseEvent object
+    this.props.onLayerHover(firstInfo, selectedInfos, event.event);
   }
 
   @autobind _onRenderFrame({gl}) {
