@@ -22,6 +22,11 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ### deck.gl v3
 
+#### [3.0.7] - 2016-11-16
+
+- Fixed precision issue for vec2_mix_fp64 function (#223)
+- Added mouse event object to hover and click event parameter (#255)
+
 #### [3.0.6] - 2016-11-14
 
 - Bug fix for picking not returning x, y coordinates (#220)
