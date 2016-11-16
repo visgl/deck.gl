@@ -695,15 +695,23 @@ vec2 radians_fp64(vec2 degree) {
 
 // Vector functions
 // vec2 functions
+void vec2_sum_fp64(vec2 a[2], vec2 b[2], out vec2 out_val[2]) {
+    out_val[0] = sum_fp64(a[0], b[0]);
+    out_val[1] = sum_fp64(a[1], b[1]);
+}
+
 void vec2_sub_fp64(vec2 a[2], vec2 b[2], out vec2 out_val[2]) {
-  for (int i = 0; i < 2; i++) {
-    out_val[i] = sub_fp64(a[i], b[i]);
-  }
+    out_val[0] = sub_fp64(a[0], b[0]);
+    out_val[1] = sub_fp64(a[1], b[1]);
 }
 
 void vec2_mix_fp64(vec2 x[2], vec2 y[2], float a, out vec2 out_val[2]) {
-  out_val[0] = sum_fp64(mul_fp64(x[0], vec2((1.0 - a), 0.0)), mul_fp64(y[0], vec2(a, 0.0)));
-  out_val[1] = sum_fp64(mul_fp64(x[1], vec2((1.0 - a), 0.0)), mul_fp64(y[1], vec2(a, 0.0)));
+  vec2 range[2];
+  vec2_sub_fp64(y, x, range);
+  vec2 portion[2];
+  portion[0] = range[0] * a;
+  portion[1] = range[1] * a;
+  vec2_sum_fp64(x, portion, out_val);
 }
 
 vec2 vec2_length_fp64(vec2 x[2]) {
