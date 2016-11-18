@@ -82,10 +82,8 @@ export default class ArcLayer extends Layer {
   draw({uniforms}) {
     const {gl} = this.context;
     const lineWidth = this.screenToDevicePixels(this.props.strokeWidth);
-    const oldLineWidth = gl.getParameter(GL.LINE_WIDTH);
     gl.lineWidth(lineWidth);
     this.state.model.render(uniforms);
-    gl.lineWidth(oldLineWidth);
   }
 
   _createModel(gl) {
