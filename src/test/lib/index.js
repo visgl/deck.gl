@@ -1,3 +1,3 @@
 import './layer.spec';
 import './attribute-manager.spec';
-import './utils';
+import './utils/compare-objects.spec';

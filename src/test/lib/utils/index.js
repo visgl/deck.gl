@@ -1,1 +1,0 @@
-import './compare-objects.spec';
