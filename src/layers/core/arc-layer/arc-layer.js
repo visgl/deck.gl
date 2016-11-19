@@ -84,6 +84,11 @@ export default class ArcLayer extends Layer {
     const lineWidth = this.screenToDevicePixels(this.props.strokeWidth);
     gl.lineWidth(lineWidth);
     this.state.model.render(uniforms);
+    // Setting line width back to 1 is here to workaround a Google Chrome bug
+    // gl.clear() and gl.isEnabled() will return GL_INVALID_VALUE even with
+    // correct parameter
+    // This is not happening on Safari and Firefox
+    gl.lineWidth(1.0);
   }
 
   _createModel(gl) {

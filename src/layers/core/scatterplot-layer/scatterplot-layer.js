@@ -94,6 +94,11 @@ export default class ScatterplotLayer extends Layer {
       ...uniforms,
       radius: this.props.radius
     });
+    // Setting line width back to 1 is here to workaround a Google Chrome bug
+    // gl.clear() and gl.isEnabled() will return GL_INVALID_VALUE even with
+    // correct parameter
+    // This is not happening on Safari and Firefox
+    gl.lineWidth(1.0);
   }
 
   _getModel(gl) {
