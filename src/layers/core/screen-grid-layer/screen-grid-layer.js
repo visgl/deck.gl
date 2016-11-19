@@ -74,10 +74,8 @@ export default class ScreenGridLayer extends Layer {
     const {minColor, maxColor} = this.props;
     const {model, cellScale, maxCount} = this.state;
     const {gl} = this.context;
-    const depthWriteMask = gl.getParameter(GL.DEPTH_WRITEMASK);
     gl.depthMask(true);
     model.render({...uniforms, minColor, maxColor, cellScale, maxCount});
-    gl.depthMask(depthWriteMask);
   }
 
   getModel(gl) {
