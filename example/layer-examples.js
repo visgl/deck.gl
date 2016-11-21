@@ -3,8 +3,7 @@ import {
   ScatterplotLayer,
   ArcLayer,
   LineLayer,
-  ScreenGridLayer,
-  ReflectionLayer
+  ScreenGridLayer
 } from '../src';
 
 import {
@@ -41,17 +40,6 @@ const ChoroplethLayerContourExample = props =>
 
 const ChoroplethLayerExample = props =>
   new ChoroplethLayer({
-    ...props,
-    id: props.id || 'choroplethLayerSolid',
-    data: props.choropleths,
-    opacity: 0.01,
-    pickable: true,
-    onHover: props.onChoroplethHovered,
-    onClick: props.onChoroplethClicked
-  });
-  
-const ReflectionLayerExample = props =>
-  new ReflectionLayer({
     ...props,
     id: props.id || 'choroplethLayerSolid',
     data: props.choropleths,
@@ -200,7 +188,6 @@ const EnhancedChoroplethLayerExample = props =>
     onClick: props.onChoroplethClicked
   });
 
-
 // Returns new array N times larger than input array
 // filled with duplicate elements
 // Avoids Array.concat (which generates temporary huge arrays)
@@ -266,8 +253,7 @@ export default {
     LineLayer: LineLayerExample,
     ScatterplotLayer: ScatterplotLayerExample,
     'ScatterplotLayer (meters)': ScatterplotLayerMetersExample,
-    ScreenGridLayer: ScreenGridLayerExample,
-    ReflectionLayer: ReflectionLayerExample
+    ScreenGridLayer: ScreenGridLayerExample
   },
 
   '64-bit Layers': {

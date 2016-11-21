@@ -21,7 +21,10 @@ import React, {PropTypes} from 'react';
 import autobind from 'autobind-decorator';
 import WebGLRenderer from './webgl-renderer';
 import {LayerManager} from '../lib';
+import {EffectManager} from '../lib';
 import {GL, addEvents} from 'luma.gl';
+
+import {ReflectionEffect} from '../effects'
 
 function noop() {}
 
@@ -61,6 +64,7 @@ export default class DeckGL extends React.Component {
     this.state = {};
     this.needsRedraw = true;
     this.layerManager = null;
+    this.effectManager = null;
   }
 
   componentWillReceiveProps(nextProps) {
@@ -89,6 +93,8 @@ export default class DeckGL extends React.Component {
 
     // Note: avoid React setState due GL animation loop / setState timing issue
     this.layerManager = new LayerManager({gl});
+    this.effectManager = new EffectManager({gl, deckgl:this});
+    this.effectManager.addEffect(new ReflectionEffect());
     this._updateLayers(this.props);
 
     this.events = addEvents(canvas, {
@@ -122,7 +128,13 @@ export default class DeckGL extends React.Component {
     }
     // clear depth and color buffers
     gl.clear(GL.COLOR_BUFFER_BIT | GL.DEPTH_BUFFER_BIT);
+    
+    this.effectManager.preDraw()
+
     this.layerManager.drawLayers();
+
+    this.effectManager.draw()
+
   }
 
   render() {
