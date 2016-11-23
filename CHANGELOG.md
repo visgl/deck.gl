@@ -22,6 +22,13 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ### deck.gl v3
 
+#### [3.0.9] - 2016-11-18
+
+- Bumped viewport-mercator-project version for the unproject fix.
+- Updated dependency versions (#229)
+- Added test code for attribute-manager (#213)
+- Added minMax radius for the scatterplot-layer (#230)
+
 #### [3.0.8] - 2016-11-18
 
 - Performance optimization: remove unnecessary gl.getParameter() calls (#227)
