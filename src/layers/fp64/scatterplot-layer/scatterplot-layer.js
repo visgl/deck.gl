@@ -40,12 +40,16 @@ export default class ScatterplotLayer64 extends Layer {
    * @class
    * @param {object} props
    * @param {number} props.radius - point radius
+   * @param {number} props.radiusMinPixels - min point radius in pixels
+   * @param {number} props.radiusMinPixels - max point radius in pixels
    */
   constructor({
     getPosition = defaultGetPosition,
     getRadius = defaultGetRadius,
     getColor = defaultGetColor,
     radius = 30,
+    radiusMinPixels = 0,
+    radiusMaxPixels = Number.MAX_SAFE_INTEGER,
     drawOutline = false,
     strokeWidth = 1,
     ...props
@@ -57,6 +61,8 @@ export default class ScatterplotLayer64 extends Layer {
       radius,
       drawOutline,
       strokeWidth,
+      radiusMinPixels,
+      radiusMaxPixels,
       ...props
     });
   }
@@ -85,6 +91,8 @@ export default class ScatterplotLayer64 extends Layer {
     this.calculateZoomRadius();
     this.state.model.render({
       ...uniforms,
+      radiusMinPixels: this.props.radiusMinPixels,
+      radiusMaxPixels: this.props.radiusMaxPixels,
       zoomRadiusFP64: this.state.zoomRadiusFP64
     });
   }

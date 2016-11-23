@@ -40,12 +40,16 @@ export default class ScatterplotLayer extends Layer {
    * @class
    * @param {object} props
    * @param {number} props.radius - point radius in meters
+   * @param {number} props.radiusMinPixels - min point radius in pixels
+   * @param {number} props.radiusMinPixels - max point radius in pixels
    */
   constructor({
     getPosition = defaultGetPosition,
     getRadius = defaultGetRadius,
     getColor = defaultGetColor,
     radius = 30,
+    radiusMinPixels = 0,
+    radiusMaxPixels = Number.MAX_SAFE_INTEGER,
     drawOutline = false,
     strokeWidth = 1,
     ...props
@@ -57,6 +61,8 @@ export default class ScatterplotLayer extends Layer {
       drawOutline,
       strokeWidth,
       radius,
+      radiusMinPixels,
+      radiusMaxPixels,
       ...props
     });
   }
@@ -92,7 +98,9 @@ export default class ScatterplotLayer extends Layer {
     gl.lineWidth(lineWidth);
     this.state.model.render({
       ...uniforms,
-      radius: this.props.radius
+      radius: this.props.radius,
+      radiusMinPixels: this.props.radiusMinPixels,
+      radiusMaxPixels: this.props.radiusMaxPixels
     });
     // Setting line width back to 1 is here to workaround a Google Chrome bug
     // gl.clear() and gl.isEnabled() will return GL_INVALID_VALUE even with
