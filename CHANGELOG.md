@@ -22,7 +22,7 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ### deck.gl v3
 
-#### [3.0.9] - 2016-11-18
+#### [3.0.9, 3.0.10] - 2016-11-18
 
 - Bumped viewport-mercator-project version for the unproject fix.
 - Updated dependency versions (#229)
