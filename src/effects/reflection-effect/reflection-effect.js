@@ -40,7 +40,7 @@ export default class ReflectionEffect extends Effect {
      * the renderer already has a reference to this, but we don't have a reference to the renderer.
      * when we refactor the camera code, we should make sure we get a reference to the renderer so
      * that we can keep this in one place.
-     */ 
+     */
     const dpi = (typeof window !== 'undefined' && window.devicePixelRatio) || 1;
     this.framebuffer.resize({width: dpi * viewport.width, height: dpi * viewport.height});
     const pitch = viewport.pitch;

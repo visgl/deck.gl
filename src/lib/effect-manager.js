@@ -8,15 +8,14 @@ export default class EffectManager {
   }
 
   _sortEffects() {
-  //this should really be made stable in the future...
+    /*this should really be made stable in the future...*/
     this._effects.sort((a, b) => {
       if (a.priority > b.priority) {
         return -1;
       } else if (a.priority < b.priority) {
         return 1;
-      } else {
-        return a.count - b.count;
       }
+      return a.count - b.count;
     });
   }
 
