@@ -24,7 +24,7 @@ import {LayerManager} from '../lib';
 import {EffectManager} from '../lib';
 import {GL, addEvents} from 'luma.gl';
 
-import {ReflectionEffect} from '../effects'
+import {ReflectionEffect} from '../effects';
 
 function noop() {}
 
@@ -93,7 +93,7 @@ export default class DeckGL extends React.Component {
 
     // Note: avoid React setState due GL animation loop / setState timing issue
     this.layerManager = new LayerManager({gl});
-    this.effectManager = new EffectManager({gl, deckgl:this});
+    this.effectManager = new EffectManager({gl, deckgl: this});
     this.effectManager.addEffect(new ReflectionEffect());
     this._updateLayers(this.props);
 
@@ -128,12 +128,12 @@ export default class DeckGL extends React.Component {
     }
     // clear depth and color buffers
     gl.clear(GL.COLOR_BUFFER_BIT | GL.DEPTH_BUFFER_BIT);
-    
-    this.effectManager.preDraw()
+
+    this.effectManager.preDraw();
 
     this.layerManager.drawLayers();
 
-    this.effectManager.draw()
+    this.effectManager.draw();
 
   }
 
