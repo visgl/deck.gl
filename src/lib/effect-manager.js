@@ -8,7 +8,9 @@ export default class EffectManager {
   }
 
   _sortEffects() {
-    /*this should really be made stable in the future...*/
+    /*
+     * this should really be made stable in the future...
+     */
     this._effects.sort((a, b) => {
       if (a.priority > b.priority) {
         return -1;
