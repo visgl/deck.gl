@@ -12,10 +12,10 @@ export default class Effect {
     this.needsRedraw = false;
   }
   
-  initializeState() {
+  initialize() {
   }
   
-  finalizeState(){
+  finalize(){
   }
 
   preDraw({gl, deckgl}) {

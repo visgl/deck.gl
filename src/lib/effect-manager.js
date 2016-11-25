@@ -12,6 +12,7 @@ export default class EffectManager {
   }
   
   _sortEffects() {
+    //this should really be made stable in the future...
     this._effects.sort((a, b) => {
       if (a.priority > b.priority) return -1;
       else if (a.priority < b.priority) return 1;
@@ -20,13 +21,16 @@ export default class EffectManager {
   }
   
   addEffect(effect) {
-		//this should really be made stable in the future...
-    this._effects.push(effect);
+		this._effects.push(effect);
     this._sortEffects();
+    effect.initialize({gl: this.gl, deckgl: this.deckgl});
   }
   
   removeEffect(effect) {
-    this._effects.remove(effect);
+    if (this._effects.indexOf(effect) >= 0) {
+      effect.finalize({gl: this.gl, deckgl: this.deckgl});
+      this._effects.remove(effect);
+    }
   }
   
   preDraw() {
