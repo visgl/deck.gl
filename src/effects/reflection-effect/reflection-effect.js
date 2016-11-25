@@ -12,9 +12,9 @@ const glslify = require('glslify');
 */
 
 export default class ReflectionEffect extends Effect{
-  constructor(height=0) {
+  constructor(reflectivity = 0.2) {
     super();
-    this.height = height;
+    this.reflectivity = reflectivity;
     this.framebuffer = null;
     this.setNeedsRedraw();
   }
@@ -61,7 +61,10 @@ export default class ReflectionEffect extends Effect{
 
 
   draw({gl, deckgl}) {
-    this.model.render({reflectionTexture: this.framebuffer.texture});
+    this.model.render({
+      reflectionTexture: this.framebuffer.texture,
+      reflectivity: this.reflectivity
+    });
   }
 
 

@@ -26,21 +26,11 @@ precision highp float;
 #endif
 
 uniform sampler2D reflectionTexture;
+uniform float reflectivity;
 
 varying vec2 uv;
-/*
-float grid(vec2 xy) {
-  #define GRID_SIZE (1.0 / 8.0)
-  xy.x = mod(xy.x, GRID_SIZE) / GRID_SIZE;
-  xy.y = mod(xy.y, GRID_SIZE) / GRID_SIZE;
-  if (xy.x < 0.25 || xy.y < 0.25) {
-    return 1.0;
-  } else {
-    return 1.0;
-  }
-  
-}
-*/
+
 void main(void) {
   gl_FragColor = texture2D(reflectionTexture, vec2(uv.x, 1. - uv.y));
+  gl_FragColor.a *= reflectivity;
 }
