@@ -79,13 +79,17 @@ export default class ScreenGridLayer extends Layer {
   }
 
   getModel(gl) {
+    const program = this.state.program ? {
+      program: this.state.program
+    } : assembleShaders(gl, {
+      vs: glslify('./screen-grid-layer-vertex.glsl'),
+      fs: glslify('./screen-grid-layer-fragment.glsl')
+    });
+
     return new Model({
       gl,
       id: this.props.id,
-      ...assembleShaders(gl, {
-        vs: glslify('./screen-grid-layer-vertex.glsl'),
-        fs: glslify('./screen-grid-layer-fragment.glsl')
-      }),
+      ...program,
       geometry: new Geometry({
         drawMode: GL.TRIANGLE_FAN,
         vertices: new Float32Array([0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0])

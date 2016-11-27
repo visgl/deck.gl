@@ -137,15 +137,19 @@ export default class ExtrudedChoroplethLayer64 extends Layer {
     gl.enable(GL.DEPTH_TEST);
     gl.depthFunc(GL.LEQUAL);
 
+    const program = this.state.program ? {
+      program: this.state.program
+    } : assembleShaders(gl, {
+      vs: glslify('./extruded-choropleth-layer-vertex.glsl'),
+      fs: glslify('./extruded-choropleth-layer-fragment.glsl'),
+      fp64: true,
+      project64: true
+    });
+
     return new Model({
       gl,
       id: this.props.id,
-      ...assembleShaders(gl, {
-        vs: glslify('./extruded-choropleth-layer-vertex.glsl'),
-        fs: glslify('./extruded-choropleth-layer-fragment.glsl'),
-        fp64: true,
-        project64: true
-      }),
+      ...program,
       geometry: new Geometry({
         drawMode: this.props.drawWireframe ? GL.LINES : GL.TRIANGLES
       }),

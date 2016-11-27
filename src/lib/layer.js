@@ -332,6 +332,8 @@ export default class Layer {
     // Initialize state only once
     this.setState({
       attributeManager: new AttributeManager({id: this.props.id}),
+      // reuse existing program (prevent from re-initializing shaders)
+      program: updateParams.program,
       model: null,
       needsRedraw: true,
       dataChanged: true

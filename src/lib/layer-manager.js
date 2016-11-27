@@ -38,6 +38,8 @@ export default class LayerManager {
   constructor({gl}) {
     this.prevLayers = [];
     this.layers = [];
+    // Caches shader programs for reuse, {layerId: program}
+    this.programs = {};
     // Tracks if any layers were drawn last update
     // Needed to ensure that screen is cleared when no layers are shown
     this.drewLayers = false;
@@ -90,7 +92,7 @@ export default class LayerManager {
       'LayerManager.updateLayers: viewport not set');
 
     // Filter out any null layers
-    newLayers = newLayers.filter(newLayer => Boolean(newLayer));
+    newLayers = newLayers.filter(Boolean);
 
     for (const layer of newLayers) {
       layer.context = this.context;
@@ -202,7 +204,7 @@ export default class LayerManager {
   /* eslint-disable max-statements */
   _matchSublayers({newLayers, oldLayerMap, generatedLayers}) {
     // Filter out any null layers
-    newLayers = newLayers.filter(newLayer => Boolean(newLayer));
+    newLayers = newLayers.filter(Boolean);
 
     let error = null;
     for (const newLayer of newLayers) {
@@ -232,7 +234,7 @@ export default class LayerManager {
         let sublayers = newLayer.renderLayers();
         // End layer lifecycle method: render sublayers
 
-        if (sublayers) {
+        if (sublayers && sublayers.length) {
           sublayers = Array.isArray(sublayers) ? sublayers : [sublayers];
           this._matchSublayers({
             newLayers: sublayers,
@@ -296,6 +298,9 @@ export default class LayerManager {
           props: layer.props,
           oldContext: this.oldContext,
           context: this.context,
+          // only layer.id is available when initializing the layer
+          // use it as the hash key get the cached program if exist
+          program: this.programs[layer.id],
           changeFlags: layer.diffProps({}, layer.props, this.context)
         });
       } catch (err) {
@@ -313,6 +318,8 @@ export default class LayerManager {
       }
       if (layer.state && layer.state.model) {
         layer.state.model.userData.layer = layer;
+        // Cache program once initialized
+        this.programs[layer.id] = layer.state.model.getProgram();
       }
     }
     return error;

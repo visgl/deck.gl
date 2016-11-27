@@ -100,15 +100,20 @@ export default class ArcLayer64 extends Layer {
     for (let i = 0; i < NUM_SEGMENTS; i++) {
       positions = [...positions, i, i, i];
     }
+
+    const program = this.state.program ? {
+      program: this.state.program
+    } : assembleShaders(gl, {
+      vs: glslify('./arc-layer-vertex.glsl'),
+      fs: glslify('./arc-layer-fragment.glsl'),
+      fp64: true,
+      project64: true
+    });
+
     return new Model({
       gl,
       id: this.props.id,
-      ...assembleShaders(gl, {
-        vs: glslify('./arc-layer-vertex.glsl'),
-        fs: glslify('./arc-layer-fragment.glsl'),
-        fp64: true,
-        project64: true
-      }),
+      ...program,
       geometry: new Geometry({
         drawMode: GL.LINE_STRIP,
         positions: new Float32Array(positions)

@@ -85,15 +85,19 @@ export default class LineLayer64 extends Layer {
   createModel(gl) {
     const positions = [0, 0, 0, 1, 1, 1];
 
+    const program = this.state.program ? {
+      program: this.state.program
+    } : assembleShaders(gl, {
+      vs: glslify('./line-layer-vertex.glsl'),
+      fs: glslify('./line-layer-fragment.glsl'),
+      fp64: true,
+      project64: true
+    });
+
     return new Model({
       gl,
       id: this.props.id,
-      ...assembleShaders(gl, {
-        vs: glslify('./line-layer-vertex.glsl'),
-        fs: glslify('./line-layer-fragment.glsl'),
-        fp64: true,
-        project64: true
-      }),
+      ...program,
       geometry: new Geometry({
         drawMode: GL.LINE_STRIP,
         positions: new Float32Array(positions)

@@ -111,15 +111,19 @@ export default class ScatterplotLayer64 extends Layer {
       ];
     }
 
+    const program = this.state.program ? {
+      program: this.state.program
+    } : assembleShaders(gl, {
+      vs: glslify('./scatterplot-layer-vertex.glsl'),
+      fs: glslify('./scatterplot-layer-fragment.glsl'),
+      fp64: true,
+      project64: true
+    });
+
     return new Model({
       gl,
       id: this.props.id,
-      ...assembleShaders(gl, {
-        vs: glslify('./scatterplot-layer-vertex.glsl'),
-        fs: glslify('./scatterplot-layer-fragment.glsl'),
-        fp64: true,
-        project64: true
-      }),
+      ...program,
       geometry: new Geometry({
         drawMode: GL.TRIANGLE_FAN,
         positions: new Float32Array(positions)
