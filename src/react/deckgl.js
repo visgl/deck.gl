@@ -58,13 +58,17 @@ export default class DeckGL extends React.Component {
 
   constructor(props) {
     super(props);
-    this.state = {};
     this.needsRedraw = true;
     this.layerManager = null;
   }
 
   componentWillReceiveProps(nextProps) {
     this._updateLayers(nextProps);
+  }
+
+  componentWillUnmount() {
+    // LayerManager is an ordinary JS class, set to null for GC
+    this.layerManager = null;
   }
 
   _updateLayers(nextProps) {

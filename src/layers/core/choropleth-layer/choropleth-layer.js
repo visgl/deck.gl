@@ -115,13 +115,17 @@ export default class ChoroplethLayer extends Layer {
   }
 
   getModel(gl) {
+    const program = this.state.program ? {
+      program: this.state.program
+    } : assembleShaders(gl, {
+      vs: glslify('./choropleth-layer-vertex.glsl'),
+      fs: glslify('./choropleth-layer-fragment.glsl')
+    });
+
     return new Model({
       gl,
       id: this.props.id,
-      ...assembleShaders(gl, {
-        vs: glslify('./choropleth-layer-vertex.glsl'),
-        fs: glslify('./choropleth-layer-fragment.glsl')
-      }),
+      ...program,
       geometry: new Geometry({
         drawMode: this.props.drawContour ? GL.LINES : GL.TRIANGLES
       }),

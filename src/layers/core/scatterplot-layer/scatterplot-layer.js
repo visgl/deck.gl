@@ -123,13 +123,17 @@ export default class ScatterplotLayer extends Layer {
       ];
     }
 
+    const program = this.state.program ? {
+      program: this.state.program
+    } : assembleShaders(gl, {
+      vs: glslify('./scatterplot-layer-vertex.glsl'),
+      fs: glslify('./scatterplot-layer-fragment.glsl')
+    });
+
     return new Model({
       gl,
-      id: 'scatterplot',
-      ...assembleShaders(gl, {
-        vs: glslify('./scatterplot-layer-vertex.glsl'),
-        fs: glslify('./scatterplot-layer-fragment.glsl')
-      }),
+      id: this.props.id,
+      ...program,
       geometry: new Geometry({
         drawMode: GL.TRIANGLE_FAN,
         positions: new Float32Array(positions)

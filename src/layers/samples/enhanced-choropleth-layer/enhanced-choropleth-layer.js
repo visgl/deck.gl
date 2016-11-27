@@ -89,13 +89,17 @@ export default class EnhancedChoroplethLayer extends Layer {
   }
 
   getModel(gl) {
+    const program = this.state.program ? {
+      program: this.state.program
+    } : assembleShaders(gl, {
+      vs: VERTEX_SHADER,
+      fs: FRAGMENT_SHADER
+    });
+
     return new Model({
       gl,
       id: this.props.id,
-      ...assembleShaders(gl, {
-        vs: VERTEX_SHADER,
-        fs: FRAGMENT_SHADER
-      }),
+      ...program,
       geometry: new Geometry({drawMode: GL.TRIANGLES}),
       vertexCount: 0,
       isIndexed: true

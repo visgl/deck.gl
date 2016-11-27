@@ -98,12 +98,17 @@ export default class ArcLayer extends Layer {
       positions = [...positions, i, i, i];
     }
 
+    const program = this.state.program ? {
+      program: this.state.program
+    } : assembleShaders(gl, {
+      vs: glslify('./arc-layer-vertex.glsl'),
+      fs: glslify('./arc-layer-fragment.glsl')
+    });
+
     return new Model({
       gl,
-      ...assembleShaders(gl, {
-        vs: glslify('./arc-layer-vertex.glsl'),
-        fs: glslify('./arc-layer-fragment.glsl')
-      }),
+      id: this.props.id,
+      ...program,
       geometry: new Geometry({
         drawMode: GL.LINE_STRIP,
         positions: new Float32Array(positions)
