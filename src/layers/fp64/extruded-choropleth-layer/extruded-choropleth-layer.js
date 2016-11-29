@@ -18,16 +18,16 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+import {GL, Model, Geometry} from 'luma.gl';
+import flattenDeep from 'lodash.flattendeep';
+import {readFileSync} from 'fs';
+import {join} from 'path';
+import {vec3} from 'gl-matrix';
+import earcut from 'earcut';
+
 import {Layer} from '../../../lib';
 import {assembleShaders} from '../../../shader-utils';
-import {GL, Model, Geometry} from 'luma.gl';
 import {fp64ify} from '../../../lib/utils/fp64';
-import {vec3} from 'gl-matrix';
-
-import earcut from 'earcut';
-import flattenDeep from 'lodash.flattendeep';
-
-const glslify = require('glslify');
 
 export default class ExtrudedChoroplethLayer64 extends Layer {
 
@@ -141,8 +141,8 @@ export default class ExtrudedChoroplethLayer64 extends Layer {
       gl,
       id: this.props.id,
       ...assembleShaders(gl, {
-        vs: glslify('./extruded-choropleth-layer-vertex.glsl'),
-        fs: glslify('./extruded-choropleth-layer-fragment.glsl'),
+        vs: readFileSync(join(__dirname, './extruded-choropleth-layer-vertex.glsl')),
+        fs: readFileSync(join(__dirname, './extruded-choropleth-layer-fragment.glsl')),
         fp64: true,
         project64: true
       }),

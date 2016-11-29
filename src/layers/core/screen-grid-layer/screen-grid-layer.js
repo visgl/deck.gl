@@ -18,11 +18,12 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+import {GL, Model, Geometry} from 'luma.gl';
+import {join} from 'path';
+import {readFileSync} from 'fs';
+
 import {Layer} from '../../../lib';
 import {assembleShaders} from '../../../shader-utils';
-import {GL, Model, Geometry} from 'luma.gl';
-
-const glslify = require('glslify');
 
 export default class ScreenGridLayer extends Layer {
 
@@ -83,8 +84,8 @@ export default class ScreenGridLayer extends Layer {
       gl,
       id: this.props.id,
       ...assembleShaders(gl, {
-        vs: glslify('./screen-grid-layer-vertex.glsl'),
-        fs: glslify('./screen-grid-layer-fragment.glsl')
+        vs: readFileSync(join(__dirname, './screen-grid-layer-vertex.glsl')),
+        fs: readFileSync(join(__dirname, './screen-grid-layer-fragment.glsl'))
       }),
       geometry: new Geometry({
         drawMode: GL.TRIANGLE_FAN,

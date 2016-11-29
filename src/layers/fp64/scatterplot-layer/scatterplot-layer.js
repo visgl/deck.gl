@@ -17,12 +17,15 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
+
+import {GL, Model, Geometry} from 'luma.gl';
+import {readFileSync} from 'fs';
+import {join} from 'path';
+
 import {Layer} from '../../../lib';
 import {assembleShaders} from '../../../shader-utils';
-import {GL, Model, Geometry} from 'luma.gl';
 import {fp64ify} from '../../../lib/utils/fp64';
 
-const glslify = require('glslify');
 const DEFAULT_COLOR = [255, 0, 255, 255];
 
 const defaultGetPosition = x => x.position;
@@ -115,8 +118,8 @@ export default class ScatterplotLayer64 extends Layer {
       gl,
       id: this.props.id,
       ...assembleShaders(gl, {
-        vs: glslify('./scatterplot-layer-vertex.glsl'),
-        fs: glslify('./scatterplot-layer-fragment.glsl'),
+        vs: readFileSync(join(__dirname, './scatterplot-layer-vertex.glsl')),
+        fs: readFileSync(join(__dirname, './scatterplot-layer-fragment.glsl')),
         fp64: true,
         project64: true
       }),

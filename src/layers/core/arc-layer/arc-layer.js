@@ -18,11 +18,12 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+import {GL, Model, Geometry} from 'luma.gl';
+import {join} from 'path';
+import {readFileSync} from 'fs';
+
 import {Layer} from '../../../lib';
 import {assembleShaders} from '../../../shader-utils';
-import {GL, Model, Geometry} from 'luma.gl';
-
-const glslify = require('glslify');
 
 const DEFAULT_COLOR = [0, 0, 255, 255];
 
@@ -101,8 +102,8 @@ export default class ArcLayer extends Layer {
     return new Model({
       gl,
       ...assembleShaders(gl, {
-        vs: glslify('./arc-layer-vertex.glsl'),
-        fs: glslify('./arc-layer-fragment.glsl')
+        vs: readFileSync(join(__dirname, './arc-layer-vertex.glsl')),
+        fs: readFileSync(join(__dirname, './arc-layer-fragment.glsl'))
       }),
       geometry: new Geometry({
         drawMode: GL.LINE_STRIP,

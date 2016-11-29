@@ -17,11 +17,13 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
+
+import {GL, Model, Geometry} from 'luma.gl';
+import {readFileSync} from 'fs';
+import {join} from 'path';
+
 import {Layer} from '../../../lib';
 import {assembleShaders} from '../../../shader-utils';
-import {GL, Model, Geometry} from 'luma.gl';
-
-const glslify = require('glslify');
 
 const DEFAULT_COLOR = [255, 0, 255, 255];
 
@@ -127,8 +129,8 @@ export default class ScatterplotLayer extends Layer {
       gl,
       id: 'scatterplot',
       ...assembleShaders(gl, {
-        vs: glslify('./scatterplot-layer-vertex.glsl'),
-        fs: glslify('./scatterplot-layer-fragment.glsl')
+        vs: readFileSync(join(__dirname, './scatterplot-layer-vertex.glsl')),
+        fs: readFileSync(join(__dirname, './scatterplot-layer-fragment.glsl'))
       }),
       geometry: new Geometry({
         drawMode: GL.TRIANGLE_FAN,

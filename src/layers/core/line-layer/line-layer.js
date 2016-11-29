@@ -17,11 +17,13 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
+
+import {GL, Model, Geometry} from 'luma.gl';
+import {readFileSync} from 'fs';
+import {join} from 'path';
+
 import {Layer} from '../../../lib';
 import {assembleShaders} from '../../../shader-utils';
-import {GL, Model, Geometry} from 'luma.gl';
-
-const glslify = require('glslify');
 
 const DEFAULT_COLOR = [0, 255, 0, 255];
 
@@ -90,8 +92,8 @@ export default class LineLayer extends Layer {
       gl,
       id: this.props.id,
       ...assembleShaders(gl, {
-        vs: glslify('./line-layer-vertex.glsl'),
-        fs: glslify('./line-layer-fragment.glsl')
+        vs: readFileSync(join(__dirname, './line-layer-vertex.glsl')),
+        fs: readFileSync(join(__dirname, './line-layer-fragment.glsl'))
       }),
       geometry: new Geometry({
         drawMode: GL.LINE_STRIP,

@@ -17,11 +17,8 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-#define SHADER_NAME choropleth-layer-vertex-shader
 
-// #pragma glslify: preproject = require(../../../../shaderlib/preproject)
-// #pragma glslify: scale = require(../../../../shaderlib/scale)
-// #pragma glslify: project = require(../../../../shaderlib/project)
+#define SHADER_NAME choropleth-layer-vertex-shader
 
 attribute vec3 positions;
 attribute vec4 colors;
@@ -42,8 +39,8 @@ vec4 picking_setNormalAndPickColors(vec4 color, vec3 pickingColor) {
   vPickingColor = mix(color, pickingColor4, pickingEnabled);
   return vPickingColor;
 }
-// PICKING
 
+// PICKING
 // vec4 getColor(vec4 color, float opacity, vec3 pickingColor, float renderPickingBuffer) {
 //   vec4 color4 = vec4(color.xyz / 255., color.w / 255. * opacity);
 //   vec4 pickingColor4 = vec4(pickingColor / 255., 1.);
