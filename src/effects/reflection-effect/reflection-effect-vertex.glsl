@@ -18,13 +18,6 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-/* vertex shader for the grid-layer */
-#define SHADER_NAME reflection-effect-vs
-
-// #pragma glslify: preproject = require(../../../../shaderlib/preproject)
-// #pragma glslify: scale = require(../../../../shaderlib/scale)
-// #pragma glslify: project = require(../../../../shaderlib/project)
-
 attribute vec3 vertices;
 
 varying vec2 uv;

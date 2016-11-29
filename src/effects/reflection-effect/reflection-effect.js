@@ -18,7 +18,7 @@ export default class ReflectionEffect extends Effect {
     this.setNeedsRedraw();
   }
 
-  initialize({gl, deckgl}) {
+  initialize({gl, layerManager}) {
     this.model = new Model({
       gl,
       ...assembleShaders(gl, {
@@ -34,8 +34,8 @@ export default class ReflectionEffect extends Effect {
 
   }
 
-  preDraw({gl, deckgl}) {
-    const viewport = deckgl.layerManager.context.viewport;
+  preDraw({gl, layerManager}) {
+    const viewport = layerManager.context.viewport;
     /*
      * the renderer already has a reference to this, but we don't have a reference to the renderer.
      * when we refactor the camera code, we should make sure we get a reference to the renderer so
@@ -48,28 +48,24 @@ export default class ReflectionEffect extends Effect {
     /* this is a huge hack around the existing viewport class.
      * TODO in the future, once we implement bona-fide cameras, we really need to fix this.
      */
-    deckgl.layerManager.setContext({
+    layerManager.setContext({
       ...viewport,
       pitch: -180 - pitch
     });
     gl.clear(GL.COLOR_BUFFER_BIT | GL.DEPTH_BUFFER_BIT);
 
-    deckgl.layerManager.drawLayers();
-    deckgl.layerManager.setContext({
+    layerManager.drawLayers();
+    layerManager.setContext({
       ...viewport,
       pitch
     });
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
   }
 
-  draw({gl, deckgl}) {
+  draw({gl, layerManager}) {
     this.model.render({
       reflectionTexture: this.framebuffer.texture,
       reflectivity: this.reflectivity
     });
-  }
-
-  setNeedsRedraw(redraw = true) {
-    this.needsRedraw = redraw;
   }
 }

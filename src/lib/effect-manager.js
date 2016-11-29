@@ -1,13 +1,43 @@
 /* eslint-disable no-try-catch */
 
 export default class EffectManager {
-  constructor({gl, deckgl}) {
+  constructor({gl, layerManager}) {
     this.gl = gl;
-    this.deckgl = deckgl;
+    this.layerManager = layerManager;
     this._effects = [];
   }
 
-  _sortEffects() {
+  addEffect(effect) {
+    this._effects.push(effect);
+    this._sortEffects();
+    effect.initialize({gl: this.gl, layerManager: this.layerManager});
+  }
+
+  removeEffect(effect) {
+    if (this._effects.indexOf(effect) >= 0) {
+      effect.finalize({gl: this.gl, layerManager: this.layerManager});
+      this._effects.remove(effect);
+    }
+  }
+
+  preDraw() {
+    for (const effect of this._effects) {
+      if (effect.needsRedraw) {
+        effect.preDraw({gl: this.gl, layerManager: this.layerManager});
+      }
+    }
+  }
+
+  draw() {
+    for (const effect of this._effects) {
+      if (effect.needsRedraw) {
+        effect.draw({gl: this.gl, layerManager: this.layerManager});
+      }
+    }
+  }
+  
+  
+   _sortEffects() {
     /*
      * this should really be made stable in the future...
      */
@@ -20,33 +50,5 @@ export default class EffectManager {
       return a.count - b.count;
     });
   }
-
-  addEffect(effect) {
-    this._effects.push(effect);
-    this._sortEffects();
-    effect.initialize({gl: this.gl, deckgl: this.deckgl});
-  }
-
-  removeEffect(effect) {
-    if (this._effects.indexOf(effect) >= 0) {
-      effect.finalize({gl: this.gl, deckgl: this.deckgl});
-      this._effects.remove(effect);
-    }
-  }
-
-  preDraw() {
-    for (const effect of this._effects) {
-      if (effect.needsRedraw) {
-        effect.preDraw({gl: this.gl, deckgl: this.deckgl});
-      }
-    }
-  }
-
-  draw() {
-    for (const effect of this._effects) {
-      if (effect.needsRedraw) {
-        effect.draw({gl: this.gl, deckgl: this.deckgl});
-      }
-    }
-  }
+  
 }

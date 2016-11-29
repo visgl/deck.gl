@@ -18,9 +18,6 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-/* fragment shader for the grid-layer */
-#define SHADER_NAME reflection-effect-fs
-
 #ifdef GL_ES
 precision highp float;
 #endif

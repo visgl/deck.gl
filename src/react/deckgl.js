@@ -93,7 +93,7 @@ export default class DeckGL extends React.Component {
 
     // Note: avoid React setState due GL animation loop / setState timing issue
     this.layerManager = new LayerManager({gl});
-    this.effectManager = new EffectManager({gl, deckgl: this});
+    this.effectManager = new EffectManager({gl, layerManager: this.layerManager});
     this.effectManager.addEffect(new ReflectionEffect());
     this._updateLayers(this.props);
 
