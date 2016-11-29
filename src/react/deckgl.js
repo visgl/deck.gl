@@ -21,10 +21,10 @@ import React, {PropTypes} from 'react';
 import autobind from 'autobind-decorator';
 import WebGLRenderer from './webgl-renderer';
 import {LayerManager} from '../lib';
-import {EffectManager} from '../lib';
+import {EffectManager} from '../experimental/lib';
 import {GL, addEvents} from 'luma.gl';
 
-import {ReflectionEffect} from '../effects';
+import {ReflectionEffect} from '../experimental/effects';
 
 function noop() {}
 

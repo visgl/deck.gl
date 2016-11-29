@@ -1,6 +1,6 @@
 /* global window */
 import {GL, Framebuffer, Model, Geometry} from 'luma.gl';
-import {assembleShaders} from '../../shader-utils';
+import {assembleShaders} from '../../../shader-utils';
 import {Effect} from '../../lib';
 
 const glslify = require('glslify');
