@@ -9,16 +9,17 @@ export default class Effect {
     this.needsRedraw = false;
   }
 
-  initialize() {
+  //subclasses should override to set up any resources needed
+  initialize({gl, layerManager}) {
   }
-
-  finalize() {
+  //and subclasses should free those resources here
+  finalize({gl, layerManager}) {
   }
-
-  preDraw({gl, deckgl}) {
+  //override for a callback immediately before drawing each frame
+  preDraw({gl, layerManager}) {
   }
-
-  draw({gl, deckgl}) {
+  //override for a callback immediately after drawing a frame's layers
+  draw({gl, layerManager}) {
   }
 
   setNeedsRedraw(redraw = true) {
