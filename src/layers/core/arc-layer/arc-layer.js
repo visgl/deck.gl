@@ -18,12 +18,10 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+import {Layer, assembleShaders} from '../../..';
 import {GL, Model, Geometry} from 'luma.gl';
 import {join} from 'path';
 import {readFileSync} from 'fs';
-
-import {Layer} from '../../../lib';
-import {assembleShaders} from '../../../shader-utils';
 
 const DEFAULT_COLOR = [0, 0, 255, 255];
 

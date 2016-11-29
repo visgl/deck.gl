@@ -18,16 +18,14 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+import {Layer, assembleShaders} from '../../..';
+import {fp64ify} from '../../../lib/utils/fp64';
 import {GL, Model, Geometry} from 'luma.gl';
 import flattenDeep from 'lodash.flattendeep';
 import normalize from 'geojson-normalize';
 import {readFileSync} from 'fs';
 import {join} from 'path';
 import earcut from 'earcut';
-
-import {Layer} from '../../../lib';
-import {assembleShaders} from '../../../shader-utils';
-import {fp64ify} from '../../../lib/utils/fp64';
 
 const DEFAULT_COLOR = [0, 0, 255, 255];
 

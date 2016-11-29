@@ -100,7 +100,7 @@
     "build-watch": "npm run build-clean && npm run build-src-watch && npm run build-shaderlib-watch",
     "build-src-watch": "babel src -d dist --source-maps inline --copy-files --watch &",
     "build-shaderlib-watch": "babel shaderlib -d dist/shaderlib --source-maps inline --copy-files --watch &",
-    "demo-start": "npm run demo-build-copy && budo demo/src/javascripts/main.js:main.min.js --dir dist-demo/ --open --  -t babelify -t sassify -t brfs-babel",
+    "demo-start": "npm run demo-build-copy && budo demo/src/javascripts/main.js:main.min.js --dir dist-demo/ --open -- -t babelify -t sassify -t brfs-babel",
     "demo-build": "npm run demo-build-clean && npm run demo-build-copy && npm run demo-build-script",
     "demo-build-clean": "rm -fr dist-demo && mkdir -p dist-demo",
     "demo-build-copy": " mkdir -p dist-demo/docs && cp -R demo/src/static/* dist-demo/ && cp -R docs dist-demo",

@@ -66,8 +66,8 @@ export default class HeroDemo extends Component {
 trips-layer.js:
 
 ```
-import {Model, Program, Geometry, glGetDebugInfo} from 'luma.gl';
 import {Layer, assembleShaders} from 'deck.gl';
+import {Model, Program, Geometry, glGetDebugInfo} from 'luma.gl';
 import {readFileSync} from 'fs';
 import {join} from 'path';
 

@@ -1,8 +1,7 @@
+import {Layer, assembleShaders} from '../../../../../../index';
 import {Model, Program, Geometry, glGetDebugInfo} from 'luma.gl';
 import {readFileSync} from 'fs';
 import {join} from 'path';
-
-import {Layer, assembleShaders} from '../../../../../../index';
 
 export default class TripsLayer extends Layer {
   /**

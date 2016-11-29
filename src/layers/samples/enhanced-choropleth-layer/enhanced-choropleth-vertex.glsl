@@ -1,4 +1,4 @@
-// Copyright (c) 2015 Uber Technologies, Inc.
+// Copyright (c) 2016 Uber Technologies, Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -18,14 +18,31 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#define SHADER_NAME choropleth-layer-fragment-shader
+#define SHADER_NAME enhanced-choropleth-layer-vertex-shader
 
-#ifdef GL_ES
-precision highp float;
-#endif
+attribute vec3 positions;
+attribute vec3 colors;
+attribute vec3 pickingColors;
+
+uniform float opacity;
+uniform float renderPickingBuffer;
+uniform vec3 selectedPickingColor;
 
 varying vec4 vColor;
 
+vec4 getColor(
+  vec4 color, float opacity, vec3 pickingColor, float renderPickingBuffer
+) {
+  vec4 color4 = vec4(color.rgb / 255., color.a / 255. * opacity);
+  vec4 pickingColor4 = vec4(pickingColor / 255., 1.);
+  return mix(color4, pickingColor4, renderPickingBuffer);
+}
+
 void main(void) {
-  gl_FragColor = vColor;
+  vec2 pos = preproject(positions.xy);
+  gl_Position = project(vec4(pos, 0., 1.));
+
+  vec4 color = vec4(colors / 255., opacity);
+  vec4 pickingColor = vec4(pickingColors / 255., 1.);
+  vColor = mix(color, pickingColor, renderPickingBuffer);
 }
