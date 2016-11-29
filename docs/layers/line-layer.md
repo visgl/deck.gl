@@ -1,7 +1,7 @@
 # Line Layer
 
-The Line Layer takes in paired latitude and longitude coordinated points and
-render them as arcs that links the starting and ending points.
+The Line Layer renders flat lines joining pairs of source and target points,
+specified as latitude/longitude coordinates.
 
 <div align="center">
   <img height="300" src="/demo/src/static/images/demo-thumb-line.jpg" />
