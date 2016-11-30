@@ -98,29 +98,30 @@ export default class ScatterplotLayer64 extends Layer {
     });
   }
 
+  getShaders() {
+    return {
+      vs: readFileSync(join(__dirname, './scatterplot-layer-vertex.glsl'), 'utf8'),
+      fs: readFileSync(join(__dirname, './scatterplot-layer-fragment.glsl'), 'utf8'),
+      fp64: true,
+      project64: true
+    };
+  }
+
   getModel(gl) {
     const NUM_SEGMENTS = 16;
-    const PI2 = Math.PI * 2;
-
-    let positions = [];
+    const positions = [];
     for (let i = 0; i < NUM_SEGMENTS; i++) {
-      positions = [
-        ...positions,
-        Math.cos(PI2 * i / NUM_SEGMENTS),
-        Math.sin(PI2 * i / NUM_SEGMENTS),
+      positions.push(
+        Math.cos(Math.PI * 2 * i / NUM_SEGMENTS),
+        Math.sin(Math.PI * 2 * i / NUM_SEGMENTS),
         0
-      ];
+      );
     }
 
     return new Model({
       gl,
       id: this.props.id,
-      ...assembleShaders(gl, {
-        vs: readFileSync(join(__dirname, './scatterplot-layer-vertex.glsl')),
-        fs: readFileSync(join(__dirname, './scatterplot-layer-fragment.glsl')),
-        fp64: true,
-        project64: true
-      }),
+      ...assembleShaders(gl, this.getShaders()),
       geometry: new Geometry({
         drawMode: GL.TRIANGLE_FAN,
         positions: new Float32Array(positions)

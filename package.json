@@ -33,15 +33,13 @@
     "gl-matrix": "^2.3.2",
     "lodash.flattendeep": "^4.4.0",
     "save-pixels": "^2.3.0",
-    "viewport-mercator-project": "3.0.0-beta3",
-    "webgl-obj-loader": "^0.1.1"
+    "viewport-mercator-project": "3.0.0-beta3"
   },
   "devDependencies": {
     "babel-cli": "^6.3.15",
     "babel-core": "^6.7.7",
     "babel-eslint": "^6.0.0",
     "babel-plugin-static-fs": "^1.1.0",
-    "babel-plugin-transform-class-properties": "^6.18.0",
     "babel-plugin-transform-decorators-legacy": "^1.3.4",
     "babel-preset-es2015": "^6.3.13",
     "babel-preset-react": "^6.3.13",
@@ -65,10 +63,9 @@
     "gl": "^4.0.1",
     "highlight.js": "^9.7.0",
     "immutable": "^3.7.5",
-    "luma.gl": "^2.10.0",
+    "luma.gl": "^2.10.3",
     "marked": "^0.3.6",
     "react": "^15.3.2",
-    "react-addons-pure-render-mixin": "^15.3.2",
     "react-addons-test-utils": "^15.0.2",
     "react-dom": "^15.3.2",
     "react-map-gl": "^1.7.2",
@@ -88,7 +85,7 @@
   "peerDependencies": {
     "react": "0.14.x - 15.x",
     "react-dom": "0.14.x - 15.x",
-    "luma.gl": "^2.10.0"
+    "luma.gl": "^2.10.3"
   },
   "scripts": {
     "build": "npm run build-dist && npm run build-script",

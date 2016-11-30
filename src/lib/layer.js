@@ -324,8 +324,8 @@ export default class Layer {
   // Called by layer manager when a new layer is found
   /* eslint-disable max-statements */
   initializeLayer(updateParams) {
-    assert(this.context.gl);
-    assert(!this.state);
+    assert(this.context.gl, 'Layer context missing gl');
+    assert(!this.state, 'Layer missing state');
 
     this.state = {};
 

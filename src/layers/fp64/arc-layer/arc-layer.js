@@ -21,8 +21,8 @@
 import {Layer, assembleShaders} from '../../..';
 import {fp64ify} from '../../../lib/utils/fp64';
 import {GL, Model, Geometry} from 'luma.gl';
-import {join} from 'path';
 import {readFileSync} from 'fs';
+import {join} from 'path';
 
 const DEFAULT_COLOR = [0, 0, 255, 255];
 
@@ -64,6 +64,14 @@ export default class ArcLayer64 extends Layer {
     const {attributeManager} = this.state;
 
     attributeManager.addInstanced({
+      instanceSourcePositionsFP64: {
+        size: 4,
+        update: this.calculateInstanceSourcePositions
+      },
+      instanceTargetPositionsFP64: {
+        size: 4,
+        update: this.calculateInstanceTargetPositions
+      },
       instanceSourceColors: {
         size: 4,
         type: GL.UNSIGNED_BYTE,
@@ -73,9 +81,7 @@ export default class ArcLayer64 extends Layer {
         size: 4,
         type: GL.UNSIGNED_BYTE,
         update: this.calculateInstanceTargetColors
-      },
-      instanceSourcePositionsFP64: {size: 4, update: this.calculateInstanceSourcePositions},
-      instanceTargetPositionsFP64: {size: 4, update: this.calculateInstanceTargetPositions}
+      }
     });
 
     this.setState({model: this.createModel(gl)});
@@ -93,6 +99,15 @@ export default class ArcLayer64 extends Layer {
     gl.lineWidth(1.0);
   }
 
+  getShaders() {
+    return {
+      vs: readFileSync(join(__dirname, './arc-layer-vertex.glsl'), 'utf8'),
+      fs: readFileSync(join(__dirname, './arc-layer-fragment.glsl'), 'utf8'),
+      fp64: true,
+      project64: true
+    };
+  }
+
   createModel(gl) {
     let positions = [];
     const NUM_SEGMENTS = 50;
@@ -102,12 +117,7 @@ export default class ArcLayer64 extends Layer {
     return new Model({
       gl,
       id: this.props.id,
-      ...assembleShaders(gl, {
-        vs: readFileSync(join(__dirname, './arc-layer-vertex.glsl')),
-        fs: readFileSync(join(__dirname, './arc-layer-fragment.glsl')),
-        fp64: true,
-        project64: true
-      }),
+      ...assembleShaders(gl, this.getShaders()),
       geometry: new Geometry({
         drawMode: GL.LINE_STRIP,
         positions: new Float32Array(positions)

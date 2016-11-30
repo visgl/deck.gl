@@ -88,7 +88,12 @@ export default class AttributeManager {
   invalidate(attributeName) {
     const {attributes} = this;
     const attribute = attributes[attributeName];
-    assert(attribute);
+    if (!attribute) {
+      let message =
+        `invalidating non-existent attribute ${attributeName} for ${this.id}\n`;
+      message += `Valid attributes: ${Object.keys(attributes).join(', ')}`;
+      assert(attribute, message);
+    }
     attribute.needsUpdate = true;
     // For performance tuning
     this.onLog(1, `invalidated attribute ${attributeName} for ${this.id}`);
@@ -358,7 +363,7 @@ export default class AttributeManager {
    */
   _analyzeBuffers({numInstances}) {
     const {attributes} = this;
-    assert(numInstances !== undefined);
+    assert(numInstances !== undefined, 'numInstances not defined');
 
     // Track whether any allocations or updates are needed
     let needsUpdate = false;

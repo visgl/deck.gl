@@ -2,8 +2,6 @@
   "presets": ["es2015", "stage-2", "react"],
   "plugins": [
     "static-fs",
-    "transform-class-properties",
     "transform-decorators-legacy"
-  ],
-  "compact": "false"
+  ]
 }

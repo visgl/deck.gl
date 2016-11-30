@@ -20,13 +20,12 @@
 
 import {Layer, assembleShaders} from '../../..';
 import {GL, Model, Geometry} from 'luma.gl';
-import {readFileSync} from 'fs';
-import {join} from 'path';
 import earcut from 'earcut';
 import flattenDeep from 'lodash.flattendeep';
 import normalize from 'geojson-normalize';
-
 import extrudePolyline from 'extrude-polyline';
+import {readFileSync} from 'fs';
+import {join} from 'path';
 
 export default class EnhancedChoroplethLayer extends Layer {
 
@@ -106,14 +105,18 @@ export default class EnhancedChoroplethLayer extends Layer {
     info.object = feature;
   }
 
+  getShaders() {
+    return {
+      vs: readFileSync(join(__dirname, './enhanced-choropleth-layer-vertex.glsl'), 'utf8'),
+      fs: readFileSync(join(__dirname, './enhanced-choropleth-layer-fragment.glsl'), 'utf8')
+    };
+  }
+
   getModel(gl) {
     return new Model({
       gl,
       id: this.props.id,
-      ...assembleShaders(gl, {
-        vs: readFileSync(join(__dirname, './enhanced-choropleth-vertex.glsl')),
-        fs: readFileSync(join(__dirname, './enhanced-choropleth-fragment.glsl'))
-      }),
+      ...assembleShaders(gl, this.getShaders()),
       geometry: new Geometry({drawMode: GL.TRIANGLES}),
       vertexCount: 0,
       isIndexed: true

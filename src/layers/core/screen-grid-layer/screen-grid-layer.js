@@ -20,8 +20,8 @@
 
 import {Layer, assembleShaders} from '../../..';
 import {GL, Model, Geometry} from 'luma.gl';
-import {join} from 'path';
 import {readFileSync} from 'fs';
+import {join} from 'path';
 
 export default class ScreenGridLayer extends Layer {
 
@@ -77,14 +77,18 @@ export default class ScreenGridLayer extends Layer {
     model.render({...uniforms, minColor, maxColor, cellScale, maxCount});
   }
 
+  getShaders() {
+    return {
+      vs: readFileSync(join(__dirname, './screen-grid-layer-vertex.glsl'), 'utf8'),
+      fs: readFileSync(join(__dirname, './screen-grid-layer-fragment.glsl'), 'utf8')
+    };
+  }
+
   getModel(gl) {
     return new Model({
       gl,
       id: this.props.id,
-      ...assembleShaders(gl, {
-        vs: readFileSync(join(__dirname, './screen-grid-layer-vertex.glsl')),
-        fs: readFileSync(join(__dirname, './screen-grid-layer-fragment.glsl'))
-      }),
+      ...assembleShaders(gl, this.getShaders()),
       geometry: new Geometry({
         drawMode: GL.TRIANGLE_FAN,
         vertices: new Float32Array([0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0])

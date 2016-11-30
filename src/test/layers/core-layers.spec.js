@@ -27,10 +27,10 @@ import {
   ScatterplotLayer,
   ArcLayer,
   ScreenGridLayer
-} from '../..';
+} from '../../..';
 
-// Import private method to test that layers can successfully be updated
-import {LayerManager} from '../../lib';
+// Import LayerManager to test that layers can successfully be updated
+import {LayerManager} from '../../..';
 
 // import CHOROPLETHS from '../../example/data/sf.zip.geo.json';
 // const HEXAGONS_FILE = './example/data/hexagons.csv';
@@ -46,12 +46,9 @@ const FIXTURE = {
     scene: new Scene(gl)
   },
 
-  mapSize: {
-    width: 800,
-    height: 640
-  },
-
   mapState: {
+    width: 800,
+    height: 640,
     latitude: 37.751537058389985,
     longitude: -122.42694203247012,
     zoom: 11.5
@@ -62,6 +59,11 @@ const FIXTURE = {
   points: [{position: [100, 100], color: [255, 0, 0]}],
   arcs: [{sourcePosition: [0, 0], targetPosition: [1, 3], color: [255, 0, 0]}]
 };
+
+test('imports', t => {
+  t.ok(LayerManager, 'LayerManager imported');
+  t.end();
+});
 
 test('ScreenGridLayer#constructor', t => {
   const {points} = FIXTURE;
@@ -91,7 +93,7 @@ test('ChoroplethLayer#constructor', t => {
 });
 
 test('ScatterplotLayer#constructor', t => {
-  const {mapSize, mapState, points} = FIXTURE;
+  const {mapState, points} = FIXTURE;
 
   const layer = new ScatterplotLayer({
     data: points,
@@ -115,10 +117,12 @@ test('ScatterplotLayer#constructor', t => {
     'Null ScatterplotLayer did not throw exception'
   );
 
-  const layerManager = new LayerManager({gl})
-    .setContext({...mapState, ...mapSize});
   t.doesNotThrow(
-    () => layerManager.updateLayers({newLayers: [layer, emptyLayer]}),
+    () => {
+      new LayerManager({gl})
+        .setContext(mapState)
+        .updateLayers({newLayers: [layer, emptyLayer]});
+    },
     'ScatterplotLayer update does not throw'
   );
 
@@ -126,7 +130,7 @@ test('ScatterplotLayer#constructor', t => {
 });
 
 test('ArcLayer#constructor', t => {
-  const {mapSize, mapState, arcs} = FIXTURE;
+  const {mapState, arcs} = FIXTURE;
 
   const layer = new ArcLayer({
     id: 'arcLayer',
@@ -150,12 +154,15 @@ test('ArcLayer#constructor', t => {
     }),
     'Null ArcLayer did not throw exception'
   );
+  const layerManager = new LayerManager({gl});
+  layerManager.setContext(mapState);
+  layerManager.updateLayers({newLayers: [layer, emptyLayer]});
 
-  const layerManager = new LayerManager({gl})
-    .setContext({...mapState, ...mapSize});
   t.doesNotThrow(
-    () => layerManager.updateLayers({newLayers: [layer, emptyLayer]}),
-    'ArcLayer update does not throw');
+    () => {
+    },
+    'ArcLayer update does not throw'
+  );
 
   t.end();
 });

@@ -3,6 +3,6 @@ var fs = require('fs');
 module.exports = {
   fp64: {
     interface: 'fp64',
-    source: fs.readFileSync(__dirname + '/math-fp64.glsl')
+    source: fs.readFileSync(__dirname + '/math-fp64.glsl', 'utf8')
   }
 };

@@ -23,9 +23,9 @@ import {fp64ify} from '../../../lib/utils/fp64';
 import {GL, Model, Geometry} from 'luma.gl';
 import flattenDeep from 'lodash.flattendeep';
 import normalize from 'geojson-normalize';
+import earcut from 'earcut';
 import {readFileSync} from 'fs';
 import {join} from 'path';
-import earcut from 'earcut';
 
 const DEFAULT_COLOR = [0, 0, 255, 255];
 
@@ -110,16 +110,20 @@ export default class ChoroplethLayer64 extends Layer {
     info.object = feature;
   }
 
+  getShaders() {
+    return {
+      vs: readFileSync(join(__dirname, './choropleth-layer-vertex.glsl'), 'utf8'),
+      fs: readFileSync(join(__dirname, './choropleth-layer-fragment.glsl'), 'utf8'),
+      fp64: true,
+      project64: true
+    };
+  }
+
   getModel(gl) {
     return new Model({
       gl,
       id: this.props.id,
-      ...assembleShaders(gl, {
-        vs: readFileSync(join(__dirname, './choropleth-layer-vertex.glsl')),
-        fs: readFileSync(join(__dirname, './choropleth-layer-fragment.glsl')),
-        fp64: true,
-        project64: true
-      }),
+      ...assembleShaders(gl, this.getShaders()),
       geometry: new Geometry({
         drawMode: this.props.drawContour ? GL.LINES : GL.TRIANGLES
       }),
