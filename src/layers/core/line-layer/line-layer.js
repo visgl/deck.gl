@@ -62,7 +62,8 @@ export default class LineLayer extends Layer {
 
     const {attributeManager} = this.state;
     attributeManager.addInstanced({
-      instancePositions: {size: 4, update: this.calculateInstancePositions},
+      instanceSourcePositions: {size: 3, update: this.calculateInstanceSourcePositions},
+      instanceTargetPositions: {size: 3, update: this.calculateInstanceTargetPositions},
       instanceColors: {
         type: GL.UNSIGNED_BYTE,
         size: 4,
@@ -105,17 +106,28 @@ export default class LineLayer extends Layer {
     });
   }
 
-  calculateInstancePositions(attribute) {
-    const {data, getSourcePosition, getTargetPosition} = this.props;
+  calculateInstanceSourcePositions(attribute) {
+    const {data, getSourcePosition} = this.props;
     const {value, size} = attribute;
     let i = 0;
     for (const object of data) {
       const sourcePosition = getSourcePosition(object);
-      const targetPosition = getTargetPosition(object);
       value[i + 0] = sourcePosition[0];
       value[i + 1] = sourcePosition[1];
-      value[i + 2] = targetPosition[0];
-      value[i + 3] = targetPosition[1];
+      value[i + 2] = sourcePosition[2] || 0;
+      i += size;
+    }
+  }
+
+  calculateInstanceTargetPositions(attribute) {
+    const {data, getTargetPosition} = this.props;
+    const {value, size} = attribute;
+    let i = 0;
+    for (const object of data) {
+      const targetPosition = getTargetPosition(object);
+      value[i + 0] = targetPosition[0];
+      value[i + 1] = targetPosition[1];
+      value[i + 2] = targetPosition[2] || 0;
       i += size;
     }
   }
