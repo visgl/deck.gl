@@ -9,16 +9,24 @@ export default class Effect {
     this.needsRedraw = false;
   }
 
-  //subclasses should override to set up any resources needed
+  /**
+   * subclasses should override to set up any resources needed
+   */
   initialize({gl, layerManager}) {
   }
-  //and subclasses should free those resources here
+  /**
+   * and subclasses should free those resources here
+   */
   finalize({gl, layerManager}) {
   }
-  //override for a callback immediately before drawing each frame
+  /**
+   * override for a callback immediately before drawing each frame
+   */
   preDraw({gl, layerManager}) {
   }
-  //override for a callback immediately after drawing a frame's layers
+  /**
+   * override for a callback immediately after drawing a frame's layers
+   */
   draw({gl, layerManager}) {
   }
 

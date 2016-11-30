@@ -18,6 +18,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+#define SHADER_NAME reflection-effect-vs
+
 attribute vec3 vertices;
 
 varying vec2 uv;

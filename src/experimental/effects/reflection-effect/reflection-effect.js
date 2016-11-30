@@ -68,8 +68,8 @@ export default class ReflectionEffect extends Effect {
       reflectivity: this.reflectivity
     });
   }
-  
+
   finalize({gl, layerManager}) {
-    //TODO: Free resources?
+    /* TODO: Free resources? */
   }
 }

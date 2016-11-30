@@ -6,7 +6,7 @@ export default class EffectManager {
     this.layerManager = layerManager;
     this._effects = [];
   }
-  
+
   /**
    * Adds an effect to be managed.  That effect's initialize function will
    * be called, and the effect's preDraw and draw callbacks will be
@@ -28,9 +28,10 @@ export default class EffectManager {
    * thus successfully removed; false otherwise
    */
   removeEffect(effect) {
-    if (this._effects.indexOf(effect) >= 0) {
+    const i = this._effects.indexOf(effect);
+    if (i >= 0) {
       effect.finalize({gl: this.gl, layerManager: this.layerManager});
-      this._effects.remove(effect);
+      this._effects.splice(i, 1);
       return true;
     }
     return false;
@@ -59,9 +60,8 @@ export default class EffectManager {
       }
     }
   }
-  
-  
-   _sortEffects() {
+
+  _sortEffects() {
     this._effects.sort((a, b) => {
       if (a.priority > b.priority) {
         return -1;
@@ -71,5 +71,4 @@ export default class EffectManager {
       return a.count - b.count;
     });
   }
-  
 }
