@@ -21,8 +21,9 @@
 #define SHADER_NAME line-layer-vertex-shader
 
 attribute vec3 positions;
+attribute vec3 instanceSourcePositions;
+attribute vec3 instanceTargetPositions;
 attribute vec4 instanceColors;
-attribute vec4 instancePositions;
 attribute vec3 instancePickingColors;
 
 uniform float opacity;
@@ -31,18 +32,19 @@ uniform float renderPickingBuffer;
 varying vec4 vColor;
 
 void main(void) {
-  vec2 source = preproject(instancePositions.xy);
-  vec2 target = preproject(instancePositions.zw);
+  // Position
+  vec3 source = project_position(instanceSourcePositions);
+  vec3 target = project_position(instanceTargetPositions);
 
+  // linear interpolation of source & target to pick right coord
   float segmentIndex = positions.x;
-  // xy: linear interpolation of source & target
-  vec2 p = mix(source, target, segmentIndex);
+  vec3 p = mix(source, target, segmentIndex);
 
-  gl_Position = project(vec4(p, 0., 1.));
+  gl_Position = project_to_clipspace(vec4(p, 1.));
 
+  // Color
   vec4 color = vec4(instanceColors.rgb, instanceColors.a * opacity) / 255.;
   vec4 pickingColor = vec4(instancePickingColors / 255., 1.);
-
   vColor = mix(
     color,
     pickingColor,

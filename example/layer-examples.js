@@ -43,7 +43,7 @@ const ChoroplethLayerExample = props =>
     ...props,
     id: props.id || 'choroplethLayerSolid',
     data: props.choropleths,
-    opacity: 0.01,
+    opacity: 0.1,
     pickable: true,
     onHover: props.onChoroplethHovered,
     onClick: props.onChoroplethClicked
@@ -136,7 +136,7 @@ const ChoroplethLayer64SolidExample = props =>
     ...props,
     id: props.id || 'choroplethLayer64Solid',
     data: props.choropleths,
-    opacity: 0.01,
+    opacity: 0.1,
     pickable: true,
     onHover: props.onChoroplethHovered,
     onClick: props.onChoroplethClicked
@@ -160,7 +160,7 @@ const LineLayer64Example = props =>
   new LineLayer64({
     ...props,
     id: props.id || 'lineLayer64',
-    data: props.arcs,
+    data: props.lines,
     strokeWidth: props.arcStrokeWidth || 1,
     pickable: true,
     onHover: props.onArcHovered,

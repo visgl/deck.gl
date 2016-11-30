@@ -1,1 +1,1 @@
-export {default as default} from './choropleth-layer';
+export {default as default} from './choropleth-layer-64';

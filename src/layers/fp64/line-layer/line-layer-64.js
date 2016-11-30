@@ -60,8 +60,18 @@ export default class LineLayer64 extends Layer {
 
     const {attributeManager} = this.state;
     attributeManager.addInstanced({
-      instanceSourcePositionsFP64: {size: 4, update: this.calculateInstanceSourcePositions},
-      instanceTargetPositionsFP64: {size: 4, update: this.calculateInstanceTargetPositions},
+      instanceSourcePositionsFP64: {
+        size: 4,
+        update: this.calculateInstanceSourcePositions
+      },
+      instanceTargetPositionsFP64: {
+        size: 4,
+        update: this.calculateInstanceTargetPositions
+      },
+      instanceElevations: {
+        size: 2,
+        update: this.calculateInstanceElevations
+      },
       instanceColors: {
         size: 4,
         type: GL.UNSIGNED_BYTE,
@@ -125,6 +135,19 @@ export default class LineLayer64 extends Layer {
       const targetPosition = getTargetPosition(object);
       [value[i + 0], value[i + 1]] = fp64ify(targetPosition[0]);
       [value[i + 2], value[i + 3]] = fp64ify(targetPosition[1]);
+      i += size;
+    }
+  }
+
+  calculateInstanceElevations(attribute) {
+    const {data, getSourcePosition, getTargetPosition} = this.props;
+    const {value, size} = attribute;
+    let i = 0;
+    for (const object of data) {
+      const sourcePosition = getSourcePosition(object);
+      const targetPosition = getTargetPosition(object);
+      value[i + 0] = sourcePosition[2] || 0;
+      value[i + 1] = targetPosition[2] || 0;
       i += size;
     }
   }

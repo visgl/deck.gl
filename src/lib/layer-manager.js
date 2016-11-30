@@ -92,7 +92,7 @@ export default class LayerManager {
       'LayerManager.updateLayers: viewport not set');
 
     // Filter out any null layers
-    newLayers = newLayers.filter(newLayer => Boolean(newLayer));
+    newLayers = newLayers.filter(newLayer => newLayer !== null);
 
     for (const layer of newLayers) {
       layer.context = this.context;
@@ -205,7 +205,7 @@ export default class LayerManager {
   /* eslint-disable max-statements */
   _matchSublayers({newLayers, oldLayerMap, generatedLayers}) {
     // Filter out any null layers
-    newLayers = newLayers.filter(newLayer => Boolean(newLayer));
+    newLayers = newLayers.filter(newLayer => newLayer !== null);
 
     let error = null;
     for (const newLayer of newLayers) {
