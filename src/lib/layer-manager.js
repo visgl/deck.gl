@@ -204,6 +204,7 @@ export default class LayerManager {
 
   /* eslint-disable max-statements */
   _matchSublayers({newLayers, oldLayerMap, generatedLayers}) {
+    console.error('_matchSublayers');
     // Filter out any null layers
     newLayers = newLayers.filter(newLayer => newLayer !== null);
 
