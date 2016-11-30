@@ -13,5 +13,5 @@ TODO
 _docs
 examples/winds/data/*.html
 node_modules
-npm-debug.log
+*.log
 .exit_code

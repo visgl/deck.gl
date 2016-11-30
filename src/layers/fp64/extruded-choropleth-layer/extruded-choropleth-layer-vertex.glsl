@@ -18,12 +18,11 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+#define SHADER_NAME extruded-choropleths-layer-vertex-shader
+
 // import MATH_FP64 from '../shaderlib/fp64/math-fp64';
 // import PROJECT from '../shaderlib/project';
 // import LIGHTING from '../shaderlib/lighting';
-// /* vertex shader for the choropleth-layer */
-// export default `\
-#define SHADER_NAME extruded-choropleths-layer-vertex-shader
 
 uniform float opacity;
 uniform vec3 colors;

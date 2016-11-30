@@ -1,8 +1,7 @@
 {
   "presets": ["es2015", "stage-2", "react"],
   "plugins": [
-  	"glslify",
-  	"static-fs",
+    "static-fs",
     "transform-class-properties",
     "transform-decorators-legacy"
   ],

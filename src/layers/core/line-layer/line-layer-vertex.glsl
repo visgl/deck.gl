@@ -17,11 +17,8 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-#define SHADER_NAME line-layer-vertex-shader
 
-// #pragma glslify: preproject = require(../../../../shaderlib/preproject)
-// #pragma glslify: scale = require(../../../../shaderlib/scale)
-// #pragma glslify: project = require(../../../../shaderlib/project)
+#define SHADER_NAME line-layer-vertex-shader
 
 attribute vec3 positions;
 attribute vec4 instanceColors;

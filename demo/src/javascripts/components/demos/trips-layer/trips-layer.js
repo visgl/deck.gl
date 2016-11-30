@@ -1,7 +1,7 @@
 import {Layer, assembleShaders} from '../../../../../../index';
 import {Model, Program, Geometry, glGetDebugInfo} from 'luma.gl';
-
-const glslify = require('glslify');
+import {readFileSync} from 'fs';
+import {join} from 'path';
 
 export default class TripsLayer extends Layer {
   /**
@@ -48,8 +48,8 @@ export default class TripsLayer extends Layer {
   getModel(gl) {
     return new Model({
       program: new Program(gl, assembleShaders(gl, {
-        vs: glslify('./trips-layer-vertex.glsl'),
-        fs: glslify('./trips-layer-fragment.glsl')
+        vs: readFileSync(join(__dirname, './trips-layer-vertex.glsl')),
+        fs: readFileSync(join(__dirname, './trips-layer-fragment.glsl'))
       })),
       geometry: new Geometry({
         id: this.props.id,

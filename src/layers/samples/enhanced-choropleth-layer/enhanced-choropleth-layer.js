@@ -1,14 +1,32 @@
-import {Layer} from '../../../lib';
-import {assembleShaders} from '../../../shader-utils';
+// Copyright (c) 2016 Uber Technologies, Inc.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+// THE SOFTWARE.
+
+import {Layer, assembleShaders} from '../../..';
+import {GL, Model, Geometry} from 'luma.gl';
+import {readFileSync} from 'fs';
+import {join} from 'path';
 import earcut from 'earcut';
 import flattenDeep from 'lodash.flattendeep';
 import normalize from 'geojson-normalize';
-import {GL, Model, Geometry} from 'luma.gl';
 
 import extrudePolyline from 'extrude-polyline';
-
-import VERTEX_SHADER from './enhanced-choropleth-layer-vertex';
-import FRAGMENT_SHADER from './enhanced-choropleth-layer-fragment';
 
 export default class EnhancedChoroplethLayer extends Layer {
 
@@ -93,8 +111,8 @@ export default class EnhancedChoroplethLayer extends Layer {
       gl,
       id: this.props.id,
       ...assembleShaders(gl, {
-        vs: VERTEX_SHADER,
-        fs: FRAGMENT_SHADER
+        vs: readFileSync(join(__dirname, './enhanced-choropleth-vertex.glsl')),
+        fs: readFileSync(join(__dirname, './enhanced-choropleth-fragment.glsl'))
       }),
       geometry: new Geometry({drawMode: GL.TRIANGLES}),
       vertexCount: 0,

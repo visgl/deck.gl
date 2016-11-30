@@ -18,15 +18,13 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {Layer} from '../../../lib';
-import {assembleShaders} from '../../../shader-utils';
+import {Layer, assembleShaders} from '../../..';
 import {GL, Model, Geometry} from 'luma.gl';
-
-const glslify = require('glslify');
-
-import earcut from 'earcut';
 import flattenDeep from 'lodash.flattendeep';
 import normalize from 'geojson-normalize';
+import {readFileSync} from 'fs';
+import {join} from 'path';
+import earcut from 'earcut';
 
 const DEFAULT_COLOR = [0, 0, 255, 255];
 
@@ -119,8 +117,8 @@ export default class ChoroplethLayer extends Layer {
       gl,
       id: this.props.id,
       ...assembleShaders(gl, {
-        vs: glslify('./choropleth-layer-vertex.glsl'),
-        fs: glslify('./choropleth-layer-fragment.glsl')
+        vs: readFileSync(join(__dirname, './choropleth-layer-vertex.glsl')),
+        fs: readFileSync(join(__dirname, './choropleth-layer-fragment.glsl'))
       }),
       geometry: new Geometry({
         drawMode: this.props.drawContour ? GL.LINES : GL.TRIANGLES
