@@ -48,7 +48,6 @@ void main(void) {
   float mixedElevation =
     mix(instanceElevations.x, instanceElevations.y, segmentIndex);
 
-
   vec2 vertex_pos_modelspace[4];
 
   vertex_pos_modelspace[0] = mixed_temp[0];
