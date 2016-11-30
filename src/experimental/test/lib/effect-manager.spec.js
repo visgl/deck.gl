@@ -1,5 +1,5 @@
 import test from 'tape-catch';
-import {Effect, EffectManager} from '../..';
+import {Effect, EffectManager} from '../../lib';
 import 'luma.gl/headless';
 import {createGLContext} from 'luma.gl';
 import {LayerManager} from '../../../lib';

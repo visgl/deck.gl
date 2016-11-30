@@ -24,8 +24,6 @@ import {LayerManager} from '../lib';
 import {EffectManager} from '../experimental/lib';
 import {GL, addEvents} from 'luma.gl';
 
-import {ReflectionEffect} from '../experimental/effects';
-
 function noop() {}
 
 const PROP_TYPES = {
@@ -33,6 +31,7 @@ const PROP_TYPES = {
   width: PropTypes.number.isRequired,
   height: PropTypes.number.isRequired,
   layers: PropTypes.array.isRequired,
+  effects: PropTypes.array,
   gl: PropTypes.object,
   debug: PropTypes.bool,
   onWebGLInitialized: noop,
@@ -44,6 +43,7 @@ const DEFAULT_PROPS = {
   id: 'deckgl-overlay',
   debug: false,
   gl: null,
+  effects: [],
   onWebGLInitialized: noop,
   onLayerClick: noop,
   onLayerHover: noop
@@ -94,7 +94,9 @@ export default class DeckGL extends React.Component {
     // Note: avoid React setState due GL animation loop / setState timing issue
     this.layerManager = new LayerManager({gl});
     this.effectManager = new EffectManager({gl, layerManager: this.layerManager});
-    this.effectManager.addEffect(new ReflectionEffect());
+    for (const effect of this.props.effects) {
+      this.effectManager.addEffect(effect);
+    }
     this._updateLayers(this.props);
 
     this.events = addEvents(canvas, {

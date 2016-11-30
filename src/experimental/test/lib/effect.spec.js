@@ -1,5 +1,5 @@
 import test from 'tape-catch';
-import {Effect} from '../..';
+import {Effect} from '../../lib';
 
 test('Effect#constructor', t => {
   const effect = new Effect();
