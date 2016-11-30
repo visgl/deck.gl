@@ -48,8 +48,8 @@ export default class TripsLayer extends Layer {
   getModel(gl) {
     return new Model({
       program: new Program(gl, assembleShaders(gl, {
-        vs: readFileSync(join(__dirname, './trips-layer-vertex.glsl')),
-        fs: readFileSync(join(__dirname, './trips-layer-fragment.glsl'))
+        vs: readFileSync(join(__dirname, './trips-layer-vertex.glsl'), 'utf8'),
+        fs: readFileSync(join(__dirname, './trips-layer-fragment.glsl'), 'utf8')
       })),
       geometry: new Geometry({
         id: this.props.id,

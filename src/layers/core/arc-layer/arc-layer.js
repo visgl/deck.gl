@@ -92,8 +92,8 @@ export default class ArcLayer extends Layer {
 
   getShaders() {
     return {
-      vs: readFileSync(join(__dirname, './arc-layer-vertex.glsl')),
-      fs: readFileSync(join(__dirname, './arc-layer-fragment.glsl'))
+      vs: readFileSync(join(__dirname, './arc-layer-vertex.glsl'), 'utf8'),
+      fs: readFileSync(join(__dirname, './arc-layer-fragment.glsl'), 'utf8')
     };
   }
 

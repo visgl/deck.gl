@@ -247,8 +247,8 @@ function test_float_add(gl, testName) {
   const float1_vec2 = fp64ify(float1);
   const float_ref_vec2 = fp64ify(float_ref);
   const program = new Program(gl, assembleShaders(gl, {
-        vs: readFileSync(join(__dirname, './shader-tests/vs_float_add.glsl')),
-        fs: readFileSync(join(__dirname, './shader-tests/fs.glsl')),
+        vs: readFileSync(join(__dirname, './shader-tests/vs_float_add.glsl'), 'utf8'),
+        fs: readFileSync(join(__dirname, './shader-tests/fs.glsl'), 'utf8'),
         fp64: true,
         project64: true
       }));
@@ -284,11 +284,11 @@ function test_float_sub(gl, testName) {
   const float_ref_vec2 = fp64ify(float_ref);
 
   const program = new Program(gl, assembleShaders(gl, {
-        vs: readFileSync(join(__dirname, './shader-tests/vs_float_sub.glsl')),
-        fs: readFileSync(join(__dirname, './shader-tests/fs.glsl')),
-        fp64: true,
-        project64: true
-      }));
+    vs: readFileSync(join(__dirname, './shader-tests/vs_float_sub.glsl'), 'utf8'),
+    fs: readFileSync(join(__dirname, './shader-tests/fs.glsl'), 'utf8'),
+    fp64: true,
+    project64: true
+  }));
 
   program.use();
   program.setBuffers({
@@ -323,8 +323,8 @@ function test_float_mul(gl, testName) {
   const float_ref_vec2 = fp64ify(float_ref);
 
   const program = new Program(gl, assembleShaders(gl, {
-        vs: readFileSync(join(__dirname, './shader-tests/vs_float_mul.glsl')),
-        fs: readFileSync(join(__dirname, './shader-tests/fs.glsl')),
+        vs: readFileSync(join(__dirname, './shader-tests/vs_float_mul.glsl'), 'utf8'),
+        fs: readFileSync(join(__dirname, './shader-tests/fs.glsl'), 'utf8'),
         fp64: true,
         project64: true
       }));
@@ -361,11 +361,11 @@ function test_float_div(gl, testName) {
   const float_ref_vec2 = fp64ify(float_ref);
 
   const program = new Program(gl, assembleShaders(gl, {
-        vs: readFileSync(join(__dirname, './shader-tests/vs_float_div.glsl')),
-        fs: readFileSync(join(__dirname, './shader-tests/fs.glsl')),
-        fp64: true,
-        project64: true
-      }))
+    vs: readFileSync(join(__dirname, './shader-tests/vs_float_div.glsl'), 'utf8'),
+    fs: readFileSync(join(__dirname, './shader-tests/fs.glsl'), 'utf8'),
+    fp64: true,
+    project64: true
+  }));
 
   program.use();
   program.setBuffers({
@@ -397,8 +397,8 @@ function test_float_sqrt(gl, testName) {
   const float_ref_vec2 = fp64ify(float_ref);
 
   const program = new Program(gl, assembleShaders(gl, {
-        vs: readFileSync(join(__dirname, './shader-tests/vs_float_sqrt.glsl')),
-        fs: readFileSync(join(__dirname, './shader-tests/fs.glsl')),
+        vs: readFileSync(join(__dirname, './shader-tests/vs_float_sqrt.glsl'), 'utf8'),
+        fs: readFileSync(join(__dirname, './shader-tests/fs.glsl'), 'utf8'),
         fp64: true,
         project64: true
       }));
@@ -432,8 +432,8 @@ function test_float_exp(gl, testName) {
   const float_ref_vec2 = fp64ify(float_ref);
 
   const program = new Program(gl, assembleShaders(gl, {
-        vs: readFileSync(join(__dirname, './shader-tests/vs_float_exp.glsl')),
-        fs: readFileSync(join(__dirname, './shader-tests/fs.glsl')),
+        vs: readFileSync(join(__dirname, './shader-tests/vs_float_exp.glsl'), 'utf8'),
+        fs: readFileSync(join(__dirname, './shader-tests/fs.glsl'), 'utf8'),
         fp64: true,
         project64: true
       }));
@@ -467,8 +467,8 @@ function test_float_log(gl, testName) {
   const float_ref_vec2 = fp64ify(float_ref);
 
   const program = new Program(gl, assembleShaders(gl, {
-        vs: readFileSync(join(__dirname, './shader-tests/vs_float_log.glsl')),
-        fs: readFileSync(join(__dirname, './shader-tests/fs.glsl')),
+        vs: readFileSync(join(__dirname, './shader-tests/vs_float_log.glsl'), 'utf8'),
+        fs: readFileSync(join(__dirname, './shader-tests/fs.glsl'), 'utf8'),
         fp64: true,
         project64: true
       }));
@@ -503,8 +503,8 @@ function test_float_sin(gl, testName) {
   const float_ref_vec2 = fp64ify(float_ref);
 
   const program = new Program(gl, assembleShaders(gl, {
-        vs: readFileSync(join(__dirname, './shader-tests/vs_float_sin.glsl')),
-        fs: readFileSync(join(__dirname, './shader-tests/fs.glsl')),
+        vs: readFileSync(join(__dirname, './shader-tests/vs_float_sin.glsl'), 'utf8'),
+        fs: readFileSync(join(__dirname, './shader-tests/fs.glsl'), 'utf8'),
         fp64: true,
         project64: true
       }));
@@ -538,8 +538,8 @@ function test_float_cos(gl, testName) {
   const float_ref_vec2 = fp64ify(float_ref);
 
   const program = new Program(gl, assembleShaders(gl, {
-        vs: readFileSync(join(__dirname, './shader-tests/vs_float_cos.glsl')),
-        fs: readFileSync(join(__dirname, './shader-tests/fs.glsl')),
+        vs: readFileSync(join(__dirname, './shader-tests/vs_float_cos.glsl'), 'utf8'),
+        fs: readFileSync(join(__dirname, './shader-tests/fs.glsl'), 'utf8'),
         fp64: true,
         project64: true
       }));
@@ -573,8 +573,8 @@ function test_float_tan(gl, testName) {
   const float_ref_vec2 = fp64ify(float_ref);
 
   const program = new Program(gl, assembleShaders(gl, {
-        vs: readFileSync(join(__dirname, './shader-tests/vs_float_tan.glsl')),
-        fs: readFileSync(join(__dirname, './shader-tests/fs.glsl')),
+        vs: readFileSync(join(__dirname, './shader-tests/vs_float_tan.glsl'), 'utf8'),
+        fs: readFileSync(join(__dirname, './shader-tests/fs.glsl'), 'utf8'),
         fp64: true,
         project64: true
       }));

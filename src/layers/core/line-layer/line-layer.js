@@ -85,8 +85,8 @@ export default class LineLayer extends Layer {
 
   getShaders() {
     return {
-      vs: readFileSync(join(__dirname, './line-layer-vertex.glsl')),
-      fs: readFileSync(join(__dirname, './line-layer-fragment.glsl'))
+      vs: readFileSync(join(__dirname, './line-layer-vertex.glsl'), 'utf8'),
+      fs: readFileSync(join(__dirname, './line-layer-fragment.glsl'), 'utf8')
     };
   }
 

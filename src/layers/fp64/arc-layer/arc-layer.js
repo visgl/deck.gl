@@ -101,8 +101,8 @@ export default class ArcLayer64 extends Layer {
 
   getShaders() {
     return {
-      vs: readFileSync(join(__dirname, './arc-layer-vertex.glsl')),
-      fs: readFileSync(join(__dirname, './arc-layer-fragment.glsl')),
+      vs: readFileSync(join(__dirname, './arc-layer-vertex.glsl'), 'utf8'),
+      fs: readFileSync(join(__dirname, './arc-layer-fragment.glsl'), 'utf8'),
       fp64: true,
       project64: true
     };

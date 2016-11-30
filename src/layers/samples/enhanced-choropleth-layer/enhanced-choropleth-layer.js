@@ -107,8 +107,8 @@ export default class EnhancedChoroplethLayer extends Layer {
 
   getShaders() {
     return {
-      vs: readFileSync(join(__dirname, './enhanced-choropleth-layer-vertex.glsl')),
-      fs: readFileSync(join(__dirname, './enhanced-choropleth-layer-fragment.glsl'))
+      vs: readFileSync(join(__dirname, './enhanced-choropleth-layer-vertex.glsl'), 'utf8'),
+      fs: readFileSync(join(__dirname, './enhanced-choropleth-layer-fragment.glsl'), 'utf8')
     };
   }
 

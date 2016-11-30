@@ -68,6 +68,7 @@ export default class ScatterplotLayer extends Layer {
   }
 
   initializeState() {
+    /* eslint-disable */
     const {gl} = this.context;
     const model = this._getModel(gl);
     this.setState({model});
@@ -112,8 +113,8 @@ export default class ScatterplotLayer extends Layer {
 
   getShaders(id) {
     return {
-      vs: readFileSync(join(__dirname, './scatterplot-layer-vertex.glsl')),
-      fs: readFileSync(join(__dirname, './scatterplot-layer-fragment.glsl'))
+      vs: readFileSync(join(__dirname, './scatterplot-layer-vertex.glsl'), 'utf8'),
+      fs: readFileSync(join(__dirname, './scatterplot-layer-fragment.glsl'), 'utf8')
     };
   }
 
@@ -127,17 +128,21 @@ export default class ScatterplotLayer extends Layer {
         0
       );
     }
+    /* eslint-disable */
 
-    return new Model({
+
+    const shaders = assembleShaders(gl, this.getShaders())
+    const model = new Model({
       gl,
       id: 'scatterplot',
-      ...assembleShaders(gl, this.getShaders()),
+      ...shaders,
       geometry: new Geometry({
         drawMode: GL.TRIANGLE_FAN,
         positions: new Float32Array(positions)
       }),
       isInstanced: true
     });
+    return model;
   }
 
   calculateInstancePositions(attribute) {

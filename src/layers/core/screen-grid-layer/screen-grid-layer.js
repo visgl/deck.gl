@@ -79,8 +79,8 @@ export default class ScreenGridLayer extends Layer {
 
   getShaders() {
     return {
-      vs: readFileSync(join(__dirname, './screen-grid-layer-vertex.glsl')),
-      fs: readFileSync(join(__dirname, './screen-grid-layer-fragment.glsl'))
+      vs: readFileSync(join(__dirname, './screen-grid-layer-vertex.glsl'), 'utf8'),
+      fs: readFileSync(join(__dirname, './screen-grid-layer-fragment.glsl'), 'utf8')
     };
   }
 
