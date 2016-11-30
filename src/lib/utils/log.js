@@ -3,7 +3,7 @@
 import assert from 'assert';
 
 export default function log(priority, ...args) {
-  assert(typeof priority === 'number');
+  assert(Number.isFinite(priority), 'log priority must be a number');
   if (priority <= log.priority) {
     console.debug(...args);
   }

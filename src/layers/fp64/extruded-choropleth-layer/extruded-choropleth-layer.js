@@ -22,10 +22,10 @@ import {Layer, assembleShaders} from '../../..';
 import {fp64ify} from '../../../lib/utils/fp64';
 import {GL, Model, Geometry} from 'luma.gl';
 import flattenDeep from 'lodash.flattendeep';
+import earcut from 'earcut';
+import {vec3} from 'gl-matrix';
 import {readFileSync} from 'fs';
 import {join} from 'path';
-import {vec3} from 'gl-matrix';
-import earcut from 'earcut';
 
 export default class ExtrudedChoroplethLayer64 extends Layer {
 
@@ -121,6 +121,15 @@ export default class ExtrudedChoroplethLayer64 extends Layer {
     info.object = feature;
   }
 
+  getShaders() {
+    return {
+      vs: readFileSync(join(__dirname, './extruded-choropleth-layer-vertex.glsl')),
+      fs: readFileSync(join(__dirname, './extruded-choropleth-layer-fragment.glsl')),
+      fp64: true,
+      project64: true
+    };
+  }
+
   getModel(gl) {
     // Make sure we have 32 bit support
     // TODO - this could be done automatically by luma in "draw"
@@ -128,6 +137,7 @@ export default class ExtrudedChoroplethLayer64 extends Layer {
     if (!gl.getExtension('OES_element_index_uint')) {
       throw new Error('Extruded choropleth layer needs 32 bit indices');
     }
+
     // Buildings are 3d so depth test should be enabled
     // TODO - it is a little heavy handed to have a layer set this
     // Alternatively, check depth test and warn if not set, or add a prop
@@ -138,12 +148,7 @@ export default class ExtrudedChoroplethLayer64 extends Layer {
     return new Model({
       gl,
       id: this.props.id,
-      ...assembleShaders(gl, {
-        vs: readFileSync(join(__dirname, './extruded-choropleth-layer-vertex.glsl')),
-        fs: readFileSync(join(__dirname, './extruded-choropleth-layer-fragment.glsl')),
-        fp64: true,
-        project64: true
-      }),
+      ...assembleShaders(gl, this.getShaders()),
       geometry: new Geometry({
         drawMode: this.props.drawWireframe ? GL.LINES : GL.TRIANGLES
       }),

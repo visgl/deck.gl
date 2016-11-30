@@ -82,18 +82,21 @@ export default class LineLayer64 extends Layer {
     gl.lineWidth(1.0);
   }
 
+  getShaders() {
+    return {
+      vs: readFileSync(join(__dirname, './line-layer-vertex.glsl')),
+      fs: readFileSync(join(__dirname, './line-layer-fragment.glsl')),
+      fp64: true,
+      project64: true
+    };
+  }
+
   createModel(gl) {
     const positions = [0, 0, 0, 1, 1, 1];
-
     return new Model({
       gl,
       id: this.props.id,
-      ...assembleShaders(gl, {
-        vs: readFileSync(join(__dirname, './line-layer-vertex.glsl')),
-        fs: readFileSync(join(__dirname, './line-layer-fragment.glsl')),
-        fp64: true,
-        project64: true
-      }),
+      ...assembleShaders(gl, this.getShaders()),
       geometry: new Geometry({
         drawMode: GL.LINE_STRIP,
         positions: new Float32Array(positions)

@@ -74,7 +74,8 @@ export default class ScatterplotLayer extends Layer {
 
     const {attributeManager} = this.state;
     attributeManager.addInstanced({
-      instancePositions: {size: 4, update: this.calculateInstancePositions},
+      calculateInstancePositions: {size: 3, update: this.calculateInstancePositions},
+      instanceRadius: {size: 1, update: this.calculateInstanceRadius},
       instanceColors: {
         type: GL.UNSIGNED_BYTE,
         size: 4,
@@ -109,27 +110,28 @@ export default class ScatterplotLayer extends Layer {
     gl.lineWidth(1.0);
   }
 
+  getShaders(id) {
+    return {
+      vs: readFileSync(join(__dirname, './scatterplot-layer-vertex.glsl')),
+      fs: readFileSync(join(__dirname, './scatterplot-layer-fragment.glsl'))
+    };
+  }
+
   _getModel(gl) {
     const NUM_SEGMENTS = 16;
-    const PI2 = Math.PI * 2;
-
-    let positions = [];
+    const positions = [];
     for (let i = 0; i < NUM_SEGMENTS; i++) {
-      positions = [
-        ...positions,
-        Math.cos(PI2 * i / NUM_SEGMENTS),
-        Math.sin(PI2 * i / NUM_SEGMENTS),
+      positions.push(
+        Math.cos(Math.PI * 2 * i / NUM_SEGMENTS),
+        Math.sin(Math.PI * 2 * i / NUM_SEGMENTS),
         0
-      ];
+      );
     }
 
     return new Model({
       gl,
       id: 'scatterplot',
-      ...assembleShaders(gl, {
-        vs: readFileSync(join(__dirname, './scatterplot-layer-vertex.glsl')),
-        fs: readFileSync(join(__dirname, './scatterplot-layer-fragment.glsl'))
-      }),
+      ...assembleShaders(gl, this.getShaders()),
       geometry: new Geometry({
         drawMode: GL.TRIANGLE_FAN,
         positions: new Float32Array(positions)
@@ -139,16 +141,25 @@ export default class ScatterplotLayer extends Layer {
   }
 
   calculateInstancePositions(attribute) {
-    const {data, getPosition, getRadius} = this.props;
+    const {data, getPosition} = this.props;
     const {value, size} = attribute;
     let i = 0;
     for (const point of data) {
       const position = getPosition(point);
-      const radius = getRadius(point) || 1;
       value[i + 0] = position[0] || 0;
       value[i + 1] = position[1] || 0;
       value[i + 2] = position[2] || 0;
-      value[i + 3] = radius || 1;
+      i += size;
+    }
+  }
+
+  calculateInstanceRadius(attribute) {
+    const {data, getRadius} = this.props;
+    const {value, size} = attribute;
+    let i = 0;
+    for (const point of data) {
+      const radius = getRadius(point) || 1;
+      value[i + 0] = radius || 1;
       i += size;
     }
   }
