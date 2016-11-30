@@ -20,44 +20,36 @@
 import React, {PropTypes} from 'react';
 import autobind from 'autobind-decorator';
 import WebGLRenderer from './webgl-renderer';
-import {LayerManager} from '../lib';
-import {EffectManager} from '../experimental/lib';
+import {LayerManager, Layer} from '../lib';
+import {EffectManager, Effect} from '../experimental';
 import {GL, addEvents} from 'luma.gl';
 
 function noop() {}
 
-const PROP_TYPES = {
-  id: PropTypes.string,
-  width: PropTypes.number.isRequired,
-  height: PropTypes.number.isRequired,
-  layers: PropTypes.array.isRequired,
-  effects: PropTypes.array,
-  gl: PropTypes.object,
-  debug: PropTypes.bool,
-  onWebGLInitialized: noop,
-  onLayerClick: noop,
-  onLayerHover: noop
-};
-
-const DEFAULT_PROPS = {
-  id: 'deckgl-overlay',
-  debug: false,
-  gl: null,
-  effects: [],
-  onWebGLInitialized: noop,
-  onLayerClick: noop,
-  onLayerHover: noop
-};
-
 export default class DeckGL extends React.Component {
 
-  static get propTypes() {
-    return PROP_TYPES;
-  }
+  static propTypes = {
+    id: PropTypes.string,
+    width: PropTypes.number.isRequired,
+    height: PropTypes.number.isRequired,
+    layers: PropTypes.arrayOf(Layer).isRequired,
+    effects: PropTypes.arrayOf(Effect),
+    gl: PropTypes.object,
+    debug: PropTypes.bool,
+    onWebGLInitialized: noop,
+    onLayerClick: noop,
+    onLayerHover: noop
+  };
 
-  static get defaultProps() {
-    return DEFAULT_PROPS;
-  }
+  static defaultProps = {
+    id: 'deckgl-overlay',
+    debug: false,
+    gl: null,
+    effects: [],
+    onWebGLInitialized: noop,
+    onLayerClick: noop,
+    onLayerHover: noop
+  };
 
   constructor(props) {
     super(props);
