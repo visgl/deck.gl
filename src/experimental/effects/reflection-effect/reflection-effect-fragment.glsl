@@ -18,14 +18,18 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-export * from './lib';
-export * from './experimental/lib';
-export * from './viewport';
-export * from './shader-utils';
+#define SHADER_NAME reflection-effect-fs
 
-// Default layers
-export * from './layers/core';
-export * from './layers/fp64';
+#ifdef GL_ES
+precision highp float;
+#endif
 
-// Effects
-export * from './experimental/effects';
+uniform sampler2D reflectionTexture;
+uniform float reflectivity;
+
+varying vec2 uv;
+
+void main(void) {
+  gl_FragColor = texture2D(reflectionTexture, vec2(uv.x, 1. - uv.y));
+  gl_FragColor.a *= reflectivity;
+}

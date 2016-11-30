@@ -18,14 +18,13 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-export * from './lib';
-export * from './experimental/lib';
-export * from './viewport';
-export * from './shader-utils';
+#define SHADER_NAME reflection-effect-vs
 
-// Default layers
-export * from './layers/core';
-export * from './layers/fp64';
+attribute vec3 vertices;
 
-// Effects
-export * from './experimental/effects';
+varying vec2 uv;
+
+void main(void) {
+  uv = vertices.xy;
+  gl_Position = vec4(2. * vertices.xy - vec2(1., 1.), 1., 1.);
+}
