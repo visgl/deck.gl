@@ -21,7 +21,8 @@
     "index.js",
     "react.js",
     "viewport.js",
-    "samples.js"
+    "samples.js",
+    "experimental.js"
   ],
   "dependencies": {
     "autobind-decorator": "^1.3.3",

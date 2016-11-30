@@ -2,8 +2,8 @@
 import {GL, Framebuffer, Model, Geometry} from 'luma.gl';
 import {assembleShaders} from '../../../shader-utils';
 import {Effect} from '../../lib';
-
-const glslify = require('glslify');
+import {readFileSync} from 'fs';
+import {join} from 'path';
 
 /*
  * This should be made a subclass of a more general effect class once other
@@ -18,13 +18,17 @@ export default class ReflectionEffect extends Effect {
     this.setNeedsRedraw();
   }
 
+  getShaders() {
+    return {
+      vs: readFileSync(join(__dirname, './reflection-effect-vertex.glsl'), 'utf8'),
+      fs: readFileSync(join(__dirname, './reflection-effect-fragment.glsl'), 'utf8')
+    };
+  }
+
   initialize({gl, layerManager}) {
     this.model = new Model({
       gl,
-      ...assembleShaders(gl, {
-        vs: glslify('./reflection-effect-vertex.glsl'),
-        fs: glslify('./reflection-effect-fragment.glsl')
-      }),
+      ...assembleShaders(gl, this.getShaders()),
       geometry: new Geometry({
         drawMode: GL.TRIANGLE_FAN,
         vertices: new Float32Array([0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0])

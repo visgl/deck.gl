@@ -36,7 +36,9 @@ import LayerInfo from './layer-info';
 
 import * as request from 'd3-request';
 import LAYER_CATEGORIES, {DEFAULT_ACTIVE_LAYERS} from './layer-examples';
+
 import DeckGL from '../src/react/deckgl';
+import {ReflectionEffect} from '../src/experimental';
 
 // ---- Default Settings ---- //
 /* eslint-disable no-process-env */
@@ -253,6 +255,8 @@ class ExampleApp extends React.Component {
       hoverChoropleth: null,
       clickItem: null
     };
+
+    this._effects = [new ReflectionEffect()];
   }
 
   componentWillMount() {
@@ -452,6 +456,7 @@ class ExampleApp extends React.Component {
         {...mapViewState}
         onWebGLInitialized={ this._onWebGLInitialized }
         layers={this._renderExamples()}
+        effects={this._effects}
       />
     );
   }
