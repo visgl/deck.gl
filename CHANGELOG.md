@@ -22,6 +22,14 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ### deck.gl v3
 
+#### [3.1.0] - 2016-11-30
+
+- LineLayer: Support elevations (z coords on positions)
+- LineLayer64: Support elevations (z coords on positions)
+- Scatterplot: Enable updateTriggers on instanceRadius, separate from positions.
+- EXPERIMENTAL FEATURE: ReflectionEffect
+- INTERNAL: Target build env moved to Node 6. Travis tests now run on 6 & 7.
+
 #### [3.0.9, 3.0.10] - 2016-11-18
 
 - Bumped viewport-mercator-project version for the unproject fix.
