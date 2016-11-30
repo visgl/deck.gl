@@ -1,1 +1,1 @@
-export {default as default} from './arc-layer';
+export {default as default} from './arc-layer-64';

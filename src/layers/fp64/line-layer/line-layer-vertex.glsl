@@ -53,7 +53,7 @@ void main(void) {
 
   vertex_pos_modelspace[0] = mixed_temp[0];
   vertex_pos_modelspace[1] = mixed_temp[1];
-  vertex_pos_modelspace[2] = vec2(mixedElevation, 0.0);
+  vertex_pos_modelspace[2] = vec2(project_scale(mixedElevation), 0.0);
   vertex_pos_modelspace[3] = vec2(1.0, 0.0);
 
   gl_Position = project_to_clipspace_fp64(vertex_pos_modelspace);

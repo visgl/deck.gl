@@ -30,6 +30,7 @@ import {Provider, connect} from 'react-redux';
 import autobind from 'autobind-decorator';
 
 import MapboxGLMap from 'react-map-gl';
+import {FPSStats} from 'react-stats';
 import LayerSelector from './layer-selector';
 import LayerInfo from './layer-info';
 
@@ -214,8 +215,8 @@ function pointsToLines(points) {
   return points.map((point, i) => {
     if (i === points.length - 1) {
       return {
-        sourcePosition: [0, 0],
-        targetPosition: [0, 0],
+        sourcePosition: [0, 0, 0],
+        targetPosition: [0, 0, 0],
         color: [35, 81, 128]
       };
     }
@@ -224,8 +225,16 @@ function pointsToLines(points) {
     const target = points[i + 1];
 
     return {
-      sourcePosition: source.position,
-      targetPosition: target.position,
+      sourcePosition: [
+        source.position[0],
+        source.position[1],
+        Math.random() * 1000
+      ],
+      targetPosition: [
+        target.position[0],
+        target.position[1],
+        Math.random() * 1000
+      ],
       color: [0, 0, 255]
     };
   });
@@ -460,6 +469,7 @@ class ExampleApp extends React.Component {
         { ...mapViewState }
         onChangeViewport={this._handleViewportChanged}>
         { this._renderOverlay() }
+        <FPSStats isActive/>
       </MapboxGLMap>
     );
   }

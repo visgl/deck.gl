@@ -1,1 +1,1 @@
-export {default as default} from './scatterplot-layer';
+export {default as default} from './scatterplot-layer-64';
