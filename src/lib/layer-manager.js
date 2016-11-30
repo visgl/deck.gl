@@ -202,7 +202,7 @@ export default class LayerManager {
     return {error: firstError, generatedLayers};
   }
 
-  /* eslint-disable max-statements */
+  /* eslint-disable */
   _matchSublayers({newLayers, oldLayerMap, generatedLayers}) {
     console.error('_matchSublayers');
     // Filter out any null layers
