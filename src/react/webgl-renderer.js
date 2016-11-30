@@ -27,56 +27,48 @@ import {createGLContext} from 'luma.gl';
 const DEFAULT_PIXEL_RATIO =
   (typeof window !== 'undefined' && window.devicePixelRatio) || 1;
 
-const PROP_TYPES = {
-  id: PropTypes.string.isRequired,
-
-  width: PropTypes.number.isRequired,
-  height: PropTypes.number.isRequired,
-  style: PropTypes.object,
-
-  pixelRatio: PropTypes.number,
-  viewport: PropTypes.object.isRequired,
-  blending: PropTypes.object,
-  events: PropTypes.object,
-  gl: PropTypes.object,
-  glOptions: PropTypes.object,
-  debug: PropTypes.bool,
-
-  onRendererInitialized: PropTypes.func.isRequired,
-  onInitializationFailed: PropTypes.func,
-  onError: PropTypes.func,
-
-  onRenderFrame: PropTypes.func,
-  onMouseMove: PropTypes.func,
-  onClick: PropTypes.func
-};
-
-const DEFAULT_PROPS = {
-  style: {},
-  gl: null,
-  glOptions: {preserveDrawingBuffer: true},
-  debug: false,
-  pixelRatio: DEFAULT_PIXEL_RATIO,
-
-  onRendererInitialized: () => {},
-  onInitializationFailed: error => {
-    throw error;
-  },
-  onError: error => {
-    throw error;
-  },
-  onRenderFrame: () => {}
-};
-
 export default class WebGLRenderer extends React.Component {
 
-  static get propTypes() {
-    return PROP_TYPES;
-  }
+  static propTypes = {
+    id: PropTypes.string.isRequired,
 
-  static get defaultProps() {
-    return DEFAULT_PROPS;
-  }
+    width: PropTypes.number.isRequired,
+    height: PropTypes.number.isRequired,
+    style: PropTypes.object,
+
+    pixelRatio: PropTypes.number,
+    viewport: PropTypes.object.isRequired,
+    blending: PropTypes.object,
+    events: PropTypes.object,
+    gl: PropTypes.object,
+    glOptions: PropTypes.object,
+    debug: PropTypes.bool,
+
+    onRendererInitialized: PropTypes.func.isRequired,
+    onInitializationFailed: PropTypes.func,
+    onError: PropTypes.func,
+
+    onRenderFrame: PropTypes.func,
+    onMouseMove: PropTypes.func,
+    onClick: PropTypes.func
+  };
+
+  static defaultProps = {
+    style: {},
+    gl: null,
+    glOptions: {preserveDrawingBuffer: true},
+    debug: false,
+    pixelRatio: DEFAULT_PIXEL_RATIO,
+
+    onRendererInitialized: () => {},
+    onInitializationFailed: error => {
+      throw error;
+    },
+    onError: error => {
+      throw error;
+    },
+    onRenderFrame: () => {}
+  };
 
   /**
    * @classdesc
