@@ -75,7 +75,7 @@ export default class ScatterplotLayer extends Layer {
 
     const {attributeManager} = this.state;
     attributeManager.addInstanced({
-      calculateInstancePositions: {size: 3, update: this.calculateInstancePositions},
+      instancePositions: {size: 3, update: this.calculateInstancePositions},
       instanceRadius: {size: 1, update: this.calculateInstanceRadius},
       instanceColors: {
         type: GL.UNSIGNED_BYTE,
@@ -163,8 +163,8 @@ export default class ScatterplotLayer extends Layer {
     const {value, size} = attribute;
     let i = 0;
     for (const point of data) {
-      const radius = getRadius(point) || 1;
-      value[i + 0] = radius || 1;
+      const radius = getRadius(point);
+      value[i + 0] = isNaN(radius) ? 0 : radius;
       i += size;
     }
   }
