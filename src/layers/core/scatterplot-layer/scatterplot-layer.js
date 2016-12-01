@@ -164,7 +164,7 @@ export default class ScatterplotLayer extends Layer {
     let i = 0;
     for (const point of data) {
       const radius = getRadius(point);
-      value[i + 0] = isNaN(radius) ? 0 : radius;
+      value[i + 0] = isNaN(radius) ? 1 : radius;
       i += size;
     }
   }
