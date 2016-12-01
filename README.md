@@ -61,5 +61,7 @@ by filling in a short form.
 ## Data sources
 
 [SF OpenData](https://data.sfgov.org)
+
 [TLC Trip Record Data](http://www.nyc.gov/html/tlc/html/about/trip_record_data.shtml)
+
 [Mapzen](https://mapzen.com/)
