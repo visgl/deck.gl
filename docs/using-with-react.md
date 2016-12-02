@@ -110,8 +110,8 @@ Callback - called when the mouse moves over the layers.
 Arguments:
 - `info` - the [info](#remarks) object for the topmost matched layer
 at the coordinate
-- `pickedInfos` - an array of info objects for all visible and pickable 
-layers, in top to bottom order.
+- `pickedInfos` - an array of info objects for all pickable layers that
+are visible, in top to bottom order.
 - `event` - the original MouseEvent object
 
 ##### `onLayerClick` (Function, optional)
@@ -121,8 +121,8 @@ Callback - called when clicking on the layer.
 Arguments:
 - `info` - the [info](#remarks) object for the topmost matched layer
 at the coordinate
-- `pickedInfos` - an array of info objects for all visible and pickable 
-layers, in top to bottom order.
+- `pickedInfos` - an array of info objects for all pickable layers that
+are visible, in top to bottom order.
 - `event` - the original MouseEvent object
 
 ## Remarks
