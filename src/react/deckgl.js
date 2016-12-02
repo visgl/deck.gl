@@ -23,6 +23,7 @@ import WebGLRenderer from './webgl-renderer';
 import {LayerManager, Layer} from '../lib';
 import {EffectManager, Effect} from '../experimental';
 import {GL, addEvents} from 'luma.gl';
+import {log} from '../lib/utils';
 
 function noop() {}
 
@@ -90,6 +91,16 @@ export default class DeckGL extends React.Component {
       this.effectManager.addEffect(effect);
     }
     this._updateLayers(this.props);
+
+    // Check if a mouse event has been specified and that at least one of the layers is pickable
+    const hasEvent = this.props.onLayerClick !== noop || this.props.onLayerHover !== noop;
+    const hasPickableLayer = this.layerManager.layers.map(l => l.props.pickable).includes(true);
+    if (hasEvent && !hasPickableLayer) {
+      log.once(
+        0,
+        'You have supplied a mouse event handler but none of your layers got the `pickable` flag.'
+      );
+    }
 
     this.events = addEvents(canvas, {
       cacheSize: false,
