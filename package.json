@@ -108,7 +108,7 @@
     "demo-gh-pages-force": "git push origin `git subtree split --prefix dist-demo master`:gh-pages --force",
     "demo-publish": "npm run build && npm run demo-build && git add dist-demo -f && git commit -m 'UPDATE DOCS' --no-verify && npm run demo-gh-pages",
     "demo-publish-force": "npm run build && npm run demo-build && git add dist-demo -f && git commit -m 'UPDATE DOCS' --no-verify && npm run demo-gh-pages-force",
-    "lint": "eslint src",
+    "lint": "eslint src exhibits/app.js",
     "precommit": "npm test",
     "mypublish": "npm run build && npm run test-fast && npm publish",
     "test": "npm run lint && npm run build-dist && npm run test-headless",

@@ -1,0 +1,24 @@
+{
+  "name": "browserify-exhibit",
+  "version": "0.0.0",
+  "description": "A browserify/deck.gl exhibit",
+  "scripts": {
+    "link": "(cd .. && rm -f node_modules && ln -s browserify/node_modules)",
+    "serve": "budo ../app.js --open -- -t babelify",
+    "start": "npm run link && npm run serve"
+  },
+  "author": "Balthazar Gronon <bgronon@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "babel-polyfill": "^6.16.0",
+    "deck.gl": "^3.1.1",
+    "luma.gl": "^2.10.3",
+    "react": "^15.4.1",
+    "react-dom": "^15.4.1",
+    "react-map-gl": "^1.7.2"
+  },
+  "devDependencies": {
+    "babelify": "^7.3.0",
+    "budo": "^9.2.2"
+  }
+}
