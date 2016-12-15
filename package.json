@@ -34,7 +34,7 @@
     "gl-matrix": "^2.3.2",
     "lodash.flattendeep": "^4.4.0",
     "save-pixels": "^2.3.0",
-    "viewport-mercator-project": "git://github.com/user/project.git#viewport-separation"
+    "viewport-mercator-project": "git://github.com/uber-common/viewport-mercator-project.git#viewport-separation"
   },
   "devDependencies": {
     "babel-cli": "^6.3.15",
