@@ -34,7 +34,7 @@
     "gl-matrix": "^2.3.2",
     "lodash.flattendeep": "^4.4.0",
     "save-pixels": "^2.3.0",
-    "viewport-mercator-project": "3.0.0-beta3"
+    "viewport-mercator-project": "git://github.com/user/project.git#viewport-separation"
   },
   "devDependencies": {
     "babel-cli": "^6.3.15",
@@ -56,9 +56,9 @@
     "discify": "^1.2.0",
     "electron": "^1.4.7",
     "envify": "^3.4.0",
-    "eslint": "^2.0.0",
-    "eslint-config-uber-es2015": "^2.0.0",
-    "eslint-config-uber-jsx": "^2.0.0",
+    "eslint": "^3.0.0",
+    "eslint-config-uber-es2015": "^3.0.0",
+    "eslint-config-uber-jsx": "^3.0.0",
     "eslint-plugin-react": "^6.0.0",
     "faucet": "0.0.1",
     "gl": "^4.0.1",
@@ -115,7 +115,7 @@
     "test-fast": "npm run lint && npm run test-headless",
     "test-headless": "node dist/test/headless.js",
     "test-headless-src": "babel-node --only=deck.gl/test,deck.gl/src,deck.gl/shaderlib src/test/headless.js",
-    "test-browser": "budo src/test/browser.js:build/test-bundle.js --dir test --live --open --port 3001 --watch-glob '**/*.{html,css,scss,js,glsl}' -- -t babelify -t brfs-babel",
+    "test-browser": "mkdir -p build && budo src/test/browser.js:build/test-bundle.js --dir test --live --open --port 3001 --watch-glob '**/*.{html,css,scss,js,glsl}' -- -t babelify -t brfs-babel",
     "test-electron": "browserify dist/test/electron.js | testron | faucet",
     "test-shader": "npm run build-dist && budo src/test/shader.js:build/test-bundle.js --dir test --live --open --port 3001 --watch-glob '**/*.{html,css,scss,js,glsl}' -- -t babelify -t brfs-babel",
     "profile-disc": "browserify src/bundle.js --full-paths -t babelify -t brfs-babel | uglifyjs | discify --open",

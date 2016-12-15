@@ -28,10 +28,11 @@
 //
 /* eslint-disable no-try-catch */
 import Layer from './layer';
-import {Viewport} from '../viewport';
 import {log} from './utils';
 import assert from 'assert';
 import {pickLayers} from './pick-layers';
+import {WebGLViewport} from '../viewport';
+import {Viewport} from 'viewport-mercator-project';
 import {FramebufferObject} from 'luma.gl';
 
 export default class LayerManager {
@@ -53,6 +54,23 @@ export default class LayerManager {
     Object.seal(this.context);
   }
 
+  setViewport({viewport}) {
+    assert(viewport instanceof Viewport, 'Invalid viewport');
+    const oldViewport = this.context.viewport;
+    const viewportChanged = !oldViewport || !viewport.equal(oldViewport);
+
+    if (viewportChanged) {
+      Object.assign(this.oldContext, this.context);
+      this.context.viewport = new WebGLViewport({viewport});
+      this.context.viewportChanged = true;
+      this.context.uniforms = {};
+      log(4, viewport);
+    }
+
+    return this;
+  }
+
+  // TODO - deprecated in favor of setViewport - remove
   setContext({
     width, height, latitude, longitude, zoom, pitch, bearing, altitude
   }) {
@@ -76,7 +94,7 @@ export default class LayerManager {
         tileSize: 512
       });
 
-      this.context.viewport = viewport;
+      this.context.viewport = new WebGLViewport({viewport});
       this.context.viewportChanged = viewportChanged;
       this.context.uniforms = {};
 
