@@ -26,8 +26,7 @@ The `DeckGL` React component now takes a generic `Viewport` prop that can be
 created with arbitrary `view` and `projection` matrices.
 If not supplied, it attempts to create a viewport from supplied mercator
 parameters, which corresponds to behavior before the change.
-- ADD: `LayerManager.setViewport` added
-- CHANGE: `LayerManager.setContext` deprecated
+- NEW: `LayerManager.setViewport` added, `LayerManager.setContext` removed
 Internal changes:
 - `WebGLViewport` now a wrapper around a supplied `Viewport` rather than a subclass.
 

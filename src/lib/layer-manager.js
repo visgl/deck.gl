@@ -31,7 +31,7 @@ import Layer from './layer';
 import {log} from './utils';
 import assert from 'assert';
 import {pickLayers} from './pick-layers';
-import {WebGLViewport} from '../viewport';
+import WebGLViewport from './webgl-viewport';
 import {Viewport} from 'viewport-mercator-project';
 import {FramebufferObject} from 'luma.gl';
 
@@ -54,10 +54,10 @@ export default class LayerManager {
     Object.seal(this.context);
   }
 
-  setViewport({viewport}) {
+  setViewport(viewport) {
     assert(viewport instanceof Viewport, 'Invalid viewport');
     const oldViewport = this.context.viewport;
-    const viewportChanged = !oldViewport || !viewport.equal(oldViewport);
+    const viewportChanged = !oldViewport || !viewport.equals(oldViewport);
 
     if (viewportChanged) {
       Object.assign(this.oldContext, this.context);
@@ -65,40 +65,6 @@ export default class LayerManager {
       this.context.viewportChanged = true;
       this.context.uniforms = {};
       log(4, viewport);
-    }
-
-    return this;
-  }
-
-  // TODO - deprecated in favor of setViewport - remove
-  setContext({
-    width, height, latitude, longitude, zoom, pitch, bearing, altitude
-  }) {
-    /* eslint-disable */
-    const oldViewport = this.context.viewport;
-    const viewportChanged = !oldViewport ||
-      width !== oldViewport.width ||
-      height !== oldViewport.height ||
-      latitude !== oldViewport.latitude ||
-      longitude !== oldViewport.longitude ||
-      zoom !== oldViewport.zoom ||
-      bearing !== oldViewport.bearing ||
-      pitch !== oldViewport.pitch ||
-      altitude !== oldViewport.altitude;
-
-    if (viewportChanged || !this.context.viewport) {
-      Object.assign(this.oldContext, this.context);
-
-      const viewport = new Viewport({
-        width, height, latitude, longitude, zoom, pitch, bearing, altitude,
-        tileSize: 512
-      });
-
-      this.context.viewport = new WebGLViewport({viewport});
-      this.context.viewportChanged = viewportChanged;
-      this.context.uniforms = {};
-
-      log(4, viewport, latitude, longitude, zoom);
     }
 
     return this;

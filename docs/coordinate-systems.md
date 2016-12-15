@@ -1,6 +1,6 @@
 # Coordinate Systems
 
-By default deck.gl's interprets positions in the Web Mercator
+By default deck.gl layers interprets positions in the Web Mercator
 coordinate system, however deck.gl also support positions
 specified in several other coordinate systems.
 
@@ -27,20 +27,46 @@ Remarks:
   and shared by all layers, so they will always pan zoom and tilt
   together, regardless of what coordinate system their positions
   are specified in.
-* Most of deck.gl's coordinate system handling has been broken out
-  into the [viewport-mercator-project](https://github.com/uber-common/viewport-mercator-project) module. See the README file there for more
-  information and documentation of the `Viewport` class.
+* Most of deck.gl's coordinate system handling has been broken out into the
+  [viewport-mercator-project](https://github.com/uber-common/viewport-mercator-project)
+  module. See the README file there for more information and documentation
+  of the `Viewport` class.
 
 
-## Supported Coordinate Systems
+### Non-cartographic Projection Mode
 
-- **longitude/latitude/altitude** (`LNGLAT`) -
-  positions are interpreted as Web Mercator coordinates.
-- **meter offsets** (`METERS`) -
-  positions are given in meter offsets from a lng/lat reference point.
-- **unprojected** (`MATHEMATICAL`) -
-  positions are given in linear coordinates from a numeric
-  reference point, with a range indicating zoom level 0 extents.
+In its simplest mode, deck.gl supports working in standard linear
+(i.e. cartographically unprojected) coordinate system
+(suitable when using deck.gl layers without underlying maps)
+
+In this mode, which does not offer any synchronization with maps, the
+application simply specifies its view and projection matrices like in
+any 3D library.
+
+The application needs to manage the extents of positions in its data,
+and adjust view matrices accordingly.
+
+To use this mode.
+
+
+## Support for the Web Mercator Projection and Cartographic Coordinate Systems
+
+A deck.gl layer can be configured to work with positions specified
+in different units.
+
+- **longitude/latitude/altitude** (`COORDINATE_SYSTEM.LNGLAT`) -
+  positions are interpreted as Web Mercator coordinates:
+  [longitude, latitude, altitude]. This is the default.
+- **meter offsets** (`COORDINATE_SYSTEM.METERS`) -
+  positions are given in meter offsets [deltaX, deltaY, deltaZ]
+  from a reference point that is specified separately.
+
+* It is possible to query the WebMercatorViewport for a meters per pixel scale.
+  Note that that distance scales are latitude dependent under
+  web mercator projection [see](http://wiki.openstreetmap.org/wiki/Zoom_levels),
+  so scaling will depend on the viewport center and any linear scale factor
+  should only be expected to be locally correct.
+
 
 ### Web Mercator Projection Mode
 
@@ -84,26 +110,6 @@ Remarks:
   deltas in projection and therefore does not lose precision under extreme
   zoom levels even when using faster 32 bit floating point.
 
-### Mathematical/Linear Projection Mode
-
-Note: deck.gl can also supports working in a standard mathematical
-(i.e. cartographically unprojected) linear coordinate system
-(suitable when using deck.gl layers without underlying maps)
-
-In this mode, which does not offer any synchronization with maps, the
-application specifies its world size (the number of pixels that the world
-occupies
-
-At zoom 0, one world unit represents one pixel unit.
-deck.gl can create a projection matrix from zoom level and center,
-(as well as pitch, bearing and altitude), to move around in the map.
-The interaction layer handles this by default.
-
-You can of course supply your own projectionMatrix and scaling uniforms
-to deck.gl.
-
-Remarks:
-*The support for specifying scales and extents is still rudimentary.
 
 
 ## Coordinate System Concepts

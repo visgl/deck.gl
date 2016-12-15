@@ -20,7 +20,8 @@
 /* eslint-disable func-style, no-console, max-len */
 import test from 'tape-catch';
 import 'luma.gl/headless';
-import {Scene, createGLContext} from 'luma.gl';
+import {createGLContext} from 'luma.gl';
+import {WebMercatorViewport} from 'viewport-mercator-project';
 
 import {
   ChoroplethLayer,
@@ -42,8 +43,7 @@ const FIXTURE = {
 
   layerState: {
     oldLayers: [],
-    gl,
-    scene: new Scene(gl)
+    gl
   },
 
   mapState: {
@@ -120,7 +120,7 @@ test('ScatterplotLayer#constructor', t => {
   t.doesNotThrow(
     () => {
       new LayerManager({gl})
-        .setContext(mapState)
+        .setViewport(new WebMercatorViewport(mapState))
         .updateLayers({newLayers: [layer, emptyLayer]});
     },
     'ScatterplotLayer update does not throw'
@@ -155,7 +155,7 @@ test('ArcLayer#constructor', t => {
     'Null ArcLayer did not throw exception'
   );
   const layerManager = new LayerManager({gl});
-  layerManager.setContext(mapState);
+  layerManager.setViewport(new WebMercatorViewport(mapState));
   layerManager.updateLayers({newLayers: [layer, emptyLayer]});
 
   t.doesNotThrow(
