@@ -49,7 +49,7 @@ test('Rendering DeckGL overlay with Viewport', t => {
 test('Rendering DeckGL overlay with WebMercatorViewport', t => {
   const viewport = new WebMercatorViewport(TEST_DATA.mapState);
   const component = utils.renderIntoDocument(
-    <DeckGL viewport={viewport} layers={[]}/>
+    <DeckGL width={100} height={100} viewport={viewport} layers={[]}/>
   );
   t.ok(component, 'WebGLOverlay is rendered.');
   t.end();

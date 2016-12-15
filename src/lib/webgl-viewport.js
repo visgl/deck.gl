@@ -57,13 +57,15 @@ export default class WebGLViewport {
 
     // calculate WebGL matrices
     // TODO - could be cached for e.g. modelMatrix === null
-    const projections = this.viewport.getMatrices({modelMatrix});
+    const matrices = this.viewport.getMatrices({modelMatrix});
 
-    const {modelViewProjectionMatrix} = projections;
-    assert(modelViewProjectionMatrix, 'Viewport props missing');
+    const {modelViewProjectionMatrix, scale, pixelsPerMeter} = matrices;
+    assert(modelViewProjectionMatrix, 'Viewport missing modelViewProjectionMatrix');
+    assert(scale, 'Viewport scale missing');
+    assert(pixelsPerMeter, 'Viewport missing pixelsPerMeter');
 
     // Convert to Float32
-    this.glProjectionMatrix = new Float32Array(viewProjectionMatrix);
+    this.glProjectionMatrix = new Float32Array(modelViewProjectionMatrix);
 
     // dy64ify
     this.glProjectionMatrixFP64 = new Float32Array(32);
@@ -73,15 +75,12 @@ export default class WebGLViewport {
         [
           this.glProjectionMatrixFP64[(i * 4 + j) * 2],
           this.glProjectionMatrixFP64[(i * 4 + j) * 2 + 1]
-        ] = fp64ify(viewProjectionMatrix[j * 4 + i]);
+        ] = fp64ify(modelViewProjectionMatrix[j * 4 + i]);
       }
     }
 
     const projectionCenter =
-      vec4.transformMat4([], projectedPositionOrigin, viewProjectionMatrix);
-
-    const {scale, center,
-    assert(Number.isFinite(zoom) && scale && center && pixelsPerMeter, 'Viewport props missing');
+      vec4.transformMat4([], projectedPositionOrigin, modelViewProjectionMatrix);
 
     return {
       // Projection mode values
@@ -93,7 +92,7 @@ export default class WebGLViewport {
       projectionFP64: this.glProjectionMatrixFP64,
       projectionPixelsPerUnit: matrices.pixelsPerMeter,
       projectionScale: matrices.scale,
-      projectionScaleFP64: fp64ify(matrices.scale),
+      projectionScaleFP64: fp64ify(matrices.scale)
     };
   }
 }
