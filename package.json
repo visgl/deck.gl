@@ -34,7 +34,7 @@
     "gl-matrix": "^2.3.2",
     "lodash.flattendeep": "^4.4.0",
     "save-pixels": "^2.3.0",
-    "viewport-mercator-project": "git://github.com/uber-common/viewport-mercator-project.git#viewport-separation"
+    "viewport-mercator-project": "3.0.0-beta4"
   },
   "devDependencies": {
     "babel-cli": "^6.3.15",
@@ -110,7 +110,8 @@
     "demo-publish-force": "npm run build && npm run demo-build && git add dist-demo -f && git commit -m 'UPDATE DOCS' --no-verify && npm run demo-gh-pages-force",
     "lint": "eslint src exhibits/app.js",
     "precommit": "npm test",
-    "mypublish": "npm run build && npm run test-fast && npm publish",
+    "publish-prod": "npm run build && npm run test-fast && npm publish",
+    "publish-beta": "npm run build && npm run test-fast && npm publish --tag beta",
     "test": "npm run lint && npm run build-dist && npm run test-headless",
     "test-fast": "npm run lint && npm run test-headless",
     "test-headless": "node dist/test/headless.js",
