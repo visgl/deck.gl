@@ -10,16 +10,16 @@ layers as a property.
 
     import MapGL from 'react-map-gl';
     import DeckGL from 'deck.gl/react';
-    import {ScatterplotLayer, Viewport} from 'deck.gl';
+    import {ScatterplotLayer} from 'deck.gl';
+    import {Viewport} from 'viewport-mercator-project';
 
-    const data = [];
-    const viewport = new Viewport();
+    const viewport = new Viewport({...});
 
     return (
       <MapGL>
         <DeckGL
           viewport={viewport}
-          layers={[new ScatterplotLayer({data})]}
+          layers={[new ScatterplotLayer({data: [...]})]}
         />
       </MapGL>
     );
@@ -38,15 +38,26 @@ Remarks
   the layers.
 
 * When the deck.gl layer list is drawn to screen, it matches the new Layer
-  instances with the instances from the previous render call, and intelligently
-  compares the new properties and only update WebGL state when needed
+  instances with the instances from the previous render call, intelligently
+  compares the new properties and only updates WebGL state when needed
   (just like React does for DOM components).
 
 * Internally, the `DeckGL` component initializes a WebGL context
   attached to a canvas element, sets up the animation loop and calls provided
-  callbacks on initial load and for each rendering frames. The `DeckGL`
+  callbacks on initial load and for each rendered frame. The `DeckGL`
   component also handles events propagation across layers, and prevents
   unnecessary calculations using React and deck.gl lifecycle functions.
+
+* Picking: The info objects have a number of fields, most interesting are
+  perhaps `layer` and `index`. If the data prop is an `Array`, `info.object`
+  will contain the selected object in the array.
+
+* Layers can add additional fields to the picking `info` object, check the
+  documentation of each layer.
+
+* Picking happens in top-to-bottom order (reverse of rendering), i.e.
+  deck.gl traverses the layer list backwards during picking.
+
 
 ## DeckGL React Component API
 
@@ -57,7 +68,23 @@ viewport parameters, and renders those layers as a transparent overlay.
 
 ##### `id` (String, optional)
 
-Canvas ID to allow style customization.
+Canvas ID to allow style customization in CSS.
+
+##### `viewport` (`Viewport`, optional)
+
+This property should contain a `Viewport` instance which represents your
+"camera" (essentially view and projection matrices, together with viewport
+width and height). By changing the `viewport` you change the view of your
+layers, e.g. as a result of mouse events or through programmatic animations.
+
+If `viewport` is not supplied, deck.gl will look for web mercator projection
+parameters (latitude, longitude, zoom, bearing and pitch) and create a
+`WebMercatorViewport` (which is a subclass of `Viewport`).
+
+Note that both `Viewport` and `WebMercatorViewport` are imported from
+[viewport-mercator-project](https://github.com/uber-common/viewport-mercator-project).
+Consult the documentation of that module for more information on how to
+create these objects.
 
 ##### `width` (Number, required)
 
@@ -67,15 +94,31 @@ Width of the canvas.
 
 Height of the canvas.
 
+##### `latitude` (Number, optional)
+
+Current latitude - used to define a mercator projection if `viewport` is not supplied.
+
+##### `longitude` (Number, optional)
+
+Current longitude - used to define a mercator projection if `viewport` is not supplied.
+
+##### `zoom` (Number, optional)
+
+Current zoom - used to define a mercator projection if `viewport` is not supplied.
+
+##### `bearing` (Number, optional)
+
+Current bearing - used to define a mercator projection if `viewport` is not supplied.
+
+##### `pitch` (Number, optional)
+
+Current pitch - used to define a mercator projection if `viewport` is not supplied.
+
 ##### `layers` (Array, required)
 
 The array of `deck.gl` layers to be rendered. This array is expected to be
 an array of newly allocated instances of your deck.gl layers, created with
 updated properties derived from the current application state.
-
-##### `blending` (Object, optional)
-
-Blending settings.
 
 ##### `style` (Object, optional)
 
@@ -124,13 +167,3 @@ at the coordinate
 - `pickedInfos` - an array of info objects for all pickable layers that
 are visible, in top to bottom order.
 - `event` - the original MouseEvent object
-
-## Remarks
-
-* Picking: The info objects have a number of fields, most interesting are
-  perhaps `layer` and `index`. If the data prop is an `Array`, `info.object`
-  will contain the selected object in the array.
-* Layers can add additional fields to the picking `info` object, check the
-  documentation of each layer.
-* Picking happens in top-to-bottom order (reverse of rendering), i.e.
-  deck.gl traverses the layer list backwards during picking.

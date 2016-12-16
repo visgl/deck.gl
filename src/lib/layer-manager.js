@@ -28,10 +28,11 @@
 //
 /* eslint-disable no-try-catch */
 import Layer from './layer';
-import {Viewport} from '../viewport';
 import {log} from './utils';
 import assert from 'assert';
 import {pickLayers} from './pick-layers';
+import WebGLViewport from './webgl-viewport';
+import {Viewport} from 'viewport-mercator-project';
 import {FramebufferObject} from 'luma.gl';
 
 export default class LayerManager {
@@ -45,6 +46,7 @@ export default class LayerManager {
     this.context = {
       gl,
       uniforms: {},
+      webglViewport: null,
       viewport: null,
       viewportChanged: true,
       pickingFBO: null
@@ -53,34 +55,18 @@ export default class LayerManager {
     Object.seal(this.context);
   }
 
-  setContext({
-    width, height, latitude, longitude, zoom, pitch, bearing, altitude
-  }) {
-    /* eslint-disable */
+  setViewport(viewport) {
+    assert(viewport instanceof Viewport, 'Invalid viewport');
     const oldViewport = this.context.viewport;
-    const viewportChanged = !oldViewport ||
-      width !== oldViewport.width ||
-      height !== oldViewport.height ||
-      latitude !== oldViewport.latitude ||
-      longitude !== oldViewport.longitude ||
-      zoom !== oldViewport.zoom ||
-      bearing !== oldViewport.bearing ||
-      pitch !== oldViewport.pitch ||
-      altitude !== oldViewport.altitude;
+    const viewportChanged = !oldViewport || !viewport.equals(oldViewport);
 
-    if (viewportChanged || !this.context.viewport) {
+    if (viewportChanged) {
       Object.assign(this.oldContext, this.context);
-
-      const viewport = new Viewport({
-        width, height, latitude, longitude, zoom, pitch, bearing, altitude,
-        tileSize: 512
-      });
-
+      this.context.webglViewport = new WebGLViewport({viewport});
       this.context.viewport = viewport;
-      this.context.viewportChanged = viewportChanged;
+      this.context.viewportChanged = true;
       this.context.uniforms = {};
-
-      log(4, viewport, latitude, longitude, zoom);
+      log(4, viewport);
     }
 
     return this;
@@ -115,11 +101,16 @@ export default class LayerManager {
   drawLayers() {
     assert(this.context.viewport, 'LayerManager.drawLayers: viewport not set');
 
-    const {uniforms} = this.context;
     let layerIndex = 0;
     for (const layer of this.layers) {
       if (layer.props.visible) {
-        layer.drawLayer({uniforms, layerIndex});
+        layer.drawLayer({
+          uniforms: {
+            ...this.context.uniforms,
+            ...this.context.webglViewport.getUniforms(this.props),
+           layerIndex
+          }
+        });
         layerIndex++;
       }
     }
@@ -132,8 +123,8 @@ export default class LayerManager {
 
     // Set up a frame buffer if needed
     if (this.context.pickingFBO === null ||
-    gl.canvas.width !== this.context.pickingFBO.width ||
-    gl.canvas.height !== this.context.pickingFBO.height) {
+      gl.canvas.width !== this.context.pickingFBO.width ||
+      gl.canvas.height !== this.context.pickingFBO.height) {
       this.context.pickingFBO = new FramebufferObject(gl, {
         width: gl.canvas.width,
         height: gl.canvas.height
@@ -142,7 +133,13 @@ export default class LayerManager {
     return pickLayers(gl, {
       x,
       y,
-      uniforms,
+      uniforms: {
+        ...this.context.uniforms,
+        ...this.context.webglViewport.getUniforms(this.props),
+        // TODO - layerIndex - if not supplied, picking will be subtly wrong
+        renderPickingBuffer: true,
+        picking_uEnable: true
+      },
       layers: this.layers,
       mode,
       pickingFBO: this.context.pickingFBO

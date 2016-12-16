@@ -18,6 +18,19 @@ Each version should:
 Ref: http://keepachangelog.com/en/0.3.0/
 -->
 
+## Recent Dev Releases
+
+#### [viewport branch] - Use new `Viewport` from `viewport-mercator-project`
+
+The `DeckGL` React component now takes a generic `Viewport` prop that can be
+created with arbitrary `view` and `projection` matrices.
+If not supplied, it attempts to create a viewport from supplied mercator
+parameters, which corresponds to behavior before the change.
+- NEW: `LayerManager.setViewport` added, `LayerManager.setContext` removed
+Internal changes:
+- `WebGLViewport` now a wrapper around a supplied `Viewport` rather than a subclass.
+
+
 ## Official Releases
 
 ### deck.gl v3

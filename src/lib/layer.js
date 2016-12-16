@@ -425,18 +425,14 @@ export default class Layer {
   }
 
   // Calculates uniforms
-  drawLayer({uniforms = {}, layerIndex = 0}) {
-    assert(this.context.viewport, 'Layer missing context.viewport');
-    const viewportUniforms = this.context.viewport.getUniforms(this.props);
-    uniforms = {...uniforms, ...viewportUniforms, layerIndex};
+  drawLayer({uniforms = {}}) {
+    uniforms = {...uniforms};
     // Call subclass lifecycle method
     this.draw({uniforms});
     // End lifecycle method
   }
 
   pickLayer({uniforms = {}, ...opts}) {
-    const viewportUniforms = this.context.viewport.getUniforms(this.props);
-    uniforms = {...uniforms, ...viewportUniforms, renderPickingBuffer: true};
     // Call subclass lifecycle method
     return this.pick({uniforms, ...opts});
     // End lifecycle method

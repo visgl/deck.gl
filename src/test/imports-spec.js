@@ -7,15 +7,12 @@ import {
   DeckGLOverlay,
   Layer,
   ChoroplethLayer, ScatterplotLayer,
-  ScreenGridLayer, ArcLayer, LineLayer,
-  Viewport
+  ScreenGridLayer, ArcLayer, LineLayer
 } from '../..';
 
 import {
   EnhancedChoroplethLayer
 } from '../../samples';
-
-import Viewport2 from '../../viewport';
 
 test('Top-level imports', t0 => {
   t0.test('import "deck.gl"', t => {
@@ -28,17 +25,11 @@ test('Top-level imports', t0 => {
     t.ok(ScreenGridLayer, 'ScreenGridLayer symbol imported');
     t.ok(ArcLayer, 'ArcLayer symbol imported');
     t.ok(LineLayer, 'LineLayer symbol imported');
-    t.ok(Viewport, 'Viewport symbol imported');
     t.end();
   });
 
   t0.test('import "deck.gl/samples"', t => {
     t.ok(EnhancedChoroplethLayer, 'EnhancedChoroplethLayer symbol imported');
-    t.end();
-  });
-
-  t0.test('import "deck.gl/viewport"', t => {
-    t.ok(Viewport2, 'Viewport symbol imported');
     t.end();
   });
   t0.end();
