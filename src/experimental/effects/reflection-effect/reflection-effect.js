@@ -17,7 +17,7 @@ export default class ReflectionEffect extends Effect {
    * @param blur how blurry the reflection should be, between 0 and 1
    */
 
-  constructor(reflectivity = 0.3, blur = 0.5) {
+  constructor(reflectivity = 0.5, blur = 0.5) {
     super();
     this.reflectivity = reflectivity;
     this.blur = blur;
