@@ -38,7 +38,6 @@ export default class WebGLRenderer extends React.Component {
 
     pixelRatio: PropTypes.number,
     viewport: PropTypes.object.isRequired,
-    blending: PropTypes.object,
     events: PropTypes.object,
     gl: PropTypes.object,
     glOptions: PropTypes.object,

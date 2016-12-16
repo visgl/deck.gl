@@ -23,6 +23,7 @@ import WebGLRenderer from './webgl-renderer';
 import {LayerManager, Layer} from '../lib';
 import {EffectManager, Effect} from '../experimental';
 import {GL, addEvents} from 'luma.gl';
+import {Viewport, WebMercatorViewport} from 'viewport-mercator-project';
 import {log} from '../lib/utils';
 
 function noop() {}
@@ -37,9 +38,10 @@ export default class DeckGL extends React.Component {
     effects: PropTypes.arrayOf(PropTypes.instanceOf(Effect)),
     gl: PropTypes.object,
     debug: PropTypes.bool,
-    onWebGLInitialized: noop,
-    onLayerClick: noop,
-    onLayerHover: noop
+    viewport: PropTypes.instanceOf(Viewport),
+    onWebGLInitialized: PropTypes.func,
+    onLayerClick: PropTypes.func,
+    onLayerHover: PropTypes.func
   };
 
   static defaultProps = {
@@ -65,15 +67,17 @@ export default class DeckGL extends React.Component {
   }
 
   _updateLayers(nextProps) {
-    const {
+    const {width, height, latitude, longitude, zoom, pitch, bearing, altitude} = nextProps;
+    let {viewport} = nextProps;
+
+    // If Viewport is not supplied, create one from mercator props
+    viewport = viewport || new WebMercatorViewport({
       width, height, latitude, longitude, zoom, pitch, bearing, altitude
-    } = nextProps;
+    });
 
     if (this.layerManager) {
       this.layerManager
-        .setContext({
-          width, height, latitude, longitude, zoom, pitch, bearing, altitude
-        })
+        .setViewport(viewport)
         .updateLayers({newLayers: nextProps.layers});
     }
   }
@@ -141,7 +145,6 @@ export default class DeckGL extends React.Component {
     this.layerManager.drawLayers();
 
     this.effectManager.draw();
-
   }
 
   render() {

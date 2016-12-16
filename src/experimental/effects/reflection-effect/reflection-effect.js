@@ -4,6 +4,7 @@ import {assembleShaders} from '../../../shader-utils';
 import {Effect} from '../../lib';
 import {readFileSync} from 'fs';
 import {join} from 'path';
+import {WebMercatorViewport} from 'viewport-mercator-project';
 
 /*
  * This should be made a subclass of a more general effect class once other
@@ -39,7 +40,7 @@ export default class ReflectionEffect extends Effect {
   }
 
   preDraw({gl, layerManager}) {
-    const viewport = layerManager.context.viewport;
+    const {viewport} = layerManager.context;
     /*
      * the renderer already has a reference to this, but we don't have a reference to the renderer.
      * when we refactor the camera code, we should make sure we get a reference to the renderer so
@@ -52,18 +53,15 @@ export default class ReflectionEffect extends Effect {
     /* this is a huge hack around the existing viewport class.
      * TODO in the future, once we implement bona-fide cameras, we really need to fix this.
      */
-    layerManager.setContext({
+    layerManager.setViewport(new WebMercatorViewport({
       ...viewport,
       pitch: -180 - pitch
-    });
+    }));
     gl.clear(GL.COLOR_BUFFER_BIT | GL.DEPTH_BUFFER_BIT);
 
     layerManager.drawLayers();
-    layerManager.setContext({
-      ...viewport,
-      pitch
-    });
-    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+    layerManager.setViewport(viewport);
+    this.framebuffer.unbind();
   }
 
   draw({gl, layerManager}) {

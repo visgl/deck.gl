@@ -20,7 +20,6 @@
 
 export * from './lib';
 export * from './experimental/lib';
-export * from './viewport';
 export * from './shader-utils';
 
 // Default layers
