@@ -7,9 +7,10 @@ import {join} from 'path';
 import {WebMercatorViewport} from 'viewport-mercator-project';
 
 export default class ReflectionEffect extends Effect {
-  constructor(reflectivity = 0.3) {
+  constructor(reflectivity = 0.3, blur = 1.0) {
     super();
     this.reflectivity = reflectivity;
+    this.blur = blur;
     this.framebuffer = null;
     this.setNeedsRedraw();
   }
@@ -62,7 +63,10 @@ export default class ReflectionEffect extends Effect {
   draw({gl, layerManager}) {
     this.model.render({
       reflectionTexture: this.framebuffer.texture,
-      reflectivity: this.reflectivity
+      reflectionTextureWidth: this.framebuffer.width,
+      reflectionTextureHeight: this.framebuffer.height,
+      reflectivity: this.reflectivity,
+      blur: this.blur
     });
   }
 
