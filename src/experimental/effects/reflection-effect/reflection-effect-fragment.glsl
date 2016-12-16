@@ -36,6 +36,11 @@ varying vec2 uv;
 
 #define KERNEL_SIZE 7
 
+/*
+ * Samples from tex with a gaussian-shaped patch, centered at uv and
+ * with standard deviation sigma.  The size of the texture in
+ * pixels must be specified by dim
+ */
 vec4 sample_gaussian(sampler2D tex, vec2 dim, vec2 uv, float sigma) {
   if (sigma == 0.0) {
     return texture2D(tex, uv);
@@ -74,5 +79,5 @@ void main(void) {
   gl_FragColor = sample_gaussian(reflectionTexture, vec2(reflectionTextureWidth, reflectionTextureHeight), vec2(uv.x, 1. - uv.y), sigma);
   //because our canvas expects alphas to be pre-multiplied, we multiply by whole
   //color vector by reflectivity, not just the alpha channel
-  gl_FragColor*= reflectivity;
+  gl_FragColor *= reflectivity;
 }

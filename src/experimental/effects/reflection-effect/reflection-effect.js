@@ -33,7 +33,7 @@ export default class ReflectionEffect extends Effect {
   }
 
   initialize({gl, layerManager}) {
-    this.model = new Model({
+    this.unitQuad = new Model({
       gl,
       ...assembleShaders(gl, this.getShaders()),
       geometry: new Geometry({
@@ -71,7 +71,13 @@ export default class ReflectionEffect extends Effect {
   }
 
   draw({gl, layerManager}) {
-    this.model.render({
+    /*
+     * Render our unit quad.
+     * This will cover the entire screen, but will lie behind all other geometry.
+     * This quad will sample the previously generated reflection texture
+     * in order to create the reflection effect
+     */
+    this.unitQuad.render({
       reflectionTexture: this.framebuffer.texture,
       reflectionTextureWidth: this.framebuffer.width,
       reflectionTextureHeight: this.framebuffer.height,
