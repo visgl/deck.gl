@@ -7,6 +7,16 @@ import {join} from 'path';
 import {WebMercatorViewport} from 'viewport-mercator-project';
 
 export default class ReflectionEffect extends Effect {
+
+  /**
+   * @classdesc
+   * ReflectionEffect
+   *
+   * @class
+   * @param reflectivity How visible reflections should be over the map, between 0 and 1
+   * @param blur how blurry the reflection should be, between 0 and 1
+   */
+
   constructor(reflectivity = 0.3, blur = 1.0) {
     super();
     this.reflectivity = reflectivity;
