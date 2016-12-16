@@ -6,15 +6,21 @@ import {readFileSync} from 'fs';
 import {join} from 'path';
 import {WebMercatorViewport} from 'viewport-mercator-project';
 
-/*
- * This should be made a subclass of a more general effect class once other
- * effects are implemented.
- */
-
 export default class ReflectionEffect extends Effect {
-  constructor(reflectivity = 0.2) {
+
+  /**
+   * @classdesc
+   * ReflectionEffect
+   *
+   * @class
+   * @param reflectivity How visible reflections should be over the map, between 0 and 1
+   * @param blur how blurry the reflection should be, between 0 and 1
+   */
+
+  constructor(reflectivity = 0.5, blur = 0.5) {
     super();
     this.reflectivity = reflectivity;
+    this.blur = blur;
     this.framebuffer = null;
     this.setNeedsRedraw();
   }
@@ -27,7 +33,7 @@ export default class ReflectionEffect extends Effect {
   }
 
   initialize({gl, layerManager}) {
-    this.model = new Model({
+    this.unitQuad = new Model({
       gl,
       ...assembleShaders(gl, this.getShaders()),
       geometry: new Geometry({
@@ -35,7 +41,7 @@ export default class ReflectionEffect extends Effect {
         vertices: new Float32Array([0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0])
       })
     });
-    this.framebuffer = new Framebuffer(gl);
+    this.framebuffer = new Framebuffer(gl, {depth: true});
 
   }
 
@@ -65,9 +71,18 @@ export default class ReflectionEffect extends Effect {
   }
 
   draw({gl, layerManager}) {
-    this.model.render({
+    /*
+     * Render our unit quad.
+     * This will cover the entire screen, but will lie behind all other geometry.
+     * This quad will sample the previously generated reflection texture
+     * in order to create the reflection effect
+     */
+    this.unitQuad.render({
       reflectionTexture: this.framebuffer.texture,
-      reflectivity: this.reflectivity
+      reflectionTextureWidth: this.framebuffer.width,
+      reflectionTextureHeight: this.framebuffer.height,
+      reflectivity: this.reflectivity,
+      blur: this.blur
     });
   }
 
