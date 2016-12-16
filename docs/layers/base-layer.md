@@ -141,8 +141,9 @@ which is useful when composing data from multiple sources that use
 different coordinate systems.
 
 Note that the matrix projection is applied after the non-linear mercator
-projection calculations are resolved, so be careful when using view matrices
-with lng/lat encoded coordinates.
+projection calculations are resolved, so be careful when using model matrices
+with lng/lat encoded coordinates. They normally work best with non-mercator
+viewports or meter offset based mercator layers
 
 
 ### Data Properties
