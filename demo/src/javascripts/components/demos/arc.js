@@ -7,6 +7,8 @@ import {scaleQuantile} from 'd3-scale';
 import {readableInteger} from '../../utils/format-utils';
 import {MAPBOX_STYLES} from '../../constants/defaults';
 
+import {ReflectionEffect} from '../../../../../src/experimental/effects';
+
 const inFlowColors = [
   [255, 255, 204],
   [199, 233, 180],
@@ -179,9 +181,13 @@ export default class ArcDemo extends Component {
         strokeWidth: params.lineWidth.value
       })
     ];
+    
+    const effects = [
+      new ReflectionEffect()
+    ];
 
     return (
-      <DeckGL {...viewport} layers={ layers }
+      <DeckGL {...viewport} layers={ layers } effects={ effects }
         onWebGLInitialized={this._initialize} />
     );
   }

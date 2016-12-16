@@ -6,13 +6,8 @@ import {readFileSync} from 'fs';
 import {join} from 'path';
 import {WebMercatorViewport} from 'viewport-mercator-project';
 
-/*
- * This should be made a subclass of a more general effect class once other
- * effects are implemented.
- */
-
 export default class ReflectionEffect extends Effect {
-  constructor(reflectivity = 0.2) {
+  constructor(reflectivity = 0.3) {
     super();
     this.reflectivity = reflectivity;
     this.framebuffer = null;
@@ -35,7 +30,7 @@ export default class ReflectionEffect extends Effect {
         vertices: new Float32Array([0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0])
       })
     });
-    this.framebuffer = new Framebuffer(gl);
+    this.framebuffer = new Framebuffer(gl, {depth: true});
 
   }
 

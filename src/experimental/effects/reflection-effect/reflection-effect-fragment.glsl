@@ -31,5 +31,5 @@ varying vec2 uv;
 
 void main(void) {
   gl_FragColor = texture2D(reflectionTexture, vec2(uv.x, 1. - uv.y));
-  gl_FragColor.a *= reflectivity;
+  gl_FragColor*= reflectivity;
 }
