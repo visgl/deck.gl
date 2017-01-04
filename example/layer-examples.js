@@ -247,12 +247,12 @@ function make100KPoints() {
 
 export default {
   'Core Layers': {
-    ArcLayer: ArcLayerExample,
     'ChoroplethLayer (Solid)': ChoroplethLayerExample,
     'ChoroplethLayer (Contour)': ChoroplethLayerContourExample,
-    LineLayer: LineLayerExample,
     ScatterplotLayer: ScatterplotLayerExample,
     'ScatterplotLayer (meters)': ScatterplotLayerMetersExample,
+    ArcLayer: ArcLayerExample,
+    LineLayer: LineLayerExample,
     ScreenGridLayer: ScreenGridLayerExample
   },
 
