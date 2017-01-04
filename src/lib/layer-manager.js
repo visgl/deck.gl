@@ -30,8 +30,7 @@
 import Layer from './layer';
 import {log} from './utils';
 import assert from 'assert';
-import {pickLayers} from './pick-layers';
-import WebGLViewport from './webgl-viewport';
+import {drawLayers, pickLayers} from './draw-and-pick';
 import {Viewport} from 'viewport-mercator-project';
 import {FramebufferObject} from 'luma.gl';
 
@@ -46,7 +45,6 @@ export default class LayerManager {
     this.context = {
       gl,
       uniforms: {},
-      webglViewport: null,
       viewport: null,
       viewportChanged: true,
       pickingFBO: null
@@ -62,7 +60,6 @@ export default class LayerManager {
 
     if (viewportChanged) {
       Object.assign(this.oldContext, this.context);
-      this.context.webglViewport = new WebGLViewport({viewport});
       this.context.viewport = viewport;
       this.context.viewportChanged = true;
       this.context.uniforms = {};
@@ -101,19 +98,7 @@ export default class LayerManager {
   drawLayers() {
     assert(this.context.viewport, 'LayerManager.drawLayers: viewport not set');
 
-    let layerIndex = 0;
-    for (const layer of this.layers) {
-      if (layer.props.visible) {
-        layer.drawLayer({
-          uniforms: {
-            ...this.context.uniforms,
-            ...this.context.webglViewport.getUniforms(this.props),
-           layerIndex
-          }
-        });
-        layerIndex++;
-      }
-    }
+    drawLayers({layers: this.layers});
 
     return this;
   }
@@ -134,9 +119,6 @@ export default class LayerManager {
       x,
       y,
       uniforms: {
-        ...this.context.uniforms,
-        ...this.context.webglViewport.getUniforms(this.props),
-        // TODO - layerIndex - if not supplied, picking will be subtly wrong
         renderPickingBuffer: true,
         picking_uEnable: true
       },
@@ -255,10 +237,8 @@ export default class LayerManager {
     const {state, props} = oldLayer;
 
     // sanity check
-    assert(state,
-      'deck.gl sanity check - Matching layer has no state');
-    assert(oldLayer !== newLayer,
-      'deck.gl sanity check - Matching layer is same');
+    assert(state, 'deck.gl sanity check - Matching layer has no state');
+    assert(oldLayer !== newLayer, 'deck.gl sanity check - Matching layer is same');
 
     // Move state
     newLayer.state = state;
@@ -300,9 +280,7 @@ export default class LayerManager {
           changeFlags: layer.diffProps({}, layer.props, this.context)
         });
       } catch (err) {
-        log.once(0,
-          `deck.gl error during initialization of ${layerName(layer)} ${err}`,
-          err);
+        log.once(0, `deck.gl error during initialization of ${layerName(layer)} ${err}`, err);
         // Save first error
         error = error || err;
       }
@@ -333,8 +311,7 @@ export default class LayerManager {
           changeFlags: layer.diffProps(oldProps, layer.props, this.context)
         });
       } catch (err) {
-        log.once(0,
-          `deck.gl error during update of ${layerName(layer)}`, err);
+        log.once(0, `deck.gl error during update of ${layerName(layer)}`, err);
         // Save first error
         error = err;
       }

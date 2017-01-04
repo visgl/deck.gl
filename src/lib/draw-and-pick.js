@@ -1,5 +1,22 @@
 /* global window */
 import {GL, glContextWithState} from 'luma.gl';
+import {getUniformsFromViewport} from './viewport-uniforms';
+
+export function drawLayers({layers}) {
+  let layerIndex = 0;
+  for (const layer of layers) {
+    if (layer.props.visible) {
+      layer.drawLayer({
+        uniforms: {
+          ...layer.context.uniforms,
+          ...getUniformsFromViewport(layer.context.viewport, layer.props),
+          layerIndex
+        }
+      });
+      layerIndex++;
+    }
+  }
+}
 
 /* eslint-disable max-depth, max-statements */
 export function pickLayers(gl, {
@@ -27,6 +44,8 @@ export function pickLayers(gl, {
     framebuffer: pickingFBO,
     scissorTest: {x: deviceX, y: deviceY, w: 1, h: 1}
   }, () => {
+
+    let layerIndex = 0;
     let zOrder = 0;
 
     // disable blending while picking, restore when done
@@ -36,7 +55,12 @@ export function pickLayers(gl, {
     for (let i = layers.length - 1; i >= 0; --i) {
       const layer = layers[i];
 
+      if (layer.props.visible) {
+        layerIndex++;
+      }
+
       if (layer.props.visible && layer.props.pickable) {
+
         // Clear the frame buffer, render and sample
         gl.clear(GL.COLOR_BUFFER_BIT | GL.DEPTH_BUFFER_BIT);
         const info = createInfo({
@@ -48,7 +72,11 @@ export function pickLayers(gl, {
 
         layer.pickLayer({
           info,
-          uniforms,
+          uniforms: {
+            ...layer.context.uniforms,
+            ...getUniformsFromViewport(layer.context.viewport, layer.props),
+            layerIndex
+          },
           pickEnableUniforms: {renderPickingBuffer: 1, pickingEnabled: 1},
           pickDisableUniforms: {renderPickingBuffer: 0, pickingEnabled: 0},
           deviceX, deviceY,

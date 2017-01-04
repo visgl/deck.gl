@@ -3,20 +3,16 @@ import {
   ScatterplotLayer,
   ArcLayer,
   LineLayer,
-  ScreenGridLayer
-} from '../src';
+  ScreenGridLayer,
 
-import {
   ScatterplotLayer64,
   ArcLayer64,
   ChoroplethLayer64,
   ExtrudedChoroplethLayer64,
-  LineLayer64
-} from '../src/layers/fp64';
+  LineLayer64,
 
-import {
   EnhancedChoroplethLayer
-} from '../src/layers/samples';
+} from '../src';
 
 const ArcLayerExample = props =>
   new ArcLayer({

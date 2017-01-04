@@ -1,1 +1,1 @@
-module.exports = require('./dist/react/deckgl');
+module.exports = require('./dist/react');
