@@ -63,7 +63,7 @@
     "gl": "^4.0.2",
     "highlight.js": "^9.7.0",
     "immutable": "^3.7.5",
-    "luma.gl": "^2.10.3",
+    "luma.gl": "3.0.0-alpha2",
     "marked": "^0.3.6",
     "react": "^15.3.2",
     "react-addons-test-utils": "^15.0.2",
@@ -84,7 +84,7 @@
     "uglify-js": "^2.6.1"
   },
   "peerDependencies": {
-    "luma.gl": "^2.10.3",
+    "luma.gl": "3.0.0-alpha2",
     "react": "0.14.x - 15.x",
     "react-dom": "0.14.x - 15.x"
   },

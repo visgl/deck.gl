@@ -229,7 +229,8 @@ class ExampleApp extends React.Component {
       hoverChoropleth: null,
       clickItem: null,
       settings: {
-        separation: 0
+        separation: 0,
+        rotation: 0
       }
     };
 
@@ -386,7 +387,7 @@ class ExampleApp extends React.Component {
   }
 
   _renderExamples() {
-    const {settings: {separation}} = this.state;
+    const {settings: {separation, rotation}} = this.state;
     const props = {
       ...this.props,
       ...this.state,
@@ -427,10 +428,11 @@ class ExampleApp extends React.Component {
           // Generate common props
           index++;
           // const modelMatrix = new Matrix4().fromTranslation([0, 0, 1000 * index * separation]);
-          layerProps.modelMatrix =
+          const modelMatrix =
             mat4.fromTranslation(mat4.create(), [0, 0, 300 * index * separation, 0]);
+          mat4.rotateZ(modelMatrix, modelMatrix, index * rotation * Math.PI / 10000);
           console.log(layerProps.modelMatrix); // eslint-disable-line
-
+          Object.assign(layerProps, {modelMatrix});
           /* eslint-enable max-depth */
           layers.push(example(layerProps));
         }
