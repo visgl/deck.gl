@@ -91,12 +91,9 @@
   "scripts": {
     "build": "npm run build-dist && npm run build-script",
     "build-clean": "rm -fr dist/*",
-    "build-dist": "npm run build-clean && npm run build-src",
-    "build-src": "babel src -d dist --source-maps inline --copy-files",
+    "build-dist": "npm run build-clean && babel src -d dist --source-maps inline --copy-files",
+    "build-watch": "npm run build-clean && babel src -d dist --source-maps inline --copy-files --watch &",
     "build-script": "browserify dist/bundle.js | uglifyjs > dist/deckgl.min.js",
-    "build-watch": "npm run build-clean && npm run build-src-watch && npm run build-shaderlib-watch",
-    "build-src-watch": "babel src -d dist --source-maps inline --copy-files --watch &",
-    "build-shaderlib-watch": "babel shaderlib -d dist/shaderlib --source-maps inline --copy-files --watch &",
     "demo-start": "npm run demo-build-copy && budo demo/src/javascripts/main.js:main.min.js --dir dist-demo/ --open -- -t babelify -t sassify -t brfs-babel",
     "demo-build": "npm run demo-build-clean && npm run demo-build-copy && npm run demo-build-script",
     "demo-build-clean": "rm -fr dist-demo && mkdir -p dist-demo",
@@ -118,6 +115,6 @@
     "test-electron": "browserify dist/test/electron.js | testron | faucet",
     "test-shader": "npm run build-dist && budo src/test/fp64-shader.spec.js:build/test-bundle.js --dir test --live --open --port 3001 --watch-glob '**/*.{html,css,scss,js,glsl}' -- -t babelify -t brfs-babel",
     "profile-disc": "browserify src/bundle.js --full-paths -t babelify -t brfs-babel | uglifyjs | discify --open",
-    "start": "budo example/app.js --live --open --port 3000 --css example/main.css --title 'deck.gl' --watch-glob '**/*.{html,css,js,glsl}' -- -t brfs-babel -t babelify -t envify"
+    "start": "budo example/app.js --live --open --port 3000 --css example/main.css --title 'deck.gl' --watch-glob '**/*.{html,css,js,glsl}' -- -t babelify -t brfs-babel"
   }
 }
