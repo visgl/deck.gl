@@ -94,7 +94,7 @@
     "build-dist": "npm run build-clean && npm run build-src && npm run build-shaderlib",
     "build-src": "babel src -d dist --source-maps inline --copy-files",
     "build-shaderlib": "babel shaderlib -d dist/shaderlib --source-maps inline --copy-files",
-    "build-script": "browserify src/bundle.js -t babelify -t brfs-babel | uglifyjs > dist/deckgl.min.js",
+    "build-script": "browserify dist/bundle.js | uglifyjs > dist/deckgl.min.js",
     "build-watch": "npm run build-clean && npm run build-src-watch && npm run build-shaderlib-watch",
     "build-src-watch": "babel src -d dist --source-maps inline --copy-files --watch &",
     "build-shaderlib-watch": "babel shaderlib -d dist/shaderlib --source-maps inline --copy-files --watch &",
