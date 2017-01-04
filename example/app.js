@@ -387,7 +387,6 @@ class ExampleApp extends React.Component {
   }
 
   _renderExamples() {
-    const {settings: {separation, rotation}} = this.state;
     const props = {
       ...this.props,
       ...this.state,
@@ -427,18 +426,28 @@ class ExampleApp extends React.Component {
 
           // Generate common props
           index++;
-          // const modelMatrix = new Matrix4().fromTranslation([0, 0, 1000 * index * separation]);
-          const modelMatrix =
-            mat4.fromTranslation(mat4.create(), [0, 0, 300 * index * separation, 0]);
-          mat4.rotateZ(modelMatrix, modelMatrix, index * rotation * Math.PI / 10000);
-          console.log(layerProps.modelMatrix); // eslint-disable-line
-          Object.assign(layerProps, {modelMatrix});
+          Object.assign(layerProps, {
+            modelMatrix: this._getModelMatrix(index)
+          });
           /* eslint-enable max-depth */
           layers.push(example(layerProps));
         }
       }
     }
     return layers;
+  }
+
+  _getModelMatrix(index) {
+    const {settings: {separation, rotation}} = this.state;
+    const {mapViewState: {longitude, latitude}} = this.props;
+    // const modelMatrix = new Matrix4().fromTranslation([0, 0, 1000 * index * separation]);
+    const modelMatrix =
+      mat4.fromTranslation(mat4.create(), [0, 0, 300 * index * separation, 0]);
+    // mat4.translate(modelMatrix, modelMatrix, [-longitude, -latitude, 0]);
+    mat4.rotateZ(modelMatrix, modelMatrix, index * rotation * Math.PI / 10000);
+    // mat4.translate(modelMatrix, modelMatrix, [longitude, latitude, 0]);
+    console.log('Model matrix', modelMatrix); // eslint-disable-line
+    return modelMatrix;
   }
 
   _renderOverlay() {
