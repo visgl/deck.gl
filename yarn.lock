@@ -1299,10 +1299,6 @@ canvas-composite-types@^1.0.4:
   version "1.0.4"
   resolved "https://registry.npmjs.org/canvas-composite-types/-/canvas-composite-types-1.0.4.tgz#7b44e7b179f06d84acbf1570480e70bef2a6a922"
 
-canvas-to-blob@0.0.0:
-  version "0.0.0"
-  resolved "https://registry.npmjs.org/canvas-to-blob/-/canvas-to-blob-0.0.0.tgz#f1db4dd083ddc74a78fe5bce6a869786b59f51f3"
-
 caseless@~0.11.0:
   version "0.11.0"
   resolved "https://registry.npmjs.org/caseless/-/caseless-0.11.0.tgz#715b96ea9841593cc33067923f5ec60ebda4f7d7"
@@ -1356,10 +1352,6 @@ chokidar@^1.0.0, chokidar@^1.0.1:
     readdirp "^2.0.0"
   optionalDependencies:
     fsevents "^1.0.0"
-
-ci-info@^1.0.0:
-  version "1.0.0"
-  resolved "https://registry.npmjs.org/ci-info/-/ci-info-1.0.0.tgz#dc5285f2b4e251821683681c381c3388f46ec534"
 
 cipher-base@^1.0.0, cipher-base@^1.0.1:
   version "1.0.3"
@@ -1452,13 +1444,13 @@ concat-stream@1.5.0:
     readable-stream "~2.0.0"
     typedarray "~0.0.5"
 
-concat-stream@^1.4.6, concat-stream@^1.5.0, concat-stream@^1.5.2:
-  version "1.6.0"
-  resolved "https://registry.npmjs.org/concat-stream/-/concat-stream-1.6.0.tgz#0aac662fd52be78964d5532f694784e70110acf7"
+concat-stream@^1.4.6, concat-stream@^1.5.0, concat-stream@^1.5.2, concat-stream@~1.5.0, concat-stream@~1.5.1:
+  version "1.5.2"
+  resolved "https://registry.npmjs.org/concat-stream/-/concat-stream-1.5.2.tgz#708978624d856af41a5a741defdd261da752c266"
   dependencies:
-    inherits "^2.0.3"
-    readable-stream "^2.2.2"
-    typedarray "^0.0.6"
+    inherits "~2.0.1"
+    readable-stream "~2.0.0"
+    typedarray "~0.0.5"
 
 concat-stream@~1.2.1:
   version "1.2.1"
@@ -1472,14 +1464,6 @@ concat-stream@~1.4.5:
   dependencies:
     inherits "~2.0.1"
     readable-stream "~1.1.9"
-    typedarray "~0.0.5"
-
-concat-stream@~1.5.0, concat-stream@~1.5.1:
-  version "1.5.2"
-  resolved "https://registry.npmjs.org/concat-stream/-/concat-stream-1.5.2.tgz#708978624d856af41a5a741defdd261da752c266"
-  dependencies:
-    inherits "~2.0.1"
-    readable-stream "~2.0.0"
     typedarray "~0.0.5"
 
 connect-pushstate@^1.0.0:
@@ -1503,12 +1487,6 @@ constants-browserify@~1.0.0:
 content-type@~1.0.1:
   version "1.0.2"
   resolved "https://registry.npmjs.org/content-type/-/content-type-1.0.2.tgz#b7d113aee7a8dd27bd21133c4dc2529df1721eed"
-
-contentstream@^1.0.0:
-  version "1.0.0"
-  resolved "https://registry.npmjs.org/contentstream/-/contentstream-1.0.0.tgz#0bdcfa46da30464a86ce8fa7ece565410dc6f9a5"
-  dependencies:
-    readable-stream "~1.0.33-1"
 
 convert-source-map@^1.1.0, convert-source-map@^1.1.1:
   version "1.3.0"
@@ -1596,12 +1574,6 @@ currently-unhandled@^0.4.1:
   resolved "https://registry.npmjs.org/currently-unhandled/-/currently-unhandled-0.4.1.tgz#988df33feab191ef799a61369dd76c17adf957ea"
   dependencies:
     array-find-index "^1.0.1"
-
-cwise-compiler@^1.0.0, cwise-compiler@^1.1.2:
-  version "1.1.2"
-  resolved "https://registry.npmjs.org/cwise-compiler/-/cwise-compiler-1.1.2.tgz#3bcbfd063bd1d69d25b3eebfc56df0de15d4c9d0"
-  dependencies:
-    uniq "^1.0.0"
 
 d3-array@1, d3-array@^1.0.1:
   version "1.0.2"
@@ -1693,10 +1665,6 @@ dashdash@^1.12.0:
   resolved "https://registry.npmjs.org/dashdash/-/dashdash-1.14.1.tgz#853cfa0f7cbe2fed5de20326b8dd581035f6e2f0"
   dependencies:
     assert-plus "^1.0.0"
-
-data-uri-to-buffer@0.0.3:
-  version "0.0.3"
-  resolved "https://registry.npmjs.org/data-uri-to-buffer/-/data-uri-to-buffer-0.0.3.tgz#18ae979a6a0ca994b0625853916d2662bbae0b1a"
 
 date-now@1.0.1:
   version "1.0.1"
@@ -2322,6 +2290,10 @@ fast-levenshtein@~2.0.4:
   version "2.0.6"
   resolved "https://registry.npmjs.org/fast-levenshtein/-/fast-levenshtein-2.0.6.tgz#3d8a5c66883a16a30ca8643e851f19baa7797917"
 
+fast-stable-stringify@^0.1.1:
+  version "0.1.1"
+  resolved "https://registry.yarnpkg.com/fast-stable-stringify/-/fast-stable-stringify-0.1.1.tgz#ce758dce1cb40fb2bf0c8aef4f93e792d195b491"
+
 faucet@0.0.1:
   version "0.0.1"
   resolved "https://registry.npmjs.org/faucet/-/faucet-0.0.1.tgz#597dcf1d2189a2c062321b591e8f151ed2039d9c"
@@ -2380,10 +2352,6 @@ filename-regex@^2.0.0:
   version "2.0.0"
   resolved "https://registry.npmjs.org/filename-regex/-/filename-regex-2.0.0.tgz#996e3e80479b98b9897f15a8a58b3d084e926775"
 
-filesaver.js@^0.2.0:
-  version "0.2.0"
-  resolved "https://registry.npmjs.org/filesaver.js/-/filesaver.js-0.2.0.tgz#2657dc471ec78f2d405d9da066cf039a5be69802"
-
 fill-range@^2.1.0:
   version "2.2.3"
   resolved "https://registry.npmjs.org/fill-range/-/fill-range-2.2.3.tgz#50b77dfd7e469bc7492470963699fe7a8485a723"
@@ -2393,10 +2361,6 @@ fill-range@^2.1.0:
     randomatic "^1.1.3"
     repeat-element "^1.1.2"
     repeat-string "^1.5.2"
-
-find-parent-dir@^0.3.0:
-  version "0.3.0"
-  resolved "https://registry.npmjs.org/find-parent-dir/-/find-parent-dir-0.3.0.tgz#33c44b429ab2b2f0646299c5f9f718f376ff8d54"
 
 find-up@^1.0.0:
   version "1.1.2"
@@ -2604,22 +2568,6 @@ get-caller-file@^1.0.1:
   version "1.0.2"
   resolved "https://registry.npmjs.org/get-caller-file/-/get-caller-file-1.0.2.tgz#f702e63127e7e231c160a80c1554acb70d5047e5"
 
-get-pixels@^3.3.0:
-  version "3.3.0"
-  resolved "https://registry.npmjs.org/get-pixels/-/get-pixels-3.3.0.tgz#8d9795beae18850b840f749581badc05d3e36e41"
-  dependencies:
-    data-uri-to-buffer "0.0.3"
-    jpeg-js "^0.1.1"
-    mime-types "^2.0.1"
-    ndarray "^1.0.13"
-    ndarray-pack "^1.1.1"
-    node-bitmap "0.0.1"
-    omggif "^1.0.5"
-    parse-data-uri "^0.2.0"
-    pngjs "^2.0.0"
-    request "^2.44.0"
-    through "^2.3.4"
-
 get-ports@^1.0.2:
   version "1.0.3"
   resolved "https://registry.npmjs.org/get-ports/-/get-ports-1.0.3.tgz#f40bd580aca7ec0efb7b96cbfcbeb03ef894b5e8"
@@ -2659,12 +2607,6 @@ ghutils@~3.2.0:
   dependencies:
     jsonist "~1.3.0"
     xtend "~4.0.1"
-
-gif-encoder@~0.4.1:
-  version "0.4.3"
-  resolved "https://registry.npmjs.org/gif-encoder/-/gif-encoder-0.4.3.tgz#8a2b4fe8ca895a48e3a0b6cbb340a0a6a3571899"
-  dependencies:
-    readable-stream "~1.1.9"
 
 github-from-package@0.0.0:
   version "0.0.0"
@@ -2727,7 +2669,7 @@ glob@^5.0.15, glob@^5.0.5:
     once "^1.3.0"
     path-is-absolute "^1.0.0"
 
-global@^4.3.0, global@^4.3.1, global@~4.3.0:
+global@^4.3.0, global@~4.3.0:
   version "4.3.1"
   resolved "https://registry.npmjs.org/global/-/global-4.3.1.tgz#5f757908c7cbabce54f386ae440e11e26b7916df"
   dependencies:
@@ -2899,14 +2841,6 @@ https-browserify@~0.0.0:
   version "0.0.1"
   resolved "https://registry.npmjs.org/https-browserify/-/https-browserify-0.0.1.tgz#3f91365cabe60b77ed0ebba24b454e3e09d95a82"
 
-husky@^0.12.0:
-  version "0.12.0"
-  resolved "https://registry.npmjs.org/husky/-/husky-0.12.0.tgz#3a44922fce8071803242c3c7522a6582c50525dc"
-  dependencies:
-    find-parent-dir "^0.3.0"
-    is-ci "^1.0.9"
-    normalize-path "^1.0.0"
-
 hyperquest@~1.2.0:
   version "1.2.0"
   resolved "https://registry.npmjs.org/hyperquest/-/hyperquest-1.2.0.tgz#39e1fef66888dc7ce0dec6c0dd814f6fc8944ad5"
@@ -2963,7 +2897,7 @@ inflight@^1.0.4:
     once "^1.3.0"
     wrappy "1"
 
-inherits@2, inherits@2.0.3, inherits@^2.0.1, inherits@^2.0.3, inherits@~2.0.0, inherits@~2.0.1, inherits@~2.0.3:
+inherits@2, inherits@2.0.3, inherits@^2.0.1, inherits@~2.0.0, inherits@~2.0.1, inherits@~2.0.3:
   version "2.0.3"
   resolved "https://registry.npmjs.org/inherits/-/inherits-2.0.3.tgz#633c2c83e3da42a502f52466022480f4208261de"
 
@@ -3038,10 +2972,6 @@ invert-kv@^1.0.0:
   version "1.0.0"
   resolved "https://registry.npmjs.org/invert-kv/-/invert-kv-1.0.0.tgz#104a8e4aaca6d3d8cd157a8ef8bfab2d7a3ffdb6"
 
-iota-array@^1.0.0:
-  version "1.0.0"
-  resolved "https://registry.npmjs.org/iota-array/-/iota-array-1.0.0.tgz#81ef57fe5d05814cd58c2483632a99c30a0e8087"
-
 is-arrayish@^0.2.1:
   version "0.2.1"
   resolved "https://registry.npmjs.org/is-arrayish/-/is-arrayish-0.2.1.tgz#77c99840527aa8ecb1a8ba697b80645a7a926a9d"
@@ -3065,12 +2995,6 @@ is-builtin-module@^1.0.0:
 is-callable@^1.1.1, is-callable@^1.1.3:
   version "1.1.3"
   resolved "https://registry.npmjs.org/is-callable/-/is-callable-1.1.3.tgz#86eb75392805ddc33af71c92a0eedf74ee7604b2"
-
-is-ci@^1.0.9:
-  version "1.0.10"
-  resolved "https://registry.npmjs.org/is-ci/-/is-ci-1.0.10.tgz#f739336b2632365061a9d48270cd56ae3369318e"
-  dependencies:
-    ci-info "^1.0.0"
 
 is-date-object@^1.0.1:
   version "1.0.1"
@@ -3223,14 +3147,6 @@ jodid25519@^1.0.0:
   resolved "https://registry.npmjs.org/jodid25519/-/jodid25519-1.0.2.tgz#06d4912255093419477d425633606e0e90782967"
   dependencies:
     jsbn "~0.1.0"
-
-jpeg-js@0.0.4:
-  version "0.0.4"
-  resolved "https://registry.npmjs.org/jpeg-js/-/jpeg-js-0.0.4.tgz#06aaf47efec7af0b1924a59cd695a6d2b5ed870e"
-
-jpeg-js@^0.1.1:
-  version "0.1.2"
-  resolved "https://registry.npmjs.org/jpeg-js/-/jpeg-js-0.1.2.tgz#135b992c0575c985cfa0f494a3227ed238583ece"
 
 js-tokens@^2.0.0:
   version "2.0.0"
@@ -3510,21 +3426,14 @@ lru-cache@^4.0.1:
     pseudomap "^1.0.1"
     yallist "^2.0.0"
 
-luma.gl@^2.10.3:
-  version "2.10.4"
-  resolved "https://registry.npmjs.org/luma.gl/-/luma.gl-2.10.4.tgz#c6952da21a972a65cb9142eea7ada8619bdb3a5d"
+luma.gl@3.0.0-alpha2:
+  version "3.0.0-alpha2"
+  resolved "https://registry.yarnpkg.com/luma.gl/-/luma.gl-3.0.0-alpha2.tgz#640b1b10d5e8545e04ad941f2253c0f583b370fd"
   dependencies:
     autobind-decorator "^1.3.3"
     babel-polyfill "^6.5.0"
-    canvas-to-blob "0.0.0"
-    filesaver.js "^0.2.0"
-    get-pixels "^3.3.0"
     gl-constants "^1.0.0"
     gl-matrix "^2.3.2"
-    global "^4.3.1"
-    ndarray "^1.0.18"
-    save-pixels "^2.3.2"
-    through "^2.3.8"
     webgl-debug "^1.0.2"
 
 map-limit@0.0.1:
@@ -3537,17 +3446,17 @@ map-obj@^1.0.0, map-obj@^1.0.1:
   version "1.0.1"
   resolved "https://registry.npmjs.org/map-obj/-/map-obj-1.0.1.tgz#d933ceb9205d82bdcf4886f6742bdc2b4dea146d"
 
-"mapbox-gl-function@github:mapbox/mapbox-gl-function#111a2b442be0689a65f5818dd2603c9b06962be0":
+mapbox-gl-function@mapbox/mapbox-gl-function#111a2b442be0689a65f5818dd2603c9b06962be0:
   version "1.3.0"
   resolved "https://codeload.github.com/mapbox/mapbox-gl-function/tar.gz/111a2b442be0689a65f5818dd2603c9b06962be0"
 
-"mapbox-gl-shaders@github:mapbox/mapbox-gl-shaders#44b65f8090a74cbb0319664d010b8d8a8a1512b0":
+mapbox-gl-shaders@mapbox/mapbox-gl-shaders#44b65f8090a74cbb0319664d010b8d8a8a1512b0:
   version "1.0.0"
   resolved "https://codeload.github.com/mapbox/mapbox-gl-shaders/tar.gz/44b65f8090a74cbb0319664d010b8d8a8a1512b0"
   dependencies:
     brfs "^1.4.0"
 
-"mapbox-gl-style-spec@github:mapbox/mapbox-gl-style-spec#7d330d2abf1775abc95ab8b889089cf5ff579357":
+mapbox-gl-style-spec@mapbox/mapbox-gl-style-spec#7d330d2abf1775abc95ab8b889089cf5ff579357:
   version "8.9.0"
   resolved "https://codeload.github.com/mapbox/mapbox-gl-style-spec/tar.gz/7d330d2abf1775abc95ab8b889089cf5ff579357"
   dependencies:
@@ -3646,7 +3555,7 @@ mime-db@~1.25.0:
   version "1.25.0"
   resolved "https://registry.npmjs.org/mime-db/-/mime-db-1.25.0.tgz#c18dbd7c73a5dbf6f44a024dc0d165a1e7b1c392"
 
-mime-types@^2.0.1, mime-types@^2.1.12, mime-types@~2.1.13, mime-types@~2.1.7:
+mime-types@^2.1.12, mime-types@~2.1.13, mime-types@~2.1.7:
   version "2.1.13"
   resolved "https://registry.npmjs.org/mime-types/-/mime-types-2.1.13.tgz#e07aaa9c6c6b9a7ca3012c69003ad25a39e92a88"
   dependencies:
@@ -3745,30 +3654,6 @@ nan@^2.3.0, nan@^2.3.2, nan@^2.3.3:
 natural-compare@^1.4.0:
   version "1.4.0"
   resolved "https://registry.npmjs.org/natural-compare/-/natural-compare-1.4.0.tgz#4abebfeed7541f2c27acfb29bdbbd15c8d5ba4f7"
-
-ndarray-ops@^1.2.2:
-  version "1.2.2"
-  resolved "https://registry.npmjs.org/ndarray-ops/-/ndarray-ops-1.2.2.tgz#59e88d2c32a7eebcb1bc690fae141579557a614e"
-  dependencies:
-    cwise-compiler "^1.0.0"
-
-ndarray-pack@^1.1.1:
-  version "1.2.1"
-  resolved "https://registry.npmjs.org/ndarray-pack/-/ndarray-pack-1.2.1.tgz#8caebeaaa24d5ecf70ff86020637977da8ee585a"
-  dependencies:
-    cwise-compiler "^1.1.2"
-    ndarray "^1.0.13"
-
-ndarray@^1.0.13, ndarray@^1.0.18:
-  version "1.0.18"
-  resolved "https://registry.npmjs.org/ndarray/-/ndarray-1.0.18.tgz#b60d3a73224ec555d0faa79711e502448fd3f793"
-  dependencies:
-    iota-array "^1.0.0"
-    is-buffer "^1.0.2"
-
-node-bitmap@0.0.1:
-  version "0.0.1"
-  resolved "https://registry.npmjs.org/node-bitmap/-/node-bitmap-0.0.1.tgz#180eac7003e0c707618ef31368f62f84b2a69091"
 
 node-fetch@^1.0.1:
   version "1.6.3"
@@ -3876,10 +3761,6 @@ normalize-package-data@^2.3.2, normalize-package-data@^2.3.4:
     semver "2 || 3 || 4 || 5"
     validate-npm-package-license "^3.0.1"
 
-normalize-path@^1.0.0:
-  version "1.0.0"
-  resolved "https://registry.npmjs.org/normalize-path/-/normalize-path-1.0.0.tgz#32d0e472f91ff345701c15a8311018d3b0a90379"
-
 normalize-path@^2.0.1:
   version "2.0.1"
   resolved "https://registry.npmjs.org/normalize-path/-/normalize-path-2.0.1.tgz#47886ac1662760d4261b7d979d241709d3ce3f7a"
@@ -3979,10 +3860,6 @@ object.omit@^2.0.0:
   dependencies:
     for-own "^0.1.4"
     is-extendable "^0.1.1"
-
-omggif@^1.0.5:
-  version "1.0.8"
-  resolved "https://registry.npmjs.org/omggif/-/omggif-1.0.8.tgz#178f37b2ab0b3d7b46ed3a0e46bd0790b58d3530"
 
 on-finished@~2.3.0:
   version "2.3.0"
@@ -4100,12 +3977,6 @@ parse-asn1@^5.0.0:
     evp_bytestokey "^1.0.0"
     pbkdf2 "^3.0.3"
 
-parse-data-uri@^0.2.0:
-  version "0.2.0"
-  resolved "https://registry.npmjs.org/parse-data-uri/-/parse-data-uri-0.2.0.tgz#bf04d851dd5c87b0ab238e5d01ace494b604b4c9"
-  dependencies:
-    data-uri-to-buffer "0.0.3"
-
 parse-glob@^3.0.4:
   version "3.0.4"
   resolved "https://registry.npmjs.org/parse-glob/-/parse-glob-3.0.4.tgz#b2c376cfb11f35513badd173ef0bb6e3a388391c"
@@ -4211,11 +4082,7 @@ pluralize@^1.2.1:
   version "1.2.1"
   resolved "https://registry.npmjs.org/pluralize/-/pluralize-1.2.1.tgz#d1a21483fd22bb41e58a12fa3421823140897c45"
 
-pngjs-nozlib@^1.0.0:
-  version "1.0.0"
-  resolved "https://registry.npmjs.org/pngjs-nozlib/-/pngjs-nozlib-1.0.0.tgz#9e64d602cfe9cce4d9d5997d0687429a73f0b7d7"
-
-pngjs@^2.0.0, pngjs@^2.2.0:
+pngjs@^2.2.0:
   version "2.3.1"
   resolved "https://registry.npmjs.org/pngjs/-/pngjs-2.3.1.tgz#11d1e12b9cb64d63e30c143a330f4c1f567da85f"
 
@@ -4519,7 +4386,7 @@ read-pkg@^1.0.0:
     normalize-package-data "^2.3.2"
     path-type "^1.0.0"
 
-"readable-stream@>=1.0.33-1 <1.1.0-0", readable-stream@~1.0.17, readable-stream@~1.0.27-1, readable-stream@~1.0.33-1:
+"readable-stream@>=1.0.33-1 <1.1.0-0", readable-stream@~1.0.17, readable-stream@~1.0.27-1:
   version "1.0.34"
   resolved "https://registry.npmjs.org/readable-stream/-/readable-stream-1.0.34.tgz#125820e34bc842d2f2aaafafe4c2916ee32c157c"
   dependencies:
@@ -4528,7 +4395,7 @@ read-pkg@^1.0.0:
     isarray "0.0.1"
     string_decoder "~0.10.x"
 
-readable-stream@^2.0.0, "readable-stream@^2.0.0 || ^1.1.13", readable-stream@^2.0.1, readable-stream@^2.0.2, readable-stream@^2.0.5, readable-stream@^2.1.0, readable-stream@^2.1.5, readable-stream@^2.2.2:
+readable-stream@^2.0.0, "readable-stream@^2.0.0 || ^1.1.13", readable-stream@^2.0.1, readable-stream@^2.0.2, readable-stream@^2.0.5, readable-stream@^2.1.0, readable-stream@^2.1.5:
   version "2.2.2"
   resolved "https://registry.npmjs.org/readable-stream/-/readable-stream-2.2.2.tgz#a9e6fec3c7dda85f8bb1b3ba7028604556fc825e"
   dependencies:
@@ -4679,7 +4546,7 @@ repeating@^2.0.0:
   dependencies:
     is-finite "^1.0.0"
 
-request@2, request@^2.39.0, request@^2.44.0, request@^2.45.0, request@^2.61.0, request@^2.79.0:
+request@2, request@^2.39.0, request@^2.45.0, request@^2.61.0, request@^2.79.0:
   version "2.79.0"
   resolved "https://registry.npmjs.org/request/-/request-2.79.0.tgz#4dfe5bf6be8b8cdc37fcf93e04b65577722710de"
   dependencies:
@@ -4829,18 +4696,6 @@ sassify@^2.0.0:
     cssify "^0.7.0"
     node-sass "^3.8.0"
     sass-module-importer "^1.2.1"
-
-save-pixels@^2.3.2:
-  version "2.3.4"
-  resolved "https://registry.npmjs.org/save-pixels/-/save-pixels-2.3.4.tgz#49d349c06b8d7c0127dbf0da24b44aca5afb59fe"
-  dependencies:
-    contentstream "^1.0.0"
-    gif-encoder "~0.4.1"
-    jpeg-js "0.0.4"
-    ndarray "^1.0.18"
-    ndarray-ops "^1.2.2"
-    pngjs-nozlib "^1.0.0"
-    through "^2.3.4"
 
 "semver@2 || 3 || 4 || 5", "semver@2.x || 3.x || 4 || 5", semver@^5.3.0, semver@~5.3.0:
   version "5.3.0"
@@ -5071,7 +4926,7 @@ static-eval@~0.2.0:
 
 static-module@^1.1.0:
   version "1.3.1"
-  resolved "https://registry.npmjs.org/static-module/-/static-module-1.3.1.tgz#79071d340e4419e4ab5ce87976a9eb67250c8493"
+  resolved "https://registry.yarnpkg.com/static-module/-/static-module-1.3.1.tgz#79071d340e4419e4ab5ce87976a9eb67250c8493"
   dependencies:
     concat-stream "~1.4.5"
     duplexer2 "~0.0.2"
@@ -5400,7 +5255,7 @@ through2@~0.4.1:
     readable-stream "~1.0.17"
     xtend "~2.1.1"
 
-"through@>=2.2.7 <3", through@^2.3.4, through@^2.3.6, through@^2.3.7, through@^2.3.8, through@~2.3.4, through@~2.3.8:
+"through@>=2.2.7 <3", through@^2.3.6, through@^2.3.7, through@~2.3.4, through@~2.3.8:
   version "2.3.8"
   resolved "https://registry.npmjs.org/through/-/through-2.3.8.tgz#0dd4c9ffaabc357960b1b724115d7e0e86a2e1f5"
 
@@ -5480,7 +5335,7 @@ type-is@~1.6.10:
     media-typer "0.3.0"
     mime-types "~2.1.13"
 
-typedarray@^0.0.6, typedarray@~0.0.5:
+typedarray@~0.0.5:
   version "0.0.6"
   resolved "https://registry.npmjs.org/typedarray/-/typedarray-0.0.6.tgz#867ac74e3864187b1d3d47d996a78ec5c8830777"
 
@@ -5535,10 +5390,6 @@ unassertify@^2.0.0:
 underscore@~1.6.0:
   version "1.6.0"
   resolved "https://registry.npmjs.org/underscore/-/underscore-1.6.0.tgz#8b38b10cacdef63337b8b24e4ff86d45aea529a8"
-
-uniq@^1.0.0:
-  version "1.0.1"
-  resolved "https://registry.npmjs.org/uniq/-/uniq-1.0.1.tgz#b31c5ae8254844a3a8281541ce2b04b865a734ff"
 
 unitbezier@^0.0.0:
   version "0.0.0"

@@ -44,6 +44,7 @@ export default class LayerControls extends Component {
       <div className="layer-controls" style={{marginTop: 0, padding: 0, width: 270}}>
         <h4>Layer Controls</h4>
         {this._renderSlider('separation', {}, settings.separation, 'Separation')}
+        {this._renderSlider('rotation', {}, settings.rotation, 'Rotation')}
       </div>
     );
   }
