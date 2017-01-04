@@ -1,6 +1,22 @@
 /* global window */
 import {GL, glContextWithState} from 'luma.gl';
 
+export function drawLayers({layers}) {
+  let layerIndex = 0;
+  for (const layer of layers) {
+    if (layer.props.visible) {
+      layer.drawLayer({
+        uniforms: {
+          ...layer.context.uniforms,
+          ...layer.context.webglViewport.getUniforms(layer.props),
+          layerIndex
+        }
+      });
+      layerIndex++;
+    }
+  }
+}
+
 /* eslint-disable max-depth, max-statements */
 export function pickLayers(gl, {
   layers,
@@ -27,12 +43,19 @@ export function pickLayers(gl, {
     framebuffer: pickingFBO,
     scissorTest: {x: deviceX, y: deviceY, w: 1, h: 1}
   }, () => {
+
+    let layerIndex = 0;
     let zOrder = 0;
 
     for (let i = layers.length - 1; i >= 0; --i) {
       const layer = layers[i];
 
+      if (layer.props.visible) {
+        layerIndex++;
+      }
+
       if (layer.props.visible && layer.props.pickable) {
+
         // Clear the frame buffer, render and sample
         gl.clear(GL.COLOR_BUFFER_BIT | GL.DEPTH_BUFFER_BIT);
         const info = createInfo({
@@ -44,7 +67,11 @@ export function pickLayers(gl, {
 
         layer.pickLayer({
           info,
-          uniforms,
+          uniforms: {
+            ...layer.context.uniforms,
+            ...layer.context.webglViewport.getUniforms(layer.props),
+            layerIndex
+          },
           pickEnableUniforms: {renderPickingBuffer: 1, pickingEnabled: 1},
           pickDisableUniforms: {renderPickingBuffer: 0, pickingEnabled: 0},
           deviceX, deviceY,
