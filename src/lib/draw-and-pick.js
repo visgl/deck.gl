@@ -1,5 +1,6 @@
 /* global window */
 import {GL, glContextWithState} from 'luma.gl';
+import {getUniformsFromViewport} from './viewport-uniforms';
 
 export function drawLayers({layers}) {
   let layerIndex = 0;
@@ -8,7 +9,7 @@ export function drawLayers({layers}) {
       layer.drawLayer({
         uniforms: {
           ...layer.context.uniforms,
-          ...layer.context.webglViewport.getUniforms(layer.props),
+          ...getUniformsFromViewport(layer.context.viewport, layer.props),
           layerIndex
         }
       });
@@ -69,7 +70,7 @@ export function pickLayers(gl, {
           info,
           uniforms: {
             ...layer.context.uniforms,
-            ...layer.context.webglViewport.getUniforms(layer.props),
+            ...getUniformsFromViewport(layer.context.viewport, layer.props),
             layerIndex
           },
           pickEnableUniforms: {renderPickingBuffer: 1, pickingEnabled: 1},

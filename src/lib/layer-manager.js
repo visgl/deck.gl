@@ -31,7 +31,6 @@ import Layer from './layer';
 import {log} from './utils';
 import assert from 'assert';
 import {drawLayers, pickLayers} from './draw-and-pick';
-import WebGLViewport from './webgl-viewport';
 import {Viewport} from 'viewport-mercator-project';
 import {FramebufferObject} from 'luma.gl';
 
@@ -46,7 +45,6 @@ export default class LayerManager {
     this.context = {
       gl,
       uniforms: {},
-      webglViewport: null,
       viewport: null,
       viewportChanged: true,
       pickingFBO: null
@@ -62,7 +60,6 @@ export default class LayerManager {
 
     if (viewportChanged) {
       Object.assign(this.oldContext, this.context);
-      this.context.webglViewport = new WebGLViewport({viewport});
       this.context.viewport = viewport;
       this.context.viewportChanged = true;
       this.context.uniforms = {};

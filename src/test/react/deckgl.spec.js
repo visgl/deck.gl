@@ -4,7 +4,6 @@ import React from 'react';
 import utils from 'react-addons-test-utils';
 
 import DeckGL from '../../../react';
-import 'luma.gl/headless';
 import {Viewport, WebMercatorViewport} from 'viewport-mercator-project';
 
 const TEST_DATA = {

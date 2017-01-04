@@ -60,6 +60,7 @@
     "eslint-config-uber-jsx": "^3.0.0",
     "eslint-plugin-react": "^6.0.0",
     "faucet": "0.0.1",
+    "gl": "^4.0.2",
     "highlight.js": "^9.7.0",
     "immutable": "^3.7.5",
     "luma.gl": "^2.10.3",
@@ -116,7 +117,7 @@
     "test-headless-src": "babel-node --only=deck.gl/test,deck.gl/src,deck.gl/shaderlib src/test/headless.js",
     "test-browser": "mkdir -p build && budo src/test/browser.js:build/test-bundle.js --dir test --live --open --port 3001 --watch-glob '**/*.{html,css,scss,js,glsl}' -- -t babelify -t brfs-babel",
     "test-electron": "browserify dist/test/electron.js | testron | faucet",
-    "test-shader": "npm run build-dist && budo src/test/shader.js:build/test-bundle.js --dir test --live --open --port 3001 --watch-glob '**/*.{html,css,scss,js,glsl}' -- -t babelify -t brfs-babel",
+    "test-shader": "npm run build-dist && budo src/test/fp64-shader.spec.js:build/test-bundle.js --dir test --live --open --port 3001 --watch-glob '**/*.{html,css,scss,js,glsl}' -- -t babelify -t brfs-babel",
     "profile-disc": "browserify src/bundle.js --full-paths -t babelify -t brfs-babel | uglifyjs | discify --open",
     "start": "budo example/app.js --live --open --port 3000 --css example/main.css --title 'deck.gl' --watch-glob '**/*.{html,css,js,glsl}' -- -t brfs-babel -t babelify -t envify"
   }
