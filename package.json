@@ -30,11 +30,9 @@
     "earcut": "^2.0.6",
     "extrude-polyline": "^1.0.6",
     "geojson-normalize": "0.0.1",
-    "get-pixels": "^3.3.0",
     "gl-matrix": "^2.3.2",
     "lodash.flattendeep": "^4.4.0",
     "react-autobind": "^1.0.6",
-    "save-pixels": "^2.3.0",
     "viewport-mercator-project": "3.0.0-beta4"
   },
   "devDependencies": {
