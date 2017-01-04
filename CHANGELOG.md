@@ -20,6 +20,10 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## Recent Dev Releases
 
+#### [v3.1.0-beta2] - Use new `Viewport` from `viewport-mercator-project`
+- FIX: modelMatrix now applied correctly in both drawing and picking
+- NEW: Main example now has slider to separate layers
+
 #### [v3.1.0-beta1] - Use new `Viewport` from `viewport-mercator-project`
 
 - NEW: Support for per-layer model matrices (layer.modelMatrix props)
