@@ -1,6 +1,6 @@
-import {COORDINATE_SYSTEM} from 'viewport-mercator-project';
 import {vec4} from 'gl-matrix';
 import assert from 'assert';
+import {COORDINATE_SYSTEM} from './constants';
 
 function fp64ify(a) {
   const hiPart = Math.fround(a);
