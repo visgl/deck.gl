@@ -20,7 +20,14 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## Recent Dev Releases
 
-#### [v3.1.0-beta2] - Use new `Viewport` from `viewport-mercator-project`
+
+#### [v3.1.0-beta4] -
+- FIX: Restore `COORDINATE_SYSTEM` export
+
+#### [v3.1.0-beta3] -
+- CHANGE: Move shaderlib into src, remove unneeded scripts
+
+#### [v3.1.0-beta2] - Working modelMatrix
 - FIX: modelMatrix now applied correctly in both drawing and picking
 - NEW: Main example now has slider to separate layers
 
