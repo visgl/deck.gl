@@ -21,6 +21,12 @@ Ref: http://keepachangelog.com/en/0.3.0/
 ## Recent Dev Releases
 
 
+#### [v3.1.0-beta5] -
+- FIX: Disable viewport comparison (temporarily) as it broke `METERS` mode.
+- CHANGE: Remove react-autobind dependency (deck.gl/react now includes a minimal
+  `autobind` implementation).
+- NEW: Additional examples included, including (WIP) google maps.
+
 #### [v3.1.0-beta4] -
 - FIX: Restore `COORDINATE_SYSTEM` export
 
