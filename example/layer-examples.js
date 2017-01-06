@@ -12,7 +12,7 @@ import {
   LineLayer64,
 
   EnhancedChoroplethLayer
-} from '../src';
+} from 'deck.gl';
 
 const ArcLayerExample = props =>
   new ArcLayer({

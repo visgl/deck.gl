@@ -20,7 +20,7 @@
 
 /* global window */
 import React, {PropTypes} from 'react';
-import autobind from 'autobind-decorator';
+import autobind from 'react-autobind';
 import {createGLContext} from 'luma.gl';
 /* global requestAnimationFrame, cancelAnimationFrame */
 
@@ -84,6 +84,7 @@ export default class WebGLRenderer extends React.Component {
     this.state = {};
     this._animationFrame = null;
     this.gl = null;
+    autobind(this);
   }
 
   componentDidMount() {
@@ -123,7 +124,6 @@ export default class WebGLRenderer extends React.Component {
   /**
    * Main WebGL animation loop
    */
-  @autobind
   _animationLoop() {
     this._renderFrame();
     // Keep registering ourselves for the next animation frame

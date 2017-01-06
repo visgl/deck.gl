@@ -32,13 +32,14 @@
     "geojson-normalize": "0.0.1",
     "gl-matrix": "^2.3.2",
     "lodash.flattendeep": "^4.4.0",
+    "react": "^15.4.1",
     "react-autobind": "^1.0.6",
     "viewport-mercator-project": "3.0.0-beta4"
   },
   "devDependencies": {
     "babel-cli": "^6.3.15",
     "babel-core": "^6.7.7",
-    "babel-eslint": "^6.0.0",
+    "babel-eslint": "^7.0.0",
     "babel-plugin-static-fs": "^1.1.0",
     "babel-plugin-transform-decorators-legacy": "^1.3.4",
     "babel-preset-es2015": "^6.3.13",
@@ -62,10 +63,10 @@
     "faucet": "0.0.1",
     "gl": "^4.0.2",
     "highlight.js": "^9.7.0",
+    "husky": "^0.12.0",
     "immutable": "^3.7.5",
     "luma.gl": "3.0.0-alpha2",
     "marked": "^0.3.6",
-    "react": "^15.3.2",
     "react-addons-test-utils": "^15.0.2",
     "react-dom": "^15.3.2",
     "react-map-gl": "^1.7.2",
@@ -104,17 +105,17 @@
     "demo-publish": "npm run build && npm run demo-build && git add dist-demo -f && git commit -m 'UPDATE DOCS' --no-verify && npm run demo-gh-pages",
     "demo-publish-force": "npm run build && npm run demo-build && git add dist-demo -f && git commit -m 'UPDATE DOCS' --no-verify && npm run demo-gh-pages-force",
     "lint": "eslint src exhibits/app.js",
-    "precommit": "npm test",
+    "precommit": "node --version && npm test",
     "publish-prod": "npm run build && npm run test-fast && npm publish",
     "publish-beta": "npm run build && npm run test-fast && npm publish --tag beta",
     "test": "npm run lint && npm run build-dist && npm run test-headless",
     "test-fast": "npm run lint && npm run test-headless",
     "test-headless": "node dist/test/headless.js",
     "test-headless-src": "babel-node --only=deck.gl/test,deck.gl/src,deck.gl/shaderlib src/test/headless.js",
-    "test-browser": "mkdir -p build && budo src/test/browser.js:build/test-bundle.js --dir test --live --open --port 3001 --watch-glob '**/*.{html,css,scss,js,glsl}' -- -t babelify -t brfs-babel",
+    "test-browser": "mkdir -p build && budo dist/test/browser.js --dir test --live --open --port 3001 --watch-glob '**/*.{html,css,scss,js,glsl}' -- --include=''",
     "test-electron": "browserify dist/test/electron.js | testron | faucet",
     "test-shader": "npm run build-dist && budo src/test/fp64-shader.spec.js:build/test-bundle.js --dir test --live --open --port 3001 --watch-glob '**/*.{html,css,scss,js,glsl}' -- -t babelify -t brfs-babel",
     "profile-disc": "browserify src/bundle.js --full-paths -t babelify -t brfs-babel | uglifyjs | discify --open",
-    "start": "budo example/app.js --live --open --port 3000 --css example/main.css --title 'deck.gl' --watch-glob '**/*.{html,css,js,glsl}' -- -t babelify -t brfs-babel"
+    "start": "npm run build-watch && budo example/app.js:example/bundle.js --live --open --port 3000 --css example/main.css --title 'deck.gl' --watch-glob '**/*.{html,css,js,glsl}' -- -t brfs-babel -t babelify -t envify"
   }
 }

@@ -33,7 +33,7 @@ function renderExampleCategories({examples, activeExamples, onChange}) {
     const category = examples[categoryName];
     children.push(
       <div key={categoryName}>
-        { categoryName }
+        <h4>{ categoryName }</h4>
         { renderExampleButtons({examples: category, activeExamples, onChange}) }
       </div>
     );

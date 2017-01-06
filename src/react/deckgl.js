@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 import React, {PropTypes} from 'react';
-import autobind from 'autobind-decorator';
+import autobind from 'react-autobind';
 import WebGLRenderer from './webgl-renderer';
 import {LayerManager, Layer} from '../lib';
 import {EffectManager, Effect} from '../experimental';
@@ -60,6 +60,7 @@ export default class DeckGL extends React.Component {
     this.needsRedraw = true;
     this.layerManager = null;
     this.effectManager = null;
+    autobind(this);
   }
 
   componentWillReceiveProps(nextProps) {
@@ -82,7 +83,7 @@ export default class DeckGL extends React.Component {
     }
   }
 
-  @autobind _onRendererInitialized({gl, canvas}) {
+  _onRendererInitialized({gl, canvas}) {
     gl.enable(GL.BLEND);
     gl.blendFunc(GL.SRC_ALPHA, GL.ONE_MINUS_SRC_ALPHA);
 
@@ -116,7 +117,7 @@ export default class DeckGL extends React.Component {
   }
 
   // Route events to layers
-  @autobind _onClick(event) {
+  _onClick(event) {
     const {x, y} = event;
     const selectedInfos = this.layerManager.pickLayer({x, y, mode: 'click'});
     const firstInfo = selectedInfos.find(info => info.index >= 0);
@@ -125,7 +126,7 @@ export default class DeckGL extends React.Component {
   }
 
   // Route events to layers
-  @autobind _onMouseMove(event) {
+  _onMouseMove(event) {
     const {x, y} = event;
     const selectedInfos = this.layerManager.pickLayer({x, y, mode: 'hover'});
     const firstInfo = selectedInfos.find(info => info.index >= 0);
@@ -133,7 +134,7 @@ export default class DeckGL extends React.Component {
     this.props.onLayerHover(firstInfo, selectedInfos, event.event);
   }
 
-  @autobind _onRenderFrame({gl}) {
+  _onRenderFrame({gl}) {
     if (!this.layerManager.needsRedraw({clearRedrawFlags: true})) {
       return;
     }

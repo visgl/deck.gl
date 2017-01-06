@@ -1,8 +1,8 @@
 /* global fetch, window, document */
 import 'babel-polyfill';
 
-import {ReflectionEffect} from '../src/experimental';
-import DeckGL from '../src/react';
+import {ReflectionEffect} from 'deck.gl/experimental';
+import DeckGL from 'deck.gl/react';
 
 import {Matrix4} from 'luma.gl';
 import {mat4} from 'gl-matrix';
@@ -28,10 +28,10 @@ import {csvParse} from 'd3-dsv';
 import assert from 'assert';
 assert(window.fetch, 'fetch API not supported by browser');
 
-const CHOROPLETHS_FILE = './example/data/sf.zip.geo.json';
-const EXTRUDED_CHOROPLETHS_FILE = '../example/data/sf.zip.geo.json';
-const HEXAGONS_FILE = './example/data/hexagons.csv';
-const POINTS_FILE = './example/data/sf.bike.parking.csv';
+const CHOROPLETHS_FILE = './data/sf.zip.geo.json';
+const EXTRUDED_CHOROPLETHS_FILE = '../data/sf.zip.geo.json';
+const HEXAGONS_FILE = './data/hexagons.csv';
+const POINTS_FILE = './data/sf.bike.parking.csv';
 
 /* eslint-disable no-process-env */
 const MAPBOX_ACCESS_TOKEN = process.env.MAPBOX_ACCESS_TOKEN || // eslint-disable-line
@@ -477,23 +477,17 @@ class ExampleApp extends React.Component {
     const {mapViewState} = this.props;
     const {width, height} = this.state;
     return (
-      <div>
+      <MapboxGLMap
+        mapboxApiAccessToken={MAPBOX_ACCESS_TOKEN}
+        width={width}
+        height={height}
+        perspectiveEnabled
+        { ...mapViewState }
+        onChangeViewport={this._handleViewportChanged}>
         { this._renderOverlay() }
-        <FPSStats isActive top="5px" left="5px" bottom="auto" right="auto"/>
-      </div>
+        <FPSStats isActive/>
+      </MapboxGLMap>
     );
-    // return (
-    //   <MapboxGLMap
-    //     mapboxApiAccessToken={MAPBOX_ACCESS_TOKEN}
-    //     width={width}
-    //     height={height}
-    //     perspectiveEnabled
-    //     { ...mapViewState }
-    //     onChangeViewport={this._handleViewportChanged}>
-    //     { this._renderOverlay() }
-    //     <FPSStats isActive/>
-    //   </MapboxGLMap>
-    // );
   }
 
   render() {
@@ -511,7 +505,7 @@ class ExampleApp extends React.Component {
         </div>
         */
         }
-        <div style={{position: 'absolute', top: 20, bottom: 100, right: 0, zIndex: 98}}>
+        <div style={{position: 'absolute', top: 20, bottom: 180, right: 0, zIndex: 98}}>
           <LayerSelector { ...this.state }
             examples={LAYER_CATEGORIES}
             onChange={this._onChangeLayers}/>
