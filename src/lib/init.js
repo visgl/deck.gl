@@ -1,5 +1,5 @@
 // Version detection
-import {version} from '../package.json';
+import {version} from '../../package.json';
 
 const STARTUP_MESSAGE = 'set deck.log.priority=2 to trace attribute updates';
 
