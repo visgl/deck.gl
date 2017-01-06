@@ -37,8 +37,6 @@ const POINTS_FILE = './data/sf.bike.parking.csv';
 const MAPBOX_ACCESS_TOKEN = process.env.MAPBOX_ACCESS_TOKEN || // eslint-disable-line
   'Set MAPBOX_ACCESS_TOKEN environment variable or put your token here.';
 
-console.log('Mapbox token:', MAPBOX_ACCESS_TOKEN);
-
 const INITIAL_STATE = {
   mapViewState: {
     latitude: 37.751537058389985,
@@ -507,7 +505,7 @@ class ExampleApp extends React.Component {
         </div>
         */
         }
-        <div style={{position: 'absolute', top: 20, bottom: 100, right: 0, zIndex: 98}}>
+        <div style={{position: 'absolute', top: 20, bottom: 180, right: 0, zIndex: 98}}>
           <LayerSelector { ...this.state }
             examples={LAYER_CATEGORIES}
             onChange={this._onChangeLayers}/>
