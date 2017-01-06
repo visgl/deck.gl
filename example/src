@@ -1,7 +1,0 @@
-{
-  "presets": ["es2015", "stage-2", "react"],
-  "plugins": [
-    "static-fs",
-    "transform-decorators-legacy"
-  ]
-}
