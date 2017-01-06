@@ -2,7 +2,7 @@
 import 'babel-polyfill';
 
 import {ReflectionEffect} from 'deck.gl/experimental';
-import DeckGL from 'deck.gl/react';
+import DeckGL, {autobind} from 'deck.gl/react';
 
 import {Matrix4} from 'luma.gl';
 import {mat4} from 'gl-matrix';
@@ -11,7 +11,6 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import {createStore} from 'redux';
 import {Provider, connect} from 'react-redux';
-import autobind from 'react-autobind';
 
 import MapboxGLMap from 'react-map-gl';
 import {FPSStats} from 'react-stats';
@@ -439,14 +438,13 @@ class ExampleApp extends React.Component {
 
   _getModelMatrix(index) {
     const {settings: {separation, rotation}} = this.state;
-    const {mapViewState: {longitude, latitude}} = this.props;
+    // const {mapViewState: {longitude, latitude}} = this.props;
     // const modelMatrix = new Matrix4().fromTranslation([0, 0, 1000 * index * separation]);
     const modelMatrix =
       mat4.fromTranslation(mat4.create(), [0, 0, 300 * index * separation, 0]);
     // mat4.translate(modelMatrix, modelMatrix, [-longitude, -latitude, 0]);
     mat4.rotateZ(modelMatrix, modelMatrix, index * rotation * Math.PI / 10000);
     // mat4.translate(modelMatrix, modelMatrix, [longitude, latitude, 0]);
-    console.log('Model matrix', modelMatrix); // eslint-disable-line
     return modelMatrix;
   }
 
