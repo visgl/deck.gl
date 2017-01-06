@@ -54,6 +54,8 @@ export function getUniformsFromViewport(viewport, {
   const projectionCenter =
     vec4.transformMat4([], projectedPositionOrigin, modelViewProjectionMatrix);
 
+  console.log(viewport, projectedPositionOrigin, projectionCenter); // eslint-disable-line
+
   return {
     // Projection mode values
     projectionMode,
