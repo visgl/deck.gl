@@ -1,0 +1,26 @@
+{
+  "name": "deckgl-hello-world",
+  "version": "0.0.0",
+  "license": "MIT",
+  "scripts": {
+    "compile": "mkdir -p dest && buble -i app.js -o dest/app.js --no modules --target chrome:52",
+    "serve": "budo ./app.js --open -- -t bubleify -t rollupify -t envify",
+    "start": "npm run compile && npm run serve"
+  },
+  "dependencies": {
+    "babel-polyfill": "^6.16.0",
+    "deck.gl": "^3.1.1",
+    "immutable": "^3.8.1",
+    "luma.gl": "^2.10.3",
+    "react": "^15.4.1",
+    "react-dom": "^15.4.1",
+    "react-map-gl": "^1.7.2"
+  },
+  "devDependencies": {
+    "buble": "^0.15.1",
+    "bubleify": "^0.7.0",
+    "budo": "^9.2.2",
+    "envify": "^4.0.0",
+    "rollupify": "^0.3.7"
+  }
+}

@@ -20,7 +20,7 @@
 
 /* global window */
 import React, {PropTypes} from 'react';
-import autobind from 'react-autobind';
+import autobind from './autobind';
 import {createGLContext} from 'luma.gl';
 /* global requestAnimationFrame, cancelAnimationFrame */
 
@@ -43,10 +43,8 @@ export default class WebGLRenderer extends React.Component {
     glOptions: PropTypes.object,
     debug: PropTypes.bool,
 
-    onRendererInitialized: PropTypes.func.isRequired,
     onInitializationFailed: PropTypes.func,
-    onError: PropTypes.func,
-
+    onRendererInitialized: PropTypes.func.isRequired,
     onRenderFrame: PropTypes.func,
     onMouseMove: PropTypes.func,
     onClick: PropTypes.func
@@ -59,13 +57,10 @@ export default class WebGLRenderer extends React.Component {
     debug: false,
     pixelRatio: DEFAULT_PIXEL_RATIO,
 
-    onRendererInitialized: () => {},
     onInitializationFailed: error => {
       throw error;
     },
-    onError: error => {
-      throw error;
-    },
+    onRendererInitialized: () => {},
     onRenderFrame: () => {}
   };
 
