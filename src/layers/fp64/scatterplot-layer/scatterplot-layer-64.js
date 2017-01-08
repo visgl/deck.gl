@@ -30,42 +30,20 @@ const defaultGetPosition = x => x.position;
 const defaultGetRadius = x => x.radius;
 const defaultGetColor = x => x.color || DEFAULT_COLOR;
 
+const defaultProps = {
+  getPosition: defaultGetPosition,
+  getRadius: defaultGetRadius,
+  getColor: defaultGetColor,
+  radius: 30,
+  radiusMinPixels: 0,
+  radiusMaxPixels: Number.MAX_SAFE_INTEGER,
+  drawOutline: false,
+  strokeWidth: 1
+};
+
 export default class ScatterplotLayer64 extends Layer {
-
-  static layerName = 'ScatterplotLayer64';
-
-  /*
-   * @classdesc
-   * ScatterplotLayer
-   *
-   * @class
-   * @param {object} props
-   * @param {number} props.radius - point radius
-   * @param {number} props.radiusMinPixels - min point radius in pixels
-   * @param {number} props.radiusMinPixels - max point radius in pixels
-   */
-  constructor({
-    getPosition = defaultGetPosition,
-    getRadius = defaultGetRadius,
-    getColor = defaultGetColor,
-    radius = 30,
-    radiusMinPixels = 0,
-    radiusMaxPixels = Number.MAX_SAFE_INTEGER,
-    drawOutline = false,
-    strokeWidth = 1,
-    ...props
-  }) {
-    super({
-      getPosition,
-      getRadius,
-      getColor,
-      radius,
-      drawOutline,
-      strokeWidth,
-      radiusMinPixels,
-      radiusMaxPixels,
-      ...props
-    });
+  constructor(props) {
+    super({...defaultProps, ...props});
   }
 
   initializeState() {
@@ -189,3 +167,5 @@ export default class ScatterplotLayer64 extends Layer {
     this.state.zoomRadiusFP64 = fp64ify(radius);
   }
 }
+
+ScatterplotLayer64.layerName = 'ScatterplotLayer64';

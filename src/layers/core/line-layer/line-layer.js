@@ -25,35 +25,16 @@ import {join} from 'path';
 
 const DEFAULT_COLOR = [0, 255, 0, 255];
 
-const defaultGetSourcePosition = x => x.sourcePosition;
-const defaultGetTargetPosition = x => x.targetPosition;
-const defaultGetColor = x => x.color || DEFAULT_COLOR;
+const defaultProps = {
+  getSourcePosition: x => x.sourcePosition,
+  getTargetPosition: x => x.targetPosition,
+  getColor: x => x.color || DEFAULT_COLOR,
+  strokeWidth: 1
+};
 
 export default class LineLayer extends Layer {
-
-  static layerName = 'LineLayer';
-
-  /**
-   * @classdesc
-   * LineLayer
-   *
-   * @class
-   * @param {object} opts
-   */
-  constructor({
-    getSourcePosition = defaultGetSourcePosition,
-    getTargetPosition = defaultGetTargetPosition,
-    getColor = defaultGetColor,
-    strokeWidth = 1,
-    ...opts
-  } = {}) {
-    super({
-      getSourcePosition,
-      getTargetPosition,
-      getColor,
-      strokeWidth,
-      ...opts
-    });
+  constructor(props) {
+    super({...defaultProps, ...props});
   }
 
   initializeState() {
@@ -145,5 +126,6 @@ export default class LineLayer extends Layer {
       i += size;
     }
   }
-
 }
+
+LineLayer.layerName = 'LineLayer';

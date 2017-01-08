@@ -32,7 +32,6 @@
     "geojson-normalize": "0.0.1",
     "gl-matrix": "^2.3.2",
     "lodash.flattendeep": "^4.4.0",
-    "react": "^15.4.1",
     "viewport-mercator-project": "3.0.0-beta4"
   },
   "devDependencies": {
@@ -48,6 +47,8 @@
     "babelify": "^7.2.0",
     "brfs-babel": "^1.0.0",
     "browserify": "^13.0.0",
+    "buble": "^0.15.1",
+    "buble-loader": "^0.4.0",
     "budo": "^9.0.0",
     "d3-color": "^1.0.1",
     "d3-request": "^1.0.2",
@@ -62,12 +63,12 @@
     "faucet": "0.0.1",
     "gl": "^4.0.2",
     "highlight.js": "^9.7.0",
-    "husky": "^0.12.0",
     "immutable": "^3.7.5",
     "luma.gl": "3.0.0-alpha2",
     "marked": "^0.3.6",
-    "react-addons-test-utils": "^15.0.2",
-    "react-dom": "^15.3.2",
+    "react": "^15.4.0",
+    "react-addons-test-utils": "^15.4.2",
+    "react-dom": "^15.4.0",
     "react-map-gl": "^1.7.2",
     "react-redux": "^4.4.5",
     "react-router": "^2.8.1",
@@ -81,7 +82,15 @@
     "tape-catch": "^1.0.4",
     "testron": "^1.2.0",
     "tween.js": "^16.3.5",
-    "uglify-js": "^2.6.1"
+    "uglify-js": "^2.6.1",
+    "module-alias": "^2.0.0",
+    "pre-commit": "^1.2.2",
+    "react-dom": "^15.4.0",
+    "reify": "^0.4.4",
+    "tap-browser-color": "^0.1.2",
+    "tape": "^4.5.1",
+    "tape-catch": "^1.0.4",
+    "webpack": "^2.2.0-rc.3"
   },
   "peerDependencies": {
     "luma.gl": "3.0.0-alpha2",
@@ -89,6 +98,13 @@
     "react-dom": "0.14.x - 15.x"
   },
   "scripts": {
+    "wp-start": "(cd examples/main && yarn && npm start)",
+    "wp-compile": "rm -fr dist && buble src -o dist --no modules --y dangerousForOf --objectAssign",
+    "wp-build": "rm -fr dist && buble src -o dist --no modules --y dangerousForOf --objectAssign && webpack -d",
+    "wp-test": "npm run lint && npm run wp-test-node",
+    "wp-test-node": "npm run wp-build && node test/node.js",
+    "wp-test-browser": "npm run wp-build && echo 'To be restored'",
+
     "build": "npm run build-dist && npm run build-script",
     "build-clean": "rm -fr dist/*",
     "build-dist": "npm run build-clean && babel src -d dist --source-maps inline --copy-files",
@@ -103,7 +119,7 @@
     "demo-gh-pages-force": "git push origin `git subtree split --prefix dist-demo master`:gh-pages --force",
     "demo-publish": "npm run build && npm run demo-build && git add dist-demo -f && git commit -m 'UPDATE DOCS' --no-verify && npm run demo-gh-pages",
     "demo-publish-force": "npm run build && npm run demo-build && git add dist-demo -f && git commit -m 'UPDATE DOCS' --no-verify && npm run demo-gh-pages-force",
-    "lint": "eslint src exhibits/app.js",
+    "lint": "eslint src test exhibits/app.js examples",
     "precommit": "node --version && npm test",
     "publish-prod": "npm run build && npm run test-fast && npm publish",
     "publish-beta": "npm run build && npm run test-fast && npm publish --tag beta",

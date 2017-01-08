@@ -30,33 +30,17 @@ const defaultGetSourcePosition = x => x.sourcePosition;
 const defaultGetTargetPosition = x => x.targetPosition;
 const defaultGetColor = x => x.color;
 
+const defaultProps = {
+  getSourcePosition: defaultGetSourcePosition,
+  getTargetPosition: defaultGetTargetPosition,
+  getSourceColor: defaultGetColor,
+  getTargetColor: defaultGetColor,
+  strokeWidth: 1
+};
+
 export default class ArcLayer64 extends Layer {
-
-  static layerName = 'ArcLayer64';
-
-  /**
-   * @classdesc
-   * ArcLayer
-   *
-   * @class
-   * @param {object} props
-   */
-  constructor({
-    getSourcePosition = defaultGetSourcePosition,
-    getTargetPosition = defaultGetTargetPosition,
-    getSourceColor = defaultGetColor,
-    getTargetColor = defaultGetColor,
-    strokeWidth = 1,
-    ...props
-  } = {}) {
-    super({
-      getSourcePosition,
-      getTargetPosition,
-      getSourceColor,
-      getTargetColor,
-      strokeWidth,
-      ...props
-    });
+  constructor(props) {
+    super({...props, ...defaultProps});
   }
 
   initializeState() {
@@ -177,5 +161,6 @@ export default class ArcLayer64 extends Layer {
       i += size;
     }
   }
-
 }
+
+ArcLayer64.layerName = 'ArcLayer64';

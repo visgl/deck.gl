@@ -27,40 +27,18 @@ import extrudePolyline from 'extrude-polyline';
 import {readFileSync} from 'fs';
 import {join} from 'path';
 
+const defaultProps = {
+  getColor: null,
+  fillColor: [128, 128, 128],
+  drawContour: true,
+  strokeWidth: 3,
+  strokeColor: [0, 0, 0],
+  elevation: 0
+};
+
 export default class EnhancedChoroplethLayer extends Layer {
-
-  static layerName = 'EnhancedChoroplethLayer';
-
-  /**
-   * @classdesc
-   * ChoroplethLayer
-   *
-   * @class
-   * @param {object} props
-   * @param {bool} props.drawContour - ? drawContour : drawArea
-   * @param {function} props.onChoroplethHovered - provide properties of the
-   *     selected choropleth, together with the mouse event when mouse hovered
-   * @param {function} props.onChoroplethClicked - provide properties of the
-   *     selected choropleth, together with the mouse event when mouse clicked
-   */
-  constructor({
-    getColor = null,
-    fillColor = [128, 128, 128],
-    drawContour = true,
-    strokeWidth = 3,
-    strokeColor = [0, 0, 0],
-    elevation = 0,
-    ...props
-  }) {
-    super({
-      getColor,
-      fillColor,
-      drawContour,
-      strokeWidth,
-      strokeColor,
-      elevation,
-      ...props
-    });
+  constructor(props) {
+    super({...defaultProps, ...props});
   }
 
   initializeState() {
@@ -251,3 +229,5 @@ export default class EnhancedChoroplethLayer extends Layer {
     }
   }
 }
+
+EnhancedChoroplethLayer.layerName = 'EnhancedChoroplethLayer';

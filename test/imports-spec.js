@@ -1,17 +1,14 @@
 import test from 'tape-catch';
 import 'luma.gl';
 
-import DeckGL from '../../react';
+import DeckGL from 'deck.gl/react';
 
 import {
-  Layer,
-  ChoroplethLayer, ScatterplotLayer, ScreenGridLayer, ArcLayer, LineLayer,
-  COORDINATE_SYSTEM
-} from '../..';
+  Layer, COORDINATE_SYSTEM,
+  ChoroplethLayer, ScatterplotLayer, ScreenGridLayer, ArcLayer, LineLayer
+} from 'deck.gl';
 
-import {
-  EnhancedChoroplethLayer
-} from '../../samples';
+import {EnhancedChoroplethLayer} from 'deck.gl/layers/samples';
 
 test('Top-level imports', t0 => {
   t0.test('import "deck.gl"', t => {

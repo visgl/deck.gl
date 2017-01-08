@@ -4,7 +4,7 @@ import 'babel-polyfill';
 import {ReflectionEffect} from 'deck.gl/experimental';
 import DeckGL, {autobind} from 'deck.gl/react';
 
-import {Matrix4} from 'luma.gl';
+// import {Matrix4} from 'luma.gl';
 import {mat4} from 'gl-matrix';
 
 import React from 'react';

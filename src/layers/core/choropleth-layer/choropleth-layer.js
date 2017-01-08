@@ -28,23 +28,22 @@ import {join} from 'path';
 
 const DEFAULT_COLOR = [0, 0, 255, 255];
 
-const defaultGetColor = feature => feature.properties.color;
+const defaultProps = {
+  getColor: feature => feature.properties.color,
+  drawCountour: false,
+  strokeWidth: 1
+};
 
 export default class ChoroplethLayer extends Layer {
-
-  static layerName = 'ChoroplethLayer';
-
-  /**
-   * @class
-   * @param {object} props
-   */
   constructor(props) {
-    super({
-      getColor: defaultGetColor,
-      drawCountour: false,
-      strokeWidth: 1,
-      ...props
-    });
+    super({...defaultProps, ...props});
+  }
+
+  getShaders() {
+    return {
+      vs: readFileSync(join(__dirname, './choropleth-layer-vertex.glsl'), 'utf8'),
+      fs: readFileSync(join(__dirname, './choropleth-layer-fragment.glsl'), 'utf8')
+    };
   }
 
   initializeState() {
@@ -110,13 +109,6 @@ export default class ChoroplethLayer extends Layer {
     const feature = index >= 0 ? this.props.data.features[index] : null;
     info.feature = feature;
     info.object = feature;
-  }
-
-  getShaders() {
-    return {
-      vs: readFileSync(join(__dirname, './choropleth-layer-vertex.glsl'), 'utf8'),
-      fs: readFileSync(join(__dirname, './choropleth-layer-fragment.glsl'), 'utf8')
-    };
   }
 
   getModel(gl) {
@@ -208,6 +200,8 @@ export default class ChoroplethLayer extends Layer {
     attribute.value = new Uint8Array(flattenDeep(colors));
   }
 }
+
+ChoroplethLayer.layerName = 'ChoroplethLayer';
 
 /*
  * converts list of features from a GeoJSON object to a list of GeoJSON

@@ -30,28 +30,16 @@ const defaultGetSourcePosition = x => x.sourcePosition;
 const defaultGetTargetPosition = x => x.targetPosition;
 const defaultGetColor = x => x.color || DEFAULT_COLOR;
 
+const defaultProps = {
+  getSourcePosition: defaultGetSourcePosition,
+  getTargetPosition: defaultGetTargetPosition,
+  getColor: defaultGetColor,
+  strokeWidth: 1
+};
+
 export default class LineLayer64 extends Layer {
-
-  static layerName = 'LineLayer64';
-
-  /**
-   * @class
-   * @param {object} opts
-   */
-  constructor({
-    getSourcePosition = defaultGetSourcePosition,
-    getTargetPosition = defaultGetTargetPosition,
-    getColor = defaultGetColor,
-    strokeWidth = 1,
-    ...opts
-  } = {}) {
-    super({
-      strokeWidth,
-      getSourcePosition,
-      getTargetPosition,
-      getColor,
-      ...opts
-    });
+  constructor(props) {
+    super({...defaultProps, ...props});
   }
 
   initializeState() {
@@ -165,5 +153,6 @@ export default class LineLayer64 extends Layer {
       i += size;
     }
   }
-
 }
+
+LineLayer64.layerName = 'LineLayer64';

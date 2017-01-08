@@ -49,15 +49,15 @@ class Root extends Component {
       //   mapboxApiAccessToken={MAPBOX_TOKEN}
       //   perspectiveEnabled
       //   onChangeViewport={v => this.setState({viewport: v})}>
-        <DeckGL
-          latitude={viewport.latitude}
-          longitude={viewport.longitude}
-          zoom={viewport.zoom}
-          bearing={viewport.bearing}
-          pitch={viewport.pitch}
-          width={width}
-          height={height}
-          layers={layers}/>
+      <DeckGL
+        latitude={viewport.latitude}
+        longitude={viewport.longitude}
+        zoom={viewport.zoom}
+        bearing={viewport.bearing}
+        pitch={viewport.pitch}
+        width={width}
+        height={height}
+        layers={layers}/>
       // </MapGL>
     );
   }

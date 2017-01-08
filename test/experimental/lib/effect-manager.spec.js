@@ -1,7 +1,7 @@
 import test from 'tape-catch';
-import {Effect, EffectManager} from '../../lib';
 import {createGLContext} from 'luma.gl';
-import {LayerManager} from '../../../lib';
+import {Effect, EffectManager} from 'deck.gl/experimental/lib';
+import {LayerManager} from 'deck.gl/lib';
 
 const gl = createGLContext();
 const layerManager = new LayerManager({gl});

@@ -56,14 +56,9 @@ export function getPlatformShaderDefines(gl) {
   return platformDefines;
 }
 
-function assembleShader(gl, {
-  vs,
-  fs,
-  fp64 = false,
-  project = true,
-  project64 = false,
-  ...opts
-}) {
+function assembleShader(gl, opts = {}) {
+  const {vs, project = true, project64 = false} = opts;
+  let {fp64 = false} = opts;
   if (project64 === true) {
     fp64 = true;
   }
@@ -78,14 +73,10 @@ function assembleShader(gl, {
   return source;
 }
 
-export function assembleShaders(gl, {
-  vs,
-  fs,
-  ...opts
-}) {
+export function assembleShaders(gl, opts) {
   return {
     gl,
-    vs: assembleShader(gl, {...opts, vs}),
-    fs
+    vs: assembleShader(gl, {opts}),
+    fs: opts.fs
   };
 }

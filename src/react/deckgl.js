@@ -28,32 +28,31 @@ import {log} from '../lib/utils';
 
 function noop() {}
 
+const propTypes = {
+  id: PropTypes.string,
+  width: PropTypes.number.isRequired,
+  height: PropTypes.number.isRequired,
+  layers: PropTypes.arrayOf(PropTypes.instanceOf(Layer)).isRequired,
+  effects: PropTypes.arrayOf(PropTypes.instanceOf(Effect)),
+  gl: PropTypes.object,
+  debug: PropTypes.bool,
+  viewport: PropTypes.instanceOf(Viewport),
+  onWebGLInitialized: PropTypes.func,
+  onLayerClick: PropTypes.func,
+  onLayerHover: PropTypes.func
+};
+
+const defaultProps = {
+  id: 'deckgl-overlay',
+  debug: false,
+  gl: null,
+  effects: [],
+  onWebGLInitialized: noop,
+  onLayerClick: noop,
+  onLayerHover: noop
+};
+
 export default class DeckGL extends React.Component {
-
-  static propTypes = {
-    id: PropTypes.string,
-    width: PropTypes.number.isRequired,
-    height: PropTypes.number.isRequired,
-    layers: PropTypes.arrayOf(PropTypes.instanceOf(Layer)).isRequired,
-    effects: PropTypes.arrayOf(PropTypes.instanceOf(Effect)),
-    gl: PropTypes.object,
-    debug: PropTypes.bool,
-    viewport: PropTypes.instanceOf(Viewport),
-    onWebGLInitialized: PropTypes.func,
-    onLayerClick: PropTypes.func,
-    onLayerHover: PropTypes.func
-  };
-
-  static defaultProps = {
-    id: 'deckgl-overlay',
-    debug: false,
-    gl: null,
-    effects: [],
-    onWebGLInitialized: noop,
-    onLayerClick: noop,
-    onLayerHover: noop
-  };
-
   constructor(props) {
     super(props);
     this.state = {};
@@ -149,11 +148,11 @@ export default class DeckGL extends React.Component {
   }
 
   render() {
-    const {width, height, gl, debug, ...otherProps} = this.props;
+    const {width, height, gl, debug} = this.props;
 
     return (
       <WebGLRenderer
-        {...otherProps}
+        {...this.props}
 
         width={width}
         height={height}
@@ -170,3 +169,6 @@ export default class DeckGL extends React.Component {
     );
   }
 }
+
+DeckGL.propTypes = propTypes;
+DeckGL.defaultProps = defaultProps;

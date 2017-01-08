@@ -28,7 +28,7 @@ import {Buffer, createGLContext, Program} from 'luma.gl';
 import {join} from 'path';
 import {readFileSync} from 'fs';
 
-import {assembleShaders} from '../shader-utils/assemble-shaders';
+import {assembleShaders} from 'deck.gl/shader-utils/assemble-shaders';
 
 // Utilities functions that to be moved to a common place for future tests
 

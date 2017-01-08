@@ -22,4 +22,4 @@ import './imports-spec';
 import './lib';
 import './layers';
 
-import '../experimental/test';
+import './experimental';

@@ -1,5 +1,5 @@
 import test from 'tape-catch';
-import {Layer} from '../..';
+import {Layer} from 'deck.gl';
 
 const dataVariants = [
   {data: ['a', 'b', 'c'], size: 3}

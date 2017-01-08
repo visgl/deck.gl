@@ -3,7 +3,7 @@ import test from 'tape-catch';
 import React from 'react';
 import utils from 'react-addons-test-utils';
 
-import DeckGL from '../../../react';
+import DeckGL from 'deck.gl/react';
 import {Viewport, WebMercatorViewport} from 'viewport-mercator-project';
 
 const TEST_DATA = {

@@ -27,43 +27,42 @@ import {createGLContext} from 'luma.gl';
 const DEFAULT_PIXEL_RATIO =
   (typeof window !== 'undefined' && window.devicePixelRatio) || 1;
 
+const propTypes = {
+  id: PropTypes.string.isRequired,
+
+  width: PropTypes.number.isRequired,
+  height: PropTypes.number.isRequired,
+  style: PropTypes.object,
+
+  pixelRatio: PropTypes.number,
+  viewport: PropTypes.object.isRequired,
+  events: PropTypes.object,
+  gl: PropTypes.object,
+  glOptions: PropTypes.object,
+  debug: PropTypes.bool,
+
+  onInitializationFailed: PropTypes.func,
+  onRendererInitialized: PropTypes.func.isRequired,
+  onRenderFrame: PropTypes.func,
+  onMouseMove: PropTypes.func,
+  onClick: PropTypes.func
+};
+
+const defaultProps = {
+  style: {},
+  gl: null,
+  glOptions: {preserveDrawingBuffer: true},
+  debug: false,
+  pixelRatio: DEFAULT_PIXEL_RATIO,
+
+  onInitializationFailed: error => {
+    throw error;
+  },
+  onRendererInitialized: () => {},
+  onRenderFrame: () => {}
+};
+
 export default class WebGLRenderer extends React.Component {
-
-  static propTypes = {
-    id: PropTypes.string.isRequired,
-
-    width: PropTypes.number.isRequired,
-    height: PropTypes.number.isRequired,
-    style: PropTypes.object,
-
-    pixelRatio: PropTypes.number,
-    viewport: PropTypes.object.isRequired,
-    events: PropTypes.object,
-    gl: PropTypes.object,
-    glOptions: PropTypes.object,
-    debug: PropTypes.bool,
-
-    onInitializationFailed: PropTypes.func,
-    onRendererInitialized: PropTypes.func.isRequired,
-    onRenderFrame: PropTypes.func,
-    onMouseMove: PropTypes.func,
-    onClick: PropTypes.func
-  };
-
-  static defaultProps = {
-    style: {},
-    gl: null,
-    glOptions: {preserveDrawingBuffer: true},
-    debug: false,
-    pixelRatio: DEFAULT_PIXEL_RATIO,
-
-    onInitializationFailed: error => {
-      throw error;
-    },
-    onRendererInitialized: () => {},
-    onRenderFrame: () => {}
-  };
-
   /**
    * @classdesc
    * Small react component that uses Luma.GL to initialize a WebGL context.
@@ -182,3 +181,6 @@ export default class WebGLRenderer extends React.Component {
     );
   }
 }
+
+WebGLRenderer.propTypes = propTypes;
+WebGLRenderer.defaultProps = defaultProps;

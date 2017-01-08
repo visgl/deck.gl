@@ -14,7 +14,7 @@ module.exports = {
       webworkify: 'webworkify-webpack-dropin',
       'gl-matrix': resolve('./node_modules/gl-matrix/dist/gl-matrix.js'),
       // Work against base library
-      'deck.gl': resolve('../dist'),
+      'deck.gl': resolve('../../dist'),
       // Using our dependencies
       'luma.gl': resolve('./node_modules/luma.gl'),
       'viewport-mercator-project': resolve('./node_modules/viewport-mercator-project'),
@@ -57,7 +57,7 @@ module.exports = {
 
   // Allow setting mapbox token using environment variables
   plugins: [
-    new webpack.EnvironmentPlugin(['MAPBOX_ACCESS_TOKEN', 'MapboxAccessToken']),
+    new webpack.EnvironmentPlugin(['MAPBOX_ACCESS_TOKEN', 'MapboxAccessToken'])
     // new webpack.LoaderOptionsPlugin({minimize: true, debug: false})
   ]
 };

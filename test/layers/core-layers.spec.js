@@ -22,15 +22,10 @@ import test from 'tape-catch';
 import {createGLContext} from 'luma.gl';
 import {WebMercatorViewport} from 'viewport-mercator-project';
 
-import {
-  ChoroplethLayer,
-  ScatterplotLayer,
-  ArcLayer,
-  ScreenGridLayer
-} from '../../..';
+import {ChoroplethLayer, ScatterplotLayer, ArcLayer, ScreenGridLayer} from 'deck.gl';
 
 // Import LayerManager to test that layers can successfully be updated
-import {LayerManager} from '../../..';
+import {LayerManager} from 'deck.gl';
 
 // import CHOROPLETHS from '../../example/data/sf.zip.geo.json';
 // const HEXAGONS_FILE = './example/data/hexagons.csv';

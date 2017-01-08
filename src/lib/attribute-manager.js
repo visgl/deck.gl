@@ -42,10 +42,7 @@ export default class AttributeManager {
    * @param {Object} [props]
    * @param {String} [props.id] - identifier (for debugging)
    */
-  constructor({
-    id = 'attribute-manager',
-    ...otherProps
-  } = {}) {
+  constructor({id = 'attribute-manager'} = {}) {
     this.id = id;
     this.attributes = {};
     this.allocedInstances = -1;
@@ -126,10 +123,10 @@ export default class AttributeManager {
     buffers = {},
     props = {},
     context = {},
-    ...opts
+    ignoreUnknownAttributes = false
   } = {}) {
     // First apply any application provided buffers
-    this._checkExternalBuffers(buffers, opts);
+    this._checkExternalBuffers({buffers, ignoreUnknownAttributes});
     this._setExternalBuffers(buffers);
 
     // Only initiate alloc/update (and logging) if actually needed
@@ -312,14 +309,17 @@ export default class AttributeManager {
 
   // Checks that any attribute buffers in props are valid
   // Note: This is just to help app catch mistakes
-  _checkExternalBuffers(bufferMap = {}, opts = {}) {
+  _checkExternalBuffers({
+    buffers = {},
+    ignoreUnknownAttributes = false
+  } = {}) {
     const {attributes} = this;
-    for (const attributeName in bufferMap) {
+    for (const attributeName in buffers) {
       const attribute = attributes[attributeName];
-      if (!attribute && !opts.ignoreUnknownAttributes) {
+      if (!attribute && !ignoreUnknownAttributes) {
         throw new Error(`Unknown attribute prop ${attributeName}`);
       }
-      // const buffer = bufferMap[attributeName];
+      // const buffer = buffers[attributeName];
       // TODO - check buffer type
     }
   }

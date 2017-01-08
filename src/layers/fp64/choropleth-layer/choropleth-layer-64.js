@@ -29,23 +29,15 @@ import {join} from 'path';
 
 const DEFAULT_COLOR = [0, 0, 255, 255];
 
-const defaultGetColor = feature => feature.properties.color;
+const defaultProps = {
+  getColor: feature => feature.properties.color || DEFAULT_COLOR,
+  drawCountour: false,
+  strokeWidth: 1
+};
 
 export default class ChoroplethLayer64 extends Layer {
-
-  static layerName = 'ChoroplethLayer64';
-
-  /**
-   * @class
-   * @param {object} props
-   */
   constructor(props) {
-    super({
-      getColor: defaultGetColor,
-      drawCountour: false,
-      strokeWidth: 1,
-      ...props
-    });
+    super({...defaultProps, ...props});
   }
 
   initializeState() {
@@ -228,6 +220,8 @@ export default class ChoroplethLayer64 extends Layer {
     attribute.value = new Uint8Array(flattenDeep(colors));
   }
 }
+
+ChoroplethLayer64.layerName = 'ChoroplethLayer64';
 
 /*
  * converts list of features from a GeoJSON object to a list of GeoJSON

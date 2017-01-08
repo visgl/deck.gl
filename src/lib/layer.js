@@ -18,9 +18,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 /* global window */
-import AttributeManager from './attribute-manager';
 import {GL} from 'luma.gl';
-import {addIterator, compareProps, log} from './utils';
+import AttributeManager from './attribute-manager';
+import {compareProps, log} from './utils';
 import assert from 'assert';
 
 /*
@@ -74,12 +74,12 @@ export default class Layer {
     this.validateRequiredProp('id', x => typeof x === 'string');
     this.validateRequiredProp('data');
     // TODO - allow app to supply dataIterator prop?
-    if (props.data) {
-      addIterator(props.data);
-      if (!props.data[Symbol.iterator]) {
-        log.once(0, 'data prop must have iterator');
-      }
-    }
+    // if (props.data) {
+    //   addIterator(props.data);
+    //   if (!props.data[Symbol.iterator]) {
+    //     log.once(0, 'data prop must have iterator');
+    //   }
+    // }
 
     this._validateDeprecatedProps();
   }
@@ -432,9 +432,10 @@ export default class Layer {
     // End lifecycle method
   }
 
-  pickLayer({uniforms = {}, ...opts}) {
+  // {uniforms = {}, ...opts}
+  pickLayer(opts) {
     // Call subclass lifecycle method
-    return this.pick({uniforms, ...opts});
+    return this.pick(opts);
     // End lifecycle method
   }
 

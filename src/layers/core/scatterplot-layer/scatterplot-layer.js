@@ -25,46 +25,30 @@ import {join} from 'path';
 
 const DEFAULT_COLOR = [255, 0, 255, 255];
 
-const defaultGetPosition = x => x.position;
-const defaultGetRadius = x => x.radius;
-const defaultGetColor = x => x.color || DEFAULT_COLOR;
+const defaultProps = {
+  getPosition: x => x.position,
+  getRadius: x => x.radius,
+  getColor: x => x.color || DEFAULT_COLOR,
+  // @type {number} props.radius - point radius in meters
+  radius: 30,
+  // @type {number} props.radiusMinPixels - min point radius in pixels
+  radiusMinPixels: 0,
+  // @type {number} props.radiusMinPixels - max point radius in pixels
+  radiusMaxPixels: Number.MAX_SAFE_INTEGER,
+  drawOutline: false,
+  strokeWidth: 1
+};
 
 export default class ScatterplotLayer extends Layer {
+  constructor(props) {
+    super({...props, ...defaultProps});
+  }
 
-  static layerName = 'ScatterplotLayer';
-
-  /*
-   * @classdesc
-   * ScatterplotLayer
-   *
-   * @class
-   * @param {object} props
-   * @param {number} props.radius - point radius in meters
-   * @param {number} props.radiusMinPixels - min point radius in pixels
-   * @param {number} props.radiusMinPixels - max point radius in pixels
-   */
-  constructor({
-    getPosition = defaultGetPosition,
-    getRadius = defaultGetRadius,
-    getColor = defaultGetColor,
-    radius = 30,
-    radiusMinPixels = 0,
-    radiusMaxPixels = Number.MAX_SAFE_INTEGER,
-    drawOutline = false,
-    strokeWidth = 1,
-    ...props
-  }) {
-    super({
-      getPosition,
-      getRadius,
-      getColor,
-      drawOutline,
-      strokeWidth,
-      radius,
-      radiusMinPixels,
-      radiusMaxPixels,
-      ...props
-    });
+  getShaders(id) {
+    return {
+      vs: readFileSync(join(__dirname, './scatterplot-layer-vertex.glsl'), 'utf8'),
+      fs: readFileSync(join(__dirname, './scatterplot-layer-fragment.glsl'), 'utf8')
+    };
   }
 
   initializeState() {
@@ -109,13 +93,6 @@ export default class ScatterplotLayer extends Layer {
     // correct parameter
     // This is not happening on Safari and Firefox
     gl.lineWidth(1.0);
-  }
-
-  getShaders(id) {
-    return {
-      vs: readFileSync(join(__dirname, './scatterplot-layer-vertex.glsl'), 'utf8'),
-      fs: readFileSync(join(__dirname, './scatterplot-layer-fragment.glsl'), 'utf8')
-    };
   }
 
   _getModel(gl) {
@@ -183,3 +160,5 @@ export default class ScatterplotLayer extends Layer {
     }
   }
 }
+
+ScatterplotLayer.layerName = 'ScatterplotLayer';
