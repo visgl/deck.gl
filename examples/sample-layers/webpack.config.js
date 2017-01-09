@@ -14,7 +14,7 @@ module.exports = {
       webworkify: 'webworkify-webpack-dropin',
       'gl-matrix': resolve('./node_modules/gl-matrix/dist/gl-matrix.js'),
       // Work against base library
-      'deck.gl': resolve('../../dist'),
+      'deck.gl': resolve('../../dist/lib-bundle.js'),
       // Using our dependencies
       'luma.gl': resolve('./node_modules/luma.gl'),
       'viewport-mercator-project': resolve('./node_modules/viewport-mercator-project'),
@@ -43,11 +43,6 @@ module.exports = {
     }, {
       test: /\.json$/,
       loader: 'json-loader'
-    }, {
-      // Mapbox has some unresolved fs calls
-      include: [resolve('../dist'), /node_modules\/mapbox-gl/],
-      loader: 'transform-loader',
-      options: 'brfs'
     }]
   },
 

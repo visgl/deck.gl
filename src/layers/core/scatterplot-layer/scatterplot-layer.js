@@ -24,11 +24,12 @@ import {GL, Model, Geometry} from 'luma.gl';
 import {readFileSync} from 'fs';
 import {join} from 'path';
 
+const DEFAULT_RADIUS = 30;
 const DEFAULT_COLOR = [255, 0, 255, 255];
 
 const defaultProps = {
   getPosition: x => x.position,
-  getRadius: x => x.radius,
+  getRadius: x => x.radius || DEFAULT_RADIUS,
   getColor: x => x.color || DEFAULT_COLOR,
   // @type {number} props.radius - point radius in meters
   radius: 30,

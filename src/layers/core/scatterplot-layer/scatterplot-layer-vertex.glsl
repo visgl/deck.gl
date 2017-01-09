@@ -46,9 +46,5 @@ void main(void) {
 
   vec4 color = vec4(instanceColors.rgb, instanceColors.a * opacity) / 255.;
   vec4 pickingColor = vec4(instancePickingColors / 255., 1.);
-  vColor = mix(
-    color,
-    pickingColor,
-    renderPickingBuffer
-  );
+  vColor = mix(color, pickingColor, renderPickingBuffer);
 }

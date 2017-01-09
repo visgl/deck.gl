@@ -6,24 +6,23 @@ module.exports = {
     app: resolve('./app.js')
   },
 
-  devtool: 'source-maps',
+  devtool: '#inline-source-map',
+
+  devServer: {stats: {warnings: false}},
 
   resolve: {
     alias: {
       // mapbox-gl config
-      webworkify: 'webworkify-webpack-dropin',
-      'gl-matrix': resolve('./node_modules/gl-matrix/dist/gl-matrix.js'),
+      // Per mapbox-gl-js README for non-browserify bundlers
+      'mapbox-gl$': resolve('./node_modules/mapbox-gl/dist/mapbox-gl.js'),
+      // 'gl-matrix': resolve('./node_modules/gl-matrix/dist/gl-matrix.js'),
       // Work against base library
-      'deck.gl': resolve('../../dist'),
+      'deck.gl': resolve('../dist'),
+      // Debugging vpm
+      'viewport-mercator-project': resolve('../dist/lib/viewports'),
       // Using our dependencies
       'luma.gl': resolve('./node_modules/luma.gl'),
-      'viewport-mercator-project': resolve('./node_modules/viewport-mercator-project'),
-      react: resolve('./node_modules/react'),
-      'autobind-decorator': resolve('./node_modules/autobind-decorator'),
-      brfs: resolve('./node_modules/brfs'),
-      earcut: resolve('./node_modules/earcut'),
-      'geojson-normalize': resolve('./node_modules/geojson-normalize'),
-      'lodash.flattendeep': resolve('./node_modules/lodash.flattendeep')
+      react: resolve('./node_modules/react')
     }
   },
 
@@ -58,6 +57,6 @@ module.exports = {
   // Allow setting mapbox token using environment variables
   plugins: [
     new webpack.EnvironmentPlugin(['MAPBOX_ACCESS_TOKEN', 'MapboxAccessToken'])
-    // new webpack.LoaderOptionsPlugin({minimize: true, debug: false})
+    // new webpack.SourceMapDevToolPlugin()
   ]
 };

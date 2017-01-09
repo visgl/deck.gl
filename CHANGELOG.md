@@ -20,6 +20,8 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## Recent Dev Releases
 
+#### [v3.1.0-beta6] -
+- FIX: Partial fix to model matrix in meters mode (breaks other modes)
 
 #### [v3.1.0-beta5] -
 - FIX: Disable viewport comparison (temporarily) as it broke `METERS` mode.

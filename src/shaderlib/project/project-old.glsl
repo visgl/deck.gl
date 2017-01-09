@@ -74,7 +74,7 @@ void sincos_taylor_fp32(float a, out float sin_t, out float cos_t) {
   cos_t = sqrt(1.0 - sin_t * sin_t);
 }
 
-float tan_taylor_fp32(float a) {
+float tan_fp32(float a) {
     float sin_a;
     float cos_a;
 
@@ -156,60 +156,36 @@ float tan_taylor_fp32(float a) {
 }
 #endif
 
-float tan_fp32(float a) {
-#ifdef INTEL_TAN_WORKAROUND
-  return tan_taylor_fp32(a);
-#else
-  return tan(a);
-#endif
-}
-
 //
 // Scaling offsets
 //
 
 float project_scale(float meters) {
-  if (projectionMode == PROJECT_MERCATOR_OFFSETS) {
-    return meters;
-  } else {
-    return meters * projectionPixelsPerUnit.x;
-  }
+  return meters * projectionPixelsPerUnit.x;
 }
 
 vec2 project_scale(vec2 meters) {
-  if (projectionMode == PROJECT_MERCATOR_OFFSETS) {
-    return meters;
-  } else {
-    return vec2(
-      meters.x * projectionPixelsPerUnit.x,
-      meters.y * projectionPixelsPerUnit.x
-    );
-  }
+  return vec2(
+    meters.x * projectionPixelsPerUnit.x,
+    meters.y * projectionPixelsPerUnit.x
+  );
 }
 
 vec3 project_scale(vec3 meters) {
-  if (projectionMode == PROJECT_MERCATOR_OFFSETS) {
-    return meters;
-  } else {
-    return vec3(
-      meters.x * projectionPixelsPerUnit.x,
-      meters.y * projectionPixelsPerUnit.x,
-      meters.z * projectionPixelsPerUnit.x
-    );
-  }
+  return vec3(
+    meters.x * projectionPixelsPerUnit.x,
+    meters.y * projectionPixelsPerUnit.x,
+    meters.z * projectionPixelsPerUnit.x
+  );
 }
 
 vec4 project_scale(vec4 meters) {
-  if (projectionMode == PROJECT_MERCATOR_OFFSETS) {
-    return meters;
-  } else {
-    return vec4(
-      meters.x * projectionPixelsPerUnit.x,
-      meters.y * projectionPixelsPerUnit.x,
-      meters.z * projectionPixelsPerUnit.x,
-      meters.w
-    );
-  }
+  return vec4(
+    meters.x * projectionPixelsPerUnit.x,
+    meters.y * projectionPixelsPerUnit.x,
+    meters.z * projectionPixelsPerUnit.x,
+    meters.w
+  );
 }
 
 //
@@ -220,16 +196,19 @@ vec4 project_scale(vec4 meters) {
 vec2 project_mercator_(vec2 lnglat) {
   return vec2(
     radians(lnglat.x) + PI,
-    PI - log(tan_fp32(PI * 0.25 + radians(lnglat.y) * 0.5))
+#ifdef INTEL_TAN_WORKAROUND
+        PI - log(tan_fp32(PI * 0.25 + radians(lnglat.y) * 0.5))
+#else
+        PI - log(tan(PI * 0.25 + radians(lnglat.y) * 0.5))
+#endif
   );
 }
 
 vec2 project_position(vec2 position) {
-  // if (projectionMode == PROJECT_LINEAR) {
-  //   return (position + vec2(TILE_SIZE / 2.0)) * projectionScale;
-  // }
+  if (projectionMode == PROJECT_LINEAR) {
+    return (position + vec2(TILE_SIZE / 2.0)) * projectionScale;
+  }
   if (projectionMode == PROJECT_MERCATOR_OFFSETS) {
-    return position;
     return project_scale(position);
   }
   // Covers projectionMode == PROJECT_MERCATOR
@@ -237,7 +216,7 @@ vec2 project_position(vec2 position) {
 }
 
 vec3 project_position(vec3 position) {
-  return vec3(project_position(position.xy), project_scale(position.z));
+  return vec3(project_position(position.xy), project_scale(position.z) + .1);
 }
 
 vec4 project_position(vec4 position) {
@@ -248,8 +227,7 @@ vec4 project_position(vec4 position) {
 
 vec4 project_to_clipspace(vec4 position) {
   if (projectionMode == PROJECT_MERCATOR_OFFSETS) {
-    vec4 pos = position * projectionPixelsPerUnit.x;
-    return projectionMatrix * vec4(pos.xyz, 0.0) + projectionCenter;
+    return projectionMatrix * vec4(position.xyz, 0.0) + projectionCenter;
   }
   return projectionMatrix * position;
 }

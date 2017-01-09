@@ -1,4 +1,4 @@
-import {vec4} from 'gl-matrix';
+import {vec4, mat4} from 'gl-matrix';
 import assert from 'assert';
 import {COORDINATE_SYSTEM} from './constants';
 
@@ -29,9 +29,9 @@ export function getUniformsFromViewport(viewport, {
 
   // calculate WebGL matrices
   // TODO - could be cached for e.g. modelMatrix === null
-  const matrices = viewport.getMatrices({modelMatrix});
+  const matrices = getMatrices({viewport, modelMatrix});
 
-  const {modelViewProjectionMatrix, scale, pixelsPerMeter} = matrices;
+  const {modelViewProjectionMatrix, viewProjectionMatrix, scale, pixelsPerMeter} = matrices;
   assert(modelViewProjectionMatrix, 'Viewport missing modelViewProjectionMatrix');
   assert(scale, 'Viewport scale missing');
   assert(pixelsPerMeter, 'Viewport missing pixelsPerMeter');
@@ -39,9 +39,9 @@ export function getUniformsFromViewport(viewport, {
   // Convert to Float32
   const glProjectionMatrix = new Float32Array(modelViewProjectionMatrix);
 
-  // dy64ify
-  const glProjectionMatrixFP64 = new Float32Array(32);
+  // "Float64Array"
   // Transpose the projection matrix to column major for GLSL.
+  const glProjectionMatrixFP64 = new Float32Array(32);
   for (let i = 0; i < 4; ++i) {
     for (let j = 0; j < 4; ++j) {
       [
@@ -52,7 +52,7 @@ export function getUniformsFromViewport(viewport, {
   }
 
   const projectionCenter =
-    vec4.transformMat4([], projectedPositionOrigin, modelViewProjectionMatrix);
+    vec4.transformMat4([], projectedPositionOrigin, viewProjectionMatrix);
 
   console.log(viewport, projectedPositionOrigin, projectionCenter); // eslint-disable-line
 
@@ -68,4 +68,46 @@ export function getUniformsFromViewport(viewport, {
     projectionScale: matrices.scale,
     projectionScaleFP64: fp64ify(matrices.scale)
   };
+}
+
+function getMatrices({viewport, modelMatrix = null} = {}) {
+  let modelViewProjectionMatrix = viewport.viewProjectionMatrix;
+  // let pixelProjectionMatrix = viewport.pixelProjectionMatrix;
+  // let pixelUnprojectionMatrix = viewport.pixelUnprojectionMatrix;
+
+  if (modelMatrix) {
+    const vpm = createMat4();
+    mat4.multiply(vpm, vpm, viewport.viewProjectionMatrix);
+    mat4.multiply(vpm, vpm, modelMatrix);
+    modelViewProjectionMatrix = vpm;
+
+    // pixelProjectionMatrix = mat4.multiply([], viewport.pixelProjectionMatrix, modelMatrix);
+    // pixelUnprojectionMatrix = mat4.invert([], pixelProjectionMatrix);
+  }
+
+  const matrices = Object.assign({}, {
+    modelViewProjectionMatrix,
+    viewProjectionMatrix: viewport.viewProjectionMatrix,
+    viewMatrix: viewport.viewMatrix,
+    projectionMatrix: viewport.projectionMatrix,
+
+    // project/unproject between pixels and world
+    // pixelProjectionMatrix,
+    // pixelUnprojectionMatrix,
+
+    width: viewport.width,
+    height: viewport.height,
+    scale: viewport.scale
+  },
+    // Subclass can add additional params
+    // TODO - Fragile: better to make base Viewport class aware of all params
+    viewport._getParams()
+  );
+
+  return matrices;
+}
+
+// Helper, avoids low-precision 32 bit matrices from gl-matrix mat4.create()
+function createMat4() {
+  return [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
 }
