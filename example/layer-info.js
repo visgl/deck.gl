@@ -1,5 +1,3 @@
-/* eslint-disable no-unused-vars */
-/* eslint-disable no-inline-comments */
 import React from 'react';
 
 export default function LayerInfo({
