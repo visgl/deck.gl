@@ -19,14 +19,13 @@ export default class LayerControls extends Component {
 
   _renderSlider(settingName, setting, value, title) {
     return (
-      <div key={settingName} style={{marginTop: 0, marginLeft: 30, marginRight: 30}}>
-        <div className="input-group" style={{width: '100%'}}>
+      <div key={settingName} >
+        <div className="input-group" >
           <label className="label" htmlFor={settingName}>
             {title}
           </label>
           <input
             type="range"
-            style={{width: '100%'}}
             id={settingName}
             min={setting.min || 0}
             max={setting.max || 1}
@@ -41,7 +40,7 @@ export default class LayerControls extends Component {
   render() {
     const {settings} = this.props;
     return (
-      <div className="layer-controls" style={{marginTop: 0, padding: 0, width: 270}}>
+      <div id="layer-controls" >
         <h4>Layer Controls</h4>
         {this._renderSlider('separation', {}, settings.separation, 'Separation')}
         {this._renderSlider('rotation', {}, settings.rotation, 'Rotation')}
