@@ -7,11 +7,12 @@ export function drawLayers({layers}) {
   for (const layer of layers) {
     if (layer.props.visible) {
       layer.drawLayer({
-        uniforms: {
-          ...layer.context.uniforms,
-          ...getUniformsFromViewport(layer.context.viewport, layer.props),
-          layerIndex
-        }
+        uniforms: Object.assign(
+          {},
+          layer.context.uniforms,
+          getUniformsFromViewport(layer.context.viewport, layer.props),
+          {layerIndex}
+        )
       });
       layerIndex++;
     }
@@ -72,11 +73,11 @@ export function pickLayers(gl, {
 
         layer.pickLayer({
           info,
-          uniforms: {
-            ...layer.context.uniforms,
-            ...getUniformsFromViewport(layer.context.viewport, layer.props),
-            layerIndex
-          },
+          uniforms: Object.assign({},
+            layer.context.uniforms,
+            getUniformsFromViewport(layer.context.viewport, layer.props),
+            {layerIndex}
+          ),
           pickEnableUniforms: {renderPickingBuffer: 1, pickingEnabled: 1},
           pickDisableUniforms: {renderPickingBuffer: 0, pickingEnabled: 0},
           deviceX, deviceY,

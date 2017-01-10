@@ -18,53 +18,38 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {Layer, assembleShaders} from '../../..';
+import {Layer} from '../../../lib';
+import {assembleShaders} from '../../../shader-utils';
 import {GL, Model, Geometry} from 'luma.gl';
 import {readFileSync} from 'fs';
 import {join} from 'path';
 
 const DEFAULT_COLOR = [255, 0, 255, 255];
 
-const defaultGetPosition = x => x.position;
-const defaultGetRadius = x => x.radius;
-const defaultGetColor = x => x.color || DEFAULT_COLOR;
+const defaultProps = {
+  getPosition: x => x.position,
+  getRadius: x => x.radius,
+  getColor: x => x.color || DEFAULT_COLOR,
+  // @type {number} props.radius - point radius in meters
+  radius: 30,
+  // @type {number} props.radiusMinPixels - min point radius in pixels
+  radiusMinPixels: 0,
+  // @type {number} props.radiusMinPixels - max point radius in pixels
+  radiusMaxPixels: Number.MAX_SAFE_INTEGER,
+  drawOutline: false,
+  strokeWidth: 1
+};
 
 export default class ScatterplotLayer extends Layer {
+  constructor(props) {
+    super(Object.assign({}, defaultProps, props));
+  }
 
-  static layerName = 'ScatterplotLayer';
-
-  /*
-   * @classdesc
-   * ScatterplotLayer
-   *
-   * @class
-   * @param {object} props
-   * @param {number} props.radius - point radius in meters
-   * @param {number} props.radiusMinPixels - min point radius in pixels
-   * @param {number} props.radiusMinPixels - max point radius in pixels
-   */
-  constructor({
-    getPosition = defaultGetPosition,
-    getRadius = defaultGetRadius,
-    getColor = defaultGetColor,
-    radius = 30,
-    radiusMinPixels = 0,
-    radiusMaxPixels = Number.MAX_SAFE_INTEGER,
-    drawOutline = false,
-    strokeWidth = 1,
-    ...props
-  }) {
-    super({
-      getPosition,
-      getRadius,
-      getColor,
-      drawOutline,
-      strokeWidth,
-      radius,
-      radiusMinPixels,
-      radiusMaxPixels,
-      ...props
-    });
+  getShaders(id) {
+    return {
+      vs: readFileSync(join(__dirname, './scatterplot-layer-vertex.glsl'), 'utf8'),
+      fs: readFileSync(join(__dirname, './scatterplot-layer-fragment.glsl'), 'utf8')
+    };
   }
 
   initializeState() {
@@ -98,24 +83,16 @@ export default class ScatterplotLayer extends Layer {
     const {gl} = this.context;
     const lineWidth = this.screenToDevicePixels(this.props.strokeWidth);
     gl.lineWidth(lineWidth);
-    this.state.model.render({
-      ...uniforms,
+    this.state.model.render(Object.assign({}, uniforms, {
       radius: this.props.radius,
       radiusMinPixels: this.props.radiusMinPixels,
       radiusMaxPixels: this.props.radiusMaxPixels
-    });
+    }));
     // Setting line width back to 1 is here to workaround a Google Chrome bug
     // gl.clear() and gl.isEnabled() will return GL_INVALID_VALUE even with
     // correct parameter
     // This is not happening on Safari and Firefox
     gl.lineWidth(1.0);
-  }
-
-  getShaders(id) {
-    return {
-      vs: readFileSync(join(__dirname, './scatterplot-layer-vertex.glsl'), 'utf8'),
-      fs: readFileSync(join(__dirname, './scatterplot-layer-fragment.glsl'), 'utf8')
-    };
   }
 
   _getModel(gl) {
@@ -131,11 +108,13 @@ export default class ScatterplotLayer extends Layer {
     /* eslint-disable */
 
 
-    const shaders = assembleShaders(gl, this.getShaders())
-    const model = new Model({
+    const shaders = assembleShaders(gl, this.getShaders());
+
+    return new Model({
       gl,
-      id: 'scatterplot',
-      ...shaders,
+      id: this.props.id,
+      vs: shaders.vs,
+      fs: shaders.fs,
       geometry: new Geometry({
         drawMode: GL.TRIANGLE_FAN,
         positions: new Float32Array(positions)
@@ -183,3 +162,5 @@ export default class ScatterplotLayer extends Layer {
     }
   }
 }
+
+ScatterplotLayer.layerName = 'ScatterplotLayer';

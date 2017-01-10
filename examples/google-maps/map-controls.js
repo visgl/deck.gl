@@ -18,9 +18,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 import React, {PropTypes, Component} from 'react';
-import autobind from 'autobind-decorator';
-import pureRender from 'pure-render-decorator';
 import EventManager from './event-manager';
+import {autobind} from 'deck.gl/react';
 
 import config from './config';
 import {mod} from './utils/transform';
@@ -37,80 +36,79 @@ const MAX_ZOOM = 40;
 const PITCH_MOUSE_THRESHOLD = 20;
 const PITCH_ACCEL = 1.2;
 
-@pureRender
+const propTypes = {
+  /** The width of the map */
+  width: PropTypes.number.isRequired,
+  /** The height of the map */
+  height: PropTypes.number.isRequired,
+  /** The latitude of the center of the map. */
+  latitude: PropTypes.number.isRequired,
+  /** The longitude of the center of the map. */
+  longitude: PropTypes.number.isRequired,
+  /** The tile zoom level of the map. */
+  zoom: PropTypes.number.isRequired,
+  /** Specify the bearing of the viewport */
+  bearing: React.PropTypes.number,
+  /** Specify the pitch of the viewport */
+  pitch: React.PropTypes.number,
+  /**
+    * Specify the altitude of the viewport camera
+    * Unit: map heights, default 1.5
+    * Non-public API, see https://github.com/mapbox/mapbox-gl-js/issues/1137
+    */
+  altitude: React.PropTypes.number,
+
+  /** Enables perspective control event handling */
+  perspectiveEnabled: PropTypes.bool,
+  /**
+    * `onChangeViewport` callback is fired when the user interacted with the
+    * map. The object passed to the callback contains `latitude`,
+    * `longitude` and `zoom` and additional state information.
+    */
+  onChangeViewport: PropTypes.func,
+
+  /**
+    * Is the component currently being dragged. This is used to show/hide the
+    * drag cursor. Also used as an optimization in some overlays by preventing
+    * rendering while dragging.
+    */
+  isDragging: PropTypes.bool,
+  /**
+    * Required to calculate the mouse projection after the first click event
+    * during dragging. Where the map is depends on where you first clicked on
+    * the map.
+    */
+  startDragLngLat: PropTypes.arrayOf(PropTypes.number),
+  /** Bearing when current perspective drag operation started */
+  startBearing: PropTypes.number,
+  /** Pitch when current perspective drag operation started */
+  startPitch: PropTypes.number,
+
+  /* Hooks to get mapbox help with calculations. TODO - replace with Viewport */
+  unproject: PropTypes.func.isRequired,
+  getLngLatAtPoint: PropTypes.func.isRequired
+};
+
+const defaultProps = {
+  bearing: 0,
+  pitch: 0,
+  altitude: 1.5,
+  clickRadius: 15,
+  onChangeViewport: null,
+  maxZoom: MAX_ZOOM,
+  minZoom: 0,
+  maxPitch: MAX_PITCH,
+  minPitch: 0
+};
+
 export default class MapControls extends Component {
-
-  static propTypes = {
-    /** The width of the map */
-    width: PropTypes.number.isRequired,
-    /** The height of the map */
-    height: PropTypes.number.isRequired,
-    /** The latitude of the center of the map. */
-    latitude: PropTypes.number.isRequired,
-    /** The longitude of the center of the map. */
-    longitude: PropTypes.number.isRequired,
-    /** The tile zoom level of the map. */
-    zoom: PropTypes.number.isRequired,
-    /** Specify the bearing of the viewport */
-    bearing: React.PropTypes.number,
-    /** Specify the pitch of the viewport */
-    pitch: React.PropTypes.number,
-    /**
-      * Specify the altitude of the viewport camera
-      * Unit: map heights, default 1.5
-      * Non-public API, see https://github.com/mapbox/mapbox-gl-js/issues/1137
-      */
-    altitude: React.PropTypes.number,
-
-    /** Enables perspective control event handling */
-    perspectiveEnabled: PropTypes.bool,
-    /**
-      * `onChangeViewport` callback is fired when the user interacted with the
-      * map. The object passed to the callback contains `latitude`,
-      * `longitude` and `zoom` and additional state information.
-      */
-    onChangeViewport: PropTypes.func,
-
-    /**
-      * Is the component currently being dragged. This is used to show/hide the
-      * drag cursor. Also used as an optimization in some overlays by preventing
-      * rendering while dragging.
-      */
-    isDragging: PropTypes.bool,
-    /**
-      * Required to calculate the mouse projection after the first click event
-      * during dragging. Where the map is depends on where you first clicked on
-      * the map.
-      */
-    startDragLngLat: PropTypes.arrayOf(PropTypes.number),
-    /** Bearing when current perspective drag operation started */
-    startBearing: PropTypes.number,
-    /** Pitch when current perspective drag operation started */
-    startPitch: PropTypes.number,
-
-    /* Hooks to get mapbox help with calculations. TODO - replace with Viewport */
-    unproject: PropTypes.func.isRequired,
-    getLngLatAtPoint: PropTypes.func.isRequired
-  };
-
-  static defaultProps = {
-    bearing: 0,
-    pitch: 0,
-    altitude: 1.5,
-    clickRadius: 15,
-    onChangeViewport: null,
-    maxZoom: MAX_ZOOM,
-    minZoom: 0,
-    maxPitch: MAX_PITCH,
-    minPitch: 0
-  };
-
   /**
    * @classdesc
    * A component that handles events and updates viewport parameters
    */
   constructor(props) {
     super(props);
+    autobind(this);
     this.state = {
       isDragging: false,
       isHovering: false,
@@ -234,27 +232,27 @@ export default class MapControls extends Component {
     };
   }
 
-  @autobind _onTouchStart(opts) {
+  _onTouchStart(opts) {
     this._onMouseDown(opts);
   }
 
-  @autobind _onTouchDrag(opts) {
+  _onTouchDrag(opts) {
     this._onMouseDrag(opts);
   }
 
-  @autobind _onTouchRotate(opts) {
+  _onTouchRotate(opts) {
     this._onMouseRotate(opts);
   }
 
-  @autobind _onTouchEnd(opts) {
+  _onTouchEnd(opts) {
     this._onMouseUp(opts);
   }
 
-  @autobind _onTouchTap(opts) {
+  _onTouchTap(opts) {
     this._onMouseClick(opts);
   }
 
-  @autobind _onMouseDown({pos}) {
+  _onMouseDown({pos}) {
     this._updateViewport({
       isDragging: true,
       startDragLngLat: this.props.unproject(pos),
@@ -263,7 +261,7 @@ export default class MapControls extends Component {
     });
   }
 
-  @autobind _onMouseDrag({pos}) {
+  _onMouseDrag({pos}) {
     if (!this.props.onChangeViewport) {
       return;
     }
@@ -286,7 +284,7 @@ export default class MapControls extends Component {
     });
   }
 
-  @autobind _onMouseRotate({pos, startPos}) {
+  _onMouseRotate({pos, startPos}) {
     if (!this.props.onChangeViewport || !this.props.perspectiveEnabled) {
       return;
     }
@@ -311,7 +309,7 @@ export default class MapControls extends Component {
     });
   }
 
-  @autobind _onMouseUp(opt) {
+  _onMouseUp(opt) {
     this._updateViewport({
       isDragging: false,
       startDragLngLat: null,
@@ -320,14 +318,14 @@ export default class MapControls extends Component {
     });
   }
 
-  @autobind _onZoom({pos, scale}) {
+  _onZoom({pos, scale}) {
     this._updateViewport({
       zoom: this._calculateNewZoom({relativeScale: scale}),
       isDragging: true
     });
   }
 
-  @autobind _onZoomEnd() {
+  _onZoomEnd() {
     this._updateViewport({isDragging: false});
   }
 
@@ -371,3 +369,6 @@ export default class MapControls extends Component {
     );
   }
 }
+
+MapControls.propTypes = propTypes;
+MapControls.defaultProps = defaultProps;

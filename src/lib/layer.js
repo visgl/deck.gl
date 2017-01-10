@@ -18,9 +18,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 /* global window */
-import AttributeManager from './attribute-manager';
 import {GL} from 'luma.gl';
-import {addIterator, compareProps, log} from './utils';
+import AttributeManager from './attribute-manager';
+import {compareProps, log} from './utils';
 import assert from 'assert';
 
 /*
@@ -28,7 +28,7 @@ import assert from 'assert';
  * @param {array}  props.data - array of data instances
  * @param {bool} props.opacity - opacity of the layer
  */
-const DEFAULT_PROPS = {
+const defaultProps = {
   data: [],
   dataIterator: null,
   dataComparator: null,
@@ -55,13 +55,11 @@ export default class Layer {
    * @param {object} props - See docs above
    */
   constructor(props) {
-    props = {
-      ...DEFAULT_PROPS,
-      ...props,
+    props = Object.assign({}, defaultProps, props, {
       // Accept null as data - otherwise apps will need to add ugly checks
       data: props.data || [],
       id: props.id || this.constructor.layerName
-    };
+    });
 
     this.id = props.id;
     this.count = counter++;
@@ -74,12 +72,12 @@ export default class Layer {
     this.validateRequiredProp('id', x => typeof x === 'string');
     this.validateRequiredProp('data');
     // TODO - allow app to supply dataIterator prop?
-    if (props.data) {
-      addIterator(props.data);
-      if (!props.data[Symbol.iterator]) {
-        log.once(0, 'data prop must have iterator');
-      }
-    }
+    // if (props.data) {
+    //   addIterator(props.data);
+    //   if (!props.data[Symbol.iterator]) {
+    //     log.once(0, 'data prop must have iterator');
+    //   }
+    // }
 
     this._validateDeprecatedProps();
   }
@@ -426,15 +424,15 @@ export default class Layer {
 
   // Calculates uniforms
   drawLayer({uniforms = {}}) {
-    uniforms = {...uniforms};
     // Call subclass lifecycle method
     this.draw({uniforms});
     // End lifecycle method
   }
 
-  pickLayer({uniforms = {}, ...opts}) {
+  // {uniforms = {}, ...opts}
+  pickLayer(opts) {
     // Call subclass lifecycle method
-    return this.pick({uniforms, ...opts});
+    return this.pick(opts);
     // End lifecycle method
   }
 

@@ -44,6 +44,6 @@ module.exports = {
   plugins: [
     new webpack.EnvironmentPlugin(['MAPBOX_ACCESS_TOKEN', 'MapboxAccessToken']),
     // TODO - doesn't eseem to have any effect
-    new webpack.LoaderOptionsPlugin({minimize: truexx`, debug: false})
+    new webpack.LoaderOptionsPlugin({minimize: true, debug: false})
   ]
 };

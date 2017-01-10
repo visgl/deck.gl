@@ -18,7 +18,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {Layer, assembleShaders} from '../../..';
+import {Layer} from '../../../lib';
+import {assembleShaders} from '../../../shader-utils';
 import {fp64ify} from '../../../lib/utils/fp64';
 import {GL, Model, Geometry} from 'luma.gl';
 import flattenDeep from 'lodash.flattendeep';
@@ -36,33 +37,14 @@ const DEFAULT_POINTLIGHT_ATTENUATION = 1.0;
 const DEFAULT_MATERIAL_SPECULAR_COLOR = [255, 255, 255];
 const DEFAULT_MATERIAL_SHININESS = 1;
 
+const defaultProps = {
+  opacity: 1,
+  elevation: 1
+};
+
 export default class ExtrudedChoroplethLayer64 extends Layer {
-
-  static layerName = 'ExtrudedChoroplethLayer64';
-
-  /**
-   * @classdesc
-   * Elevated Choropleth
-   *
-   * @class
-   * @param {object} props
-   * @param {bool} props.opacity=1 - default opacity is 1
-   * @param {bool} props.elevation=1 - Elevation scale
-   * @param {function} props.onHover - provides properties of the
-   *    selected building, together with the mouse event when mouse hovered
-   * @param {function} props.onClick - provide properties of the
-   *    selected building, together with the mouse event when mouse clicked
-   */
-  constructor({
-    opacity = 1,
-    elevation = 1,
-    ...props
-  }) {
-    super({
-      opacity,
-      elevation,
-      ...props
-    });
+  constructor(props) {
+    super(Object.assign({}, defaultProps, props));
   }
 
   initializeState() {
@@ -111,9 +93,7 @@ export default class ExtrudedChoroplethLayer64 extends Layer {
   }
 
   draw({uniforms}) {
-    this.state.model.render({
-      ...uniforms
-    });
+    this.state.model.render(uniforms);
   }
 
   pick(opts) {
@@ -149,10 +129,13 @@ export default class ExtrudedChoroplethLayer64 extends Layer {
     gl.enable(GL.DEPTH_TEST);
     gl.depthFunc(GL.LEQUAL);
 
+    const shaders = assembleShaders(gl, this.getShaders());
+
     return new Model({
       gl,
       id: this.props.id,
-      ...assembleShaders(gl, this.getShaders()),
+      vs: shaders.vs,
+      fs: shaders.fs,
       geometry: new Geometry({
         drawMode: this.props.drawWireframe ? GL.LINES : GL.TRIANGLES
       }),
@@ -286,7 +269,8 @@ export default class ExtrudedChoroplethLayer64 extends Layer {
     // Generate a flat list of buildings
     this.state.buildings = [];
     for (const building of data.features) {
-      const {properties, geometry: {coordinates, type}} = building;
+      const {properties, geometry} = building;
+      const {coordinates, type} = geometry;
       if (!properties.height) {
         properties.height = Math.random() * 1000;
       }
@@ -384,6 +368,8 @@ export default class ExtrudedChoroplethLayer64 extends Layer {
     }
   }
 }
+
+ExtrudedChoroplethLayer64.layerName = 'ExtrudedChoroplethLayer64';
 
 /*
  * helpers

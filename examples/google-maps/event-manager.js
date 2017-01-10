@@ -21,7 +21,7 @@
 // Portions of the code below originally from:
 // https://github.com/mapbox/mapbox-gl-js/blob/master/js/ui/handler/scroll_zoom.js
 import React, {PropTypes, Component} from 'react';
-import autobind from 'autobind-decorator';
+import autobind from 'deck.gl/react';
 import document from 'global/document';
 import window from 'global/window';
 
@@ -63,46 +63,44 @@ function centroid(positions) {
   return [sum[0] / positions.length, sum[1] / positions.length];
 }
 
+const propTypes = {
+  width: PropTypes.number.isRequired,
+  height: PropTypes.number.isRequired,
+  onMouseDown: PropTypes.func,
+  onMouseDrag: PropTypes.func,
+  onMouseRotate: PropTypes.func,
+  onMouseUp: PropTypes.func,
+  onMouseMove: PropTypes.func,
+  onMouseClick: PropTypes.func,
+  onTouchStart: PropTypes.func,
+  onTouchDrag: PropTypes.func,
+  onTouchRotate: PropTypes.func,
+  onTouchEnd: PropTypes.func,
+  onTouchTap: PropTypes.func,
+  onZoom: PropTypes.func,
+  onZoomEnd: PropTypes.func
+};
+
+const defaultProps = {
+  onMouseDown: noop,
+  onMouseDrag: noop,
+  onMouseRotate: noop,
+  onMouseUp: noop,
+  onMouseMove: noop,
+  onMouseClick: noop,
+  onTouchStart: noop,
+  onTouchDrag: noop,
+  onTouchRotate: noop,
+  onTouchEnd: noop,
+  onTouchTap: noop,
+  onZoom: noop,
+  onZoomEnd: noop
+};
+
 export default class EventManager extends Component {
-
-  static displayName = 'EventManager';
-
-  static propTypes = {
-    width: PropTypes.number.isRequired,
-    height: PropTypes.number.isRequired,
-    onMouseDown: PropTypes.func,
-    onMouseDrag: PropTypes.func,
-    onMouseRotate: PropTypes.func,
-    onMouseUp: PropTypes.func,
-    onMouseMove: PropTypes.func,
-    onMouseClick: PropTypes.func,
-    onTouchStart: PropTypes.func,
-    onTouchDrag: PropTypes.func,
-    onTouchRotate: PropTypes.func,
-    onTouchEnd: PropTypes.func,
-    onTouchTap: PropTypes.func,
-    onZoom: PropTypes.func,
-    onZoomEnd: PropTypes.func
-  };
-
-  static defaultProps = {
-    onMouseDown: noop,
-    onMouseDrag: noop,
-    onMouseRotate: noop,
-    onMouseUp: noop,
-    onMouseMove: noop,
-    onMouseClick: noop,
-    onTouchStart: noop,
-    onTouchDrag: noop,
-    onTouchRotate: noop,
-    onTouchEnd: noop,
-    onTouchTap: noop,
-    onZoom: noop,
-    onZoomEnd: noop
-  };
-
   constructor(props) {
     super(props);
+    autobind(this);
     this.state = {
       didDrag: false,
       isFunctionKeyPressed: false,
@@ -128,7 +126,6 @@ export default class EventManager extends Component {
       event.ctrlKey || event.shiftKey);
   }
 
-  @autobind
   _onMouseDown(event) {
     const pos = this._getMousePos(event);
     this.setState({
@@ -142,7 +139,6 @@ export default class EventManager extends Component {
     document.addEventListener('mouseup', this._onMouseUp, false);
   }
 
-  @autobind
   _onTouchStart(event) {
     const pos = this._getTouchPos(event);
     this.setState({
@@ -156,7 +152,6 @@ export default class EventManager extends Component {
     document.addEventListener('touchend', this._onTouchEnd, false);
   }
 
-  @autobind
   _onMouseDrag(event) {
     const pos = this._getMousePos(event);
     this.setState({pos, didDrag: true});
@@ -168,7 +163,6 @@ export default class EventManager extends Component {
     }
   }
 
-  @autobind
   _onTouchDrag(event) {
     const pos = this._getTouchPos(event);
     this.setState({pos, didDrag: true});
@@ -181,7 +175,6 @@ export default class EventManager extends Component {
     event.preventDefault();
   }
 
-  @autobind
   _onMouseUp(event) {
     document.removeEventListener('mousemove', this._onMouseDrag, false);
     document.removeEventListener('mouseup', this._onMouseUp, false);
@@ -193,7 +186,6 @@ export default class EventManager extends Component {
     }
   }
 
-  @autobind
   _onTouchEnd(event) {
     document.removeEventListener('touchmove', this._onTouchDrag, false);
     document.removeEventListener('touchend', this._onTouchEnd, false);
@@ -205,14 +197,12 @@ export default class EventManager extends Component {
     }
   }
 
-  @autobind
   _onMouseMove(event) {
     const pos = this._getMousePos(event);
     this.props.onMouseMove({pos});
   }
 
   /* eslint-disable complexity, max-statements */
-  @autobind
   _onWheel(event) {
     event.preventDefault();
     let value = event.deltaY;
@@ -326,3 +316,7 @@ export default class EventManager extends Component {
     );
   }
 }
+
+EventManager.displayName = 'EventManager';
+EventManager.propTypes = propTypes;
+EventManager.defaultProps = defaultProps;

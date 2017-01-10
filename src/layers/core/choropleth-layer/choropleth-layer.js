@@ -18,7 +18,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {Layer, assembleShaders} from '../../..';
+import {Layer} from '../../../lib';
+import {assembleShaders} from '../../../shader-utils';
 import {GL, Model, Geometry} from 'luma.gl';
 import flattenDeep from 'lodash.flattendeep';
 import normalize from 'geojson-normalize';
@@ -28,23 +29,22 @@ import {join} from 'path';
 
 const DEFAULT_COLOR = [0, 0, 255, 255];
 
-const defaultGetColor = feature => feature.properties.color;
+const defaultProps = {
+  getColor: feature => feature.properties.color,
+  drawCountour: false,
+  strokeWidth: 1
+};
 
 export default class ChoroplethLayer extends Layer {
-
-  static layerName = 'ChoroplethLayer';
-
-  /**
-   * @class
-   * @param {object} props
-   */
   constructor(props) {
-    super({
-      getColor: defaultGetColor,
-      drawCountour: false,
-      strokeWidth: 1,
-      ...props
-    });
+    super(Object.assign({}, defaultProps, props));
+  }
+
+  getShaders() {
+    return {
+      vs: readFileSync(join(__dirname, './choropleth-layer-vertex.glsl'), 'utf8'),
+      fs: readFileSync(join(__dirname, './choropleth-layer-fragment.glsl'), 'utf8')
+    };
   }
 
   initializeState() {
@@ -112,18 +112,14 @@ export default class ChoroplethLayer extends Layer {
     info.object = feature;
   }
 
-  getShaders() {
-    return {
-      vs: readFileSync(join(__dirname, './choropleth-layer-vertex.glsl'), 'utf8'),
-      fs: readFileSync(join(__dirname, './choropleth-layer-fragment.glsl'), 'utf8')
-    };
-  }
-
   getModel(gl) {
+    const shaders = assembleShaders(gl, this.getShaders());
+
     return new Model({
       gl,
       id: this.props.id,
-      ...assembleShaders(gl, this.getShaders()),
+      vs: shaders.vs,
+      fs: shaders.fs,
       geometry: new Geometry({
         drawMode: this.props.drawContour ? GL.LINES : GL.TRIANGLES
       }),
@@ -208,6 +204,8 @@ export default class ChoroplethLayer extends Layer {
     attribute.value = new Uint8Array(flattenDeep(colors));
   }
 }
+
+ChoroplethLayer.layerName = 'ChoroplethLayer';
 
 /*
  * converts list of features from a GeoJSON object to a list of GeoJSON

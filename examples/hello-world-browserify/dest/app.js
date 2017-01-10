@@ -1,4 +1,4 @@
-import React, {Component} from 'react';
+import {Component, createElement} from 'react';
 import {render} from 'react-dom';
 import MapGL from 'react-map-gl';
 import DeckGL from 'deck.gl/react';
@@ -9,7 +9,6 @@ import {LineLayer} from 'deck.gl';
 const MAPBOX_TOKEN = process.env.MAPBOX_ACCESS_TOKEN; // eslint-disable-line
 
 class Root extends Component {
-
   constructor(props) {
     super(props);
     this.state = {
@@ -36,15 +35,18 @@ class Root extends Component {
     })];
 
     return (
-      React.createElement( MapGL, {
-        latitude: viewport.latitude, longitude: viewport.longitude, zoom: viewport.zoom, bearing: viewport.bearing, pitch: viewport.pitch, width: width, height: height, mapStyle: "mapbox://styles/mapbox/dark-v9", mapboxApiAccessToken: MAPBOX_TOKEN, perspectiveEnabled: true, onChangeViewport: v => this.setState({viewport: v}) },
-        React.createElement( DeckGL, {
-          latitude: viewport.latitude, longitude: viewport.longitude, zoom: viewport.zoom, bearing: viewport.bearing, pitch: viewport.pitch, width: width, height: height, layers: layers })
+      createElement(
+        MapGL, {
+          ...viewport,
+          width, height,
+          perspectiveEnabled: true,
+          mapboxApiAccessToken: MAPBOX_TOKEN,
+          onChangeViewport: v => this.setState({viewport: v})
+        },
+        createElement(DeckGL, {...viewport.pitch, width, height, layers})
       )
     );
   }
 }
 
-const root = document.createElement('div');
-document.body.appendChild(root);
-render(React.createElement( Root, null ), root);
+render(createElement(Root, null), document.body.appendChild(document.createElement('div')));

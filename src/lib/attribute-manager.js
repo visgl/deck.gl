@@ -42,10 +42,7 @@ export default class AttributeManager {
    * @param {Object} [props]
    * @param {String} [props.id] - identifier (for debugging)
    */
-  constructor({
-    id = 'attribute-manager',
-    ...otherProps
-  } = {}) {
+  constructor({id = 'attribute-manager'} = {}) {
     this.id = id;
     this.attributes = {};
     this.allocedInstances = -1;
@@ -126,10 +123,10 @@ export default class AttributeManager {
     buffers = {},
     props = {},
     context = {},
-    ...opts
+    ignoreUnknownAttributes = false
   } = {}) {
     // First apply any application provided buffers
-    this._checkExternalBuffers(buffers, opts);
+    this._checkExternalBuffers({buffers, ignoreUnknownAttributes});
     this._setExternalBuffers(buffers);
 
     // Only initiate alloc/update (and logging) if actually needed
@@ -256,10 +253,8 @@ export default class AttributeManager {
       // For now, just copy any attributes from that map into the main map
       // TODO - Attribute maps are a deprecated feature, remove
       if (attributeName in updaters) {
-        attributes[attributeName] = {
-          ...attributes[attributeName],
-          ...updaters[attributeName]
-        };
+        attributes[attributeName] =
+          Object.assign({}, attributes[attributeName], updaters[attributeName]);
       }
 
       const attribute = attributes[attributeName];
@@ -268,29 +263,30 @@ export default class AttributeManager {
       this._validate(attributeName, attribute);
 
       // Initialize the attribute descriptor, with WebGL and metadata fields
-      const attributeData = {
-        // Ensure that fields are present before Object.seal()
-        target: undefined,
-        isIndexed: false,
+      const attributeData = Object.assign(
+        {
+          // Ensure that fields are present before Object.seal()
+          target: undefined,
+          isIndexed: false,
 
-        // Reserved for application
-        userData: {},
-
+          // Reserved for application
+          userData: {}
+        },
         // Metadata
-        ...attribute,
+        attribute,
+        {
+          // State
+          isExternalBuffer: false,
+          needsAlloc: false,
+          needsUpdate: false,
+          changed: false,
 
-        // State
-        isExternalBuffer: false,
-        needsAlloc: false,
-        needsUpdate: false,
-        changed: false,
-
-        // Luma fields
-        size: attribute.size,
-        value: attribute.value || null,
-
-        ..._extraProps
-      };
+          // Luma fields
+          size: attribute.size,
+          value: attribute.value || null
+        },
+        _extraProps
+      );
       // Sanity - no app fields on our attributes. Use userData instead.
       Object.seal(attributeData);
 
@@ -312,14 +308,17 @@ export default class AttributeManager {
 
   // Checks that any attribute buffers in props are valid
   // Note: This is just to help app catch mistakes
-  _checkExternalBuffers(bufferMap = {}, opts = {}) {
+  _checkExternalBuffers({
+    buffers = {},
+    ignoreUnknownAttributes = false
+  } = {}) {
     const {attributes} = this;
-    for (const attributeName in bufferMap) {
+    for (const attributeName in buffers) {
       const attribute = attributes[attributeName];
-      if (!attribute && !opts.ignoreUnknownAttributes) {
+      if (!attribute && !ignoreUnknownAttributes) {
         throw new Error(`Unknown attribute prop ${attributeName}`);
       }
-      // const buffer = bufferMap[attributeName];
+      // const buffer = buffers[attributeName];
       // TODO - check buffer type
     }
   }
