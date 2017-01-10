@@ -1,13 +1,10 @@
-/* eslint-disable no-unused-vars */
 import React from 'react';
-/* eslint-enable no-unused-vars */
 
 function renderExampleButtons({examples, activeExamples, onChange}) {
   const children = [];
   for (const exampleName of Object.keys(examples)) {
     children.push(
-      <div key={ exampleName } className="checkbox"
-          style={{pointerEvents: 'auto'}}>
+      <div key={ exampleName } className="checkbox" >
         <input
           type="checkbox"
           id={exampleName}
@@ -16,10 +13,8 @@ function renderExampleButtons({examples, activeExamples, onChange}) {
           checked={activeExamples[exampleName] || ''}
           onChange={e => onChange(exampleName)}
         />
-        <label htmlFor={ exampleName } style={{display: 'inline-block'}}>
-          <div style={{marginLeft: 30, whiteSpace: 'nowrap'}}>
-            { exampleName }
-          </div>
+        <label htmlFor={ exampleName } >
+          <span>{ exampleName }</span>
         </label>
       </div>
     );
@@ -43,13 +38,7 @@ function renderExampleCategories({examples, activeExamples, onChange}) {
 
 export default function LayerSelector({examples, activeExamples, onChange}) {
   return (
-    <div id="example-selector" style={{
-      padding: 0,
-      width: 270,
-      height: '100%',
-      overflowX: 'hidden',
-      overflowY: 'scroll'
-    }}>
+    <div id="layer-selector" >
       {
         renderExampleCategories({examples, activeExamples, onChange})
       }
