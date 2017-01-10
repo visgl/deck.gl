@@ -18,44 +18,25 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {Layer, assembleShaders} from '../../..';
+import {Layer} from '../../../lib';
+import {assembleShaders} from '../../../shader-utils';
 import {GL, Model, Geometry} from 'luma.gl';
 import {readFileSync} from 'fs';
 import {join} from 'path';
 
 const DEFAULT_COLOR = [0, 0, 255, 255];
 
-const defaultGetSourcePosition = x => x.sourcePosition;
-const defaultGetTargetPosition = x => x.targetPosition;
-const defaultGetColor = x => x.color;
+const defaultProps = {
+  strokeWidth: 1,
+  getSourcePosition: x => x.sourcePosition,
+  getTargetPosition: x => x.targetPosition,
+  getSourceColor: x => x.color,
+  getTargetColor: x => x.color
+};
 
 export default class ArcLayer extends Layer {
-
-  static layerName = 'ArcLayer';
-
-  /**
-   * @classdesc
-   * ArcLayer
-   *
-   * @class
-   * @param {object} props
-   */
-  constructor({
-    strokeWidth = 1,
-    getSourcePosition = defaultGetSourcePosition,
-    getTargetPosition = defaultGetTargetPosition,
-    getSourceColor = defaultGetColor,
-    getTargetColor = defaultGetColor,
-    ...props
-  } = {}) {
-    super({
-      strokeWidth,
-      getSourcePosition,
-      getTargetPosition,
-      getSourceColor,
-      getTargetColor,
-      ...props
-    });
+  constructor(props) {
+    super(Object.assign({}, defaultProps, props));
   }
 
   initializeState() {
@@ -104,9 +85,12 @@ export default class ArcLayer extends Layer {
       positions = [...positions, i, i, i];
     }
 
+    const shaders = assembleShaders(gl, this.getShaders());
+
     return new Model({
       gl,
-      ...assembleShaders(gl, this.getShaders()),
+      vs: shaders.vs,
+      fs: shaders.fs,
       geometry: new Geometry({
         drawMode: GL.LINE_STRIP,
         positions: new Float32Array(positions)
@@ -158,3 +142,5 @@ export default class ArcLayer extends Layer {
     }
   }
 }
+
+ArcLayer.layerName = 'ArcLayer';

@@ -18,7 +18,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {Layer, assembleShaders} from '../../..';
+import {Layer} from '../../../lib';
+import {assembleShaders} from '../../../shader-utils';
 import {fp64ify} from '../../../lib/utils/fp64';
 import {GL, Model, Geometry} from 'luma.gl';
 import flattenDeep from 'lodash.flattendeep';
@@ -29,23 +30,15 @@ import {join} from 'path';
 
 const DEFAULT_COLOR = [0, 0, 255, 255];
 
-const defaultGetColor = feature => feature.properties.color;
+const defaultProps = {
+  getColor: feature => feature.properties.color || DEFAULT_COLOR,
+  drawCountour: false,
+  strokeWidth: 1
+};
 
 export default class ChoroplethLayer64 extends Layer {
-
-  static layerName = 'ChoroplethLayer64';
-
-  /**
-   * @class
-   * @param {object} props
-   */
   constructor(props) {
-    super({
-      getColor: defaultGetColor,
-      drawCountour: false,
-      strokeWidth: 1,
-      ...props
-    });
+    super(Object.assign({}, defaultProps, props));
   }
 
   initializeState() {
@@ -120,10 +113,13 @@ export default class ChoroplethLayer64 extends Layer {
   }
 
   getModel(gl) {
+    const shaders = assembleShaders(gl, this.getShaders());
+
     return new Model({
       gl,
       id: this.props.id,
-      ...assembleShaders(gl, this.getShaders()),
+      vs: shaders.vs,
+      fs: shaders.fs,
       geometry: new Geometry({
         drawMode: this.props.drawContour ? GL.LINES : GL.TRIANGLES
       }),
@@ -228,6 +224,8 @@ export default class ChoroplethLayer64 extends Layer {
     attribute.value = new Uint8Array(flattenDeep(colors));
   }
 }
+
+ChoroplethLayer64.layerName = 'ChoroplethLayer64';
 
 /*
  * converts list of features from a GeoJSON object to a list of GeoJSON

@@ -33,9 +33,12 @@ export default class ReflectionEffect extends Effect {
   }
 
   initialize({gl, layerManager}) {
+    const shaders = assembleShaders(gl, this.getShaders());
+
     this.unitQuad = new Model({
       gl,
-      ...assembleShaders(gl, this.getShaders()),
+      vs: shaders.vs,
+      fs: shaders.fs,
       geometry: new Geometry({
         drawMode: GL.TRIANGLE_FAN,
         vertices: new Float32Array([0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0])
@@ -59,10 +62,9 @@ export default class ReflectionEffect extends Effect {
     /* this is a huge hack around the existing viewport class.
      * TODO in the future, once we implement bona-fide cameras, we really need to fix this.
      */
-    layerManager.setViewport(new WebMercatorViewport({
-      ...viewport,
-      pitch: -180 - pitch
-    }));
+    layerManager.setViewport(
+      new WebMercatorViewport(Object.assign({}, viewport, {pitch: -180 - pitch}))
+    );
     gl.clear(GL.COLOR_BUFFER_BIT | GL.DEPTH_BUFFER_BIT);
 
     layerManager.drawLayers();

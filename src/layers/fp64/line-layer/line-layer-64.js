@@ -18,7 +18,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {Layer, assembleShaders} from '../../..';
+import {Layer} from '../../../lib';
+import {assembleShaders} from '../../../shader-utils';
 import {fp64ify} from '../../../lib/utils/fp64';
 import {GL, Model, Geometry} from 'luma.gl';
 import {readFileSync} from 'fs';
@@ -30,28 +31,16 @@ const defaultGetSourcePosition = x => x.sourcePosition;
 const defaultGetTargetPosition = x => x.targetPosition;
 const defaultGetColor = x => x.color || DEFAULT_COLOR;
 
+const defaultProps = {
+  getSourcePosition: defaultGetSourcePosition,
+  getTargetPosition: defaultGetTargetPosition,
+  getColor: defaultGetColor,
+  strokeWidth: 1
+};
+
 export default class LineLayer64 extends Layer {
-
-  static layerName = 'LineLayer64';
-
-  /**
-   * @class
-   * @param {object} opts
-   */
-  constructor({
-    getSourcePosition = defaultGetSourcePosition,
-    getTargetPosition = defaultGetTargetPosition,
-    getColor = defaultGetColor,
-    strokeWidth = 1,
-    ...opts
-  } = {}) {
-    super({
-      strokeWidth,
-      getSourcePosition,
-      getTargetPosition,
-      getColor,
-      ...opts
-    });
+  constructor(props) {
+    super(Object.assign({}, defaultProps, props));
   }
 
   initializeState() {
@@ -103,10 +92,14 @@ export default class LineLayer64 extends Layer {
 
   createModel(gl) {
     const positions = [0, 0, 0, 1, 1, 1];
+
+    const shaders = assembleShaders(gl, this.getShaders());
+
     return new Model({
       gl,
       id: this.props.id,
-      ...assembleShaders(gl, this.getShaders()),
+      vs: shaders.vs,
+      fs: shaders.fs,
       geometry: new Geometry({
         drawMode: GL.LINE_STRIP,
         positions: new Float32Array(positions)
@@ -165,5 +158,6 @@ export default class LineLayer64 extends Layer {
       i += size;
     }
   }
-
 }
+
+LineLayer64.layerName = 'LineLayer64';

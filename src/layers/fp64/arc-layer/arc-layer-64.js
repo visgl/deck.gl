@@ -18,7 +18,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {Layer, assembleShaders} from '../../..';
+import {Layer} from '../../../lib';
+import {assembleShaders} from '../../../shader-utils';
 import {fp64ify} from '../../../lib/utils/fp64';
 import {GL, Model, Geometry} from 'luma.gl';
 import {readFileSync} from 'fs';
@@ -30,33 +31,17 @@ const defaultGetSourcePosition = x => x.sourcePosition;
 const defaultGetTargetPosition = x => x.targetPosition;
 const defaultGetColor = x => x.color;
 
+const defaultProps = {
+  getSourcePosition: defaultGetSourcePosition,
+  getTargetPosition: defaultGetTargetPosition,
+  getSourceColor: defaultGetColor,
+  getTargetColor: defaultGetColor,
+  strokeWidth: 1
+};
+
 export default class ArcLayer64 extends Layer {
-
-  static layerName = 'ArcLayer64';
-
-  /**
-   * @classdesc
-   * ArcLayer
-   *
-   * @class
-   * @param {object} props
-   */
-  constructor({
-    getSourcePosition = defaultGetSourcePosition,
-    getTargetPosition = defaultGetTargetPosition,
-    getSourceColor = defaultGetColor,
-    getTargetColor = defaultGetColor,
-    strokeWidth = 1,
-    ...props
-  } = {}) {
-    super({
-      getSourcePosition,
-      getTargetPosition,
-      getSourceColor,
-      getTargetColor,
-      strokeWidth,
-      ...props
-    });
+  constructor(props) {
+    super(Object.assign({}, defaultProps, props));
   }
 
   initializeState() {
@@ -114,10 +99,14 @@ export default class ArcLayer64 extends Layer {
     for (let i = 0; i < NUM_SEGMENTS; i++) {
       positions = [...positions, i, i, i];
     }
+
+    const shaders = assembleShaders(gl, this.getShaders());
+
     return new Model({
       gl,
       id: this.props.id,
-      ...assembleShaders(gl, this.getShaders()),
+      vs: shaders.vs,
+      fs: shaders.fs,
       geometry: new Geometry({
         drawMode: GL.LINE_STRIP,
         positions: new Float32Array(positions)
@@ -177,5 +166,6 @@ export default class ArcLayer64 extends Layer {
       i += size;
     }
   }
-
 }
+
+ArcLayer64.layerName = 'ArcLayer64';

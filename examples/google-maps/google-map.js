@@ -13,7 +13,7 @@ export default class GoogleMap extends PureComponent {
 
   _onChange({center, zoom, bounds, marginBounds}) {
     const {lat: latitude, lng: longitude} = center;
-    console.log('Viewport Change', center, longitude, latitude, zoom);
+    console.log('Viewport Change', center, longitude, latitude, zoom); // eslint-disable-line
     // this.props.onViewportChanged({longitude, latitude, zoom});
   }
 
@@ -24,7 +24,7 @@ export default class GoogleMap extends PureComponent {
     if (!key) {
       throw new Error('Google Maps API Key not set. Use GoogleMapsKey env variable or set in code');
     }
-    console.log(key);
+    console.log(key); // eslint-disable-line
     return (
       <div style={{width, height}}>
         <GoogleMapReact

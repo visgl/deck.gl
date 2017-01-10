@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 
 /* global window */
-import React, {PropTypes} from 'react';
+import React, {PropTypes, createElement} from 'react';
 import autobind from './autobind';
 import {createGLContext} from 'luma.gl';
 /* global requestAnimationFrame, cancelAnimationFrame */
@@ -27,43 +27,42 @@ import {createGLContext} from 'luma.gl';
 const DEFAULT_PIXEL_RATIO =
   (typeof window !== 'undefined' && window.devicePixelRatio) || 1;
 
+const propTypes = {
+  id: PropTypes.string.isRequired,
+
+  width: PropTypes.number.isRequired,
+  height: PropTypes.number.isRequired,
+  style: PropTypes.object,
+
+  pixelRatio: PropTypes.number,
+  viewport: PropTypes.object.isRequired,
+  events: PropTypes.object,
+  gl: PropTypes.object,
+  glOptions: PropTypes.object,
+  debug: PropTypes.bool,
+
+  onInitializationFailed: PropTypes.func,
+  onRendererInitialized: PropTypes.func.isRequired,
+  onRenderFrame: PropTypes.func,
+  onMouseMove: PropTypes.func,
+  onClick: PropTypes.func
+};
+
+const defaultProps = {
+  style: {},
+  gl: null,
+  glOptions: {preserveDrawingBuffer: true},
+  debug: false,
+  pixelRatio: DEFAULT_PIXEL_RATIO,
+
+  onInitializationFailed: error => {
+    throw error;
+  },
+  onRendererInitialized: () => {},
+  onRenderFrame: () => {}
+};
+
 export default class WebGLRenderer extends React.Component {
-
-  static propTypes = {
-    id: PropTypes.string.isRequired,
-
-    width: PropTypes.number.isRequired,
-    height: PropTypes.number.isRequired,
-    style: PropTypes.object,
-
-    pixelRatio: PropTypes.number,
-    viewport: PropTypes.object.isRequired,
-    events: PropTypes.object,
-    gl: PropTypes.object,
-    glOptions: PropTypes.object,
-    debug: PropTypes.bool,
-
-    onInitializationFailed: PropTypes.func,
-    onRendererInitialized: PropTypes.func.isRequired,
-    onRenderFrame: PropTypes.func,
-    onMouseMove: PropTypes.func,
-    onClick: PropTypes.func
-  };
-
-  static defaultProps = {
-    style: {},
-    gl: null,
-    glOptions: {preserveDrawingBuffer: true},
-    debug: false,
-    pixelRatio: DEFAULT_PIXEL_RATIO,
-
-    onInitializationFailed: error => {
-      throw error;
-    },
-    onRendererInitialized: () => {},
-    onRenderFrame: () => {}
-  };
-
   /**
    * @classdesc
    * Small react component that uses Luma.GL to initialize a WebGL context.
@@ -103,7 +102,7 @@ export default class WebGLRenderer extends React.Component {
     let gl = this.props.gl;
     if (!gl) {
       try {
-        gl = createGLContext({canvas, debug, ...glOptions});
+        gl = createGLContext(Object.assign({canvas, debug}, glOptions));
       } catch (error) {
         this.props.onInitializationFailed(error);
         return;
@@ -171,14 +170,16 @@ export default class WebGLRenderer extends React.Component {
 
   render() {
     const {id, width, height, pixelRatio, style} = this.props;
-    return (
-      <canvas
-        ref={'overlay'}
-        key={'overlay'}
-        id={id}
-        width={width * pixelRatio}
-        height={height * pixelRatio}
-        style={{...style, width, height}}/>
-    );
+    return createElement('canvas', {
+      ref: 'overlay',
+      key: 'overlay',
+      id,
+      width: width * pixelRatio,
+      height: height * pixelRatio,
+      style: Object.assign({}, style, {width, height})
+    });
   }
 }
+
+WebGLRenderer.propTypes = propTypes;
+WebGLRenderer.defaultProps = defaultProps;

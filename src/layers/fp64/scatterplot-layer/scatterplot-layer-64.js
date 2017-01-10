@@ -18,7 +18,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {Layer, assembleShaders} from '../../..';
+import {Layer} from '../../../lib';
+import {assembleShaders} from '../../../shader-utils';
 import {fp64ify} from '../../../lib/utils/fp64';
 import {GL, Model, Geometry} from 'luma.gl';
 import {readFileSync} from 'fs';
@@ -30,42 +31,20 @@ const defaultGetPosition = x => x.position;
 const defaultGetRadius = x => x.radius;
 const defaultGetColor = x => x.color || DEFAULT_COLOR;
 
+const defaultProps = {
+  getPosition: defaultGetPosition,
+  getRadius: defaultGetRadius,
+  getColor: defaultGetColor,
+  radius: 30,
+  radiusMinPixels: 0,
+  radiusMaxPixels: Number.MAX_SAFE_INTEGER,
+  drawOutline: false,
+  strokeWidth: 1
+};
+
 export default class ScatterplotLayer64 extends Layer {
-
-  static layerName = 'ScatterplotLayer64';
-
-  /*
-   * @classdesc
-   * ScatterplotLayer
-   *
-   * @class
-   * @param {object} props
-   * @param {number} props.radius - point radius
-   * @param {number} props.radiusMinPixels - min point radius in pixels
-   * @param {number} props.radiusMinPixels - max point radius in pixels
-   */
-  constructor({
-    getPosition = defaultGetPosition,
-    getRadius = defaultGetRadius,
-    getColor = defaultGetColor,
-    radius = 30,
-    radiusMinPixels = 0,
-    radiusMaxPixels = Number.MAX_SAFE_INTEGER,
-    drawOutline = false,
-    strokeWidth = 1,
-    ...props
-  }) {
-    super({
-      getPosition,
-      getRadius,
-      getColor,
-      radius,
-      drawOutline,
-      strokeWidth,
-      radiusMinPixels,
-      radiusMaxPixels,
-      ...props
-    });
+  constructor(props) {
+    super(Object.assign({}, defaultProps, props));
   }
 
   initializeState() {
@@ -90,12 +69,11 @@ export default class ScatterplotLayer64 extends Layer {
 
   draw({uniforms}) {
     this.calculateZoomRadius();
-    this.state.model.render({
-      ...uniforms,
+    this.state.model.render(Object.assign({}, uniforms, {
       radiusMinPixels: this.props.radiusMinPixels,
       radiusMaxPixels: this.props.radiusMaxPixels,
       zoomRadiusFP64: this.state.zoomRadiusFP64
-    });
+    }));
   }
 
   getShaders() {
@@ -118,10 +96,13 @@ export default class ScatterplotLayer64 extends Layer {
       );
     }
 
+    const shaders = assembleShaders(gl, this.getShaders());
+
     return new Model({
       gl,
       id: this.props.id,
-      ...assembleShaders(gl, this.getShaders()),
+      vs: shaders.vs,
+      fs: shaders.fs,
       geometry: new Geometry({
         drawMode: GL.TRIANGLE_FAN,
         positions: new Float32Array(positions)
@@ -189,3 +170,5 @@ export default class ScatterplotLayer64 extends Layer {
     this.state.zoomRadiusFP64 = fp64ify(radius);
   }
 }
+
+ScatterplotLayer64.layerName = 'ScatterplotLayer64';

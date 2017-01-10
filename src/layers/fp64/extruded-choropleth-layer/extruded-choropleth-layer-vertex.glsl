@@ -20,10 +20,6 @@
 
 #define SHADER_NAME extruded-choropleths-layer-vertex-shader
 
-// import MATH_FP64 from '../shaderlib/fp64/math-fp64';
-// import PROJECT from '../shaderlib/project';
-// import LIGHTING from '../shaderlib/lighting';
-
 uniform float opacity;
 uniform vec3 colors;
 uniform float elevation;

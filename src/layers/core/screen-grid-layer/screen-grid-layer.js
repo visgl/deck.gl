@@ -18,34 +18,33 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {Layer, assembleShaders} from '../../..';
+import {Layer} from '../../../lib';
+import {assembleShaders} from '../../../shader-utils';
 import {GL, Model, Geometry} from 'luma.gl';
 import {readFileSync} from 'fs';
 import {join} from 'path';
 
+const defaultProps = {
+  // @type {number} opts.unitWidth - width of the unit rectangle
+  unitWidth: 100,
+  // @type {number} opts.unitHeight - height of the unit rectangle
+  unitHeight: 100,
+  minColor: [0, 0, 0, 255],
+  maxColor: [0, 255, 0, 255],
+  getPosition: d => d.position,
+  getWeight: d => 1
+};
+
 export default class ScreenGridLayer extends Layer {
+  constructor(props) {
+    super(Object.assign({}, defaultProps, props));
+  }
 
-  static layerName = 'ScreenGridLayer';
-
-  /**
-   * @classdesc
-   * ScreenGridLayer
-   *
-   * @class
-   * @param {object} opts
-   * @param {number} opts.unitWidth - width of the unit rectangle
-   * @param {number} opts.unitHeight - height of the unit rectangle
-   */
-  constructor(opts) {
-    super({
-      unitWidth: 100,
-      unitHeight: 100,
-      minColor: [0, 0, 0, 255],
-      maxColor: [0, 255, 0, 255],
-      getPosition: d => d.position,
-      getWeight: d => 1,
-      ...opts
-    });
+  getShaders() {
+    return {
+      vs: readFileSync(join(__dirname, './screen-grid-layer-vertex.glsl'), 'utf8'),
+      fs: readFileSync(join(__dirname, './screen-grid-layer-fragment.glsl'), 'utf8')
+    };
   }
 
   initializeState() {
@@ -74,21 +73,18 @@ export default class ScreenGridLayer extends Layer {
     const {model, cellScale, maxCount} = this.state;
     const {gl} = this.context;
     gl.depthMask(true);
-    model.render({...uniforms, minColor, maxColor, cellScale, maxCount});
-  }
-
-  getShaders() {
-    return {
-      vs: readFileSync(join(__dirname, './screen-grid-layer-vertex.glsl'), 'utf8'),
-      fs: readFileSync(join(__dirname, './screen-grid-layer-fragment.glsl'), 'utf8')
-    };
+    uniforms = Object.assign({}, uniforms, {minColor, maxColor, cellScale, maxCount});
+    model.render(uniforms);
   }
 
   getModel(gl) {
+    const shaders = assembleShaders(gl, this.getShaders());
+
     return new Model({
       gl,
       id: this.props.id,
-      ...assembleShaders(gl, this.getShaders()),
+      vs: shaders.vs,
+      fs: shaders.fs,
       geometry: new Geometry({
         drawMode: GL.TRIANGLE_FAN,
         vertices: new Float32Array([0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0])
@@ -160,3 +156,5 @@ export default class ScreenGridLayer extends Layer {
     this.setState({maxCount});
   }
 }
+
+ScreenGridLayer.layerName = 'ScreenGridLayer';
