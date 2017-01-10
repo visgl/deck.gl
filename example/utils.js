@@ -1,18 +1,5 @@
 
-// flatten geoJSON-style geometry coordinates into array of points
-export function flattenCoords(coordinates) {
-  if (!Array.isArray(coordinates)) {
-    return [];
-  }
-  if (Array.isArray(coordinates[0])) {
-    return coordinates.reduce((result, coordArray) => {
-      return result.concat(flattenCoords(coordArray));
-    }, []);
-  }
-  return [coordinates];
-}
-
-// generate random points
+// generate points in a grid
 export function pointGrid(N, bbox) {
   const dLon = bbox[2] - bbox[0];
   const dLat = bbox[3] - bbox[1];
@@ -36,16 +23,4 @@ export function pointGrid(N, bbox) {
     }
   }
   return points;
-}
-
-// load json from file
-export function loadJson(path) {
-  return fetch(path)
-  .then(response => {
-    if (!response.ok) {
-      throw new Error('Network response was not OK');
-    }
-    return response.json();
-  })
-  .catch(error => console.error(error)); // eslint-disable-line
 }

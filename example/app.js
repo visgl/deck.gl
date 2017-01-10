@@ -99,25 +99,18 @@ class App extends React.Component {
     for (const categoryName of Object.keys(LAYER_CATEGORIES)) {
       for (const exampleName of Object.keys(LAYER_CATEGORIES[categoryName])) {
 
-        // An example is an array of two functions:
-        // the first returns a DeckGL layer instance
-        // the second returns the value to be passed as data prop
+        // An example is a function that returns a DeckGL layer instance
         if (this.state.activeExamples[exampleName]) {
-          let example = LAYER_CATEGORIES[categoryName][exampleName];
-          const [getLayer, getData] = example;
+          const example = LAYER_CATEGORIES[categoryName][exampleName];
 
           const layerProps = {
             ...this.state,
             modelMatrix: this._getModelMatrix(index++),
-            data: getData(this.forceUpdate.bind(this)),
             onHovered: this._onItemHovered,
             onClicked: this._onItemClicked
           };
 
-          if (layerProps.data) {
-            // data is loaded
-            layers.push(getLayer(layerProps));
-          }
+          layers.push(example(layerProps));
         }
       }
     }

@@ -13,17 +13,16 @@ import {
 
 } from 'deck.gl';
 
-import dataSamples from './data-samples';
-import {flattenCoords} from './utils';
+import * as dataSamples from './data-samples';
 
 const ArcLayerExample = props =>
   new ArcLayer({
     id: 'arcLayer',
-    data: props.data,
-    getSourcePosition: f => flattenCoords(f.geometry.coordinates).shift(),
-    getTargetPosition: f => flattenCoords(f.geometry.coordinates).pop(),
-    getSourceColor: f => f.properties.DIRECTION === 'INBOUND' ? [0, 128, 200] : [0, 200, 128],
-    getTargetColor: f => f.properties.DIRECTION === 'INBOUND' ? [0, 200, 128] : [0, 128, 200],
+    data: dataSamples.routes,
+    getSourcePosition: d => d.START,
+    getTargetPosition: d => d.END,
+    getSourceColor: d => [64, 255, 0],
+    getTargetColor: d => [0, 128, 200],
     strokeWidth: 1,
     pickable: true,
     onHover: props.onHovered,
@@ -33,7 +32,7 @@ const ArcLayerExample = props =>
 const ChoroplethLayerContourExample = props =>
   new ChoroplethLayer({
     id: 'choroplethLayerContour',
-    data: props.data,
+    data: dataSamples.choropleths,
     getColor: f => [0, 80, 200],
     opacity: 0.8,
     drawContour: true
@@ -42,7 +41,7 @@ const ChoroplethLayerContourExample = props =>
 const ChoroplethLayerExample = props =>
   new ChoroplethLayer({
     id: 'choroplethLayerSolid',
-    data: props.data,
+    data: dataSamples.choropleths,
     getColor: f => [((f.properties.ZIP_CODE * 10) % 127) + 128, 0, 0],
     opacity: 0.8,
     pickable: true,
@@ -53,7 +52,7 @@ const ChoroplethLayerExample = props =>
 const ScreenGridLayerExample = props =>
   new ScreenGridLayer({
     id: 'screenGridLayer',
-    data: props.data,
+    data: dataSamples.points,
     getPosition: d => d.COORDINATES,
     unitWidth: 40,
     unitHeight: 40,
@@ -65,10 +64,10 @@ const ScreenGridLayerExample = props =>
 const LineLayerExample = props =>
   new LineLayer({
     id: 'lineLayer',
-    data: props.data,
-    getSourcePosition: f => flattenCoords(f.geometry.coordinates).shift(),
-    getTargetPosition: f => flattenCoords(f.geometry.coordinates).pop(),
-    getColor: f => f.properties.DIRECTION === 'INBOUND' ? [0, 128, 200] : [0, 200, 128],
+    data: dataSamples.routes,
+    getSourcePosition: d => d.START,
+    getTargetPosition: d => d.END,
+    getColor: d => d.SERVICE === 'WEEKDAY' ? [255, 64, 0] : [255, 200, 0],
     strokeWidth: 1,
     pickable: true,
     onHover: props.onHovered,
@@ -78,7 +77,7 @@ const LineLayerExample = props =>
 const ScatterplotLayerExample = props =>
   new ScatterplotLayer({
     id: 'scatterplotLayer',
-    data: props.data,
+    data: dataSamples.points,
     getPosition: d => d.COORDINATES,
     getColor: d => [255, 128, 0],
     getRadius: d => d.SPACES,
@@ -94,7 +93,7 @@ const ScatterplotLayerExample = props =>
 const ScatterplotLayerMetersExample = props =>
   new ScatterplotLayer({
     id: 'scatterplotLayerMeter',
-    data: props.data,
+    data: dataSamples.meterPoints,
     drawOutline: true,
     projectionMode: 2,
     positionOrigin: [-122.45, 37.75],
@@ -111,11 +110,11 @@ const ScatterplotLayerMetersExample = props =>
 const ArcLayer64Example = props =>
   new ArcLayer64({
     id: 'arcLayer64',
-    data: props.data,
-    getSourcePosition: f => flattenCoords(f.geometry.coordinates).shift(),
-    getTargetPosition: f => flattenCoords(f.geometry.coordinates).pop(),
-    getSourceColor: f => f.properties.DIRECTION === 'INBOUND' ? [0, 128, 200] : [0, 200, 128],
-    getTargetColor: f => f.properties.DIRECTION === 'INBOUND' ? [0, 200, 128] : [0, 128, 200],
+    data: dataSamples.routes,
+    getSourcePosition: d => d.START,
+    getTargetPosition: d => d.END,
+    getSourceColor: d => [64, 255, 0],
+    getTargetColor: d => [0, 128, 200],
     strokeWidth: 1,
     pickable: true,
     onHover: props.onHovered,
@@ -125,7 +124,7 @@ const ArcLayer64Example = props =>
 const ChoroplethLayer64ContourExample = props =>
   new ChoroplethLayer64({
     id: 'choroplethLayer64Contour',
-    data: props.data,
+    data: dataSamples.choropleths,
     getColor: f => [0, 80, 200],
     opacity: 0.8,
     drawContour: true
@@ -134,7 +133,7 @@ const ChoroplethLayer64ContourExample = props =>
 const ChoroplethLayer64SolidExample = props =>
   new ChoroplethLayer64({
     id: 'choroplethLayer64Solid',
-    data: props.data,
+    data: dataSamples.choropleths,
     getColor: f => [((f.properties.ZIP_CODE * 10) % 127) + 128, 0, 0],
     opacity: 0.8,
     pickable: true,
@@ -145,7 +144,7 @@ const ChoroplethLayer64SolidExample = props =>
 const ExtrudedChoroplethLayer64Example = props =>
   new ExtrudedChoroplethLayer64({
     id: 'extrudedChoroplethLayer64',
-    data: props.data,
+    data: dataSamples.choropleths,
     getColor: f => [((f.properties.ZIP_CODE * 10) % 127) + 128, 0, 0],
     pointLightLocation: [
       props.mapViewState.longitude,
@@ -159,10 +158,10 @@ const ExtrudedChoroplethLayer64Example = props =>
 const LineLayer64Example = props =>
   new LineLayer64({
     id: 'lineLayer64',
-    data: props.data,
-    getSourcePosition: f => flattenCoords(f.geometry.coordinates).shift(),
-    getTargetPosition: f => flattenCoords(f.geometry.coordinates).pop(),
-    getColor: f => f.properties.DIRECTION === 'INBOUND' ? [0, 128, 200] : [0, 200, 128],
+    data: dataSamples.routes,
+    getSourcePosition: d => d.START,
+    getTargetPosition: d => d.END,
+    getColor: d => d.SERVICE === 'WEEKDAY' ? [255, 64, 0] : [255, 200, 0],
     strokeWidth: 1,
     pickable: true,
     onHover: props.onHovered,
@@ -172,7 +171,7 @@ const LineLayer64Example = props =>
 const ScatterplotLayer64Example = props =>
   new ScatterplotLayer64({
     id: 'scatterplotLayer64',
-    data: props.data,
+    data: dataSamples.points,
     getPosition: d => d.COORDINATES,
     getColor: d => [255, 128, 0],
     getRadius: d => d.SPACES,
@@ -184,10 +183,10 @@ const ScatterplotLayer64Example = props =>
   });
 
 // perf test examples
-const ScatterplotLayerPerfExample = props =>
+const ScatterplotLayerPerfExample = getData => props =>
   new ScatterplotLayer({
     id: 'scatterplotLayer',
-    data: props.data,
+    data: getData(),
     getPosition: d => d,
     getColor: d => [0, 128, 0],
     radius: 1,
@@ -198,10 +197,10 @@ const ScatterplotLayerPerfExample = props =>
     onClick: props.onClicked
   });
 
-const ScatterplotLayer64PerfExample = props =>
+const ScatterplotLayer64PerfExample = getData => props =>
   new ScatterplotLayer64({
     id: 'scatterplotLayer64',
-    data: props.data,
+    data: getData(),
     getPosition: d => d,
     getColor: d => [0, 128, 0],
     radius: 1,
@@ -214,30 +213,30 @@ const ScatterplotLayer64PerfExample = props =>
 
 export default {
   'Core Layers': {
-    'ChoroplethLayer (Solid)': [ChoroplethLayerExample, dataSamples.getChoropleths],
-    'ChoroplethLayer (Contour)': [ChoroplethLayerContourExample, dataSamples.getChoropleths],
-    ScatterplotLayer: [ScatterplotLayerExample, dataSamples.getPoints],
-    'ScatterplotLayer (meters)': [ScatterplotLayerMetersExample, dataSamples.getMeterPoints],
-    ArcLayer: [ArcLayerExample, dataSamples.getRoutes],
-    LineLayer: [LineLayerExample, dataSamples.getRoutes],
-    ScreenGridLayer: [ScreenGridLayerExample, dataSamples.getPoints]
+    'ChoroplethLayer (Solid)': ChoroplethLayerExample,
+    'ChoroplethLayer (Contour)': ChoroplethLayerContourExample,
+    ScatterplotLayer: ScatterplotLayerExample,
+    'ScatterplotLayer (meters)': ScatterplotLayerMetersExample,
+    ArcLayer: ArcLayerExample,
+    LineLayer: LineLayerExample,
+    ScreenGridLayer: ScreenGridLayerExample
   },
 
   '64-bit Layers': {
-    ArcLayer64: [ArcLayer64Example, dataSamples.getRoutes],
-    'ChoroplethLayer64 (Solid)': [ChoroplethLayer64SolidExample, dataSamples.getChoropleths],
-    'ChoroplethLayer64 (Contour)': [ChoroplethLayer64ContourExample, dataSamples.getChoropleths],
-    ExtrudedChoroplethLayer64: [ExtrudedChoroplethLayer64Example, dataSamples.getChoropleths],
-    ScatterplotLayer64: [ScatterplotLayer64Example, dataSamples.getPoints],
-    LineLayer64: [LineLayer64Example, dataSamples.getRoutes]
+    ArcLayer64: ArcLayer64Example,
+    'ChoroplethLayer64 (Solid)': ChoroplethLayer64SolidExample,
+    'ChoroplethLayer64 (Contour)': ChoroplethLayer64ContourExample,
+    ExtrudedChoroplethLayer64: ExtrudedChoroplethLayer64Example,
+    ScatterplotLayer64: ScatterplotLayer64Example,
+    LineLayer64: LineLayer64Example
   },
 
   'Performance Tests': {
-    'ScatterplotLayer 1M': [ScatterplotLayerPerfExample, dataSamples.get1MPoints],
-    'ScatterplotLayer 10M': [ScatterplotLayerPerfExample, dataSamples.get10MPoints],
-    'ScatterplotLayer64 100K': [ScatterplotLayer64PerfExample, dataSamples.get100KPoints],
-    'ScatterplotLayer64 1M': [ScatterplotLayer64PerfExample, dataSamples.get1MPoints],
-    'ScatterplotLayer64 10M': [ScatterplotLayer64PerfExample, dataSamples.get10MPoints]
+    'ScatterplotLayer 1M': ScatterplotLayerPerfExample(dataSamples.getPoints1M),
+    'ScatterplotLayer 10M': ScatterplotLayerPerfExample(dataSamples.getPoints10M),
+    'ScatterplotLayer64 100K': ScatterplotLayer64PerfExample(dataSamples.getPoints100K),
+    'ScatterplotLayer64 1M': ScatterplotLayer64PerfExample(dataSamples.getPoints1M),
+    'ScatterplotLayer64 10M': ScatterplotLayer64PerfExample(dataSamples.getPoints10M)
   }
 };
 
