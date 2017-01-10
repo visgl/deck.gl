@@ -13,8 +13,8 @@ export function pointGrid(N, bbox) {
   const points = Array(sizeX * sizeY);
   let index = 0;
 
-  for (let x = 0; x < sizeX; x ++) {
-    for (let y = 0; y < sizeY; y ++) {
+  for (let x = 0; x < sizeX; x++) {
+    for (let y = 0; y < sizeY; y++) {
       points[index] = [
         bbox[0] + stepX * x,
         bbox[1] + stepY * y

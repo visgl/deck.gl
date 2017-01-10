@@ -253,10 +253,8 @@ export default class AttributeManager {
       // For now, just copy any attributes from that map into the main map
       // TODO - Attribute maps are a deprecated feature, remove
       if (attributeName in updaters) {
-        attributes[attributeName] = {
-          ...attributes[attributeName],
-          ...updaters[attributeName]
-        };
+        attributes[attributeName] =
+          Object.assign({}, attributes[attributeName], updaters[attributeName]);
       }
 
       const attribute = attributes[attributeName];
@@ -265,29 +263,30 @@ export default class AttributeManager {
       this._validate(attributeName, attribute);
 
       // Initialize the attribute descriptor, with WebGL and metadata fields
-      const attributeData = {
-        // Ensure that fields are present before Object.seal()
-        target: undefined,
-        isIndexed: false,
+      const attributeData = Object.assign(
+        {
+          // Ensure that fields are present before Object.seal()
+          target: undefined,
+          isIndexed: false,
 
-        // Reserved for application
-        userData: {},
-
+          // Reserved for application
+          userData: {}
+        },
         // Metadata
-        ...attribute,
+        attribute,
+        {
+          // State
+          isExternalBuffer: false,
+          needsAlloc: false,
+          needsUpdate: false,
+          changed: false,
 
-        // State
-        isExternalBuffer: false,
-        needsAlloc: false,
-        needsUpdate: false,
-        changed: false,
-
-        // Luma fields
-        size: attribute.size,
-        value: attribute.value || null,
-
-        ..._extraProps
-      };
+          // Luma fields
+          size: attribute.size,
+          value: attribute.value || null
+        },
+        _extraProps
+      );
       // Sanity - no app fields on our attributes. Use userData instead.
       Object.seal(attributeData);
 

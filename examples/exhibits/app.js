@@ -14,16 +14,19 @@ if (!token) {
 
 class Root extends Component {
 
-  state = {
-    viewport: {
-      latitude: 37.785164,
-      longitude: -122.41669,
-      zoom: 16.140440,
-      bearing: -20.55991,
-      pitch: 60,
-    },
-    width: 500,
-    height: 500,
+  constructor(props) {
+    super(props);
+    this.state = {
+      viewport: {
+        latitude: 37.785164,
+        longitude: -122.41669,
+        zoom: 16.140440,
+        bearing: -20.55991,
+        pitch: 60,
+      },
+      width: 500,
+      height: 500,
+    };
   }
 
   render() {

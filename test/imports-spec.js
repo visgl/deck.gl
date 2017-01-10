@@ -2,13 +2,8 @@ import test from 'tape-catch';
 import 'luma.gl';
 
 import DeckGL from 'deck.gl/react';
-
-import {
-  Layer, COORDINATE_SYSTEM,
-  ChoroplethLayer, ScatterplotLayer, ScreenGridLayer, ArcLayer, LineLayer
-} from 'deck.gl';
-
-import {EnhancedChoroplethLayer} from 'deck.gl/layers/samples';
+import {Layer, COORDINATE_SYSTEM} from 'deck.gl';
+import {ChoroplethLayer, ScatterplotLayer, ScreenGridLayer, ArcLayer, LineLayer} from 'deck.gl';
 
 test('Top-level imports', t0 => {
   t0.test('import "deck.gl"', t => {
@@ -32,9 +27,5 @@ test('Top-level imports', t0 => {
     t.end();
   });
 
-  t0.test('import "deck.gl/samples"', t => {
-    t.ok(EnhancedChoroplethLayer, 'EnhancedChoroplethLayer symbol imported');
-    t.end();
-  });
   t0.end();
 });

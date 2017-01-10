@@ -2,7 +2,7 @@ import {glGetDebugInfo} from 'luma.gl';
 
 // Load shader chunks
 // import SHADER_CHUNKS from '../../dist/shaderlib/shader-chunks';
-import SHADER_CHUNKS from './shader-chunks';
+import * as SHADER_CHUNKS from './shader-chunks';
 
 export function checkRendererVendor(debugInfo, gpuVendor) {
   const {vendor, renderer} = debugInfo;
@@ -63,7 +63,7 @@ function assembleShader(gl, opts = {}) {
     fp64 = true;
   }
   let source = `${getPlatformShaderDefines(gl)}\n`;
-  opts = {...opts, project, project64, fp64};
+  opts = Object.assign({}, opts, {project, project64, fp64});
   for (const chunkName of Object.keys(SHADER_CHUNKS)) {
     if (opts[chunkName]) {
       source += `${SHADER_CHUNKS[chunkName].source}\n`;

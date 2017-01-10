@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 
 /* global window */
-import React, {PropTypes} from 'react';
+import React, {PropTypes, createElement} from 'react';
 import autobind from './autobind';
 import {createGLContext} from 'luma.gl';
 /* global requestAnimationFrame, cancelAnimationFrame */
@@ -102,7 +102,7 @@ export default class WebGLRenderer extends React.Component {
     let gl = this.props.gl;
     if (!gl) {
       try {
-        gl = createGLContext({canvas, debug, ...glOptions});
+        gl = createGLContext(Object.assign({canvas, debug}, glOptions));
       } catch (error) {
         this.props.onInitializationFailed(error);
         return;
@@ -170,15 +170,14 @@ export default class WebGLRenderer extends React.Component {
 
   render() {
     const {id, width, height, pixelRatio, style} = this.props;
-    return (
-      <canvas
-        ref={'overlay'}
-        key={'overlay'}
-        id={id}
-        width={width * pixelRatio}
-        height={height * pixelRatio}
-        style={{...style, width, height}}/>
-    );
+    return createElement('canvas', {
+      ref: 'overlay',
+      key: 'overlay',
+      id,
+      width: width * pixelRatio,
+      height: height * pixelRatio,
+      style: Object.assign({}, style, {width, height})
+    });
   }
 }
 

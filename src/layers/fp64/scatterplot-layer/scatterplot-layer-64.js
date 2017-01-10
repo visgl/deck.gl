@@ -18,7 +18,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {Layer, assembleShaders} from '../../..';
+import {Layer} from '../../../lib';
+import {assembleShaders} from '../../../shader-utils';
 import {fp64ify} from '../../../lib/utils/fp64';
 import {GL, Model, Geometry} from 'luma.gl';
 import {readFileSync} from 'fs';
@@ -43,7 +44,7 @@ const defaultProps = {
 
 export default class ScatterplotLayer64 extends Layer {
   constructor(props) {
-    super({...defaultProps, ...props});
+    super(Object.assign({}, defaultProps, props));
   }
 
   initializeState() {
@@ -68,12 +69,11 @@ export default class ScatterplotLayer64 extends Layer {
 
   draw({uniforms}) {
     this.calculateZoomRadius();
-    this.state.model.render({
-      ...uniforms,
+    this.state.model.render(Object.assign({}, uniforms, {
       radiusMinPixels: this.props.radiusMinPixels,
       radiusMaxPixels: this.props.radiusMaxPixels,
       zoomRadiusFP64: this.state.zoomRadiusFP64
-    });
+    }));
   }
 
   getShaders() {
@@ -96,10 +96,13 @@ export default class ScatterplotLayer64 extends Layer {
       );
     }
 
+    const shaders = assembleShaders(gl, this.getShaders());
+
     return new Model({
       gl,
       id: this.props.id,
-      ...assembleShaders(gl, this.getShaders()),
+      vs: shaders.vs,
+      fs: shaders.fs,
       geometry: new Geometry({
         drawMode: GL.TRIANGLE_FAN,
         positions: new Float32Array(positions)

@@ -4,15 +4,14 @@ const webpack = require('webpack');
 module.exports = {
   // Bundle the transpiled code in dist
   entry: {
-    lib: resolve('./dist/index.js'),
-    test: resolve('./test/index.js')
+    lib: resolve('./dist/index.js')
   },
 
   // Generate a bundle in dist folder
   output: {
     path: resolve('./dist'),
     filename: '[name]-bundle.js',
-    library: 'react-map-gl',
+    library: 'deck.gl',
     libraryTarget: 'umd'
   },
 
@@ -25,12 +24,13 @@ module.exports = {
     warnings: false
   },
 
-  // devtool: 'source-maps'
-  resolve: {
-    alias: {
-      'deck.gl': resolve('./dist')
-    }
-  },
+  devtool: '#inline-source-maps',
+
+  // resolve: {
+  //   alias: {
+  //     'deck.gl': resolve('./dist')
+  //   }
+  // },
 
   module: {
     rules: [
@@ -38,7 +38,7 @@ module.exports = {
         // Compile ES2015 using buble
         test: /\.js$/,
         loader: 'buble-loader',
-        include: [/src/, /test/],
+        include: [/src/],
         options: {
           objectAssign: 'Object.assign',
           transforms: {
@@ -46,6 +46,16 @@ module.exports = {
             modules: false
           }
         }
+      },
+      {
+        // Mapbox has some unresolved fs calls
+        include: [resolve('./src')],
+        loader: 'transform-loader',
+        options: 'brfs'
+      },
+      {
+        test: /\.glsl$/,
+        loader: 'file?name=[path][name].[ext]'
       }
     ]
   },

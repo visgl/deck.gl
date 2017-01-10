@@ -28,7 +28,7 @@ import assert from 'assert';
  * @param {array}  props.data - array of data instances
  * @param {bool} props.opacity - opacity of the layer
  */
-const DEFAULT_PROPS = {
+const defaultProps = {
   data: [],
   dataIterator: null,
   dataComparator: null,
@@ -55,13 +55,11 @@ export default class Layer {
    * @param {object} props - See docs above
    */
   constructor(props) {
-    props = {
-      ...DEFAULT_PROPS,
-      ...props,
+    props = Object.assign({}, defaultProps, props, {
       // Accept null as data - otherwise apps will need to add ugly checks
       data: props.data || [],
       id: props.id || this.constructor.layerName
-    };
+    });
 
     this.id = props.id;
     this.count = counter++;
@@ -426,7 +424,6 @@ export default class Layer {
 
   // Calculates uniforms
   drawLayer({uniforms = {}}) {
-    uniforms = {...uniforms};
     // Call subclass lifecycle method
     this.draw({uniforms});
     // End lifecycle method

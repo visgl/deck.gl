@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 import test from 'tape-catch';
-import React from 'react';
+import React, {createElement} from 'react';
 import utils from 'react-addons-test-utils';
 
 import DeckGL from 'deck.gl/react';
@@ -22,7 +22,7 @@ const TEST_DATA = {
 test('Rendering DeckGL overlay without viewport params', t => {
   // TODO - should this work? A default WebMercatorViewport?
   const component = utils.renderIntoDocument(
-    <DeckGL width={100} height={100} layers={[]} />
+    createElement(DeckGL, {width: 100, height: 100, layers: []})
   );
   t.ok(component, 'WebGLOverlay is rendered.');
   t.end();
@@ -30,7 +30,7 @@ test('Rendering DeckGL overlay without viewport params', t => {
 
 test('Rendering DeckGL overlay with viewport params', t => {
   const component = utils.renderIntoDocument(
-    <DeckGL {...TEST_DATA.mapState} layers={[]}/>
+    createElement(DeckGL, Object.assign({}, TEST_DATA.mapState, {layers: []}))
   );
   t.ok(component, 'WebGLOverlay is rendered.');
   t.end();
@@ -39,7 +39,7 @@ test('Rendering DeckGL overlay with viewport params', t => {
 test('Rendering DeckGL overlay with Viewport', t => {
   const viewport = new Viewport();
   const component = utils.renderIntoDocument(
-    <DeckGL width={100} height={100} viewport={viewport} layers={[]}/>
+    createElement(DeckGL, {width: 100, height: 100, viewport, layers: []})
   );
   t.ok(component, 'WebGLOverlay is rendered.');
   t.end();
@@ -48,7 +48,7 @@ test('Rendering DeckGL overlay with Viewport', t => {
 test('Rendering DeckGL overlay with WebMercatorViewport', t => {
   const viewport = new WebMercatorViewport(TEST_DATA.mapState);
   const component = utils.renderIntoDocument(
-    <DeckGL width={100} height={100} viewport={viewport} layers={[]}/>
+    createElement(DeckGL, {width: 100, height: 100, viewport, layers: []})
   );
   t.ok(component, 'WebGLOverlay is rendered.');
   t.end();

@@ -35,7 +35,7 @@ const TEST_CASES = [
   }, {
     title: 'shallow objects (different)',
     object1: SHALLOW_OBJECT,
-    object2: {...SHALLOW_OBJECT},
+    object2: Object.assign({}, SHALLOW_OBJECT),
     result: SAME
   }, {
     title: 'deep objects (same)',
@@ -45,7 +45,7 @@ const TEST_CASES = [
   }, {
     title: 'deep objects (different, but same nested objects)',
     object1: DEEP_OBJECT,
-    object2: {...DEEP_OBJECT},
+    object2: Object.assign({}, DEEP_OBJECT),
     result: SAME
   }, {
     title: 'deep objects (different nested objects)',
@@ -81,8 +81,7 @@ const TEST_CASES = [
 ];
 
 test('compareProps#import', t => {
-  t.ok(compareProps,
-    'compareProps imported OK');
+  t.ok(compareProps, 'compareProps imported OK');
   t.end();
 });
 

@@ -18,7 +18,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {Layer, assembleShaders} from '../../..';
+import {Layer} from '../../../lib';
+import {assembleShaders} from '../../../shader-utils';
 import {GL, Model, Geometry} from 'luma.gl';
 import {readFileSync} from 'fs';
 import {join} from 'path';
@@ -35,7 +36,7 @@ const defaultProps = {
 
 export default class ArcLayer extends Layer {
   constructor(props) {
-    super({...defaultProps, ...props});
+    super(Object.assign({}, defaultProps, props));
   }
 
   initializeState() {
@@ -84,9 +85,12 @@ export default class ArcLayer extends Layer {
       positions = [...positions, i, i, i];
     }
 
+    const shaders = assembleShaders(gl, this.getShaders());
+
     return new Model({
       gl,
-      ...assembleShaders(gl, this.getShaders()),
+      vs: shaders.vs,
+      fs: shaders.fs,
       geometry: new Geometry({
         drawMode: GL.LINE_STRIP,
         positions: new Float32Array(positions)

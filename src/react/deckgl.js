@@ -17,7 +17,7 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-import React, {PropTypes} from 'react';
+import React, {PropTypes, createElement} from 'react';
 import autobind from './autobind';
 import WebGLRenderer from './webgl-renderer';
 import {LayerManager, Layer} from '../lib';
@@ -150,23 +150,18 @@ export default class DeckGL extends React.Component {
   render() {
     const {width, height, gl, debug} = this.props;
 
-    return (
-      <WebGLRenderer
-        {...this.props}
-
-        width={width}
-        height={height}
-
-        gl={gl}
-        debug={debug}
-        viewport={{x: 0, y: 0, width, height}}
-
-        onRendererInitialized={this._onRendererInitialized}
-        onNeedRedraw={this._onNeedRedraw}
-        onRenderFrame={this._onRenderFrame}
-        onMouseMove={this._onMouseMove}
-        onClick={this._onClick}/>
-    );
+    return createElement(WebGLRenderer, Object.assign({}, this.props, {
+      width,
+      height,
+      gl,
+      debug,
+      viewport: {x: 0, y: 0, width, height},
+      onRendererInitialized: this._onRendererInitialized,
+      onNeedRedraw: this._onNeedRedraw,
+      onRenderFrame: this._onRenderFrame,
+      onMouseMove: this._onMouseMove,
+      onClick: this._onClick
+    }));
   }
 }
 

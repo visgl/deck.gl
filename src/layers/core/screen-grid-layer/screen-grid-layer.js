@@ -18,7 +18,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {Layer, assembleShaders} from '../../..';
+import {Layer} from '../../../lib';
+import {assembleShaders} from '../../../shader-utils';
 import {GL, Model, Geometry} from 'luma.gl';
 import {readFileSync} from 'fs';
 import {join} from 'path';
@@ -36,7 +37,7 @@ const defaultProps = {
 
 export default class ScreenGridLayer extends Layer {
   constructor(props) {
-    super({...defaultProps, ...props});
+    super(Object.assign({}, defaultProps, props));
   }
 
   getShaders() {
@@ -72,14 +73,18 @@ export default class ScreenGridLayer extends Layer {
     const {model, cellScale, maxCount} = this.state;
     const {gl} = this.context;
     gl.depthMask(true);
-    model.render({...uniforms, minColor, maxColor, cellScale, maxCount});
+    uniforms = Object.assign({}, uniforms, {minColor, maxColor, cellScale, maxCount});
+    model.render(uniforms);
   }
 
   getModel(gl) {
+    const shaders = assembleShaders(gl, this.getShaders());
+
     return new Model({
       gl,
       id: this.props.id,
-      ...assembleShaders(gl, this.getShaders()),
+      vs: shaders.vs,
+      fs: shaders.fs,
       geometry: new Geometry({
         drawMode: GL.TRIANGLE_FAN,
         vertices: new Float32Array([0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0])

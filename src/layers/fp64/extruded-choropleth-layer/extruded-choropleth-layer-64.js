@@ -18,7 +18,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {Layer, assembleShaders} from '../../..';
+import {Layer} from '../../../lib';
+import {assembleShaders} from '../../../shader-utils';
 import {fp64ify} from '../../../lib/utils/fp64';
 import {GL, Model, Geometry} from 'luma.gl';
 import flattenDeep from 'lodash.flattendeep';
@@ -43,7 +44,7 @@ const defaultProps = {
 
 export default class ExtrudedChoroplethLayer64 extends Layer {
   constructor(props) {
-    super({...defaultProps, ...props});
+    super(Object.assign({}, defaultProps, props));
   }
 
   initializeState() {
@@ -128,10 +129,13 @@ export default class ExtrudedChoroplethLayer64 extends Layer {
     gl.enable(GL.DEPTH_TEST);
     gl.depthFunc(GL.LEQUAL);
 
+    const shaders = assembleShaders(gl, this.getShaders());
+
     return new Model({
       gl,
       id: this.props.id,
-      ...assembleShaders(gl, this.getShaders()),
+      vs: shaders.vs,
+      fs: shaders.fs,
       geometry: new Geometry({
         drawMode: this.props.drawWireframe ? GL.LINES : GL.TRIANGLES
       }),

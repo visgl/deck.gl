@@ -18,7 +18,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {Layer, assembleShaders} from '../../..';
+import {Layer} from '../../../lib';
+import {assembleShaders} from '../../../shader-utils';
 import {GL, Model, Geometry} from 'luma.gl';
 import {readFileSync} from 'fs';
 import {join} from 'path';
@@ -41,7 +42,7 @@ const defaultProps = {
 
 export default class ScatterplotLayer extends Layer {
   constructor(props) {
-    super({...props, ...defaultProps});
+    super(Object.assign({}, defaultProps, props));
   }
 
   getShaders(id) {
@@ -82,12 +83,11 @@ export default class ScatterplotLayer extends Layer {
     const {gl} = this.context;
     const lineWidth = this.screenToDevicePixels(this.props.strokeWidth);
     gl.lineWidth(lineWidth);
-    this.state.model.render({
-      ...uniforms,
+    this.state.model.render(Object.assign({}, uniforms, {
       radius: this.props.radius,
       radiusMinPixels: this.props.radiusMinPixels,
       radiusMaxPixels: this.props.radiusMaxPixels
-    });
+    }));
     // Setting line width back to 1 is here to workaround a Google Chrome bug
     // gl.clear() and gl.isEnabled() will return GL_INVALID_VALUE even with
     // correct parameter
@@ -108,11 +108,13 @@ export default class ScatterplotLayer extends Layer {
     /* eslint-disable */
 
 
-    const shaders = assembleShaders(gl, this.getShaders())
-    const model = new Model({
+    const shaders = assembleShaders(gl, this.getShaders());
+
+    return new Model({
       gl,
-      id: 'scatterplot',
-      ...shaders,
+      id: this.props.id,
+      vs: shaders.vs,
+      fs: shaders.fs,
       geometry: new Geometry({
         drawMode: GL.TRIANGLE_FAN,
         positions: new Float32Array(positions)

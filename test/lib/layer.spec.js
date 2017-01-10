@@ -40,10 +40,7 @@ test('Layer#constructor with zeroes', t => {
 
 test('Layer#getNumInstances', t => {
   for (const dataVariant of dataVariants) {
-    const layer = new Layer({
-      ...LAYER_PROPS,
-      data: dataVariant.data
-    });
+    const layer = new Layer(Object.assign({}, LAYER_PROPS, {data: dataVariant.data}));
     t.equal(layer.getNumInstances(), dataVariant.size);
   }
   t.end();

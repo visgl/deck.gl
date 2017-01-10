@@ -1,4 +1,4 @@
-/* global fetch, window, document */
+/* global window, document */
 import 'babel-polyfill';
 
 import {ReflectionEffect} from 'deck.gl/experimental';
@@ -16,9 +16,6 @@ import LayerInfo from './layer-info';
 import LayerSelector from './layer-selector';
 import LayerControls from './layer-controls';
 import LAYER_CATEGORIES, {DEFAULT_ACTIVE_LAYERS} from './layer-examples';
-
-import assert from 'assert';
-assert(window.fetch, 'fetch API not supported by browser');
 
 /* eslint-disable no-process-env */
 const MAPBOX_ACCESS_TOKEN = process.env.MAPBOX_ACCESS_TOKEN || // eslint-disable-line
