@@ -37,6 +37,7 @@ export {default as LineLayer64} from './layers/fp64/line-layer';
 
 // React exports
 export {default as autobind} from './react/autobind';
+export {default as DeckGL} from './react/deckgl';
 export {default as default} from './react/deckgl';
 
 // Effects

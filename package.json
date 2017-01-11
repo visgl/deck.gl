@@ -2,7 +2,7 @@
   "name": "deck.gl",
   "description": "A suite of 3D-enabled data visualization overlays, suitable for react-map-gl",
   "license": "MIT",
-  "version": "3.1.0-beta6",
+  "version": "3.1.0-beta.7",
   "keywords": [
     "webgl",
     "visualization",
@@ -16,13 +16,7 @@
   "main": "dist/lib-bundle.js",
   "files": [
     "dist",
-    "shaderlib",
-    "src",
-    "index.js",
-    "react.js",
-    "viewport.js",
-    "samples.js",
-    "experimental.js"
+    "src"
   ],
   "scripts": {
     "start": "(cd examples/main && yarn && npm start)",

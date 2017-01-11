@@ -1,10 +1,10 @@
 const {resolve} = require('path');
-const webpack = require('webpack');
+// const webpack = require('webpack');
 
 module.exports = {
   // Bundle the transpiled code in dist
   entry: {
-    lib: resolve('./dist/index.js')
+    lib: resolve('./src/index.js')
   },
 
   // Generate a bundle in dist folder
@@ -17,7 +17,7 @@ module.exports = {
 
   // Exclude any non-relative imports from resulting bundle
   externals: [
-    /^[a-z\-0-9]+$/
+    /^[a-z\.\-0-9]+$/
   ],
 
   stats: {
@@ -25,12 +25,6 @@ module.exports = {
   },
 
   devtool: '#inline-source-maps',
-
-  // resolve: {
-  //   alias: {
-  //     'deck.gl': resolve('./dist')
-  //   }
-  // },
 
   module: {
     rules: [
@@ -51,13 +45,13 @@ module.exports = {
         // Mapbox has some unresolved fs calls
         include: [resolve('./src')],
         loader: 'transform-loader',
-        options: 'brfs'
-      },
-      {
-        test: /\.glsl$/,
-        loader: 'file?name=[path][name].[ext]'
+        options: 'brfs-babel'
       }
     ]
+  },
+
+  node: {
+    fs: 'empty'
   },
 
   plugins: [
