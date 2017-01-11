@@ -20,6 +20,20 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## Recent Dev Releases
 
+#### [v3.1.0-beta.9] -
+FIX: Additional model matrix cleanup and streamlining
+
+#### [v3.1.0-beta.8] -
+FIX: Model matrix cleanup
+
+#### [v3.1.0-beta.7] -
+- FIX: Re-export of beta6 with fixed config.
+
+#### [v3.1.0-beta6] -
+- FIX: Fix to model matrix in meter offsets mode (now handles rotations in addition to translations)
+- BREAKING: `react` and `experimental` entry points no longer supported (after webpack transition).
+- CHANGE: Now packaged using Webpack 2 - exposed as a single bundle rather than a directory of files.
+- UPDATE: Simplification and cleanup of main example.
 
 #### [v3.1.0-beta5] -
 - FIX: Disable viewport comparison (temporarily) as it broke `METERS` mode.

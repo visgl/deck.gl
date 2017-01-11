@@ -31,7 +31,9 @@ import Layer from './layer';
 import {log} from './utils';
 import assert from 'assert';
 import {drawLayers, pickLayers} from './draw-and-pick';
-import {Viewport} from 'viewport-mercator-project';
+// import {Viewport} from 'viewport-mercator-project';
+import {Viewport} from './viewports';
+
 import {FramebufferObject} from 'luma.gl';
 
 export default class LayerManager {

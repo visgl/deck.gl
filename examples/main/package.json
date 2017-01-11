@@ -2,7 +2,7 @@
   "name": "deckgl-hello-world-webpack",
   "license": "MIT",
   "scripts": {
-    "start": "webpack-dev-server --config webpack2.buble.config.js --progress --hot --port 3001 --open"
+    "start": "webpack-dev-server --progress --hot --port 3001 --open"
   },
   "dependencies": {
     "babel-polyfill": "^6.16.0",
