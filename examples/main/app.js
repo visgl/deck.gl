@@ -39,7 +39,8 @@ class App extends React.Component {
       clickedItem: null,
       settings: {
         separation: 0,
-        rotation: 0
+        rotationZ: 0,
+        rotationX: 0
       }
     };
 
@@ -127,13 +128,14 @@ class App extends React.Component {
   }
 
   _getModelMatrix(index, offsetMode) {
-    const {settings: {separation, rotation}} = this.state;
+    const {settings: {separation, rotationZ, rotationX}} = this.state;
     // const {mapViewState: {longitude, latitude}} = this.props;
     // const modelMatrix = new Matrix4().fromTranslation([0, 0, 1000 * index * separation]);
     const modelMatrix = new Matrix4()
       .fromTranslation([0, 0, 1000 * index * separation]);
     if (offsetMode) {
-      modelMatrix.rotateZ(index * rotation * Math.PI);
+      modelMatrix.rotateZ(index * rotationZ * Math.PI);
+      modelMatrix.rotateX(index * rotationX * Math.PI);
     }
     return modelMatrix;
   }
