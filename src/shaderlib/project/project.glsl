@@ -249,8 +249,9 @@ vec4 project_position(vec4 position) {
 vec4 project_to_clipspace(vec4 position) {
   if (projectionMode == PROJECT_MERCATOR_OFFSETS) {
     vec4 pos = position * projectionPixelsPerUnit.x;
-    return projectionMatrix * vec4(pos.xyz, 0.0) + projectionCenter;
+    return projectionMatrixUncentered * vec4(pos.xyz, 1.0) + projectionCenter;
   }
+  // return projectionMatrixUncentered * position + projectionCenter;
   return projectionMatrix * position;
 }
 

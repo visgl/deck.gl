@@ -4,7 +4,8 @@ import {assembleShaders} from '../../../shader-utils';
 import {Effect} from '../../lib';
 import {readFileSync} from 'fs';
 import {join} from 'path';
-import {WebMercatorViewport} from 'viewport-mercator-project';
+// import {WebMercatorViewport} from 'viewport-mercator-project';
+import {WebMercatorViewport} from '../../../lib/viewports';
 
 export default class ReflectionEffect extends Effect {
 
@@ -37,6 +38,7 @@ export default class ReflectionEffect extends Effect {
 
     this.unitQuad = new Model({
       gl,
+      id: 'reflection-effect',
       vs: shaders.vs,
       fs: shaders.fs,
       geometry: new Geometry({

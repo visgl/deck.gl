@@ -10,13 +10,13 @@ import {
   ChoroplethLayer64,
   ExtrudedChoroplethLayer64,
   LineLayer64
-
 } from 'deck.gl';
 
 import * as dataSamples from './data-samples';
 
-const ArcLayerExample = props =>
-  new ArcLayer({
+const ArcLayerExample = {
+  layer: ArcLayer,
+  props: {
     id: 'arcLayer',
     data: dataSamples.routes,
     getSourcePosition: d => d.START,
@@ -24,33 +24,35 @@ const ArcLayerExample = props =>
     getSourceColor: d => [64, 255, 0],
     getTargetColor: d => [0, 128, 200],
     strokeWidth: 1,
-    pickable: true,
-    onHover: props.onHovered,
-    onClick: props.onClicked
-  });
+    pickable: true
+  }
+};
 
-const ChoroplethLayerContourExample = props =>
-  new ChoroplethLayer({
+const ChoroplethLayerContourExample = {
+  layer: ChoroplethLayer,
+  props: {
     id: 'choroplethLayerContour',
     data: dataSamples.choropleths,
     getColor: f => [0, 80, 200],
     opacity: 0.8,
     drawContour: true
-  });
+  }
+};
 
-const ChoroplethLayerExample = props =>
-  new ChoroplethLayer({
+const ChoroplethLayerExample = {
+  layer: ChoroplethLayer,
+  props: {
     id: 'choroplethLayerSolid',
     data: dataSamples.choropleths,
     getColor: f => [((f.properties.ZIP_CODE * 10) % 127) + 128, 0, 0],
     opacity: 0.8,
-    pickable: true,
-    onHover: props.onHovered,
-    onClick: props.onClicked
-  });
+    pickable: true
+  }
+};
 
-const ScreenGridLayerExample = props =>
-  new ScreenGridLayer({
+const ScreenGridLayerExample = {
+  layer: ScreenGridLayer,
+  props: {
     id: 'screenGridLayer',
     data: dataSamples.points,
     getPosition: d => d.COORDINATES,
@@ -59,23 +61,25 @@ const ScreenGridLayerExample = props =>
     minColor: [0, 0, 80, 0],
     maxColor: [100, 255, 0, 128],
     pickable: false
-  });
+  }
+};
 
-const LineLayerExample = props =>
-  new LineLayer({
+const LineLayerExample = {
+  layer: LineLayer,
+  props: {
     id: 'lineLayer',
     data: dataSamples.routes,
     getSourcePosition: d => d.START,
     getTargetPosition: d => d.END,
     getColor: d => d.SERVICE === 'WEEKDAY' ? [255, 64, 0] : [255, 200, 0],
     strokeWidth: 1,
-    pickable: true,
-    onHover: props.onHovered,
-    onClick: props.onClicked
-  });
+    pickable: true
+  }
+};
 
-const ScatterplotLayerExample = props =>
-  new ScatterplotLayer({
+const ScatterplotLayerExample = {
+  layer: ScatterplotLayer,
+  props: {
     id: 'scatterplotLayer',
     data: dataSamples.points,
     getPosition: d => d.COORDINATES,
@@ -85,30 +89,30 @@ const ScatterplotLayerExample = props =>
     strokeWidth: 2,
     pickable: true,
     radiusMinPixels: 1,
-    radiusMaxPixels: 30,
-    onHover: props.onHovered,
-    onClick: props.onClicked
-  });
+    radiusMaxPixels: 30
+  }
+};
 
-const ScatterplotLayerMetersExample = props =>
-  new ScatterplotLayer({
+const ScatterplotLayerMetersExample = {
+  layer: ScatterplotLayer,
+  props: {
     id: 'scatterplotLayerMeter',
     data: dataSamples.meterPoints,
     drawOutline: true,
     projectionMode: 2,
-    positionOrigin: [-122.45, 37.75],
+    positionOrigin: dataSamples.positionOrigin,
     getPosition: d => d,
     getColor: d => [0, 0, 255],
     opacity: 0.5,
-    pickable: true,
-    onHover: props.onHovered,
-    onClick: props.onClicked
-  });
+    pickable: true
+  }
+};
 
 // 64 BIT LAYER EXAMPLES
 
-const ArcLayer64Example = props =>
-  new ArcLayer64({
+const ArcLayer64Example = {
+  layer: ArcLayer64,
+  props: {
     id: 'arcLayer64',
     data: dataSamples.routes,
     getSourcePosition: d => d.START,
@@ -116,60 +120,66 @@ const ArcLayer64Example = props =>
     getSourceColor: d => [64, 255, 0],
     getTargetColor: d => [0, 128, 200],
     strokeWidth: 1,
-    pickable: true,
-    onHover: props.onHovered,
-    onClick: props.onClicked
-  });
+    pickable: true
+  }
+};
 
-const ChoroplethLayer64ContourExample = props =>
-  new ChoroplethLayer64({
+const ChoroplethLayer64ContourExample = {
+  layer: ChoroplethLayer64,
+  props: {
     id: 'choroplethLayer64Contour',
     data: dataSamples.choropleths,
     getColor: f => [0, 80, 200],
     opacity: 0.8,
     drawContour: true
-  });
+  }
+};
 
-const ChoroplethLayer64SolidExample = props =>
-  new ChoroplethLayer64({
+const ChoroplethLayer64SolidExample = {
+  layer: ChoroplethLayer64,
+  props: {
     id: 'choroplethLayer64Solid',
     data: dataSamples.choropleths,
     getColor: f => [((f.properties.ZIP_CODE * 10) % 127) + 128, 0, 0],
     opacity: 0.8,
-    pickable: true,
-    onHover: props.onHovered,
-    onClick: props.onClicked
-  });
+    pickable: true
+  }
+};
 
-const ExtrudedChoroplethLayer64Example = props =>
-  new ExtrudedChoroplethLayer64({
+const ExtrudedChoroplethLayer64Example = {
+  layer: ExtrudedChoroplethLayer64,
+  props: {
     id: 'extrudedChoroplethLayer64',
     data: dataSamples.choropleths,
     getColor: f => [((f.properties.ZIP_CODE * 10) % 127) + 128, 0, 0],
     pointLightLocation: [
-      props.mapViewState.longitude,
-      props.mapViewState.latitude,
+      // props.mapViewState.longitude,
+      // props.mapViewState.latitude,
+      37.751537058389985,
+      -122.42694203247012,
       1e4
     ],
     opacity: 1.0,
     pickable: true
-  });
+  }
+};
 
-const LineLayer64Example = props =>
-  new LineLayer64({
+const LineLayer64Example = {
+  layer: LineLayer64,
+  props: {
     id: 'lineLayer64',
     data: dataSamples.routes,
     getSourcePosition: d => d.START,
     getTargetPosition: d => d.END,
     getColor: d => d.SERVICE === 'WEEKDAY' ? [255, 64, 0] : [255, 200, 0],
     strokeWidth: 1,
-    pickable: true,
-    onHover: props.onHovered,
-    onClick: props.onClicked
-  });
+    pickable: true
+  }
+};
 
-const ScatterplotLayer64Example = props =>
-  new ScatterplotLayer64({
+const ScatterplotLayer64Example = {
+  layer: ScatterplotLayer64,
+  props: {
     id: 'scatterplotLayer64',
     data: dataSamples.points,
     getPosition: d => d.COORDINATES,
@@ -177,39 +187,40 @@ const ScatterplotLayer64Example = props =>
     getRadius: d => d.SPACES,
     pickable: true,
     radiusMinPixels: 1,
-    radiusMaxPixels: 30,
-    onHover: props.onHovered,
-    onClick: props.onClicked
-  });
+    radiusMaxPixels: 30
+  }
+};
 
 // perf test examples
-const ScatterplotLayerPerfExample = getData => props =>
-  new ScatterplotLayer({
-    id: 'scatterplotLayer',
-    data: getData(),
+const ScatterplotLayerPerfExample = ({
+  layer: ScatterplotLayer,
+  getData: dataSamples.getPoints1M,
+  props: {
+    id: 'scatterplotLayerPerf',
+    data: dataSamples.getPoints1M,
     getPosition: d => d,
     getColor: d => [0, 128, 0],
     radius: 1,
     pickable: true,
     radiusMinPixels: 1,
-    radiusMaxPixels: 30,
-    onHover: props.onHovered,
-    onClick: props.onClicked
-  });
+    radiusMaxPixels: 30
+  }
+});
 
-const ScatterplotLayer64PerfExample = getData => props =>
-  new ScatterplotLayer64({
-    id: 'scatterplotLayer64',
-    data: getData(),
+const ScatterplotLayer64PerfExample = ({
+  layer: ScatterplotLayer64,
+  getData: dataSamples.getPoints100K,
+  props: {
+    id: 'scatterplotLayer64Perf',
+    data: dataSamples.getPoints100K,
     getPosition: d => d,
     getColor: d => [0, 128, 0],
     radius: 1,
     pickable: true,
     radiusMinPixels: 1,
-    radiusMaxPixels: 30,
-    onHover: props.onHovered,
-    onClick: props.onClicked
-  });
+    radiusMaxPixels: 30
+  }
+});
 
 export default {
   'Core Layers': {
@@ -232,11 +243,11 @@ export default {
   },
 
   'Performance Tests': {
-    'ScatterplotLayer 1M': ScatterplotLayerPerfExample(dataSamples.getPoints1M),
-    'ScatterplotLayer 10M': ScatterplotLayerPerfExample(dataSamples.getPoints10M),
-    'ScatterplotLayer64 100K': ScatterplotLayer64PerfExample(dataSamples.getPoints100K),
-    'ScatterplotLayer64 1M': ScatterplotLayer64PerfExample(dataSamples.getPoints1M),
-    'ScatterplotLayer64 10M': ScatterplotLayer64PerfExample(dataSamples.getPoints10M)
+    'ScatterplotLayer 1M': ScatterplotLayerPerfExample,
+    // 'ScatterplotLayer 10M': ScatterplotLayerPerfExample,
+    'ScatterplotLayer64 100K': ScatterplotLayer64PerfExample
+    // 'ScatterplotLayer64 1M': ScatterplotLayer64PerfExample,
+    // 'ScatterplotLayer64 10M': ScatterplotLayer64PerfExample
   }
 };
 

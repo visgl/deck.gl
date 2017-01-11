@@ -28,22 +28,25 @@ module.exports = {
   },
 
   module: {
-    rules: [{
-      // Compile ES2015 using buble
-      test: /\.js$/,
-      loader: 'buble-loader',
-      exclude: [/node_modules/, /dist/],
-      options: {
-        objectAssign: 'Object.assign',
-        transforms: {
-          dangerousForOf: true,
-          modules: false
+    rules: [
+      {
+        // Compile ES2015 using buble
+        test: /\.js$/,
+        loader: 'buble-loader',
+        exclude: [/node_modules/, /dist/],
+        options: {
+          objectAssign: 'Object.assign',
+          transforms: {
+            dangerousForOf: true,
+            modules: false
+          }
         }
+      },
+      {
+        test: /\.json$/,
+        loader: 'json-loader'
       }
-    }, {
-      test: /\.json$/,
-      loader: 'json-loader'
-    }]
+    ]
   },
 
   node: {

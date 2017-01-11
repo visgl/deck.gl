@@ -19,29 +19,12 @@ module.exports = {
       // Work against base library
       'deck.gl': resolve('../../src'),
       // // Debugging vpm
-      // 'viewport-mercator-project': resolve('../dist/lib/viewports'),
+      // 'viewport-mercator-project': resolve('../src/lib/viewports'),
       // Using our dependencies
       'luma.gl': resolve('./node_modules/luma.gl'),
       react: resolve('./node_modules/react')
     }
   },
-  // resolve: {
-  //   alias: {
-  //     // mapbox-gl config
-  //     webworkify: 'webworkify-webpack-dropin',
-  //     'gl-matrix': resolve('./node_modules/gl-matrix/dist/gl-matrix.js'),
-  //     // Work against base library
-  //     'deck.gl': resolve('../../dist'),
-  //     // Using our dependencies
-  //     'luma.gl': resolve('./node_modules/luma.gl'),
-  //     'viewport-mercator-project': resolve('./node_modules/viewport-mercator-project'),
-  //     react: resolve('./node_modules/react'),
-  //     'autobind-decorator': resolve('./node_modules/autobind-decorator'),
-  //     earcut: resolve('./node_modules/earcut'),
-  //     'geojson-normalize': resolve('./node_modules/geojson-normalize'),
-  //     'lodash.flattendeep': resolve('./node_modules/lodash.flattendeep')
-  //   }
-  // },
 
   module: {
     rules: [
@@ -78,6 +61,5 @@ module.exports = {
   // Allow setting mapbox token using environment variables
   plugins: [
     new webpack.EnvironmentPlugin(['MAPBOX_ACCESS_TOKEN', 'MapboxAccessToken'])
-    // new webpack.LoaderOptionsPlugin({minimize: true, debug: false})
   ]
 };

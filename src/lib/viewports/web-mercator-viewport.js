@@ -2,7 +2,6 @@
 // map view properties
 import Viewport, {createMat4} from './viewport';
 import {mat4, vec4, vec2} from 'gl-matrix';
-import autobind from 'autobind-decorator';
 
 // CONSTANTS
 const PI = Math.PI;
@@ -54,7 +53,7 @@ export default class WebMercatorViewport extends Viewport {
    *    division by zero. This is intended to reduce the burden of apps to
    *    to check values before instantiating a Viewport.
    */
-  /* eslint-disable complexity */
+  /* eslint-disable complexity, max-statements */
   constructor({
     // Map state
     width,
@@ -96,19 +95,24 @@ export default class WebMercatorViewport extends Viewport {
       altitude
     });
 
-    const {viewMatrix, viewCenter} = makeViewMatrixFromMercatorParams({
-      width,
-      height,
-      longitude,
-      latitude,
-      zoom,
-      pitch,
-      bearing,
-      altitude,
-      distanceScales
-    });
+    const {viewMatrix, viewMatrixUncentered, viewCenter} =
+      makeViewMatrixFromMercatorParams({
+        width,
+        height,
+        longitude,
+        latitude,
+        zoom,
+        pitch,
+        bearing,
+        altitude,
+        distanceScales
+      });
 
     super({width, height, viewMatrix, projectionMatrix});
+
+    // Add additional matrices
+    this.viewMatrixUncentered = viewMatrixUncentered;
+    this.viewCenter = viewCenter;
 
     // Save parameters
     this.latitude = latitude;
@@ -121,8 +125,13 @@ export default class WebMercatorViewport extends Viewport {
     this.scale = scale;
 
     this._distanceScales = distanceScales;
+
+    this.getDistanceScales = this.getDistanceScales.bind(this);
+    this.metersToLngLatDelta = this.metersToLngLatDelta.bind(this);
+    this.lngLatDeltaToMeters = this.lngLatDeltaToMeters.bind(this);
+    this.addMetersToLngLat = this.addMetersToLngLat.bind(this);
   }
-  /* eslint-enable complexity */
+  /* eslint-enable complexity, max-statements */
 
   /**
    * Project [lng,lat] on sphere onto [x,y] on 512*512 Mercator Zoom 0 tile.
@@ -151,7 +160,6 @@ export default class WebMercatorViewport extends Viewport {
     return unprojectFlat(xy, scale);
   }
 
-  @autobind
   getDistanceScales() {
     return this._distanceScales;
   }
@@ -165,7 +173,6 @@ export default class WebMercatorViewport extends Viewport {
    * @param {[Number,Number]|[Number,Number,Number]) xyz - array of meter deltas
    * @return {[Number,Number]|[Number,Number,Number]) - array of [lng,lat,z] deltas
    */
-  @autobind
   metersToLngLatDelta(xyz) {
     const [x, y, z = 0] = xyz;
     const {pixelsPerMeter, degreesPerPixel} = this._distanceScales;
@@ -183,7 +190,6 @@ export default class WebMercatorViewport extends Viewport {
    * @param {[Number,Number]|[Number,Number,Number]) deltaLngLatZ - array of [lng,lat,z] deltas
    * @return {[Number,Number]|[Number,Number,Number]) - array of meter deltas
    */
-  @autobind
   lngLatDeltaToMeters(deltaLngLatZ) {
     const [deltaLng, deltaLat, deltaZ = 0] = deltaLngLatZ;
     const {pixelsPerDegree, metersPerPixel} = this._distanceScales;
@@ -202,7 +208,6 @@ export default class WebMercatorViewport extends Viewport {
    * @param {[Number,Number]|[Number,Number,Number]) xyz - array of meter deltas
    * @return {[Number,Number]|[Number,Number,Number]) array of [lng,lat,z] deltas
    */
-  @autobind
   addMetersToLngLat(lngLatZ, xyz) {
     const [lng, lat, Z = 0] = lngLatZ;
     const [deltaLng, deltaLat, deltaZ = 0] = this.metersToLngLatDelta(xyz);
@@ -365,15 +370,14 @@ function makeViewMatrixFromMercatorParams({
 
   const [centerX, centerY] = projectFlat([longitude, latitude], scale);
 
-  const center = [centerX, centerY, 0, 1];
+  const center = [-centerX, -centerY, 0, 1];
   const viewCenter = vec4.transformMat4([], center, vm);
   console.log('ViewCenter', viewCenter); // eslint-disable-line
 
-  // const vmCentered = createMat4();
-  mat4.translate(vm, vm, [-centerX, -centerY, 0]);
+  const vmCentered = mat4.translate([], vm, [-centerX, -centerY, 0]);
 
   return {
-    viewMatrix: vm,
+    viewMatrix: vmCentered,
     viewMatrixUncentered: vm,
     viewCenter
   };

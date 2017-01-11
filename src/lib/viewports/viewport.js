@@ -1,10 +1,10 @@
+// eslint-disable
 // View and Projection Matrix management
 
 // gl-matrix is a large dependency for a small module.
 // However since it is used by mapbox etc, it should already be present
 // in most target application bundles.
 import {mat4, vec4} from 'gl-matrix';
-import autobind from 'autobind-decorator';
 
 const IDENTITY = createMat4();
 
@@ -85,6 +85,12 @@ export default class Viewport {
 
     this.pixelProjectionMatrix = m;
     this.pixelUnprojectionMatrix = mInverse;
+
+    this.project = this.project.bind(this);
+    this.unproject = this.unproject.bind(this);
+    this.projectFlat = this.projectFlat.bind(this);
+    this.unprojectFlat = this.unprojectFlat.bind(this);
+    this.getMatrices = this.getMatrices.bind(this);
   }
   /* eslint-enable complexity */
 
@@ -113,7 +119,7 @@ export default class Viewport {
    * @param {Object} opts.topLeft=true - Whether projected coords are top left
    * @return {Array} - [x, y] or [x, y, z] in top left coords
    */
-  @autobind project(xyz, {topLeft = false} = {}) {
+  project(xyz, {topLeft = false} = {}) {
     const Z = xyz[2] || 0;
     // console.error('projecting non-linear', xyz);
     const [X, Y] = this.projectFlat(xyz);
@@ -138,7 +144,7 @@ export default class Viewport {
    * @param {Array} xyz -
    * @return {Array} - [lng, lat, Z] or [X, Y, Z]
    */
-  @autobind unproject(xyz, {topLeft = false} = {}) {
+  unproject(xyz, {topLeft = false} = {}) {
     // console.error('unprojecting linear', xyz);
     const [x = 0, y = 0, z = 0] = xyz;
     // const y2 = topLeft ? this.height - 1 - y : y;
@@ -166,7 +172,7 @@ export default class Viewport {
    *   Specifies a point on the sphere to project onto the map.
    * @return {Array} [x,y] coordinates.
    */
-  @autobind projectFlat([x, y], scale = this.scale) {
+  projectFlat([x, y], scale = this.scale) {
     return this._projectFlat(...arguments);
   }
 
@@ -178,7 +184,7 @@ export default class Viewport {
    *   Has toArray method if you need a GeoJSON Array.
    *   Per cartographic tradition, lat and lon are specified as degrees.
    */
-  @autobind unprojectFlat(xyz, scale = this.scale) {
+  unprojectFlat(xyz, scale = this.scale) {
     return this._unprojectFlat(...arguments);
   }
 
@@ -190,7 +196,7 @@ export default class Viewport {
   //   return xyz;
   // }
 
-  @autobind getMatrices({modelMatrix = null, ...opts} = {}) {
+  getMatrices({modelMatrix = null} = {}) {
     let modelViewProjectionMatrix = this.viewProjectionMatrix;
     let pixelProjectionMatrix = this.pixelProjectionMatrix;
     let pixelUnprojectionMatrix = this.pixelUnprojectionMatrix;
@@ -201,7 +207,7 @@ export default class Viewport {
       pixelUnprojectionMatrix = mat4.invert([], pixelProjectionMatrix);
     }
 
-    const matrices = {
+    const matrices = Object.assign({
       modelViewProjectionMatrix,
       viewProjectionMatrix: this.viewProjectionMatrix,
       viewMatrix: this.viewMatrix,
@@ -213,12 +219,13 @@ export default class Viewport {
 
       width: this.width,
       height: this.height,
-      scale: this.scale,
+      scale: this.scale
+    },
 
       // Subclass can add additional params
       // TODO - Fragile: better to make base Viewport class aware of all params
-      ...this._getParams()
-    };
+      this._getParams()
+    );
 
     return matrices;
   }

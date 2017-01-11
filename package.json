@@ -13,7 +13,7 @@
     "type": "git",
     "url": "https://github.com/uber/deck.gl.git"
   },
-  "main": "index.js",
+  "main": "dist/lib-bundle.js",
   "files": [
     "dist",
     "shaderlib",
@@ -27,15 +27,15 @@
   "scripts": {
     "start": "(cd examples/main && yarn && npm start)",
     "compile": "rm -fr dist && buble src -o dist --no modules --y dangerousForOf --objectAssign",
-    "build": "rm -fr dist && buble src -o dist --no modules --y dangerousForOf --objectAssign && webpack -d",
+    "build": "rm -fr dist && buble src -o dist --no modules --y dangerousForOf --objectAssign && webpack -d --display-modules",
     "lint": "eslint src test exhibits/app.js examples",
     "publish-prod": "npm run build && npm run test-fast && npm publish",
     "publish-beta": "npm run build && npm run test-fast && npm publish --tag beta",
-    "test-fast": "npm run lint && npm run test-node",
-    "test-shader": "npm run build-dist && budo src/test/fp64-shader.spec.js:build/test-bundle.js --dir test --live --open --port 3001 --watch-glob '**/*.{html,css,scss,js,glsl}' -- -t babelify -t brfs-babel",
-    "test": "npm run lint && npm run test-node | faucet",
+    "test": "npm run lint && npm run test-node",
+    "test-fast": "npm run lint && node test/node.js | faucet",
     "test-node": "npm run build && node test/node.js",
-    "test-browser": "webpack-dev-server --config webpack.config.test-browser.js --progress --hot --open"
+    "test-browser": "webpack-dev-server --config webpack.config.test-browser.js --progress --hot --open",
+    "test-shader": "npm run build-dist && budo src/test/fp64-shader.spec.js:build/test-bundle.js --dir test --live --open --port 3001 --watch-glob '**/*.{html,css,scss,js,glsl}' -- -t babelify -t brfs-babel"
   },
   "dependencies": {
     "earcut": "^2.0.6",
