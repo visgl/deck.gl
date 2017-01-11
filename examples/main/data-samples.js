@@ -7,6 +7,8 @@ export {default as hexagons} from './data/hexagons.json';
 export {default as points} from './data/sf.bike.parking.json';
 export {default as routes} from './data/sfmta.routes.json';
 
+export const positionOrigin = [-122.45, 37.75, 0];
+
 export const meterPoints = pointGrid(1e3, [-5000, -5000, 5000, 5000]);
 
 // time consuming - only generate on demand

@@ -4,8 +4,7 @@ import 'babel-polyfill';
 import {ReflectionEffect} from 'deck.gl/experimental';
 import DeckGL, {autobind} from 'deck.gl/react';
 
-// import {Matrix4} from 'luma.gl';
-import {mat4} from 'gl-matrix';
+import {Matrix4} from 'luma.gl';
 
 import React from 'react';
 import ReactDOM from 'react-dom';
@@ -40,7 +39,8 @@ class App extends React.Component {
       clickedItem: null,
       settings: {
         separation: 0,
-        rotation: 0
+        rotationZ: 0,
+        rotationX: 0
       }
     };
 
@@ -90,8 +90,29 @@ class App extends React.Component {
     this.setState({settings});
   }
 
+  _renderExampleLayer(example, index) {
+    const {layer: Layer, props, getData} = example;
+
+    if (props.pickable) {
+      Object.assign(props, {
+        onHover: this._onItemHovered,
+        onClick: this._onItemClicked
+      });
+    }
+
+    if (getData) {
+      Object.assign(props, getData());
+    }
+
+    Object.assign(props, {
+      modelMatrix: this._getModelMatrix(index, props.projectionMode === 2)
+    });
+
+    return new Layer(props);
+  }
+
   _renderExamples() {
-    let index = 0;
+    let index = 1;
     const layers = [];
     for (const categoryName of Object.keys(LAYER_CATEGORIES)) {
       for (const exampleName of Object.keys(LAYER_CATEGORIES[categoryName])) {
@@ -99,30 +120,23 @@ class App extends React.Component {
         // An example is a function that returns a DeckGL layer instance
         if (this.state.activeExamples[exampleName]) {
           const example = LAYER_CATEGORIES[categoryName][exampleName];
-
-          const layerProps = {
-            ...this.state,
-            modelMatrix: this._getModelMatrix(index++),
-            onHovered: this._onItemHovered,
-            onClicked: this._onItemClicked
-          };
-
-          layers.push(example(layerProps));
+          layers.push(this._renderExampleLayer(example, index++));
         }
       }
     }
     return layers;
   }
 
-  _getModelMatrix(index) {
-    const {settings: {separation, rotation}} = this.state;
+  _getModelMatrix(index, offsetMode) {
+    const {settings: {separation, rotationZ, rotationX}} = this.state;
     // const {mapViewState: {longitude, latitude}} = this.props;
     // const modelMatrix = new Matrix4().fromTranslation([0, 0, 1000 * index * separation]);
-    const modelMatrix =
-      mat4.fromTranslation(mat4.create(), [0, 0, 300 * index * separation, 0]);
-    // mat4.translate(modelMatrix, modelMatrix, [-longitude, -latitude, 0]);
-    mat4.rotateZ(modelMatrix, modelMatrix, index * rotation * Math.PI / 10000);
-    // mat4.translate(modelMatrix, modelMatrix, [longitude, latitude, 0]);
+    const modelMatrix = new Matrix4()
+      .fromTranslation([0, 0, 1000 * index * separation]);
+    if (offsetMode) {
+      modelMatrix.rotateZ(index * rotationZ * Math.PI);
+      modelMatrix.rotateX(index * rotationX * Math.PI);
+    }
     return modelMatrix;
   }
 

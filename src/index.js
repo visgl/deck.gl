@@ -19,11 +19,7 @@
 // THE SOFTWARE.
 
 export * from './lib';
-export * from './experimental/lib';
 export * from './shader-utils';
-
-// Effects
-export * from './experimental/effects';
 
 // Core Layers
 export {default as ArcLayer} from './layers/core/arc-layer';
@@ -38,3 +34,12 @@ export {default as ArcLayer64} from './layers/fp64/arc-layer';
 export {default as ChoroplethLayer64} from './layers/fp64/choropleth-layer';
 export {default as ExtrudedChoroplethLayer64} from './layers/fp64/extruded-choropleth-layer';
 export {default as LineLayer64} from './layers/fp64/line-layer';
+
+// React exports
+export {default as autobind} from './react/autobind';
+export {default as DeckGL} from './react/deckgl';
+export {default as default} from './react/deckgl';
+
+// Effects
+export {EffectManager, Effect} from './experimental/lib';
+export {default as ReflectionEffect} from './experimental/effects/reflection-effect';

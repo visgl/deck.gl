@@ -1,10 +1,10 @@
 const {resolve} = require('path');
-const webpack = require('webpack');
+// const webpack = require('webpack');
 
 module.exports = {
   // Bundle the transpiled code in dist
   entry: {
-    lib: resolve('./dist/index.js')
+    lib: resolve('./src/index.js')
   },
 
   // Generate a bundle in dist folder
@@ -17,20 +17,12 @@ module.exports = {
 
   // Exclude any non-relative imports from resulting bundle
   externals: [
-    /^[a-z\-0-9]+$/
+    /^[a-z\.\-0-9]+$/
   ],
 
   stats: {
     warnings: false
   },
-
-  devtool: '#inline-source-maps',
-
-  // resolve: {
-  //   alias: {
-  //     'deck.gl': resolve('./dist')
-  //   }
-  // },
 
   module: {
     rules: [
@@ -48,47 +40,19 @@ module.exports = {
         }
       },
       {
-        // Mapbox has some unresolved fs calls
+        // Inline shaders
         include: [resolve('./src')],
         loader: 'transform-loader',
-        options: 'brfs'
-      },
-      {
-        test: /\.glsl$/,
-        loader: 'file?name=[path][name].[ext]'
+        options: 'brfs-babel'
       }
     ]
   },
 
+  node: {
+    fs: 'empty'
+  },
+
   plugins: [
-    new webpack.optimize.UglifyJsPlugin({
-      output: {
-        comments: false
-      }
-    })
+    // new webpack.optimize.UglifyJsPlugin({comments: false})
   ]
-  /*
-  plugins: [
-    new webpack.optimize.AggressiveMergingPlugin(),
-    new webpack.optimize.UglifyJsPlugin({
-      sourceMap: false,
-      compress: {
-        sequences: true,
-        dead_code: true,
-        conditionals: true,
-        booleans: true,
-        unused: true,
-        if_return: true,
-        join_vars: true,
-        drop_console: true
-      },
-      mangle: {
-        except: ['$super', '$', 'exports', 'require']
-      },
-      output: {
-        comments: false
-      }
-    })
-  ]
-  */
 };
