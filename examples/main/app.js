@@ -107,7 +107,7 @@ class App extends React.Component {
   }
 
   _renderExamples() {
-    let index = 0;
+    let index = 1;
     const layers = [];
     for (const categoryName of Object.keys(LAYER_CATEGORIES)) {
       for (const exampleName of Object.keys(LAYER_CATEGORIES[categoryName])) {
@@ -115,7 +115,7 @@ class App extends React.Component {
         // An example is a function that returns a DeckGL layer instance
         if (this.state.activeExamples[exampleName]) {
           const example = LAYER_CATEGORIES[categoryName][exampleName];
-          layers.push(this._renderExampleLayer(example, ++index));
+          layers.push(this._renderExampleLayer(example, index++));
         }
       }
     }
@@ -127,7 +127,7 @@ class App extends React.Component {
     // const {mapViewState: {longitude, latitude}} = this.props;
     // const modelMatrix = new Matrix4().fromTranslation([0, 0, 1000 * index * separation]);
     const modelMatrix = new Matrix4()
-      .fromTranslation([0, 50 * index * separation, 300 * index * separation]);
+      .fromTranslation([0, 0, 100 * index * separation]);
     if (offsetMode) {
       modelMatrix.rotateZ(index * rotation * Math.PI);
     }

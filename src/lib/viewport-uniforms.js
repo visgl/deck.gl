@@ -24,9 +24,6 @@ export function getUniformsFromViewport(viewport, {
   projectionMode = COORDINATE_SYSTEM.LNGLAT,
   positionOrigin = [0, 0]
 } = {}) {
-  // TODO: move the following line to initialization so that it's done only once
-  const positionOriginPixels = viewport.projectFlat(positionOrigin);
-
   // calculate WebGL matrices
   // TODO - could be cached for e.g. modelMatrix === null
   const matrices = getMatrices({
@@ -55,16 +52,14 @@ export function getUniformsFromViewport(viewport, {
     }
   }
 
-  const projectedPositionOrigin = new Vector4(
-    positionOriginPixels[0], positionOriginPixels[1], 0.0, 1.0
+  const positionOriginPixels = viewport.projectFlat(positionOrigin);
+
+  const projectionCenter = vec4.transformMat4([],
+    new Vector4(positionOriginPixels[0], positionOriginPixels[1], 0.0, 1.0),
+    viewProjectionMatrix
   );
 
-  const layerCenter =
-    vec4.transformMat4([], projectedPositionOrigin, viewProjectionMatrix);
-
-  const projectionCenter = new Vector4(layerCenter);
-
-  console.log(viewport, projectedPositionOrigin, projectionCenter); // eslint-disable-line
+  console.log(viewport, positionOriginPixels, projectionCenter); // eslint-disable-line
 
   return {
     // Projection mode values
@@ -82,17 +77,18 @@ export function getUniformsFromViewport(viewport, {
 }
 
 function getMatrices({viewport, modelMatrix = null, offsetMode = false} = {}) {
-  let modelViewProjectionMatrix = viewport.viewProjectionMatrix;
+  const modelViewProjectionMatrix = new Matrix4()
+    // Always apply projection matrix
+    .multiplyRight(viewport.projectionMatrix)
+    // Apply centered or uncentered matrix depending on mode
+    .multiplyRight(offsetMode ? viewport.viewMatrixUncentered : viewport.viewMatrix);
 
   if (modelMatrix) {
-    modelViewProjectionMatrix =
-      new Matrix4()
-        .multiplyRight(viewport.projectionMatrix)
-        .multiplyRight(offsetMode ? viewport.viewMatrixUncentered : viewport.viewMatrix)
-        .multiplyRight(modelMatrix);
+    // Apply model matrix if supplied
+    modelViewProjectionMatrix.multiplyRight(modelMatrix);
   }
 
-  const matrices = Object.assign({}, {
+  const matrices = {
     modelViewProjectionMatrix,
     viewProjectionMatrix: viewport.viewProjectionMatrix,
     viewMatrix: viewport.viewMatrix,
@@ -100,11 +96,10 @@ function getMatrices({viewport, modelMatrix = null, offsetMode = false} = {}) {
     width: viewport.width,
     height: viewport.height,
     scale: viewport.scale
-  },
+  };
     // Subclass can add additional params
     // TODO - Fragile: better to make base Viewport class aware of all params
-    viewport._getParams()
-  );
+  Object.assign(matrices, viewport._getParams());
 
   return matrices;
 }
