@@ -51,7 +51,7 @@
     "gl": "^4.0.2",
     "immutable": "^3.7.5",
     "jsdom": "^9.9.1",
-    "luma.gl": "3.0.0-alpha2",
+    "luma.gl": "3.0.0-alpha.3",
     "module-alias": "^2.0.0",
     "pre-commit": "^1.2.2",
     "react": "^15.4.0",

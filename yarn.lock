@@ -179,10 +179,6 @@ arrify@^1.0.0:
   version "1.0.1"
   resolved "https://registry.npmjs.org/arrify/-/arrify-1.0.1.tgz#898508da2226f380df904728456849c1501a4b0d"
 
-as-number@^1.0.0:
-  version "1.0.0"
-  resolved "https://registry.npmjs.org/as-number/-/as-number-1.0.0.tgz#acb27e34f8f9d8ab0da9e376f3b8959860f80a66"
-
 asap@~2.0.3:
   version "2.0.5"
   resolved "https://registry.npmjs.org/asap/-/asap-2.0.5.tgz#522765b50c3510490e52d7dcfe085ef9ba96958f"
@@ -484,7 +480,7 @@ brfs-babel@^1.0.0:
     babel-plugin-static-fs "^1.1.0"
     through2 "^2.0.0"
 
-brfs@^1.4.0, brfs@^1.4.3:
+brfs@^1.4.0:
   version "1.4.3"
   resolved "https://registry.yarnpkg.com/brfs/-/brfs-1.4.3.tgz#db675d6f5e923e6df087fca5859c9090aaed3216"
   dependencies:
@@ -1516,14 +1512,6 @@ extglob@^0.3.1:
   dependencies:
     is-extglob "^1.0.0"
 
-extrude-polyline@^1.0.6:
-  version "1.0.6"
-  resolved "https://registry.npmjs.org/extrude-polyline/-/extrude-polyline-1.0.6.tgz#7e6afe1f349a4182fa3f61a00d93979b95f18b20"
-  dependencies:
-    as-number "^1.0.0"
-    gl-vec2 "^1.0.0"
-    polyline-miter-util "^1.0.1"
-
 extsprintf@1.0.2:
   version "1.0.2"
   resolved "https://registry.npmjs.org/extsprintf/-/extsprintf-1.0.2.tgz#e1080e0658e300b06294990cc70e1502235fd550"
@@ -1828,10 +1816,6 @@ gl-constants@^1.0.0:
 gl-matrix@^2.3.1, gl-matrix@^2.3.2:
   version "2.3.2"
   resolved "https://registry.npmjs.org/gl-matrix/-/gl-matrix-2.3.2.tgz#aac808c74af7d5db05fe04cb60ca1a0fcb174d74"
-
-gl-vec2@^1.0.0:
-  version "1.0.0"
-  resolved "https://registry.npmjs.org/gl-vec2/-/gl-vec2-1.0.0.tgz#77fce6ae9612856d6c8b621cd261cd8281b9c637"
 
 gl@^4.0.2:
   version "4.0.2"
@@ -2553,11 +2537,10 @@ lru-cache@^4.0.1:
     pseudomap "^1.0.1"
     yallist "^2.0.0"
 
-luma.gl@3.0.0-alpha2:
-  version "3.0.0-alpha2"
-  resolved "https://registry.yarnpkg.com/luma.gl/-/luma.gl-3.0.0-alpha2.tgz#640b1b10d5e8545e04ad941f2253c0f583b370fd"
+luma.gl@3.0.0-alpha.3:
+  version "3.0.0-alpha.3"
+  resolved "https://unpm.uberinternal.com/luma.gl/-/luma.gl-3.0.0-alpha.3.tgz#09d935ecfdb671baa152270a9fa5009dd2e3599c"
   dependencies:
-    autobind-decorator "^1.3.3"
     babel-polyfill "^6.5.0"
     gl-constants "^1.0.0"
     gl-matrix "^2.3.2"
@@ -3189,12 +3172,6 @@ pngjs@^2.2.0:
 point-geometry@0.0.0, point-geometry@^0.0.0:
   version "0.0.0"
   resolved "https://registry.npmjs.org/point-geometry/-/point-geometry-0.0.0.tgz#6fcbcad7a803b6418247dd6e49c2853c584daff7"
-
-polyline-miter-util@^1.0.1:
-  version "1.0.1"
-  resolved "https://registry.npmjs.org/polyline-miter-util/-/polyline-miter-util-1.0.1.tgz#b693f2389ea0ded36a6bcf5ecd2ece4b6917d957"
-  dependencies:
-    gl-vec2 "^1.0.0"
 
 portfinder@^1.0.9:
   version "1.0.10"
