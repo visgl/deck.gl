@@ -1,5 +1,4 @@
-import {vec4} from 'gl-matrix';
-import {Matrix4, Vector4} from 'luma.gl';
+import {Matrix4} from 'luma.gl';
 
 import assert from 'assert';
 import {COORDINATE_SYSTEM} from './constants';
@@ -8,6 +7,66 @@ function fp64ify(a) {
   const hiPart = Math.fround(a);
   const loPart = a - Math.fround(a);
   return [hiPart, loPart];
+}
+
+// To quickly set a vector to zero
+const ZERO_VECTOR = [0, 0, 0, 0];
+// 4x4 matrix that drops 4th component of vector
+const VECTOR_TO_POINT_MATRIX = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0];
+
+function calculateMatrixAndOffset({
+  projectionMode,
+  positionOrigin,
+  viewport,
+  modelMatrix
+}) {
+  const {viewMatrixUncentered, viewMatrix, projectionMatrix} = viewport;
+
+  let projectionCenter;
+  let modelViewProjectionMatrix;
+
+  const viewProjectionMatrix = new Matrix4(projectionMatrix).multiplyRight(viewMatrix);
+
+  switch (projectionMode) {
+
+  case COORDINATE_SYSTEM.LNGLAT:
+    projectionCenter = ZERO_VECTOR;
+    modelViewProjectionMatrix = viewProjectionMatrix;
+    if (modelMatrix) {
+      // Apply model matrix if supplied
+      // modelViewProjectionMatrix = modelViewProjectionMatrix.clone();
+      modelViewProjectionMatrix.multiplyRight(modelMatrix);
+    }
+    break;
+
+  case COORDINATE_SYSTEM.METER_OFFSETS:
+    // Calculate transformed projectionCenter (in 64 bit precision)
+    // This is the key to offset mode precision (avoids doing this
+    // addition in 32 bit precision)
+    const positionPixels = viewport.projectFlat(positionOrigin);
+    projectionCenter = viewProjectionMatrix
+      .transformVector([positionPixels[0], positionPixels[1], 0.0, 1.0]);
+
+    modelViewProjectionMatrix = new Matrix4(projectionMatrix)
+      // Always apply uncentered projection matrix (shader adds center)
+      .multiplyRight(viewMatrixUncentered)
+      // Zero out 4th coordinate ("after" model matrix) - avoids further translations
+      .multiplyRight(VECTOR_TO_POINT_MATRIX);
+
+    if (modelMatrix) {
+      // Apply model matrix if supplied
+      modelViewProjectionMatrix.multiplyRight(modelMatrix);
+    }
+    break;
+
+  default:
+    throw new Error('Unknown projection mode');
+  }
+
+  return {
+    modelViewProjectionMatrix,
+    projectionCenter
+  };
 }
 
 /**
@@ -24,24 +83,21 @@ export function getUniformsFromViewport(viewport, {
   projectionMode = COORDINATE_SYSTEM.LNGLAT,
   positionOrigin = [0, 0]
 } = {}) {
-  // calculate WebGL matrices
-  // TODO - could be cached for e.g. modelMatrix === null
-  const matrices = getMatrices({
-    viewport,
-    modelMatrix,
-    offsetMode: projectionMode !== COORDINATE_SYSTEM.LNGLAT
-  });
+  assert(viewport.scale, 'Viewport scale missing');
 
-  modelMatrix = modelMatrix || new Matrix4().identity();
+  const {projectionCenter, modelViewProjectionMatrix} =
+    calculateMatrixAndOffset({projectionMode, positionOrigin, modelMatrix, viewport});
 
-  const {modelViewProjectionMatrix, viewProjectionMatrix, scale, pixelsPerMeter} = matrices;
   assert(modelViewProjectionMatrix, 'Viewport missing modelViewProjectionMatrix');
-  assert(scale, 'Viewport scale missing');
-  assert(pixelsPerMeter, 'Viewport missing pixelsPerMeter');
+
+  // Calculate projection pixels per unit
+  const projectionPixelsPerUnit = viewport.getDistanceScales().pixelsPerMeter;
+  assert(projectionPixelsPerUnit, 'Viewport missing pixelsPerMeter');
+
+  // calculate WebGL matrices
 
   // Convert to Float32
-  const glProjectionMatrix = new Float32Array(viewProjectionMatrix);
-  const glModelMatrix = new Float32Array(modelMatrix);
+  const glProjectionMatrix = new Float32Array(modelViewProjectionMatrix);
 
   // "Float64Array"
   // Transpose the projection matrix to column major for GLSL.
@@ -55,62 +111,23 @@ export function getUniformsFromViewport(viewport, {
     }
   }
 
-  const m = new Matrix4()
-    // Always apply projection matrix
-    .multiplyRight(viewport.projectionMatrix)
-    // Apply centered or uncentered matrix depending on mode
-    .multiplyRight(viewport.viewMatrix);
-
-  const positionOriginPixels = viewport.projectFlat(positionOrigin);
-
-  const projectionCenter = vec4.transformMat4([],
-    new Vector4(positionOriginPixels[0], positionOriginPixels[1], 0.0, 1.0),
-    m
-  );
-
-  console.log(viewport, positionOriginPixels, projectionCenter); // eslint-disable-line
-
   return {
     // Projection mode values
     projectionMode,
     projectionCenter,
 
+    // modelMatrix: modelMatrix || new Matrix4().identity(),
+
     // Main projection matrices
-    modelMatrix2: glModelMatrix,
     projectionMatrix: glProjectionMatrix,
     projectionMatrixUncentered: glProjectionMatrix,
     projectionFP64: glProjectionMatrixFP64,
-    projectionPixelsPerUnit: matrices.pixelsPerMeter,
-    projectionScale: matrices.scale,
-    projectionScaleFP64: fp64ify(matrices.scale)
+    projectionPixelsPerUnit,
+
+    // This is the mercator scale (2 ** zoom)
+    projectionScale: viewport.scale,
+
+    // Deprecated?
+    projectionScaleFP64: fp64ify(viewport.scale)
   };
-}
-
-function getMatrices({viewport, modelMatrix = null, offsetMode = false} = {}) {
-  const modelViewProjectionMatrix = new Matrix4()
-    // Always apply projection matrix
-    .multiplyRight(viewport.projectionMatrix)
-    // Apply centered or uncentered matrix depending on mode
-    .multiplyRight(offsetMode ? viewport.viewMatrixUncentered : viewport.viewMatrix);
-
-  // if (modelMatrix) {
-  //   // Apply model matrix if supplied
-  //   modelViewProjectionMatrix.multiplyRight(modelMatrix);
-  // }
-
-  const matrices = {
-    modelMatrix,
-    modelViewProjectionMatrix,
-    viewProjectionMatrix: viewport.viewProjectionMatrix,
-    viewMatrix: viewport.viewMatrix,
-    projectionMatrix: viewport.projectionMatrix,
-    width: viewport.width,
-    height: viewport.height,
-    scale: viewport.scale
-  };
-    // Subclass can add additional params
-    // TODO - Fragile: better to make base Viewport class aware of all params
-  Object.assign(matrices, viewport._getParams());
-
-  return matrices;
 }

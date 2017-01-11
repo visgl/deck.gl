@@ -20,6 +20,12 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## Recent Dev Releases
 
+#### [v3.1.0-beta.9] -
+FIX: Additional model matrix cleanup and streamlining
+
+#### [v3.1.0-beta.8] -
+FIX: Model matrix cleanup
+
 #### [v3.1.0-beta.7] -
 - FIX: Re-export of beta6 with fixed config.
 

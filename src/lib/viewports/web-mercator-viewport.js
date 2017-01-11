@@ -372,7 +372,6 @@ function makeViewMatrixFromMercatorParams({
 
   const center = [-centerX, -centerY, 0, 1];
   const viewCenter = vec4.transformMat4([], center, vm);
-  console.log('ViewCenter', viewCenter); // eslint-disable-line
 
   const vmCentered = mat4.translate([], vm, [-centerX, -centerY, 0]);
 

@@ -22,5 +22,6 @@ export function pointGrid(N, bbox) {
       index++;
     }
   }
+
   return points;
 }

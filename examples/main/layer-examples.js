@@ -194,16 +194,14 @@ const ScatterplotLayer64Example = {
 // perf test examples
 const ScatterplotLayerPerfExample = ({
   layer: ScatterplotLayer,
-  getData: dataSamples.getPoints1M,
+  getData: dataSamples.getPoints100K,
   props: {
     id: 'scatterplotLayerPerf',
-    data: dataSamples.getPoints1M,
     getPosition: d => d,
     getColor: d => [0, 128, 0],
-    radius: 1,
-    pickable: true,
+    // pickable: true,
     radiusMinPixels: 1,
-    radiusMaxPixels: 30
+    radiusMaxPixels: 5
   }
 });
 
@@ -212,13 +210,11 @@ const ScatterplotLayer64PerfExample = ({
   getData: dataSamples.getPoints100K,
   props: {
     id: 'scatterplotLayer64Perf',
-    data: dataSamples.getPoints100K,
     getPosition: d => d,
     getColor: d => [0, 128, 0],
-    radius: 1,
-    pickable: true,
+    // pickable: true,
     radiusMinPixels: 1,
-    radiusMaxPixels: 30
+    radiusMaxPixels: 5
   }
 });
 

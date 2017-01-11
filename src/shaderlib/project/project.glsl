@@ -12,8 +12,6 @@ uniform vec4 projectionCenter;
 uniform vec3 projectionPixelsPerUnit;
 
 uniform mat4 projectionMatrix;
-// lumagl messes with 'modelMatrix'
-uniform mat4 modelMatrix2;
 uniform mat4 projectionMatrixUncentered;
 
 #ifdef INTEL_TAN_WORKAROUND
@@ -251,11 +249,9 @@ vec4 project_position(vec4 position) {
 
 vec4 project_to_clipspace(vec4 position) {
   if (projectionMode == PROJECT_MERCATOR_OFFSETS) {
-    vec4 pos = modelMatrix2 * position * projectionPixelsPerUnit.x;
-    return projectionMatrix * vec4(pos.xyz, 0.0) + projectionCenter;
+    position = position * projectionPixelsPerUnit.x;
   }
-  // return projectionMatrixUncentered * position + projectionCenter;
-  return projectionMatrix * modelMatrix2 * position;
+  return projectionMatrix * position + projectionCenter;
 }
 
 // Backwards compatibility

@@ -24,8 +24,6 @@ module.exports = {
     warnings: false
   },
 
-  devtool: '#inline-source-maps',
-
   module: {
     rules: [
       {
@@ -42,7 +40,7 @@ module.exports = {
         }
       },
       {
-        // Mapbox has some unresolved fs calls
+        // Inline shaders
         include: [resolve('./src')],
         loader: 'transform-loader',
         options: 'brfs-babel'
@@ -57,28 +55,4 @@ module.exports = {
   plugins: [
     // new webpack.optimize.UglifyJsPlugin({comments: false})
   ]
-  /*
-  plugins: [
-    new webpack.optimize.AggressiveMergingPlugin(),
-    new webpack.optimize.UglifyJsPlugin({
-      sourceMap: false,
-      compress: {
-        sequences: true,
-        dead_code: true,
-        conditionals: true,
-        booleans: true,
-        unused: true,
-        if_return: true,
-        join_vars: true,
-        drop_console: true
-      },
-      mangle: {
-        except: ['$super', '$', 'exports', 'require']
-      },
-      output: {
-        comments: false
-      }
-    })
-  ]
-  */
 };

@@ -90,13 +90,17 @@ class App extends React.Component {
   }
 
   _renderExampleLayer(example, index) {
-    const {layer: Layer, props} = example;
+    const {layer: Layer, props, getData} = example;
 
     if (props.pickable) {
       Object.assign(props, {
         onHover: this._onItemHovered,
         onClick: this._onItemClicked
       });
+    }
+
+    if (getData) {
+      Object.assign(props, getData());
     }
 
     Object.assign(props, {
@@ -127,7 +131,7 @@ class App extends React.Component {
     // const {mapViewState: {longitude, latitude}} = this.props;
     // const modelMatrix = new Matrix4().fromTranslation([0, 0, 1000 * index * separation]);
     const modelMatrix = new Matrix4()
-      .fromTranslation([0, 0, 100 * index * separation]);
+      .fromTranslation([0, 0, 1000 * index * separation]);
     if (offsetMode) {
       modelMatrix.rotateZ(index * rotation * Math.PI);
     }
