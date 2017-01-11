@@ -6,7 +6,7 @@ import DeckGL, {autobind} from 'deck.gl/react';
 
 import {Matrix4} from 'luma.gl';
 
-import React from 'react';
+import React, {PureComponent} from 'react';
 import ReactDOM from 'react-dom';
 import MapboxGLMap from 'react-map-gl';
 import {FPSStats} from 'react-stats';
@@ -20,8 +20,10 @@ import LAYER_CATEGORIES, {DEFAULT_ACTIVE_LAYERS} from './layer-examples';
 const MAPBOX_ACCESS_TOKEN = process.env.MAPBOX_ACCESS_TOKEN || // eslint-disable-line
   'Set MAPBOX_ACCESS_TOKEN environment variable or put your token here.';
 
+const noOp = () => {};
+
 // ---- View ---- //
-class App extends React.Component {
+class App extends PureComponent {
   constructor(props) {
     super(props);
     autobind(this);
@@ -35,8 +37,6 @@ class App extends React.Component {
         bearing: 0
       },
       activeExamples: DEFAULT_ACTIVE_LAYERS,
-      hoveredItem: null,
-      clickedItem: null,
       settings: {
         separation: 0,
         rotationZ: 0,
@@ -67,16 +67,8 @@ class App extends React.Component {
     this.setState({mapViewState});
   }
 
-  _onItemHovered(info) {
-    this.setState({hoveredItem: info});
-  }
-
-  _onItemClicked(info) {
-    this.setState({clickedItem: info});
-  }
-
   _onToggleLayer(exampleName) {
-    const {activeExamples} = this.state;
+    const activeExamples = {...this.state.activeExamples};
     activeExamples[exampleName] = !activeExamples[exampleName];
     this.setState({activeExamples});
   }
@@ -92,16 +84,17 @@ class App extends React.Component {
 
   _renderExampleLayer(example, index) {
     const {layer: Layer, props, getData} = example;
+    const {infoPanel} = this.refs;
 
     if (props.pickable) {
       Object.assign(props, {
-        onHover: this._onItemHovered,
-        onClick: this._onItemClicked
+        onHover: infoPanel ? infoPanel.onItemHovered : noOp,
+        onClick: infoPanel ? infoPanel.onItemClicked : noOp
       });
     }
 
     if (getData) {
-      Object.assign(props, getData());
+      Object.assign(props, {data: getData()});
     }
 
     Object.assign(props, {
@@ -140,54 +133,47 @@ class App extends React.Component {
     return modelMatrix;
   }
 
-  _renderOverlay() {
-    const {width, height, mapViewState} = this.state;
-
-    return (
-      <DeckGL
-        id="default-deckgl-overlay"
-        width={width}
-        height={height}
-        debug
-        {...mapViewState}
-        onWebGLInitialized={ this._onWebGLInitialized }
-        layers={this._renderExamples()}
-        effects={this._effects}
-      />
-    );
-  }
-
   _renderMap() {
     const {width, height, mapViewState} = this.state;
     return (
       <MapboxGLMap
         mapboxApiAccessToken={MAPBOX_ACCESS_TOKEN}
-        width={width}
-        height={height}
+        width={width} height={height}
         perspectiveEnabled
         { ...mapViewState }
         onChangeViewport={this._onViewportChanged}>
-        { this._renderOverlay() }
+
+        <DeckGL
+          debug
+          id="default-deckgl-overlay"
+          width={width} height={height}
+          {...mapViewState}
+          onWebGLInitialized={ this._onWebGLInitialized }
+          layers={this._renderExamples()}
+          effects={this._effects}
+        />
+
         <FPSStats isActive/>
       </MapboxGLMap>
     );
   }
 
   render() {
-    const {settings, hoveredItem, clickedItem} = this.state;
+    const {settings, activeExamples} = this.state;
 
     return (
       <div>
         { this._renderMap() }
         <div id="control-panel">
-          <LayerSelector { ...this.state }
+          <LayerSelector
+            activeExamples={activeExamples}
             examples={LAYER_CATEGORIES}
             onChange={this._onToggleLayer}/>
           <LayerControls
             settings={settings}
             onSettingsChange={this._onSettingsChange}/>
         </div>
-        <LayerInfo hoveredItem={hoveredItem} clickedItem={clickedItem} />
+        <LayerInfo ref="infoPanel"/>
       </div>
     );
   }

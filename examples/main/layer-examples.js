@@ -194,7 +194,7 @@ const ScatterplotLayer64Example = {
 // perf test examples
 const ScatterplotLayerPerfExample = ({
   layer: ScatterplotLayer,
-  getData: dataSamples.getPoints100K,
+  getData: dataSamples.getPoints1M,
   props: {
     id: 'scatterplotLayerPerf',
     getPosition: d => d,
