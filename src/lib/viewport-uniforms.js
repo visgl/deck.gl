@@ -32,13 +32,16 @@ export function getUniformsFromViewport(viewport, {
     offsetMode: projectionMode !== COORDINATE_SYSTEM.LNGLAT
   });
 
+  modelMatrix = modelMatrix || new Matrix4().identity();
+
   const {modelViewProjectionMatrix, viewProjectionMatrix, scale, pixelsPerMeter} = matrices;
   assert(modelViewProjectionMatrix, 'Viewport missing modelViewProjectionMatrix');
   assert(scale, 'Viewport scale missing');
   assert(pixelsPerMeter, 'Viewport missing pixelsPerMeter');
 
   // Convert to Float32
-  const glProjectionMatrix = new Float32Array(modelViewProjectionMatrix);
+  const glProjectionMatrix = new Float32Array(viewProjectionMatrix);
+  const glModelMatrix = new Float32Array(modelMatrix);
 
   // "Float64Array"
   // Transpose the projection matrix to column major for GLSL.
@@ -52,11 +55,17 @@ export function getUniformsFromViewport(viewport, {
     }
   }
 
+  const m = new Matrix4()
+    // Always apply projection matrix
+    .multiplyRight(viewport.projectionMatrix)
+    // Apply centered or uncentered matrix depending on mode
+    .multiplyRight(viewport.viewMatrix);
+
   const positionOriginPixels = viewport.projectFlat(positionOrigin);
 
   const projectionCenter = vec4.transformMat4([],
     new Vector4(positionOriginPixels[0], positionOriginPixels[1], 0.0, 1.0),
-    viewProjectionMatrix
+    m
   );
 
   console.log(viewport, positionOriginPixels, projectionCenter); // eslint-disable-line
@@ -67,6 +76,7 @@ export function getUniformsFromViewport(viewport, {
     projectionCenter,
 
     // Main projection matrices
+    modelMatrix2: glModelMatrix,
     projectionMatrix: glProjectionMatrix,
     projectionMatrixUncentered: glProjectionMatrix,
     projectionFP64: glProjectionMatrixFP64,
@@ -83,12 +93,13 @@ function getMatrices({viewport, modelMatrix = null, offsetMode = false} = {}) {
     // Apply centered or uncentered matrix depending on mode
     .multiplyRight(offsetMode ? viewport.viewMatrixUncentered : viewport.viewMatrix);
 
-  if (modelMatrix) {
-    // Apply model matrix if supplied
-    modelViewProjectionMatrix.multiplyRight(modelMatrix);
-  }
+  // if (modelMatrix) {
+  //   // Apply model matrix if supplied
+  //   modelViewProjectionMatrix.multiplyRight(modelMatrix);
+  // }
 
   const matrices = {
+    modelMatrix,
     modelViewProjectionMatrix,
     viewProjectionMatrix: viewport.viewProjectionMatrix,
     viewMatrix: viewport.viewMatrix,
