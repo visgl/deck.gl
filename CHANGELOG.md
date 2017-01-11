@@ -20,6 +20,9 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## Recent Dev Releases
 
+#### [v3.1.0-beta.10] -
+FIX: Loosen luma.gl peer dependency
+
 #### [v3.1.0-beta.9] -
 FIX: Additional model matrix cleanup and streamlining
 
