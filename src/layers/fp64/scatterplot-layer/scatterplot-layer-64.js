@@ -28,7 +28,7 @@ export default class ScatterplotLayer64 extends ScatterplotLayer {
   // Override the super class vertex shader
   getShaders(id) {
     return {
-      vs: readFileSync(join(__dirname, './scatterplot-layer-vertex.glsl'), 'utf8'),
+      vs: readFileSync(join(__dirname, './scatterplot-layer-64-vertex.glsl'), 'utf8'),
       fs: super.getShaders().fs,
       fp64: true,
       project64: true
@@ -36,21 +36,21 @@ export default class ScatterplotLayer64 extends ScatterplotLayer {
   }
 
   initializeState() {
-    // We the model and several attributes of the base layer
+    // We use the model and all attributes except "instancePositions" of the base layer
     super.initializeState();
 
     // Add the 64 bit positions
     const {attributeManager} = this.state;
     attributeManager.addInstanced({
-      instancePositionsFP64: {size: 4, update: this.calculateInstancePositions},
-      instanceHeightsFP64: {size: 2, update: this.calculateInstanceHeightsFP64}
+      instancePositions64xy: {size: 4, update: this.calculateInstancePositions64xy},
+      instancePositions64z: {size: 2, update: this.calculateInstancePositions64z}
       // Reusing from base class
       // instanceRadius: {size: 1, update: this.calculateInstanceRadius},
       // instanceColors: {size: 4, type: GL.UNSIGNED_BYTE, update: this.calculateInstanceColors}
     });
   }
 
-  calculateInstancePositions(attribute) {
+  calculateInstancePositions64xy(attribute) {
     const {data, getPosition} = this.props;
     const {value, size} = attribute;
     let i = 0;
@@ -62,7 +62,7 @@ export default class ScatterplotLayer64 extends ScatterplotLayer {
     }
   }
 
-  calculateInstanceHeightsFP64(attribute) {
+  calculateInstancePositions64z(attribute) {
     const {data, getPosition} = this.props;
     const {value, size} = attribute;
     let i = 0;
