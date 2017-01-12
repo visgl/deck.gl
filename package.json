@@ -29,7 +29,8 @@
     "test-fast": "npm run lint && node test/node.js | faucet",
     "test-node": "npm run build && node test/node.js",
     "test-browser": "webpack-dev-server --config webpack.config.test-browser.js --progress --hot --open",
-    "test-shader": "npm run build-dist && budo src/test/fp64-shader.spec.js:build/test-bundle.js --dir test --live --open --port 3001 --watch-glob '**/*.{html,css,scss,js,glsl}' -- -t babelify -t brfs-babel"
+    "test-fp64": "(cd test/fp64-test && webpack-dev-server --config webpack.config.test-fp64.js --progress --hot --open)",
+    "test-rendering": "(cd test/rendering-test && webpack-dev-server --config webpack.config.test-rendering.js --progress --hot --open)"
   },
   "dependencies": {
     "earcut": "^2.0.6",
@@ -54,6 +55,7 @@
     "luma.gl": "3.0.0-alpha.3",
     "module-alias": "^2.0.0",
     "pre-commit": "^1.2.2",
+    "raw-loader": "^0.5.1",
     "react": "^15.4.0",
     "react-addons-test-utils": "^15.4.2",
     "react-dom": "^15.4.0",

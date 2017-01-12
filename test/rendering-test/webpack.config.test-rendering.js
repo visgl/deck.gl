@@ -12,7 +12,7 @@ module.exports = {
 
   // Bundle the tests for running in the browser
   entry: {
-    'test-browser': resolve('./test/browser.js')
+    'test-rendering': resolve('rendering-test/rendering-test.js')
   },
 
   // Generate a bundle in dist folder
