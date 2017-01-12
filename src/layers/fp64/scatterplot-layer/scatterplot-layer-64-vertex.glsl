@@ -21,15 +21,16 @@
 #define SHADER_NAME scatterplot-layer-64-vertex-shader
 
 attribute vec3 positions;
-attribute vec4 instancePositionsFP64;
-attribute vec2 layerHeight;
+
+attribute vec4 instancePositions64xy;
+attribute vec2 instancePositions64z;
 attribute float instanceRadius;
 attribute vec4 instanceColors;
 attribute vec3 instancePickingColors;
 
 // Only one-dimensional arrays may be declared in GLSL ES 1.0. specs p.24
 uniform float opacity;
-uniform vec2 zoomRadiusFP64;
+uniform float radius;
 uniform float radiusMinPixels;
 uniform float radiusMaxPixels;
 uniform float renderPickingBuffer;
@@ -37,32 +38,28 @@ uniform float renderPickingBuffer;
 varying vec4 vColor;
 
 void main(void) {
-  // For some reason, need to add one to elevation to show up in untilted mode
+  // Multiply out radius and clamp to limits
+  float radiusPixels = clamp(
+    project_scale(radius * instanceRadius),
+    radiusMinPixels, radiusMaxPixels
+  );
 
   vec2 projected_coord_xy[2];
-  project_position_fp64(instancePositionsFP64, projected_coord_xy);
-
-  vec2 pos_mul_radius[4];
-  vec4_fp64(vec4(positions * instanceRadius, 0.0), pos_mul_radius);
+  project_position_fp64(instancePositions64xy, projected_coord_xy);
 
   vec2 vertex_pos_localspace[4];
-  vec4_scalar_mul_fp64(pos_mul_radius, zoomRadiusFP64, vertex_pos_localspace);
+  vec4_fp64(vec4(positions * radiusPixels, 0.0), vertex_pos_localspace);
 
   vec2 vertex_pos_modelspace[4];
-
   vertex_pos_modelspace[0] = sum_fp64(vertex_pos_localspace[0], projected_coord_xy[0]);
   vertex_pos_modelspace[1] = sum_fp64(vertex_pos_localspace[1], projected_coord_xy[1]);
-  vertex_pos_modelspace[2] = sum_fp64(vertex_pos_localspace[2], vec2(layerHeight.x + 1.0, layerHeight.y));
+  vertex_pos_modelspace[2] = sum_fp64(vertex_pos_localspace[2], vec2(instancePositions64z.x + 1.0, instancePositions64z.y));
   vertex_pos_modelspace[3] = vec2(1.0, 0.0);
 
   gl_Position = project_to_clipspace_fp64(vertex_pos_modelspace);
 
+  // Apply opacity to instance color, or return instance picking color
   vec4 color = vec4(instanceColors.rgb, instanceColors.a * opacity) / 255.;
   vec4 pickingColor = vec4(instancePickingColors / 255., 1.);
-
-  vColor = mix(
-    color,
-    pickingColor,
-    renderPickingBuffer
-  );
+  vColor = mix(color, pickingColor, renderPickingBuffer);
 }
