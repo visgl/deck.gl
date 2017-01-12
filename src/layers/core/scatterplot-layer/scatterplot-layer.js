@@ -27,16 +27,17 @@ import {join} from 'path';
 const DEFAULT_RADIUS = 30;
 const DEFAULT_COLOR = [255, 0, 255, 255];
 
+const defaultGetPosition = x => x.position;
+const defaultGetRadius = x => x.radius || DEFAULT_RADIUS;
+const defaultGetColor = x => x.color || DEFAULT_COLOR;
+
 const defaultProps = {
-  getPosition: x => x.position,
-  getRadius: x => x.radius || DEFAULT_RADIUS,
-  getColor: x => x.color || DEFAULT_COLOR,
-  // @type {number} props.radius - point radius in meters
-  radius: 30,
-  // @type {number} props.radiusMinPixels - min point radius in pixels
-  radiusMinPixels: 0,
-  // @type {number} props.radiusMinPixels - max point radius in pixels
-  radiusMaxPixels: Number.MAX_SAFE_INTEGER,
+  getPosition: defaultGetPosition,
+  getRadius: defaultGetRadius,
+  getColor: defaultGetColor,
+  radius: 30,  //  point radius in meters
+  radiusMinPixels: 0, //  min point radius in pixels
+  radiusMaxPixels: Number.MAX_SAFE_INTEGER, // max point radius in pixels
   drawOutline: false,
   strokeWidth: 1
 };
@@ -63,11 +64,7 @@ export default class ScatterplotLayer extends Layer {
     attributeManager.addInstanced({
       instancePositions: {size: 3, update: this.calculateInstancePositions},
       instanceRadius: {size: 1, update: this.calculateInstanceRadius},
-      instanceColors: {
-        type: GL.UNSIGNED_BYTE,
-        size: 4,
-        update: this.calculateInstanceColors
-      }
+      instanceColors: {size: 4, type: GL.UNSIGNED_BYTE, update: this.calculateInstanceColors}
     });
   }
 

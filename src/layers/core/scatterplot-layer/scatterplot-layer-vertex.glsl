@@ -36,14 +36,18 @@ uniform float renderPickingBuffer;
 varying vec4 vColor;
 
 void main(void) {
-  vec3 center = project_position(instancePositions);
+  // Multiply out radius and clamp to limits
   float radiusPixels = clamp(
     project_scale(radius * instanceRadius),
     radiusMinPixels, radiusMaxPixels
   );
+
+  // Find the center of the point and add the current vertex
+  vec3 center = project_position(instancePositions);
   vec3 vertex = positions * radiusPixels;
   gl_Position = project_to_clipspace(vec4(center + vertex, 1.0));
 
+  // Apply opacity to instance color, or return instance picking color
   vec4 color = vec4(instanceColors.rgb, instanceColors.a * opacity) / 255.;
   vec4 pickingColor = vec4(instancePickingColors / 255., 1.);
   vColor = mix(color, pickingColor, renderPickingBuffer);
