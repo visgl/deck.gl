@@ -20,7 +20,7 @@ import LAYER_CATEGORIES, {DEFAULT_ACTIVE_LAYERS} from './layer-examples';
 const MAPBOX_ACCESS_TOKEN = process.env.MAPBOX_ACCESS_TOKEN || // eslint-disable-line
   'Set MAPBOX_ACCESS_TOKEN environment variable or put your token here.';
 
-const noOp = () => {};
+const noop = () => {};
 
 // ---- View ---- //
 class App extends PureComponent {
@@ -88,8 +88,8 @@ class App extends PureComponent {
 
     if (props.pickable) {
       Object.assign(props, {
-        onHover: infoPanel ? infoPanel.onItemHovered : noOp,
-        onClick: infoPanel ? infoPanel.onItemClicked : noOp
+        onHover: infoPanel ? infoPanel.onItemHovered : noop,
+        onClick: infoPanel ? infoPanel.onItemClicked : noop
       });
     }
 
