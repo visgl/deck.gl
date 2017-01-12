@@ -148,7 +148,7 @@ export default class ScatterplotLayer64 extends Layer {
     let i = 0;
     for (const point of data) {
       const position = getPosition(point);
-      [value[i + 0], value[i + 1]] = fp64ify(position[2]);
+      [value[i + 0], value[i + 1]] = fp64ify(position[2] || 0);
       i += size;
     }
   }
