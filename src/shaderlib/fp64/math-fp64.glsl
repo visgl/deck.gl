@@ -319,13 +319,13 @@ vec2 sin_taylor_fp64(vec2 a) {
   t = mul_fp64(r, INVERSE_FACTORIAL_5_FP64);
   s = sum_fp64(s, t);
 
-  r = mul_fp64(r, x);
-  t = mul_fp64(r, INVERSE_FACTORIAL_7_FP64);
-  s = sum_fp64(s, t);
+  // r = mul_fp64(r, x);
+  // t = mul_fp64(r, INVERSE_FACTORIAL_7_FP64);
+  // s = sum_fp64(s, t);
 
-  r = mul_fp64(r, x);
-  t = mul_fp64(r, INVERSE_FACTORIAL_9_FP64);
-  s = sum_fp64(s, t);
+  // r = mul_fp64(r, x);
+  // t = mul_fp64(r, INVERSE_FACTORIAL_9_FP64);
+  // s = sum_fp64(s, t);
 
   return s;
 }
@@ -349,13 +349,13 @@ vec2 cos_taylor_fp64(vec2 a) {
   t = mul_fp64(r, INVERSE_FACTORIAL_6_FP64);
   s = sum_fp64(s, t);
 
-  r = mul_fp64(r, x);
-  t = mul_fp64(r, INVERSE_FACTORIAL_8_FP64);
-  s = sum_fp64(s, t);
+  // r = mul_fp64(r, x);
+  // t = mul_fp64(r, INVERSE_FACTORIAL_8_FP64);
+  // s = sum_fp64(s, t);
 
-  r = mul_fp64(r, x);
-  t = mul_fp64(r, INVERSE_FACTORIAL_10_FP64);
-  s = sum_fp64(s, t);
+  // r = mul_fp64(r, x);
+  // t = mul_fp64(r, INVERSE_FACTORIAL_10_FP64);
+  // s = sum_fp64(s, t);
 
   return s;
 }
