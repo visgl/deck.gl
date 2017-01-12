@@ -104,9 +104,11 @@ vec2 nint_fp64(vec2 a) {
 
 #if defined(NVIDIA_EQUATION_WORKAROUND) || defined(INTEL_EQUATION_WORKAROUND)
 vec2 twoSum(float a, float b) {
-  float s = (a + b) * ONE;
-  float v = (s - a);
-  float err = (a - (s - v) * ONE) * ONE + (b - v);
+  float s = (a + b);
+  float v = (s * ONE - a) * ONE;
+  float err = (a - (s - v) * ONE) * ONE * ONE * ONE + (b - v);
+
+  // err = (a + b) * ONE^6 - a * ONE^5 - (a + b) * ONE^4 + a * ONE^3 - b - (a + b) * ONE^2 + a * ONE
   return vec2(s, err);
 }
 #else
@@ -120,9 +122,9 @@ vec2 twoSum(float a, float b) {
 
 #if defined(NVIDIA_EQUATION_WORKAROUND) || defined(INTEL_EQUATION_WORKAROUND)
 vec2 twoSub(float a, float b) {
-  float s = (a - b) * ONE;
-  float v = (s - a);
-  float err = (a - (s - v) * ONE) * ONE - (b + v);
+  float s = (a - b);
+  float v = (s * ONE - a) * ONE;
+  float err = (a - (s - v) * ONE) * ONE * ONE * ONE - (b + v);
   return vec2(s, err);
 }
 #else
@@ -218,7 +220,7 @@ vec2 sqrt_fp64(vec2 a) {
 }
 
 vec2 exp_fp64(vec2 a) {
-  const float k = 512.0;
+  const float k = 16.0;
   const float inv_k = 1.0 / k;
 
   if (a.x <= -88.0) return vec2(0.0, 0.0);
@@ -247,15 +249,16 @@ vec2 exp_fp64(vec2 a) {
   p = mul_fp64(p, r);
   t = mul_fp64(p, INVERSE_FACTORIAL_5_FP64);
 
-  s = sum_fp64(s, t);
-  p = mul_fp64(p, r);
-  t = mul_fp64(p, INVERSE_FACTORIAL_6_FP64);
+  // s = sum_fp64(s, t);
+  // p = mul_fp64(p, r);
+  // t = mul_fp64(p, INVERSE_FACTORIAL_6_FP64);
+
+  // s = sum_fp64(s, t);
+  // p = mul_fp64(p, r);
+  // t = mul_fp64(p, INVERSE_FACTORIAL_7_FP64);
 
   s = sum_fp64(s, t);
-  p = mul_fp64(p, r);
-  t = mul_fp64(p, INVERSE_FACTORIAL_7_FP64);
 
-  s = sum_fp64(s, t);
 
   // At this point, s = exp(r) - 1; but after following 4 recursions, we will get exp(r) ^ 512 - 1.
 
@@ -265,14 +268,14 @@ vec2 exp_fp64(vec2 a) {
   s = sum_fp64(s * 2.0, mul_fp64(s, s));
 
   // We can add more iterations here and increase k.
-  s = sum_fp64(s * 2.0, mul_fp64(s, s));
-  s = sum_fp64(s * 2.0, mul_fp64(s, s));
-  s = sum_fp64(s * 2.0, mul_fp64(s, s));
-  s = sum_fp64(s * 2.0, mul_fp64(s, s));
-  s = sum_fp64(s * 2.0, mul_fp64(s, s));
+  // s = sum_fp64(s * 2.0, mul_fp64(s, s));
+  // s = sum_fp64(s * 2.0, mul_fp64(s, s));
+  // s = sum_fp64(s * 2.0, mul_fp64(s, s));
+  // s = sum_fp64(s * 2.0, mul_fp64(s, s));
+  // s = sum_fp64(s * 2.0, mul_fp64(s, s));
 
 #if defined(NVIDIA_FP64_WORKAROUND) || defined(INTEL_FP64_WORKAROUND)
-  s = sum_fp64(s, vec2(1.0, 0.0) * ONE);
+  s = sum_fp64(s, vec2(ONE, 0.0));
 #else
   s = sum_fp64(s, vec2(1.0, 0.0));
 #endif
@@ -286,7 +289,14 @@ vec2 log_fp64(vec2 a)
   if (a.x == 1.0 && a.y == 0.0) return vec2(0.0, 0.0);
   if (a.x <= 0.0) return vec2(0.0 / 0.0, 0.0 / 0.0);
   vec2 x = vec2(log(a.x), 0.0);
-  x = sub_fp64(sum_fp64(x, mul_fp64(a, exp_fp64(-x))), vec2(1.0, 0.0));
+  vec2 s;
+#if defined(NVIDIA_FP64_WORKAROUND) || defined(INTEL_FP64_WORKAROUND)
+  s = vec2(ONE, 0.0);
+#else
+  s = vec2(1.0, 0.0);
+#endif
+
+  x = sub_fp64(sum_fp64(x, mul_fp64(a, exp_fp64(-x))), s);
   return x;
 }
 
