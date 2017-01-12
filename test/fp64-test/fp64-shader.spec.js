@@ -25,7 +25,7 @@ import 'babel-polyfill';
 
 import {document, window} from 'global';
 import {Buffer, createGLContext, Program} from 'luma.gl';
-import {assembleShaders} from 'deck.gl';///shader-utils/assemble-shaders';
+import {assembleShaders} from 'deck.gl';
 
 // Utilities functions that to be moved to a common place for future tests
 

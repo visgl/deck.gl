@@ -32,7 +32,6 @@ module.exports = {
   module: {
     rules: [
       {
-        // Mapbox has some unresolved fs calls
         include: [resolve('./src')],
         loader: 'transform-loader',
         options: 'brfs-babel'
