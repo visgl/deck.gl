@@ -24,33 +24,11 @@ uniform float opacity;
 uniform vec3 colors;
 uniform float elevation;
 
-uniform vec3 uAmbientColor;
-uniform float uPointLightAmbientCoefficient;
-uniform vec3 uPointLightLocation;
-uniform vec3 uPointLightColor;
-uniform float uPointLightAttenuation;
-
-uniform vec3 uMaterialSpecularColor;
-uniform float uMaterialShininess;
-
 attribute vec4 positions;
 attribute vec2 heights;
 attribute vec3 normals;
 
 varying vec4 vColor;
-
-vec3 applyLighting(vec3 position_modelspace, vec3 normal_modelspace, vec3 color) {
-
-  vec3 pointLightLocation_modelspace = vec3(project_position(uPointLightLocation));
-  vec3 lightDirection = normalize(pointLightLocation_modelspace - position_modelspace);
-
-  vec3 ambient = uPointLightAmbientCoefficient * color / 255.0 * uAmbientColor / 255.0;
-
-  float diffuseCoefficient = max(dot(normal_modelspace, lightDirection), 0.0);
-  vec3 diffuse = diffuseCoefficient * uPointLightColor / 255. * color / 255.;
-
-  return ambient + uPointLightAttenuation * diffuse;
-}
 
 void main(void) {
   vec2 projected_xy[2];
@@ -65,14 +43,14 @@ void main(void) {
 
   gl_Position = project_to_clipspace_fp64(vertex_pos_modelspace);
 
-  vec3 color = applyLighting(
-  	vec3(
-  	  vertex_pos_modelspace[0].x,
-  	  vertex_pos_modelspace[1].x,
-  	  vertex_pos_modelspace[2].x),
-  	normals,
-  	colors
+  vec3 vertex =  vec3(
+    vertex_pos_modelspace[0].x,
+    vertex_pos_modelspace[1].x,
+    vertex_pos_modelspace[2].x
   );
+
+  vec3 color = applyLighting(vertex, normals, colors);
+
+  // TODO - Picking colors???
   vColor = vec4(color, opacity);
 }
-// `;

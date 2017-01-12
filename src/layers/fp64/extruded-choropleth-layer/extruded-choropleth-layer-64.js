@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 
 import {Layer} from '../../../lib';
-import {assembleShaders} from '../../../shader-utils';
+import {assembleShaders, lightingSetUniforms} from '../../../shader-utils';
 import {fp64ify} from '../../../lib/utils/fp64';
 import {GL, Model, Geometry} from 'luma.gl';
 import flattenDeep from 'lodash.flattendeep';
@@ -29,13 +29,14 @@ import {readFileSync} from 'fs';
 import {join} from 'path';
 
 const DEFAULT_COLOR = [180, 180, 200];
-const DEFAULT_AMBIENT_COLOR = [255, 255, 255];
-const DEFAULT_POINTLIGHT_AMBIENT_COEFFICIENT = 0.1;
-const DEFAULT_POINTLIGHT_LOCATION = [40.4406, -79.9959, 100];
-const DEFAULT_POINTLIGHT_COLOR = [255, 255, 255];
-const DEFAULT_POINTLIGHT_ATTENUATION = 1.0;
-const DEFAULT_MATERIAL_SPECULAR_COLOR = [255, 255, 255];
-const DEFAULT_MATERIAL_SHININESS = 1;
+
+// const DEFAULT_AMBIENT_COLOR = [255, 255, 255];
+// const DEFAULT_POINTLIGHT_AMBIENT_COEFFICIENT = 0.1;
+// const DEFAULT_POINTLIGHT_LOCATION = [40.4406, -79.9959, 100];
+// const DEFAULT_POINTLIGHT_COLOR = [255, 255, 255];
+// const DEFAULT_POINTLIGHT_ATTENUATION = 1.0;
+// const DEFAULT_MATERIAL_SPECULAR_COLOR = [255, 255, 255];
+// const DEFAULT_MATERIAL_SHININESS = 1;
 
 const defaultProps = {
   opacity: 1,
@@ -45,6 +46,16 @@ const defaultProps = {
 export default class ExtrudedChoroplethLayer64 extends Layer {
   constructor(props) {
     super(Object.assign({}, defaultProps, props));
+  }
+
+  getShaders() {
+    return {
+      vs: readFileSync(join(__dirname, './extruded-choropleth-layer-vertex.glsl'), 'utf8'),
+      fs: readFileSync(join(__dirname, './extruded-choropleth-layer-fragment.glsl'), 'utf8'),
+      fp64: true,
+      project64: true,
+      lighting: true
+    };
   }
 
   initializeState() {
@@ -71,25 +82,13 @@ export default class ExtrudedChoroplethLayer64 extends Layer {
       attributeManager.invalidateAll();
     }
 
-    const {
-      elevation,
-      color, ambientColor, pointLightColor,
-      pointLightLocation, pointLightAmbientCoefficient,
-      pointLightAttenuation, materialSpecularColor, materialShininess
-    } = this.props;
-
+    const {elevation, color} = this.props;
     this.setUniforms({
       elevation: Number.isFinite(elevation) ? elevation : 1,
-      colors: color || DEFAULT_COLOR,
-      uAmbientColor: ambientColor || DEFAULT_AMBIENT_COLOR,
-      uPointLightAmbientCoefficient:
-        pointLightAmbientCoefficient || DEFAULT_POINTLIGHT_AMBIENT_COEFFICIENT,
-      uPointLightLocation: pointLightLocation || DEFAULT_POINTLIGHT_LOCATION,
-      uPointLightColor: pointLightColor || DEFAULT_POINTLIGHT_COLOR,
-      uPointLightAttenuation: pointLightAttenuation || DEFAULT_POINTLIGHT_ATTENUATION,
-      uMaterialSpecularColor: materialSpecularColor || DEFAULT_MATERIAL_SPECULAR_COLOR,
-      uMaterialShininess: materialShininess || DEFAULT_MATERIAL_SHININESS
+      colors: color || DEFAULT_COLOR
     });
+
+    lightingSetUniforms(this, this.props);
   }
 
   draw({uniforms}) {
@@ -103,15 +102,6 @@ export default class ExtrudedChoroplethLayer64 extends Layer {
     const feature = index >= 0 ? this.props.data.features[index] : null;
     info.feature = feature;
     info.object = feature;
-  }
-
-  getShaders() {
-    return {
-      vs: readFileSync(join(__dirname, './extruded-choropleth-layer-vertex.glsl'), 'utf8'),
-      fs: readFileSync(join(__dirname, './extruded-choropleth-layer-fragment.glsl'), 'utf8'),
-      fp64: true,
-      project64: true
-    };
   }
 
   getModel(gl) {

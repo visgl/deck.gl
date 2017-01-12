@@ -21,6 +21,7 @@
 #define SHADER_NAME scatterplot-layer-vertex-shader
 
 attribute vec3 positions;
+attribute vec3 normals;
 
 attribute vec3 instancePositions;
 attribute float instanceRadius;
@@ -48,7 +49,8 @@ void main(void) {
   gl_Position = project_to_clipspace(vec4(center + vertex, 1.0));
 
   // Apply opacity to instance color, or return instance picking color
-  vec4 color = vec4(instanceColors.rgb, instanceColors.a * opacity) / 255.;
+  vec3 rgb = applyLighting(vertex, normals, instanceColors.rgb);
+  vec4 color = vec4(rgb, instanceColors.a * opacity) / 255.;
   vec4 pickingColor = vec4(instancePickingColors / 255., 1.);
   vColor = mix(color, pickingColor, renderPickingBuffer);
 }
