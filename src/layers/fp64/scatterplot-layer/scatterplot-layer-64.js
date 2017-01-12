@@ -18,100 +18,39 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {Layer} from '../../../lib';
-import {assembleShaders} from '../../../shader-utils';
+import ScatterplotLayer from '../../core/scatterplot-layer';
 import {fp64ify} from '../../../lib/utils/fp64';
-import {GL, Model, Geometry} from 'luma.gl';
 import {readFileSync} from 'fs';
 import {join} from 'path';
 
-const DEFAULT_COLOR = [255, 0, 255, 255];
+export default class ScatterplotLayer64 extends ScatterplotLayer {
 
-const defaultGetPosition = x => x.position;
-const defaultGetRadius = x => x.radius;
-const defaultGetColor = x => x.color || DEFAULT_COLOR;
-
-const defaultProps = {
-  getPosition: defaultGetPosition,
-  getRadius: defaultGetRadius,
-  getColor: defaultGetColor,
-  radius: 30,
-  radiusMinPixels: 0,
-  radiusMaxPixels: Number.MAX_SAFE_INTEGER,
-  drawOutline: false,
-  strokeWidth: 1
-};
-
-export default class ScatterplotLayer64 extends Layer {
-  constructor(props) {
-    super(Object.assign({}, defaultProps, props));
-  }
-
-  initializeState() {
-    const {gl} = this.context;
-    const {attributeManager} = this.state;
-
-    this.setState({
-      model: this.getModel(gl)
-    });
-
-    attributeManager.addInstanced({
-      instancePositionsFP64: {size: 4, update: this.calculateInstancePositions},
-      instanceRadius: {size: 1, update: this.calculateInstanceRadius},
-      layerHeight: {size: 2, update: this.calculateLayerHeight},
-      instanceColors: {
-        size: 4,
-        type: GL.UNSIGNED_BYTE,
-        update: this.calculateInstanceColors
-      }
-    });
-  }
-
-  draw({uniforms}) {
-    this.calculateZoomRadius();
-    this.state.model.render(Object.assign({}, uniforms, {
-      radiusMinPixels: this.props.radiusMinPixels,
-      radiusMaxPixels: this.props.radiusMaxPixels,
-      zoomRadiusFP64: this.state.zoomRadiusFP64
-    }));
-  }
-
-  getShaders() {
+  // Override the super class vertex shader
+  getShaders(id) {
     return {
-      vs: readFileSync(join(__dirname, './scatterplot-layer-vertex.glsl'), 'utf8'),
-      fs: readFileSync(join(__dirname, './scatterplot-layer-fragment.glsl'), 'utf8'),
+      vs: readFileSync(join(__dirname, './scatterplot-layer-64-vertex.glsl'), 'utf8'),
+      fs: super.getShaders().fs,
       fp64: true,
       project64: true
     };
   }
 
-  getModel(gl) {
-    const NUM_SEGMENTS = 16;
-    const positions = [];
-    for (let i = 0; i < NUM_SEGMENTS; i++) {
-      positions.push(
-        Math.cos(Math.PI * 2 * i / NUM_SEGMENTS),
-        Math.sin(Math.PI * 2 * i / NUM_SEGMENTS),
-        0
-      );
-    }
+  initializeState() {
+    // We use the model and all attributes except "instancePositions" of the base layer
+    super.initializeState();
 
-    const shaders = assembleShaders(gl, this.getShaders());
-
-    return new Model({
-      gl,
-      id: this.props.id,
-      vs: shaders.vs,
-      fs: shaders.fs,
-      geometry: new Geometry({
-        drawMode: GL.TRIANGLE_FAN,
-        positions: new Float32Array(positions)
-      }),
-      isInstanced: true
+    // Add the 64 bit positions
+    const {attributeManager} = this.state;
+    attributeManager.addInstanced({
+      instancePositions64xy: {size: 4, update: this.calculateInstancePositions64xy},
+      instancePositions64z: {size: 2, update: this.calculateInstancePositions64z}
+      // Reusing from base class
+      // instanceRadius: {size: 1, update: this.calculateInstanceRadius},
+      // instanceColors: {size: 4, type: GL.UNSIGNED_BYTE, update: this.calculateInstanceColors}
     });
   }
 
-  calculateInstancePositions(attribute) {
+  calculateInstancePositions64xy(attribute) {
     const {data, getPosition} = this.props;
     const {value, size} = attribute;
     let i = 0;
@@ -123,51 +62,15 @@ export default class ScatterplotLayer64 extends Layer {
     }
   }
 
-  calculateLayerHeight(attribute) {
+  calculateInstancePositions64z(attribute) {
     const {data, getPosition} = this.props;
     const {value, size} = attribute;
     let i = 0;
     for (const point of data) {
       const position = getPosition(point);
-      [value[i + 0], value[i + 1]] = fp64ify(position[2]);
+      [value[i + 0], value[i + 1]] = fp64ify(position[2] || 0);
       i += size;
     }
-  }
-
-  calculateInstanceRadius(attribute) {
-    const {data, getRadius} = this.props;
-    const {value, size} = attribute;
-    let i = 0;
-    for (const point of data) {
-      const radius = getRadius(point) || 1;
-      value[i + 0] = radius;
-      i += size;
-    }
-  }
-
-  calculateInstanceColors(attribute) {
-    const {data, getColor} = this.props;
-    const {value, size} = attribute;
-    let i = 0;
-    for (const point of data) {
-      const color = getColor(point);
-      value[i + 0] = color[0];
-      value[i + 1] = color[1];
-      value[i + 2] = color[2];
-      value[i + 3] = isNaN(color[3]) ? DEFAULT_COLOR[3] : color[3];
-      i += size;
-    }
-  }
-
-  calculateZoomRadius() {
-    const pixel0 = this.projectFlat([-122, 37.5]);
-    const pixel1 = this.projectFlat([-122, 37.5002]);
-
-    const dx = pixel0[0] - pixel1[0];
-    const dy = pixel0[1] - pixel1[1];
-
-    const radius = Math.max(Math.sqrt(dx * dx + dy * dy), 2.0);
-    this.state.zoomRadiusFP64 = fp64ify(radius);
   }
 }
 
