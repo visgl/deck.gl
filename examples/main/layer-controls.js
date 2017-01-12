@@ -1,6 +1,6 @@
-import React, {Component} from 'react';
+import React, {PureComponent} from 'react';
 
-export default class LayerControls extends Component {
+export default class LayerControls extends PureComponent {
 
   _onSliderChange(settingName, e) {
     const newValue = Number(e.target.value);
