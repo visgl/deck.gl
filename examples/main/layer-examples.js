@@ -192,11 +192,11 @@ const ScatterplotLayer64Example = {
 };
 
 // perf test examples
-const ScatterplotLayerPerfExample = ({
+const ScatterplotLayerPerfExample = (id, getData) => ({
   layer: ScatterplotLayer,
-  getData: dataSamples.getPoints100K,
+  getData,
   props: {
-    id: 'scatterplotLayerPerf',
+    id: `scatterplotLayerPerf-${id}`,
     getPosition: d => d,
     getColor: d => [0, 128, 0],
     // pickable: true,
@@ -205,11 +205,11 @@ const ScatterplotLayerPerfExample = ({
   }
 });
 
-const ScatterplotLayer64PerfExample = ({
+const ScatterplotLayer64PerfExample = (id, getData) => ({
   layer: ScatterplotLayer64,
-  getData: dataSamples.getPoints100K,
+  getData,
   props: {
-    id: 'scatterplotLayer64Perf',
+    id: `scatterplotLayer64Perf-${id}`,
     getPosition: d => d,
     getColor: d => [0, 128, 0],
     // pickable: true,
@@ -239,11 +239,11 @@ export default {
   },
 
   'Performance Tests': {
-    'ScatterplotLayer 1M': ScatterplotLayerPerfExample,
-    // 'ScatterplotLayer 10M': ScatterplotLayerPerfExample,
-    'ScatterplotLayer64 100K': ScatterplotLayer64PerfExample
-    // 'ScatterplotLayer64 1M': ScatterplotLayer64PerfExample,
-    // 'ScatterplotLayer64 10M': ScatterplotLayer64PerfExample
+    'ScatterplotLayer 1M': ScatterplotLayerPerfExample('1M', dataSamples.getPoints1M),
+    'ScatterplotLayer 10M': ScatterplotLayerPerfExample('10M', dataSamples.getPoints10M),
+    'ScatterplotLayer64 100K': ScatterplotLayer64PerfExample('100K', dataSamples.getPoints100K),
+    'ScatterplotLayer64 1M': ScatterplotLayer64PerfExample('1M', dataSamples.getPoints1M),
+    'ScatterplotLayer64 10M': ScatterplotLayer64PerfExample('10M', dataSamples.getPoints10M)
   }
 };
 

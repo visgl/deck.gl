@@ -1,15 +1,16 @@
-import React from 'react';
+import React, {PureComponent} from 'react';
 
-function renderExampleButtons({examples, activeExamples, onChange}) {
-  const children = [];
-  for (const exampleName of Object.keys(examples)) {
-    children.push(
+export default class LayerSelector extends PureComponent {
+
+  _renderExampleButton(exampleName, example) {
+    const {activeExamples, onChange} = this.props;
+
+    return (
       <div key={ exampleName } className="checkbox" >
         <input
           type="checkbox"
           id={exampleName}
           name="layerStatus"
-          value={exampleName || ''}
           checked={activeExamples[exampleName] || ''}
           onChange={e => onChange(exampleName)}
         />
@@ -19,29 +20,29 @@ function renderExampleButtons({examples, activeExamples, onChange}) {
       </div>
     );
   }
-  return children;
-}
 
-function renderExampleCategories({examples, activeExamples, onChange}) {
-  const children = [];
-  for (const categoryName of Object.keys(examples)) {
-    const category = examples[categoryName];
-    children.push(
-      <div key={categoryName}>
-        <h4>{ categoryName }</h4>
-        { renderExampleButtons({examples: category, activeExamples, onChange}) }
+  _renderExampleCategories(examples) {
+    return Object.keys(examples).map(categoryName => {
+      const category = examples[categoryName];
+      return (
+        <div key={categoryName}>
+          <h4>{ categoryName }</h4>
+          {
+            Object.keys(category)
+              .map(exampleName => this._renderExampleButton(exampleName, category[exampleName]))
+          }
+        </div>
+      );
+    });
+  }
+
+  render() {
+    return (
+      <div id="layer-selector" >
+        {
+          this._renderExampleCategories(this.props.examples)
+        }
       </div>
     );
   }
-  return children;
-}
-
-export default function LayerSelector({examples, activeExamples, onChange}) {
-  return (
-    <div id="layer-selector" >
-      {
-        renderExampleCategories({examples, activeExamples, onChange})
-      }
-    </div>
-  );
 }
