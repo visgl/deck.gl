@@ -29,6 +29,11 @@ export function pickLayers(gl, {
   }, () => {
     let zOrder = 0;
 
+    const blend = gl.getParameter(GL.BLEND);
+
+    // disable blending for picking buffer
+    gl.disable(GL.BLEND);
+
     for (let i = layers.length - 1; i >= 0; --i) {
       const layer = layers[i];
 
@@ -62,6 +67,11 @@ export function pickLayers(gl, {
 
         pickedInfos.push(info);
       }
+    }
+
+    if (blend) {
+      // enable blending after rendering picking buffer
+      gl.enable(GL.BLEND);
     }
   });
 
