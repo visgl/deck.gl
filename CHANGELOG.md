@@ -18,6 +18,32 @@ Each version should:
 Ref: http://keepachangelog.com/en/0.3.0/
 -->
 
+## Recent Dev Releases
+
+
+#### [v3.1.0-beta4] -
+- FIX: Restore `COORDINATE_SYSTEM` export
+
+#### [v3.1.0-beta3] -
+- CHANGE: Move shaderlib into src, remove unneeded scripts
+
+#### [v3.1.0-beta2] - Working modelMatrix
+- FIX: modelMatrix now applied correctly in both drawing and picking
+- NEW: Main example now has slider to separate layers
+
+#### [v3.1.0-beta1] - Use new `Viewport` from `viewport-mercator-project`
+
+- NEW: Support for per-layer model matrices (layer.modelMatrix props)
+- NEW: Support for non-mercator Viewports
+  The `DeckGL` React component now takes a generic `Viewport` prop that can be
+  created with arbitrary `view` and `projection` matrices.
+  If not supplied, it attempts to create a viewport from supplied mercator
+  parameters, which corresponds to behavior before the change.
+- NEW: `LayerManager.setViewport` replaces `LayerManager.setContext`
+Internal changes:
+- `WebGLViewport` now a wrapper around a supplied `Viewport` rather than a subclass.
+
+
 ## Official Releases
 
 ### deck.gl v3

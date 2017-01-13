@@ -1,61 +1,48 @@
-// Copyright (c) 2015 Uber Technologies, Inc.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
-/* eslint-disable func-style */
-/* eslint-disable no-console */
-/* global console, process */
-/* global document, window */
+/* global fetch, window, document */
 import 'babel-polyfill';
+
+import {ReflectionEffect} from 'deck.gl/experimental';
+import DeckGL from 'deck.gl/react';
+
+import {Matrix4} from 'luma.gl';
+import {mat4} from 'gl-matrix';
 
 import React from 'react';
 import ReactDOM from 'react-dom';
 import {createStore} from 'redux';
 import {Provider, connect} from 'react-redux';
-import autobind from 'autobind-decorator';
+import autobind from 'react-autobind';
 
 import MapboxGLMap from 'react-map-gl';
 import {FPSStats} from 'react-stats';
-import LayerSelector from './layer-selector';
-import LayerInfo from './layer-info';
+// import Dat, {DatNumber} from 'react-dat-gui';
 
-import * as request from 'd3-request';
+import LayerInfo from './layer-info';
+import LayerSelector from './layer-selector';
+import LayerControls from './layer-controls';
+
 import LAYER_CATEGORIES, {DEFAULT_ACTIVE_LAYERS} from './layer-examples';
 
-import DeckGL from '../src/react/deckgl';
-import {ReflectionEffect} from '../src/experimental';
+import {csvParse} from 'd3-dsv';
 
-// ---- Default Settings ---- //
+import assert from 'assert';
+assert(window.fetch, 'fetch API not supported by browser');
+
+const CHOROPLETHS_FILE = './data/sf.zip.geo.json';
+const EXTRUDED_CHOROPLETHS_FILE = '../data/sf.zip.geo.json';
+const HEXAGONS_FILE = './data/hexagons.csv';
+const POINTS_FILE = './data/sf.bike.parking.csv';
+
 /* eslint-disable no-process-env */
-const MAPBOX_ACCESS_TOKEN = process.env.MAPBOX_ACCESS_TOKEN ||
+const MAPBOX_ACCESS_TOKEN = process.env.MAPBOX_ACCESS_TOKEN || // eslint-disable-line
   'Set MAPBOX_ACCESS_TOKEN environment variable or put your token here.';
-
-const CHOROPLETHS_FILE = './example/data/sf.zip.geo.json';
-const EXTRUDED_CHOROPLETHS_FILE = './example/data/sf.zip.geo.json';
-const HEXAGONS_FILE = './example/data/hexagons.csv';
-const POINTS_FILE = './example/data/sf.bike.parking.csv';
 
 const INITIAL_STATE = {
   mapViewState: {
     latitude: 37.751537058389985,
     longitude: -122.42694203247012,
     zoom: 11.5,
-    pitch: 0,
+    pitch: 30,
     bearing: 0
   },
   choropleths: null,
@@ -199,16 +186,10 @@ function pointsToArcs(points) {
 
     const source = point;
     const target = points[i + 1];
-
     return {
       sourcePosition: source.position,
       targetPosition: target.position,
-      color: [
-        i % 255,
-        255 - i % 255,
-        Math.floor(i / 255) % 255,
-        255
-      ]
+      color: [i % 255, 255 - i % 255, Math.floor(i / 255) % 255, 255]
     };
   });
 }
@@ -225,18 +206,9 @@ function pointsToLines(points) {
 
     const source = point;
     const target = points[i + 1];
-
     return {
-      sourcePosition: [
-        source.position[0],
-        source.position[1],
-        Math.random() * 1000
-      ],
-      targetPosition: [
-        target.position[0],
-        target.position[1],
-        Math.random() * 1000
-      ],
+      sourcePosition: [source.position[0], source.position[1], Math.random() * 1000],
+      targetPosition: [target.position[0], target.position[1], Math.random() * 1000],
       color: [0, 0, 255]
     };
   });
@@ -246,6 +218,8 @@ function pointsToLines(points) {
 class ExampleApp extends React.Component {
   constructor(props) {
     super(props);
+    autobind(this);
+
     this.state = {
       activeExamples: DEFAULT_ACTIVE_LAYERS,
       selectedHexagons: [],
@@ -253,7 +227,11 @@ class ExampleApp extends React.Component {
       hoverPoint: null,
       hoverArc: null,
       hoverChoropleth: null,
-      clickItem: null
+      clickItem: null,
+      settings: {
+        separation: 0,
+        rotation: 0
+      }
     };
 
     this._effects = [new ReflectionEffect()];
@@ -263,76 +241,82 @@ class ExampleApp extends React.Component {
     this._handleResize();
     window.addEventListener('resize', this._handleResize);
 
-    this._loadJsonFile(CHOROPLETHS_FILE, this._handleChoroplethsLoaded);
-    this._loadJsonFile(EXTRUDED_CHOROPLETHS_FILE, this._handleExtrudedChoroplethsLoaded);
-    this._loadCsvFile(HEXAGONS_FILE, this._handleHexagonsLoaded);
-    this._loadCsvFile(POINTS_FILE, this._handlePointsLoaded);
+    this._loadJson(CHOROPLETHS_FILE).then(json => this._handleChoroplethsLoaded(json));
+    this._loadJson(EXTRUDED_CHOROPLETHS_FILE).then(
+      json => this._handleExtrudedChoroplethsLoaded(json)
+    );
+    this._loadText(HEXAGONS_FILE).then(text => this._handleHexagonsLoaded(csvParse(text)));
+    this._loadText(POINTS_FILE).then(text => this._handlePointsLoaded(csvParse(text)));
   }
 
   componentWillUnmount() {
     window.removeEventListener('resize', this._handleResize);
   }
 
-  _loadJsonFile(path, onDataLoaded) {
-    request.json(path, function loadJson(error, data) {
-      if (error) {
-        console.error(error);
+  _loadJson(path) {
+    return fetch(path)
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Network response was not OK');
       }
-      onDataLoaded(data);
-    });
+      return response.json();
+    })
+    .catch(error => console.error(error)); // eslint-disable-line
   }
 
-  _loadCsvFile(path, onDataLoaded) {
-    request.csv(path, function loadJson(error, data) {
-      if (error) {
-        console.error(error);
+  _loadText(path) {
+    return fetch(path)
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Network response was not OK');
       }
-      onDataLoaded(data);
-    });
+      return response.text();
+    })
+    .catch(error => console.error(error)); // eslint-disable-line
   }
 
-  @autobind _updateArcStrokeWidth() {
+  _updateArcStrokeWidth() {
     this.setState({arcStrokeWidth: 1});
   }
 
-  @autobind _handleHexagonsLoaded(data) {
+  _handleHexagonsLoaded(data) {
     this.props.dispatch(loadHexagons(data));
   }
 
-  @autobind _handlePointsLoaded(data) {
+  _handlePointsLoaded(data) {
     this.props.dispatch(loadPoints(data));
   }
 
-  @autobind _handleChoroplethsLoaded(data) {
+  _handleChoroplethsLoaded(data) {
     this.props.dispatch(loadChoropleths(data));
   }
 
-  @autobind _handleExtrudedChoroplethsLoaded(data) {
+  _handleExtrudedChoroplethsLoaded(data) {
     this.props.dispatch(loadExtrudedChoropleths(data));
   }
 
-  @autobind _handleResize() {
+  _handleResize() {
     this.setState({width: window.innerWidth, height: window.innerHeight});
   }
 
-  @autobind _handleViewportChanged(mapViewState) {
+  _handleViewportChanged(mapViewState) {
     if (mapViewState.pitch > 60) {
       mapViewState.pitch = 60;
     }
     this.props.dispatch(updateMap(mapViewState));
   }
 
-  @autobind _handleChoroplethHovered(info) {
+  _handleChoroplethHovered(info) {
     info.type = 'choropleth';
     this.setState({hoverChoropleth: info});
   }
 
-  @autobind _handleChoroplethClicked(info) {
+  _handleChoroplethClicked(info) {
     info.type = 'choropleth';
     this.setState({clickItem: info});
   }
 
-  @autobind _handleHexagonHovered(info) {
+  _handleHexagonHovered(info) {
     info.type = 'hexagon';
 
     const {hexData} = this.props;
@@ -350,51 +334,56 @@ class ExampleApp extends React.Component {
     });
   }
 
-  @autobind _handleHexagonClicked(info) {
+  _handleHexagonClicked(info) {
     info.type = 'hexagon';
     this.setState({clickItem: info});
     this.props.dispatch(swapData());
   }
 
-  @autobind _handleScatterplotHovered(info) {
+  _handleScatterplotHovered(info) {
     info.type = 'point';
     this.setState({hoverPoint: info});
   }
 
-  @autobind _handleScatterplotClicked(info) {
+  _handleScatterplotClicked(info) {
     info.type = 'point';
     this.setState({clickItem: info});
   }
 
-  @autobind _handleArcHovered(info) {
+  _handleArcHovered(info) {
     info.type = 'arc';
     this.setState({hoverArc: info});
   }
 
-  @autobind _handleArcClicked(info) {
+  _handleArcClicked(info) {
     info.type = 'arc';
     this.setState({clickItem: info});
   }
 
-  @autobind _handleLineHovered(info) {
+  _handleLineHovered(info) {
     info.type = 'line';
     this.setState({hoverLine: info});
   }
 
-  @autobind _handleLineClicked(info) {
+  _handleLineClicked(info) {
     info.type = 'line';
     this.setState({clickItem: info});
   }
 
-  @autobind _onChangeLayers(exampleName) {
+  _onChangeLayers(exampleName) {
     const {activeExamples} = this.state;
     activeExamples[exampleName] = !activeExamples[exampleName];
     this.setState({activeExamples});
   }
 
-  @autobind _onWebGLInitialized(gl) {
+  _onWebGLInitialized(gl) {
     gl.enable(gl.DEPTH_TEST);
     gl.depthFunc(gl.LEQUAL);
+  }
+
+  _onSettingsChange(settings) {
+    console.log(settings);
+    this.setState({settings});
   }
 
   _renderExamples() {
@@ -412,12 +401,15 @@ class ExampleApp extends React.Component {
       onLineHovered: this._handleLineHovered,
       onLineClicked: this._handleLineClicked
     };
+
+    let index = 0;
     const layers = [];
     for (const categoryName of Object.keys(LAYER_CATEGORIES)) {
       for (const exampleName of Object.keys(LAYER_CATEGORIES[categoryName])) {
+
+        // An example can be a function returning a deck.gl layer instance
+        // or an array of such a function and a prop generating function
         if (this.state.activeExamples[exampleName]) {
-          // An example can be a function returning a deck.gl layer instance
-          // or an array of such a function and a prop generating function
           let example = LAYER_CATEGORIES[categoryName][exampleName];
           let layerProps = props;
           /* eslint-disable max-depth */
@@ -427,15 +419,35 @@ class ExampleApp extends React.Component {
             layerProps = {
               ...props,
               ...makeProps(),
-              id: exampleName
+              id: exampleName,
+              picking: false
             };
           }
+
+          // Generate common props
+          index++;
+          Object.assign(layerProps, {
+            modelMatrix: this._getModelMatrix(index)
+          });
           /* eslint-enable max-depth */
           layers.push(example(layerProps));
         }
       }
     }
     return layers;
+  }
+
+  _getModelMatrix(index) {
+    const {settings: {separation, rotation}} = this.state;
+    const {mapViewState: {longitude, latitude}} = this.props;
+    // const modelMatrix = new Matrix4().fromTranslation([0, 0, 1000 * index * separation]);
+    const modelMatrix =
+      mat4.fromTranslation(mat4.create(), [0, 0, 300 * index * separation, 0]);
+    // mat4.translate(modelMatrix, modelMatrix, [-longitude, -latitude, 0]);
+    mat4.rotateZ(modelMatrix, modelMatrix, index * rotation * Math.PI / 10000);
+    // mat4.translate(modelMatrix, modelMatrix, [longitude, latitude, 0]);
+    console.log('Model matrix', modelMatrix); // eslint-disable-line
+    return modelMatrix;
   }
 
   _renderOverlay() {
@@ -464,7 +476,6 @@ class ExampleApp extends React.Component {
   _renderMap() {
     const {mapViewState} = this.props;
     const {width, height} = this.state;
-
     return (
       <MapboxGLMap
         mapboxApiAccessToken={MAPBOX_ACCESS_TOKEN}
@@ -480,12 +491,30 @@ class ExampleApp extends React.Component {
   }
 
   render() {
+    const {settings} = this.state;
+
     return (
       <div>
         { this._renderMap() }
-        <LayerSelector { ...this.state }
-          examples={LAYER_CATEGORIES}
-          onChange={this._onChangeLayers}/>
+        {
+        /*
+        <div id="layer-settings" style={{position: 'absolute', top: 20, left: 20, zIndex: 99}}>
+          <Dat data={this.state.settings} onUpdate={this._onSettingsChanged}>
+            <DatNumber path="separation" label="Separation" min={0} max={100} step={1}/>
+          </Dat>
+        </div>
+        */
+        }
+        <div style={{position: 'absolute', top: 20, bottom: 180, right: 0, zIndex: 98}}>
+          <LayerSelector { ...this.state }
+            examples={LAYER_CATEGORIES}
+            onChange={this._onChangeLayers}/>
+        </div>
+        <div style={{position: 'absolute', bottom: 20, right: 0, zIndex: 98}}>
+          <LayerControls
+            settings={settings}
+            onSettingsChange={this._onSettingsChange}/>
+        </div>
         <LayerInfo { ...this.state }/>
       </div>
     );
@@ -505,5 +534,3 @@ ReactDOM.render(
   </Provider>,
   container
 );
-/* eslint-enable func-style */
-/* eslint-enable no-console */

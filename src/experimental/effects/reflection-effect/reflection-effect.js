@@ -4,16 +4,23 @@ import {assembleShaders} from '../../../shader-utils';
 import {Effect} from '../../lib';
 import {readFileSync} from 'fs';
 import {join} from 'path';
-
-/*
- * This should be made a subclass of a more general effect class once other
- * effects are implemented.
- */
+import {WebMercatorViewport} from 'viewport-mercator-project';
 
 export default class ReflectionEffect extends Effect {
-  constructor(reflectivity = 0.2) {
+
+  /**
+   * @classdesc
+   * ReflectionEffect
+   *
+   * @class
+   * @param reflectivity How visible reflections should be over the map, between 0 and 1
+   * @param blur how blurry the reflection should be, between 0 and 1
+   */
+
+  constructor(reflectivity = 0.5, blur = 0.5) {
     super();
     this.reflectivity = reflectivity;
+    this.blur = blur;
     this.framebuffer = null;
     this.setNeedsRedraw();
   }
@@ -26,7 +33,7 @@ export default class ReflectionEffect extends Effect {
   }
 
   initialize({gl, layerManager}) {
-    this.model = new Model({
+    this.unitQuad = new Model({
       gl,
       ...assembleShaders(gl, this.getShaders()),
       geometry: new Geometry({
@@ -34,12 +41,12 @@ export default class ReflectionEffect extends Effect {
         vertices: new Float32Array([0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0])
       })
     });
-    this.framebuffer = new Framebuffer(gl);
+    this.framebuffer = new Framebuffer(gl, {depth: true});
 
   }
 
   preDraw({gl, layerManager}) {
-    const viewport = layerManager.context.viewport;
+    const {viewport} = layerManager.context;
     /*
      * the renderer already has a reference to this, but we don't have a reference to the renderer.
      * when we refactor the camera code, we should make sure we get a reference to the renderer so
@@ -52,24 +59,30 @@ export default class ReflectionEffect extends Effect {
     /* this is a huge hack around the existing viewport class.
      * TODO in the future, once we implement bona-fide cameras, we really need to fix this.
      */
-    layerManager.setContext({
+    layerManager.setViewport(new WebMercatorViewport({
       ...viewport,
       pitch: -180 - pitch
-    });
+    }));
     gl.clear(GL.COLOR_BUFFER_BIT | GL.DEPTH_BUFFER_BIT);
 
     layerManager.drawLayers();
-    layerManager.setContext({
-      ...viewport,
-      pitch
-    });
-    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+    layerManager.setViewport(viewport);
+    this.framebuffer.unbind();
   }
 
   draw({gl, layerManager}) {
-    this.model.render({
+    /*
+     * Render our unit quad.
+     * This will cover the entire screen, but will lie behind all other geometry.
+     * This quad will sample the previously generated reflection texture
+     * in order to create the reflection effect
+     */
+    this.unitQuad.render({
       reflectionTexture: this.framebuffer.texture,
-      reflectivity: this.reflectivity
+      reflectionTextureWidth: this.framebuffer.width,
+      reflectionTextureHeight: this.framebuffer.height,
+      reflectivity: this.reflectivity,
+      blur: this.blur
     });
   }
 

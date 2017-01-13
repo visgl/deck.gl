@@ -1,26 +1,21 @@
 import test from 'tape-catch';
-import 'luma.gl/headless';
+import 'luma.gl';
 
 import DeckGL from '../../react';
 
 import {
-  DeckGLOverlay,
   Layer,
-  ChoroplethLayer, ScatterplotLayer,
-  ScreenGridLayer, ArcLayer, LineLayer,
-  Viewport
+  ChoroplethLayer, ScatterplotLayer, ScreenGridLayer, ArcLayer, LineLayer,
+  COORDINATE_SYSTEM
 } from '../..';
 
 import {
   EnhancedChoroplethLayer
 } from '../../samples';
 
-import Viewport2 from '../../viewport';
-
 test('Top-level imports', t0 => {
   t0.test('import "deck.gl"', t => {
-    t.ok(DeckGL, 'DeckGL symbol imported from /react');
-    t.ok(!DeckGLOverlay, 'DeckGLOverlay symbol NOT imported from index');
+
     t.ok(Layer, 'Layer symbol imported');
     t.ok(Layer, 'Layer symbol imported');
     t.ok(ChoroplethLayer, 'ChoroplethLayer symbol imported');
@@ -28,17 +23,20 @@ test('Top-level imports', t0 => {
     t.ok(ScreenGridLayer, 'ScreenGridLayer symbol imported');
     t.ok(ArcLayer, 'ArcLayer symbol imported');
     t.ok(LineLayer, 'LineLayer symbol imported');
-    t.ok(Viewport, 'Viewport symbol imported');
+
+    t.ok(Number.isFinite(COORDINATE_SYSTEM.LNGLAT), 'COORDINATE_SYSTEM.LNGLAT imported');
+    t.ok(Number.isFinite(COORDINATE_SYSTEM.METERS), 'COORDINATE_SYSTEM.METERS imported');
+    t.ok(Number.isFinite(COORDINATE_SYSTEM.IDENTITY), 'COORDINATE_SYSTEM.IDENTITY imported');
+    t.end();
+  });
+
+  t0.test('import "deck.gl/react"', t => {
+    t.ok(DeckGL, 'DeckGL symbol imported from /react');
     t.end();
   });
 
   t0.test('import "deck.gl/samples"', t => {
     t.ok(EnhancedChoroplethLayer, 'EnhancedChoroplethLayer symbol imported');
-    t.end();
-  });
-
-  t0.test('import "deck.gl/viewport"', t => {
-    t.ok(Viewport2, 'Viewport symbol imported');
     t.end();
   });
   t0.end();

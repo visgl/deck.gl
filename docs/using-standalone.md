@@ -13,7 +13,7 @@ applications.
 The deck.gl `LayerManager` class handles updates, drawing and picking
 for a set of layers.
 
-* Use the `setContext` method to update viewport.
+* Use the `setViewport` method to update viewport.
 * Use the `updateLayers` method to update the list of layers with a
   freshly rendered list.
 * You can use the `drawLayers` method to draw the layers - it will only

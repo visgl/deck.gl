@@ -18,11 +18,12 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 import React, {PropTypes} from 'react';
-import autobind from 'autobind-decorator';
+import autobind from 'react-autobind';
 import WebGLRenderer from './webgl-renderer';
 import {LayerManager, Layer} from '../lib';
 import {EffectManager, Effect} from '../experimental';
 import {GL, addEvents} from 'luma.gl';
+import {Viewport, WebMercatorViewport} from 'viewport-mercator-project';
 import {log} from '../lib/utils';
 
 function noop() {}
@@ -37,9 +38,10 @@ export default class DeckGL extends React.Component {
     effects: PropTypes.arrayOf(PropTypes.instanceOf(Effect)),
     gl: PropTypes.object,
     debug: PropTypes.bool,
-    onWebGLInitialized: noop,
-    onLayerClick: noop,
-    onLayerHover: noop
+    viewport: PropTypes.instanceOf(Viewport),
+    onWebGLInitialized: PropTypes.func,
+    onLayerClick: PropTypes.func,
+    onLayerHover: PropTypes.func
   };
 
   static defaultProps = {
@@ -58,6 +60,7 @@ export default class DeckGL extends React.Component {
     this.needsRedraw = true;
     this.layerManager = null;
     this.effectManager = null;
+    autobind(this);
   }
 
   componentWillReceiveProps(nextProps) {
@@ -65,20 +68,22 @@ export default class DeckGL extends React.Component {
   }
 
   _updateLayers(nextProps) {
-    const {
+    const {width, height, latitude, longitude, zoom, pitch, bearing, altitude} = nextProps;
+    let {viewport} = nextProps;
+
+    // If Viewport is not supplied, create one from mercator props
+    viewport = viewport || new WebMercatorViewport({
       width, height, latitude, longitude, zoom, pitch, bearing, altitude
-    } = nextProps;
+    });
 
     if (this.layerManager) {
       this.layerManager
-        .setContext({
-          width, height, latitude, longitude, zoom, pitch, bearing, altitude
-        })
+        .setViewport(viewport)
         .updateLayers({newLayers: nextProps.layers});
     }
   }
 
-  @autobind _onRendererInitialized({gl, canvas}) {
+  _onRendererInitialized({gl, canvas}) {
     gl.enable(GL.BLEND);
     gl.blendFunc(GL.SRC_ALPHA, GL.ONE_MINUS_SRC_ALPHA);
 
@@ -112,7 +117,7 @@ export default class DeckGL extends React.Component {
   }
 
   // Route events to layers
-  @autobind _onClick(event) {
+  _onClick(event) {
     const {x, y} = event;
     const selectedInfos = this.layerManager.pickLayer({x, y, mode: 'click'});
     const firstInfo = selectedInfos.find(info => info.index >= 0);
@@ -121,7 +126,7 @@ export default class DeckGL extends React.Component {
   }
 
   // Route events to layers
-  @autobind _onMouseMove(event) {
+  _onMouseMove(event) {
     const {x, y} = event;
     const selectedInfos = this.layerManager.pickLayer({x, y, mode: 'hover'});
     const firstInfo = selectedInfos.find(info => info.index >= 0);
@@ -129,7 +134,7 @@ export default class DeckGL extends React.Component {
     this.props.onLayerHover(firstInfo, selectedInfos, event.event);
   }
 
-  @autobind _onRenderFrame({gl}) {
+  _onRenderFrame({gl}) {
     if (!this.layerManager.needsRedraw({clearRedrawFlags: true})) {
       return;
     }
@@ -141,7 +146,6 @@ export default class DeckGL extends React.Component {
     this.layerManager.drawLayers();
 
     this.effectManager.draw();
-
   }
 
   render() {

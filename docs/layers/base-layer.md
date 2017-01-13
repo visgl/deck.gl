@@ -117,8 +117,8 @@ that are not Web Mercator projected longitudes/latitudes.
 Specifies how layer positions and offsets should be interpreted.
 
 The default is to interpret positions as latitude and longitude, however it
-is also possible to interpret positions as meter offsets from the
-`projectionCenter` prop.
+is also possible to interpret positions as meter offsets (measured from the
+`projectionCenter` prop).
 
 See the article on Coordinate Systems for details.
 
@@ -130,7 +130,7 @@ Specifies a longitude and a latitude from which meter offsets are calculated.
 
 See the article on Coordinate Systems for details
 
-##### `viewMatrix` (Number[16], optional)
+##### `modelMatrix` (Number[16], optional)
 
 An optional 4x4 matrix that is premultiplied into the affine projection
 matrices used by shader `project` GLSL function and the
@@ -141,7 +141,10 @@ which is useful when composing data from multiple sources that use
 different coordinate systems.
 
 Note that the matrix projection is applied after the non-linear mercator
-projection calculations are resolved, so be careful when using view matrices with lng/lat encoded coordinates.
+projection calculations are resolved, so be careful when using model matrices
+with lng/lat encoded coordinates. They normally work best with non-mercator
+viewports or meter offset based mercator layers
+
 
 ### Data Properties
 

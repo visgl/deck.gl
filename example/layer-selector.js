@@ -21,8 +21,6 @@ function renderExampleButtons({examples, activeExamples, onChange}) {
             { exampleName }
           </div>
         </label>
-        <span>
-        </span>
       </div>
     );
   }
@@ -35,7 +33,7 @@ function renderExampleCategories({examples, activeExamples, onChange}) {
     const category = examples[categoryName];
     children.push(
       <div key={categoryName}>
-        { categoryName }
+        <h4>{ categoryName }</h4>
         { renderExampleButtons({examples: category, activeExamples, onChange}) }
       </div>
     );
@@ -46,23 +44,15 @@ function renderExampleCategories({examples, activeExamples, onChange}) {
 export default function LayerSelector({examples, activeExamples, onChange}) {
   return (
     <div id="example-selector" style={{
-      position: 'absolute',
-      top: 20,
-      bottom: 20,
-      right: 0,
-      zIndex: 98
+      padding: 0,
+      width: 270,
+      height: '100%',
+      overflowX: 'hidden',
+      overflowY: 'scroll'
     }}>
-      <div style={ {
-        padding: 0,
-        width: 270,
-        height: '100%',
-        overflowX: 'hidden',
-        overflowY: 'scroll'
-      } }>
       {
         renderExampleCategories({examples, activeExamples, onChange})
       }
-      </div>
     </div>
   );
 }

@@ -3,20 +3,16 @@ import {
   ScatterplotLayer,
   ArcLayer,
   LineLayer,
-  ScreenGridLayer
-} from '../src';
+  ScreenGridLayer,
 
-import {
   ScatterplotLayer64,
   ArcLayer64,
   ChoroplethLayer64,
   ExtrudedChoroplethLayer64,
-  LineLayer64
-} from '../src/layers/fp64';
+  LineLayer64,
 
-import {
   EnhancedChoroplethLayer
-} from '../src/layers/samples';
+} from 'deck.gl';
 
 const ArcLayerExample = props =>
   new ArcLayer({
@@ -251,12 +247,12 @@ function make100KPoints() {
 
 export default {
   'Core Layers': {
-    ArcLayer: ArcLayerExample,
     'ChoroplethLayer (Solid)': ChoroplethLayerExample,
     'ChoroplethLayer (Contour)': ChoroplethLayerContourExample,
-    LineLayer: LineLayerExample,
     ScatterplotLayer: ScatterplotLayerExample,
     'ScatterplotLayer (meters)': ScatterplotLayerMetersExample,
+    ArcLayer: ArcLayerExample,
+    LineLayer: LineLayerExample,
     ScreenGridLayer: ScreenGridLayerExample
   },
 
