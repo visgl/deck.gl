@@ -103,12 +103,23 @@ vec2 nint_fp64(vec2 a) {
 }
 
 #if defined(NVIDIA_EQUATION_WORKAROUND) || defined(INTEL_EQUATION_WORKAROUND)
+
+/* The purpose of this workaround is to prevent compilers from
+optimizing away necessary arithmetic operations by swapping their sequences
+or transform the equation to some 'equivalent' from.
+
+The method is to multiply an artifical variable, ONE, which will be known to
+the compiler to be one only at the runtime. The whole expression is then represented
+as a polynomial with respective to ONE. In the coefficients of all terms, only one a
+and one b should appear
+
+err = (a + b) * ONE^6 - a * ONE^5 - (a + b) * ONE^4 + a * ONE^3 - b - (a + b) * ONE^2 + a * ONE
+*/
+
 vec2 twoSum(float a, float b) {
   float s = (a + b);
   float v = (s * ONE - a) * ONE;
   float err = (a - (s - v) * ONE) * ONE * ONE * ONE + (b - v);
-
-  // err = (a + b) * ONE^6 - a * ONE^5 - (a + b) * ONE^4 + a * ONE^3 - b - (a + b) * ONE^2 + a * ONE
   return vec2(s, err);
 }
 #else
@@ -121,6 +132,7 @@ vec2 twoSum(float a, float b) {
 #endif
 
 #if defined(NVIDIA_EQUATION_WORKAROUND) || defined(INTEL_EQUATION_WORKAROUND)
+/* Same thing as in twoSum() */
 vec2 twoSub(float a, float b) {
   float s = (a - b);
   float v = (s * ONE - a) * ONE;
@@ -219,18 +231,25 @@ vec2 sqrt_fp64(vec2 a) {
   return sum_fp64(vec2(yn, 0.0), prod);
 }
 
+/* k_power controls how much range reduction we would like to have
+Range reduction uses the following method:
+assume a = k_power * r + m * log(2), k and m being integers.
+Set k_power = 4 (we can choose other k to trade accuracy with performance.
+we only need to calculate exp(r) and using exp(a) = 2^m * exp(r)^k_power;
+*/
+
 vec2 exp_fp64(vec2 a) {
+  // We need to make sure these two numbers match
+  // as bit-wise shift is not available in GLSL 1.0
+  const int k_power = 4;
   const float k = 16.0;
+
   const float inv_k = 1.0 / k;
 
   if (a.x <= -88.0) return vec2(0.0, 0.0);
   if (a.x >= 88.0) return vec2(1.0 / 0.0, 1.0 / 0.0);
   if (a.x == 0.0 && a.y == 0.0) return vec2(1.0, 0.0);
   if (a.x == 1.0 && a.y == 0.0) return E_FP64;
-
-  // Range reduction using assume a = kr + m * log(2), k and m being integers.
-  // Set k = 9 (we can choose other k to trade accuracy with performance.
-  // we only need to calculate exp(r) and using exp(a) = 2^m * exp(r)^k
 
   float m = floor(a.x / LOG2_FP64.x + 0.5);
   vec2 r = sub_fp64(a, mul_fp64(LOG2_FP64, vec2(m, 0.0))) * inv_k;
@@ -261,18 +280,9 @@ vec2 exp_fp64(vec2 a) {
 
 
   // At this point, s = exp(r) - 1; but after following 4 recursions, we will get exp(r) ^ 512 - 1.
-
-  s = sum_fp64(s * 2.0, mul_fp64(s, s));
-  s = sum_fp64(s * 2.0, mul_fp64(s, s));
-  s = sum_fp64(s * 2.0, mul_fp64(s, s));
-  s = sum_fp64(s * 2.0, mul_fp64(s, s));
-
-  // We can add more iterations here and increase k.
-  // s = sum_fp64(s * 2.0, mul_fp64(s, s));
-  // s = sum_fp64(s * 2.0, mul_fp64(s, s));
-  // s = sum_fp64(s * 2.0, mul_fp64(s, s));
-  // s = sum_fp64(s * 2.0, mul_fp64(s, s));
-  // s = sum_fp64(s * 2.0, mul_fp64(s, s));
+  for (int i = 0; i < k_power; i++) {
+    s = sum_fp64(s * 2.0, mul_fp64(s, s));
+  }
 
 #if defined(NVIDIA_FP64_WORKAROUND) || defined(INTEL_FP64_WORKAROUND)
   s = sum_fp64(s, vec2(ONE, 0.0));
@@ -319,6 +329,8 @@ vec2 sin_taylor_fp64(vec2 a) {
   t = mul_fp64(r, INVERSE_FACTORIAL_5_FP64);
   s = sum_fp64(s, t);
 
+  /* keep the following commented code in case we need them
+  for extra accuracy from the Taylor expansion*/
   // r = mul_fp64(r, x);
   // t = mul_fp64(r, INVERSE_FACTORIAL_7_FP64);
   // s = sum_fp64(s, t);
@@ -349,6 +361,8 @@ vec2 cos_taylor_fp64(vec2 a) {
   t = mul_fp64(r, INVERSE_FACTORIAL_6_FP64);
   s = sum_fp64(s, t);
 
+  /* keep the following commented code in case we need them
+  for extra accuracy from the Taylor expansion*/
   // r = mul_fp64(r, x);
   // t = mul_fp64(r, INVERSE_FACTORIAL_8_FP64);
   // s = sum_fp64(s, t);
