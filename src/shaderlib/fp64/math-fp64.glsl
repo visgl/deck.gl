@@ -332,7 +332,6 @@ vec2 sin_taylor_fp64(vec2 a) {
 
   /* keep the following commented code in case we need them
   for extra accuracy from the Taylor expansion*/
-
   // r = mul_fp64(r, x);
   // t = mul_fp64(r, INVERSE_FACTORIAL_7_FP64);
   // s = sum_fp64(s, t);
@@ -365,7 +364,6 @@ vec2 cos_taylor_fp64(vec2 a) {
 
   /* keep the following commented code in case we need them
   for extra accuracy from the Taylor expansion*/
-
   // r = mul_fp64(r, x);
   // t = mul_fp64(r, INVERSE_FACTORIAL_8_FP64);
   // s = sum_fp64(s, t);
