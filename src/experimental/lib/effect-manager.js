@@ -55,7 +55,7 @@ export default class EffectManager {
    */
   draw() {
     for (const effect of this._effects) {
-      if (effect.needsRedraw) {
+      if (effect.needsRedraw && effect.enabled) {
         effect.draw({gl: this.gl, layerManager: this.layerManager});
       }
     }

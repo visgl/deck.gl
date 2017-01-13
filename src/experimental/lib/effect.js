@@ -4,8 +4,8 @@ export default class Effect {
 
   constructor() {
     this.count = counter++;
-    this.visible = true;
     this.priority = 0;
+    this.enabled = true;
     this.needsRedraw = false;
   }
 
