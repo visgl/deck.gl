@@ -29,9 +29,8 @@ export function pickLayers(gl, {
   }, () => {
     let zOrder = 0;
 
-    const blend = gl.getParameter(GL.BLEND);
-
-    // disable blending for picking buffer
+    // disable blending while picking, restore when done
+    const isBlending = gl.isEnabled(GL.BLEND);
     gl.disable(GL.BLEND);
 
     for (let i = layers.length - 1; i >= 0; --i) {
@@ -69,8 +68,8 @@ export function pickLayers(gl, {
       }
     }
 
-    if (blend) {
-      // enable blending after rendering picking buffer
+    if (isBlending) {
+      // enable blending after picking
       gl.enable(GL.BLEND);
     }
   });
