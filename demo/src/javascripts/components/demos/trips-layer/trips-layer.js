@@ -1,5 +1,6 @@
 import {Layer, assembleShaders} from '../../../../../../index';
-import {Model, Program, Geometry, glGetDebugInfo} from 'luma.gl';
+
+import {Model, Program, Geometry} from 'luma.gl';
 import {readFileSync} from 'fs';
 import {join} from 'path';
 
@@ -16,7 +17,6 @@ export default class TripsLayer extends Layer {
   }
 
   updateState({props, oldProps, changeFlags: {dataChanged, somethingChanged}}) {
-    const {attributeManager} = this.state;
     if (dataChanged) {
       this.countVertices(props.data);
     }

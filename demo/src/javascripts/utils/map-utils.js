@@ -1,19 +1,19 @@
+/* global window */
 import TWEEN from 'tween.js';
 
 let viewportTween;
 
-function animate() {
+const animate = () => {
   TWEEN.update();
-  requestAnimationFrame(animate);
-}
+  window.requestAnimationFrame(animate);
+};
 
 // get a linear tween
-function ease(fromState, toState, duration) {
-  return new TWEEN.Tween(fromState).to(toState, duration);
-}
+const ease = (fromState, toState, duration) =>
+  new TWEEN.Tween(fromState).to(toState, duration);
 
 // fly to new viewport
-function fly(fromViewport, toViewport, duration, onUpdate) {
+const fly = (fromViewport, toViewport, duration, onUpdate) => {
   const fromState = {};
   const nanState = {};
   const toState = {};
@@ -35,12 +35,12 @@ function fly(fromViewport, toViewport, duration, onUpdate) {
 
   viewportTween = new TWEEN.Tween(fromState)
     .to(toState, duration)
-    .onUpdate(function() {
-      onUpdate({...this, ...nanState});
+    .onUpdate(function update() {
+      onUpdate({...this, ...nanState}); // eslint-disable-line no-invalid-this
     });
 
   return viewportTween;
-}
+};
 
 export default {
   init: animate,

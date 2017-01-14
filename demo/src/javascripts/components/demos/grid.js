@@ -53,7 +53,7 @@ export default class GridDemo extends Component {
 
     const layer = new ScreenGridLayer({
       id: 'grid',
-      data: data,
+      data,
       minColor: [0, 0, 0, 0],
       unitWidth: params.cellSize.value,
       unitHeight: params.cellSize.value

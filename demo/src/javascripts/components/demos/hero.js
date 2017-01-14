@@ -73,18 +73,18 @@ export default class HeroDemo extends Component {
   constructor(props) {
     super(props);
 
-    const thisDemo = this;
+    this.state = {time: 0};
 
-    this.state = {
-      time: 0
-    };
+    const thisDemo = this; // eslint-disable-line
+
     this.tween = ViewportAnimation.ease({time: 0}, {time: 1800}, 60000)
-      .onUpdate(function() { thisDemo.setState(this) })
+      .onUpdate(function tweenUpdate() {
+        thisDemo.setState(this); // eslint-disable-line
+      })
       .repeat(Infinity);
   }
 
   componentDidMount() {
-    const thisDemo = this;
     this.tween.start();
   }
 
@@ -98,17 +98,18 @@ export default class HeroDemo extends Component {
     if (!data) {
       return null;
     }
+
     const layers = [].concat(
       data[0] && data[0].map((layerData, layerIndex) => new TripsLayer({
-          id: `trips-${layerIndex}`,
-          data: layerData,
-          getPath: d => d.segments,
-          getColor: d => d.vendor === 0 ? [253,128,93] : [23,184,190],
-          opacity: 0.3,
-          strokeWidth: 2,
-          trailLength: params.trail.value,
-          currentTime: this.state.time
-        })
+        id: `trips-${layerIndex}`,
+        data: layerData,
+        getPath: d => d.segments,
+        getColor: d => d.vendor === 0 ? [253, 128, 93] : [23, 184, 190],
+        opacity: 0.3,
+        strokeWidth: 2,
+        trailLength: params.trail.value,
+        currentTime: this.state.time
+      })
       ),
       data[1] && data[1].map((d, i) => new ExtrudedChoroplethLayer64({
         id: `building=${i}`,
@@ -120,7 +121,7 @@ export default class HeroDemo extends Component {
     ).filter(Boolean);
 
     return (
-      <DeckGL {...viewport} layers={ layers } />
+      <DeckGL {...viewport} layers={layers} />
     );
   }
 }

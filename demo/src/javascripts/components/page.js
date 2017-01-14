@@ -1,4 +1,6 @@
+/* global window */
 import 'babel-polyfill';
+
 import React, {Component, PropTypes} from 'react';
 import {connect} from 'react-redux';
 import autobind from 'autobind-decorator';
@@ -39,13 +41,13 @@ class Page extends Component {
     if (typeof content !== 'object') {
       content = {content};
     }
-    const {demo, ...docs} = content;
-    const {loadContent} = this.props;
+
+    const {...docs} = content;
 
     // grab text contents
     Object.values(docs).forEach(src => {
       if (typeof src === 'string') {
-        loadContent(src);
+        this.props.loadContent(src);
       }
     });
 
@@ -77,28 +79,28 @@ class Page extends Component {
     const {tabs, mapFocus} = this.state;
     const activeTab = location.query.tab || Object.keys(tabs)[0];
 
-    return Object.keys(tabs).map(tabName => {
-      const tab = tabs[tabName];
+    return Object.keys(tabs).map(_tabName => {
+      const _tab = tabs[_tabName];
       let child;
 
-      if (tabName === 'demo') {
+      if (_tabName === 'demo') {
         child = (
           <div>
-            <Map demo={tab} 
-              onInteract={ this._setMapFocus.bind(this, true) } />
-            <InfoPanel demo={tab} hasFocus={!mapFocus}
-              onInteract={ this._setMapFocus.bind(this, false) } />
+            <Map demo={_tab}
+              onInteract={this._setMapFocus.bind(this, true)} />
+            <InfoPanel demo={_tab} hasFocus={!mapFocus}
+              onInteract={this._setMapFocus.bind(this, false)} />
           </div>
-        )
-      } else if (typeof tab === 'string') {
-        child = <MarkdownPage content={contents[tab]} />;
+        );
+      } else if (typeof _tab === 'string') {
+        child = <MarkdownPage content={contents[_tab]} />;
       } else {
-        child = React.createElement(tab);
+        child = React.createElement(_tab);
       }
 
       return (
-        <div key={tabName} className={`tab ${tabName === activeTab ? 'active' : ''}`}>
-          { child }
+        <div key={_tabName} className={`tab ${tabName === activeTab ? 'active' : ''}`}>
+          {child}
         </div>
       );
     });
@@ -111,20 +113,19 @@ class Page extends Component {
 
     return (
       <ul className="tabs">
-        {
-          activeTab === 'demo' &&
-          <li><span className="bg-black tip">Hold down shift key to rotate map</span></li>
 
-        }
-        {
-          Object.keys(tabs).map(tabName => (
-            <li key={tabName} className={`${tabName === activeTab ? 'active' : ''}`}>
-              <button onClick={ this._setActiveTab.bind(this, tabName) }>
-                { tabName }
-              </button>
-            </li>
-          ))
-        }
+        {activeTab === 'demo' && (
+          <li><span className="bg-black tip">Hold down shift key to rotate map</span></li>
+        )}
+
+        {Object.keys(tabs).map(tabName => (
+          <li key={tabName} className={`${tabName === activeTab ? 'active' : ''}`}>
+            <button onClick={this._setActiveTab.bind(this, tabName)}>
+              {tabName}
+            </button>
+          </li>
+        ))}
+
       </ul>
     );
   }
@@ -148,7 +149,7 @@ Page.contextTypes = {
 function mapStateToProps(state) {
   return {
     contents: state.contents
-  }
+  };
 }
 
 export default connect(mapStateToProps, {loadContent, updateMap})(Page);

@@ -14,27 +14,23 @@ const inFlowColors = [
   [65, 182, 196],
   [29, 145, 192],
   [34, 94, 168],
-  [12, 44, 132],
+  [12, 44, 132]
 ];
 
 const outFlowColors = [
-  [255,255,178],
-  [254,217,118],
-  [254,178,76],
-  [253,141,60],
-  [252,78,42],
-  [227,26,28],
-  [177,0,38],
+  [255, 255, 178],
+  [254, 217, 118],
+  [254, 178, 76],
+  [253, 141, 60],
+  [252, 78, 42],
+  [227, 26, 28],
+  [177, 0, 38]
 ];
 
 const colorRamp = inFlowColors.slice().reverse().concat(outFlowColors)
   .map(color => `rgb(${color.join(',')})`);
 
 export default class ArcDemo extends Component {
-  constructor(props) {
-    super(props);
-    this.state = this._updateFlows(props);
-  }
 
   static get data() {
     return {
@@ -69,8 +65,10 @@ export default class ArcDemo extends Component {
 
         <div className="layout">
           {colorRamp.map((c, i) => (
-              <div key={i} className="legend" style={{background: c, width: `${100 / colorRamp.length}%`}} />
-            ))}
+            <div key={i}
+              className="legend"
+              style={{background: c, width: `${100 / colorRamp.length}%`}} />
+          ))}
         </div>
         <p className="layout">
           <span className="col-1-2">Net gain</span>
@@ -91,6 +89,11 @@ export default class ArcDemo extends Component {
     );
   }
 
+  constructor(props) {
+    super(props);
+    this.state = this._updateFlows(props);
+  }
+
   componentWillReceiveProps(nextProps) {
     const {data} = nextProps;
     if (data && data !== this.props.data) {
@@ -108,16 +111,14 @@ export default class ArcDemo extends Component {
     selectedFeature = selectedFeature || features[362];
 
     const {flows, centroid, name} = selectedFeature.properties;
-    const arcs = [];
-
-    for (let toId in flows) {
+    const arcs = Object.keys(flows).reduce((acc, toId) => {
       const f = features[toId];
-      arcs.push({
+      return [...acc, {
         source: centroid,
         target: f.properties.centroid,
         value: flows[toId]
-      });
-    }
+      }];
+    }, []);
 
     const scale = scaleQuantile()
       .domain(arcs.map(a => Math.abs(a.value)))
@@ -146,7 +147,7 @@ export default class ArcDemo extends Component {
 
   render() {
     const {viewport, params, data} = this.props;
-    const {scale, arcs, selectedFeature} = this.state;
+    const {arcs, selectedFeature} = this.state;
 
     if (!data) {
       return null;

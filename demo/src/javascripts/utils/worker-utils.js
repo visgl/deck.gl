@@ -1,7 +1,9 @@
+/* global Worker */
+
 const workers = {};
 
 export function StreamParser(workerUrl, callback) {
-  var parsedLength = 0;
+  let parsedLength = 0;
 
   if (workers[workerUrl]) {
     workers[workerUrl].terminate();
@@ -13,20 +15,15 @@ export function StreamParser(workerUrl, callback) {
 
   workerInstance.onmessage = e => {
     const {action, data, meta} = e.data;
-    switch(action) {
-    case 'add':
-      if (data && data.length) {
-        streamedData = streamedData.concat(data);
-        callback(streamedData, meta);
-      }
-      break;
-    case 'end':
+    if (action === 'end') {
       workerInstance.terminate();
-      break;
+    } else if (action === 'add' && data && data.length) {
+      streamedData = streamedData.concat(data);
+      callback(streamedData, meta);
     }
   };
 
-  this.onProgress = function(e) {
+  this.onProgress = e => {
     const {responseText} = e.target;
     const lineBreak = responseText.lastIndexOf('\n') + 1;
 
@@ -34,10 +31,11 @@ export function StreamParser(workerUrl, callback) {
       event: 'progress',
       text: responseText.slice(parsedLength, lineBreak)
     });
+
     parsedLength = lineBreak;
   };
 
-  this.onLoad = function(target) {
+  this.onLoad = target => {
     const {responseText} = target;
     workerInstance.postMessage({
       event: 'load',

@@ -6,7 +6,6 @@ import MapGL from 'react-map-gl';
 
 import Demos from './demos';
 import {updateMap, updateMeta, loadData, useParams} from '../actions/app-actions';
-import {MAPBOX_STYLES} from '../constants/defaults';
 import MAPBOX_ACCESS_TOKEN from '../constants/mapbox-token';
 import ViewportAnimation from '../utils/map-utils';
 
@@ -24,12 +23,11 @@ class Map extends Component {
   }
 
   _loadDemo(demo, useTransition) {
-    const {loadData, useParams, updateMap} = this.props;
     const DemoComponent = Demos[demo];
 
     if (DemoComponent) {
-      loadData(demo, DemoComponent.data);
-      useParams(DemoComponent.parameters);
+      this.props.loadData(demo, DemoComponent.data);
+      this.props.useParams(DemoComponent.parameters);
 
       if (useTransition) {
         const {viewport} = this.props;
@@ -37,8 +35,8 @@ class Map extends Component {
         .easing(ViewportAnimation.Easing.Exponential.Out)
         .start();
       } else {
-        updateMap(DemoComponent.viewport);
-      }      
+        this.props.updateMap(DemoComponent.viewport);
+      }
     }
   }
 
@@ -49,7 +47,7 @@ class Map extends Component {
   }
 
   render() {
-    const {viewport, demo, params, owner, data, updateMeta, isInteractive} = this.props;
+    const {viewport, demo, params, owner, data, isInteractive} = this.props;
     const DemoComponent = Demos[demo];
 
     if (!DemoComponent) {
@@ -60,29 +58,30 @@ class Map extends Component {
       <MapGL
         mapboxApiAccessToken={MAPBOX_ACCESS_TOKEN}
         perspectiveEnabled={true}
-        { ...viewport }
-        onChangeViewport={ isInteractive ? this._onUpdateMap : undefined }>
+        {...viewport}
+        onChangeViewport={isInteractive ? this._onUpdateMap : undefined}>
 
         <DemoComponent ref="demo" viewport={viewport} params={params}
-          onStateChange={updateMeta}
+          onStateChange={this.props.updateMeta}
           data={owner === demo ? data : null} />
 
       </MapGL>
-    )
+    );
   }
 
 }
 
-function mapStateToProps(state) {
-  return {
-    viewport: state.viewport, 
-    ...state.vis
-  }
-}
+const mapStateToProps = state => ({
+  viewport: state.viewport,
+  ...state.vis
+});
 
 Map.defaultProps = {
   onInteract: () => {},
   isInteractive: true
 };
 
-export default connect(mapStateToProps, {updateMap, updateMeta, loadData, useParams})(Map);
+export default connect(
+  mapStateToProps,
+  {updateMap, updateMeta, loadData, useParams}
+)(Map);
