@@ -26,7 +26,6 @@
     "publish-prod": "npm run build && npm run test-fast && npm publish",
     "publish-beta": "npm run build && npm run test-fast && npm publish --tag beta",
     "test": "npm run lint && npm run test-node",
-    "test-fast": "npm run lint && node test/node.js | faucet",
     "test-node": "npm run build && node test/node.js",
     "test-browser": "webpack-dev-server --config webpack.config.test-browser.js --progress --hot --open",
     "test-fp64": "(cd test/fp64-test && webpack-dev-server --config webpack.config.test-fp64.js --progress --hot --open)",
@@ -34,9 +33,7 @@
   },
   "dependencies": {
     "earcut": "^2.0.6",
-    "geojson-normalize": "0.0.1",
     "gl-matrix": "^2.3.2",
-    "lodash.flattendeep": "^4.4.0",
     "viewport-mercator-project": "3.0.0-beta4"
   },
   "devDependencies": {
@@ -50,8 +47,7 @@
     "eslint-plugin-react": "~6.7.0",
     "faucet": "0.0.1",
     "gl": "^4.0.3",
-    "immutable": "^3.7.5",
-    "jsdom": "^9.9.1",
+    "immutable": "^3.8.1",
     "luma.gl": "3.0.0-alpha.3",
     "module-alias": "^2.0.0",
     "pre-commit": "^1.2.2",
@@ -59,9 +55,7 @@
     "react": "^15.4.0",
     "react-addons-test-utils": "^15.4.2",
     "react-dom": "^15.4.0",
-    "react-map-gl": "^1.7.2",
     "reify": "^0.4.4",
-    "sinon": "^1.17.7",
     "tap-browser-color": "^0.1.2",
     "tape": "^4.5.1",
     "tape-catch": "^1.0.4",

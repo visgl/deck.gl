@@ -1,6 +1,6 @@
 import test from 'tape-catch';
 import {getUniformsFromViewport} from 'deck.gl/lib/viewport-uniforms';
-import {Viewport, WebMercatorViewport} from 'viewport-mercator-project';
+import {Viewport, WebMercatorViewport} from 'deck.gl/lib/viewports';
 
 const TEST_DATA = {
   mapState: {
