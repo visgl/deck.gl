@@ -111,18 +111,20 @@ export default class ArcDemo extends Component {
     selectedFeature = selectedFeature || features[362];
 
     const {flows, centroid, name} = selectedFeature.properties;
-    const arcs = Object.keys(flows).reduce((acc, toId) => {
+
+    const arcs = Object.keys(flows).map((acc, toId) => {
       const f = features[toId];
-      return [...acc, {
+      return {
         source: centroid,
         target: f.properties.centroid,
         value: flows[toId]
-      }];
-    }, []);
+      };
+    });
 
     const scale = scaleQuantile()
       .domain(arcs.map(a => Math.abs(a.value)))
       .range(inFlowColors.map((c, i) => i));
+
     arcs.forEach(a => {
       a.gain = Math.sign(a.value);
       a.quantile = scale(Math.abs(a.value));

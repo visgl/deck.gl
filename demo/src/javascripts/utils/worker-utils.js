@@ -19,7 +19,7 @@ export function StreamParser(workerUrl, callback) {
       workerInstance.terminate();
     } else if (action === 'add' && data && data.length) {
       streamedData = streamedData.concat(data);
-      callback(streamedData, meta);
+      callback(streamedData, meta); // eslint-disable-line callback-return
     }
   };
 

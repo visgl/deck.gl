@@ -42,10 +42,14 @@ class Page extends Component {
       content = {content};
     }
 
-    const {...docs} = content;
-
     // grab text contents
-    Object.values(docs).forEach(src => {
+    Object.keys(content).forEach(key => {
+
+      if (key === 'demo') {
+        return;
+      }
+
+      const src = content[key];
       if (typeof src === 'string') {
         this.props.loadContent(src);
       }
@@ -79,27 +83,27 @@ class Page extends Component {
     const {tabs, mapFocus} = this.state;
     const activeTab = location.query.tab || Object.keys(tabs)[0];
 
-    return Object.keys(tabs).map(_tabName => {
-      const _tab = tabs[_tabName];
+    return Object.keys(tabs).map(selectedTabName => {
+      const selectedTab = tabs[selectedTabName];
       let child;
 
-      if (_tabName === 'demo') {
+      if (selectedTabName === 'demo') {
         child = (
           <div>
-            <Map demo={_tab}
+            <Map demo={selectedTab}
               onInteract={this._setMapFocus.bind(this, true)} />
-            <InfoPanel demo={_tab} hasFocus={!mapFocus}
+            <InfoPanel demo={selectedTab} hasFocus={!mapFocus}
               onInteract={this._setMapFocus.bind(this, false)} />
           </div>
         );
-      } else if (typeof _tab === 'string') {
-        child = <MarkdownPage content={contents[_tab]} />;
+      } else if (typeof selectedTab === 'string') {
+        child = <MarkdownPage content={contents[selectedTabName]} />;
       } else {
-        child = React.createElement(_tab);
+        child = React.createElement(selectedTab);
       }
 
       return (
-        <div key={_tabName} className={`tab ${tabName === activeTab ? 'active' : ''}`}>
+        <div key={selectedTabName} className={`tab ${tabName === activeTab ? 'active' : ''}`}>
           {child}
         </div>
       );
