@@ -119,7 +119,7 @@ export default class Viewport {
    * @param {Object} opts.topLeft=true - Whether projected coords are top left
    * @return {Array} - [x, y] or [x, y, z] in top left coords
    */
-  project(xyz, {topLeft = false} = {}) {
+  project(xyz, {topLeft = true} = {}) {
     const Z = xyz[2] || 0;
     // console.error('projecting non-linear', xyz);
     const [X, Y] = this.projectFlat(xyz);
@@ -144,7 +144,7 @@ export default class Viewport {
    * @param {Array} xyz -
    * @return {Array} - [lng, lat, Z] or [X, Y, Z]
    */
-  unproject(xyz, {topLeft = false} = {}) {
+  unproject(xyz, {topLeft = true} = {}) {
     // console.error('unprojecting linear', xyz);
     const [x = 0, y = 0, z = 0] = xyz;
     // const y2 = topLeft ? this.height - 1 - y : y;
