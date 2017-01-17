@@ -1,65 +1,86 @@
+// NOTE: To use this example standalone (outside of deck.gl repo)
+// delete the local development overrides at the bottom of this file
 const {resolve} = require('path');
 const webpack = require('webpack');
 
 module.exports = {
+  // bundle app.js and everything it imports, recursively.
   entry: {
     app: resolve('./app.js')
   },
 
+  // inline source maps seem to work best
   devtool: '#inline-source-map',
 
+  // suppress warnings about bundle size
   devServer: {stats: {warnings: false}},
 
   resolve: {
     alias: {
-      // mapbox-gl config
-      // Per mapbox-gl-js README for non-browserify bundlers
-      'mapbox-gl$': resolve('./node_modules/mapbox-gl/dist/mapbox-gl.js'),
-      // 'gl-matrix': resolve('./node_modules/gl-matrix/dist/gl-matrix.js'),
-      // Work against base library
-      'deck.gl': resolve('../../src'),
-      // // Debugging vpm
-      // 'viewport-mercator-project': resolve('../src/lib/viewports'),
-      // Using our dependencies
-      'luma.gl': resolve('./node_modules/luma.gl'),
-      react: resolve('./node_modules/react')
+      // From mapbox-gl-js README. Unfortunately this is required
+      // for non-browserify bundlers (e.g. webpack):
+      'mapbox-gl$': resolve('./node_modules/mapbox-gl/dist/mapbox-gl.js')
     }
   },
 
   module: {
     rules: [
       {
-        // Compile ES2015 using buble
+        // Transpile to ES5 using buble
+        // Mainly needed if your apps want to use JSX (or support old browsers)
         test: /\.js$/,
         loader: 'buble-loader',
-        exclude: [/node_modules/, /dist/],
+        exclude: [/node_modules/],
         options: {
-          objectAssign: 'Object.assign',
+          objectAssign: 'Object.assign', // May need polyfill on old browsers
           transforms: {
-            dangerousForOf: true,
-            modules: false
+            modules: false,      // Webpack will take care of import/exports
+            dangerousForOf: true // Use for/of in spite of limitations
           }
         }
       },
       {
+        // The example has some JSON data
         test: /\.json$/,
-        loader: 'json-loader'
-      },
+        loader: 'json-loader',
+        exclude: [/node_modules/]
+      }
+    ]
+  },
+
+  // Optional: Enables reading mapbox token from environment variable
+  plugins: [
+    new webpack.EnvironmentPlugin(['MAPBOX_ACCESS_TOKEN', 'MapboxAccessToken'])
+  ]
+};
+
+// BEGIN DELETE THESE LINES WHEN RUNNING THIS EXAMPLE STANDALONE
+
+// Support for hot reloading changes to the deck.gl library:
+const LOCAL_DEVELOPMENT_CONFIG = {
+  resolve: {
+    alias: {
+      // Imports the deck.gl library from the src directory in this repo
+      'deck.gl': resolve('../../src'),
+      // Important: ensure shared dependencies come from this app's node_modules
+      'luma.gl': resolve('./node_modules/luma.gl'),
+      react: resolve('./node_modules/react')
+    }
+  },
+  module: {
+    rules: [
       {
-        // Mapbox has some unresolved fs calls
+        // Needed to inline deck.gl GLSL shaders
         include: [resolve('../../src')],
         loader: 'transform-loader',
         options: 'brfs-babel'
       }
     ]
-  },
-
-  node: {
-    fs: 'empty'
-  },
-
-  // Allow setting mapbox token using environment variables
-  plugins: [
-    new webpack.EnvironmentPlugin(['MAPBOX_ACCESS_TOKEN', 'MapboxAccessToken'])
-  ]
+  }
 };
+
+Object.assign(module.exports.resolve.alias, LOCAL_DEVELOPMENT_CONFIG.resolve.alias);
+module.exports.module.rules =
+  module.exports.module.rules.concat(LOCAL_DEVELOPMENT_CONFIG.module.rules);
+
+// END DELETE THESE LINES WHEN RUNNING STANDALONE
