@@ -23,12 +23,6 @@ import {fp64ify} from '../../../lib/utils/fp64';
 import {readFileSync} from 'fs';
 import {join} from 'path';
 
-const DEFAULT_COLOR = [0, 0, 255, 255];
-
-const defaultGetSourcePosition = x => x.sourcePosition;
-const defaultGetTargetPosition = x => x.targetPosition;
-const defaultGetColor = x => x.color;
-
 export default class ArcLayer64 extends ArcLayer {
 
   initializeState() {
@@ -44,7 +38,7 @@ export default class ArcLayer64 extends ArcLayer {
       instanceTargetPositions64: {
         size: 4,
         update: this.calculateInstanceTargetPositions64
-      },
+      }
       // Reuse from base class
       // instanceSourceColors: {
       //   size: 4,
@@ -61,7 +55,7 @@ export default class ArcLayer64 extends ArcLayer {
 
   getShaders() {
     return {
-      vs: readFileSync(join(__dirname, './arc-layer-vertex.glsl'), 'utf8'),
+      vs: readFileSync(join(__dirname, './arc-layer-64-vertex.glsl'), 'utf8'),
       fs: super.getShaders().fs,
       fp64: true,
       project64: true
