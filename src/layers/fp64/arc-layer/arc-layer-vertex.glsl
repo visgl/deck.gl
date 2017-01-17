@@ -26,8 +26,8 @@ attribute vec3 positions;
 attribute vec4 instanceSourceColors;
 attribute vec4 instanceTargetColors;
 attribute vec3 instancePickingColors;
-attribute vec4 instanceSourcePositionsFP64;
-attribute vec4 instanceTargetPositionsFP64;
+attribute vec4 instanceSourcePositions64;
+attribute vec4 instanceTargetPositions64;
 
 uniform float opacity;
 uniform float renderPickingBuffer;
@@ -48,9 +48,9 @@ vec2 paraboloid_fp64(vec2 source[2], vec2 target[2], float ratio) {
 
 void main(void) {
   vec2 projectedSourceCoord[2];
-  project_position_fp64(instanceSourcePositionsFP64, projectedSourceCoord);
+  project_position_fp64(instanceSourcePositions64, projectedSourceCoord);
   vec2 projectedTargetCoord[2];
-  project_position_fp64(instanceTargetPositionsFP64, projectedTargetCoord);
+  project_position_fp64(instanceTargetPositions64, projectedTargetCoord);
 
   float segmentRatio = smoothstep(0.0, 1.0, positions.x / N);
 
