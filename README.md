@@ -59,7 +59,7 @@ Either upgrade to a newest version, or install something like [nvm](https://gith
 ## Contributing
 
 PRs and bug reports are welcome. Note that you once your PR is
-about to be merged, your will be asked to register as a contributor
+about to be merged, you will be asked to register as a contributor
 by filling in a short form.
 
 ## Data sources
