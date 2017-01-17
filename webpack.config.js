@@ -2,13 +2,18 @@ const {resolve} = require('path');
 // const webpack = require('webpack');
 
 module.exports = {
-  // Bundle the transpiled code in dist
+  // Bundle the source code
   entry: {
     lib: resolve('./src/index.js')
   },
 
-  // Generate a bundle in dist folder
+  // Silence warnings about big bundles
+  stats: {
+    warnings: false
+  },
+
   output: {
+    // Generate the bundle in dist folder
     path: resolve('./dist'),
     filename: '[name]-bundle.js',
     library: 'deck.gl',
@@ -19,10 +24,6 @@ module.exports = {
   externals: [
     /^[a-z\.\-0-9]+$/
   ],
-
-  stats: {
-    warnings: false
-  },
 
   module: {
     rules: [
@@ -53,6 +54,7 @@ module.exports = {
   },
 
   plugins: [
+    // leave minification to app
     // new webpack.optimize.UglifyJsPlugin({comments: false})
   ]
 };

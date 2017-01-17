@@ -1,6 +1,5 @@
-// This is a Webpack 2 configuration file
+// Webpack 2 configuration file for running tests in browser
 const {resolve} = require('path');
-// const webpack = require('webpack');
 
 module.exports = {
   devServer: {
