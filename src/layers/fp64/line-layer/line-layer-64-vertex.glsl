@@ -21,8 +21,8 @@
 #define SHADER_NAME line-layer-64-vertex-shader
 
 attribute vec3 positions;
-attribute vec4 instanceSourcePositionsFP64;
-attribute vec4 instanceTargetPositionsFP64;
+attribute vec4 instanceSourcePositions64;
+attribute vec4 instanceTargetPositions64;
 attribute vec2 instanceElevations;
 attribute vec4 instanceColors;
 attribute vec3 instancePickingColors;
@@ -35,9 +35,9 @@ varying vec4 vColor;
 void main(void) {
   // Position
   vec2 projectedSourceCoord[2];
-  project_position_fp64(instanceSourcePositionsFP64, projectedSourceCoord);
+  project_position_fp64(instanceSourcePositions64, projectedSourceCoord);
   vec2 projectedTargetCoord[2];
-  project_position_fp64(instanceTargetPositionsFP64, projectedTargetCoord);
+  project_position_fp64(instanceTargetPositions64, projectedTargetCoord);
 
   // linear interpolation of source & target to pick right coord
   float segmentIndex = positions.x;

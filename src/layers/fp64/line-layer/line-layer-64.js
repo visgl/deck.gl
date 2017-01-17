@@ -18,94 +18,40 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {Layer} from '../../../lib';
-import {assembleShaders} from '../../../shader-utils';
+import LineLayer from '../../core/line-layer';
 import {fp64ify} from '../../../lib/utils/fp64';
-import {GL, Model, Geometry} from 'luma.gl';
 import {readFileSync} from 'fs';
 import {join} from 'path';
 
-const DEFAULT_COLOR = [0, 255, 0, 255];
-
-const defaultGetSourcePosition = x => x.sourcePosition;
-const defaultGetTargetPosition = x => x.targetPosition;
-const defaultGetColor = x => x.color || DEFAULT_COLOR;
-
-const defaultProps = {
-  getSourcePosition: defaultGetSourcePosition,
-  getTargetPosition: defaultGetTargetPosition,
-  getColor: defaultGetColor,
-  strokeWidth: 1
-};
-
-export default class LineLayer64 extends Layer {
-  constructor(props) {
-    super(Object.assign({}, defaultProps, props));
-  }
+export default class LineLayer64 extends LineLayer {
 
   initializeState() {
-    const {gl} = this.context;
-    this.setState({model: this.createModel(gl)});
+    super.initializeState();
 
     const {attributeManager} = this.state;
     attributeManager.addInstanced({
-      instanceSourcePositionsFP64: {
+      instanceSourcePositions64: {
         size: 4,
         update: this.calculateInstanceSourcePositions
       },
-      instanceTargetPositionsFP64: {
+      instanceTargetPositions64: {
         size: 4,
         update: this.calculateInstanceTargetPositions
       },
       instanceElevations: {
         size: 2,
         update: this.calculateInstanceElevations
-      },
-      instanceColors: {
-        size: 4,
-        type: GL.UNSIGNED_BYTE,
-        update: this.calculateInstanceColors
       }
     });
   }
 
-  draw({uniforms}) {
-    const {gl} = this.context;
-    const lineWidth = this.screenToDevicePixels(this.props.strokeWidth);
-    gl.lineWidth(lineWidth);
-    this.state.model.render(uniforms);
-    // Setting line width back to 1 is here to workaround a Google Chrome bug
-    // gl.clear() and gl.isEnabled() will return GL_INVALID_VALUE even with
-    // correct parameter
-    // This is not happening on Safari and Firefox
-    gl.lineWidth(1.0);
-  }
-
   getShaders() {
     return {
-      vs: readFileSync(join(__dirname, './line-layer-vertex.glsl'), 'utf8'),
-      fs: readFileSync(join(__dirname, './line-layer-fragment.glsl'), 'utf8'),
+      vs: readFileSync(join(__dirname, './line-layer-64-vertex.glsl'), 'utf8'),
+      fs: super.getShaders().fs,
       fp64: true,
       project64: true
     };
-  }
-
-  createModel(gl) {
-    const positions = [0, 0, 0, 1, 1, 1];
-
-    const shaders = assembleShaders(gl, this.getShaders());
-
-    return new Model({
-      gl,
-      id: this.props.id,
-      vs: shaders.vs,
-      fs: shaders.fs,
-      geometry: new Geometry({
-        drawMode: GL.LINE_STRIP,
-        positions: new Float32Array(positions)
-      }),
-      isInstanced: true
-    });
   }
 
   calculateInstanceSourcePositions(attribute) {
@@ -141,20 +87,6 @@ export default class LineLayer64 extends Layer {
       const targetPosition = getTargetPosition(object);
       value[i + 0] = sourcePosition[2] || 0;
       value[i + 1] = targetPosition[2] || 0;
-      i += size;
-    }
-  }
-
-  calculateInstanceColors(attribute) {
-    const {data, getColor} = this.props;
-    const {value, size} = attribute;
-    let i = 0;
-    for (const object of data) {
-      const color = getColor(object);
-      value[i + 0] = color[0];
-      value[i + 1] = color[1];
-      value[i + 2] = color[2];
-      value[i + 3] = isNaN(color[3]) ? DEFAULT_COLOR[3] : color[3];
       i += size;
     }
   }
