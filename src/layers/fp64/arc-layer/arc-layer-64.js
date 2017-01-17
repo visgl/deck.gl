@@ -18,10 +18,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {Layer} from '../../../lib';
-import {assembleShaders} from '../../../shader-utils';
+import ArcLayer from '../../core/arc-layer';
 import {fp64ify} from '../../../lib/utils/fp64';
-import {GL, Model, Geometry} from 'luma.gl';
 import {readFileSync} from 'fs';
 import {join} from 'path';
 
@@ -31,91 +29,46 @@ const defaultGetSourcePosition = x => x.sourcePosition;
 const defaultGetTargetPosition = x => x.targetPosition;
 const defaultGetColor = x => x.color;
 
-const defaultProps = {
-  getSourcePosition: defaultGetSourcePosition,
-  getTargetPosition: defaultGetTargetPosition,
-  getSourceColor: defaultGetColor,
-  getTargetColor: defaultGetColor,
-  strokeWidth: 1
-};
-
-export default class ArcLayer64 extends Layer {
-  constructor(props) {
-    super(Object.assign({}, defaultProps, props));
-  }
+export default class ArcLayer64 extends ArcLayer {
 
   initializeState() {
-    const {gl} = this.context;
+    super.initializeState();
+
     const {attributeManager} = this.state;
 
     attributeManager.addInstanced({
-      instanceSourcePositionsFP64: {
+      instanceSourcePositions64: {
         size: 4,
-        update: this.calculateInstanceSourcePositions
+        update: this.calculateInstanceSourcePositions64
       },
-      instanceTargetPositionsFP64: {
+      instanceTargetPositions64: {
         size: 4,
-        update: this.calculateInstanceTargetPositions
+        update: this.calculateInstanceTargetPositions64
       },
-      instanceSourceColors: {
-        size: 4,
-        type: GL.UNSIGNED_BYTE,
-        update: this.calculateInstanceSourceColors
-      },
-      instanceTargetColors: {
-        size: 4,
-        type: GL.UNSIGNED_BYTE,
-        update: this.calculateInstanceTargetColors
-      }
+      // Reuse from base class
+      // instanceSourceColors: {
+      //   size: 4,
+      //   type: GL.UNSIGNED_BYTE,
+      //   update: this.calculateInstanceSourceColors
+      // },
+      // instanceTargetColors: {
+      //   size: 4,
+      //   type: GL.UNSIGNED_BYTE,
+      //   update: this.calculateInstanceTargetColors
+      // }
     });
-
-    this.setState({model: this.createModel(gl)});
-  }
-
-  draw({uniforms}) {
-    const {gl} = this.context;
-    const lineWidth = this.screenToDevicePixels(this.props.strokeWidth);
-    gl.lineWidth(lineWidth);
-    this.state.model.render(uniforms);
-    // Setting line width back to 1 is here to workaround a Google Chrome bug
-    // gl.clear() and gl.isEnabled() will return GL_INVALID_VALUE even with
-    // correct parameter
-    // This is not happening on Safari and Firefox
-    gl.lineWidth(1.0);
   }
 
   getShaders() {
     return {
       vs: readFileSync(join(__dirname, './arc-layer-vertex.glsl'), 'utf8'),
-      fs: readFileSync(join(__dirname, './arc-layer-fragment.glsl'), 'utf8'),
+      fs: super.getShaders().fs,
       fp64: true,
       project64: true
     };
   }
 
-  createModel(gl) {
-    let positions = [];
-    const NUM_SEGMENTS = 50;
-    for (let i = 0; i < NUM_SEGMENTS; i++) {
-      positions = [...positions, i, i, i];
-    }
-
-    const shaders = assembleShaders(gl, this.getShaders());
-
-    return new Model({
-      gl,
-      id: this.props.id,
-      vs: shaders.vs,
-      fs: shaders.fs,
-      geometry: new Geometry({
-        drawMode: GL.LINE_STRIP,
-        positions: new Float32Array(positions)
-      }),
-      isInstanced: true
-    });
-  }
-
-  calculateInstanceSourcePositions(attribute) {
+  calculateInstanceSourcePositions64(attribute) {
     const {data, getSourcePosition} = this.props;
     const {value, size} = attribute;
     let i = 0;
@@ -127,7 +80,7 @@ export default class ArcLayer64 extends Layer {
     }
   }
 
-  calculateInstanceTargetPositions(attribute) {
+  calculateInstanceTargetPositions64(attribute) {
     const {data, getTargetPosition} = this.props;
     const {value, size} = attribute;
     let i = 0;
@@ -139,33 +92,6 @@ export default class ArcLayer64 extends Layer {
     }
   }
 
-  calculateInstanceSourceColors(attribute) {
-    const {data, getSourceColor} = this.props;
-    const {value, size} = attribute;
-    let i = 0;
-    for (const object of data) {
-      const color = getSourceColor(object) || DEFAULT_COLOR;
-      value[i + 0] = color[0];
-      value[i + 1] = color[1];
-      value[i + 2] = color[2];
-      value[i + 3] = isNaN(color[3]) ? DEFAULT_COLOR[3] : color[3];
-      i += size;
-    }
-  }
-
-  calculateInstanceTargetColors(attribute) {
-    const {data, getTargetColor} = this.props;
-    const {value, size} = attribute;
-    let i = 0;
-    for (const object of data) {
-      const color = getTargetColor(object) || DEFAULT_COLOR;
-      value[i + 0] = color[0];
-      value[i + 1] = color[1];
-      value[i + 2] = color[2];
-      value[i + 3] = isNaN(color[3]) ? DEFAULT_COLOR[3] : color[3];
-      i += size;
-    }
-  }
 }
 
 ArcLayer64.layerName = 'ArcLayer64';
