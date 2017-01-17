@@ -49,7 +49,7 @@
     "eslint-config-uber-jsx": "^3.0.0",
     "eslint-plugin-react": "~6.7.0",
     "faucet": "0.0.1",
-    "gl": "^4.0.2",
+    "gl": "^4.0.3",
     "immutable": "^3.7.5",
     "jsdom": "^9.9.1",
     "luma.gl": "3.0.0-alpha.3",
