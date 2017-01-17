@@ -21,8 +21,6 @@
 import ChoroplethLayer from '../../core/choropleth-layer';
 import {fp64ify} from '../../../lib/utils/fp64';
 import flattenDeep from 'lodash.flattendeep';
-import normalize from 'geojson-normalize';
-import earcut from 'earcut';
 import {readFileSync} from 'fs';
 import {join} from 'path';
 
@@ -33,13 +31,13 @@ export default class ChoroplethLayer64 extends ChoroplethLayer {
 
     this.state.attributeManager.addDynamic({
       positions64: {size: 4, update: this.calculatePositions64},
-      heights64: {size: 2, update: this.calculateHeights64},
+      heights64: {size: 2, update: this.calculateHeights64}
     });
   }
 
   getShaders() {
     return {
-      vs: readFileSync(join(__dirname, './choropleth-layer-vertex.glsl'), 'utf8'),
+      vs: readFileSync(join(__dirname, './choropleth-layer-64-vertex.glsl'), 'utf8'),
       fs: super.getShaders().fs,
       fp64: true,
       project64: true
