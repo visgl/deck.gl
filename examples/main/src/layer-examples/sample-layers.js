@@ -1,9 +1,9 @@
-import {
-  EnhancedChoroplethLayer,
-  TripsLayer
-} from '../../../sample-layers';
+/* eslint-disable max-len */
+import * as mainDataSamples from '../data-samples';
+import * as extraDataSamples from '../../../sample-layers';
+const dataSamples = Object.assign({}, mainDataSamples, extraDataSamples);
 
-import * as dataSamples from '../data-samples';
+import EnhancedChoroplethLayer from '../../../sample-layers/enhanced-choropleth-layer/enhanced-choropleth-layer';
 
 const EnhancedChoroplethLayerExample = {
   layer: EnhancedChoroplethLayer,
@@ -14,6 +14,8 @@ const EnhancedChoroplethLayerExample = {
     strokeWidth: 5
   }
 };
+
+import TripsLayer from '../../../sample-layers/trips-layer/trips-layer';
 
 const TripsLayerExample = {
   layer: TripsLayer,
@@ -32,10 +34,26 @@ const TripsLayerExample = {
   }
 };
 
+import S2Layer from '../../../sample-layers/s2-layer/s2-layer';
+
+const S2LayerExample = {
+  layer: S2Layer,
+  props: {
+    data: dataSamples.s2cells,
+    opacity: 0.6,
+    getS2Token: f => f.token,
+    getPath: f => f.path,
+    getFillColor: f => [f.value * 256, (1 - f.value) * 256, (1 - f.value) * 128],
+    getStrokeWidth: f => 10,
+    pickable: true
+  }
+};
+
 /* eslint-disable quote-props */
 export default {
   'Sample Layers': {
     'EnhancedChoroplethLayer': EnhancedChoroplethLayerExample,
-    'TripsLayer': TripsLayerExample
+    'TripsLayer': TripsLayerExample,
+    'S2Layer': S2LayerExample
   }
 };
