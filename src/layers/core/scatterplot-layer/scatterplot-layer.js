@@ -19,8 +19,9 @@
 // THE SOFTWARE.
 
 import {Layer} from '../../../lib';
-import {assembleShaders} from '../../../shader-utils';
-import {GL, Model, Geometry} from 'luma.gl';
+import {assembleShaders, lightingSetUniforms} from '../../../shader-utils';
+import CircleGeometry from './circle';
+import {GL, Model, Geometry, SphereGeometry} from 'luma.gl';
 import {readFileSync} from 'fs';
 import {join} from 'path';
 
@@ -39,7 +40,8 @@ const defaultProps = {
   radiusMinPixels: 0, //  min point radius in pixels
   radiusMaxPixels: Number.MAX_SAFE_INTEGER, // max point radius in pixels
   drawOutline: false,
-  strokeWidth: 1
+  strokeWidth: 1,
+  geometry: 'sphere'
 };
 
 export default class ScatterplotLayer extends Layer {
@@ -50,7 +52,8 @@ export default class ScatterplotLayer extends Layer {
   getShaders(id) {
     return {
       vs: readFileSync(join(__dirname, './scatterplot-layer-vertex.glsl'), 'utf8'),
-      fs: readFileSync(join(__dirname, './scatterplot-layer-fragment.glsl'), 'utf8')
+      fs: readFileSync(join(__dirname, './scatterplot-layer-fragment.glsl'), 'utf8'),
+      lighting: true
     };
   }
 
@@ -68,13 +71,14 @@ export default class ScatterplotLayer extends Layer {
     });
   }
 
-  updateState(evt) {
-    super.updateState(evt);
-    const {props, oldProps} = evt;
-    if (props.drawOutline !== oldProps.drawOutline) {
+  updateState({props, oldProps}) {
+    if (props.drawOutline !== oldProps.drawOutline && props.geometry === 'circle') {
+      // TODO - this may only work on circle geometries
+      // We should probably maintain two primitives to handle outlines
       this.state.model.geometry.drawMode =
         props.drawOutline ? GL.LINE_LOOP : GL.TRIANGLE_FAN;
     }
+    lightingSetUniforms(this, props);
   }
 
   draw({uniforms}) {
@@ -94,32 +98,27 @@ export default class ScatterplotLayer extends Layer {
   }
 
   _getModel(gl) {
-    const NUM_SEGMENTS = 16;
-    const positions = [];
-    for (let i = 0; i < NUM_SEGMENTS; i++) {
-      positions.push(
-        Math.cos(Math.PI * 2 * i / NUM_SEGMENTS),
-        Math.sin(Math.PI * 2 * i / NUM_SEGMENTS),
-        0
-      );
-    }
-    /* eslint-disable */
-
-
     const shaders = assembleShaders(gl, this.getShaders());
-
     return new Model({
       gl,
       id: this.props.id,
       vs: shaders.vs,
       fs: shaders.fs,
-      geometry: new Geometry({
-        drawMode: GL.TRIANGLE_FAN,
-        positions: new Float32Array(positions)
-      }),
+      geometry: this._getGeometry(),
       isInstanced: true
     });
-    return model;
+  }
+
+  // At the moment, geometry prop is only checked on layer creation
+  _getGeometry() {
+    switch (this.props.geometry) {
+    case 'circle': return new CircleGeometry();
+    case 'sphere': return new SphereGeometry();
+    default:
+      // allow app to pass any luma.gl Geometry instance
+      assert(geometry instanceof Geometry, 'invalid geometry prop');
+      return geometry;
+    }
   }
 
   calculateInstancePositions(attribute) {

@@ -12,6 +12,13 @@ import {
   LineLayer64
 } from 'deck.gl';
 
+// TODO - should point light location really be in lng/lat?
+const POINT_LIGHT_LOCATION = [
+  37.751537058389985,
+  -122.42694203247012,
+  1e4
+];
+
 import * as dataSamples from './data-samples';
 
 const ArcLayerExample = {
@@ -89,7 +96,8 @@ const ScatterplotLayerExample = {
     strokeWidth: 2,
     pickable: true,
     radiusMinPixels: 1,
-    radiusMaxPixels: 30
+    radiusMaxPixels: 30,
+    pointLightLocation: POINT_LIGHT_LOCATION
   }
 };
 
@@ -104,7 +112,8 @@ const ScatterplotLayerMetersExample = {
     getPosition: d => d,
     getColor: d => [0, 0, 255],
     opacity: 0.5,
-    pickable: true
+    pickable: true,
+    pointLightLocation: POINT_LIGHT_LOCATION
   }
 };
 
@@ -152,13 +161,7 @@ const ExtrudedChoroplethLayer64Example = {
     id: 'extrudedChoroplethLayer64',
     data: dataSamples.choropleths,
     getColor: f => [((f.properties.ZIP_CODE * 10) % 127) + 128, 0, 0],
-    pointLightLocation: [
-      // props.mapViewState.longitude,
-      // props.mapViewState.latitude,
-      37.751537058389985,
-      -122.42694203247012,
-      1e4
-    ],
+    pointLightLocation: POINT_LIGHT_LOCATION,
     opacity: 1.0,
     pickable: true
   }

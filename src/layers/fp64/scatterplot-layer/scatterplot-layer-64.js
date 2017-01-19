@@ -25,14 +25,13 @@ import {join} from 'path';
 
 export default class ScatterplotLayer64 extends ScatterplotLayer {
 
-  // Override the super class vertex shader
+  // Override the base layer's vertex shader and request 64 bit modules
   getShaders(id) {
-    return {
+    return Object.assign({}, super.getShaders(), {
       vs: readFileSync(join(__dirname, './scatterplot-layer-64-vertex.glsl'), 'utf8'),
-      fs: super.getShaders().fs,
       fp64: true,
       project64: true
-    };
+    });
   }
 
   initializeState() {
@@ -44,10 +43,11 @@ export default class ScatterplotLayer64 extends ScatterplotLayer {
     attributeManager.addInstanced({
       instancePositions64xy: {size: 4, update: this.calculateInstancePositions64xy},
       instancePositions64z: {size: 2, update: this.calculateInstancePositions64z}
-      // Reusing from base class
-      // instanceRadius: {size: 1, update: this.calculateInstanceRadius},
-      // instanceColors: {size: 4, type: GL.UNSIGNED_BYTE, update: this.calculateInstanceColors}
+      // Reusing from base class: instanceRadius, instanceColors
     });
+
+    // TODO - Delete (or disable) the 32 bit instancePositions attribute.
+    // For now it gets allocated/calculated even though it is not used by 64 bit layer.
   }
 
   calculateInstancePositions64xy(attribute) {
