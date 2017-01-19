@@ -22,6 +22,12 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ### deck.gl v3
 
+#### [3.1.2] - 2017-1-19
+
+- HOTFIX: Fixed some 64-bit math issue on some Nvidia GPUs (#286)
+- HOTFIX: Fixed an issue in scatterplot64 that NaN got passed to GPU (#287)
+- Disable blending when rendering to picking framebuffer (#288)
+
 #### [3.1.1] - 2016-12-1
 
 - FIX: ExtrudedChoroplethLayer64 - Now updates uniforms when props change
