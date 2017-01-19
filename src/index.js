@@ -23,7 +23,6 @@ export * from './shader-utils';
 
 // Core Layers
 export {default as ArcLayer} from './layers/core/arc-layer';
-export {default as ChoroplethLayer} from './layers/core/choropleth-layer';
 export {default as LineLayer} from './layers/core/line-layer';
 export {default as ScatterplotLayer} from './layers/core/scatterplot-layer';
 export {default as ScreenGridLayer} from './layers/core/screen-grid-layer';
@@ -31,9 +30,13 @@ export {default as ScreenGridLayer} from './layers/core/screen-grid-layer';
 // 64-bit Layers
 export {default as ScatterplotLayer64} from './layers/fp64/scatterplot-layer';
 export {default as ArcLayer64} from './layers/fp64/arc-layer';
-export {default as ChoroplethLayer64} from './layers/fp64/choropleth-layer';
-export {default as ExtrudedChoroplethLayer64} from './layers/fp64/extruded-choropleth-layer';
 export {default as LineLayer64} from './layers/fp64/line-layer';
+
+// Deprecated Layers
+export {default as ChoroplethLayer} from './layers/deprecated/choropleth-layer';
+export {default as ChoroplethLayer64} from './layers/deprecated/choropleth-layer-64';
+export {default as ExtrudedChoroplethLayer64}
+	from './layers/deprecated/extruded-choropleth-layer-64';
 
 // React exports
 export {default as autobind} from './react/autobind';
