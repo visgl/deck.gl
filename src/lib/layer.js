@@ -20,7 +20,7 @@
 /* global window */
 import {GL} from 'luma.gl';
 import AttributeManager from './attribute-manager';
-import {compareProps, log} from './utils';
+import {compareProps, log, count} from './utils';
 import assert from 'assert';
 
 /*
@@ -294,26 +294,9 @@ export default class Layer {
       return props.numInstances;
     }
 
+    // Use container library to get a count for any ES6 container or object
     const {data} = props;
-
-    // Check if ES6 collection "count" function is available
-    if (data && typeof data.count === 'function') {
-      return data.count();
-    }
-
-    // Check if ES6 collection "size" attribute is set
-    if (data && data.size !== undefined) {
-      return data.size;
-    }
-
-    // Check if array length attribute is set
-    // Note: checking this last since some ES6 collections (Immutable.js)
-    // emit profuse warnings when trying to access `length` attribute
-    if (data && data.length !== undefined) {
-      return data.length;
-    }
-
-    throw new Error('Could not deduce numInstances');
+    return count(data);
   }
 
   // LAYER MANAGER API

@@ -20,10 +20,9 @@
 
 import {Layer} from '../../../lib';
 import {assembleShaders} from '../../../shader-utils';
+import {flatten, normalizeGeojson} from '../../../lib/utils';
 import {GL, Model, Geometry} from 'luma.gl';
 import earcut from 'earcut';
-import flattenDeep from 'lodash.flattendeep';
-import normalize from 'geojson-normalize';
 import extrudePolyline from 'extrude-polyline';
 import {readFileSync} from 'fs';
 import {join} from 'path';
@@ -108,9 +107,8 @@ export default class EnhancedChoroplethLayer extends Layer {
   calculatePositions(attribute) {
     const {elevation} = this.props;
     const positions = this.props.drawContour ?
-      flattenDeep(this.state.meshes.map(mesh =>
-        mesh.positions.map(pos => [...pos, elevation]))) :
-      flattenDeep(this.state.groupedVertices);
+      flatten(this.state.meshes.map(mesh => mesh.positions.map(pos => [...pos, elevation]))) :
+      flatten(this.state.groupedVertices);
 
     attribute.value = new Float32Array(positions);
   }
@@ -137,12 +135,12 @@ export default class EnhancedChoroplethLayer extends Layer {
         )) :
       this.state.groupedVertices.map(
         (vertices, choroplethIndex) =>
-          earcut(flattenDeep(vertices), null, 3).map(
+          earcut(flatten(vertices), null, 3).map(
             index => index + offsets[choroplethIndex]
           )
       );
 
-    attribute.value = new Uint16Array(flattenDeep(indices));
+    attribute.value = new Uint16Array(flatten(indices));
     attribute.target = GL.ELEMENT_ARRAY_BUFFER;
     // attribute.isIndexed = true;
 
@@ -172,7 +170,7 @@ export default class EnhancedChoroplethLayer extends Layer {
         }
       );
 
-    attribute.value = new Float32Array(flattenDeep(colors));
+    attribute.value = new Float32Array(flatten(colors));
   }
 
   // Override the default picking colors calculation
@@ -192,12 +190,12 @@ export default class EnhancedChoroplethLayer extends Layer {
         )
       );
 
-    attribute.value = new Float32Array(flattenDeep(colors));
+    attribute.value = new Float32Array(flatten(colors));
   }
 
   extractChoropleths() {
     const {data} = this.props;
-    const normalizedGeojson = normalize(data);
+    const normalizedGeojson = normalizeGeojson(data);
 
     this.state.choropleths = normalizedGeojson.features.map(choropleth => {
       let coordinates = choropleth.geometry.coordinates[0] || [];

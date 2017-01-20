@@ -1,4 +1,4 @@
-import './utils/compare-objects.spec';
+import './utils';
 import './viewports';
 import './attribute-manager.spec';
 import './viewport-uniforms.spec';

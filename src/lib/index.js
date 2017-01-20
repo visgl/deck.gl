@@ -9,4 +9,4 @@ export {default as AttributeManager} from './attribute-manager';
 export {default as LayerManager} from './layer-manager';
 
 // Object iteration helper
-export * from './utils/object-iterator';
+export {count, get, values, isKeyedContainer, keys, entries} from './utils/container';
