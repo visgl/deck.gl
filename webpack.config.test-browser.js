@@ -31,6 +31,19 @@ module.exports = {
   module: {
     rules: [
       {
+        // Compile ES2015 using buble
+        test: /\.js$/,
+        loader: 'buble-loader',
+        include: [/src/],
+        options: {
+          objectAssign: 'Object.assign',
+          transforms: {
+            dangerousForOf: true,
+            modules: false
+          }
+        }
+      },
+      {
         include: [resolve('./src')],
         loader: 'transform-loader',
         options: 'brfs-babel'

@@ -1,18 +1,14 @@
 import {
-  ChoroplethLayer,
-  ScatterplotLayer,
-  ArcLayer,
-  LineLayer,
-  ScreenGridLayer,
-
-  ScatterplotLayer64,
-  ArcLayer64,
-  ChoroplethLayer64,
-  ExtrudedChoroplethLayer64,
-  LineLayer64
+  ChoroplethLayer, ScatterplotLayer, ArcLayer, LineLayer, ScreenGridLayer,
+  ChoroplethLayer64, ExtrudedChoroplethLayer64, ScatterplotLayer64, ArcLayer64, LineLayer64,
+  get
 } from 'deck.gl';
 
 import * as dataSamples from './data-samples';
+
+// Demonstrate immutable support
+import Immutable from 'immutable';
+const immutableChoropleths = Immutable.fromJS(dataSamples.choropleths);
 
 const ArcLayerExample = {
   layer: ArcLayer,
@@ -43,8 +39,8 @@ const ChoroplethLayerExample = {
   layer: ChoroplethLayer,
   props: {
     id: 'choroplethLayerSolid',
-    data: dataSamples.choropleths,
-    getColor: f => [((f.properties.ZIP_CODE * 10) % 127) + 128, 0, 0],
+    data: immutableChoropleths,
+    getColor: f => [((get(f, 'properties.ZIP_CODE') * 10) % 127) + 128, 0, 0],
     opacity: 0.8,
     pickable: true
   }

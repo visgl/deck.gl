@@ -22,7 +22,7 @@ import {Layer} from '../../../lib';
 import {assembleShaders} from '../../../shader-utils';
 import {fp64ify} from '../../../lib/utils/fp64';
 import {GL, Model, Geometry} from 'luma.gl';
-import flattenDeep from 'lodash.flattendeep';
+import {flatten} from '../../../lib/utils';
 import earcut from 'earcut';
 import {vec3} from 'gl-matrix';
 import {readFileSync} from 'fs';
@@ -149,7 +149,7 @@ export default class ExtrudedChoroplethLayer64 extends Layer {
   calculatePositions(attribute) {
     let {positions} = this.state;
     if (!positions) {
-      positions = flattenDeep(this.state.groupedVertices.map(
+      positions = flatten(this.state.groupedVertices.map(
         vertices => {
           const topVertices = Array.prototype.concat.apply([], vertices);
           const baseVertices = topVertices.map(v => [v[0], v[1], 0]);
@@ -170,7 +170,7 @@ export default class ExtrudedChoroplethLayer64 extends Layer {
   calculateHeights(attribute) {
     let {positions} = this.state;
     if (!positions) {
-      positions = flattenDeep(this.state.groupedVertices.map(
+      positions = flatten(this.state.groupedVertices.map(
         vertices => {
           const topVertices = Array.prototype.concat.apply([], vertices);
           const baseVertices = topVertices.map(v => [v[0], v[1], 0]);
@@ -204,7 +204,7 @@ export default class ExtrudedChoroplethLayer64 extends Layer {
       }
     );
 
-    attribute.value = new Float32Array(flattenDeep(normals));
+    attribute.value = new Float32Array(flatten(normals));
   }
 
   calculateSideNormals(vertices) {
@@ -241,7 +241,7 @@ export default class ExtrudedChoroplethLayer64 extends Layer {
         this.calculateSurfaceIndices(vertices, offsets[buildingIndex])
     );
 
-    attribute.value = new Uint32Array(flattenDeep(indices));
+    attribute.value = new Uint32Array(flatten(indices));
     attribute.target = GL.ELEMENT_ARRAY_BUFFER;
     this.state.model.setVertexCount(attribute.value.length / attribute.size);
   }
@@ -261,7 +261,7 @@ export default class ExtrudedChoroplethLayer64 extends Layer {
           [topColors, topColors, topColors, baseColors, baseColors];
       }
     );
-    attribute.value = new Float32Array(flattenDeep(colors));
+    attribute.value = new Float32Array(flatten(colors));
   }
 
   extractExtrudedChoropleth() {
@@ -344,7 +344,7 @@ export default class ExtrudedChoroplethLayer64 extends Layer {
       ).slice(1, vertices.length);
     }
 
-    const topIndices = earcut(flattenDeep(vertices), holes, 3)
+    const topIndices = earcut(flatten(vertices), holes, 3)
       .map(index => index + offset);
 
     const sideIndices = vertices.map(polygon => {

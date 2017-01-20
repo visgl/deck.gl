@@ -20,9 +20,8 @@
 
 import {Layer} from '../../../lib';
 import {assembleShaders} from '../../../shader-utils';
+import {get, flatten, extractPolygons} from '../../../lib/utils';
 import {GL, Model, Geometry} from 'luma.gl';
-import flattenDeep from 'lodash.flattendeep';
-import normalize from 'geojson-normalize';
 import earcut from 'earcut';
 import {readFileSync} from 'fs';
 import {join} from 'path';
@@ -30,8 +29,8 @@ import {join} from 'path';
 const DEFAULT_COLOR = [0, 0, 255, 255];
 
 const defaultProps = {
-  getColor: feature => feature.properties.color,
-  drawCountour: false,
+  getColor: feature => get(feature, 'properties.color'),
+  drawContour: false,
   strokeWidth: 1
 };
 
@@ -55,22 +54,17 @@ export default class ChoroplethLayer extends Layer {
       // Primtive attributes
       indices: {size: 1, update: this.calculateIndices, isIndexed: true},
       positions: {size: 3, update: this.calculatePositions},
-      colors: {
-        type: GL.UNSIGNED_BYTE,
-        size: 4,
-        update: this.calculateColors
-      },
+      colors: {size: 4, type: GL.UNSIGNED_BYTE, update: this.calculateColors},
       // Instanced attributes
       pickingColors: {
-        type: GL.UNSIGNED_BYTE,
         size: 3,
+        type: GL.UNSIGNED_BYTE,
         update: this.calculatePickingColors,
         noAlloc: true
       }
     });
 
-    const IndexType = gl.getExtension('OES_element_index_uint') ?
-      Uint32Array : Uint16Array;
+    const IndexType = gl.getExtension('OES_element_index_uint') ? Uint32Array : Uint16Array;
 
     this.setState({
       model: this.getModel(gl),
@@ -82,7 +76,7 @@ export default class ChoroplethLayer extends Layer {
   updateState({oldProps, props, changeFlags}) {
     const {attributeManager} = this.state;
     if (changeFlags.dataChanged) {
-      this.state.choropleths = extractChoropleths(props.data);
+      this.state.choropleths = extractPolygons(props.data);
       attributeManager.invalidateAll();
     }
 
@@ -107,7 +101,7 @@ export default class ChoroplethLayer extends Layer {
     super.pick(opts);
     const {info} = opts;
     const index = this.decodePickingColor(info.color);
-    const feature = index >= 0 ? this.props.data.features[index] : null;
+    const feature = index >= 0 ? get(this.props.data, ['features', index]) : null;
     info.feature = feature;
     info.object = feature;
   }
@@ -144,124 +138,59 @@ export default class ChoroplethLayer extends Layer {
       (choropleth, choroplethIndex) => this.props.drawContour ?
         // 1. get sequentially ordered indices of each choropleth contour
         // 2. offset them by the number of indices in previous choropleths
-        calculateContourIndices(choropleth).map(
-          index => index + offsets[choroplethIndex]
-        ) :
+        calculateContourIndices(choropleth).map(index => index + offsets[choroplethIndex]) :
         // 1. get triangulated indices for the internal areas
         // 2. offset them by the number of indices in previous choropleths
-        calculateSurfaceIndices(choropleth).map(
-          index => index + offsets[choroplethIndex]
-        )
+        calculateSurfaceIndices(choropleth).map(index => index + offsets[choroplethIndex])
     );
 
-    attribute.value = new IndexType(flattenDeep(indices));
+    attribute.value = new IndexType(flatten(indices));
     attribute.target = GL.ELEMENT_ARRAY_BUFFER;
     this.state.model.setVertexCount(attribute.value.length / attribute.size);
   }
 
   calculatePositions(attribute) {
-    const vertices = flattenDeep(this.state.choropleths);
+    const vertices = flatten(this.state.choropleths);
     attribute.value = new Float32Array(vertices);
   }
 
   calculateColors(attribute) {
-    const {data: {features}, getColor} = this.props;
-
+    const {data, getColor} = this.props;
+    const features = get(data, 'features');
     const colors = this.state.choropleths.map(
       (choropleth, choroplethIndex) => {
-        const feature = features[choropleth.featureIndex];
+        const feature = get(features, choropleth.featureIndex);
         const color = getColor(feature) || DEFAULT_COLOR;
-
+        // Ensure alpha is set
         if (isNaN(color[3])) {
           color[3] = DEFAULT_COLOR[3];
         }
-
-        return choropleth.map(polygon =>
-          polygon.map(vertex => color)
-        );
+        return choropleth.map(polygon => polygon.map(vertex => color));
       }
     );
 
-    attribute.value = new Uint8Array(flattenDeep(colors));
+    attribute.value = new Uint8Array(flatten(colors));
   }
 
   // Override the default picking colors calculation
   calculatePickingColors(attribute) {
-
     const colors = this.state.choropleths.map(
       (choropleth, choroplethIndex) => {
         const {featureIndex} = choropleth;
         const color = this.props.drawContour ? [0, 0, 0] : [
           (featureIndex + 1) % 256,
           Math.floor((featureIndex + 1) / 256) % 256,
-          Math.floor((featureIndex + 1) / 256 / 256) % 256];
-        return choropleth.map(polygon =>
-          polygon.map(vertex => color)
-        );
+          Math.floor((featureIndex + 1) / 256 / 256) % 256
+        ];
+        return choropleth.map(polygon => polygon.map(vertex => color));
       }
     );
 
-    attribute.value = new Uint8Array(flattenDeep(colors));
+    attribute.value = new Uint8Array(flatten(colors));
   }
 }
 
 ChoroplethLayer.layerName = 'ChoroplethLayer';
-
-/*
- * converts list of features from a GeoJSON object to a list of GeoJSON
- * polygon-style coordinates
- * @param {Object} data - geojson object
- * @returns {[Number,Number,Number][][][]} array of choropleths
- */
-function extractChoropleths(data) {
-  const normalizedGeojson = normalize(data);
-  const result = [];
-
-  normalizedGeojson.features.map((feature, featureIndex) => {
-    const choropleths = featureToChoropleths(feature);
-    choropleths.forEach(choropleth => {
-      choropleth.featureIndex = featureIndex;
-    });
-    result.push(...choropleths);
-  });
-  return result;
-}
-
-/*
- * converts one GeoJSON features from object to a list of GeoJSON polygon-style
- * coordinates
- * @param {Object} data - geojson object
- * @returns {[Number,Number,Number][][][]} array of choropleths
- */
-function featureToChoropleths(feature) {
-  const {coordinates, type} = feature.geometry;
-  let choropleths;
-
-  switch (type) {
-  case 'MultiPolygon':
-    choropleths = coordinates;
-    break;
-  case 'Polygon':
-    choropleths = [coordinates];
-    break;
-  case 'LineString':
-    // create a LineStringLayer for LineString and MultiLineString?
-    choropleths = [[coordinates]];
-    break;
-  case 'MultiLineString':
-    choropleths = coordinates.map(coords => [coords]);
-    break;
-  default:
-    choropleths = [];
-  }
-  return choropleths.map(
-    choropleth => choropleth.map(
-      polygon => polygon.map(
-        coordinate => [coordinate[0], coordinate[1], coordinate[2] || 0]
-      )
-    )
-  );
-}
 
 /*
  * get vertex indices for drawing choropleth contour
@@ -301,5 +230,5 @@ function calculateSurfaceIndices(choropleth) {
     ).slice(1, choropleth.length);
   }
 
-  return earcut(flattenDeep(choropleth), holes, 3);
+  return earcut(flatten(choropleth), holes, 3);
 }
