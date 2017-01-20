@@ -34,6 +34,8 @@
   "dependencies": {
     "earcut": "^2.0.6",
     "gl-matrix": "^2.3.2",
+    "lodash.flatten": "^4.4.0",
+    "lodash.flattendeep": "^4.4.0",
     "viewport-mercator-project": "3.0.0-beta4"
   },
   "devDependencies": {
