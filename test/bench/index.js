@@ -2,7 +2,7 @@
 /* global console */
 import {Suite} from 'benchmark';
 import * as data from '../data';
-import {ScatterplotLayer, ChoroplethLayer, PolygonLayer} from 'deck.gl';
+import {ScatterplotLayer, ChoroplethLayer} from 'deck.gl';
 
 import {createGLContext} from 'luma.gl';
 
@@ -46,18 +46,8 @@ suite
 .add('ChoroplethLayer#construct', () => {
   return new ChoroplethLayer({data: data.choropleths});
 })
-.add('PolygonLayer#construct', () => {
-  return new PolygonLayer({data: data.choropleths});
-  // testInitializeLayer({gl, layer});
-})
 .add('ChoroplethLayer#initialize', () => {
   const layer = new ChoroplethLayer({data: data.choropleths});
-  testInitializeLayer({gl, layer});
-})
-.add('PolygonLayer#initialize', () => {
-  const layer = new PolygonLayer({
-    data: data.choropleths
-  });
   testInitializeLayer({gl, layer});
 })
 // add listeners

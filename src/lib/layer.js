@@ -43,32 +43,6 @@ const defaultProps = {
   updateTriggers: {}
 };
 
-/**
- * Return merged default props stored on layers constructor, create them if needed
- */
-function getDefaultProps(layer) {
-  const {mergedDefaultProps} = layer.constructor;
-  if (mergedDefaultProps) {
-    return mergedDefaultProps;
-  }
-  return mergeDefaultProps(layer);
-}
-
-function mergeDefaultProps(layer) {
-  const {constructor} = layer;
-  let mergedDefaultProps = {};
-  while (layer) {
-    const layerDefaultProps = layer.constructor.defaultProps;
-    if (layerDefaultProps) {
-      mergedDefaultProps = Object.assign(layerDefaultProps, mergedDefaultProps);
-    }
-    layer = Object.getPrototypeOf(layer);
-  }
-  // Store for quick lookup
-  constructor.mergedDefaultProps = mergedDefaultProps;
-  return mergedDefaultProps;
-}
-
 let counter = 0;
 
 export default class Layer {
@@ -77,22 +51,19 @@ export default class Layer {
    * @param {object} props - See docs and defaults above
    */
   constructor(props) {
+    // If sublayer has static defaultProps member, getDefaultProps will return it
     const mergedDefaultProps = getDefaultProps(this);
-    // TODO - premerge default props so that we don't have to merge twice?
     props = Object.assign({}, mergedDefaultProps, props, {
-      // Accept null as data - otherwise apps will need to add ugly checks
-      data: props.data || [],
-      id: props.id || this.constructor.layerName
+      // Accept null as data - otherwise apps and layers need to add ugly checks
+      data: props.data || []
     });
 
-    this.id = props.id;
-    this.count = counter++;
+    // this.id = props.id;
+    this.props = props;
     this.oldProps = null;
     this.state = null;
     this.context = null;
-
-    this.props = props;
-
+    this.count = counter++;
     Object.seal(this);
 
     this.validateRequiredProp('id', x => typeof x === 'string');
@@ -605,5 +576,38 @@ export default class Layer {
   }
 }
 
+Layer.layerName = 'Layer';
 Layer.defaultProps = defaultProps;
 
+// HELPERS
+
+/*
+ * Return merged default props stored on layers constructor, create them if needed
+ */
+function getDefaultProps(layer) {
+  const {mergedDefaultProps} = layer.constructor;
+  if (mergedDefaultProps) {
+    return mergedDefaultProps;
+  }
+  return mergeDefaultProps(layer);
+}
+
+/*
+ * Walk the prototype chain and merge all default props
+ */
+function mergeDefaultProps(layer) {
+  const {constructor} = layer;
+  let mergedDefaultProps = {
+    id: constructor.layerName
+  };
+  while (layer) {
+    const layerDefaultProps = layer.constructor.defaultProps;
+    if (layerDefaultProps) {
+      mergedDefaultProps = Object.assign(layerDefaultProps, mergedDefaultProps);
+    }
+    layer = Object.getPrototypeOf(layer);
+  }
+  // Store for quick lookup
+  constructor.mergedDefaultProps = mergedDefaultProps;
+  return mergedDefaultProps;
+}

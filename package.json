@@ -55,7 +55,6 @@
     "gl": "^4.0.3",
     "immutable": "^3.8.1",
     "luma.gl": "3.0.0-alpha.3",
-    "microtime": "^2.1.2",
     "module-alias": "^2.0.0",
     "pre-commit": "^1.2.2",
     "raw-loader": "^0.5.1",
