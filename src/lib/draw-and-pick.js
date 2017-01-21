@@ -1,8 +1,13 @@
 /* global window */
 import {GL, glContextWithState} from 'luma.gl';
 import {getUniformsFromViewport} from './viewport-uniforms';
+import {log} from './utils';
 
-export function drawLayers({layers}) {
+let renderCount = 0;
+
+export function drawLayers({layers, pass}) {
+  log.log(2, `DRAWING ${layers.length} layers`);
+
   let layerIndex = 0;
   for (const layer of layers) {
     if (layer.props.visible) {
@@ -17,6 +22,8 @@ export function drawLayers({layers}) {
       layerIndex++;
     }
   }
+
+  log.log(1, `RENDER PASS ${pass}: ${renderCount++} ${layerIndex} visible, ${layers.length} total`);
 }
 
 /* eslint-disable max-depth, max-statements */

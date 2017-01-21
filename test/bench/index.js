@@ -4,7 +4,7 @@ import {Suite} from 'benchmark';
 import * as data from '../data';
 
 import {
-  // ScatterplotLayer,
+  ScatterplotLayer,
   PolygonLayer,
   ChoroplethLayer,
   ExtrudedChoroplethLayer64
@@ -16,15 +16,15 @@ const suite = new Suite();
 
 // add tests
 suite
-// .add('ScatterplotLayer#construct', () => {
-//   return new ScatterplotLayer({data: data.choropleths});
-// })
-// .add('ChoroplethLayer#construct', () => {
-//   return new ChoroplethLayer({data: data.choropleths});
-// })
-// .add('PolygonLayer#construct', () => {
-//   return new PolygonLayer({data: data.choropleths});
-// })
+.add('ScatterplotLayer#construct', () => {
+  return new ScatterplotLayer({data: data.points});
+})
+.add('ChoroplethLayer#construct', () => {
+  return new ChoroplethLayer({data: data.choropleths});
+})
+.add('PolygonLayer#construct', () => {
+  return new PolygonLayer({data: data.choropleths});
+})
 .add('ChoroplethLayer#initialize', () => {
   const layer = new ChoroplethLayer({data: data.choropleths});
   testInitializeLayer({layer});
@@ -78,7 +78,4 @@ suite
 .on('complete', function t() {
   console.log(`Fastest is ${this.filter('fastest').map('name')}`);
 })
-.run({
-  maxTime: 0.01,
-  delay: 0.1
-});
+.run({});

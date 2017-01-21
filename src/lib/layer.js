@@ -29,7 +29,6 @@ import assert from 'assert';
  * @param {bool} props.opacity - opacity of the layer
  */
 const defaultProps = {
-  data: [],
   dataIterator: null,
   dataComparator: null,
   numInstances: undefined,
@@ -53,12 +52,12 @@ export default class Layer {
   constructor(props) {
     // If sublayer has static defaultProps member, getDefaultProps will return it
     const mergedDefaultProps = getDefaultProps(this);
-    props = Object.assign({}, mergedDefaultProps, props, {
-      // Accept null as data - otherwise apps and layers need to add ugly checks
-      data: props.data || []
-    });
+    // Merge supplied props with pre-merged default props
+    props = Object.assign({}, mergedDefaultProps, props);
+    // Accept null as data - otherwise apps and layers need to add ugly checks
+    props.data = props.data || [];
 
-    this.id = props.id;
+    this.id = props.id || this.constructor.layerName;
     this.props = props;
     this.oldProps = null;
     this.state = null;
@@ -71,9 +70,8 @@ export default class Layer {
   }
 
   toString() {
-    const className = this.constructor.name;
-    return (className !== this.props.id) ?
-      `<${className}:'${this.props.id}'>` : `<${className}>`;
+    const className = this.constructor.layerName || this.constructor.name;
+    return className !== this.props.id ? `<${className}:'${this.props.id}'>` : `<${className}>`;
   }
 
   // //////////////////////////////////////////////////

@@ -20,7 +20,8 @@
 
 import {Layer} from '../../../lib';
 import {assembleShaders} from '../../../shader-utils';
-import {Container, flatten, extractPolygons} from '../../../lib/utils';
+import {Container, flatten} from '../../../lib/utils';
+import {extractPolygons} from './geojson';
 import {GL, Model, Geometry} from 'luma.gl';
 import earcut from 'earcut';
 import {readFileSync} from 'fs';
