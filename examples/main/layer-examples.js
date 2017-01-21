@@ -1,7 +1,22 @@
 import {
-  ChoroplethLayer, ScatterplotLayer, ArcLayer, LineLayer, ScreenGridLayer,
-  ChoroplethLayer64, ExtrudedChoroplethLayer64, ScatterplotLayer64, ArcLayer64, LineLayer64,
-  get
+  ScatterplotLayer,
+  ArcLayer,
+  LineLayer,
+  ScreenGridLayer,
+
+  GeoJsonLayer,
+  // PolygonLayer,
+  // PathLayer,
+
+  ScatterplotLayer64,
+  ArcLayer64,
+  LineLayer64,
+
+  ChoroplethLayer,
+  ChoroplethLayer64,
+  ExtrudedChoroplethLayer64,
+
+  Container
 } from 'deck.gl';
 
 import * as dataSamples from './data-samples';
@@ -24,27 +39,77 @@ const ArcLayerExample = {
   }
 };
 
-const ChoroplethLayerContourExample = {
-  layer: ChoroplethLayer,
+const GeoJsonLayerExample = {
+  layer: GeoJsonLayer,
   props: {
-    id: 'choroplethLayerContour',
+    id: 'geojsonLayer',
     data: dataSamples.choropleths,
-    getColor: f => [0, 80, 200],
+    getFillColor: f => [0, 0, ((Container.get(f, 'properties.ZIP_CODE') * 10) % 127) + 128],
+    getColor: f => [200, 0, 80],
     opacity: 0.8,
     drawContour: true
   }
 };
 
-const ChoroplethLayerExample = {
-  layer: ChoroplethLayer,
+const GeoJsonLayerExtrudedExample = {
+  layer: GeoJsonLayer,
   props: {
-    id: 'choroplethLayerSolid',
-    data: immutableChoropleths,
-    getColor: f => [((get(f, 'properties.ZIP_CODE') * 10) % 127) + 128, 0, 0],
+    id: 'geojsonLayer-example',
+    data: dataSamples.choropleths,
+    extruded: true,
+    getFillColor: f => [0, 0, ((Container.get(f, 'properties.ZIP_CODE') * 10) % 127) + 128],
+    getColor: f => [200, 0, 80],
     opacity: 0.8,
-    pickable: true
+    drawContour: true
   }
 };
+
+const GeoJsonLayerWireframeExample = {
+  layer: GeoJsonLayer,
+  props: {
+    id: 'geojsonLayer-wireframe',
+    data: dataSamples.choropleths,
+    extruded: true,
+    wireframe: true,
+    getFillColor: f => [0, 0, ((Container.get(f, 'properties.ZIP_CODE') * 10) % 127) + 128],
+    getColor: f => [200, 0, 80],
+    opacity: 0.8,
+    drawContour: true
+  }
+};
+
+// const GeoJsonLayerImmutableExample = {
+//   layer: GeoJsonLayer,
+//   props: {
+//     id: 'geojsonLayer-immutable',
+//     data: immutableChoropleths,
+//     getFillColor: f => [0, ((Container.get(f, 'properties.ZIP_CODE') * 10) % 127) * 2, 128],
+//     getColor: f => [200, 0, 80],
+//     opacity: 0.8,
+//     drawContour: true
+//   }
+// };
+
+// const PolygonLayerExample = {
+//   layer: PolygonLayer,
+//   props: {
+//     data: dataSamples.polygons,
+//     getColor: f => [((f.properties.ZIP_CODE * 10) % 127) + 128, 0, 0],
+//     opacity: 0.8,
+//     pickable: true
+//   }
+// };
+
+// const PathLayerExample = {
+//   layer: ChoroplethLayer,
+//   props: {
+//     id: 'choroplethLayerSolid',
+//     data: dataSamples.polygons,
+//     getColor: f => [((f.properties.ZIP_CODE * 10) % 127) + 128, 0, 0],
+//     opacity: 0.8,
+//     pickable: true
+//   }
+// };
 
 const ScreenGridLayerExample = {
   layer: ScreenGridLayer,
@@ -120,6 +185,55 @@ const ArcLayer64Example = {
   }
 };
 
+const LineLayer64Example = {
+  layer: LineLayer64,
+  props: {
+    id: 'lineLayer64',
+    data: dataSamples.routes,
+    getSourcePosition: d => d.START,
+    getTargetPosition: d => d.END,
+    getColor: d => d.SERVICE === 'WEEKDAY' ? [255, 64, 0] : [255, 200, 0],
+    strokeWidth: 1,
+    pickable: true
+  }
+};
+
+const ScatterplotLayer64Example = {
+  layer: ScatterplotLayer64,
+  props: {
+    id: 'scatterplotLayer64',
+    data: dataSamples.points,
+    getPosition: d => d.COORDINATES,
+    getColor: d => [255, 128, 0],
+    getRadius: d => d.SPACES,
+    pickable: true,
+    radiusMinPixels: 1,
+    radiusMaxPixels: 30
+  }
+};
+
+const ChoroplethLayerContourExample = {
+  layer: ChoroplethLayer,
+  props: {
+    id: 'choroplethLayerContour',
+    data: immutableChoropleths,
+    getColor: f => [0, 80, 200],
+    opacity: 0.8,
+    drawContour: true
+  }
+};
+
+const ChoroplethLayerExample = {
+  layer: ChoroplethLayer,
+  props: {
+    id: 'choroplethLayerSolid',
+    data: dataSamples.choropleths,
+    getColor: f => [((Container.get(f, 'properties.ZIP_CODE') * 10) % 127) + 128, 0, 0],
+    opacity: 0.8,
+    pickable: true
+  }
+};
+
 const ChoroplethLayer64ContourExample = {
   layer: ChoroplethLayer64,
   props: {
@@ -160,31 +274,12 @@ const ExtrudedChoroplethLayer64Example = {
   }
 };
 
-const LineLayer64Example = {
-  layer: LineLayer64,
-  props: {
-    id: 'lineLayer64',
-    data: dataSamples.routes,
-    getSourcePosition: d => d.START,
-    getTargetPosition: d => d.END,
-    getColor: d => d.SERVICE === 'WEEKDAY' ? [255, 64, 0] : [255, 200, 0],
-    strokeWidth: 1,
-    pickable: true
-  }
-};
-
-const ScatterplotLayer64Example = {
-  layer: ScatterplotLayer64,
-  props: {
-    id: 'scatterplotLayer64',
-    data: dataSamples.points,
-    getPosition: d => d.COORDINATES,
-    getColor: d => [255, 128, 0],
-    getRadius: d => d.SPACES,
-    pickable: true,
-    radiusMinPixels: 1,
-    radiusMaxPixels: 30
-  }
+const ExtrudedChoroplethLayer64WireframeExample = {
+  layer: ExtrudedChoroplethLayer64,
+  props: Object.assign({}, ExtrudedChoroplethLayer64Example.props, {
+    id: 'extrudedChoroplethLayer64-wireframe',
+    drawWireframe: true
+  })
 };
 
 // perf test examples
@@ -214,11 +309,16 @@ const ScatterplotLayer64PerfExample = (id, getData) => ({
   }
 });
 
+/* eslint-disable quote-props */
 export default {
   'Core Layers': {
-    'ChoroplethLayer (Solid)': ChoroplethLayerExample,
-    'ChoroplethLayer (Contour)': ChoroplethLayerContourExample,
-    ScatterplotLayer: ScatterplotLayerExample,
+    'GeoJsonLayer': GeoJsonLayerExample,
+    'GeoJsonLayer (Extruded)': GeoJsonLayerExtrudedExample,
+    'GeoJsonLayer (Wireframe)': GeoJsonLayerWireframeExample,
+    // 'GeoJsonLayer (Immutable)': GeoJsonLayerImmutableExample,
+    // PolygonLayer: PolygonLayerExample,
+    // PathLayer: PathLayerExample,
+    'ScatterplotLayer': ScatterplotLayerExample,
     'ScatterplotLayer (meters)': ScatterplotLayerMetersExample,
     ArcLayer: ArcLayerExample,
     LineLayer: LineLayerExample,
@@ -227,11 +327,17 @@ export default {
 
   '64-bit Layers': {
     ArcLayer64: ArcLayer64Example,
-    'ChoroplethLayer64 (Solid)': ChoroplethLayer64SolidExample,
-    'ChoroplethLayer64 (Contour)': ChoroplethLayer64ContourExample,
-    ExtrudedChoroplethLayer64: ExtrudedChoroplethLayer64Example,
     ScatterplotLayer64: ScatterplotLayer64Example,
     LineLayer64: LineLayer64Example
+  },
+
+  'Deprecated Layers': {
+    'ChoroplethLayer (Solid)': ChoroplethLayerExample,
+    'ChoroplethLayer (Contour)': ChoroplethLayerContourExample,
+    'ChoroplethLayer64 (Solid)': ChoroplethLayer64SolidExample,
+    'ChoroplethLayer64 (Contour)': ChoroplethLayer64ContourExample,
+    'ExtrudedChoroplethLayer64': ExtrudedChoroplethLayer64Example,
+    'ExtrudedChoroplethLayer64 (Wireframe)': ExtrudedChoroplethLayer64WireframeExample
   },
 
   'Performance Tests': {

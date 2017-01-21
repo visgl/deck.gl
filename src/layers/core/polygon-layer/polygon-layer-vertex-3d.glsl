@@ -20,11 +20,6 @@
 
 #define SHADER_NAME extruded-choropleths-layer-vertex-shader
 
-attribute vec4 positions;
-attribute vec2 heights;
-attribute vec3 normals;
-uniform vec3 colors;
-
 uniform float opacity;
 uniform float elevation;
 
@@ -37,25 +32,39 @@ uniform float uPointLightAttenuation;
 uniform vec3 uMaterialSpecularColor;
 uniform float uMaterialShininess;
 
-varying vec4 vColor;
+attribute vec3 positions;
+// attribute vec4 positions64xy;
+// attribute vec2 positions64z;
+attribute vec3 normals;
+uniform vec3 colors;
 
-vec3 applyLighting(vec3 position_modelspace, vec3 normal_modelspace, vec3 color) {
+varying vec4 vPickingColor;
 
-  vec3 pointLightLocation_modelspace = vec3(project_position(uPointLightLocation));
-  vec3 lightDirection = normalize(pointLightLocation_modelspace - position_modelspace);
+// vec3 applyLighting(vec3 position_modelspace, vec3 normal_modelspace, vec3 color) {
 
-  vec3 ambient = uPointLightAmbientCoefficient * color / 255.0 * uAmbientColor / 255.0;
+//   vec3 pointLightLocation_modelspace = vec3(project_position(uPointLightLocation));
+//   vec3 lightDirection = normalize(pointLightLocation_modelspace - position_modelspace);
 
-  float diffuseCoefficient = max(dot(normal_modelspace, lightDirection), 0.0);
-  vec3 diffuse = diffuseCoefficient * uPointLightColor / 255. * color / 255.;
+//   vec3 ambient = uPointLightAmbientCoefficient * color / 255.0 * uAmbientColor / 255.0;
 
-  return ambient + uPointLightAttenuation * diffuse;
+//   float diffuseCoefficient = max(dot(normal_modelspace, lightDirection), 0.0);
+//   vec3 diffuse = diffuseCoefficient * uPointLightColor / 255. * color / 255.;
+
+//   return ambient + uPointLightAttenuation * diffuse;
+// }
+
+void main(void) {
+  vec3 vertex_pos_modelspace = project_position(positions);
+  gl_Position = project_to_clipspace(vec4(vertex_pos_modelspace, 1.));
+  // vec3 color = applyLighting(vec3(vertex_pos_modelspace), normals, colors);
+  vPickingColor = vec4(0., 0., 0., 1.);
 }
 
+#ifdef DONT
 void main(void) {
   vec2 projected_xy[2];
   project_position_fp64(positions, projected_xy);
-  vec2 scaled_height = mul_fp64(heights, vec2(projectionPixelsPerUnit.x * elevation, 0.0));
+  vec2 scaled_height = mul_fp64(positions64z, vec2(projectionPixelsPerUnit.x * elevation, 0.0));
 
   vec2 vertex_pos_modelspace[4];
   vertex_pos_modelspace[0] = projected_xy[0];
@@ -66,13 +75,13 @@ void main(void) {
   gl_Position = project_to_clipspace_fp64(vertex_pos_modelspace);
 
   vec3 color = applyLighting(
-  	vec3(
-  	  vertex_pos_modelspace[0].x,
-  	  vertex_pos_modelspace[1].x,
-  	  vertex_pos_modelspace[2].x),
-  	normals,
-  	colors
+    vec3(
+      vertex_pos_modelspace[0].x,
+      vertex_pos_modelspace[1].x,
+      vertex_pos_modelspace[2].x),
+    normals,
+    colors
   );
-  vColor = vec4(color, opacity);
+  vColor = vec4(0, 0, 0,, opacity);
 }
-// `;
+#endif

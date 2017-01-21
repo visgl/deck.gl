@@ -1,3 +1,5 @@
+import {createGLContext} from 'luma.gl';
+
 /**
  * Covert all numbers in a deep structure to a given precision, allowing
  * reliable float comparisons. Converts data in-place.
@@ -19,4 +21,42 @@ export function toLowPrecision(input, precision = 11) {
     }
   }
   return input;
+}
+
+// Create and reuse a default context if none is supplied
+let glContext = null;
+
+function getGLContext() {
+  glContext = glContext || createGLContext();
+  return glContext;
+}
+
+export function testInitializeLayer({gl, layer}) {
+  gl = gl || getGLContext();
+
+  const oldContext = {gl};
+  const context = {gl};
+  let failures = 0;
+  try {
+    layer.context = context;
+
+    layer.initializeLayer({
+      oldProps: {},
+      props: layer.props,
+      oldContext,
+      context,
+      changeFlags: layer.diffProps({}, layer.props, context)
+    });
+
+    layer.updateLayer({
+      oldProps: {},
+      props: layer.props,
+      oldContext,
+      context,
+      changeFlags: layer.diffProps({}, layer.props, context)
+    });
+  } catch (error) {
+    failures++;
+  }
+  return failures;
 }
