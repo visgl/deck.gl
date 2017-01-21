@@ -38,24 +38,48 @@ const defaultProps = {
   opacity: 0.8,
   onHover: () => {},
   onClick: () => {},
-  getValue: x => x,
   // Update triggers: a key change detection mechanism in deck.gl
   // See layer documentation
   updateTriggers: {}
 };
 
+/**
+ * Return merged default props stored on layers constructor, create them if needed
+ */
+function getDefaultProps(layer) {
+  const {mergedDefaultProps} = layer.constructor;
+  if (mergedDefaultProps) {
+    return mergedDefaultProps;
+  }
+  return mergeDefaultProps(layer);
+}
+
+function mergeDefaultProps(layer) {
+  const {constructor} = layer;
+  let mergedDefaultProps = {};
+  while (layer) {
+    const layerDefaultProps = layer.constructor.defaultProps;
+    if (layerDefaultProps) {
+      mergedDefaultProps = Object.assign(layerDefaultProps, mergedDefaultProps);
+    }
+    layer = Object.getPrototypeOf(layer);
+  }
+  // Store for quick lookup
+  constructor.mergedDefaultProps = mergedDefaultProps;
+  return mergedDefaultProps;
+}
+
 let counter = 0;
 
 export default class Layer {
   /**
-   * @classdesc
-   * Base Layer class
-   *
    * @class
-   * @param {object} props - See docs above
+   * @param {object} props - See docs and defaults above
    */
   constructor(props) {
-    props = Object.assign({}, defaultProps, props, {
+    const mergedDefaultProps = getDefaultProps(this);
+    // TODO - premerge default props so that we don't have to merge twice?
+    props = Object.assign({}, mergedDefaultProps, props, {
       // Accept null as data - otherwise apps will need to add ugly checks
       data: props.data || [],
       id: props.id || this.constructor.layerName
@@ -63,23 +87,16 @@ export default class Layer {
 
     this.id = props.id;
     this.count = counter++;
-    this.props = props;
     this.oldProps = null;
     this.state = null;
     this.context = null;
+
+    this.props = props;
+
     Object.seal(this);
 
     this.validateRequiredProp('id', x => typeof x === 'string');
     this.validateRequiredProp('data');
-    // TODO - allow app to supply dataIterator prop?
-    // if (props.data) {
-    //   addIterator(props.data);
-    //   if (!props.data[Symbol.iterator]) {
-    //     log.once(0, 'data prop must have iterator');
-    //   }
-    // }
-
-    this._validateDeprecatedProps();
   }
 
   toString() {
@@ -586,26 +603,7 @@ export default class Layer {
     this.state.needsRedraw = true;
     log(3, 'layer.setUniforms', uniformMap);
   }
-
-  _validateDeprecatedProps() {
-    if (this.props.isPickable !== undefined) {
-      log.once(0, 'No isPickable prop in deckgl v3 - use pickable instead');
-    }
-
-    // TODO - inject viewport from overlay instead of creating for each layer?
-    const hasViewportProps =
-      // this.props.width !== undefined ||
-      // this.props.height !== undefined ||
-      this.props.latitude !== undefined ||
-      this.props.longitude !== undefined ||
-      this.props.zoom !== undefined ||
-      this.props.pitch !== undefined ||
-      this.props.bearing !== undefined;
-    if (hasViewportProps) {
-      /* eslint-disable no-console */
-      // /* global console */
-      log.once(0,
-        `deck.gl v3 no longer needs viewport props in Layer ${this}`);
-    }
-  }
 }
+
+Layer.defaultProps = defaultProps;
+

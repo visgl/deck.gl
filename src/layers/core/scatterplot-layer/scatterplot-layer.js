@@ -44,7 +44,7 @@ const defaultProps = {
 
 export default class ScatterplotLayer extends Layer {
   constructor(props) {
-    super(Object.assign({}, defaultProps, props));
+    super(props);
   }
 
   getShaders(id) {
@@ -162,3 +162,4 @@ export default class ScatterplotLayer extends Layer {
 }
 
 ScatterplotLayer.layerName = 'ScatterplotLayer';
+ScatterplotLayer.defaultProps = defaultProps;
