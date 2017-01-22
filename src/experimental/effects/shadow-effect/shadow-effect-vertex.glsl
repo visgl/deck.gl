@@ -22,9 +22,14 @@
 
 attribute vec3 vertices;
 
-varying vec2 uv;
+varying vec4 worldPosition;
+varying vec4 clipPosition;
 
 void main(void) {
-  uv = vertices.xy;
-  gl_Position = vec4(2. * vertices.xy - vec2(1., 1.), -1., 1.);
+  worldPosition = vec4(preproject(vertices.xy), 0, 1);
+  clipPosition = project(worldPosition);
+  //gl_Position = vec4(sign(vertices.x), sign(vertices.y), 0, 1);
+  //gl_Position = vec4(vertices.xy, 0, 1);
+  
+  gl_Position = clipPosition;
 }

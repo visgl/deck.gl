@@ -24,10 +24,53 @@
 precision highp float;
 #endif
 
-uniform sampler2D depthTexture;
+uniform int numShadows;
 
-varying vec2 uv;
+uniform sampler2D shadowSampler_0;
+uniform sampler2D shadowSampler_1;
+uniform sampler2D shadowSampler_2;
+uniform sampler2D shadowSampler_3;
+uniform sampler2D shadowSampler_4;
+
+
+uniform mat4 shadowMatrix_0;
+uniform mat4 shadowMatrix_1;
+uniform mat4 shadowMatrix_2;
+uniform mat4 shadowMatrix_3;
+uniform mat4 shadowMatrix_4;
+
+
+
+varying vec4 worldPosition;
+varying vec4 clipPosition;
+
+#define EPSILON 0.001;
+
+#define MAG(v, f) (mod((v), float(f)) / float(f))
+
+
+float sampledDepth(sampler2D sampler, mat4 matrix, vec4 pos) {
+  vec4 clip = matrix * pos;
+  //depth divide
+  clip = clip / clip.w;
+  if (abs(clip.x) > 1.0 || abs(clip.y) > 1.0) return 0.0;
+  vec2 uv = 0.5 * (vec2(clip.x + 1.0, 1.0 - clip.y));
+  return texture2D(sampler, uv).r;
+}
+
+bool cameraOccluded(sampler2D sampler, mat4 matrix, vec4 pos) {
+  vec4 clip = matrix * pos;
+  //depth divide
+  clip = clip / clip.w;
+  if (abs(clip.x) > 1.0 || abs(clip.y) > 1.0) return true;
+  vec2 uv = 0.5 * (vec2(clip.x + 1.0, 1.0 - clip.y));
+  float depth = (1.0 - clip.z) / 2.0;
+  return texture2D(sampler, uv).r < depth;
+}
+
 
 void main(void) {
-  gl_FragColor = texture2D(depthTexture, vec2(uv.x, 1. - uv.y));
+  float lighting = cameraOccluded(shadowSampler_0, shadowMatrix_0, worldPosition) ? 0.0 : 1.0;
+  //float lighting = sampledDepth(shadowSampler_0, shadowMatrix_0, worldPosition);
+  gl_FragColor = vec4(lighting, lighting, lighting, 0.5);
 }

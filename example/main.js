@@ -258,7 +258,7 @@ class ExampleApp extends React.Component {
 
     this._effects = [
       new ReflectionEffect(),
-      new ShadowEffect()
+      new ShadowEffect({})
     ];
   }
 
