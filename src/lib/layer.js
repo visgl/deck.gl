@@ -58,7 +58,11 @@ export default class Layer {
       data: props.data || []
     });
 
+<<<<<<< HEAD
     this.id = props.id;
+=======
+    // this.id = props.id;
+>>>>>>> Add benchmarks for node and browser.js (#299)
     this.props = props;
     this.oldProps = null;
     this.state = null;

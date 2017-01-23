@@ -21,14 +21,14 @@
   "scripts": {
     "start": "(cd examples/main && yarn && npm start)",
     "compile": "rm -fr dist && buble src -o dist --no modules --y dangerousForOf --objectAssign",
-    "build": "npm run compile && webpack -d --display-modules",
+    "build": "rnpm run compile && webpack -d --display-modules",
     "lint": "eslint src test exhibits/app.js examples",
     "publish-prod": "npm run build && npm run test && npm publish",
     "publish-beta": "npm run build && npm run test && npm publish --tag beta",
     "test": "npm run lint && npm run test-node",
-    "test-node": "node test/node.js",
+    "test-node": "npm run compile && node test/node.js",
     "test-browser": "webpack-dev-server --config webpack.config.test-browser.js --progress --hot --open --port 3010",
-    "bench": "node test/bench/node.js",
+    "bench-node": "npm run compile && node test/bench/node.js",
     "bench-browser": "webpack-dev-server --config webpack.config.bench-browser.js --progress --hot --open --port 3011",
     "test-fp64": "(cd test/fp64-test && webpack-dev-server --config webpack.config.test-fp64.js --progress --hot --open)",
     "test-rendering": "(cd test/rendering-test && webpack-dev-server --config webpack.config.test-rendering.js --progress --hot --open)"
