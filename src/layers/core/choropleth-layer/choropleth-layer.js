@@ -170,43 +170,83 @@ export default class ChoroplethLayer extends Layer {
 
   calculateColors(attribute) {
     const {data: {features}, getColor} = this.props;
+    const {choropleths} = this.state;
 
-    const colors = this.state.choropleths.map(
-      (choropleth, choroplethIndex) => {
-        const feature = features[choropleth.featureIndex];
-        const color = getColor(feature) || DEFAULT_COLOR;
-
-        if (isNaN(color[3])) {
-          color[3] = DEFAULT_COLOR[3];
-        }
-
-        return choropleth.map(polygon =>
-          polygon.map(vertex => color)
-        );
+    calculateAttributeColors(attribute, choropleths, 4, (choropleth) => {
+      const feature = features[choropleth.featureIndex];
+      const color = getColor(feature) || DEFAULT_COLOR;
+      if (isNaN(color[3])) {
+        color[3] = DEFAULT_COLOR[3];
       }
-    );
-
-    attribute.value = new Uint8Array(flattenDeep(colors));
+      return color;
+    });
   }
 
   // Override the default picking colors calculation
   calculatePickingColors(attribute) {
+    const {choropleths} = this.state;
+    const {drawContour} = this.props;
 
-    const colors = this.state.choropleths.map(
-      (choropleth, choroplethIndex) => {
-        const {featureIndex} = choropleth;
-        const color = this.props.drawContour ? [0, 0, 0] : [
-          (featureIndex + 1) % 256,
-          Math.floor((featureIndex + 1) / 256) % 256,
-          Math.floor((featureIndex + 1) / 256 / 256) % 256];
-        return choropleth.map(polygon =>
-          polygon.map(vertex => color)
-        );
-      }
-    );
-
-    attribute.value = new Uint8Array(flattenDeep(colors));
+    calculateAttributeColors(attribute, choropleths, 3, (choropleth) => {
+      const {featureIndex} = choropleth;
+      const color = drawContour ? [0, 0, 0] : [
+        (featureIndex + 1) % 256,
+        Math.floor((featureIndex + 1) / 256) % 256,
+        Math.floor((featureIndex + 1) / 256 / 256) % 256];
+      return color;
+    });
   }
+}
+
+function calculateAttributeColors(attribute, choropleths, colorComponents, colorFn) {
+  if (colorComponents !== 3 && colorComponents !== 4) {
+    throw new Error('colorComponents should be 3 (RGB) or 4 (RGBA)');
+  }
+
+  // Minimize memory allocations. Re-use the same Uint8Array when possible.
+  // This makes a huge difference with picking enabled: when the choropleth changes color in
+  // response to mouse hover, calculateColors runs every single frame during rapid mouse movement.
+  // By default, make room for 1k points.
+  let arr = attribute.value || new Uint8Array(1 << 12);
+  let index = 0;
+
+  // Write colors directly into a flat Uint8Array.
+  // Creating lots of JS arrays, then calling flatten() is slow.
+  choropleths.forEach((choropleth) => {
+    const color = colorFn(choropleth);
+    if (color.length !== colorComponents) {
+      throw new Error('invalid colorFn, expected a color with ${colorComponents} components');
+    }
+    for (let i = 0; i < choropleth.length; i++) {
+      const polygon = choropleth[i];
+      const newLength = index + polygon.length * colorComponents;
+      arr = resizeIfNeeded(arr, newLength);
+      for (let j = 0; j < polygon.length; j++) {
+        for (let k = 0; k < colorComponents; k++) {
+          arr[index++] = color[k];
+        }
+      }
+    }
+  });
+
+  attribute.value = arr;
+}
+
+/**
+ * Takes a Uint8Array. Returns the same array if it's long enough to fit `length` bytes, otherwise
+ * returns a new Uint8Array with the elements copied over from the old array.
+ */
+function resizeIfNeeded(arr, length) {
+  if (arr.length >= length) {
+    return arr;
+  }
+  let arrLen = arr.length;
+  while (arrLen < length) {
+    arrLen *= 2;
+  }
+  const ret = new Uint8Array(arrLen);
+  ret.set(arr);
+  return ret;
 }
 
 /*
