@@ -70,6 +70,12 @@ const LOCAL_DEVELOPMENT_CONFIG = {
   module: {
     rules: [
       {
+        // Inline shaders
+        test: /\.glsl$/,
+        loader: 'raw-loader',
+        exclude: [/node_modules/]
+      },
+      {
         // Needed to inline deck.gl GLSL shaders
         include: [resolve('../../src')],
         loader: 'transform-loader',
