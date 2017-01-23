@@ -43,10 +43,6 @@ const defaultProps = {
 };
 
 export default class ScatterplotLayer extends Layer {
-  constructor(props) {
-    super(Object.assign({}, defaultProps, props));
-  }
-
   getShaders(id) {
     return {
       vs: readFileSync(join(__dirname, './scatterplot-layer-vertex.glsl'), 'utf8'),
@@ -162,3 +158,4 @@ export default class ScatterplotLayer extends Layer {
 }
 
 ScatterplotLayer.layerName = 'ScatterplotLayer';
+ScatterplotLayer.defaultProps = defaultProps;

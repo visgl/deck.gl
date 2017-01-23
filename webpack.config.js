@@ -28,6 +28,16 @@ module.exports = {
   module: {
     rules: [
       {
+        // Inline shaders
+        test: /\.glsl$/,
+        exclude: /node_modules/,
+        loader(content) {
+          this.cacheable && this.cacheable(); // eslint-disable-line
+          this.value = content;
+          return "module.exports = " + JSON.stringify(content); // eslint-disable-line
+        }
+      },
+      {
         // Compile ES2015 using buble
         test: /\.js$/,
         loader: 'buble-loader',
