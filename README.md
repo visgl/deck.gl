@@ -57,8 +57,8 @@ Building deck.gl from source has a dependency on node `4.0` or higher.
 Either upgrade to a newest version, or install something like [nvm](https://github.com/creationix/nvm).
 
 #### Install yarn
-deck.gl uses [yarn] (https://www.npmjs.com/package/yarn) to manage packages.
-To develop deck.gl, install yarn with brew
+On macOS deck.gl uses [yarn] (https://www.npmjs.com/package/yarn) to manage packages.
+To develop deck.gl, [install yarn] (https://yarnpkg.com/en/docs/install) with brew
 ```
 brew update
 brew install yarn

@@ -39,10 +39,11 @@ function positionsAreEqual(v1, v2) {
 
 const defaultProps = {
   id: 'hexagon-layer',
+  data: [],
   dotRadius: 1,
-  elevation: 0,
   enable3d: true,
-  invisibleColor: {r: 0, g: 0, b: 0},
+  hexagonVertices: null,
+  invisibleColor: [0, 0, 0],
   getCentroid: x => x.centroid,
   getColor: x => x.color,
   getAlpha: x => 255,
@@ -63,8 +64,8 @@ export default class HexagonLayer extends Layer {
    *
    * @class
    * @param {object} props
+   * @param {number} props.data - all hexagons
    * @param {number} props.dotRadius - hexagon radius multiplier
-   * @param {number} props.elevation - hexagon elevation uniform, 1 unit roughly equals 100 meters
    * @param {boolean} props.enable3d - if set to false, all hexagons will be flat
    * @param {array} props.hexagonVertices - primitive hexagon vertices as [[lon, lat]]
    * @param {object} props.invisibleColor - hexagon invisible color
@@ -76,6 +77,9 @@ export default class HexagonLayer extends Layer {
    */
   constructor(props) {
     assert(props.hexagonVertices, 'hexagonVertices must be supplied');
+    assert(props.hexagonVertices.length === 6,
+        'hexagonVertices should be an array of 6 [lon, lat] paris');
+
     super(Object.assign({}, defaultProps, props));
   }
 
@@ -133,7 +137,7 @@ export default class HexagonLayer extends Layer {
       // Calculate angle that the perpendicular hexagon vertex axis is tilted
       angle: Math.acos(dx / dxy) * -Math.sign(dy) + Math.PI / 2,
       // Allow user to fine tune radius
-      radius: dxy / 2 * Math.min(1, dotRadius)
+      radius: dxy / 2 * Math.max(0, Math.min(1, dotRadius))
     });
   }
 
@@ -151,12 +155,11 @@ export default class HexagonLayer extends Layer {
   }
 
   updateUniforms() {
-    const {opacity, enable3d, elevation, invisibleColor} = this.props;
+    const {opacity, enable3d, invisibleColor} = this.props;
     this.setUniforms({
-      opacity,
       enable3d: enable3d ? 1 : 0,
-      elevation,
-      invisibleColor: [invisibleColor.r, invisibleColor.g, invisibleColor.b]
+      invisibleColor,
+      opacity
     });
   }
 
