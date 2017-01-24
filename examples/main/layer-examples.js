@@ -18,7 +18,6 @@ import {
   ExtrudedChoroplethLayer64,
 
   Container
-
 } from 'deck.gl';
 
 import * as dataSamples from './data-samples';
@@ -293,8 +292,8 @@ const ExtrudedChoroplethLayer64Example = {
 const ExtrudedChoroplethLayer64WireframeExample = {
   layer: ExtrudedChoroplethLayer64,
   props: Object.assign({}, ExtrudedChoroplethLayer64Example.props, {
-      id: 'extrudedChoroplethLayer64-wireframe',
-      drawWireframe: true
+    id: 'extrudedChoroplethLayer64-wireframe',
+    drawWireframe: true
   })
 };
 
