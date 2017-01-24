@@ -3,6 +3,7 @@ import {
   ArcLayer,
   LineLayer,
   ScreenGridLayer,
+  HexagonLayer,
 
   GeoJsonLayer,
   // PolygonLayer,
@@ -169,6 +170,20 @@ const ScatterplotLayerMetersExample = {
   }
 };
 
+const HexagonLayerExample = {
+    layer: HexagonLayer,
+    props: {
+        id: 'hexagonLayer',
+        data: dataSamples.hexagons,
+        hexagonVertices: dataSamples.hexagons[0].vertices,
+        getColor: h => [48, 128, h.value * 255],
+        getElevation: h => h.value,
+        enable3d: true,
+        pickable: true,
+        opacity: 1
+    }
+};
+
 // 64 BIT LAYER EXAMPLES
 
 const ArcLayer64Example = {
@@ -322,7 +337,8 @@ export default {
     'ScatterplotLayer (meters)': ScatterplotLayerMetersExample,
     ArcLayer: ArcLayerExample,
     LineLayer: LineLayerExample,
-    ScreenGridLayer: ScreenGridLayerExample
+    ScreenGridLayer: ScreenGridLayerExample,
+    HexagonLayer: HexagonLayerExample
   },
 
   '64-bit Layers': {
