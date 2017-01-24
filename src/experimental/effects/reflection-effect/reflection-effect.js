@@ -69,7 +69,7 @@ export default class ReflectionEffect extends Effect {
     );
     gl.clear(GL.COLOR_BUFFER_BIT | GL.DEPTH_BUFFER_BIT);
 
-    layerManager.drawLayers();
+    layerManager.drawLayers({pass: 'reflection'});
     layerManager.setViewport(viewport);
     this.framebuffer.unbind();
   }

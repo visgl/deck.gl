@@ -13,10 +13,10 @@ const defaultLightSettings = {
   materialShininess: 1
 };
 
-export function updateSettings({layer, props, oldProps}) {
-  if (props.lightSettings !== oldProps.lightSettings) {
-    const lightSettings = Object.assign({}, defaultLightSettings, props.lightSettings);
-    layer.setUniforms({
+export function updateSettings({settings, oldSettings = {}}) {
+  if (settings !== oldSettings) {
+    const lightSettings = Object.assign({}, defaultLightSettings, settings);
+    return {
       uLightingEnabled: lightSettings.enabled,
       uAmbientColor: lightSettings.ambientColor,
       uPointLightAmbientCoefficient: lightSettings.pointLightAmbientCoefficient,
@@ -25,8 +25,9 @@ export function updateSettings({layer, props, oldProps}) {
       uPointLightAttenuation: lightSettings.pointLightAttenuation,
       uMaterialSpecularColor: lightSettings.materialSpecularColor,
       uMaterialShininess: lightSettings.materialShininess
-    });
+    };
   }
+  return {};
 }
 
 export const lighting = {

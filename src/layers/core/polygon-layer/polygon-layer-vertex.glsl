@@ -52,8 +52,8 @@ void main(void) {
   vec3 position_modelspace = project_position(positions);
   gl_Position = project_to_clipspace(vec4(position_modelspace, 1.));
 
-  // vec3 litColor = lighting_filterColor(position_modelspace, normals, colors.rgb);
-  vec3 litColor = colors.rgb;
+  vec3 litColor = lighting_filterColor(position_modelspace, normals, colors.rgb);
+  // vec3 litColor = colors.rgb;
   vec4 color = vec4(litColor.rgb, colors.a * opacity) / 255.;
   picking_setNormalAndPickColors(color, pickingColors / 255.);
 }

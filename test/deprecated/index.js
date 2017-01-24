@@ -1,0 +1,1 @@
+import './geojson.spec';

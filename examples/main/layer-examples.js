@@ -51,14 +51,27 @@ const GeoJsonLayerExample = {
   }
 };
 
+const GeoJsonLayerOutlineExample = {
+  layer: GeoJsonLayer,
+  props: {
+    id: 'geojsonLayer-outline',
+    data: dataSamples.choropleths,
+    fillPolygons: false,
+    getStrokeColor: f => [0, 0, ((Container.get(f, 'properties.ZIP_CODE') * 10) % 127) + 128],
+    getColor: f => [200, 0, 80],
+    opacity: 0.8,
+    drawContour: true
+  }
+};
+
 const GeoJsonLayerExtrudedExample = {
   layer: GeoJsonLayer,
   props: {
     id: 'geojsonLayer-example',
     data: dataSamples.choropleths,
+    getHeight: f => ((f.properties.ZIP_CODE * 10) % 127) * 10,
     getFillColor: f => [0, 0, ((Container.get(f, 'properties.ZIP_CODE') * 23) % 100) + 155],
     getColor: f => [0, 0, ((Container.get(f, 'properties.ZIP_CODE') * 10) % 256)],
-    getHeight: f => ((f.properties.ZIP_CODE * 10) % 127) * 10,
     opacity: 1,
     extruded: true
   }
@@ -69,9 +82,11 @@ const GeoJsonLayerWireframeExample = {
   props: {
     id: 'geojsonLayer-wireframe',
     data: dataSamples.choropleths,
+    fillPolygons: false,
     extruded: true,
     wireframe: true,
     lightSettings: {enabled: false},
+    getHeight: f => ((f.properties.ZIP_CODE * 10) % 127) * 10,
     getFillColor: f => [0, 0, ((Container.get(f, 'properties.ZIP_CODE') * 10) % 127) + 128],
     getColor: f => [200, 0, 80],
     opacity: 0.8
@@ -313,6 +328,7 @@ const ScatterplotLayer64PerfExample = (id, getData) => ({
 export default {
   'Core Layers': {
     'GeoJsonLayer': GeoJsonLayerExample,
+    'GeoJsonLayer (Outline)': GeoJsonLayerOutlineExample,
     'GeoJsonLayer (Extruded)': GeoJsonLayerExtrudedExample,
     'GeoJsonLayer (Wireframe)': GeoJsonLayerWireframeExample,
     // 'GeoJsonLayer (Immutable)': GeoJsonLayerImmutableExample,

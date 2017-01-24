@@ -101,10 +101,10 @@ export default class LayerManager {
     return this;
   }
 
-  drawLayers() {
+  drawLayers({pass}) {
     assert(this.context.viewport, 'LayerManager.drawLayers: viewport not set');
 
-    drawLayers({layers: this.layers});
+    drawLayers({layers: this.layers, pass});
 
     return this;
   }

@@ -143,7 +143,7 @@ export default class DeckGL extends React.Component {
 
     this.effectManager.preDraw();
 
-    this.layerManager.drawLayers();
+    this.layerManager.drawLayers({pass: 'primary'});
 
     this.effectManager.draw();
   }

@@ -1,4 +1,4 @@
-import * as Container from './container';
+import * as Container from '../../../lib/utils';
 
 /**
  * "Normalizes" complete or partial GeoJSON data into iterable list of features

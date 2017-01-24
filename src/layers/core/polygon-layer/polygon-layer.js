@@ -25,19 +25,25 @@ import {readFileSync} from 'fs';
 import {join} from 'path';
 
 // Polygon geometry generation is managed by the polygon tesselator
-import {Container, getGeojsonFeatures, featureToPolygons} from '../../../lib/utils';
+import {Container} from '../../../lib/utils';
 import {PolygonTesselator} from './polygon-tesselator';
 import {PolygonTesselatorExtruded} from './polygon-tesselator-extruded';
 
 // const defaultColor = [0, 0, 0, 255];
 
 const defaultProps = {
-  getPolygons: feature => featureToPolygons(feature),
-  getColor: f => Container.get(f, 'properties.color') || Container.get(f, 'color'),
-  getHeight:
-    f => Container.get(f, 'properties.height') || Container.get(f, 'height') || 1000,
+  // Whether to extrude in 2.5D
   extruded: false,
+  // Whether to draw a GL.LINES wireframe of the polygon
+  // TODO - not clear that this should be part of the main layer
   wireframe: false,
+  // Accessor for polygon geometry
+  getPolygon: f => Container.get(f, 'polygon') || Container.get(f, 'geometry.coordinates'),
+  // Accessor for extrusion height
+  getHeight: f => Container.get(f, 'height') || Container.get(f, 'properties.height') || 0,
+  // Accessor for color
+  getColor: f => Container.get(f, 'color') || Container.get(f, 'properties.color'),
+  // Optional settings for 'lighting' shader module
   lightSettings: {}
 };
 
@@ -45,7 +51,6 @@ export default class PolygonLayer extends Layer {
   getShaders() {
     return {
       vs: readFileSync(join(__dirname, './polygon-layer-vertex.glsl'), 'utf8'),
-      // vs: readFileSync(join(__dirname, './polygon-layer-vertex-3d.glsl'), 'utf8'),
       fs: readFileSync(join(__dirname, './polygon-layer-fragment.glsl'), 'utf8'),
       modules: ['lighting']
     };
@@ -82,7 +87,14 @@ export default class PolygonLayer extends Layer {
 
   updateState({props, oldProps, changeFlags}) {
     this.updateGeometry({props, oldProps, changeFlags});
-    lighting.updateSettings({layer: this, props, oldProps});
+    if (props.extruded) {
+      this.setUniforms(lighting.updateSettings({
+        settings: props.lightSettings,
+        prevSettings: oldProps.lightSettings
+      }));
+    } else {
+      this.setUniforms(lighting.updateSettings({settings: {enabled: false}}));
+    }
   }
 
   updateGeometry({props, oldProps, changeFlags}) {
@@ -91,25 +103,17 @@ export default class PolygonLayer extends Layer {
       props.wireframe !== oldProps.wireframe;
 
     if (changeFlags.dataChanged || geometryChanged) {
-      const {getPolygons, extruded, wireframe, getHeight} = props;
+      const {getPolygon, extruded, wireframe, getHeight} = props;
 
-      // Extract polygons from data (each object can have multiple polygons)
-      // Also build a matching object array
+      // TODO - avoid creating a temporary array here: let the tesselator iterate
       const polygons = [];
-      const features = [];
-      Container.forEach(getGeojsonFeatures(props.data), feature =>
-        Container.forEach(getPolygons(feature), (polygon, i) => {
-          polygons.push(polygon);
-          features.push(feature);
-        })
-      );
-      this.setState({features});
+      Container.forEach(props.data, feature => polygons.push(getPolygon(feature) || []));
 
       this.setState({
         polygonTesselator: !extruded ?
           new PolygonTesselator({polygons}) :
           new PolygonTesselatorExtruded({polygons, wireframe,
-            getHeight: polygonIndex => getHeight(this.state.features[polygonIndex])
+            getHeight: polygonIndex => getHeight(this.props.data[polygonIndex])
           })
       });
 
@@ -161,7 +165,7 @@ export default class PolygonLayer extends Layer {
   calculateColors(attribute) {
     attribute.value = this.state.polygonTesselator.colors({
       getColor: polygonIndex => {
-        return this.props.getColor(this.state.features[polygonIndex]);
+        return this.props.getColor(this.props.data[polygonIndex]);
       }
     });
   }
