@@ -59,7 +59,6 @@ const GeoJsonLayerExtrudedExample = {
     getFillColor: f => [0, 0, ((Container.get(f, 'properties.ZIP_CODE') * 23) % 100) + 155],
     getColor: f => [0, 0, ((Container.get(f, 'properties.ZIP_CODE') * 10) % 256)],
     getHeight: f => ((f.properties.ZIP_CODE * 10) % 127) * 10,
-    // lightSettings: {enabled: false},
     opacity: 1,
     extruded: true
   }
@@ -72,6 +71,7 @@ const GeoJsonLayerWireframeExample = {
     data: dataSamples.choropleths,
     extruded: true,
     wireframe: true,
+    lightSettings: {enabled: false},
     getFillColor: f => [0, 0, ((Container.get(f, 'properties.ZIP_CODE') * 10) % 127) + 128],
     getColor: f => [200, 0, 80],
     opacity: 0.8
