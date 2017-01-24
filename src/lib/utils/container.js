@@ -42,6 +42,10 @@ export function isPlainObject(value) {
   return value !== null && typeof value === 'object' && value.constructor === Object;
 }
 
+export function isContainer(value) {
+  return Array.isArray(value) || ArrayBuffer.isView(value) || isObject(value);
+}
+
 /**
  * Deduces numer of elements in a JavaScript container.
  * - Auto-deduction for ES6 containers that define a count() method
@@ -224,28 +228,29 @@ function getKeys(compositeKey) {
   return Array.isArray(compositeKey) ? compositeKey : [compositeKey];
 }
 
-// Attempt to create a simple (array, plain object) representation of
-// a nested structure of ES6 iterable classes.
-// Assumption is that if an entries() method is available, the iterable object
-// should be represented as an object, if not as an array.
-export function toJS(container) {
-  if (!isObject(container)) {
-    return container;
+// "Generic" forEach that first attempts to call a
+export function forEach(container, visitor) {
+  // Hack to work around limitations in buble compiler
+  const prototype = Object.getPrototypeOf(container);
+  if (prototype.forEach) {
+    container.forEach(visitor);
+    return;
   }
 
-  if (isKeyedContainer(container)) {
-    const result = {};
+  const isKeyed = isKeyedContainer(container);
+  if (isKeyed) {
     for (const [key, value] of entries(container)) {
-      result[key] = toJS(value);
+      visitor(value, key, container);
     }
-    return result;
+    return;
   }
 
-  const result = [];
-  for (const value of values(container)) {
-    result.push(toJS(value));
+  let index = 0;
+  for (const element of values(container)) {
+    // result[index] = visitor(element, index, container);
+    visitor(element, index, container);
+    index++;
   }
-  return result;
 }
 
 export function map(container, visitor) {
@@ -273,6 +278,59 @@ export function map(container, visitor) {
       result.push(visitor(element, index, container));
       index++;
     }
+  }
+  return result;
+}
+
+export function reduce(container, visitor) {
+  // Hack to work around limitations in buble compiler
+  const prototype = Object.getPrototypeOf(container);
+  if (prototype.forEach) {
+    const result = [];
+    container.forEach((x, i, e) => result.push(visitor(x, i, e)));
+    return result;
+  }
+
+  const isKeyed = isKeyedContainer(container);
+  // const result = new Array(count(container));
+  const result = [];
+  if (isKeyed) {
+    // TODO - should this create an object?
+    for (const [key, value] of entries(container)) {
+      // result[index] = visitor(element, index, container);
+      result.push(visitor(value, key, container));
+    }
+  } else {
+    let index = 0;
+    for (const element of values(container)) {
+      // result[index] = visitor(element, index, container);
+      result.push(visitor(element, index, container));
+      index++;
+    }
+  }
+  return result;
+}
+
+// Attempt to create a simple (array, plain object) representation of
+// a nested structure of ES6 iterable classes.
+// Assumption is that if an entries() method is available, the iterable object
+// should be represented as an object, if not as an array.
+export function toJS(container) {
+  if (!isObject(container)) {
+    return container;
+  }
+
+  if (isKeyedContainer(container)) {
+    const result = {};
+    for (const [key, value] of entries(container)) {
+      result[key] = toJS(value);
+    }
+    return result;
+  }
+
+  const result = [];
+  for (const value of values(container)) {
+    result.push(toJS(value));
   }
   return result;
 }

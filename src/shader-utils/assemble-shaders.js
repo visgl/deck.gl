@@ -69,6 +69,13 @@ function assembleShader(gl, opts = {}) {
       source += `${SHADER_CHUNKS[chunkName].source}\n`;
     }
   }
+  for (const chunkName of opts.modules || []) {
+    if (SHADER_CHUNKS[chunkName]) {
+      source += `${SHADER_CHUNKS[chunkName].source}\n`;
+    } else {
+      throw new Error(`Shader module ${chunkName} not found`);
+    }
+  }
   source += vs;
   return source;
 }

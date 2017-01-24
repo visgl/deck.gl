@@ -17,15 +17,23 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
+/* eslint-disable max-len */
 
+// Utilities
 export * from './lib';
 export * from './shader-utils';
+import * as Container from './lib/utils/container';
+export {Container};
 
 // Core Layers
 export {default as ArcLayer} from './layers/core/arc-layer';
 export {default as LineLayer} from './layers/core/line-layer';
 export {default as ScatterplotLayer} from './layers/core/scatterplot-layer';
 export {default as ScreenGridLayer} from './layers/core/screen-grid-layer';
+
+export {default as PathLayer} from './layers/core/path-layer/path-layer';
+export {default as PolygonLayer} from './layers/core/polygon-layer/polygon-layer';
+export {default as GeoJsonLayer} from './layers/core/geojson-layer/geojson-layer';
 
 // 64-bit Layers
 export {default as ScatterplotLayer64} from './layers/fp64/scatterplot-layer';
@@ -35,8 +43,7 @@ export {default as LineLayer64} from './layers/fp64/line-layer';
 // Deprecated Layers
 export {default as ChoroplethLayer} from './layers/deprecated/choropleth-layer';
 export {default as ChoroplethLayer64} from './layers/deprecated/choropleth-layer-64';
-export {default as ExtrudedChoroplethLayer64}
-	from './layers/deprecated/extruded-choropleth-layer-64';
+export {default as ExtrudedChoroplethLayer64} from './layers/deprecated/extruded-choropleth-layer-64';
 
 // React exports
 export {default as autobind} from './react/autobind';
