@@ -20,7 +20,11 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## Recent Dev Releases
 
+#### [v3.1.0-beta.12] -
+FIX: Broken dist export
+
 #### [v3.1.0-beta.11] -
+
 NEW: GeoJsonLayer, PathLayer
 NEW: PolygonLayer with flat, extrusion and wireframe (5x faster than Choropleth)
 NEW: Support immutable geojson data in choropleth layers
