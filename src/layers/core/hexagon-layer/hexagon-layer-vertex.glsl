@@ -12,7 +12,7 @@ attribute vec3 instancePickingColors;
 uniform float renderPickingBuffer;
 uniform vec3 selectedPickingColor;
 
-// projection uniforms
+// Projection uniforms
 uniform float mercatorScale;
 uniform mat4 worldMatrix;
 uniform mat4 viewMatrix;
@@ -25,7 +25,7 @@ uniform float radius;
 uniform float angle;
 uniform float enable3d;
 
-// Lighting constants, this can also be set via uniform
+// Lighting constants
 const vec3 ambientColor = vec3(1., 1., 1.);
 const vec3 pointLocation = vec3(-1., 3., -1.);
 const vec3 pointColor = vec3(1., 1., 1.);
@@ -36,32 +36,32 @@ const float pointLightAmbientCoefficient = 0.8;
 // Result
 varying vec4 vColor;
 
-// a magic number to scale elevations so that 1 unit roughly equals 100 meter
-float elevationScaler = 6000.;
+// A magic number to scale elevation so that 1 unit approximate to 100 meter
+#define ELEVATION_SCALE 6000.
 
 void main(void) {
 
   // rotate primitive position and normal
   mat2 rotationMatrix = mat2(cos(angle), -sin(angle), sin(angle), cos(angle));
 
-  vec3 rotatedPositions = vec3(
-    vec2(rotationMatrix * positions.xz).x,
-    positions.y,
-    vec2(rotationMatrix * positions.xz).y
-  );
-  vec3 rotatedNormals = vec3(
-    vec2(rotationMatrix * normals.xz).x,
-    normals.y,
-    vec2(rotationMatrix * normals.xz).y
-  );
+  vec2 rPos = rotationMatrix * positions.xz;
+  vec2 rNorm = rotationMatrix * normals.xz;
 
-  float elevation = mix(0., instancePositions.z * elevationScaler * (positions.y + 0.5), enable3d);
+  vec3 rotatedPositions = vec3(rPos.x, positions.y, rPos.y);
+  vec3 rotatedNormals = vec3(rNorm.x, normals.y, rNorm.y);
+
+  // calculate elevation, if 3d not enabled set to 0
+  float elevation = mix(0., instancePositions.z * ELEVATION_SCALE * (positions.y + 0.5), enable3d);
+
+  // project center of hexagon
   vec4 centroidPosition = vec4(project_position(vec3(instancePositions.xy, elevation)), 0.0);
 
   gl_Position = project_to_clipspace(centroidPosition + vec4(vec2(rotatedPositions.xz * radius), 0., 1.));
 
+  // check whether hexagon is currently picked
   float selected = isPicked(instancePickingColors, selectedPickingColor);
 
+  // calculate lighting
   vec3 lightWeighting = getLightWeight(
     viewMatrix,
     worldMatrix,
