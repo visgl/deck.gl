@@ -58,7 +58,7 @@ export default class Layer {
       data: props.data || []
     });
 
-    // this.id = props.id;
+    this.id = props.id;
     this.props = props;
     this.oldProps = null;
     this.state = null;

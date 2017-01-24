@@ -375,7 +375,7 @@ binary-extensions@^1.0.0:
   version "1.8.0"
   resolved "https://registry.yarnpkg.com/binary-extensions/-/binary-extensions-1.8.0.tgz#48ec8d16df4377eae5fa5884682480af4d95c774"
 
-bindings@^1.2.1:
+bindings@1.2.x, bindings@^1.2.1:
   version "1.2.1"
   resolved "https://registry.yarnpkg.com/bindings/-/bindings-1.2.1.tgz#14ad6113812d2d37d72e67b4cacb4bb726505f11"
 
@@ -1190,7 +1190,7 @@ evp_bytestokey@^1.0.0:
 
 execspawn@^1.0.1:
   version "1.0.1"
-  resolved "http://registry.npmjs.org/execspawn/-/execspawn-1.0.1.tgz#8286f9dde7cecde7905fbdc04e24f368f23f8da6"
+  resolved "https://registry.yarnpkg.com/execspawn/-/execspawn-1.0.1.tgz#8286f9dde7cecde7905fbdc04e24f368f23f8da6"
   dependencies:
     util-extend "^1.0.1"
 
@@ -2188,6 +2188,13 @@ micromatch@^2.1.5, micromatch@^2.3.11:
     parse-glob "^3.0.4"
     regex-cache "^0.4.2"
 
+microtime@^2.1.2:
+  version "2.1.2"
+  resolved "https://registry.yarnpkg.com/microtime/-/microtime-2.1.2.tgz#9c955d0781961ab13a1b6f9a82b080f5d7ecd83b"
+  dependencies:
+    bindings "1.2.x"
+    nan "2.4.x"
+
 miller-rabin@^4.0.0:
   version "4.0.0"
   resolved "https://registry.yarnpkg.com/miller-rabin/-/miller-rabin-4.0.0.tgz#4a62fb1d42933c05583982f4c716f6fb9e6c6d3d"
@@ -2258,6 +2265,10 @@ ms@0.7.2:
 mute-stream@0.0.5:
   version "0.0.5"
   resolved "https://registry.yarnpkg.com/mute-stream/-/mute-stream-0.0.5.tgz#8fbfabb0a98a253d3184331f9e8deb7372fac6c0"
+
+nan@2.4.x:
+  version "2.4.0"
+  resolved "https://registry.yarnpkg.com/nan/-/nan-2.4.0.tgz#fb3c59d45fe4effe215f0b890f8adf6eb32d2232"
 
 nan@^2.3.0, nan@^2.3.3:
   version "2.5.0"

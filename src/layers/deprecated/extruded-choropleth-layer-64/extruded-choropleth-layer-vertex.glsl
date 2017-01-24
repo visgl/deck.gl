@@ -20,8 +20,12 @@
 
 #define SHADER_NAME extruded-choropleths-layer-vertex-shader
 
-uniform float opacity;
+attribute vec4 positions;
+attribute vec2 heights;
+attribute vec3 normals;
 uniform vec3 colors;
+
+uniform float opacity;
 uniform float elevation;
 
 uniform vec3 uAmbientColor;
@@ -32,10 +36,6 @@ uniform float uPointLightAttenuation;
 
 uniform vec3 uMaterialSpecularColor;
 uniform float uMaterialShininess;
-
-attribute vec4 positions;
-attribute vec2 heights;
-attribute vec3 normals;
 
 varying vec4 vColor;
 

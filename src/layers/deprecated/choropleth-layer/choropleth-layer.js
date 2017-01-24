@@ -20,7 +20,7 @@
 
 import {Layer} from '../../../lib';
 import {assembleShaders} from '../../../shader-utils';
-import {get, flatten, extractPolygons} from '../../../lib/utils';
+import {Container, flatten, extractPolygons} from '../../../lib/utils';
 import {GL, Model, Geometry} from 'luma.gl';
 import earcut from 'earcut';
 import {readFileSync} from 'fs';
@@ -29,7 +29,7 @@ import {join} from 'path';
 const DEFAULT_COLOR = [0, 0, 255, 255];
 
 const defaultProps = {
-  getColor: feature => get(feature, 'properties.color'),
+  getColor: feature => Container.get(feature, 'properties.color'),
   drawContour: false,
   strokeWidth: 1
 };
@@ -101,7 +101,7 @@ export default class ChoroplethLayer extends Layer {
     super.pick(opts);
     const {info} = opts;
     const index = this.decodePickingColor(info.color);
-    const feature = index >= 0 ? get(this.props.data, ['features', index]) : null;
+    const feature = index >= 0 ? Container.get(this.props.data, ['features', index]) : null;
     info.feature = feature;
     info.object = feature;
   }
@@ -156,10 +156,10 @@ export default class ChoroplethLayer extends Layer {
 
   calculateColors(attribute) {
     const {data, getColor} = this.props;
-    const features = get(data, 'features');
+    const features = Container.get(data, 'features');
     const colors = this.state.choropleths.map(
       (choropleth, choroplethIndex) => {
-        const feature = get(features, choropleth.featureIndex);
+        const feature = Container.get(features, choropleth.featureIndex);
         const color = getColor(feature) || DEFAULT_COLOR;
         // Ensure alpha is set
         if (isNaN(color[3])) {
