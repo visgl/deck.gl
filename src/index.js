@@ -26,6 +26,7 @@ export {default as ArcLayer} from './layers/core/arc-layer';
 export {default as LineLayer} from './layers/core/line-layer';
 export {default as ScatterplotLayer} from './layers/core/scatterplot-layer';
 export {default as ScreenGridLayer} from './layers/core/screen-grid-layer';
+export {default as HexagonLayer} from './layers/core/hexagon-layer';
 
 // 64-bit Layers
 export {default as ScatterplotLayer64} from './layers/fp64/scatterplot-layer';

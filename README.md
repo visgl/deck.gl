@@ -53,8 +53,17 @@ or browse directly the [docs folder](./docs).
 
 #### Node Version Requirement
 
-Building deck.gl from source has a dependency on node `0.12` or higher.
+Building deck.gl from source has a dependency on node `4.0` or higher.
 Either upgrade to a newest version, or install something like [nvm](https://github.com/creationix/nvm).
+
+#### Install yarn
+deck.gl uses [yarn] (https://www.npmjs.com/package/yarn) to manage packages.
+To develop deck.gl, install yarn with brew
+```
+brew update
+brew install yarn
+
+```
 
 ## Contributing
 
