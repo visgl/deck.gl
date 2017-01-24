@@ -54,7 +54,7 @@ export default class ExtrudedChoroplethLayer64 extends Layer {
       positions: {size: 4, update: this.calculatePositions},
       heights: {size: 2, update: this.calculateHeights},
       normals: {size: 3, update: this.calculateNormals},
-      colors: {size: 3, update: this.calculateColors}
+      colors: {size: 4, update: this.calculateColors}
     });
 
     const {gl} = this.context;
