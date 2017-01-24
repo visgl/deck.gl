@@ -36,10 +36,6 @@ export {default as PathLayer} from './layers/core/path-layer/path-layer';
 export {default as PolygonLayer} from './layers/core/polygon-layer/polygon-layer';
 export {default as GeoJsonLayer} from './layers/core/geojson-layer/geojson-layer';
 
-export {default as PathLayer} from './layers/core/path-layer/path-layer';
-export {default as PolygonLayer} from './layers/core/polygon-layer/polygon-layer';
-export {default as GeoJsonLayer} from './layers/core/geojson-layer/geojson-layer';
-
 // 64-bit Layers
 export {default as ScatterplotLayer64} from './layers/fp64/scatterplot-layer';
 export {default as ArcLayer64} from './layers/fp64/arc-layer';
