@@ -38,6 +38,11 @@ export class PolygonTesselator {
     return calculatePositions({polygons, pointCount});
   }
 
+  normals() {
+    const {polygons, pointCount} = this;
+    return calculateNormals({polygons, pointCount});
+  }
+
   colors({getColor = x => DEFAULT_COLOR} = {}) {
     const {polygons, pointCount} = this;
     return calculateColors({polygons, pointCount, getColor});
@@ -177,9 +182,14 @@ function calculatePositions({polygons, pointCount}) {
   return attribute;
 }
 
-// const defaultColor = [0, 0, 0, 255];
+function calculateNormals({polygons, pointCount}) {
+  // TODO - use generic vertex attribute?
+  const attribute = new Float32Array(pointCount * 3);
+  fillArray({target: attribute, source: [0, 0, 1], start: 0, pointCount});
+  return attribute;
+}
 
-export function calculateColors({polygons, pointCount, getColor}) {
+function calculateColors({polygons, pointCount, getColor}) {
   const attribute = new Uint8Array(pointCount * 4);
   let i = 0;
   polygons.forEach((complexPolygon, polygonIndex) => {

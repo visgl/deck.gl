@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 
 import {Layer} from '../../../lib';
-import {assembleShaders} from '../../../shader-utils';
+import {assembleShaders, lighting} from '../../../shader-utils';
 import {GL, Model, Geometry} from 'luma.gl';
 import {readFileSync} from 'fs';
 import {join} from 'path';
@@ -29,24 +29,17 @@ import {Container, getGeojsonFeatures, featureToPolygons} from '../../../lib/uti
 import {PolygonTesselator} from './polygon-tesselator';
 import {PolygonTesselatorExtruded} from './polygon-tesselator-extruded';
 
-// Light settings are used in 3d mode
-// const defaultLightSettings = {
-//   color: [180, 180, 200],
-//   ambientColor: [255, 255, 255],
-//   pointlightAmbientCoefficient: 0.1,
-//   pointlightLocation: [40.4406, -79.9959, 100],
-//   pointlightColor: [255, 255, 255],
-//   pointlightAttenuation: 1.0,
-//   materialSpecularColor: [255, 255, 255],
-//   materialShininess: 1
-// };
+// const defaultColor = [0, 0, 0, 255];
+// const defaultHeight = 1000;
 
 const defaultProps = {
+  getPolygons: feature => featureToPolygons(feature),
+  getColor: f => Container.get(f, 'properties.color') || Container.get(f, 'color'),
+  getHeight:
+    f => Container.get(f, 'properties.height') || Container.get(f, 'height'),
   extruded: false,
   wireframe: false,
-  color: [0, 0, 255, 255],
-  getPolygons: feature => featureToPolygons(feature),
-  getColor: feature => Container.get(feature, 'properties.color') || Container.get(feature, 'color')
+  lightSettings: {}
 };
 
 export default class PolygonLayer extends Layer {
@@ -54,7 +47,8 @@ export default class PolygonLayer extends Layer {
     return {
       vs: readFileSync(join(__dirname, './polygon-layer-vertex.glsl'), 'utf8'),
       // vs: readFileSync(join(__dirname, './polygon-layer-vertex-3d.glsl'), 'utf8'),
-      fs: readFileSync(join(__dirname, './polygon-layer-fragment.glsl'), 'utf8')
+      fs: readFileSync(join(__dirname, './polygon-layer-fragment.glsl'), 'utf8'),
+      modules: ['lighting']
     };
   }
 
@@ -71,6 +65,7 @@ export default class PolygonLayer extends Layer {
     attributeManager.addDynamic({
       indices: {size: 1, update: this.calculateIndices, isIndexed: true, noAlloc},
       positions: {size: 3, update: this.calculatePositions, noAlloc},
+      normals: {size: 3, update: this.calculateNormals, noAlloc},
       colors: {
         type: GL.UNSIGNED_BYTE,
         size: 4,
@@ -86,15 +81,19 @@ export default class PolygonLayer extends Layer {
     });
   }
 
-  updateState({oldProps, props, changeFlags}) {
-    const {attributeManager} = this.state;
-    const {getPolygons, extruded, wireframe} = props;
+  updateState({props, oldProps, changeFlags}) {
+    this.updateGeometry({props, oldProps, changeFlags});
+    lighting.updateSettings({layer: this, props, oldProps});
+  }
 
+  updateGeometry({props, oldProps, changeFlags}) {
     const geometryChanged =
       props.extruded !== oldProps.extruded ||
       props.wireframe !== oldProps.wireframe;
 
     if (changeFlags.dataChanged || geometryChanged) {
+      const {getPolygons, extruded, wireframe, getHeight} = props;
+
       // Extract polygons from data (each object can have multiple polygons)
       // Also build a matching object array
       const polygons = [];
@@ -105,19 +104,17 @@ export default class PolygonLayer extends Layer {
           features.push(feature);
         })
       );
+      this.setState({features});
 
       this.setState({
-        features,
-        polygonTesselator: extruded ?
-          new PolygonTesselatorExtruded({polygons, wireframe}) :
-          new PolygonTesselator({polygons})
+        polygonTesselator: !extruded ?
+          new PolygonTesselator({polygons}) :
+          new PolygonTesselatorExtruded({polygons, wireframe,
+            getHeight: polygonIndex => getHeight(this.state.features[polygonIndex])
+          })
       });
 
-      attributeManager.invalidateAll();
-    }
-
-    if (oldProps.opacity !== props.opacity) {
-      this.setUniforms({opacity: props.opacity});
+      this.state.attributeManager.invalidateAll();
     }
   }
 
@@ -156,6 +153,10 @@ export default class PolygonLayer extends Layer {
 
   calculatePositions(attribute) {
     attribute.value = this.state.polygonTesselator.positions();
+  }
+
+  calculateNormals(attribute) {
+    attribute.value = this.state.polygonTesselator.normals();
   }
 
   calculateColors(attribute) {

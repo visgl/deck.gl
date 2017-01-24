@@ -7,6 +7,8 @@ import {fp64ify} from '../../../lib/utils/fp64';
 import {Container} from '../../../lib/utils';
 // import {Container, flattenVertices, fillArray} from '../../../lib/utils';
 
+const DEFAULT_COLOR = [0, 0, 0, 255]; // Black
+
 export class PolygonTesselatorExtruded {
 
   constructor({
@@ -25,6 +27,7 @@ export class PolygonTesselatorExtruded {
 
     const groupedVertices = polygons;
     this.groupedVertices = polygons;
+    this.wireframe = wireframe;
 
     const positionsJS = calculatePositionsJS({groupedVertices, wireframe});
 
@@ -38,7 +41,7 @@ export class PolygonTesselatorExtruded {
     Object.assign(this.attributes, {
       indices: calculateIndices({groupedVertices, wireframe}),
       normals: calculateNormals({groupedVertices, wireframe}),
-      colors: calculateColors({groupedVertices, wireframe}),
+      // colors: calculateColors({groupedVertices, wireframe, getColor}),
       pickingColors: calculatePickingColors({groupedVertices, wireframe})
     });
 
@@ -64,8 +67,9 @@ export class PolygonTesselatorExtruded {
     return this.attributes.normals;
   }
 
-  colors() {
-    return this.attributes.colors;
+  colors({getColor = x => DEFAULT_COLOR} = {}) {
+    const {groupedVertices, wireframe} = this;
+    return calculateColors({groupedVertices, wireframe, getColor});
   }
 
   pickingColors() {
@@ -171,13 +175,33 @@ function calculateSideNormals(vertices) {
   return [[...normals, normals[0]], [normals[0], ...normals]];
 }
 
-function calculateColors({groupedVertices, color = [0, 0, 0, 255], wireframe = false}) {
-  const colors = groupedVertices.map((vertices, buildingIndex) => {
+/*
+function calculateColors({polygons, pointCount, getColor}) {
+  const attribute = new Uint8Array(pointCount * 4);
+  let i = 0;
+  polygons.forEach((complexPolygon, polygonIndex) => {
+    // Calculate polygon color
+    const color = getColor(polygonIndex);
+    color[3] = Number.isFinite(color[3]) ? color[3] : 255;
+
+    const count = Polygon.getVertexCount(complexPolygon);
+    fillArray({target: attribute, source: color, start: i, count});
+    i += color.length * count;
+  });
+  return attribute;
+}
+*/
+
+function calculateColors({groupedVertices, getColor, wireframe = false}) {
+  const colors = groupedVertices.map((complexPolygon, polygonIndex) => {
+    const color = getColor(polygonIndex);
+    color[3] = Number.isFinite(color[3]) ? color[3] : 255;
+
     // const baseColor = Array.isArray(color) ? color[0] : color;
     // const topColor = Array.isArray(color) ? color[color.length - 1] : color;
-    const numVertices = countVertices(vertices);
-    const topColors = new Array(numVertices).fill([0, 0, 0, 255]);
-    const baseColors = new Array(numVertices).fill([0, 0, 0, 255]);
+    const numVertices = countVertices(complexPolygon);
+    const topColors = new Array(numVertices).fill(color);
+    const baseColors = new Array(numVertices).fill(color);
     return wireframe ?
       [topColors, baseColors] :
       [topColors, topColors, topColors, baseColors, baseColors];

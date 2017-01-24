@@ -20,6 +20,7 @@
 #define SHADER_NAME polygon-layer-vertex-shader
 
 attribute vec3 positions;
+attribute vec3 normals;
 attribute vec4 colors;
 attribute vec3 pickingColors;
 
@@ -30,15 +31,16 @@ uniform vec3 selectedPickingColor;
 // PICKING
 uniform float pickingEnabled;
 varying vec4 vPickingColor;
+
 void picking_setPickColor(vec3 pickingColor) {
   vPickingColor = vec4(pickingColor,  1.);
 }
+
 vec4 picking_setNormalAndPickColors(vec4 color, vec3 pickingColor) {
   vec4 pickingColor4 = vec4(pickingColor.rgb, 1.);
   vPickingColor = mix(color, pickingColor4, pickingEnabled);
   return color;
 }
-// PICKING
 
 // vec4 getColor(vec4 color, float opacity, vec3 pickingColor, float renderPickingBuffer) {
 //   vec4 color4 = vec4(color.xyz / 255., color.w / 255. * opacity);
@@ -47,9 +49,10 @@ vec4 picking_setNormalAndPickColors(vec4 color, vec3 pickingColor) {
 // }
 
 void main(void) {
-  vec3 p = project_position(positions);
-  gl_Position = project_to_clipspace(vec4(p, 1.));
+  vec3 position_modelspace = project_position(positions);
+  gl_Position = project_to_clipspace(vec4(position_modelspace, 1.));
 
-  vec4 color = vec4(colors.rgb, colors.a * opacity) / 255.;
+  vec3 litColor = lighting_filterColor(position_modelspace, normals, colors.rgb);
+  vec4 color = vec4(litColor.rgb, colors.a * opacity) / 255.;
   picking_setNormalAndPickColors(color, pickingColors / 255.);
 }
