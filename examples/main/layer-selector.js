@@ -2,7 +2,7 @@ import React, {PureComponent} from 'react';
 
 export default class LayerSelector extends PureComponent {
 
-  _renderExampleButton(exampleName, example) {
+  _renderExampleButton(exampleName) {
     const {activeExamples, onChange} = this.props;
 
     return (
@@ -10,7 +10,6 @@ export default class LayerSelector extends PureComponent {
         <input
           type="checkbox"
           id={exampleName}
-          name="layerStatus"
           checked={activeExamples[exampleName] || ''}
           onChange={e => onChange(exampleName)}
         />

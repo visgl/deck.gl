@@ -38,6 +38,7 @@ class App extends PureComponent {
       },
       activeExamples: DEFAULT_ACTIVE_LAYERS,
       settings: {
+        effects: false,
         separation: 0,
         rotationZ: 0,
         rotationX: 0
@@ -134,7 +135,7 @@ class App extends PureComponent {
   }
 
   _renderMap() {
-    const {width, height, mapViewState} = this.state;
+    const {width, height, mapViewState, settings: {effects}} = this.state;
     return (
       <MapboxGLMap
         mapboxApiAccessToken={MAPBOX_ACCESS_TOKEN}
@@ -150,7 +151,7 @@ class App extends PureComponent {
           {...mapViewState}
           onWebGLInitialized={ this._onWebGLInitialized }
           layers={this._renderExamples()}
-          effects={this._effects}
+          effects={effects ? this._effects : undefined}
         />
 
         <FPSStats isActive/>

@@ -2,8 +2,7 @@ import React, {PureComponent} from 'react';
 
 export default class LayerControls extends PureComponent {
 
-  _onSliderChange(settingName, e) {
-    const newValue = Number(e.target.value);
+  _onValueChange(settingName, newValue) {
     const {settings} = this.props;
     // Only update if we have a confirmed change
     if (settings[settingName] !== newValue) {
@@ -29,7 +28,25 @@ export default class LayerControls extends PureComponent {
             max={setting.max || 1}
             step={setting.step || 0.01}
             value={value}
-            onChange={this._onSliderChange.bind(this, settingName)}/>
+            onChange={ e => this._onValueChange(settingName, Number(e.target.value)) }/>
+        </div>
+      </div>
+    );
+  }
+
+  _renderCheckbox(settingName, setting, value, title) {
+    return (
+      <div key={settingName} >
+        <div className="checkbox" >
+          <input
+            type="checkbox"
+            id={settingName}
+            checked={value}
+            onChange={ e => this._onValueChange(settingName, e.target.checked) }/>
+
+          <label htmlFor={settingName}>
+            <span>{title}</span>
+          </label>
         </div>
       </div>
     );
@@ -40,6 +57,7 @@ export default class LayerControls extends PureComponent {
     return (
       <div id="layer-controls" >
         <h4>Layer Controls</h4>
+        {this._renderCheckbox('effects', {}, settings.effects, 'Enable Effects')}
         {this._renderSlider('separation', {}, settings.separation, 'Separation')}
         {this._renderSlider('rotationZ', {}, settings.rotationZ, 'Rotation (in plane)')}
         {this._renderSlider('rotationX', {}, settings.rotationX, 'Rotation (3D)')}
