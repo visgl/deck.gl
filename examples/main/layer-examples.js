@@ -3,6 +3,7 @@ import {
   ArcLayer,
   LineLayer,
   ScreenGridLayer,
+  HexagonLayer,
 
   GeoJsonLayer,
   // PolygonLayer,
@@ -17,6 +18,7 @@ import {
   ExtrudedChoroplethLayer64,
 
   Container
+
 } from 'deck.gl';
 
 import * as dataSamples from './data-samples';
@@ -169,6 +171,20 @@ const ScatterplotLayerMetersExample = {
   }
 };
 
+const HexagonLayerExample = {
+    layer: HexagonLayer,
+    props: {
+        id: 'hexagonLayer',
+        data: dataSamples.hexagons,
+        hexagonVertices: dataSamples.hexagons[0].vertices,
+        getColor: h => [48, 128, h.value * 255],
+        getElevation: h => h.value,
+        enable3d: true,
+        pickable: true,
+        opacity: 1
+    }
+};
+
 // 64 BIT LAYER EXAMPLES
 
 const ArcLayer64Example = {
@@ -274,12 +290,11 @@ const ExtrudedChoroplethLayer64Example = {
   }
 };
 
-
 const ExtrudedChoroplethLayer64WireframeExample = {
   layer: ExtrudedChoroplethLayer64,
   props: Object.assign({}, ExtrudedChoroplethLayer64Example.props, {
-    id: 'extrudedChoroplethLayer64-wireframe',
-    drawWireframe: true
+      id: 'extrudedChoroplethLayer64-wireframe',
+      drawWireframe: true
   })
 };
 
