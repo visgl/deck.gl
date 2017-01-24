@@ -30,13 +30,12 @@ import {PolygonTesselator} from './polygon-tesselator';
 import {PolygonTesselatorExtruded} from './polygon-tesselator-extruded';
 
 // const defaultColor = [0, 0, 0, 255];
-// const defaultHeight = 1000;
 
 const defaultProps = {
   getPolygons: feature => featureToPolygons(feature),
   getColor: f => Container.get(f, 'properties.color') || Container.get(f, 'color'),
   getHeight:
-    f => Container.get(f, 'properties.height') || Container.get(f, 'height'),
+    f => Container.get(f, 'properties.height') || Container.get(f, 'height') || 1000,
   extruded: false,
   wireframe: false,
   lightSettings: {}

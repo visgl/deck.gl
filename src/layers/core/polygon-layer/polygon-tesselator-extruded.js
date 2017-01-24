@@ -20,7 +20,7 @@ export class PolygonTesselatorExtruded {
   }) {
     // Expensive operation, convert all polygons to arrays
     polygons = Container.map(polygons, (complexPolygon, polygonIndex) => {
-      const height = getHeight(polygonIndex);
+      const height = getHeight(polygonIndex) || 0;
       return Container.map(Polygon.normalize(complexPolygon),
         polygon => Container.map(polygon, coord => [coord[0], coord[1], height]));
     });
@@ -59,7 +59,7 @@ export class PolygonTesselatorExtruded {
     return this.attributes.positions64xy;
   }
 
-  positions64x() {
+  positions64z() {
     return this.attributes.positions64z;
   }
 
@@ -73,12 +73,13 @@ export class PolygonTesselatorExtruded {
   }
 
   pickingColors() {
-    // return this.attributes.pickingColors;
     return this.attributes.pickingColors;
   }
 
   // updateTriggers: {
-  //   positions: ['getHeight']
+  //   positions: ['getHeight'],
+  //   colors: ['getColors']
+  //   pickingColors: 'none'
   // }
 }
 

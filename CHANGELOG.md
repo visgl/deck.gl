@@ -20,6 +20,22 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## Recent Dev Releases
 
+#### [v3.1.0-beta.11] -
+NEW: GeoJsonLayer, PathLayer
+NEW: PolygonLayer with flat, extrusion and wireframe (5x faster than Choropleth)
+NEW: Support immutable geojson data in choropleth layers
+NEW: Add benchmarks for node and browser.js (#299)
+NEW: Lighting supported on polygon layer. New lighting shader module.
+FIX: FP64 math function improvement, bug fixes and speed
+FIX: Set Viewport project/unproject default to screen coordinates
+- Main example refactored
+- Shader tests as webpack
+- 64bit layers as subclasses of 32 bit layers
+- Choropleth Layers now in deprecated folder
+- Remove lodash.flattendeep and geojson-normalize module dependencies
+
+
+
 #### [v3.1.0-beta.10] -
 FIX: Loosen luma.gl peer dependency
 
