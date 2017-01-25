@@ -20,6 +20,10 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## Recent Dev Releases
 
+#### [v3.1.0-beta.13] -
+NEW: GeoJsonLayer cleanup
+NEW: HexagonLayer
+
 #### [v3.1.0-beta.12] -
 FIX: Broken dist export
 
