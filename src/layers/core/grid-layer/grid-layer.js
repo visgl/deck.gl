@@ -118,8 +118,7 @@ export default class GridLayer extends Layer {
       latDelta: this.props.latDelta,
       lngDelta: this.props.lngDelta,
       opacity: this.props.opacity,
-      viewMatrix,
-      testScale: 80
+      viewMatrix
     }, uniforms)});
   }
 
