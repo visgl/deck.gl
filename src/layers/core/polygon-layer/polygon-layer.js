@@ -122,18 +122,6 @@ export default class PolygonLayer extends Layer {
     }
   }
 
-  pick(opts) {
-    super.pick(opts);
-    const {info} = opts;
-    if (!info) {
-      return;
-    }
-    const index = info.index;
-    const feature = index >= 0 ? this.props.data[index] : null;
-    info.feature = feature;
-    info.object = feature;
-  }
-
   getModel(gl) {
     const shaders = assembleShaders(gl, this.getShaders());
     return new Model({

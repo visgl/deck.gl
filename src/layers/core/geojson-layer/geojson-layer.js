@@ -53,13 +53,12 @@ const defaultProps = {
   getHeight: f => 1000
 };
 
-const noop = () => {};
-
 export default class GeoJsonLayer extends Layer {
   initializeState() {
     this.state = {
       subLayers: null,
-      hoverInfos: {}
+      hoverInfos: {},
+      clickInfos: {}
     };
   }
 
@@ -67,13 +66,7 @@ export default class GeoJsonLayer extends Layer {
     if (changeFlags.dataChanged) {
       const {data} = this.props;
       const features = getGeojsonFeatures(data);
-      const separateFeatures = separateGeojsonFeatures(features);
-      this.state.subLayers = {
-        pointFeatures: separateFeatures.pointFeatures,
-        lineFeatures: separateFeatures.lineFeatures,
-        polygonFeatures: separateFeatures.polygonFeatures
-      };
-      this.state.hoveredIndices = {};
+      this.state.subLayers = separateGeojsonFeatures(features);
     }
     if (oldProps.onHover !== props.onHover) {
       this.setState({onHover: props.onHover});
@@ -81,7 +74,7 @@ export default class GeoJsonLayer extends Layer {
     }
     if (oldProps.onClick !== props.onClick) {
       this.setState({onClick: props.onClick});
-      this.props.onClick = noop;
+      this.props.onClick = this._onClick.bind(this);
     }
   }
 
@@ -96,23 +89,35 @@ export default class GeoJsonLayer extends Layer {
     return info;
   }
 
-  _onHover(info) {
-    info = Object.values(this.state.hoverInfos).find(i => i.index > 0) || info;
+  _getPickingInfo(infos, defaultInfo) {
+    const info = Object.values(infos).find(i => i.index >= 0) || defaultInfo;
     info.layer = this;
+    info.feature = info.object ? (info.object.feature || info.object) : undefined;
+    return info;
+  }
+
+  _onHover(info) {
+    info = this._getPickingInfo(this.state.hoverInfos, info);
     this.state.onHover(info);
+    this.state.hoverInfos = {};
   }
 
   _onClick(info) {
-    info.layer = this;
+    info = this._getPickingInfo(this.state.clickInfos, info);
     this.state.onClick(info);
+    this.state.clickInfos = {};
   }
 
   _onHoverSubLayer(info) {
     this.state.hoverInfos[info.layer.id] = info;
   }
 
+  _onClickSubLayer(info) {
+    this.state.clickInfos[info.layer.id] = info;
+  }
+
   renderLayers() {
-    const {subLayers: {pointFeatures, lineFeatures, polygonFeatures}} = this.state;
+    const {subLayers: {pointFeatures, lineFeatures, polygonFeatures, polygonOutlineFeatures}} = this.state;
     const {id, getStrokeColor, getStrokeWidth, getFillColor, getHeight} = this.props;
     const {extruded, wireframe} = this.props;
 
@@ -132,7 +137,7 @@ export default class GeoJsonLayer extends Layer {
       extruded,
       wireframe: false,
       onHover: this._onHoverSubLayer.bind(this),
-      onClick: this._onClick.bind(this)
+      onClick: this._onClickSubLayer.bind(this)
     }));
 
     // Polygon outline or wireframe
@@ -147,17 +152,17 @@ export default class GeoJsonLayer extends Layer {
         extruded: true,
         wireframe: true,
         onHover: this._onHoverSubLayer.bind(this),
-        onClick: this._onClick.bind(this)
+        onClick: this._onClickSubLayer.bind(this)
       }));
     } else if (drawPolygons) {
       polygonOutlineLayer = new PathLayer(Object.assign({}, this.props, {
         id: `${id}-polygon-outline`,
-        data: polygonFeatures,
+        data: polygonOutlineFeatures,
         getPaths: f => get(f, 'geometry.coordinates'),
         getColor: getStrokeColor,
         getWidth: getStrokeWidth,
         onHover: this._onHoverSubLayer.bind(this),
-        onClick: this._onClick.bind(this)
+        onClick: this._onClickSubLayer.bind(this)
       }));
     }
 
@@ -168,14 +173,14 @@ export default class GeoJsonLayer extends Layer {
       getColor: getStrokeColor,
       getWidth: getStrokeWidth,
       onHover: this._onHoverSubLayer.bind(this),
-      onClick: this._onClick.bind(this)
+      onClick: this._onClickSubLayer.bind(this)
     }));
 
     const pointLayer = drawPoints && new ScatterplotLayer(Object.assign({}, this.props, {
       id: `${id}-points`,
       data: pointFeatures,
       onHover: this._onHoverSubLayer.bind(this),
-      onClick: this._onClick.bind(this)
+      onClick: this._onClickSubLayer.bind(this)
     }));
 
     return [

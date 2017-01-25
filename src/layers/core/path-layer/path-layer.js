@@ -53,12 +53,7 @@ export default class PathLayer extends Layer {
       // this.state.paths only stores point positions in each path
       this.state.paths = [];
 
-      props.data.map(f => getPaths(f)).forEach((paths, index) => {
-        paths.forEach(path => {
-          path._index = index;
-        });
-        this.state.paths.push(...paths);
-      });
+      this.state.paths =props.data.map(getPaths);
 
       this.state.pointCount = 0;
       this.state.indexCount = 0;
@@ -84,18 +79,6 @@ export default class PathLayer extends Layer {
       thickness: this.props.strokeWidth || 1,
       miterLimit: 1
     }));
-  }
-
-  pick(opts) {
-    super.pick(opts);
-    const {info} = opts;
-    if (!info) {
-      return;
-    }
-    const index = info.index;
-    const feature = index >= 0 ? this.props.data[index] : null;
-    info.feature = feature;
-    info.object = feature;
   }
 
   getModel(gl) {

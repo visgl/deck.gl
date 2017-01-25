@@ -29,6 +29,9 @@ export default class LayerInfo extends PureComponent {
 
   _infoToString(info) {
     const object = info.feature || info.object;
+    if (!object) {
+      return 'None';
+    }
     const props = object.properties || object;
     return JSON.stringify(props);
   }
