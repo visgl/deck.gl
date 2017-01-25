@@ -7,7 +7,7 @@ import {join} from 'path';
 const defaultProps = {
   opacity: 1,
   strokeWidth: 1,
-  getPaths: feature => feature.geometry.coordinates,
+  getPath: feature => feature.geometry.coordinates,
   getColor: feature => feature.properties.color,
   getWidth: feature => feature.properties.width || 1
 };
@@ -46,14 +46,12 @@ export default class PathLayer extends Layer {
   }
 
   updateState({oldProps, props, changeFlags}) {
-    const {getPaths} = this.props;
+    const {getPath} = this.props;
     const {attributeManager} = this.state;
 
     if (changeFlags.dataChanged) {
       // this.state.paths only stores point positions in each path
-      this.state.paths = [];
-
-      this.state.paths =props.data.map(getPaths);
+      this.state.paths = props.data.map(getPath);
 
       this.state.pointCount = 0;
       this.state.indexCount = 0;

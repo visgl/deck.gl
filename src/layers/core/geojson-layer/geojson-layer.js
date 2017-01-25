@@ -53,6 +53,8 @@ const defaultProps = {
   getHeight: f => 1000
 };
 
+const getCoordinates = f => get(f, 'geometry.coordinates');
+
 export default class GeoJsonLayer extends Layer {
   initializeState() {
     this.state = {
@@ -69,24 +71,13 @@ export default class GeoJsonLayer extends Layer {
       this.state.subLayers = separateGeojsonFeatures(features);
     }
     if (oldProps.onHover !== props.onHover) {
-      this.setState({onHover: props.onHover});
+      this.state.onHover = props.onHover;
       this.props.onHover = this._onHover.bind(this);
     }
     if (oldProps.onClick !== props.onClick) {
-      this.setState({onClick: props.onClick});
+      this.state.onClick = props.onClick;
       this.props.onClick = this._onClick.bind(this);
     }
-  }
-
-  _addFeatureToInfo(info, features) {
-    let feature = null;
-    if (info.index >= 0) {
-      feature = features[info.index];
-      feature = feature.feature || feature;
-    }
-    info.layer = this;
-    info.feature = feature;
-    return info;
   }
 
   _getPickingInfo(infos, defaultInfo) {
@@ -97,34 +88,36 @@ export default class GeoJsonLayer extends Layer {
   }
 
   _onHover(info) {
-    info = this._getPickingInfo(this.state.hoverInfos, info);
-    this.state.onHover(info);
-    this.state.hoverInfos = {};
+    if (info.layer === this) {
+      info = this._getPickingInfo(this.state.hoverInfos, info);
+      this.state.onHover(info);
+      this.state.hoverInfos = {};
+    } else {
+      this.state.hoverInfos[info.layer.id] = info;
+    }
   }
 
   _onClick(info) {
-    info = this._getPickingInfo(this.state.clickInfos, info);
-    this.state.onClick(info);
-    this.state.clickInfos = {};
-  }
-
-  _onHoverSubLayer(info) {
-    this.state.hoverInfos[info.layer.id] = info;
-  }
-
-  _onClickSubLayer(info) {
-    this.state.clickInfos[info.layer.id] = info;
+    if (info.layer === this) {
+      info = this._getPickingInfo(this.state.clickInfos, info);
+      this.state.onClick(info);
+      this.state.clickInfos = {};
+    } else {
+      this.state.clickInfos[info.layer.id] = info;
+    }
   }
 
   renderLayers() {
-    const {subLayers: {pointFeatures, lineFeatures, polygonFeatures, polygonOutlineFeatures}} = this.state;
-    const {id, getStrokeColor, getStrokeWidth, getFillColor, getHeight} = this.props;
+    const {subLayers: {pointFeatures, lineFeatures, polygonFeatures,
+      polygonOutlineFeatures}} = this.state;
+    const {id, getPointColor, getPointSize, getStrokeColor, getStrokeWidth,
+      getFillColor, getHeight} = this.props;
     const {extruded, wireframe} = this.props;
 
     let {drawPoints, drawLines, drawPolygons, fillPolygons} = this.props;
     drawPoints = drawPoints && pointFeatures && pointFeatures.length > 0;
     drawLines = drawLines && lineFeatures && lineFeatures.length > 0;
-    drawPolygons = drawPolygons && polygonFeatures && polygonFeatures.length > 0;
+    drawPolygons = drawPolygons && polygonOutlineFeatures && polygonOutlineFeatures.length > 0;
     fillPolygons = fillPolygons && polygonFeatures && polygonFeatures.length > 0;
 
     // Filled Polygon Layer
@@ -135,9 +128,7 @@ export default class GeoJsonLayer extends Layer {
       getHeight,
       getColor: getFillColor,
       extruded,
-      wireframe: false,
-      onHover: this._onHoverSubLayer.bind(this),
-      onClick: this._onClickSubLayer.bind(this)
+      wireframe: false
     }));
 
     // Polygon outline or wireframe
@@ -146,41 +137,36 @@ export default class GeoJsonLayer extends Layer {
       polygonOutlineLayer = new PolygonLayer(Object.assign({}, this.props, {
         id: `${id}-polygon-wireframe`,
         data: polygonFeatures,
-        getPolygon: f => get(f, 'geometry.coordinates'),
+        getPolygon: getCoordinates,
         getHeight,
         getColor: getStrokeColor,
         extruded: true,
-        wireframe: true,
-        onHover: this._onHoverSubLayer.bind(this),
-        onClick: this._onClickSubLayer.bind(this)
+        wireframe: true
       }));
     } else if (drawPolygons) {
       polygonOutlineLayer = new PathLayer(Object.assign({}, this.props, {
         id: `${id}-polygon-outline`,
         data: polygonOutlineFeatures,
-        getPaths: f => get(f, 'geometry.coordinates'),
+        getPath: getCoordinates,
         getColor: getStrokeColor,
-        getWidth: getStrokeWidth,
-        onHover: this._onHoverSubLayer.bind(this),
-        onClick: this._onClickSubLayer.bind(this)
+        getWidth: getStrokeWidth
       }));
     }
 
     const lineLayer = drawLines && new PathLayer(Object.assign({}, this.props, {
       id: `${id}-line-paths`,
       data: lineFeatures,
-      getPaths: f => get(f, 'geometry.coordinates'),
+      getPath: getCoordinates,
       getColor: getStrokeColor,
-      getWidth: getStrokeWidth,
-      onHover: this._onHoverSubLayer.bind(this),
-      onClick: this._onClickSubLayer.bind(this)
+      getWidth: getStrokeWidth
     }));
 
     const pointLayer = drawPoints && new ScatterplotLayer(Object.assign({}, this.props, {
       id: `${id}-points`,
       data: pointFeatures,
-      onHover: this._onHoverSubLayer.bind(this),
-      onClick: this._onClickSubLayer.bind(this)
+      getPosition: getCoordinates,
+      getColor: getPointColor,
+      getRadius: getPointSize
     }));
 
     return [
