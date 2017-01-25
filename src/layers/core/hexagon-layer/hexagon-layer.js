@@ -79,8 +79,7 @@ export default class HexagonLayer extends Layer {
     assert(props.hexagonVertices, 'hexagonVertices must be supplied');
     assert(props.hexagonVertices.length === 6,
         'hexagonVertices should be an array of 6 [lon, lat] paris');
-
-    super(Object.assign({}, defaultProps, props));
+    super(props);
   }
 
   /**
@@ -222,3 +221,4 @@ export default class HexagonLayer extends Layer {
 }
 
 HexagonLayer.layerName = 'HexagonLayer';
+HexagonLayer.defaultProps = defaultProps;

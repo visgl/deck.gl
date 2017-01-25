@@ -43,10 +43,6 @@ const defaultProps = {
 };
 
 export default class ExtrudedChoroplethLayer64 extends Layer {
-  constructor(props) {
-    super(Object.assign({}, defaultProps, props));
-  }
-
   initializeState() {
     const {attributeManager} = this.state;
     attributeManager.add({
@@ -370,6 +366,7 @@ export default class ExtrudedChoroplethLayer64 extends Layer {
 }
 
 ExtrudedChoroplethLayer64.layerName = 'ExtrudedChoroplethLayer64';
+ExtrudedChoroplethLayer64.defaultProps = defaultProps;
 
 /*
  * helpers
