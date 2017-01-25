@@ -37,12 +37,12 @@ Inherits from all [Base Layer properties](/docs/layers/base-layer.md):
       }
     }
 
-#### `onHovered` (Function, optional)
+#### `onHover` (Function, optional)
 
 Provides selected feature (and properties) along with mouse event when a
 GeoJson feature is hovered.
 
-#### `onClicked` (Function, optional)
+#### `onClick` (Function, optional)
 
 Provides selected feature (and properties) along with mouse event when a
 GeoJson feature is clicked.
@@ -54,19 +54,34 @@ GeoJson feature is clicked.
 ### `getStrokeWidth`
 
 ### `getFillColor`
+### `getHeight`
 
 ### `getPointColor`
-### `getPointRadius`
+### `getPointSize`
 
 ## Layer-specific Properties
 
-#### `strokeColor` (Boolean, optional)
 
-- Default: `false`
+#### `drawPoints` (Boolean, optional)
 
-Each object can have a `color`. strokeColor is the default.
+Draw Point features if true.
+
+
+#### `drawLines` (Boolean, optional)
+
+Draw LineString and MultiLineString features if true.
+
+
+#### `drawPolygons` (Boolean, optional)
+
+Draw outlines of Polygon and MultiPolygon features if true.
+
+
+#### `fillPolygons` (Boolean, optional)
+
+Fill areas of Polygon and MultiPolygon features if true.
 
 
 #### `extruded` (Boolean, optional)
 
-Draw choropleth contour if true, else fill choropleth area.
+Extrude Polygon and MultiPolygon features in 3D if true.
