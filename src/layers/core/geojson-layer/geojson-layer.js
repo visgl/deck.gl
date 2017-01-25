@@ -24,44 +24,37 @@ import PathLayer from '../path-layer/path-layer';
 import PolygonLayer from '../polygon-layer/polygon-layer';
 import flatten from 'lodash.flatten';
 
-import {Container, getGeojsonFeatures} from '../../../lib/utils';
+import {Container} from '../../../lib/utils';
+import {getGeojsonFeatures, separateGeojsonFeatures} from './geojson';
 
-const noop = () => {};
+const defaultPointColor = [0xFF, 0x88, 0x00, 0xFF];
+const defaultStrokeColor = [0x33, 0x33, 0x33, 0xFF];
+const defaultFillColor = [0xBD, 0xE2, 0x7A, 0xFF];
 
 const defaultProps = {
-  pointColor: '#FF8800',
-  pointSize: 5,
-  pointOpacity: 1,
+  drawPoints: false,
+  drawLines: true,
+  drawPolygons: true,
+  fillPolygons: true,
+  // extrudePolygons: false,
+  // wireframe: false,
 
-  strokeColor: '#333333',
-  strokeWidth: 1,
-  strokeOpacity: 1,
+  // Point accessors
+  getPointColor: f => Container.get(f, 'properties.color') || defaultPointColor,
+  getPointSize: f => Container.get(f, 'properties.size') || 5,
 
-  fillColor: '#BDE27A',
-  fillOpacity: 1,
+  // Line and polygon outline accessors
+  getStrokeColor: f => Container.get(f, 'properties.strokeColor') || defaultStrokeColor,
+  getStrokeWidth: f => Container.get(f, 'properties.strokeWidth') || 1,
 
-  getPointColor: f => f.properties && f.properties.color,
-  getPointSize: f => f.properties && f.properties.size,
-  getPointOpacity: f => f.properties && f.properties.opacity,
+  // Polygon fill accessors
+  getFillColor: f => Container.get(f, 'properties.fillColor') || defaultFillColor,
 
-  getStrokeColor: f => f.properties && f.properties.strokeColor,
-  getStrokeWidth: f => (f.properties && f.properties.strokeWidth) || 1,
-  getStrokeOpacity: f => f.properties && f.properties.strokeOpacity,
-
-  getFillColor: f => f.properties && f.properties.fillColor,
-  getFillOpacity: f => f.properties && f.properties.fillOpacity,
-
-  onHover: noop,
-  onClick: noop
+  // Polygon extrusion accessor
+  getHeight: f => 1000
 };
 
 export default class GeoJsonLayer extends Layer {
-  constructor(props) {
-    const data = (props.data && props.data.features) || props.data || [];
-    super(Object.assign({}, defaultProps, props, {data}));
-  }
-
-  // Must be defined
   initializeState() {
     this.state = {
       subLayers: null
@@ -70,43 +63,15 @@ export default class GeoJsonLayer extends Layer {
 
   updateState({changeFlags}) {
     if (changeFlags.dataChanged) {
-      this.state.subLayers = this._extractSublayers();
+      const {data} = this.props;
+      const features = getGeojsonFeatures(data);
+      const separateFeatures = separateGeojsonFeatures(features);
+      this.state.subLayers = {
+        pointFeatures: separateFeatures.pointFeatures,
+        lineFeatures: separateFeatures.lineFeatures,
+        polygonFeatures: separateFeatures.polygonFeatures
+      };
     }
-  }
-
-  _extractSublayers() {
-    const {data} = this.props;
-    const features = getGeojsonFeatures(data);
-
-    const pointFeatures = [];
-    const lineFeatures = [];
-    const polygonFeatures = [];
-    Container.forEach(features, feature => {
-      const type = Container.get(feature, 'geometry.type');
-      switch (type) {
-      case 'Point':
-      case 'MultiPoint':
-        pointFeatures.push(feature);
-        break;
-      case 'LineString':
-      case 'MultiLineString':
-        lineFeatures.push(feature);
-        break;
-      case 'Polygon':
-      case 'MultiPolygon':
-        lineFeatures.push(feature);
-        polygonFeatures.push(feature);
-        break;
-      default:
-        throw new Error(`GeoJsonLayer: ${type} not supported.`);
-      }
-    });
-
-    return {
-      pointLayerData: this._extractPoints(pointFeatures),
-      // pathLayerData: lineFeatures,
-      polygonLayerData: polygonFeatures
-    };
   }
 
   _extractPoints(pointFeatures) {
@@ -155,64 +120,116 @@ export default class GeoJsonLayer extends Layer {
     );
   }
 
-  getFeaturePolygons(feature) {
-    const type = Container.get(feature, 'geometry.type');
-    const coordinates = Container.get(feature, 'geometry.coordinates');
-    switch (type) {
-    case 'MultiPolygon':
-      return coordinates;
-    case 'Polygon':
-      return [coordinates];
-    default:
-      return [];
+  _addFeatureToInfo(info, features) {
+    let feature = null;
+    if (info.index >= 0) {
+      feature = this.state.pointFeatures[info.index];
+      feature = feature.feature || feature;
     }
+    info.feature = feature;
+    return info;
+  }
+
+  _onHoverPoint(info) {
+    this.props.onHover(this._addFeatureToInfo(info, this.state.pointFeatures));
+  }
+
+  _onClickPoint(info) {
+    this.props.onClick(this._addFeatureToInfo(info, this.state.pointFeatures));
+  }
+
+  _onHoverLine(info) {
+    this.props.onHover(this._addFeatureToInfo(info, this.state.lineFeatures));
+  }
+
+  _onClickLine(info) {
+    this.props.onClick(this._addFeatureToInfo(info, this.state.lineFeatures));
+  }
+
+  _onHoverPolygon(info) {
+    this.props.onHover(this._addFeatureToInfo(info, this.state.polygonFeatures));
+  }
+
+  _onClickPolygon(info) {
+    this.props.onClick(this._addFeatureToInfo(info, this.state.polygonFeatures));
   }
 
   renderLayers() {
-    const {
-      id,
-      getStrokeColor, getStrokeWidth, getStrokeOpacity,
-      getFillColor, getFillOpacity,
-      onHover, onClick
-    } = this.props;
+    const {subLayers: {pointFeatures, lineFeatures, polygonFeatures}} = this.state;
+    const {id, getStrokeColor, getStrokeWidth, getFillColor, getHeight} = this.props;
+    const {extruded, wireframe} = this.props;
 
-    const {subLayers: {pointLayerData, pathLayerData, polygonLayerData}} = this.state;
+    let {drawPoints, drawLines, drawPolygons, fillPolygons} = this.props;
+    drawPoints = drawPoints && pointFeatures && pointFeatures.length > 0;
+    drawLines = drawLines && lineFeatures && lineFeatures.length > 0;
+    drawPolygons = drawPolygons && polygonFeatures && polygonFeatures.length > 0;
+    fillPolygons = fillPolygons && polygonFeatures && polygonFeatures.length > 0;
 
-    const pointLayer = pointLayerData && pointLayerData.length &&
-      new ScatterplotLayer(Object.assign({}, this.props, {
-        id: `${id}-point-sublayer`,
-        data: pointLayerData,
-        pickable: false,
-        onHover,
-        onClick
+    // Filled Polygon Layer
+    const polygonFillLayer = fillPolygons && new PolygonLayer(Object.assign({}, this.props, {
+      id: `${id}-polygon-fill`,
+      data: polygonFeatures,
+      getPolygon: f => Container.get(f, 'geometry.coordinates'),
+      getHeight,
+      getColor: getFillColor,
+      extruded,
+      wireframe: false,
+      onHover: this._onHoverPolygon,
+      onClick: this._onClickPolygon
+    }));
+
+    // Polygon outline or wireframe
+    let polygonOutlineLayer = null;
+    if (drawPolygons && extruded && wireframe) {
+      polygonOutlineLayer = new PolygonLayer(Object.assign({}, this.props, {
+        id: `${id}-polygon-wireframe`,
+        data: polygonFeatures,
+        getPolygon: f => Container.get(f, 'geometry.coordinates'),
+        getHeight,
+        getColor: getFillColor,
+        extruded: true,
+        wireframe: true,
+        onHover: this._onHoverPolygon,
+        onClick: this._onClickPolygon
       }));
-
-    const pathLayer = pathLayerData &&
-      new PathLayer(Object.assign({}, this.props, {
-        id: `${id}-path-sublayer`,
-        data: pathLayerData,
-        getPaths: this._extractPaths,
+    } else if (drawPolygons) {
+      polygonOutlineLayer = new PathLayer(Object.assign({}, this.props, {
+        id: `${id}-polygon-outline`,
+        data: polygonFeatures,
+        getPaths: f => Container.get(f, 'geometry.coordinates'),
         getColor: getStrokeColor,
         getWidth: getStrokeWidth,
-        getOpacity: getStrokeOpacity,
-        pickable: false,
-        onHover,
-        onClick
+        onHover: this._onHoverPolygon,
+        onClick: this._onClickPolygon
       }));
+    }
 
-    const polygonLayer = polygonLayerData &&
-      new PolygonLayer(Object.assign({}, this.props, {
-        id: `${id}-polygon-sublayer`,
-        data: polygonLayerData,
-        getPolygons: this.getFeaturePolygons,
-        getColor: getFillColor,
-        getOpacity: getFillOpacity,
-        pickable: false,
-        onHover,
-        onClick
-      }));
+    const lineLayer = drawPolygons && drawLines && new PathLayer(Object.assign({}, this.props, {
+      id: `${id}-line-paths`,
+      data: lineFeatures,
+      getPaths: f => Container.get(f, 'geometry.coordinates'),
+      getColor: getStrokeColor,
+      getWidth: getStrokeWidth,
+      onHover: this._onHoverLine,
+      onClick: this._onClickLine
+    }));
 
-    return [polygonLayer, pathLayer, pointLayer].filter(Boolean);
+    const pointLayer = drawPoints && new ScatterplotLayer(Object.assign({}, this.props, {
+      id: `${id}-points`,
+      data: pointFeatures,
+      pickable: false,
+      onHover: this._onHoverPoint,
+      onClick: this._onClickPoint
+    }));
+
+    return [
+      polygonFillLayer,
+      polygonOutlineLayer,
+      lineLayer,
+      pointLayer
+    ].filter(Boolean);
   }
 }
+
 GeoJsonLayer.layerName = 'GeoJsonLayer';
+GeoJsonLayer.defaultProps = defaultProps;

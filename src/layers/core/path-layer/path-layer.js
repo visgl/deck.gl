@@ -9,17 +9,13 @@ const defaultProps = {
   color: [64, 64, 64, 255],
   strokeWidth: 1,
   strokeOpacity: 1,
-  getPaths: features => features.map(f => [f.geometry.coordinates]),
+  getPaths: feature => feature.geometry.coordinates,
   getColor: feature => feature.properties.color,
   getWidth: feature => feature.properties.width || 1,
   getOpacity: feature => feature.properties.opacity
 };
 
 export default class PathLayer extends Layer {
-  constructor(props) {
-    super({}, Object.assign({}, props, defaultProps));
-  }
-
   getShaders() {
     return {
       vs: readFileSync(join(__dirname, './path-layer-vertex.glsl'), 'utf8'),
@@ -176,10 +172,10 @@ export default class PathLayer extends Layer {
       path.forEach(point => {
         positions[i++] = point[0];
         positions[i++] = point[1];
-        positions[i++] = point[2];
+        positions[i++] = point[2] || 0;
         positions[i++] = point[0];
         positions[i++] = point[1];
-        positions[i++] = point[2];
+        positions[i++] = point[2] || 0;
       })
     );
 
@@ -195,10 +191,10 @@ export default class PathLayer extends Layer {
       this._shiftPath(path, -1).forEach(point => {
         prevPositions[i++] = point[0];
         prevPositions[i++] = point[1];
-        prevPositions[i++] = point[2];
+        prevPositions[i++] = point[2] || 0;
         prevPositions[i++] = point[0];
         prevPositions[i++] = point[1];
-        prevPositions[i++] = point[2];
+        prevPositions[i++] = point[2] || 0;
       });
     });
 
@@ -214,10 +210,10 @@ export default class PathLayer extends Layer {
       this._shiftPath(path, 1).forEach(point => {
         nextPositions[i++] = point[0];
         nextPositions[i++] = point[1];
-        nextPositions[i++] = point[2];
+        nextPositions[i++] = point[2] || 0;
         nextPositions[i++] = point[0];
         nextPositions[i++] = point[1];
-        nextPositions[i++] = point[2];
+        nextPositions[i++] = point[2] || 0;
       });
     });
 
@@ -242,21 +238,16 @@ export default class PathLayer extends Layer {
   }
 
   calculateColors(attribute) {
-    const {
-      data, color, strokeOpacity, getColor, getOpacity
-    } = this.props;
+    const {data, getColor} = this.props;
     const {paths, pointCount} = this.state;
     const colors = new Uint8Array(pointCount * attribute.size * 2);
 
     let i = 0;
     paths.forEach(path => {
-      const pointColor = getColor(data[path._index]) || color;
-      const opacity = getOpacity(data[path._index]) || strokeOpacity;
-
+      const pointColor = getColor(data[path._index]);
       if (isNaN(pointColor[3])) {
-        pointColor[3] = color[3];
+        pointColor[3] = 255;
       }
-      pointColor[3] *= opacity;
 
       path.forEach(() => {
         colors[i++] = pointColor[0];
@@ -306,3 +297,4 @@ export default class PathLayer extends Layer {
 }
 
 PathLayer.layerName = 'PathLayer';
+PathLayer.defaultProps = defaultProps;
