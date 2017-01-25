@@ -5,6 +5,7 @@ import {
   HexagonLayer,
 
   ScreenGridLayer,
+  IconLayer,
 
   GeoJsonLayer,
   // PolygonLayer,
@@ -37,6 +38,23 @@ const ArcLayerExample = {
     getSourceColor: d => [64, 255, 0],
     getTargetColor: d => [0, 128, 200],
     strokeWidth: 1,
+    pickable: true
+  }
+};
+
+const IconLayerExample = {
+  layer: IconLayer,
+  props: {
+    iconAtlas: 'data/icon-atlas.png',
+    iconMapping: dataSamples.iconAtlas,
+    data: dataSamples.points,
+    size: 24,
+    getPosition: d => d.COORDINATES,
+    getColor: d => [64, 64, 72],
+    getIcon: d => d.PLACEMENT === 'SW' ? 'marker' : 'marker-warning',
+    getScale: d => d.RACKS > 2 ? 2 : 1,
+    getOffset: d => [0, -1],
+    opacity: 0.8,
     pickable: true
   }
 };
@@ -355,7 +373,8 @@ export default {
     ArcLayer: ArcLayerExample,
     LineLayer: LineLayerExample,
     ScreenGridLayer: ScreenGridLayerExample,
-    HexagonLayer: HexagonLayerExample
+    HexagonLayer: HexagonLayerExample,
+    IconLayer: IconLayerExample
   },
 
   '64-bit Layers': {

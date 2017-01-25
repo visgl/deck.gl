@@ -31,6 +31,7 @@ export {default as LineLayer} from './layers/core/line-layer';
 export {default as ScatterplotLayer} from './layers/core/scatterplot-layer';
 export {default as ScreenGridLayer} from './layers/core/screen-grid-layer';
 export {default as HexagonLayer} from './layers/core/hexagon-layer';
+export {default as IconLayer} from './layers/core/icon-layer';
 
 export {default as PathLayer} from './layers/core/path-layer/path-layer';
 export {default as PolygonLayer} from './layers/core/polygon-layer/polygon-layer';
