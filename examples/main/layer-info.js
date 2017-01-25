@@ -13,18 +13,24 @@ export default class LayerInfo extends PureComponent {
     this.onItemClicked = this._onMouseEvent.bind(this, 'clicked');
   }
 
-  _onMouseEvent(name, item) {
-    if (item.index < 0) {
-      item = null;
+  _onMouseEvent(name, info) {
+    if (info.index < 0) {
+      info = null;
     }
 
     const oldItem = this.state[name];
-    if (oldItem === item ||
-      (oldItem && item && oldItem.layer.id === item.layer.id && oldItem.index === item.index)) {
+    if (oldItem === info ||
+      (oldItem && info && oldItem.layer.id === info.layer.id && oldItem.index === info.index)) {
       // no change
       return;
     }
-    this.setState({[name]: item});
+    this.setState({[name]: info});
+  }
+
+  _infoToString(info) {
+    const object = info.feature || info.object;
+    const props = object.properties || object;
+    return JSON.stringify(props);
   }
 
   render() {
@@ -34,11 +40,11 @@ export default class LayerInfo extends PureComponent {
       <div id="layer-info">
         { hovered && (<div>
           <h4>Hover</h4>
-          <span>Layer: { hovered.layer.id } Index: { hovered.index }</span>
+          <span>Layer: { hovered.layer.id } Object: { this._infoToString(hovered) }</span>
         </div>) }
         { clicked && (<div>
           <h4>Click</h4>
-          <span>Layer: { clicked.layer.id } Index: { clicked.index }</span>
+          <span>Layer: { clicked.layer.id } Object: { this._infoToString(clicked) }</span>
         </div>) }
       </div>
     );

@@ -6,13 +6,10 @@ import {join} from 'path';
 
 const defaultProps = {
   opacity: 1,
-  color: [64, 64, 64, 255],
   strokeWidth: 1,
-  strokeOpacity: 1,
   getPaths: feature => feature.geometry.coordinates,
   getColor: feature => feature.properties.color,
-  getWidth: feature => feature.properties.width || 1,
-  getOpacity: feature => feature.properties.opacity
+  getWidth: feature => feature.properties.width || 1
 };
 
 export default class PathLayer extends Layer {
