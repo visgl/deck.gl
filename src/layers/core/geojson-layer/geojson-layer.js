@@ -19,11 +19,9 @@
 // THE SOFTWARE.
 
 import {Layer} from '../../../lib';
-import {autobind} from '../../../react';
 import ScatterplotLayer from '../scatterplot-layer';
 import PathLayer from '../path-layer/path-layer';
 import PolygonLayer from '../polygon-layer/polygon-layer';
-import flatten from 'lodash.flatten';
 
 import {get} from '../../../lib/utils';
 import {getGeojsonFeatures, separateGeojsonFeatures} from './geojson';
