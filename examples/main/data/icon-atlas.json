@@ -4,6 +4,7 @@
     "y": 0,
     "width": 128,
     "height": 128,
+    "anchorY": 128,
     "mask": true
   },
   "marker-warning": {
@@ -11,6 +12,7 @@
     "y": 0,
     "width": 128,
     "height": 128,
+    "anchorY": 128,
     "mask": false
   }
 }

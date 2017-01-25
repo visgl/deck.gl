@@ -22,15 +22,13 @@ import {GL, Model, Geometry, Texture2D, loadTextures} from 'luma.gl';
 import {readFileSync} from 'fs';
 import {join} from 'path';
 
-const DEFAULT_COLOR = [255, 0, 255, 255];
-const DEFAULT_OFFSET = [0, 0, 0];
+const DEFAULT_COLOR = [0, 0, 0, 255];
 
 const defaultProps = {
   getPosition: x => x.position,
   getIcon: x => x.icon,
   getColor: x => x.color || DEFAULT_COLOR,
   getScale: x => x.size,
-  getOffset: x => x.offset || DEFAULT_OFFSET,
   iconAtlas: null,
   iconMapping: {},
   size: 30
@@ -50,6 +48,10 @@ export default class IconLayer extends Layer {
    * @param {object} props.iconMapping[icon_name].y - y position of icon on the atlas image
    * @param {object} props.iconMapping[icon_name].width - width of icon on the atlas image
    * @param {object} props.iconMapping[icon_name].height - height of icon on the atlas image
+   * @param {object} props.iconMapping[icon_name].anchorX - x anchor of icon on the atlas image,
+   *   default to width / 2
+   * @param {object} props.iconMapping[icon_name].anchorY - y anchor of icon on the atlas image,
+   *   default to height / 2
    * @param {object} props.iconMapping[icon_name].mask - whether icon is treated as a transparency
    *   mask. If true, user defined color is applied. If false, original color from the image is
    *   applied. Default to false.
@@ -57,7 +59,6 @@ export default class IconLayer extends Layer {
    * @param {func} props.getPosition - returns anchor position of the icon, in [lng, lat, z]
    * @param {func} props.getIcon - returns icon name as a string
    * @param {func} props.getScale - returns icon size multiplier as a number
-   * @param {func} props.getOffset - returns icon offset in [dx, dy], relative to size
    * @param {func} props.getColor - returns color of the icon in [r, g, b, a]. Only works on icons
    *   with mask: true.
    */
@@ -168,17 +169,6 @@ export default class IconLayer extends Layer {
     }
   }
 
-  calculateInstanceOffsets(attribute) {
-    const {data, getOffset} = this.props;
-    const {value} = attribute;
-    let i = 0;
-    for (const object of data) {
-      const offset = getOffset(object);
-      value[i++] = offset[0];
-      value[i++] = offset[1];
-    }
-  }
-
   calculateInstanceColors(attribute) {
     const {data, getColor} = this.props;
     const {value} = attribute;
@@ -190,6 +180,18 @@ export default class IconLayer extends Layer {
       value[i++] = color[1];
       value[i++] = color[2];
       value[i++] = isNaN(color[3]) ? DEFAULT_COLOR[3] : color[3];
+    }
+  }
+
+  calculateInstanceOffsets(attribute) {
+    const {data, iconMapping, getIcon} = this.props;
+    const {value} = attribute;
+    let i = 0;
+    for (const object of data) {
+      const icon = getIcon(object);
+      const rect = iconMapping[icon] || {};
+      value[i++] = (1 / 2 - rect.anchorX / rect.width) || 0;
+      value[i++] = (1 / 2 - rect.anchorY / rect.height) || 0;
     }
   }
 

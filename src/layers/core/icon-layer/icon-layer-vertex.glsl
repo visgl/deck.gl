@@ -40,7 +40,7 @@ varying vec2 vTextureCoords;
 
 void main(void) {
   vec3 center = project_position(instancePositions);
-  vec2 vertex = (positions + instanceOffsets) * size * instanceSizes;
+  vec2 vertex = (positions + instanceOffsets * 2.0) * size * instanceSizes;
   gl_Position = project_to_clipspace(vec4(center, 1.0)) + vec4(vertex, 0.0, 0.0);
 
   vTextureCoords = mix(

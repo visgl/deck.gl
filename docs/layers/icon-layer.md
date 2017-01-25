@@ -24,6 +24,10 @@ Icon names mapped to icon definitions. Each icon is defined with the following v
 
   - `height`: height of icon on the atlas image
 
+  - `anchorX`: horizontal position of icon anchor. Default: half width.
+
+  - `anchorY`: vertical position of icon anchor. Default: half height.
+
   - `mask`: whether icon is treated as a transparency mask.
   If `true`, user defined color is applied.
   If `false`, pixel color from the image is applied.
@@ -52,12 +56,6 @@ Method called to retrieve the icon name of each object, returns string.
 - Default: `d => d.size`
 
 Method called to retrieve the size multiplier of each object, returns a number.
-
-##### `getOffset` (Function, optional)
-
-- Default: `d => d.offset`
-
-Method called to retrieve the icon offset of each object, returns `[dx, dy]` relative to size.
 
 ##### `getColor` (Function, optional)
 

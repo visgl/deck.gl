@@ -53,7 +53,6 @@ const IconLayerExample = {
     getColor: d => [64, 64, 72],
     getIcon: d => d.PLACEMENT === 'SW' ? 'marker' : 'marker-warning',
     getScale: d => d.RACKS > 2 ? 2 : 1,
-    getOffset: d => [0, -1],
     opacity: 0.8,
     pickable: true
   }
