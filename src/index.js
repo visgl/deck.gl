@@ -30,12 +30,9 @@ export {default as ArcLayer} from './layers/core/arc-layer';
 export {default as LineLayer} from './layers/core/line-layer';
 export {default as ScatterplotLayer} from './layers/core/scatterplot-layer';
 export {default as ScreenGridLayer} from './layers/core/screen-grid-layer';
+export {default as GridLayer} from './layers/core/grid-layer';
 export {default as HexagonLayer} from './layers/core/hexagon-layer';
 export {default as IconLayer} from './layers/core/icon-layer';
-
-export {default as PathLayer} from './layers/core/path-layer/path-layer';
-export {default as PolygonLayer} from './layers/core/polygon-layer/polygon-layer';
-export {default as GeoJsonLayer} from './layers/core/geojson-layer/geojson-layer';
 
 // 64-bit Layers
 export {default as ScatterplotLayer64} from './layers/fp64/scatterplot-layer';
