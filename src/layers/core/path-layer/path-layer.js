@@ -6,13 +6,10 @@ import {join} from 'path';
 
 const defaultProps = {
   opacity: 1,
-  color: [64, 64, 64, 255],
   strokeWidth: 1,
-  strokeOpacity: 1,
-  getPaths: feature => feature.geometry.coordinates,
-  getColor: feature => feature.properties.color,
-  getWidth: feature => feature.properties.width || 1,
-  getOpacity: feature => feature.properties.opacity
+  getPath: object => object.path,
+  getColor: object => object.color,
+  getWidth: object => object.width || 1
 };
 
 export default class PathLayer extends Layer {
@@ -49,19 +46,12 @@ export default class PathLayer extends Layer {
   }
 
   updateState({oldProps, props, changeFlags}) {
-    const {getPaths} = this.props;
+    const {getPath} = this.props;
     const {attributeManager} = this.state;
 
     if (changeFlags.dataChanged) {
       // this.state.paths only stores point positions in each path
-      this.state.paths = [];
-
-      props.data.map(f => getPaths(f)).forEach((paths, index) => {
-        paths.forEach(path => {
-          path._index = index;
-        });
-        this.state.paths.push(...paths);
-      });
+      this.state.paths = props.data.map(getPath);
 
       this.state.pointCount = 0;
       this.state.indexCount = 0;
@@ -87,18 +77,6 @@ export default class PathLayer extends Layer {
       thickness: this.props.strokeWidth || 1,
       miterLimit: 1
     }));
-  }
-
-  pick(opts) {
-    super.pick(opts);
-    const {info} = opts;
-    if (!info) {
-      return;
-    }
-    const index = info.index;
-    const feature = index >= 0 ? this.props.data[index] : null;
-    info.feature = feature;
-    info.object = feature;
   }
 
   getModel(gl) {
@@ -221,13 +199,13 @@ export default class PathLayer extends Layer {
   }
 
   calculateDirections(attribute) {
-    const {data, strokeWidth, getWidth} = this.props;
+    const {data, getWidth} = this.props;
     const {paths, pointCount} = this.state;
     const directions = new Float32Array(pointCount * attribute.size * 2);
 
     let i = 0;
-    paths.forEach(path => {
-      const w = getWidth(data[path._index]) || strokeWidth;
+    paths.forEach((path, index) => {
+      const w = getWidth(data[index], index);
       path.forEach(() => {
         directions[i++] = w;
         directions[i++] = -w;
@@ -243,8 +221,8 @@ export default class PathLayer extends Layer {
     const colors = new Uint8Array(pointCount * attribute.size * 2);
 
     let i = 0;
-    paths.forEach(path => {
-      const pointColor = getColor(data[path._index]);
+    paths.forEach((path, index) => {
+      const pointColor = getColor(data[index], index);
       if (isNaN(pointColor[3])) {
         pointColor[3] = 255;
       }

@@ -47,6 +47,8 @@ export function separateGeojsonFeatures(features) {
   const pointFeatures = [];
   const lineFeatures = [];
   const polygonFeatures = [];
+  const polygonOutlineFeatures = [];
+
   Container.forEach(features, feature => {
     const type = Container.get(feature, 'geometry.type');
     const coordinates = Container.get(feature, 'geometry.coordinates');
@@ -65,19 +67,26 @@ export function separateGeojsonFeatures(features) {
       lineFeatures.push(feature);
       break;
     case 'MultiLineString':
-      // Break multipolygons into multiple polygons with same properties
+      // Break multilinestrings into multiple lines with same properties
       Container.forEach(coordinates, path => {
         lineFeatures.push({geometry: {coordinates: path}, properties, feature});
       });
       break;
     case 'Polygon':
       polygonFeatures.push(feature);
+      // Break polygon into multiple lines with same properties
+      Container.forEach(coordinates, path => {
+        polygonOutlineFeatures.push({geometry: {coordinates: path}, properties, feature});
+      });
       break;
     case 'MultiPolygon':
       // Break multipolygons into multiple polygons with same properties
       Container.forEach(coordinates, polygon => {
-        const subFeature = {geometry: {coordinates: polygon}, properties, feature};
-        polygonFeatures.push(subFeature);
+        polygonFeatures.push({geometry: {coordinates: polygon}, properties, feature});
+        // Break polygon into multiple lines with same properties
+        Container.forEach(polygon, path => {
+          polygonOutlineFeatures.push({geometry: {coordinates: path}, properties, feature});
+        });
       });
       break;
       // Not yet supported
@@ -90,6 +99,7 @@ export function separateGeojsonFeatures(features) {
   return {
     pointFeatures,
     lineFeatures,
-    polygonFeatures
+    polygonFeatures,
+    polygonOutlineFeatures
   };
 }

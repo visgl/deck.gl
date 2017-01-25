@@ -10,16 +10,9 @@ Inherits from all [Base Layer](/docs/layers/base-layer.md) properties.
 ## Layer-specific Properties
 
 
-#### `getPathCount`
-
-default: `object => 1`
-
-Number of paths for an object
-
-
 #### `getPath` (Function, optional)
 
-- Default: `(object, index) => object.paths[index]`
+- Default: `(object, index) => object.paths`
 
 Returns the specified path for the object.
 
@@ -41,12 +34,11 @@ If the color alpha (the fourth component) is not provided,
 `alpha` will be set to `255`.
 
 
-#### `getCoordinate` (Function, optional)
+#### `getWidth` (Function, optional)
 
-- Default: `(path, index) => path[index]`
+- Default: `(object, index) => object.width || 1`
 
-Return a coordinate from a path. The coordinate is expected to be
-three components. The third component will be set to 0 if not provided.
+Return a width multiplier from each object.
 
 
 ##### `strokeWidth` (Number, optional)

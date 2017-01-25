@@ -64,23 +64,10 @@ const GeoJsonLayerExample = {
   props: {
     id: 'geojsonLayer',
     data: dataSamples.choropleths,
-    getFillColor: f => [0, 0, ((Container.get(f, 'properties.ZIP_CODE') * 10) % 127) + 128],
-    getColor: f => [200, 0, 80],
-    opacity: 0.8,
-    drawContour: true
-  }
-};
-
-const GeoJsonLayerOutlineExample = {
-  layer: GeoJsonLayer,
-  props: {
-    id: 'geojsonLayer-outline',
-    data: dataSamples.choropleths,
-    fillPolygons: false,
-    getStrokeColor: f => [0, 0, ((Container.get(f, 'properties.ZIP_CODE') * 10) % 127) + 128],
-    getColor: f => [200, 0, 80],
-    opacity: 0.8,
-    drawContour: true
+    getFillColor: f => [0, 0, ((Container.get(f, 'properties.ZIP_CODE') * 10) % 127) + 128, 64],
+    getStrokeColor: f => [200, 0, 80],
+    strokeWidth: 4,
+    pickable: true
   }
 };
 
@@ -91,9 +78,9 @@ const GeoJsonLayerExtrudedExample = {
     data: dataSamples.choropleths,
     getHeight: f => ((f.properties.ZIP_CODE * 10) % 127) * 10,
     getFillColor: f => [0, 0, ((Container.get(f, 'properties.ZIP_CODE') * 23) % 100) + 155],
-    getColor: f => [0, 0, ((Container.get(f, 'properties.ZIP_CODE') * 10) % 256)],
-    opacity: 1,
-    extruded: true
+    drawPolygons: false,
+    extruded: true,
+    pickable: true
   }
 };
 
@@ -107,9 +94,7 @@ const GeoJsonLayerWireframeExample = {
     wireframe: true,
     lightSettings: {enabled: false},
     getHeight: f => ((f.properties.ZIP_CODE * 10) % 127) * 10,
-    getFillColor: f => [0, 0, ((Container.get(f, 'properties.ZIP_CODE') * 10) % 127) + 128],
-    getColor: f => [200, 0, 80],
-    opacity: 0.8
+    getStrokeColor: f => [200, 0, 80]
   }
 };
 
@@ -377,7 +362,6 @@ const ScatterplotLayer64PerfExample = (id, getData) => ({
 export default {
   'Core Layers': {
     'GeoJsonLayer': GeoJsonLayerExample,
-    'GeoJsonLayer (Outline)': GeoJsonLayerOutlineExample,
     'GeoJsonLayer (Extruded)': GeoJsonLayerExtrudedExample,
     'GeoJsonLayer (Wireframe)': GeoJsonLayerWireframeExample,
     // 'GeoJsonLayer (Immutable)': GeoJsonLayerImmutableExample,

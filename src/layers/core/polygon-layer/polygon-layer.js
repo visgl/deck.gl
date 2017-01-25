@@ -107,8 +107,7 @@ export default class PolygonLayer extends Layer {
       const {getPolygon, extruded, wireframe, getHeight} = props;
 
       // TODO - avoid creating a temporary array here: let the tesselator iterate
-      const polygons = [];
-      Container.forEach(props.data, feature => polygons.push(getPolygon(feature) || []));
+      const polygons = props.data.map(getPolygon);
 
       this.setState({
         polygonTesselator: !extruded ?
@@ -120,18 +119,6 @@ export default class PolygonLayer extends Layer {
 
       this.state.attributeManager.invalidateAll();
     }
-  }
-
-  pick(opts) {
-    super.pick(opts);
-    const {info} = opts;
-    if (!info) {
-      return;
-    }
-    const index = info.index;
-    const feature = index >= 0 ? this.props.data[index] : null;
-    info.feature = feature;
-    info.object = feature;
   }
 
   getModel(gl) {
