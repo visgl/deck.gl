@@ -35,10 +35,6 @@ const defaultProps = {
 };
 
 export default class ArcLayer extends Layer {
-  constructor(props) {
-    super(Object.assign({}, defaultProps, props));
-  }
-
   initializeState() {
     const {gl} = this.context;
     this.setState({model: this._createModel(gl)});
@@ -144,3 +140,4 @@ export default class ArcLayer extends Layer {
 }
 
 ArcLayer.layerName = 'ArcLayer';
+ArcLayer.defaultProps = defaultProps;

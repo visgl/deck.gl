@@ -22,6 +22,28 @@ import {GL, Model, Geometry, Texture2D, loadTextures} from 'luma.gl';
 import {readFileSync} from 'fs';
 import {join} from 'path';
 
+/*
+ * @param {object} props
+ * @param {Texture2D | string} props.iconAtlas - atlas image url or texture
+ * @param {object} props.iconMapping - icon names mapped to icon definitions
+ * @param {object} props.iconMapping[icon_name].x - x position of icon on the atlas image
+ * @param {object} props.iconMapping[icon_name].y - y position of icon on the atlas image
+ * @param {object} props.iconMapping[icon_name].width - width of icon on the atlas image
+ * @param {object} props.iconMapping[icon_name].height - height of icon on the atlas image
+ * @param {object} props.iconMapping[icon_name].anchorX - x anchor of icon on the atlas image,
+ *   default to width / 2
+ * @param {object} props.iconMapping[icon_name].anchorY - y anchor of icon on the atlas image,
+ *   default to height / 2
+ * @param {object} props.iconMapping[icon_name].mask - whether icon is treated as a transparency
+ *   mask. If true, user defined color is applied. If false, original color from the image is
+ *   applied. Default to false.
+ * @param {number} props.size - icon size in pixels
+ * @param {func} props.getPosition - returns anchor position of the icon, in [lng, lat, z]
+ * @param {func} props.getIcon - returns icon name as a string
+ * @param {func} props.getScale - returns icon size multiplier as a number
+ * @param {func} props.getColor - returns color of the icon in [r, g, b, a]. Only works on icons
+ *   with mask: true.
+ */
 const DEFAULT_COLOR = [0, 0, 0, 255];
 
 const defaultProps = {
@@ -35,37 +57,6 @@ const defaultProps = {
 };
 
 export default class IconLayer extends Layer {
-
-  /*
-   * @classdesc
-   * IconLayer
-   *
-   * @class
-   * @param {object} props
-   * @param {Texture2D | string} props.iconAtlas - atlas image url or texture
-   * @param {object} props.iconMapping - icon names mapped to icon definitions
-   * @param {object} props.iconMapping[icon_name].x - x position of icon on the atlas image
-   * @param {object} props.iconMapping[icon_name].y - y position of icon on the atlas image
-   * @param {object} props.iconMapping[icon_name].width - width of icon on the atlas image
-   * @param {object} props.iconMapping[icon_name].height - height of icon on the atlas image
-   * @param {object} props.iconMapping[icon_name].anchorX - x anchor of icon on the atlas image,
-   *   default to width / 2
-   * @param {object} props.iconMapping[icon_name].anchorY - y anchor of icon on the atlas image,
-   *   default to height / 2
-   * @param {object} props.iconMapping[icon_name].mask - whether icon is treated as a transparency
-   *   mask. If true, user defined color is applied. If false, original color from the image is
-   *   applied. Default to false.
-   * @param {number} props.size - icon size in pixels
-   * @param {func} props.getPosition - returns anchor position of the icon, in [lng, lat, z]
-   * @param {func} props.getIcon - returns icon name as a string
-   * @param {func} props.getScale - returns icon size multiplier as a number
-   * @param {func} props.getColor - returns color of the icon in [r, g, b, a]. Only works on icons
-   *   with mask: true.
-   */
-  constructor(props) {
-    super(Object.assign({}, defaultProps, props));
-  }
-
   initializeState() {
     const {attributeManager} = this.state;
     attributeManager.addInstanced({
@@ -220,3 +211,6 @@ export default class IconLayer extends Layer {
     }
   }
 }
+
+IconLayer.layerName = 'IconLayer';
+IconLayer.defaultProps = defaultProps;

@@ -20,11 +20,60 @@ There are a couple of ways to build a layer in deck.gl
   (set of props) than an existing layer, transforms those props into
   a format that fits and existing layer, and renders that.
 
-Note that there is no strict division between layers that draw and composite
-layers, a layer could do both. That said, it often makes sense to keep your
-layers simple.
+Remarks:
+* There is no strict division between layers that draw and composite
+  layers, a layer could do both. That said, it often makes sense to keep your
+  layers simple and focused on doing one thing well.
+
+### Creating your Layer class
+
+Your layer class must be a subclass of [Layer](/docs/layers/base-layer.md).
+```js
+class SubLayer extends Layer {...}
+```
+It can be a direct subclass of Layer, or extend another layer.
+
+### Naming your Layer
+
+Store the layer name in the `layerName` static property on your `Layer` subclass:
+```js
+class SubLayer extends Layer {...}
+SubLayer.layerName = 'SubLayer';
+```
+
+The layer name will be used as the default id of layer instances and also during
+debugging.
+
+
+### Defining Layer Properties
+
+The list of properties is the main API your new layer will provide to
+applications. So it makes sense to carefully consider what properties
+your layer should offer.
+
+You also need to define the default values of your properties.
+
+The most efficient method of doing this is to define a static `defaultProps`
+member on your layer class.
+
+```js
+const defaultProps = {
+  color: [...],
+  ...
+}
+class SubLayer extends Layer {...}
+SubLayer.layerName = 'SubLayer';
+SubLayer.defaultProps = defaultProps;
+```
+
+Also consider the properties of the base [Layer](/docs/layers/base-layer.md) class,
+as well as any other inherited properties if you are deriving.
+base `Layer` class, and and
 
 ## Implementing the Layer Lifecycle Functions
+
+To describe how a layer's properties relate to WebGL attributes and uniforms
+you need to implement the layers life cycle functions.
 
 ### Creating, Destroying and Drawing Layers
 
@@ -54,6 +103,12 @@ directly, rather than waiting for the garbage collector to do it.
 
 A layer is discarded when a new set of layers are rendered and none of
 them match (have the same `id` prop) as your old layer.
+
+`getShaders` - This is not a formal life cycle function, but rather a recommended
+convention. Each layer is expected define a `getShaders` function that returns
+your layer's shaders (as JavaScript strings containing GLSL source).
+This makes it much easier for others to subclass your layer and make small
+changes to the shaders.
 
 ## Change Detection
 
