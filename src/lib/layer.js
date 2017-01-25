@@ -60,7 +60,7 @@ export default class Layer {
     Object.freeze(props);
 
     // Define all members and freeze layer
-    this.id = props.id || this.constructor.layerName;
+    this.id = props.id;
     this.props = props;
     this.oldProps = null;
     this.state = null;
@@ -68,7 +68,7 @@ export default class Layer {
     this.count = counter++;
     Object.seal(this);
 
-    this.validateRequiredProp('id', x => typeof x === 'string');
+    this.validateRequiredProp('id', x => typeof x === 'string' && x !== '');
     this.validateRequiredProp('data');
   }
 
@@ -86,20 +86,22 @@ export default class Layer {
     throw new Error(`Layer ${this} has not defined initializeState`);
   }
 
-  // Called once when layer is no longer matched and state will be discarded
-  // App can destroy WebGL resources
-  finalizeState() {
-  }
-
+  // Let's layer control if updateState should be called
   shouldUpdateState({oldProps, props, oldContext, context, changeFlags}) {
     return changeFlags.somethingChanged;
   }
 
-  // Default implementation, all attributeManager will be updated
+  // Default implementation, all attributes will be invalidated and updated
+  // when data changes
   updateState({oldProps, props, oldContext, context, changeFlags}) {
-    if (changeFlags.dataChanged && this.state.attributeManager) {
-      this.state.attributeManager.invalidateAll();
+    if (changeFlags.dataChanged) {
+      this.invalidateAttribute('all');
     }
+  }
+
+  // Called once when layer is no longer matched and state will be discarded
+  // App can destroy WebGL resources here
+  finalizeState() {
   }
 
   // Implement to generate sublayers
@@ -148,6 +150,39 @@ export default class Layer {
 
   // END LIFECYCLE METHODS
   // //////////////////////////////////////////////////
+
+  // Default implementation of attribute invalidation, can be redefine
+  invalidateAttribute(name = 'all') {
+    if (name === 'all') {
+      this.state.attributeManager.invalidateAll();
+    } else {
+      this.state.attributeManager.invalidate(name);
+    }
+  }
+
+  // Calls attribute manager to update any WebGL attributes, can be redefined
+  updateAttributes(props) {
+    const {attributeManager, model} = this.state;
+    if (!attributeManager) {
+      return;
+    }
+
+    const numInstances = this.getNumInstances(props);
+    // Figure out data length
+    attributeManager.update({
+      data: props.data,
+      numInstances,
+      props,
+      buffers: props,
+      context: this,
+      // Don't worry about non-attribute props
+      ignoreUnknownAttributes: true
+    });
+    if (model) {
+      const changedAttributes = attributeManager.getChangedAttributes({clearChangedFlags: true});
+      model.setAttributes(changedAttributes);
+    }
+  }
 
   // Public API
 
@@ -328,7 +363,7 @@ export default class Layer {
     // End subclass lifecycle methods
 
     // Add any subclass attributes
-    this._updateAttributes(this.props);
+    this.updateAttributes(this.props);
     this._updateBaseUniforms();
 
     const {model} = this.state;
@@ -358,8 +393,7 @@ export default class Layer {
       const hasRedefinedMethod = this.willReceiveProps &&
         this.willReceiveProps !== Layer.prototype.willReceiveProps;
       if (hasRedefinedMethod) {
-        log.once(0,
-          `deck.gl v3 willReceiveProps deprecated. Use updateState in ${this}`);
+        log.once(0, `deck.gl v3 willReceiveProps deprecated. Use updateState in ${this}`);
         const {oldProps, props, changeFlags} = updateParams;
         this.setState(changeFlags);
         this.willReceiveProps(oldProps, props, changeFlags);
@@ -375,7 +409,7 @@ export default class Layer {
       // End lifecycle method
 
       // Run the attribute updaters
-      this._updateAttributes(updateParams.props);
+      this.updateAttributes(updateParams.props);
       this._updateBaseUniforms();
 
       if (this.state.model) {
@@ -408,23 +442,23 @@ export default class Layer {
   }
 
   diffProps(oldProps, newProps, context) {
-    // If any props have changed, ignoring updateTriggers objects
-    // (updateTriggers are expected to be a new object on every update)
+    // First check if any props have changed (ignore props that will be examined separately)
     const propsChangedReason = compareProps({
       newProps,
       oldProps,
       ignoreProps: {data: null, updateTriggers: null}
     });
 
+    // Now check if any data related props have changed
     const dataChangedReason = this._diffDataProps(oldProps, newProps);
 
     const propsChanged = Boolean(propsChangedReason);
     const dataChanged = Boolean(dataChangedReason);
     const viewportChanged = context.viewportChanged;
-    const somethingChanged =
-      propsChanged || dataChanged || viewportChanged;
+    const somethingChanged = propsChanged || dataChanged || viewportChanged;
 
-    // If data hasn't changed, check update triggers
+    // Check update triggers to determine if any attributes need regeneration
+    // Note - if data has changed, all attributes will need regeneration, so skip this step
     if (!dataChanged) {
       this._diffUpdateTriggers(oldProps, newProps);
     } else {
@@ -454,10 +488,8 @@ export default class Layer {
     this.state.needsRedraw = this.state.needsRedraw && !clearRedrawFlags;
 
     const {attributeManager, model} = this.state;
-    redraw = redraw ||
-      (attributeManager && attributeManager.getNeedsRedraw({clearRedrawFlags}));
-    redraw = redraw ||
-      (model && model.getNeedsRedraw({clearRedrawFlags}));
+    redraw = redraw || (attributeManager && attributeManager.getNeedsRedraw({clearRedrawFlags}));
+    redraw = redraw || (model && model.getNeedsRedraw({clearRedrawFlags}));
 
     return redraw;
   }
@@ -485,10 +517,8 @@ export default class Layer {
   // attributes accordingly.
   /* eslint-disable max-statements */
   _diffUpdateTriggers(oldProps, newProps) {
-    const {attributeManager} = this.state;
-    if (!attributeManager) {
-      return false;
-    }
+    // const {attributeManager} = this.state;
+    // const updateTriggerMap = attributeManager.getUpdateTriggerMap();
 
     let change = false;
 
@@ -501,14 +531,12 @@ export default class Layer {
       });
       if (diffReason) {
         if (propName === 'all') {
-          log.log(1,
-            `updateTriggers invalidating all attributes: ${diffReason}`);
-          attributeManager.invalidateAll();
+          log.log(1, `updateTriggers invalidating all attributes: ${diffReason}`);
+          this.invalidateAttribute('all');
           change = true;
         } else {
-          log.log(1,
-            `updateTriggers invalidating attribute ${propName}: ${diffReason}`);
-          attributeManager.invalidate(propName);
+          log.log(1, `updateTriggers invalidating attribute ${propName}: ${diffReason}`);
+          this.invalidateAttribute(propName);
           change = true;
         }
       }
@@ -525,31 +553,6 @@ export default class Layer {
     }
     if (condition && !condition(value)) {
       throw new Error(`Bad property ${propertyName} in layer ${this}`);
-    }
-  }
-
-  // Calls attribute manager to update any WebGL attributes
-  _updateAttributes(props) {
-    const {attributeManager, model} = this.state;
-    if (!attributeManager) {
-      return;
-    }
-
-    const numInstances = this.getNumInstances(props);
-    // Figure out data length
-    attributeManager.update({
-      data: props.data,
-      numInstances,
-      props,
-      buffers: props,
-      context: this,
-      // Don't worry about non-attribute props
-      ignoreUnknownAttributes: true
-    });
-    if (model) {
-      const changedAttributes =
-        attributeManager.getChangedAttributes({clearChangedFlags: true});
-      model.setAttributes(changedAttributes);
     }
   }
 

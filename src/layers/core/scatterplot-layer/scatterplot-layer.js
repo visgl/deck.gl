@@ -17,6 +17,7 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
+
 import {Layer} from '../../../lib';
 import {assembleShaders} from '../../../shader-utils';
 import {GL, Model, Geometry} from 'luma.gl';
@@ -49,10 +50,13 @@ export default class ScatterplotLayer extends Layer {
     this.setState({model: this._getModel(gl)});
 
     this.state.attributeManager.addInstanced({
-      instancePositions: {size: 3, accessor: 'getPosition'},
-      instanceRadius: {size: 1, accessor: 'getRadius', defaultValue: 1},
+      instancePositions: {
+        size: 3, accessor: 'getPosition', update: this.calculateInstancePositions},
+      instanceRadius: {
+        size: 1, accessor: 'getRadius', defaultValue: 1, update: this.calculateInstanceRadius},
       instanceColors: {
-        size: 4, type: GL.UNSIGNED_BYTE, accessor: 'getColor', defaultValue: [0, 0, 0, 255]
+        size: 4, type: GL.UNSIGNED_BYTE, accessor: 'getColor', defaultValue: [0, 0, 0, 255],
+        update: this.calculateInstanceColors
       }
     });
   }
@@ -73,7 +77,8 @@ export default class ScatterplotLayer extends Layer {
       radiusMaxPixels: this.props.radiusMaxPixels
     }));
     // Setting line width back to 1 is here to workaround a Google Chrome bug
-    // gl.clear() and gl.isEnabled() will return GL_INVALID_VALUE even with correct parameter
+    // gl.clear() and gl.isEnabled() will return GL_INVALID_VALUE even with
+    // correct parameter
     // This is not happening on Safari and Firefox
     gl.lineWidth(1.0);
   }
@@ -88,6 +93,8 @@ export default class ScatterplotLayer extends Layer {
         0
       );
     }
+    /* eslint-disable */
+
 
     const shaders = assembleShaders(gl, this.getShaders());
 
@@ -102,6 +109,45 @@ export default class ScatterplotLayer extends Layer {
       }),
       isInstanced: true
     });
+    return model;
+  }
+
+  calculateInstancePositions(attribute) {
+    const {data, getPosition} = this.props;
+    const {value, size} = attribute;
+    let i = 0;
+    for (const point of data) {
+      const position = getPosition(point);
+      value[i + 0] = position[0] || 0;
+      value[i + 1] = position[1] || 0;
+      value[i + 2] = position[2] || 0;
+      i += size;
+    }
+  }
+
+  calculateInstanceRadius(attribute) {
+    const {data, getRadius} = this.props;
+    const {value, size} = attribute;
+    let i = 0;
+    for (const point of data) {
+      const radius = getRadius(point);
+      value[i + 0] = isNaN(radius) ? 1 : radius;
+      i += size;
+    }
+  }
+
+  calculateInstanceColors(attribute) {
+    const {data, getColor} = this.props;
+    const {value, size} = attribute;
+    let i = 0;
+    for (const point of data) {
+      const color = getColor(point);
+      value[i + 0] = color[0] || 0;
+      value[i + 1] = color[1] || 0;
+      value[i + 2] = color[2] || 0;
+      value[i + 3] = isNaN(color[3]) ? DEFAULT_COLOR[3] : color[3];
+      i += size;
+    }
   }
 
   calculateInstancePositions(attribute) {
