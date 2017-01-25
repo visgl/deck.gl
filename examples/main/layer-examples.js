@@ -4,7 +4,7 @@ import {
   LineLayer,
   ScreenGridLayer,
   HexagonLayer,
-
+  GridLayer,
   GeoJsonLayer,
   // PolygonLayer,
   // PathLayer,
@@ -170,18 +170,33 @@ const ScatterplotLayerMetersExample = {
   }
 };
 
+const GridLayerExample = {
+  layer: GridLayer,
+  props: {
+    id: 'gridLayer',
+    data: dataSamples.worldGrid.data,
+    latDelta: dataSamples.worldGrid.latDelta,
+    lngDelta: dataSamples.worldGrid.lngDelta,
+    getColor: g => [245, 166, g.value * 255],
+    getElevation: h => h.value * 50,
+    enable3d: true,
+    pickable: true,
+    opacity: 1
+  }
+};
+
 const HexagonLayerExample = {
-    layer: HexagonLayer,
-    props: {
-        id: 'hexagonLayer',
-        data: dataSamples.hexagons,
-        hexagonVertices: dataSamples.hexagons[0].vertices,
-        getColor: h => [48, 128, h.value * 255],
-        getElevation: h => h.value,
-        enable3d: true,
-        pickable: true,
-        opacity: 1
-    }
+  layer: HexagonLayer,
+  props: {
+    id: 'hexagonLayer',
+    data: dataSamples.hexagons,
+    hexagonVertices: dataSamples.hexagons[0].vertices,
+    getColor: h => [48, 128, h.value * 255],
+    getElevation: h => h.value * 50,
+    enable3d: true,
+    pickable: true,
+    opacity: 1
+  }
 };
 
 // 64 BIT LAYER EXAMPLES
@@ -338,7 +353,8 @@ export default {
     ArcLayer: ArcLayerExample,
     LineLayer: LineLayerExample,
     ScreenGridLayer: ScreenGridLayerExample,
-    HexagonLayer: HexagonLayerExample
+    HexagonLayer: HexagonLayerExample,
+    GridLayer: GridLayerExample
   },
 
   '64-bit Layers': {
