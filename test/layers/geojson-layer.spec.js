@@ -19,7 +19,7 @@ test('GeoJsonLayer#constructor', t => {
   t.ok(layer instanceof GeoJsonLayer, 'GeoJsonLayer created');
 
   testInitializeLayer({layer});
-  t.ok(layer.state.subLayers, 'GeoJsonLayer has subLayers');
+  // t.ok(layer.state.subLayers, 'GeoJsonLayer has subLayers');
 
   layer = new GeoJsonLayer({
     data: data.immutableChoropleths,
