@@ -22,3 +22,4 @@ import './imports-spec';
 import './lib';
 import './layers';
 import './experimental';
+import './deprecated';

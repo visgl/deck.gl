@@ -61,7 +61,7 @@ void main() {
   gl_Position = project_to_clipspace(
     vec4(
       lineJoin(prevProjected, currProjected, nextProjected),
-      currProjected.z + 0.1, 
+      currProjected.z + 0.1,
       1.0
     )
   );
