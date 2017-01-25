@@ -36,10 +36,6 @@ const defaultProps = {
 };
 
 export default class ChoroplethLayer extends Layer {
-  constructor(props) {
-    super(Object.assign({}, defaultProps, props));
-  }
-
   getShaders() {
     return {
       vs: readFileSync(join(__dirname, './choropleth-layer-vertex.glsl'), 'utf8'),
@@ -192,6 +188,7 @@ export default class ChoroplethLayer extends Layer {
 }
 
 ChoroplethLayer.layerName = 'ChoroplethLayer';
+ChoroplethLayer.defaultProps = defaultProps;
 
 /*
  * get vertex indices for drawing choropleth contour

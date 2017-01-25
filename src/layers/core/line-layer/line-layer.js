@@ -34,10 +34,6 @@ const defaultProps = {
 };
 
 export default class LineLayer extends Layer {
-  constructor(props) {
-    super(Object.assign({}, defaultProps, props));
-  }
-
   initializeState() {
     const {gl} = this.context;
     this.setState({model: this.createModel(gl)});
@@ -133,3 +129,4 @@ export default class LineLayer extends Layer {
 }
 
 LineLayer.layerName = 'LineLayer';
+LineLayer.defaultProps = defaultProps;

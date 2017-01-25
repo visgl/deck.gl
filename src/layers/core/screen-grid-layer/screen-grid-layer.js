@@ -36,10 +36,6 @@ const defaultProps = {
 };
 
 export default class ScreenGridLayer extends Layer {
-  constructor(props) {
-    super(Object.assign({}, defaultProps, props));
-  }
-
   getShaders() {
     return {
       vs: readFileSync(join(__dirname, './screen-grid-layer-vertex.glsl'), 'utf8'),
@@ -158,3 +154,4 @@ export default class ScreenGridLayer extends Layer {
 }
 
 ScreenGridLayer.layerName = 'ScreenGridLayer';
+ScreenGridLayer.defaultProps = defaultProps;
