@@ -22,10 +22,9 @@ import {Layer} from '../../../lib';
 import ScatterplotLayer from '../scatterplot-layer';
 import PathLayer from '../path-layer/path-layer';
 import PolygonLayer from '../polygon-layer/polygon-layer';
-import flatten from 'lodash.flatten';
 
 import {Container} from '../../../lib/utils';
-import {getGeojsonFeatures, separateGeojsonFeatures} from './geojson';
+import {getGeojsonFeatures, separateAndFlattenGeojsonFeatures} from './geojson';
 
 const defaultPointColor = [0xFF, 0x88, 0x00, 0xFF];
 const defaultStrokeColor = [0x33, 0x33, 0x33, 0xFF];
@@ -57,7 +56,10 @@ const defaultProps = {
 export default class GeoJsonLayer extends Layer {
   initializeState() {
     this.state = {
-      subLayers: null
+      pointFeatures: [],
+      lineFeatures: [],
+      polygonOutlineFeatures: [],
+      polygonFeatures: []
     };
   }
 
@@ -65,59 +67,19 @@ export default class GeoJsonLayer extends Layer {
     if (changeFlags.dataChanged) {
       const {data} = this.props;
       const features = getGeojsonFeatures(data);
-      const separateFeatures = separateGeojsonFeatures(features);
-      this.state.subLayers = {
-        pointFeatures: separateFeatures.pointFeatures,
-        lineFeatures: separateFeatures.lineFeatures,
-        polygonFeatures: separateFeatures.polygonFeatures
+
+      // Generates separate feature lists to support the various draw/fill props
+      // Also "flattens" geojson `Multi*` primitives into multiple single primitives
+      // that can be understood by the sub layers
+      const {pointFeatures, lineFeatures, polygonOutlineFeatures, polygonFeatures} =
+        separateAndFlattenGeojsonFeatures(features);
+      this.state = {
+        pointFeatures, // props.drawPoints
+        lineFeatures, // props.drawLines
+        polygonOutlineFeatures, // props.drawPolygons
+        polygonFeatures // props.fillPolygons
       };
     }
-  }
-
-  _extractPoints(pointFeatures) {
-    const {pointColor, pointSize, getPointColor, getPointSize} = this.props;
-    const points = [];
-
-    pointFeatures.forEach(feature => {
-      const {coordinates, type} = feature.geometry;
-      (type === 'Point' ? [coordinates] : coordinates).forEach(coord => {
-        points.push({
-          position: [Number(coord[0]), Number(coord[1]), 0],
-          color: getPointColor(feature) || pointColor,
-          radius: getPointSize(feature) || pointSize
-        });
-      });
-    });
-
-    return points;
-  }
-
-  _extractPaths(feature) {
-    const {coordinates, type} = feature.geometry;
-
-    let paths = [];
-
-    switch (type) {
-    case 'LineString':
-      paths = [coordinates];
-      break;
-    case 'Polygon':
-    case 'MultiLineString':
-    case 'LineSegments':
-      paths = coordinates;
-      break;
-    case 'MultiPolygon':
-      paths = flatten(coordinates);
-      break;
-    default:
-      break;
-    }
-
-    return paths.map(
-      path => path.map(
-        coordinate => [coordinate[0], coordinate[1], coordinate[2] || 0]
-      )
-    );
   }
 
   _addFeatureToInfo(info, features) {
@@ -146,6 +108,8 @@ export default class GeoJsonLayer extends Layer {
     this.props.onClick(this._addFeatureToInfo(info, this.state.lineFeatures));
   }
 
+  // TODO - add PolygonOutline support
+
   _onHoverPolygon(info) {
     this.props.onHover(this._addFeatureToInfo(info, this.state.polygonFeatures));
   }
@@ -155,14 +119,14 @@ export default class GeoJsonLayer extends Layer {
   }
 
   renderLayers() {
-    const {subLayers: {pointFeatures, lineFeatures, polygonFeatures}} = this.state;
+    const {pointFeatures, lineFeatures, polygonOutlineFeatures, polygonFeatures} = this.state;
     const {id, getStrokeColor, getStrokeWidth, getFillColor, getHeight} = this.props;
     const {extruded, wireframe} = this.props;
 
     let {drawPoints, drawLines, drawPolygons, fillPolygons} = this.props;
     drawPoints = drawPoints && pointFeatures && pointFeatures.length > 0;
     drawLines = drawLines && lineFeatures && lineFeatures.length > 0;
-    drawPolygons = drawPolygons && polygonFeatures && polygonFeatures.length > 0;
+    drawPolygons = drawPolygons && polygonOutlineFeatures && polygonOutlineFeatures.length > 0;
     fillPolygons = fillPolygons && polygonFeatures && polygonFeatures.length > 0;
 
     // Filled Polygon Layer

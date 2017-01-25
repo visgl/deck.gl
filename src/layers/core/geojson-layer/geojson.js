@@ -1,4 +1,5 @@
 import {Container} from '../../../lib/utils';
+import flatten from 'lodash.flatten';
 
 /**
  * "Normalizes" complete or partial GeoJSON data into iterable list of features
@@ -43,9 +44,10 @@ export function getGeojsonFeatures(geojson) {
 }
 
 // Linearize
-export function separateGeojsonFeatures(features) {
+export function separateAndFlattenGeojsonFeatures(features) {
   const pointFeatures = [];
   const lineFeatures = [];
+  const polygonOutlineFeatures = [];
   const polygonFeatures = [];
   Container.forEach(features, feature => {
     const type = Container.get(feature, 'geometry.type');
@@ -62,22 +64,26 @@ export function separateGeojsonFeatures(features) {
       });
       break;
     case 'LineString':
-      lineFeatures.push(feature);
+      // Wrap single lines into array of paths
+      lineFeatures.push({geometry: {coordinates: [coordinates]}, properties, feature});
       break;
     case 'MultiLineString':
-      // Break multipolygons into multiple polygons with same properties
-      Container.forEach(coordinates, path => {
-        lineFeatures.push({geometry: {coordinates: path}, properties, feature});
-      });
+      // MultiLine is already array of paths
+      lineFeatures.push(feature);
       break;
     case 'Polygon':
       polygonFeatures.push(feature);
+      // A polygon is already an array of paths
+      polygonOutlineFeatures.push(feature);
       break;
     case 'MultiPolygon':
       // Break multipolygons into multiple polygons with same properties
       Container.forEach(coordinates, polygon => {
-        const subFeature = {geometry: {coordinates: polygon}, properties, feature};
-        polygonFeatures.push(subFeature);
+        polygonFeatures.push({geometry: {coordinates: polygon}, properties, feature});
+      });
+      // A polygon is already an array of paths, but we need to flatten into a single list
+      polygonOutlineFeatures.push({
+        geometry: {coordinates: flatten(coordinates)}, properties, feature
       });
       break;
       // Not yet supported
@@ -90,6 +96,55 @@ export function separateGeojsonFeatures(features) {
   return {
     pointFeatures,
     lineFeatures,
+    polygonOutlineFeatures,
     polygonFeatures
   };
 }
+
+/*
+  _extractPoints(pointFeatures) {
+    const {pointColor, pointSize, getPointColor, getPointSize} = this.props;
+    const points = [];
+
+    pointFeatures.forEach(feature => {
+      const {coordinates, type} = feature.geometry;
+      (type === 'Point' ? [coordinates] : coordinates).forEach(coord => {
+        points.push({
+          position: [Number(coord[0]), Number(coord[1]), 0],
+          color: getPointColor(feature) || pointColor,
+          radius: getPointSize(feature) || pointSize
+        });
+      });
+    });
+
+    return points;
+  }
+
+  _extractPaths(feature) {
+    const {coordinates, type} = feature.geometry;
+
+    let paths = [];
+
+    switch (type) {
+    case 'LineString':
+      paths = [coordinates];
+      break;
+    case 'Polygon':
+    case 'MultiLineString':
+    case 'LineSegments':
+      paths = coordinates;
+      break;
+    case 'MultiPolygon':
+      paths = flatten(coordinates);
+      break;
+    default:
+      break;
+    }
+
+    return paths.map(
+      path => path.map(
+        coordinate => [coordinate[0], coordinate[1], coordinate[2] || 0]
+      )
+    );
+  }
+*/
