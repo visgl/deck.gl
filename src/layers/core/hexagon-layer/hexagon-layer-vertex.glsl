@@ -13,7 +13,6 @@ uniform float renderPickingBuffer;
 uniform vec3 selectedPickingColor;
 
 // Projection uniforms
-uniform float mercatorScale;
 uniform mat4 worldMatrix;
 uniform mat4 viewMatrix;
 uniform mat4 worldInverseTransposeMatrix;
@@ -37,7 +36,7 @@ const float pointLightAmbientCoefficient = 0.8;
 varying vec4 vColor;
 
 // A magic number to scale elevation so that 1 unit approximate to 100 meter
-#define ELEVATION_SCALE 6000.
+#define ELEVATION_SCALE 80.
 
 void main(void) {
 
@@ -51,10 +50,11 @@ void main(void) {
   vec3 rotatedNormals = vec3(rNorm.x, normals.y, rNorm.y);
 
   // calculate elevation, if 3d not enabled set to 0
-  float elevation = mix(0., instancePositions.z * ELEVATION_SCALE * (positions.y + 0.5), enable3d);
+  // cylindar gemoetry height are between -0.5 to 0.5, transform it to between 0, 1
+  float elevation =  mix(0., project_scale(instancePositions.z  * (positions.y + 0.5) * ELEVATION_SCALE), enable3d);
 
   // project center of hexagon
-  vec4 centroidPosition = vec4(project_position(vec3(instancePositions.xy, elevation)), 0.0);
+  vec4 centroidPosition = vec4(project_position(instancePositions.xy), elevation, 0.0);
 
   gl_Position = project_to_clipspace(centroidPosition + vec4(vec2(rotatedPositions.xz * radius), 0., 1.));
 
