@@ -1,8 +1,9 @@
 # GridLayer
 
-The GridLayer is a generic layer that can render heatmap. It takes latitude longitude delta
-of the cells, and the top left coordinate each cells. grid can be 3d when pass in a height
-and set enable3d to true
+The GridLayer can render a grid-based heatmap. 
+It takes the constant width / height of all cells and top-left coordinate of 
+each cell. The grid cells can be given a height using the getHeight accessor.
+
 
 <div align="center">
   <img height="300" src="/demo/src/static/images/grid-layer.png" />
@@ -54,5 +55,5 @@ Expecting a number, 1 unit approximate to 100 meter
 
 - Default: `cell => cell.color`
 
-Method called to retrieve the rgba color of each cell. ExpectingIf the alpha parameter
-is not provided, it will be set to `255`.
+Method called to retrieve the rgba color of each cell. Expecting [r, g, b, a]. 
+If the alpha is not provided, it will be set to `255`.

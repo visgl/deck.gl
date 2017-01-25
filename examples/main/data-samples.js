@@ -1,6 +1,7 @@
 /* load data samples for display */
 import allPoints from './data/sf.bike.parking.json';
-import {pointGrid, pointsToWorldGrid} from './utils';
+import {pointGrid} from './utils';
+import {pointsToWorldGrid} from './utils/grid-aggregator';
 
 export {default as choropleths} from './data/sf.zip.geo.json';
 export {default as hexagons} from './data/hexagons.json';
