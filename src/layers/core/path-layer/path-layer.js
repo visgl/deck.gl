@@ -7,9 +7,9 @@ import {join} from 'path';
 const defaultProps = {
   opacity: 1,
   strokeWidth: 1,
-  getPath: feature => feature.geometry.coordinates,
-  getColor: feature => feature.properties.color,
-  getWidth: feature => feature.properties.width || 1
+  getPath: object => object.path,
+  getColor: object => object.color,
+  getWidth: object => object.width || 1
 };
 
 export default class PathLayer extends Layer {
@@ -199,13 +199,13 @@ export default class PathLayer extends Layer {
   }
 
   calculateDirections(attribute) {
-    const {data, strokeWidth, getWidth} = this.props;
+    const {data, getWidth} = this.props;
     const {paths, pointCount} = this.state;
     const directions = new Float32Array(pointCount * attribute.size * 2);
 
     let i = 0;
-    paths.forEach(path => {
-      const w = getWidth(data[path._index]) || strokeWidth;
+    paths.forEach((path, index) => {
+      const w = getWidth(data[index], index);
       path.forEach(() => {
         directions[i++] = w;
         directions[i++] = -w;
@@ -221,8 +221,8 @@ export default class PathLayer extends Layer {
     const colors = new Uint8Array(pointCount * attribute.size * 2);
 
     let i = 0;
-    paths.forEach(path => {
-      const pointColor = getColor(data[path._index]);
+    paths.forEach((path, index) => {
+      const pointColor = getColor(data[index], index);
       if (isNaN(pointColor[3])) {
         pointColor[3] = 255;
       }

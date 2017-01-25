@@ -124,7 +124,7 @@ export default class GeoJsonLayer extends Layer {
     const polygonFillLayer = fillPolygons && new PolygonLayer(Object.assign({}, this.props, {
       id: `${id}-polygon-fill`,
       data: polygonFeatures,
-      getPolygon: f => get(f, 'geometry.coordinates'),
+      getPolygon: getCoordinates,
       getHeight,
       getColor: getFillColor,
       extruded,
