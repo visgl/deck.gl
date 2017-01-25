@@ -3,6 +3,9 @@ import {
   ArcLayer,
   LineLayer,
   HexagonLayer,
+
+  ScreenGridLayer,
+  IconLayer,
   GridLayer,
   GeoJsonLayer,
   // PolygonLayer,
@@ -385,6 +388,7 @@ export default {
     ArcLayer: ArcLayerExample,
     LineLayer: LineLayerExample,
     ScreenGridLayer: ScreenGridLayerExample,
+    GridLayer: GridLayerExample,
     HexagonLayer: HexagonLayerExample,
     GridLayer: GridLayerExample
   },
