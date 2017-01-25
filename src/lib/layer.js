@@ -342,8 +342,7 @@ export default class Layer {
   updateLayer(updateParams) {
     // Check for deprecated method
     if (this.shouldUpdate) {
-      log.once(0,
-        `deck.gl v3 shouldUpdate deprecated. Use shouldUpdateState in ${this}`);
+      log.once(0, `deck.gl v3 ${this}: "shouldUpdate" deprecated, renamed to "shouldUpdateState"`);
     }
 
     // Call subclass lifecycle method
@@ -579,11 +578,15 @@ Layer.defaultProps = defaultProps;
 
 // HELPERS
 
+// Constructors have their super class constructors as prototypes
+function getOwnProperty(object, prop) {
+  return object.hasOwnProperty(prop) && object[prop];
+}
 /*
  * Return merged default props stored on layers constructor, create them if needed
  */
 function getDefaultProps(layer) {
-  const {mergedDefaultProps} = layer.constructor;
+  const mergedDefaultProps = getOwnProperty(layer.constructor, 'mergedDefaultProps');
   if (mergedDefaultProps) {
     return mergedDefaultProps;
   }
@@ -594,18 +597,27 @@ function getDefaultProps(layer) {
  * Walk the prototype chain and merge all default props
  */
 function mergeDefaultProps(layer) {
-  const {constructor} = layer;
+  const subClassConstructor = layer.constructor;
+  const layerName = getOwnProperty(subClassConstructor, 'layerName');
+  if (!layerName) {
+    log.once(0, `layer ${layer.constructor.name} does not specify a "layerName"`);
+  }
   let mergedDefaultProps = {
-    id: constructor.layerName
+    id: layerName || layer.constructor.name
   };
+
   while (layer) {
-    const layerDefaultProps = layer.constructor.defaultProps;
+    const layerDefaultProps = getOwnProperty(layer.constructor, 'defaultProps');
     if (layerDefaultProps) {
       mergedDefaultProps = Object.assign(layerDefaultProps, mergedDefaultProps);
     }
     layer = Object.getPrototypeOf(layer);
   }
   // Store for quick lookup
-  constructor.mergedDefaultProps = mergedDefaultProps;
+  subClassConstructor.mergedDefaultProps = mergedDefaultProps;
   return mergedDefaultProps;
 }
+
+export const TEST_EXPORTS = {
+  mergeDefaultProps
+};
