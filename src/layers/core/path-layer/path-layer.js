@@ -92,7 +92,7 @@ export default class PathLayer extends Layer {
   }
 
   calculateIndices(attribute) {
-    const {paths, IndexType, model, indexCount} = this.state;
+    const {paths, IndexType, model, indexCount, pointCount} = this.state;
 
     if (IndexType === Uint16Array && indexCount > 65535) {
       throw new Error('Vertex count exceeds browser\'s limit');
@@ -102,29 +102,29 @@ export default class PathLayer extends Layer {
     const indices = new IndexType(indexCount);
 
     let i = 0;
-    let offset = 0;
+    let outsideIndex = 0;
+    let insideIndex = pointCount;
     paths.forEach((path, pathIndex) => {
       const ptCount = path.length;
 
       // counter-clockwise triangulation
       //                ___
-      //             0 |  /| 2
+      //            O0 |  /| O1  (outside vertices)
       //  o---o  =>    o / o
-      //             1 |/__| 3
+      //            I0 |/__| I1  (inside vertices)
       //
       for (let ptIndex = 0; ptIndex < ptCount - 1; ptIndex++) {
         // triangle A with indices: 0, 1, 2
-        indices[i++] = offset + 0;
-        indices[i++] = offset + 1;
-        indices[i++] = offset + 2;
+        indices[i++] = outsideIndex;
+        indices[i++] = insideIndex;
+        indices[i++] = ++outsideIndex;
         // triangle B with indices: 2, 1, 3
-        indices[i++] = offset + 2;
-        indices[i++] = offset + 1;
-        indices[i++] = offset + 3;
-
-        offset += 2;
+        indices[i++] = outsideIndex;
+        indices[i++] = insideIndex;
+        indices[i++] = ++insideIndex;
       }
-      offset += 2;
+      ++outsideIndex;
+      ++insideIndex;
     });
 
     attribute.value = indices;
@@ -141,10 +141,9 @@ export default class PathLayer extends Layer {
         positions[i++] = point[0];
         positions[i++] = point[1];
         positions[i++] = point[2] || 0;
-        positions.copyWithin(i, i - 3, i);
-        i += 3;
       })
     );
+    positions.copyWithin(i, 0, i);
 
     attribute.value = positions;
   }
@@ -156,15 +155,17 @@ export default class PathLayer extends Layer {
 
     let i = 0;
     paths.forEach(path => {
-      path.forEach((point, index) => {
-        const prevPoint = path[index - 1] || point;
-        leftDeltas[i++] = point[0] - prevPoint[0];
-        leftDeltas[i++] = point[1] - prevPoint[1];
-        leftDeltas[i++] = (point[2] - prevPoint[2]) || 0;
-        leftDeltas.copyWithin(i, i - 3, i);
-        i += 3;
-      });
+      i += 3;
+      path.reduce((prevPoint, point) => {
+        if (prevPoint) {
+          leftDeltas[i++] = point[0] - prevPoint[0];
+          leftDeltas[i++] = point[1] - prevPoint[1];
+          leftDeltas[i++] = (point[2] - prevPoint[2]) || 0;
+        }
+        return point;
+      }, null);
     });
+    leftDeltas.copyWithin(i, 0, i);
 
     attribute.value = leftDeltas;
   }
@@ -176,15 +177,17 @@ export default class PathLayer extends Layer {
 
     let i = 0;
     paths.forEach(path => {
-      path.forEach((point, index) => {
-        const nextPoint = path[index + 1] || point;
-        rightDeltas[i++] = nextPoint[0] - point[0];
-        rightDeltas[i++] = nextPoint[1] - point[1];
-        rightDeltas[i++] = (nextPoint[2] - point[2]) || 0;
-        rightDeltas.copyWithin(i, i - 3, i);
-        i += 3;
-      });
+      path.reduce((prevPoint, point) => {
+        if (prevPoint) {
+          rightDeltas[i++] = point[0] - prevPoint[0];
+          rightDeltas[i++] = point[1] - prevPoint[1];
+          rightDeltas[i++] = (point[2] - prevPoint[2]) || 0;
+        }
+        return point;
+      }, null);
+      i += 3;
     });
+    rightDeltas.copyWithin(i, 0, i);
 
     attribute.value = rightDeltas;
   }
@@ -201,8 +204,9 @@ export default class PathLayer extends Layer {
         w = 1;
       }
       const count = path.length;
-      fillArray({target: directions, source: [w, -w], start: i, count});
-      i += count * 2;
+      fillArray({target: directions, source: [w], start: i, count});
+      fillArray({target: directions, source: [-w], start: i + pointCount, count});
+      i += count;
     });
 
     attribute.value = directions;
@@ -220,10 +224,11 @@ export default class PathLayer extends Layer {
       if (isNaN(pointColor[3])) {
         pointColor[3] = 255;
       }
-      const count = path.length * 2;
+      const count = path.length;
       fillArray({target: colors, source: pointColor, start: i, count});
       i += count * size;
     });
+    colors.copyWithin(i, 0, i);
 
     attribute.value = colors;
   }
@@ -237,10 +242,11 @@ export default class PathLayer extends Layer {
     let i = 0;
     paths.forEach((path, index) => {
       const pickingColor = this.encodePickingColor(index);
-      const count = path.length * 2;
+      const count = path.length;
       fillArray({target: pickingColors, source: pickingColor, start: i, count});
       i += count * size;
     });
+    pickingColors.copyWithin(i, 0, i);
 
     attribute.value = pickingColors;
   }
