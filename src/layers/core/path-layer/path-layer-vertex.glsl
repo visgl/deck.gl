@@ -1,9 +1,9 @@
 #define SHADER_NAME path-layer-vertex-shader
 
 attribute float directions;
-attribute vec3 prevPositions;
 attribute vec3 positions;
-attribute vec3 nextPositions;
+attribute vec3 leftDeltas;
+attribute vec3 rightDeltas;
 
 attribute vec4 colors;
 attribute vec3 pickingColors;
@@ -54,9 +54,9 @@ void main() {
   vec4 pickingColor = vec4(pickingColors.rgb, 255.) / 255.;
   vColor = mix(color, pickingColor, renderPickingBuffer);
 
-  vec3 prevProjected = project_position(prevPositions);
+  vec3 prevProjected = project_position(positions - leftDeltas);
   vec3 currProjected = project_position(positions);
-  vec3 nextProjected = project_position(nextPositions);
+  vec3 nextProjected = project_position(positions + rightDeltas);
 
   gl_Position = project_to_clipspace(
     vec4(

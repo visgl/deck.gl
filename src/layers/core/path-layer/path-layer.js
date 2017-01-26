@@ -1,5 +1,6 @@
 import {Layer} from '../../../lib';
 import {assembleShaders} from '../../../shader-utils';
+import {fillArray} from '../../../lib/utils';
 import {GL, Model, Geometry} from 'luma.gl';
 import {readFileSync} from 'fs';
 import {join} from 'path';
@@ -34,16 +35,12 @@ export default class PathLayer extends Layer {
     attributeManager.addDynamic({
       indices: {size: 1, update: this.calculateIndices, isIndexed: true},
       positions: {size: 3, update: this.calculatePositions},
-      prevPositions: {size: 3, update: this.calculatePrevPositions},
-      nextPositions: {size: 3, update: this.calculateNextPositions},
+      leftDeltas: {size: 3, update: this.calculateLeftDeltas},
+      rightDeltas: {size: 3, update: this.calculateRightDeltas},
       directions: {size: 1, update: this.calculateDirections},
       colors: {size: 4, type: GL.UNSIGNED_BYTE, update: this.calculateColors},
-      pickingColors: {
-        size: 3,
-        type: GL.UNSIGNED_BYTE,
-        update: this.calculatePickingColors,
-        noAlloc: true
-      }
+      pickingColors: {size: 3, type: GL.UNSIGNED_BYTE, update: this.calculatePickingColors,
+        noAlloc: true}
     });
   }
 
@@ -53,23 +50,21 @@ export default class PathLayer extends Layer {
 
     if (changeFlags.dataChanged) {
       // this.state.paths only stores point positions in each path
-      this.state.paths = props.data.map(getPath);
+      const paths = props.data.map(getPath);
 
-      this.state.pointCount = 0;
-      this.state.indexCount = 0;
+      let pointCount = 0;
+      let indexCount = 0;
 
-      this.state.paths.forEach(path => {
-        this.state.pointCount += path.length;
+      paths.forEach(path => {
+        const ptCount = path.length;
+        pointCount += ptCount;
         // path.length - 1: n points => n-1 line segments
-        // * 2 * 3: each is rendered as 2 triangles with 3 vertices
-        this.state.indexCount += (path.length - 1) * 2 * 3;
+        // * 2 * 3: each segment is rendered as 2 triangles with 3 vertices
+        indexCount += (ptCount - 1) * 2 * 3;
       });
 
+      this.setState({paths, pointCount, indexCount});
       attributeManager.invalidateAll();
-    }
-
-    if (oldProps.opacity !== props.opacity) {
-      this.setUniforms({opacity: props.opacity});
     }
   }
 
@@ -106,18 +101,9 @@ export default class PathLayer extends Layer {
 
     const indices = new IndexType(indexCount);
 
-    // 1. calculate index offsets for points on paths
-    const offsets = [0];
-    let accLength = 0;
-    paths.forEach(vertices => {
-      accLength += vertices.length;
-      offsets.push(accLength);
-    });
-
     let i = 0;
-    // 2. generate mesh indices
+    let offset = 0;
     paths.forEach((path, pathIndex) => {
-      const di = offsets[pathIndex] * 2;
       const ptCount = path.length;
 
       // counter-clockwise triangulation
@@ -127,16 +113,18 @@ export default class PathLayer extends Layer {
       //             1 |---| 3
       //
       for (let ptIndex = 0; ptIndex < ptCount - 1; ptIndex++) {
-        const startIndex = ptIndex * 2 + di;
         // triangle A with indices: 0, 1, 2
-        indices[i++] = startIndex + 0;
-        indices[i++] = startIndex + 1;
-        indices[i++] = startIndex + 2;
+        indices[i++] = offset + 0;
+        indices[i++] = offset + 1;
+        indices[i++] = offset + 2;
         // triangle B with indices: 2, 1, 3
-        indices[i++] = startIndex + 2;
-        indices[i++] = startIndex + 1;
-        indices[i++] = startIndex + 3;
+        indices[i++] = offset + 2;
+        indices[i++] = offset + 1;
+        indices[i++] = offset + 3;
+
+        offset += 2;
       }
+      offset += 2;
     });
 
     attribute.value = indices;
@@ -153,57 +141,58 @@ export default class PathLayer extends Layer {
         positions[i++] = point[0];
         positions[i++] = point[1];
         positions[i++] = point[2] || 0;
-        positions[i++] = point[0];
-        positions[i++] = point[1];
-        positions[i++] = point[2] || 0;
+        positions.copyWithin(i, i - 3, i);
+        i += 3;
       })
     );
 
     attribute.value = positions;
   }
 
-  calculatePrevPositions(attribute) {
+  calculateLeftDeltas(attribute) {
     const {paths, pointCount} = this.state;
-    const prevPositions = new Float32Array(pointCount * attribute.size * 2);
+
+    const leftDeltas = new Float32Array(pointCount * attribute.size * 2);
 
     let i = 0;
     paths.forEach(path => {
-      this._shiftPath(path, -1).forEach(point => {
-        prevPositions[i++] = point[0];
-        prevPositions[i++] = point[1];
-        prevPositions[i++] = point[2] || 0;
-        prevPositions[i++] = point[0];
-        prevPositions[i++] = point[1];
-        prevPositions[i++] = point[2] || 0;
+      path.forEach((point, index) => {
+        const prevPoint = path[index - 1] || point;
+        leftDeltas[i++] = point[0] - prevPoint[0];
+        leftDeltas[i++] = point[1] - prevPoint[1];
+        leftDeltas[i++] = (point[2] - prevPoint[2]) || 0;
+        leftDeltas.copyWithin(i, i - 3, i);
+        i += 3;
       });
     });
 
-    attribute.value = prevPositions;
+    attribute.value = leftDeltas;
   }
 
-  calculateNextPositions(attribute) {
+  calculateRightDeltas(attribute) {
     const {paths, pointCount} = this.state;
-    const nextPositions = new Float32Array(pointCount * attribute.size * 2);
+    
+    const rightDeltas = new Float32Array(pointCount * attribute.size * 2);
 
     let i = 0;
     paths.forEach(path => {
-      this._shiftPath(path, 1).forEach(point => {
-        nextPositions[i++] = point[0];
-        nextPositions[i++] = point[1];
-        nextPositions[i++] = point[2] || 0;
-        nextPositions[i++] = point[0];
-        nextPositions[i++] = point[1];
-        nextPositions[i++] = point[2] || 0;
+      path.forEach((point, index) => {
+        const nextPoint = path[index + 1] || point;
+        rightDeltas[i++] = nextPoint[0] - point[0];
+        rightDeltas[i++] = nextPoint[1] - point[1];
+        rightDeltas[i++] = (nextPoint[2] - point[2]) || 0;
+        rightDeltas.copyWithin(i, i - 3, i);
+        i += 3;
       });
     });
-
-    attribute.value = nextPositions;
+    
+    attribute.value = rightDeltas;
   }
 
   calculateDirections(attribute) {
     const {data, getWidth} = this.props;
     const {paths, pointCount} = this.state;
-    const directions = new Float32Array(pointCount * attribute.size * 2);
+    const directions = new Float32Array(pointCount * 2);
 
     let i = 0;
     paths.forEach((path, index) => {
@@ -211,11 +200,9 @@ export default class PathLayer extends Layer {
       if (isNaN(w)) {
         w = 1;
       }
-
-      path.forEach(() => {
-        directions[i++] = w;
-        directions[i++] = -w;
-      });
+      const count = path.length;
+      fillArray({target: directions, source: [w, -w], start: i, count});
+      i += count * 2;
     });
 
     attribute.value = directions;
@@ -224,7 +211,8 @@ export default class PathLayer extends Layer {
   calculateColors(attribute) {
     const {data, getColor} = this.props;
     const {paths, pointCount} = this.state;
-    const colors = new Uint8Array(pointCount * attribute.size * 2);
+    const {size} = attribute;
+    const colors = new Uint8Array(pointCount * size * 2);
 
     let i = 0;
     paths.forEach((path, index) => {
@@ -232,17 +220,9 @@ export default class PathLayer extends Layer {
       if (isNaN(pointColor[3])) {
         pointColor[3] = 255;
       }
-
-      path.forEach(() => {
-        colors[i++] = pointColor[0];
-        colors[i++] = pointColor[1];
-        colors[i++] = pointColor[2];
-        colors[i++] = pointColor[3];
-        colors[i++] = pointColor[0];
-        colors[i++] = pointColor[1];
-        colors[i++] = pointColor[2];
-        colors[i++] = pointColor[3];
-      });
+      const count = path.length * 2;
+      fillArray({target: colors, source: pointColor, start: i, count});
+      i += count * size;
     });
 
     attribute.value = colors;
@@ -251,33 +231,20 @@ export default class PathLayer extends Layer {
   // Override the default picking colors calculation
   calculatePickingColors(attribute) {
     const {paths, pointCount} = this.state;
-    const pickingColors = new Uint8Array(pointCount * attribute.size * 2);
+    const {size} = attribute;
+    const pickingColors = new Uint8Array(pointCount * size * 2);
 
     let i = 0;
     paths.forEach((path, index) => {
       const pickingColor = this.encodePickingColor(index);
-      path.forEach(() => {
-        pickingColors[i++] = pickingColor[0];
-        pickingColors[i++] = pickingColor[1];
-        pickingColors[i++] = pickingColor[2];
-        pickingColors[i++] = pickingColor[0];
-        pickingColors[i++] = pickingColor[1];
-        pickingColors[i++] = pickingColor[2];
-      });
+      const count = path.length * 2;
+      fillArray({target: pickingColors, source: pickingColor, start: i, count});
+      i += count * size;
     });
 
     attribute.value = pickingColors;
   }
 
-  _shiftPath(path, offset = 0) {
-    const result = new Array(path.length);
-    let point = path[0];
-    for (let i = 0; i < path.length; i++) {
-      point = path[i + offset] || point;
-      result[i] = point;
-    }
-    return result;
-  }
 }
 
 PathLayer.layerName = 'PathLayer';
