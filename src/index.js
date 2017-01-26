@@ -30,6 +30,7 @@ export {default as ArcLayer} from './layers/core/arc-layer';
 export {default as LineLayer} from './layers/core/line-layer';
 export {default as ScatterplotLayer} from './layers/core/scatterplot-layer';
 export {default as ScreenGridLayer} from './layers/core/screen-grid-layer';
+export {default as GridLayer} from './layers/core/grid-layer';
 export {default as HexagonLayer} from './layers/core/hexagon-layer';
 export {default as IconLayer} from './layers/core/icon-layer';
 

@@ -1,16 +1,19 @@
 /* load data samples for display */
-
+import allPoints from './data/sf.bike.parking.json';
 import {pointGrid} from './utils';
+import {pointsToWorldGrid} from './utils/grid-aggregator';
 
 export {default as choropleths} from './data/sf.zip.geo.json';
 export {default as hexagons} from './data/hexagons.json';
-export {default as points} from './data/sf.bike.parking.json';
 export {default as routes} from './data/sfmta.routes.json';
 export {default as iconAtlas} from './data/icon-atlas.json';
 
+export const points = allPoints;
 export const positionOrigin = [-122.45, 37.75, 0];
 
 export const meterPoints = pointGrid(1e3, [-5000, -5000, 5000, 5000]);
+
+export const worldGrid = pointsToWorldGrid(points, 0.5);
 
 // time consuming - only generate on demand
 let _points100K = null;
