@@ -17,7 +17,6 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-
 import {Layer} from '../../../lib';
 import {assembleShaders} from '../../../shader-utils';
 import {GL, Model, Geometry} from 'luma.gl';
@@ -26,14 +25,10 @@ import {join} from 'path';
 
 const DEFAULT_COLOR = [255, 0, 255, 255];
 
-const defaultGetPosition = x => x.position;
-const defaultGetRadius = x => x.radius;
-const defaultGetColor = x => x.color;
-
 const defaultProps = {
-  getPosition: defaultGetPosition,
-  getRadius: defaultGetRadius,
-  getColor: defaultGetColor,
+  getPosition: x => x.position,
+  getRadius: x => x.radius || 30,
+  getColor: x => x.color || DEFAULT_COLOR,
   radius: 30,  //  point radius in meters
   radiusMinPixels: 0, //  min point radius in pixels
   radiusMaxPixels: Number.MAX_SAFE_INTEGER, // max point radius in pixels
@@ -50,25 +45,21 @@ export default class ScatterplotLayer extends Layer {
   }
 
   initializeState() {
-    /* eslint-disable */
     const {gl} = this.context;
-    const model = this._getModel(gl);
-    this.setState({model});
+    this.setState({model: this._getModel(gl)});
 
-    const {attributeManager} = this.state;
-    attributeManager.addInstanced({
-      instancePositions: {size: 3, update: this.calculateInstancePositions},
-      instanceRadius: {size: 1, update: this.calculateInstanceRadius},
-      instanceColors: {size: 4, type: GL.UNSIGNED_BYTE, update: this.calculateInstanceColors}
+    this.state.attributeManager.addInstanced({
+      instancePositions: {size: 3, accessor: 'getPosition'},
+      instanceRadius: {size: 1, accessor: 'getRadius', defaultValue: 1},
+      instanceColors: {
+        size: 4, type: GL.UNSIGNED_BYTE, accessor: 'getColor', defaultValue: [0, 0, 0, 255]
+      }
     });
   }
 
-  updateState(evt) {
-    super.updateState(evt);
-    const {props, oldProps} = evt;
+  updateState({props, oldProps}) {
     if (props.drawOutline !== oldProps.drawOutline) {
-      this.state.model.geometry.drawMode =
-        props.drawOutline ? GL.LINE_LOOP : GL.TRIANGLE_FAN;
+      this.state.model.geometry.drawMode = props.drawOutline ? GL.LINE_LOOP : GL.TRIANGLE_FAN;
     }
   }
 
@@ -82,8 +73,7 @@ export default class ScatterplotLayer extends Layer {
       radiusMaxPixels: this.props.radiusMaxPixels
     }));
     // Setting line width back to 1 is here to workaround a Google Chrome bug
-    // gl.clear() and gl.isEnabled() will return GL_INVALID_VALUE even with
-    // correct parameter
+    // gl.clear() and gl.isEnabled() will return GL_INVALID_VALUE even with correct parameter
     // This is not happening on Safari and Firefox
     gl.lineWidth(1.0);
   }
@@ -98,8 +88,6 @@ export default class ScatterplotLayer extends Layer {
         0
       );
     }
-    /* eslint-disable */
-
 
     const shaders = assembleShaders(gl, this.getShaders());
 
@@ -114,7 +102,6 @@ export default class ScatterplotLayer extends Layer {
       }),
       isInstanced: true
     });
-    return model;
   }
 
   calculateInstancePositions(attribute) {

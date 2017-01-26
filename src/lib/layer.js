@@ -375,7 +375,7 @@ export default class Layer {
       // End lifecycle method
 
       // Run the attribute updaters
-      this._updateAttributes(updateParams.newProps);
+      this._updateAttributes(updateParams.props);
       this._updateBaseUniforms();
 
       if (this.state.model) {
@@ -538,8 +538,10 @@ export default class Layer {
     const numInstances = this.getNumInstances(props);
     // Figure out data length
     attributeManager.update({
+      data: props.data,
       numInstances,
-      bufferMap: props,
+      props,
+      buffers: props,
       context: this,
       // Don't worry about non-attribute props
       ignoreUnknownAttributes: true
