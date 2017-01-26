@@ -4,12 +4,14 @@ import {GL, Model, Geometry} from 'luma.gl';
 import {readFileSync} from 'fs';
 import {join} from 'path';
 
+const DEFAULT_COLOR = [0, 0, 0, 255];
+
 const defaultProps = {
   opacity: 1,
   strokeWidth: 1,
   getPath: object => object.path,
   getColor: object => object.color,
-  getWidth: object => object.width || 1
+  getWidth: object => object.width
 };
 
 export default class PathLayer extends Layer {
@@ -74,7 +76,7 @@ export default class PathLayer extends Layer {
   draw({uniforms}) {
     this.state.model.render(Object.assign({}, uniforms, {
       opacity: this.props.opacity,
-      thickness: this.props.strokeWidth || 1,
+      thickness: this.props.strokeWidth,
       miterLimit: 1
     }));
   }
@@ -205,7 +207,11 @@ export default class PathLayer extends Layer {
 
     let i = 0;
     paths.forEach((path, index) => {
-      const w = getWidth(data[index], index);
+      let w = getWidth(data[index], index);
+      if (isNaN(w)) {
+        w = 1;
+      }
+
       path.forEach(() => {
         directions[i++] = w;
         directions[i++] = -w;
@@ -222,7 +228,7 @@ export default class PathLayer extends Layer {
 
     let i = 0;
     paths.forEach((path, index) => {
-      const pointColor = getColor(data[index], index);
+      const pointColor = getColor(data[index], index) || DEFAULT_COLOR;
       if (isNaN(pointColor[3])) {
         pointColor[3] = 255;
       }

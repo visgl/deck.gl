@@ -24,12 +24,11 @@ import {GL, Model, Geometry} from 'luma.gl';
 import {readFileSync} from 'fs';
 import {join} from 'path';
 
-const DEFAULT_RADIUS = 30;
 const DEFAULT_COLOR = [255, 0, 255, 255];
 
 const defaultGetPosition = x => x.position;
-const defaultGetRadius = x => x.radius || DEFAULT_RADIUS;
-const defaultGetColor = x => x.color || DEFAULT_COLOR;
+const defaultGetRadius = x => x.radius;
+const defaultGetColor = x => x.color;
 
 const defaultProps = {
   getPosition: defaultGetPosition,
@@ -120,39 +119,36 @@ export default class ScatterplotLayer extends Layer {
 
   calculateInstancePositions(attribute) {
     const {data, getPosition} = this.props;
-    const {value, size} = attribute;
+    const {value} = attribute;
     let i = 0;
     for (const point of data) {
       const position = getPosition(point);
-      value[i + 0] = position[0] || 0;
-      value[i + 1] = position[1] || 0;
-      value[i + 2] = position[2] || 0;
-      i += size;
+      value[i++] = position[0];
+      value[i++] = position[1];
+      value[i++] = position[2] || 0;
     }
   }
 
   calculateInstanceRadius(attribute) {
     const {data, getRadius} = this.props;
-    const {value, size} = attribute;
+    const {value} = attribute;
     let i = 0;
     for (const point of data) {
       const radius = getRadius(point);
-      value[i + 0] = isNaN(radius) ? 1 : radius;
-      i += size;
+      value[i++] = isNaN(radius) ? 1 : radius;
     }
   }
 
   calculateInstanceColors(attribute) {
     const {data, getColor} = this.props;
-    const {value, size} = attribute;
+    const {value} = attribute;
     let i = 0;
     for (const point of data) {
-      const color = getColor(point);
-      value[i + 0] = color[0] || 0;
-      value[i + 1] = color[1] || 0;
-      value[i + 2] = color[2] || 0;
-      value[i + 3] = isNaN(color[3]) ? DEFAULT_COLOR[3] : color[3];
-      i += size;
+      const color = getColor(point) || DEFAULT_COLOR;
+      value[i++] = color[0];
+      value[i++] = color[1];
+      value[i++] = color[2];
+      value[i++] = isNaN(color[3]) ? DEFAULT_COLOR[3] : color[3];
     }
   }
 }
