@@ -20,10 +20,7 @@ module.exports = {
       test: /\.(eot|svg|ttf|woff|woff2|gif|jpe?g|png)$/,
       loader: 'url-loader'
     }, {
-      test: /\.json$/,
-      loader: 'json-loader'
-    }, {
-      include: /node_modules\/mapbox-gl/,
+      include: /node_modules\/mapbox-gl.*\.js$/,
       loader: 'transform-loader?brfs-babel',
       enforce: 'post'
     }, {
