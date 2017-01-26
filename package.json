@@ -27,7 +27,7 @@
     "build-babel": "rm -fr dist && babel src --out-dir dist --presets=es2015 --plugins=static-fs --source-maps inline",
     "build-buble": "buble dist-es6 -o dist --no modules --y dangerousForOf --objectAssign",
     "build": "npm run build-clean && npm run build-shaders && npm run build-babel && webpack -d --display-modules",
-    "lint": "eslint src test exhibits/app.js examples",
+    "lint": "eslint src test examples",
     "publish-prod": "npm run build && npm run test && npm run test-dist && npm publish",
     "publish-beta": "npm run build && npm run test && npm run test-dist && npm publish --tag beta",
     "test": "npm run lint && npm run test-node",

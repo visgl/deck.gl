@@ -1,22 +1,24 @@
 importScripts('./util.js');
-var FLUSH_LIMIT = 20000;
-var result = [];
-var count = 0;
-var triangleCount = 0;
+const FLUSH_LIMIT = 20000;
+let result = [];
+let count = 0;
+let triangleCount = 0;
 
 onmessage = function(e) {
-  var lines = e.data.text.split('\n');
+  const lines = e.data.text.split('\n');
 
   lines.forEach(function(line) {
-    if (!line) return;
-    var parts = line.split('\x01');
+    if (!line) {
+      return;
+    }
+    const parts = line.split('\x01');
 
-    var feature = {
+    const feature = {
       type: 'Feature',
       geometry: {
         type: 'MultiPolygon',
         coordinates: parts.slice(1).map(function(str) {
-          var coords = decodePolyline(str);
+          const coords = decodePolyline(str);
           triangleCount += coords.length * 3 - 2;
           coords.push(coords[0]);
           return [coords];

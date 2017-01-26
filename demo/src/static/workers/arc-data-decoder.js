@@ -1,18 +1,21 @@
 importScripts('./util.js');
-var result = [];
-var flowCount = 0;
+
+const result = [];
+let flowCount = 0;
 
 onmessage = function(e) {
 
-  var lines = e.data.text.split('\n');
+  const lines = e.data.text.split('\n');
 
   lines.forEach(function(line) {
-    if (!line) return;
-    var parts = line.split('\x01');
-    var f = {
+    if (!line) {
+      return;
+    }
+    const parts = line.split('\x01');
+    const f = {
       type: 'Feature',
       properties: {
-        name: parts[0].slice(0, -2) + ', ' + parts[0].slice(-2),
+        name: `${parts[0].slice(0, -2) }, ${ parts[0].slice(-2)}`,
         flows: decodeLinks(parts[1])
       },
       geometry: {
@@ -22,9 +25,12 @@ onmessage = function(e) {
 
     result.push(f);
 
-    var sumX = 0, sumY = 0, len = 0;
+    let sumX = 0;
+    let sumY = 0;
+    let len = 0;
+
     f.geometry.coordinates = parts.slice(2).map(function(str) {
-      var coords = decodePolyline(str);
+      const coords = decodePolyline(str);
       coords.forEach(function(c) {
         sumX += c[0];
         sumY += c[1];
@@ -38,8 +44,8 @@ onmessage = function(e) {
 
   if (e.data.event === 'load') {
     result.forEach(function(f, i) {
-      var flows = f.properties.flows;
-      for (var toId in flows) {
+      const flows = f.properties.flows;
+      for (const toId in flows) {
         result[toId].properties.flows[i] = -flows[toId];
         flowCount++;
       }
@@ -53,7 +59,7 @@ onmessage = function(e) {
       }],
       meta: {
         count: result.length,
-        flowCount: flowCount
+        flowCount
       }
     });
     postMessage({action: 'end'});
@@ -61,11 +67,11 @@ onmessage = function(e) {
 };
 
 function decodeLinks(str) {
-  var links = {};
-  var tokens = str.split(/([\x28-\x5b]+)/);
-  for (var i = 0; i < tokens.length - 1; i += 2) {
-    var index = decodeNumber(tokens[i], 32, 93);
-    var flow = decodeNumber(tokens[i + 1], 52, 40);
+  const links = {};
+  const tokens = str.split(/([\x28-\x5b]+)/);
+  for (let i = 0; i < tokens.length - 1; i += 2) {
+    const index = decodeNumber(tokens[i], 32, 93);
+    const flow = decodeNumber(tokens[i + 1], 52, 40);
     links[index] = flow;
   }
   return links;
