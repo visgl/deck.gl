@@ -494,7 +494,7 @@ function test_float_sin(gl, testName) {
   addSpan(testName, currentDiv);
 
  // sin
-  const float0 = getFloat64(3);
+  const float0 = getFloat64(8);
   const float_ref = Math.sin(float0);
 
   const float0_vec2 = fp64ify(float0);
@@ -529,7 +529,7 @@ function test_float_cos(gl, testName) {
   addSpan(testName, currentDiv);
 
  // cos
-  const float0 = getFloat64(3);
+  const float0 = getFloat64(8);
   const float_ref = Math.cos(float0);
 
   const float0_vec2 = fp64ify(float0);
@@ -564,7 +564,7 @@ function test_float_tan(gl, testName) {
   addSpan(testName, currentDiv);
 
  // tan
-  const float0 = getFloat64(3);
+  const float0 = getFloat64(8);
   const float_ref = Math.tan(float0);
 
   const float0_vec2 = fp64ify(float0);
@@ -573,6 +573,41 @@ function test_float_tan(gl, testName) {
   const program = new Program(gl, assembleShaders(gl, {
         vs: require('./vs_float_tan.glsl'),
         fs: require('./fs.glsl'),
+        fp64: true,
+        project64: true
+      }));
+
+  program.use();
+  program.setBuffers({
+    positions: new Buffer(gl).setData({
+      data: new Float32Array([1, 1, -1, 1, 1, -1, -1, -1]),
+      size: 2
+    })
+  }).setUniforms({
+    a: float0_vec2,
+    ONE: 1.0
+  });
+
+  var line;
+  line = "tan(" + float0_vec2.toString() + ')<br>';
+  addSpan(line, currentDiv);
+  return float_ref_vec2;
+}
+
+function test_float_radians(gl, testName) {
+  var currentDiv = addDiv();
+  addSpan(testName, currentDiv);
+
+ // radians
+  const float0 = getFloat64(16);
+  const float_ref = float0 * Math.PI / 180.0;
+
+  const float0_vec2 = fp64ify(float0);
+  const float_ref_vec2 = fp64ify(float_ref);
+
+  const program = new Program(gl, assembleShaders(gl, {
+        vs: readFileSync(join(__dirname, './shader-tests/vs_float_radians.glsl'), 'utf8'),
+        fs: readFileSync(join(__dirname, './shader-tests/fs.glsl'), 'utf8'),
         fp64: true,
         project64: true
       }));
@@ -609,7 +644,7 @@ window.onload = () => {
 
   var idx0;
   var test_no = 0;
-  const loop = 20;
+  const loop = 100;
 
   for (idx0 = 0; idx0 < loop; idx0++) {
     var currentDiv = addDiv();
@@ -774,4 +809,20 @@ window.onload = () => {
     addSpan("------------------------", currentDiv);
   }
 
+  for (idx0 = 0; idx0 < loop; idx0++) {
+    var currentDiv = addDiv();
+    addSpan("------------------------", currentDiv);
+    addSpan("Loop No. " + test_no++, currentDiv);
+
+
+    var cpu_result = test_float_radians(gl, "Float radians test");
+
+    render(gl);
+
+    var gpu_result = getGPUOutput(gl);
+
+    checkError(gpu_result, cpu_result);
+
+    addSpan("------------------------", currentDiv);
+  }
 }
