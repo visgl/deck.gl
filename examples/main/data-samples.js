@@ -4,6 +4,7 @@ import {pointGrid} from './utils';
 import {pointsToWorldGrid} from './utils/grid-aggregator';
 
 export {default as choropleths} from './data/sf.zip.geo.json';
+export {default as geojson} from './data/sample.geo.json';
 export {default as hexagons} from './data/hexagons.json';
 export {default as routes} from './data/sfmta.routes.json';
 export {default as iconAtlas} from './data/icon-atlas.json';

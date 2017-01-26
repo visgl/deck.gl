@@ -31,7 +31,7 @@ const defaultStrokeColor = [0x33, 0x33, 0x33, 0xFF];
 const defaultFillColor = [0xBD, 0xE2, 0x7A, 0xFF];
 
 const defaultProps = {
-  drawPoints: false,
+  drawPoints: true,
   drawLines: true,
   drawPolygons: true,
   fillPolygons: true,

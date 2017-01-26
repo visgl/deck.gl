@@ -3,7 +3,7 @@
   "features": [{
     "type": "Feature",
     "properties": {
-      "marker-color": "#ff0000",
+      "marker-color": [255, 0, 0],
       "marker-size": "small",
       "marker-symbol": ""
     },
@@ -14,7 +14,7 @@
   }, {
     "type": "Feature",
     "properties": {
-      "marker-color": "#0000ff",
+      "marker-color": [0, 0, 255],
       "marker-size": "large",
       "marker-symbol": ""
     },
@@ -37,7 +37,7 @@
   }, {
     "type": "Feature",
     "properties": {
-      "stroke": "#ff0000",
+      "stroke": [255, 0, 0],
       "stroke-width": 10,
       "stroke-opacity": 1
     },
@@ -57,7 +57,7 @@
   }, {
     "type": "Feature",
     "properties": {
-      "stroke": "#408000",
+      "stroke": [64, 128, 0],
       "stroke-width": 2,
       "stroke-opacity": 1
     },
@@ -77,10 +77,10 @@
   }, {
     "type": "Feature",
     "properties": {
-      "stroke": "#800000",
+      "stroke": [128, 0, 0],
       "stroke-width": 3,
       "stroke-opacity": 0.5,
-      "fill": "#ffff66",
+      "fill": [255, 255, 100],
       "fill-opacity": 1
     },
     "geometry": {
@@ -110,10 +110,10 @@
   }, {
     "type": "Feature",
     "properties": {
-      "stroke": "#004080",
+      "stroke": [0, 64, 128],
       "stroke-width": 2,
       "stroke-opacity": 1,
-      "fill": "#66ff66",
+      "fill": [100, 255, 100],
       "fill-opacity": 0.5
     },
     "geometry": {
