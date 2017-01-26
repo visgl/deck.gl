@@ -22,8 +22,7 @@
 // Utilities
 export * from './lib';
 export * from './shader-utils';
-import * as Container from './lib/utils/container';
-export {Container};
+export {get} from './lib/utils/container';
 
 // Core Layers
 export {default as ArcLayer} from './layers/core/arc-layer';

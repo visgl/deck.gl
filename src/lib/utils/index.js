@@ -1,3 +1,4 @@
+export {parseColor} from './color';
 import * as Container from './container';
 export {Container};
 export {count, get} from './container';
