@@ -12,8 +12,8 @@ const TEST_CASES = [
     result: [127, 128, 129, 255]
   }, {
     title: '3 component hex string',
-    argument: '#101010',
-    result: [16, 16, 16, 255]
+    argument: '#ff8000',
+    result: [255, 128, 0, 255]
   }, {
     title: '4 component hex string',
     argument: '#10101010',
