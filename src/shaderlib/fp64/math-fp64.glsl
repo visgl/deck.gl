@@ -28,6 +28,7 @@ const vec2 PI_4_FP64 = vec2(0.7853981852531433, -2.1855695031547384e-8);
 const vec2 PI_16_FP64 = vec2(0.19634954631328583, -5.463923757886846e-9);
 const vec2 PI_16_2_FP64 = vec2(0.39269909262657166, -1.0927847515773692e-8);
 const vec2 PI_16_3_FP64 = vec2(0.5890486240386963, -1.4906100798128818e-9);
+const vec2 PI_180_FP64 = vec2(0.01745329238474369, 1.3519960498364902e-10);
 
 const vec2 SIN_TABLE_0_FP64 = vec2(0.19509032368659973, -1.6704714833615242e-9);
 const vec2 SIN_TABLE_1_FP64 = vec2(0.3826834261417389, 6.22335089017767e-9);
@@ -331,6 +332,7 @@ vec2 sin_taylor_fp64(vec2 a) {
 
   /* keep the following commented code in case we need them
   for extra accuracy from the Taylor expansion*/
+
   // r = mul_fp64(r, x);
   // t = mul_fp64(r, INVERSE_FACTORIAL_7_FP64);
   // s = sum_fp64(s, t);
@@ -363,6 +365,7 @@ vec2 cos_taylor_fp64(vec2 a) {
 
   /* keep the following commented code in case we need them
   for extra accuracy from the Taylor expansion*/
+
   // r = mul_fp64(r, x);
   // t = mul_fp64(r, INVERSE_FACTORIAL_8_FP64);
   // s = sum_fp64(s, t);
@@ -422,10 +425,6 @@ vec2 sin_fp64(vec2 a) {
 
     if (abs_k > 4) {
         return vec2(0.0 / 0.0, 0.0 / 0.0);
-    } else if (k == 3) {
-        t = sub_fp64(t, PI_16_3_FP64);
-    } else if (k == -3) {
-        t = sum_fp64(t, PI_16_3_FP64);
     } else {
         t = sub_fp64(t, mul_fp64(PI_16_FP64, vec2(q, 0.0)));
     }
@@ -465,6 +464,8 @@ vec2 sin_fp64(vec2 a) {
 
     vec2 sin_t, cos_t;
     sincos_taylor_fp64(t, sin_t, cos_t);
+
+
 
     vec2 result = vec2(0.0, 0.0);
     if (j == 0) {
@@ -534,10 +535,6 @@ vec2 cos_fp64(vec2 a) {
 
     if (abs_k > 4) {
         return vec2(0.0 / 0.0, 0.0 / 0.0);
-    } else if (k == 3) {
-        t = sub_fp64(t, PI_16_3_FP64);
-    } else if (k == -3) {
-        t = sum_fp64(t, PI_16_3_FP64);
     } else {
         t = sub_fp64(t, mul_fp64(PI_16_FP64, vec2(q, 0.0)));
     }
@@ -639,10 +636,6 @@ vec2 tan_fp64(vec2 a) {
     // so let's just store it
     if (abs_k > 4) {
         return vec2(0.0 / 0.0, 0.0 / 0.0);
-    } else if (k == 3) {
-        t = sub_fp64(t, PI_16_3_FP64);
-    } else if (k == -3) {
-        t = sum_fp64(t, PI_16_3_FP64);
     } else {
         t = sub_fp64(t, mul_fp64(PI_16_FP64, vec2(q, 0.0)));
     }
@@ -714,7 +707,7 @@ vec2 tan_fp64(vec2 a) {
 }
 
 vec2 radians_fp64(vec2 degree) {
-  return div_fp64(mul_fp64(degree, PI_FP64), vec2(180.0, 0.0));
+  return mul_fp64(degree, PI_180_FP64);
 }
 
 // Vector functions
