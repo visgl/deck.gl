@@ -10,12 +10,23 @@ import {
   ExtrudedChoroplethLayer64
 } from 'deck.gl';
 
+import {parseColor} from 'deck.gl/lib/utils/color';
+
 import {testInitializeLayer} from '../test-utils';
 
 const suite = new Suite();
 
+const COLOR_STRING = '#FFEEBB';
+const COLOR_ARRAY = [222, 222, 222];
+
 // add tests
 suite
+.add('color#parseColor (string)', () => {
+  return parseColor(COLOR_STRING);
+})
+.add('color#parseColor (3 element array)', () => {
+  return parseColor(COLOR_ARRAY);
+})
 .add('ScatterplotLayer#construct', () => {
   return new ScatterplotLayer({data: data.points});
 })
