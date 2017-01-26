@@ -61,7 +61,7 @@ const LOCAL_DEVELOPMENT_CONFIG = {
   resolve: {
     alias: {
       // Imports the deck.gl library from the src directory in this repo
-      'deck.gl': resolve('../../src'),
+      'deck.gl': resolve('../../dist'),
       // Important: ensure shared dependencies come from this app's node_modules
       'luma.gl': resolve('./node_modules/luma.gl'),
       react: resolve('./node_modules/react')

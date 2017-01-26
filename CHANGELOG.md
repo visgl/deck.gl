@@ -20,6 +20,9 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## Recent Dev Releases
 
+#### [v3.1.0-beta.15] -
+CHANGE: Revert to babel compilation to expose the dist file tree rather than a bundle
+
 #### [v3.1.0-beta.14] -
 FIX: GeoJson path layer
 FIX: defaultProps handling

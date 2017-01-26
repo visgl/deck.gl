@@ -1,4 +1,5 @@
 dist/*
+dist-es6/*
 dist-demo/*
 demo/dist/*
 build/*

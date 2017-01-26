@@ -37,19 +37,19 @@ module.exports = {
           return "module.exports = " + JSON.stringify(content); // eslint-disable-line
         }
       },
-      {
-        // Compile ES2015 using buble
-        test: /\.js$/,
-        loader: 'buble-loader',
-        include: [/src/],
-        options: {
-          objectAssign: 'Object.assign',
-          transforms: {
-            dangerousForOf: true,
-            modules: false
-          }
-        }
-      },
+      // {
+      //   // Compile ES2015 using buble
+      //   test: /\.js$/,
+      //   loader: 'buble-loader',
+      //   include: [/src/],
+      //   options: {
+      //     objectAssign: 'Object.assign',
+      //     transforms: {
+      //       dangerousForOf: true,
+      //       modules: false
+      //     }
+      //   }
+      // },
       {
         // Inline shaders
         include: [resolve('./src')],
