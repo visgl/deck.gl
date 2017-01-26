@@ -25,6 +25,10 @@ suite
 .add('PolygonLayer#construct', () => {
   return new PolygonLayer({data: data.choropleths});
 })
+.add('ScatterplotLayer#initialize', () => {
+  const layer = new ChoroplethLayer({data: data.points});
+  testInitializeLayer({layer});
+})
 .add('ChoroplethLayer#initialize', () => {
   const layer = new ChoroplethLayer({data: data.choropleths});
   testInitializeLayer({layer});

@@ -6,18 +6,49 @@ const {mergeDefaultProps} = TEST_EXPORTS;
 
 const dataVariants = [
   {data: ['a', 'b', 'c'], size: 3}
-  //  {data: new Map('a', 'b', 'c'), size: 3},
-  //  {data: {a: 'a', b: 'b', c: 'c'}, size: 3}
+  //  {data: , size: 3},
+  //  {data: , size: 3}
 ];
 
 const LAYER_PROPS = {
   id: 'testLayer',
   data: []
 };
-const LAYER_PROPS_ZEROES = {
-  id: 'testLayer',
-  data: []
-};
+
+const LAYER_CONSTRUCT_TEST_CASES = [
+  {
+    title: 'Default id',
+    props: {data: null},
+    id: 'Layer'
+  },
+  {
+    title: 'Null data',
+    props: {id: 'testLayer', data: null}
+  },
+  {
+    title: 'Empty data',
+    props: {id: 'testLayer', data: []}
+  },
+  {
+    title: 'With data object',
+    props: {id: 'testLayer', data: {a: 'a', b: 'b', c: 'c'}}
+  },
+  {
+    title: 'With data map',
+    props: {id: 'testLayer', data: new Map([['a', 'a'], ['b', 'b'], ['c', 'c']])}
+  }
+];
+
+const LAYER_CONSTRUCT_FAIL_TEST_CASES = [
+  {
+    title: 'Null id',
+    props: {id: null}
+  },
+  {
+    title: 'Empty string id',
+    props: {id: ''}
+  }
+];
 
 class SubLayer extends Layer {}
 SubLayer.layerName = 'SubLayer';
@@ -46,14 +77,23 @@ test('Layer#mergeDefaultProps', t => {
 });
 
 test('Layer#constructor', t => {
-  const layer = new Layer(LAYER_PROPS);
-  t.ok(layer, 'Layer created');
+  for (const tc of LAYER_CONSTRUCT_TEST_CASES) {
+    const layer = new Layer(tc.props);
+    t.ok(layer, `Layer created ${tc.title}`);
+    const expectedId = tc.props.id || tc.id;
+    t.equal(layer.id, expectedId, 'Layer id set correctly');
+    t.ok(layer.props, 'Layer props not null');
+  }
   t.end();
 });
 
-test('Layer#constructor with zeroes', t => {
-  const layer = new Layer(LAYER_PROPS_ZEROES);
-  t.ok(layer, 'Layer created');
+test('Layer#constructor with bad props', t => {
+  for (const tc of LAYER_CONSTRUCT_FAIL_TEST_CASES) {
+    t.throws(
+      () => new Layer(tc.props),
+      `Expected invalid prop to throw an error ${tc.title}`
+    );
+  }
   t.end();
 });
 
