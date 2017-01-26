@@ -51,19 +51,9 @@ export default class PathLayer extends Layer {
     if (changeFlags.dataChanged) {
       // this.state.paths only stores point positions in each path
       const paths = props.data.map(getPath);
+      const pointCount = paths.reduce((count, path) => count + path.length, 0);
 
-      let pointCount = 0;
-      let indexCount = 0;
-
-      paths.forEach(path => {
-        const ptCount = path.length;
-        pointCount += ptCount;
-        // path.length - 1: n points => n-1 line segments
-        // * 2 * 3: each segment is rendered as 2 triangles with 3 vertices
-        indexCount += (ptCount - 1) * 2 * 3;
-      });
-
-      this.setState({paths, pointCount, indexCount});
+      this.setState({paths, pointCount});
       attributeManager.invalidateAll();
     }
   }
@@ -92,7 +82,11 @@ export default class PathLayer extends Layer {
   }
 
   calculateIndices(attribute) {
-    const {paths, IndexType, model, indexCount, pointCount} = this.state;
+    const {paths, IndexType, model, pointCount} = this.state;
+
+    // each path with length n has n-1 line segments
+    // * 2 * 3: each segment is rendered as 2 triangles with 3 vertices
+    const indexCount = (pointCount - paths.length) * 2 * 3;
 
     if (IndexType === Uint16Array && indexCount > 65535) {
       throw new Error('Vertex count exceeds browser\'s limit');
