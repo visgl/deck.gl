@@ -1,23 +1,25 @@
 importScripts('./util.js');
-var FLUSH_LIMIT = 10000;
-var result = [];
-var index = 0;
-var count = 0;
-var vertexCount = 0;
+const FLUSH_LIMIT = 10000;
+let result = [];
+let index = 0;
+let count = 0;
+let vertexCount = 0;
 
 onmessage = function(e) {
-  var lines = e.data.text.split('\n');
+  const lines = e.data.text.split('\n');
 
   lines.forEach(function(line) {
 
     line.split('\x01').forEach(function(str) {
-      if (!str) return;
+      if (!str) {
+        return;
+      }
 
-      var coords = decodePolyline(str);
+      const coords = decodePolyline(str);
       vertexCount += coords.length;
       coords.push(coords[0]);
 
-      var feature = {
+      const feature = {
         type: 'Feature',
         geometry: {
           type: 'Polygon',
@@ -51,7 +53,7 @@ function flush() {
       type: 'FeatureCollection',
       features: result
     }],
-    meta: {count: count, vertexCount: vertexCount}
+    meta: {count, vertexCount}
   });
   result = [];
 }
