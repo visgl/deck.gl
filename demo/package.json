@@ -49,7 +49,6 @@
     "eslint-config-uber-jsx": "^3.0.0",
     "eslint-plugin-react": "^6.0.0",
     "file-loader": "^0.9.0",
-    "json-loader": "^0.5.4",
     "node-sass": "^4.3.0",
     "sass-loader": "^4.1.1",
     "style-loader": "^0.13.1",
