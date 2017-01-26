@@ -21,6 +21,9 @@ Ref: http://keepachangelog.com/en/0.3.0/
 ## Official Releases
 
 ### deck.gl v3
+#### [3.1.3] - 2017-1-25
+
+- HOTFIX: Fixed project_fp64 issue under linux + nvidia (#315)
 
 #### [3.1.2] - 2017-1-19
 
