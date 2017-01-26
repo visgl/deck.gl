@@ -107,10 +107,10 @@ export default class PathLayer extends Layer {
       const ptCount = path.length;
 
       // counter-clockwise triangulation
-      //
-      //             0 |---| 2
+      //                ___
+      //             0 |  /| 2
       //  o---o  =>    o / o
-      //             1 |---| 3
+      //             1 |/__| 3
       //
       for (let ptIndex = 0; ptIndex < ptCount - 1; ptIndex++) {
         // triangle A with indices: 0, 1, 2
@@ -171,7 +171,7 @@ export default class PathLayer extends Layer {
 
   calculateRightDeltas(attribute) {
     const {paths, pointCount} = this.state;
-    
+
     const rightDeltas = new Float32Array(pointCount * attribute.size * 2);
 
     let i = 0;
@@ -185,7 +185,7 @@ export default class PathLayer extends Layer {
         i += 3;
       });
     });
-    
+
     attribute.value = rightDeltas;
   }
 
