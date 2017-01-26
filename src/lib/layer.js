@@ -56,7 +56,10 @@ export default class Layer {
     props = Object.assign({}, mergedDefaultProps, props);
     // Accept null as data - otherwise apps and layers need to add ugly checks
     props.data = props.data || [];
+    // Props are immutable
+    Object.freeze(props);
 
+    // Define all members and freeze layer
     this.id = props.id || this.constructor.layerName;
     this.props = props;
     this.oldProps = null;
@@ -608,8 +611,9 @@ function mergeDefaultProps(layer) {
 
   while (layer) {
     const layerDefaultProps = getOwnProperty(layer.constructor, 'defaultProps');
+    Object.freeze(layerDefaultProps);
     if (layerDefaultProps) {
-      mergedDefaultProps = Object.assign(layerDefaultProps, mergedDefaultProps);
+      mergedDefaultProps = Object.assign({}, layerDefaultProps, mergedDefaultProps);
     }
     layer = Object.getPrototypeOf(layer);
   }
