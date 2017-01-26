@@ -25,6 +25,12 @@ SubLayer.defaultProps = {
   getColor: x => x.color
 };
 
+class SubLayer2 extends Layer {}
+SubLayer2.layerName = 'SubLayer2';
+
+class SubLayer3 extends Layer {}
+SubLayer3.layerName = 'SubLayer2';
+
 test('Layer#mergeDefaultProps', t => {
   class A {}
   A.defaultProps = {a: 1};
@@ -60,13 +66,24 @@ test('SubLayer#constructor', t => {
   t.end();
 });
 
+test('SubLayer2#constructor (no defaultProps)', t => {
+  const layer = new SubLayer2(LAYER_PROPS);
+  t.ok(layer, 'SubLayer2 created');
+  t.end();
+});
+
+test('SubLayer3#constructor (no layerName, no defaultProps)', t => {
+  const layer = new SubLayer3(LAYER_PROPS);
+  t.ok(layer, 'SubLayer3 created');
+  t.end();
+});
+
 // test('Layer#constructor with bad or missing props', t => {
 //   t.throws(
 //     () => new Layer({...LAYER_PROPS, zoom: undefined}),
 //     /Property zoom undefined in layer testLayer/,
 //     'Expected invalid prop to throw an error'
 //   );
-
 //   t.end();
 // });
 
