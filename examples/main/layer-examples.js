@@ -58,13 +58,22 @@ const IconLayerExample = {
   }
 };
 
+const MARKER_SIZE_MAP = {
+  small: 2,
+  medium: 5,
+  large: 10
+};
+
 const GeoJsonLayerExample = {
   layer: GeoJsonLayer,
   props: {
     id: 'geojsonLayer',
-    data: dataSamples.choropleths,
-    getFillColor: f => [0, 0, ((Container.get(f, 'properties.ZIP_CODE') * 10) % 127) + 128, 64],
-    getStrokeColor: f => [200, 0, 80],
+    data: dataSamples.geojson,
+    getPointColor: f => f.properties['marker-color'],
+    getPointSize: f => MARKER_SIZE_MAP[f.properties['marker-size']],
+    getStrokeColor: f => f.properties.stroke,
+    getStrokeWidth: f => f.properties['stroke-width'],
+    getFillColor: f => f.properties.fill,
     strokeWidth: 4,
     pickable: true
   }
