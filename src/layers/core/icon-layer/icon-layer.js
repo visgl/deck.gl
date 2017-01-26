@@ -49,8 +49,8 @@ const DEFAULT_COLOR = [0, 0, 0, 255];
 const defaultProps = {
   getPosition: x => x.position,
   getIcon: x => x.icon,
-  getColor: x => x.color || DEFAULT_COLOR,
-  getScale: x => x.size || 1,
+  getColor: x => x.color,
+  getScale: x => x.size,
   iconAtlas: null,
   iconMapping: {},
   size: 30
@@ -156,7 +156,8 @@ export default class IconLayer extends Layer {
     const {value} = attribute;
     let i = 0;
     for (const object of data) {
-      value[i++] = getScale(object);
+      const size = getScale(object);
+      value[i++] = isNaN(size) ? 1 : size;
     }
   }
 
