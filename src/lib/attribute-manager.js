@@ -120,8 +120,8 @@ export default class AttributeManager {
   update({
     data,
     numInstances,
-    buffers = {},
     props = {},
+    buffers = {},
     context = {},
     ignoreUnknownAttributes = false
   } = {}) {
@@ -259,18 +259,16 @@ export default class AttributeManager {
 
       const attribute = attributes[attributeName];
 
-      // Check all fields and generate helpful error messages
-      this._validate(attributeName, attribute);
+      const isIndexed = attribute.isIndexed || attribute.elements;
+      const size = (attribute.elements && 1) || attribute.size;
+      const value = attribute.value || null;
 
       // Initialize the attribute descriptor, with WebGL and metadata fields
       const attributeData = Object.assign(
         {
           // Ensure that fields are present before Object.seal()
           target: undefined,
-          isIndexed: false,
-
-          // Reserved for application
-          userData: {}
+          userData: {}        // Reserved for application
         },
         // Metadata
         attribute,
@@ -282,13 +280,17 @@ export default class AttributeManager {
           changed: false,
 
           // Luma fields
-          size: attribute.size,
-          value: attribute.value || null
+          isIndexed,
+          size,
+          value
         },
         _extraProps
       );
       // Sanity - no app fields on our attributes. Use userData instead.
       Object.seal(attributeData);
+
+      // Check all fields and generate helpful error messages
+      this._validateAttributeDefinition(attributeName, attributeData);
 
       // Add to both attributes list (for registration with model)
       this.attributes[attributeName] = attributeData;
@@ -297,13 +299,17 @@ export default class AttributeManager {
     Object.assign(this.attributes, newAttributes);
   }
 
-  _validate(attributeName, attribute) {
-    assert(typeof attribute.size === 'number',
-      `Attribute definition for ${attributeName} missing size`);
+  _validateAttributeDefinition(attributeName, attribute) {
+    assert(attribute.size >= 1 && attribute.size <= 4,
+      `Attribute definition for ${attributeName} invalid size`);
 
-    // Check the updater
-    assert(typeof attribute.update === 'function' || attribute.noAlloc,
-      `Attribute updater for ${attributeName} missing update method`);
+    // Check that either 'accessor' or 'update' is a valid function
+    const hasUpdater = attribute.noAlloc ||
+      typeof attribute.update === 'function' ||
+      typeof attribute.accessor === 'string';
+    if (!hasUpdater) {
+      throw new Error(`Attribute ${attributeName} missing update or accessor`);
+    }
   }
 
   // Checks that any attribute buffers in props are valid
@@ -374,7 +380,7 @@ export default class AttributeManager {
         const needsAlloc =
           attribute.value === null ||
           attribute.value.length / attribute.size < numInstances;
-        if (needsAlloc && attribute.update) {
+        if (needsAlloc && (attribute.update || attribute.accessor)) {
           attribute.needsAlloc = true;
           needsUpdate = true;
         }
@@ -399,7 +405,7 @@ export default class AttributeManager {
    * @param {Object} opts.props - passed to updaters
    * @param {Object} opts.context - Used as "this" context for updaters
    */
-  /* eslint-disable max-statements */
+  /* eslint-disable max-statements, complexity */
   _updateBuffers({numInstances, data, props, context}) {
     const {attributes} = this;
 
@@ -420,20 +426,64 @@ export default class AttributeManager {
 
       // Call updater function if needed
       if (attribute.needsUpdate) {
-        const {update} = attribute;
-        if (update) {
-          this.onLog(2, `${this.id}:${attributeName} updating ${numInstances}`);
-          update.call(context, attribute, {data, props, numInstances});
-        } else {
-          this.onLog(2, `${this.id}:${attributeName} missing update function`);
-        }
-        attribute.needsUpdate = false;
-        attribute.changed = true;
-        this.needsRedraw = true;
+        this._updateBuffer({attribute, attributeName, numInstances, data, props, context});
       }
     }
 
     this.allocedInstances = allocCount;
   }
+
+  _updateBuffer({attribute, attributeName, numInstances, data, props, context}) {
+    const {update, accessor} = attribute;
+    if (update) {
+      // Custom updater - typically for non-instanced layers
+      this.onLog(2, `${this.id}:${attributeName} updating ${numInstances}`);
+      update.call(context, attribute, {data, props, numInstances});
+      this._checkAttributeArray(attribute, attributeName);
+    } else if (accessor) {
+      // Standard updater
+      this._updateBufferViaStandardAccessor({attribute, data, props});
+      this._checkAttributeArray(attribute, attributeName);
+    } else {
+      this.onLog(2, `${this.id}:${attributeName} missing update function`);
+    }
+
+    attribute.needsUpdate = false;
+    attribute.changed = true;
+    this.needsRedraw = true;
+  }
   /* eslint-enable max-statements */
+
+  _updateBufferViaStandardAccessor({attribute, data, props}) {
+    const {accessor} = attribute;
+    const accessorFunc = props[accessor];
+    const {value, size} = attribute;
+    let {defaultValue = [0, 0, 0, 0]} = attribute;
+    defaultValue = Array.isArray(defaultValue) ? defaultValue : [defaultValue];
+    let i = 0;
+    for (const object of data) {
+      let objectValue = accessorFunc(object);
+      objectValue = Array.isArray(objectValue) ? objectValue : [objectValue];
+      /* eslint-disable no-fallthrough, default-case */
+      switch (size) {
+      case 4: value[i + 3] = Number.isFinite(objectValue[3]) ? objectValue[3] : defaultValue[3];
+      case 3: value[i + 2] = Number.isFinite(objectValue[2]) ? objectValue[2] : defaultValue[2];
+      case 2: value[i + 1] = Number.isFinite(objectValue[1]) ? objectValue[1] : defaultValue[1];
+      case 1: value[i + 0] = Number.isFinite(objectValue[0]) ? objectValue[0] : defaultValue[0];
+      }
+      i += size;
+    }
+  }
+
+  _checkAttributeArray(attribute, attributeName) {
+    const {value} = attribute;
+    if (value && value.length >= 4) {
+      const valid =
+        Number.isFinite(value[0]) && Number.isFinite(value[1]) &&
+        Number.isFinite(value[2]) && Number.isFinite(value[3]);
+      if (!valid) {
+        throw new Error(`Illegal attribute generated for ${attributeName}`);
+      }
+    }
+  }
 }

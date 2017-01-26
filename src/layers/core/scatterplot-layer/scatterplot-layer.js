@@ -26,14 +26,10 @@ import {join} from 'path';
 
 const DEFAULT_COLOR = [255, 0, 255, 255];
 
-const defaultGetPosition = x => x.position;
-const defaultGetRadius = x => x.radius;
-const defaultGetColor = x => x.color;
-
 const defaultProps = {
-  getPosition: defaultGetPosition,
-  getRadius: defaultGetRadius,
-  getColor: defaultGetColor,
+  getPosition: x => x.position,
+  getRadius: x => x.radius || 30,
+  getColor: x => x.color || DEFAULT_COLOR,
   radius: 30,  //  point radius in meters
   radiusMinPixels: 0, //  min point radius in pixels
   radiusMaxPixels: Number.MAX_SAFE_INTEGER, // max point radius in pixels
@@ -50,25 +46,24 @@ export default class ScatterplotLayer extends Layer {
   }
 
   initializeState() {
-    /* eslint-disable */
     const {gl} = this.context;
-    const model = this._getModel(gl);
-    this.setState({model});
+    this.setState({model: this._getModel(gl)});
 
-    const {attributeManager} = this.state;
-    attributeManager.addInstanced({
-      instancePositions: {size: 3, update: this.calculateInstancePositions},
-      instanceRadius: {size: 1, update: this.calculateInstanceRadius},
-      instanceColors: {size: 4, type: GL.UNSIGNED_BYTE, update: this.calculateInstanceColors}
+    this.state.attributeManager.addInstanced({
+      instancePositions: {
+        size: 3, accessor: 'getPosition', update: this.calculateInstancePositions},
+      instanceRadius: {
+        size: 1, accessor: 'getRadius', defaultValue: 1, update: this.calculateInstanceRadius},
+      instanceColors: {
+        size: 4, type: GL.UNSIGNED_BYTE, accessor: 'getColor', defaultValue: [0, 0, 0, 255],
+        update: this.calculateInstanceColors
+      }
     });
   }
 
-  updateState(evt) {
-    super.updateState(evt);
-    const {props, oldProps} = evt;
+  updateState({props, oldProps}) {
     if (props.drawOutline !== oldProps.drawOutline) {
-      this.state.model.geometry.drawMode =
-        props.drawOutline ? GL.LINE_LOOP : GL.TRIANGLE_FAN;
+      this.state.model.geometry.drawMode = props.drawOutline ? GL.LINE_LOOP : GL.TRIANGLE_FAN;
     }
   }
 
@@ -115,6 +110,44 @@ export default class ScatterplotLayer extends Layer {
       isInstanced: true
     });
     return model;
+  }
+
+  calculateInstancePositions(attribute) {
+    const {data, getPosition} = this.props;
+    const {value, size} = attribute;
+    let i = 0;
+    for (const point of data) {
+      const position = getPosition(point);
+      value[i + 0] = position[0] || 0;
+      value[i + 1] = position[1] || 0;
+      value[i + 2] = position[2] || 0;
+      i += size;
+    }
+  }
+
+  calculateInstanceRadius(attribute) {
+    const {data, getRadius} = this.props;
+    const {value, size} = attribute;
+    let i = 0;
+    for (const point of data) {
+      const radius = getRadius(point);
+      value[i + 0] = isNaN(radius) ? 1 : radius;
+      i += size;
+    }
+  }
+
+  calculateInstanceColors(attribute) {
+    const {data, getColor} = this.props;
+    const {value, size} = attribute;
+    let i = 0;
+    for (const point of data) {
+      const color = getColor(point);
+      value[i + 0] = color[0] || 0;
+      value[i + 1] = color[1] || 0;
+      value[i + 2] = color[2] || 0;
+      value[i + 3] = isNaN(color[3]) ? DEFAULT_COLOR[3] : color[3];
+      i += size;
+    }
   }
 
   calculateInstancePositions(attribute) {
