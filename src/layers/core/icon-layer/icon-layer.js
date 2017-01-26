@@ -50,7 +50,7 @@ const defaultProps = {
   getPosition: x => x.position,
   getIcon: x => x.icon,
   getColor: x => x.color || DEFAULT_COLOR,
-  getScale: x => x.size,
+  getScale: x => x.size || 1,
   iconAtlas: null,
   iconMapping: {},
   size: 30
@@ -156,7 +156,7 @@ export default class IconLayer extends Layer {
     const {value} = attribute;
     let i = 0;
     for (const object of data) {
-      value[i++] = getScale(object) || 1;
+      value[i++] = getScale(object);
     }
   }
 
