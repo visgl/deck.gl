@@ -102,3 +102,28 @@ test('Core#AttributeManager.update - 0 numInstances', t => {
 
   t.end();
 });
+
+test('Core#AttributeManager.invalidate', t => {
+  const attributeManager = new AttributeManager();
+  attributeManager.add({positions: {size: 2, update}});
+  attributeManager.add({colors: {size: 2, accessor: 'getColor', update}});
+  attributeManager.update({
+    numInstances: 1,
+    data: [{}]
+  });
+
+  attributeManager.invalidate('positions');
+  t.ok(attributeManager.getAttributes()['positions'].needsUpdate,
+    'invalidated attribute by name');
+
+  attributeManager.invalidate('getColor');
+  t.ok(attributeManager.getAttributes()['colors'].needsUpdate,
+    'invalidated attribute by accessor name');
+
+  t.throws(
+    () => attributeManager.invalidate('lineWidths'),
+    'throws on unmatched attribute name'
+  );
+
+  t.end();
+});

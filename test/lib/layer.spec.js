@@ -134,3 +134,36 @@ test('Layer#getNumInstances', t => {
   }
   t.end();
 });
+
+test('Layer#diffProps', t => {
+  const layer = new SubLayer(LAYER_PROPS);
+  const context = {viewportChanged: false};
+  let diff;
+
+  diff = layer.diffProps(LAYER_PROPS,
+    Object.assign({}, LAYER_PROPS), context);
+  t.false(diff.somethingChanged, 'same props');
+
+  diff = layer.diffProps(LAYER_PROPS,
+    Object.assign({}, LAYER_PROPS, {data: dataVariants[0]}), context);
+  t.true(diff.dataChanged, 'data changed');
+
+  diff = layer.diffProps(LAYER_PROPS,
+    Object.assign({}, LAYER_PROPS, {size: 0}), context);
+  t.true(diff.propsChanged, 'props changed');
+
+  let invalidatedName = null;
+  layer.state = {
+    attributeManager: {
+      invalidate: name => {
+        invalidatedName = name;
+      }
+    }
+  };
+
+  diff = layer.diffProps(layer.props,
+    Object.assign({}, LAYER_PROPS, {updateTriggers: {color: {version: 0}}}), context);
+  t.is(invalidatedName, 'color', 'updateTriggers fired');
+
+  t.end();
+});
