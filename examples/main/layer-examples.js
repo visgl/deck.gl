@@ -19,7 +19,6 @@ import {
   ChoroplethLayer64,
   ExtrudedChoroplethLayer64
 
-  // Container
 } from 'deck.gl';
 
 import * as dataSamples from './data-samples';

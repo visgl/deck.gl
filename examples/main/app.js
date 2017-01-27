@@ -171,7 +171,7 @@ class App extends PureComponent {
           {...mapViewState}
           onWebGLInitialized={ this._onWebGLInitialized }
           layers={this._renderExamples()}
-          effects={effects ? this._effects : undefined}
+          effects={effects ? this._effects : []}
         />
 
         <FPSStats isActive/>
