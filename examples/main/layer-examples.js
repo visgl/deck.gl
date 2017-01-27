@@ -419,5 +419,3 @@ export default {
     'ScatterplotLayer64 10M': ScatterplotLayer64PerfExample('10M', dataSamples.getPoints10M)
   }
 };
-
-export const DEFAULT_ACTIVE_LAYERS = {};

@@ -1,4 +1,5 @@
 import React, {PureComponent} from 'react';
+import ColorPicker from './utils/color-picker';
 
 export default class LayerControls extends PureComponent {
 
@@ -7,60 +8,87 @@ export default class LayerControls extends PureComponent {
     // Only update if we have a confirmed change
     if (settings[settingName] !== newValue) {
       // Create a new object so that shallow-equal detects a change
-      this.props.onSettingsChange({
+      this.props.onChange({
         ...settings,
         [settingName]: newValue
       });
     }
   }
 
-  _renderSlider(settingName, setting, value, title) {
+  _renderColorPicker(settingName, value) {
     return (
-      <div key={settingName} >
+      <div key={settingName}>
         <div className="input-group" >
-          <label className="label" htmlFor={settingName}>
-            {title}
-          </label>
-          <input
-            type="range"
-            id={settingName}
-            min={setting.min || 0}
-            max={setting.max || 1}
-            step={setting.step || 0.01}
-            value={value}
-            onChange={ e => this._onValueChange(settingName, Number(e.target.value)) }/>
+          <label>{settingName}</label>
+          <ColorPicker value={value}
+            onChange={this._onValueChange.bind(this, settingName)} />
         </div>
       </div>
     );
   }
 
-  _renderCheckbox(settingName, setting, value, title) {
+  _renderSlider(settingName, value) {
+    let max = 1;
+    if (/radius|width|height|pixel|size/i.test(settingName)) {
+      max = 100;
+    }
+
     return (
       <div key={settingName} >
-        <div className="checkbox" >
+        <div className="input-group" >
+          <label className="label" htmlFor={settingName}>
+            {settingName}
+          </label>
+          <div>
+            <input
+              type="range"
+              id={settingName}
+              min={0} max={max} step={max / 100}
+              value={value}
+              onChange={ e => this._onValueChange(settingName, Number(e.target.value)) }/>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  _renderCheckbox(settingName, value) {
+    return (
+      <div key={settingName} >
+        <div className="input-group" >
+          <label htmlFor={settingName}>
+            <span>{settingName}</span>
+          </label>
           <input
             type="checkbox"
             id={settingName}
             checked={value}
             onChange={ e => this._onValueChange(settingName, e.target.checked) }/>
-
-          <label htmlFor={settingName}>
-            <span>{title}</span>
-          </label>
         </div>
       </div>
     );
   }
 
+  _renderSetting(settingName, value) {
+    switch (typeof value) {
+    case 'boolean':
+      return this._renderCheckbox(settingName, value);
+    case 'number':
+      return this._renderSlider(settingName, value);
+    default:
+      if (/color/i.test(settingName)) {
+        return this._renderColorPicker(settingName, value);
+      }
+    }
+    return null;
+  }
+
   render() {
-    const {settings} = this.props;
+    const {title, settings} = this.props;
     return (
-      <div id="layer-controls" >
-        <h4>Layer Controls</h4>
-        {this._renderCheckbox('effects', {}, settings.effects, 'Enable Effects')}
-        {this._renderSlider('separation', {}, settings.separation, 'Separation')}
-        {this._renderSlider('rotationZ', {}, settings.rotationZ, 'Rotation (in plane)')}
-        {this._renderSlider('rotationX', {}, settings.rotationX, 'Rotation (3D)')}
+      <div className="layer-controls" >
+        { title && <h4>{title}</h4>}
+        { Object.keys(settings).map(key => this._renderSetting(key, settings[key])) }
       </div>
     );
   }

@@ -38,30 +38,47 @@ h4 {
 	padding: 0 20px 40px 20px;
 }
 
-#layer-selector {
+.layer-selector {
 	flex: 1 1 auto;
   padding: 0;
   overflow-x: hidden;
   overflow-y: scroll;
 }
 
-#layer-controls {
-	border-top: groove 2px #fff;
+.layer-controls {
+	border: groove 2px #fff;
+  border-left: none;
+  border-right: none;
+  padding: 8px 0;
 	flex: 0 1 auto;
 }
 
-input[type=range] {
-	width: 100%;
-	margin-bottom: 12px;
-}
-
 /* Checkbox style adapted from http://cssdeck.com/labs/css-checkbox-styles */
-input[type=checkbox] {
-	visibility: hidden;
+.input-group {
+  color: #333;
+  line-height: 28px;
+  display: table;
+  width: 100%;
+}
+.input-group > * {
+  display: table-cell;
+  width: 50%;
+  vertical-align: middle;
+}
+.input-group input[type=range] {
+  width: 100%;
+  vertical-align: middle;
+}
+.color-picker {
+  width: 18px;
+  height: 18px;
+  vertical-align: middle;
+  border: solid 1px #ccc;
+  display: block;
+  margin: 5px 2px;
 }
 
 .checkbox {
-	color: #333;
 	text-align: center;
 	width: 20px;
 	height: 20px;
@@ -72,7 +89,12 @@ input[type=checkbox] {
 	position: relative;
 }
 
+.checkbox input {
+  visibility: hidden;
+}
+
 .checkbox label {
+  color: #333;
 	cursor: pointer;
 	position: absolute;
 	width: 14px;
@@ -105,7 +127,7 @@ input[type=checkbox] {
 	opacity: 0.3;
 }
 
-.checkbox input[type=checkbox]:checked + label:after {
+.checkbox input:checked + label:after {
 	background: #40bf00;
 	opacity: 1;
 }

@@ -1,21 +1,28 @@
 import React, {PureComponent} from 'react';
+import LayerControls from './layer-controls';
 
 export default class LayerSelector extends PureComponent {
 
-  _renderExampleButton(exampleName) {
-    const {activeExamples, onChange} = this.props;
+  _renderExampleButton(exampleName, example) {
+    const {activeExamples} = this.props;
+    const settings = activeExamples[exampleName];
 
     return (
-      <div key={ exampleName } className="checkbox" >
-        <input
-          type="checkbox"
-          id={exampleName}
-          checked={activeExamples[exampleName] || ''}
-          onChange={e => onChange(exampleName)}
-        />
-        <label htmlFor={ exampleName } >
-          <span>{ exampleName }</span>
-        </label>
+      <div key={ exampleName } >
+        <div className="checkbox" >
+          <input
+            type="checkbox"
+            id={exampleName}
+            checked={Boolean(settings)}
+            onChange={() => this.props.onToggleLayer(exampleName, example)}
+          />
+          <label htmlFor={ exampleName } >
+            <span>{ exampleName }</span>
+          </label>
+        </div>
+
+        { settings && <LayerControls settings={settings}
+          onChange={this.props.onUpdateLayer.bind(this, exampleName)} /> }
       </div>
     );
   }
@@ -37,7 +44,7 @@ export default class LayerSelector extends PureComponent {
 
   render() {
     return (
-      <div id="layer-selector" >
+      <div className="layer-selector" >
         {
           this._renderExampleCategories(this.props.examples)
         }
