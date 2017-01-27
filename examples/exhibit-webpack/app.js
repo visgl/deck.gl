@@ -2,12 +2,11 @@ import 'babel-polyfill';
 
 import React, {Component} from 'react';
 import {render} from 'react-dom';
-import DeckGL from 'deck.gl';
+import DeckGL from 'deck.gl/react';
 import {LineLayer} from 'deck.gl';
-// import MapGL from 'react-map-gl';
-/* global document */
+import MapGL from 'react-map-gl';
 
-const token = '' || process.env.MAPBOX_ACCESS_TOKEN || process.env.MapboxAccessToken; // eslint-disable-line
+const token = '';
 
 if (!token) {
   throw new Error('Please specify a valid mapbox token');
@@ -42,18 +41,28 @@ class Root extends Component {
     })];
 
     return (
-      <DeckGL
+      <MapGL
         {...viewport}
+        mapStyle="mapbox://styles/mapbox/dark-v9"
+        onChangeViewport={v => this.setState({viewport: v})}
+        preventStyleDiffing={false}
+        mapboxApiAccessToken={token}
+        perspectiveEnabled
         width={width}
-        height={height}
-        layers={layers}
-        debug />
+        height={height}>
+        <DeckGL
+          {...viewport}
+          width={width}
+          height={height}
+          layers={layers}
+          debug />
+      </MapGL>
     );
   }
 
 }
 
+/* global document */
 const root = document.createElement('div');
 document.body.appendChild(root);
-
 render(<Root />, root);

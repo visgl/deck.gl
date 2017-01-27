@@ -20,17 +20,19 @@
 /* eslint-disable max-len */
 
 // Utilities
-export * from './lib';
-export * from './shader-utils';
+export {assembleShaders} from './shader-utils';
+
+// Lib
+export {COORDINATE_SYSTEM, Layer, LayerManager, AttributeManager} from './lib';
 
 // Core Layers
-export {default as ArcLayer} from './layers/core/arc-layer';
-export {default as LineLayer} from './layers/core/line-layer';
-export {default as ScatterplotLayer} from './layers/core/scatterplot-layer';
-export {default as ScreenGridLayer} from './layers/core/screen-grid-layer';
-export {default as GridLayer} from './layers/core/grid-layer';
-export {default as HexagonLayer} from './layers/core/hexagon-layer';
-export {default as IconLayer} from './layers/core/icon-layer';
+export {default as ArcLayer} from './layers/core/arc-layer/arc-layer';
+export {default as GridLayer} from './layers/core/grid-layer/grid-layer';
+export {default as HexagonLayer} from './layers/core/hexagon-layer/hexagon-layer';
+export {default as IconLayer} from './layers/core/icon-layer/icon-layer';
+export {default as LineLayer} from './layers/core/line-layer/line-layer';
+export {default as ScatterplotLayer} from './layers/core/scatterplot-layer/scatterplot-layer';
+export {default as ScreenGridLayer} from './layers/core/screen-grid-layer/screen-grid-layer';
 
 export {default as PathLayer} from './layers/core/path-layer/path-layer';
 export {default as PolygonLayer} from './layers/core/polygon-layer/polygon-layer';
@@ -52,5 +54,15 @@ export {default as DeckGL} from './react/deckgl';
 export {default as default} from './react/deckgl';
 
 // Effects
-export {EffectManager, Effect} from './experimental/lib';
-export {default as ReflectionEffect} from './experimental/effects/reflection-effect';
+import {EffectManager, Effect} from './experimental/lib';
+import {default as ReflectionEffect} from './experimental/effects/reflection-effect';
+
+// Experimental
+import {get} from './lib/utils/container';
+
+export const experimental = {
+  get,
+  EffectManager,
+  Effect,
+  ReflectionEffect
+};

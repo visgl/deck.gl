@@ -5,7 +5,7 @@ module.exports = {
   entry: [
     resolve('../app.js'),
     'webpack/hot/dev-server',
-    'webpack-dev-server/client?http://localhost:3000',
+    'webpack-dev-server/client?http://localhost:3000'
   ],
 
   devtool: 'source-maps',
@@ -13,31 +13,31 @@ module.exports = {
   resolve: {
     alias: {
       webworkify: 'webworkify-webpack-dropin',
-      'gl-matrix': resolve('./node_modules/gl-matrix/dist/gl-matrix.js'),
-    },
+      'gl-matrix': resolve('./node_modules/gl-matrix/dist/gl-matrix.js')
+    }
   },
 
   module: {
 
     loaders: [{
       test: /\.json$/,
-      loader: 'json-loader',
+      loader: 'json-loader'
     }, {
       test: /\.js$/,
       loader: 'babel-loader',
-      include: resolve('../app.js'),
+      include: resolve('../app.js')
     }],
 
     postLoaders: [{
       include: /node_modules\/mapbox-gl/,
       loader: 'transform-loader',
-      query: 'brfs',
-    }],
+      query: 'brfs'
+    }]
 
   },
 
   node: {
-    fs: 'empty',
-  },
+    fs: 'empty'
+  }
 
 };
