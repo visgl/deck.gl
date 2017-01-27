@@ -20,6 +20,10 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## Recent Dev Releases
 
+#### [v3.1.0-beta.16] -
+- Webpack config improvements to enable tree-shaking
+- Example improvements
+
 #### [v3.1.0-beta.15] -
 CHANGE: Revert to babel compilation to expose the dist file tree rather than a bundle
 

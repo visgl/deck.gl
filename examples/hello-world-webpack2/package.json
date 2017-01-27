@@ -3,12 +3,14 @@
   "version": "0.0.0",
   "license": "MIT",
   "scripts": {
-    "start": "webpack-dev-server --config webpack2.config.js --progress --hot --port 3000 --open"
+    "start": "webpack-dev-server --progress --hot --port 3000 --open",
+    "build": "NODE_ENV=production webpack --env.prod=true"
   },
   "dependencies": {
     "babel-polyfill": "^6.16.0",
-    "deck.gl": "^3.1.1",
-    "luma.gl": "^3.0.0-alpha1",
+    "deck.gl": "3.1.0-beta.15",
+    "immutable": "^3.8.1",
+    "luma.gl": "3.0.0-alpha.3",
     "react": "^15.4.1",
     "react-dom": "^15.4.1",
     "react-map-gl": "^1.7.2"
@@ -18,15 +20,8 @@
     "buble-loader": "^0.4.0",
     "json-loader": "^0.5.4",
     "transform-loader": "^0.2.3",
-    "webpack": "^2.2.0-rc.3",
-    "webpack-dev-server": "^2.2.0-rc.0",
+    "webpack": "^2.2.0",
+    "webpack-dev-server": "^2.2.0",
     "webworkify-webpack-dropin": "^1.1.9"
-  },
-  "babel": {
-    "presets": [
-      "es2015",
-      "stage-2",
-      "react"
-    ]
   }
 }
