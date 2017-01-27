@@ -17,9 +17,7 @@ import {
 
   ChoroplethLayer,
   ChoroplethLayer64,
-  ExtrudedChoroplethLayer64,
-
-  Container
+  ExtrudedChoroplethLayer64
 
 } from 'deck.gl';
 
@@ -97,8 +95,8 @@ const GeoJsonLayerExtrudedExample = {
     id: 'geojsonLayer-example',
     data: dataSamples.choropleths,
     getHeight: f => ((f.properties.ZIP_CODE * 10) % 127) * 10,
-    getFillColor: f => [0, 0, ((Container.get(f, 'properties.ZIP_CODE') * 23) % 100) + 155],
-    drawPolygons: false,
+    getFillColor: f => [0, 0, ((f.properties.ZIP_CODE * 23) % 100) + 155],
+    drawPolygons: true,
     extruded: true,
     pickable: true
   }
@@ -297,7 +295,7 @@ const ChoroplethLayerExample = {
   props: {
     id: 'choroplethLayerSolid',
     data: dataSamples.choropleths,
-    getColor: f => [((Container.get(f, 'properties.ZIP_CODE') * 10) % 127) + 128, 0, 0],
+    getColor: f => [((f.properties.ZIP_CODE * 10) % 127) + 128, 0, 0],
     opacity: 0.8,
     pickable: true
   }
@@ -420,5 +418,3 @@ export default {
     'ScatterplotLayer64 10M': ScatterplotLayer64PerfExample('10M', dataSamples.getPoints10M)
   }
 };
-
-export const DEFAULT_ACTIVE_LAYERS = {};
