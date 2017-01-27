@@ -17,13 +17,6 @@ export default class LayerInfo extends PureComponent {
     if (info.index < 0) {
       info = null;
     }
-
-    const oldItem = this.state[name];
-    if (oldItem === info ||
-      (oldItem && info && oldItem.layer.id === info.layer.id && oldItem.index === info.index)) {
-      // no change
-      return;
-    }
     this.setState({[name]: info});
   }
 
