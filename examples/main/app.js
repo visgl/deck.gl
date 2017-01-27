@@ -14,7 +14,7 @@ import {FPSStats} from 'react-stats';
 import LayerInfo from './layer-info';
 import LayerSelector from './layer-selector';
 import LayerControls from './layer-controls';
-import LAYER_CATEGORIES, {DEFAULT_ACTIVE_LAYERS} from './layer-examples';
+import LAYER_CATEGORIES from './layer-examples';
 
 /* eslint-disable no-process-env */
 const MAPBOX_ACCESS_TOKEN = process.env.MAPBOX_ACCESS_TOKEN || // eslint-disable-line
@@ -36,8 +36,9 @@ class App extends PureComponent {
         pitch: 30,
         bearing: 0
       },
-      activeExamples: DEFAULT_ACTIVE_LAYERS,
+      activeExamples: {},
       settings: {
+        effects: false,
         separation: 0,
         rotationZ: 0,
         rotationX: 0
@@ -67,9 +68,27 @@ class App extends PureComponent {
     this.setState({mapViewState});
   }
 
-  _onToggleLayer(exampleName) {
+  _onToggleLayer(exampleName, example) {
     const activeExamples = {...this.state.activeExamples};
-    activeExamples[exampleName] = !activeExamples[exampleName];
+
+    if (activeExamples[exampleName]) {
+      activeExamples[exampleName] = null;
+    } else {
+      activeExamples[exampleName] = {
+        ...example.layer.defaultProps,
+        ...example.props
+      };
+    }
+    this.setState({activeExamples});
+  }
+
+  _onUpdateLayerSettings(exampleName, settings) {
+    const activeExamples = {...this.state.activeExamples};
+
+    activeExamples[exampleName] = {
+      ...activeExamples[exampleName],
+      ...settings
+    };
     this.setState({activeExamples});
   }
 
@@ -78,30 +97,31 @@ class App extends PureComponent {
     gl.depthFunc(gl.LEQUAL);
   }
 
-  _onSettingsChange(settings) {
+  _onUpdateContainerSettings(settings) {
     this.setState({settings});
   }
 
-  _renderExampleLayer(example, index) {
+  _renderExampleLayer(example, settings, index) {
     const {layer: Layer, props, getData} = example;
     const {infoPanel} = this.refs;
+    const layerProps = Object.assign({}, props, settings);
 
     if (props.pickable) {
-      Object.assign(props, {
+      Object.assign(layerProps, {
         onHover: infoPanel ? infoPanel.onItemHovered : noop,
         onClick: infoPanel ? infoPanel.onItemClicked : noop
       });
     }
 
     if (getData) {
-      Object.assign(props, {data: getData()});
+      Object.assign(layerProps, {data: getData()});
     }
 
-    Object.assign(props, {
-      modelMatrix: this._getModelMatrix(index, props.projectionMode === 2)
+    Object.assign(layerProps, {
+      modelMatrix: this._getModelMatrix(index, layerProps.projectionMode === 2)
     });
 
-    return new Layer(props);
+    return new Layer(layerProps);
   }
 
   _renderExamples() {
@@ -110,10 +130,11 @@ class App extends PureComponent {
     for (const categoryName of Object.keys(LAYER_CATEGORIES)) {
       for (const exampleName of Object.keys(LAYER_CATEGORIES[categoryName])) {
 
+        const settings = this.state.activeExamples[exampleName];
         // An example is a function that returns a DeckGL layer instance
-        if (this.state.activeExamples[exampleName]) {
+        if (settings) {
           const example = LAYER_CATEGORIES[categoryName][exampleName];
-          layers.push(this._renderExampleLayer(example, index++));
+          layers.push(this._renderExampleLayer(example, settings, index++));
         }
       }
     }
@@ -134,7 +155,7 @@ class App extends PureComponent {
   }
 
   _renderMap() {
-    const {width, height, mapViewState} = this.state;
+    const {width, height, mapViewState, settings: {effects}} = this.state;
     return (
       <MapboxGLMap
         mapboxApiAccessToken={MAPBOX_ACCESS_TOKEN}
@@ -150,7 +171,7 @@ class App extends PureComponent {
           {...mapViewState}
           onWebGLInitialized={ this._onWebGLInitialized }
           layers={this._renderExamples()}
-          effects={this._effects}
+          effects={effects ? this._effects : []}
         />
 
         <FPSStats isActive/>
@@ -165,13 +186,15 @@ class App extends PureComponent {
       <div>
         { this._renderMap() }
         <div id="control-panel">
+          <LayerControls
+            title="Composite Settings"
+            settings={settings}
+            onChange={this._onUpdateContainerSettings}/>
           <LayerSelector
             activeExamples={activeExamples}
             examples={LAYER_CATEGORIES}
-            onChange={this._onToggleLayer}/>
-          <LayerControls
-            settings={settings}
-            onSettingsChange={this._onSettingsChange}/>
+            onToggleLayer={this._onToggleLayer}
+            onUpdateLayer={this._onUpdateLayerSettings} />
         </div>
         <LayerInfo ref="infoPanel"/>
       </div>

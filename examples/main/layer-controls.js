@@ -1,48 +1,103 @@
 import React, {PureComponent} from 'react';
+import ColorPicker from './utils/color-picker';
 
 export default class LayerControls extends PureComponent {
 
-  _onSliderChange(settingName, e) {
-    const newValue = Number(e.target.value);
+  _onValueChange(settingName, newValue) {
     const {settings} = this.props;
     // Only update if we have a confirmed change
     if (settings[settingName] !== newValue) {
       // Create a new object so that shallow-equal detects a change
-      this.props.onSettingsChange({
-        ...settings,
-        [settingName]: newValue
-      });
+      const newSettings = {...this.props.settings};
+
+      if (settingName.indexOf('get') === 0) {
+        newSettings[settingName] = d => newValue;
+        newSettings.updateTriggers = {
+          ...newSettings.updateTriggers,
+          [settingName]: {value: newValue.toString()}
+        };
+      } else {
+        newSettings[settingName] = newValue;
+      }
+
+      this.props.onChange(newSettings);
     }
   }
 
-  _renderSlider(settingName, setting, value, title) {
+  _renderColorPicker(settingName, value) {
     return (
-      <div key={settingName} >
+      <div key={settingName}>
         <div className="input-group" >
-          <label className="label" htmlFor={settingName}>
-            {title}
-          </label>
-          <input
-            type="range"
-            id={settingName}
-            min={setting.min || 0}
-            max={setting.max || 1}
-            step={setting.step || 0.01}
-            value={value}
-            onChange={this._onSliderChange.bind(this, settingName)}/>
+          <label>{settingName}</label>
+          <ColorPicker value={value}
+            onChange={this._onValueChange.bind(this, settingName)} />
         </div>
       </div>
     );
   }
 
-  render() {
-    const {settings} = this.props;
+  _renderSlider(settingName, value) {
+    let max = 1;
+    if (/radius|width|height|pixel|size/i.test(settingName)) {
+      max = 100;
+    }
+
     return (
-      <div id="layer-controls" >
-        <h4>Layer Controls</h4>
-        {this._renderSlider('separation', {}, settings.separation, 'Separation')}
-        {this._renderSlider('rotationZ', {}, settings.rotationZ, 'Rotation (in plane)')}
-        {this._renderSlider('rotationX', {}, settings.rotationX, 'Rotation (3D)')}
+      <div key={settingName} >
+        <div className="input-group" >
+          <label className="label" htmlFor={settingName}>
+            {settingName}
+          </label>
+          <div>
+            <input
+              type="range"
+              id={settingName}
+              min={0} max={max} step={max / 100}
+              value={value}
+              onChange={ e => this._onValueChange(settingName, Number(e.target.value)) }/>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  _renderCheckbox(settingName, value) {
+    return (
+      <div key={settingName} >
+        <div className="input-group" >
+          <label htmlFor={settingName}>
+            <span>{settingName}</span>
+          </label>
+          <input
+            type="checkbox"
+            id={settingName}
+            checked={value}
+            onChange={ e => this._onValueChange(settingName, e.target.checked) }/>
+        </div>
+      </div>
+    );
+  }
+
+  _renderSetting(settingName, value) {
+    switch (typeof value) {
+    case 'boolean':
+      return this._renderCheckbox(settingName, value);
+    case 'number':
+      return this._renderSlider(settingName, value);
+    default:
+      if (/color/i.test(settingName)) {
+        return this._renderColorPicker(settingName, value);
+      }
+    }
+    return null;
+  }
+
+  render() {
+    const {title, settings} = this.props;
+    return (
+      <div className="layer-controls" >
+        { title && <h4>{title}</h4>}
+        { Object.keys(settings).map(key => this._renderSetting(key, settings[key])) }
       </div>
     );
   }
