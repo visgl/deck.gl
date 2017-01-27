@@ -23,10 +23,17 @@ import {
 } from 'deck.gl';
 
 import * as dataSamples from './data-samples';
+import {parseHexColor, setOpacity} from '../../src/lib/utils/color';
 
 // Demonstrate immutable support
 import Immutable from 'immutable';
 const immutableChoropleths = Immutable.fromJS(dataSamples.choropleths);
+
+const MARKER_SIZE_MAP = {
+  small: 2,
+  medium: 5,
+  large: 10
+};
 
 const ArcLayerExample = {
   layer: ArcLayer,
@@ -62,10 +69,22 @@ const GeoJsonLayerExample = {
   layer: GeoJsonLayer,
   props: {
     id: 'geojsonLayer',
-    data: dataSamples.choropleths,
-    getFillColor: f => [0, 0, ((Container.get(f, 'properties.ZIP_CODE') * 10) % 127) + 128, 64],
-    getStrokeColor: f => [200, 0, 80],
-    strokeWidth: 4,
+    data: dataSamples.geojson,
+    // TODO change to use the color util when it is landed
+    getPointColor: f => parseHexColor(f.properties['marker-color']),
+    getPointSize: f => MARKER_SIZE_MAP[f.properties['marker-size']],
+    getStrokeColor: f => {
+      const color = parseHexColor(f.properties.stroke);
+      const opacity = f.properties['stroke-opacity'] * 255;
+      return setOpacity(color, opacity);
+    },
+    getStrokeWidth: f => f.properties['stroke-width'],
+    getFillColor: f => {
+      const color = parseHexColor(f.properties.fill);
+      const opacity = f.properties['fill-opacity'] * 255;
+      return setOpacity(color, opacity);
+    },
+    strokeWidth: 10,
     pickable: true
   }
 };

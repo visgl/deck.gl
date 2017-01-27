@@ -17,7 +17,7 @@ export function parseHexColor(color) {
     const value = parseInt(color.substring(1), 16);
     array[0] = value / 65536;
     array[1] = (value / 256) % 256;
-    array[2] = value / 65536;
+    array[2] = value % 256;
     array[3] = 255;
   } else if (color.length === 9) {
     const value = parseInt(color.substring(1), 16);
