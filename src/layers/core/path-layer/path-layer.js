@@ -1,6 +1,5 @@
 import {Layer} from '../../../lib';
 import {assembleShaders} from '../../../shader-utils';
-import {fillArray} from '../../../lib/utils';
 import {GL, Model, Geometry} from 'luma.gl';
 import {readFileSync} from 'fs';
 import {join} from 'path';
@@ -97,29 +96,28 @@ export default class PathLayer extends Layer {
     const indices = new IndexType(indexCount);
 
     let i = 0;
-    let outsideIndex = 0;
-    let insideIndex = pointCount;
-    paths.forEach((path, pathIndex) => {
-      const ptCount = path.length;
-
+    let offset = 0;
+    paths.forEach(path => {
       // counter-clockwise triangulation
       //                ___
-      //            O0 |  /| O1  (outside vertices)
+      //             0 |  /| 2  (outside edge)
       //  o---o  =>    o / o
-      //            I0 |/__| I1  (inside vertices)
+      //             1 |/__| 3  (inside edge)
       //
-      for (let ptIndex = 0; ptIndex < ptCount - 1; ptIndex++) {
+      for (let ptIndex = 0; ptIndex < path.length - 1; ptIndex++) {
         // triangle A with indices: 0, 1, 2
-        indices[i++] = outsideIndex;
-        indices[i++] = insideIndex;
-        indices[i++] = ++outsideIndex;
+        indices[i++] = offset + 0;
+        indices[i++] = offset + 1;
+        indices[i++] = offset + 2;
         // triangle B with indices: 2, 1, 3
-        indices[i++] = outsideIndex;
-        indices[i++] = insideIndex;
-        indices[i++] = ++insideIndex;
+        indices[i++] = offset + 2;
+        indices[i++] = offset + 1;
+        indices[i++] = offset + 3;
+        // move to the next segment
+        offset += 2;
       }
-      ++outsideIndex;
-      ++insideIndex;
+      // move to the next path
+      offset += 2;
     });
 
     attribute.value = indices;
@@ -131,29 +129,36 @@ export default class PathLayer extends Layer {
     const positions = new Float32Array(pointCount * attribute.size * 2);
 
     let i = 0;
-    paths.forEach(path =>
+    paths.forEach(path => {
       path.forEach(point => {
+        // two copies for outside edge and inside edge each
         positions[i++] = point[0];
         positions[i++] = point[1];
         positions[i++] = point[2] || 0;
-      })
-    );
-    // two copies for outside and inside edges each
-    positions.copyWithin(i, 0, i);
+        positions[i++] = point[0];
+        positions[i++] = point[1];
+        positions[i++] = point[2] || 0;
+      });
+    });
 
     attribute.value = positions;
   }
 
   calculateLeftDeltas(attribute) {
     const {paths, pointCount} = this.state;
+    const {size} = attribute;
 
-    const leftDeltas = new Float32Array(pointCount * attribute.size * 2);
+    const leftDeltas = new Float32Array(pointCount * size * 2);
 
     let i = 0;
     paths.forEach(path => {
-      i += 3;
+      i += size * 2;
       path.reduce((prevPoint, point) => {
         if (prevPoint) {
+          // two copies for outside edge and inside edge each
+          leftDeltas[i++] = point[0] - prevPoint[0];
+          leftDeltas[i++] = point[1] - prevPoint[1];
+          leftDeltas[i++] = (point[2] - prevPoint[2]) || 0;
           leftDeltas[i++] = point[0] - prevPoint[0];
           leftDeltas[i++] = point[1] - prevPoint[1];
           leftDeltas[i++] = (point[2] - prevPoint[2]) || 0;
@@ -161,31 +166,32 @@ export default class PathLayer extends Layer {
         return point;
       }, null);
     });
-    // two copies for outside and inside edges each
-    leftDeltas.copyWithin(i, 0, i);
 
     attribute.value = leftDeltas;
   }
 
   calculateRightDeltas(attribute) {
     const {paths, pointCount} = this.state;
+    const {size} = attribute;
 
-    const rightDeltas = new Float32Array(pointCount * attribute.size * 2);
+    const rightDeltas = new Float32Array(pointCount * size * 2);
 
     let i = 0;
     paths.forEach(path => {
       path.reduce((prevPoint, point) => {
         if (prevPoint) {
+          // two copies for outside edge and inside edge each
+          rightDeltas[i++] = point[0] - prevPoint[0];
+          rightDeltas[i++] = point[1] - prevPoint[1];
+          rightDeltas[i++] = (point[2] - prevPoint[2]) || 0;
           rightDeltas[i++] = point[0] - prevPoint[0];
           rightDeltas[i++] = point[1] - prevPoint[1];
           rightDeltas[i++] = (point[2] - prevPoint[2]) || 0;
         }
         return point;
       }, null);
-      i += 3;
+      i += size * 2;
     });
-    // two copies for outside and inside edges each
-    rightDeltas.copyWithin(i, 0, i);
 
     attribute.value = rightDeltas;
   }
@@ -201,10 +207,10 @@ export default class PathLayer extends Layer {
       if (isNaN(w)) {
         w = 1;
       }
-      const count = path.length;
-      fillArray({target: directions, source: [w], start: i, count});
-      fillArray({target: directions, source: [-w], start: i + pointCount, count});
-      i += count;
+      for (let ptIndex = 0; ptIndex < path.length; ptIndex++) {
+        directions[i++] = w;
+        directions[i++] = -w;
+      }
     });
 
     attribute.value = directions;
@@ -222,12 +228,18 @@ export default class PathLayer extends Layer {
       if (isNaN(pointColor[3])) {
         pointColor[3] = 255;
       }
-      const count = path.length;
-      fillArray({target: colors, source: pointColor, start: i, count});
-      i += count * size;
+      for (let ptIndex = 0; ptIndex < path.length; ptIndex++) {
+        // two copies for outside edge and inside edge each
+        colors[i++] = pointColor[0];
+        colors[i++] = pointColor[1];
+        colors[i++] = pointColor[2];
+        colors[i++] = pointColor[3];
+        colors[i++] = pointColor[0];
+        colors[i++] = pointColor[1];
+        colors[i++] = pointColor[2];
+        colors[i++] = pointColor[3];
+      }
     });
-    // two copies for outside and inside edges each
-    colors.copyWithin(i, 0, i);
 
     attribute.value = colors;
   }
@@ -241,12 +253,16 @@ export default class PathLayer extends Layer {
     let i = 0;
     paths.forEach((path, index) => {
       const pickingColor = this.encodePickingColor(index);
-      const count = path.length;
-      fillArray({target: pickingColors, source: pickingColor, start: i, count});
-      i += count * size;
+      for (let ptIndex = 0; ptIndex < path.length; ptIndex++) {
+        // two copies for outside edge and inside edge each
+        pickingColors[i++] = pickingColor[0];
+        pickingColors[i++] = pickingColor[1];
+        pickingColors[i++] = pickingColor[2];
+        pickingColors[i++] = pickingColor[0];
+        pickingColors[i++] = pickingColor[1];
+        pickingColors[i++] = pickingColor[2];
+      }
     });
-    // two copies for outside and inside edges each
-    pickingColors.copyWithin(i, 0, i);
 
     attribute.value = pickingColors;
   }

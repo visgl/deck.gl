@@ -42,12 +42,12 @@ suite
   const layer = new ChoroplethLayer({data: data.points});
   testInitializeLayer({layer});
 })
-.add('ChoroplethLayer#initialize', () => {
-  const layer = new ChoroplethLayer({data: data.choropleths});
-  testInitializeLayer({layer});
-})
 .add('PathLayer#initialize', () => {
   const layer = new PathLayer({data: lines});
+  testInitializeLayer({layer});
+})
+.add('ChoroplethLayer#initialize', () => {
+  const layer = new ChoroplethLayer({data: data.choropleths});
   testInitializeLayer({layer});
 })
 .add('PolygonLayer#initialize (flat)', () => {
