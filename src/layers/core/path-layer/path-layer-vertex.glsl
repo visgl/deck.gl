@@ -1,14 +1,16 @@
 #define SHADER_NAME path-layer-vertex-shader
 
 attribute float directions;
-attribute vec3 prevPositions;
 attribute vec3 positions;
-attribute vec3 nextPositions;
+attribute vec3 leftDeltas;
+attribute vec3 rightDeltas;
 
 attribute vec4 colors;
 attribute vec3 pickingColors;
 
 uniform float thickness;
+uniform float strokeMinPixels;
+uniform float strokeMaxPixels;
 uniform float miterLimit;
 uniform float opacity;
 uniform float renderPickingBuffer;
@@ -22,7 +24,8 @@ vec2 lineJoin(vec3 prevProjected, vec3 currProjected, vec3 nextProjected) {
   vec2 currScreen = currProjected.xy;
   vec2 nextScreen = nextProjected.xy;
 
-  float len = project_scale(thickness);
+  float len = clamp(project_scale(thickness),
+    strokeMinPixels, strokeMaxPixels);
 
   vec2 dir = vec2(0.0);
   if (currScreen == prevScreen) {
@@ -54,9 +57,9 @@ void main() {
   vec4 pickingColor = vec4(pickingColors.rgb, 255.) / 255.;
   vColor = mix(color, pickingColor, renderPickingBuffer);
 
-  vec3 prevProjected = project_position(prevPositions);
+  vec3 prevProjected = project_position(positions - leftDeltas);
   vec3 currProjected = project_position(positions);
-  vec3 nextProjected = project_position(nextPositions);
+  vec3 nextProjected = project_position(positions + rightDeltas);
 
   gl_Position = project_to_clipspace(
     vec4(
