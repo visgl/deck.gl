@@ -92,8 +92,16 @@ export default class HexagonLayer extends Layer {
 
     const {attributeManager} = this.state;
     attributeManager.addInstanced({
-      instancePositions: {size: 3, update: this.calculateInstancePositions},
-      instanceColors: {size: 4, update: this.calculateInstanceColors}
+      instancePositions: {
+        size: 3, 
+        update: this.calculateInstancePositions
+      },
+      instanceColors: {
+        type: GL.UNSIGNED_BYTE,
+        size: 4,
+        accessor: 'getColor',
+        update: this.calculateInstanceColors
+      }
     });
 
     this.updateRadiusAngle();

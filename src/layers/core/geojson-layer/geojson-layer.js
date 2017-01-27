@@ -114,6 +114,7 @@ export default class GeoJsonLayer extends Layer {
       onHover: this._onHoverSublayer.bind(this),
       onClick: noop
     };
+    const updateTriggers = this.props.updateTriggers || {};
 
     // Filled Polygon Layer
     const polygonFillLayer = fillPolygons && new PolygonLayer(Object.assign({},
@@ -124,7 +125,11 @@ export default class GeoJsonLayer extends Layer {
         getHeight,
         getColor: getFillColor,
         extruded,
-        wireframe: false
+        wireframe: false,
+        updateTriggers: {
+          getHeight: updateTriggers.getHeight,
+          getColor: updateTriggers.getFillColor
+        }
       }));
 
     // Polygon outline or wireframe
@@ -137,7 +142,10 @@ export default class GeoJsonLayer extends Layer {
         getHeight,
         getColor: getStrokeColor,
         extruded: true,
-        wireframe: true
+        wireframe: true,
+        updateTriggers: {
+          getColor: updateTriggers.getStrokeColor
+        }
       }));
     } else if (drawPolygons) {
       polygonOutlineLayer = new PathLayer(Object.assign({}, this.props, handlers, {
@@ -145,7 +153,11 @@ export default class GeoJsonLayer extends Layer {
         data: polygonOutlineFeatures,
         getPath: getCoordinates,
         getColor: getStrokeColor,
-        getWidth: getStrokeWidth
+        getWidth: getStrokeWidth,
+        updateTriggers: {
+          getColor: updateTriggers.getStrokeColor,
+          getWidth: updateTriggers.getStrokeWidth
+        }
       }));
     }
 
@@ -155,7 +167,11 @@ export default class GeoJsonLayer extends Layer {
         data: lineFeatures,
         getPath: getCoordinates,
         getColor: getStrokeColor,
-        getWidth: getStrokeWidth
+        getWidth: getStrokeWidth,
+        updateTriggers: {
+          getColor: updateTriggers.getStrokeColor,
+          getWidth: updateTriggers.getStrokeWidth
+        }
       }));
 
     const pointLayer = drawPoints && new ScatterplotLayer(Object.assign({},
@@ -164,7 +180,11 @@ export default class GeoJsonLayer extends Layer {
         data: pointFeatures,
         getPosition: getCoordinates,
         getColor: getPointColor,
-        getRadius: getPointSize
+        getRadius: getPointSize,
+        updateTriggers: {
+          getColor: updateTriggers.getPointColor,
+          getRadius: updateTriggers.getPointSize
+        }
       }));
 
     return [

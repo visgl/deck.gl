@@ -46,8 +46,15 @@ export default class ScreenGridLayer extends Layer {
   initializeState() {
     const {attributeManager} = this.state;
     attributeManager.addInstanced({
-      instancePositions: {size: 3, update: this.calculateInstancePositions},
-      instanceCount: {size: 1, update: this.calculateInstanceCount}
+      instancePositions: {
+        size: 3,
+        update: this.calculateInstancePositions
+      },
+      instanceCount: {
+        size: 1,
+        accessor: 'getWeight',
+        update: this.calculateInstanceCount
+      }
     });
 
     const {gl} = this.context;

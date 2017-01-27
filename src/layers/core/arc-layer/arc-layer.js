@@ -41,15 +41,20 @@ export default class ArcLayer extends Layer {
 
     const {attributeManager} = this.state;
     attributeManager.addInstanced({
-      instancePositions: {size: 4, update: this.calculateInstancePositions},
+      instancePositions: {
+        size: 4,
+        update: this.calculateInstancePositions
+      },
       instanceSourceColors: {
         type: GL.UNSIGNED_BYTE,
         size: 4,
+        accessor: 'getSourceColor',
         update: this.calculateInstanceSourceColors
       },
       instanceTargetColors: {
         type: GL.UNSIGNED_BYTE,
         size: 4,
+        accessor: 'getTargetColor',
         update: this.calculateInstanceTargetColors
       }
     });

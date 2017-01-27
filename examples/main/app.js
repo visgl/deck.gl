@@ -70,21 +70,12 @@ class App extends PureComponent {
 
   _onToggleLayer(exampleName, example) {
     const activeExamples = {...this.state.activeExamples};
-
-    if (activeExamples[exampleName]) {
-      activeExamples[exampleName] = null;
-    } else {
-      activeExamples[exampleName] = {
-        ...example.layer.defaultProps,
-        ...example.props
-      };
-    }
+    activeExamples[exampleName] = !activeExamples[exampleName];
     this.setState({activeExamples});
   }
 
   _onUpdateLayerSettings(exampleName, settings) {
     const activeExamples = {...this.state.activeExamples};
-
     activeExamples[exampleName] = {
       ...activeExamples[exampleName],
       ...settings
@@ -130,11 +121,17 @@ class App extends PureComponent {
     for (const categoryName of Object.keys(LAYER_CATEGORIES)) {
       for (const exampleName of Object.keys(LAYER_CATEGORIES[categoryName])) {
 
-        const settings = this.state.activeExamples[exampleName];
+        let settings = this.state.activeExamples[exampleName];
         // An example is a function that returns a DeckGL layer instance
         if (settings) {
           const example = LAYER_CATEGORIES[categoryName][exampleName];
-          layers.push(this._renderExampleLayer(example, settings, index++));
+          const layer = this._renderExampleLayer(example, settings, index++);
+
+          if (typeof settings !== 'object') {
+            this.state.activeExamples[exampleName] = layer.props;
+          }
+
+          layers.push(layer);
         }
       }
     }

@@ -81,10 +81,13 @@ export default class AttributeManager {
     this._add(attributes, updaters);
   }
 
-  // Marks an attribute for update
+  /* Marks an attribute for update
+   * @param {string} attributeName: attribute or accessor name
+   */
   invalidate(attributeName) {
     const {attributes} = this;
-    const attribute = attributes[attributeName];
+    const attribute = attributes[attributeName] ||
+      Object.values(attributes).find(attr => attr.accessor === attributeName);
     if (!attribute) {
       let message =
         `invalidating non-existent attribute ${attributeName} for ${this.id}\n`;

@@ -92,27 +92,15 @@ const GeoJsonLayerExample = {
 const GeoJsonLayerExtrudedExample = {
   layer: GeoJsonLayer,
   props: {
-    id: 'geojsonLayer-example',
+    id: 'geojsonLayer-extruded',
     data: dataSamples.choropleths,
     getHeight: f => ((f.properties.ZIP_CODE * 10) % 127) * 10,
-    getFillColor: f => [0, 0, ((f.properties.ZIP_CODE * 23) % 100) + 155],
+    getFillColor: f => [0, 255, ((f.properties.ZIP_CODE * 23) % 100) + 155],
+    getStrokeColor: f => [200, 0, 80],
     drawPolygons: true,
     extruded: true,
-    pickable: true
-  }
-};
-
-const GeoJsonLayerWireframeExample = {
-  layer: GeoJsonLayer,
-  props: {
-    id: 'geojsonLayer-wireframe',
-    data: dataSamples.choropleths,
-    fillPolygons: false,
-    extruded: true,
     wireframe: true,
-    lightSettings: {enabled: false},
-    getHeight: f => ((f.properties.ZIP_CODE * 10) % 127) * 10,
-    getStrokeColor: f => [200, 0, 80]
+    pickable: true
   }
 };
 
@@ -381,7 +369,6 @@ export default {
   'Core Layers': {
     'GeoJsonLayer': GeoJsonLayerExample,
     'GeoJsonLayer (Extruded)': GeoJsonLayerExtrudedExample,
-    'GeoJsonLayer (Wireframe)': GeoJsonLayerWireframeExample,
     // 'GeoJsonLayer (Immutable)': GeoJsonLayerImmutableExample,
     // PolygonLayer: PolygonLayerExample,
     // PathLayer: PathLayerExample,

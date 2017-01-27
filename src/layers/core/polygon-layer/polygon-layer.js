@@ -67,20 +67,30 @@ export default class PolygonLayer extends Layer {
     const {attributeManager} = this.state;
     const noAlloc = true;
     attributeManager.addDynamic({
-      indices: {size: 1, update: this.calculateIndices, isIndexed: true, noAlloc},
-      positions: {size: 3, update: this.calculatePositions, noAlloc},
-      normals: {size: 3, update: this.calculateNormals, noAlloc},
+      indices: {
+        size: 1,
+        isIndexed: true,
+        update: this.calculateIndices, noAlloc
+      },
+      positions: {
+        size: 3,
+        accessor: 'getHeight',
+        update: this.calculatePositions, noAlloc
+      },
+      normals: {
+        size: 3,
+        update: this.calculateNormals, noAlloc
+      },
       colors: {
         type: GL.UNSIGNED_BYTE,
         size: 4,
-        update: this.calculateColors,
-        noAlloc
+        accessor: 'getColor',
+        update: this.calculateColors, noAlloc
       },
       pickingColors: {
         type: GL.UNSIGNED_BYTE,
         size: 3,
-        update: this.calculatePickingColors,
-        noAlloc
+        update: this.calculatePickingColors, noAlloc
       }
     });
   }

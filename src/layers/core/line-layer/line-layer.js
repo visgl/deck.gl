@@ -40,11 +40,20 @@ export default class LineLayer extends Layer {
 
     const {attributeManager} = this.state;
     attributeManager.addInstanced({
-      instanceSourcePositions: {size: 3, update: this.calculateInstanceSourcePositions},
-      instanceTargetPositions: {size: 3, update: this.calculateInstanceTargetPositions},
+      instanceSourcePositions: {
+        size: 3,
+        accessor: 'getSourcePosition',
+        update: this.calculateInstanceSourcePositions
+      },
+      instanceTargetPositions: {
+        size: 3,
+        accessor: 'getTargetPosition',
+        update: this.calculateInstanceTargetPositions
+      },
       instanceColors: {
         type: GL.UNSIGNED_BYTE,
         size: 4,
+        accessor: 'getColor',
         update: this.calculateInstanceColors
       }
     });
