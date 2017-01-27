@@ -46,12 +46,17 @@ export default class PathLayer extends Layer {
 
   updateState({oldProps, props, changeFlags}) {
     const {getPath} = this.props;
-    const {attributeManager} = this.state;
+    const {attributeManager, IndexType} = this.state;
 
     if (changeFlags.dataChanged) {
       // this.state.paths only stores point positions in each path
       const paths = props.data.map(getPath);
       const pointCount = paths.reduce((count, path) => count + path.length, 0);
+
+      // each point will generate two vertices for outside and inside
+      if (IndexType === Uint16Array && pointCount * 2 > 65535) {
+        throw new Error('Vertex count exceeds browser\'s limit');
+      }
 
       this.setState({paths, pointCount});
       attributeManager.invalidateAll();
@@ -87,10 +92,6 @@ export default class PathLayer extends Layer {
     // each path with length n has n-1 line segments
     // * 2 * 3: each segment is rendered as 2 triangles with 3 vertices
     const indexCount = (pointCount - paths.length) * 2 * 3;
-
-    if (IndexType === Uint16Array && indexCount > 65535) {
-      throw new Error('Vertex count exceeds browser\'s limit');
-    }
     model.setVertexCount(indexCount);
 
     const indices = new IndexType(indexCount);
@@ -137,6 +138,7 @@ export default class PathLayer extends Layer {
         positions[i++] = point[2] || 0;
       })
     );
+    // two copies for outside and inside edges each
     positions.copyWithin(i, 0, i);
 
     attribute.value = positions;
@@ -159,6 +161,7 @@ export default class PathLayer extends Layer {
         return point;
       }, null);
     });
+    // two copies for outside and inside edges each
     leftDeltas.copyWithin(i, 0, i);
 
     attribute.value = leftDeltas;
@@ -181,6 +184,7 @@ export default class PathLayer extends Layer {
       }, null);
       i += 3;
     });
+    // two copies for outside and inside edges each
     rightDeltas.copyWithin(i, 0, i);
 
     attribute.value = rightDeltas;
@@ -210,7 +214,7 @@ export default class PathLayer extends Layer {
     const {data, getColor} = this.props;
     const {paths, pointCount} = this.state;
     const {size} = attribute;
-    const colors = new Uint8Array(pointCount * size * 2);
+    const colors = new Uint8ClampedArray(pointCount * size * 2);
 
     let i = 0;
     paths.forEach((path, index) => {
@@ -222,6 +226,7 @@ export default class PathLayer extends Layer {
       fillArray({target: colors, source: pointColor, start: i, count});
       i += count * size;
     });
+    // two copies for outside and inside edges each
     colors.copyWithin(i, 0, i);
 
     attribute.value = colors;
@@ -231,7 +236,7 @@ export default class PathLayer extends Layer {
   calculatePickingColors(attribute) {
     const {paths, pointCount} = this.state;
     const {size} = attribute;
-    const pickingColors = new Uint8Array(pointCount * size * 2);
+    const pickingColors = new Uint8ClampedArray(pointCount * size * 2);
 
     let i = 0;
     paths.forEach((path, index) => {
@@ -240,6 +245,7 @@ export default class PathLayer extends Layer {
       fillArray({target: pickingColors, source: pickingColor, start: i, count});
       i += count * size;
     });
+    // two copies for outside and inside edges each
     pickingColors.copyWithin(i, 0, i);
 
     attribute.value = pickingColors;
