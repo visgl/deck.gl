@@ -9,6 +9,8 @@ attribute vec4 colors;
 attribute vec3 pickingColors;
 
 uniform float thickness;
+uniform float strokeMinPixels;
+uniform float strokeMaxPixels;
 uniform float miterLimit;
 uniform float opacity;
 uniform float renderPickingBuffer;
@@ -22,7 +24,8 @@ vec2 lineJoin(vec3 prevProjected, vec3 currProjected, vec3 nextProjected) {
   vec2 currScreen = currProjected.xy;
   vec2 nextScreen = nextProjected.xy;
 
-  float len = project_scale(thickness);
+  float len = clamp(project_scale(thickness),
+    strokeMinPixels, strokeMaxPixels);
 
   vec2 dir = vec2(0.0);
   if (currScreen == prevScreen) {

@@ -8,7 +8,10 @@ const DEFAULT_COLOR = [0, 0, 0, 255];
 
 const defaultProps = {
   opacity: 1,
-  strokeWidth: 1,
+  strokeWidth: 1, // stroke width in meters
+  miterLimit: 4,
+  strokeMinPixels: 0, //  min stroke width in pixels
+  strokeMaxPixels: Number.MAX_SAFE_INTEGER, // max stroke width in pixels
   getPath: object => object.path,
   getColor: object => object.color,
   getWidth: object => object.width
@@ -63,10 +66,14 @@ export default class PathLayer extends Layer {
   }
 
   draw({uniforms}) {
+    const {opacity, strokeWidth, miterLimit, strokeMinPixels, strokeMaxPixels} = this.props;
+
     this.state.model.render(Object.assign({}, uniforms, {
-      opacity: this.props.opacity,
-      thickness: this.props.strokeWidth,
-      miterLimit: 1
+      opacity,
+      thickness: strokeWidth,
+      miterLimit,
+      strokeMinPixels,
+      strokeMaxPixels
     }));
   }
 
