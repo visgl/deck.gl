@@ -3,7 +3,7 @@
 const {resolve} = require('path');
 const webpack = require('webpack');
 
-module.exports = {
+const BASE_CONFIG = {
   // bundle app.js and everything it imports, recursively.
   entry: {
     app: resolve('./app.js')
@@ -17,8 +17,7 @@ module.exports = {
 
   resolve: {
     alias: {
-      // From mapbox-gl-js README. Unfortunately this is required
-      // for non-browserify bundlers (e.g. webpack):
+      // From mapbox-gl-js README. Required for non-browserify bundlers (e.g. webpack):
       'mapbox-gl$': resolve('./node_modules/mapbox-gl/dist/mapbox-gl.js')
     }
   },
@@ -61,7 +60,7 @@ const LOCAL_DEVELOPMENT_CONFIG = {
   resolve: {
     alias: {
       // Imports the deck.gl library from the src directory in this repo
-      'deck.gl': resolve('../../dist'),
+      'deck.gl': resolve('../../src'),
       // Important: ensure shared dependencies come from this app's node_modules
       'luma.gl': resolve('./node_modules/luma.gl'),
       react: resolve('./node_modules/react')
@@ -85,8 +84,18 @@ const LOCAL_DEVELOPMENT_CONFIG = {
   }
 };
 
-Object.assign(module.exports.resolve.alias, LOCAL_DEVELOPMENT_CONFIG.resolve.alias);
-module.exports.module.rules =
-  module.exports.module.rules.concat(LOCAL_DEVELOPMENT_CONFIG.module.rules);
+function addLocalDevSettings(config) {
+  Object.assign(config.resolve.alias, LOCAL_DEVELOPMENT_CONFIG.resolve.alias);
+  config.module.rules = config.module.rules.concat(LOCAL_DEVELOPMENT_CONFIG.module.rules);
+  return config;
+}
 
 // END DELETE THESE LINES WHEN RUNNING STANDALONE
+
+module.exports = env => {
+  const config = BASE_CONFIG;
+  if (env && env.local) {
+    addLocalDevSettings(config);
+  }
+  return config;
+};

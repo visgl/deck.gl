@@ -25,11 +25,22 @@ import {readFileSync} from 'fs';
 import {join} from 'path';
 import {mat4} from 'gl-matrix';
 
-const defaultGetPosition = x => x.position;
-const defaultGetElevation = x => x.height;
-const defaultGetColor = x => x.color;
 const DEFAULT_COLOR = [255, 255, 255, 0];
 
+/**
+ * A generic GridLayer that takes latitude longitude delta of cells as a uniform
+ * and the min lat lng of cells. grid can be 3d when pass in a height
+ * and set enable3d to true
+ *
+ * @param {array} props.data -
+ * @param {boolean} props.enable3d - enable grid height
+ * @param {number} props.latDelta - grid cell size in lat delta
+ * @param {number} props.lngDelta - grid cell size in lng delta
+ * @param {number} props.opacity - opacity
+ * @param {function} props.getPosition - position accessor, returned as [minLng, minLat]
+ * @param {function} props.getElevation - elevation accessor
+ * @param {function} props.getColor - color accessor, returned as [r, g, b]
+ */
 const defaultProps = {
   id: 'grid-layer',
   data: [],
@@ -37,9 +48,9 @@ const defaultProps = {
   lngDelta: 0.0113,
   enable3d: true,
   opacity: 0.6,
-  getPosition: defaultGetPosition,
-  getElevation: defaultGetElevation,
-  getColor: defaultGetColor
+  getPosition: x => x.position,
+  getElevation: x => x.height,
+  getColor: x => x.color
 };
 
 // viewMatrix added as Uniform for lighting calculation
@@ -48,29 +59,6 @@ mat4.lookAt(viewMatrixCompat, [0, 0, 0], [0, 0, -1], [0, 1, 0]);
 const viewMatrix = new Float32Array(viewMatrixCompat);
 
 export default class GridLayer extends Layer {
-
-  /**
-   * @classdesc
-   * GridLayer
-   * A generic GridLayer that takes latitude longitude delta of cells as a uniform
-   * and the min lat lng of cells. grid can be 3d when pass in a height
-   * and set enable3d to true
-   *
-   * @class
-   * @param {object} props
-   * @param {array} props.data -
-   * @param {boolean} props.enable3d - enable grid height
-   * @param {number} props.latDelta - grid cell size in lat delta
-   * @param {number} props.lngDelta - grid cell size in lng delta
-   * @param {number} props.opacity - opacity
-   * @param {function} props.getPosition - position accessor, returned as [minLng, minLat]
-   * @param {function} props.getElevation - elevation accessor
-   * @param {function} props.getColor - color accessor, returned as [r, g, b]
-   */
-  constructor(props) {
-    super(Object.assign({}, defaultProps, props));
-  }
-
   getShaders() {
     const vertex = readFileSync(join(__dirname, './grid-layer-vertex.glsl'), 'utf8');
     const lighting = readFileSync(join(__dirname, './lighting.glsl'), 'utf8');
@@ -151,3 +139,6 @@ export default class GridLayer extends Layer {
     }
   }
 }
+
+GridLayer.layerName = 'GridLayer';
+GridLayer.defaultProps = defaultProps;

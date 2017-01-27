@@ -22,10 +22,10 @@ class Root extends Component {
         longitude: -122.41669,
         zoom: 16.140440,
         bearing: -20.55991,
-        pitch: 60,
+        pitch: 60
       },
       width: 500,
-      height: 500,
+      height: 500
     };
   }
 
@@ -36,8 +36,8 @@ class Root extends Component {
     const layers = [new LineLayer({
       data: [{
         sourcePosition: [-122.41669, 37.7853],
-        targetPosition: [-122.41669, 37.781],
-      }],
+        targetPosition: [-122.41669, 37.781]
+      }]
     })];
 
     return (
@@ -62,7 +62,7 @@ class Root extends Component {
 
 }
 
+/* global document */
 const root = document.createElement('div');
 document.body.appendChild(root);
-
 render(<Root />, root);

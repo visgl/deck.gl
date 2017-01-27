@@ -22,7 +22,7 @@ import {
 } from 'deck.gl';
 
 import * as dataSamples from './data-samples';
-import {parseColor, setOpacity} from '../../src/lib/utils/color';
+import {parseColor, setOpacity} from './color';
 
 // Demonstrate immutable support
 import Immutable from 'immutable';

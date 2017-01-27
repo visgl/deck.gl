@@ -4,7 +4,7 @@ import React, {Component} from 'react';
 import {render} from 'react-dom';
 import DeckGL from 'deck.gl';
 import {LineLayer} from 'deck.gl';
-// import MapGL from 'react-map-gl';
+import MapGL from 'react-map-gl';
 /* global document */
 
 const token = '' || process.env.MAPBOX_ACCESS_TOKEN || process.env.MapboxAccessToken; // eslint-disable-line
@@ -42,12 +42,22 @@ class Root extends Component {
     })];
 
     return (
-      <DeckGL
+      <MapGL
         {...viewport}
+        mapStyle="mapbox://styles/mapbox/dark-v9"
+        onChangeViewport={v => this.setState({viewport: v})}
+        preventStyleDiffing={false}
+        mapboxApiAccessToken={token}
+        perspectiveEnabled
         width={width}
-        height={height}
-        layers={layers}
-        debug />
+        height={height}>
+        <DeckGL
+          {...viewport}
+          width={width}
+          height={height}
+          layers={layers}
+          debug />
+      </MapGL>
     );
   }
 
@@ -55,5 +65,4 @@ class Root extends Component {
 
 const root = document.createElement('div');
 document.body.appendChild(root);
-
 render(<Root />, root);

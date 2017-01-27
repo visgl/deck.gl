@@ -17,10 +17,13 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-import {Layer, assembleShaders} from 'deck.gl';
+import {Layer} from '../../../lib';
+import {assembleShaders} from '../../../shader-utils';
 import {GL, Model, Geometry, Texture2D, loadTextures} from 'luma.gl';
 import {readFileSync} from 'fs';
 import {join} from 'path';
+
+const DEFAULT_COLOR = [0, 0, 0, 255];
 
 /*
  * @param {object} props
@@ -44,8 +47,6 @@ import {join} from 'path';
  * @param {func} props.getColor - returns color of the icon in [r, g, b, a]. Only works on icons
  *   with mask: true.
  */
-const DEFAULT_COLOR = [0, 0, 0, 255];
-
 const defaultProps = {
   getPosition: x => x.position,
   getIcon: x => x.icon,
