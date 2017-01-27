@@ -36,7 +36,7 @@ If the color alpha (the fourth component) is not provided,
 
 #### `getWidth` (Function, optional)
 
-- Default: `(object, index) => object.width || 1`
+- Default: `(object, index) => object.width`
 
 Return a width multiplier from each object.
 
@@ -45,7 +45,27 @@ Return a width multiplier from each object.
 
 - Default: `1`
 
-The stroke width used to draw each line.
+The stroke width used to draw each line. Unit is meters.
+
+##### `strokeMinPixels` (Number, optional)
+
+- Default: `0`
+
+The minimum stroke size in pixels.
+
+
+##### `strokeMaxPixels` (Number, optional)
+
+- Default: `None`
+
+The maximum stroke size in pixels.
+
+
+##### `miterLimit` (Number, optional)
+
+- Default: `4`
+
+The maximum extent of the join as a ratio to the stroke-width.
 
 
 ##### `strokeColor` (Number, optional)

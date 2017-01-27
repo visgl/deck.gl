@@ -6,6 +6,7 @@ import * as data from '../data';
 import {
   ScatterplotLayer,
   PolygonLayer,
+  PathLayer,
   ChoroplethLayer,
   ExtrudedChoroplethLayer64
 } from 'deck.gl';
@@ -15,6 +16,7 @@ import {parseColor} from 'deck.gl/lib/utils/color';
 import {testInitializeLayer} from '../test-utils';
 
 const suite = new Suite();
+const lines = data.choropleths.features.map(f => ({path: f.geometry.coordinates[0]}));
 
 const COLOR_STRING = '#FFEEBB';
 const COLOR_ARRAY = [222, 222, 222];
@@ -38,6 +40,10 @@ suite
 })
 .add('ScatterplotLayer#initialize', () => {
   const layer = new ChoroplethLayer({data: data.points});
+  testInitializeLayer({layer});
+})
+.add('PathLayer#initialize', () => {
+  const layer = new PathLayer({data: lines});
   testInitializeLayer({layer});
 })
 .add('ChoroplethLayer#initialize', () => {
