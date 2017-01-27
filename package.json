@@ -79,8 +79,8 @@
     "tape-catch": "^1.0.4",
     "transform-loader": "^0.2.3",
     "uglify-js": "^2.6.1",
-    "webpack": "^2.2.0-rc.3",
-    "webpack-dev-server": "^2.2.0-rc.0"
+    "webpack": "^2.2.0",
+    "webpack-dev-server": "^2.2.0"
   },
   "peerDependencies": {
     "luma.gl": "^3.0.0-alpha.3",

@@ -23,7 +23,7 @@ import {
 } from 'deck.gl';
 
 import * as dataSamples from './data-samples';
-import {parseHexColor, setOpacity} from '../../src/lib/utils/color';
+import {parseColor, setOpacity} from '../../src/lib/utils/color';
 
 // Demonstrate immutable support
 import Immutable from 'immutable';
@@ -71,16 +71,16 @@ const GeoJsonLayerExample = {
     id: 'geojsonLayer',
     data: dataSamples.geojson,
     // TODO change to use the color util when it is landed
-    getPointColor: f => parseHexColor(f.properties['marker-color']),
+    getPointColor: f => parseColor(f.properties['marker-color']),
     getPointSize: f => MARKER_SIZE_MAP[f.properties['marker-size']],
     getStrokeColor: f => {
-      const color = parseHexColor(f.properties.stroke);
+      const color = parseColor(f.properties.stroke);
       const opacity = f.properties['stroke-opacity'] * 255;
       return setOpacity(color, opacity);
     },
     getStrokeWidth: f => f.properties['stroke-width'],
     getFillColor: f => {
-      const color = parseHexColor(f.properties.fill);
+      const color = parseColor(f.properties.fill);
       const opacity = f.properties['fill-opacity'] * 255;
       return setOpacity(color, opacity);
     },
