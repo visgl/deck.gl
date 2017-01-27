@@ -8,10 +8,19 @@ export default class LayerControls extends PureComponent {
     // Only update if we have a confirmed change
     if (settings[settingName] !== newValue) {
       // Create a new object so that shallow-equal detects a change
-      this.props.onChange({
-        ...settings,
-        [settingName]: newValue
-      });
+      const newSettings = {...this.props.settings};
+
+      if (settingName.indexOf('get') === 0) {
+        newSettings[settingName] = d => newValue;
+        newSettings.updateTriggers = {
+          ...newSettings.updateTriggers,
+          [settingName]: {value: newValue.toString()}
+        };
+      } else {
+        newSettings[settingName] = newValue;
+      }
+
+      this.props.onChange(newSettings);
     }
   }
 

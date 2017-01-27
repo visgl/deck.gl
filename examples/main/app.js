@@ -104,10 +104,10 @@ class App extends PureComponent {
   _renderExampleLayer(example, settings, index) {
     const {layer: Layer, props, getData} = example;
     const {infoPanel} = this.refs;
-    const layerProps = {};
+    const layerProps = Object.assign({}, props, settings);
 
     if (props.pickable) {
-      Object.assign(layerProps, props, settings, {
+      Object.assign(layerProps, {
         onHover: infoPanel ? infoPanel.onItemHovered : noop,
         onClick: infoPanel ? infoPanel.onItemClicked : noop
       });
@@ -186,15 +186,15 @@ class App extends PureComponent {
       <div>
         { this._renderMap() }
         <div id="control-panel">
+          <LayerControls
+            title="Composite Settings"
+            settings={settings}
+            onChange={this._onUpdateContainerSettings}/>
           <LayerSelector
             activeExamples={activeExamples}
             examples={LAYER_CATEGORIES}
             onToggleLayer={this._onToggleLayer}
             onUpdateLayer={this._onUpdateLayerSettings} />
-          <LayerControls
-            title="Composite Settings"
-            settings={settings}
-            onChange={this._onUpdateContainerSettings}/>
         </div>
         <LayerInfo ref="infoPanel"/>
       </div>

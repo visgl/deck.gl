@@ -26,23 +26,17 @@ h4 {
 	position: fixed;
 	z-index: 9;
 	top: 0;
+  bottom: 0;
 	right: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
   height: 100%;
   width: 280px;
   background: rgba(255, 255, 255, 0.5);
-  display: flex;
-  flex-flow: column;
 }
 
 #control-panel > div{
-	padding: 0 20px 40px 20px;
-}
-
-.layer-selector {
-	flex: 1 1 auto;
-  padding: 0;
-  overflow-x: hidden;
-  overflow-y: scroll;
+	padding: 0 20px 20px 20px;
 }
 
 .layer-controls {
@@ -50,7 +44,6 @@ h4 {
   border-left: none;
   border-right: none;
   padding: 8px 0;
-	flex: 0 1 auto;
 }
 
 /* Checkbox style adapted from http://cssdeck.com/labs/css-checkbox-styles */

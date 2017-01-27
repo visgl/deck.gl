@@ -9,15 +9,15 @@ function pad2(str) {
 }
 
 function toHexString(value) {
+  if (typeof value === 'function') {
+    try {
+      value = value();
+    } catch (err) {
+      // is data dependent
+    }
+  }
   if (typeof value === 'string') {
     return value;
-  }
-  if (typeof value === 'function') {
-    const funcText = value.toString();
-    const colorArray = (funcText.match(/\[\d+(,\s*\d+){2,3}\]/) || [])[0];
-    if (colorArray) {
-      value = JSON.parse(colorArray);
-    }
   }
   if (Array.isArray(value) && value.length >= 3) {
     return `#${value.slice(0, 3).map(v => pad2(v.toString(16))).join('')}`;
