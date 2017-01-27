@@ -17,6 +17,13 @@ const defaultProps = {
   getWidth: object => object.width
 };
 
+const isClosed = path => {
+  const firstPoint = path[0];
+  const lastPoint = path[path.length - 1];
+  return firstPoint[0] === lastPoint[0] && firstPoint[1] === lastPoint[1] &&
+    firstPoint[2] === lastPoint[2];
+};
+
 export default class PathLayer extends Layer {
   getShaders() {
     return {
@@ -159,7 +166,6 @@ export default class PathLayer extends Layer {
 
     let i = 0;
     paths.forEach(path => {
-      i += size * 2;
       path.reduce((prevPoint, point) => {
         if (prevPoint) {
           // two copies for outside edge and inside edge each
@@ -171,7 +177,7 @@ export default class PathLayer extends Layer {
           leftDeltas[i++] = (point[2] - prevPoint[2]) || 0;
         }
         return point;
-      }, null);
+      }, isClosed(path) ? path[path.length - 2] : path[0]);
     });
 
     attribute.value = leftDeltas;
@@ -185,19 +191,20 @@ export default class PathLayer extends Layer {
 
     let i = 0;
     paths.forEach(path => {
-      path.reduce((prevPoint, point) => {
-        if (prevPoint) {
-          // two copies for outside edge and inside edge each
-          rightDeltas[i++] = point[0] - prevPoint[0];
-          rightDeltas[i++] = point[1] - prevPoint[1];
-          rightDeltas[i++] = (point[2] - prevPoint[2]) || 0;
-          rightDeltas[i++] = point[0] - prevPoint[0];
-          rightDeltas[i++] = point[1] - prevPoint[1];
-          rightDeltas[i++] = (point[2] - prevPoint[2]) || 0;
+      path.forEach((point, ptIndex) => {
+        let nextPoint = path[ptIndex + 1];
+        if (!nextPoint) {
+          nextPoint = isClosed(path) ? path[1] : point;
         }
-        return point;
-      }, null);
-      i += size * 2;
+
+        // two copies for outside edge and inside edge each
+        rightDeltas[i++] = nextPoint[0] - point[0];
+        rightDeltas[i++] = nextPoint[1] - point[1];
+        rightDeltas[i++] = (nextPoint[2] - point[2]) || 0;
+        rightDeltas[i++] = nextPoint[0] - point[0];
+        rightDeltas[i++] = nextPoint[1] - point[1];
+        rightDeltas[i++] = (nextPoint[2] - point[2]) || 0;
+      });
     });
 
     attribute.value = rightDeltas;
