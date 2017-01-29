@@ -307,11 +307,11 @@ export default class AttributeManager {
 
     Object.assign(this.attributes, newAttributes);
 
-    this._mapUpdateTriggerToAttributes();
+    this._mapUpdateTriggersToAttributes();
   }
 
   // build updateTrigger name to attribute name mapping
-  _mapUpdateTriggerToAttributes() {
+  _mapUpdateTriggersToAttributes() {
     const triggers = {};
 
     for (const attributeName in this.attributes) {
@@ -335,7 +335,7 @@ export default class AttributeManager {
       }
     }
 
-    Object.assign(this.updateTriggers, triggers);
+    this.updateTriggers = triggers;
   }
 
   _validateAttributeDefinition(attributeName, attribute) {
