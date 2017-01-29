@@ -45,6 +45,7 @@ export default class AttributeManager {
   constructor({id = 'attribute-manager'} = {}) {
     this.id = id;
     this.attributes = {};
+    this.updateTriggers = {};
     this.allocedInstances = -1;
     this.needsRedraw = true;
     this.userData = {};
@@ -82,21 +83,26 @@ export default class AttributeManager {
   }
 
   /* Marks an attribute for update
-   * @param {string} attributeName: attribute or accessor name
+   * @param {string} triggerName: attribute or accessor name
    */
-  invalidate(attributeName) {
-    const {attributes} = this;
-    const attribute = attributes[attributeName] ||
-      Object.values(attributes).find(attr => attr.accessor === attributeName);
-    if (!attribute) {
+  invalidate(triggerName) {
+    const {attributes, updateTriggers} = this;
+    const attributesToUpdate = updateTriggers[triggerName];
+
+    if (!attributesToUpdate) {
       let message =
-        `invalidating non-existent attribute ${attributeName} for ${this.id}\n`;
+        `invalidating non-existent attribute ${triggerName} for ${this.id}\n`;
       message += `Valid attributes: ${Object.keys(attributes).join(', ')}`;
-      assert(attribute, message);
+      assert(attributesToUpdate, message);
     }
-    attribute.needsUpdate = true;
+    attributesToUpdate.forEach(name => {
+      const attribute = attributes[name];
+      if (attribute) {
+        attribute.needsUpdate = true;
+      }
+    });
     // For performance tuning
-    this.onLog(1, `invalidated attribute ${attributeName} for ${this.id}`);
+    this.onLog(1, `invalidated attribute ${attributesToUpdate} for ${this.id}`);
   }
 
   invalidateAll() {
@@ -296,10 +302,40 @@ export default class AttributeManager {
       this._validateAttributeDefinition(attributeName, attributeData);
 
       // Add to both attributes list (for registration with model)
-      this.attributes[attributeName] = attributeData;
+      newAttributes[attributeName] = attributeData;
     }
 
     Object.assign(this.attributes, newAttributes);
+
+    this._mapUpdateTriggerToAttributes();
+  }
+
+  // build updateTrigger name to attribute name mapping
+  _mapUpdateTriggerToAttributes() {
+    const triggers = {};
+
+    for (const attributeName in this.attributes) {
+      const attribute = this.attributes[attributeName];
+      let {accessor} = attribute;
+
+      // use attribute name as update trigger key
+      triggers[attributeName] = [attributeName];
+
+      // use accessor name as update trigger key
+      if (typeof accessor === 'string') {
+        accessor = [accessor];
+      }
+      if (Array.isArray(accessor)) {
+        accessor.forEach(accessorName => {
+          if (!triggers[accessorName]) {
+            triggers[accessorName] = [];
+          }
+          triggers[accessorName].push(attributeName);
+        });
+      }
+    }
+
+    Object.assign(this.updateTriggers, triggers);
   }
 
   _validateAttributeDefinition(attributeName, attribute) {
@@ -458,9 +494,11 @@ export default class AttributeManager {
   /* eslint-enable max-statements */
 
   _updateBufferViaStandardAccessor({attribute, data, props}) {
-    const {accessor} = attribute;
+    const {accessor, value, size} = attribute;
     const accessorFunc = props[accessor];
-    const {value, size} = attribute;
+
+    assert(typeof accessorFunc === 'function', `accessor "${accessor}" is not a function`);
+
     let {defaultValue = [0, 0, 0, 0]} = attribute;
     defaultValue = Array.isArray(defaultValue) ? defaultValue : [defaultValue];
     let i = 0;

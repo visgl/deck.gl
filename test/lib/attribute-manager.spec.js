@@ -37,9 +37,12 @@ test('Core#AttributeManager.add', t => {
     'AttributeManager.add - throws on missing attribute update'
   );
 
-  attributeManager.add({positions: {size: 2, update}});
+  attributeManager.add({positions: {size: 2, accessor: 'getPosition', update}});
   t.ok(attributeManager.getAttributes()['positions'],
     'AttributeManager.add - add attribute successful');
+  t.deepEquals(attributeManager.updateTriggers,
+    {positions: ['positions'], getPosition: ['positions']},
+    'AttributeManager.add - build update triggers mapping');
   t.end();
 });
 
