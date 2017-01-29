@@ -66,33 +66,15 @@ export default class PolygonLayer extends Layer {
 
     const {attributeManager} = this.state;
     const noAlloc = true;
+    /* eslint-disable max-len */
     attributeManager.addDynamic({
-      indices: {
-        size: 1,
-        isIndexed: true,
-        update: this.calculateIndices, noAlloc
-      },
-      positions: {
-        size: 3,
-        accessor: 'getHeight',
-        update: this.calculatePositions, noAlloc
-      },
-      normals: {
-        size: 3,
-        update: this.calculateNormals, noAlloc
-      },
-      colors: {
-        type: GL.UNSIGNED_BYTE,
-        size: 4,
-        accessor: 'getColor',
-        update: this.calculateColors, noAlloc
-      },
-      pickingColors: {
-        type: GL.UNSIGNED_BYTE,
-        size: 3,
-        update: this.calculatePickingColors, noAlloc
-      }
+      indices: {size: 1, isIndexed: true, update: this.calculateIndices, noAlloc},
+      positions: {size: 3, accessor: 'getHeight', update: this.calculatePositions, noAlloc},
+      normals: {size: 3, update: this.calculateNormals, noAlloc},
+      colors: {size: 4, type: GL.UNSIGNED_BYTE, accessor: 'getColor', update: this.calculateColors, noAlloc},
+      pickingColors: {size: 3, type: GL.UNSIGNED_BYTE, update: this.calculatePickingColors, noAlloc}
     });
+    /* eslint-enable max-len */
   }
 
   updateState({props, oldProps, changeFlags}) {

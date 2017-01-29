@@ -114,7 +114,6 @@ export default class GeoJsonLayer extends Layer {
       onHover: this._onHoverSublayer.bind(this),
       onClick: noop
     };
-    const updateTriggers = this.props.updateTriggers || {};
 
     // Filled Polygon Layer
     const polygonFillLayer = fillPolygons && new PolygonLayer(Object.assign({},
@@ -127,8 +126,8 @@ export default class GeoJsonLayer extends Layer {
         extruded,
         wireframe: false,
         updateTriggers: {
-          getHeight: updateTriggers.getHeight,
-          getColor: updateTriggers.getFillColor
+          getHeight: this.props.updateTriggers.getHeight,
+          getColor: this.props.updateTriggers.getFillColor
         }
       }));
 
@@ -144,7 +143,7 @@ export default class GeoJsonLayer extends Layer {
         extruded: true,
         wireframe: true,
         updateTriggers: {
-          getColor: updateTriggers.getStrokeColor
+          getColor: this.props.updateTriggers.getStrokeColor
         }
       }));
     } else if (drawPolygons) {
@@ -155,8 +154,8 @@ export default class GeoJsonLayer extends Layer {
         getColor: getStrokeColor,
         getWidth: getStrokeWidth,
         updateTriggers: {
-          getColor: updateTriggers.getStrokeColor,
-          getWidth: updateTriggers.getStrokeWidth
+          getColor: this.props.updateTriggers.getStrokeColor,
+          getWidth: this.props.updateTriggers.getStrokeWidth
         }
       }));
     }
@@ -169,8 +168,8 @@ export default class GeoJsonLayer extends Layer {
         getColor: getStrokeColor,
         getWidth: getStrokeWidth,
         updateTriggers: {
-          getColor: updateTriggers.getStrokeColor,
-          getWidth: updateTriggers.getStrokeWidth
+          getColor: this.props.updateTriggers.getStrokeColor,
+          getWidth: this.props.updateTriggers.getStrokeWidth
         }
       }));
 
@@ -182,8 +181,8 @@ export default class GeoJsonLayer extends Layer {
         getColor: getPointColor,
         getRadius: getPointSize,
         updateTriggers: {
-          getColor: updateTriggers.getPointColor,
-          getRadius: updateTriggers.getPointSize
+          getColor: this.props.updateTriggers.getPointColor,
+          getRadius: this.props.updateTriggers.getPointSize
         }
       }));
 

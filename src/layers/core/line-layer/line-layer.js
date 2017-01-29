@@ -39,24 +39,13 @@ export default class LineLayer extends Layer {
     this.setState({model: this.createModel(gl)});
 
     const {attributeManager} = this.state;
+    /* eslint-disable max-len */
     attributeManager.addInstanced({
-      instanceSourcePositions: {
-        size: 3,
-        accessor: 'getSourcePosition',
-        update: this.calculateInstanceSourcePositions
-      },
-      instanceTargetPositions: {
-        size: 3,
-        accessor: 'getTargetPosition',
-        update: this.calculateInstanceTargetPositions
-      },
-      instanceColors: {
-        type: GL.UNSIGNED_BYTE,
-        size: 4,
-        accessor: 'getColor',
-        update: this.calculateInstanceColors
-      }
+      instanceSourcePositions: {size: 3, accessor: 'getSourcePosition', update: this.calculateInstanceSourcePositions},
+      instanceTargetPositions: {size: 3, accessor: 'getTargetPosition', update: this.calculateInstanceTargetPositions},
+      instanceColors: {size: 4, type: GL.UNSIGNED_BYTE, accessor: 'getColor', update: this.calculateInstanceColors}
     });
+    /* eslint-enable max-len */
   }
 
   draw({uniforms}) {

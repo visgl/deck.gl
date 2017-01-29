@@ -88,18 +88,12 @@ export default class GridLayer extends Layer {
     this.setState({model: this._createModel(gl)});
 
     const {attributeManager} = this.state;
+    /* eslint-disable max-len */
     attributeManager.addInstanced({
-      instancePositions: {
-        size: 4,
-        update: this.calculateInstancePositions
-      },
-      instanceColors: {
-        type: GL.UNSIGNED_BYTE,
-        size: 4,
-        accessor: 'getColor',
-        update: this.calculateInstanceColors
-      }
+      instancePositions: {size: 4, accessor: ['getPosition', 'getElevation'], update: this.calculateInstancePositions},
+      instanceColors: {size: 4, type: GL.UNSIGNED_BYTE, accessor: 'getColor', update: this.calculateInstanceColors}
     });
+    /* eslint-enable max-len */
   }
 
   _createModel(gl) {

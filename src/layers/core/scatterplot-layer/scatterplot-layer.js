@@ -49,26 +49,13 @@ export default class ScatterplotLayer extends Layer {
     const {gl} = this.context;
     this.setState({model: this._getModel(gl)});
 
+    /* eslint-disable max-len */
     this.state.attributeManager.addInstanced({
-      instancePositions: {
-        size: 3,
-        accessor: 'getPosition',
-        update: this.calculateInstancePositions
-      },
-      instanceRadius: {
-        size: 1,
-        accessor: 'getRadius',
-        defaultValue: 1,
-        update: this.calculateInstanceRadius
-      },
-      instanceColors: {
-        type: GL.UNSIGNED_BYTE,
-        size: 4,
-        accessor: 'getColor',
-        defaultValue: [0, 0, 0, 255],
-        update: this.calculateInstanceColors
-      }
+      instancePositions: {size: 3, accessor: 'getPosition', update: this.calculateInstancePositions},
+      instanceRadius: {size: 1, accessor: 'getRadius', defaultValue: 1, update: this.calculateInstanceRadius},
+      instanceColors: {size: 4, type: GL.UNSIGNED_BYTE, accessor: 'getColor', update: this.calculateInstanceColors}
     });
+    /* eslint-enable max-len */
   }
 
   updateState({props, oldProps}) {
@@ -120,44 +107,6 @@ export default class ScatterplotLayer extends Layer {
       isInstanced: true
     });
     return model;
-  }
-
-  calculateInstancePositions(attribute) {
-    const {data, getPosition} = this.props;
-    const {value, size} = attribute;
-    let i = 0;
-    for (const point of data) {
-      const position = getPosition(point);
-      value[i + 0] = position[0] || 0;
-      value[i + 1] = position[1] || 0;
-      value[i + 2] = position[2] || 0;
-      i += size;
-    }
-  }
-
-  calculateInstanceRadius(attribute) {
-    const {data, getRadius} = this.props;
-    const {value, size} = attribute;
-    let i = 0;
-    for (const point of data) {
-      const radius = getRadius(point);
-      value[i + 0] = isNaN(radius) ? 1 : radius;
-      i += size;
-    }
-  }
-
-  calculateInstanceColors(attribute) {
-    const {data, getColor} = this.props;
-    const {value, size} = attribute;
-    let i = 0;
-    for (const point of data) {
-      const color = getColor(point);
-      value[i + 0] = color[0] || 0;
-      value[i + 1] = color[1] || 0;
-      value[i + 2] = color[2] || 0;
-      value[i + 3] = isNaN(color[3]) ? DEFAULT_COLOR[3] : color[3];
-      i += size;
-    }
   }
 
   calculateInstancePositions(attribute) {

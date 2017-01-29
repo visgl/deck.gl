@@ -91,18 +91,12 @@ export default class HexagonLayer extends Layer {
     this.setState({model: this.getModel(gl)});
 
     const {attributeManager} = this.state;
+    /* eslint-disable max-len */
     attributeManager.addInstanced({
-      instancePositions: {
-        size: 3,
-        update: this.calculateInstancePositions
-      },
-      instanceColors: {
-        type: gl.UNSIGNED_BYTE,
-        size: 4,
-        accessor: 'getColor',
-        update: this.calculateInstanceColors
-      }
+      instancePositions: {size: 3, accessor: ['getCentroid', 'getElevation'], update: this.calculateInstancePositions},
+      instanceColors: {size: 4, type: gl.UNSIGNED_BYTE, accessor: 'getColor', update: this.calculateInstanceColors}
     });
+    /* eslint-enable max-len */
 
     this.updateRadiusAngle();
   }

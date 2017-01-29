@@ -115,6 +115,7 @@ class App extends PureComponent {
     return new Layer(layerProps);
   }
 
+  /* eslint-disable max-depth */
   _renderExamples() {
     let index = 1;
     const layers = [];
@@ -125,21 +126,21 @@ class App extends PureComponent {
 
         const settings = activeExamples[exampleName];
         // An example is a function that returns a DeckGL layer instance
-        if (!settings) {
-          continue;
-        }
-        const example = LAYER_CATEGORIES[categoryName][exampleName];
-        const layer = this._renderExampleLayer(example, settings, index++);
+        if (settings) {
+          const example = LAYER_CATEGORIES[categoryName][exampleName];
+          const layer = this._renderExampleLayer(example, settings, index++);
 
-        if (typeof settings !== 'object') {
-          activeExamples[exampleName] = layer.props;
-        }
+          if (typeof settings !== 'object') {
+            activeExamples[exampleName] = layer.props;
+          }
 
-        layers.push(layer);
+          layers.push(layer);
+        }
       }
     }
     return layers;
   }
+  /* eslint-enable max-depth */
 
   _getModelMatrix(index, offsetMode) {
     const {settings: {separation, rotationZ, rotationX}} = this.state;

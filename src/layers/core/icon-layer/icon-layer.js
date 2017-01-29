@@ -59,40 +59,16 @@ const defaultProps = {
 export default class IconLayer extends Layer {
   initializeState() {
     const {attributeManager} = this.state;
+    /* eslint-disable max-len */
     attributeManager.addInstanced({
-      instancePositions: {
-        size: 3,
-        accessor: 'getPosition',
-        update: this.calculateInstancePositions
-      },
-      instanceSizes: {
-        size: 1,
-        accessor: 'getScale',
-        update: this.calculateInstanceSizes
-      },
-      instanceOffsets: {
-        size: 2,
-        accessor: 'getIcon',
-        update: this.calculateInstanceOffsets
-      },
-      instanceIconFrames: {
-        size: 4,
-        accessor: 'getIcon',
-        update: this.calculateInstanceIconFrames
-      },
-      instanceColorModes: {
-        type: GL.UNSIGNED_BYTE,
-        size: 1,
-        accessor: 'getIcon',
-        update: this.calculateInstanceColorMode
-      },
-      instanceColors: {
-        type: GL.UNSIGNED_BYTE,
-        size: 4,
-        accessor: 'getColor',
-        update: this.calculateInstanceColors
-      }
+      instancePositions: {size: 3, accessor: 'getPosition', update: this.calculateInstancePositions},
+      instanceSizes: {size: 1, accessor: 'getScale', update: this.calculateInstanceSizes},
+      instanceOffsets: {size: 2, accessor: 'getIcon', update: this.calculateInstanceOffsets},
+      instanceIconFrames: {size: 4, accessor: 'getIcon', update: this.calculateInstanceIconFrames},
+      instanceColorModes: {size: 1, type: GL.UNSIGNED_BYTE, accessor: 'getIcon', update: this.calculateInstanceColorMode},
+      instanceColors: {size: 4, type: GL.UNSIGNED_BYTE, accessor: 'getColor', update: this.calculateInstanceColors}
     });
+    /* eslint-enable max-len */
 
     const {gl} = this.context;
     this.setState({model: this.getModel(gl)});
