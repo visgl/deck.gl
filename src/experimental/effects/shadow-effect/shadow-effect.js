@@ -57,8 +57,14 @@ export default class ShadowEffect extends Effect {
     
     this.lights = [new DirectionalLight({
       gl,
-      pos: vec3.create(0, 100, 0),
-      dir: vec3.create(0, -1, 0)
+      width: 800,
+      height: 600,
+      latitude: 37.70882935609515,
+      longitude: -122.41451343553304,
+      zoom: 10.34018170187848,
+      pitch: 60,
+      bearing: 1.4845360824741647,
+      tileSize:512
     })];
     
   }
@@ -66,12 +72,13 @@ export default class ShadowEffect extends Effect {
   preDraw({gl, layerManager}) {
     for (const light of this.lights) {
       //TODO - in reality we only need to do this on scene updates.
+      //light.options.zoom = layerManager.context.viewport.zoom;
       light.depthRender({gl, layerManager});
     }
-    layerManager.context.uniforms = {...layerManager.context.uniforms, ...this._getUniforms()};
+    layerManager.context.uniforms = {...layerManager.context.uniforms, ...this._getUniforms({layerManager})};
   }
   
-  _getUniforms() {
+  _getUniforms({layerManager}) {
     let uniforms = {};
     const iden = mat4.create();
     for (let i = 0; i < 5; ++i) {
@@ -79,8 +86,15 @@ export default class ShadowEffect extends Effect {
       //if this is changed, an array would make much more sense than
       //named uniforms like this
       if (i < this.lights.length) {
+        //this.lights[i].options.zoom = layerManager.context.viewport.zoom;
         uniforms["shadowSampler_" + i] = this.lights[i].depthTexture;
-        uniforms["shadowMatrix_" + i] = this.lights[i].viewProjectionMatrix;
+        let lightViewport = this.lights[i].getViewport();
+        let matrix = lightViewport.glProjectionMatrix;
+        //for (var i = 0; i < matrix.length-4; ++i) {
+        //  matrix[i] *= lightViewport.scale / layerManager.context.viewport.scale;
+        //}
+        console.log(matrix)
+        uniforms["shadowMatrix_" + i] = matrix;
       } else {
         uniforms["shadowSampler_" + i] = this.dummyDepthTexture
         uniforms["shadowMatrix_" + i] = iden;
@@ -92,7 +106,7 @@ export default class ShadowEffect extends Effect {
 
   
   draw({gl, layerManager}) {
-    const uniforms = {...layerManager.context.uniforms, ...layerManager.context.viewport.getUniforms()};
+    const uniforms = {...layerManager.context.uniforms, ...layerManager.context.viewport.getUniforms({layerManager})};
     this.model.render(uniforms);
   }
   

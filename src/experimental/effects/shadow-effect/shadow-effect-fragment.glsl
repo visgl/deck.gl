@@ -49,13 +49,30 @@ varying vec4 clipPosition;
 #define MAG(v, f) (mod((v), float(f)) / float(f))
 
 
+vec2 uv(mat4 matrix, vec4 pos) {
+  vec4 clip = matrix * pos;
+  //depth divide
+  vec3 ndc = clip.xyz / clip.w;
+  if (abs(ndc.x) > 1.0 || abs(ndc.y) > 1.0) return vec2(0,0);
+  vec2 uv = 0.5 * vec2(ndc.x + 1.0, 1.0 - ndc.y);
+  return uv;
+}
+
 float sampledDepth(sampler2D sampler, mat4 matrix, vec4 pos) {
   vec4 clip = matrix * pos;
   //depth divide
-  clip = clip / clip.w;
-  if (abs(clip.x) > 1.0 || abs(clip.y) > 1.0) return 0.0;
-  vec2 uv = 0.5 * (vec2(clip.x + 1.0, 1.0 - clip.y));
+  vec3 ndc = clip.xyz / clip.w;
+  if (abs(ndc.x) > 1.0 || abs(ndc.y) > 1.0) return 0.0;
+  vec2 uv = 0.5 * vec2(1.0 + ndc.x, 1.0 - ndc.y);
   return texture2D(sampler, uv).r;
+}
+
+float actualDepth(mat4 matrix, vec4 pos) {
+  vec4 clip = matrix * pos;
+  //depth divide
+  vec3 ndc = clip.xyz / clip.w;
+  return ndc.z;
+  //return (1.0 - ndc.z) / 2.0;
 }
 
 bool cameraOccluded(sampler2D sampler, mat4 matrix, vec4 pos) {
@@ -70,7 +87,15 @@ bool cameraOccluded(sampler2D sampler, mat4 matrix, vec4 pos) {
 
 
 void main(void) {
-  float lighting = cameraOccluded(shadowSampler_0, shadowMatrix_0, worldPosition) ? 0.0 : 1.0;
-  //float lighting = sampledDepth(shadowSampler_0, shadowMatrix_0, worldPosition);
-  gl_FragColor = vec4(lighting, lighting, lighting, 0.5);
+  gl_FragColor = vec4(0, 0, 0, 0.5);
+  /*
+  if (!cameraOccluded(shadowSampler_0, shadowMatrix_0, worldPosition)) {
+    gl_FragColor.a = 0.0;
+  }
+  */
+  //gl_FragColor.r = sampledDepth(shadowSampler_0, shadowMatrix_0, worldPosition);
+  //gl_FragColor.g = 10.0*sampledDepth(shadowSampler_0, shadowMatrix_0, worldPosition)-9.0;
+  gl_FragColor.b =  MAG(sampledDepth(shadowSampler_0, shadowMatrix_0, worldPosition), 0.01);
+  gl_FragColor.rg = uv(shadowMatrix_0, worldPosition);
+  //gl_FragColor.rgb = clip.xyz;
 }
