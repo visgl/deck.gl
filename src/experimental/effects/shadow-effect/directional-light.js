@@ -81,7 +81,6 @@ export default class DirectionalLight {
     this.framebuffer.bind();
     layerManager.context.viewport = viewport;
     gl.clear(GL.COLOR_BUFFER_BIT | GL.DEPTH_BUFFER_BIT);
-    //change to depth rendering
     layerManager.drawLayers();
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
     layerManager.context.viewport = oldViewport;

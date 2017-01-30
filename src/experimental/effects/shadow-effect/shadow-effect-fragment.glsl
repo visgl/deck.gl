@@ -88,14 +88,10 @@ bool cameraOccluded(sampler2D sampler, mat4 matrix, vec4 pos) {
 
 void main(void) {
   gl_FragColor = vec4(0, 0, 0, 0.5);
-  /*
-  if (!cameraOccluded(shadowSampler_0, shadowMatrix_0, worldPosition)) {
-    gl_FragColor.a = 0.0;
-  }
-  */
+  
   //gl_FragColor.r = sampledDepth(shadowSampler_0, shadowMatrix_0, worldPosition);
-  //gl_FragColor.g = 10.0*sampledDepth(shadowSampler_0, shadowMatrix_0, worldPosition)-9.0;
-  gl_FragColor.b =  MAG(sampledDepth(shadowSampler_0, shadowMatrix_0, worldPosition), 0.01);
-  gl_FragColor.rg = uv(shadowMatrix_0, worldPosition);
+  gl_FragColor.r = 1000.0*sampledDepth(shadowSampler_0, shadowMatrix_0, worldPosition)-999.0;
+  gl_FragColor.b =  MAG(sampledDepth(shadowSampler_0, shadowMatrix_0, worldPosition), 0.1);
+  //gl_FragColor.rg = uv(shadowMatrix_0, worldPosition);
   //gl_FragColor.rgb = clip.xyz;
 }
