@@ -21,8 +21,16 @@ Ref: http://keepachangelog.com/en/0.3.0/
 ## Recent Dev Releases
 
 #### [v3.1.0-beta.16] -
+- NEW: Main example now provides UI to modify layer props
+- NEW: Main example now has GeoJson test file with all GeoJson geometry types.
+- NEW: GridLayer
+- FIX: GeoJson points now render correctly
+- FIX: Mutation issue in defaultProps
+- Demo now installs and builds stand-alone
+- Picking improvements - order of function calls changed to enable layer overrides
+- PathLayer: new props
+- PathLayer: geometry generation performance.
 - Webpack config improvements to enable tree-shaking
-- Example improvements
 
 #### [v3.1.0-beta.15] -
 CHANGE: Revert to babel compilation to expose the dist file tree rather than a bundle
