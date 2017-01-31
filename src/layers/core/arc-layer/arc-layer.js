@@ -40,19 +40,13 @@ export default class ArcLayer extends Layer {
     this.setState({model: this._createModel(gl)});
 
     const {attributeManager} = this.state;
+    /* eslint-disable max-len */
     attributeManager.addInstanced({
-      instancePositions: {size: 4, update: this.calculateInstancePositions},
-      instanceSourceColors: {
-        type: GL.UNSIGNED_BYTE,
-        size: 4,
-        update: this.calculateInstanceSourceColors
-      },
-      instanceTargetColors: {
-        type: GL.UNSIGNED_BYTE,
-        size: 4,
-        update: this.calculateInstanceTargetColors
-      }
+      instancePositions: {size: 4, accessor: ['getSourcePosition', 'getTargetPosition'], update: this.calculateInstancePositions},
+      instanceSourceColors: {size: 4, type: GL.UNSIGNED_BYTE, accessor: 'getSourceColor', update: this.calculateInstanceSourceColors},
+      instanceTargetColors: {size: 4, type: GL.UNSIGNED_BYTE, accessor: 'getTargetColor', update: this.calculateInstanceTargetColors}
     });
+    /* eslint-enable max-len */
   }
 
   draw({uniforms}) {

@@ -45,10 +45,12 @@ export default class ScreenGridLayer extends Layer {
 
   initializeState() {
     const {attributeManager} = this.state;
+    /* eslint-disable max-len */
     attributeManager.addInstanced({
       instancePositions: {size: 3, update: this.calculateInstancePositions},
-      instanceCount: {size: 1, update: this.calculateInstanceCount}
+      instanceCount: {size: 1, accessor: ['getPosition', 'getWeight'], update: this.calculateInstanceCount}
     });
+    /* eslint-disable max-len */
 
     const {gl} = this.context;
     this.setState({model: this.getModel(gl)});
