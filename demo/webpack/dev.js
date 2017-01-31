@@ -2,6 +2,7 @@ const {resolve, join} = require('path');
 const webpack = require('webpack');
 
 const sources = join(__dirname, '../../src');
+const demo = join(__dirname, '../src');
 
 module.exports = {
 
@@ -20,13 +21,13 @@ module.exports = {
       test: /\.(eot|svg|ttf|woff|woff2|gif|jpe?g|png)$/,
       loader: 'url-loader'
     }, {
-      include: /node_modules\/mapbox-gl.*\.js$/,
-      loader: 'transform-loader?brfs-babel',
+      test: /\.glsl$/,
+      loader: 'raw-loader',
+      include: demo,
       enforce: 'post'
     }, {
-      include: sources,
-      loader: 'transform-loader?brfs-babel',
-      enforce: 'post'
+      include: [/src\/.*\.js$/, /node_modules\/mapbox-gl.*\.js$/],
+      loader: 'transform-loader?brfs-babel'
     }]
   },
 
