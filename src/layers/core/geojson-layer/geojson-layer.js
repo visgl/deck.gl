@@ -124,7 +124,11 @@ export default class GeoJsonLayer extends Layer {
         getHeight,
         getColor: getFillColor,
         extruded,
-        wireframe: false
+        wireframe: false,
+        updateTriggers: {
+          getHeight: this.props.updateTriggers.getHeight,
+          getColor: this.props.updateTriggers.getFillColor
+        }
       }));
 
     // Polygon outline or wireframe
@@ -137,7 +141,10 @@ export default class GeoJsonLayer extends Layer {
         getHeight,
         getColor: getStrokeColor,
         extruded: true,
-        wireframe: true
+        wireframe: true,
+        updateTriggers: {
+          getColor: this.props.updateTriggers.getStrokeColor
+        }
       }));
     } else if (drawPolygons) {
       polygonOutlineLayer = new PathLayer(Object.assign({}, this.props, handlers, {
@@ -145,7 +152,11 @@ export default class GeoJsonLayer extends Layer {
         data: polygonOutlineFeatures,
         getPath: getCoordinates,
         getColor: getStrokeColor,
-        getWidth: getStrokeWidth
+        getWidth: getStrokeWidth,
+        updateTriggers: {
+          getColor: this.props.updateTriggers.getStrokeColor,
+          getWidth: this.props.updateTriggers.getStrokeWidth
+        }
       }));
     }
 
@@ -155,7 +166,11 @@ export default class GeoJsonLayer extends Layer {
         data: lineFeatures,
         getPath: getCoordinates,
         getColor: getStrokeColor,
-        getWidth: getStrokeWidth
+        getWidth: getStrokeWidth,
+        updateTriggers: {
+          getColor: this.props.updateTriggers.getStrokeColor,
+          getWidth: this.props.updateTriggers.getStrokeWidth
+        }
       }));
 
     const pointLayer = drawPoints && new ScatterplotLayer(Object.assign({},
@@ -164,7 +179,11 @@ export default class GeoJsonLayer extends Layer {
         data: pointFeatures,
         getPosition: getCoordinates,
         getColor: getPointColor,
-        getRadius: getPointSize
+        getRadius: getPointSize,
+        updateTriggers: {
+          getColor: this.props.updateTriggers.getPointColor,
+          getRadius: this.props.updateTriggers.getPointSize
+        }
       }));
 
     return [

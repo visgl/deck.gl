@@ -41,16 +41,18 @@ export default class PathLayer extends Layer {
     });
 
     const {attributeManager} = this.state;
+    const noAlloc = true;
+    /* eslint-disable max-len */
     attributeManager.addDynamic({
-      indices: {size: 1, update: this.calculateIndices, isIndexed: true},
-      positions: {size: 3, update: this.calculatePositions},
-      leftDeltas: {size: 3, update: this.calculateLeftDeltas},
-      rightDeltas: {size: 3, update: this.calculateRightDeltas},
-      directions: {size: 1, update: this.calculateDirections},
-      colors: {size: 4, type: GL.UNSIGNED_BYTE, update: this.calculateColors},
-      pickingColors: {size: 3, type: GL.UNSIGNED_BYTE, update: this.calculatePickingColors,
-        noAlloc: true}
+      indices: {size: 1, isIndexed: true, update: this.calculateIndices, noAlloc},
+      positions: {size: 3, update: this.calculatePositions, noAlloc},
+      leftDeltas: {size: 3, update: this.calculateLeftDeltas, noAlloc},
+      rightDeltas: {size: 3, update: this.calculateRightDeltas, noAlloc},
+      directions: {size: 1, accessor: 'getWidth', update: this.calculateDirections, noAlloc},
+      colors: {size: 4, type: GL.UNSIGNED_BYTE, accessor: 'getColor', update: this.calculateColors, noAlloc},
+      pickingColors: {size: 3, type: GL.UNSIGNED_BYTE, update: this.calculatePickingColors, noAlloc}
     });
+    /* eslint-enable max-len */
   }
 
   updateState({oldProps, props, changeFlags}) {

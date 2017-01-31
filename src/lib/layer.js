@@ -523,8 +523,8 @@ export default class Layer {
     let change = false;
 
     for (const propName in newProps.updateTriggers) {
-      const oldTriggers = oldProps.updateTriggers[propName];
-      const newTriggers = newProps.updateTriggers[propName];
+      const oldTriggers = oldProps.updateTriggers[propName] || {};
+      const newTriggers = newProps.updateTriggers[propName] || {};
       const diffReason = compareProps({
         oldProps: oldTriggers,
         newProps: newTriggers

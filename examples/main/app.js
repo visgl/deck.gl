@@ -70,21 +70,12 @@ class App extends PureComponent {
 
   _onToggleLayer(exampleName, example) {
     const activeExamples = {...this.state.activeExamples};
-
-    if (activeExamples[exampleName]) {
-      activeExamples[exampleName] = null;
-    } else {
-      activeExamples[exampleName] = {
-        ...example.layer.defaultProps,
-        ...example.props
-      };
-    }
+    activeExamples[exampleName] = !activeExamples[exampleName];
     this.setState({activeExamples});
   }
 
   _onUpdateLayerSettings(exampleName, settings) {
     const activeExamples = {...this.state.activeExamples};
-
     activeExamples[exampleName] = {
       ...activeExamples[exampleName],
       ...settings
@@ -124,22 +115,32 @@ class App extends PureComponent {
     return new Layer(layerProps);
   }
 
+  /* eslint-disable max-depth */
   _renderExamples() {
     let index = 1;
     const layers = [];
+    const {activeExamples} = this.state;
+
     for (const categoryName of Object.keys(LAYER_CATEGORIES)) {
       for (const exampleName of Object.keys(LAYER_CATEGORIES[categoryName])) {
 
-        const settings = this.state.activeExamples[exampleName];
+        const settings = activeExamples[exampleName];
         // An example is a function that returns a DeckGL layer instance
         if (settings) {
           const example = LAYER_CATEGORIES[categoryName][exampleName];
-          layers.push(this._renderExampleLayer(example, settings, index++));
+          const layer = this._renderExampleLayer(example, settings, index++);
+
+          if (typeof settings !== 'object') {
+            activeExamples[exampleName] = layer.props;
+          }
+
+          layers.push(layer);
         }
       }
     }
     return layers;
   }
+  /* eslint-enable max-depth */
 
   _getModelMatrix(index, offsetMode) {
     const {settings: {separation, rotationZ, rotationX}} = this.state;

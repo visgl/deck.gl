@@ -60,16 +60,16 @@ const defaultProps = {
 export default class IconLayer extends Layer {
   initializeState() {
     const {attributeManager} = this.state;
+    /* eslint-disable max-len */
     attributeManager.addInstanced({
-      instancePositions: {size: 3, update: this.calculateInstancePositions},
-      instanceSizes: {size: 1, update: this.calculateInstanceSizes},
-      instanceOffsets: {size: 2, update: this.calculateInstanceOffsets},
-      instanceIconFrames: {size: 4, update: this.calculateInstanceIconFrames},
-      instanceColorModes: {size: 1, update: this.calculateInstanceColorMode,
-        type: GL.UNSIGNED_BYTE},
-      instanceColors: {size: 4, update: this.calculateInstanceColors,
-        type: GL.UNSIGNED_BYTE}
+      instancePositions: {size: 3, accessor: 'getPosition', update: this.calculateInstancePositions},
+      instanceSizes: {size: 1, accessor: 'getScale', update: this.calculateInstanceSizes},
+      instanceOffsets: {size: 2, accessor: 'getIcon', update: this.calculateInstanceOffsets},
+      instanceIconFrames: {size: 4, accessor: 'getIcon', update: this.calculateInstanceIconFrames},
+      instanceColorModes: {size: 1, type: GL.UNSIGNED_BYTE, accessor: 'getIcon', update: this.calculateInstanceColorMode},
+      instanceColors: {size: 4, type: GL.UNSIGNED_BYTE, accessor: 'getColor', update: this.calculateInstanceColors}
     });
+    /* eslint-enable max-len */
 
     const {gl} = this.context;
     this.setState({model: this.getModel(gl)});
