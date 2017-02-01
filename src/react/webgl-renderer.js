@@ -166,6 +166,9 @@ export default class WebGLRenderer extends React.Component {
 
     // Call render callback
     this.props.onRenderFrame({gl});
+
+    this.props.onFrameDrawn(this.refs.overlay);
+
   }
 
   render() {

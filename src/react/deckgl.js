@@ -69,8 +69,8 @@ export default class DeckGL extends React.Component {
     this._updateLayers(nextProps);
   }
 
-  componentDidUpdate() {
-    this.props.onLayerDrawn(this.state.canvas);
+  _onFrameDrawn(canvas) {
+    this.props.onLayerDrawn(canvas);
   }
 
   _updateLayers(nextProps) {
@@ -92,10 +92,6 @@ export default class DeckGL extends React.Component {
   _onRendererInitialized({gl, canvas}) {
     gl.enable(GL.BLEND);
     gl.blendFunc(GL.SRC_ALPHA, GL.ONE_MINUS_SRC_ALPHA);
-
-    this.setState({
-      canvas
-    });
 
     this.props.onWebGLInitialized(gl);
 
@@ -168,6 +164,7 @@ export default class DeckGL extends React.Component {
       debug,
       viewport: {x: 0, y: 0, width, height},
       onRendererInitialized: this._onRendererInitialized,
+      onFrameDrawn: this._onFrameDrawn,
       onNeedRedraw: this._onNeedRedraw,
       onRenderFrame: this._onRenderFrame,
       onMouseMove: this._onMouseMove,
