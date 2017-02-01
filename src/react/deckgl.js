@@ -40,7 +40,8 @@ const propTypes = {
   viewport: PropTypes.instanceOf(Viewport),
   onWebGLInitialized: PropTypes.func,
   onLayerClick: PropTypes.func,
-  onLayerHover: PropTypes.func
+  onLayerHover: PropTypes.func,
+  onLayerDrawn: PropTypes.func
 };
 
 const defaultProps = {
@@ -50,7 +51,8 @@ const defaultProps = {
   effects: [],
   onWebGLInitialized: noop,
   onLayerClick: noop,
-  onLayerHover: noop
+  onLayerHover: noop,
+  onLayerDrawn: noop
 };
 
 export default class DeckGL extends React.Component {
@@ -65,6 +67,10 @@ export default class DeckGL extends React.Component {
 
   componentWillReceiveProps(nextProps) {
     this._updateLayers(nextProps);
+  }
+
+  componentDidUpdate() {
+    this.props.onLayerDrawn(this.state.canvas);
   }
 
   _updateLayers(nextProps) {
@@ -86,6 +92,10 @@ export default class DeckGL extends React.Component {
   _onRendererInitialized({gl, canvas}) {
     gl.enable(GL.BLEND);
     gl.blendFunc(GL.SRC_ALPHA, GL.ONE_MINUS_SRC_ALPHA);
+
+    this.setState({
+      canvas
+    });
 
     this.props.onWebGLInitialized(gl);
 
