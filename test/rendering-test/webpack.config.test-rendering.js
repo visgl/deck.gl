@@ -12,7 +12,7 @@ module.exports = {
 
   // Bundle the tests for running in the browser
   entry: {
-    'test-rendering': resolve('rendering-test/rendering-test.js')
+    'test-rendering': resolve('test-rendering.js')
   },
 
   // Generate a bundle in dist folder
@@ -25,16 +25,20 @@ module.exports = {
 
   resolve: {
     alias: {
-      'deck.gl': resolve('./src')
+      'deck.gl': resolve('../../src')
     }
   },
 
   module: {
     rules: [
       {
-        include: [resolve('./src')],
+        include: [resolve('../../src')],
         loader: 'transform-loader',
         options: 'brfs-babel'
+      },
+      {
+        test: /\.png$/,
+        loader: 'url-loader?mimetype=image/png'
       }
     ]
   },
