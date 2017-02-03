@@ -121,7 +121,7 @@ class RenderingTest extends Component {
       width: width,
       height: height,
       debug: true,
-      onLayerDrawn: this._onDrawComplete.bind(this)
+      onAfterRender: this._onDrawComplete.bind(this)
     }, mapViewState, {
       layers: layers
     }))

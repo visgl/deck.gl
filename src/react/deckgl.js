@@ -41,7 +41,7 @@ const propTypes = {
   onWebGLInitialized: PropTypes.func,
   onLayerClick: PropTypes.func,
   onLayerHover: PropTypes.func,
-  onLayerDrawn: PropTypes.func
+  onAfterRender: PropTypes.func
 };
 
 const defaultProps = {
@@ -52,7 +52,7 @@ const defaultProps = {
   onWebGLInitialized: noop,
   onLayerClick: noop,
   onLayerHover: noop,
-  onLayerDrawn: noop
+  onAfterRender: noop
 };
 
 export default class DeckGL extends React.Component {
@@ -67,10 +67,6 @@ export default class DeckGL extends React.Component {
 
   componentWillReceiveProps(nextProps) {
     this._updateLayers(nextProps);
-  }
-
-  _onFrameDrawn(canvas) {
-    this.props.onLayerDrawn(canvas);
   }
 
   _updateLayers(nextProps) {
@@ -164,7 +160,6 @@ export default class DeckGL extends React.Component {
       debug,
       viewport: {x: 0, y: 0, width, height},
       onRendererInitialized: this._onRendererInitialized,
-      onFrameDrawn: this._onFrameDrawn,
       onNeedRedraw: this._onNeedRedraw,
       onRenderFrame: this._onRenderFrame,
       onMouseMove: this._onMouseMove,
