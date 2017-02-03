@@ -606,8 +606,8 @@ function test_float_radians(gl, testName) {
   const float_ref_vec2 = fp64ify(float_ref);
 
   const program = new Program(gl, assembleShaders(gl, {
-        vs: readFileSync(join(__dirname, './shader-tests/vs_float_radians.glsl'), 'utf8'),
-        fs: readFileSync(join(__dirname, './shader-tests/fs.glsl'), 'utf8'),
+        vs: require('./vs_float_radians.glsl'),
+        fs: require('./fs.glsl'),
         fp64: true,
         project64: true
       }));

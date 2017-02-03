@@ -40,7 +40,8 @@ const propTypes = {
   viewport: PropTypes.instanceOf(Viewport),
   onWebGLInitialized: PropTypes.func,
   onLayerClick: PropTypes.func,
-  onLayerHover: PropTypes.func
+  onLayerHover: PropTypes.func,
+  onAfterRender: PropTypes.func
 };
 
 const defaultProps = {
@@ -50,7 +51,8 @@ const defaultProps = {
   effects: [],
   onWebGLInitialized: noop,
   onLayerClick: noop,
-  onLayerHover: noop
+  onLayerHover: noop,
+  onAfterRender: noop
 };
 
 export default class DeckGL extends React.Component {
