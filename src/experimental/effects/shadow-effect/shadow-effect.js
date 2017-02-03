@@ -42,17 +42,20 @@ export default class ShadowEffect extends Effect {
     });
     
     
+    const shaders = assembleShaders(gl, this.getShaders());
+    
     //this is a bit of a hack in order to cover the entire map
     const max_lat = 89.99;
     const max_lon = 179.99;
     
     this.model = new Model({
       gl,
-      ...assembleShaders(gl, this.getShaders()),
+      vs: shaders.vs,
+      fs: shaders.fs,
       geometry: new Geometry({
         drawMode: GL.TRIANGLE_FAN,
         vertices: new Float32Array([max_lon, max_lat, 0, -max_lon, max_lat, 0, -max_lon, -max_lat, 0, max_lon, -max_lat, 0])
-      })
+      }),
     });
     /*
     this.lights = [new DirectionalLight({
@@ -89,7 +92,8 @@ export default class ShadowEffect extends Effect {
       light.options.zoom = layerManager.context.viewport.zoom;
       light.depthRender({gl, layerManager});
     }
-    layerManager.context.uniforms = {...layerManager.context.uniforms, ...this._getUniforms({layerManager})};
+    Object.assign(layerManager.context.uniforms, this._getUniforms({layerManager}));
+    //layerManager.context.uniforms = {...layerManager.context.uniforms, ...this._getUniforms({layerManager})};
   }
   
   _getUniforms({layerManager}) {
@@ -116,7 +120,7 @@ export default class ShadowEffect extends Effect {
 
   
   draw({gl, layerManager}) {
-    const uniforms = {...layerManager.context.uniforms, ...layerManager.context.viewport.getUniforms({layerManager})};
+    const uniforms = Object.assign({}, layerManager.context.uniforms, layerManager.context.viewport.getUniforms({layerManager}));
     this.model.render(uniforms);
   }
   

@@ -36,6 +36,20 @@ export default class EffectManager {
     }
     return false;
   }
+  
+  updateEffects(newEffects) {
+    for (const effect of this._effects) {
+      if (newEffects.indexOf(effect) < 0) {
+        this.removeEffect(effect);
+      }
+    }
+    for (const effect of newEffects) {
+      if (this._effects.indexOf(effect) < 0) {
+        this.addEffect(effect);
+      }
+    }
+    
+  }
 
   /**
    * Envoke the preDraw callback of all managed events, in order of

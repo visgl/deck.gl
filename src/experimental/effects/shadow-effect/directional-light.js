@@ -1,9 +1,9 @@
-import {vec3, vec4, mat4, quat} from 'gl-matrix';
 import {GL, Framebuffer, Texture2D} from 'luma.gl';
-import {Viewport} from '../../../viewport';
+import {Viewport} from '../../../lib/viewports';
 
 export default class DirectionalLight {
-  /*constructor({
+  /*
+    constructor({
     gl,
     pos=vec3.create(),
     dir=vec3.fromValues(0, 0, 1),

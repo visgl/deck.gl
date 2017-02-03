@@ -65,6 +65,7 @@ export default class DeckGL extends React.Component {
 
   componentWillReceiveProps(nextProps) {
     this._updateLayers(nextProps);
+    this.effectManager.updateEffects(nextProps.effects);
   }
 
   _updateLayers(nextProps) {
