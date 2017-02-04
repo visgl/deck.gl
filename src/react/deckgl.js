@@ -137,16 +137,16 @@ export default class DeckGL extends React.Component {
   }
 
   _onRenderFrame({gl}) {
-    if (!this.layerManager.needsRedraw({clearRedrawFlags: true})) {
+    const redraw = this.layerManager.needsRedraw({clearRedrawFlags: true});
+    if (!redraw) {
       return;
     }
+
     // clear depth and color buffers
     gl.clear(GL.COLOR_BUFFER_BIT | GL.DEPTH_BUFFER_BIT);
 
     this.effectManager.preDraw();
-
     this.layerManager.drawLayers({pass: 'primary'});
-
     this.effectManager.draw();
   }
 
