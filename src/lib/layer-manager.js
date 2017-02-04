@@ -42,7 +42,7 @@ export default class LayerManager {
     this.layers = [];
     // Tracks if any layers were drawn last update
     // Needed to ensure that screen is cleared when no layers are shown
-    this.drewLayers = false;
+    this.screenCleared = false;
     this.oldContext = {};
     this.context = {
       gl,
@@ -51,7 +51,6 @@ export default class LayerManager {
       viewportChanged: true,
       pickingFBO: null
     };
-    this.redrawNeeded = true;
     Object.seal(this.context);
   }
 
@@ -142,19 +141,20 @@ export default class LayerManager {
     let redraw = false;
 
     // Make sure that buffer is cleared once when layer list becomes empty
-    if (this.layers.length === 0 && this.drewLayers) {
-      redraw = true;
-      return true;
-    }
-
-    if (this.redrawNeeded) {
-      this.redrawNeeded = false;
-      redraw = true;
+    if (this.layers.length === 0) {
+      if (this.screenCleared === false) {
+        redraw = true;
+        this.screenCleared = true;
+        return true;
+      }
+    } else {
+      if (this.screenCleared === true) {
+        this.screenCleared = false;
+      }
     }
 
     for (const layer of this.layers) {
       redraw = redraw || layer.getNeedsRedraw({clearRedrawFlags});
-      this.drewLayers = true;
     }
     return redraw;
   }
