@@ -1,7 +1,7 @@
 /* global window, document */
 import 'babel-polyfill';
 
-import {ReflectionEffect} from 'deck.gl/experimental';
+import {ReflectionEffect, ShadowEffect} from 'deck.gl/experimental';
 import DeckGL, {autobind} from 'deck.gl/react';
 
 import {Matrix4} from 'luma.gl';
@@ -45,7 +45,7 @@ class App extends PureComponent {
       }
     };
 
-    this._effects = [new ReflectionEffect()];
+    this._effects = [new ReflectionEffect(), new ShadowEffect({})];
   }
 
   componentWillMount() {

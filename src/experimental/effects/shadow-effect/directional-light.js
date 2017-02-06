@@ -1,42 +1,9 @@
 import {GL, Framebuffer, Texture2D} from 'luma.gl';
-import {Viewport} from '../../../lib/viewports';
+import {PerspectiveViewport} from '../../../lib/viewports';
+import {WebMercatorViewport} from '../../../lib/viewports';
 
 export default class DirectionalLight {
-  /*
-    constructor({
-    gl,
-    pos=vec3.create(),
-    dir=vec3.fromValues(0, 0, 1),
-    shadowCameraWidth=800,
-    shadowCameraHeight=600,
-    projectionMatrix = mat4.ortho(mat4.create(), -4000, 4000, -3000, 3000, -100000, 100000),
-  }) {
-    this.pos = pos;
-    this.dir = dir;
-    this.projectionMatrix = projectionMatrix;
-    this.viewMatrix = mat4.create();
-    this.viewProjectionMatrix = mat4.create();
-    
-    //this.updateMatrices();
-    
-    this.framebuffer = new Framebuffer(gl, {
-      width: shadowCameraWidth,
-      height: shadowCameraHeight
-    });
-    
-    this.depthTexture = new Texture2D(gl, {
-      width: shadowCameraWidth,
-      height: shadowCameraHeight,
-      format: gl.DEPTH_COMPONENT,
-      type: gl.UNSIGNED_INT
-    });
-    this.framebuffer.attachTexture({
-      texture: this.depthTexture,
-      attachment: GL.DEPTH_ATTACHMENT
-    });
-  }*/
   constructor(options) {
-    this.options = options
     this.gl = options.gl
     const shadowCameraWidth = options.shadowCameraWidth || 800;
     const shadowCameraHeight = options.shadowCameraHeight || 600;
@@ -58,31 +25,27 @@ export default class DirectionalLight {
     });
   }
   
-  getViewport() {
-    // maybe cache this if it doesn't need to change?
-    return new Viewport(this.options);
+  getViewport(oldViewport) {    
+    //todo: maybe cache this?
+    return new WebMercatorViewport({
+      width: this.framebuffer.width,
+      height: this.framebuffer.height,
+      latitude: 37.7749,
+      longitude: -122.4194,
+      zoom: oldViewport.zoom,
+      pitch: 0
+    });
+    
   }
-  
-  /*updateMatrices({layerManager}) {
-    const worldPos = layerManager.context.viewport.project(this.pos);
-    const worldTranslation =  vec3.fromValues(-worldPos[0], -worldPos[1], -worldPos[2]);
-    var q = quat.create();
-    // this does not force  the camera to remain oriented "up"
-    // is that a problem?
-    quat.rotationTo(q, vec3.fromValues(0, 0, -1), this.dir);
-    mat4.fromRotationTranslation(this.viewMatrix, q, worldTranslation);
-    mat4.multiply(this.viewProjectionMatrix, this.projectionMatrix, this.viewMatrix);
-    console.log(this.viewProjectionMatrix);
-  }*/
-  
+
   depthRender({gl, layerManager}) {
-    const viewport = this.getViewport();
     const oldViewport = layerManager.context.viewport;
+    const viewport = this.getViewport(oldViewport);
     this.framebuffer.bind();
-    layerManager.context.viewport = viewport;
+    layerManager.setViewport(viewport);
     gl.clear(GL.COLOR_BUFFER_BIT | GL.DEPTH_BUFFER_BIT);
-    layerManager.drawLayers();
-    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-    layerManager.context.viewport = oldViewport;
+    layerManager.drawLayers({pass: 'shadow'});
+    layerManager.setViewport(oldViewport);
+    this.framebuffer.unbind();
   }
 }

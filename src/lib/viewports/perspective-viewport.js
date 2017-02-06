@@ -17,7 +17,7 @@ export default class PerspectiveViewport extends Viewport {
     near = 1, // Distance of near clipping plane
     far = 100, // Distance of far clipping plane
     // automatically calculated
-    aspect = null // Aspect ratio (set to viewport widht/height)
+    aspect = null, // Aspect ratio (set to viewport widht/height)
   }) {
     const fovyRadians = fovy * DEGREES_TO_RADIANS;
     aspect = Number.isFinite(aspect) ? aspect : width / height;
@@ -27,5 +27,13 @@ export default class PerspectiveViewport extends Viewport {
       width,
       height
     });
+  }
+  getDistanceScales() {
+    return {
+      pixelsPerMeter: [1, 1, 1],
+      metersPerPixel: [1, 1, 1],
+      pixelsPerDegree: [1, 1, 1],
+      degreesPerPixel: [1, 1, 1]
+    };
   }
 }
