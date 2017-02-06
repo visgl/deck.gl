@@ -25,13 +25,15 @@ export default class DirectionalLight {
     });
   }
   
-  getViewport(oldViewport) {    
+  getViewport(oldViewport) {
     //todo: maybe cache this?
     return new WebMercatorViewport({
       width: this.framebuffer.width,
       height: this.framebuffer.height,
-      latitude: 37.7749,
-      longitude: -122.4194,
+      //latitude: 37.7749,
+      //longitude: -122.4194,
+      latitude: oldViewport.latitude,
+      longitude: oldViewport.longitude,
       zoom: oldViewport.zoom,
       pitch: 0
     });
