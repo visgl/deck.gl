@@ -77,7 +77,7 @@ export default class HexagonLayer extends Layer {
    */
   constructor(props) {
     if (!props.hexagonVertices) {
-      log.once(0, 'hexagonVertices is missing, use default vertices of 1 km radius hexagon');
+      log.once(0, 'hexagonVertices is missing, use default vertices of a 1 km radius hexagon');
     }
 
     super(props);
