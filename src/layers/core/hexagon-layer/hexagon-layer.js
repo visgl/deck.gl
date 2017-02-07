@@ -37,16 +37,15 @@ function positionsAreEqual(v1, v2) {
   );
 }
 
+const DEFAULT_COLOR = [255, 0, 255, 255];
+
 const defaultProps = {
-  id: 'hexagon-layer',
-  data: [],
-  radiusScale: 1,
   extruded: true,
   hexagonVertices: null,
-  invisibleColor: [0, 0, 0],
+  opacity: 0.8,
+  radiusScale: 1,
   getCentroid: x => x.centroid,
   getColor: x => x.color,
-  getAlpha: x => 255,
   getElevation: x => x.elevation
 };
 
@@ -68,10 +67,8 @@ export default class HexagonLayer extends Layer {
    * @param {number} props.radiusScale - hexagon radius multiplier
    * @param {boolean} props.extruded - if set to false, all hexagons will be flat
    * @param {array} props.hexagonVertices - primitive hexagon vertices as [[lon, lat]]
-   * @param {object} props.invisibleColor - hexagon invisible color
    * @param {function} props.getCentroid - hexagon centroid should be formatted as [lon, lat]
-   * @param {function} props.getColor -  hexagon color should be formatted as [255, 255, 255]
-   * @param {function} props.alpha -  hexagon opacity should be from 0 - 255
+   * @param {function} props.getColor -  hexagon color should be formatted as [r, g, b, a]
    * @param {function} props.getElevation - hexagon elevation 1 unit approximate to 100 meters
    *
    */
@@ -126,7 +123,7 @@ export default class HexagonLayer extends Layer {
     let radius;
 
     if (!Array.isArray(vertices) || vertices.length !== 6) {
-      vertices = _getDefaultVertices(this.props.data, this.props.getCentroid);
+      vertices = _calculateDefaultVertices(this.props.data, this.props.getCentroid);
     }
 
     if (!vertices) {
@@ -171,10 +168,9 @@ export default class HexagonLayer extends Layer {
   }
 
   updateUniforms() {
-    const {opacity, extruded, invisibleColor, radiusScale} = this.props;
+    const {opacity, extruded, radiusScale} = this.props;
     this.setUniforms({
-      extruded: extruded ? 1 : 0,
-      invisibleColor,
+      extruded,
       opacity,
       radiusScale
     });
@@ -224,15 +220,16 @@ export default class HexagonLayer extends Layer {
   }
 
   calculateInstanceColors(attribute) {
-    const {data, getColor, getAlpha} = this.props;
+    const {data, getColor} = this.props;
     const {value, size} = attribute;
     let i = 0;
     for (const object of data) {
-      const color = getColor(object);
+      const color = getColor(object) || DEFAULT_COLOR;
+
       value[i + 0] = color[0];
       value[i + 1] = color[1];
       value[i + 2] = color[2];
-      value[i + 3] = getAlpha(object);
+      value[i + 3] = Number.isFinite(color[3]) ? color[3] : DEFAULT_COLOR[3];
       i += size;
     }
   }
@@ -240,7 +237,7 @@ export default class HexagonLayer extends Layer {
 
 // if hexagon vertices not provided, calculate a 1km radius hexagon
 // at the first object's centroid location
-function _getDefaultVertices(data, getCentroid) {
+function _calculateDefaultVertices(data, getCentroid) {
 
   const firstObject = Array.isArray(data) && data.length && data[0];
 

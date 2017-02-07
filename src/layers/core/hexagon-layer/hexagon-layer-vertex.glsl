@@ -19,7 +19,6 @@ uniform mat4 worldInverseTransposeMatrix;
 
 // Custom uniforms
 uniform float opacity;
-uniform vec3 invisibleColor;
 uniform float radius;
 uniform float angle;
 uniform float extruded;
@@ -81,11 +80,8 @@ void main(void) {
 
   vec3 lightWeightedColor = mix(vec3(1), lightWeighting, extruded) * (instanceColors.rgb / 255.0);
 
-  // Hide hexagon if set to invisibleColor
-  float alpha = instanceColors.rgb == invisibleColor ? 0. : opacity;
-
   // Color: Either opacity-multiplied instance color, or picking color
-  vec4 color = vec4(lightWeightedColor, alpha * instanceColors.a / 255.);
+  vec4 color = vec4(lightWeightedColor, opacity * instanceColors.a / 255.);
 
   vec4 pickingColor = vec4(instancePickingColors / 255., 1.);
 
