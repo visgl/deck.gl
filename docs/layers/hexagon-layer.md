@@ -20,24 +20,18 @@ Inherits from all [Base Layer](/docs/layers/base-layer.md) properties.
 Primitive hexagon vertices as an array of six [lon, lat] pairs,
 in either clockwise or counter clouckwise direction.
 
-##### `dotRadius` (Number, optional)
+##### `radiusScale` (Number, optional)
 
 - Default: `1`
 
-Hexagon radius multiplier, between 0 - 1. It defines the gap between each hexagon.
-when set to 1, all hexagons will be closely placed to each other.
+Hexagon radius multiplier, between 0 - 1. The radius of hexagon is calculated by 
+radiusScale * getRadius(d)
 
-##### `enable3d` (Boolean, optional)
+##### `extruded` (Boolean, optional)
 
 - Default: `true`
 
 Whether to extrude hexagon. If se to false, all hexagons will be set to flat.
-
-#### `invisibleColor` (Number[3], optional)
-
-- Default: `[0, 0, 0]`
-
-To make one hexagon invisible, set its color to equal to invisibleColor
 
 #### `getCentroid` (Function, optional)
 
@@ -49,14 +43,8 @@ Method called to retrieve the centroid of each hexagon. Centoid should be set to
 
 - Default: `object => object.color`
 
-Method called to retrieve the color of each object. Color should be set to [r, g, b]
+Method called to retrieve the color of each object. Color should be set to [r, g, b, a]
 with each number between 0 -255
-
-#### `getAlpha` (Function, optional)
-
-- Default: `object => 255`
-
-Method called to retrieve the alpha of each object. Color should be set between 0 to 255
 
 #### `getElevation` (Function, optional)
 
