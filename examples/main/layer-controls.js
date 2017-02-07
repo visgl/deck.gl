@@ -38,7 +38,8 @@ export default class LayerControls extends PureComponent {
 
   _renderSlider(settingName, value) {
     let max = 1;
-    if (/radius|width|height|pixel|size/i.test(settingName)) {
+    if (/radius|width|height|pixel|size/i.test(settingName) &&
+      !(/^((?!scale).)*$/).test(settingName)) {
       max = 100;
     }
 
