@@ -40,7 +40,7 @@ function positionsAreEqual(v1, v2) {
 const defaultProps = {
   id: 'hexagon-layer',
   data: [],
-  radiusScale: 0.2,
+  radiusScale: 1,
   extruded: true,
   hexagonVertices: null,
   invisibleColor: [0, 0, 0],
