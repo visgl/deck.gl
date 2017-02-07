@@ -22,7 +22,8 @@ uniform float opacity;
 uniform vec3 invisibleColor;
 uniform float radius;
 uniform float angle;
-uniform float enable3d;
+uniform float extruded;
+uniform float radiusScale;
 
 // Lighting constants
 const vec3 ambientColor = vec3(1., 1., 1.);
@@ -51,12 +52,13 @@ void main(void) {
 
   // calculate elevation, if 3d not enabled set to 0
   // cylindar gemoetry height are between -0.5 to 0.5, transform it to between 0, 1
-  float elevation =  mix(0., project_scale(instancePositions.z  * (positions.y + 0.5) * ELEVATION_SCALE), enable3d);
+  float elevation =  mix(0., project_scale(instancePositions.z  * (positions.y + 0.5) * ELEVATION_SCALE), extruded);
 
+  float dotRadius = radius * clamp(radiusScale, 0.0, 1.0);
   // project center of hexagon
   vec4 centroidPosition = vec4(project_position(instancePositions.xy), elevation, 0.0);
 
-  gl_Position = project_to_clipspace(centroidPosition + vec4(vec2(rotatedPositions.xz * radius), 0., 1.));
+  gl_Position = project_to_clipspace(centroidPosition + vec4(vec2(rotatedPositions.xz * dotRadius), 0., 1.));
 
   // check whether hexagon is currently picked
   float selected = isPicked(instancePickingColors, selectedPickingColor);
@@ -77,7 +79,7 @@ void main(void) {
     shininess
   );
 
-  vec3 lightWeightedColor = mix(vec3(1), lightWeighting, enable3d) * (instanceColors.rgb / 255.0);
+  vec3 lightWeightedColor = mix(vec3(1), lightWeighting, extruded) * (instanceColors.rgb / 255.0);
 
   // Hide hexagon if set to invisibleColor
   float alpha = instanceColors.rgb == invisibleColor ? 0. : opacity;

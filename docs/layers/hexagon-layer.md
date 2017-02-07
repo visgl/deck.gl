@@ -20,14 +20,14 @@ Inherits from all [Base Layer](/docs/layers/base-layer.md) properties.
 Primitive hexagon vertices as an array of six [lon, lat] pairs,
 in either clockwise or counter clouckwise direction.
 
-##### `dotRadius` (Number, optional)
+##### `radiusScale` (Number, optional)
 
 - Default: `1`
 
 Hexagon radius multiplier, between 0 - 1. It defines the gap between each hexagon.
 when set to 1, all hexagons will be closely placed to each other.
 
-##### `enable3d` (Boolean, optional)
+##### `extruded` (Boolean, optional)
 
 - Default: `true`
 

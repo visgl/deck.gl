@@ -218,8 +218,9 @@ const HexagonLayerExample = {
     hexagonVertices: dataSamples.hexagons[0].vertices,
     getColor: h => [48, 128, h.value * 255],
     getElevation: h => h.value * 50,
-    enable3d: true,
+    extruded: true,
     pickable: true,
+    radiusScale: 1,
     opacity: 1
   }
 };
