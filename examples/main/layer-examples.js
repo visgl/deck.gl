@@ -200,11 +200,11 @@ const GridLayerExample = {
   props: {
     id: 'gridLayer',
     data: dataSamples.worldGrid.data,
-    latDelta: dataSamples.worldGrid.latDelta,
-    lngDelta: dataSamples.worldGrid.lngDelta,
-    getColor: g => [245, 166, g.value * 255],
+    latOffset: dataSamples.worldGrid.latOffset,
+    lonOffset: dataSamples.worldGrid.lonOffset,
+    getColor: g => [245, 166, g.value * 255, 255],
     getElevation: h => h.value * 50,
-    enable3d: true,
+    extruded: true,
     pickable: true,
     opacity: 1
   }
@@ -216,7 +216,7 @@ const HexagonLayerExample = {
     id: 'hexagonLayer',
     data: dataSamples.hexagons,
     hexagonVertices: dataSamples.hexagons[0].vertices,
-    getColor: h => [48, 128, h.value * 255],
+    getColor: h => [48, 128, h.value * 255, 255],
     getElevation: h => h.value * 50,
     extruded: true,
     pickable: true,

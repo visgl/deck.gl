@@ -25,31 +25,14 @@ import {readFileSync} from 'fs';
 import {join} from 'path';
 import {mat4} from 'gl-matrix';
 
-const DEFAULT_COLOR = [255, 255, 255, 0];
+const DEFAULT_COLOR = [255, 0, 255, 255];
 
-/**
- * A generic GridLayer that takes latitude longitude delta of cells as a uniform
- * and the min lat lng of cells. grid can be 3d when pass in a height
- * and set enable3d to true
- *
- * @param {array} props.data -
- * @param {boolean} props.enable3d - enable grid height
- * @param {number} props.latDelta - grid cell size in lat delta
- * @param {number} props.lngDelta - grid cell size in lng delta
- * @param {number} props.opacity - opacity
- * @param {function} props.getPosition - position accessor, returned as [minLng, minLat]
- * @param {function} props.getElevation - elevation accessor
- * @param {function} props.getColor - color accessor, returned as [r, g, b]
- */
 const defaultProps = {
-  id: 'grid-layer',
-  data: [],
-  latDelta: 0.0089,
-  lngDelta: 0.0113,
-  enable3d: true,
-  opacity: 0.6,
+  extruded: true,
+  latOffset: 0.0089,
+  lonOffset: 0.0113,
   getPosition: x => x.position,
-  getElevation: x => x.height,
+  getElevation: x => x.elevation,
   getColor: x => x.color
 };
 
@@ -59,6 +42,20 @@ mat4.lookAt(viewMatrixCompat, [0, 0, 0], [0, 0, -1], [0, 1, 0]);
 const viewMatrix = new Float32Array(viewMatrixCompat);
 
 export default class GridLayer extends Layer {
+  /**
+   * A generic GridLayer that takes latitude longitude delta of cells as a uniform
+   * and the min lat lng of cells. grid can be 3d when pass in a height
+   * and set enable3d to true
+   *
+   * @param {array} props.data -
+   * @param {boolean} props.extruded - enable grid elevation
+   * @param {number} props.latOffset - grid cell size in lat delta
+   * @param {number} props.lonOffset - grid cell size in lng delta
+   * @param {function} props.getPosition - position accessor, returned as [minLng, minLat]
+   * @param {function} props.getElevation - elevation accessor
+   * @param {function} props.getColor - color accessor, returned as [r, g, b, a]
+   */
+
   getShaders() {
     const vertex = readFileSync(join(__dirname, './grid-layer-vertex.glsl'), 'utf8');
     const lighting = readFileSync(join(__dirname, './lighting.glsl'), 'utf8');
@@ -99,11 +96,12 @@ export default class GridLayer extends Layer {
   }
 
   draw({uniforms}) {
+    const {extruded, latOffset, lonOffset} = this.props;
+
     super.draw({uniforms: Object.assign({
-      enable3d: this.props.enable3d ? 1 : 0,
-      latDelta: this.props.latDelta,
-      lngDelta: this.props.lngDelta,
-      opacity: this.props.opacity,
+      extruded,
+      latOffset,
+      lonOffset,
       viewMatrix
     }, uniforms)});
   }
@@ -114,11 +112,11 @@ export default class GridLayer extends Layer {
     let i = 0;
     for (const object of data) {
       const position = getPosition(object);
-      const height = getElevation(object) || 0;
+      const elevation = getElevation(object) || 0;
       value[i + 0] = position[0];
       value[i + 1] = position[1];
       value[i + 2] = 0;
-      value[i + 3] = height;
+      value[i + 3] = elevation;
       i += size;
     }
   }
@@ -132,7 +130,7 @@ export default class GridLayer extends Layer {
       value[i + 0] = color[0];
       value[i + 1] = color[1];
       value[i + 2] = color[2];
-      value[i + 3] = isNaN(color[3]) ? DEFAULT_COLOR[3] : color[3];
+      value[i + 3] = Number.isFinite(color[3]) ? color[3] : DEFAULT_COLOR[3];
       i += size;
     }
   }

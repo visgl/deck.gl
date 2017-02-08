@@ -15,27 +15,23 @@ Inherits from all [Base Layer](/docs/layers/base-layer.md) properties.
 
 ## Layer-specific Properties
 
-##### `latDelta` (Number, optional)
+##### `latOffset` (Number, optional)
 
 - Default: `0.0089`
 
 Latitude increment of each cell
 
-##### `lngDelta` (Number, optional)
+##### `lonOffset` (Number, optional)
 
 - Default: `0.0113`
 
 Longitude increment of each cell
 
-##### `enable3d` (Boolean, optional)
+##### `extruded` (Boolean, optional)
 
 - Default: `true`
 
 Whether to enable grid elevation. If se to false, all grid will be flat.
-
-##### `opacity` (Number, optional)
-
-- Default: `0.6`
 
 ##### `getPosition` (Function, optional)
 
