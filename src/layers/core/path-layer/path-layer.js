@@ -9,12 +9,13 @@ const DEFAULT_COLOR = [0, 0, 0, 255];
 const defaultProps = {
   opacity: 1,
   strokeWidth: 1, // stroke width in meters
+  roundedJoint: false,
   miterLimit: 4,
   strokeMinPixels: 0, //  min stroke width in pixels
   strokeMaxPixels: Number.MAX_SAFE_INTEGER, // max stroke width in pixels
   getPath: object => object.path,
-  getColor: object => object.color,
-  getWidth: object => object.width
+  getColor: object => object.color || DEFAULT_COLOR,
+  getWidth: object => object.width || 1
 };
 
 const isClosed = path => {
@@ -34,51 +35,42 @@ export default class PathLayer extends Layer {
 
   initializeState() {
     const {gl} = this.context;
-    this.setState({
-      model: this.getModel(gl),
-      numInstances: 0,
-      IndexType: gl.getExtension('OES_element_index_uint') ? Uint32Array : Uint16Array
-    });
+    this.setState({model: this.getModel(gl)});
 
     const {attributeManager} = this.state;
-    const noAlloc = true;
     /* eslint-disable max-len */
-    attributeManager.addDynamic({
-      indices: {size: 1, isIndexed: true, update: this.calculateIndices, noAlloc},
-      positions: {size: 3, update: this.calculatePositions, noAlloc},
-      leftDeltas: {size: 3, update: this.calculateLeftDeltas, noAlloc},
-      rightDeltas: {size: 3, update: this.calculateRightDeltas, noAlloc},
-      directions: {size: 1, accessor: 'getWidth', update: this.calculateDirections, noAlloc},
-      colors: {size: 4, type: GL.UNSIGNED_BYTE, accessor: 'getColor', update: this.calculateColors, noAlloc},
-      pickingColors: {size: 3, type: GL.UNSIGNED_BYTE, update: this.calculatePickingColors, noAlloc}
+    attributeManager.addInstanced({
+      instanceStartPositions: {size: 3, update: this.calculateStartPositions},
+      instanceEndPositions: {size: 3, update: this.calculateEndPositions},
+      instanceLeftDeltas: {size: 3, update: this.calculateLeftDeltas},
+      instanceRightDeltas: {size: 3, update: this.calculateRightDeltas},
+      instanceColors: {size: 4, type: GL.UNSIGNED_BYTE, accessor: 'getColor', update: this.calculateColors},
+      instancePickingColors: {size: 3, type: GL.UNSIGNED_BYTE, update: this.calculatePickingColors}
     });
     /* eslint-enable max-len */
   }
 
   updateState({oldProps, props, changeFlags}) {
     const {getPath} = this.props;
-    const {attributeManager, IndexType} = this.state;
+    const {attributeManager} = this.state;
 
     if (changeFlags.dataChanged) {
       // this.state.paths only stores point positions in each path
       const paths = props.data.map(getPath);
-      const pointCount = paths.reduce((count, path) => count + path.length, 0);
+      const numInstances = paths.reduce((count, path) => count + path.length - 1, 0);
 
-      // each point will generate two vertices for outside and inside
-      if (IndexType === Uint16Array && pointCount * 2 > 65535) {
-        throw new Error('Vertex count exceeds browser\'s limit');
-      }
-
-      this.setState({paths, pointCount});
+      this.setState({paths, numInstances});
       attributeManager.invalidateAll();
     }
   }
 
   draw({uniforms}) {
-    const {opacity, strokeWidth, miterLimit, strokeMinPixels, strokeMaxPixels} = this.props;
+    const {opacity, strokeWidth, roundedJoint, miterLimit,
+      strokeMinPixels, strokeMaxPixels} = this.props;
 
     this.state.model.render(Object.assign({}, uniforms, {
       opacity,
+      jointType: Number(roundedJoint),
       thickness: strokeWidth,
       miterLimit,
       strokeMinPixels,
@@ -88,199 +80,172 @@ export default class PathLayer extends Layer {
 
   getModel(gl) {
     const shaders = assembleShaders(gl, this.getShaders());
+
+    /*
+     *       \
+     *    \   \ 1                               3
+     * \   .   o-------------------------------o-_  5
+     *  \   \ / ""--..__                      /   ;o
+     *   \   @- - - - - ""--..__- - - - - - -/ -@`  '.
+     *    \ /                   ""--..__    /,-`:    |
+     *     o----------------------------""-o`   :    |
+     *   0,2                             4 |    :    |
+     *                                     |    :    |
+     *
+     */
+
+    const SEGMENT_INDICES = [
+      // start corner
+      0, 2, 1,
+      // body
+      1, 2, 4, 1, 4, 3,
+      // end corner
+      3, 4, 5
+    ];
+
+    // wireframe mode
+    // const SEGMENT_INDICES = [
+    //   0, 1, 1, 2, 0, 2, 1, 3, 2, 4, 3, 4, 3, 5, 4, 5
+    // ];
+
+    // [isEnd, offsetDirection, isCenter]
+    const SEGMENT_POSITIONS = [
+      // bevel start corner
+      0, 0, 1,
+      // start inner corner
+      0, -1, 0,
+      // start outer corner
+      0, 1, 0,
+      // end inner corner
+      1, -1, 0,
+      // end outer corner
+      1, 1, 0,
+      // bevel end corner
+      1, 0, 1
+    ];
+
     return new Model({
       gl,
       id: this.props.id,
       fs: shaders.fs,
       vs: shaders.vs,
       geometry: new Geometry({
-        drawMode: GL.TRIANGLES
+        // wireframe mode
+        // drawMode: GL.LINES,
+        drawMode: GL.TRIANGLES,
+        attributes: {
+          indices: new Uint16Array(SEGMENT_INDICES),
+          positions: new Float32Array(SEGMENT_POSITIONS)
+        }
       }),
-      vertexCount: 0,
-      isIndexed: true
+      isInstanced: true
     });
   }
 
-  calculateIndices(attribute) {
-    const {paths, IndexType, model, pointCount} = this.state;
-
-    // each path with length n has n-1 line segments
-    // * 2 * 3: each segment is rendered as 2 triangles with 3 vertices
-    const indexCount = (pointCount - paths.length) * 2 * 3;
-    model.setVertexCount(indexCount);
-
-    const indices = new IndexType(indexCount);
+  calculateStartPositions(attribute) {
+    const {paths} = this.state;
+    const {value} = attribute;
 
     let i = 0;
-    let offset = 0;
     paths.forEach(path => {
-      // counter-clockwise triangulation
-      //                ___
-      //             0 |  /| 2  (outside edge)
-      //  o---o  =>    o / o
-      //             1 |/__| 3  (inside edge)
-      //
-      for (let ptIndex = 0; ptIndex < path.length - 1; ptIndex++) {
-        // triangle A with indices: 0, 1, 2
-        indices[i++] = offset + 0;
-        indices[i++] = offset + 1;
-        indices[i++] = offset + 2;
-        // triangle B with indices: 2, 1, 3
-        indices[i++] = offset + 2;
-        indices[i++] = offset + 1;
-        indices[i++] = offset + 3;
-        // move to the next segment
-        offset += 2;
+      const numSegments = path.length - 1;
+      for (let ptIndex = 0; ptIndex < numSegments; ptIndex++) {
+        const point = path[ptIndex];
+        value[i++] = point[0];
+        value[i++] = point[1];
+        value[i++] = point[2] || 0;
       }
-      // move to the next path
-      offset += 2;
     });
-
-    attribute.value = indices;
-    attribute.target = GL.ELEMENT_ARRAY_BUFFER;
   }
 
-  calculatePositions(attribute) {
-    const {paths, pointCount} = this.state;
-    const positions = new Float32Array(pointCount * attribute.size * 2);
+  calculateEndPositions(attribute) {
+    const {paths} = this.state;
+    const {value} = attribute;
 
     let i = 0;
     paths.forEach(path => {
-      path.forEach(point => {
-        // two copies for outside edge and inside edge each
-        positions[i++] = point[0];
-        positions[i++] = point[1];
-        positions[i++] = point[2] || 0;
-        positions[i++] = point[0];
-        positions[i++] = point[1];
-        positions[i++] = point[2] || 0;
-      });
+      for (let ptIndex = 1; ptIndex < path.length; ptIndex++) {
+        const point = path[ptIndex];
+        value[i++] = point[0];
+        value[i++] = point[1];
+        value[i++] = point[2] || 0;
+      }
     });
-
-    attribute.value = positions;
   }
 
   calculateLeftDeltas(attribute) {
-    const {paths, pointCount} = this.state;
-    const {size} = attribute;
-
-    const leftDeltas = new Float32Array(pointCount * size * 2);
+    const {paths} = this.state;
+    const {value} = attribute;
 
     let i = 0;
     paths.forEach(path => {
-      path.reduce((prevPoint, point) => {
-        if (prevPoint) {
-          // two copies for outside edge and inside edge each
-          leftDeltas[i++] = point[0] - prevPoint[0];
-          leftDeltas[i++] = point[1] - prevPoint[1];
-          leftDeltas[i++] = (point[2] - prevPoint[2]) || 0;
-          leftDeltas[i++] = point[0] - prevPoint[0];
-          leftDeltas[i++] = point[1] - prevPoint[1];
-          leftDeltas[i++] = (point[2] - prevPoint[2]) || 0;
-        }
-        return point;
-      }, isClosed(path) ? path[path.length - 2] : path[0]);
-    });
+      const numSegments = path.length - 1;
+      let prevPoint = isClosed(path) ? path[path.length - 2] : path[0];
 
-    attribute.value = leftDeltas;
+      for (let ptIndex = 0; ptIndex < numSegments; ptIndex++) {
+        const point = path[ptIndex];
+        value[i++] = point[0] - prevPoint[0];
+        value[i++] = point[1] - prevPoint[1];
+        value[i++] = (point[2] - prevPoint[2]) || 0;
+        prevPoint = point;
+      }
+    });
   }
 
   calculateRightDeltas(attribute) {
-    const {paths, pointCount} = this.state;
-    const {size} = attribute;
-
-    const rightDeltas = new Float32Array(pointCount * size * 2);
+    const {paths} = this.state;
+    const {value} = attribute;
 
     let i = 0;
     paths.forEach(path => {
-      path.forEach((point, ptIndex) => {
+      for (let ptIndex = 1; ptIndex < path.length; ptIndex++) {
+        const point = path[ptIndex];
         let nextPoint = path[ptIndex + 1];
         if (!nextPoint) {
           nextPoint = isClosed(path) ? path[1] : point;
         }
 
-        // two copies for outside edge and inside edge each
-        rightDeltas[i++] = nextPoint[0] - point[0];
-        rightDeltas[i++] = nextPoint[1] - point[1];
-        rightDeltas[i++] = (nextPoint[2] - point[2]) || 0;
-        rightDeltas[i++] = nextPoint[0] - point[0];
-        rightDeltas[i++] = nextPoint[1] - point[1];
-        rightDeltas[i++] = (nextPoint[2] - point[2]) || 0;
-      });
-    });
-
-    attribute.value = rightDeltas;
-  }
-
-  calculateDirections(attribute) {
-    const {data, getWidth} = this.props;
-    const {paths, pointCount} = this.state;
-    const directions = new Float32Array(pointCount * 2);
-
-    let i = 0;
-    paths.forEach((path, index) => {
-      let w = getWidth(data[index], index);
-      if (isNaN(w)) {
-        w = 1;
-      }
-      for (let ptIndex = 0; ptIndex < path.length; ptIndex++) {
-        directions[i++] = w;
-        directions[i++] = -w;
+        value[i++] = nextPoint[0] - point[0];
+        value[i++] = nextPoint[1] - point[1];
+        value[i++] = (nextPoint[2] - point[2]) || 0;
       }
     });
-
-    attribute.value = directions;
   }
 
   calculateColors(attribute) {
     const {data, getColor} = this.props;
-    const {paths, pointCount} = this.state;
-    const {size} = attribute;
-    const colors = new Uint8ClampedArray(pointCount * size * 2);
+    const {paths} = this.state;
+    const {value} = attribute;
 
     let i = 0;
     paths.forEach((path, index) => {
-      const pointColor = getColor(data[index], index) || DEFAULT_COLOR;
+      const pointColor = getColor(data[index], index);
       if (isNaN(pointColor[3])) {
         pointColor[3] = 255;
       }
-      for (let ptIndex = 0; ptIndex < path.length; ptIndex++) {
-        // two copies for outside edge and inside edge each
-        colors[i++] = pointColor[0];
-        colors[i++] = pointColor[1];
-        colors[i++] = pointColor[2];
-        colors[i++] = pointColor[3];
-        colors[i++] = pointColor[0];
-        colors[i++] = pointColor[1];
-        colors[i++] = pointColor[2];
-        colors[i++] = pointColor[3];
+      for (let ptIndex = 1; ptIndex < path.length; ptIndex++) {
+        value[i++] = pointColor[0];
+        value[i++] = pointColor[1];
+        value[i++] = pointColor[2];
+        value[i++] = pointColor[3];
       }
     });
-
-    attribute.value = colors;
   }
 
   // Override the default picking colors calculation
   calculatePickingColors(attribute) {
-    const {paths, pointCount} = this.state;
-    const {size} = attribute;
-    const pickingColors = new Uint8ClampedArray(pointCount * size * 2);
+    const {paths} = this.state;
+    const {value} = attribute;
 
     let i = 0;
     paths.forEach((path, index) => {
       const pickingColor = this.encodePickingColor(index);
-      for (let ptIndex = 0; ptIndex < path.length; ptIndex++) {
-        // two copies for outside edge and inside edge each
-        pickingColors[i++] = pickingColor[0];
-        pickingColors[i++] = pickingColor[1];
-        pickingColors[i++] = pickingColor[2];
-        pickingColors[i++] = pickingColor[0];
-        pickingColors[i++] = pickingColor[1];
-        pickingColors[i++] = pickingColor[2];
+      for (let ptIndex = 1; ptIndex < path.length; ptIndex++) {
+        value[i++] = pickingColor[0];
+        value[i++] = pickingColor[1];
+        value[i++] = pickingColor[2];
       }
     });
-
-    attribute.value = pickingColors;
   }
 
 }
