@@ -9,10 +9,9 @@ Inherits from all [Base Layer](/docs/layers/base-layer.md) properties.
 
 ## Layer-specific Properties
 
-
 #### `getPath` (Function, optional)
 
-- Default: `(object, index) => object.paths`
+- Default: `(object, index) => object.path`
 
 Returns the specified path for the object.
 
@@ -21,11 +20,15 @@ A path is an array of coordinates.
 
 #### `getColor` (Function, optional)
 
-Returns an array of color
+Returns an color (array of numbers, RGBA) or array of colors (array of arrays).
 
 - Default `(object, index) => object.color`
 
-Method called to determine the rgba color of the source.
+Method called to determine either the stroke color for the whole path, or the
+color at each point.
+
+If the method returns an array of colors, the length of the array must match
+the length of the path returned by `getPath`.
 
 If the method does not return a value for the given object,
 fallback to `strokeColor`.
