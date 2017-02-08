@@ -16,6 +16,15 @@ export const meterPoints = pointGrid(1e3, [-5000, -5000, 5000, 5000]);
 
 export const worldGrid = pointsToWorldGrid(points, 0.5);
 
+export const zigzag = [
+  {path: (new Array(12)).fill(0).map(
+    (d, i) => [
+      positionOrigin[0] + i * i * 0.001,
+      positionOrigin[1] + Math.cos(i * Math.PI) * 0.2 / (i + 4)
+    ])
+  }
+];
+
 // time consuming - only generate on demand
 let _points100K = null;
 export function getPoints100K() {
