@@ -20,12 +20,12 @@
 
 import {Layer} from '../../../lib';
 import {assembleShaders, lighting} from '../../../shader-utils';
+import {get} from '../../../lib/utils';
 import {GL, Model, Geometry} from 'luma.gl';
 import {readFileSync} from 'fs';
 import {join} from 'path';
 
 // Polygon geometry generation is managed by the polygon tesselator
-import {Container} from '../../../lib/utils';
 import {PolygonTesselator} from './polygon-tesselator';
 import {PolygonTesselatorExtruded} from './polygon-tesselator-extruded';
 
@@ -38,11 +38,11 @@ const defaultProps = {
   // TODO - not clear that this should be part of the main layer
   wireframe: false,
   // Accessor for polygon geometry
-  getPolygon: f => Container.get(f, 'polygon') || Container.get(f, 'geometry.coordinates'),
+  getPolygon: f => get(f, 'polygon') || get(f, 'geometry.coordinates'),
   // Accessor for extrusion height
-  getHeight: f => Container.get(f, 'height') || Container.get(f, 'properties.height') || 0,
+  getElevation: f => get(f, 'elevation') || get(f, 'properties.height') || 0,
   // Accessor for color
-  getColor: f => Container.get(f, 'color') || Container.get(f, 'properties.color'),
+  getColor: f => get(f, 'color') || get(f, 'properties.color'),
   // Optional settings for 'lighting' shader module
   lightSettings: {}
 };

@@ -1,4 +1,11 @@
-# deck.gl v3
+# deck.gl v4.0
+
+Release date: TBD, Q1 2017
+
+# Highlights
+
+
+# deck.gl v3.0
 
 Release date: November, 2016
 

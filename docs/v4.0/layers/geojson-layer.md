@@ -7,7 +7,8 @@ renders it as interactive polygons, lines and points.
 
 ## Base-Layer Properties
 
-Inherits from all [Base Layer properties](/docs/layers/base-layer.md):
+Inherits from all [Base Layer properties](/docs/layers/base-layer.md),
+with the following modifications:
 
 #### `data`
 
@@ -50,17 +51,45 @@ GeoJson feature is clicked.
 
 ## Layer-specific Accessors
 
-### `getStrokeColor`
-### `getStrokeWidth`
-
-### `getFillColor`
-### `getHeight`
-
 ### `getPointColor`
+
+Note: This accessor is only called for `Point` and `MultiPoint` features.
+
 ### `getPointSize`
 
-## Layer-specific Properties
+Note: This accessor is only called for `Point` and `MultiPoint` features.
 
+### `getStrokeColor`
+
+Called to retrieve the line fill color for a GeoJson feature.
+
+Note: This accessor is only called for `LineString` and `MultiLineString` features.
+
+### `getStrokeWidth`
+
+Called to retrieve the line width for a GeoJson feature.
+
+Note: This accessor is only called for `LineString` and `MultiLineString` features.
+
+### `getFillColor` (Function, optional)
+
+Called to retrieve the polygon fill color for a GeoJson feature.
+
+Note: This accessor is only called for `Polygon` and `MultiPolygon` features.
+
+#### `getElevation` (Function, optional)
+
+- Default: `object => object.elevation`
+
+Called to retrieve the elevation of a polygon feature (when `extruded` is true).
+
+If a cartographic projection mode is used, height will be interpreted as meters,
+otherwise will be in unit coordinates.
+
+Note: This accessor is only called for `Polygon` and `MultiPolygon` features.
+
+
+## Layer-specific Properties
 
 #### `drawPoints` (Boolean, optional)
 
@@ -85,3 +114,9 @@ Fill areas of Polygon and MultiPolygon features if true.
 #### `extruded` (Boolean, optional)
 
 Extrude Polygon and MultiPolygon features in 3D if true.
+
+
+#### `lightSettings` (Object, optional) **EXPERIMENTAL**
+
+This is an object that contains light settings for extruded polygons.
+Be aware that this prop will likely be changed in a future version of deck.gl.
