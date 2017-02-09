@@ -21,6 +21,8 @@ varying vec4 vColor;
 varying vec2 vCornerOffset;
 varying float vMiterLength;
 
+const float EPSILON = 0.001;
+
 float flipIfTrue(bool flag) {
   return -(float(flag) * 2. - 1.);
 }
@@ -28,13 +30,13 @@ float flipIfTrue(bool flag) {
 // calculate line join positions
 vec3 lineJoin(vec3 prevPoint, vec3 currPoint, vec3 nextPoint) {
 
-  float offset = clamp(project_scale(thickness),
+  float width = clamp(project_scale(thickness),
     strokeMinPixels, strokeMaxPixels) / 2.0;
 
   vec2 deltaA = currPoint.xy - prevPoint.xy;
   vec2 deltaB = nextPoint.xy - currPoint.xy;
 
-  vec2 dir;
+  vec2 offsetVec;
   float offsetScale;
   float offsetDirection;
 
@@ -46,31 +48,39 @@ vec3 lineJoin(vec3 prevPoint, vec3 currPoint, vec3 nextPoint) {
   vec2 perpB = vec2(-dirB.y, dirB.x);
 
   // tangent of the corner
-  vec2 tangent = normalize(dirA + dirB);
-  // width offset from current position
-  vec2 perp = mix(perpB, perpA, positions.x);
+  vec2 tangent = vec2(dirA + dirB);
+  tangent = length(tangent) > 0. ? normalize(tangent) : perpA;
   // direction of the corner
   vec2 miterVec = vec2(-tangent.y, tangent.x);
+  // width offset from current position
+  vec2 perp = mix(perpB, perpA, positions.x);
+  float L = mix(lenB, lenA, positions.x);
 
   // cap super sharp angles
-  float sinHalfA = max(abs(dot(miterVec, perp)), 0.01);
+  float sinHalfA = abs(dot(miterVec, perp));
   float cosHalfA = abs(dot(dirA, miterVec));
+  bool turnsRight = dirA.x * dirB.y > dirA.y * dirB.x;
 
   // relative position to the corner:
   // -1: inside (smaller side of the angle)
   // 0: center
   // 1: outside (bigger side of the angle)
   float cornerPosition = mix(
-    flipIfTrue((dirB.y > dirA.y) == (positions.y > 0.0)),
+    flipIfTrue(turnsRight == (positions.y > 0.0)),
     0.0,
     positions.z
   );
 
-  offsetScale = 1.0 / sinHalfA;
+  offsetScale = 1.0 / max(sinHalfA, EPSILON);
 
-  // flip if inside corner extends further than the line segment
-  float maxInsideMiter = min(lenA, lenB) * cosHalfA / offset;
-  cornerPosition *= flipIfTrue(cornerPosition < 0.0 && offsetScale > maxInsideMiter);
+  // do not bevel if line segment is too short
+  cornerPosition *= float(cornerPosition <= 0.0 || sinHalfA < min(lenA, lenB) / width * cosHalfA);
+  // trim if inside corner extends further than the line segment
+  offsetScale = mix(
+    offsetScale,
+    min(offsetScale, L / width / max(cosHalfA, EPSILON)),
+    float(cornerPosition < 0.0)
+  );
 
   vMiterLength = mix(
     offsetScale * cornerPosition,
@@ -80,14 +90,14 @@ vec3 lineJoin(vec3 prevPoint, vec3 currPoint, vec3 nextPoint) {
   offsetDirection = mix(
     positions.y,
     mix(
-      flipIfTrue(dirB.y > dirA.y), 
-      positions.y * flipIfTrue((dirB.y > dirA.y) == (positions.x == 1.)), 
+      flipIfTrue(turnsRight), 
+      positions.y * flipIfTrue(turnsRight == (positions.x == 1.)), 
       cornerPosition
     ),
     step(0.0, cornerPosition)
   );
-  dir = mix(tangent, miterVec, step(0.5, cornerPosition));
-  offsetScale = mix(offsetScale, 1.0 / cosHalfA, step(0.5, cornerPosition));
+  offsetVec = mix(miterVec, -tangent, step(0.5, cornerPosition));
+  offsetScale = mix(offsetScale, 1.0 / max(cosHalfA, 0.001), step(0.5, cornerPosition));
 
   // special treatment for start cap and end cap
   float isStartCap = step(0.0, -lenA);
@@ -95,12 +105,12 @@ vec3 lineJoin(vec3 prevPoint, vec3 currPoint, vec3 nextPoint) {
   float isCap = max(isStartCap, isEndCap);
 
   // 0: center, 1: side
-  cornerPosition = isCap * abs(cornerPosition);
+  cornerPosition = isCap * (1.0 - positions.z);
 
   // start of path: use next - curr
-  dir = mix(dir, mix(perpB, dirB, cornerPosition), isStartCap);
+  offsetVec = mix(offsetVec, mix(dirB, perpB, cornerPosition), isStartCap);
   // end of path: use curr - prev
-  dir = mix(dir, mix(perpA, dirA, cornerPosition), isEndCap);
+  offsetVec = mix(offsetVec, mix(dirA, perpA, cornerPosition), isEndCap);
 
   // extend out a triangle to envelope the round cap
   offsetScale = mix(
@@ -112,14 +122,13 @@ vec3 lineJoin(vec3 prevPoint, vec3 currPoint, vec3 nextPoint) {
 
   offsetDirection = mix(
     offsetDirection,
-    mix(flipIfTrue(isEndCap > 0.), positions.y, cornerPosition),
+    mix(flipIfTrue(isStartCap > 0.), positions.y, cornerPosition),
     isCap
   );
 
-  vec2 normal = vec2(-dir.y, dir.x) * offsetDirection;
-  vCornerOffset = normal * offsetScale;
+  vCornerOffset = offsetVec * offsetDirection * offsetScale;
 
-  return currPoint + vec3(vCornerOffset * offset, 0.0);
+  return currPoint + vec3(vCornerOffset * width, 0.0);
 }
 
 void main() {

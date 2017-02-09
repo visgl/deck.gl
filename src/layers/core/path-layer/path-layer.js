@@ -82,16 +82,18 @@ export default class PathLayer extends Layer {
     const shaders = assembleShaders(gl, this.getShaders());
 
     /*
-     *       \
-     *    \   \ 1                               3
-     * \   .   o-------------------------------o-_  5
-     *  \   \ / ""--..__                      /   ;o
-     *   \   @- - - - - ""--..__- - - - - - -/ -@`  '.
-     *    \ /                   ""--..__    /,-`:    |
-     *     o----------------------------""-o`   :    |
-     *   0,2                             4 |    :    |
-     *                                     |    :    |
-     *
+     *       _  
+     *        "-_ 1                   3                       5
+     *     _     "o---------------------o-------------------_-o
+     *       -   / ""--..__              '.             _.-' /
+     *   _     "@- - - - - ""--..__- - - - x - - - -_.@'    /
+     *    "-_  /                   ""--..__ '.  _,-` :     /
+     *       "o----------------------------""-o'    :     /
+     *      0,2                            4 / '.  :     /
+     *                                      /   '.:     /
+     *                                     /     :'.   /
+     *                                    /     :  ', /
+     *                                   /     :     o
      */
 
     const SEGMENT_INDICES = [
@@ -108,7 +110,9 @@ export default class PathLayer extends Layer {
     //   0, 1, 1, 2, 0, 2, 1, 3, 2, 4, 3, 4, 3, 5, 4, 5
     // ];
 
-    // [isEnd, offsetDirection, isCenter]
+    // [0] position on segment - 0: start, 1: end
+    // [1] side of path - -1: left, 0: center, 1: right
+    // [2] role - 0: offset point 1: joint point
     const SEGMENT_POSITIONS = [
       // bevel start corner
       0, 0, 1,
