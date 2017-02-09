@@ -9,7 +9,7 @@ import {
   GridLayer,
   GeoJsonLayer,
   // PolygonLayer,
-  // PathLayer,
+  PathLayer,
 
   ScatterplotLayer64,
   ArcLayer64,
@@ -126,16 +126,18 @@ const GeoJsonLayerExtrudedExample = {
 //   }
 // };
 
-// const PathLayerExample = {
-//   layer: ChoroplethLayer,
-//   props: {
-//     id: 'choroplethLayerSolid',
-//     data: dataSamples.polygons,
-//     getColor: f => [((f.properties.ZIP_CODE * 10) % 127) + 128, 0, 0],
-//     opacity: 0.8,
-//     pickable: true
-//   }
-// };
+const PathLayerExample = {
+  layer: PathLayer,
+  props: {
+    id: 'pathLayer',
+    data: dataSamples.zigzag,
+    opacity: 0.6,
+    getPath: f => f.path,
+    getColor: f => [128, 0, 0],
+    getStrokeWidth: f => 10,
+    pickable: true
+  }
+};
 
 const ScreenGridLayerExample = {
   layer: ScreenGridLayer,
@@ -372,7 +374,7 @@ export default {
     'GeoJsonLayer (Extruded)': GeoJsonLayerExtrudedExample,
     // 'GeoJsonLayer (Immutable)': GeoJsonLayerImmutableExample,
     // PolygonLayer: PolygonLayerExample,
-    // PathLayer: PathLayerExample,
+    PathLayer: PathLayerExample,
     'ScatterplotLayer': ScatterplotLayerExample,
     'ScatterplotLayer (meters)': ScatterplotLayerMetersExample,
     ArcLayer: ArcLayerExample,

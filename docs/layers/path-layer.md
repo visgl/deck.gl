@@ -23,29 +23,27 @@ A path is an array of coordinates.
 
 Returns an array of color
 
-- Default `(object, index) => object.color`
+- Default `(object, index) => object.color || [0, 0, 0, 255]`
 
 Method called to determine the rgba color of the source.
-
-If the method does not return a value for the given object,
-fallback to `strokeColor`.
 
 If the color alpha (the fourth component) is not provided,
 `alpha` will be set to `255`.
 
 
-#### `getWidth` (Function, optional)
+#### `getStrokeWidth` (Function, optional)
 
-- Default: `(object, index) => object.width`
+- Default: `(object, index) => object.width || 1`
 
-Return a width multiplier from each object.
+Method called to determine the width to draw each path with.
+Unit is meters.
 
 
-##### `strokeWidth` (Number, optional)
+##### `strokeWidthScale` (Number, optional)
 
 - Default: `1`
 
-The stroke width used to draw each line. Unit is meters.
+The global stroke width multiplier.
 
 ##### `strokeMinPixels` (Number, optional)
 
@@ -60,15 +58,16 @@ The minimum stroke size in pixels.
 
 The maximum stroke size in pixels.
 
+##### `rounded` (Boolean, optional)
+
+- Default: `false`
+
+Type of joint. If `true`, draw round joints. Otherwise draw miter joints.
+
 
 ##### `miterLimit` (Number, optional)
 
 - Default: `4`
 
-The maximum extent of the join as a ratio to the stroke-width.
-
-
-##### `strokeColor` (Number, optional)
-
-- Default: `[0, 0, 0, 255]`
-
+The maximum extent of a joint in ratio to the stroke width.
+Only works if `rounded` is `false`.
