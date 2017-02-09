@@ -33,11 +33,11 @@ Icon names mapped to icon definitions. Each icon is defined with the following v
   If `false`, pixel color from the image is applied.
   Default: `false`
 
-##### `size` (Number, optional)
+##### `sizeScale` (Number, optional)
 
-- Default: `30`
+- Default: `1`
 
-Icon size in pixels
+Icon size multiplier.
 
 ##### `getPosition` (Function, optional)
 
@@ -51,14 +51,15 @@ Method called to retrieve the position of each object, returns `[lng, lat, z]`.
 
 Method called to retrieve the icon name of each object, returns string.
 
-##### `getScale` (Function, optional)
+##### `getSize` (Function, optional)
 
-- Default: `d => d.size`
+- Default: `d => d.size || 1`
 
-Method called to retrieve the size multiplier of each object, returns a number.
+Method called to retrieve the size of each object, returns a number. Unit is pixels.
 
 ##### `getColor` (Function, optional)
 
-- Default: `d => d.color`
+- Default: `d => d.color || [0, 0, 0, 255]`
 
 Method called to retrieve the color of each object, returns `[r, g, b, a]`.
+If the alpha component is not supplied, it is set to `255`.

@@ -54,11 +54,11 @@ const IconLayerExample = {
     iconAtlas: 'data/icon-atlas.png',
     iconMapping: dataSamples.iconAtlas,
     data: dataSamples.points,
-    size: 24,
+    sizeScale: 24,
     getPosition: d => d.COORDINATES,
     getColor: d => [64, 64, 72],
     getIcon: d => d.PLACEMENT === 'SW' ? 'marker' : 'marker-warning',
-    getScale: d => d.RACKS > 2 ? 2 : 1,
+    getSize: d => d.RACKS > 2 ? 2 : 1,
     opacity: 0.8,
     pickable: true
   }
