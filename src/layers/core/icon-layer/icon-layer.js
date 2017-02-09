@@ -43,18 +43,18 @@ const DEFAULT_COLOR = [0, 0, 0, 255];
  * @param {number} props.size - icon size in pixels
  * @param {func} props.getPosition - returns anchor position of the icon, in [lng, lat, z]
  * @param {func} props.getIcon - returns icon name as a string
- * @param {func} props.getScale - returns icon size multiplier as a number
+ * @param {func} props.getSize - returns icon size multiplier as a number
  * @param {func} props.getColor - returns color of the icon in [r, g, b, a]. Only works on icons
  *   with mask: true.
  */
 const defaultProps = {
   getPosition: x => x.position,
   getIcon: x => x.icon,
-  getColor: x => x.color,
-  getScale: x => x.size,
+  getColor: x => x.color || DEFAULT_COLOR,
+  getSize: x => x.size || 1,
   iconAtlas: null,
   iconMapping: {},
-  size: 30
+  sizeScale: 1
 };
 
 export default class IconLayer extends Layer {
@@ -63,7 +63,7 @@ export default class IconLayer extends Layer {
     /* eslint-disable max-len */
     attributeManager.addInstanced({
       instancePositions: {size: 3, accessor: 'getPosition', update: this.calculateInstancePositions},
-      instanceSizes: {size: 1, accessor: 'getScale', update: this.calculateInstanceSizes},
+      instanceSizes: {size: 1, accessor: 'getSize', update: this.calculateInstanceSizes},
       instanceOffsets: {size: 2, accessor: 'getIcon', update: this.calculateInstanceOffsets},
       instanceIconFrames: {size: 4, accessor: 'getIcon', update: this.calculateInstanceIconFrames},
       instanceColorModes: {size: 1, type: GL.UNSIGNED_BYTE, accessor: 'getIcon', update: this.calculateInstanceColorMode},
@@ -97,7 +97,7 @@ export default class IconLayer extends Layer {
 
   draw({uniforms}) {
     const {viewport: {width, height}, gl} = this.context;
-    const {size} = this.props;
+    const {sizeScale} = this.props;
     const iconsTexture = this.state.icons && this.state.icons.texture;
 
     if (iconsTexture) {
@@ -108,7 +108,7 @@ export default class IconLayer extends Layer {
       this.state.model.render(Object.assign({}, uniforms, {
         iconsTexture,
         iconsTextureDim: [iconsTexture.width, iconsTexture.height],
-        size: [size / width, -size / height]
+        sizeScale: [sizeScale / width, -sizeScale / height]
       }));
 
       gl.enable(gl.DEPTH_TEST);
@@ -153,12 +153,11 @@ export default class IconLayer extends Layer {
   }
 
   calculateInstanceSizes(attribute) {
-    const {data, getScale} = this.props;
+    const {data, getSize} = this.props;
     const {value} = attribute;
     let i = 0;
     for (const object of data) {
-      const size = getScale(object);
-      value[i++] = isNaN(size) ? 1 : size;
+      value[i++] = getSize(object);
     }
   }
 
@@ -167,12 +166,12 @@ export default class IconLayer extends Layer {
     const {value} = attribute;
     let i = 0;
     for (const object of data) {
-      const color = getColor(object) || DEFAULT_COLOR;
+      const color = getColor(object);
 
       value[i++] = color[0];
       value[i++] = color[1];
       value[i++] = color[2];
-      value[i++] = isNaN(color[3]) ? DEFAULT_COLOR[3] : color[3];
+      value[i++] = isNaN(color[3]) ? 255 : color[3];
     }
   }
 
