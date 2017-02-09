@@ -219,7 +219,7 @@ export default class PathLayer extends Layer {
     paths.forEach((path, index) => {
       const width = getStrokeWidth(data[index], index);
       for (let ptIndex = 1; ptIndex < path.length; ptIndex++) {
-        value[i++] = width
+        value[i++] = width;
       }
     });
   }
