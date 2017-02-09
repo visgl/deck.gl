@@ -11,8 +11,8 @@ const defaultProps = {
   strokeWidthScale: 1, // stroke width in meters
   rounded: false,
   miterLimit: 4,
-  strokeMinPixels: 0, //  min stroke width in pixels
-  strokeMaxPixels: Number.MAX_SAFE_INTEGER, // max stroke width in pixels
+  strokeWidthMinPixels: 0, //  min stroke width in pixels
+  strokeWidthMaxPixels: Number.MAX_SAFE_INTEGER, // max stroke width in pixels
   getPath: object => object.path,
   getColor: object => object.color || DEFAULT_COLOR,
   getStrokeWidth: object => object.width || 1
@@ -44,7 +44,7 @@ export default class PathLayer extends Layer {
       instanceEndPositions: {size: 3, update: this.calculateEndPositions},
       instanceLeftDeltas: {size: 3, update: this.calculateLeftDeltas},
       instanceRightDeltas: {size: 3, update: this.calculateRightDeltas},
-      instanceWidths: {size: 1, accessor: 'getStrokeWidth', update: this.calculateWidths},
+      instanceStrokeWidths: {size: 1, accessor: 'getStrokeWidth', update: this.calculateStrokeWidths},
       instanceColors: {size: 4, type: GL.UNSIGNED_BYTE, accessor: 'getColor', update: this.calculateColors},
       instancePickingColors: {size: 3, type: GL.UNSIGNED_BYTE, update: this.calculatePickingColors}
     });
@@ -66,16 +66,16 @@ export default class PathLayer extends Layer {
   }
 
   draw({uniforms}) {
-    const {opacity, strokeWidthScale, rounded, miterLimit,
-      strokeMinPixels, strokeMaxPixels} = this.props;
+    const {
+      rounded, miterLimit, strokeWidthScale, strokeWidthMinPixels, strokeWidthMaxPixels
+    } = this.props;
 
     this.state.model.render(Object.assign({}, uniforms, {
-      opacity,
       jointType: Number(rounded),
-      widthScale: strokeWidthScale,
+      strokeWidthScale,
       miterLimit,
-      strokeMinPixels,
-      strokeMaxPixels
+      strokeWidthMinPixels,
+      strokeWidthMaxPixels
     }));
   }
 
@@ -210,7 +210,7 @@ export default class PathLayer extends Layer {
     });
   }
 
-  calculateWidths(attribute) {
+  calculateStrokeWidths(attribute) {
     const {data, getStrokeWidth} = this.props;
     const {paths} = this.state;
     const {value} = attribute;

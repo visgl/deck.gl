@@ -20,6 +20,36 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## Recent Dev Releases
 
+#### [v4.0.0-beta.1] - NOT YET PUBLISHED
+
+API AUDIT CHANGES:
+- `GeoJsonLayer` `getHeight` => `getElevation`
+- `GeoJsonLayer` Docs: Clarified that elevation is always in `meters` for cartographic projection modes
+
+- `PolygonLayer` `getHeight` => `getElevation`
+- `PolygonLayer` Docs: Clarified that elevation is always in `meters` for cartographic projection modes
+- `PolygonLayer` Docs: documented missing props
+- `PolygonLayer` Docs: Marked `lightSettings` as experimental
+
+- `PathLayer` `getWidth` => `getStrokeWidth`
+- `PathLayer` `strokeWidth` => `strokeWidthScale`
+- `PathLayer` `strokeMinPixels` => `strokeWidthMinPixels`
+- `PathLayer` `strokeMaxPixels` => `strokeWidthMaxPixels`
+
+- `HexagonLayer` Docs: Marked `lightSettings` as experimental
+- `HexagonLayer` Docs: Marked `selectedPickingColor` as experimental
+- `GridLayer` Docs: Marked `lightSettings` as experimental
+
+- Cleanup: More layers now only imports the `get` utility function instead
+  of the full `Container` object from utils - this provides most of the
+  benefits with smaller impact on the code.
+
+DOCS
+  - Moved docs into 4.0 subfolder to support publishing multiple doc versions
+    from a single tree.
+
+
+
 #### [v3.1.0-beta.16] -
 - NEW: Main example now provides UI to modify layer props
 - NEW: Main example now has GeoJson test file with all GeoJson geometry types.

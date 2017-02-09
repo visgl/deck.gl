@@ -13,6 +13,29 @@ It renders each hexagon based on color, opacity and elevation.
 
 Inherits from all [Base Layer](/docs/layers/base-layer.md) properties.
 
+
+## Layer Accessors
+
+#### `getCentroid` (Function, optional)
+
+- Default: `object => object.centroid`
+
+Method called to retrieve the centroid of each hexagon. Centoid should be set to [lon, lat]
+
+#### `getColor` (Function, optional)
+
+- Default: `object => object.color`
+
+Method called to retrieve the color of each object. Color should be set to [r, g, b, a]
+with each number between 0 -255
+
+#### `getElevation` (Function, optional)
+
+- Default: `object => object.elevation`
+
+Method called to retrieve the elevation of each object. 1 unit approximate to 100 meters.
+
+
 ## Layer-specific Properties
 
 ##### `hexagonVertices` (Array[[lon, lat]], required)
@@ -33,21 +56,11 @@ radiusScale * getRadius(d)
 
 Whether to extrude hexagon. If se to false, all hexagons will be set to flat.
 
-#### `getCentroid` (Function, optional)
+##### `selectedPickingColor` (Array, optional) **EXPERIMENTAL**
 
-- Default: `object => object.centroid`
+Shader based highlighting of a selected object
 
-Method called to retrieve the centroid of each hexagon. Centoid should be set to [lon, lat]
+##### `lightSettings` (Object, optional) **EXPERIMENTAL**
 
-#### `getColor` (Function, optional)
-
-- Default: `object => object.color`
-
-Method called to retrieve the color of each object. Color should be set to [r, g, b, a]
-with each number between 0 -255
-
-#### `getElevation` (Function, optional)
-
-- Default: `object => object.elevation`
-
-Method called to retrieve the elevation of each object. 1 unit approximate to 100 meters.
+This is an object that contains light settings for extruded polygons.
+Be aware that this prop will likely be changed in a future version of deck.gl.

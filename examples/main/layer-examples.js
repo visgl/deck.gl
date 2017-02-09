@@ -84,7 +84,7 @@ const GeoJsonLayerExample = {
       return setOpacity(color, opacity);
     },
     strokeWidth: 10,
-    strokeMinPixels: 1,
+    strokeWidthMinPixels: 1,
     pickable: true
   }
 };

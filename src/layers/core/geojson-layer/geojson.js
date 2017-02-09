@@ -1,3 +1,4 @@
+import {get} from '../../../lib';
 import {Container} from '../../../lib/utils';
 
 /**
@@ -18,7 +19,7 @@ export function getGeojsonFeatures(geojson) {
     return geojson;
   }
 
-  const type = Container.get(geojson, 'type');
+  const type = get(geojson, 'type');
   switch (type) {
   case 'Point':
   case 'MultiPoint':
@@ -36,7 +37,7 @@ export function getGeojsonFeatures(geojson) {
     return [geojson];
   case 'FeatureCollection':
     // Just return the 'Features' array from the collection
-    return Container.get(geojson, 'features');
+    return get(geojson, 'features');
   default:
     throw new Error('Unknown geojson type');
   }
@@ -50,9 +51,9 @@ export function separateGeojsonFeatures(features) {
   const polygonOutlineFeatures = [];
 
   Container.forEach(features, feature => {
-    const type = Container.get(feature, 'geometry.type');
-    const coordinates = Container.get(feature, 'geometry.coordinates');
-    const properties = Container.get(feature, 'properties');
+    const type = get(feature, 'geometry.type');
+    const coordinates = get(feature, 'geometry.coordinates');
+    const properties = get(feature, 'properties');
     switch (type) {
     case 'Point':
       pointFeatures.push(feature);

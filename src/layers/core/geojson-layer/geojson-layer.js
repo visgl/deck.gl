@@ -18,12 +18,11 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {Layer} from '../../../lib';
+import {Layer, get} from '../../../lib';
 import ScatterplotLayer from '../scatterplot-layer';
 import PathLayer from '../path-layer/path-layer';
 import PolygonLayer from '../polygon-layer/polygon-layer';
 
-import {get} from '../../../lib/utils';
 import {getGeojsonFeatures, separateGeojsonFeatures} from './geojson';
 
 const defaultPointColor = [0xFF, 0x88, 0x00, 0xFF];
@@ -50,7 +49,7 @@ const defaultProps = {
   getFillColor: f => get(f, 'properties.fillColor') || defaultFillColor,
 
   // Polygon extrusion accessor
-  getHeight: f => 1000
+  getElevation: f => 1000
 };
 
 function noop() {}
@@ -100,7 +99,7 @@ export default class GeoJsonLayer extends Layer {
     const {subLayers: {pointFeatures, lineFeatures, polygonFeatures,
       polygonOutlineFeatures}} = this.state;
     const {id, getPointColor, getPointSize, getStrokeColor, getStrokeWidth,
-      getFillColor, getHeight} = this.props;
+      getFillColor, getElevation} = this.props;
     const {extruded, wireframe} = this.props;
 
     let {drawPoints, drawLines, drawPolygons, fillPolygons} = this.props;
@@ -121,12 +120,12 @@ export default class GeoJsonLayer extends Layer {
         id: `${id}-polygon-fill`,
         data: polygonFeatures,
         getPolygon: getCoordinates,
-        getHeight,
+        getElevation,
         getColor: getFillColor,
         extruded,
         wireframe: false,
         updateTriggers: {
-          getHeight: this.props.updateTriggers.getHeight,
+          getElevation: this.props.updateTriggers.getElevation,
           getColor: this.props.updateTriggers.getFillColor
         }
       }));
@@ -138,7 +137,7 @@ export default class GeoJsonLayer extends Layer {
         id: `${id}-polygon-wireframe`,
         data: polygonFeatures,
         getPolygon: getCoordinates,
-        getHeight,
+        getElevation,
         getColor: getStrokeColor,
         extruded: true,
         wireframe: true,
