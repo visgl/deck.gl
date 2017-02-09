@@ -15,13 +15,13 @@ export function pointsToWorldGrid(points, worldUnitSize) {
 
   const centerLat = (latMin + latMax) / 2;
 
-  const gridDelta = _calculateGridLatLngDelta(worldUnitSize, centerLat);
+  const gridOffset = _calculateGridLatLonOffset(worldUnitSize, centerLat);
 
   // calculate count per cell
   const gridHash = points.reduce((accu, pt) => {
-    const latIdx = Math.floor((pt.COORDINATES[1] + 90) / gridDelta.latDelta);
-    const lngIdx = Math.floor((pt.COORDINATES[0] + 180) / gridDelta.lngDelta);
-    const key = `${latIdx}-${lngIdx}`;
+    const latIdx = Math.floor((pt.COORDINATES[1] + 90) / gridOffset.latOffset);
+    const lonIdx = Math.floor((pt.COORDINATES[0] + 180) / gridOffset.lonOffset);
+    const key = `${latIdx}-${lonIdx}`;
 
     accu[key] = accu[key] + 1 || 1;
     return accu;
@@ -32,12 +32,12 @@ export function pointsToWorldGrid(points, worldUnitSize) {
   const data = Object.keys(gridHash).reduce((accu, key) => {
     const idxs = key.split('-');
     const latIdx = parseInt(idxs[0], 10);
-    const lngIdx = parseInt(idxs[1], 10);
+    const lonIdx = parseInt(idxs[1], 10);
 
     accu.push({
       position: [
-        -180 + gridDelta.lngDelta * lngIdx,
-        -90 + gridDelta.latDelta * latIdx
+        -180 + gridOffset.lonOffset * lonIdx,
+        -90 + gridOffset.latOffset * latIdx
       ],
       value: gridHash[key] / maxHeight
     });
@@ -45,20 +45,20 @@ export function pointsToWorldGrid(points, worldUnitSize) {
     return accu;
   }, []);
 
-  return Object.assign({data}, gridDelta);
+  return Object.assign({data}, gridOffset);
 }
 
 /**
- * calculate grid layer cell size in lat lng based on world unit size
+ * calculate grid layer cell size in lat lon based on world unit size
  * and current latitude
  * @param {number} worldUnitSize
  * @param {number} latitude
- * @returns {object} - lat delta and lng delta
+ * @returns {object} - lat delta and lon delta
  */
-export function _calculateGridLatLngDelta(worldUnitSize, latitude) {
-  const latDelta = calculateLatDelta(worldUnitSize);
-  const lngDelta = calculateLngDelta(latitude, worldUnitSize);
-  return {latDelta, lngDelta};
+export function _calculateGridLatLonOffset(worldUnitSize, latitude) {
+  const latOffset = calculateLatOffset(worldUnitSize);
+  const lonOffset = calculateLonOffset(latitude, worldUnitSize);
+  return {latOffset, lonOffset};
 }
 
 /**
@@ -67,7 +67,7 @@ export function _calculateGridLatLngDelta(worldUnitSize, latitude) {
  * @param {number} dy - change in km
  * @return {number} - increment in latitude
  */
-export function calculateLatDelta(dy) {
+export function calculateLatOffset(dy) {
   return (dy / R_EARTH) * (180 / Math.PI);
 }
 
@@ -79,6 +79,6 @@ export function calculateLatDelta(dy) {
  * @param {number} dx - change in km
  * @return {number} - increment in longitude
  */
-export function calculateLngDelta(lat, dx) {
+export function calculateLonOffset(lat, dx) {
   return (dx / R_EARTH) * (180 / Math.PI) / Math.cos(lat * Math.PI / 180);
 }
