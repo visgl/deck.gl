@@ -50,14 +50,27 @@ GeoJson feature is clicked.
 
 ## Layer-specific Accessors
 
+### `getPointColor`
+### `getPointSize`
+
 ### `getStrokeColor`
 ### `getStrokeWidth`
 
 ### `getFillColor`
-### `getHeight`
+### `getHElevation`
 
-### `getPointColor`
-### `getPointSize`
+#### `getColor` (Function, optional)
+
+The fill color for the polygon
+
+#### `getElevation` (Function, optional)
+
+- Default: `object => object.elevation`
+
+Method called to retrieve the elevation of each object's polygon.
+
+If a cartographic projection mode is used, height will be interpreted as meters,
+otherwise will be in unit coordinates.
 
 ## Layer-specific Properties
 
@@ -85,3 +98,9 @@ Fill areas of Polygon and MultiPolygon features if true.
 #### `extruded` (Boolean, optional)
 
 Extrude Polygon and MultiPolygon features in 3D if true.
+
+
+#### `lightSettings` (Object, optional) **EXPERIMENTAL**
+
+This is an object that contains light settings for extruded polygons.
+Be aware that this prop will likely be changed in a future version of deck.gl.
