@@ -92,8 +92,8 @@ vec3 lineJoin(vec3 prevPoint, vec3 currPoint, vec3 nextPoint) {
   offsetDirection = mix(
     positions.y,
     mix(
-      flipIfTrue(turnsRight),
-      positions.y * flipIfTrue(turnsRight == (positions.x == 1.)),
+      flipIfTrue(turnsRight), 
+      positions.y * flipIfTrue(turnsRight == (positions.x == 1.)), 
       cornerPosition
     ),
     step(0.0, cornerPosition)
