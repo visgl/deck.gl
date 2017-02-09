@@ -18,156 +18,109 @@ uniform float opacity;
 uniform float renderPickingBuffer;
 
 varying vec4 vColor;
-varying vec3 vCornerUV;
-varying float shouldDiscard;
+varying vec2 vCornerOffset;
+varying float vMiterLength;
+
+float flipIfTrue(bool flag) {
+  return -(float(flag) * 2. - 1.);
+}
 
 // calculate line join positions
-vec3 miterJoin(vec3 prevPoint, vec3 currPoint, vec3 nextPoint) {
+vec3 lineJoin(vec3 prevPoint, vec3 currPoint, vec3 nextPoint) {
 
   float offset = clamp(project_scale(thickness),
     strokeMinPixels, strokeMaxPixels) / 2.0;
-  float offsetScale = 1.0;
 
   vec2 deltaA = currPoint.xy - prevPoint.xy;
   vec2 deltaB = nextPoint.xy - currPoint.xy;
 
-  vec2 dir = vec2(0.0);
-  float offsetDirection = positions.y;
-  shouldDiscard = positions.z;
+  vec2 dir;
+  float offsetScale;
+  float offsetDirection;
 
-  if (deltaA == vec2(0.0)) {
-    // starting point uses (next - current)
-    dir = normalize(deltaB);
-  } else if (deltaB == vec2(0.0)) {
-    // ending point uses (current - previous)
-    dir = normalize(deltaA);
-  } else {
-    vec2 dirA = normalize(deltaA);
-    vec2 dirB = normalize(deltaB);
-    // direction of the corner
-    vec2 tangent = normalize(dirA + dirB);
-    // width offset from current position
-    dir = mix(dirB, dirA, positions.x);
-    vec2 perp = vec2(-dir.y, dir.x);
+  float lenA = length(deltaA);
+  float lenB = length(deltaB);
+  vec2 dirA = lenA > 0. ? normalize(deltaA) : vec2(1.0, 0.0);
+  vec2 dirB = lenB > 0. ? normalize(deltaB) : vec2(1.0, 0.0);
+  vec2 perpA = vec2(-dirA.y, dirA.x);
+  vec2 perpB = vec2(-dirB.y, dirB.x);
 
-    vec2 miterVec = vec2(-tangent.y, tangent.x);
-    dir = tangent;
-    offsetScale = 1.0 / dot(miterVec, perp);
+  // tangent of the corner
+  vec2 tangent = normalize(dirA + dirB);
+  // width offset from current position
+  vec2 perp = mix(perpB, perpA, positions.x);
+  // direction of the corner
+  vec2 miterVec = vec2(-tangent.y, tangent.x);
 
-    bool isOutsideCorner = (dirB.y > dirA.y) == (positions.y < 0.0);
+  // cap super sharp angles
+  float sinHalfA = max(abs(dot(miterVec, perp)), 0.01);
+  float cosHalfA = abs(dot(dirA, miterVec));
 
-    if (!isOutsideCorner && positions.z == 0.0) {
-      // is inside corner
-      float maxLen = min(length(deltaA), length(deltaB));
-      maxLen *= abs(dot(miterVec, dirA));
-      if (offsetScale * offset > maxLen) {
-        isOutsideCorner = true;
-      }
-    }
+  // relative position to the corner:
+  // -1: inside (smaller side of the angle)
+  // 0: center
+  // 1: outside (bigger side of the angle)
+  float cornerPosition = mix(
+    flipIfTrue((dirB.y > dirA.y) == (positions.y > 0.0)),
+    0.0,
+    positions.z
+  );
 
-    // needs cropping?
-    if (offsetScale > miterLimit) {
-      if (positions.z == 1.0) {
-        // is bevel center point
-        offsetDirection = dirB.y > dirA.y ? -1.0 : 1.0;
-        offsetScale = miterLimit;
-        shouldDiscard = 0.0;
-      } else if (isOutsideCorner) {
-        // is outside corner
-        // move to bevel center
-        currPoint += vec3(miterVec * (offset * miterLimit) * offsetDirection, 0.0);
+  offsetScale = 1.0 / sinHalfA;
 
-        // offset from bevel center
-        offsetScale = (offsetScale - miterLimit) / offsetScale;
-        offsetScale /= abs(dot(miterVec, dirA));
-        offsetDirection *= float((dirB.y > dirA.y) == (positions.x == 0.)) * 2. - 1.;
-        dir = miterVec;
-      }
-    }
-  }
-  vec2 normal = vec2(-dir.y, dir.x) * offsetDirection;
+  // flip if inside corner extends further than the line segment
+  float maxInsideMiter = min(lenA, lenB) * cosHalfA / offset;
+  cornerPosition *= flipIfTrue(cornerPosition < 0.0 && offsetScale > maxInsideMiter);
 
-  return currPoint + vec3(normal * offset * offsetScale, 0.0);
-}
+  vMiterLength = mix(
+    offsetScale * cornerPosition,
+    mix(offsetScale, 0.0, cornerPosition),
+    step(0.0, cornerPosition)
+  ) - sinHalfA * jointType;
+  offsetDirection = mix(
+    positions.y,
+    mix(
+      flipIfTrue(dirB.y > dirA.y), 
+      positions.y * flipIfTrue((dirB.y > dirA.y) == (positions.x == 1.)), 
+      cornerPosition
+    ),
+    step(0.0, cornerPosition)
+  );
+  dir = mix(tangent, miterVec, step(0.5, cornerPosition));
+  offsetScale = mix(offsetScale, 1.0 / cosHalfA, step(0.5, cornerPosition));
 
-vec3 roundJoin(vec3 prevPoint, vec3 currPoint, vec3 nextPoint) {
+  // special treatment for start cap and end cap
+  float isStartCap = step(0.0, -lenA);
+  float isEndCap = step(0.0, -lenB);
+  float isCap = max(isStartCap, isEndCap);
 
-  float offset = clamp(project_scale(thickness),
-    strokeMinPixels, strokeMaxPixels) / 2.0;
-  float offsetScale = 1.0;
+  // 0: center, 1: side
+  cornerPosition = isCap * abs(cornerPosition);
 
-  vec2 deltaA = currPoint.xy - prevPoint.xy;
-  vec2 deltaB = nextPoint.xy - currPoint.xy;
+  // start of path: use next - curr
+  dir = mix(dir, mix(perpB, dirB, cornerPosition), isStartCap);
+  // end of path: use curr - prev
+  dir = mix(dir, mix(perpA, dirA, cornerPosition), isEndCap);
 
-  vec2 dir = vec2(0.0);
-  float offsetDirection = positions.y;
-  float isOutsideCorner = 0.0;
+  // extend out a triangle to envelope the round cap
+  offsetScale = mix(
+    offsetScale,
+    mix(4.0 * jointType, 1.0, cornerPosition),
+    isCap
+  );
+  vMiterLength = mix(vMiterLength, 1.0 - cornerPosition, isCap);
 
-  if (deltaA == vec2(0.0)) {
-    // starting point uses (next - current)
-    dir = normalize(deltaB);
-    // end cap
-    if (positions.z == 1.0) {
-      dir = vec2(-dir.y, dir.x);
-      offsetDirection = 1.0;
-      offsetScale = 4.0;
-      isOutsideCorner = 1.0;
-    }
-
-  } else if (deltaB == vec2(0.0)) {
-    // ending point uses (current - previous)
-    dir = normalize(deltaA);
-    // end cap
-    if (positions.z == 1.0) {
-      dir = vec2(-dir.y, dir.x);
-      offsetDirection = -1.0;
-      offsetScale = 4.0;
-      isOutsideCorner = 1.0;
-    }
-
-  } else {
-
-    vec2 dirA = normalize(deltaA);
-    vec2 dirB = normalize(deltaB);
-
-    if ((dirB.y > dirA.y) == (positions.y < 0.0) && positions.z == 0.0) {
-      // is outside corner
-      dir = mix(dirB, dirA, positions.x);
-    } else {
-      // direction of the corner
-      vec2 tangent = normalize(dirA + dirB);
-      // width offset from current position
-      dir = mix(dirB, dirA, positions.x);
-      vec2 perp = vec2(-dir.y, dir.x);
-
-      vec2 miterVec = vec2(-tangent.y, tangent.x);
-      dir = tangent;
-      offsetScale = 1.0 / dot(miterVec, perp);
-
-      if (positions.z == 1.0) {
-        // is bevel center point
-        offsetDirection = dirB.y > dirA.y ? -1.0 : 1.0;
-        isOutsideCorner = offsetScale;
-      } else {
-        // is inside
-        float maxLen = min(length(deltaA), length(deltaB));
-        maxLen *= abs(dot(miterVec, dirA));
-        if (offsetScale * offset > maxLen) {
-          dir = mix(dirB, dirA, positions.x);
-          offsetScale = 1.0;
-        } else {
-          isOutsideCorner = -offsetScale;
-        }
-      }
-    }
-  }
+  offsetDirection = mix(
+    offsetDirection,
+    mix(flipIfTrue(isEndCap > 0.), positions.y, cornerPosition),
+    isCap
+  );
 
   vec2 normal = vec2(-dir.y, dir.x) * offsetDirection;
-  vCornerUV = vec3(normal * offsetScale, isOutsideCorner);
+  vCornerOffset = normal * offsetScale;
 
-  return currPoint + vec3(normal * offset * offsetScale, 0.0);
+  return currPoint + vec3(vCornerOffset * offset, 0.0);
 }
-
 
 void main() {
   vec4 color = vec4(instanceColors.rgb, instanceColors.a * opacity) / 255.;
@@ -187,11 +140,7 @@ void main() {
 
   vec3 pos;
 
-  if (jointType == 0.0) {
-    pos = miterJoin(prevPosition, currPosition, nextPosition);
-  } else {
-    pos = roundJoin(prevPosition, currPosition, nextPosition);
-  }
+  pos = lineJoin(prevPosition, currPosition, nextPosition);
 
   gl_Position = project_to_clipspace(vec4(pos, 1.0));
 }

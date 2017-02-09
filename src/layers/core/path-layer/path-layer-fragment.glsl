@@ -25,17 +25,18 @@ precision highp float;
 #endif
 
 uniform float jointType;
+uniform float miterLimit;
 
 varying vec4 vColor;
-varying vec3 vCornerUV;
-varying float shouldDiscard;
+varying vec2 vCornerOffset;
+varying float vMiterLength;
 
 void main(void) {
-  if (shouldDiscard > 1.0) {
+  // if joint is rounded, test distance from the corner
+  if (jointType > 0.0 && vMiterLength > 0.0 && length(vCornerOffset) > 1.0) {
     discard;
   }
-  // if joint is rounded, test distance from the corner
-  if (jointType > 0.0 && vCornerUV.z > 0.0 && length(vCornerUV.xy) > 1.0) {
+  if (jointType == 0.0 && vMiterLength > miterLimit) {
     discard;
   }
   gl_FragColor = vColor;
