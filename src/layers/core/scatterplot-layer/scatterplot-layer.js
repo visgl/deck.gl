@@ -30,10 +30,10 @@ const defaultProps = {
   getPosition: x => x.position,
   getRadius: x => x.radius || 30,
   getColor: x => x.color || DEFAULT_COLOR,
-  radius: 30,  //  point radius in meters
+  radiusScale: 30,  //  point radius in meters
   radiusMinPixels: 0, //  min point radius in pixels
   radiusMaxPixels: Number.MAX_SAFE_INTEGER, // max point radius in pixels
-  drawOutline: false,
+  outline: false,
   strokeWidth: 1
 };
 
@@ -59,11 +59,11 @@ export default class ScatterplotLayer extends Layer {
   }
 
   draw({uniforms}) {
-    const {radius, radiusMinPixels, radiusMaxPixels, drawOutline, strokeWidth} = this.props;
+    const {radiusScale, radiusMinPixels, radiusMaxPixels, outline, strokeWidth} = this.props;
     this.state.model.render(Object.assign({}, uniforms, {
-      drawOutline: drawOutline ? 1 : 0,
+      outline: outline ? 1 : 0,
       strokeWidth,
-      radius,
+      radiusScale,
       radiusMinPixels,
       radiusMaxPixels
     }));

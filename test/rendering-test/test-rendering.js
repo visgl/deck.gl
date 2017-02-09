@@ -154,7 +154,6 @@ testConfigs.push({
         getColor: d => [255, 128, 0],
         getRadius: d => 5.0,
         opacity: 0.5,
-        strokeWidth: 2,
         pickable: true,
         radiusMinPixels: 5,
         radiusMaxPixels: 5
@@ -187,7 +186,6 @@ testConfigs.push({
         getColor: d => [255, 128, 0],
         getRadius: d => 5.0,
         opacity: 0.5,
-        strokeWidth: 2,
         pickable: true,
         radiusMinPixels: 5,
         radiusMaxPixels: 5

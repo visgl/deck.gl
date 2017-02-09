@@ -17,21 +17,15 @@ Inherits from all [Base Layer](/docs/layers/base-layer.md) properties.
 
 ## Layer-specific Properties
 
-##### `strokeWidth` (Number, optional)
-
-- Default: `1`
-
-Width of stroke if drawing outline.
-
-##### `drawOutline` (Boolean, optional)
+##### `outline` (Boolean, optional)
 
 - Default: `false`
 
 Only draw outline of dot.
 
-##### `radius` (Number, optional)
+##### `radiusScale` (Number, optional)
 
-- Default: `30`
+- Default: `1`
 
 Global radius across all markers.
 
