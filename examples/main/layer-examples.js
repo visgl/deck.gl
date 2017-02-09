@@ -131,11 +131,11 @@ const PathLayerExample = {
   props: {
     id: 'pathLayer',
     data: dataSamples.zigzag,
-    strokeWidth: 500,
     opacity: 0.6,
     getPath: f => f.path,
     getColor: f => [128, 0, 0],
-    pickable: false
+    getStrokeWidth: f => 10,
+    pickable: true
   }
 };
 

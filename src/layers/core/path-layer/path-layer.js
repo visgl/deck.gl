@@ -8,14 +8,14 @@ const DEFAULT_COLOR = [0, 0, 0, 255];
 
 const defaultProps = {
   opacity: 1,
-  strokeWidth: 1, // stroke width in meters
-  roundedJoint: false,
+  strokeWidthScale: 1, // stroke width in meters
+  rounded: false,
   miterLimit: 4,
   strokeMinPixels: 0, //  min stroke width in pixels
   strokeMaxPixels: Number.MAX_SAFE_INTEGER, // max stroke width in pixels
   getPath: object => object.path,
   getColor: object => object.color || DEFAULT_COLOR,
-  getWidth: object => object.width || 1
+  getStrokeWidth: object => object.width || 1
 };
 
 const isClosed = path => {
@@ -44,6 +44,7 @@ export default class PathLayer extends Layer {
       instanceEndPositions: {size: 3, update: this.calculateEndPositions},
       instanceLeftDeltas: {size: 3, update: this.calculateLeftDeltas},
       instanceRightDeltas: {size: 3, update: this.calculateRightDeltas},
+      instanceWidths: {size: 1, accessor: 'getStrokeWidth', update: this.calculateWidths},
       instanceColors: {size: 4, type: GL.UNSIGNED_BYTE, accessor: 'getColor', update: this.calculateColors},
       instancePickingColors: {size: 3, type: GL.UNSIGNED_BYTE, update: this.calculatePickingColors}
     });
@@ -65,13 +66,13 @@ export default class PathLayer extends Layer {
   }
 
   draw({uniforms}) {
-    const {opacity, strokeWidth, roundedJoint, miterLimit,
+    const {opacity, strokeWidthScale, rounded, miterLimit,
       strokeMinPixels, strokeMaxPixels} = this.props;
 
     this.state.model.render(Object.assign({}, uniforms, {
       opacity,
-      jointType: Number(roundedJoint),
-      thickness: strokeWidth,
+      jointType: Number(rounded),
+      widthScale: strokeWidthScale,
       miterLimit,
       strokeMinPixels,
       strokeMaxPixels
@@ -82,7 +83,7 @@ export default class PathLayer extends Layer {
     const shaders = assembleShaders(gl, this.getShaders());
 
     /*
-     *       _  
+     *       _
      *        "-_ 1                   3                       5
      *     _     "o---------------------o-------------------_-o
      *       -   / ""--..__              '.             _.-' /
@@ -104,11 +105,6 @@ export default class PathLayer extends Layer {
       // end corner
       3, 4, 5
     ];
-
-    // wireframe mode
-    // const SEGMENT_INDICES = [
-    //   0, 1, 1, 2, 0, 2, 1, 3, 2, 4, 3, 4, 3, 5, 4, 5
-    // ];
 
     // [0] position on segment - 0: start, 1: end
     // [1] side of path - -1: left, 0: center, 1: right
@@ -134,8 +130,6 @@ export default class PathLayer extends Layer {
       fs: shaders.fs,
       vs: shaders.vs,
       geometry: new Geometry({
-        // wireframe mode
-        // drawMode: GL.LINES,
         drawMode: GL.TRIANGLES,
         attributes: {
           indices: new Uint16Array(SEGMENT_INDICES),
@@ -212,6 +206,20 @@ export default class PathLayer extends Layer {
         value[i++] = nextPoint[0] - point[0];
         value[i++] = nextPoint[1] - point[1];
         value[i++] = (nextPoint[2] - point[2]) || 0;
+      }
+    });
+  }
+
+  calculateWidths(attribute) {
+    const {data, getStrokeWidth} = this.props;
+    const {paths} = this.state;
+    const {value} = attribute;
+
+    let i = 0;
+    paths.forEach((path, index) => {
+      const width = getStrokeWidth(data[index], index);
+      for (let ptIndex = 1; ptIndex < path.length; ptIndex++) {
+        value[i++] = width
       }
     });
   }

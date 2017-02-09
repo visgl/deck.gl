@@ -6,10 +6,11 @@ attribute vec3 instanceStartPositions;
 attribute vec3 instanceEndPositions;
 attribute vec3 instanceLeftDeltas;
 attribute vec3 instanceRightDeltas;
+attribute float instanceWidths;
 attribute vec4 instanceColors;
 attribute vec3 instancePickingColors;
 
-uniform float thickness;
+uniform float widthScale;
 uniform float strokeMinPixels;
 uniform float strokeMaxPixels;
 uniform float jointType;
@@ -30,7 +31,7 @@ float flipIfTrue(bool flag) {
 // calculate line join positions
 vec3 lineJoin(vec3 prevPoint, vec3 currPoint, vec3 nextPoint) {
 
-  float width = clamp(project_scale(thickness),
+  float width = clamp(project_scale(instanceWidths * widthScale),
     strokeMinPixels, strokeMaxPixels) / 2.0;
 
   vec2 deltaA = currPoint.xy - prevPoint.xy;
