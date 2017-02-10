@@ -76,6 +76,13 @@ to review the props of the new layer to make sure you get the desired results.
 
 The old layers are still around for now so there is no urgency to upgrade.
 
+## Removed Layers
+
+## EnhancedChoroplethLayer
+
+This sample layer in deck.gl v3 has been moved to a stand-alone example and
+is no longer included in the deck.gl module.
+
 
 # Upgrading Layers from deck.gl v3 to v4
 

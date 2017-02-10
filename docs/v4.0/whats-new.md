@@ -5,6 +5,103 @@ Release date: TBD, Q1 2017
 # Highlights
 
 
+## Performance
+
+A number of performance improvements and fixes have been gradually introduced
+since deck.gl v3.0 was launched. While many are not new in v4.0, cumulatively
+they enable noticeably better framerates and a lighter footprint when big data
+sets are loaded, compared to the initial v3.0.0 version
+
+
+## New Layers
+
+* GeoJsonLayer
+
+A composite layer that parses geojson and renders it as a `PathLayer`
+and a `PolygonLayer`.
+
+### PathLayer
+
+
+### PolygonLayer
+
+
+### IconLayer
+
+
+### GridLayer
+
+A layer that draws rectangular, optionally elevated cells.
+A typical grid based heatmap layer.
+Differs from the `ScreenGridLayer` in that the cells are in
+world coordinates and pre aggregated.
+
+
+### HexagonLayer
+
+A layer that draws hexagonal, optionally elevated cells.
+
+
+### Point Cloud Layer
+
+Draws a point cloud. Supports point color/opacity. Points can be drawn using
+GL.POINTS or using a primitive.
+
+
+## `Layer
+
+
+### TBD - support immutable data/ES6 containers?
+
+
+### Support for Per-Layer Model Matrix
+
+Each layer now supports a `modelMatrix` property that can be used to
+specify a local coordinate system for the data in that layer:
+
+* Model matrices can dramatically simplify working with data in different
+  coordinate systems, as the data does not need to be pre-transformed into
+  a common coordinate system.
+
+* Model matrices also enable interesting layer animation and composition
+  possibilities as individual layers can be scaled, rotated, translated etc
+  with very low computational cost (i.e. without modifying the data).
+
+TBD - `layerMatrix` vs `modelMatrix`
+
+
+### **Overridable shaders** - All layers now have a `getShaders` method that can
+  be overriden by subclasses, enables reuse of all layer code while just
+  replacing one or both shaders, often dramatically reducing the amount of
+  code needed to add a small feature or change to en existing layers
+
+
+## New Features for Layer Writers
+
+### `defaultProps` - layers are now encouraged to define a `defaultProps`
+static member listing their props and default values, rather than programmatically
+declaring the props in constructor parameters etc. Using `defaultProps` means
+that many layer classes no longer need a constructor.
+
+## New Examples
+
+
+## Deprecations
+
+The various Choropleth layers have been deprecated since deck.gl has new and
+better layers that fill the same role. The choropleth layers are still available
+but will not be maintained beyond critical bug fixes and will likely be
+removed in the next major version of deck.gl.
+
+A careful API audit has also been done to align property names between layers.
+While this will makes the layers more consistent and easier to work with, it
+does mean that some properties have been renamed, with the old name being
+deprecated, and in some very few cases, default values have changed.
+
+For more information on deprecations and how to update your code in response
+to them, please consult the deck.gl [Upgrade Guide](upgrade-guide.md).
+
+
 # deck.gl v3.0
 
 Release date: November, 2016
