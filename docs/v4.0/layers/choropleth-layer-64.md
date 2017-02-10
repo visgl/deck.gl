@@ -1,4 +1,8 @@
-# Choropleth Layer (64 bit)
+# Choropleth Layer (64 bit) **DEPRECATED**
+
+Note: The `ChoroplethLayer64` has been deprecated in deck.gl v4 in favor
+of the new `GeoJsonLayer` and `PolygonLayer`. It will likely be removed in the
+next major release of deck.gl.
 
 The Choropleth Layer takes in [GeoJson](http://geojson.org/) formatted data and
 renders it as interactive choropleths.

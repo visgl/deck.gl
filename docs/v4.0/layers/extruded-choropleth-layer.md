@@ -1,4 +1,8 @@
-# Extruded Choropleth Layer (64 bit)
+# Extruded Choropleth Layer (64 bit) **DEPRECATED**
+
+Note: The `ExtrudedChoroplethLayer64` has been deprecated in deck.gl v4 in favor
+of the new `GeoJsonLayer` and `PolygonLayer`. It will likely be removed in the
+next major release of deck.gl.
 
 Choropleth Layer with Elevation
 

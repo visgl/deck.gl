@@ -1,4 +1,9 @@
-# Enhanced Choropleth Layer (64 bit)
+# Enhanced Choropleth Layer (64 bit) **REMOVED**
+
+Note: The `EnhancedChoroplethLayer` sample layer has been removed in deck.gl v4
+in favor of the new `PathLayer`. It is still available as a stand-alone
+example in the examples folder and can be copied from there, but is no longer
+included in the deck.gl package.
 
 A layer that extrudes lines in Choropleth polygons by tesselating them into
 long, thin triangles. This provides control over line thickness
