@@ -49,4 +49,4 @@ Method called to retrieve the rgba color of each object. If the alpha parameter
 is not provided, it will be set to `255`.
 
 If the method does not return a value for the given object, fallback to
-`[255, 0, 255, 255]`.
+`[0, 0, 0, 255]`.

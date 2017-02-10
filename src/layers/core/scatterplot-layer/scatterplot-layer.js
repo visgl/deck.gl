@@ -24,7 +24,7 @@ import {GL, Model, Geometry} from 'luma.gl';
 import {readFileSync} from 'fs';
 import {join} from 'path';
 
-const DEFAULT_COLOR = [255, 0, 255, 255];
+const DEFAULT_COLOR = [0, 0, 0, 255];
 
 const defaultProps = {
   getPosition: x => x.position,
@@ -50,6 +50,19 @@ export default class ScatterplotLayer extends Layer {
     this.setState({model: this._getModel(gl)});
 
     /* eslint-disable max-len */
+    /* deprecated props check */
+    if (this.props.radius !== undefined) {
+      log.once(0, `ScatterplotLayer no longer accepts props.radius in this version of deck.gl. Please use props.radiusScale instead.`);
+    }
+
+    if (this.props.outline !== undefined) {
+      log.once(0, `ScatterplotLayer no longer accepts props.drawOutline in this version of deck.gl. Please use props.outline instead.`);
+    }
+
+    if (this.props.strokeWidth !== undefined) {
+      log.once(0, `ScatterplotLayer no longer accepts props.strokeWidth in this version of deck.gl.`);
+    }
+
     this.state.attributeManager.addInstanced({
       instancePositions: {size: 3, accessor: 'getPosition', update: this.calculateInstancePositions},
       instanceRadius: {size: 1, accessor: 'getRadius', defaultValue: 1, update: this.calculateInstanceRadius},
@@ -118,7 +131,7 @@ export default class ScatterplotLayer extends Layer {
       value[i++] = color[0];
       value[i++] = color[1];
       value[i++] = color[2];
-      value[i++] = isNaN(color[3]) ? DEFAULT_COLOR[3] : color[3];
+      value[i++] = isNaN(color[3]) ? 255 : color[3];
     }
   }
 }

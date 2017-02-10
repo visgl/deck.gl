@@ -24,7 +24,7 @@ import {GL, Model, Geometry} from 'luma.gl';
 import {readFileSync} from 'fs';
 import {join} from 'path';
 
-const DEFAULT_COLOR = [0, 255, 0, 255];
+const DEFAULT_COLOR = [0, 0, 0, 255];
 
 const defaultProps = {
   getSourcePosition: x => x.sourcePosition,
@@ -35,11 +35,17 @@ const defaultProps = {
 
 export default class LineLayer extends Layer {
   initializeState() {
+
     const {gl} = this.context;
     this.setState({model: this.createModel(gl)});
 
     const {attributeManager} = this.state;
+
     /* eslint-disable max-len */
+    if (this.props.strokeWidth !== undefined) {
+      log.once(0, `LineLayer no longer accepts props.strokeWidth in this version of deck.gl.`);
+    }
+
     attributeManager.addInstanced({
       instanceSourcePositions: {size: 3, accessor: 'getSourcePosition', update: this.calculateInstanceSourcePositions},
       instanceTargetPositions: {size: 3, accessor: 'getTargetPosition', update: this.calculateInstanceTargetPositions},
@@ -98,7 +104,7 @@ export default class LineLayer extends Layer {
       const sourcePosition = getSourcePosition(object);
       value[i + 0] = sourcePosition[0];
       value[i + 1] = sourcePosition[1];
-      value[i + 2] = sourcePosition[2] || 0;
+      value[i + 2] = isNaN(sourcePosition[2]) ? 0 : sourcePosition[2];
       i += size;
     }
   }
@@ -111,7 +117,7 @@ export default class LineLayer extends Layer {
       const targetPosition = getTargetPosition(object);
       value[i + 0] = targetPosition[0];
       value[i + 1] = targetPosition[1];
-      value[i + 2] = targetPosition[2] || 0;
+      value[i + 2] = isNaN(targetPosition[2]) ? 0 : targetPosition[2];
       i += size;
     }
   }
@@ -125,7 +131,7 @@ export default class LineLayer extends Layer {
       value[i + 0] = color[0];
       value[i + 1] = color[1];
       value[i + 2] = color[2];
-      value[i + 3] = color[3] || 255;
+      value[i + 3] = isNaN(color[3]) ? 255 : color[3];
       i += size;
     }
   }

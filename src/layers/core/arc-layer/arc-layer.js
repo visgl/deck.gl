@@ -24,7 +24,7 @@ import {GL, Model, Geometry} from 'luma.gl';
 import {readFileSync} from 'fs';
 import {join} from 'path';
 
-const DEFAULT_COLOR = [0, 0, 255, 255];
+const DEFAULT_COLOR = [0, 0, 0, 255];
 
 const defaultProps = {
   getSourcePosition: x => x.sourcePosition,
@@ -41,11 +41,16 @@ export default class ArcLayer extends Layer {
 
     const {attributeManager} = this.state;
     /* eslint-disable max-len */
+    if (this.props.strokeWidth !== undefined) {
+      log.once(0, `ArcLayer no longer accepts props.strokeWidth in  in this version of deck.gl.`);
+    }
+
     attributeManager.addInstanced({
       instancePositions: {size: 4, accessor: ['getSourcePosition', 'getTargetPosition'], update: this.calculateInstancePositions},
       instanceSourceColors: {size: 4, type: GL.UNSIGNED_BYTE, accessor: 'getSourceColor', update: this.calculateInstanceSourceColors},
       instanceTargetColors: {size: 4, type: GL.UNSIGNED_BYTE, accessor: 'getTargetColor', update: this.calculateInstanceTargetColors}
     });
+
     /* eslint-enable max-len */
   }
 
@@ -122,7 +127,7 @@ export default class ArcLayer extends Layer {
       value[i + 0] = color[0];
       value[i + 1] = color[1];
       value[i + 2] = color[2];
-      value[i + 3] = color[3] || 255;
+      value[i + 3] = isNaN(color[3]) ? 255 : color[3];
       i += size;
     }
   }
@@ -136,7 +141,7 @@ export default class ArcLayer extends Layer {
       value[i + 0] = color[0];
       value[i + 1] = color[1];
       value[i + 2] = color[2];
-      value[i + 3] = color[3] || 255;
+      value[i + 3] = isNaN(color[3]) ? 255 : color[3];
       i += size;
     }
   }
