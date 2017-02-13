@@ -25,7 +25,11 @@ precision highp float;
 #endif
 
 varying vec4 vColor;
+varying vec2 uv;
 
 void main(void) {
+  if (length(uv) > 1.0) {
+    discard;
+  }
   gl_FragColor = vColor;
 }

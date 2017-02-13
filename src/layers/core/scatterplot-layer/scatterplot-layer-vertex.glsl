@@ -34,6 +34,7 @@ uniform float radiusMaxPixels;
 uniform float renderPickingBuffer;
 
 varying vec4 vColor;
+varying vec2 uv;
 
 void main(void) {
   // Multiply out radius and clamp to limits
@@ -42,6 +43,7 @@ void main(void) {
     radiusMinPixels, radiusMaxPixels
   );
 
+  uv = positions.xy;
   // Find the center of the point and add the current vertex
   vec3 center = project_position(instancePositions);
   vec3 vertex = positions * radiusPixels;
