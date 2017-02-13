@@ -112,7 +112,7 @@ export default class ArcDemo extends Component {
 
     const {flows, centroid, name} = selectedFeature.properties;
 
-    const arcs = Object.keys(flows).map((acc, toId) => {
+    const arcs = Object.keys(flows).map(toId => {
       const f = features[toId];
       return {
         source: centroid,

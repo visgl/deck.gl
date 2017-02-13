@@ -29,7 +29,7 @@ class Map extends Component {
 
       if (useTransition) {
         const {viewport} = this.props;
-        ViewportAnimation.fly(viewport, DemoComponent.viewport, 1000, updateMap)
+        ViewportAnimation.fly(viewport, DemoComponent.viewport, 1000, this.props.updateMap)
         .easing(ViewportAnimation.Easing.Exponential.Out)
         .start();
       } else {

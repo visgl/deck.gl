@@ -8,6 +8,7 @@
   "main": "index.js",
   "scripts": {
     "start": "webpack-dev-server --config webpack/dev --progress --hot --content-base ./src/static --port 3000 --open",
+    "build": "rm -rf ./dist && mkdir dist && cp -r ./src/static/* dist && webpack -p --config webpack/prod",
     "lint": "eslint src --ignore-pattern workers"
   },
   "dependencies": {
