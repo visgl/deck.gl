@@ -1,5 +1,5 @@
 const {resolve} = require('path');
-// const webpack = require('webpack');
+const webpack = require('webpack');
 
 module.exports = {
   // Bundle the source code
@@ -66,5 +66,8 @@ module.exports = {
   plugins: [
     // leave minification to app
     // new webpack.optimize.UglifyJsPlugin({comments: false})
+    new webpack.DefinePlugin({
+      VERSION: JSON.stringify(require('./package.json').version)
+    })
   ]
 };

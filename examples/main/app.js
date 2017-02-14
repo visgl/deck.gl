@@ -1,8 +1,9 @@
 /* global window, document */
 import 'babel-polyfill';
 
-import {ReflectionEffect} from 'deck.gl/experimental';
 import DeckGL, {autobind} from 'deck.gl/react';
+import {experimental} from 'deck.gl';
+const {ReflectionEffect} = experimental;
 
 import {Matrix4} from 'luma.gl';
 

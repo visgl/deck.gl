@@ -5,14 +5,6 @@ Release date: TBD, Q1 2017
 # Highlights
 
 
-## Performance
-
-A number of performance improvements and fixes have been gradually introduced
-since deck.gl v3.0 was launched. While many are not new in v4.0, cumulatively
-they enable noticeably better framerates and a lighter footprint when big data
-sets are loaded, compared to the initial v3.0.0 version
-
-
 ## New Layers
 
 * GeoJsonLayer
@@ -22,12 +14,19 @@ and a `PolygonLayer`.
 
 ### PathLayer
 
+Takes a sequence of coordinates and renders them as a thick line with
+mitered or rounded end caps.
 
 ### PolygonLayer
 
+Each object in data is expected to provide a "closed" sequence of coordinates
+and renders them as a polygon, optionally extruded or in wireframe mode.
+Supports polygons with holes.
 
 ### IconLayer
 
+Allows the user to provide a texture atlas and a JSON configuration specifying
+where icons are located in the atlas.
 
 ### GridLayer
 
@@ -36,11 +35,9 @@ A typical grid based heatmap layer.
 Differs from the `ScreenGridLayer` in that the cells are in
 world coordinates and pre aggregated.
 
-
 ### HexagonLayer
 
 A layer that draws hexagonal, optionally elevated cells.
-
 
 ### Point Cloud Layer
 
@@ -48,8 +45,7 @@ Draws a point cloud. Supports point color/opacity. Points can be drawn using
 GL.POINTS or using a primitive.
 
 
-## `Layer
-
+## Improvements to all Layers
 
 ### TBD - support immutable data/ES6 containers?
 
@@ -67,39 +63,110 @@ specify a local coordinate system for the data in that layer:
   possibilities as individual layers can be scaled, rotated, translated etc
   with very low computational cost (i.e. without modifying the data).
 
-TBD - `layerMatrix` vs `modelMatrix`
+TBD - `layerMatrix` vs. `modelMatrix`
 
 
-### **Overridable shaders** - All layers now have a `getShaders` method that can
-  be overriden by subclasses, enables reuse of all layer code while just
-  replacing one or both shaders, often dramatically reducing the amount of
-  code needed to add a small feature or change to en existing layers
+### UpdateTriggers now accept Accessor Names
+
+`updateTriggers` now accept Accessor Names.
+
+The `updateTriggers` mechanism in deck.gl v3 required the user to know the
+name of the vertex attribute controlled by an accessor. It is now possible
+to supply names of `accessors`.
+
+
+## New Features for Layer Subclassing
+
+### **Overridable shaders
+
+All layers now have a `getShaders` method that can
+be overriden by subclasses, enables reuse of all layer code while just
+replacing one or both shaders, often dramatically reducing the amount of
+code needed to add a small feature or change to en existing layers.
 
 
 ## New Features for Layer Writers
 
-### `defaultProps` - layers are now encouraged to define a `defaultProps`
+### `defaultProps`
+
+Layers are now encouraged to define a `defaultProps`
 static member listing their props and default values, rather than programmatically
 declaring the props in constructor parameters etc. Using `defaultProps` means
 that many layer classes no longer need a constructor.
 
-## New Examples
+
+### AttributeManager now accepts new `accessor` field
+
+Can be a string or a an array of strings. Will be used to match
+`updateTriggers` accessor names with instance attributes.
+
+
+## Performance
+
+A number of performance improvements and fixes have been gradually introduced
+since deck.gl v3.0 was launched. While many are not new in v4.0, cumulatively
+they enable noticeably better framerates and a lighter footprint when big data
+sets are loaded, compared to the initial v3.0.0 version
+
+
+## Library Improvements
+
+JavaScript build tooling continues to evolve rapidly and efforts have
+been made to ensure deck.gl supports several popular new tooling setups:
+
+* **Dependency Reduction** The number of npm dependencies (both in `deck.gl`,
+  `luma.gl` and `react-map-gl`) have been reduced considerably, meaning that
+  installing deck.gl and related modules will bring in less additional
+  JavaScript code into your app, and your app will build and run faster.
+* **Tree-shaking support**: deck.gl and related libraries now publish a "module"
+  entry point in package.json which points to a parallel distribution (`deck.gl/dist-es6`)
+  that preserves the `import` and `export` statements. This should allow tree
+  shaking bundlers such as webpack 2 and rollup to further reduce bundle size.
+* **Pure ES6 source code**: With few exceptions (e.g some JSX usage in examples),
+  the source code of deck.gl and related modules are now all restricted to
+  conformant ES6 (i.e. no ES2016 or ES2017, flow or similar syntax is used).
+  This means that the source code can run directly (ie. without transpilation)
+  in Node.js and modern browsers.
+  You could potentially import code directly from `deck.gl/src` to experiment with
+  this.
+* **Buble support** in examples. [Buble](https://buble.surge.sh/guide/) is a nice
+  alternative to babel if you have a simple app and don't need all the power of babel.
+  Many of the examples now use buble for faster and smaller builds.
+
+
+## Examples
+
+Code examples have been improved in several ways:
+* **Multiple Examples** deck.gl now provides multiple different examples in an
+  [examples folder](https://github.com/uber/deck.gl/tree/master/examples),
+  showing various interesting uses of deck.gl.
+* **Stand Alone Examples** Examples are now stand alone, each with its own
+  minimal `package.json` and configuration files, enabling them to be easily
+  copied and modified.
+* **Hello World Examples** Minimal examples for building with webpack 2
+  and browserify (previously called "exhibits") are still provided,
+  and have been further simplified.
+* **Improved Layer Browsing** The "main" example has been expanded into a full
+  "layer and property browser" allowing for easy testing of all core layers.
 
 
 ## Deprecations
 
 The various Choropleth layers have been deprecated since deck.gl has new and
-better layers that fill the same role. The choropleth layers are still available
-but will not be maintained beyond critical bug fixes and will likely be
-removed in the next major version of deck.gl.
+better layers (`GeoJsonLayer`, `PathLayer`, `PolygonLayer`) that fill the same
+roles. The choropleth layers are still available but will not be maintained
+beyond critical bug fixes and will likely be removed in the next major version
+of deck.gl.
 
-A careful API audit has also been done to align property names between layers.
-While this will makes the layers more consistent and easier to work with, it
-does mean that some properties have been renamed, with the old name being
-deprecated, and in some very few cases, default values have changed.
+A careful API audit has also been done to align property names between old and
+new layers.
+While this will makes the layers more consistent and the combined API easier
+to learn and work with, it does mean that some properties have been renamed,
+with the old name being deprecated, and in some very few cases,
+default values have changed.
 
 For more information on deprecations and how to update your code in response
-to them, please consult the deck.gl [Upgrade Guide](upgrade-guide.md).
+to these changes, please consult the deck.gl [Upgrade Guide](upgrade-guide.md).
 
 
 # deck.gl v3.0

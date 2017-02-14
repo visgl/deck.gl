@@ -1,7 +1,7 @@
 const {resolve} = require('path');
 const webpack = require('webpack');
 
-module.exports = {
+const CONFIG = {
   entry: {
     app: resolve('./app.js')
   },
@@ -37,4 +37,39 @@ module.exports = {
   plugins: [
     new webpack.EnvironmentPlugin(['MAPBOX_ACCESS_TOKEN', 'MapboxAccessToken'])
   ]
+};
+
+module.exports = env => {
+  if (env && env.prod) {
+
+    delete CONFIG.devtool;
+
+    CONFIG.plugins.push(
+      new webpack.LoaderOptionsPlugin({
+        minimize: true,
+        debug: false
+      })
+      // ,
+      /* eslint-disable camelcase */
+      // new webpack.optimize.UglifyJsPlugin({
+      //   compress: {
+      //     warnings: false,
+      //     screw_ie8: true,
+      //     conditionals: true,
+      //     unused: true,
+      //     comparisons: true,
+      //     sequences: true,
+      //     dead_code: true,
+      //     evaluate: true,
+      //     if_return: true,
+      //     join_vars: true
+      //   },
+      //   output: {
+      //     comments: false
+      //   }
+      // })
+    );
+  }
+
+  return CONFIG;
 };
