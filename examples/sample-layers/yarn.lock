@@ -277,7 +277,7 @@ braces@^1.8.2:
     preserve "^0.2.0"
     repeat-element "^1.1.2"
 
-brfs@^1.4.0:
+brfs@^1.4.0, brfs@^1.4.3:
   version "1.4.3"
   resolved "https://registry.yarnpkg.com/brfs/-/brfs-1.4.3.tgz#db675d6f5e923e6df087fca5859c9090aaed3216"
   dependencies:
@@ -701,7 +701,13 @@ date-now@^0.1.4:
   version "0.1.4"
   resolved "https://registry.yarnpkg.com/date-now/-/date-now-0.1.4.tgz#eaf439fd4d4848ad74e5cc7dbef200672b9e345b"
 
-debug@^2.2.0, debug@~2.2.0:
+debug@^2.2.0:
+  version "2.6.1"
+  resolved "https://registry.yarnpkg.com/debug/-/debug-2.6.1.tgz#79855090ba2c4e3115cc7d8769491d58f0491351"
+  dependencies:
+    ms "0.7.2"
+
+debug@~2.2.0:
   version "2.2.0"
   resolved "https://registry.yarnpkg.com/debug/-/debug-2.2.0.tgz#f87057e995b1a1f6ae6a4960664137bc56f039da"
   dependencies:
@@ -2327,6 +2333,10 @@ react-map-gl@^1.7.2:
     svg-transform "0.0.3"
     viewport-mercator-project "^2.0.1"
 
+react-stats@^0.0.5:
+  version "0.0.5"
+  resolved "https://registry.yarnpkg.com/react-stats/-/react-stats-0.0.5.tgz#7fc7942799ad94369a54b674059f645df40ab00f"
+
 react@^15.4.1:
   version "15.4.2"
   resolved "https://registry.yarnpkg.com/react/-/react-15.4.2.tgz#41f7991b26185392ba9bae96c8889e7e018397ef"
@@ -2842,6 +2852,10 @@ tough-cookie@~2.3.0:
   dependencies:
     punycode "^1.4.1"
 
+transform-loader@^0.2.3:
+  version "0.2.3"
+  resolved "https://registry.yarnpkg.com/transform-loader/-/transform-loader-0.2.3.tgz#019d1b4ba5bb30a49e0fd20ce04ee86ca0f0d511"
+
 tty-browserify@0.0.0:
   version "0.0.0"
   resolved "https://registry.yarnpkg.com/tty-browserify/-/tty-browserify-0.0.0.tgz#a157ba402da24e9bf957f9aa69d524eed42901a6"
@@ -3049,7 +3063,7 @@ webpack-dev-middleware@^1.9.0:
     path-is-absolute "^1.0.0"
     range-parser "^1.0.3"
 
-webpack-dev-server@^2.2.0:
+webpack-dev-server@^2.2.0-rc.0:
   version "2.3.0"
   resolved "https://registry.yarnpkg.com/webpack-dev-server/-/webpack-dev-server-2.3.0.tgz#0437704bbd4d941a6e4c061eb3cc232ed7d06101"
   dependencies:
@@ -3078,7 +3092,7 @@ webpack-sources@^0.1.4:
     source-list-map "~0.1.7"
     source-map "~0.5.3"
 
-webpack@*, webpack@^2.2.0:
+webpack@*, webpack@^2.2.0-rc.3:
   version "2.2.1"
   resolved "https://registry.yarnpkg.com/webpack/-/webpack-2.2.1.tgz#7bb1d72ae2087dd1a4af526afec15eed17dda475"
   dependencies:
@@ -3112,6 +3126,10 @@ websocket-driver@>=0.5.1:
 websocket-extensions@>=0.1.1:
   version "0.1.1"
   resolved "https://registry.yarnpkg.com/websocket-extensions/-/websocket-extensions-0.1.1.tgz#76899499c184b6ef754377c2dbb0cd6cb55d29e7"
+
+webworkify-webpack-dropin@^1.1.9:
+  version "1.1.9"
+  resolved "https://registry.yarnpkg.com/webworkify-webpack-dropin/-/webworkify-webpack-dropin-1.1.9.tgz#1d19b9817616319ee238a4537c6610f3df54f3ff"
 
 webworkify@^1.4.0:
   version "1.4.0"
