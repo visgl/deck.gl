@@ -1,6 +1,4 @@
 {
-  "name": "deckgl-rollup-example",
-  "version": "0.0.0",
   "license": "MIT",
   "scripts": {
     "start": "webpack-dev-server --config webpack2.config.js --progress --hot --port 3000 --open"

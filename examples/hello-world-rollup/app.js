@@ -1,7 +1,7 @@
 import 'babel-polyfill';
 import React, {Component} from 'react';
 import {render} from 'react-dom';
-// import MapGL from 'react-map-gl';
+import MapGL from 'react-map-gl';
 import DeckGL from 'deck.gl/react';
 import {LineLayer} from 'deck.gl';
 /* global document */
@@ -37,19 +37,7 @@ class Root extends Component {
     })];
 
     return (
-      // <MapGL
-      //   latitude={viewport.latitude}
-      //   longitude={viewport.longitude}
-      //   zoom={viewport.zoom}
-      //   bearing={viewport.bearing}
-      //   pitch={viewport.pitch}
-      //   width={width}
-      //   height={height}
-      //   mapStyle="mapbox://styles/mapbox/dark-v9"
-      //   mapboxApiAccessToken={MAPBOX_TOKEN}
-      //   perspectiveEnabled
-      //   onChangeViewport={v => this.setState({viewport: v})}>
-      <DeckGL
+      <MapGL
         latitude={viewport.latitude}
         longitude={viewport.longitude}
         zoom={viewport.zoom}
@@ -57,12 +45,22 @@ class Root extends Component {
         pitch={viewport.pitch}
         width={width}
         height={height}
-        layers={layers}/>
-      // </MapGL>
+        mapStyle="mapbox://styles/mapbox/dark-v9"
+        mapboxApiAccessToken={MAPBOX_TOKEN}
+        perspectiveEnabled
+        onChangeViewport={v => this.setState({viewport: v})}>
+        <DeckGL
+          latitude={viewport.latitude}
+          longitude={viewport.longitude}
+          zoom={viewport.zoom}
+          bearing={viewport.bearing}
+          pitch={viewport.pitch}
+          width={width}
+          height={height}
+          layers={layers}/>
+      </MapGL>
     );
   }
 }
 
-const root = document.createElement('div');
-document.body.appendChild(root);
-render(<Root />, root);
+render(<Root />, document.body.appendChild(document.createElement('div')));

@@ -4,7 +4,7 @@ dist-es6/
 dist-demo/
 node_modules/
 
-example/bundle.js
+dist-bundle.js
 examples/winds/data/*.html
 mapbox-token.js
 TODO
