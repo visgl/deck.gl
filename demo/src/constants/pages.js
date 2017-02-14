@@ -1,5 +1,5 @@
 function getDocUrl(filename) {
-  return `docs/${filename}`;
+  return `docs/v4.0/${filename}`;
 }
 
 function generatePath(tree) {
@@ -72,6 +72,10 @@ export const docPages = generatePath([
       {
         name: 'What\'s New',
         content: getDocUrl('whats-new.md')
+      },
+      {
+        name: 'Upgrade Guide',
+        content: getDocUrl('upgrade-guide.md')
       }
     ]
   },
@@ -114,12 +118,12 @@ export const docPages = generatePath([
       {
         name: 'Attribute Management',
         content: getDocUrl('attribute-management.md')
-      }
+      },
       // WIP
-      // {
-      //   name: 'Writing Shaders',
-      //   content: getDocUrl('writing-shaders.md')
-      // }
+      {
+        name: 'Writing Shaders',
+        content: getDocUrl('writing-shaders.md')
+      }
     ]
   },
   {
@@ -169,24 +173,44 @@ export const layerDocPages = generatePath([
     name: 'Core Layers',
     children: [
       {
-        name: 'ArcLayer',
-        content: getDocUrl('layers/arc-layer.md')
+        name: 'ScatterplotLayer',
+        content: getDocUrl('layers/scatterplot-layer.md')
       },
       {
-        name: 'ChoroplethLayer',
-        content: getDocUrl('layers/choropleth-layer.md')
+        name: 'ArcLayer',
+        content: getDocUrl('layers/arc-layer.md')
       },
       {
         name: 'LineLayer',
         content: getDocUrl('layers/line-layer.md')
       },
       {
-        name: 'ScatterplotLayer',
-        content: getDocUrl('layers/scatterplot-layer.md')
+        name: 'GeoJSONLayer',
+        content: getDocUrl('layers/geojson-layer.md')
+      },
+      {
+        name: 'PathLayer',
+        content: getDocUrl('layers/path-layer.md')
+      },
+      {
+        name: 'PolygonLayer',
+        content: getDocUrl('layers/polygon-layer.md')
+      },
+      {
+        name: 'IconLayer',
+        content: getDocUrl('layers/icon-layer.md')
+      },
+      {
+        name: 'GridLayer',
+        content: getDocUrl('layers/grid-layer.md')
       },
       {
         name: 'ScreenGridLayer',
         content: getDocUrl('layers/screen-grid-layer.md')
+      },
+      {
+        name: 'HexagonLayer',
+        content: getDocUrl('layers/hexagon-layer.md')
       }
     ]
   },
