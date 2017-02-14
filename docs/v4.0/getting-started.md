@@ -23,6 +23,9 @@ For more info about `luma.gl`, see remarks section.
 Check out the source code tabs in the examples page, or clone the
 deck.gl repository and run `npm start`.
 
+There's also the [react-map-gl](https://github.com/uber/react-map-gl) exhibits folder.
+Although not integrating deck.gl, it will give you a quick and simple example to look into.
+
 ## Remarks
 
 * `luma.gl` will not be automatically installed with deck.gl. The reason is that an application must only include one copy of luma.gl. If you are using npm v3, please explicitly install `luma.gl` with your app. This is similar
