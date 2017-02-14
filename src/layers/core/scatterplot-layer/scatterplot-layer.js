@@ -58,10 +58,12 @@ export default class ScatterplotLayer extends Layer {
     /* eslint-enable max-len */
   }
 
-  updateState({props, oldProps}) {
+  updateState(info) {
+    const {props, oldProps} = info;
     if (props.drawOutline !== oldProps.drawOutline) {
       this.state.model.geometry.drawMode = props.drawOutline ? GL.LINE_LOOP : GL.TRIANGLE_FAN;
     }
+    super.updateState(info);
   }
 
   draw({uniforms}) {
