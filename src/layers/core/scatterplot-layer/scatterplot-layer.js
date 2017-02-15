@@ -61,25 +61,19 @@ export default class ScatterplotLayer extends Layer {
   updateState(info) {
     const {props, oldProps} = info;
     if (props.drawOutline !== oldProps.drawOutline) {
-      this.state.model.geometry.drawMode = props.drawOutline ? GL.LINE_LOOP : GL.TRIANGLE_FAN;
+      this.setUniforms({drawOutline: props.drawOutline ? 1 : 0});
     }
     super.updateState(info);
   }
 
   draw({uniforms}) {
-    const {gl} = this.context;
-    const lineWidth = this.screenToDevicePixels(this.props.strokeWidth);
-    gl.lineWidth(lineWidth);
+    const {radius, radiusMinPixels, radiusMaxPixels, strokeWidth} = this.props;
     this.state.model.render(Object.assign({}, uniforms, {
-      radius: this.props.radius,
-      radiusMinPixels: this.props.radiusMinPixels,
-      radiusMaxPixels: this.props.radiusMaxPixels
+      strokeWidth,
+      radius,
+      radiusMinPixels,
+      radiusMaxPixels
     }));
-    // Setting line width back to 1 is here to workaround a Google Chrome bug
-    // gl.clear() and gl.isEnabled() will return GL_INVALID_VALUE even with
-    // correct parameter
-    // This is not happening on Safari and Firefox
-    gl.lineWidth(1.0);
   }
 
   _getModel(gl) {

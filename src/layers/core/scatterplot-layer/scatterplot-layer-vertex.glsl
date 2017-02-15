@@ -32,16 +32,20 @@ uniform float radius;
 uniform float radiusMinPixels;
 uniform float radiusMaxPixels;
 uniform float renderPickingBuffer;
+uniform float drawOutline;
+uniform float strokeWidth;
 
 varying vec4 vColor;
 varying vec2 uv;
+varying float strokeWidthRatio;
 
 void main(void) {
   // Multiply out radius and clamp to limits
   float radiusPixels = clamp(
     project_scale(radius * instanceRadius),
     radiusMinPixels, radiusMaxPixels
-  );
+  ) + drawOutline * strokeWidth / 2.0;
+  strokeWidthRatio = strokeWidth / radiusPixels;
 
   uv = positions.xy;
   // Find the center of the point and add the current vertex

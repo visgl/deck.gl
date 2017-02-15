@@ -24,12 +24,19 @@
 precision highp float;
 #endif
 
+uniform float drawOutline;
+
 varying vec4 vColor;
 varying vec2 uv;
+varying float strokeWidthRatio;
 
 void main(void) {
-  if (length(uv) > 1.0) {
+
+  float distToCenter = length(uv);
+
+  if (distToCenter <= 1.0 && (drawOutline == 0.0 || distToCenter >= 1.0 - strokeWidthRatio)) {
+    gl_FragColor = vColor;
+  } else {
     discard;
   }
-  gl_FragColor = vColor;
 }
