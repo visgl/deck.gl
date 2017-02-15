@@ -50,15 +50,13 @@ export default class ArcLayer extends Layer {
   }
 
   draw({uniforms}) {
-    const {gl} = this.context;
-    const lineWidth = this.screenToDevicePixels(this.props.strokeWidth);
-    gl.lineWidth(lineWidth);
-    this.state.model.render(uniforms);
-    // Setting line width back to 1 is here to workaround a Google Chrome bug
-    // gl.clear() and gl.isEnabled() will return GL_INVALID_VALUE even with
-    // correct parameter
-    // This is not happening on Safari and Firefox
-    gl.lineWidth(1.0);
+    const {strokeWidth} = this.props;
+    const {viewport: {width, height}} = this.context;
+
+    this.state.model.render(Object.assign({}, uniforms, {
+      screenSize: [width, height],
+      strokeWidth
+    }));
   }
 
   getShaders() {
@@ -70,23 +68,41 @@ export default class ArcLayer extends Layer {
 
   _createModel(gl) {
     let positions = [];
+    let indices = [];
     const NUM_SEGMENTS = 50;
     for (let i = 0; i < NUM_SEGMENTS; i++) {
-      positions = [...positions, i, i, i];
+      positions = positions.concat([i, -1, 0, i, 1, 0]);
+      if (i > 0) {
+        /*
+         *  (-1)-------------_,(1)
+         *    |          _,-"   |
+         *    o      _,-"       o
+         *    |  _,-"           |
+         *  (-2)"--------------(0)
+         */
+        indices = indices.concat([
+          i * 2 - 2, i * 2 - 1, i * 2 + 1,
+          i * 2 - 2, i * 2 + 1, i * 2 + 0
+        ]);
+      }
     }
 
     const shaders = assembleShaders(gl, this.getShaders());
 
-    return new Model({
+    const model = new Model({
       gl,
       vs: shaders.vs,
       fs: shaders.fs,
       geometry: new Geometry({
-        drawMode: GL.LINE_STRIP,
+        indices: new Uint16Array(indices),
         positions: new Float32Array(positions)
       }),
       isInstanced: true
     });
+
+    model.setUniforms({numSegments: NUM_SEGMENTS});
+
+    return model;
   }
 
   calculateInstancePositions(attribute) {

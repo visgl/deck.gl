@@ -49,15 +49,13 @@ export default class LineLayer extends Layer {
   }
 
   draw({uniforms}) {
-    const {gl} = this.context;
-    const lineWidth = this.screenToDevicePixels(this.props.strokeWidth);
-    gl.lineWidth(lineWidth);
-    this.state.model.render(uniforms);
-    // Setting line width back to 1 is here to workaround a Google Chrome bug
-    // gl.clear() and gl.isEnabled() will return GL_INVALID_VALUE even with
-    // correct parameter
-    // This is not happening on Safari and Firefox
-    gl.lineWidth(1.0);
+    const {strokeWidth} = this.props;
+    const {viewport: {width, height}} = this.context;
+
+    this.state.model.render(Object.assign({}, uniforms, {
+      screenSize: [width, height],
+      strokeWidth
+    }));
   }
 
   getShaders() {
@@ -68,7 +66,15 @@ export default class LineLayer extends Layer {
   }
 
   createModel(gl) {
-    const positions = [0, 0, 0, 1, 1, 1];
+    /*
+     *  (1)-------------_(2)
+     *   |          _,-"  |
+     *   o      _,-"      o
+     *   |  _,-"          |
+     *  (0)"-------------(3)
+     */
+    const positions = [0, -1, 0, 0, 1, 0, 1, -1, 0, 1, 1, 0];
+    const indices = [0, 1, 2, 3];
 
     const shaders = assembleShaders(gl, this.getShaders());
 
@@ -78,7 +84,8 @@ export default class LineLayer extends Layer {
       vs: shaders.vs,
       fs: shaders.fs,
       geometry: new Geometry({
-        drawMode: GL.LINE_STRIP,
+        drawMode: GL.TRIANGLE_STRIP,
+        indices: new Uint16Array(indices),
         positions: new Float32Array(positions)
       }),
       isInstanced: true

@@ -20,14 +20,15 @@
 
 #define SHADER_NAME arc-layer-vertex-shader
 
-const float N = 49.0;
-
 attribute vec3 positions;
 attribute vec4 instanceSourceColors;
 attribute vec4 instanceTargetColors;
 attribute vec4 instancePositions;
 attribute vec3 instancePickingColors;
 
+uniform float numSegments;
+uniform vec2 screenSize;
+uniform float strokeWidth;
 uniform float opacity;
 uniform float renderPickingBuffer;
 
@@ -43,22 +44,41 @@ float paraboloid(vec2 source, vec2 target, float ratio) {
   return (dSourceCenter + dXCenter) * (dSourceCenter - dXCenter);
 }
 
-void main(void) {
-  vec2 source = preproject(instancePositions.xy);
-  vec2 target = preproject(instancePositions.zw);
+float getSegmentRatio(float index) {
+  return smoothstep(0.0, 1.0, index / (numSegments - 1.0));
+}
 
-  float segmentRatio = smoothstep(0.0, 1.0, positions.x / N);
-
+vec3 getPos(vec2 source, vec2 target, float segmentRatio) {
   float vertex_height = paraboloid(source, target, segmentRatio);
-  if (vertex_height < 0.0) vertex_height = 0.0;
-  vec3 p = vec3(
-    // xy: linear interpolation of source & target
-    mix(source, target, segmentRatio),
-    // z: paraboloid interpolate of source & target
-    sqrt(vertex_height)
-  );
 
-  gl_Position = project(vec4(p, 1.0));
+  return vec3(
+    mix(source, target, segmentRatio),
+    sqrt(max(0.0, vertex_height))
+  );
+}
+
+void main(void) {
+  vec2 source = project_position(instancePositions.xy);
+  vec2 target = project_position(instancePositions.zw);
+
+  float segmentIndex = positions.x;
+  float segmentRatio = getSegmentRatio(segmentIndex);
+  // if it's the first point, use next - current as direction
+  // otherwise use current - prev
+  float indexDir = mix(-1.0, 1.0, step(segmentIndex, 0.0));
+  float nextSegmentRatio = getSegmentRatio(segmentIndex + indexDir);
+  
+  vec3 currPos = getPos(source, target, segmentRatio);
+  vec3 nextPos = getPos(source, target, nextSegmentRatio);
+  vec4 curr = project_to_clipspace(vec4(currPos, 1.0));
+  vec4 next = project_to_clipspace(vec4(nextPos, 1.0));
+
+  // extrude by strokeWidth
+  vec2 dir = normalize((next.xy - curr.xy) * indexDir * screenSize);
+  vec2 perp = vec2(-dir.y, dir.x);
+  vec2 offset = perp * positions.y * strokeWidth / screenSize;
+
+  gl_Position = curr + vec4(offset, 0.0, 0.0);
 
   vec4 color = mix(instanceSourceColors, instanceTargetColors, segmentRatio) / 255.;
 

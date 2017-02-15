@@ -26,6 +26,8 @@ attribute vec3 instanceTargetPositions;
 attribute vec4 instanceColors;
 attribute vec3 instancePickingColors;
 
+uniform vec2 screenSize;
+uniform float strokeWidth;
 uniform float opacity;
 uniform float renderPickingBuffer;
 
@@ -33,14 +35,21 @@ varying vec4 vColor;
 
 void main(void) {
   // Position
-  vec3 source = project_position(instanceSourcePositions);
-  vec3 target = project_position(instanceTargetPositions);
+  vec3 sourcePos = project_position(instanceSourcePositions);
+  vec3 targetPos = project_position(instanceTargetPositions);
+  vec4 source = project_to_clipspace(vec4(sourcePos, 1.0));
+  vec4 target = project_to_clipspace(vec4(targetPos, 1.0));
 
   // linear interpolation of source & target to pick right coord
   float segmentIndex = positions.x;
-  vec3 p = mix(source, target, segmentIndex);
+  vec4 p = mix(source, target, segmentIndex);
 
-  gl_Position = project_to_clipspace(vec4(p, 1.));
+  // extrude by strokeWidth
+  vec2 dir = normalize((target.xy - source.xy) * screenSize);
+  vec2 perp = vec2(-dir.y, dir.x);
+  vec2 offset = perp * positions.y * strokeWidth / screenSize;
+
+  gl_Position = p + vec4(offset, 0.0, 0.0);
 
   // Color
   vec4 color = vec4(instanceColors.rgb, instanceColors.a * opacity) / 255.;
