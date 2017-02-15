@@ -17,7 +17,7 @@ Inherits from all [Base Layer](/docs/layers/base-layer.md) properties.
 
 - Default: `1`
 
-The stroke width used to draw each arc.
+The stroke width used to draw each arc. Unit in pixels.
 
 ##### `getSourcePosition` (Function, optional)
 
