@@ -44,6 +44,20 @@ float paraboloid(vec2 source, vec2 target, float ratio) {
   return (dSourceCenter + dXCenter) * (dSourceCenter - dXCenter);
 }
 
+// offset vector by strokeWidth pixels
+// offset_direction is -1 (left) or 1 (right)
+vec2 getExtrusionOffset(vec2 line_clipspace, float offset_direction) {
+  // normalized direction of the line
+  vec2 dir_screenspace = normalize(line_clipspace * screenSize);
+  // rotate by 90 degrees
+  dir_screenspace = vec2(-dir_screenspace.y, dir_screenspace.x);
+
+  vec2 offset_screenspace = dir_screenspace * offset_direction * strokeWidth / 2.0;
+  vec2 offset_clipspace = offset_screenspace / screenSize * 2.0;
+
+  return offset_clipspace;
+}
+
 float getSegmentRatio(float index) {
   return smoothstep(0.0, 1.0, index / (numSegments - 1.0));
 }
@@ -67,17 +81,14 @@ void main(void) {
   // otherwise use current - prev
   float indexDir = mix(-1.0, 1.0, step(segmentIndex, 0.0));
   float nextSegmentRatio = getSegmentRatio(segmentIndex + indexDir);
-  
+
   vec3 currPos = getPos(source, target, segmentRatio);
   vec3 nextPos = getPos(source, target, nextSegmentRatio);
   vec4 curr = project_to_clipspace(vec4(currPos, 1.0));
   vec4 next = project_to_clipspace(vec4(nextPos, 1.0));
 
-  // extrude by strokeWidth
-  vec2 dir = normalize((next.xy - curr.xy) * indexDir * screenSize);
-  vec2 perp = vec2(-dir.y, dir.x);
-  vec2 offset = perp * positions.y * strokeWidth / screenSize;
-
+  // extrude
+  vec2 offset = getExtrusionOffset((next.xy - curr.xy) * indexDir, positions.y);
   gl_Position = curr + vec4(offset, 0.0, 0.0);
 
   vec4 color = mix(instanceSourceColors, instanceTargetColors, segmentRatio) / 255.;

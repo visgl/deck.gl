@@ -68,23 +68,16 @@ export default class ArcLayer extends Layer {
 
   _createModel(gl) {
     let positions = [];
-    let indices = [];
     const NUM_SEGMENTS = 50;
+    /*
+     *  (0, -1)-------------_(1, -1)
+     *       |          _,-"  |
+     *       o      _,-"      o
+     *       |  _,-"          |
+     *   (0, 1)"-------------(1, 1)
+     */
     for (let i = 0; i < NUM_SEGMENTS; i++) {
       positions = positions.concat([i, -1, 0, i, 1, 0]);
-      if (i > 0) {
-        /*
-         *  (-1)-------------_,(1)
-         *    |          _,-"   |
-         *    o      _,-"       o
-         *    |  _,-"           |
-         *  (-2)"--------------(0)
-         */
-        indices = indices.concat([
-          i * 2 - 2, i * 2 - 1, i * 2 + 1,
-          i * 2 - 2, i * 2 + 1, i * 2 + 0
-        ]);
-      }
     }
 
     const shaders = assembleShaders(gl, this.getShaders());
@@ -94,7 +87,7 @@ export default class ArcLayer extends Layer {
       vs: shaders.vs,
       fs: shaders.fs,
       geometry: new Geometry({
-        indices: new Uint16Array(indices),
+        drawMode: GL.TRIANGLE_STRIP,
         positions: new Float32Array(positions)
       }),
       isInstanced: true

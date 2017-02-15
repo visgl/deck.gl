@@ -33,6 +33,20 @@ uniform float renderPickingBuffer;
 
 varying vec4 vColor;
 
+// offset vector by strokeWidth pixels
+// offset_direction is -1 (left) or 1 (right)
+vec2 getExtrusionOffset(vec2 line_clipspace, float offset_direction) {
+  // normalized direction of the line
+  vec2 dir_screenspace = normalize(line_clipspace * screenSize);
+  // rotate by 90 degrees
+  dir_screenspace = vec2(-dir_screenspace.y, dir_screenspace.x);
+
+  vec2 offset_screenspace = dir_screenspace * offset_direction * strokeWidth / 2.0;
+  vec2 offset_clipspace = offset_screenspace / screenSize * 2.0;
+
+  return offset_clipspace;
+}
+
 void main(void) {
   // Position
   vec3 sourcePos = project_position(instanceSourcePositions);
@@ -44,11 +58,8 @@ void main(void) {
   float segmentIndex = positions.x;
   vec4 p = mix(source, target, segmentIndex);
 
-  // extrude by strokeWidth
-  vec2 dir = normalize((target.xy - source.xy) * screenSize);
-  vec2 perp = vec2(-dir.y, dir.x);
-  vec2 offset = perp * positions.y * strokeWidth / screenSize;
-
+  // extrude
+  vec2 offset = getExtrusionOffset(target.xy - source.xy, positions.y);
   gl_Position = p + vec4(offset, 0.0, 0.0);
 
   // Color

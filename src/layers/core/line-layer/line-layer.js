@@ -67,14 +67,13 @@ export default class LineLayer extends Layer {
 
   createModel(gl) {
     /*
-     *  (1)-------------_(2)
-     *   |          _,-"  |
-     *   o      _,-"      o
-     *   |  _,-"          |
-     *  (0)"-------------(3)
+     *  (0, -1)-------------_(1, -1)
+     *       |          _,-"  |
+     *       o      _,-"      o
+     *       |  _,-"          |
+     *   (0, 1)"-------------(1, 1)
      */
     const positions = [0, -1, 0, 0, 1, 0, 1, -1, 0, 1, 1, 0];
-    const indices = [0, 1, 2, 3];
 
     const shaders = assembleShaders(gl, this.getShaders());
 
@@ -85,7 +84,6 @@ export default class LineLayer extends Layer {
       fs: shaders.fs,
       geometry: new Geometry({
         drawMode: GL.TRIANGLE_STRIP,
-        indices: new Uint16Array(indices),
         positions: new Float32Array(positions)
       }),
       isInstanced: true
