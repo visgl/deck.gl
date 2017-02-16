@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 
 import {Layer} from '../../../lib';
-import {assembleShaders, lighting} from '../../../shader-utils';
+import {assembleShaders} from '../../../shader-utils';
 import {get} from '../../../lib/utils';
 import {GL, Model, Geometry} from 'luma.gl';
 import {readFileSync} from 'fs';
@@ -44,7 +44,14 @@ const defaultProps = {
   // Accessor for color
   getColor: f => get(f, 'color') || get(f, 'properties.color'),
   // Optional settings for 'lighting' shader module
-  lightSettings: {}
+  lightSettings: {
+    lightsPosition: [-122.45, 37.75, 8000, -122.0, 38.00, 5000],
+    ambientRatio: 0.05,
+    diffuseRatio: 0.6,
+    specularRatio: 0.8,
+    lightsStrength: [2.0, 0.0, 0.0, 0.0],
+    numberOfLights: 2
+  }
 };
 
 export default class PolygonLayer extends Layer {
@@ -79,15 +86,13 @@ export default class PolygonLayer extends Layer {
 
   updateState({props, oldProps, changeFlags}) {
     this.updateGeometry({props, oldProps, changeFlags});
+    const {opacity, extruded, lightSettings} = props;
 
-    if (props.extruded) {
-      this.setUniforms(lighting.updateSettings({
-        settings: props.lightSettings,
-        prevSettings: oldProps.lightSettings
-      }));
-    } else {
-      this.setUniforms(lighting.updateSettings({settings: {enabled: false}}));
-    }
+    this.setUniforms(Object.assign({}, {
+      extruded: extruded ? 1.0 : 0.0,
+      opacity
+    },
+    lightSettings));
   }
 
   updateGeometry({props, oldProps, changeFlags}) {

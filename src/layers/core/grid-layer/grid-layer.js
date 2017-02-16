@@ -23,7 +23,6 @@ import {assembleShaders} from '../../../shader-utils';
 import {GL, Model, CubeGeometry} from 'luma.gl';
 import {readFileSync} from 'fs';
 import {join} from 'path';
-import {mat4} from 'gl-matrix';
 
 const DEFAULT_COLOR = [255, 0, 255, 255];
 
@@ -33,13 +32,16 @@ const defaultProps = {
   lonOffset: 0.0113,
   getPosition: x => x.position,
   getElevation: x => x.elevation,
-  getColor: x => x.color
+  getColor: x => x.color,
+  lightSettings: {
+    lightsPosition: [-122.45, 37.65, 8000, -122.45, 37.20, 1000],
+    ambientRatio: 0.1,
+    diffuseRatio: 0.6,
+    specularRatio: 0.8,
+    lightsStrength: [1.0, 0.0, 1.0, 0.0],
+    numberOfLights: 2
+  }
 };
-
-// viewMatrix added as Uniform for lighting calculation
-const viewMatrixCompat = mat4.create();
-mat4.lookAt(viewMatrixCompat, [0, 0, 0], [0, 0, -1], [0, 1, 0]);
-const viewMatrix = new Float32Array(viewMatrixCompat);
 
 export default class GridLayer extends Layer {
   /**
@@ -58,13 +60,13 @@ export default class GridLayer extends Layer {
 
   getShaders() {
     const vertex = readFileSync(join(__dirname, './grid-layer-vertex.glsl'), 'utf8');
-    const lighting = readFileSync(join(__dirname, './lighting.glsl'), 'utf8');
     const picking = readFileSync(join(__dirname, './picking.glsl'), 'utf8');
-    const vs = picking.concat(lighting).concat(vertex);
+    const vs = picking.concat(vertex);
 
     return {
       vs,
-      fs: readFileSync(join(__dirname, './grid-layer-fragment.glsl'), 'utf8')
+      fs: readFileSync(join(__dirname, './grid-layer-fragment.glsl'), 'utf8'),
+      modules: ['lighting']
     };
   }
 
@@ -81,6 +83,11 @@ export default class GridLayer extends Layer {
     /* eslint-enable max-len */
   }
 
+  updateState(opt) {
+    super.updateState(opt);
+    this.updateUniforms();
+  }
+
   _createModel(gl) {
     const geometry = new CubeGeometry({});
     const shaders = assembleShaders(gl, this.getShaders());
@@ -95,15 +102,20 @@ export default class GridLayer extends Layer {
     });
   }
 
-  draw({uniforms}) {
-    const {extruded, latOffset, lonOffset} = this.props;
+  updateUniforms() {
+    const {opacity, extruded, latOffset, lonOffset, lightSettings} = this.props;
 
-    super.draw({uniforms: Object.assign({
+    this.setUniforms(Object.assign({}, {
       extruded,
+      opacity,
       latOffset,
-      lonOffset,
-      viewMatrix
-    }, uniforms)});
+      lonOffset
+    },
+    lightSettings));
+  }
+
+  draw({uniforms}) {
+    super.draw({uniforms: Object.assign({}, uniforms)});
   }
 
   calculateInstancePositions(attribute) {
