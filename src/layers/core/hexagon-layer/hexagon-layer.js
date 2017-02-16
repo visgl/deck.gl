@@ -46,13 +46,21 @@ const defaultProps = {
   radiusScale: 1,
   getCentroid: x => x.centroid,
   getColor: x => x.color,
-  getElevation: x => x.elevation
+  getElevation: x => x.elevation,
+  lightSettings: {
+      lightsPosition: [-122.45, 37.75, 8000, -122., 38.00, 5000],
+      ambientRatio: 0.05,
+      diffuseRatio: 0.6,
+      specularRatio: 0.8,
+      lightsStrength: [2.0, 0.0, 0.0, 0.0],
+      numberOfLights: 2
+  }
 };
 
-// viewMatrix added as Uniform for lighting calculation
-const viewMatrixCompat = mat4.create();
-mat4.lookAt(viewMatrixCompat, [0, 0, 0], [0, 0, -1], [0, 1, 0]);
-const viewMatrix = new Float32Array(viewMatrixCompat);
+// // viewMatrix added as Uniform for lighting calculation
+// const viewMatrixCompat = mat4.create();
+// mat4.lookAt(viewMatrixCompat, [0, 0, 0], [0, 0, -1], [0, 1, 0]);
+// const viewMatrix = new Float32Array(viewMatrixCompat);
 
 export default class HexagonLayer extends Layer {
 
@@ -168,11 +176,21 @@ export default class HexagonLayer extends Layer {
   }
 
   updateUniforms() {
-    const {opacity, extruded, radiusScale} = this.props;
+    const {opacity, extruded, radiusScale, lightSettings} = this.props;
+
+    const {lightsPosition, ambientRatio, diffuseRatio, specularRatio, lightsStrength} = lightSettings;
+
+    console.log('lightSettings: ', lightSettings);
+
     this.setUniforms({
       extruded,
       opacity,
-      radiusScale
+      radiusScale,
+      lightsPosition,
+      ambientRatio,
+      diffuseRatio,
+      specularRatio,
+      lightsStrength
     });
   }
 
@@ -180,10 +198,10 @@ export default class HexagonLayer extends Layer {
     const vertex = readFileSync(join(__dirname, './hexagon-layer-vertex.glsl'), 'utf8');
     const lighting = readFileSync(join(__dirname, './lighting.glsl'), 'utf8');
     const picking = readFileSync(join(__dirname, './picking.glsl'), 'utf8');
-    const vs = picking.concat(lighting).concat(vertex);
-
+    //const vs = picking.concat(lighting).concat(vertex);
+    const vs = picking.concat(vertex);
     return {
-      vs,
+      vs: vs,
       fs: readFileSync(join(__dirname, './hexagon-layer-fragment.glsl'), 'utf8')
     };
   }
@@ -202,7 +220,7 @@ export default class HexagonLayer extends Layer {
   }
 
   draw({uniforms}) {
-    super.draw({uniforms: Object.assign({}, {viewMatrix}, uniforms)});
+    super.draw({uniforms: Object.assign({}, uniforms)});
   }
 
   calculateInstancePositions(attribute) {
