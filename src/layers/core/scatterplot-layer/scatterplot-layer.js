@@ -58,17 +58,10 @@ export default class ScatterplotLayer extends Layer {
     /* eslint-enable max-len */
   }
 
-  updateState(info) {
-    const {props, oldProps} = info;
-    if (props.drawOutline !== oldProps.drawOutline) {
-      this.setUniforms({drawOutline: props.drawOutline ? 1 : 0});
-    }
-    super.updateState(info);
-  }
-
   draw({uniforms}) {
-    const {radius, radiusMinPixels, radiusMaxPixels, strokeWidth} = this.props;
+    const {radius, radiusMinPixels, radiusMaxPixels, drawOutline, strokeWidth} = this.props;
     this.state.model.render(Object.assign({}, uniforms, {
+      drawOutline: drawOutline ? 1 : 0,
       strokeWidth,
       radius,
       radiusMinPixels,
@@ -77,6 +70,7 @@ export default class ScatterplotLayer extends Layer {
   }
 
   _getModel(gl) {
+    // a square that minimally cover the unit circle
     const positions = [-1, -1, 0, -1, 1, 0, 1, 1, 0, 1, -1, 0];
     const shaders = assembleShaders(gl, this.getShaders());
 
@@ -85,7 +79,6 @@ export default class ScatterplotLayer extends Layer {
       id: this.props.id,
       vs: shaders.vs,
       fs: shaders.fs,
-      // timerQueryEnabled: true,
       geometry: new Geometry({
         drawMode: GL.TRIANGLE_FAN,
         positions: new Float32Array(positions)
