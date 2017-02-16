@@ -26,21 +26,41 @@ attribute vec3 instanceTargetPositions;
 attribute vec4 instanceColors;
 attribute vec3 instancePickingColors;
 
+uniform vec2 screenSize;
+uniform float strokeWidth;
 uniform float opacity;
 uniform float renderPickingBuffer;
 
 varying vec4 vColor;
 
+// offset vector by strokeWidth pixels
+// offset_direction is -1 (left) or 1 (right)
+vec2 getExtrusionOffset(vec2 line_clipspace, float offset_direction) {
+  // normalized direction of the line
+  vec2 dir_screenspace = normalize(line_clipspace * screenSize);
+  // rotate by 90 degrees
+  dir_screenspace = vec2(-dir_screenspace.y, dir_screenspace.x);
+
+  vec2 offset_screenspace = dir_screenspace * offset_direction * strokeWidth / 2.0;
+  vec2 offset_clipspace = offset_screenspace / screenSize * 2.0;
+
+  return offset_clipspace;
+}
+
 void main(void) {
   // Position
-  vec3 source = project_position(instanceSourcePositions);
-  vec3 target = project_position(instanceTargetPositions);
+  vec3 sourcePos = project_position(instanceSourcePositions);
+  vec3 targetPos = project_position(instanceTargetPositions);
+  vec4 source = project_to_clipspace(vec4(sourcePos, 1.0));
+  vec4 target = project_to_clipspace(vec4(targetPos, 1.0));
 
   // linear interpolation of source & target to pick right coord
   float segmentIndex = positions.x;
-  vec3 p = mix(source, target, segmentIndex);
+  vec4 p = mix(source, target, segmentIndex);
 
-  gl_Position = project_to_clipspace(vec4(p, 1.));
+  // extrude
+  vec2 offset = getExtrusionOffset(target.xy - source.xy, positions.y);
+  gl_Position = p + vec4(offset, 0.0, 0.0);
 
   // Color
   vec4 color = vec4(instanceColors.rgb, instanceColors.a * opacity) / 255.;
