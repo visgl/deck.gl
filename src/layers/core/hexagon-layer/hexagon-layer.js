@@ -23,7 +23,6 @@ import {assembleShaders} from '../../../shader-utils';
 import {Model, CylinderGeometry} from 'luma.gl';
 import {readFileSync} from 'fs';
 import {join} from 'path';
-import {mat4} from 'gl-matrix';
 import {log} from '../../../lib/utils';
 
 function positionsAreEqual(v1, v2) {
@@ -48,12 +47,12 @@ const defaultProps = {
   getColor: x => x.color,
   getElevation: x => x.elevation,
   lightSettings: {
-      lightsPosition: [-122.45, 37.75, 8000, -122., 38.00, 5000],
-      ambientRatio: 0.05,
-      diffuseRatio: 0.6,
-      specularRatio: 0.8,
-      lightsStrength: [2.0, 0.0, 0.0, 0.0],
-      numberOfLights: 2
+    lightsPosition: [-122.45, 37.75, 8000, -122.0, 38.00, 5000],
+    ambientRatio: 0.05,
+    diffuseRatio: 0.6,
+    specularRatio: 0.8,
+    lightsStrength: [2.0, 0.0, 0.0, 0.0],
+    numberOfLights: 2
   }
 };
 
@@ -107,16 +106,15 @@ export default class HexagonLayer extends Layer {
     this.updateRadiusAngle();
   }
 
-  updateState({props, oldProps, changeFlags: {dataChanged, viewportChanged}} = {}) {
-    const {model, attributeManager} = this.state;
+  updateState(opt) {
+    super.updateState(opt);
 
-    if (dataChanged) {
-      attributeManager.invalidateAll();
-    }
+    const viewportChanged = opt.changeFlags.viewportChanged;
+    const {model} = this.state;
 
     // Update the positions in the model if they've changes
     const verticesChanged =
-      !positionsAreEqual(oldProps.hexagonVertices, props.hexagonVertices);
+      !positionsAreEqual(opt.oldProps.hexagonVertices, opt.props.hexagonVertices);
 
     if (model && (verticesChanged || viewportChanged)) {
       this.updateRadiusAngle();
@@ -178,31 +176,22 @@ export default class HexagonLayer extends Layer {
   updateUniforms() {
     const {opacity, extruded, radiusScale, lightSettings} = this.props;
 
-    const {lightsPosition, ambientRatio, diffuseRatio, specularRatio, lightsStrength} = lightSettings;
-
-    console.log('lightSettings: ', lightSettings);
-
-    this.setUniforms({
+    this.setUniforms(Object.assign({}, {
       extruded,
       opacity,
-      radiusScale,
-      lightsPosition,
-      ambientRatio,
-      diffuseRatio,
-      specularRatio,
-      lightsStrength
-    });
+      radiusScale
+    },
+    lightSettings));
   }
 
   getShaders() {
     const vertex = readFileSync(join(__dirname, './hexagon-layer-vertex.glsl'), 'utf8');
-    const lighting = readFileSync(join(__dirname, './lighting.glsl'), 'utf8');
     const picking = readFileSync(join(__dirname, './picking.glsl'), 'utf8');
-    //const vs = picking.concat(lighting).concat(vertex);
     const vs = picking.concat(vertex);
     return {
-      vs: vs,
-      fs: readFileSync(join(__dirname, './hexagon-layer-fragment.glsl'), 'utf8')
+      vs,
+      fs: readFileSync(join(__dirname, './hexagon-layer-fragment.glsl'), 'utf8'),
+      modules: ['lighting']
     };
   }
 

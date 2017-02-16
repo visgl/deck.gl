@@ -24,7 +24,9 @@ attribute vec3 normals;
 attribute vec4 colors;
 attribute vec3 pickingColors;
 
+uniform float extruded;
 uniform float opacity;
+
 uniform float renderPickingBuffer;
 uniform vec3 selectedPickingColor;
 
@@ -32,29 +34,25 @@ uniform vec3 selectedPickingColor;
 uniform float pickingEnabled;
 varying vec4 vPickingColor;
 
-void picking_setPickColor(vec3 pickingColor) {
-  vPickingColor = vec4(pickingColor,  1.);
-}
-
-vec4 picking_setNormalAndPickColors(vec4 color, vec3 pickingColor) {
-  vec4 pickingColor4 = vec4(pickingColor.rgb, 1.);
-  vPickingColor = mix(color, pickingColor4, pickingEnabled);
-  return color;
-}
-
-// vec4 getColor(vec4 color, float opacity, vec3 pickingColor, float renderPickingBuffer) {
-//   vec4 color4 = vec4(color.xyz / 255., color.w / 255. * opacity);
-//   vec4 pickingColor4 = vec4(pickingColor / 255., 1.);
-//   return mix(color4, pickingColor4, renderPickingBuffer);
-// }
-
 void main(void) {
-  vec3 position_modelspace = project_position(positions);
-  gl_Position = project_to_clipspace(vec4(position_modelspace, 1.));
+  vec4 position_worldspace = vec4(project_position(positions), 1.0);
+  gl_Position = project_to_clipspace(position_worldspace);
 
-  vec3 litColor = lighting_filterColor(position_modelspace, normals, colors.rgb);
-  // vec3 litColor = colors.rgb;
+  float lightWeight = 1.0;
 
-  vec4 color = vec4(litColor.rgb, colors.a * opacity) / 255.;
-  picking_setNormalAndPickColors(color, pickingColors / 255.);
+  if (extruded > 0.5) {
+    lightWeight = getLightWeight(
+      position_worldspace,
+      normals
+    );
+  }
+
+  vec3 lightWeightedColor = lightWeight * colors.rgb;
+  vec4 color = vec4(lightWeightedColor, colors.a * opacity) / 255.0;
+
+  if (pickingEnabled > 0.5) {
+    vPickingColor = vec4(pickingColors.rgb / 255.0, 1.0);
+  } else {
+    vPickingColor = color;
+  }
 }
