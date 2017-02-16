@@ -16,7 +16,6 @@ export default class Header extends Component {
           </div>
           <div className="links">
             <Link activeClassName="active" to="examples">Examples</Link>
-            <Link activeClassName="active" to="layers">Layers</Link>
             <Link activeClassName="active" to="documentation">Documentation</Link>
           </div>
         </div>

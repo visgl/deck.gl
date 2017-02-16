@@ -1,5 +1,5 @@
 /* eslint-disable no-console */
-/* global console, window */
+/* global console */
 import assert from 'assert';
 
 export default function log(priority, ...args) {
@@ -26,8 +26,3 @@ function once(priority, arg, ...args) {
 log.priority = 0;
 log.log = log;
 log.once = once;
-
-// Expose to browser
-if (typeof window !== 'undefined') {
-  window.deck = window.deck || {log};
-}

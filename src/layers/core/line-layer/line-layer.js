@@ -79,7 +79,7 @@ export default class LineLayer extends Layer {
       fs: shaders.fs,
       geometry: new Geometry({
         drawMode: GL.LINE_STRIP,
-        positions: new Float32Array(positions)
+        attributes: {positions: new Float32Array(positions)}
       }),
       isInstanced: true
     });
