@@ -25,9 +25,7 @@ function calculateMatrixAndOffset({
   let projectionCenter;
   let modelViewProjectionMatrix;
 
-  let modelViewMatrix = new Matrix4(viewMatrix);
-  let modelViewMatrixInv;
-  let cameraPos;
+  const modelViewMatrixInv = new Matrix4(viewMatrix);
   const viewProjectionMatrix = new Matrix4(projectionMatrix).multiplyRight(viewMatrix);
 
   switch (projectionMode) {
@@ -39,13 +37,9 @@ function calculateMatrixAndOffset({
       // Apply model matrix if supplied
       // modelViewProjectionMatrix = modelViewProjectionMatrix.clone();
       modelViewProjectionMatrix.multiplyRight(modelMatrix);
-      modelViewMatrix.multiplyRight(modelMatrix);
+      modelViewMatrixInv.multiplyRight(modelMatrix);
     }
-
-    modelViewMatrixInv = new Matrix4(modelViewMatrix);
     modelViewMatrixInv.invert();
-    cameraPos = [modelViewMatrixInv[12], modelViewMatrixInv[13], modelViewMatrixInv[14]];
-
     break;
 
   // TODO: make lighitng work for meter offset mode
@@ -73,10 +67,11 @@ function calculateMatrixAndOffset({
     throw new Error('Unknown projection mode');
   }
 
+  const cameraPos = [modelViewMatrixInv[12], modelViewMatrixInv[13], modelViewMatrixInv[14]];
+
   return {
     modelViewProjectionMatrix,
     projectionCenter,
-    modelViewMatrix,
     cameraPos
   };
 }
@@ -97,7 +92,7 @@ export function getUniformsFromViewport(viewport, {
 } = {}) {
   assert(viewport.scale, 'Viewport scale missing');
 
-  const {projectionCenter, modelViewProjectionMatrix, modelViewMatrix, normalMatrix, cameraPos} =
+  const {projectionCenter, modelViewProjectionMatrix, cameraPos} =
     calculateMatrixAndOffset({projectionMode, positionOrigin, modelMatrix, viewport});
 
   assert(modelViewProjectionMatrix, 'Viewport missing modelViewProjectionMatrix');
@@ -123,8 +118,6 @@ export function getUniformsFromViewport(viewport, {
     }
   }
 
-  const glModelViewMatrix = new Float32Array(modelViewMatrix);
-
   return {
     // Projection mode values
     projectionMode,
@@ -145,7 +138,6 @@ export function getUniformsFromViewport(viewport, {
     projectionScaleFP64: fp64ify(viewport.scale),
 
     // This is for lighting calculations
-    modelViewMatrix: glModelViewMatrix,
     cameraPos: new Float32Array(cameraPos)
 
   };
