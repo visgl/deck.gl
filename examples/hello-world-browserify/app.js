@@ -1,4 +1,3 @@
-import 'babel-polyfill';
 import React, {Component} from 'react';
 import {render} from 'react-dom';
 import MapGL from 'react-map-gl';

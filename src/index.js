@@ -1,4 +1,4 @@
-// Copyright (c) 2015 Uber Technologies, Inc.
+	// Copyright (c) 2015 Uber Technologies, Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -49,16 +49,13 @@ export {default as ChoroplethLayer64} from './layers/deprecated/choropleth-layer
 export {default as ExtrudedChoroplethLayer64} from './layers/deprecated/extruded-choropleth-layer-64';
 
 // React exports
-export {default as autobind} from './react/autobind';
 export {default as DeckGL} from './react/deckgl';
 export {default as default} from './react/deckgl';
 
-// Effects
+// Experimental Features (May change in minor version bumps, use at your own risk)
+import {get} from './lib/utils/container';
 import {EffectManager, Effect} from './experimental/lib';
 import {default as ReflectionEffect} from './experimental/effects/reflection-effect';
-
-// Experimental
-import {get} from './lib/utils/container';
 
 export const experimental = {
   get,
