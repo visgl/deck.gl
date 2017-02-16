@@ -25,6 +25,9 @@ function calculateMatrixAndOffset({
   let projectionCenter;
   let modelViewProjectionMatrix;
 
+  let modelViewMatrix = new Matrix4(viewMatrix);
+  let modelViewMatrixInv;
+  let cameraPos;
   const viewProjectionMatrix = new Matrix4(projectionMatrix).multiplyRight(viewMatrix);
 
   switch (projectionMode) {
@@ -36,9 +39,16 @@ function calculateMatrixAndOffset({
       // Apply model matrix if supplied
       // modelViewProjectionMatrix = modelViewProjectionMatrix.clone();
       modelViewProjectionMatrix.multiplyRight(modelMatrix);
+      modelViewMatrix.multiplyRight(modelMatrix);
     }
+
+    modelViewMatrixInv = new Matrix4(modelViewMatrix);
+    modelViewMatrixInv.invert();
+    cameraPos = [modelViewMatrixInv[12], modelViewMatrixInv[13], modelViewMatrixInv[14]];
+
     break;
 
+  // TODO: make lighitng work for meter offset mode
   case COORDINATE_SYSTEM.METER_OFFSETS:
     // Calculate transformed projectionCenter (in 64 bit precision)
     // This is the key to offset mode precision (avoids doing this
@@ -65,7 +75,9 @@ function calculateMatrixAndOffset({
 
   return {
     modelViewProjectionMatrix,
-    projectionCenter
+    projectionCenter,
+    modelViewMatrix,
+    cameraPos
   };
 }
 
@@ -85,7 +97,7 @@ export function getUniformsFromViewport(viewport, {
 } = {}) {
   assert(viewport.scale, 'Viewport scale missing');
 
-  const {projectionCenter, modelViewProjectionMatrix} =
+  const {projectionCenter, modelViewProjectionMatrix, modelViewMatrix, normalMatrix, cameraPos} =
     calculateMatrixAndOffset({projectionMode, positionOrigin, modelMatrix, viewport});
 
   assert(modelViewProjectionMatrix, 'Viewport missing modelViewProjectionMatrix');
@@ -111,6 +123,8 @@ export function getUniformsFromViewport(viewport, {
     }
   }
 
+  const glModelViewMatrix = new Float32Array(modelViewMatrix);
+
   return {
     // Projection mode values
     projectionMode,
@@ -128,6 +142,11 @@ export function getUniformsFromViewport(viewport, {
     projectionScale: viewport.scale,
 
     // Deprecated?
-    projectionScaleFP64: fp64ify(viewport.scale)
+    projectionScaleFP64: fp64ify(viewport.scale),
+
+    // This is for lighting calculations
+    modelViewMatrix: glModelViewMatrix,
+    cameraPos: new Float32Array(cameraPos)
+
   };
 }
