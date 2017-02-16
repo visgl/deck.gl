@@ -49,8 +49,11 @@ after that?
 
 ### Understanding the Reactive Programming Model
 
-The key to writing good, performant deck.gl layers lies in understanding
-how to minimize updates and redundant calculations.
+deck.gl is designed according to the principles of the
+[Reactive Programming Model](https://en.wikipedia.org/wiki/Reactive_programming).
+
+The key to writing good, performant deck.gl applications and layers
+lies in understanding how to minimize updates and redundant calculations.
 
 It is important to understand the implications of the shallow equality
 comparisons deck.gl performs on layer properties, and how this implies that

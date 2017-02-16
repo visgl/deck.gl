@@ -1,9 +1,7 @@
-import 'babel-polyfill';
 import React, {Component} from 'react';
 import {render} from 'react-dom';
 import MapGL from 'react-map-gl';
-import DeckGL from 'deck.gl/react';
-import {LineLayer} from 'deck.gl';
+import DeckGL, {LineLayer} from 'deck.gl';
 /* global document */
 
 // Set your mapbox token here
@@ -38,11 +36,7 @@ class Root extends Component {
 
     return (
       <MapGL
-        latitude={viewport.latitude}
-        longitude={viewport.longitude}
-        zoom={viewport.zoom}
-        bearing={viewport.bearing}
-        pitch={viewport.pitch}
+        {...viewport}
         width={width}
         height={height}
         mapStyle="mapbox://styles/mapbox/dark-v9"
@@ -50,6 +44,7 @@ class Root extends Component {
         perspectiveEnabled
         onChangeViewport={v => this.setState({viewport: v})}>
         <DeckGL
+          debug
           latitude={viewport.latitude}
           longitude={viewport.longitude}
           zoom={viewport.zoom}

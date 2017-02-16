@@ -533,7 +533,7 @@ babel-plugin-transform-strict-mode@^6.22.0:
     babel-runtime "^6.22.0"
     babel-types "^6.22.0"
 
-babel-polyfill@^6.16.0, babel-polyfill@^6.5.0:
+babel-polyfill@^6.16.0:
   version "6.22.0"
   resolved "https://registry.yarnpkg.com/babel-polyfill/-/babel-polyfill-6.22.0.tgz#1ac99ebdcc6ba4db1e2618c387b2084a82154a3b"
   dependencies:
@@ -1320,9 +1320,9 @@ decamelize@^1.1.2:
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/decamelize/-/decamelize-1.2.0.tgz#f6534d15148269b20352e7bee26f501f9a191290"
 
-deck.gl@3.1.0-beta.16:
-  version "3.1.0-beta.16"
-  resolved "https://registry.yarnpkg.com/deck.gl/-/deck.gl-3.1.0-beta.16.tgz#b77d3cd7d905d494aaf16530e07641ce6bccc0b8"
+deck.gl@^4.0.0-beta.1:
+  version "4.0.0-beta.1"
+  resolved "https://registry.yarnpkg.com/deck.gl/-/deck.gl-4.0.0-beta.1.tgz#e40e026b1849ead970e5ec15d5294773b689c0ad"
   dependencies:
     earcut "^2.0.6"
     file-loader "^0.9.0"
@@ -2364,11 +2364,10 @@ loud-rejection@^1.0.0:
     currently-unhandled "^0.4.1"
     signal-exit "^3.0.0"
 
-luma.gl@3.0.0-alpha.4:
-  version "3.0.0-alpha.4"
-  resolved "https://registry.yarnpkg.com/luma.gl/-/luma.gl-3.0.0-alpha.4.tgz#71e454bbbbc09596e8dff8f287abb136394905a2"
+luma.gl@3.0.0-beta.3:
+  version "3.0.0-beta.3"
+  resolved "https://registry.yarnpkg.com/luma.gl/-/luma.gl-3.0.0-beta.3.tgz#290d9b9c9a3664698f9b26abe4911be7e0e32837"
   dependencies:
-    babel-polyfill "^6.5.0"
     gl-constants "^1.0.0"
     gl-matrix "^2.3.2"
     webgl-debug "^1.0.2"
@@ -2383,17 +2382,17 @@ map-obj@^1.0.0, map-obj@^1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/map-obj/-/map-obj-1.0.1.tgz#d933ceb9205d82bdcf4886f6742bdc2b4dea146d"
 
-"mapbox-gl-function@github:mapbox/mapbox-gl-function#111a2b442be0689a65f5818dd2603c9b06962be0":
+mapbox-gl-function@mapbox/mapbox-gl-function#111a2b442be0689a65f5818dd2603c9b06962be0:
   version "1.3.0"
   resolved "https://codeload.github.com/mapbox/mapbox-gl-function/tar.gz/111a2b442be0689a65f5818dd2603c9b06962be0"
 
-"mapbox-gl-shaders@github:mapbox/mapbox-gl-shaders#44b65f8090a74cbb0319664d010b8d8a8a1512b0":
+mapbox-gl-shaders@mapbox/mapbox-gl-shaders#44b65f8090a74cbb0319664d010b8d8a8a1512b0:
   version "1.0.0"
   resolved "https://codeload.github.com/mapbox/mapbox-gl-shaders/tar.gz/44b65f8090a74cbb0319664d010b8d8a8a1512b0"
   dependencies:
     brfs "^1.4.0"
 
-"mapbox-gl-style-spec@github:mapbox/mapbox-gl-style-spec#7d330d2abf1775abc95ab8b889089cf5ff579357":
+mapbox-gl-style-spec@mapbox/mapbox-gl-style-spec#7d330d2abf1775abc95ab8b889089cf5ff579357:
   version "8.9.0"
   resolved "https://codeload.github.com/mapbox/mapbox-gl-style-spec/tar.gz/7d330d2abf1775abc95ab8b889089cf5ff579357"
   dependencies:

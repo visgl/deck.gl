@@ -6,11 +6,11 @@ const webpack = require('webpack');
 module.exports = {
   // bundle app.js and everything it imports, recursively.
   entry: {
-    app: resolve('./app.js')
+    app: resolve('./src/app.js')
   },
 
   // inline source maps seem to work best
-  devtool: '#inline-source-map',
+  devtool: 'inline-source-map',
 
   resolve: {
     alias: {

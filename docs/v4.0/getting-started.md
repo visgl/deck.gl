@@ -3,9 +3,9 @@
 
 ## Installation
 
-    npm install --save deck.gl luma.gl babel-polyfill
+    npm install --save deck.gl luma.gl
 or
-    yarn add deck.gl luma.gl babel-polyfill
+    yarn add deck.gl luma.gl
 
 Remarks:
 * `luma.gl` will not be automatically installed with deck.gl.
@@ -18,7 +18,6 @@ Remarks:
 
 ## Basic Usage
 
-	import 'babel-polyfill';
     import DeckGL from 'deck.gl/react';
     import {ArcLayer} from 'deck.gl';
 
