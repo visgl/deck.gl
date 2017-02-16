@@ -1,17 +1,13 @@
 {
-  "name": "deckgl-hello-world",
-  "version": "0.0.0",
-  "license": "MIT",
   "scripts": {
-    "compile": "mkdir -p dest && buble -i app.js -o dest/app.js --no modules --target chrome:52",
-    "serve": "budo ./app.js --open -- -t bubleify -t rollupify -t envify",
-    "start": "npm run compile && npm run serve"
+    "start": "budo ./app.js --open -- -t babelify -t envify",
+    "build": "browserify ./app.js -o dist-bundle.js -t babelify"
   },
   "dependencies": {
     "babel-polyfill": "^6.16.0",
-    "deck.gl": "3.1.0.beta.15",
+    "deck.gl": "^4.0.0-beta.1",
     "immutable": "^3.8.1",
-    "luma.gl": "3.0.0-alpha.3",
+    "luma.gl": "3.0.0-beta.7",
     "react": "^15.4.1",
     "react-dom": "^15.4.1",
     "react-map-gl": "^1.7.2"
@@ -20,9 +16,14 @@
     "babel-preset-es2015": "^6.18.0",
     "babel-preset-react": "^6.16.0",
     "babelify": "^7.3.0",
-    "budo": "^9.2.2"
+    "browserify": "^14.0.0",
+    "budo": "^9.2.2",
+    "envify": "^4.0.0"
   },
   "babel": {
-    "presets": ["es2015", "react"]
+    "presets": [
+      "es2015",
+      "react"
+    ]
   }
 }

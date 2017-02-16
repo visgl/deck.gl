@@ -1,15 +1,14 @@
 /* global window, document */
-import 'babel-polyfill';
-
-import {ReflectionEffect} from 'deck.gl/experimental';
 import DeckGL, {autobind} from 'deck.gl/react';
-
-import {Matrix4} from 'luma.gl';
+import {experimental} from 'deck.gl';
+const {ReflectionEffect} = experimental;
 
 import React, {PureComponent} from 'react';
 import ReactDOM from 'react-dom';
 import MapboxGLMap from 'react-map-gl';
 import {FPSStats} from 'react-stats';
+
+import {Matrix4} from 'luma.gl';
 
 import LayerInfo from './layer-info';
 import LayerSelector from './layer-selector';

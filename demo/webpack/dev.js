@@ -47,7 +47,7 @@ module.exports = {
 
   plugins: [
     new webpack.DefinePlugin({
-      MAPBOX_ACCESS_TOKEN: JSON.stringify('pk.eyJ1IjoidWJlcmRhdGEiLCJhIjoiY2l2ZTRhdG11MDFhYTJ5cDNtb3A5dGp0YiJ9.GUb9v-U52cjPSt4vznbdwQ')
+      MAPBOX_ACCESS_TOKEN: `"${process.env.MAPBOX_ACCESS_TOKEN}"`
     })
   ]
 

@@ -1,14 +1,12 @@
 {
-  "name": "deckgl-hello-world-webpack",
-  "license": "MIT",
   "scripts": {
-    "start": "webpack-dev-server --config webpack2.buble.config.js --progress --hot --port 3001 --open"
+    "start": "webpack-dev-server --progress --hot --port 3001 --open"
   },
   "dependencies": {
     "babel-polyfill": "^6.16.0",
-    "deck.gl": "3.1.0-beta5",
+    "deck.gl": "3.1.0-beta.16",
     "immutable": "^3.8.1",
-    "luma.gl": "3.0.0-alpha2",
+    "luma.gl": "3.0.0-alpha.4",
     "react": "^15.4.1",
     "react-dom": "^15.4.1",
     "react-map-gl": "^1.7.2",

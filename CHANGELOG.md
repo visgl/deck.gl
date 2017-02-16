@@ -20,7 +20,12 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## Recent Dev Releases
 
-#### [v4.0.0-beta.1] - NOT YET PUBLISHED
+#### [v4.0.0-beta.2]
+- Bumps luma.gl with some hotfixes
+- Remove unfinished example
+- Doc improvements (upgrade guide)
+
+#### [v4.0.0-beta.1]
 
 API AUDIT CHANGES:
 - `GeoJsonLayer` `getHeight` => `getElevation`

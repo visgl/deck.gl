@@ -1,8 +1,36 @@
 /* eslint-disable guard-for-in */
-import {GL, glArrayFromType} from 'luma.gl';
+import {GL} from 'luma.gl';
 import {log} from './utils';
 import assert from 'assert';
+
 function noop() {}
+
+/* eslint-disable complexity */
+export function glArrayFromType(glType, {clamped = true} = {}) {
+  // Sorted in some order of likelihood to reduce amount of comparisons
+  switch (glType) {
+  case GL.FLOAT:
+    return Float32Array;
+  case GL.UNSIGNED_SHORT:
+  case GL.UNSIGNED_SHORT_5_6_5:
+  case GL.UNSIGNED_SHORT_4_4_4_4:
+  case GL.UNSIGNED_SHORT_5_5_5_1:
+    return Uint16Array;
+  case GL.UNSIGNED_INT:
+    return Uint32Array;
+  case GL.UNSIGNED_BYTE:
+    return clamped ? Uint8ClampedArray : Uint8Array;
+  case GL.BYTE:
+    return Int8Array;
+  case GL.SHORT:
+    return Int16Array;
+  case GL.INT:
+    return Int32Array;
+  default:
+    throw new Error('Failed to deduce type from array');
+  }
+}
+/* eslint-enable complexity */
 
 export default class AttributeManager {
   /**

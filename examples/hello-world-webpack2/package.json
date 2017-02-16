@@ -1,27 +1,20 @@
 {
-  "name": "deckgl-hello-world-webpack",
-  "version": "0.0.0",
-  "license": "MIT",
   "scripts": {
+    "start-local": "webpack-dev-server --env.local --progress --hot --port 3000 --open",
     "start": "webpack-dev-server --progress --hot --port 3000 --open",
     "build": "NODE_ENV=production webpack --env.prod=true"
   },
   "dependencies": {
-    "babel-polyfill": "^6.16.0",
-    "deck.gl": "3.1.0-beta.15",
+    "deck.gl": "^4.0.0-beta.1",
     "immutable": "^3.8.1",
-    "luma.gl": "3.0.0-alpha.3",
+    "luma.gl": "3.0.0-beta.7",
     "react": "^15.4.1",
     "react-dom": "^15.4.1",
     "react-map-gl": "^1.7.2"
   },
   "devDependencies": {
-    "brfs": "^1.4.3",
     "buble-loader": "^0.4.0",
-    "json-loader": "^0.5.4",
-    "transform-loader": "^0.2.3",
     "webpack": "^2.2.0",
-    "webpack-dev-server": "^2.2.0",
-    "webworkify-webpack-dropin": "^1.1.9"
+    "webpack-dev-server": "^2.2.0"
   }
 }

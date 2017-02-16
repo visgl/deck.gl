@@ -2,7 +2,7 @@
   "name": "deck.gl",
   "description": "A suite of 3D-enabled data visualization overlays, suitable for react-map-gl",
   "license": "MIT",
-  "version": "3.1.0-beta.16",
+  "version": "4.0.0-beta.2",
   "keywords": [
     "webgl",
     "visualization",
@@ -18,9 +18,7 @@
   "files": [
     "dist",
     "dist-es6",
-    "src",
-    "react.js",
-    "react-es6.js"
+    "src"
   ],
   "scripts": {
     "start": "(cd examples/main && yarn && npm run start-local)",
@@ -29,7 +27,8 @@
     "build-es5": "rm -fr dist && babel src --out-dir dist --plugins=static-fs,transform-es2015-modules-commonjs --source-maps inline",
     "build-buble": "buble dist-es6 -o dist --no modules --y dangerousForOf --objectAssign",
     "build": "npm run build-clean && npm run build-es6 && npm run build-es5 && webpack -d --display-modules",
-    "lint": "eslint src test examples",
+    "lint": "eslint src test examples && npm run lint-yarn",
+    "lint-yarn": "find . -name yarn.lock -exec grep -l unpm.u {} \\;",
     "publish-prod": "npm run build && npm run test && npm run test-dist && npm publish",
     "publish-beta": "npm run build && npm run test && npm run test-dist && npm publish --tag beta",
     "test": "npm run lint && npm run test-node",
@@ -68,7 +67,7 @@
     "faucet": "0.0.1",
     "gl": "^4.0.3",
     "immutable": "^3.8.1",
-    "luma.gl": "3.0.0-alpha.3",
+    "luma.gl": "3.0.0-beta.9",
     "module-alias": "^2.0.0",
     "pre-commit": "^1.2.2",
     "raw-loader": "^0.5.1",
@@ -86,7 +85,7 @@
     "webpack-dev-server": "^2.2.0"
   },
   "peerDependencies": {
-    "luma.gl": "^3.0.0-alpha.3",
+    "luma.gl": "3.0.0-beta.9",
     "react": "0.14.x - 15.x",
     "react-dom": "0.14.x - 15.x"
   },

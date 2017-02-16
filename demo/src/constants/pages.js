@@ -1,5 +1,5 @@
 function getDocUrl(filename) {
-  return `docs/${filename}`;
+  return `docs/v4.0/${filename}`;
 }
 
 function generatePath(tree) {
@@ -72,6 +72,10 @@ export const docPages = generatePath([
       {
         name: 'What\'s New',
         content: getDocUrl('whats-new.md')
+      },
+      {
+        name: 'Upgrade Guide',
+        content: getDocUrl('upgrade-guide.md')
       }
     ]
   },
@@ -101,28 +105,6 @@ export const docPages = generatePath([
     ]
   },
   {
-    name: 'Creating Custom Layers',
-    children: [
-      {
-        name: 'Custom Layers',
-        content: getDocUrl('custom-layers.md')
-      },
-      {
-        name: 'Layer Lifecycle',
-        content: getDocUrl('layer-lifecycle.md')
-      },
-      {
-        name: 'Attribute Management',
-        content: getDocUrl('attribute-management.md')
-      }
-      // WIP
-      // {
-      //   name: 'Writing Shaders',
-      //   content: getDocUrl('writing-shaders.md')
-      // }
-    ]
-  },
-  {
     name: 'Advanced Topics',
     children: [
       {
@@ -138,22 +120,9 @@ export const docPages = generatePath([
         content: getDocUrl('64-bits.md')
       }
     ]
-  }
-  // WIP
-  // {
-  //   name: 'Release History',
-  //   children: [
-  //     {
-  //       name: 'Release History',
-  //       content: getDocUrl('release-history.md')
-  //     }
-  //   ]
-  // }
-]);
-
-export const layerDocPages = generatePath([
+  },
   {
-    name: 'Catalog',
+    name: 'About Layers',
     children: [
       {
         name: 'Overview',
@@ -169,24 +138,44 @@ export const layerDocPages = generatePath([
     name: 'Core Layers',
     children: [
       {
-        name: 'ArcLayer',
-        content: getDocUrl('layers/arc-layer.md')
+        name: 'ScatterplotLayer',
+        content: getDocUrl('layers/scatterplot-layer.md')
       },
       {
-        name: 'ChoroplethLayer',
-        content: getDocUrl('layers/choropleth-layer.md')
+        name: 'ArcLayer',
+        content: getDocUrl('layers/arc-layer.md')
       },
       {
         name: 'LineLayer',
         content: getDocUrl('layers/line-layer.md')
       },
       {
-        name: 'ScatterplotLayer',
-        content: getDocUrl('layers/scatterplot-layer.md')
+        name: 'GeoJSONLayer',
+        content: getDocUrl('layers/geojson-layer.md')
+      },
+      {
+        name: 'PathLayer',
+        content: getDocUrl('layers/path-layer.md')
+      },
+      {
+        name: 'PolygonLayer',
+        content: getDocUrl('layers/polygon-layer.md')
+      },
+      {
+        name: 'IconLayer',
+        content: getDocUrl('layers/icon-layer.md')
+      },
+      {
+        name: 'GridLayer',
+        content: getDocUrl('layers/grid-layer.md')
       },
       {
         name: 'ScreenGridLayer',
         content: getDocUrl('layers/screen-grid-layer.md')
+      },
+      {
+        name: 'HexagonLayer',
+        content: getDocUrl('layers/hexagon-layer.md')
       }
     ]
   },
@@ -198,10 +187,6 @@ export const layerDocPages = generatePath([
         content: getDocUrl('layers/arc-layer-64.md')
       },
       {
-        name: 'ChoroplethLayer64',
-        content: getDocUrl('layers/choropleth-layer-64.md')
-      },
-      {
         name: 'LineLayer64',
         content: getDocUrl('layers/line-layer-64.md')
       },
@@ -210,14 +195,56 @@ export const layerDocPages = generatePath([
         content: getDocUrl('layers/scatterplot-layer-64.md')
       }
     ]
+  },
+  {
+    name: 'Deprecated Layers',
+    children: [
+      {
+        name: 'ChoroplethLayer',
+        content: getDocUrl('layers/choropleth-layer.md')
+      },
+      {
+        name: 'ChoroplethLayer64',
+        content: getDocUrl('layers/choropleth-layer-64.md')
+      },
+      {
+        name: 'ExtrudedChoroplethLayer64',
+        content: getDocUrl('layers/extruded-choropleth-layer.md')
+      }
+    ]
+  },
+  {
+    name: 'Custom Layers',
+    children: [
+      {
+        name: 'Custom Layers',
+        content: getDocUrl('custom-layers.md')
+      },
+      {
+        name: 'Layer Lifecycle',
+        content: getDocUrl('layer-lifecycle.md')
+      },
+      {
+        name: 'Attribute Management',
+        content: getDocUrl('attribute-management.md')
+      },
+      // WIP
+      {
+        name: 'Writing Shaders',
+        content: getDocUrl('writing-shaders.md')
+      }
+    ]
   }
-  // {
-  //   name: 'Sample Layers',
-  //   children: [
-  //     {
-  //       name: 'ExtrudedChoroplethLayer',
-  //       content: getDocUrl('layers/extruded-choropleth-layer.md')
-  //     }
-  //   ]
-  // }
+]);
+
+export const layerDocPages = generatePath([
+  {
+    name: 'Deleted',
+    children: [
+      {
+        name: 'Overview',
+        content: getDocUrl('layers/README.md')
+      }
+    ]
+  }
 ]);

@@ -1,4 +1,3 @@
-import 'babel-polyfill';
 import React, {Component} from 'react';
 import {render} from 'react-dom';
 import MapGL from 'react-map-gl';
@@ -63,6 +62,4 @@ class Root extends Component {
   }
 }
 
-const root = document.createElement('div');
-document.body.appendChild(root);
-render(<Root />, root);
+render(<Root />, document.body.appendChild(document.createElement('div')));

@@ -58,41 +58,20 @@ export default class ScatterplotLayer extends Layer {
     /* eslint-enable max-len */
   }
 
-  updateState({props, oldProps}) {
-    if (props.drawOutline !== oldProps.drawOutline) {
-      this.state.model.geometry.drawMode = props.drawOutline ? GL.LINE_LOOP : GL.TRIANGLE_FAN;
-    }
-  }
-
   draw({uniforms}) {
-    const {gl} = this.context;
-    const lineWidth = this.screenToDevicePixels(this.props.strokeWidth);
-    gl.lineWidth(lineWidth);
+    const {radius, radiusMinPixels, radiusMaxPixels, drawOutline, strokeWidth} = this.props;
     this.state.model.render(Object.assign({}, uniforms, {
-      radius: this.props.radius,
-      radiusMinPixels: this.props.radiusMinPixels,
-      radiusMaxPixels: this.props.radiusMaxPixels
+      drawOutline: drawOutline ? 1 : 0,
+      strokeWidth,
+      radius,
+      radiusMinPixels,
+      radiusMaxPixels
     }));
-    // Setting line width back to 1 is here to workaround a Google Chrome bug
-    // gl.clear() and gl.isEnabled() will return GL_INVALID_VALUE even with
-    // correct parameter
-    // This is not happening on Safari and Firefox
-    gl.lineWidth(1.0);
   }
 
   _getModel(gl) {
-    const NUM_SEGMENTS = 16;
-    const positions = [];
-    for (let i = 0; i < NUM_SEGMENTS; i++) {
-      positions.push(
-        Math.cos(Math.PI * 2 * i / NUM_SEGMENTS),
-        Math.sin(Math.PI * 2 * i / NUM_SEGMENTS),
-        0
-      );
-    }
-    /* eslint-disable */
-
-
+    // a square that minimally cover the unit circle
+    const positions = [-1, -1, 0, -1, 1, 0, 1, 1, 0, 1, -1, 0];
     const shaders = assembleShaders(gl, this.getShaders());
 
     return new Model({
@@ -106,7 +85,6 @@ export default class ScatterplotLayer extends Layer {
       }),
       isInstanced: true
     });
-    return model;
   }
 
   calculateInstancePositions(attribute) {

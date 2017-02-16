@@ -1,17 +1,11 @@
-import 'babel-polyfill';
-
 import React, {Component} from 'react';
 import {render} from 'react-dom';
-import DeckGL from 'deck.gl';
-import {LineLayer} from 'deck.gl';
-// import MapGL from 'react-map-gl';
+import MapGL from 'react-map-gl';
+import DeckGL, {LineLayer} from 'deck.gl';
 /* global document */
 
-const token = '' || process.env.MAPBOX_ACCESS_TOKEN || process.env.MapboxAccessToken; // eslint-disable-line
-
-if (!token) {
-  throw new Error('Please specify a valid mapbox token');
-}
+// Set your mapbox token here
+const MAPBOX_TOKEN = process.env.MAPBOX_ACCESS_TOKEN; // eslint-disable-line
 
 class Root extends Component {
 
@@ -31,7 +25,6 @@ class Root extends Component {
   }
 
   render() {
-
     const {viewport, width, height} = this.state;
 
     const layers = [new LineLayer({
@@ -42,18 +35,27 @@ class Root extends Component {
     })];
 
     return (
-      <DeckGL
+      <MapGL
         {...viewport}
         width={width}
         height={height}
-        layers={layers}
-        debug />
+        mapStyle="mapbox://styles/mapbox/dark-v9"
+        mapboxApiAccessToken={MAPBOX_TOKEN}
+        perspectiveEnabled
+        onChangeViewport={v => this.setState({viewport: v})}>
+        <DeckGL
+          debug
+          latitude={viewport.latitude}
+          longitude={viewport.longitude}
+          zoom={viewport.zoom}
+          bearing={viewport.bearing}
+          pitch={viewport.pitch}
+          width={width}
+          height={height}
+          layers={layers}/>
+      </MapGL>
     );
   }
-
 }
 
-const root = document.createElement('div');
-document.body.appendChild(root);
-
-render(<Root />, root);
+render(<Root />, document.body.appendChild(document.createElement('div')));
