@@ -1,3 +1,7 @@
+<p align="right">
+  <img src="https://img.shields.io/badge/extruded-yes-blue.svg?style=flat-square" alt="64-bit" />
+</p>
+
 # GeoJsonLayer
 
 The GeoJson Layer takes in [GeoJson](http://geojson.org/) formatted data and

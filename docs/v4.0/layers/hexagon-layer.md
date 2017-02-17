@@ -1,3 +1,7 @@
+<p align="right">
+  <img src="https://img.shields.io/badge/extruded-yes-blue.svg?style=flat-square" alt="64-bit" />
+</p>
+
 # HexagonLayer
 
 The HexagonLayer is a variation of grid layer. it is intended to render tessellatied hexagons,
