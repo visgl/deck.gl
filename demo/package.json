@@ -7,7 +7,7 @@
   },
   "main": "index.js",
   "scripts": {
-    "start": "webpack-dev-server --config webpack/dev --progress --hot --content-base ./src/static --port 3000 --open",
+    "start": "webpack-dev-server --config webpack/dev --progress --content-base ./src/static --port 3000",
     "build": "rm -rf ./dist && mkdir dist && cp -r ./src/static/* dist && webpack -p --config webpack/prod",
     "lint": "eslint src --ignore-pattern workers"
   },
@@ -52,12 +52,14 @@
     "file-loader": "^0.9.0",
     "node-sass": "^4.3.0",
     "raw-loader": "^0.5.1",
+    "react-hot-loader": "next",
     "sass-loader": "^4.1.1",
     "style-loader": "^0.13.1",
     "transform-loader": "^0.2.3",
     "url-loader": "^0.5.7",
     "webpack": "^2.2.0",
     "webpack-dev-server": "^1.16.2",
+    "webpack-hot-middleware": "^2.17.0",
     "webworkify-webpack-dropin": "^1.1.9"
   },
   "babel": {
@@ -68,7 +70,14 @@
     ],
     "plugins": [
       "transform-decorators-legacy"
-    ]
+    ],
+    "env": {
+      "test": {
+        "plugins": [
+          "react-hot-loader/babel"
+        ]
+      }
+    }
   },
   "eslintConfig": {
     "parser": "babel-eslint",
