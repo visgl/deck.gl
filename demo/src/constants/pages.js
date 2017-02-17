@@ -70,23 +70,6 @@ export const docPages = generatePath([
         content: getDocUrl('getting-started.md')
       },
       {
-        name: 'What\'s New',
-        content: getDocUrl('whats-new.md')
-      },
-      {
-        name: 'Upgrade Guide',
-        content: getDocUrl('upgrade-guide.md')
-      }
-    ]
-  },
-  {
-    name: 'Usage',
-    children: [
-      {
-        name: 'Using Layers',
-        content: getDocUrl('using-layers.md')
-      },
-      {
         name: 'Using With React',
         content: getDocUrl('using-with-react.md')
       },
@@ -95,29 +78,12 @@ export const docPages = generatePath([
         content: getDocUrl('using-with-mapbox-gl.md')
       },
       {
-        name: 'Using Standalone',
-        content: getDocUrl('using-standalone.md')
+        name: 'What\'s New',
+        content: getDocUrl('whats-new.md')
       },
       {
-        name: 'Tips and Tricks',
-        content: getDocUrl('tips-and-tricks.md')
-      }
-    ]
-  },
-  {
-    name: 'Advanced Topics',
-    children: [
-      {
-        name: 'Coordinate Systems',
-        content: getDocUrl('coordinate-systems.md')
-      },
-      {
-        name: 'Performance',
-        content: getDocUrl('performance.md')
-      },
-      {
-        name: '64 bit Layers',
-        content: getDocUrl('64-bits.md')
+        name: 'Upgrade Guide',
+        content: getDocUrl('upgrade-guide.md')
       }
     ]
   },
@@ -129,8 +95,20 @@ export const docPages = generatePath([
         content: getDocUrl('layers/README.md')
       },
       {
+        name: 'Using Layers',
+        content: getDocUrl('using-layers.md')
+      },
+      {
         name: 'Layer Base Class',
         content: getDocUrl('layers/base-layer.md')
+      },
+      {
+        name: '64 bit Layers',
+        content: getDocUrl('64-bits.md')
+      },
+      {
+        name: 'Coordinate Systems',
+        content: getDocUrl('coordinate-systems.md')
       }
     ]
   },
@@ -180,36 +158,19 @@ export const docPages = generatePath([
     ]
   },
   {
-    name: '64bit Layers',
-    children: [
-      {
-        name: 'ArcLayer64',
-        content: getDocUrl('layers/arc-layer-64.md')
-      },
-      {
-        name: 'LineLayer64',
-        content: getDocUrl('layers/line-layer-64.md')
-      },
-      {
-        name: 'ScatterplotLayer64',
-        content: getDocUrl('layers/scatterplot-layer-64.md')
-      }
-    ]
-  },
-  {
     name: 'Deprecated Layers',
     children: [
       {
         name: 'ChoroplethLayer',
-        content: getDocUrl('layers/choropleth-layer.md')
+        content: getDocUrl('layers/deprecated/choropleth-layer.md')
       },
       {
         name: 'ChoroplethLayer64',
-        content: getDocUrl('layers/choropleth-layer-64.md')
+        content: getDocUrl('layers/deprecated/choropleth-layer-64.md')
       },
       {
         name: 'ExtrudedChoroplethLayer64',
-        content: getDocUrl('layers/extruded-choropleth-layer.md')
+        content: getDocUrl('layers/deprecated/extruded-choropleth-layer.md')
       }
     ]
   },
@@ -217,7 +178,11 @@ export const docPages = generatePath([
     name: 'Custom Layers',
     children: [
       {
-        name: 'Custom Layers',
+        name: 'Customizing Layers',
+        content: getDocUrl('subclassing-layers.md')
+      },
+      {
+        name: 'Writing New Layers',
         content: getDocUrl('custom-layers.md')
       },
       {
@@ -228,22 +193,26 @@ export const docPages = generatePath([
         name: 'Attribute Management',
         content: getDocUrl('attribute-management.md')
       },
-      // WIP
       {
         name: 'Writing Shaders',
         content: getDocUrl('writing-shaders.md')
       }
     ]
-  }
-]);
-
-export const layerDocPages = generatePath([
+  },
   {
-    name: 'Deleted',
+    name: 'Advanced Topics',
     children: [
       {
-        name: 'Overview',
-        content: getDocUrl('layers/README.md')
+        name: 'Performance',
+        content: getDocUrl('performance.md')
+      },
+      {
+        name: 'Using Standalone',
+        content: getDocUrl('using-standalone.md')
+      },
+      {
+        name: 'Tips and Tricks',
+        content: getDocUrl('tips-and-tricks.md')
       }
     ]
   }

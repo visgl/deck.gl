@@ -1,18 +1,10 @@
-# Enhanced Choropleth Layer (64 bit) **REMOVED**
+# Extruded Choropleth Layer (64 bit) **(DEPRECATED)**
 
-Note: The `EnhancedChoroplethLayer` sample layer has been removed in deck.gl v4
-in favor of the new `PathLayer`. It is still available as a stand-alone
-example in the examples folder and can be copied from there, but is no longer
-included in the deck.gl package.
+Note: The `ExtrudedChoroplethLayer64` has been deprecated in deck.gl v4 in favor
+of the new `GeoJsonLayer` and `PolygonLayer`. It will likely be removed in the
+next major release of deck.gl.
 
-A layer that extrudes lines in Choropleth polygons by tesselating them into
-long, thin triangles. This provides control over line thickness
-while ensuring good line mitering, overcoming WebGL's limitations in this
-regard.
-
-**Note:** Very sharp angles can generate very long miters and handling of this
-case needs more work, but for "modest" angles (e.g. 60 degrees in hexagons)
-the results will be good.
+Choropleth Layer with Elevation
 
     import {ExtrudedChoroplethLayer64} from 'deck.gl';
 
