@@ -1,54 +1,19 @@
-const {resolve, join} = require('path');
 const webpack = require('webpack');
 
-const sources = join(__dirname, '../../src');
-const demo = join(__dirname, '../src');
+const config = require('./config');
 
-module.exports = {
+module.exports = Object.assign(config, {
 
-  entry: ['./src/main'],
+  entry: [
+    'webpack-hot-middleware/client',
+    './src/main'
+  ],
 
   devtool: 'cheap-source-maps',
 
-  module: {
-    rules: [{
-      test: /\.js$/,
-      loader: 'babel-loader'
-    }, {
-      test: /\.scss$/,
-      loaders: ['style-loader', 'css-loader', 'sass-loader', 'autoprefixer-loader']
-    }, {
-      test: /\.(eot|svg|ttf|woff|woff2|gif|jpe?g|png)$/,
-      loader: 'url-loader'
-    }, {
-      test: /\.glsl$/,
-      loader: 'raw-loader',
-      include: demo,
-      enforce: 'post'
-    }, {
-      include: [/src\/.*\.js$/, /node_modules\/mapbox-gl.*\.js$/],
-      loader: 'transform-loader?brfs-babel'
-    }]
-  },
+  plugins: config.plugins.concat([
+    new webpack.HotModuleReplacementPlugin(),
+    new webpack.NoErrorsPlugin()
+  ])
 
-  resolve: {
-    alias: {
-      webworkify: 'webworkify-webpack-dropin',
-      react: resolve('./node_modules/react'),
-      'deck.gl': sources,
-      'react-dom': resolve('./node_modules/react-dom'),
-      'gl-matrix': resolve('./node_modules/gl-matrix/dist/gl-matrix.js')
-    }
-  },
-
-  node: {
-    fs: 'empty'
-  },
-
-  plugins: [
-    new webpack.DefinePlugin({
-      MAPBOX_ACCESS_TOKEN: `"${process.env.MAPBOX_ACCESS_TOKEN}"`
-    })
-  ]
-
-};
+});
