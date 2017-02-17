@@ -1,12 +1,10 @@
-const devConfig = require('./dev');
+const config = require('./config');
 
-module.exports = Object.assign(devConfig, {
+module.exports = Object.assign(config, {
 
   output: {
     path: './dist',
     filename: 'bundle.js'
-  },
-
-  devtool: ''
+  }
 
 });
