@@ -1,5 +1,6 @@
 import {PathLayer} from 'deck.gl';
 
+// PathLayer subclass by @dcposch
 export default class MultiColorPathLayer extends PathLayer {
   calculateColors(attribute) {
     const {data, getColor} = this.props;
