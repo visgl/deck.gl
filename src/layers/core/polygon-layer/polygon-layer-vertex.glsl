@@ -38,21 +38,22 @@ void main(void) {
   vec4 position_worldspace = vec4(project_position(positions), 1.0);
   gl_Position = project_to_clipspace(position_worldspace);
 
-  float lightWeight = 1.0;
+  if (pickingEnabled < 0.5) {
+    float lightWeight = 1.0;
 
-  if (extruded > 0.5) {
-    lightWeight = getLightWeight(
-      position_worldspace,
-      normals
-    );
-  }
+    if (extruded > 0.5) {
+      lightWeight = getLightWeight(
+        position_worldspace,
+        normals
+      );
+    }
 
-  vec3 lightWeightedColor = lightWeight * colors.rgb;
-  vec4 color = vec4(lightWeightedColor, colors.a * opacity) / 255.0;
+    vec3 lightWeightedColor = lightWeight * colors.rgb;
+    vec4 color = vec4(lightWeightedColor, colors.a * opacity) / 255.0;
 
-  if (pickingEnabled > 0.5) {
-    vPickingColor = vec4(pickingColors.rgb / 255.0, 1.0);
-  } else {
     vPickingColor = color;
+
+  } else {
+    vPickingColor = vec4(pickingColors.rgb / 255.0, 1.0);
   }
 }
