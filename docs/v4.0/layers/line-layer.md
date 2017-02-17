@@ -1,3 +1,7 @@
+<p align="right">
+  <img src="https://img.shields.io/badge/64--bit-support-blue.svg?style=flat-square" alt="64-bit" />
+</p>
+
 # Line Layer
 
 The Line Layer renders flat lines joining pairs of source and target points,

@@ -1,3 +1,7 @@
+<p align="right">
+  <img src="https://img.shields.io/badge/extruded-yes-blue.svg?style=flat-square" alt="64-bit" />
+</p>
+
 # GridLayer
 
 The GridLayer can render a grid-based heatmap.
