@@ -3,27 +3,15 @@ const webpack = require('webpack');
 
 module.exports = {
   entry: {
-    app: resolve('./app.js')
+    app: resolve('./src/app.js')
   },
 
   devtool: 'source-maps',
 
   resolve: {
     alias: {
-      // mapbox-gl config
-      // webworkify: 'webworkify-webpack-dropin'
-      // 'gl-matrix': resolve('./node_modules/gl-matrix/dist/gl-matrix.js'),
-      // // Work against base library
-      // 'deck.gl': resolve('../../dist/lib-bundle.js'),
-      // // Using our dependencies
-      // 'luma.gl': resolve('./node_modules/luma.gl'),
-      // 'viewport-mercator-project': resolve('./node_modules/viewport-mercator-project'),
-      // react: resolve('./node_modules/react'),
-      // 'autobind-decorator': resolve('./node_modules/autobind-decorator'),
-      // brfs: resolve('./node_modules/brfs'),
-      // earcut: resolve('./node_modules/earcut'),
-      // 'geojson-normalize': resolve('./node_modules/geojson-normalize'),
-      // 'lodash.flattendeep': resolve('./node_modules/lodash.flattendeep')
+      // From mapbox-gl-js README. Required for non-browserify bundlers (e.g. webpack):
+      'mapbox-gl$': resolve('./node_modules/mapbox-gl/dist/mapbox-gl.js')
     }
   },
 
