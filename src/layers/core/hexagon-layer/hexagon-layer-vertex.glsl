@@ -56,7 +56,9 @@ void main(void) {
 
   // render display
   if (renderPickingBuffer < 0.5) {
-    // check whether hexagon is currently picked
+
+    // TODO: we should allow the user to specify the color for "selected element"
+    // check whether hexagon is currently picked.
     float selected = isPicked(instancePickingColors, selectedPickingColor);
 
     // Light calculations
@@ -73,16 +75,16 @@ void main(void) {
       );
     }
 
-    vec3 lightWeightedColor = mix(1.0, lightWeight, extruded) * (instanceColors.rgb / 255.0);
+    vec3 lightWeightedColor = lightWeight * instanceColors.rgb;
 
     // Color: Either opacity-multiplied instance color, or picking color
-    vec4 color = vec4(lightWeightedColor, opacity * instanceColors.a / 255.);
+    vec4 color = vec4(lightWeightedColor, opacity * instanceColors.a) / 255.0;
 
     vColor = color;
 
   } else {
 
-    vec4 pickingColor = vec4(instancePickingColors / 255., 1.);
+    vec4 pickingColor = vec4(instancePickingColors / 255.0, 1.0);
     vColor = pickingColor;
 
   }

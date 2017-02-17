@@ -46,6 +46,9 @@ void main(void) {
   gl_Position = project_to_clipspace(position_worldspace);
 
   if (renderPickingBuffer < 0.5) {
+
+    // TODO: we should allow the user to specify the color for "selected element"
+    // check whether a bar is currently picked.
     float selected = isPicked(instancePickingColors, selectedPickingColor);
 
     float lightWeight = 1.0;
@@ -57,13 +60,13 @@ void main(void) {
       );
     }
 
-    vec3 lightWeightedColor = lightWeight * (instanceColors.rgb / 255.);
-    vec4 color = vec4(lightWeightedColor, instanceColors.a * opacity / 255.);
+    vec3 lightWeightedColor = lightWeight * instanceColors.rgb;
+    vec4 color = vec4(lightWeightedColor, instanceColors.a * opacity) / 255.0;
     vColor = color;
 
   } else {
 
-    vec4 pickingColor = vec4(instancePickingColors / 255., 1.);
+    vec4 pickingColor = vec4(instancePickingColors / 255.0, 1.0);
      vColor = pickingColor;
 
   }
