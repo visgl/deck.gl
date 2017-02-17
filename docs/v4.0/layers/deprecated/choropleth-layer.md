@@ -1,4 +1,4 @@
-# Choropleth Layer **DEPRECATED**
+# Choropleth Layer **(DEPRECATED)**
 
 Note: The `ChoroplethLayer` has been deprecated in deck.gl v4 in favor
 of the new `GeoJsonLayer` and `PolygonLayer`. It will likely be removed in the

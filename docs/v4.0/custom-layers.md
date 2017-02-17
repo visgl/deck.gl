@@ -1,5 +1,9 @@
 # Creating Custom Layers
 
+Before creating a new layer, it is recommended that you verify that you
+can not achive the desired effect either through layer subclassing or
+through using composite layers.
+
 ## Choosing the Type of Layer
 
 There are a couple of ways to build a layer in deck.gl
