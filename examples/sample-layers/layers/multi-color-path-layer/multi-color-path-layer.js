@@ -49,3 +49,5 @@ colors returned doesn't match the number of points in the path. Index ${index}`)
     attribute.value = colors;
   }
 }
+
+MultiColorPathLayer.layerName = 'MultiColorPathLayer';

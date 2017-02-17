@@ -38,6 +38,8 @@ const EnhancedChoroplethLayerExample = {
   }
 };
 
+const COLORS = new Array(1000).fill(0).map(x => Math.random() * 256);
+
 const MultiColorPathLayerExample = {
   layer: MultiColorPathLayer,
   props: {
@@ -45,7 +47,7 @@ const MultiColorPathLayerExample = {
     data: dataSamples.zigzag,
     opacity: 0.6,
     getPath: f => f.path,
-    getColor: f => [128, 0, 0],
+    getColor: f => COLORS,
     getStrokeWidth: f => 10,
     pickable: true
   }
