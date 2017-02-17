@@ -42,10 +42,3 @@ code, but they are not listed here in the official documentation.
 
 To use one of the sample layers an application simply needs to copy it into
 its own source tree, as these layers are not `export`ed by deck.gl.
-
-Remarks:
-* Sample layers are not as actively supported as core layers,
-  and could even have breaking changes between minor releases of deck.gl.
-  This should not be an issue in practice since applications need to
-  copy these layers into their own source tree in order to use them.
-
