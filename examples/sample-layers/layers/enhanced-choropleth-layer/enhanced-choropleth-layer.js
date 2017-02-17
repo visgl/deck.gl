@@ -18,14 +18,13 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {Layer} from '../../../lib';
-import {assembleShaders} from '../../../shader-utils';
-import {flatten, normalizeGeojson} from '../../../lib/utils';
+import {Layer} from 'deck.gl';
+import {assembleShaders} from 'deck.gl';
+import {normalizeGeojson} from './geojson';
+import flatten from 'lodash.flattendeep';
 import {GL, Model, Geometry} from 'luma.gl';
 import earcut from 'earcut';
 import extrudePolyline from 'extrude-polyline';
-import {readFileSync} from 'fs';
-import {join} from 'path';
 
 const defaultProps = {
   getColor: null,
@@ -85,8 +84,8 @@ export default class EnhancedChoroplethLayer extends Layer {
 
   getShaders() {
     return {
-      vs: readFileSync(join(__dirname, './enhanced-choropleth-layer-vertex.glsl'), 'utf8'),
-      fs: readFileSync(join(__dirname, './enhanced-choropleth-layer-fragment.glsl'), 'utf8')
+      vs: require('./enhanced-choropleth-layer-vertex.glsl'),
+      fs: require('./enhanced-choropleth-layer-fragment.glsl')
     };
   }
 
