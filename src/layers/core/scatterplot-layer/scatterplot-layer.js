@@ -23,17 +23,18 @@ import {assembleShaders} from '../../../shader-utils';
 import {GL, Model, Geometry} from 'luma.gl';
 import {readFileSync} from 'fs';
 import {join} from 'path';
+import {log} from '../../../lib/utils';
 
-const DEFAULT_COLOR = [255, 0, 255, 255];
+const DEFAULT_COLOR = [0, 0, 0, 255];
 
 const defaultProps = {
   getPosition: x => x.position,
   getRadius: x => x.radius || 30,
   getColor: x => x.color || DEFAULT_COLOR,
-  radius: 30,  //  point radius in meters
+  radiusScale: 30,  //  point radius in meters
   radiusMinPixels: 0, //  min point radius in pixels
   radiusMaxPixels: Number.MAX_SAFE_INTEGER, // max point radius in pixels
-  drawOutline: false,
+  outline: false,
   strokeWidth: 1
 };
 
@@ -50,6 +51,15 @@ export default class ScatterplotLayer extends Layer {
     this.setState({model: this._getModel(gl)});
 
     /* eslint-disable max-len */
+    /* deprecated props check */
+    if (this.props.radius !== undefined) {
+      log.once(0, 'ScatterplotLayer no longer accepts props.radius in this version of deck.gl. Please use props.radiusScale instead.');
+    }
+
+    if (this.props.outline !== undefined) {
+      log.once(0, 'ScatterplotLayer no longer accepts props.drawOutline in this version of deck.gl. Please use props.outline instead.');
+    }
+
     this.state.attributeManager.addInstanced({
       instancePositions: {size: 3, accessor: 'getPosition', update: this.calculateInstancePositions},
       instanceRadius: {size: 1, accessor: 'getRadius', defaultValue: 1, update: this.calculateInstanceRadius},
@@ -59,11 +69,11 @@ export default class ScatterplotLayer extends Layer {
   }
 
   draw({uniforms}) {
-    const {radius, radiusMinPixels, radiusMaxPixels, drawOutline, strokeWidth} = this.props;
+    const {radiusScale, radiusMinPixels, radiusMaxPixels, outline, strokeWidth} = this.props;
     this.state.model.render(Object.assign({}, uniforms, {
-      drawOutline: drawOutline ? 1 : 0,
+      outline: outline ? 1 : 0,
       strokeWidth,
-      radius,
+      radiusScale,
       radiusMinPixels,
       radiusMaxPixels
     }));
@@ -118,7 +128,7 @@ export default class ScatterplotLayer extends Layer {
       value[i++] = color[0];
       value[i++] = color[1];
       value[i++] = color[2];
-      value[i++] = isNaN(color[3]) ? DEFAULT_COLOR[3] : color[3];
+      value[i++] = isNaN(color[3]) ? 255 : color[3];
     }
   }
 }

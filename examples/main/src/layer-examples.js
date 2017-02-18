@@ -43,7 +43,6 @@ const ArcLayerExample = {
     getTargetPosition: d => d.END,
     getSourceColor: d => [64, 255, 0],
     getTargetColor: d => [0, 128, 200],
-    strokeWidth: 1,
     pickable: true
   }
 };
@@ -161,7 +160,6 @@ const LineLayerExample = {
     getSourcePosition: d => d.START,
     getTargetPosition: d => d.END,
     getColor: d => d.SERVICE === 'WEEKDAY' ? [255, 64, 0] : [255, 200, 0],
-    strokeWidth: 1,
     pickable: true
   }
 };
@@ -175,7 +173,6 @@ const ScatterplotLayerExample = {
     getColor: d => [255, 128, 0],
     getRadius: d => d.SPACES,
     opacity: 0.5,
-    strokeWidth: 2,
     pickable: true,
     radiusMinPixels: 1,
     radiusMaxPixels: 30
@@ -187,7 +184,7 @@ const ScatterplotLayerMetersExample = {
   props: {
     id: 'scatterplotLayerMeter',
     data: dataSamples.meterPoints,
-    drawOutline: true,
+    outline: true,
     projectionMode: 2,
     positionOrigin: dataSamples.positionOrigin,
     getPosition: d => d,
