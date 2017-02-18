@@ -17,21 +17,15 @@ Inherits from all [Base Layer](/docs/layers/base-layer.md) properties.
 
 ## Layer-specific Properties
 
-##### `strokeWidth` (Number, optional)
-
-- Default: `1`
-
-Width of stroke if drawing outline.
-
-##### `drawOutline` (Boolean, optional)
+##### `outline` (Boolean, optional)
 
 - Default: `false`
 
 Only draw outline of dot.
 
-##### `radius` (Number, optional)
+##### `radiusScale` (Number, optional)
 
-- Default: `30`
+- Default: `1`
 
 Global radius across all markers.
 
@@ -55,4 +49,4 @@ Method called to retrieve the rgba color of each object. If the alpha parameter
 is not provided, it will be set to `255`.
 
 If the method does not return a value for the given object, fallback to
-`[255, 0, 255, 255]`.
+`[0, 0, 0, 255]`.
