@@ -42,10 +42,6 @@ export default class LineLayer extends Layer {
     const {attributeManager} = this.state;
 
     /* eslint-disable max-len */
-    if (this.props.strokeWidth !== undefined) {
-      log.once(0, `LineLayer no longer accepts props.strokeWidth in this version of deck.gl.`);
-    }
-
     attributeManager.addInstanced({
       instanceSourcePositions: {size: 3, accessor: 'getSourcePosition', update: this.calculateInstanceSourcePositions},
       instanceTargetPositions: {size: 3, accessor: 'getTargetPosition', update: this.calculateInstanceTargetPositions},

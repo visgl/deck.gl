@@ -41,9 +41,6 @@ export default class ArcLayer extends Layer {
 
     const {attributeManager} = this.state;
     /* eslint-disable max-len */
-    if (this.props.strokeWidth !== undefined) {
-      log.once(0, `ArcLayer no longer accepts props.strokeWidth in  in this version of deck.gl.`);
-    }
 
     attributeManager.addInstanced({
       instancePositions: {size: 4, accessor: ['getSourcePosition', 'getTargetPosition'], update: this.calculateInstancePositions},

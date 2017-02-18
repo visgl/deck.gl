@@ -23,6 +23,7 @@ import {assembleShaders} from '../../../shader-utils';
 import {GL, Model, Geometry} from 'luma.gl';
 import {readFileSync} from 'fs';
 import {join} from 'path';
+import {log} from '../../../lib/utils';
 
 const DEFAULT_COLOR = [0, 0, 0, 255];
 
@@ -52,15 +53,11 @@ export default class ScatterplotLayer extends Layer {
     /* eslint-disable max-len */
     /* deprecated props check */
     if (this.props.radius !== undefined) {
-      log.once(0, `ScatterplotLayer no longer accepts props.radius in this version of deck.gl. Please use props.radiusScale instead.`);
+      log.once(0, 'ScatterplotLayer no longer accepts props.radius in this version of deck.gl. Please use props.radiusScale instead.');
     }
 
     if (this.props.outline !== undefined) {
-      log.once(0, `ScatterplotLayer no longer accepts props.drawOutline in this version of deck.gl. Please use props.outline instead.`);
-    }
-
-    if (this.props.strokeWidth !== undefined) {
-      log.once(0, `ScatterplotLayer no longer accepts props.strokeWidth in this version of deck.gl.`);
+      log.once(0, 'ScatterplotLayer no longer accepts props.drawOutline in this version of deck.gl. Please use props.outline instead.');
     }
 
     this.state.attributeManager.addInstanced({
