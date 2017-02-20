@@ -56,7 +56,7 @@ export default class ScatterplotLayer extends Layer {
       log.once(0, 'ScatterplotLayer no longer accepts props.radius in this version of deck.gl. Please use props.radiusScale instead.');
     }
 
-    if (this.props.outline !== undefined) {
+    if (this.props.drawOutline !== undefined) {
       log.once(0, 'ScatterplotLayer no longer accepts props.drawOutline in this version of deck.gl. Please use props.outline instead.');
     }
 
