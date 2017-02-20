@@ -20,15 +20,16 @@
 
 #define SHADER_NAME arc-layer-64-vertex-shader
 
-const float N = 49.0;
-
 attribute vec3 positions;
 attribute vec4 instanceSourceColors;
 attribute vec4 instanceTargetColors;
-attribute vec3 instancePickingColors;
 attribute vec4 instanceSourcePositions64;
 attribute vec4 instanceTargetPositions64;
+attribute vec3 instancePickingColors;
 
+uniform float numSegments;
+uniform vec2 screenSize;
+uniform float strokeWidth;
 uniform float opacity;
 uniform float renderPickingBuffer;
 
@@ -46,30 +47,69 @@ vec2 paraboloid_fp64(vec2 source[2], vec2 target[2], float ratio) {
   return mul_fp64(sum_fp64(dSourceCenter, dXCenter), sub_fp64(dSourceCenter, dXCenter));
 }
 
-void main(void) {
-  vec2 projectedSourceCoord[2];
-  project_position_fp64(instanceSourcePositions64, projectedSourceCoord);
-  vec2 projectedTargetCoord[2];
-  project_position_fp64(instanceTargetPositions64, projectedTargetCoord);
+// offset vector by strokeWidth pixels
+// offset_direction is -1 (left) or 1 (right)
+vec2 getExtrusionOffset(vec2 line_clipspace, float offset_direction) {
+  // normalized direction of the line
+  vec2 dir_screenspace = normalize(line_clipspace * screenSize);
+  // rotate by 90 degrees
+  dir_screenspace = vec2(-dir_screenspace.y, dir_screenspace.x);
 
-  float segmentRatio = smoothstep(0.0, 1.0, positions.x / N);
+  vec2 offset_screenspace = dir_screenspace * offset_direction * strokeWidth / 2.0;
+  vec2 offset_clipspace = offset_screenspace / screenSize * 2.0;
 
-  vec2 mixed_temp[2];
+  return offset_clipspace;
+}
 
-  vec2_mix_fp64(projectedSourceCoord, projectedTargetCoord, segmentRatio, mixed_temp);
+float getSegmentRatio(float index) {
+  return smoothstep(0.0, 1.0, index / (numSegments - 1.0));
+}
 
-  vec2 vertex_pos_modelspace[4];
+void get_pos_fp64(vec2 source[2], vec2 target[2], float segmentRatio, out vec2 position[4]) {
 
-  vertex_pos_modelspace[0] = mixed_temp[0];
-  vertex_pos_modelspace[1] = mixed_temp[1];
+  vec2 vertex_height = paraboloid_fp64(source, target, segmentRatio);
 
-  vec2 vertex_height = paraboloid_fp64(projectedSourceCoord, projectedTargetCoord, segmentRatio);
+  vec2 position_temp[2];
+
+  vec2_mix_fp64(source, target, segmentRatio, position_temp);
+
+  position[0] = position_temp[0];
+  position[1] = position_temp[1];
+
   if (vertex_height.x < 0.0 || (vertex_height.x == 0.0 && vertex_height.y <= 0.0)) vertex_height = vec2(0.0, 0.0);
 
-  vertex_pos_modelspace[2] = sqrt_fp64(vertex_height);
-  vertex_pos_modelspace[3] = vec2(1.0, 0.0);
+  position[2] = sqrt_fp64(vertex_height);
+  position[3] = vec2(1.0, 0.0);
+}
 
-  gl_Position = project_to_clipspace_fp64(vertex_pos_modelspace);
+void main(void) {
+  vec2 projected_source_coord[2];
+  project_position_fp64(instanceSourcePositions64, projected_source_coord);
+  vec2 projected_target_coord[2];
+  project_position_fp64(instanceTargetPositions64, projected_target_coord);
+
+  float segmentIndex = positions.x;
+  float segmentRatio = getSegmentRatio(segmentIndex);
+
+  // if it's the first point, use next - current as direction
+  // otherwise use current - prev
+  float indexDir = mix(-1.0, 1.0, step(segmentIndex, 0.0));
+  float nextSegmentRatio = getSegmentRatio(segmentIndex + indexDir);
+
+  vec2 curr_pos_modelspace[4];
+
+  get_pos_fp64(projected_source_coord, projected_target_coord, segmentRatio, curr_pos_modelspace);
+
+  vec2 next_pos_modelspace[4];
+
+  get_pos_fp64(projected_source_coord, projected_target_coord, nextSegmentRatio, next_pos_modelspace);
+
+  vec4 curr_pos_clipspace = project_to_clipspace_fp64(curr_pos_modelspace);
+  vec4 next_pos_clipspace = project_to_clipspace_fp64(next_pos_modelspace);
+
+  vec2 offset = getExtrusionOffset(next_pos_clipspace.xy - curr_pos_clipspace.xy, positions.y);
+
+  gl_Position = curr_pos_clipspace + vec4(offset, 0.0, 0.0);
 
   vec4 color = mix(instanceSourceColors, instanceTargetColors, segmentRatio) / 255.;
 

@@ -44,9 +44,6 @@ export default class ScatterplotLayer64 extends ScatterplotLayer {
     attributeManager.addInstanced({
       instancePositions64xy: {size: 4, update: this.calculateInstancePositions64xy},
       instancePositions64z: {size: 2, update: this.calculateInstancePositions64z}
-      // Reusing from base class
-      // instanceRadius: {size: 1, update: this.calculateInstanceRadius},
-      // instanceColors: {size: 4, type: GL.UNSIGNED_BYTE, update: this.calculateInstanceColors}
     });
   }
 
