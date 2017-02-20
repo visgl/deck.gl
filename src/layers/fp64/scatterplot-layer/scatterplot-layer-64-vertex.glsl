@@ -30,25 +30,38 @@ attribute vec3 instancePickingColors;
 
 // Only one-dimensional arrays may be declared in GLSL ES 1.0. specs p.24
 uniform float opacity;
-uniform float radius;
+uniform float radiusScale;
 uniform float radiusMinPixels;
 uniform float radiusMaxPixels;
 uniform float renderPickingBuffer;
+uniform float outline;
+uniform float strokeWidth;
 
 varying vec4 vColor;
+varying vec2 unitPosition;
+varying float innerUnitRadius;
 
 void main(void) {
   // Multiply out radius and clamp to limits
-  float radiusPixels = clamp(
-    project_scale(radius * instanceRadius),
+  float outerRadiusPixels = clamp(
+    project_scale(radiusScale * instanceRadius),
     radiusMinPixels, radiusMaxPixels
   );
+
+  // outline is centered at the radius
+  // outer radius needs to offset by half stroke width
+  outerRadiusPixels += outline * strokeWidth / 2.0;
+
+  // position on the containing square in [-1, 1] space
+  unitPosition = positions.xy;
+  // 0 - solid circle, 1 - stroke with lineWidth=0
+  innerUnitRadius = outline * (1.0 - strokeWidth / outerRadiusPixels);
 
   vec2 projected_coord_xy[2];
   project_position_fp64(instancePositions64xy, projected_coord_xy);
 
   vec2 vertex_pos_localspace[4];
-  vec4_fp64(vec4(positions * radiusPixels, 0.0), vertex_pos_localspace);
+  vec4_fp64(vec4(positions * outerRadiusPixels, 0.0), vertex_pos_localspace);
 
   vec2 vertex_pos_modelspace[4];
   vertex_pos_modelspace[0] = sum_fp64(vertex_pos_localspace[0], projected_coord_xy[0]);

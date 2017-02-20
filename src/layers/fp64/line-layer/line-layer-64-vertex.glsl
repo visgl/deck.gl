@@ -27,35 +27,56 @@ attribute vec2 instanceElevations;
 attribute vec4 instanceColors;
 attribute vec3 instancePickingColors;
 
+uniform vec2 screenSize;
+uniform float strokeWidth;
 uniform float opacity;
 uniform float renderPickingBuffer;
 
 varying vec4 vColor;
 
+// offset vector by strokeWidth pixels
+// offset_direction is -1 (left) or 1 (right)
+vec2 getExtrusionOffset(vec2 line_clipspace, float offset_direction) {
+  // normalized direction of the line
+  vec2 dir_screenspace = normalize(line_clipspace * screenSize);
+  // rotate by 90 degrees
+  dir_screenspace = vec2(-dir_screenspace.y, dir_screenspace.x);
+
+  vec2 offset_screenspace = dir_screenspace * offset_direction * strokeWidth / 2.0;
+  vec2 offset_clipspace = offset_screenspace / screenSize * 2.0;
+
+  return offset_clipspace;
+}
+
 void main(void) {
   // Position
-  vec2 projectedSourceCoord[2];
-  project_position_fp64(instanceSourcePositions64, projectedSourceCoord);
-  vec2 projectedTargetCoord[2];
-  project_position_fp64(instanceTargetPositions64, projectedTargetCoord);
+  vec2 projected_source_coord[2];
+  project_position_fp64(instanceSourcePositions64, projected_source_coord);
+  vec2 projected_target_coord[2];
+  project_position_fp64(instanceTargetPositions64, projected_target_coord);
 
-  // linear interpolation of source & target to pick right coord
+  vec2 source_pos_modelspace[4];
+  source_pos_modelspace[0] =  projected_source_coord[0];
+  source_pos_modelspace[1] =  projected_source_coord[1];
+  source_pos_modelspace[2] = vec2(project_scale(instanceElevations.x), 0.0);
+  source_pos_modelspace[3] = vec2(1.0, 0.0);
+
+  vec4 source_pos_clipspace = project_to_clipspace_fp64(source_pos_modelspace);
+
+  vec2 target_pos_modelspace[4];
+  target_pos_modelspace[0] =  projected_target_coord[0];
+  target_pos_modelspace[1] =  projected_target_coord[1];
+  target_pos_modelspace[2] = vec2(project_scale(instanceElevations.y), 0.0);
+  target_pos_modelspace[3] = vec2(1.0, 0.0);
+
+  vec4 target_pos_clipspace = project_to_clipspace_fp64(target_pos_modelspace);
+
   float segmentIndex = positions.x;
-  vec2 mixed_temp[2];
+  vec4 p = mix(source_pos_clipspace, target_pos_clipspace, segmentIndex);
 
-  vec2_mix_fp64(projectedSourceCoord, projectedTargetCoord, segmentIndex, mixed_temp);
+  vec2 offset = getExtrusionOffset(target_pos_clipspace.xy - source_pos_clipspace.xy, positions.y);
 
-  float mixedElevation =
-    mix(instanceElevations.x, instanceElevations.y, segmentIndex);
-
-  vec2 vertex_pos_modelspace[4];
-
-  vertex_pos_modelspace[0] = mixed_temp[0];
-  vertex_pos_modelspace[1] = mixed_temp[1];
-  vertex_pos_modelspace[2] = vec2(project_scale(mixedElevation), 0.0);
-  vertex_pos_modelspace[3] = vec2(1.0, 0.0);
-
-  gl_Position = project_to_clipspace_fp64(vertex_pos_modelspace);
+  gl_Position = p + vec4(offset, 0.0, 0.0);
 
   // Color
   vec4 color = vec4(instanceColors.rgb, instanceColors.a * opacity) / 255.;
