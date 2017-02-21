@@ -7,6 +7,7 @@ import {
   ScreenGridLayer,
   IconLayer,
   GridLayer,
+  PointDensityGridLayer,
   GeoJsonLayer,
   // PolygonLayer,
   PathLayer,
@@ -209,6 +210,26 @@ const GridLayerExample = {
   }
 };
 
+const PointDensityGridLayerExample = {
+  layer: PointDensityGridLayer,
+  props: {
+    id: 'pointDensityGridLayer',
+    data: dataSamples.points,
+    extruded: true,
+    pickable: true,
+    opacity: 1,
+    cellSize: 0.3,
+    lightSettings: {
+      lightsPosition: [-122.45, 37.66, 8000, -122.0, 38.00, 5000],
+      ambientRatio: 0.4,
+      diffuseRatio: 0.6,
+      specularRatio: 0.6,
+      lightsStrength: [1.2, 2.0, 0.0, 0.0],
+      numberOfLights: 2
+    }
+  }
+};
+
 const HexagonLayerExample = {
   layer: HexagonLayer,
   props: {
@@ -378,6 +399,7 @@ export default {
     LineLayer: LineLayerExample,
     ScreenGridLayer: ScreenGridLayerExample,
     GridLayer: GridLayerExample,
+    PointDensityGridLayer: PointDensityGridLayerExample,
     HexagonLayer: HexagonLayerExample,
     IconLayer: IconLayerExample
   },

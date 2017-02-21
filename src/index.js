@@ -28,6 +28,7 @@ export {COORDINATE_SYSTEM, Layer, LayerManager, AttributeManager} from './lib';
 // Core Layers
 export {default as ArcLayer} from './layers/core/arc-layer/arc-layer';
 export {default as GridLayer} from './layers/core/grid-layer/grid-layer';
+export {default as PointDensityGridLayer} from './layers/core/point-density-grid-layer/point-density-grid-layer';
 export {default as HexagonLayer} from './layers/core/hexagon-layer/hexagon-layer';
 export {default as IconLayer} from './layers/core/icon-layer/icon-layer';
 export {default as LineLayer} from './layers/core/line-layer/line-layer';
