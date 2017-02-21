@@ -220,11 +220,11 @@ const PointDensityGridLayerExample = {
     opacity: 1,
     cellSize: 0.3,
     lightSettings: {
-      lightsPosition: [-122.45, 37.66, 8000, -122.0, 38.00, 5000],
+      lightsPosition: [-122.45, 37.66, 8000, -122.0, 38.00, 8000],
       ambientRatio: 0.4,
       diffuseRatio: 0.6,
       specularRatio: 0.6,
-      lightsStrength: [1.2, 2.0, 0.0, 0.0],
+      lightsStrength: [1.2, 0.0, 0.8, 0.0],
       numberOfLights: 2
     }
   }
