@@ -32,12 +32,12 @@ const defaultProps = {
   getColor: x => x.color || DEFAULT_COLOR,
   radius: 10,  //  point radius in pixels
   lightSettings: {
-    lightsPosition: [0, 0, 8000, 0, 0, 5000],
-    ambientRatio: 0.05,
+    lightsPosition: [0, 0, 5000, -1000, 1000, 8000, 5000, -5000, 1000],
+    ambientRatio: 0.2,
     diffuseRatio: 0.6,
     specularRatio: 0.8,
-    lightsStrength: [2.0, 0.0, 0.0, 0.0],
-    numberOfLights: 2
+    lightsStrength: [1.0, 0.0, 0.8, 0.0, 0.4, 0.0],
+    numberOfLights: 3
   }
 };
 
@@ -64,12 +64,12 @@ export default class ScatterplotLayer extends Layer {
   }
 
   draw({uniforms}) {
-    const {radius} = this.props;
+    const {radius, lightSettings} = this.props;
     const {viewport: {width, height}} = this.context;
     this.state.model.render(Object.assign({}, uniforms, {
       radius,
       screenSize: [width, height]
-    }));
+    }, lightSettings));
   }
 
   _getModel(gl) {
