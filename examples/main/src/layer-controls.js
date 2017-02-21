@@ -43,6 +43,10 @@ export default class LayerControls extends PureComponent {
       max = 100;
     }
 
+    if (settingName === 'cellSize') {
+      max = 10;
+    }
+
     return (
       <div key={settingName} >
         <div className="input-group" >
