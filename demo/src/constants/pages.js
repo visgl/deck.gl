@@ -154,6 +154,10 @@ export const docPages = generatePath([
       {
         name: 'HexagonLayer',
         content: getDocUrl('layers/hexagon-layer.md')
+      },
+      {
+        name: 'PointCloudLayer',
+        content: getDocUrl('layers/point-cloud-layer.md')
       }
     ]
   },

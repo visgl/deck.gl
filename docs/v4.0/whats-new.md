@@ -41,8 +41,7 @@ A layer that draws hexagonal, optionally elevated cells.
 
 ### Point Cloud Layer
 
-Draws a point cloud. Supports point color/opacity. Points can be drawn using
-GL.POINTS or using a primitive.
+Draws a LiDAR point cloud. Supports point position/normal/color.
 
 
 ## Improvements to all Layers
