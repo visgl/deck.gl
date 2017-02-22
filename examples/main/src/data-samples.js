@@ -12,8 +12,6 @@ export {default as iconAtlas} from '../data/icon-atlas.json';
 export const points = allPoints;
 export const positionOrigin = [-122.45, 37.75, 0];
 
-export const meterPoints = pointGrid(1e3, [-5000, -5000, 5000, 5000]);
-
 export const worldGrid = pointsToWorldGrid(points, 0.5);
 
 export const zigzag = [
@@ -26,6 +24,31 @@ export const zigzag = [
 ];
 
 // time consuming - only generate on demand
+
+let _pointCloud = null;
+export function getPointCloud() {
+  if (!_pointCloud) {
+    _pointCloud = pointGrid(
+      2e4,
+      [0, -Math.PI / 2, Math.PI * 2, Math.PI / 2],
+      true
+    ).map(([x, y]) => {
+      const R = 1000;
+      const cosx = Math.cos(x);
+      const sinx = Math.sin(x);
+      const cosy = Math.cos(y);
+      const siny = Math.sin(y);
+
+      return {
+        position: [cosx * R * cosy, sinx * R * cosy, (siny + 1) * R],
+        normal: [cosx * cosy, sinx * cosy, siny],
+        color: [(siny + 1) * 128, (cosy + 1) * 128, 0]
+      };
+    });
+  }
+  return _pointCloud;
+}
+
 let _points100K = null;
 export function getPoints100K() {
   _points100K = _points100K || pointGrid(1e5, [-122.6, 37.6, -122.2, 37.9]);

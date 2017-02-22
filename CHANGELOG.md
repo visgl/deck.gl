@@ -20,6 +20,9 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## Recent Dev Releases
 
+#### [v4.0.0-beta.3]
+- Add PointCloudLayer
+
 #### [v4.0.0-beta.2]
 - Bumps luma.gl with some hotfixes
 - Remove unfinished example
