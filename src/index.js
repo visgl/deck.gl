@@ -53,6 +53,9 @@ export {default as ExtrudedChoroplethLayer64} from './layers/deprecated/extruded
 export {default as DeckGL} from './react/deckgl';
 export {default as default} from './react/deckgl';
 
+// Viewports
+export {default as PerspectiveViewport} from './lib/viewports/perspective-viewport';
+
 // Experimental Features (May change in minor version bumps, use at your own risk)
 import {get} from './lib/utils/container';
 import {EffectManager, Effect} from './experimental/lib';

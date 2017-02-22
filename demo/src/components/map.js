@@ -6,6 +6,7 @@ import MapGL from 'react-map-gl';
 import Demos from './demos';
 import {updateMap, updateMeta, loadData, useParams} from '../actions/app-actions';
 import ViewportAnimation from '../utils/map-utils';
+import {MAPBOX_STYLES} from '../constants/defaults';
 
 class Map extends Component {
 
@@ -27,7 +28,12 @@ class Map extends Component {
       this.props.loadData(demo, DemoComponent.data);
       this.props.useParams(DemoComponent.parameters);
 
-      if (useTransition) {
+      if (!DemoComponent.viewport) {
+        // do not show map
+        this.props.updateMap({
+          mapStyle: null
+        });
+      } else if (useTransition) {
         const {viewport} = this.props;
         ViewportAnimation.fly(viewport, DemoComponent.viewport, 1000, this.props.updateMap)
         .easing(ViewportAnimation.Easing.Exponential.Out)
@@ -56,7 +62,9 @@ class Map extends Component {
       <MapGL
         mapboxApiAccessToken={MAPBOX_ACCESS_TOKEN}
         perspectiveEnabled={true}
+        preventStyleDiffing={true}
         {...viewport}
+        mapStyle={viewport.mapStyle || MAPBOX_STYLES.BLANK}
         onChangeViewport={isInteractive ? this._onUpdateMap : undefined}>
 
         <DemoComponent ref="demo" viewport={viewport} params={params}

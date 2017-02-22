@@ -241,6 +241,9 @@ hr.short {
   right: 0;
   z-index: 9;
 }
+.overlays {
+  cursor: crosshair;
+}
 
 @media screen and (max-width: 1200px) {
   .thumb {

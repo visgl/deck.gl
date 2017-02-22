@@ -129,7 +129,7 @@ class Page extends Component {
       <ul className="tabs">
 
         {activeTab === 'demo' && (
-          <li><span className="bg-black tip">Hold down shift key to rotate map</span></li>
+          <li><span className="bg-black tip">Hold down shift key to rotate</span></li>
         )}
 
         {Object.keys(tabs).map(tabName => (

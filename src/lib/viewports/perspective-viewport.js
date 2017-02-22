@@ -28,4 +28,13 @@ export default class PerspectiveViewport extends Viewport {
       height
     });
   }
+
+  getDistanceScales() {
+    return {
+      pixelsPerMeter: [1, 1, 1],
+      metersPerPixel: [1, 1, 1],
+      pixelsPerDegree: [1, 1, 1],
+      degreesPerPixel: [1, 1, 1]
+    };
+  }
 }
