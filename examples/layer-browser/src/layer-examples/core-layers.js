@@ -11,16 +11,18 @@ import {
   PointDensityGridLayer,
   PointDensityHexagonLayer,
   GeoJsonLayer,
-  // PolygonLayer,
+  PolygonLayer,
   PathLayer
 } from 'deck.gl';
 
 import * as dataSamples from '../data-samples';
 import {parseColor, setOpacity} from '../utils/color';
 
-// Demonstrate immutable support
-// import Immutable from 'immutable';
-// const immutableChoropleths = Immutable.fromJS(dataSamples.choropleths);
+import {experimental} from 'deck.gl';
+const {get} = experimental;
+
+const polygons = dataSamples.choropleths.features
+  .map(choropleth => choropleth.geometry.coordinates);
 
 const MARKER_SIZE_MAP = {
   small: 2,
@@ -106,27 +108,15 @@ const GeoJsonLayerExtrudedExample = {
   }
 };
 
-// const GeoJsonLayerImmutableExample = {
-//   layer: GeoJsonLayer,
-//   props: {
-//     id: 'geojsonLayer-immutable',
-//     data: immutableChoropleths,
-//     getFillColor: f => [0, ((Container.get(f, 'properties.ZIP_CODE') * 10) % 127) * 2, 128],
-//     getColor: f => [200, 0, 80],
-//     opacity: 0.8,
-//     drawContour: true
-//   }
-// };
-
-// const PolygonLayerExample = {
-//   layer: PolygonLayer,
-//   props: {
-//     data: dataSamples.polygons,
-//     getColor: f => [((f.properties.ZIP_CODE * 10) % 127) + 128, 0, 0],
-//     opacity: 0.8,
-//     pickable: true
-//   }
-// };
+const PolygonLayerExample = {
+  layer: PolygonLayer,
+  props: {
+    data: polygons,
+    getColor: f => [((f.properties.ZIP_CODE * 10) % 127) + 128, 0, 0],
+    opacity: 0.8,
+    pickable: true
+  }
+};
 
 const PathLayerExample = {
   layer: PathLayer,
@@ -305,8 +295,7 @@ export default {
   'Core Layers': {
     'GeoJsonLayer': GeoJsonLayerExample,
     'GeoJsonLayer (Extruded)': GeoJsonLayerExtrudedExample,
-    // 'GeoJsonLayer (Immutable)': GeoJsonLayerImmutableExample,
-    // PolygonLayer: PolygonLayerExample,
+    PolygonLayer: PolygonLayerExample,
     PathLayer: PathLayerExample,
     'ScatterplotLayer': ScatterplotLayerExample,
     'PointCloudLayer': PointCloudLayerExample,

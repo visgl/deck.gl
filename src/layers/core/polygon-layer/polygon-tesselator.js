@@ -5,7 +5,7 @@
 // - 3D wireframes (not yet)
 import * as Polygon from './polygon';
 import earcut from 'earcut';
-import {Container, flattenVertices, fillArray} from '../../../lib/utils';
+import {Container, get, flattenVertices, fillArray} from '../../../lib/utils';
 import {fp64ify} from '../../../lib/utils/fp64';
 
 // Maybe deck.gl or luma.gl needs to export this
@@ -144,7 +144,7 @@ export function flattenVertices2(nestedArray, {result = [], dimensions = 3} = {}
   let vertexLength = 0;
   const length = Container.count(nestedArray);
   while (++index < length) {
-    const value = Container.get(nestedArray, index);
+    const value = get(nestedArray, index);
     if (Container.isContainer(value)) {
       flattenVertices(value, {result, dimensions});
     } else {
@@ -227,36 +227,3 @@ function calculatePickingColors({polygons, pointCount}) {
   });
   return attribute;
 }
-
-// TODO - extremely slow for some reason - to big for JS compiler?
-// return calculateAttribute({
-//   polygons,
-//   attribute,
-//   size: 4,
-//   accessor: getColor,
-//   defaultValue: [0, 0, 0, 255]
-// });
-
-/* eslint-disable complexity
-function calculateAttribute4({
-  polygons, attribute, size, accessor, defaultValue = [0, 0, 0, 0]
-}) {
-  let i = 0;
-  polygons.forEach((complexPolygon, polygonIndex) => {
-    const value = accessor(polygonIndex) || defaultValue;
-    value[3] = (Number.isFinite(value[3]) ? value[3] : defaultValue[3]);
-
-    // Copy polygon's value into the flattened vertices of the simple polygons
-    // TODO - use version of flatten that can take an offset and a target array?
-    for (const simplePolygon of complexPolygon) {
-      for (const vertex of simplePolygon) { // eslint-disable-line
-        attribute[i++] = value[0];
-        attribute[i++] = value[1];
-        attribute[i++] = value[2];
-        attribute[i++] = value[3];
-      }
-    }
-  });
-  return attribute;
-}
-*/

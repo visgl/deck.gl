@@ -1,10 +1,13 @@
 export {parseColor} from './color';
-import * as Container from './container';
-export {Container};
-export {count, get} from './container';
+export {get} from './get';
 export {flatten, flattenVertices, fillArray} from './flatten';
-export * from './compare-objects';
+export {compareProps, areEqualShallow} from './compare-objects';
 export {compareArrays, checkArray} from './compare-arrays';
 export {default as log} from './log';
-export * from './fp64';
-export * from './blend';
+export {fp64ify} from './fp64';
+export {getBlendMode, setBlendMode} from './blend';
+
+// TBD
+export {count} from './container';
+import * as Container from './container';
+export {Container};
