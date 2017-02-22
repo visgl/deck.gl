@@ -17,83 +17,18 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-
-import {Layer, get} from '../../../lib';
-import ScatterplotLayer from '../scatterplot-layer/scatterplot-layer';
-import PathLayer from '../path-layer/path-layer';
-import PolygonLayer from '../polygon-layer/polygon-layer';
-
-import {getGeojsonFeatures, separateGeojsonFeatures} from './geojson';
-
-const defaultPointColor = [0xFF, 0x88, 0x00, 0xFF];
-const defaultStrokeColor = [0x33, 0x33, 0x33, 0xFF];
-const defaultFillColor = [0xBD, 0xE2, 0x7A, 0xFF];
-
-const defaultProps = {
-  drawPoints: true,
-  drawLines: true,
-  drawPolygons: true,
-  fillPolygons: true,
-  // extrudePolygons: false,
-  // wireframe: false,
-
-  // Point accessors
-  getPointColor: f => get(f, 'properties.color') || defaultPointColor,
-  getPointSize: f => get(f, 'properties.size') || 5,
-
-  // Line and polygon outline accessors
-  getStrokeColor: f => get(f, 'properties.strokeColor') || defaultStrokeColor,
-  getStrokeWidth: f => get(f, 'properties.strokeWidth') || 1,
-
-  // Polygon fill accessors
-  getFillColor: f => get(f, 'properties.fillColor') || defaultFillColor,
-
-  // Polygon extrusion accessor
-  getElevation: f => 1000
-};
+import {get} from '../../../lib';
+import GeoJsonLayer from '../../core/geojson-layer/geojson-layer';
+import PathLayer from '../../core/path-layer/path-layer';
+// import PolygonLayer64 from '../polygon-layer/polygon-layer-64';
+import ScatterplotLayer64 from '../scatterplot-layer/scatterplot-layer-64';
+import PolygonLayer from '../../core/polygon-layer/polygon-layer';
 
 function noop() {}
 
 const getCoordinates = f => get(f, 'geometry.coordinates');
 
-export default class GeoJsonLayer extends Layer {
-  initializeState() {
-    this.state = {
-      subLayers: null,
-      pickInfos: []
-    };
-  }
-
-  updateState({oldProps, props, changeFlags}) {
-    if (changeFlags.dataChanged) {
-      const {data} = this.props;
-      const features = getGeojsonFeatures(data);
-      this.state.subLayers = separateGeojsonFeatures(features);
-    }
-  }
-
-  _onHoverSublayer(info) {
-    this.state.pickInfos.push(info);
-  }
-
-  pick(opts) {
-    super.pick(opts);
-
-    const info = this.state.pickInfos.find(i => i.index >= 0);
-
-    if (opts.mode === 'hover') {
-      this.state.pickInfos = [];
-    }
-
-    if (!info) {
-      return;
-    }
-
-    Object.assign(opts.info, info, {
-      layer: this,
-      feature: get(info, 'object.feature') || info.object
-    });
-  }
+export default class GeoJsonLayer64 extends GeoJsonLayer {
 
   renderLayers() {
     const {subLayers: {pointFeatures, lineFeatures, polygonFeatures,
@@ -124,6 +59,7 @@ export default class GeoJsonLayer extends Layer {
         getColor: getFillColor,
         extruded,
         wireframe: false,
+        fp64: true,
         updateTriggers: {
           getElevation: this.props.updateTriggers.getElevation,
           getColor: this.props.updateTriggers.getFillColor
@@ -141,6 +77,7 @@ export default class GeoJsonLayer extends Layer {
         getColor: getStrokeColor,
         extruded: true,
         wireframe: true,
+        fp64: true,
         updateTriggers: {
           getColor: this.props.updateTriggers.getStrokeColor
         }
@@ -172,7 +109,7 @@ export default class GeoJsonLayer extends Layer {
         }
       }));
 
-    const pointLayer = drawPoints && new ScatterplotLayer(Object.assign({},
+    const pointLayer = drawPoints && new ScatterplotLayer64(Object.assign({},
       this.props, handlers, {
         id: `${id}-points`,
         data: pointFeatures,
@@ -194,5 +131,4 @@ export default class GeoJsonLayer extends Layer {
   }
 }
 
-GeoJsonLayer.layerName = 'GeoJsonLayer';
-GeoJsonLayer.defaultProps = defaultProps;
+GeoJsonLayer64.layerName = 'GeoJsonLayer64';

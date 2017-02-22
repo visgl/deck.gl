@@ -18,6 +18,8 @@ export class PolygonTesselatorExtruded {
     wireframe = false,
     fp64 = false
   }) {
+    this.fp64 = fp64;
+
     // Expensive operation, convert all polygons to arrays
     polygons = Container.map(polygons, (complexPolygon, polygonIndex) => {
       const height = getHeight(polygonIndex) || 0;
@@ -29,22 +31,16 @@ export class PolygonTesselatorExtruded {
     this.groupedVertices = polygons;
     this.wireframe = wireframe;
 
+    this.attributes = {};
+
     const positionsJS = calculatePositionsJS({groupedVertices, wireframe});
-
-    this.attributes = fp64 ? {
-      positions64xy: calculatePositions64xy(positionsJS),
-      positions64z: calculatePositions64z(positionsJS)
-    } : {
-      positions: calculatePositions(positionsJS)
-    };
-
     Object.assign(this.attributes, {
+      positions: calculatePositions(positionsJS, this.fp64),
       indices: calculateIndices({groupedVertices, wireframe}),
       normals: calculateNormals({groupedVertices, wireframe}),
       // colors: calculateColors({groupedVertices, wireframe, getColor}),
       pickingColors: calculatePickingColors({groupedVertices, wireframe})
     });
-
   }
 
   indices() {
@@ -53,14 +49,6 @@ export class PolygonTesselatorExtruded {
 
   positions() {
     return this.attributes.positions;
-  }
-
-  positions64xy() {
-    return this.attributes.positions64xy;
-  }
-
-  positions64z() {
-    return this.attributes.positions64z;
   }
 
   normals() {
@@ -126,25 +114,18 @@ function calculatePositionsJS({groupedVertices, wireframe = false}) {
   return flattenDeep(positions);
 }
 
-function calculatePositions(positionsJS) {
-  return new Float32Array(positionsJS);
-}
+function calculatePositions(positionsJS, fp64) {
+  let positionLow;
+  if (fp64) {
+    // We only need x, y component
+    positionLow = new Float32Array(positionsJS / 3 * 2);
+    for (let i = 0; i < positionsJS.length / 3; i++) {
+      positionLow[i * 2 + 0] = fp64ify(positionsJS[i * 3 + 0])[1];
+      positionLow[i * 2 + 1] = fp64ify(positionsJS[i * 3 + 1])[1];
+    }
 
-function calculatePositions64xy(positionsJS) {
-  const attribute = new Float32Array(positionsJS.length / 3 * 4);
-  for (let i = 0; i < positionsJS.length / 3; i++) {
-    [attribute[i * 4 + 0], attribute[i * 4 + 1]] = fp64ify(positionsJS[i * 3 + 0]);
-    [attribute[i * 4 + 2], attribute[i * 4 + 3]] = fp64ify(positionsJS[i * 3 + 1]);
   }
-  return attribute;
-}
-
-function calculatePositions64z(positionsJS) {
-  const attribute = new Float32Array(positionsJS.length / 3 * 2);
-  for (let i = 0; i < positionsJS.length / 3; i++) {
-    [attribute[i * 2 + 0], attribute.value[i * 2 + 1]] = fp64ify(positionsJS[i * 3 + 2] + 0.1);
-  }
-  return attribute;
+  return {positions: new Float32Array(positionsJS), positions64xyLow: positionLow};
 }
 
 function calculateNormals({groupedVertices, wireframe}) {
