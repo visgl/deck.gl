@@ -1,4 +1,5 @@
 import {Layer, assembleShaders} from 'deck.gl';
+import {scaleLinear} from 'd3-scale';
 
 import {GL, Model, Geometry} from 'luma.gl';
 import {readFileSync} from 'fs';
@@ -7,7 +8,11 @@ import {join} from 'path';
 const defaultProps = {
   xRange: [-1, 1],
   zRange: [-1, 1],
-  resolution: [100, 100]
+  resolution: [100, 100],
+  ticksCount: 6,
+  axisOffset: 0,
+  axisColor: [0, 0, 0, 255],
+  fade: 1
 };
 
 /* Utils */
@@ -26,6 +31,20 @@ function crossProduct(v0, v1) {
   ];
 }
 
+function arrayEqual(arr0, arr1) {
+  return arr0 && arr1 && arr0.length === arr1.length && arr0.every((a, i) => a === arr1[i]);
+}
+
+function flatten(arrayOfArrays) {
+  return arrayOfArrays.reduce((acc, arr) => acc.concat(arr), []);
+}
+
+function getTicks([min, max], ticksCount) {
+  return scaleLinear().domain([min, max])
+    .ticks(ticksCount)
+    .map(t => (t - min) / (max - min) - 0.5);
+}
+
 export default class GraphLayer extends Layer {
 
   initializeState() {
@@ -34,55 +53,128 @@ export default class GraphLayer extends Layer {
 
     attributeManager.add({
       indices: {size: 1, isIndexed: true, update: this.calculateIndices},
-      positions: {size: 3, update: this.calculatePositions, noAlloc: true},
-      normals: {size: 3, update: this.calculateNormals, noAlloc: true},
-      colors: {size: 4, type: GL.UNSIGNED_BYTE, update: this.calculateColors, noAlloc: true}
+      positions: {size: 3, accessor: 'getY', update: this.calculatePositions, noAlloc: true},
+      normals: {size: 3, accessor: 'getY', update: this.calculateNormals, noAlloc: true},
+      colors: {size: 4, accessor: ['getY', 'getColor'], type: GL.UNSIGNED_BYTE, update: this.calculateColors, noAlloc: true}
     });
 
     gl.getExtension('OES_element_index_uint');
     this.setState({
-      model: this.getModel(gl),
-      bounds: [[0, 0], [0, 0], [0, 0]]
+      ...this.getModels(gl),
+      center: [0, 0, 0],
+      size: 1
     });
   }
 
-  getShaders(id) {
-    return {
-      vs: readFileSync(join(__dirname, './graph-layer-vertex.glsl'), 'utf8'),
-      fs: readFileSync(join(__dirname, './graph-layer-fragment.glsl'), 'utf8')
-    };
+  updateState({oldProps, props}) {
+    if (!arrayEqual(oldProps.xRange, props.xRange) ||
+      !arrayEqual(oldProps.zRange, props.zRange) ||
+      !arrayEqual(oldProps.resolution, props.resolution)) {
+      this.state.attributeManager.invalidateAll();
+    }
   }
 
-  getModel(gl) {
-    // a square that minimally cover the unit circle
-    const shaders = assembleShaders(gl, this.getShaders());
+  getModels(gl) {
+    // 3d surface
+    const graphShaders = assembleShaders(gl, {
+      vs: readFileSync(join(__dirname, './graph-vertex.glsl'), 'utf8'),
+      fs: readFileSync(join(__dirname, './graph-fragment.glsl'), 'utf8')
+    });
 
-    return new Model({
+    const graphModel = new Model({
       gl,
-      id: this.props.id,
-      vs: shaders.vs,
-      fs: shaders.fs,
+      id: `${this.props.id}-graph`,
+      vs: graphShaders.vs,
+      fs: graphShaders.fs,
       geometry: new Geometry({
         drawMode: GL.TRIANGLES
       }),
       vertexCount: 0,
       isIndexed: true
     });
+
+    // axis grids
+    const axisShaders = assembleShaders(gl, {
+      vs: readFileSync(join(__dirname, './axis-vertex.glsl'), 'utf8'),
+      fs: readFileSync(join(__dirname, './axis-fragment.glsl'), 'utf8')
+    });
+
+    // draw rectangle around slice
+    const axisPositions = [
+      -1, -1, 0, -1, 1, 0,
+      -1, 1, 0, 1, 1, 0,
+      1, 1, 0, 1, -1, 0,
+      1, -1, 0, -1, -1, 0
+    ];
+    const axisNormals = [
+      -1, 0, 0, -1, 0, 0,
+      0, 1, 0, 0, 1, 0,
+      1, 0, 0, 1, 0, 0,
+      0, -1, 0, 0, -1, 0
+    ];
+    const axisModel = new Model({
+      gl,
+      id: `${this.props.id}-axis`,
+      vs: axisShaders.vs,
+      fs: axisShaders.fs,
+      geometry: new Geometry({
+        drawMode: GL.LINES,
+        positions: new Float32Array(axisPositions),
+        normals: new Float32Array(axisNormals)
+      }),
+      isInstanced: true
+    });
+
+    return {
+      model: graphModel,
+      axisModel
+    };
   }
 
   draw({uniforms}) {
-    const {bounds} = this.state;
+    const {center, size} = this.state;
+    const {fade, axisColor, axisOffset} = this.props;
     const {viewport: {width, height}} = this.context;
 
-    const size = Math.max(...bounds.map(b => b[1] - b[0])) || 1;
+    this.state.axisModel.render({
+      ...uniforms,
+      offset: axisOffset,
+      strokeColor: axisColor
+    });
 
     this.state.model.render({
       ...uniforms,
-      center: bounds.map(b => (b[0] + b[1]) / 2),
-      size
+      center,
+      size,
+      fade
     });
   }
 
+  _setBounds(bounds) {
+    this.setState({
+      center: bounds.map(b => (b[0] + b[1]) / 2),
+      size: Math.max(...bounds.map(b => b[1] - b[0])) || 1
+    });
+
+    // generate axis
+    const {axisModel} = this.state;
+    const {ticksCount} = this.props;
+    const xTicks = getTicks(bounds[0], ticksCount);
+    const yTicks = getTicks(bounds[1], ticksCount);
+    const zTicks = getTicks(bounds[2], ticksCount);
+
+    const normals = [].concat(
+      xTicks.map(t => [1, 0, 0]),
+      yTicks.map(t => [0, 1, 0]),
+      zTicks.map(t => [0, 0, 1])
+    );
+
+    axisModel.setAttributes({
+      instancePositions: {size: 1, value: new Float32Array(flatten([xTicks, yTicks, zTicks])), instanced: true},
+      instanceNormals: {size: 3, value: new Float32Array(flatten(normals)), instanced: true}
+    });
+    axisModel.setInstanceCount(normals.length);
+  }
 
   _forEachVertex(cb) {
     const {resolution: [xCount, zCount], xRange, zRange} = this.props;
@@ -153,7 +245,7 @@ export default class GraphLayer extends Layer {
     });
 
     attribute.value = value;
-    this.setState({bounds: [xRange, [minY, maxY], zRange]});
+    this._setBounds([xRange, [minY, maxY], zRange]);
   }
 
   calculateNormals(attribute) {

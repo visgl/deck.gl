@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#define SHADER_NAME trips-layer-fragment-shader
+#define SHADER_NAME graph-layer-fragment-shader
 
 #ifdef GL_ES
 precision highp float;

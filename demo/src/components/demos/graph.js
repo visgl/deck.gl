@@ -65,6 +65,8 @@ export default class GraphDemo extends Component {
       xRange: [-Math.PI, Math.PI],
       zRange: [-Math.PI, Math.PI],
       resolution: [100, 100],
+      axisOffset: 0.5,
+      axisColor: [0, 0, 0, 128],
       opacity: 1
     });
 

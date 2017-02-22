@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#define SHADER_NAME trips-layer-vertex-shader
+#define SHADER_NAME graph-layer-vertex-shader
 
 attribute vec3 positions;
 attribute vec3 normals;
@@ -26,6 +26,7 @@ attribute vec4 colors;
 
 uniform vec3 center;
 uniform float size;
+uniform float fade;
 uniform float opacity;
 
 varying vec4 vColor;
@@ -36,7 +37,7 @@ void main(void) {
   vec4 position_modelspace = vec4((positions - center) / size, 1.0);
   gl_Position = project_to_clipspace(position_modelspace);
 
-  // float lightWeight = getLightWeight(position_modelspace, normals);
-
-  vColor = vec4(colors.rgb, colors.a * opacity) / 255.0;
+  vec4 center_viewspace = project_to_clipspace(vec4(0.0, 0.0, 0.0, 1.0));
+  float fadeFactor = 1.0 - (gl_Position.z - center_viewspace.z) * fade;
+  vColor = vec4(colors.rgb * fadeFactor, colors.a * opacity) / 255.0;
 }
