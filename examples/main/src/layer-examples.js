@@ -4,6 +4,7 @@ import {
   LineLayer,
   HexagonLayer,
 
+  PointCloudLayer,
   ScreenGridLayer,
   IconLayer,
   GridLayer,
@@ -179,17 +180,19 @@ const ScatterplotLayerExample = {
   }
 };
 
-const ScatterplotLayerMetersExample = {
-  layer: ScatterplotLayer,
+const PointCloudLayerExample = {
+  layer: PointCloudLayer,
+  getData: dataSamples.getPointCloud,
   props: {
-    id: 'scatterplotLayerMeter',
-    data: dataSamples.meterPoints,
+    id: 'pointCloudLayer',
     outline: true,
     projectionMode: 2,
     positionOrigin: dataSamples.positionOrigin,
-    getPosition: d => d,
-    getColor: d => [0, 0, 255],
-    opacity: 0.5,
+    getPosition: d => d.position,
+    getNormal: d => d.normal,
+    getColor: d => d.color,
+    opacity: 1,
+    radius: 4,
     pickable: true
   }
 };
@@ -373,7 +376,7 @@ export default {
     // PolygonLayer: PolygonLayerExample,
     PathLayer: PathLayerExample,
     'ScatterplotLayer': ScatterplotLayerExample,
-    'ScatterplotLayer (meters)': ScatterplotLayerMetersExample,
+    'PointCloudLayer': PointCloudLayerExample,
     ArcLayer: ArcLayerExample,
     LineLayer: LineLayerExample,
     ScreenGridLayer: ScreenGridLayerExample,

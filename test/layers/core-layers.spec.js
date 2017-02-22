@@ -22,7 +22,7 @@ import test from 'tape-catch';
 import {createGLContext} from 'luma.gl';
 // import {WebMercatorViewport} from 'viewport-mercator-project';
 
-import {ChoroplethLayer, ScatterplotLayer, ArcLayer, ScreenGridLayer} from 'deck.gl';
+import {ChoroplethLayer, ScatterplotLayer, ArcLayer, ScreenGridLayer, PointCloudLayer} from 'deck.gl';
 
 // Import LayerManager to test that layers can successfully be updated
 import {LayerManager} from 'deck.gl';
@@ -51,7 +51,8 @@ const FIXTURE = {
   choropleths: [],
   hexagons: [],
   points: [{position: [100, 100], color: [255, 0, 0]}],
-  arcs: [{sourcePosition: [0, 0], targetPosition: [1, 3], color: [255, 0, 0]}]
+  arcs: [{sourcePosition: [0, 0], targetPosition: [1, 3], color: [255, 0, 0]}],
+  pointCloud: [{position: [0, 0, 0], normal: [0, 1, 0], color: [255, 0, 0]}]
 };
 
 test('imports', t => {
@@ -159,6 +160,34 @@ test('ArcLayer#constructor', t => {
   //   },
   //   'ArcLayer update does not throw'
   // );
+
+  t.end();
+});
+
+test('PointCloudLayer#constructor', t => {
+  const {pointCloud} = FIXTURE;
+
+  const layer = new PointCloudLayer({
+    data: pointCloud,
+    pickable: true
+  });
+  t.ok(layer instanceof PointCloudLayer, 'PointCloudLayer created');
+
+  const emptyLayer = new PointCloudLayer({
+    id: 'emptyPointCloudLayer',
+    data: [],
+    pickable: true
+  });
+  t.ok(emptyLayer instanceof PointCloudLayer, 'Empty PointCloudLayer created');
+
+  t.doesNotThrow(
+    () => new PointCloudLayer({
+      id: 'nullPointCloudLayer',
+      data: null,
+      pickable: true
+    }),
+    'Null PointCloudLayer did not throw exception'
+  );
 
   t.end();
 });
