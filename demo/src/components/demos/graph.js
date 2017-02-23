@@ -14,7 +14,7 @@ export default class GraphDemo extends Component {
 
   static get parameters() {
     return {
-      equation: {displayName: 'Equation', type: 'text', value: 'sin(x ^ 2 + y ^ 2)'},
+      equation: {displayName: 'Equation', type: 'text', value: 'sin(x ^ 2 + y ^ 2) * x / 3.14'},
       resolution: {displayName: 'Resolution', type: 'number',
         value: 200, step: 10, min: 10, max: 1000},
       showAxis: {displayName: 'Show Axis', type: 'checkbox', value: true}
@@ -104,7 +104,7 @@ export default class GraphDemo extends Component {
 
     const layers = equation.valid ? [new GraphLayer({
       getZ: equation.func,
-      getColor: (x, y, z) => [40, z * 255, 160],
+      getColor: (x, y, z) => [40, z * 128 + 128, 160],
       xRange: [-Math.PI, Math.PI],
       yRange: [-Math.PI, Math.PI],
       resolution: [resolution.value, resolution.value],
