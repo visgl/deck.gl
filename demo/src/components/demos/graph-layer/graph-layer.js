@@ -6,6 +6,7 @@ import {readFileSync} from 'fs';
 import {join} from 'path';
 
 const defaultProps = {
+  data: [],
   xRange: [-1, 1],
   zRange: [-1, 1],
   resolution: [100, 100],

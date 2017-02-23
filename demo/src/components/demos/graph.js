@@ -1,5 +1,6 @@
 import React, {Component} from 'react';
 import autobind from 'autobind-decorator';
+import {Parser} from 'expr-eval';
 
 import Canvas3D from '../canvas3d';
 import GraphLayer from './graph-layer/graph-layer';
@@ -13,6 +14,9 @@ export default class GraphDemo extends Component {
 
   static get parameters() {
     return {
+      equation: {displayName: 'Equation', type: 'text', value: 'sin(x ^ 2 + z ^ 2)'},
+      resolution: {displayName: 'Resolution', type: 'number', value: 100, step: 10, min: 10, max: 500},
+      showAxis: {displayName: 'Show Axis', type: 'checkbox', value: true}
     };
   }
 
@@ -33,13 +37,16 @@ export default class GraphDemo extends Component {
     super(props);
 
     this.state = {
-      lookAt: [0, 0, 0],
-      distance: 5,
-      rotationX: -30,
-      rotationY: 30,
-      fov: 50,
-      minDistance: 2,
-      maxDistance: 20
+      viewport: {
+        lookAt: [0, 0, 0],
+        distance: 5,
+        rotationX: -30,
+        rotationY: 30,
+        fov: 50,
+        minDistance: 2,
+        maxDistance: 20
+      },
+      equation: {}
     };
   }
 
@@ -47,8 +54,33 @@ export default class GraphDemo extends Component {
     this.refs.canvas.fitBounds([-1, -1, -1], [1, 1, 1]);
   }
 
+  componentWillReceiveProps(nextProps) {
+    const {equation} = nextProps.params;
+    if (equation && equation !== this.props.params.equation) {
+      const expression = equation.value;
+      try {
+        const p = Parser.parse(expression);
+        this.setState({
+          equation: {
+            valid: true,
+            func: (x, z) => p.evaluate({x, z}),
+            text: p.toString()
+          }
+        })
+      } catch (err) {
+        this.setState({
+          equation: {
+            valid: false
+          }
+        })
+      }
+    }
+  }
+
   @autobind _onViewportChange(viewport) {
-    this.setState(viewport);
+    this.setState({
+      viewport: {...this.state.viewport, ...viewport}
+    });
   }
 
   _onInitialized(gl) {
@@ -57,23 +89,30 @@ export default class GraphDemo extends Component {
   }
 
   render() {
-    const {viewport: {width, height}, params, data} = this.props;
+    const {
+      viewport: {width, height},
+      params: {resolution, showAxis}
+    } = this.props;
+    const {viewport, equation} = this.state;
 
-    const layer = new GraphLayer({
-      getY: (x, z) => Math.sin(x * x + z),
+    const layers = equation.valid ? [new GraphLayer({
+      getY: equation.func,
       getColor: (x, y, z) => [40, y * 255, 160],
       xRange: [-Math.PI, Math.PI],
       zRange: [-Math.PI, Math.PI],
-      resolution: [100, 100],
+      resolution: [resolution.value, resolution.value],
       axisOffset: 0.5,
-      axisColor: [0, 0, 0, 128],
-      opacity: 1
-    });
+      axisColor: showAxis.value ? [0, 0, 0, 128] : [0, 0, 0, 0],
+      opacity: 1,
+      updateTriggers: {
+        getY: equation.text
+      }
+    })] : [];
 
     const canvasProps = {
       width,
       height,
-      ...this.state
+      ...viewport
     };
     const perspectiveViewport = Canvas3D.getViewport(canvasProps);
 
@@ -86,7 +125,7 @@ export default class GraphDemo extends Component {
           width={width}
           height={height}
           viewport={perspectiveViewport}
-          layers={ [layer] } />
+          layers={ layers } />
       </Canvas3D>
     );
   }

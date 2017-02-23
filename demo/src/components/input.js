@@ -1,14 +1,31 @@
 import React, {Component} from 'react';
 import pureRender from 'pure-render-decorator';
+import autobind from 'autobind-decorator';
 
 @pureRender
 export default class GenericInput extends Component {
 
+  @autobind _onChange(evt) {
+    const {value, type} = evt.target;
+    let newValue = value;
+    if (type === 'checkbox') {
+      newValue = evt.target.checked;
+    }
+    if (type === 'number') {
+      newValue = Number(value);
+    }
+    return this.props.onChange(this.props.name, newValue);
+  }
+
   render() {
-    const {displayName, name, displayValue, onChange} = this.props;
+    const {displayName, type, displayValue} = this.props;
     const props = {...this.props};
     delete props.displayName;
     delete props.displayValue;
+
+    if (type === 'checkbox') {
+      props.checked = props.value;
+    }
 
     return (
       <div className="input">
@@ -16,7 +33,7 @@ export default class GenericInput extends Component {
         <input
           {...props}
           value={displayValue}
-          onChange={ e => onChange(name, e.target.value) }/>
+          onChange={ this._onChange }/>
       </div>
     );
   }
