@@ -1,4 +1,6 @@
+/* global window */
 import React, {Component, PropTypes} from 'react';
+import autobind from 'autobind-decorator';
 import {PerspectiveViewport} from 'deck.gl';
 
 /* Utils */
@@ -85,13 +87,13 @@ export default class Canvas3D extends Component {
     this._dragStartPos = null;
   }
 
-  _onDragStart = evt => {
+  @autobind _onDragStart(evt) {
     const {pageX, pageY} = evt;
     this._dragStartPos = [pageX, pageY];
     this.props.onViewportChange({isDragging: true});
   }
 
-  _onDrag = evt => {
+  @autobind _onDrag(evt) {
     if (this._dragStartPos) {
       const {pageX, pageY} = evt;
       const {width, height} = this.props;
@@ -111,7 +113,7 @@ export default class Canvas3D extends Component {
       } else {
         // pan
         const {lookAt, distance, rotationX, rotationY, fov} = this.props;
-        
+
         const unitsPerPixel = distance / Math.tan(fov / 180 * Math.PI / 2) / 2;
         let translation = [-unitsPerPixel * dx, unitsPerPixel * dy, 0];
         translation = rotateX(translation, rotationX);
@@ -125,19 +127,19 @@ export default class Canvas3D extends Component {
     }
   }
 
-  _onDragEnd = () => {
+  @autobind _onDragEnd() {
     this._dragStartPos = null;
     this.props.onViewportChange({isDragging: false});
   }
 
-  _onWheel = evt => {
+  @autobind _onWheel(evt) {
     evt.preventDefault();
     let value = evt.deltaY;
     // Firefox doubles the values on retina screens...
-    if (firefox && event.deltaMode === window.WheelEvent.DOM_DELTA_PIXEL) {
+    if (firefox && evt.deltaMode === window.WheelEvent.DOM_DELTA_PIXEL) {
       value /= window.devicePixelRatio;
     }
-    if (event.deltaMode === window.WheelEvent.DOM_DELTA_LINE) {
+    if (evt.deltaMode === window.WheelEvent.DOM_DELTA_LINE) {
       value *= 40;
     }
     if (value !== 0 && value % 4.000244140625 === 0) {

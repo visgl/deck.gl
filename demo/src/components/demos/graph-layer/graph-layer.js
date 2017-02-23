@@ -52,12 +52,14 @@ export default class GraphLayer extends Layer {
     const {gl} = this.context;
     const {attributeManager} = this.state;
 
+    /* eslint-disable max-len */
     attributeManager.add({
       indices: {size: 1, isIndexed: true, update: this.calculateIndices},
       positions: {size: 3, accessor: 'getY', update: this.calculatePositions, noAlloc: true},
       normals: {size: 3, accessor: 'getY', update: this.calculateNormals, noAlloc: true},
       colors: {size: 4, accessor: ['getY', 'getColor'], type: GL.UNSIGNED_BYTE, update: this.calculateColors, noAlloc: true}
     });
+    /* eslint-enable max-len */
 
     gl.getExtension('OES_element_index_uint');
     this.setState({
@@ -135,7 +137,6 @@ export default class GraphLayer extends Layer {
   draw({uniforms}) {
     const {center, size} = this.state;
     const {fade, axisColor, axisOffset} = this.props;
-    const {viewport: {width, height}} = this.context;
 
     this.state.axisModel.render({
       ...uniforms,
@@ -171,13 +172,17 @@ export default class GraphLayer extends Layer {
     );
 
     axisModel.setAttributes({
-      instancePositions: {size: 1, value: new Float32Array(flatten([xTicks, yTicks, zTicks])), instanced: true},
+      instancePositions: {
+        size: 1,
+        value: new Float32Array(flatten([xTicks, yTicks, zTicks])),
+        instanced: true
+      },
       instanceNormals: {size: 3, value: new Float32Array(flatten(normals)), instanced: true}
     });
     axisModel.setInstanceCount(normals.length);
   }
 
-  _forEachVertex(cb) {
+  _forEachVertex(func) {
     const {resolution: [xCount, zCount], xRange, zRange} = this.props;
     const xStep = (xRange[1] - xRange[0]) / (xCount - 1);
     const zStep = (zRange[1] - zRange[0]) / (zCount - 1);
@@ -187,7 +192,7 @@ export default class GraphLayer extends Layer {
       for (let zIndex = 0; zIndex < zCount; zIndex++) {
         const x = xIndex * xStep + xRange[0];
         const z = zIndex * zStep + zRange[0];
-        cb(x, z, i++);
+        func(x, z, i++);
       }
     }
   }
@@ -206,7 +211,7 @@ export default class GraphLayer extends Layer {
         /*
          *   i0   i1
          *    +---+---
-         *    | / |   
+         *    | / |
          *    +---+---
          *    |   |
          *   i2   i3
@@ -283,7 +288,7 @@ export default class GraphLayer extends Layer {
       value[i * 4] = color[0];
       value[i * 4 + 1] = color[1];
       value[i * 4 + 2] = color[2];
-      value[i * 4 + 3] = isNaN(color[3]) ?  255 : color[3];
+      value[i * 4 + 3] = isNaN(color[3]) ? 255 : color[3];
     });
 
     attribute.value = value;

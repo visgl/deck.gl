@@ -15,7 +15,8 @@ export default class GraphDemo extends Component {
   static get parameters() {
     return {
       equation: {displayName: 'Equation', type: 'text', value: 'sin(x ^ 2 + z ^ 2)'},
-      resolution: {displayName: 'Resolution', type: 'number', value: 100, step: 10, min: 10, max: 500},
+      resolution: {displayName: 'Resolution', type: 'number',
+        value: 100, step: 10, min: 10, max: 500},
       showAxis: {displayName: 'Show Axis', type: 'checkbox', value: true}
     };
   }
@@ -66,13 +67,11 @@ export default class GraphDemo extends Component {
             func: (x, z) => p.evaluate({x, z}),
             text: p.toString()
           }
-        })
+        });
       } catch (err) {
         this.setState({
-          equation: {
-            valid: false
-          }
-        })
+          equation: {valid: false}
+        });
       }
     }
   }
