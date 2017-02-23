@@ -23,6 +23,7 @@ import GridLayer from '../grid-layer/grid-layer';
 
 import {pointToDensityGridData} from './grid-aggregator';
 import {ordinalScale, linearScale} from './scale-utils';
+import {pointToHexbin} from './hexagon-aggregator';
 
 const defaultCellSize = 1000;
 const defaultColorRange = [
@@ -63,6 +64,8 @@ export default class PointDensityGridLayer extends Layer {
       const {data, cellSize, getPosition} = this.props;
       const {gridOffset, layerData, countRange} =
         pointToDensityGridData(data, cellSize, getPosition);
+
+      pointToHexbin(data, cellSize, getPosition, this.projectFlat.bind(this));
 
       Object.assign(this.state, {gridOffset, layerData, countRange});
     }
