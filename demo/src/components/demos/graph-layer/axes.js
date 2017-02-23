@@ -11,10 +11,8 @@ function flatten(arrayOfArrays) {
   return arrayOfArrays.reduce((acc, arr) => acc.concat(arr), []);
 }
 
-function getTicks([min, max], ticksCount, extent) {
-  return scaleLinear().domain([min, max])
-    .ticks(ticksCount)
-    .map(t => (t - (max + min) / 2) / extent);
+function getTicks([min, max], ticksCount) {
+  return scaleLinear().domain([min, max]).ticks(ticksCount);
 }
 
 export default class Axes {
@@ -28,10 +26,9 @@ export default class Axes {
   }
 
   update(bounds, ticksCount) {
-    const extent = Math.max(...bounds.map(b => b[1] - b[0]));
-    const xTicks = getTicks(bounds[0], ticksCount, extent);
-    const yTicks = getTicks(bounds[1], ticksCount, extent);
-    const zTicks = getTicks(bounds[2], ticksCount, extent);
+    const xTicks = getTicks(bounds[0], ticksCount);
+    const yTicks = getTicks(bounds[1], ticksCount);
+    const zTicks = getTicks(bounds[2], ticksCount);
 
     const normals = [].concat(
       xTicks.map(t => [1, 0, 0]),

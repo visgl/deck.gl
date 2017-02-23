@@ -43,7 +43,7 @@ export default class GraphLayer extends Layer {
       model: this.getModels(gl),
       axes: new Axes({gl, id: this.props.id}),
       center: [0, 0, 0],
-      size: 1
+      dim: [1, 1, 1]
     });
   }
 
@@ -77,12 +77,14 @@ export default class GraphLayer extends Layer {
   }
 
   draw({uniforms}) {
-    const {center, size} = this.state;
+    const {center, dim} = this.state;
     const {fade, drawAxes, axesColor, axesOffset} = this.props;
 
     if (drawAxes) {
       this.state.axes.render({
         ...uniforms,
+        center,
+        dim,
         offset: axesOffset,
         strokeColor: axesColor
       });
@@ -91,7 +93,7 @@ export default class GraphLayer extends Layer {
     this.state.model.render({
       ...uniforms,
       center,
-      size,
+      dim,
       fade
     });
   }
@@ -138,7 +140,7 @@ export default class GraphLayer extends Layer {
   _setBounds(bounds) {
     this.setState({
       center: bounds.map(b => (b[0] + b[1]) / 2),
-      size: Math.max(...bounds.map(b => b[1] - b[0])) || 1
+      dim: bounds.map(b => b[1] - b[0])
     });
 
     // update axes

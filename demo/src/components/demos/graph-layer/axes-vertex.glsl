@@ -25,6 +25,8 @@ attribute vec3 normals;
 attribute float instancePositions;
 attribute vec3 instanceNormals;
 
+uniform vec3 center;
+uniform vec3 dim;
 uniform float offset;
 uniform vec4 strokeColor;
 uniform float renderPickingBuffer;
@@ -43,7 +45,7 @@ void main(void) {
     ),
     positions,
     instanceNormals.z
-  ) / 2.0;
+  ) * dim / 2.0;
 
   vec3 vertexNormal = mix(
     mix(
@@ -60,7 +62,12 @@ void main(void) {
   vec4 vertex_viewspace = project_to_clipspace(vec4(vertexNormal, 1.0));
   shouldDiscard = step(vertex_viewspace.z, center_viewspace.z) + renderPickingBuffer;
 
-  vec4 position_modelspace = vec4(instancePositions * instanceNormals + vertexPosition + offset * vertexNormal, 1.0);
+  // fit into a unit cube that centers at [0, 0, 0]
+  float scale = 1.0 / max(dim.x, max(dim.y, dim.z));
+  vec4 position_modelspace = vec4(
+    (instancePositions * instanceNormals + vertexPosition - center) * scale + offset * vertexNormal,
+    1.0
+  );
   gl_Position = project_to_clipspace(position_modelspace);
 
   vColor = strokeColor / 255.0;

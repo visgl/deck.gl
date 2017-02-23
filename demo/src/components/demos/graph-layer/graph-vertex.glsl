@@ -25,7 +25,7 @@ attribute vec4 colors;
 attribute vec3 pickingColors;
 
 uniform vec3 center;
-uniform float size;
+uniform vec3 dim;
 uniform float fade;
 uniform float opacity;
 uniform float renderPickingBuffer;
@@ -36,7 +36,8 @@ varying float shouldDiscard;
 void main(void) {
 
   // fit into a unit cube that centers at [0, 0, 0]
-  vec4 position_modelspace = vec4((positions.xyz - center) / size, 1.0);
+  float scale = 1.0 / max(dim.x, max(dim.y, dim.z));
+  vec4 position_modelspace = vec4((positions.xyz - center) * scale, 1.0);
   gl_Position = project_to_clipspace(position_modelspace);
 
   vec4 center_viewspace = project_to_clipspace(vec4(0.0, 0.0, 0.0, 1.0));
