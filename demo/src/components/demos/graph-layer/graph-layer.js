@@ -1,6 +1,6 @@
 import {Layer, assembleShaders} from 'deck.gl';
-import {scaleLinear} from 'd3-scale';
 
+import Axes from './axes';
 import {GL, Model, Geometry} from 'luma.gl';
 import {readFileSync} from 'fs';
 import {join} from 'path';
@@ -11,8 +11,9 @@ const defaultProps = {
   yRange: [-1, 1],
   resolution: [100, 100],
   ticksCount: 6,
-  axisOffset: 0,
-  axisColor: [0, 0, 0, 255],
+  drawAxes: true,
+  axesOffset: 0,
+  axesColor: [0, 0, 0, 255],
   fade: 1
 };
 
@@ -20,16 +21,6 @@ const defaultProps = {
 
 function arrayEqual(arr0, arr1) {
   return arr0 && arr1 && arr0.length === arr1.length && arr0.every((a, i) => a === arr1[i]);
-}
-
-function flatten(arrayOfArrays) {
-  return arrayOfArrays.reduce((acc, arr) => acc.concat(arr), []);
-}
-
-function getTicks([min, max], ticksCount) {
-  return scaleLinear().domain([min, max])
-    .ticks(ticksCount)
-    .map(t => (t - min) / (max - min) - 0.5);
 }
 
 export default class GraphLayer extends Layer {
@@ -49,7 +40,8 @@ export default class GraphLayer extends Layer {
 
     gl.getExtension('OES_element_index_uint');
     this.setState({
-      ...this.getModels(gl),
+      model: this.getModels(gl),
+      axes: new Axes({gl, id: this.props.id}),
       center: [0, 0, 0],
       size: 1
     });
@@ -70,7 +62,7 @@ export default class GraphLayer extends Layer {
       fs: readFileSync(join(__dirname, './fragment.glsl'), 'utf8')
     });
 
-    const graphModel = new Model({
+    return new Model({
       gl,
       id: `${this.props.id}-graph`,
       vs: graphShaders.vs,
@@ -82,53 +74,19 @@ export default class GraphLayer extends Layer {
       isIndexed: true
     });
 
-    // axis grids
-    const axisShaders = assembleShaders(gl, {
-      vs: readFileSync(join(__dirname, './axis-vertex.glsl'), 'utf8'),
-      fs: readFileSync(join(__dirname, './fragment.glsl'), 'utf8')
-    });
-
-    // draw rectangle around slice
-    const axisPositions = [
-      -1, -1, 0, -1, 1, 0,
-      -1, 1, 0, 1, 1, 0,
-      1, 1, 0, 1, -1, 0,
-      1, -1, 0, -1, -1, 0
-    ];
-    const axisNormals = [
-      -1, 0, 0, -1, 0, 0,
-      0, 1, 0, 0, 1, 0,
-      1, 0, 0, 1, 0, 0,
-      0, -1, 0, 0, -1, 0
-    ];
-    const axisModel = new Model({
-      gl,
-      id: `${this.props.id}-axis`,
-      vs: axisShaders.vs,
-      fs: axisShaders.fs,
-      geometry: new Geometry({
-        drawMode: GL.LINES,
-        positions: new Float32Array(axisPositions),
-        normals: new Float32Array(axisNormals)
-      }),
-      isInstanced: true
-    });
-
-    return {
-      model: graphModel,
-      axisModel
-    };
   }
 
   draw({uniforms}) {
     const {center, size} = this.state;
-    const {fade, axisColor, axisOffset} = this.props;
+    const {fade, drawAxes, axesColor, axesOffset} = this.props;
 
-    this.state.axisModel.render({
-      ...uniforms,
-      offset: axisOffset,
-      strokeColor: axisColor
-    });
+    if (drawAxes) {
+      this.state.axes.render({
+        ...uniforms,
+        offset: axesOffset,
+        strokeColor: axesColor
+      });
+    }
 
     this.state.model.render({
       ...uniforms,
@@ -183,28 +141,8 @@ export default class GraphLayer extends Layer {
       size: Math.max(...bounds.map(b => b[1] - b[0])) || 1
     });
 
-    // generate axis
-    const {axisModel} = this.state;
-    const {ticksCount} = this.props;
-    const xTicks = getTicks(bounds[0], ticksCount);
-    const yTicks = getTicks(bounds[1], ticksCount);
-    const zTicks = getTicks(bounds[2], ticksCount);
-
-    const normals = [].concat(
-      xTicks.map(t => [1, 0, 0]),
-      yTicks.map(t => [0, 1, 0]),
-      zTicks.map(t => [0, 0, 1])
-    );
-
-    axisModel.setAttributes({
-      instancePositions: {
-        size: 1,
-        value: new Float32Array(flatten([xTicks, yTicks, zTicks])),
-        instanced: true
-      },
-      instanceNormals: {size: 3, value: new Float32Array(flatten(normals)), instanced: true}
-    });
-    axisModel.setInstanceCount(normals.length);
+    // update axes
+    this.state.axes.update(bounds, this.props.ticksCount);
   }
 
   _forEachVertex(func) {
