@@ -15,9 +15,9 @@ export default class GraphDemo extends Component {
   static get parameters() {
     return {
       equation: {displayName: 'Equation', type: 'text', value: 'sin(x ^ 2 + y ^ 2) * x / 3.14'},
+      showAxis: {displayName: 'Grid', type: 'checkbox', value: true},
       resolution: {displayName: 'Resolution', type: 'number',
-        value: 200, step: 10, min: 10, max: 1000},
-      showAxis: {displayName: 'Show Axis', type: 'checkbox', value: true}
+        value: 200, step: 10, min: 10, max: 1000}
     };
   }
 

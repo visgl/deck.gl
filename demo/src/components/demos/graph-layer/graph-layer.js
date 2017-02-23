@@ -105,16 +105,20 @@ export default class GraphLayer extends Layer {
     const yIndex = (i - xIndex) / xCount;
 
     return [
-      (xIndex + 1) / xCount * 255,
-      (yIndex + 1) / yCount * 255,
-      0
+      xIndex / (xCount - 1) * 255,
+      yIndex / (yCount - 1) * 255,
+      255
     ];
   }
 
   decodePickingColor([r, g, b]) {
+    if (b === 0) {
+      return -1;
+    }
+
     const {resolution: [xCount, yCount]} = this.props;
-    const xIndex = Math.round(r / 255 * xCount) - 1;
-    const yIndex = Math.round(g / 255 * yCount) - 1;
+    const xIndex = Math.round(r / 255 * (xCount - 1));
+    const yIndex = Math.round(g / 255 * (yCount - 1));
 
     return yIndex * xCount + xIndex;
   }
@@ -126,8 +130,8 @@ export default class GraphLayer extends Layer {
     if (info && info.index >= 0) {
       const {resolution: [xCount, yCount], xRange, yRange, getZ} = this.props;
 
-      const xRatio = (info.color[0] / 255 * xCount - 1) / (xCount - 1);
-      const yRatio = (info.color[1] / 255 * yCount - 1) / (yCount - 1);
+      const xRatio = info.color[0] / 255;
+      const yRatio = info.color[1] / 255;
 
       const x = xRatio * (xRange[1] - xRange[0]) + xRange[0];
       const y = yRatio * (yRange[1] - yRange[0]) + yRange[0];

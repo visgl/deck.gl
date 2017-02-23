@@ -29,6 +29,7 @@ uniform vec3 dim;
 uniform float fade;
 uniform float opacity;
 uniform float renderPickingBuffer;
+uniform vec3 selectedPickingColor;
 
 varying vec4 vColor;
 varying float shouldDiscard;
