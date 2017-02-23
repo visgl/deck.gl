@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import ScatterplotLayer from '../../core/scatterplot-layer';
+import ScatterplotLayer from '../../core/scatterplot-layer/scatterplot-layer';
 import {fp64ify} from '../../../lib/utils/fp64';
 import {readFileSync} from 'fs';
 import {join} from 'path';

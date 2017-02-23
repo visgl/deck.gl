@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import ChoroplethLayer from '../choropleth-layer';
+import ChoroplethLayer from '../choropleth-layer/choropleth-layer';
 import {fp64ify} from '../../../lib/utils/fp64';
 import flattenDeep from 'lodash.flattendeep';
 import {readFileSync} from 'fs';
