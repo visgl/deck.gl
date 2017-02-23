@@ -44,7 +44,8 @@ export default class LayerControls extends PureComponent {
     }
 
     if (settingName === 'cellSize') {
-      max = 10;
+      // cell size is in meters
+      max = 10000;
     }
 
     return (
