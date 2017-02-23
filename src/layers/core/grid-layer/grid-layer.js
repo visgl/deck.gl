@@ -1,4 +1,4 @@
-// Copyright (c) 2015 Uber Technologies, Inc.
+// Copyright (c) 2016 Uber Technologies, Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -35,10 +35,10 @@ const defaultProps = {
   getColor: x => x.color,
   lightSettings: {
     lightsPosition: [-122.45, 37.65, 8000, -122.45, 37.20, 1000],
-    ambientRatio: 0.1,
+    ambientRatio: 0.4,
     diffuseRatio: 0.6,
     specularRatio: 0.8,
-    lightsStrength: [1.0, 0.0, 1.0, 0.0],
+    lightsStrength: [1.0, 0.0, 0.8, 0.0],
     numberOfLights: 2
   }
 };
