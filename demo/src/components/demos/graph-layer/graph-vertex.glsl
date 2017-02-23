@@ -26,7 +26,7 @@ attribute vec3 pickingColors;
 
 uniform vec3 center;
 uniform vec3 dim;
-uniform float fade;
+uniform float lightStrength;
 uniform float opacity;
 uniform float renderPickingBuffer;
 
@@ -41,7 +41,7 @@ void main(void) {
   gl_Position = project_to_clipspace(position_modelspace);
 
   vec4 center_viewspace = project_to_clipspace(vec4(0.0, 0.0, 0.0, 1.0));
-  float fadeFactor = 1.0 - (gl_Position.z - center_viewspace.z) * fade;
+  float fadeFactor = 1.0 - (gl_Position.z - center_viewspace.z) * lightStrength;
   
   vec4 color = vec4(colors.rgb * fadeFactor, colors.a * opacity) / 255.0;
   vec4 pickingColor = vec4(pickingColors / 255.0, 1.0);

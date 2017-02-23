@@ -5,24 +5,48 @@ import {GL, Model, Geometry} from 'luma.gl';
 import {readFileSync} from 'fs';
 import {join} from 'path';
 
+const DEFAULT_COLOR = [0, 0, 0, 255];
+
 const defaultProps = {
   data: [],
-  xRange: [-1, 1],
-  yRange: [-1, 1],
-  resolution: [100, 100],
-  ticksCount: 6,
+  getZ: () => 0,
+  getColor: () => DEFAULT_COLOR,
+  xMin: -1,
+  xMax: 1,
+  yMin: -1,
+  yMax: 1,
+  xResolution: 100,
+  yResolution: 100,
   drawAxes: true,
+  ticksCount: 6,
   axesOffset: 0,
   axesColor: [0, 0, 0, 255],
-  fade: 1
+  lightStrength: 1
 };
 
-/* Utils */
-
-function arrayEqual(arr0, arr1) {
-  return arr0 && arr1 && arr0.length === arr1.length && arr0.every((a, i) => a === arr1[i]);
-}
-
+/*
+ * @classdesc
+ * A layer that plots a surface based on a z=f(x,y) equation.
+ *
+ * @class
+ * @param {Object} [props]
+ * @param {Function} [props.getZ] - method called to get z from (x,y) values
+ * @param {Function} [props.getColor] - method called to get color from (x,y,z)
+      returns [r,g,b,a].
+ * @param {Number} [props.xMin] - low bound of x
+ * @param {Number} [props.xMax] - high bound of x
+ * @param {Number} [props.yMin] - low bound of y
+ * @param {Number} [props.yMax] - high bound of y
+ * @param {Integer} [props.xResolution] - number of samples within x range
+ * @param {Integer} [props.yResolution] - number of samples within y range
+ * @param {Number} [props.lightStrength] - front light strength
+ * @param {Boolean} [props.drawAxes] - whether to draw axes
+ * @param {Integer} [props.ticksCount] - number of ticks along each axis, see 
+      https://github.com/d3/d3-axis/blob/master/README.md#axis_ticks
+ * @param {Number} [props.axesOffset] - amount to set back grids from the plot,
+      relative to the size of the bounding box
+ * @param {Array} [props.axesColor] - color of the gridlines, in [r,g,b,a]
+ */
 export default class GraphLayer extends Layer {
 
   initializeState() {
@@ -48,16 +72,23 @@ export default class GraphLayer extends Layer {
     });
   }
 
-  updateState({oldProps, props}) {
-    const {xRange, yRange, resolution} = props;
+  updateState({oldProps, props, changeFlags}) {
+    if (changeFlags.propsChanged) {
+      const {xMin, xMax, yMin, yMax, xResolution, yResolution} = props;
 
-    if (!arrayEqual(oldProps.xRange, xRange) ||
-      !arrayEqual(oldProps.yRange, yRange) ||
-      !arrayEqual(oldProps.resolution, resolution)) {
-      this.setState({
-        vertexCount: resolution[0] * resolution[1]
-      });
-      this.state.attributeManager.invalidateAll();
+      if (oldProps.xMin !== xMin ||
+        oldProps.xMax !== xMax ||
+        oldProps.yMin !== yMin ||
+        oldProps.yMax !== yMax ||
+        oldProps.xResolution !== xResolution ||
+        oldProps.yResolution !== yResolution) {
+        this.setState({
+          vertexCount: xResolution * yResolution
+        });
+        this.state.attributeManager.invalidateAll();
+      }
+
+      this.state.axes.updateProps({ticksCount: this.props.ticksCount});
     }
   }
 
@@ -84,7 +115,7 @@ export default class GraphLayer extends Layer {
 
   draw({uniforms}) {
     const {center, dim} = this.state;
-    const {fade, drawAxes, axesColor, axesOffset} = this.props;
+    const {lightStrength, drawAxes, axesColor, axesOffset} = this.props;
 
     if (drawAxes) {
       this.state.axes.render({
@@ -100,7 +131,7 @@ export default class GraphLayer extends Layer {
       ...uniforms,
       center,
       dim,
-      fade
+      lightStrength
     });
   }
 
@@ -114,14 +145,14 @@ export default class GraphLayer extends Layer {
    *              x
    */
   encodePickingColor(i) {
-    const {resolution: [xCount, yCount]} = this.props;
+    const {xResolution, yResolution} = this.props;
 
-    const xIndex = i % xCount;
-    const yIndex = (i - xIndex) / xCount;
+    const xIndex = i % xResolution;
+    const yIndex = (i - xIndex) / xResolution;
 
     return [
-      xIndex / (xCount - 1) * 255,
-      yIndex / (yCount - 1) * 255,
+      xIndex / (xResolution - 1) * 255,
+      yIndex / (yResolution - 1) * 255,
       1
     ];
   }
@@ -138,9 +169,9 @@ export default class GraphLayer extends Layer {
     const {info} = props;
 
     if (info && info.index) {
-      const {xRange, yRange, getZ} = this.props;
-      const x = info.index[0] * (xRange[1] - xRange[0]) + xRange[0];
-      const y = info.index[1] * (yRange[1] - yRange[0]) + yRange[0];
+      const {xMin, xMax, yMin, yMax, getZ} = this.props;
+      const x = info.index[0] * (xMax - xMin) + xMin;
+      const y = info.index[1] * (yMax - yMin) + yMin;
       const z = getZ(x, y);
 
       info.sample = [x, y, z];
@@ -154,31 +185,31 @@ export default class GraphLayer extends Layer {
     });
 
     // update axes
-    this.state.axes.update(bounds, this.props.ticksCount);
+    this.state.axes.updateProps({bounds, ticksCount: this.props.ticksCount});
   }
 
   calculateIndices(attribute) {
-    const {resolution: [xCount, yCount]} = this.props;
+    const {xResolution, yResolution} = this.props;
     // # of squares = (nx - 1) * (ny - 1)
     // # of triangles = squares * 2
     // # of indices = triangles * 3
-    const indicesCount = (xCount - 1) * (yCount - 1) * 2 * 3;
+    const indicesCount = (xResolution - 1) * (yResolution - 1) * 2 * 3;
     const indices = new Uint32Array(indicesCount);
 
     let i = 0;
-    for (let xIndex = 0; xIndex < xCount - 1; xIndex++) {
-      for (let yIndex = 0; yIndex < yCount - 1; yIndex++) {
+    for (let xIndex = 0; xIndex < xResolution - 1; xIndex++) {
+      for (let yIndex = 0; yIndex < yResolution - 1; yIndex++) {
         /*
          *   i0   i1
-         *    +---+---
+         *    +--.+---
          *    | / |
-         *    +---+---
+         *    +'--+---
          *    |   |
          *   i2   i3
          */
-        const i0 = yIndex * xCount + xIndex;
+        const i0 = yIndex * xResolution + xIndex;
         const i1 = i0 + 1;
-        const i2 = i0 + xCount;
+        const i2 = i0 + xResolution;
         const i3 = i2 + 1;
 
         indices[i++] = i0;
@@ -197,31 +228,31 @@ export default class GraphLayer extends Layer {
   // the fourth component is a flag for invalid z (NaN or Infinity)
   calculatePositions(attribute) {
     const {vertexCount} = this.state;
-    const {resolution: [xCount, yCount], xRange, yRange, getZ} = this.props;
+    const {xMin, xMax, yMin, yMax, xResolution, yResolution, getZ} = this.props;
 
     // step between samples
-    const xDelta = (xRange[1] - xRange[0]) / (xCount - 1);
-    const yDelta = (yRange[1] - yRange[0]) / (yCount - 1);
+    const xDelta = (xMax - xMin) / (xResolution - 1);
+    const yDelta = (yMax - yMin) / (yResolution - 1);
 
     // calculate z range
-    let minZ = Infinity;
-    let maxZ = -Infinity;
+    let zMin = Infinity;
+    let zMax = -Infinity;
 
     const value = new Float32Array(vertexCount * attribute.size);
 
     let i = 0;
-    for (let yIndex = 0; yIndex < yCount; yIndex++) {
-      for (let xIndex = 0; xIndex < xCount; xIndex++) {
-        const x = xIndex * xDelta + xRange[0];
-        const y = yIndex * yDelta + yRange[0];
+    for (let yIndex = 0; yIndex < yResolution; yIndex++) {
+      for (let xIndex = 0; xIndex < xResolution; xIndex++) {
+        const x = xIndex * xDelta + xMin;
+        const y = yIndex * yDelta + yMin;
         let z = getZ(x, y);
         const isZFinite = isFinite(z);
         if (!isZFinite) {
           z = 0;
         }
 
-        minZ = Math.min(minZ, z);
-        maxZ = Math.max(maxZ, z);
+        zMin = Math.min(zMin, z);
+        zMax = Math.max(zMax, z);
 
         // swap z and y: y is up in the default viewport
         value[i++] = x;
@@ -232,7 +263,7 @@ export default class GraphLayer extends Layer {
     }
 
     attribute.value = value;
-    this._setBounds([xRange, [minZ, maxZ], yRange]);
+    this._setBounds([[xMin, xMax], [zMin, zMax], [yMin, yMax]]);
   }
 
   calculateColors(attribute) {

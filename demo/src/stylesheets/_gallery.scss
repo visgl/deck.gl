@@ -135,6 +135,9 @@
     float: left;
     margin: 4px;
   }
+  .input-text {
+    width: 100%;
+  }
   label {
     text-transform: uppercase;
     display: block;
@@ -149,9 +152,6 @@
     min-width: 100%;
     height: 20px;
     border: solid 1px #ccc;
-  }
-  input[type="text"] {
-    width: 228px;
   }
   h3 {
     font-size: 1.2em;

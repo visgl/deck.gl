@@ -34,7 +34,7 @@ export default class GenericInput extends Component {
     }
 
     return (
-      <div className="input">
+      <div className={`input input-${type}`}>
         <label>{displayName}</label>
         <input
           {...props}
