@@ -51,16 +51,21 @@ const defaultProps = {
     specularRatio: 0.8,
     lightsStrength: [2.0, 0.0, 0.0, 0.0],
     numberOfLights: 2
-  }
+  },
+  fp64: false
 };
 
 export default class PolygonLayer extends Layer {
   getShaders() {
-    return {
-      vs: readFileSync(join(__dirname, './polygon-layer-vertex.glsl'), 'utf8'),
+
+    const shaders = this.props.fp64 ? {
+      vs: readFileSync(join(__dirname, './polygon-layer-64-vertex.glsl'), 'utf8'),
       fs: readFileSync(join(__dirname, './polygon-layer-fragment.glsl'), 'utf8'),
-      modules: ['lighting']
-    };
+      modules: ['lighting', 'fp64', 'project64']} : {
+        vs: readFileSync(join(__dirname, './polygon-layer-vertex.glsl'), 'utf8'),
+        fs: readFileSync(join(__dirname, './polygon-layer-fragment.glsl'), 'utf8'),
+        modules: ['lighting']};
+    return shaders;
   }
 
   initializeState() {
@@ -82,6 +87,12 @@ export default class PolygonLayer extends Layer {
       pickingColors: {size: 3, type: GL.UNSIGNED_BYTE, update: this.calculatePickingColors, noAlloc}
     });
     /* eslint-enable max-len */
+
+    if (this.props.fp64) {
+      attributeManager.addDynamic({
+        positions64xyLow: {size: 2, update: this.calculatePositionsLow}
+      });
+    }
   }
 
   updateState({props, oldProps, changeFlags}) {
@@ -108,9 +119,10 @@ export default class PolygonLayer extends Layer {
 
       this.setState({
         polygonTesselator: !extruded ?
-          new PolygonTesselator({polygons}) :
+          new PolygonTesselator({polygons, fp64: this.props.fp64}) :
           new PolygonTesselatorExtruded({polygons, wireframe,
-            getHeight: polygonIndex => getHeight(this.props.data[polygonIndex])
+            getHeight: polygonIndex => getHeight(this.props.data[polygonIndex]),
+            fp64: this.props.fp64
           })
       });
 
@@ -140,9 +152,11 @@ export default class PolygonLayer extends Layer {
   }
 
   calculatePositions(attribute) {
-    attribute.value = this.state.polygonTesselator.positions();
+    attribute.value = this.state.polygonTesselator.positions().positions;
   }
-
+  calculatePositionsLow(attribute) {
+    attribute.value = this.state.polygonTesselator.positions().positions64xyLow;
+  }
   calculateNormals(attribute) {
     attribute.value = this.state.polygonTesselator.normals();
   }
