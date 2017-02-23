@@ -27,6 +27,7 @@ attribute vec3 instanceNormals;
 
 uniform float offset;
 uniform vec4 strokeColor;
+uniform float renderPickingBuffer;
 
 varying vec4 vColor;
 varying float shouldDiscard;
@@ -57,7 +58,7 @@ void main(void) {
   // do not draw in front of the graph
   vec4 center_viewspace = project_to_clipspace(vec4(0.0, 0.0, 0.0, 1.0));
   vec4 vertex_viewspace = project_to_clipspace(vec4(vertexNormal, 1.0));
-  shouldDiscard = step(vertex_viewspace.z, center_viewspace.z);
+  shouldDiscard = step(vertex_viewspace.z, center_viewspace.z) + renderPickingBuffer;
 
   vec4 position_modelspace = vec4(instancePositions * instanceNormals + vertexPosition + offset * vertexNormal, 1.0);
   gl_Position = project_to_clipspace(position_modelspace);

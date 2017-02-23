@@ -18,20 +18,6 @@ const defaultProps = {
 
 /* Utils */
 
-function normalize(vector) {
-  const [x, y, z] = vector;
-  const len = Math.sqrt(x * x + y * y + z * z);
-  return len ? [x / len, y / len, z / len] : vector;
-}
-
-function crossProduct(v0, v1) {
-  return [
-    v0[1] * v1[2] - v0[2] * v1[1],
-    v0[2] * v1[0] - v0[0] * v1[2],
-    v0[0] * v1[1] - v0[1] * v1[0]
-  ];
-}
-
 function arrayEqual(arr0, arr1) {
   return arr0 && arr1 && arr0.length === arr1.length && arr0.every((a, i) => a === arr1[i]);
 }
@@ -56,7 +42,8 @@ export default class GraphLayer extends Layer {
     attributeManager.add({
       indices: {size: 1, isIndexed: true, update: this.calculateIndices},
       positions: {size: 4, accessor: 'getZ', update: this.calculatePositions, noAlloc: true},
-      colors: {size: 4, accessor: ['getZ', 'getColor'], type: GL.UNSIGNED_BYTE, update: this.calculateColors, noAlloc: true}
+      colors: {size: 4, accessor: ['getZ', 'getColor'], type: GL.UNSIGNED_BYTE, update: this.calculateColors, noAlloc: true},
+      pickingColors: {size: 3, type: GL.UNSIGNED_BYTE, update: this.calculatePickingColors, noAlloc: true}
     });
     /* eslint-enable max-len */
 
@@ -151,6 +138,45 @@ export default class GraphLayer extends Layer {
     });
   }
 
+  encodePickingColor(i) {
+    const {resolution: [xCount, yCount]} = this.props;
+
+    const xIndex = i % xCount;
+    const yIndex = (i - xIndex) / xCount;
+
+    return [
+      (xIndex + 1) / xCount * 255,
+      (yIndex + 1) / yCount * 255,
+      0
+    ];
+  }
+
+  decodePickingColor([r, g, b]) {
+    const {resolution: [xCount, yCount]} = this.props;
+    const xIndex = Math.round(r / 255 * xCount) - 1;
+    const yIndex = Math.round(g / 255 * yCount) - 1;
+
+    return yIndex * xCount + xIndex;
+  }
+
+  pick(props) {
+    super.pick(props);
+    const {info} = props;
+
+    if (info && info.index >= 0) {
+      const {resolution: [xCount, yCount], xRange, yRange, getZ} = this.props;
+
+      const xRatio = (info.color[0] / 255 * xCount - 1) / (xCount - 1);
+      const yRatio = (info.color[1] / 255 * yCount - 1) / (yCount - 1);
+
+      const x = xRatio * (xRange[1] - xRange[0]) + xRange[0];
+      const y = yRatio * (yRange[1] - yRange[0]) + yRange[0];
+      const z = getZ(x, y);
+
+      info.sample = [x, y, z];
+    }
+  }
+
   _setBounds(bounds) {
     this.setState({
       center: bounds.map(b => (b[0] + b[1]) / 2),
@@ -183,14 +209,14 @@ export default class GraphLayer extends Layer {
 
   _forEachVertex(func) {
     const {resolution: [xCount, yCount], xRange, yRange} = this.props;
-    const xStep = (xRange[1] - xRange[0]) / (xCount - 1);
-    const yStep = (yRange[1] - yRange[0]) / (yCount - 1);
+    const xDelta = (xRange[1] - xRange[0]) / (xCount - 1);
+    const yDelta = (yRange[1] - yRange[0]) / (yCount - 1);
 
     let i = 0;
-    for (let xIndex = 0; xIndex < xCount; xIndex++) {
-      for (let yIndex = 0; yIndex < yCount; yIndex++) {
-        const x = xIndex * xStep + xRange[0];
-        const y = yIndex * yStep + yRange[0];
+    for (let yIndex = 0; yIndex < yCount; yIndex++) {
+      for (let xIndex = 0; xIndex < xCount; xIndex++) {
+        const x = xIndex * xDelta + xRange[0];
+        const y = yIndex * yDelta + yRange[0];
         func(x, y, i++);
       }
     }
@@ -270,6 +296,20 @@ export default class GraphLayer extends Layer {
       value[i * 4 + 1] = color[1];
       value[i * 4 + 2] = color[2];
       value[i * 4 + 3] = isNaN(color[3]) ? 255 : color[3];
+    });
+
+    attribute.value = value;
+  }
+
+  calculatePickingColors(attribute) {
+    const {resolution: [xCount, yCount]} = this.props;
+
+    const value = new Uint8ClampedArray(xCount * yCount * 3);
+    this._forEachVertex((x, y, i) => {
+      const pickingColor = this.encodePickingColor(i);
+      value[i * 3] = pickingColor[0];
+      value[i * 3 + 1] = pickingColor[1];
+      value[i * 3 + 2] = pickingColor[2];
     });
 
     attribute.value = value;

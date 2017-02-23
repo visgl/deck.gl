@@ -168,7 +168,7 @@ export default class Canvas3D extends Component {
 
   render() {
     return (
-      <div
+      <div style={{position: 'relative', userSelect: 'none'}}
         onMouseDown={this._onDragStart}
         onMouseMove={this._onDrag}
         onMouseLeave={this._onDragEnd}

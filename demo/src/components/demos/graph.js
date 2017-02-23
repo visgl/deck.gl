@@ -16,7 +16,7 @@ export default class GraphDemo extends Component {
     return {
       equation: {displayName: 'Equation', type: 'text', value: 'sin(x ^ 2 + y ^ 2)'},
       resolution: {displayName: 'Resolution', type: 'number',
-        value: 100, step: 10, min: 10, max: 1000},
+        value: 200, step: 10, min: 10, max: 1000},
       showAxis: {displayName: 'Show Axis', type: 'checkbox', value: true}
     };
   }
@@ -47,7 +47,8 @@ export default class GraphDemo extends Component {
         minDistance: 2,
         maxDistance: 20
       },
-      equation: {}
+      equation: {},
+      hoverInfo: null
     };
   }
 
@@ -76,6 +77,13 @@ export default class GraphDemo extends Component {
     }
   }
 
+  @autobind _onHover(info) {
+    const hoverInfo = info.sample ? info : null;
+    if (hoverInfo !== this.state.hoverInfo) {
+      this.setState({hoverInfo});
+    }
+  }
+
   @autobind _onViewportChange(viewport) {
     this.setState({
       viewport: {...this.state.viewport, ...viewport}
@@ -92,7 +100,7 @@ export default class GraphDemo extends Component {
       viewport: {width, height},
       params: {resolution, showAxis}
     } = this.props;
-    const {viewport, equation} = this.state;
+    const {viewport, equation, hoverInfo} = this.state;
 
     const layers = equation.valid ? [new GraphLayer({
       getZ: equation.func,
@@ -103,6 +111,8 @@ export default class GraphDemo extends Component {
       axisOffset: 0.5,
       axisColor: showAxis.value ? [0, 0, 0, 128] : [0, 0, 0, 0],
       opacity: 1,
+      pickable: true,
+      onHover: this._onHover,
       updateTriggers: {
         getZ: equation.text
       }
@@ -125,6 +135,11 @@ export default class GraphDemo extends Component {
           height={height}
           viewport={perspectiveViewport}
           layers={ layers } />
+
+        {hoverInfo && <div className="tooltip" style={{left: hoverInfo.x, top: hoverInfo.y}} >
+          { hoverInfo.sample.map(x => x.toFixed(3)).join(', ') }
+          </div>}
+
       </Canvas3D>
     );
   }

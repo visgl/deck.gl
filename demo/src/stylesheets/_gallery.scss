@@ -113,6 +113,14 @@
     font-size: 3em;
   }
 }
+.tooltip {
+  position: absolute;
+  padding: 4px;
+  background: rgba(0, 0, 0, 0.8);
+  color: #fff;
+  font-size: 10px;
+  pointer-events: none;
+}
 .options-panel {
   width: 284px;
   background: #fff;

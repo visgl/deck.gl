@@ -22,11 +22,13 @@
 
 attribute vec4 positions;
 attribute vec4 colors;
+attribute vec3 pickingColors;
 
 uniform vec3 center;
 uniform float size;
 uniform float fade;
 uniform float opacity;
+uniform float renderPickingBuffer;
 
 varying vec4 vColor;
 varying float shouldDiscard;
@@ -39,7 +41,10 @@ void main(void) {
 
   vec4 center_viewspace = project_to_clipspace(vec4(0.0, 0.0, 0.0, 1.0));
   float fadeFactor = 1.0 - (gl_Position.z - center_viewspace.z) * fade;
-  vColor = vec4(colors.rgb * fadeFactor, colors.a * opacity) / 255.0;
+  
+  vec4 color = vec4(colors.rgb * fadeFactor, colors.a * opacity) / 255.0;
+  vec4 pickingColor = vec4(pickingColors / 255.0, 1.0);
 
+  vColor = mix(color, pickingColor, renderPickingBuffer);
   shouldDiscard = positions.w;
 }
