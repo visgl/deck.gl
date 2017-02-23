@@ -218,6 +218,8 @@ const PointDensityGridLayerExample = {
   props: {
     id: 'pointDensityGridLayer',
     data: dataSamples.points,
+    cellSize: 0.3,
+    opacity: 1,
     extruded: true,
     pickable: true,
     opacity: 1,

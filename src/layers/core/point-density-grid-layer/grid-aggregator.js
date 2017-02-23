@@ -8,6 +8,7 @@ const R_EARTH = 6378000;
  * @returns {object} - grid data, cell dimension and count range
  */
 export function pointToDensityGridData(points, worldUnitSize, getPosition) {
+
   const {gridHash, gridOffset} = _pointsToGridHashing(points, worldUnitSize, getPosition);
   const layerData = _getGridLayerDataFromGridHash(gridHash, gridOffset);
   const countRange = _getCellCountExtent(layerData);
