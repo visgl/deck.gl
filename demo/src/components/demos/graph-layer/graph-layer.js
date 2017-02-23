@@ -8,7 +8,7 @@ import {join} from 'path';
 const defaultProps = {
   data: [],
   xRange: [-1, 1],
-  zRange: [-1, 1],
+  yRange: [-1, 1],
   resolution: [100, 100],
   ticksCount: 6,
   axisOffset: 0,
@@ -55,9 +55,8 @@ export default class GraphLayer extends Layer {
     /* eslint-disable max-len */
     attributeManager.add({
       indices: {size: 1, isIndexed: true, update: this.calculateIndices},
-      positions: {size: 3, accessor: 'getY', update: this.calculatePositions, noAlloc: true},
-      normals: {size: 3, accessor: 'getY', update: this.calculateNormals, noAlloc: true},
-      colors: {size: 4, accessor: ['getY', 'getColor'], type: GL.UNSIGNED_BYTE, update: this.calculateColors, noAlloc: true}
+      positions: {size: 4, accessor: 'getZ', update: this.calculatePositions, noAlloc: true},
+      colors: {size: 4, accessor: ['getZ', 'getColor'], type: GL.UNSIGNED_BYTE, update: this.calculateColors, noAlloc: true}
     });
     /* eslint-enable max-len */
 
@@ -71,7 +70,7 @@ export default class GraphLayer extends Layer {
 
   updateState({oldProps, props}) {
     if (!arrayEqual(oldProps.xRange, props.xRange) ||
-      !arrayEqual(oldProps.zRange, props.zRange) ||
+      !arrayEqual(oldProps.yRange, props.yRange) ||
       !arrayEqual(oldProps.resolution, props.resolution)) {
       this.state.attributeManager.invalidateAll();
     }
@@ -81,7 +80,7 @@ export default class GraphLayer extends Layer {
     // 3d surface
     const graphShaders = assembleShaders(gl, {
       vs: readFileSync(join(__dirname, './graph-vertex.glsl'), 'utf8'),
-      fs: readFileSync(join(__dirname, './graph-fragment.glsl'), 'utf8')
+      fs: readFileSync(join(__dirname, './fragment.glsl'), 'utf8')
     });
 
     const graphModel = new Model({
@@ -99,7 +98,7 @@ export default class GraphLayer extends Layer {
     // axis grids
     const axisShaders = assembleShaders(gl, {
       vs: readFileSync(join(__dirname, './axis-vertex.glsl'), 'utf8'),
-      fs: readFileSync(join(__dirname, './axis-fragment.glsl'), 'utf8')
+      fs: readFileSync(join(__dirname, './fragment.glsl'), 'utf8')
     });
 
     // draw rectangle around slice
@@ -183,31 +182,31 @@ export default class GraphLayer extends Layer {
   }
 
   _forEachVertex(func) {
-    const {resolution: [xCount, zCount], xRange, zRange} = this.props;
+    const {resolution: [xCount, yCount], xRange, yRange} = this.props;
     const xStep = (xRange[1] - xRange[0]) / (xCount - 1);
-    const zStep = (zRange[1] - zRange[0]) / (zCount - 1);
+    const yStep = (yRange[1] - yRange[0]) / (yCount - 1);
 
     let i = 0;
     for (let xIndex = 0; xIndex < xCount; xIndex++) {
-      for (let zIndex = 0; zIndex < zCount; zIndex++) {
+      for (let yIndex = 0; yIndex < yCount; yIndex++) {
         const x = xIndex * xStep + xRange[0];
-        const z = zIndex * zStep + zRange[0];
-        func(x, z, i++);
+        const y = yIndex * yStep + yRange[0];
+        func(x, y, i++);
       }
     }
   }
 
   calculateIndices(attribute) {
-    const {resolution: [xCount, zCount]} = this.props;
-    // squares = (nx - 1) * (nz - 1)
+    const {resolution: [xCount, yCount]} = this.props;
+    // squares = (nx - 1) * (ny - 1)
     // triangles = squares * 2
     // indices = triangles * 3
-    const indicesCount = (xCount - 1) * (zCount - 1) * 2 * 3;
+    const indicesCount = (xCount - 1) * (yCount - 1) * 2 * 3;
     const indices = new Uint32Array(indicesCount);
 
     let i = 0;
     for (let xIndex = 0; xIndex < xCount - 1; xIndex++) {
-      for (let zIndex = 0; zIndex < zCount - 1; zIndex++) {
+      for (let yIndex = 0; yIndex < yCount - 1; yIndex++) {
         /*
          *   i0   i1
          *    +---+---
@@ -216,7 +215,7 @@ export default class GraphLayer extends Layer {
          *    |   |
          *   i2   i3
          */
-        const i0 = zIndex * xCount + xIndex;
+        const i0 = yIndex * xCount + xIndex;
         const i1 = i0 + 1;
         const i2 = i0 + xCount;
         const i3 = i2 + 1;
@@ -234,57 +233,39 @@ export default class GraphLayer extends Layer {
     this.state.model.setVertexCount(indicesCount);
   }
 
+  // the fourth component is a flag for z:NaN
   calculatePositions(attribute) {
-    const {resolution: [xCount, zCount], xRange, zRange, getY} = this.props;
-    let minY = Infinity;
-    let maxY = -Infinity;
+    const {resolution: [xCount, yCount], xRange, yRange, getZ} = this.props;
+    let minZ = Infinity;
+    let maxZ = -Infinity;
 
-    const value = new Float32Array(xCount * zCount * 3);
-    this._forEachVertex((x, z, i) => {
-      const y = getY(x, z);
-      minY = Math.min(minY, y);
-      maxY = Math.max(maxY, y);
+    const value = new Float32Array(xCount * yCount * 4);
+    this._forEachVertex((x, y, i) => {
+      let z = getZ(x, y);
+      const isZNaN = isNaN(z);
+      if (isZNaN) {
+        z = 0;
+      }
 
-      value[i * 3] = x;
-      value[i * 3 + 1] = y;
-      value[i * 3 + 2] = z;
+      minZ = Math.min(minZ, z);
+      maxZ = Math.max(maxZ, z);
+
+      value[i * 4] = x;
+      value[i * 4 + 1] = z;
+      value[i * 4 + 2] = y;
+      value[i * 4 + 3] = isZNaN ? 1 : 0;
     });
 
     attribute.value = value;
-    this._setBounds([xRange, [minY, maxY], zRange]);
-  }
-
-  calculateNormals(attribute) {
-    const {resolution: [xCount, zCount], xRange, zRange, getY} = this.props;
-
-    const EPSILON = 1e-7;
-    const ex = EPSILON * (xRange[1] - xRange[0]);
-    const ez = EPSILON * (zRange[1] - zRange[0]);
-
-    const value = new Float32Array(xCount * zCount * 3);
-    this._forEachVertex((x, z, i) => {
-      const y0 = getY(x, z);
-      const y1 = getY(x + ex, z);
-      const y2 = getY(x, z + ez);
-      const normal = normalize(crossProduct(
-        [ex, y1 - y0, 0],
-        [0, y2 - y0, ez]
-      ));
-
-      value[i * 3] = normal[0];
-      value[i * 3 + 1] = normal[1];
-      value[i * 3 + 2] = normal[2];
-    });
-
-    attribute.value = value;
+    this._setBounds([xRange, [minZ, maxZ], yRange]);
   }
 
   calculateColors(attribute) {
-    const {resolution: [xCount, zCount], getY, getColor} = this.props;
+    const {resolution: [xCount, yCount], getZ, getColor} = this.props;
 
-    const value = new Uint8ClampedArray(xCount * zCount * 4);
-    this._forEachVertex((x, z, i) => {
-      const color = getColor(x, getY(x, z), z);
+    const value = new Uint8ClampedArray(xCount * yCount * 4);
+    this._forEachVertex((x, y, i) => {
+      const color = getColor(x, y, getZ(x, y) || 0);
       value[i * 4] = color[0];
       value[i * 4 + 1] = color[1];
       value[i * 4 + 2] = color[2];

@@ -100,7 +100,7 @@ export default class Canvas3D extends Component {
       const dx = (pageX - this._dragStartPos[0]) / width;
       const dy = (pageY - this._dragStartPos[1]) / height;
 
-      if (evt.shiftKey) {
+      if (evt.shiftKey || evt.ctrlKey || evt.altKey || evt.metaKey) {
         // rotate
         const {rotationX, rotationY} = this.props;
         const newRotationX = clamp(rotationX - dy * 180, -90, 90);

@@ -13,6 +13,12 @@ export default class GenericInput extends Component {
     }
     if (type === 'number') {
       newValue = Number(value);
+      if (this.props.min !== undefined) {
+        newValue = Math.max(this.props.min, newValue);
+      }
+      if (this.props.max !== undefined) {
+        newValue = Math.min(this.props.max, newValue);
+      }
     }
     return this.props.onChange(this.props.name, newValue);
   }

@@ -14,9 +14,9 @@ export default class GraphDemo extends Component {
 
   static get parameters() {
     return {
-      equation: {displayName: 'Equation', type: 'text', value: 'sin(x ^ 2 + z ^ 2)'},
+      equation: {displayName: 'Equation', type: 'text', value: 'sin(x ^ 2 + y ^ 2)'},
       resolution: {displayName: 'Resolution', type: 'number',
-        value: 100, step: 10, min: 10, max: 500},
+        value: 100, step: 10, min: 10, max: 1000},
       showAxis: {displayName: 'Show Axis', type: 'checkbox', value: true}
     };
   }
@@ -64,7 +64,7 @@ export default class GraphDemo extends Component {
         this.setState({
           equation: {
             valid: true,
-            func: (x, z) => p.evaluate({x, z}),
+            func: (x, y) => p.evaluate({x, y}),
             text: p.toString()
           }
         });
@@ -95,16 +95,16 @@ export default class GraphDemo extends Component {
     const {viewport, equation} = this.state;
 
     const layers = equation.valid ? [new GraphLayer({
-      getY: equation.func,
-      getColor: (x, y, z) => [40, y * 255, 160],
+      getZ: equation.func,
+      getColor: (x, y, z) => [40, z * 255, 160],
       xRange: [-Math.PI, Math.PI],
-      zRange: [-Math.PI, Math.PI],
+      yRange: [-Math.PI, Math.PI],
       resolution: [resolution.value, resolution.value],
       axisOffset: 0.5,
       axisColor: showAxis.value ? [0, 0, 0, 128] : [0, 0, 0, 0],
       opacity: 1,
       updateTriggers: {
-        getY: equation.text
+        getZ: equation.text
       }
     })] : [];
 

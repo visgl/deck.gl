@@ -20,8 +20,7 @@
 
 #define SHADER_NAME graph-layer-vertex-shader
 
-attribute vec3 positions;
-attribute vec3 normals;
+attribute vec4 positions;
 attribute vec4 colors;
 
 uniform vec3 center;
@@ -30,14 +29,17 @@ uniform float fade;
 uniform float opacity;
 
 varying vec4 vColor;
+varying float shouldDiscard;
 
 void main(void) {
 
   // fit into a unit cube that centers at [0, 0, 0]
-  vec4 position_modelspace = vec4((positions - center) / size, 1.0);
+  vec4 position_modelspace = vec4((positions.xyz - center) / size, 1.0);
   gl_Position = project_to_clipspace(position_modelspace);
 
   vec4 center_viewspace = project_to_clipspace(vec4(0.0, 0.0, 0.0, 1.0));
   float fadeFactor = 1.0 - (gl_Position.z - center_viewspace.z) * fade;
   vColor = vec4(colors.rgb * fadeFactor, colors.a * opacity) / 255.0;
+
+  shouldDiscard = positions.w;
 }
