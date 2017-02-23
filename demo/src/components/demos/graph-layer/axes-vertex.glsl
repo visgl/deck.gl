@@ -29,7 +29,6 @@ uniform vec3 center;
 uniform vec3 dim;
 uniform float offset;
 uniform vec4 strokeColor;
-uniform float renderPickingBuffer;
 
 varying vec4 vColor;
 varying float shouldDiscard;
@@ -37,35 +36,27 @@ varying float shouldDiscard;
 void main(void) {
 
   // rotate rectangle to align with slice
-  vec3 vertexPosition = mix(
-    mix(
-      vec3(positions.x, 0.0, positions.y),
-      vec3(0.0, positions.x, positions.y),
-      instanceNormals.x
-    ),
-    positions,
-    instanceNormals.z
-  ) * dim / 2.0;
+  vec3 vertexPosition = mat3(
+      vec3(positions.z, positions.xy),
+      vec3(positions.yz, positions.x),
+      positions
+    ) * instanceNormals * dim / 2.0;
 
-  vec3 vertexNormal = mix(
-    mix(
-      vec3(normals.x, 0.0, normals.y),
-      vec3(0.0, normals.x, normals.y),
-      instanceNormals.x
-    ),
-    normals,
-    instanceNormals.z
-  ) / 2.0;
+  vec3 vertexNormal = mat3(
+      vec3(normals.z, normals.xy),
+      vec3(normals.yz, normals.x),
+      normals
+    ) * instanceNormals;
 
   // do not draw in front of the graph
   vec4 center_viewspace = project_to_clipspace(vec4(0.0, 0.0, 0.0, 1.0));
   vec4 vertex_viewspace = project_to_clipspace(vec4(vertexNormal, 1.0));
-  shouldDiscard = step(vertex_viewspace.z, center_viewspace.z) + renderPickingBuffer;
+  shouldDiscard = step(vertex_viewspace.z, center_viewspace.z);
 
   // fit into a unit cube that centers at [0, 0, 0]
   float scale = 1.0 / max(dim.x, max(dim.y, dim.z));
   vec4 position_modelspace = vec4(
-    (instancePositions * instanceNormals + vertexPosition - center) * scale + offset * vertexNormal,
+    ((vec3(instancePositions) - center) * instanceNormals + vertexPosition) * scale + offset * vertexNormal,
     1.0
   );
   gl_Position = project_to_clipspace(position_modelspace);

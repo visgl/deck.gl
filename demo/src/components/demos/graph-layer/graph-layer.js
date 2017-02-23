@@ -28,13 +28,14 @@ export default class GraphLayer extends Layer {
   initializeState() {
     const {gl} = this.context;
     const {attributeManager} = this.state;
+    const noAlloc = true;
 
     /* eslint-disable max-len */
     attributeManager.add({
-      indices: {size: 1, isIndexed: true, update: this.calculateIndices},
-      positions: {size: 4, accessor: 'getZ', update: this.calculatePositions, noAlloc: true},
-      colors: {size: 4, accessor: ['getZ', 'getColor'], type: GL.UNSIGNED_BYTE, update: this.calculateColors, noAlloc: true},
-      pickingColors: {size: 3, type: GL.UNSIGNED_BYTE, update: this.calculatePickingColors, noAlloc: true}
+      indices: {size: 1, isIndexed: true, update: this.calculateIndices, noAlloc},
+      positions: {size: 4, accessor: 'getZ', update: this.calculatePositions, noAlloc},
+      colors: {size: 4, accessor: ['getZ', 'getColor'], type: GL.UNSIGNED_BYTE, update: this.calculateColors, noAlloc},
+      pickingColors: {size: 3, type: GL.UNSIGNED_BYTE, update: this.calculatePickingColors, noAlloc}
     });
     /* eslint-enable max-len */
 
@@ -48,9 +49,14 @@ export default class GraphLayer extends Layer {
   }
 
   updateState({oldProps, props}) {
-    if (!arrayEqual(oldProps.xRange, props.xRange) ||
-      !arrayEqual(oldProps.yRange, props.yRange) ||
-      !arrayEqual(oldProps.resolution, props.resolution)) {
+    const {xRange, yRange, resolution} = props;
+
+    if (!arrayEqual(oldProps.xRange, xRange) ||
+      !arrayEqual(oldProps.yRange, yRange) ||
+      !arrayEqual(oldProps.resolution, resolution)) {
+      this.setState({
+        vertexCount: resolution[0] * resolution[1]
+      });
       this.state.attributeManager.invalidateAll();
     }
   }
@@ -98,6 +104,15 @@ export default class GraphLayer extends Layer {
     });
   }
 
+  /*
+   * y 1
+   *   ^
+   *   |
+   *   |
+   *   |
+   *   0--------> 1
+   *              x
+   */
   encodePickingColor(i) {
     const {resolution: [xCount, yCount]} = this.props;
 
@@ -107,34 +122,25 @@ export default class GraphLayer extends Layer {
     return [
       xIndex / (xCount - 1) * 255,
       yIndex / (yCount - 1) * 255,
-      255
+      1
     ];
   }
 
   decodePickingColor([r, g, b]) {
     if (b === 0) {
-      return -1;
+      return null;
     }
-
-    const {resolution: [xCount, yCount]} = this.props;
-    const xIndex = Math.round(r / 255 * (xCount - 1));
-    const yIndex = Math.round(g / 255 * (yCount - 1));
-
-    return yIndex * xCount + xIndex;
+    return [r / 255, g / 255];
   }
 
   pick(props) {
     super.pick(props);
     const {info} = props;
 
-    if (info && info.index >= 0) {
-      const {resolution: [xCount, yCount], xRange, yRange, getZ} = this.props;
-
-      const xRatio = info.color[0] / 255;
-      const yRatio = info.color[1] / 255;
-
-      const x = xRatio * (xRange[1] - xRange[0]) + xRange[0];
-      const y = yRatio * (yRange[1] - yRange[0]) + yRange[0];
+    if (info && info.index) {
+      const {xRange, yRange, getZ} = this.props;
+      const x = info.index[0] * (xRange[1] - xRange[0]) + xRange[0];
+      const y = info.index[1] * (yRange[1] - yRange[0]) + yRange[0];
       const z = getZ(x, y);
 
       info.sample = [x, y, z];
@@ -151,26 +157,11 @@ export default class GraphLayer extends Layer {
     this.state.axes.update(bounds, this.props.ticksCount);
   }
 
-  _forEachVertex(func) {
-    const {resolution: [xCount, yCount], xRange, yRange} = this.props;
-    const xDelta = (xRange[1] - xRange[0]) / (xCount - 1);
-    const yDelta = (yRange[1] - yRange[0]) / (yCount - 1);
-
-    let i = 0;
-    for (let yIndex = 0; yIndex < yCount; yIndex++) {
-      for (let xIndex = 0; xIndex < xCount; xIndex++) {
-        const x = xIndex * xDelta + xRange[0];
-        const y = yIndex * yDelta + yRange[0];
-        func(x, y, i++);
-      }
-    }
-  }
-
   calculateIndices(attribute) {
     const {resolution: [xCount, yCount]} = this.props;
-    // squares = (nx - 1) * (ny - 1)
-    // triangles = squares * 2
-    // indices = triangles * 3
+    // # of squares = (nx - 1) * (ny - 1)
+    // # of triangles = squares * 2
+    // # of indices = triangles * 3
     const indicesCount = (xCount - 1) * (yCount - 1) * 2 * 3;
     const indices = new Uint32Array(indicesCount);
 
@@ -203,58 +194,78 @@ export default class GraphLayer extends Layer {
     this.state.model.setVertexCount(indicesCount);
   }
 
-  // the fourth component is a flag for z:NaN
+  // the fourth component is a flag for invalid z (NaN or Infinity)
   calculatePositions(attribute) {
+    const {vertexCount} = this.state;
     const {resolution: [xCount, yCount], xRange, yRange, getZ} = this.props;
+
+    // step between samples
+    const xDelta = (xRange[1] - xRange[0]) / (xCount - 1);
+    const yDelta = (yRange[1] - yRange[0]) / (yCount - 1);
+
+    // calculate z range
     let minZ = Infinity;
     let maxZ = -Infinity;
 
-    const value = new Float32Array(xCount * yCount * 4);
-    this._forEachVertex((x, y, i) => {
-      let z = getZ(x, y);
-      const isZNaN = isNaN(z);
-      if (isZNaN) {
-        z = 0;
+    const value = new Float32Array(vertexCount * attribute.size);
+
+    let i = 0;
+    for (let yIndex = 0; yIndex < yCount; yIndex++) {
+      for (let xIndex = 0; xIndex < xCount; xIndex++) {
+        const x = xIndex * xDelta + xRange[0];
+        const y = yIndex * yDelta + yRange[0];
+        let z = getZ(x, y);
+        const isZFinite = isFinite(z);
+        if (!isZFinite) {
+          z = 0;
+        }
+
+        minZ = Math.min(minZ, z);
+        maxZ = Math.max(maxZ, z);
+
+        // swap z and y: y is up in the default viewport
+        value[i++] = x;
+        value[i++] = z;
+        value[i++] = y;
+        value[i++] = isZFinite ? 0 : 1;
       }
-
-      minZ = Math.min(minZ, z);
-      maxZ = Math.max(maxZ, z);
-
-      value[i * 4] = x;
-      value[i * 4 + 1] = z;
-      value[i * 4 + 2] = y;
-      value[i * 4 + 3] = isZNaN ? 1 : 0;
-    });
+    }
 
     attribute.value = value;
     this._setBounds([xRange, [minZ, maxZ], yRange]);
   }
 
   calculateColors(attribute) {
-    const {resolution: [xCount, yCount], getZ, getColor} = this.props;
+    const {vertexCount, attributeManager} = this.state;
+    const {getColor} = this.props;
 
-    const value = new Uint8ClampedArray(xCount * yCount * 4);
-    this._forEachVertex((x, y, i) => {
-      const color = getColor(x, y, getZ(x, y) || 0);
+    // reuse the calculated [x, y, z] in positions
+    const positions = attributeManager.attributes.positions.value;
+    const value = new Uint8ClampedArray(vertexCount * attribute.size);
+
+    for (let i = 0; i < vertexCount; i++) {
+      const index = i * 4;
+      const color = getColor(positions[index], positions[index + 2], positions[index + 1]);
       value[i * 4] = color[0];
       value[i * 4 + 1] = color[1];
       value[i * 4 + 2] = color[2];
       value[i * 4 + 3] = isNaN(color[3]) ? 255 : color[3];
-    });
+    }
 
     attribute.value = value;
   }
 
   calculatePickingColors(attribute) {
-    const {resolution: [xCount, yCount]} = this.props;
+    const {vertexCount} = this.state;
 
-    const value = new Uint8ClampedArray(xCount * yCount * 3);
-    this._forEachVertex((x, y, i) => {
+    const value = new Uint8ClampedArray(vertexCount * attribute.size);
+
+    for (let i = 0; i < vertexCount; i++) {
       const pickingColor = this.encodePickingColor(i);
       value[i * 3] = pickingColor[0];
       value[i * 3 + 1] = pickingColor[1];
       value[i * 3 + 2] = pickingColor[2];
-    });
+    }
 
     attribute.value = value;
   }

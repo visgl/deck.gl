@@ -104,7 +104,7 @@ export default class Canvas3D extends Component {
         // rotate
         const {rotationX, rotationY} = this.props;
         const newRotationX = clamp(rotationX - dy * 180, -90, 90);
-        const newRotationY = rotationY - dx * 180;
+        const newRotationY = (rotationY - dx * 180) % 360;
 
         this.props.onViewportChange({
           rotationX: newRotationX,

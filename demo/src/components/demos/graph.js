@@ -109,7 +109,7 @@ export default class GraphDemo extends Component {
       yRange: [-Math.PI, Math.PI],
       resolution: [resolution.value, resolution.value],
       drawAxes: showAxis.value,
-      axesOffset: 0.5,
+      axesOffset: 0.25,
       axesColor: [0, 0, 0, 128],
       opacity: 1,
       pickable: true,
