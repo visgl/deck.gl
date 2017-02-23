@@ -27,6 +27,7 @@ Ref: http://keepachangelog.com/en/0.3.0/
 - Bumps luma.gl with some hotfixes
 - Remove unfinished example
 - Doc improvements (upgrade guide)
+- NEW: PointDensityGridLayer
 
 #### [v4.0.0-beta.1]
 
