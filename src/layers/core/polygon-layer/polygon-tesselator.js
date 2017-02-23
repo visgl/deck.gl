@@ -6,6 +6,7 @@
 import * as Polygon from './polygon';
 import earcut from 'earcut';
 import {Container, flattenVertices, fillArray} from '../../../lib/utils';
+import {fp64ify} from '../../../lib/utils/fp64';
 
 // Maybe deck.gl or luma.gl needs to export this
 function getPickingColor(index) {
@@ -21,11 +22,12 @@ const DEFAULT_COLOR = [0, 0, 0, 255]; // Black
 // This class is set up to allow querying one attribute at a time
 // the way the AttributeManager expects it
 export class PolygonTesselator {
-  constructor({polygons}) {
+  constructor({polygons, fp64 = false}) {
     // Normalize all polygons
     this.polygons = Container.map(polygons, polygon => Polygon.normalize(polygon));
     // Count all polygon vertices
     this.pointCount = getPointCount(this.polygons);
+    this.fp64 = fp64;
   }
 
   indices() {
@@ -35,7 +37,7 @@ export class PolygonTesselator {
 
   positions() {
     const {polygons, pointCount} = this;
-    return calculatePositions({polygons, pointCount});
+    return calculatePositions({polygons, pointCount, fp64: this.fp64});
   }
 
   normals() {
@@ -159,15 +161,25 @@ export function flattenVertices2(nestedArray, {result = [], dimensions = 3} = {}
   return result;
 }
 
-function calculatePositions({polygons, pointCount}) {
+function calculatePositions({polygons, pointCount, fp64}) {
   // Flatten out all the vertices of all the sub subPolygons
   const attribute = new Float32Array(pointCount * 3);
+  let attributeLow;
+  if (fp64) {
+    // We only need x, y component
+    attributeLow = new Float32Array(pointCount * 2);
+  }
   let i = 0;
+  let j = 0;
   Container.forEach(polygons, polygon =>
     Polygon.forEachVertex(polygon, vertex => {
       attribute[i++] = vertex[0];
       attribute[i++] = vertex[1];
       attribute[i++] = vertex[2] || 0;
+      if (fp64) {
+        attributeLow[j++] = fp64ify(vertex[0])[1];
+        attributeLow[j++] = fp64ify(vertex[1])[1];
+      }
     })
   );
   // for (const complexPolygon of polygons) {
@@ -179,7 +191,7 @@ function calculatePositions({polygons, pointCount}) {
   //     }
   //   }
   // }
-  return attribute;
+  return {positions: attribute, positions64xyLow: attributeLow};
 }
 
 function calculateNormals({polygons, pointCount}) {

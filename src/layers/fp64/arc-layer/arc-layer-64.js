@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import ArcLayer from '../../core/arc-layer';
+import ArcLayer from '../../core/arc-layer/arc-layer';
 import {fp64ify} from '../../../lib/utils/fp64';
 import {readFileSync} from 'fs';
 import {join} from 'path';

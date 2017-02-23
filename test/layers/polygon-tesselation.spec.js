@@ -41,11 +41,14 @@ test('PolygonTesselator#methods', t => {
   t.ok(tesselator instanceof PolygonTesselator, 'PolygonTesselator created');
   const indices = tesselator.indices();
   t.ok(ArrayBuffer.isView(indices), 'PolygonTesselator.indices');
-  const positions = tesselator.positions();
+  const positions = tesselator.positions().positions;
   t.ok(ArrayBuffer.isView(positions), 'PolygonTesselator.positions');
   const colors = tesselator.colors();
   t.ok(ArrayBuffer.isView(colors), 'PolygonTesselator.colors');
   // t.ok(ArrayBuffer.isView(tesselator.normals()), 'PolygonTesselator.normals');
+  const tesselator64 = new PolygonTesselator({polygons: POLYGONS, fp64: true});
+  const positions64xyLow = tesselator64.positions().positions64xyLow;
+  t.ok(ArrayBuffer.isView(positions64xyLow), 'PolygonTesselator.positions64xyLow');
   t.end();
 });
 
@@ -54,10 +57,14 @@ test('PolygonTesselatorExtruded#methods', t => {
   t.ok(tesselator instanceof PolygonTesselatorExtruded, 'PolygonTesselatorExtruded created');
   const indices = tesselator.indices();
   t.ok(ArrayBuffer.isView(indices), 'PolygonTesselatorExtruded.indices');
-  const positions = tesselator.positions();
+  const positions = tesselator.positions().positions;
   t.ok(ArrayBuffer.isView(positions), 'PolygonTesselatorExtruded.positions');
   const colors = tesselator.colors();
   t.ok(ArrayBuffer.isView(colors), 'PolygonTesselatorExtruded.colors');
   t.ok(ArrayBuffer.isView(tesselator.normals()), 'PolygonTesselatorExtruded.normals');
+  const tesselatorExtruded64 = new PolygonTesselator({polygons: POLYGONS, fp64: true});
+  const positionsExtruded64xyLow = tesselatorExtruded64.positions().positions64xyLow;
+  t.ok(ArrayBuffer.isView(positionsExtruded64xyLow), 'PolygonTesselatorExtruded.positions64xyLow');
+
   t.end();
 });
