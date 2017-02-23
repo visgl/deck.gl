@@ -221,7 +221,8 @@ const PointDensityGridLayerExample = {
     extruded: true,
     pickable: true,
     opacity: 1,
-    cellSize: 0.3,
+    cellSize: 200,
+    getPosition: d => d.COORDINATES,
     lightSettings: {
       lightsPosition: [-122.45, 37.66, 8000, -122.0, 38.00, 8000],
       ambientRatio: 0.4,

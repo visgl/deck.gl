@@ -1,4 +1,4 @@
-// Copyright (c) 2015 Uber Technologies, Inc.
+// Copyright (c) 2016 Uber Technologies, Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -19,11 +19,12 @@
 // THE SOFTWARE.
 
 import {Layer} from '../../../lib';
-import GridLayer from '../grid-layer';
+import GridLayer from '../grid-layer/grid-layer';
 
 import {pointToDensityGridData} from './grid-aggregator';
+import {ordinalScale, linearScale} from './scale-utils';
 
-const defaultCellSize = 1;
+const defaultCellSize = 1000;
 const defaultColorRange = [
   [255, 255, 178],
   [254, 217, 118],
@@ -37,7 +38,8 @@ const defaultElevationRange = [0, 10];
 const defaultProps = {
   cellSize: defaultCellSize,
   colorRange: defaultColorRange,
-  elevationRange: defaultElevationRange
+  elevationRange: defaultElevationRange,
+  getPosition: x => x.position
 };
 
 function noop() {}
@@ -46,23 +48,10 @@ function _needsReProjectPoints(oldProps, props) {
   return oldProps.cellSize !== props.cellSize;
 }
 
-function _ordinalScale(domain, range, value) {
-  const step = (domain[1] - domain[0]) / range.length;
-  const idx = Math.floor((value - domain[0]) / step);
-  const clampIdx = Math.max(Math.min(idx, range.length - 1), 0);
-
-  return range[clampIdx];
-}
-
-function _linearScale(domain, range, value) {
-
-  return (value - domain[0]) / (domain[1] - domain[0]) * (range[1] - range[0]) + range[0];
-}
-
 export default class PointDensityGridLayer extends Layer {
   initializeState() {
     this.state = {
-      gridOffset: {latOffset: 0.0089, lonOffset: 0.0113},
+      gridOffset: {yOffset: 0.0089, xOffset: 0.0113},
       layerData: [],
       countRange: null,
       pickedCell: null
@@ -71,8 +60,9 @@ export default class PointDensityGridLayer extends Layer {
 
   updateState({oldProps, props, changeFlags}) {
     if (changeFlags.dataChanged || _needsReProjectPoints(oldProps, props)) {
-      const {data, cellSize} = this.props;
-      const {gridOffset, layerData, countRange} = pointToDensityGridData(data, cellSize);
+      const {data, cellSize, getPosition} = this.props;
+      const {gridOffset, layerData, countRange} =
+        pointToDensityGridData(data, cellSize, getPosition);
 
       Object.assign(this.state, {gridOffset, layerData, countRange});
     }
@@ -103,33 +93,31 @@ export default class PointDensityGridLayer extends Layer {
     const {colorRange} = this.props;
     const colorDomain = this.props.colorDomain || this.state.countRange;
 
-    return _ordinalScale(colorDomain, colorRange, cell.count);
+    return ordinalScale(colorDomain, colorRange, cell.count);
   }
 
   _onGetSublayerElevation(cell) {
     const {elevationRange} = this.props;
     const elevationDomain = this.props.elevationDomain || [0, this.state.countRange[1]];
-    return _linearScale(elevationDomain, elevationRange, cell.count);
+    return linearScale(elevationDomain, elevationRange, cell.count);
   }
 
   renderLayers() {
     const {id} = this.props;
 
-    // Override user's onHover and onClick props
-    const handlers = {
-      getColor: this._onGetSublayerColor.bind(this),
-      getElevation: this._onGetSublayerElevation.bind(this),
-      onHover: this._onHoverSublayer.bind(this),
-      onClick: noop
-    };
-
     return new GridLayer(Object.assign({},
-      this.props, handlers, {
+      this.props, {
         id: `${id}-density-grid`,
         data: this.state.layerData,
-        latOffset: this.state.gridOffset.latOffset,
-        lonOffset: this.state.gridOffset.lonOffset,
-        pickable: true
+        latOffset: this.state.gridOffset.yOffset,
+        lonOffset: this.state.gridOffset.xOffset,
+        pickable: true,
+        getColor: this._onGetSublayerColor.bind(this),
+        getElevation: this._onGetSublayerElevation.bind(this),
+        getPosition: d => d.position,
+        // Override user's onHover and onClick props
+        onHover: this._onHoverSublayer.bind(this),
+        onClick: noop
       }));
   }
 }
