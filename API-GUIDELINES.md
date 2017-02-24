@@ -133,12 +133,14 @@ it is natural to stay with the well-accepted term.
   to achieve the same effect. E.g. an `elevationOffset` or `elevationScale`
   propscould be handled by the `modelMatrix` prop in many situations.
 
-* **Documenation** Extra care must be taken with documentation to make
-  sure that the layer user understands the interaction between modifying
-  props and accessors.
+* **Documentation** Extra care must be taken with documentation to make
+  sure that the layer user understands the interaction between the modifying
+  props and accessors (E.g. `getRadius` vs. `radiusScale`), as well as the
+  making clear what units the value being scaled is in (meters etc.)
 
 * **Default values** Unless there are strong reasons, multiplicative props
   (e.g. `radiusScale`) should always default to 1, and additive props to 0.
+  Other choices are likely to cause surprises for users.
 
 ### Naming rules for groups of uniform-related props
 
