@@ -41,7 +41,7 @@ const defaultProps = {
  * @param {Integer} [props.yResolution] - number of samples within y range
  * @param {Number} [props.lightStrength] - front light strength
  * @param {Boolean} [props.drawAxes] - whether to draw axes
- * @param {Integer} [props.ticksCount] - number of ticks along each axis, see 
+ * @param {Integer} [props.ticksCount] - number of ticks along each axis, see
       https://github.com/d3/d3-axis/blob/master/README.md#axis_ticks
  * @param {Number} [props.axesOffset] - amount to set back grids from the plot,
       relative to the size of the bounding box
@@ -114,6 +114,7 @@ export default class GraphLayer extends Layer {
   }
 
   draw({uniforms}) {
+    const {viewport: {width, height}} = this.context;
     const {center, dim} = this.state;
     const {lightStrength, drawAxes, axesColor, axesOffset} = this.props;
 
@@ -122,6 +123,7 @@ export default class GraphLayer extends Layer {
         ...uniforms,
         center,
         dim,
+        screenSize: [width, height],
         offset: axesOffset,
         strokeColor: axesColor
       });

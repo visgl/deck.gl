@@ -22,7 +22,7 @@
 
 attribute vec3 positions;
 attribute vec3 normals;
-attribute float instancePositions;
+attribute vec2 instancePositions;
 attribute vec3 instanceNormals;
 
 uniform vec3 center;
@@ -32,6 +32,12 @@ uniform vec4 strokeColor;
 
 varying vec4 vColor;
 varying float shouldDiscard;
+
+float frontFacing(vec3 v) {
+  vec4 p0_viewspace = project_to_clipspace(vec4(0.0, 0.0, 0.0, 1.0));
+  vec4 p1_viewspace = project_to_clipspace(vec4(v, 1.0));
+  return step(p1_viewspace.z, p0_viewspace.z);
+}
 
 void main(void) {
 
@@ -49,14 +55,12 @@ void main(void) {
     ) * instanceNormals;
 
   // do not draw in front of the graph
-  vec4 center_viewspace = project_to_clipspace(vec4(0.0, 0.0, 0.0, 1.0));
-  vec4 vertex_viewspace = project_to_clipspace(vec4(vertexNormal, 1.0));
-  shouldDiscard = step(vertex_viewspace.z, center_viewspace.z);
+  shouldDiscard = frontFacing(vertexNormal);
 
   // fit into a unit cube that centers at [0, 0, 0]
   float scale = 1.0 / max(dim.x, max(dim.y, dim.z));
   vec4 position_modelspace = vec4(
-    ((vec3(instancePositions) - center) * instanceNormals + vertexPosition) * scale + offset * vertexNormal,
+    ((vec3(instancePositions.x) - center) * instanceNormals + vertexPosition) * scale + offset * vertexNormal,
     1.0
   );
   gl_Position = project_to_clipspace(position_modelspace);
