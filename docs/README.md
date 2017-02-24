@@ -1,3 +1,6 @@
+Note: This documentation is for deck.gl v4. Looking for
+[v3 docs](https://github.com/uber/deck.gl/tree/3.0-release/docs)?
+
 # Introduction
 
 deck.gl is designed to make visualization of large data sets simple.
