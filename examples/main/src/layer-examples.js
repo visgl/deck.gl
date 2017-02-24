@@ -9,6 +9,7 @@ import {
   IconLayer,
   GridLayer,
   PointDensityGridLayer,
+  PointDensityHexagonLayer,
   GeoJsonLayer,
   // PolygonLayer,
   PathLayer,
@@ -232,7 +233,7 @@ const GridLayerExample = {
     latOffset: dataSamples.worldGrid.latOffset,
     lonOffset: dataSamples.worldGrid.lonOffset,
     getColor: g => [245, 166, g.value * 255, 255],
-    getElevation: h => h.value * 50,
+    getElevation: h => h.value * 5000,
     extruded: true,
     pickable: true,
     opacity: 1
@@ -244,12 +245,10 @@ const PointDensityGridLayerExample = {
   props: {
     id: 'pointDensityGridLayer',
     data: dataSamples.points,
-    cellSize: 0.3,
+    cellSize: 200,
     opacity: 1,
     extruded: true,
     pickable: true,
-    opacity: 1,
-    cellSize: 200,
     getPosition: d => d.COORDINATES,
     lightSettings: {
       lightsPosition: [-122.45, 37.66, 8000, -122.0, 38.00, 8000],
@@ -269,11 +268,33 @@ const HexagonLayerExample = {
     data: dataSamples.hexagons,
     hexagonVertices: dataSamples.hexagons[0].vertices,
     getColor: h => [48, 128, h.value * 255, 255],
-    getElevation: h => h.value * 50,
+    getElevation: h => h.value * 5000,
     extruded: true,
     pickable: true,
-    radiusScale: 1,
     opacity: 1
+  }
+};
+
+const PointDensityHexagonLayerExample = {
+  layer: PointDensityHexagonLayer,
+  props: {
+    id: 'PointDensityHexagonLayer',
+    data: dataSamples.points,
+    extruded: true,
+    pickable: true,
+    radius: 1000,
+    opacity: 1,
+    elevationScale: 0.8,
+    coverage: 1,
+    getPosition: d => d.COORDINATES,
+    lightSettings: {
+      lightsPosition: [-122.45, 37.66, 8000, -122.0, 38.00, 8000],
+      ambientRatio: 0.3,
+      diffuseRatio: 0.6,
+      specularRatio: 0.6,
+      lightsStrength: [1.2, 0.0, 0.8, 0.0],
+      numberOfLights: 2
+    }
   }
 };
 
@@ -432,6 +453,7 @@ export default {
     ScreenGridLayer: ScreenGridLayerExample,
     GridLayer: GridLayerExample,
     PointDensityGridLayer: PointDensityGridLayerExample,
+    PointDensityHexagonLayer: PointDensityHexagonLayerExample,
     HexagonLayer: HexagonLayerExample,
     IconLayer: IconLayerExample
   },

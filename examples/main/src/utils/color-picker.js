@@ -20,7 +20,7 @@ function numberToHex(x, len = 0) {
  * @param {string | array | function} value - color value or accessor
  * @returns {string} hex color string
  */
-function getColorHex(value) {
+export function getColorHex(value) {
   if (typeof value === 'function') {
     try {
       value = value();
@@ -42,7 +42,7 @@ function getColorHex(value) {
  * @param {string} str - color hex string
  * @returns {array} color value in [r, g, b]
  */
-function getColorArray(str) {
+export function getColorArray(str) {
   return [
     parseInt(str.slice(1, 3), 16),
     parseInt(str.slice(3, 5), 16),

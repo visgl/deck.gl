@@ -55,6 +55,14 @@ Latitude increment of each cell
 
 Longitude increment of each cell
 
+##### `elevationScale` (Number, optional)
+
+- Default: `1`
+
+Hexagon elevation multiplier. The elevation of hexagon is calculated by 
+`elevationScale * getElevation(d)`. `elevationScale` is a handy property to scale all hexagons 
+elevations without updating the data.
+
 ##### `extruded` (Boolean, optional)
 
 - Default: `true`

@@ -1,9 +1,11 @@
 import React, {PureComponent} from 'react';
 import ColorPicker from './utils/color-picker';
+import ColorPalettePicker from './utils/color-palette-picker';
 
 export default class LayerControls extends PureComponent {
 
   _onValueChange(settingName, newValue) {
+
     const {settings} = this.props;
     // Only update if we have a confirmed change
     if (settings[settingName] !== newValue) {
@@ -25,12 +27,14 @@ export default class LayerControls extends PureComponent {
   }
 
   _renderColorPicker(settingName, value) {
+    const props = {value, onChange: this._onValueChange.bind(this, settingName)};
+
     return (
       <div key={settingName}>
         <div className="input-group" >
           <label>{settingName}</label>
-          <ColorPicker value={value}
-            onChange={this._onValueChange.bind(this, settingName)} />
+          {settingName === 'colorRange' ?
+            <ColorPalettePicker {...props}/> : <ColorPicker {...props}/>}
         </div>
       </div>
     );
@@ -38,14 +42,14 @@ export default class LayerControls extends PureComponent {
 
   _renderSlider(settingName, value) {
     let max = 1;
-    if (/radius|width|height|pixel|size|miter/i.test(settingName) &&
+    if (/radiusScale|elevationScale|width|height|pixel|size|miter/i.test(settingName) &&
       (/^((?!scale).)*$/).test(settingName)) {
       max = 100;
     }
 
-    if (settingName === 'cellSize') {
-      // cell size is in meters
-      max = 10000;
+    if (settingName === 'cellSize' || settingName === 'radius') {
+      // cell size and radius are in meters
+      max = 3000;
     }
 
     return (

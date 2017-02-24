@@ -42,17 +42,38 @@ Method called to retrieve the elevation of each object. 1 unit approximate to 10
 
 ## Layer-specific Properties
 
-##### `hexagonVertices` (Array[[lon, lat]], required)
+##### `hexagonVertices` (Array[[lon, lat]], optional)
 
 Primitive hexagon vertices as an array of six [lon, lat] pairs,
-in either clockwise or counter clouckwise direction.
+in either clockwise or counter clouckwise direction. Use radius and angle instead 
+of hexagonVertices if provided.
 
-##### `radiusScale` (Number, optional)
+##### `radius` (Number, optional)
+
+Primitive hexagon radius in meter. The hexagons are pointy-topped (rather than flat-topped).
+If `radius` and `angle` are provided, they will be used to calculate 
+primitive hexagon instead of `hexagonVertices`
+
+##### `angle` (Number, optional)
+
+Primitive hexagon angle in radian. Angle is the rotation from one corner of the hexagon
+counter clockwise from north. If `radius` and `angle` are provided, 
+they will be used to calculate primitive hexagon instead of `hexagonVertices`
+
+##### `coverage` (Number, optional)
 
 - Default: `1`
 
 Hexagon radius multiplier, between 0 - 1. The radius of hexagon is calculated by 
-radiusScale * getRadius(d)
+`coverage * getRadius(d)`
+
+##### `elevationScale` (Number, optional)
+
+- Default: `1`
+
+Hexagon elevation multiplier. The elevation of hexagon is calculated by 
+`elevationScale * getElevation(d)`. `elevationScale` is a handy property to scale all hexagons 
+elevations without updating the data.
 
 ##### `extruded` (Boolean, optional)
 

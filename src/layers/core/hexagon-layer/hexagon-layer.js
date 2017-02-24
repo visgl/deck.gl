@@ -42,46 +42,40 @@ const defaultProps = {
   extruded: true,
   hexagonVertices: null,
   opacity: 0.8,
-  radiusScale: 1,
+  coverage: 1,
+  elevationScale: 1,
   getCentroid: x => x.centroid,
   getColor: x => x.color,
   getElevation: x => x.elevation,
   lightSettings: {
     lightsPosition: [-122.45, 37.75, 8000, -122.0, 38.00, 5000],
-    ambientRatio: 0.05,
+    ambientRatio: 0.4,
     diffuseRatio: 0.6,
     specularRatio: 0.8,
-    lightsStrength: [2.0, 0.0, 0.0, 0.0],
+    lightsStrength: [1.2, 0.0, 0.8, 0.0],
     numberOfLights: 2
   }
 };
 
-// // viewMatrix added as Uniform for lighting calculation
-// const viewMatrixCompat = mat4.create();
-// mat4.lookAt(viewMatrixCompat, [0, 0, 0], [0, 0, -1], [0, 1, 0]);
-// const viewMatrix = new Float32Array(viewMatrixCompat);
-
 export default class HexagonLayer extends Layer {
 
-  /**
-   * @classdesc
-   * HexagonLayer is a variation of grid layer, it is intended to render
-   * hexagon tessellations. It supports elevation, lighting as well
-   *
-   * @class
-   * @param {object} props
-   * @param {number} props.data - all hexagons
-   * @param {number} props.radiusScale - hexagon radius multiplier
-   * @param {boolean} props.extruded - if set to false, all hexagons will be flat
-   * @param {array} props.hexagonVertices - primitive hexagon vertices as [[lon, lat]]
-   * @param {function} props.getCentroid - hexagon centroid should be formatted as [lon, lat]
-   * @param {function} props.getColor -  hexagon color should be formatted as [r, g, b, a]
-   * @param {function} props.getElevation - hexagon elevation 1 unit approximate to 100 meters
-   *
-   */
   constructor(props) {
-    if (!props.hexagonVertices) {
-      log.once(0, 'hexagonVertices is missing, use default vertices of a 1 km radius hexagon');
+    let missingProps = false;
+    if (!props.hexagonVertices && (!props.radius || !Number.isFinite(props.angle))) {
+      log.once(0, 'HexagonLayer: Either hexagonVertices or radius and angel is needed.');
+      missingProps = true;
+
+    } else if (props.hexagonVertices && (!Array.isArray(props.hexagonVertices) ||
+      props.hexagonVertices.length !== 6)) {
+      log.once(0, 'HexagonLayer: HexagonVertices needs to be an array of 6 points');
+
+      missingProps = true;
+    }
+
+    if (missingProps) {
+      log.once(0, 'Now using 1000 meter as default radius, 0 as default angel');
+      props.radius = 1000;
+      props.angle = 0;
     }
 
     super(props);
@@ -124,18 +118,20 @@ export default class HexagonLayer extends Layer {
   }
 
   updateRadiusAngle() {
-    let vertices = this.props.hexagonVertices;
     let angle;
     let radius;
 
-    if (!Array.isArray(vertices) || vertices.length !== 6) {
-      vertices = _calculateDefaultVertices(this.props.data, this.props.getCentroid);
-    }
+    if (this.props.radius && Number.isFinite(this.props.angle)) {
+      const {viewport} = this.context;
+      const {pixelsPerMeter} = viewport.getDistanceScales();
 
-    if (!vertices) {
-      angle = 0;
-      radius = 10;
+      angle = this.props.angle;
+      radius = this.props.radius * pixelsPerMeter[0];
+
     } else {
+
+      // calculate angle and vertices from hexagonVertices
+      const vertices = this.props.hexagonVertices;
 
       const vertex0 = vertices[0];
       const vertex3 = vertices[3];
@@ -174,12 +170,13 @@ export default class HexagonLayer extends Layer {
   }
 
   updateUniforms() {
-    const {opacity, extruded, radiusScale, lightSettings} = this.props;
+    const {opacity, elevationScale, extruded, coverage, lightSettings} = this.props;
 
     this.setUniforms(Object.assign({}, {
       extruded,
       opacity,
-      radiusScale
+      coverage,
+      elevationScale
     },
     lightSettings));
   }
@@ -213,6 +210,7 @@ export default class HexagonLayer extends Layer {
   }
 
   calculateInstancePositions(attribute) {
+
     const {data, getCentroid, getElevation} = this.props;
     const {value, size} = attribute;
     let i = 0;
@@ -240,35 +238,6 @@ export default class HexagonLayer extends Layer {
       i += size;
     }
   }
-}
-
-// if hexagon vertices not provided, calculate a 1km radius hexagon
-// at the first object's centroid location
-function _calculateDefaultVertices(data, getCentroid) {
-
-  const firstObject = Array.isArray(data) && data.length && data[0];
-
-  if (!firstObject) {
-    return null;
-  }
-  const R_EARTH = 6378;
-  // get center [lon, lat] of first obejct
-  const [cLon, cLat] = getCentroid(data[0]);
-
-  // lat lon delta of 1 km at centerLat
-  const latDelta = (1 / R_EARTH) * (180 / Math.PI);
-  const lonDelta = (1 / R_EARTH) * (180 / Math.PI) / Math.cos(cLat * Math.PI / 180);
-
-  const cos30 = Math.cos(30 / 180 * Math.PI);
-
-  return [
-    [cLon + lonDelta / 2, cLat + cos30 * latDelta],
-    [cLon + lonDelta, cLat],
-    [cLon + lonDelta / 2, cLat - cos30 * latDelta],
-    [cLon - lonDelta / 2, cLat - cos30 * latDelta],
-    [cLon - lonDelta, cLat],
-    [cLon - lonDelta / 2, cLat + cos30 * latDelta]
-  ];
 }
 
 HexagonLayer.layerName = 'HexagonLayer';
