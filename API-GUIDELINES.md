@@ -63,7 +63,7 @@ similar).
   either have 64bits or not.
 * **Geospatial** 64 bits is most valuable for geospatial layers, other layers
   that are primarily designed for non-geo use cases probably do not need
-  in excess of 1.000.000x zoom.
+  >1.000.000x zoom.
 * **2D vs 2.5D (extrusion)/3D Support**
   Simple “3D”: A “2D” layer can offer “3D” support without additional
   consideration if the cost in terms of code complexity and performance
@@ -133,14 +133,12 @@ it is natural to stay with the well-accepted term.
   to achieve the same effect. E.g. an `elevationOffset` or `elevationScale`
   propscould be handled by the `modelMatrix` prop in many situations.
 
-* **Documentation** Extra care must be taken with documentation to make
-  sure that the layer user understands the interaction between the modifying
-  props and accessors (E.g. `getRadius` vs. `radiusScale`), as well as the
-  making clear what units the value being scaled is in (meters etc.)
+* **Documenation** Extra care must be taken with documentation to make
+  sure that the layer user understands the interaction between modifying
+  props and accessors.
 
 * **Default values** Unless there are strong reasons, multiplicative props
   (e.g. `radiusScale`) should always default to 1, and additive props to 0.
-  Other choices are likely to cause surprises for users.
 
 ### Naming rules for groups of uniform-related props
 
@@ -148,6 +146,8 @@ it is natural to stay with the well-accepted term.
   a common prefix or suffix (`lightDirection`, `lightColorAmbient`, `lightColorDirectional`, …)
 * If a set of uniforms belong to the same module/effect, it could make sense to
   package them into a single `settings` object. `lightSettings`.
+
+More to come...
 
 ### Alignment of property naming between layers
 
@@ -159,6 +159,9 @@ the user's ability to learn and easily work with deck.gl.
 
 Update triggers should be named the same as the accessor property
 for the vertex attribute.
+
+In v4, for backwards compatibility, the name of the WebGL attribute
+(e.g. `instanceColors` is also supported in addition to `getColor`).
 
 The attribute manager now accepts an `accessor` field that can be a string
 or an array of strings - these will be automatically be used as update triggers
@@ -172,17 +175,3 @@ new Layer({
   }
 });
 ```
-
-## Design Decisions
-
-This is a list of specific issues that have been raised and discussed, and current position/decision
-
-### Overloading props and APIs on types?
-
-Decision: LIMITED. We should be conservative with overloading,
-but it is acceptable if the value is significant (in terms of
-simplification of the API etc), as long as the resulting API remains
-intuitive and documentation and tests are provided.
-
-E.g. make a prop take both a function and a string, and do different
-but similar things dependending on which type was supplied
