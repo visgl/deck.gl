@@ -109,6 +109,10 @@ export const docPages = generatePath([
       {
         name: 'Coordinate Systems',
         content: getDocUrl('coordinate-systems.md')
+      },
+      {
+        name: 'Viewports',
+        content: getDocUrl('viewports.md')
       }
     ]
   },
