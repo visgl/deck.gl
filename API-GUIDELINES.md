@@ -147,8 +147,6 @@ it is natural to stay with the well-accepted term.
 * If a set of uniforms belong to the same module/effect, it could make sense to
   package them into a single `settings` object. `lightSettings`.
 
-More to come...
-
 ### Alignment of property naming between layers
 
 It is important that properties are consistent between layers,
@@ -159,9 +157,6 @@ the user's ability to learn and easily work with deck.gl.
 
 Update triggers should be named the same as the accessor property
 for the vertex attribute.
-
-In v4, for backwards compatibility, the name of the WebGL attribute
-(e.g. `instanceColors` is also supported in addition to `getColor`).
 
 The attribute manager now accepts an `accessor` field that can be a string
 or an array of strings - these will be automatically be used as update triggers
