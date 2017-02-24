@@ -40,16 +40,19 @@ export default class LayerControls extends PureComponent {
     );
   }
 
-  _renderSlider(settingName, value) {
-    let max = 1;
-    if (/radiusScale|elevationScale|width|height|pixel|size|miter/i.test(settingName) &&
+  _renderSlider(settingName, value, propType) {
+    let max;
+
+    if (propType && Number.isFinite(propType.max)) {
+      max = propType.max;
+
+    } else if (/radiusScale|elevationScale|width|height|pixel|size|miter/i.test(settingName) &&
+
       (/^((?!scale).)*$/).test(settingName)) {
       max = 100;
-    }
+    } else {
 
-    if (settingName === 'cellSize' || settingName === 'radius') {
-      // cell size and radius are in meters
-      max = 3000;
+      max = 1;
     }
 
     return (
@@ -88,26 +91,39 @@ export default class LayerControls extends PureComponent {
     );
   }
 
-  _renderSetting(settingName, value) {
+  _renderSetting(settingName, value, propType) {
+
+    // first test if proptype is already defined
+    if (propType && propType.type) {
+      switch (propType.type) {
+      case 'range':
+        return this._renderSlider(settingName, value, propType);
+      default:
+        break;
+      }
+    }
+
     switch (typeof value) {
     case 'boolean':
-      return this._renderCheckbox(settingName, value);
+      return this._renderCheckbox(settingName, value, propType);
     case 'number':
-      return this._renderSlider(settingName, value);
+      return this._renderSlider(settingName, value, propType);
     default:
       if (/color/i.test(settingName)) {
-        return this._renderColorPicker(settingName, value);
+        return this._renderColorPicker(settingName, value, propType);
       }
     }
     return null;
   }
 
   render() {
-    const {title, settings} = this.props;
+    const {title, settings, propTypes = {}} = this.props;
+
     return (
       <div className="layer-controls" >
         { title && <h4>{title}</h4>}
-        { Object.keys(settings).map(key => this._renderSetting(key, settings[key])) }
+        { Object.keys(settings).map(key =>
+          this._renderSetting(key, settings[key], propTypes[key])) }
       </div>
     );
   }
