@@ -9,6 +9,7 @@ import {
   IconLayer,
   GridLayer,
   PointDensityGridLayer,
+  PointDensityHexagonLayer,
   GeoJsonLayer,
   // PolygonLayer,
   PathLayer,
@@ -35,6 +36,15 @@ const MARKER_SIZE_MAP = {
   small: 2,
   medium: 5,
   large: 10
+};
+
+const LIGHT_SETTINGS = {
+  lightsPosition: [-122.45, 37.66, 8000, -122.0, 38.00, 8000],
+  ambientRatio: 0.4,
+  diffuseRatio: 0.6,
+  specularRatio: 0.6,
+  lightsStrength: [1, 0.0, 0.8, 0.0],
+  numberOfLights: 2
 };
 
 const ArcLayerExample = {
@@ -231,47 +241,69 @@ const GridLayerExample = {
     data: dataSamples.worldGrid.data,
     latOffset: dataSamples.worldGrid.latOffset,
     lonOffset: dataSamples.worldGrid.lonOffset,
-    getColor: g => [245, 166, g.value * 255, 255],
-    getElevation: h => h.value * 50,
     extruded: true,
     pickable: true,
-    opacity: 1
+    opacity: 1,
+    getColor: g => [245, 166, g.value * 255, 255],
+    getElevation: h => h.value * 5000,
+    lightSettings: LIGHT_SETTINGS
   }
 };
 
 const PointDensityGridLayerExample = {
   layer: PointDensityGridLayer,
+  propTypes: {
+    cellSize: {type: 'range', min: 0, max: 1000}
+  },
   props: {
     id: 'pointDensityGridLayer',
     data: dataSamples.points,
+    cellSize: 200,
+    opacity: 1,
     extruded: true,
     pickable: true,
-    opacity: 1,
-    cellSize: 200,
     getPosition: d => d.COORDINATES,
-    lightSettings: {
-      lightsPosition: [-122.45, 37.66, 8000, -122.0, 38.00, 8000],
-      ambientRatio: 0.4,
-      diffuseRatio: 0.6,
-      specularRatio: 0.6,
-      lightsStrength: [1.2, 0.0, 0.8, 0.0],
-      numberOfLights: 2
-    }
+    lightSettings: LIGHT_SETTINGS
   }
 };
 
 const HexagonLayerExample = {
   layer: HexagonLayer,
+  propTypes: {
+    coverage: {type: 'range', min: 0, max: 1}
+  },
   props: {
     id: 'hexagonLayer',
     data: dataSamples.hexagons,
     hexagonVertices: dataSamples.hexagons[0].vertices,
-    getColor: h => [48, 128, h.value * 255, 255],
-    getElevation: h => h.value * 50,
+    coverage: 1,
     extruded: true,
     pickable: true,
-    radiusScale: 1,
-    opacity: 1
+    opacity: 1,
+    getColor: h => [48, 128, h.value * 255, 255],
+    getElevation: h => h.value * 5000,
+    lightSettings: LIGHT_SETTINGS
+  }
+};
+
+const PointDensityHexagonLayerExample = {
+  layer: PointDensityHexagonLayer,
+  propTypes: {
+    coverage: {type: 'range', min: 0, max: 1},
+    radius: {type: 'range', min: 0, max: 3000}
+  },
+  props: {
+    id: 'PointDensityHexagonLayer',
+    data: dataSamples.points,
+    extruded: true,
+    pickable: true,
+    radius: 1000,
+    opacity: 1,
+    elevationScale: 1,
+    elevationRange: [0, 3000],
+    coverage: 1,
+    getPosition: d => d.COORDINATES,
+    lightSettings: LIGHT_SETTINGS
   }
 };
 
@@ -430,6 +462,7 @@ export default {
     ScreenGridLayer: ScreenGridLayerExample,
     GridLayer: GridLayerExample,
     PointDensityGridLayer: PointDensityGridLayerExample,
+    PointDensityHexagonLayer: PointDensityHexagonLayerExample,
     HexagonLayer: HexagonLayerExample,
     IconLayer: IconLayerExample
   },

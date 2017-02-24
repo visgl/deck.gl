@@ -19,35 +19,57 @@
 // THE SOFTWARE.
 
 import {Layer} from '../../../lib';
-import GridLayer from '../grid-layer/grid-layer';
+import HexagonLayer from '../hexagon-layer/hexagon-layer';
+import {log} from '../../../lib/utils';
 
-import {pointToDensityGridData} from './grid-aggregator';
 import {ordinalScale, linearScale} from '../../../utils/scale-utils';
 import {defaultColorRange} from '../../../utils/color-utils';
+import {pointToHexbin} from './hexagon-aggregator';
 
-const defaultCellSize = 1000;
+const defaultRadius = 1000;
+const defaultCoverage = 1;
 const defaultElevationRange = [0, 1000];
 const defaultElevationScale = 1;
+const defaultAggregator = pointToHexbin;
 
 const defaultProps = {
-  cellSize: defaultCellSize,
   colorRange: defaultColorRange,
   elevationRange: defaultElevationRange,
   elevationScale: defaultElevationScale,
+  radius: defaultRadius,
+  coverage: defaultCoverage,
+  hexagonAggregator: defaultAggregator,
   getPosition: x => x.position
 };
 
 function noop() {}
 
 function _needsReProjectPoints(oldProps, props) {
-  return oldProps.cellSize !== props.cellSize;
+  return oldProps.radius !== props.radius;
 }
 
-export default class PointDensityGridLayer extends Layer {
+function _getCountRange(hexagons) {
+  return [
+    Math.min.apply(null, hexagons.map(bin => bin.points.length)),
+    Math.max.apply(null, hexagons.map(bin => bin.points.length))
+  ];
+}
+
+export default class PointDensityHexagonLayer extends Layer {
+  constructor(props) {
+    if (!props.radius) {
+      log.once(0, 'PointDensityHexagonLayer: radius in meter is needed to aggregate points into ' +
+        'hexagonal bins, Now using 1000 meter as default');
+
+      props.radius = defaultRadius;
+    }
+
+    super(props);
+  }
+
   initializeState() {
     this.state = {
-      gridOffset: {yOffset: 0.0089, xOffset: 0.0113},
-      layerData: [],
+      hexagons: [],
       countRange: null,
       pickedCell: null
     };
@@ -55,12 +77,13 @@ export default class PointDensityGridLayer extends Layer {
 
   updateState({oldProps, props, changeFlags}) {
     if (changeFlags.dataChanged || _needsReProjectPoints(oldProps, props)) {
-      const {data, cellSize, getPosition} = this.props;
+      const {hexagonAggregator} = this.props;
+      const {viewport} = this.context;
 
-      const {gridOffset, layerData, countRange} =
-        pointToDensityGridData(data, cellSize, getPosition);
+      const hexagons = hexagonAggregator(this.props, viewport);
+      const countRange = _getCountRange(hexagons);
 
-      Object.assign(this.state, {gridOffset, layerData, countRange});
+      Object.assign(this.state, {hexagons, countRange});
     }
   }
 
@@ -82,34 +105,33 @@ export default class PointDensityGridLayer extends Layer {
   _onHoverSublayer(info) {
 
     this.state.pickedCell = info.picked && info.index > -1 ?
-      this.state.layerData[info.index] : null;
+      this.state.hexagons[info.index] : null;
   }
 
   _onGetSublayerColor(cell) {
     const {colorRange} = this.props;
     const colorDomain = this.props.colorDomain || this.state.countRange;
 
-    return ordinalScale(colorDomain, colorRange, cell.count);
+    return ordinalScale(colorDomain, colorRange, cell.points.length);
   }
 
   _onGetSublayerElevation(cell) {
     const {elevationRange} = this.props;
     const elevationDomain = this.props.elevationDomain || [0, this.state.countRange[1]];
-    return linearScale(elevationDomain, elevationRange, cell.count);
+    return linearScale(elevationDomain, elevationRange, cell.points.length);
   }
 
   renderLayers() {
-    const {id} = this.props;
+    const {id, radius} = this.props;
 
-    return new GridLayer(Object.assign({},
+    return new HexagonLayer(Object.assign({},
       this.props, {
-        id: `${id}-density-grid`,
-        data: this.state.layerData,
-        latOffset: this.state.gridOffset.yOffset,
-        lonOffset: this.state.gridOffset.xOffset,
+        id: `${id}-density-hexagon`,
+        data: this.state.hexagons,
+        radius,
+        angle: Math.PI,
         getColor: this._onGetSublayerColor.bind(this),
         getElevation: this._onGetSublayerElevation.bind(this),
-        getPosition: d => d.position,
         // Override user's onHover and onClick props
         onHover: this._onHoverSublayer.bind(this),
         onClick: noop,
@@ -121,5 +143,5 @@ export default class PointDensityGridLayer extends Layer {
   }
 }
 
-PointDensityGridLayer.layerName = 'PointDensityGridLayer';
-PointDensityGridLayer.defaultProps = defaultProps;
+PointDensityHexagonLayer.layerName = 'PointDensityHexagonLayer';
+PointDensityHexagonLayer.defaultProps = defaultProps;

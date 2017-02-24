@@ -21,7 +21,7 @@ export default class LayerSelector extends PureComponent {
           </label>
         </div>
 
-        { settings && <LayerControls settings={settings}
+        { settings && <LayerControls settings={settings} propTypes={example.propTypes}
           onChange={this.props.onUpdateLayer.bind(this, exampleName)} /> }
       </div>
     );

@@ -1,4 +1,5 @@
 import {createGLContext} from 'luma.gl';
+import {WebMercatorViewport} from '../src/lib/viewports';
 
 /**
  * Covert all numbers in a deep structure to a given precision, allowing
@@ -31,11 +32,16 @@ function getGLContext() {
   return glContext;
 }
 
-export function testInitializeLayer({gl, layer}) {
-  gl = gl || getGLContext();
+function getViewport() {
+  return new WebMercatorViewport({width: 100, height: 100});
+}
 
-  const oldContext = {gl};
-  const context = {gl};
+export function testInitializeLayer({gl, layer, viewport}) {
+  gl = gl || getGLContext();
+  viewport = viewport || getViewport();
+
+  const oldContext = {gl, viewport};
+  const context = {gl, viewport};
   let failures = 0;
   try {
     layer.context = context;
