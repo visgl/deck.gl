@@ -93,28 +93,18 @@ or a function), and a normal prop (like "color") always sets a uniform
 (either to a value, or a value returned by calling the supplied function).
 That seems more orthogonal to me.
 
-### Naming rules for attribute-related props (aka accessors)
+### Naming Rules for Accessors (i.e. attribute related props)
 
 An attribute is called `instancePositions` or `positions`, `instanceColors` or
 `colors`, etc.
 The property associated with that attribute is called `getPosition`, `getColor` etc:
 the attribute name with `instance` and the plural removed.
 
-Such property is called an accessor. It can either be a function, in which
+Such property is called an accessor. Its value must be a function, in which
 case it is applied to every element in data to extract the data.
-Or it can be a value (number or short array of numbers) in which
-case all instances are set to that value (N/I).
 
-The updateTrigger for that accessor is named after the accessor:
-`getColor`, `getPosition`. For backwards compatibility,
-the name of the attribute (e.g. `instanceColors` is also supported)
-
-### Notes on non-attribute related props
-
-If a function, it is called (possibly repeatedly in-between renders in animation mode)
-to generate a value for the uniform.
-If a property is set to a function, that function is called with an object
-containing some arguments (like time and tick count that it can use to interpolate values).
+The `updateTrigger` for that accessor is named after the accessor:
+`getColor`, `getPosition`.
 
 ### Naming rules for props that control uniforms
 
@@ -124,7 +114,7 @@ A uniform related property typically takes only one value (either a number or a 
 It typically sets a uniform of the same name with the given value
 (either directly or after some simple transformation, e.g. applying gamma to opacity).
 
-### Naming rules for props modifier props
+### Naming rules for "Modifier" props (Scale/Offset)
 
 Special care should uniform that modifies an attribute (e.g. as a multiplier,
 or additive element).
@@ -157,32 +147,29 @@ it is natural to stay with the well-accepted term.
 * If a set of uniforms belong to the same module/effect, it could make sense to
   package them into a single `settings` object. `lightSettings`.
 
-More to come...
-
 ### Alignment of property naming between layers
 
 It is important that properties are consistent between layers,
 especially between layers in a layer group, as this can dramatically affect
-the user`s ability to learn and easily work with deck.gl.
+the user's ability to learn and easily work with deck.gl.
 
 ### Naming of updateTriggers
 
 Update triggers should be named the same as the accessor property
 for the vertex attribute.
 
-In v4, for backwards compatibility, the name of the WebGL attribute
-(e.g. `instanceColors` is also supported in addition to `getColor`).
-
 The attribute manager now accepts an `accessor` field that can be a string
 or an array of strings - these will be automatically be used as update triggers
 for that attribute.
 
-  new Layer({
-    updateTriggers: {
-      getColor: {...}},
-      instanceColors: {...}}  // deprecated, backwards compatibility
-  });
-
+```js
+new Layer({
+  updateTriggers: {
+    getColor: {...},
+    instanceColors: {...}  // deprecated, backwards compatibility
+  }
+});
+```
 
 ## Design Decisions
 
