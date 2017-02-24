@@ -1,35 +1,55 @@
-# Creating Custom Layers
+# Writing New Layers
+
+## Preparations
 
 Before creating a new layer, it is recommended that you verify that you
 can not achive the desired effect either through layer subclassing or
 through using composite layers.
 
-## Choosing the Type of Layer
+There are a couple of ways to build a layer in deck.gl, and it is helpful
+to consider what approach will serve you best before starting:
 
-There are a couple of ways to build a layer in deck.gl
-
-* **Single-primitive, instanced layer** - This is type of layer renders
-  the same geometry many times. Usually the simplest way to go
-  when creating layers that renders a lot of similar objects (think
-  ScatterplotLayer, ArcLayers etc).
-* **Single-primitive, dynamic geometry layer** - This is needed when
-  dealing with data that needs to be rendered as unique, complies geometries,
-  such as polygons.
-* Multi-primitive layer - it sometimes desirable to have a single layer
-  render using multiple primitives. Note that it often useful to keep
+* **Single-primitive layer** - it sometimes desirable to have a single layer
+  render using multiple primitives, rather than creating
+  separate layers. Note that it often useful to keep
   layers focused on drawing one thing well, and having the application
   compose them to get desired effects,.
-* Composite layer - a layer that creates other layers. This allows you to
+* **Multi-primitive layer** - it sometimes desirable to have a single layer
+  render using multiple primitives (e.g both circles and lines, or
+  triangles and textured meshes etc), rather than creating separate layers.
+  Note that it while a Multi-Primitive layer is a fine choice, it can reduce
+  the reusability of your code as it is not as easy for an application to
+  compose a visualization from the two pieces. the toften useful to keep
+  layers focused on drawing one thing well, and having the application
+  compose them (possibly using composite layers) to get desired effects.
+* **Composite layer** - a layer that creates other layers. This allows you to
   build e.g. a "semantic layer" - a layer that presents a different interface
   (set of props) than an existing layer, transforms those props into
   a format that fits and existing layer, and renders that.
+  [Customizing Layers](/docs/layers/subclassing-layers.md).
+* **Subclassed layer** - a layer that is a subclass of another layers.
+  This allows you to reuse big parts of an existing layer, only overriding
+  the parts you need. Layer subclassing is described in
+  [Customizing Layers](/docs/layers/subclassing-layers.md).
+
+Another choice to make is whether your WebGL primitives (draw calls) should
+be instanced, or use dynamic geometry:
+
+* **Instanced layer (Single-primitive)** - This is type of layer renders
+  the same geometry many times. Usually the simplest way to go
+  when creating layers that renders a lot of similar objects (think
+  ScatterplotLayer, ArcLayers etc).
+* **Dynamic geometry layer** - This is needed when
+  dealing with data that needs to be rendered using multiple similar but unique
+  geometries, such as polygons (i.e. the geometries are not copies of each
+  othat that only differ in terms of.
 
 Remarks:
 * There is no strict division between layers that draw and composite
   layers, a layer could do both. That said, it often makes sense to keep your
   layers simple and focused on doing one thing well.
 
-### Creating your Layer class
+## Creating your Layer class
 
 Your layer class must be a subclass of [Layer](/docs/layers/base-layer.md).
 ```js
@@ -159,6 +179,7 @@ render into a off-screen frame buffer using `pickingColor` or
 `instancePickingColor` attributes instead of using its normal color calculation.
 
 See [`Layer.encodePickingColor`](/docs/custom-layers.md#layerencodepickingcolorindex--number).
+
 
 ## Defining your vertex attributes.
 
