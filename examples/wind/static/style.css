@@ -1,0 +1,56 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Helvetica Neue", Helvetica, sans-serif !important;
+  font-size: 11px;
+  padding: 0;
+  margin: 0;
+  color: #fff;
+  background: #111;
+  overflow: hidden;
+}
+
+a, a:visited {
+  color: #08f;
+  text-decoration: none;
+  font-style: italic;
+}
+a:hover {
+  text-decoration: underline;
+}
+
+.control-panel {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  padding: 12px;
+  width: 320px;
+  background: rgba(40,40,40,0.8);
+  box-shadow: 0 0 4px rgba(0, 0, 0, 0.5);
+}
+
+hr {
+  margin: 24px 0;
+  border-color: #888;
+  opacity: 0.3;
+}
+
+.input label {
+  min-width: 60px;
+  margin-right: 8px;
+  display: inline-block;
+  line-height: 24px;
+  text-transform: uppercase;
+}
+
+ul {
+  margin: 0;
+  padding: 0 0 0 12px;
+}
+
+li {
+  margin: 9px;
+  list-style-type: square;
+}
