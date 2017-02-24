@@ -19,11 +19,10 @@ test('PointDensityGridLayer#constructor', t => {
   t.ok(layer instanceof PointDensityGridLayer, 'PointDensityGridLayer created');
 
   testInitializeLayer({layer});
-  // t.ok(layer.state.subLayers, 'GeoJsonLayer has subLayers');
 
   t.doesNotThrow(
     () => new PointDensityGridLayer({
-      id: 'nullGeoJsonLayer',
+      id: 'nullPointDensityGridLayer',
       data: null,
       pickable: true
     }),

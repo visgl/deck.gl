@@ -1,9 +1,11 @@
 import React, {PureComponent} from 'react';
 import ColorPicker from './utils/color-picker';
+import ColorPalettePicker from './utils/color-palette-picker';
 
 export default class LayerControls extends PureComponent {
 
   _onValueChange(settingName, newValue) {
+
     const {settings} = this.props;
     // Only update if we have a confirmed change
     if (settings[settingName] !== newValue) {
@@ -25,27 +27,32 @@ export default class LayerControls extends PureComponent {
   }
 
   _renderColorPicker(settingName, value) {
+    const props = {value, onChange: this._onValueChange.bind(this, settingName)};
+
     return (
       <div key={settingName}>
         <div className="input-group" >
           <label>{settingName}</label>
-          <ColorPicker value={value}
-            onChange={this._onValueChange.bind(this, settingName)} />
+          {settingName === 'colorRange' ?
+            <ColorPalettePicker {...props}/> : <ColorPicker {...props}/>}
         </div>
       </div>
     );
   }
 
-  _renderSlider(settingName, value) {
-    let max = 1;
-    if (/radius|width|height|pixel|size|miter/i.test(settingName) &&
+  _renderSlider(settingName, value, propType) {
+    let max;
+
+    if (propType && Number.isFinite(propType.max)) {
+      max = propType.max;
+
+    } else if (/radiusScale|elevationScale|width|height|pixel|size|miter/i.test(settingName) &&
+
       (/^((?!scale).)*$/).test(settingName)) {
       max = 100;
-    }
+    } else {
 
-    if (settingName === 'cellSize') {
-      // cell size is in meters
-      max = 10000;
+      max = 1;
     }
 
     return (
@@ -84,26 +91,39 @@ export default class LayerControls extends PureComponent {
     );
   }
 
-  _renderSetting(settingName, value) {
+  _renderSetting(settingName, value, propType) {
+
+    // first test if proptype is already defined
+    if (propType && propType.type) {
+      switch (propType.type) {
+      case 'range':
+        return this._renderSlider(settingName, value, propType);
+      default:
+        break;
+      }
+    }
+
     switch (typeof value) {
     case 'boolean':
-      return this._renderCheckbox(settingName, value);
+      return this._renderCheckbox(settingName, value, propType);
     case 'number':
-      return this._renderSlider(settingName, value);
+      return this._renderSlider(settingName, value, propType);
     default:
       if (/color/i.test(settingName)) {
-        return this._renderColorPicker(settingName, value);
+        return this._renderColorPicker(settingName, value, propType);
       }
     }
     return null;
   }
 
   render() {
-    const {title, settings} = this.props;
+    const {title, settings, propTypes = {}} = this.props;
+
     return (
       <div className="layer-controls" >
         { title && <h4>{title}</h4>}
-        { Object.keys(settings).map(key => this._renderSetting(key, settings[key])) }
+        { Object.keys(settings).map(key =>
+          this._renderSetting(key, settings[key], propTypes[key])) }
       </div>
     );
   }

@@ -30,6 +30,7 @@ const defaultProps = {
   extruded: true,
   latOffset: 0.0089,
   lonOffset: 0.0113,
+  elevationScale: 1,
   getPosition: x => x.position,
   getElevation: x => x.elevation,
   getColor: x => x.color,
@@ -103,10 +104,11 @@ export default class GridLayer extends Layer {
   }
 
   updateUniforms() {
-    const {opacity, extruded, latOffset, lonOffset, lightSettings} = this.props;
+    const {opacity, extruded, elevationScale, latOffset, lonOffset, lightSettings} = this.props;
 
     this.setUniforms(Object.assign({}, {
       extruded,
+      elevationScale,
       opacity,
       latOffset,
       lonOffset

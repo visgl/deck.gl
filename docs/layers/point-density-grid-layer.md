@@ -6,7 +6,7 @@
 
 The PointDensityGridLayer renders a grid heatmap based on an array of points.
 It takes the constant size all each cell, projects points into cells. The color 
-and height of the cell is scaled by number of points it contains. Grid layer 
+and height of the cell is scaled by number of points it contains. PointDensityGridLayer 
 at the moment only works with COORDINATE_SYSTEM.LNG_LAT.
 
 
@@ -37,19 +37,27 @@ Color scale domain, default is set to the range of point counts in each cell.
 
 - Default: <img src="/demo/src/static/images/colorbrewer_YlOrRd_6.png"/></a>
 
-Cell color ranges as an array of colors formatted as `[255, 255, 255]`. Default is colorbrewer `6-class YlOrRd`.
+Color ranges as an array of colors formatted as `[255, 255, 255]`. Default is colorbrewer `6-class YlOrRd`.
 
 ##### `elevationDomain` (Array, optional)
 
 - Default: `[0, max(count)]`
 
-Elevation scale domain, default is set to the range of point counts in each cell.
+Elevation scale input domain, default is set to the extent of point counts in each cell.
 
 #### `elevationRange` (Array, optional)
 
-- Default: `[0, 10]`
+- Default: `[0, 1000]`
 
-Elevation scale range
+Elevation scale output range
+
+##### `elevationScale` (Number, optional)
+
+- Default: `1`
+
+Cell elevation multiplier. The elevation of cell is calculated by 
+`elevationScale * getElevation(d)`. `elevationScale` is a handy property to scale 
+all cells without updating the data.
 
 ##### `extruded` (Boolean, optional)
 
