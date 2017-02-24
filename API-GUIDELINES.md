@@ -63,7 +63,7 @@ similar).
   either have 64bits or not.
 * **Geospatial** 64 bits is most valuable for geospatial layers, other layers
   that are primarily designed for non-geo use cases probably do not need
-  >1.000.000x zoom.
+  in excess of 1.000.000x zoom.
 * **2D vs 2.5D (extrusion)/3D Support**
   Simple “3D”: A “2D” layer can offer “3D” support without additional
   consideration if the cost in terms of code complexity and performance
