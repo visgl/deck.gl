@@ -4,6 +4,10 @@
 The Point Cloud Layer takes in points with 3d positions, normals and colors
 and renders them as spheres with a certain radius.
 
+  <div align="center">
+    <img height="300" src="/demo/src/static/images/demo-thumb-point-cloud.jpg" />
+  </div>
+  
     import {PointCloudLayer} from 'deck.gl';
 
 Inherits from all [Base Layer](/docs/layers/base-layer.md) properties.
