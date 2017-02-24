@@ -1,5 +1,5 @@
 function getDocUrl(filename) {
-  return `docs/v4.0/${filename}`;
+  return `docs/${filename}`;
 }
 
 function generatePath(tree) {
