@@ -96,8 +96,6 @@ For API consistency reasons these have all been renamed with the suffix `..Scale
 
 ## Modified Layers
 
-* `ScatterplotLayer`
-
 
 ### Upgrading Layers from deck.gl v3 to v4
 
@@ -106,4 +104,5 @@ you may want to take advantage of.
 
 ## updateTriggers
 
-To enable applications 
+To enable applications to use accessor names in updateTriggers, you need to
+add an 'accessor' field when you register your attributes.
