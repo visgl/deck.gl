@@ -17,13 +17,14 @@ uniform float opacity;
 uniform float radius;
 uniform float angle;
 uniform float extruded;
-uniform float radiusScale;
+uniform float coverage;
+uniform float elevationScale;
 
 // Result
 varying vec4 vColor;
 
-// A magic number to scale elevation so that 1 unit approximate to 100 meter.
-#define ELEVATION_SCALE 80.
+// A magic number to scale elevation so that 1 unit approximate to 1 meter.
+#define ELEVATION_SCALE 0.8
 
 
 void main(void) {
@@ -42,10 +43,10 @@ void main(void) {
   float elevation = 0.0;
 
   if (extruded > 0.5) {
-    elevation = project_scale(instancePositions.z * (positions.y + 0.5) * ELEVATION_SCALE);
+    elevation = project_scale(instancePositions.z * (positions.y + 0.5) * ELEVATION_SCALE * elevationScale);
 }
 
-  float dotRadius = radius * clamp(radiusScale, 0.0, 1.0);
+  float dotRadius = radius * clamp(coverage, 0.0, 1.0);
   // // project center of hexagon
 
   vec4 centroidPosition = vec4(project_position(instancePositions.xy), elevation, 0.0);

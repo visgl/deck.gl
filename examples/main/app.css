@@ -71,6 +71,22 @@ h4 {
   margin: 5px 2px;
 }
 
+.color-palette-picker {
+	width: 120px;
+	display: block;
+	line-height: 24px;
+}
+
+.color-palette-picker .block {
+	display: inline-block;
+	vertical-align: middle;
+	height: 18px;
+}
+
+.color-palette-picker .picker-checkbox {
+	display: inline-block;
+}
+
 .checkbox {
 	text-align: center;
 	width: 20px;

@@ -20,9 +20,10 @@ uniform float extruded;
 uniform float lonOffset;
 uniform float latOffset;
 uniform float opacity;
+uniform float elevationScale;
 
-// A magic number to scale elevation so that 1 unit approximate to 100 meter
-#define ELEVATION_SCALE 80.
+// A magic number to scale elevation so that 1 unit approximate to 1 meter
+#define ELEVATION_SCALE 0.8
 
 // Result
 varying vec4 vColor;
@@ -37,7 +38,7 @@ void main(void) {
   float elevation = 0.0;
 
   if (extruded > 0.5) {
-    elevation = project_scale(instancePositions.w  * (positions.z + 1.0) * ELEVATION_SCALE);
+    elevation = project_scale(instancePositions.w  * (positions.z + 1.0) * ELEVATION_SCALE * elevationScale);
   }
 
   // extrude positions
