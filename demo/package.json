@@ -7,7 +7,7 @@
   },
   "main": "index.js",
   "scripts": {
-    "start": "webpack-dev-server --config webpack/dev --progress --content-base ./src/static --port 3000",
+    "start": "webpack-dev-server --config webpack/dev --progress --content-base ./src/static --port 3000 --open",
     "build": "rm -rf ./dist && mkdir dist && cp -r ./src/static/* dist && webpack -p --config webpack/prod",
     "lint": "eslint src --ignore-pattern workers"
   },
