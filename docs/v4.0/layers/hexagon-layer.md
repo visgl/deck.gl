@@ -56,7 +56,7 @@ primitive hexagon instead of `hexagonVertices`
 
 ##### `angle` (Number, optional)
 
-Primitive hexagon angle in radian. Angle is the rotation from one corner of the hexagon
+Primitive hexagon angle in radian. Angle is the rotation of one corner
 counter clockwise from north. If `radius` and `angle` are provided, 
 they will be used to calculate primitive hexagon instead of `hexagonVertices`
 
