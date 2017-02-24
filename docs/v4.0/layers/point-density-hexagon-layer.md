@@ -48,7 +48,7 @@ Color scale domain, default is set to the range of point counts in each hexagon.
 
 - Default: <img src="/demo/src/static/images/colorbrewer_YlOrRd_6.png"/></a>
 
-Hexagon color ranges as an array of colors formatted as `[255, 255, 255]`. Default is colorbrewer `6-class YlOrRd`.
+Hexagon color ranges as an array of colors formatted as `[255, 255, 255, 255]`. Default is colorbrewer `6-class YlOrRd`.
 
 ##### `coverage` (Number, optional)
 

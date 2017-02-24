@@ -62,11 +62,12 @@ export default class HexagonLayer extends Layer {
   constructor(props) {
     let missingProps = false;
     if (!props.hexagonVertices && (!props.radius || !Number.isFinite(props.angle))) {
-      log.once(0, 'HexagonLayer: Either hexagonVertices or radius and angel is needed.');
+      log.once(0, 'HexagonLayer: Either hexagonVertices or radius and angel are ' +
+        'needed to calculate primitive hexagon.');
       missingProps = true;
 
     } else if (props.hexagonVertices && (!Array.isArray(props.hexagonVertices) ||
-      props.hexagonVertices.length !== 6)) {
+      props.hexagonVertices.length < 6)) {
       log.once(0, 'HexagonLayer: HexagonVertices needs to be an array of 6 points');
 
       missingProps = true;
@@ -120,17 +121,11 @@ export default class HexagonLayer extends Layer {
   updateRadiusAngle() {
     let angle;
     let radius;
+    const {hexagonVertices} = this.props;
 
-    if (this.props.radius && Number.isFinite(this.props.angle)) {
-      const {viewport} = this.context;
-      const {pixelsPerMeter} = viewport.getDistanceScales();
+    if (Array.isArray(hexagonVertices) && hexagonVertices.length >= 6) {
 
-      angle = this.props.angle;
-      radius = this.props.radius * pixelsPerMeter[0];
-
-    } else {
-
-      // calculate angle and vertices from hexagonVertices
+      // calculate angle and vertices from hexagonVertices if provided
       const vertices = this.props.hexagonVertices;
 
       const vertex0 = vertices[0];
@@ -148,6 +143,16 @@ export default class HexagonLayer extends Layer {
       // Calculate angle that the perpendicular hexagon vertex axis is tilted
       angle = Math.acos(dx / dxy) * -Math.sign(dy) + Math.PI / 2;
       radius = dxy / 2;
+
+    } else if (this.props.radius && Number.isFinite(this.props.angle)) {
+
+      // if no hexagonVertices provided, try use radius & angle
+      const {viewport} = this.context;
+      const {pixelsPerMeter} = viewport.getDistanceScales();
+
+      angle = this.props.angle;
+      radius = this.props.radius * pixelsPerMeter[0];
+
     }
 
     this.setUniforms({

@@ -216,6 +216,9 @@ const GridLayerExample = {
 
 const PointDensityGridLayerExample = {
   layer: PointDensityGridLayer,
+  propTypes: {
+    cellSize: {type: 'range', min: 0, max: 1000}
+  },
   props: {
     id: 'pointDensityGridLayer',
     data: dataSamples.points,
@@ -237,20 +240,28 @@ const PointDensityGridLayerExample = {
 
 const HexagonLayerExample = {
   layer: HexagonLayer,
+  propTypes: {
+    coverage: {type: 'range', min: 0, max: 1}
+  },
   props: {
     id: 'hexagonLayer',
     data: dataSamples.hexagons,
     hexagonVertices: dataSamples.hexagons[0].vertices,
-    getColor: h => [48, 128, h.value * 255, 255],
-    getElevation: h => h.value * 5000,
+    coverage: 1,
     extruded: true,
     pickable: true,
-    opacity: 1
+    opacity: 1,
+    getColor: h => [48, 128, h.value * 255, 255],
+    getElevation: h => h.value * 5000
   }
 };
 
 const PointDensityHexagonLayerExample = {
   layer: PointDensityHexagonLayer,
+  propTypes: {
+    coverage: {type: 'range', min: 0, max: 1},
+    radius: {type: 'range', min: 0, max: 3000}
+  },
   props: {
     id: 'PointDensityHexagonLayer',
     data: dataSamples.points,
@@ -258,7 +269,8 @@ const PointDensityHexagonLayerExample = {
     pickable: true,
     radius: 1000,
     opacity: 1,
-    elevationScale: 0.8,
+    elevationScale: 1,
+    elevationRange: [0, 3000],
     coverage: 1,
     getPosition: d => d.COORDINATES,
     lightSettings: {
