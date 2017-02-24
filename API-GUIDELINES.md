@@ -91,7 +91,6 @@ Summary: Custom layer props usually refer to either attributes or uniforms.
 An accessor (like "getColor") always sets a WebGL attribute (whether a value
 or a function), and a normal prop (like "color") always sets a uniform
 (either to a value, or a value returned by calling the supplied function).
-That seems more orthogonal to me.
 
 ### Naming Rules for Accessors (i.e. attribute related props)
 
@@ -116,8 +115,9 @@ It typically sets a uniform of the same name with the given value
 
 ### Naming rules for "Modifier" props (Scale/Offset)
 
-Special care should uniform that modifies an attribute (e.g. as a multiplier,
-or additive element).
+Special care should be applied when naming a uniform that modifies an
+attribute (e.g. as a multiplier, or additive element), to ensure that
+the semantics of the property is easily understood by the user.
 
 * **Naming** For some well-known modifier concepts, like `opacity`
 (which modifies the forth component of the value returned byt the `getColor` accessor),
@@ -133,12 +133,14 @@ it is natural to stay with the well-accepted term.
   to achieve the same effect. E.g. an `elevationOffset` or `elevationScale`
   propscould be handled by the `modelMatrix` prop in many situations.
 
-* **Documenation** Extra care must be taken with documentation to make
-  sure that the layer user understands the interaction between modifying
-  props and accessors.
+* **Documentation** Extra care must be taken with documentation to make
+  sure that the layer user understands the interaction between the modifying
+  props and accessors (E.g. `getRadius` vs. `radiusScale`), as well as the
+  making clear what units the value being scaled is in (meters etc.)
 
 * **Default values** Unless there are strong reasons, multiplicative props
   (e.g. `radiusScale`) should always default to 1, and additive props to 0.
+  Other choices are likely to cause surprises for users.
 
 ### Naming rules for groups of uniform-related props
 
