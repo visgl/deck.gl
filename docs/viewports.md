@@ -2,18 +2,27 @@
 
 ## Overview
 
-Projection and camera utilities supporting the Web Mercator Projection.
-At its core this is a utility for converting to and from map
+deck.gl calculates projections using a a generic `Viewport` class
+(which is essentially a 3D matrix "camera" class of the type you would find
+in any 3D/WebGL/OpenGL library, holding `view` and `projection` matrices).
+
+The basic `Viewport` class is generic and can be used directly
+if you can calculate your own projection matrices, it is often preferable to
+use a `Viewport` subclass that takes higher level parameters, such as
+camera position and viewing direction, or map coordinates, rather than
+working directly with matrices.
+
+In addition to matrices which are mainly used as WebGL uniforms, the `Viewport`
+class also offers JavaScript functions to project and unproject as well as
+getting local distance scales.
+
+A special property of the `Viewport` class that sets it apart from the typical
+OpenGL Camera class is that it has the necessary plumbing to support non-linear
+Web Mercator projection.
+
+There is a special subclass, the `WebMercatorViewport`, that at its core
+is a utility for converting to and from map
 (latitude, longitude) coordinates to screen coordinates and back.
-
-* `WebMercatorViewport` - For 3D applications, a subclass
-  of a generic `Viewport` class (which is essentially a 3D matrix
-  "camera" class of the type you would find in any 3D/WebGL/OpenGL library).
-
-The constructor of this "advanced" perspective-enabled viewport also takes
-the same typical map view parameters as the `FlatViewport`, however it
-offers perspective enabled/project unproject functions, and generates
-general 4x4 view matrices that correspond to the parameters.
 
 
 ### Notes on Coordinates
