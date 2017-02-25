@@ -62,11 +62,6 @@ test('HexagonLayer#updateRadiusAngle', t => {
   });
 
   testInitializeLayer({layer});
-  /* eslint-disable no-console */
-  /* eslint-disable no-undef */
-
-  console.log(layer);
-  /* eslint-enable no-console */
 
   layer.updateRadiusAngle();
   t.equal(toLowPrecision(layer.state.model.uniforms.angle, 5), 1.8543,
