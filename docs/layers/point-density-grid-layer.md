@@ -37,7 +37,8 @@ Color scale domain, default is set to the range of point counts in each cell.
 
 - Default: <img src="/demo/src/static/images/colorbrewer_YlOrRd_6.png"/></a>
 
-Color ranges as an array of colors formatted as `[255, 255, 255]`. Default is colorbrewer `6-class YlOrRd`.
+Color ranges as an array of colors formatted as `[255, 255, 255]`. Default is 
+[colorbrewer] (http://colorbrewer2.org/#type=sequential&scheme=YlOrRd&n=6) `6-class YlOrRd`.
 
 ##### `elevationDomain` (Array, optional)
 

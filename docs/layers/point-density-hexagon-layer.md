@@ -52,7 +52,8 @@ when you want to render different data input with the same color mapping for com
 
 - Default: <img src="/demo/src/static/images/colorbrewer_YlOrRd_6.png"/></a>
 
-Hexagon color ranges as an array of colors formatted as `[[255, 255, 255, 255]]`. Default is colorbrewer `6-class YlOrRd`.
+Hexagon color ranges as an array of colors formatted as `[[255, 255, 255, 255]]`. Default is 
+[colorbrewer] (http://colorbrewer2.org/#type=sequential&scheme=YlOrRd&n=6) `6-class YlOrRd`.
 
 ##### `coverage` (Number, optional)
 
