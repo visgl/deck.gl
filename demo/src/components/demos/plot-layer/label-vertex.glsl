@@ -27,10 +27,11 @@ attribute vec2 instancePositions;
 attribute vec3 instanceNormals;
 
 uniform vec2 screenSize;
-uniform vec3 center;
-uniform vec3 dim;
+uniform vec3 modelCenter;
+uniform vec3 modelDim;
 uniform float offset;
 uniform vec3 labelWidths;
+uniform float fontSize;
 uniform float labelHeight;
 uniform vec2 labelTextureDim;
 
@@ -60,7 +61,7 @@ void main(void) {
       vec3(positions.z, positions.xy),
       vec3(positions.yz, positions.x),
       positions
-    ) * instanceNormals * dim / 2.0;
+    ) * instanceNormals * modelDim / 2.0;
 
   vec3 vertexNormal = mat3(
       vec3(normals.z, normals.xy),
@@ -82,12 +83,13 @@ void main(void) {
   vTexCoords.y = 1.0 - vTexCoords.y;
 
   // fit into a unit cube that centers at [0, 0, 0]
-  float scale = 1.0 / max(dim.x, max(dim.y, dim.z));
-  vec3 position_modelspace = ((vec3(instancePositions.x) - center) * instanceNormals + vertexPosition) * scale
+  float scale = 1.0 / max(modelDim.x, max(modelDim.y, modelDim.z));
+  vec3 position_modelspace = ((vec3(instancePositions.x) - modelCenter) * instanceNormals + vertexPosition) * scale
    + offset * vertexNormal
    + vertexPosition * LABEL_OFFSET;
   vec4 position_clipspace = project_to_clipspace(vec4(position_modelspace, 1.0));
-  vec2 label_vertex = textureFrame.zw * (vec2(texCoords.x - 0.5, 0.5 - texCoords.y)) * position_clipspace.w;
+  vec2 label_vertex = textureFrame.zw * (vec2(texCoords.x - 0.5, 0.5 - texCoords.y));
+  label_vertex *= fontSize / labelHeight * position_clipspace.w;
 
   gl_Position = position_clipspace + 
     vec4(label_vertex / screenSize, 0.0, 0.0);

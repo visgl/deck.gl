@@ -6,29 +6,35 @@ import {scaleLinear} from 'd3-scale';
 import {readFileSync} from 'fs';
 import {join} from 'path';
 
-/* Utils */
-function flatten(arrayOfArrays) {
-  return arrayOfArrays.reduce((acc, arr) => acc.concat(arr), []);
-}
-
-function getTicks([min, max], ticksCount) {
-  return scaleLinear().domain([min, max]).ticks(ticksCount);
-}
-
-function setTextStyle(ctx, fontSize) {
-  ctx.font = `${fontSize}px Helvetica,Arial,sans-serif`;
-  ctx.fillStyle = '#000';
-  ctx.textBaseline = 'top';
-  ctx.textAlign = 'center';
-}
-
 /* Constants */
+const FONT_SIZE = 48;
+
 const defaultProps = {
   fontSize: 24,
   ticksCount: 6,
   axesOffset: 0,
   axesColor: [0, 0, 0, 255]
 };
+
+/* Utils */
+function flatten(arrayOfArrays) {
+  const flatArray = arrayOfArrays.reduce((acc, arr) => acc.concat(arr), []);
+  if (Array.isArray(flatArray[0])) {
+    return flatten(flatArray);
+  }
+  return flatArray;
+}
+
+function getTicks([min, max], ticksCount) {
+  return scaleLinear().domain([min, max]).ticks(ticksCount);
+}
+
+function setTextStyle(ctx) {
+  ctx.font = `${FONT_SIZE}px Helvetica,Arial,sans-serif`;
+  ctx.fillStyle = '#000';
+  ctx.textBaseline = 'top';
+  ctx.textAlign = 'center';
+}
 
 /*
  * @classdesc
@@ -55,7 +61,11 @@ export default class AxesLayer extends Layer {
     });
 
     this.setState({
-      models: this._getModels(gl)
+      models: this._getModels(gl),
+      numInstances: 0,
+      labels: null,
+      center: [0, 0, 0],
+      dim: [1, 1, 1]
     });
   }
 
@@ -63,46 +73,54 @@ export default class AxesLayer extends Layer {
     const {attributeManager} = this.state;
 
     if (changeFlags.dataChanged || oldProps.ticksCount !== props.ticksCount) {
-      const ticks = calculateTicks();
+      const {data, ticksCount} = props;
+
+      const ticks = this.calculateTicks(data, ticksCount);
 
       this.setState({
         ticks,
-        labels: renderLabelTexture(ticks),
-        dims: this.props.data.map(d => d[1])
+        labelTexture: this.renderLabelTexture(ticks),
+        center: data.map(b => (b[0] + b[1]) / 2),
+        dim: data.map(b => b[1] - b[0])
       });
-
-      const instanceCount = ticks[0] + ticks[1] + ticks[2];
-      const {grids, labels} = this.state.models;
 
       attributeManager.invalidateAll();
-
-      Object.values(this.state.models).forEach(model => {
-        model.setInstanceCount(instanceCount);
-        model.setAttributes(attributeManager.attributes);
-      });
     }
+  }
+
+  updateAttributes(props) {
+    super.updateAttributes(props);
+    const {attributeManager, models, numInstances} = this.state;
+    const changedAttributes = attributeManager.getChangedAttributes({clearChangedFlags: true});
+
+    models.grids.setInstanceCount(numInstances);
+    models.grids.setAttributes(changedAttributes);
+
+    models.labels.setInstanceCount(numInstances);
+    models.labels.setAttributes(changedAttributes);
   }
 
   draw({uniforms}) {
     const {viewport: {width, height}} = this.context;
-    const {dim} = this.state;
+    const {center, dim, models, labelTexture} = this.state;
     const {fontSize, axesColor, axesOffset} = this.props;
 
-    const baseUniforms = {
-      ...uniforms,
-      fontSize,
-      dim,
-      screenSize: [width, height],
-      offset: axesOffset,
-      strokeColor: axesColor
-    };
+    if (labelTexture) {
+      const baseUniforms = {
+        ...uniforms,
+        fontSize,
+        modelCenter: center,
+        modelDim: dim,
+        offset: axesOffset,
+        strokeColor: axesColor
+      };
 
-    if (this.state.labels) {
-      this.models.grids.render(baseUniforms);
+      models.grids.render(baseUniforms);
 
-      this.models.labels.render({
+      models.labels.render({
         ...baseUniforms,
-        ...this.state.labels
+        screenSize: [width, height],
+        ...labelTexture
       });
     }
   }
@@ -166,7 +184,7 @@ export default class AxesLayer extends Layer {
 
     const labels = new Model({
       gl,
-      id: `${id}-labels`,
+      id: `${this.props.id}-labels`,
       vs: labelShaders.vs,
       fs: labelShaders.fs,
       geometry: new Geometry({
@@ -189,7 +207,10 @@ export default class AxesLayer extends Layer {
       axisTicks.map((t, i) => [t, i])
     );
 
-    attribute.value = new Float32Array(flatten(positions));
+    const value = new Float32Array(flatten(positions));
+    attribute.value = value;
+
+    this.setState({numInstances: value.length / attribute.size});
   }
 
   calculateInstanceNormals(attribute) {
@@ -205,25 +226,19 @@ export default class AxesLayer extends Layer {
   }
 
   // updates the instancePositions and instanceNormals attributes
-  calculateTicks() {
-    const {data, ticksCount} = this.props;
-    if (!data) {
-      return;
-    }
-
-    const xTicks = getTicks(data[0], ticksCount);
-    const yTicks = getTicks(data[1], ticksCount);
-    const zTicks = getTicks(data[2], ticksCount);
+  calculateTicks(bounds, ticksCount) {
+    const xTicks = getTicks(bounds[0], ticksCount);
+    const yTicks = getTicks(bounds[1], ticksCount);
+    const zTicks = getTicks(bounds[2], ticksCount);
 
     return [xTicks, yTicks, zTicks];
   }
 
   renderLabelTexture(ticks) {
 
-    if (this.labels) {
-      this.labels.labelTexture.delete();
+    if (this.state.labels) {
+      this.state.labels.labelTexture.delete();
     }
-    const fontSize = 48;
 
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
@@ -239,7 +254,12 @@ export default class AxesLayer extends Layer {
 
     const canvasWidth = maxWidth.reduce((x, w) => x + Math.ceil(w) * 2, 0);
     const canvasHeight = ticks.reduce((h, axisLabels) =>
-      Math.max(h, axisLabels.length * fontSize), 0);
+      Math.max(h, axisLabels.length * FONT_SIZE), 0);
+
+    if (canvasWidth === 0 || canvasHeight === 0) {
+      // empty canvas willl cause error in Texture2D
+      return null;
+    }
 
     canvas.width = canvasWidth;
     canvas.height = canvasHeight;
@@ -251,20 +271,23 @@ export default class AxesLayer extends Layer {
     ticks.forEach((axisLabels, axis) => {
       x += maxWidth[axis] / 2;
       axisLabels.forEach((label, i) => {
-        ctx.fillText(label, x, i * fontSize);
+        ctx.fillText(label, x, i * FONT_SIZE);
       });
       x += maxWidth[axis] / 2;
     });
 
-    this.labels = {
-      labelHeight: fontSize,
+    return {
+      labelHeight: FONT_SIZE,
       labelWidths: maxWidth,
       labelTextureDim: [canvasWidth, canvasHeight],
-      labelTexture: new Texture2D(this.props.gl, {pixels: canvas})
+      labelTexture: new Texture2D(this.context.gl, {
+        pixels: canvas,
+        magFilter: GL.LINEAR
+      })
     };
   }
 
 }
 
-PlotLayer.layerName = 'AxesLayer';
-PlotLayer.defaultProps = defaultProps;
+AxesLayer.layerName = 'AxesLayer';
+AxesLayer.defaultProps = defaultProps;

@@ -7,6 +7,7 @@ import {join} from 'path';
 const DEFAULT_COLOR = [0, 0, 0, 255];
 
 const defaultProps = {
+  data: [],
   getZ: () => 0,
   getColor: () => DEFAULT_COLOR,
   xMin: -1,
@@ -15,7 +16,8 @@ const defaultProps = {
   yMax: 1,
   xResolution: 100,
   yResolution: 100,
-  lightStrength: 1
+  lightStrength: 1,
+  onUpdate: () => {}
 };
 
 /*
@@ -35,7 +37,7 @@ const defaultProps = {
  * @param {Integer} [props.yResolution] - number of samples within y range
  * @param {Number} [props.lightStrength] - front light strength
  */
-export default class PlotLayer extends Layer {
+export default class SurfaceLayer extends Layer {
 
   initializeState() {
     const {gl} = this.context;
@@ -53,9 +55,9 @@ export default class PlotLayer extends Layer {
 
     gl.getExtension('OES_element_index_uint');
     this.setState({
-      model: this.getModels(gl),
+      model: this.getModel(gl),
       center: [0, 0, 0],
-      dim: [1, 1, 1]
+      scale: 1
     });
   }
 
@@ -78,16 +80,16 @@ export default class PlotLayer extends Layer {
     }
   }
 
-  getModels(gl) {
+  getModel(gl) {
     // 3d surface
     const graphShaders = assembleShaders(gl, {
-      vs: readFileSync(join(__dirname, './graph-vertex.glsl'), 'utf8'),
+      vs: readFileSync(join(__dirname, './surface-vertex.glsl'), 'utf8'),
       fs: readFileSync(join(__dirname, './fragment.glsl'), 'utf8')
     });
 
     return new Model({
       gl,
-      id: `${this.props.id}-graph`,
+      id: `${this.props.id}-surface`,
       vs: graphShaders.vs,
       fs: graphShaders.fs,
       geometry: new Geometry({
@@ -100,14 +102,13 @@ export default class PlotLayer extends Layer {
   }
 
   draw({uniforms}) {
-    const {viewport: {width, height}} = this.context;
-    const {center, dim} = this.state;
+    const {center, scale} = this.state;
     const {lightStrength} = this.props;
 
     this.state.model.render({
       ...uniforms,
-      center,
-      dim,
+      modelCenter: center,
+      modelScale: scale,
       lightStrength
     });
   }
@@ -156,10 +157,13 @@ export default class PlotLayer extends Layer {
   }
 
   _setBounds(bounds) {
+    const extent = bounds.reduce((size, b) => Math.max(size, b[1] - b[0]), 0);
+
     this.setState({
       center: bounds.map(b => (b[0] + b[1]) / 2),
-      dim: bounds.map(b => b[1] - b[0])
+      scale: 1 / (extent || 1)
     });
+    this.props.onUpdate(bounds);
   }
 
   calculateIndices(attribute) {
@@ -277,5 +281,5 @@ export default class PlotLayer extends Layer {
 
 }
 
-PlotLayer.layerName = 'PlotLayer';
-PlotLayer.defaultProps = defaultProps;
+SurfaceLayer.layerName = 'SurfaceLayer';
+SurfaceLayer.defaultProps = defaultProps;

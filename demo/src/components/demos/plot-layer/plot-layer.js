@@ -1,12 +1,8 @@
-import {Layer, assembleShaders} from 'deck.gl';
-import {GL, Model, Geometry} from 'luma.gl';
-
+import {Layer} from 'deck.gl';
 import AxesLayer from './axes-layer';
-import PlotLayer from './plot-layer';
+import SurfaceLayer from './surface-layer';
 
-import {readFileSync} from 'fs';
-import {join} from 'path';
-
+const DEFAULT_COLOR = [0, 0, 0, 255];
 const defaultProps = {
   getZ: () => 0,
   getColor: () => DEFAULT_COLOR,
@@ -48,15 +44,15 @@ const defaultProps = {
  * @param {Number} [props.fontSize] - size of the labels
  * @param {Array} [props.axesColor] - color of the gridlines, in [r,g,b,a]
  */
-export default class GraphLayer extends Layer {
+export default class PlotLayer extends Layer {
 
   initializeState() {
-    const {gl} = this.context;
-
     this.state = {
-      samples: null,
       bounds: [[0, 0], [0, 0], [0, 0]]
     };
+  }
+
+  updateState() {
   }
 
   _updateBounds(bounds) {
@@ -65,7 +61,7 @@ export default class GraphLayer extends Layer {
 
   renderLayers() {
     return [
-      new PlotLayer({
+      new SurfaceLayer({
         getZ: this.props.getZ,
         getColor: this.props.getColor,
         xMin: this.props.xMin,
@@ -79,7 +75,7 @@ export default class GraphLayer extends Layer {
         visible: this.props.visible,
         onHover: this.props.onHover,
         onClick: this.props.onClick,
-        onUpdate: this._updateBounds,
+        onUpdate: this._updateBounds.bind(this),
         updateTriggers: this.props.updateTriggers
       }),
       new AxesLayer({
@@ -96,5 +92,5 @@ export default class GraphLayer extends Layer {
 
 }
 
-GraphLayer.layerName = 'GraphLayer';
-GraphLayer.defaultProps = defaultProps;
+PlotLayer.layerName = 'PlotLayer';
+PlotLayer.defaultProps = defaultProps;

@@ -3,7 +3,7 @@ import autobind from 'autobind-decorator';
 import {Parser} from 'expr-eval';
 
 import Canvas3D from '../canvas3d';
-import GraphLayer from './graph-layer/graph-layer';
+import PlotLayer from './plot-layer/plot-layer';
 import DeckGL from 'deck.gl';
 
 export default class GraphDemo extends Component {
@@ -78,6 +78,9 @@ export default class GraphDemo extends Component {
   }
 
   @autobind _onHover(info) {
+    if (info.layer.id === 'PlotLayer') {
+      return;
+    }
     const hoverInfo = info.sample ? info : null;
     if (hoverInfo !== this.state.hoverInfo) {
       this.setState({hoverInfo});
@@ -102,7 +105,7 @@ export default class GraphDemo extends Component {
     } = this.props;
     const {viewport, equation, hoverInfo} = this.state;
 
-    const layers = equation.valid ? [new GraphLayer({
+    const layers = equation.valid ? [new PlotLayer({
       getZ: equation.func,
       getColor: (x, y, z) => [40, z * 128 + 128, 160],
       xMin: -Math.PI,

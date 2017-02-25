@@ -25,8 +25,8 @@ attribute vec3 normals;
 attribute vec2 instancePositions;
 attribute vec3 instanceNormals;
 
-uniform vec3 center;
-uniform vec3 dim;
+uniform vec3 modelCenter;
+uniform vec3 modelDim;
 uniform float offset;
 uniform vec4 strokeColor;
 
@@ -46,7 +46,7 @@ void main(void) {
       vec3(positions.z, positions.xy),
       vec3(positions.yz, positions.x),
       positions
-    ) * instanceNormals * dim / 2.0;
+    ) * instanceNormals * modelDim / 2.0;
 
   vec3 vertexNormal = mat3(
       vec3(normals.z, normals.xy),
@@ -58,9 +58,9 @@ void main(void) {
   shouldDiscard = frontFacing(vertexNormal);
 
   // fit into a unit cube that centers at [0, 0, 0]
-  float scale = 1.0 / max(dim.x, max(dim.y, dim.z));
+  float scale = 1.0 / max(modelDim.x, max(modelDim.y, modelDim.z));
   vec4 position_modelspace = vec4(
-    ((vec3(instancePositions.x) - center) * instanceNormals + vertexPosition) * scale + offset * vertexNormal,
+    ((vec3(instancePositions.x) - modelCenter) * instanceNormals + vertexPosition) * scale + offset * vertexNormal,
     1.0
   );
   gl_Position = project_to_clipspace(position_modelspace);
