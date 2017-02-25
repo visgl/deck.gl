@@ -1,93 +1,83 @@
-# deck.gl API and Layer Design Guidelines
+# deck.gl Design Guidelines
 
-An evolving set of API design guidelines intended to ensure that we offer
-a consistent, easy-to-learn API to our end users even as we add new layers and
-features.
+An evolving set of design guidelines intended to ensure that deck.gl is
+a consistent framework that is easy-to-learn as new layers and features keep
+ being added.
 
 ## Design Principles
-First we define some abstract principles to define our general API design
-philosophy. The intention is that these can help us all get on the same page
-in terms of API vision, and help guide us in specific API design decisions
-when detailed recommendations covering a specific case are not available.
+The design principles listed here reflects deck.gl's general API design
+philosophy.
 
 * **Simplicity** - deck.gl was designed to be a very simple way to create
   and package WebGL visualizations APIs - Avoid creating APIs that do many
   things. Make APIs focused and composable.
 * **Layers** - When designing layers, think about ease of subclassing.
-  If you have lots of options and primitives in your layer, it will not
-  be easy for others to use.
-* **Avoid “Magic”** - deck.gl aims for a transparent API that makes it
-  clear to the user what happens at every stage.
-  Makes it easy to get introduced to WebGL and shader programming through
-  deck.gl. This aligns with luma.gl, which exposes one class for every WebGL
+  If a layer has lots of options and primitives, it's not easy to further
+  extend it.
+* **Avoid “Magic”** - deck.gl aims to have a set of transparent APIs that
+  makes the effects bring by them clear to the users.
+  Users can choose to learn WebGL and shader programming through deck.gl.
+  This aligns with luma.gl, which exposes one class for every WebGL
   type.
-* **Reactive first** - deck.gl is designed to work in a
+* **Reactive first** - deck.gl is primarily designed to work in a
   [“Reactive architecture”](https://en.wikipedia.org/wiki/Reactive_programming)
-  application. It is great if it works well in other paradigms as well
-  but this is a secondary goal.
+  application. It can be used in other programming paradigms but its support
+  come secondary.
 
 ## Design Guidelines
 
-This is a list of specific design rules that have been agreed upon.
-Exceptions to all rules can always be made if there is a good justification
-(which should be documented somewhere if possible, in code comments, docs or
-similar).
+This is a list of design rules that general applies to everything in the framework.
+However, exceptions are sometimes necessary when there is an actual need and justification
+for it. Whenever this is happening, it needs to be documented somewhere, in code comments,
+docs, or other places that are easy to track.
 
 ## Rules for Defining and Naming Layers
 
 ### Basic Principles
 
-* **“Small” Set of Core Layers** - We want a small selection of versatile core layers,
-  that are simple to understand and learn and easy to extend through subclassing.
-* **Groups of Related Layers** - Ideally we'd like to have small “groups” of similar
-  layers organized together. The layers within a group should be designed to
-  address one type of problem (e.g. general geospatial visualizations,
-  geo visualizations using S2 library, 3D chart layers,
-  Mathematical layers, etc) and within each group w should at least have a
-  consistent design in terms of features, naming of properties etc.
-* **Reasonably Flexible Layers** - We want layers to be flexible and handle a
-  reasonable variety of use cases (to avoid having to maintain many very
-  similar layers)
-* **Avoid Overly Large/Complicated Layers** - Flexibility, but not at the
-  expense of making our layers large and complicated so that they become
-  hard to subclass and extend - that is a signal that the layer should be
-  divided.
+* **“Small” Set of Core Layers** - A small selection of versatile core layers
+  that are simple to understand and easy to extend through subclassing are provided
+  with deck.gl.
+* **Groups of Related Layers** - The intention is to have groups of layers that
+  each of the groups addresses one type of problem (e.g. general geospatial visualizations,
+  geo visualizations using S2 library, 3D chart layers, Mathematical layers, etc).
+  Consistency should be maintained throughout the same group in terms of features,
+  naming of properties etc.
+* **Reasonably Flexible Layers** - Layers comes with deck.gl needs to be flexible
+  and handle a reasonable variety of use cases.
+* **Avoid Overly Large/Complicated Layers** - Flexibility, but not at the expense of
+  making layers large and complicated so that they become hard to subclass and extend
+   - that is a signal that the layer should be divided.
 * **Orthogonality/Future Proofing** - Features should be added only after some
   thought has been given to the impact of supporting a similar feature on
   other similar layers and also to impact on future versions.
 * **64-bit Layers**
-  32 vs 64 bits: Until we can unify 32 and 64 bit layers (or fix the perf impact of 64 bits), we should offer both 32 and 64 bit versions (or only a 32 bit version, but never just a 64 bit version).
-  Naming: 64 bit layers will simply have the number `64` added at the end. ScatterplotLayer vs. ScatterplotLayer64.
-* **Consistency** We want to be consistent when offering 64 bit versions of our
-  layers, so at least within a given “group” of layers all layers should
-  either have 64bits or not.
-* **Geospatial** 64 bits is most valuable for geospatial layers, other layers
-  that are primarily designed for non-geo use cases probably do not need
-  in excess of 1.000.000x zoom.
+  64-bit support of the layers, if offered, will be through a fp64 prop settable by
+  deck.gl's users. 64-bit support is usually provided if the layers are
+  expected to be used to visualize data with extremely high dynamic range, such as
+  many cases in geospatial data visualization.
 * **2D vs 2.5D (extrusion)/3D Support**
   Simple “3D”: A “2D” layer can offer “3D” support without additional
   consideration if the cost in terms of code complexity and performance
   is small. E.g. the line layer can add a z coordinate to its positions
   with very little complexity and performance impact.
-* **Consistency within Layer Groups** - The layers withing a group should have a
-  similar ambition in terms of 3D, e.g. the core geospatial layers in general
-  try to provide 2.5D (extrusion) and low cost Z-coordinate support.
-* **Lighting and effects: TBD**
-* **Splitting Layers** - If the code is significantly different between 2D and 3D
-  it can be better to split into two layers - perhaps even into two layer
-  groups. Some effort should be done to clean up code and check if sharing
-  of some parts is possible.
+* **Lighting and effects**
+  Layers with extrusion support (2.5D) or 3D should repsond correctly to lights through
+  the lighting packages provided by deck.gl. This includes providing necessary APIs for
+  setting light parameters.
+* **Splitting Layers** - If the code is significantly different different variant of the
+  same layer (such as 2D and 3D), splitting into two might be necessary - perhaps even
+  into two layer groups. Some effort should be done to clean up code and check if code
+  reuse is possible.
 * **Functional Variants of Layers**
-  Examples are Brushed, Animated, Enhanced etc layers.
-  Unless of a compelling reason, we will probably want to provide these as
-  examples rather than supported layers. When we have dynamic shaders we
-  may be able to auto inject such features into existing layers using a
-  handful of props.
-
+  Functional variants of layers such are Brushed, Animated, Enhanced etc, will be provided
+  as examples rather than supported layers with the intention to help users implement similar
+  functionality for themselves.
 
 ## Rules for Naming Props, Attributes, Uniforms and updateTriggers
 
-Summary: Custom layer props usually refer to either attributes or uniforms.
+Summary: Custom layer props usually corresponds to either attributes or uniforms
+of the underlying shaders.
 An accessor (like "getColor") always sets a WebGL attribute (whether a value
 or a function), and a normal prop (like "color") always sets a uniform
 (either to a value, or a value returned by calling the supplied function).
@@ -107,11 +97,9 @@ The `updateTrigger` for that accessor is named after the accessor:
 
 ### Naming rules for props that control uniforms
 
-A property that controls shader uniforms should typically be named the same
-as the uniform, to simplify code readability.
+A property that controls shader uniforms should typically be named the same as the uniform
+it intends to set.
 A uniform related property typically takes only one value (either a number or a short array)
-It typically sets a uniform of the same name with the given value
-(either directly or after some simple transformation, e.g. applying gamma to opacity).
 
 ### Naming rules for "Modifier" props (Scale/Offset)
 
@@ -130,30 +118,30 @@ it is natural to stay with the well-accepted term.
 
 * **Justification** Carefully consider if the layer really needs a modifier.
   Is the use case common enough that it makes sense, or is there another way
-  to achieve the same effect. E.g. an `elevationOffset` or `elevationScale`
-  propscould be handled by the `modelMatrix` prop in many situations.
+  to achieve the same effect.
 
 * **Documentation** Extra care must be taken with documentation to make
   sure that the layer user understands the interaction between the modifying
   props and accessors (E.g. `getRadius` vs. `radiusScale`), as well as the
   making clear what units the value being scaled is in (meters etc.)
 
-* **Default values** Unless there are strong reasons, multiplicative props
-  (e.g. `radiusScale`) should always default to 1, and additive props to 0.
-  Other choices are likely to cause surprises for users.
+* **Default values** Unless with exceptional and well-documented reasons,
+multiplicative props (e.g. `radiusScale`) should always default to 1,
+and additive props to 0.
 
 ### Naming rules for groups of uniform-related props
 
-* If a set of uniforms belong to certain module, it may make sense to given them
-  a common prefix or suffix (`lightDirection`, `lightColorAmbient`, `lightColorDirectional`, …)
+* If a set of uniforms belong to certain module, it's a common practice to have them
+  come with a common prefix or suffix (e. g. `lightDirection`, `lightColorAmbient`,
+  `lightColorDirectional`, …)
 * If a set of uniforms belong to the same module/effect, it could make sense to
-  package them into a single `settings` object. `lightSettings`.
+  package them into a single `settings` object. (e. g. `lightSettings`)
 
 ### Alignment of property naming between layers
 
-It is important that properties are consistent between layers,
-especially between layers in a layer group, as this can dramatically affect
-the user's ability to learn and easily work with deck.gl.
+It is important that properties are consistent between layers, especially between
+layers in a layer group, as this can dramatically affect the user's ability to learn
+and work with deck.gl.
 
 ### Naming of updateTriggers
 
@@ -172,17 +160,3 @@ new Layer({
   }
 });
 ```
-
-## Design Decisions
-
-This is a list of specific issues that have been raised and discussed, and current position/decision
-
-### Overloading props and APIs on types?
-
-Decision: LIMITED. We should be conservative with overloading,
-but it is acceptable if the value is significant (in terms of
-simplification of the API etc), as long as the resulting API remains
-intuitive and documentation and tests are provided.
-
-E.g. make a prop take both a function and a string, and do different
-but similar things dependending on which type was supplied
