@@ -54,13 +54,6 @@ export const examplePages = generatePath([
       demo: 'HeroDemo',
       code: 'code-markdown/trips.md'
     }
-  },
-  {
-    name: 'Point Density Hexagons',
-    content: {
-      demo: 'HexagonDemo',
-      code: 'code-markdown/trips.md'
-    }
   }
 ]);
 
