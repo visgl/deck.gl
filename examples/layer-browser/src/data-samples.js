@@ -3,12 +3,19 @@ import allPoints from '../data/sf.bike.parking.json';
 import {pointGrid} from './utils';
 import {pointsToWorldGrid} from './utils/grid-aggregator';
 
-export {default as choropleths} from '../data/sf.zip.geo.json';
-export {default as geojson} from '../data/sample.geo.json';
-export {default as hexagons} from '../data/hexagons.json';
-export {default as routes} from '../data/sfmta.routes.json';
-export {default as trips} from '../data/trips.json';
-export {default as iconAtlas} from '../data/icon-atlas.json';
+import {default as choropleths} from '../data/sf.zip.geo.json';
+import {default as geojson} from '../data/sample.geo.json';
+import {default as hexagons} from '../data/hexagons.json';
+import {default as routes} from '../data/sfmta.routes.json';
+import {default as trips} from '../data/trips.json';
+import {default as iconAtlas} from '../data/icon-atlas.json';
+
+export {choropleths};
+export {geojson};
+export {hexagons};
+export {routes};
+export {trips};
+export {iconAtlas};
 
 export const points = allPoints;
 export const positionOrigin = [-122.45, 37.75, 0];
@@ -16,13 +23,17 @@ export const positionOrigin = [-122.45, 37.75, 0];
 export const worldGrid = pointsToWorldGrid(points, 0.5);
 
 export const zigzag = [
-  {path: (new Array(12)).fill(0).map(
-    (d, i) => [
+  {
+    path: new Array(12).fill(0).map((d, i) => [
       positionOrigin[0] + i * i * 0.001,
       positionOrigin[1] + Math.cos(i * Math.PI) * 0.2 / (i + 4)
     ])
   }
 ];
+
+// Extract simple/complex polygons arrays from geojson
+export const polygons = choropleths.features
+  .map(choropleth => choropleth.geometry.coordinates);
 
 // time consuming - only generate on demand
 

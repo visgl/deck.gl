@@ -20,7 +20,8 @@
 /* global window */
 import {GL} from 'luma.gl';
 import AttributeManager from './attribute-manager';
-import {compareProps, log, count} from './utils';
+import {compareProps, log} from './utils';
+import {count} from './utils/container';
 import assert from 'assert';
 import {COORDINATE_SYSTEM} from '.';
 
@@ -30,7 +31,6 @@ import {COORDINATE_SYSTEM} from '.';
  * @param {bool} props.opacity - opacity of the layer
  */
 const defaultProps = {
-  dataIterator: null,
   dataComparator: null,
   numInstances: undefined,
   visible: true,

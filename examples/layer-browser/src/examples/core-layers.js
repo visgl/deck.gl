@@ -15,14 +15,12 @@ import {
   PathLayer
 } from 'deck.gl';
 
-import * as dataSamples from '../data-samples';
-import {parseColor, setOpacity} from '../utils/color';
-
+// Demonstrate immutable support
 import {experimental} from 'deck.gl';
 const {get} = experimental;
 
-const polygons = dataSamples.choropleths.features
-  .map(choropleth => choropleth.geometry.coordinates);
+import dataSamples from '../immutable-data-samples';
+import {parseColor, setOpacity} from '../utils/color';
 
 const MARKER_SIZE_MAP = {
   small: 2,
@@ -61,8 +59,8 @@ const IconLayerExample = {
     sizeScale: 24,
     getPosition: d => d.COORDINATES,
     getColor: d => [64, 64, 72],
-    getIcon: d => d.PLACEMENT === 'SW' ? 'marker' : 'marker-warning',
-    getSize: d => d.RACKS > 2 ? 2 : 1,
+    getIcon: d => get(d, 'PLACEMENT') === 'SW' ? 'marker' : 'marker-warning',
+    getSize: d => get(d, 'RACKS') > 2 ? 2 : 1,
     opacity: 0.8,
     pickable: true
   }
@@ -98,8 +96,8 @@ const GeoJsonLayerExtrudedExample = {
   props: {
     id: 'geojsonLayer-extruded',
     data: dataSamples.choropleths,
-    getHeight: f => ((f.properties.ZIP_CODE * 10) % 127) * 10,
-    getFillColor: f => [0, 255, ((f.properties.ZIP_CODE * 23) % 100) + 155],
+    getHeight: f => get(f, 'properties.ZIP_CODE') * 10 % 127 * 10,
+    getFillColor: f => [0, 255, get(f, 'properties.ZIP_CODE') * 23 % 100 + 155],
     getStrokeColor: f => [200, 0, 80],
     drawPolygons: true,
     extruded: true,
@@ -111,8 +109,8 @@ const GeoJsonLayerExtrudedExample = {
 const PolygonLayerExample = {
   layer: PolygonLayer,
   props: {
-    data: polygons,
-    getColor: f => [((f.properties.ZIP_CODE * 10) % 127) + 128, 0, 0],
+    data: dataSamples.polygons,
+    getColor: f => [get(f, 'properties.ZIP_CODE') * 10 % 127 + 128, 0, 0],
     opacity: 0.8,
     pickable: true
   }
@@ -124,7 +122,7 @@ const PathLayerExample = {
     id: 'pathLayer',
     data: dataSamples.zigzag,
     opacity: 0.6,
-    getPath: f => f.path,
+    getPath: f => get(f, 'path'),
     getColor: f => [128, 0, 0],
     getStrokeWidth: f => 10,
     pickable: true
@@ -136,7 +134,7 @@ const ScreenGridLayerExample = {
   props: {
     id: 'screenGridLayer',
     data: dataSamples.points,
-    getPosition: d => d.COORDINATES,
+    getPosition: d => get(d, 'COORDINATES'),
     unitWidth: 40,
     unitHeight: 40,
     minColor: [0, 0, 80, 0],
@@ -150,9 +148,9 @@ const LineLayerExample = {
   props: {
     id: 'lineLayer',
     data: dataSamples.routes,
-    getSourcePosition: d => d.START,
-    getTargetPosition: d => d.END,
-    getColor: d => d.SERVICE === 'WEEKDAY' ? [255, 64, 0] : [255, 200, 0],
+    getSourcePosition: d => get(d, 'START'),
+    getTargetPosition: d => get(d, 'END'),
+    getColor: d => get(d, 'SERVICE') === 'WEEKDAY' ? [255, 64, 0] : [255, 200, 0],
     pickable: true
   }
 };
@@ -162,9 +160,9 @@ const ScatterplotLayerExample = {
   props: {
     id: 'scatterplotLayer',
     data: dataSamples.points,
-    getPosition: d => d.COORDINATES,
+    getPosition: d => get(d, 'COORDINATES'),
     getColor: d => [255, 128, 0],
-    getRadius: d => d.SPACES,
+    getRadius: d => get(d, 'SPACES'),
     opacity: 0.5,
     pickable: true,
     radiusMinPixels: 1,
@@ -180,9 +178,9 @@ const PointCloudLayerExample = {
     outline: true,
     projectionMode: 2,
     positionOrigin: dataSamples.positionOrigin,
-    getPosition: d => d.position,
-    getNormal: d => d.normal,
-    getColor: d => d.color,
+    getPosition: d => get(d, 'position'),
+    getNormal: d => get(d, 'normal'),
+    getColor: d => get(d, 'color'),
     opacity: 1,
     radius: 4,
     pickable: true
@@ -199,8 +197,8 @@ const GridLayerExample = {
     extruded: true,
     pickable: true,
     opacity: 1,
-    getColor: g => [245, 166, g.value * 255, 255],
-    getElevation: h => h.value * 5000,
+    getColor: g => [245, 166, get(g, 'value') * 255, 255],
+    getElevation: h => get(h, 'value') * 5000,
     lightSettings: LIGHT_SETTINGS
   }
 };
@@ -208,7 +206,7 @@ const GridLayerExample = {
 const PointDensityGridLayerExample = {
   layer: PointDensityGridLayer,
   propTypes: {
-    cellSize: {type: 'range', min: 0, max: 1000}
+    cellSize: {type: 'number', min: 0, max: 1000}
   },
   props: {
     id: 'pointDensityGridLayer',
@@ -217,7 +215,7 @@ const PointDensityGridLayerExample = {
     opacity: 1,
     extruded: true,
     pickable: true,
-    getPosition: d => d.COORDINATES,
+    getPosition: d => get(d, 'COORDINATES'),
     lightSettings: LIGHT_SETTINGS
   }
 };
@@ -225,7 +223,7 @@ const PointDensityGridLayerExample = {
 const HexagonLayerExample = {
   layer: HexagonLayer,
   propTypes: {
-    coverage: {type: 'range', min: 0, max: 1}
+    coverage: {type: 'number', min: 0, max: 1}
   },
   props: {
     id: 'hexagonLayer',
@@ -235,8 +233,8 @@ const HexagonLayerExample = {
     extruded: true,
     pickable: true,
     opacity: 1,
-    getColor: h => [48, 128, h.value * 255, 255],
-    getElevation: h => h.value * 5000,
+    getColor: h => [48, 128, get(h, 'value') * 255, 255],
+    getElevation: h => get(h, 'value') * 5000,
     lightSettings: LIGHT_SETTINGS
   }
 };
@@ -244,8 +242,8 @@ const HexagonLayerExample = {
 const PointDensityHexagonLayerExample = {
   layer: PointDensityHexagonLayer,
   propTypes: {
-    coverage: {type: 'range', min: 0, max: 1},
-    radius: {type: 'range', min: 0, max: 3000}
+    coverage: {type: 'number', min: 0, max: 1},
+    radius: {type: 'number', min: 0, max: 3000}
   },
   props: {
     id: 'PointDensityHexagonLayer',
@@ -257,7 +255,7 @@ const PointDensityHexagonLayerExample = {
     elevationScale: 1,
     elevationRange: [0, 3000],
     coverage: 1,
-    getPosition: d => d.COORDINATES,
+    getPosition: d => get(d, 'COORDINATES'),
     lightSettings: LIGHT_SETTINGS
   }
 };

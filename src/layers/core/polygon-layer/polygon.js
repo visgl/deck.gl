@@ -1,4 +1,4 @@
-import {Container} from '../../../lib/utils';
+import {Container, count} from '../../../lib/utils';
 
 // Basic polygon support
 //
@@ -13,7 +13,9 @@ import {Container} from '../../../lib/utils';
  * @return {Boolean} - true if the polygon is a simple polygon (i.e. not an array of polygons)
  */
 export function isSimple(polygon) {
-  return polygon.length >= 1 && polygon[0].length >= 2 && Number.isFinite(polygon[0][0]);
+  return count(polygon) >= 1 &&
+    count(polygon[0]) >= 2 &&
+    Number.isFinite(polygon[0][0]);
 }
 
 /**
@@ -34,8 +36,8 @@ export function normalize(polygon, {dimensions = 3} = {}) {
  */
 export function getVertexCount(polygon) {
   return isSimple(polygon) ?
-    Container.count(polygon) :
-    polygon.reduce((count, simplePolygon) => count + Container.count(simplePolygon), 0);
+    count(polygon) :
+    polygon.reduce((length, simplePolygon) => length + count(simplePolygon), 0);
 }
 
 // Return number of triangles needed to tesselate the polygon
@@ -43,7 +45,7 @@ export function getTriangleCount(polygon) {
   let triangleCount = 0;
   let first = true;
   for (const simplePolygon of normalize(polygon)) {
-    const size = Container.count(simplePolygon);
+    const size = count(simplePolygon);
     if (first) {
       triangleCount += size > 3 ? size - 3 : 0;
     } else {

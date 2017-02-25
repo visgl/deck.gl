@@ -5,7 +5,7 @@
 // - 3D wireframes (not yet)
 import * as Polygon from './polygon';
 import earcut from 'earcut';
-import {Container, get, flattenVertices, fillArray} from '../../../lib/utils';
+import {Container, get, count, flattenVertices, fillArray} from '../../../lib/utils';
 import {fp64ify} from '../../../lib/utils/fp64';
 
 // Maybe deck.gl or luma.gl needs to export this
@@ -63,12 +63,12 @@ export class PolygonTesselator {
 
 // Count number of points in a list of complex polygons
 function getPointCount(polygons) {
-  return polygons.reduce((sum, polygon) => sum + Polygon.getVertexCount(polygon), 0);
+  return polygons.reduce((points, polygon) => points + Polygon.getVertexCount(polygon), 0);
 }
 
 // COunt number of triangles in a list of complex polygons
 function getTriangleCount(polygons) {
-  return polygons.reduce((count, polygon) => count + Polygon.getTriangleCount(polygon), 0);
+  return polygons.reduce((triangles, polygon) => triangles + Polygon.getTriangleCount(polygon), 0);
 }
 
 // Returns the offsets of each complex polygon in the combined array of all polygons
@@ -142,7 +142,7 @@ function calculateSurfaceIndices(complexPolygon) {
 export function flattenVertices2(nestedArray, {result = [], dimensions = 3} = {}) {
   let index = -1;
   let vertexLength = 0;
-  const length = Container.count(nestedArray);
+  const length = count(nestedArray);
   while (++index < length) {
     const value = get(nestedArray, index);
     if (Container.isContainer(value)) {
@@ -209,9 +209,9 @@ function calculateColors({polygons, pointCount, getColor}) {
     const color = getColor(polygonIndex);
     color[3] = Number.isFinite(color[3]) ? color[3] : 255;
 
-    const count = Polygon.getVertexCount(complexPolygon);
-    fillArray({target: attribute, source: color, start: i, count});
-    i += color.length * count;
+    const vertexCount = Polygon.getVertexCount(complexPolygon);
+    fillArray({target: attribute, source: color, start: i, count: vertexCount});
+    i += color.length * vertexCount;
   });
   return attribute;
 }
@@ -221,8 +221,8 @@ function calculatePickingColors({polygons, pointCount}) {
   let i = 0;
   polygons.forEach((complexPolygon, polygonIndex) => {
     const color = getPickingColor(polygonIndex);
-    const count = Polygon.getVertexCount(complexPolygon);
-    fillArray({target: attribute, source: color, start: i, count});
+    const vertexCount = Polygon.getVertexCount(complexPolygon);
+    fillArray({target: attribute, source: color, start: i, count: vertexCount});
     i += color.length * count;
   });
   return attribute;

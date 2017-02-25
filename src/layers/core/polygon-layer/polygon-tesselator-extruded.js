@@ -1,11 +1,10 @@
 import * as Polygon from './polygon';
-// import {getPolygonVertexCount, getPolygonTriangleCount} from './polygon';
-import earcut from 'earcut';
-import flattenDeep from 'lodash.flattendeep';
 import {vec3} from 'gl-matrix';
 import {fp64ify} from '../../../lib/utils/fp64';
 import {Container} from '../../../lib/utils';
 // import {Container, flattenVertices, fillArray} from '../../../lib/utils';
+import earcut from 'earcut';
+import flattenDeep from 'lodash.flattendeep';
 
 const DEFAULT_COLOR = [0, 0, 0, 255]; // Black
 
@@ -72,7 +71,7 @@ export class PolygonTesselatorExtruded {
 }
 
 function countVertices(vertices) {
-  return vertices.reduce((count, polygon) => count + polygon.length, 0);
+  return vertices.reduce((vertexCount, polygon) => vertexCount + polygon.length, 0);
 }
 
 function calculateIndices({groupedVertices, wireframe = false}) {
@@ -157,30 +156,11 @@ function calculateSideNormals(vertices) {
   return [[...normals, normals[0]], [normals[0], ...normals]];
 }
 
-/*
-function calculateColors({polygons, pointCount, getColor}) {
-  const attribute = new Uint8Array(pointCount * 4);
-  let i = 0;
-  polygons.forEach((complexPolygon, polygonIndex) => {
-    // Calculate polygon color
-    const color = getColor(polygonIndex);
-    color[3] = Number.isFinite(color[3]) ? color[3] : 255;
-
-    const count = Polygon.getVertexCount(complexPolygon);
-    fillArray({target: attribute, source: color, start: i, count});
-    i += color.length * count;
-  });
-  return attribute;
-}
-*/
-
 function calculateColors({groupedVertices, getColor, wireframe = false}) {
   const colors = groupedVertices.map((complexPolygon, polygonIndex) => {
     const color = getColor(polygonIndex);
     color[3] = Number.isFinite(color[3]) ? color[3] : 255;
 
-    // const baseColor = Array.isArray(color) ? color[0] : color;
-    // const topColor = Array.isArray(color) ? color[color.length - 1] : color;
     const numVertices = countVertices(complexPolygon);
     const topColors = new Array(numVertices).fill(color);
     const baseColors = new Array(numVertices).fill(color);
@@ -193,8 +173,6 @@ function calculateColors({groupedVertices, getColor, wireframe = false}) {
 
 function calculatePickingColors({groupedVertices, color = [0, 0, 0], wireframe = false}) {
   const colors = groupedVertices.map((vertices, buildingIndex) => {
-    // const baseColor = Array.isArray(color) ? color[0] : color;
-    // const topColor = Array.isArray(color) ? color[color.length - 1] : color;
     const numVertices = countVertices(vertices);
     const topColors = new Array(numVertices).fill([0, 0, 0]);
     const baseColors = new Array(numVertices).fill([0, 0, 0]);

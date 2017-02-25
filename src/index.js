@@ -54,11 +54,13 @@ export {default as default} from './react/deckgl';
 
 // Experimental Features (May change in minor version bumps, use at your own risk)
 import {get} from './lib/utils/get';
+import {count} from './lib/utils/count';
 import {EffectManager, Effect} from './experimental/lib';
 import {default as ReflectionEffect} from './experimental/effects/reflection-effect';
 
 export const experimental = {
   get,
+  count,
   EffectManager,
   Effect,
   ReflectionEffect
