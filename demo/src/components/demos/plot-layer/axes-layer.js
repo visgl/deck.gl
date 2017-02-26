@@ -126,23 +126,50 @@ export default class AxesLayer extends Layer {
   }
 
   _getModels(gl) {
-    // grids
+    /* grids:
+     * for each x tick, draw rectangle on yz plane around the bounding box.
+     * for each y tick, draw rectangle on zx plane around the bounding box.
+     * for each z tick, draw rectangle on xy plane around the bounding box.
+     * show/hide is toggled by the vertex shader
+     */
     const gridShaders = assembleShaders(gl, {
       vs: readFileSync(join(__dirname, './grid-vertex.glsl'), 'utf8'),
       fs: readFileSync(join(__dirname, './fragment.glsl'), 'utf8')
     });
 
-    // draw rectangle around slice
+    /*
+     * rectangles are defined in 2d and rotated in the vertex shader
+     *
+     * (-1,1)      (1,1)
+     *   +-----------+
+     *   |           |
+     *   |           |
+     *   |           |
+     *   |           |
+     *   +-----------+
+     * (-1,-1)     (1,-1)
+     */
+
+    // offset of each corner
     const gridPositions = [
+      // left edge
       -1, -1, 0, -1, 1, 0,
+      // top edge
       -1, 1, 0, 1, 1, 0,
+      // right edge
       1, 1, 0, 1, -1, 0,
+      // bottom edge
       1, -1, 0, -1, -1, 0
     ];
+    // normal of each edge
     const gridNormals = [
+      // left edge
       -1, 0, 0, -1, 0, 0,
+      // top edge
       0, 1, 0, 0, 1, 0,
+      // right edge
       1, 0, 0, 1, 0, 0,
+      // bottom edge
       0, -1, 0, 0, -1, 0
     ];
 
@@ -159,7 +186,10 @@ export default class AxesLayer extends Layer {
       isInstanced: true
     });
 
-    // labels
+    /* labels
+     * one label is placed at each end of every grid line
+     * show/hide is toggled by the vertex shader
+     */
     const labelShaders = assembleShaders(gl, {
       vs: readFileSync(join(__dirname, './label-vertex.glsl'), 'utf8'),
       fs: readFileSync(join(__dirname, './label-fragment.glsl'), 'utf8')
@@ -170,12 +200,21 @@ export default class AxesLayer extends Layer {
     let labelNormals = [];
     let labelIndices = [];
     for (let i = 0; i < 8; i++) {
+      /*
+       * each label is rendered as a rectangle
+       *   0     2
+       *    +--.+
+       *    | / |
+       *    +'--+
+       *   1     3
+       */
       labelTexCoords = labelTexCoords.concat([0, 0, 0, 1, 1, 0, 1, 1]);
       labelIndices = labelIndices.concat([
         i * 4 + 0, i * 4 + 1, i * 4 + 2,
         i * 4 + 2, i * 4 + 1, i * 4 + 3
       ]);
 
+      // all four vertices of this label's rectangle is anchored at the same grid endpoint
       for (let j = 0; j < 4; j++) {
         labelPositions = labelPositions.concat(gridPositions.slice(i * 3, i * 3 + 3));
         labelNormals = labelNormals.concat(gridNormals.slice(i * 3, i * 3 + 3));
@@ -267,6 +306,14 @@ export default class AxesLayer extends Layer {
     // changing canvas size will reset context
     setTextStyle(ctx);
 
+    /*
+     *  +----------+----------+----------+
+     *  | xlabel0  | ylabel0  | zlabel0  |
+     *  +----------+----------+----------+
+     *  | xlabel1  | ylabel1  | zlabel1  |
+     *  +----------+----------+----------+
+     *  | ...      | ...      | ...      |
+     */
     let x = 0;
     ticks.forEach((axisLabels, axis) => {
       x += maxWidth[axis] / 2;

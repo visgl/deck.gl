@@ -55,24 +55,37 @@ float frontFacing(vec3 v) {
 }
 
 void main(void) {
+ 
+  // rotated rectangle to align with slice:
+  // for each x tick, draw rectangle on yz plane
+  // for each y tick, draw rectangle on zx plane
+  // for each z tick, draw rectangle on xy plane
 
-  // rotate rectangle to align with slice
+  // 2d offset of each corner
   vec3 vertexPosition = mat3(
       vec3(positions.z, positions.xy),
       vec3(positions.yz, positions.x),
       positions
     ) * instanceNormals * modelDim / 2.0;
 
+  // 2d normal of each edge
   vec3 vertexNormal = mat3(
       vec3(normals.z, normals.xy),
       vec3(normals.yz, normals.x),
       normals
     ) * instanceNormals;
 
-  // do not draw in front of the graph
+  // do not draw grid line in front of the graph
+  // do not draw label behind the graph
   shouldDiscard = frontFacing(vertexNormal) + (1.0 - frontFacing(vertexPosition));
 
   // get bounding box of texture in pixels
+  //  +----------+----------+----------+
+  //  | xlabel0  | ylabel0  | zlabel0  |
+  //  +----------+----------+----------+
+  //  | xlabel1  | ylabel1  | zlabel1  |
+  //  +----------+----------+----------+
+  //  | ...      | ...      | ...      |
   vec4 textureFrame = vec4(
     sum3(vec3(0.0, labelWidths.x, sum2(labelWidths.xy)) * instanceNormals),
     instancePositions.y * labelHeight,
@@ -82,13 +95,15 @@ void main(void) {
   vTexCoords = (textureFrame.xy + textureFrame.zw * texCoords) / labelTextureDim;
   vTexCoords.y = 1.0 - vTexCoords.y;
 
-  // fit into a unit cube that centers at [0, 0, 0]
+  // scale bounding box to fit into a unit cube that centers at [0, 0, 0]
   float scale = 1.0 / max(modelDim.x, max(modelDim.y, modelDim.z));
   vec3 position_modelspace = ((vec3(instancePositions.x) - modelCenter) * instanceNormals + vertexPosition) * scale
    + offset * vertexNormal
    + vertexPosition * LABEL_OFFSET;
   vec4 position_clipspace = project_to_clipspace(vec4(position_modelspace, 1.0));
+
   vec2 label_vertex = textureFrame.zw * (vec2(texCoords.x - 0.5, 0.5 - texCoords.y));
+  // scale label to be constant size in pixels
   label_vertex *= fontSize / labelHeight * position_clipspace.w;
 
   gl_Position = position_clipspace + 

@@ -40,24 +40,30 @@ float frontFacing(vec3 v) {
 }
 
 void main(void) {
+  
+  // rotated rectangle to align with slice:
+  // for each x tick, draw rectangle on yz plane
+  // for each y tick, draw rectangle on zx plane
+  // for each z tick, draw rectangle on xy plane
 
-  // rotate rectangle to align with slice
+  // 2d offset of each corner
   vec3 vertexPosition = mat3(
       vec3(positions.z, positions.xy),
       vec3(positions.yz, positions.x),
       positions
     ) * instanceNormals * modelDim / 2.0;
 
+  // 2d normal of each edge
   vec3 vertexNormal = mat3(
       vec3(normals.z, normals.xy),
       vec3(normals.yz, normals.x),
       normals
     ) * instanceNormals;
 
-  // do not draw in front of the graph
+  // do not draw grid line in front of the graph
   shouldDiscard = frontFacing(vertexNormal);
 
-  // fit into a unit cube that centers at [0, 0, 0]
+  // scale bounding box to fit into a unit cube that centers at [0, 0, 0]
   float scale = 1.0 / max(modelDim.x, max(modelDim.y, modelDim.z));
   vec4 position_modelspace = vec4(
     ((vec3(instancePositions.x) - modelCenter) * instanceNormals + vertexPosition) * scale + offset * vertexNormal,
