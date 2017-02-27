@@ -97,10 +97,11 @@ export default class ChoroplethLayer extends Layer {
   pick(opts) {
     super.pick(opts);
     const {info} = opts;
-    const index = this.decodePickingColor(info.color);
+    const {index} = info;
     const feature = index >= 0 ? Container.get(this.props.data, ['features', index]) : null;
     info.feature = feature;
     info.object = feature;
+    return info;
   }
 
   getModel(gl) {

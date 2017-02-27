@@ -92,7 +92,7 @@ export default class PointDensityHexagonLayer extends Layer {
 
     const pickedCell = this.state.pickedCell;
 
-    Object.assign(opts.info, {
+    return Object.assign(opts.info, {
       layer: this,
       // override index with cell index
       index: pickedCell ? pickedCell.index : -1,
