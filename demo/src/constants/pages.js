@@ -54,6 +54,13 @@ export const examplePages = generatePath([
       demo: 'HeroDemo',
       code: 'code-markdown/trips.md'
     }
+  },
+  {
+    name: 'Graph Explorer',
+    content: {
+      demo: 'PlotDemo',
+      code: 'code-markdown/scatterplot.md'
+    }
   }
 ]);
 
