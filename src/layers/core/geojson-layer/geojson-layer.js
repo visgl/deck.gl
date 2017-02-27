@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {Layer, get} from '../../../lib';
+import {CompositeLayer, get} from '../../../lib';
 import ScatterplotLayer from '../scatterplot-layer/scatterplot-layer';
 import PathLayer from '../path-layer/path-layer';
 import PolygonLayer from '../polygon-layer/polygon-layer';
@@ -56,7 +56,7 @@ function noop() {}
 
 const getCoordinates = f => get(f, 'geometry.coordinates');
 
-export default class GeoJsonLayer extends Layer {
+export default class GeoJsonLayer extends CompositeLayer {
   initializeState() {
     this.state = {
       subLayers: null,
