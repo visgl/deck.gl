@@ -105,7 +105,7 @@ export default class AxesLayer extends Layer {
         fontSize,
         modelCenter: center,
         modelDim: dim,
-        offset: axesOffset,
+        gridOffset: axesOffset,
         strokeColor: axesColor
       };
 
