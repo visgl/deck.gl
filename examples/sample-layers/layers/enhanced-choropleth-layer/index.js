@@ -1,1 +1,1 @@
-export {default as default} from './enhanced-choropleth-layer';
+export {default as EnhancedChoroplethLayer} from './enhanced-choropleth-layer';
