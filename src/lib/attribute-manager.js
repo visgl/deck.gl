@@ -110,6 +110,25 @@ export default class AttributeManager {
     this._add(attributes, updaters);
   }
 
+ /**
+   * Removes attributes
+   * Takes an array of attribute names and delete them from
+   * the attribute map if they exists
+   *
+   * @example
+   * attributeManager.remove(['position']);
+   *
+   * @param {Object} attributeNameArray - attribute name array (see above)
+   */
+  remove(attributeNameArray) {
+    for (let i = 0; i < attributeNameArray.length; i++) {
+      const name = attributeNameArray[i];
+      if (this.attributes[name] !== undefined) {
+        delete this.attributes[name];
+      }
+    }
+  }
+
   /* Marks an attribute for update
    * @param {string} triggerName: attribute or accessor name
    */
