@@ -60,12 +60,10 @@ export function pickLayers(gl, {
     gl.clear(GL.COLOR_BUFFER_BIT | GL.DEPTH_BUFFER_BIT);
     // Save current blend settings
     const oldBlendMode = getBlendMode(gl);
-    // Set blend mode for picking: overwrite
+    // Set blend mode for picking
+    // always overwrite existing pixel with [r,g,b,layerIndex]
     gl.enable(gl.BLEND);
-    gl.blendFuncSeparate(
-      gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA,
-      gl.CONSTANT_ALPHA, gl.ONE_MINUS_SRC_ALPHA
-    );
+    gl.blendFuncSeparate(gl.ONE, gl.ZERO, gl.CONSTANT_ALPHA, gl.ZERO);
     gl.blendEquation(gl.FUNC_ADD);
 
     // Render all pickable layers

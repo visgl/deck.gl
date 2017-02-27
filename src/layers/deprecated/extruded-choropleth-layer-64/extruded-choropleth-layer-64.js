@@ -94,7 +94,7 @@ export default class ExtrudedChoroplethLayer64 extends Layer {
 
   pick(opts) {
     const {info} = opts;
-    const {index} = info;
+    const index = this.decodePickingColor(info.color);
     const feature = index >= 0 ? this.props.data.features[index] : null;
     info.feature = feature;
     info.object = feature;
