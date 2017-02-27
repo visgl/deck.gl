@@ -40,7 +40,7 @@ export default class ChoroplethDemo extends Component {
     const legendCount = 5;
     const legendBlocks = (new Array(legendCount)).fill(0).map((d, i) => {
       const color = colorScale(i / (legendCount - 1)).map(Math.round);
-      return `rgb(${color.join(',')})`
+      return `rgb(${color.join(',')})`;
     });
     const width = `${100 / legendCount}%`;
 
@@ -49,7 +49,7 @@ export default class ChoroplethDemo extends Component {
         <h3>Chicago Building Ages</h3>
         <p>Age of Chicago Downtown Buildings</p>
         <div className="layout">
-        {legendBlocks.map((background, i) => (
+          {legendBlocks.map((background, i) => (
             <div key={i} className="legend" style={{background, width}} />
           ))}
         </div>
@@ -74,7 +74,7 @@ export default class ChoroplethDemo extends Component {
   }
 
   render() {
-    const {viewport, params, data} = this.props;
+    const {viewport, data} = this.props;
 
     if (!data) {
       return null;

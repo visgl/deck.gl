@@ -1,35 +1,30 @@
+import {handleActions} from 'redux-actions';
+
 import {DEFAULT_VIS_STATE} from '../constants/defaults';
 import {normalizeParam} from '../utils/format-utils';
 
-export default function vispReducer(state = DEFAULT_VIS_STATE, action) {
-  switch (action.type) {
+export default handleActions({
 
-  case 'LOAD_DATA_START':
-    return {...state,
-      owner: action.owner,
-      meta: {},
-      data: null
-    };
-
-  case 'LOAD_DATA_SUCCESS':
+  LOAD_DATA_START: (state, action) => ({...state, owner: action.owner, meta: {}, data: null}),
+  LOAD_DATA_SUCCESS: (state, action) => {
     if (action.payload.owner !== state.owner) {
       return state;
     }
     return {...state, ...action.payload};
+  },
 
-  case 'UPDATE_META':
-    return {...state, meta: {...state.meta, ...action.meta}};
+  UPDATE_META: (state, action) => ({...state, meta: {...state.meta, ...action.meta}}),
+  USE_PARAMS: (state, action) => {
 
-  case 'USE_PARAMS': {
-    const params = {};
-    for (var name in action.params) {
-      params[name] = normalizeParam(action.params[name]);
-    }
+    const params = Object.keys(action.params)
+      .reduce((acc, name) => {
+        acc[name] = normalizeParam(action.params[name]);
+        return acc;
+      }, {});
 
     return {...state, params};
-  }
-
-  case 'UPDATE_PARAM': {
+  },
+  UPDATE_PARAM: (state, action) => {
     const {name, value} = action.payload;
     const newParams = {};
     const p = state.params[name];
@@ -41,7 +36,5 @@ export default function vispReducer(state = DEFAULT_VIS_STATE, action) {
     }
     return state;
   }
-  }
 
-  return state;
-}
+}, DEFAULT_VIS_STATE);

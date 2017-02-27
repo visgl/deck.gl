@@ -1,8 +1,8 @@
 import 'babel-polyfill';
+
 import React, {Component} from 'react';
 import {connect} from 'react-redux';
 import TableOfContents from './table-of-contents';
-import autobind from 'autobind-decorator';
 
 class Gallery extends Component {
 
@@ -16,7 +16,7 @@ class Gallery extends Component {
             <div className="flexbox-item">
               <TableOfContents parentRoute={path} pages={pages} isOpen={isMenuOpen} />
             </div>
-            <div className={`flexbox-item flexbox-item--fill`}>
+            <div className={'flexbox-item flexbox-item--fill'}>
               { children }
             </div>
           </div>

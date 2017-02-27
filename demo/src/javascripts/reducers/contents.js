@@ -1,8 +1,7 @@
+import {handleActions} from 'redux-actions';
 
-export default function contentsReducer(state = {}, action) {
-  switch(action.type) {
-  case 'LOAD_CONTENT':
-    return {...state, ...action.payload}
-  }
-  return state;
-}
+export default handleActions({
+
+  LOAD_CONTENT: (state, action) => ({...state, ...action.payload})
+
+}, {});

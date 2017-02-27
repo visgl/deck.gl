@@ -57,7 +57,7 @@ export default class ScatterPlotDemo extends Component {
 
     const layer = new ScatterplotLayer({
       id: 'scatter-plot',
-      data: data,
+      data,
       getPosition: d => [d[0], d[1], 0],
       getColor: d => d[2] === 1 ? params.colorM.value : params.colorF.value,
       getRadius: d => params.radius.value,

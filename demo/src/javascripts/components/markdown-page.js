@@ -1,6 +1,6 @@
 import 'babel-polyfill';
+
 import marked from 'marked';
-import {highlight} from 'highlight.js';
 import React, {Component, PropTypes} from 'react';
 import pureRender from 'pure-render-decorator';
 
@@ -34,10 +34,12 @@ export default class MarkdownPage extends Component {
   render() {
     const {content} = this.props;
 
-    if (!content) { return null; }
+    if (!content) {
+      return null;
+    }
 
     marked.setOptions({
-      highlight: function (code) {
+      highlight(code) {
         return require('highlight.js').highlightAuto(code).value;
       }
     });
@@ -46,7 +48,9 @@ export default class MarkdownPage extends Component {
 
     renderer.link = (href, title, text) => {
       const to = urlRewrites[href] === undefined ? href : urlRewrites[href];
-      if (to === false) { return `<span>${text}</span>`; }
+      if (to === false) {
+        return `<span>${text}</span>`;
+      }
       return `<a href=${to} title=${title}>${text}</a>`;
     };
 
@@ -60,11 +64,14 @@ export default class MarkdownPage extends Component {
     const __html = marked(content, {renderer})
       .replace(/\/demo\/src\/static\/images/g, 'images');
 
+    /* eslint-disable react/no-danger */
     return (
       <div className="markdown">
         <div className="markdown-body" dangerouslySetInnerHTML={{__html}} />
       </div>
     );
+    /* eslint-enable react/no-danger */
+
   }
 }
 

@@ -1,3 +1,4 @@
+/* global document */
 import 'babel-polyfill';
 
 import React from 'react';
@@ -6,7 +7,6 @@ import {Provider} from 'react-redux';
 
 import AppState from './reducers';
 import Routes from './routes';
-/* global document */
 
 ReactDOM.render(
   <Provider store={AppState} >

@@ -1,15 +1,13 @@
+/* global window */
 import 'babel-polyfill';
+
 import Stats from 'stats.js';
 import React, {Component} from 'react';
 import {connect} from 'react-redux';
 
-import Demos from './demos';
 import {updateMap, setHeaderOpacity} from '../actions/app-actions';
 import Map from './map';
 import ViewportAnimation from '../utils/map-utils';
-
-const DEMO_TAB = 0;
-const CONTENT_TAB = 1;
 
 class Home extends Component {
   constructor(props) {
@@ -38,10 +36,10 @@ class Home extends Component {
     const calcFPS = () => {
       this._stats.begin();
       this._stats.end();
-      this._animateRef = requestAnimationFrame(calcFPS);
-    }
+      this._animateRef = window.requestAnimationFrame(calcFPS);
+    };
 
-    this._animateRef = requestAnimationFrame(calcFPS);
+    this._animateRef = window.requestAnimationFrame(calcFPS);
 
     this.cameraAnimation.start();
   }
@@ -50,7 +48,7 @@ class Home extends Component {
     window.onscroll = null;
     window.onresize = null;
     this.cameraAnimation.stop();
-    cancelAnimationFrame(this._animateRef);
+    window.cancelAnimationFrame(this._animateRef);
   }
 
   _resizeMap() {
@@ -142,7 +140,6 @@ class Home extends Component {
             </a>
           </div>
         </section>
-
 
         <hr />
 

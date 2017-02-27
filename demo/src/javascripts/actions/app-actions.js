@@ -1,35 +1,39 @@
 import {request, text} from 'd3-request';
+
 import {StreamParser} from '../utils/worker-utils';
 
-export function loadContent(filename) {
+const loadContentSuccess = (name, content) => {
+  const payload = {};
+  payload[name] = content;
+  return {type: 'LOAD_CONTENT', payload};
+};
+
+const loadContentStart = name => loadContentSuccess(name, '');
+
+export const loadContent = filename => {
   return (dispatch, getState) => {
     const {contents} = getState();
     if (filename in contents) {
       // already loaded
       return;
     }
+
     dispatch(loadContentStart(filename));
     text(filename, (error, response) => {
       dispatch(loadContentSuccess(filename, error ? error.target.response : response));
     });
-  }
-}
 
-function loadContentStart(name) {
-  return loadContentSuccess(name, '');
-}
+  };
+};
 
-function loadContentSuccess(name, content) {
-  const payload = {};
-  payload[name] = content;
-  return {type: 'LOAD_CONTENT', payload};
-}
+const loadDataStart = owner => ({type: 'LOAD_DATA_START', owner});
 
-export function updateMap(viewport) {
-  return {type: 'UPDATE_MAP', viewport};
-}
+const loadDataSuccess = (owner, data, meta) => ({
+  type: 'LOAD_DATA_SUCCESS',
+  payload: {owner, data, meta}
+});
 
-export function loadData(owner, dataArr) {
+export const loadData = (owner, dataArr) => {
 
   return (dispatch, getState) => {
     if (getState().vis.owner === owner) {
@@ -48,8 +52,8 @@ export function loadData(owner, dataArr) {
     dispatch(loadDataStart(owner));
 
     dataArr.forEach(({url, worker}, index) => {
-      var req = request(url);
-      var dataParser = new StreamParser(worker, (data, meta) => {
+      const req = request(url);
+      const dataParser = new StreamParser(worker, (data, meta) => {
         if (isArray) {
           resultData[index] = data;
         } else {
@@ -62,38 +66,14 @@ export function loadData(owner, dataArr) {
       req.on('progress', dataParser.onProgress)
         .on('load', dataParser.onLoad)
         .get();
-    })
+    });
 
   };
-}
+};
 
-function loadDataStart(owner) {
-  return {type: 'LOAD_DATA_START', owner};
-}
-
-function loadDataSuccess(owner, data, meta) {
-  return {
-    type: 'LOAD_DATA_SUCCESS',
-    payload: {owner, data, meta}
-  };
-}
-
-export function updateMeta(meta) {
-  return {type: 'UPDATE_META', meta};
-}
-
-export function updateParam(name, value) {
-  return {type: 'UPDATE_PARAM', payload: {name, value}};
-}
-
-export function useParams(params) {
-  return {type: 'USE_PARAMS', params};
-}
-
-export function toggleMenu(isOpen) {
-  return {type: 'TOGGLE_MENU', isOpen};
-}
-
-export function setHeaderOpacity(opacity) {
-  return {type: 'SET_HEADER_OPACITY', opacity};
-}
+export const updateMap = viewport => ({type: 'UPDATE_MAP', viewport});
+export const updateMeta = meta => ({type: 'UPDATE_META', meta});
+export const updateParam = (name, value) => ({type: 'UPDATE_PARAM', payload: {name, value}});
+export const useParams = params => ({type: 'USE_PARAMS', params});
+export const toggleMenu = isOpen => ({type: 'TOGGLE_MENU', isOpen});
+export const setHeaderOpacity = opacity => ({type: 'SET_HEADER_OPACITY', opacity});

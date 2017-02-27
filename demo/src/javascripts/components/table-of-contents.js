@@ -1,6 +1,7 @@
 import 'babel-polyfill';
+
 import React, {Component, PropTypes} from 'react';
-import {Link} from 'react-router'
+import {Link} from 'react-router';
 
 export default class TableOfContents extends Component {
 
@@ -9,22 +10,21 @@ export default class TableOfContents extends Component {
     const path = `${parentRoute}/${page.path}`;
 
     if (children) {
-      return [
-        (
-          <Link className="list-header" activeClassName="active"
-              key={`group-header${i}`} to={path}>
-            { name }
+      return (
+        <div>
+          <Link className="list-header" activeClassName="active" key={`group-header${i}`} to={path}>
+            {name}
           </Link>
-        ), (
           <ul key={`group-list${i}`} style={{maxHeight: `${40 * children.length}px`}}>
-            { children.map(this._renderPage.bind(this, path)) }
+            {children.map(this._renderPage.bind(this, path))}
           </ul>
-        )
-      ];
+        </div>
+      );
     }
+
     return (
       <li key={`page-${i}`}>
-        <Link className="link" to={ path } activeClassName="active">{ page.name }</Link>
+        <Link className="link" to={path} activeClassName="active">{page.name}</Link>
       </li>
     );
   }
@@ -35,15 +35,15 @@ export default class TableOfContents extends Component {
     return (
       <div className={`toc ${isOpen ? 'open' : ''}`}>
         <div>
-          { pages.map(this._renderPage.bind(this, parentRoute)) }
+          {pages.map(this._renderPage.bind(this, parentRoute))}
         </div>
       </div>
-    )
+    );
   }
 }
 
 TableOfContents.propTypes = {
   isOpen: PropTypes.bool,
   parentRoute: PropTypes.string.isRequired,
-  pages: PropTypes.array.isRequired
+  pages: PropTypes.arrayOf(PropTypes.object).isRequired
 };
