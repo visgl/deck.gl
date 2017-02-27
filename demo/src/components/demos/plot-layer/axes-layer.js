@@ -1,10 +1,11 @@
 /* global document */
 import {Layer, assembleShaders} from 'deck.gl';
-import {GL, Model, Geometry, Texture2D} from 'luma.gl';
+import {GL, Model, Geometry} from 'luma.gl';
 
 import {scaleLinear} from 'd3-scale';
 import {readFileSync} from 'fs';
 import {join} from 'path';
+import {textMatrixToTexture} from './utils';
 
 /* Constants */
 const FONT_SIZE = 48;
@@ -27,13 +28,6 @@ function flatten(arrayOfArrays) {
 
 function getTicks([min, max], ticksCount) {
   return scaleLinear().domain([min, max]).ticks(ticksCount);
-}
-
-function setTextStyle(ctx) {
-  ctx.font = `${FONT_SIZE}px Helvetica,Arial,sans-serif`;
-  ctx.fillStyle = '#000';
-  ctx.textBaseline = 'top';
-  ctx.textAlign = 'center';
 }
 
 /*
@@ -279,59 +273,20 @@ export default class AxesLayer extends Layer {
       this.state.labels.labelTexture.delete();
     }
 
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
-    setTextStyle(ctx);
+    // attach a 2d texture of all the label texts
+    const textureInfo = textMatrixToTexture(this.context.gl, ticks, FONT_SIZE);
+    if (textureInfo) {
+      // success
+      const {columnWidths, texture} = textureInfo;
 
-    // measure texts
-    const maxWidth = ticks.map(axisLabels => {
-      return axisLabels.reduce((acc, label) => {
-        const w = ctx.measureText(label).width;
-        return Math.max(acc, w);
-      }, 0);
-    });
-
-    const canvasWidth = maxWidth.reduce((x, w) => x + Math.ceil(w) * 2, 0);
-    const canvasHeight = ticks.reduce((h, axisLabels) =>
-      Math.max(h, axisLabels.length * FONT_SIZE), 0);
-
-    if (canvasWidth === 0 || canvasHeight === 0) {
-      // empty canvas willl cause error in Texture2D
-      return null;
+      return {
+        labelHeight: FONT_SIZE,
+        labelWidths: columnWidths,
+        labelTextureDim: [texture.width, texture.height],
+        labelTexture: texture
+      };
     }
-
-    canvas.width = canvasWidth;
-    canvas.height = canvasHeight;
-
-    // changing canvas size will reset context
-    setTextStyle(ctx);
-
-    /*
-     *  +----------+----------+----------+
-     *  | xlabel0  | ylabel0  | zlabel0  |
-     *  +----------+----------+----------+
-     *  | xlabel1  | ylabel1  | zlabel1  |
-     *  +----------+----------+----------+
-     *  | ...      | ...      | ...      |
-     */
-    let x = 0;
-    ticks.forEach((axisLabels, axis) => {
-      x += maxWidth[axis] / 2;
-      axisLabels.forEach((label, i) => {
-        ctx.fillText(label, x, i * FONT_SIZE);
-      });
-      x += maxWidth[axis] / 2;
-    });
-
-    return {
-      labelHeight: FONT_SIZE,
-      labelWidths: maxWidth,
-      labelTextureDim: [canvasWidth, canvasHeight],
-      labelTexture: new Texture2D(this.context.gl, {
-        pixels: canvas,
-        magFilter: GL.LINEAR
-      })
-    };
+    return null;
   }
 
 }
