@@ -62,7 +62,10 @@ export function pickLayers(gl, {
     const oldBlendMode = getBlendMode(gl);
     // Set blend mode for picking: overwrite
     gl.enable(gl.BLEND);
-    gl.blendFuncSeparate(gl.ONE, gl.ZERO, gl.CONSTANT_ALPHA, gl.ZERO);
+    gl.blendFuncSeparate(
+      gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA,
+      gl.CONSTANT_ALPHA, gl.ONE_MINUS_SRC_ALPHA
+    );
     gl.blendEquation(gl.FUNC_ADD);
 
     // Render all pickable layers
@@ -98,25 +101,22 @@ export function pickLayers(gl, {
     );
 
     layers.forEach(layer => {
-      let info = Object.assign({}, baseInfo, {
-        layer,
-        color: layer === pickedLayer ? color : EMPTY_PIXEL
-      });
+      const info = Object.assign({}, baseInfo, {layer});
 
-      info = layer.pickLayer({info, mode});
-
-      if (!info) {
-        return;
+      if (layer === pickedLayer) {
+        const index = layer.decodePickingColor(color);
+        info.index = index;
+        info.color = color;
+        if (index >= 0) {
+          info.picked = true;
+          // If props.data is an indexable array, get the object
+          if (Array.isArray(layer.props.data)) {
+            info.object = layer.props.data[index];
+          }
+        }
       }
 
-      // Calling callbacks can have async interactions with React
-      // which nullifies layer.state.
-      let handled = null;
-      switch (mode) {
-      case 'click': handled = layer.props.onClick(info); break;
-      case 'hover': handled = layer.props.onHover(info); break;
-      default: throw new Error('unknown pick type');
-      }
+      const handled = layer.pickLayer({info, mode});
 
       if (!handled) {
         unhandledPickInfos.push(info);

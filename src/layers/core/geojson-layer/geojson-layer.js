@@ -97,7 +97,7 @@ export default class GeoJsonLayer extends CompositeLayer {
     // this is called before the onHover/onClick of sublayers
     // pickInfo is used to collect the pick results of all sublayers
     this.state.pickInfos.length = 0;
-    return null;
+    return true;
   }
 
   renderLayers() {

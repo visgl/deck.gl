@@ -116,15 +116,13 @@ export default class Layer {
     }
   }
 
+  // called on mouse event.
+  // @returns {bool} handled
   pick({info, mode}) {
-    const {color} = info;
-    // Index < 0 means nothing selected
-    const index = this.decodePickingColor(color);
-    info.index = index;
-    info.object = Array.isArray(this.props.data) ? this.props.data[index] : null;
 
     // TODO - selectedPickingColor should be removed?
     if (mode === 'hover') {
+      const {color} = info;
       const selectedPickingColor = new Float32Array(3);
       selectedPickingColor[0] = color[0];
       selectedPickingColor[1] = color[1];
@@ -132,8 +130,14 @@ export default class Layer {
       this.setUniforms({selectedPickingColor});
     }
 
-    // return null to cancel the event
-    return info;
+    // Calling callbacks can have async interactions with React
+    // which nullifies layer.state.
+    switch (mode) {
+    case 'click': return this.props.onClick(info);
+    case 'hover': return this.props.onHover(info);
+    default: throw new Error('unknown pick type');
+    }
+
   }
 
   // END LIFECYCLE METHODS

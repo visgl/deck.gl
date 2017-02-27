@@ -93,13 +93,12 @@ export default class ExtrudedChoroplethLayer64 extends Layer {
   }
 
   pick(opts) {
-    super.pick(opts);
     const {info} = opts;
     const {index} = info;
     const feature = index >= 0 ? this.props.data.features[index] : null;
     info.feature = feature;
     info.object = feature;
-    return info;
+    return super.pick(opts);
   }
 
   getShaders() {

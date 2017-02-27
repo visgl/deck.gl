@@ -88,11 +88,9 @@ export default class PointDensityHexagonLayer extends Layer {
   }
 
   pick(opts) {
-    super.pick(opts);
-
     const pickedCell = this.state.pickedCell;
 
-    return Object.assign(opts.info, {
+    Object.assign(opts.info, {
       layer: this,
       // override index with cell index
       index: pickedCell ? pickedCell.index : -1,
@@ -100,6 +98,8 @@ export default class PointDensityHexagonLayer extends Layer {
       // override object with picked cell
       object: pickedCell
     });
+
+    return super.pick(opts);
   }
 
   _onHoverSublayer(info) {
