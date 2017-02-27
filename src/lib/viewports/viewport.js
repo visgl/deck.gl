@@ -91,6 +91,7 @@ export default class Viewport {
     this.projectFlat = this.projectFlat.bind(this);
     this.unprojectFlat = this.unprojectFlat.bind(this);
     this.getMatrices = this.getMatrices.bind(this);
+    this.getDistanceScales = this.getDistanceScales.bind(this);
   }
   /* eslint-enable complexity */
 
@@ -188,13 +189,13 @@ export default class Viewport {
     return this._unprojectFlat(...arguments);
   }
 
-  // _projectFlat(xyz, scale = this.scale) {
-  //   return xyz;
-  // }
+  _projectFlat(xyz, scale = this.scale) {
+    return xyz;
+  }
 
-  // _unprojectFlat(xyz, scale = this.scale) {
-  //   return xyz;
-  // }
+  _unprojectFlat(xyz, scale = this.scale) {
+    return xyz;
+  }
 
   getMatrices({modelMatrix = null} = {}) {
     let modelViewProjectionMatrix = this.viewProjectionMatrix;
@@ -228,6 +229,15 @@ export default class Viewport {
     );
 
     return matrices;
+  }
+
+  getDistanceScales() {
+    return {
+      pixelsPerMeter: [1, 1, 1],
+      metersPerPixel: [1, 1, 1],
+      pixelsPerDegree: [1, 1, 1],
+      degreesPerPixel: [1, 1, 1]
+    };
   }
 
   // INTERNAL METHODS

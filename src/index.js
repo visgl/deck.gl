@@ -24,6 +24,7 @@ export {assembleShaders} from './shader-utils';
 
 // Lib
 export {COORDINATE_SYSTEM, Layer, LayerManager, AttributeManager} from './lib';
+export {default as PerspectiveViewport} from './lib/viewports/perspective-viewport';
 
 // Core Layers
 export {default as ArcLayer} from './layers/core/arc-layer/arc-layer';
