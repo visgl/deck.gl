@@ -290,7 +290,9 @@ const PointDensityHexagonLayerExample = {
   layer: PointDensityHexagonLayer,
   propTypes: {
     coverage: {type: 'range', min: 0, max: 1},
-    radius: {type: 'range', min: 0, max: 3000}
+    radius: {type: 'range', min: 0, max: 3000},
+    lowerPercentile: {type: 'range', min: 0, max: 100},
+    upperPercentile: {type: 'range', min: 0, max: 100}
   },
   props: {
     id: 'PointDensityHexagonLayer',
@@ -299,8 +301,10 @@ const PointDensityHexagonLayerExample = {
     pickable: true,
     radius: 1000,
     opacity: 1,
+    lowerPercentile: 51,
+    upperPercentile: 50,
     elevationScale: 1,
-    elevationRange: [0, 3000],
+    elevationRange: [1, 3000],
     coverage: 1,
     getPosition: d => d.COORDINATES,
     lightSettings: LIGHT_SETTINGS

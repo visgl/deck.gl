@@ -24,6 +24,7 @@ import {log} from '../../../lib/utils';
 
 import {ordinalScale, linearScale} from '../../../utils/scale-utils';
 import {defaultColorRange} from '../../../utils/color-utils';
+import {getSortedCounts, getCountRangeFromPercentile} from '../../../utils/aggregation-utils';
 import {pointToHexbin} from './hexagon-aggregator';
 
 const defaultRadius = 1000;
@@ -31,13 +32,17 @@ const defaultCoverage = 1;
 const defaultElevationRange = [0, 1000];
 const defaultElevationScale = 1;
 const defaultAggregator = pointToHexbin;
+const defaultLowerPercentile = 0;
+const defaultUpperPercentile = 100;
 
 const defaultProps = {
   colorRange: defaultColorRange,
+  coverage: defaultCoverage,
   elevationRange: defaultElevationRange,
   elevationScale: defaultElevationScale,
+  lowerPercentile: defaultLowerPercentile,
+  upperPercentile: defaultUpperPercentile,
   radius: defaultRadius,
-  coverage: defaultCoverage,
   hexagonAggregator: defaultAggregator,
   getPosition: x => x.position
 };
@@ -48,13 +53,10 @@ function _needsReProjectPoints(oldProps, props) {
   return oldProps.radius !== props.radius;
 }
 
-function _getCountRange(hexagons) {
-  return [
-    Math.min.apply(null, hexagons.map(bin => bin.points.length)),
-    Math.max.apply(null, hexagons.map(bin => bin.points.length))
-  ];
+function _percentilChanged(oldProps, props) {
+  return oldProps.lowerPercentile !== props.lowerPercentile ||
+    oldProps.upperPercentile !== props.upperPercentile;
 }
-
 export default class PointDensityHexagonLayer extends Layer {
   constructor(props) {
     if (!props.radius) {
@@ -64,14 +66,38 @@ export default class PointDensityHexagonLayer extends Layer {
       props.radius = defaultRadius;
     }
 
+    if (Number.isFinite(props.upperPercentile) &&
+      (props.upperPercentile > 100 || props.upperPercentile < 0)) {
+      log.once(0, 'PointDensityHexagonLayer: upperPercentile should be between 0 and 100. ' +
+        'Assign to 100 by default');
+
+      props.upperPercentile = defaultUpperPercentile;
+    }
+
+    if (Number.isFinite(props.lowerPercentile) &&
+      (props.lowerPercentile > 100 || props.lowerPercentile < 0)) {
+      log.once(0, 'PointDensityHexagonLayer: lowerPercentile should be between 0 and 100. ' +
+        'Assign to 0 by default');
+
+      props.lowerPercentile = defaultLowerPercentile;
+    }
+
+    if (props.lowerPercentile >= props.upperPercentile) {
+      log.once(0, 'PointDensityHexagonLayer: lowerPercentile should not be bigger than ' +
+        'upperPercentile. Assign to 0 by default');
+
+      props.lowerPercentile = defaultLowerPercentile;
+    }
+
     super(props);
   }
 
   initializeState() {
     this.state = {
       hexagons: [],
-      countRange: null,
-      pickedCell: null
+      pickedCell: null,
+      sortedCounts: null,
+      countDomainByPercentile: null
     };
   }
 
@@ -81,9 +107,16 @@ export default class PointDensityHexagonLayer extends Layer {
       const {viewport} = this.context;
 
       const hexagons = hexagonAggregator(this.props, viewport);
-      const countRange = _getCountRange(hexagons);
+      const sortedCounts = getSortedCounts(hexagons);
 
-      Object.assign(this.state, {hexagons, countRange});
+      Object.assign(this.state, {hexagons, sortedCounts});
+
+      // this needs sortedCounts to be set
+      this._onPercentileChange();
+
+    } else if (_percentilChanged) {
+
+      this._onPercentileChange();
     }
   }
 
@@ -102,6 +135,13 @@ export default class PointDensityHexagonLayer extends Layer {
     });
   }
 
+  _onPercentileChange() {
+    const [lower, upper] = [this.props.lowerPercentile, this.props.upperPercentile];
+
+    this.state.countDomainByPercentile =
+      getCountRangeFromPercentile(this.state.sortedCounts, [lower, upper]);
+  }
+
   _onHoverSublayer(info) {
 
     this.state.pickedCell = info.picked && info.index > -1 ?
@@ -110,15 +150,26 @@ export default class PointDensityHexagonLayer extends Layer {
 
   _onGetSublayerColor(cell) {
     const {colorRange} = this.props;
-    const colorDomain = this.props.colorDomain || this.state.countRange;
+    const {countDomainByPercentile} = this.state;
+    const colorDomain = this.props.colorDomain || countDomainByPercentile;
+    const count = cell.points.length;
 
-    return ordinalScale(colorDomain, colorRange, cell.points.length);
+    const color = ordinalScale(colorDomain, colorRange, count);
+
+    // if cell count is outside domain, set alpha to 0
+    const alpha = count >= countDomainByPercentile[0] && count <= countDomainByPercentile[1] ?
+      (Number.isFinite(color[3]) ? color[3] : 255) : 0;
+
+    return color.concat([alpha]);
   }
 
   _onGetSublayerElevation(cell) {
-    const {elevationRange} = this.props;
-    const elevationDomain = this.props.elevationDomain || [0, this.state.countRange[1]];
-    return linearScale(elevationDomain, elevationRange, cell.points.length);
+    const {elevationDomain, elevationRange} = this.props;
+    const {sortedCounts} = this.state;
+
+    // elevation is not affected by percentile
+    const domain = elevationDomain || [0, sortedCounts[sortedCounts.length - 1].counts];
+    return linearScale(domain, elevationRange, cell.points.length);
   }
 
   renderLayers() {
@@ -136,8 +187,16 @@ export default class PointDensityHexagonLayer extends Layer {
         onHover: this._onHoverSublayer.bind(this),
         onClick: noop,
         updateTriggers: {
-          getColor: {colorRange: this.props.colorRange},
-          getElevation: {elevationRange: this.props.elevationRange}
+          getColor: {
+            colorRange: this.props.colorRange,
+            colorDomain: this.props.colorDomain,
+            lowerPercentile: this.props.lowerPercentile,
+            upperPercentile: this.props.upperPercentile
+          },
+          getElevation: {
+            elevationRange: this.props.elevationRange,
+            elevationDomain: this.props.elevationDomain
+          }
         }
       }));
   }
