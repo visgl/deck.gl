@@ -24,6 +24,7 @@ export {assembleShaders} from './shader-utils';
 
 // Lib
 export {COORDINATE_SYSTEM, Layer, LayerManager, AttributeManager} from './lib';
+export {default as PerspectiveViewport} from './lib/viewports/perspective-viewport';
 
 // Core Layers
 export {default as ArcLayer} from './layers/core/arc-layer/arc-layer';
@@ -52,9 +53,6 @@ export {default as ExtrudedChoroplethLayer64} from './layers/deprecated/extruded
 // React exports
 export {default as DeckGL} from './react/deckgl';
 export {default as default} from './react/deckgl';
-
-// Viewports
-export {default as PerspectiveViewport} from './lib/viewports/perspective-viewport';
 
 // Experimental Features (May change in minor version bumps, use at your own risk)
 import {get} from './lib/utils/container';

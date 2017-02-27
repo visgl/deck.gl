@@ -3,7 +3,7 @@ import {default as ArcDemo} from './arc';
 import {default as GridDemo} from './grid';
 import {default as ChoroplethDemo} from './choropleth';
 import {default as HeroDemo} from './hero';
-import {default as GraphDemo} from './graph';
+import {default as PlotDemo} from './plot';
 
 class HomeDemo extends HeroDemo {
 
@@ -39,5 +39,5 @@ export default {
   ChoroplethDemo,
   HeroDemo,
   HomeDemo,
-  GraphDemo
+  PlotDemo
 };

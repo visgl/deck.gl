@@ -58,7 +58,7 @@ export const examplePages = generatePath([
   {
     name: 'Graph Explorer',
     content: {
-      demo: 'GraphDemo',
+      demo: 'PlotDemo',
       code: 'code-markdown/scatterplot.md'
     }
   }

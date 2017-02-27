@@ -2,6 +2,7 @@
 import React, {Component, PropTypes} from 'react';
 import autobind from 'autobind-decorator';
 import {PerspectiveViewport} from 'deck.gl';
+import {vec3} from 'gl-matrix';
 
 /* Utils */
 
@@ -16,69 +17,25 @@ function clamp(x, min, max) {
   return x;
 }
 
-// vector operations
-function add(v0, v1) {
-  return [
-    v0[0] + v1[0],
-    v0[1] + v1[1],
-    v0[2] + v1[2]
-  ];
-}
-
-function minus(v0, v1) {
-  return [
-    v0[0] - v1[0],
-    v0[1] - v1[1],
-    v0[2] - v1[2]
-  ];
-}
-
-// rotate vector around x axis
-// @param {number} angle: in degrees
-function rotateX(vector, angle) {
-  const r = angle / 180 * Math.PI;
-  const cosA = Math.cos(r);
-  const sinA = Math.sin(r);
-  const [x, y, z] = vector;
-  return [
-    x,
-    y * cosA - z * sinA,
-    y * sinA + z * cosA
-  ];
-}
-
-// rotate vector around y axis
-// @param {number} angle: in degrees
-function rotateY(vector, angle) {
-  const r = angle / 180 * Math.PI;
-  const cosA = Math.cos(r);
-  const sinA = Math.sin(r);
-  const [x, y, z] = vector;
-  return [
-    x * cosA + z * sinA,
-    y,
-    -x * sinA + z * cosA
-  ];
-}
-
 const ua = typeof window.navigator !== 'undefined' ?
   window.navigator.userAgent.toLowerCase() : '';
 const firefox = ua.indexOf('firefox') !== -1;
 
 /* Interaction */
 
-export default class Canvas3D extends Component {
+export default class OrbitController extends Component {
 
   static getViewport({width, height, lookAt, distance, rotationX, rotationY, fov}) {
-    let cameraDir = [0, 0, distance];
-    cameraDir = rotateX(cameraDir, rotationX);
-    cameraDir = rotateY(cameraDir, rotationY);
+    const cameraPos = vec3.add([], lookAt, [0, 0, distance]);
+    vec3.rotateX(cameraPos, cameraPos, lookAt, rotationX / 180 * Math.PI);
+    vec3.rotateY(cameraPos, cameraPos, lookAt, rotationY / 180 * Math.PI);
+
     return new PerspectiveViewport({
       width,
       height,
       lookAt,
       fovy: fov,
-      eye: add(lookAt, cameraDir)
+      eye: cameraPos
     });
   }
 
@@ -115,11 +72,13 @@ export default class Canvas3D extends Component {
         const {lookAt, distance, rotationX, rotationY, fov} = this.props;
 
         const unitsPerPixel = distance / Math.tan(fov / 180 * Math.PI / 2) / 2;
-        let translation = [-unitsPerPixel * dx, unitsPerPixel * dy, 0];
-        translation = rotateX(translation, rotationX);
-        translation = rotateY(translation, rotationY);
+
+        const newLookAt = vec3.add([], lookAt, [-unitsPerPixel * dx, unitsPerPixel * dy, 0]);
+        vec3.rotateX(newLookAt, newLookAt, lookAt, rotationX / 180 * Math.PI);
+        vec3.rotateY(newLookAt, newLookAt, lookAt, rotationY / 180 * Math.PI);
+
         this.props.onViewportChange({
-          lookAt: add(lookAt, translation)
+          lookAt: newLookAt
         });
       }
 
@@ -159,7 +118,8 @@ export default class Canvas3D extends Component {
   // public API
   fitBounds(min, max) {
     const {fov} = this.props;
-    const newDistance = Math.max(...minus(max, min)) / Math.tan(fov / 180 * Math.PI / 2) / 2;
+    const size = Math.max(max[0] - min[0], max[1] - min[1], max[2] - min[2]);
+    const newDistance = size / Math.tan(fov / 180 * Math.PI / 2) / 2;
 
     this.props.onViewportChange({
       distance: newDistance
@@ -181,7 +141,7 @@ export default class Canvas3D extends Component {
   }
 }
 
-Canvas3D.propTypes = {
+OrbitController.propTypes = {
   // target position
   lookAt: PropTypes.arrayOf(PropTypes.number),
   // camera distance
@@ -201,7 +161,7 @@ Canvas3D.propTypes = {
   onViewportChange: PropTypes.func.isRequired
 };
 
-Canvas3D.defaultProps = {
+OrbitController.defaultProps = {
   lookAt: [0, 0, 0],
   rotationX: 0,
   rotationY: 0,

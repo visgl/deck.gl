@@ -2,11 +2,11 @@ import React, {Component} from 'react';
 import autobind from 'autobind-decorator';
 import {Parser} from 'expr-eval';
 
-import Canvas3D from '../canvas3d';
+import OrbitController from '../orbit-controller';
 import PlotLayer from './plot-layer/plot-layer';
 import DeckGL from 'deck.gl';
 
-export default class GraphDemo extends Component {
+export default class PlotDemo extends Component {
 
   static get data() {
     return [];
@@ -130,10 +130,10 @@ export default class GraphDemo extends Component {
       height,
       ...viewport
     };
-    const perspectiveViewport = Canvas3D.getViewport(canvasProps);
+    const perspectiveViewport = OrbitController.getViewport(canvasProps);
 
     return (
-      <Canvas3D ref="canvas"
+      <OrbitController ref="canvas"
         {...canvasProps}
         onViewportChange={this._onViewportChange} >
         <DeckGL
@@ -147,7 +147,7 @@ export default class GraphDemo extends Component {
           { hoverInfo.sample.map(x => x.toFixed(3)).join(', ') }
           </div>}
 
-      </Canvas3D>
+      </OrbitController>
     );
   }
 }
