@@ -116,37 +116,25 @@ export default class Layer {
     }
   }
 
-  // If state has a model, draw it with supplied uniforms
-  /* eslint-disable max-statements */
-  pick({info, uniforms, pickEnableUniforms, pickDisableUniforms, mode}) {
-    const {gl} = this.context;
-    const {model} = this.state;
+  pick({info, mode}) {
+    const {color} = info;
+    // Index < 0 means nothing selected
+    const index = this.decodePickingColor(color);
+    info.index = index;
+    info.object = Array.isArray(this.props.data) ? this.props.data[index] : null;
 
-    if (model) {
-      model.setUniforms(pickEnableUniforms);
-      model.render(uniforms);
-      model.setUniforms(pickDisableUniforms);
-
-      // Read color in the central pixel, to be mapped with picking colors
-      const [x, y] = info.devicePixel;
-      const color = new Uint8Array(4);
-      gl.readPixels(x, y, 1, 1, GL.RGBA, GL.UNSIGNED_BYTE, color);
-
-      // Index < 0 means nothing selected
-      info.index = this.decodePickingColor(color);
-      info.color = color;
-
-      // TODO - selectedPickingColor should be removed?
-      if (mode === 'hover') {
-        const selectedPickingColor = new Float32Array(3);
-        selectedPickingColor[0] = color[0];
-        selectedPickingColor[1] = color[1];
-        selectedPickingColor[2] = color[2];
-        this.setUniforms({selectedPickingColor});
-      }
+    // TODO - selectedPickingColor should be removed?
+    if (mode === 'hover') {
+      const selectedPickingColor = new Float32Array(3);
+      selectedPickingColor[0] = color[0];
+      selectedPickingColor[1] = color[1];
+      selectedPickingColor[2] = color[2];
+      this.setUniforms({selectedPickingColor});
     }
+
+    // return null to cancel the event
+    return info;
   }
-  /* eslint-enable max-statements */
 
   // END LIFECYCLE METHODS
   // //////////////////////////////////////////////////

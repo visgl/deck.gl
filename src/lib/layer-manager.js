@@ -129,6 +129,7 @@ export default class LayerManager {
       },
       layers: this.layers,
       mode,
+      viewport: this.context.viewport,
       pickingFBO: this.context.pickingFBO
     });
   }
