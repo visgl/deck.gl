@@ -10,7 +10,7 @@
 import Viewport, {COORDINATE_SYSTEM}
   from 'viewport-mercator-project/perspective';
 import autobind from 'autobind-decorator';
-import {mat4, vec4} from 'gl-matrix';
+import {mat4, vec3, vec4} from 'gl-matrix';
 
 export {COORDINATE_SYSTEM}
   from 'viewport-mercator-project/perspective';
@@ -79,14 +79,14 @@ export default class WebGLViewport extends Viewport {
       // Projection mode values
       projectionMode,
       projectionCenter,
-
       // Main projection matrices
       projectionMatrix: this.glProjectionMatrix,
       projectionFP64: this.glProjectionMatrixFP64,
       projectionPixelsPerUnit: this.pixelsPerMeter,
       projectionScale: this.scale,
       projectionScaleFP64: fp64ify(this.scale),
-
+      // viewMatrix is needed for backward-compatibility to deck.gl v2 shaders
+      viewMatrix: this.glViewMatrix,
       // TODO - deprecated, remove
       mercatorScale: Math.pow(2, this.zoom),
       mercatorCenter: this.center
@@ -99,6 +99,9 @@ export default class WebGLViewport extends Viewport {
   _calculateWebGLMatrices() {
     this.glProjectionMatrix =
       new Float32Array(this.viewProjectionMatrix);
+    const viewMatrixCompat = mat4.create();
+    mat4.lookAt(viewMatrixCompat, [0, 0, 0], [0, 0, -1], [0, 1, 0]);
+    this.glViewMatrix = new Float32Array(viewMatrixCompat);
     this.glProjectionMatrixFP64 = new Float32Array(32);
     this._dy64ifyProjectionMatrix();
   }
