@@ -14,9 +14,6 @@ export default class LayerInfo extends PureComponent {
   }
 
   _onMouseEvent(name, info) {
-    if (info.index < 0) {
-      info = null;
-    }
     this.setState({[name]: info});
   }
 

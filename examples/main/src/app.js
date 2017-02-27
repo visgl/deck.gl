@@ -19,8 +19,6 @@ import LAYER_CATEGORIES from './layer-examples';
 const MAPBOX_ACCESS_TOKEN = process.env.MAPBOX_ACCESS_TOKEN || // eslint-disable-line
   'Set MAPBOX_ACCESS_TOKEN environment variable or put your token here.';
 
-const noop = () => {};
-
 // ---- View ---- //
 class App extends PureComponent {
   constructor(props) {
@@ -91,17 +89,17 @@ class App extends PureComponent {
     this.setState({settings});
   }
 
+  _onHover(info) {
+    this.refs.infoPanel.onItemHovered(info);
+  }
+
+  _onClick(info) {
+    this.refs.infoPanel.onItemClicked(info);
+  }
+
   _renderExampleLayer(example, settings, index) {
     const {layer: Layer, props, getData} = example;
-    const {infoPanel} = this.refs;
     const layerProps = Object.assign({}, props, settings);
-
-    if (props.pickable) {
-      Object.assign(layerProps, {
-        onHover: infoPanel ? infoPanel.onItemHovered : noop,
-        onClick: infoPanel ? infoPanel.onItemClicked : noop
-      });
-    }
 
     if (getData) {
       Object.assign(layerProps, {data: getData()});
@@ -170,6 +168,8 @@ class App extends PureComponent {
           width={width} height={height}
           {...mapViewState}
           onWebGLInitialized={ this._onWebGLInitialized }
+          onLayerHover={ this._onHover }
+          onLayerClick={ this._onClick }
           layers={this._renderExamples()}
           effects={effects ? this._effects : []}
         />
