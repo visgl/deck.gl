@@ -125,7 +125,6 @@ export default class GeoJsonLayer extends CompositeLayer {
         getColor: getFillColor,
         extruded,
         wireframe: false,
-        fp64: this.props.fp64,
         updateTriggers: {
           getElevation: this.props.updateTriggers.getElevation,
           getColor: this.props.updateTriggers.getFillColor
@@ -143,7 +142,6 @@ export default class GeoJsonLayer extends CompositeLayer {
         getColor: getStrokeColor,
         extruded: true,
         wireframe: true,
-        fp64: this.props.fp64,
         updateTriggers: {
           getColor: this.props.updateTriggers.getStrokeColor
         }
@@ -185,7 +183,8 @@ export default class GeoJsonLayer extends CompositeLayer {
         updateTriggers: {
           getColor: this.props.updateTriggers.getPointColor,
           getRadius: this.props.updateTriggers.getPointSize
-        }
+        },
+        fp64: this.props.fp64
       }));
 
     return [

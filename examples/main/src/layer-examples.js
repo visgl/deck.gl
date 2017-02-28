@@ -14,7 +14,6 @@ import {
   // PolygonLayer,
   PathLayer,
 
-  ScatterplotLayer64,
   ArcLayer64,
   LineLayer64,
 
@@ -97,32 +96,6 @@ const GeoJsonLayerExample = {
     strokeWidth: 10,
     strokeWidthMinPixels: 1,
     pickable: true
-  }
-};
-
-const GeoJsonLayer64Example = {
-  layer: GeoJsonLayer,
-  props: {
-    id: 'geojsonLayer',
-    data: dataSamples.geojson,
-    // TODO change to use the color util when it is landed
-    getPointColor: f => parseColor(f.properties['marker-color']),
-    getPointSize: f => MARKER_SIZE_MAP[f.properties['marker-size']],
-    getStrokeColor: f => {
-      const color = parseColor(f.properties.stroke);
-      const opacity = f.properties['stroke-opacity'] * 255;
-      return setOpacity(color, opacity);
-    },
-    getStrokeWidth: f => f.properties['stroke-width'],
-    getFillColor: f => {
-      const color = parseColor(f.properties.fill);
-      const opacity = f.properties['fill-opacity'] * 255;
-      return setOpacity(color, opacity);
-    },
-    strokeWidth: 10,
-    strokeWidthMinPixels: 1,
-    pickable: true,
-    fp64: true
   }
 };
 
@@ -336,20 +309,6 @@ const LineLayer64Example = {
   }
 };
 
-const ScatterplotLayer64Example = {
-  layer: ScatterplotLayer64,
-  props: {
-    id: 'scatterplotLayer64',
-    data: dataSamples.points,
-    getPosition: d => d.COORDINATES,
-    getColor: d => [255, 128, 0],
-    getRadius: d => d.SPACES,
-    pickable: true,
-    radiusMinPixels: 1,
-    radiusMaxPixels: 30
-  }
-};
-
 const ChoroplethLayerContourExample = {
   layer: ChoroplethLayer,
   props: {
@@ -435,7 +394,7 @@ const ScatterplotLayerPerfExample = (id, getData) => ({
 });
 
 const ScatterplotLayer64PerfExample = (id, getData) => ({
-  layer: ScatterplotLayer64,
+  layer: ScatterplotLayer,
   getData,
   props: {
     id: `scatterplotLayer64Perf-${id}`,
@@ -443,7 +402,8 @@ const ScatterplotLayer64PerfExample = (id, getData) => ({
     getColor: d => [0, 128, 0],
     // pickable: true,
     radiusMinPixels: 1,
-    radiusMaxPixels: 5
+    radiusMaxPixels: 5,
+    fp64: true
   }
 });
 
@@ -469,9 +429,7 @@ export default {
 
   '64-bit Layers': {
     ArcLayer64: ArcLayer64Example,
-    ScatterplotLayer64: ScatterplotLayer64Example,
-    LineLayer64: LineLayer64Example,
-    GeoJsonLayer64: GeoJsonLayer64Example
+    LineLayer64: LineLayer64Example
   },
 
   'Deprecated Layers': {
