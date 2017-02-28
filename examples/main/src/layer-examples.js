@@ -17,7 +17,6 @@ import {
   ScatterplotLayer64,
   ArcLayer64,
   LineLayer64,
-  GeoJsonLayer64,
 
   ChoroplethLayer,
   ChoroplethLayer64,
@@ -102,7 +101,7 @@ const GeoJsonLayerExample = {
 };
 
 const GeoJsonLayer64Example = {
-  layer: GeoJsonLayer64,
+  layer: GeoJsonLayer,
   props: {
     id: 'geojsonLayer',
     data: dataSamples.geojson,
@@ -122,7 +121,8 @@ const GeoJsonLayer64Example = {
     },
     strokeWidth: 10,
     strokeWidthMinPixels: 1,
-    pickable: true
+    pickable: true,
+    fp64: true
   }
 };
 

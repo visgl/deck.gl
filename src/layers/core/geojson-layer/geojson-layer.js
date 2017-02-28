@@ -49,7 +49,8 @@ const defaultProps = {
   getFillColor: f => get(f, 'properties.fillColor') || defaultFillColor,
 
   // Polygon extrusion accessor
-  getElevation: f => 1000
+  getElevation: f => 1000,
+  fp64: false
 };
 
 function noop() {}
@@ -124,6 +125,7 @@ export default class GeoJsonLayer extends CompositeLayer {
         getColor: getFillColor,
         extruded,
         wireframe: false,
+        fp64: this.props.fp64,
         updateTriggers: {
           getElevation: this.props.updateTriggers.getElevation,
           getColor: this.props.updateTriggers.getFillColor
@@ -141,6 +143,7 @@ export default class GeoJsonLayer extends CompositeLayer {
         getColor: getStrokeColor,
         extruded: true,
         wireframe: true,
+        fp64: this.props.fp64,
         updateTriggers: {
           getColor: this.props.updateTriggers.getStrokeColor
         }
