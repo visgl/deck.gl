@@ -118,6 +118,7 @@ export default class ScatterplotLayer extends Layer {
           'positions64xyLow'
         ]);
       }
+
     }
   }
 
