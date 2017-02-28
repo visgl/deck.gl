@@ -91,20 +91,22 @@ export default class ScatterplotLayer extends Layer {
   updateAttribute({props, oldProps, changeFlags}) {
     if (props.fp64 !== oldProps.fp64) {
       const {attributeManager} = this.state;
-
-      // all attributes needs to be set again after the model changes
-      this.state.attributeManager.addInstanced({
-        instancePositions: {size: 3, accessor: 'getPosition', update: this.calculateInstancePositions},
-        instanceRadius: {size: 1, accessor: 'getRadius', defaultValue: 1, update: this.calculateInstanceRadius},
-        instanceColors: {size: 4, type: GL.UNSIGNED_BYTE, accessor: 'getColor', update: this.calculateInstanceColors},
-        instancePickingColors: {type: GL.UNSIGNED_BYTE, size: 3, update: this.calculateInstancePickingColors}
-      });
+      attributeManager.invalidateAll();
 
       if (props.fp64 === true) {
         attributeManager.addInstanced({
-          instancePositions64xyLow: {size: 2, accessor: 'getPosition', update: this.calculateInstancePositions64xyLow}
+          instancePositions64xyLow: {
+            size: 2,
+            accessor: 'getPosition',
+            update: this.calculateInstancePositions64xyLow
+          }
         });
+      } else {
+        attributeManager.remove([
+          'positions64xyLow'
+        ]);
       }
+
     }
   }
 
