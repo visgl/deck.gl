@@ -43,14 +43,15 @@ const defaultProps = {
 export default class ScatterplotLayer extends Layer {
   getShaders(id) {
 
-    const shaders = this.props.fp64 ? {
+    return this.props.fp64 ? {
       vs: readFileSync(join(__dirname, './scatterplot-layer-64-vertex.glsl'), 'utf8'),
       fs: readFileSync(join(__dirname, './scatterplot-layer-fragment.glsl'), 'utf8'),
-      modules: ['lighting', 'fp64', 'project64']} : {
-        vs: readFileSync(join(__dirname, './scatterplot-layer-vertex.glsl'), 'utf8'),
-        fs: readFileSync(join(__dirname, './scatterplot-layer-fragment.glsl'), 'utf8'),
-        modules: ['lighting']};
-    return shaders;
+      modules: ['lighting', 'fp64', 'project64']
+    } : {
+      vs: readFileSync(join(__dirname, './scatterplot-layer-vertex.glsl'), 'utf8'),
+      fs: readFileSync(join(__dirname, './scatterplot-layer-fragment.glsl'), 'utf8'),
+      modules: ['lighting']
+    };
   }
 
   initializeState() {
