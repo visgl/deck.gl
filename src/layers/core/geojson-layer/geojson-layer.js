@@ -185,7 +185,8 @@ export default class GeoJsonLayer extends CompositeLayer {
         updateTriggers: {
           getColor: this.props.updateTriggers.getPointColor,
           getRadius: this.props.updateTriggers.getPointSize
-        }
+        },
+        fp64: this.props.fp64
       }));
 
     return [

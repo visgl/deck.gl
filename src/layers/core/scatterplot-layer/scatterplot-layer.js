@@ -24,6 +24,7 @@ import {GL, Model, Geometry} from 'luma.gl';
 import {readFileSync} from 'fs';
 import {join} from 'path';
 import {log} from '../../../lib/utils';
+import {fp64ify} from '../../../lib/utils/fp64';
 
 const DEFAULT_COLOR = [0, 0, 0, 255];
 
@@ -35,15 +36,21 @@ const defaultProps = {
   radiusMinPixels: 0, //  min point radius in pixels
   radiusMaxPixels: Number.MAX_SAFE_INTEGER, // max point radius in pixels
   outline: false,
-  strokeWidth: 1
+  strokeWidth: 1,
+  fp64: false
 };
 
 export default class ScatterplotLayer extends Layer {
   getShaders(id) {
-    return {
-      vs: readFileSync(join(__dirname, './scatterplot-layer-vertex.glsl'), 'utf8'),
-      fs: readFileSync(join(__dirname, './scatterplot-layer-fragment.glsl'), 'utf8')
-    };
+
+    const shaders = this.props.fp64 ? {
+      vs: readFileSync(join(__dirname, './scatterplot-layer-64-vertex.glsl'), 'utf8'),
+      fs: readFileSync(join(__dirname, './scatterplot-layer-fragment.glsl'), 'utf8'),
+      modules: ['lighting', 'fp64', 'project64']} : {
+        vs: readFileSync(join(__dirname, './scatterplot-layer-vertex.glsl'), 'utf8'),
+        fs: readFileSync(join(__dirname, './scatterplot-layer-fragment.glsl'), 'utf8'),
+        modules: ['lighting']};
+    return shaders;
   }
 
   initializeState() {
@@ -65,7 +72,45 @@ export default class ScatterplotLayer extends Layer {
       instanceRadius: {size: 1, accessor: 'getRadius', defaultValue: 1, update: this.calculateInstanceRadius},
       instanceColors: {size: 4, type: GL.UNSIGNED_BYTE, accessor: 'getColor', update: this.calculateInstanceColors}
     });
+
+    if (this.props.fp64) {
+      this.state.attributeManager.addInstanced({
+        instancePositions64xyLow: {size: 2, accessor: 'getPosition', update: this.calculateInstancePositions64xyLow}
+      });
+    }
     /* eslint-enable max-len */
+  }
+
+  updateModel({props, oldProps, changeFlags}) {
+    if (props.fp64 !== oldProps.fp64) {
+      const {gl} = this.context;
+      this.setState({model: this._getModel(gl)});
+    }
+  }
+
+  updateAttribute({props, oldProps, changeFlags}) {
+    if (props.fp64 !== oldProps.fp64) {
+      const {attributeManager} = this.state;
+
+      // all attributes needs to be set again after the model changes
+      this.state.attributeManager.addInstanced({
+        instancePositions: {size: 3, accessor: 'getPosition', update: this.calculateInstancePositions},
+        instanceRadius: {size: 1, accessor: 'getRadius', defaultValue: 1, update: this.calculateInstanceRadius},
+        instanceColors: {size: 4, type: GL.UNSIGNED_BYTE, accessor: 'getColor', update: this.calculateInstanceColors},
+        instancePickingColors: {type: GL.UNSIGNED_BYTE, size: 3, update: this.calculateInstancePickingColors}
+      });
+
+      if (props.fp64 === true) {
+        attributeManager.addInstanced({
+          instancePositions64xyLow: {size: 2, accessor: 'getPosition', update: this.calculateInstancePositions64xyLow}
+        });
+      }
+    }
+  }
+
+  updateState({props, oldProps, changeFlags}) {
+    this.updateModel({props, oldProps, changeFlags});
+    this.updateAttribute({props, oldProps, changeFlags});
   }
 
   draw({uniforms}) {
@@ -106,6 +151,17 @@ export default class ScatterplotLayer extends Layer {
       value[i++] = position[0];
       value[i++] = position[1];
       value[i++] = position[2] || 0;
+    }
+  }
+
+  calculateInstancePositions64xyLow(attribute) {
+    const {data, getPosition} = this.props;
+    const {value} = attribute;
+    let i = 0;
+    for (const point of data) {
+      const position = getPosition(point);
+      value[i++] = fp64ify(position[0])[1];
+      value[i++] = fp64ify(position[1])[1];
     }
   }
 
