@@ -43,7 +43,7 @@ export {default as ScreenGridLayer} from './layers/core/screen-grid-layer/screen
 export {default as ScatterplotLayer64} from './layers/fp64/scatterplot-layer/scatterplot-layer-64';
 export {default as ArcLayer64} from './layers/fp64/arc-layer/arc-layer-64';
 export {default as LineLayer64} from './layers/fp64/line-layer/line-layer-64';
-export {default as GeoJsonLayer64} from './layers/fp64/geojson-layer/geojson-layer-64';
+// export {default as GeoJsonLayer64} from './layers/fp64/geojson-layer/geojson-layer-64';
 
 // Deprecated Layers
 export {default as ChoroplethLayer} from './layers/deprecated/choropleth-layer/choropleth-layer';

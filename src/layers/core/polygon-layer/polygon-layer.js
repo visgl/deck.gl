@@ -79,7 +79,7 @@ export default class PolygonLayer extends Layer {
     const {attributeManager} = this.state;
     const noAlloc = true;
     /* eslint-disable max-len */
-    attributeManager.addDynamic({
+    attributeManager.add({
       indices: {size: 1, isIndexed: true, update: this.calculateIndices, noAlloc},
       positions: {size: 3, accessor: 'getHeight', update: this.calculatePositions, noAlloc},
       normals: {size: 3, update: this.calculateNormals, noAlloc},
@@ -89,14 +89,39 @@ export default class PolygonLayer extends Layer {
     /* eslint-enable max-len */
 
     if (this.props.fp64) {
-      attributeManager.addDynamic({
+      attributeManager.add({
         positions64xyLow: {size: 2, update: this.calculatePositionsLow}
       });
     }
   }
 
+  updateModel({props, oldProps, changeFlags}) {
+    if (props.fp64 !== oldProps.fp64) {
+      const {gl} = this.context;
+      this.setState({model: this.getModel(gl)});
+    }
+  }
+
+  updateAttribute({props, oldProps, changeFlags}) {
+    if (props.fp64 !== oldProps.fp64) {
+      const {attributeManager} = this.state;
+      if (props.fp64 === true) {
+        attributeManager.add({
+          positions64xyLow: {size: 2, update: this.calculatePositionsLow}
+        });
+      } else {
+        attributeManager.remove([
+          'positions64xyLow'
+        ]);
+      }
+    }
+  }
+
   updateState({props, oldProps, changeFlags}) {
     this.updateGeometry({props, oldProps, changeFlags});
+    this.updateModel({props, oldProps, changeFlags});
+    this.updateAttribute({props, oldProps, changeFlags});
+
     const {opacity, extruded, lightSettings} = props;
 
     this.setUniforms(Object.assign({}, {
@@ -109,7 +134,7 @@ export default class PolygonLayer extends Layer {
   updateGeometry({props, oldProps, changeFlags}) {
     const geometryChanged =
       props.extruded !== oldProps.extruded ||
-      props.wireframe !== oldProps.wireframe;
+      props.wireframe !== oldProps.wireframe || props.fp64 !== oldProps.fp64;
 
     if (changeFlags.dataChanged || geometryChanged) {
       const {getPolygon, extruded, wireframe, getHeight} = props;
