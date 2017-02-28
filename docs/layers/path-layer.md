@@ -3,6 +3,10 @@
 The Path Layer takes in paired latitude and longitude coordinated points and
 render them as arcs that links the starting and ending points.
 
+  <div align="center">
+    <img height="300" src="/demo/src/static/images/demo-thumb-path.jpg" />
+  </div>
+
     import {PathLayer} from 'deck.gl';
 
 Inherits from all [Base Layer](/docs/layers/base-layer.md) properties.

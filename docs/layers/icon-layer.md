@@ -2,6 +2,10 @@
 
 The Icon Layer renders raster icons at given latitude/longitude coordinates.
 
+  <div align="center">
+    <img height="300" src="/demo/src/static/images/demo-thumb-icon.jpg" />
+  </div>
+
     import {IconLayer} from 'deck.gl';
 
 Inherits from all [Base Layer](/docs/layers/base-layer.md) properties.
