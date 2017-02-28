@@ -42,8 +42,6 @@ const defaultProps = {
 
 export default class ScatterplotLayer extends Layer {
   getShaders(id) {
-
-<<<<<<< HEAD
     return this.props.fp64 ? {
       vs: readFileSync(join(__dirname, './scatterplot-layer-64-vertex.glsl'), 'utf8'),
       fs: readFileSync(join(__dirname, './scatterplot-layer-fragment.glsl'), 'utf8'),
@@ -53,16 +51,6 @@ export default class ScatterplotLayer extends Layer {
       fs: readFileSync(join(__dirname, './scatterplot-layer-fragment.glsl'), 'utf8'),
       modules: ['lighting']
     };
-=======
-    const shaders = this.props.fp64 ? {
-      vs: readFileSync(join(__dirname, './scatterplot-layer-64-vertex.glsl'), 'utf8'),
-      fs: readFileSync(join(__dirname, './scatterplot-layer-fragment.glsl'), 'utf8'),
-      modules: ['lighting', 'fp64', 'project64']} : {
-        vs: readFileSync(join(__dirname, './scatterplot-layer-vertex.glsl'), 'utf8'),
-        fs: readFileSync(join(__dirname, './scatterplot-layer-fragment.glsl'), 'utf8'),
-        modules: ['lighting']};
-    return shaders;
->>>>>>> Merge the 32-bit and 64-bit scatterplot layer and let user dynamically switch between them using props.fp64
   }
 
   initializeState() {
