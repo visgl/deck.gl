@@ -23,6 +23,7 @@ import {assembleShaders} from '../../../shader-utils';
 import {GL, Model, Geometry} from 'luma.gl';
 import {readFileSync} from 'fs';
 import {join} from 'path';
+import {fp64ify} from '../../../lib/utils/fp64';
 
 const DEFAULT_COLOR = [0, 0, 0, 255];
 
@@ -30,14 +31,27 @@ const defaultProps = {
   getSourcePosition: x => x.sourcePosition,
   getTargetPosition: x => x.targetPosition,
   getColor: x => x.color || DEFAULT_COLOR,
-  strokeWidth: 1
+  strokeWidth: 1,
+  fp64: false
 };
 
 export default class LineLayer extends Layer {
+  getShaders() {
+    return this.props.fp64 ? {
+      vs: readFileSync(join(__dirname, './line-layer-64-vertex.glsl'), 'utf8'),
+      fs: readFileSync(join(__dirname, './line-layer-fragment.glsl'), 'utf8'),
+      modules: ['fp64', 'project64']
+    } : {
+      vs: readFileSync(join(__dirname, './line-layer-vertex.glsl'), 'utf8'),
+      fs: readFileSync(join(__dirname, './line-layer-fragment.glsl'), 'utf8'),
+      modules: []
+    };
+  }
+
   initializeState() {
 
     const {gl} = this.context;
-    this.setState({model: this.createModel(gl)});
+    this.setState({model: this._getModel(gl)});
 
     const {attributeManager} = this.state;
 
@@ -47,7 +61,43 @@ export default class LineLayer extends Layer {
       instanceTargetPositions: {size: 3, accessor: 'getTargetPosition', update: this.calculateInstanceTargetPositions},
       instanceColors: {size: 4, type: GL.UNSIGNED_BYTE, accessor: 'getColor', update: this.calculateInstanceColors}
     });
+
+    if (this.props.fp64) {
+      this.state.attributeManager.addInstanced({
+        /* We only need low parts of the x, y coordinates. So the source and target
+        positions are lumped together into one attribute
+        */
+        instanceSourceTargetPositions64xyLow: {size: 4, accessor: ['getSourcePosition', 'getTargetPosition'], update: this.calculateInstanceSourceTargetPositions64xyLow}
+      });
+    }
     /* eslint-enable max-len */
+  }
+
+  updateAttribute({props, oldProps, changeFlags}) {
+    if (props.fp64 !== oldProps.fp64) {
+      const {attributeManager} = this.state;
+      attributeManager.invalidateAll();
+
+      if (props.fp64 === true) {
+        attributeManager.addInstanced({
+          instanceSourceTargetPositions64xyLow: {
+            size: 4,
+            accessor: ['getSourcePosition', 'getTargetPosition'],
+            update: this.calculateInstanceSourceTargetPositions64xyLow
+          }
+        });
+      } else {
+        attributeManager.remove([
+          'instanceSourceTargetPositions64xyLow'
+        ]);
+      }
+
+    }
+  }
+
+  updateState({props, oldProps, changeFlags}) {
+    this.updateModel({props, oldProps, changeFlags});
+    this.updateAttribute({props, oldProps, changeFlags});
   }
 
   draw({uniforms}) {
@@ -60,14 +110,7 @@ export default class LineLayer extends Layer {
     }));
   }
 
-  getShaders() {
-    return {
-      vs: readFileSync(join(__dirname, './line-layer-vertex.glsl'), 'utf8'),
-      fs: readFileSync(join(__dirname, './line-layer-fragment.glsl'), 'utf8')
-    };
-  }
-
-  createModel(gl) {
+  _getModel(gl) {
     /*
      *  (0, -1)-------------_(1, -1)
      *       |          _,-"  |
@@ -114,6 +157,21 @@ export default class LineLayer extends Layer {
       value[i + 0] = targetPosition[0];
       value[i + 1] = targetPosition[1];
       value[i + 2] = isNaN(targetPosition[2]) ? 0 : targetPosition[2];
+      i += size;
+    }
+  }
+
+  calculateInstanceSourceTargetPositions64xyLow(attribute) {
+    const {data, getSourcePosition, getTargetPosition} = this.props;
+    const {value, size} = attribute;
+    let i = 0;
+    for (const object of data) {
+      const sourcePosition = getSourcePosition(object);
+      const targetPosition = getTargetPosition(object);
+      value[i + 0] = fp64ify(sourcePosition[0])[1];
+      value[i + 1] = fp64ify(sourcePosition[1])[1];
+      value[i + 2] = fp64ify(targetPosition[0])[1];
+      value[i + 3] = fp64ify(targetPosition[1])[1];
       i += size;
     }
   }

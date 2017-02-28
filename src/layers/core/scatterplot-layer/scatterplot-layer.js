@@ -45,11 +45,11 @@ export default class ScatterplotLayer extends Layer {
     return this.props.fp64 ? {
       vs: readFileSync(join(__dirname, './scatterplot-layer-64-vertex.glsl'), 'utf8'),
       fs: readFileSync(join(__dirname, './scatterplot-layer-fragment.glsl'), 'utf8'),
-      modules: ['lighting', 'fp64', 'project64']
+      modules: ['fp64', 'project64']
     } : {
       vs: readFileSync(join(__dirname, './scatterplot-layer-vertex.glsl'), 'utf8'),
       fs: readFileSync(join(__dirname, './scatterplot-layer-fragment.glsl'), 'utf8'),
-      modules: ['lighting']
+      modules: []
     };
   }
 
@@ -81,13 +81,6 @@ export default class ScatterplotLayer extends Layer {
     /* eslint-enable max-len */
   }
 
-  updateModel({props, oldProps, changeFlags}) {
-    if (props.fp64 !== oldProps.fp64) {
-      const {gl} = this.context;
-      this.setState({model: this._getModel(gl)});
-    }
-  }
-
   updateAttribute({props, oldProps, changeFlags}) {
     if (props.fp64 !== oldProps.fp64) {
       const {attributeManager} = this.state;
@@ -103,7 +96,7 @@ export default class ScatterplotLayer extends Layer {
         });
       } else {
         attributeManager.remove([
-          'positions64xyLow'
+          'instancePositions64xyLow'
         ]);
       }
 

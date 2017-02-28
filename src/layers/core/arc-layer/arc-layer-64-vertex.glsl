@@ -23,8 +23,10 @@
 attribute vec3 positions;
 attribute vec4 instanceSourceColors;
 attribute vec4 instanceTargetColors;
-attribute vec4 instanceSourcePositions64;
-attribute vec4 instanceTargetPositions64;
+
+attribute vec4 instancePositions;
+attribute vec4 instancePositions64Low;
+
 attribute vec3 instancePickingColors;
 
 uniform float numSegments;
@@ -83,9 +85,13 @@ void get_pos_fp64(vec2 source[2], vec2 target[2], float segmentRatio, out vec2 p
 }
 
 void main(void) {
+  vec4 instanceSourcePositions64 = vec4(instancePositions.x, instancePositions64Low.x, instancePositions.y, instancePositions64Low.y);
+  vec4 instanceTargetPositions64 = vec4(instancePositions.z, instancePositions64Low.z, instancePositions.w, instancePositions64Low.w);
+
   vec2 projected_source_coord[2];
-  project_position_fp64(instanceSourcePositions64, projected_source_coord);
   vec2 projected_target_coord[2];
+
+  project_position_fp64(instanceSourcePositions64, projected_source_coord);
   project_position_fp64(instanceTargetPositions64, projected_target_coord);
 
   float segmentIndex = positions.x;

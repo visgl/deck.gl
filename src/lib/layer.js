@@ -152,6 +152,13 @@ export default class Layer {
     }
   }
 
+  updateModel({props, oldProps, changeFlags}) {
+    if (props.fp64 !== oldProps.fp64) {
+      const {gl} = this.context;
+      this.setState({model: this._getModel(gl)});
+    }
+  }
+
   // Calls attribute manager to update any WebGL attributes, can be redefined
   updateAttributes(props) {
     const {attributeManager, model} = this.state;
