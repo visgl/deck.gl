@@ -105,6 +105,8 @@ export default class PolygonLayer extends Layer {
   updateAttribute({props, oldProps, changeFlags}) {
     if (props.fp64 !== oldProps.fp64) {
       const {attributeManager} = this.state;
+      attributeManager.invalidateAll();
+
       if (props.fp64 === true) {
         attributeManager.add({
           positions64xyLow: {size: 2, update: this.calculatePositionsLow}
