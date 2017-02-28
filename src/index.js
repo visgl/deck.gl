@@ -43,11 +43,6 @@ export {default as PathLayer} from './layers/core/path-layer/path-layer';
 export {default as PolygonLayer} from './layers/core/polygon-layer/polygon-layer';
 export {default as GeoJsonLayer} from './layers/core/geojson-layer/geojson-layer';
 
-// 64-bit Layers
-// export {default as ScatterplotLayer64} from './layers/fp64/scatterplot-layer/scatterplot-layer-64';
-// export {default as ArcLayer64} from './layers/fp64/arc-layer/arc-layer-64';
-// export {default as LineLayer64} from './layers/fp64/line-layer/line-layer-64';
-
 // Deprecated Layers
 export {default as ChoroplethLayer} from './layers/deprecated/choropleth-layer/choropleth-layer';
 export {default as ChoroplethLayer64} from './layers/deprecated/choropleth-layer-64/choropleth-layer-64';
