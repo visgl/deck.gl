@@ -3,7 +3,7 @@ import autobind from 'autobind-decorator';
 import {Parser} from 'expr-eval';
 
 import OrbitController from '../orbit-controller';
-import {PlotLayer} from '../../../../examples/sample-layers/layers';
+import PlotLayer from '../../../../examples/sample-layers/plot-layer';
 import DeckGL from 'deck.gl';
 
 export default class PlotDemo extends Component {

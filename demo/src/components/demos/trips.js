@@ -6,7 +6,7 @@ import DeckGL from 'deck.gl/react';
 import {MAPBOX_STYLES} from '../../constants/defaults';
 import {readableInteger} from '../../utils/format-utils';
 import ViewportAnimation from '../../utils/map-utils';
-import {TripsLayer} from '../../../../examples/sample-layers/layers';
+import TripsLayer from '../../../../examples/sample-layers/trips-layer';
 
 export default class TripsDemo extends Component {
 
