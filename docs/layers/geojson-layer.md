@@ -6,6 +6,10 @@
 
 The GeoJson Layer takes in [GeoJson](http://geojson.org/) formatted data and
 renders it as interactive polygons, lines and points.
+  
+  <div align="center">
+    <img height="300" src="/demo/src/static/images/demo-thumb-geojson.jpg" />
+  </div>
 
     import {GeoJsonLayer} from 'deck.gl';
 
