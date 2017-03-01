@@ -12,10 +12,7 @@ import {
   PointDensityHexagonLayer,
   GeoJsonLayer,
   // PolygonLayer,
-  PathLayer,
-
-  ArcLayer64,
-  LineLayer64
+  PathLayer
 } from 'deck.gl';
 
 import * as dataSamples from '../data-samples';
@@ -275,35 +272,6 @@ const PointDensityHexagonLayerExample = {
   }
 };
 
-// 64 BIT LAYER EXAMPLES
-
-const ArcLayer64Example = {
-  layer: ArcLayer64,
-  props: {
-    id: 'arcLayer64',
-    data: dataSamples.routes,
-    getSourcePosition: d => d.START,
-    getTargetPosition: d => d.END,
-    getSourceColor: d => [64, 255, 0],
-    getTargetColor: d => [0, 128, 200],
-    strokeWidth: 1,
-    pickable: true
-  }
-};
-
-const LineLayer64Example = {
-  layer: LineLayer64,
-  props: {
-    id: 'lineLayer64',
-    data: dataSamples.routes,
-    getSourcePosition: d => d.START,
-    getTargetPosition: d => d.END,
-    getColor: d => d.SERVICE === 'WEEKDAY' ? [255, 64, 0] : [255, 200, 0],
-    strokeWidth: 1,
-    pickable: true
-  }
-};
-
 // perf test examples
 const ScatterplotLayerPerfExample = (id, getData) => ({
   layer: ScatterplotLayer,
@@ -350,11 +318,6 @@ export default {
     PointDensityHexagonLayer: PointDensityHexagonLayerExample,
     HexagonLayer: HexagonLayerExample,
     GridLayer: GridLayerExample
-  },
-
-  '64-bit Layers': {
-    ArcLayer64: ArcLayer64Example,
-    LineLayer64: LineLayer64Example
   },
 
   'Performance Tests': {

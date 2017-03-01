@@ -71,7 +71,7 @@ export default class PolygonLayer extends Layer {
   initializeState() {
     const {gl} = this.context;
     this.setState({
-      model: this.getModel(gl),
+      model: this._getModel(gl),
       numInstances: 0,
       IndexType: gl.getExtension('OES_element_index_uint') ? Uint32Array : Uint16Array
     });
@@ -92,13 +92,6 @@ export default class PolygonLayer extends Layer {
       attributeManager.add({
         positions64xyLow: {size: 2, update: this.calculatePositionsLow}
       });
-    }
-  }
-
-  updateModel({props, oldProps, changeFlags}) {
-    if (props.fp64 !== oldProps.fp64) {
-      const {gl} = this.context;
-      this.setState({model: this.getModel(gl)});
     }
   }
 
@@ -157,7 +150,7 @@ export default class PolygonLayer extends Layer {
     }
   }
 
-  getModel(gl) {
+  _getModel(gl) {
     const shaders = assembleShaders(gl, this.getShaders());
     return new Model({
       gl,

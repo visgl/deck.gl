@@ -39,10 +39,9 @@ export {default as PointCloudLayer} from './layers/core/point-cloud-layer/point-
 export {default as ScatterplotLayer} from './layers/core/scatterplot-layer/scatterplot-layer';
 export {default as ScreenGridLayer} from './layers/core/screen-grid-layer/screen-grid-layer';
 
-// 64-bit Layers
-export {default as ScatterplotLayer64} from './layers/fp64/scatterplot-layer/scatterplot-layer-64';
-export {default as ArcLayer64} from './layers/fp64/arc-layer/arc-layer-64';
-export {default as LineLayer64} from './layers/fp64/line-layer/line-layer-64';
+export {default as PathLayer} from './layers/core/path-layer/path-layer';
+export {default as PolygonLayer} from './layers/core/polygon-layer/polygon-layer';
+export {default as GeoJsonLayer} from './layers/core/geojson-layer/geojson-layer';
 
 // Deprecated Layers
 export {default as ChoroplethLayer} from './layers/deprecated/choropleth-layer/choropleth-layer';

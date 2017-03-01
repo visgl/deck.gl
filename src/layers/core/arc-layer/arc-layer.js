@@ -23,6 +23,7 @@ import {assembleShaders} from '../../../shader-utils';
 import {GL, Model, Geometry} from 'luma.gl';
 import {readFileSync} from 'fs';
 import {join} from 'path';
+import {fp64ify} from '../../../lib/utils/fp64';
 
 const DEFAULT_COLOR = [0, 0, 0, 255];
 
@@ -31,13 +32,26 @@ const defaultProps = {
   getTargetPosition: x => x.targetPosition,
   getSourceColor: x => x.color || DEFAULT_COLOR,
   getTargetColor: x => x.color || DEFAULT_COLOR,
-  strokeWidth: 1
+  strokeWidth: 1,
+  fp64: false
 };
 
 export default class ArcLayer extends Layer {
+  getShaders() {
+    return this.props.fp64 ? {
+      vs: readFileSync(join(__dirname, './arc-layer-64-vertex.glsl'), 'utf8'),
+      fs: readFileSync(join(__dirname, './arc-layer-fragment.glsl'), 'utf8'),
+      modules: ['fp64', 'project64']
+    } : {
+      vs: readFileSync(join(__dirname, './arc-layer-vertex.glsl'), 'utf8'),
+      fs: readFileSync(join(__dirname, './arc-layer-fragment.glsl'), 'utf8'),
+      modules: []
+    };
+  }
+
   initializeState() {
     const {gl} = this.context;
-    this.setState({model: this._createModel(gl)});
+    this.setState({model: this._getModel(gl)});
 
     const {attributeManager} = this.state;
     /* eslint-disable max-len */
@@ -48,7 +62,39 @@ export default class ArcLayer extends Layer {
       instanceTargetColors: {size: 4, type: GL.UNSIGNED_BYTE, accessor: 'getTargetColor', update: this.calculateInstanceTargetColors}
     });
 
+    if (this.props.fp64) {
+      this.state.attributeManager.addInstanced({
+        instancePositions64Low: {size: 4, accessor: ['getSourcePosition', 'getTargetPosition'], update: this.calculateInstancePositions64Low}
+      });
+    }
     /* eslint-enable max-len */
+  }
+
+  updateAttribute({props, oldProps, changeFlags}) {
+    if (props.fp64 !== oldProps.fp64) {
+      const {attributeManager} = this.state;
+      attributeManager.invalidateAll();
+
+      if (props.fp64 === true) {
+        attributeManager.addInstanced({
+          instancePositions64Low: {
+            size: 4,
+            accessor: ['getSourcePosition', 'getTargetPosition'],
+            update: this.calculateInstancePositions64Low
+          }
+        });
+      } else {
+        attributeManager.remove([
+          'instancePositions64Low'
+        ]);
+      }
+
+    }
+  }
+
+  updateState({props, oldProps, changeFlags}) {
+    this.updateModel({props, oldProps, changeFlags});
+    this.updateAttribute({props, oldProps, changeFlags});
   }
 
   draw({uniforms}) {
@@ -61,14 +107,7 @@ export default class ArcLayer extends Layer {
     }));
   }
 
-  getShaders() {
-    return {
-      vs: readFileSync(join(__dirname, './arc-layer-vertex.glsl'), 'utf8'),
-      fs: readFileSync(join(__dirname, './arc-layer-fragment.glsl'), 'utf8')
-    };
-  }
-
-  _createModel(gl) {
+  _getModel(gl) {
     let positions = [];
     const NUM_SEGMENTS = 50;
     /*
@@ -111,6 +150,21 @@ export default class ArcLayer extends Layer {
       value[i + 1] = sourcePosition[1];
       value[i + 2] = targetPosition[0];
       value[i + 3] = targetPosition[1];
+      i += size;
+    }
+  }
+
+  calculateInstancePositions64Low(attribute) {
+    const {data, getSourcePosition, getTargetPosition} = this.props;
+    const {value, size} = attribute;
+    let i = 0;
+    for (const object of data) {
+      const sourcePosition = getSourcePosition(object);
+      const targetPosition = getTargetPosition(object);
+      value[i + 0] = fp64ify(sourcePosition[0])[1];
+      value[i + 1] = fp64ify(sourcePosition[1])[1];
+      value[i + 2] = fp64ify(targetPosition[0])[1];
+      value[i + 3] = fp64ify(targetPosition[1])[1];
       i += size;
     }
   }
