@@ -118,7 +118,7 @@ function calculatePositions(positionsJS, fp64) {
   let positionLow;
   if (fp64) {
     // We only need x, y component
-    positionLow = new Float32Array(positionsJS / 3 * 2);
+    positionLow = new Float32Array(positionsJS.length / 3 * 2);
     for (let i = 0; i < positionsJS.length / 3; i++) {
       positionLow[i * 2 + 0] = fp64ify(positionsJS[i * 3 + 0])[1];
       positionLow[i * 2 + 1] = fp64ify(positionsJS[i * 3 + 1])[1];
