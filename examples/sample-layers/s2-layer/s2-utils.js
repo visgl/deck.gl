@@ -1,7 +1,11 @@
 // s2-geometry is a pure JavaScript port of Google/Niantic's S2 Geometry library
 // which is perfect since it works in the browser.
 import {S2} from 's2-geometry';
-import converter from 'hex2dec';
+
+// import {hexToDec} from 'hex2dec';
+function hexToDec(hexString) {
+  return String(parseInt(hexString, 16));
+}
 
 /**
  * Given a S2 hex token this function returns cell level
@@ -27,7 +31,7 @@ function getIdFromToken(token) {
   // pad token with zeros to make the length 16
   const padding = 16 - token.length;
   const paddedToken = token + new Array(padding + 1).join('0');
-  return converter.hexToDec(paddedToken);
+  return hexToDec(paddedToken);
 }
 
 /**

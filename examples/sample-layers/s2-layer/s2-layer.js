@@ -68,15 +68,13 @@ export default class S2Layer extends Layer {
   initializeState() {
   }
 
-  updateState({oldProps, props, changeFlags}) {
-  }
-
   renderLayers() {
     const {id, getS2Token, getFillColor, getHeight} = this.props;
     const {extruded, wireframe} = this.props;
 
     // Filled Polygon Layer
-    const polygonFillLayer = new PolygonLayer(Object.assign({}, this.props, {
+    // TODO - use a composite polygon layer that renders outlines etc
+    return new PolygonLayer(Object.assign({}, this.props, {
       id: `${id}-polygon-fill`,
       getPolygon: x => getS2Polygon(getS2Token(x)),
       getHeight,
@@ -87,50 +85,6 @@ export default class S2Layer extends Layer {
         getColor: this.props.updateTriggers.getFillColor
       })
     }));
-
-    // // Polygon outline or wireframe
-    // let polygonOutlineLayer = null;
-    // if (drawPolygons && extruded && wireframe) {
-
-    //   polygonOutlineLayer = new PolygonLayer(Object.assign({}, this.props, {
-    //     id: `${id}-polygon-wireframe`,
-    //     data: polygonFeatures,
-    //     getPolygon: x => getS2Polygon(getS2Token(x)),
-    //     getHeight,
-    //     getColor: getStrokeColor,
-    //     extruded: true,
-    //     wireframe: true,
-    //     // Override user's onHover and onClick props
-    //     onHover: this._onHoverSublayer.bind(this),
-    //     onClick: noop,
-    //     updateTriggers: {
-    //       getColor: this.props.updateTriggers.getStrokeColor
-    //     }
-    //   }));
-
-    // } else if (drawPolygons) {
-
-    //   polygonOutlineLayer = new PathLayer(Object.assign({}, this.props, {
-    //     id: `${id}-polygon-outline`,
-    //     data: polygonOutlineFeatures,
-    //     getPath: getCoordinates,
-    //     getColor: getStrokeColor,
-    //     getWidth: getStrokeWidth,
-    //     // Override user's onHover and onClick props
-    //     onHover: this._onHoverSublayer.bind(this),
-    //     onClick: noop,
-    //     updateTriggers: {
-    //       getColor: this.props.updateTriggers.getStrokeColor,
-    //       getWidth: this.props.updateTriggers.getStrokeWidth
-    //     }
-    //   }));
-
-    // }
-
-    return [
-      polygonFillLayer
-//      polygonOutlineLayer
-    ].filter(Boolean);
   }
 }
 

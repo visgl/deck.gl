@@ -1,10 +1,11 @@
 /* global window, document */
-import DeckGL, {autobind} from 'deck.gl/react';
+import DeckGL from 'deck.gl';
 import {experimental} from 'deck.gl';
 const {ReflectionEffect} = experimental;
 
 import React, {PureComponent} from 'react';
 import ReactDOM from 'react-dom';
+import autobind from 'react-autobind';
 import MapboxGLMap from 'react-map-gl';
 import {FPSStats} from 'react-stats';
 

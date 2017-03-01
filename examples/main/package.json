@@ -1,14 +1,16 @@
 {
   "scripts": {
     "start": "webpack-dev-server --progress --hot --open",
-    "start-local": "webpack-dev-server --env.local --progress --hot --open"
+    "start-local": "webpack-dev-server --env.local --progress --hot --open",
+    "build": "webpack app bundle.js --env.local --display-error-details"
   },
   "dependencies": {
-    "deck.gl": "^4.0.0-beta.1",
+    "deck.gl": "^4.0.0-beta.3",
     "extrude-polyline": "^1.0.6",
     "immutable": "^3.8.1",
     "luma.gl": "3.0.0-beta.9",
     "react": "^15.4.1",
+    "react-autobind": "^1.0.6",
     "react-dom": "^15.4.1",
     "react-map-gl": "1.7.2",
     "react-stats": "^0.0.5",

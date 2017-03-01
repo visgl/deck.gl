@@ -1,6 +1,6 @@
 /* eslint-disable max-len */
 import * as mainDataSamples from '../data-samples';
-import * as extraDataSamples from '../../../sample-layers';
+import * as extraDataSamples from '../../../sample-layers/data';
 const dataSamples = Object.assign({}, mainDataSamples, extraDataSamples);
 
 import EnhancedChoroplethLayer from '../../../sample-layers/enhanced-choropleth-layer/enhanced-choropleth-layer';
@@ -20,7 +20,7 @@ import TripsLayer from '../../../sample-layers/trips-layer/trips-layer';
 const TripsLayerExample = {
   layer: TripsLayer,
   props: {
-    id: 'trips-layer',
+    id: 'trips-layer  ',
     data: dataSamples.trips,
     getPath: trip => trip.map(d => [
       d.begin_shape[0],
