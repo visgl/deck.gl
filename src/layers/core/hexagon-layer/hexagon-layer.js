@@ -24,6 +24,7 @@ import {Model, CylinderGeometry} from 'luma.gl';
 import {readFileSync} from 'fs';
 import {join} from 'path';
 import {log} from '../../../lib/utils';
+import {fp64ify} from '../../../lib/utils/fp64';
 
 function positionsAreEqual(v1, v2) {
   // Hex positions are expected to change entirely, not to maintain some
@@ -54,7 +55,8 @@ const defaultProps = {
     specularRatio: 0.8,
     lightsStrength: [1.2, 0.0, 0.8, 0.0],
     numberOfLights: 2
-  }
+  },
+  fp64: false
 };
 
 export default class HexagonLayer extends Layer {
@@ -82,13 +84,25 @@ export default class HexagonLayer extends Layer {
     super(props);
   }
 
+  getShaders() {
+    return this.props.fp64 ? {
+      vs: readFileSync(join(__dirname, './hexagon-layer-64-vertex.glsl'), 'utf8'),
+      fs: readFileSync(join(__dirname, './hexagon-layer-fragment.glsl'), 'utf8'),
+      modules: ['fp64', 'project64', 'lighting']
+    } : {
+      vs: readFileSync(join(__dirname, './hexagon-layer-vertex.glsl'), 'utf8'),
+      fs: readFileSync(join(__dirname, './hexagon-layer-fragment.glsl'), 'utf8'),
+      modules: ['lighting']
+    };
+  }
+
   /**
    * DeckGL calls initializeState when GL context is available
    * Essentially a deferred constructor
    */
   initializeState() {
     const {gl} = this.context;
-    this.setState({model: this.getModel(gl)});
+    this.setState({model: this._getModel(gl)});
 
     const {attributeManager} = this.state;
     /* eslint-disable max-len */
@@ -96,26 +110,57 @@ export default class HexagonLayer extends Layer {
       instancePositions: {size: 3, accessor: ['getCentroid', 'getElevation'], update: this.calculateInstancePositions},
       instanceColors: {size: 4, type: gl.UNSIGNED_BYTE, accessor: 'getColor', update: this.calculateInstanceColors}
     });
+
+    if (this.props.fp64) {
+      this.state.attributeManager.addInstanced({
+        instancePositions64xyLow: {size: 2, accessor: 'getCentroid', update: this.calculateInstancePositions64xyLow}
+      });
+    }
     /* eslint-enable max-len */
 
     this.updateRadiusAngle();
   }
 
-  updateState(opt) {
-    super.updateState(opt);
+  updateAttribute({props, oldProps, changeFlags}) {
+    if (props.fp64 !== oldProps.fp64) {
+      const {attributeManager} = this.state;
+      attributeManager.invalidateAll();
 
-    const viewportChanged = opt.changeFlags.viewportChanged;
+      if (props.fp64 === true) {
+        attributeManager.addInstanced({
+          instancePositions64xyLow: {
+            size: 2,
+            accessor: 'getCentroid',
+            update: this.calculateInstancePositions64xyLow
+          }
+        });
+      } else {
+        attributeManager.remove([
+          'instancePositions64xyLow'
+        ]);
+      }
+
+    }
+  }
+
+  updateState({props, oldProps, changeFlags}) {
+    super.updateState({props, oldProps, changeFlags});
+
+    const viewportChanged = changeFlags.viewportChanged;
     const {model} = this.state;
 
     // Update the positions in the model if they've changes
     const verticesChanged =
-      !positionsAreEqual(opt.oldProps.hexagonVertices, opt.props.hexagonVertices);
+      !positionsAreEqual(oldProps.hexagonVertices, props.hexagonVertices);
 
     if (model && (verticesChanged || viewportChanged)) {
       this.updateRadiusAngle();
     }
 
     this.updateUniforms();
+    this.updateModel({props, oldProps, changeFlags});
+    this.updateAttribute({props, oldProps, changeFlags});
+
   }
 
   updateRadiusAngle() {
@@ -186,18 +231,7 @@ export default class HexagonLayer extends Layer {
     lightSettings));
   }
 
-  getShaders() {
-    const vertex = readFileSync(join(__dirname, './hexagon-layer-vertex.glsl'), 'utf8');
-    const picking = readFileSync(join(__dirname, './picking.glsl'), 'utf8');
-    const vs = picking.concat(vertex);
-    return {
-      vs,
-      fs: readFileSync(join(__dirname, './hexagon-layer-fragment.glsl'), 'utf8'),
-      modules: ['lighting']
-    };
-  }
-
-  getModel(gl) {
+  _getModel(gl) {
     const shaders = assembleShaders(gl, this.getShaders());
 
     return new Model({
@@ -215,7 +249,6 @@ export default class HexagonLayer extends Layer {
   }
 
   calculateInstancePositions(attribute) {
-
     const {data, getCentroid, getElevation} = this.props;
     const {value, size} = attribute;
     let i = 0;
@@ -226,6 +259,17 @@ export default class HexagonLayer extends Layer {
       value[i + 1] = lat;
       value[i + 2] = elevation || this.props.elevation;
       i += size;
+    }
+  }
+
+  calculateInstancePositions64xyLow(attribute) {
+    const {data, getCentroid} = this.props;
+    const {value} = attribute;
+    let i = 0;
+    for (const object of data) {
+      const position = getCentroid(object);
+      value[i++] = fp64ify(position[0])[1];
+      value[i++] = fp64ify(position[1])[1];
     }
   }
 

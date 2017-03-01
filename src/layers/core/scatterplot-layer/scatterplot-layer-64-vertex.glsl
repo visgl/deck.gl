@@ -67,7 +67,7 @@ void main(void) {
   vec2 vertex_pos_modelspace[4];
   vertex_pos_modelspace[0] = sum_fp64(vertex_pos_localspace[0], projected_coord_xy[0]);
   vertex_pos_modelspace[1] = sum_fp64(vertex_pos_localspace[1], projected_coord_xy[1]);
-  vertex_pos_modelspace[2] = sum_fp64(vertex_pos_localspace[2], vec2(project_scale(positions.z), 0.0));
+  vertex_pos_modelspace[2] = sum_fp64(vertex_pos_localspace[2], vec2(project_scale(instancePositions.z), 0.0));
   vertex_pos_modelspace[3] = vec2(1.0, 0.0);
 
   gl_Position = project_to_clipspace_fp64(vertex_pos_modelspace);
