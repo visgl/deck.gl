@@ -3,18 +3,6 @@ import * as mainDataSamples from '../data-samples';
 import * as extraDataSamples from '../../../sample-layers/data';
 const dataSamples = Object.assign({}, mainDataSamples, extraDataSamples);
 
-import EnhancedChoroplethLayer from '../../../sample-layers/enhanced-choropleth-layer/enhanced-choropleth-layer';
-
-const EnhancedChoroplethLayerExample = {
-  layer: EnhancedChoroplethLayer,
-  props: {
-    id: 'enhanced-choropleth-layer',
-    data: dataSamples.choropleths,
-    getColor: f => [200, 0, 80],
-    strokeWidth: 5
-  }
-};
-
 import TripsLayer from '../../../sample-layers/trips-layer/trips-layer';
 
 const TripsLayerExample = {
@@ -49,11 +37,55 @@ const S2LayerExample = {
   }
 };
 
+import EnhancedChoroplethLayer from '../../../sample-layers/enhanced-choropleth-layer/enhanced-choropleth-layer';
+
+const EnhancedChoroplethLayerExample = {
+  layer: EnhancedChoroplethLayer,
+  props: {
+    id: 'enhanced-choropleth-layer',
+    data: dataSamples.choropleths,
+    getColor: f => [200, 0, 80],
+    strokeWidth: 5
+  }
+};
+
+import BitmapLayer from '../../../sample-layers/bitmap-layer/bitmap-layer';
+
+const BitmapLayerExample = {
+  layer: BitmapLayer,
+  props: {
+    data: []
+  }
+};
+
+import MeshLayer from '../../../sample-layers/mesh-layer/mesh-layer';
+
+const MeshLayerExample = {
+  layer: MeshLayer,
+  props: {
+    data: []
+  }
+};
+
+import LabelLayer from '../../../sample-layers/label-layer/label-layer';
+
+const LabelLayerExample = {
+  layer: LabelLayer,
+  props: {
+    data: []
+  }
+};
+
 /* eslint-disable quote-props */
 export default {
   'Sample Layers': {
-    'EnhancedChoroplethLayer': EnhancedChoroplethLayerExample,
     'TripsLayer': TripsLayerExample,
-    'S2Layer': S2LayerExample
+    'S2Layer': S2LayerExample,
+
+    'EnhancedChoroplethLayer': EnhancedChoroplethLayerExample,
+
+    'BitmapLayer': BitmapLayerExample,
+    'MeshLayer': MeshLayerExample,
+    'LabelLayer': LabelLayerExample
   }
 };
