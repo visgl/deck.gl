@@ -74,6 +74,13 @@ name of the vertex attribute controlled by an accessor. It is now possible
 to supply names of `accessors`.
 
 
+### More intuitive mouse events
+
+`onHover` is now only fired on entering/exiting an object instead of on mouse move.
+
+`onClick` is now only fired on the picked layer instead of all pickable layers.
+
+
 ## New Features for Layer Subclassing
 
 ### **Overridable shaders
@@ -98,6 +105,12 @@ that many layer classes no longer need a constructor.
 
 Can be a string or a an array of strings. Will be used to match
 `updateTriggers` accessor names with instance attributes.
+
+
+### `getPickingInfo()`
+
+This method replaces the old `pick()` method and is expected to return an info
+object. Layers can block the execution of callback functions by returning `null`.
 
 
 ## Performance

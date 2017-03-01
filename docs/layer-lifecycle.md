@@ -75,18 +75,17 @@ The default implementation looks for a variable `model` in the layer's
 state (which is expected to be an instance of the luma.gl `Model` class)
 and calls `draw` on that model.
 
-##### Picking: pick({uniforms, deviceX, deviceY})
+##### Picking: getPickingInfo({info, mode})
 
 The pick method should return an object with optional fields about
-what was picked. This `info` object is then populated with additional
-information by deck.gl and finally passed to the layer's `onHover` or
-`onPick` callbacks.
+what was picked. This `info` object is then passed to the layer's `onHover` 
+or `onPick` callbacks.
 
-The default implementation looks for a variable `model` in the layer's
-state (which is expected to be an instance of the luma.gl `Model` class)
-uses that model for picking, and renders that model with attributes set
-that allow the layer shaders to render picking colors instead of normal
-colors.
+The received `info` argument contains fields `color` as the picked pixel 
+and `index` calculated using `layer.decodePickingColor()`.
+
+The default implementation populates the `info` object with an `object` field
+that is indexed from `layer.props.data`.
 
 ### Comparison with React's Lifecycle
 

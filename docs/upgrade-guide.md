@@ -94,15 +94,22 @@ For API consistency reasons these have all been renamed with the suffix `..Scale
 
 | scatterplotLayer | radius | radiusScale |
 
-## Modified Layers
+### Modified Layers
 
 
-### Upgrading Layers from deck.gl v3 to v4
+## Upgrading Layers from deck.gl v3 to v4
 
 While v3 layers should work without changes in v4, there are some improvements
 you may want to take advantage of.
 
-## updateTriggers
+#### updateTriggers
 
 To enable applications to use accessor names in updateTriggers, you need to
 add an 'accessor' field when you register your attributes.
+
+#### getPickingInfo
+
+To override the default picking behavior, implement the `getPickingInfo()` method
+that returns an info object to be passed to `onHover` and `onClick` handlers. If
+this methods returns `null`, no event will be fired.
+
