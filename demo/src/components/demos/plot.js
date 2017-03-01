@@ -78,9 +78,6 @@ export default class PlotDemo extends Component {
   }
 
   @autobind _onHover(info) {
-    if (info.layer.id === 'PlotLayer') {
-      return;
-    }
     const hoverInfo = info.sample ? info : null;
     if (hoverInfo !== this.state.hoverInfo) {
       this.setState({hoverInfo});

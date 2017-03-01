@@ -1,4 +1,4 @@
-import {Layer} from 'deck.gl';
+import {CompositeLayer} from 'deck.gl';
 import AxesLayer from './axes-layer';
 import SurfaceLayer from './surface-layer';
 
@@ -44,7 +44,7 @@ const defaultProps = {
  * @param {Number} [props.fontSize] - size of the labels
  * @param {Array} [props.axesColor] - color of the gridlines, in [r,g,b,a]
  */
-export default class PlotLayer extends Layer {
+export default class PlotLayer extends CompositeLayer {
 
   initializeState() {
     this.state = {
