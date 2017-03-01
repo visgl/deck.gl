@@ -21,9 +21,9 @@
 #define SHADER_NAME line-layer-64-vertex-shader
 
 attribute vec3 positions;
-attribute vec4 instanceSourcePositions64;
-attribute vec4 instanceTargetPositions64;
-attribute vec2 instanceElevations;
+attribute vec3 instanceSourcePositions;
+attribute vec3 instanceTargetPositions;
+attribute vec4 instanceSourceTargetPositions64xyLow;
 attribute vec4 instanceColors;
 attribute vec3 instancePickingColors;
 
@@ -50,15 +50,19 @@ vec2 getExtrusionOffset(vec2 line_clipspace, float offset_direction) {
 
 void main(void) {
   // Position
+  vec4 instanceSourcePositions64 = vec4(instanceSourcePositions.x, instanceSourceTargetPositions64xyLow.x, instanceSourcePositions.y, instanceSourceTargetPositions64xyLow.y);
+  vec4 instanceTargetPositions64 = vec4(instanceTargetPositions.x, instanceSourceTargetPositions64xyLow.z, instanceTargetPositions.y, instanceSourceTargetPositions64xyLow.w);
+
   vec2 projected_source_coord[2];
-  project_position_fp64(instanceSourcePositions64, projected_source_coord);
   vec2 projected_target_coord[2];
+
+  project_position_fp64(instanceSourcePositions64, projected_source_coord);
   project_position_fp64(instanceTargetPositions64, projected_target_coord);
 
   vec2 source_pos_modelspace[4];
   source_pos_modelspace[0] =  projected_source_coord[0];
   source_pos_modelspace[1] =  projected_source_coord[1];
-  source_pos_modelspace[2] = vec2(project_scale(instanceElevations.x), 0.0);
+  source_pos_modelspace[2] = vec2(project_scale(instanceSourcePositions.z), 0.0);
   source_pos_modelspace[3] = vec2(1.0, 0.0);
 
   vec4 source_pos_clipspace = project_to_clipspace_fp64(source_pos_modelspace);
@@ -66,7 +70,7 @@ void main(void) {
   vec2 target_pos_modelspace[4];
   target_pos_modelspace[0] =  projected_target_coord[0];
   target_pos_modelspace[1] =  projected_target_coord[1];
-  target_pos_modelspace[2] = vec2(project_scale(instanceElevations.y), 0.0);
+  target_pos_modelspace[2] = vec2(project_scale(instanceTargetPositions.z), 0.0);
   target_pos_modelspace[3] = vec2(1.0, 0.0);
 
   vec4 target_pos_clipspace = project_to_clipspace_fp64(target_pos_modelspace);
