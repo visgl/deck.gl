@@ -6,15 +6,15 @@ import DeckGL from 'deck.gl/react';
 import {MAPBOX_STYLES} from '../../constants/defaults';
 import {readableInteger} from '../../utils/format-utils';
 import ViewportAnimation from '../../utils/map-utils';
-import TripsLayer from './trips-layer/trips-layer';
+import TripsLayer from '../../../../examples/sample-layers/trips-layer';
 
-export default class HeroDemo extends Component {
+export default class TripsDemo extends Component {
 
   static get data() {
     return [
       {
-        url: 'data/hero-data.txt',
-        worker: 'workers/hero-data-decoder.js?loop=1800&trail=180'
+        url: 'data/trips-data.txt',
+        worker: 'workers/trips-data-decoder.js?loop=1800&trail=180'
       },
       {
         url: 'data/building-data.txt',

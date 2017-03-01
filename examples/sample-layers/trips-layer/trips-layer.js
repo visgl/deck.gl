@@ -4,27 +4,14 @@ import {Model, Program, Geometry} from 'luma.gl';
 import {readFileSync} from 'fs';
 import {join} from 'path';
 
+const defaultProps = {
+  trailLength: 120,
+  currentTime: 0,
+  getPath: d => d.path,
+  getColor: d => d.color
+};
+
 export default class TripsLayer extends Layer {
-
-  /**
-   * @classdesc
-   * LineLayer
-   *
-   * @class
-   * @param {object} opts
-   */
-  constructor(opts) {
-    super(opts);
-  }
-
-  updateState({props, oldProps, changeFlags: {dataChanged, somethingChanged}}) {
-    if (dataChanged) {
-      this.countVertices(props.data);
-    }
-    if (somethingChanged) {
-      this.updateUniforms();
-    }
-  }
 
   initializeState() {
     const {gl} = this.context;
@@ -40,10 +27,13 @@ export default class TripsLayer extends Layer {
 
     gl.getExtension('OES_element_index_uint');
     this.setState({model});
-    gl.lineWidth(this.props.strokeWidth);
+  }
 
-    this.countVertices();
-    this.updateUniforms();
+  updateState({props, changeFlags: {dataChanged}}) {
+    if (dataChanged) {
+      this.countVertices(props.data);
+      this.state.attributeManager.invalidateAll();
+    }
   }
 
   getModel(gl) {
@@ -87,13 +77,12 @@ export default class TripsLayer extends Layer {
     this.setState({pathLengths, vertexCount});
   }
 
-  updateUniforms() {
-    const {opacity, trailLength, currentTime} = this.props;
-    this.setUniforms({
-      opacity,
+  draw({uniforms}) {
+    const {trailLength, currentTime} = this.props;
+    this.state.model.render(Object.assign({}, uniforms, {
       trailLength,
       currentTime
-    });
+    }));
   }
 
   calculateIndices(attribute) {
@@ -155,3 +144,6 @@ export default class TripsLayer extends Layer {
   }
 
 }
+
+TripsLayer.layerName = 'TripsLayer';
+TripsLayer.defaultProps = defaultProps;

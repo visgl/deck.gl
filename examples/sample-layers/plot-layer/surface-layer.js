@@ -105,12 +105,11 @@ export default class SurfaceLayer extends Layer {
     const {center, scale} = this.state;
     const {lightStrength} = this.props;
 
-    this.state.model.render({
-      ...uniforms,
+    this.state.model.render(Object.assign({}, uniforms, {
       modelCenter: center,
       modelScale: scale,
       lightStrength
-    });
+    }));
   }
 
   /*

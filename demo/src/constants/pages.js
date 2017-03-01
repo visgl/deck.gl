@@ -51,7 +51,7 @@ export const examplePages = generatePath([
   {
     name: 'Trip Routes',
     content: {
-      demo: 'HeroDemo',
+      demo: 'TripsDemo',
       code: 'code-markdown/trips.md'
     }
   },

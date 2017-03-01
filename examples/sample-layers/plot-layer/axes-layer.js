@@ -1,4 +1,3 @@
-/* global document */
 import {Layer, assembleShaders} from 'deck.gl';
 import {GL, Model, Geometry} from 'luma.gl';
 
@@ -101,21 +100,17 @@ export default class AxesLayer extends Layer {
 
     if (labelTexture) {
       const baseUniforms = {
-        ...uniforms,
         fontSize,
+        screenSize: [width, height],
         modelCenter: center,
         modelDim: dim,
         gridOffset: axesOffset,
         strokeColor: axesColor
       };
 
-      models.grids.render(baseUniforms);
+      models.grids.render(Object.assign({}, uniforms, baseUniforms));
 
-      models.labels.render({
-        ...baseUniforms,
-        screenSize: [width, height],
-        ...labelTexture
-      });
+      models.labels.render(Object.assign({}, uniforms, baseUniforms, labelTexture));
     }
   }
 
