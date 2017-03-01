@@ -37,6 +37,7 @@ export default class LabelLayer extends CompositeLayer {
 
   renderLayers() {
     return new IconLayer(Object.assign({}, this.props, {
+      id: 'label-icons',
       iconAtlas: this.state.texture,
       iconMapping: this.state.mapping,
       data: this.state.mapping,
