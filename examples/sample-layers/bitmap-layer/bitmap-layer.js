@@ -54,7 +54,6 @@ const defaultProps = {
 };
 
 export default class BitmapLayer extends Layer {
-
   getShaders() {
     return {
       vs: BITMAP_VERTEX_SHADER,
