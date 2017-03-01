@@ -33,11 +33,13 @@ export function drawLayers({layers, pass}) {
 /* eslint-disable max-depth, max-statements */
 export function pickLayers(gl, {
   layers,
-  context,
+  pickingFBO,
   uniforms = {},
   x,
   y,
-  mode
+  viewport,
+  mode,
+  lastPickedInfo
 }) {
   // Convert from canvas top-left to WebGL bottom-left coordinates
   // And compensate for pixelRatio
@@ -52,8 +54,8 @@ export function pickLayers(gl, {
   // Make sure we clear scissor test and fbo bindings in case of exceptions
   // We are only interested in one pixel, no need to render anything else
   glContextWithState(gl, {
-    frameBuffer: context.pickingFBO,
-    framebuffer: context.pickingFBO,
+    frameBuffer: pickingFBO,
+    framebuffer: pickingFBO,
     scissorTest: {x: deviceX, y: deviceY, w: 1, h: 1}
   }, () => {
 
@@ -95,45 +97,50 @@ export function pickLayers(gl, {
     // Picking process end
 
     // Process picked info start
-    // Decode alpha to layer index
-    const pickedLayer = pickedColor[3] ? layers[pickedColor[3] - 1] : null;
-    const affectedLayers = [pickedLayer];
+    // Decode picked color
+    const pickedLayerIndex = pickedColor[3] - 1;
+    const pickedLayer = pickedLayerIndex >= 0 ? layers[pickedLayerIndex] : null;
+    const pickedObjectIndex = pickedLayer ? pickedLayer.decodePickingColor(pickedColor) : -1;
+    const pickedLayerId = pickedLayer && pickedLayer.props.id;
+    const affectedLayers = pickedLayer ? [pickedLayer] : [];
 
     if (mode === 'hover') {
       // only invoke onHover events if picked object has changed
-      const {lastPickedColor, lastPickedLayerId} = context;
+      const lastPickedObjectIndex = lastPickedInfo.index;
+      const lastPickedLayerId = lastPickedInfo.layerId;
 
-      const pickedLayerChanged = (pickedLayer && pickedLayer.props.id) !== lastPickedLayerId;
-      const pickedColorChanged = (lastPickedColor[0] !== pickedColor[0] ||
-        lastPickedColor[1] !== pickedColor[1] || lastPickedColor[2] !== pickedColor[2]);
-
-      if (pickedLayerChanged) {
-        // We cannot store a ref to lastPickedLayer in the context because
-        // the state of an outdated layer is no longer valid
-        // and the props may have changed
-        const lastPickedLayer = layers.find(l => l.props.id === lastPickedLayerId);
-        // Let leave event fire before enter event
-        affectedLayers.splice(0, 0, lastPickedLayer);
-      } else if (!pickedColorChanged) {
+      if (pickedLayerId === lastPickedLayerId && pickedObjectIndex === lastPickedObjectIndex) {
         // picked object did not change, no need to proceed
         return;
       }
 
+      if (pickedLayerId !== lastPickedLayerId) {
+        // We cannot store a ref to lastPickedLayer in the context because
+        // the state of an outdated layer is no longer valid
+        // and the props may have changed
+        const lastPickedLayer = layers.find(l => l.props.id === lastPickedLayerId);
+        if (lastPickedLayer) {
+          // Let leave event fire before enter event
+          affectedLayers.unshift(lastPickedLayer);
+        }
+      }
+
       // Update layer manager context
-      context.lastPickedLayerId = pickedLayer && pickedLayer.props.id;
-      context.lastPickedColor = pickedColor;
+      lastPickedInfo.layerId = pickedLayerId;
+      lastPickedInfo.index = pickedObjectIndex;
     }
 
-    const baseInfo = createInfo([x, y], context.viewport);
+    const baseInfo = createInfo([x, y], viewport);
     baseInfo.devicePixel = [deviceX, deviceY];
     baseInfo.pixelRatio = pixelRatio;
 
-    affectedLayers.filter(Boolean).forEach(layer => {
+    affectedLayers.forEach(layer => {
       let info = Object.assign({}, baseInfo);
       info.layer = layer;
 
       if (layer === pickedLayer) {
         info.color = pickedColor;
+        info.index = pickedObjectIndex;
         info.picked = true;
       }
 

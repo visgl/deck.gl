@@ -50,8 +50,10 @@ export default class LayerManager {
       viewport: null,
       viewportChanged: true,
       pickingFBO: null,
-      lastPickedColor: new Uint8Array(4),
-      lastPickedLayerId: null
+      lastPickedInfo: {
+        index: -1,
+        layerId: null
+      }
     };
     Object.seal(this.context);
   }
@@ -131,7 +133,9 @@ export default class LayerManager {
       },
       layers: this.layers,
       mode,
-      context: this.context
+      viewport: this.context.viewport,
+      pickingFBO: this.context.pickingFBO,
+      lastPickedInfo: this.context.lastPickedInfo
     });
   }
 

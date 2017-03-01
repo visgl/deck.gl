@@ -71,16 +71,12 @@ export default class GeoJsonLayer extends CompositeLayer {
   }
 
   _onHoverSubLayer(info) {
-    if (info.object) {
-      info.object = info.object.feature || info.object;
-    }
+    info.object = (info.object && info.object.feature) || info.object;
     this.props.onHover(info);
   }
 
   _onClickSubLayer(info) {
-    if (info.object) {
-      info.object = info.object.feature || info.object;
-    }
+    info.object = (info.object && info.object.feature) || info.object;
     this.props.onClick(info);
   }
 

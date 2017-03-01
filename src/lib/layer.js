@@ -119,10 +119,8 @@ export default class Layer {
   // called to populate the info object that is passed to the event handler
   // @return null to cancel event
   getPickingInfo({info, mode}) {
-    const {color} = info;
-    const index = this.decodePickingColor(color);
+    const {color, index} = info;
 
-    info.index = index;
     if (index >= 0) {
       // If props.data is an indexable array, get the object
       if (Array.isArray(this.props.data)) {
