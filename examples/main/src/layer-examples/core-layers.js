@@ -15,20 +15,15 @@ import {
   PathLayer,
 
   ArcLayer64,
-  LineLayer64,
-
-  ChoroplethLayer,
-  ChoroplethLayer64,
-  ExtrudedChoroplethLayer64
-
+  LineLayer64
 } from 'deck.gl';
 
-import * as dataSamples from './data-samples';
-import {parseColor, setOpacity} from './utils/color';
+import * as dataSamples from '../data-samples';
+import {parseColor, setOpacity} from '../utils/color';
 
 // Demonstrate immutable support
-import Immutable from 'immutable';
-const immutableChoropleths = Immutable.fromJS(dataSamples.choropleths);
+// import Immutable from 'immutable';
+// const immutableChoropleths = Immutable.fromJS(dataSamples.choropleths);
 
 const MARKER_SIZE_MAP = {
   small: 2,
@@ -309,76 +304,6 @@ const LineLayer64Example = {
   }
 };
 
-const ChoroplethLayerContourExample = {
-  layer: ChoroplethLayer,
-  props: {
-    id: 'choroplethLayerContour',
-    data: immutableChoropleths,
-    getColor: f => [0, 80, 200],
-    opacity: 0.8,
-    drawContour: true
-  }
-};
-
-const ChoroplethLayerExample = {
-  layer: ChoroplethLayer,
-  props: {
-    id: 'choroplethLayerSolid',
-    data: dataSamples.choropleths,
-    getColor: f => [((f.properties.ZIP_CODE * 10) % 127) + 128, 0, 0],
-    opacity: 0.8,
-    pickable: true
-  }
-};
-
-const ChoroplethLayer64ContourExample = {
-  layer: ChoroplethLayer64,
-  props: {
-    id: 'choroplethLayer64Contour',
-    data: dataSamples.choropleths,
-    getColor: f => [0, 80, 200],
-    opacity: 0.8,
-    drawContour: true
-  }
-};
-
-const ChoroplethLayer64SolidExample = {
-  layer: ChoroplethLayer64,
-  props: {
-    id: 'choroplethLayer64Solid',
-    data: dataSamples.choropleths,
-    getColor: f => [((f.properties.ZIP_CODE * 10) % 127) + 128, 0, 0],
-    opacity: 0.8,
-    pickable: true
-  }
-};
-
-const ExtrudedChoroplethLayer64Example = {
-  layer: ExtrudedChoroplethLayer64,
-  props: {
-    id: 'extrudedChoroplethLayer64',
-    data: dataSamples.choropleths,
-    getColor: f => [((f.properties.ZIP_CODE * 10) % 127) + 128, 0, 0],
-    pointLightLocation: [
-      // props.mapViewState.longitude,
-      // props.mapViewState.latitude,
-      37.751537058389985,
-      -122.42694203247012,
-      1e4
-    ],
-    opacity: 1.0,
-    pickable: true
-  }
-};
-
-const ExtrudedChoroplethLayer64WireframeExample = {
-  layer: ExtrudedChoroplethLayer64,
-  props: Object.assign({}, ExtrudedChoroplethLayer64Example.props, {
-      id: 'extrudedChoroplethLayer64-wireframe',
-      drawWireframe: true
-  })
-};
-
 // perf test examples
 const ScatterplotLayerPerfExample = (id, getData) => ({
   layer: ScatterplotLayer,
@@ -430,15 +355,6 @@ export default {
   '64-bit Layers': {
     ArcLayer64: ArcLayer64Example,
     LineLayer64: LineLayer64Example
-  },
-
-  'Deprecated Layers': {
-    'ChoroplethLayer (Solid)': ChoroplethLayerExample,
-    'ChoroplethLayer (Contour)': ChoroplethLayerContourExample,
-    'ChoroplethLayer64 (Solid)': ChoroplethLayer64SolidExample,
-    'ChoroplethLayer64 (Contour)': ChoroplethLayer64ContourExample,
-    'ExtrudedChoroplethLayer64': ExtrudedChoroplethLayer64Example,
-    'ExtrudedChoroplethLayer64 (Wireframe)': ExtrudedChoroplethLayer64WireframeExample
   },
 
   'Performance Tests': {

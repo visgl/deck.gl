@@ -5,7 +5,7 @@ import {ExtrudedChoroplethLayer64} from 'deck.gl';
 import TripsLayer from './trips-layer';
 import TWEEN from 'tween.js';
 
-export default class HeroDemo extends Component {
+export default class TripsDemo extends Component {
 
   constructor(props) {
     super(props);

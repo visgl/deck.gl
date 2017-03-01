@@ -24,7 +24,7 @@ module.exports = {
       include: demo,
       enforce: 'post'
     }, {
-      include: [/src\/.*\.js$/, /node_modules\/mapbox-gl.*\.js$/],
+      test: /\.js$/,
       loader: 'transform-loader?brfs-babel'
     }]
   },
