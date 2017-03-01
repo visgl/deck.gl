@@ -1,5 +1,5 @@
 import {CompositeLayer, IconLayer} from 'deck.gl';
-import {labelsToTextureAtlas} from './label-utils';
+import {makeTextureAtlasFromLabels} from './label-utils';
 
 /* Constants */
 const defaultProps = {
@@ -18,9 +18,6 @@ const defaultProps = {
  * @param {Array} [props.axesColor] - color of the gridlines, in [r,g,b,a]
  */
 export default class LabelLayer extends CompositeLayer {
-
-  initializeState() {}
-
   updateState({props, oldProps, changeFlags}) {
     if (changeFlags.dataChanged || props.fontSize !== oldProps.fontSize) {
       this.updateLabelAtlas(props);
@@ -31,10 +28,10 @@ export default class LabelLayer extends CompositeLayer {
     const {gl} = this.context;
     const {data, getLabel, fontSize} = this.props;
 
-    const {texture, mapping} = labelsToTextureAtlas({gl, data, getLabel, fontSize});
-    if (this.state.texture) {
-      this.state.texture.delete();
-    }
+    const {texture, mapping} = makeTextureAtlasFromLabels(gl, {data, getLabel, fontSize});
+    // if (this.state.texture) {
+    //   this.state.texture.delete();
+    // }
     this.setState({texture, mapping});
   }
 
@@ -45,9 +42,9 @@ export default class LabelLayer extends CompositeLayer {
       data: this.state.mapping,
       sizeScale: 24,
       getIcon: d => d.index,
-      getSize: d => 1,
-      opacity: 0.8,
-      pickable: true
+      getPosition: d => this.props.getPosition(d.object),
+      getColor: d => this.props.getColor(d.object),
+      getSize: d => this.props.getSize(d.object)
     }));
   }
 }

@@ -77,9 +77,15 @@ export default class ChoroplethLayer extends Layer {
       attributeManager.invalidateAll();
     }
 
-    if (oldProps.opacity !== props.opacity) {
+    if (props.opacity !== oldProps.opacity) {
       this.setUniforms({opacity: props.opacity});
     }
+
+    if (props.drawContour !== oldProps.drawContour) {
+      this.state.model.geometry.drawMode = props.drawContour ? GL.LINES : GL.TRIANGLES;
+      attributeManager.invalidateAll();
+    }
+
   }
 
   draw({uniforms}) {

@@ -10,7 +10,7 @@ module.exports = {
   },
 
   // inline source maps seem to work best
-  devtool: 'inline-source-map',
+  devtool: 'source-map',
 
   resolve: {
     // Make src files outside of this dir resolve modules in our node_modules folder

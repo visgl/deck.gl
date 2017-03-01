@@ -69,10 +69,16 @@ const MeshLayerExample = {
 
 import LabelLayer from '../../../sample-layers/label-layer/label-layer';
 
+const somePoints = dataSamples.points.slice(0, 50);
+
 const LabelLayerExample = {
   layer: LabelLayer,
   props: {
-    data: []
+    data: somePoints,
+    getLabel: x => `${x.PLACEMENT}-${x.YR_INSTALLED}`,
+    getPosition: x => x.COORDINATES,
+    getColor: x => [Math.random() * 255, 0, Math.random() * 255, 255],
+    getSize: x => 2
   }
 };
 

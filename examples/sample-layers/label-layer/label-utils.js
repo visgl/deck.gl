@@ -8,7 +8,7 @@ function setTextStyle(ctx, fontSize) {
   ctx.font = `${fontSize}px Helvetica,Arial,sans-serif`;
   ctx.fillStyle = '#000';
   ctx.textBaseline = 'top';
-  ctx.textAlign = 'center';
+  ctx.textAlign = 'left';
 }
 
 /*
@@ -18,7 +18,7 @@ function setTextStyle(ctx, fontSize) {
  * @param {Number} fontSize: size to render with
  * @returns {object} {texture, columnWidths}
  */
-export function labelsToTextureAtlas(gl, {data, getText = x => x, fontSize = 48}) {
+export function makeTextureAtlasFromLabels(gl, {data, getLabel = x => x, fontSize = 48}) {
   const canvas = document.createElement('canvas');
   const ctx = canvas.getContext('2d');
   setTextStyle(ctx, fontSize);
@@ -27,21 +27,24 @@ export function labelsToTextureAtlas(gl, {data, getText = x => x, fontSize = 48}
   let row = 0;
   let x = 0;
   const mapping = data.map((object, index) => {
-    const string = getText(object);
+    const string = getLabel(object);
     const {width} = ctx.measureText(string);
     if (x + width > MAX_CANVAS_WIDTH) {
       x = 0;
       row++;
     }
-
-    return {
+    const iconMap = {
+      object,
       index,
       string,
       x,
       y: row * fontSize,
       width: Math.min(width, MAX_CANVAS_WIDTH),
-      height: fontSize
+      height: fontSize,
+      mask: true
     };
+    x += width;
+    return iconMap;
   });
 
   canvas.width = MAX_CANVAS_WIDTH;
