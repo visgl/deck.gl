@@ -49,7 +49,9 @@ export default class LayerManager {
       uniforms: {},
       viewport: null,
       viewportChanged: true,
-      pickingFBO: null
+      pickingFBO: null,
+      lastPickedColor: new Uint8Array(4),
+      lastPickedLayerId: null
     };
     Object.seal(this.context);
   }
@@ -129,8 +131,7 @@ export default class LayerManager {
       },
       layers: this.layers,
       mode,
-      viewport: this.context.viewport,
-      pickingFBO: this.context.pickingFBO
+      context: this.context
     });
   }
 

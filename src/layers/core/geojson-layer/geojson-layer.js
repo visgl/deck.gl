@@ -58,9 +58,7 @@ const getCoordinates = f => get(f, 'geometry.coordinates');
 export default class GeoJsonLayer extends CompositeLayer {
   initializeState() {
     this.state = {
-      subLayers: null,
-      subLayerCount: 0,
-      pickInfos: []
+      subLayers: null
     };
   }
 
@@ -72,32 +70,18 @@ export default class GeoJsonLayer extends CompositeLayer {
     }
   }
 
-  _onPickSublayer(mode, info) {
-    const {pickInfos, subLayerCount} = this.state;
-    pickInfos.push(info);
-
-    if (pickInfos.length === subLayerCount) {
-      // all sublayers have been accounted for
-      let pickInfo = pickInfos.find(i => i.index >= 0) || pickInfos[0];
-
-      pickInfo = Object.assign({}, pickInfo, {
-        layer: this,
-        feature: get(pickInfo, 'object.feature') || pickInfo.object
-      });
-
-      switch (mode) {
-      case 'click': this.props.onClick(pickInfo); break;
-      case 'hover': this.props.onHover(pickInfo); break;
-      default: throw new Error('unknown pick type');
-      }
+  _onHoverSubLayer(info) {
+    if (info.object) {
+      info.object = info.object.feature || info.object;
     }
+    this.props.onHover(info);
   }
 
-  getPickingInfo(opts) {
-    // this is called before the onHover/onClick of sublayers
-    // pickInfo is used to collect the pick results of all sublayers
-    this.state.pickInfos.length = 0;
-    return null;
+  _onClickSubLayer(info) {
+    if (info.object) {
+      info.object = info.object.feature || info.object;
+    }
+    this.props.onClick(info);
   }
 
   renderLayers() {
@@ -113,15 +97,12 @@ export default class GeoJsonLayer extends CompositeLayer {
     drawPolygons = drawPolygons && polygonOutlineFeatures && polygonOutlineFeatures.length > 0;
     fillPolygons = fillPolygons && polygonFeatures && polygonFeatures.length > 0;
 
-    // Override user's onHover and onClick props
-    const handlers = {
-      onHover: this._onPickSublayer.bind(this, 'hover'),
-      onClick: this._onPickSublayer.bind(this, 'click')
-    };
+    const onHover = this._onHoverSubLayer.bind(this);
+    const onClick = this._onClickSubLayer.bind(this);
 
     // Filled Polygon Layer
     const polygonFillLayer = fillPolygons && new PolygonLayer(Object.assign({},
-      this.props, handlers, {
+      this.props, {
         id: `${id}-polygon-fill`,
         data: polygonFeatures,
         getPolygon: getCoordinates,
@@ -129,6 +110,8 @@ export default class GeoJsonLayer extends CompositeLayer {
         getColor: getFillColor,
         extruded,
         wireframe: false,
+        onHover,
+        onClick,
         updateTriggers: {
           getElevation: this.props.updateTriggers.getElevation,
           getColor: this.props.updateTriggers.getFillColor
@@ -138,7 +121,7 @@ export default class GeoJsonLayer extends CompositeLayer {
     // Polygon outline or wireframe
     let polygonOutlineLayer = null;
     if (drawPolygons && extruded && wireframe) {
-      polygonOutlineLayer = new PolygonLayer(Object.assign({}, this.props, handlers, {
+      polygonOutlineLayer = new PolygonLayer(Object.assign({}, this.props, {
         id: `${id}-polygon-wireframe`,
         data: polygonFeatures,
         getPolygon: getCoordinates,
@@ -146,17 +129,21 @@ export default class GeoJsonLayer extends CompositeLayer {
         getColor: getStrokeColor,
         extruded: true,
         wireframe: true,
+        onHover,
+        onClick,
         updateTriggers: {
           getColor: this.props.updateTriggers.getStrokeColor
         }
       }));
     } else if (drawPolygons) {
-      polygonOutlineLayer = new PathLayer(Object.assign({}, this.props, handlers, {
+      polygonOutlineLayer = new PathLayer(Object.assign({}, this.props, {
         id: `${id}-polygon-outline`,
         data: polygonOutlineFeatures,
         getPath: getCoordinates,
         getColor: getStrokeColor,
         getStrokeWidth,
+        onHover,
+        onClick,
         updateTriggers: {
           getColor: this.props.updateTriggers.getStrokeColor,
           getStrokeWidth: this.props.updateTriggers.getStrokeWidth
@@ -165,12 +152,14 @@ export default class GeoJsonLayer extends CompositeLayer {
     }
 
     const lineLayer = drawLines && new PathLayer(Object.assign({},
-      this.props, handlers, {
+      this.props, {
         id: `${id}-line-paths`,
         data: lineFeatures,
         getPath: getCoordinates,
         getColor: getStrokeColor,
         getStrokeWidth,
+        onHover,
+        onClick,
         updateTriggers: {
           getColor: this.props.updateTriggers.getStrokeColor,
           getStrokeWidth: this.props.updateTriggers.getStrokeWidth
@@ -178,12 +167,14 @@ export default class GeoJsonLayer extends CompositeLayer {
       }));
 
     const pointLayer = drawPoints && new ScatterplotLayer(Object.assign({},
-      this.props, handlers, {
+      this.props, {
         id: `${id}-points`,
         data: pointFeatures,
         getPosition: getCoordinates,
         getColor: getPointColor,
         getRadius: getPointSize,
+        onHover,
+        onClick,
         updateTriggers: {
           getColor: this.props.updateTriggers.getPointColor,
           getRadius: this.props.updateTriggers.getPointSize
@@ -191,16 +182,12 @@ export default class GeoJsonLayer extends CompositeLayer {
         fp64: this.props.fp64
       }));
 
-    const layers = [
+    return [
       polygonFillLayer,
       polygonOutlineLayer,
       lineLayer,
       pointLayer
     ].filter(Boolean);
-
-    this.state.subLayerCount = layers.length;
-
-    return layers;
   }
 }
 
