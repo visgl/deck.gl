@@ -13,6 +13,9 @@ module.exports = {
   devtool: 'inline-source-map',
 
   resolve: {
+    // Make src files outside of this dir resolve modules in our node_modules folder
+    modules: [resolve(__dirname, '.'), resolve(__dirname, 'node_modules'), 'node_modules'],
+
     alias: {
       // From mapbox-gl-js README. Required for non-browserify bundlers (e.g. webpack):
       'mapbox-gl$': resolve('./node_modules/mapbox-gl/dist/mapbox-gl.js')
