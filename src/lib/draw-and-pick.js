@@ -9,6 +9,7 @@ let renderCount = 0;
 export function drawLayers({layers, pass}) {
   log.log(2, `DRAWING ${layers.length} layers`);
 
+  // render layers in normal colors
   let visibleCount = 0;
   // render layers in normal colors
   layers.forEach((layer, layerIndex) => {
@@ -37,7 +38,8 @@ export function pickLayers(gl, {
   x,
   y,
   viewport,
-  mode
+  mode,
+  lastPickedInfo
 }) {
   // Convert from canvas top-left to WebGL bottom-left coordinates
   // And compensate for pixelRatio
@@ -87,27 +89,58 @@ export function pickLayers(gl, {
     });
 
     // Read color in the central pixel, to be mapped with picking colors
-    const color = new Uint8Array(4);
-    gl.readPixels(deviceX, deviceY, 1, 1, GL.RGBA, GL.UNSIGNED_BYTE, color);
+    const pickedColor = new Uint8Array(4);
+    gl.readPixels(deviceX, deviceY, 1, 1, GL.RGBA, GL.UNSIGNED_BYTE, pickedColor);
 
     // restore blend mode
     setBlendMode(gl, oldBlendMode);
     // Picking process end
 
     // Process picked info start
-    // Decode alpha to layer index
-    const pickedLayer = layers[color[3] - 1];
+    // Decode picked color
+    const pickedLayerIndex = pickedColor[3] - 1;
+    const pickedLayer = pickedLayerIndex >= 0 ? layers[pickedLayerIndex] : null;
+    const pickedObjectIndex = pickedLayer ? pickedLayer.decodePickingColor(pickedColor) : -1;
+    const pickedLayerId = pickedLayer && pickedLayer.props.id;
+    const affectedLayers = pickedLayer ? [pickedLayer] : [];
+
+    if (mode === 'hover') {
+      // only invoke onHover events if picked object has changed
+      const lastPickedObjectIndex = lastPickedInfo.index;
+      const lastPickedLayerId = lastPickedInfo.layerId;
+
+      if (pickedLayerId === lastPickedLayerId && pickedObjectIndex === lastPickedObjectIndex) {
+        // picked object did not change, no need to proceed
+        return;
+      }
+
+      if (pickedLayerId !== lastPickedLayerId) {
+        // We cannot store a ref to lastPickedLayer in the context because
+        // the state of an outdated layer is no longer valid
+        // and the props may have changed
+        const lastPickedLayer = layers.find(l => l.props.id === lastPickedLayerId);
+        if (lastPickedLayer) {
+          // Let leave event fire before enter event
+          affectedLayers.unshift(lastPickedLayer);
+        }
+      }
+
+      // Update layer manager context
+      lastPickedInfo.layerId = pickedLayerId;
+      lastPickedInfo.index = pickedObjectIndex;
+    }
 
     const baseInfo = createInfo([x, y], viewport);
     baseInfo.devicePixel = [deviceX, deviceY];
     baseInfo.pixelRatio = pixelRatio;
 
-    layers.forEach(layer => {
+    affectedLayers.forEach(layer => {
       let info = Object.assign({}, baseInfo);
       info.layer = layer;
 
       if (layer === pickedLayer) {
-        info.color = color;
+        info.color = pickedColor;
+        info.index = pickedObjectIndex;
         info.picked = true;
       }
 

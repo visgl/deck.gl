@@ -22,6 +22,7 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 #### [v4.0.0-beta.3]
 - Add PointCloudLayer
+- FIX: `onHover` and `onClick` are no longer called on layers that are not affected
 - BREAKING: `layer.pick()` is renamed to `layer.getPickingInfo()`, must return info object
 
 #### [v4.0.0-beta.2]

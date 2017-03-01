@@ -122,18 +122,22 @@ export default class DeckGL extends React.Component {
   _onClick(event) {
     const {x, y} = event;
     const selectedInfos = this.layerManager.pickLayer({x, y, mode: 'click'});
-    const firstInfo = selectedInfos.find(info => info.index >= 0);
-    // Event.event holds the original MouseEvent object
-    this.props.onLayerClick(firstInfo, selectedInfos, event.event);
+    if (selectedInfos.length) {
+      const firstInfo = selectedInfos.find(info => info.index >= 0);
+      // Event.event holds the original MouseEvent object
+      this.props.onLayerClick(firstInfo, selectedInfos, event.event);
+    }
   }
 
   // Route events to layers
   _onMouseMove(event) {
     const {x, y} = event;
     const selectedInfos = this.layerManager.pickLayer({x, y, mode: 'hover'});
-    const firstInfo = selectedInfos.find(info => info.index >= 0);
-    // Event.event holds the original MouseEvent object
-    this.props.onLayerHover(firstInfo, selectedInfos, event.event);
+    if (selectedInfos.length) {
+      const firstInfo = selectedInfos.find(info => info.index >= 0);
+      // Event.event holds the original MouseEvent object
+      this.props.onLayerHover(firstInfo, selectedInfos, event.event);
+    }
   }
 
   _onRenderFrame({gl}) {

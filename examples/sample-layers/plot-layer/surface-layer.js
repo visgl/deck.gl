@@ -136,16 +136,15 @@ export default class SurfaceLayer extends Layer {
 
   decodePickingColor([r, g, b]) {
     if (b === 0) {
-      return null;
+      return -1;
     }
     return [r / 255, g / 255];
   }
 
-  pick(props) {
-    super.pick(props);
-    const {info} = props;
+  getPickingInfo(opts) {
+    const {info} = opts;
 
-    if (info && info.index) {
+    if (info && info.index !== -1) {
       const {xMin, xMax, yMin, yMax, getZ} = this.props;
       const x = info.index[0] * (xMax - xMin) + xMin;
       const y = info.index[1] * (yMax - yMin) + yMin;
@@ -153,6 +152,8 @@ export default class SurfaceLayer extends Layer {
 
       info.sample = [x, y, z];
     }
+
+    return info;
   }
 
   _setBounds(bounds) {

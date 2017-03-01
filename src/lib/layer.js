@@ -119,10 +119,8 @@ export default class Layer {
   // called to populate the info object that is passed to the event handler
   // @return null to cancel event
   getPickingInfo({info, mode}) {
-    const {color} = info;
-    const index = this.decodePickingColor(color);
+    const {color, index} = info;
 
-    info.index = index;
     if (index >= 0) {
       // If props.data is an indexable array, get the object
       if (Array.isArray(this.props.data)) {
@@ -130,7 +128,7 @@ export default class Layer {
       }
     }
 
-    // TODO - selectedPickingColor should be removed?
+    // TODO - move to the JS part of a shader picking shader package
     if (mode === 'hover') {
       const selectedPickingColor = new Float32Array(3);
       selectedPickingColor[0] = color[0];
