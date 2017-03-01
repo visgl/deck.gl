@@ -15,26 +15,15 @@ import {
   PathLayer,
 
   ArcLayer64,
-  LineLayer64,
-
-  ChoroplethLayer,
-  ChoroplethLayer64,
-  ExtrudedChoroplethLayer64
-
+  LineLayer64
 } from 'deck.gl';
 
-import {
-  EnhancedChoroplethLayer,
-  // PlotLayer,
-  TripsLayer
-} from '../../sample-layers';
-
-import * as dataSamples from './data-samples';
-import {parseColor, setOpacity} from './utils/color';
+import * as dataSamples from '../data-samples';
+import {parseColor, setOpacity} from '../utils/color';
 
 // Demonstrate immutable support
-import Immutable from 'immutable';
-const immutableChoropleths = Immutable.fromJS(dataSamples.choropleths);
+// import Immutable from 'immutable';
+// const immutableChoropleths = Immutable.fromJS(dataSamples.choropleths);
 
 const MARKER_SIZE_MAP = {
   small: 2,
@@ -315,76 +304,6 @@ const LineLayer64Example = {
   }
 };
 
-const ChoroplethLayerContourExample = {
-  layer: ChoroplethLayer,
-  props: {
-    id: 'choroplethLayerContour',
-    data: immutableChoropleths,
-    getColor: f => [0, 80, 200],
-    opacity: 0.8,
-    drawContour: true
-  }
-};
-
-const ChoroplethLayerExample = {
-  layer: ChoroplethLayer,
-  props: {
-    id: 'choroplethLayerSolid',
-    data: dataSamples.choropleths,
-    getColor: f => [((f.properties.ZIP_CODE * 10) % 127) + 128, 0, 0],
-    opacity: 0.8,
-    pickable: true
-  }
-};
-
-const ChoroplethLayer64ContourExample = {
-  layer: ChoroplethLayer64,
-  props: {
-    id: 'choroplethLayer64Contour',
-    data: dataSamples.choropleths,
-    getColor: f => [0, 80, 200],
-    opacity: 0.8,
-    drawContour: true
-  }
-};
-
-const ChoroplethLayer64SolidExample = {
-  layer: ChoroplethLayer64,
-  props: {
-    id: 'choroplethLayer64Solid',
-    data: dataSamples.choropleths,
-    getColor: f => [((f.properties.ZIP_CODE * 10) % 127) + 128, 0, 0],
-    opacity: 0.8,
-    pickable: true
-  }
-};
-
-const ExtrudedChoroplethLayer64Example = {
-  layer: ExtrudedChoroplethLayer64,
-  props: {
-    id: 'extrudedChoroplethLayer64',
-    data: dataSamples.choropleths,
-    getColor: f => [((f.properties.ZIP_CODE * 10) % 127) + 128, 0, 0],
-    pointLightLocation: [
-      // props.mapViewState.longitude,
-      // props.mapViewState.latitude,
-      37.751537058389985,
-      -122.42694203247012,
-      1e4
-    ],
-    opacity: 1.0,
-    pickable: true
-  }
-};
-
-const ExtrudedChoroplethLayer64WireframeExample = {
-  layer: ExtrudedChoroplethLayer64,
-  props: Object.assign({}, ExtrudedChoroplethLayer64Example.props, {
-    id: 'extrudedChoroplethLayer64-wireframe',
-    drawWireframe: true
-  })
-};
-
 // perf test examples
 const ScatterplotLayerPerfExample = (id, getData) => ({
   layer: ScatterplotLayer,
@@ -413,33 +332,6 @@ const ScatterplotLayer64PerfExample = (id, getData) => ({
   }
 });
 
-const EnhancedChoroplethLayerExample = {
-  layer: EnhancedChoroplethLayer,
-  props: {
-    id: 'enhanced-choropleth-layer',
-    data: dataSamples.choropleths,
-    getColor: f => [200, 0, 80],
-    strokeWidth: 5
-  }
-};
-
-const TripsLayerExample = {
-  layer: TripsLayer,
-  props: {
-    id: 'trips-layer',
-    data: dataSamples.trips,
-    getPath: trip => trip.map(d => [
-      d.begin_shape[0],
-      d.begin_shape[1],
-      // cast time range to [0, 1]
-      d.begin_time / 2000
-    ]),
-    getColor: f => [0, 80, 200],
-    trailLength: 0.25,
-    currentTime: 0.4
-  }
-};
-
 /* eslint-disable quote-props */
 export default {
   'Core Layers': {
@@ -465,25 +357,11 @@ export default {
     LineLayer64: LineLayer64Example
   },
 
-  'Deprecated Layers': {
-    'ChoroplethLayer (Solid)': ChoroplethLayerExample,
-    'ChoroplethLayer (Contour)': ChoroplethLayerContourExample,
-    'ChoroplethLayer64 (Solid)': ChoroplethLayer64SolidExample,
-    'ChoroplethLayer64 (Contour)': ChoroplethLayer64ContourExample,
-    'ExtrudedChoroplethLayer64': ExtrudedChoroplethLayer64Example,
-    'ExtrudedChoroplethLayer64 (Wireframe)': ExtrudedChoroplethLayer64WireframeExample
-  },
-
   'Performance Tests': {
     'ScatterplotLayer 1M': ScatterplotLayerPerfExample('1M', dataSamples.getPoints1M),
     'ScatterplotLayer 10M': ScatterplotLayerPerfExample('10M', dataSamples.getPoints10M),
     'ScatterplotLayer64 100K': ScatterplotLayer64PerfExample('100K', dataSamples.getPoints100K),
     'ScatterplotLayer64 1M': ScatterplotLayer64PerfExample('1M', dataSamples.getPoints1M),
     'ScatterplotLayer64 10M': ScatterplotLayer64PerfExample('10M', dataSamples.getPoints10M)
-  },
-
-  'Sample Layers': {
-    'EnhancedChoroplethLayer': EnhancedChoroplethLayerExample,
-    'TripsLayer': TripsLayerExample
   }
 };
