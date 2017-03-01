@@ -10,6 +10,7 @@ export function drawLayers({layers, pass}) {
   log.log(2, `DRAWING ${layers.length} layers`);
 
   let visibleCount = 0;
+  // render layers in normal colors
   layers.forEach((layer, layerIndex) => {
     if (layer.props.visible) {
       layer.drawLayer({
@@ -56,6 +57,7 @@ export function pickLayers(gl, {
     scissorTest: {x: deviceX, y: deviceY, w: 1, h: 1}
   }, () => {
 
+    // Picking process start
     // Clear the frame buffer
     gl.clear(GL.COLOR_BUFFER_BIT | GL.DEPTH_BUFFER_BIT);
     // Save current blend settings
@@ -66,7 +68,7 @@ export function pickLayers(gl, {
     gl.blendFuncSeparate(gl.ONE, gl.ZERO, gl.CONSTANT_ALPHA, gl.ZERO);
     gl.blendEquation(gl.FUNC_ADD);
 
-    // Render all pickable layers
+    // Render all pickable layers in picking colors
     layers.forEach((layer, layerIndex) => {
       if (layer.props.visible && layer.props.pickable) {
 
@@ -88,41 +90,47 @@ export function pickLayers(gl, {
     const color = new Uint8Array(4);
     gl.readPixels(deviceX, deviceY, 1, 1, GL.RGBA, GL.UNSIGNED_BYTE, color);
 
-    // Decode alpha to layer index
-    const pickedLayer = layers[color[3] - 1];
-    const baseInfo = Object.assign(
-      createInfo([x, y], viewport),
-      {
-        devicePixel: [deviceX, deviceY],
-        pixelRatio
-      }
-    );
-
-    layers.forEach(layer => {
-      const info = Object.assign({}, baseInfo, {layer});
-
-      if (layer === pickedLayer) {
-        const index = layer.decodePickingColor(color);
-        info.index = index;
-        info.color = color;
-        if (index >= 0) {
-          info.picked = true;
-          // If props.data is an indexable array, get the object
-          if (Array.isArray(layer.props.data)) {
-            info.object = layer.props.data[index];
-          }
-        }
-      }
-
-      const handled = layer.pickLayer({info, mode});
-
-      if (!handled) {
-        unhandledPickInfos.push(info);
-      }
-    });
-
     // restore blend mode
     setBlendMode(gl, oldBlendMode);
+    // Picking process end
+
+    // Process picked info start
+    // Decode alpha to layer index
+    const pickedLayer = layers[color[3] - 1];
+
+    const baseInfo = createInfo([x, y], viewport);
+    baseInfo.devicePixel = [deviceX, deviceY];
+    baseInfo.pixelRatio = pixelRatio;
+
+    layers.forEach(layer => {
+      let info = Object.assign({}, baseInfo);
+      info.layer = layer;
+
+      if (layer === pickedLayer) {
+        info.color = color;
+        info.picked = true;
+      }
+
+      // Let layers populate its own info object
+      info = layer.pickLayer({info, mode});
+
+      // If layer.getPickingInfo() returns null, do not proceed
+      if (info) {
+        let handled = false;
+
+        // Calling callbacks can have async interactions with React
+        // which nullifies layer.state.
+        switch (mode) {
+        case 'click': handled = layer.props.onClick(info); break;
+        case 'hover': handled = layer.props.onHover(info); break;
+        default: throw new Error('unknown pick type');
+        }
+
+        if (!handled) {
+          unhandledPickInfos.push(info);
+        }
+      }
+    });
   });
 
   return unhandledPickInfos;
