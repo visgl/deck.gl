@@ -2,21 +2,6 @@ import React, {PureComponent} from 'react';
 
 export default class LayerInfo extends PureComponent {
 
-  constructor(props) {
-    super(props);
-    this.state = {
-      hovered: null,
-      clicked: null
-    };
-
-    this.onItemHovered = this._onMouseEvent.bind(this, 'hovered');
-    this.onItemClicked = this._onMouseEvent.bind(this, 'clicked');
-  }
-
-  _onMouseEvent(name, info) {
-    this.setState({[name]: info});
-  }
-
   _infoToString(info) {
     const object = info.feature || info.object;
     if (!object) {
@@ -27,7 +12,7 @@ export default class LayerInfo extends PureComponent {
   }
 
   render() {
-    const {hovered, clicked} = this.state;
+    const {hovered, clicked} = this.props;
 
     return (
       <div id="layer-info">

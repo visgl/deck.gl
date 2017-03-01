@@ -39,7 +39,9 @@ class App extends PureComponent {
         separation: 0,
         rotationZ: 0,
         rotationX: 0
-      }
+      },
+      hoveredItem: null,
+      clickedItem: null
     };
 
     this._effects = [new ReflectionEffect()];
@@ -90,11 +92,11 @@ class App extends PureComponent {
   }
 
   _onHover(info) {
-    this.refs.infoPanel.onItemHovered(info);
+    this.setState({hoveredItem: info});
   }
 
   _onClick(info) {
-    this.refs.infoPanel.onItemClicked(info);
+    this.setState({clickedItem: info});
   }
 
   _renderExampleLayer(example, settings, index) {
@@ -180,7 +182,7 @@ class App extends PureComponent {
   }
 
   render() {
-    const {settings, activeExamples} = this.state;
+    const {settings, activeExamples, hoveredItem, clickedItem} = this.state;
 
     return (
       <div>
@@ -196,7 +198,7 @@ class App extends PureComponent {
             onToggleLayer={this._onToggleLayer}
             onUpdateLayer={this._onUpdateLayerSettings} />
         </div>
-        <LayerInfo ref="infoPanel"/>
+        <LayerInfo ref="infoPanel" hovered={hoveredItem} clicked={clickedItem} />
       </div>
     );
   }
