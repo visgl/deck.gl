@@ -64,12 +64,11 @@ export default class PointDensityGridLayer extends Layer {
     }
   }
 
-  pick(opts) {
-    super.pick(opts);
-
+  getPickingInfo(opts) {
+    const info = super.getPickingInfo(opts);
     const pickedCell = this.state.pickedCell;
 
-    Object.assign(opts.info, {
+    return Object.assign(info, {
       layer: this,
       // override index with cell index
       index: pickedCell ? pickedCell.index : -1,

@@ -19,8 +19,6 @@ import LAYER_CATEGORIES from './layer-examples';
 const MAPBOX_ACCESS_TOKEN = process.env.MAPBOX_ACCESS_TOKEN || // eslint-disable-line
   'Set MAPBOX_ACCESS_TOKEN environment variable or put your token here.';
 
-const noop = () => {};
-
 // ---- View ---- //
 class App extends PureComponent {
   constructor(props) {
@@ -41,7 +39,9 @@ class App extends PureComponent {
         separation: 0,
         rotationZ: 0,
         rotationX: 0
-      }
+      },
+      hoveredItem: null,
+      clickedItem: null
     };
 
     this._effects = [new ReflectionEffect()];
@@ -91,17 +91,17 @@ class App extends PureComponent {
     this.setState({settings});
   }
 
+  _onHover(info) {
+    this.setState({hoveredItem: info});
+  }
+
+  _onClick(info) {
+    this.setState({clickedItem: info});
+  }
+
   _renderExampleLayer(example, settings, index) {
     const {layer: Layer, props, getData} = example;
-    const {infoPanel} = this.refs;
     const layerProps = Object.assign({}, props, settings);
-
-    if (props.pickable) {
-      Object.assign(layerProps, {
-        onHover: infoPanel ? infoPanel.onItemHovered : noop,
-        onClick: infoPanel ? infoPanel.onItemClicked : noop
-      });
-    }
 
     if (getData) {
       Object.assign(layerProps, {data: getData()});
@@ -170,6 +170,8 @@ class App extends PureComponent {
           width={width} height={height}
           {...mapViewState}
           onWebGLInitialized={ this._onWebGLInitialized }
+          onLayerHover={ this._onHover }
+          onLayerClick={ this._onClick }
           layers={this._renderExamples()}
           effects={effects ? this._effects : []}
         />
@@ -180,7 +182,7 @@ class App extends PureComponent {
   }
 
   render() {
-    const {settings, activeExamples} = this.state;
+    const {settings, activeExamples, hoveredItem, clickedItem} = this.state;
 
     return (
       <div>
@@ -196,7 +198,7 @@ class App extends PureComponent {
             onToggleLayer={this._onToggleLayer}
             onUpdateLayer={this._onUpdateLayerSettings} />
         </div>
-        <LayerInfo ref="infoPanel"/>
+        <LayerInfo ref="infoPanel" hovered={hoveredItem} clicked={clickedItem} />
       </div>
     );
   }
