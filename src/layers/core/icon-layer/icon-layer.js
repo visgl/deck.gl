@@ -22,6 +22,7 @@ import {assembleShaders} from '../../../shader-utils';
 import {GL, Model, Geometry, Texture2D, loadTextures} from 'luma.gl';
 import {readFileSync} from 'fs';
 import {join} from 'path';
+import {fp64ify} from '../../../lib/utils/fp64';
 
 const DEFAULT_COLOR = [0, 0, 0, 255];
 
@@ -54,7 +55,8 @@ const defaultProps = {
   getSize: x => x.size || 1,
   iconAtlas: null,
   iconMapping: {},
-  sizeScale: 1
+  sizeScale: 1,
+  fp64: false
 };
 
 export default class IconLayer extends Layer {
@@ -72,7 +74,29 @@ export default class IconLayer extends Layer {
     /* eslint-enable max-len */
 
     const {gl} = this.context;
-    this.setState({model: this.getModel(gl)});
+    this.setState({model: this._getModel(gl)});
+  }
+
+  updateAttribute({props, oldProps, changeFlags}) {
+    if (props.fp64 !== oldProps.fp64) {
+      const {attributeManager} = this.state;
+      attributeManager.invalidateAll();
+
+      if (props.fp64 === true) {
+        attributeManager.addInstanced({
+          instancePositions64xyLow: {
+            size: 2,
+            accessor: 'getPosition',
+            update: this.calculateInstancePositions64xyLow
+          }
+        });
+      } else {
+        attributeManager.remove([
+          'instancePositions64xyLow'
+        ]);
+      }
+
+    }
   }
 
   updateState({oldProps, props, changeFlags}) {
@@ -93,6 +117,10 @@ export default class IconLayer extends Layer {
         });
       }
     }
+
+    this.updateModel({props, oldProps, changeFlags});
+    this.updateAttribute({props, oldProps, changeFlags});
+
   }
 
   draw({uniforms}) {
@@ -116,13 +144,18 @@ export default class IconLayer extends Layer {
   }
 
   getShaders() {
-    return {
+    return this.props.fp64 ? {
+      vs: readFileSync(join(__dirname, './icon-layer-64-vertex.glsl'), 'utf8'),
+      fs: readFileSync(join(__dirname, './icon-layer-fragment.glsl'), 'utf8'),
+      modules: ['fp64', 'project64']
+    } : {
       vs: readFileSync(join(__dirname, './icon-layer-vertex.glsl'), 'utf8'),
-      fs: readFileSync(join(__dirname, './icon-layer-fragment.glsl'), 'utf8')
+      fs: readFileSync(join(__dirname, './icon-layer-fragment.glsl'), 'utf8'),
+      modules: []
     };
   }
 
-  getModel(gl) {
+  _getModel(gl) {
     const positions = [-1, -1, 0, -1, 1, 0, 1, 1, 0, 1, -1, 0];
 
     const shaders = assembleShaders(gl, this.getShaders());
@@ -149,6 +182,17 @@ export default class IconLayer extends Layer {
       value[i++] = position[0];
       value[i++] = position[1];
       value[i++] = position[2] || 0;
+    }
+  }
+
+  calculateInstancePositions64xyLow(attribute) {
+    const {data, getPosition} = this.props;
+    const {value} = attribute;
+    let i = 0;
+    for (const point of data) {
+      const position = getPosition(point);
+      value[i++] = fp64ify(position[0])[1];
+      value[i++] = fp64ify(position[1])[1];
     }
   }
 

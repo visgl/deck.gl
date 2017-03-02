@@ -23,6 +23,7 @@ import {assembleShaders} from '../../../shader-utils';
 import {GL, Model, CubeGeometry} from 'luma.gl';
 import {readFileSync} from 'fs';
 import {join} from 'path';
+import {fp64ify} from '../../../lib/utils/fp64';
 
 const DEFAULT_COLOR = [255, 0, 255, 255];
 
@@ -41,7 +42,8 @@ const defaultProps = {
     specularRatio: 0.8,
     lightsStrength: [1.0, 0.0, 0.8, 0.0],
     numberOfLights: 2
-  }
+  },
+  fp64: false
 };
 
 export default class GridLayer extends Layer {
@@ -60,12 +62,12 @@ export default class GridLayer extends Layer {
    */
 
   getShaders() {
-    const vertex = readFileSync(join(__dirname, './grid-layer-vertex.glsl'), 'utf8');
-    const picking = readFileSync(join(__dirname, './picking.glsl'), 'utf8');
-    const vs = picking.concat(vertex);
-
-    return {
-      vs,
+    return this.props.fp64 ? {
+      vs: readFileSync(join(__dirname, './grid-layer-64-vertex.glsl'), 'utf8'),
+      fs: readFileSync(join(__dirname, './grid-layer-fragment.glsl'), 'utf8'),
+      modules: ['fp64', 'project64', 'lighting']
+    } : {
+      vs: readFileSync(join(__dirname, './grid-layer-vertex.glsl'), 'utf8'),
       fs: readFileSync(join(__dirname, './grid-layer-fragment.glsl'), 'utf8'),
       modules: ['lighting']
     };
@@ -73,7 +75,7 @@ export default class GridLayer extends Layer {
 
   initializeState() {
     const {gl} = this.context;
-    this.setState({model: this._createModel(gl)});
+    this.setState({model: this._getModel(gl)});
 
     const {attributeManager} = this.state;
     /* eslint-disable max-len */
@@ -84,12 +86,36 @@ export default class GridLayer extends Layer {
     /* eslint-enable max-len */
   }
 
-  updateState(opt) {
-    super.updateState(opt);
+  updateAttribute({props, oldProps, changeFlags}) {
+    if (props.fp64 !== oldProps.fp64) {
+      const {attributeManager} = this.state;
+      attributeManager.invalidateAll();
+
+      if (props.fp64 === true) {
+        attributeManager.addInstanced({
+          instancePositions64xyLow: {
+            size: 2,
+            accessor: 'getPosition',
+            update: this.calculateInstancePositions64xyLow
+          }
+        });
+      } else {
+        attributeManager.remove([
+          'instancePositions64xyLow'
+        ]);
+      }
+
+    }
+  }
+
+  updateState({props, oldProps, changeFlags}) {
+    super.updateState({props, oldProps, changeFlags});
+    this.updateModel({props, oldProps, changeFlags});
+    this.updateAttribute({props, oldProps, changeFlags});
     this.updateUniforms();
   }
 
-  _createModel(gl) {
+  _getModel(gl) {
     const geometry = new CubeGeometry({});
     const shaders = assembleShaders(gl, this.getShaders());
 
@@ -132,6 +158,17 @@ export default class GridLayer extends Layer {
       value[i + 2] = 0;
       value[i + 3] = elevation;
       i += size;
+    }
+  }
+
+  calculateInstancePositions64xyLow(attribute) {
+    const {data, getPosition} = this.props;
+    const {value} = attribute;
+    let i = 0;
+    for (const point of data) {
+      const position = getPosition(point);
+      value[i++] = fp64ify(position[0])[1];
+      value[i++] = fp64ify(position[1])[1];
     }
   }
 
