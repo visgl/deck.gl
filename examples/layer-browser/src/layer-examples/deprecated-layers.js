@@ -6,17 +6,6 @@ import {
 
 import * as dataSamples from '../data-samples';
 
-const ChoroplethLayerContourExample = {
-  layer: ChoroplethLayer,
-  props: {
-    id: 'choroplethLayerContour',
-    data: dataSamples.choropleths,
-    getColor: f => [0, 80, 200],
-    opacity: 0.8,
-    drawContour: true
-  }
-};
-
 const ChoroplethLayerExample = {
   layer: ChoroplethLayer,
   props: {
@@ -79,8 +68,7 @@ const ExtrudedChoroplethLayer64WireframeExample = {
 /* eslint-disable quote-props */
 export default {
   'Deprecated Layers': {
-    'ChoroplethLayer (Solid)': ChoroplethLayerExample,
-    'ChoroplethLayer (Contour)': ChoroplethLayerContourExample,
+    'ChoroplethLayer': ChoroplethLayerExample,
     'ChoroplethLayer64 (Solid)': ChoroplethLayer64SolidExample,
     'ChoroplethLayer64 (Contour)': ChoroplethLayer64ContourExample,
     'ExtrudedChoroplethLayer64': ExtrudedChoroplethLayer64Example,
