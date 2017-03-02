@@ -4,7 +4,8 @@ import {makeTextureAtlasFromLabels} from './label-utils';
 /* Constants */
 const defaultProps = {
   getLabel: x => x.label,
-  fontSize: 24
+  fontSize: 24,
+  fp64: false
 };
 
 /*
