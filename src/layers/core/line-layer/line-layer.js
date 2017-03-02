@@ -82,7 +82,6 @@ export default class LineLayer extends Layer {
           'instanceSourceTargetPositions64xyLow'
         ]);
       }
-
     }
   }
 

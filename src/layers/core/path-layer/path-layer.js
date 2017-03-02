@@ -3,6 +3,7 @@ import {assembleShaders} from '../../../shader-utils';
 import {GL, Model, Geometry} from 'luma.gl';
 import {readFileSync} from 'fs';
 import {join} from 'path';
+import {fp64ify} from '../../../lib/utils/fp64';
 
 const DEFAULT_COLOR = [0, 0, 0, 255];
 
@@ -15,7 +16,8 @@ const defaultProps = {
   strokeWidthMaxPixels: Number.MAX_SAFE_INTEGER, // max stroke width in pixels
   getPath: object => object.path,
   getColor: object => object.color || DEFAULT_COLOR,
-  getStrokeWidth: object => object.width || 1
+  getStrokeWidth: object => object.width || 1,
+  fp64: false
 };
 
 const isClosed = path => {
@@ -27,15 +29,20 @@ const isClosed = path => {
 
 export default class PathLayer extends Layer {
   getShaders() {
-    return {
+    return this.props.fp64 ? {
+      vs: readFileSync(join(__dirname, './path-layer-64-vertex.glsl'), 'utf8'),
+      fs: readFileSync(join(__dirname, './path-layer-fragment.glsl'), 'utf8'),
+      modules: ['fp64', 'project64']
+    } : {
       vs: readFileSync(join(__dirname, './path-layer-vertex.glsl'), 'utf8'),
-      fs: readFileSync(join(__dirname, './path-layer-fragment.glsl'), 'utf8')
+      fs: readFileSync(join(__dirname, './path-layer-fragment.glsl'), 'utf8'),
+      modules: []
     };
   }
 
   initializeState() {
     const {gl} = this.context;
-    this.setState({model: this.getModel(gl)});
+    this.setState({model: this._getModel(gl)});
 
     const {attributeManager} = this.state;
     /* eslint-disable max-len */
@@ -51,9 +58,31 @@ export default class PathLayer extends Layer {
     /* eslint-enable max-len */
   }
 
+  updateAttribute({props, oldProps, changeFlags}) {
+    if (props.fp64 !== oldProps.fp64) {
+      const {attributeManager} = this.state;
+      attributeManager.invalidateAll();
+
+      if (props.fp64 === true) {
+        attributeManager.addInstanced({
+          instanceStartEndPositions64xyLow: {
+            size: 4,
+            update: this.calculateInstanceStartEndPositions64xyLow
+          }
+        });
+      } else {
+        attributeManager.remove([
+          'instanceStartEndPositions64xyLow'
+        ]);
+      }
+    }
+  }
+
   updateState({oldProps, props, changeFlags}) {
     const {getPath} = this.props;
     const {attributeManager} = this.state;
+    this.updateModel({props, oldProps, changeFlags});
+    this.updateAttribute({props, oldProps, changeFlags});
 
     if (changeFlags.dataChanged) {
       // this.state.paths only stores point positions in each path
@@ -63,6 +92,7 @@ export default class PathLayer extends Layer {
       this.setState({paths, numInstances});
       attributeManager.invalidateAll();
     }
+
   }
 
   draw({uniforms}) {
@@ -79,7 +109,7 @@ export default class PathLayer extends Layer {
     }));
   }
 
-  getModel(gl) {
+  _getModel(gl) {
     const shaders = assembleShaders(gl, this.getShaders());
 
     /*
@@ -167,6 +197,24 @@ export default class PathLayer extends Layer {
         value[i++] = point[0];
         value[i++] = point[1];
         value[i++] = point[2] || 0;
+      }
+    });
+  }
+
+  calculateInstanceStartEndPositions64xyLow(attribute) {
+    const {paths} = this.state;
+    const {value} = attribute;
+
+    let i = 0;
+    paths.forEach(path => {
+      const numSegments = path.length - 1;
+      for (let ptIndex = 0; ptIndex < numSegments; ptIndex++) {
+        const startPoint = path[ptIndex];
+        const endPoint = path[ptIndex + 1];
+        value[i++] = fp64ify(startPoint[0])[1];
+        value[i++] = fp64ify(startPoint[1])[1];
+        value[i++] = fp64ify(endPoint[0])[1];
+        value[i++] = fp64ify(endPoint[1])[1];
       }
     });
   }
