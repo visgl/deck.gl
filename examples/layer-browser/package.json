@@ -12,7 +12,7 @@
     "react": "^15.4.1",
     "react-autobind": "^1.0.6",
     "react-dom": "^15.4.1",
-    "react-map-gl": "1.7.2",
+    "react-map-gl": "^2.0.0",
     "react-stats": "^0.0.5",
     "s2-geometry": "^1.2.9"
   },

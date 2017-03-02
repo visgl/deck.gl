@@ -27,7 +27,7 @@ use cases, such as scatterplots, choropleths etc in 2 and 3 dimensions.
 ## Example
 
 ```javascript
-import DeckGL from 'deck.gl/react';
+import DeckGL from 'deck.gl';
 import {ArcLayer} from 'deck.gl';
 
 const flights = new ArcLayer({
@@ -49,16 +49,24 @@ or browse directly the [docs folder](./docs).
 
     npm install
     npm test
-    npm start
+    npm start  # See note below
+
+Note that you will also need to do an npm install in the main example (`examples/layer-browser`)
+since the npm start command tries to build and run that example.
+
+    cd examples/layer-browser
+    npm install
+    cd ../..
 
 #### Node Version Requirement
 
 Building deck.gl from source has a dependency on node `4.0` or higher.
-Either upgrade to a newest version, or install something like [nvm](https://github.com/creationix/nvm).
+Either upgrade to a newest version, or install something like
+[nvm](https://github.com/creationix/nvm).
 
 #### Install yarn
-On macOS deck.gl uses [yarn] (https://www.npmjs.com/package/yarn) to manage packages.
-To develop deck.gl, [install yarn] (https://yarnpkg.com/en/docs/install) with brew
+On macOS deck.gl uses [yarn](https://www.npmjs.com/package/yarn) to manage packages.
+To develop deck.gl, [install yarn](https://yarnpkg.com/en/docs/install) with brew
 ```
 brew update
 brew install yarn

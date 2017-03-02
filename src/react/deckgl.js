@@ -23,7 +23,6 @@ import WebGLRenderer from './webgl-renderer';
 import {LayerManager, Layer} from '../lib';
 import {EffectManager, Effect} from '../experimental';
 import {GL, addEvents} from 'luma.gl';
-// import {Viewport, WebMercatorViewport} from 'viewport-mercator-project';
 import {Viewport, WebMercatorViewport} from '../lib/viewports';
 import {log} from '../lib/utils';
 

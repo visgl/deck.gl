@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 
 import {ScreenGridLayer} from 'deck.gl';
-import DeckGL from 'deck.gl/react';
+import DeckGL from 'deck.gl';
 
 import {readableInteger} from '../../utils/format-utils';
 import {MAPBOX_STYLES} from '../../constants/defaults';

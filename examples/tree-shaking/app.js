@@ -1,7 +1,8 @@
 import React, {Component} from 'react';
 import {render} from 'react-dom';
 import MapGL from 'react-map-gl';
-import DeckGL, {LineLayer} from 'deck.gl';
+import DeckGL from 'deck.gl';
+import {LineLayer} from 'deck.gl';
 /* global document */
 
 // Set your mapbox token here

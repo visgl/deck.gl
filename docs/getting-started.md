@@ -18,7 +18,7 @@ Remarks:
 
 ## Basic Usage
 
-    import DeckGL from 'deck.gl/react';
+    import DeckGL from 'deck.gl';
     import {ArcLayer} from 'deck.gl';
 
     const flights = new ArcLayer({

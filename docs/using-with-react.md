@@ -9,9 +9,8 @@ render it as a child of another component, passing in your list of deck.gl
 layers as a property.
 
     import MapGL from 'react-map-gl';
-    import DeckGL from 'deck.gl/react';
+    import DeckGL from 'deck.gl';
     import {ScatterplotLayer} from 'deck.gl';
-    import {Viewport} from 'viewport-mercator-project';
 
     const viewport = new Viewport({...});
 
@@ -80,11 +79,6 @@ layers, e.g. as a result of mouse events or through programmatic animations.
 If `viewport` is not supplied, deck.gl will look for web mercator projection
 parameters (latitude, longitude, zoom, bearing and pitch) and create a
 `WebMercatorViewport` (which is a subclass of `Viewport`).
-
-Note that both `Viewport` and `WebMercatorViewport` are imported from
-[viewport-mercator-project](https://github.com/uber-common/viewport-mercator-project).
-Consult the documentation of that module for more information on how to
-create these objects.
 
 ##### `width` (Number, required)
 

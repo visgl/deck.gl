@@ -6,12 +6,12 @@
   },
   "dependencies": {
     "babel-polyfill": "^6.16.0",
-    "deck.gl": "3.1.0-beta.16",
+    "deck.gl": "^4.0.0-beta.3",
     "immutable": "^3.8.1",
-    "luma.gl": "3.0.0-alpha.4",
+    "luma.gl": "3.0.0-beta.9",
     "react": "^15.4.1",
     "react-dom": "^15.4.1",
-    "react-map-gl": "^1.7.2"
+    "react-map-gl": "^2.0.0"
   },
   "devDependencies": {
     "buble-loader": "^0.4.0",

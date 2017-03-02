@@ -2,9 +2,6 @@
 
 All notable changes to deck.gl will be documented in this file.
 
-Official releases are documented first. Beta releases are listed
-towards the end of this document.
-
 <!--
 Each version should:
   List its release date in the above format.
@@ -19,6 +16,10 @@ Ref: http://keepachangelog.com/en/0.3.0/
 -->
 
 ## Recent Dev Releases
+
+#### [TBD]
+- Dependencies: Bump to react-map-gl@2, remove viewport-mercator-project & lodash.flatten
+- ...
 
 #### [v4.0.0-beta.3]
 - Add PointCloudLayer
@@ -423,7 +424,7 @@ For details see [What's New](docs/whats-new.md)
  - BREAKING: No longer use Camera/Scene to render. Enabler for issue #5.
  - BREAKING: Sample layers now available through `import 'deck.gl/samples';
  - FEATURE: FP64 layers now exported by default import 'deck.gl'
- - BREAKING: DeckGLOverlay renamed to DeckGL: `import DeckGL from 'deck.gl/react';`
+ - BREAKING: DeckGLOverlay renamed to DeckGL: `import DeckGL from 'deck.gl';`
  - FIX: GridLayer
  - FEATURE: ChoroplethLayer now renders MultiPolygons and Polygons with holes
 

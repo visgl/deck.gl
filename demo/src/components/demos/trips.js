@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 
 import {ExtrudedChoroplethLayer64} from 'deck.gl';
-import DeckGL from 'deck.gl/react';
+import DeckGL from 'deck.gl';
 
 import {MAPBOX_STYLES} from '../../constants/defaults';
 import {readableInteger} from '../../utils/format-utils';

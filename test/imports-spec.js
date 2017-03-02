@@ -1,7 +1,7 @@
 import test from 'tape-catch';
 import 'luma.gl';
 
-import DeckGL from 'deck.gl/react';
+import DeckGL from 'deck.gl';
 import {Layer, COORDINATE_SYSTEM} from 'deck.gl';
 import {ChoroplethLayer, ScatterplotLayer, ScreenGridLayer, ArcLayer, LineLayer} from 'deck.gl';
 
