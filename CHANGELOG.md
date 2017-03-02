@@ -19,6 +19,8 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 #### [TBD]
 - Dependencies: Bump to react-map-gl@2, remove viewport-mercator-project & lodash.flatten
+- FIX: IconLayer preserves icons' aspect ratio
+- NEW: add `viewportSize`, `viewMatrix` and `modelMatrix` to default uniforms
 - ...
 
 #### [v4.0.0-beta.3]
