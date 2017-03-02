@@ -7,6 +7,7 @@ attribute vec3 positions;
 attribute vec3 normals;
 
 attribute vec4 instancePositions;
+attribute vec2 instancePositions64xyLow;
 attribute vec4 instanceColors;
 attribute vec3 instancePickingColors;
 
@@ -28,30 +29,39 @@ uniform float elevationScale;
 // Result
 varying vec4 vColor;
 
-// whether is point picked
 float isPicked(vec3 pickingColors, vec3 selectedColor) {
  return float(pickingColors.x == selectedColor.x
  && pickingColors.y == selectedColor.y
  && pickingColors.z == selectedColor.z);
 }
 
+
 void main(void) {
 
-  // cube gemoetry vertics are between -1 to 1, scale and transform it to between 0, 1
-  vec2 ptPosition = instancePositions.xy + vec2((positions.x + 1.0 ) * lonOffset / 2.0, (positions.y + 1.0) * latOffset / 2.0);
+  // vec2 instancePositions64x = vec2(instancePositions.x, instancePositions64xyLow.x);
+  // vec2 instancePositions64y = vec2(instancePositions.y, instancePositions64xyLow.y);
+  // vec2 offsetInstancePosition64x = sum_fp64(instancePositions64x, vec2((positions.x + 1.0 ) * lonOffset / 2.0, 0.0));
+  // vec2 offsetInstancePosition64y = sum_fp64(instancePositions64y, vec2((positions.y + 1.0 ) * latOffset / 2.0, 0.0));
+  vec4 instancePositions64xy = vec4(instancePositions.x + (positions.x + 1.0) * lonOffset / 2.0, instancePositions64xyLow.x, instancePositions.y + (positions.y + 1.0) * latOffset / 2.0, instancePositions64xyLow.y);
 
-  vec2 pos = project_position(ptPosition);
+  vec2 projected_coord_xy[2];
+  project_position_fp64(instancePositions64xy, projected_coord_xy);
 
   float elevation = 0.0;
 
   if (extruded > 0.5) {
-    elevation = project_scale(instancePositions.w  * (positions.z + 1.0) * ELEVATION_SCALE * elevationScale);
+    elevation = project_scale(instancePositions.w  * (positions.z + 1.0) * ELEVATION_SCALE * elevationScale) + 1.0;
   }
 
-  // extrude positions
-  vec3 extrudedPosition = vec3(pos.xy, elevation + 1.0);
-  vec4 position_worldspace = vec4(extrudedPosition, 1.0);
-  gl_Position = project_to_clipspace(position_worldspace);
+  vec2 vertex_pos_modelspace[4];
+  vertex_pos_modelspace[0] = projected_coord_xy[0];
+  vertex_pos_modelspace[1] = projected_coord_xy[1];
+  vertex_pos_modelspace[2] = vec2(elevation, 0.0);
+  vertex_pos_modelspace[3] = vec2(1.0, 0.0);
+
+  vec4 position_worldspace = vec4(vertex_pos_modelspace[0].x, vertex_pos_modelspace[1].x, vertex_pos_modelspace[2].x, vertex_pos_modelspace[3].x);
+
+  gl_Position = project_to_clipspace_fp64(vertex_pos_modelspace);
 
   if (renderPickingBuffer < 0.5) {
 

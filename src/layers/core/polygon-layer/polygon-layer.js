@@ -87,12 +87,6 @@ export default class PolygonLayer extends Layer {
       pickingColors: {size: 3, type: GL.UNSIGNED_BYTE, update: this.calculatePickingColors, noAlloc}
     });
     /* eslint-enable max-len */
-
-    if (this.props.fp64) {
-      attributeManager.add({
-        positions64xyLow: {size: 2, update: this.calculatePositionsLow}
-      });
-    }
   }
 
   updateAttribute({props, oldProps, changeFlags}) {

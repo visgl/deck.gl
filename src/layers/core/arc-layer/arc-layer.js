@@ -61,12 +61,6 @@ export default class ArcLayer extends Layer {
       instanceSourceColors: {size: 4, type: GL.UNSIGNED_BYTE, accessor: 'getSourceColor', update: this.calculateInstanceSourceColors},
       instanceTargetColors: {size: 4, type: GL.UNSIGNED_BYTE, accessor: 'getTargetColor', update: this.calculateInstanceTargetColors}
     });
-
-    if (this.props.fp64) {
-      this.state.attributeManager.addInstanced({
-        instancePositions64Low: {size: 4, accessor: ['getSourcePosition', 'getTargetPosition'], update: this.calculateInstancePositions64Low}
-      });
-    }
     /* eslint-enable max-len */
   }
 
