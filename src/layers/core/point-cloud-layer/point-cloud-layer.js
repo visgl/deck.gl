@@ -44,7 +44,7 @@ const defaultProps = {
 
 export default class PointCloudLayer extends Layer {
   getShaders(id) {
-    return this.props.fp64 ? {
+    return this.props.fp64 && this.props.projectionMode === 1 ? {
       vs: readFileSync(join(__dirname, './point-cloud-layer-64-vertex.glsl'), 'utf8'),
       fs: readFileSync(join(__dirname, './point-cloud-layer-fragment.glsl'), 'utf8'),
       modules: ['lighting', 'fp64', 'project64']
@@ -73,7 +73,7 @@ export default class PointCloudLayer extends Layer {
       const {attributeManager} = this.state;
       attributeManager.invalidateAll();
 
-      if (props.fp64 === true) {
+      if (props.fp64 && this.props.projectionMode === 1) {
         attributeManager.addInstanced({
           instancePositions64xyLow: {
             size: 2,

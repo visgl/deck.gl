@@ -57,7 +57,7 @@ const defaultProps = {
 export default class PolygonLayer extends Layer {
   getShaders() {
 
-    const shaders = this.props.fp64 ? {
+    const shaders = this.props.fp64 && this.props.projectionMode === 1 ? {
       vs: readFileSync(join(__dirname, './polygon-layer-64-vertex.glsl'), 'utf8'),
       fs: readFileSync(join(__dirname, './polygon-layer-fragment.glsl'), 'utf8'),
       modules: ['lighting', 'fp64', 'project64']} : {
@@ -93,7 +93,7 @@ export default class PolygonLayer extends Layer {
       const {attributeManager} = this.state;
       attributeManager.invalidateAll();
 
-      if (props.fp64 === true) {
+      if (props.fp64 && this.props.projectionMode === 1) {
         attributeManager.add({
           positions64xyLow: {size: 2, update: this.calculatePositionsLow}
         });

@@ -40,6 +40,7 @@ const defaultProps = {
   // Update triggers: a key change detection mechanism in deck.gl
   // See layer documentation
   updateTriggers: {},
+  projectionMode: 1,
   fp64: false
 };
 

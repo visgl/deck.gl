@@ -28,7 +28,7 @@ const isClosed = path => {
 
 export default class PathLayer extends Layer {
   getShaders() {
-    return this.props.fp64 ? {
+    return this.props.fp64 && this.props.projectionMode === 1 ? {
       vs: readFileSync(join(__dirname, './path-layer-64-vertex.glsl'), 'utf8'),
       fs: readFileSync(join(__dirname, './path-layer-fragment.glsl'), 'utf8'),
       modules: ['fp64', 'project64']
@@ -62,7 +62,7 @@ export default class PathLayer extends Layer {
       const {attributeManager} = this.state;
       attributeManager.invalidateAll();
 
-      if (props.fp64 === true) {
+      if (props.fp64 && this.props.projectionMode === 1) {
         attributeManager.addInstanced({
           instanceStartEndPositions64xyLow: {
             size: 4,
