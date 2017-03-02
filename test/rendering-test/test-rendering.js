@@ -31,7 +31,7 @@ import ReactDOM from 'react-dom';
 import {join} from 'path';
 import {readFileSync} from 'fs';
 
-import DeckGL from 'deck.gl/react';
+import DeckGL from 'deck.gl';
 import {getPoints100K} from './data-generator';
 
 import {

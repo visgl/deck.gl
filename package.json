@@ -21,7 +21,7 @@
     "src"
   ],
   "scripts": {
-    "start": "(cd examples/layer-browser && yarn && npm run start-local)",
+    "start": "(cd examples/layer-browser && npm run start-local)",
     "build-clean": "rm -fr dist dist-es6 && mkdir -p dist dist-es6 ",
     "build-es6": "rm -fr dist-es6 && babel src --out-dir dist-es6 --plugins=static-fs --source-maps inline",
     "build-es5": "rm -fr dist && babel src --out-dir dist --plugins=static-fs,transform-es2015-modules-commonjs --source-maps inline",
@@ -43,11 +43,8 @@
   "dependencies": {
     "d3-hexbin": "^0.2.1",
     "earcut": "^2.0.6",
-    "file-loader": "^0.9.0",
     "gl-matrix": "^2.3.2",
-    "lodash.flatten": "^4.4.0",
-    "lodash.flattendeep": "^4.4.0",
-    "viewport-mercator-project": "3.0.0-beta4"
+    "lodash.flattendeep": "^4.4.0"
   },
   "devDependencies": {
     "babel-cli": "^6.22.2",
@@ -67,6 +64,7 @@
     "eslint-config-uber-jsx": "^3.0.0",
     "eslint-plugin-react": "~6.7.0",
     "faucet": "0.0.1",
+    "file-loader": "^0.10.1",
     "gl": "^4.0.3",
     "immutable": "^3.8.1",
     "luma.gl": "3.0.0-beta.9",

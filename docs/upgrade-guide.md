@@ -6,8 +6,7 @@
 
 A small but breaking change is that the 'deck.gl/react' import is no
 longer available, since the relative file caused complications with
-the new support for support "tree shaking" (multiple transpiled distributions). This means you will need to revert to the pre-3.0 way of importing the react
-component:
+the new support for support "tree shaking" (multiple transpiled distributions). This means you will need to revert to the pre-3.0 way of importing the react component:
 
 ```
 // V3

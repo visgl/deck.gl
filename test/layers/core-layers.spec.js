@@ -20,7 +20,6 @@
 /* eslint-disable func-style, no-console, max-len */
 import test from 'tape-catch';
 import {createGLContext} from 'luma.gl';
-// import {WebMercatorViewport} from 'viewport-mercator-project';
 
 import {ChoroplethLayer, ScatterplotLayer, ArcLayer, ScreenGridLayer, PointCloudLayer} from 'deck.gl';
 

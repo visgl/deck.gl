@@ -27,11 +27,6 @@ Remarks:
   and shared by all layers, so they will always pan zoom and tilt
   together, regardless of what coordinate system their positions
   are specified in.
-* Most of deck.gl's coordinate system handling has been broken out into the
-  [viewport-mercator-project](https://github.com/uber-common/viewport-mercator-project)
-  module. See the README file there for more information and documentation
-  of the `Viewport` class.
-
 
 ### Non-cartographic Projection Mode
 
