@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 import {render} from 'react-dom';
 // import MapGL from 'react-map-gl';
-import DeckGL from 'deck.gl/react';
+import DeckGL from 'deck.gl';
 import {LineLayer} from 'deck.gl';
 /* global document */
 

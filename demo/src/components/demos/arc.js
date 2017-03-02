@@ -2,7 +2,7 @@ import React, {Component} from 'react';
 import {scaleQuantile} from 'd3-scale';
 
 import {ChoroplethLayer, ArcLayer} from 'deck.gl';
-import DeckGL from 'deck.gl/react';
+import DeckGL from 'deck.gl';
 
 import {readableInteger} from '../../utils/format-utils';
 import {MAPBOX_STYLES} from '../../constants/defaults';

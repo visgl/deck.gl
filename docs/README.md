@@ -34,9 +34,6 @@ deck.gl has been developed in parallel with a number of companion modules:
   or other WebGL libraries.
 * [react-map-gl](https://uber.github.io/react-map-gl/#/) - A React wrapper
   around Mapbox GL which works seamlessly with deck.gl.
-* [viewport-mercator-project](https://github.com/uber-common/viewport-mercator-project) -
-  Perspective enabled Web Mercator projection and transformation class. Created
-  for deck.gl, but broken out since it is independently useful and can for instance be used with `react-map-gl` to create perspective enabled SVG overlays (which could be used together with deck.gl).
 
 In addition, in the future we hope to publish additional deck.gl layers and
 layer packages as separate modules.
