@@ -39,8 +39,10 @@ varying vec4 vColor;
 varying vec2 vTextureCoords;
 
 void main(void) {
+  // scale icon height to match instanceSize
+  float instanceScale = instanceSizes / max(instanceIconFrames.w, 1.0);
   vec3 center = project_position(instancePositions);
-  vec2 vertex = (positions + instanceOffsets * 2.0) * sizeScale * instanceSizes;
+  vec2 vertex = (positions + instanceOffsets * 2.0) * instanceIconFrames.zw * sizeScale * instanceScale;
   gl_Position = project_to_clipspace(vec4(center, 1.0)) + vec4(vertex, 0.0, 0.0);
 
   vTextureCoords = mix(
