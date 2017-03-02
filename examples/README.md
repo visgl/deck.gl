@@ -2,9 +2,19 @@
 
 ## Overview
 
-* [Main (Layer Browser)](./main/README.md) - The Layer Browser enables
-  testing of props for all core layers. This is the main example
-  used for testing layers during development of deck.gl.
+* [Layer Browser (Main Example)](./layer-browser/README.md) - The Layer Browser
+  enables testing of props for all core layers and many sample layers.
+  This is the main example used for testing layers during development of deck.gl.
+
+
+## Sample Layers
+
+A number of sample layers are available in `examples/sample-layers`. These can
+be copied into your app and extended/modified as needed.
+
+
+## Tutorial Examples
+
 * [Hello World (webpack2)](./hello-world-webpack2/README.md): Bundles a minimal app with
   [webpack 2](https://github.com/webpack/webpack) and serves it with webpack-dev-server.
   Transpiles with buble.
