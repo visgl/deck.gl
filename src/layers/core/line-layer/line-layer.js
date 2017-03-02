@@ -93,10 +93,8 @@ export default class LineLayer extends Layer {
 
   draw({uniforms}) {
     const {strokeWidth} = this.props;
-    const {viewport: {width, height}} = this.context;
 
     this.state.model.render(Object.assign({}, uniforms, {
-      screenSize: [width, height],
       strokeWidth
     }));
   }

@@ -65,10 +65,8 @@ export default class ScatterplotLayer extends Layer {
 
   draw({uniforms}) {
     const {radius, lightSettings} = this.props;
-    const {viewport: {width, height}} = this.context;
     this.state.model.render(Object.assign({}, uniforms, {
-      radius,
-      screenSize: [width, height]
+      radius
     }, lightSettings));
   }
 

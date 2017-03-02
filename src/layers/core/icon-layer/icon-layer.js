@@ -124,7 +124,6 @@ export default class IconLayer extends Layer {
   }
 
   draw({uniforms}) {
-    const {viewport: {width, height}} = this.context;
     const {sizeScale} = this.props;
     const iconsTexture = this.state.icons && this.state.icons.texture;
 
@@ -132,7 +131,6 @@ export default class IconLayer extends Layer {
       this.state.model.render(Object.assign({}, uniforms, {
         iconsTexture,
         iconsTextureDim: [iconsTexture.width, iconsTexture.height],
-        screenSize: [width, height],
         sizeScale
       }));
     }
