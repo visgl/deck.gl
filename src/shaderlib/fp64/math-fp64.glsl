@@ -710,6 +710,10 @@ vec2 radians_fp64(vec2 degree) {
   return mul_fp64(degree, PI_180_FP64);
 }
 
+vec2 mix_fp64(vec2 a, vec2 b, float x) {
+  vec2 range = sub_fp64(b, a);
+  return sum_fp64(a, mul_fp64(range, vec2(x, 0.0)));
+}
 // Vector functions
 // vec2 functions
 void vec2_sum_fp64(vec2 a[2], vec2 b[2], out vec2 out_val[2]) {
@@ -720,6 +724,16 @@ void vec2_sum_fp64(vec2 a[2], vec2 b[2], out vec2 out_val[2]) {
 void vec2_sub_fp64(vec2 a[2], vec2 b[2], out vec2 out_val[2]) {
     out_val[0] = sub_fp64(a[0], b[0]);
     out_val[1] = sub_fp64(a[1], b[1]);
+}
+
+void vec2_mul_fp64(vec2 a[2], vec2 b[2], out vec2 out_val[2]) {
+    out_val[0] = mul_fp64(a[0], b[0]);
+    out_val[1] = mul_fp64(a[1], b[1]);
+}
+
+void vec2_div_fp64(vec2 a[2], vec2 b[2], out vec2 out_val[2]) {
+    out_val[0] = div_fp64(a[0], b[0]);
+    out_val[1] = div_fp64(a[1], b[1]);
 }
 
 void vec2_mix_fp64(vec2 x[2], vec2 y[2], float a, out vec2 out_val[2]) {
@@ -735,10 +749,28 @@ vec2 vec2_length_fp64(vec2 x[2]) {
   return sqrt_fp64(sum_fp64(mul_fp64(x[0], x[0]), mul_fp64(x[1], x[1])));
 }
 
+void vec2_normalize_fp64(vec2 x[2], out vec2 out_val[2]) {
+  vec2 length = vec2_length_fp64(x);
+  vec2 length_vec2[2];
+  length_vec2[0] = length;
+  length_vec2[1] = length;
+
+  vec2_div_fp64(x, length_vec2, out_val);
+}
+
 vec2 vec2_distance_fp64(vec2 x[2], vec2 y[2]) {
   vec2 diff[2];
   vec2_sub_fp64(x, y, diff);
   return vec2_length_fp64(diff);
+}
+
+vec2 vec2_dot_fp64(vec2 a[2], vec2 b[2]) {
+  vec2 v[2];
+
+  v[0] = mul_fp64(a[0], b[0]);
+  v[1] = mul_fp64(a[1], b[1]);
+
+  return sum_fp64(v[0], v[1]);
 }
 
 // vec3 functions
