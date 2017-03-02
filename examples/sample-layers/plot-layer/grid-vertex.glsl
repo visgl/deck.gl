@@ -25,6 +25,8 @@ attribute vec3 normals;
 attribute vec2 instancePositions;
 attribute vec3 instanceNormals;
 
+uniform mat4 modelMatrix;
+uniform mat4 viewMatrix;
 uniform vec3 modelCenter;
 uniform vec3 modelDim;
 uniform float gridOffset;
@@ -33,13 +35,10 @@ uniform vec4 strokeColor;
 varying vec4 vColor;
 varying float shouldDiscard;
 
-// determines if the grid line is behind or in front of the center.
-// normally we get this by applying viewMatrix to the vector
-// TODO: send viewMatrix via uniform
+// determines if the grid line is behind or in front of the center
 float frontFacing(vec3 v) {
-  vec4 p0_viewspace = project_to_clipspace(vec4(0.0, 0.0, 0.0, 1.0));
-  vec4 p1_viewspace = project_to_clipspace(vec4(v, 1.0));
-  return step(p1_viewspace.z, p0_viewspace.z);
+  vec4 v_viewspace = viewMatrix * modelMatrix * vec4(v, 0.0);
+  return step(0.0, v_viewspace.z);
 }
 
 void main(void) {

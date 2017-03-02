@@ -26,7 +26,9 @@ attribute vec2 texCoords;
 attribute vec2 instancePositions;
 attribute vec3 instanceNormals;
 
-uniform vec2 screenSize;
+uniform mat4 modelMatrix;
+uniform mat4 viewMatrix;
+uniform vec2 viewportSize;
 uniform vec3 modelCenter;
 uniform vec3 modelDim;
 uniform float gridOffset;
@@ -48,13 +50,10 @@ float sum3(vec3 v) {
   return v.x + v.y + v.z;
 }
 
-// determines if the grid line is behind or in front of the center.
-// normally we get this by applying viewMatrix to the vector
-// TODO: send viewMatrix via uniform
+// determines if the grid line is behind or in front of the center
 float frontFacing(vec3 v) {
-  vec4 p0_viewspace = project_to_clipspace(vec4(0.0, 0.0, 0.0, 1.0));
-  vec4 p1_viewspace = project_to_clipspace(vec4(v, 1.0));
-  return step(p1_viewspace.z, p0_viewspace.z);
+  vec4 v_viewspace = viewMatrix * modelMatrix * vec4(v, 0.0);
+  return step(0.0, v_viewspace.z);
 }
 
 void main(void) {
@@ -115,6 +114,6 @@ void main(void) {
   label_vertex *= fontSize / labelHeight * position_clipspace.w;
 
   gl_Position = position_clipspace + 
-    vec4(label_vertex / screenSize, 0.0, 0.0);
+    vec4(label_vertex / viewportSize, 0.0, 0.0);
 
 }

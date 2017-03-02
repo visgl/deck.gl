@@ -123,7 +123,11 @@ export function getUniformsFromViewport(viewport, {
     projectionMode,
     projectionCenter,
 
-    // modelMatrix: modelMatrix || new Matrix4().identity(),
+    modelMatrix: modelMatrix || new Matrix4().identity(),
+    viewMatrix: viewport.viewMatrix,
+
+    // Screen size
+    viewportSize: [viewport.width, viewport.height],
 
     // Main projection matrices
     projectionMatrix: glProjectionMatrix,

@@ -30,7 +30,7 @@ attribute vec4 instancePositions64Low;
 attribute vec3 instancePickingColors;
 
 uniform float numSegments;
-uniform vec2 screenSize;
+uniform vec2 viewportSize;
 uniform float strokeWidth;
 uniform float opacity;
 uniform float renderPickingBuffer;
@@ -53,12 +53,12 @@ vec2 paraboloid_fp64(vec2 source[2], vec2 target[2], float ratio) {
 // offset_direction is -1 (left) or 1 (right)
 vec2 getExtrusionOffset(vec2 line_clipspace, float offset_direction) {
   // normalized direction of the line
-  vec2 dir_screenspace = normalize(line_clipspace * screenSize);
+  vec2 dir_screenspace = normalize(line_clipspace * viewportSize);
   // rotate by 90 degrees
   dir_screenspace = vec2(-dir_screenspace.y, dir_screenspace.x);
 
   vec2 offset_screenspace = dir_screenspace * offset_direction * strokeWidth / 2.0;
-  vec2 offset_clipspace = offset_screenspace / screenSize * 2.0;
+  vec2 offset_clipspace = offset_screenspace / viewportSize * 2.0;
 
   return offset_clipspace;
 }

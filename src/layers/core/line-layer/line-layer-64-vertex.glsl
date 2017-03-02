@@ -27,7 +27,7 @@ attribute vec4 instanceSourceTargetPositions64xyLow;
 attribute vec4 instanceColors;
 attribute vec3 instancePickingColors;
 
-uniform vec2 screenSize;
+uniform vec2 viewportSize;
 uniform float strokeWidth;
 uniform float opacity;
 uniform float renderPickingBuffer;
@@ -38,12 +38,12 @@ varying vec4 vColor;
 // offset_direction is -1 (left) or 1 (right)
 vec2 getExtrusionOffset(vec2 line_clipspace, float offset_direction) {
   // normalized direction of the line
-  vec2 dir_screenspace = normalize(line_clipspace * screenSize);
+  vec2 dir_screenspace = normalize(line_clipspace * viewportSize);
   // rotate by 90 degrees
   dir_screenspace = vec2(-dir_screenspace.y, dir_screenspace.x);
 
   vec2 offset_screenspace = dir_screenspace * offset_direction * strokeWidth / 2.0;
-  vec2 offset_clipspace = offset_screenspace / screenSize * 2.0;
+  vec2 offset_clipspace = offset_screenspace / viewportSize * 2.0;
 
   return offset_clipspace;
 }
