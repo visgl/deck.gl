@@ -116,9 +116,9 @@ export default class GridLayer extends Layer {
 
   updateState({props, oldProps, changeFlags}) {
     super.updateState({props, oldProps, changeFlags});
-    this.updateUniforms();
     this.updateModel({props, oldProps, changeFlags});
     this.updateAttribute({props, oldProps, changeFlags});
+    this.updateUniforms();
   }
 
   _getModel(gl) {

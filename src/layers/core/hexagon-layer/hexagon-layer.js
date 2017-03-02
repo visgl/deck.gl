@@ -156,11 +156,9 @@ export default class HexagonLayer extends Layer {
     if (model && (verticesChanged || viewportChanged)) {
       this.updateRadiusAngle();
     }
-
-    this.updateUniforms();
     this.updateModel({props, oldProps, changeFlags});
     this.updateAttribute({props, oldProps, changeFlags});
-
+    this.updateUniforms();
   }
 
   updateRadiusAngle() {
