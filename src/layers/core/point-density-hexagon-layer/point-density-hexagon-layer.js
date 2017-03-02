@@ -39,8 +39,7 @@ const defaultProps = {
   radius: defaultRadius,
   coverage: defaultCoverage,
   hexagonAggregator: defaultAggregator,
-  getPosition: x => x.position,
-  fp64: false
+  getPosition: x => x.position
 };
 
 function noop() {}

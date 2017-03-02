@@ -55,8 +55,7 @@ const defaultProps = {
     specularRatio: 0.8,
     lightsStrength: [1.2, 0.0, 0.8, 0.0],
     numberOfLights: 2
-  },
-  fp64: false
+  }
 };
 
 export default class HexagonLayer extends Layer {

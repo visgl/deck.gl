@@ -32,8 +32,7 @@ const defaultProps = {
   getTargetPosition: x => x.targetPosition,
   getSourceColor: x => x.color || DEFAULT_COLOR,
   getTargetColor: x => x.color || DEFAULT_COLOR,
-  strokeWidth: 1,
-  fp64: false
+  strokeWidth: 1
 };
 
 export default class ArcLayer extends Layer {

@@ -36,8 +36,7 @@ const defaultProps = {
   radiusMinPixels: 0, //  min point radius in pixels
   radiusMaxPixels: Number.MAX_SAFE_INTEGER, // max point radius in pixels
   outline: false,
-  strokeWidth: 1,
-  fp64: false
+  strokeWidth: 1
 };
 
 export default class ScatterplotLayer extends Layer {

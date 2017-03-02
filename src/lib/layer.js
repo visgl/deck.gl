@@ -39,7 +39,8 @@ const defaultProps = {
   onClick: () => {},
   // Update triggers: a key change detection mechanism in deck.gl
   // See layer documentation
-  updateTriggers: {}
+  updateTriggers: {},
+  fp64: false
 };
 
 let counter = 0;

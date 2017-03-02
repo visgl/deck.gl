@@ -31,8 +31,7 @@ const defaultProps = {
   getSourcePosition: x => x.sourcePosition,
   getTargetPosition: x => x.targetPosition,
   getColor: x => x.color || DEFAULT_COLOR,
-  strokeWidth: 1,
-  fp64: false
+  strokeWidth: 1
 };
 
 export default class LineLayer extends Layer {

@@ -16,8 +16,7 @@ const defaultProps = {
   strokeWidthMaxPixels: Number.MAX_SAFE_INTEGER, // max stroke width in pixels
   getPath: object => object.path,
   getColor: object => object.color || DEFAULT_COLOR,
-  getStrokeWidth: object => object.width || 1,
-  fp64: false
+  getStrokeWidth: object => object.width || 1
 };
 
 const isClosed = path => {

@@ -55,8 +55,7 @@ const defaultProps = {
   getSize: x => x.size || 1,
   iconAtlas: null,
   iconMapping: {},
-  sizeScale: 1,
-  fp64: false
+  sizeScale: 1
 };
 
 export default class IconLayer extends Layer {

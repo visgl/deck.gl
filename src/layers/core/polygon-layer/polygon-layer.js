@@ -51,8 +51,7 @@ const defaultProps = {
     specularRatio: 0.8,
     lightsStrength: [2.0, 0.0, 0.0, 0.0],
     numberOfLights: 2
-  },
-  fp64: false
+  }
 };
 
 export default class PolygonLayer extends Layer {
