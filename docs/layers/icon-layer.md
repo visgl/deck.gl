@@ -59,7 +59,7 @@ Method called to retrieve the icon name of each object, returns string.
 
 - Default: `d => d.size || 1`
 
-Method called to retrieve the size of each object, returns a number. Unit is pixels.
+Method called to retrieve the height of each icon, returns a number. Unit is pixels.
 
 ##### `getColor` (Function, optional)
 
