@@ -29,8 +29,8 @@ attribute vec4 instanceIconFrames;
 attribute float instanceColorModes;
 attribute vec2 instanceOffsets;
 
-uniform vec2 sizeScale;
-
+uniform vec2 screenSize;
+uniform float sizeScale;
 uniform float renderPickingBuffer;
 uniform vec2 iconsTextureDim;
 
@@ -39,13 +39,18 @@ varying vec4 vColor;
 varying vec2 vTextureCoords;
 
 void main(void) {
+  vec2 iconSize = instanceIconFrames.zw;
+  vec2 iconSize_clipspace = iconSize / screenSize * 2.0;
+  // scale icon height to match instanceSize
+  float instanceScale = iconSize.y == 0.0 ? 0.0 : instanceSizes / iconSize.y;
   vec3 center = project_position(instancePositions);
-  vec2 vertex = (positions + instanceOffsets * 2.0) * sizeScale * instanceSizes;
+  vec2 vertex = (positions / 2.0 + instanceOffsets) * iconSize_clipspace * sizeScale * instanceScale;
+  vertex.y *= -1.0;
   gl_Position = project_to_clipspace(vec4(center, 1.0)) + vec4(vertex, 0.0, 0.0);
 
   vTextureCoords = mix(
     instanceIconFrames.xy,
-    instanceIconFrames.xy + instanceIconFrames.zw,
+    instanceIconFrames.xy + iconSize,
     (positions.xy + 1.0) / 2.0
   ) / iconsTextureDim;
 

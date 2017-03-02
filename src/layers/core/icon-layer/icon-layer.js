@@ -124,22 +124,17 @@ export default class IconLayer extends Layer {
   }
 
   draw({uniforms}) {
-    const {viewport: {width, height}, gl} = this.context;
+    const {viewport: {width, height}} = this.context;
     const {sizeScale} = this.props;
     const iconsTexture = this.state.icons && this.state.icons.texture;
 
     if (iconsTexture) {
-      // transparency doesn't work with DEPTH_TEST on
-      // tradeoff being we cannot guarantee that foreground icons will be rendered on top
-      gl.disable(gl.DEPTH_TEST);
-
       this.state.model.render(Object.assign({}, uniforms, {
         iconsTexture,
         iconsTextureDim: [iconsTexture.width, iconsTexture.height],
-        sizeScale: [sizeScale / width, -sizeScale / height]
+        screenSize: [width, height],
+        sizeScale
       }));
-
-      gl.enable(gl.DEPTH_TEST);
     }
   }
 

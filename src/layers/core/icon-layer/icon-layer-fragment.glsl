@@ -31,6 +31,8 @@ varying float vColorMode;
 varying vec4 vColor;
 varying vec2 vTextureCoords;
 
+const float MIN_ALPHA = 0.05;
+
 void main(void) {
   vec4 texColor = texture2D(iconsTexture, vTextureCoords);
 
@@ -41,9 +43,13 @@ void main(void) {
   );
   float a = texColor.a * opacity * mix(1.0, vColor.a, vColorMode);
 
+  if (a < MIN_ALPHA) {
+    discard;
+  }
+
   // if rendering to screen, use mixed alpha
   // if rendering picking buffer, use binary alpha
-  a = mix(a, step(0.1, a), renderPickingBuffer);
+  a = mix(a, 1.0, renderPickingBuffer);
 
   gl_FragColor = vec4(color, a);
 }
