@@ -712,7 +712,7 @@ vec2 radians_fp64(vec2 degree) {
 
 vec2 mix_fp64(vec2 a, vec2 b, float x) {
   vec2 range = sub_fp64(b, a);
-  return sum_fp64(a, range * x);
+  return sum_fp64(a, mul_fp64(range, vec2(x, 0.0)));
 }
 // Vector functions
 // vec2 functions
