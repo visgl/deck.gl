@@ -39,23 +39,42 @@ void main(void) {
 
 ## Uniforms
 
-### `layerIndex` uniform
+### Viewport uniforms
+
+#### `mat4 modelMatrix`
+
+The user supplied model matrix if `props.modelMatrix` is set on the layer,
+otherwise an identity matrix.
+
+#### `mat4 viewMatrix`
+
+The view matrix of the current viewport.
+
+#### `vec2 viewportSize`
+
+Viewport width and height. Useful when rendering pixel sizes.
+
+### Layer prop uniforms
+
+#### `float layerIndex`
 
 The layerIndex is a small integer that starts at zero and is incremented
 for each layer that is rendered. It can be used to add small offsets to
 the z coordinate of layers to resolve z-fighting between overlapping
 layers.
 
-### `opacity` uniform
+#### `float opacity`
 
 In the fragment shader, multiply the fragment color with the opacity
 uniform.
 
-### `picking` uniforms
+### Picking uniforms
+
+#### `float renderPickingBuffer`
 
 If you choose to implement picking through picking colors, make sure
 the `pickingColors` or `instancePickingColors` attribute is correctly set up,
-and ensure that you return the picking color when `renderPickingColors`
+and ensure that you return the picking color when `renderPickingBuffer`
 uniform is set. Alternatively call the `layerColor` method on your
 fragment color before assigning to `gl_FragColor`.
 
@@ -82,6 +101,11 @@ vs (good)
    	renderPickingBuffer
    );
 ```
+
+#### `vec3 selectedPickingColor`
+
+This uniform is set if `props.pickable` is enabled on the layer and reflects the color
+of the last picked pixel. 
 
 ## Build Concerns
 
