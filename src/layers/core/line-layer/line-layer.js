@@ -61,15 +61,6 @@ export default class LineLayer extends Layer {
       instanceTargetPositions: {size: 3, accessor: 'getTargetPosition', update: this.calculateInstanceTargetPositions},
       instanceColors: {size: 4, type: GL.UNSIGNED_BYTE, accessor: 'getColor', update: this.calculateInstanceColors}
     });
-
-    if (this.props.fp64) {
-      this.state.attributeManager.addInstanced({
-        /* We only need low parts of the x, y coordinates. So the source and target
-        positions are lumped together into one attribute
-        */
-        instanceSourceTargetPositions64xyLow: {size: 4, accessor: ['getSourcePosition', 'getTargetPosition'], update: this.calculateInstanceSourceTargetPositions64xyLow}
-      });
-    }
     /* eslint-enable max-len */
   }
 

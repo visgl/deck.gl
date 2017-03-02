@@ -110,12 +110,6 @@ export default class HexagonLayer extends Layer {
       instancePositions: {size: 3, accessor: ['getCentroid', 'getElevation'], update: this.calculateInstancePositions},
       instanceColors: {size: 4, type: gl.UNSIGNED_BYTE, accessor: 'getColor', update: this.calculateInstanceColors}
     });
-
-    if (this.props.fp64) {
-      this.state.attributeManager.addInstanced({
-        instancePositions64xyLow: {size: 2, accessor: 'getCentroid', update: this.calculateInstancePositions64xyLow}
-      });
-    }
     /* eslint-enable max-len */
 
     this.updateRadiusAngle();
@@ -145,6 +139,8 @@ export default class HexagonLayer extends Layer {
 
   updateState({props, oldProps, changeFlags}) {
     super.updateState({props, oldProps, changeFlags});
+    this.updateModel({props, oldProps, changeFlags});
+    this.updateAttribute({props, oldProps, changeFlags});
 
     const viewportChanged = changeFlags.viewportChanged;
     const {model} = this.state;
@@ -156,8 +152,6 @@ export default class HexagonLayer extends Layer {
     if (model && (verticesChanged || viewportChanged)) {
       this.updateRadiusAngle();
     }
-    this.updateModel({props, oldProps, changeFlags});
-    this.updateAttribute({props, oldProps, changeFlags});
     this.updateUniforms();
   }
 

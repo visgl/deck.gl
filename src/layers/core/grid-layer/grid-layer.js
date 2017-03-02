@@ -83,12 +83,6 @@ export default class GridLayer extends Layer {
       instancePositions: {size: 4, accessor: ['getPosition', 'getElevation'], update: this.calculateInstancePositions},
       instanceColors: {size: 4, type: GL.UNSIGNED_BYTE, accessor: 'getColor', update: this.calculateInstanceColors}
     });
-
-    if (this.props.fp64) {
-      this.state.attributeManager.addInstanced({
-        instancePositions64xyLow: {size: 2, accessor: 'getPosition', update: this.calculateInstancePositions64xyLow}
-      });
-    }
     /* eslint-enable max-len */
   }
 
