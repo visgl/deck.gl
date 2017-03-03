@@ -112,7 +112,7 @@ export function getUniformsFromViewport(viewport, {
     }
   }
 
-  const devicePixelRatio = typeof window !== 'undefined' ? window.devicePixelRatio : 1;
+  const devicePixelRatio = (window && window.devicePixelRatio) || 1;
 
   return {
     // Projection mode values
