@@ -22,6 +22,7 @@ import {GL} from 'luma.gl';
 import AttributeManager from './attribute-manager';
 import {compareProps, log, count} from './utils';
 import assert from 'assert';
+import {COORDINATE_SYSTEM} from '.';
 
 /*
  * @param {string} props.id - layer name
@@ -40,8 +41,7 @@ const defaultProps = {
   // Update triggers: a key change detection mechanism in deck.gl
   // See layer documentation
   updateTriggers: {},
-  projectionMode: 1,
-  fp64: false
+  projectionMode: COORDINATE_SYSTEM.LNG_LAT
 };
 
 let counter = 0;

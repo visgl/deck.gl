@@ -4,6 +4,7 @@ import {GL, Model, Geometry} from 'luma.gl';
 import {readFileSync} from 'fs';
 import {join} from 'path';
 import {fp64ify} from '../../../lib/utils/fp64';
+import {COORDINATE_SYSTEM} from '../../../lib';
 
 const DEFAULT_COLOR = [0, 0, 0, 255];
 
@@ -16,7 +17,8 @@ const defaultProps = {
   strokeWidthMaxPixels: Number.MAX_SAFE_INTEGER, // max stroke width in pixels
   getPath: object => object.path,
   getColor: object => object.color || DEFAULT_COLOR,
-  getStrokeWidth: object => object.width || 1
+  getStrokeWidth: object => object.width || 1,
+  fp64: false
 };
 
 const isClosed = path => {
@@ -28,7 +30,7 @@ const isClosed = path => {
 
 export default class PathLayer extends Layer {
   getShaders() {
-    return this.props.fp64 && this.props.projectionMode === 1 ? {
+    return this.props.fp64 && this.props.projectionMode === COORDINATE_SYSTEM.LNG_LAT ? {
       vs: readFileSync(join(__dirname, './path-layer-64-vertex.glsl'), 'utf8'),
       fs: readFileSync(join(__dirname, './path-layer-fragment.glsl'), 'utf8'),
       modules: ['fp64', 'project64']
@@ -62,7 +64,7 @@ export default class PathLayer extends Layer {
       const {attributeManager} = this.state;
       attributeManager.invalidateAll();
 
-      if (props.fp64 && this.props.projectionMode === 1) {
+      if (props.fp64 && this.props.projectionMode === COORDINATE_SYSTEM.LNG_LAT) {
         attributeManager.addInstanced({
           instanceStartEndPositions64xyLow: {
             size: 4,

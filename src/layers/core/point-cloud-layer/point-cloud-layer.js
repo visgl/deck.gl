@@ -24,6 +24,7 @@ import {GL, Model, Geometry} from 'luma.gl';
 import {readFileSync} from 'fs';
 import {join} from 'path';
 import {fp64ify} from '../../../lib/utils/fp64';
+import {COORDINATE_SYSTEM} from '../../../lib';
 
 const DEFAULT_COLOR = [0, 0, 0, 255];
 
@@ -39,12 +40,13 @@ const defaultProps = {
     specularRatio: 0.8,
     lightsStrength: [1.0, 0.0, 0.8, 0.0, 0.4, 0.0],
     numberOfLights: 3
-  }
+  },
+  fp64: false
 };
 
 export default class PointCloudLayer extends Layer {
   getShaders(id) {
-    return this.props.fp64 && this.props.projectionMode === 1 ? {
+    return this.props.fp64 && this.props.projectionMode === COORDINATE_SYSTEM.LNG_LAT ? {
       vs: readFileSync(join(__dirname, './point-cloud-layer-64-vertex.glsl'), 'utf8'),
       fs: readFileSync(join(__dirname, './point-cloud-layer-fragment.glsl'), 'utf8'),
       modules: ['lighting', 'fp64', 'project64']
@@ -73,7 +75,7 @@ export default class PointCloudLayer extends Layer {
       const {attributeManager} = this.state;
       attributeManager.invalidateAll();
 
-      if (props.fp64 && this.props.projectionMode === 1) {
+      if (props.fp64 && this.props.projectionMode === COORDINATE_SYSTEM.LNG_LAT) {
         attributeManager.addInstanced({
           instancePositions64xyLow: {
             size: 2,

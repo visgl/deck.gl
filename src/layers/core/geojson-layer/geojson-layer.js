@@ -49,7 +49,8 @@ const defaultProps = {
   getFillColor: f => get(f, 'properties.fillColor') || defaultFillColor,
 
   // Polygon extrusion accessor
-  getElevation: f => 1000
+  getElevation: f => 1000,
+  fp64: false
 };
 
 const getCoordinates = f => get(f, 'geometry.coordinates');
