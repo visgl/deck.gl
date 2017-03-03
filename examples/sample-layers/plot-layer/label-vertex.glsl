@@ -26,8 +26,6 @@ attribute vec2 texCoords;
 attribute vec2 instancePositions;
 attribute vec3 instanceNormals;
 
-uniform mat4 modelMatrix;
-uniform mat4 viewMatrix;
 uniform vec2 viewportSize;
 uniform vec3 modelCenter;
 uniform vec3 modelDim;
@@ -52,7 +50,7 @@ float sum3(vec3 v) {
 
 // determines if the grid line is behind or in front of the center
 float frontFacing(vec3 v) {
-  vec4 v_viewspace = viewMatrix * modelMatrix * vec4(v, 0.0);
+  vec4 v_viewspace = project_to_viewspace(vec4(v, 0.0));
   return step(0.0, v_viewspace.z);
 }
 
@@ -88,13 +86,13 @@ void main(void) {
   //  | xlabel1  | ylabel1  | zlabel1  |
   //  +----------+----------+----------+
   //  | ...      | ...      | ...      |
-  vec4 textureFrame = vec4(
+  vec2 textureOrigin = vec2(
     sum3(vec3(0.0, labelWidths.x, sum2(labelWidths.xy)) * instanceNormals),
-    instancePositions.y * labelHeight,
-    sum3(labelWidths * instanceNormals),
-    labelHeight
+    instancePositions.y * labelHeight
   );
-  vTexCoords = (textureFrame.xy + textureFrame.zw * texCoords) / labelTextureDim;
+  vec2 textureSize = vec2(sum3(labelWidths * instanceNormals), labelHeight);
+
+  vTexCoords = (textureOrigin + textureSize * texCoords) / labelTextureDim;
   vTexCoords.y = 1.0 - vTexCoords.y;
 
   vec3 position_modelspace = (vec3(instancePositions.x) - modelCenter) * instanceNormals + gridVertexOffset * modelDim / 2.0;
@@ -109,11 +107,12 @@ void main(void) {
 
   vec4 position_clipspace = project_to_clipspace(vec4(position_modelspace, 1.0));
 
-  vec2 label_vertex = textureFrame.zw * (vec2(texCoords.x - 0.5, 0.5 - texCoords.y));
+  vec2 labelVertexOffset = vec2(texCoords.x - 0.5, 0.5 - texCoords.y) * textureSize;
+  // project to clipspace
+  labelVertexOffset *= 2.0 / viewportSize;
   // scale label to be constant size in pixels
-  label_vertex *= fontSize / labelHeight * position_clipspace.w;
+  labelVertexOffset *= fontSize / labelHeight * position_clipspace.w;
 
-  gl_Position = position_clipspace + 
-    vec4(label_vertex / viewportSize, 0.0, 0.0);
+  gl_Position = position_clipspace + vec4(labelVertexOffset, 0.0, 0.0);
 
 }
