@@ -22,7 +22,15 @@ follow deck.gl's projection methods, enabling your layer to accept coordinates
 in both [longitude,latitude,altitude] or [metersX,metersY,metersZ] format.
 
 The projection package is included by default by the `assembleShaders` function,
-and offers three functions `project_position`, `project_scale` and `project_to_clipspace`.
+and offers the following functions:
+
+#### `project_position`
+
+#### `project_scale`
+
+#### `project_to_viewspace`
+
+#### `project_to_clipspace`
 
 ```glsl
 attribute vec3 positions;
@@ -41,18 +49,13 @@ void main(void) {
 
 ### Viewport uniforms
 
-#### `mat4 modelMatrix`
+#### `mat4 modelViewMatrix`
 
-The user supplied model matrix if `props.modelMatrix` is set on the layer,
-otherwise an identity matrix.
-
-#### `mat4 viewMatrix`
-
-The view matrix of the current viewport.
+The model view matrix of the current viewport.
 
 #### `vec2 viewportSize`
 
-Viewport width and height. Useful when rendering pixel sizes.
+Viewport width and height in device pixels. Useful when rendering pixel sizes.
 
 ### Layer prop uniforms
 

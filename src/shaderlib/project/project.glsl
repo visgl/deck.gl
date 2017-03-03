@@ -11,6 +11,7 @@ uniform float projectionScale;
 uniform vec4 projectionCenter;
 uniform vec3 projectionPixelsPerUnit;
 
+uniform mat4 modelViewMatrix;
 uniform mat4 projectionMatrix;
 uniform mat4 projectionMatrixUncentered;
 
@@ -246,6 +247,10 @@ vec4 project_position(vec4 position) {
 }
 
 //
+
+vec4 project_to_viewspace(vec4 position) {
+  return modelViewMatrix * position;
+}
 
 vec4 project_to_clipspace(vec4 position) {
   if (projectionMode == PROJECT_MERCATOR_OFFSETS) {

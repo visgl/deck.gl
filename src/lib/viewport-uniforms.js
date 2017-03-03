@@ -24,9 +24,14 @@ function calculateMatrixAndOffset({
 
   let projectionCenter;
   let modelViewProjectionMatrix;
+  let modelViewMatrixInv;
 
-  const modelViewMatrixInv = new Matrix4(viewMatrix);
+  const modelViewMatrix = new Matrix4(viewMatrix);
   const viewProjectionMatrix = new Matrix4(projectionMatrix).multiplyRight(viewMatrix);
+
+  if (modelMatrix) {
+    modelViewMatrix.multiplyRight(modelMatrix);
+  }
 
   switch (projectionMode) {
 
@@ -37,8 +42,8 @@ function calculateMatrixAndOffset({
       // Apply model matrix if supplied
       // modelViewProjectionMatrix = modelViewProjectionMatrix.clone();
       modelViewProjectionMatrix.multiplyRight(modelMatrix);
-      modelViewMatrixInv.multiplyRight(modelMatrix);
     }
+    modelViewMatrixInv = new Matrix4(modelViewMatrix);
     modelViewMatrixInv.invert();
     break;
 
@@ -61,6 +66,7 @@ function calculateMatrixAndOffset({
       // Apply model matrix if supplied
       modelViewProjectionMatrix.multiplyRight(modelMatrix);
     }
+    modelViewMatrixInv = new Matrix4(viewMatrix);
     break;
 
   default:
@@ -70,6 +76,7 @@ function calculateMatrixAndOffset({
   const cameraPos = [modelViewMatrixInv[12], modelViewMatrixInv[13], modelViewMatrixInv[14]];
 
   return {
+    modelViewMatrix,
     modelViewProjectionMatrix,
     projectionCenter,
     cameraPos
@@ -92,7 +99,7 @@ export function getUniformsFromViewport(viewport, {
 } = {}) {
   assert(viewport.scale, 'Viewport scale missing');
 
-  const {projectionCenter, modelViewProjectionMatrix, cameraPos} =
+  const {projectionCenter, modelViewMatrix, modelViewProjectionMatrix, cameraPos} =
     calculateMatrixAndOffset({projectionMode, positionOrigin, modelMatrix, viewport});
 
   assert(modelViewProjectionMatrix, 'Viewport missing modelViewProjectionMatrix');
@@ -123,8 +130,8 @@ export function getUniformsFromViewport(viewport, {
     projectionMode,
     projectionCenter,
 
-    modelMatrix: modelMatrix || new Matrix4().identity(),
-    viewMatrix: viewport.viewMatrix,
+    // modelMatrix: modelMatrix || new Matrix4().identity(),
+    modelViewMatrix,
 
     // Screen size
     viewportSize: [viewport.width, viewport.height],

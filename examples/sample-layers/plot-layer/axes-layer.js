@@ -10,7 +10,7 @@ import {textMatrixToTexture} from './utils';
 const FONT_SIZE = 48;
 
 const defaultProps = {
-  fontSize: 24,
+  fontSize: 12,
   ticksCount: 6,
   axesOffset: 0,
   axesColor: [0, 0, 0, 255]
