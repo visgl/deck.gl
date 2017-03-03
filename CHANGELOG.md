@@ -18,7 +18,7 @@ Ref: http://keepachangelog.com/en/0.3.0/
 ## Recent Dev Releases
 
 #### TBD
-- NEW: add `viewportSize`, `viewMatrix` and `modelMatrix` to default uniforms
+- NEW: add `viewportSize`, `aspectRatio` and `modelViewMatrix` to default uniforms
 
 #### [v4.0.0-beta.4]
 - FIX: Make luma.gl peer dependency more flexible
