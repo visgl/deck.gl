@@ -95,7 +95,7 @@ export default class PolygonLayer extends Layer {
       const {attributeManager} = this.state;
       attributeManager.invalidateAll();
 
-      if (props.fp64 && this.props.projectionMode === COORDINATE_SYSTEM.LNG_LAT) {
+      if (props.fp64 && props.projectionMode === COORDINATE_SYSTEM.LNG_LAT) {
         attributeManager.add({
           positions64xyLow: {size: 2, update: this.calculatePositionsLow}
         });

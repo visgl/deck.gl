@@ -64,7 +64,7 @@ export default class PathLayer extends Layer {
       const {attributeManager} = this.state;
       attributeManager.invalidateAll();
 
-      if (props.fp64 && this.props.projectionMode === COORDINATE_SYSTEM.LNG_LAT) {
+      if (props.fp64 && props.projectionMode === COORDINATE_SYSTEM.LNG_LAT) {
         attributeManager.addInstanced({
           instanceStartEndPositions64xyLow: {
             size: 4,
