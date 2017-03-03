@@ -24,6 +24,7 @@ import {get} from '../../../lib/utils';
 import {GL, Model, Geometry} from 'luma.gl';
 import {readFileSync} from 'fs';
 import {join} from 'path';
+import {enable64bitSupport} from '../../../lib/utils/fp64';
 import {COORDINATE_SYSTEM} from '../../../lib';
 
 // Polygon geometry generation is managed by the polygon tesselator
@@ -58,15 +59,15 @@ const defaultProps = {
 
 export default class PolygonLayer extends Layer {
   getShaders() {
+    const vs64 = readFileSync(join(__dirname, './polygon-layer-64-vertex.glsl'), 'utf8');
+    const vs32 = readFileSync(join(__dirname, './polygon-layer-vertex.glsl'), 'utf8');
+    const fs = readFileSync(join(__dirname, './polygon-layer-fragment.glsl'), 'utf8');
 
-    const shaders = this.props.fp64 && this.props.projectionMode === COORDINATE_SYSTEM.LNG_LAT ? {
-      vs: readFileSync(join(__dirname, './polygon-layer-64-vertex.glsl'), 'utf8'),
-      fs: readFileSync(join(__dirname, './polygon-layer-fragment.glsl'), 'utf8'),
-      modules: ['lighting', 'fp64', 'project64']} : {
-        vs: readFileSync(join(__dirname, './polygon-layer-vertex.glsl'), 'utf8'),
-        fs: readFileSync(join(__dirname, './polygon-layer-fragment.glsl'), 'utf8'),
-        modules: ['lighting']};
-    return shaders;
+    return enable64bitSupport(this.props) ? {
+      vs: vs64, fs, modules: ['fp64', 'project64', 'lighting']
+    } : {
+      vs: vs32, fs, modules: ['lighting']
+    };
   }
 
   initializeState() {
