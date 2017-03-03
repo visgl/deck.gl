@@ -55,7 +55,11 @@ The model view matrix based on the current viewport and layer.
 
 #### `vec2 viewportSize`
 
-Viewport width and height in device pixels. Useful when rendering pixel sizes.
+Viewport width and height in physical pixels. Useful when rendering pixel sizes.
+
+#### `float devicePixelRatio`
+
+Device pixel ratio of the browser window.
 
 ### Layer prop uniforms
 
