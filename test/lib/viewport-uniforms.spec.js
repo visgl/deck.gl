@@ -1,6 +1,9 @@
 import test from 'tape-catch';
+import {Matrix4} from 'luma.gl';
+
 import {getUniformsFromViewport} from 'deck.gl/lib/viewport-uniforms';
 import {Viewport, WebMercatorViewport} from 'deck.gl/lib/viewports';
+import {COORDINATE_SYSTEM} from 'deck.gl/lib/constants';
 
 const TEST_DATA = {
   mapState: {
@@ -25,7 +28,17 @@ test('getUniformsFromViewport', t => {
   const viewport = new WebMercatorViewport(TEST_DATA.mapState);
   t.ok(viewport instanceof Viewport, 'Created new WebMercatorViewport');
 
-  const uniforms = getUniformsFromViewport(viewport);
-  t.ok(uniforms, 'Returned some uniforms (TODO - add detailed checks)');
+  let uniforms = getUniformsFromViewport(viewport);
+  t.ok(uniforms.devicePixelRatio > 0, 'Returned devicePixelRatio');
+  t.ok((uniforms.projectionMatrix instanceof Float32Array) ||
+    (uniforms.projectionMatrix instanceof Matrix4), 'Returned projectionMatrix');
+  t.ok((uniforms.modelViewMatrix instanceof Float32Array) ||
+    (uniforms.modelViewMatrix instanceof Matrix4), 'Returned modelViewMatrix');
+
+  uniforms = getUniformsFromViewport(viewport, {
+    projectionMode: COORDINATE_SYSTEM.METER_OFFSETS
+  });
+  t.ok(uniforms.projectionCenter.some(x => x), 'Returned non-trivial projection center');
+
   t.end();
 });
