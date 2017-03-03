@@ -51,7 +51,7 @@ void main(void) {
 
 #### `mat4 modelViewMatrix`
 
-The model view matrix of the current viewport.
+The model view matrix based on the current viewport and layer.
 
 #### `vec2 viewportSize`
 
@@ -108,7 +108,7 @@ vs (good)
 #### `vec3 selectedPickingColor`
 
 This uniform is set if `props.pickable` is enabled on the layer and reflects the color
-of the last picked pixel. 
+of the last picked pixel. If no pixel is selected, the value will be `[0, 0, 0]`.
 
 ## Build Concerns
 
