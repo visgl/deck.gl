@@ -17,9 +17,14 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## Recent Dev Releases
 
-#### [TBD]
+#### [v4.0.0-beta.4]
+- FIX: Make luma.gl peer dependency more flexible
 - Dependencies: Bump to react-map-gl@2, remove viewport-mercator-project & lodash.flatten
-- ...
+- 64 bit layers additions and fixes
+- IconLayer aspect ratio
+- New sample layers
+
+
 
 #### [v4.0.0-beta.3]
 - Add PointCloudLayer
