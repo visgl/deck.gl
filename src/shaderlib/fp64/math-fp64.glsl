@@ -714,6 +714,7 @@ vec2 mix_fp64(vec2 a, vec2 b, float x) {
   vec2 range = sub_fp64(b, a);
   return sum_fp64(a, mul_fp64(range, vec2(x, 0.0)));
 }
+
 // Vector functions
 // vec2 functions
 void vec2_sum_fp64(vec2 a[2], vec2 b[2], out vec2 out_val[2]) {

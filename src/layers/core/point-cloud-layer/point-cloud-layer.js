@@ -23,6 +23,8 @@ import {assembleShaders} from '../../../shader-utils';
 import {GL, Model, Geometry} from 'luma.gl';
 import {readFileSync} from 'fs';
 import {join} from 'path';
+import {fp64ify} from '../../../lib/utils/fp64';
+import {COORDINATE_SYSTEM} from '../../../lib';
 
 const DEFAULT_COLOR = [0, 0, 0, 255];
 
@@ -38,12 +40,17 @@ const defaultProps = {
     specularRatio: 0.8,
     lightsStrength: [1.0, 0.0, 0.8, 0.0, 0.4, 0.0],
     numberOfLights: 3
-  }
+  },
+  fp64: false
 };
 
-export default class ScatterplotLayer extends Layer {
+export default class PointCloudLayer extends Layer {
   getShaders(id) {
-    return {
+    return this.props.fp64 && this.props.projectionMode === COORDINATE_SYSTEM.LNG_LAT ? {
+      vs: readFileSync(join(__dirname, './point-cloud-layer-64-vertex.glsl'), 'utf8'),
+      fs: readFileSync(join(__dirname, './point-cloud-layer-fragment.glsl'), 'utf8'),
+      modules: ['lighting', 'fp64', 'project64']
+    } : {
       vs: readFileSync(join(__dirname, './point-cloud-layer-vertex.glsl'), 'utf8'),
       fs: readFileSync(join(__dirname, './point-cloud-layer-fragment.glsl'), 'utf8'),
       modules: ['lighting']
@@ -61,6 +68,33 @@ export default class ScatterplotLayer extends Layer {
       instanceColors: {size: 4, type: GL.UNSIGNED_BYTE, accessor: 'getColor', update: this.calculateInstanceColors}
     });
     /* eslint-enable max-len */
+  }
+
+  updateAttribute({props, oldProps, changeFlags}) {
+    if (props.fp64 !== oldProps.fp64) {
+      const {attributeManager} = this.state;
+      attributeManager.invalidateAll();
+
+      if (props.fp64 && props.projectionMode === COORDINATE_SYSTEM.LNG_LAT) {
+        attributeManager.addInstanced({
+          instancePositions64xyLow: {
+            size: 2,
+            accessor: 'getPosition',
+            update: this.calculateInstancePositions64xyLow
+          }
+        });
+      } else {
+        attributeManager.remove([
+          'instancePositions64xyLow'
+        ]);
+      }
+
+    }
+  }
+
+  updateState({props, oldProps, changeFlags}) {
+    this.updateModel({props, oldProps, changeFlags});
+    this.updateAttribute({props, oldProps, changeFlags});
   }
 
   draw({uniforms}) {
@@ -106,7 +140,18 @@ export default class ScatterplotLayer extends Layer {
       const position = getPosition(point);
       value[i++] = position[0];
       value[i++] = position[1];
-      value[i++] = position[2];
+      value[i++] = position[2] || 0;
+    }
+  }
+
+  calculateInstancePositions64xyLow(attribute) {
+    const {data, getPosition} = this.props;
+    const {value} = attribute;
+    let i = 0;
+    for (const point of data) {
+      const position = getPosition(point);
+      value[i++] = fp64ify(position[0])[1];
+      value[i++] = fp64ify(position[1])[1];
     }
   }
 
@@ -136,5 +181,5 @@ export default class ScatterplotLayer extends Layer {
   }
 }
 
-ScatterplotLayer.layerName = 'PointCloudLayer';
-ScatterplotLayer.defaultProps = defaultProps;
+PointCloudLayer.layerName = 'PointCloudLayer';
+PointCloudLayer.defaultProps = defaultProps;

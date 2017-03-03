@@ -25,6 +25,7 @@ import {readFileSync} from 'fs';
 import {join} from 'path';
 import {log} from '../../../lib/utils';
 import {fp64ify} from '../../../lib/utils/fp64';
+import {COORDINATE_SYSTEM} from '../../../lib';
 
 function positionsAreEqual(v1, v2) {
   // Hex positions are expected to change entirely, not to maintain some
@@ -85,7 +86,7 @@ export default class HexagonLayer extends Layer {
   }
 
   getShaders() {
-    return this.props.fp64 ? {
+    return this.props.fp64 && this.props.projectionMode === COORDINATE_SYSTEM.LNG_LAT ? {
       vs: readFileSync(join(__dirname, './hexagon-layer-64-vertex.glsl'), 'utf8'),
       fs: readFileSync(join(__dirname, './hexagon-layer-fragment.glsl'), 'utf8'),
       modules: ['fp64', 'project64', 'lighting']
@@ -120,7 +121,7 @@ export default class HexagonLayer extends Layer {
       const {attributeManager} = this.state;
       attributeManager.invalidateAll();
 
-      if (props.fp64 === true) {
+      if (props.fp64 && props.projectionMode === COORDINATE_SYSTEM.LNG_LAT) {
         attributeManager.addInstanced({
           instancePositions64xyLow: {
             size: 2,

@@ -34,8 +34,7 @@ const defaultProps = {
   colorRange: defaultColorRange,
   elevationRange: defaultElevationRange,
   elevationScale: defaultElevationScale,
-  getPosition: x => x.position,
-  fp64: false
+  getPosition: x => x.position
 };
 
 function noop() {}

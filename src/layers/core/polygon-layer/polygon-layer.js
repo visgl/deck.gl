@@ -24,6 +24,7 @@ import {get} from '../../../lib/utils';
 import {GL, Model, Geometry} from 'luma.gl';
 import {readFileSync} from 'fs';
 import {join} from 'path';
+import {COORDINATE_SYSTEM} from '../../../lib';
 
 // Polygon geometry generation is managed by the polygon tesselator
 import {PolygonTesselator} from './polygon-tesselator';
@@ -58,7 +59,7 @@ const defaultProps = {
 export default class PolygonLayer extends Layer {
   getShaders() {
 
-    const shaders = this.props.fp64 ? {
+    const shaders = this.props.fp64 && this.props.projectionMode === COORDINATE_SYSTEM.LNG_LAT ? {
       vs: readFileSync(join(__dirname, './polygon-layer-64-vertex.glsl'), 'utf8'),
       fs: readFileSync(join(__dirname, './polygon-layer-fragment.glsl'), 'utf8'),
       modules: ['lighting', 'fp64', 'project64']} : {
@@ -94,7 +95,7 @@ export default class PolygonLayer extends Layer {
       const {attributeManager} = this.state;
       attributeManager.invalidateAll();
 
-      if (props.fp64 === true) {
+      if (props.fp64 && props.projectionMode === COORDINATE_SYSTEM.LNG_LAT) {
         attributeManager.add({
           positions64xyLow: {size: 2, update: this.calculatePositionsLow}
         });
