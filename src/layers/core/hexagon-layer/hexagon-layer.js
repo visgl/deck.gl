@@ -24,7 +24,7 @@ import {Model, CylinderGeometry} from 'luma.gl';
 import {readFileSync} from 'fs';
 import {join} from 'path';
 import {log} from '../../../lib/utils';
-import {fp64ify} from '../../../lib/utils/fp64';
+import {fp64ify, enable64bitSupport} from '../../../lib/utils/fp64';
 import {COORDINATE_SYSTEM} from '../../../lib';
 
 function positionsAreEqual(v1, v2) {
@@ -86,14 +86,14 @@ export default class HexagonLayer extends Layer {
   }
 
   getShaders() {
-    return this.props.fp64 && this.props.projectionMode === COORDINATE_SYSTEM.LNG_LAT ? {
-      vs: readFileSync(join(__dirname, './hexagon-layer-64-vertex.glsl'), 'utf8'),
-      fs: readFileSync(join(__dirname, './hexagon-layer-fragment.glsl'), 'utf8'),
-      modules: ['fp64', 'project64', 'lighting']
+    const vs64 = readFileSync(join(__dirname, './hexagon-layer-64-vertex.glsl'), 'utf8');
+    const vs32 = readFileSync(join(__dirname, './hexagon-layer-vertex.glsl'), 'utf8');
+    const fs = readFileSync(join(__dirname, './hexagon-layer-fragment.glsl'), 'utf8');
+
+    return enable64bitSupport(this.props) ? {
+      vs: vs64, fs, modules: ['fp64', 'project64', 'lighting']
     } : {
-      vs: readFileSync(join(__dirname, './hexagon-layer-vertex.glsl'), 'utf8'),
-      fs: readFileSync(join(__dirname, './hexagon-layer-fragment.glsl'), 'utf8'),
-      modules: ['lighting']
+      vs: vs32, fs, modules: ['lighting']
     };
   }
 

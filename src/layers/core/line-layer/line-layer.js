@@ -23,7 +23,7 @@ import {assembleShaders} from '../../../shader-utils';
 import {GL, Model, Geometry} from 'luma.gl';
 import {readFileSync} from 'fs';
 import {join} from 'path';
-import {fp64ify} from '../../../lib/utils/fp64';
+import {fp64ify, enable64bitSupport} from '../../../lib/utils/fp64';
 import {COORDINATE_SYSTEM} from '../../../lib';
 
 const DEFAULT_COLOR = [0, 0, 0, 255];
@@ -38,14 +38,14 @@ const defaultProps = {
 
 export default class LineLayer extends Layer {
   getShaders() {
-    return this.props.fp64 && this.props.projectionMode === COORDINATE_SYSTEM.LNG_LAT ? {
-      vs: readFileSync(join(__dirname, './line-layer-64-vertex.glsl'), 'utf8'),
-      fs: readFileSync(join(__dirname, './line-layer-fragment.glsl'), 'utf8'),
-      modules: ['fp64', 'project64']
+    const vs64 = readFileSync(join(__dirname, './line-layer-64-vertex.glsl'), 'utf8');
+    const vs32 = readFileSync(join(__dirname, './line-layer-vertex.glsl'), 'utf8');
+    const fs = readFileSync(join(__dirname, './line-layer-fragment.glsl'), 'utf8');
+
+    return enable64bitSupport(this.props) ? {
+      vs: vs64, fs, modules: ['fp64', 'project64']
     } : {
-      vs: readFileSync(join(__dirname, './line-layer-vertex.glsl'), 'utf8'),
-      fs: readFileSync(join(__dirname, './line-layer-fragment.glsl'), 'utf8'),
-      modules: []
+      vs: vs32, fs, modules: []
     };
   }
 
