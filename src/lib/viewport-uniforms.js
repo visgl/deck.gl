@@ -23,28 +23,13 @@ function calculateMatrixAndOffset({
   const {viewMatrixUncentered, viewMatrix, projectionMatrix} = viewport;
 
   let projectionCenter;
-  let modelViewProjectionMatrix;
-  let modelViewMatrixInv;
-
-  const modelViewMatrix = new Matrix4(viewMatrix);
-  const viewProjectionMatrix = new Matrix4(projectionMatrix).multiplyRight(viewMatrix);
-
-  if (modelMatrix) {
-    modelViewMatrix.multiplyRight(modelMatrix);
-  }
+  let modelViewMatrix;
 
   switch (projectionMode) {
 
   case COORDINATE_SYSTEM.LNGLAT:
     projectionCenter = ZERO_VECTOR;
-    modelViewProjectionMatrix = viewProjectionMatrix;
-    if (modelMatrix) {
-      // Apply model matrix if supplied
-      // modelViewProjectionMatrix = modelViewProjectionMatrix.clone();
-      modelViewProjectionMatrix.multiplyRight(modelMatrix);
-    }
-    modelViewMatrixInv = new Matrix4(modelViewMatrix);
-    modelViewMatrixInv.invert();
+    modelViewMatrix = new Matrix4(viewMatrix);
     break;
 
   // TODO: make lighitng work for meter offset mode
@@ -53,26 +38,27 @@ function calculateMatrixAndOffset({
     // This is the key to offset mode precision (avoids doing this
     // addition in 32 bit precision)
     const positionPixels = viewport.projectFlat(positionOrigin);
+    const viewProjectionMatrix = new Matrix4(projectionMatrix).multiplyRight(viewMatrix);
     projectionCenter = viewProjectionMatrix
       .transformVector([positionPixels[0], positionPixels[1], 0.0, 1.0]);
 
-    modelViewProjectionMatrix = new Matrix4(projectionMatrix)
-      // Always apply uncentered projection matrix (shader adds center)
-      .multiplyRight(viewMatrixUncentered)
+    // Always apply uncentered projection matrix (shader adds center)
+    modelViewMatrix = new Matrix4(viewMatrixUncentered)
       // Zero out 4th coordinate ("after" model matrix) - avoids further translations
       .multiplyRight(VECTOR_TO_POINT_MATRIX);
-
-    if (modelMatrix) {
-      // Apply model matrix if supplied
-      modelViewProjectionMatrix.multiplyRight(modelMatrix);
-    }
-    modelViewMatrixInv = new Matrix4(viewMatrix);
     break;
 
   default:
     throw new Error('Unknown projection mode');
   }
 
+  if (modelMatrix) {
+    // Apply model matrix if supplied
+    modelViewMatrix.multiplyRight(modelMatrix);
+  }
+
+  const modelViewMatrixInv = modelViewMatrix.clone().invert();
+  const modelViewProjectionMatrix = new Matrix4(projectionMatrix).multiplyRight(modelViewMatrix);
   const cameraPos = [modelViewMatrixInv[12], modelViewMatrixInv[13], modelViewMatrixInv[14]];
 
   return {
