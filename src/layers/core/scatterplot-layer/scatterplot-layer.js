@@ -25,6 +25,7 @@ import {readFileSync} from 'fs';
 import {join} from 'path';
 import {log} from '../../../lib/utils';
 import {fp64ify} from '../../../lib/utils/fp64';
+import {COORDINATE_SYSTEM} from '../../../lib';
 
 const DEFAULT_COLOR = [0, 0, 0, 255];
 
@@ -42,7 +43,7 @@ const defaultProps = {
 
 export default class ScatterplotLayer extends Layer {
   getShaders(id) {
-    return this.props.fp64 ? {
+    return (this.props.fp64 && this.props.projectionMode === COORDINATE_SYSTEM.LNG_LAT) ? {
       vs: readFileSync(join(__dirname, './scatterplot-layer-64-vertex.glsl'), 'utf8'),
       fs: readFileSync(join(__dirname, './scatterplot-layer-fragment.glsl'), 'utf8'),
       modules: ['fp64', 'project64']
@@ -80,7 +81,7 @@ export default class ScatterplotLayer extends Layer {
       const {attributeManager} = this.state;
       attributeManager.invalidateAll();
 
-      if (props.fp64 === true) {
+      if (props.fp64 && props.projectionMode === COORDINATE_SYSTEM.LNG_LAT) {
         attributeManager.addInstanced({
           instancePositions64xyLow: {
             size: 2,
