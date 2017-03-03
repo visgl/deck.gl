@@ -1,3 +1,4 @@
+/* global window */
 import {Matrix4} from 'luma.gl';
 
 import assert from 'assert';
@@ -111,6 +112,8 @@ export function getUniformsFromViewport(viewport, {
     }
   }
 
+  const devicePixelRatio = typeof window !== 'undefined' ? window.devicePixelRatio : 1;
+
   return {
     // Projection mode values
     projectionMode,
@@ -120,7 +123,8 @@ export function getUniformsFromViewport(viewport, {
     modelViewMatrix,
 
     // Screen size
-    viewportSize: [viewport.width, viewport.height],
+    viewportSize: [viewport.width * devicePixelRatio, viewport.height * devicePixelRatio],
+    devicePixelRatio,
 
     // Main projection matrices
     projectionMatrix: glProjectionMatrix,
