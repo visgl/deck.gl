@@ -53,14 +53,15 @@ function calculateMatrixAndOffset({
     throw new Error('Unknown projection mode');
   }
 
+  const viewMatrixInv = modelViewMatrix.clone().invert();
+
   if (modelMatrix) {
     // Apply model matrix if supplied
     modelViewMatrix.multiplyRight(modelMatrix);
   }
 
-  const modelViewMatrixInv = modelViewMatrix.clone().invert();
   const modelViewProjectionMatrix = new Matrix4(projectionMatrix).multiplyRight(modelViewMatrix);
-  const cameraPos = [modelViewMatrixInv[12], modelViewMatrixInv[13], modelViewMatrixInv[14]];
+  const cameraPos = [viewMatrixInv[12], viewMatrixInv[13], viewMatrixInv[14]];
 
   return {
     modelViewMatrix,
