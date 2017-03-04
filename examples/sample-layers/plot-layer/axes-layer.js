@@ -10,7 +10,7 @@ import {textMatrixToTexture} from './utils';
 const FONT_SIZE = 48;
 
 const defaultProps = {
-  fontSize: 24,
+  fontSize: 12,
   ticksCount: 6,
   axesOffset: 0,
   axesColor: [0, 0, 0, 255]
@@ -94,14 +94,12 @@ export default class AxesLayer extends Layer {
   }
 
   draw({uniforms}) {
-    const {viewport: {width, height}} = this.context;
     const {center, dim, models, labelTexture} = this.state;
     const {fontSize, axesColor, axesOffset} = this.props;
 
     if (labelTexture) {
       const baseUniforms = {
         fontSize,
-        screenSize: [width, height],
         modelCenter: center,
         modelDim: dim,
         gridOffset: axesOffset,

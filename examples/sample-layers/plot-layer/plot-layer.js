@@ -14,7 +14,7 @@ const defaultProps = {
   yResolution: 100,
   lightStrength: 1,
   drawAxes: true,
-  fontSize: 24,
+  fontSize: 12,
   ticksCount: 6,
   axesOffset: 0,
   axesColor: [0, 0, 0, 255]

@@ -22,7 +22,15 @@ follow deck.gl's projection methods, enabling your layer to accept coordinates
 in both [longitude,latitude,altitude] or [metersX,metersY,metersZ] format.
 
 The projection package is included by default by the `assembleShaders` function,
-and offers three functions `project_position`, `project_scale` and `project_to_clipspace`.
+and offers the following functions:
+
+#### `project_position`
+
+#### `project_scale`
+
+#### `project_to_viewspace`
+
+#### `project_to_clipspace`
 
 ```glsl
 attribute vec3 positions;
@@ -39,23 +47,41 @@ void main(void) {
 
 ## Uniforms
 
-### `layerIndex` uniform
+### Viewport uniforms
+
+#### `mat4 modelViewMatrix`
+
+The model view matrix based on the current viewport and layer.
+
+#### `vec2 viewportSize`
+
+Viewport width and height in physical pixels. Useful when rendering pixel sizes.
+
+#### `float devicePixelRatio`
+
+Device pixel ratio of the browser window.
+
+### Layer prop uniforms
+
+#### `float layerIndex`
 
 The layerIndex is a small integer that starts at zero and is incremented
 for each layer that is rendered. It can be used to add small offsets to
 the z coordinate of layers to resolve z-fighting between overlapping
 layers.
 
-### `opacity` uniform
+#### `float opacity`
 
 In the fragment shader, multiply the fragment color with the opacity
 uniform.
 
-### `picking` uniforms
+### Picking uniforms
+
+#### `float renderPickingBuffer`
 
 If you choose to implement picking through picking colors, make sure
 the `pickingColors` or `instancePickingColors` attribute is correctly set up,
-and ensure that you return the picking color when `renderPickingColors`
+and ensure that you return the picking color when `renderPickingBuffer`
 uniform is set. Alternatively call the `layerColor` method on your
 fragment color before assigning to `gl_FragColor`.
 
@@ -82,6 +108,11 @@ vs (good)
    	renderPickingBuffer
    );
 ```
+
+#### `vec3 selectedPickingColor`
+
+This uniform is set if `props.pickable` is enabled on the layer and reflects the color
+of the last picked pixel. If no pixel is selected, the value will be `[0, 0, 0]`.
 
 ## Build Concerns
 
