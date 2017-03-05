@@ -1,8 +1,10 @@
 const {resolve, join} = require('path');
 const webpack = require('webpack');
 
-const sources = join(__dirname, '../../src');
-const demo = join(__dirname, '../src');
+const rootDir = join(__dirname, '../..');
+const demoDir = join(__dirname, '..');
+const libSources = join(rootDir, 'src');
+const demoSources = join(demoDir, 'src');
 
 module.exports = {
 
@@ -21,7 +23,7 @@ module.exports = {
     }, {
       test: /\.glsl$/,
       loader: 'raw-loader',
-      include: demo,
+      include: demoSources,
       enforce: 'post'
     }, {
       test: /\.js$/,
@@ -30,12 +32,13 @@ module.exports = {
   },
 
   resolve: {
+    modules: [resolve(rootDir, 'node_modules'), resolve(demoDir, 'node_modules')],
     alias: {
-      webworkify: 'webworkify-webpack-dropin',
-      react: resolve('./node_modules/react'),
-      'deck.gl': sources,
-      'react-dom': resolve('./node_modules/react-dom'),
-      'gl-matrix': resolve('./node_modules/gl-matrix/dist/gl-matrix.js')
+      'deck.gl': libSources,
+      webworkify: 'webworkify-webpack-dropin'
+      // react: resolve('./node_modules/react'),
+      // 'react-dom': resolve('./node_modules/react-dom'),
+      // 'gl-matrix': resolve('./node_modules/gl-matrix/dist/gl-matrix.js')
     }
   },
 
@@ -45,7 +48,7 @@ module.exports = {
 
   plugins: [
     new webpack.DefinePlugin({
-      MAPBOX_ACCESS_TOKEN: `"${process.env.MAPBOX_ACCESS_TOKEN}"`
+      MAPBOX_ACCESS_TOKEN: `"${process.env.MAPBOX_ACCESS_TOKEN}"` // eslint-disable-line
     })
   ]
 

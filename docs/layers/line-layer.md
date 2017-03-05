@@ -13,15 +13,18 @@ specified as latitude/longitude coordinates.
 
     import {LineLayer} from 'deck.gl';
 
-Inherits from all [Base Layer](/docs/layers/base-layer.md) properties.
+## Properties
 
-## Layer-specific Properties
+Inherits from all [Base Layer](/docs/layers/base-layer.md) properties.
 
 ##### `strokeWidth` (Number, optional)
 
 - Default: `1`
 
 The stroke width used to draw each line. Unit in pixels.
+
+
+## Accessors
 
 ##### `getSourcePosition` (Function, optional)
 
@@ -39,8 +42,7 @@ Method called to retrieve the target position of each object.
 
 - Default: `object => object.color`
 
-Method called to determine the rgba color of the source. If the alpha parameter
-is not provided, it will be set to `255`.
-
-If the method does not return a value for the given object, fallback to
+Method called to determine the rgba color of the source.
+* If the alpha parameter is not provided, it will be set to `255`.
+* If the method does not return a value for the given object, fallback to
 `[0, 0, 0, 255]`.
