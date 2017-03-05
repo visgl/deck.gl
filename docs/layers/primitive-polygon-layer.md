@@ -4,7 +4,7 @@
 
 # Polygon Layer
 
-The Polygon Layer renders filled and/or stroked polygons.
+The Polygon Layer renders filled polygons.
 * The polypgons can be simple or complex (complex polygons are polygons with holes).
    * A simple polygon specified as an array of vertices, each vertice being an array
      of two or three numbers
@@ -24,36 +24,18 @@ new PolygonLayer({
     ]
   ]
 });
-```
 
 Remarks:
+* This layer only renders filled polygons. If you need to render polygon
+  outlines, use the [`PathLayer`](/docs/layers/path-layer.md)
 * Polygons are always closed, i.e. there is an implicit line segment between
   the first and last vertices, when those vertices are not equal.
 * The specification of complex polygons intentionally follows the GeoJson
-  conventions for representing polygons with holes.
-
-
-## Accessors and Properties
-
-Inherits from all [Base Layer properties](/docs/layers/base-layer.md).
+  conventions for representing polugons with holes.
 
 ## Properties
 
-Inherits from all [Base Layer](/docs/layers/base-layer.md) properties.
-
-##### `filled` (Boolean, optional)
-
-- Default: `true`
-
-Whether to draw a filled polygon (solid fill). Note that only
-the area between the outer polygon and any holes will be filled.
-
-##### `stroked` (Boolean, optional)
-
-- Default: `false`
-
-Whether to draw an outline around the polygon (solid fill). Note that
-both the outer polygon as well the outlines of any holes will be drawn.
+Inherits from all [Base Layer properties](/docs/layers/base-layer.md).
 
 ##### `extruded` (Boolean, optional)
 
@@ -82,7 +64,7 @@ This is an object that contains light settings for extruded polygons.
 Be aware that this prop will likely be changed in a future version of deck.gl.
 
 
-### Accessors
+## Accessors
 
 #### `getPolygon` (Function, optional)
 

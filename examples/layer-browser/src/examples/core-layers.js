@@ -10,6 +10,7 @@ import {
   GridLayer,
   PointDensityGridLayer,
   PointDensityHexagonLayer,
+
   GeoJsonLayer,
   PolygonLayer,
   PathLayer
@@ -73,7 +74,7 @@ const GeoJsonLayerExample = {
     id: 'geojsonLayer',
     // TODO change to use the color util when it is landed
     getPointColor: f => parseColor(f.properties['marker-color']),
-    getPointSize: f => MARKER_SIZE_MAP[f.properties['marker-size']],
+    getPointRadius: f => MARKER_SIZE_MAP[f.properties['marker-size']],
     getStrokeColor: f => {
       const color = parseColor(f.properties.stroke);
       const opacity = f.properties['stroke-opacity'] * 255;
@@ -85,6 +86,7 @@ const GeoJsonLayerExample = {
       const opacity = f.properties['fill-opacity'] * 255;
       return setOpacity(color, opacity);
     },
+    getHeight: f => Math.random() * 1000,
     strokeWidthScale: 10,
     strokeWidthMinPixels: 1,
     pickable: true
@@ -111,7 +113,8 @@ const PolygonLayerExample = {
   getData: () => dataSamples.polygons,
   props: {
     getPolygon: f => f,
-    getColor: f => [Math.random() * 255, 0, 0],
+    getFillColor: f => [Math.random() * 255, 0, 0],
+    getHeight: f => Math.random() * 1000,
     opacity: 0.8,
     pickable: true
   }
