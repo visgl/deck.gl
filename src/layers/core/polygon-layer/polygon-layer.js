@@ -18,174 +18,109 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {Layer} from '../../../lib';
-import {assembleShaders} from '../../../shader-utils';
-import {get} from '../../../lib/utils';
-import {GL, Model, Geometry} from 'luma.gl';
-import {readFileSync} from 'fs';
-import {join} from 'path';
-import {enable64bitSupport} from '../../../lib/utils/fp64';
-import {COORDINATE_SYSTEM} from '../../../lib';
+import {CompositeLayer, get} from '../../../lib';
+import SolidPolygonLayer from '../solid-polygon-layer/solid-polygon-layer';
+import PathLayer from '../path-layer/path-layer';
+import * as Polygon from '../solid-polygon-layer/polygon';
 
-// Polygon geometry generation is managed by the polygon tesselator
-import {PolygonTesselator} from './polygon-tesselator';
-import {PolygonTesselatorExtruded} from './polygon-tesselator-extruded';
-
-// const defaultColor = [0, 0, 0, 255];
+const defaultColor = [0xBD, 0xE2, 0x7A, 0xFF];
+const defaultFillColor = [0xBD, 0xE2, 0x7A, 0xFF];
 
 const defaultProps = {
-  // Whether to extrude in 2.5D
+  stroked: true,
+  filled: true,
   extruded: false,
-  // Whether to draw a GL.LINES wireframe of the polygon
-  // TODO - not clear that this should be part of the main layer
   wireframe: false,
-  // Accessor for polygon geometry
-  getPolygon: f => get(f, 'polygon') || get(f, 'geometry.coordinates'),
-  // Accessor for extrusion height
-  getElevation: f => get(f, 'elevation') || get(f, 'properties.height') || 0,
-  // Accessor for color
-  getColor: f => get(f, 'color') || get(f, 'properties.color'),
-  // Optional settings for 'lighting' shader module
-  lightSettings: {
-    lightsPosition: [-122.45, 37.75, 8000, -122.0, 38.00, 5000],
-    ambientRatio: 0.05,
-    diffuseRatio: 0.6,
-    specularRatio: 0.8,
-    lightsStrength: [2.0, 0.0, 0.0, 0.0],
-    numberOfLights: 2
-  },
-  fp64: false
+  fp64: false,
+
+  // TODO: Missing props: radiusMinPixels, strokeWidthMinPixels, ...
+
+  // Polygon fill color
+  getFillColor: f => get(f, 'fillColor') || defaultFillColor,
+  // Point, line and polygon outline color
+  getStrokeColor: f => get(f, 'color') || get(f, 'strokeColor') || defaultColor,
+  // Line and polygon outline accessors
+  getStrokeWidth: f => get(f, 'strokeWidth') || 1,
+  // Polygon extrusion accessor
+  getElevation: f => 1000
 };
 
-export default class PolygonLayer extends Layer {
-  getShaders() {
-    const vs64 = readFileSync(join(__dirname, './polygon-layer-64-vertex.glsl'), 'utf8');
-    const vs32 = readFileSync(join(__dirname, './polygon-layer-vertex.glsl'), 'utf8');
-    const fs = readFileSync(join(__dirname, './polygon-layer-fragment.glsl'), 'utf8');
-
-    return enable64bitSupport(this.props) ? {
-      vs: vs64, fs, modules: ['fp64', 'project64', 'lighting']
-    } : {
-      vs: vs32, fs, modules: ['lighting']
+export default class PolygonLayer extends CompositeLayer {
+  initializeState() {
+    this.state = {
+      paths: [],
+      onHover: this._onHoverSubLayer.bind(this),
+      onClick: this._onClickSubLayer.bind(this)
     };
   }
 
-  initializeState() {
-    const {gl} = this.context;
-    this.setState({
-      model: this._getModel(gl),
-      numInstances: 0,
-      IndexType: gl.getExtension('OES_element_index_uint') ? Uint32Array : Uint16Array
-    });
-
-    const {attributeManager} = this.state;
-    const noAlloc = true;
-    /* eslint-disable max-len */
-    attributeManager.add({
-      indices: {size: 1, isIndexed: true, update: this.calculateIndices, noAlloc},
-      positions: {size: 3, accessor: 'getHeight', update: this.calculatePositions, noAlloc},
-      normals: {size: 3, update: this.calculateNormals, noAlloc},
-      colors: {size: 4, type: GL.UNSIGNED_BYTE, accessor: 'getColor', update: this.calculateColors, noAlloc},
-      pickingColors: {size: 3, type: GL.UNSIGNED_BYTE, update: this.calculatePickingColors, noAlloc}
-    });
-    /* eslint-enable max-len */
-  }
-
-  updateAttribute({props, oldProps, changeFlags}) {
-    if (props.fp64 !== oldProps.fp64) {
-      const {attributeManager} = this.state;
-      attributeManager.invalidateAll();
-
-      if (props.fp64 && props.projectionMode === COORDINATE_SYSTEM.LNG_LAT) {
-        attributeManager.add({
-          positions64xyLow: {size: 2, update: this.calculatePositionsLow}
-        });
-      } else {
-        attributeManager.remove([
-          'positions64xyLow'
-        ]);
-      }
-    }
-  }
-
-  updateState({props, oldProps, changeFlags}) {
-    this.updateGeometry({props, oldProps, changeFlags});
-    this.updateModel({props, oldProps, changeFlags});
-    this.updateAttribute({props, oldProps, changeFlags});
-
-    const {opacity, extruded, lightSettings} = props;
-
-    this.setUniforms(Object.assign({}, {
-      extruded: extruded ? 1.0 : 0.0,
-      opacity
-    },
-    lightSettings));
-  }
-
-  updateGeometry({props, oldProps, changeFlags}) {
-    const geometryChanged =
-      props.extruded !== oldProps.extruded ||
-      props.wireframe !== oldProps.wireframe || props.fp64 !== oldProps.fp64;
-
-    if (changeFlags.dataChanged || geometryChanged) {
-      const {getPolygon, extruded, wireframe, getHeight} = props;
-
-      // TODO - avoid creating a temporary array here: let the tesselator iterate
-      const polygons = props.data.map(getPolygon);
-
-      this.setState({
-        polygonTesselator: !extruded ?
-          new PolygonTesselator({polygons, fp64: this.props.fp64}) :
-          new PolygonTesselatorExtruded({polygons, wireframe,
-            getHeight: polygonIndex => getHeight(this.props.data[polygonIndex]),
-            fp64: this.props.fp64
-          })
+  updateState({oldProps, props, changeFlags}) {
+    if (changeFlags.dataChanged) {
+      const {data, getPolygon} = this.props;
+      this.state.paths = [];
+      data.forEach(object => {
+        const complexPolygon = Polygon.normalize(getPolygon(object));
+        complexPolygon.forEach(polygon => this.state.paths.push({
+          path: polygon,
+          object
+        }));
       });
-
-      this.state.attributeManager.invalidateAll();
     }
   }
 
-  _getModel(gl) {
-    const shaders = assembleShaders(gl, this.getShaders());
-    return new Model({
-      gl,
-      id: this.props.id,
-      vs: shaders.vs,
-      fs: shaders.fs,
-      geometry: new Geometry({
-        drawMode: this.props.wireframe ? GL.LINES : GL.TRIANGLES
-      }),
-      vertexCount: 0,
-      isIndexed: true
-    });
+  _onHoverSubLayer(info) {
+    info.object = (info.object && info.object.feature) || info.object;
+    this.props.onHover(info);
   }
 
-  calculateIndices(attribute) {
-    attribute.value = this.state.polygonTesselator.indices();
-    attribute.target = GL.ELEMENT_ARRAY_BUFFER;
-    this.state.model.setVertexCount(attribute.value.length / attribute.size);
+  _onClickSubLayer(info) {
+    info.object = (info.object && info.object.feature) || info.object;
+    this.props.onClick(info);
   }
 
-  calculatePositions(attribute) {
-    attribute.value = this.state.polygonTesselator.positions().positions;
-  }
-  calculatePositionsLow(attribute) {
-    attribute.value = this.state.polygonTesselator.positions().positions64xyLow;
-  }
-  calculateNormals(attribute) {
-    attribute.value = this.state.polygonTesselator.normals();
-  }
+  renderLayers() {
+    const {getFillColor, getStrokeColor, getStrokeWidth, getElevation, updateTriggers} = this.props;
+    const {data, id, stroked, filled, extruded, wireframe} = this.props;
+    const {paths, onHover, onClick} = this.state;
 
-  calculateColors(attribute) {
-    attribute.value = this.state.polygonTesselator.colors({
-      getColor: polygonIndex => this.props.getColor(this.props.data[polygonIndex])
-    });
-  }
+    const strokePolygons = stroked && data && data.length > 0;
+    const fillPolygons = filled && data && data.length > 0;
 
-  // Override the default picking colors calculation
-  calculatePickingColors(attribute) {
-    attribute.value = this.state.polygonTesselator.pickingColors();
+    // Filled Polygon Layer
+    const polygonFillLayer = fillPolygons && new SolidPolygonLayer(Object.assign({},
+      this.props, {
+        id: `${id}-fill`,
+        data,
+        getElevation,
+        getColor: getFillColor,
+        extruded,
+        wireframe,
+        updateTriggers: Object.assign({}, updateTriggers, {
+          getColor: updateTriggers.getFillColor
+        })
+      }));
+
+    // Polygon outline layer
+    let polygonOutlineLayer = null;
+    if (strokePolygons) {
+      polygonOutlineLayer = new PathLayer(Object.assign({}, this.props, {
+        id: `${id}-stroke`,
+        data: paths,
+        getPath: x => x.path,
+        getColor: getStrokeColor,
+        getStrokeWidth,
+        onHover,
+        onClick,
+        updateTriggers: Object.assign({}, updateTriggers, {
+          getColor: updateTriggers.getStrokeColor
+        })
+      }));
+    }
+
+    return [
+      polygonFillLayer,
+      polygonOutlineLayer
+    ].filter(Boolean);
   }
 }
 
