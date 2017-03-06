@@ -110,7 +110,8 @@ const PolygonLayerExample = {
   layer: PolygonLayer,
   props: {
     data: dataSamples.polygons,
-    getColor: f => [get(f, 'properties.ZIP_CODE') * 10 % 127 + 128, 0, 0],
+    getPolygon: f => f,
+    getColor: f => [Math.random() * 255, 0, 0],
     opacity: 0.8,
     pickable: true
   }

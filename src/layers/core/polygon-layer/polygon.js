@@ -1,4 +1,4 @@
-import {Container, count} from '../../../lib/utils';
+import {get, count} from '../../../lib/utils';
 
 // Basic polygon support
 //
@@ -14,8 +14,8 @@ import {Container, count} from '../../../lib/utils';
  */
 export function isSimple(polygon) {
   return count(polygon) >= 1 &&
-    count(polygon[0]) >= 2 &&
-    Number.isFinite(polygon[0][0]);
+    count(get(polygon, 0)) >= 2 &&
+    Number.isFinite(get(get(polygon, 0), 0));
 }
 
 /**
@@ -58,13 +58,13 @@ export function getTriangleCount(polygon) {
 
 export function forEachVertex(polygon, visitor) {
   if (isSimple(polygon)) {
-    Container.forEach(polygon, visitor);
+    polygon.forEach(visitor);
     return;
   }
 
   let vertexIndex = 0;
-  Container.forEach(polygon, simplePolygon => {
-    Container.forEach(simplePolygon, (v, i, p) => visitor(v, vertexIndex, polygon));
+  polygon.forEach(simplePolygon => {
+    simplePolygon.forEach((v, i, p) => visitor(v, vertexIndex, polygon));
     vertexIndex++;
   });
 }
