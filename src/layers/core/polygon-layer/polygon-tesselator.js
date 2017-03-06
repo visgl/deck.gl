@@ -17,6 +17,14 @@ function getPickingColor(index) {
   ];
 }
 
+function parseColor(color) {
+  if (!Array.isArray(color)) {
+    color = [get(color, 0), get(color, 1), get(color, 2), get(color, 3)];
+  }
+  color[3] = Number.isFinite(color[3]) ? color[3] : 255;
+  return color;
+}
+
 const DEFAULT_COLOR = [0, 0, 0, 255]; // Black
 
 // This class is set up to allow querying one attribute at a time
@@ -24,7 +32,7 @@ const DEFAULT_COLOR = [0, 0, 0, 255]; // Black
 export class PolygonTesselator {
   constructor({polygons, fp64 = false}) {
     // Normalize all polygons
-    this.polygons = Container.map(polygons, polygon => Polygon.normalize(polygon));
+    this.polygons = polygons.map(polygon => Polygon.normalize(polygon));
     // Count all polygon vertices
     this.pointCount = getPointCount(this.polygons);
     this.fp64 = fp64;
@@ -89,7 +97,7 @@ function getHoleIndices(complexPolygon) {
   if (complexPolygon.length > 1) {
     let polygonStartIndex = 0;
     holeIndices = [];
-    Container.forEach(complexPolygon, polygon => {
+    complexPolygon.forEach(polygon => {
       polygonStartIndex += polygon.length;
       holeIndices.push(polygonStartIndex);
     });
@@ -171,7 +179,7 @@ function calculatePositions({polygons, pointCount, fp64}) {
   }
   let i = 0;
   let j = 0;
-  Container.forEach(polygons, polygon =>
+  polygons.forEach(polygon =>
     Polygon.forEachVertex(polygon, vertex => {
       attribute[i++] = vertex[0];
       attribute[i++] = vertex[1];
@@ -206,8 +214,8 @@ function calculateColors({polygons, pointCount, getColor}) {
   let i = 0;
   polygons.forEach((complexPolygon, polygonIndex) => {
     // Calculate polygon color
-    const color = getColor(polygonIndex);
-    color[3] = Number.isFinite(color[3]) ? color[3] : 255;
+    let color = getColor(polygonIndex);
+    color = parseColor(color);
 
     const vertexCount = Polygon.getVertexCount(complexPolygon);
     fillArray({target: attribute, source: color, start: i, count: vertexCount});

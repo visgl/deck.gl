@@ -74,6 +74,37 @@ docs, or other places that are easy to track.
   as examples rather than supported layers with the intention to help users implement similar
   functionality for themselves.
 
+## Rules for Data Iteration and Access
+
+A general ambition is that all deck.gl layers should accept any "ES6 container"
+in the `data` prop. This includes ES6 Sets and Maps, as well as Immutable.js
+containers. For most layers the only requirement is that iteration
+over data is performed using general functions:
+```
+    for (const object of this.props.data) { ... } // GOOD
+    this.props.data.forEach((object, index) => ...) // GOOD
+```
+Note that the following will NOT work on general containers:
+```
+    for (let i = 0; i < this.props.data.length; i++) { // NOT GOOD
+      const object = this.props.data[i];
+      ...
+    }
+```
+Special attention is normally only required when accessing elements using
+keys or indices. deck.gl provides internal functions `get` and `count` to
+handle such cases:
+```
+    for (let i = 0; i < count(this.props.data); i++) { // GOOD
+      const object = get(this.props.data, i); // instead of this.props.data[i]
+      const value = get(object, 'value'); // instead of object.value
+    }
+```
+Remarks:
+* deck.gl does not support plain objects as `data`. Support for objects would
+  impose too many restrictions on layer iteration code and make layers less
+  readable.
+
 ## Rules for Naming Props, Attributes, Uniforms and updateTriggers
 
 Summary: Custom layer props usually corresponds to either attributes or uniforms
