@@ -10,7 +10,7 @@ layout: default
 
   <div class="tag-cloud">
     {% for tag in page.tags %}
-      <a href="{{ site.baseurl }}/{{ site.tag_page_dir }}/{{ tag }}">{{ tag }}</a>
+      <a href="{{ site.baseurl }}/{{ site.tag_page_dir }}/{{ tag | downcase }}">{{ tag }}</a>
     {% endfor %}
   </div>
   <div>

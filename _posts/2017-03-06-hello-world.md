@@ -12,7 +12,7 @@ tags:
   - React
 ---
 
-![deck.gl]({{ site.baseurl }}/img/header-bg.jpg)
+![deck.gl](../img/header-bg.jpg)
 
 # Introduction
 
