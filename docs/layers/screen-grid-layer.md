@@ -15,9 +15,9 @@ visuals when used with the right data set can be quite effective.
 
     import {ScreenGridLayer} from 'deck.gl';
 
-Inherits from all [Base Layer](/docs/layers/base-layer.md) properties.
+## Properties
 
-## Layer-specific Properties
+Inherits from all [Base Layer](/docs/layers/base-layer.md) properties.
 
 ##### `unitWidth` (Number, optional)
 
@@ -42,6 +42,8 @@ Expressed as an rgba array, minimal color that could be rendered by a tile.
 - Default: `[0, 255, 0, 255]`
 
 Expressed as an rgba array, maximal color that could be rendered by a tile.
+
+## Accessors
 
 #### `getPosition` (Function, optional)
 

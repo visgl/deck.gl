@@ -15,6 +15,14 @@ import DeckGL from 'deck.gl/react';
 import DeckGL from 'deck.gl';
 ```
 
+### Removed, Changed and Deprecated Layer Properties
+
+#### `BaseLayer.dataIterator` prop (Removed)
+
+This prop has been removed. This prop was not correctly implemented in
+deck.gl v3 so its removal is unlikely to break any existing code.
+
+
 ### Deprecated and Removed Layers
 
 #### ChoroplethLayer, ChoroplethLayer64, ExtrudedChoroplethLayer (Deprecated)

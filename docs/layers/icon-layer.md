@@ -1,6 +1,6 @@
 # Icon Layer
 
-The Icon Layer renders raster icons at given latitude/longitude coordinates.
+The Icon Layer renders raster icons at given coordinates.
 
   <div align="center">
     <img height="300" src="/demo/src/static/images/demo-thumb-icon.jpg" />
@@ -8,9 +8,9 @@ The Icon Layer renders raster icons at given latitude/longitude coordinates.
 
     import {IconLayer} from 'deck.gl';
 
-Inherits from all [Base Layer](/docs/layers/base-layer.md) properties.
+## Properties
 
-## Layer-specific Properties
+Inherits from all [Base Layer](/docs/layers/base-layer.md) properties.
 
 ##### `iconAtlas` (Texture2D | String, required)
 
@@ -21,17 +21,11 @@ Atlas image url or texture
 Icon names mapped to icon definitions. Each icon is defined with the following values:
 
   - `x`: x position of icon on the atlas image
-
   - `y`: y position of icon on the atlas image
-
   - `width`: width of icon on the atlas image
-
   - `height`: height of icon on the atlas image
-
   - `anchorX`: horizontal position of icon anchor. Default: half width.
-
   - `anchorY`: vertical position of icon anchor. Default: half height.
-
   - `mask`: whether icon is treated as a transparency mask.
   If `true`, user defined color is applied.
   If `false`, pixel color from the image is applied.
@@ -42,6 +36,9 @@ Icon names mapped to icon definitions. Each icon is defined with the following v
 - Default: `1`
 
 Icon size multiplier.
+
+
+## Accessors
 
 ##### `getPosition` (Function, optional)
 
