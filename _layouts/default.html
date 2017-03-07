@@ -21,11 +21,11 @@
     {% if paginator.total_pages > 1 %}
       <div class="pagination">
         {% if paginator.previous_page == 1 %}
-          <a href="{{ site.baseurl }}/" class="page-item">&laquo;</a>
+          <a href="{{ site.baseurl }}/" class="page-item">&lt;</a>
         {% elsif paginator.previous_page%}
-          <a href="{{ site.baseurl }}{{ paginator.previous_page_path}}" class="page-item">&laquo;</a>
+          <a href="{{ site.baseurl }}{{ paginator.previous_page_path}}" class="page-item">&lt;</a>
         {% else %}
-          <span class="page-item">&laquo;</span>
+          <span class="page-item">&lt;</span>
         {% endif %}
       
         {% for page in (1..paginator.total_pages) %}
@@ -39,9 +39,9 @@
         {% endfor %}
       
         {% if paginator.next_page %}
-          <a href="{{ site.baseurl }}{{ paginator.next_page_path }}" class="page-item">&raquo;</a>
+          <a href="{{ site.baseurl }}{{ paginator.next_page_path }}" class="page-item">&gt;</a>
         {% else %}
-          <span class="page-item">&raquo;</span>
+          <span class="page-item">&gt;</span>
         {% endif %}
       </div>
     {% endif %}

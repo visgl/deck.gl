@@ -67,6 +67,16 @@ main {
   background: $primary;
   padding: 0 4px;
 }
+.pagination {
+  text-align: center;
+
+  .page-item {
+    display: inline-block;
+    font-size: 12px;
+    line-height: 18px;
+    width: 18px;
+  }
+}
 
 /* Markdown */
 
