@@ -5,7 +5,7 @@
 // - 3D wireframes (not yet)
 import * as Polygon from './polygon';
 import earcut from 'earcut';
-import {Container, get, count, flattenVertices, fillArray} from '../../../lib/utils';
+import {get, count, flattenVertices, fillArray} from '../../../lib/utils';
 import {fp64ify} from '../../../lib/utils/fp64';
 
 // Maybe deck.gl or luma.gl needs to export this
@@ -81,7 +81,7 @@ function getTriangleCount(polygons) {
 
 // Returns the offsets of each complex polygon in the combined array of all polygons
 function getPolygonOffsets(polygons) {
-  const offsets = new Array(polygons.length + 1);
+  const offsets = new Array(count(polygons) + 1);
   offsets[0] = 0;
   let offset = 0;
   polygons.forEach((polygon, i) => {
@@ -94,11 +94,11 @@ function getPolygonOffsets(polygons) {
 // Returns the offset of each hole polygon in the flattened array for that polygon
 function getHoleIndices(complexPolygon) {
   let holeIndices = null;
-  if (complexPolygon.length > 1) {
+  if (count(complexPolygon) > 1) {
     let polygonStartIndex = 0;
     holeIndices = [];
     complexPolygon.forEach(polygon => {
-      polygonStartIndex += polygon.length;
+      polygonStartIndex += count(polygon);
       holeIndices.push(polygonStartIndex);
     });
     // Last element points to end of the flat array, remove it
@@ -146,6 +146,13 @@ function calculateSurfaceIndices(complexPolygon) {
   return earcut(verts, holeIndices, 3);
 }
 
+// TODO - refactor
+function isContainer(value) {
+  return Array.isArray(value) || ArrayBuffer.isView(value) ||
+    value !== null && typeof value === 'object';
+}
+
+// TODO - refactor, this file should not need a separate flatten func
 // Flattens nested array of vertices, padding third coordinate as needed
 export function flattenVertices2(nestedArray, {result = [], dimensions = 3} = {}) {
   let index = -1;
@@ -153,7 +160,7 @@ export function flattenVertices2(nestedArray, {result = [], dimensions = 3} = {}
   const length = count(nestedArray);
   while (++index < length) {
     const value = get(nestedArray, index);
-    if (Container.isContainer(value)) {
+    if (isContainer(value)) {
       flattenVertices(value, {result, dimensions});
     } else {
       if (vertexLength < dimensions) { // eslint-disable-line
@@ -179,26 +186,20 @@ function calculatePositions({polygons, pointCount, fp64}) {
   }
   let i = 0;
   let j = 0;
-  polygons.forEach(polygon =>
-    Polygon.forEachVertex(polygon, vertex => {
-      attribute[i++] = vertex[0];
-      attribute[i++] = vertex[1];
-      attribute[i++] = vertex[2] || 0;
+  for (const polygon of polygons) {
+    Polygon.forEachVertex(polygon, vertex => { // eslint-disable-line
+      const x = get(vertex, 0);
+      const y = get(vertex, 1);
+      const z = get(vertex, 2) || 0;
+      attribute[i++] = x;
+      attribute[i++] = y;
+      attribute[i++] = z;
       if (fp64) {
-        attributeLow[j++] = fp64ify(vertex[0])[1];
-        attributeLow[j++] = fp64ify(vertex[1])[1];
+        attributeLow[j++] = fp64ify(x)[1];
+        attributeLow[j++] = fp64ify(y)[1];
       }
-    })
-  );
-  // for (const complexPolygon of polygons) {
-  //   for (const simplePolygon of complexPolygon) {
-  //     for (const vertex of simplePolygon) {
-  //       attribute[i++] = vertex[0];
-  //       attribute[i++] = vertex[1];
-  //       attribute[i++] = vertex[2] || 0;
-  //     }
-  //   }
-  // }
+    });
+  }
   return {positions: attribute, positions64xyLow: attributeLow};
 }
 

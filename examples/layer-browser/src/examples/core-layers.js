@@ -39,9 +39,9 @@ const LIGHT_SETTINGS = {
 
 const ArcLayerExample = {
   layer: ArcLayer,
+  getData: () => dataSamples.routes,
   props: {
     id: 'arcLayer',
-    data: dataSamples.routes,
     getSourcePosition: d => d.START,
     getTargetPosition: d => d.END,
     getSourceColor: d => [64, 255, 0],
@@ -52,10 +52,10 @@ const ArcLayerExample = {
 
 const IconLayerExample = {
   layer: IconLayer,
+  getData: () => dataSamples.points,
   props: {
     iconAtlas: 'data/icon-atlas.png',
     iconMapping: dataSamples.iconAtlas,
-    data: dataSamples.points,
     sizeScale: 24,
     getPosition: d => d.COORDINATES,
     getColor: d => [64, 64, 72],
@@ -68,9 +68,9 @@ const IconLayerExample = {
 
 const GeoJsonLayerExample = {
   layer: GeoJsonLayer,
+  getData: () => dataSamples.geojson,
   props: {
     id: 'geojsonLayer',
-    data: dataSamples.geojson,
     // TODO change to use the color util when it is landed
     getPointColor: f => parseColor(f.properties['marker-color']),
     getPointSize: f => MARKER_SIZE_MAP[f.properties['marker-size']],
@@ -93,9 +93,9 @@ const GeoJsonLayerExample = {
 
 const GeoJsonLayerExtrudedExample = {
   layer: GeoJsonLayer,
+  getData: () => dataSamples.choropleths,
   props: {
     id: 'geojsonLayer-extruded',
-    data: dataSamples.choropleths,
     getHeight: f => get(f, 'properties.ZIP_CODE') * 10 % 127 * 10,
     getFillColor: f => [0, 255, get(f, 'properties.ZIP_CODE') * 23 % 100 + 155],
     getStrokeColor: f => [200, 0, 80],
@@ -108,8 +108,8 @@ const GeoJsonLayerExtrudedExample = {
 
 const PolygonLayerExample = {
   layer: PolygonLayer,
+  getData: () => dataSamples.polygons,
   props: {
-    data: dataSamples.polygons,
     getPolygon: f => f,
     getColor: f => [Math.random() * 255, 0, 0],
     opacity: 0.8,
@@ -119,9 +119,9 @@ const PolygonLayerExample = {
 
 const PathLayerExample = {
   layer: PathLayer,
+  getData: () => dataSamples.zigzag,
   props: {
     id: 'pathLayer',
-    data: dataSamples.zigzag,
     opacity: 0.6,
     getPath: f => get(f, 'path'),
     getColor: f => [128, 0, 0],
@@ -132,9 +132,9 @@ const PathLayerExample = {
 
 const ScreenGridLayerExample = {
   layer: ScreenGridLayer,
+  getData: () => dataSamples.points,
   props: {
     id: 'screenGridLayer',
-    data: dataSamples.points,
     getPosition: d => get(d, 'COORDINATES'),
     unitWidth: 40,
     unitHeight: 40,
@@ -146,9 +146,9 @@ const ScreenGridLayerExample = {
 
 const LineLayerExample = {
   layer: LineLayer,
+  getData: () => dataSamples.routes,
   props: {
     id: 'lineLayer',
-    data: dataSamples.routes,
     getSourcePosition: d => get(d, 'START'),
     getTargetPosition: d => get(d, 'END'),
     getColor: d => get(d, 'SERVICE') === 'WEEKDAY' ? [255, 64, 0] : [255, 200, 0],
@@ -158,9 +158,9 @@ const LineLayerExample = {
 
 const ScatterplotLayerExample = {
   layer: ScatterplotLayer,
+  getData: () => dataSamples.points,
   props: {
     id: 'scatterplotLayer',
-    data: dataSamples.points,
     getPosition: d => get(d, 'COORDINATES'),
     getColor: d => [255, 128, 0],
     getRadius: d => get(d, 'SPACES'),

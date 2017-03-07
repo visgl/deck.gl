@@ -14,7 +14,3 @@ export {getBlendMode, setBlendMode} from './blend';
 // ES6 Container and Immutable support
 export {get} from './get';
 export {count} from './count';
-
-// TBD - The Container API is too intrusive.
-import * as Container from './container';
-export {Container};

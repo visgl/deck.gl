@@ -1,4 +1,4 @@
-import {Container, get} from '../../../lib/utils';
+import {get} from '../../../lib/utils';
 
 /**
  * "Normalizes" complete or partial GeoJSON data into iterable list of features
@@ -71,7 +71,7 @@ export function featureToPolygons(feature) {
     break;
   case 'MultiLineString':
     // TODO - should lines really be handled in this switch?
-    polygons = Container.map(coordinates, coords => [coords]);
+    polygons = coordinates.map(coords => [coords]);
     break;
   default:
     polygons = [];
@@ -96,9 +96,9 @@ export function extractPolygons(data) {
     let choropleths = featureToPolygons(feature);
 
     /* eslint-disable max-nested-callbacks */
-    choropleths = Container.map(choropleths,
-      choropleth => Container.map(choropleth,
-        polygon => Container.map(polygon,
+    choropleths = choropleths.map(
+      choropleth => choropleth.map(
+        polygon => polygon.map(
           coord => [
             get(coord, 0),
             get(coord, 1),

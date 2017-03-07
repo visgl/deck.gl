@@ -83,7 +83,7 @@ test('PolygonTesselator#methods(immutable)', t => {
   t.ok(tesselator instanceof PolygonTesselator, 'PolygonTesselator created');
   const indices = tesselator.indices();
   t.ok(ArrayBuffer.isView(indices), 'PolygonTesselator.indices');
-  const positions = tesselator.positions();
+  const positions = tesselator.positions().positions;
   t.ok(ArrayBuffer.isView(positions), 'PolygonTesselator.positions');
   const colors = tesselator.colors();
   t.ok(ArrayBuffer.isView(colors), 'PolygonTesselator.colors');
@@ -95,7 +95,7 @@ test('PolygonTesselatorExtruded#methods(immutable)', t => {
   t.ok(tesselator instanceof PolygonTesselatorExtruded, 'PolygonTesselatorExtruded created');
   const indices = tesselator.indices();
   t.ok(ArrayBuffer.isView(indices), 'PolygonTesselatorExtruded.indices');
-  const positions = tesselator.positions();
+  const positions = tesselator.positions().positions;
   t.ok(ArrayBuffer.isView(positions), 'PolygonTesselatorExtruded.positions');
   const colors = tesselator.colors();
   t.ok(ArrayBuffer.isView(colors), 'PolygonTesselatorExtruded.colors');

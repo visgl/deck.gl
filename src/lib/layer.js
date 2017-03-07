@@ -18,12 +18,11 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 /* global window */
-import {GL} from 'luma.gl';
+import {COORDINATE_SYSTEM} from './constants';
 import AttributeManager from './attribute-manager';
-import {compareProps, log} from './utils';
-import {count} from './utils/container';
+import {log, compareProps, count} from './utils';
+import {GL} from 'luma.gl';
 import assert from 'assert';
-import {COORDINATE_SYSTEM} from '.';
 
 /*
  * @param {string} props.id - layer name

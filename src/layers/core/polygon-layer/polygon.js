@@ -47,7 +47,7 @@ export function getTriangleCount(polygon) {
   for (const simplePolygon of normalize(polygon)) {
     const size = count(simplePolygon);
     if (first) {
-      triangleCount += size > 3 ? size - 3 : 0;
+      triangleCount += size >= 3 ? size - 2 : 0;
     } else {
       triangleCount += size + 1;
     }
