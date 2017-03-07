@@ -106,10 +106,6 @@ export const docPages = generatePath([
         content: getDocUrl('using-layers.md')
       },
       {
-        name: 'Layer Base Class',
-        content: getDocUrl('layers/base-layer.md')
-      },
-      {
         name: '64 bit Layers',
         content: getDocUrl('64-bits.md')
       },
@@ -126,6 +122,10 @@ export const docPages = generatePath([
   {
     name: 'Core Layers',
     children: [
+      {
+        name: 'Layer Base Class',
+        content: getDocUrl('layers/base-layer.md')
+      },
       {
         name: 'ScatterplotLayer',
         content: getDocUrl('layers/scatterplot-layer.md')
@@ -155,20 +155,28 @@ export const docPages = generatePath([
         content: getDocUrl('layers/icon-layer.md')
       },
       {
-        name: 'GridLayer',
-        content: getDocUrl('layers/grid-layer.md')
+        name: 'PointCloudLayer',
+        content: getDocUrl('layers/point-cloud-layer.md')
       },
       {
-        name: 'ScreenGridLayer',
-        content: getDocUrl('layers/screen-grid-layer.md')
+        name: 'GridLayer',
+        content: getDocUrl('layers/grid-layer.md')
       },
       {
         name: 'HexagonLayer',
         content: getDocUrl('layers/hexagon-layer.md')
       },
       {
-        name: 'PointCloudLayer',
-        content: getDocUrl('layers/point-cloud-layer.md')
+        name: 'PointDensityHexagonLayer',
+        content: getDocUrl('layers/point-density-hexagon-layer.md')
+      },
+      {
+        name: 'PointDensityGridLayer',
+        content: getDocUrl('layers/point-density-grid-layer.md')
+      },
+      {
+        name: 'ScreenGridLayer',
+        content: getDocUrl('layers/screen-grid-layer.md')
       }
     ]
   },
@@ -194,6 +202,10 @@ export const docPages = generatePath([
     children: [
       {
         name: 'Customizing Layers',
+        content: getDocUrl('composite-layers.md')
+      },
+      {
+        name: 'Subclassing Layers',
         content: getDocUrl('subclassing-layers.md')
       },
       {
@@ -230,5 +242,29 @@ export const docPages = generatePath([
         content: getDocUrl('tips-and-tricks.md')
       }
     ]
-  }
-]);
+  },
+  {
+    name: 'API Reference',
+    children: [
+      {
+        name: 'AttributeManager',
+        content: getDocUrl('api-reference/attribute-manager.md')
+      },
+      {
+        name: 'Viewport',
+        content: getDocUrl('api-reference/viewport.md')
+      },
+      {
+        name: 'PerspectiveViewport',
+        content: getDocUrl('api-reference/perspective-viewport.md')
+      },
+      {
+        name: 'OrthographicViewport',
+        content: getDocUrl('api-reference/orthographic-viewport.md')
+      },
+      {
+        name: 'WebMercatorViewport',
+        content: getDocUrl('api-reference/web-mercator-viewport.md')
+      }
+    ]
+  }]);

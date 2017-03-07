@@ -158,8 +158,8 @@ Code examples have been improved in several ways:
 * **Hello World Examples** Minimal examples for building with webpack 2
   and browserify (previously called "exhibits") are still provided,
   and have been further simplified.
-* **Improved Layer Browsing** The "main" example has been expanded into a full
-  "layer and property browser" allowing for easy testing of all core layers.
+* **Layer Browser** The main `layer-browser` example has been expanded
+  into a full "layer and property browser" allowing for easy testing of layers.
 
 
 ## Deprecations
