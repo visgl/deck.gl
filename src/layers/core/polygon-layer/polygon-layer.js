@@ -21,6 +21,7 @@
 import {CompositeLayer, get} from '../../../lib';
 import PrimitivePolygonLayer from '../primitive-polygon-layer/polygon-layer';
 import PathLayer from '../path-layer/path-layer';
+import * as Polygon from '../primitive-polygon-layer/polygon';
 
 const defaultColor = [0xBD, 0xE2, 0x7A, 0xFF];
 const defaultFillColor = [0xBD, 0xE2, 0x7A, 0xFF];
@@ -34,10 +35,10 @@ const defaultProps = {
 
   // TODO: Missing props: radiusMinPixels, strokeWidthMinPixels, ...
 
-  // Point, line and polygon outline color
-  getColor: f => get(f, 'color') || get(f, 'strokeColor') || defaultColor,
   // Polygon fill color
   getFillColor: f => get(f, 'fillColor') || defaultFillColor,
+  // Point, line and polygon outline color
+  getStrokeColor: f => get(f, 'color') || get(f, 'strokeColor') || defaultColor,
   // Line and polygon outline accessors
   getStrokeWidth: f => get(f, 'strokeWidth') || 1,
   // Polygon extrusion accessor
@@ -45,12 +46,44 @@ const defaultProps = {
 };
 
 export default class PolygonLayer extends CompositeLayer {
-  renderLayers() {
-    const {getColor, getFillColor, getStrokeWidth, getElevation} = this.props;
-    const {data, id, stroked, filled, extruded, wireframe} = this.props;
+  initializeState() {
+    this.state = {
+      paths: [],
+      onHover: this._onHoverSubLayer.bind(this),
+      onClick: this._onClickSubLayer.bind(this)
+    };
+  }
 
-    let {} = this.props;
-    const drawPolygons = stroked && data && data.length > 0;
+  updateState({oldProps, props, changeFlags}) {
+    if (changeFlags.dataChanged) {
+      const {data, getPolygon} = this.props;
+      this.state.paths = [];
+      data.forEach(object => {
+        const complexPolygon = Polygon.normalize(getPolygon(object));
+        complexPolygon.forEach(polygon => this.state.paths.push({
+          path: polygon,
+          object
+        }));
+      });
+    }
+  }
+
+  _onHoverSubLayer(info) {
+    info.object = (info.object && info.object.feature) || info.object;
+    this.props.onHover(info);
+  }
+
+  _onClickSubLayer(info) {
+    info.object = (info.object && info.object.feature) || info.object;
+    this.props.onClick(info);
+  }
+
+  renderLayers() {
+    const {getFillColor, getStrokeColor, getStrokeWidth, getElevation, updateTriggers} = this.props;
+    const {data, id, stroked, filled, extruded, wireframe} = this.props;
+    const {paths, onHover, onClick} = this.state;
+
+    const strokePolygons = stroked && data && data.length > 0;
     const fillPolygons = filled && data && data.length > 0;
 
     // Filled Polygon Layer
@@ -62,36 +95,44 @@ export default class PolygonLayer extends CompositeLayer {
         getColor: getFillColor,
         extruded,
         wireframe: false,
-        updateTriggers: Object.assign({}, this.props.updateTriggers, {
-          getColor: this.props.updateTriggers.getFillColor
+        updateTriggers: Object.assign({}, updateTriggers, {
+          getColor: updateTriggers.getFillColor
         })
       }));
 
     // Polygon outline or wireframe
+    let polygonWireframeLayer = null;
     let polygonOutlineLayer = null;
-    if (drawPolygons && extruded && wireframe) {
-      polygonOutlineLayer = new PrimitivePolygonLayer(Object.assign({}, this.props, {
+    if (strokePolygons && extruded && wireframe) {
+      polygonWireframeLayer = new PrimitivePolygonLayer(Object.assign({}, this.props, {
         id: `${id}-wireframe`,
         data,
         getElevation,
-        getColor,
+        getColor: getStrokeColor,
         extruded: true,
         wireframe: true,
-        updateTriggers: Object.assign({}, this.props.updateTriggers, {
-          getColor: this.props.updateTriggers.getFillColor
+        updateTriggers: Object.assign({}, updateTriggers, {
+          getColor: updateTriggers.getStrokeColor
         })
       }));
-    } else if (drawPolygons) {
+    } else if (strokePolygons) {
       polygonOutlineLayer = new PathLayer(Object.assign({}, this.props, {
         id: `${id}-stroke`,
-        data,
-        getColor,
-        getStrokeWidth
+        data: paths,
+        getPath: x => x.path,
+        getColor: getStrokeColor,
+        getStrokeWidth,
+        onHover,
+        onClick,
+        updateTriggers: Object.assign({}, updateTriggers, {
+          getColor: updateTriggers.getStrokeColor
+        })
       }));
     }
 
     return [
       polygonFillLayer,
+      polygonWireframeLayer,
       polygonOutlineLayer
     ].filter(Boolean);
   }

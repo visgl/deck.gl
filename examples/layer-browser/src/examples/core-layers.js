@@ -113,7 +113,8 @@ const PolygonLayerExample = {
   getData: () => dataSamples.polygons,
   props: {
     getPolygon: f => f,
-    getFillColor: f => [Math.random() * 255, 0, 0],
+    getFillColor: f => [Math.random() % 256, 0, 0],
+    getStrokeColor: f => [0, 0, 0, 255],
     getHeight: f => Math.random() * 1000,
     opacity: 0.8,
     pickable: true
