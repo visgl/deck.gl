@@ -1,9 +1,20 @@
-<!doctype html>
-<html>
-  <head>
-    <title>deck.gl tests</title>
-  </head>
-  <body>
-    <script src='test-browser-bundle.js'></script>
-  </body>
-</html>
+---
+layout: default
+---
+<!-- Posts -->
+<ul id="posts">
+
+	{% for post in paginator.posts %}
+
+	  <li class="post">
+	  	<h2><a href="{{ site.baseurl }}{{ post.url }}">{{ post.title }}</a></h2>
+      <div>
+        <span class="time">{{ post.date | date_to_string }}</span>
+        <span class="author"> <i>by <a href="http://github.com/{{ post.author_username }}">{{ post.author }}</a></i></span>
+      </div>
+	  	<p>{{ post.content | strip_html | truncatewords:100 }}</p>
+	  </li>
+
+  {% endfor %}
+
+</ul>

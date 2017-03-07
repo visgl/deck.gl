@@ -1,6 +1,0 @@
-{
-  "dependencies": {
-    "extrude-polyline": "^1.0.6",
-    "s2-geometry": "^1.2.9"
-  }
-}

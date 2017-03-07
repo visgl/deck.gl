@@ -1,0 +1,30 @@
+# Site settings
+title: Deck.gl Blog
+description: "A blog for deck.gl: WebGL-powered data visualization"
+url: "http://deck.gl"
+author:
+  name: "Uber"
+  url: "http://uber.github.io"
+
+# Build settings
+baseurl: /blog # Change this to your relative path (ex: /blog/), or leave just a /
+markdown: kramdown
+source: .
+exclude: [./dist, README.md]
+destination: ./dist
+permalink: /:year/:title
+paginate: 8
+paginate_path: /page:num/
+
+# Default values
+defaults:
+  -
+    scope:
+      path: ""
+      type: "posts"
+    values:
+      layout: "post"
+
+# Plugins
+gems:
+  - jekyll-paginate

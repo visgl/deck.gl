@@ -1,0 +1,21 @@
+---
+layout: default
+---
+<article id="post">
+	<h1>{{ page.title }}</h1>
+
+  <div>
+    {% for tag in page.tags %}
+      <a class="tag">{{ tag }}</a>
+    {% endfor %}
+  </div>
+  <div>
+    <span class="time">{{ page.date | date_to_string }}</span>
+    <span class="author"> <i>by <a href="http://github.com/{{ page.author_username }}">{{ page.author }}</a></i></span>
+  </div>
+
+	<div class="content">
+		{{ content }}
+	</div>
+</article>
+

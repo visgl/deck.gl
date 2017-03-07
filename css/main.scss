@@ -1,0 +1,115 @@
+---
+# Front matter comment to ensure Jekyll properly reads file.
+---
+
+$primary: #00ADE6;
+$secondary: #05E3D5;
+$black: #041725;
+$black-20: #213746;
+$black-40: #5A666D;
+$white: #EDEDED;
+$white-40: #8D9BA3;
+
+@mixin linearGradientH($property_name, $left, $right){
+    #{$property_name}: $left; /* Old browsers */
+    #{$property_name}: -moz-linear-gradient(left,  $left 0%, $right 100%); /* FF3.6+ */
+    #{$property_name}: -webkit-linear-gradient(left,  $left 0%,$right 100%); /* Chrome10+,Safari5.1+ */
+    #{$property_name}: -o-linear-gradient(left,  $left 0%,$right 100%); /* Opera 11.10+ */
+    #{$property_name}: -ms-linear-gradient(left,  $left 0%,$right 100%); /* IE10+ */
+    #{$property_name}: linear-gradient(to right,  $left 0%,$right 100%); /* W3C */
+}
+
+* {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: ff-clan-web-pro, "Helvetica Neue", Helvetica, sans-serif !important;
+  font-size: 12px;
+  line-height: 1.8333;
+  overflow-y: auto;
+}
+
+a {
+  outline: none;
+  text-decoration: none;
+  display: inline-block;
+  cursor: pointer;
+}
+a, a:visited {
+  color: $primary;
+}
+
+.container {
+  padding: 0 24px;
+  margin: 0 auto;
+  max-width: 960px;
+  width: 100%;
+  overflow: hidden;
+}
+
+.post {
+  list-style-type: none;
+}
+
+hr {
+  border: none;
+  background: $white;
+  display: inline-block;
+  margin: 24px 0 0;
+  width: 32px;
+  height: 2px;
+  @include linearGradientH(background, $primary, $secondary);
+}
+
+b, strong {
+  font-weight: 600;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+h1 {
+  font-size: 32px;
+  font-weight: 600;
+}
+
+h2 {
+  font-size: 24px;
+  font-weight: 600;
+}
+
+h3 {
+  font-size: 20px;
+  font-weight: 600;
+}
+
+h4 {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+h5 {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+h6 {
+  font-size: 12px;
+  font-weight: 600;
+}
+
+p {
+  margin-top: 0;
+  margin-bottom: 10px;
+}
+
+footer {
+  text-align: center;
+  color: $white-40;
+}
+
