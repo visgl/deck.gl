@@ -1,0 +1,26 @@
+---
+layout: default
+---
+
+<article id="tag-page">
+  {% include breadcrumb.html %}
+
+  <h3>Tag: {{ page.tag }}</h3>
+
+  <ul id="posts">
+
+    {% for post in page.posts %}
+      {% include post.html %}
+    {% endfor %}
+
+  </ul>
+
+  <hr />
+
+  <h4>All tags</h4>
+
+  <div class="tag-cloud">
+    {{ site | tag_cloud }}
+  </div>
+
+</article>

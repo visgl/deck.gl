@@ -1,12 +1,18 @@
 ---
 title: Hello World - deck.gl
-description: Introducing deck.gl.
-author: Ib Green
-author_username: ibgreen
+description: 
+  Introducing deck.gl, a framework for visualizing large data sets powered by WebGL.
+  It enables users to quickly get impressive visual results with limited effort
+  through composition of existing layers, while offering a complete architecture
+  for packaging advanced WebGL based visualizations as reusable JavaScript
+  layers.
+author: ib
 tags:
-- WebGL
-- React
+  - WebGL
+  - React
 ---
+
+![deck.gl]({{ site.baseurl }}/img/header-bg.jpg)
 
 # Introduction
 

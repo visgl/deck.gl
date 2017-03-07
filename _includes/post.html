@@ -1,0 +1,10 @@
+{% assign author = site.data.authors[post.author] %}
+
+<li class="post">
+  <h2><a href="{{ site.baseurl }}{{ post.url }}">{{ post.title }}</a></h2>
+  <div>
+    <span class="date"><b>{{ post.date | date_to_string }}</b></span>
+    <span class="author">by <a href="http://github.com/{{ author.github_username }}"><b>{{ author.display_name }}</b></a></span>
+  </div>
+  <p>{{ post.description }}</p>
+</li>

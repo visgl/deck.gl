@@ -9,12 +9,20 @@ author:
 # Build settings
 baseurl: /blog # Change this to your relative path (ex: /blog/), or leave just a /
 markdown: kramdown
+sass:
+  style: compressed
 source: .
-exclude: [./dist, README.md]
+exclude: [./dist, README.md, Gemfile, Gemfile.lock]
 destination: ./dist
 permalink: /:year/:title
+
+# Paginate settings
 paginate: 8
 paginate_path: /page:num/
+
+# Tag page settings
+tag_page_layout: tag
+tag_page_dir: tag
 
 # Default values
 defaults:
@@ -28,3 +36,5 @@ defaults:
 # Plugins
 gems:
   - jekyll-paginate
+  - jekyll-feed
+  

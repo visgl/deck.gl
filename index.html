@@ -4,17 +4,8 @@ layout: default
 <!-- Posts -->
 <ul id="posts">
 
-	{% for post in paginator.posts %}
-
-	  <li class="post">
-	  	<h2><a href="{{ site.baseurl }}{{ post.url }}">{{ post.title }}</a></h2>
-      <div>
-        <span class="time">{{ post.date | date_to_string }}</span>
-        <span class="author"> <i>by <a href="http://github.com/{{ post.author_username }}">{{ post.author }}</a></i></span>
-      </div>
-	  	<p>{{ post.content | strip_html | truncatewords:100 }}</p>
-	  </li>
-
+  {% for post in paginator.posts %}
+    {% include post.html %}
   {% endfor %}
 
 </ul>
