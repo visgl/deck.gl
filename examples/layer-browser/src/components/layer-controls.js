@@ -1,6 +1,6 @@
 import React, {PureComponent} from 'react';
-import ColorPicker from './utils/color-picker';
-import ColorPalettePicker from './utils/color-palette-picker';
+import ColorPicker from './color-picker';
+import ColorPalettePicker from './color-palette-picker';
 
 export default class LayerControls extends PureComponent {
 
@@ -96,7 +96,7 @@ export default class LayerControls extends PureComponent {
     // first test if proptype is already defined
     if (propType && propType.type) {
       switch (propType.type) {
-      case 'range':
+      case 'number':
         return this._renderSlider(settingName, value, propType);
       default:
         break;

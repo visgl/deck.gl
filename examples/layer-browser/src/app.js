@@ -1,6 +1,5 @@
 /* global window, document */
-import DeckGL from 'deck.gl';
-import {experimental} from 'deck.gl';
+import DeckGL, {experimental} from 'deck.gl';
 const {ReflectionEffect} = experimental;
 
 import React, {PureComponent} from 'react';
@@ -11,10 +10,12 @@ import {FPSStats} from 'react-stats';
 
 import {Matrix4} from 'luma.gl';
 
-import LayerInfo from './layer-info';
-import LayerSelector from './layer-selector';
-import LayerControls from './layer-controls';
-import LAYER_CATEGORIES from './layer-examples';
+import LayerInfo from './components/layer-info';
+import LayerSelector from './components/layer-selector';
+import LayerControls from './components/layer-controls';
+
+import LAYER_CATEGORIES from './examples';
+import {setImmutableDataSamples} from './immutable-data-samples';
 
 /* eslint-disable no-process-env */
 const MAPBOX_ACCESS_TOKEN = process.env.MAPBOX_ACCESS_TOKEN || // eslint-disable-line
@@ -36,6 +37,7 @@ class App extends PureComponent {
       },
       activeExamples: {},
       settings: {
+        // immutable: false,
         effects: false,
         separation: 0,
         rotationZ: 0,
@@ -90,6 +92,7 @@ class App extends PureComponent {
 
   _onUpdateContainerSettings(settings) {
     this.setState({settings});
+    setImmutableDataSamples(settings.immutable);
   }
 
   _onHover(info) {

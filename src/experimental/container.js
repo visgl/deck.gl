@@ -167,67 +167,6 @@ export function entries(keyedContainer) {
   return null;
 }
 
-/**
- * Access properties of nested containers using dot-path notation
- * - Supports plain objects and arrays, as well as classes with `get` methods
- *   such as ES6 Maps, Immutable.js objects etc
- * - Returns undefined if any container is not valid, instead of throwing
- *
- * @param {Object} container - container that supports get
- * @param {String|*} compositeKey - key to access, can be '.'-separated string
- * @return {*} - value in the final key of the nested container
- */
-export function get(container, compositeKey) {
-  // Split the key into subkeys
-  const keyList = getKeys(compositeKey);
-  // Recursively get the value of each key;
-  let value = container;
-  for (const key of keyList) {
-    // If any intermediate subfield is not a container, return undefined
-    if (!isObject(value)) {
-      return undefined;
-    }
-    // Get the `getter` for this container
-    const getter = getGetter(value);
-    // Use the getter to get the value for the key
-    value = getter(value, key);
-  }
-  return value;
-}
-
-// Default getter is container indexing
-const squareBracketGetter = (container, key) => container[key];
-const getMethodGetter = (obj, key) => obj.get(key);
-// Cache key to key arrays for speed
-const keyMap = {};
-
-// Looks for a `get` function on the prototype
-// TODO - follow prototype chain?
-// @private
-// @return {Function} - get function: (container, key) => value
-function getGetter(container) {
-  // Check if container has a special get method
-  const prototype = Object.getPrototypeOf(container);
-  return prototype.get ? getMethodGetter : squareBracketGetter;
-}
-
-// Takes a string of '.' separated keys and returns an array of keys
-// E.g. 'feature.geometry.type' => 'feature', 'geometry', 'type'
-// @private
-function getKeys(compositeKey) {
-  if (typeof compositeKey === 'string') {
-    // else assume string and split around dots
-    let keyList = keyMap[compositeKey];
-    if (!keyList) {
-      keyList = compositeKey.split('.');
-      keyMap[compositeKey] = keyList;
-    }
-    return keyList;
-  }
-  // Wrap in array if needed
-  return Array.isArray(compositeKey) ? compositeKey : [compositeKey];
-}
-
 // "Generic" forEach that first attempts to call a
 export function forEach(container, visitor) {
   // Hack to work around limitations in buble compiler

@@ -24,13 +24,12 @@ test('PolygonLayer#constructor', t => {
 
   layer = new PolygonLayer({
     data: POLYGONS,
-    pickable: true
+    getPolygon: x => x
   });
   t.ok(layer instanceof PolygonLayer, 'PolygonLayer created');
 
   layer = new PolygonLayer({
-    data: data.choropleths,
-    pickable: true
+    data: data.choropleths
   });
   t.ok(layer instanceof PolygonLayer, 'PolygonLayer created');
 
@@ -40,8 +39,7 @@ test('PolygonLayer#constructor', t => {
   t.doesNotThrow(
     () => new PolygonLayer({
       id: 'nullPolygonLayer',
-      data: null,
-      pickable: true
+      data: null
     }),
     'Null PolygonLayer did not throw exception'
   );

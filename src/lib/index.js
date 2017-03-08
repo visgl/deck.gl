@@ -10,7 +10,4 @@ export {default as AttributeManager} from './attribute-manager';
 export {default as LayerManager} from './layer-manager';
 
 // Ability to extract data from ES6 containers (Maps, Immutable.maps etc)
-export {get} from './utils/container';
-
-// Object iteration helper
-export {count, values, isKeyedContainer, keys, entries} from './utils/container';
+export {get} from './utils/get';
