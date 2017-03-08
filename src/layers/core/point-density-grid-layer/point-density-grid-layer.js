@@ -22,7 +22,7 @@ import {Layer} from '../../../lib';
 import GridLayer from '../grid-layer/grid-layer';
 
 import {pointToDensityGridData} from './grid-aggregator';
-import {ordinalScale, linearScale} from '../../../utils/scale-utils';
+import {linearScale, quantizeScale} from '../../../utils/scale-utils';
 import {defaultColorRange} from '../../../utils/color-utils';
 
 const defaultCellSize = 1000;
@@ -89,7 +89,7 @@ export default class PointDensityGridLayer extends Layer {
     const {colorRange} = this.props;
     const colorDomain = this.props.colorDomain || this.state.countRange;
 
-    return ordinalScale(colorDomain, colorRange, cell.count);
+    return quantizeScale(colorDomain, colorRange, cell.count);
   }
 
   _onGetSublayerElevation(cell) {
