@@ -1,4 +1,4 @@
 import './color.spec';
-import './container.spec';
+import './get.spec';
 import './flatten.spec';
 import './compare-objects.spec';

@@ -19,12 +19,17 @@
 // THE SOFTWARE.
 
 import ChoroplethLayer from '../choropleth-layer/choropleth-layer';
-import {fp64ify} from '../../../lib/utils/fp64';
+import {fp64ify, log} from '../../../lib/utils';
 import flattenDeep from 'lodash.flattendeep';
 import {readFileSync} from 'fs';
 import {join} from 'path';
 
 export default class ChoroplethLayer64 extends ChoroplethLayer {
+
+  constructor(props) {
+    super(props);
+    log.once('ChoroplethLayer64 is deprecated. Consider using GeoJsonLayer instead');
+  }
 
   initializeState() {
     super.initializeState();

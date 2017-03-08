@@ -47,7 +47,7 @@ or browse directly the [docs folder](./docs).
 
 ## Developing
 
-    npm install
+    npm install # or yarn
     npm test
     npm start  # See note below
 
@@ -57,6 +57,15 @@ since the npm start command tries to build and run that example.
     cd examples/layer-browser
     npm install
     cd ../..
+
+Note that `npm start` in the main directory actually runs `examples/main`.
+You will need to install dependencies in that example first:
+
+    cd examples/main
+    npm install # or yarn
+    cd ../..
+    npm start
+
 
 #### Node Version Requirement
 

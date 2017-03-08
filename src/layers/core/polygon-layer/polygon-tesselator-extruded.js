@@ -1,11 +1,17 @@
 import * as Polygon from './polygon';
-// import {getPolygonVertexCount, getPolygonTriangleCount} from './polygon';
-import earcut from 'earcut';
-import flattenDeep from 'lodash.flattendeep';
 import {vec3} from 'gl-matrix';
 import {fp64ify} from '../../../lib/utils/fp64';
-import {Container} from '../../../lib/utils';
-// import {Container, flattenVertices, fillArray} from '../../../lib/utils';
+import {get, count} from '../../../lib/utils';
+import earcut from 'earcut';
+import flattenDeep from 'lodash.flattendeep';
+
+function parseColor(color) {
+  if (!Array.isArray(color)) {
+    color = [get(color, 0), get(color, 1), get(color, 2), get(color, 3)];
+  }
+  color[3] = Number.isFinite(color[3]) ? color[3] : 255;
+  return color;
+}
 
 const DEFAULT_COLOR = [0, 0, 0, 255]; // Black
 
@@ -21,10 +27,11 @@ export class PolygonTesselatorExtruded {
     this.fp64 = fp64;
 
     // Expensive operation, convert all polygons to arrays
-    polygons = Container.map(polygons, (complexPolygon, polygonIndex) => {
+    polygons = polygons.map((complexPolygon, polygonIndex) => {
       const height = getHeight(polygonIndex) || 0;
-      return Container.map(Polygon.normalize(complexPolygon),
-        polygon => Container.map(polygon, coord => [coord[0], coord[1], height]));
+      return Polygon.normalize(complexPolygon).map(
+        polygon => polygon.map(coord => [get(coord, 0), get(coord, 1), height])
+      );
     });
 
     const groupedVertices = polygons;
@@ -72,7 +79,7 @@ export class PolygonTesselatorExtruded {
 }
 
 function countVertices(vertices) {
-  return vertices.reduce((count, polygon) => count + polygon.length, 0);
+  return vertices.reduce((vertexCount, polygon) => vertexCount + count(polygon), 0);
 }
 
 function calculateIndices({groupedVertices, wireframe = false}) {
@@ -102,10 +109,10 @@ function calculateIndices({groupedVertices, wireframe = false}) {
 // * each top vertex is on 3 surfaces
 // * each bottom vertex is on 2 surfaces
 function calculatePositionsJS({groupedVertices, wireframe = false}) {
-  const positions = Container.map(groupedVertices, complexPolygon =>
-    Container.map(complexPolygon, vertices => {
+  const positions = groupedVertices.map(complexPolygon =>
+    complexPolygon.map(vertices => {
       const topVertices = [].concat(vertices);
-      const baseVertices = topVertices.map(v => [v[0], v[1], 0]);
+      const baseVertices = topVertices.map(v => [get(v, 0), get(v, 1), 0]);
       return wireframe ?
         [topVertices, baseVertices] :
         [topVertices, topVertices, topVertices, baseVertices, baseVertices];
@@ -146,41 +153,26 @@ function calculateNormals({groupedVertices, wireframe}) {
 }
 
 function calculateSideNormals(vertices) {
-  const numVertices = vertices.length;
   const normals = [];
 
-  for (let i = 0; i < numVertices - 1; i++) {
-    const n = getNormal(vertices[i], vertices[i + 1]);
-    normals.push(n);
+  let lastVertice = null;
+  for (const vertice of vertices) {
+    if (lastVertice) {
+      // vertex[i-1], vertex[i]
+      const n = getNormal(lastVertice, vertice);
+      normals.push(n);
+    }
+    lastVertice = vertice;
   }
 
   return [[...normals, normals[0]], [normals[0], ...normals]];
 }
 
-/*
-function calculateColors({polygons, pointCount, getColor}) {
-  const attribute = new Uint8Array(pointCount * 4);
-  let i = 0;
-  polygons.forEach((complexPolygon, polygonIndex) => {
-    // Calculate polygon color
-    const color = getColor(polygonIndex);
-    color[3] = Number.isFinite(color[3]) ? color[3] : 255;
-
-    const count = Polygon.getVertexCount(complexPolygon);
-    fillArray({target: attribute, source: color, start: i, count});
-    i += color.length * count;
-  });
-  return attribute;
-}
-*/
-
 function calculateColors({groupedVertices, getColor, wireframe = false}) {
   const colors = groupedVertices.map((complexPolygon, polygonIndex) => {
-    const color = getColor(polygonIndex);
-    color[3] = Number.isFinite(color[3]) ? color[3] : 255;
+    let color = getColor(polygonIndex);
+    color = parseColor(color);
 
-    // const baseColor = Array.isArray(color) ? color[0] : color;
-    // const topColor = Array.isArray(color) ? color[color.length - 1] : color;
     const numVertices = countVertices(complexPolygon);
     const topColors = new Array(numVertices).fill(color);
     const baseColors = new Array(numVertices).fill(color);
@@ -193,8 +185,6 @@ function calculateColors({groupedVertices, getColor, wireframe = false}) {
 
 function calculatePickingColors({groupedVertices, color = [0, 0, 0], wireframe = false}) {
   const colors = groupedVertices.map((vertices, buildingIndex) => {
-    // const baseColor = Array.isArray(color) ? color[0] : color;
-    // const topColor = Array.isArray(color) ? color[color.length - 1] : color;
     const numVertices = countVertices(vertices);
     const topColors = new Array(numVertices).fill([0, 0, 0]);
     const baseColors = new Array(numVertices).fill([0, 0, 0]);
@@ -272,15 +262,20 @@ function calculateSurfaceIndices(vertices, offset) {
 
 // get normal vector of line segment
 function getNormal(p1, p2) {
-  if (p1[0] === p2[0] && p1[1] === p2[1]) {
+  const p1x = get(p1, 0);
+  const p1y = get(p1, 1);
+  const p2x = get(p2, 0);
+  const p2y = get(p2, 1);
+
+  if (p1x === p2x && p1y === p2y) {
     return [1, 0, 0];
   }
 
   const degrees2radians = Math.PI / 180;
-  const lon1 = degrees2radians * p1[0];
-  const lon2 = degrees2radians * p2[0];
-  const lat1 = degrees2radians * p1[1];
-  const lat2 = degrees2radians * p2[1];
+  const lon1 = degrees2radians * p1x;
+  const lon2 = degrees2radians * p2x;
+  const lat1 = degrees2radians * p1y;
+  const lat2 = degrees2radians * p2y;
   const a = Math.sin(lon2 - lon1) * Math.cos(lat2);
   const b = Math.cos(lat1) * Math.sin(lat2) -
     Math.sin(lat1) * Math.cos(lat2) * Math.cos(lon2 - lon1);

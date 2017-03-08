@@ -7,7 +7,8 @@ function entries(obj) {
 }
 
 const cbNames = ['YlOrRd', 'YlGnBu', 'PuRd', 'YlGn',
-  'Greens', 'Reds', 'Blues', 'RdYlGn', 'Spectral'];
+  // 'Greens', 'Reds', 'Blues', 'RdYlGn',
+  'Spectral'];
 const flip = ['RdYlGn', 'Spectral'];
 
 const colorbrewerColors = [];
