@@ -21,36 +21,33 @@
 import {CompositeLayer, get} from '../../../lib';
 import ScatterplotLayer from '../scatterplot-layer/scatterplot-layer';
 import PathLayer from '../path-layer/path-layer';
-import PolygonLayer from '../polygon-layer/polygon-layer';
+// Use primitive layer to avoid "Composite Composite" layers for now
+import SolidPolygonLayer from '../solid-polygon-layer/solid-polygon-layer';
 
 import {getGeojsonFeatures, separateGeojsonFeatures} from './geojson';
 
-const defaultPointColor = [0xFF, 0x88, 0x00, 0xFF];
-const defaultStrokeColor = [0x33, 0x33, 0x33, 0xFF];
+const defaultColor = [0xBD, 0xE2, 0x7A, 0xFF];
 const defaultFillColor = [0xBD, 0xE2, 0x7A, 0xFF];
 
 const defaultProps = {
-  drawPoints: true,
-  drawLines: true,
-  drawPolygons: true,
-  fillPolygons: true,
-  // extrudePolygons: false,
-  // wireframe: false,
+  stroked: true,
+  filled: true,
+  extruded: false,
+  wireframe: false,
+  fp64: false,
 
-  // Point accessors
-  getPointColor: f => get(f, 'properties.color') || defaultPointColor,
-  getPointSize: f => get(f, 'properties.size') || 5,
+  // TODO: Missing props: radiusMinPixels, strokeWidthMinPixels, ...
 
-  // Line and polygon outline accessors
-  getStrokeColor: f => get(f, 'properties.strokeColor') || defaultStrokeColor,
-  getStrokeWidth: f => get(f, 'properties.strokeWidth') || 1,
-
-  // Polygon fill accessors
+  // Point, line and polygon outline color
+  getColor: f => get(f, 'properties.color') || get(f, 'properties.strokeColor') || defaultColor,
+  // Polygon fill color
   getFillColor: f => get(f, 'properties.fillColor') || defaultFillColor,
-
+  // Point radius
+  getRadius: f => get(f, 'properties.radius') || get(f, 'properties.size') || 5,
+  // Line and polygon outline accessors
+  getStrokeWidth: f => get(f, 'properties.strokeWidth') || 1,
   // Polygon extrusion accessor
-  getElevation: f => 1000,
-  fp64: false
+  getElevation: f => 1000
 };
 
 const getCoordinates = f => get(f, 'geometry.coordinates');
@@ -58,7 +55,7 @@ const getCoordinates = f => get(f, 'geometry.coordinates');
 export default class GeoJsonLayer extends CompositeLayer {
   initializeState() {
     this.state = {
-      subLayers: null
+      features: {}
     };
   }
 
@@ -66,7 +63,7 @@ export default class GeoJsonLayer extends CompositeLayer {
     if (changeFlags.dataChanged) {
       const {data} = this.props;
       const features = getGeojsonFeatures(data);
-      this.state.subLayers = separateGeojsonFeatures(features);
+      this.state.features = separateGeojsonFeatures(features);
     }
   }
 
@@ -81,23 +78,22 @@ export default class GeoJsonLayer extends CompositeLayer {
   }
 
   renderLayers() {
-    const {subLayers: {pointFeatures, lineFeatures, polygonFeatures,
-      polygonOutlineFeatures}} = this.state;
-    const {id, getPointColor, getPointSize, getStrokeColor, getStrokeWidth,
-      getFillColor, getElevation} = this.props;
-    const {extruded, wireframe} = this.props;
+    const {features} = this.state;
+    const {pointFeatures, lineFeatures, polygonFeatures, polygonOutlineFeatures} = features;
+    const {getColor, getFillColor, getRadius, getStrokeWidth, getElevation} = this.props;
+    const {id, stroked, filled, extruded, wireframe} = this.props;
 
-    let {drawPoints, drawLines, drawPolygons, fillPolygons} = this.props;
-    drawPoints = drawPoints && pointFeatures && pointFeatures.length > 0;
-    drawLines = drawLines && lineFeatures && lineFeatures.length > 0;
-    drawPolygons = drawPolygons && polygonOutlineFeatures && polygonOutlineFeatures.length > 0;
-    fillPolygons = fillPolygons && polygonFeatures && polygonFeatures.length > 0;
+    let {} = this.props;
+    const drawPoints = pointFeatures && pointFeatures.length > 0;
+    const drawLines = lineFeatures && lineFeatures.length > 0;
+    const drawPolygons = stroked && polygonOutlineFeatures && polygonOutlineFeatures.length > 0;
+    const fillPolygons = filled && polygonFeatures && polygonFeatures.length > 0;
 
     const onHover = this._onHoverSubLayer.bind(this);
     const onClick = this._onClickSubLayer.bind(this);
 
     // Filled Polygon Layer
-    const polygonFillLayer = fillPolygons && new PolygonLayer(Object.assign({},
+    const polygonFillLayer = fillPolygons && new SolidPolygonLayer(Object.assign({},
       this.props, {
         id: `${id}-polygon-fill`,
         data: polygonFeatures,
@@ -117,33 +113,29 @@ export default class GeoJsonLayer extends CompositeLayer {
     // Polygon outline or wireframe
     let polygonOutlineLayer = null;
     if (drawPolygons && extruded && wireframe) {
-      polygonOutlineLayer = new PolygonLayer(Object.assign({}, this.props, {
+      polygonOutlineLayer = new SolidPolygonLayer(Object.assign({}, this.props, {
         id: `${id}-polygon-wireframe`,
         data: polygonFeatures,
         getPolygon: getCoordinates,
         getElevation,
-        getColor: getStrokeColor,
+        getColor,
         extruded: true,
         wireframe: true,
         onHover,
         onClick,
-        updateTriggers: {
-          getColor: this.props.updateTriggers.getStrokeColor
-        }
+        updateTriggers: Object.assign({}, this.props.updateTriggers, {
+          getColor: this.props.updateTriggers.getFillColor
+        })
       }));
     } else if (drawPolygons) {
       polygonOutlineLayer = new PathLayer(Object.assign({}, this.props, {
         id: `${id}-polygon-outline`,
         data: polygonOutlineFeatures,
         getPath: getCoordinates,
-        getColor: getStrokeColor,
+        getColor,
         getStrokeWidth,
         onHover,
-        onClick,
-        updateTriggers: {
-          getColor: this.props.updateTriggers.getStrokeColor,
-          getStrokeWidth: this.props.updateTriggers.getStrokeWidth
-        }
+        onClick
       }));
     }
 
@@ -152,14 +144,10 @@ export default class GeoJsonLayer extends CompositeLayer {
         id: `${id}-line-paths`,
         data: lineFeatures,
         getPath: getCoordinates,
-        getColor: getStrokeColor,
+        getColor,
         getStrokeWidth,
         onHover,
-        onClick,
-        updateTriggers: {
-          getColor: this.props.updateTriggers.getStrokeColor,
-          getStrokeWidth: this.props.updateTriggers.getStrokeWidth
-        }
+        onClick
       }));
 
     const pointLayer = drawPoints && new ScatterplotLayer(Object.assign({},
@@ -167,14 +155,10 @@ export default class GeoJsonLayer extends CompositeLayer {
         id: `${id}-points`,
         data: pointFeatures,
         getPosition: getCoordinates,
-        getColor: getPointColor,
-        getRadius: getPointSize,
+        getColor,
+        getRadius,
         onHover,
         onClick,
-        updateTriggers: {
-          getColor: this.props.updateTriggers.getPointColor,
-          getRadius: this.props.updateTriggers.getPointSize
-        },
         fp64: this.props.fp64
       }));
 

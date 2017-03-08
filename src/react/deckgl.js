@@ -101,7 +101,7 @@ export default class DeckGL extends React.Component {
     // Check if a mouse event has been specified and that at least one of the layers is pickable
     const hasEvent = this.props.onLayerClick !== noop || this.props.onLayerHover !== noop;
     const hasPickableLayer = this.layerManager.layers.map(l => l.props.pickable).includes(true);
-    if (hasEvent && !hasPickableLayer) {
+    if (this.layerManager.layers.length && hasEvent && !hasPickableLayer) {
       log.once(
         0,
         'You have supplied a mouse event handler but none of your layers got the `pickable` flag.'
