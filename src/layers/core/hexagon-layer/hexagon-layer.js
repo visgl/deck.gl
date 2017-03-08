@@ -26,6 +26,7 @@ import {join} from 'path';
 import {log} from '../../../lib/utils';
 import {fp64ify, enable64bitSupport} from '../../../lib/utils/fp64';
 import {COORDINATE_SYSTEM} from '../../../lib';
+import {clamp} from '../../../utils/scale-utils';
 
 function positionsAreEqual(v1, v2) {
   // Hex positions are expected to change entirely, not to maintain some
@@ -218,7 +219,7 @@ export default class HexagonLayer extends Layer {
     this.setUniforms(Object.assign({}, {
       extruded,
       opacity,
-      coverage,
+      coverage: clamp([0, 1], coverage),
       elevationScale
     },
     lightSettings));
