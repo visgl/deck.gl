@@ -46,7 +46,7 @@ void main(void) {
     elevation = project_scale(instancePositions.z * (positions.y + 0.5) * ELEVATION_SCALE * elevationScale);
 }
 
-  float dotRadius = radius * mix(clamp(coverage, 0.0, 1.0), 0.0, float(instanceColors.a == 0.0));
+  float dotRadius = radius * mix(coverage, 0.0, float(instanceColors.a == 0.0));
   // // project center of hexagon
 
   vec4 centroidPosition = vec4(project_position(instancePositions.xy), elevation, 0.0);
