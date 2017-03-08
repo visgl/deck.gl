@@ -296,16 +296,16 @@ export default {
     'GeoJsonLayer (Extruded)': GeoJsonLayerExtrudedExample,
     PolygonLayer: PolygonLayerExample,
     PathLayer: PathLayerExample,
-    'ScatterplotLayer': ScatterplotLayerExample,
-    'PointCloudLayer': PointCloudLayerExample,
+    ScatterplotLayer: ScatterplotLayerExample,
     ArcLayer: ArcLayerExample,
     LineLayer: LineLayerExample,
-    ScreenGridLayer: ScreenGridLayerExample,
+    IconLayer: IconLayerExample,
     GridLayer: GridLayerExample,
     PointDensityGridLayer: PointDensityGridLayerExample,
-    PointDensityHexagonLayer: PointDensityHexagonLayerExample,
+    ScreenGridLayer: ScreenGridLayerExample,
     HexagonLayer: HexagonLayerExample,
-    IconLayer: IconLayerExample
+    PointDensityHexagonLayer: PointDensityHexagonLayerExample,
+    PointCloudLayer: PointCloudLayerExample
   },
 
   'Performance Tests': {

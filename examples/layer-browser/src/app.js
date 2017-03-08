@@ -37,7 +37,7 @@ class App extends PureComponent {
       },
       activeExamples: {},
       settings: {
-        immutable: false,
+        // immutable: false,
         effects: false,
         separation: 0,
         rotationZ: 0,
