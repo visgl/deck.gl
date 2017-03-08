@@ -59,10 +59,9 @@ const defaultProps = {
 
 export default class PolygonLayer extends Layer {
   getShaders() {
-    const vs64 = readFileSync(join(__dirname, './polygon-layer-64-vertex.glsl'), 'utf8');
-    const vs32 = readFileSync(join(__dirname, './polygon-layer-vertex.glsl'), 'utf8');
-    const fs = readFileSync(join(__dirname, './polygon-layer-fragment.glsl'), 'utf8');
-
+    const vs64 = readFileSync(join(__dirname, './solid-polygon-layer-vertex-64.glsl'), 'utf8');
+    const vs32 = readFileSync(join(__dirname, './solid-polygon-layer-vertex.glsl'), 'utf8');
+    const fs = readFileSync(join(__dirname, './solid-polygon-layer-fragment.glsl'), 'utf8');
     return enable64bitSupport(this.props) ? {
       vs: vs64, fs, modules: ['fp64', 'project64', 'lighting']
     } : {

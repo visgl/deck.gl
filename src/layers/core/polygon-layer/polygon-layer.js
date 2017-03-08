@@ -19,9 +19,9 @@
 // THE SOFTWARE.
 
 import {CompositeLayer, get} from '../../../lib';
-import PrimitivePolygonLayer from '../primitive-polygon-layer/polygon-layer';
+import SolidPolygonLayer from '../solid-polygon-layer/solid-polygon-layer';
 import PathLayer from '../path-layer/path-layer';
-import * as Polygon from '../primitive-polygon-layer/polygon';
+import * as Polygon from '../solid-polygon-layer/polygon';
 
 const defaultColor = [0xBD, 0xE2, 0x7A, 0xFF];
 const defaultFillColor = [0xBD, 0xE2, 0x7A, 0xFF];
@@ -87,35 +87,22 @@ export default class PolygonLayer extends CompositeLayer {
     const fillPolygons = filled && data && data.length > 0;
 
     // Filled Polygon Layer
-    const polygonFillLayer = fillPolygons && new PrimitivePolygonLayer(Object.assign({},
+    const polygonFillLayer = fillPolygons && new SolidPolygonLayer(Object.assign({},
       this.props, {
         id: `${id}-fill`,
         data,
         getElevation,
         getColor: getFillColor,
         extruded,
-        wireframe: false,
+        wireframe,
         updateTriggers: Object.assign({}, updateTriggers, {
           getColor: updateTriggers.getFillColor
         })
       }));
 
-    // Polygon outline or wireframe
-    let polygonWireframeLayer = null;
+    // Polygon outline layer
     let polygonOutlineLayer = null;
-    if (strokePolygons && extruded && wireframe) {
-      polygonWireframeLayer = new PrimitivePolygonLayer(Object.assign({}, this.props, {
-        id: `${id}-wireframe`,
-        data,
-        getElevation,
-        getColor: getStrokeColor,
-        extruded: true,
-        wireframe: true,
-        updateTriggers: Object.assign({}, updateTriggers, {
-          getColor: updateTriggers.getStrokeColor
-        })
-      }));
-    } else if (strokePolygons) {
+    if (strokePolygons) {
       polygonOutlineLayer = new PathLayer(Object.assign({}, this.props, {
         id: `${id}-stroke`,
         data: paths,
@@ -132,7 +119,6 @@ export default class PolygonLayer extends CompositeLayer {
 
     return [
       polygonFillLayer,
-      polygonWireframeLayer,
       polygonOutlineLayer
     ].filter(Boolean);
   }

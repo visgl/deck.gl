@@ -1,9 +1,9 @@
 import test from 'tape-catch';
 
-import * as Polygon from 'deck.gl/layers/core/primitive-polygon-layer/polygon';
-import {PolygonTesselator} from 'deck.gl/layers/core/primitive-polygon-layer/polygon-tesselator';
+import * as Polygon from 'deck.gl/layers/core/solid-polygon-layer/polygon';
+import {PolygonTesselator} from 'deck.gl/layers/core/solid-polygon-layer/polygon-tesselator';
 import {PolygonTesselatorExtruded}
-  from 'deck.gl/layers/core/primitive-polygon-layer/polygon-tesselator-extruded';
+  from 'deck.gl/layers/core/solid-polygon-layer/polygon-tesselator-extruded';
 
 import Immutable from 'immutable';
 

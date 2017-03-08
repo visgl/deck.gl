@@ -22,7 +22,7 @@ import {CompositeLayer, get} from '../../../lib';
 import ScatterplotLayer from '../scatterplot-layer/scatterplot-layer';
 import PathLayer from '../path-layer/path-layer';
 // Use primitive layer to avoid "Composite Composite" layers for now
-import PrimitivePolygonLayer from '../primitive-polygon-layer/polygon-layer';
+import SolidPolygonLayer from '../solid-polygon-layer/solid-polygon-layer';
 
 import {getGeojsonFeatures, separateGeojsonFeatures} from './geojson';
 
@@ -93,7 +93,7 @@ export default class GeoJsonLayer extends CompositeLayer {
     const onClick = this._onClickSubLayer.bind(this);
 
     // Filled Polygon Layer
-    const polygonFillLayer = fillPolygons && new PrimitivePolygonLayer(Object.assign({},
+    const polygonFillLayer = fillPolygons && new SolidPolygonLayer(Object.assign({},
       this.props, {
         id: `${id}-polygon-fill`,
         data: polygonFeatures,
@@ -113,7 +113,7 @@ export default class GeoJsonLayer extends CompositeLayer {
     // Polygon outline or wireframe
     let polygonOutlineLayer = null;
     if (drawPolygons && extruded && wireframe) {
-      polygonOutlineLayer = new PrimitivePolygonLayer(Object.assign({}, this.props, {
+      polygonOutlineLayer = new SolidPolygonLayer(Object.assign({}, this.props, {
         id: `${id}-polygon-wireframe`,
         data: polygonFeatures,
         getPolygon: getCoordinates,
