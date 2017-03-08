@@ -1,9 +1,9 @@
+/* global document */
 import React, {Component} from 'react';
 import {render} from 'react-dom';
-// import MapGL from 'react-map-gl';
+import MapGL from 'react-map-gl';
 import DeckGL from 'deck.gl';
 import {LineLayer} from 'deck.gl';
-/* global document */
 
 // Set your mapbox token here
 const MAPBOX_TOKEN = process.env.MAPBOX_ACCESS_TOKEN; // eslint-disable-line

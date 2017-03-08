@@ -1,4 +1,4 @@
-import {Container} from '../../../lib/utils';
+import {get} from '../../../lib/utils';
 
 /**
  * "Normalizes" complete or partial GeoJSON data into iterable list of features
@@ -18,7 +18,7 @@ export function getGeojsonFeatures(geojson) {
     return geojson;
   }
 
-  const type = Container.get(geojson, 'type');
+  const type = get(geojson, 'type');
   switch (type) {
   case 'Point':
   case 'MultiPoint':
@@ -36,7 +36,7 @@ export function getGeojsonFeatures(geojson) {
     return [geojson];
   case 'FeatureCollection':
     // Just return the 'Features' array from the collection
-    return Container.get(geojson, 'features');
+    return get(geojson, 'features');
   default:
     throw new Error('Unknown geojson type');
   }
@@ -48,14 +48,14 @@ export function getGeojsonFeatures(geojson) {
  * @returns {[Number,Number,Number][][][]} array of choropleths
  */
 export function featureToPolygons(feature) {
-  const geometry = Container.get(feature, 'geometry');
+  const geometry = get(feature, 'geometry');
   // If no geometry field, assume that "feature" is the polygon list
   if (geometry === undefined) {
     return feature;
   }
 
-  const type = Container.get(geometry, 'type');
-  const coordinates = Container.get(geometry, 'coordinates');
+  const type = get(geometry, 'type');
+  const coordinates = get(geometry, 'coordinates');
 
   let polygons;
   switch (type) {
@@ -71,7 +71,7 @@ export function featureToPolygons(feature) {
     break;
   case 'MultiLineString':
     // TODO - should lines really be handled in this switch?
-    polygons = Container.map(coordinates, coords => [coords]);
+    polygons = coordinates.map(coords => [coords]);
     break;
   default:
     polygons = [];
@@ -89,20 +89,20 @@ export function featureToPolygons(feature) {
  */
 export function extractPolygons(data) {
   const normalizedGeojson = normalizeGeojson(data);
-  const features = Container.get(normalizedGeojson, 'features');
+  const features = get(normalizedGeojson, 'features');
 
   const result = [];
   features.forEach((feature, featureIndex) => {
     let choropleths = featureToPolygons(feature);
 
     /* eslint-disable max-nested-callbacks */
-    choropleths = Container.map(choropleths,
-      choropleth => Container.map(choropleth,
-        polygon => Container.map(polygon,
+    choropleths = choropleths.map(
+      choropleth => choropleth.map(
+        polygon => polygon.map(
           coord => [
-            Container.get(coord, 0),
-            Container.get(coord, 1),
-            Container.get(coord, 2) || 0
+            get(coord, 0),
+            get(coord, 1),
+            get(coord, 2) || 0
           ]
         )
       )
@@ -125,7 +125,7 @@ export function extractPolygons(data) {
  * @return {object} - normalized geojson data
  */
 export function normalizeGeojson(geojson) {
-  const type = Container.get(geojson, 'type');
+  const type = get(geojson, 'type');
   switch (type) {
   case 'Point':
   case 'MultiPoint':

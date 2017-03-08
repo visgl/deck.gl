@@ -22,7 +22,7 @@ import {Layer} from '../../../lib';
 import {assembleShaders} from '../../../shader-utils';
 import {fp64ify} from '../../../lib/utils/fp64';
 import {GL, Model, Geometry} from 'luma.gl';
-import {flatten} from '../../../lib/utils';
+import {flatten, log} from '../../../lib/utils';
 import earcut from 'earcut';
 import {vec3} from 'gl-matrix';
 import {readFileSync} from 'fs';
@@ -43,6 +43,11 @@ const defaultProps = {
 };
 
 export default class ExtrudedChoroplethLayer64 extends Layer {
+  constructor(props) {
+    super(props);
+    log.once('ExtrudedChoroplethLayer64 is deprecated. Consider using GeoJsonLayer instead');
+  }
+
   initializeState() {
     const {attributeManager} = this.state;
     attributeManager.add({

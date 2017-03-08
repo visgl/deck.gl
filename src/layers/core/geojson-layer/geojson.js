@@ -1,5 +1,4 @@
 import {get} from '../../../lib';
-import {Container} from '../../../lib/utils';
 
 /**
  * "Normalizes" complete or partial GeoJSON data into iterable list of features
@@ -50,7 +49,7 @@ export function separateGeojsonFeatures(features) {
   const polygonFeatures = [];
   const polygonOutlineFeatures = [];
 
-  Container.forEach(features, feature => {
+  features.forEach(feature => {
     const type = get(feature, 'geometry.type');
     const coordinates = get(feature, 'geometry.coordinates');
     const properties = get(feature, 'properties');
@@ -60,7 +59,7 @@ export function separateGeojsonFeatures(features) {
       break;
     case 'MultiPoint':
       // TODO - split multipoints
-      Container.forEach(coordinates, point => {
+      coordinates.forEach(point => {
         pointFeatures.push({geometry: {coordinates: point}, properties, feature});
       });
       break;
@@ -69,23 +68,23 @@ export function separateGeojsonFeatures(features) {
       break;
     case 'MultiLineString':
       // Break multilinestrings into multiple lines with same properties
-      Container.forEach(coordinates, path => {
+      coordinates.forEach(path => {
         lineFeatures.push({geometry: {coordinates: path}, properties, feature});
       });
       break;
     case 'Polygon':
       polygonFeatures.push(feature);
       // Break polygon into multiple lines with same properties
-      Container.forEach(coordinates, path => {
+      coordinates.forEach(path => {
         polygonOutlineFeatures.push({geometry: {coordinates: path}, properties, feature});
       });
       break;
     case 'MultiPolygon':
       // Break multipolygons into multiple polygons with same properties
-      Container.forEach(coordinates, polygon => {
+      coordinates.forEach(polygon => {
         polygonFeatures.push({geometry: {coordinates: polygon}, properties, feature});
         // Break polygon into multiple lines with same properties
-        Container.forEach(polygon, path => {
+        polygon.forEach(path => {
           polygonOutlineFeatures.push({geometry: {coordinates: path}, properties, feature});
         });
       });

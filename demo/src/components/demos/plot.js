@@ -102,25 +102,27 @@ export default class PlotDemo extends Component {
     } = this.props;
     const {viewport, equation, hoverInfo} = this.state;
 
-    const layers = equation.valid ? [new PlotLayer({
-      getZ: equation.func,
-      getColor: (x, y, z) => [40, z * 128 + 128, 160],
-      xMin: -Math.PI,
-      xMax: Math.PI,
-      yMin: -Math.PI,
-      yMax: Math.PI,
-      xResolution: resolution.value,
-      yResolution: resolution.value,
-      drawAxes: showAxis.value,
-      axesOffset: 0.25,
-      axesColor: [0, 0, 0, 128],
-      opacity: 1,
-      pickable: true,
-      onHover: this._onHover,
-      updateTriggers: {
-        getZ: equation.text
-      }
-    })] : [];
+    const layers = equation.valid ? [
+      new PlotLayer({
+        getZ: equation.func,
+        getColor: (x, y, z) => [40, z * 128 + 128, 160],
+        xMin: -Math.PI,
+        xMax: Math.PI,
+        yMin: -Math.PI,
+        yMax: Math.PI,
+        xResolution: resolution.value,
+        yResolution: resolution.value,
+        drawAxes: showAxis.value,
+        axesOffset: 0.25,
+        axesColor: [0, 0, 0, 128],
+        opacity: 1,
+        pickable: true,
+        onHover: this._onHover,
+        updateTriggers: {
+          getZ: equation.text
+        }
+      })
+    ] : [];
 
     const canvasProps = {
       width,

@@ -9,7 +9,6 @@ module.exports = {
     app: resolve('./src/app.js')
   },
 
-  // inline source maps seem to work best
   devtool: 'source-map',
 
   resolve: {

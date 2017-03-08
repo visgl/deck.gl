@@ -5,7 +5,7 @@
 // - 3D wireframes (not yet)
 import * as Polygon from './polygon';
 import earcut from 'earcut';
-import {Container, flattenVertices, fillArray} from '../../../lib/utils';
+import {get, count, flattenVertices, fillArray} from '../../../lib/utils';
 import {fp64ify} from '../../../lib/utils/fp64';
 
 // Maybe deck.gl or luma.gl needs to export this
@@ -17,6 +17,14 @@ function getPickingColor(index) {
   ];
 }
 
+function parseColor(color) {
+  if (!Array.isArray(color)) {
+    color = [get(color, 0), get(color, 1), get(color, 2), get(color, 3)];
+  }
+  color[3] = Number.isFinite(color[3]) ? color[3] : 255;
+  return color;
+}
+
 const DEFAULT_COLOR = [0, 0, 0, 255]; // Black
 
 // This class is set up to allow querying one attribute at a time
@@ -24,7 +32,7 @@ const DEFAULT_COLOR = [0, 0, 0, 255]; // Black
 export class PolygonTesselator {
   constructor({polygons, fp64 = false}) {
     // Normalize all polygons
-    this.polygons = Container.map(polygons, polygon => Polygon.normalize(polygon));
+    this.polygons = polygons.map(polygon => Polygon.normalize(polygon));
     // Count all polygon vertices
     this.pointCount = getPointCount(this.polygons);
     this.fp64 = fp64;
@@ -63,17 +71,17 @@ export class PolygonTesselator {
 
 // Count number of points in a list of complex polygons
 function getPointCount(polygons) {
-  return polygons.reduce((sum, polygon) => sum + Polygon.getVertexCount(polygon), 0);
+  return polygons.reduce((points, polygon) => points + Polygon.getVertexCount(polygon), 0);
 }
 
 // COunt number of triangles in a list of complex polygons
 function getTriangleCount(polygons) {
-  return polygons.reduce((count, polygon) => count + Polygon.getTriangleCount(polygon), 0);
+  return polygons.reduce((triangles, polygon) => triangles + Polygon.getTriangleCount(polygon), 0);
 }
 
 // Returns the offsets of each complex polygon in the combined array of all polygons
 function getPolygonOffsets(polygons) {
-  const offsets = new Array(polygons.length + 1);
+  const offsets = new Array(count(polygons) + 1);
   offsets[0] = 0;
   let offset = 0;
   polygons.forEach((polygon, i) => {
@@ -86,11 +94,11 @@ function getPolygonOffsets(polygons) {
 // Returns the offset of each hole polygon in the flattened array for that polygon
 function getHoleIndices(complexPolygon) {
   let holeIndices = null;
-  if (complexPolygon.length > 1) {
+  if (count(complexPolygon) > 1) {
     let polygonStartIndex = 0;
     holeIndices = [];
-    Container.forEach(complexPolygon, polygon => {
-      polygonStartIndex += polygon.length;
+    complexPolygon.forEach(polygon => {
+      polygonStartIndex += count(polygon);
       holeIndices.push(polygonStartIndex);
     });
     // Last element points to end of the flat array, remove it
@@ -138,14 +146,21 @@ function calculateSurfaceIndices(complexPolygon) {
   return earcut(verts, holeIndices, 3);
 }
 
+// TODO - refactor
+function isContainer(value) {
+  return Array.isArray(value) || ArrayBuffer.isView(value) ||
+    value !== null && typeof value === 'object';
+}
+
+// TODO - refactor, this file should not need a separate flatten func
 // Flattens nested array of vertices, padding third coordinate as needed
 export function flattenVertices2(nestedArray, {result = [], dimensions = 3} = {}) {
   let index = -1;
   let vertexLength = 0;
-  const length = Container.count(nestedArray);
+  const length = count(nestedArray);
   while (++index < length) {
-    const value = Container.get(nestedArray, index);
-    if (Container.isContainer(value)) {
+    const value = get(nestedArray, index);
+    if (isContainer(value)) {
       flattenVertices(value, {result, dimensions});
     } else {
       if (vertexLength < dimensions) { // eslint-disable-line
@@ -171,26 +186,20 @@ function calculatePositions({polygons, pointCount, fp64}) {
   }
   let i = 0;
   let j = 0;
-  Container.forEach(polygons, polygon =>
-    Polygon.forEachVertex(polygon, vertex => {
-      attribute[i++] = vertex[0];
-      attribute[i++] = vertex[1];
-      attribute[i++] = vertex[2] || 0;
+  for (const polygon of polygons) {
+    Polygon.forEachVertex(polygon, vertex => { // eslint-disable-line
+      const x = get(vertex, 0);
+      const y = get(vertex, 1);
+      const z = get(vertex, 2) || 0;
+      attribute[i++] = x;
+      attribute[i++] = y;
+      attribute[i++] = z;
       if (fp64) {
-        attributeLow[j++] = fp64ify(vertex[0])[1];
-        attributeLow[j++] = fp64ify(vertex[1])[1];
+        attributeLow[j++] = fp64ify(x)[1];
+        attributeLow[j++] = fp64ify(y)[1];
       }
-    })
-  );
-  // for (const complexPolygon of polygons) {
-  //   for (const simplePolygon of complexPolygon) {
-  //     for (const vertex of simplePolygon) {
-  //       attribute[i++] = vertex[0];
-  //       attribute[i++] = vertex[1];
-  //       attribute[i++] = vertex[2] || 0;
-  //     }
-  //   }
-  // }
+    });
+  }
   return {positions: attribute, positions64xyLow: attributeLow};
 }
 
@@ -206,12 +215,12 @@ function calculateColors({polygons, pointCount, getColor}) {
   let i = 0;
   polygons.forEach((complexPolygon, polygonIndex) => {
     // Calculate polygon color
-    const color = getColor(polygonIndex);
-    color[3] = Number.isFinite(color[3]) ? color[3] : 255;
+    let color = getColor(polygonIndex);
+    color = parseColor(color);
 
-    const count = Polygon.getVertexCount(complexPolygon);
-    fillArray({target: attribute, source: color, start: i, count});
-    i += color.length * count;
+    const vertexCount = Polygon.getVertexCount(complexPolygon);
+    fillArray({target: attribute, source: color, start: i, count: vertexCount});
+    i += color.length * vertexCount;
   });
   return attribute;
 }
@@ -221,42 +230,9 @@ function calculatePickingColors({polygons, pointCount}) {
   let i = 0;
   polygons.forEach((complexPolygon, polygonIndex) => {
     const color = getPickingColor(polygonIndex);
-    const count = Polygon.getVertexCount(complexPolygon);
-    fillArray({target: attribute, source: color, start: i, count});
+    const vertexCount = Polygon.getVertexCount(complexPolygon);
+    fillArray({target: attribute, source: color, start: i, count: vertexCount});
     i += color.length * count;
   });
   return attribute;
 }
-
-// TODO - extremely slow for some reason - to big for JS compiler?
-// return calculateAttribute({
-//   polygons,
-//   attribute,
-//   size: 4,
-//   accessor: getColor,
-//   defaultValue: [0, 0, 0, 255]
-// });
-
-/* eslint-disable complexity
-function calculateAttribute4({
-  polygons, attribute, size, accessor, defaultValue = [0, 0, 0, 0]
-}) {
-  let i = 0;
-  polygons.forEach((complexPolygon, polygonIndex) => {
-    const value = accessor(polygonIndex) || defaultValue;
-    value[3] = (Number.isFinite(value[3]) ? value[3] : defaultValue[3]);
-
-    // Copy polygon's value into the flattened vertices of the simple polygons
-    // TODO - use version of flatten that can take an offset and a target array?
-    for (const simplePolygon of complexPolygon) {
-      for (const vertex of simplePolygon) { // eslint-disable-line
-        attribute[i++] = value[0];
-        attribute[i++] = value[1];
-        attribute[i++] = value[2];
-        attribute[i++] = value[3];
-      }
-    }
-  });
-  return attribute;
-}
-*/

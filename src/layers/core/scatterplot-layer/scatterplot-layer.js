@@ -20,12 +20,12 @@
 
 import {Layer} from '../../../lib';
 import {assembleShaders} from '../../../shader-utils';
+import {COORDINATE_SYSTEM} from '../../../lib';
+import {log, get} from '../../../lib/utils';
+import {fp64ify, enable64bitSupport} from '../../../lib/utils/fp64';
 import {GL, Model, Geometry} from 'luma.gl';
 import {readFileSync} from 'fs';
 import {join} from 'path';
-import {log} from '../../../lib/utils';
-import {fp64ify, enable64bitSupport} from '../../../lib/utils/fp64';
-import {COORDINATE_SYSTEM} from '../../../lib';
 
 const DEFAULT_COLOR = [0, 0, 0, 255];
 
@@ -138,9 +138,9 @@ export default class ScatterplotLayer extends Layer {
     let i = 0;
     for (const point of data) {
       const position = getPosition(point);
-      value[i++] = position[0];
-      value[i++] = position[1];
-      value[i++] = position[2] || 0;
+      value[i++] = get(position, 0);
+      value[i++] = get(position, 1);
+      value[i++] = get(position, 2) || 0;
     }
   }
 
@@ -150,8 +150,8 @@ export default class ScatterplotLayer extends Layer {
     let i = 0;
     for (const point of data) {
       const position = getPosition(point);
-      value[i++] = fp64ify(position[0])[1];
-      value[i++] = fp64ify(position[1])[1];
+      value[i++] = fp64ify(get(position, 0))[1];
+      value[i++] = fp64ify(get(position, 1))[1];
     }
   }
 
@@ -171,10 +171,10 @@ export default class ScatterplotLayer extends Layer {
     let i = 0;
     for (const point of data) {
       const color = getColor(point) || DEFAULT_COLOR;
-      value[i++] = color[0];
-      value[i++] = color[1];
-      value[i++] = color[2];
-      value[i++] = isNaN(color[3]) ? 255 : color[3];
+      value[i++] = get(color, 0);
+      value[i++] = get(color, 1);
+      value[i++] = get(color, 2);
+      value[i++] = isNaN(get(color, 3)) ? 255 : get(color, 3);
     }
   }
 }

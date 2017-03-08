@@ -18,11 +18,11 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 /* global window */
-import {GL} from 'luma.gl';
+import {COORDINATE_SYSTEM} from './constants';
 import AttributeManager from './attribute-manager';
-import {compareProps, log, count} from './utils';
+import {log, compareProps, count} from './utils';
+import {GL} from 'luma.gl';
 import assert from 'assert';
-import {COORDINATE_SYSTEM} from '.';
 
 /*
  * @param {string} props.id - layer name
@@ -30,7 +30,6 @@ import {COORDINATE_SYSTEM} from '.';
  * @param {bool} props.opacity - opacity of the layer
  */
 const defaultProps = {
-  dataIterator: null,
   dataComparator: null,
   numInstances: undefined,
   visible: true,
