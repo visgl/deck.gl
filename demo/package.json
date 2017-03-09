@@ -8,7 +8,10 @@
   "main": "index.js",
   "scripts": {
     "start": "webpack-dev-server --config webpack/dev --progress --content-base ./src/static --port 3000 --open",
-    "build": "rm -rf ./dist && mkdir dist && cp -r ./src/static/* dist && webpack -p --config webpack/prod",
+    "build-clean": "rm -rf ./dist && mkdir dist",
+    "build-static": "cp -r ./src/static/* dist && cd `git rev-parse --show-toplevel` && git checkout origin/blog -- blog && mv blog demo/dist/blog && cd -",
+    "build-script": "webpack -p --config webpack/prod",
+    "build": "npm run build-clean && npm run build-static && npm run build-script",
     "lint": "eslint src --ignore-pattern workers"
   },
   "dependencies": {
