@@ -6,6 +6,7 @@ import App from './components/app';
 import Home from './components/home';
 import Gallery from './components/gallery';
 import Page from './components/page';
+import Blog from './components/blog';
 
 import {examplePages, docPages} from './constants/pages';
 
@@ -52,6 +53,10 @@ export default () => (
       <IndexRoute component={Home} />
       {renderRouteGroup('examples', examplePages)}
       {renderRouteGroup('documentation', docPages)}
+      <Route path="blog">
+        <IndexRoute component={Blog} />
+        <Route path="*" component={Blog} />
+      </Route>
       <Route path="*" component={Home} />
     </Route>
   </Router>
