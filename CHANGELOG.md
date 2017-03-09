@@ -17,7 +17,7 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## Recent Dev Releases
 
-#### TBD
+#### [v4.0.0-beta.5]
 - NEW: add `viewportSize`, `devicePixelRatio` and `modelViewMatrix` to default uniforms
 
 #### [v4.0.0-beta.4]
