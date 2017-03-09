@@ -35,7 +35,6 @@ module.exports = {
     modules: [resolve(rootDir, 'node_modules'), resolve(demoDir, 'node_modules')],
     alias: {
       'deck.gl': libSources,
-      'd3-scale': resolve('./node_modules/d3-scale'),
       webworkify: 'webworkify-webpack-dropin'
       // react: resolve('./node_modules/react'),
       // 'react-dom': resolve('./node_modules/react-dom'),
