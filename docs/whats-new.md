@@ -2,8 +2,28 @@
 
 Release date: TBD, Q1 2017
 
-# Highlights
+## Highlights
 
+- **New Geospatial Layers** GeoJsonLayer, PathLayer, PolygonLayer, IconLayer,
+  GridLayer, HexagonLayer, PointCloudLayer.
+- **Aggregating Layers** The new PointDensityGridLayer, PointDensityHexagonLayer
+  automatically "bin" your point data into grid cells or hexagons.
+- **Documentation**
+  [Documentation](http://uber.github.io/deck.gl/#/documentation/overview/introduction)
+  has been improved and reorganized in response to user feedback.
+- **Examples** deck.gl now provides multiple stand-alone examples, with minimal
+  configuration files (`package.json`, `webpack.config.js`) intended to make it
+  easy to just copy an example folder and get things working.
+- **Unified Layers** - 64-bit Layers are now unified with 32-bit layers, use `fp64` prop.
+- **Performance** A mix of small improvements across the core library and layers.
+- **Library Size Reduction** - A number of npm package dependencies have been
+  trimmed from deck.gl, and the distribution has initial support for "tree-shaking"
+  bundlers like webpack2 and rollup.
+- **Model Matrix** - Model matrix support for the `METER_OFFSET` projection mode
+  enables arbitrary coordinate transforms (translations, rotations, scaling etc)
+  to be applied per layer enabling scene graph like layer composition and animation.
+- **Experimental Features** Experimental support for non-Mercator projections and
+  rendering effects (Reflection)
 
 ## New Layers
 
