@@ -27,7 +27,7 @@ export function pointsToWorldGrid(points, worldUnitSize) {
     return accu;
   }, {});
 
-  const maxHeight = Math.max.apply(null, Object.values(gridHash));
+  const maxHeight = Math.max.apply(null, Object.keys(gridHash).map(k => gridHash[k]));
 
   const data = Object.keys(gridHash).reduce((accu, key) => {
     const idxs = key.split('-');
