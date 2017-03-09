@@ -30,7 +30,7 @@ attribute vec4 instanceIconFrames;
 attribute float instanceColorModes;
 attribute vec2 instanceOffsets;
 
-uniform vec2 screenSize;
+uniform vec2 viewportSize;
 uniform float sizeScale;
 uniform float renderPickingBuffer;
 uniform vec2 iconsTextureDim;
@@ -41,7 +41,7 @@ varying vec2 vTextureCoords;
 
 void main(void) {
   vec2 iconSize = instanceIconFrames.zw;
-  vec2 iconSize_clipspace = iconSize / screenSize * 2.0;
+  vec2 iconSize_clipspace = iconSize / viewportSize * 2.0;
   // scale icon height to match instanceSize
   float instanceScale = iconSize.y == 0.0 ? 0.0 : instanceSizes / iconSize.y;
 
