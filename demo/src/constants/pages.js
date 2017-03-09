@@ -73,6 +73,10 @@ export const docPages = generatePath([
         content: getDocUrl('README.md')
       },
       {
+        name: 'What\'s New',
+        content: getDocUrl('whats-new.md')
+      },
+      {
         name: 'Getting Started',
         content: getDocUrl('getting-started.md')
       },
@@ -83,10 +87,6 @@ export const docPages = generatePath([
       {
         name: 'Using With Mapbox GL',
         content: getDocUrl('using-with-mapbox-gl.md')
-      },
-      {
-        name: 'What\'s New',
-        content: getDocUrl('whats-new.md')
       },
       {
         name: 'Upgrade Guide',
