@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="http://jekyllrb.com" version="3.4.1">Jekyll</generator><link href="http://deck.gl/blog/feed.xml" rel="self" type="application/atom+xml" /><link href="http://deck.gl/blog/" rel="alternate" type="text/html" /><updated>2017-03-09T10:41:55-08:00</updated><id>http://deck.gl/blog/</id><title type="html">Deck.gl Blog</title><subtitle>A blog for deck.gl: WebGL-powered data visualization</subtitle><author><name>Uber</name></author><entry><title type="html">Hello World - deck.gl</title><link href="http://deck.gl/blog/2017/hello-world" rel="alternate" type="text/html" title="Hello World - deck.gl" /><published>2017-03-06T00:00:00-08:00</published><updated>2017-03-06T00:00:00-08:00</updated><id>http://deck.gl/blog/2017/hello-world</id><content type="html" xml:base="http://deck.gl/blog/2017/hello-world">&lt;p&gt;&lt;img src=&quot;../img/header-bg.jpg&quot; alt=&quot;deck.gl&quot; /&gt;&lt;/p&gt;
+
+&lt;h1 id=&quot;introduction&quot;&gt;Introduction&lt;/h1&gt;
+
+&lt;p&gt;deck.gl is designed to make visualization of large data sets simple.
+It enables users to quickly get impressive visual results with limited effort
+through composition of existing layers, while offering a complete architecture
+for packaging advanced WebGL based visualizations as reusable JavaScript
+layers.&lt;/p&gt;
+
+&lt;h2 id=&quot;brief-overview&quot;&gt;Brief Overview&lt;/h2&gt;
+
+&lt;p&gt;The basic idea of using deck.gl is to render a stack of visual overlays,
+usually (but not always) over maps.&lt;/p&gt;
+
+&lt;p&gt;To make this simple concept work, deck.gl handles a number of challenges:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Handling of large data sets and performant updates&lt;/li&gt;
+  &lt;li&gt;Interactive event handling such as picking&lt;/li&gt;
+  &lt;li&gt;Cartographic Projections and integration with underlying map&lt;/li&gt;
+  &lt;li&gt;Selection of proven, well-tested layers&lt;/li&gt;
+  &lt;li&gt;Ability for the user to create new layers and customize existing layers&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&quot;ecosystem&quot;&gt;Ecosystem&lt;/h2&gt;
+
+&lt;p&gt;deck.gl has been developed in parallel with a number of companion modules:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;a href=&quot;https://uber.github.io/luma.gl/#/&quot;&gt;luma.gl&lt;/a&gt; -
+A general purpose WebGL library designed to be interoperable both with the
+raw WebGL API and (as far as possible) with other WebGL libraries.
+In particular, luma.gl does not claim ownership of the WebGL context, and can
+work with any supplied context, including contexts created by the application
+or other WebGL libraries.&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://uber.github.io/react-map-gl/#/&quot;&gt;react-map-gl&lt;/a&gt; - A React wrapper
+around Mapbox GL which works seamlessly with deck.gl.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;In addition, in the future we hope to publish additional deck.gl layers and
+layer packages as separate modules.&lt;/p&gt;
+
+&lt;h2 id=&quot;learning-deckgl&quot;&gt;Learning deck.gl&lt;/h2&gt;
+
+&lt;p&gt;How you approach learning deck.gl will probably depend on your previous
+knowledge and how you want to use it.&lt;/p&gt;
+
+&lt;p&gt;Learning the layer props, and reading the basic articles in the deck.gl
+documentation should of course be the first step. But where do you go
+after that?&lt;/p&gt;
+
+&lt;h3 id=&quot;understanding-the-reactive-programming-model&quot;&gt;Understanding the Reactive Programming Model&lt;/h3&gt;
+
+&lt;p&gt;deck.gl is designed according to the principles of the
+&lt;a href=&quot;https://en.wikipedia.org/wiki/Reactive_programming&quot;&gt;Reactive Programming Model&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;The key to writing good, performant deck.gl applications and layers
+lies in understanding how to minimize updates and redundant calculations.&lt;/p&gt;
+
+&lt;p&gt;It is important to understand the implications of the shallow equality
+comparisons deck.gl performs on layer properties, and how this implies that
+new data and property objects must only be created when the underlying
+data actually changes in order to prevent unnecessary updates.&lt;/p&gt;
+
+&lt;p&gt;There is an impressive amount of information (documentation, blog posts,
+educational videos, etc.) on the reactive programming paradigm in relation to
+modern web frameworks such as React, Flux and Redux. Where to start depends
+mostly on your application architecture choices.&lt;/p&gt;
+
+&lt;h3 id=&quot;understanding-webgl&quot;&gt;Understanding WebGL&lt;/h3&gt;
+
+&lt;p&gt;This is only needed if you want to create custom layers in deck.gl.
+Note that while trying out a new ambitious rendering approach for a
+new layer will likely require deeper knowledge, it is often possible to modify
+or extend existing deck.gl layers (including modifying the shader code) with
+a surprisingly limited amount of WebGL knowledge.&lt;/p&gt;
+
+&lt;p&gt;There are many web resources for learning WebGL. The
+&lt;a href=&quot;https://uber.github.io/luma.gl/#/&quot;&gt;luma.gl&lt;/a&gt; documentation
+can be a starting point.&lt;/p&gt;</content><author><name>{&quot;display_name&quot;=&gt;&quot;Ib Green&quot;, &quot;github_username&quot;=&gt;&quot;ibgreen&quot;, &quot;email&quot;=&gt;&quot;ib@uber.com&quot;}</name><email>ib@uber.com</email></author><category term="WebGL" /><category term="React" /><summary type="html"></summary></entry></feed>

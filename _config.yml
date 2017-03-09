@@ -12,8 +12,8 @@ markdown: kramdown
 sass:
   style: compressed
 source: .
-exclude: [./dist, README.md, Gemfile, Gemfile.lock]
-destination: ./dist
+exclude: [./blog, README.md, Gemfile, Gemfile.lock]
+destination: ./blog
 permalink: /:year/:title
 
 # Paginate settings
