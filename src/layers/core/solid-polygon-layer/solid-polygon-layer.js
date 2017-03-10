@@ -37,14 +37,16 @@ const defaultProps = {
   // Whether to extrude in 2.5D
   extruded: false,
   // Whether to draw a GL.LINES wireframe of the polygon
-  // TODO - not clear that this should be part of the main layer
   wireframe: false,
+  fp64: false,
+
   // Accessor for polygon geometry
   getPolygon: f => get(f, 'polygon') || get(f, 'geometry.coordinates'),
   // Accessor for extrusion height
   getElevation: f => get(f, 'elevation') || get(f, 'properties.height') || 0,
   // Accessor for color
   getColor: f => get(f, 'color') || get(f, 'properties.color'),
+
   // Optional settings for 'lighting' shader module
   lightSettings: {
     lightsPosition: [-122.45, 37.75, 8000, -122.0, 38.00, 5000],
@@ -53,8 +55,7 @@ const defaultProps = {
     specularRatio: 0.8,
     lightsStrength: [2.0, 0.0, 0.0, 0.0],
     numberOfLights: 2
-  },
-  fp64: false
+  }
 };
 
 export default class PolygonLayer extends Layer {

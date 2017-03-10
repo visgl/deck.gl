@@ -30,15 +30,16 @@ import {join} from 'path';
 const DEFAULT_COLOR = [0, 0, 0, 255];
 
 const defaultProps = {
-  getPosition: x => x.position,
-  getRadius: x => x.radius || 30,
-  getColor: x => x.color || DEFAULT_COLOR,
-  radiusScale: 30,  //  point radius in meters
+  radiusScale: 1,  //  point radius in meters
   radiusMinPixels: 0, //  min point radius in pixels
   radiusMaxPixels: Number.MAX_SAFE_INTEGER, // max point radius in pixels
-  outline: false,
   strokeWidth: 1,
-  fp64: false
+  outline: false,
+  fp64: false,
+
+  getPosition: x => x.position,
+  getRadius: x => x.radius || 1,
+  getColor: x => x.color || DEFAULT_COLOR
 };
 
 export default class ScatterplotLayer extends Layer {

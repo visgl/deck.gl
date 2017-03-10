@@ -25,12 +25,12 @@ import {readFileSync} from 'fs';
 import {join} from 'path';
 
 const defaultProps = {
-  // @type {number} opts.unitWidth - width of the unit rectangle
-  unitWidth: 100,
-  // @type {number} opts.unitHeight - height of the unit rectangle
-  unitHeight: 100,
+  cellSizePixels: 100,
+
+  // Color range?
   minColor: [0, 0, 0, 255],
   maxColor: [0, 255, 0, 255],
+
   getPosition: d => d.position,
   getWeight: d => 1
 };

@@ -38,9 +38,9 @@ const defaultProps = {
 
   // TODO: Missing props: radiusMinPixels, strokeWidthMinPixels, ...
 
-  // Point, line and polygon outline color
-  getColor: f => get(f, 'properties.color') || get(f, 'properties.strokeColor') || defaultColor,
-  // Polygon fill color
+  // Line and polygon outline color
+  getStrokeColor: f => get(f, 'properties.strokeColor') || defaultColor,
+  // Point and polygon fill color
   getFillColor: f => get(f, 'properties.fillColor') || defaultFillColor,
   // Point radius
   getRadius: f => get(f, 'properties.radius') || get(f, 'properties.size') || 5,

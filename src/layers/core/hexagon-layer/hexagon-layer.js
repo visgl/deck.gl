@@ -19,269 +19,122 @@
 // THE SOFTWARE.
 
 import {Layer} from '../../../lib';
-import {assembleShaders} from '../../../shader-utils';
-import {Model, CylinderGeometry} from 'luma.gl';
-import {readFileSync} from 'fs';
-import {join} from 'path';
+import HexagonLayer from '../hexagon-layer/hexagon-layer';
 import {log} from '../../../lib/utils';
-import {fp64ify, enable64bitSupport} from '../../../lib/utils/fp64';
-import {COORDINATE_SYSTEM} from '../../../lib';
-import {clamp} from '../../../utils/scale-utils';
 
-function positionsAreEqual(v1, v2) {
-  // Hex positions are expected to change entirely, not to maintain some
-  // positions and change others. Right now we only check a single vertex,
-  // because H3 guarantees order, but even if that wasn't true, this would only
-  // return a false positive for adjacent hexagons, which is close enough for
-  // our purposes.
-  return v1 === v2 || (
-    v1 && v2 && v1[0][0] === v2[0][0] && v1[0][1] === v2[0][1]
-  );
-}
-
-const DEFAULT_COLOR = [255, 0, 255, 255];
+import {ordinalScale, linearScale} from '../../../utils/scale-utils';
+import {defaultColorRange} from '../../../utils/color-utils';
+import {pointToHexbin} from './hexagon-aggregator';
 
 const defaultProps = {
-  extruded: true,
-  hexagonVertices: null,
-  opacity: 0.8,
-  coverage: 1,
+  colorRange: defaultColorRange,
+  elevationRange: [0, 1000],
   elevationScale: 1,
-  getCentroid: x => x.centroid,
-  getColor: x => x.color,
-  getElevation: x => x.elevation,
-  lightSettings: {
-    lightsPosition: [-122.45, 37.75, 8000, -122.0, 38.00, 5000],
-    ambientRatio: 0.4,
-    diffuseRatio: 0.6,
-    specularRatio: 0.8,
-    lightsStrength: [1.2, 0.0, 0.8, 0.0],
-    numberOfLights: 2
-  },
-  fp64: false
+  radius: 1000,
+  coverage: 1,
+  hexagonAggregator: pointToHexbin,
+  getPosition: x => x.position
 };
 
-export default class HexagonLayer extends Layer {
+function noop() {}
 
+function _needsReProjectPoints(oldProps, props) {
+  return oldProps.radius !== props.radius;
+}
+
+function _getCountRange(hexagons) {
+  return [
+    Math.min.apply(null, hexagons.map(bin => bin.points.length)),
+    Math.max.apply(null, hexagons.map(bin => bin.points.length))
+  ];
+}
+
+export default class PointDensityHexagonLayer extends Layer {
   constructor(props) {
-    let missingProps = false;
-    if (!props.hexagonVertices && (!props.radius || !Number.isFinite(props.angle))) {
-      log.once(0, 'HexagonLayer: Either hexagonVertices or radius and angel are ' +
-        'needed to calculate primitive hexagon.');
-      missingProps = true;
+    if (!props.radius) {
+      log.once(0, 'PointDensityHexagonLayer: radius in meter is needed to aggregate points into ' +
+        'hexagonal bins, Now using 1000 meter as default');
 
-    } else if (props.hexagonVertices && (!Array.isArray(props.hexagonVertices) ||
-      props.hexagonVertices.length < 6)) {
-      log.once(0, 'HexagonLayer: HexagonVertices needs to be an array of 6 points');
-
-      missingProps = true;
-    }
-
-    if (missingProps) {
-      log.once(0, 'Now using 1000 meter as default radius, 0 as default angel');
-      props.radius = 1000;
-      props.angle = 0;
+      props.radius = defaultProps.radius;
     }
 
     super(props);
   }
 
-  getShaders() {
-    const vs64 = readFileSync(join(__dirname, './hexagon-layer-64-vertex.glsl'), 'utf8');
-    const vs32 = readFileSync(join(__dirname, './hexagon-layer-vertex.glsl'), 'utf8');
-    const fs = readFileSync(join(__dirname, './hexagon-layer-fragment.glsl'), 'utf8');
-
-    return enable64bitSupport(this.props) ? {
-      vs: vs64, fs, modules: ['fp64', 'project64', 'lighting']
-    } : {
-      vs: vs32, fs, modules: ['lighting']
+  initializeState() {
+    this.state = {
+      hexagons: [],
+      countRange: null,
+      pickedCell: null
     };
   }
 
-  /**
-   * DeckGL calls initializeState when GL context is available
-   * Essentially a deferred constructor
-   */
-  initializeState() {
-    const {gl} = this.context;
-    this.setState({model: this._getModel(gl)});
-
-    const {attributeManager} = this.state;
-    /* eslint-disable max-len */
-    attributeManager.addInstanced({
-      instancePositions: {size: 3, accessor: ['getCentroid', 'getElevation'], update: this.calculateInstancePositions},
-      instanceColors: {size: 4, type: gl.UNSIGNED_BYTE, accessor: 'getColor', update: this.calculateInstanceColors}
-    });
-    /* eslint-enable max-len */
-
-    this.updateRadiusAngle();
-  }
-
-  updateAttribute({props, oldProps, changeFlags}) {
-    if (props.fp64 !== oldProps.fp64) {
-      const {attributeManager} = this.state;
-      attributeManager.invalidateAll();
-
-      if (props.fp64 && props.projectionMode === COORDINATE_SYSTEM.LNG_LAT) {
-        attributeManager.addInstanced({
-          instancePositions64xyLow: {
-            size: 2,
-            accessor: 'getCentroid',
-            update: this.calculateInstancePositions64xyLow
-          }
-        });
-      } else {
-        attributeManager.remove([
-          'instancePositions64xyLow'
-        ]);
-      }
-
-    }
-  }
-
-  updateState({props, oldProps, changeFlags}) {
-    super.updateState({props, oldProps, changeFlags});
-    this.updateModel({props, oldProps, changeFlags});
-    this.updateAttribute({props, oldProps, changeFlags});
-
-    const viewportChanged = changeFlags.viewportChanged;
-    const {model} = this.state;
-
-    // Update the positions in the model if they've changes
-    const verticesChanged =
-      !positionsAreEqual(oldProps.hexagonVertices, props.hexagonVertices);
-
-    if (model && (verticesChanged || viewportChanged)) {
-      this.updateRadiusAngle();
-    }
-    this.updateUniforms();
-  }
-
-  updateRadiusAngle() {
-    let angle;
-    let radius;
-    const {hexagonVertices} = this.props;
-
-    if (Array.isArray(hexagonVertices) && hexagonVertices.length >= 6) {
-
-      // calculate angle and vertices from hexagonVertices if provided
-      const vertices = this.props.hexagonVertices;
-
-      const vertex0 = vertices[0];
-      const vertex3 = vertices[3];
-
-      // transform to space coordinates
-      const spaceCoord0 = this.projectFlat(vertex0);
-      const spaceCoord3 = this.projectFlat(vertex3);
-
-      // distance between two close centroids
-      const dx = spaceCoord0[0] - spaceCoord3[0];
-      const dy = spaceCoord0[1] - spaceCoord3[1];
-      const dxy = Math.sqrt(dx * dx + dy * dy);
-
-      // Calculate angle that the perpendicular hexagon vertex axis is tilted
-      angle = Math.acos(dx / dxy) * -Math.sign(dy) + Math.PI / 2;
-      radius = dxy / 2;
-
-    } else if (this.props.radius && Number.isFinite(this.props.angle)) {
-
-      // if no hexagonVertices provided, try use radius & angle
+  updateState({oldProps, props, changeFlags}) {
+    if (changeFlags.dataChanged || _needsReProjectPoints(oldProps, props)) {
+      const {hexagonAggregator} = this.props;
       const {viewport} = this.context;
-      const {pixelsPerMeter} = viewport.getDistanceScales();
 
-      angle = this.props.angle;
-      radius = this.props.radius * pixelsPerMeter[0];
+      const hexagons = hexagonAggregator(this.props, viewport);
+      const countRange = _getCountRange(hexagons);
 
+      Object.assign(this.state, {hexagons, countRange});
     }
+  }
 
-    this.setUniforms({
-      angle,
-      radius
+  getPickingInfo(opts) {
+    const info = super.getPickingInfo(opts);
+    const pickedCell = this.state.pickedCell;
+
+    return Object.assign(info, {
+      layer: this,
+      // override index with cell index
+      index: pickedCell ? pickedCell.index : -1,
+      picked: Boolean(pickedCell),
+      // override object with picked cell
+      object: pickedCell
     });
   }
 
-  getCylinderGeometry(radius) {
-    return new CylinderGeometry({
-      radius,
-      topRadius: radius,
-      bottomRadius: radius,
-      topCap: true,
-      bottomCap: true,
-      height: 1,
-      nradial: 6,
-      nvertical: 1
-    });
+  _onHoverSublayer(info) {
+
+    this.state.pickedCell = info.picked && info.index > -1 ?
+      this.state.hexagons[info.index] : null;
   }
 
-  updateUniforms() {
-    const {opacity, elevationScale, extruded, coverage, lightSettings} = this.props;
+  _onGetSublayerColor(cell) {
+    const {colorRange} = this.props;
+    const colorDomain = this.props.colorDomain || this.state.countRange;
 
-    this.setUniforms(Object.assign({}, {
-      extruded,
-      opacity,
-      coverage: clamp([0, 1], coverage),
-      elevationScale
-    },
-    lightSettings));
+    return ordinalScale(colorDomain, colorRange, cell.points.length);
   }
 
-  _getModel(gl) {
-    const shaders = assembleShaders(gl, this.getShaders());
-
-    return new Model({
-      gl,
-      id: this.props.id,
-      vs: shaders.vs,
-      fs: shaders.fs,
-      geometry: this.getCylinderGeometry(1),
-      isInstanced: true
-    });
+  _onGetSublayerElevation(cell) {
+    const {elevationRange} = this.props;
+    const elevationDomain = this.props.elevationDomain || [0, this.state.countRange[1]];
+    return linearScale(elevationDomain, elevationRange, cell.points.length);
   }
 
-  draw({uniforms}) {
-    super.draw({uniforms: Object.assign({}, uniforms)});
-  }
+  renderLayers() {
+    const {id, radius} = this.props;
 
-  calculateInstancePositions(attribute) {
-    const {data, getCentroid, getElevation} = this.props;
-    const {value, size} = attribute;
-    let i = 0;
-    for (const object of data) {
-      const [lon, lat] = getCentroid(object);
-      const elevation = getElevation(object);
-      value[i + 0] = lon;
-      value[i + 1] = lat;
-      value[i + 2] = elevation || this.props.elevation;
-      i += size;
-    }
-  }
-
-  calculateInstancePositions64xyLow(attribute) {
-    const {data, getCentroid} = this.props;
-    const {value} = attribute;
-    let i = 0;
-    for (const object of data) {
-      const position = getCentroid(object);
-      value[i++] = fp64ify(position[0])[1];
-      value[i++] = fp64ify(position[1])[1];
-    }
-  }
-
-  calculateInstanceColors(attribute) {
-    const {data, getColor} = this.props;
-    const {value, size} = attribute;
-    let i = 0;
-    for (const object of data) {
-      const color = getColor(object) || DEFAULT_COLOR;
-
-      value[i + 0] = color[0];
-      value[i + 1] = color[1];
-      value[i + 2] = color[2];
-      value[i + 3] = Number.isFinite(color[3]) ? color[3] : DEFAULT_COLOR[3];
-      i += size;
-    }
+    return new HexagonLayer(Object.assign({},
+      this.props, {
+        id: `${id}-density-hexagon`,
+        data: this.state.hexagons,
+        radius,
+        angle: Math.PI,
+        getColor: this._onGetSublayerColor.bind(this),
+        getElevation: this._onGetSublayerElevation.bind(this),
+        // Override user's onHover and onClick props
+        onHover: this._onHoverSublayer.bind(this),
+        onClick: noop,
+        updateTriggers: {
+          getColor: {colorRange: this.props.colorRange},
+          getElevation: {elevationRange: this.props.elevationRange}
+        }
+      }));
   }
 }
 
-HexagonLayer.layerName = 'HexagonLayer';
-HexagonLayer.defaultProps = defaultProps;
+PointDensityHexagonLayer.layerName = 'PointDensityHexagonLayer';
+PointDensityHexagonLayer.defaultProps = defaultProps;

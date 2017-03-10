@@ -1,4 +1,4 @@
-// Copyright (c) 2015 Uber Technologies, Inc.
+// Copyright (c) 2016 Uber Technologies, Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -20,37 +20,57 @@
 
 import {Layer} from '../../../lib';
 import {assembleShaders} from '../../../shader-utils';
-import {GL, Model, Geometry} from 'luma.gl';
+import {GL, Model, CubeGeometry} from 'luma.gl';
 import {readFileSync} from 'fs';
 import {join} from 'path';
 import {fp64ify, enable64bitSupport} from '../../../lib/utils/fp64';
 import {COORDINATE_SYSTEM} from '../../../lib';
 
-const DEFAULT_COLOR = [0, 0, 0, 255];
+const DEFAULT_COLOR = [255, 0, 255, 255];
 
 const defaultProps = {
-  radiusPixels: 10,  //  point radius in pixels
+  cellSize: 1000,
+  // AUDIT - replace with cellsize
+  lonOffset: 0.0113,
+  latOffset: 0.0089,
+
+  elevationScale: 1,
+  extruded: true,
   fp64: false,
 
   getPosition: x => x.position,
-  getNormal: x => x.normal,
-  getColor: x => x.color || DEFAULT_COLOR,
+  getElevation: x => x.elevation,
+  getColor: x => x.color,
 
   lightSettings: {
-    lightsPosition: [0, 0, 5000, -1000, 1000, 8000, 5000, -5000, 1000],
-    ambientRatio: 0.2,
+    lightsPosition: [-122.45, 37.65, 8000, -122.45, 37.20, 1000],
+    ambientRatio: 0.4,
     diffuseRatio: 0.6,
     specularRatio: 0.8,
-    lightsStrength: [1.0, 0.0, 0.8, 0.0, 0.4, 0.0],
-    numberOfLights: 3
+    lightsStrength: [1.0, 0.0, 0.8, 0.0],
+    numberOfLights: 2
   }
 };
 
-export default class PointCloudLayer extends Layer {
-  getShaders(id) {
-    const vs64 = readFileSync(join(__dirname, './point-cloud-layer-64-vertex.glsl'), 'utf8');
-    const vs32 = readFileSync(join(__dirname, './point-cloud-layer-vertex.glsl'), 'utf8');
-    const fs = readFileSync(join(__dirname, './point-cloud-layer-fragment.glsl'), 'utf8');
+export default class GridLayer extends Layer {
+  /**
+   * A generic GridLayer that takes latitude longitude delta of cells as a uniform
+   * and the min lat lng of cells. grid can be 3d when pass in a height
+   * and set enable3d to true
+   *
+   * @param {array} props.data -
+   * @param {boolean} props.extruded - enable grid elevation
+   * @param {number} props.latOffset - grid cell size in lat delta
+   * @param {number} props.lonOffset - grid cell size in lng delta
+   * @param {function} props.getPosition - position accessor, returned as [minLng, minLat]
+   * @param {function} props.getElevation - elevation accessor
+   * @param {function} props.getColor - color accessor, returned as [r, g, b, a]
+   */
+
+  getShaders() {
+    const vs64 = readFileSync(join(__dirname, './grid-layer-64-vertex.glsl'), 'utf8');
+    const vs32 = readFileSync(join(__dirname, './grid-layer-vertex.glsl'), 'utf8');
+    const fs = readFileSync(join(__dirname, './grid-layer-fragment.glsl'), 'utf8');
 
     return enable64bitSupport(this.props) ? {
       vs: vs64, fs, modules: ['fp64', 'project64', 'lighting']
@@ -63,10 +83,10 @@ export default class PointCloudLayer extends Layer {
     const {gl} = this.context;
     this.setState({model: this._getModel(gl)});
 
+    const {attributeManager} = this.state;
     /* eslint-disable max-len */
-    this.state.attributeManager.addInstanced({
-      instancePositions: {size: 3, accessor: 'getPosition', update: this.calculateInstancePositions},
-      instanceNormals: {size: 3, accessor: 'getNormal', defaultValue: 1, update: this.calculateInstanceNormals},
+    attributeManager.addInstanced({
+      instancePositions: {size: 4, accessor: ['getPosition', 'getElevation'], update: this.calculateInstancePositions},
       instanceColors: {size: 4, type: GL.UNSIGNED_BYTE, accessor: 'getColor', update: this.calculateInstanceColors}
     });
     /* eslint-enable max-len */
@@ -95,28 +115,14 @@ export default class PointCloudLayer extends Layer {
   }
 
   updateState({props, oldProps, changeFlags}) {
+    super.updateState({props, oldProps, changeFlags});
     this.updateModel({props, oldProps, changeFlags});
     this.updateAttribute({props, oldProps, changeFlags});
-  }
-
-  draw({uniforms}) {
-    const {radius, lightSettings} = this.props;
-    this.state.model.render(Object.assign({}, uniforms, {
-      radius
-    }, lightSettings));
+    this.updateUniforms();
   }
 
   _getModel(gl) {
-    // a triangle that minimally cover the unit circle
-    const positions = [];
-    for (let i = 0; i < 3; i++) {
-      const angle = i / 3 * Math.PI * 2;
-      positions.push(
-        Math.cos(angle) * 2,
-        Math.sin(angle) * 2,
-        0
-      );
-    }
+    const geometry = new CubeGeometry({});
     const shaders = assembleShaders(gl, this.getShaders());
 
     return new Model({
@@ -124,23 +130,40 @@ export default class PointCloudLayer extends Layer {
       id: this.props.id,
       vs: shaders.vs,
       fs: shaders.fs,
-      geometry: new Geometry({
-        drawMode: GL.TRIANGLES,
-        positions: new Float32Array(positions)
-      }),
+      geometry,
       isInstanced: true
     });
   }
 
+  updateUniforms() {
+    const {opacity, extruded, elevationScale, latOffset, lonOffset, lightSettings} = this.props;
+
+    this.setUniforms(Object.assign({}, {
+      extruded,
+      elevationScale,
+      opacity,
+      latOffset,
+      lonOffset
+    },
+    lightSettings));
+  }
+
+  draw({uniforms}) {
+    super.draw({uniforms: Object.assign({}, uniforms)});
+  }
+
   calculateInstancePositions(attribute) {
-    const {data, getPosition} = this.props;
-    const {value} = attribute;
+    const {data, getPosition, getElevation} = this.props;
+    const {value, size} = attribute;
     let i = 0;
-    for (const point of data) {
-      const position = getPosition(point);
-      value[i++] = position[0];
-      value[i++] = position[1];
-      value[i++] = position[2] || 0;
+    for (const object of data) {
+      const position = getPosition(object);
+      const elevation = getElevation(object) || 0;
+      value[i + 0] = position[0];
+      value[i + 1] = position[1];
+      value[i + 2] = 0;
+      value[i + 3] = elevation;
+      i += size;
     }
   }
 
@@ -155,31 +178,20 @@ export default class PointCloudLayer extends Layer {
     }
   }
 
-  calculateInstanceNormals(attribute) {
-    const {data, getNormal} = this.props;
-    const {value} = attribute;
-    let i = 0;
-    for (const point of data) {
-      const normal = getNormal(point);
-      value[i++] = normal[0];
-      value[i++] = normal[1];
-      value[i++] = normal[2];
-    }
-  }
-
   calculateInstanceColors(attribute) {
     const {data, getColor} = this.props;
-    const {value} = attribute;
+    const {value, size} = attribute;
     let i = 0;
-    for (const point of data) {
-      const color = getColor(point);
-      value[i++] = color[0];
-      value[i++] = color[1];
-      value[i++] = color[2];
-      value[i++] = isNaN(color[3]) ? 255 : color[3];
+    for (const object of data) {
+      const color = getColor(object) || DEFAULT_COLOR;
+      value[i + 0] = color[0];
+      value[i + 1] = color[1];
+      value[i + 2] = color[2];
+      value[i + 3] = Number.isFinite(color[3]) ? color[3] : DEFAULT_COLOR[3];
+      i += size;
     }
   }
 }
 
-PointCloudLayer.layerName = 'PointCloudLayer';
-PointCloudLayer.defaultProps = defaultProps;
+GridLayer.layerName = 'GridLayer';
+GridLayer.defaultProps = defaultProps;
