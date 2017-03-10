@@ -2,30 +2,33 @@
 
 ## Overview
 
-deck.gl layers were designed to be used with a Reactive programming
+deck.gl layers' public API were designed to follow a Reactive programming
 paradigm.
-The challenge is of course that in the "reactive" model, every change to
-application state causes a full re-render, while in WebGL, potentially
-huge memory buffers describing the geometry (so called "vertex attributes",
-or just "attributes" for short) must be prepared in advance of any draw calls.
+The challenge is that in the "reactive" model, every change to application state
+causes everything to be re-rendered. This is not an issue for UI rendering for
+general purpose apps, but for high performance, graphics intensive and sometime
+ 3D contents to be rendered by WebGL, huge memory buffers (so called "vertex attributes",
+or just "attributes" for short) must be prepared and transferred to the GPUs
+before any draw calls got executed on the GPUs.
 
 ## WebGL Performance Challenges
 
-Creating new WebGL buffers before every draw call would quickly lead
-to unacceptable performance. Just like in React (which "renders" to the
-browser's slow-updating DOM) the challenge becomes to detect exactly what
-changes were made to each layer's properties and then limit both attribute
-recalculation and re-rendering to the minimum needed to ensure that the
-next draw cycle correctly reflects the changes.
+Creating and transferring new WebGL buffers before every draw call would result in
+unacceptable performance even for moderately complex models. Just like in React
+(which "renders" to the browser's slow-updating DOM), the challenge becomes to
+detect which part of the visualization is changed to limit both attributes recalculation
+and re-rendering to the minimum.
 
 Since the length of attributes are usually proportional of to the number of
-data elements being visualized (hundreds of thousands or even millions of
+data elements being visualized (hundreds of thousands or even multiple millions of
 elements are not uncommon in big data visualizations), efficient attribute
-updates is critical. It is such an important use case that deck.gl provides an
-`AttributeManager` class to simplify layer creation.
+updates is critical.
 
-Note that it is possible for a layer to use custom code to manage attribute
-updates, however most layers rely on the AttributeManager class.
+deck.gl alleviates the burden of layer developers by providing an
+ `AttributeManager` class to manage the lifecycle of those WebGL
+attributes. Note that it is completely possible for a layer to use custom
+code to manage attribute updates, however most layers rely on
+the AttributeManager class to handle WebGL buffer management for them.
 
 ## Automatic Attribute Generation
 
@@ -75,7 +78,6 @@ While most apps rely on their layers to automatically generate
 appropriate WebGL buffers from their props, it is possible for applications
 to take control of buffer generation and supply the buffers as properties.
 
-
 While this allows for ultimate performance and control of updates, as well
 as potential sharing of buffers between layers,
 the application will need to generate attributes in exactly the format that the
@@ -91,16 +93,17 @@ normally left to the layer.
 
 ### Introduction to Vertex Attributes
 
-deck.gl layers use WebGL to draw to the screen, and WebGL draw calls
-need to be provided with on a carefully prepared description of the
-geometry to be rendered.
+deck.gl layers use the WebGL technology to render visualization elements.
+To have the WebGL drawing command work, multiple things need to be
+provided and configured beforehand and the geometric description of the
+to-be-rendered element is one of them. In WebGL, all geometry elements are
+made of a set of vertices, and each vertex has multiple attributes to
+determine how it will be rendered to the screen. These attributes
+are called **vertex attributes** and are provided by users using JavaScript
+typed arrays (e.g. `Float32Array` or `Uint8Array`).
 
-In WebGL, such geometry descriptions are called
-**vertex attributes** and are specified using JavaScript typed arrays
-(e.g. `Float32Array` or `Uint8Array`).
-
-During rendering, these vertex attributes will become available
-layer's vertex shader executing on the GPU.
+During rendering, these vertex attributes will become available in vertex
+shaders executing on the GPU.
 
 Part of designing a new WebGL layer is creating an elegant mapping from a
 set of data properties in JavaScript to a set of WebGL vertex attributes,
@@ -111,26 +114,24 @@ drawing the layer.
 
 ### Introduction to Instanced Vertex Attributes
 
-For performance reasons, each deck.gl layer aspires to use as few
-GPU draw calls as possible to draw all the graphics representing
-the visualization of all the objects in its `data` property. In fact,
-the majority of deck.gl layers issue only a single GPU draw call.
+Even for high performance rendering API like WebGL, setting up draw calls
+and dispatching them to GPUs quick become a performance bottleneck for
+visualizing big data. Therefore, each deck.gl layer aspires to use as few
+GPU draw calls as possible to draw all everything contained in the data.
 
-Since most layers need to render thousands or even millions of similar
-objects, think circles in the ScatterplotLayer, hexagons in the HexagonLayer
-etc), how is this achieved?
-
-The key is to use "instanced attributes". While some vertex attributes will
-still describe the geometry of each object (or instance), some vertex
-attributes will describe what is different between each object or instance.
-These attributes are called instanced attributes.
+Here the [`Instanced Rendering`](https://developer.mozilla.org/en-US/docs/Web/API/ANGLE_instanced_arrays)
+ comes into play. While some vertex attributes will still describe the geometry
+ of each object (or instance), some vertex attributes will describe what is
+ different between each object or instance. The latter kind of attributes are
+ called instanced attributes.
 
 **Note:** While "instanced rendering" is technically an "extension" to WebGL,
 (meaning that it is not guaranteed to be present in all browsers),
 today the feature is supported by wide range of systems.
 [WebGL Stats](http://webglstats.com/) for statistics on how big a percentage
 of systems support various WebGL features, particularly the
-`ANGLE_instanced_arrays` extension.
+`ANGLE_instanced_arrays` extension. In WebGL 2.0,  instanced rendering becomes
+a core feature that needs to be implemented by all vendors.
 
 
 ### Learning More

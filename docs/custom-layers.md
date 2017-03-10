@@ -9,33 +9,27 @@ through using composite layers.
 There are a couple of ways to build a layer in deck.gl, and it is helpful
 to consider what approach will serve you best before starting:
 
-* **Single-primitive layer** - it sometimes desirable to have a single layer
-  render using multiple primitives, rather than creating
-  separate layers. Note that it often useful to keep
-  layers focused on drawing one thing well, and having the application
-  compose them to get desired effects,.
-* **Multi-primitive layer** - it sometimes desirable to have a single layer
-  render using multiple primitives (e.g both circles and lines, or
+* **Single-model layer** - This is the predominant form among all core layers
+  that deck.gl currently provides. In these layers, a single geometry model is
+  defined and created for each layer. The Model could be very simple, as in the
+  Scatterplot layer or become very complex, as in the Polygon layer. But there
+  is always one object of luma.gl's Model class.
+* **Multi-model layer** - It sometimes desirable to have a single layer
+  render using multiple geometry primitives (e.g both circles and lines, or
   triangles and textured meshes etc), rather than creating separate layers.
-  Note that it while a Multi-Primitive layer is a fine choice, it can reduce
-  the reusability of your code as it is not as easy for an application to
-  compose a visualization from the two pieces. the toften useful to keep
-  layers focused on drawing one thing well, and having the application
-  compose them (possibly using composite layers) to get desired effects.
-* **Composite layer** - a layer that creates other layers. This allows you to
-  build e.g. a "semantic layer" - a layer that presents a different interface
-  (set of props) than an existing layer, transforms those props into
-  a format that fits and existing layer, and renders that.
-  [Customizing Layers](/docs/layers/subclassing-layers.md).
-* **Subclassed layer** - a layer that is a subclass of another layers.
-  This allows you to reuse big parts of an existing layer, only overriding
-  the parts you need. Layer subclassing is described in
+* **Composite layer** - Composite layer is a special kind of layers that creates
+  other layers. This allows you to build e.g. a "semantic layer" - a layer that
+  presents a different interface (set of props) than an existing layer, transforms
+  those props into a format that fits and existing layer, and renders that.
+* **Subclassed layer** - Subclassed layer is a new layer created by subclassing
+  another layers. This allows the developer to reuse all of the interfaces and implementations
+  of an existing layer unless they are explicitly overriden. Layer subclassing is described in
   [Customizing Layers](/docs/layers/subclassing-layers.md).
 
 Another choice to make is whether your WebGL primitives (draw calls) should
 be instanced, or use dynamic geometry:
 
-* **Instanced layer (Single-primitive)** - This is type of layer renders
+* **Instanced layer (Single-model)** - This is type of layer renders
   the same geometry many times. Usually the simplest way to go
   when creating layers that renders a lot of similar objects (think
   ScatterplotLayer, ArcLayers etc).
@@ -75,7 +69,7 @@ The list of properties is the main API your new layer will provide to
 applications. So it makes sense to carefully consider what properties
 your layer should offer.
 
-You also need to define the default values of your properties.
+You also need to define the default values of the layer's properties.
 
 The most efficient method of doing this is to define a static `defaultProps`
 member on your layer class.
@@ -92,22 +86,21 @@ SubLayer.defaultProps = defaultProps;
 
 Also consider the properties of the base [Layer](/docs/layers/base-layer.md) class,
 as well as any other inherited properties if you are deriving.
-base `Layer` class, and and
 
 ## Implementing the Layer Lifecycle Functions
 
 To describe how a layer's properties relate to WebGL attributes and uniforms
-you need to implement the layers life cycle functions.
+you need to implement the [layers life cycle functions](/docs/layer-lifecycle.md).
 
 ### Creating, Destroying and Drawing Layers
 
 `initializeState` - This is the one method that you must implement to create
 any WebGL resources you need for rendering your layer.
 
-deck.gl looks for the variable `model` on your state, and if set expects it
-to be an instance of a [luma.gl] `Model` class. It then uses this model
-during rendering and picking etc meaning that you don't have to do anything
-more to get a working layer.
+deck.gl looks for the variable `model` on layer's state, and expects it
+to be an instance of a [luma.gl](https://github.com/uber/luma.gl) `Model` class.
+It then uses this model during rendering and picking etc meaning that you don't
+have to do anything more to get a working layer.
 
 `draw` - If you want to use custom uniforms or settings when drawing, you would
 typical implement the `draw` method and pass those to your render call.
@@ -126,7 +119,7 @@ state is discarded. Use it e.g. to destroy non-shared WebGL resources
 directly, rather than waiting for the garbage collector to do it.
 
 A layer is discarded when a new set of layers are rendered and none of
-them match (have the same `id` prop) as your old layer.
+them match (have the same `id` prop) to your old layer.
 
 `getShaders` - This is not a formal life cycle function, but rather a recommended
 convention. Each layer is expected define a `getShaders` function that returns
@@ -183,7 +176,7 @@ See [`Layer.encodePickingColor`](/docs/custom-layers.md#layerencodepickingcolori
 
 ## Defining your vertex attributes.
 
-See the separate article on Attribute Management.
+See the separate article on [Attribute Management](/docs/attribute-management.md).
 
 Some questions to ask yourself.
 - Will you support altitude?
@@ -192,7 +185,7 @@ Some questions to ask yourself.
 
 ## Writing the Shaders
 
-For details, please see the separate article on shaders.
+For details, please see the separate article on [writing shaders](/docs/writing-shaders.md).
 
 ### Supporting Map Coordinates
 

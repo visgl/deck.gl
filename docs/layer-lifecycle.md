@@ -42,9 +42,8 @@ If this function return false, `updateState` will never be called.
 The default implementation essentially does a shallow equal comparison
 on the props and returns false if no properties have changed.
 
-There are some exceptions, the `dataComparator` prop and the `updateTriggers`
-prop can be supplied additional checks. See the documentation of those
-props in the Layer API.
+Under more complicated circumstances, additional checks can be implemented through
+the `dataComparator` prop and the `updateTriggers` prop can be supplied additional checks. See the documentation of those props in the Layer API.
 
 ##### Updating: updateState({props, oldProps, context, oldContext, changeFlags})
 
@@ -78,10 +77,10 @@ and calls `draw` on that model.
 ##### Picking: getPickingInfo({info, mode})
 
 The pick method should return an object with optional fields about
-what was picked. This `info` object is then passed to the layer's `onHover` 
+what was picked. This `info` object is then passed to the layer's `onHover`
 or `onPick` callbacks.
 
-The received `info` argument contains fields `color` as the picked pixel 
+The received `info` argument contains fields `color` as the picked pixel
 and `index` calculated using `layer.decodePickingColor()`.
 
 The default implementation populates the `info` object with an `object` field
