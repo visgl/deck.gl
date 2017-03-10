@@ -6,7 +6,9 @@
 
 A small but breaking change is that the 'deck.gl/react' import is no
 longer available, since the relative file caused complications with
-the new support for support "tree shaking" (multiple transpiled distributions). This means you will need to revert to the pre-3.0 way of importing the react component:
+the new support for support "tree shaking" (multiple transpiled distributions).
+As of v4.0, the user is expected to import deck.gl using "pre-v3.0" way as
+follows:
 
 ```
 // V3
@@ -19,33 +21,34 @@ import DeckGL from 'deck.gl';
 
 #### `BaseLayer.dataIterator` prop (Removed)
 
-This prop has been removed. This prop was not correctly implemented in
-deck.gl v3 so its removal is unlikely to break any existing code.
-
+This prop has been removed in deck.gl v4 as it was not correctly functioning
+as intended in deck.gl v3.
 
 ### Deprecated and Removed Layers
 
 #### ChoroplethLayer, ChoroplethLayer64, ExtrudedChoroplethLayer (Deprecated)
 
-The functionality of these is now covered in a more unified, flexible and
-performant way by the following new layers: `GeoJsonLayer`, `PolygonLayer` and
-`PathLayer`.
+These set of layers are deprecated in deck.gl v4, with their functionality
+completely substituted by more unified, flexible and performant new layers:
+ `GeoJsonLayer`, `PolygonLayer` and `PathLayer`.
 
-You should be able to just supply the same geojson data you are already using
-with your `ChoroplethLayer`s to the new `GeoJsonLayer`, although you will want
-to review the props of the new layer to make sure you get the desired results.
+Developers should be able to just supply the same geojson data that are used with
+ `ChoroplethLayer`s to the new `GeoJsonLayer`. The props of the `GeoJsonLayer` is
+ also a bit different from the old `ChoroplethLayer`, so proper testing is recommended
+ to achieve satisfactory result.
 
-The Choropleth layers are still around for now so there is no urgency to upgrade,
-but they will likely be removed in the next major version of deck.gl.
+As a deprecated layer, the Choropleth-family layers will stick around for
+at least another major revision, but please take some time to upgrade to the new
+GeoJsonLayer.
 
 ### EnhancedChoroplethLayer (Removed)
 
 This was a a sample layer in deck.gl v3 and has now been moved to a
 stand-alone example and is no longer exported from the deck.gl npm module.
 
-Applications can either copy this layer from deck.gl v3 or the example,
+Developers can either copy this layer from deck.gl v3 or the example,
 or consider using the new `PathLayer` which also handles wide lines albeit in a
-slightly different way. It may fit the same use cases.
+slightly different way.
 
 
 ### Upgrading Layer Accessors and Properties
@@ -63,60 +66,20 @@ Note that this is supported on all layers supplied by deck.gl, but if you
 are using older layers, they need a small addition to their attribute
 definitions, see below.
 
-#### `strokeWidth` props
+#### Props with `Scale` suffix
 
-One of the most noticeable changes in v4 could be that all line based layers
-(i.e. layers that render using the `GL.LINE` drawing mode, namely
-`LineLayer and `ArcLayer` and the `ScatterplotLayer` in outline mode)
-have dropped support for the `strokeWidth` prop.
-
-This particular change was caused by browsers dropping support for this feature.
-Note that this is not a completely surprising changes since `GL.LINE` mode
-rendering always had signficant limitations in terms of lack of support for
-mitering, unreliable support for anti-aliasing and platform dependent line width limits.
-
-The practical outcome of this is that these layers should now only be
-considered for outline/wireframe type rendering, and the resulting lines may be
-very thin on modern Retina/4K+ displays.
-
-deck.gl will gradually provide alternate layers that use non-`GL.LINE` based
-techniques that provide better line rendering for various use cases.
-In 4.0 the `PathLayer` is the first example of this, and `PathLayer` is also used
-by the new `GeoJsonLayer` to render lines and outlines.
-
-Remarks:
-* Some background: WebGL lineWidth no longer has any effect in
-  [Chrome](https://bugs.chromium.org/p/chromium/issues/detail?id=60124)
-  and [Firefox](https://bugzilla.mozilla.org/show_bug.cgi?id=634506).
-
-#### `Scale` props
-
-Scale props (or "multiplicative uniform" props) is a set of props that
-multiply some existing value for all objects in the layers.
-
-This makes it easy to make a slider that instantly modifies e.g. radius of
-every point in a scatterplot without rebuilding the geometry.
+Props that have their name end of `Scale` is a set of props that
+multiply some existing value for all objects in the layers. These props usually correspond
+to WebGL shader uniforms that "scaling" all values of specific attributes simultaneously.
 
 For API consistency reasons these have all been renamed with the suffix `..Scale`
 
-| scatterplotLayer | radius | radiusScale |
+| ScatterplotLayer | radius | radiusScale |
 
-### Modified Layers
+| GridLayer | elevation | elevationScale |
 
+| HexagonLayer | elevation | elevationScale |
 
-## Upgrading Layers from deck.gl v3 to v4
+| IconLayer | size | sizeScale |
 
-While v3 layers should work without changes in v4, there are some improvements
-you may want to take advantage of.
-
-#### updateTriggers
-
-To enable applications to use accessor names in updateTriggers, you need to
-add an 'accessor' field when you register your attributes.
-
-#### getPickingInfo
-
-To override the default picking behavior, implement the `getPickingInfo()` method
-that returns an info object to be passed to `onHover` and `onClick` handlers. If
-this methods returns `null`, no event will be fired.
-
+| PathLayer | strokeWidth | strokeWidthScale |

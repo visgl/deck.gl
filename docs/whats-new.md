@@ -1,6 +1,6 @@
 # deck.gl v4.0
 
-Release date: Target: March 17, 2017
+Release date: Target: March 24, 2017
 
 ## Highlights
 
@@ -8,7 +8,6 @@ Release date: Target: March 17, 2017
   GridLayer, HexagonLayer, PointCloudLayer.
 - **New Aggregating Layers** PointDensityGridLayer and PointDensityHexagonLayer
   automatically "bin" your point data into grid cells or hexagons.
-- **Documentation** Improved and reorganized in response to user feedback.
 - **New Examples** deck.gl now provides multiple stand-alone examples, with minimal
   configuration files (`package.json`, `webpack.config.js` etc) intended to make it
   easy to just copy an example folder and get things working.
@@ -20,7 +19,8 @@ Release date: Target: March 17, 2017
   improves rendering and picking performance.
 - **Model Matrix Support** - Model matrix support for the `METER_OFFSET` projection mode
   enables arbitrary coordinate transforms (translations, rotations, scaling etc)
-  to be applied per layer enabling scene graph like layer composition and animation.
+  to be applied on individual layer enabling scene graph like layer composition and animation.
+- **Documentation** Improved and reorganized in response to user feedbacks.
 - **Experimental Features** Experimental support for non-Mercator projections and
   rendering effects (e.g. Reflections)
 

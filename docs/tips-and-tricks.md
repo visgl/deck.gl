@@ -4,19 +4,19 @@
 
 To get a handle on blending modes, it helps to consider that deck.gl
 renders in a separate transparent div on top of the map div,
-so it is actually the browser that blends the deck.gl output into the map,
-not WebGL, and the default blending in the browser typically does not give
-ideal effects.
-
-There is a CSS property `mix-blend-mode` in modern browsers
-that allows control over blending:
+so the final composition of the image a user see on the computer monitor is
+controlled by the browser according to CSS settings instead of the WebGL
+settings. Unfortuntely, the default blending in the browser typically usually
+does not give ideal results and the way the deck.gl development team to improve
+the blending effect is by specifying the CSS property `mix-blend-mode`
+in modern browsers to be `multiply`:
 
     .overlays canvas {
       mix-blend-mode: multiply;
     }
 
-`multiply` blend mode is usually the right choice, as it only darkens.
-This will keep your overlay colors, but let map legends underneath
+`multiply` blend mode usually gives the expected results, as it only darkens.
+This blend mode keeps the overlay colors, but let map legends underneath
 remain black and legible.
 
 **Note:** that there is a caveat with setting `mix-blend-mode`:
@@ -30,7 +30,7 @@ element.
 ## Notes on data property
 
 The `data` property will accept any containers that can be iterated over using
-ES6 for-of iteration, this includes e.g. native Arrays, ES6 Sets and Maps,
+ES6 "for-of" iteration, this includes e.g. native Arrays, ES6 Sets and Maps,
 all Immutable.js containers etc. The notable exception are native JavaScript
 object maps. It is recommended to use ES6 Maps instead.
 
@@ -42,8 +42,8 @@ objects) as it ensures that changes to `data` property trigger a re-render.
 
 **Note**: Because DeckGL layers are designed to take any type of iterable
 collection as data (which may not support "random access" array style
-references of its elements), the picking calculates and index but the
-actual object.
+references of its elements), the picking process outputs the actual object instead
+of some index.
 
 ## Debugging and Instrumentation
 
@@ -51,18 +51,17 @@ deck.gl is built on luma.gl which has extensive debugging and instrumentation
 support.
 
 * Automatic checks are performed on your uniforms and attributes.
-  Passing an `undefined` value to a uniform is a common JavaScript mistake
-  that normally results in no warnings and no output from the shaders,
-  often causing simple errors to be time consuming to debug, however in
-  deck.gl will immediately generate a descriptive exception.
+  Passing an `undefined` value to a uniform is a common JavaScript mistake that
+  will immediately generate a descriptive exception in deck.gl. This can be tracked
+  from the console output.
 
 * The DeckGL react component has a debug flag which instructs luma.gl
-  to instruments the gl context (this has a performance cost) which allows
-  tracing all calls, see below on luma debug priority levels.
+  to instruments the gl context (with a performance cost) which allows
+  tracing all WebGL call errors, see below on luma debug priority levels.
   It also generates exceptions immediately when a WebGL operation fails,
   allowing you to pinpoint exactly where in the code the issue
-  happened. Due to the asynchronous nature of WebGL, you would normally
-  receive these errors as warning at a later time during code execution.
+  happened. Due to the asynchronous nature of the GPU, some WebGL execution
+  errors are surfaced and caught later than the calls that generate them.
 
 * In the browser console, setting `luma.log.priority` to various values will
   enable increasing levels of debugging.

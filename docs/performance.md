@@ -3,10 +3,13 @@
 
 ## General Expectations
 
-While performance is obviously hardware dependent here are some guidelines:
+There are mainly two aspects that developers usually consider regarding the
+performance of any computer programs: the time and the memory consumption, both
+of which obviously depends on the specs of the hardware deck.gl is ultimately
+running on.
 
-On recent MacBook Pros with dual graphics cards, we see most basic layers
-(like `ScatterplotLayer`) rendering fluidly at 60 FPS during pan and zoom
+On 2015 MacBook Pros with dual graphics cards, most basic layers
+(like `ScatterplotLayer`) renders fluidly at 60 FPS during pan and zoom
 operations up to about 1M (one million) data items, with framerates dropping
 into low double digits (10-20FPS) when the data sets approach 10M items.
 

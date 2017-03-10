@@ -10,7 +10,7 @@ const DEFAULT_COLOR = [0, 0, 0, 255];
 
 const defaultProps = {
   opacity: 1,
-  strokeWidthScale: 1, // stroke width in meters
+  strokeWidthScale: 1,
   rounded: false,
   miterLimit: 4,
   strokeWidthMinPixels: 0, //  min stroke width in pixels
