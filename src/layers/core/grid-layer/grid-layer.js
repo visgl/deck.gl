@@ -22,15 +22,18 @@ import {Layer} from '../../../lib';
 import GridCellLayer from '../grid-cell-layer/grid-cell-layer';
 
 import {pointToDensityGridData} from './grid-aggregator';
-import {ordinalScale, linearScale} from '../../../utils/scale-utils';
+import {linearScale, quantizeScale} from '../../../utils/scale-utils';
 import {defaultColorRange} from '../../../utils/color-utils';
 
-const defaultProps = {
-  cellSize: 1000,
-  colorRange: defaultColorRange,
-  elevationRange: [0, 1000],
-  elevationScale: 1,
+const defaultCellSize = 1000;
+const defaultElevationRange = [0, 1000];
+const defaultElevationScale = 1;
 
+const defaultProps = {
+  cellSize: defaultCellSize,
+  colorRange: defaultColorRange,
+  elevationRange: defaultElevationRange,
+  elevationScale: defaultElevationScale,
   getPosition: x => x.position
   // AUDIT - getWeight ?
 };
@@ -86,7 +89,7 @@ export default class GridLayer extends Layer {
     const {colorRange} = this.props;
     const colorDomain = this.props.colorDomain || this.state.countRange;
 
-    return ordinalScale(colorDomain, colorRange, cell.count);
+    return quantizeScale(colorDomain, colorRange, cell.count);
   }
 
   _onGetSublayerElevation(cell) {

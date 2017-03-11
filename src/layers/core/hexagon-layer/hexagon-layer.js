@@ -22,7 +22,7 @@ import {Layer} from '../../../lib';
 import HexagonCellLayer from '../hexagon-cell-layer/hexagon-cell-layer';
 import {log} from '../../../lib/utils';
 
-import {ordinalScale, linearScale} from '../../../utils/scale-utils';
+import {quantizeScale, linearScale} from '../../../utils/scale-utils';
 import {defaultColorRange} from '../../../utils/color-utils';
 import {pointToHexbin} from './hexagon-aggregator';
 
@@ -34,6 +34,7 @@ const defaultProps = {
   coverage: 1,
   hexagonAggregator: pointToHexbin,
   getPosition: x => x.position
+  //
 };
 
 function noop() {}
@@ -105,7 +106,7 @@ export default class HexagonLayer extends Layer {
     const {colorRange} = this.props;
     const colorDomain = this.props.colorDomain || this.state.countRange;
 
-    return ordinalScale(colorDomain, colorRange, cell.points.length);
+    return quantizeScale(colorDomain, colorRange, cell.points.length);
   }
 
   _onGetSublayerElevation(cell) {
