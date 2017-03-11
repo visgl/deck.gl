@@ -26,7 +26,7 @@ import SolidPolygonLayer from '../solid-polygon-layer/solid-polygon-layer';
 
 import {getGeojsonFeatures, separateGeojsonFeatures} from './geojson';
 
-const defaultColor = [0xBD, 0xE2, 0x7A, 0xFF];
+const defaultStrokeColor = [0xBD, 0xE2, 0x7A, 0xFF];
 const defaultFillColor = [0xBD, 0xE2, 0x7A, 0xFF];
 
 const defaultProps = {
@@ -39,7 +39,7 @@ const defaultProps = {
   // TODO: Missing props: radiusMinPixels, strokeWidthMinPixels, ...
 
   // Line and polygon outline color
-  getStrokeColor: f => get(f, 'properties.strokeColor') || defaultColor,
+  getStrokeColor: f => get(f, 'properties.strokeColor') || defaultStrokeColor,
   // Point and polygon fill color
   getFillColor: f => get(f, 'properties.fillColor') || defaultFillColor,
   // Point radius

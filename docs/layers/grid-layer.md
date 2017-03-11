@@ -4,13 +4,15 @@
 
 # GridLayer
 
-The GridLayer can render a grid-based heatmap.
-It takes the constant width / height of all cells and top-left coordinate of
-each cell. The grid cells can be given a height using the `getElevation` accessor.
+The GridLayer renders a grid heatmap based on an array of points.
+It takes the constant size all each cell, projects points into cells. The color
+and height of the cell is scaled by number of points it contains.
 
+Remarks:
+* GridLayer at the moment only works with `COORDINATE_SYSTEM.LNG_LAT`.
 
 <div align="center">
-  <img height="300" src="/demo/src/static/images/grid-layer.png" />
+  <img height="300" src="/demo/src/static/images/grid-layer.gif" />
 </div>
 
     import {GridLayer} from 'deck.gl';
@@ -19,31 +21,50 @@ each cell. The grid cells can be given a height using the `getElevation` accesso
 
 Inherits from all [Base Layer](/docs/layers/base-layer.md) properties.
 
-##### `latOffset` (Number, optional)
+##### `cellSize` (Number, optional)
 
-- Default: `0.0089`
+- Default: `1000`
 
-Latitude increment of each cell
+Size of each cell in meters
 
-##### `lonOffset` (Number, optional)
+##### `colorDomain` (Array, optional)
 
-- Default: `0.0113`
+- Default: `[min(count), max(count)]`
 
-Longitude increment of each cell
+Color scale domain, default is set to the range of point counts in each cell.
+
+##### `colorRange` (Array, optional)
+
+- Default: <img src="/demo/src/static/images/colorbrewer_YlOrRd_6.png"/></a>
+
+Color ranges as an array of colors formatted as `[255, 255, 255]`. Default is
+[colorbrewer](http://colorbrewer2.org/#type=sequential&scheme=YlOrRd&n=6) `6-class YlOrRd`.
+
+##### `elevationDomain` (Array, optional)
+
+- Default: `[0, max(count)]`
+
+Elevation scale input domain, default is set to the extent of point counts in each cell.
+
+#### `elevationRange` (Array, optional)
+
+- Default: `[0, 1000]`
+
+Elevation scale output range
 
 ##### `elevationScale` (Number, optional)
 
 - Default: `1`
 
-Elevation multiplier. The elevation of cell is calculated by
-`elevationScale * getElevation(d)`. `elevationScale` is a handy property
-to scale all cell elevations without updating the data.
+Cell elevation multiplier. The elevation of cell is calculated by
+`elevationScale * getElevation(d)`.
+`elevationScale` is a handy property to scale all cells without updating the data.
 
 ##### `extruded` (Boolean, optional)
 
 - Default: `true`
 
-Whether to enable grid elevation. If se to false, all grid will be flat.
+Whether to enable cell elevation. Cell elevation scale by count of points in each cell. If set to false, all cell will be flat.
 
 ##### `lightSettings` (Object, optional) **EXPERIMENTAL**
 
@@ -54,21 +75,6 @@ Be aware that this prop will likely be changed in a future version of deck.gl.
 
 ##### `getPosition` (Function, optional)
 
-- Default: `cell => cell.position`
+- Default: `object => object.position`
 
-Method called to retrieve the top left corner of each cell.
-Expecting [lon, lat].
-
-##### `getElevation` (Function, optional)
-
-- Default: `cell => cell.elevation`
-
-Method called to retrieve the elevation of each cell.
-Expecting a number, 1 unit approximate to 100 meter
-
-##### `getColor` (Function, optional)
-
-- Default: `cell => cell.color`
-
-Method called to retrieve the rgba color of each cell. Expecting [r, g, b, a].
-If the alpha is not provided, it will be set to `255`.
+Method called to retrieve the position of each point.
