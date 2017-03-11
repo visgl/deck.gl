@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 
 import {Layer} from '../../../lib';
-import HexagonLayer from '../hexagon-layer/hexagon-layer';
+import HexagonCellLayer from '../hexagon-cell-layer/hexagon-cell-layer';
 import {log} from '../../../lib/utils';
 
 import {ordinalScale, linearScale} from '../../../utils/scale-utils';
@@ -49,7 +49,7 @@ function _getCountRange(hexagons) {
   ];
 }
 
-export default class PointDensityHexagonLayer extends Layer {
+export default class HexagonLayer extends Layer {
   constructor(props) {
     if (!props.radius) {
       log.once(0, 'PointDensityHexagonLayer: radius in meter is needed to aggregate points into ' +
@@ -117,7 +117,7 @@ export default class PointDensityHexagonLayer extends Layer {
   renderLayers() {
     const {id, radius} = this.props;
 
-    return new HexagonLayer(Object.assign({},
+    return new HexagonCellLayer(Object.assign({},
       this.props, {
         id: `${id}-density-hexagon`,
         data: this.state.hexagons,
@@ -136,5 +136,5 @@ export default class PointDensityHexagonLayer extends Layer {
   }
 }
 
-PointDensityHexagonLayer.layerName = 'PointDensityHexagonLayer';
-PointDensityHexagonLayer.defaultProps = defaultProps;
+HexagonLayer.layerName = 'HexagonLayer';
+HexagonLayer.defaultProps = defaultProps;

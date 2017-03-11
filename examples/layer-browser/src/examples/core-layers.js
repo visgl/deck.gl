@@ -2,14 +2,14 @@ import {
   ScatterplotLayer,
   ArcLayer,
   LineLayer,
-  HexagonLayer,
 
   PointCloudLayer,
   ScreenGridLayer,
   IconLayer,
+  GridCellLayer,
   GridLayer,
-  PointDensityGridLayer,
-  PointDensityHexagonLayer,
+  HexagonCellLayer,
+  HexagonLayer,
 
   GeoJsonLayer,
   PolygonLayer,
@@ -192,10 +192,10 @@ const PointCloudLayerExample = {
   }
 };
 
-const GridLayerExample = {
-  layer: GridLayer,
+const GridCellLayerExample = {
+  layer: GridCellLayer,
   props: {
-    id: 'gridLayer',
+    id: 'gridCellLayer',
     data: dataSamples.worldGrid.data,
     latOffset: dataSamples.worldGrid.latOffset,
     lonOffset: dataSamples.worldGrid.lonOffset,
@@ -208,13 +208,13 @@ const GridLayerExample = {
   }
 };
 
-const PointDensityGridLayerExample = {
-  layer: PointDensityGridLayer,
+const GridLayerExample = {
+  layer: GridLayer,
   propTypes: {
     cellSize: {type: 'number', min: 0, max: 1000}
   },
   props: {
-    id: 'pointDensityGridLayer',
+    id: 'gridLayer',
     data: dataSamples.points,
     cellSize: 200,
     opacity: 1,
@@ -225,13 +225,13 @@ const PointDensityGridLayerExample = {
   }
 };
 
-const HexagonLayerExample = {
-  layer: HexagonLayer,
+const HexagonCellLayerExample = {
+  layer: HexagonCellLayer,
   propTypes: {
     coverage: {type: 'number', min: 0, max: 1}
   },
   props: {
-    id: 'hexagonLayer',
+    id: 'hexagonCellLayer',
     data: dataSamples.hexagons,
     hexagonVertices: dataSamples.hexagons[0].vertices,
     coverage: 1,
@@ -244,14 +244,14 @@ const HexagonLayerExample = {
   }
 };
 
-const PointDensityHexagonLayerExample = {
-  layer: PointDensityHexagonLayer,
+const HexagonLayerExample = {
+  layer: HexagonLayer,
   propTypes: {
     coverage: {type: 'number', min: 0, max: 1},
     radius: {type: 'number', min: 0, max: 3000}
   },
   props: {
-    id: 'PointDensityHexagonLayer',
+    id: 'HexagonLayer',
     data: dataSamples.points,
     extruded: true,
     pickable: true,
@@ -304,11 +304,11 @@ export default {
     ArcLayer: ArcLayerExample,
     LineLayer: LineLayerExample,
     IconLayer: IconLayerExample,
+    GridCellLayer: GridCellLayerExample,
     GridLayer: GridLayerExample,
-    PointDensityGridLayer: PointDensityGridLayerExample,
     ScreenGridLayer: ScreenGridLayerExample,
+    HexagonCellLayer: HexagonCellLayerExample,
     HexagonLayer: HexagonLayerExample,
-    PointDensityHexagonLayer: PointDensityHexagonLayerExample,
     PointCloudLayer: PointCloudLayerExample
   },
 

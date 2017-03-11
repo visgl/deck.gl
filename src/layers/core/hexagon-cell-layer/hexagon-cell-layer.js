@@ -63,7 +63,7 @@ const defaultProps = {
   }
 };
 
-export default class HexagonLayer extends Layer {
+export default class HexagonCellLayer extends Layer {
 
   constructor(props) {
     let missingProps = false;
@@ -89,9 +89,9 @@ export default class HexagonLayer extends Layer {
   }
 
   getShaders() {
-    const vs64 = readFileSync(join(__dirname, './hexagon-layer-64-vertex.glsl'), 'utf8');
-    const vs32 = readFileSync(join(__dirname, './hexagon-layer-vertex.glsl'), 'utf8');
-    const fs = readFileSync(join(__dirname, './hexagon-layer-fragment.glsl'), 'utf8');
+    const vs64 = readFileSync(join(__dirname, './hexagon-cell-layer-64-vertex.glsl'), 'utf8');
+    const vs32 = readFileSync(join(__dirname, './hexagon-cell-layer-vertex.glsl'), 'utf8');
+    const fs = readFileSync(join(__dirname, './hexagon-cell-layer-fragment.glsl'), 'utf8');
 
     return enable64bitSupport(this.props) ? {
       vs: vs64, fs, modules: ['fp64', 'project64', 'lighting']
@@ -285,5 +285,5 @@ export default class HexagonLayer extends Layer {
   }
 }
 
-HexagonLayer.layerName = 'HexagonLayer';
-HexagonLayer.defaultProps = defaultProps;
+HexagonCellLayer.layerName = 'HexagonCellLayer';
+HexagonCellLayer.defaultProps = defaultProps;

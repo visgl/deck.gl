@@ -1,5 +1,5 @@
 // See: npm glsl-shader-name
-#define SHADER_NAME extruded-hexagon-layer-fs
+#define SHADER_NAME hexagon-cell-layer-fs
 
 #ifdef GL_ES
 precision highp float;

@@ -52,7 +52,7 @@ const defaultProps = {
   }
 };
 
-export default class GridLayer extends Layer {
+export default class GridCellLayer extends Layer {
   /**
    * A generic GridLayer that takes latitude longitude delta of cells as a uniform
    * and the min lat lng of cells. grid can be 3d when pass in a height
@@ -68,9 +68,9 @@ export default class GridLayer extends Layer {
    */
 
   getShaders() {
-    const vs64 = readFileSync(join(__dirname, './grid-layer-64-vertex.glsl'), 'utf8');
-    const vs32 = readFileSync(join(__dirname, './grid-layer-vertex.glsl'), 'utf8');
-    const fs = readFileSync(join(__dirname, './grid-layer-fragment.glsl'), 'utf8');
+    const vs64 = readFileSync(join(__dirname, './grid-cell-layer-64-vertex.glsl'), 'utf8');
+    const vs32 = readFileSync(join(__dirname, './grid-cell-layer-vertex.glsl'), 'utf8');
+    const fs = readFileSync(join(__dirname, './grid-cell-layer-fragment.glsl'), 'utf8');
 
     return enable64bitSupport(this.props) ? {
       vs: vs64, fs, modules: ['fp64', 'project64', 'lighting']
@@ -193,5 +193,5 @@ export default class GridLayer extends Layer {
   }
 }
 
-GridLayer.layerName = 'GridLayer';
-GridLayer.defaultProps = defaultProps;
+GridCellLayer.layerName = 'GridCellLayer';
+GridCellLayer.defaultProps = defaultProps;

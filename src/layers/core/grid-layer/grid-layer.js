@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 
 import {Layer} from '../../../lib';
-import GridLayer from '../grid-layer/grid-layer';
+import GridCellLayer from '../grid-cell-layer/grid-cell-layer';
 
 import {pointToDensityGridData} from './grid-aggregator';
 import {ordinalScale, linearScale} from '../../../utils/scale-utils';
@@ -41,7 +41,7 @@ function _needsReProjectPoints(oldProps, props) {
   return oldProps.cellSize !== props.cellSize;
 }
 
-export default class PointDensityGridLayer extends Layer {
+export default class GridLayer extends Layer {
   initializeState() {
     this.state = {
       gridOffset: {yOffset: 0.0089, xOffset: 0.0113},
@@ -98,7 +98,7 @@ export default class PointDensityGridLayer extends Layer {
   renderLayers() {
     const {id} = this.props;
 
-    return new GridLayer(Object.assign({},
+    return new GridCellLayer(Object.assign({},
       this.props, {
         id: `${id}-density-grid`,
         data: this.state.layerData,
@@ -118,5 +118,5 @@ export default class PointDensityGridLayer extends Layer {
   }
 }
 
-PointDensityGridLayer.layerName = 'PointDensityGridLayer';
-PointDensityGridLayer.defaultProps = defaultProps;
+GridLayer.layerName = 'GridLayer';
+GridLayer.defaultProps = defaultProps;
