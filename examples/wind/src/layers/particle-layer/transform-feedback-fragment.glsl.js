@@ -1,4 +1,3 @@
-export default `
 // Copyright (c) 2015 Uber Technologies, Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -19,7 +18,8 @@ export default `
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#define SHADER_NAME wind-layer-fragment-shader
+export default `\
+#define SHADER_NAME particle-feedback-fragment-shader
 
 #ifdef GL_ES
 precision highp float;

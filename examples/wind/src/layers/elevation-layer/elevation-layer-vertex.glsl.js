@@ -1,4 +1,4 @@
-export default `
+export default `\
 #define SHADER_NAME elevation-layer-vertex-shader
 
 uniform sampler2D elevationTexture;
@@ -6,7 +6,7 @@ uniform vec4 elevationBounds;
 uniform vec2 elevationRange;
 uniform float zScale;
 
-attribute vec2 positions;
+attribute vec3 positions;
 
 varying vec4 vPosition;
 varying vec3 vNormal;
@@ -23,13 +23,13 @@ vec3 getWorldPosition(vec2 lngLat) {
 
 void main() {
 
-  vec3 curr = getWorldPosition(positions);
+  vec3 curr = getWorldPosition(positions.xy);
   vAltitude = curr.z / zScale;
   curr = project_position(curr);
 
-  vec3 prev = getWorldPosition(positions + vec2(1., 0.0));
+  vec3 prev = getWorldPosition(positions.xy + vec2(1., 0.0));
   prev = project_position(prev);
-  vec3 next = getWorldPosition(positions - vec2(0.0, 1.));
+  vec3 next = getWorldPosition(positions.xy - vec2(0.0, 1.));
   next = project_position(next);
 
   curr.z = (curr.z + prev.z + next.z) / 3.;
@@ -38,6 +38,6 @@ void main() {
   gl_Position = project_to_clipspace(position_worldspace);
 
   vPosition = position_worldspace;
-  vNormal = cross(prev-curr, next-curr);
+  vNormal = cross(prev - curr, next - curr);
 }
 `;

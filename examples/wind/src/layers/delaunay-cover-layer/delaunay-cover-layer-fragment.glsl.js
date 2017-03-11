@@ -1,5 +1,4 @@
-export default `
-// Copyright (c) 2015 Uber Technologies, Inc.
+// Copyright (c) 2017 Uber Technologies, Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -19,6 +18,7 @@ export default `
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+export default `\
 #define SHADER_NAME delaunay-cover-fragment-shader
 
 #ifdef GL_ES
@@ -326,7 +326,9 @@ float getLightWeight(vec4 position_worldspace, vec3 normals_worldspace) {
     specular = pow(specular_angle, 32.0);
   }
   lambertian = max(lambertian, 0.0);
-  lightWeight += (ambientRatio + lambertian * diffuseRatio + specular * specularRatio) * lightsStrength.x;
+  lightWeight +=
+    (ambientRatio + lambertian * diffuseRatio + specular * specularRatio) *
+    lightsStrength.x;
 
   return lightWeight;
 }

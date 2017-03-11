@@ -1,4 +1,4 @@
-export default `
+export default `\
 #define SHADER_NAME elevation-layer-fragment-shader
 
 uniform vec2 elevationRange;

@@ -1,18 +1,11 @@
+/* global document */
 import {assembleShaders} from 'deck.gl';
-import {GL, Model, Geometry, Program, createGLContext} from 'luma.gl';
-import {join} from 'path';
-import vertex from './delaunay-vertex.js';
-import fragment from './delaunay-fragment.js';
+import {Model, Geometry, Program, createGLContext} from 'luma.gl';
+
+import vertex from './delaunay-interpolation-vertex.glsl';
+import fragment from './delaunay-interpolation-fragment.glsl';
 
 export default class DelaunayInterpolation {
-
-  /**
-   * @classdesc
-   * DelaunayInterpolation
-   *
-   * @class
-   * @param {object} opts
-   */
   constructor(opts) {
     this.props = opts;
     this.context = opts.gl;
@@ -29,13 +22,12 @@ export default class DelaunayInterpolation {
     return this.props.textureWidth || 256;
   }
 
-  initializeState() {
-  }
-
   generateTextures() {
     const gl = this.context;
-    const {bbox, measures, triangulation} = this.props;
-    const {txt, bounds, textures, width, height} = this._generateTextures(gl, bbox, triangulation, measures);
+    const {boundingBox, measures, triangulation} = this.props;
+    const {txt, bounds, textures, width, height} =
+      this._generateTextures(gl, boundingBox, triangulation, measures);
+
     return {
       textureObject: txt,
       dataBounds: bounds,
@@ -53,12 +45,12 @@ export default class DelaunayInterpolation {
 
   getDelaunayModel(gl, triangulation) {
     const positions = [];
-    triangulation.forEach(t => positions.push(
-      -t[0].long, t[0].lat, t[0].elv,
-      -t[1].long, t[1].lat, t[1].elv,
-      -t[2].long, t[2].lat, t[2].elv
+    triangulation.forEach(triangle => positions.push(
+      -triangle[0].long, triangle[0].lat, triangle[0].elv,
+      -triangle[1].long, triangle[1].lat, triangle[1].elv,
+      -triangle[2].long, triangle[2].lat, triangle[2].elv
     ));
-    /* eslint-disable */
+
     const shaders = assembleShaders(gl, this.getDelaunayShaders());
 
     return new Model({
@@ -75,26 +67,18 @@ export default class DelaunayInterpolation {
 
   createTexture(gl, options) {
     gl.getExtension('EXT_color_buffer_float');
-    
-    let opt = Object.assign({
+
+    const opt = Object.assign({
       textureType: gl.TEXTURE_2D,
-      pixelStore: [{
-        name: gl.UNPACK_FLIP_Y_WEBGL,
-        value: true
-      }],
-      parameters: [{
-        name: gl.TEXTURE_MAG_FILTER,
-        value: gl.NEAREST
-      }, {
-        name: gl.TEXTURE_MIN_FILTER,
-        value: gl.NEAREST
-      }, {
-        name: gl.TEXTURE_WRAP_S,
-        value: gl.CLAMP_TO_EDGE
-      }, {
-        name: gl.TEXTURE_WRAP_T,
-        value: gl.CLAMP_TO_EDGE
-      }],
+      pixelStore: [
+        {name: gl.UNPACK_FLIP_Y_WEBGL, value: true}
+      ],
+      parameters: [
+        {name: gl.TEXTURE_MAG_FILTER, value: gl.NEAREST},
+        {name: gl.TEXTURE_MIN_FILTER, value: gl.NEAREST},
+        {name: gl.TEXTURE_WRAP_S, value: gl.CLAMP_TO_EDGE},
+        {name: gl.TEXTURE_WRAP_T, value: gl.CLAMP_TO_EDGE}
+      ],
       data: {
         internalFormat: gl.RGBA32F,
         format: gl.RGBA,
@@ -107,38 +91,40 @@ export default class DelaunayInterpolation {
       }
     }, options);
 
-    let textureType = opt.textureType,
-        textureTarget = textureType,
-        texture = gl.createTexture(),
-        pixelStore = opt.pixelStore,
-        parameters = opt.parameters,
-        data = opt.data,
-        value = data.value,
-        type = data.type,
-        format = data.format,
-        internalFormat = data.internalFormat,
-        hasValue = !!data.value;
+    const textureType = opt.textureType;
+    const textureTarget = textureType;
+    const pixelStore = opt.pixelStore;
+    const parameters = opt.parameters;
+    const data = opt.data;
+    const value = data.value;
+    const type = data.type;
+    const format = data.format;
+    const internalFormat = data.internalFormat;
+    const hasValue = Boolean(data.value);
 
+    const texture = gl.createTexture();
     gl.bindTexture(textureType, texture);
 
-    //set texture properties
-    pixelStore.forEach(opt => gl.pixelStorei(opt.name, opt.value));
+    // set texture properties
+    pixelStore.forEach(option => gl.pixelStorei(option.name, option.value));
 
-    //load texture
+    // load texture
     if (hasValue) {
       if ((data.width || data.height) && (!value.width && !value.height)) {
-        gl.texImage2D(textureTarget, 0, internalFormat, data.width, data.height, data.border, format, type, value, 0);
+        gl.texImage2D(textureTarget, 0, internalFormat, data.width, data.height,
+          data.border, format, type, value, 0);
       } else {
         gl.texImage2D(textureTarget, 0, internalFormat, format, type, value);
       }
 
-    //we're setting a texture to a framebuffer
+    // we're setting a texture to a framebuffer
     } else if (data.width || data.height) {
-      gl.texImage2D(textureTarget, 0, internalFormat, data.width, data.height, data.border, format, type, null);
+      gl.texImage2D(textureTarget, 0, internalFormat, data.width, data.height,
+        data.border, format, type, null);
     }
-    //set texture parameters
+    // set texture parameters
     for (let i = 0; i < parameters.length; i++) {
-      let opti = parameters[i];
+      const opti = parameters[i];
       gl.texParameteri(textureType, opti.name, opti.value);
     }
 
@@ -146,13 +132,13 @@ export default class DelaunayInterpolation {
   }
 
   createRenderbuffer(gl, options) {
-    let opt = Object.assign({
+    const opt = Object.assign({
       storageType: gl.DEPTH_COMPONENT16,
       width: 0,
       height: 0
     }, options);
 
-    let renderBuffer = gl.createRenderbuffer(gl.RENDERBUFFER);
+    const renderBuffer = gl.createRenderbuffer(gl.RENDERBUFFER);
     gl.bindRenderbuffer(gl.RENDERBUFFER, renderBuffer);
     gl.renderbufferStorage(gl.RENDERBUFFER, opt.storageType, opt.width, opt.height);
 
@@ -160,15 +146,15 @@ export default class DelaunayInterpolation {
   }
 
   createFramebufferWithTexture(gl, options) {
-    let opt = Object.assign({
+    const opt = Object.assign({
       width: 0,
       height: 0,
-      //All texture params
+      // All texture params
       bindToTexture: false,
       textureOptions: {
         attachment: gl.COLOR_ATTACHMENT0
       },
-      //All render buffer params
+      // All render buffer params
       bindToRenderBuffer: false,
       renderBufferOptions: {
         attachment: gl.DEPTH_ATTACHMENT
@@ -177,69 +163,67 @@ export default class DelaunayInterpolation {
 
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
     // create fb
-    let fb = gl.createFramebuffer();
+    const fb = gl.createFramebuffer();
     gl.bindFramebuffer(gl.FRAMEBUFFER, fb);
     // create txt
-    let txt = this.createTexture(gl, options.txt);
+    const texture = this.createTexture(gl, options.txt);
 
-    let bindToTexture = opt.bindToTexture,
-        bindToRenderBuffer = opt.bindToRenderBuffer,
-        texOpt = opt.textureOptions;
+    const texOpt = opt.textureOptions;
 
     // bind to texture
-    gl.framebufferTexture2D(gl.FRAMEBUFFER, texOpt.attachment, gl.TEXTURE_2D, txt, 0);
+    gl.framebufferTexture2D(gl.FRAMEBUFFER, texOpt.attachment, gl.TEXTURE_2D, texture, 0);
 
     // create rb
-    let rb = this.createRenderbuffer(gl, options.rb);
+    const rb = this.createRenderbuffer(gl, options.rb);
     gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, rb);
 
-    return {fb, rb, txt};
+    return {fb, rb, texture};
   }
 
-  _generateTextures(gl, bbox, triangulation, measures) {
-    let delaunayModel = this.getDelaunayModel(gl, triangulation),
-        lngDiff = Math.abs(bbox.maxLng - bbox.minLng),
-        latDiff = Math.abs(bbox.maxLat - bbox.minLat),
-        width = this.getTextureWidth(),
-        height = Math.ceil(latDiff * width / lngDiff),
-        bounds = [],
-        correctAngles = (angle1, angle2, angle3) => {
-          //return [angle1, angle2, angle3];
-          const abs = Math.abs.bind(Math);
-          const modulo = 8;
-          let flip = false;
-          if (abs(angle1 - angle2) > abs(angle1 - (angle2 + modulo))) {
-            flip = true;
-          }
-          if (abs(angle1 - angle3) > abs(angle1 - (angle3 + modulo))) {
-            if (flip) {
-              // need to flip angle1
-              angle1 -= modulo;
-            } else {
-              // need to flip angle3
-              angle3 += modulo;
-            }
-          } else if (flip) {
-            // need to flip angle2
-            angle2 += modulo;
-          }
-          return [angle1, angle2, angle3];
-        },
-        {fb, rb, txt} = this.createFramebufferWithTexture(gl, {
-          fb: {width, height},
-          rb: {width, height},
-          txt: {
-            data: {
-              internalFormat: gl.RGBA32F,
-              format: gl.RGBA,
-              value: false,
-              type: gl.FLOAT,
-              width,
-              height,
-              border: 0
-            }
-          }
-        });
+  _generateTextures(gl, boundingBox, triangulation, measures) {
+    const delaunayModel = this.getDelaunayModel(gl, triangulation);
+    const lngDiff = Math.abs(boundingBox.maxLng - boundingBox.minLng);
+    const latDiff = Math.abs(boundingBox.maxLat - boundingBox.minLat);
+    const width = this.getTextureWidth();
+    const height = Math.ceil(latDiff * width / lngDiff);
+    const bounds = [];
+    const correctAngles = (angle1, angle2, angle3) => {
+      // return [angle1, angle2, angle3];
+      const abs = Math.abs.bind(Math);
+      const modulo = 8;
+      let flip = false;
+      if (abs(angle1 - angle2) > abs(angle1 - (angle2 + modulo))) {
+        flip = true;
+      }
+      if (abs(angle1 - angle3) > abs(angle1 - (angle3 + modulo))) {
+        if (flip) {
+          // need to flip angle1
+          angle1 -= modulo;
+        } else {
+          // need to flip angle3
+          angle3 += modulo;
+        }
+      } else if (flip) {
+        // need to flip angle2
+        angle2 += modulo;
+      }
+      return [angle1, angle2, angle3];
+    };
+    const {fb, rb, texture} = this.createFramebufferWithTexture(gl, {
+      fb: {width, height},
+      rb: {width, height},
+      txt: {
+        data: {
+          internalFormat: gl.RGBA32F,
+          format: gl.RGBA,
+          value: false,
+          type: gl.FLOAT,
+          width,
+          height,
+          border: 0
+        }
+      }
+    });
 
     // basic gl set up
     gl.clearColor(0.0, 0.0, 0.0, 0.0);
@@ -249,7 +233,7 @@ export default class DelaunayInterpolation {
     gl.depthFunc(gl.LEQUAL);
 
     const textures = measures.map((measure, hour) => {
-      let sample = [];      
+      const sample = [];
       gl.bindFramebuffer(gl.FRAMEBUFFER, fb);
       gl.viewport(0, 0, width, height);
       gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
@@ -261,10 +245,12 @@ export default class DelaunayInterpolation {
           bounds[2] = {min: measure[triplet[0].index][2], max: measure[triplet[0].index][2]};
         } else {
           [0, 1, 2].forEach(index => {
-            triplet.forEach(t => {
+            triplet.forEach(t => { // eslint-disable-line
               if (measure[t.index][index] !== 0) {
-                bounds[index].min = bounds[index].min > measure[t.index][index] ? measure[t.index][index] : bounds[index].min;
-                bounds[index].max = bounds[index].max < measure[t.index][index] ? measure[t.index][index] : bounds[index].max;
+                bounds[index].min = bounds[index].min > measure[t.index][index] ?
+                  measure[t.index][index] : bounds[index].min;
+                bounds[index].max = bounds[index].max < measure[t.index][index] ?
+                  measure[t.index][index] : bounds[index].max;
               }
             });
           });
@@ -303,11 +289,13 @@ export default class DelaunayInterpolation {
       });
 
       delaunayModel.render({
-        bbox: [bbox.minLng, bbox.maxLng, bbox.minLat, bbox.maxLat],
+        boundingBox: [
+          boundingBox.minLng, boundingBox.maxLng, boundingBox.minLat, boundingBox.maxLat
+        ],
         size: [width, height]
       });
 
-      gl.bindTexture(gl.TEXTURE_2D, txt);
+      gl.bindTexture(gl.TEXTURE_2D, texture);
 
       // read texture back
       const pixels = new Float32Array(width * height * 4);
@@ -337,6 +325,6 @@ export default class DelaunayInterpolation {
       return pixels;
     });
 
-    return {fb, rb, txt, bounds, textures, width, height};
+    return {fb, rb, texture, bounds, textures, width, height};
   }
 }
