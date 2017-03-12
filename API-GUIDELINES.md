@@ -101,9 +101,7 @@ handle such cases:
     }
 ```
 Remarks:
-* deck.gl does not support plain objects as `data`. Support for objects would
-  impose too many restrictions on layer iteration code and make layers less
-  readable.
+* deck.gl does not attempt to support plain objects as `data`.
 
 ## Rules for Naming Props, Attributes, Uniforms and updateTriggers
 
@@ -159,6 +157,18 @@ it is natural to stay with the well-accepted term.
 * **Default values** Unless with exceptional and well-documented reasons,
 multiplicative props (e.g. `radiusScale`) should always default to 1,
 and additive props to 0.
+
+### Naming rules for props that control "sizes"
+
+* **Screen Space** Any prop that defines an extent or distance in screen space
+  pixels should have the suffix `Pixels`, e.g. `widthPixels`, `radiusMinPixels`,
+  unless the prop has a name that clearly indicates that the unit is pixels,
+  such as `strokeWidth`, i.e. **`stroke`** is generally assumed to be in pixels.
+* **World Space** Any prop that defines an extent or distance in world space
+  is named without a suffix (e.g. `width`, `radius`). In cartographic projection
+  modes, world space distances will be interpreted in meters according to the
+  local projection scale in other projection modes world space distances will
+  be taken as unit coordinates.
 
 ### Naming rules for groups of uniform-related props
 

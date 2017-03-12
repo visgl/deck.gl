@@ -163,20 +163,20 @@ export const docPages = generatePath([
         content: getDocUrl('layers/grid-layer.md')
       },
       {
+        name: 'ScreenGridLayer',
+        content: getDocUrl('layers/screen-grid-layer.md')
+      },
+      {
+        name: 'GridCellLayer',
+        content: getDocUrl('layers/grid-cell-layer.md')
+      },
+      {
         name: 'HexagonLayer',
         content: getDocUrl('layers/hexagon-layer.md')
       },
       {
-        name: 'PointDensityHexagonLayer',
-        content: getDocUrl('layers/point-density-hexagon-layer.md')
-      },
-      {
-        name: 'PointDensityGridLayer',
-        content: getDocUrl('layers/point-density-grid-layer.md')
-      },
-      {
-        name: 'ScreenGridLayer',
-        content: getDocUrl('layers/screen-grid-layer.md')
+        name: 'HexagonCellLayer',
+        content: getDocUrl('layers/hexagon-cell-layer.md')
       }
     ]
   },
