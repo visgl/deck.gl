@@ -11,9 +11,9 @@ attribute float instanceStrokeWidths;
 attribute vec4 instanceColors;
 attribute vec3 instancePickingColors;
 
-uniform float strokeWidthScale;
-uniform float strokeWidthMinPixels;
-uniform float strokeWidthMaxPixels;
+uniform float widthScale;
+uniform float widthMinPixels;
+uniform float widthMaxPixels;
 uniform float jointType;
 uniform float miterLimit;
 
@@ -31,8 +31,8 @@ float flipIfTrue(bool flag) {
 }
 vec3 lineJoin(vec3 prevPoint, vec3 currPoint, vec3 nextPoint) {
 
-  float width = clamp(project_scale(instanceStrokeWidths * strokeWidthScale),
-    strokeWidthMinPixels, strokeWidthMaxPixels) / 2.0;
+  float width = clamp(project_scale(instanceStrokeWidths * widthScale),
+    widthMinPixels, widthMaxPixels) / 2.0;
 
   vec2 deltaA = currPoint.xy - prevPoint.xy;
   vec2 deltaB = nextPoint.xy - currPoint.xy;
