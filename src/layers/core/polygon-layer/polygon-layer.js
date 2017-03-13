@@ -38,9 +38,9 @@ const defaultProps = {
   // Polygon fill color
   getFillColor: f => get(f, 'fillColor') || defaultFillColor,
   // Point, line and polygon outline color
-  getStrokeColor: f => get(f, 'color') || get(f, 'strokeColor') || defaultColor,
+  getColor: f => get(f, 'color') || get(f, 'strokeColor') || defaultColor,
   // Line and polygon outline accessors
-  getStrokeWidth: f => get(f, 'strokeWidth') || 1,
+  getWidth: f => get(f, 'strokeWidth') || 1,
   // Polygon extrusion accessor
   getElevation: f => 1000
 };
@@ -79,7 +79,7 @@ export default class PolygonLayer extends CompositeLayer {
   }
 
   renderLayers() {
-    const {getFillColor, getStrokeColor, getStrokeWidth, getElevation, updateTriggers} = this.props;
+    const {getFillColor, getColor, getWidth, getElevation, updateTriggers} = this.props;
     const {data, id, stroked, filled, extruded, wireframe} = this.props;
     const {paths, onHover, onClick} = this.state;
 
@@ -107,12 +107,12 @@ export default class PolygonLayer extends CompositeLayer {
         id: `${id}-stroke`,
         data: paths,
         getPath: x => x.path,
-        getColor: getStrokeColor,
-        getStrokeWidth,
+        getColor,
+        getWidth,
         onHover,
         onClick,
         updateTriggers: Object.assign({}, updateTriggers, {
-          getColor: updateTriggers.getStrokeColor
+          getColor: updateTriggers.getColor
         })
       }));
     }
