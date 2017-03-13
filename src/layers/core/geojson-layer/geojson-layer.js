@@ -86,7 +86,7 @@ export default class GeoJsonLayer extends CompositeLayer {
     let {} = this.props;
     const drawPoints = pointFeatures && pointFeatures.length > 0;
     const drawLines = lineFeatures && lineFeatures.length > 0;
-    const drawPolygons = stroked && polygonOutlineFeatures && polygonOutlineFeatures.length > 0;
+    const drawPolygons = polygonOutlineFeatures && polygonOutlineFeatures.length > 0;
     const fillPolygons = filled && polygonFeatures && polygonFeatures.length > 0;
 
     const onHover = this._onHoverSubLayer.bind(this);
@@ -111,7 +111,8 @@ export default class GeoJsonLayer extends CompositeLayer {
 
     // Polygon outline or wireframe
     let polygonOutlineLayer = null;
-    if (drawPolygons && extruded && wireframe) {
+    // If extruded, check the "wireframe" prop
+    if (extruded && wireframe && drawPolygons) {
       polygonOutlineLayer = new SolidPolygonLayer(Object.assign({}, this.props, {
         id: `${id}-polygon-wireframe`,
         data: polygonFeatures,
@@ -127,7 +128,8 @@ export default class GeoJsonLayer extends CompositeLayer {
         onHover,
         onClick
       }));
-    } else if (drawPolygons) {
+    // If non-extruded, check the "stroked" prop
+    } else if (!extruded && stroked && drawPolygons) {
       polygonOutlineLayer = new PathLayer(Object.assign({}, this.props, {
         id: `${id}-polygon-outline`,
         data: polygonOutlineFeatures,

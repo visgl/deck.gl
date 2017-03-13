@@ -83,7 +83,7 @@ export default class PolygonLayer extends Layer {
     /* eslint-disable max-len */
     attributeManager.add({
       indices: {size: 1, isIndexed: true, update: this.calculateIndices, noAlloc},
-      positions: {size: 3, accessor: 'getHeight', update: this.calculatePositions, noAlloc},
+      positions: {size: 3, accessor: 'getElevation', update: this.calculatePositions, noAlloc},
       normals: {size: 3, update: this.calculateNormals, noAlloc},
       colors: {size: 4, type: GL.UNSIGNED_BYTE, accessor: 'getColor', update: this.calculateColors, noAlloc},
       pickingColors: {size: 3, type: GL.UNSIGNED_BYTE, update: this.calculatePickingColors, noAlloc}
@@ -128,7 +128,7 @@ export default class PolygonLayer extends Layer {
       props.wireframe !== oldProps.wireframe || props.fp64 !== oldProps.fp64;
 
     if (changeFlags.dataChanged || geometryChanged) {
-      const {getPolygon, extruded, wireframe, getHeight} = props;
+      const {getPolygon, extruded, wireframe, getElevation} = props;
 
       // TODO - avoid creating a temporary array here: let the tesselator iterate
       const polygons = props.data.map(getPolygon);
@@ -137,7 +137,7 @@ export default class PolygonLayer extends Layer {
         polygonTesselator: !extruded ?
           new PolygonTesselator({polygons, fp64: this.props.fp64}) :
           new PolygonTesselatorExtruded({polygons, wireframe,
-            getHeight: polygonIndex => getHeight(this.props.data[polygonIndex]),
+            getHeight: polygonIndex => getElevation(this.props.data[polygonIndex]),
             fp64: this.props.fp64
           })
       });
