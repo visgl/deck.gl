@@ -1,6 +1,6 @@
 ---
 title: Hello World - deck.gl
-description: 
+description:
   Introducing deck.gl, a framework for visualizing large data sets powered by WebGL.
   It enables users to quickly get impressive visual results with limited effort
   through composition of existing layers, while offering a complete architecture

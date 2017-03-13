@@ -1,4 +1,52 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="http://jekyllrb.com" version="3.4.1">Jekyll</generator><link href="http://deck.gl/blog/feed.xml" rel="self" type="application/atom+xml" /><link href="http://deck.gl/blog/" rel="alternate" type="text/html" /><updated>2017-03-09T10:41:55-08:00</updated><id>http://deck.gl/blog/</id><title type="html">Deck.gl Blog</title><subtitle>A blog for deck.gl: WebGL-powered data visualization</subtitle><author><name>Uber</name></author><entry><title type="html">Hello World - deck.gl</title><link href="http://deck.gl/blog/2017/hello-world" rel="alternate" type="text/html" title="Hello World - deck.gl" /><published>2017-03-06T00:00:00-08:00</published><updated>2017-03-06T00:00:00-08:00</updated><id>http://deck.gl/blog/2017/hello-world</id><content type="html" xml:base="http://deck.gl/blog/2017/hello-world">&lt;p&gt;&lt;img src=&quot;../img/header-bg.jpg&quot; alt=&quot;deck.gl&quot; /&gt;&lt;/p&gt;
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="http://jekyllrb.com" version="3.4.2">Jekyll</generator><link href="http://localhost:4000/blog/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/blog/" rel="alternate" type="text/html" /><updated>2017-03-13T11:38:16-07:00</updated><id>http://localhost:4000/blog/</id><title type="html">Deck.gl Blog</title><subtitle>A blog for deck.gl: WebGL-powered data visualization</subtitle><author><name>Uber</name></author><entry><title type="html">Wind Map</title><link href="http://localhost:4000/blog/2017/wind" rel="alternate" type="text/html" title="Wind Map" /><published>2017-03-13T00:00:00-07:00</published><updated>2017-03-13T00:00:00-07:00</updated><id>http://localhost:4000/blog/2017/wind</id><content type="html" xml:base="http://localhost:4000/blog/2017/wind">&lt;p&gt;A few weeks ago I set on trying out new WebGL 2.0 features with deck.gl. WebGL 2.0 brings plenty of new goodies to be used for game development, creative coding and data visualization like instancing, floating-point textures, transform feedback, multiple render targets, and more. With this in mind, and inspired by the work of Cameron Beccario, Viegas and Wattenberg and NASA I created a WebGL 2.0 wind map demo using deck.gl.&lt;/p&gt;
+
+&lt;p&gt;This interactive demo enables you to change the map’s perspective by using cmd + drag; toggle between vector field and particle layers on the left panel, and use the slider to change the time of day to see wind change for a 72 hour period.&lt;/p&gt;
+
+&lt;h2 id=&quot;some-interesting-insights&quot;&gt;Some interesting insights&lt;/h2&gt;
+&lt;p&gt;The picture below shows wind speed near Mount Washington, which has the fastest winds in the US.&lt;/p&gt;
+
+&lt;p align=&quot;center&quot;&gt;
+  &lt;img src=&quot;../img/wind1.gif&quot; /&gt;
+&lt;/p&gt;
+
+&lt;p&gt;Something interesting to look at as well are the wind corridors being formed in Florida at specific times.&lt;/p&gt;
+
+&lt;p align=&quot;center&quot;&gt;
+  &lt;img src=&quot;../img/wind2.png&quot; /&gt;
+&lt;/p&gt;
+
+&lt;h2 id=&quot;under-the-hood&quot;&gt;Under the hood&lt;/h2&gt;
+&lt;p&gt;There are thousands of stations that capture wind speed, orientation and temperature with different time granularity. If you turn all layers off you’ll see yellow dots that represent each one of the stations we’re getting data from.&lt;/p&gt;
+
+&lt;p align=&quot;center&quot;&gt;
+  &lt;img src=&quot;../img/wind3.gif&quot; /&gt;
+&lt;/p&gt;
+
+&lt;p&gt;For this example though one of the challenges was to be able to get a uniform distribution of wind speed, direction and temperature that could be sampled at any point of the map, not simply at each station. In order to do this we created a Delaunay tessellation for the stations, and then rendered the mesh to a floating-point texture, to get GPU-interpolated values into an image. In this case we map wind direction to the red channel, wind speed to green, temperature to blue and elevation to alpha.&lt;/p&gt;
+
+&lt;p align=&quot;center&quot;&gt;
+  &lt;img src=&quot;../img/wind4.png&quot; /&gt;
+&lt;/p&gt;
+
+&lt;p&gt;You can see the Delaunay mesh rendered to an image below.&lt;/p&gt;
+
+&lt;p align=&quot;center&quot;&gt;
+  &lt;img src=&quot;../img/wind5.png&quot; /&gt;
+&lt;/p&gt;
+
+&lt;p&gt;The next step was to use instancing to create a regular vector field layer. For this we created tetrahedron instances to serve as arrows and used the texture above to set their orientation, color and size. If you use the slider on the left you’ll also see that there’s GPU interpolation. Although we sample data every hour, we interpolate between the textures so we can estimate the values at each minute. Since we already had the Delaunay model we also used that to give an approximation of the elevation in the US:&lt;/p&gt;
+
+&lt;p align=&quot;center&quot;&gt;
+  &lt;img src=&quot;../img/wind6.png&quot; /&gt;
+&lt;/p&gt;
+
+&lt;p&gt;Finally we used transform feedback, which enables us to only use the vertex shader for data processing and updating every particle’s position in real-time. We throw a random sample of particles (~1M) that get updated by the texture data, and then render those on the screen. Every particle has a TTL (time-to-live); when the TTL expires it gets repositioned at a random location on the map. Blending reveals where the biggest concentration of particles are.&lt;/p&gt;
+
+&lt;p align=&quot;center&quot;&gt;
+  &lt;img src=&quot;../img/wind7.png&quot; /&gt;
+&lt;/p&gt;
+
+&lt;p&gt;And that’s it! Three custom layers built with deck.gl to bring this wind map to life. Check out the example here and feel free to provide feedback!&lt;/p&gt;</content><author><name>{&quot;display_name&quot;=&gt;&quot;Nicolas Belmonte&quot;, &quot;github_username&quot;=&gt;&quot;philogb&quot;, &quot;email&quot;=&gt;&quot;nico@uber.com&quot;}</name><email>nico@uber.com</email></author><category term="Vis" /><category term="WebGL" /><summary type="html">A few weeks ago I set on trying out new WebGL 2.0 features with deck.gl. WebGL 2.0 brings plenty of new goodies to be used for game development, creative coding and data visualization like instancing, floating-point textures, transform feedback, multiple render targets, and more. With this in mind, and inspired by the work of Cameron Beccario, Viegas and Wattenberg and NASA I created a WebGL 2.0 wind map demo using deck.gl.</summary></entry><entry><title type="html">Hello World - deck.gl</title><link href="http://localhost:4000/blog/2017/hello-world" rel="alternate" type="text/html" title="Hello World - deck.gl" /><published>2017-03-06T00:00:00-08:00</published><updated>2017-03-06T00:00:00-08:00</updated><id>http://localhost:4000/blog/2017/hello-world</id><content type="html" xml:base="http://localhost:4000/blog/2017/hello-world">&lt;p&gt;&lt;img src=&quot;../img/header-bg.jpg&quot; alt=&quot;deck.gl&quot; /&gt;&lt;/p&gt;
 
 &lt;h1 id=&quot;introduction&quot;&gt;Introduction&lt;/h1&gt;
 
