@@ -72,24 +72,32 @@ const GeoJsonLayerExample = {
   getData: () => dataSamples.geojson,
   props: {
     id: 'geojsonLayer',
-    // TODO change to use the color util when it is landed
+    getRadius: f => MARKER_SIZE_MAP[f.properties['marker-size']],
+    getFillColor: f => {
+      const color = parseColor(f.properties.fill || f.properties['marker-color']);
+      const opacity = (f.properties['fill-opacity'] || 1) * 255;
+      return setOpacity(color, opacity);
+    },
+    getColor: f => {
+      const color = parseColor(f.properties.stroke);
+      const opacity = (f.properties['stroke-opacity'] || 1) * 255;
+      return setOpacity(color, opacity);
+    },
+    getWidth: f => f.properties['stroke-width'],
+    getHeight: f => Math.random() * 1000,
+    widthScale: 10,
+    widthMinPixels: 1,
+    pickable: true,
+
+    // TODO - Old accessors
     getPointColor: f => parseColor(f.properties['marker-color']),
     getPointRadius: f => MARKER_SIZE_MAP[f.properties['marker-size']],
     getStrokeColor: f => {
       const color = parseColor(f.properties.stroke);
-      const opacity = f.properties['stroke-opacity'] * 255;
+      const opacity = (f.properties['stroke-opacity'] || 1) * 255;
       return setOpacity(color, opacity);
     },
-    getStrokeWidth: f => f.properties['stroke-width'],
-    getFillColor: f => {
-      const color = parseColor(f.properties.fill);
-      const opacity = f.properties['fill-opacity'] * 255;
-      return setOpacity(color, opacity);
-    },
-    getHeight: f => Math.random() * 1000,
-    strokeWidthScale: 10,
-    strokeWidthMinPixels: 1,
-    pickable: true
+    getStrokeWidth: f => f.properties['stroke-width']
   }
 };
 
@@ -129,7 +137,8 @@ const PathLayerExample = {
     opacity: 0.6,
     getPath: f => get(f, 'path'),
     getColor: f => [128, 0, 0],
-    getStrokeWidth: f => 10,
+    getWidth: f => 10,
+    strokeMinWidth: 1,
     pickable: true
   }
 };
@@ -140,8 +149,7 @@ const ScreenGridLayerExample = {
   props: {
     id: 'screenGridLayer',
     getPosition: d => get(d, 'COORDINATES'),
-    unitWidth: 40,
-    unitHeight: 40,
+    cellSizePixels: 40,
     minColor: [0, 0, 80, 0],
     maxColor: [100, 255, 0, 128],
     pickable: false
@@ -170,6 +178,7 @@ const ScatterplotLayerExample = {
     getRadius: d => get(d, 'SPACES'),
     opacity: 0.5,
     pickable: true,
+    radiusScale: 30,
     radiusMinPixels: 1,
     radiusMaxPixels: 30
   }

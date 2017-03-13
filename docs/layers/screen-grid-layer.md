@@ -19,17 +19,11 @@ visuals when used with the right data set can be quite effective.
 
 Inherits from all [Base Layer](/docs/layers/base-layer.md) properties.
 
-##### `unitWidth` (Number, optional)
+##### `cellSizePixels` (Number, optional)
 
 - Default: `100`
 
-Unit width of the bins.
-
-##### `unitHeight` (Number, optional)
-
-- Default: `100`
-
-Unit height of the bins.
+Unit width/height of the bins.
 
 #### `minColor` (Number[4], optional)
 

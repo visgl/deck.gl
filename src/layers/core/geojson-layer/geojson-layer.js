@@ -39,13 +39,13 @@ const defaultProps = {
   // TODO: Missing props: radiusMinPixels, strokeWidthMinPixels, ...
 
   // Line and polygon outline color
-  getStrokeColor: f => get(f, 'properties.strokeColor') || defaultStrokeColor,
+  getColor: f => get(f, 'properties.strokeColor') || defaultStrokeColor,
   // Point and polygon fill color
   getFillColor: f => get(f, 'properties.fillColor') || defaultFillColor,
   // Point radius
   getRadius: f => get(f, 'properties.radius') || get(f, 'properties.size') || 5,
   // Line and polygon outline accessors
-  getStrokeWidth: f => get(f, 'properties.strokeWidth') || 1,
+  getWidth: f => get(f, 'properties.strokeWidth') || 1,
   // Polygon extrusion accessor
   getElevation: f => 1000
 };
@@ -93,22 +93,21 @@ export default class GeoJsonLayer extends CompositeLayer {
     const onClick = this._onClickSubLayer.bind(this);
 
     // Filled Polygon Layer
-    const polygonFillLayer = fillPolygons && new SolidPolygonLayer(Object.assign({},
-      this.props, {
-        id: `${id}-polygon-fill`,
-        data: polygonFeatures,
-        getPolygon: getCoordinates,
-        getElevation,
-        getColor: getFillColor,
-        extruded,
-        wireframe: false,
-        onHover,
-        onClick,
-        updateTriggers: {
-          getElevation: this.props.updateTriggers.getElevation,
-          getColor: this.props.updateTriggers.getFillColor
-        }
-      }));
+    const polygonFillLayer = fillPolygons && new SolidPolygonLayer(Object.assign({}, this.props, {
+      id: `${id}-polygon-fill`,
+      data: polygonFeatures,
+      extruded,
+      wireframe: false,
+      getPolygon: getCoordinates,
+      getElevation,
+      getColor: getFillColor,
+      updateTriggers: {
+        getElevation: this.props.updateTriggers.getElevation,
+        getColor: this.props.updateTriggers.getFillColor
+      },
+      onHover,
+      onClick
+    }));
 
     // Polygon outline or wireframe
     let polygonOutlineLayer = null;
@@ -116,16 +115,16 @@ export default class GeoJsonLayer extends CompositeLayer {
       polygonOutlineLayer = new SolidPolygonLayer(Object.assign({}, this.props, {
         id: `${id}-polygon-wireframe`,
         data: polygonFeatures,
+        extruded: true,
+        wireframe: true,
         getPolygon: getCoordinates,
         getElevation,
         getColor,
-        extruded: true,
-        wireframe: true,
-        onHover,
-        onClick,
         updateTriggers: Object.assign({}, this.props.updateTriggers, {
           getColor: this.props.updateTriggers.getFillColor
-        })
+        }),
+        onHover,
+        onClick
       }));
     } else if (drawPolygons) {
       polygonOutlineLayer = new PathLayer(Object.assign({}, this.props, {
@@ -139,28 +138,28 @@ export default class GeoJsonLayer extends CompositeLayer {
       }));
     }
 
-    const lineLayer = drawLines && new PathLayer(Object.assign({},
-      this.props, {
-        id: `${id}-line-paths`,
-        data: lineFeatures,
-        getPath: getCoordinates,
-        getColor,
-        getStrokeWidth,
-        onHover,
-        onClick
-      }));
+    const lineLayer = drawLines && new PathLayer(Object.assign({}, this.props, {
+      id: `${id}-line-paths`,
+      data: lineFeatures,
+      getPath: getCoordinates,
+      getColor,
+      getStrokeWidth,
+      onHover,
+      onClick
+    }));
 
-    const pointLayer = drawPoints && new ScatterplotLayer(Object.assign({},
-      this.props, {
-        id: `${id}-points`,
-        data: pointFeatures,
-        getPosition: getCoordinates,
-        getColor,
-        getRadius,
-        onHover,
-        onClick,
-        fp64: this.props.fp64
-      }));
+    const pointLayer = drawPoints && new ScatterplotLayer(Object.assign({}, this.props, {
+      id: `${id}-points`,
+      data: pointFeatures,
+      getPosition: getCoordinates,
+      getColor: getFillColor,
+      getRadius,
+      updateTriggers: Object.assign({}, this.props.updateTriggers, {
+        getColor: this.props.updateTriggers.getFillColor
+      }),
+      onHover,
+      onClick
+    }));
 
     return [
       polygonFillLayer,

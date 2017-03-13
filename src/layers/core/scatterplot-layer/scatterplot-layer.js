@@ -21,7 +21,7 @@
 import {Layer} from '../../../lib';
 import {assembleShaders} from '../../../shader-utils';
 import {COORDINATE_SYSTEM} from '../../../lib';
-import {log, get} from '../../../lib/utils';
+import {get} from '../../../lib/utils';
 import {fp64ify, enable64bitSupport} from '../../../lib/utils/fp64';
 import {GL, Model, Geometry} from 'luma.gl';
 import {readFileSync} from 'fs';
@@ -61,13 +61,8 @@ export default class ScatterplotLayer extends Layer {
 
     /* eslint-disable max-len */
     /* deprecated props check */
-    if (this.props.radius !== undefined) {
-      log.once(0, 'ScatterplotLayer no longer accepts props.radius in this version of deck.gl. Please use props.radiusScale instead.');
-    }
-
-    if (this.props.drawOutline !== undefined) {
-      log.once(0, 'ScatterplotLayer no longer accepts props.drawOutline in this version of deck.gl. Please use props.outline instead.');
-    }
+    this._checkRemovedProp('radius', 'radiusScale');
+    this._checkRemovedProp('drawOutline', 'outline');
 
     this.state.attributeManager.addInstanced({
       instancePositions: {size: 3, accessor: 'getPosition', update: this.calculateInstancePositions},

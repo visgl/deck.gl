@@ -22,7 +22,7 @@ Inherits from all [Base Layer](/docs/layers/base-layer.md) properties.
 
 - Default: `1`
 
-The stroke width used to draw each arc. Unit in pixels.
+The stroke width used to draw each arc. Unit is pixels.
 
 ## Accessors
 
