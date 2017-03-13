@@ -24,9 +24,9 @@ import dataSamples from '../immutable-data-samples';
 import {parseColor, setOpacity} from '../utils/color';
 
 const MARKER_SIZE_MAP = {
-  small: 2,
-  medium: 5,
-  large: 10
+  small: 200,
+  medium: 500,
+  large: 1000
 };
 
 const LIGHT_SETTINGS = {
