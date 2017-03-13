@@ -55,8 +55,7 @@ export default class GridDemo extends Component {
       id: 'grid',
       data,
       minColor: [0, 0, 0, 0],
-      unitWidth: params.cellSize.value,
-      unitHeight: params.cellSize.value
+      cellSizePixels: params.cellSize.value
     });
 
     return (

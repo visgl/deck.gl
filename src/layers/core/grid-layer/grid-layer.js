@@ -19,172 +19,105 @@
 // THE SOFTWARE.
 
 import {Layer} from '../../../lib';
-import {assembleShaders} from '../../../shader-utils';
-import {GL, Model, CubeGeometry} from 'luma.gl';
-import {readFileSync} from 'fs';
-import {join} from 'path';
-import {fp64ify, enable64bitSupport} from '../../../lib/utils/fp64';
-import {COORDINATE_SYSTEM} from '../../../lib';
+import GridCellLayer from '../grid-cell-layer/grid-cell-layer';
 
-const DEFAULT_COLOR = [255, 0, 255, 255];
+import {pointToDensityGridData} from './grid-aggregator';
+import {linearScale, quantizeScale} from '../../../utils/scale-utils';
+import {defaultColorRange} from '../../../utils/color-utils';
+
+const defaultCellSize = 1000;
+const defaultElevationRange = [0, 1000];
+const defaultElevationScale = 1;
 
 const defaultProps = {
-  extruded: true,
-  latOffset: 0.0089,
-  lonOffset: 0.0113,
-  elevationScale: 1,
-  getPosition: x => x.position,
-  getElevation: x => x.elevation,
-  getColor: x => x.color,
-  lightSettings: {
-    lightsPosition: [-122.45, 37.65, 8000, -122.45, 37.20, 1000],
-    ambientRatio: 0.4,
-    diffuseRatio: 0.6,
-    specularRatio: 0.8,
-    lightsStrength: [1.0, 0.0, 0.8, 0.0],
-    numberOfLights: 2
-  },
-  fp64: false
+  cellSize: defaultCellSize,
+  colorRange: defaultColorRange,
+  elevationRange: defaultElevationRange,
+  elevationScale: defaultElevationScale,
+  getPosition: x => x.position
+  // AUDIT - getWeight ?
 };
 
+function noop() {}
+
+function _needsReProjectPoints(oldProps, props) {
+  return oldProps.cellSize !== props.cellSize;
+}
+
 export default class GridLayer extends Layer {
-  /**
-   * A generic GridLayer that takes latitude longitude delta of cells as a uniform
-   * and the min lat lng of cells. grid can be 3d when pass in a height
-   * and set enable3d to true
-   *
-   * @param {array} props.data -
-   * @param {boolean} props.extruded - enable grid elevation
-   * @param {number} props.latOffset - grid cell size in lat delta
-   * @param {number} props.lonOffset - grid cell size in lng delta
-   * @param {function} props.getPosition - position accessor, returned as [minLng, minLat]
-   * @param {function} props.getElevation - elevation accessor
-   * @param {function} props.getColor - color accessor, returned as [r, g, b, a]
-   */
-
-  getShaders() {
-    const vs64 = readFileSync(join(__dirname, './grid-layer-64-vertex.glsl'), 'utf8');
-    const vs32 = readFileSync(join(__dirname, './grid-layer-vertex.glsl'), 'utf8');
-    const fs = readFileSync(join(__dirname, './grid-layer-fragment.glsl'), 'utf8');
-
-    return enable64bitSupport(this.props) ? {
-      vs: vs64, fs, modules: ['fp64', 'project64', 'lighting']
-    } : {
-      vs: vs32, fs, modules: ['lighting']
+  initializeState() {
+    this.state = {
+      gridOffset: {yOffset: 0.0089, xOffset: 0.0113},
+      layerData: [],
+      countRange: null,
+      pickedCell: null
     };
   }
 
-  initializeState() {
-    const {gl} = this.context;
-    this.setState({model: this._getModel(gl)});
+  updateState({oldProps, props, changeFlags}) {
+    if (changeFlags.dataChanged || _needsReProjectPoints(oldProps, props)) {
+      const {data, cellSize, getPosition} = this.props;
 
-    const {attributeManager} = this.state;
-    /* eslint-disable max-len */
-    attributeManager.addInstanced({
-      instancePositions: {size: 4, accessor: ['getPosition', 'getElevation'], update: this.calculateInstancePositions},
-      instanceColors: {size: 4, type: GL.UNSIGNED_BYTE, accessor: 'getColor', update: this.calculateInstanceColors}
-    });
-    /* eslint-enable max-len */
-  }
+      const {gridOffset, layerData, countRange} =
+        pointToDensityGridData(data, cellSize, getPosition);
 
-  updateAttribute({props, oldProps, changeFlags}) {
-    if (props.fp64 !== oldProps.fp64) {
-      const {attributeManager} = this.state;
-      attributeManager.invalidateAll();
-
-      if (props.fp64 && props.projectionMode === COORDINATE_SYSTEM.LNG_LAT) {
-        attributeManager.addInstanced({
-          instancePositions64xyLow: {
-            size: 2,
-            accessor: 'getPosition',
-            update: this.calculateInstancePositions64xyLow
-          }
-        });
-      } else {
-        attributeManager.remove([
-          'instancePositions64xyLow'
-        ]);
-      }
-
+      Object.assign(this.state, {gridOffset, layerData, countRange});
     }
   }
 
-  updateState({props, oldProps, changeFlags}) {
-    super.updateState({props, oldProps, changeFlags});
-    this.updateModel({props, oldProps, changeFlags});
-    this.updateAttribute({props, oldProps, changeFlags});
-    this.updateUniforms();
-  }
+  getPickingInfo(opts) {
+    const info = super.getPickingInfo(opts);
+    const pickedCell = this.state.pickedCell;
 
-  _getModel(gl) {
-    const geometry = new CubeGeometry({});
-    const shaders = assembleShaders(gl, this.getShaders());
-
-    return new Model({
-      gl,
-      id: this.props.id,
-      vs: shaders.vs,
-      fs: shaders.fs,
-      geometry,
-      isInstanced: true
+    return Object.assign(info, {
+      layer: this,
+      // override index with cell index
+      index: pickedCell ? pickedCell.index : -1,
+      picked: Boolean(pickedCell),
+      // override object with picked cell
+      object: pickedCell
     });
   }
 
-  updateUniforms() {
-    const {opacity, extruded, elevationScale, latOffset, lonOffset, lightSettings} = this.props;
+  _onHoverSublayer(info) {
 
-    this.setUniforms(Object.assign({}, {
-      extruded,
-      elevationScale,
-      opacity,
-      latOffset,
-      lonOffset
-    },
-    lightSettings));
+    this.state.pickedCell = info.picked && info.index > -1 ?
+      this.state.layerData[info.index] : null;
   }
 
-  draw({uniforms}) {
-    super.draw({uniforms: Object.assign({}, uniforms)});
+  _onGetSublayerColor(cell) {
+    const {colorRange} = this.props;
+    const colorDomain = this.props.colorDomain || this.state.countRange;
+
+    return quantizeScale(colorDomain, colorRange, cell.count);
   }
 
-  calculateInstancePositions(attribute) {
-    const {data, getPosition, getElevation} = this.props;
-    const {value, size} = attribute;
-    let i = 0;
-    for (const object of data) {
-      const position = getPosition(object);
-      const elevation = getElevation(object) || 0;
-      value[i + 0] = position[0];
-      value[i + 1] = position[1];
-      value[i + 2] = 0;
-      value[i + 3] = elevation;
-      i += size;
-    }
+  _onGetSublayerElevation(cell) {
+    const {elevationRange} = this.props;
+    const elevationDomain = this.props.elevationDomain || [0, this.state.countRange[1]];
+    return linearScale(elevationDomain, elevationRange, cell.count);
   }
 
-  calculateInstancePositions64xyLow(attribute) {
-    const {data, getPosition} = this.props;
-    const {value} = attribute;
-    let i = 0;
-    for (const point of data) {
-      const position = getPosition(point);
-      value[i++] = fp64ify(position[0])[1];
-      value[i++] = fp64ify(position[1])[1];
-    }
-  }
+  renderLayers() {
+    const {id} = this.props;
 
-  calculateInstanceColors(attribute) {
-    const {data, getColor} = this.props;
-    const {value, size} = attribute;
-    let i = 0;
-    for (const object of data) {
-      const color = getColor(object) || DEFAULT_COLOR;
-      value[i + 0] = color[0];
-      value[i + 1] = color[1];
-      value[i + 2] = color[2];
-      value[i + 3] = Number.isFinite(color[3]) ? color[3] : DEFAULT_COLOR[3];
-      i += size;
-    }
+    return new GridCellLayer(Object.assign({},
+      this.props, {
+        id: `${id}-density-grid`,
+        data: this.state.layerData,
+        latOffset: this.state.gridOffset.yOffset,
+        lonOffset: this.state.gridOffset.xOffset,
+        getColor: this._onGetSublayerColor.bind(this),
+        getElevation: this._onGetSublayerElevation.bind(this),
+        getPosition: d => d.position,
+        // Override user's onHover and onClick props
+        onHover: this._onHoverSublayer.bind(this),
+        onClick: noop,
+        updateTriggers: {
+          getColor: {colorRange: this.props.colorRange},
+          getElevation: {elevationRange: this.props.elevationRange}
+        }
+      }));
   }
 }
 

@@ -15,18 +15,24 @@ building blocks.
 
 The core layers are the most stable and supported deck.gl layers.
 
-### Extrusions and 2.5D support.
+Some notable features of the core deck.gl layers
 
-Some of the Core layers support extrusions and heights. The layers
-that support extrusions are marked with an "Extrusion" tag.
-
-## 64-bit Layers
-
-Core Layers have 64 bit counterparts that can be used to achieve
-higher precision, particularly under high zoom levels (> 1.000.000x)
+* **64-bit Mode**
+Most core Layers support a 64 bit mode that can be used
+to achieve higher precision, particularly under high zoom levels (> 1.000.000x)
 at the cost of sacrificing some performance and memory.
+Layers that have a 64 bit counterpart are marked with a "64-bit" tag.
+* **Extrusions**
+Some of the Core layers support extrusions and heights (aka "elevations")
+enabling applications to show a "2.5D" view of their data when using the map
+in perspective mode.
+The layers that support extrusions are marked with an "Extrusion" tag.
 
-Layers that have a 64 bit counterpart are marked with a 64-bit tag.
+## Deprecated Layers
+
+These are layers from an older releases that now have better counterparts.
+They should not be used in new applications as they may be removed in future
+deck.gl releases.
 
 ## Sample Layers
 
@@ -36,4 +42,5 @@ can be designed. These layers sometimes have documentation in the example
 code, but they are not listed here in the official documentation.
 
 To use one of the sample layers an application simply needs to copy it into
-its own source tree, as these layers are not `export`ed by deck.gl.
+its own source tree. This is necessary because these layers are not
+included in the deck.gl distribution (i.e. they are not `export`ed by deck.gl).

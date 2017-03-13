@@ -4,14 +4,15 @@
 
 # HexagonLayer
 
-The HexagonLayer is a variation of grid layer. It is intended to render tessellatied hexagons,
-and also enables height in 3d. The HexagonLayer takes in the vertices of a primitive
-hexagon as [[longitude, latitude]], and an array of hexagon centroid as [longitude, latitude].
-It renders each hexagon based on color, opacity and elevation.
+The `HexagonLayer` renders a hexagon heatmap based on an array of points.
+ It takes the radius of hexagon bin, projects points into hexagon bins. The color
+and height of the hexagon is scaled by number of points it contains. HexagonLayer
+at the moment only works with COORDINATE_SYSTEM.LNG_LAT.
 
-<div align="center">
-  <img height="300" src="/demo/src/static/images/hexagon-layer.png" />
-</div>
+
+  <div align="center">
+    <img height="300" src="/demo/src/static/images/hexagon-layer.gif" />
+  </div>
 
     import {HexagonLayer} from 'deck.gl';
 
@@ -19,74 +20,88 @@ It renders each hexagon based on color, opacity and elevation.
 
 Inherits from all [Base Layer](/docs/layers/base-layer.md) properties.
 
-##### `hexagonVertices` (Array[[lon, lat]], optional)
-
-Primitive hexagon vertices as an array of six [lon, lat] pairs,
-in either clockwise or counter clouckwise direction. Use radius and angle
-instead of hexagonVertices if provided.
-
 ##### `radius` (Number, optional)
 
-Primitive hexagon radius in meter. The hexagons are pointy-topped (rather than flat-topped).
-If `radius` and `angle` are provided, they will be used to calculate
-primitive hexagon instead of `hexagonVertices`
+- Default: `1000`
 
-##### `angle` (Number, optional)
+Radius of hexagon bin in meters. The hexagons are pointy-topped (rather than flat-topped).
 
-Primitive hexagon angle in radian. Angle is the rotation of one corner
-counter clockwise from north. If `radius` and `angle` are provided,
-they will be used to calculate primitive hexagon instead of `hexagonVertices`
+##### `hexagonAggregator` (Function, optional)
+
+- Default: `d3-hexbin`
+
+`hexagonAggregator` is the function to aggregate data into hexagonal bins.
+The `hexagonAggregator` takes props of the layer and current viewport as input.
+The output should be an array of hexagons with each formatted as `{centroid: [], points: []}`, where
+`centroid` is the center of the hexagon, and `points` is an array of points that contained by it.
+By default, the `HexagonLayer` uses
+[d3-hexbin](https://github.com/d3/d3-hexbin) as `hexagonAggregator`,
+see `src/layers/core/point-density-hexagon-layer/hexagon-aggregator`
+
+##### `colorDomain` (Array, optional)
+
+- Default: `[min(count), max(count)]`
+
+Color scale input domain. The color scale maps continues numeric domain into
+discrete color range. If not provided, the layer will set `colorDomain` to the
+range of counts in each hexagon. You can control how the color of hexagons mapped
+to number of counts by passing in an arbitrary color domain. This property is extremely handy when you want to render different data input with the same color mapping for comparison.
+
+##### `colorRange` (Array, optional)
+
+- Default: <img src="/demo/src/static/images/colorbrewer_YlOrRd_6.png"/></a>
+
+Hexagon color ranges as an array of colors formatted as `[[255, 255, 255, 255]]`. Default is
+[colorbrewer](http://colorbrewer2.org/#type=sequential&scheme=YlOrRd&n=6) `6-class YlOrRd`.
 
 ##### `coverage` (Number, optional)
 
 - Default: `1`
 
-Hexagon radius multiplier, between 0 - 1. The radius of hexagon is calculated by
-`coverage * getRadius(d)`
+Hexagon radius multiplier, clamped between 0 - 1. The final radius of hexagon
+is calculated by `coverage * radius`. Note: coverage does not affect how points
+are binned.
+The radius of the bin is determined only by the `radius` property.
+
+##### `elevationDomain` (Array, optional)
+
+- Default: `[0, max(count)]`
+
+Elevation scale input domain. The elevation scale is a linear scale that
+maps number of counts to elevation. By default it is set to between
+0 and max of point counts in each hexagon.
+This property is extremely handy when you want to render different data input
+with the same elevation scale for comparison.
+
+#### `elevationRange` (Array, optional)
+
+- Default: `[0, 1000]`
+
+Elevation scale output range
 
 ##### `elevationScale` (Number, optional)
 
 - Default: `1`
 
-Hexagon elevation multiplier. The elevation of hexagon is calculated by
-`elevationScale * getElevation(d)`. `elevationScale` is a handy property
-to scale all hexagon elevations without updating the data.
+Hexagon elevation multiplier. The actual elevation is calculated by
+  `elevationScale * getElevation(d)`. `elevationScale` is a handy property to scale
+all hexagons without updating the data.
 
 ##### `extruded` (Boolean, optional)
 
 - Default: `true`
 
-Whether to extrude hexagon. If se to false, all hexagons will be set to flat.
-
-##### `selectedPickingColor` (Array, optional) **EXPERIMENTAL**
-
-Shader based highlighting of a selected object
+Whether to enable cell elevation. Cell elevation scale by count of points in each cell. If set to false, all cells will be flat.
 
 ##### `lightSettings` (Object, optional) **EXPERIMENTAL**
 
 This is an object that contains light settings for extruded polygons.
-Be aware that this prop will likely be changed in a future version of deck.gl.
-
+  Be aware that this prop will likely be changed in a future version of deck.gl.
 
 ## Accessors
 
-#### `getCentroid` (Function, optional)
+##### `getPosition` (Function, optional)
 
-- Default: `object => object.centroid`
+- Default: `object => object.position`
 
-Method called to retrieve the centroid of each hexagon. Centorid should be
-set to [lon, lat]
-
-#### `getColor` (Function, optional)
-
-- Default: `object => object.color`
-
-Method called to retrieve the color of each object. Color should be set to
-[r, g, b, a] with each number between 0-255.
-
-#### `getElevation` (Function, optional)
-
-- Default: `object => object.elevation`
-
-Method called to retrieve the elevation of each object.
-1 unit approximate to 100 meters.
+Method called to retrieve the position of each point.

@@ -50,19 +50,21 @@ const DEFAULT_COLOR = [0, 0, 0, 255];
  *   with mask: true.
  */
 const defaultProps = {
-  getPosition: x => x.position,
-  getIcon: x => x.icon,
-  getColor: x => x.color || DEFAULT_COLOR,
-  getSize: x => x.size || 1,
   iconAtlas: null,
   iconMapping: {},
   sizeScale: 1,
-  fp64: false
+  fp64: false,
+
+  getPosition: x => x.position,
+  getIcon: x => x.icon,
+  getColor: x => x.color || DEFAULT_COLOR,
+  getSize: x => x.size || 1
 };
 
 export default class IconLayer extends Layer {
   initializeState() {
     const {attributeManager} = this.state;
+
     /* eslint-disable max-len */
     attributeManager.addInstanced({
       instancePositions: {size: 3, accessor: 'getPosition', update: this.calculateInstancePositions},

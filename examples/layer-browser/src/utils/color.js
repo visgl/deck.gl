@@ -10,7 +10,7 @@ export function parseColor(color) {
   if (typeof color === 'string') {
     return parseHexColor(color);
   }
-  return null;
+  return [0, 0, 0, 255];
 }
 
 // Parse a hex color

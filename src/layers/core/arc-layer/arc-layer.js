@@ -29,12 +29,13 @@ import {COORDINATE_SYSTEM} from '../../../lib';
 const DEFAULT_COLOR = [0, 0, 0, 255];
 
 const defaultProps = {
+  strokeWidth: 1,
+  fp64: false,
+
   getSourcePosition: x => x.sourcePosition,
   getTargetPosition: x => x.targetPosition,
   getSourceColor: x => x.color || DEFAULT_COLOR,
-  getTargetColor: x => x.color || DEFAULT_COLOR,
-  strokeWidth: 1,
-  fp64: false
+  getTargetColor: x => x.color || DEFAULT_COLOR
 };
 
 export default class ArcLayer extends Layer {
@@ -55,8 +56,8 @@ export default class ArcLayer extends Layer {
     this.setState({model: this._getModel(gl)});
 
     const {attributeManager} = this.state;
-    /* eslint-disable max-len */
 
+    /* eslint-disable max-len */
     attributeManager.addInstanced({
       instancePositions: {size: 4, accessor: ['getSourcePosition', 'getTargetPosition'], update: this.calculateInstancePositions},
       instanceSourceColors: {size: 4, type: GL.UNSIGNED_BYTE, accessor: 'getSourceColor', update: this.calculateInstanceSourceColors},

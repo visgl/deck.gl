@@ -25,12 +25,12 @@ import {readFileSync} from 'fs';
 import {join} from 'path';
 
 const defaultProps = {
-  // @type {number} opts.unitWidth - width of the unit rectangle
-  unitWidth: 100,
-  // @type {number} opts.unitHeight - height of the unit rectangle
-  unitHeight: 100,
+  cellSizePixels: 100,
+
+  // Color range?
   minColor: [0, 0, 0, 255],
   maxColor: [0, 255, 0, 255],
+
   getPosition: d => d.position,
   getWeight: d => 1
 };
@@ -41,6 +41,12 @@ export default class ScreenGridLayer extends Layer {
       vs: readFileSync(join(__dirname, './screen-grid-layer-vertex.glsl'), 'utf8'),
       fs: readFileSync(join(__dirname, './screen-grid-layer-fragment.glsl'), 'utf8')
     };
+  }
+
+  constructor(props) {
+    super(props);
+    this._checkRemovedProp('unitWidth', 'cellSizePixels');
+    this._checkRemovedProp('unitHeight', 'cellSizePixels');
   }
 
   initializeState() {
@@ -58,8 +64,7 @@ export default class ScreenGridLayer extends Layer {
 
   updateState({oldProps, props, changeFlags}) {
     const cellSizeChanged =
-      props.unitWidth !== oldProps.unitWidth ||
-      props.unitHeight !== oldProps.unitHeight;
+      props.cellSizePixels !== oldProps.cellSizePixels;
 
     if (cellSizeChanged || changeFlags.viewportChanged) {
       this.updateCell();
@@ -93,16 +98,16 @@ export default class ScreenGridLayer extends Layer {
 
   updateCell() {
     const {width, height} = this.context.viewport;
-    const {unitWidth, unitHeight} = this.props;
+    const {cellSizePixels} = this.props;
 
     const MARGIN = 2;
     const cellScale = new Float32Array([
-      (unitWidth - MARGIN) / width * 2,
-      -(unitHeight - MARGIN) / height * 2,
+      (cellSizePixels - MARGIN) / width * 2,
+      -(cellSizePixels - MARGIN) / height * 2,
       1
     ]);
-    const numCol = Math.ceil(width / unitWidth);
-    const numRow = Math.ceil(height / unitHeight);
+    const numCol = Math.ceil(width / cellSizePixels);
+    const numRow = Math.ceil(height / cellSizePixels);
 
     this.setState({
       cellScale,
@@ -117,21 +122,21 @@ export default class ScreenGridLayer extends Layer {
 
   calculateInstancePositions(attribute, {numInstances}) {
     const {width, height} = this.context.viewport;
-    const {unitWidth, unitHeight} = this.props;
+    const {cellSizePixels} = this.props;
     const {numCol} = this.state;
     const {value, size} = attribute;
 
     for (let i = 0; i < numInstances; i++) {
       const x = i % numCol;
       const y = Math.floor(i / numCol);
-      value[i * size + 0] = x * unitWidth / width * 2 - 1;
-      value[i * size + 1] = 1 - y * unitHeight / height * 2;
+      value[i * size + 0] = x * cellSizePixels / width * 2 - 1;
+      value[i * size + 1] = 1 - y * cellSizePixels / height * 2;
       value[i * size + 2] = 0;
     }
   }
 
   calculateInstanceCount(attribute) {
-    const {data, unitWidth, unitHeight, getPosition, getWeight} = this.props;
+    const {data, cellSizePixels, getPosition, getWeight} = this.props;
     const {numCol, numRow} = this.state;
     const {value} = attribute;
     let maxCount = 0;
@@ -140,8 +145,8 @@ export default class ScreenGridLayer extends Layer {
 
     for (const point of data) {
       const pixel = this.project(getPosition(point));
-      const colId = Math.floor(pixel[0] / unitWidth);
-      const rowId = Math.floor(pixel[1] / unitHeight);
+      const colId = Math.floor(pixel[0] / cellSizePixels);
+      const rowId = Math.floor(pixel[1] / cellSizePixels);
       if (colId >= 0 && colId < numCol && rowId >= 0 && rowId < numRow) {
         const i = colId + rowId * numCol;
         value[i] += getWeight(point);

@@ -39,17 +39,6 @@ const LAYER_CONSTRUCT_TEST_CASES = [
   }
 ];
 
-const LAYER_CONSTRUCT_FAIL_TEST_CASES = [
-  {
-    title: 'Null id',
-    props: {id: null}
-  },
-  {
-    title: 'Empty string id',
-    props: {id: ''}
-  }
-];
-
 class SubLayer extends Layer {}
 SubLayer.layerName = 'SubLayer';
 SubLayer.defaultProps = {
@@ -83,16 +72,6 @@ test('Layer#constructor', t => {
     const expectedId = tc.props.id || tc.id;
     t.equal(layer.id, expectedId, 'Layer id set correctly');
     t.ok(layer.props, 'Layer props not null');
-  }
-  t.end();
-});
-
-test('Layer#constructor with bad props', t => {
-  for (const tc of LAYER_CONSTRUCT_FAIL_TEST_CASES) {
-    t.throws(
-      () => new Layer(tc.props),
-      `Expected invalid prop to throw an error ${tc.title}`
-    );
   }
   t.end();
 });

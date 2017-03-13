@@ -29,11 +29,12 @@ import {COORDINATE_SYSTEM} from '../../../lib';
 const DEFAULT_COLOR = [0, 0, 0, 255];
 
 const defaultProps = {
+  strokeWidth: 1,
+  fp64: false,
+
   getSourcePosition: x => x.sourcePosition,
   getTargetPosition: x => x.targetPosition,
-  getColor: x => x.color || DEFAULT_COLOR,
-  strokeWidth: 1,
-  fp64: false
+  getColor: x => x.color || DEFAULT_COLOR
 };
 
 export default class LineLayer extends Layer {

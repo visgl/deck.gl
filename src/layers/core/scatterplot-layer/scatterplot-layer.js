@@ -21,7 +21,7 @@
 import {Layer} from '../../../lib';
 import {assembleShaders} from '../../../shader-utils';
 import {COORDINATE_SYSTEM} from '../../../lib';
-import {log, get} from '../../../lib/utils';
+import {get} from '../../../lib/utils';
 import {fp64ify, enable64bitSupport} from '../../../lib/utils/fp64';
 import {GL, Model, Geometry} from 'luma.gl';
 import {readFileSync} from 'fs';
@@ -30,15 +30,16 @@ import {join} from 'path';
 const DEFAULT_COLOR = [0, 0, 0, 255];
 
 const defaultProps = {
-  getPosition: x => x.position,
-  getRadius: x => x.radius || 30,
-  getColor: x => x.color || DEFAULT_COLOR,
-  radiusScale: 30,  //  point radius in meters
+  radiusScale: 1,  //  point radius in meters
   radiusMinPixels: 0, //  min point radius in pixels
   radiusMaxPixels: Number.MAX_SAFE_INTEGER, // max point radius in pixels
-  outline: false,
   strokeWidth: 1,
-  fp64: false
+  outline: false,
+  fp64: false,
+
+  getPosition: x => x.position,
+  getRadius: x => x.radius || 1,
+  getColor: x => x.color || DEFAULT_COLOR
 };
 
 export default class ScatterplotLayer extends Layer {
@@ -60,13 +61,8 @@ export default class ScatterplotLayer extends Layer {
 
     /* eslint-disable max-len */
     /* deprecated props check */
-    if (this.props.radius !== undefined) {
-      log.once(0, 'ScatterplotLayer no longer accepts props.radius in this version of deck.gl. Please use props.radiusScale instead.');
-    }
-
-    if (this.props.drawOutline !== undefined) {
-      log.once(0, 'ScatterplotLayer no longer accepts props.drawOutline in this version of deck.gl. Please use props.outline instead.');
-    }
+    this._checkRemovedProp('radius', 'radiusScale');
+    this._checkRemovedProp('drawOutline', 'outline');
 
     this.state.attributeManager.addInstanced({
       instancePositions: {size: 3, accessor: 'getPosition', update: this.calculateInstancePositions},

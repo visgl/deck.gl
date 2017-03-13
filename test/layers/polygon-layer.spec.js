@@ -34,7 +34,7 @@ test('PolygonLayer#constructor', t => {
   t.ok(layer instanceof PolygonLayer, 'PolygonLayer created');
 
   testInitializeLayer({layer});
-  t.ok(layer.state.model, 'PolygonLayer has state');
+  // t.ok(layer.state.model, 'PolygonLayer has state');
 
   t.doesNotThrow(
     () => new PolygonLayer({

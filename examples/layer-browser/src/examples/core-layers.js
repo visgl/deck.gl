@@ -2,14 +2,15 @@ import {
   ScatterplotLayer,
   ArcLayer,
   LineLayer,
-  HexagonLayer,
 
   PointCloudLayer,
   ScreenGridLayer,
   IconLayer,
+  GridCellLayer,
   GridLayer,
-  PointDensityGridLayer,
-  PointDensityHexagonLayer,
+  HexagonCellLayer,
+  HexagonLayer,
+
   GeoJsonLayer,
   PolygonLayer,
   PathLayer
@@ -71,23 +72,32 @@ const GeoJsonLayerExample = {
   getData: () => dataSamples.geojson,
   props: {
     id: 'geojsonLayer',
-    // TODO change to use the color util when it is landed
+    getRadius: f => MARKER_SIZE_MAP[f.properties['marker-size']],
+    getFillColor: f => {
+      const color = parseColor(f.properties.fill || f.properties['marker-color']);
+      const opacity = (f.properties['fill-opacity'] || 1) * 255;
+      return setOpacity(color, opacity);
+    },
+    getColor: f => {
+      const color = parseColor(f.properties.stroke);
+      const opacity = (f.properties['stroke-opacity'] || 1) * 255;
+      return setOpacity(color, opacity);
+    },
+    getWidth: f => f.properties['stroke-width'],
+    getHeight: f => Math.random() * 1000,
+    widthScale: 10,
+    widthMinPixels: 1,
+    pickable: true,
+
+    // TODO - Old accessors
     getPointColor: f => parseColor(f.properties['marker-color']),
-    getPointSize: f => MARKER_SIZE_MAP[f.properties['marker-size']],
+    getPointRadius: f => MARKER_SIZE_MAP[f.properties['marker-size']],
     getStrokeColor: f => {
       const color = parseColor(f.properties.stroke);
-      const opacity = f.properties['stroke-opacity'] * 255;
+      const opacity = (f.properties['stroke-opacity'] || 1) * 255;
       return setOpacity(color, opacity);
     },
-    getStrokeWidth: f => f.properties['stroke-width'],
-    getFillColor: f => {
-      const color = parseColor(f.properties.fill);
-      const opacity = f.properties['fill-opacity'] * 255;
-      return setOpacity(color, opacity);
-    },
-    strokeWidthScale: 10,
-    strokeWidthMinPixels: 1,
-    pickable: true
+    getStrokeWidth: f => f.properties['stroke-width']
   }
 };
 
@@ -111,7 +121,9 @@ const PolygonLayerExample = {
   getData: () => dataSamples.polygons,
   props: {
     getPolygon: f => f,
-    getColor: f => [Math.random() * 255, 0, 0],
+    getFillColor: f => [Math.random() % 256, 0, 0],
+    getStrokeColor: f => [0, 0, 0, 255],
+    getHeight: f => Math.random() * 1000,
     opacity: 0.8,
     pickable: true
   }
@@ -125,7 +137,8 @@ const PathLayerExample = {
     opacity: 0.6,
     getPath: f => get(f, 'path'),
     getColor: f => [128, 0, 0],
-    getStrokeWidth: f => 10,
+    getWidth: f => 10,
+    strokeMinWidth: 1,
     pickable: true
   }
 };
@@ -136,8 +149,7 @@ const ScreenGridLayerExample = {
   props: {
     id: 'screenGridLayer',
     getPosition: d => get(d, 'COORDINATES'),
-    unitWidth: 40,
-    unitHeight: 40,
+    cellSizePixels: 40,
     minColor: [0, 0, 80, 0],
     maxColor: [100, 255, 0, 128],
     pickable: false
@@ -166,6 +178,7 @@ const ScatterplotLayerExample = {
     getRadius: d => get(d, 'SPACES'),
     opacity: 0.5,
     pickable: true,
+    radiusScale: 30,
     radiusMinPixels: 1,
     radiusMaxPixels: 30
   }
@@ -188,10 +201,10 @@ const PointCloudLayerExample = {
   }
 };
 
-const GridLayerExample = {
-  layer: GridLayer,
+const GridCellLayerExample = {
+  layer: GridCellLayer,
   props: {
-    id: 'gridLayer',
+    id: 'gridCellLayer',
     data: dataSamples.worldGrid.data,
     latOffset: dataSamples.worldGrid.latOffset,
     lonOffset: dataSamples.worldGrid.lonOffset,
@@ -204,13 +217,13 @@ const GridLayerExample = {
   }
 };
 
-const PointDensityGridLayerExample = {
-  layer: PointDensityGridLayer,
+const GridLayerExample = {
+  layer: GridLayer,
   propTypes: {
     cellSize: {type: 'number', min: 0, max: 1000}
   },
   props: {
-    id: 'pointDensityGridLayer',
+    id: 'gridLayer',
     data: dataSamples.points,
     cellSize: 200,
     opacity: 1,
@@ -221,13 +234,13 @@ const PointDensityGridLayerExample = {
   }
 };
 
-const HexagonLayerExample = {
-  layer: HexagonLayer,
+const HexagonCellLayerExample = {
+  layer: HexagonCellLayer,
   propTypes: {
     coverage: {type: 'number', min: 0, max: 1}
   },
   props: {
-    id: 'hexagonLayer',
+    id: 'hexagonCellLayer',
     data: dataSamples.hexagons,
     hexagonVertices: dataSamples.hexagons[0].vertices,
     coverage: 1,
@@ -240,14 +253,14 @@ const HexagonLayerExample = {
   }
 };
 
-const PointDensityHexagonLayerExample = {
-  layer: PointDensityHexagonLayer,
+const HexagonLayerExample = {
+  layer: HexagonLayer,
   propTypes: {
     coverage: {type: 'number', min: 0, max: 1},
     radius: {type: 'number', min: 0, max: 3000}
   },
   props: {
-    id: 'PointDensityHexagonLayer',
+    id: 'HexagonLayer',
     data: dataSamples.points,
     extruded: true,
     pickable: true,
@@ -300,11 +313,11 @@ export default {
     ArcLayer: ArcLayerExample,
     LineLayer: LineLayerExample,
     IconLayer: IconLayerExample,
+    GridCellLayer: GridCellLayerExample,
     GridLayer: GridLayerExample,
-    PointDensityGridLayer: PointDensityGridLayerExample,
     ScreenGridLayer: ScreenGridLayerExample,
+    HexagonCellLayer: HexagonCellLayerExample,
     HexagonLayer: HexagonLayerExample,
-    PointDensityHexagonLayer: PointDensityHexagonLayerExample,
     PointCloudLayer: PointCloudLayerExample
   },
 

@@ -29,15 +29,17 @@ export {default as PerspectiveViewport} from './lib/viewports/perspective-viewpo
 
 // Core Layers
 export {default as ArcLayer} from './layers/core/arc-layer/arc-layer';
-export {default as GridLayer} from './layers/core/grid-layer/grid-layer';
-export {default as PointDensityGridLayer} from './layers/core/point-density-grid-layer/point-density-grid-layer';
-export {default as PointDensityHexagonLayer} from './layers/core/point-density-hexagon-layer/point-density-hexagon-layer';
-export {default as HexagonLayer} from './layers/core/hexagon-layer/hexagon-layer';
 export {default as IconLayer} from './layers/core/icon-layer/icon-layer';
 export {default as LineLayer} from './layers/core/line-layer/line-layer';
 export {default as PointCloudLayer} from './layers/core/point-cloud-layer/point-cloud-layer';
 export {default as ScatterplotLayer} from './layers/core/scatterplot-layer/scatterplot-layer';
+
 export {default as ScreenGridLayer} from './layers/core/screen-grid-layer/screen-grid-layer';
+export {default as GridLayer} from './layers/core/grid-layer/grid-layer';
+export {default as GridCellLayer} from './layers/core/grid-cell-layer/grid-cell-layer';
+
+export {default as HexagonLayer} from './layers/core/hexagon-layer/hexagon-layer';
+export {default as HexagonCellLayer} from './layers/core/hexagon-cell-layer/hexagon-cell-layer';
 
 export {default as PathLayer} from './layers/core/path-layer/path-layer';
 export {default as PolygonLayer} from './layers/core/polygon-layer/polygon-layer';

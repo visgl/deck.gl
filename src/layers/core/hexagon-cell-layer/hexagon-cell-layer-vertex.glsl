@@ -1,4 +1,4 @@
-#define SHADER_NAME extruded-hexagon-layer-vs
+#define SHADER_NAME hexagon-cell-layer-vs
 
 attribute vec3 positions;
 attribute vec3 normals;

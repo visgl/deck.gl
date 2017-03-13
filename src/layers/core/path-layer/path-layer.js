@@ -10,15 +10,16 @@ const DEFAULT_COLOR = [0, 0, 0, 255];
 
 const defaultProps = {
   opacity: 1,
-  strokeWidthScale: 1,
+  widthScale: 1, // stroke width in meters
+  widthMinPixels: 0, //  min stroke width in pixels
+  widthMaxPixels: Number.MAX_SAFE_INTEGER, // max stroke width in pixels
   rounded: false,
   miterLimit: 4,
-  strokeWidthMinPixels: 0, //  min stroke width in pixels
-  strokeWidthMaxPixels: Number.MAX_SAFE_INTEGER, // max stroke width in pixels
+  fp64: false,
+
   getPath: object => object.path,
   getColor: object => object.color || DEFAULT_COLOR,
-  getStrokeWidth: object => object.width || 1,
-  fp64: false
+  getWidth: object => object.width || 1
 };
 
 const isClosed = path => {
@@ -52,7 +53,7 @@ export default class PathLayer extends Layer {
       instanceEndPositions: {size: 3, update: this.calculateEndPositions},
       instanceLeftDeltas: {size: 3, update: this.calculateLeftDeltas},
       instanceRightDeltas: {size: 3, update: this.calculateRightDeltas},
-      instanceStrokeWidths: {size: 1, accessor: 'getStrokeWidth', update: this.calculateStrokeWidths},
+      instanceStrokeWidths: {size: 1, accessor: 'getWidth', update: this.calculateStrokeWidths},
       instanceColors: {size: 4, type: GL.UNSIGNED_BYTE, accessor: 'getColor', update: this.calculateColors},
       instancePickingColors: {size: 3, type: GL.UNSIGNED_BYTE, update: this.calculatePickingColors}
     });
@@ -98,15 +99,15 @@ export default class PathLayer extends Layer {
 
   draw({uniforms}) {
     const {
-      rounded, miterLimit, strokeWidthScale, strokeWidthMinPixels, strokeWidthMaxPixels
+      rounded, miterLimit, widthScale, widthMinPixels, widthMaxPixels
     } = this.props;
 
     this.state.model.render(Object.assign({}, uniforms, {
       jointType: Number(rounded),
-      strokeWidthScale,
+      widthScale,
       miterLimit,
-      strokeWidthMinPixels,
-      strokeWidthMaxPixels
+      widthMinPixels,
+      widthMaxPixels
     }));
   }
 
@@ -260,13 +261,13 @@ export default class PathLayer extends Layer {
   }
 
   calculateStrokeWidths(attribute) {
-    const {data, getStrokeWidth} = this.props;
+    const {data, getWidth} = this.props;
     const {paths} = this.state;
     const {value} = attribute;
 
     let i = 0;
     paths.forEach((path, index) => {
-      const width = getStrokeWidth(data[index], index);
+      const width = getWidth(data[index], index);
       for (let ptIndex = 1; ptIndex < path.length; ptIndex++) {
         value[i++] = width;
       }
