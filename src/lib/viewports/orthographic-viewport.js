@@ -13,7 +13,6 @@ export default class OrthographicViewport extends Viewport {
     // projection matrix arguments
     near = 1, // Distance of near clipping plane
     far = 100, // Distance of far clipping plane
-    fovy = 75, // Field of view covered by camera
     left, // Left bound of the frustum
     top, // Top bound of the frustum
     // automatically calculated
@@ -21,7 +20,7 @@ export default class OrthographicViewport extends Viewport {
     bottom = null // Bottom bound of the frustum
   }) {
     right = Number.isFinite(right) ? right : left + width;
-    bottom = Number.isFinite(bottom) ? right : top + height;
+    bottom = Number.isFinite(bottom) ? bottom : top + height;
     super({
       viewMatrix: mat4.lookAt([], eye, lookAt, up),
       projectionMatrix: mat4.ortho([], left, right, bottom, top, near, far),
