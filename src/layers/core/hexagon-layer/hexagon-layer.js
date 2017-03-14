@@ -33,7 +33,8 @@ const defaultProps = {
   radius: 1000,
   coverage: 1,
   hexagonAggregator: pointToHexbin,
-  getPosition: x => x.position
+  getPosition: x => x.position,
+  fp64: false
   //
 };
 

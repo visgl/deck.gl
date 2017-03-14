@@ -34,7 +34,8 @@ const defaultProps = {
   colorRange: defaultColorRange,
   elevationRange: defaultElevationRange,
   elevationScale: defaultElevationScale,
-  getPosition: x => x.position
+  getPosition: x => x.position,
+  fp64: false
   // AUDIT - getWeight ?
 };
 
