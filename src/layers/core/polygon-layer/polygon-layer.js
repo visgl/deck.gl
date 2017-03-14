@@ -95,9 +95,10 @@ export default class PolygonLayer extends CompositeLayer {
         getColor: getFillColor,
         extruded,
         wireframe,
-        updateTriggers: Object.assign({}, updateTriggers, {
+        updateTriggers: {
+          getElevation: updateTriggers.getElevation,
           getColor: updateTriggers.getFillColor
-        })
+        }
       }));
 
     // Polygon outline layer
@@ -111,9 +112,10 @@ export default class PolygonLayer extends CompositeLayer {
         getWidth,
         onHover,
         onClick,
-        updateTriggers: Object.assign({}, updateTriggers, {
+        updateTriggers: {
+          getWidth: updateTriggers.getWidth,
           getColor: updateTriggers.getColor
-        })
+        }
       }));
     }
 
