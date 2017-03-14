@@ -3,7 +3,7 @@ import {connect} from 'react-redux';
 import autobind from 'autobind-decorator';
 import MapGL from 'react-map-gl';
 
-import Demos from './demos';
+import * as Demos from './demos';
 import {updateMap, updateMeta, loadData, useParams} from '../actions/app-actions';
 import ViewportAnimation from '../utils/map-utils';
 import {MAPBOX_STYLES} from '../constants/defaults';

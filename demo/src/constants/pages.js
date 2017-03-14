@@ -128,7 +128,10 @@ export const docPages = generatePath([
       },
       {
         name: 'ScatterplotLayer',
-        content: getDocUrl('layers/scatterplot-layer.md')
+        content: {
+          demo: 'ScatterplotLayerDemo',
+          API: getDocUrl('layers/scatterplot-layer.md')
+        }
       },
       {
         name: 'ArcLayer',
