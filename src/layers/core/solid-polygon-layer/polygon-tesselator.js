@@ -232,7 +232,7 @@ function calculatePickingColors({polygons, pointCount}) {
     const color = getPickingColor(polygonIndex);
     const vertexCount = Polygon.getVertexCount(complexPolygon);
     fillArray({target: attribute, source: color, start: i, count: vertexCount});
-    i += color.length * count;
+    i += color.length * vertexCount;
   });
   return attribute;
 }
