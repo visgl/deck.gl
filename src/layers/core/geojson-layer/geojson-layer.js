@@ -80,7 +80,7 @@ export default class GeoJsonLayer extends CompositeLayer {
   renderLayers() {
     const {features} = this.state;
     const {pointFeatures, lineFeatures, polygonFeatures, polygonOutlineFeatures} = features;
-    const {getColor, getFillColor, getRadius, getStrokeWidth, getElevation} = this.props;
+    const {getColor, getFillColor, getRadius, getWidth, getElevation} = this.props;
     const {id, stroked, filled, extruded, wireframe} = this.props;
 
     let {} = this.props;
@@ -132,7 +132,7 @@ export default class GeoJsonLayer extends CompositeLayer {
         data: polygonOutlineFeatures,
         getPath: getCoordinates,
         getColor,
-        getStrokeWidth,
+        getWidth,
         onHover,
         onClick
       }));
@@ -143,7 +143,7 @@ export default class GeoJsonLayer extends CompositeLayer {
       data: lineFeatures,
       getPath: getCoordinates,
       getColor,
-      getStrokeWidth,
+      getWidth,
       onHover,
       onClick
     }));

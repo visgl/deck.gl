@@ -87,17 +87,7 @@ const GeoJsonLayerExample = {
     getHeight: f => Math.random() * 1000,
     widthScale: 10,
     widthMinPixels: 1,
-    pickable: true,
-
-    // TODO - Old accessors
-    getPointColor: f => parseColor(f.properties['marker-color']),
-    getPointRadius: f => MARKER_SIZE_MAP[f.properties['marker-size']],
-    getStrokeColor: f => {
-      const color = parseColor(f.properties.stroke);
-      const opacity = (f.properties['stroke-opacity'] || 1) * 255;
-      return setOpacity(color, opacity);
-    },
-    getStrokeWidth: f => f.properties['stroke-width']
+    pickable: true
   }
 };
 
@@ -108,7 +98,7 @@ const GeoJsonLayerExtrudedExample = {
     id: 'geojsonLayer-extruded',
     getHeight: f => get(f, 'properties.ZIP_CODE') * 10 % 127 * 10,
     getFillColor: f => [0, 255, get(f, 'properties.ZIP_CODE') * 23 % 100 + 155],
-    getStrokeColor: f => [200, 0, 80],
+    getColor: f => [200, 0, 80],
     drawPolygons: true,
     extruded: true,
     wireframe: true,
@@ -122,7 +112,8 @@ const PolygonLayerExample = {
   props: {
     getPolygon: f => f,
     getFillColor: f => [Math.random() % 256, 0, 0],
-    getStrokeColor: f => [0, 0, 0, 255],
+    getColor: f => [0, 0, 0, 255],
+    getWidth: f => 20,
     getHeight: f => Math.random() * 1000,
     opacity: 0.8,
     pickable: true
