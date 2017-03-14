@@ -80,7 +80,7 @@ export default class GeoJsonLayer extends CompositeLayer {
   renderLayers() {
     const {features} = this.state;
     const {pointFeatures, lineFeatures, polygonFeatures, polygonOutlineFeatures} = features;
-    const {getColor, getFillColor, getRadius, getWidth, getElevation} = this.props;
+    const {getColor, getFillColor, getRadius, getWidth, getElevation, updateTriggers} = this.props;
     const {id, stroked, filled, extruded, wireframe} = this.props;
 
     let {} = this.props;
@@ -102,8 +102,8 @@ export default class GeoJsonLayer extends CompositeLayer {
       getElevation,
       getColor: getFillColor,
       updateTriggers: {
-        getElevation: this.props.updateTriggers.getElevation,
-        getColor: this.props.updateTriggers.getFillColor
+        getElevation: updateTriggers.getElevation,
+        getColor: updateTriggers.getFillColor
       },
       onHover,
       onClick
@@ -120,9 +120,10 @@ export default class GeoJsonLayer extends CompositeLayer {
         getPolygon: getCoordinates,
         getElevation,
         getColor,
-        updateTriggers: Object.assign({}, this.props.updateTriggers, {
-          getColor: this.props.updateTriggers.getFillColor
-        }),
+        updateTriggers: {
+          getElevation: updateTriggers.getElevation,
+          getColor: updateTriggers.getColor
+        },
         onHover,
         onClick
       }));
@@ -133,6 +134,10 @@ export default class GeoJsonLayer extends CompositeLayer {
         getPath: getCoordinates,
         getColor,
         getWidth,
+        updateTriggers: {
+          getColor: updateTriggers.getColor,
+          getWidth: updateTriggers.getWidth
+        },
         onHover,
         onClick
       }));
@@ -145,7 +150,11 @@ export default class GeoJsonLayer extends CompositeLayer {
       getColor,
       getWidth,
       onHover,
-      onClick
+      onClick,
+      updateTriggers: {
+        getColor: updateTriggers.getColor,
+        getWidth: updateTriggers.getWidth
+      }
     }));
 
     const pointLayer = drawPoints && new ScatterplotLayer(Object.assign({}, this.props, {
@@ -154,9 +163,10 @@ export default class GeoJsonLayer extends CompositeLayer {
       getPosition: getCoordinates,
       getColor: getFillColor,
       getRadius,
-      updateTriggers: Object.assign({}, this.props.updateTriggers, {
-        getColor: this.props.updateTriggers.getFillColor
-      }),
+      updateTriggers: {
+        getColor: updateTriggers.getFillColor,
+        getRadius: updateTriggers.getRadius
+      },
       onHover,
       onClick
     }));
