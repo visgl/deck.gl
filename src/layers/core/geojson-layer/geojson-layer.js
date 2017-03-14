@@ -87,13 +87,12 @@ export default class GeoJsonLayer extends CompositeLayer {
     const drawPoints = pointFeatures && pointFeatures.length > 0;
     const drawLines = lineFeatures && lineFeatures.length > 0;
     const drawPolygons = polygonOutlineFeatures && polygonOutlineFeatures.length > 0;
-    const fillPolygons = filled && polygonFeatures && polygonFeatures.length > 0;
 
     const onHover = this._onHoverSubLayer.bind(this);
     const onClick = this._onClickSubLayer.bind(this);
 
     // Filled Polygon Layer
-    const polygonFillLayer = fillPolygons && new SolidPolygonLayer(Object.assign({}, this.props, {
+    const polygonFillLayer = filled && drawPolygons && new SolidPolygonLayer(Object.assign({}, this.props, {
       id: `${id}-polygon-fill`,
       data: polygonFeatures,
       extruded,

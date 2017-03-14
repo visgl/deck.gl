@@ -83,18 +83,17 @@ export default class PolygonLayer extends CompositeLayer {
     const {data, id, stroked, filled, extruded, wireframe} = this.props;
     const {paths, onHover, onClick} = this.state;
 
-    const strokePolygons = stroked && data && data.length > 0;
-    const fillPolygons = filled && data && data.length > 0;
+    const polygon = data && data.length > 0;
 
     // Filled Polygon Layer
-    const polygonFillLayer = fillPolygons && new SolidPolygonLayer(Object.assign({},
+    const polygonFillLayer = filled && polygon && new SolidPolygonLayer(Object.assign({},
       this.props, {
         id: `${id}-fill`,
         data,
         getElevation,
         getColor: getFillColor,
         extruded,
-        wireframe,
+        wireframe: false,
         updateTriggers: {
           getElevation: updateTriggers.getElevation,
           getColor: updateTriggers.getFillColor
@@ -103,7 +102,7 @@ export default class PolygonLayer extends CompositeLayer {
 
     // Polygon outline layer
     let polygonOutlineLayer = null;
-    if (strokePolygons) {
+    if (!extruded && stroked && polygon) {
       polygonOutlineLayer = new PathLayer(Object.assign({}, this.props, {
         id: `${id}-stroke`,
         data: paths,
@@ -115,6 +114,20 @@ export default class PolygonLayer extends CompositeLayer {
         updateTriggers: {
           getWidth: updateTriggers.getWidth,
           getColor: updateTriggers.getColor
+        }
+      }));
+    } else if (extruded && wireframe && polygon) {
+      polygonOutlineLayer = new SolidPolygonLayer(Object.assign({},
+      this.props, {
+        id: `${id}-wireframe`,
+        data,
+        getElevation,
+        getColor: getFillColor,
+        extruded,
+        wireframe: true,
+        updateTriggers: {
+          getElevation: updateTriggers.getElevation,
+          getColor: updateTriggers.getFillColor
         }
       }));
     }
