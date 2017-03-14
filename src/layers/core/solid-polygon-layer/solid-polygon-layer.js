@@ -109,13 +109,12 @@ export default class PolygonLayer extends Layer {
   }
 
   draw({uniforms}) {
-    const {
-      extruded
-    } = this.props;
+    const {extruded, lightSettings} = this.props;
 
     this.state.model.render(Object.assign({}, uniforms, {
-      extruded
-    }));
+      extruded: extruded ? 1.0 : 0.0
+    },
+    lightSettings));
   }
 
   updateState({props, oldProps, changeFlags}) {
@@ -129,14 +128,6 @@ export default class PolygonLayer extends Layer {
       this.setState({model: this._getModel(gl)});
     }
     this.updateAttribute({props, oldProps, changeFlags});
-
-    const {opacity, extruded, lightSettings} = props;
-
-    this.setUniforms(Object.assign({}, {
-      extruded: extruded ? 1.0 : 0.0,
-      opacity
-    },
-    lightSettings));
   }
 
   updateGeometry({props, oldProps, changeFlags}) {
