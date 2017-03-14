@@ -5,6 +5,14 @@ import {get, count} from '../../../lib/utils';
 import earcut from 'earcut';
 import flattenDeep from 'lodash.flattendeep';
 
+function getPickingColor(index) {
+  return [
+    (index + 1) % 256,
+    Math.floor((index + 1) / 256) % 256,
+    Math.floor((index + 1) / 256 / 256) % 256
+  ];
+}
+
 function parseColor(color) {
   if (!Array.isArray(color)) {
     color = [get(color, 0), get(color, 1), get(color, 2), get(color, 3)];
@@ -183,11 +191,12 @@ function calculateColors({groupedVertices, getColor, wireframe = false}) {
   return new Uint8ClampedArray(flattenDeep(colors));
 }
 
-function calculatePickingColors({groupedVertices, color = [0, 0, 0], wireframe = false}) {
+function calculatePickingColors({groupedVertices, wireframe = false}) {
   const colors = groupedVertices.map((vertices, polygonIndex) => {
     const numVertices = countVertices(vertices);
-    const topColors = new Array(numVertices).fill([polygonIndex, 0, 0]);
-    const baseColors = new Array(numVertices).fill([polygonIndex, 0, 0]);
+    const color = getPickingColor(polygonIndex);
+    const topColors = new Array(numVertices).fill(color);
+    const baseColors = new Array(numVertices).fill(color);
     return wireframe ?
       [topColors, baseColors] :
       [topColors, topColors, topColors, baseColors, baseColors];
