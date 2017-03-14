@@ -83,28 +83,45 @@ export default class PolygonLayer extends CompositeLayer {
     const {data, id, stroked, filled, extruded, wireframe} = this.props;
     const {paths, onHover, onClick} = this.state;
 
-    const strokePolygons = stroked && data && data.length > 0;
-    const fillPolygons = filled && data && data.length > 0;
+    const hasData = data && data.length > 0;
 
     // Filled Polygon Layer
-    const polygonFillLayer = fillPolygons && new SolidPolygonLayer(Object.assign({},
+    const polygonLayer = filled && hasData && new SolidPolygonLayer(Object.assign({},
       this.props, {
         id: `${id}-fill`,
         data,
         getElevation,
         getColor: getFillColor,
         extruded,
-        wireframe,
+        wireframe: false,
         updateTriggers: {
           getElevation: updateTriggers.getElevation,
           getColor: updateTriggers.getFillColor
         }
       }));
 
+    const polygonWireframeLayer = extruded &&
+      wireframe &&
+      hasData &&
+      new SolidPolygonLayer(Object.assign({},
+      this.props, {
+        id: `${id}-wireframe`,
+        data,
+        getElevation,
+        getColor,
+        extruded: true,
+        wireframe: true,
+        updateTriggers: {
+          getElevation: updateTriggers.getElevation,
+          getColor: updateTriggers.getColor
+        }
+      }));
+
     // Polygon outline layer
-    let polygonOutlineLayer = null;
-    if (strokePolygons) {
-      polygonOutlineLayer = new PathLayer(Object.assign({}, this.props, {
+    const polygonOutlineLayer = !extruded &&
+      stroked &&
+      hasData &&
+      new PathLayer(Object.assign({}, this.props, {
         id: `${id}-stroke`,
         data: paths,
         getPath: x => x.path,
@@ -117,10 +134,10 @@ export default class PolygonLayer extends CompositeLayer {
           getColor: updateTriggers.getColor
         }
       }));
-    }
 
     return [
-      polygonFillLayer,
+      polygonLayer,
+      polygonWireframeLayer,
       polygonOutlineLayer
     ].filter(Boolean);
   }

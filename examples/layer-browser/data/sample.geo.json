@@ -4,7 +4,7 @@
     "type": "Feature",
     "properties": {
       "marker-color": "#ff0000",
-      "marker-size": "small",
+      "marker-size": "medium",
       "marker-symbol": ""
     },
     "geometry": {
@@ -24,7 +24,9 @@
     }
   }, {
     "type": "Feature",
-    "properties": {},
+    "properties": {
+      "marker-size": "small"
+    },
     "geometry": {
       "type": "MultiPoint",
       "coordinates": [

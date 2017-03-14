@@ -83,7 +83,7 @@ export default class PolygonLayer extends Layer {
     /* eslint-disable max-len */
     attributeManager.add({
       indices: {size: 1, isIndexed: true, update: this.calculateIndices, noAlloc},
-      positions: {size: 3, accessor: 'getHeight', update: this.calculatePositions, noAlloc},
+      positions: {size: 3, accessor: 'getElevation', update: this.calculatePositions, noAlloc},
       normals: {size: 3, update: this.calculateNormals, noAlloc},
       colors: {size: 4, type: GL.UNSIGNED_BYTE, accessor: 'getColor', update: this.calculateColors, noAlloc},
       pickingColors: {size: 3, type: GL.UNSIGNED_BYTE, update: this.calculatePickingColors, noAlloc}
@@ -108,27 +108,35 @@ export default class PolygonLayer extends Layer {
     }
   }
 
-  updateState({props, oldProps, changeFlags}) {
-    this.updateGeometry({props, oldProps, changeFlags});
-    this.updateModel({props, oldProps, changeFlags});
-    this.updateAttribute({props, oldProps, changeFlags});
+  draw({uniforms}) {
+    const {extruded, lightSettings} = this.props;
 
-    const {opacity, extruded, lightSettings} = props;
-
-    this.setUniforms(Object.assign({}, {
-      extruded: extruded ? 1.0 : 0.0,
-      opacity
+    this.state.model.render(Object.assign({}, uniforms, {
+      extruded: extruded ? 1.0 : 0.0
     },
     lightSettings));
   }
 
+  updateState({props, oldProps, changeFlags}) {
+    super.updateState({props, oldProps, changeFlags});
+
+    const geometryChanged = this.updateGeometry({props, oldProps, changeFlags});
+
+    // Re-generate model if geometry changed
+    if (geometryChanged) {
+      const {gl} = this.context;
+      this.setState({model: this._getModel(gl)});
+    }
+    this.updateAttribute({props, oldProps, changeFlags});
+  }
+
   updateGeometry({props, oldProps, changeFlags}) {
-    const geometryChanged =
+    const regenerateModel = changeFlags.dataChanged ||
       props.extruded !== oldProps.extruded ||
       props.wireframe !== oldProps.wireframe || props.fp64 !== oldProps.fp64;
 
-    if (changeFlags.dataChanged || geometryChanged) {
-      const {getPolygon, extruded, wireframe, getHeight} = props;
+    if (regenerateModel) {
+      const {getPolygon, extruded, wireframe, getElevation} = props;
 
       // TODO - avoid creating a temporary array here: let the tesselator iterate
       const polygons = props.data.map(getPolygon);
@@ -137,13 +145,15 @@ export default class PolygonLayer extends Layer {
         polygonTesselator: !extruded ?
           new PolygonTesselator({polygons, fp64: this.props.fp64}) :
           new PolygonTesselatorExtruded({polygons, wireframe,
-            getHeight: polygonIndex => getHeight(this.props.data[polygonIndex]),
+            getHeight: polygonIndex => getElevation(this.props.data[polygonIndex]),
             fp64: this.props.fp64
           })
       });
 
       this.state.attributeManager.invalidateAll();
     }
+
+    return regenerateModel;
   }
 
   _getModel(gl) {

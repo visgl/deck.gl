@@ -63,6 +63,7 @@ export default class ScreenGridLayer extends Layer {
   }
 
   updateState({oldProps, props, changeFlags}) {
+    super.updateState({props, oldProps, changeFlags});
     const cellSizeChanged =
       props.cellSizePixels !== oldProps.cellSizePixels;
 
