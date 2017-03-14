@@ -21,10 +21,12 @@
 import {Layer} from '../../../lib';
 import {assembleShaders} from '../../../shader-utils';
 import {GL, Model, Geometry} from 'luma.gl';
-import {readFileSync} from 'fs';
-import {join} from 'path';
 import {fp64ify, enable64bitSupport} from '../../../lib/utils/fp64';
 import {COORDINATE_SYSTEM} from '../../../lib';
+
+import arcVertex from './arc-layer-vertex.glsl';
+import arc64Vertex from './arc-layer-64-vertex.glsl';
+import arcFragment from './arc-layer-fragment.glsl';
 
 const DEFAULT_COLOR = [0, 0, 0, 255];
 
@@ -40,14 +42,10 @@ const defaultProps = {
 
 export default class ArcLayer extends Layer {
   getShaders() {
-    const vs64 = readFileSync(join(__dirname, './arc-layer-64-vertex.glsl'), 'utf8');
-    const vs32 = readFileSync(join(__dirname, './arc-layer-vertex.glsl'), 'utf8');
-    const fs = readFileSync(join(__dirname, './arc-layer-fragment.glsl'), 'utf8');
-
     return enable64bitSupport(this.props) ? {
-      vs: vs64, fs, modules: ['fp64', 'project64']
+      vs: arc64Vertex, arcFragment, modules: ['fp64', 'project64']
     } : {
-      vs: vs32, fs, modules: []
+      vs: arcVertex, arcFragment, modules: []
     };
   }
 

@@ -1,10 +1,32 @@
+// Copyright (c) 2017 Uber Technologies, Inc.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+// THE SOFTWARE.
+
 import {Layer} from '../../../lib';
 import {assembleShaders} from '../../../shader-utils';
 import {GL, Model, Geometry} from 'luma.gl';
-import {readFileSync} from 'fs';
-import {join} from 'path';
 import {fp64ify, enable64bitSupport} from '../../../lib/utils/fp64';
 import {COORDINATE_SYSTEM} from '../../../lib';
+
+import pathVertex from './path-layer-vertex.glsl';
+import path64Vertex from './path-layer-64-vertex.glsl';
+import pathFragment from './path-layer-fragment.glsl';
 
 const DEFAULT_COLOR = [0, 0, 0, 255];
 
@@ -31,14 +53,10 @@ const isClosed = path => {
 
 export default class PathLayer extends Layer {
   getShaders() {
-    const vs64 = readFileSync(join(__dirname, './path-layer-64-vertex.glsl'), 'utf8');
-    const vs32 = readFileSync(join(__dirname, './path-layer-vertex.glsl'), 'utf8');
-    const fs = readFileSync(join(__dirname, './path-layer-fragment.glsl'), 'utf8');
-
     return enable64bitSupport(this.props) ? {
-      vs: vs64, fs, modules: ['fp64', 'project64']
+      vs: path64Vertex, pathFragment, modules: ['fp64', 'project64']
     } : {
-      vs: vs32, fs, modules: []
+      vs: pathVertex, pathFragment, modules: []
     };
   }
 

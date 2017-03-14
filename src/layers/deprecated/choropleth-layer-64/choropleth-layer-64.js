@@ -21,8 +21,8 @@
 import ChoroplethLayer from '../choropleth-layer/choropleth-layer';
 import {fp64ify, log} from '../../../lib/utils';
 import flattenDeep from 'lodash.flattendeep';
-import {readFileSync} from 'fs';
-import {join} from 'path';
+
+import choropleth64Vertex from './choropleth-layer-64-vertex.glsl';
 
 export default class ChoroplethLayer64 extends ChoroplethLayer {
 
@@ -42,7 +42,7 @@ export default class ChoroplethLayer64 extends ChoroplethLayer {
 
   getShaders() {
     return {
-      vs: readFileSync(join(__dirname, './choropleth-layer-64-vertex.glsl'), 'utf8'),
+      vs: choropleth64Vertex,
       fs: super.getShaders().fs,
       fp64: true,
       project64: true

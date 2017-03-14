@@ -21,10 +21,12 @@
 import {Layer} from '../../../lib';
 import {assembleShaders} from '../../../shader-utils';
 import {GL, Model, CubeGeometry} from 'luma.gl';
-import {readFileSync} from 'fs';
-import {join} from 'path';
 import {fp64ify, enable64bitSupport} from '../../../lib/utils/fp64';
 import {COORDINATE_SYSTEM} from '../../../lib';
+
+import gridCellVertex from './grid-cell-layer-vertex.glsl';
+import gridCell64Vertex from './grid-cell-layer-64-vertex.glsl';
+import gridCellFragment from './grid-cell-layer-fragment.glsl';
 
 const DEFAULT_COLOR = [255, 0, 255, 255];
 
@@ -68,14 +70,10 @@ export default class GridCellLayer extends Layer {
    */
 
   getShaders() {
-    const vs64 = readFileSync(join(__dirname, './grid-cell-layer-64-vertex.glsl'), 'utf8');
-    const vs32 = readFileSync(join(__dirname, './grid-cell-layer-vertex.glsl'), 'utf8');
-    const fs = readFileSync(join(__dirname, './grid-cell-layer-fragment.glsl'), 'utf8');
-
     return enable64bitSupport(this.props) ? {
-      vs: vs64, fs, modules: ['fp64', 'project64', 'lighting']
+      vs: gridCell64Vertex, gridCellFragment, modules: ['fp64', 'project64', 'lighting']
     } : {
-      vs: vs32, fs, modules: ['lighting']
+      vs: gridCellVertex, gridCellFragment, modules: ['lighting']
     };
   }
 
