@@ -5,6 +5,14 @@ import {get, count} from '../../../lib/utils';
 import earcut from 'earcut';
 import flattenDeep from 'lodash.flattendeep';
 
+function getPickingColor(index) {
+  return [
+    (index + 1) % 256,
+    Math.floor((index + 1) / 256) % 256,
+    Math.floor((index + 1) / 256 / 256) % 256
+  ];
+}
+
 function parseColor(color) {
   if (!Array.isArray(color)) {
     color = [get(color, 0), get(color, 1), get(color, 2), get(color, 3)];
@@ -83,7 +91,7 @@ function countVertices(vertices) {
 }
 
 function calculateIndices({groupedVertices, wireframe = false}) {
-  // adjust index offset for multiple buildings
+  // adjust index offset for multiple polygons
   const multiplier = wireframe ? 2 : 5;
   const offsets = groupedVertices.reduce(
     (acc, vertices) =>
@@ -91,14 +99,14 @@ function calculateIndices({groupedVertices, wireframe = false}) {
     [0]
   );
 
-  const indices = groupedVertices.map((vertices, buildingIndex) =>
+  const indices = groupedVertices.map((vertices, polygonIndex) =>
     wireframe ?
-      // 1. get sequentially ordered indices of each building wireframe
-      // 2. offset them by the number of indices in previous buildings
-      calculateContourIndices(vertices, offsets[buildingIndex]) :
+      // 1. get sequentially ordered indices of each polygons wireframe
+      // 2. offset them by the number of indices in previous polygons
+      calculateContourIndices(vertices, offsets[polygonIndex]) :
       // 1. get triangulated indices for the internal areas
-      // 2. offset them by the number of indices in previous buildings
-      calculateSurfaceIndices(vertices, offsets[buildingIndex])
+      // 2. offset them by the number of indices in previous polygons
+      calculateSurfaceIndices(vertices, offsets[polygonIndex])
   );
 
   return new Uint32Array(flattenDeep(indices));
@@ -138,7 +146,7 @@ function calculatePositions(positionsJS, fp64) {
 function calculateNormals({groupedVertices, wireframe}) {
   const up = [0, 1, 0];
 
-  const normals = groupedVertices.map((vertices, buildingIndex) => {
+  const normals = groupedVertices.map((vertices, polygonIndex) => {
     const topNormals = new Array(countVertices(vertices)).fill(up);
     const sideNormals = vertices.map(polygon => calculateSideNormals(polygon));
     const sideNormalsForward = sideNormals.map(n => n[0]);
@@ -183,11 +191,12 @@ function calculateColors({groupedVertices, getColor, wireframe = false}) {
   return new Uint8ClampedArray(flattenDeep(colors));
 }
 
-function calculatePickingColors({groupedVertices, color = [0, 0, 0], wireframe = false}) {
-  const colors = groupedVertices.map((vertices, buildingIndex) => {
+function calculatePickingColors({groupedVertices, wireframe = false}) {
+  const colors = groupedVertices.map((vertices, polygonIndex) => {
     const numVertices = countVertices(vertices);
-    const topColors = new Array(numVertices).fill([0, 0, 0]);
-    const baseColors = new Array(numVertices).fill([0, 0, 0]);
+    const color = getPickingColor(polygonIndex);
+    const topColors = new Array(numVertices).fill(color);
+    const baseColors = new Array(numVertices).fill(color);
     return wireframe ?
       [topColors, baseColors] :
       [topColors, topColors, topColors, baseColors, baseColors];
@@ -202,14 +211,14 @@ function calculateContourIndices(vertices, offset) {
     const indices = [offset];
     const numVertices = polygon.length;
 
-    // building top
+    // polygon top
     // use vertex pairs for GL.LINES => [0, 1, 1, 2, 2, ..., n-1, n-1, 0]
     for (let i = 1; i < numVertices - 1; i++) {
       indices.push(i + offset, i + offset);
     }
     indices.push(offset);
 
-    // building sides
+    // polygon sides
     for (let i = 0; i < numVertices - 1; i++) {
       indices.push(i + offset, i + stride + offset);
     }
@@ -243,10 +252,10 @@ function calculateSurfaceIndices(vertices, offset) {
 
   const sideIndices = vertices.map(polygon => {
     const numVertices = polygon.length;
-    // building top
+    // polygon top
     const indices = [];
 
-    // building sides
+    // polygon sides
     for (let i = 0; i < numVertices - 1; i++) {
       indices.push(...drawRectangle(i));
     }
