@@ -95,7 +95,10 @@ export default class ScatterplotLayer extends Layer {
   }
 
   updateState({props, oldProps, changeFlags}) {
-    this.updateModel({props, oldProps, changeFlags});
+    if (props.fp64 !== oldProps.fp64) {
+      const {gl} = this.context;
+      this.setState({model: this._getModel(gl)});
+    }
     this.updateAttribute({props, oldProps, changeFlags});
   }
 

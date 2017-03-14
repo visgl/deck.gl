@@ -83,10 +83,10 @@ export default class PolygonLayer extends CompositeLayer {
     const {data, id, stroked, filled, extruded, wireframe} = this.props;
     const {paths, onHover, onClick} = this.state;
 
-    const polygon = data && data.length > 0;
+    const hasData = data && data.length > 0;
 
     // Filled Polygon Layer
-    const polygonFillLayer = filled && polygon && new SolidPolygonLayer(Object.assign({},
+    const polygonLayer = filled && hasData && new SolidPolygonLayer(Object.assign({},
       this.props, {
         id: `${id}-fill`,
         data,
@@ -100,10 +100,28 @@ export default class PolygonLayer extends CompositeLayer {
         }
       }));
 
+    const polygonWireframeLayer = extruded &&
+      wireframe &&
+      hasData &&
+      new SolidPolygonLayer(Object.assign({},
+      this.props, {
+        id: `${id}-wireframe`,
+        data,
+        getElevation,
+        getColor,
+        extruded: true,
+        wireframe: true,
+        updateTriggers: {
+          getElevation: updateTriggers.getElevation,
+          getColor: updateTriggers.getColor
+        }
+      }));
+
     // Polygon outline layer
-    let polygonOutlineLayer = null;
-    if (!extruded && stroked && polygon) {
-      polygonOutlineLayer = new PathLayer(Object.assign({}, this.props, {
+    const polygonOutlineLayer = !extruded &&
+      stroked &&
+      hasData &&
+      new PathLayer(Object.assign({}, this.props, {
         id: `${id}-stroke`,
         data: paths,
         getPath: x => x.path,
@@ -116,24 +134,10 @@ export default class PolygonLayer extends CompositeLayer {
           getColor: updateTriggers.getColor
         }
       }));
-    } else if (extruded && wireframe && polygon) {
-      polygonOutlineLayer = new SolidPolygonLayer(Object.assign({},
-      this.props, {
-        id: `${id}-wireframe`,
-        data,
-        getElevation,
-        getColor: getFillColor,
-        extruded,
-        wireframe: true,
-        updateTriggers: {
-          getElevation: updateTriggers.getElevation,
-          getColor: updateTriggers.getFillColor
-        }
-      }));
-    }
 
     return [
-      polygonFillLayer,
+      polygonLayer,
+      polygonWireframeLayer,
       polygonOutlineLayer
     ].filter(Boolean);
   }

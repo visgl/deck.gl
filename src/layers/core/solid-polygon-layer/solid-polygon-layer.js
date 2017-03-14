@@ -108,9 +108,26 @@ export default class PolygonLayer extends Layer {
     }
   }
 
+  draw({uniforms}) {
+    const {
+      extruded
+    } = this.props;
+
+    this.state.model.render(Object.assign({}, uniforms, {
+      extruded
+    }));
+  }
+
   updateState({props, oldProps, changeFlags}) {
-    this.updateGeometry({props, oldProps, changeFlags});
-    this.updateModel({props, oldProps, changeFlags});
+    super.updateState({props, oldProps, changeFlags});
+
+    const geometryChanged = this.updateGeometry({props, oldProps, changeFlags});
+
+    // Re-generate model if geometry changed
+    if (geometryChanged) {
+      const {gl} = this.context;
+      this.setState({model: this._getModel(gl)});
+    }
     this.updateAttribute({props, oldProps, changeFlags});
 
     const {opacity, extruded, lightSettings} = props;
@@ -123,11 +140,11 @@ export default class PolygonLayer extends Layer {
   }
 
   updateGeometry({props, oldProps, changeFlags}) {
-    const geometryChanged =
+    const regenerateModel = changeFlags.dataChanged ||
       props.extruded !== oldProps.extruded ||
       props.wireframe !== oldProps.wireframe || props.fp64 !== oldProps.fp64;
 
-    if (changeFlags.dataChanged || geometryChanged) {
+    if (regenerateModel) {
       const {getPolygon, extruded, wireframe, getElevation} = props;
 
       // TODO - avoid creating a temporary array here: let the tesselator iterate
@@ -144,6 +161,8 @@ export default class PolygonLayer extends Layer {
 
       this.state.attributeManager.invalidateAll();
     }
+
+    return regenerateModel;
   }
 
   _getModel(gl) {

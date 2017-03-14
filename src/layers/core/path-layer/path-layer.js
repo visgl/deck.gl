@@ -81,9 +81,14 @@ export default class PathLayer extends Layer {
   }
 
   updateState({oldProps, props, changeFlags}) {
+    super.updateState({props, oldProps, changeFlags});
+
     const {getPath} = this.props;
     const {attributeManager} = this.state;
-    this.updateModel({props, oldProps, changeFlags});
+    if (props.fp64 !== oldProps.fp64) {
+      const {gl} = this.context;
+      this.setState({model: this._getModel(gl)});
+    }
     this.updateAttribute({props, oldProps, changeFlags});
 
     if (changeFlags.dataChanged) {
@@ -94,7 +99,6 @@ export default class PathLayer extends Layer {
       this.setState({paths, numInstances});
       attributeManager.invalidateAll();
     }
-
   }
 
   draw({uniforms}) {

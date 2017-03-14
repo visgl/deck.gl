@@ -86,50 +86,54 @@ export default class GeoJsonLayer extends CompositeLayer {
     let {} = this.props;
     const drawPoints = pointFeatures && pointFeatures.length > 0;
     const drawLines = lineFeatures && lineFeatures.length > 0;
-    const drawPolygons = polygonOutlineFeatures && polygonOutlineFeatures.length > 0;
+    const hasPolygonOutline = polygonOutlineFeatures && polygonOutlineFeatures.length > 0;
+    const hasPolygon = polygonFeatures && polygonFeatures.length > 0;
 
     const onHover = this._onHoverSubLayer.bind(this);
     const onClick = this._onClickSubLayer.bind(this);
 
     // Filled Polygon Layer
-    const polygonFillLayer = filled && drawPolygons && new SolidPolygonLayer(Object.assign({}, this.props, {
-      id: `${id}-polygon-fill`,
-      data: polygonFeatures,
-      extruded,
-      wireframe: false,
-      getPolygon: getCoordinates,
-      getElevation,
-      getColor: getFillColor,
-      updateTriggers: {
-        getElevation: updateTriggers.getElevation,
-        getColor: updateTriggers.getFillColor
-      },
-      onHover,
-      onClick
-    }));
+    const polygonFillLayer = filled &&
+      hasPolygon &&
+      new SolidPolygonLayer(Object.assign({}, this.props, {
+        id: `${id}-polygon-fill`,
+        data: polygonFeatures,
+        extruded,
+        wireframe: false,
+        getPolygon: getCoordinates,
+        getElevation,
+        getColor: getFillColor,
+        updateTriggers: {
+          getElevation: updateTriggers.getElevation,
+          getColor: updateTriggers.getFillColor
+        },
+        onHover,
+        onClick
+      }));
 
-    // Polygon outline or wireframe
-    let polygonOutlineLayer = null;
-    // If extruded, check the "wireframe" prop
-    if (extruded && wireframe && drawPolygons) {
-      polygonOutlineLayer = new SolidPolygonLayer(Object.assign({}, this.props, {
+    const polygonWireframeLayer = wireframe &&
+      extruded &&
+      hasPolygon &&
+      new SolidPolygonLayer(Object.assign({}, this.props, {
         id: `${id}-polygon-wireframe`,
         data: polygonFeatures,
-        extruded: true,
+        extruded,
         wireframe: true,
         getPolygon: getCoordinates,
         getElevation,
         getColor,
         updateTriggers: {
           getElevation: updateTriggers.getElevation,
-          getColor: updateTriggers.getColor
+          getColor: updateTriggers.getFillColor
         },
         onHover,
         onClick
       }));
-    // If non-extruded, check the "stroked" prop
-    } else if (!extruded && stroked && drawPolygons) {
-      polygonOutlineLayer = new PathLayer(Object.assign({}, this.props, {
+
+    const polygonOutlineLayer = !extruded &&
+      stroked &&
+      hasPolygonOutline &&
+      new PathLayer(Object.assign({}, this.props, {
         id: `${id}-polygon-outline`,
         data: polygonOutlineFeatures,
         getPath: getCoordinates,
@@ -142,7 +146,6 @@ export default class GeoJsonLayer extends CompositeLayer {
         onHover,
         onClick
       }));
-    }
 
     const lineLayer = drawLines && new PathLayer(Object.assign({}, this.props, {
       id: `${id}-line-paths`,
@@ -174,6 +177,7 @@ export default class GeoJsonLayer extends CompositeLayer {
 
     return [
       polygonFillLayer,
+      polygonWireframeLayer,
       polygonOutlineLayer,
       lineLayer,
       pointLayer
