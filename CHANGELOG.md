@@ -15,7 +15,39 @@ Each version should:
 Ref: http://keepachangelog.com/en/0.3.0/
 -->
 
-## Recent Dev Releases
+## Latest Beta Releases
+#### [v4.0.0-rc1]
+
+- FIX: Composite layers now have a stub invalidateAttribute()
+- FIX: GeoJsonLayer and PolygonLayer now transfer correct updateTriggers to its sublayers
+- FIX: Fix the picking for PolygonLayer with and without extrusions
+- FIX: update the data file and default values for GeoJsonLayer example so that it correctly shows all geometry features
+- FIX: `GeoJsonLayer` now wireframe prop only affects extruded layer and stroked only affects non-extruded layer
+- FIX: super.updateState() now get called appropriately so that data change can correctly popylate to GPUs
+- Re-factored GeoJsonLayer and PolygonLayer to separate polygon wireframe and polygon outline
+- Removed loader for glsl and use exported Javascript string to store all GLSL shaders
+
+- `PointDensityGridLayer` => `GridLayer`
+- `PointDensityHexagonLayer` => `HexagonLayer`
+- `GridLayer` => `GridCellLayer`
+- `HexagonLayer` => `HexagonCellLayer`
+- `PolygonLayer` => `SolidPolygonLayer`
+- `PolygonLayer` is now a new composite layer that could render solid polygons as well as polygon outlines
+- `GridLayer` and `HexagonLayer` to use new quantizedScale utility function
+- `GeoJsonLayer` remove `drawPoints`, `drawLines`, `drawPolygon`, `fillPolygon`
+- `GeoJsonLayer` add `stroked`, `filled`, `extruded`, `wireframe`
+- `GeoJsonLayer` `getPointSize` => `getRadius`
+- `GeoJsonLayer` `getStrokeWidth` => `getWidth`
+- `GeoJsonLayer` `getStrokerColor` => `getColor`
+- `GeoJsonLayer` remove `getPointColor`, use `getFillColor` instead
+- `PathLayer` `strokeWidthScale` => `widthScale`
+- `PathLayer` `strokeWidthMinPixels` => `widthMinPixels`
+- `PathLayer` `strokeWidthMaxPixels` => `widthMaxPixels`
+- `PathLayer` `getStrokeWidth` => `getWidth`
+- `ScatterplotLayer` change the default `radiusScale` to 1
+- `ScreenGridLayer` change `unitWidth` and `unitHeight` to `cellSizePixels`
+
+- Update tests to reflect the new layer names and props
 
 #### [v4.0.0-beta.5]
 - NEW: add `viewportSize`, `devicePixelRatio` and `modelViewMatrix` to default uniforms
@@ -304,7 +336,7 @@ For details see [What's New](docs/whats-new.md)
 #### [1.0.0] - 2016-01-06
 - Initial commit of the open-source version of deck.gl
 
-# Beta Releases
+# Previous Beta Releases
 
 ### Beta-3.0.0 Releases
 
