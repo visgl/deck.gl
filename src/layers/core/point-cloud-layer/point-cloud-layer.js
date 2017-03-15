@@ -21,10 +21,12 @@
 import {Layer} from '../../../lib';
 import {assembleShaders} from '../../../shader-utils';
 import {GL, Model, Geometry} from 'luma.gl';
-import {readFileSync} from 'fs';
-import {join} from 'path';
 import {fp64ify, enable64bitSupport} from '../../../lib/utils/fp64';
 import {COORDINATE_SYSTEM} from '../../../lib';
+
+import pointCloudVertex from './point-cloud-layer-vertex.glsl';
+import pointCloudVertex64 from './point-cloud-layer-vertex-64.glsl';
+import pointCloudFragment from './point-cloud-layer-fragment.glsl';
 
 const DEFAULT_COLOR = [0, 0, 0, 255];
 
@@ -48,14 +50,10 @@ const defaultProps = {
 
 export default class PointCloudLayer extends Layer {
   getShaders(id) {
-    const vs64 = readFileSync(join(__dirname, './point-cloud-layer-64-vertex.glsl'), 'utf8');
-    const vs32 = readFileSync(join(__dirname, './point-cloud-layer-vertex.glsl'), 'utf8');
-    const fs = readFileSync(join(__dirname, './point-cloud-layer-fragment.glsl'), 'utf8');
-
     return enable64bitSupport(this.props) ? {
-      vs: vs64, fs, modules: ['fp64', 'project64', 'lighting']
+      vs: pointCloudVertex64, fs: pointCloudFragment, modules: ['fp64', 'project64', 'lighting']
     } : {
-      vs: vs32, fs, modules: ['lighting']
+      vs: pointCloudVertex, fs: pointCloudFragment, modules: ['lighting']
     };
   }
 

@@ -24,8 +24,10 @@ import {COORDINATE_SYSTEM} from '../../../lib';
 import {get} from '../../../lib/utils';
 import {fp64ify, enable64bitSupport} from '../../../lib/utils/fp64';
 import {GL, Model, Geometry} from 'luma.gl';
-import {readFileSync} from 'fs';
-import {join} from 'path';
+
+import scatterplotVertex from './scatterplot-layer-vertex.glsl';
+import scatterplotVertex64 from './scatterplot-layer-vertex-64.glsl';
+import scatterplotFragment from './scatterplot-layer-fragment.glsl';
 
 const DEFAULT_COLOR = [0, 0, 0, 255];
 
@@ -44,14 +46,10 @@ const defaultProps = {
 
 export default class ScatterplotLayer extends Layer {
   getShaders(id) {
-    const vs64 = readFileSync(join(__dirname, './scatterplot-layer-64-vertex.glsl'), 'utf8');
-    const vs32 = readFileSync(join(__dirname, './scatterplot-layer-vertex.glsl'), 'utf8');
-    const fs = readFileSync(join(__dirname, './scatterplot-layer-fragment.glsl'), 'utf8');
-
     return enable64bitSupport(this.props) ? {
-      vs: vs64, fs, modules: ['fp64', 'project64']
+      vs: scatterplotVertex64, fs: scatterplotFragment, modules: ['fp64', 'project64']
     } : {
-      vs: vs32, fs, modules: []
+      vs: scatterplotVertex, fs: scatterplotFragment, modules: []
     };
   }
 

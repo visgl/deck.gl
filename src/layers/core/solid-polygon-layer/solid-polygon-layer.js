@@ -22,8 +22,6 @@ import {Layer} from '../../../lib';
 import {assembleShaders} from '../../../shader-utils';
 import {get} from '../../../lib/utils';
 import {GL, Model, Geometry} from 'luma.gl';
-import {readFileSync} from 'fs';
-import {join} from 'path';
 import {enable64bitSupport} from '../../../lib/utils/fp64';
 import {COORDINATE_SYSTEM} from '../../../lib';
 
@@ -31,7 +29,9 @@ import {COORDINATE_SYSTEM} from '../../../lib';
 import {PolygonTesselator} from './polygon-tesselator';
 import {PolygonTesselatorExtruded} from './polygon-tesselator-extruded';
 
-// const defaultColor = [0, 0, 0, 255];
+import solidPolygonVertex from './solid-polygon-layer-vertex.glsl';
+import solidPolygonVertex64 from './solid-polygon-layer-vertex-64.glsl';
+import solidPolygonFragment from './solid-polygon-layer-fragment.glsl';
 
 const defaultProps = {
   // Whether to extrude in 2.5D
@@ -60,13 +60,10 @@ const defaultProps = {
 
 export default class SolidPolygonLayer extends Layer {
   getShaders() {
-    const vs64 = readFileSync(join(__dirname, './solid-polygon-layer-vertex-64.glsl'), 'utf8');
-    const vs32 = readFileSync(join(__dirname, './solid-polygon-layer-vertex.glsl'), 'utf8');
-    const fs = readFileSync(join(__dirname, './solid-polygon-layer-fragment.glsl'), 'utf8');
     return enable64bitSupport(this.props) ? {
-      vs: vs64, fs, modules: ['fp64', 'project64', 'lighting']
+      vs: solidPolygonVertex64, fs: solidPolygonFragment, modules: ['fp64', 'project64', 'lighting']
     } : {
-      vs: vs32, fs, modules: ['lighting']
+      vs: solidPolygonVertex, fs: solidPolygonFragment, modules: ['lighting']
     };
   }
 

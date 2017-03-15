@@ -24,8 +24,9 @@ import {get, flatten, log} from '../../../lib/utils';
 import {extractPolygons} from './geojson';
 import {GL, Model, Geometry} from 'luma.gl';
 import earcut from 'earcut';
-import {readFileSync} from 'fs';
-import {join} from 'path';
+
+import choroplethVertex from './choropleth-layer-vertex.glsl';
+import choroplethFragment from './choropleth-layer-fragment.glsl';
 
 const DEFAULT_COLOR = [0, 0, 255, 255];
 
@@ -44,8 +45,8 @@ export default class ChoroplethLayer extends Layer {
 
   getShaders() {
     return {
-      vs: readFileSync(join(__dirname, './choropleth-layer-vertex.glsl'), 'utf8'),
-      fs: readFileSync(join(__dirname, './choropleth-layer-fragment.glsl'), 'utf8')
+      vs: choroplethVertex,
+      fs: choroplethFragment
     };
   }
 

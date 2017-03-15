@@ -25,8 +25,9 @@ import {GL, Model, Geometry} from 'luma.gl';
 import {flatten, log} from '../../../lib/utils';
 import earcut from 'earcut';
 import {vec3} from 'gl-matrix';
-import {readFileSync} from 'fs';
-import {join} from 'path';
+
+import extrudedChoroplethVertex from './extruded-choropleth-layer-vertex.glsl';
+import extrudedChoroplethFragment from './extruded-choropleth-layer-fragment.glsl';
 
 const DEFAULT_COLOR = [180, 180, 200];
 const DEFAULT_AMBIENT_COLOR = [255, 255, 255];
@@ -108,8 +109,8 @@ export default class ExtrudedChoroplethLayer64 extends Layer {
 
   getShaders() {
     return {
-      vs: readFileSync(join(__dirname, './extruded-choropleth-layer-vertex.glsl'), 'utf8'),
-      fs: readFileSync(join(__dirname, './extruded-choropleth-layer-fragment.glsl'), 'utf8'),
+      vs: extrudedChoroplethVertex,
+      fs: extrudedChoroplethFragment,
       fp64: true,
       project64: true
     };

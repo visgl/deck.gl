@@ -21,11 +21,13 @@
 import {Layer} from '../../../lib';
 import {assembleShaders} from '../../../shader-utils';
 import {Model, CylinderGeometry} from 'luma.gl';
-import {readFileSync} from 'fs';
-import {join} from 'path';
 import {log} from '../../../lib/utils';
 import {fp64ify, enable64bitSupport} from '../../../lib/utils/fp64';
 import {COORDINATE_SYSTEM} from '../../../lib';
+
+import hexCellVertex from './hexagon-cell-layer-vertex.glsl';
+import hexCellVertex64 from './hexagon-cell-layer-vertex-64.glsl';
+import hexCellFragment from './hexagon-cell-layer-fragment.glsl';
 
 function positionsAreEqual(v1, v2) {
   // Hex positions are expected to change entirely, not to maintain some
@@ -89,14 +91,10 @@ export default class HexagonCellLayer extends Layer {
   }
 
   getShaders() {
-    const vs64 = readFileSync(join(__dirname, './hexagon-cell-layer-64-vertex.glsl'), 'utf8');
-    const vs32 = readFileSync(join(__dirname, './hexagon-cell-layer-vertex.glsl'), 'utf8');
-    const fs = readFileSync(join(__dirname, './hexagon-cell-layer-fragment.glsl'), 'utf8');
-
     return enable64bitSupport(this.props) ? {
-      vs: vs64, fs, modules: ['fp64', 'project64', 'lighting']
+      vs: hexCellVertex64, fs: hexCellFragment, modules: ['fp64', 'project64', 'lighting']
     } : {
-      vs: vs32, fs, modules: ['lighting']
+      vs: hexCellVertex, fs: hexCellFragment, modules: ['lighting']
     };
   }
 
@@ -111,8 +109,10 @@ export default class HexagonCellLayer extends Layer {
     const {attributeManager} = this.state;
     /* eslint-disable max-len */
     attributeManager.addInstanced({
-      instancePositions: {size: 3, accessor: ['getCentroid', 'getElevation'], update: this.calculateInstancePositions},
-      instanceColors: {size: 4, type: gl.UNSIGNED_BYTE, accessor: 'getColor', update: this.calculateInstanceColors}
+      instancePositions: {size: 3, accessor: ['getCentroid', 'getElevation'],
+        update: this.calculateInstancePositions},
+      instanceColors: {size: 4, type: gl.UNSIGNED_BYTE, accessor: 'getColor',
+        update: this.calculateInstanceColors}
     });
     /* eslint-enable max-len */
 

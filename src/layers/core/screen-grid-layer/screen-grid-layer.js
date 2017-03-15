@@ -21,8 +21,9 @@
 import {Layer} from '../../../lib';
 import {assembleShaders} from '../../../shader-utils';
 import {GL, Model, Geometry} from 'luma.gl';
-import {readFileSync} from 'fs';
-import {join} from 'path';
+
+import screenGridVertex from './screen-grid-layer-vertex.glsl';
+import screenGridFragment from './screen-grid-layer-fragment.glsl';
 
 const defaultProps = {
   cellSizePixels: 100,
@@ -38,8 +39,8 @@ const defaultProps = {
 export default class ScreenGridLayer extends Layer {
   getShaders() {
     return {
-      vs: readFileSync(join(__dirname, './screen-grid-layer-vertex.glsl'), 'utf8'),
-      fs: readFileSync(join(__dirname, './screen-grid-layer-fragment.glsl'), 'utf8')
+      vs: screenGridVertex,
+      fs: screenGridFragment
     };
   }
 
