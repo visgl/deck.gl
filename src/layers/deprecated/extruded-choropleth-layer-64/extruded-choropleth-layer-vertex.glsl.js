@@ -77,4 +77,3 @@ void main(void) {
   vColor = vec4(color, opacity);
 }
 `;
-/* eslint-enable max-len */

@@ -48,7 +48,8 @@ export default class SurfaceLayer extends Layer {
     attributeManager.add({
       indices: {size: 1, isIndexed: true, update: this.calculateIndices, noAlloc},
       positions: {size: 4, accessor: 'getZ', update: this.calculatePositions, noAlloc},
-      colors: {size: 4, accessor: ['getZ', 'getColor'], type: GL.UNSIGNED_BYTE, update: this.calculateColors, noAlloc},
+      colors: {size: 4, accessor: ['getZ', 'getColor'],
+        type: GL.UNSIGNED_BYTE, update: this.calculateColors, noAlloc},
       pickingColors: {size: 3, type: GL.UNSIGNED_BYTE, update: this.calculatePickingColors, noAlloc}
     });
     /* eslint-enable max-len */
