@@ -30,7 +30,7 @@ import {PolygonTesselator} from './polygon-tesselator';
 import {PolygonTesselatorExtruded} from './polygon-tesselator-extruded';
 
 import solidPolygonVertex from './solid-polygon-layer-vertex.glsl';
-import solidPolygon64Vertex from './solid-polygon-layer-64-vertex.glsl';
+import solidPolygonVertex64 from './solid-polygon-layer-vertex-64.glsl';
 import solidPolygonFragment from './solid-polygon-layer-fragment.glsl';
 
 const defaultProps = {
@@ -61,7 +61,7 @@ const defaultProps = {
 export default class SolidPolygonLayer extends Layer {
   getShaders() {
     return enable64bitSupport(this.props) ? {
-      vs: solidPolygon64Vertex, fs: solidPolygonFragment, modules: ['fp64', 'project64', 'lighting']
+      vs: solidPolygonVertex64, fs: solidPolygonFragment, modules: ['fp64', 'project64', 'lighting']
     } : {
       vs: solidPolygonVertex, fs: solidPolygonFragment, modules: ['lighting']
     };

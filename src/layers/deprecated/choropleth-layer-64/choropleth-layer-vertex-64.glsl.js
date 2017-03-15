@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 
 export default `\
-#define SHADER_NAME choropleth-layer-64-vertex-shader
+#define SHADER_NAME choropleth-layer-vertex-64-shader
 
 attribute vec4 positions64;
 attribute vec2 heights64;

@@ -25,7 +25,7 @@ import {fp64ify, enable64bitSupport} from '../../../lib/utils/fp64';
 import {COORDINATE_SYSTEM} from '../../../lib';
 
 import lineVertex from './line-layer-vertex.glsl';
-import line64Vertex from './line-layer-64-vertex.glsl';
+import lineVertex64 from './line-layer-vertex-64.glsl';
 import lineFragment from './line-layer-fragment.glsl';
 
 const DEFAULT_COLOR = [0, 0, 0, 255];
@@ -42,7 +42,7 @@ const defaultProps = {
 export default class LineLayer extends Layer {
   getShaders() {
     return enable64bitSupport(this.props) ? {
-      vs: line64Vertex, fs: lineFragment, modules: ['fp64', 'project64']
+      vs: lineVertex64, fs: lineFragment, modules: ['fp64', 'project64']
     } : {
       vs: lineVertex, fs: lineFragment, modules: []
     };

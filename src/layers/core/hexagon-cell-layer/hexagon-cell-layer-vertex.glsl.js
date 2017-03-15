@@ -18,7 +18,6 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-/* eslint-disable max-len */
 export default `\
 
 #define SHADER_NAME hexagon-cell-layer-vs
@@ -72,7 +71,8 @@ void main(void) {
   float elevation = 0.0;
 
   if (extruded > 0.5) {
-    elevation = project_scale(instancePositions.z * (positions.y + 0.5) * ELEVATION_SCALE * elevationScale);
+    elevation = project_scale(instancePositions.z * (positions.y + 0.5) *
+      ELEVATION_SCALE * elevationScale);
   }
 
   float dotRadius = radius * mix(coverage, 0.0, float(instanceColors.a == 0.0));
@@ -120,4 +120,3 @@ void main(void) {
   }
 }
 `;
-/* eslint-enable max-len */

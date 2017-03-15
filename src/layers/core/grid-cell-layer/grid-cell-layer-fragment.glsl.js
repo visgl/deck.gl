@@ -18,7 +18,6 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-/* fragment shader for the grid-layer */
 export default `\
 #define SHADER_NAME grid-cell-layer-fragment-shader
 

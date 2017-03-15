@@ -18,7 +18,6 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-/* eslint-disable max-len */
 export default `\
 #define SHADER_NAME icon-layer-vertex-shader
 
@@ -49,10 +48,15 @@ void main(void) {
   float instanceScale = iconSize.y == 0.0 ? 0.0 : instanceSizes / iconSize.y;
 
   // The vertex variable is in clip space and should not go through project_to_clipspace call
-  vec2 vertex = (positions / 2.0 + instanceOffsets) * iconSize_clipspace * sizeScale * instanceScale;
+  vec2 vertex = (positions / 2.0 + instanceOffsets) * iconSize_clipspace *
+    sizeScale * instanceScale;
+
   vertex.y *= -1.0;
 
-  vec4 instancePositions64xy = vec4(instancePositions.x, instancePositions64xyLow.x, instancePositions.y, instancePositions64xyLow.y);
+  vec4 instancePositions64xy = vec4(
+    instancePositions.x, instancePositions64xyLow.x,
+    instancePositions.y, instancePositions64xyLow.y);
+
   vec2 projected_coord_xy[2];
   project_position_fp64(instancePositions64xy, projected_coord_xy);
 
@@ -79,4 +83,3 @@ void main(void) {
   vColorMode = instanceColorModes;
 }
 `;
-/* eslint-enable max-len */

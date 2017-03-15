@@ -18,7 +18,6 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-/* eslint-disable max-len */
 export default `\
 #define SHADER_NAME extruded-choropleths-layer-vertex-shader
 

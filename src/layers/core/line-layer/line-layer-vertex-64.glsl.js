@@ -18,9 +18,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-/* eslint-disable max-len */
 export default `\
-#define SHADER_NAME line-layer-64-vertex-shader
+#define SHADER_NAME line-layer-vertex-64-shader
 
 attribute vec3 positions;
 attribute vec3 instanceSourcePositions;
@@ -52,8 +51,13 @@ vec2 getExtrusionOffset(vec2 line_clipspace, float offset_direction) {
 
 void main(void) {
   // Position
-  vec4 instanceSourcePositions64 = vec4(instanceSourcePositions.x, instanceSourceTargetPositions64xyLow.x, instanceSourcePositions.y, instanceSourceTargetPositions64xyLow.y);
-  vec4 instanceTargetPositions64 = vec4(instanceTargetPositions.x, instanceSourceTargetPositions64xyLow.z, instanceTargetPositions.y, instanceSourceTargetPositions64xyLow.w);
+  vec4 instanceSourcePositions64 = vec4(
+    instanceSourcePositions.x, instanceSourceTargetPositions64xyLow.x,
+    instanceSourcePositions.y, instanceSourceTargetPositions64xyLow.y);
+
+  vec4 instanceTargetPositions64 = vec4(
+    instanceTargetPositions.x, instanceSourceTargetPositions64xyLow.z,
+    instanceTargetPositions.y, instanceSourceTargetPositions64xyLow.w);
 
   vec2 projected_source_coord[2];
   vec2 projected_target_coord[2];
@@ -95,4 +99,3 @@ void main(void) {
   );
 }
 `;
-/* eslint-enable max-len */

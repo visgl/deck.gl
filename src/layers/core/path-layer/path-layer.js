@@ -25,7 +25,7 @@ import {fp64ify, enable64bitSupport} from '../../../lib/utils/fp64';
 import {COORDINATE_SYSTEM} from '../../../lib';
 
 import pathVertex from './path-layer-vertex.glsl';
-import path64Vertex from './path-layer-64-vertex.glsl';
+import pathVertex64 from './path-layer-vertex-64.glsl';
 import pathFragment from './path-layer-fragment.glsl';
 
 const DEFAULT_COLOR = [0, 0, 0, 255];
@@ -54,7 +54,7 @@ const isClosed = path => {
 export default class PathLayer extends Layer {
   getShaders() {
     return enable64bitSupport(this.props) ? {
-      vs: path64Vertex, fs: pathFragment, modules: ['fp64', 'project64']
+      vs: pathVertex64, fs: pathFragment, modules: ['fp64', 'project64']
     } : {
       vs: pathVertex, fs: pathFragment, modules: []
     };

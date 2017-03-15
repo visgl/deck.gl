@@ -18,8 +18,6 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-// See: npm glsl-shader-name
-
 export default `\
 #define SHADER_NAME hexagon-cell-layer-fs
 

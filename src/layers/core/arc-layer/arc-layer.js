@@ -25,7 +25,7 @@ import {fp64ify, enable64bitSupport} from '../../../lib/utils/fp64';
 import {COORDINATE_SYSTEM} from '../../../lib';
 
 import arcVertex from './arc-layer-vertex.glsl';
-import arc64Vertex from './arc-layer-64-vertex.glsl';
+import arcVertex64 from './arc-layer-vertex-64.glsl';
 import arcFragment from './arc-layer-fragment.glsl';
 
 const DEFAULT_COLOR = [0, 0, 0, 255];
@@ -43,7 +43,7 @@ const defaultProps = {
 export default class ArcLayer extends Layer {
   getShaders() {
     return enable64bitSupport(this.props) ? {
-      vs: arc64Vertex, fs: arcFragment, modules: ['fp64', 'project64']
+      vs: arcVertex64, fs: arcFragment, modules: ['fp64', 'project64']
     } : {
       vs: arcVertex, fs: arcFragment, modules: []
     };

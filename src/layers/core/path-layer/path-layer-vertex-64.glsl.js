@@ -18,7 +18,6 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-/* eslint-disable max-len */
 export default `\
 
 #define SHADER_NAME path-layer-vertex-shader
@@ -204,4 +203,3 @@ void main() {
   gl_Position = project_to_clipspace_fp64(vertex_pos_modelspace);
 }
 `;
-/* eslint-enable max-len */

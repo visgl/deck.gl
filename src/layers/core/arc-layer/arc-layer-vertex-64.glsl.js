@@ -18,9 +18,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-/* eslint-disable max-len */
 export default `\
-#define SHADER_NAME arc-layer-64-vertex-shader
+#define SHADER_NAME arc-layer-vertex-64-shader
 
 attribute vec3 positions;
 attribute vec4 instanceSourceColors;
@@ -80,15 +79,19 @@ void get_pos_fp64(vec2 source[2], vec2 target[2], float segmentRatio, out vec2 p
   position[0] = position_temp[0];
   position[1] = position_temp[1];
 
-  if (vertex_height.x < 0.0 || (vertex_height.x == 0.0 && vertex_height.y <= 0.0)) vertex_height = vec2(0.0, 0.0);
+  if (vertex_height.x < 0.0 || (vertex_height.x == 0.0 && vertex_height.y <= 0.0)) {
+    vertex_height = vec2(0.0, 0.0);
+  }
 
   position[2] = sqrt_fp64(vertex_height);
   position[3] = vec2(1.0, 0.0);
 }
 
 void main(void) {
-  vec4 instanceSourcePositions64 = vec4(instancePositions.x, instancePositions64Low.x, instancePositions.y, instancePositions64Low.y);
-  vec4 instanceTargetPositions64 = vec4(instancePositions.z, instancePositions64Low.z, instancePositions.w, instancePositions64Low.w);
+  vec4 instanceSourcePositions64 = vec4(instancePositions.x,
+    instancePositions64Low.x, instancePositions.y, instancePositions64Low.y);
+  vec4 instanceTargetPositions64 = vec4(instancePositions.z,
+    instancePositions64Low.z, instancePositions.w, instancePositions64Low.w);
 
   vec2 projected_source_coord[2];
   vec2 projected_target_coord[2];
@@ -106,11 +109,13 @@ void main(void) {
 
   vec2 curr_pos_modelspace[4];
 
-  get_pos_fp64(projected_source_coord, projected_target_coord, segmentRatio, curr_pos_modelspace);
+  get_pos_fp64(projected_source_coord, projected_target_coord, segmentRatio,
+    curr_pos_modelspace);
 
   vec2 next_pos_modelspace[4];
 
-  get_pos_fp64(projected_source_coord, projected_target_coord, nextSegmentRatio, next_pos_modelspace);
+  get_pos_fp64(projected_source_coord, projected_target_coord, nextSegmentRatio,
+    next_pos_modelspace);
 
   vec4 curr_pos_clipspace = project_to_clipspace_fp64(curr_pos_modelspace);
   vec4 next_pos_clipspace = project_to_clipspace_fp64(next_pos_modelspace);
@@ -128,4 +133,3 @@ void main(void) {
   );
 }
 `;
-/* eslint-enable max-len */

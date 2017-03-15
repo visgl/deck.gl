@@ -18,17 +18,13 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-// Inspired by screen-grid-layer vertex shader in deck.gl
-
-/* vertex shader for the grid-layer */
-/* eslint-disable max-len */
 export default `\
-#define SHADER_NAME grid-layer-vs
+#define SHADER_NAME hexagon-cell-layer-vs-64
 
 attribute vec3 positions;
 attribute vec3 normals;
 
-attribute vec4 instancePositions;
+attribute vec3 instancePositions;
 attribute vec2 instancePositions64xyLow;
 attribute vec4 instanceColors;
 attribute vec3 instancePickingColors;
@@ -39,17 +35,18 @@ uniform float renderPickingBuffer;
 uniform vec3 selectedPickingColor;
 
 // Custom uniforms
-uniform float extruded;
-uniform float lonOffset;
-uniform float latOffset;
 uniform float opacity;
+uniform float radius;
+uniform float angle;
+uniform float extruded;
+uniform float coverage;
 uniform float elevationScale;
-
-// A magic number to scale elevation so that 1 unit approximate to 1 meter
-#define ELEVATION_SCALE 0.8
 
 // Result
 varying vec4 vColor;
+
+// A magic number to scale elevation so that 1 unit approximate to 1 meter.
+#define ELEVATION_SCALE 0.8
 
 float isPicked(vec3 pickingColors, vec3 selectedColor) {
  return float(pickingColors.x == selectedColor.x
@@ -57,59 +54,84 @@ float isPicked(vec3 pickingColors, vec3 selectedColor) {
  && pickingColors.z == selectedColor.z);
 }
 
-
 void main(void) {
 
-  // vec2 instancePositions64x = vec2(instancePositions.x, instancePositions64xyLow.x);
-  // vec2 instancePositions64y = vec2(instancePositions.y, instancePositions64xyLow.y);
-  // vec2 offsetInstancePosition64x = sum_fp64(instancePositions64x, vec2((positions.x + 1.0 ) * lonOffset / 2.0, 0.0));
-  // vec2 offsetInstancePosition64y = sum_fp64(instancePositions64y, vec2((positions.y + 1.0 ) * latOffset / 2.0, 0.0));
-  vec4 instancePositions64xy = vec4(instancePositions.x + (positions.x + 1.0) * lonOffset / 2.0, instancePositions64xyLow.x, instancePositions.y + (positions.y + 1.0) * latOffset / 2.0, instancePositions64xyLow.y);
+  // rotate primitive position and normal
+  mat2 rotationMatrix = mat2(cos(angle), -sin(angle), sin(angle), cos(angle));
+
+  vec2 rPos = rotationMatrix * positions.xz;
+  vec2 rNorm = rotationMatrix * normals.xz;
+
+  vec3 rotatedPositions = vec3(rPos.x, positions.y, rPos.y);
+  vec3 rotatedNormals = vec3(rNorm.x, normals.y, rNorm.y);
+
+  // calculate elevation, if 3d not enabled set to 0
+  // cylindar gemoetry height are between -0.5 to 0.5, transform it to between 0, 1
+  float elevation = 0.0;
+
+  if (extruded > 0.5) {
+    elevation = project_scale(instancePositions.z * (positions.y + 0.5) *
+      ELEVATION_SCALE * elevationScale);
+}
+
+  float dotRadius = radius * clamp(coverage, 0.0, 1.0);
+  // // project center of hexagon
+
+  vec4 instancePositions64xy = vec4(
+    instancePositions.x, instancePositions64xyLow.x,
+    instancePositions.y, instancePositions64xyLow.y);
 
   vec2 projected_coord_xy[2];
   project_position_fp64(instancePositions64xy, projected_coord_xy);
 
-  float elevation = 0.0;
-
-  if (extruded > 0.5) {
-    elevation = project_scale(instancePositions.w  * (positions.z + 1.0) * ELEVATION_SCALE * elevationScale) + 1.0;
-  }
+  vec2 vertex_pos_localspace[4];
+  vec4_fp64(vec4(rotatedPositions.xz * dotRadius, 0.0, 1.0), vertex_pos_localspace);
 
   vec2 vertex_pos_modelspace[4];
-  vertex_pos_modelspace[0] = projected_coord_xy[0];
-  vertex_pos_modelspace[1] = projected_coord_xy[1];
-  vertex_pos_modelspace[2] = vec2(elevation, 0.0);
+  vertex_pos_modelspace[0] = sum_fp64(vertex_pos_localspace[0], projected_coord_xy[0]);
+  vertex_pos_modelspace[1] = sum_fp64(vertex_pos_localspace[1], projected_coord_xy[1]);
+  vertex_pos_modelspace[2] = sum_fp64(vertex_pos_localspace[2], vec2(elevation, 0.0));
   vertex_pos_modelspace[3] = vec2(1.0, 0.0);
 
-  vec4 position_worldspace = vec4(vertex_pos_modelspace[0].x, vertex_pos_modelspace[1].x, vertex_pos_modelspace[2].x, vertex_pos_modelspace[3].x);
+  vec4 position_worldspace = vec4(
+    vertex_pos_modelspace[0].x, vertex_pos_modelspace[1].x,
+    vertex_pos_modelspace[2].x, vertex_pos_modelspace[3].x);
 
   gl_Position = project_to_clipspace_fp64(vertex_pos_modelspace);
 
+  // render display
   if (renderPickingBuffer < 0.5) {
 
     // TODO: we should allow the user to specify the color for "selected element"
-    // check whether a bar is currently picked.
+    // check whether hexagon is currently picked.
     float selected = isPicked(instancePickingColors, selectedPickingColor);
+
+    // Light calculations
+    // Worldspace is the linear space after Mercator projection
+
+    vec3 normals_worldspace = rotatedNormals;
 
     float lightWeight = 1.0;
 
     if (extruded > 0.5) {
       lightWeight = getLightWeight(
         position_worldspace,
-        normals
+        normals_worldspace
       );
     }
 
     vec3 lightWeightedColor = lightWeight * instanceColors.rgb;
-    vec4 color = vec4(lightWeightedColor, instanceColors.a * opacity) / 255.0;
+
+    // Color: Either opacity-multiplied instance color, or picking color
+    vec4 color = vec4(lightWeightedColor, opacity * instanceColors.a) / 255.0;
+
     vColor = color;
 
   } else {
 
     vec4 pickingColor = vec4(instancePickingColors / 255.0, 1.0);
-     vColor = pickingColor;
+    vColor = pickingColor;
 
   }
 }
 `;
-/* eslint-enable max-len */

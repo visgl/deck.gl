@@ -26,7 +26,7 @@ import {fp64ify, enable64bitSupport} from '../../../lib/utils/fp64';
 import {GL, Model, Geometry} from 'luma.gl';
 
 import scatterplotVertex from './scatterplot-layer-vertex.glsl';
-import scatterplot64Vertex from './scatterplot-layer-64-vertex.glsl';
+import scatterplotVertex64 from './scatterplot-layer-vertex-64.glsl';
 import scatterplotFragment from './scatterplot-layer-fragment.glsl';
 
 const DEFAULT_COLOR = [0, 0, 0, 255];
@@ -47,7 +47,7 @@ const defaultProps = {
 export default class ScatterplotLayer extends Layer {
   getShaders(id) {
     return enable64bitSupport(this.props) ? {
-      vs: scatterplot64Vertex, fs: scatterplotFragment, modules: ['fp64', 'project64']
+      vs: scatterplotVertex64, fs: scatterplotFragment, modules: ['fp64', 'project64']
     } : {
       vs: scatterplotVertex, fs: scatterplotFragment, modules: []
     };

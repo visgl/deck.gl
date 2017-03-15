@@ -26,7 +26,7 @@ import {fp64ify, enable64bitSupport} from '../../../lib/utils/fp64';
 import {COORDINATE_SYSTEM} from '../../../lib';
 
 import hexCellVertex from './hexagon-cell-layer-vertex.glsl';
-import hexCell64Vertex from './hexagon-cell-layer-64-vertex.glsl';
+import hexCellVertex64 from './hexagon-cell-layer-vertex-64.glsl';
 import hexCellFragment from './hexagon-cell-layer-fragment.glsl';
 
 function positionsAreEqual(v1, v2) {
@@ -92,7 +92,7 @@ export default class HexagonCellLayer extends Layer {
 
   getShaders() {
     return enable64bitSupport(this.props) ? {
-      vs: hexCell64Vertex, fs: hexCellFragment, modules: ['fp64', 'project64', 'lighting']
+      vs: hexCellVertex64, fs: hexCellFragment, modules: ['fp64', 'project64', 'lighting']
     } : {
       vs: hexCellVertex, fs: hexCellFragment, modules: ['lighting']
     };

@@ -18,7 +18,6 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-/* eslint-disable max-len */
 export default `\
 #define SHADER_NAME icon-layer-vertex-shader
 
@@ -47,7 +46,8 @@ void main(void) {
   // scale icon height to match instanceSize
   float instanceScale = iconSize.y == 0.0 ? 0.0 : instanceSizes / iconSize.y;
   vec3 center = project_position(instancePositions);
-  vec2 vertex = (positions / 2.0 + instanceOffsets) * iconSize_clipspace * sizeScale * instanceScale;
+  vec2 vertex = (positions / 2.0 + instanceOffsets) * iconSize_clipspace *
+    sizeScale * instanceScale;
   vertex.y *= -1.0;
   gl_Position = project_to_clipspace(vec4(center, 1.0)) + vec4(vertex, 0.0, 0.0);
 
@@ -66,4 +66,3 @@ void main(void) {
   vColorMode = instanceColorModes;
 }
 `;
-/* eslint-enable max-len */

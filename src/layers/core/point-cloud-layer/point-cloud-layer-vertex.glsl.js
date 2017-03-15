@@ -18,7 +18,6 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-/* eslint-disable max-len */
 export default `\
 #define SHADER_NAME point-cloud-layer-vertex-shader
 
@@ -55,4 +54,3 @@ void main(void) {
   vColor = mix(color, pickingColor, renderPickingBuffer);
 }
 `;
-/* eslint-enable max-len */

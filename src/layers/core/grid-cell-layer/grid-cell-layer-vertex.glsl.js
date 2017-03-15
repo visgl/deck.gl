@@ -20,8 +20,6 @@
 
 // Inspired by screen-grid-layer vertex shader in deck.gl
 
-/* vertex shader for the grid-layer */
-/* eslint-disable max-len */
 export default `\
 #define SHADER_NAME grid-layer-vs
 
@@ -60,14 +58,16 @@ float isPicked(vec3 pickingColors, vec3 selectedColor) {
 void main(void) {
 
   // cube gemoetry vertics are between -1 to 1, scale and transform it to between 0, 1
-  vec2 ptPosition = instancePositions.xy + vec2((positions.x + 1.0 ) * lonOffset / 2.0, (positions.y + 1.0) * latOffset / 2.0);
+  vec2 ptPosition = instancePositions.xy + vec2((positions.x + 1.0 ) *
+    lonOffset / 2.0, (positions.y + 1.0) * latOffset / 2.0);
 
   vec2 pos = project_position(ptPosition);
 
   float elevation = 0.0;
 
   if (extruded > 0.5) {
-    elevation = project_scale(instancePositions.w  * (positions.z + 1.0) * ELEVATION_SCALE * elevationScale);
+    elevation = project_scale(instancePositions.w  * (positions.z + 1.0) *
+      ELEVATION_SCALE * elevationScale);
   }
 
   // extrude positions
@@ -102,4 +102,3 @@ void main(void) {
   }
 }
 `;
-/* eslint-enable max-len */

@@ -18,7 +18,6 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-/* eslint-disable max-len */
 export default `\
 #define SHADER_NAME polygon-layer-vertex-shader
 
@@ -52,7 +51,9 @@ void main(void) {
 
   gl_Position = project_to_clipspace_fp64(vertex_pos_modelspace);
 
-  vec4 position_worldspace = vec4(vertex_pos_modelspace[0].x, vertex_pos_modelspace[1].x, vertex_pos_modelspace[2].x, vertex_pos_modelspace[3].x);
+  vec4 position_worldspace = vec4(
+    vertex_pos_modelspace[0].x, vertex_pos_modelspace[1].x,
+    vertex_pos_modelspace[2].x, vertex_pos_modelspace[3].x);
 
   if (pickingEnabled < 0.5) {
     float lightWeight = 1.0;
@@ -74,4 +75,3 @@ void main(void) {
   }
 }
 `;
-/* eslint-enable max-len */

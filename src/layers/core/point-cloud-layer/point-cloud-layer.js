@@ -25,7 +25,7 @@ import {fp64ify, enable64bitSupport} from '../../../lib/utils/fp64';
 import {COORDINATE_SYSTEM} from '../../../lib';
 
 import pointCloudVertex from './point-cloud-layer-vertex.glsl';
-import pointCloud64Vertex from './point-cloud-layer-64-vertex.glsl';
+import pointCloudVertex64 from './point-cloud-layer-vertex-64.glsl';
 import pointCloudFragment from './point-cloud-layer-fragment.glsl';
 
 const DEFAULT_COLOR = [0, 0, 0, 255];
@@ -51,7 +51,7 @@ const defaultProps = {
 export default class PointCloudLayer extends Layer {
   getShaders(id) {
     return enable64bitSupport(this.props) ? {
-      vs: pointCloud64Vertex, fs: pointCloudFragment, modules: ['fp64', 'project64', 'lighting']
+      vs: pointCloudVertex64, fs: pointCloudFragment, modules: ['fp64', 'project64', 'lighting']
     } : {
       vs: pointCloudVertex, fs: pointCloudFragment, modules: ['lighting']
     };

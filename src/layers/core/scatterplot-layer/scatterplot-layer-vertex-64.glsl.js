@@ -18,9 +18,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-/* eslint-disable max-len */
 export default `\
-#define SHADER_NAME scatterplot-layer-64-vertex-shader
+#define SHADER_NAME scatterplot-layer-vertex-64-shader
 
 attribute vec3 positions;
 
@@ -59,7 +58,10 @@ void main(void) {
   // 0 - solid circle, 1 - stroke with lineWidth=0
   innerUnitRadius = outline * (1.0 - strokeWidth / outerRadiusPixels);
 
-  vec4 instancePositions64xy = vec4(instancePositions.x, instancePositions64xyLow.x, instancePositions.y, instancePositions64xyLow.y);
+  vec4 instancePositions64xy = vec4(
+    instancePositions.x, instancePositions64xyLow.x,
+    instancePositions.y, instancePositions64xyLow.y);
+
   vec2 projected_coord_xy[2];
   project_position_fp64(instancePositions64xy, projected_coord_xy);
 
@@ -69,7 +71,8 @@ void main(void) {
   vec2 vertex_pos_modelspace[4];
   vertex_pos_modelspace[0] = sum_fp64(vertex_pos_localspace[0], projected_coord_xy[0]);
   vertex_pos_modelspace[1] = sum_fp64(vertex_pos_localspace[1], projected_coord_xy[1]);
-  vertex_pos_modelspace[2] = sum_fp64(vertex_pos_localspace[2], vec2(project_scale(instancePositions.z), 0.0));
+  vertex_pos_modelspace[2] = sum_fp64(vertex_pos_localspace[2],
+    vec2(project_scale(instancePositions.z), 0.0));
   vertex_pos_modelspace[3] = vec2(1.0, 0.0);
 
   gl_Position = project_to_clipspace_fp64(vertex_pos_modelspace);
@@ -85,4 +88,3 @@ void main(void) {
   // vColor = mix(color, pickingColor, renderPickingBuffer);
 }
 `;
-/* eslint-enable max-len */

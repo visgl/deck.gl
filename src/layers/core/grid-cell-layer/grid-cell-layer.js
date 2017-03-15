@@ -25,7 +25,7 @@ import {fp64ify, enable64bitSupport} from '../../../lib/utils/fp64';
 import {COORDINATE_SYSTEM} from '../../../lib';
 
 import gridCellVertex from './grid-cell-layer-vertex.glsl';
-import gridCell64Vertex from './grid-cell-layer-64-vertex.glsl';
+import gridCellVertex64 from './grid-cell-layer-vertex-64.glsl';
 import gridCellFragment from './grid-cell-layer-fragment.glsl';
 
 const DEFAULT_COLOR = [255, 0, 255, 255];
@@ -71,7 +71,7 @@ export default class GridCellLayer extends Layer {
 
   getShaders() {
     return enable64bitSupport(this.props) ? {
-      vs: gridCell64Vertex, fs: gridCellFragment, modules: ['fp64', 'project64', 'lighting']
+      vs: gridCellVertex64, fs: gridCellFragment, modules: ['fp64', 'project64', 'lighting']
     } : {
       vs: gridCellVertex, fs: gridCellFragment, modules: ['lighting']
     };

@@ -24,7 +24,7 @@ import {fp64ify, enable64bitSupport} from '../../../lib/utils/fp64';
 import {COORDINATE_SYSTEM} from '../../../lib';
 
 import iconVertex from './icon-layer-vertex.glsl';
-import icon64Vertex from './icon-layer-64-vertex.glsl';
+import iconVertex64 from './icon-layer-vertex-64.glsl';
 import iconFragment from './icon-layer-fragment.glsl';
 
 const DEFAULT_COLOR = [0, 0, 0, 255];
@@ -148,7 +148,7 @@ export default class IconLayer extends Layer {
 
   getShaders() {
     return enable64bitSupport(this.props) ? {
-      vs: icon64Vertex, fs: iconFragment, modules: ['fp64', 'project64']
+      vs: iconVertex64, fs: iconFragment, modules: ['fp64', 'project64']
     } : {
       vs: iconVertex, fs: iconFragment, modules: []
     };
