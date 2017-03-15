@@ -43,9 +43,9 @@ const defaultProps = {
 export default class ArcLayer extends Layer {
   getShaders() {
     return enable64bitSupport(this.props) ? {
-      vs: arc64Vertex, arcFragment, modules: ['fp64', 'project64']
+      vs: arc64Vertex, fs: arcFragment, modules: ['fp64', 'project64']
     } : {
-      vs: arcVertex, arcFragment, modules: []
+      vs: arcVertex, fs: arcFragment, modules: []
     };
   }
 

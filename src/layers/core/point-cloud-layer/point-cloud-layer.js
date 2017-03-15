@@ -51,9 +51,9 @@ const defaultProps = {
 export default class PointCloudLayer extends Layer {
   getShaders(id) {
     return enable64bitSupport(this.props) ? {
-      vs: pointCloud64Vertex, pointCloudFragment, modules: ['fp64', 'project64', 'lighting']
+      vs: pointCloud64Vertex, fs: pointCloudFragment, modules: ['fp64', 'project64', 'lighting']
     } : {
-      vs: pointCloudVertex, pointCloudFragment, modules: ['lighting']
+      vs: pointCloudVertex, fs: pointCloudFragment, modules: ['lighting']
     };
   }
 

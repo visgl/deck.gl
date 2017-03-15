@@ -54,9 +54,9 @@ const isClosed = path => {
 export default class PathLayer extends Layer {
   getShaders() {
     return enable64bitSupport(this.props) ? {
-      vs: path64Vertex, pathFragment, modules: ['fp64', 'project64']
+      vs: path64Vertex, fs: pathFragment, modules: ['fp64', 'project64']
     } : {
-      vs: pathVertex, pathFragment, modules: []
+      vs: pathVertex, fs: pathFragment, modules: []
     };
   }
 

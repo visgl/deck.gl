@@ -47,9 +47,9 @@ const defaultProps = {
 export default class ScatterplotLayer extends Layer {
   getShaders(id) {
     return enable64bitSupport(this.props) ? {
-      vs: scatterplot64Vertex, scatterplotFragment, modules: ['fp64', 'project64']
+      vs: scatterplot64Vertex, fs: scatterplotFragment, modules: ['fp64', 'project64']
     } : {
-      vs: scatterplotVertex, scatterplotFragment, modules: []
+      vs: scatterplotVertex, fs: scatterplotFragment, modules: []
     };
   }
 

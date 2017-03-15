@@ -148,9 +148,9 @@ export default class IconLayer extends Layer {
 
   getShaders() {
     return enable64bitSupport(this.props) ? {
-      vs: icon64Vertex, iconFragment, modules: ['fp64', 'project64']
+      vs: icon64Vertex, fs: iconFragment, modules: ['fp64', 'project64']
     } : {
-      vs: iconVertex, iconFragment, modules: []
+      vs: iconVertex, fs: iconFragment, modules: []
     };
   }
 

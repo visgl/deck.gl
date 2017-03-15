@@ -42,9 +42,9 @@ const defaultProps = {
 export default class LineLayer extends Layer {
   getShaders() {
     return enable64bitSupport(this.props) ? {
-      vs: line64Vertex, lineFragment, modules: ['fp64', 'project64']
+      vs: line64Vertex, fs: lineFragment, modules: ['fp64', 'project64']
     } : {
-      vs: lineVertex, lineFragment, modules: []
+      vs: lineVertex, fs: lineFragment, modules: []
     };
   }
 
