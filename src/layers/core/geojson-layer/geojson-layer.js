@@ -124,7 +124,7 @@ export default class GeoJsonLayer extends CompositeLayer {
         getColor,
         updateTriggers: {
           getElevation: updateTriggers.getElevation,
-          getColor: updateTriggers.getFillColor
+          getColor: updateTriggers.getColor
         },
         onHover,
         onClick
