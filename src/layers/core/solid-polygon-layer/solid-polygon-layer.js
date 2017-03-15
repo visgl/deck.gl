@@ -58,7 +58,7 @@ const defaultProps = {
   }
 };
 
-export default class PolygonLayer extends Layer {
+export default class SolidPolygonLayer extends Layer {
   getShaders() {
     const vs64 = readFileSync(join(__dirname, './solid-polygon-layer-vertex-64.glsl'), 'utf8');
     const vs32 = readFileSync(join(__dirname, './solid-polygon-layer-vertex.glsl'), 'utf8');
@@ -199,5 +199,5 @@ export default class PolygonLayer extends Layer {
   }
 }
 
-PolygonLayer.layerName = 'PolygonLayer';
-PolygonLayer.defaultProps = defaultProps;
+SolidPolygonLayer.layerName = 'SolidPolygonLayer';
+SolidPolygonLayer.defaultProps = defaultProps;
