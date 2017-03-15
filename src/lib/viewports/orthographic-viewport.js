@@ -7,7 +7,7 @@ export default class OrthographicViewport extends Viewport {
     width, // Width of viewport
     height, // Height of viewport
     // view matrix arguments
-    eye, // Defines eye position
+    eye = [0, 0, 1], // Defines eye position, default unit distance along z axis
     lookAt = [0, 0, 0], // Which point is camera looking at, default origin
     up = [0, 1, 0], // Defines up direction, default positive y axis
     // projection matrix arguments

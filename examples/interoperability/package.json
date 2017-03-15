@@ -1,0 +1,22 @@
+{
+  "name": "interoperability-demo",
+  "version": "0.0.1",
+  "license": "MIT",
+  "scripts": {
+    "start": "webpack-dev-server --progress --hot --port 3000 --open",
+    "start-local": "webpack-dev-server --env.local --progress --hot --open"
+  },
+  "dependencies": {
+    "deck.gl": "git+ssh://git@github.com/uber/deck.gl.git",
+    "luma.gl": "^3.0.0-beta.11",
+    "react": "^15.4.1",
+    "react-dom": "^15.4.1",
+    "viewport-mercator-project": "^3.0.0-beta3"
+  },
+  "devDependencies": {
+    "babel-polyfill": "^6.23.0",
+    "buble-loader": "^0.4.0",
+    "webpack": "^2.2.1",
+    "webpack-dev-server": "^2.3.0"
+  }
+}

@@ -2,7 +2,8 @@ const float TILE_SIZE = 512.0;
 const float PI = 3.1415926536;
 const float WORLD_SCALE = TILE_SIZE / (PI * 2.0);
 
-const float PROJECT_LINEAR = 0.;
+// ref: lib/constants.js
+const float PROJECT_IDENTITY = 0.;
 const float PROJECT_MERCATOR = 1.;
 const float PROJECT_MERCATOR_OFFSETS = 2.;
 
@@ -227,9 +228,9 @@ vec2 project_mercator_(vec2 lnglat) {
 }
 
 vec2 project_position(vec2 position) {
-  // if (projectionMode == PROJECT_LINEAR) {
-  //   return (position + vec2(TILE_SIZE / 2.0)) * projectionScale;
-  // }
+  if (projectionMode == PROJECT_IDENTITY) {
+    return position * projectionScale;
+  }
   if (projectionMode == PROJECT_MERCATOR_OFFSETS) {
     return position;
     return project_scale(position);
