@@ -9,7 +9,7 @@ A subclass of `Viewport` that creates an orthogonal matrix
 | `width`      | `Number`    | 1       | Width of "viewport" or window                 |
 | `height`     | `Number`    | 1       | Height of "viewport" or window                |
 view matrix arguments
-* `eye` (Vector3 = [0, 0, 1]) - Defines eye position, default [0, 0, 1]
+* `eye` (Vector3 = [0, 0, 1]) - Defines eye position, default unit distance along z axis
 * `lookAt` (Vector3 = [0, 0, 0]) - Which point is camera looking at, default origin
 * `up` (Vector3 = [0, 1, 0]) - Defines up direction, default positive y axis
 projection matrix arguments

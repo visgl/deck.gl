@@ -1,27 +1,31 @@
-import 'babel-polyfill';
 /* global document, window,*/
 /* eslint-disable no-console */
 import React, {PureComponent} from 'react';
 import {render} from 'react-dom';
 import DeckGL, {
   ScatterplotLayer, OrthographicViewport, COORDINATE_SYSTEM
-} from '../../src';
-// import DeckGL, {ScatterplotLayer} from 'deck.gl';
+} from 'deck.gl';
 
 const DEGREE_TO_RADIAN = Math.PI / 180;
 const NUM_POINTS = 2000;
+const VIEW_MODE = {
+  WEBGL: 0,
+  SVG: 1,
+  HYBRID: 2
+};
 
 class Root extends PureComponent {
   constructor(props) {
     super(props);
 
     this._onResize = this._onResize.bind(this);
+    this._onClick = this._onClick.bind(this);
     this._update = this._update.bind(this);
 
     this.state = {
       width: 0,
       height: 0,
-      viewMode: 0
+      viewMode: VIEW_MODE.WEBGL
     };
 
     this.points = Array.from(Array(NUM_POINTS)).map((_, i) => {
@@ -48,6 +52,26 @@ class Root extends PureComponent {
   _onResize() {
     const {innerWidth: width, innerHeight: height} = window;
     this.setState({width, height});
+  }
+
+  _onClick() {
+    let nextViewMode;
+
+    switch (this.state.viewMode) {
+    case VIEW_MODE.WEBGL:
+      nextViewMode = VIEW_MODE.SVG;
+      break;
+    case VIEW_MODE.SVG:
+      nextViewMode = VIEW_MODE.HYBRID;
+      break;
+    case VIEW_MODE.HYBRID:
+      nextViewMode = VIEW_MODE.WEBGL;
+      break;
+    default:
+      nextViewMode = VIEW_MODE.WEBGL;
+    }
+
+    this.setState({viewMode: nextViewMode});
   }
 
   _update() {
@@ -99,22 +123,21 @@ class Root extends PureComponent {
 
   render() {
     const {width, height, viewMode} = this.state;
-
     const left = -Math.min(width, height) / 2;
     const top = -Math.min(width, height) / 2;
     const glViewport = new OrthographicViewport({width, height, left, top});
 
     return width && height && <div>
-      {viewMode > 0 && <svg viewBox={`0 0 ${width} ${height}`}>
-        { this._renderSVGPoints() }
-      </svg>}
-      {viewMode !== 1 && <DeckGL width={width} height={height} viewport={glViewport}
-        style={{position: 'absolute', top: '0px', left: '0px'}}
-        layers={[this._renderScatterplotLayer()]}/>}
+      {(viewMode === VIEW_MODE.SVG || viewMode === VIEW_MODE.HYBRID) &&
+        <svg viewBox={`0 0 ${width} ${height}`}>
+          { this._renderSVGPoints() }
+        </svg>}
+      {(viewMode === VIEW_MODE.WEBGL || viewMode === VIEW_MODE.HYBRID) &&
+        <DeckGL width={width} height={height} viewport={glViewport}
+          style={{position: 'absolute', top: '0px', left: '0px'}}
+          layers={[this._renderScatterplotLayer()]}/>}
       <button style={{position: 'absolute', top: '8px', left: '8px'}}
-        onClick={() => {
-          this.setState({viewMode: (viewMode + 1) % 3});
-        }}>switch</button>
+        onClick={this._onClick}>switch</button>
     </div>;
   }
 }

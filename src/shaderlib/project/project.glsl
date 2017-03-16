@@ -229,7 +229,7 @@ vec2 project_mercator_(vec2 lnglat) {
 
 vec2 project_position(vec2 position) {
   if (projectionMode == PROJECT_IDENTITY) {
-    return position * projectionScale;
+    return position;
   }
   if (projectionMode == PROJECT_MERCATOR_OFFSETS) {
     return position;
