@@ -17,6 +17,8 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
+
+export default `\
 uniform float ONE;
 
 const vec2 E_FP64 = vec2(2.7182817459106445e+00, 8.254840366817007e-08);
@@ -163,7 +165,8 @@ vec2 twoSqr(float a) {
   float prod = a * a;
   vec2 a_fp64 = split(a);
 
-  float err = ((a_fp64.x * a_fp64.x - prod) * ONE + 2.0 * a_fp64.x * a_fp64.y * ONE * ONE) + a_fp64.y * a_fp64.y * ONE * ONE * ONE;
+  float err = ((a_fp64.x * a_fp64.x - prod) * ONE + 2.0 * a_fp64.x *
+    a_fp64.y * ONE * ONE) + a_fp64.y * a_fp64.y * ONE * ONE * ONE;
   return vec2(prod, err);
 }
 #else
@@ -788,7 +791,8 @@ void vec3_sum_fp64(vec2 a[3], vec2 b[3], out vec2 out_val[3]) {
 }
 
 vec2 vec3_length_fp64(vec2 x[3]) {
-  return sqrt_fp64(sum_fp64(sum_fp64(mul_fp64(x[0], x[0]), mul_fp64(x[1], x[1])), mul_fp64(x[2], x[2])));
+  return sqrt_fp64(sum_fp64(sum_fp64(mul_fp64(x[0], x[0]), mul_fp64(x[1], x[1])),
+    mul_fp64(x[2], x[2])));
 }
 
 vec2 vec3_distance_fp64(vec2 x[3], vec2 y[3]) {
@@ -848,3 +852,4 @@ void mat4_vec4_mul_fp64(vec2 b[16], vec2 a[4], out vec2 out_val[4]) {
     vec4_dot_fp64(a, tmp, out_val[i]);
   }
 }
+`;

@@ -1,6 +1,6 @@
-import fs from 'fs';
-import path from 'path';
+import project64Shader from './project64.glsl';
+
 export const project64 = {
   interface: 'project64',
-  source: fs.readFileSync(path.join(__dirname, 'project64.glsl'), 'utf8')
+  source: project64Shader
 };
