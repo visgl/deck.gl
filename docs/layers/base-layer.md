@@ -15,8 +15,7 @@ and profiling.
 #### `defaultProps` (static, object, optional)
 
 All deck.gl layers define a `defaultProps` static member listing their props and
-default values, rather than programmatically declaring the props in their
-constructors. Using `defaultProps` improves both the code readability and
+default values. Using `defaultProps` improves both the code readability and
 performance during layer instance construction.
 
 Remarks:
@@ -96,16 +95,18 @@ Layers can be interacted with using these properties.
 
 - Default: `false`
 
-Whether layer responds to mouse pointer picking events.
+Whether the layer responds to mouse pointer picking events.
 
 ##### `onHover` (Function, optional)
 
 This callback will be called when the mouse hovers over the deck.gl
 viewport. The callback will be called for the layer that has
-been picked and the feature that user's mouse is hovered on will be
+been picked and the data object that user's mouse is hovered on will be
 reported to the caller of onHover through a single parameter `info`.
 This `info` object contains a variety of fields describing the mouse or touch
 event and what was hovered.
+
+If index is -1, no feature is matched for this layer.
 
 **Requires `pickable` to be true.**
 
@@ -113,12 +114,12 @@ event and what was hovered.
 
 This callback will be called when the mouse clicks over the deck.gl
 viewport. The callback will be called for the layer that has
-been picked and the feature that user's mouse is clicked on will be
+been picked and the data object that user's mouse is clicked on will be
 reported to the caller of onClick through a single parameter `info`.
 This `info` object contains a variety of fields describing the mouse or touch
 event and what was clicked.
 
-If index is -1, no feature was matched for this layer
+If index is -1, no feature is matched for this layer.
 
 **Requires `pickable` to be true.**
 
@@ -132,7 +133,7 @@ that are not Web Mercator projected longitudes/latitudes.
 Specifies how layer positions and offsets should be geographically interpreted.
 
 The default is to interpret positions as latitude and longitude, however it
-is also possible to interpret positions as meter offsets on top of a projection
+is also possible to interpret positions as meter offsets added to projection
 center specified by the `projectionCenter` prop.
 
 See the article on Coordinate Systems for details.
@@ -189,12 +190,14 @@ maunally override it using this prop.
 
 ##### `updateTriggers`
 
-This prop expects an object with key/value pairs that the keys matching attribute names.
-If any values in this object are changed between props udpate, the corresponding attribute
-will be invalidated.
+This prop expects an object of which the keys matching the accessor names of a layer.
+If any values in this object are changed between props update, the attribute corresponding
+to the accessors named by the key will be invalidated.
 
-Using this method, the attribute update can happen when the content of `data` prop changed, or
-the developer would like to manually force an attribute update on the GPU side.
+Using this method, the attribute update can happen not only when the content of `data` prop
+changed, but also when the developer would like to manually force an attribute update.
 
 Note: shallow comparision of the `data` prop has higher priority than the `updateTriggers`. So
-if the app to mint a new object on every render, all attribute will be automatically updated
+if the app to mint a new object on every render, all attributes will be automatically updated.
+updateTriggers cannot block attribute updates, just trigger them. To block the attribute updates,
+developers need to override the updateState.
