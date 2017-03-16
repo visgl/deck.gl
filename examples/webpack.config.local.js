@@ -12,7 +12,7 @@ const LIB_DIR = resolve(__dirname, '..');
 const SRC_DIR = resolve(LIB_DIR, './src');
 
 // Support for hot reloading changes to the deck.gl library:
-const LOCAL_DEVELOPMENT_CONFIG = {
+const LOCAL_DEV_CONFIG = {
   // suppress warnings about bundle size
   devServer: {
     stats: {
@@ -46,8 +46,13 @@ const LOCAL_DEVELOPMENT_CONFIG = {
 };
 
 function addLocalDevSettings(config) {
-  Object.assign(config.resolve.alias, LOCAL_DEVELOPMENT_CONFIG.resolve.alias);
-  config.module.rules = config.module.rules.concat(LOCAL_DEVELOPMENT_CONFIG.module.rules);
+  config.resolve = config.resolve || {};
+  Object.assign(config.resolve, {alias: LOCAL_DEV_CONFIG.resolve.alias});
+
+  config.module = config.module || {};
+  Object.assign(config.module, {
+    rules: (config.module.rules || []).concat(LOCAL_DEV_CONFIG.module.rules)
+  });
   return config;
 }
 
