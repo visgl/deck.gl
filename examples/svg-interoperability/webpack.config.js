@@ -15,11 +15,6 @@ module.exports = {
       options: {
         objectAssign: 'Object.assign'
       }
-    }, {
-      // Needed to inline deck.gl GLSL shaders
-      include: [resolve(__dirname, '../../src')],
-      loader: 'transform-loader',
-      options: 'brfs-babel'
     }]
   },
   node: {

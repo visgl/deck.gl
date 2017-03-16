@@ -2,9 +2,10 @@
 import {GL, Framebuffer, Model, Geometry} from 'luma.gl';
 import {assembleShaders} from '../../../shader-utils';
 import {Effect} from '../../lib';
-import {readFileSync} from 'fs';
-import {join} from 'path';
 import {WebMercatorViewport} from '../../../lib/viewports';
+
+import reflectionVertex from './reflection-effect-vertex.glsl';
+import reflectionFragment from './reflection-effect-fragment.glsl';
 
 export default class ReflectionEffect extends Effect {
 
@@ -27,8 +28,8 @@ export default class ReflectionEffect extends Effect {
 
   getShaders() {
     return {
-      vs: readFileSync(join(__dirname, './reflection-effect-vertex.glsl'), 'utf8'),
-      fs: readFileSync(join(__dirname, './reflection-effect-fragment.glsl'), 'utf8')
+      vs: reflectionVertex,
+      fs: reflectionFragment
     };
   }
 

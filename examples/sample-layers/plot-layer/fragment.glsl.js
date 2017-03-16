@@ -18,24 +18,20 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+export default `\
 #define SHADER_NAME graph-layer-fragment-shader
 
 #ifdef GL_ES
 precision highp float;
 #endif
 
-uniform sampler2D labelTexture;
-
-varying vec2 vTexCoords;
+varying vec4 vColor;
 varying float shouldDiscard;
 
 void main(void) {
   if (shouldDiscard > 0.0) {
     discard;
   }
-  vec4 color = texture2D(labelTexture, vTexCoords);
-  if (color.a == 0.0) {
-    discard;
-  }
-  gl_FragColor = color;
+  gl_FragColor = vColor;
 }
+`;

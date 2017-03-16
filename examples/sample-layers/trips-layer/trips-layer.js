@@ -1,8 +1,9 @@
 import {Layer, assembleShaders} from 'deck.gl';
 
 import {Model, Program, Geometry} from 'luma.gl';
-import {readFileSync} from 'fs';
-import {join} from 'path';
+
+import tripsVertex from './trips-layer-vertex.glsl';
+import tripsFragment from './trips-layer-fragment.glsl';
 
 const defaultProps = {
   trailLength: 120,
@@ -39,8 +40,8 @@ export default class TripsLayer extends Layer {
   getModel(gl) {
     return new Model({
       program: new Program(gl, assembleShaders(gl, {
-        vs: readFileSync(join(__dirname, './trips-layer-vertex.glsl'), 'utf8'),
-        fs: readFileSync(join(__dirname, './trips-layer-fragment.glsl'), 'utf8')
+        vs: tripsVertex,
+        fs: tripsFragment
       })),
       geometry: new Geometry({
         id: this.props.id,

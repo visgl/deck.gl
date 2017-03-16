@@ -41,12 +41,6 @@ module.exports = {
         test: /\.json$/,
         loader: 'json-loader',
         exclude: [/node_modules/]
-      },
-      {
-        // Needed to inline deck.gl GLSL shaders
-        include: [resolve(__dirname, '../sample-layers')],
-        loader: 'transform-loader',
-        options: 'brfs-babel'
       }
     ]
   },

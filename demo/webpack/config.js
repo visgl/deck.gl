@@ -26,9 +26,6 @@ module.exports = {
       loader: 'raw-loader',
       include: demoSources,
       enforce: 'post'
-    }, {
-      test: /\.js$/,
-      loader: 'transform-loader?brfs-babel'
     }]
   },
 

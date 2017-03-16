@@ -18,18 +18,20 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#define SHADER_NAME graph-layer-fragment-shader
+export default `\
+#define SHADER_NAME trips-layer-fragment-shader
 
 #ifdef GL_ES
 precision highp float;
 #endif
 
+varying float vTime;
 varying vec4 vColor;
-varying float shouldDiscard;
 
 void main(void) {
-  if (shouldDiscard > 0.0) {
+  if (vTime > 1.0 || vTime < 0.0) {
     discard;
   }
-  gl_FragColor = vColor;
+  gl_FragColor = vec4(vColor.rgb, vColor.a * vTime);
 }
+`;

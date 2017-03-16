@@ -32,11 +32,6 @@ module.exports = {
   module: {
     rules: [
       {
-        include: [resolve('../../src')],
-        loader: 'transform-loader',
-        options: 'brfs-babel'
-      },
-      {
         test: /\.png$/,
         loader: 'url-loader?mimetype=image/png'
       }
