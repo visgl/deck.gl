@@ -28,6 +28,7 @@ function calculateMatrixAndOffset({
 
   switch (projectionMode) {
 
+  case COORDINATE_SYSTEM.IDENTITY:
   case COORDINATE_SYSTEM.LNGLAT:
     projectionCenter = ZERO_VECTOR;
     modelViewMatrix = new Matrix4(viewMatrix);
