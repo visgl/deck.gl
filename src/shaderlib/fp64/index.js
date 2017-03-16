@@ -1,6 +1,6 @@
-import fs from 'fs';
-import path from 'path';
+import mathFp64 from './math-fp64.glsl';
+
 export const fp64 = {
   interface: 'fp64',
-  source: fs.readFileSync(path.join(__dirname, 'math-fp64.glsl'), 'utf8')
+  source: mathFp64
 };

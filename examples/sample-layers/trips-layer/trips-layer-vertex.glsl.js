@@ -18,36 +18,27 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#define SHADER_NAME graph-layer-vertex-shader
+export default `\
+#define SHADER_NAME trips-layer-vertex-shader
 
-attribute vec4 positions;
-attribute vec4 colors;
-attribute vec3 pickingColors;
+attribute vec3 positions;
+attribute vec3 colors;
 
-uniform vec3 modelCenter;
-uniform float modelScale;
-uniform float lightStrength;
 uniform float opacity;
-uniform float renderPickingBuffer;
+uniform float currentTime;
+uniform float trailLength;
 
+varying float vTime;
 varying vec4 vColor;
-varying float shouldDiscard;
 
 void main(void) {
+  vec2 p = preproject(positions.xy);
+  // the magic de-flickering factor
+  vec4 shift = vec4(0., 0., mod(positions.z, trailLength) * 1e-4, 0.);
 
-  // fit into a unit cube that centers at [0, 0, 0]
-  vec4 position_modelspace = vec4((positions.xyz - modelCenter) * modelScale, 1.0);
-  gl_Position = project_to_clipspace(position_modelspace);
+  gl_Position = project(vec4(p, 1., 1.)) + shift;
 
-  // cheap way to produce believable front-lit effect.
-  // Note: clipsspace depth is nonlinear and deltaZ depends on the near and far values
-  // when creating the perspective projection matrix.
-  vec4 center_clipspace = project_to_clipspace(vec4(0.0, 0.0, 0.0, 1.0));
-  float fadeFactor = 1.0 - (gl_Position.z - center_clipspace.z) * lightStrength;
-  
-  vec4 color = vec4(colors.rgb * fadeFactor, colors.a * opacity) / 255.0;
-  vec4 pickingColor = vec4(pickingColors / 255.0, 1.0);
-
-  vColor = mix(color, pickingColor, renderPickingBuffer);
-  shouldDiscard = positions.w;
+  vColor = vec4(colors / 255.0, opacity);
+  vTime = 1.0 - (currentTime - positions.z) / trailLength;
 }
+`;

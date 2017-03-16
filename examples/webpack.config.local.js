@@ -36,12 +36,6 @@ const LOCAL_DEVELOPMENT_CONFIG = {
         test: /\.glsl$/,
         loader: 'raw-loader',
         exclude: [/node_modules/]
-      },
-      {
-        // Needed to inline deck.gl GLSL shaders
-        include: [SRC_DIR],
-        loader: 'transform-loader',
-        options: 'brfs-babel'
       }
     ]
   },

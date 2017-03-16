@@ -1,4 +1,4 @@
-// Copyright (c) 2015 Uber Technologies, Inc.
+// Copyright (c) 2016 Uber Technologies, Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -18,18 +18,11 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#define SHADER_NAME trips-layer-fragment-shader
+export default `\
+uniform bool pickingEnabled;
+varying vec4 vPickingColor;
 
-#ifdef GL_ES
-precision highp float;
-#endif
-
-varying float vTime;
-varying vec4 vColor;
-
-void main(void) {
-  if (vTime > 1.0 || vTime < 0.0) {
-    discard;
-  }
-  gl_FragColor = vec4(vColor.rgb, vColor.a * vTime);
+void picking_set_color(vec4 normalColor, vec3 pickingColor) {
+  vPickingColor = mix(normalColor, vec4(pickingColor.rgb, 1.), pickingEnabled);
 }
+`;

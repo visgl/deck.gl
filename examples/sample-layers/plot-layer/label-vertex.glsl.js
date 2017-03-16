@@ -18,20 +18,36 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+export default `\
 #define SHADER_NAME graph-layer-axis-vertex-shader
 
 attribute vec3 positions;
 attribute vec3 normals;
+attribute vec2 texCoords;
 attribute vec2 instancePositions;
 attribute vec3 instanceNormals;
 
+uniform vec2 viewportSize;
 uniform vec3 modelCenter;
 uniform vec3 modelDim;
 uniform float gridOffset;
-uniform vec4 strokeColor;
+uniform vec3 labelWidths;
+uniform float fontSize;
+uniform float labelHeight;
+uniform vec2 labelTextureDim;
 
-varying vec4 vColor;
+varying vec2 vTexCoords;
 varying float shouldDiscard;
+
+const float LABEL_OFFSET = 0.02;
+
+float sum2(vec2 v) {
+  return v.x + v.y;
+}
+
+float sum3(vec3 v) {
+  return v.x + v.y + v.z;
+}
 
 // determines if the grid line is behind or in front of the center
 float frontFacing(vec3 v) {
@@ -40,7 +56,7 @@ float frontFacing(vec3 v) {
 }
 
 void main(void) {
-  
+
   // rotated rectangle to align with slice:
   // for each x tick, draw rectangle on yz plane
   // for each y tick, draw rectangle on zx plane
@@ -61,9 +77,27 @@ void main(void) {
     ) * instanceNormals;
 
   // do not draw grid line in front of the graph
-  shouldDiscard = frontFacing(gridLineNormal);
+  // do not draw label behind the graph
+  shouldDiscard = frontFacing(gridLineNormal) + (1.0 - frontFacing(gridVertexOffset));
 
-  vec3 position_modelspace = (vec3(instancePositions.x) - modelCenter) * instanceNormals + gridVertexOffset * modelDim / 2.0;
+  // get bounding box of texture in pixels
+  //  +----------+----------+----------+
+  //  | xlabel0  | ylabel0  | zlabel0  |
+  //  +----------+----------+----------+
+  //  | xlabel1  | ylabel1  | zlabel1  |
+  //  +----------+----------+----------+
+  //  | ...      | ...      | ...      |
+  vec2 textureOrigin = vec2(
+    sum3(vec3(0.0, labelWidths.x, sum2(labelWidths.xy)) * instanceNormals),
+    instancePositions.y * labelHeight
+  );
+  vec2 textureSize = vec2(sum3(labelWidths * instanceNormals), labelHeight);
+
+  vTexCoords = (textureOrigin + textureSize * texCoords) / labelTextureDim;
+  vTexCoords.y = 1.0 - vTexCoords.y;
+
+  vec3 position_modelspace = (vec3(instancePositions.x) - modelCenter) *
+    instanceNormals + gridVertexOffset * modelDim / 2.0;
 
   // scale bounding box to fit into a unit cube that centers at [0, 0, 0]
   float scale = 1.0 / max(modelDim.x, max(modelDim.y, modelDim.z));
@@ -71,8 +105,17 @@ void main(void) {
 
   // apply offsets
   position_modelspace += gridOffset * gridLineNormal;
+  position_modelspace += LABEL_OFFSET * gridVertexOffset;
 
-  gl_Position = project_to_clipspace(vec4(position_modelspace, 1.0));
+  vec4 position_clipspace = project_to_clipspace(vec4(position_modelspace, 1.0));
 
-  vColor = strokeColor / 255.0;
+  vec2 labelVertexOffset = vec2(texCoords.x - 0.5, 0.5 - texCoords.y) * textureSize;
+  // project to clipspace
+  labelVertexOffset *= 2.0 / viewportSize;
+  // scale label to be constant size in pixels
+  labelVertexOffset *= fontSize / labelHeight * position_clipspace.w;
+
+  gl_Position = position_clipspace + vec4(labelVertexOffset, 0.0, 0.0);
+
 }
+`;

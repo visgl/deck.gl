@@ -48,11 +48,6 @@ module.exports = {
         test: /\.glsl$/,
         exclude: /node_modules/,
         loader: 'raw-loader'
-      },
-      {
-        include: [resolve('./src')],
-        loader: 'transform-loader',
-        options: 'brfs-babel'
       }
     ]
   },

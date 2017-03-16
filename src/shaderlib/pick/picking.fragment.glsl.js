@@ -1,4 +1,4 @@
-// Copyright (c) 2015 Uber Technologies, Inc.
+// Copyright (c) 2016 Uber Technologies, Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -18,13 +18,11 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#define SHADER_NAME reflection-effect-vs
+export default `\
+uniform bool pickingEnabled;
+varying vec4 vPickingColor;
 
-attribute vec3 vertices;
-
-varying vec2 uv;
-
-void main(void) {
-  uv = vertices.xy;
-  gl_Position = vec4(2. * vertices.xy - vec2(1., 1.), 1., 1.);
+vec4 picking_get_color() {
+  return vPickingColor;
 }
+`;

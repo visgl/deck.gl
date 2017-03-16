@@ -2,9 +2,12 @@ import {Layer, assembleShaders} from 'deck.gl';
 import {GL, Model, Geometry} from 'luma.gl';
 
 import {scaleLinear} from 'd3-scale';
-import {readFileSync} from 'fs';
-import {join} from 'path';
 import {textMatrixToTexture} from './utils';
+
+import fragmentShader from './fragment.glsl';
+import gridVertex from './grid-vertex.glsl';
+import labelVertex from './label-vertex.glsl';
+import labelFragment from './label-fragment.glsl';
 
 /* Constants */
 const FONT_SIZE = 48;
@@ -120,8 +123,8 @@ export default class AxesLayer extends Layer {
      * show/hide is toggled by the vertex shader
      */
     const gridShaders = assembleShaders(gl, {
-      vs: readFileSync(join(__dirname, './grid-vertex.glsl'), 'utf8'),
-      fs: readFileSync(join(__dirname, './fragment.glsl'), 'utf8')
+      vs: gridVertex,
+      fs: fragmentShader
     });
 
     /*
@@ -178,8 +181,8 @@ export default class AxesLayer extends Layer {
      * show/hide is toggled by the vertex shader
      */
     const labelShaders = assembleShaders(gl, {
-      vs: readFileSync(join(__dirname, './label-vertex.glsl'), 'utf8'),
-      fs: readFileSync(join(__dirname, './label-fragment.glsl'), 'utf8')
+      vs: labelVertex,
+      fs: labelFragment
     });
 
     let labelTexCoords = [];

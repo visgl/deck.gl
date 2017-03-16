@@ -1,8 +1,8 @@
 import {Layer, assembleShaders} from 'deck.gl';
-
 import {GL, Model, Geometry} from 'luma.gl';
-import {readFileSync} from 'fs';
-import {join} from 'path';
+
+import surfaceVertex from './surface-vertex.glsl';
+import fragmentShader from './fragment.glsl';
 
 const DEFAULT_COLOR = [0, 0, 0, 255];
 
@@ -84,8 +84,8 @@ export default class SurfaceLayer extends Layer {
   getModel(gl) {
     // 3d surface
     const graphShaders = assembleShaders(gl, {
-      vs: readFileSync(join(__dirname, './surface-vertex.glsl'), 'utf8'),
-      fs: readFileSync(join(__dirname, './fragment.glsl'), 'utf8')
+      vs: surfaceVertex,
+      fs: fragmentShader
     });
 
     return new Model({

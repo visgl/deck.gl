@@ -18,6 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+export default `\
 #define SHADER_NAME reflection-effect-fs
 
 #ifdef GL_ES
@@ -45,10 +46,10 @@ vec4 sample_gaussian(sampler2D tex, vec2 dim, vec2 uv, float sigma) {
   if (sigma == 0.0) {
     return texture2D(tex, uv);
   }
-  
+
   vec2 delta = 1.0 / dim;
   vec2 top_left = uv - delta * float(KERNEL_SIZE+1) / 2.0;
-  
+
   vec4 color = vec4(0);
   float sum = 0.0;
   for (int i = 0; i <  KERNEL_SIZE; ++i) {
@@ -74,10 +75,12 @@ void main(void) {
   //let this be our standard deviation in terms of screen-widths.
   //rewrite this in terms of pixels.
   sigma *= float(reflectionTextureWidth);
-  
-  
-  gl_FragColor = sample_gaussian(reflectionTexture, vec2(reflectionTextureWidth, reflectionTextureHeight), vec2(uv.x, 1. - uv.y), sigma);
+
+
+  gl_FragColor = sample_gaussian(reflectionTexture, vec2(reflectionTextureWidth,
+    reflectionTextureHeight), vec2(uv.x, 1. - uv.y), sigma);
   //because our canvas expects alphas to be pre-multiplied, we multiply by whole
   //color vector by reflectivity, not just the alpha channel
   gl_FragColor *= reflectivity;
 }
+`;
