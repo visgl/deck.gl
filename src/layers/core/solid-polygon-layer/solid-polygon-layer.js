@@ -34,7 +34,7 @@ import solidPolygonVertex64 from './solid-polygon-layer-vertex-64.glsl';
 import solidPolygonFragment from './solid-polygon-layer-fragment.glsl';
 
 const defaultProps = {
-  // Whether to extrude in 2.5D
+  // Whether to extrude in 3D
   extruded: false,
   // Whether to draw a GL.LINES wireframe of the polygon
   wireframe: false,

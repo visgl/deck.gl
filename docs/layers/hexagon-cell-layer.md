@@ -59,15 +59,26 @@ to scale all hexagon elevations without updating the data.
 
 Whether to extrude hexagon. If se to false, all hexagons will be set to flat.
 
+##### `fp64` (Boolean, optional)
+
+- Default: `false`
+
+Whether the layer should be rendered in high-precision 64-bit mode
+
 ##### `selectedPickingColor` (Array, optional) **EXPERIMENTAL**
 
 Shader based highlighting of a selected object
+
+##### `fp64` (Boolean, optional)
+
+- Default: `false`
+
+Whether the layer should be rendered in high-precision 64-bit mode
 
 ##### `lightSettings` (Object, optional) **EXPERIMENTAL**
 
 This is an object that contains light settings for extruded polygons.
 Be aware that this prop will likely be changed in a future version of deck.gl.
-
 
 ## Accessors
 

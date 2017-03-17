@@ -13,23 +13,23 @@ renders them as extruded lines with mitering.
 
 Inherits from all [Base Layer](/docs/layers/base-layer.md) properties.
 
-##### `strokeWidthScale` (Number, optional)
+##### `widthScale` (Number, optional)
 
 - Default: `1`
 
-The global stroke width multiplier.
+The path width multiplier that multiplied to all paths.
 
-##### `strokeMinPixels` (Number, optional)
+##### `widthMinPixels` (Number, optional)
 
 - Default: `0`
 
-The minimum stroke size in pixels.
+The minimum path width in pixels.
 
-##### `strokeMaxPixels` (Number, optional)
+##### `widthMaxPixels` (Number, optional)
 
-- Default: `None`
+- Default: Number.MAX_SAFE_INTEGER
 
-The maximum stroke size in pixels.
+The maximum path width in pixels.
 
 ##### `rounded` (Boolean, optional)
 
@@ -44,6 +44,11 @@ Type of joint. If `true`, draw round joints. Otherwise draw miter joints.
 The maximum extent of a joint in ratio to the stroke width.
 Only works if `rounded` is `false`.
 
+##### `fp64` (Boolean, optional)
+
+- Default: `false`
+
+Whether the layer should be rendered in high-precision 64-bit mode
 
 ## Accessors
 
@@ -66,7 +71,7 @@ Method called to determine the rgba color of the source.
 If the color alpha (the fourth component) is not provided,
 `alpha` will be set to `255`.
 
-#### `getStrokeWidth` (Function, optional)
+#### `getWidth` (Function, optional)
 
 - Default: `(object, index) => object.width || 1`
 

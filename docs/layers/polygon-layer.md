@@ -5,37 +5,18 @@
 # Polygon Layer
 
 The Polygon Layer renders filled and/or stroked polygons.
+
+Method called to retrieve the elevation of each object's polygon.
+
+If a cartographic projection mode is used, height will be interpreted as meters,
+otherwise will be in unit coordinates.
+
 * The polypgons can be simple or complex (complex polygons are polygons with holes).
-   * A simple polygon specified as an array of vertices, each vertice being an array
-     of two or three numbers
-   * A complex polygon is specified as an array of simple polygons, the
-     first polygon representing the outer outline, and the remaining polygons
-     representing holes. These polygons are expected to not intersect.
+* A simple polygon specified as an array of vertices, each vertice being an array of two or three numbers
+* A complex polygon is specified as an array of simple polygons, the
+first polygon representing the outer outline, and the remaining polygons representing holes. These polygons are expected to not intersect.
 
-```
-import {PolygonLayer} from 'deck.gl';
-
-new PolygonLayer({
-  data: [
-    [[0, 0], [0, 1], [1, 1], [1, 0], [0, 0]],   // Simple polygon (array of coords)
-    [                                           // Complex polygon with one hole
-      [[0, 0], [0, 2], [2, 2], [2, 0], [0, 0]], // (array of array of coords)
-      [[0, 0], [0, 1], [1, 1], [1, 0], [0, 0]]
-    ]
-  ]
-});
-```
-
-Remarks:
-* Polygons are always closed, i.e. there is an implicit line segment between
-  the first and last vertices, when those vertices are not equal.
-* The specification of complex polygons intentionally follows the GeoJson
-  conventions for representing polygons with holes.
-
-
-## Accessors and Properties
-
-Inherits from all [Base Layer properties](/docs/layers/base-layer.md).
+    import {PolygonLayer} from 'deck.gl';
 
 ## Properties
 
@@ -75,12 +56,18 @@ Remarks:
 * These lines are rendered with `GL.LINE` and will thus always be 1 pixel wide.
 * Wireframe and solid extrusions are exclusive, you'll need to create two layers
   with the same data if you want a combined rendering effect.
+* This is only effective if the `extruded` prop is set to true.
+
+##### `fp64` (Boolean, optional)
+
+- Default: `false`
+
+Whether the layer should be rendered in high-precision 64-bit mode
 
 #### `lightSettings` (Object, optional) **EXPERIMENTAL**
 
 This is an object that contains light settings for extruded polygons.
 Be aware that this prop will likely be changed in a future version of deck.gl.
-
 
 ### Accessors
 
@@ -94,15 +81,44 @@ that extracts a polygon (simple or complex) from each object.
 
 This accessor returns the polygon corresponding to an object in the `data` stream.
 
-#### `getColor` (Function, optional)
+#### `getFillColor` (Function, optional)
+
+- Default: `object => object.fillColor || [0, 0, 0, 255]`
 
 The fill color for the polygon
 
+#### `getColor` (Function, optional)
+
+- Default: `object => object.color || object => object.strokeColor || [0, 0, 0, 255]`
+
+The outline color for the polygon, if drawn in the outline mode
+
+#### `getWidth` (Function, optional)
+
+- Default: `object => object.strokeWidth || 1`
+
+The width of the outline of the polygon, in meters
+
 #### `getElevation` (Function, optional)
 
-- Default: `object => object.elevation`
+- Default: `object => object.elevation || 1000`
 
-Method called to retrieve the elevation of each object's polygon.
+## Remarks
 
-If a cartographic projection mode is used, height will be interpreted as meters,
-otherwise will be in unit coordinates.
+```
+new PolygonLayer({
+  data: [
+    [[0, 0], [0, 1], [1, 1], [1, 0], [0, 0]],   // Simple polygon (array of coords)
+    [                                           // Complex polygon with one hole
+      [[0, 0], [0, 2], [2, 2], [2, 0], [0, 0]], // (array of array of coords)
+      [[0, 0], [0, 1], [1, 1], [1, 0], [0, 0]]
+    ]
+  ]
+});
+```
+
+* Polygons are always closed, i.e. there is an implicit line segment between
+  the first and last vertices, when those vertices are not equal.
+* The specification of complex polygons intentionally follows the GeoJson
+  conventions for representing polygons with holes.
+

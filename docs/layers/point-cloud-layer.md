@@ -14,12 +14,17 @@ and renders them as spheres with a certain radius.
 
 Inherits from all [Base Layer](/docs/layers/base-layer.md) properties.
 
-##### `radius` (Number, optional)
+##### `radiusPixels` (Number, optional)
 
 - Default: `10`
 
 Global radius of all points.
 
+##### `fp64` (Boolean, optional)
+
+- Default: `false`
+
+Whether the layer should be rendered in high-precision 64-bit mode
 ##### `lightSettings` (Object, optional) **EXPERIMENTAL**
 
 This is an object that contains light settings for the point cloud.

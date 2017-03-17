@@ -32,7 +32,9 @@ const defaultElevationScale = 1;
 const defaultProps = {
   cellSize: defaultCellSize,
   colorRange: defaultColorRange,
+  colorDomain: null,
   elevationRange: defaultElevationRange,
+  elecationDomain: null,
   elevationScale: defaultElevationScale,
   getPosition: x => x.position,
   extruded: false,

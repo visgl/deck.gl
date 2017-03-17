@@ -23,8 +23,8 @@ import SolidPolygonLayer from '../solid-polygon-layer/solid-polygon-layer';
 import PathLayer from '../path-layer/path-layer';
 import * as Polygon from '../solid-polygon-layer/polygon';
 
-const defaultLineColor = [0xBD, 0xE2, 0x7A, 0xFF];
-const defaultFillColor = [0xBD, 0xE2, 0x7A, 0xFF];
+const defaultLineColor = [0x0, 0x0, 0x0, 0xFF];
+const defaultFillColor = [0x0, 0x0, 0x0, 0xFF];
 
 const defaultProps = {
   stroked: true,
@@ -47,7 +47,7 @@ const defaultProps = {
   // Line and polygon outline accessors
   getLineWidth: f => get(f, 'lineWidth') || 1,
   // Polygon extrusion accessor
-  getElevation: f => 1000
+  getElevation: f => get(f, 'elevation') || 1000
 };
 
 export default class PolygonLayer extends CompositeLayer {
