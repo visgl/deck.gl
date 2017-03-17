@@ -47,7 +47,8 @@ const LOCAL_DEV_CONFIG = {
 
 function addLocalDevSettings(config) {
   config.resolve = config.resolve || {};
-  Object.assign(config.resolve, {alias: LOCAL_DEV_CONFIG.resolve.alias});
+  config.resolve.alias = config.resolve.alias || {};
+  Object.assign(config.resolve.alias, LOCAL_DEV_CONFIG.resolve.alias);
 
   config.module = config.module || {};
   Object.assign(config.module, {
