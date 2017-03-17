@@ -32,6 +32,7 @@ const defaultProps = {
   elevationScale: 1,
   radius: 1000,
   coverage: 1,
+  extruded: false,
   hexagonAggregator: pointToHexbin,
   getPosition: x => x.position,
   fp64: false
@@ -117,24 +118,25 @@ export default class HexagonLayer extends Layer {
   }
 
   renderLayers() {
-    const {id, radius} = this.props;
+    const {id, radius, extruded, fp64} = this.props;
 
-    return new HexagonCellLayer(Object.assign({},
-      this.props, {
-        id: `${id}-density-hexagon`,
-        data: this.state.hexagons,
-        radius,
-        angle: Math.PI,
-        getColor: this._onGetSublayerColor.bind(this),
-        getElevation: this._onGetSublayerElevation.bind(this),
-        // Override user's onHover and onClick props
-        onHover: this._onHoverSublayer.bind(this),
-        onClick: noop,
-        updateTriggers: {
-          getColor: {colorRange: this.props.colorRange},
-          getElevation: {elevationRange: this.props.elevationRange}
-        }
-      }));
+    return new HexagonCellLayer({
+      id: `${id}-hexagon-cell`,
+      data: this.state.hexagons,
+      radius,
+      angle: Math.PI,
+      extruded,
+      fp64,
+      getColor: this._onGetSublayerColor.bind(this),
+      getElevation: this._onGetSublayerElevation.bind(this),
+      // Override user's onHover and onClick props
+      onHover: this._onHoverSublayer.bind(this),
+      onClick: noop,
+      updateTriggers: {
+        getColor: {colorRange: this.props.colorRange},
+        getElevation: {elevationRange: this.props.elevationRange}
+      }
+    });
   }
 }
 
