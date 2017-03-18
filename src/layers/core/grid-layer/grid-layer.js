@@ -35,8 +35,8 @@ const defaultProps = {
   elevationRange: defaultElevationRange,
   elevationScale: defaultElevationScale,
   getPosition: x => x.position,
+  extruded: false,
   fp64: false
-  // AUDIT - getWeight ?
 };
 
 function noop() {}
@@ -100,25 +100,26 @@ export default class GridLayer extends Layer {
   }
 
   renderLayers() {
-    const {id} = this.props;
+    const {id, fp64, extruded} = this.props;
 
-    return new GridCellLayer(Object.assign({},
-      this.props, {
-        id: `${id}-density-grid`,
-        data: this.state.layerData,
-        latOffset: this.state.gridOffset.yOffset,
-        lonOffset: this.state.gridOffset.xOffset,
-        getColor: this._onGetSublayerColor.bind(this),
-        getElevation: this._onGetSublayerElevation.bind(this),
-        getPosition: d => d.position,
-        // Override user's onHover and onClick props
-        onHover: this._onHoverSublayer.bind(this),
-        onClick: noop,
-        updateTriggers: {
-          getColor: {colorRange: this.props.colorRange},
-          getElevation: {elevationRange: this.props.elevationRange}
-        }
-      }));
+    return new GridCellLayer({
+      id: `${id}-grid-cell`,
+      data: this.state.layerData,
+      latOffset: this.state.gridOffset.yOffset,
+      lonOffset: this.state.gridOffset.xOffset,
+      extruded,
+      fp64,
+      getColor: this._onGetSublayerColor.bind(this),
+      getElevation: this._onGetSublayerElevation.bind(this),
+      getPosition: d => d.position,
+      // Override user's onHover and onClick props
+      onHover: this._onHoverSublayer.bind(this),
+      onClick: noop,
+      updateTriggers: {
+        getColor: {colorRange: this.props.colorRange},
+        getElevation: {elevationRange: this.props.elevationRange}
+      }
+    });
   }
 }
 

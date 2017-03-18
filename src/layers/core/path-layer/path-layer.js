@@ -31,7 +31,6 @@ import pathFragment from './path-layer-fragment.glsl';
 const DEFAULT_COLOR = [0, 0, 0, 255];
 
 const defaultProps = {
-  opacity: 1,
   widthScale: 1, // stroke width in meters
   widthMinPixels: 0, //  min stroke width in pixels
   widthMaxPixels: Number.MAX_SAFE_INTEGER, // max stroke width in pixels

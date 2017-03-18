@@ -78,15 +78,15 @@ const GeoJsonLayerExample = {
       const opacity = (f.properties['fill-opacity'] || 1) * 255;
       return setOpacity(color, opacity);
     },
-    getColor: f => {
+    getLineColor: f => {
       const color = parseColor(f.properties.stroke);
       const opacity = (f.properties['stroke-opacity'] || 1) * 255;
       return setOpacity(color, opacity);
     },
-    getWidth: f => f.properties['stroke-width'],
+    getLineWidth: f => f.properties['stroke-width'],
     getElevation: f => 500,
-    widthScale: 10,
-    widthMinPixels: 1,
+    lineWidthScale: 10,
+    lineWidthMinPixels: 1,
     pickable: true
   }
 };
@@ -98,8 +98,7 @@ const GeoJsonLayerExtrudedExample = {
     id: 'geojsonLayer-extruded',
     getElevation: f => get(f, 'properties.ZIP_CODE') * 10 % 127 * 10,
     getFillColor: f => [0, 255, get(f, 'properties.ZIP_CODE') * 23 % 100 + 155],
-    getColor: f => [200, 0, 80],
-    drawPolygons: true,
+    getLineColor: f => [200, 0, 80],
     extruded: true,
     wireframe: true,
     pickable: true
@@ -112,7 +111,7 @@ const PolygonLayerExample = {
   props: {
     getPolygon: f => f,
     getFillColor: f => [Math.random() % 256, 0, 0],
-    getColor: f => [0, 0, 0, 255],
+    getLineColor: f => [0, 0, 0, 255],
     getWidth: f => 20,
     getHeight: f => Math.random() * 1000,
     opacity: 0.8,

@@ -26,7 +26,7 @@ import SolidPolygonLayer from '../solid-polygon-layer/solid-polygon-layer';
 
 import {getGeojsonFeatures, separateGeojsonFeatures} from './geojson';
 
-const defaultStrokeColor = [0xBD, 0xE2, 0x7A, 0xFF];
+const defaultLineColor = [0xBD, 0xE2, 0x7A, 0xFF];
 const defaultFillColor = [0xBD, 0xE2, 0x7A, 0xFF];
 
 const defaultProps = {
@@ -34,18 +34,22 @@ const defaultProps = {
   filled: true,
   extruded: false,
   wireframe: false,
+
+  lineWidthScale: 1,
+  lineWidthMinPixels: 0,
+  lineWidthMaxPixels: Number.MAX_SAFE_INTEGER,
+  lineJointRounded: false,
+  lineMiterLimit: 4,
   fp64: false,
 
-  // TODO: Missing props: radiusMinPixels, strokeWidthMinPixels, ...
-
   // Line and polygon outline color
-  getColor: f => get(f, 'properties.strokeColor') || defaultStrokeColor,
+  getLineColor: f => get(f, 'properties.lineColor') || defaultLineColor,
   // Point and polygon fill color
   getFillColor: f => get(f, 'properties.fillColor') || defaultFillColor,
   // Point radius
   getRadius: f => get(f, 'properties.radius') || get(f, 'properties.size') || 5,
   // Line and polygon outline accessors
-  getWidth: f => get(f, 'properties.strokeWidth') || 1,
+  getLineWidth: f => get(f, 'properties.lineWidth') || 1,
   // Polygon extrusion accessor
   getElevation: f => 1000
 };
@@ -80,13 +84,15 @@ export default class GeoJsonLayer extends CompositeLayer {
   renderLayers() {
     const {features} = this.state;
     const {pointFeatures, lineFeatures, polygonFeatures, polygonOutlineFeatures} = features;
-    const {getColor, getFillColor, getRadius, getWidth, getElevation, updateTriggers} = this.props;
+    const {getLineColor, getFillColor, getRadius,
+      getLineWidth, getElevation, updateTriggers} = this.props;
     const {id, stroked, filled, extruded, wireframe} = this.props;
+    const {lineWidthScale, lineWidthMinPixels, lineWidthMaxPixels,
+      lineJointRounded, lineMiterLimit, fp64} = this.props;
 
-    let {} = this.props;
     const drawPoints = pointFeatures && pointFeatures.length > 0;
     const drawLines = lineFeatures && lineFeatures.length > 0;
-    const hasPolygonOutline = polygonOutlineFeatures && polygonOutlineFeatures.length > 0;
+    const hasPolygonLines = polygonOutlineFeatures && polygonOutlineFeatures.length > 0;
     const hasPolygon = polygonFeatures && polygonFeatures.length > 0;
 
     const onHover = this._onHoverSubLayer.bind(this);
@@ -95,91 +101,106 @@ export default class GeoJsonLayer extends CompositeLayer {
     // Filled Polygon Layer
     const polygonFillLayer = filled &&
       hasPolygon &&
-      new SolidPolygonLayer(Object.assign({}, this.props, {
+      new SolidPolygonLayer({
         id: `${id}-polygon-fill`,
         data: polygonFeatures,
         extruded,
         wireframe: false,
+        fp64,
         getPolygon: getCoordinates,
         getElevation,
         getColor: getFillColor,
+        onHover,
+        onClick,
         updateTriggers: {
           getElevation: updateTriggers.getElevation,
           getColor: updateTriggers.getFillColor
-        },
-        onHover,
-        onClick
-      }));
+        }
+      });
 
     const polygonWireframeLayer = wireframe &&
       extruded &&
       hasPolygon &&
-      new SolidPolygonLayer(Object.assign({}, this.props, {
+      new SolidPolygonLayer({
         id: `${id}-polygon-wireframe`,
         data: polygonFeatures,
         extruded,
         wireframe: true,
+        fp64,
         getPolygon: getCoordinates,
         getElevation,
-        getColor,
+        getColor: getLineColor,
         updateTriggers: {
           getElevation: updateTriggers.getElevation,
-          getColor: updateTriggers.getColor
+          getColor: updateTriggers.getLineColor
         },
         onHover,
         onClick
-      }));
+      });
 
-    const polygonOutlineLayer = !extruded &&
+    const polygonLineLayer = !extruded &&
       stroked &&
-      hasPolygonOutline &&
-      new PathLayer(Object.assign({}, this.props, {
+      hasPolygonLines &&
+      new PathLayer({
         id: `${id}-polygon-outline`,
         data: polygonOutlineFeatures,
+        widthScale: lineWidthScale,
+        widthMinPixels: lineWidthMinPixels,
+        widthMaxPixels: lineWidthMaxPixels,
+        rounded: lineJointRounded,
+        miterLimit: lineMiterLimit,
+        fp64,
         getPath: getCoordinates,
-        getColor,
-        getWidth,
-        updateTriggers: {
-          getColor: updateTriggers.getColor,
-          getWidth: updateTriggers.getWidth
-        },
+        getColor: getLineColor,
+        getWidth: getLineWidth,
         onHover,
-        onClick
-      }));
+        onClick,
+        updateTriggers: {
+          getColor: updateTriggers.getLineColor,
+          getWidth: updateTriggers.getLineWidth
+        }
+      });
 
-    const lineLayer = drawLines && new PathLayer(Object.assign({}, this.props, {
+    const pathLayer = drawLines && new PathLayer({
       id: `${id}-line-paths`,
       data: lineFeatures,
+      widthScale: lineWidthScale,
+      widthMinPixels: lineWidthMinPixels,
+      widthMaxPixels: lineWidthMaxPixels,
+      rounded: lineJointRounded,
+      miterLimit: lineMiterLimit,
+      fp64,
       getPath: getCoordinates,
-      getColor,
-      getWidth,
+      getColor: getLineColor,
+      getWidth: getLineWidth,
       onHover,
       onClick,
       updateTriggers: {
-        getColor: updateTriggers.getColor,
-        getWidth: updateTriggers.getWidth
+        getColor: updateTriggers.getLineColor,
+        getWidth: updateTriggers.getLineWidth
       }
-    }));
+    });
 
-    const pointLayer = drawPoints && new ScatterplotLayer(Object.assign({}, this.props, {
+    const pointLayer = drawPoints && new ScatterplotLayer({
       id: `${id}-points`,
       data: pointFeatures,
+      fp64,
       getPosition: getCoordinates,
       getColor: getFillColor,
       getRadius,
+      onHover,
+      onClick,
       updateTriggers: {
         getColor: updateTriggers.getFillColor,
         getRadius: updateTriggers.getRadius
-      },
-      onHover,
-      onClick
-    }));
+      }
+    });
 
     return [
       polygonFillLayer,
       polygonWireframeLayer,
-      polygonOutlineLayer,
-      lineLayer,
+      polygonLineLayer,
+      pathLayer,
       pointLayer
     ].filter(Boolean);
   }

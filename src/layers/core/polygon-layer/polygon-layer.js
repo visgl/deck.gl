@@ -23,7 +23,7 @@ import SolidPolygonLayer from '../solid-polygon-layer/solid-polygon-layer';
 import PathLayer from '../path-layer/path-layer';
 import * as Polygon from '../solid-polygon-layer/polygon';
 
-const defaultColor = [0xBD, 0xE2, 0x7A, 0xFF];
+const defaultLineColor = [0xBD, 0xE2, 0x7A, 0xFF];
 const defaultFillColor = [0xBD, 0xE2, 0x7A, 0xFF];
 
 const defaultProps = {
@@ -31,16 +31,21 @@ const defaultProps = {
   filled: true,
   extruded: false,
   wireframe: false,
+
+  lineWidthScale: 1,
+  lineWidthMinPixels: 0,
+  lineWidthMaxPixels: Number.MAX_SAFE_INTEGER,
+  lineJointRounded: false,
+  lineMiterLimit: 4,
   fp64: false,
 
-  // TODO: Missing props: radiusMinPixels, strokeWidthMinPixels, ...
-
+  getPolygon: f => get(f, 'polygon'),
   // Polygon fill color
   getFillColor: f => get(f, 'fillColor') || defaultFillColor,
   // Point, line and polygon outline color
-  getColor: f => get(f, 'color') || get(f, 'strokeColor') || defaultColor,
+  getLineColor: f => get(f, 'lineColor') || defaultLineColor,
   // Line and polygon outline accessors
-  getWidth: f => get(f, 'strokeWidth') || 1,
+  getLineWidth: f => get(f, 'lineWidth') || 1,
   // Polygon extrusion accessor
   getElevation: f => 1000
 };
@@ -79,66 +84,82 @@ export default class PolygonLayer extends CompositeLayer {
   }
 
   renderLayers() {
-    const {getFillColor, getColor, getWidth, getElevation, updateTriggers} = this.props;
+    const {getFillColor, getLineColor, getLineWidth, getElevation,
+      getPolygon, updateTriggers} = this.props;
     const {data, id, stroked, filled, extruded, wireframe} = this.props;
+    const {lineWidthScale, lineWidthMinPixels, lineWidthMaxPixels,
+      lineJointRounded, lineMiterLimit, fp64} = this.props;
+
     const {paths, onHover, onClick} = this.state;
 
     const hasData = data && data.length > 0;
 
     // Filled Polygon Layer
-    const polygonLayer = filled && hasData && new SolidPolygonLayer(Object.assign({},
-      this.props, {
-        id: `${id}-fill`,
-        data,
-        getElevation,
-        getColor: getFillColor,
-        extruded,
-        wireframe: false,
-        updateTriggers: {
-          getElevation: updateTriggers.getElevation,
-          getColor: updateTriggers.getFillColor
-        }
-      }));
+    const polygonLayer = filled && hasData && new SolidPolygonLayer({
+      id: `${id}-fill`,
+      data,
+      extruded,
+      wireframe: false,
+      fp64,
+      getPolygon,
+      getElevation,
+      getColor: getFillColor,
+      onHover,
+      onClick,
+      updateTriggers: {
+        getElevation: updateTriggers.getElevation,
+        getColor: updateTriggers.getFillColor
+      }
+    });
 
     const polygonWireframeLayer = extruded &&
       wireframe &&
       hasData &&
-      new SolidPolygonLayer(Object.assign({},
-      this.props, {
+      new SolidPolygonLayer({
         id: `${id}-wireframe`,
         data,
-        getElevation,
-        getColor,
         extruded: true,
         wireframe: true,
-        updateTriggers: {
-          getElevation: updateTriggers.getElevation,
-          getColor: updateTriggers.getColor
-        }
-      }));
-
-    // Polygon outline layer
-    const polygonOutlineLayer = !extruded &&
-      stroked &&
-      hasData &&
-      new PathLayer(Object.assign({}, this.props, {
-        id: `${id}-stroke`,
-        data: paths,
-        getPath: x => x.path,
-        getColor,
-        getWidth,
+        fp64,
+        getPolygon,
+        getElevation,
+        getColor: getLineColor,
         onHover,
         onClick,
         updateTriggers: {
-          getWidth: updateTriggers.getWidth,
-          getColor: updateTriggers.getColor
+          getElevation: updateTriggers.getElevation,
+          getColor: updateTriggers.getLineColor
         }
-      }));
+      });
+
+    // Polygon line layer
+    const polygonLineLayer = !extruded &&
+      stroked &&
+      hasData &&
+      new PathLayer({
+        id: `${id}-stroke`,
+        data: paths,
+        widthScale: lineWidthScale,
+        widthMinPixels: lineWidthMinPixels,
+        widthMaxPixels: lineWidthMaxPixels,
+        rounded: lineJointRounded,
+        miterLimit: lineMiterLimit,
+        fp64,
+        getPath: x => x.path,
+        getColor: getLineColor,
+        getWidth: getLineWidth,
+        onHover,
+        onClick,
+        updateTriggers: {
+          getWidth: updateTriggers.getLineWidth,
+          getColor: updateTriggers.getLineColor
+        }
+      });
 
     return [
       polygonLayer,
       polygonWireframeLayer,
-      polygonOutlineLayer
+      polygonLineLayer
     ].filter(Boolean);
   }
 }
