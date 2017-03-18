@@ -92,7 +92,7 @@ export default class GeoJsonLayer extends CompositeLayer {
 
     const drawPoints = pointFeatures && pointFeatures.length > 0;
     const drawLines = lineFeatures && lineFeatures.length > 0;
-    const hasPolygonLine = polygonOutlineFeatures && polygonOutlineFeatures.length > 0;
+    const hasPolygonLines = polygonOutlineFeatures && polygonOutlineFeatures.length > 0;
     const hasPolygon = polygonFeatures && polygonFeatures.length > 0;
 
     const onHover = this._onHoverSubLayer.bind(this);
@@ -140,7 +140,7 @@ export default class GeoJsonLayer extends CompositeLayer {
 
     const polygonLineLayer = !extruded &&
       stroked &&
-      hasPolygonLine &&
+      hasPolygonLines &&
       new PathLayer({
         id: `${id}-polygon-outline`,
         data: polygonOutlineFeatures,

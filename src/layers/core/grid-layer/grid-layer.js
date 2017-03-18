@@ -37,7 +37,6 @@ const defaultProps = {
   getPosition: x => x.position,
   extruded: false,
   fp64: false
-  // AUDIT - getWeight ?
 };
 
 function noop() {}
