@@ -3,6 +3,7 @@ import DeckGL from 'deck.gl';
 import autobind from 'autobind-decorator';
 
 import {MAPBOX_STYLES} from '../../constants/defaults';
+import {getLayerParams} from '../../utils/layer-params';
 
 const defaultViewport = {
   mapStyle: MAPBOX_STYLES.LIGHT,
@@ -14,40 +15,6 @@ const defaultViewport = {
   bearing: 0
 };
 
-function propToParam(key, value) {
-  const param = {
-    name: key,
-    displayName: key,
-    value
-  };
-
-  switch (typeof value) {
-  case 'boolean':
-    return {...param, type: 'checkbox'};
-  case 'number':
-    if (/pixels|width|height|size|scale/i.test(key)) {
-      param.max = 100;
-      param.step = 1;
-    } else {
-      param.max = 1;
-      param.step = 0.01;
-    }
-    return {...param, type: 'range', min: 0};
-  case 'function':
-    if (key.indexOf('get') === 0) {
-      // is accessor
-      return {...param, type: 'function'};
-    }
-    break;
-  default:
-  }
-  return null;
-}
-
-function paramToProp(value, param) {
-  return param.value;
-}
-
 export default function createLayerDemoClass(settings) {
 
   const renderLayer = (data, params, extraProps = {}) => {
@@ -56,7 +23,7 @@ export default function createLayerDemoClass(settings) {
 
     if (params) {
       Object.keys(params).forEach(key => {
-        props[key] = paramToProp(props[key], params[key]);
+        props[key] = params[key].value;
       });
     }
 
@@ -74,17 +41,7 @@ export default function createLayerDemoClass(settings) {
     static viewport = defaultViewport;
 
     static get parameters() {
-      const layer = renderLayer();
-      const params = {};
-
-      Object.keys(layer.props).forEach(key => {
-        const p = propToParam(key, layer.props[key]);
-        if (p) {
-          params[key] = p;
-        }
-      });
-
-      return params;
+      return getLayerParams(renderLayer());
     }
 
     static renderInfo() {
@@ -117,7 +74,8 @@ export default function createLayerDemoClass(settings) {
         return (
           <div className="tooltip"
             style={{left: hoveredItem.x, top: hoveredItem.y}}>
-            { info.split('\n').map(str => <p>{str}</p>) }
+            { info.split('\n')
+                .map((str, i) => <p key={i}>{str}</p>) }
           </div>
         );
       }
