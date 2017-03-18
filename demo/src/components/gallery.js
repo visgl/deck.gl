@@ -12,7 +12,7 @@ class Gallery extends Component {
       <div className="gallery-wrapper">
         <div className="fullheight">
           <div className="flexbox--row">
-            <div className="flexbox-item">
+            <div className="flexbox-item" style={{zIndex: 1}}>
               <TableOfContents parentRoute={path} pages={pages} isOpen={isMenuOpen} />
             </div>
             <div className={'flexbox-item flexbox-item--fill'}>

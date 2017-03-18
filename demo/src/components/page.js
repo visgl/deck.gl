@@ -13,13 +13,13 @@ class Page extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      mapFocus: true,
+      mapHasFocus: true,
       tabs: this._loadContent(props.route.content)
     };
   }
 
   componentDidMount() {
-    window.onresize = this._resizeMap.bind(this);
+    window.onresize = this._resizeMap;
     this._resizeMap();
   }
 
@@ -27,7 +27,8 @@ class Page extends Component {
     const {route} = nextProps;
     if (this.props.route !== route) {
       this.setState({
-        tabs: this._loadContent(route.content)
+        tabs: this._loadContent(route.content),
+        embedDemo: route.embedded
       });
     }
   }
@@ -57,8 +58,7 @@ class Page extends Component {
     return content;
   }
 
-  @autobind
-  _resizeMap() {
+  @autobind _resizeMap() {
     const w = window.innerWidth;
     const h = window.innerHeight;
     this.props.updateMap({
@@ -67,9 +67,18 @@ class Page extends Component {
     });
   }
 
-  @autobind
   _setMapFocus(state) {
-    this.setState({mapFocus: state});
+    if (this.state.mapHasFocus !== state) {
+      this.setState({mapHasFocus: state});
+    }
+  }
+
+  @autobind _onMapFocus() {
+    this._setMapFocus(true);
+  }
+
+  @autobind _onMapBlur() {
+    this._setMapFocus(false);
   }
 
   _setActiveTab(tabName) {
@@ -89,30 +98,40 @@ class Page extends Component {
     );
   }
 
+  _renderDemo(name, fullSize) {
+    const {mapHasFocus} = this.state;
+
+    return (
+      <div className={`demo ${fullSize ? '' : 'embedded'}`}>
+        <Map
+          demo={name}
+          onInteract={this._onMapFocus} />
+        <InfoPanel
+          demo={name}
+          hasFocus={!mapHasFocus}
+          onInteract={this._onMapBlur} />
+      </div>
+    );
+  }
+
   _renderTabContent() {
     const {contents} = this.props;
-    const {tabs, mapFocus} = this.state;
+    const {tabs, embedDemo} = this.state;
 
     return Object.keys(tabs).map(tabKey => {
       const tab = tabs[tabKey];
 
       if (tabKey === 'demo') {
-
-        const child = (
-          <div>
-            <Map
-              demo={tab}
-              onInteract={this._setMapFocus.bind(this, true)} />
-            <InfoPanel
-              demo={tab}
-              hasFocus={!mapFocus}
-              onInteract={this._setMapFocus.bind(this, false)} />
-          </div>
-        );
-
+        const child = this._renderDemo(tab, true);
         return this._renderChild(child, tabKey);
       } else if (typeof tab === 'string') {
-        return this._renderChild(<MarkdownPage content={contents[tab]} />, tabKey);
+        const child = (
+          <div>
+            { embedDemo && this._renderDemo(embedDemo, false) }
+            <MarkdownPage content={contents[tab]} />
+          </div>
+        );
+        return this._renderChild(child, tabKey);
       }
 
       return this._renderChild(React.createElement(tab), tabKey);

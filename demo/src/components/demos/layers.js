@@ -7,16 +7,16 @@ import {
 export const ScatterplotLayerDemo = createLayerDemoClass({
   Layer: ScatterplotLayer,
   dataUrl: 'data/bart-ridership.json',
-  formatTooltip: f => f.properties.description,
+  formatTooltip: d => d.description,
   props: {
     pickable: true,
     opacity: 0.8,
     radiusScale: 10,
     radiusMinPixels: 1,
     radiusMaxPixels: 100,
-    getPosition: f => f.geometry.coordinates,
-    getRadius: f => Math.sqrt(f.properties.exits),
-    getColor: f => [255, 140, 0]
+    getPosition: d => d.coordinates,
+    getRadius: d => Math.sqrt(d.exits),
+    getColor: d => [255, 140, 0]
   }
 });
 

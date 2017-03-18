@@ -92,7 +92,8 @@ export default function createLayerDemoClass(settings) {
       return (
         <div>
           <h3>{ name }</h3>
-          <p>Explore {name}'s API</p>
+          <p>Explore {name}'s API <br/>
+            <a href={settings.dataUrl} target="_new">Sample data</a></p>
         </div>
       );
     }
@@ -116,7 +117,7 @@ export default function createLayerDemoClass(settings) {
         return (
           <div className="tooltip"
             style={{left: hoveredItem.x, top: hoveredItem.y}}>
-            { info }
+            { info.split('\n').map(str => <p>{str}</p>) }
           </div>
         );
       }

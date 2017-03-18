@@ -97,12 +97,14 @@
 }
 .tab.active {
   display: block;
+  >div {
+    height: 100%;
+    overflow-y: scroll;
+    -webkit-overflow-scrolling: touch;
+  }
 }
 .markdown {
   padding: 40px 36px 96px;
-  height: 100%;
-  overflow-y: scroll;
-  -webkit-overflow-scrolling: touch;
 }
 .stat {
   text-transform: uppercase;
@@ -196,6 +198,26 @@
 }
 code {
   font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace !important;
+}
+.demo {
+  position: relative;
+  overflow: hidden;
+  height: 100vh;
+  transition: height 300ms;
+
+  &.embedded {
+    height: 80vh;
+  }
+  &.embedded:not(:hover) {
+    height: 30vh;
+    min-height: 200px;
+
+    .options-panel {
+      .input, hr {
+        display: none;
+      }
+    }
+  }
 }
 
 @media (max-width: 576px) {
