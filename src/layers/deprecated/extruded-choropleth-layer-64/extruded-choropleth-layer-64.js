@@ -29,7 +29,7 @@ import {vec3} from 'gl-matrix';
 import extrudedChoroplethVertex from './extruded-choropleth-layer-vertex.glsl';
 import extrudedChoroplethFragment from './extruded-choropleth-layer-fragment.glsl';
 
-const DEFAULT_COLOR = [180, 180, 200];
+const DEFAULT_COLOR = [180, 180, 200, 255];
 const DEFAULT_AMBIENT_COLOR = [255, 255, 255];
 const DEFAULT_POINTLIGHT_AMBIENT_COEFFICIENT = 0.1;
 const DEFAULT_POINTLIGHT_LOCATION = [40.4406, -79.9959, 100];
@@ -75,14 +75,13 @@ export default class ExtrudedChoroplethLayer64 extends Layer {
 
     const {
       elevation,
-      color, ambientColor, pointLightColor,
+      ambientColor, pointLightColor,
       pointLightLocation, pointLightAmbientCoefficient,
       pointLightAttenuation, materialSpecularColor, materialShininess
     } = this.props;
 
     this.setUniforms({
       elevation: Number.isFinite(elevation) ? elevation : 1,
-      colors: color || DEFAULT_COLOR,
       uAmbientColor: ambientColor || DEFAULT_AMBIENT_COLOR,
       uPointLightAmbientCoefficient:
         pointLightAmbientCoefficient || DEFAULT_POINTLIGHT_AMBIENT_COEFFICIENT,
@@ -252,9 +251,8 @@ export default class ExtrudedChoroplethLayer64 extends Layer {
     const colors = this.state.groupedVertices.map(
       (vertices, buildingIndex) => {
         const {color} = this.props;
-        const baseColor = Array.isArray(color) ? color[0] : color;
-        const topColor = Array.isArray(color) ?
-          color[color.length - 1] : color;
+        const baseColor = color || DEFAULT_COLOR;
+        const topColor = color || DEFAULT_COLOR;
         const numVertices = countVertices(vertices);
 
         const topColors = new Array(numVertices).fill(topColor);
