@@ -34,7 +34,7 @@ const defaultProps = {
   colorRange: defaultColorRange,
   colorDomain: null,
   elevationRange: defaultElevationRange,
-  elecationDomain: null,
+  elevationDomain: null,
   elevationScale: defaultElevationScale,
   getPosition: x => x.position,
   extruded: false,

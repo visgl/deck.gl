@@ -64,6 +64,40 @@ Remarks:
   with the same data if you want a combined rendering effect.
 * This is only effective if the `extruded` prop is set to true.
 
+#### `lineWidthScale` (Boolean, optional)
+
+- Default: `1`
+
+The line width multiplier that multiplied to all lines, including the `LineString`
+and `MultiLineString` features and also the outline for `Polygon` and `MultiPolygon`
+features if the `stroked` attribute is true.
+
+##### `lineWidthMinPixels` (Number, optional)
+
+- Default: `0`
+
+The minimum line width in pixels.
+
+##### `lineWidthMaxPixels` (Number, optional)
+
+- Default: Number.MAX_SAFE_INTEGER
+
+The maximum line width in pixels.
+
+##### `lineJointRounded` (Boolean, optional)
+
+- Default: `false`
+
+Type of joint. If `true`, draw round joints. Otherwise draw miter joints.
+
+##### `lineMiterLimit` (Number, optional)
+
+- Default: `4`
+
+The maximum extent of a joint in ratio to the stroke width.
+Only works if `lineJointRounded` is `false`.
+
+
 #### `fp64` (Boolean, optional)
 
 - Default: `false`
@@ -78,20 +112,20 @@ deck.gl.
 
 ## Accessors
 
-#### `getColor`
+#### `getLineColor`
 
-- Default: `object => object.strokeColor || [0, 0, 0, 255]`
+- Default: `object => object.lineColor || [0, 0, 0, 255]`
 
-Called to retrieve the point or line color for a GeoJson feature, depending
+Called to retrieve the color of line and/or the outline of polygon color for a GeoJson feature, depending
 on its type.
 
 #### `getFillColor` (Function, optional)
 
 - Default: `object => object.fillColor || [0, 0, 0, 25]`
 
-Called to retrieve the polygon fill color for a GeoJson feature.
+Called to retrieve the solid color of the polygon and point features of a GeoJson.
 
-Note: This accessor is only called for `Polygon` and `MultiPolygon` features.
+Note: This accessor is only called for `Polygon` and `MultiPolygon` and `Point` features.
 
 #### `getRadius`
 
@@ -99,9 +133,9 @@ Note: This accessor is only called for `Polygon` and `MultiPolygon` features.
 
 Called to retrieve the radius of `Point` and `MultiPoint` feature.
 
-#### `getWidth`
+#### `getLineWidth`
 
-- Default: `object => object.strokeWidth || 1`
+- Default: `object => object.lineWidth || 1`
 
 Called to retrieve the line width for a GeoJson feature.
 

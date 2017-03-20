@@ -58,6 +58,38 @@ Remarks:
   with the same data if you want a combined rendering effect.
 * This is only effective if the `extruded` prop is set to true.
 
+#### `lineWidthScale` (Boolean, optional)
+
+- Default: `1`
+
+The line width multiplier that multiplied to all outlines of `Polygon` and `MultiPolygon`
+features if the `stroked` attribute is true.
+
+##### `lineWidthMinPixels` (Number, optional)
+
+- Default: `0`
+
+The minimum line width in pixels.
+
+##### `lineWidthMaxPixels` (Number, optional)
+
+- Default: Number.MAX_SAFE_INTEGER
+
+The maximum line width in pixels.
+
+##### `lineJointRounded` (Boolean, optional)
+
+- Default: `false`
+
+Type of joint. If `true`, draw round joints. Otherwise draw miter joints.
+
+##### `lineMiterLimit` (Number, optional)
+
+- Default: `4`
+
+The maximum extent of a joint in ratio to the stroke width.
+Only works if `lineJointRounded` is `false`.
+
 ##### `fp64` (Boolean, optional)
 
 - Default: `false`

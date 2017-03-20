@@ -69,12 +69,6 @@ Whether the layer should be rendered in high-precision 64-bit mode
 
 Shader based highlighting of a selected object
 
-##### `fp64` (Boolean, optional)
-
-- Default: `false`
-
-Whether the layer should be rendered in high-precision 64-bit mode
-
 ##### `lightSettings` (Object, optional) **EXPERIMENTAL**
 
 This is an object that contains light settings for extruded polygons.
