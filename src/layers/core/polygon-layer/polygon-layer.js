@@ -88,7 +88,7 @@ export default class PolygonLayer extends CompositeLayer {
       getPolygon, updateTriggers} = this.props;
     const {data, id, stroked, filled, extruded, wireframe} = this.props;
     const {lineWidthScale, lineWidthMinPixels, lineWidthMaxPixels,
-      lineJointRounded, lineMiterLimit, fp64} = this.props;
+      lineJointRounded, lineMiterLimit, fp64, opacity} = this.props;
 
     const {paths, onHover, onClick} = this.state;
 
@@ -101,6 +101,7 @@ export default class PolygonLayer extends CompositeLayer {
       extruded,
       wireframe: false,
       fp64,
+      opacity,
       getPolygon,
       getElevation,
       getColor: getFillColor,
@@ -121,6 +122,7 @@ export default class PolygonLayer extends CompositeLayer {
         extruded: true,
         wireframe: true,
         fp64,
+        opacity,
         getPolygon,
         getElevation,
         getColor: getLineColor,
@@ -145,6 +147,7 @@ export default class PolygonLayer extends CompositeLayer {
         rounded: lineJointRounded,
         miterLimit: lineMiterLimit,
         fp64,
+        opacity,
         getPath: x => x.path,
         getColor: getLineColor,
         getWidth: getLineWidth,
