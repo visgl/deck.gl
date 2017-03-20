@@ -24,7 +24,7 @@ export default `\
 attribute vec4 positions;
 attribute vec2 heights;
 attribute vec3 normals;
-uniform vec3 colors;
+attribute vec4 colors;
 
 uniform float opacity;
 uniform float elevation;
@@ -72,7 +72,7 @@ void main(void) {
   	  vertex_pos_modelspace[1].x,
   	  vertex_pos_modelspace[2].x),
   	normals,
-  	colors
+  	colors.rgb
   );
   vColor = vec4(color, opacity);
 }
