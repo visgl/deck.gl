@@ -27,7 +27,9 @@ import {defaultColorRange} from '../../../utils/color-utils';
 import {pointToHexbin} from './hexagon-aggregator';
 
 const defaultProps = {
+  colorDomain: null,
   colorRange: defaultColorRange,
+  elevationDomain: null,
   elevationRange: [0, 1000],
   elevationScale: 1,
   radius: 1000,

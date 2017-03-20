@@ -9,7 +9,6 @@ The `HexagonLayer` renders a hexagon heatmap based on an array of points.
 and height of the hexagon is scaled by number of points it contains. HexagonLayer
 at the moment only works with COORDINATE_SYSTEM.LNG_LAT.
 
-
   <div align="center">
     <img height="300" src="/demo/src/static/images/hexagon-layer.gif" />
   </div>
@@ -34,6 +33,7 @@ Radius of hexagon bin in meters. The hexagons are pointy-topped (rather than fla
 The `hexagonAggregator` takes props of the layer and current viewport as input.
 The output should be an array of hexagons with each formatted as `{centroid: [], points: []}`, where
 `centroid` is the center of the hexagon, and `points` is an array of points that contained by it.
+
 By default, the `HexagonLayer` uses
 [d3-hexbin](https://github.com/d3/d3-hexbin) as `hexagonAggregator`,
 see `src/layers/core/point-density-hexagon-layer/hexagon-aggregator`
@@ -92,6 +92,12 @@ all hexagons without updating the data.
 - Default: `true`
 
 Whether to enable cell elevation. Cell elevation scale by count of points in each cell. If set to false, all cells will be flat.
+
+##### `fp64` (Boolean, optional)
+
+- Default: `false`
+
+Whether the layer should be rendered in high-precision 64-bit mode
 
 ##### `lightSettings` (Object, optional) **EXPERIMENTAL**
 

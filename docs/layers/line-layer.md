@@ -23,6 +23,11 @@ Inherits from all [Base Layer](/docs/layers/base-layer.md) properties.
 
 The stroke width used to draw each line. Unit is pixels.
 
+##### `fp64` (Boolean, optional)
+
+- Default: `false`
+
+Whether the layer should be rendered in high-precision 64-bit mode
 
 ## Accessors
 

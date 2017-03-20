@@ -37,6 +37,11 @@ Icon names mapped to icon definitions. Each icon is defined with the following v
 
 Icon size multiplier.
 
+##### `fp64` (Boolean, optional)
+
+- Default: `false`
+
+Whether the layer should be rendered in high-precision 64-bit mode
 
 ## Accessors
 
