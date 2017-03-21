@@ -84,11 +84,17 @@ export default class GeoJsonLayer extends CompositeLayer {
   renderLayers() {
     const {features} = this.state;
     const {pointFeatures, lineFeatures, polygonFeatures, polygonOutlineFeatures} = features;
+
     const {getLineColor, getFillColor, getRadius,
       getLineWidth, getElevation, updateTriggers} = this.props;
+
     const {id, stroked, filled, extruded, wireframe} = this.props;
+
     const {lineWidthScale, lineWidthMinPixels, lineWidthMaxPixels,
       lineJointRounded, lineMiterLimit, fp64} = this.props;
+
+    // base layer props
+    const {opacity, pickable, visible, projectionMode} = this.props;
 
     const drawPoints = pointFeatures && pointFeatures.length > 0;
     const drawLines = lineFeatures && lineFeatures.length > 0;
@@ -107,6 +113,10 @@ export default class GeoJsonLayer extends CompositeLayer {
         extruded,
         wireframe: false,
         fp64,
+        opacity,
+        pickable,
+        visible,
+        projectionMode,
         getPolygon: getCoordinates,
         getElevation,
         getColor: getFillColor,
@@ -127,6 +137,10 @@ export default class GeoJsonLayer extends CompositeLayer {
         extruded,
         wireframe: true,
         fp64,
+        opacity,
+        pickable,
+        visible,
+        projectionMode,
         getPolygon: getCoordinates,
         getElevation,
         getColor: getLineColor,
@@ -150,6 +164,10 @@ export default class GeoJsonLayer extends CompositeLayer {
         rounded: lineJointRounded,
         miterLimit: lineMiterLimit,
         fp64,
+        opacity,
+        pickable,
+        visible,
+        projectionMode,
         getPath: getCoordinates,
         getColor: getLineColor,
         getWidth: getLineWidth,
@@ -170,6 +188,10 @@ export default class GeoJsonLayer extends CompositeLayer {
       rounded: lineJointRounded,
       miterLimit: lineMiterLimit,
       fp64,
+      opacity,
+      pickable,
+      visible,
+      projectionMode,
       getPath: getCoordinates,
       getColor: getLineColor,
       getWidth: getLineWidth,
@@ -185,6 +207,10 @@ export default class GeoJsonLayer extends CompositeLayer {
       id: `${id}-points`,
       data: pointFeatures,
       fp64,
+      opacity,
+      pickable,
+      visible,
+      projectionMode,
       getPosition: getCoordinates,
       getColor: getFillColor,
       getRadius,

@@ -128,7 +128,7 @@ const PathLayerExample = {
     getPath: f => get(f, 'path'),
     getColor: f => [128, 0, 0],
     getWidth: f => 10,
-    strokeMinWidth: 1,
+    widthMinPixels: 1,
     pickable: true
   }
 };

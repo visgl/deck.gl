@@ -120,15 +120,23 @@ export default class HexagonLayer extends Layer {
   }
 
   renderLayers() {
-    const {id, radius, extruded, fp64} = this.props;
+    const {id, radius, elevationScale, extruded, fp64} = this.props;
+
+    // base layer props
+    const {opacity, pickable, visible, projectionMode} = this.props;
 
     return new HexagonCellLayer({
       id: `${id}-hexagon-cell`,
       data: this.state.hexagons,
       radius,
+      elevationScale,
       angle: Math.PI,
       extruded,
       fp64,
+      opacity,
+      pickable,
+      visible,
+      projectionMode,
       getColor: this._onGetSublayerColor.bind(this),
       getElevation: this._onGetSublayerElevation.bind(this),
       // Override user's onHover and onClick props
