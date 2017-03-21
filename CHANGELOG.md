@@ -17,9 +17,9 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## Latest Beta Releases
 
-#### [v4.0.0-rc.2]
+#### [v4.0.0-rc.3]
 
-- Disable implicit props forwarding between the composite layer and its underlying layers. 
+- Disable implicit props forwarding between the composite layer and its underlying layers.
 - `GeoJsonLayer` `getColor` => `getLineColor`
 - `GeoJsonLayer` `getWidth` => `getLineWidth`
 - `GeoJsonLayer` add `lineWidthScale`
