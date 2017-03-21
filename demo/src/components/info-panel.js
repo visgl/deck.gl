@@ -2,7 +2,7 @@ import React, {Component} from 'react';
 import {connect} from 'react-redux';
 
 import GenericInput from './input';
-import Demos from './demos';
+import * as Demos from './demos';
 import {updateParam} from '../actions/app-actions';
 
 class InfoPanel extends Component {

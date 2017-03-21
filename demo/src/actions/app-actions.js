@@ -1,4 +1,4 @@
-import {request, text} from 'd3-request';
+import {request, json, text} from 'd3-request';
 
 import {StreamParser} from '../utils/worker-utils';
 
@@ -52,20 +52,37 @@ export const loadData = (owner, dataArr) => {
     dispatch(loadDataStart(owner));
 
     dataArr.forEach(({url, worker}, index) => {
-      const req = request(url);
-      const dataParser = new StreamParser(worker, (data, meta) => {
-        if (isArray) {
-          resultData[index] = data;
-        } else {
-          resultData = data;
-        }
-        resultMeta = {...resultMeta, ...meta};
-        dispatch(loadDataSuccess(owner, resultData, resultMeta));
-      });
+      if (worker) {
+        const req = request(url);
+        // use a web worker to parse data
+        const dataParser = new StreamParser(worker, (data, meta) => {
+          if (isArray) {
+            resultData[index] = data;
+          } else {
+            resultData = data;
+          }
+          resultMeta = {...resultMeta, ...meta};
+          dispatch(loadDataSuccess(owner, resultData, resultMeta));
+        });
 
-      req.on('progress', dataParser.onProgress)
-        .on('load', dataParser.onLoad)
-        .get();
+        req.on('progress', dataParser.onProgress)
+          .on('load', dataParser.onLoad)
+          .get();
+      } else if (/\.(json|geojson)$/.test(url)) {
+        // load as json
+        json(url, (error, response) => {
+          if (!error) {
+            dispatch(loadDataSuccess(owner, response, {}));
+          }
+        });
+      } else {
+        // load as plain text
+        text(url, (error, response) => {
+          if (!error) {
+            dispatch(loadDataSuccess(owner, response, {}));
+          }
+        });
+      }
     });
 
   };

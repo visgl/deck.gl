@@ -1,4 +1,3 @@
-/* global window */
 import React, {Component, PropTypes} from 'react';
 import autobind from 'autobind-decorator';
 

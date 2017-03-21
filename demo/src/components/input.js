@@ -29,13 +29,22 @@ export default class GenericInput extends Component {
     delete props.displayName;
     delete props.displayValue;
 
+    if (type === 'function') {
+      // non-editable
+      return (<div className="input">
+        <label>{displayName}</label>
+        <input type="text" disabled value={displayValue} />
+      </div>);
+    }
+
     if (type === 'checkbox') {
       props.checked = props.value;
     }
 
     return (
-      <div className={`input input-${type}`}>
+      <div className="input">
         <label>{displayName}</label>
+        <div className="tooltip">{displayName}: {displayValue}</div>
         <input
           {...props}
           value={displayValue}
