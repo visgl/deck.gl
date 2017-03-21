@@ -16,6 +16,29 @@ Ref: http://keepachangelog.com/en/0.3.0/
 -->
 
 ## Latest Beta Releases
+
+#### [v4.0.0-rc.2]
+
+- Disable implicit props forwarding between the composite layer and its underlying layers. 
+- `GeoJsonLayer` `getColor` => `getLineColor`
+- `GeoJsonLayer` `getWidth` => `getLineWidth`
+- `GeoJsonLayer` add `lineWidthScale`
+- `GeoJsonLayer` add `lineWidthMinPixels`
+- `GeoJsonLayer` add `lineWidthMaxPixels`
+- `GeoJsonLayer` add `lineJointRounded`
+- `GeoJsonLayer` add `lineMiterLimit`
+- `PolygonLayer` `getColor` => `getLineColor`
+- `PolygonLayer` `getWidth` => `getLineWidth`
+- `PolygonLayer` add `lineWidthScale`
+- `PolygonLayer` add `lineWidthMinPixels`
+- `PolygonLayer` add `lineWidthMaxPixels`
+- `PolygonLayer` add `lineJointRounded`
+- `PolygonLayer` add `lineMiterLimit`
+- FIX: `ScatterplotLayer` calls Layer.updateState() to invalidate all attributes when data changed
+- FIX: Fix the `ExtrudedChoroplethLayer64` in deprecated layer examples
+- Replace all readFileSync() calls with Javascript imports for all GLSL shaders
+
+
 #### [v4.0.0-rc1]
 
 - FIX: Composite layers now have a stub invalidateAttribute()
