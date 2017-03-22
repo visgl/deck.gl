@@ -97,7 +97,7 @@ const GeoJsonLayerExtrudedExample = {
   props: {
     id: 'geojsonLayer-extruded',
     getElevation: f => get(f, 'properties.ZIP_CODE') * 10 % 127 * 10,
-    getFillColor: f => [0, 255, get(f, 'properties.ZIP_CODE') * 23 % 100 + 155],
+    getFillColor: f => [0, 100, get(f, 'properties.ZIP_CODE') * 55 % 255],
     getLineColor: f => [200, 0, 80],
     extruded: true,
     wireframe: true,
@@ -110,7 +110,7 @@ const PolygonLayerExample = {
   getData: () => dataSamples.polygons,
   props: {
     getPolygon: f => f,
-    getFillColor: f => [Math.random() % 256, 0, 0],
+    getFillColor: f => [Math.floor(Math.random() * 255), 0, 0],
     getLineColor: f => [0, 0, 0, 255],
     getWidth: f => 20,
     getHeight: f => Math.random() * 1000,
