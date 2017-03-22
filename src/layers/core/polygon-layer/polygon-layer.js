@@ -77,7 +77,7 @@ export default class PolygonLayer extends CompositeLayer {
     Object.assign(info, {
       layer: this,
       // override object with picked feature
-      object: (info.object && info.object.feature) || info.object
+      object: (info.object && info.object.object) || info.object
     });
 
     return this.props[handler](info);
