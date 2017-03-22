@@ -78,13 +78,19 @@ and calls `draw` on that model.
 
 The pick method should return an object with optional fields about
 what was picked. This `info` object is then passed to the layer's `onHover`
-or `onPick` callbacks.
+or `onClick` callbacks.
 
 The received `info` argument contains fields `color` as the picked pixel
 and `index` calculated using `layer.decodePickingColor()`.
 
 The default implementation populates the `info` object with an `object` field
 that is indexed from `layer.props.data`.
+
+Composite layers can further augment the `info` object after it is processed
+by the picked sublayer. This allows the composite layer to hide implementation
+details and expose only user-friendly information.
+
+If this method returns `null`, the corresponding event is cancelled.
 
 ### Comparison with React's Lifecycle
 
