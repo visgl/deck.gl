@@ -143,29 +143,34 @@
 
     >* {
       vertical-align: middle;
+      white-space: nowrap;
     }
     label {
       display: inline-block;
       width: 40%;
       margin-right: 10%;
-      white-space: nowrap;
       color: $black-40;
       margin-bottom: 4px;
     }
-    input {
+    input, a {
+      font-size: 0.9em;
       display: inline-block;
       padding: 0 4px;
       width: 50%;
       height: 20px;
-      border: solid 1px #ccc;
       line-height: 1.833;
     }
-    input:disabled {
-      background: $white;
+    input {
+      border: solid 1px #ccc;
+
+      &:disabled {
+        background: $white;
+      }
+      &[type="checkbox"] {
+        height: auto;
+      }
     }
-    input[type="checkbox"] {
-      height: auto;
-    }
+    
     .tooltip {
       left: 50%;
       top: 24px;
@@ -207,11 +212,19 @@ code {
 
   &.embedded {
     height: 80vh;
+
+    >div:first-child {
+      margin-top: 0;
+      transition: margin-top 300ms;
+    }
   }
   &.embedded:not(:hover) {
     height: 30vh;
     min-height: 200px;
 
+    >div:first-child {
+      margin-top: -20vh;
+    }
     .options-panel {
       .input, hr {
         display: none;

@@ -8,10 +8,10 @@ import {getLayerParams} from '../../utils/layer-params';
 const defaultViewport = {
   mapStyle: MAPBOX_STYLES.LIGHT,
   longitude: -122.4,
-  latitude: 37.7,
-  zoom: 9,
-  maxZoom: 20,
-  pitch: 0,
+  latitude: 37.74,
+  zoom: 11,
+  maxZoom: 16,
+  pitch: 30,
   bearing: 0
 };
 
@@ -82,6 +82,11 @@ export default function createLayerDemoClass(settings) {
       return null;
     }
 
+    _initialize(gl) {
+      gl.enable(gl.DEPTH_TEST);
+      gl.depthFunc(gl.LEQUAL);
+    }
+
     render() {
       const {viewport, params, data} = this.props;
       const layer = renderLayer(data, params, {
@@ -90,7 +95,7 @@ export default function createLayerDemoClass(settings) {
 
       return (
         <div>
-          <DeckGL {...viewport} layers={ [layer] } />
+          <DeckGL {...viewport} layers={ [layer] } onWebGLInitialized={this._initialize} />
           { this._renderTooltip() }
         </div>
       );

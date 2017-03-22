@@ -12,7 +12,7 @@ export function propToParam(key, value) {
   case 'boolean':
     return {...param, type: 'checkbox'};
   case 'number':
-    if (/pixels|width|height|size|scale/i.test(key)) {
+    if (/pixels|width|height|size|scale|radius|limit/i.test(key)) {
       param.max = 100;
       param.step = 1;
     } else {
@@ -24,6 +24,19 @@ export function propToParam(key, value) {
     if (key.indexOf('get') === 0) {
       // is accessor
       return {...param, type: 'function'};
+    }
+    break;
+  case 'string':
+    if (/\.(png|jpg|jpeg|gif)/i.test(value)) {
+      return {...param, type: 'link'};
+    }
+    break;
+  case 'object':
+    if (/color/i.test(key) && value && Number.isFinite(value[0])) {
+      return {...param, type: 'color'};
+    }
+    if (/mapping|domain|range/i.test(key)) {
+      return {...param, type: 'json'};
     }
     break;
   default:
