@@ -87,7 +87,6 @@ export class PolygonTesselatorExtruded {
 }
 
 function countVertices(vertices) {
-
   return vertices.reduce((vertexCount, polygon) => vertexCount + count(polygon), 0);
 }
 
