@@ -136,7 +136,6 @@ export function pickLayers(gl, {
 
     affectedLayers.forEach(layer => {
       let info = Object.assign({}, baseInfo);
-      info.layer = layer;
 
       if (layer === pickedLayer) {
         info.color = pickedColor;
@@ -144,8 +143,15 @@ export function pickLayers(gl, {
         info.picked = true;
       }
 
-      // Let layers populate its own info object
-      info = layer.pickLayer({info, mode});
+      // walk up the composite chain and find the owner of the event
+      // sublayers are never directly exposed to the user
+      while (layer) {
+        // Let layers populate its own info object
+        info = layer.pickLayer({info, mode});
+        info.layer = layer;
+        layer = layer.parentLayer;
+      }
+      layer = info.layer;
 
       // If layer.getPickingInfo() returns null, do not proceed
       if (info) {

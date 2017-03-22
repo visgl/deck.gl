@@ -83,18 +83,15 @@ export default class HexagonLayer extends Layer {
     }
   }
 
-  _onPickSubLayer(handler, info) {
+  getPickingInfo({info}) {
     const pickedCell = info.picked && info.index > -1 ?
       this.state.hexagons[info.index] : null;
 
-    Object.assign(info, {
-      layer: this,
+    return Object.assign(info, {
       picked: Boolean(pickedCell),
       // override object with picked cell
       object: pickedCell
     });
-
-    return this.props[handler](info);
   }
 
   _onGetSublayerColor(cell) {
@@ -130,9 +127,6 @@ export default class HexagonLayer extends Layer {
       projectionMode,
       getColor: this._onGetSublayerColor.bind(this),
       getElevation: this._onGetSublayerElevation.bind(this),
-      // Override user's onHover and onClick props
-      onHover: this._onPickSubLayer.bind(this, 'onHover'),
-      onClick: this._onPickSubLayer.bind(this, 'onClick'),
       updateTriggers: {
         getColor: {colorRange: this.props.colorRange},
         getElevation: {elevationRange: this.props.elevationRange}

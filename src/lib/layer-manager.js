@@ -228,6 +228,12 @@ export default class LayerManager {
 
         if (sublayers) {
           sublayers = Array.isArray(sublayers) ? sublayers : [sublayers];
+
+          // populate reference to parent layer
+          sublayers.forEach(layer => {
+            layer.parentLayer = newLayer;
+          });
+
           this._matchSublayers({
             newLayers: sublayers,
             oldLayerMap,

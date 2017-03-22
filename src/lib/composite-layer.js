@@ -15,8 +15,7 @@ export default class CompositeLayer extends Layer {
   invalidateAttribute() {
   }
 
-  getPickingInfo(opts) {
-    // do not call onHover/onClick on the container
-    return null;
+  getPickingInfo({info}) {
+    return info;
   }
 }

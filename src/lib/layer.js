@@ -66,6 +66,7 @@ export default class Layer {
     this.oldProps = null;
     this.state = null;
     this.context = null;
+    this.parentLayer = null;
     this.count = counter++;
     Object.seal(this);
   }
