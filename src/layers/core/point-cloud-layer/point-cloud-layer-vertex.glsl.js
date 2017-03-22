@@ -30,7 +30,7 @@ attribute vec3 instancePickingColors;
 
 uniform float renderPickingBuffer;
 uniform float opacity;
-uniform float radius;
+uniform float radiusPixels;
 uniform vec2 viewportSize;
 
 varying vec4 vColor;
@@ -42,7 +42,7 @@ void main(void) {
 
   // Find the center of the point and add the current vertex
   vec4 position_worldspace = vec4(project_position(instancePositions), 1.0);
-  vec2 vertex = positions.xy * radius / viewportSize * 2.0;
+  vec2 vertex = positions.xy * radiusPixels / viewportSize * 2.0;
   gl_Position = project_to_clipspace(position_worldspace) + vec4(vertex, 0.0, 0.0);
 
   // Apply lighting

@@ -40,23 +40,31 @@ export const polygons = choropleths.features
 let _pointCloud = null;
 export function getPointCloud() {
   if (!_pointCloud) {
-    _pointCloud = pointGrid(
-      2e4,
-      [0, -Math.PI / 2, Math.PI * 2, Math.PI / 2],
-      true
-    ).map(([x, y]) => {
-      const R = 1000;
-      const cosx = Math.cos(x);
-      const sinx = Math.sin(x);
+    const RESOLUTION = 100;
+    const R = 1000;
+    _pointCloud = [];
+
+    // x is longitude, from 0 to 360
+    // y is latitude, from -90 to 90
+    for (let yIndex = 0; yIndex <= RESOLUTION; yIndex++) {
+      const y = (yIndex / RESOLUTION - 1 / 2) * Math.PI;
       const cosy = Math.cos(y);
       const siny = Math.sin(y);
+      // need less samples at high latitude
+      const xCount = Math.floor(cosy * RESOLUTION * 2) + 1;
 
-      return {
-        position: [cosx * R * cosy, sinx * R * cosy, (siny + 1) * R],
-        normal: [cosx * cosy, sinx * cosy, siny],
-        color: [(siny + 1) * 128, (cosy + 1) * 128, 0]
-      };
-    });
+      for (let xIndex = 0; xIndex < xCount; xIndex++) {
+        const x = xIndex / xCount * Math.PI * 2;
+        const cosx = Math.cos(x);
+        const sinx = Math.sin(x);
+
+        _pointCloud.push({
+          position: [cosx * R * cosy, sinx * R * cosy, (siny + 1) * R],
+          normal: [cosx * cosy, sinx * cosy, siny],
+          color: [(siny + 1) * 128, (cosy + 1) * 128, 0]
+        });
+      }
+    }
   }
   return _pointCloud;
 }

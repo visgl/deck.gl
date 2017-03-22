@@ -102,9 +102,9 @@ export default class PointCloudLayer extends Layer {
   }
 
   draw({uniforms}) {
-    const {radius, lightSettings} = this.props;
+    const {radiusPixels, lightSettings} = this.props;
     this.state.model.render(Object.assign({}, uniforms, {
-      radius
+      radiusPixels
     }, lightSettings));
   }
 
