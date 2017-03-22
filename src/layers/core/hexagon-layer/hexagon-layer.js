@@ -94,7 +94,7 @@ export default class HexagonLayer extends Layer {
       object: pickedCell
     });
 
-    this.props[handler](info);
+    return this.props[handler](info);
   }
 
   _onGetSublayerColor(cell) {

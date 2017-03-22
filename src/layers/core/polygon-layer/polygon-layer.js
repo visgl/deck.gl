@@ -80,7 +80,7 @@ export default class PolygonLayer extends CompositeLayer {
       object: (info.object && info.object.feature) || info.object
     });
 
-    this.props[handler](info);
+    return this.props[handler](info);
   }
 
   renderLayers() {
