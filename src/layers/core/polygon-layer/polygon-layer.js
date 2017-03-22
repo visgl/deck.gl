@@ -53,9 +53,7 @@ const defaultProps = {
 export default class PolygonLayer extends CompositeLayer {
   initializeState() {
     this.state = {
-      paths: [],
-      onHover: this._onPickSubLayer.bind(this, 'onHover'),
-      onClick: this._onPickSubLayer.bind(this, 'onClick')
+      paths: []
     };
   }
 
@@ -73,14 +71,11 @@ export default class PolygonLayer extends CompositeLayer {
     }
   }
 
-  _onPickSubLayer(handler, info) {
-    Object.assign(info, {
-      layer: this,
-      // override object with picked feature
+  getPickingInfo({info}) {
+    return Object.assign(info, {
+      // override object with picked data
       object: (info.object && info.object.object) || info.object
     });
-
-    return this.props[handler](info);
   }
 
   renderLayers() {
@@ -91,7 +86,7 @@ export default class PolygonLayer extends CompositeLayer {
       lineJointRounded, lineMiterLimit, fp64} = this.props;
     // base layer props
     const {opacity, pickable, visible, projectionMode} = this.props;
-    const {paths, onHover, onClick} = this.state;
+    const {paths} = this.state;
 
     const hasData = data && data.length > 0;
 
@@ -109,8 +104,6 @@ export default class PolygonLayer extends CompositeLayer {
       getPolygon,
       getElevation,
       getColor: getFillColor,
-      onHover,
-      onClick,
       updateTriggers: {
         getElevation: updateTriggers.getElevation,
         getColor: updateTriggers.getFillColor
@@ -133,8 +126,6 @@ export default class PolygonLayer extends CompositeLayer {
         getPolygon,
         getElevation,
         getColor: getLineColor,
-        onHover,
-        onClick,
         updateTriggers: {
           getElevation: updateTriggers.getElevation,
           getColor: updateTriggers.getLineColor
@@ -161,8 +152,6 @@ export default class PolygonLayer extends CompositeLayer {
         getPath: x => x.path,
         getColor: getLineColor,
         getWidth: getLineWidth,
-        onHover,
-        onClick,
         updateTriggers: {
           getWidth: updateTriggers.getLineWidth,
           getColor: updateTriggers.getLineColor

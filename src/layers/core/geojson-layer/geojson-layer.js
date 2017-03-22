@@ -59,9 +59,7 @@ const getCoordinates = f => get(f, 'geometry.coordinates');
 export default class GeoJsonLayer extends CompositeLayer {
   initializeState() {
     this.state = {
-      features: {},
-      onHover: this._onPickSubLayer.bind(this, 'onHover'),
-      onClick: this._onPickSubLayer.bind(this, 'onClick')
+      features: {}
     };
   }
 
@@ -73,18 +71,15 @@ export default class GeoJsonLayer extends CompositeLayer {
     }
   }
 
-  _onPickSubLayer(handler, info) {
-    Object.assign(info, {
-      layer: this,
+  getPickingInfo({info}) {
+    return Object.assign(info, {
       // override object with picked feature
       object: (info.object && info.object.feature) || info.object
     });
-
-    return this.props[handler](info);
   }
 
   renderLayers() {
-    const {features, onHover, onClick} = this.state;
+    const {features} = this.state;
     const {pointFeatures, lineFeatures, polygonFeatures, polygonOutlineFeatures} = features;
 
     const {getLineColor, getFillColor, getRadius,
@@ -119,8 +114,6 @@ export default class GeoJsonLayer extends CompositeLayer {
         getPolygon: getCoordinates,
         getElevation,
         getColor: getFillColor,
-        onHover,
-        onClick,
         updateTriggers: {
           getElevation: updateTriggers.getElevation,
           getColor: updateTriggers.getFillColor
@@ -146,9 +139,7 @@ export default class GeoJsonLayer extends CompositeLayer {
         updateTriggers: {
           getElevation: updateTriggers.getElevation,
           getColor: updateTriggers.getLineColor
-        },
-        onHover,
-        onClick
+        }
       });
 
     const polygonLineLayer = !extruded &&
@@ -170,8 +161,6 @@ export default class GeoJsonLayer extends CompositeLayer {
         getPath: getCoordinates,
         getColor: getLineColor,
         getWidth: getLineWidth,
-        onHover,
-        onClick,
         updateTriggers: {
           getColor: updateTriggers.getLineColor,
           getWidth: updateTriggers.getLineWidth
@@ -194,8 +183,6 @@ export default class GeoJsonLayer extends CompositeLayer {
       getPath: getCoordinates,
       getColor: getLineColor,
       getWidth: getLineWidth,
-      onHover,
-      onClick,
       updateTriggers: {
         getColor: updateTriggers.getLineColor,
         getWidth: updateTriggers.getLineWidth
@@ -213,8 +200,6 @@ export default class GeoJsonLayer extends CompositeLayer {
       getPosition: getCoordinates,
       getColor: getFillColor,
       getRadius,
-      onHover,
-      onClick,
       updateTriggers: {
         getColor: updateTriggers.getFillColor,
         getRadius: updateTriggers.getRadius

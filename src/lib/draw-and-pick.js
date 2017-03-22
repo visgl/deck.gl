@@ -136,7 +136,6 @@ export function pickLayers(gl, {
 
     affectedLayers.forEach(layer => {
       let info = Object.assign({}, baseInfo);
-      info.layer = layer;
 
       if (layer === pickedLayer) {
         info.color = pickedColor;
@@ -144,8 +143,14 @@ export function pickLayers(gl, {
         info.picked = true;
       }
 
-      // Let layers populate its own info object
-      info = layer.pickLayer({info, mode});
+      // walk up the composite chain and find the owner of the event
+      // sublayers are never directly exposed to the user
+      while (layer && info) {
+        info.layer = layer;
+        // Let layers populate its own info object
+        info = layer.pickLayer({info, mode});
+        layer = layer.parentLayer;
+      }
 
       // If layer.getPickingInfo() returns null, do not proceed
       if (info) {
@@ -154,8 +159,8 @@ export function pickLayers(gl, {
         // Calling callbacks can have async interactions with React
         // which nullifies layer.state.
         switch (mode) {
-        case 'click': handled = layer.props.onClick(info); break;
-        case 'hover': handled = layer.props.onHover(info); break;
+        case 'click': handled = info.layer.props.onClick(info); break;
+        case 'hover': handled = info.layer.props.onHover(info); break;
         default: throw new Error('unknown pick type');
         }
 
