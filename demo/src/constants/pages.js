@@ -163,7 +163,8 @@ export const docPages = generatePath([
       },
       {
         name: 'PointCloudLayer',
-        content: getDocUrl('layers/point-cloud-layer.md')
+        content: getDocUrl('layers/point-cloud-layer.md'),
+        embedded: 'PointCloudLayerDemo'
       },
       {
         name: 'GridLayer',

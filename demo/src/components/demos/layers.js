@@ -10,7 +10,8 @@ import {
   GridLayer,
   HexagonLayer,
   PolygonLayer,
-  GeoJsonLayer
+  GeoJsonLayer,
+  PointCloudLayer
 } from 'deck.gl';
 
 import {colorToRGBArray} from '../../utils/format-utils';
@@ -22,7 +23,7 @@ export const ScatterplotLayerDemo = createLayerDemoClass({
   props: {
     pickable: true,
     opacity: 0.8,
-    radiusScale: 10,
+    radiusScale: 6,
     radiusMinPixels: 1,
     radiusMaxPixels: 100,
     getPosition: d => d.coordinates,
@@ -65,9 +66,10 @@ export const PathLayerDemo = createLayerDemoClass({
   props: {
     pickable: true,
     widthScale: 20,
+    widthMinPixels: 2,
     getPath: d => d.path,
-    getWidth: d => 5,
-    getColor: d => colorToRGBArray(d.color)
+    getColor: d => colorToRGBArray(d.color),
+    getWidth: d => 5
   }
 });
 
@@ -139,16 +141,15 @@ export const HexagonLayerDemo = createLayerDemoClass({
 
 export const PolygonLayerDemo = createLayerDemoClass({
   Layer: PolygonLayer,
-  dataUrl: 'data/sf-highrise.json',
-  formatTooltip: d => `Height: ${d.height}m`,
+  dataUrl: 'data/sf-zipcodes.json',
+  formatTooltip: d => `${d.zipcode}\nPopulation: ${d.population}`,
   props: {
     pickable: true,
     stroked: true,
     filled: true,
-    extruded: true,
-    getPolygon: d => d.polygon,
-    getElevation: d => d.height,
-    getFillColor: d => [128, 128, 128]
+    getPolygon: d => d.contour,
+    getElevation: d => d.population / d.area / 10,
+    getFillColor: d => [d.population / d.area / 10, 140, 0]
   }
 });
 
@@ -160,5 +161,20 @@ export const GeoJsonLayerDemo = createLayerDemoClass({
     pickable: true,
     stroked: true,
     filled: true
+  }
+});
+
+export const PointCloudLayerDemo = createLayerDemoClass({
+  Layer: PointCloudLayer,
+  dataUrl: 'data/pointcloud.json',
+  formatTooltip: d => '',
+  props: {
+    pickable: false,
+    projectionMode: 2,
+    positionOrigin: [-122.4, 37.74],
+    radius: 4,
+    getPosition: d => d.position,
+    getNormal: d => d.normal,
+    getColor: d => d.color
   }
 });

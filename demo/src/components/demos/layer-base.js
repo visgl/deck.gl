@@ -10,7 +10,7 @@ const defaultViewport = {
   longitude: -122.4,
   latitude: 37.74,
   zoom: 11,
-  maxZoom: 16,
+  maxZoom: 20,
   pitch: 30,
   bearing: 0
 };
