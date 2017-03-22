@@ -19,9 +19,11 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 #### [TBD]
 
-- Fix bug where `onHover` and `onClick` props do not work on `GridLayer` and `HexagonLayer`
+- FIX: `onHover` and `onClick` props now work on `GridLayer` and `HexagonLayer`
 - Picking info from `GeoJsonLayer` and `PolygonLayer` now have `layer` property point to the
   composite layer instead of a sublayer
+- FIX: `PointCloudLayer` use `radiusPixels` instead of `radius`
+
 
 #### [v4.0.0-rc.3]
 
