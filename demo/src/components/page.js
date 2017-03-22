@@ -27,8 +27,7 @@ class Page extends Component {
     const {route} = nextProps;
     if (this.props.route !== route) {
       this.setState({
-        tabs: this._loadContent(route.content),
-        embedDemo: route.embedded
+        tabs: this._loadContent(route.content)
       });
     }
   }
@@ -115,8 +114,8 @@ class Page extends Component {
   }
 
   _renderTabContent() {
-    const {contents} = this.props;
-    const {tabs, embedDemo} = this.state;
+    const {contents, route: {embedded}} = this.props;
+    const {tabs} = this.state;
 
     return Object.keys(tabs).map(tabKey => {
       const tab = tabs[tabKey];
@@ -127,7 +126,7 @@ class Page extends Component {
       } else if (typeof tab === 'string') {
         const child = (
           <div>
-            { embedDemo && this._renderDemo(embedDemo, false) }
+            { embedded && this._renderDemo(embedded, false) }
             <MarkdownPage content={contents[tab]} />
           </div>
         );
