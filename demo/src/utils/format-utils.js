@@ -3,9 +3,9 @@ import {rgb} from 'd3-color';
 export const normalizeParam = p => {
   if (p.type === 'function') {
     let displayValue = p.value.toString();
-    displayValue = displayValue.replace(/^function \w+\((\w*?)\)/, '$1 =>');
-    displayValue = displayValue.replace(/^function \w+(\(.*?\))/, '$1 =>');
-    displayValue = displayValue.replace(/\{\s*return (.*?);?\s*\}$/, '$1');
+    displayValue = displayValue.replace(/^function (\w+)?\((\w*?)\)/, '$2 =>');
+    displayValue = displayValue.replace(/^function (\w+)?(\(.*?\))/, '$2 =>');
+    displayValue = displayValue.replace(/\{\s*return\s*(.*?);?\s*\}$/, '$1');
     return {...p, displayValue};
   }
   if (p.type === 'json') {
