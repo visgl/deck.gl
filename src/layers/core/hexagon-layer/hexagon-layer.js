@@ -41,8 +41,6 @@ const defaultProps = {
   //
 };
 
-function noop() {}
-
 function _needsReProjectPoints(oldProps, props) {
   return oldProps.radius !== props.radius;
 }
@@ -69,8 +67,7 @@ export default class HexagonLayer extends Layer {
   initializeState() {
     this.state = {
       hexagons: [],
-      countRange: null,
-      pickedCell: null
+      countRange: null
     };
   }
 
@@ -86,24 +83,18 @@ export default class HexagonLayer extends Layer {
     }
   }
 
-  getPickingInfo(opts) {
-    const info = super.getPickingInfo(opts);
-    const pickedCell = this.state.pickedCell;
+  _onPickSubLayer(handler, info) {
+    const pickedCell = info.picked && info.index > -1 ?
+      this.state.hexagons[info.index] : null;
 
-    return Object.assign(info, {
+    Object.assign(info, {
       layer: this,
-      // override index with cell index
-      index: pickedCell ? pickedCell.index : -1,
       picked: Boolean(pickedCell),
       // override object with picked cell
       object: pickedCell
     });
-  }
 
-  _onHoverSublayer(info) {
-
-    this.state.pickedCell = info.picked && info.index > -1 ?
-      this.state.hexagons[info.index] : null;
+    this.props[handler](info);
   }
 
   _onGetSublayerColor(cell) {
@@ -140,8 +131,8 @@ export default class HexagonLayer extends Layer {
       getColor: this._onGetSublayerColor.bind(this),
       getElevation: this._onGetSublayerElevation.bind(this),
       // Override user's onHover and onClick props
-      onHover: this._onHoverSublayer.bind(this),
-      onClick: noop,
+      onHover: this._onPickSubLayer.bind(this, 'onHover'),
+      onClick: this._onPickSubLayer.bind(this, 'onClick'),
       updateTriggers: {
         getColor: {colorRange: this.props.colorRange},
         getElevation: {elevationRange: this.props.elevationRange}
