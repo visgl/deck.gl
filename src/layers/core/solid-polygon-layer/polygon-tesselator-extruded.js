@@ -87,6 +87,7 @@ export class PolygonTesselatorExtruded {
 }
 
 function countVertices(vertices) {
+
   return vertices.reduce((vertexCount, polygon) => vertexCount + count(polygon), 0);
 }
 
@@ -117,15 +118,15 @@ function calculateIndices({groupedVertices, wireframe = false}) {
 // * each top vertex is on 3 surfaces
 // * each bottom vertex is on 2 surfaces
 function calculatePositionsJS({groupedVertices, wireframe = false}) {
-  const positions = groupedVertices.map(complexPolygon =>
-    complexPolygon.map(vertices => {
-      const topVertices = [].concat(vertices);
+  const positions = groupedVertices.map(
+    vertices => {
+      const topVertices = Array.prototype.concat.apply([], vertices);
       const baseVertices = topVertices.map(v => [get(v, 0), get(v, 1), 0]);
-      return wireframe ?
-        [topVertices, baseVertices] :
+      return wireframe ? [topVertices, baseVertices] :
         [topVertices, topVertices, topVertices, baseVertices, baseVertices];
-    })
+    }
   );
+
   return flattenDeep(positions);
 }
 
