@@ -119,7 +119,7 @@ export default class DeckGL extends React.Component {
 
   // Route events to layers
   _onClick(event) {
-    const {x, y} = event;
+    const {event: {offsetX: x = 0, offsetY: y = 0} = {}} = event;
     const selectedInfos = this.layerManager.pickLayer({x, y, mode: 'click'});
     if (selectedInfos.length) {
       const firstInfo = selectedInfos.find(info => info.index >= 0);
@@ -130,7 +130,7 @@ export default class DeckGL extends React.Component {
 
   // Route events to layers
   _onMouseMove(event) {
-    const {x, y} = event;
+    const {event: {offsetX: x = 0, offsetY: y = 0} = {}} = event;
     const selectedInfos = this.layerManager.pickLayer({x, y, mode: 'hover'});
     if (selectedInfos.length) {
       const firstInfo = selectedInfos.find(info => info.index >= 0);
