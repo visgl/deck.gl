@@ -186,7 +186,7 @@ const PointCloudLayerExample = {
     getNormal: d => get(d, 'normal'),
     getColor: d => get(d, 'color'),
     opacity: 1,
-    radius: 4,
+    radiusPixels: 4,
     pickable: true
   }
 };
