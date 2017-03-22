@@ -54,8 +54,8 @@ export default class PolygonLayer extends CompositeLayer {
   initializeState() {
     this.state = {
       paths: [],
-      onHover: this._onHoverSubLayer.bind(this),
-      onClick: this._onClickSubLayer.bind(this)
+      onHover: this._onPickSubLayer.bind(this, 'onHover'),
+      onClick: this._onPickSubLayer.bind(this, 'onClick')
     };
   }
 
@@ -73,14 +73,14 @@ export default class PolygonLayer extends CompositeLayer {
     }
   }
 
-  _onHoverSubLayer(info) {
-    info.object = (info.object && info.object.feature) || info.object;
-    this.props.onHover(info);
-  }
+  _onPickSubLayer(handler, info) {
+    Object.assign(info, {
+      layer: this,
+      // override object with picked feature
+      object: (info.object && info.object.object) || info.object
+    });
 
-  _onClickSubLayer(info) {
-    info.object = (info.object && info.object.feature) || info.object;
-    this.props.onClick(info);
+    return this.props[handler](info);
   }
 
   renderLayers() {

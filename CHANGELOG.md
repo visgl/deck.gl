@@ -17,6 +17,12 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## Latest Beta Releases
 
+#### [TBD]
+
+- Fix bug where `onHover` and `onClick` props do not work on `GridLayer` and `HexagonLayer`
+- Picking info from `GeoJsonLayer` and `PolygonLayer` now have `layer` property point to the
+  composite layer instead of a sublayer
+
 #### [v4.0.0-rc.3]
 
 - Disable implicit props forwarding between the composite layer and its underlying layers.

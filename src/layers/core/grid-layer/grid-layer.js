@@ -41,8 +41,6 @@ const defaultProps = {
   fp64: false
 };
 
-function noop() {}
-
 function _needsReProjectPoints(oldProps, props) {
   return oldProps.cellSize !== props.cellSize;
 }
@@ -52,8 +50,7 @@ export default class GridLayer extends Layer {
     this.state = {
       gridOffset: {yOffset: 0.0089, xOffset: 0.0113},
       layerData: [],
-      countRange: null,
-      pickedCell: null
+      countRange: null
     };
   }
 
@@ -68,24 +65,18 @@ export default class GridLayer extends Layer {
     }
   }
 
-  getPickingInfo(opts) {
-    const info = super.getPickingInfo(opts);
-    const pickedCell = this.state.pickedCell;
+  _onPickSubLayer(handler, info) {
+    const pickedCell = info.picked && info.index > -1 ?
+      this.state.layerData[info.index] : null;
 
-    return Object.assign(info, {
+    Object.assign(info, {
       layer: this,
-      // override index with cell index
-      index: pickedCell ? pickedCell.index : -1,
       picked: Boolean(pickedCell),
       // override object with picked cell
       object: pickedCell
     });
-  }
 
-  _onHoverSublayer(info) {
-
-    this.state.pickedCell = info.picked && info.index > -1 ?
-      this.state.layerData[info.index] : null;
+    return this.props[handler](info);
   }
 
   _onGetSublayerColor(cell) {
@@ -123,8 +114,8 @@ export default class GridLayer extends Layer {
       getElevation: this._onGetSublayerElevation.bind(this),
       getPosition: d => d.position,
       // Override user's onHover and onClick props
-      onHover: this._onHoverSublayer.bind(this),
-      onClick: noop,
+      onHover: this._onPickSubLayer.bind(this, 'onHover'),
+      onClick: this._onPickSubLayer.bind(this, 'onClick'),
       updateTriggers: {
         getColor: {colorRange: this.props.colorRange},
         getElevation: {elevationRange: this.props.elevationRange}

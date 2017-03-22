@@ -59,7 +59,9 @@ const getCoordinates = f => get(f, 'geometry.coordinates');
 export default class GeoJsonLayer extends CompositeLayer {
   initializeState() {
     this.state = {
-      features: {}
+      features: {},
+      onHover: this._onPickSubLayer.bind(this, 'onHover'),
+      onClick: this._onPickSubLayer.bind(this, 'onClick')
     };
   }
 
@@ -71,18 +73,18 @@ export default class GeoJsonLayer extends CompositeLayer {
     }
   }
 
-  _onHoverSubLayer(info) {
-    info.object = (info.object && info.object.feature) || info.object;
-    this.props.onHover(info);
-  }
+  _onPickSubLayer(handler, info) {
+    Object.assign(info, {
+      layer: this,
+      // override object with picked feature
+      object: (info.object && info.object.feature) || info.object
+    });
 
-  _onClickSubLayer(info) {
-    info.object = (info.object && info.object.feature) || info.object;
-    this.props.onClick(info);
+    return this.props[handler](info);
   }
 
   renderLayers() {
-    const {features} = this.state;
+    const {features, onHover, onClick} = this.state;
     const {pointFeatures, lineFeatures, polygonFeatures, polygonOutlineFeatures} = features;
 
     const {getLineColor, getFillColor, getRadius,
@@ -100,9 +102,6 @@ export default class GeoJsonLayer extends CompositeLayer {
     const drawLines = lineFeatures && lineFeatures.length > 0;
     const hasPolygonLines = polygonOutlineFeatures && polygonOutlineFeatures.length > 0;
     const hasPolygon = polygonFeatures && polygonFeatures.length > 0;
-
-    const onHover = this._onHoverSubLayer.bind(this);
-    const onClick = this._onClickSubLayer.bind(this);
 
     // Filled Polygon Layer
     const polygonFillLayer = filled &&
