@@ -107,7 +107,14 @@ export default class IconLayer extends Layer {
   updateState({oldProps, props, changeFlags}) {
     super.updateState({props, oldProps, changeFlags});
 
-    const {iconAtlas} = props;
+    const {iconAtlas, iconMapping} = props;
+
+    if (oldProps.iconMapping !== iconMapping) {
+      const {attributeManager} = this.state;
+      attributeManager.invalidate('instanceOffsets');
+      attributeManager.invalidate('instanceIconFrames');
+      attributeManager.invalidate('instanceColorModes');
+    }
 
     if (oldProps.iconAtlas !== iconAtlas) {
       const icons = {};
