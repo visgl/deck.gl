@@ -133,39 +133,48 @@ export const docPages = generatePath([
       },
       {
         name: 'ArcLayer',
-        content: getDocUrl('layers/arc-layer.md')
+        content: getDocUrl('layers/arc-layer.md'),
+        embedded: 'ArcLayerDemo'
       },
       {
         name: 'LineLayer',
-        content: getDocUrl('layers/line-layer.md')
+        content: getDocUrl('layers/line-layer.md'),
+        embedded: 'LineLayerDemo'
       },
       {
         name: 'GeoJSONLayer',
-        content: getDocUrl('layers/geojson-layer.md')
+        content: getDocUrl('layers/geojson-layer.md'),
+        embedded: 'GeoJsonLayerDemo'
       },
       {
         name: 'PathLayer',
-        content: getDocUrl('layers/path-layer.md')
+        content: getDocUrl('layers/path-layer.md'),
+        embedded: 'PathLayerDemo'
       },
       {
         name: 'PolygonLayer',
-        content: getDocUrl('layers/polygon-layer.md')
+        content: getDocUrl('layers/polygon-layer.md'),
+        embedded: 'PolygonLayerDemo'
       },
       {
         name: 'IconLayer',
-        content: getDocUrl('layers/icon-layer.md')
+        content: getDocUrl('layers/icon-layer.md'),
+        embedded: 'IconLayerDemo'
       },
       {
         name: 'PointCloudLayer',
-        content: getDocUrl('layers/point-cloud-layer.md')
+        content: getDocUrl('layers/point-cloud-layer.md'),
+        embedded: 'PointCloudLayerDemo'
       },
       {
         name: 'GridLayer',
-        content: getDocUrl('layers/grid-layer.md')
+        content: getDocUrl('layers/grid-layer.md'),
+        embedded: 'GridLayerDemo'
       },
       {
         name: 'ScreenGridLayer',
-        content: getDocUrl('layers/screen-grid-layer.md')
+        content: getDocUrl('layers/screen-grid-layer.md'),
+        embedded: 'ScreenGridLayerDemo'
       },
       {
         name: 'GridCellLayer',
@@ -173,7 +182,8 @@ export const docPages = generatePath([
       },
       {
         name: 'HexagonLayer',
-        content: getDocUrl('layers/hexagon-layer.md')
+        content: getDocUrl('layers/hexagon-layer.md'),
+        embedded: 'HexagonLayerDemo'
       },
       {
         name: 'HexagonCellLayer',

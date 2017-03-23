@@ -8,10 +8,10 @@ import {getLayerParams} from '../../utils/layer-params';
 const defaultViewport = {
   mapStyle: MAPBOX_STYLES.LIGHT,
   longitude: -122.4,
-  latitude: 37.7,
-  zoom: 9,
+  latitude: 37.74,
+  zoom: 11,
   maxZoom: 20,
-  pitch: 0,
+  pitch: 30,
   bearing: 0
 };
 
@@ -71,15 +71,20 @@ export default function createLayerDemoClass(settings) {
       if (hoveredItem && hoveredItem.index >= 0) {
         const {formatTooltip} = settings;
         const info = formatTooltip ? formatTooltip(hoveredItem.object) : hoveredItem.index;
-        return (
+        return info && (
           <div className="tooltip"
             style={{left: hoveredItem.x, top: hoveredItem.y}}>
-            { info.split('\n')
+            { info.toString().split('\n')
                 .map((str, i) => <p key={i}>{str}</p>) }
           </div>
         );
       }
       return null;
+    }
+
+    _initialize(gl) {
+      gl.enable(gl.DEPTH_TEST);
+      gl.depthFunc(gl.LEQUAL);
     }
 
     render() {
@@ -90,7 +95,7 @@ export default function createLayerDemoClass(settings) {
 
       return (
         <div>
-          <DeckGL {...viewport} layers={ [layer] } />
+          <DeckGL {...viewport} layers={ [layer] } onWebGLInitialized={this._initialize} />
           { this._renderTooltip() }
         </div>
       );

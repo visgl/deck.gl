@@ -29,7 +29,13 @@ export default class GenericInput extends Component {
     delete props.displayName;
     delete props.displayValue;
 
-    if (type === 'function') {
+    if (type === 'link') {
+      return (<div className="input">
+        <label>{displayName}</label>
+        <a href={displayValue} target="_new">{displayValue}</a>
+      </div>);
+    }
+    if (type === 'function' || type === 'json') {
       // non-editable
       return (<div className="input">
         <label>{displayName}</label>
