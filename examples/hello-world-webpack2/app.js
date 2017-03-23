@@ -2,8 +2,7 @@
 import React, {Component} from 'react';
 import {render} from 'react-dom';
 import MapGL from 'react-map-gl';
-import DeckGL from 'deck.gl';
-import {LineLayer} from 'deck.gl';
+import DeckGL, {LineLayer} from 'deck.gl';
 
 // Set your mapbox token here
 const MAPBOX_TOKEN = process.env.MAPBOX_ACCESS_TOKEN; // eslint-disable-line
@@ -37,26 +36,16 @@ class Root extends Component {
 
     return (
       <MapGL
-        latitude={viewport.latitude}
-        longitude={viewport.longitude}
-        zoom={viewport.zoom}
-        bearing={viewport.bearing}
-        pitch={viewport.pitch}
+        {...viewport}
         width={width}
         height={height}
-        mapStyle="mapbox://styles/mapbox/dark-v9"
-        mapboxApiAccessToken={MAPBOX_TOKEN}
-        perspectiveEnabled
-        onChangeViewport={v => this.setState({viewport: v})}>
+        mapboxApiAccessToken={MAPBOX_TOKEN}>
         <DeckGL
-          latitude={viewport.latitude}
-          longitude={viewport.longitude}
-          zoom={viewport.zoom}
-          bearing={viewport.bearing}
-          pitch={viewport.pitch}
+          {...viewport}
           width={width}
           height={height}
-          layers={layers}/>
+          layers={layers}
+          debug/>
       </MapGL>
     );
   }

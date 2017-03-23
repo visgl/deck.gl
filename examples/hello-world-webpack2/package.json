@@ -5,9 +5,9 @@
     "build": "NODE_ENV=production webpack --env.prod=true"
   },
   "dependencies": {
-    "deck.gl": "^4.0.0-beta.3",
+    "deck.gl": "^4.0.0-rc.3",
     "immutable": "^3.8.1",
-    "luma.gl": "3.0.0-beta.11",
+    "luma.gl": "^3.0.0",
     "react": "^15.4.1",
     "react-dom": "^15.4.1",
     "react-map-gl": "^2.0.0"
