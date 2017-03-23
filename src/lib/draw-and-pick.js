@@ -135,8 +135,12 @@ export function pickLayers(gl, {
     baseInfo.devicePixel = [deviceX, deviceY];
     baseInfo.pixelRatio = pixelRatio;
 
-    // Use a Map to store all picking infos
+    // Use a Map to store all picking infos.
+    // The following two forEach loops are the result of
+    // https://github.com/uber/deck.gl/issues/443
+    // Please be very careful when changing this pattern
     const infos = new Map();
+
     affectedLayers.forEach(layer => {
       let info = Object.assign({}, baseInfo);
 
@@ -146,17 +150,19 @@ export function pickLayers(gl, {
         info.picked = true;
       }
 
-      // walk up the composite chain and find the owner of the event
+      // Walk up the composite chain and find the owner of the event
       // sublayers are never directly exposed to the user
       while (layer && info) {
         info.layer = layer;
-        // Let layers populate its own info object
+        // layer.pickLayer() function requires a non-null ```layer.state```
+        // object to funtion properly. So the layer refereced here
+        // must be the "current" layer, not an "out-dated" / "invalidated" layer
         info = layer.pickLayer({info, mode});
         layer = layer.parentLayer;
       }
 
-      // This guarantees that there will be only one copy of info with
-      // the same composite layer
+      // This guarantees that there will be only one copy of info for
+      // one composite layer
       infos.set(info.layer.id, info);
     });
 
@@ -164,9 +170,15 @@ export function pickLayers(gl, {
       // If layer.getPickingInfo() returns null, do not proceed
       if (info) {
         let handled = false;
+        // The onClick and onHover functions are provided by the user
+        // and out of control by deck.gl. It's well possible that
+        // the user calls React lifecycle methods, like ReactComponent.setState()
+        // in these methods. This will induce a re-render and re-generation of props
+        // of deck.gl and layers, which in turn will invalidate all layers currently
+        // passed to this very function.
 
-        // Calling callbacks can have async interactions with React
-        // which nullifies layer.state.
+        // Therefore, these calls need to be at the end of the function. NO operation
+        // relies on the states of current layers should be called after this two line of code.
         switch (mode) {
         case 'click': handled = info.layer.props.onClick(info); break;
         case 'hover': handled = info.layer.props.onHover(info); break;
