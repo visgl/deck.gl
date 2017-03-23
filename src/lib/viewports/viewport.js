@@ -1,12 +1,15 @@
-// eslint-disable
 // View and Projection Matrix management
 
 // gl-matrix is a large dependency for a small module.
 // However since it is used by mapbox etc, it should already be present
 // in most target application bundles.
-import {mat4, vec4} from 'gl-matrix';
+import {mat4, vec4, vec2} from 'gl-matrix';
+import autobind from './autobind';
+import assert from 'assert';
 
 const IDENTITY = createMat4();
+
+const ERR_ARGUMENT = 'Illegal argument to Viewport';
 
 export default class Viewport {
   /**
@@ -70,13 +73,22 @@ export default class Viewport {
      */
     const m = createMat4();
 
+   // matrix for conversion from location to screen coordinates
+    mat4.scale(m, m, [this.width / 2, -this.height / 2, 1]);
+    mat4.translate(m, m, [1, -1, 0]);
+
     // Scale with viewport window's width and height in pixels
-    mat4.scale(m, m, [this.width, this.height, 1]);
+    // mat4.scale(m, m, [this.width, this.height, 1]);
     // Convert to (0, 1)
-    mat4.translate(m, m, [0.5, 0.5, 0]);
-    mat4.scale(m, m, [0.5, 0.5, 1]);
+    // mat4.translate(m, m, [0.5, 0.5, 0]);
+    // mat4.scale(m, m, [0.5, 0.5, 1]);
     // Project to clip space (-1, 1)
     mat4.multiply(m, m, this.viewProjectionMatrix);
+
+    // console.log(`vec ${[this.width / 2, this.height / 2, 1]}`);
+    // console.log(`View ${this.viewMatrix}`);
+    // console.log(`VPM ${vpm}`);
+    // console.log(`Pixel ${m}`);
 
     const mInverse = mat4.invert(createMat4(), m);
     if (!mInverse) {
@@ -86,12 +98,7 @@ export default class Viewport {
     this.pixelProjectionMatrix = m;
     this.pixelUnprojectionMatrix = mInverse;
 
-    this.project = this.project.bind(this);
-    this.unproject = this.unproject.bind(this);
-    this.projectFlat = this.projectFlat.bind(this);
-    this.unprojectFlat = this.unprojectFlat.bind(this);
-    this.getMatrices = this.getMatrices.bind(this);
-    this.getDistanceScales = this.getDistanceScales.bind(this);
+    autobind(this);
   }
   /* eslint-enable complexity */
 
@@ -120,21 +127,16 @@ export default class Viewport {
    * @param {Object} opts.topLeft=true - Whether projected coords are top left
    * @return {Array} - [x, y] or [x, y, z] in top left coords
    */
-  project(xyz, {topLeft = true} = {}) {
-    const Z = xyz[2] || 0;
-    // console.error('projecting non-linear', xyz);
-    const [X, Y] = this.projectFlat(xyz);
-    const v = [X, Y, Z, 1];
-    // console.error('projecting linear', v);
-    // vec4.sub(v, v, [this.centerX, this.centerY, 0, 0]);
-    vec4.transformMat4(v, v, this.pixelProjectionMatrix);
-    // Divide by w
-    const scale = 1 / v[3];
-    vec4.multiply(v, v, [scale, scale, scale, scale]);
-    // console.error('projected', v);
-    const [x, , z] = v;
-    const y = topLeft ? this.height - v[1] : v[1];
-    return xyz.length === 2 ? [x, y] : [x, y, z];
+  project(xyz, {topLeft = false} = {}) {
+    const [x0, y0, z0 = 0] = xyz;
+    assert(Number.isFinite(x0) && Number.isFinite(y0) && Number.isFinite(z0), ERR_ARGUMENT);
+
+    const [X, Y] = this.projectFlat([x0, y0]);
+    const v = this.transformVector(this.pixelProjectionMatrix, [X, Y, z0, 1]);
+
+    const [x, y] = v;
+    const y2 = topLeft ? this.height - y : y;
+    return xyz.length === 2 ? [x, y2] : [x, y2, 0];
   }
 
   /**
@@ -145,20 +147,34 @@ export default class Viewport {
    * @param {Array} xyz -
    * @return {Array} - [lng, lat, Z] or [X, Y, Z]
    */
-  unproject(xyz, {topLeft = true} = {}) {
-    // console.error('unprojecting linear', xyz);
-    const [x = 0, y = 0, z = 0] = xyz;
-    // const y2 = topLeft ? this.height - 1 - y : y;
+  unproject(xyz, {topLeft = false} = {}) {
+    const [x, y, targetZ = 0] = xyz;
+
     const y2 = topLeft ? this.height - y : y;
-    const v = [x, y2, z, 1];
-    vec4.transformMat4(v, v, this.pixelUnprojectionMatrix);
-    const scale = 1 / v[3];
-    vec4.multiply(v, v, [scale, scale, scale, scale]);
-    // console.error('unprojecting non-linear', v);
-    const [x0, y0] = this.unprojectFlat(v);
-    // console.error('unprojected', [x0, y0]);
-    const [, , z0] = v;
-    return xyz.length === 2 ? [x0, y0] : [x0, y0, z0];
+
+    // since we don't know the correct projected z value for the point,
+    // unproject two points to get a line and then find the point on that line with z=0
+    const coord0 = this.transformVector(this.pixelUnprojectionMatrix, [x, y2, 0, 1]);
+    const coord1 = this.transformVector(this.pixelUnprojectionMatrix, [x, y2, 1, 1]);
+
+    const z0 = coord0[2];
+    const z1 = coord1[2];
+
+    const t = z0 === z1 ? 0 : (targetZ - z0) / (z1 - z0);
+    const v = vec2.lerp([], coord0, coord1, t);
+
+    // console.error(`unprojecting to non-linear ${v}<=${[x, y2, targetZ]}`);
+
+    const vUnprojected = this.unprojectFlat(v);
+    return xyz.length === 2 ? vUnprojected : [vUnprojected[0], vUnprojected[1], 0];
+  }
+
+  // TODO - replace with math.gl
+  transformVector(matrix, vector) {
+    const result = vec4.transformMat4([0, 0, 0, 0], vector, matrix);
+    const scale = 1 / result[3];
+    vec4.multiply(result, result, [scale, scale, scale, scale]);
+    return result;
   }
 
   // NON_LINEAR PROJECTION HOOKS
@@ -187,14 +203,6 @@ export default class Viewport {
    */
   unprojectFlat(xyz, scale = this.scale) {
     return this._unprojectFlat(...arguments);
-  }
-
-  _projectFlat(xyz, scale = this.scale) {
-    return xyz;
-  }
-
-  _unprojectFlat(xyz, scale = this.scale) {
-    return xyz;
   }
 
   getMatrices({modelMatrix = null} = {}) {
@@ -229,15 +237,6 @@ export default class Viewport {
     );
 
     return matrices;
-  }
-
-  getDistanceScales() {
-    return {
-      pixelsPerMeter: [1, 1, 1],
-      metersPerPixel: [1, 1, 1],
-      pixelsPerDegree: [1, 1, 1],
-      degreesPerPixel: [1, 1, 1]
-    };
   }
 
   // INTERNAL METHODS
