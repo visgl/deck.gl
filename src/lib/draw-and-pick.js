@@ -163,7 +163,9 @@ export function pickLayers(gl, {
 
       // This guarantees that there will be only one copy of info for
       // one composite layer
-      infos.set(info.layer.id, info);
+      if (info) {
+        infos.set(info.layer.id, info);
+      }
     });
 
     infos.forEach(info => {
@@ -171,14 +173,15 @@ export function pickLayers(gl, {
       if (info) {
         let handled = false;
         // The onClick and onHover functions are provided by the user
-        // and out of control by deck.gl. It's well possible that
-        // the user calls React lifecycle methods, like ReactComponent.setState()
-        // in these methods. This will induce a re-render and re-generation of props
-        // of deck.gl and layers, which in turn will invalidate all layers currently
-        // passed to this very function.
+        // and out of control by deck.gl. It's very much possible that
+        // the user calls React lifecycle methods in these function, such as
+        // ReactComponent.setState(). React lifecycle methods sometimes induce
+        // a re-render and re-generation of props of deck.gl and its layers,
+        // which invalidates all layers currently passed to this very function.
 
-        // Therefore, these calls need to be at the end of the function. NO operation
-        // relies on the states of current layers should be called after this two line of code.
+        // Therefore, calls to functions like onClick and onHover need to be done
+        // at the end of the function. NO operation relies on the states of current
+        // layers should be called after this two lines of code.
         switch (mode) {
         case 'click': handled = info.layer.props.onClick(info); break;
         case 'hover': handled = info.layer.props.onHover(info); break;
