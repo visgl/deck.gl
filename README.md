@@ -38,9 +38,10 @@ const flights = new ArcLayer({
 <DeckGL width={1920} height={1080} layers={[flights]} />
 ```
 
-A very simple usage of deck.gl is showcased in the [exhibits directory](./exhibits),
-using both webpack and browserify, so you can choose which setup you prefer or
-are more familiar with.
+A very simple usage of deck.gl is showcased in the [hello-world examples](./examples),
+using both [webpack](./examples/hello-world-webpack) and
+[browserify](./examples/hello-world-browserify),
+so you can choose which setup you prefer or are more familiar with.
 
 You can also take a look at the [docs website](https://uber.github.io/deck.gl)
 or browse directly the [docs folder](./docs).
