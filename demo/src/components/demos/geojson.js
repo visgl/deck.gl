@@ -1,7 +1,6 @@
 import React, {Component} from 'react';
 
-import {ChoroplethLayer64} from 'deck.gl';
-import DeckGL from 'deck.gl';
+import DeckGL, {GeoJsonLayer} from 'deck.gl';
 
 import {readableInteger} from '../../utils/format-utils';
 import {MAPBOX_STYLES} from '../../constants/defaults';
@@ -10,7 +9,7 @@ function colorScale(r) {
   return [255 * r, 200 * (1 - r), 255 * (1 - r)];
 }
 
-export default class ChoroplethDemo extends Component {
+export default class GeoJsonDemo extends Component {
 
   static get data() {
     return {
@@ -80,10 +79,14 @@ export default class ChoroplethDemo extends Component {
       return null;
     }
 
-    const layers = data.map((d, i) => new ChoroplethLayer64({
+    const layers = data.map((d, i) => new GeoJsonLayer({
       id: `choropleth-${i}`,
       data: d,
-      getColor: f => {
+      stroked: true,
+      filled: true,
+      fp64: true,
+      lineWidthMaxPixels: 1,
+      getFillColor: f => {
         const r = f.properties.value / 160;
         return colorScale(r);
       }

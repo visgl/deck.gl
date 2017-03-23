@@ -47,7 +47,17 @@ const defaultProps = {
   // Line and polygon outline accessors
   getLineWidth: f => get(f, 'lineWidth') || 1,
   // Polygon extrusion accessor
-  getElevation: f => get(f, 'elevation') || 1000
+  getElevation: f => get(f, 'elevation') || 1000,
+
+  // Optional settings for 'lighting' shader module
+  lightSettings: {
+    lightsPosition: [-122.45, 37.75, 8000, -122.0, 38.00, 5000],
+    ambientRatio: 0.05,
+    diffuseRatio: 0.6,
+    specularRatio: 0.8,
+    lightsStrength: [2.0, 0.0, 0.0, 0.0],
+    numberOfLights: 2
+  }
 };
 
 export default class PolygonLayer extends CompositeLayer {
@@ -80,7 +90,7 @@ export default class PolygonLayer extends CompositeLayer {
 
   renderLayers() {
     const {getFillColor, getLineColor, getLineWidth, getElevation,
-      getPolygon, updateTriggers} = this.props;
+      getPolygon, updateTriggers, lightSettings} = this.props;
     const {data, id, stroked, filled, extruded, wireframe} = this.props;
     const {lineWidthScale, lineWidthMinPixels, lineWidthMaxPixels,
       lineJointRounded, lineMiterLimit, fp64} = this.props;
@@ -107,7 +117,8 @@ export default class PolygonLayer extends CompositeLayer {
       updateTriggers: {
         getElevation: updateTriggers.getElevation,
         getColor: updateTriggers.getFillColor
-      }
+      },
+      lightSettings
     });
 
     const polygonWireframeLayer = extruded &&

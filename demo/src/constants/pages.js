@@ -35,10 +35,10 @@ export const examplePages = generatePath([
     }
   },
   {
-    name: 'ChoroplethLayer',
+    name: 'GeoJsonLayer',
     content: {
-      demo: 'ChoroplethDemo',
-      code: 'code-markdown/choropleth.md'
+      demo: 'GeoJsonDemo',
+      code: 'code-markdown/geojson.md'
     }
   },
   {
@@ -59,7 +59,7 @@ export const examplePages = generatePath([
     name: 'Graph Explorer',
     content: {
       demo: 'PlotDemo',
-      code: 'code-markdown/scatterplot.md'
+      code: 'code-markdown/plot.md'
     }
   }
 ]);
