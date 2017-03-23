@@ -147,7 +147,7 @@ export default class ArcDemo extends Component {
 
   render() {
     const {viewport, params, data} = this.props;
-    const {arcs, selectedFeature} = this.state;
+    const {arcs} = this.state;
 
     if (!data) {
       return null;
