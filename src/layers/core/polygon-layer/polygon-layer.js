@@ -89,13 +89,23 @@ export default class PolygonLayer extends CompositeLayer {
   }
 
   renderLayers() {
-    const {getFillColor, getLineColor, getLineWidth, getElevation,
-      getPolygon, updateTriggers, lightSettings} = this.props;
+    // Layer composition props
     const {data, id, stroked, filled, extruded, wireframe} = this.props;
+
+    // Rendering props underlying layer
     const {lineWidthScale, lineWidthMinPixels, lineWidthMaxPixels,
       lineJointRounded, lineMiterLimit, fp64} = this.props;
+
+    // Accessor props for underlying layers
+    const {getFillColor, getLineColor, getLineWidth, getElevation,
+      getPolygon, updateTriggers, lightSettings} = this.props;
+
     // base layer props
-    const {opacity, pickable, visible, projectionMode} = this.props;
+    const {opacity, pickable, visible} = this.props;
+
+    // viewport props
+    const {positionOrigin, projectionMode, modelMatrix} = this.props;
+
     const {paths} = this.state;
 
     const hasData = data && data.length > 0;
@@ -111,6 +121,8 @@ export default class PolygonLayer extends CompositeLayer {
       pickable,
       visible,
       projectionMode,
+      positionOrigin,
+      modelMatrix,
       getPolygon,
       getElevation,
       getColor: getFillColor,
@@ -134,6 +146,8 @@ export default class PolygonLayer extends CompositeLayer {
         pickable,
         visible,
         projectionMode,
+        positionOrigin,
+        modelMatrix,
         getPolygon,
         getElevation,
         getColor: getLineColor,
@@ -160,6 +174,8 @@ export default class PolygonLayer extends CompositeLayer {
         pickable,
         visible,
         projectionMode,
+        positionOrigin,
+        modelMatrix,
         getPath: x => x.path,
         getColor: getLineColor,
         getWidth: getLineWidth,
