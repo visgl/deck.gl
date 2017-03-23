@@ -46,7 +46,6 @@ export {default as HexagonLayer} from './layers/core/hexagon-layer/hexagon-layer
 export {default as HexagonCellLayer} from './layers/core/hexagon-cell-layer/hexagon-cell-layer';
 
 export {default as PathLayer} from './layers/core/path-layer/path-layer';
-export {default as SolidPolygonLayer} from './layers/core/solid-polygon-layer/solid-polygon-layer';
 export {default as PolygonLayer} from './layers/core/polygon-layer/polygon-layer';
 export {default as GeoJsonLayer} from './layers/core/geojson-layer/geojson-layer';
 
