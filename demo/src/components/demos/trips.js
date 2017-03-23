@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 
-import DeckGL, {SolidPolygonLayer} from 'deck.gl';
+import DeckGL, {PolygonLayer} from 'deck.gl';
 
 import {MAPBOX_STYLES} from '../../constants/defaults';
 import {readableInteger} from '../../utils/format-utils';
@@ -124,7 +124,7 @@ export default class TripsDemo extends Component {
         trailLength: params.trail.value,
         currentTime: this.state.time
       })),
-      data[1] && new SolidPolygonLayer({
+      data[1] && new PolygonLayer({
         id: `buildings`,
         data: data[1],
         extruded: true,
@@ -133,7 +133,7 @@ export default class TripsDemo extends Component {
         opacity: 0.5,
         getPolygon: f => f.polygon,
         getElevation: f => f.height,
-        getColor: f => [74, 80, 87],
+        getFillColor: f => [74, 80, 87],
         lightSettings: LIGHT_SETTINGS
       })
     ).filter(Boolean);

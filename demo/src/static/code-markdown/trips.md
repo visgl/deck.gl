@@ -7,7 +7,7 @@ into your project folder.
 
 ```
 import React, {Component} from 'react';
-import DeckGL, {SolidPolygonLayer} from 'deck.gl';
+import DeckGL, {PolygonLayer} from 'deck.gl';
 import TripsLayer from './trips-layer';
 import TWEEN from 'tween.js';
 
@@ -68,7 +68,7 @@ export default class TripsDemo extends Component {
         trailLength: params.trail.value,
         currentTime: this.state.time
       })),
-      data[1] && new SolidPolygonLayer({
+      data[1] && new PolygonLayer({
         id: `buildings`,
         data: data[1],
         extruded: true,

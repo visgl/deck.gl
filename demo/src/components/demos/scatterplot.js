@@ -16,8 +16,8 @@ export default class ScatterPlotDemo extends Component {
 
   static get parameters() {
     return {
-      colorM: {displayName: 'Male', type: 'color', value: '#08f'},
-      colorF: {displayName: 'Female', type: 'color', value: '#f08'},
+      colorM: {displayName: 'Male', type: 'color', value: [0, 128, 255]},
+      colorF: {displayName: 'Female', type: 'color', value: [255, 0, 128]},
       radius: {displayName: 'Radius', type: 'number', value: 10, step: 1, min: 1}
     };
   }
