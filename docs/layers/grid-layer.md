@@ -84,6 +84,6 @@ Method called to retrieve the position of each point.
 
 ## Remarks
 
-* GridLayer at the moment only works with `COORDINATE_SYSTEM.LNG_LAT`.
+* GridLayer at the moment only works with `COORDINATE_SYSTEM.LNGLAT`.
 
 

@@ -40,7 +40,7 @@ const defaultProps = {
   // Update triggers: a key change detection mechanism in deck.gl
   // See layer documentation
   updateTriggers: {},
-  projectionMode: COORDINATE_SYSTEM.LNG_LAT
+  projectionMode: COORDINATE_SYSTEM.LNGLAT
 };
 
 let counter = 0;

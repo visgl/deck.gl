@@ -31,7 +31,7 @@ attribute vec3 instancePickingColors;
 
 uniform float renderPickingBuffer;
 uniform float opacity;
-uniform float radius;
+uniform float radiusPixels;
 uniform vec2 screenSize;
 
 varying vec4 vColor;
@@ -49,7 +49,7 @@ void main(void) {
   project_position_fp64(instancePositions64xy, projected_coord_xy);
 
   vec2 vertex_pos_localspace[4];
-  vec4_fp64(vec4(positions.xy * radius / screenSize * 2.0, 0.0, 0.0), vertex_pos_localspace);
+  vec4_fp64(vec4(positions.xy * radiusPixels / screenSize * 2.0, 0.0, 0.0), vertex_pos_localspace);
 
   vec2 vertex_pos_modelspace[4];
   vertex_pos_modelspace[0] = sum_fp64(vertex_pos_localspace[0], projected_coord_xy[0]);
@@ -64,11 +64,6 @@ void main(void) {
     projected_coord_xy[0].x, projected_coord_xy[1].x,
     project_scale(instancePositions.z), 1.0);
 
-  // Find the center of the point and add the current vertex
-  // vec4 position_worldspace = vec4(project_position(instancePositions), 1.0);
-  // vec2 vertex = positions.xy * radius / screenSize * 2.0;
-  // gl_Position = project_to_clipspace(position_worldspace) + vec4(vertex, 0.0, 0.0);
-
   if (renderPickingBuffer > 0.5) {
     vColor = vec4(instancePickingColors / 255., 1.);
   } else {
@@ -78,13 +73,5 @@ void main(void) {
     // Apply opacity to instance color, or return instance picking color
     vColor = vec4(lightWeight * instanceColors.rgb, instanceColors.a * opacity) / 255.;
   }
-
-  // // Apply lighting
-  // float lightWeight = getLightWeight(position_worldspace, instanceNormals);
-
-  // // Apply opacity to instance color, or return instance picking color
-  // vec4 color = vec4(lightWeight * instanceColors.rgb, instanceColors.a * opacity) / 255.;
-  // vec4 pickingColor = vec4(instancePickingColors / 255., 1.);
-  // vColor = mix(color, pickingColor, renderPickingBuffer);
 }
 `;

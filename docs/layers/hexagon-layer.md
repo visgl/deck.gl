@@ -7,7 +7,7 @@
 The `HexagonLayer` renders a hexagon heatmap based on an array of points.
  It takes the radius of hexagon bin, projects points into hexagon bins. The color
 and height of the hexagon is scaled by number of points it contains. HexagonLayer
-at the moment only works with COORDINATE_SYSTEM.LNG_LAT.
+at the moment only works with COORDINATE_SYSTEM.LNGLAT.
 
   <div align="center">
     <img height="300" src="/demo/src/static/images/hexagon-layer.gif" />
