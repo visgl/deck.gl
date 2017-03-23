@@ -1,7 +1,6 @@
 import React, {Component} from 'react';
 
-import {ExtrudedChoroplethLayer64} from 'deck.gl';
-import DeckGL from 'deck.gl';
+import DeckGL, {GeoJsonLayer} from 'deck.gl';
 
 import {MAPBOX_STYLES} from '../../constants/defaults';
 import {readableInteger} from '../../utils/format-utils';
@@ -93,6 +92,11 @@ export default class TripsDemo extends Component {
     this.tween.stop();
   }
 
+  _initialize(gl) {
+    gl.enable(gl.DEPTH_TEST);
+    gl.depthFunc(gl.LEQUAL);
+  }
+
   render() {
     const {viewport, data, params} = this.props;
 
@@ -111,17 +115,19 @@ export default class TripsDemo extends Component {
         trailLength: params.trail.value,
         currentTime: this.state.time
       })),
-      data[1] && data[1].map((d, i) => new ExtrudedChoroplethLayer64({
+      data[1] && data[1].map((d, i) => new GeoJsonLayer({
         id: `building=${i}`,
         data: d,
-        // color: [72, 72, 72],
-        color: [74, 80, 87],
+        extruded: true,
+        fp64: true,
+        getElevation: f => f.properties.height,
+        getFillColor: f => [74, 80, 87],
         opacity: 0.5
       }))
     ).filter(Boolean);
 
     return (
-      <DeckGL {...viewport} layers={layers} />
+      <DeckGL {...viewport} layers={layers} onWebGLInitialized={this._initialize} />
     );
   }
 }

@@ -1,7 +1,6 @@
 ```
 import React, {Component} from 'react';
-import {ChoroplethLayer, ArcLayer} from 'deck.gl';
-import DeckGL from 'deck.gl/react';
+import DeckGL, {GeoJsonLayer, ArcLayer} from 'deck.gl';
 import {scaleQuantile} from 'd3-scale';
 
 const inFlowColors = [[255, 255, 204], [199, 233, 180], [127, 205, 187], [65, 182, 196], [29, 145, 192], [34, 94, 168], [12, 44, 132]];
@@ -63,10 +62,9 @@ export default class ArcDemo extends Component {
     gl.depthFunc(gl.LEQUAL);
   }
 
-  _onClickFeature(evt) {
-    const {feature} = evt;
-    if (this.state.selectedFeature !== feature) {
-      this.setState(this._updateFlows(this.props, feature));
+  _onClickFeature({object}) {
+    if (this.state.selectedFeature !== object) {
+      this.setState(this._updateFlows(this.props, object));
     }
   }
 
@@ -79,21 +77,14 @@ export default class ArcDemo extends Component {
     }
 
     const layers = [
-      new ChoroplethLayer({
+      new GeoJsonLayer({
         id: 'choropleth',
         data: data[0],
-        opacity: 0,
-        getColor: () => [255, 255, 255],
+        stroked: false,
+        filled: true,
+        getFillColor: () => [0, 0, 0, 0],
         onClick: this._onClickFeature.bind(this),
         pickable: true
-      }),
-      new ChoroplethLayer({
-        id: 'selected-choropleth',
-        data: {type: 'FeatureCollection', features: [selectedFeature]},
-        drawContour: true,
-        strokeWidth: 4,
-        opacity: 0.2,
-        getColor: () => [0, 0, 0]
       }),
       new ArcLayer({
         id: 'arc',
@@ -107,8 +98,7 @@ export default class ArcDemo extends Component {
     ];
 
     return (
-      <DeckGL {...viewport} layers={ layers }
-        onWebGLInitialized={this._initialize} />
+      <DeckGL {...viewport} layers={ layers } onWebGLInitialized={this._initialize} />
     );
   }
 }

@@ -14,7 +14,7 @@
     </div>
   </div>
   <div class="thumb">
-    <div data-title="Chicago Building Ages" data-name="ChoroplethLayer">
+    <div data-title="Chicago Building Ages" data-name="GeoJsonLayer">
       <a href="#/examples/choropleth-layer">
         <img src="images/demo-thumb-choropleth.jpg" />
       </a>
@@ -28,9 +28,16 @@
     </div>
   </div>
   <div class="thumb">
-    <div class="bg-black" data-title="Taxi Trips in NYC" data-name="Example Layer">
+    <div class="bg-black" data-title="Taxi Trips in NYC" data-name="TripsLayer">
       <a href="#/examples/trip-routes">
         <img src="images/demo-thumb-trip.jpg" />
+      </a>
+      </div>
+  </div>
+  <div class="thumb">
+    <div data-title="Graph Explorer" data-name="PlotLayer">
+      <a href="#/examples/graph-explorer">
+        <img src="images/demo-thumb-plot.jpg" />
       </a>
       </div>
   </div>

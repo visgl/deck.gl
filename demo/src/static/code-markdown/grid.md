@@ -1,7 +1,6 @@
 ```
 import React, {Component} from 'react';
-import {ScreenGridLayer} from 'deck.gl';
-import DeckGL from 'deck.gl/react';
+import DeckGL, {ScreenGridLayer} from 'deck.gl';
 
 export default class GridDemo extends Component {
 
@@ -14,10 +13,9 @@ export default class GridDemo extends Component {
 
     const layer = new ScreenGridLayer({
       id: 'grid',
-      data: data,
+      data,
       minColor: [0, 0, 0, 0],
-      unitWidth: params.cellSize.value,
-      unitHeight: params.cellSize.value
+      cellSizePixels: params.cellSize.value
     });
 
     return (
