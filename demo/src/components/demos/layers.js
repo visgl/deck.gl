@@ -81,13 +81,13 @@ export const IconLayerDemo = createLayerDemoClass({
     pickable: true,
     iconAtlas: 'images/icon-atlas.png',
     iconMapping: {
-      "marker": {
-        "x": 0,
-        "y": 0,
-        "width": 128,
-        "height": 128,
-        "anchorY": 128,
-        "mask": true
+      marker: {
+        x: 0,
+        y: 0,
+        width: 128,
+        height: 128,
+        anchorY: 128,
+        mask: true
       }
     },
     sizeScale: 15,
@@ -116,7 +116,7 @@ export const ScreenGridLayerDemo = createLayerDemoClass({
 export const GridLayerDemo = createLayerDemoClass({
   Layer: GridLayer,
   dataUrl: 'data/sf-bike-parking.json',
-  formatTooltip: d => d,
+  formatTooltip: d => `${d.position.join(', ')}\nCount: ${d.count}`,
   props: {
     pickable: true,
     extruded: true,
@@ -129,7 +129,7 @@ export const GridLayerDemo = createLayerDemoClass({
 export const HexagonLayerDemo = createLayerDemoClass({
   Layer: HexagonLayer,
   dataUrl: 'data/sf-bike-parking.json',
-  formatTooltip: d => d,
+  formatTooltip: d => `${d.centroid.join(', ')}\nCount: ${d.points.length}`,
   props: {
     pickable: true,
     extruded: true,
@@ -147,32 +147,43 @@ export const PolygonLayerDemo = createLayerDemoClass({
     pickable: true,
     stroked: true,
     filled: true,
+    lineWidthMinPixels: 1,
     getPolygon: d => d.contour,
     getElevation: d => d.population / d.area / 10,
-    getFillColor: d => [d.population / d.area / 10, 140, 0]
+    getFillColor: d => [d.population / d.area / 10, 140, 0],
+    getLineColor: d => [80, 80, 80],
+    getLineWidth: d => 1
   }
 });
 
 export const GeoJsonLayerDemo = createLayerDemoClass({
   Layer: GeoJsonLayer,
-  dataUrl: 'data/sf-open-space.geo.json',
-  formatTooltip: d => d,
+  dataUrl: 'data/bart.geo.json',
+  formatTooltip: d => d.properties.name || d.properties.station,
   props: {
     pickable: true,
-    stroked: true,
-    filled: true
+    stroked: false,
+    filled: true,
+    extruded: true,
+    lineWidthScale: 20,
+    lineWidthMinPixels: 2,
+    getFillColor: d => [160, 160, 180, 200],
+    getLineColor: d => colorToRGBArray(d.properties.color),
+    getRadius: d => 100,
+    getLineWidth: d => 1,
+    getElevation: d => 30
   }
 });
 
 export const PointCloudLayerDemo = createLayerDemoClass({
   Layer: PointCloudLayer,
   dataUrl: 'data/pointcloud.json',
-  formatTooltip: d => '',
+  formatTooltip: d => d.position.join(', '),
   props: {
     pickable: false,
     projectionMode: 2,
     positionOrigin: [-122.4, 37.74],
-    radius: 4,
+    radiusPixels: 4,
     getPosition: d => d.position,
     getNormal: d => d.normal,
     getColor: d => d.color
