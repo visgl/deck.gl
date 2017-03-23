@@ -101,10 +101,10 @@ export default class PolygonLayer extends CompositeLayer {
       getPolygon, updateTriggers, lightSettings} = this.props;
 
     // base layer props
-    const {opacity, pickable, visible, projectionMode} = this.props;
+    const {opacity, pickable, visible} = this.props;
 
     // viewport props
-    const {positionOrigin, modelMatrix} = this.props;
+    const {positionOrigin, projectionMode, modelMatrix} = this.props;
 
     const {paths} = this.state;
 

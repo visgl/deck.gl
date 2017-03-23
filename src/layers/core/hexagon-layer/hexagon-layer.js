@@ -111,10 +111,10 @@ export default class HexagonLayer extends Layer {
     const {id, radius, elevationScale, extruded, fp64} = this.props;
 
     // base layer props
-    const {opacity, pickable, visible, projectionMode} = this.props;
+    const {opacity, pickable, visible} = this.props;
 
     // viewport props
-    const {positionOrigin, modelMatrix} = this.props;
+    const {positionOrigin, projectionMode, modelMatrix} = this.props;
 
     return new HexagonCellLayer({
       id: `${id}-hexagon-cell`,

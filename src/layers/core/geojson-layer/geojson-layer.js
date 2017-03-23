@@ -94,10 +94,10 @@ export default class GeoJsonLayer extends CompositeLayer {
       getLineWidth, getElevation, updateTriggers} = this.props;
 
     // base layer props
-    const {opacity, pickable, visible, projectionMode} = this.props;
+    const {opacity, pickable, visible} = this.props;
 
     // viewport props
-    const {positionOrigin, modelMatrix} = this.props;
+    const {positionOrigin, projectionMode, modelMatrix} = this.props;
 
     const drawPoints = pointFeatures && pointFeatures.length > 0;
     const drawLines = lineFeatures && lineFeatures.length > 0;

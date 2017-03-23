@@ -93,10 +93,10 @@ export default class GridLayer extends Layer {
     const {id, elevationScale, fp64, extruded} = this.props;
 
     // base layer props
-    const {opacity, pickable, visible, projectionMode} = this.props;
+    const {opacity, pickable, visible} = this.props;
 
     // viewport props
-    const {positionOrigin, modelMatrix} = this.props;
+    const {positionOrigin, projectionMode, modelMatrix} = this.props;
 
     return new GridCellLayer({
       id: `${id}-grid-cell`,
