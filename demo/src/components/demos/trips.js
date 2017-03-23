@@ -1,11 +1,20 @@
 import React, {Component} from 'react';
 
-import DeckGL, {GeoJsonLayer} from 'deck.gl';
+import DeckGL, {SolidPolygonLayer} from 'deck.gl';
 
 import {MAPBOX_STYLES} from '../../constants/defaults';
 import {readableInteger} from '../../utils/format-utils';
 import ViewportAnimation from '../../utils/map-utils';
 import TripsLayer from '../../../../examples/sample-layers/trips-layer';
+
+const LIGHT_SETTINGS = {
+  lightsPosition: [-74.05, 40.7, 8000, -73.5, 41, 5000],
+  ambientRatio: 0.05,
+  diffuseRatio: 0.6,
+  specularRatio: 0.8,
+  lightsStrength: [2.0, 0.0, 0.0, 0.0],
+  numberOfLights: 2
+};
 
 export default class TripsDemo extends Component {
 
@@ -115,15 +124,18 @@ export default class TripsDemo extends Component {
         trailLength: params.trail.value,
         currentTime: this.state.time
       })),
-      data[1] && data[1].map((d, i) => new GeoJsonLayer({
-        id: `building=${i}`,
-        data: d,
+      data[1] && new SolidPolygonLayer({
+        id: `buildings`,
+        data: data[1],
         extruded: true,
+        wireframe: false,
         fp64: true,
-        getElevation: f => f.properties.height,
-        getFillColor: f => [74, 80, 87],
-        opacity: 0.5
-      }))
+        opacity: 0.5,
+        getPolygon: f => f.polygon,
+        getElevation: f => f.height,
+        getColor: f => [74, 80, 87],
+        lightSettings: LIGHT_SETTINGS
+      })
     ).filter(Boolean);
 
     return (
