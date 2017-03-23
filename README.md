@@ -39,7 +39,7 @@ const flights = new ArcLayer({
 ```
 
 A very simple usage of deck.gl is showcased in the [hello-world examples](./examples),
-using both [webpack](./examples/hello-world-webpack) and
+using both [webpack2](./examples/hello-world-webpack2) and
 [browserify](./examples/hello-world-browserify),
 so you can choose which setup you prefer or are more familiar with.
 
