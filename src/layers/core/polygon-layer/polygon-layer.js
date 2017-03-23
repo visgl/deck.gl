@@ -104,7 +104,7 @@ export default class PolygonLayer extends CompositeLayer {
     const {opacity, pickable, visible, projectionMode} = this.props;
 
     // viewport props
-    const {positionOffset, modelMatrix} = this.props;
+    const {positionOrigin, modelMatrix} = this.props;
 
     const {paths} = this.state;
 
@@ -121,7 +121,7 @@ export default class PolygonLayer extends CompositeLayer {
       pickable,
       visible,
       projectionMode,
-      positionOffset,
+      positionOrigin,
       modelMatrix,
       getPolygon,
       getElevation,
@@ -146,7 +146,7 @@ export default class PolygonLayer extends CompositeLayer {
         pickable,
         visible,
         projectionMode,
-        positionOffset,
+        positionOrigin,
         modelMatrix,
         getPolygon,
         getElevation,
@@ -174,7 +174,7 @@ export default class PolygonLayer extends CompositeLayer {
         pickable,
         visible,
         projectionMode,
-        positionOffset,
+        positionOrigin,
         modelMatrix,
         getPath: x => x.path,
         getColor: getLineColor,

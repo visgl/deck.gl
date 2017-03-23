@@ -97,7 +97,7 @@ export default class GeoJsonLayer extends CompositeLayer {
     const {opacity, pickable, visible, projectionMode} = this.props;
 
     // viewport props
-    const {positionOffset, modelMatrix} = this.props;
+    const {positionOrigin, modelMatrix} = this.props;
 
     const drawPoints = pointFeatures && pointFeatures.length > 0;
     const drawLines = lineFeatures && lineFeatures.length > 0;
@@ -117,7 +117,7 @@ export default class GeoJsonLayer extends CompositeLayer {
         pickable,
         visible,
         projectionMode,
-        positionOffset,
+        positionOrigin,
         modelMatrix,
         getPolygon: getCoordinates,
         getElevation,
@@ -141,7 +141,7 @@ export default class GeoJsonLayer extends CompositeLayer {
         pickable,
         visible,
         projectionMode,
-        positionOffset,
+        positionOrigin,
         modelMatrix,
         getPolygon: getCoordinates,
         getElevation,
@@ -168,7 +168,7 @@ export default class GeoJsonLayer extends CompositeLayer {
         pickable,
         visible,
         projectionMode,
-        positionOffset,
+        positionOrigin,
         modelMatrix,
         getPath: getCoordinates,
         getColor: getLineColor,
@@ -192,7 +192,7 @@ export default class GeoJsonLayer extends CompositeLayer {
       pickable,
       visible,
       projectionMode,
-      positionOffset,
+      positionOrigin,
       modelMatrix,
       getPath: getCoordinates,
       getColor: getLineColor,
@@ -211,7 +211,7 @@ export default class GeoJsonLayer extends CompositeLayer {
       pickable,
       visible,
       projectionMode,
-      positionOffset,
+      positionOrigin,
       modelMatrix,
       getPosition: getCoordinates,
       getColor: getFillColor,

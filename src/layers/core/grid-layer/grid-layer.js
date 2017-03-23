@@ -96,7 +96,7 @@ export default class GridLayer extends Layer {
     const {opacity, pickable, visible, projectionMode} = this.props;
 
     // viewport props
-    const {positionOffset, modelMatrix} = this.props;
+    const {positionOrigin, modelMatrix} = this.props;
 
     return new GridCellLayer({
       id: `${id}-grid-cell`,
@@ -110,7 +110,7 @@ export default class GridLayer extends Layer {
       pickable,
       visible,
       projectionMode,
-      positionOffset,
+      positionOrigin,
       modelMatrix,
       getColor: this._onGetSublayerColor.bind(this),
       getElevation: this._onGetSublayerElevation.bind(this),
