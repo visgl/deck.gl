@@ -196,8 +196,7 @@ const GridCellLayerExample = {
   props: {
     id: 'gridCellLayer',
     data: dataSamples.worldGrid.data,
-    latOffset: dataSamples.worldGrid.latOffset,
-    lonOffset: dataSamples.worldGrid.lonOffset,
+    cellSize: dataSamples.worldGrid.cellSize,
     extruded: true,
     pickable: true,
     opacity: 1,

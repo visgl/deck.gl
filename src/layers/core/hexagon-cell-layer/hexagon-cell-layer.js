@@ -196,7 +196,6 @@ export default class HexagonCellLayer extends Layer {
 
       angle = this.props.angle;
       radius = this.props.radius * pixelsPerMeter[0];
-
     }
 
     this.setUniforms({

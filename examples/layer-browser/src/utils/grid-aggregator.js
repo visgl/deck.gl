@@ -1,12 +1,12 @@
-const R_EARTH = 6378;
+const R_EARTH = 6378000;
 
 /**
  * Aggregate points for the grid layer
  * @param {array} points
- * @param {number} worldUnitSize - unit size in kilometer
+ * @param {number} cellSize - cell size in meters
  * @returns {object} - grid data and cell dimension
  */
-export function pointsToWorldGrid(points, worldUnitSize) {
+export function pointsToWorldGrid(points, cellSize) {
 
   // find the geometric center of sample points
   const allLat = points.map(p => p.COORDINATES[1]);
@@ -15,7 +15,7 @@ export function pointsToWorldGrid(points, worldUnitSize) {
 
   const centerLat = (latMin + latMax) / 2;
 
-  const gridOffset = _calculateGridLatLonOffset(worldUnitSize, centerLat);
+  const gridOffset = _calculateGridLatLonOffset(cellSize, centerLat);
 
   // calculate count per cell
   const gridHash = points.reduce((accu, pt) => {
@@ -45,19 +45,19 @@ export function pointsToWorldGrid(points, worldUnitSize) {
     return accu;
   }, []);
 
-  return Object.assign({data}, gridOffset);
+  return Object.assign({data}, {cellSize});
 }
 
 /**
  * calculate grid layer cell size in lat lon based on world unit size
  * and current latitude
- * @param {number} worldUnitSize
+ * @param {number} cellSize
  * @param {number} latitude
  * @returns {object} - lat delta and lon delta
  */
-export function _calculateGridLatLonOffset(worldUnitSize, latitude) {
-  const latOffset = calculateLatOffset(worldUnitSize);
-  const lonOffset = calculateLonOffset(latitude, worldUnitSize);
+export function _calculateGridLatLonOffset(cellSize, latitude) {
+  const latOffset = calculateLatOffset(cellSize);
+  const lonOffset = calculateLonOffset(latitude, cellSize);
   return {latOffset, lonOffset};
 }
 

@@ -20,7 +20,7 @@ export {iconAtlas};
 export const points = allPoints;
 export const positionOrigin = [-122.45, 37.75, 0];
 
-export const worldGrid = pointsToWorldGrid(points, 0.5);
+export const worldGrid = pointsToWorldGrid(points, 500);
 
 export const zigzag = [
   {

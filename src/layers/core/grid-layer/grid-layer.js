@@ -48,7 +48,6 @@ function _needsReProjectPoints(oldProps, props) {
 export default class GridLayer extends Layer {
   initializeState() {
     this.state = {
-      gridOffset: {yOffset: 0.0089, xOffset: 0.0113},
       layerData: [],
       countRange: null
     };
@@ -58,10 +57,10 @@ export default class GridLayer extends Layer {
     if (changeFlags.dataChanged || _needsReProjectPoints(oldProps, props)) {
       const {data, cellSize, getPosition} = this.props;
 
-      const {gridOffset, layerData, countRange} =
+      const {layerData, countRange} =
         pointToDensityGridData(data, cellSize, getPosition);
 
-      Object.assign(this.state, {gridOffset, layerData, countRange});
+      Object.assign(this.state, {layerData, countRange});
     }
   }
 
@@ -90,7 +89,7 @@ export default class GridLayer extends Layer {
   }
 
   renderLayers() {
-    const {id, elevationScale, fp64, extruded} = this.props;
+    const {id, elevationScale, fp64, extruded, cellSize} = this.props;
 
     // base layer props
     const {opacity, pickable, visible} = this.props;
@@ -101,8 +100,7 @@ export default class GridLayer extends Layer {
     return new GridCellLayer({
       id: `${id}-grid-cell`,
       data: this.state.layerData,
-      latOffset: this.state.gridOffset.yOffset,
-      lonOffset: this.state.gridOffset.xOffset,
+      cellSize,
       elevationScale,
       extruded,
       fp64,
