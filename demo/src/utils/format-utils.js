@@ -3,8 +3,12 @@ import {rgb} from 'd3-color';
 export const normalizeParam = p => {
   if (p.type === 'function') {
     let displayValue = p.value.toString();
+    // pretty print function code:
+    // convert `function funcName(d) {...}` to `d => {...}`
     displayValue = displayValue.replace(/^function (\w+)?\((\w*?)\)/, '$2 =>');
+    // convert `function funcName(d, i) {...}` to `(d, i) => {...}`
     displayValue = displayValue.replace(/^function (\w+)?(\(.*?\))/, '$2 =>');
+    // convert `d => {return 1}` to `d => 1`
     displayValue = displayValue.replace(/\{\s*return\s*(.*?);?\s*\}$/, '$1');
     return {...p, displayValue};
   }
