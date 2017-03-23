@@ -41,6 +41,7 @@ export function pickLayers(gl, {
   mode,
   lastPickedInfo
 }) {
+
   // Convert from canvas top-left to WebGL bottom-left coordinates
   // And compensate for pixelRatio
   const pixelRatio = typeof window !== 'undefined' ?
@@ -134,6 +135,8 @@ export function pickLayers(gl, {
     baseInfo.devicePixel = [deviceX, deviceY];
     baseInfo.pixelRatio = pixelRatio;
 
+    // Use a Map to store all picking infos
+    const infos = new Map();
     affectedLayers.forEach(layer => {
       let info = Object.assign({}, baseInfo);
 
@@ -152,6 +155,12 @@ export function pickLayers(gl, {
         layer = layer.parentLayer;
       }
 
+      // This guarantees that there will be only one copy of info with
+      // the same composite layer
+      infos.set(info.layer.id, info);
+    });
+
+    infos.forEach(info => {
       // If layer.getPickingInfo() returns null, do not proceed
       if (info) {
         let handled = false;
