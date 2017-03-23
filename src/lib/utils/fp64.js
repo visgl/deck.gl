@@ -10,11 +10,11 @@ export function fp64ify(a) {
 
 export function enable64bitSupport(props) {
   if (props.fp64) {
-    if (props.projectionMode === COORDINATE_SYSTEM.LNG_LAT) {
+    if (props.projectionMode === COORDINATE_SYSTEM.LNGLAT) {
       return true;
     }
     log.once(0, `64-bit mode only works with projectionMode set to
-      COORDINATE_SYSTEM.LNG_LAT. Rendering in 32-bit mode instead`);
+      COORDINATE_SYSTEM.LNGLAT. Rendering in 32-bit mode instead`);
   }
 
   return false;
