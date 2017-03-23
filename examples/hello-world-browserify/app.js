@@ -1,9 +1,7 @@
 import React, {Component} from 'react';
 import {render} from 'react-dom';
-// import MapGL from 'react-map-gl';
-import DeckGL from 'deck.gl';
-import {LineLayer} from 'deck.gl';
-/* global document */
+import MapGL from 'react-map-gl';
+import DeckGL, {LineLayer} from 'deck.gl';
 
 // Set your mapbox token here
 const MAPBOX_TOKEN = process.env.MAPBOX_ACCESS_TOKEN; // eslint-disable-line
@@ -36,14 +34,21 @@ class Root extends Component {
     })];
 
     return (
-      <DeckGL
+      <MapGL
         {...viewport}
         width={width}
         height={height}
-        layers={layers}
-        debug />
+        mapboxApiAccessToken={MAPBOX_TOKEN}>
+        <DeckGL
+          {...viewport}
+          width={width}
+          height={height}
+          layers={layers}
+          debug/>
+      </MapGL>
     );
   }
 }
 
+/* global document */
 render(<Root />, document.body.appendChild(document.createElement('div')));

@@ -735,17 +735,14 @@ decamelize@^1.0.0, decamelize@^1.1.1:
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/decamelize/-/decamelize-1.2.0.tgz#f6534d15148269b20352e7bee26f501f9a191290"
 
-deck.gl@^4.0.0-beta.3:
-  version "4.0.0-beta.3"
-  resolved "https://registry.yarnpkg.com/deck.gl/-/deck.gl-4.0.0-beta.3.tgz#571e5f63ccb645fd0ea299d4ee8b2f85b2a5a854"
+deck.gl@^4.0.0-rc.3:
+  version "4.0.0-rc1"
+  resolved "https://registry.yarnpkg.com/deck.gl/-/deck.gl-4.0.0-rc1.tgz#438116983c88a0c385bcffd7f19401ed843c5f44"
   dependencies:
     d3-hexbin "^0.2.1"
     earcut "^2.0.6"
-    file-loader "^0.9.0"
     gl-matrix "^2.3.2"
-    lodash.flatten "^4.4.0"
     lodash.flattendeep "^4.4.0"
-    viewport-mercator-project "3.0.0-beta4"
 
 deep-equal@^1.0.0:
   version "1.0.1"
@@ -1078,12 +1075,6 @@ fbjs@^0.8.0, fbjs@^0.8.1, fbjs@^0.8.4:
 feature-filter@^2.2.0:
   version "2.2.0"
   resolved "https://registry.yarnpkg.com/feature-filter/-/feature-filter-2.2.0.tgz#3cc356015e968c362afbdf7ff1bb744ddf7fc2e0"
-
-file-loader@^0.9.0:
-  version "0.9.0"
-  resolved "https://registry.yarnpkg.com/file-loader/-/file-loader-0.9.0.tgz#1d2daddd424ce6d1b07cfe3f79731bed3617ab42"
-  dependencies:
-    loader-utils "~0.2.5"
 
 filename-regex@^2.0.0:
   version "2.0.0"
@@ -1691,7 +1682,7 @@ loader-runner@^2.3.0:
   version "2.3.0"
   resolved "https://registry.yarnpkg.com/loader-runner/-/loader-runner-2.3.0.tgz#f482aea82d543e07921700d5a46ef26fdac6b8a2"
 
-loader-utils@^0.2.15, loader-utils@^0.2.16, loader-utils@~0.2.5:
+loader-utils@^0.2.15, loader-utils@^0.2.16:
   version "0.2.17"
   resolved "https://registry.yarnpkg.com/loader-utils/-/loader-utils-0.2.17.tgz#f86e6374d43205a6e6c60e9196f17c0299bfb348"
   dependencies:
@@ -1715,10 +1706,6 @@ lodash._bindcallback@^3.0.0:
 lodash._getnative@^3.0.0:
   version "3.9.1"
   resolved "https://registry.yarnpkg.com/lodash._getnative/-/lodash._getnative-3.9.1.tgz#570bc7dede46d61cdcde687d65d3eecbaa3aaff5"
-
-lodash.flatten@^4.4.0:
-  version "4.4.0"
-  resolved "https://registry.yarnpkg.com/lodash.flatten/-/lodash.flatten-4.4.0.tgz#f31c22225a9632d2bbf8e4addbef240aa765a61f"
 
 lodash.flattendeep@^4.4.0:
   version "4.4.0"
@@ -1769,9 +1756,9 @@ loose-envify@^1.0.0, loose-envify@^1.1.0:
   dependencies:
     js-tokens "^3.0.0"
 
-luma.gl@3.0.0-beta.9:
-  version "3.0.0-beta.9"
-  resolved "https://registry.yarnpkg.com/luma.gl/-/luma.gl-3.0.0-beta.9.tgz#58f93035d365a56615235285c53491e168df1b78"
+luma.gl@^3.0.0:
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/luma.gl/-/luma.gl-3.0.0.tgz#eacc76fe0144372b05f34a29328f38830a709584"
   dependencies:
     gl-constants "^1.0.0"
     gl-matrix "^2.3.2"
@@ -1783,11 +1770,11 @@ magic-string@^0.14.0:
   dependencies:
     vlq "^0.2.1"
 
-"mapbox-gl-function@github:mapbox/mapbox-gl-function#41c6724e2bbd7bd1eb5991451bbf118b7d02b525":
+mapbox-gl-function@mapbox/mapbox-gl-function#41c6724e2bbd7bd1eb5991451bbf118b7d02b525:
   version "1.3.0"
   resolved "https://codeload.github.com/mapbox/mapbox-gl-function/tar.gz/41c6724e2bbd7bd1eb5991451bbf118b7d02b525"
 
-"mapbox-gl-style-spec@github:mapbox/mapbox-gl-style-spec#d11f6d2775bf5b22534b3b2fb3410755b2473cdf":
+mapbox-gl-style-spec@mapbox/mapbox-gl-style-spec#d11f6d2775bf5b22534b3b2fb3410755b2473cdf:
   version "8.11.0"
   resolved "https://codeload.github.com/mapbox/mapbox-gl-style-spec/tar.gz/d11f6d2775bf5b22534b3b2fb3410755b2473cdf"
   dependencies:
@@ -3082,13 +3069,6 @@ verror@1.3.6:
   resolved "https://registry.yarnpkg.com/verror/-/verror-1.3.6.tgz#cff5df12946d297d2baaefaa2689e25be01c005c"
   dependencies:
     extsprintf "1.0.2"
-
-viewport-mercator-project@3.0.0-beta4:
-  version "3.0.0-beta4"
-  resolved "https://registry.yarnpkg.com/viewport-mercator-project/-/viewport-mercator-project-3.0.0-beta4.tgz#4c5cf210153715292b1a3a5ce2cf402ee53b6cca"
-  dependencies:
-    autobind-decorator "^1.3.3"
-    gl-matrix "^2.3.2"
 
 viewport-mercator-project@^2.0.1:
   version "2.1.0"
