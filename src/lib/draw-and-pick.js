@@ -41,6 +41,7 @@ export function pickLayers(gl, {
   mode,
   lastPickedInfo
 }) {
+
   // Convert from canvas top-left to WebGL bottom-left coordinates
   // And compensate for pixelRatio
   const pixelRatio = typeof window !== 'undefined' ?
@@ -134,6 +135,12 @@ export function pickLayers(gl, {
     baseInfo.devicePixel = [deviceX, deviceY];
     baseInfo.pixelRatio = pixelRatio;
 
+    // Use a Map to store all picking infos.
+    // The following two forEach loops are the result of
+    // https://github.com/uber/deck.gl/issues/443
+    // Please be very careful when changing this pattern
+    const infos = new Map();
+
     affectedLayers.forEach(layer => {
       let info = Object.assign({}, baseInfo);
 
@@ -143,30 +150,44 @@ export function pickLayers(gl, {
         info.picked = true;
       }
 
-      // walk up the composite chain and find the owner of the event
+      // Walk up the composite chain and find the owner of the event
       // sublayers are never directly exposed to the user
       while (layer && info) {
         info.layer = layer;
-        // Let layers populate its own info object
+        // layer.pickLayer() function requires a non-null ```layer.state```
+        // object to funtion properly. So the layer refereced here
+        // must be the "current" layer, not an "out-dated" / "invalidated" layer
         info = layer.pickLayer({info, mode});
         layer = layer.parentLayer;
       }
 
-      // If layer.getPickingInfo() returns null, do not proceed
+      // This guarantees that there will be only one copy of info for
+      // one composite layer
       if (info) {
-        let handled = false;
+        infos.set(info.layer.id, info);
+      }
+    });
 
-        // Calling callbacks can have async interactions with React
-        // which nullifies layer.state.
-        switch (mode) {
-        case 'click': handled = info.layer.props.onClick(info); break;
-        case 'hover': handled = info.layer.props.onHover(info); break;
-        default: throw new Error('unknown pick type');
-        }
+    infos.forEach(info => {
+      let handled = false;
+      // The onClick and onHover functions are provided by the user
+      // and out of control by deck.gl. It's very much possible that
+      // the user calls React lifecycle methods in these function, such as
+      // ReactComponent.setState(). React lifecycle methods sometimes induce
+      // a re-render and re-generation of props of deck.gl and its layers,
+      // which invalidates all layers currently passed to this very function.
 
-        if (!handled) {
-          unhandledPickInfos.push(info);
-        }
+      // Therefore, calls to functions like onClick and onHover need to be done
+      // at the end of the function. NO operation relies on the states of current
+      // layers should be called after this two lines of code.
+      switch (mode) {
+      case 'click': handled = info.layer.props.onClick(info); break;
+      case 'hover': handled = info.layer.props.onHover(info); break;
+      default: throw new Error('unknown pick type');
+      }
+
+      if (!handled) {
+        unhandledPickInfos.push(info);
       }
     });
   });
