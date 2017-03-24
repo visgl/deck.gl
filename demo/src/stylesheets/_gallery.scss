@@ -103,7 +103,7 @@
     -webkit-overflow-scrolling: touch;
   }
 }
-.markdown {
+.markdown-body {
   padding: 40px 36px 96px;
 }
 .stat {
@@ -206,19 +206,19 @@ code {
 }
 .demo {
   position: relative;
-  overflow: hidden;
+  overflow: hidden !important;
   height: 100vh;
   transition: height 300ms;
+}
+.markdown .demo {
+  height: 80vh;
 
-  &.embedded {
-    height: 80vh;
-
-    >div:first-child {
-      margin-top: 0;
-      transition: margin-top 300ms;
-    }
+  >div:first-child {
+    margin-top: 0;
+    transition: margin-top 300ms;
   }
-  &.embedded:not(:hover) {
+
+  &:not(:hover) {
     height: 30vh;
     min-height: 200px;
 
@@ -275,7 +275,7 @@ code {
   .tabs .tip {
     display: none;
   }
-  .markdown {
+  .markdown-body {
     padding: 40px 12px 96px;
   }
 }

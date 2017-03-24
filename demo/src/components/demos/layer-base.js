@@ -18,8 +18,11 @@ const defaultViewport = {
 export default function createLayerDemoClass(settings) {
 
   const renderLayer = (data, params, extraProps = {}) => {
-    const props = {...settings.props, ...extraProps};
-    props.data = data && data.features || data || [];
+    if (!data) {
+      return null;
+    }
+
+    const props = {...settings.props, ...extraProps, data};
 
     if (params) {
       Object.keys(params).forEach(key => {
@@ -41,7 +44,7 @@ export default function createLayerDemoClass(settings) {
     static viewport = defaultViewport;
 
     static get parameters() {
-      return getLayerParams(renderLayer());
+      return getLayerParams(renderLayer([]));
     }
 
     static renderInfo() {
@@ -89,13 +92,15 @@ export default function createLayerDemoClass(settings) {
 
     render() {
       const {viewport, params, data} = this.props;
-      const layer = renderLayer(data, params, {
-        onHover: this._onHover
-      });
+      const layers = [
+        renderLayer(data, params, {
+          onHover: this._onHover
+        })
+      ].filter(Boolean);
 
       return (
         <div>
-          <DeckGL {...viewport} layers={ [layer] } onWebGLInitialized={this._initialize} />
+          <DeckGL {...viewport} layers={ layers } onWebGLInitialized={this._initialize} />
           { this._renderTooltip() }
         </div>
       );

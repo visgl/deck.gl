@@ -1,6 +1,7 @@
 import React, {Component, PropTypes} from 'react';
 import pureRender from 'pure-render-decorator';
 import marked from 'marked';
+import * as Demos from './demos';
 
 /**
  * This map allows you to rewrite urls present in the markdown files
@@ -26,46 +27,57 @@ const urlRewrites = {
  */
 const imageRewrites = {};
 
+/* Look for demo injection tag */
+const INJECTION_REG = /<!-- INJECT:"(.+)\" -->/g;
+
+/* Markdown renderer */
+marked.setOptions({
+  // code highlight
+  highlight: code => {
+    return require('highlight.js').highlightAuto(code).value;
+  }
+});
+
+const renderer = new marked.Renderer();
+// links override
+renderer.link = (href, title, text) => {
+  const to = urlRewrites[href] === undefined ? href : urlRewrites[href];
+  if (to === false) {
+    return `<span>${text}</span>`;
+  }
+  return `<a href=${to} title=${title}>${text}</a>`;
+};
+// images override
+renderer.image = (href, title, text) => {
+  const src = imageRewrites[href] || href;
+  return `<img src=${src} title=${title} alt=${text} />`;
+};
+
 @pureRender
 export default class MarkdownPage extends Component {
 
   render() {
-    const {content} = this.props;
-
-    if (!content) {
-      return null;
-    }
-
-    marked.setOptions({
-      highlight(code) {
-        return require('highlight.js').highlightAuto(code).value;
-      }
-    });
-
-    const renderer = new marked.Renderer();
-
-    renderer.link = (href, title, text) => {
-      const to = urlRewrites[href] === undefined ? href : urlRewrites[href];
-      if (to === false) {
-        return `<span>${text}</span>`;
-      }
-      return `<a href=${to} title=${title}>${text}</a>`;
-    };
-
-    renderer.image = (href, title, text) => {
-      const src = imageRewrites[href] || href;
-      return `<img src=${src} title=${title} alt=${text} />`;
-    };
+    const {content, renderDemo} = this.props;
 
     // Since some images are embedded as html, it won't be processed by
     // the renderer image override. So hard replace it globally.
-    const __html = marked(content, {renderer})
+    const html = marked(content, {renderer})
       .replace(/\/demo\/src\/static\/images/g, 'images');
 
     /* eslint-disable react/no-danger */
     return (
       <div className="markdown">
-        <div className="markdown-body" dangerouslySetInnerHTML={{__html}} />
+        {
+          html.split(INJECTION_REG).map((__html, index) => {
+            if (!__html) {
+              return null;
+            }
+            if (Demos[__html]) {
+              return <div key={index}>{ renderDemo(__html) }</div>;
+            }
+            return <div key={index} className="markdown-body" dangerouslySetInnerHTML={{__html}} />;
+          })
+        }
       </div>
     );
     /* eslint-enable react/no-danger */
@@ -74,5 +86,10 @@ export default class MarkdownPage extends Component {
 }
 
 MarkdownPage.propTypes = {
-  content: PropTypes.string
+  content: PropTypes.string,
+  renderDemo: PropTypes.func.isRequired
+};
+
+MarkdownPage.defaultProps = {
+  content: ''
 };

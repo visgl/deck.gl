@@ -1,7 +1,17 @@
+const blackList = [
+  'projectionMode',
+  'modelMatrix'
+];
+
+/* eslint-disable complexity */
 /*
  * infer parameter type from a prop
  */
 export function propToParam(key, value) {
+  if (blackList.indexOf(key) >= 0) {
+    return null;
+  }
+
   const param = {
     name: key,
     displayName: key,
@@ -43,19 +53,28 @@ export function propToParam(key, value) {
   }
   return null;
 }
+/* eslint-enable complexity */
 
 /*
  * get array of parameters from a layer's default props
+ * sorted by type
  */
 export function getLayerParams(layer) {
-  const params = {};
+  const paramsMap = {};
+  const paramsArr = [];
 
   Object.keys(layer.props).forEach(key => {
     const p = propToParam(key, layer.props[key]);
     if (p) {
-      params[key] = p;
+      paramsArr.push(p);
     }
   });
 
-  return params;
+  paramsArr.sort((p1, p2) => p1.type.localeCompare(p2.type));
+
+  paramsArr.forEach(p => {
+    paramsMap[p.name] = p;
+  });
+
+  return paramsMap;
 }
