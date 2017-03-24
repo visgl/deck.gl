@@ -3,13 +3,13 @@ const R_EARTH = 6378000;
 /**
  * Calculate density grid from an array of points
  * @param {array} points
- * @param {number} worldUnitSize - unit size in meters
+ * @param {number} cellSize - cell size in meters
  * @param {function} getPosition - position accessor
  * @returns {object} - grid data, cell dimension and count range
  */
-export function pointToDensityGridData(points, worldUnitSize, getPosition) {
+export function pointToDensityGridData(points, cellSize, getPosition) {
 
-  const {gridHash, gridOffset} = _pointsToGridHashing(points, worldUnitSize, getPosition);
+  const {gridHash, gridOffset} = _pointsToGridHashing(points, cellSize, getPosition);
   const layerData = _getGridLayerDataFromGridHash(gridHash, gridOffset);
   const countRange = _getCellCountExtent(layerData);
 
@@ -23,11 +23,11 @@ export function pointToDensityGridData(points, worldUnitSize, getPosition) {
 /**
  * Project points into each cell, return a hash table of cells
  * @param {array} points
- * @param {number} worldUnitSize - unit size in meters
+ * @param {number} cellSize - unit size in meters
  * @param {function} getPosition - position accessor
  * @returns {object} - grid hash and cell dimension
  */
-function _pointsToGridHashing(points, worldUnitSize, getPosition) {
+function _pointsToGridHashing(points, cellSize, getPosition) {
 
   // find the geometric center of sample points
   const allLat = points.map(p => getPosition(p)[1]);
@@ -36,7 +36,7 @@ function _pointsToGridHashing(points, worldUnitSize, getPosition) {
 
   const centerLat = (latMin + latMax) / 2;
 
-  const gridOffset = _calculateGridLatLonOffset(worldUnitSize, centerLat);
+  const gridOffset = _calculateGridLatLonOffset(cellSize, centerLat);
 
   if (gridOffset.xOffset <= 0 || gridOffset.yOffset <= 0) {
     return {gridHash: {}, gridOffset};
@@ -85,13 +85,13 @@ function _getCellCountExtent(data) {
 /**
  * calculate grid layer cell size in lat lon based on world unit size
  * and current latitude
- * @param {number} worldUnitSize
+ * @param {number} cellSize
  * @param {number} latitude
  * @returns {object} - lat delta and lon delta
  */
-function _calculateGridLatLonOffset(worldUnitSize, latitude) {
-  const yOffset = _calculateLatOffset(worldUnitSize);
-  const xOffset = _calculateLonOffset(latitude, worldUnitSize);
+function _calculateGridLatLonOffset(cellSize, latitude) {
+  const yOffset = _calculateLatOffset(cellSize);
+  const xOffset = _calculateLonOffset(latitude, cellSize);
   return {yOffset, xOffset};
 }
 
