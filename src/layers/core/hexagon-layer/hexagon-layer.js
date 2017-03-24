@@ -108,7 +108,7 @@ export default class HexagonLayer extends Layer {
   }
 
   renderLayers() {
-    const {id, radius, elevationScale, extruded, fp64} = this.props;
+    const {id, radius, elevationScale, extruded, coverage, fp64} = this.props;
 
     // base layer props
     const {opacity, pickable, visible} = this.props;
@@ -123,6 +123,7 @@ export default class HexagonLayer extends Layer {
       elevationScale,
       angle: Math.PI,
       extruded,
+      coverage,
       fp64,
       opacity,
       pickable,
