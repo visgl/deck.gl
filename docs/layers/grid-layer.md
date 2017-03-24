@@ -1,4 +1,6 @@
-<p align="right">
+<!-- INJECT:"GridLayerDemo" -->
+
+<p class="badges">
   <img src="https://img.shields.io/badge/extruded-yes-blue.svg?style=flat-square" alt="64-bit" />
 </p>
 
@@ -7,10 +9,6 @@
 The GridLayer renders a grid heatmap based on an array of points.
 It takes the constant size all each cell, projects points into cells. The color
 and height of the cell is scaled by number of points it contains.
-
-<div align="center">
-  <img height="300" src="/demo/src/static/images/grid-layer.gif" />
-</div>
 
     import {GridLayer} from 'deck.gl';
 

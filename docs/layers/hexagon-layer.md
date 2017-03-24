@@ -1,4 +1,6 @@
-<p align="right">
+<!-- INJECT:"HexagonLayerDemo" -->
+
+<p class="badges">
   <img src="https://img.shields.io/badge/extruded-yes-blue.svg?style=flat-square" alt="64-bit" />
 </p>
 
@@ -8,10 +10,6 @@ The `HexagonLayer` renders a hexagon heatmap based on an array of points.
  It takes the radius of hexagon bin, projects points into hexagon bins. The color
 and height of the hexagon is scaled by number of points it contains. HexagonLayer
 at the moment only works with COORDINATE_SYSTEM.LNGLAT.
-
-  <div align="center">
-    <img height="300" src="/demo/src/static/images/hexagon-layer.gif" />
-  </div>
 
     import {HexagonLayer} from 'deck.gl';
 

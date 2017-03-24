@@ -1,4 +1,6 @@
-<p align="right">
+<!-- INJECT:"LineLayerDemo" -->
+
+<p class="badges">
   <img src="https://img.shields.io/badge/64--bit-support-blue.svg?style=flat-square" alt="64-bit" />
 </p>
 
@@ -6,10 +8,6 @@
 
 The Line Layer renders flat lines joining pairs of source and target points,
 specified as latitude/longitude coordinates.
-
-<div align="center">
-  <img height="300" src="/demo/src/static/images/demo-thumb-line.jpg" />
-</div>
 
     import {LineLayer} from 'deck.gl';
 

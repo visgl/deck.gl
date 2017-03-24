@@ -1,4 +1,6 @@
-<p align="right">
+<!-- INJECT:"ArcLayerDemo" -->
+
+<p class="badges">
   <img src="https://img.shields.io/badge/64--bit-support-blue.svg?style=flat-square" alt="64-bit" />
   <img src="https://img.shields.io/badge/extruded-yes-blue.svg?style=flat-square" alt="64-bit" />
 </p>
@@ -7,10 +9,6 @@
 
 The Arc Layer renders raised arcs joining pairs of source and target points,
 specified as latitude/longitude coordinates.
-
-<div align="center">
-  <img height="300" src="/demo/src/static/images/demo-thumb-arc.jpg" />
-</div>
 
     import {ArcLayer} from 'deck.gl';
 
