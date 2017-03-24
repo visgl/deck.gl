@@ -193,11 +193,13 @@ const PointCloudLayerExample = {
 
 const GridCellLayerExample = {
   layer: GridCellLayer,
+  propTypes: {
+    cellSize: {type: 'number', min: 0, max: 1000}
+  },
   props: {
     id: 'gridCellLayer',
     data: dataSamples.worldGrid.data,
-    latOffset: dataSamples.worldGrid.latOffset,
-    lonOffset: dataSamples.worldGrid.lonOffset,
+    cellSize: dataSamples.worldGrid.cellSize,
     extruded: true,
     pickable: true,
     opacity: 1,

@@ -32,10 +32,6 @@ const DEFAULT_COLOR = [255, 0, 255, 255];
 
 const defaultProps = {
   cellSize: 1000,
-  // AUDIT - replace with cellsize
-  lonOffset: 0.0113,
-  latOffset: 0.0089,
-
   elevationScale: 1,
   extruded: true,
   fp64: false,
@@ -62,8 +58,7 @@ export default class GridCellLayer extends Layer {
    *
    * @param {array} props.data -
    * @param {boolean} props.extruded - enable grid elevation
-   * @param {number} props.latOffset - grid cell size in lat delta
-   * @param {number} props.lonOffset - grid cell size in lng delta
+   * @param {number} props.cellSize - grid cell size in meters
    * @param {function} props.getPosition - position accessor, returned as [minLng, minLat]
    * @param {function} props.getElevation - elevation accessor
    * @param {function} props.getColor - color accessor, returned as [r, g, b, a]
@@ -138,14 +133,15 @@ export default class GridCellLayer extends Layer {
   }
 
   updateUniforms() {
-    const {opacity, extruded, elevationScale, latOffset, lonOffset, lightSettings} = this.props;
+    const {opacity, extruded, elevationScale, cellSize, lightSettings} = this.props;
+    const {viewport} = this.context;
+    const {pixelsPerMeter} = viewport.getDistanceScales();
 
     this.setUniforms(Object.assign({}, {
       extruded,
       elevationScale,
       opacity,
-      latOffset,
-      lonOffset
+      cellSize: cellSize * pixelsPerMeter[0]
     },
     lightSettings));
   }

@@ -19,17 +19,11 @@ each cell. The grid cells can be given a height using the `getElevation` accesso
 
 Inherits from all [Base Layer](/docs/layers/base-layer.md) properties.
 
-##### `latOffset` (Number, optional)
+##### `cellSize` (Number, optional)
 
-- Default: `0.0089`
+- Default: `1000`
 
-Latitude increment of each cell
-
-##### `lonOffset` (Number, optional)
-
-- Default: `0.0113`
-
-Longitude increment of each cell
+Size of each grid cell in meters
 
 ##### `elevationScale` (Number, optional)
 
