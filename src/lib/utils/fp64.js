@@ -1,6 +1,6 @@
 // TODO - move to shaderlib utilities
-import {log} from '.';
-import {COORDINATE_SYSTEM} from '..';
+import log from './log';
+import {COORDINATE_SYSTEM} from '../constants';
 
 export function fp64ify(a) {
   const hiPart = Math.fround(a);
