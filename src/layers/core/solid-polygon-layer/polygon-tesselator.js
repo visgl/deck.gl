@@ -211,7 +211,7 @@ function calculateNormals({polygons, pointCount}) {
 }
 
 function calculateColors({polygons, pointCount, getColor}) {
-  const attribute = new Uint8Array(pointCount * 4);
+  const attribute = new Uint8ClampedArray(pointCount * 4);
   let i = 0;
   polygons.forEach((complexPolygon, polygonIndex) => {
     // Calculate polygon color
@@ -226,7 +226,7 @@ function calculateColors({polygons, pointCount, getColor}) {
 }
 
 function calculatePickingColors({polygons, pointCount}) {
-  const attribute = new Uint8Array(pointCount * 3);
+  const attribute = new Uint8ClampedArray(pointCount * 3);
   let i = 0;
   polygons.forEach((complexPolygon, polygonIndex) => {
     const color = getPickingColor(polygonIndex);
