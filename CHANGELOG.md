@@ -17,12 +17,24 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## Latest Beta Releases
 
-#### [TBD]
-
+#### [v4.0.0-rc.4]
+- `GridCellLayer` `latOffset` and `lonOffset` => `cellSize`
+- Picking improvement: consistently handle picking in composite layers and also simplied picking (#448, #450)
+- FIX: Fix the projectionMode checks for point cloud layer (#454)
+- FIX: Make extruded and non-extruded polygon layers using the same Uint8ClampedArray to process colors
+- FIX: Make radiusPixels works for PointCloudLayer (#450)
+- FIX: Fix the bug that several composite layer not transferring proper props to their underlying layers (#455, #464)
+- FIX: Fix a bug causes active layers got invalidated in the middle of the picking info processing (#458)
+- FIX: Fix the vertice generation for extruded polygons with holes (#447)
+- FIX: Now deck.gl picking works properly for non-fullscreen apps (#455)
 - FIX: `onHover` and `onClick` props now work on `GridLayer` and `HexagonLayer`
 - Picking info from `GeoJsonLayer` and `PolygonLayer` now have `layer` property point to the
   composite layer instead of a sublayer
 - FIX: `PointCloudLayer` use `radiusPixels` instead of `radius`
+- Examples: Fix the hello-world examples (#461)
+- Demo site: Add interactive demo for each core layers (#452)
+- Demo site: Upgrade old demos to v4 (#453)
+- Demo site: Various other bug fixes (#463)
 
 
 #### [v4.0.0-rc.3]
