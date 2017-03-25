@@ -68,6 +68,13 @@ export const examplePages = generatePath([
       demo: 'PlotDemo',
       code: 'code-markdown/plot.md'
     }
+  },
+  {
+    name: '3D Heatmap',
+    content: {
+      demo: 'HeatmapDemo',
+      code: 'code-markdown/plot.md'
+    }
   }
 ]);
 

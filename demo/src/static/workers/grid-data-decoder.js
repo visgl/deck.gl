@@ -1,5 +1,4 @@
 importScripts('./util.js');
-const COORDINATE_PRECISION = 5;
 let total = 0;
 
 onmessage = function(e) {

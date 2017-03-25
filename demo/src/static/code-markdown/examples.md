@@ -48,4 +48,11 @@
       </a>
       </div>
   </div>
+    <div class="thumb">
+      <div data-title="3D Heatmap" data-name="HeatmapLayer">
+        <a href="#/examples/heatmap-layer">
+          <img src="images/demo-thumb-plot.jpg" />
+        </a>
+        </div>
+    </div>
 </div>

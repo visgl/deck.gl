@@ -1,4 +1,4 @@
-import {request, json, text} from 'd3-request';
+import {request, json, csv, text} from 'd3-request';
 
 import {StreamParser} from '../utils/worker-utils';
 
@@ -97,6 +97,12 @@ export const loadData = (owner, source) => {
         json(url, (error, response) => {
           if (!error) {
             dispatch(loadDataSuccess(context, index, response, {}));
+          }
+        });
+      } else if (/\.(csv)$/.test(url)) {
+        csv(url, (error, response) => {
+          if (!error) {
+            dispatch(loadDataSuccess(owner, response, {}));
           }
         });
       } else {
