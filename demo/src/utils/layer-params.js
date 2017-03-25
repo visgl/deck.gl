@@ -61,19 +61,19 @@ export function propToParam(key, value) {
  */
 export function getLayerParams(layer) {
   const paramsMap = {};
-  const paramsArr = [];
+  const paramsArray = [];
 
   Object.keys(layer.props).forEach(key => {
-    const p = propToParam(key, layer.props[key]);
-    if (p) {
-      paramsArr.push(p);
+    const param = propToParam(key, layer.props[key]);
+    if (param) {
+      paramsArray.push(param);
     }
   });
 
-  paramsArr.sort((p1, p2) => p1.type.localeCompare(p2.type));
+  paramsArray.sort((p1, p2) => p1.type.localeCompare(p2.type));
 
-  paramsArr.forEach(p => {
-    paramsMap[p.name] = p;
+  paramsArray.forEach(param => {
+    paramsMap[param.name] = param;
   });
 
   return paramsMap;
