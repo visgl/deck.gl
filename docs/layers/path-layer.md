@@ -1,11 +1,9 @@
+<!-- INJECT:"PathLayerDemo" -->
+
 # Path Layer
 
 The Path Layer takes in lists of coordinate points and
 renders them as extruded lines with mitering.
-
-  <div align="center">
-    <img height="300" src="/demo/src/static/images/demo-thumb-path.jpg" />
-  </div>
 
     import {PathLayer} from 'deck.gl';
 

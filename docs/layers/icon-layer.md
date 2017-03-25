@@ -1,10 +1,8 @@
+<!-- INJECT:"IconLayerDemo" -->
+
 # Icon Layer
 
 The Icon Layer renders raster icons at given coordinates.
-
-  <div align="center">
-    <img height="300" src="/demo/src/static/images/demo-thumb-icon.jpg" />
-  </div>
 
     import {IconLayer} from 'deck.gl';
 

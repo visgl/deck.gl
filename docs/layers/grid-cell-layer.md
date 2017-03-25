@@ -1,4 +1,4 @@
-<p align="right">
+<p class="badges">
   <img src="https://img.shields.io/badge/extruded-yes-blue.svg?style=flat-square" alt="64-bit" />
 </p>
 
@@ -10,7 +10,7 @@ each cell. The grid cells can be given a height using the `getElevation` accesso
 
 
 <div align="center">
-  <img height="300" src="/demo/src/static/images/grid-cell-layer.png" />
+  <img height="300" src="/demo/src/static/images/grid-layer.gif" />
 </div>
 
     import {GridCellLayer} from 'deck.gl';

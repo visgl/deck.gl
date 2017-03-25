@@ -1,3 +1,5 @@
+<!-- INJECT:"ScreenGridLayerDemo" -->
+
 # ScreenGridLayer
 
 The ScreenGridLayer takes in an array of latitude and longitude
@@ -8,10 +10,6 @@ Note: The aggregation is done in screen space, so the data prop
 needs to be reaggregated by the layer whenever the map is zoomed or panned.
 This means that this layer is best used with small data set, however the
 visuals when used with the right data set can be quite effective.
-
-<div align="center">
-  <img height="300" src="/demo/src/static/images/demo-thumb-screengrid.jpg" />
-</div>
 
     import {ScreenGridLayer} from 'deck.gl';
 

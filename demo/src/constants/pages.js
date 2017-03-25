@@ -128,53 +128,43 @@ export const docPages = generatePath([
       },
       {
         name: 'ScatterplotLayer',
-        content: getDocUrl('layers/scatterplot-layer.md'),
-        embedded: 'ScatterplotLayerDemo'
+        content: getDocUrl('layers/scatterplot-layer.md')
       },
       {
         name: 'ArcLayer',
-        content: getDocUrl('layers/arc-layer.md'),
-        embedded: 'ArcLayerDemo'
+        content: getDocUrl('layers/arc-layer.md')
       },
       {
         name: 'LineLayer',
-        content: getDocUrl('layers/line-layer.md'),
-        embedded: 'LineLayerDemo'
+        content: getDocUrl('layers/line-layer.md')
       },
       {
         name: 'GeoJSONLayer',
-        content: getDocUrl('layers/geojson-layer.md'),
-        embedded: 'GeoJsonLayerDemo'
+        content: getDocUrl('layers/geojson-layer.md')
       },
       {
         name: 'PathLayer',
-        content: getDocUrl('layers/path-layer.md'),
-        embedded: 'PathLayerDemo'
+        content: getDocUrl('layers/path-layer.md')
       },
       {
         name: 'PolygonLayer',
-        content: getDocUrl('layers/polygon-layer.md'),
-        embedded: 'PolygonLayerDemo'
+        content: getDocUrl('layers/polygon-layer.md')
       },
       {
         name: 'IconLayer',
-        content: getDocUrl('layers/icon-layer.md'),
-        embedded: 'IconLayerDemo'
+        content: getDocUrl('layers/icon-layer.md')
       },
       {
         name: 'PointCloudLayer',
-        content: getDocUrl('layers/point-cloud-layer.md'),
-        embedded: 'PointCloudLayerDemo'
-      },
-      {
-        name: 'GridLayer',
-        content: getDocUrl('layers/grid-layer.md'),
-        embedded: 'GridLayerDemo'
+        content: getDocUrl('layers/point-cloud-layer.md')
       },
       {
         name: 'ScreenGridLayer',
-        content: getDocUrl('layers/screen-grid-layer.md'),
-        embedded: 'ScreenGridLayerDemo'
+        content: getDocUrl('layers/screen-grid-layer.md')
+      },
+      {
+        name: 'GridLayer',
+        content: getDocUrl('layers/grid-layer.md')
       },
       {
         name: 'GridCellLayer',
@@ -182,8 +172,7 @@ export const docPages = generatePath([
       },
       {
         name: 'HexagonLayer',
-        content: getDocUrl('layers/hexagon-layer.md'),
-        embedded: 'HexagonLayerDemo'
+        content: getDocUrl('layers/hexagon-layer.md')
       },
       {
         name: 'HexagonCellLayer',

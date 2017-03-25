@@ -17,6 +17,10 @@ Github Markdown Stylesheet (c) Sindre Sorhus <sindresorhus@gmail.com> (sindresor
   word-wrap: break-word;
 }
 
+.markdown-body .badges {
+  float: right;
+}
+
 .markdown-body .pl-c {
   color: #969896;
 }

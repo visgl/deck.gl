@@ -147,10 +147,11 @@ export const PolygonLayerDemo = createLayerDemoClass({
     pickable: true,
     stroked: true,
     filled: true,
+    wireframe: true,
     lineWidthMinPixels: 1,
     getPolygon: d => d.contour,
     getElevation: d => d.population / d.area / 10,
-    getFillColor: d => [d.population / d.area / 10, 140, 0],
+    getFillColor: d => [d.population / d.area / 60, 140, 0],
     getLineColor: d => [80, 80, 80],
     getLineWidth: d => 1
   }

@@ -80,28 +80,16 @@ class Page extends Component {
     this._setMapFocus(false);
   }
 
-  _setActiveTab(tabName) {
+  @autobind _setActiveTab(tabName) {
     const {location: {pathname}} = this.props;
     this.context.router.replace(`${pathname}?tab=${tabName}`);
   }
 
-  _renderChild(child, tabKey) {
-    const {location} = this.props;
-    const {tabs} = this.state;
-    const activeTab = location.query.tab || Object.keys(tabs)[0];
-
-    return (
-      <div key={tabKey} className={`tab ${tabKey === activeTab ? 'active' : ''}`}>
-        {child}
-      </div>
-    );
-  }
-
-  _renderDemo(name, fullSize) {
+  @autobind _renderDemo(name) {
     const {mapHasFocus} = this.state;
 
     return (
-      <div className={`demo ${fullSize ? '' : 'embedded'}`}>
+      <div className="demo">
         <Map
           demo={name}
           onInteract={this._onMapFocus} />
@@ -114,27 +102,27 @@ class Page extends Component {
   }
 
   _renderTabContent() {
-    const {contents, route: {embedded}} = this.props;
+    const {contents, location} = this.props;
     const {tabs} = this.state;
+    const activeTab = location.query.tab || Object.keys(tabs)[0];
 
-    return Object.keys(tabs).map(tabKey => {
+    return Object.keys(tabs).map((tabKey, tabIndex) => {
       const tab = tabs[tabKey];
+      let child;
 
       if (tabKey === 'demo') {
-        const child = this._renderDemo(tab, true);
-        return this._renderChild(child, tabKey);
+        child = this._renderDemo(tab);
       } else if (typeof tab === 'string') {
-        const child = (
-          <div>
-            { embedded && this._renderDemo(embedded, false) }
-            <MarkdownPage content={contents[tab]} />
-          </div>
-        );
-        return this._renderChild(child, tabKey);
+        child = <MarkdownPage content={contents[tab]} renderDemo={this._renderDemo} />;
+      } else {
+        child = React.createElement(tab);
       }
 
-      return this._renderChild(React.createElement(tab), tabKey);
-
+      return (
+        <div key={tabIndex} className={`tab ${tabKey === activeTab ? 'active' : ''}`}>
+          {child}
+        </div>
+      );
     });
   }
 

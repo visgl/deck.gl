@@ -24,10 +24,9 @@ const getDefaultPath = pages => {
 };
 
 const renderRoute = (page, i) => {
-  const {children, path, content, embedded} = page;
+  const {children, path, content} = page;
   if (!children) {
-    return (<Route key={i} path={path} component={Page}
-      content={content} embedded={embedded} />);
+    return (<Route key={i} path={path} component={Page} content={content} />);
   }
 
   return (

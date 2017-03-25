@@ -125,7 +125,7 @@ export default class TripsDemo extends Component {
         currentTime: this.state.time
       })),
       data[1] && new PolygonLayer({
-        id: `buildings`,
+        id: 'buildings',
         data: data[1],
         extruded: true,
         wireframe: false,
