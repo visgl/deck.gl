@@ -21,6 +21,7 @@ Ref: http://keepachangelog.com/en/0.3.0/
 [TBD]
 - TripsLayer is moved from `examples/sample-layers` to `examples/trips`, for easier bootstraping of a
 standalone app.
+- `getPickingInfo()` methods receive an additional argument `sourceLayer`
 
 
 #### [v4.0.0-rc.4]

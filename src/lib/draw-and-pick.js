@@ -155,7 +155,7 @@ export function pickLayers(gl, {
       while (layer && info) {
         // For a composite layer, sourceLayer will point to the sublayer
         // where the event originates from.
-        // It provides additiona; context for the composite layer's
+        // It provides additional context for the composite layer's
         // getPickingInfo() method to populate the info object
         const sourceLayer = info.layer || layer;
         info.layer = layer;
