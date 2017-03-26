@@ -18,6 +18,7 @@ export default class SortedBins {
   /**
    * Get an array of object with sorted count and index of bins
    * @param {Number} lower
+   * @param {Number} upper
    * @return {Array} array of nuw count range
    */
   getCountRange([lower, upper]) {

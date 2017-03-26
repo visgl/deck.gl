@@ -70,13 +70,13 @@ export default class HexagonCellLayer extends Layer {
   constructor(props) {
     let missingProps = false;
     if (!props.hexagonVertices && (!props.radius || !Number.isFinite(props.angle))) {
-      log.once(0, 'HexagonLayer: Either hexagonVertices or radius and angel are ' +
+      log.once(0, 'HexagonCellLayer: Either hexagonVertices or radius and angel are ' +
         'needed to calculate primitive hexagon.');
       missingProps = true;
 
     } else if (props.hexagonVertices && (!Array.isArray(props.hexagonVertices) ||
       props.hexagonVertices.length < 6)) {
-      log.once(0, 'HexagonLayer: HexagonVertices needs to be an array of 6 points');
+      log.once(0, 'HexagonCellLayer: HexagonVertices needs to be an array of 6 points');
 
       missingProps = true;
     }
