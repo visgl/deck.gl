@@ -49,6 +49,13 @@ export const examplePages = generatePath([
     }
   },
   {
+    name: 'IconLayer',
+    content: {
+      demo: 'IconDemo',
+      code: 'code-markdown/icon.md'
+    }
+  },
+  {
     name: 'Trip Routes',
     content: {
       demo: 'TripsDemo',

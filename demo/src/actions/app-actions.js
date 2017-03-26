@@ -28,10 +28,25 @@ export const loadContent = filename => {
 
 const loadDataStart = owner => ({type: 'LOAD_DATA_START', owner});
 
-const loadDataSuccess = (owner, data, meta) => ({
-  type: 'LOAD_DATA_SUCCESS',
-  payload: {owner, data, meta}
-});
+const loadDataSuccess = (context, index, data, meta) => {
+
+  if (context.isArray) {
+    context.resultData = context.resultData.slice(0);
+    context.resultData[index] = data;
+  } else {
+    context.resultData = data;
+  }
+  context.resultMeta = {...context.resultMeta, ...meta};
+
+  return {
+    type: 'LOAD_DATA_SUCCESS',
+    payload: {
+      owner: context.owner,
+      data: context.resultData,
+      meta: context.resultMeta
+    }
+  };
+};
 
 export const loadData = (owner, dataArr) => {
 
@@ -41,13 +56,17 @@ export const loadData = (owner, dataArr) => {
       return;
     }
 
-    let resultData = [];
-    let resultMeta = {};
     const isArray = Array.isArray(dataArr);
 
     if (!isArray) {
       dataArr = [dataArr];
     }
+    const context = {
+      owner,
+      resultData: [],
+      resultMeta: [],
+      isArray
+    };
 
     dispatch(loadDataStart(owner));
 
@@ -56,13 +75,7 @@ export const loadData = (owner, dataArr) => {
         const req = request(url);
         // use a web worker to parse data
         const dataParser = new StreamParser(worker, (data, meta) => {
-          if (isArray) {
-            resultData[index] = data;
-          } else {
-            resultData = data;
-          }
-          resultMeta = {...resultMeta, ...meta};
-          dispatch(loadDataSuccess(owner, resultData, resultMeta));
+          dispatch(loadDataSuccess(context, index, data, meta));
         });
 
         req.on('progress', dataParser.onProgress)
@@ -72,14 +85,14 @@ export const loadData = (owner, dataArr) => {
         // load as json
         json(url, (error, response) => {
           if (!error) {
-            dispatch(loadDataSuccess(owner, response, {}));
+            dispatch(loadDataSuccess(context, index, response, {}));
           }
         });
       } else {
         // load as plain text
         text(url, (error, response) => {
           if (!error) {
-            dispatch(loadDataSuccess(owner, response, {}));
+            dispatch(loadDataSuccess(context, index, response, {}));
           }
         });
       }
