@@ -153,11 +153,16 @@ export function pickLayers(gl, {
       // Walk up the composite chain and find the owner of the event
       // sublayers are never directly exposed to the user
       while (layer && info) {
+        // For a composite layer, sourceLayer will point to the sublayer
+        // where the event originates from.
+        // It provides additiona; context for the composite layer's
+        // getPickingInfo() method to populate the info object
+        const sourceLayer = info.layer || layer;
         info.layer = layer;
         // layer.pickLayer() function requires a non-null ```layer.state```
         // object to funtion properly. So the layer refereced here
         // must be the "current" layer, not an "out-dated" / "invalidated" layer
-        info = layer.pickLayer({info, mode});
+        info = layer.pickLayer({info, mode, sourceLayer});
         layer = layer.parentLayer;
       }
 

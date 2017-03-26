@@ -74,7 +74,7 @@ The default implementation looks for a variable `model` in the layer's
 state (which is expected to be an instance of the luma.gl `Model` class)
 and calls `draw` on that model.
 
-##### Picking: getPickingInfo({info, mode})
+##### Picking: getPickingInfo({info, mode, sourceLayer})
 
 The pick method should return an object with optional fields about
 what was picked. This `info` object is then passed to the layer's `onHover`
@@ -83,12 +83,16 @@ or `onClick` callbacks.
 The received `info` argument contains fields `color` as the picked pixel
 and `index` calculated using `layer.decodePickingColor()`.
 
+The `mode` argument is one of `hover` and `click`.
+
 The default implementation populates the `info` object with an `object` field
 that is indexed from `layer.props.data`.
 
 Composite layers can further augment the `info` object after it is processed
 by the picked sublayer. This allows the composite layer to hide implementation
-details and expose only user-friendly information.
+details and expose only user-friendly information. The composite layer can
+refer to the `sourceLayer` argument for the sublayer instance where this event
+originates from.
 
 If this method returns `null`, the corresponding event is cancelled.
 
