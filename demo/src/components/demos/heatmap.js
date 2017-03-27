@@ -61,8 +61,8 @@ export default class HeatmapDemo extends Component {
 
     return (
       <div>
-        <h3>United States County-to-county Migration</h3>
-        <p>People moving in and out of <b>{meta.sourceName}</b> between 2009-2013</p>
+        <h3>United Kingdom Road Safty</h3>
+        <p>Personal injury road accidents in GB from 1979</p>
 
         <div className="layout">
           {colorRamp.map((c, i) => (
@@ -72,15 +72,15 @@ export default class HeatmapDemo extends Component {
           ))}
         </div>
         <p className="layout">
-          <span className="col-1-2">Net gain</span>
-          <span className="col-1-2 text-right">Net loss</span>
+          <span className="col-1-2">Less Accidents</span>
+          <span className="col-1-2 text-right">More Accidents</span>
         </p>
 
-        <p>Data source: <a href="http://www.census.gov">US Census Bureau</a></p>
+        <p>Data source: <a href="https://data.gov.uk">DATA.GOV.UK</a></p>
 
         <div className="layout">
           <div className="stat col-1-2">
-            Counties<b>{ readableInteger(meta.count) || 0 }</b>
+            Accidents<b>{ readableInteger(meta.count) || 0 }</b>
           </div>
           <div className="stat col-1-2">
           </div>
