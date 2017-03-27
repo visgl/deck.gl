@@ -19,6 +19,8 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 #### [v4.0.0-rc.4]
 - `GridCellLayer` `latOffset` and `lonOffset` => `cellSize`
+- `HexagonLayer` add `lowerPercentile`
+- `HexagonLayer` add `upperPercentile`
 - Picking improvement: consistently handle picking in composite layers and also simplied picking (#448, #450)
 - FIX: Fix the projectionMode checks for point cloud layer (#454)
 - FIX: Make extruded and non-extruded polygon layers using the same Uint8ClampedArray to process colors
@@ -35,7 +37,6 @@ Ref: http://keepachangelog.com/en/0.3.0/
 - Demo site: Add interactive demo for each core layers (#452)
 - Demo site: Upgrade old demos to v4 (#453)
 - Demo site: Various other bug fixes (#463)
-
 
 #### [v4.0.0-rc.3]
 

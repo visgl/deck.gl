@@ -91,6 +91,20 @@ all hexagons without updating the data.
 
 Whether to enable cell elevation. Cell elevation scale by count of points in each cell. If set to false, all cells will be flat.
 
+##### `upperPercentile' (Number, optional)
+
+- Default: `100`
+
+Filter bins and re-calculate color by `upperPercentile`. Hexagons with counts 
+bigger than the upperPercentile counts will be hidden.
+
+##### `lowerPercentile' (Number, optional)
+
+- Default: `0`
+
+Filter bins and re-calculate color by `lowerPercentile`. Hexagons with counts 
+smaller than the lowerPercentile counts will be hidden.
+
 ##### `fp64` (Boolean, optional)
 
 - Default: `false`
