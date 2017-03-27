@@ -28,6 +28,13 @@
     </div>
   </div>
   <div class="thumb">
+    <div class="bg-black" data-title="Where Films Were Made" data-name="IconLayer">
+      <a href="#/examples/icon-layer">
+        <img src="images/demo-thumb-icon.jpg" />
+      </a>
+    </div>
+  </div>
+  <div class="thumb">
     <div class="bg-black" data-title="Taxi Trips in NYC" data-name="TripsLayer">
       <a href="#/examples/trip-routes">
         <img src="images/demo-thumb-trip.jpg" />
