@@ -1,5 +1,5 @@
 
-export default class SortedBins {
+export default class BinSorter {
   constructor(bins) {
     this.sortedBins = this.getSortedCounts(bins);
   }
@@ -17,8 +17,9 @@ export default class SortedBins {
 
   /**
    * Get an array of object with sorted count and index of bins
-   * @param {Number} lower
-   * @param {Number} upper
+   * @param {Number[]} range
+   * @param {Number} range[0] - lower bound
+   * @param {Number} range[1] - upper bound
    * @return {Array} array of nuw count range
    */
   getCountRange([lower, upper]) {

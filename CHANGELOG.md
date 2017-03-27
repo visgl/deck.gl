@@ -54,6 +54,8 @@ Ref: http://keepachangelog.com/en/0.3.0/
 - `PolygonLayer` add `lineWidthMaxPixels`
 - `PolygonLayer` add `lineJointRounded`
 - `PolygonLayer` add `lineMiterLimit`
+- `HexagonLayer` add `lowerPercentile`
+- `HexagonLayer` add `upperPercentile`
 - FIX: `ScatterplotLayer` calls Layer.updateState() to invalidate all attributes when data changed
 - FIX: Fix the `ExtrudedChoroplethLayer64` in deprecated layer examples
 - Replace all readFileSync() calls with Javascript imports for all GLSL shaders

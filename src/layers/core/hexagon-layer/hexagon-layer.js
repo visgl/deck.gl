@@ -26,7 +26,7 @@ import {quantizeScale, linearScale} from '../../../utils/scale-utils';
 import {defaultColorRange} from '../../../utils/color-utils';
 import {pointToHexbin} from './hexagon-aggregator';
 
-import SortedBins from '../../../utils/sorted-bins';
+import BinSorter from '../../../utils/bin-sorter';
 
 const defaultProps = {
   colorDomain: null,
@@ -103,7 +103,7 @@ export default class HexagonLayer extends Layer {
       const {viewport} = this.context;
 
       const hexagons = hexagonAggregator(this.props, viewport);
-      const sortedCounts = new SortedBins(hexagons);
+      const sortedCounts = new BinSorter(hexagons);
 
       Object.assign(this.state, {hexagons, sortedCounts});
 
