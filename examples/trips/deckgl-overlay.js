@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 import DeckGL, {PolygonLayer} from 'deck.gl';
 
-import TripsLayer from '../sample-layers/trips-layer';
+import TripsLayer from './trips-layer';
 
 const LIGHT_SETTINGS = {
   lightsPosition: [-74.05, 40.7, 8000, -73.5, 41, 5000],

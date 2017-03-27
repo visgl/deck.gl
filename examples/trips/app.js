@@ -3,7 +3,6 @@ import React, {Component} from 'react';
 import {render} from 'react-dom';
 import MapGL from 'react-map-gl';
 import DeckGLOverlay from './deckgl-overlay.js';
-import TWEEN from 'tween.js';
 
 import {json as requestJson} from 'd3-request';
 
