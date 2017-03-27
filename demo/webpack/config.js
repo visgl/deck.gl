@@ -6,6 +6,9 @@ const demoDir = join(__dirname, '..');
 const libSources = join(rootDir, 'src');
 const demoSources = join(demoDir, 'src');
 
+// Otherwise modules imported from outside this directory does not compile
+// Seems to be a Babel bug
+// https://github.com/babel/babel-loader/issues/149#issuecomment-191991686
 const BABEL_CONFIG = {
   presets: [
     'es2015',
