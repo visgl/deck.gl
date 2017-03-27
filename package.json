@@ -22,6 +22,7 @@
   ],
   "scripts": {
     "start": "(cd examples/layer-browser && npm run start-local)",
+    "postinstall": "(cd examples/layer-browser && npm install)",
     "build-clean": "rm -fr dist dist-es6 && mkdir -p dist dist-es6 ",
     "build-es6": "rm -fr dist-es6 && babel src --out-dir dist-es6 --plugins=static-fs --source-maps inline",
     "build-es5": "rm -fr dist && babel src --out-dir dist --plugins=static-fs,transform-es2015-modules-commonjs --source-maps inline",
