@@ -249,7 +249,9 @@ const HexagonLayerExample = {
   layer: HexagonLayer,
   propTypes: {
     coverage: {type: 'number', min: 0, max: 1},
-    radius: {type: 'number', min: 0, max: 3000}
+    radius: {type: 'number', min: 0, max: 3000},
+    lowerPercentile: {type: 'number', min: 0, max: 100},
+    upperPercentile: {type: 'number', min: 0, max: 100}
   },
   props: {
     id: 'HexagonLayer',
