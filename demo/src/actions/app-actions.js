@@ -28,12 +28,38 @@ export const loadContent = filename => {
 
 const loadDataStart = owner => ({type: 'LOAD_DATA_START', owner});
 
-const loadDataSuccess = (owner, data, meta) => ({
-  type: 'LOAD_DATA_SUCCESS',
-  payload: {owner, data, meta}
-});
+const loadDataSuccess = (context, index, data, meta) => {
 
-export const loadData = (owner, dataArr) => {
+  if (context.isArray) {
+    context.resultData = context.resultData.slice(0);
+    context.resultData[index] = data;
+  } else {
+    context.resultData = data;
+  }
+  context.resultMeta = {...context.resultMeta, ...meta};
+
+  return {
+    type: 'LOAD_DATA_SUCCESS',
+    payload: {
+      owner: context.owner,
+      data: context.resultData,
+      meta: context.resultMeta
+    }
+  };
+};
+
+/*
+ * loads data for a demo
+ * @param {String} owner - identifier of the demo
+ * @param {Object | Array} source - an object or array of objects specifying
+ *  the data that needs to be loaded
+ *    {String} source.url - (required) url of the data file
+ *    {String} source.worker - (optional) url of a web worker
+ *      if specified, then the loaded file content will be passed to the worker
+ *      if not specified, then the loaded file will be parsed as JSON or text
+ *      based on its extension
+ */
+export const loadData = (owner, source) => {
 
   return (dispatch, getState) => {
     if (getState().vis.owner === owner) {
@@ -41,28 +67,26 @@ export const loadData = (owner, dataArr) => {
       return;
     }
 
-    let resultData = [];
-    let resultMeta = {};
-    const isArray = Array.isArray(dataArr);
+    const isArray = Array.isArray(source);
 
     if (!isArray) {
-      dataArr = [dataArr];
+      source = [source];
     }
+    const context = {
+      owner,
+      resultData: [],
+      resultMeta: [],
+      isArray
+    };
 
     dispatch(loadDataStart(owner));
 
-    dataArr.forEach(({url, worker}, index) => {
+    source.forEach(({url, worker}, index) => {
       if (worker) {
         const req = request(url);
         // use a web worker to parse data
         const dataParser = new StreamParser(worker, (data, meta) => {
-          if (isArray) {
-            resultData[index] = data;
-          } else {
-            resultData = data;
-          }
-          resultMeta = {...resultMeta, ...meta};
-          dispatch(loadDataSuccess(owner, resultData, resultMeta));
+          dispatch(loadDataSuccess(context, index, data, meta));
         });
 
         req.on('progress', dataParser.onProgress)
@@ -72,14 +96,14 @@ export const loadData = (owner, dataArr) => {
         // load as json
         json(url, (error, response) => {
           if (!error) {
-            dispatch(loadDataSuccess(owner, response, {}));
+            dispatch(loadDataSuccess(context, index, response, {}));
           }
         });
       } else {
         // load as plain text
         text(url, (error, response) => {
           if (!error) {
-            dispatch(loadDataSuccess(owner, response, {}));
+            dispatch(loadDataSuccess(context, index, response, {}));
           }
         });
       }

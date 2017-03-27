@@ -279,3 +279,39 @@ code {
     padding: 40px 12px 96px;
   }
 }
+
+.icon-demo {
+  position: relative;
+
+  &.clickable {
+    cursor: pointer;
+  }
+  .tooltip {
+    padding: 4px 12px;
+    max-width: 240px;
+    max-height: 320px;
+    box-sizing: content-box;
+    overflow-y: hidden;
+
+    h5 {
+      font-size: 1em;
+    }
+    p {
+      display: none;
+      text-indent: 4px;
+    }
+  }
+  .tooltip.interactive {
+    border: solid 4px transparent;
+    margin: -4px;
+    background: $white;
+    color: $black;
+    pointer-events: all;
+    width: 240px;
+    overflow-y: auto;
+
+    p {
+      display: block;
+    }
+  }
+}
