@@ -6,6 +6,20 @@ const demoDir = join(__dirname, '..');
 const libSources = join(rootDir, 'src');
 const demoSources = join(demoDir, 'src');
 
+// Otherwise modules imported from outside this directory does not compile
+// Seems to be a Babel bug
+// https://github.com/babel/babel-loader/issues/149#issuecomment-191991686
+const BABEL_CONFIG = {
+  presets: [
+    'es2015',
+    'react',
+    'stage-2'
+  ].map(function(name) { return require.resolve("babel-preset-"+name) }),
+  "plugins": [
+    "transform-decorators-legacy"
+  ].map(function(name) { return require.resolve("babel-plugin-"+name) })
+};
+
 module.exports = {
 
   entry: ['./src/main'],
@@ -14,7 +28,8 @@ module.exports = {
     rules: [{
       test: /\.js$/,
       exclude: [/node_modules/],
-      loader: 'babel-loader'
+      loader: 'babel-loader',
+      query: BABEL_CONFIG
     }, {
       test: /\.scss$/,
       loaders: ['style-loader', 'css-loader', 'sass-loader', 'autoprefixer-loader']
@@ -26,9 +41,6 @@ module.exports = {
       loader: 'raw-loader',
       include: demoSources,
       enforce: 'post'
-    }, {
-      test: /\.js$/,
-      loader: 'transform-loader?brfs-babel'
     }]
   },
 
@@ -36,10 +48,10 @@ module.exports = {
     modules: [resolve(rootDir, 'node_modules'), resolve(demoDir, 'node_modules')],
     alias: {
       'deck.gl': libSources,
-      webworkify: 'webworkify-webpack-dropin'
-      // react: resolve('./node_modules/react'),
-      // 'react-dom': resolve('./node_modules/react-dom'),
-      // 'gl-matrix': resolve('./node_modules/gl-matrix/dist/gl-matrix.js')
+      // used by Mapbox
+      webworkify: 'webworkify-webpack-dropin',
+      // From mapbox-gl-js README. Required for non-browserify bundlers (e.g. webpack):
+      'mapbox-gl$': resolve('./node_modules/mapbox-gl/dist/mapbox-gl.js')
     }
   },
 

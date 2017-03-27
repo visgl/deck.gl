@@ -1,20 +1,9 @@
 import React, {Component} from 'react';
 
-import DeckGL, {PolygonLayer} from 'deck.gl';
-
 import {MAPBOX_STYLES} from '../../constants/defaults';
 import {readableInteger} from '../../utils/format-utils';
 import ViewportAnimation from '../../utils/map-utils';
-import TripsLayer from '../../../../examples/sample-layers/trips-layer';
-
-const LIGHT_SETTINGS = {
-  lightsPosition: [-74.05, 40.7, 8000, -73.5, 41, 5000],
-  ambientRatio: 0.05,
-  diffuseRatio: 0.6,
-  specularRatio: 0.8,
-  lightsStrength: [2.0, 0.0, 0.0, 0.0],
-  numberOfLights: 2
-};
+import TripsOverlay from '../../../../examples/trips/deckgl-overlay';
 
 export default class TripsDemo extends Component {
 
@@ -39,13 +28,8 @@ export default class TripsDemo extends Component {
 
   static get viewport() {
     return {
-      mapStyle: MAPBOX_STYLES.DARK,
-      longitude: -74,
-      latitude: 40.72,
-      zoom: 13,
-      maxZoom: 16,
-      pitch: 45,
-      bearing: 0
+      ...TripsOverlay.defaultViewport,
+      mapStyle: MAPBOX_STYLES.DARK
     };
   }
 
@@ -101,11 +85,6 @@ export default class TripsDemo extends Component {
     this.tween.stop();
   }
 
-  _initialize(gl) {
-    gl.enable(gl.DEPTH_TEST);
-    gl.depthFunc(gl.LEQUAL);
-  }
-
   render() {
     const {viewport, data, params} = this.props;
 
@@ -113,33 +92,12 @@ export default class TripsDemo extends Component {
       return null;
     }
 
-    const layers = [].concat(
-      data[0] && data[0].map((layerData, layerIndex) => new TripsLayer({
-        id: `trips-${layerIndex}`,
-        data: layerData,
-        getPath: d => d.segments,
-        getColor: d => d.vendor === 0 ? [253, 128, 93] : [23, 184, 190],
-        opacity: 0.3,
-        strokeWidth: 2,
-        trailLength: params.trail.value,
-        currentTime: this.state.time
-      })),
-      data[1] && new PolygonLayer({
-        id: 'buildings',
-        data: data[1],
-        extruded: true,
-        wireframe: false,
-        fp64: true,
-        opacity: 0.5,
-        getPolygon: f => f.polygon,
-        getElevation: f => f.height,
-        getFillColor: f => [74, 80, 87],
-        lightSettings: LIGHT_SETTINGS
-      })
-    ).filter(Boolean);
-
     return (
-      <DeckGL {...viewport} layers={layers} onWebGLInitialized={this._initialize} />
+      <TripsOverlay viewport={viewport}
+        trips={data[0]}
+        buildings={data[1]}
+        trailLength={params.trail.value}
+        time={this.state.time} />
     );
   }
 }
