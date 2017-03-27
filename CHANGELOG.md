@@ -17,6 +17,12 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## Latest Beta Releases
 
+
+[TBD]
+- TripsLayer is moved from `examples/sample-layers` to `examples/trips`, for easier bootstraping of a
+standalone app.
+
+
 #### [v4.0.0-rc.4]
 - `GridCellLayer` `latOffset` and `lonOffset` => `cellSize`
 - `HexagonLayer` add `lowerPercentile`

@@ -48,6 +48,7 @@ module.exports = {
     modules: [resolve(rootDir, 'node_modules'), resolve(demoDir, 'node_modules')],
     alias: {
       'deck.gl': libSources,
+      // used by Mapbox
       webworkify: 'webworkify-webpack-dropin',
       // From mapbox-gl-js README. Required for non-browserify bundlers (e.g. webpack):
       'mapbox-gl$': resolve('./node_modules/mapbox-gl/dist/mapbox-gl.js')

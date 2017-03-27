@@ -1,2 +1,13 @@
-* [hello-world-webpack2](./hello-world-webpack.md): Bundles a minimal app with
-  [webpack 2](https://github.com/webpack/webpack) and serves it with webpack-dev-server.
+This is a minimal standalone version of the TripsLayer example
+on [deck.gl](http://deck.gl) website.
+
+### Usage
+Copy the content of this folder to your project. Run
+```
+npm install
+npm start
+```
+
+### Data format
+Sample data is stored in the `data` folder. To use your own data, checkout
+the [documentation of TripsLayer](./trips-layer/README.md).
