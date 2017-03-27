@@ -61,7 +61,7 @@ function addTrip(trip) {
 function flush() {
   postMessage({
     action: 'add',
-    data: [result],
+    data: result,
     meta: {trips: tripsCount, vertices: vertexCount}
   });
   result = [];
