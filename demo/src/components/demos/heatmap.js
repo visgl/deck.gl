@@ -4,12 +4,21 @@ import {readableInteger} from '../../utils/format-utils';
 
 import {MAPBOX_STYLES} from '../../constants/defaults';
 
+// const colorRange = [
+//   [1, 152, 189],
+//   [1, 202, 252],
+//   [73, 227, 206],
+//   [143, 253, 159],
+//   [216, 254, 181]
+// ];
+
 const colorRange = [
   [1, 152, 189],
-  [1, 202, 252],
   [73, 227, 206],
-  [143, 253, 159],
-  [216, 254, 181]
+  [216, 254, 181],
+  [254, 237, 177],
+  [254, 173, 84],
+  [209, 55, 78]
 ];
 
 const LIGHT_SETTINGS = {
@@ -41,6 +50,13 @@ export default class HeatmapDemo extends Component {
         value: 1000,
         step: 1000,
         min: 1000
+      },
+      upperPercentile: {
+        displayName: 'Upper Percentile',
+        type: 'number',
+        value: 100,
+        step: 1,
+        min: 0
       }
     };
   }
@@ -118,7 +134,8 @@ export default class HeatmapDemo extends Component {
         extruded: true,
         pickable: true,
         radius: params.radius.value,
-        elevationScale: 50,
+        upperPercentile: params.upperPercentile.value,
+        elevationScale: 1,
         elevationRange: [0, 3000],
         coverage: 1,
         getPosition: d => d,
