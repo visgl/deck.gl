@@ -103,7 +103,10 @@ export default class IconDemo extends Component {
     }
   }
 
-  // pre-compute icon clusters
+  // Compute icon clusters
+  // We use the projected positions instead of longitude and latitude to build
+  // the spatial index, because this particular dataset is distributed all over
+  // the world, we can't use some fixed deltaLon and deltaLat
   _updateCluster(points, viewport) {
     const tree = this._tree;
 

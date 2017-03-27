@@ -48,7 +48,18 @@ const loadDataSuccess = (context, index, data, meta) => {
   };
 };
 
-export const loadData = (owner, dataArr) => {
+/*
+ * loads data for a demo
+ * @param {String} owner - identifier of the demo
+ * @param {Object | Array} source - an object or array of objects specifying
+ *  the data that needs to be loaded
+ *    {String} source.url - (required) url of the data file
+ *    {String} source.worker - (optional) url of a web worker
+ *      if specified, then the loaded file content will be passed to the worker
+ *      if not specified, then the loaded file will be parsed as JSON or text
+ *      based on its extension
+ */
+export const loadData = (owner, source) => {
 
   return (dispatch, getState) => {
     if (getState().vis.owner === owner) {
@@ -56,10 +67,10 @@ export const loadData = (owner, dataArr) => {
       return;
     }
 
-    const isArray = Array.isArray(dataArr);
+    const isArray = Array.isArray(source);
 
     if (!isArray) {
-      dataArr = [dataArr];
+      source = [source];
     }
     const context = {
       owner,
@@ -70,7 +81,7 @@ export const loadData = (owner, dataArr) => {
 
     dispatch(loadDataStart(owner));
 
-    dataArr.forEach(({url, worker}, index) => {
+    source.forEach(({url, worker}, index) => {
       if (worker) {
         const req = request(url);
         // use a web worker to parse data
