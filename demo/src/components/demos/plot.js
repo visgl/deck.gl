@@ -2,9 +2,8 @@ import React, {Component} from 'react';
 import autobind from 'autobind-decorator';
 import {Parser} from 'expr-eval';
 
-import OrbitController from '../orbit-controller';
-import PlotLayer from '../../../../examples/sample-layers/plot-layer';
-import DeckGL from 'deck.gl';
+import OrbitController from '../../../../examples/plot/orbit-controller';
+import PlotOverlay from '../../../../examples/plot/deckgl-overlay';
 
 export default class PlotDemo extends Component {
 
@@ -84,15 +83,10 @@ export default class PlotDemo extends Component {
     }
   }
 
-  @autobind _onViewportChange(viewport) {
+  @autobind _onChangeViewport(viewport) {
     this.setState({
       viewport: {...this.state.viewport, ...viewport}
     });
-  }
-
-  _onInitialized(gl) {
-    gl.enable(gl.DEPTH_TEST);
-    gl.depthFunc(gl.LEQUAL);
   }
 
   render() {
@@ -101,28 +95,6 @@ export default class PlotDemo extends Component {
       params: {resolution, showAxis}
     } = this.props;
     const {viewport, equation, hoverInfo} = this.state;
-
-    const layers = equation.valid ? [
-      new PlotLayer({
-        getZ: equation.func,
-        getColor: (x, y, z) => [40, z * 128 + 128, 160],
-        xMin: -Math.PI,
-        xMax: Math.PI,
-        yMin: -Math.PI,
-        yMax: Math.PI,
-        xResolution: resolution.value,
-        yResolution: resolution.value,
-        drawAxes: showAxis.value,
-        axesOffset: 0.25,
-        axesColor: [0, 0, 0, 128],
-        opacity: 1,
-        pickable: true,
-        onHover: this._onHover,
-        updateTriggers: {
-          getZ: equation.text
-        }
-      })
-    ] : [];
 
     const canvasProps = {
       width,
@@ -134,13 +106,13 @@ export default class PlotDemo extends Component {
     return (
       <OrbitController ref="canvas"
         {...canvasProps}
-        onViewportChange={this._onViewportChange} >
-        <DeckGL
-          onWebGLInitialized={this._onInitialized}
-          width={width}
-          height={height}
-          viewport={perspectiveViewport}
-          layers={ layers } />
+        onChangeViewport={this._onChangeViewport} >
+        {resolution && <PlotOverlay
+          viewport={canvasProps}
+          equation={equation.valid ? equation.func : null}
+          resolution={resolution.value}
+          showAxis={showAxis.value}
+          onHover={this._onHover} />}
 
         {hoverInfo && <div className="tooltip" style={{left: hoverInfo.x, top: hoverInfo.y}} >
           { hoverInfo.sample.map(x => x.toFixed(3)).join(', ') }
