@@ -44,7 +44,7 @@ export const examplePages = generatePath([
   {
     name: 'ScreenGridLayer',
     content: {
-      demo: 'GridDemo',
+      demo: 'ScreenGridDemo',
       code: 'code-markdown/grid.md'
     }
   },

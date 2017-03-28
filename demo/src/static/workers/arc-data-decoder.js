@@ -53,10 +53,7 @@ onmessage = function(e) {
 
     postMessage({
       action: 'add',
-      data: [{
-        type: 'FeatureCollection',
-        features: result
-      }],
+      data: result,
       meta: {
         count: result.length,
         flowCount

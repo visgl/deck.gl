@@ -28,17 +28,6 @@ const defaultProps = {
   coverage: 1
 };
 
-function Tooltip({x, y, lat, lng, count}) {
-  return (
-    <div className="tooltip"
-         style={{left: x, top: y}}>
-      <div>{`latitude: ${Number.isFinite(lat) ? lat.toFixed(6) : ''}`}</div>
-      <div>{`longitude: ${Number.isFinite(lng) ? lng.toFixed(6) : ''}`}</div>
-      <div>{`${count} Accidents`}</div>
-    </div>
-  );
-}
-
 export default class DeckGLOverlay extends Component {
 
   static get defaultColorRange() {
@@ -61,13 +50,11 @@ export default class DeckGLOverlay extends Component {
     this.startAnimationTimer = null;
     this.intervalTimer = null;
     this.state = {
-      elevationScale: elevationScale.min,
-      hoveredObject: null
+      elevationScale: elevationScale.min
     };
 
     this._startAnimate = this._startAnimate.bind(this);
     this._animateHeight = this._animateHeight.bind(this);
-    this._onHover = this._onHover.bind(this);
   }
 
   componentWillReceiveProps(nextProps) {
@@ -97,10 +84,6 @@ export default class DeckGLOverlay extends Component {
     }
   }
 
-  _onHover({x, y, object}) {
-    this.setState({x, y, hoveredObject: object});
-  }
-
   _initialize(gl) {
     gl.enable(gl.DEPTH_TEST);
     gl.depthFunc(gl.LEQUAL);
@@ -108,8 +91,6 @@ export default class DeckGLOverlay extends Component {
 
   render() {
     const {viewport, data, radius, coverage, upperPercentile} = this.props;
-
-    const {x, y, hoveredObject} = this.state;
 
     if (!data) {
       return null;
@@ -126,25 +107,15 @@ export default class DeckGLOverlay extends Component {
         extruded: true,
         getPosition: d => d,
         lightSettings: LIGHT_SETTINGS,
-        onHover: this._onHover,
+        onHover: this.props.onHover,
         opacity: 1,
-        pickable: true,
+        pickable: Boolean(this.props.onHover),
         radius,
         upperPercentile
       })
     ];
 
-    return (
-      <div>
-        {this.state.hoveredObject ? <Tooltip
-            x={x}
-            y={y}
-            count={hoveredObject.points.length}
-            lat={hoveredObject.centroid[1]}
-            lng={hoveredObject.centroid[0]}/> : null}
-        <DeckGL {...viewport} layers={layers} onWebGLInitialized={this._initialize} />
-      </div>
-    );
+    return <DeckGL {...viewport} layers={layers} onWebGLInitialized={this._initialize} />;
   }
 }
 

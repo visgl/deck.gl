@@ -1,16 +1,14 @@
 import React, {Component} from 'react';
-
-import DeckGL, {ScreenGridLayer} from 'deck.gl';
-
 import {readableInteger} from '../../utils/format-utils';
 import {MAPBOX_STYLES} from '../../constants/defaults';
+import ScreenGridOverlay from '../../../../examples/screen-grid/deckgl-overlay';
 
-export default class GridDemo extends Component {
+export default class ScreenGridDemo extends Component {
 
   static get data() {
     return {
-      url: 'data/grid-data.txt',
-      worker: 'workers/grid-data-decoder.js'
+      url: 'data/screen-grid-data.txt',
+      worker: 'workers/screen-grid-data-decoder.js'
     };
   }
 
@@ -22,13 +20,8 @@ export default class GridDemo extends Component {
 
   static get viewport() {
     return {
-      mapStyle: MAPBOX_STYLES.DARK,
-      longitude: -119.3,
-      latitude: 35.6,
-      zoom: 6,
-      maxZoom: 20,
-      pitch: 0,
-      bearing: 0
+      ...ScreenGridOverlay.defaultViewport,
+      mapStyle: MAPBOX_STYLES.DARK
     };
   }
 
@@ -50,15 +43,8 @@ export default class GridDemo extends Component {
       return null;
     }
 
-    const layer = new ScreenGridLayer({
-      id: 'grid',
-      data,
-      minColor: [0, 0, 0, 0],
-      cellSizePixels: params.cellSize.value
-    });
-
     return (
-      <DeckGL {...viewport} layers={ [layer] } />
+      <ScreenGridOverlay viewport={viewport} data={data} cellSize={params.cellSize.value} />
     );
   }
 }

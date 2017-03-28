@@ -1,13 +1,13 @@
 import React, {Component} from 'react';
-
-import DeckGL, {GeoJsonLayer} from 'deck.gl';
-
 import {readableInteger} from '../../utils/format-utils';
 import {MAPBOX_STYLES} from '../../constants/defaults';
+import GeoJsonOverlay from '../../../../examples/geojson/deckgl-overlay';
 
-function colorScale(r) {
+const MAX_AGE = 160;
+const colorScale = v => {
+  const r = v / MAX_AGE;
   return [255 * r, 200 * (1 - r), 255 * (1 - r)];
-}
+};
 
 export default class GeoJsonDemo extends Component {
 
@@ -24,13 +24,8 @@ export default class GeoJsonDemo extends Component {
 
   static get viewport() {
     return {
-      mapStyle: MAPBOX_STYLES.LIGHT,
-      latitude: 41.87,
-      longitude: -87.62,
-      zoom: 13,
-      maxZoom: 16,
-      pitch: 0,
-      bearing: 0
+      ...GeoJsonOverlay.defaultViewport,
+      mapStyle: MAPBOX_STYLES.LIGHT
     };
   }
 
@@ -38,7 +33,7 @@ export default class GeoJsonDemo extends Component {
 
     const legendCount = 5;
     const legendBlocks = (new Array(legendCount)).fill(0).map((d, i) => {
-      const color = colorScale(i / (legendCount - 1)).map(Math.round);
+      const color = colorScale(i / (legendCount - 1) * MAX_AGE).map(Math.round);
       return `rgb(${color.join(',')})`;
     });
     const width = `${100 / legendCount}%`;
@@ -54,8 +49,8 @@ export default class GeoJsonDemo extends Component {
         </div>
         <p className="layout">
           <span className="col-1-3">0</span>
-          <span className="col-1-3 text-center">80</span>
-          <span className="col-1-3 text-right">160</span>
+          <span className="col-1-3 text-center">{ MAX_AGE / 2}</span>
+          <span className="col-1-3 text-right">{ MAX_AGE }</span>
         </p>
         <p>Source:&nbsp;
           <a href="https://data.cityofchicago.org/">City of Chicago</a>
@@ -79,21 +74,8 @@ export default class GeoJsonDemo extends Component {
       return null;
     }
 
-    const layers = data.map((d, i) => new GeoJsonLayer({
-      id: `choropleth-${i}`,
-      data: d,
-      stroked: false,
-      filled: true,
-      fp64: true,
-      lineWidthMaxPixels: 1,
-      getFillColor: f => {
-        const r = f.properties.value / 160;
-        return colorScale(r);
-      }
-    }));
-
     return (
-      <DeckGL {...viewport} layers={ layers } />
+      <GeoJsonOverlay viewport={viewport} data={data} colorScale={colorScale} />
     );
   }
 }
