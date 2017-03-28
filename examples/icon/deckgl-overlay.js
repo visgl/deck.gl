@@ -118,7 +118,6 @@ export default class DeckGLOverlay extends Component {
 
   render() {
     const {viewport, data, iconAtlas, iconMapping, showCluster} = this.props;
-    const {hoveredItems} = this.state;
 
     if (!data || !iconMapping) {
       return null;
@@ -129,7 +128,7 @@ export default class DeckGLOverlay extends Component {
 
     const layer = new IconLayer({
       id: 'icon',
-      data: data,
+      data,
       pickable: this.props.onHover || this.props.onClick,
       iconAtlas,
       iconMapping,

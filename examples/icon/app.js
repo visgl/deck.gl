@@ -8,8 +8,6 @@ import {json as requestJson} from 'd3-request';
 
 // Set your mapbox token here
 const MAPBOX_TOKEN = process.env.MAPBOX_ACCESS_TOKEN; // eslint-disable-line
-const MALE_COLOR = [0, 128, 255];
-const FEMALE_COLOR = [255, 0, 128];
 
 class Root extends Component {
 
