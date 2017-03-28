@@ -101,7 +101,6 @@ export default class PlotDemo extends Component {
       height,
       ...viewport
     };
-    const perspectiveViewport = OrbitController.getViewport(canvasProps);
 
     return (
       <OrbitController ref="canvas"

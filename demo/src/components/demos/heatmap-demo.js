@@ -81,20 +81,57 @@ export default class HeatmapDemo extends Component {
     );
   }
 
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      hoveredObject: null
+    };
+  }
+
+  _onHover({x, y, object}) {
+    this.setState({x, y, hoveredObject: object});
+  }
+
+  _renderTooltip() {
+    const {x, y, hoveredObject} = this.state;
+
+    if (!hoveredObject) {
+      return null;
+    }
+    const lat = hoveredObject.centroid[1];
+    const lng = hoveredObject.centroid[0];
+    const count = hoveredObject.points.length;
+
+    return (
+      <div className="tooltip"
+           style={{left: x, top: y}}>
+        <div>{`latitude: ${Number.isFinite(lat) ? lat.toFixed(6) : ''}`}</div>
+        <div>{`longitude: ${Number.isFinite(lng) ? lng.toFixed(6) : ''}`}</div>
+        <div>{`${count} Accidents`}</div>
+      </div>
+    );
+  }
+
   render() {
     const {viewport, params, data} = this.props;
+
     if (!data) {
       return null;
     }
 
     return (
-      <HeatmapOverlay
-        viewport={viewport}
-        data={data}
-        radius={params.radius.value}
-        upperPercentile={params.upperPercentile.value}
-        coverage={params.coverage.value}
-      />
+      <div>
+        {this._renderTooltip()}
+        <HeatmapOverlay
+          viewport={viewport}
+          data={data}
+          radius={params.radius.value}
+          upperPercentile={params.upperPercentile.value}
+          coverage={params.coverage.value}
+          onHover={this._onHover.bind(this)}
+        />
+      </div>
     );
   }
 }

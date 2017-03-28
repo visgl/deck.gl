@@ -42,7 +42,7 @@ export default class ScreenGridDemo extends Component {
     if (!data) {
       return null;
     }
-    
+
     return (
       <ScreenGridOverlay viewport={viewport} data={data} cellSize={params.cellSize.value} />
     );

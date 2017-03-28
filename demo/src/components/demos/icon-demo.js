@@ -1,4 +1,3 @@
-/* global window */
 import React, {Component} from 'react';
 import {MAPBOX_STYLES} from '../../constants/defaults';
 import {readableInteger} from '../../utils/format-utils';
