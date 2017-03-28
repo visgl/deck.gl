@@ -38,10 +38,15 @@ class App extends PureComponent {
       activeExamples: {},
       settings: {
         // immutable: false,
-        effects: false,
-        separation: 0,
-        rotationZ: 0,
-        rotationX: 0
+        // Effects are experimental for now. Will be enabled in the future
+        // effects: false,
+        separation: 0
+        // the rotation controls works only for layers in
+        // meter offset projection mode. They are commented out
+        // here since layer browser currently only have one layer
+        // in this mode.
+        // rotationZ: 0,
+        // rotationX: 0
       },
       hoveredItem: null,
       clickedItem: null
