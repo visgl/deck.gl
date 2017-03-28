@@ -81,11 +81,6 @@ export default class HeatmapDemo extends Component {
     );
   }
 
-  constructor(props) {
-    super(props);
-    this.state = {};
-  }
-
   render() {
     const {viewport, params, data} = this.props;
     if (!data) {
