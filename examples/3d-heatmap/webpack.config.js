@@ -1,6 +1,20 @@
 const {resolve} = require('path');
 const webpack = require('webpack');
 
+// Otherwise modules imported from outside this directory does not compile
+// Seems to be a Babel bug
+// https://github.com/babel/babel-loader/issues/149#issuecomment-191991686
+const BABEL_CONFIG = {
+  presets: [
+    'es2015',
+    'react',
+    'stage-2'
+  ].map(name => require.resolve(`babel-preset-${name}`)),
+  plugins: [
+    'transform-decorators-legacy'
+  ].map(name => require.resolve(`babel-plugin-${name}`))
+};
+
 module.exports = {
   entry: {
     app: resolve('./app.js')
@@ -10,14 +24,12 @@ module.exports = {
 
   module: {
     rules: [{
-      // Compile ES2015 using buble
+      // Compile with babel
       test: /\.js$/,
-      loader: 'buble-loader',
+      loader: 'babel-loader',
       include: [resolve('.')],
       exclude: [/node_modules/],
-      options: {
-        objectAssign: 'Object.assign'
-      }
+      query: BABEL_CONFIG
     }]
   },
 

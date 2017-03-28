@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 import {readableInteger} from '../../utils/format-utils';
-//import HeatmapOverlay from '../../../../examples/3d-heatmap/deckgl-overlay';
+import HeatmapOverlay from '../../../../examples/3d-heatmap/deckgl-overlay';
 
 import {MAPBOX_STYLES} from '../../constants/defaults';
 
@@ -18,16 +18,25 @@ export default class HeatmapDemo extends Component {
       radius: {
         displayName: 'Radius',
         type: 'number',
-        value: 1000,
-        step: 1000,
-        min: 1000
+        value: 2000,
+        step: 500,
+        min: 500
+      },
+      coverage: {
+        displayName: 'Coverage',
+        type: 'number',
+        value: 1,
+        step: 0.1,
+        min: 0,
+        max: 1
       },
       upperPercentile: {
         displayName: 'Upper Percentile',
         type: 'number',
         value: 100,
-        step: 1,
-        min: 0
+        step: 0.5,
+        min: 0,
+        max: 100
       }
     };
   }
@@ -67,8 +76,6 @@ export default class HeatmapDemo extends Component {
           <div className="stat col-1-2">
             Accidents<b>{ readableInteger(meta.count) || 0 }</b>
           </div>
-          <div className="stat col-1-2">
-          </div>
         </div>
       </div>
     );
@@ -84,14 +91,15 @@ export default class HeatmapDemo extends Component {
     if (!data) {
       return null;
     }
-    return null;
-    // return (
-    //   <HeatmapOverlay
-    //     viewport={viewport}
-    //     data={data}
-    //     radius={params.radius.value}
-    //     upperPercentile={params.upperPercentile.value}
-    //   />
-    // );
+
+    return (
+      <HeatmapOverlay
+        viewport={viewport}
+        data={data}
+        radius={params.radius.value}
+        upperPercentile={params.upperPercentile.value}
+        coverage={params.coverage.value}
+      />
+    );
   }
 }

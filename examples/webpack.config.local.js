@@ -62,6 +62,6 @@ module.exports = baseConfig => env => {
   if (env && env.local) {
     addLocalDevSettings(config);
   }
-  // console.log(JSON.stringify(config, null, 2));
+
   return config;
 };

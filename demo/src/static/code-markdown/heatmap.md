@@ -1,3 +1,4 @@
+```
 /* global window */
 import React, {Component} from 'react';
 import DeckGL, {HexagonLayer} from 'deck.gl';
@@ -8,7 +9,7 @@ const LIGHT_SETTINGS = {
   ambientRatio: 0.6,
   diffuseRatio: 0.6,
   specularRatio: 0.3,
-  lightsStrength: [0.8, 0.0, 0.8, 0.0],
+  lightsStrength: [1, 0.0, 0.8, 0.0],
   numberOfLights: 2
 };
 
@@ -22,23 +23,6 @@ const colorRange = [
 ];
 
 const elevationScale = {min: 1, max: 50};
-
-const defaultProps = {
-  radius: 1000,
-  upperPercentile: 100,
-  coverage: 1
-};
-
-function Tooltip({x, y, lat, lng, count}) {
-  return (
-    <div className="tooltip"
-         style={{left: x, top: y}}>
-      <div>{`latitude: ${Number.isFinite(lat) ? lat.toFixed(6) : ''}`}</div>
-      <div>{`longitude: ${Number.isFinite(lng) ? lng.toFixed(6) : ''}`}</div>
-      <div>{`${count} Accidents`}</div>
-    </div>
-  );
-}
 
 export default class DeckGLOverlay extends Component {
 
@@ -68,11 +52,12 @@ export default class DeckGLOverlay extends Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    if (nextProps.data.length !== this.props.data.length) {
+    if (this.props.data.length !== nextProps.data.length) {
       this._animate();
     }
   }
 
+  @autobind
   _animate() {
     window.clearTimeout(this.startAnimationTimer);
     window.clearTimeout(this.intervalTimer);
@@ -107,8 +92,7 @@ export default class DeckGLOverlay extends Component {
   }
 
   render() {
-    const {viewport, data, radius, coverage, upperPercentile} = this.props;
-
+    const {viewport, data, radius, upperPercentile} = this.props;
     const {x, y, hoveredObject} = this.state;
 
     if (!data) {
@@ -118,35 +102,44 @@ export default class DeckGLOverlay extends Component {
     const layers = [
       new HexagonLayer({
         id: 'heatmap',
-        colorRange,
-        coverage,
         data,
-        elevationRange: [0, 3000],
-        elevationScale: this.state.elevationScale,
-        extruded: true,
-        getPosition: d => d,
-        lightSettings: LIGHT_SETTINGS,
-        onHover: this._onHover,
         opacity: 1,
+        colorRange,
+        extruded: true,
         pickable: true,
         radius,
-        upperPercentile
+        upperPercentile,
+        elevationScale: this.state.elevationScale,
+        elevationRange: [0, 3000],
+        coverage: 1,
+        getPosition: d => d,
+        onHover: this._onHover,
+        lightSettings: LIGHT_SETTINGS
       })
     ];
 
     return (
       <div>
         {this.state.hoveredObject ? <Tooltip
-            x={x}
-            y={y}
-            count={hoveredObject.points.length}
-            lat={hoveredObject.centroid[1]}
-            lng={hoveredObject.centroid[0]}/> : null}
+          x={x}
+          y={y}
+          count={hoveredObject.points.length}
+          lat={hoveredObject.centroid[1]}
+          lng={hoveredObject.centroid[0]}/> : null}
         <DeckGL {...viewport} layers={layers} onWebGLInitialized={this._initialize} />
       </div>
     );
   }
 }
 
-DeckGLOverlay.displayName = 'DeckGLOverlay';
-DeckGLOverlay.defaultProps = defaultProps;
+function Tooltip({x, y, lat, lng, count}) {
+  return (
+    <div className="tooltip"
+         style={{left: x, top: y}}>
+      <div>{`latitude: ${Number.isFinite(lat) ? lat.toFixed(6) : ''}`}</div>
+      <div>{`longitude: ${Number.isFinite(lng) ? lat.toFixed(6) : ''}`}</div>
+      <div>{`${count} Accidents`}</div>
+    </div>
+  );
+}
+```

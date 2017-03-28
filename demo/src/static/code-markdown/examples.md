@@ -35,7 +35,7 @@
     </div>
   </div>
   <div class="thumb">
-    <div class="bg-black" data-title="Road Safety in UK" data-name="HeatmapLayer">
+    <div class="bg-black" data-title="Road Safety in UK" data-name="HexagonLayer">
       <a href="#/examples/3-heatmap">
         <img src="images/demo-thumb-heatmap.jpg" />
       </a>

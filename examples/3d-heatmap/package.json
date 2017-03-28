@@ -5,6 +5,7 @@
     "build": "NODE_ENV=production webpack --env.prod=true"
   },
   "dependencies": {
+    "autobind-decorator": "^1.3.3",
     "d3-request": "^1.0.5",
     "deck.gl": "^4.0.0-rc.4",
     "immutable": "^3.8.1",
@@ -14,7 +15,13 @@
     "react-map-gl": "^2.0.0"
   },
   "devDependencies": {
+    "babel-core": "^6.24.0",
+    "babel-loader": "^6.4.1",
+    "babel-preset-es2015": "^6.24.0",
+    "babel-preset-react": "^6.23.0",
+    "babel-preset-stage-2": "^6.22.0",
     "buble-loader": "^0.4.0",
+    "babel-plugin-transform-decorators-legacy": "^1.3.4",
     "webpack": "^2.2.0",
     "webpack-dev-server": "^2.2.0"
   }

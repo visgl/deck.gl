@@ -19,14 +19,13 @@ class Root extends Component {
         width: 500,
         height: 500
       },
-      buildings: null,
-      trips: null,
-      time: 0
+      data: null
     };
 
     requestCsv('./data/heatmap-data.csv', (error, response) => {
       if (!error) {
-        this.setState({data: response});
+        const data = response.map(d => ([Number(d.lng), Number(d.lat)]));
+        this.setState({data});
       }
     });
   }
@@ -59,8 +58,9 @@ class Root extends Component {
         perspectiveEnabled={true}
         onChangeViewport={this._onChangeViewport.bind(this)}
         mapboxApiAccessToken={MAPBOX_TOKEN}>
-        <DeckGLOverlay viewport={viewport}
-          data={data}
+        <DeckGLOverlay
+          viewport={viewport}
+          data={data || []}
         />
       </MapGL>
     );
