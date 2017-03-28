@@ -76,9 +76,9 @@ export default class ArcDemo extends Component {
     }
   }
 
-  _onSelectCounty(feature) {
-    this.setState({selectedCounty: feature});
-    this.props.onStateChange({sourceName: feature.properties.name});
+  _onSelectCounty({object}) {
+    this.setState({selectedCounty: object});
+    this.props.onStateChange({sourceName: object.properties.name});
   }
 
   render() {
@@ -94,7 +94,7 @@ export default class ArcDemo extends Component {
         data={data}
         selectedFeature={selectedCounty}
         strokeWidth={params.lineWidth.value}
-        onClickFeature={this._onSelectCounty.bind(this)} />
+        onClick={this._onSelectCounty.bind(this)} />
     );
   }
 }

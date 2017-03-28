@@ -51,8 +51,10 @@ class Root extends Component {
     });
   }
 
-  _onSelectCounty(name) {
-    this.setState({selectedCounty: name});
+  _onSelectCounty({object}) {
+    if (this.state.selectedCounty !== object) {
+      this.setState({selectedCounty: object});
+    }
   }
 
   render() {
@@ -68,7 +70,7 @@ class Root extends Component {
           data={data}
           selectedFeature={selectedCounty}
           strokeWidth={2}
-          onClickFeature={this._onSelectCounty.bind(this)}
+          onClick={this._onSelectCounty.bind(this)}
           />
       </MapGL>
     );

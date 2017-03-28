@@ -85,12 +85,6 @@ export default class DeckGLOverlay extends Component {
     gl.depthFunc(gl.LEQUAL);
   }
 
-  _onClickFeature({object}) {
-    if (this.props.selectedFeature !== object) {
-      this.props.onClickFeature(object);
-    }
-  }
-
   render() {
     const {viewport, strokeWidth, data} = this.props;
     const {arcs} = this.state;
@@ -106,7 +100,7 @@ export default class DeckGLOverlay extends Component {
         stroked: false,
         filled: true,
         getFillColor: () => [0, 0, 0, 0],
-        onClick: this._onClickFeature.bind(this),
+        onClick: this.props.onClick,
         pickable: true
       }),
       new ArcLayer({
