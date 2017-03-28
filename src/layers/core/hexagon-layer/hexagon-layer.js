@@ -110,7 +110,7 @@ export default class HexagonLayer extends Layer {
       // this needs sortedCounts to be set
       this._onPercentileChange();
 
-    } else if (_percentileChanged) {
+    } else if (_percentileChanged(oldProps, props)) {
 
       this._onPercentileChange();
     }
