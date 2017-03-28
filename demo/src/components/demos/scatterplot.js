@@ -1,9 +1,7 @@
 import React, {Component} from 'react';
-
-import DeckGL, {ScatterplotLayer} from 'deck.gl';
-
 import {MAPBOX_STYLES} from '../../constants/defaults';
 import {readableInteger} from '../../utils/format-utils';
+import ScatterplotOverlay from '../../../../examples/scatterplot/deckgl-overlay';
 
 export default class ScatterPlotDemo extends Component {
 
@@ -24,13 +22,8 @@ export default class ScatterPlotDemo extends Component {
 
   static get viewport() {
     return {
-      mapStyle: MAPBOX_STYLES.LIGHT,
-      longitude: -74,
-      latitude: 40.7,
-      zoom: 11,
-      maxZoom: 16,
-      pitch: 0,
-      bearing: 0
+      ...ScatterplotOverlay.defaultViewport,
+      mapStyle: MAPBOX_STYLES.LIGHT
     };
   }
 
@@ -54,21 +47,12 @@ export default class ScatterPlotDemo extends Component {
       return null;
     }
 
-    const layer = new ScatterplotLayer({
-      id: 'scatter-plot',
-      data,
-      radiusScale: params.radius.value,
-      radiusMinPixels: 0.25,
-      getPosition: d => [d[0], d[1], 0],
-      getColor: d => d[2] === 1 ? params.colorM.value : params.colorF.value,
-      getRadius: d => 1,
-      updateTriggers: {
-        getColor: {c1: params.colorM.value, c2: params.colorF.value}
-      }
-    });
-
     return (
-      <DeckGL {...viewport} layers={ [layer] } />
+      <ScatterplotOverlay viewport={viewport}
+        data={data}
+        maleColor={params.colorM.value}
+        femaleColor={params.colorF.value}
+        radius={params.radius.value} />
     );
   }
 }

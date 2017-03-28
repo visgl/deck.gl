@@ -8,6 +8,8 @@ import {json as requestJson} from 'd3-request';
 
 // Set your mapbox token here
 const MAPBOX_TOKEN = process.env.MAPBOX_ACCESS_TOKEN; // eslint-disable-line
+const MALE_COLOR = [0, 128, 255];
+const FEMALE_COLOR = [255, 0, 128];
 
 class Root extends Component {
 
@@ -19,16 +21,12 @@ class Root extends Component {
         width: 500,
         height: 500
       },
-      data: null,
-      selectedCounty: null
+      data: null
     };
 
-    requestJson('./data/counties.json', (error, response) => {
+    requestJson('./data/manhattan.json', (error, response) => {
       if (!error) {
-        this.setState({
-          data: response.features,
-          selectedCounty: response.features[126]
-        });
+        this.setState({data: response});
       }
     });
   }
@@ -51,12 +49,8 @@ class Root extends Component {
     });
   }
 
-  _onSelectCounty(name) {
-    this.setState({selectedCounty: name});
-  }
-
   render() {
-    const {viewport, data, selectedCounty} = this.state;
+    const {viewport, data} = this.state;
 
     return (
       <MapGL
@@ -66,9 +60,9 @@ class Root extends Component {
         mapboxApiAccessToken={MAPBOX_TOKEN}>
         <DeckGLOverlay viewport={viewport}
           data={data}
-          selectedFeature={selectedCounty}
-          strokeWidth={2}
-          onClickFeature={this._onSelectCounty.bind(this)}
+          maleColor={MALE_COLOR}
+          femaleColor={FEMALE_COLOR}
+          radius={30}
           />
       </MapGL>
     );
