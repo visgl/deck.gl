@@ -30,23 +30,23 @@ const EnhancedChoroplethLayerExample = {
   }
 };
 
-import BitmapLayer from '../../../sample-layers/bitmap-layer/bitmap-layer';
+// import BitmapLayer from '../../../sample-layers/bitmap-layer/bitmap-layer';
 
-const BitmapLayerExample = {
-  layer: BitmapLayer,
-  props: {
-    data: []
-  }
-};
+// const BitmapLayerExample = {
+//   layer: BitmapLayer,
+//   props: {
+//     data: []
+//   }
+// };
 
-import MeshLayer from '../../../sample-layers/mesh-layer/mesh-layer';
+// import MeshLayer from '../../../sample-layers/mesh-layer/mesh-layer';
 
-const MeshLayerExample = {
-  layer: MeshLayer,
-  props: {
-    data: []
-  }
-};
+// const MeshLayerExample = {
+//   layer: MeshLayer,
+//   props: {
+//     data: []
+//   }
+// };
 
 import LabelLayer from '../../../sample-layers/label-layer/label-layer';
 
@@ -67,11 +67,9 @@ const LabelLayerExample = {
 export default {
   'Sample Layers': {
     'S2Layer': S2LayerExample,
-
     'EnhancedChoroplethLayer': EnhancedChoroplethLayerExample,
-
-    'BitmapLayer': BitmapLayerExample,
-    'MeshLayer': MeshLayerExample,
+    // 'BitmapLayer': BitmapLayerExample,
+    // 'MeshLayer': MeshLayerExample,
     'LabelLayer': LabelLayerExample
   }
 };

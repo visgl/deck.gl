@@ -38,10 +38,10 @@ class App extends PureComponent {
       activeExamples: {},
       settings: {
         // immutable: false,
-        effects: false,
-        separation: 0,
-        rotationZ: 0,
-        rotationX: 0
+        // effects: false,
+        separation: 0
+        // rotationZ: 0,
+        // rotationX: 0
       },
       hoveredItem: null,
       clickedItem: null
