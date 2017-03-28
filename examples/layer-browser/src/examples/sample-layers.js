@@ -30,6 +30,8 @@ const EnhancedChoroplethLayerExample = {
   }
 };
 
+// BitmapLayer and MeshLayer examples are current commented out
+// They going to be added in the future.
 // import BitmapLayer from '../../../sample-layers/bitmap-layer/bitmap-layer';
 
 // const BitmapLayerExample = {
@@ -68,6 +70,8 @@ export default {
   'Sample Layers': {
     'S2Layer': S2LayerExample,
     'EnhancedChoroplethLayer': EnhancedChoroplethLayerExample,
+    // BitmapLayer and MeshLayer examples are current commented out
+    // They going to be added in the future.
     // 'BitmapLayer': BitmapLayerExample,
     // 'MeshLayer': MeshLayerExample,
     'LabelLayer': LabelLayerExample
