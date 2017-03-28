@@ -55,7 +55,7 @@ export default class HeatmapDemo extends Component {
 
     return (
       <div>
-        <h3>United Kingdom Road Safty</h3>
+        <h3>United Kingdom Road Safety</h3>
         <p>Personal injury road accidents in GB from 1979</p>
 
         <div className="layout">
