@@ -2,7 +2,7 @@
 // map view properties
 import Viewport, {createMat4} from './viewport';
 import {mat4, vec2} from 'gl-matrix';
-import autobind from './autobind';
+import autobind from '../../react/autobind';
 import assert from 'assert';
 
 // CONSTANTS
@@ -57,7 +57,7 @@ export default class WebMercatorViewport extends Viewport {
    *    division by zero. This is intended to reduce the burden of apps to
    *    to check values before instantiating a Viewport.
    */
-  /* eslint-disable complexity */
+  /* eslint-disable complexity, max-statements */
   constructor({
     // Map state
     width,
@@ -133,7 +133,7 @@ export default class WebMercatorViewport extends Viewport {
     autobind(this);
     Object.freeze(this);
   }
-  /* eslint-enable complexity */
+  /* eslint-enable complexity, max-statements */
 
   /**
    * Project [lng,lat] on sphere onto [x,y] on 512*512 Mercator Zoom 0 tile.

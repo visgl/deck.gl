@@ -4,7 +4,7 @@
 // However since it is used by mapbox etc, it should already be present
 // in most target application bundles.
 import {mat4, vec4, vec2} from 'gl-matrix';
-import autobind from './autobind';
+import autobind from '../../react/autobind';
 import assert from 'assert';
 
 const IDENTITY = createMat4();

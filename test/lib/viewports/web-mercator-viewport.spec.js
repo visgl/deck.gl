@@ -1,6 +1,6 @@
 import test from 'tape-catch';
 import {vec2, vec3} from 'gl-matrix';
-import {PerspectiveMercatorViewport} from 'viewport-mercator-project';
+import {PerspectiveMercatorViewport} from 'deck.gl';
 
 /* eslint-disable */
 const TEST_VIEWPORTS = [

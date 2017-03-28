@@ -1,4 +1,4 @@
-import {PerspectiveMercatorViewport} from 'viewport-mercator-project';
+import {PerspectiveMercatorViewport} from 'deck.gl';
 import test from 'tape-catch';
 import {toLowPrecision} from '../utils/test-utils';
 
