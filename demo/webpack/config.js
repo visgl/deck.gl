@@ -41,6 +41,11 @@ module.exports = {
       loader: 'raw-loader',
       include: demoSources,
       enforce: 'post'
+    }, {
+      // Needed to inline mapbox shaders
+      include: /mapbox-gl/,
+      loader: 'transform-loader',
+      options: 'brfs-babel'
     }]
   },
 
