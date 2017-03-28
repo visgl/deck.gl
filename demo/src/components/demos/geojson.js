@@ -82,7 +82,7 @@ export default class GeoJsonDemo extends Component {
     const layers = data.map((d, i) => new GeoJsonLayer({
       id: `choropleth-${i}`,
       data: d,
-      stroked: true,
+      stroked: false,
       filled: true,
       fp64: true,
       lineWidthMaxPixels: 1,
