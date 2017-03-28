@@ -3,25 +3,6 @@ import * as mainDataSamples from '../data-samples';
 import * as extraDataSamples from '../../../sample-layers/data';
 const dataSamples = Object.assign({}, mainDataSamples, extraDataSamples);
 
-import TripsLayer from '../../../sample-layers/trips-layer/trips-layer';
-
-const TripsLayerExample = {
-  layer: TripsLayer,
-  props: {
-    id: 'trips-layer  ',
-    data: dataSamples.trips,
-    getPath: trip => trip.map(d => [
-      d.begin_shape[0],
-      d.begin_shape[1],
-      // cast time range to [0, 1]
-      d.begin_time / 2000
-    ]),
-    getColor: f => [0, 80, 200],
-    trailLength: 0.25,
-    currentTime: 0.4
-  }
-};
-
 import S2Layer from '../../../sample-layers/s2-layer/s2-layer';
 
 const S2LayerExample = {
@@ -85,7 +66,6 @@ const LabelLayerExample = {
 /* eslint-disable quote-props */
 export default {
   'Sample Layers': {
-    'TripsLayer': TripsLayerExample,
     'S2Layer': S2LayerExample,
 
     'EnhancedChoroplethLayer': EnhancedChoroplethLayerExample,
