@@ -89,7 +89,7 @@ export default class GridLayer extends Layer {
   }
 
   renderLayers() {
-    const {id, elevationScale, fp64, extruded, cellSize} = this.props;
+    const {id, elevationScale, fp64, extruded, cellSize, lightSettings} = this.props;
 
     // base layer props
     const {opacity, pickable, visible} = this.props;
@@ -101,6 +101,7 @@ export default class GridLayer extends Layer {
       id: `${id}-grid-cell`,
       data: this.state.layerData,
       cellSize,
+      lightSettings,
       elevationScale,
       extruded,
       fp64,

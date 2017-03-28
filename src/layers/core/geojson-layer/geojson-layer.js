@@ -83,7 +83,7 @@ export default class GeoJsonLayer extends CompositeLayer {
     const {pointFeatures, lineFeatures, polygonFeatures, polygonOutlineFeatures} = features;
 
     // Layer composition props
-    const {id, stroked, filled, extruded, wireframe} = this.props;
+    const {id, stroked, filled, extruded, wireframe, lightSettings} = this.props;
 
     // Rendering props underlying layer
     const {lineWidthScale, lineWidthMinPixels, lineWidthMaxPixels,
@@ -112,6 +112,7 @@ export default class GeoJsonLayer extends CompositeLayer {
         data: polygonFeatures,
         extruded,
         wireframe: false,
+        lightSettings,
         fp64,
         opacity,
         pickable,
