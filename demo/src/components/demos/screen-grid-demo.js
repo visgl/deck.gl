@@ -3,7 +3,7 @@ import {readableInteger} from '../../utils/format-utils';
 import {MAPBOX_STYLES} from '../../constants/defaults';
 import ScreenGridOverlay from '../../../../examples/screen-grid/deckgl-overlay';
 
-export default class GridDemo extends Component {
+export default class ScreenGridDemo extends Component {
 
   static get data() {
     return {

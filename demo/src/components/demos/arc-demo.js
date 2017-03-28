@@ -64,6 +64,7 @@ export default class ArcDemo extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      // Set default selection to San Francisco
       selectedCounty: props.data ? props.data[362] : null
     };
   }
@@ -71,6 +72,7 @@ export default class ArcDemo extends Component {
   componentWillReceiveProps(nextProps) {
     if (nextProps.data !== this.props.data) {
       this.setState({
+        // Set default selection to San Francisco
         selectedCounty: nextProps.data[362]
       });
     }

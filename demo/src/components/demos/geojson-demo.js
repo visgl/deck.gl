@@ -75,7 +75,7 @@ export default class GeoJsonDemo extends Component {
     }
 
     return (
-      <GeoJsonOverlay viewport={viewport} dataArray={data} colorScale={colorScale} />
+      <GeoJsonOverlay viewport={viewport} data={data} colorScale={colorScale} />
     );
   }
 }

@@ -21,14 +21,14 @@ export default class DeckGLOverlay extends Component {
   }
 
   render() {
-    const {viewport, dataArray, colorScale, extruded} = this.props;
+    const {viewport, data, colorScale, extruded} = this.props;
 
-    if (!dataArray) {
+    if (!data) {
       return null;
     }
 
-    const layers = dataArray.map((data, index) => new GeoJsonLayer({
-      id: `geojson-${index}`,
+    const layer = new GeoJsonLayer({
+      id: 'geojson',
       data,
       stroked: true,
       filled: true,
@@ -37,10 +37,10 @@ export default class DeckGLOverlay extends Component {
       lineWidthMaxPixels: 1,
       getElevation: f => f.properties.value,
       getFillColor: f => colorScale(f.properties.value)
-    }));
+    });
 
     return (
-      <DeckGL {...viewport} layers={ layers } onWebGLInitialized={this._initialize} />
+      <DeckGL {...viewport} layers={ [layer] } onWebGLInitialized={this._initialize} />
     );
   }
 }

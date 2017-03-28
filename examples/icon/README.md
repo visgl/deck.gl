@@ -1,4 +1,4 @@
-This is a minimal standalone version of the TripsLayer example
+This is a minimal standalone version of the IconLayer example
 on [deck.gl](http://deck.gl) website.
 
 ### Usage
@@ -10,4 +10,4 @@ npm start
 
 ### Data format
 Sample data is stored in the `data` folder. To use your own data, checkout
-the [documentation of TripsLayer](./trips-layer/README.md).
+the [documentation of IconLayer](../../docs/layers/icon-layer.md).

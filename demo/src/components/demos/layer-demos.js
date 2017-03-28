@@ -1,4 +1,4 @@
-import createLayerDemoClass from './layer-base';
+import createLayerDemoClass from './layer-demo-base';
 
 import {
   ScatterplotLayer,

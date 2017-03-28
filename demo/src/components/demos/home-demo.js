@@ -1,4 +1,4 @@
-import TripsDemo from './trips';
+import TripsDemo from './trips-demo';
 
 export default class HomeDemo extends TripsDemo {
 

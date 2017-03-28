@@ -49,10 +49,7 @@ onmessage = function(e) {
 function flush() {
   postMessage({
     action: 'add',
-    data: [{
-      type: 'FeatureCollection',
-      features: result
-    }],
+    data: result,
     meta: {count, vertexCount}
   });
   result = [];

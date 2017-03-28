@@ -21,12 +21,12 @@ class Root extends Component {
         width: 500,
         height: 500
       },
-      dataArray: null
+      data: null
     };
 
     requestJson('./data/chicago-buildings.json', (error, response) => {
       if (!error) {
-        this.setState({dataArray: [response]});
+        this.setState({data: response});
       }
     });
   }
@@ -50,7 +50,7 @@ class Root extends Component {
   }
 
   render() {
-    const {viewport, dataArray} = this.state;
+    const {viewport, data} = this.state;
 
     return (
       <MapGL
@@ -59,7 +59,7 @@ class Root extends Component {
         onChangeViewport={this._onChangeViewport.bind(this)}
         mapboxApiAccessToken={MAPBOX_TOKEN}>
         <DeckGLOverlay viewport={viewport}
-          dataArray={dataArray}
+          data={data}
           colorScale={colorScale} />
       </MapGL>
     );
