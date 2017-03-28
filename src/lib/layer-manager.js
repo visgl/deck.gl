@@ -259,6 +259,7 @@ export default class LayerManager {
 
     // Move state
     newLayer.state = state;
+    newLayer.lifecycle = 'Matched. State transferred from previous layer';
     state.layer = newLayer;
 
     // Update model layer reference
@@ -267,7 +268,8 @@ export default class LayerManager {
     }
     // Keep a temporary ref to the old props, for prop comparison
     newLayer.oldProps = props;
-    oldLayer.state = null;
+    // oldLayer.state = null;
+    newLayer.lifecycle = 'Awaiting garbage collection';
   }
 
   // Update the old layers that were not matched
@@ -296,6 +298,7 @@ export default class LayerManager {
           context: this.context,
           changeFlags: layer.diffProps({}, layer.props, this.context)
         });
+        layer.lifecycle = 'Intialized';
       } catch (err) {
         log.once(0, `deck.gl error during initialization of ${layerName(layer)} ${err}`, err);
         // Save first error
@@ -350,7 +353,8 @@ export default class LayerManager {
         // Save first error
         error = err;
       }
-      layer.state = null;
+      // layer.state = null;
+      layer.lifecycle = 'Finalized! Awaiting garbage collection';
       log(1, `finalizing ${layerName(layer)}`);
     }
     return error;

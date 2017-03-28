@@ -68,6 +68,7 @@ export default class Layer {
     this.context = null;
     this.parentLayer = null;
     this.count = counter++;
+    this.lifecycle = 'Awaiting state';
     Object.seal(this);
   }
 
