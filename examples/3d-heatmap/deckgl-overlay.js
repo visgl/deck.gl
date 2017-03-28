@@ -1,7 +1,6 @@
 /* global window */
 import React, {Component} from 'react';
 import DeckGL, {HexagonLayer} from 'deck.gl';
-import autobind from 'autobind-decorator';
 
 const LIGHT_SETTINGS = {
   lightsPosition: [-0.144528, 49.739968, 8000, -3.807751, 54.104682, 8000],
@@ -65,6 +64,10 @@ export default class DeckGLOverlay extends Component {
       elevationScale: elevationScale.min,
       hoveredObject: null
     };
+
+    this._startAnimate = this._startAnimate.bind(this);
+    this._animateHeight = this._animateHeight.bind(this);
+    this._onHover = this._onHover.bind(this);
   }
 
   componentWillReceiveProps(nextProps) {
@@ -81,12 +84,10 @@ export default class DeckGLOverlay extends Component {
     this.startAnimationTimer = window.setTimeout(this._startAnimate, 1500);
   }
 
-  @autobind
   _startAnimate() {
     window.setInterval(this._animateHeight, 20);
   }
 
-  @autobind
   _animateHeight() {
     if (this.state.elevationScale === elevationScale.max) {
       window.clearTimeout(this.startAnimationTimer);
@@ -96,7 +97,6 @@ export default class DeckGLOverlay extends Component {
     }
   }
 
-  @autobind
   _onHover({x, y, object}) {
     this.setState({x, y, hoveredObject: object});
   }
