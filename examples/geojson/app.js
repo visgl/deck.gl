@@ -24,7 +24,7 @@ class Root extends Component {
       data: null
     };
 
-    requestJson('./data/chicago-buildings.json', (error, response) => {
+    requestJson('./data/vancouver-blocks.json', (error, response) => {
       if (!error) {
         this.setState({data: response});
       }
@@ -55,6 +55,7 @@ class Root extends Component {
     return (
       <MapGL
         {...viewport}
+        mapStyle="mapbox://styles/uberdata/cive485h000192imn6c6cc8fc"
         perspectiveEnabled={true}
         onChangeViewport={this._onChangeViewport.bind(this)}
         mapboxApiAccessToken={MAPBOX_TOKEN}>
