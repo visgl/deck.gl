@@ -1,37 +1,8 @@
 import React, {Component} from 'react';
-import DeckGL, {HexagonLayer} from 'deck.gl';
 import {readableInteger} from '../../utils/format-utils';
+//import HeatmapOverlay from '../../../../examples/3d-heatmap/deckgl-overlay';
 
 import {MAPBOX_STYLES} from '../../constants/defaults';
-
-// const colorRange = [
-//   [1, 152, 189],
-//   [1, 202, 252],
-//   [73, 227, 206],
-//   [143, 253, 159],
-//   [216, 254, 181]
-// ];
-
-const colorRange = [
-  [1, 152, 189],
-  [73, 227, 206],
-  [216, 254, 181],
-  [254, 237, 177],
-  [254, 173, 84],
-  [209, 55, 78]
-];
-
-const LIGHT_SETTINGS = {
-  lightsPosition: [-0.144528, 49.739968, 8000, -3.807751, 54.104682, 8000],
-  ambientRatio: 0.6,
-  diffuseRatio: 0.6,
-  specularRatio: 0.3,
-  lightsStrength: [1, 0.0, 0.8, 0.0],
-  numberOfLights: 2
-};
-
-const colorRamp = colorRange.slice()
-  .map(color => `rgb(${color.join(',')})`);
 
 export default class HeatmapDemo extends Component {
 
@@ -63,17 +34,15 @@ export default class HeatmapDemo extends Component {
 
   static get viewport() {
     return {
-      mapStyle: MAPBOX_STYLES.DARK,
-      longitude: -1.4855092665310963,
-      latitude: 52.38821282001933,
-      zoom: 6.6,
-      maxZoom: 15,
-      pitch: 60,
-      bearing: -14
+      ...HeatmapOverlay.defaultViewport,
+      mapStyle: MAPBOX_STYLES.DARK
     };
   }
 
   static renderInfo(meta) {
+
+    const colorRamp = HeatmapOverlay.defaultColorRange.slice()
+      .map(color => `rgb(${color.join(',')})`);
 
     return (
       <div>
@@ -110,41 +79,19 @@ export default class HeatmapDemo extends Component {
     this.state = {};
   }
 
-  componentWillReceiveProps(nextProps) {
-    const {data} = nextProps;
-  }
-
-  _initialize(gl) {
-    gl.enable(gl.DEPTH_TEST);
-    gl.depthFunc(gl.LEQUAL);
-  }
-
   render() {
     const {viewport, params, data} = this.props;
     if (!data) {
       return null;
     }
-
-    const layers = [
-      new HexagonLayer({
-        id: 'heatmap',
-        data,
-        opacity: 1,
-        colorRange,
-        extruded: true,
-        pickable: true,
-        radius: params.radius.value,
-        upperPercentile: params.upperPercentile.value,
-        elevationScale: 1,
-        elevationRange: [0, 3000],
-        coverage: 1,
-        getPosition: d => d,
-        lightSettings: LIGHT_SETTINGS
-      })
-    ];
-
-    return (
-      <DeckGL {...viewport} layers={ layers } onWebGLInitialized={this._initialize}/>
-    );
+    return null;
+    // return (
+    //   <HeatmapOverlay
+    //     viewport={viewport}
+    //     data={data}
+    //     radius={params.radius.value}
+    //     upperPercentile={params.upperPercentile.value}
+    //   />
+    // );
   }
 }
