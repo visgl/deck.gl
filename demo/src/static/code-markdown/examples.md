@@ -42,6 +42,13 @@
       </div>
   </div>
   <div class="thumb">
+    <div class="bg-black" data-title="Flights at Heathrow" data-name="LineLayer">
+      <a href="#/examples/line-layer">
+        <img src="images/demo-thumb-line.jpg" />
+      </a>
+      </div>
+  </div>
+  <div class="thumb">
     <div class="bg-black" data-title="Taxi Trips in NYC" data-name="TripsLayer">
       <a href="#/examples/trip-routes">
         <img src="images/demo-thumb-trip.jpg" />

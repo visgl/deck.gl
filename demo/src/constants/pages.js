@@ -56,20 +56,6 @@ export const examplePages = generatePath([
     }
   },
   {
-    name: 'Trip Routes',
-    content: {
-      demo: 'TripsDemo',
-      code: 'code-markdown/trips.md'
-    }
-  },
-  {
-    name: 'Graph Explorer',
-    content: {
-      demo: 'PlotDemo',
-      code: 'code-markdown/plot.md'
-    }
-  },
-  {
     name: '3D Heatmap',
     content: {
       demo: 'HeatmapDemo',
@@ -81,6 +67,20 @@ export const examplePages = generatePath([
     content: {
       demo: 'LineDemo',
       code: 'code-markdown/line.md'
+    }
+  },
+  {
+    name: 'Trip Routes',
+    content: {
+      demo: 'TripsDemo',
+      code: 'code-markdown/trips.md'
+    }
+  },
+  {
+    name: 'Graph Explorer',
+    content: {
+      demo: 'PlotDemo',
+      code: 'code-markdown/plot.md'
     }
   }
 ]);
