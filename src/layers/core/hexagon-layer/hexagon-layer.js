@@ -41,7 +41,16 @@ const defaultProps = {
   extruded: false,
   hexagonAggregator: pointToHexbin,
   getPosition: x => x.position,
-  fp64: false
+  fp64: false,
+  // Optional settings for 'lighting' shader module
+  lightSettings: {
+    lightsPosition: [-122.45, 37.75, 8000, -122.0, 38.00, 5000],
+    ambientRatio: 0.05,
+    diffuseRatio: 0.6,
+    specularRatio: 0.8,
+    lightsStrength: [2.0, 0.0, 0.0, 0.0],
+    numberOfLights: 2
+  }
 };
 
 function _needsReProjectPoints(oldProps, props) {
