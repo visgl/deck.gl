@@ -27,7 +27,7 @@ function colorScale(x) {
   if (x < 0) {
     return COLOR_SCALE[i] || COLOR_SCALE[0];
   }
-  return COLOR_SCALE[i] || COLOR_SCALE[COLOR_SCALE.leng - 1];
+  return COLOR_SCALE[i] || COLOR_SCALE[COLOR_SCALE.length - 1];
 }
 
 export default class GeoJsonDemo extends Component {
