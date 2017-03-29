@@ -9,7 +9,7 @@ import {json as requestJson} from 'd3-request';
 // Set your mapbox token here
 const MAPBOX_TOKEN = process.env.MAPBOX_ACCESS_TOKEN; // eslint-disable-line
 
-const colorScale = r => [r, 0, 200 - r];
+const colorScale = r => [r * 255, 140, 200 * (1 - r)];
 
 class Root extends Component {
 
@@ -55,7 +55,6 @@ class Root extends Component {
     return (
       <MapGL
         {...viewport}
-        mapStyle="mapbox://styles/uberdata/cive485h000192imn6c6cc8fc"
         perspectiveEnabled={true}
         onChangeViewport={this._onChangeViewport.bind(this)}
         mapboxApiAccessToken={MAPBOX_TOKEN}>
