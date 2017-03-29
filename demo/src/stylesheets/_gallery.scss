@@ -179,6 +179,10 @@ code {
   height: 100vh;
   transition: height 300ms;
 }
+.markdown {
+  height: 100%;
+  overflow-y: auto;
+}
 .markdown .demo {
   height: 80vh;
 

@@ -78,7 +78,11 @@ class Page extends Component {
           demo={name}
           hasFocus={!mapHasFocus}
           onInteract={this._onMapBlur} >
-          { sourceLink && <div className="source-link"><a href={sourceLink} target="_new">View Code ↗</a></div>}
+
+          {sourceLink && (<div className="source-link">
+            <a href={sourceLink} target="_new">View Code ↗</a>
+          </div>)}
+
         </InfoPanel>
       </div>
     );
