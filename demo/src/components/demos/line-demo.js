@@ -19,7 +19,8 @@ export default class LineDemo extends Component {
 
   static get parameters() {
     return {
-      strokeWidth: {displayName: 'Stroke Width', type: 'number', value: 3, step: 1, min: 1}
+      strokeWidth: {displayName: 'Stroke Width',
+        type: 'range', value: 3, step: 0.1, min: 0, max: 10}
     };
   }
 

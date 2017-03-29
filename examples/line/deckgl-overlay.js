@@ -59,7 +59,7 @@ export default class DeckGLOverlay extends Component {
         id: 'flight-paths',
         data: flightPaths,
         strokeWidth,
-        fp64: true,
+        fp64: false,
         getSourcePosition: d => d.start,
         getTargetPosition: d => d.end,
         getColor,

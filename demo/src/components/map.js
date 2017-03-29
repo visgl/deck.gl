@@ -27,19 +27,29 @@ class Map extends Component {
     if (DemoComponent) {
       this.props.loadData(demo, DemoComponent.data);
       this.props.useParams(DemoComponent.parameters);
+      let demoViewport = DemoComponent.viewport;
 
-      if (!DemoComponent.viewport) {
+      if (!demoViewport) {
         // do not show map
         this.props.updateMap({
           mapStyle: null
         });
-      } else if (useTransition) {
-        const {viewport} = this.props;
-        ViewportAnimation.fly(viewport, DemoComponent.viewport, 1000, this.props.updateMap)
-        .easing(ViewportAnimation.Easing.Exponential.Out)
-        .start();
       } else {
-        this.props.updateMap(DemoComponent.viewport);
+        demoViewport = {
+          perspectiveEnabled: true,
+          minZoom: 0,
+          maxZoom: 20,
+          ...demoViewport
+        };
+
+        if (useTransition) {
+          const {viewport} = this.props;
+          ViewportAnimation.fly(viewport, demoViewport, 1000, this.props.updateMap)
+          .easing(ViewportAnimation.Easing.Exponential.Out)
+          .start();
+        } else {
+          this.props.updateMap(demoViewport);
+        }
       }
     }
   }
@@ -61,7 +71,6 @@ class Map extends Component {
     return (
       <MapGL
         mapboxApiAccessToken={MAPBOX_ACCESS_TOKEN}
-        perspectiveEnabled={true}
         preventStyleDiffing={true}
         {...viewport}
         mapStyle={viewport.mapStyle || MAPBOX_STYLES.BLANK}
