@@ -135,7 +135,6 @@ export default class DeckGLOverlay extends Component {
       sizeScale: ICON_SIZE * size,
       getPosition: d => d.coordinates,
       getIcon: d => showCluster ? (d.zoomLevels[z] && d.zoomLevels[z].icon) : 'marker',
-      getColor: d => [255, 180, 0, 160],
       getSize: d => 1,
       onHover: this.props.onHover,
       onClick: this.props.onClick,
