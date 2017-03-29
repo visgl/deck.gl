@@ -27,7 +27,7 @@ function colorScale(x) {
   if (x < 0) {
     return COLOR_SCALE[i] || COLOR_SCALE[0];
   }
-  return COLOR_SCALE[i] || COLOR_SCALE[12];
+  return COLOR_SCALE[i] || COLOR_SCALE[COLOR_SCALE.leng - 1];
 }
 
 export default class GeoJsonDemo extends Component {
@@ -53,9 +53,8 @@ export default class GeoJsonDemo extends Component {
   static renderInfo(meta) {
 
     const legendCount = 5;
-    const legends = new Array(legendCount).fill(0).map((d, i) => {
-      return i / (legendCount - 1) * 2 - 0.5;
-    });
+    const legends = new Array(legendCount).fill(0).map((d, i) => i / (legendCount - 1) * 2 - 0.5);
+
     const width = `${100 / legendCount}%`;
 
     return (
