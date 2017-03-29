@@ -23,7 +23,7 @@ export default class IconDemo extends Component {
 
   static get parameters() {
     return {
-      cluster: {displayName: 'Cluster', type: 'checkbox', value: false}
+      cluster: {displayName: 'Cluster', type: 'checkbox', value: true}
     };
   }
 

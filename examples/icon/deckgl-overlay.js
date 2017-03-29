@@ -134,7 +134,7 @@ export default class DeckGLOverlay extends Component {
       iconMapping,
       sizeScale: ICON_SIZE * size,
       getPosition: d => d.coordinates,
-      getIcon: d => showCluster ? (d.zoomLevels[z] && d.zoomLevels[z].icon) : 'marker-1',
+      getIcon: d => showCluster ? (d.zoomLevels[z] && d.zoomLevels[z].icon) : 'marker',
       getColor: d => [255, 180, 0, 160],
       getSize: d => 1,
       onHover: this.props.onHover,
