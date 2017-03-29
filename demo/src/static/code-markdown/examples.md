@@ -15,7 +15,7 @@
   </div>
   <div class="thumb">
     <div data-title="Chicago Building Ages" data-name="GeoJsonLayer">
-      <a href="#/examples/geojson-layer">
+      <a href="#/examples/geo-json-layer">
         <img src="images/demo-thumb-geojson.jpg" />
       </a>
     </div>
