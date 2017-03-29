@@ -20,7 +20,7 @@ export default class TripsLayer extends Layer {
 
     const model = this.getModel(gl);
 
-    attributeManager.addDynamic({
+    attributeManager.add({
       indices: {size: 1, update: this.calculateIndices, isIndexed: true},
       positions: {size: 3, update: this.calculatePositions},
       colors: {size: 3, update: this.calculateColors}

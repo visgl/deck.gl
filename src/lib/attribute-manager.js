@@ -3,6 +3,9 @@ import {GL} from 'luma.gl';
 import {log} from './utils';
 import assert from 'assert';
 
+const LOG_START_END_PRIORITY = 1;
+const LOG_DETAIL_PRIORITY = 2;
+
 function noop() {}
 
 /* eslint-disable complexity */
@@ -32,7 +35,50 @@ export function glArrayFromType(glType, {clamped = true} = {}) {
 }
 /* eslint-enable complexity */
 
+// Default loggers
+const logFunctions = {
+  onUpdateStart: ({level, id}) => {
+    log.time(level, `Updated attributes for ${id}`);
+  },
+  onLog: ({level, message}) => {
+    log.log(level, message);
+  },
+  onUpdateEnd: ({level, id}) => {
+    log.timeEnd(level, `Updated attributes for ${id}`);
+  }
+};
+
 export default class AttributeManager {
+  /**
+   * Sets log functions to help trace or time attribute updates.
+   * Default logging uses deck logger.
+   *
+   * `onLog` is called for each attribute.
+   *
+   * To enable detailed control of timming and e.g. hierarchical logging,
+   * hooks are also provided for update start and end.
+   *
+   * @param {Object} [opts]
+   * @param {String} [opts.onLog=] - called to print
+   * @param {String} [opts.onUpdateStart=] - called before update() starts
+   * @param {String} [opts.onUpdateEnd=] - called after update() ends
+   */
+  static setDefaultLogFunctions({
+    onLog,
+    onUpdateStart,
+    onUpdateEnd
+  } = {}) {
+    if (onLog !== undefined) {
+      logFunctions.onLog = onLog || noop;
+    }
+    if (onUpdateStart !== undefined) {
+      logFunctions.onUpdateStart = onUpdateStart || noop;
+    }
+    if (onUpdateEnd !== undefined) {
+      logFunctions.onUpdateEnd = onUpdateEnd || noop;
+    }
+  }
+
   /**
    * @classdesc
    * Automated attribute generation and management. Suitable when a set of
@@ -77,10 +123,6 @@ export default class AttributeManager {
     this.allocedInstances = -1;
     this.needsRedraw = true;
     this.userData = {};
-
-    this.onUpdateStart = noop;
-    this.onUpdateEnd = noop;
-    this.onLog = this._defaultLog;
 
     // For debugging sanity, prevent uninitialized members
     Object.seal(this);
@@ -149,7 +191,11 @@ export default class AttributeManager {
       }
     });
     // For performance tuning
-    this.onLog(1, `invalidated attribute ${attributesToUpdate} for ${this.id}`);
+    logFunctions.onLog({
+      level: LOG_DETAIL_PRIORITY,
+      message: `invalidated attribute ${attributesToUpdate} for ${this.id}`,
+      id: this.identifier
+    });
   }
 
   invalidateAll() {
@@ -187,34 +233,10 @@ export default class AttributeManager {
 
     // Only initiate alloc/update (and logging) if actually needed
     if (this._analyzeBuffers({numInstances})) {
-      this.onUpdateStart(this.id);
+      logFunctions.onUpdateStart({level: LOG_START_END_PRIORITY, id: this.id});
       this._updateBuffers({numInstances, data, props, context});
-      this.onUpdateEnd(this.id);
+      logFunctions.onUpdateEnd({level: LOG_START_END_PRIORITY, id: this.id});
     }
-  }
-
-  /**
-   * Sets log functions to help trace or time attribute updates.
-   * Default logging uses luma logger.
-   *
-   * Note that the app may not be in control of when update is called,
-   * so hooks are provided for update start and end.
-   *
-   * @param {Object} [opts]
-   * @param {String} [opts.onLog=] - called to print
-   * @param {String} [opts.onUpdateStart=] - called before update() starts
-   * @param {String} [opts.onUpdateEnd=] - called after update() ends
-   */
-  setLogFunctions({
-    onLog,
-    onUpdateStart,
-    onUpdateEnd
-  } = {}) {
-    this.onLog = onLog !== undefined ? onLog : this.onLog;
-    this.onUpdateStart =
-      onUpdateStart !== undefined ? onUpdateStart : this.onUpdateStart;
-    this.onUpdateEnd =
-      onUpdateEnd !== undefined ? onUpdateEnd : this.onUpdateEnd;
   }
 
   /**
@@ -278,26 +300,11 @@ export default class AttributeManager {
    * @param {Object} attributes - attribute map (see above)
    * @param {Object} updaters - separate map of update functions (deprecated)
    */
-  addDynamic(attributes, updaters = {}) {
-    this._add(attributes, updaters);
-  }
-
-  /**
-   * @deprecated since version 2.5, use add() instead
-   * Adds attributes
-   * @param {Object} attributes - attribute map (see above)
-   * @param {Object} updaters - separate map of update functions (deprecated)
-   */
   addInstanced(attributes, updaters = {}) {
     this._add(attributes, updaters, {instanced: 1});
   }
 
   // PRIVATE METHODS
-
-  // Default logger
-  _defaultLog(level, message) {
-    log.log(level, message);
-  }
 
   // Used to register an attribute
   _add(attributes, updaters = {}, _extraProps = {}) {
@@ -505,7 +512,11 @@ export default class AttributeManager {
       if (attribute.needsAlloc) {
         const ArrayType = glArrayFromType(attribute.type || GL.FLOAT);
         attribute.value = new ArrayType(attribute.size * allocCount);
-        this.onLog(2, `${this.id}:${attributeName} allocated ${allocCount}`);
+        logFunctions.onLog({
+          level: LOG_DETAIL_PRIORITY,
+          message: `${this.id}:${attributeName} allocated ${allocCount}`,
+          id: this.id
+        });
         attribute.needsAlloc = false;
         attribute.needsUpdate = true;
       }
@@ -523,7 +534,11 @@ export default class AttributeManager {
     const {update, accessor} = attribute;
     if (update) {
       // Custom updater - typically for non-instanced layers
-      this.onLog(2, `${this.id}:${attributeName} updating ${numInstances}`);
+      logFunctions.onLog({
+        level: LOG_DETAIL_PRIORITY,
+        message: `${this.id}:${attributeName} updating ${numInstances}`,
+        id: this.id
+      });
       update.call(context, attribute, {data, props, numInstances});
       this._checkAttributeArray(attribute, attributeName);
     } else if (accessor) {
@@ -531,7 +546,11 @@ export default class AttributeManager {
       this._updateBufferViaStandardAccessor({attribute, data, props});
       this._checkAttributeArray(attribute, attributeName);
     } else {
-      this.onLog(2, `${this.id}:${attributeName} missing update function`);
+      logFunctions.onLog({
+        level: LOG_DETAIL_PRIORITY,
+        message: `${this.id}:${attributeName} missing update function`,
+        id: this.id
+      });
     }
 
     attribute.needsUpdate = false;

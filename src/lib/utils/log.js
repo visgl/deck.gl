@@ -2,10 +2,10 @@
 /* global console */
 import assert from 'assert';
 
-export default function log(priority, ...args) {
+function log(priority, ...args) {
   assert(Number.isFinite(priority), 'log priority must be a number');
   if (priority <= log.priority) {
-    // Node doesn't have console.debug, but looks better in browser consoles
+    // Node doesn't have console.debug, but using it looks better in browser consoles
     if (console.debug) {
       console.debug(...args);
     } else {
@@ -23,6 +23,35 @@ function once(priority, arg, ...args) {
   }
 }
 
+// Logs a message with a time
+function time(priority, label) {
+  assert(Number.isFinite(priority), 'log priority must be a number');
+  if (priority <= log.priority) {
+    // In case the platform doesn't have console.time
+    if (console.time) {
+      console.time(label);
+    } else {
+      console.info(label);
+    }
+  }
+}
+
+function timeEnd(priority, label) {
+  assert(Number.isFinite(priority), 'log priority must be a number');
+  if (priority <= log.priority) {
+    // In case the platform doesn't have console.timeEnd
+    if (console.timeEnd) {
+      console.timeEnd(label);
+    } else {
+      console.info(label);
+    }
+  }
+}
+
 log.priority = 0;
 log.log = log;
 log.once = once;
+log.time = time;
+log.timeEnd = timeEnd;
+
+export default log;

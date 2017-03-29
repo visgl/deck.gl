@@ -35,6 +35,9 @@ import {Viewport} from './viewports';
 
 import {FramebufferObject} from 'luma.gl';
 
+const LOG_PRIORITY_LIFECYCLE = 2;
+const LOG_PRIORITY_LIFECYCLE_MINOR = 3;
+
 export default class LayerManager {
   constructor({gl}) {
     this.prevLayers = [];
@@ -214,7 +217,8 @@ export default class LayerManager {
         // Only transfer state at this stage. We must not generate exceptions
         // until all layers' state have been transferred
         if (oldLayer) {
-          log(3, `matched ${layerName(newLayer)}`, oldLayer, '=>', newLayer);
+          log(LOG_PRIORITY_LIFECYCLE_MINOR,
+            `matched ${layerName(newLayer)}`, oldLayer, '=>', newLayer);
           this._transferLayerState(oldLayer, newLayer);
           this._updateLayer(newLayer);
         } else {
@@ -289,7 +293,7 @@ export default class LayerManager {
     let error = null;
     // Check if new layer, and initialize it's state
     if (!layer.state) {
-      log(1, `initializing ${layerName(layer)}`);
+      log(LOG_PRIORITY_LIFECYCLE, `initializing ${layerName(layer)}`);
       try {
         layer.initializeLayer({
           oldProps: {},
@@ -335,7 +339,7 @@ export default class LayerManager {
         // Save first error
         error = err;
       }
-      log(2, `updating ${layerName(layer)}`);
+      log(LOG_PRIORITY_LIFECYCLE_MINOR, `updating ${layerName(layer)}`);
     }
     return error;
   }
@@ -355,7 +359,7 @@ export default class LayerManager {
       }
       // layer.state = null;
       layer.lifecycle = 'Finalized! Awaiting garbage collection';
-      log(1, `finalizing ${layerName(layer)}`);
+      log(LOG_PRIORITY_LIFECYCLE, `finalizing ${layerName(layer)}`);
     }
     return error;
   }
