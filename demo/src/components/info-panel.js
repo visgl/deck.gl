@@ -26,6 +26,8 @@ class InfoPanel extends Component {
             onChange={this.props.updateParam} />
         ))}
 
+        {this.props.children}
+
       </div>
     );
   }
