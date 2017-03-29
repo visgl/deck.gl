@@ -24,18 +24,27 @@ import DeckGL from 'deck.gl/react';
 | ScreenGridLayer  | `unitWidth`    | `cellSizePixels` | |
 | ScreenGridLayer  | `unitHeight`   | `cellSizePixels` | | |
 
-#### `Layer.dataIterator` prop (Removed)
+#### Removed prop: `Layer.dataIterator`
 
 This prop has been removed in deck.gl v4. Note that it was not functioning
 as documented in deck.gl v3.
 
-#### Props with `Scale` suffix
+#### Removed lifecycle method: `Layer.willReceiveProps`
+
+This lifecycle was deprecated in v3 and is now removed. Use `Layer.updateState`
+instead.
+
+
+#### Renamed Props: The `...Scale` suffix
 
 Props that have their name end of `Scale` is a set of props that
-multiply some existing value for all objects in the layers. These props usually correspond
-to WebGL shader uniforms that "scaling" all values of specific attributes simultaneously.
+multiply some existing value for all objects in the layers.
+These props usually correspond to WebGL shader uniforms that "scaling" all
+values of specific attributes simultaneously.
 
-For API consistency reasons these have all been renamed with the suffix `..Scale`
+For API consistency reasons these have all been renamed with the suffix `..Scale`.
+See the property table above.
+
 
 #### updateTriggers
 
@@ -45,6 +54,19 @@ instead of the name of the actual WebGL attribute.
 Note that this is supported on all layers supplied by deck.gl, but if you
 are using older layers, they need a small addition to their attribute
 definitions, see below.
+
+
+### AttributeManager changes
+
+#### Removed method: `AttributeManager.setLogFunctions`
+
+Use the new static function `AttributeManager.setDefaultLogFunctions` to set
+loggers for all AttributeManagers (i.e. for all layers).
+
+#### Removed method: `AttributeManager.addDynamic`
+
+This method has been deprecated since version 2.5 and is now removed, use
+`AttributeManager.add()` instead
 
 
 ### Deprecated/Removed Layers

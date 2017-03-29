@@ -7,7 +7,7 @@ const EMPTY_PIXEL = new Uint8Array(4);
 let renderCount = 0;
 
 export function drawLayers({layers, pass}) {
-  log.log(2, `DRAWING ${layers.length} layers`);
+  log.log(3, `DRAWING ${layers.length} layers`);
 
   // render layers in normal colors
   let visibleCount = 0;
@@ -26,7 +26,7 @@ export function drawLayers({layers, pass}) {
     }
   });
 
-  log.log(1, `RENDER PASS ${pass}: ${renderCount++}
+  log.log(3, `RENDER PASS ${pass}: ${renderCount++}
     ${visibleCount} visible, ${layers.length} total`);
 }
 

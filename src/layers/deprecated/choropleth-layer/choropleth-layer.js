@@ -54,7 +54,7 @@ export default class ChoroplethLayer extends Layer {
     const {gl} = this.context;
 
     const {attributeManager} = this.state;
-    attributeManager.addDynamic({
+    attributeManager.add({
       // Primtive attributes
       indices: {size: 1, update: this.calculateIndices, isIndexed: true},
       positions: {size: 3, update: this.calculatePositions},
