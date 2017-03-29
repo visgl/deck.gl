@@ -75,6 +75,13 @@ export const examplePages = generatePath([
       demo: 'HeatmapDemo',
       code: 'code-markdown/heatmap.md'
     }
+  },
+  {
+    name: 'LineLayer',
+    content: {
+      demo: 'LineDemo',
+      code: 'code-markdown/line.md'
+    }
   }
 ]);
 
