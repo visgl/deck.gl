@@ -64,45 +64,6 @@
     max-height: 0 !important;
   }
 }
-.tabs {
-  position: absolute;
-  bottom: 0;
-  right: 0;
-  margin: 24px;
-  z-index: 1;
-  list-style: none;
-
-  .tip {
-    padding: 4px 8px;
-  }
-
-  li {
-    display: inline;
-    margin-left: -1px;
-  }
-  li.active button {
-    color: #000;
-  }
-  li:not(.active) button:hover {
-    background: #222;
-    color: $white;
-    border-color: #000;
-  }
-}
-.tab {
-  display: none;
-  position: absolute;
-  width: 100%;
-  height: 100%;
-}
-.tab.active {
-  display: block;
-  >div {
-    height: 100%;
-    overflow-y: scroll;
-    -webkit-overflow-scrolling: touch;
-  }
-}
 .markdown-body {
   padding: 40px 36px 96px;
 }

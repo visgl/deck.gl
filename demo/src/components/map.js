@@ -71,6 +71,8 @@ class Map extends Component {
           onStateChange={this.props.updateMeta}
           data={owner === demo ? data : null} />
 
+        <div className="mapbox-tip">Hold down shift to rotate</div>
+
       </MapGL>
     );
   }
