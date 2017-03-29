@@ -151,15 +151,16 @@ class App extends PureComponent {
   /* eslint-enable max-depth */
 
   _getModelMatrix(index, offsetMode) {
-    const {settings: {separation, rotationZ, rotationX}} = this.state;
+    // const {settings: {separation, rotationZ, rotationX}} = this.state;
+    const {settings: {separation}} = this.state;
     // const {mapViewState: {longitude, latitude}} = this.props;
     // const modelMatrix = new Matrix4().fromTranslation([0, 0, 1000 * index * separation]);
     const modelMatrix = new Matrix4()
       .fromTranslation([0, 0, 1000 * index * separation]);
-    if (offsetMode) {
-      modelMatrix.rotateZ(index * rotationZ * Math.PI);
-      modelMatrix.rotateX(index * rotationX * Math.PI);
-    }
+    // if (offsetMode) {
+    //   modelMatrix.rotateZ(index * rotationZ * Math.PI);
+    //   modelMatrix.rotateX(index * rotationX * Math.PI);
+    // }
     return modelMatrix;
   }
 
