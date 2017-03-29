@@ -9,7 +9,7 @@ import {json as requestJson} from 'd3-request';
 // Set your mapbox token here
 const MAPBOX_TOKEN = process.env.MAPBOX_ACCESS_TOKEN; // eslint-disable-line
 
-const colorScale = r => [r, 0, 200 - r];
+const colorScale = r => [r * 255, 140, 200 * (1 - r)];
 
 class Root extends Component {
 
@@ -24,7 +24,7 @@ class Root extends Component {
       data: null
     };
 
-    requestJson('./data/chicago-buildings.json', (error, response) => {
+    requestJson('./data/vancouver-blocks.json', (error, response) => {
       if (!error) {
         this.setState({data: response});
       }
