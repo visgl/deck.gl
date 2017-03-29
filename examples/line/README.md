@@ -1,4 +1,4 @@
-This is a minimal standalone version of the GeoJsonLayer example
+This is a minimal standalone version of the LineLayer example
 on [deck.gl](http://deck.gl) website.
 
 ### Usage
@@ -10,4 +10,4 @@ npm start
 
 ### Data format
 Sample data is stored in the `data` folder. To use your own data, checkout
-the [documentation of GeoJsonLayer](../../docs/layers/geojson-layer.md).
+the [documentation of LineLayer](../../docs/layers/line-layer.md).
