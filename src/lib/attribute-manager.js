@@ -3,8 +3,8 @@ import {GL} from 'luma.gl';
 import {log} from './utils';
 import assert from 'assert';
 
-const LOG_START_END_PRIORITY = 2;
-const LOG_DETAIL_PRIORITY = 3;
+const LOG_START_END_PRIORITY = 1;
+const LOG_DETAIL_PRIORITY = 2;
 
 function noop() {}
 
@@ -38,13 +38,12 @@ export function glArrayFromType(glType, {clamped = true} = {}) {
 // Default loggers
 const logFunctions = {
   onUpdateStart: ({level, id}) => {
-    log.log(level, `Updated attributes for ${id}`);
     log.time(level, `Updated attributes for ${id}`);
   },
-  onLog: ({level, label}) => {
-    log.log(level, label);
+  onLog: ({level, message}) => {
+    log.log(level, message);
   },
-  onUpdateEnd: ({level, label, id}) => {
+  onUpdateEnd: ({level, id}) => {
     log.timeEnd(level, `Updated attributes for ${id}`);
   }
 };

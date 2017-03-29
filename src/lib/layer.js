@@ -24,6 +24,8 @@ import {log, compareProps, count} from './utils';
 import {GL} from 'luma.gl';
 import assert from 'assert';
 
+const LOG_PRIORITY_UPDATE = 2;
+
 /*
  * @param {string} props.id - layer name
  * @param {array}  props.data - array of data instances
@@ -377,22 +379,6 @@ export default class Layer {
     // End lifecycle method
 
     if (stateNeedsUpdate) {
-
-      // Call deprecated lifecycle method if defined
-      const hasRedefinedMethod = this.willReceiveProps &&
-        this.willReceiveProps !== Layer.prototype.willReceiveProps;
-      if (hasRedefinedMethod) {
-        log.once(0, `deck.gl v3 willReceiveProps deprecated. Use updateState in ${this}`);
-        const {oldProps, props, changeFlags} = updateParams;
-        this.setState(changeFlags);
-        this.willReceiveProps(oldProps, props, changeFlags);
-        this.setState({
-          dataChanged: false,
-          viewportChanged: false
-        });
-      }
-      // End lifecycle method
-
       // Call subclass lifecycle method
       this.updateState(updateParams);
       // End lifecycle method
@@ -451,7 +437,7 @@ export default class Layer {
     if (!dataChanged) {
       this._diffUpdateTriggers(oldProps, newProps);
     } else {
-      log.log(1, `dataChanged: ${dataChanged}`);
+      log.log(2, `dataChanged: ${dataChanged}`);
     }
 
     return {
@@ -520,11 +506,13 @@ export default class Layer {
       });
       if (diffReason) {
         if (propName === 'all') {
-          log.log(1, `updateTriggers invalidating all attributes: ${diffReason}`);
+          log.log(LOG_PRIORITY_UPDATE,
+            `updateTriggers invalidating all attributes: ${diffReason}`);
           this.invalidateAttribute('all');
           change = true;
         } else {
-          log.log(1, `updateTriggers invalidating attribute ${propName}: ${diffReason}`);
+          log.log(LOG_PRIORITY_UPDATE,
+            `updateTriggers invalidating attribute ${propName}: ${diffReason}`);
           this.invalidateAttribute(propName);
           change = true;
         }
@@ -566,10 +554,6 @@ export default class Layer {
   }
 
   // DEPRECATED METHODS
-  // shouldUpdate() {}
-
-  willReceiveProps() {
-  }
 
   // Updates selected state members and marks the object for redraw
   setUniforms(uniformMap) {

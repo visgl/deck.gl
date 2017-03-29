@@ -17,14 +17,21 @@ const fixture = {
   positions: new Float32Array([0, 1, 0, -1, -1, 0, 1, -1, 0])
 };
 
-test('Core#AttributeManager constructor', t => {
+test('AttributeManager imports', t => {
+  t.equals(typeof AttributeManager, 'function', 'AttributeManager import successful');
+  t.ok(AttributeManager.setDefaultLogFunctions,
+    'AttributeManager.setDefaultLogFunctions available');
+  t.end();
+});
+
+test('AttributeManager constructor', t => {
   const attributeManager = new AttributeManager();
 
   t.ok(attributeManager, 'AttributeManager construction successful');
   t.end();
 });
 
-test('Core#AttributeManager.add', t => {
+test('AttributeManager.add', t => {
   const attributeManager = new AttributeManager();
 
   t.throws(
@@ -46,7 +53,7 @@ test('Core#AttributeManager.add', t => {
   t.end();
 });
 
-test('Core#AttributeManager.update', t => {
+test('AttributeManager.update', t => {
   const attributeManager = new AttributeManager();
   attributeManager.add({positions: {size: 2, update}});
 
@@ -90,7 +97,7 @@ test('Core#AttributeManager.update', t => {
   t.end();
 });
 
-test('Core#AttributeManager.update - 0 numInstances', t => {
+test('AttributeManager.update - 0 numInstances', t => {
   const attributeManager = new AttributeManager();
   attributeManager.add({positions: {size: 2, update}});
 
@@ -106,7 +113,7 @@ test('Core#AttributeManager.update - 0 numInstances', t => {
   t.end();
 });
 
-test('Core#AttributeManager.invalidate', t => {
+test('AttributeManager.invalidate', t => {
   const attributeManager = new AttributeManager();
   attributeManager.add({positions: {size: 2, update}});
   attributeManager.add({colors: {size: 2, accessor: 'getColor', update}});
@@ -128,5 +135,38 @@ test('Core#AttributeManager.invalidate', t => {
     'throws on unmatched attribute name'
   );
 
+  t.end();
+});
+
+test('AttributeManager.setDefaultLogFunctions', t => {
+  // track which updaters were called
+  const updaterCalled = {};
+  AttributeManager.setDefaultLogFunctions({
+    onUpdateStart: () => {
+      updaterCalled.start = true;
+    },
+    onLog: () => {
+      updaterCalled.log = true;
+    },
+    onUpdateEnd: () => {
+      updaterCalled.end = true;
+    }
+  });
+
+  const attributeManager = new AttributeManager();
+  attributeManager.add({positions: {size: 2, update}});
+
+  // First update, should autoalloc and update the value array
+  attributeManager.update({
+    numInstances: 1,
+    data: [{}]
+  });
+
+  const attribute = attributeManager.getAttributes()['positions'];
+  t.ok(ArrayBuffer.isView(attribute.value), 'logged attribute has typed array');
+
+  t.ok(updaterCalled.start, 'onUpdateStart called');
+  t.ok(updaterCalled.log, 'onLog called');
+  t.ok(updaterCalled.end, 'onUpdateEnd called');
   t.end();
 });

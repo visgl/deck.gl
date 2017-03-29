@@ -139,10 +139,15 @@ since deck.gl v3.0 was launched. While many are not new in v4.0, cumulatively
 they enable noticeably better framerates and a lighter footprint when big data
 sets are loaded, compared to the initial v3.0.0 version.
 
-The `AttributeManager` now has default timing of attribute updates that can be
-activated by setting `deck.log.priority` in the console. The new function
-`AttributeManager.setDefaultLogFunctions` allows the app to install its own
-loggers to provide detailed statistics for attribute updates.
+The `AttributeManager` class now supports default logging of timings for attribute
+updates. This logging can be activated by simply setting `deck.log.priority=2`
+in the console (levels 1 and 2 provide different amounts of detail).
+This can be very helpful in verifying that your application is not triggering
+unnecessary attribute updates.
+
+In addition, the new function `AttributeManager.setDefaultLogFunctions` allows
+the app to install its own custom logging functions to take even more control
+over logging of attribute updates.
 
 
 ## Library Improvements
