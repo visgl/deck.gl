@@ -26,7 +26,7 @@ In fact several core deck.gl layers, like the GeoJsonLayer and the GridLayer
 are written as composite "adapter" layers.
 
 
-##$ Collection Layers
+### Collection Layers
 
 Often a more complex visualization consists of a number of layers that are
 rendered after breaking down a common set of props. It can be helpful
