@@ -33,6 +33,8 @@ export default class OrbitController extends Component {
       width,
       height,
       lookAt,
+      far: 1000,
+      near: 0.1,
       fovy: fov,
       eye: cameraPos
     });
