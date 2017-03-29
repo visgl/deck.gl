@@ -95,7 +95,7 @@ export default class DeckGLOverlay extends Component {
 
     const layers = [
       new GeoJsonLayer({
-        id: 'choropleth',
+        id: 'geojson',
         data,
         stroked: false,
         filled: true,

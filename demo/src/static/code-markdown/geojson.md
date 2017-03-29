@@ -8,7 +8,7 @@ export default class GeoJsonDemo extends Component {
     const {viewport, data} = this.props;
 
     const layers = data.map((d, i) => new GeoJsonLayer({
-      id: `choropleth-${i}`,
+      id: `geojson-${i}`,
       data: d,
       stroked: true,
       filled: true,
