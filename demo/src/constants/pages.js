@@ -1,6 +1,9 @@
 function getDocUrl(filename) {
   return `docs/${filename}`;
 }
+function getCodeUrl(pathname) {
+  return `https://github.com/uber/deck.gl/tree/master/${pathname}`;
+}
 
 function generatePath(tree) {
   if (Array.isArray(tree)) {
@@ -18,69 +21,69 @@ function generatePath(tree) {
 export const examplePages = generatePath([
   {
     name: 'Overview',
-    content: 'code-markdown/examples.md'
+    content: 'markdown/examples.md'
   },
   {
     name: 'ScatterplotLayer',
     content: {
       demo: 'ScatterplotDemo',
-      code: 'code-markdown/scatterplot.md'
+      code: getCodeUrl('examples/scatterplot')
     }
   },
   {
     name: 'ArcLayer',
     content: {
       demo: 'ArcDemo',
-      code: 'code-markdown/arc.md'
+      code: getCodeUrl('examples/arc')
     }
   },
   {
     name: 'GeoJsonLayer',
     content: {
       demo: 'GeoJsonDemo',
-      code: 'code-markdown/geojson.md'
+      code: getCodeUrl('examples/geojson')
     }
   },
   {
     name: 'ScreenGridLayer',
     content: {
       demo: 'ScreenGridDemo',
-      code: 'code-markdown/grid.md'
+      code: getCodeUrl('examples/screen-grid')
     }
   },
   {
     name: 'IconLayer',
     content: {
       demo: 'IconDemo',
-      code: 'code-markdown/icon.md'
+      code: getCodeUrl('examples/icon')
     }
   },
   {
     name: '3D Heatmap',
     content: {
       demo: 'HeatmapDemo',
-      code: 'code-markdown/heatmap.md'
+      code: getCodeUrl('examples/3d-heatmap')
     }
   },
   {
     name: 'LineLayer',
     content: {
       demo: 'LineDemo',
-      code: 'code-markdown/line.md'
+      code: getCodeUrl('examples/line')
     }
   },
   {
     name: 'Trip Routes',
     content: {
       demo: 'TripsDemo',
-      code: 'code-markdown/trips.md'
+      code: getCodeUrl('examples/trips')
     }
   },
   {
     name: 'Graph Explorer',
     content: {
       demo: 'PlotDemo',
-      code: 'code-markdown/plot.md'
+      code: getCodeUrl('examples/plot')
     }
   }
 ]);

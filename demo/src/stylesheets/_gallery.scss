@@ -96,9 +96,18 @@
   hr {
     margin: 12px -24px;
   }
+  .source-link {
+    text-align: right;
+    margin-top: 8px;
+
+    a {
+      font-weight: bold;
+      color: $black-40;
+      font-size: 11px;
+    }
+  }
   .input {
     position: relative;
-    margin: 4px;
     width: 100%;
 
     >* {
