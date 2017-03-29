@@ -16,7 +16,7 @@ const urlRewrites = {
   '/docs/custom-layers.md#layerencodepickingcolorindex--number': false,
   '/docs/layers/arc-layer.md': '#/layers/core-layers/arc-layer',
   '/docs/layers/line-layer.md': '#/layers/core-layers/line-layer',
-  '/docs/layers/choropleth-layer.md': '#/layers/core-layers/choropleth-layer',
+  '/docs/layers/geojson-layer.md': '#/layers/core-layers/geojson-layer',
   '/docs/layers/scatterplot-layer.md': '#/layers/core-layers/scatterplot-layer',
   '/docs/64-bits.md': '#/documentation/advanced-topics/64-layers'
 };

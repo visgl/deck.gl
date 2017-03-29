@@ -78,7 +78,7 @@ export default class ArcDemo extends Component {
 
     const layers = [
       new GeoJsonLayer({
-        id: 'choropleth',
+        id: 'geojson',
         data: data[0],
         stroked: false,
         filled: true,
