@@ -334,9 +334,6 @@ export default class Layer {
       dataChanged: true
     });
 
-    // Add attribute manager loggers if provided
-    this.state.attributeManager.setLogFunctions(this.props);
-
     const {attributeManager} = this.state;
     // All instanced layers get instancePickingColors attribute by default
     // Their shaders can use it to render a picking scene

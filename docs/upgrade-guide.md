@@ -47,6 +47,19 @@ are using older layers, they need a small addition to their attribute
 definitions, see below.
 
 
+### AttributeManager
+
+* Removed method: `AttributeManager.addDynamic`
+
+This method has been deprecated since version 2.5 and is now removed, use
+`AttributeManager.add()` instead
+
+* Removed method: `AttributeManager.setLogFunctions`
+
+Use the new static function `AttributeManager.setDefaultLogFunctions` to set
+loggers for all layers.
+
+
 ### Deprecated/Removed Layers
 
 | Layer            | Status       | Replacement         |

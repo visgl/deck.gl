@@ -137,7 +137,12 @@ object. Layers can block the execution of callback functions by returning `null`
 A number of performance improvements and fixes have been gradually introduced
 since deck.gl v3.0 was launched. While many are not new in v4.0, cumulatively
 they enable noticeably better framerates and a lighter footprint when big data
-sets are loaded, compared to the initial v3.0.0 version
+sets are loaded, compared to the initial v3.0.0 version.
+
+The `AttributeManager` now has default timing of attribute updates that can be
+activated by setting `deck.log.priority` in the console. The new function
+`AttributeManager.setDefaultLogFunctions` allows the app to install its own
+loggers to provide detailed statistics for attribute updates.
 
 
 ## Library Improvements

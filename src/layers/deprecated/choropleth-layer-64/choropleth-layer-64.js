@@ -34,7 +34,7 @@ export default class ChoroplethLayer64 extends ChoroplethLayer {
   initializeState() {
     super.initializeState();
 
-    this.state.attributeManager.addDynamic({
+    this.state.attributeManager.add({
       positions64: {size: 4, update: this.calculatePositions64},
       heights64: {size: 2, update: this.calculateHeights64}
     });

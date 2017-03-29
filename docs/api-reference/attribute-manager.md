@@ -13,6 +13,22 @@ Limitations:
   There are currently no provisions for only invalidating a range of
   indices in an attribute.
 
+## Static Functions
+
+### AttributeManager.setDefaultLogFunctions (static)
+
+Sets log functions to help trace or time attribute updates.
+Default logging uses the luma.gl logger.
+
+Note that the app may not be in control of when update is called,
+so hooks are provided for update start and end.
+
+* opts (Object) - named parameters
+* opts.onLog (Function) - callback, called to print
+* opts.onUpdateStart= (Function) - callback, called before update() starts
+* opts.onUpdateEnd= (Function) - callback, called after update() ends
+
+
 ## Methods
 
 ### Constructor
@@ -42,16 +58,3 @@ Takes a map of attribute descriptor objects
         update: calculateColors
       }
     });
-
-### AttributeManager.setLogFunctions
-
-Sets log functions to help trace or time attribute updates.
-Default logging uses the luma.gl logger.
-
-Note that the app may not be in control of when update is called,
-so hooks are provided for update start and end.
-
-* opts (Object) - named parameters
-* opts.onLog (Function) - callback, called to print
-* opts.onUpdateStart= (Function) - callback, called before update() starts
-* opts.onUpdateEnd= (Function) - callback, called after update() ends
