@@ -15,8 +15,8 @@ const BABEL_CONFIG = {
     'react',
     'stage-2'
   ].map(function(name) { return require.resolve("babel-preset-"+name) }),
-  "plugins": [
-    "transform-decorators-legacy"
+  plugins: [
+    'transform-decorators-legacy'
   ].map(function(name) { return require.resolve("babel-plugin-"+name) })
 };
 
@@ -28,8 +28,10 @@ module.exports = {
     rules: [{
       test: /\.js$/,
       exclude: [/node_modules/],
-      loader: 'babel-loader',
-      query: BABEL_CONFIG
+      use: [{
+        loader: 'babel-loader',
+        options: BABEL_CONFIG
+      }]
     }, {
       test: /\.scss$/,
       loaders: ['style-loader', 'css-loader', 'sass-loader', 'autoprefixer-loader']
@@ -41,12 +43,11 @@ module.exports = {
       loader: 'raw-loader',
       include: demoSources,
       enforce: 'post'
-    }, {
-      // Needed to inline mapbox shaders
-      include: /mapbox-gl/,
-      loader: 'transform-loader',
-      options: 'brfs-babel'
-    }]
+    }],
+
+    // Uglify seems to be incompatible with mapbox
+    // https://github.com/mapbox/mapbox-gl-js/issues/4359#issuecomment-288001933
+    noParse: /(mapbox-gl)\.js$/
   },
 
   resolve: {

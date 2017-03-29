@@ -1,9 +1,7 @@
-import React, {Component} from 'react';
-import pureRender from 'pure-render-decorator';
+import React, {PureComponent} from 'react';
 import autobind from 'autobind-decorator';
 
-@pureRender
-export default class GenericInput extends Component {
+export default class GenericInput extends PureComponent {
 
   @autobind _onChange(evt) {
     const {value, type} = evt.target;
