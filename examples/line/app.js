@@ -19,12 +19,18 @@ class Root extends Component {
         width: 500,
         height: 500
       },
-      data: null
+      flightPaths: null,
+      airports: null
     };
 
     requestJson('./data/heathrow-flights.json', (error, response) => {
       if (!error) {
-        this.setState({data: response});
+        this.setState({flightPaths: response});
+      }
+    });
+    requestJson('./data/airports.json', (error, response) => {
+      if (!error) {
+        this.setState({airports: response});
       }
     });
   }
@@ -48,7 +54,7 @@ class Root extends Component {
   }
 
   render() {
-    const {viewport, data} = this.state;
+    const {viewport, flightPaths, airports} = this.state;
 
     return (
       <MapGL
@@ -59,7 +65,8 @@ class Root extends Component {
         mapboxApiAccessToken={MAPBOX_TOKEN}>
         <DeckGLOverlay viewport={viewport}
           strokeWidth={3}
-          data={data} />
+          flightPaths={flightPaths}
+          airports={airports} />
       </MapGL>
     );
   }
