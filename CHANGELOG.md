@@ -18,11 +18,18 @@ Ref: http://keepachangelog.com/en/0.3.0/
 ## Latest Beta Releases
 
 #### [v4.0.0-rc.5]
-- TripsLayer is moved from `examples/sample-layers` to `examples/trips`, for easier bootstraping of a
-standalone app.
-- `getPickingInfo()` methods receive an additional argument `sourceLayer`
-- `HexagonLayer` add `lowerPercentile` and `higherPercentile`
-- Demo site: Add IconLayer demo
+- `getPickingInfo()` methods receive an additional argument `sourceLayer` (#468)
+- `HexagonLayer` add `lowerPercentile` and `higherPercentile` (#470)
+- FIX: Fix the async loading issue #347 by not setting state of stale layers to null (#483)
+- FIX: Fix the lightSettings prop transfer issue in composite layers (#484)
+- FIX: Fix the attribute logger (#499)
+- Demo site: Add IconLayer demo (#467, #487)
+- Demo site: Refactor to make all demos available as standalone examples (#471, 477)
+- Demo site: Add Hexagon layer demo (3d heatmap) (#478)
+- Demo site: New data set for the GeoJsonLayer demo (#492)
+- Demo site: Link directly to source code from examples (#497)
+- Examples: Remove layers that are not in v4 release plan from LayerBrowser example (#475, #490)
+- Examples: Add JSX wrapper example (#482)
 
 #### [v4.0.0-rc.4]
 - `GridCellLayer` `latOffset` and `lonOffset` => `cellSize`
