@@ -33,8 +33,8 @@ export default class DeckGLOverlay extends Component {
   }
 
   _initialize(gl) {
-    gl.enable(gl.DEPTH_TEST);
-    gl.depthFunc(gl.LEQUAL);
+    gl.blendFuncSeparate(gl.SRC_ALPHA, gl.ONE, gl.ONE_MINUS_DST_ALPHA, gl.ONE);
+    gl.blendEquation(gl.FUNC_ADD);
   }
 
   render() {

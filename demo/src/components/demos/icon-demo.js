@@ -38,7 +38,7 @@ export default class IconDemo extends Component {
   static renderInfo(meta) {
     return (
       <div>
-        <h3>Where Films Were Made (2007 - 2017)</h3>
+        <h3>Where Films Were Made <br/>(2007-2017)</h3>
         <p>Click a pin to expand detials.</p>
         <p>Data source: <a href="http://www.imdb.com/conditions">IMDB</a></p>
         <div className="layout">

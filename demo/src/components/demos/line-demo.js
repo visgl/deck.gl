@@ -34,7 +34,7 @@ export default class LineDemo extends Component {
   static renderInfo(meta) {
     return (
       <div>
-        <h3>Flights In And Out Of Heathrow Airport</h3>
+        <h3>Flights In And Out Of <br/>Heathrow Airport</h3>
         <p>Flight paths from a 4 hour window on March 28th, 2017</p>
         <p>Flight tracking data source:
           <a href="https://opensky-network.org/"> The OpenSky Network</a><br />
