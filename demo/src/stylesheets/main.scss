@@ -236,10 +236,17 @@ hr.short {
   }
 
 }
+
+.mapbox-tip {
+  position: absolute;
+  right: 4px;
+  bottom: 24px;
+  color: $white-40;
+}
 .mapboxgl-ctrl-attrib {
   position: absolute;
-  bottom: 0;
-  right: 0;
+  bottom: 2px;
+  right: 4px;
   z-index: 9;
 }
 .overlays {

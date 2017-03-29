@@ -14,7 +14,7 @@ class Page extends Component {
     super(props);
     this.state = {
       mapHasFocus: true,
-      tabs: this._loadContent(props.route.content)
+      content: this._loadContent(props.route.content)
     };
   }
 
@@ -27,7 +27,7 @@ class Page extends Component {
     const {route} = nextProps;
     if (this.props.route !== route) {
       this.setState({
-        tabs: this._loadContent(route.content)
+        content: this._loadContent(route.content)
       });
     }
   }
@@ -37,23 +37,9 @@ class Page extends Component {
   }
 
   _loadContent(content) {
-    if (typeof content !== 'object') {
-      content = {content};
+    if (typeof content === 'string') {
+      this.props.loadContent(content);
     }
-
-    // grab text contents
-    Object.keys(content).forEach(key => {
-
-      if (key === 'demo') {
-        return;
-      }
-
-      const src = content[key];
-      if (typeof src === 'string') {
-        this.props.loadContent(src);
-      }
-    });
-
     return content;
   }
 
@@ -80,12 +66,7 @@ class Page extends Component {
     this._setMapFocus(false);
   }
 
-  @autobind _setActiveTab(tabName) {
-    const {location: {pathname}} = this.props;
-    this.context.router.replace(`${pathname}?tab=${tabName}`);
-  }
-
-  @autobind _renderDemo(name) {
+  @autobind _renderDemo(name, sourceLink) {
     const {mapHasFocus} = this.state;
 
     return (
@@ -96,69 +77,30 @@ class Page extends Component {
         <InfoPanel
           demo={name}
           hasFocus={!mapHasFocus}
-          onInteract={this._onMapBlur} />
+          onInteract={this._onMapBlur} >
+
+          {sourceLink && (<div className="source-link">
+            <a href={sourceLink} target="_new">View Code ↗</a>
+          </div>)}
+
+        </InfoPanel>
       </div>
-    );
-  }
-
-  _renderTabContent() {
-    const {contents, location} = this.props;
-    const {tabs} = this.state;
-    const activeTab = location.query.tab || Object.keys(tabs)[0];
-
-    return Object.keys(tabs).map((tabKey, tabIndex) => {
-      const tab = tabs[tabKey];
-      let child;
-
-      if (tabKey === 'demo') {
-        child = this._renderDemo(tab);
-      } else if (typeof tab === 'string') {
-        child = <MarkdownPage content={contents[tab]} renderDemo={this._renderDemo} />;
-      } else {
-        child = React.createElement(tab);
-      }
-
-      return (
-        <div key={tabIndex} className={`tab ${tabKey === activeTab ? 'active' : ''}`}>
-          {child}
-        </div>
-      );
-    });
-  }
-
-  _renderTabs() {
-    const {location} = this.props;
-    const {tabs} = this.state;
-    const activeTab = location.query.tab || Object.keys(tabs)[0];
-
-    return (
-      <ul className="tabs">
-
-        {activeTab === 'demo' && (
-          <li><span className="bg-black tip">Hold down shift key to rotate</span></li>
-        )}
-
-        {Object.keys(tabs).map(tabName => (
-          <li key={tabName} className={`${tabName === activeTab ? 'active' : ''}`}>
-            <button onClick={this._setActiveTab.bind(this, tabName)}>
-              {tabName}
-            </button>
-          </li>
-        ))}
-
-      </ul>
     );
   }
 
   render() {
-    const {tabs} = this.state;
+    const {contents} = this.props;
+    const {content} = this.state;
 
-    return (
-      <div className="page">
-        {Object.keys(tabs).length > 1 && this._renderTabs()}
-        {this._renderTabContent()}
-      </div>
-    );
+    let child;
+
+    if (content.demo) {
+      child = this._renderDemo(content.demo, content.code);
+    } else if (typeof content === 'string') {
+      child = <MarkdownPage content={contents[content]} renderDemo={this._renderDemo} />;
+    }
+
+    return <div className="page">{child}</div>;
   }
 }
 
