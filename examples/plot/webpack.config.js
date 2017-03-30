@@ -1,4 +1,4 @@
-const resolve = require('path').resolve;
+const {resolve} = require('path');
 const webpack = require('webpack');
 
 module.exports = {
