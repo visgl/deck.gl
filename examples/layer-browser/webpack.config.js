@@ -1,6 +1,8 @@
 // NOTE: To use this example standalone (e.g. outside of deck.gl repo)
 // delete the local development overrides at the bottom of this file
-const {resolve} = require('path');
+
+// avoid destructuring for older Node version support
+const resolve = require('path').resolve;
 const webpack = require('webpack');
 
 module.exports = {

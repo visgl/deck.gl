@@ -1,4 +1,5 @@
-const {resolve} = require('path');
+// avoid destructuring for older Node version support
+const resolve = require('path').resolve;
 const webpack = require('webpack');
 
 const CONFIG = {

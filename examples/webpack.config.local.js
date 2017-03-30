@@ -5,7 +5,8 @@
 // This enables using the examples to debug the main deck.gl library source
 // without publishing or npm linking, with conveniences such hot reloading etc.
 
-const {resolve} = require('path');
+// avoid destructuring for older Node version support
+const resolve = require('path').resolve;
 const webpack = require('webpack');
 
 const LIB_DIR = resolve(__dirname, '..');
