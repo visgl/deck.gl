@@ -31,36 +31,24 @@ Remarks:
 
 ## Examples
 
-* The source code tabs in the Examples page in the interactive documentation
-* The deck.gl repository contains an
-  [examples folder](https://github.com/uber/deck.gl/tree/master/examples)
-  with a selection of standalone examples.
-  These foldiers can be copied and you should be able to get them running
-  simply by installing (`yarn` or `npm install` and running `npm start`).
+The deck.gl repository contains an
+[examples folder](https://github.com/uber/deck.gl/tree/master/examples)
+with a selection of small, standalone examples that could be good starting
+points for your application.
 
-There's also the [react-map-gl](https://github.com/uber/react-map-gl) exhibits folder. Although not integrating deck.gl, it will give you additional examples
-about how to use the base map component.
+These foldiers can be copied and you should be able to get them running
+simply by installing (`yarn` or `npm install` and running `npm start`).
+
+For more on using maps with deck.gl,it might also be worth checking out the
+[react-map-gl](https://github.com/uber/react-map-gl)
+examples. Although not focused on deck.gl, these will provide you with
+additional examples of how to use the base map component.
 
 
-## Note on "Map Tokens"
+## Note on Map Tokens
 
-This concerns Mapbox Tokens/Google Map Keys.
+The main requirement before running any application using maps will be to provide
+a map token to the examples so that they can load maps from mapbox etc.
 
-Your main requirement before running any example will be to provide a map
-token to the examples so that they can load maps from mapbox/google etc.
-
-To get a token, you typically need to register (create an account)
-with the map data provider, and apply for a token. The token will usually
-be free until a certain level of traffic is exceeded.
-
-There are several ways to provide a token:
-* Modify [app](./app.js) file to specify your Mapbox token,
-* Set an environment variable (MapboxAccessToken)
-* TBD - Provide the token in the URL
-
-Remarks:
-* If you fail to provide a token, the examples will still run,
-  and render any deck.gl overlays, but the underlying maps will not render.
-* The map token requirement obviously only applies only to examples that use
-  base maps, e.g. any examples using
-  [react-map-gl](https://github.com/uber/react-map-gl) to render map tiles.
+For more information about map token read the sections about "Using with Mapbox",
+and the [examples](https://github.com/uber/deck.gl/tree/master/examples/README.md)

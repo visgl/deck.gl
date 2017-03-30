@@ -2,17 +2,20 @@
 
 ## Upgrading from deck.gl v3 to v4
 
-### Importing deck.gl React component
+### Changed Import: The `DeckGL` React component
 
-A small but breaking change is that the 'deck.gl/react' import is no
-longer available (see remarks). As of v4.0, the user is expected to
-import deck.gl using "pre-v3.0" way as follows:
+A small but breaking change that will affect all applications is that the
+'deck.gl/react' import is no longer available. As of v4.0, the app is required
+to import deck.gl as follows:
 ```
 // V4
 import DeckGL from 'deck.gl';
 // V3
 import DeckGL from 'deck.gl/react';
 ```
+While it would have been preferable to avoid this change, a significant
+modernization of the deck.gl build process and preparations for "tree-shaking"
+support combined to make it impractical to keep supporting the old import style.
 
 ### Removed, Changed and Deprecated Layer Properties
 
@@ -29,12 +32,6 @@ import DeckGL from 'deck.gl/react';
 This prop has been removed in deck.gl v4. Note that it was not functioning
 as documented in deck.gl v3.
 
-#### Removed lifecycle method: `Layer.willReceiveProps`
-
-This lifecycle was deprecated in v3 and is now removed. Use `Layer.updateState`
-instead.
-
-
 #### Renamed Props: The `...Scale` suffix
 
 Props that have their name end of `Scale` is a set of props that
@@ -45,6 +42,10 @@ values of specific attributes simultaneously.
 For API consistency reasons these have all been renamed with the suffix `..Scale`.
 See the property table above.
 
+#### Removed lifecycle method: `Layer.willReceiveProps`
+
+This lifecycle was deprecated in v3 and is now removed in v4.
+Use `Layer.updateState` instead.
 
 #### updateTriggers
 
@@ -65,8 +66,8 @@ loggers for all AttributeManagers (i.e. for all layers).
 
 #### Removed method: `AttributeManager.addDynamic`
 
-This method has been deprecated since version 2.5 and is now removed, use
-`AttributeManager.add()` instead
+This method has been deprecated since version 2.5 and is now removed in v4.
+Use `AttributeManager.add()` instead.
 
 
 ### Deprecated/Removed Layers
@@ -85,9 +86,9 @@ completely substituted by more unified, flexible and performant new layers:
  `GeoJsonLayer`, `PolygonLayer` and `PathLayer`.
 
 Developers should be able to just supply the same geojson data that are used with
- `ChoroplethLayer`s to the new `GeoJsonLayer`. The props of the `GeoJsonLayer` is
- also a bit different from the old `ChoroplethLayer`, so proper testing is recommended
- to achieve satisfactory result.
+`ChoroplethLayer`s to the new `GeoJsonLayer`. The props of the `GeoJsonLayer` are
+a bit different from the old `ChoroplethLayer`, so proper testing is recommended
+to achieve satisfactory result.
 
 As a deprecated layer, the Choropleth-family layers will stick around for
 at least another major revision, but please take some time to upgrade to the new

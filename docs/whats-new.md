@@ -1,16 +1,17 @@
 # deck.gl v4.0
 
-Release date: Target: March 24, 2017
+Release date: March 31, 2017
 
 ## Highlights
 
 - **New Geospatial Layers** GeoJsonLayer, PathLayer, PolygonLayer, IconLayer,
-  GridLayer, HexagonLayer, PointCloudLayer.
-- **New Aggregating Layers** PointDensityGridLayer and PointDensityHexagonLayer
-  automatically "bin" your point data into grid cells or hexagons.
+  GridCellLayer, HexagonCellLayer, PointCloudLayer.
+- **New Aggregating Layers** GridLayer and HexagonLayer now join the ScreenGridLayer
+  in a growing family of layers that automatically "bin" your point data, in this
+  case into grid cells or hexagons.
 - **New Examples** deck.gl now provides multiple stand-alone examples, with minimal
   configuration files (`package.json`, `webpack.config.js` etc) intended to make it
-  easy to just copy an example folder and get things working.
+  easy to just copy an example folder and get an app up and running in minutes.
 - **Unified 64-bit Layers** - 64-bit Layers are now unified with 32-bit layers, use `fp64` prop.
 - **Library Size Reduction** - A number of npm package dependencies have been
   trimmed from deck.gl, and the distribution has initial support for "tree-shaking"
@@ -20,16 +21,19 @@ Release date: Target: March 24, 2017
 - **Model Matrix Support** - Model matrix support for the `METER_OFFSET` projection mode
   enables arbitrary coordinate transforms (translations, rotations, scaling etc)
   to be applied on individual layer enabling scene graph like layer composition and animation.
-- **Documentation** Improved and reorganized in response to user feedbacks.
+- **Documentation** Improved and reorganized in response to user feedback.
 - **Experimental Features** Experimental support for non-Mercator projections and
   rendering effects (e.g. Reflections)
 
 ## New Layers
 
-* GeoJsonLayer
+### GeoJsonLayer
 
-A composite layer that parses geojson and renders it as a `PathLayer`
-and a `PolygonLayer`.
+A layer that parses and renders GeoJson. Supports all GeoJson primitives
+(polygons, lines and points).
+The GeoJsonLayer is an example of a composite layer that instantiates other layers
+(in this case `PathLayer`, `PolygonLayer` and `ScatterplotLayer`) to do the actual
+rendering. This layer replaces the now deprecated family of `ChoroplethLayer`s.
 
 ### PathLayer
 
@@ -65,9 +69,6 @@ Draws a LiDAR point cloud. Supports point position/normal/color.
 
 ## Improvements to all Layers
 
-### TBD - support immutable data/ES6 containers?
-
-
 ### Support for Per-Layer Model Matrix
 
 Each layer now supports a `modelMatrix` property that can be used to
@@ -81,8 +82,6 @@ specify a local coordinate system for the data in that layer:
   possibilities as individual layers can be scaled, rotated, translated etc
   with very low computational cost (i.e. without modifying the data).
 
-TBD - `layerMatrix` vs. `modelMatrix`
-
 
 ### UpdateTriggers now accept Accessor Names
 
@@ -95,14 +94,13 @@ to supply names of `accessors`.
 
 ### More intuitive mouse events
 
-`onHover` is now only fired on entering/exiting an object instead of on mouse move.
-
-`onClick` is now only fired on the picked layer instead of all pickable layers.
+* `onHover` is now only fired on entering/exiting an object instead of on mouse move.
+* `onClick` is now only fired on the picked layer instead of all pickable layers.
 
 
 ## New Features for Layer Subclassing
 
-### **Overridable shaders
+### Overridable Shaders
 
 All layers now have a `getShaders` method that can
 be overriden by subclasses, enables reuse of all layer code while just
@@ -152,7 +150,7 @@ over logging of attribute updates.
 
 ## Library Improvements
 
-JavaScript build tooling continues to evolve rapidly and efforts have
+JavaScript build tooling continues to evolve and efforts have
 been made to ensure deck.gl supports several popular new tooling setups:
 
 * **Dependency Reduction** The number of npm dependencies (both in `deck.gl`,

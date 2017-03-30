@@ -70,9 +70,10 @@ You will need to install dependencies in that example first:
 
 #### Node Version Requirement
 
-Building deck.gl from source has a dependency on node `4.0` or higher.
-Either upgrade to a newest version, or install something like
-[nvm](https://github.com/creationix/nvm).
+Running deck.gl as a dependency in another project (e.g. via `npm i deck.gl`) requires Node `v4` or higher.
+Building deck.gl from source has a dependency on Node `v6.4` or higher.
+Either upgrade to a supported version, or install something like
+[nvm](https://github.com/creationix/nvm) to manage Node versions.
 
 #### Install yarn
 On macOS deck.gl uses [yarn](https://www.npmjs.com/package/yarn) to manage packages.
