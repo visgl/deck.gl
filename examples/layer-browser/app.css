@@ -22,6 +22,17 @@ h4 {
   pointer-events: none;
 }
 
+#no-token-warning {
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	transform: translate(-50%, -50%);
+	padding: 20px;
+	max-width: 240px;
+	text-align: center;
+	background: rgba(255, 255, 255, 0.5);
+}
+
 #control-panel {
 	position: fixed;
 	z-index: 9;
