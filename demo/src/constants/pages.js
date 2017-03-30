@@ -89,6 +89,13 @@ export const examplePages = generatePath([
     expanded: true,
     children: [
       {
+        name: 'Arc Brushing',
+        content: {
+          demo: 'ArcBrushingDemo',
+          code: getCodeUrl('examples/arc-brushing')
+        }
+      },
+      {
         name: 'Trip Routes',
         content: {
           demo: 'TripsDemo',
