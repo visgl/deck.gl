@@ -88,6 +88,7 @@ class Page extends Component {
     );
   }
 
+  // replaces the current query string in react-router
   @autobind _updateQueryString(queryString) {
     const {location: {pathname, search}} = this.props;
     if (search !== queryString) {
@@ -109,7 +110,7 @@ class Page extends Component {
     } else if (typeof content === 'string') {
       child = (<MarkdownPage content={contents[content]}
         query={query}
-        updateQuery={this._updateQueryString}
+        updateQueryString={this._updateQueryString}
         renderDemo={this._renderDemo} />);
     }
 

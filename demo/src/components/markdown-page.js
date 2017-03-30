@@ -14,6 +14,12 @@ import {markdownFiles} from '../constants/pages';
  */
 const urlRewrites = [
   {
+    /*
+     * Look for urls in the form of
+     * `/docs/path/to/file.md#header`
+     * and convert to
+     * `#/documentation/path/to/page?section=header`
+     */
     test: /^\/(docs\/.+?\.md)(#.*)?$/,
     rewrite: match => {
       const filepath = match[1];
@@ -71,9 +77,10 @@ export default class MarkdownPage extends PureComponent {
   constructor(props) {
     super(props);
     this.state = {
-      html: renderMarkdown(props.content),
-      anchorPositions: null
+      html: renderMarkdown(props.content)
     };
+    this._anchorPositions = null;
+    this._currentSection = null;
     this._internalScroll = false;
   }
 
@@ -84,9 +91,10 @@ export default class MarkdownPage extends PureComponent {
   componentWillReceiveProps(nextProps) {
     if (nextProps.content !== this.props.content) {
       this.setState({
-        html: renderMarkdown(nextProps.content),
-        anchorPositions: null
+        html: renderMarkdown(nextProps.content)
       });
+      this._anchorPositions = null;
+      this._currentSection = null;
     }
   }
 
@@ -94,9 +102,11 @@ export default class MarkdownPage extends PureComponent {
     this._jumpTo(this.props.query.section);
   }
 
+  // get the vertical scroll position of a DOM object relative to this component
   _getScrollPosition(object) {
     const {container} = this.refs;
-    let top = 0;
+    // give the header some breath room
+    let top = -28;
     while (object && Number.isFinite(object.offsetTop) && object !== container) {
       top += object.offsetTop;
       object = object.parentNode;
@@ -107,9 +117,14 @@ export default class MarkdownPage extends PureComponent {
   // Because we use hash paths in react-router, hash jump links do not work
   // In-page links can be passed using ?section=<id>
   _jumpTo(section) {
-    const anchor = this.refs.container.querySelector(`#${section}`);
-    this._internalScroll = true;
-    this.refs.container.scrollTop = this._getScrollPosition(anchor);
+    if (section !== this._currentSection) {
+      const anchor = this.refs.container.querySelector(`#${section}`);
+      const scrollTop = this._getScrollPosition(anchor);
+      if (this.refs.container.scrollTop !== scrollTop) {
+        this._internalScroll = true;
+        this.refs.container.scrollTop = scrollTop;
+      }
+    }
   }
 
   // Find the current section and update the query string.
@@ -121,29 +136,34 @@ export default class MarkdownPage extends PureComponent {
       return;
     }
 
-    let {anchorPositions} = this.state;
+    let {_anchorPositions} = this;
     const top = evt.target.scrollTop;
 
     // Calculate all scroll positions of h2, h3 once
-    if (!anchorPositions) {
-      anchorPositions = {};
+    if (!_anchorPositions) {
+      _anchorPositions = {};
       // generate mapping of anchor id -> scrollTop
       const anchors = this.refs.container.querySelectorAll('h2[id],h3[id]');
       for (const anchor of anchors) {
-        anchorPositions[anchor.id] = this._getScrollPosition(anchor);
+        _anchorPositions[anchor.id] = this._getScrollPosition(anchor);
       }
-      this.setState({anchorPositions});
+      this._anchorPositions = _anchorPositions;
     }
 
     let currentSection;
-    for (const id in anchorPositions) {
-      if (anchorPositions[id] <= top) {
+    for (const id in _anchorPositions) {
+      if (_anchorPositions[id] <= top) {
         currentSection = id;
       } else {
         break;
       }
     }
-    this.props.updateQuery(currentSection ? `?section=${currentSection}` : '');
+
+    if (currentSection !== this._currentSection) {
+      this._currentSection = currentSection;
+      // update query string in url
+      this.props.updateQueryString(currentSection ? `?section=${currentSection}` : '');
+    }
   }
 
   render() {
