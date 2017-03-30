@@ -4,18 +4,16 @@ let total = 0;
 onmessage = function(e) {
 
   const lines = e.data.text.split('\n');
-  const result = [];
-
-  lines.forEach(function(line) {
-    if (!line) {
-      return;
+  
+  const result = lines.reduce(function(acc, line) {
+    if (line) {
+      const pts = decodePolyline(line);
+      return acc.concat(pts);
     }
-    const pts = line.split(',');
-    result.push(pts.map(function(d) {
-      return Number(d)
-    }));
-    total++;
-  });
+    return acc;
+  }, []);
+
+  total += result.length;
 
   postMessage({
     action: 'add',
