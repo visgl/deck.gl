@@ -56,6 +56,8 @@ export default class DeckGLOverlay extends Component {
 
     this._startAnimate = this._startAnimate.bind(this);
     this._animateHeight = this._animateHeight.bind(this);
+
+    this._animate();
   }
 
   componentWillReceiveProps(nextProps) {
@@ -73,7 +75,7 @@ export default class DeckGLOverlay extends Component {
   }
 
   _startAnimate() {
-    window.setInterval(this._animateHeight, 20);
+    this.intervalTimer = window.setInterval(this._animateHeight, 20);
   }
 
   _animateHeight() {
