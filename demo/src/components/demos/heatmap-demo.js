@@ -8,7 +8,7 @@ export default class HeatmapDemo extends Component {
 
   static get data() {
     return {
-      url: 'data/heatmap-data.csv',
+      url: 'data/heatmap-data.txt',
       worker: 'workers/heatmap-data-decoder.js'
     };
   }
