@@ -88,8 +88,18 @@ class Page extends Component {
     );
   }
 
+  @autobind _updateSection(sectionName) {
+    const {location: {pathname, query}} = this.props;
+    if (query.section !== sectionName) {
+      this.context.router.replace({
+        pathname,
+        search: sectionName ? `?section=${sectionName}` : ''
+      });
+    }
+  }
+
   render() {
-    const {contents} = this.props;
+    const {contents, location: {query}} = this.props;
     const {content} = this.state;
 
     let child;
@@ -97,7 +107,10 @@ class Page extends Component {
     if (content.demo) {
       child = this._renderDemo(content.demo, content.code);
     } else if (typeof content === 'string') {
-      child = <MarkdownPage content={contents[content]} renderDemo={this._renderDemo} />;
+      child = (<MarkdownPage content={contents[content]}
+        section={query.section}
+        updateSection={this._updateSection}
+        renderDemo={this._renderDemo} />);
     }
 
     return <div className="page">{child}</div>;

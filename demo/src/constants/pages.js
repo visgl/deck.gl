@@ -5,15 +5,21 @@ function getCodeUrl(pathname) {
   return `https://github.com/uber/deck.gl/tree/master/${pathname}`;
 }
 
-function generatePath(tree) {
+// mapping from file path in source to generated page url
+export const markdownFiles = {};
+
+function generatePath(tree, parentPath = '') {
   if (Array.isArray(tree)) {
-    tree.forEach(branch => generatePath(branch));
-  }
-  if (tree.children) {
-    generatePath(tree.children);
+    tree.forEach(branch => generatePath(branch, parentPath));
   }
   if (tree.name) {
     tree.path = tree.name.match(/(([A-Z]|^)[a-z]+|3D|\d+)/g).join('-').toLowerCase();
+  }
+  if (tree.children) {
+    generatePath(tree.children, `${parentPath}/${tree.path}`);
+  }
+  if (typeof tree.content === 'string') {
+    markdownFiles[tree.content] = `${parentPath}/${tree.path}`;
   }
   return tree;
 }
@@ -140,6 +146,10 @@ export const docPages = generatePath([
       {
         name: 'Viewports',
         content: getDocUrl('viewports.md')
+      },
+      {
+        name: 'Interactivity',
+        content: getDocUrl('interactivity.md')
       }
     ]
   },
