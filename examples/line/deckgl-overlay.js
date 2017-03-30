@@ -33,8 +33,8 @@ export default class DeckGLOverlay extends Component {
   }
 
   _initialize(gl) {
-    gl.enable(gl.DEPTH_TEST);
-    gl.depthFunc(gl.LEQUAL);
+    gl.blendFuncSeparate(gl.SRC_ALPHA, gl.ONE, gl.ONE_MINUS_DST_ALPHA, gl.ONE);
+    gl.blendEquation(gl.FUNC_ADD);
   }
 
   render() {
@@ -59,7 +59,7 @@ export default class DeckGLOverlay extends Component {
         id: 'flight-paths',
         data: flightPaths,
         strokeWidth,
-        fp64: true,
+        fp64: false,
         getSourcePosition: d => d.start,
         getTargetPosition: d => d.end,
         getColor,

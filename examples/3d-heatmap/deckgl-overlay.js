@@ -39,6 +39,7 @@ export default class DeckGLOverlay extends Component {
       longitude: -1.4855092665310963,
       latitude: 52.38821282001933,
       zoom: 6.6,
+      minZoom: 5,
       maxZoom: 15,
       pitch: 60,
       bearing: -14

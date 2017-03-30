@@ -9,8 +9,11 @@ export default handleActions({
 
   UPDATE_MAP: (state, action) => {
     const {viewport} = action;
-    const maxZoom = viewport.maxZoom || state.maxZoom || 20;
-    if (viewport.zoom > maxZoom) {
+
+    const maxZoom = Number.isFinite(viewport.maxZoom) ? state.maxZoom : viewport.maxZoom;
+    const minZoom = Number.isFinite(viewport.minZoom) ? state.minZoom : viewport.minZoom;
+
+    if (viewport.zoom > maxZoom || viewport.zoom < minZoom) {
       return state;
     }
     return {...state, ...viewport};
