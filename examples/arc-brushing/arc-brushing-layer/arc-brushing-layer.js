@@ -1,4 +1,4 @@
-// Copyright (c) 2015 Uber Technologies, Inc.
+// Copyright (c) 2016 Uber Technologies, Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -19,46 +19,27 @@
 // THE SOFTWARE.
 
 import {ArcLayer} from 'deck.gl';
-import {readFileSync} from 'fs';
-import {join} from 'path';
+
+import arcVertex from './arc-brushing-layer-vertex.glsl';
+import arcFragment from './arc-brushing-layer-fragment.glsl';
+
+const defaultProps = {
+  ...ArcLayer.defaultProps,
+
+  // show arc if source is in brush
+  brushSource: true,
+  // show arc if target is in brush
+  brushTarget: true,
+  enableBrushing: true,
+  // brush radius in kilometer
+  brushRadius: 1,
+  // outside brush point radius
+};
 
 export default class ArcBrushingLayer extends ArcLayer {
 
-  static layerName = 'ArcBrushingLayer';
-
-  /*
-   * @classdesc
-   * ScatterplotBrushingLayer
-   *
-   * @class
-   * @param {object} props
-   * @param {boolean} props.enableBrushing - whether brushing is enabled
-   */
-  constructor({
-    // show arc if source is in brush
-    brushSource = true,
-    // show arc if target is in brush
-    brushTarget = true,
-    enableBrushing = true,
-    // brush radius in kilometer
-    brushRadius = 1,
-    // outside brush point radius
-    ...props
-  }) {
-    super({
-      brushSource,
-      brushTarget,
-      brushRadius,
-      enableBrushing,
-      ...props
-    });
-  }
-
   getShaders() {
-    return {
-      vs: readFileSync(join(__dirname, './arc-brushing-layer-vertex.glsl'), 'utf8'),
-      fs: readFileSync(join(__dirname, './arc-brushing-layer-fragment.glsl'), 'utf8')
-    };
+    return {vs: arcVertex, fs: arcFragment, modules: []};
   }
 
   draw({uniforms}) {
@@ -81,3 +62,6 @@ export default class ArcBrushingLayer extends ArcLayer {
     });
   }
 }
+
+ArcBrushingLayer.layerName = 'ArcBrushingLayer';
+ArcBrushingLayer.defaultProps = defaultProps;

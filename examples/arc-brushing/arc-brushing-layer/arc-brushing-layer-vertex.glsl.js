@@ -17,10 +17,11 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
+
+export default `\
 #define SHADER_NAME arc-brushing-layer-vertex-shader
 
-//const float PI = 3.1415926536;
-const float R_EARTH = 6371.0; // earth radius in km
+const float R_EARTH = 6371000.0; // earth radius in km
 const float N = 49.0;
 
 attribute vec3 positions;
@@ -29,6 +30,9 @@ attribute vec4 instanceTargetColors;
 attribute vec4 instancePositions;
 attribute vec3 instancePickingColors;
 
+uniform float numSegments;
+uniform vec2 viewportSize;
+uniform float strokeWidth;
 uniform float opacity;
 uniform float renderPickingBuffer;
 
@@ -41,7 +45,7 @@ uniform float brushTarget;
 
 varying vec4 vColor;
 
-// approximate distance bwtween lat lng in km
+// approximate distance between lat lng in meters
 float distanceBetweenLatLng(vec2 source, vec2 target) {
 
   vec2 delta = (source - target) * PI / 180.0;
@@ -55,6 +59,7 @@ float distanceBetweenLatLng(vec2 source, vec2 target) {
 
   return R_EARTH * c;
 }
+
 // range is km
 float isPointInRange(vec2 ptLatLng, vec2 mouseLatLng, float range, float enabled) {
 
@@ -71,30 +76,61 @@ float paraboloid(vec2 source, vec2 target, float ratio) {
   return (dSourceCenter + dXCenter) * (dSourceCenter - dXCenter);
 }
 
+// offset vector by strokeWidth pixels
+// offset_direction is -1 (left) or 1 (right)
+vec2 getExtrusionOffset(vec2 line_clipspace, float offset_direction) {
+  // normalized direction of the line
+  vec2 dir_screenspace = normalize(line_clipspace * viewportSize);
+  // rotate by 90 degrees
+  dir_screenspace = vec2(-dir_screenspace.y, dir_screenspace.x);
+
+  vec2 offset_screenspace = dir_screenspace * offset_direction * strokeWidth / 2.0;
+  vec2 offset_clipspace = offset_screenspace / viewportSize * 2.0;
+
+  return offset_clipspace;
+}
+
+float getSegmentRatio(float index) {
+  return smoothstep(0.0, 1.0, index / (numSegments - 1.0));
+}
+
+vec3 getPos(vec2 source, vec2 target, float segmentRatio) {
+  float vertex_height = paraboloid(source, target, segmentRatio);
+
+  return vec3(
+    mix(source, target, segmentRatio),
+    sqrt(max(0.0, vertex_height))
+  );
+}
+
 void main(void) {
-  vec2 source = preproject(instancePositions.xy);
-  vec2 target = preproject(instancePositions.zw);
-  float segmentRatio = smoothstep(0.0, 1.0, positions.x / N);
+  vec2 source = project_position(instancePositions.xy);
+  vec2 target = project_position(instancePositions.zw);
 
   // if not enabled return true
-  float isSourceInBrush = isPointInRange(instancePositions.xy, mousePos, brushRadius, brushSource);
-  float isTargetInBrush = isPointInRange(instancePositions.zw, mousePos, brushRadius, brushTarget);
+  //float isSourceInBrush = isPointInRange(instancePositions.xy, mousePos, brushRadius, brushSource);
+  //float isTargetInBrush = isPointInRange(instancePositions.zw, mousePos, brushRadius, brushTarget);
 
-  float isInBrush = float(enableBrushing <= 0. || (brushSource * isSourceInBrush > 0. || brushTarget * isTargetInBrush > 0.));
+  //float isInBrush = float(enableBrushing <= 0. || (brushSource * isSourceInBrush > 0. || brushTarget * isTargetInBrush > 0.));
 
   // mix segIndex with brush, if not in brush, return 0
-  float segIndex = mix(0.0, segmentRatio, isInBrush);
+  // float segIndex = mix(0.0, segmentRatio, isInBrush);
 
-  float vertex_height = paraboloid(source, target, segIndex);
-  if (vertex_height < 0.0) vertex_height = 0.0;
-  vec3 p = vec3(
-    // xy: linear interpolation of source & target
-    mix(source, target, segIndex),
-    // z: paraboloid interpolate of source & target
-    sqrt(vertex_height)
-  );
+  float segmentIndex = positions.x;
+  float segmentRatio = getSegmentRatio(segmentIndex);
+  // if it's the first point, use next - current as direction
+  // otherwise use current - prev
+  float indexDir = mix(-1.0, 1.0, step(segmentIndex, 0.0));
+  float nextSegmentRatio = getSegmentRatio(segmentIndex + indexDir);
 
-  gl_Position = project(vec4(p, 1.0));
+  vec3 currPos = getPos(source, target, segmentRatio);
+  vec3 nextPos = getPos(source, target, nextSegmentRatio);
+  vec4 curr = project_to_clipspace(vec4(currPos, 1.0));
+  vec4 next = project_to_clipspace(vec4(nextPos, 1.0));
+
+  // extrude
+  vec2 offset = getExtrusionOffset((next.xy - curr.xy) * indexDir, positions.y);
+  gl_Position = curr + vec4(offset, 0.0, 0.0);
 
   vec4 color = mix(instanceSourceColors, instanceTargetColors, segmentRatio) / 255.;
 
@@ -104,3 +140,4 @@ void main(void) {
     renderPickingBuffer
   );
 }
+`;
