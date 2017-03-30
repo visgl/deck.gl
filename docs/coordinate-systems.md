@@ -41,8 +41,6 @@ any 3D library.
 The application needs to manage the extents of positions in its data,
 and adjust view matrices accordingly.
 
-To use this mode.
-
 
 ## Support for the Web Mercator Projection and Cartographic Coordinate Systems
 
