@@ -17,6 +17,9 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## Latest Beta Releases
 
+#### [v4.0.0-rc.6]
+- Fix: remove postinstall script
+
 #### [v4.0.0-rc.5]
 - `getPickingInfo()` methods receive an additional argument `sourceLayer` (#468)
 - `HexagonLayer` add `lowerPercentile` and `higherPercentile` (#470)
