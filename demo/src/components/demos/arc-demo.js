@@ -18,7 +18,7 @@ export default class ArcDemo extends Component {
 
   static get parameters() {
     return {
-      lineWidth: {displayName: 'Width', type: 'number', value: 2, step: 1, min: 1}
+      lineWidth: {displayName: 'Width', type: 'range', value: 2, step: 0.1, min: 0, max: 10}
     };
   }
 

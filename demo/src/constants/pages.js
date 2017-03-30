@@ -13,7 +13,7 @@ function generatePath(tree) {
     generatePath(tree.children);
   }
   if (tree.name) {
-    tree.path = tree.name.match(/(([A-Z]|^)[a-z]+|\d+)/g).join('-').toLowerCase();
+    tree.path = tree.name.match(/(([A-Z]|^)[a-z]+|3D|\d+)/g).join('-').toLowerCase();
   }
   return tree;
 }
@@ -24,38 +24,10 @@ export const examplePages = generatePath([
     content: 'markdown/examples.md'
   },
   {
-    name: 'ScatterplotLayer',
+    name: 'LineLayer',
     content: {
-      demo: 'ScatterplotDemo',
-      code: getCodeUrl('examples/scatterplot')
-    }
-  },
-  {
-    name: 'ArcLayer',
-    content: {
-      demo: 'ArcDemo',
-      code: getCodeUrl('examples/arc')
-    }
-  },
-  {
-    name: 'GeoJsonLayer',
-    content: {
-      demo: 'GeoJsonDemo',
-      code: getCodeUrl('examples/geojson')
-    }
-  },
-  {
-    name: 'ScreenGridLayer',
-    content: {
-      demo: 'ScreenGridDemo',
-      code: getCodeUrl('examples/screen-grid')
-    }
-  },
-  {
-    name: 'IconLayer',
-    content: {
-      demo: 'IconDemo',
-      code: getCodeUrl('examples/icon')
+      demo: 'LineDemo',
+      code: getCodeUrl('examples/line')
     }
   },
   {
@@ -66,10 +38,24 @@ export const examplePages = generatePath([
     }
   },
   {
-    name: 'LineLayer',
+    name: 'IconLayer',
     content: {
-      demo: 'LineDemo',
-      code: getCodeUrl('examples/line')
+      demo: 'IconDemo',
+      code: getCodeUrl('examples/icon')
+    }
+  },
+  {
+    name: '3D Surface Explorer',
+    content: {
+      demo: 'PlotDemo',
+      code: getCodeUrl('examples/plot')
+    }
+  },
+  {
+    name: 'GeoJsonLayer',
+    content: {
+      demo: 'GeoJsonDemo',
+      code: getCodeUrl('examples/geojson')
     }
   },
   {
@@ -80,10 +66,24 @@ export const examplePages = generatePath([
     }
   },
   {
-    name: 'Graph Explorer',
+    name: 'ScreenGridLayer',
     content: {
-      demo: 'PlotDemo',
-      code: getCodeUrl('examples/plot')
+      demo: 'ScreenGridDemo',
+      code: getCodeUrl('examples/screen-grid')
+    }
+  },
+  {
+    name: 'ArcLayer',
+    content: {
+      demo: 'ArcDemo',
+      code: getCodeUrl('examples/arc')
+    }
+  },
+  {
+    name: 'ScatterplotLayer',
+    content: {
+      demo: 'ScatterplotDemo',
+      code: getCodeUrl('examples/scatterplot')
     }
   }
 ]);

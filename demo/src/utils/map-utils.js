@@ -21,11 +21,11 @@ const fly = (fromViewport, toViewport, duration, onUpdate) => {
   Object.keys(toViewport).forEach(key => {
     const v0 = fromViewport[key];
     const v1 = toViewport[key];
-    if (isNaN(v0) || isNaN(v1)) {
-      nanState[key] = v1;
-    } else {
+    if (Number.isFinite(v0) && Number.isFinite(v1)) {
       fromState[key] = v0;
       toState[key] = v1;
+    } else {
+      nanState[key] = v1;
     }
   });
 

@@ -14,13 +14,14 @@ export default class ScreenGridDemo extends Component {
 
   static get parameters() {
     return {
-      cellSize: {displayName: 'Cell Size', type: 'number', value: 10, step: 5, min: 10}
+      cellSize: {displayName: 'Cell Size', type: 'range', value: 30, step: 1, min: 10, max: 100}
     };
   }
 
   static get viewport() {
     return {
       ...ScreenGridOverlay.defaultViewport,
+      perspectiveEnabled: false,
       mapStyle: MAPBOX_STYLES.DARK
     };
   }

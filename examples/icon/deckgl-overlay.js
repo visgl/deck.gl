@@ -3,7 +3,7 @@ import React, {Component} from 'react';
 import DeckGL, {IconLayer, WebMercatorViewport} from 'deck.gl';
 import rbush from 'rbush';
 
-const ICON_SIZE = 80;
+const ICON_SIZE = 60;
 
 function getIconName(size) {
   if (size === 0) {
@@ -18,13 +18,17 @@ function getIconName(size) {
   return 'marker-100';
 }
 
+function getIconSize(size) {
+  return Math.min(100, size) / 100 * 0.5 + 0.5;
+}
+
 export default class DeckGLOverlay extends Component {
 
   static get defaultViewport() {
     return {
-      longitude: -89.4,
+      longitude: -35,
       latitude: 36.7,
-      zoom: 3,
+      zoom: 1.8,
       maxZoom: 20,
       pitch: 0,
       bearing: 0
@@ -84,7 +88,7 @@ export default class DeckGLOverlay extends Component {
     tree.load(data);
 
     for (let z = 0; z <= 20; z++) {
-      const radius = ICON_SIZE / window.devicePixelRatio / 2 / Math.pow(2, z);
+      const radius = ICON_SIZE / 2 / Math.pow(2, z);
 
       data.forEach(p => {
         if (p.zoomLevels[z] === undefined) {
@@ -105,6 +109,7 @@ export default class DeckGLOverlay extends Component {
             if (neighbor === p) {
               p.zoomLevels[z] = {
                 icon: getIconName(neighbors.length),
+                size: getIconSize(neighbors.length),
                 points: neighbors
               };
             } else {
@@ -125,6 +130,7 @@ export default class DeckGLOverlay extends Component {
 
     const z = Math.floor(viewport.zoom);
     const size = showCluster ? 1 : Math.min(Math.pow(1.5, viewport.zoom - 10), 1);
+    const updateTrigger = {z: z * showCluster};
 
     const layer = new IconLayer({
       id: 'icon',
@@ -132,16 +138,15 @@ export default class DeckGLOverlay extends Component {
       pickable: this.props.onHover || this.props.onClick,
       iconAtlas,
       iconMapping,
-      sizeScale: ICON_SIZE * size,
+      sizeScale: ICON_SIZE * size * window.devicePixelRatio,
       getPosition: d => d.coordinates,
       getIcon: d => showCluster ? (d.zoomLevels[z] && d.zoomLevels[z].icon) : 'marker',
-      getSize: d => 1,
+      getSize: d => showCluster ? (d.zoomLevels[z] && d.zoomLevels[z].size) : 1,
       onHover: this.props.onHover,
       onClick: this.props.onClick,
       updateTriggers: {
-        getIcon: {
-          z: z * showCluster
-        }
+        getIcon: updateTrigger,
+        getSize: updateTrigger
       }
     });
 

@@ -19,7 +19,8 @@ export default class LineDemo extends Component {
 
   static get parameters() {
     return {
-      strokeWidth: {displayName: 'Stroke Width', type: 'number', value: 3, step: 1, min: 1}
+      strokeWidth: {displayName: 'Stroke Width',
+        type: 'range', value: 3, step: 0.1, min: 0, max: 10}
     };
   }
 
@@ -33,7 +34,7 @@ export default class LineDemo extends Component {
   static renderInfo(meta) {
     return (
       <div>
-        <h3>Flights In And Out Of Heathrow Airport</h3>
+        <h3>Flights In And Out Of <br/>Heathrow Airport</h3>
         <p>Flight paths from a 4 hour window on March 28th, 2017</p>
         <p>Flight tracking data source:
           <a href="https://opensky-network.org/"> The OpenSky Network</a><br />
