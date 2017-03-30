@@ -30,6 +30,7 @@ export default class IconDemo extends Component {
   static get viewport() {
     return {
       ...IconOverlay.defaultViewport,
+      perspectiveEnabled: false,
       mapStyle: MAPBOX_STYLES.DARK
     };
   }
@@ -37,7 +38,7 @@ export default class IconDemo extends Component {
   static renderInfo(meta) {
     return (
       <div>
-        <h3>Where Films Were Made (2007 - 2017)</h3>
+        <h3>Where Films Were Made <br/>(2007-2017)</h3>
         <p>Click a pin to expand detials.</p>
         <p>Data source: <a href="http://www.imdb.com/conditions">IMDB</a></p>
         <div className="layout">
@@ -71,20 +72,19 @@ export default class IconDemo extends Component {
     let hoveredItems = null;
 
     if (object) {
-      hoveredItems = new Map();
+      hoveredItems = {};
       if (showCluster) {
         object.zoomLevels[z].points.forEach(p => {
-          let scenes = hoveredItems.get(p.name);
+          let scenes = hoveredItems[p.name];
           if (!scenes) {
             scenes = [];
-            hoveredItems.set(p.name, scenes);
+            hoveredItems[p.name] = scenes;
           }
           scenes.push(p.scene);
         });
       } else {
-        hoveredItems.set(object.name, [object.scene]);
+        hoveredItems[object.name] = [object.scene];
       }
-      hoveredItems = hoveredItems.toJSON();
     }
 
     this.setState({x, y, hoveredItems, expanded: false});
@@ -101,20 +101,30 @@ export default class IconDemo extends Component {
       return null;
     }
 
+    if (expanded) {
+      return (
+        <div className="tooltip interactive"
+             style={{left: x, top: y}}
+             onWheel={stopPropagation}
+             onMouseDown={stopPropagation}>
+          {
+            Object.keys(hoveredItems).map(name => {
+              return (
+                <div key={name}>
+                  <h5>{name}</h5>
+                  { hoveredItems[name].map((s, i) => <p key={i}>{s}</p>) }
+                </div>
+              );
+            })
+          }
+        </div>
+      );
+    }
+
     return (
-      <div className={`tooltip ${expanded ? 'interactive' : ''}`}
-           style={{left: x, top: y}}
-           onWheel={stopPropagation}
-           onMouseDown={stopPropagation}>
+      <div className="tooltip" style={{left: x, top: y}} >
         {
-          hoveredItems.map(([name, scenes]) => {
-            return (
-              <div key={name}>
-                <h5>{name}</h5>
-                { scenes.map((s, i) => <p key={i}>{s}</p>) }
-              </div>
-            );
-          })
+          Object.keys(hoveredItems).slice(0, 20).map(name => <div key={name}><h5>{name}</h5></div>)
         }
       </div>
     );

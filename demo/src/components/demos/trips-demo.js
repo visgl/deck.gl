@@ -22,7 +22,7 @@ export default class TripsDemo extends Component {
 
   static get parameters() {
     return {
-      trail: {displayName: 'Trail', type: 'number', value: 180, step: 10, min: 10, max: 180}
+      trail: {displayName: 'Trail', type: 'range', value: 180, step: 1, min: 10, max: 200}
     };
   }
 

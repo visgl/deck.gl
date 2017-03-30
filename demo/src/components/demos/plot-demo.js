@@ -27,7 +27,7 @@ export default class PlotDemo extends Component {
   static renderInfo(meta) {
     return (
       <div>
-        <h3>Graph Explorer</h3>
+        <h3>3D Surface Explorer</h3>
         <p>Non-geospatial demo.</p>
       </div>
     );
@@ -43,7 +43,7 @@ export default class PlotDemo extends Component {
         rotationX: -30,
         rotationY: 30,
         fov: 50,
-        minDistance: 2,
+        minDistance: 0.5,
         maxDistance: 20
       },
       equation: {},
