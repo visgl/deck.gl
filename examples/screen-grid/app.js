@@ -54,6 +54,7 @@ class Root extends Component {
       <MapGL
         {...viewport}
         mapStyle="mapbox://styles/mapbox/dark-v9"
+        perspectiveEnabled={false}
         onChangeViewport={this._onChangeViewport.bind(this)}
         mapboxApiAccessToken={MAPBOX_TOKEN}>
         <DeckGLOverlay viewport={viewport}

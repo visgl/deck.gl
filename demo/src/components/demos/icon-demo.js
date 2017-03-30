@@ -124,13 +124,7 @@ export default class IconDemo extends Component {
     return (
       <div className="tooltip" style={{left: x, top: y}} >
         {
-          Object.keys(hoveredItems).slice(0, 20).map(name => {
-            return (
-              <div key={name}>
-                <h5>{name}</h5>
-              </div>
-            );
-          })
+          Object.keys(hoveredItems).slice(0, 20).map(name => <div key={name}><h5>{name}</h5></div>)
         }
       </div>
     );
