@@ -88,8 +88,19 @@ class Page extends Component {
     );
   }
 
+  // replaces the current query string in react-router
+  @autobind _updateQueryString(queryString) {
+    const {location: {pathname, search}} = this.props;
+    if (search !== queryString) {
+      this.context.router.replace({
+        pathname,
+        search: queryString
+      });
+    }
+  }
+
   render() {
-    const {contents} = this.props;
+    const {contents, location: {query}} = this.props;
     const {content} = this.state;
 
     let child;
@@ -97,7 +108,10 @@ class Page extends Component {
     if (content.demo) {
       child = this._renderDemo(content.demo, content.code);
     } else if (typeof content === 'string') {
-      child = <MarkdownPage content={contents[content]} renderDemo={this._renderDemo} />;
+      child = (<MarkdownPage content={contents[content]}
+        query={query}
+        updateQueryString={this._updateQueryString}
+        renderDemo={this._renderDemo} />);
     }
 
     return <div className="page">{child}</div>;
