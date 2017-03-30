@@ -1,5 +1,12 @@
 <div>
   <div class="thumb">
+    <div data-title="US County-to-County Migration" data-name="ArcBrushingLayer">
+      <a href="#/examples/arc-brushing-layer">
+        <img src="images/demo-thumb-arc.jpg" />
+      </a>
+    </div>
+  </div>
+  <div class="thumb">
     <div class="bg-black" data-title="Flights at Heathrow" data-name="LineLayer">
       <a href="#/examples/core-layers/line-layer">
         <img src="images/demo-thumb-line.jpg" />
