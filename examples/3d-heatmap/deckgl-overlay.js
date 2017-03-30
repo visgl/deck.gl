@@ -4,9 +4,9 @@ import DeckGL, {HexagonLayer} from 'deck.gl';
 
 const LIGHT_SETTINGS = {
   lightsPosition: [-0.144528, 49.739968, 8000, -3.807751, 54.104682, 8000],
-  ambientRatio: 0.6,
+  ambientRatio: 0.45,
   diffuseRatio: 0.6,
-  specularRatio: 0.3,
+  specularRatio: 0.2,
   lightsStrength: [0.8, 0.0, 0.8, 0.0],
   numberOfLights: 2
 };
