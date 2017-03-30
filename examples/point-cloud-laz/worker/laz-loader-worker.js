@@ -1,5 +1,4 @@
 // laz-loader-worker.js
-//
 
 importScripts('laz-perf.js');
 

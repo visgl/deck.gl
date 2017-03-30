@@ -6,7 +6,7 @@ import DeckGL, {PointCloudLayer, COORDINATE_SYSTEM} from 'deck.gl';
 
 import {
   OrbitController,
-  loadLazFile, readLazData
+  loadLazFile, parseLazData
 } from './utils';
 
 function normalize(points) {
@@ -75,9 +75,9 @@ class Example extends PureComponent {
 
     const {points} = this.state;
 
-    const skip = 2;
+    const skip = 10;
     loadLazFile('data/indoor.laz').then(rawData => {
-      readLazData(rawData, skip, (decoder, progress) => {
+      parseLazData(rawData, skip, (decoder, progress) => {
         for (let i = 0; i < decoder.pointsCount; i++) {
           const {color, position} = decoder.getPoint(i);
           points.push({color, position});

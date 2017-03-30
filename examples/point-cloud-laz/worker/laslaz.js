@@ -1,7 +1,7 @@
+/* eslint no-use-before-define: 0 */
 // https://github.com/verma/plasio/
 // laslaz.js
 // LAS/LAZ loading
-//
 
 (function(scope) {
 	"use strict";
@@ -364,3 +364,5 @@
 	scope.LASFile = LASFile;
 	scope.LASModuleWasLoaded = false;
 })(module.exports);
+
+/* eslint no-use-before-define: 2 */
