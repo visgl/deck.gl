@@ -35,7 +35,9 @@ class App extends PureComponent {
         pitch: 30,
         bearing: 0
       },
-      activeExamples: {},
+      activeExamples: {
+        ScatterplotLayer: true
+      },
       settings: {
         // immutable: false,
         // Effects are experimental for now. Will be enabled in the future
@@ -176,7 +178,7 @@ class App extends PureComponent {
     const {width, height, mapViewState, settings: {effects}} = this.state;
     return (
       <MapboxGLMap
-        mapboxApiAccessToken={MAPBOX_ACCESS_TOKEN}
+        mapboxApiAccessToken={MAPBOX_ACCESS_TOKEN || 'no_token'}
         width={width} height={height}
         perspectiveEnabled
         { ...mapViewState }
@@ -199,12 +201,24 @@ class App extends PureComponent {
     );
   }
 
+  _renderNoTokenWarning() {
+    /* eslint-disable max-len */
+    return (
+      <div id="no-token-warning">
+        <h3>No Mapbox access token found.</h3>
+        Read <a href="http://uber.github.io/deck.gl/#/documentation/overview/getting-started#note-on-map-tokens-">"Note on Map Tokens"</a> for information on setting up your basemap.
+      </div>
+    );
+    /* eslint-disable max-len */
+  }
+
   render() {
     const {settings, activeExamples, hoveredItem, clickedItem} = this.state;
 
     return (
       <div>
         { this._renderMap() }
+        { !MAPBOX_ACCESS_TOKEN && this._renderNoTokenWarning() }
         <div id="control-panel">
           <LayerControls
             title="Composite Settings"
