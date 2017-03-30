@@ -43,15 +43,16 @@ class Example extends PureComponent {
   constructor(props) {
     super(props);
 
-    this._onResize = this._onResize.bind(this);
+    this._onChangeViewport = this._onChangeViewport.bind(this);
     this._onInitialized = this._onInitialized.bind(this);
-    this._onViewportChange = this._onViewportChange.bind(this);
+    this._onResize = this._onResize.bind(this);
     this._onUpdate = this._onUpdate.bind(this);
 
     this.state = {
       width: 0,
       height: 0,
       points: [],
+      progress: 0,
       viewport: {
         lookAt: [0, 0, 0],
         distance: 10,
@@ -75,20 +76,18 @@ class Example extends PureComponent {
     const {points} = this.state;
 
     const skip = 2;
-    loadLazFile('data/velodyne.laz').then(rawData => {
+    loadLazFile('data/indoor.laz').then(rawData => {
       readLazData(rawData, skip, (decoder, progress) => {
         for (let i = 0; i < decoder.pointsCount; i++) {
-          const point = decoder.getPoint(i);
-          const {color, position} = point;
-          // points.push({color, position});
-          points.push({color, position: [position[0], position[2], position[1]]});
+          const {color, position} = decoder.getPoint(i);
+          points.push({color, position});
         }
 
         if (progress >= 1) {
           normalize(points);
         }
 
-        this.setState({points});
+        this.setState({points, progress});
       });
     });
 
@@ -110,10 +109,8 @@ class Example extends PureComponent {
     gl.depthFunc(gl.LEQUAL);
   }
 
-  _onViewportChange(viewport) {
-    this.setState({
-      viewport: {...this.state.viewport, ...viewport}
-    });
+  _onChangeViewport(viewport) {
+    this.setState({viewport: {...this.state.viewport, ...viewport}});
   }
 
   _onUpdate() {
@@ -122,7 +119,6 @@ class Example extends PureComponent {
       viewport: {
         ...viewport,
         rotationY: viewport.rotationY + 1
-        // distance: viewport.distance + 0.001
       }
     });
     window.requestAnimationFrame(this._onUpdate);
@@ -140,21 +136,38 @@ class Example extends PureComponent {
     });
   }
 
-  render() {
+  _renderDeckGLCanvas() {
     const {width, height, viewport} = this.state;
     const canvasProps = {width, height, ...viewport};
     const glViewport = OrbitController.getViewport(canvasProps);
 
-    return width && height &&
-      <OrbitController {...canvasProps} ref={canvas => {
-        this._canvas = canvas;
-      }} onViewportChange={this._onViewportChange}>
-        <DeckGL width={width} height={height} viewport={glViewport}
-          layers={[
-            this._renderLazPointCloudLayer()
-          ].filter(Boolean)}
-          onWebGLInitialized={this._onInitialized}/>
-      </OrbitController>;
+    return width && height && <OrbitController {...canvasProps} ref={canvas => {
+      this._canvas = canvas;
+    }} onChangeViewport={this._onChangeViewport}>
+      <DeckGL width={width} height={height} viewport={glViewport}
+        layers={[this._renderLazPointCloudLayer()].filter(Boolean)}
+        onWebGLInitialized={this._onInitialized}/>
+    </OrbitController>;
+  }
+
+  _renderProgressBar() {
+    const label = `Loading ${(this.state.progress * 100).toFixed(2)}%`;
+    return this.state.progress < 1 && (
+      <div style={{
+        position: 'absolute', left: '8px', top: '8px',
+        color: '#FFF', fontSize: '15px'
+      }}>
+        {label}
+      </div>
+    );
+  }
+
+  render() {
+    const {width, height} = this.state;
+    return width && height && <div>
+      {this._renderDeckGLCanvas()}
+      {this._renderProgressBar()}
+    </div>;
   }
 }
 

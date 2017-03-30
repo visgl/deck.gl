@@ -43,17 +43,12 @@ export default class OrbitController extends Component {
   constructor(props) {
     super(props);
     this._dragStartPos = null;
-
-    this._onDragStart = this._onDragStart.bind(this);
-    this._onDrag = this._onDrag.bind(this);
-    this._onDragEnd = this._onDragEnd.bind(this);
-    this._onWheel = this._onWheel.bind(this);
   }
 
   _onDragStart(evt) {
     const {pageX, pageY} = evt;
     this._dragStartPos = [pageX, pageY];
-    this.props.onViewportChange({isDragging: true});
+    this.props.onChangeViewport({isDragging: true});
   }
 
   _onDrag(evt) {
@@ -64,16 +59,6 @@ export default class OrbitController extends Component {
       const dy = (pageY - this._dragStartPos[1]) / height;
 
       if (evt.shiftKey || evt.ctrlKey || evt.altKey || evt.metaKey) {
-        // rotate
-        const {rotationX, rotationY} = this.props;
-        const newRotationX = clamp(rotationX - dy * 180, -90, 90);
-        const newRotationY = (rotationY - dx * 180) % 360;
-
-        this.props.onViewportChange({
-          rotationX: newRotationX,
-          rotationY: newRotationY
-        });
-      } else {
         // pan
         const {lookAt, distance, rotationX, rotationY, fov} = this.props;
 
@@ -83,8 +68,18 @@ export default class OrbitController extends Component {
         vec3.rotateX(newLookAt, newLookAt, lookAt, rotationX / 180 * Math.PI);
         vec3.rotateY(newLookAt, newLookAt, lookAt, rotationY / 180 * Math.PI);
 
-        this.props.onViewportChange({
+        this.props.onChangeViewport({
           lookAt: newLookAt
+        });
+      } else {
+        // rotate
+        const {rotationX, rotationY} = this.props;
+        const newRotationX = clamp(rotationX - dy * 180, -90, 90);
+        const newRotationY = (rotationY - dx * 180) % 360;
+
+        this.props.onChangeViewport({
+          rotationX: newRotationX,
+          rotationY: newRotationY
         });
       }
 
@@ -94,7 +89,7 @@ export default class OrbitController extends Component {
 
   _onDragEnd() {
     this._dragStartPos = null;
-    this.props.onViewportChange({isDragging: false});
+    this.props.onChangeViewport({isDragging: false});
   }
 
   _onWheel(evt) {
@@ -116,7 +111,7 @@ export default class OrbitController extends Component {
     const {distance, minDistance, maxDistance} = this.props;
     const newDistance = clamp(distance * Math.pow(1.01, value), minDistance, maxDistance);
 
-    this.props.onViewportChange({
+    this.props.onChangeViewport({
       distance: newDistance
     });
   }
@@ -127,7 +122,7 @@ export default class OrbitController extends Component {
     const size = Math.max(max[0] - min[0], max[1] - min[1], max[2] - min[2]);
     const newDistance = size / Math.tan(fov / 180 * Math.PI / 2) / 2;
 
-    this.props.onViewportChange({
+    this.props.onChangeViewport({
       distance: newDistance
     });
   }
@@ -135,11 +130,11 @@ export default class OrbitController extends Component {
   render() {
     return (
       <div style={{position: 'relative', userSelect: 'none'}}
-        onMouseDown={this._onDragStart}
-        onMouseMove={this._onDrag}
-        onMouseLeave={this._onDragEnd}
-        onMouseUp={this._onDragEnd}
-        onWheel={this._onWheel} >
+        onMouseDown={this._onDragStart.bind(this)}
+        onMouseMove={this._onDrag.bind(this)}
+        onMouseLeave={this._onDragEnd.bind(this)}
+        onMouseUp={this._onDragEnd.bind(this)}
+        onWheel={this._onWheel.bind(this)} >
 
         {this.props.children}
 
@@ -164,7 +159,7 @@ OrbitController.propTypes = {
   // viewport height in pixels
   height: PropTypes.number.isRequired,
   // callback
-  onViewportChange: PropTypes.func.isRequired
+  onChangeViewport: PropTypes.func.isRequired
 };
 
 OrbitController.defaultProps = {
