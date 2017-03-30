@@ -70,7 +70,7 @@ You will need to install dependencies in that example first:
 
 #### Node Version Requirement
 
-Building deck.gl from source has a dependency on node `4.0` or higher.
+Building deck.gl from source has a dependency on node `6.4` or higher.
 Either upgrade to a newest version, or install something like
 [nvm](https://github.com/creationix/nvm).
 
