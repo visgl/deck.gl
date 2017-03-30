@@ -1,25 +1,21 @@
 importScripts('./util.js');
-let total = 0;
 
 onmessage = function(e) {
 
   const lines = e.data.text.split('\n');
-  const result = [];
+  let result = [];
 
   lines.forEach(function(line) {
     if (!line) {
       return;
     }
-    const pts = line.split(',');
-    result.push(pts.map(function(d) {
-      return Number(d)
-    }));
-    total++;
+    const pts = decodePolyline(line);
+    result = result.concat(pts);
   });
 
   postMessage({
     action: 'add',
     data: result,
-    meta: {count: total}
+    meta: {count: result.length}
   });
 };
