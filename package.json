@@ -21,9 +21,8 @@
     "src"
   ],
   "scripts": {
-    "start": "(cd examples/layer-browser && npm run start-local)",
-    "postinstall": "(cd examples/layer-browser && npm install)",
-    "build-clean": "rm -fr dist dist-es6 && mkdir -p dist dist-es6 ",
+    "start": "(cd examples/layer-browser && (path-exists node_modules || npm i) && npm run start-local)",
+    "build-clean": "rm -fr dist dist-es6 && mkdir -p dist dist-es6",
     "build-es6": "rm -fr dist-es6 && babel src --out-dir dist-es6 --plugins=static-fs --source-maps inline",
     "build-es5": "rm -fr dist && babel src --out-dir dist --plugins=static-fs,transform-es2015-modules-commonjs --source-maps inline",
     "build-buble": "buble dist-es6 -o dist --no modules --y dangerousForOf --objectAssign",
@@ -70,6 +69,7 @@
     "immutable": "^3.8.1",
     "luma.gl": "^3.0.0",
     "module-alias": "^2.0.0",
+    "path-exists-cli": "^1.0.0",
     "pre-commit": "^1.2.2",
     "raw-loader": "^0.5.1",
     "react": "^15.4.0",
