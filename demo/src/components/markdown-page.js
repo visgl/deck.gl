@@ -78,7 +78,7 @@ export default class MarkdownPage extends PureComponent {
   }
 
   componentDidMount() {
-    this._jumpTo(this.props.section);
+    this._jumpTo(this.props.query.section);
   }
 
   componentWillReceiveProps(nextProps) {
@@ -91,7 +91,7 @@ export default class MarkdownPage extends PureComponent {
   }
 
   componentDidUpdate() {
-    this._jumpTo(this.props.section);
+    this._jumpTo(this.props.query.section);
   }
 
   _getScrollPosition(object) {
@@ -143,7 +143,7 @@ export default class MarkdownPage extends PureComponent {
         break;
       }
     }
-    this.props.updateSection(currentSection);
+    this.props.updateQuery(currentSection ? `?section=${currentSection}` : '');
   }
 
   render() {

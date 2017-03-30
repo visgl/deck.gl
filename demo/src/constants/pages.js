@@ -146,10 +146,6 @@ export const docPages = generatePath([
       {
         name: 'Viewports',
         content: getDocUrl('viewports.md')
-      },
-      {
-        name: 'Interactivity',
-        content: getDocUrl('interactivity.md')
       }
     ]
   },

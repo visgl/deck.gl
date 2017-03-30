@@ -88,12 +88,12 @@ class Page extends Component {
     );
   }
 
-  @autobind _updateSection(sectionName) {
-    const {location: {pathname, query}} = this.props;
-    if (query.section !== sectionName) {
+  @autobind _updateQueryString(queryString) {
+    const {location: {pathname, search}} = this.props;
+    if (search !== queryString) {
       this.context.router.replace({
         pathname,
-        search: sectionName ? `?section=${sectionName}` : ''
+        search: queryString
       });
     }
   }
@@ -108,8 +108,8 @@ class Page extends Component {
       child = this._renderDemo(content.demo, content.code);
     } else if (typeof content === 'string') {
       child = (<MarkdownPage content={contents[content]}
-        section={query.section}
-        updateSection={this._updateSection}
+        query={query}
+        updateQuery={this._updateQueryString}
         renderDemo={this._renderDemo} />);
     }
 
