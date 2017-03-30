@@ -1,4 +1,5 @@
 importScripts('./util.js');
+let total = 0;
 
 onmessage = function(e) {
 
@@ -13,9 +14,11 @@ onmessage = function(e) {
     result = result.concat(pts);
   });
 
+  total += result.length;
+
   postMessage({
     action: 'add',
     data: result,
-    meta: {count: result.length}
+    meta: {count: total}
   });
 };
