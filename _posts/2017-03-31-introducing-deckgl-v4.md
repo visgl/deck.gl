@@ -77,10 +77,6 @@ Some of deck.gl layers now support extrusion. Extrusion can be enabled by settin
 
 To make extrusion looks natural and make extruded layers look visually pleasing, deck.gl v4 includes an experimental lighting module that provides basic shading of 3D layers. It has very straightforward APIs and should be easy for users to understand by simplying looking at every increasing number of examples that comes with deck.gl. It's worth mentioning that since it's experimental, the public APIs might change in the future release of deck.gl.
 
-## Interoperability
-
-### TODO
-
 ## Interactive Documentation
 
 Deck.gl's documentation has been significantly improved and reorganized in response to user feedback. In particular, every layer now has an interactive layer browser allowing users to tweak all properties of the layer and see how they affect the final rendering of layers while reading the docs. It also serves as an intuitive tool for users to select appropriate layers for their use cases.
@@ -89,13 +85,17 @@ Deck.gl's documentation has been significantly improved and reorganized in respo
 
 deck.gl v3 came with essentially a single example that was interleaved with the complicated build scripts and extensive package dependencies of the main library. This has been called out by many entry-level users, so the deck.gl team decide to provide multiple stand-alone examples with minimal configuration files. These examples should jump start the learning process on deck.gl and intrigued users can easily copy them out and bootstrapping their own app from them. These examples are located in the **example** folder in deck.gl's main repository.
 
+## Interoperability Examples
+
+To leverage your knowledge in data visualization with the tools you are familiar with, we also provide examples to demonstrate the interoperability between deck.gl and regular SVG-based visualizations. That is, you can use for example the modularized d3-* utilities for layout calculation, and have deck.gl take care of the rendering, so there is no heavy DOM manipulations and you get GPU-accelerated rendering of up to millions of elements for free.
+
 ## What’s Next?
 
 Deck.gl v4 is an important milestone for us, but what's next? We have many ideas on how to move deck.gl forward and we would like to provide a bit more information on some of them.
 
 ### More layers
 
-Layers are where the most of the users start using deck.gl. We plan to add more layers, both in the geospatial area and the infovis area in the future releases of deck.gl. We also encourages all deck.gl users and developers to consider submitting your fancy new layers to deck.gl through PR. If they actually help address some common questions and accomplish some common tasks in any areas of data visualization, they might end up being in the core layers catalog of deck.gl in next release!
+Layers are where the most of the users start using deck.gl. We plan to add more layers, both in the geospatial area and the InfoVis area in the future releases of deck.gl. We also encourages all deck.gl users and developers to consider submitting your fancy new layers to deck.gl through PR. If they actually help address some common questions and accomplish some common tasks in any areas of data visualization, they might end up being in the core layers catalog of deck.gl in next release!
 
 ### Text rendering support
 
