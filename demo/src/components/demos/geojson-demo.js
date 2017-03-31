@@ -60,8 +60,9 @@ export default class GeoJsonDemo extends Component {
     return (
       <div>
         <h3>Vancouver Property Value</h3>
-        <p>Height - Average property value per square meter lot size <br />
-           Color - Growth from last assessment</p>
+        <p>The property value of Vancouver, BC</p>
+        <p>Height of polygons - average property value per square meter of lot<br/>
+           Color - value growth from last assessment</p>
         <div className="layout">
           {legends.map((l, i) => (
             <div key={i} className="legend"
@@ -73,15 +74,15 @@ export default class GeoJsonDemo extends Component {
             <div key={i} style={{width}} >{Math.round(l * 100)}%</div>
           ))}
         </div>
-        <p>Source:&nbsp;
+        <p>Data source:&nbsp;
           <a href="http://data.vancouver.ca/">City of Vancouver</a>
         </p>
         <div className="layout">
           <div className="stat col-1-2">
-            Polygons<b>{ readableInteger(meta.count) || 0 }</b>
+            No. of Polygons<b>{ readableInteger(meta.count) || 0 }</b>
           </div>
           <div className="stat col-1-2">
-            Vertices<b>{ readableInteger(meta.vertexCount || 0) }</b>
+            No. of Vertices<b>{ readableInteger(meta.vertexCount || 0) }</b>
           </div>
         </div>
       </div>

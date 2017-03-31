@@ -28,7 +28,8 @@ export default class PlotDemo extends Component {
     return (
       <div>
         <h3>3D Surface Explorer</h3>
-        <p>Non-geospatial demo.</p>
+        <p>Surface plot from a mathematical equation</p>
+        <p>Hover on the plot to see the values</p>
       </div>
     );
   }

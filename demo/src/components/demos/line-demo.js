@@ -34,14 +34,15 @@ export default class LineDemo extends Component {
   static renderInfo(meta) {
     return (
       <div>
-        <h3>Flights In And Out Of <br/>Heathrow Airport</h3>
-        <p>Flight paths from a 4 hour window on March 28th, 2017</p>
-        <p>Flight tracking data source:
+        <h3>Flights To And From <br/>London Heathrow Airport</h3>
+        <p>Flight paths in a 6-hour window</p>
+        <p>From 08:32:43 GMT to 14:32:43 GMT on March 28th, 2017</p>
+        <p>Flight path data source:
           <a href="https://opensky-network.org/"> The OpenSky Network</a><br />
-          Airport data source:
-          <a href="http://www.naturalearthdata.com/"> Natrual Earth</a>
+          Airport location data source:
+          <a href="http://www.naturalearthdata.com/"> Natural Earth</a>
         </p>
-        <div className="stat">Segments<b>{ readableInteger(meta.count || 0) }</b></div>
+        <div className="stat">No. of Line Segments<b>{ readableInteger(meta.count || 0) }</b></div>
       </div>
     );
   }

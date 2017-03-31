@@ -30,9 +30,10 @@ export default class ScreenGridDemo extends Component {
     return (
       <div>
         <h3>Public Transit Accessibility In California</h3>
-        <p>Distribution of public transportation stops.</p>
+        <p>Distribution of public transportation stops</p>
+        <p>The layer aggregates data within the boundaries of each screen grid cells</p>
         <p>Data source: <a href="http://openstreetmap.org">OpenStreetMaps</a></p>
-        <div className="stat">Samples<b>{ readableInteger(meta.count || 0) }</b></div>
+        <div className="stat">No. of Samples<b>{ readableInteger(meta.count || 0) }</b></div>
       </div>
     );
   }

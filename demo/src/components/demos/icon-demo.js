@@ -38,14 +38,16 @@ export default class IconDemo extends Component {
   static renderInfo(meta) {
     return (
       <div>
-        <h3>Where Films Were Made <br/>(2007-2017)</h3>
-        <p>Click a pin to expand detials.</p>
+        <h3>Where Films Were Made</h3>
+        <p>The location where films are shot, from 2007 to 2017</p>
+        <p>Hover on a pin to see the title list</p>
+        <p>Click on a pin to see the details</p>
         <p>Data source: <a href="http://www.imdb.com/conditions">IMDB</a></p>
         <div className="layout">
-          <div className="stat col-1-2">Movies
+          <div className="stat col-1-2">No. of Movies
             <b>{ readableInteger(meta.movies || 0) }</b>
           </div>
-          <div className="stat col-1-2">Locations
+          <div className="stat col-1-2">No. of Locations
             <b>{ readableInteger(meta.locations || 0) }</b>
           </div>
         </div>
