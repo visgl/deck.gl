@@ -11,16 +11,19 @@ that the layer uses to build the visualization.
 The `accessors` are functions that you supply to describe how the layer
 should extract various values
 
-The data would typically be
-a list (e.g. Array) of objects, often parsed from a JSON or CSV formatted
-data.
-
+The data would typically be a list (e.g. Array) of objects, often parsed
+from a JSON or CSV formatted data.
 
 ```
   <DeckGL layers={[
-    new ScatterplotLayer({data: ...}),
+    new ScatterplotLayer({data: ...})
   ]}/>
 ```
+
+When the layer is about to be drawn on screen for the first time,
+the layer will traverse the `data` array and build up WebGL buffers that
+allow the GPU to render a visualization of your data very quickly.
+These WebGL buffers are saved and matched with any future changes.
 
 ## Rendering Multiple Layers
 
@@ -38,9 +41,22 @@ This allows you to compose visualizations using several primitive layers.
   ]}/>
 ```
 
-## Available Layers
+The main concern when rendering more than one instance of a specific layer (say
+two `ScatterplotLayer`s) is that their `id` props must be unique for each layer
+or deck.gl will fail to match layers between render cycles.
 
-deck.gl provides a couple of different types of layers
+```
+  <DeckGL layers={[
+    new ScatterplotLayer({id: 'big-points', data: ..., ...}),
+    new ScatterplotLayer({data: 'small-points', data: ..., ...}),
+  ]}/>
+```
+
+The `id` property is similar (but not identicaly) to the `key` property on
+React components.
+
+
+## Available Layers
 
 ### Base Layers
 
@@ -90,36 +106,3 @@ works where every render cycle generates a new tree of ReactElement instances,
 so the model is proven.
 
 The layer lifecycle is documented in detail in the section about writing layers.
-
-## Notable Layer Properties
-
-### The id Property
-
-It is used to ensure that new components are matched with their counterparts
-from the previous rendering cycle. the `id` property defaults to the layer name
-so if you only have a single layer of each type you may not need to supply it.
-
-However as soon as you add multiple instances of a specific layer (say
-two `ScatterplotLayer`s) their `id`s must be unique for each layer or deck.gl
-will fail to match layers.
-
-The `id` property is similar to the `key` property on React components.
-However deck.gl relies on this property even more than React does.
-
-
-```
-  <DeckGL layers={[
-    new ScatterplotLayer({id: 'big-points', data: ..., ...}),
-    new ScatterplotLayer({data: 'small-points', data: ..., ...}),
-  ]}/>
-```
-
-
-### The data Property and Accessors
-
-Every deck.gl layer takes a `data` property, which the application usually
-sets to an array of JavaScript objects. When the layer is about to be
-drawn on screen for the first time, the layer will traverse this array
-and build up WebGL buffers that allow it to render the data very quickly.
-These WebGL buffers are saved and matched with any future changes.
-s
