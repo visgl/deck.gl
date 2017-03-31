@@ -15,6 +15,13 @@ The data would typically be
 a list (e.g. Array) of objects, often parsed from a JSON or CSV formatted
 data.
 
+
+```
+  <DeckGL layers={[
+    new ScatterplotLayer({data: ...}),
+  ]}/>
+```
+
 ## Rendering Multiple Layers
 
 deck.gl allows you to render multiple layers using the same or different data
@@ -22,6 +29,14 @@ sets. You simply provide an array of layer instances and deck.gl will render
 them in order (and handle interactivity when hovering clicking etc).
 
 This allows you to compose visualizations using several primitive layers.
+
+```
+  <DeckGL layers={[
+    new ScatterplotLayer({data: ...}),
+    new LineLayer({data: ...}),
+    new ArcLayer({data: ...}),
+  ]}/>
+```
 
 ## Available Layers
 
@@ -54,16 +69,27 @@ illustrate various ideas and approaches to how layers can be designed. These
 layers sometimes have documentation in the example code, but they are not
 listed here in the official documentation.
 
-## Layer Creation
+## Layer Creation, Update and Destruction
 
 Every time some state in your application that affects visualization changes,
 you simply create new layer instances with updated properties and pass them to
 deck.gl for rendering.
 
+After matching your newly supplied layers with the layers you provided
+in your previous call to deck.gl, the state of any old layers is copied to
+the new layers, and the old layers are discarded by deck.gl.
+
+The application does not have to be aware about this, as long as it keeps
+rendering new layers with the same `id` they will be matched and the existing
+state of that layer will be updated accordingly
+
 The constant creation and disposal of layer instances may seem wasteful,
 however the creation and recycling of JavaScript objects is quite efficient
-in modern JavaScript environments.
+in modern JavaScript environments, and this is very similar to how React
+works where every render cycle generates a new tree of ReactElement instances,
+so the model is proven.
 
+The layer lifecycle is documented in detail in the section about writing layers.
 
 ## Notable Layer Properties
 
@@ -81,6 +107,14 @@ The `id` property is similar to the `key` property on React components.
 However deck.gl relies on this property even more than React does.
 
 
+```
+  <DeckGL layers={[
+    new ScatterplotLayer({id: 'big-points', data: ..., ...}),
+    new ScatterplotLayer({data: 'small-points', data: ..., ...}),
+  ]}/>
+```
+
+
 ### The data Property and Accessors
 
 Every deck.gl layer takes a `data` property, which the application usually
@@ -88,4 +122,4 @@ sets to an array of JavaScript objects. When the layer is about to be
 drawn on screen for the first time, the layer will traverse this array
 and build up WebGL buffers that allow it to render the data very quickly.
 These WebGL buffers are saved and matched with any future changes.
-
+s
