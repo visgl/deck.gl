@@ -9,29 +9,42 @@ tags:
 
 ## Introducing deck.gl v4.0
 
-We've just released a new major version of deck.gl. It is a good time to share some information about the improvements that went into the new version, the rationale behind them, and provide some hints on what we are currently thinking about the future of deck.gl.
+We've just released a new major version of deck.gl, so this is a good time to share some information about the improvements that went into the new version, the rationale behind them, and provide some hints on what we are currently thinking about the future of deck.gl.
 
-### What motivated the release?
+### What Motivated the Release?
 
-Since the v3 release in last November, deck.gl saw rapid adoption across a number of internal data visualization applications at Uber and we also received substantial amount of comments, suggestions and help requests from external users and developers. We noticed that developers are not only building apps using deck.gl's highly performant layers, but also starting to unleash their own creativity by creating various new layers. This is pushing deck.gl into areas that we have never thought it would be.
+Since the big deck.gl v3 release in November 2016, deck.gl has seen rapid adoption across a number of internal data visualization applications at Uber. We have also received many good comments, suggestions and requests, both from internal and external users. We noticed that developers are not only building apps using deck.gl's highly performant layers, but also starting to unleash their own creativity by creating various new layers. This is pushing deck.gl into areas that we have never thought it would be.
 
 While some of these layers are highly specialized and application specific, many others are general-purpose and solves some common problems in certain applications. Those general-purpose layers saves other developers with similar needs considerable amount of time, so why reinvent the wheel?
 
 Therefore, in this v4 release, the stars are the new layers enlisted in our deck.gl layer catalog that do magic with data. Now, the numder of core layers in deck.gl has grown to over a dozen and all of them are carefully audited, tested and documented [layers](https://uber.github.io/deck.gl/#/layers/catalog/overview).
 
-### Why a major version bump?
+### Why a Major Version Bump?
 
-In spite of the major version bump, deck.gl v4 is highly compatible with the v3 in terms of public APIs and the way layers work. We did take an extensive APIs audit of the new layers and decided that it's the right time to make all layer APIs consistent so that the whole framework is much user friendly. This resulted in a short list of deprecations and changes to the existing layers, and thus led to a bump in the major version.
+As part of the release work we conducted an extensive API audit of both
+the new v4 layers and the existing v3 layers and found that doing a small set
+of changes to existing v3 layer APIs would allow us to make the APIs
+of all layers considerably more consistent and the whole framework more
+cohesive and logical.
 
-To ensure a smooth transition, an [update guide](https://uber.github.io/deck.gl/#/documentation/overview/upgrade-guide) is provided and we expect the upgrade effort for applications to be minimal.
+We take backwards compatibility of deck.gl very seriously, and the decision to
+make any breaking changes to our API is not taken lightly, and in spite of the
+major version bump, deck.gl v4 is highly compatible with deck.gl
+v3, both in terms of public APIs and the way layers work.
+
+Also, to ensure a smooth transition, an
+[update guide](https://uber.github.io/deck.gl/#/documentation/overview/upgrade-guide)
+is provided and we expect the upgrade effort for applications to be minimal.
+
+Note: deck.gl follows [semver](http://semver.org) versioning rules so
+any change to existing functionality requires us to bump
+the major version number, from 3 to 4 in this case.
 
 ## A Growing Layer Catalog
 
-### New Layers
-
 Deck.gl is a geospatial data visualization framework from the very beginning and geospatial use cases will always be the top priority. The new layers added to the [layer catalog](https://uber.github.io/deck.gl/#/documentation/core-layers) are widely used in geospatial data analysis within Uber and we hope they will solve the problems of deck.gl users face everyday.
 
-#### [`GeoJsonLayer`](https://uber.github.io/deck.gl/#/documentation/core-layers/geo-layer)
+### [`GeoJsonLayer`](https://uber.github.io/deck.gl/#/documentation/core-layers/geo-layer)
 
 <p aligh="center">
 	<img src="../img/demo-thumb-geojson.jpg">
@@ -41,7 +54,7 @@ The GeoJsonLayer is designed to render geometry primitives in the widely accepte
 
 The flexibility of the GeoJson layer combined with deck.gl's high rendering performance makes it possible to render large amount of data on the city or even the world level, like what we are doing in the GeoJson layer example on our demo site. [links here]
 
-#### [`PathLayer`](https://uber.github.io/deck.gl/#/documentation/core-layers/path-layer)
+### [`PathLayer`](https://uber.github.io/deck.gl/#/documentation/core-layers/path-layer)
 
 <p aligh="center">
 	<img src="../img/demo-thumb-path.png">
@@ -50,7 +63,7 @@ The flexibility of the GeoJson layer combined with deck.gl's high rendering perf
 
 The `PathLayer` is created to render a path consists of multiple line segments specified by a sequence of coordinates. The path drawn has customizable width with mitered or rounded line joints.
 
-#### [`PolygonLayer`](https://uber.github.io/deck.gl/#/documentation/core-layers/polygon-layer)
+### [`PolygonLayer`](https://uber.github.io/deck.gl/#/documentation/core-layers/polygon-layer)
 
 <p aligh="center">
 	<img src="../img/demo-thumb-polygon.png">
@@ -58,7 +71,7 @@ The `PathLayer` is created to render a path consists of multiple line segments s
 
 The `PolygonLayer` renders general flat or extruded polygons specified by a "closed" sequence of coordinates, like how polygon features are specified in the GeoJson specifications. Polygons can be rendered as filled or outline in 2D and filled or wireframe in 3D. This layer supports rendering convex, concave and polygon with holes.
 
-#### [`IconLayer`](https://uber.github.io/deck.gl/#/documentation/core-layers/icon-layer)
+### [`IconLayer`](https://uber.github.io/deck.gl/#/documentation/core-layers/icon-layer)
 
 <p aligh="center">
 	<img src="../img/demo-thumb-icon.jpg">
@@ -66,7 +79,7 @@ The `PolygonLayer` renders general flat or extruded polygons specified by a "clo
 
 The `IconLayer` allows the user to render customizable markers on top of the base map. Multiple icons can be used in a single layer through a texture atlas and a configuration object in JSON. The size of the icons can be separately controlled and bounded with user specified values.
 
-#### [`PointCloudLayer`](https://uber.github.io/deck.gl/#/documentation/core-layers/point-cloud-layer)
+### [`PointCloudLayer`](https://uber.github.io/deck.gl/#/documentation/core-layers/point-cloud-layer)
 
 <p aligh="center">
 	<img src="../img/demo-thumb-point-cloud.png">
@@ -74,7 +87,7 @@ The `IconLayer` allows the user to render customizable markers on top of the bas
 
 The `PointCloudLayer` is designed to visualize 3D point cloud data, usually generated from different types of sensors that are ubiquitous nowadays. Point cloud data can contain position, normal and color values to control the style of rendered points, whic are "billboarded" towards the user.
 
-#### [`GridLayer`](https://uber.github.io/deck.gl/#/documentation/core-layers/grid-layer) and [`HexagonLayer`](https://uber.github.io/deck.gl/#/documentation/core-layers/hexagon-layer)
+### [`GridLayer`](https://uber.github.io/deck.gl/#/documentation/core-layers/grid-layer) and [`HexagonLayer`](https://uber.github.io/deck.gl/#/documentation/core-layers/hexagon-layer)
 
 <p aligh="center">
 	<img src="../img/demo-thumb-heatmap.jpg">
@@ -82,7 +95,10 @@ The `PointCloudLayer` is designed to visualize 3D point cloud data, usually gene
 
 In this deck.gl release, we add these two special layers that goes beyond simply putting user data on the map. This is a very exiciting new direction of deck.gl as we not only want to provide layers that are visually compelling to our users, but also ***smart***. The `GridLayer` and `HexagonLayer` draw equal-area rectangular or hexagonal cells. At the same time they "bin" user-provided point data into cells and do aggregations on the data points that fall into those cells. The aggregated values can be mapped to the color of the cells, the height of the cells, or both, depending on the specific style settings. This effectively makes these two layers two different implementations of typical grid-based **heatmaps**. Both layer supports 2D and 3D cells.
 
-The `GridLayer` and `HexagonLayer` are different from the `ScreenGridLayer` provided in the previous version as both the rendered geometry and the aggregation boundaries are in the ***world coordinates***.
+The `GridLayer` and `HexagonLayer` are different from the `ScreenGridLayer`
+provided in the previous version as both the rendered geometry and the
+aggregation boundaries are in ***world coordinates*** rather than screen
+coordinates.
 
 ## Layer extrusion and lighting
 
@@ -109,25 +125,37 @@ To leverage your knowledge in data visualization with the tools you are familiar
 
 ## What’s Next?
 
-Deck.gl v4 is an important milestone for us, but what's next? We have many ideas on where we would like deck.gl to move and we would like to provide a bit more information on them.
+Deck.gl v4 is an important milestone for us, but what's next? While we haven't finalized
+any plans for a possible deck.gl v4.1 or v5 release yet, we have many ideas about
+improvements and directions we would like deck.gl to evolve along. Some examples are:
 
-### More layers
+### More and Better Layers
 
-Layers are how deck.gl create values for most of the users so we plan to add more layers, both in the geospatial area and the InfoVis area in the future releases of deck.gl. We also encourages all deck.gl users and developers to consider submitting your fancy new layers to deck.gl through PR. If they help address some common questions and accomplish some common tasks in any areas of data visualization, they might end up being in the core layers catalog of deck.gl in next release!
+Layers are how deck.gl creates value for most users, so obviously we plan to add more layers. We will of course always keep improving support for the geospatial vusalizations but we are also
+considering supporting abstract visualizations in the InfoVis area.
 
-### Text rendering support
+We also encourages all deck.gl users and developers to consider share your fancy new layers with the deck.gl community (github pull requests are welcome). If your layer helps address some common needs and/or accomplish some common tasks in any areas of data visualization, they might even end up being included in the core layers catalog of deck.gl in a future release!
 
-Texts are crucial in various data visualization applications and can be implemented in various ways depending on specific use cases. Using WebGL to render text labels or geometries are both very performant and versartile. In deck.gl v4 we are not providing any official support for text rendering besides a basic sample layer called ["LabelLayer"](https://github.com/uber/deck.gl/tree/master/examples/sample-layers/label-layer) that was built on top of `IconLayer`. This is an area we are actively investigating and developing.
+### Text Rendering Support
 
-### Improved aggregation
+Text is crucial in many data visualization applications and can be implemented in various ways depending on specific use cases. Using WebGL to render text labels or geometries is both performant and versatile, but can be non-trivial to implement. In deck.gl v4 we are not providing any official support for text rendering besides a basic sample layer called ["LabelLayer"](https://github.com/uber/deck.gl/tree/master/examples/sample-layers/label-layer). This is an area we are actively investigating how to improve support.
 
-The new aggregating layers in deck.gl v4 are only scratching the surface. More advanced aggregation algorithms will be researched and implemented if they are useful for our internal or external customers. We are even considering using powerful features in the newly released WebGL 2.0 to do the data aggregation on the GPUs.
+### Expanding and Improving Aggregation
 
-### Improved layer composition
+The new aggregating layers in deck.gl v4 are only scratching the surface of what can be done
+in terms of adding data processing intelligence to deck.gl. More advanced aggregation algorithms are being researched, and will be implemented if they are useful for our internal or external customers.
 
-In the new v4 release of deck.gl, some new layers like the `GeoJsonLayer` and `HexagonLayer` are what we called **composite** layers as they are actually built on top of other core deck.gl layers. The composite layers have their own props but leverage its underlying layers for part of their functionalities. This kind of composition greatly reduces the efforts required for creating new layers and makes the internal structure of layers much cleaner. In future releases, we will continue making layer development easier by decoupling different sets of functionalities of layers and keeping improving our guides and docs.
+### More Data Processing (possibly on GPU) for Geospatial Data Analysis
 
-### More advanced picking (selection) support
+As we march forward in the geospatial data analysis field, it's obvious that the single threaded Javascript engine in our browsers will soon be overwhelmed by computation intensive tasks. We can solve this by seeking help from backend, but not without its own limitations. The recently released WebGL 2.0 provided a way to access powerful GPUs on every desktops and laptops in a way that is not possible in the past. With features like transform feedback, we might be able to vastly accelerate many computational tasks in geospatial data analysis.
+
+We have already started experimenting with the powerful features in the newly released WebGL 2.0 standard to do not only rendering, but also data aggregation on the GPU.
+
+### Improved Layer Composition
+
+In the new v4 release of deck.gl, some new layers like the `GeoJsonLayer` and `HexagonLayer` are what we called **composite** layers as they are actually built by "composing" other core deck.gl layers. The composite layers have their own props but leverage its underlying layers for part of their functionalities. This kind of composition greatly reduces the effort required for creating new layers and makes the internal structure of many layers much cleaner. In future releases, we will continue making composite layer development easier by decoupling different sets of functionalities of layers and keeping improving our guides and docs.
+
+### More Advanced Picking (Selection) Support
 
 Picking or selection is also one of the most common tasks of any data visualization applications and is a core functionality we provide with deck.gl. In the v4 release, a color-coded picking process that are both much more robust and performant is implemented. We plan to continue improving picking by adopting better picking boundary arbitration, supporting square or polygon area picking, etc.
 
@@ -135,9 +163,6 @@ Picking or selection is also one of the most common tasks of any data visualizat
 
 Performance is always what we are seeking as deck.gl, from the first day, is designed to be a **high performance** visualization framework. Many under-the-hood performance improvements went into the v4 release, including a 3.5~4X faster scatterplot layer, faster 64-bit maths, and ~2X performance boost in picking, etc. In the future, we are considering implementing a better WebGL state manager that faciliates the resource sharing and reuse, a better layer manager that manages and updates resources in a smarter way and a better rendering engine that only allows necessary data to hit GPUs from the very beginning.
 
-### More data processing, possibly on GPU, for geospatial data analysis
+## Final Words
 
-As we march forward in the geospatial data analysis field, it's obvious that the single threaded Javascript engine in our browsers will soon be overwhelmed by computation intensive tasks. We can solve this by seeking help from backend, but not without its own limitations. The recently released WebGL 2.0 provided a way to access powerful GPUs on every desktops and laptops in a way that is not possible in the past. With features like transform feedback, we might be able to vastly accelerate many computational tasks in geospatial data analysis.
-
-
-Finally, just in case there is any doubt from our users, we would like to reiterate our commitments that deck.gl be a  "geospatial visualization" library. All the non-geospatial use cases we are showing do not in any way compromise the geospatial visualization aspects of the library. To the contrary, as we mentioned earlier in this article, users can expect us to add even more "advanced" geospatial processing functionalities to the future releases of deck.gl.
+Finally, just in case there is any doubt from our users, we would like to reiterate our commitment that deck.gl will remain a "geospatial visualization first" framework. All the non-geospatial use cases we are showing will not compromise our focus on improving the geospatial visualization aspects of deck.gl. To the contrary, as we mentioned earlier in this article, users can expect see even more "advanced" geospatial processing functionalities to the future releases of deck.gl.
