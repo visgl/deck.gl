@@ -4,18 +4,21 @@ import {Link} from 'react-router';
 export default class TableOfContents extends Component {
 
   _renderPage(parentRoute, page, i) {
-    const {children, name} = page;
+    const {children, name, expanded} = page;
     const path = `${parentRoute}/${page.path}`;
 
     if (children) {
       return (
         <div key={`page-${i}`}>
-          <Link className="list-header" activeClassName="active" key={`group-header${i}`} to={path}>
+          <Link className={`list-header ${expanded ? 'expanded' : ''}`}
+            activeClassName="active" key={`group-header${i}`} to={path}>
             {name}
           </Link>
-          <ul key={`group-list${i}`} style={{maxHeight: `${40 * children.length}px`}}>
-            {children.map(this._renderPage.bind(this, path))}
-          </ul>
+          <div className="subpages" style={{maxHeight: `${40 * children.length}px`}}>
+            <ul key={`group-list${i}`} >
+              {children.map(this._renderPage.bind(this, path))}
+            </ul>
+          </div>
         </div>
       );
     }

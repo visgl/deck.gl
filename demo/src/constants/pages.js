@@ -31,6 +31,7 @@ export const examplePages = generatePath([
   },
   {
     name: 'Core Layers',
+    expanded: true,
     children: [
       {
         name: 'LineLayer',
@@ -85,6 +86,7 @@ export const examplePages = generatePath([
   },
   {
     name: 'Custom Layers',
+    expanded: true,
     children: [
       {
         name: 'Trip Routes',
@@ -97,6 +99,7 @@ export const examplePages = generatePath([
   },
   {
     name: 'Beyond Maps',
+    expanded: true,
     children: [
       {
         name: '3D Surface Explorer',

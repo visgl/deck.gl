@@ -27,7 +27,7 @@ class Root extends Component {
       if (!error) {
         this.setState({
           data: response.features,
-          selectedCounty: response.features[126]
+          selectedCounty: response.features.find(f => f.properties.name === 'Los Angeles, CA')
         });
       }
     });
@@ -51,12 +51,6 @@ class Root extends Component {
     });
   }
 
-  _onSelectCounty({object}) {
-    if (this.state.selectedCounty !== object) {
-      this.setState({selectedCounty: object});
-    }
-  }
-
   render() {
     const {viewport, data, selectedCounty} = this.state;
 
@@ -70,7 +64,6 @@ class Root extends Component {
           data={data}
           selectedFeature={selectedCounty}
           strokeWidth={2}
-          onClick={this._onSelectCounty.bind(this)}
           />
       </MapGL>
     );
