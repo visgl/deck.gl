@@ -36,8 +36,8 @@ export default class HeatmapDemo extends Component {
 
     return (
       <div>
-        <h3>United Kingdom Road Safety</h3>
-        <p>Personal injury road accidents in GB from 1979</p>
+        <h3>Road Safety in United Kingdom</h3>
+        <p>Personal injuries from road accidents in UK from 1979 to now</p>
 
         <div className="layout">
           {colorRamp.map((c, i) => (
@@ -55,7 +55,7 @@ export default class HeatmapDemo extends Component {
 
         <div className="layout">
           <div className="stat col-1-2">
-            Accidents<b>{ readableInteger(meta.count) || 0 }</b>
+            No. of Accidents<b>{ readableInteger(meta.count) || 0 }</b>
           </div>
         </div>
       </div>

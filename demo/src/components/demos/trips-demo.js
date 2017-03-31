@@ -37,7 +37,7 @@ export default class TripsDemo extends Component {
     return (
       <div>
         <h3>Yellow Cab Vs. Green Cab Trips in Manhattan</h3>
-        <p>June 16, 2016 21:00 - 21:30</p>
+        <p>Trips are taken from June 16, 2016 21:00 to 21:30</p>
         <p>Trip data source:&nbsp;
           <a href="http://www.nyc.gov/html/tlc/html/about/trip_record_data.shtml">
           NYC Taxi & Limousine Commission Trip Records</a>
@@ -47,10 +47,10 @@ export default class TripsDemo extends Component {
           <a href="https://mapzen.com/">Mapzen Vector Tiles API</a>
         </p>
         <div className="layout">
-          <div className="stat col-1-2">Trips
+          <div className="stat col-1-2">No. of Trips
             <b>{ readableInteger(meta.trips || 0) }</b>
           </div>
-          <div className="stat col-1-2">Buildings
+          <div className="stat col-1-2">No. of Buildings
             <b>{ readableInteger(meta.buildings || 0) }</b>
           </div>
         </div>
