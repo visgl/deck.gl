@@ -61,9 +61,8 @@ handles wide lines albeit in a slightly different way.
 
 #### Note about `strokeWidth` props
 
-All line based layers
-(`LineLayer and `ArcLayer` and the `ScatterplotLayer` in outline mode)
-now use use shaders to render an exact pixel thickness
+All line based layers (`LineLayer and `ArcLayer` and the `ScatterplotLayer`
+in outline mode) now use use shaders to render an exact pixel thickness
 on lines, instead of using the `GL.LINE` drawing mode.
 
 This particular change was caused by browsers dropping support for this feature
@@ -74,9 +73,6 @@ Also `GL.LINE` mode rendering always had signficant limitations in terms of
 lack of support for mitering, unreliable support for anti-aliasing and
 platform dependent line width limits so this should represent an improvement
 in visual quality and consistency for these layers.
-
-Remarks:
-* Some background: WebGL lineWidth no longer has any effect in
 
 #### Removed prop: `Layer.dataIterator`
 
@@ -103,7 +99,7 @@ Use `Layer.updateState` instead.
 Update triggers can now be specified by referring to the name of the accessor,
 instead of the name of the actual WebGL attribute.
 
-Note that this is supported on all layers supplied by deck.gl, but if you
+Note that this is supported on all layers supplied by deck.gl v4, but if you
 are using older layers, they need a small addition to their attribute
 definitions to specify the name of the accessor.
 
