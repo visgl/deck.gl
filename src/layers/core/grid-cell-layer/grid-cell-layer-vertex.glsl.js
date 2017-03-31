@@ -1,4 +1,4 @@
-// Copyright (c) 2017 Uber Technologies, Inc.
+// Copyright (c) 2015 - 2017 Uber Technologies, Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -61,7 +61,7 @@ void main(void) {
   // cube gemoetry vertics are between -1 to 1, scale and transform it to between 0, 1
   vec2 pos = topLeftPos + vec2((positions.x + 1.0) * cellSize
      / 2.0, (positions.y + 1.0) * cellSize / 2.0);
-  
+
   float elevation = 0.0;
 
   if (extruded > 0.5) {
