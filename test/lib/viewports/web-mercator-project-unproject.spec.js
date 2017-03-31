@@ -1,6 +1,6 @@
-import {PerspectiveMercatorViewport} from 'deck.gl';
+import {WebMercatorViewport} from 'deck.gl';
 import test from 'tape-catch';
-import {toLowPrecision} from '../utils/test-utils';
+import {toLowPrecision} from '../test-utils';
 
 const viewportProps = {
   latitude: 37.75,
@@ -36,11 +36,35 @@ const TEST_CASES = [
     func: 'unproject',
     input: [0, 0],
     expected: [-122.55024809579456, 37.832294933238586]
+  },
+  {
+    title: 'projectFlat (center)',
+    func: 'projectFlat',
+    input: [-122.43, 37.75],
+    expected: [237142.08819, 573305.65851]
+  },
+  {
+    title: 'unProjectFlat (center)',
+    func: 'unprojectFlat',
+    input: [237142.08819, 573305.65851],
+    expected: [-122.43, 37.749999999]
+  },
+  {
+    title: 'projectFlat (corner)',
+    func: 'projectFlat',
+    input: [-122.55, 37.83],
+    expected: [236647.78473, 572888.66298]
+  },
+  {
+    title: 'unprojectFlat (corner)',
+    func: 'unprojectFlat',
+    input: [236647, 572888],
+    expected: [-122.5501905, 37.830127124]
   }
 ];
 
 test('Viewport constructor', t => {
-  const viewport = new PerspectiveMercatorViewport(viewportProps);
+  const viewport = new WebMercatorViewport(viewportProps);
 
   t.ok(viewport, 'Viewport construction successful');
 
@@ -54,8 +78,10 @@ test('Viewport constructor', t => {
 });
 
 test('Viewport projection', t => {
-  const viewport = new PerspectiveMercatorViewport(viewportProps);
+  const viewport = new WebMercatorViewport(viewportProps);
+
   TEST_CASES.forEach(({title, func, input, expected}) => {
+
     const output = viewport[func](input);
     t.deepEquals(
       output.map(x => toLowPrecision(x)),

@@ -4,7 +4,6 @@
 // However since it is used by mapbox etc, it should already be present
 // in most target application bundles.
 import {mat4, vec4, vec2} from 'gl-matrix';
-import autobind from '../../react/autobind';
 import assert from 'assert';
 
 const IDENTITY = createMat4();
@@ -85,11 +84,6 @@ export default class Viewport {
     // Project to clip space (-1, 1)
     mat4.multiply(m, m, this.viewProjectionMatrix);
 
-    // console.log(`vec ${[this.width / 2, this.height / 2, 1]}`);
-    // console.log(`View ${this.viewMatrix}`);
-    // console.log(`VPM ${vpm}`);
-    // console.log(`Pixel ${m}`);
-
     const mInverse = mat4.invert(createMat4(), m);
     if (!mInverse) {
       throw new Error('Pixel project matrix not invertible');
@@ -98,7 +92,12 @@ export default class Viewport {
     this.pixelProjectionMatrix = m;
     this.pixelUnprojectionMatrix = mInverse;
 
-    autobind(this);
+    this.equals = this.equals.bind(this);
+    this.project = this.project.bind(this);
+    this.unproject = this.unproject.bind(this);
+    this.projectFlat = this.projectFlat.bind(this);
+    this.unprojectFlat = this.unprojectFlat.bind(this);
+    this.getMatrices = this.getMatrices.bind(this);
   }
   /* eslint-enable complexity */
 
@@ -239,11 +238,28 @@ export default class Viewport {
     return matrices;
   }
 
+  getDistanceScales() {
+    return {
+      pixelsPerMeter: [1, 1, 1],
+      metersPerPixel: [1, 1, 1],
+      pixelsPerDegree: [1, 1, 1],
+      degreesPerPixel: [1, 1, 1]
+    };
+  }
+
   // INTERNAL METHODS
 
   // Can be subclassed to add additional fields to `getMatrices`
   _getParams() {
     return {};
+  }
+
+  _projectFlat(xyz, scale = this.scale) {
+    return xyz;
+  }
+
+  _unprojectFlat(xyz, scale = this.scale) {
+    return xyz;
   }
 }
 

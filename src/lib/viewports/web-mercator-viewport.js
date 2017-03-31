@@ -2,7 +2,6 @@
 // map view properties
 import Viewport, {createMat4} from './viewport';
 import {mat4, vec2} from 'gl-matrix';
-import autobind from '../../react/autobind';
 import assert from 'assert';
 
 // CONSTANTS
@@ -130,7 +129,11 @@ export default class WebMercatorViewport extends Viewport {
 
     this._distanceScales = distanceScales;
 
-    autobind(this);
+    this.getDistanceScales = this.getDistanceScales.bind(this);
+    this.metersToLngLatDelta = this.metersToLngLatDelta.bind(this);
+    this.lngLatDeltaToMeters = this.lngLatDeltaToMeters.bind(this);
+    this.addMetersToLngLat = this.addMetersToLngLat.bind(this);
+
     Object.freeze(this);
   }
   /* eslint-enable complexity, max-statements */
@@ -169,8 +172,7 @@ export default class WebMercatorViewport extends Viewport {
     const translate = vec2.sub([], coordAtPoint, c);
     const newPos = vec2.sub([], coordCenter, translate);
     const newLngLat = this.unproject(newPos, {topLeft: false});
-    // console.log(
-    //   `vp.GetLoc [${newLngLat}] ${newPos} c=${c} ${coordCenter} ${coordAtPoint} ${translate}`);
+
     return newLngLat;
   }
 
