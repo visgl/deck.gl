@@ -13,7 +13,9 @@ each cell. The grid cells can be given a height using the `getElevation` accesso
   <img height="300" src="/demo/src/static/images/grid-layer.png" />
 </div>
 
-    import {GridLayer} from 'deck.gl';
+```js
+import {GridLayer} from 'deck.gl';
+```
 
 ## Properties
 

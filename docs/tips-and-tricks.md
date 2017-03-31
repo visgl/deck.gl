@@ -11,9 +11,11 @@ ideal effects.
 There is a CSS property `mix-blend-mode` in modern browsers
 that allows control over blending:
 
-    .overlays canvas {
-      mix-blend-mode: multiply;
-    }
+```css
+.overlays canvas {
+  mix-blend-mode: multiply;
+}
+```
 
 `multiply` blend mode is usually the right choice, as it only darkens.
 This will keep your overlay colors, but let map legends underneath
@@ -25,7 +27,11 @@ controls or legends that are being rendered on top of the map).
 If this is an issue, set isolation CSS prop on the map (DeckGLOverlay parent)
 element.
 
-    isolation: 'isolate';
+```css
+.deckgl-parent-example-class-not-real {
+  isolation: 'isolate';
+}
+```
 
 ## Notes on data property
 

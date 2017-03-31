@@ -11,7 +11,9 @@ points and renders them as circles with a certain radius.
   <img height="300" src="/demo/src/static/images/demo-thumb-scatterplot.jpg" />
 </div>
 
-    import {ScatterplotLayer} from 'deck.gl';
+```js
+import {ScatterplotLayer} from 'deck.gl';
+```
 
 ## Properties
 
@@ -28,7 +30,6 @@ Only draw outline of dot.
 - Default: `1`
 
 Global radius across all markers.
-
 
 ## Accessors
 

@@ -12,7 +12,9 @@ and height of the cell is scaled by number of points it contains. PointDensityGr
   <img height="300" src="/demo/src/static/images/point-density-grid.gif" />
 </div>
 
-    import {PointDensityGridLayer} from 'deck.gl';
+```js
+import {PointDensityGridLayer} from 'deck.gl';
+```
 
 ## Properties
 

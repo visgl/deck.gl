@@ -9,12 +9,13 @@ The `PointDensityHexagonLayer` renders a hexagon heatmap based on an array of po
 and height of the hexagon is scaled by number of points it contains. PointDensityHexagonLayer
 at the moment only works with COORDINATE_SYSTEM.LNG_LAT.
 
-
   <div align="center">
     <img height="300" src="/demo/src/static/images/point-density-hexagon.gif" />
   </div>
 
-    import {PointDensityHexagonLayer} from 'deck.gl';
+```js
+import {PointDensityHexagonLayer} from 'deck.gl';
+```
 
 ## Properties
 
@@ -49,7 +50,7 @@ to number of counts by passing in an arbitrary color domain. This property is ex
 
 ##### `colorRange` (Array, optional)
 
-- Default: <img src="/demo/src/static/images/colorbrewer_YlOrRd_6.png"/></a>
+- Default: <img src="/demo/src/static/images/colorbrewer_YlOrRd_6.png"/>
 
 Hexagon color ranges as an array of colors formatted as `[[255, 255, 255, 255]]`. Default is
 [colorbrewer](http://colorbrewer2.org/#type=sequential&scheme=YlOrRd&n=6) `6-class YlOrRd`.

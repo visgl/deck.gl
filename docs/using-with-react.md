@@ -1,32 +1,32 @@
 # Using deck.gl with React
 
-deck.gl is a perfect match for
-[React](https://facebook.github.io/react/) applications, since
-deck.gl layers fit naturally into React's component render flow.
+*deck.gl* is a perfect match for React applications, since
+its layers fits naturally into React's component render flow.
 
 To use deck.gl with React, simply import the `DeckGL` React component and
 render it as a child of another component, passing in your list of deck.gl
 layers as a property.
 
-    import MapGL from 'react-map-gl';
-    import DeckGL from 'deck.gl';
-    import {ScatterplotLayer} from 'deck.gl';
+```js
+import MapGL from 'react-map-gl';
+import DeckGL from 'deck.gl';
+import {ScatterplotLayer} from 'deck.gl';
 
-    const viewport = new Viewport({...});
+const viewport = new Viewport({...});
 
-    return (
-      <MapGL>
-        <DeckGL
-          viewport={viewport}
-          layers={[new ScatterplotLayer({data: [...]})]}
-        />
-      </MapGL>
-    );
+return (
+  <MapGL>
+    <DeckGL
+      viewport={viewport}
+      layers={[new ScatterplotLayer({data: [...]})]} />
+  </MapGL>
+);
+```
 
 Remarks
 
 * The `DeckGL` component is typically rendered as a child of a
-  map component like [react-map-gl](https://uber.github.io/react-map-gl/#/),
+  map component like [react-map-gl](https://github.com/uber/react-map-gl),
   but could be rendered as a child of any React component that you want to
   overlay your layers on top of.
 
@@ -56,7 +56,6 @@ Remarks
 
 * Picking happens in top-to-bottom order (reverse of rendering), i.e.
   deck.gl traverses the layer list backwards during picking.
-
 
 ## DeckGL React Component API
 

@@ -6,7 +6,9 @@ The Icon Layer renders raster icons at given coordinates.
     <img height="300" src="/demo/src/static/images/demo-thumb-icon.jpg" />
   </div>
 
-    import {IconLayer} from 'deck.gl';
+```js
+import {IconLayer} from 'deck.gl';
+```
 
 ## Properties
 
@@ -36,7 +38,6 @@ Icon names mapped to icon definitions. Each icon is defined with the following v
 - Default: `1`
 
 Icon size multiplier.
-
 
 ## Accessors
 

@@ -13,7 +13,9 @@ It renders each hexagon based on color, opacity and elevation.
   <img height="300" src="/demo/src/static/images/hexagon-layer.png" />
 </div>
 
-    import {HexagonLayer} from 'deck.gl';
+```js
+import {HexagonLayer} from 'deck.gl';
+```
 
 ## Properties
 
