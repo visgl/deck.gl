@@ -1,6 +1,7 @@
 ---
 layout: default
 ---
+
 <!-- Posts -->
 <ul id="posts">
 
@@ -9,3 +10,11 @@ layout: default
   {% endfor %}
 
 </ul>
+
+<hr />
+
+<h4>Browse by tags</h4>
+
+<div class="tag-cloud">
+  {{ site | tag_cloud }}
+</div>

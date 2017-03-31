@@ -30,18 +30,33 @@ body {
   font-size: 14px;
   line-height: 1.8333;
   overflow-y: auto;
+  min-height: 100vh;
 }
 header {
   height: 24px;
 }
 footer {
   font-size: 12px;
-  text-align: center;
   color: $white-40;
+  background-size: 32px;
+  background-repeat: repeat;
+  background-image:url(../img/footer-pattern.gif);
+  height: 144px;
+
+  img {
+    margin-top: 64px;
+    height: 25px;
+  }
 }
 .breadcrumb {
+  text-transform: uppercase;
+  position: absolute;
   font-size: 12px;
   margin-top: 24px;
+
+  a {
+    text-decoration: none !important;
+  }
 }
 main {
   margin: 40px 0;
@@ -60,12 +75,20 @@ main {
 .author {
   font-size: 12px;
   font-style: italic;
+
+  a {
+    margin-right: 4px;
+    padding: 0 2px;
+  }
 }
-.tag-cloud a {
-  font-size: 12px;
-  color: #fff !important;
-  background: $primary;
-  padding: 0 4px;
+.tag-cloud {
+  margin-top: 24px;
+  a {
+    font-size: 12px;
+    color: #fff !important;
+    background: $primary;
+    padding: 0 4px;
+  }
 }
 .pagination {
   text-align: center;
@@ -78,6 +101,19 @@ main {
   }
 }
 
+.flexbox {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+
+  .flexbox__item {
+    flex: 1 0 auto;
+  }
+  .flexbox__item--collapsed {
+    flex: 0 1 auto;
+  }
+}
+
 /* Markdown */
 
 a {
@@ -85,9 +121,14 @@ a {
   text-decoration: none;
   display: inline-block;
   cursor: pointer;
+  transition: all 200ms;
 }
 a, a:visited {
   color: $primary;
+}
+a:hover {
+  color: #fff !important;
+  background: $primary;
 }
 
 img {
@@ -109,37 +150,50 @@ b, strong {
 }
 
 h1, h2, h3, h4, h5, h6 {
-  margin-top: 0;
-  margin-bottom: 0;
+  line-height: 1;
+  margin-top: 24px;
+  margin-bottom: 12px;
 }
 
 h1 {
-  font-size: 32px;
-  font-weight: 600;
+  font-size: 40px;
+  font-weight: 100;
+  margin-bottom: 0;
+
+  a, a:visited {
+    color: $white-40;
+  }
+  a:hover {
+    background: none;
+    color: $black !important;
+  }
 }
 
 h2 {
-  font-size: 24px;
-  font-weight: 600;
+  font-size: 20px;
+  padding: 12px;
+  font-weight: 300;
+  text-align: center;
+  border-bottom: solid 1px $white;
 }
 
 h3 {
-  font-size: 20px;
-  font-weight: 600;
-}
-
-h4 {
   font-size: 16px;
   font-weight: 600;
 }
 
-h5 {
+h4 {
   font-size: 14px;
   font-weight: 600;
 }
 
-h6 {
+h5 {
   font-size: 12px;
+  font-weight: 600;
+}
+
+h6 {
+  font-size: 11px;
   font-weight: 600;
 }
 
@@ -149,7 +203,7 @@ p {
 }
 
 ul, ol {
-  padding-left: 2em;
+  padding-left: 0;
 }
 
 ul ul,

@@ -1,1 +1,15 @@
-<header></header>
+<header>
+  {% unless page.url == "/" %}
+  <div class="container">
+    <div class="breadcrumb">
+      <a href="{{ site.baseurl }}/">Home</a>
+      &gt;
+      {% if page.title %}
+      <span>{{page.title}}</span>
+      {% else if page.tag %}
+      <span>Tag: {{page.tag}}</span>
+      {% endif %}
+    </div>
+  </div>
+  {% endunless %}
+</header>

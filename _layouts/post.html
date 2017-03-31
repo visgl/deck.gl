@@ -1,25 +1,33 @@
 ---
 layout: default
 ---
-{% assign author = site.data.authors[page.author] %}
+
+{% assign authors = page.author | split:","" %}
 
 <article id="post">
-  {% include breadcrumb.html %}
 
 	<h1>{{ page.title }}</h1>
+
+  <div>
+    <span class="date"><b>{{ page.date | date_to_string }}</b></span>
+    <span class="author">by 
+      {% for author in authors %}
+        <a href="http://github.com/{{ site.data.authors[author].github_username }}">
+          <b>{{ site.data.authors[author].display_name }}</b>
+        </a>
+      {% endfor %}
+    </span>
+  </div>
+
+	<div class="content">
+		{{ content }}
+	</div>
 
   <div class="tag-cloud">
     {% for tag in page.tags %}
       <a href="{{ site.baseurl }}/{{ site.tag_page_dir }}/{{ tag | downcase }}">{{ tag }}</a>
     {% endfor %}
   </div>
-  <div>
-    <span class="date"><b>{{ page.date | date_to_string }}</b></span>
-    <span class="author">by <a href="http://github.com/{{ author.github_username }}"><b>{{ author.display_name }}</b></a></span>
-  </div>
 
-	<div class="content">
-		{{ content }}
-	</div>
 </article>
 

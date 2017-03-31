@@ -24,20 +24,30 @@
 
 <body>
   
-  <!-- Header -->
-  <header></header>
+  <div class="flexbox">
 
-  <!-- Main content -->
-  <div class="container">	
+    <div class="flexbox__item">
+      <!-- Header -->
+      <header>
+  
+  <div class="container">
+    <div class="breadcrumb">
+      <a href="/blog/">Home</a>
+      &gt;
+      
+      <span>Tag: Vis</span>
+      
+    </div>
+  </div>
+  
+</header>
 
-	<main>
+      <!-- Main content -->
+      <div class="container">	
 
-		<article id="tag-page">
-  <div class="breadcrumb">
-  <a href="/blog/">&lt; All posts</a>
-</div>
+    	<main>
 
-  <h3>Tag: Vis</h3>
+    		<article id="tag-page">
 
   <ul id="posts">
 
@@ -45,39 +55,52 @@
       
 
 <li class="post">
-  <h2><a href="/blog/2017/wind">Wind Map</a></h2>
+  <h1><a href="/blog/2017/introducing-deckgl-v4">Introducing deck.gl v4.0</a></h1>
   <div>
-    <span class="date"><b>13 Mar 2017</b></span>
-    <span class="author">by <a href="http://github.com/philogb"><b>Nicolas Belmonte</b></a></span>
+    <span class="date"><b>31 Mar 2017</b></span>
+    <span class="author">by 
+      
+        <a href="http://github.com/shaojingli">
+          <b>Shaojing Li</b>
+        </a>
+      
+        <a href="http://github.com/ibgreen">
+          <b>Ib Green</b>
+        </a>
+      
+        <a href="http://github.com/gnavvy">
+          <b>Yang Wang</b>
+        </a>
+      
+    </span>
   </div>
-  <p>Creating a wind map with deck.gl</p>
+  <p>We've just released a new major version of deck.gl. It is a good time to share some information about the improvements that went into the new version, the rationale behind them, and provide some hints on what we are currently thinking about the future of deck.gl.</p>
 </li>
     
 
   </ul>
 
-  <hr />
-
-  <h4>All tags</h4>
-
-  <div class="tag-cloud">
-    <a href="/blog/tag/react.html" class="set-1">React</a> <a href="/blog/tag/vis.html" class="set-1">Vis</a> <a href="/blog/tag/webgl.html" class="set-5">WebGL</a>
-  </div>
-
 </article>
 
-  </main>
-	
-	  <!-- Pagination links -->
-    
+      </main>
+    	
+    	  <!-- Pagination links -->
+        
 
+      </div>
+    </div>
+
+    <div class="flexbox__item--collapsed">
+      <!-- Footer -->
+      <footer>
+  <div class="container">
+    <img src="/blog/img/logo.gif" />
   </div>
-    
-  <!-- Footer -->
-  <footer>
-  @2017 - Uber
 </footer>
 
+    </div>
+
+  </div>
 
 </body>
 </html>

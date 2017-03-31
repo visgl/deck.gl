@@ -1,10 +1,16 @@
-{% assign author = site.data.authors[post.author] %}
+{% assign authors = post.author | split:","" %}
 
 <li class="post">
-  <h2><a href="{{ site.baseurl }}{{ post.url }}">{{ post.title }}</a></h2>
+  <h1><a href="{{ site.baseurl }}{{ post.url }}">{{ post.title }}</a></h1>
   <div>
     <span class="date"><b>{{ post.date | date_to_string }}</b></span>
-    <span class="author">by <a href="http://github.com/{{ author.github_username }}"><b>{{ author.display_name }}</b></a></span>
+    <span class="author">by 
+      {% for author in authors %}
+        <a href="http://github.com/{{ site.data.authors[author].github_username }}">
+          <b>{{ site.data.authors[author].display_name }}</b>
+        </a>
+      {% endfor %}
+    </span>
   </div>
   <p>{{ post.description }}</p>
 </li>

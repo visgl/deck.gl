@@ -1,7 +1,7 @@
 ---
 title: Introducing deck.gl v4.0
-description: Creating a wind map with deck.gl
-author: shaojing, ib, gnavvy
+description: We've just released a new major version of deck.gl. It is a good time to share some information about the improvements that went into the new version, the rationale behind them, and provide some hints on what we are currently thinking about the future of deck.gl.
+author: shaojing,ib,gnavvy
 tags:
   - Vis
   - WebGL
