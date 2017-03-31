@@ -17,6 +17,37 @@ While it would have been preferable to avoid this change, a significant
 modernization of the deck.gl build process and preparations for "tree-shaking"
 support combined to make it impractical to keep supporting the old import style.
 
+
+### Deprecated/Removed Layers
+
+| Layer            | Status       | Replacement         |
+| ---              | ---            | ---              | ---     |
+| `ChoroplethLayer`  | Deprecated | `GeoJsonLayer`, `PolygonLayer` and `PathLayer`    |
+| `ChoroplethLayer64` | Deprecated | `GeoJsonLayer`, `PolygonLayer` and `PathLayer`    |
+| `ExtrudedChoroplethLayer` | Deprecated | `GeoJsonLayer`, `PolygonLayer` and `PathLayer`    |
+| `EnhancedChoroplethLayer`  | Moved to samples  | `PathLayer`    |
+
+* ChoroplethLayer, ChoroplethLayer64, ExtrudedChoroplethLayer
+
+These set of layers are deprecated in deck.gl v4, with their functionality
+completely substituted by more unified, flexible and performant new layers:
+ `GeoJsonLayer`, `PolygonLayer` and `PathLayer`.
+
+Developers should be able to just supply the same geojson data that are used with
+`ChoroplethLayer`s to the new `GeoJsonLayer`. The props of the `GeoJsonLayer` are
+a bit different from the old `ChoroplethLayer`, so proper testing is recommended
+to achieve satisfactory result.
+
+* EnhancedChoroplethLayer
+
+This was a a sample layer in deck.gl v3 and has now been moved to a
+stand-alone example and is no longer exported from the deck.gl npm module.
+
+Developers can either copy this layer from the example folder into their
+application's source tree, or consider using the new `PathLayer` which also
+handles wide lines albeit in a slightly different way.
+
+
 ### Removed, Changed and Deprecated Layer Properties
 
 | Layer            | Old Prop       | New Prop         | Comment |
@@ -26,6 +57,26 @@ support combined to make it impractical to keep supporting the old import style.
 | ScatterplotLayer | `drawOutline`  | `outline`        | |
 | ScreenGridLayer  | `unitWidth`    | `cellSizePixels` | |
 | ScreenGridLayer  | `unitHeight`   | `cellSizePixels` | | |
+
+
+#### Note about `strokeWidth` props
+
+All line based layers
+(`LineLayer and `ArcLayer` and the `ScatterplotLayer` in outline mode)
+now use use shaders to render an exact pixel thickness
+on lines, instead of using the `GL.LINE` drawing mode.
+
+This particular change was caused by browsers dropping support for this feature
+([Chrome](https://bugs.chromium.org/p/chromium/issues/detail?id=60124)
+and [Firefox](https://bugzilla.mozilla.org/show_bug.cgi?id=634506)).
+
+Also `GL.LINE` mode rendering always had signficant limitations in terms of
+lack of support for mitering, unreliable support for anti-aliasing and
+platform dependent line width limits so this should represent an improvement
+in visual quality and consistency for these layers.
+
+Remarks:
+* Some background: WebGL lineWidth no longer has any effect in
 
 #### Removed prop: `Layer.dataIterator`
 
@@ -47,15 +98,14 @@ See the property table above.
 This lifecycle was deprecated in v3 and is now removed in v4.
 Use `Layer.updateState` instead.
 
-#### updateTriggers
+#### Changes to `updateTriggers`
 
 Update triggers can now be specified by referring to the name of the accessor,
 instead of the name of the actual WebGL attribute.
 
 Note that this is supported on all layers supplied by deck.gl, but if you
 are using older layers, they need a small addition to their attribute
-definitions, see below.
-
+definitions to specify the name of the accessor.
 
 ### AttributeManager changes
 
@@ -68,37 +118,3 @@ loggers for all AttributeManagers (i.e. for all layers).
 
 This method has been deprecated since version 2.5 and is now removed in v4.
 Use `AttributeManager.add()` instead.
-
-
-### Deprecated/Removed Layers
-
-| Layer            | Status       | Replacement         |
-| ---              | ---            | ---              | ---     |
-| `ChoroplethLayer`  | Deprecated | `GeoJsonLayer`, `PolygonLayer` and `PathLayer`    |
-| `ChoroplethLayer64` | Deprecated | `GeoJsonLayer`, `PolygonLayer` and `PathLayer`    |
-| `ExtrudedChoroplethLayer` | Deprecated | `GeoJsonLayer`, `PolygonLayer` and `PathLayer`    |
-| `EnhancedChoroplethLayer`  | Moved to samples  | `PathLayer`    |
-
-#### ChoroplethLayer, ChoroplethLayer64, ExtrudedChoroplethLayer
-
-These set of layers are deprecated in deck.gl v4, with their functionality
-completely substituted by more unified, flexible and performant new layers:
- `GeoJsonLayer`, `PolygonLayer` and `PathLayer`.
-
-Developers should be able to just supply the same geojson data that are used with
-`ChoroplethLayer`s to the new `GeoJsonLayer`. The props of the `GeoJsonLayer` are
-a bit different from the old `ChoroplethLayer`, so proper testing is recommended
-to achieve satisfactory result.
-
-As a deprecated layer, the Choropleth-family layers will stick around for
-at least another major revision, but please take some time to upgrade to the new
-GeoJsonLayer.
-
-#### EnhancedChoroplethLayer
-
-This was a a sample layer in deck.gl v3 and has now been moved to a
-stand-alone example and is no longer exported from the deck.gl npm module.
-
-Developers can either copy this layer from deck.gl v3 or the example,
-or consider using the new `PathLayer` which also handles wide lines albeit in a
-slightly different way.
