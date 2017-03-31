@@ -1,6 +1,6 @@
 ---
 title: Introducing deck.gl v4.0
-description: We've just released a new major version of deck.gl. It is a good time to share some information about the improvements that went into the new version, the rationale behind them, and provide some hints on what we are currently thinking about the future of deck.gl.
+description: We've just released a new major version of deck.gl, so this is a good time to share some information about the improvements that went into the new version, the rationale behind them, and provide some hints on what we are currently thinking about the future of deck.gl.
 author: shaojing,ib,gnavvy
 tags:
   - Vis
@@ -17,7 +17,7 @@ Since the big deck.gl v3 release in November 2016, deck.gl has seen rapid adopti
 
 While some of these layers are highly specialized and application specific, many others are general-purpose and solves some common problems in certain applications. Those general-purpose layers saves other developers with similar needs considerable amount of time, so why reinvent the wheel?
 
-Therefore, in this v4 release, the stars are the new layers enlisted in our deck.gl layer catalog that do magic with data. Now, the numder of core layers in deck.gl has grown to over a dozen and all of them are carefully audited, tested and documented [layers](https://uber.github.io/deck.gl/#/layers/catalog/overview).
+Therefore, in this v4 release, the stars are the new layers enlisted in our deck.gl layer catalog that do magic with data. Now, the numder of core layers in deck.gl has grown to over a dozen and all of them are carefully audited, tested and documented [layers](https://uber.github.io/deck.gl/#/documentation/layer-catalog).
 
 ### Why a Major Version Bump?
 
@@ -33,7 +33,7 @@ major version bump, deck.gl v4 is highly compatible with deck.gl
 v3, both in terms of public APIs and the way layers work.
 
 Also, to ensure a smooth transition, an
-[update guide](https://uber.github.io/deck.gl/#/documentation/overview/upgrade-guide)
+[update guide](https://uber.github.io/deck.gl/#/documentation/overview/upgrade-from-v3)
 is provided and we expect the upgrade effort for applications to be minimal.
 
 Note: deck.gl follows [semver](http://semver.org) versioning rules so
@@ -42,55 +42,55 @@ the major version number, from 3 to 4 in this case.
 
 ## A Growing Layer Catalog
 
-Deck.gl is a geospatial data visualization framework from the very beginning and geospatial use cases will always be the top priority. The new layers added to the [layer catalog](https://uber.github.io/deck.gl/#/documentation/core-layers) are widely used in geospatial data analysis within Uber and we hope they will solve the problems of deck.gl users face everyday.
+Deck.gl is a geospatial data visualization framework from the very beginning and geospatial use cases will always be the top priority. The new layers added to the [layer catalog](https://uber.github.io/deck.gl/#/documentation/layer-catalog) are widely used in geospatial data analysis within Uber and we hope they will solve the problems of deck.gl users face everyday.
 
-### [`GeoJsonLayer`](https://uber.github.io/deck.gl/#/documentation/core-layers/geo-layer)
+### [`GeoJsonLayer`](https://uber.github.io/deck.gl/#/documentation/layer-catalog/geojson-layer)
 
-<p aligh="center">
-	<img src="../img/demo-thumb-geojson.jpg">
+<p>
+	<img width="400" src="../img/demo-thumb-geojson.jpg">
 </p>
 
 The GeoJsonLayer is designed to render geometry primitives in the widely accepted GeoJson data format. The GeoJsonLayer itself is very powerful as it renders multiple types of geometry primitives, including points, lines, multilines, polygons and multipolygons all at once. Moreover, it can render polygons and multipolygons in different styles, currently supporting filled and outline styles in 2D, and filled and wireframe styles in extruded.
 
 The flexibility of the GeoJson layer combined with deck.gl's high rendering performance makes it possible to render large amount of data on the city or even the world level, like what we are doing in the GeoJson layer example on our demo site. [links here]
 
-### [`PathLayer`](https://uber.github.io/deck.gl/#/documentation/core-layers/path-layer)
+### [`PathLayer`](https://uber.github.io/deck.gl/#/documentation/layer-catalog/path-layer)
 
-<p aligh="center">
-	<img src="../img/demo-thumb-path.png">
+<p>
+	<img width="400" src="../img/demo-thumb-path.png">
 </p>
 
 
 The `PathLayer` is created to render a path consists of multiple line segments specified by a sequence of coordinates. The path drawn has customizable width with mitered or rounded line joints.
 
-### [`PolygonLayer`](https://uber.github.io/deck.gl/#/documentation/core-layers/polygon-layer)
+### [`PolygonLayer`](https://uber.github.io/deck.gl/#/documentation/layer-catalog/polygon-layer)
 
 <p aligh="center">
-	<img src="../img/demo-thumb-polygon.png">
+	<img width="400" src="../img/demo-thumb-polygon.png">
 </p>
 
 The `PolygonLayer` renders general flat or extruded polygons specified by a "closed" sequence of coordinates, like how polygon features are specified in the GeoJson specifications. Polygons can be rendered as filled or outline in 2D and filled or wireframe in 3D. This layer supports rendering convex, concave and polygon with holes.
 
-### [`IconLayer`](https://uber.github.io/deck.gl/#/documentation/core-layers/icon-layer)
+### [`IconLayer`](https://uber.github.io/deck.gl/#/documentation/layer-catalog/icon-layer)
 
-<p aligh="center">
-	<img src="../img/demo-thumb-icon.jpg">
+<p>
+	<img width="400" src="../img/demo-thumb-icon.jpg">
 </p>
 
 The `IconLayer` allows the user to render customizable markers on top of the base map. Multiple icons can be used in a single layer through a texture atlas and a configuration object in JSON. The size of the icons can be separately controlled and bounded with user specified values.
 
-### [`PointCloudLayer`](https://uber.github.io/deck.gl/#/documentation/core-layers/point-cloud-layer)
+### [`PointCloudLayer`](https://uber.github.io/deck.gl/#/documentation/layer-catalog/point-cloud-layer)
 
-<p aligh="center">
-	<img src="../img/demo-thumb-point-cloud.png">
+<p>
+	<img width="400" src="../img/demo-thumb-point-cloud.png">
 </p>
 
 The `PointCloudLayer` is designed to visualize 3D point cloud data, usually generated from different types of sensors that are ubiquitous nowadays. Point cloud data can contain position, normal and color values to control the style of rendered points, whic are "billboarded" towards the user.
 
-### [`GridLayer`](https://uber.github.io/deck.gl/#/documentation/core-layers/grid-layer) and [`HexagonLayer`](https://uber.github.io/deck.gl/#/documentation/core-layers/hexagon-layer)
+### [`GridLayer`](https://uber.github.io/deck.gl/#/documentation/layer-catalog/grid-layer) and [`HexagonLayer`](https://uber.github.io/deck.gl/#/documentation/layer-catalog/hexagon-layer)
 
-<p aligh="center">
-	<img src="../img/demo-thumb-heatmap.jpg">
+<p>
+	<img width="400" src="../img/demo-thumb-heatmap.jpg">
 </p>
 
 In this deck.gl release, we add these two special layers that goes beyond simply putting user data on the map. This is a very exiciting new direction of deck.gl as we not only want to provide layers that are visually compelling to our users, but also ***smart***. The `GridLayer` and `HexagonLayer` draw equal-area rectangular or hexagonal cells. At the same time they "bin" user-provided point data into cells and do aggregations on the data points that fall into those cells. The aggregated values can be mapped to the color of the cells, the height of the cells, or both, depending on the specific style settings. This effectively makes these two layers two different implementations of typical grid-based **heatmaps**. Both layer supports 2D and 3D cells.
@@ -110,7 +110,7 @@ To make extrusion looks natural and make extruded layers look visually pleasing,
 
 Deck.gl's documentation has been significantly improved and reorganized in response to user feedback. In particular, every layer now has an interactive layer browser allowing users to tweak all properties of the layer and see how they affect the final rendering of layers while reading the docs. It also serves as an intuitive tool for users to select appropriate layers for their use cases.
 
-<p aligh="center">
+<p>
 	<img src="../img/interactive-layer-browser.png">
 </p>
 
