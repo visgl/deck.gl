@@ -16,8 +16,7 @@ const ICON_MAPPING = {
   marker: {x: 0, y: 0, width: 32, height: 32, mask: true}
 };
 
-const App = () => {
-  const {data, viewport} = this.props;
+const App = ({data, viewport}) => {
 
   /**
    * Data format:

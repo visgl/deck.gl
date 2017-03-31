@@ -19,8 +19,7 @@ It renders each hexagon based on color, opacity and elevation.
 ```js
 import DeckGL, {HexagonCellLayer} from 'deck.gl';
 
-const App = () => {
-  const {data, viewport} = this.props;
+const App = ({data, viewport}) => {
 
   /**
    * Data format:

@@ -14,7 +14,7 @@ renders it as interactive polygons, lines and points.
 ```js
 import DeckGL, {GeoJsonLayer} from 'deck.gl';
 
-const App = () => {
+const App = ({data, viewport}) => {
   const {data, viewport} = this.props;
 
   /**

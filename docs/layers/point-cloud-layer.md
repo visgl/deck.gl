@@ -13,8 +13,7 @@ and renders them as spheres with a certain radius.
 ```js
 import DeckGL, {PointCloudLayer} from 'deck.gl';
 
-const App = () => {
-  const {data, viewport} = this.props;
+const App = ({data, viewport}) => {
 
   /**
    * Data format:

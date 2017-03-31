@@ -16,8 +16,7 @@ at the moment only works with COORDINATE_SYSTEM.LNGLAT.
 ```js
 import DeckGL, {HexagonLayer} from 'deck.gl';
 
-const App = () => {
-  const {data, viewport} = this.props;
+const App = ({data, viewport}) => {
 
   /**
    * Data format:

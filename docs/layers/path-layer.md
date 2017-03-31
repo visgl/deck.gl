@@ -12,8 +12,7 @@ The Path Layer takes in lists of coordinate points and renders them as extruded 
 ```js
 import DeckGL, {PathLayer} from 'deck.gl';
 
-const App = () => {
-  const {data, viewport} = this.props;
+const App = ({data, viewport}) => {
 
   /**
    * Data format:

@@ -10,8 +10,7 @@ renders as a grid.
 ```js
 import DeckGL, {ScreenGridLayer} from 'deck.gl';
 
-const App = () => {
-  const {data, viewport} = this.props;
+const App = ({data, viewport}) => {
 
   /**
    * Data format:

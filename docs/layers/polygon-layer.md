@@ -13,8 +13,7 @@ The Polygon Layer renders filled and/or stroked polygons.
 ```js
 import DeckGL, {PolygonLayer} from 'deck.gl';
 
-const App = () => {
-  const {data, viewport} = this.props;
+const App = ({data, viewport}) => {
 
   /**
    * Data format:

@@ -13,8 +13,7 @@ specified as latitude/longitude coordinates.
 ```js
 import DeckGL, {ArcLayer} from 'deck.gl';
 
-const App = () => {
-  const {data, viewport} = this.props;
+const App = ({data, viewport}) => {
 
   /**
    * Data format:

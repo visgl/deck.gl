@@ -17,8 +17,7 @@ each cell. The grid cells can be given a height using the `getElevation` accesso
 ```js
 import DeckGL, {GridCellLayer} from 'deck.gl';
 
-const App = () => {
-  const {data, viewport} = this.props;
+const App = ({data, viewport}) => {
 
   /**
    * Data format:

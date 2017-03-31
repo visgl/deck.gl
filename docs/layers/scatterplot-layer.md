@@ -13,8 +13,7 @@ points and renders them as circles with a certain radius.
 ```js
 import DeckGL, {ScatterplotLayer} from 'deck.gl';
 
-const App = () => {
-  const {data, viewport} = this.props;
+const App = ({data, viewport}) => {
 
   /**
    * Data format:

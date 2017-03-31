@@ -15,8 +15,7 @@ and height of the cell is scaled by number of points it contains.
 ```js
 import DeckGL, {GridLayer} from 'deck.gl';
 
-const App = () => {
-  const {data, viewport} = this.props;
+const App = ({data, viewport}) => {
 
   /**
    * Data format:
