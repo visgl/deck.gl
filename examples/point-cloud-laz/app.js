@@ -141,16 +141,23 @@ class Example extends PureComponent {
     const canvasProps = {width, height, ...viewport};
     const glViewport = OrbitController.getViewport(canvasProps);
 
-    return width && height && <OrbitController {...canvasProps} ref={canvas => {
-      this._canvas = canvas;
-    }} onChangeViewport={this._onChangeViewport}>
-      <DeckGL width={width} height={height} viewport={glViewport}
-        layers={[this._renderLazPointCloudLayer()].filter(Boolean)}
-        onWebGLInitialized={this._onInitialized}/>
-    </OrbitController>;
+    return width && height && (
+      <OrbitController {...canvasProps} ref={canvas => {
+        this._canvas = canvas;
+      }} onChangeViewport={this._onChangeViewport}>
+        <DeckGL
+          width={width}
+          height={height}
+          viewport={glViewport}
+          layers={[
+            this._renderLazPointCloudLayer()
+          ].filter(Boolean)}
+          onWebGLInitialized={this._onInitialized}/>
+      </OrbitController>
+    );
   }
 
-  _renderProgressBar() {
+  _renderProgress() {
     const label = `Loading ${(this.state.progress * 100).toFixed(2)}%`;
     return this.state.progress < 1 && (
       <div style={{
@@ -166,7 +173,7 @@ class Example extends PureComponent {
     const {width, height} = this.state;
     return width && height && <div>
       {this._renderDeckGLCanvas()}
-      {this._renderProgressBar()}
+      {this._renderProgress()}
     </div>;
   }
 }

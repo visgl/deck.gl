@@ -103,13 +103,20 @@ class Example extends PureComponent {
     const canvasProps = {width, height, ...viewport};
     const glViewport = OrbitController.getViewport(canvasProps);
 
-    return width && height && <OrbitController {...canvasProps} ref={canvas => {
-      this._canvas = canvas;
-    }} onChangeViewport={this._onChangeViewport}>
-      <DeckGL width={width} height={height} viewport={glViewport}
-        layers={[this._renderPointCloudLayer()].filter(Boolean)}
-        onWebGLInitialized={this._onInitialized}/>
-    </OrbitController>;
+    return width && height && (
+      <OrbitController {...canvasProps} ref={canvas => {
+        this._canvas = canvas;
+      }} onChangeViewport={this._onChangeViewport}>
+        <DeckGL
+          width={width}
+          height={height}
+          viewport={glViewport}
+          layers={[
+            this._renderPointCloudLayer()
+          ].filter(Boolean)}
+          onWebGLInitialized={this._onInitialized}/>
+        </OrbitController>
+      );
   }
 }
 
