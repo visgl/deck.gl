@@ -6,8 +6,10 @@ renders them as extruded lines with mitering.
   <div align="center">
     <img height="300" src="/demo/src/static/images/demo-thumb-path.jpg" />
   </div>
-
-    import {PathLayer} from 'deck.gl';
+  
+```js
+import {PathLayer} from 'deck.gl';
+```
 
 ## Properties
 
@@ -43,7 +45,6 @@ Type of joint. If `true`, draw round joints. Otherwise draw miter joints.
 
 The maximum extent of a joint in ratio to the stroke width.
 Only works if `rounded` is `false`.
-
 
 ## Accessors
 

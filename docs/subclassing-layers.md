@@ -7,13 +7,14 @@ the vertex and/or fragment shaders.
 If a small feature is missing from a layer, subclassing can often be a
 good technique to add it.
 
-## Example - Adding per-segment color to PathLayer
+### Example
 
-```
-// Example by @dcposch
+Adding per-segment color to the [PathLayer](/docs/layers/path-layer.md).
+
+```js
 import {PathLayer} from 'deck.gl';
 
-// Accesor: `getColor` (Function, optional)
+// Accessor: `getColor` (Function, optional)
 // Returns an color (array of numbers, RGBA) or array of colors (array of arrays).
 
 export default MultiColorPathLayer extends PathLayer {
@@ -65,3 +66,5 @@ export default MultiColorPathLayer extends PathLayer {
    }
 }
 ```
+
+*[Courtesy](https://github.com/uber/deck.gl/pull/336) of [@dcposch](https://github.com/dcposch).*

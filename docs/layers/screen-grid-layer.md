@@ -13,7 +13,9 @@ visuals when used with the right data set can be quite effective.
   <img height="300" src="/demo/src/static/images/demo-thumb-screengrid.jpg" />
 </div>
 
-    import {ScreenGridLayer} from 'deck.gl';
+```js
+import {ScreenGridLayer} from 'deck.gl';
+```
 
 ## Properties
 

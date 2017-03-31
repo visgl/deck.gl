@@ -2,54 +2,49 @@
 
 Release date: TBD, Q1 2017
 
-# Highlights
+### New Layers
 
-
-## New Layers
-
-* GeoJsonLayer
+##### GeoJsonLayer
 
 A composite layer that parses geojson and renders it as a `PathLayer`
 and a `PolygonLayer`.
 
-### PathLayer
+##### PathLayer
 
 Takes a sequence of coordinates and renders them as a thick line with
 mitered or rounded end caps.
 
-### PolygonLayer
+##### PolygonLayer
 
 Each object in data is expected to provide a "closed" sequence of coordinates
 and renders them as a polygon, optionally extruded or in wireframe mode.
 Supports polygons with holes.
 
-### IconLayer
+##### IconLayer
 
 Allows the user to provide a texture atlas and a JSON configuration specifying
 where icons are located in the atlas.
 
-### GridLayer
+##### GridLayer
 
 A layer that draws rectangular, optionally elevated cells.
 A typical grid based heatmap layer.
 Differs from the `ScreenGridLayer` in that the cells are in
 world coordinates and pre aggregated.
 
-### HexagonLayer
+##### HexagonLayer
 
 A layer that draws hexagonal, optionally elevated cells.
 
-### Point Cloud Layer
+##### Point Cloud Layer
 
 Draws a LiDAR point cloud. Supports point position/normal/color.
 
+### Improvements to all Layers
 
-## Improvements to all Layers
+##### TBD - support immutable data/ES6 containers?
 
-### TBD - support immutable data/ES6 containers?
-
-
-### Support for Per-Layer Model Matrix
+##### Support for Per-Layer Model Matrix
 
 Each layer now supports a `modelMatrix` property that can be used to
 specify a local coordinate system for the data in that layer:
@@ -64,8 +59,7 @@ specify a local coordinate system for the data in that layer:
 
 TBD - `layerMatrix` vs. `modelMatrix`
 
-
-### UpdateTriggers now accept Accessor Names
+##### updateTriggers
 
 `updateTriggers` now accept Accessor Names.
 
@@ -73,55 +67,48 @@ The `updateTriggers` mechanism in deck.gl v3 required the user to know the
 name of the vertex attribute controlled by an accessor. It is now possible
 to supply names of `accessors`.
 
-
-### More intuitive mouse events
+##### More intuitive mouse events
 
 `onHover` is now only fired on entering/exiting an object instead of on mouse move.
 
 `onClick` is now only fired on the picked layer instead of all pickable layers.
 
+### New Features for Layer Subclassing
 
-## New Features for Layer Subclassing
-
-### **Overridable shaders
+##### Overridable shaders
 
 All layers now have a `getShaders` method that can
 be overriden by subclasses, enables reuse of all layer code while just
 replacing one or both shaders, often dramatically reducing the amount of
 code needed to add a small feature or change to en existing layers.
 
+### New Features for Layer Writers
 
-## New Features for Layer Writers
-
-### `defaultProps`
+##### defaultProps
 
 Layers are now encouraged to define a `defaultProps`
 static member listing their props and default values, rather than programmatically
 declaring the props in constructor parameters etc. Using `defaultProps` means
 that many layer classes no longer need a constructor.
 
+##### AttributeManager
 
-### AttributeManager now accepts new `accessor` field
+Now accepts new `accessor` field, which can be a string or a an array of strings.
+Will be used to match `updateTriggers` accessor names with instance attributes.
 
-Can be a string or a an array of strings. Will be used to match
-`updateTriggers` accessor names with instance attributes.
-
-
-### `getPickingInfo()`
+##### getPickingInfo
 
 This method replaces the old `pick()` method and is expected to return an info
 object. Layers can block the execution of callback functions by returning `null`.
 
-
-## Performance
+### Performance
 
 A number of performance improvements and fixes have been gradually introduced
 since deck.gl v3.0 was launched. While many are not new in v4.0, cumulatively
 they enable noticeably better framerates and a lighter footprint when big data
 sets are loaded, compared to the initial v3.0.0 version
 
-
-## Library Improvements
+### Library Improvements
 
 JavaScript build tooling continues to evolve rapidly and efforts have
 been made to ensure deck.gl supports several popular new tooling setups:
@@ -145,8 +132,7 @@ been made to ensure deck.gl supports several popular new tooling setups:
   alternative to babel if you have a simple app and don't need all the power of babel.
   Many of the examples now use buble for faster and smaller builds.
 
-
-## Examples
+### Examples
 
 Code examples have been improved in several ways:
 * **Multiple Examples** deck.gl now provides multiple different examples in an
@@ -161,8 +147,7 @@ Code examples have been improved in several ways:
 * **Layer Browser** The main `layer-browser` example has been expanded
   into a full "layer and property browser" allowing for easy testing of layers.
 
-
-## Deprecations
+### Deprecations
 
 The various Choropleth layers have been deprecated since deck.gl has new and
 better layers (`GeoJsonLayer`, `PathLayer`, `PolygonLayer`) that fill the same
@@ -179,7 +164,6 @@ default values have changed.
 
 For more information on deprecations and how to update your code in response
 to these changes, please consult the deck.gl [Upgrade Guide](upgrade-guide.md).
-
 
 # deck.gl v3.0
 

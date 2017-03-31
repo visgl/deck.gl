@@ -42,7 +42,6 @@ void main(void) {
   vec3 vertex = positions * project_scale(radius * instanceRadius);
   gl_Position = project_to_clipspace(center + vertex);
 }
-
 ```
 
 ## Uniforms
@@ -90,23 +89,26 @@ channel of 1. Beware blending in opacity as it can result in the rendered
 color not matching the picking color, causing the wrong index to be picked.
 
 Compare (bad)
+
+```glsl
+gl_FragColor = vec4(
+  mix(
+    instanceColor.rgb,
+    instancePickingColor,
+    renderPickingBuffer
+  ),
+  opacity
+);
 ```
-   gl_FragColor = vec4(
-     mix(
-   	  instanceColor.rgb,
-   	  instancePickingColor,
-   	  renderPickingBuffer
-     ),
-     opacity
-   );
-```
+
 vs (good)
-```
-   gl_FragColor = mix(
-   	vec4(instanceColor.rgb, instanceColor.a * opacity),
-   	vec4(instancePickingColor, 1.),
-   	renderPickingBuffer
-   );
+
+```glsl
+gl_FragColor = mix(
+  vec4(instanceColor.rgb, instanceColor.a * opacity),
+  vec4(instancePickingColor, 1.),
+  renderPickingBuffer
+);
 ```
 
 #### `vec3 selectedPickingColor`
@@ -121,9 +123,7 @@ the [glslify](https://github.com/stackgl/glslify) tool you will need to
 install that module and add the required transform or plugin to your
 application build process.
 
-
 ## Optional Features
-
 
 ### Filtering and Brushing (Vertex and Fragment Shaders)
 
@@ -139,13 +139,11 @@ that can easily be added to a deck.gl shader.
 **Tip:** Use `discard` in the fragment shader instead of 0 alpha.
 Faster and leaves the depth buffer unaffected.
 
-
 ### Lighting (Vertex and Fragment Shaders)
 
 A simple lighting package is provided in deck.gl, supporting a single
 directional light in addition to ambient light. Turning on lighting requires
 normals to be provided for each vertex.
-
 
 ### Animation (Vertex Shader)
 
@@ -156,7 +154,6 @@ Creating an animated layer can be as easy as having the application supply
 start and end positions for every object, and a time interval over which
 to animate, and have the vertex shader interpolate the positions for every
 frame using a simple `mix` GLSL instruction.
-
 
 ## Shader libraries
 
@@ -174,14 +171,12 @@ does NOT do any kind of syntax analysis so is not able to prevent naming conflic
 when variable or function names from different modules. You can use multiple
 techniques to organize your shader code to fit your project needs.
 
-
 ### Platform defines
 
 This "virtual" module is a dynamically generated prologue containing #defines describing
 your graphics card and platform. It is designed to work around certain platform-specific
 issues to allow the same rendering results are different GPUs and platforms. It is
 automatically injected by `assembleShaders` before any modules are included.
-
 
 ### fp64
 

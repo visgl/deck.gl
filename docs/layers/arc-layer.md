@@ -12,7 +12,9 @@ specified as latitude/longitude coordinates.
   <img height="300" src="/demo/src/static/images/demo-thumb-arc.jpg" />
 </div>
 
-    import {ArcLayer} from 'deck.gl';
+```js
+import {ArcLayer} from 'deck.gl';
+```
 
 ## Properties
 

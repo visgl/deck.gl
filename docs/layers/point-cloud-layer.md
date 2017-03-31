@@ -8,7 +8,9 @@ and renders them as spheres with a certain radius.
     <img height="300" src="/demo/src/static/images/demo-thumb-point-cloud.jpg" />
   </div>
 
-    import {PointCloudLayer} from 'deck.gl';
+```js
+import {PointCloudLayer} from 'deck.gl';
+```
 
 ## Properties
 

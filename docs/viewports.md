@@ -2,9 +2,9 @@
 
 ## Overview
 
-deck.gl calculates projections using a a generic `Viewport` class
-(which is essentially a 3D matrix "camera" class of the type you would find
-in any 3D/WebGL/OpenGL library, holding `view` and `projection` matrices).
+deck.gl calculates projections using a a generic [Viewport class](src/lib/viewports/viewport.js)
+(which is essentially a 3D matrix "camera" class of the type you would find in any 3D/WebGL/OpenGL
+library, holding `view` and `projection` matrices).
 
 The basic `Viewport` class is generic and can be used directly
 if you can calculate your own projection matrices, it is often preferable to
@@ -23,7 +23,6 @@ Web Mercator projection.
 There is a special subclass, the `WebMercatorViewport`, that at its core
 is a utility for converting to and from map
 (latitude, longitude) coordinates to screen coordinates and back.
-
 
 ### Notes on Coordinates
 

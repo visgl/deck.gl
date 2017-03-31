@@ -47,14 +47,19 @@ Remarks:
 
 E.g. assuming a composite GeoJsonLayer layer that renders two sublayers,
 choropleths and lines, with those ids:
-```
+
+```js
 new GeoJsonLayer({id: 'street-grid'});
 ```
+
 Will generate the following layers and ids:
-```
-GeoJsonLayer: 'street-grid'
-PolygonLayer: 'street-grid-polygon'
-LineLayer: 'street-grid-line'
+
+```js
+{
+  GeoJsonLayer: 'street-grid'
+  PolygonLayer: 'street-grid-polygon'
+  LineLayer: 'street-grid-line'
+}
 ```
 
 ##### `data` (Array or Iterable, optional)
@@ -71,19 +76,23 @@ please see JavaScript `[Symbol.iterator]`.
 Whether layer is drawn.
 
 For performance reasons it is often better to control layer visibility
-  with the `visible` prop rather than through conditional rendering. Compare:
+with the `visible` prop rather than through conditional rendering. Compare:
+
 ```js
 const layers = [
   new MyLayer({data: ..., visible: showMyLayer})
 ];
 ```
+
 with
+
 ```js
 const layers = [];
 if (showMyLayer) {
   layers.push(new MyLayer({data: ...}));
 }
 ```
+
 In the second example (conditional rendering) the layer state will
 be destroyed and regenerated every time the showMyLayer flag changes.
 
@@ -93,11 +102,10 @@ The opacity of the layer. deck.gl automatically applies gamma to the opacity
 in an attempt to make opacity changes appear linear (i.e. the opacity is
 visually proportional to the value of the prop.)
 
-Remarks
-* While it is a recommended convention that all deck.gl layers should
-  support the `opacity` prop, it is up to each layer's fragment shader
-  to implement support for opacity.
-
+**Remark:**
+While it is a recommended convention that all deck.gl layers should
+support the `opacity` prop, it is up to each layer's fragment shader
+to implement support for opacity.
 
 ### Interaction Properties
 
@@ -177,7 +185,6 @@ Note that the matrix projection is applied after the non-linear mercator
 projection calculations are resolved, so be careful when using model matrices
 with lng/lat encoded coordinates. They normally work best with non-mercator
 viewports or meter offset based mercator layers
-
 
 ### Data Properties
 

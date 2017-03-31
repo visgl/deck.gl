@@ -11,7 +11,9 @@ specified as latitude/longitude coordinates.
   <img height="300" src="/demo/src/static/images/demo-thumb-line.jpg" />
 </div>
 
-    import {LineLayer} from 'deck.gl';
+```js
+import {LineLayer} from 'deck.gl';
+```
 
 ## Properties
 
