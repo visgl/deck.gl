@@ -48,7 +48,7 @@ export default class HeatmapDemo extends Component {
           ))}
         </div>
         <p className="layout">
-          <span className="col-1-2">Less Accidents</span>
+          <span className="col-1-2">Fewer Accidents</span>
           <span className="col-1-2 text-right">More Accidents</span>
         </p>
 

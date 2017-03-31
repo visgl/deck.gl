@@ -1,7 +1,7 @@
 <!-- INJECT:"PathLayerDemo" -->
 
 <p class="badges">
-  <img src="https://img.shields.io/badge/-64--bit-blue.svg?style=flat-square" alt="64-bit" />
+  <img src="https://img.shields.io/badge/64--bit-support-blue.svg?style=flat-square" alt="64-bit" />
 </p>
 
 # Path Layer

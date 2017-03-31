@@ -3,7 +3,8 @@
 </div>
 
 <p class="badges">
-  <img src="https://img.shields.io/badge/-extruded-blue.svg?style=flat-square" alt="extruded" />
+  <img src="https://img.shields.io/badge/64--bit-support-blue.svg?style=flat-square" alt="64-bit" />
+  <img src="https://img.shields.io/badge/extruded-yes-blue.svg?style=flat-square" alt="extruded" />
 </p>
 
 # GridCellLayer
@@ -11,6 +12,10 @@
 The Grid Cell Layer can render a grid-based heatmap.
 It takes the constant width / height of all cells and top-left coordinate of
 each cell. The grid cells can be given a height using the `getElevation` accessor.
+
+<div align="center">
+  <img height="300" src="/demo/src/static/images/grid-cell-layer.gif" />
+</div>
 
 ```
 import DeckGL, {GridCellLayer} from 'deck.gl';
@@ -29,10 +34,6 @@ render() {
     data,
     cellSize: 500
   });
-
-  return <DeckGL {...viewport} layers={[layer]} />
-}
-```
 
 ## Properties
 
