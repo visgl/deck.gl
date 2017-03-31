@@ -1,6 +1,5 @@
 # Getting Started
 
-
 ## Installation
 
     npm install --save deck.gl luma.gl
@@ -15,20 +14,6 @@ Remarks:
   on React, and it is the application's responsibility to actually
   select and install a specific React version.
 
-
-## Basic Usage
-
-    import DeckGL from 'deck.gl';
-    import {ArcLayer} from 'deck.gl';
-
-    const flights = new ArcLayer({
-      id: 'flights',
-      data: [] // Some flight points
-    });
-
-    <DeckGL width={1920} height={1080} layers={[flights]} />
-
-
 ## Examples
 
 The deck.gl repository contains an
@@ -36,19 +21,22 @@ The deck.gl repository contains an
 with a selection of small, standalone examples that could be good starting
 points for your application.
 
-These foldiers can be copied and you should be able to get them running
-simply by installing (`yarn` or `npm install` and running `npm start`).
-
-For more on using maps with deck.gl,it might also be worth checking out the
-[react-map-gl](https://github.com/uber/react-map-gl)
-examples. Although not focused on deck.gl, these will provide you with
-additional examples of how to use the base map component.
-
+You should be able to copy these folders to other locations, and get them running
+simply by installing using `yarn` or `npm install` and running using `npm start`.
 
 ## Note on Map Tokens
 
-The main requirement before running any application using maps will be to provide
-a map token to the examples so that they can load maps from mapbox etc.
+For most of the examples come with deck.gl, sample geospatial data is rendered
+on top of a Mapbox basemap. Mapbox requires each user to provide a token before
+they serve any basemap tiles from their servers to your browser. You can either set an environmental variable needs to be set via
+```
+export MAPBOX_ACCESS_TOKEN={Your Token Here}
+```
+and import it in your application code via
+```
+const MAPBOX_TOKEN = process.env.MAPBOX_ACCESS_TOKEN;
+```
+or your can write out the token in your app explicitly.
 
-For more information about map token read the sections about "Using with Mapbox",
+For more information about map token read the sections about ["Using with Mapbox"(link update needed)](),
 and the [examples](https://github.com/uber/deck.gl/tree/master/examples/README.md)
