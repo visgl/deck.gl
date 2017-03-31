@@ -24,13 +24,26 @@ in both [longitude,latitude,altitude] or [metersX,metersY,metersZ] format.
 The projection package is included by default by the `assembleShaders` function,
 and offers the following functions:
 
-#### `project_position`
+##### `vec2 project_position(vec2 position)`
+##### `vec3 project_position(vec3 position)`
+##### `vec4 project_position(vec4 position)`
 
-#### `project_scale`
+Projects input to worldspace coordinates.
 
-#### `project_to_viewspace`
+##### `float project_scale(float meters)`
+##### `vec2 project_scale(vec2 meters)`
+##### `vec3 project_scale(vec3 meters)`
+##### `vec4 project_scale(vec4 meters)`
 
-#### `project_to_clipspace`
+Projects input to worldspace sizes.
+
+##### `vec4 project_to_viewspace(vec4 position)`
+
+Projects worldspace coordinates to viewspace coordinates.
+
+##### `vec4 project_to_clipspace(vec4 position)`
+
+Projects worldspace coordinates to clipspace coordinates.
 
 ```glsl
 attribute vec3 positions;
@@ -49,35 +62,35 @@ void main(void) {
 
 ### Viewport uniforms
 
-#### `mat4 modelViewMatrix`
+##### `mat4 modelViewMatrix`
 
 The model view matrix based on the current viewport and layer.
 
-#### `vec2 viewportSize`
+##### `vec2 viewportSize`
 
 Viewport width and height in physical pixels. Useful when rendering pixel sizes.
 
-#### `float devicePixelRatio`
+##### `float devicePixelRatio`
 
 Device pixel ratio of the browser window.
 
 ### Layer prop uniforms
 
-#### `float layerIndex`
+##### `float layerIndex`
 
 The layerIndex is a small integer that starts at zero and is incremented
 for each layer that is rendered. It can be used to add small offsets to
 the z coordinate of layers to resolve z-fighting between overlapping
 layers.
 
-#### `float opacity`
+##### `float opacity`
 
 In the fragment shader, multiply the fragment color with the opacity
 uniform.
 
 ### Picking uniforms
 
-#### `float renderPickingBuffer`
+##### `float renderPickingBuffer`
 
 If you choose to implement picking through picking colors, make sure
 the `pickingColors` or `instancePickingColors` attribute is correctly set up,
@@ -109,7 +122,7 @@ vs (good)
    );
 ```
 
-#### `vec3 selectedPickingColor`
+##### `vec3 selectedPickingColor`
 
 This uniform is set if `props.pickable` is enabled on the layer and reflects the color
 of the last picked pixel. If no pixel is selected, the value will be `[0, 0, 0]`.

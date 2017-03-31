@@ -13,7 +13,7 @@ function generatePath(tree, parentPath = '') {
     tree.forEach(branch => generatePath(branch, parentPath));
   }
   if (tree.name) {
-    tree.path = tree.name.match(/(([A-Z]|^)[a-z]+|3D|\d+)/g).join('-').toLowerCase();
+    tree.path = tree.name.match(/(GeoJson|3D|API|([A-Z]|^)[a-z]+|\d+)/g).join('-').toLowerCase();
   }
   if (tree.children) {
     generatePath(tree.children, `${parentPath}/${tree.path}`);
@@ -26,71 +26,86 @@ function generatePath(tree, parentPath = '') {
 
 export const examplePages = generatePath([
   {
-    name: 'Overview',
+    name: 'Index',
     content: 'markdown/examples.md'
   },
   {
-    name: 'LineLayer',
-    content: {
-      demo: 'LineDemo',
-      code: getCodeUrl('examples/line')
-    }
+    name: 'Core Layers',
+    children: [
+      {
+        name: 'LineLayer',
+        content: {
+          demo: 'LineDemo',
+          code: getCodeUrl('examples/line')
+        }
+      },
+      {
+        name: 'HexagonLayer',
+        content: {
+          demo: 'HeatmapDemo',
+          code: getCodeUrl('examples/3d-heatmap')
+        }
+      },
+      {
+        name: 'IconLayer',
+        content: {
+          demo: 'IconDemo',
+          code: getCodeUrl('examples/icon')
+        }
+      },
+      {
+        name: 'GeoJsonLayer',
+        content: {
+          demo: 'GeoJsonDemo',
+          code: getCodeUrl('examples/geojson')
+        }
+      },
+      {
+        name: 'ScreenGridLayer',
+        content: {
+          demo: 'ScreenGridDemo',
+          code: getCodeUrl('examples/screen-grid')
+        }
+      },
+      {
+        name: 'ArcLayer',
+        content: {
+          demo: 'ArcDemo',
+          code: getCodeUrl('examples/arc')
+        }
+      },
+      {
+        name: 'ScatterplotLayer',
+        content: {
+          demo: 'ScatterplotDemo',
+          code: getCodeUrl('examples/scatterplot')
+        }
+      }
+    ]
   },
   {
-    name: '3D Heatmap',
-    content: {
-      demo: 'HeatmapDemo',
-      code: getCodeUrl('examples/3d-heatmap')
-    }
+    name: 'Custom Layers',
+    children: [
+      {
+        name: 'Trip Routes',
+        content: {
+          demo: 'TripsDemo',
+          code: getCodeUrl('examples/trips')
+        }
+      }
+    ]
   },
   {
-    name: 'IconLayer',
-    content: {
-      demo: 'IconDemo',
-      code: getCodeUrl('examples/icon')
-    }
-  },
-  {
-    name: '3D Surface Explorer',
-    content: {
-      demo: 'PlotDemo',
-      code: getCodeUrl('examples/plot')
-    }
-  },
-  {
-    name: 'GeoJsonLayer',
-    content: {
-      demo: 'GeoJsonDemo',
-      code: getCodeUrl('examples/geojson')
-    }
-  },
-  {
-    name: 'Trip Routes',
-    content: {
-      demo: 'TripsDemo',
-      code: getCodeUrl('examples/trips')
-    }
-  },
-  {
-    name: 'ScreenGridLayer',
-    content: {
-      demo: 'ScreenGridDemo',
-      code: getCodeUrl('examples/screen-grid')
-    }
-  },
-  {
-    name: 'ArcLayer',
-    content: {
-      demo: 'ArcDemo',
-      code: getCodeUrl('examples/arc')
-    }
-  },
-  {
-    name: 'ScatterplotLayer',
-    content: {
-      demo: 'ScatterplotDemo',
-      code: getCodeUrl('examples/scatterplot')
-    }
+    name: 'Beyond Maps',
+    children: [
+      {
+        name: '3D Surface Explorer',
+        content: {
+          demo: 'PlotDemo',
+          code: getCodeUrl('examples/plot')
+        }
+      }
+    ]
   }
 ]);
 
@@ -103,94 +118,116 @@ export const docPages = generatePath([
         content: getDocUrl('README.md')
       },
       {
-        name: 'What\'s New',
+        name: 'What\'s New in v4',
         content: getDocUrl('whats-new.md')
       },
       {
-        name: 'Getting Started',
-        content: getDocUrl('getting-started.md')
-      },
-      {
-        name: 'Using With React',
-        content: getDocUrl('using-with-react.md')
-      },
-      {
-        name: 'Using With Mapbox GL',
-        content: getDocUrl('using-with-mapbox-gl.md')
-      },
-      {
-        name: 'Upgrade Guide',
+        name: 'Upgrade Guide from v3',
         content: getDocUrl('upgrade-guide.md')
       }
     ]
   },
   {
-    name: 'About Layers',
+    name: 'Getting Started',
     children: [
       {
-        name: 'Overview',
-        content: getDocUrl('layers/README.md')
+        name: 'Installation',
+        content: getDocUrl('get-started/getting-started.md')
+      },
+      {
+        name: 'Using With React',
+        content: getDocUrl('get-started/using-with-react.md')
+      },
+      {
+        name: 'Using With Mapbox GL',
+        content: getDocUrl('get-started/using-with-mapbox-gl.md')
       },
       {
         name: 'Using Layers',
-        content: getDocUrl('using-layers.md')
+        content: getDocUrl('get-started/using-layers.md')
       },
       {
-        name: '64 bit Layers',
-        content: getDocUrl('64-bits.md')
-      },
-      {
-        name: 'Coordinate Systems',
-        content: getDocUrl('coordinate-systems.md')
-      },
-      {
-        name: 'Viewports',
-        content: getDocUrl('viewports.md')
+        name: 'Interactivity',
+        content: getDocUrl('get-started/interactivity.md')
       }
     ]
   },
   {
-    name: 'Core Layers',
+    name: 'Custom Layers',
     children: [
       {
-        name: 'Layer Base Class',
-        content: getDocUrl('layers/base-layer.md')
+        name: 'Writing Layers',
+        content: getDocUrl('advanced/custom-layers.md')
       },
       {
-        name: 'ScatterplotLayer',
-        content: getDocUrl('layers/scatterplot-layer.md')
+        name: 'Composite Layers',
+        content: getDocUrl('advanced/composite-layers.md')
       },
+      {
+        name: 'Subclassed Layers',
+        content: getDocUrl('advanced/subclassed-layers.md')
+      },
+      {
+        name: 'Primitive Layers',
+        content: getDocUrl('advanced/primitive-layers.md')
+      },
+      {
+        name: 'Writing Shaders',
+        content: getDocUrl('advanced/writing-shaders.md')
+      }
+    ]
+  },
+  {
+    name: 'Advanced Topics',
+    children: [
+      {
+        name: 'Layer Lifecycle',
+        content: getDocUrl('advanced/layer-lifecycle.md')
+      },
+      {
+        name: 'Attribute Management',
+        content: getDocUrl('advanced/attribute-management.md')
+      },
+      {
+        name: 'Picking',
+        content: getDocUrl('advanced/picking.md')
+      },
+      {
+        name: '64 bit Layers',
+        content: getDocUrl('advanced/64-bits.md')
+      },
+      {
+        name: 'Performance',
+        content: getDocUrl('advanced/performance.md')
+      },
+      {
+        name: 'Coordinate Systems',
+        content: getDocUrl('advanced/coordinate-systems.md')
+      },
+      {
+        name: 'Viewports',
+        content: getDocUrl('advanced/viewports.md')
+      },
+      {
+        name: 'Using Standalone',
+        content: getDocUrl('advanced/using-standalone.md')
+      },
+      {
+        name: 'Tips and Tricks',
+        content: getDocUrl('advanced/tips-and-tricks.md')
+      }
+    ]
+  },
+  {
+    name: 'Layer Catalog',
+    children: [
       {
         name: 'ArcLayer',
         content: getDocUrl('layers/arc-layer.md')
       },
       {
-        name: 'LineLayer',
-        content: getDocUrl('layers/line-layer.md')
-      },
-      {
-        name: 'GeoJSONLayer',
+        name: 'GeoJsonLayer',
         content: getDocUrl('layers/geojson-layer.md')
-      },
-      {
-        name: 'PathLayer',
-        content: getDocUrl('layers/path-layer.md')
-      },
-      {
-        name: 'PolygonLayer',
-        content: getDocUrl('layers/polygon-layer.md')
-      },
-      {
-        name: 'IconLayer',
-        content: getDocUrl('layers/icon-layer.md')
-      },
-      {
-        name: 'PointCloudLayer',
-        content: getDocUrl('layers/point-cloud-layer.md')
-      },
-      {
-        name: 'ScreenGridLayer',
-        content: getDocUrl('layers/screen-grid-layer.md')
       },
       {
         name: 'GridLayer',
@@ -207,69 +244,46 @@ export const docPages = generatePath([
       {
         name: 'HexagonCellLayer',
         content: getDocUrl('layers/hexagon-cell-layer.md')
-      }
-    ]
-  },
-  {
-    name: 'Deprecated Layers',
-    children: [
+      },
       {
-        name: 'ChoroplethLayer',
+        name: 'IconLayer',
+        content: getDocUrl('layers/icon-layer.md')
+      },
+      {
+        name: 'LineLayer',
+        content: getDocUrl('layers/line-layer.md')
+      },
+      {
+        name: 'PathLayer',
+        content: getDocUrl('layers/path-layer.md')
+      },
+      {
+        name: 'PointCloudLayer',
+        content: getDocUrl('layers/point-cloud-layer.md')
+      },
+      {
+        name: 'PolygonLayer',
+        content: getDocUrl('layers/polygon-layer.md')
+      },
+      {
+        name: 'ScatterplotLayer',
+        content: getDocUrl('layers/scatterplot-layer.md')
+      },
+      {
+        name: 'ScreenGridLayer',
+        content: getDocUrl('layers/screen-grid-layer.md')
+      },
+      {
+        name: 'ChoroplethLayer (DEPRECATED)',
         content: getDocUrl('layers/deprecated/choropleth-layer.md')
       },
       {
-        name: 'ChoroplethLayer64',
+        name: 'ChoroplethLayer64 (DEPRECATED)',
         content: getDocUrl('layers/deprecated/choropleth-layer-64.md')
       },
       {
-        name: 'ExtrudedChoroplethLayer64',
+        name: 'ExtrudedChoroplethLayer64 (DEPRECATED)',
         content: getDocUrl('layers/deprecated/extruded-choropleth-layer.md')
-      }
-    ]
-  },
-  {
-    name: 'Custom Layers',
-    children: [
-      {
-        name: 'Customizing Layers',
-        content: getDocUrl('composite-layers.md')
-      },
-      {
-        name: 'Subclassing Layers',
-        content: getDocUrl('subclassing-layers.md')
-      },
-      {
-        name: 'Writing New Layers',
-        content: getDocUrl('custom-layers.md')
-      },
-      {
-        name: 'Layer Lifecycle',
-        content: getDocUrl('layer-lifecycle.md')
-      },
-      {
-        name: 'Attribute Management',
-        content: getDocUrl('attribute-management.md')
-      },
-      {
-        name: 'Writing Shaders',
-        content: getDocUrl('writing-shaders.md')
-      }
-    ]
-  },
-  {
-    name: 'Advanced Topics',
-    children: [
-      {
-        name: 'Performance',
-        content: getDocUrl('performance.md')
-      },
-      {
-        name: 'Using Standalone',
-        content: getDocUrl('using-standalone.md')
-      },
-      {
-        name: 'Tips and Tricks',
-        content: getDocUrl('tips-and-tricks.md')
       }
     ]
   },
@@ -281,16 +295,32 @@ export const docPages = generatePath([
         content: getDocUrl('api-reference/attribute-manager.md')
       },
       {
-        name: 'Viewport',
-        content: getDocUrl('api-reference/viewport.md')
+        name: 'CompositeLayer',
+        content: getDocUrl('api-reference/composite-layer.md')
+      },
+      {
+        name: 'DeckGL',
+        content: getDocUrl('api-reference/deckgl.md')
+      },
+      {
+        name: 'Layer',
+        content: getDocUrl('api-reference/base-layer.md')
+      },
+      {
+        name: 'LayerManager',
+        content: getDocUrl('api-reference/layer-manager.md')
+      },
+      {
+        name: 'OrthographicViewport',
+        content: getDocUrl('api-reference/orthographic-viewport.md')
       },
       {
         name: 'PerspectiveViewport',
         content: getDocUrl('api-reference/perspective-viewport.md')
       },
       {
-        name: 'OrthographicViewport',
-        content: getDocUrl('api-reference/orthographic-viewport.md')
+        name: 'Viewport',
+        content: getDocUrl('api-reference/viewport.md')
       },
       {
         name: 'WebMercatorViewport',

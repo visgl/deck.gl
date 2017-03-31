@@ -1,24 +1,49 @@
+<div align="center">
+  <img height="300" src="/demo/src/static/images/hexagon-cell-layer.png" />
+</div>
+
 <p class="badges">
-  <img src="https://img.shields.io/badge/extruded-yes-blue.svg?style=flat-square" alt="64-bit" />
+  <img src="https://img.shields.io/badge/-extruded-blue.svg?style=flat-square" alt="extruded" />
 </p>
 
 # HexagonCellLayer
 
-The HexagonCellLayer is a variation of the grid layer. It is intended to render
+The Hexagon Cell Layer is a variation of the grid layer. It is intended to render
 tessellated hexagons, and also enables height in 3d. The HexagonCellLayer
 takes in the vertices of a primitive hexagon as [[longitude, latitude]],
 and an array of hexagon centroid as [longitude, latitude].
 It renders each hexagon based on color, opacity and elevation.
 
-<div align="center">
-  <img height="300" src="/demo/src/static/images/hexagon-cell-layer.png" />
-</div>
+```
+import DeckGL, {HexagonCellLayer} from 'deck.gl';
 
-    import {HexagonCellLayer} from 'deck.gl';
+render() {
+  const {data, viewport} = this.props;
+
+  /* data format:
+   * [
+   *   {centroid: [-122.4, 37.7], color: [255, 0, 0], elevation: 100},
+   *   ...
+   * ]
+   */
+  const layer = new HexagonCellLayer({
+    id: 'hexagon-cell-layer',
+    data,
+    radius: 500,
+    angle: 0
+  });
+
+  return <DeckGL {...viewport} layers={[layer]} />
+}
+```
 
 ## Properties
 
-Inherits from all [Base Layer](/docs/layers/base-layer.md) properties.
+### Base Layer Properties
+
+Inherits from all [Base Layer](/docs/api-reference/base-layer.md) properties.
+
+### Render Options
 
 ##### `hexagonVertices` (Array[[lon, lat]], optional)
 
@@ -74,25 +99,29 @@ Shader based highlighting of a selected object
 This is an object that contains light settings for extruded polygons.
 Be aware that this prop will likely be changed in a future version of deck.gl.
 
-## Accessors
+### Data Accessors
 
-#### `getCentroid` (Function, optional)
+##### `getCentroid` (Function, optional)
 
 - Default: `object => object.centroid`
 
 Method called to retrieve the centroid of each hexagon. Centorid should be
 set to [lon, lat]
 
-#### `getColor` (Function, optional)
+##### `getColor` (Function, optional)
 
 - Default: `object => object.color`
 
 Method called to retrieve the color of each object. Color should be set to
 [r, g, b, a] with each number between 0-255.
 
-#### `getElevation` (Function, optional)
+##### `getElevation` (Function, optional)
 
 - Default: `object => object.elevation`
 
 Method called to retrieve the elevation of each object.
 1 unit approximate to 100 meters.
+
+
+## Source Code
+[HexagonCellLayer](https://github.com/uber/deck.gl/tree/master/src/layers/core/hexagon-cell-layer)

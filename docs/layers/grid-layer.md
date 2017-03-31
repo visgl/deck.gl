@@ -1,20 +1,44 @@
 <!-- INJECT:"GridLayerDemo" -->
 
 <p class="badges">
-  <img src="https://img.shields.io/badge/extruded-yes-blue.svg?style=flat-square" alt="64-bit" />
+  <img src="https://img.shields.io/badge/-extruded-blue.svg?style=flat-square" alt="extruded" />
 </p>
 
 # GridLayer
 
-The GridLayer renders a grid heatmap based on an array of points.
+The Grid Layer renders a grid heatmap based on an array of points.
 It takes the constant size all each cell, projects points into cells. The color
 and height of the cell is scaled by number of points it contains.
 
-    import {GridLayer} from 'deck.gl';
+```
+import DeckGL, {GridLayer} from 'deck.gl';
+
+render() {
+  const {data, viewport} = this.props;
+
+  /* data format:
+   * [
+   *   {position: [-122.4, 37.7]},
+   *   ...
+   * ]
+   */
+  const layer = new GridLayer({
+    id: 'grid-layer',
+    data,
+    cellSize: 500
+  });
+
+  return <DeckGL {...viewport} layers={[layer]} />
+}
+```
 
 ## Properties
 
-Inherits from all [Base Layer](/docs/layers/base-layer.md) properties.
+### Base Layer Properties
+
+Inherits from all [Base Layer](/docs/api-reference/base-layer.md) properties.
+
+### Render Options
 
 ##### `cellSize` (Number, optional)
 
@@ -41,7 +65,7 @@ Color ranges as an array of colors formatted as `[255, 255, 255]`. Default is
 
 Elevation scale input domain, default is set to the extent of point counts in each cell.
 
-#### `elevationRange` (Array, optional)
+##### `elevationRange` (Array, optional)
 
 - Default: `[0, 1000]`
 
@@ -72,7 +96,7 @@ Whether the layer should be rendered in high-precision 64-bit mode
 This is an object that contains light settings for extruded polygons.
 Be aware that this prop will likely be changed in a future version of deck.gl.
 
-## Accessors
+### Data Accessors
 
 ##### `getPosition` (Function, optional)
 
@@ -85,3 +109,5 @@ Method called to retrieve the position of each point.
 * GridLayer at the moment only works with `COORDINATE_SYSTEM.LNGLAT`.
 
 
+## Source Code
+[GridLayer](https://github.com/uber/deck.gl/tree/master/src/layers/core/grid-layer)

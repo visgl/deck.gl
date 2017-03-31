@@ -121,30 +121,3 @@ deck.gl works with two concepts:
 As a deck.gl user, you should mainly make sure to scan a layer definition to
 make sure you understand where you are expect to pass in [lng, lat] coordinates.
 
-
-## Handling Coordinate Systems When Writing Layers
-
-As a deck.gl layer writer, you need to consider how to process these values.
-To make mercator projections work, position and distance values need to be
-processed differently so carefully consider
-each attribute and uniform and decide whether it is a position or a distance,
-perhaps even making it clear in the variable's name.
-
-- All positions must be passed through the `preproject` function
-  (available both in JavaScript and GLSL) to convert non-linear web-mercator
-  coordinates to linear mercator "world" or "pixel" coordinates,
-  that can be passed to the projection matrix.
-
-- All offsets must be passed through the `scale` function
-  (available both in JavaScript and GLSL) to convert distances
-  to world coordinates (note that that distance scales are latitude dependent
-  under web mercator projection
-  [see](http://wiki.openstreetmap.org/wiki/Zoom_levels),
-  so scaling will depend on the viewport center and should only be expected to be locally correct.
-
-## Making a vertex shader work with deck.gl's coordinate systems.
-
-A family of GLSL projection methods that support three different projection
-modes, latlon (default), meters and neutral. By always using three shader
-functions (preproject, scale and project) for handling projections and scaling,
-a single layer class can support all three modes (app selects via a layer prop).

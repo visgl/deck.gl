@@ -1,7 +1,7 @@
 
 .gallery-wrapper {
   position: fixed;;
-  padding-top: 64px;
+  padding-top: $topbar-height;
   width: 100%;
   height: 100vh;
 }
@@ -18,6 +18,7 @@
   box-shadow: 2px 0 4px rgba(0,0,0,0.15);
   z-index: 1;
   transition: all 300ms;
+  white-space: nowrap;
 
   >div {
     padding-top: 20px;
@@ -177,7 +178,7 @@ code {
   position: relative;
   overflow: hidden !important;
   height: 100vh;
-  transition: height 300ms;
+  transition: height 600ms ease-in;
 }
 .markdown {
   height: 100%;
@@ -188,15 +189,17 @@ code {
 
   >div:first-child {
     margin-top: 0;
-    transition: margin-top 300ms;
+    transition: margin-top 600ms ease-in;
   }
 
   &:not(:hover) {
     height: 30vh;
     min-height: 200px;
+    transition: height 300ms;
 
     >div:first-child {
       margin-top: -20vh;
+      transition: margin-top 300ms;
     }
     .options-panel {
       .input, hr {

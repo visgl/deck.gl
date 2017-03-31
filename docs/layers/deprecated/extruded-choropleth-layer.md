@@ -1,4 +1,9 @@
-# Extruded Choropleth Layer (64 bit) **(DEPRECATED)**
+
+<p class="badges">
+  <img src="https://img.shields.io/badge/-deprecated-red.svg?style=flat-square" alt="64-bit" />
+</p>
+
+# Extruded Choropleth Layer (64 bit)
 
 Note: The `ExtrudedChoroplethLayer64` has been deprecated in deck.gl v4 in favor
 of the new `GeoJsonLayer` and `PolygonLayer`. It will likely be removed in the
@@ -8,7 +13,7 @@ Choropleth Layer with Elevation
 
     import {ExtrudedChoroplethLayer64} from 'deck.gl';
 
-Inherits from all [Base Layer](/docs/layers/base-layer.md) properties.
+Inherits from all [Base Layer](/docs/api-reference/base-layer.md) properties.
 
 ##### `drawContour` (Boolean, optional)
 

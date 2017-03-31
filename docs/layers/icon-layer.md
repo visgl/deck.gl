@@ -1,14 +1,47 @@
 <!-- INJECT:"IconLayerDemo" -->
 
-# Icon Layer
+<p class="badges">
+  <img src="https://img.shields.io/badge/-64--bit-blue.svg?style=flat-square" alt="64-bit" />
+</p>
+
+# IconLayer
 
 The Icon Layer renders raster icons at given coordinates.
 
-    import {IconLayer} from 'deck.gl';
+```
+import DeckGL, {ArcLayer} from 'deck.gl';
+
+const ICON_MAPPING = {
+  marker: {x: 0, y: 0, width: 32, height: 32, mask: true}
+};
+
+render() {
+  const {data, viewport} = this.props;
+
+  /* data format:
+   * [
+   *   {position: [-122.4, 37.7], icon: 'marker', size: 24, color: [255, 0, 0]},
+   *   ...
+   * ]
+   */
+  const layer = new IconLayer({
+    id: 'icon-layer',
+    data,
+    iconAtlas: '/path/to/image.png',
+    iconMapping: ICON_MAPPING
+  });
+
+  return <DeckGL {...viewport} layers={[layer]} />
+}
+```
 
 ## Properties
 
-Inherits from all [Base Layer](/docs/layers/base-layer.md) properties.
+### Base Layer Properties
+
+Inherits from all [Base Layer](/docs/api-reference/base-layer.md) properties.
+
+### Render Options
 
 ##### `iconAtlas` (Texture2D | String, required)
 
@@ -41,7 +74,7 @@ Icon size multiplier.
 
 Whether the layer should be rendered in high-precision 64-bit mode
 
-## Accessors
+### Data Accessors
 
 ##### `getPosition` (Function, optional)
 
@@ -67,3 +100,7 @@ Method called to retrieve the height of each icon, returns a number. Unit is pix
 
 Method called to retrieve the color of each object, returns `[r, g, b, a]`.
 If the alpha component is not supplied, it is set to `255`.
+
+
+## Source Code
+[IconLayer](https://github.com/uber/deck.gl/tree/master/src/layers/core/icon-layer)

@@ -1,5 +1,6 @@
 <p class="badges">
-  <img src="https://img.shields.io/badge/extruded-yes-blue.svg?style=flat-square" alt="64-bit" />
+  <img src="https://img.shields.io/badge/-64--bit-blue.svg?style=flat-square" alt="64-bit" />
+  <img src="https://img.shields.io/badge/-extruded-blue.svg?style=flat-square" alt="extruded" />
 </p>
 
 # Polygon Layer
@@ -35,7 +36,11 @@ Remarks:
 
 ## Properties
 
-Inherits from all [Base Layer properties](/docs/layers/base-layer.md).
+### Base Layer Properties
+
+Inherits from all [Base Layer](/docs/api-reference/base-layer.md) properties.
+
+### Render Options
 
 ##### `extruded` (Boolean, optional)
 
@@ -58,15 +63,15 @@ Remarks:
 * Wireframe and solid extrusions are exclusive, you'll need to create two layers
   with the same data if you want a combined rendering effect.
 
-#### `lightSettings` (Object, optional) **EXPERIMENTAL**
+##### `lightSettings` (Object, optional) **EXPERIMENTAL**
 
 This is an object that contains light settings for extruded polygons.
 Be aware that this prop will likely be changed in a future version of deck.gl.
 
 
-## Accessors
+### Data Accessors
 
-#### `getPolygon` (Function, optional)
+##### `getPolygon` (Function, optional)
 
 - default: object => object
 
@@ -76,11 +81,11 @@ that extracts a polygon (simple or complex) from each object.
 
 This accessor returns the polygon corresponding to an object in the `data` stream.
 
-#### `getColor` (Function, optional)
+##### `getColor` (Function, optional)
 
 The fill color for the polygon
 
-#### `getElevation` (Function, optional)
+##### `getElevation` (Function, optional)
 
 - Default: `object => object.elevation`
 
@@ -88,3 +93,7 @@ Method called to retrieve the elevation of each object's polygon.
 
 If a cartographic projection mode is used, height will be interpreted as meters,
 otherwise will be in unit coordinates.
+
+
+## Source Code
+[PrimitivePolygonLayer](https://github.com/uber/deck.gl/tree/master/src/layers/core/primitive-polygon-layer)

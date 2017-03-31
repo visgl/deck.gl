@@ -4,12 +4,14 @@ The deck.gl layer catalog is organized into a couple of sections.
 
 ## Base Layer
 
-All deck.gl layers inherit from the `Layer` base class and
-its props are available to all layers unless otherwise documented.
+All deck.gl layers inherit from the
+[`Layer`](/docs/api-reference/base-layer.md) base class
+and its props are available to all layers unless otherwise documented.
 
 ## Core Layers
 
-The Core Layers are a group of geospatial visualization focused layers,
+The [Core Layers](/docs/layers/scatterplot-layer.md)
+are a group of geospatial visualization focused layers,
 intended to represent a small set of widely applicable data visualization
 building blocks.
 
@@ -36,7 +38,8 @@ deck.gl releases.
 
 ## Sample Layers
 
-Deck.gl provides a number of sample layers in the examples folders
+Deck.gl provides a number of sample layers in the
+[examples folders](https://github.com/uber/deck.gl/tree/master/examples/sample-layers)
 intended to illustrate various ideas and approaches to how layers
 can be designed. These layers sometimes have documentation in the example
 code, but they are not listed here in the official documentation.
