@@ -45,7 +45,7 @@ uniform float brushTarget;
 
 varying vec4 vColor;
 
-// approximate distance between lat lng in meters
+// approximate distance between lng lat in meters
 float distanceBetweenLatLng(vec2 source, vec2 target) {
 
   vec2 delta = (source - target) * PI / 180.0;
@@ -78,7 +78,7 @@ float paraboloid(vec2 source, vec2 target, float ratio) {
 
 // offset vector by strokeWidth pixels
 // offset_direction is -1 (left) or 1 (right)
-vec2 getExtrusionOffset(vec2 line_clipspace, float offset_direction) {
+vec2 getExtrusionOffset(vec2 line_clipspace, float offset_direction, float strokeWidth) {
   // normalized direction of the line
   vec2 dir_screenspace = normalize(line_clipspace * viewportSize);
   // rotate by 90 degrees
@@ -108,16 +108,17 @@ void main(void) {
   vec2 target = project_position(instancePositions.zw);
 
   // if not enabled return true
-  //float isSourceInBrush = isPointInRange(instancePositions.xy, mousePos, brushRadius, brushSource);
-  //float isTargetInBrush = isPointInRange(instancePositions.zw, mousePos, brushRadius, brushTarget);
+  float isSourceInBrush = isPointInRange(instancePositions.xy, mousePos, brushRadius, brushSource);
+  float isTargetInBrush = isPointInRange(instancePositions.zw, mousePos, brushRadius, brushTarget);
 
-  //float isInBrush = float(enableBrushing <= 0. || (brushSource * isSourceInBrush > 0. || brushTarget * isTargetInBrush > 0.));
+  float isInBrush = float(enableBrushing <= 0. || (brushSource * isSourceInBrush > 0. || brushTarget * isTargetInBrush > 0.));
 
   // mix segIndex with brush, if not in brush, return 0
   // float segIndex = mix(0.0, segmentRatio, isInBrush);
 
   float segmentIndex = positions.x;
   float segmentRatio = getSegmentRatio(segmentIndex);
+  
   // if it's the first point, use next - current as direction
   // otherwise use current - prev
   float indexDir = mix(-1.0, 1.0, step(segmentIndex, 0.0));
@@ -127,13 +128,14 @@ void main(void) {
   vec3 nextPos = getPos(source, target, nextSegmentRatio);
   vec4 curr = project_to_clipspace(vec4(currPos, 1.0));
   vec4 next = project_to_clipspace(vec4(nextPos, 1.0));
-
+  
+  float finalWidth = mix(0.0, strokeWidth, isInBrush);
   // extrude
-  vec2 offset = getExtrusionOffset((next.xy - curr.xy) * indexDir, positions.y);
+  vec2 offset = getExtrusionOffset((next.xy - curr.xy) * indexDir, positions.y, finalWidth);
   gl_Position = curr + vec4(offset, 0.0, 0.0);
 
   vec4 color = mix(instanceSourceColors, instanceTargetColors, segmentRatio) / 255.;
-
+  
   vColor = mix(
     vec4(color.rgb, color.a * opacity),
     vec4(instancePickingColors / 255., 1.),

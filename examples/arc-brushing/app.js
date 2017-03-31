@@ -20,14 +20,15 @@ class Root extends Component {
         height: 500
       },
       data: null,
-      selectedCounty: null
+      mousePosition: []
     };
+
+    this._onMouseMove = this._onMouseMove.bind(this);
 
     requestJson('./data/counties.json', (error, response) => {
       if (!error) {
         this.setState({
-          data: response.features,
-          selectedCounty: response.features[126]
+          data: response.features
         });
       }
     });
@@ -51,28 +52,28 @@ class Root extends Component {
     });
   }
 
-  _onSelectCounty({object}) {
-    if (this.state.selectedCounty !== object) {
-      this.setState({selectedCounty: object});
-    }
+  _onMouseMove(evt){
+    this.setState({mousePosition: [evt.pageX, evt.pageY]});
   }
 
   render() {
     const {viewport, data, selectedCounty} = this.state;
 
     return (
-      <MapGL
-        {...viewport}
-        perspectiveEnabled={true}
-        onChangeViewport={this._onChangeViewport.bind(this)}
-        mapboxApiAccessToken={MAPBOX_TOKEN}>
-        <DeckGLOverlay viewport={viewport}
-          data={data}
-          selectedFeature={selectedCounty}
-          strokeWidth={2}
-          onClick={this._onSelectCounty.bind(this)}
-          />
-      </MapGL>
+      <div onMouseMove={this._onMouseMove}>
+        <MapGL
+          {...viewport}
+          perspectiveEnabled={true}
+          onChangeViewport={this._onChangeViewport.bind(this)}
+          mapboxApiAccessToken={MAPBOX_TOKEN}>
+          <DeckGLOverlay viewport={viewport}
+            data={data}
+            selectedFeature={selectedCounty}
+            strokeWidth={2}
+            onClick={this._onSelectCounty.bind(this)}
+            />
+        </MapGL>
+      </div>
     );
   }
 }

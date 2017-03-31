@@ -31,9 +31,9 @@ const defaultProps = {
   // show arc if target is in brush
   brushTarget: true,
   enableBrushing: true,
-  // brush radius in kilometer
-  brushRadius: 1,
-  // outside brush point radius
+  // brush radius in meters
+  brushRadius: 100000,
+  mousePosition: [0, 0]
 };
 
 export default class ArcBrushingLayer extends ArcLayer {
@@ -43,23 +43,20 @@ export default class ArcBrushingLayer extends ArcLayer {
   }
 
   draw({uniforms}) {
+    const {viewport} = this.context;
+
+    if (this.props.mousePosition) {
+      //console.log(this.props.mousePosition)
+      console.log(this.unproject(this.props.mousePosition));
+    }
     super.draw({uniforms: {
       ...uniforms,
       brushSource: this.props.brushSource ? 1 : 0,
       brushTarget: this.props.brushTarget ? 1 : 0,
       brushRadius: this.props.brushRadius,
+      mousePos: this.props.mousePosition ? new Float32Array(this.unproject(this.props.mousePosition)) : defaultProps.mousePosition,
       enableBrushing: this.props.enableBrushing ? 1 : 0
     }});
-  }
-
-  pickLayer({uniforms = {}, ...opts}) {
-    // add mousePos to uniform
-    const mousePos = new Float32Array(opts.info.lngLat);
-
-    super.pickLayer({
-      uniforms: {...uniforms, mousePos},
-      ...opts
-    });
   }
 }
 

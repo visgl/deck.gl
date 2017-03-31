@@ -9,6 +9,13 @@ import ViewportAnimation from '../utils/map-utils';
 import {MAPBOX_STYLES} from '../constants/defaults';
 
 class Map extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      trackMouseMove: false,
+      mousePosition: null
+    }
+  }
 
   componentDidMount() {
     this._loadDemo(this.props.demo, false);
@@ -51,6 +58,10 @@ class Map extends Component {
           this.props.updateMap(demoViewport);
         }
       }
+
+      if (DemoComponent.trackMouseMove) {
+        this.setState({trackMouseMove: true});
+      }
     }
   }
 
@@ -58,6 +69,13 @@ class Map extends Component {
   _onUpdateMap(viewport) {
     this.props.onInteract();
     this.props.updateMap(viewport);
+  }
+
+  @autobind
+  _onMouseMove(evt){
+    if (evt.nativeEvent) {
+      this.setState({mousePosition: [evt.nativeEvent.offsetX, evt.nativeEvent.offsetY]});
+    }
   }
 
   render() {
@@ -69,20 +87,24 @@ class Map extends Component {
     }
 
     return (
-      <MapGL
-        mapboxApiAccessToken={MAPBOX_ACCESS_TOKEN}
-        preventStyleDiffing={true}
-        {...viewport}
-        mapStyle={viewport.mapStyle || MAPBOX_STYLES.BLANK}
-        onChangeViewport={isInteractive ? this._onUpdateMap : undefined}>
+      <div onMouseMove={this.state.trackMouseMove? this._onMouseMove : null}>
+        <MapGL
+          mapboxApiAccessToken={MAPBOX_ACCESS_TOKEN}
+          preventStyleDiffing={true}
 
-        <DemoComponent ref="demo" viewport={viewport} params={params}
-          onStateChange={this.props.updateMeta}
-          data={owner === demo ? data : null} />
+          {...viewport}
+          mapStyle={viewport.mapStyle || MAPBOX_STYLES.BLANK}
+          onChangeViewport={isInteractive ? this._onUpdateMap : undefined}>
 
-        <div className="mapbox-tip">Hold down shift to rotate</div>
+          <DemoComponent ref="demo" viewport={viewport} params={params}
+            onStateChange={this.props.updateMeta}
+            mousePosition={this.state.mousePosition}
+            data={owner === demo ? data : null} />
 
-      </MapGL>
+          <div className="mapbox-tip">Hold down shift to rotate</div>
+
+        </MapGL>
+      </div>
     );
   }
 
