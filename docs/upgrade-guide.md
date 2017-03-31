@@ -20,12 +20,12 @@ support combined to make it impractical to keep supporting the old import style.
 
 ### Deprecated/Removed Layers
 
-| Layer            | Status       | Replacement         |
-| ---              | ---            | ---              | ---     |
+| Layer              | Status       | Replacement         |
+| ---                | ---          | ---                 |
 | `ChoroplethLayer`  | Deprecated | `GeoJsonLayer`, `PolygonLayer` and `PathLayer`    |
 | `ChoroplethLayer64` | Deprecated | `GeoJsonLayer`, `PolygonLayer` and `PathLayer`    |
 | `ExtrudedChoroplethLayer` | Deprecated | `GeoJsonLayer`, `PolygonLayer` and `PathLayer`    |
-| `EnhancedChoroplethLayer`  | Moved to samples  | `PathLayer`    |
+| `EnhancedChoroplethLayer`  | Moved to examples  | `PathLayer`    |
 
 * ChoroplethLayer, ChoroplethLayer64, ExtrudedChoroplethLayer
 
