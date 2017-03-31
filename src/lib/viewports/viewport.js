@@ -1,6 +1,5 @@
 // View and Projection Matrix management
 
-// gl-matrix is a large dependency for a small module.
 // However since it is used by mapbox etc, it should already be present
 // in most target application bundles.
 import {mat4, vec4, vec2} from 'gl-matrix';
@@ -72,16 +71,9 @@ export default class Viewport {
      */
     const m = createMat4();
 
-   // matrix for conversion from location to screen coordinates
+    // matrix for conversion from location to screen coordinates
     mat4.scale(m, m, [this.width / 2, -this.height / 2, 1]);
     mat4.translate(m, m, [1, -1, 0]);
-
-    // Scale with viewport window's width and height in pixels
-    // mat4.scale(m, m, [this.width, this.height, 1]);
-    // Convert to (0, 1)
-    // mat4.translate(m, m, [0.5, 0.5, 0]);
-    // mat4.scale(m, m, [0.5, 0.5, 1]);
-    // Project to clip space (-1, 1)
     mat4.multiply(m, m, this.viewProjectionMatrix);
 
     const mInverse = mat4.invert(createMat4(), m);
@@ -161,8 +153,6 @@ export default class Viewport {
 
     const t = z0 === z1 ? 0 : (targetZ - z0) / (z1 - z0);
     const v = vec2.lerp([], coord0, coord1, t);
-
-    // console.error(`unprojecting to non-linear ${v}<=${[x, y2, targetZ]}`);
 
     const vUnprojected = this.unprojectFlat(v);
     return xyz.length === 2 ? vUnprojected : [vUnprojected[0], vUnprojected[1], 0];
