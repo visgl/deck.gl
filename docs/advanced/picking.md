@@ -66,10 +66,10 @@ following fields:
     `layer.props.projectionMode` is `COORDINATE_SYSTEM.LNGLAT`.
   + `color`: the color of the pixel that is being picked. It represents a
     "picking color" that is encoded by
-    [`layer.encodePickingColor()`](/docs/writing-layers/picking.md#layer-picking-methods).
+    [`layer.encodePickingColor()`](/docs/advanced/picking.md#layer-picking-methods).
   + `index`: the index of the object that is being picked. It is the returned
     value of
-    [`layer.decodePickingColor()`](/docs/writing-layers/picking.md#layer-picking-methods).
+    [`layer.decodePickingColor()`](/docs/advanced/picking.md#layer-picking-methods).
   + `picked`: `true` if `index` is not `-1`.
 - `pickParams.mode`: one of `hover` and `click`
 - `pickParams.sourceLayer`: a composite layer can refer to the `sourceLayer` argument

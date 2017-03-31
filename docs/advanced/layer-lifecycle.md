@@ -81,7 +81,7 @@ implementation of `renderLayers` returns null.
 ##### `draw(drawParams)`
 
 - `drawParams.uniforms`: an object that contains all the
-[default unforms](/docs/writing-layers/writing-shaders.md#uniforms)
+[default unforms](/docs/advanced/writing-shaders.md#uniforms)
 to be passed to the shaders.
 
 Allow a layer to render to the WebGL canvas.
@@ -98,7 +98,7 @@ The layer can override or add additional fields to the `info` object that
 will be passed to the callbacks.
 
 Read more about the parameters and default implementation at
-[Layer Picking Methods](/docs/writing-layers/picking.md#layer-picking-methods).
+[Layer Picking Methods](/docs/advanced/picking.md#layer-picking-methods).
 
 ##### `finalizeState()`
 

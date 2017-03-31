@@ -13,7 +13,7 @@ function generatePath(tree, parentPath = '') {
     tree.forEach(branch => generatePath(branch, parentPath));
   }
   if (tree.name) {
-    tree.path = tree.name.match(/(GeoJson|3D|([A-Z]|^)[a-z]+|\d+)/g).join('-').toLowerCase();
+    tree.path = tree.name.match(/(GeoJson|3D|API|([A-Z]|^)[a-z]+|\d+)/g).join('-').toLowerCase();
   }
   if (tree.children) {
     generatePath(tree.children, `${parentPath}/${tree.path}`);
@@ -103,59 +103,47 @@ export const docPages = generatePath([
         content: getDocUrl('README.md')
       },
       {
-        name: 'What\'s New',
+        name: 'What\'s New in v4',
         content: getDocUrl('whats-new.md')
       },
       {
-        name: 'Getting Started',
-        content: getDocUrl('getting-started.md')
-      },
-      {
-        name: 'Using With React',
-        content: getDocUrl('using-with-react.md')
-      },
-      {
-        name: 'Using With Mapbox GL',
-        content: getDocUrl('using-with-mapbox-gl.md')
-      },
-      {
-        name: 'Upgrade Guide',
+        name: 'Upgrade Guide from v3',
         content: getDocUrl('upgrade-guide.md')
       }
     ]
   },
   {
-    name: 'About Layers',
+    name: 'Getting Started',
+    children: [
+      {
+        name: 'Quick Start Guide',
+        content: getDocUrl('get-started/getting-started.md')
+      },
+      {
+        name: 'Using With React',
+        content: getDocUrl('get-started/using-with-react.md')
+      },
+      {
+        name: 'Using Layers',
+        content: getDocUrl('get-started/using-layers.md')
+      },
+      {
+        name: 'Mapbox Integration',
+        content: getDocUrl('get-started/using-with-mapbox-gl.md')
+      },
+      {
+        name: 'Interactivity',
+        content: getDocUrl('get-started/interactivity.md')
+      }
+    ]
+  },
+  {
+    name: 'Layer Catalog',
     children: [
       {
         name: 'Overview',
         content: getDocUrl('layers/README.md')
       },
-      {
-        name: 'Using Layers',
-        content: getDocUrl('using-layers.md')
-      },
-      {
-        name: '64 bit Layers',
-        content: getDocUrl('64-bits.md')
-      },
-      {
-        name: 'Coordinate Systems',
-        content: getDocUrl('coordinate-systems.md')
-      },
-      {
-        name: 'Viewports',
-        content: getDocUrl('viewports.md')
-      },
-      {
-        name: 'Interactivity',
-        content: getDocUrl('interactivity.md')
-      }
-    ]
-  },
-  {
-    name: 'Core Layers',
-    children: [
       {
         name: 'ScatterplotLayer',
         content: getDocUrl('layers/scatterplot-layer.md')
@@ -223,48 +211,55 @@ export const docPages = generatePath([
     ]
   },
   {
-    name: 'Custom Layers',
-    children: [
-      {
-        name: 'Overview',
-        content: getDocUrl('writing-layers/overview.md')
-      },
-      {
-        name: 'Composite Layers',
-        content: getDocUrl('writing-layers/composite-layers.md')
-      },
-      {
-        name: 'Subclassed Layers',
-        content: getDocUrl('writing-layers/subclassed-layers.md')
-      },
-      {
-        name: 'From Ground Up',
-        content: getDocUrl('writing-layers/new-layers.md')
-      },
-      {
-        name: 'Layer Lifecycle',
-        content: getDocUrl('writing-layers/layer-lifecycle.md')
-      },
-      {
-        name: 'Attribute Management',
-        content: getDocUrl('writing-layers/attribute-management.md')
-      },
-      {
-        name: 'Writing Shaders',
-        content: getDocUrl('writing-layers/writing-shaders.md')
-      },
-      {
-        name: 'Picking',
-        content: getDocUrl('writing-layers/picking.md')
-      }
-    ]
-  },
-  {
     name: 'Advanced Topics',
     children: [
       {
+        name: 'Writing Layers',
+        content: getDocUrl('advanced/custom-layers.md')
+      },
+      {
+        name: 'Composite Layers',
+        content: getDocUrl('advanced/composite-layers.md')
+      },
+      {
+        name: 'Subclassed Layers',
+        content: getDocUrl('advanced/subclassed-layers.md')
+      },
+      {
+        name: 'Primitive Layers',
+        content: getDocUrl('advanced/primitive-layers.md')
+      },
+      {
+        name: 'Layer Lifecycle',
+        content: getDocUrl('advanced/layer-lifecycle.md')
+      },
+      {
+        name: 'Attribute Management',
+        content: getDocUrl('advanced/attribute-management.md')
+      },
+      {
+        name: 'Writing Shaders',
+        content: getDocUrl('advanced/writing-shaders.md')
+      },
+      {
+        name: 'Picking',
+        content: getDocUrl('advanced/picking.md')
+      },
+      {
+        name: '64 bit Layers',
+        content: getDocUrl('advanced/64-bits.md')
+      },
+      {
         name: 'Performance',
         content: getDocUrl('advanced/performance.md')
+      },
+      {
+        name: 'Coordinate Systems',
+        content: getDocUrl('advanced/coordinate-systems.md')
+      },
+      {
+        name: 'Viewports',
+        content: getDocUrl('advanced/viewports.md')
       },
       {
         name: 'Using Standalone',
@@ -280,24 +275,36 @@ export const docPages = generatePath([
     name: 'API Reference',
     children: [
       {
-        name: 'Layer Base Class',
-        content: getDocUrl('api-reference/base-layer.md')
-      },
-      {
         name: 'AttributeManager',
         content: getDocUrl('api-reference/attribute-manager.md')
       },
       {
-        name: 'Viewport',
-        content: getDocUrl('api-reference/viewport.md')
+        name: 'CompositeLayer',
+        content: getDocUrl('api-reference/composite-layer.md')
+      },
+      {
+        name: 'DeckGL',
+        content: getDocUrl('api-reference/deckgl.md')
+      },
+      {
+        name: 'Layer',
+        content: getDocUrl('api-reference/base-layer.md')
+      },
+      {
+        name: 'LayerManager',
+        content: getDocUrl('api-reference/layer-manager.md')
+      },
+      {
+        name: 'OrthographicViewport',
+        content: getDocUrl('api-reference/orthographic-viewport.md')
       },
       {
         name: 'PerspectiveViewport',
         content: getDocUrl('api-reference/perspective-viewport.md')
       },
       {
-        name: 'OrthographicViewport',
-        content: getDocUrl('api-reference/orthographic-viewport.md')
+        name: 'Viewport',
+        content: getDocUrl('api-reference/viewport.md')
       },
       {
         name: 'WebMercatorViewport',

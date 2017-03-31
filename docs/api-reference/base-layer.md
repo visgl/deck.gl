@@ -279,5 +279,5 @@ low and high resolution displays.
 ### Layer Picking Methods
 
 Not to be called by the user.
-See [implement picking](/docs/writing-layers/picking.md#layer-picking-methods).
+See [implement picking](/docs/advanced/picking.md#layer-picking-methods).
 

@@ -1,4 +1,4 @@
-# New Layers From Ground Up
+# Primitive Layers
 
 
 ## Implementing the Layer Lifecycle Functions
@@ -10,7 +10,7 @@ you need to implement the [layers life cycle functions](/docs/layer-lifecycle.md
 
 `initializeState()` - This is the one method that you must implement to create
 any WebGL resources you need for rendering your layer. A layer should create its
-[Model](/docs/writing-layers/new-layers.md#creating-models) during this phase.
+[Model](/docs/advanced/primitive-layers.md#creating-models) during this phase.
 
 `draw()` - If you want to use custom uniforms or settings when drawing, you would
 typical implement the `draw` method and pass those to your render call.
@@ -189,4 +189,4 @@ a single layer class can support all projection modes for free:
 
 ## Implement Picking
 
-See [implementing picking](/docs/writing-layers/picking.md).
+See [implementing picking](/docs/advanced/picking.md).

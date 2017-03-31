@@ -9,16 +9,16 @@ through using composite layers.
 There are a couple of ways to build a layer in deck.gl, and it is helpful
 to consider what approach will serve you best before starting:
 
-* **[Create a composite layer](/docs/writing-layers/composite-layers.md)** - 
+* **[Create a composite layer](/docs/advanced/composite-layers.md)** - 
   Composite layer is a special kind of layers that creates
   other layers. This allows you to build e.g. a "semantic layer" - a layer that
   presents a different interface (set of props) than an existing layer, transforms
   those props into a format that fits and existing layer, etc.
-* **[Subclass a layer](/docs/writing-layers/subclassed-layers.md)** - 
+* **[Subclass a layer](/docs/advanced/subclassed-layers.md)** - 
   Subclassed layer is a new layer created by subclassing
   another layers. This allows the developer to reuse all of the interfaces and implementations
   of an existing layer unless they are explicitly overriden.
-* **[Implement a layer from scratch](/docs/writing-layers/new-layers.md)** - 
+* **[Implement a layer from scratch](/docs/advanced/primitive-layers.md)** - 
   If you want to draw something completely different
   and you are comfortable around WebGL, this option gives you the most flexibility. You
   have full control of the layer lifecycle, manage your own model(s) an directly

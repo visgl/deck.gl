@@ -56,7 +56,7 @@ renderer.link = (href, title, text) => {
     }
   });
 
-  return to ? `<a href=${to} title=${title}>${text}</a>` :
+  return to ? `<a href=${to}>${text}</a>` :
     `<span>${text}</span>`;
 };
 // images override

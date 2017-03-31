@@ -135,7 +135,7 @@ void main(void) {
 ## Defining Additional Attributes
 
 During initialization, you may define additional attributes by accessing the
-layer's [attribute manager](/docs/writing-layers/attribute-management.md):
+layer's [attribute manager](/docs/advanced/attribute-management.md):
 
 ```
 /// my-point-cloud-layer.js
