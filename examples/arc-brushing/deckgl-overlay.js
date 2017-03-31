@@ -24,6 +24,15 @@ export const outFlowColors = [
   [177, 0, 38]
 ];
 
+const sourceColor = [144, 12, 63];
+const targetColor = [255, 195, 0];
+//
+// rgb(218, 247, 166)
+// rgb(255, 195, 0)
+// rgb(255, 87, 51)
+// rgb(199, 0, 57)
+// rgb(144, 12, 63)
+// rgb(88, 24, 69)
 export default class DeckGLOverlay extends Component {
 
   static get defaultViewport() {
@@ -32,50 +41,62 @@ export default class DeckGLOverlay extends Component {
       latitude: 40.7,
       zoom: 3,
       maxZoom: 15,
-      pitch: 30,
-      bearing: 30
+      pitch: 0,
+      bearing: 0
     };
   }
 
   constructor(props) {
     super(props);
     this.state = {
-      arcs: this._getArcs(props)
-    };
+      arcs: []
+    }
+  }
+  componentDidMount() {
+    this.setState({
+      arcs: this._getArcs(this.props)
+    });
   }
 
   componentWillReceiveProps(nextProps) {
-    if (nextProps.data !== this.props.data ||
-        nextProps.selectedFeature !== this.props.selectedFeature) {
+    if (nextProps.data !== this.props.data) {
       this.setState({
         arcs: this._getArcs(nextProps)
       });
     }
   }
 
-  _getArcs({data, selectedFeature}) {
-    if (!data || !selectedFeature) {
+  _getArcs({data}) {
+    if (!data) {
       return null;
     }
+    const arcs = [];
+    const points = [];
+    const pairs = {};
 
-    const {flows, centroid} = selectedFeature.properties;
+    data.forEach((county, i) => {
 
-    const arcs = Object.keys(flows).map(toId => {
-      const f = data[toId];
-      return {
-        source: centroid,
-        target: f.properties.centroid,
-        value: flows[toId]
-      };
-    });
+      const {flows, centroid: targetCentroid} = county.properties;
+      points.push({
+        positions: targetCentroid
+      });
+      Object.keys(flows).forEach(toId => {
+        // eliminate duplicates
+        const pairKey = [i, Number(toId)].sort((a, b) =>  a - b).join('-');
+        if (pairs[pairKey]) {
+          return;
+        }
 
-    const scale = scaleQuantile()
-      .domain(arcs.map(a => Math.abs(a.value)))
-      .range(inFlowColors.map((c, i) => i));
+        pairs[pairKey] = true;
+        const sourceCentroid = data[toId].properties.centroid;
+        const gain = Math.sign(flows[toId]);
 
-    arcs.forEach(a => {
-      a.gain = Math.sign(a.value);
-      a.quantile = scale(Math.abs(a.value));
+        arcs.push({
+          source: gain ? sourceCentroid : targetCentroid,
+          target: gain ? targetCentroid : sourceCentroid,
+          value: flows[toId]
+        });
+      })
     });
 
     return arcs;
@@ -84,10 +105,13 @@ export default class DeckGLOverlay extends Component {
   _initialize(gl) {
     gl.enable(gl.DEPTH_TEST);
     gl.depthFunc(gl.LEQUAL);
+    //gl.blendFuncSeparate(gl.SRC_ALPHA, gl.ONE, gl.ONE_MINUS_DST_ALPHA, gl.ONE);
+    gl.blendFunc(gl.SRC_ALPHA, gl.DST_ALPHA);
+    gl.blendEquation(gl.FUNC_ADD);
   }
 
   render() {
-    const {viewport, strokeWidth, data} = this.props;
+    const {viewport, strokeWidth, opacity, mousePosition} = this.props;
     const {arcs} = this.state;
 
     if (!arcs) {
@@ -95,29 +119,24 @@ export default class DeckGLOverlay extends Component {
     }
 
     const layers = [
-      new GeoJsonLayer({
-        id: 'geojson',
-        data,
-        stroked: false,
-        filled: true,
-        getFillColor: () => [0, 0, 0, 0],
-        onClick: this.props.onClick,
-        pickable: true
-      }),
       new ArcBrushingLayer({
         id: 'arc',
         data: arcs,
         pickable: true,
+        strokeWidth,
+        opacity,
+        mousePosition,
         getSourcePosition: d => d.source,
         getTargetPosition: d => d.target,
-        getSourceColor: d => (d.gain > 0 ? inFlowColors : outFlowColors)[d.quantile],
-        getTargetColor: d => (d.gain > 0 ? outFlowColors : inFlowColors)[d.quantile],
-        strokeWidth
+        // getSourceColor: d => (d.gain > 0 ? inFlowColors : outFlowColors)[d.quantile],
+        // getTargetColor: d => (d.gain > 0 ? outFlowColors : inFlowColors)[d.quantile],
+        getSourceColor: d => sourceColor,
+        getTargetColor: d => targetColor
       })
     ];
 
     return (
-      <DeckGL {...viewport} layers={ layers } onWebGLInitialized={this._initialize} />
+      <DeckGL {...viewport} layers={ layers } onWebGLInitialized={this._initialize}/>
     );
   }
 }

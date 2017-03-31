@@ -2,12 +2,15 @@ import React, {Component} from 'react';
 
 import {MAPBOX_STYLES} from '../../constants/defaults';
 import {readableInteger} from '../../utils/format-utils';
-import ArcOverlay, {inFlowColors, outFlowColors} from '../../../../examples/arc/deckgl-overlay';
+import ArchBrushingOverlay, {inFlowColors, outFlowColors} from '../../../../examples/arc-brushing/deckgl-overlay';
 
 const colorRamp = inFlowColors.slice().reverse().concat(outFlowColors)
   .map(color => `rgb(${color.join(',')})`);
 
-export default class ArcDemo extends Component {
+export default class ArcBrushingDemo extends Component {
+  static get trackMouseMove() {
+    return true;
+  }
 
   static get data() {
     return {
@@ -18,14 +21,15 @@ export default class ArcDemo extends Component {
 
   static get parameters() {
     return {
-      lineWidth: {displayName: 'Width', type: 'number', value: 2, step: 1, min: 1}
+      lineWidth: {displayName: 'Width', type: 'number', value: 1, step: 1, min: 1},
+      opacity: {displayName: 'opacity', type: 'range', value: 0.3, step: 0.01, min: 0.01, max: 1}
     };
   }
 
   static get viewport() {
     return {
-      ...ArcOverlay.defaultViewport,
-      mapStyle: MAPBOX_STYLES.LIGHT
+      ...ArchBrushingOverlay.defaultViewport,
+      mapStyle: MAPBOX_STYLES.DARK
     };
   }
 
@@ -61,43 +65,20 @@ export default class ArcDemo extends Component {
     );
   }
 
-  constructor(props) {
-    super(props);
-    this.state = {
-      // Set default selection to San Francisco
-      selectedCounty: props.data ? props.data[362] : null
-    };
-  }
-
-  componentWillReceiveProps(nextProps) {
-    if (nextProps.data !== this.props.data) {
-      console.log(nextProps.data);
-      this.setState({
-        // Set default selection to San Francisco
-        selectedCounty: nextProps.data[362]
-      });
-    }
-  }
-
-  _onSelectCounty({object}) {
-    this.setState({selectedCounty: object});
-    this.props.onStateChange({sourceName: object.properties.name});
-  }
-
   render() {
-    const {viewport, params, data} = this.props;
-    const {selectedCounty} = this.state;
+    const {viewport, params, data, mousePosition} = this.props;
 
     if (!data) {
       return null;
     }
 
     return (
-      <ArcOverlay viewport={viewport}
-                  data={data}
-                  selectedFeature={selectedCounty}
-                  strokeWidth={params.lineWidth.value}
-                  onClick={this._onSelectCounty.bind(this)} />
+      <ArchBrushingOverlay viewport={viewport}
+        data={data}
+        mousePosition={mousePosition}
+        strokeWidth={params.lineWidth.value}
+        opacity={params.opacity.value}
+      />
     );
   }
 }
