@@ -1,20 +1,16 @@
 <p class="badges">
-  <img src="https://img.shields.io/badge/-64--bit-blue.svg?style=flat-square" alt="64-bit" />
-  <img src="https://img.shields.io/badge/-extruded-blue.svg?style=flat-square" alt="extruded" />
+  <img src="https://img.shields.io/badge/64--bit-support-blue.svg?style=flat-square" alt="64-bit" />
+  <img src="https://img.shields.io/badge/extruded-yes-blue.svg?style=flat-square" alt="extruded" />
 </p>
 
-# Polygon Layer
+# SolidPolygon Layer
 
-The Polygon Layer renders filled polygons.
-* The polypgons can be simple or complex (complex polygons are polygons with holes).
-   * A simple polygon specified as an array of vertices, each vertice being an array
-     of two or three numbers
-   * A complex polygon is specified as an array of simple polygons, the
-     first polygon representing the outer outline, and the remaining polygons
-     representing holes. These polygons are expected to not intersect.
+The SolidPolygon Layer renders filled polygons.
+
+[Source](https://github.com/uber/deck.gl/tree/master/src/layers/core/primitive-polygon-layer)
 
 ```
-import {PolygonLayer} from 'deck.gl';
+import DeckGL, {SolidPolygonLayer} from 'deck.gl';
 
 new PolygonLayer({
   data: [
@@ -25,8 +21,15 @@ new PolygonLayer({
     ]
   ]
 });
+* The polypgons can be simple or complex (complex polygons are polygons with holes).
+  * A simple polygon specified as an array of vertices, each vertice being an array
+    of two or three numbers
+  * A complex polygon is specified as an array of simple polygons, the
+    first polygon representing the outer outline, and the remaining polygons
+    representing holes. These polygons are expected to not intersect.
 
-Remarks:
+**Remarks:**
+
 * This layer only renders filled polygons. If you need to render polygon
   outlines, use the [`PathLayer`](/docs/layers/path-layer.md)
 * Polygons are always closed, i.e. there is an implicit line segment between
@@ -34,9 +37,7 @@ Remarks:
 * The specification of complex polygons intentionally follows the GeoJson
   conventions for representing polugons with holes.
 
-## Properties
-
-### Base Layer Properties
+### Properties
 
 Inherits from all [Base Layer](/docs/api-reference/base-layer.md) properties.
 
@@ -58,16 +59,18 @@ Whether to generate a line wireframe of the hexagon. The outline will have
 "horizontal" lines closing the top and bottom polygons and a vertical line
 (a "strut") for each vertex on the polygon.
 
-Remarks:
+**Remarks:**
+
 * These lines are rendered with `GL.LINE` and will thus always be 1 pixel wide.
 * Wireframe and solid extrusions are exclusive, you'll need to create two layers
   with the same data if you want a combined rendering effect.
 
-##### `lightSettings` (Object, optional) **EXPERIMENTAL**
+##### `lightSettings` (Object, optional
+
+**EXPERIMENTAL**
 
 This is an object that contains light settings for extruded polygons.
 Be aware that this prop will likely be changed in a future version of deck.gl.
-
 
 ### Data Accessors
 
@@ -93,7 +96,3 @@ Method called to retrieve the elevation of each object's polygon.
 
 If a cartographic projection mode is used, height will be interpreted as meters,
 otherwise will be in unit coordinates.
-
-
-## Source Code
-[PrimitivePolygonLayer](https://github.com/uber/deck.gl/tree/master/src/layers/core/primitive-polygon-layer)

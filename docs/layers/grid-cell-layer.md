@@ -12,18 +12,16 @@
 The Grid Cell Layer can render a grid-based heatmap.
 It takes the constant width / height of all cells and top-left coordinate of
 each cell. The grid cells can be given a height using the `getElevation` accessor.
+[Source](https://github.com/uber/deck.gl/tree/master/src/layers/core/grid-cell-layer)
 
-<div align="center">
-  <img height="300" src="/demo/src/static/images/grid-cell-layer.gif" />
-</div>
-
-```
+```js
 import DeckGL, {GridCellLayer} from 'deck.gl';
 
-render() {
+const App = () => {
   const {data, viewport} = this.props;
 
-  /* data format:
+  /**
+   * Data format:
    * [
    *   {position: [-122.4, 37.7], color: [255, 0, 0], elevation: 100},
    *   ...
@@ -35,9 +33,11 @@ render() {
     cellSize: 500
   });
 
-## Properties
+  return (<DeckGL {...viewport} layers={[layer]} />);
+};
+```
 
-### Base Layer Properties
+### Properties
 
 Inherits from all [Base Layer](/docs/api-reference/base-layer.md) properties.
 
@@ -96,7 +96,3 @@ Expecting a number, 1 unit approximate to 100 meter
 
 Method called to retrieve the rgba color of each cell. Expecting [r, g, b, a].
 If the alpha is not provided, it will be set to `255`.
-
-
-## Source Code
-[GridCellLayer](https://github.com/uber/deck.gl/tree/master/src/layers/core/grid-cell-layer)

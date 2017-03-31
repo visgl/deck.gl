@@ -3,6 +3,22 @@
 `DeckGL` is a React component that takes deck.gl layer instances and
 viewport parameters, and renders those layers as a transparent overlay.
 
+```js
+import MapGL from 'react-map-gl';
+import DeckGL from 'deck.gl';
+import {ScatterplotLayer} from 'deck.gl';
+
+const viewport = new Viewport({...});
+
+const App = () => (
+  <MapGL>
+    <DeckGL
+      viewport={viewport}
+      layers={[new ScatterplotLayer({data: [...]})]} />
+  </MapGL>
+);
+```
+
 ### Properties
 
 ##### `id` (String, optional)

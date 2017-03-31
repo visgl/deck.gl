@@ -1,23 +1,20 @@
 <!-- INJECT:"ScreenGridLayerDemo" -->
 
-# ScreenGridLayer
+# ScreenGrid Layer
 
 The Screen Grid Layer takes in an array of latitude and longitude
 coordinated points, aggregates them into histogram bins and
 renders as a grid.
+[Source](https://github.com/uber/deck.gl/tree/master/src/layers/core/screen-grid-layer)
 
-Note: The aggregation is done in screen space, so the data prop
-needs to be reaggregated by the layer whenever the map is zoomed or panned.
-This means that this layer is best used with small data set, however the
-visuals when used with the right data set can be quite effective.
-
-```
+```js
 import DeckGL, {ScreenGridLayer} from 'deck.gl';
 
-render() {
+const App = () => {
   const {data, viewport} = this.props;
 
-  /* data format:
+  /**
+   * Data format:
    * [
    *   {position: [-122.4, 37.7]},
    *   ...
@@ -29,13 +26,16 @@ render() {
     cellSizePixels: 40
   });
 
-  return <DeckGL {...viewport} layers={[layer]} />
-}
+  return (<DeckGL {...viewport} layers={[layer]} />);
+};
 ```
 
-## Properties
+**Note:** The aggregation is done in screen space, so the data prop
+needs to be reaggregated by the layer whenever the map is zoomed or panned.
+This means that this layer is best used with small data set, however the
+visuals when used with the right data set can be quite effective.
 
-### Base Layer Properties
+### Properties
 
 Inherits from all [Base Layer](/docs/api-reference/base-layer.md) properties.
 
@@ -72,7 +72,3 @@ Method called to retrieve the position of each object.
 - Default: `object => 1`
 
 Method called to retrieve the weight of each object.
-
-
-## Source Code
-[ScreenGridLayer](https://github.com/uber/deck.gl/tree/master/src/layers/core/screen-grid-layer)

@@ -11,17 +11,19 @@
 
 The Hexagon Cell Layer is a variation of the grid layer. It is intended to render
 tessellated hexagons, and also enables height in 3d. The HexagonCellLayer
-takes in the vertices of a primitive hexagon as [[longitude, latitude]],
-and an array of hexagon centroid as [longitude, latitude].
+takes in the vertices of a primitive hexagon as `[[longitude, latitude]]`,
+and an array of hexagon centroid as `[longitude, latitude]`.
 It renders each hexagon based on color, opacity and elevation.
+[Source](https://github.com/uber/deck.gl/tree/master/src/layers/core/hexagon-cell-layer)
 
-```
+```js
 import DeckGL, {HexagonCellLayer} from 'deck.gl';
 
-render() {
+const App = () => {
   const {data, viewport} = this.props;
 
-  /* data format:
+  /**
+   * Data format:
    * [
    *   {centroid: [-122.4, 37.7], color: [255, 0, 0], elevation: 100},
    *   ...
@@ -34,13 +36,11 @@ render() {
     angle: 0
   });
 
-  return <DeckGL {...viewport} layers={[layer]} />
-}
+  return (<DeckGL {...viewport} layers={[layer]} />);
+};
 ```
 
-## Properties
-
-### Base Layer Properties
+### Properties
 
 Inherits from all [Base Layer](/docs/api-reference/base-layer.md) properties.
 
@@ -120,9 +120,4 @@ Method called to retrieve the color of each object. Color should be set to
 
 - Default: `object => object.elevation`
 
-Method called to retrieve the elevation of each object.
-1 unit approximate to 100 meters.
-
-
-## Source Code
-[HexagonCellLayer](https://github.com/uber/deck.gl/tree/master/src/layers/core/hexagon-cell-layer)
+Method called to retrieve the elevation of each object. 1 unit approximate to 100 meters.

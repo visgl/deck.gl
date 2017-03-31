@@ -1,21 +1,23 @@
 <!-- INJECT:"ScatterplotLayerDemo" -->
 
 <p class="badges">
-  <img src="https://img.shields.io/badge/-64--bit-blue.svg?style=flat-square" alt="64-bit" />
+  <img src="https://img.shields.io/badge/64--bit-support-blue.svg?style=flat-square" alt="64-bit" />
 </p>
 
 # Scatterplot Layer
 
 The Scatterplot Layer takes in paired latitude and longitude coordinated
 points and renders them as circles with a certain radius.
+[Source](https://github.com/uber/deck.gl/tree/master/src/layers/core/scatterplot-layer)
 
-```
+```js
 import DeckGL, {ScatterplotLayer} from 'deck.gl';
 
-render() {
+const App = () => {
   const {data, viewport} = this.props;
 
-  /* data format:
+  /**
+   * Data format:
    * [
    *   {position: [-122.4, 37.7], radius: 5, color: [255, 0, 0]},
    *   ...
@@ -28,13 +30,11 @@ render() {
     outline: false
   });
 
-  return <DeckGL {...viewport} layers={[layer]} />
-}
+  return (<DeckGL {...viewport} layers={[layer]} />);
+};
 ```
 
-## Properties
-
-### Base Layer Properties
+### Properties
 
 Inherits from all [Base Layer](/docs/api-reference/base-layer.md) properties.
 
@@ -64,13 +64,11 @@ Width of the outline, in meters. Requires `outline` to be `true`.
 
 The minimum radius in pixels.
 
-
 ##### `radiusMaxPixels` (Number, optional)
 
 - Default: `Number.MAX_SAFE_INTEGER`
 
 The maximum radius in pixels.
-
 
 ### Data Accessors
 
@@ -94,7 +92,3 @@ Method called to retrieve the rgba color of each object.
 * If the alpha parameter is not provided, it will be set to `255`.
 * If the method does not return a value for the given object, fallback to
 `[0, 0, 0, 255]`.
-
-
-## Source Code
-[ScatterplotLayer](https://github.com/uber/deck.gl/tree/master/src/layers/core/scatterplot-layer)

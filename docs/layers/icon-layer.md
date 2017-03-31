@@ -7,18 +7,20 @@
 # IconLayer
 
 The Icon Layer renders raster icons at given coordinates.
+[Source](https://github.com/uber/deck.gl/tree/master/src/layers/core/icon-layer)
 
-```
+```js
 import DeckGL, {ArcLayer} from 'deck.gl';
 
 const ICON_MAPPING = {
   marker: {x: 0, y: 0, width: 32, height: 32, mask: true}
 };
 
-render() {
+const App = () => {
   const {data, viewport} = this.props;
 
-  /* data format:
+  /**
+   * Data format:
    * [
    *   {position: [-122.4, 37.7], icon: 'marker', size: 24, color: [255, 0, 0]},
    *   ...
@@ -31,13 +33,11 @@ render() {
     iconMapping: ICON_MAPPING
   });
 
-  return <DeckGL {...viewport} layers={[layer]} />
-}
+  return (<DeckGL {...viewport} layers={[layer]} />);
+};
 ```
 
-## Properties
-
-### Base Layer Properties
+### Properties
 
 Inherits from all [Base Layer](/docs/api-reference/base-layer.md) properties.
 
@@ -100,7 +100,3 @@ Method called to retrieve the height of each icon, returns a number. Unit is pix
 
 Method called to retrieve the color of each object, returns `[r, g, b, a]`.
 If the alpha component is not supplied, it is set to `255`.
-
-
-## Source Code
-[IconLayer](https://github.com/uber/deck.gl/tree/master/src/layers/core/icon-layer)

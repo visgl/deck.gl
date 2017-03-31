@@ -2,7 +2,7 @@
 
 Release date: March 31, 2017
 
-## Highlights
+### Highlights
 
 - **New Geospatial Layers** GeoJsonLayer, PathLayer, PolygonLayer, IconLayer,
   GridCellLayer, HexagonCellLayer, PointCloudLayer.
@@ -25,9 +25,9 @@ Release date: March 31, 2017
 - **Experimental Features** Experimental support for non-Mercator projections and
   rendering effects (e.g. Reflections)
 
-## New Layers
+### New Layers
 
-### GeoJsonLayer
+##### GeoJsonLayer
 
 A layer that parses and renders GeoJson. Supports all GeoJson primitives
 (polygons, lines and points).
@@ -35,41 +35,39 @@ The GeoJsonLayer is an example of a composite layer that instantiates other laye
 (in this case `PathLayer`, `PolygonLayer` and `ScatterplotLayer`) to do the actual
 rendering. This layer replaces the now deprecated family of `ChoroplethLayer`s.
 
-### PathLayer
+##### PathLayer
 
 Takes a sequence of coordinates and renders them as a thick line with
 mitered or rounded end caps.
 
-### PolygonLayer
+##### PolygonLayer
 
 Each object in data is expected to provide a "closed" sequence of coordinates
 and renders them as a polygon, optionally extruded or in wireframe mode.
 Supports polygons with holes.
 
-### IconLayer
+##### IconLayer
 
 Allows the user to provide a texture atlas and a JSON configuration specifying
 where icons are located in the atlas.
 
-### GridLayer
+##### GridLayer
 
-A layer that draws rectangular, optionally elevated cells.
-A typical grid based heatmap layer.
-Differs from the `ScreenGridLayer` in that the cells are in
-world coordinates and pre aggregated.
+A layer that draws rectangular, optionally elevated cells. A typical grid based
+heatmap layer. Differs from the `ScreenGridLayer` in that the cells are in world
+coordinates and pre aggregated.
 
-### HexagonLayer
+##### HexagonLayer
 
 A layer that draws hexagonal, optionally elevated cells.
 
-### Point Cloud Layer
+##### Point Cloud Layer
 
 Draws a LiDAR point cloud. Supports point position/normal/color.
 
+### Improvements to all Layers
 
-## Improvements to all Layers
-
-### Support for Per-Layer Model Matrix
+##### Support for Per-Layer Model Matrix
 
 Each layer now supports a `modelMatrix` property that can be used to
 specify a local coordinate system for the data in that layer:
@@ -82,8 +80,7 @@ specify a local coordinate system for the data in that layer:
   possibilities as individual layers can be scaled, rotated, translated etc
   with very low computational cost (i.e. without modifying the data).
 
-
-### UpdateTriggers now accept Accessor Names
+##### UpdateTriggers now accept Accessor Names
 
 `updateTriggers` now accept Accessor Names.
 
@@ -91,46 +88,40 @@ The `updateTriggers` mechanism in deck.gl v3 required the user to know the
 name of the vertex attribute controlled by an accessor. It is now possible
 to supply names of `accessors`.
 
-
-### More intuitive mouse events
+##### More intuitive mouse events
 
 * `onHover` is now only fired on entering/exiting an object instead of on mouse move.
 * `onClick` is now only fired on the picked layer instead of all pickable layers.
 
+### New Features for Layer Subclassing
 
-## New Features for Layer Subclassing
-
-### Overridable Shaders
+##### Overridable Shaders
 
 All layers now have a `getShaders` method that can
 be overriden by subclasses, enables reuse of all layer code while just
 replacing one or both shaders, often dramatically reducing the amount of
 code needed to add a small feature or change to en existing layers.
 
+### New Features for Layer Writers
 
-## New Features for Layer Writers
-
-### `defaultProps`
+##### `defaultProps`
 
 Layers are now encouraged to define a `defaultProps`
 static member listing their props and default values, rather than programmatically
 declaring the props in constructor parameters etc. Using `defaultProps` means
 that many layer classes no longer need a constructor.
 
-
-### AttributeManager now accepts new `accessor` field
+##### AttributeManager now accepts new `accessor` field
 
 Can be a string or a an array of strings. Will be used to match
 `updateTriggers` accessor names with instance attributes.
 
-
-### `getPickingInfo()`
+##### `getPickingInfo()`
 
 This method replaces the old `pick()` method and is expected to return an info
 object. Layers can block the execution of callback functions by returning `null`.
 
-
-## Performance
+### Performance
 
 A number of performance improvements and fixes have been gradually introduced
 since deck.gl v3.0 was launched. While many are not new in v4.0, cumulatively
@@ -147,8 +138,7 @@ In addition, the new function `AttributeManager.setDefaultLogFunctions` allows
 the app to install its own custom logging functions to take even more control
 over logging of attribute updates.
 
-
-## Library Improvements
+### Library Improvements
 
 JavaScript build tooling continues to evolve and efforts have
 been made to ensure deck.gl supports several popular new tooling setups:
@@ -172,8 +162,7 @@ been made to ensure deck.gl supports several popular new tooling setups:
   alternative to babel if you have a simple app and don't need all the power of babel.
   Many of the examples now use buble for faster and smaller builds.
 
-
-## Examples
+### Examples
 
 Code examples have been improved in several ways:
 * **Multiple Examples** deck.gl now provides multiple different examples in an
@@ -188,8 +177,7 @@ Code examples have been improved in several ways:
 * **Layer Browser** The main `layer-browser` example has been expanded
   into a full "layer and property browser" allowing for easy testing of layers.
 
-
-## Deprecations
+### Deprecations
 
 The various Choropleth layers have been deprecated since deck.gl has new and
 better layers (`GeoJsonLayer`, `PathLayer`, `PolygonLayer`) that fill the same
@@ -207,12 +195,12 @@ default values have changed.
 For more information on deprecations and how to update your code in response
 to these changes, please consult the deck.gl [Upgrade Guide](upgrade-guide.md).
 
-
 # deck.gl v3.0
 
 Release date: November, 2016
 
-## Highlights
+### Highlights
+
   - New [website](http://uber.github.io/deck.gl/)
   - Comprehensive [documentation](http://uber.github.io/deck.gl/#/documentation/overview/introduction)
   - All Core Layers updated (API, features, performance)
@@ -221,7 +209,7 @@ Release date: November, 2016
   - Multi-Primitive Layer Support
   - Composite Layer Support
 
-## React Integration
+### React Integration
 - `DeckGL` (`DeckGLOverlay` in v2) component now requires a separate
   import (`import DeckGL from 'deck.gl/react'`). This allows the core
   deck.gl library to be imported by non-React applications without
@@ -233,7 +221,7 @@ Release date: November, 2016
 - The `DeckGL` component no longer manages WebGL blending modes,
   as this is better done directly by layers.
 
-## Layers
+### Layers
 
 - All layers now support accessors, removing the need for applications to
   transform data before passing it to deck.gl.
@@ -249,63 +237,73 @@ Release date: November, 2016
   props to each layer.
   These properties only need to be passed to the `DeckGL` react component.
 
-#### Base Layer
+##### Base Layer
+
 - `deepCompare` prop replaced with more flexible `dataComparator`
 
-#### ArcLayer
+##### ArcLayer
+
 - Specify separate start and end color for each arc.
 - Renders smoother arcs, especially for bottom arc segments close to map
 - Fixes flickering last segments
 
-#### ScatterplotLayer.
+##### ScatterplotLayer.
+
 - Adds drawOutline option.
 
-#### ScreenGridLayer
+##### ScreenGridLayer
+
 - New name for deck.gl v2 GridLayer
 - Now have accessors (getPosition, getWeight)
 - Custom color ramps (minColor, maxColor)
 
-#### ChoroplethLayer
+##### ChoroplethLayer
+
 - Now renders MultiPolygons and Polygons with holes
 
-#### HexagonLayer (REMOVED)
+##### HexagonLayer (REMOVED)
+
 - The v2 HexagonLayer has not yet been ported to v3.
 
 ### 64bit layers
 
 A set of new high precision layers that support extreme zoom levels
 
-#### ArcLayer64 (NEW)
+##### ArcLayer64 (NEW)
 
-#### ChoroplethLayer64 (NEW)
+##### ChoroplethLayer64 (NEW)
 
-#### ScatterplotLayer64 (NEW)
+##### ScatterplotLayer64 (NEW)
 
-#### 64 bit ExtrudedChoroplethLayer (NEW)
+##### 64 bit ExtrudedChoroplethLayer (NEW)
+
 - Great for rendering 3D buildings on top of maps
 - Includes a basic shading model
+
+##### GeoJsonLayer (NEW, EXPERIMENTAL)
+
+- Initial composite layer, only Polygons for now.
 
 ### Sample Layers
 
 Sample layers now available through `import 'deck.gl/samples';
 
-### GeoJsonLayer (NEW, EXPERIMENTAL)
-- Initial composite layer, only Polygons for now.
+### Changes affecting Custom Layers
 
+##### Streamlined life cycle methods
 
-## Changes affecting Custom Layers
-
-### Streamlined life cycle methods
 - The Layer life cycle methods are now optimized for deck.gl's needs
   and no longer try to mimic React.
 - Limited compatibility with deck.gl v2 is provided but it is strongly
   recommended to update layers to the new methods
 
-### Optimizations
+##### Optimizations
+
 - `Uint8Array` encoding is now supported for color and picking color
    attributes, which provides significant GPU memory savings.
 
-### GLSL package manager and modules
+##### GLSL package manager and modules
+
 - All layers now use `assembleShaders` to inject GLSL packages and platform
   fixes
 - GLSL `project` package -
@@ -314,12 +312,12 @@ Sample layers now available through `import 'deck.gl/samples';
     - Adds high precision version of trigonometry functions and `tan`
     - Especially for Intel GPUs
 
-
 # deck.gl v2
 
 Release date: May 2016
 
-## Highlights
+### Highlights
+
 - 3D Perspective Mode
 - Performance: Huge under the hood refactor of layer update logic
 - Automatic attribute management (`AttributeManager` class)
@@ -328,19 +326,21 @@ Release date: May 2016
 - Retina display support
 - Support for disabling mercator project (experimental)
 
-## React Integration
+### React Integration
+
 - Ability to specify canvas ID and customize styles
 
-## Layers
+### Layers
+
 - Added data deep comparison support
 
-### ScatterplotLayer
+##### ScatterplotLayer
+
 - Add per point radius support for the scatterplot-layer
 - Added per point color support for the scatterplot-layer
 - Fixed primitive distortion bug
 
-### LineLayer (NEW)
-
+##### LineLayer (NEW)
 
 # deck.gl v1
 

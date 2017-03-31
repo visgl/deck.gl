@@ -5,19 +5,21 @@
   <img src="https://img.shields.io/badge/extruded-yes-blue.svg?style=flat-square" alt="extruded" />
 </p>
 
-# GridLayer
+# Grid Layer
 
 The Grid Layer renders a grid heatmap based on an array of points.
 It takes the constant size all each cell, projects points into cells. The color
 and height of the cell is scaled by number of points it contains.
+[Source](https://github.com/uber/deck.gl/tree/master/src/layers/core/grid-layer)
 
-```
+```js
 import DeckGL, {GridLayer} from 'deck.gl';
 
-render() {
+const App = () => {
   const {data, viewport} = this.props;
 
-  /* data format:
+  /**
+   * Data format:
    * [
    *   {position: [-122.4, 37.7]},
    *   ...
@@ -29,13 +31,13 @@ render() {
     cellSize: 500
   });
 
-  return <DeckGL {...viewport} layers={[layer]} />
-}
+  return (<DeckGL {...viewport} layers={[layer]} />);
+};
 ```
 
-## Properties
+**Remark:** GridLayer at the moment only works with `COORDINATE_SYSTEM.LNGLAT`.
 
-### Base Layer Properties
+### Properties
 
 Inherits from all [Base Layer](/docs/api-reference/base-layer.md) properties.
 
@@ -104,11 +106,3 @@ Be aware that this prop will likely be changed in a future version of deck.gl.
 - Default: `object => object.position`
 
 Method called to retrieve the position of each point.
-
-## Remarks
-
-* GridLayer at the moment only works with `COORDINATE_SYSTEM.LNGLAT`.
-
-
-## Source Code
-[GridLayer](https://github.com/uber/deck.gl/tree/master/src/layers/core/grid-layer)

@@ -11,9 +11,11 @@ does not give ideal results and the way the deck.gl development team to improve
 the blending effect is by specifying the CSS property `mix-blend-mode`
 in modern browsers to be `multiply`:
 
-    .overlays canvas {
-      mix-blend-mode: multiply;
-    }
+```css
+.overlays canvas {
+  mix-blend-mode: multiply;
+}
+```
 
 `multiply` blend mode usually gives the expected results, as it only darkens.
 This blend mode keeps the overlay colors, but let map legends underneath
@@ -25,7 +27,11 @@ controls or legends that are being rendered on top of the map).
 If this is an issue, set isolation CSS prop on the map (DeckGLOverlay parent)
 element.
 
-    isolation: 'isolate';
+```css
+.deckgl-parent-example-class-not-real {
+  isolation: 'isolate';
+}
+```
 
 ## Notes on data property
 

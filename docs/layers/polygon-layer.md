@@ -1,31 +1,23 @@
 <!-- INJECT:"PolygonLayerDemo" -->
 
 <p class="badges">
-  <img src="https://img.shields.io/badge/-64--bit-blue.svg?style=flat-square" alt="64-bit" />
-  <img src="https://img.shields.io/badge/-extruded-blue.svg?style=flat-square" alt="extruded" />
+  <img src="https://img.shields.io/badge/64--bit-support-blue.svg?style=flat-square" alt="64-bit" />
+  <img src="https://img.shields.io/badge/extruded-yes-blue.svg?style=flat-square" alt="extruded" />
 </p>
 
 # Polygon Layer
 
 The Polygon Layer renders filled and/or stroked polygons.
+[Source](https://github.com/uber/deck.gl/tree/master/src/layers/core/polygon-layer)
 
-Method called to retrieve the elevation of each object's polygon.
-
-If a cartographic projection mode is used, height will be interpreted as meters,
-otherwise will be in unit coordinates.
-
-* The polypgons can be simple or complex (complex polygons are polygons with holes).
-* A simple polygon specified as an array of vertices, each vertice being an array of two or three numbers
-* A complex polygon is specified as an array of simple polygons, the
-first polygon representing the outer outline, and the remaining polygons representing holes. These polygons are expected to not intersect.
-
-```
+```js
 import DeckGL, {PolygonLayer} from 'deck.gl';
 
-render() {
+const App = () => {
   const {data, viewport} = this.props;
 
-  /* data format:
+  /**
+   * Data format:
    * [
    *   {
    *     // Simple polygon (array of coords)
@@ -53,13 +45,19 @@ render() {
     extruded: true
   });
 
-  return <DeckGL {...viewport} layers={[layer]} />
-}
+  return (<DeckGL {...viewport} layers={[layer]} />);
+};
 ```
 
-## Properties
+If a cartographic projection mode is used, height will be interpreted as meters,
+otherwise will be in unit coordinates.
 
-### Base Layer Properties
+* The polypgons can be simple or complex (complex polygons are polygons with holes).
+* A simple polygon specified as an array of vertices, each vertice being an array of two or three numbers
+* A complex polygon is specified as an array of simple polygons, the first polygon
+  representing the outer outline, and the remaining polygons representing holes. These polygons are expected to not intersect.
+
+### Properties
 
 Inherits from all [Base Layer](/docs/api-reference/base-layer.md) properties.
 
@@ -95,7 +93,8 @@ Whether to generate a line wireframe of the hexagon. The outline will have
 "horizontal" lines closing the top and bottom polygons and a vertical line
 (a "strut") for each vertex on the polygon.
 
-Remarks:
+**Remarks:**
+
 * These lines are rendered with `GL.LINE` and will thus always be 1 pixel wide.
 * Wireframe and solid extrusions are exclusive, you'll need to create two layers
   with the same data if you want a combined rendering effect.
@@ -139,7 +138,9 @@ Only works if `lineJointRounded` is `false`.
 
 Whether the layer should be rendered in high-precision 64-bit mode
 
-##### `lightSettings` (Object, optional) **EXPERIMENTAL**
+##### `lightSettings` (Object, optional)
+
+**EXPERIMENTAL**
 
 This is an object that contains light settings for extruded polygons.
 Be aware that this prop will likely be changed in a future version of deck.gl.
@@ -148,7 +149,7 @@ Be aware that this prop will likely be changed in a future version of deck.gl.
 
 ##### `getPolygon` (Function, optional)
 
-- default: object => object.polygon
+- default: `object => object.polygon`
 
 Like any deck.gl layer, the polygon accepts a data prop which is expected to
 be an iterable container of objects, and an accessor
@@ -184,7 +185,3 @@ The width of the outline of the polygon, in meters
   the first and last vertices, when those vertices are not equal.
 * The specification of complex polygons intentionally follows the GeoJson
   conventions for representing polygons with holes.
-
-
-## Source Code
-[PolygonLayer](https://github.com/uber/deck.gl/tree/master/src/layers/core/polygon-layer)
