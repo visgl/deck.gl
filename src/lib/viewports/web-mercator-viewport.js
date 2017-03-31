@@ -1,7 +1,8 @@
 // View and Projection Matrix calculations for mapbox-js style
 // map view properties
 import Viewport, {createMat4} from './viewport';
-import {mat4, vec4, vec2} from 'gl-matrix';
+import {mat4, vec2} from 'gl-matrix';
+import assert from 'assert';
 
 // CONSTANTS
 const PI = Math.PI;
@@ -9,7 +10,7 @@ const PI_4 = PI / 4;
 const DEGREES_TO_RADIANS = PI / 180;
 const RADIANS_TO_DEGREES = 180 / PI;
 const TILE_SIZE = 512;
-const WORLD_SCALE = TILE_SIZE / (2 * PI);
+const WORLD_SCALE = TILE_SIZE;
 
 const DEFAULT_MAP_STATE = {
   latitude: 37,
@@ -19,6 +20,8 @@ const DEFAULT_MAP_STATE = {
   bearing: 0,
   altitude: 1.5
 };
+
+const ERR_ARGUMENT = 'Illegal argument to WebMercatorViewport';
 
 export default class WebMercatorViewport extends Viewport {
   /**
@@ -64,7 +67,7 @@ export default class WebMercatorViewport extends Viewport {
     pitch,
     bearing,
     altitude,
-    mercatorEnabled
+    farZMultiplier = 10
   } = {}) {
     // Viewport - support undefined arguments
     width = width !== undefined ? width : DEFAULT_MAP_STATE.width;
@@ -85,6 +88,8 @@ export default class WebMercatorViewport extends Viewport {
     // TODO - just throw an Error instead?
     altitude = Math.max(0.75, altitude);
 
+    const center = projectFlat([longitude, latitude], scale);
+
     const distanceScales = calculateDistanceScales({latitude, longitude, scale});
 
     const projectionMatrix = makeProjectionMatrixFromMercatorParams({
@@ -92,27 +97,24 @@ export default class WebMercatorViewport extends Viewport {
       height,
       pitch,
       bearing,
-      altitude
+      altitude,
+      farZMultiplier
     });
 
-    const {viewMatrix, viewMatrixUncentered, viewCenter} =
-      makeViewMatrixFromMercatorParams({
-        width,
-        height,
-        longitude,
-        latitude,
-        zoom,
-        pitch,
-        bearing,
-        altitude,
-        distanceScales
-      });
+    const viewMatrix = makeViewMatrixFromMercatorParams({
+      width,
+      height,
+      longitude,
+      latitude,
+      zoom,
+      pitch,
+      bearing,
+      altitude,
+      distanceScales,
+      center
+    });
 
     super({width, height, viewMatrix, projectionMatrix});
-
-    // Add additional matrices
-    this.viewMatrixUncentered = viewMatrixUncentered;
-    this.viewCenter = viewCenter;
 
     // Save parameters
     this.latitude = latitude;
@@ -123,6 +125,7 @@ export default class WebMercatorViewport extends Viewport {
     this.altitude = altitude;
 
     this.scale = scale;
+    this.center = center;
 
     this._distanceScales = distanceScales;
 
@@ -130,6 +133,8 @@ export default class WebMercatorViewport extends Viewport {
     this.metersToLngLatDelta = this.metersToLngLatDelta.bind(this);
     this.lngLatDeltaToMeters = this.lngLatDeltaToMeters.bind(this);
     this.addMetersToLngLat = this.addMetersToLngLat.bind(this);
+
+    Object.freeze(this);
   }
   /* eslint-enable complexity, max-statements */
 
@@ -160,6 +165,27 @@ export default class WebMercatorViewport extends Viewport {
     return unprojectFlat(xy, scale);
   }
 
+  getLocationAtPoint({lngLat, pos}) {
+    const c = this.project(lngLat, {topLeft: false});
+    const coordCenter = this.project([this.longitude, this.latitude], {topLeft: false});
+    const coordAtPoint = pos;
+    const translate = vec2.sub([], coordAtPoint, c);
+    const newPos = vec2.sub([], coordCenter, translate);
+    const newLngLat = this.unproject(newPos, {topLeft: false});
+
+    return newLngLat;
+  }
+
+  /*
+  getLngLatAtViewportPosition(lnglat, xy) {
+    const c = this.locationCoordinate(lnglat);
+    const coordAtPoint = this.pointCoordinate(xy);
+    const coordCenter = this.pointCoordinate(this.centerPoint);
+    const translate = coordAtPoint._sub(c);
+    this.center = this.coordinateLocation(coordCenter._sub(translate));
+  }
+  */
+
   getDistanceScales() {
     return this._distanceScales;
   }
@@ -175,6 +201,7 @@ export default class WebMercatorViewport extends Viewport {
    */
   metersToLngLatDelta(xyz) {
     const [x, y, z = 0] = xyz;
+    assert(Number.isFinite(x) && Number.isFinite(y) && Number.isFinite(z), ERR_ARGUMENT);
     const {pixelsPerMeter, degreesPerPixel} = this._distanceScales;
     const deltaLng = x * pixelsPerMeter[0] * degreesPerPixel[0];
     const deltaLat = y * pixelsPerMeter[1] * degreesPerPixel[1];
@@ -192,6 +219,8 @@ export default class WebMercatorViewport extends Viewport {
    */
   lngLatDeltaToMeters(deltaLngLatZ) {
     const [deltaLng, deltaLat, deltaZ = 0] = deltaLngLatZ;
+    assert(Number.isFinite(deltaLng) && Number.isFinite(deltaLat) && Number.isFinite(deltaZ),
+      ERR_ARGUMENT);
     const {pixelsPerDegree, metersPerPixel} = this._distanceScales;
     const deltaX = deltaLng * pixelsPerDegree[0] * metersPerPixel[0];
     const deltaY = deltaLat * pixelsPerDegree[1] * metersPerPixel[1];
@@ -237,8 +266,8 @@ function projectFlat([lng, lat], scale) {
   scale = scale * WORLD_SCALE;
   const lambda2 = lng * DEGREES_TO_RADIANS;
   const phi2 = lat * DEGREES_TO_RADIANS;
-  const x = scale * (lambda2 + PI);
-  const y = scale * (PI - Math.log(Math.tan(PI_4 + phi2 * 0.5)));
+  const x = scale * (lambda2 + PI) / (2 * PI);
+  const y = scale * (PI - Math.log(Math.tan(PI_4 + phi2 * 0.5))) / (2 * PI);
   return [x, y];
 }
 
@@ -253,8 +282,8 @@ function projectFlat([lng, lat], scale) {
  */
 function unprojectFlat([x, y], scale) {
   scale = scale * WORLD_SCALE;
-  const lambda2 = x / scale - PI;
-  const phi2 = 2 * (Math.atan(Math.exp(PI - y / scale)) - PI_4);
+  const lambda2 = (x / scale) * (2 * PI) - PI;
+  const phi2 = 2 * (Math.atan(Math.exp(PI - (y / scale) * (2 * PI))) - PI_4);
   return [lambda2 * RADIANS_TO_DEGREES, phi2 * RADIANS_TO_DEGREES];
 }
 
@@ -265,6 +294,7 @@ function unprojectFlat([x, y], scale) {
  * with latitude.
  */
 function calculateDistanceScales({latitude, longitude, scale}) {
+  assert(!isNaN(latitude) && !isNaN(longitude) && !isNaN(scale), ERR_ARGUMENT);
   // Approximately 111km per degree at equator
   const METERS_PER_DEGREE = 111000;
 
@@ -275,14 +305,14 @@ function calculateDistanceScales({latitude, longitude, scale}) {
   // Calculate number of pixels occupied by one degree longitude
   // around current lat/lon
   const pixelsPerDegreeX = vec2.distance(
-    projectFlat([longitude + 0.5, latitude]),
-    projectFlat([longitude - 0.5, latitude])
+    projectFlat([longitude + 0.5, latitude], scale),
+    projectFlat([longitude - 0.5, latitude], scale)
   );
   // Calculate number of pixels occupied by one degree latitude
   // around current lat/lon
   const pixelsPerDegreeY = vec2.distance(
-    projectFlat([longitude, latitude + 0.5]),
-    projectFlat([longitude, latitude - 0.5])
+    projectFlat([longitude, latitude + 0.5], scale),
+    projectFlat([longitude, latitude - 0.5], scale)
   );
 
   const pixelsPerMeterX = pixelsPerDegreeX / metersPerDegree;
@@ -311,17 +341,16 @@ function calculateDistanceScales({latitude, longitude, scale}) {
 // view and projection matrix creation is intentionally kept compatible with
 // mapbox-gl's implementation to ensure that seamless interoperation
 // with mapbox and react-map-gl. See: https://github.com/mapbox/mapbox-gl-js
-function makeProjectionMatrixFromMercatorParams({
-  width,
-  height,
-  pitch,
-  altitude
-}) {
-  const pitchRadians = pitch * DEGREES_TO_RADIANS;
 
-  // PROJECTION MATRIX: PROJECTS FROM CAMERA SPACE TO CLIPSPACE
+// Variable fov (in radians)
+export function getFov({height, altitude}) {
+  return 2 * Math.atan((height / 2) / altitude);
+}
+
+export function getClippingPlanes({altitude, pitch}) {
   // Find the distance from the center point to the center top
   // in altitude units using law of sines.
+  const pitchRadians = pitch * DEGREES_TO_RADIANS;
   const halfFov = Math.atan(0.5 / altitude);
   const topHalfSurfaceDistance =
     Math.sin(halfFov) * altitude / Math.sin(Math.PI / 2 - pitchRadians - halfFov);
@@ -329,12 +358,26 @@ function makeProjectionMatrixFromMercatorParams({
   // Calculate z value of the farthest fragment that should be rendered.
   const farZ = Math.cos(Math.PI / 2 - pitchRadians) * topHalfSurfaceDistance + altitude;
 
+  return {farZ, nearZ: 0.1};
+}
+
+// PROJECTION MATRIX: PROJECTS FROM CAMERA (VIEW) SPACE TO CLIPSPACE
+export function makeProjectionMatrixFromMercatorParams({
+  width,
+  height,
+  pitch,
+  altitude,
+  farZMultiplier = 10
+}) {
+  const {nearZ, farZ} = getClippingPlanes({altitude, pitch});
+  const fov = getFov({height, altitude});
+
   const projectionMatrix = mat4.perspective(
     createMat4(),
-    2 * Math.atan((height / 2) / altitude), // fov in radians
-    width / height,                         // aspect ratio
-    0.1,                                    // near plane
-    farZ * 10.0                             // far plane
+    fov,              // fov in radians
+    width / height,   // aspect ratio
+    nearZ,            // near plane
+    farZ * farZMultiplier // far plane
   );
 
   return projectionMatrix;
@@ -348,10 +391,9 @@ function makeViewMatrixFromMercatorParams({
   zoom,
   pitch,
   bearing,
-  altitude
+  altitude,
+  center
 }) {
-  // Center x, y
-  const scale = Math.pow(2, zoom);
   // VIEW MATRIX: PROJECTS FROM VIRTUAL PIXELS TO CAMERA SPACE
   // Note: As usual, matrix operation orders should be read in reverse
   // since vectors will be multiplied from the right during transformation
@@ -367,17 +409,8 @@ function makeViewMatrixFromMercatorParams({
   // Rotate by bearing, and then by pitch (which tilts the view)
   mat4.rotateX(vm, vm, pitch * DEGREES_TO_RADIANS);
   mat4.rotateZ(vm, vm, -bearing * DEGREES_TO_RADIANS);
-
-  const [centerX, centerY] = projectFlat([longitude, latitude], scale);
-
-  const center = [-centerX, -centerY, 0, 1];
-  const viewCenter = vec4.transformMat4([], center, vm);
-
-  const vmCentered = mat4.translate([], vm, [-centerX, -centerY, 0]);
-
-  return {
-    viewMatrix: vmCentered,
-    viewMatrixUncentered: vm,
-    viewCenter
-  };
+  // console.log(`VIEWPT Z ${pitch * DEGREES_TO_RADIANS} ${-bearing * DEGREES_TO_RADIANS} ${vm}`);
+  mat4.translate(vm, vm, [-center[0], -center[1], 0]);
+  // console.log(`VIEWPT T ${pitch * DEGREES_TO_RADIANS} ${-bearing * DEGREES_TO_RADIANS} ${vm}`);
+  return vm;
 }
