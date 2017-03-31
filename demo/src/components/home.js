@@ -74,7 +74,7 @@ class Home extends Component {
           <div className="container soft-left">
             <h1>deck.gl</h1>
             <p>Large-scale WebGL-powered Data Visualization</p>
-            <a href="#/documentation/overview/getting-started" className="btn">Get started</a>
+            <a href="#/documentation/get-started/quick-start-guide" className="btn">Get started</a>
           </div>
           <div ref="fps" className="fps" />
         </section>
@@ -97,7 +97,7 @@ class Home extends Component {
               deck.gl allows complex visualizations to be constructed by
               composing existing layers, and makes it easy to package and
               share new visulizations as reusable layers. We already offer
-              a <a href="#/layers/catalog/overview">catalog of proven layers</a> and
+              a <a href="#/layer-catalog">catalog of proven layers</a> and
               we have many more in the works.
               </p>
 
@@ -127,7 +127,7 @@ class Home extends Component {
           </div>
 
           <div className="container text-center buttons">
-            <a href="#/documentation/overview/getting-started" className="btn">
+            <a href="#/documentation/get-started/quick-start-guide" className="btn">
               Get Started <i className="icon icon-arrow-right" />
             </a>
             <a href="https://github.com/uber/deck.gl" className="btn">
