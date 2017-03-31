@@ -1,23 +1,46 @@
-<p class="badges">
-  <img src="https://img.shields.io/badge/extruded-yes-blue.svg?style=flat-square" alt="64-bit" />
-</p>
-
-# GridCellLayer
-
-The GridCellLayer can render a grid-based heatmap.
-It takes the constant width / height of all cells and top-left coordinate of
-each cell. The grid cells can be given a height using the `getElevation` accessor.
-
-
 <div align="center">
   <img height="300" src="/demo/src/static/images/grid-layer.gif" />
 </div>
 
-    import {GridCellLayer} from 'deck.gl';
+<p class="badges">
+  <img src="https://img.shields.io/badge/-extruded-blue.svg?style=flat-square" alt="extruded" />
+</p>
+
+# GridCellLayer
+
+The Grid Cell Layer can render a grid-based heatmap.
+It takes the constant width / height of all cells and top-left coordinate of
+each cell. The grid cells can be given a height using the `getElevation` accessor.
+
+```
+import DeckGL, {GridCellLayer} from 'deck.gl';
+
+render() {
+  const {data, viewport} = this.props;
+
+  /* data format:
+   * [
+   *   {position: [-122.4, 37.7], color: [255, 0, 0], elevation: 100},
+   *   ...
+   * ]
+   */
+  const layer = new GridCellLayer({
+    id: 'grid-cell-layer',
+    data,
+    cellSize: 500
+  });
+
+  return <DeckGL {...viewport} layers={[layer]} />
+}
+```
 
 ## Properties
 
+### Base Layer Properties
+
 Inherits from all [Base Layer](/docs/api-reference/base-layer.md) properties.
+
+### Render Options
 
 ##### `cellSize` (Number, optional)
 
@@ -50,7 +73,7 @@ Whether the layer should be rendered in high-precision 64-bit mode
 This is an object that contains light settings for extruded polygons.
 Be aware that this prop will likely be changed in a future version of deck.gl.
 
-## Accessors
+### Data Accessors
 
 ##### `getPosition` (Function, optional)
 
@@ -72,3 +95,7 @@ Expecting a number, 1 unit approximate to 100 meter
 
 Method called to retrieve the rgba color of each cell. Expecting [r, g, b, a].
 If the alpha is not provided, it will be set to `255`.
+
+
+## Source Code
+[GridCellLayer](https://github.com/uber/deck.gl/tree/master/src/layers/core/grid-cell-layer)

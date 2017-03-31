@@ -1,21 +1,45 @@
 <!-- INJECT:"HexagonLayerDemo" -->
 
 <p class="badges">
-  <img src="https://img.shields.io/badge/extruded-yes-blue.svg?style=flat-square" alt="64-bit" />
+  <img src="https://img.shields.io/badge/-extruded-blue.svg?style=flat-square" alt="extruded" />
 </p>
 
 # HexagonLayer
 
-The `HexagonLayer` renders a hexagon heatmap based on an array of points.
+The Hexagon Layer renders a hexagon heatmap based on an array of points.
  It takes the radius of hexagon bin, projects points into hexagon bins. The color
 and height of the hexagon is scaled by number of points it contains. HexagonLayer
 at the moment only works with COORDINATE_SYSTEM.LNGLAT.
 
-    import {HexagonLayer} from 'deck.gl';
+```
+import DeckGL, {HexagonLayer} from 'deck.gl';
+
+render() {
+  const {data, viewport} = this.props;
+
+  /* data format:
+   * [
+   *   {position: [-122.4, 37.7]},
+   *   ...
+   * ]
+   */
+  const layer = new HexagonLayer({
+    id: 'hexagon-layer',
+    data,
+    cellSize: 500
+  });
+
+  return <DeckGL {...viewport} layers={[layer]} />
+}
+```
 
 ## Properties
 
+### Base Layer Properties
+
 Inherits from all [Base Layer](/docs/api-reference/base-layer.md) properties.
+
+### Render Options
 
 ##### `radius` (Number, optional)
 
@@ -71,7 +95,7 @@ maps number of counts to elevation. By default it is set to between
 This property is extremely handy when you want to render different data input
 with the same elevation scale for comparison.
 
-#### `elevationRange` (Array, optional)
+##### `elevationRange` (Array, optional)
 
 - Default: `[0, 1000]`
 
@@ -116,10 +140,14 @@ Whether the layer should be rendered in high-precision 64-bit mode
 This is an object that contains light settings for extruded polygons.
   Be aware that this prop will likely be changed in a future version of deck.gl.
 
-## Accessors
+### Data Accessors
 
 ##### `getPosition` (Function, optional)
 
 - Default: `object => object.position`
 
 Method called to retrieve the position of each point.
+
+
+## Source Code
+[HexagonLayer](https://github.com/uber/deck.gl/tree/master/src/layers/core/hexagon-layer)

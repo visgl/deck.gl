@@ -1,15 +1,48 @@
 <!-- INJECT:"PathLayerDemo" -->
 
+<p class="badges">
+  <img src="https://img.shields.io/badge/-64--bit-blue.svg?style=flat-square" alt="64-bit" />
+</p>
+
 # Path Layer
 
 The Path Layer takes in lists of coordinate points and
 renders them as extruded lines with mitering.
 
-    import {PathLayer} from 'deck.gl';
+```
+import DeckGL, {PathLayer} from 'deck.gl';
+
+render() {
+  const {data, viewport} = this.props;
+
+  /* data format:
+   * [
+   *   {
+   *     path: [[-122.4, 37.7], [-122.5, 37.8], [-122.6, 37.85]],
+   *     width: 1,
+   *     color: [255, 0, 0]
+   *   },
+   *   ...
+   * ]
+   */
+  const layer = new PathLayer({
+    id: 'path-layer',
+    data,
+    rounded: true
+    widthScale: 100
+  });
+
+  return <DeckGL {...viewport} layers={[layer]} />
+}
+```
 
 ## Properties
 
+### Base Layer Properties
+
 Inherits from all [Base Layer](/docs/api-reference/base-layer.md) properties.
+
+### Render Options
 
 ##### `widthScale` (Number, optional)
 
@@ -48,9 +81,9 @@ Only works if `rounded` is `false`.
 
 Whether the layer should be rendered in high-precision 64-bit mode
 
-## Accessors
+### Data Accessors
 
-#### `getPath` (Function, optional)
+##### `getPath` (Function, optional)
 
 - Default: `(object, index) => object.paths`
 
@@ -58,7 +91,7 @@ Returns the specified path for the object.
 
 A path is an array of coordinates.
 
-#### `getColor` (Function, optional)
+##### `getColor` (Function, optional)
 
 Returns an array of color
 
@@ -69,9 +102,13 @@ Method called to determine the rgba color of the source.
 If the color alpha (the fourth component) is not provided,
 `alpha` will be set to `255`.
 
-#### `getWidth` (Function, optional)
+##### `getWidth` (Function, optional)
 
 - Default: `(object, index) => object.width || 1`
 
 Method called to determine the width to draw each path with.
 Unit is meters.
+
+
+## Source Code
+[PathLayer](https://github.com/uber/deck.gl/tree/master/src/layers/core/path-layer)

@@ -10,6 +10,7 @@ $black-20: #213746;
 $black-40: #5A666D;
 $white: #EDEDED;
 $white-40: #8D9BA3;
+$topbar-height: 64px;
 
 @import 'blog';
 @import 'home';
@@ -55,8 +56,8 @@ header {
   left: 0;
   width: 100%;
   transition: all 300ms;
-  max-height: 64px;
-  line-height: 64px;
+  max-height: $topbar-height;
+  line-height: $topbar-height;
   overflow: hidden;
   @include venderPrefix(user-select, none);
 
@@ -277,7 +278,7 @@ hr.short {
       margin-right: 40px;
       a {
         display: block;
-        line-height: 64px;
+        line-height: $topbar-height;
         border-width: 0;
         border-style: none;
       }

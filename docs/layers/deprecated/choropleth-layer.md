@@ -1,4 +1,9 @@
-# Choropleth Layer **(DEPRECATED)**
+
+<p class="badges">
+  <img src="https://img.shields.io/badge/-deprecated-red.svg?style=flat-square" alt="64-bit" />
+</p>
+
+# Choropleth Layer
 
 Note: The `ChoroplethLayer` has been deprecated in deck.gl v4 in favor
 of the new `GeoJsonLayer` and `PolygonLayer`. It will likely be removed in the

@@ -1,7 +1,8 @@
 <!-- INJECT:"GeoJsonLayerDemo" -->
 
 <p class="badges">
-  <img src="https://img.shields.io/badge/extruded-yes-blue.svg?style=flat-square" alt="64-bit" />
+  <img src="https://img.shields.io/badge/-64--bit-blue.svg?style=flat-square" alt="64-bit" />
+  <img src="https://img.shields.io/badge/-extruded-blue.svg?style=flat-square" alt="extruded" />
 </p>
 
 # GeoJsonLayer
@@ -9,27 +10,40 @@
 The GeoJson Layer takes in [GeoJson](http://geojson.org/) formatted data and
 renders it as interactive polygons, lines and points.
 
-<div align="center">
-  <img height="300" src="/demo/src/static/images/demo-thumb-geojson.jpg" />
-</div>
+```
+import DeckGL, {GeoJsonLayer} from 'deck.gl';
 
-    import {GeoJsonLayer} from 'deck.gl';
+render() {
+  const {data, viewport} = this.props;
+
+  /* data format:
+   * a valid GeoJSON object
+   */
+  const layer = new GeoJsonLayer({
+    id: 'geojson-layer',
+    data,
+    filled: true,
+    stroked: false,
+    extruded: true
+  });
+
+  return <DeckGL {...viewport} layers={[layer]} />
+}
+```
 
 ## Properties
+
+### Base Layer Properties
+
+Inherits from all [Base Layer](/docs/api-reference/base-layer.md) properties.
+
+### Render Options
 
 Inherits from all [Base Layer properties](/docs/api-reference/base-layer.md),
 however, the `data` prop is interpreted slightly more flexibly to accommodate
 pure GeoJson "payloads".
 
-Also note that the `GeoJsonLayer` is a **composite** layer, that renders points, lines and polygons with its outlines with different "underlying" layers, so developers can sometimes achieve additional control of rendering by controlling
-the props of the underlying layers directly.
-
-#### `data` (Object, Array or iterable)
-
-A GeoJson `FeatureCollection` object, or a list of GeoJson `Feature` objects.
-For more information on how the GeoJson is interpreted see the introduction.
-
-#### `filled` (Boolean, optional)
+##### `filled` (Boolean, optional)
 
 - Default: `true`
 
@@ -37,7 +51,7 @@ Whether to draw filled polygons (solid fill). Note that for each polygon,
 only the area between the outer polygon and any holes will be filled. This
 prop is effective only when the polygon is NOT extruded.
 
-#### `stroked` (Boolean, optional)
+##### `stroked` (Boolean, optional)
 
 - Default: `false`
 
@@ -45,14 +59,14 @@ Whether to draw an outline around polygons (solid fill). Note that
 for complex polygons, both the outer polygon as well the outlines of
 any holes will be drawn.
 
-#### `extruded` (Boolean, optional)
+##### `extruded` (Boolean, optional)
 
 Extrude Polygon and MultiPolygon features along the z-axis if set to
 true. The height of the drawn features is obtained using the `getElevation` accessor.
 
 - Default: `false`
 
-#### `wireframe` (Boolean, optional)
+##### `wireframe` (Boolean, optional)
 
 - Default: `false`
 
@@ -66,7 +80,7 @@ Remarks:
   with the same data if you want a combined rendering effect.
 * This is only effective if the `extruded` prop is set to true.
 
-#### `lineWidthScale` (Boolean, optional)
+##### `lineWidthScale` (Boolean, optional)
 
 - Default: `1`
 
@@ -100,44 +114,44 @@ The maximum extent of a joint in ratio to the stroke width.
 Only works if `lineJointRounded` is `false`.
 
 
-#### `fp64` (Boolean, optional)
+##### `fp64` (Boolean, optional)
 
 - Default: `false`
 
 Whether the layer should be rendered in high-precision 64-bit mode
 
-#### `lightSettings` (Object, optional) **EXPERIMENTAL**
+##### `lightSettings` (Object, optional) **EXPERIMENTAL**
 
 This is an object that contains light settings for extruded polygons.
 Be aware that this prop will likely be changed in the future versions of
 deck.gl.
 
-## Accessors
+### Data Accessors
 
-#### `getLineColor`
+##### `getLineColor`
 
-- Default: `object => object.lineColor || [0, 0, 0, 255]`
+- Default: `f => f.properties.lineColor || [0, 0, 0, 255]`
 
 Called to retrieve the color of line and/or the outline of polygon color for a GeoJson feature, depending
 on its type.
 
-#### `getFillColor` (Function, optional)
+##### `getFillColor` (Function, optional)
 
-- Default: `object => object.fillColor || [0, 0, 0, 25]`
+- Default: `f => f.properties.fillColor || [0, 0, 0, 25]`
 
 Called to retrieve the solid color of the polygon and point features of a GeoJson.
 
 Note: This accessor is only called for `Polygon` and `MultiPolygon` and `Point` features.
 
-#### `getRadius`
+##### `getRadius`
 
-- Default: `object => object.radius || object => object.size || 1`
+- Default: `f => f.properties.radius || f => f.properties.size || 1`
 
 Called to retrieve the radius of `Point` and `MultiPoint` feature.
 
-#### `getLineWidth`
+##### `getLineWidth`
 
-- Default: `object => object.lineWidth || 1`
+- Default: `f => f.properties.lineWidth || 1`
 
 Called to retrieve the line width for a GeoJson feature.
 
@@ -145,9 +159,9 @@ Note: This accessor is called for `LineString` and `MultiLineString`
 features. It is called for `Polygon` and `MultiPolygon` features if the
 `stroked` attribute is true.
 
-#### `getElevation` (Function, optional)
+##### `getElevation` (Function, optional)
 
-- Default: `object => object.elevation || 1000`
+- Default: `f => f.properties.elevation || 1000`
 
 Called to retrieve the elevation of a polygon feature (when `extruded` is true).
 
@@ -156,30 +170,7 @@ otherwise will be in unit coordinates.
 
 Note: This accessor is only called for `Polygon` and `MultiPolygon` features.
 
-## Remarks
-
-```
-new GeoJsonLayer({
-  data: {
-    "type": "FeatureCollection",
-      "features": [
-        {
-          "type": "Feature",
-          "geometry": {
-            "type": "Point",
-            "coordinates": [102.0, 0.5]
-          },
-          "properties": {
-            "color": [255, 0, 0, 255],
-            "prop1": {"application": "defined"}
-          }
-        },
-        ...
-      ]
-    }
-  }
-});
-```
+### Remarks
 
 * By supplying a GeoJson `FeatureCollection` you can render multiple polygons,
   lines and points.
@@ -187,3 +178,8 @@ new GeoJsonLayer({
   for an optional property `color`, which is expected to be a 4 element
   array of values between 0 and 255, representing the rgba values for
   the color of that `Feature`.
+
+
+## Source Code
+[GeoJsonLayer](https://github.com/uber/deck.gl/tree/master/src/layers/core/geojson-layer)
+

@@ -23,8 +23,8 @@ const layer = new ScatterplotLayer({
 });
 ```
 - Set callback for all pickable layers by
-setting [`onLayerHover`](/docs/using-with-react.md#-onlayerhover-function-optional-)
-and [`onLayerClick`](/docs/using-with-react.md#-onlayerclick-function-optional-)
+setting [`onLayerHover`](/docs/api-reference/deckgl.md#-onlayerhover-function-optional-)
+and [`onLayerClick`](/docs/api-reference/deckgl.md#-onlayerclick-function-optional-)
 props of the `DeckGL` canvas:
 ```js
 <DeckGL
@@ -45,9 +45,9 @@ layer changes.
 What constitutes an object is defined by each layer.
 Usually, it is one of the data entries that is passed in via `prop.data`.
 For example, in
-[ScatterplotLayer](/docs/layers/scatterplot-layer.md), an object is an element
+[Scatterplot Layer](/docs/layers/scatterplot-layer.md), an object is an element
 in the `props.data` array that is used to render one circle. In
-[GeoJsonLayer](/docs/layers/geojson-layer.md), an object is a GeoJSON feature
+[GeoJson Layer](/docs/layers/geojson-layer.md), an object is a GeoJSON feature
 in the `props.data` feature collection that is used to render one
 point, path or polygon.
 
