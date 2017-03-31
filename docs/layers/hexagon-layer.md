@@ -1,7 +1,8 @@
 <!-- INJECT:"HexagonLayerDemo" -->
 
 <p class="badges">
-  <img src="https://img.shields.io/badge/-extruded-blue.svg?style=flat-square" alt="extruded" />
+  <img src="https://img.shields.io/badge/64--bit-support-blue.svg?style=flat-square" alt="64-bit" />
+  <img src="https://img.shields.io/badge/extruded-yes-blue.svg?style=flat-square" alt="extruded" />
 </p>
 
 # HexagonLayer
@@ -119,14 +120,14 @@ Whether to enable cell elevation. Cell elevation scale by count of points in eac
 
 - Default: `100`
 
-Filter bins and re-calculate color by `upperPercentile`. Hexagons with counts 
+Filter bins and re-calculate color by `upperPercentile`. Hexagons with counts
 bigger than the upperPercentile counts will be hidden.
 
 ##### `lowerPercentile' (Number, optional)
 
 - Default: `0`
 
-Filter bins and re-calculate color by `lowerPercentile`. Hexagons with counts 
+Filter bins and re-calculate color by `lowerPercentile`. Hexagons with counts
 smaller than the lowerPercentile counts will be hidden.
 
 ##### `fp64` (Boolean, optional)
