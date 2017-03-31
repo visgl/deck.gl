@@ -34,7 +34,7 @@ export default class LineDemo extends Component {
   static renderInfo(meta) {
     return (
       <div>
-        <h3>Flights To And From <br/>London Heathrow Airport</h3>
+        <h3>Flights To And From London Heathrow Airport</h3>
         <p>Flight paths in a 6-hour window</p>
         <p>From 08:32:43 GMT to 14:32:43 GMT on March 28th, 2017</p>
         <p>Flight path data source:
@@ -59,8 +59,8 @@ export default class LineDemo extends Component {
     let tooltipLine1 = '';
     let tooltipLine2 = '';
     if (object) {
-      tooltipLine1 = object.name;
-      tooltipLine2 = object.country || object.abbrev;
+      tooltipLine1 = object.country || object.abbrev;
+      tooltipLine2 = object.name.indexOf('0x') >= 0 ? '' : object.name;
     }
     this.setState({x, y, tooltipLine1, tooltipLine2});
   }

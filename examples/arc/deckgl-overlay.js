@@ -100,8 +100,9 @@ export default class DeckGLOverlay extends Component {
         stroked: false,
         filled: true,
         getFillColor: () => [0, 0, 0, 0],
+        onHover: this.props.onHover,
         onClick: this.props.onClick,
-        pickable: true
+        pickable: Boolean(this.props.onHover || this.props.onClick)
       }),
       new ArcLayer({
         id: 'arc',

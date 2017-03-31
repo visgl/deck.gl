@@ -33,23 +33,6 @@ element.
 }
 ```
 
-## Notes on data property
-
-The `data` property will accept any containers that can be iterated over using
-ES6 "for-of" iteration, this includes e.g. native Arrays, ES6 Sets and Maps,
-all Immutable.js containers etc. The notable exception are native JavaScript
-object maps. It is recommended to use ES6 Maps instead.
-
-It is recommended, but not required, to use immutable data (containers AND
-objects) as it ensures that changes to `data` property trigger a re-render.
-(See the notes on `rerenderCount` and `updateCount` properties.)
-
-## Notes on picking
-
-**Note**: Because DeckGL layers are designed to take any type of iterable
-collection as data (which may not support "random access" array style
-references of its elements), the picking process outputs the actual object instead
-of some index.
 
 ## Debugging and Instrumentation
 

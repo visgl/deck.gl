@@ -57,6 +57,9 @@ export default class DeckGLOverlay extends Component {
     this._startAnimate = this._startAnimate.bind(this);
     this._animateHeight = this._animateHeight.bind(this);
 
+  }
+
+  componentDidMount() {
     this._animate();
   }
 
@@ -66,9 +69,12 @@ export default class DeckGLOverlay extends Component {
     }
   }
 
+  componentWillUnmount() {
+    this._stopAnimate();
+  }
+
   _animate() {
-    window.clearTimeout(this.startAnimationTimer);
-    window.clearTimeout(this.intervalTimer);
+    this._stopAnimate();
 
     // wait 1.5 secs to start animation so that all data are loaded
     this.startAnimationTimer = window.setTimeout(this._startAnimate, 1500);
@@ -78,10 +84,14 @@ export default class DeckGLOverlay extends Component {
     this.intervalTimer = window.setInterval(this._animateHeight, 20);
   }
 
+  _stopAnimate() {
+    window.clearTimeout(this.startAnimationTimer);
+    window.clearTimeout(this.intervalTimer);
+  }
+
   _animateHeight() {
     if (this.state.elevationScale === elevationScale.max) {
-      window.clearTimeout(this.startAnimationTimer);
-      window.clearTimeout(this.intervalTimer);
+      this._stopAnimate();
     } else {
       this.setState({elevationScale: this.state.elevationScale + 1});
     }
