@@ -18,7 +18,6 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {WebMercatorViewport} from 'deck.gl/lib/viewports';
 import test from 'tape-catch';
 import {vec2, vec3} from 'gl-matrix';
 import {WebMercatorViewport} from 'deck.gl';
