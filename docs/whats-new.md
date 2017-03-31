@@ -12,12 +12,12 @@ Release date: March 31, 2017
 - **New Examples** deck.gl now provides multiple stand-alone examples, with minimal
   configuration files (`package.json`, `webpack.config.js` etc) intended to make it
   easy to just copy an example folder and get an app up and running in minutes.
-- **Unified 64-bit Layers** - 64-bit Layers are now unified with 32-bit layers, controlled via a `fp64` prop.
+- **Unified 64-bit Layers** - 64-bit Layers are now unified with 32-bit layers, controlled via a new `fp64` prop.
 - **Library Size Reduction** - A number of npm package dependencies have been
   trimmed from deck.gl, and the distribution has initial support for "tree-shaking"
   bundlers like webpack2 and rollup.
 - **Performance** A number of improvements across the core library and layers
-  greatly accelerate rendering and picking performance.
+   improves rendering and picking performance.
 - **Model Matrix Support** - Model matrix support for the `METER_OFFSET` projection mode
   enables arbitrary coordinate transforms (translations, rotations, scaling etc)
   to be applied on individual layer enabling scene graph like layer composition and animation.
