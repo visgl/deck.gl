@@ -6,7 +6,7 @@ To use deck.gl with React, simply import the `DeckGL` React component and
 render it as a child of another component, passing in your list of deck.gl
 layers as a property.
 
-```
+```jsx
 // Import React
 import React, {Component} from 'react';
 import {render} from 'react-dom';
@@ -41,12 +41,14 @@ class Root extends Component {
     const {viewport, width, height} = this.state;
 
     return (
+      // Mapbox React component
       <MapGL
         // Viewport props for Mapbox
         {...viewport}
         width={width}
         height={height}
         mapboxApiAccessToken={MAPBOX_TOKEN}>
+        // deck.gl React component
         <DeckGL
           // The same viewport props for deck.gl
           {...viewport}

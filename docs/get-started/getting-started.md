@@ -29,14 +29,15 @@ simply by installing using `yarn` or `npm install` and running using `npm start`
 For most of the examples come with deck.gl, sample geospatial data is rendered
 on top of a Mapbox basemap. Mapbox requires each user to provide a token before
 they serve any basemap tiles from their servers to your browser. You can either set an environmental variable needs to be set via
-```
+```bash
 export MAPBOX_ACCESS_TOKEN={Your Token Here}
 ```
 and import it in your application code via
-```
+```jsx
 const MAPBOX_TOKEN = process.env.MAPBOX_ACCESS_TOKEN;
 ```
-or your can write out the token in your app explicitly.
+
+Or your can write out the token in your app explicitly.
 
 For more information about map token read the sections about ["Using with Mapbox"(link update needed)](),
 and the [examples](https://github.com/uber/deck.gl/tree/master/examples/README.md)
