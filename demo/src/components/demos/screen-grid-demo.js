@@ -31,7 +31,7 @@ export default class ScreenGridDemo extends Component {
       <div>
         <h3>Public Transit Accessibility In California</h3>
         <p>Distribution of public transportation stops</p>
-        <p>Data is binned to a screen grid and value mapped to a dynamic color scale</p>
+        <p>The layer aggregates data within the boundaries of each screen grid cells</p>
         <p>Data source: <a href="http://openstreetmap.org">OpenStreetMaps</a></p>
         <div className="stat">No. of Samples<b>{ readableInteger(meta.count || 0) }</b></div>
       </div>
