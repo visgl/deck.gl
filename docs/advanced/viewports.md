@@ -2,7 +2,7 @@
 
 ## Overview
 
-deck.gl calculates projections using a a generic [Viewport class](src/lib/viewports/viewport.js)
+deck.gl calculates projections using a generic [Viewport class](/docs/api-reference/viewport.md)
 (which is essentially a 3D matrix "camera" class of the type you would find in any 3D/WebGL/OpenGL
 library, holding `view` and `projection` matrices).
 
