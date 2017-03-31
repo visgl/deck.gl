@@ -4,7 +4,7 @@
   <img src="https://img.shields.io/badge/64--bit-support-blue.svg?style=flat-square" alt="64-bit" />
 </p>
 
-# Scatterplot Layer
+# ScatterplotLayer
 
 The Scatterplot Layer takes in paired latitude and longitude coordinated
 points and renders them as circles with a certain radius.

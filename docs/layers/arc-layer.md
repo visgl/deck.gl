@@ -4,7 +4,7 @@
   <img src="https://img.shields.io/badge/64--bit-support-blue.svg?style=flat-square" alt="64-bit" />
 </p>
 
-# Arc Layer
+# ArcLayer
 
 The Arc Layer renders raised arcs joining pairs of source and target points,
 specified as latitude/longitude coordinates.

@@ -1,6 +1,6 @@
 <!-- INJECT:"ScreenGridLayerDemo" -->
 
-# ScreenGrid Layer
+# ScreenGridLayer
 
 The Screen Grid Layer takes in an array of latitude and longitude
 coordinated points, aggregates them into histogram bins and

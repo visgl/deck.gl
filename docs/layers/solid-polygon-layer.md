@@ -3,7 +3,7 @@
   <img src="https://img.shields.io/badge/extruded-yes-blue.svg?style=flat-square" alt="extruded" />
 </p>
 
-# SolidPolygon Layer
+# SolidPolygonLayer
 
 The SolidPolygon Layer renders filled polygons.
 

@@ -5,7 +5,7 @@
   <img src="https://img.shields.io/badge/extruded-yes-blue.svg?style=flat-square" alt="extruded" />
 </p>
 
-# Grid Layer
+# GridLayer
 
 The Grid Layer renders a grid heatmap based on an array of points.
 It takes the constant size all each cell, projects points into cells. The color

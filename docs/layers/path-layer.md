@@ -4,7 +4,7 @@
   <img src="https://img.shields.io/badge/64--bit-support-blue.svg?style=flat-square" alt="64-bit" />
 </p>
 
-# Path Layer
+# PathLayer
 
 The Path Layer takes in lists of coordinate points and renders them as extruded lines with mitering.
 [Source](https://github.com/uber/deck.gl/tree/master/src/layers/core/path-layer)
