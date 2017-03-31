@@ -64,6 +64,7 @@ export default class ArcDemo extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      hoveredCounty: null,
       // Set default selection to San Francisco
       selectedCounty: props.data ? props.data[362] : null
     };
@@ -78,9 +79,22 @@ export default class ArcDemo extends Component {
     }
   }
 
+  _onHoverCounty({x, y, object}) {
+    this.setState({x, y, hoveredCounty: object});
+  }
+
   _onSelectCounty({object}) {
     this.setState({selectedCounty: object});
     this.props.onStateChange({sourceName: object.properties.name});
+  }
+
+  _renderTooltip() {
+    const {x, y, hoveredCounty} = this.state;
+    return hoveredCounty && (
+      <div className="tooltip" style={{left: x, top: y}}>
+        {hoveredCounty.properties.name}
+      </div>
+    );
   }
 
   render() {
@@ -92,11 +106,17 @@ export default class ArcDemo extends Component {
     }
 
     return (
-      <ArcOverlay viewport={viewport}
-        data={data}
-        selectedFeature={selectedCounty}
-        strokeWidth={params.lineWidth.value}
-        onClick={this._onSelectCounty.bind(this)} />
+      <div>
+        <ArcOverlay viewport={viewport}
+          data={data}
+          selectedFeature={selectedCounty}
+          strokeWidth={params.lineWidth.value}
+          onHover={this._onHoverCounty.bind(this)}
+          onClick={this._onSelectCounty.bind(this)} />
+
+        {this._renderTooltip()}
+
+      </div>
     );
   }
 }

@@ -24,7 +24,7 @@
     padding-top: 20px;
     padding-bottom: 80px;
   }
-  ul {
+  .subpages {
     transition: max-height 0.3s;
     overflow: hidden;
   }
@@ -54,6 +54,7 @@
     color: $white-40;
   }
   .list-header {
+    position: relative;
     font-weight: 700;
     font-size: 0.833em;
     text-transform: uppercase;
@@ -61,7 +62,17 @@
     padding: 24px 0 8px 24px;
     color: $white-40;
   }
-  .list-header:not(.active) + ul {
+  .list-header:not(.active):not(.expanded):before {
+    content: '+';
+    font-weight: 700;
+    color: $white-40;
+    position: absolute;
+    top: 24px;
+    right: 8px;
+    font-size: 16px;
+    line-height: 18px;
+  }
+  .list-header:not(.active):not(.expanded) + .subpages {
     max-height: 0 !important;
   }
 }
