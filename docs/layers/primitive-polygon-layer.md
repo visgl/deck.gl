@@ -35,7 +35,7 @@ Remarks:
 
 ## Properties
 
-Inherits from all [Base Layer properties](/docs/layers/base-layer.md).
+Inherits from all [Base Layer properties](/docs/api-reference/base-layer.md).
 
 ##### `extruded` (Boolean, optional)
 

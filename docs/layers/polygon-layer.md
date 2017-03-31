@@ -22,7 +22,7 @@ first polygon representing the outer outline, and the remaining polygons represe
 
 ## Properties
 
-Inherits from all [Base Layer](/docs/layers/base-layer.md) properties.
+Inherits from all [Base Layer](/docs/api-reference/base-layer.md) properties.
 
 ##### `filled` (Boolean, optional)
 

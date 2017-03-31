@@ -47,10 +47,3 @@ common in applications that follow the Reactive architecture. While using
 them is by no means required, their use does ensure that deep changes to
 the `data` property always triggers a re-render.
 
-
-## Notes on picking
-
-**Note**: Because the deck.gl layers are designed to take any type of iterable
-collection as data (which may not support "random access" array style
-references of its elements), the picking calculates and index but the
-actual object.

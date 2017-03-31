@@ -18,7 +18,7 @@ It renders each hexagon based on color, opacity and elevation.
 
 ## Properties
 
-Inherits from all [Base Layer](/docs/layers/base-layer.md) properties.
+Inherits from all [Base Layer](/docs/api-reference/base-layer.md) properties.
 
 ##### `hexagonVertices` (Array[[lon, lat]], optional)
 

@@ -17,7 +17,7 @@ renders it as interactive polygons, lines and points.
 
 ## Properties
 
-Inherits from all [Base Layer properties](/docs/layers/base-layer.md),
+Inherits from all [Base Layer properties](/docs/api-reference/base-layer.md),
 however, the `data` prop is interpreted slightly more flexibly to accommodate
 pure GeoJson "payloads".
 

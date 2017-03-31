@@ -15,5 +15,5 @@ Check out the [64 bit about page](/docs/64-bits.md) for more info.
 
     import {ChoroplethLayer64} from 'deck.gl';
 
-Inherits from all [Base Layer](/docs/layers/base-layer.md) properties and has
+Inherits from all [Base Layer](/docs/api-reference/base-layer.md) properties and has
 this same as the [Choropleth Layer](/docs/layers/choropleth-layer.md).

@@ -15,7 +15,7 @@ at the moment only works with COORDINATE_SYSTEM.LNGLAT.
 
 ## Properties
 
-Inherits from all [Base Layer](/docs/layers/base-layer.md) properties.
+Inherits from all [Base Layer](/docs/api-reference/base-layer.md) properties.
 
 ##### `radius` (Number, optional)
 

@@ -15,6 +15,7 @@ Github Markdown Stylesheet (c) Sindre Sorhus <sindresorhus@gmail.com> (sindresor
   font-size: 14px;
   line-height: 1.5;
   word-wrap: break-word;
+  max-width: 900px;
 }
 
 .markdown-body .badges {
@@ -238,35 +239,6 @@ Github Markdown Stylesheet (c) Sindre Sorhus <sindresorhus@gmail.com> (sindresor
 .markdown-body h6 {
   margin-top: 0;
   margin-bottom: 0;
-}
-
-.markdown-body h1 {
-  font-size: 32px;
-  font-weight: 600;
-}
-
-.markdown-body h2 {
-  font-size: 24px;
-  font-weight: 600;
-}
-
-.markdown-body h3 {
-  font-size: 20px;
-  font-weight: 600;
-}
-
-.markdown-body h4 {
-  font-size: 16px;
-  font-weight: 600;
-}
-
-.markdown-body h5 {
-  font-size: 14px;
-  font-weight: 600;
-}
-
-.markdown-body h6 {
-  font-size: 12px;
   font-weight: 600;
 }
 
@@ -458,7 +430,7 @@ Github Markdown Stylesheet (c) Sindre Sorhus <sindresorhus@gmail.com> (sindresor
 }
 
 .markdown-body h3 {
-  font-size: 1.25em;
+  font-size: 1.2em;
 }
 
 .markdown-body h4 {
@@ -466,12 +438,14 @@ Github Markdown Stylesheet (c) Sindre Sorhus <sindresorhus@gmail.com> (sindresor
 }
 
 .markdown-body h5 {
-  font-size: 0.875em;
+  font-size: 1em;
+  margin-bottom: 8px;
 }
 
 .markdown-body h6 {
   font-size: 0.85em;
   color: #777;
+  margin-bottom: 4px;
 }
 
 .markdown-body ul,

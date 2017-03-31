@@ -11,5 +11,5 @@ Check out the [64 bit about page](/docs/64-bits.md) for more info.
 
     import {ArcLayer64} from 'deck.gl';
 
-Inherits from all [Base Layer](/docs/layers/base-layer.md) properties and has
+Inherits from all [Base Layer](/docs/api-reference/base-layer.md) properties and has
 the same as the [Arc Layer](/docs/layers/arc-layer.md).

@@ -13,7 +13,13 @@ points and renders them as circles with a certain radius.
 
 ## Properties
 
-Inherits from all [Base Layer](/docs/layers/base-layer.md) properties.
+Inherits from all [Base Layer](/docs/api-reference/base-layer.md) properties.
+
+##### `radiusScale` (Number, optional)
+
+- Default: `1`
+
+Global radius across all markers.
 
 ##### `outline` (Boolean, optional)
 
@@ -21,11 +27,24 @@ Inherits from all [Base Layer](/docs/layers/base-layer.md) properties.
 
 Only draw outline of dot.
 
-##### `radiusScale` (Number, optional)
+##### `strokeWidth` (Number, optional)
 
 - Default: `1`
 
-Global radius across all markers.
+Width of the outline, in meters. Requires `outline` to be `true`.
+
+##### `radiusMinPixels` (Number, optional)
+
+- Default: `0`
+
+The minimum radius in pixels.
+
+
+##### `radiusMaxPixels` (Number, optional)
+
+- Default: `Number.MAX_SAFE_INTEGER`
+
+The maximum radius in pixels.
 
 
 ## Accessors

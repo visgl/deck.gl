@@ -47,16 +47,6 @@ Remarks
   component also handles events propagation across layers, and prevents
   unnecessary calculations using React and deck.gl lifecycle functions.
 
-* Picking: The info objects have a number of fields, most interesting are
-  perhaps `layer` and `index`. If the data prop is an `Array`, `info.object`
-  will contain the selected object in the array.
-
-* Layers can add additional fields to the picking `info` object, check the
-  documentation of each layer.
-
-* Picking happens in top-to-bottom order (reverse of rendering), i.e.
-  deck.gl traverses the layer list backwards during picking.
-
 
 ## DeckGL React Component API
 
@@ -142,13 +132,13 @@ Callback arguments:
 
 ##### `onLayerHover` (Function, optional)
 
-Callback - called when the mouse moves over the layers.
+Callback - called when the object under the pointer changes.
 
 Arguments:
-- `info` - the [info](#remarks) object for the topmost matched layer
-at the coordinate
+- `info` - the [`info`](/docs/interactivity.md#the-picking-info-object)
+object for the topmost picked layer at the coordinate
 - `pickedInfos` - an array of info objects for all pickable layers that
-are visible, in top to bottom order.
+are affected.
 - `event` - the original MouseEvent object
 
 ##### `onLayerClick` (Function, optional)
@@ -156,8 +146,8 @@ are visible, in top to bottom order.
 Callback - called when clicking on the layer.
 
 Arguments:
-- `info` - the [info](#remarks) object for the topmost matched layer
-at the coordinate
+- `info` - the [`info`](/docs/interactivity.md#the-picking-info-object)
+object for the topmost picked layer at the coordinate
 - `pickedInfos` - an array of info objects for all pickable layers that
-are visible, in top to bottom order.
+are affected.
 - `event` - the original MouseEvent object

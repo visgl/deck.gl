@@ -13,7 +13,7 @@ renders it as interactive choropleths.
 
     import {ChoroplethLayer} from 'deck.gl';
 
-Inherits from all [Base Layer](/docs/layers/base-layer.md) properties.
+Inherits from all [Base Layer](/docs/api-reference/base-layer.md) properties.
 
 ## Layer-specific Properties
 

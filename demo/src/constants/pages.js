@@ -13,7 +13,7 @@ function generatePath(tree, parentPath = '') {
     tree.forEach(branch => generatePath(branch, parentPath));
   }
   if (tree.name) {
-    tree.path = tree.name.match(/(([A-Z]|^)[a-z]+|3D|\d+)/g).join('-').toLowerCase();
+    tree.path = tree.name.match(/(GeoJson|3D|([A-Z]|^)[a-z]+|\d+)/g).join('-').toLowerCase();
   }
   if (tree.children) {
     generatePath(tree.children, `${parentPath}/${tree.path}`);
@@ -146,16 +146,16 @@ export const docPages = generatePath([
       {
         name: 'Viewports',
         content: getDocUrl('viewports.md')
+      },
+      {
+        name: 'Interactivity',
+        content: getDocUrl('interactivity.md')
       }
     ]
   },
   {
     name: 'Core Layers',
     children: [
-      {
-        name: 'Layer Base Class',
-        content: getDocUrl('layers/base-layer.md')
-      },
       {
         name: 'ScatterplotLayer',
         content: getDocUrl('layers/scatterplot-layer.md')
@@ -169,7 +169,7 @@ export const docPages = generatePath([
         content: getDocUrl('layers/line-layer.md')
       },
       {
-        name: 'GeoJSONLayer',
+        name: 'GeoJsonLayer',
         content: getDocUrl('layers/geojson-layer.md')
       },
       {
@@ -207,22 +207,17 @@ export const docPages = generatePath([
       {
         name: 'HexagonCellLayer',
         content: getDocUrl('layers/hexagon-cell-layer.md')
-      }
-    ]
-  },
-  {
-    name: 'Deprecated Layers',
-    children: [
+      },
       {
-        name: 'ChoroplethLayer',
+        name: 'ChoroplethLayer (DEPRECATED)',
         content: getDocUrl('layers/deprecated/choropleth-layer.md')
       },
       {
-        name: 'ChoroplethLayer64',
+        name: 'ChoroplethLayer64 (DEPRECATED)',
         content: getDocUrl('layers/deprecated/choropleth-layer-64.md')
       },
       {
-        name: 'ExtrudedChoroplethLayer64',
+        name: 'ExtrudedChoroplethLayer64 (DEPRECATED)',
         content: getDocUrl('layers/deprecated/extruded-choropleth-layer.md')
       }
     ]
@@ -231,28 +226,36 @@ export const docPages = generatePath([
     name: 'Custom Layers',
     children: [
       {
-        name: 'Customizing Layers',
-        content: getDocUrl('composite-layers.md')
+        name: 'Overview',
+        content: getDocUrl('writing-layers/overview.md')
       },
       {
-        name: 'Subclassing Layers',
-        content: getDocUrl('subclassing-layers.md')
+        name: 'Composite Layers',
+        content: getDocUrl('writing-layers/composite-layers.md')
       },
       {
-        name: 'Writing New Layers',
-        content: getDocUrl('custom-layers.md')
+        name: 'Subclassed Layers',
+        content: getDocUrl('writing-layers/subclassed-layers.md')
+      },
+      {
+        name: 'From Ground Up',
+        content: getDocUrl('writing-layers/new-layers.md')
       },
       {
         name: 'Layer Lifecycle',
-        content: getDocUrl('layer-lifecycle.md')
+        content: getDocUrl('writing-layers/layer-lifecycle.md')
       },
       {
         name: 'Attribute Management',
-        content: getDocUrl('attribute-management.md')
+        content: getDocUrl('writing-layers/attribute-management.md')
       },
       {
         name: 'Writing Shaders',
-        content: getDocUrl('writing-shaders.md')
+        content: getDocUrl('writing-layers/writing-shaders.md')
+      },
+      {
+        name: 'Picking',
+        content: getDocUrl('writing-layers/picking.md')
       }
     ]
   },
@@ -261,21 +264,25 @@ export const docPages = generatePath([
     children: [
       {
         name: 'Performance',
-        content: getDocUrl('performance.md')
+        content: getDocUrl('advanced/performance.md')
       },
       {
         name: 'Using Standalone',
-        content: getDocUrl('using-standalone.md')
+        content: getDocUrl('advanced/using-standalone.md')
       },
       {
         name: 'Tips and Tricks',
-        content: getDocUrl('tips-and-tricks.md')
+        content: getDocUrl('advanced/tips-and-tricks.md')
       }
     ]
   },
   {
     name: 'API Reference',
     children: [
+      {
+        name: 'Layer Base Class',
+        content: getDocUrl('api-reference/base-layer.md')
+      },
       {
         name: 'AttributeManager',
         content: getDocUrl('api-reference/attribute-manager.md')

@@ -14,7 +14,7 @@ specified as latitude/longitude coordinates.
 
 ## Properties
 
-Inherits from all [Base Layer](/docs/layers/base-layer.md) properties.
+Inherits from all [Base Layer](/docs/api-reference/base-layer.md) properties.
 
 ##### `strokeWidth` (Number, optional)
 

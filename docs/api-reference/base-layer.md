@@ -99,31 +99,31 @@ Whether the layer responds to mouse pointer picking events.
 
 ##### `onHover` (Function, optional)
 
-This callback will be called when the mouse hovers over the deck.gl
-viewport. The callback will be called for the layer that has
-been picked and the data object that user's mouse is hovered on will be
-reported to the caller of onHover through a single parameter `info`.
-This `info` object contains a variety of fields describing the mouse or touch
-event and what was hovered.
+This callback will be called when the mouse enters/leaves an object of this
+deck.gl layer with a single parameter
+[`info`](/docs/interactivity.md#the-picking-info-object).
 
-If index is -1, no feature is matched for this layer.
+If this callback returns a truthy value, the `hover` event is marked as handled
+and will not bubble up to the
+[`onLayerHover`](/docs/using-with-react.md#-onlayerhover-function-optional-)
+callback of the `DeckGL` canvas.
 
-**Requires `pickable` to be true.**
+Requires `pickable` to be true.**
 
 ##### `onClick` (Function, optional)
 
-This callback will be called when the mouse clicks over the deck.gl
-viewport. The callback will be called for the layer that has
-been picked and the data object that user's mouse is clicked on will be
-reported to the caller of onClick through a single parameter `info`.
-This `info` object contains a variety of fields describing the mouse or touch
-event and what was clicked.
+This callback will be called when the mouse clicks over an object of this
+deck.gl layer with a single parameter
+[`info`](/docs/interactivity.md#the-picking-info-object).
 
-If index is -1, no feature is matched for this layer.
+If this callback returns a truthy value, the `hover` event is marked as handled
+and will not bubble up to the
+[`onLayerHover`](/docs/using-with-react.md#-onlayerhover-function-optional-)
+callback of the `DeckGL` canvas.
 
-**Requires `pickable` to be true.**
+Requires `pickable` to be true.**
 
-## Coordinate System Properties
+### Coordinate System Properties
 
 Normally only used when the application wants to work with coordinates
 that are not Web Mercator projected longitudes/latitudes.
@@ -188,7 +188,7 @@ deck.gl automatically derives the number of drawing instances from the `data` pr
 counting the number of objects in `data`. However, the developer might want to
 maunally override it using this prop.
 
-##### `updateTriggers`
+##### `updateTriggers` (Object, optional)
 
 This prop expects an object of which the keys matching the accessor names of a layer.
 If any values in this object are changed between props update, the attribute corresponding
@@ -201,3 +201,83 @@ Note: shallow comparision of the `data` prop has higher priority than the `updat
 if the app to mint a new object on every render, all attributes will be automatically updated.
 updateTriggers cannot block attribute updates, just trigger them. To block the attribute updates,
 developers need to override the updateState.
+
+
+## Methods
+
+> Layer methods are designed to support the creation of new layers through
+layer sub-classing and are not intended to be called by applications.
+
+### General Methods
+
+##### setState()
+
+Used to update the layers state object, which allows a layer to store
+information that will be available to the next matching layer.
+
+Calling this method will also mark the layer as needing a rerender.
+
+### Layer Lifecycle Methods
+
+Not to be called by the user.
+See [layer lifecycle](/docs/layer-lifecycle.md).
+
+### Layer Projection Methods
+
+While most projection is handled "automatically" in the layers vertex
+shader, it is occasionally useful to be able to work in the projected
+coordinates in JavaScript while calculating uniforms etc.
+
+##### `project(lngLatZ[, options])`
+
+- `lngLatZ`: an array of `[longitude, latitude, altitude]`.
+- `options.topLeft`: whether to use screen coordinates (start from top
+left) or clipspace-like coordinates (start from bottom left).
+Default to `true`.
+
+Projects a map coordinate using the current viewport settings.
+
+##### `unproject(xyz[, options])`
+
+- `xyz`: an array of `[x, y, depth]`.
+- `options.topLeft`: whether to use screen coordinates (start from top
+left) or clipspace-like coordinates (start from bottom left).
+Default to `true`.
+
+Projects a pixel coordinate using the current viewport settings.
+
+##### `projectFlat(lngLatZ[, options])`
+
+- `lngLatZ`: an array of `[longitude, latitude, altitude]`.
+- `options.topLeft`: whether to use screen coordinates (start from top
+left) or clipspace-like coordinates (start from bottom left).
+Default to `true`.
+
+Projects a map coordinate using the current viewport settings, ignoring any
+perspective tilt. Can be useful to calculate screen space distances.
+
+##### `unprojectFlat(xyz[, options])`
+
+- `xyz`: an array of `[x, y, depth]`.
+- `options.topLeft`: whether to use screen coordinates (start from top
+left) or clipspace-like coordinates (start from bottom left).
+Default to `true`.
+
+Unrojects a pixel coordinate using the current viewport settings, ignoring any
+perspective tilt (meaning that the pixel was projected).
+
+##### `screenToDevicePixels(pixels)`
+
+- `pixels`: a number in screen pixels to scale to device pixels.
+
+Simply multiplies `pixels` parameter with `window.devicePixelRatio` if
+available.
+
+Useful to adjust e.g. line widths to get more consistent visuals between
+low and high resolution displays.
+
+### Layer Picking Methods
+
+Not to be called by the user.
+See [implement picking](/docs/writing-layers/picking.md#layer-picking-methods).
+

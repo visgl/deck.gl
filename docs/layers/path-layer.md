@@ -9,7 +9,7 @@ renders them as extruded lines with mitering.
 
 ## Properties
 
-Inherits from all [Base Layer](/docs/layers/base-layer.md) properties.
+Inherits from all [Base Layer](/docs/api-reference/base-layer.md) properties.
 
 ##### `widthScale` (Number, optional)
 

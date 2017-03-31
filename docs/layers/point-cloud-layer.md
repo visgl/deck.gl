@@ -9,7 +9,7 @@ and renders them as spheres with a certain radius.
 
 ## Properties
 
-Inherits from all [Base Layer](/docs/layers/base-layer.md) properties.
+Inherits from all [Base Layer](/docs/api-reference/base-layer.md) properties.
 
 ##### `radiusPixels` (Number, optional)
 

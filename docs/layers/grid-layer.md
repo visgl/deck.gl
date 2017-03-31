@@ -14,7 +14,7 @@ and height of the cell is scaled by number of points it contains.
 
 ## Properties
 
-Inherits from all [Base Layer](/docs/layers/base-layer.md) properties.
+Inherits from all [Base Layer](/docs/api-reference/base-layer.md) properties.
 
 ##### `cellSize` (Number, optional)
 
