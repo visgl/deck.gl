@@ -56,7 +56,7 @@ otherwise will be in unit coordinates.
 * A complex polygon is specified as an array of simple polygons, the first polygon
   representing the outer outline, and the remaining polygons representing holes. These polygons are expected to not intersect.
 
-### Properties
+## Properties
 
 Inherits from all [Base Layer](/docs/api-reference/base-layer.md) properties.
 
@@ -92,12 +92,7 @@ Whether to generate a line wireframe of the hexagon. The outline will have
 "horizontal" lines closing the top and bottom polygons and a vertical line
 (a "strut") for each vertex on the polygon.
 
-**Remarks:**
-
-* These lines are rendered with `GL.LINE` and will thus always be 1 pixel wide.
-* Wireframe and solid extrusions are exclusive, you'll need to create two layers
-  with the same data if you want a combined rendering effect.
-* This is only effective if the `extruded` prop is set to true.
+Requires the `extruded` prop to be true.
 
 ##### `lineWidthScale` (Boolean, optional)
 
@@ -184,3 +179,6 @@ The width of the outline of the polygon, in meters
   the first and last vertices, when those vertices are not equal.
 * The specification of complex polygons intentionally follows the GeoJson
   conventions for representing polygons with holes.
+* Wireframe lines are rendered with `GL.LINE` and thus will always be 1 pixel wide.
+* Wireframe and solid extrusions are exclusive, you'll need to create two layers
+  with the same data if you want a combined rendering effect.

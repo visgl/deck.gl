@@ -24,22 +24,13 @@ new PolygonLayer({
 ```
 
 * The polypgons can be simple or complex (complex polygons are polygons with holes).
-  * A simple polygon specified as an array of vertices, each vertice being an array
-    of two or three numbers
-  * A complex polygon is specified as an array of simple polygons, the
-    first polygon representing the outer outline, and the remaining polygons
-    representing holes. These polygons are expected to not intersect.
+* A simple polygon specified as an array of vertices, each vertice being an array
+  of two or three numbers
+* A complex polygon is specified as an array of simple polygons, the
+  first polygon representing the outer outline, and the remaining polygons
+  representing holes. These polygons are expected to not intersect.
 
-**Remarks:**
-
-* This layer only renders filled polygons. If you need to render polygon
-  outlines, use the [`PathLayer`](/docs/layers/path-layer.md)
-* Polygons are always closed, i.e. there is an implicit line segment between
-  the first and last vertices, when those vertices are not equal.
-* The specification of complex polygons intentionally follows the GeoJson
-  conventions for representing polugons with holes.
-
-### Properties
+## Properties
 
 Inherits from all [Base Layer](/docs/api-reference/base-layer.md) properties.
 
@@ -98,3 +89,12 @@ Method called to retrieve the elevation of each object's polygon.
 
 If a cartographic projection mode is used, height will be interpreted as meters,
 otherwise will be in unit coordinates.
+
+## Remarks
+
+* This layer only renders filled polygons. If you need to render polygon
+  outlines, use the [`PathLayer`](/docs/layers/path-layer.md)
+* Polygons are always closed, i.e. there is an implicit line segment between
+  the first and last vertices, when those vertices are not equal.
+* The specification of complex polygons intentionally follows the GeoJson
+  conventions for representing polugons with holes.

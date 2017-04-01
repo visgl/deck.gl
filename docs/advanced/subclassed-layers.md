@@ -7,7 +7,7 @@ the vertex and/or fragment shaders.
 If a small feature is missing from a layer, subclassing can often be a
 good technique to add it.
 
-### Overriding Attribute Calculation
+## Overriding Attribute Calculation
 
 ```js
 // Example to add per-segment color to PathLayer
@@ -55,7 +55,7 @@ export default MultiColorPathLayer extends PathLayer {
 
 *[Courtesy](https://github.com/uber/deck.gl/pull/336) of [@dcposch](https://github.com/dcposch).*
 
-### Overriding Shaders
+## Overriding Shaders
 
 You can replace the shaders used in a layer by overriding the `getShaders()`
 method. Every core layer calls this method during initialization. It
@@ -70,7 +70,7 @@ also define a `getShaders()` function to retreive your shaders.
 This makes it much easier for others to subclass your layer and make small
 changes to the shaders.
 
-### Defining Additional Uniforms
+## Defining Additional Uniforms
 
 The best way to pass additional uniforms to your custom shader is to override
 the `draw()` method:
@@ -133,7 +133,7 @@ void main(void) {
 `;
 ```
 
-### Defining Additional Attributes
+## Defining Additional Attributes
 
 During initialization, you may define additional attributes by accessing the
 layer's [attribute manager](/docs/advanced/attribute-management.md):

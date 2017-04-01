@@ -34,7 +34,7 @@ needs to be reaggregated by the layer whenever the map is zoomed or panned.
 This means that this layer is best used with small data set, however the
 visuals when used with the right data set can be quite effective.
 
-### Properties
+## Properties
 
 Inherits from all [Base Layer](/docs/api-reference/base-layer.md) properties.
 

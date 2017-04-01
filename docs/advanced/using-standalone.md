@@ -29,7 +29,6 @@ the application will have to implement its own event handling
 Note that all deck.gl examples currently rely on react-map-gl's event
 handling.
 
-
 ## Using deck.gl without React
 
 In lieu of better documentation, the [React integration](/doc/api-reference/deckgl.md)

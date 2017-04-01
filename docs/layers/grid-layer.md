@@ -34,9 +34,9 @@ const App = ({data, viewport}) => {
 };
 ```
 
-**Remark:** GridLayer at the moment only works with `COORDINATE_SYSTEM.LNGLAT`.
+**Note:** The `GridLayer` at the moment only works with `COORDINATE_SYSTEM.LNGLAT`.
 
-### Properties
+## Properties
 
 Inherits from all [Base Layer](/docs/api-reference/base-layer.md) properties.
 
@@ -93,7 +93,9 @@ Whether to enable cell elevation. Cell elevation scale by count of points in eac
 
 Whether the layer should be rendered in high-precision 64-bit mode
 
-##### `lightSettings` (Object, optional) **EXPERIMENTAL**
+##### `lightSettings` (Object, optional)
+
+**EXPERIMENTAL**
 
 This is an object that contains light settings for extruded polygons.
 Be aware that this prop will likely be changed in a future version of deck.gl.

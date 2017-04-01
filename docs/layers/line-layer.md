@@ -32,7 +32,7 @@ const App = ({data, viewport}) => {
 };
 ```
 
-### Properties
+## Properties
 
 Inherits from all [Base Layer](/docs/api-reference/base-layer.md) properties.
 

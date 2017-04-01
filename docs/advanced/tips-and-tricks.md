@@ -33,7 +33,6 @@ element.
 }
 ```
 
-
 ## Debugging and Instrumentation
 
 deck.gl is built on luma.gl which has extensive debugging and instrumentation
