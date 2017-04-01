@@ -13,19 +13,19 @@ We've just released a new major version of deck.gl, so this is a good time to sh
 
 ### What Motivated the Release?
 
-When we did our first external [announcement](https://eng.uber.com/deck-gl-framework/) of deck.gl in November 2016 (coinciding with the deck.gl v3 release), we also stated our intent to improve and expand deck.gl's layer catalog in future releases, and that is a major part of what we are doing now through the deck.gl v4 release.
+When we did our first external [announcement](https://eng.uber.com/deck-gl-framework/) of deck.gl in November 2016 (announcing the deck.gl v3 release), we also stated our intent to improve and expand deck.gl's layer catalog in future releases, and that is a major part of what we are doing now through the deck.gl v4 release.
 
-deck.gl has seen rapid adoption across a number of internal data visualization applications here at Uber. A long list of new layers were developed for these applications, and the most general of these layers started to be reused between applications. It quickly became clear that including the "best" of these layer in a new official deck.gl release would be helpful both to internal and external developers.
+deck.gl v3 saw rapid adoption across a number of internal data visualization applications here at Uber, and it didn't take long before an impressive list of new layers had been developed to support these applications. The most general of these layers soon started to be reused between applications, and it quickly became clear that including the "best" of these layers in a new official deck.gl release would likely be of high value both to internal and external developers.
 
 In deck.gl v4, the core layer catalog in deck.gl effectively doubles in size to over a dozen carefully audited, tested and documented [layers](https://uber.github.io/deck.gl/#/documentation/layer-catalog), covering a significantly wider array of geospatial visualization use cases.
 
-Obviously, while the new layers are the big stars of this release, deck.gl v4 includes more than just the layers. It covers almost five months of intensive development, during which have received and addressed many good comments, suggestions, bug reports and feature requests, both from internal and external users. If you are already a deck.gl v3 user, we believe that as you start working with v4, you will find few areas, whether in terms of APIs, documentation, examples, or actual code that haven't received some level of additional polish.
+Obviously, while the new layers are the big stars of the release, deck.gl v4 includes more than just the layers. It covers almost five months of intensive development, during which have received and addressed many good comments, suggestions, bug reports and feature requests, both from internal and external users. If you are already a deck.gl v3 user, we believe that as you start working with v4, you will find few areas, whether in terms of APIs, documentation, examples or actual code, that haven't received some level of additional polish.
 
 ### Why a Major Version Bump?
 
 We take backwards compatibility of deck.gl very seriously, and deck.gl follows [semver](http://semver.org) versioning rules, which require that any change to existing functionality, no matter how small, is accompanied by a bump of the major version number, from 3 to 4 in this case.
 
-Obviously, an addition of new layers would not by itself change existing functionality, and thus only require a minor version bump (e.g. deck.gl v3.1). However, as part of the release preparations, we conducted an extensive API audit of both the new v4 layers and the existing v3 layers and found that doing a small set of changes to existing v3 layer APIs would allow us to make the APIs of all layers considerably more consistent and the whole framework more cohesive and logical.
+Obviously, the addition of a set of new layers would not by itself change any existing functionality, and thus only require a minor version bump (e.g. deck.gl v3.1). However, as part of the release preparations, we conducted an extensive API audit of both the new v4 layers and the existing v3 layers and found that doing a small set of changes to existing v3 layer APIs would allow us to make the APIs of all layers considerably more consistent and the whole framework more cohesive and logical, which was clearly the right long-term choice.
 
 In spite of the major version bump, deck.gl v4 remains highly compatible with deck.gl v3, both in terms of public APIs and the way layers work. Also, to ensure a smooth transition, an
 [upgrade guide](https://uber.github.io/deck.gl/#/documentation/overview/upgrade-from-v3)
@@ -33,7 +33,7 @@ is provided and we expect the upgrade effort for applications to be minimal.
 
 ## A Growing Layer Catalog
 
-From the very beginning, deck.gl has always been a geospatial data visualization framework, and geospatial use cases will always be the top priority. The new layers added to the [layer catalog](https://uber.github.io/deck.gl/#/documentation/layer-catalog) are widely used in geospatial data analysis within Uber and we hope they will help solve the problems of deck.gl users face everyday.
+From the very beginning, deck.gl has always been a geospatial data visualization framework, and geospatial use cases will always be the top priority. The new layers added to the [layer catalog](https://uber.github.io/deck.gl/#/documentation/layer-catalog) are widely used in geospatial data analysis within Uber and we hope they will help solve the problems that deck.gl users face every day.
 
 ### [`GeoJsonLayer`](https://uber.github.io/deck.gl/#/documentation/layer-catalog/geojson-layer)
 
