@@ -1,4 +1,5 @@
-## OrthographicViewport
+
+# OrthographicViewport Class
 
 A subclass of `Viewport` that creates an orthogonal matrix
 

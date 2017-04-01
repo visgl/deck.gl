@@ -1,4 +1,5 @@
-## PerspectiveViewport
+
+# PerspectiveViewport Class
 
 A subclass of `Viewport` that creates a perspective view based on typical
 affine perspective projection matrix parameters (`fov`, `aspect`, `near`, `far`).
@@ -9,7 +10,7 @@ Remarks:
   `gl-matrix` module.
 
 
-### `PerspectiveViewport.constructor`
+##### `constructor`
 
 `new PerspectiveViewport({lookAt, eye, up, fov, aspect, near, far, width, height})`
 

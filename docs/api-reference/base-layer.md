@@ -1,4 +1,4 @@
-# Layer Base Class
+# Layer Class
 
 The `Layer` class is the base class of all deck.gl layers, and it provides
 a number of **base properties** availabe in all layers.

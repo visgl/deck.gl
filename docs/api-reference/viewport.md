@@ -1,6 +1,5 @@
-# API Documentation
 
-## Viewport
+# Viewport Class
 
 Manages projection and unprojection of coordinates between world and viewport
 coordinates.
@@ -20,7 +19,7 @@ Remarks:
   that these still need to be converted to typed arrays.
 
 
-### `Viewport.constructor`
+##### `constructor`
 
 `new Viewport({viewMatrix, projectionMatrix, width, height})`
 
@@ -32,7 +31,7 @@ Remarks:
 | `projectionMatrix` | `Array[16]` | 1 | Either use scale or zoom                      |
 
 
-### `Viewport.getMatrices`
+##### `getMatrices`
 
 Returns an object with various matrices
 
@@ -54,7 +53,7 @@ Returns an object with various matrices
 * `height` (Height) - Height of viewport
 
 
-#### `Viewport.project`
+##### `project`
 
 Projects latitude, longitude (and altitude) to pixel coordinates in window using
 viewport projection parameters.
@@ -72,7 +71,7 @@ Returns:
 Note: By default, returns top-left coordinates for canvas/SVG type render
 
 
-#### `Viewport.unproject`
+##### `unproject`
 
 Unproject pixel coordinates on screen onto [lng, lat, altitude] on map.
 

@@ -1,4 +1,4 @@
-# The AttributeManager Class
+# AttributeManager Class
 
 The `AttributeManager` class automated attribute allocation and updates.
 
@@ -31,12 +31,12 @@ so hooks are provided for update start and end.
 
 ## Methods
 
-### Constructor
+##### `constructor`
 
 * opts (Object) - named parameters
 * opts.id (String, not required) - identifier (for debugging)
 
-### AttributeManager.add
+##### `add`
 
 Adds attribute descriptions to the AttributeManager that describe
 the attributes that should be auto-calculated.

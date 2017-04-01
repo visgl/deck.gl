@@ -1,5 +1,5 @@
 
-## WebMercatorViewport
+# WebMercatorViewport Class
 
 The main purpose of the `WebMercatorViewport` is to enable 3D rendering to
 seamlessly overlay on top of map components that take web mercator style
@@ -17,7 +17,7 @@ Remarks:
   applications (rendering on top of a typical map component that only accepts
   web mercator parameters) the `WebMercatorViewport` is necessary.
 
-### Constructor
+##### `constructor`
 
 | Parameter    |   Type  | Default | Description                                        |
 | ------------ | ------- | ------- | -------------------------------------------------- |
@@ -50,7 +50,7 @@ Remarks:
    latitudes are specified as degrees.
 
 
-### `WebMercatorViewport.project`
+##### `WebMercatorViewport.project`
 
 Projects latitude and longitude to pixel coordinates in window
 using viewport projection parameters
@@ -71,7 +71,7 @@ Remarks:
   rendering.
 
 
-### `WebMercatorViewport.unproject`
+##### `WebMercatorViewport.unproject`
 
 Unproject pixel coordinates on screen onto [lon, lat] on map.
 
@@ -84,7 +84,7 @@ Returns: Unprojected coordinates in array from, depending on input:
 - `[x, y, z]` => `[lng, lat, Z]`
 
 
-#### `WebMercatorViewport.projectFlat([lng, lat], scale = this.scale)`
+####$ `WebMercatorViewport.projectFlat([lng, lat], scale = this.scale)`
 
 Project `[lng, lat]` on sphere onto "screen pixel" coordinates `[x, y]` without
 considering any perspective (effectively ignoring pitch, bearing and altitude).
@@ -97,7 +97,7 @@ Returns:
 
  - `[x, y]`, representing map or world coordinates.
 
-#### `PerspectiveViewport.unprojectFlat`
+##### `PerspectiveViewport.unprojectFlat`
 
 Unprojects a screen point `[x, y]` on the map or world `[lng, lat]` on sphere.
 * `lnglat` - Array `[lng, lat]` or `[xmap, ymap]` coordinates
@@ -108,7 +108,7 @@ Parameters:
  - `pixels` {Array} - `[x, y]`
 
 
-#### `WebMercatorViewport.unprojectFlat([x, y], scale = this.scale)`
+##### `WebMercatorViewport.unprojectFlat([x, y], scale = this.scale)`
 
 
 Parameters:
@@ -118,7 +118,7 @@ Returns:
 * [lat, lon] or [x, y] of point on sphere.
 
 
-#### `getDistanceScales()`
+##### `getDistanceScales()`
 
 Returns:
 - An object with precalculated distance scales allowing conversion between
@@ -134,7 +134,7 @@ Remarks:
   mentioned above.
 
 
-#### `metersToLngLatDelta(xyz)`
+##### `metersToLngLatDelta(xyz)`
 
 Converts a meter offset to a lnglat offset using linear approximation.
 For information on numerical precision, see remarks on `getDistanceScales`.
@@ -143,7 +143,7 @@ For information on numerical precision, see remarks on `getDistanceScales`.
 returns ([Number,Number]|[Number,Number,Number]) - array of [lng,lat,z] deltas
 
 
-#### `lngLatDeltaToMeters(deltaLngLatZ)`
+##### `lngLatDeltaToMeters(deltaLngLatZ)`
 
 Converts a lnglat offset to a meter offset using linear approximation.
 For information on numerical precision, see remarks on `getDistanceScales`.
@@ -152,7 +152,7 @@ For information on numerical precision, see remarks on `getDistanceScales`.
 Returns ([Number,Number]|[Number,Number,Number]) - array of meter deltas
 
 
-#### `addMetersToLngLat(lngLatZ, xyz)`
+##### `addMetersToLngLat(lngLatZ, xyz)`
 
 Add a meter delta to a base lnglat coordinate, returning a new lnglat array,
 using linear approximation.
