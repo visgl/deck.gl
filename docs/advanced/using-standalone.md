@@ -10,7 +10,7 @@ applications.
 
 ## LayerManager class
 
-The deck.gl `LayerManager` class handles updates, drawing and picking
+The deck.gl [LayerManager](/doc/api-reference/layer-manager.md) class handles updates, drawing and picking
 for a set of layers.
 
 * Use the `setViewport` method to update viewport.
@@ -29,11 +29,8 @@ the application will have to implement its own event handling
 Note that all deck.gl examples currently rely on react-map-gl's event
 handling.
 
-
 ## Using deck.gl without React
 
-In lieu of better documentation, the React integration in
-`src/react/deckgl.js` uses the `LayerManager` class to render
-the layers, so looking at that code can be a good reference
-for how to use the `LayerManager` class.
-
+In lieu of better documentation, the [React integration](/doc/api-reference/deckgl.md)
+uses the `LayerManager` class to render the layers, so looking at that code
+can be a good reference for how to use it.

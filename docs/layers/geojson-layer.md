@@ -7,17 +7,19 @@
 
 # GeoJsonLayer
 
-The GeoJson Layer takes in [GeoJson](http://geojson.org/) formatted data and
+The GeoJson Layer takes in [GeoJson](http://geojson.org) formatted data and
 renders it as interactive polygons, lines and points.
+[Source](https://github.com/uber/deck.gl/tree/master/src/layers/core/geojson-layer)
 
-```
+```js
 import DeckGL, {GeoJsonLayer} from 'deck.gl';
 
-render() {
+const App = ({data, viewport}) => {
   const {data, viewport} = this.props;
 
-  /* data format:
-   * a valid GeoJSON object
+  /**
+   * Data format:
+   * Valid GeoJSON object
    */
   const layer = new GeoJsonLayer({
     id: 'geojson-layer',
@@ -27,13 +29,11 @@ render() {
     extruded: true
   });
 
-  return <DeckGL {...viewport} layers={[layer]} />
-}
+  return (<DeckGL {...viewport} layers={[layer]} />);
+};
 ```
 
 ## Properties
-
-### Base Layer Properties
 
 Inherits from all [Base Layer](/docs/api-reference/base-layer.md) properties.
 
@@ -178,8 +178,3 @@ Note: This accessor is only called for `Polygon` and `MultiPolygon` features.
   for an optional property `color`, which is expected to be a 4 element
   array of values between 0 and 255, representing the rgba values for
   the color of that `Feature`.
-
-
-## Source Code
-[GeoJsonLayer](https://github.com/uber/deck.gl/tree/master/src/layers/core/geojson-layer)
-

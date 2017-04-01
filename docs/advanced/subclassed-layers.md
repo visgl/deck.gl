@@ -9,12 +9,11 @@ good technique to add it.
 
 ## Overriding Attribute Calculation
 
-```
+```js
 // Example to add per-segment color to PathLayer
-// adapted from the implementation by @dcposch
 import {PathLayer} from 'deck.gl';
 
-// Accesor: `getColor` (Function, optional)
+// Accessor: `getColor` (Function, optional)
 // Returns an color (array of numbers, RGBA) or array of colors (array of arrays).
 
 export default MultiColorPathLayer extends PathLayer {
@@ -54,6 +53,8 @@ export default MultiColorPathLayer extends PathLayer {
 }
 ```
 
+*[Courtesy](https://github.com/uber/deck.gl/pull/336) of [@dcposch](https://github.com/dcposch).*
+
 ## Overriding Shaders
 
 You can replace the shaders used in a layer by overriding the `getShaders()`
@@ -69,13 +70,12 @@ also define a `getShaders()` function to retreive your shaders.
 This makes it much easier for others to subclass your layer and make small
 changes to the shaders.
 
-
 ## Defining Additional Uniforms
 
 The best way to pass additional uniforms to your custom shader is to override
 the `draw()` method:
 
-```
+```js
 /// my-scatterplot-layer.js
 // Example to draw rounded rectangles instead of circles in ScatterplotLayer
 import {ScatterplotLayer} from 'deck.gl';
@@ -104,7 +104,8 @@ RoundedRectangleLayer.defaultProps = {
   cornerRadius: 0.1
 }
 ```
-```
+
+```js
 /// my-scatterplot-layer-fragment.js
 export default `\
 #define SHADER_NAME my-scatterplot-layer-fragment-shader
@@ -137,8 +138,8 @@ void main(void) {
 During initialization, you may define additional attributes by accessing the
 layer's [attribute manager](/docs/advanced/attribute-management.md):
 
-```
-/// my-point-cloud-layer.js
+```js
+// my-point-cloud-layer.js
 // Example to add per-point size to point cloud layer
 import {PointCloudLayer} from 'deck.gl';
 import vertexShader from 'my-point-cloud-layer-vertex';
@@ -174,8 +175,9 @@ MyPointCloudLayer.defaultProps = {
   getRadiusPixels: d => 1
 }
 ```
-```
-/// my-point-cloud-layer-vertex.js
+
+```js
+// my-point-cloud-layer-vertex.js
 export default `\
 #define SHADER_NAME my-point-cloud-layer-vertex-shader
 

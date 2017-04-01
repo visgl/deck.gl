@@ -1,21 +1,22 @@
 <!-- INJECT:"LineLayerDemo" -->
 
 <p class="badges">
-  <img src="https://img.shields.io/badge/-64--bit-blue.svg?style=flat-square" alt="64-bit" />
+  <img src="https://img.shields.io/badge/64--bit-support-blue.svg?style=flat-square" alt="64-bit" />
 </p>
 
-# Line Layer
+# LineLayer
 
 The Line Layer renders flat lines joining pairs of source and target points,
 specified as latitude/longitude coordinates.
+[Source](https://github.com/uber/deck.gl/tree/master/src/layers/core/line-layer)
 
-```
+```js
 import DeckGL, {LineLayer} from 'deck.gl';
 
-render() {
-  const {data, viewport} = this.props;
+const App = ({data, viewport}) => {
 
-  /* data format:
+  /**
+   * Data format:
    * [
    *   {sourcePosition: [-122.4, 37.7], targetPosition: [-122.5, 37.8], color: [255, 0, 0]},
    *   ...
@@ -27,13 +28,11 @@ render() {
     strokeWdith: 2
   });
 
-  return <DeckGL {...viewport} layers={[layer]} />
-}
+  return (<DeckGL {...viewport} layers={[layer]} />);
+};
 ```
 
 ## Properties
-
-### Base Layer Properties
 
 Inherits from all [Base Layer](/docs/api-reference/base-layer.md) properties.
 
@@ -73,7 +72,3 @@ Method called to determine the rgba color of the source.
 * If the alpha parameter is not provided, it will be set to `255`.
 * If the method does not return a value for the given object, fallback to
 `[0, 0, 0, 255]`.
-
-
-## Source Code
-[LineLayer](https://github.com/uber/deck.gl/tree/master/src/layers/core/line-layer)

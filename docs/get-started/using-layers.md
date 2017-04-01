@@ -14,10 +14,10 @@ should extract various values
 The data would typically be a list (e.g. Array) of objects, often parsed
 from a JSON or CSV formatted data.
 
-```
-  <DeckGL layers={[
-    new ScatterplotLayer({data: ...})
-  ]}/>
+```js
+<DeckGL layers={[
+  new ArcLayer({data: ...})
+]} />
 ```
 
 When the layer is about to be drawn on screen for the first time,
@@ -33,28 +33,27 @@ them in order (and handle interactivity when hovering clicking etc).
 
 This allows you to compose visualizations using several primitive layers.
 
-```
-  <DeckGL layers={[
-    new ScatterplotLayer({data: ...}),
-    new LineLayer({data: ...}),
-    new ArcLayer({data: ...}),
-  ]}/>
+```js
+<DeckGL layers={[
+  new PathLayer({data: ...}),
+  new LineLayer({data: ...}),
+  new ArcLayer({data: ...}),
+]} />
 ```
 
 The main concern when rendering more than one instance of a specific layer (say
 two `ScatterplotLayer`s) is that their `id` props must be unique for each layer
 or deck.gl will fail to match layers between render cycles.
 
-```
-  <DeckGL layers={[
-    new ScatterplotLayer({id: 'big-points', data: ..., ...}),
-    new ScatterplotLayer({data: 'small-points', data: ..., ...}),
-  ]}/>
+```js
+<DeckGL layers={[
+  new ScatterplotLayer({id: 'big-points', data: ..., ...}),
+  new ScatterplotLayer({data: 'small-points', data: ..., ...}),
+]} />
 ```
 
 The `id` property is similar (but not identicaly) to the `key` property on
 React components.
-
 
 ## Available Layers
 

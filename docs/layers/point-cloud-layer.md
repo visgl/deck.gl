@@ -1,21 +1,22 @@
 <!-- INJECT:"PointCloudLayerDemo" -->
 
 <p class="badges">
-  <img src="https://img.shields.io/badge/-64--bit-blue.svg?style=flat-square" alt="64-bit" />
+  <img src="https://img.shields.io/badge/64--bit-support-blue.svg?style=flat-square" alt="64-bit" />
 </p>
 
 # PointCloudLayer
 
 The Point Cloud Layer takes in points with 3d positions, normals and colors
 and renders them as spheres with a certain radius.
+[Source](https://github.com/uber/deck.gl/tree/master/src/layers/core/point-cloud-layer)
 
-```
+```js
 import DeckGL, {PointCloudLayer} from 'deck.gl';
 
-render() {
-  const {data, viewport} = this.props;
+const App = ({data, viewport}) => {
 
-  /* data format:
+  /**
+   * Data format:
    * [
    *   {position: [-122.4, 37.7, 12], normal: [-1, 0, 0], color: [255, 255, 0]},
    *   ...
@@ -27,13 +28,11 @@ render() {
     radiusPixels: 20
   });
 
-  return <DeckGL {...viewport} layers={[layer]} />
-}
+  return (<DeckGL {...viewport} layers={[layer]} />);
+};
 ```
 
 ## Properties
-
-### Base Layer Properties
 
 Inherits from all [Base Layer](/docs/api-reference/base-layer.md) properties.
 
@@ -77,7 +76,3 @@ Method called to retrieve the rgba color of each object.
 * If the alpha parameter is not provided, it will be set to `255`.
 * If the method does not return a value for the given object, fallback to
 `[0, 0, 0, 255]`.
-
-
-## Source Code
-[PointCloudLayer](https://github.com/uber/deck.gl/tree/master/src/layers/core/point-cloud-layer)
