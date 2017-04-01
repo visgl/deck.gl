@@ -13,13 +13,13 @@ We've just released a new major version of deck.gl, so this is a good time to sh
 
 ### What Motivated the Release?
 
-When we did our first external [announcement](https://eng.uber.com/deck-gl-framework/) of deck.gl in November 2016 (announcing the deck.gl v3 release), we also stated our intent to improve and expand deck.gl's layer catalog in future releases, and that is a major part of what we are doing now through the deck.gl v4 release.
+When we did our first [external announcement](https://eng.uber.com/deck-gl-framework/) of deck.gl in November 2016 (announcing the deck.gl v3 release), we also stated our intention to improve and expand deck.gl's layer catalog in future releases, and that is a major part of what we are doing now through the deck.gl v4 release.
 
 deck.gl v3 saw rapid adoption across a number of internal data visualization applications here at Uber, and it didn't take long before an impressive list of new layers had been developed to support these applications. The most general of these layers soon started to be reused between applications, and it quickly became clear that including the "best" of these layers in a new official deck.gl release would likely be of high value both to internal and external developers.
 
 In deck.gl v4, the core layer catalog in deck.gl effectively doubles in size to over a dozen carefully audited, tested and documented [layers](https://uber.github.io/deck.gl/#/documentation/layer-catalog), covering a significantly wider array of geospatial visualization use cases.
 
-Obviously, while the new layers are the big stars of the release, deck.gl v4 includes more than just the layers. It covers almost five months of intensive development, during which have received and addressed many good comments, suggestions, bug reports and feature requests, both from internal and external users. If you are already a deck.gl v3 user, we believe that as you start working with v4, you will find few areas, whether in terms of APIs, documentation, examples or actual code, that haven't received some level of additional polish.
+Obviously, while the new layers are the big stars of the release, deck.gl v4 includes more than just the layers. It covers almost five months of intensive development, and incorporates improvements addressing an long list of comments, suggestions, bug reports and feature requests from both internal and external users. If you are already a deck.gl v3 user, we believe that as you start working with v4, you will find few areas, whether in terms of APIs, documentation, examples or actual code, that haven't received some level of additional polish.
 
 ### Why a Major Version Bump?
 
@@ -84,11 +84,11 @@ The `PointCloudLayer` is designed to visualize 3D point cloud data, usually gene
 	<img width="400" src="../img/demo-thumb-heatmap.jpg">
 </p>
 
-In this deck.gl release, we have added two layers of the "auto-aggregating" type that was introduced with `ScreenGridLayer` in deck.gl v3. These layers go beyond simply displaying user data on the map. The `GridLayer` and `HexagonLayer` draw equal-area rectangular or hexagonal cells. However, they don't draw one cell per data point like most deck.gl layers do. They first aggregate (or "bin") the user-provided data points into these cells, and then draw the cells using the aggregated values, effectively rendering grid-based **heatmaps**.
+deck.gl v4 introduces two new "auto-aggregating" layers that complement the `ScreenGridLayer` from deck.gl v3. The `GridLayer` and `HexagonLayer` draw equal-area rectangular or hexagonal cells. These layers go beyond directly displaying the supplied data on the map, in that they don't draw one cell per data point, like most deck.gl layers do. They first aggregate (or "bin") the user-provided data points into cells, and then draw the cells using the aggregated values to control properties like color and height, effectively rendering grid-based **heatmaps**.
 
 Aggregation is an exiciting new direction for deck.gl as we want to not only provide layers that are visually compelling to our users, but are also ***smart***.
 
-Finally, note that the new `GridLayer` and `HexagonLayer` are different from the existing `ScreenGridLayer` provided in the previous version as both the rendered geometry and the aggregation boundaries are in **world coordinates** rather than screen coordinates. Another difference is that the new layers also support both 2D and 3D cells.
+Finally, note that the new `GridLayer` and `HexagonLayer` are different from the existing `ScreenGridLayer` as both the rendered geometry and the aggregation boundaries are in world coordinates rather than screen coordinates. Another difference is that the new layers also support both 2D and 3D cells.
 
 ## Layer extrusion and lighting
 
@@ -146,7 +146,7 @@ In the new v4 release of deck.gl, some new layers like the `GeoJsonLayer` and `H
 
 ### More Advanced Picking Support
 
-Picking (e.g. using a mouse to select the graphical representation of one data point to highlight it or show more information about it) is one of the most common tasks of any data visualization applications and is a core functionality we provide with deck.gl. We have ideas for improving picking by adopting better picking boundary arbitration (bigger pick targets), supporting square or polygon area picking, etc.
+Picking (i.e. mouse selection) is one of the most common tasks of any data visualization applications and is a core functionality we provide with deck.gl. We have ideas for improving picking by adopting better picking boundary arbitration (bigger pick targets), supporting square or polygon area picking, etc.
 
 ### Performance
 
