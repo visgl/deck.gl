@@ -35,13 +35,11 @@ export default class App extends Component {
 
   render() {
 
-    const layers = [
-      new LineLayer({id: 'line-layer', data})
-    ]; 
-
     return (
       <MapGL {...viewport} mapboxApiAccessToken={MAPBOX_ACCESS_TOKEN}>
-        <DeckGL {...viewport} layers={layers} />
+        <DeckGL {...viewport} layers={[
+          new LineLayer({id: 'line-layer', data})
+        ]} />
       </MapGL>
     );
   }
