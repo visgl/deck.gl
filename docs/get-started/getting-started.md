@@ -1,10 +1,13 @@
 # Getting Started
 
 ## Installation
-
-    npm install --save deck.gl luma.gl
+```bash
+npm install --save deck.gl luma.gl 
+```
 or
-    yarn add deck.gl luma.gl
+```bash
+yarn add deck.gl luma.gl
+```
 
 Remarks:
 * `luma.gl` will not be automatically installed with deck.gl.
@@ -24,11 +27,9 @@ points for your application.
 You should be able to copy these folders to your preferred locations, and get them running simply by installing dependencies using:
 
 ```bash
-# either
-npm install
-# or
-yarn
+npm install  # or yarn
 ```
+
 and then running using:
 
 ```bash
@@ -37,8 +38,7 @@ export MAPBOX_ACCESS_TOKEN={Your Token Here} && npm start
 
 Remarks:
 
-MAPBOX_ACCESS_TOKEN is the Mapbox token. For most examples shipped with deck.gl, geospatial data is rendered on top of Mapbox-powered basemap. Mapbox requires users to provide an access token before
+`MAPBOX_ACCESS_TOKEN` is the Mapbox token. For most examples shipped with deck.gl, geospatial data is rendered on top of Mapbox-powered basemap. Mapbox requires users to provide an access token before
 they serve map tiles to user's browsers.
 
-For more information about map token read the sections about ["Using with Mapbox"](/docs/get-started/using-with-mapbox-gl.md),
-and the [examples](https://github.com/uber/deck.gl/tree/master/examples/)
+For more information about map token read the sections about [Using with Mapbox](/docs/get-started/using-with-mapbox-gl.md).
