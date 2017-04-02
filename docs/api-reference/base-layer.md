@@ -1,18 +1,18 @@
-# Layer Base Class
+# Layer Class
 
 The `Layer` class is the base class of all deck.gl layers, and it provides
 a number of **base properties** availabe in all layers.
 
 ## Static Members
 
-#### `layerName` (static, string, required)
+#### `layerName` (String, required)
 
 This static property should contain the name of the layer,
 typically the name of layer's class (it cannot reliably be autodeduced in
 minified code). It is used as the default Layer id as well as for debugging
 and profiling.
 
-#### `defaultProps` (static, object, optional)
+#### `defaultProps` (Object, optional)
 
 All deck.gl layers define a `defaultProps` static member listing their props and
 default values. Using `defaultProps` improves both the code readability and
@@ -23,13 +23,16 @@ Remarks:
 to follow core deck.gl layers and define `defaultProps`. In the future version
 of deck.gl, a check will be in place to enforce this
 
-## Properties
+
+## Constructor
+
+- `props` (Object) - Layer properties.
 
 ### Basic Properties
 
 ##### `id` (String, optional)
 
-Default: layers `layerName` static property.
+- Default: layers `layerName` static property.
 
 The `id` must be unique among all your layers at a given time.
 The default value of `id` is the `Layer`'s "name". If more than one instance of
@@ -165,7 +168,7 @@ different coordinate systems.
 
 Note that the matrix projection is applied after the non-linear mercator
 projection calculations are resolved, so be careful when using model matrices
-with lng/lat encoded coordinates. They normally work best with non-mercator
+with longitude/latitude encoded coordinates. They normally work best with non-mercator
 viewports or meter offset based mercator layers
 
 ### Data Properties
@@ -207,24 +210,155 @@ if the app to mint a new object on every render, all attributes will be automati
 updateTriggers cannot block attribute updates, just trigger them. To block the attribute updates,
 developers need to override the updateState.
 
+## Members
+
+> Layer members are designed to support the creation of new layers or
+layer sub-classing and are **not** intended to be used by applications.
+
+##### `context` (Object)
+
+The context object stores information that are shared by all layers.
+
+- `gl` ([WebGLRenderingContext](https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext)) - WebGL context of the current canvas.
+- `viewport` ([Viewport](/docs/api-reference/viewport.md)) - The current viewport
+
+##### `state` (Object)
+
+The state object allows a layer to store persistent information cross rendering cycles.
+
+- `attributeManager` ([AttributeManager](/docs/api-reference/attribute-manager.md)) - The
+attribute manager of this layer.
+
+##### `props` (Object)
+
+[Properties](/docs/api-reference/base-layer.md#constructor) of this layer.
+
 ## Methods
 
-> Layer methods are designed to support the creation of new layers through
-layer sub-classing and are not intended to be called by applications.
+> Layer methods are designed to support the creation of new layers or
+layer sub-classing and are **not** intended to be called by applications.
 
 ### General Methods
 
-##### setState()
+##### `setState`
 
-Used to update the layers state object, which allows a layer to store
-information that will be available to the next matching layer.
-
-Calling this method will also mark the layer as needing a rerender.
+Used to update the layers [`state`](/docs/api-reference/base-layer.md#-state-object-) object.
+Calling this method will also cause the layer to rerender.
 
 ### Layer Lifecycle Methods
 
-Not to be called by the user.
-See [layer lifecycle](/docs/layer-lifecycle.md).
+For more information about when these methods are called,
+see [layer lifecycle](/docs/advanced/layer-lifecycle.md).
+
+##### `initializeState`
+
+This method is called only once for each layer to set up the initial state.
+
+deck.gl will already have created the `state` object at this time, and
+added the `gl` context and the `attributeManager` state.
+
+##### `shouldUpdateState`
+
+Called during each rendering cycle when layer
+[properties](/docs/api-reference/base-layer.md#constructor) or
+[context](/docs/api-reference/base-layer.md#-context-object-) has been updated
+and before layers are drawn.
+
+Parameters:
+
+- `updateParams` (Object)
+  * `updateParams.props` (Object) - Layer properties from the current rendering cycle.
+  * `updateParams.oldProps` (Object) - Layer properties from the previous rendering cycle.
+  * `updateParams.context` (Object) - Layer context from the current rendering cycle.
+  * `updateParams.oldContext` (Object) - Layer context from the previous rendering cycle.
+  * `updateParams.changeFlags`: an object that contains the following boolean
+  flags: `dataChanged`, `propChanged`, `viewportChanged`, `somethingChanged`
+
+Returns:
+
+- `true` this layer needs to be updated.
+
+Remarks:
+
+- Prop change is determined by shallow comparison.
+- Data change is determined by shallow comparison of `props.data` unless 
+[`dataComparator`](/docs/api-reference/base-layer.md#-datacomparator-function-optional-)
+is supplied.
+- The default implementation returns `true` if any change has been detected.
+
+##### `updateState`
+
+Called when a layer needs to be updated.
+
+Parameters:
+
+- `updateParams` (Object)
+  * `updateParams.props` (Object) - Layer properties from the current rendering cycle.
+  * `updateParams.oldProps` (Object) - Layer properties from the previous rendering cycle.
+  * `updateParams.context` (Object) - Layer context from the current rendering cycle.
+  * `updateParams.oldContext` (Object) - Layer context from the previous rendering cycle.
+  * `updateParams.changeFlags`: an object that contains the following boolean
+  flags: `dataChanged`, `propChanged`, `viewportChanged`, `somethingChanged`
+
+The default implementation will invalidate all attributeManager attributes
+if the `data` prop has changed.
+
+##### `draw`
+
+Called on a layer to render to the WebGL canvas.
+
+Parameters:
+
+- `drawParams` (Object)
+  - `drawParams.uniforms`: an object that contains all the
+  [default unforms](/docs/advanced/writing-shaders.md#uniforms)
+  to be passed to the shaders.
+
+The default implementation looks for a variable `model` in the layer's
+state (which is expected to be an instance of the luma.gl `Model` class)
+and calls `draw` on that model.
+
+##### `getPickingInfo`
+
+Called when a layer is being hovered or clicked, before any user callbacks
+are called.
+The layer can override or add additional fields to the `info` object that
+will be passed to the callbacks.
+
+Parameters:
+
+- `pickParams` (Object)
+  * `pickParams.info` (Object) - The current `info` object. By default it contains the
+  following fields:
+    + `x` (Number) - Mouse position x relative to the viewport.
+    + `y` (Number) - Mouse position y relative to the viewport.
+    + `lngLat` ([Number, Number]) - Mouse position in world coordinates. Only applies if
+      [`projectionMode`](/docs/api-reference/base-layer.md#-projectionmode-number-optional-)
+      is `COORDINATE_SYSTEM.LNGLAT`.
+    + `color` (Number[4]) - The color of the pixel that is being picked. It represents a
+      "picking color" that is encoded by
+      [`layer.encodePickingColor()`](/docs/api-reference/base-layer.md#-encodepickingcolor-).
+    + `index` (Number) - The index of the object that is being picked. It is the returned
+      value of
+      [`layer.decodePickingColor()`](/docs/api-reference/base-layer.md#-decodepickingcolor-).
+    + `picked` (Boolean) - `true` if `index` is not `-1`.
+  * `pickParams.mode` (String) - One of `hover` and `click`
+
+Returns:
+
+- An `info` object with optional fields about what was picked.
+This object will be passed to the layer's `onHover` or `onClick` callbacks.
+- `null`, if the corresponding event should cancelled with no callback
+functions called.
+
+The default implementation populates the `info.object` field
+with the `info.index` element from the layer's `data` prop.
+
+##### `finalizeState`
+
+This method is called before the layer is being removed.
+A layer should release all resources created during its life span.
+
 
 ### Layer Projection Methods
 
@@ -232,55 +366,122 @@ While most projection is handled "automatically" in the layers vertex
 shader, it is occasionally useful to be able to work in the projected
 coordinates in JavaScript while calculating uniforms etc.
 
-##### `project(lngLatZ[, options])`
-
-- `lngLatZ`: an array of `[longitude, latitude, altitude]`.
-- `options.topLeft`: whether to use screen coordinates (start from top
-left) or clipspace-like coordinates (start from bottom left).
-Default to `true`.
+##### `project`
 
 Projects a map coordinate using the current viewport settings.
 
-##### `unproject(xyz[, options])`
+Parameters:
 
-- `xyz`: an array of `[x, y, depth]`.
-- `options.topLeft`: whether to use screen coordinates (start from top
-left) or clipspace-like coordinates (start from bottom left).
-Default to `true`.
+  - `coordinates` (Array) - `[lng, lat, altitude]` Passing an altitude is optional.
+  - `opts` (Object)
+    - `topLeft` (Boolean, optional) - Whether projected coords are top left. Default to `true`.
 
-Projects a pixel coordinate using the current viewport settings.
+Returns:
 
-##### `projectFlat(lngLatZ[, options])`
+  - A screen coordinates array `[x, y]` or `[x, y, z]` if an altitude was given.
 
-- `lngLatZ`: an array of `[longitude, latitude, altitude]`.
-- `options.topLeft`: whether to use screen coordinates (start from top
-left) or clipspace-like coordinates (start from bottom left).
-Default to `true`.
+##### `unproject`
+
+Unprojects a pixel coordinate using the current viewport settings.
+
+Parameters:
+
+  - `pixels` (Array) - `[x, y, z]` Passing a `z` is optional.
+  - `opts` (Object)
+    - `topLeft` (Boolean, optional) - Whether projected coords are top left. Default to `true`.
+
+Returns:
+
+  - A map coordinates array `[lng, lat]` or `[lng, lat, altitude]` if a `z` was given.
+
+##### `projectFlat`
 
 Projects a map coordinate using the current viewport settings, ignoring any
 perspective tilt. Can be useful to calculate screen space distances.
 
-##### `unprojectFlat(xyz[, options])`
+Parameters:
 
-- `xyz`: an array of `[x, y, depth]`.
-- `options.topLeft`: whether to use screen coordinates (start from top
-left) or clipspace-like coordinates (start from bottom left).
-Default to `true`.
+ - `coordinates` (Array) - `[longitude, latitude]` coordinates.
+ - `scale` (Number) - Map zoom scale calculated from `Math.pow(2, zoom)`.
+
+Returns:
+
+ - Screen coordinates in `[x, y]`.
+
+##### `unprojectFlat`
 
 Unrojects a pixel coordinate using the current viewport settings, ignoring any
 perspective tilt (meaning that the pixel was projected).
 
-##### `screenToDevicePixels(pixels)`
+Parameters:
+ - `pixels` (Array) - `[x, y]`
+ - `scale` (Number) - Map zoom scale calculated from `Math.pow(2, zoom)`.
 
-- `pixels`: a number in screen pixels to scale to device pixels.
+Returns:
+
+ - Map or world coordinates in `[longitude, latitude]`.
+
+##### `screenToDevicePixels`
 
 Simply multiplies `pixels` parameter with `window.devicePixelRatio` if
 available.
-
 Useful to adjust e.g. line widths to get more consistent visuals between
 low and high resolution displays.
 
+Parameters:
+
+  - `pixels` (Number) - The number in screen pixels.
+
+Retures:
+
+  - A number in device pixels
+
+
 ### Layer Picking Methods
 
-Not to be called by the user.
-See [implement picking](/docs/advanced/picking.md#layer-picking-methods).
+For the usage of these methods, see [how picking works](/docs/advanced/picking.md).
+
+##### `decodePickingColor`
+
+Converts a color to a "sub-feature index" number.
+This color is encoded by the `layer.encodePickingColor()` method.
+
+Parameters:
+
+- `color` (Array) - The color to be decoded in `[r, g, b]`.
+
+Returns:
+
+- A number representing the index of the feature. The null picking color (See
+`Layer.nullPickingColor`) will be decoded as -1.
+
+Note: The null picking color is returned when a pixel is picked that is not
+covered by the layer, or when they layer has selected to render a pixel
+using the null picking color to make it unpickable.
+
+##### `encodePickingColor`
+
+Converts a "sub-feature index" number to a color.
+This color can later be decoded by the `layer.decodePickingColor()` method.
+
+Parameters:
+
+- `index` (Integer) - The index to be encoded.
+
+Returns:
+
+- An array of `[r, g, b]`.
+
+To get a color that does not correspond to any sub-feature, use
+`layer.nullPickingColor()`.
+
+Notes:
+* indices to be encoded must be integers larger than or equal to 0.
+* Picking colors are 24 bit values and can thus encode up to 16 million indices.
+
+##### `nullPickingColor`
+
+Returns:
+- a "null" picking color which is equal the the color of pixels
+not covered by the layer. This color is guaranteed not to match any index value
+greater than or equal to zero.

@@ -57,31 +57,25 @@ React components.
 
 ## Available Layers
 
-### Base Layers
+All deck.gl layers inherit from either the
+[`Layer`](/docs/api-reference/base-layer.md) or the
+[`CompositeLayer`](/docs/api-reference/composite-layer.md) base classes and the props of
+those layers are available to all layers unless otherwise documented.
 
-All deck.gl layers inherit from either the `Layer` or the `CompositeLayer` base
-classes and the props of those layers are available to all layers (unless otherwise
-documented). These are not layers that your application would instantiate directly,
-but you need to be aware of them as many important capabilities of deck.gl layers are
-implemented in and documented on these base layers.
+### Core Layers
 
-## Core Layers
+[Browse deck.gl's layer catalog](/docs/layers/arc-layer.md)
 
-The so called "Core Layers" are a group of geospatial visualization focused layers,
+The "core layers" are a group of geospatial visualization focused layers,
 intended to represent a small set of widely applicable data visualization building
 blocks. The core layers are the most stable and supported deck.gl layers.
 
-### Deprecated Layers
-
-These are layers from an older releases that now have better counterparts.
-They should not be used in new applications as they will be removed in future
-deck.gl releases.
-
 ### Sample Layers
 
-Deck.gl provides a number of sample layers in the examples folders intended to
-illustrate various ideas and approaches to how layers can be designed. These
-layers sometimes have documentation in the example code, but they are not
+Deck.gl provides a number of sample layers in the
+[examples directory](https://github.com/uber/deck.gl/tree/master/examples/sample-layers)
+intended to illustrate various ideas and approaches to how layers can be designed.
+These layers have documentation in their respective folders, but they are not
 listed here in the official documentation.
 
 ## Layer Creation, Update and Destruction
@@ -104,4 +98,4 @@ in modern JavaScript environments, and this is very similar to how React
 works where every render cycle generates a new tree of ReactElement instances,
 so the model is proven.
 
-The layer lifecycle is documented in detail in the section about writing layers.
+For more details, read about [Layer Lifecycle](/docs/advanced/layer-lifecycle.md).

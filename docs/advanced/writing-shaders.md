@@ -1,28 +1,39 @@
-# Writing Layer Shaders
+# Writing Shaders
 
-Note: This documentation is a Work-in-Progress.
+A shader library facilitates creating shaders that work seamlessly with deck.gl. 
+Use the "shader compositor" (the `assembleShaders` function) to dynamically
+include this library into your own GLSL code:
 
-## Instanced vs non-instanced rendering
+```js
+import {assembleShaders} from deck.gl;
 
-When doing instanced rendering your vertex shader will be called once for
-every vertex in the primitive geometry, for every instance.
+const shaders = assembleShaders({
+  vs: '// vertex shader GLSL source'
+  fs: '// fragment shader GLSL source',
+  modules: ['lighting'] // list of optional module names
+});
 
-By convention deck.gl names all instanced attributes with the prefix
-`instance`.
+// shaders.vs - assembled vertex shader
+// shaders.fs - assembled fragment shader
+```
 
-## Mandatory shader features
+The generated shader always contains a prologue of platform defines, and then
+the [modules](/docs/advanced/writing-shaders.md#shader-modules),
+and finally your shader code is added.
 
-To support the basic features expected of a deck.gl layer, your new layer's
-shaders need to follow a few rules.
+
+## Shader Modules
 
 ### Projection (Vertex Shader)
 
-The projection shaderlib package makes it easy to write vertex shaders that
+The projection modules is included by default by the `assembleShaders` function.
+
+The projection module makes it easy to write vertex shaders that
 follow deck.gl's projection methods, enabling your layer to accept coordinates
 in both [longitude,latitude,altitude] or [metersX,metersY,metersZ] format.
-
-The projection package is included by default by the `assembleShaders` function,
-and offers the following functions:
+To support the basic features expected of a deck.gl layer, such as various viewport
+types and coordinate systems, your own shaders should always use the built-in
+projection functions.
 
 ##### `vec2 project_position(vec2 position)`
 ##### `vec3 project_position(vec3 position)`
@@ -46,18 +57,70 @@ Projects worldspace coordinates to viewspace coordinates.
 Projects worldspace coordinates to clipspace coordinates.
 
 ```glsl
+// instanced geometry
 attribute vec3 positions;
-attribute vec3 instancePositions;
-attribute float instanceRadius;
+// instance attributes
+attribute vec3 instanceCenter;
+attribute float instanceSize;
 
 void main(void) {
-  vec3 center = project_position(instancePositions);
-  vec3 vertex = positions * project_scale(radius * instanceRadius);
+  vec3 center = project_position(instanceCenter);
+  vec3 vertex = positions * project_scale(instanceSize);
   gl_Position = project_to_clipspace(center + vertex);
 }
 ```
 
+### Filtering and Brushing (Vertex and Fragment Shaders)
+
+When rendering large data sets (especially a lot of intersecting lines or
+arcs) it can be hard to see the structure in the data in the resulting
+visualization. A useful technique in these cases is to use brushing
+
+Sometimes, being able to filter out a specific color, or range of colors,
+from the data without modifying the data container itself can be helpful
+for performance or just code simplification reasons. This is also a feature
+that can easily be added to a deck.gl shader.
+
+**Tip:** Use `discard` in the fragment shader instead of 0 alpha.
+Faster and leaves the depth buffer unaffected.
+
+### Lighting (Vertex and Fragment Shaders)
+
+A simple lighting package is provided in deck.gl, supporting a single
+directional light in addition to ambient light. Turning on lighting requires
+normals to be provided for each vertex.
+
+### Animation (Vertex Shader)
+
+A powerful capability of deck.gl is to render layers with thousands of
+animated and/or interactive objects with the computing power of GPUs.
+
+Creating an animated layer can be as easy as having the application supply
+start and end positions for every object, and a time interval over which
+to animate, and have the vertex shader interpolate the positions for every
+frame using a simple `mix` GLSL instruction.
+
+### Platform defines
+
+This "virtual" module is a dynamically generated prologue containing #defines describing
+your graphics card and platform. It is designed to work around certain platform-specific
+issues to allow the same rendering results are different GPUs and platforms. It is
+automatically injected by `assembleShaders` before any modules are included.
+
+### fp64
+
+A core feature of deck.gl is the fp64 shader math library that can be used leveraged by
+developers to conduct numerical computations that requires high numerical accuracy.
+This shader math library uses "multiple precision" algorithms to emulate 64-bit double
+precision floating point numbers, with some limitations, using two 32-bit single
+precision floating point numbers. To use it, just set the "fp64" key to "true" when
+calling `assembleShaders`. Please refer to the "64-bit layers" section in the document
+for more information.
+
+
 ## Uniforms
+
+The following uniforms are injected by deck.gl and available to all shaders:
 
 ### Viewport uniforms
 
@@ -101,21 +164,6 @@ Note that the picking color must be rendered exactly as is with an alpha
 channel of 1. Beware blending in opacity as it can result in the rendered
 color not matching the picking color, causing the wrong index to be picked.
 
-Compare (bad)
-
-```glsl
-gl_FragColor = vec4(
-  mix(
-    instanceColor.rgb,
-    instancePickingColor,
-    renderPickingBuffer
-  ),
-  opacity
-);
-```
-
-vs (good)
-
 ```glsl
 gl_FragColor = mix(
   vec4(instanceColor.rgb, instanceColor.a * opacity),
@@ -129,74 +177,12 @@ gl_FragColor = mix(
 This uniform is set if `props.pickable` is enabled on the layer and reflects the color
 of the last picked pixel. If no pixel is selected, the value will be `[0, 0, 0]`.
 
-## Build Concerns
+## Use With Other GLSL Code Assemblers
 
-You need to decide how to organize your shader code. If you decide to use
-the [glslify](https://github.com/stackgl/glslify) tool you will need to
-install that module and add the required transform or plugin to your
-application build process.
-
-## Optional Features
-
-### Filtering and Brushing (Vertex and Fragment Shaders)
-
-When rendering large data sets (especially a lot of intersecting lines or
-arcs) it can be hard to see the structure in the data in the resulting
-visualization. A useful technique in these cases is to use brushing
-
-Sometimes, being able to filter out a specific color, or range of colors,
-from the data without modifying the data container itself can be helpful
-for performance or just code simplification reasons. This is also a feature
-that can easily be added to a deck.gl shader.
-
-**Tip:** Use `discard` in the fragment shader instead of 0 alpha.
-Faster and leaves the depth buffer unaffected.
-
-### Lighting (Vertex and Fragment Shaders)
-
-A simple lighting package is provided in deck.gl, supporting a single
-directional light in addition to ambient light. Turning on lighting requires
-normals to be provided for each vertex.
-
-### Animation (Vertex Shader)
-
-A powerful capability of deck.gl is to render layers with thousands of
-animated and/or interactive objects with the computing power of GPUs.
-
-Creating an animated layer can be as easy as having the application supply
-start and end positions for every object, and a time interval over which
-to animate, and have the vertex shader interpolate the positions for every
-frame using a simple `mix` GLSL instruction.
-
-## Shader libraries
-
-deck.gl comes with a basic "shader compositor" (the `assembleShaders` function)
-that allows you to dynamically assemble a shader from a set of shader
-libraries or modules.
-
-The generated shader always contains a prologue of platform defines, and then
-other modules are included based on flags to `assembleShaders`, and finally
-your shader code is added.
-
-**Note**: Your code can be run through another glsl code assembler like
-`glslify` before you pass it to `assembleShaders`. The `assembleShaders` function
-does NOT do any kind of syntax analysis so is not able to prevent naming conflicts
+Your code can be run through another GLSL code assembler like
+[glslify](https://github.com/stackgl/glslify)
+before you pass it to `assembleShaders`. The `assembleShaders` function
+does **not** do any kind of syntax analysis so is not able to prevent naming conflicts
 when variable or function names from different modules. You can use multiple
 techniques to organize your shader code to fit your project needs.
 
-### Platform defines
-
-This "virtual" module is a dynamically generated prologue containing #defines describing
-your graphics card and platform. It is designed to work around certain platform-specific
-issues to allow the same rendering results are different GPUs and platforms. It is
-automatically injected by `assembleShaders` before any modules are included.
-
-### fp64
-
-A core feature of deck.gl is the fp64 shader math library that can be used leveraged by
-developers to conduct numerical computations that requires high numerical accuracy.
-This shader math library uses "multiple precision" algorithms to emulate 64-bit double
-precision floating point numbers, with some limitations, using two 32-bit single
-precision floating point numbers. To use it, just set the "fp64" key to "true" when
-calling `assembleShaders`. Please refer to the "64-bit layers" section in the document
-for more information.

@@ -5,107 +5,95 @@ at certain points in its lifecycle. The layer can specify how its state
 is initialized and finalized, if and how it should react to property changes,
 and how it should draw and pick the layer.
 
-## Layer States
 
-`Layer.state` is an object that is internal to an instance of a layer.
-The layer can use it to store processed information that is used in rendering.
-Can be updated with [this.setState()](/docs/api-reference/base-layer.md#setstate-).
+## deck.gl Rendering Cycles
 
-The `id` property is used to uniquely identify layers.
+Internally, deck.gl sets up the animation loop and calls provided
+callbacks on initial load and for each rendered frame.
+When the deck.gl layer list is drawn to screen, it matches the new Layer
+instances with the instances from the previous render call, uniquely identified
+by their `id` property.
 Every time you create a new layer with the same `id` property as a layer you
 rendered last time, deck.gl consider the new layer instance an "update" of the
-old instance, and the new layer will now have access to the state of the old layer
-via `this.state`.
+old instance.
+
+`layer.state` is an object that is internal to an instance of a layer.
+When a new layer instance is matched to an existing layer instance by `id`,
+the state object of the old layer becomes accessible to the new layer.
+Layers can use the state object to store persistent information cross rendering cycles.
 
 
-## Lifecycle Methods
+## Layer Lifecycle Stages
 
-##### `initializeState()`
+### Initialization
 
-This method is called only once for each layer (as defined by the `id`
-property), to set up the initial state for that layer.
+This happens only once for each layer that is being added, i.e. a layer from the
+current rendering cycle whose `id` does not get matched with any layer in the previous
+cycle.
+[`layer.initializeState()`](/docs/api-reference/base-layer.md#-initializestate-) is called at
+this stage.
 
-deck.gl will already have created the `state` object at this time, and
-added the `gl` context and the `attributeManager` context.
+At the end of initialization,
+[`layer.updateState()`](/docs/api-reference/base-layer.md#-updatestate-) is called
+before the first render.
 
-##### `shouldUpdateState(updateParams)`
+### Updating
 
-- `updateParams.props`
-- `updateParams.oldProps`
-- `updateParams.context`
-- `updateParams.oldContext`
-- `updateParams.changeFlags`: an object that contains the following boolean
-flags: `dataChanged`, `propChanged`, `viewportChanged`, `somethingChanged`
-
-Called when a new layer has been matched with a layer from the previous
-render cycle (resulting in new props being passed to that layer),
+Happens when a new layer has been matched with a layer from the previous
+rendering cycle (resulting in new props being passed to that layer),
 or when context has changed and layers are about to be drawn.
 
-If this function return false, `updateState` will never be called.
+[`layer.shouldUpdateState()`](/docs/api-reference/base-layer.md#-shouldupdatestate-)
+is called to determine if the layer needs an update.
+By default, it does a shallow equal comparison on the props and context.
+Under more complicated circumstances, additional checks can be supplied through the
+[`dataComparator`](/docs/api-reference/base-layer.md#-datacomparator-function-optional-)
+prop.
 
-The default implementation essentially does a shallow equal comparison
-on the props and returns false if no properties have changed.
+If the layer does need to be updated,
+[`layer.updateState()`](/docs/api-reference/base-layer.md#-updatestate-)
+is called to perform any necessary operation before the layer is rendered.
+This usually involves recalculating an attribute by calling
+[`state.attributeManager.invalidate`](/docs/api-reference/attribute-manager.md#-invalidate-)
+and updating unforms by calling
+[`setUniform`](/docs/api-reference/base-layer.md#-setuniform-).
+By default, when `props.data` changes, all attributes are recalculated.
 
-Under more complicated circumstances, additional checks can be implemented through
-the `dataComparator` prop and the `updateTriggers` prop can be supplied additional
-checks. See the documentation of those props in the Layer API.
-
-##### `updateState(updateParams)`
-
-- `updateParams.props`
-- `updateParams.oldProps`
-- `updateParams.context`
-- `updateParams.oldContext`
-- `updateParams.changeFlags`: an object that contains the following boolean
-flags: `dataChanged`, `propChanged`, `viewportChanged`, `somethingChanged`
-
-Called when a new layer has been matched with a layer from the previous
-render cycle (resulting in new props being passed to that layer),
-or when context has changed and layers are about to be drawn.
-
-The default implementation will invalidate all attributeManager attributes
-if any change has been detected to the `data` prop.
-
-##### `renderLayers()`
-
-Allows a layer to "render" or generate one or more deck.gl Layers
-passing in its own state as props.
-The layers will be rendered after the rendering layer, but before the next
-layer in the list. `renderLayers` will be called on the new layers,
+A layer may use
+[`layer.renderLayers()`](/docs/api-reference/composite-layer.md#-renderlayers-)
+to insert one or more deck.gl layers after itself.
+The generated layers will then be matched and updated,
 allowing the decomposition of the drawing of a complex data set
 into "primitive" layers.
 
-A layer can return null, a single layer, or an array of layers. The default
-implementation of `renderLayers` returns null.
+### Rendering
 
-##### `draw(drawParams)`
+Happens during each rendering cycle to draw the layer to the WebGL context.
 
-- `drawParams.uniforms`: an object that contains all the
-[default unforms](/docs/advanced/writing-shaders.md#uniforms)
-to be passed to the shaders.
+[`layer.draw()`](/docs/api-reference/base-layer.md#-draw-)
+is called at this stage.
 
-Allow a layer to render to the WebGL canvas.
+### Picking
 
-The default implementation looks for a variable `model` in the layer's
-state (which is expected to be an instance of the luma.gl `Model` class)
-and calls `draw` on that model.
+Happens when a pointer moves over or clicks on the deck.gl canvas.
 
-##### `getPickingInfo(pickParams)`
+[`layer.draw()`](/docs/api-reference/base-layer.md#-draw-) of all pickable layers
+are called with special uniforms to draw into an off-screen picking buffer.
 
-Called when a layer is being hovered or clicked, before any user callbacks
-are called.
-The layer can override or add additional fields to the `info` object that
-will be passed to the callbacks.
+When a layer is picked,
+[`layer.getPickingInfo()`](/docs/api-reference/base-layer.md#-getpickinginfo-)
+is called to generate the `info` object of information about what has been picked.
+This object is then passed to the `onHover` or `onClick` callbacks of the layer.
 
-Read more about the parameters and default implementation at
-[Layer Picking Methods](/docs/advanced/picking.md#layer-picking-methods).
+Read more about [how picking works](/docs/advanced/picking.md).
 
-##### `finalizeState()`
+### Finalization
 
-Called once for each layer that is being removed, i.e. a layer from previous
+Happens for each layer that is being removed, i.e. a layer from the previous
 rendering cycle whose `id` did not get matched with any layer in the current
 cycle.
-Called just before the reference to the state of that layer
+[`layer.finalizeState()`](/docs/api-reference/base-layer.md#-finalizestate-)
+is called just before the reference to the state of that layer
 is released.
 
 

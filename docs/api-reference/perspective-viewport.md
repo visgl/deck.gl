@@ -1,29 +1,44 @@
-## PerspectiveViewport
 
-A subclass of `Viewport` that creates a perspective view based on typical
-affine perspective projection matrix parameters (`fov`, `aspect`, `near`, `far`).
+# PerspectiveViewport Class
+
+A subclass of [Viewport](/docs/api-reference/viewport.md) that creates a perspective view.
 
 Remarks:
 * This class is just a convenience, the application can use `Viewport` directly
   together with e.g. the `mat4.perspective` and `mat4.lookAt` functions from the
   `gl-matrix` module.
 
+## Constructor
 
-### `PerspectiveViewport.constructor`
+Parameters:
 
-`new PerspectiveViewport({lookAt, eye, up, fov, aspect, near, far, width, height})`
+- `opts` (Object) - Perspective view options
+  * `width` (Number) - Width of "viewport" or window. Default to `1`.
+  * `height` (Number) - Height of "viewport" or window. Default to `1`.
 
-| Parameter    | Type        | Default | Description                                   |
-| ------------ | ----------- | ------- | --------------------------------------------- |
-| `width`      | `Number`    | 1       | Width of "viewport" or window                 |
-| `height`     | `Number`    | 1       | Height of "viewport" or window                |
-view matrix arguments
-* `eye` (Vector3) - Defines eye position
-* `lookAt` (Vector3 = [0, 0, 0]) - Which point is camera looking at, default origin
-* `up` (Vector3 = [0, 1, 0]) - Defines up direction, default positive y axis
-projection matrix arguments
-* `fov` (Number = 75) - Field of view covered by camera
-* `near` (Number = 1) - Distance of near clipping plane
-* `far` (Number = 100) - Distance of far clipping plane
-automatically calculated
-* `aspect` (Number) - Aspect ratio (set to viewport widht/height)
+  view matrix arguments:
+  * `eye` (Vector3, optional) - Defines eye position, default unit distance along z axis.
+    Default to `[0, 0, 1]`.
+  * `lookAt` (Vector3, optional) - Which point is camera looking at. Default to origin `[0, 0, 0]`.
+  * `up` (Vector3, optional) - Defines up direction. Default to positive y axis `[0, 1, 0]`.
+
+  projection matrix arguments:
+  * `fov` (Number, optional) - Field of view covered by camera. Default to `75`.
+  * `near` (Number, optional) - Distance of near clipping plane. Default to `1`.
+  * `far` (Number, optional) - Distance of far clipping plane. Default to `100`.
+
+  automatically calculated:
+  * `aspect` (Number, optional) - Aspect ratio. Default to the viewport's `widht/height`.
+
+```js
+const viewport = new PerspectiveViewport({
+  eye: [0, 0, 100],
+  fov: 45,
+  width: 500,
+  height: 500
+});
+```
+
+## Methods
+
+Inherits all [Viewport methods](/docs/api-reference/viewport.md#methods).

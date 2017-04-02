@@ -1,4 +1,4 @@
-# The AttributeManager Class
+# AttributeManager Class
 
 The `AttributeManager` class automated attribute allocation and updates.
 
@@ -13,9 +13,9 @@ Limitations:
   There are currently no provisions for only invalidating a range of
   indices in an attribute.
 
-## Static Functions
+## Static Methods
 
-### AttributeManager.setDefaultLogFunctions (static)
+##### `setDefaultLogFunctions`
 
 Sets log functions to help trace or time attribute updates.
 Default logging uses the luma.gl logger.
@@ -23,38 +23,85 @@ Default logging uses the luma.gl logger.
 Note that the app may not be in control of when update is called,
 so hooks are provided for update start and end.
 
-* opts (Object) - named parameters
-* opts.onLog (Function) - callback, called to print
-* opts.onUpdateStart= (Function) - callback, called before update() starts
-* opts.onUpdateEnd= (Function) - callback, called after update() ends
+Parameters:
 
+- `opts` (Object) - named parameters
+  * `opts.onLog` (Function) - callback, called to print
+  * `opts.onUpdateStart` (Function) - callback, called before update() starts
+  * `opts.onUpdateEnd` (Function) - callback, called after update() ends
+
+## Constructor
+
+- `opts` (Object) - named parameters
+  * `opts.id` (String, optional) - identifier (for debugging)
+
+```
+new AttributeManager({id: 'attribute-manager'});
+```
 
 ## Methods
 
-### Constructor
-
-* opts (Object) - named parameters
-* opts.id (String, not required) - identifier (for debugging)
-
-### AttributeManager.add
+##### `add`
 
 Adds attribute descriptions to the AttributeManager that describe
 the attributes that should be auto-calculated.
 
-Takes a map of attribute descriptor objects
+Takes a single parameter as a map of attribute descriptor objects:
 - keys are attribute names
-- values are objects with attribute fields
+- values are objects with attribute definitions
+  * `attribute.size` (Number) - number of elements per object
+  * `attribute.accessor` (String | Array of strings) - accessor name(s) that will
+    trigger an update of this attribute when changed. Used with
+    [`updateTriggers`](/docs/api-reference/base-layer.md#-updatetriggers-object-optional-).
+  * `attribute.update` (Function) - the function to be called when
+  * `attribute.instanced` (Boolean, optional) - if this is an instanced attribute
+    (a.k.a. divisor). Default to `false`.
+  * `attribute.noAlloc` (Boolean, optional) - if this attribute should not be
+    automatically allocated. Default to `false`.
 
-* attribute.size - number of elements per object
-* attribute.updater - number of elements
-* attribute.instanced=0 - is this is an instanced attribute (a.k.a. divisor)
-* attribute.noAlloc=false - if this attribute should not be allocated
+```js
+attributeManager.add({
+  positions: {
+    size: 2,
+    accessor: 'getPosition',
+    update: calculatePositions
+  }
+  colors: {
+    size: 4,
+    type: GL.UNSIGNED_BYTE,
+    accessor: 'getColor',
+    update: calculateColors
+  }
+});
+```
 
-    attributeManager.add({
-      positions: {size: 2, update: calculatePositions}
-      colors: {
-        size: 4,
-        type: GL.UNSIGNED_BYTE,
-        update: calculateColors
-      }
-    });
+##### `addInstanced`
+
+Shorthand for `add()` in which all attributes `instanced` field are set to `true`.
+
+##### `getAttributes`
+
+Returns:
+
+- A map of attribute names to attribute objects.
+
+##### `invalidate`
+
+Mark an attribute as need update.
+
+Parameters:
+
+- `name` (String) - Either the name of the attribute, or the name of an accessor.
+If an name of accessor is provided, all attributes with that accessor are invalidated.
+
+##### `invalidateAll`
+
+Mark all attributes as need update.
+
+##### `remove`
+
+Removes defined attributes.
+
+Parameters:
+
+- `attributeNames` (Array) - Array of attribute names to be removed

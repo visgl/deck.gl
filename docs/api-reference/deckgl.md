@@ -1,21 +1,15 @@
-# DeckGL React Component
+# DeckGL (React Component)
 
 `DeckGL` is a React component that takes deck.gl layer instances and
 viewport parameters, and renders those layers as a transparent overlay.
 
 ```js
-import MapGL from 'react-map-gl';
-import DeckGL from 'deck.gl';
-import {ScatterplotLayer} from 'deck.gl';
+import DeckGL, {ScatterplotLayer} from 'deck.gl';
 
-const viewport = new Viewport({...});
-
-const App = () => (
-  <MapGL>
-    <DeckGL
-      viewport={viewport}
-      layers={[new ScatterplotLayer({data: [...]})]} />
-  </MapGL>
+const App = (viewport, data) => (
+  <DeckGL
+    {...viewport}
+    layers={[new ScatterplotLayer({data})]} />
 );
 ```
 
@@ -25,7 +19,7 @@ const App = () => (
 
 Canvas ID to allow style customization in CSS.
 
-##### `viewport` (`Viewport`, optional)
+##### `viewport` ([Viewport](/docs/api-reference/viewport.md), optional)
 
 This property should contain a `Viewport` instance which represents your
 "camera" (essentially view and projection matrices, together with viewport
@@ -66,7 +60,7 @@ Current pitch - used to define a mercator projection if `viewport` is not suppli
 
 ##### `layers` (Array, required)
 
-The array of `deck.gl` layers to be rendered. This array is expected to be
+The array of deck.gl layers to be rendered. This array is expected to be
 an array of newly allocated instances of your deck.gl layers, created with
 updated properties derived from the current application state.
 
@@ -94,26 +88,26 @@ to keep track of GPU state.
 Callback, called once the WebGL context has been initiated
 
 Callback arguments:
-- opts.gl - the WebGL context.
+- `gl` - the WebGL context.
 
 ##### `onLayerHover` (Function, optional)
 
 Callback - called when the object under the pointer changes.
 
-Arguments:
+Callback Arguments:
 - `info` - the [`info`](/docs/interactivity.md#the-picking-info-object)
 object for the topmost picked layer at the coordinate
 - `pickedInfos` - an array of info objects for all pickable layers that
 are affected.
-- `event` - the original MouseEvent object
+- `event` - the original [MouseEvent](https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent) object
 
 ##### `onLayerClick` (Function, optional)
 
 Callback - called when clicking on the layer.
 
-Arguments:
+Callback Arguments:
 - `info` - the [`info`](/docs/interactivity.md#the-picking-info-object)
 object for the topmost picked layer at the coordinate
 - `pickedInfos` - an array of info objects for all pickable layers that
 are affected.
-- `event` - the original MouseEvent object
+- `event` - the original [MouseEvent](https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent) object

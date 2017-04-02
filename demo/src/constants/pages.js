@@ -13,7 +13,7 @@ function generatePath(tree, parentPath = '') {
     tree.forEach(branch => generatePath(branch, parentPath));
   }
   if (tree.name) {
-    tree.path = tree.name.match(/(GeoJson|3D|API|([A-Z]|^)[a-z]+|\d+)/g).join('-').toLowerCase();
+    tree.path = tree.name.match(/(GeoJson|3D|API|([A-Z]|^)[a-z'0-9]+|\d+)/g).join('-').toLowerCase().replace(/[^\w-]/g, '');
   }
   if (tree.children) {
     generatePath(tree.children, `${parentPath}/${tree.path}`);
@@ -121,11 +121,11 @@ export const docPages = generatePath([
         content: getDocUrl('README.md')
       },
       {
-        name: 'What\'s New in v4',
+        name: 'What\'s New',
         content: getDocUrl('whats-new.md')
       },
       {
-        name: 'Upgrade Guide from v3',
+        name: 'Upgrade From V3',
         content: getDocUrl('upgrade-guide.md')
       }
     ]
@@ -159,7 +159,7 @@ export const docPages = generatePath([
     name: 'Custom Layers',
     children: [
       {
-        name: 'Writing Layers',
+        name: 'Writing Your Own Layer',
         content: getDocUrl('advanced/custom-layers.md')
       },
       {
