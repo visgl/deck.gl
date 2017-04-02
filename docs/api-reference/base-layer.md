@@ -212,6 +212,9 @@ developers need to override the updateState.
 
 ## Members
 
+> Layer members are designed to support the creation of new layers or
+layer sub-classing and are **not** intended to be used by applications.
+
 ##### `context` (Object)
 
 The context object stores information that are shared by all layers.
@@ -232,7 +235,7 @@ attribute manager of this layer.
 
 ## Methods
 
-> Layer methods are designed to support the creation of new layers through
+> Layer methods are designed to support the creation of new layers or
 layer sub-classing and are **not** intended to be called by applications.
 
 ### General Methods

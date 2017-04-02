@@ -75,7 +75,7 @@ is called at this stage.
 
 ### Picking
 
-Happens when the layer is being hovered or clicked.
+Happens when a pointer moves over or clicks on the deck.gl canvas.
 
 [`layer.draw()`](/docs/api-reference/base-layer.md#-draw-) of all pickable layers
 are called with special uniforms to draw into an off-screen picking buffer.

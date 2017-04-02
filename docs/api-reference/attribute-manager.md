@@ -85,12 +85,6 @@ Returns:
 
 - A map of attribute names to attribute objects.
 
-##### `getChangedAttributes`
-
-Returns:
-
-- A map of attribute names to attribute objects that has been updated in this cycle.
-
 ##### `invalidate`
 
 Mark an attribute as need update.
@@ -111,16 +105,3 @@ Removes defined attributes.
 Parameters:
 
 - `attributeNames` (Array) - Array of attribute names to be removed
-
-##### `update`
-
-Update all attributes as needed.
-
-Parameters:
-
-- `opts` (Object) - options
-  * `opts.data` (Object) - data (iterable object)
-  * `opts.numInstances` (Number) - count of data objects
-  * `opts.buffers` (Object, optional) - pre-allocated buffers
-  * `opts.props` (Object, optional) - passed to updaters
-  * `opts.context` (Object, optional) - Used as "this" context for updaters

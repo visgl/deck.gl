@@ -45,27 +45,6 @@ Returns:
 
 - `true` if the given viewport is identical to the current one.
 
-##### `getMatrices`
-
-Returns an object with various matrices
-
-Parameters:
-
-- `modelMatrix` (Array[16], optional) - Model matrix. Default to identity matrix.
-
-Returns:
-
-- A object of the following fields:
-  * `modelMatrix` (Matrix4) - transforms model to world space
-  * `viewMatrix` (Matrix4) - transforms world to camera space
-  * `projectionMatrix` (Matrix4) - transforms camera to clip space
-  * `viewProjectionMatrix` (Matrix4)  - transforms world to clip space
-  * `modelViewProjectionMatrix` (Matrix4) - transforms model to clip space
-  * `pixelProjectionMatrix` (Matrix4)  - transforms world to pixel space
-  * `pixelUnprojectionMatrix` (Matrix4) - transforms pixel to world space
-  * `width` (Number) - Width of viewport
-  * `height` (Height) - Height of viewport
-
 ##### `project`
 
 Projects latitude, longitude (and altitude) to pixel coordinates in window using
