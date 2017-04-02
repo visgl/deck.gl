@@ -1,0 +1,15 @@
+---
+layout:
+---
+
+<!DOCTYPE html>
+<html>
+
+<body>
+  <script>
+    {% assign latest = site.posts | first %}
+    window.location.href = '.{{latest.url}}.html';
+  </script>
+</body>
+
+</html>

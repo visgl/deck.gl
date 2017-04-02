@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
 
+{% include base_url.html %}
 {% include head.html %}
 
 <body>
@@ -24,9 +25,9 @@
         {% if paginator.total_pages > 1 %}
           <div class="pagination">
             {% if paginator.previous_page == 1 %}
-              <a href="{{ site.baseurl }}/" class="page-item">&lt;</a>
+              <a href="{{ baseurl }}/" class="page-item">&lt;</a>
             {% elsif paginator.previous_page%}
-              <a href="{{ site.baseurl }}{{ paginator.previous_page_path}}" class="page-item">&lt;</a>
+              <a href="{{ baseurl }}{{ paginator.previous_page_path}}" class="page-item">&lt;</a>
             {% else %}
               <span class="page-item">&lt;</span>
             {% endif %}
@@ -35,14 +36,14 @@
               {% if page == paginator.page %}
                 <span class="page-item">{{ page }}</span>
               {% elsif page == 1 %}
-                <a href="{{ site.baseurl }}/" class="page-item">{{ page }}</a>
+                <a href="{{ baseurl }}/" class="page-item">{{ page }}</a>
               {% else %}
-                <a href="{{ site.baseurl }}{{ site.paginate_path | replace: ':num', page }}" class="page-item">{{ page }}</a>
+                <a href="{{ baseurl }}{{ site.paginate_path | replace: ':num', page }}" class="page-item">{{ page }}</a>
               {% endif %}
             {% endfor %}
           
             {% if paginator.next_page %}
-              <a href="{{ site.baseurl }}{{ paginator.next_page_path }}" class="page-item">&gt;</a>
+              <a href="{{ baseurl }}{{ paginator.next_page_path }}" class="page-item">&gt;</a>
             {% else %}
               <span class="page-item">&gt;</span>
             {% endif %}

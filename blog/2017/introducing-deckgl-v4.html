@@ -4,6 +4,9 @@
 
 
 
+
+
+
 <head>
 	<!-- Meta -->
 	<meta charset="UTF-8"/>
@@ -28,11 +31,15 @@
 
     <div class="flexbox__item">
       <!-- Header -->
-      <header>
+      
+
+
+
+<header>
   
   <div class="container">
     <div class="breadcrumb">
-      <a href="/blog/">Home</a>
+      <a href="../index.html">Home</a>
       &gt;
       
       <span>Introducing deck.gl v4.0</span>
@@ -49,6 +56,9 @@
 
     		
 
+
+
+
 <article id="post">
 
 	<h1>Introducing deck.gl v4.0</h1>
@@ -57,12 +67,20 @@
     <span class="date"><b>31 Mar 2017</b></span>
     <span class="author">by 
       
-        <a href="http://github.com/shaojingli">
-          <b>Shaojing Li</b>
+        <a href="http://github.com/Pessimistress">
+          <b>Xiaoji Chen</b>
         </a>
       
         <a href="http://github.com/ibgreen">
           <b>Ib Green</b>
+        </a>
+      
+        <a href="http://github.com/heshan0131">
+          <b>Shan He</b>
+        </a>
+      
+        <a href="http://github.com/shaojingli">
+          <b>Shaojing Li</b>
         </a>
       
         <a href="http://github.com/gnavvy">
@@ -79,36 +97,27 @@
 
 <h3 id="what-motivated-the-release">What Motivated the Release?</h3>
 
-<p>Since the big deck.gl v3 release in November 2016, deck.gl has seen rapid adoption across a number of internal data visualization applications at Uber. We have also received many good comments, suggestions and requests, both from internal and external users. We noticed that developers are not only building apps using deck.gl’s highly performant layers, but also starting to unleash their own creativity by creating various new layers. This is pushing deck.gl into areas that we have never thought it would be.</p>
+<p>When we did our first <a href="https://eng.uber.com/deck-gl-framework/">external announcement</a> of deck.gl in November 2016 (announcing the deck.gl v3 release), we also stated our intention to improve and expand deck.gl’s layer catalog in future releases, and that is a major part of what we are doing now through the deck.gl v4 release.</p>
 
-<p>While some of these layers are highly specialized and application specific, many others are general-purpose and solves some common problems in certain applications. Those general-purpose layers saves other developers with similar needs considerable amount of time, so why reinvent the wheel?</p>
+<p>deck.gl v3 saw rapid adoption across a number of internal data visualization applications here at Uber, and it didn’t take long before an impressive list of new layers had been developed to support these applications. The most general of these layers soon started to be reused between applications, and it quickly became clear that including the “best” of these layers in a new official deck.gl release would likely be of high value both to internal and external developers.</p>
 
-<p>Therefore, in this v4 release, the stars are the new layers enlisted in our deck.gl layer catalog that do magic with data. Now, the numder of core layers in deck.gl has grown to over a dozen and all of them are carefully audited, tested and documented <a href="https://uber.github.io/deck.gl/#/documentation/layer-catalog">layers</a>.</p>
+<p>In deck.gl v4, the core layer catalog in deck.gl effectively doubles in size to over a dozen carefully audited, tested and documented <a href="https://uber.github.io/deck.gl/#/documentation/layer-catalog">layers</a>, covering a significantly wider array of geospatial visualization use cases.</p>
+
+<p>Obviously, while the new layers are the big stars of the release, deck.gl v4 includes more than just the layers. It covers almost five months of intensive development, and incorporates improvements addressing an long list of comments, suggestions, bug reports and feature requests from both internal and external users. If you are already a deck.gl v3 user, we believe that as you start working with v4, you will find few areas, whether in terms of APIs, documentation, examples or actual code, that haven’t received some level of additional polish.</p>
 
 <h3 id="why-a-major-version-bump">Why a Major Version Bump?</h3>
 
-<p>As part of the release work we conducted an extensive API audit of both
-the new v4 layers and the existing v3 layers and found that doing a small set
-of changes to existing v3 layer APIs would allow us to make the APIs
-of all layers considerably more consistent and the whole framework more
-cohesive and logical.</p>
+<p>We take backwards compatibility of deck.gl very seriously, and deck.gl follows <a href="http://semver.org">semver</a> versioning rules, which require that any change to existing functionality, no matter how small, is accompanied by a bump of the major version number, from 3 to 4 in this case.</p>
 
-<p>We take backwards compatibility of deck.gl very seriously, and the decision to
-make any breaking changes to our API is not taken lightly, and in spite of the
-major version bump, deck.gl v4 is highly compatible with deck.gl
-v3, both in terms of public APIs and the way layers work.</p>
+<p>Obviously, the addition of a set of new layers would not by itself change any existing functionality, and thus only require a minor version bump (e.g. deck.gl v3.1). However, as part of the release preparations, we conducted an extensive API audit of both the new v4 layers and the existing v3 layers and found that doing a small set of changes to existing v3 layer APIs would allow us to make the APIs of all layers considerably more consistent and the whole framework more cohesive and logical, which was clearly the right long-term choice.</p>
 
-<p>Also, to ensure a smooth transition, an
-<a href="https://uber.github.io/deck.gl/#/documentation/overview/upgrade-from-v3">update guide</a>
+<p>In spite of the major version bump, deck.gl v4 remains highly compatible with deck.gl v3, both in terms of public APIs and the way layers work. Also, to ensure a smooth transition, an
+<a href="https://uber.github.io/deck.gl/#/documentation/overview/upgrade-from-v3">upgrade guide</a>
 is provided and we expect the upgrade effort for applications to be minimal.</p>
-
-<p>Note: deck.gl follows <a href="http://semver.org">semver</a> versioning rules so
-any change to existing functionality requires us to bump
-the major version number, from 3 to 4 in this case.</p>
 
 <h2 id="a-growing-layer-catalog">A Growing Layer Catalog</h2>
 
-<p>Deck.gl is a geospatial data visualization framework from the very beginning and geospatial use cases will always be the top priority. The new layers added to the <a href="https://uber.github.io/deck.gl/#/documentation/layer-catalog">layer catalog</a> are widely used in geospatial data analysis within Uber and we hope they will solve the problems of deck.gl users face everyday.</p>
+<p>From the very beginning, deck.gl has always been a geospatial data visualization framework, and geospatial use cases will always be the top priority. The new layers added to the <a href="https://uber.github.io/deck.gl/#/documentation/layer-catalog">layer catalog</a> are widely used in geospatial data analysis within Uber and we hope they will help solve the problems that deck.gl users face every day.</p>
 
 <h3 id="geojsonlayer"><a href="https://uber.github.io/deck.gl/#/documentation/layer-catalog/geojson-layer"><code class="highlighter-rouge">GeoJsonLayer</code></a></h3>
 
@@ -158,12 +167,11 @@ the major version number, from 3 to 4 in this case.</p>
 	<img width="400" src="../img/demo-thumb-heatmap.jpg" />
 </p>
 
-<p>In this deck.gl release, we add these two special layers that goes beyond simply putting user data on the map. This is a very exiciting new direction of deck.gl as we not only want to provide layers that are visually compelling to our users, but also <strong><em>smart</em></strong>. The <code class="highlighter-rouge">GridLayer</code> and <code class="highlighter-rouge">HexagonLayer</code> draw equal-area rectangular or hexagonal cells. At the same time they “bin” user-provided point data into cells and do aggregations on the data points that fall into those cells. The aggregated values can be mapped to the color of the cells, the height of the cells, or both, depending on the specific style settings. This effectively makes these two layers two different implementations of typical grid-based <strong>heatmaps</strong>. Both layer supports 2D and 3D cells.</p>
+<p>deck.gl v4 introduces two new “auto-aggregating” layers that complement the <code class="highlighter-rouge">ScreenGridLayer</code> from deck.gl v3. The <code class="highlighter-rouge">GridLayer</code> and <code class="highlighter-rouge">HexagonLayer</code> draw equal-area rectangular or hexagonal cells. These layers go beyond directly displaying the supplied data on the map, in that they don’t draw one cell per data point, like most deck.gl layers do. They first aggregate (or “bin”) the user-provided data points into cells, and then draw the cells using the aggregated values to control properties like color and height, effectively rendering grid-based <strong>heatmaps</strong>.</p>
 
-<p>The <code class="highlighter-rouge">GridLayer</code> and <code class="highlighter-rouge">HexagonLayer</code> are different from the <code class="highlighter-rouge">ScreenGridLayer</code>
-provided in the previous version as both the rendered geometry and the
-aggregation boundaries are in <strong><em>world coordinates</em></strong> rather than screen
-coordinates.</p>
+<p>Aggregation is an exiciting new direction for deck.gl as we want to not only provide layers that are visually compelling to our users, but are also <strong><em>smart</em></strong>.</p>
+
+<p>Finally, note that the new <code class="highlighter-rouge">GridLayer</code> and <code class="highlighter-rouge">HexagonLayer</code> are different from the existing <code class="highlighter-rouge">ScreenGridLayer</code> as both the rendered geometry and the aggregation boundaries are in world coordinates rather than screen coordinates. Another difference is that the new layers also support both 2D and 3D cells.</p>
 
 <h2 id="layer-extrusion-and-lighting">Layer extrusion and lighting</h2>
 
@@ -173,7 +181,7 @@ coordinates.</p>
 
 <h2 id="interactive-documentation">Interactive Documentation</h2>
 
-<p>Deck.gl’s documentation has been significantly improved and reorganized in response to user feedback. In particular, every layer now has an interactive layer browser allowing users to tweak all properties of the layer and see how they affect the final rendering of layers while reading the docs. It also serves as an intuitive tool for users to select appropriate layers for their use cases.</p>
+<p>deck.gl’s documentation has been significantly improved and reorganized in response to user feedback. In particular, every layer now has an interactive layer browser allowing users to tweak all properties of the layer and see how they affect the final rendering of layers while reading the docs. It also serves as an intuitive tool for users to select appropriate layers for their use cases.</p>
 
 <p>
 	<img src="../img/interactive-layer-browser.png" />
@@ -189,7 +197,7 @@ coordinates.</p>
 
 <h2 id="whats-next">What’s Next?</h2>
 
-<p>Deck.gl v4 is an important milestone for us, but what’s next? While we haven’t finalized
+<p>deck.gl v4 is an important milestone for us, but what’s next? While we haven’t finalized
 any plans for a possible deck.gl v4.1 or v5 release yet, we have many ideas about
 improvements and directions we would like deck.gl to evolve along. Some examples are:</p>
 
@@ -219,25 +227,25 @@ in terms of adding data processing intelligence to deck.gl. More advanced aggreg
 
 <p>In the new v4 release of deck.gl, some new layers like the <code class="highlighter-rouge">GeoJsonLayer</code> and <code class="highlighter-rouge">HexagonLayer</code> are what we called <strong>composite</strong> layers as they are actually built by “composing” other core deck.gl layers. The composite layers have their own props but leverage its underlying layers for part of their functionalities. This kind of composition greatly reduces the effort required for creating new layers and makes the internal structure of many layers much cleaner. In future releases, we will continue making composite layer development easier by decoupling different sets of functionalities of layers and keeping improving our guides and docs.</p>
 
-<h3 id="more-advanced-picking-selection-support">More Advanced Picking (Selection) Support</h3>
+<h3 id="more-advanced-picking-support">More Advanced Picking Support</h3>
 
-<p>Picking or selection is also one of the most common tasks of any data visualization applications and is a core functionality we provide with deck.gl. In the v4 release, a color-coded picking process that are both much more robust and performant is implemented. We plan to continue improving picking by adopting better picking boundary arbitration, supporting square or polygon area picking, etc.</p>
+<p>Picking (i.e. mouse selection) is one of the most common tasks of any data visualization applications and is a core functionality we provide with deck.gl. We have ideas for improving picking by adopting better picking boundary arbitration (bigger pick targets), supporting square or polygon area picking, etc.</p>
 
 <h3 id="performance">Performance</h3>
 
-<p>Performance is always what we are seeking as deck.gl, from the first day, is designed to be a <strong>high performance</strong> visualization framework. Many under-the-hood performance improvements went into the v4 release, including a 3.5~4X faster scatterplot layer, faster 64-bit maths, and ~2X performance boost in picking, etc. In the future, we are considering implementing a better WebGL state manager that faciliates the resource sharing and reuse, a better layer manager that manages and updates resources in a smarter way and a better rendering engine that only allows necessary data to hit GPUs from the very beginning.</p>
+<p>Performance is always at the front of our minds as deck.gl, from the first day, was designed to be a <strong>high performance</strong> visualization framework. Many under-the-hood performance improvements went into the v4 release, including a 3.5~4X faster scatterplot layer, faster 64-bit maths, and ~2X performance boost in picking, etc. In the future, we are considering implementing a better WebGL state manager that faciliates the resource sharing and reuse, a better layer manager that manages and updates resources in a smarter way and a better rendering engine that only allows necessary data to hit GPUs from the very beginning.</p>
 
 <h2 id="final-words">Final Words</h2>
 
-<p>Finally, just in case there is any doubt from our users, we would like to reiterate our commitment that deck.gl will remain a “geospatial visualization first” framework. All the non-geospatial use cases we are showing will not compromise our focus on improving the geospatial visualization aspects of deck.gl. To the contrary, as we mentioned earlier in this article, users can expect see even more “advanced” geospatial processing functionalities to the future releases of deck.gl.</p>
+<p>Finally, just to dispel any doubt from our users, we would like to reiterate our commitment that deck.gl will remain a “geospatial visualization first” framework. The non-geospatial use cases we are working on will not compromise our focus on maintaining and improving the geospatial visualization aspects of deck.gl. To the contrary, as we mentioned earlier in this article, users can expect see even more “advanced” geospatial processing functionalities to the future releases of deck.gl.</p>
 
 	</div>
 
   <div class="tag-cloud">
     
-      <a href="/blog/tag/vis">Vis</a>
+      <a href="../tag/vis.html">Vis</a>
     
-      <a href="/blog/tag/webgl">WebGL</a>
+      <a href="../tag/webgl.html">WebGL</a>
     
   </div>
 

@@ -1,8 +1,10 @@
+{% include base_url.html %}
+
 <header>
   {% unless page.url == "/" %}
   <div class="container">
     <div class="breadcrumb">
-      <a href="{{ site.baseurl }}/">Home</a>
+      <a href="{{ baseurl }}/index.html">Home</a>
       &gt;
       {% if page.title %}
       <span>{{page.title}}</span>
