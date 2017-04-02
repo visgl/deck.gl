@@ -11,39 +11,48 @@ import autobind from 'autobind-decorator';
  */
 export default class Blog extends Component {
 
-  // When the iframe finishes loading, traverse all <a> elements
-  // in the child page and set their targets to the parent window
-  @autobind _onPostLoaded(evt) {
-    const doc = evt.target.contentDocument;
-    const anchors = doc.getElementsByTagName('a');
-
-    for (let i = 0; i < anchors.length; i++) {
-      const anchor = anchors[i];
-      anchor.onclick = this._onClickLink;
-      anchor.target = '_parent';
+  // There are two types of navigation
+  // Nav type 1 - from route, need to navigate iframe to specified page
+  componentWillReceiveProps(nextProps) {
+    const nextUrl = this._getUrlFromRoute(nextProps);
+    if (nextUrl !== this._loadedUrl) {
+      this.refs.frame.contentWindow.location.href = `.${nextUrl}.html`;
     }
   }
 
-  // A link in the child page was clicked
-  @autobind _onClickLink(evt) {
-    const href = evt.target.getAttribute('href');
-    if (href.indexOf('/blog') === 0) {
-      // If navigating inside the blog, redirect to react router
-      evt.preventDefault();
-      this.context.router.push(href);
+  shouldComponentUpdate(nextProps) {
+    // Setting iframe.src is not reliable, use contentWindow.location instead
+    // Rerender will cause page to load twice
+    return false;
+  }
+
+  // Nav type 2 - from user click within the iframe,
+  // Need to capture the loaded url and update route
+  @autobind _onPostLoaded(evt) {
+    const loadedUrl = evt.target.contentWindow.location.href;
+
+    this._loadedUrl = loadedUrl
+      .slice(loadedUrl.indexOf('/blog/'))
+      .replace('.html', '');
+
+    if (this.props.location.pathname !== this._loadedUrl) {
+      // update route to match the current url
+      this.context.router.push(this._loadedUrl);
     }
+  }
+
+  _getUrlFromRoute(props) {
+    // redirect /blog and /blog/ to /blog/latest
+    const {location: {pathname}} = props;
+    return pathname.length > 6 ? pathname : '/blog/latest';
   }
 
   render() {
-    // splat is the string that matches the wildcard in
-    // the current route: <base_url>/blog/*
-    let {routeParams: {splat = 'index'}} = this.props;
-
-    splat = splat.replace(/\.html$/, '');
+    const url = this._getUrlFromRoute(this.props);
 
     return (
       <div className="blog-page">
-        <iframe src={`./blog/${splat}.html`} onLoad={ this._onPostLoaded } />
+        <iframe ref="frame" src={`.${url}.html`} onLoad={ this._onPostLoaded } />
       </div>
     );
   }
