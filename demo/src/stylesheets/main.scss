@@ -190,6 +190,7 @@ hr.short {
   position: relative;
   width: 32%;
   display: inline-block;
+  line-height: 0;
 
   img {
     transition: opacity 0.4s;
@@ -203,6 +204,7 @@ hr.short {
     text-align: center;
     pointer-events: none;
     box-sizing: border-box;
+    line-height: 1.5;
   }
   >div:before {
     content: attr(data-title);
