@@ -4,17 +4,12 @@
 viewport parameters, and renders those layers as a transparent overlay.
 
 ```js
-import MapGL from 'react-map-gl';
 import DeckGL, {ScatterplotLayer} from 'deck.gl';
 
-const viewport = new Viewport({...});
-
-const App = () => (
-  <MapGL>
-    <DeckGL
-      viewport={viewport}
-      layers={[new ScatterplotLayer({data: [...]})]} />
-  </MapGL>
+const App = (viewport, data) => (
+  <DeckGL
+    {...viewport}
+    layers={[new ScatterplotLayer({data})]} />
 );
 ```
 
