@@ -63,7 +63,6 @@
     </div>
   </div>
   <div class="thumb">
-  
     <div data-title="Every Person in NYC" data-name="ScatterplotLayer">
       <a href="#/examples/core-layers/scatterplot-layer">
         <img src="images/demo-thumb-scatterplot.jpg" />

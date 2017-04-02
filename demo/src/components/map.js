@@ -59,11 +59,9 @@ class Map extends Component {
         }
       }
 
-      if (DemoComponent.trackMouseMove) {
-        this.setState({
-          trackMouseMove: true
-        });
-      }
+      this.setState({
+        trackMouseMove: Boolean(DemoComponent.trackMouseMove)
+      });
     }
   }
 
