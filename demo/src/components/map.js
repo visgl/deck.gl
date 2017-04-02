@@ -60,7 +60,9 @@ class Map extends Component {
       }
 
       if (DemoComponent.trackMouseMove) {
-        this.setState({trackMouseMove: true});
+        this.setState({
+          trackMouseMove: true
+        });
       }
     }
   }
@@ -78,6 +80,16 @@ class Map extends Component {
     }
   }
 
+  @autobind
+  _onMouseEnter() {
+    this.setState({mouseEntered: true});
+  }
+
+  @autobind
+  _onMouseLeave() {
+    this.setState({mouseEntered: false});
+  }
+
   render() {
     const {viewport, demo, params, owner, data, isInteractive} = this.props;
     const DemoComponent = Demos[demo];
@@ -87,7 +99,10 @@ class Map extends Component {
     }
 
     return (
-      <div onMouseMove={this.state.trackMouseMove? this._onMouseMove : null}>
+      <div
+        onMouseMove={this.state.trackMouseMove? this._onMouseMove : null}
+        onMouseEnter={this.state.trackMouseMove? this._onMouseEnter : null}
+        onMouseLeave={this.state.trackMouseMove? this._onMouseLeave : null}>
         <MapGL
           mapboxApiAccessToken={MAPBOX_ACCESS_TOKEN}
           preventStyleDiffing={true}
@@ -99,6 +114,7 @@ class Map extends Component {
           <DemoComponent ref="demo" viewport={viewport} params={params}
             onStateChange={this.props.updateMeta}
             mousePosition={this.state.mousePosition}
+            mouseEntered={this.state.mouseEntered}
             data={owner === demo ? data : null} />
 
           <div className="mapbox-tip">Hold down shift to rotate</div>

@@ -52,7 +52,7 @@ class Root extends Component {
     });
   }
 
-  _onMouseMove(evt){
+  _onMouseMove(evt) {
     this.setState({mousePosition: [evt.pageX, evt.pageY]});
   }
 

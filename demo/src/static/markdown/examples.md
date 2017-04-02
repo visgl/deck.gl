@@ -1,8 +1,8 @@
 <div>
   <div class="thumb">
     <div data-title="US County-to-County Migration" data-name="ArcBrushingLayer">
-      <a href="#/examples/arc-brushing-layer">
-        <img src="images/demo-thumb-arc.jpg" />
+      <a href="#/examples/custom-layers/arc-brushing-layer">
+        <img src="images/demo-thumb-arc-brushing.jpg" />
       </a>
     </div>
   </div>
@@ -63,6 +63,7 @@
     </div>
   </div>
   <div class="thumb">
+  
     <div data-title="Every Person in NYC" data-name="ScatterplotLayer">
       <a href="#/examples/core-layers/scatterplot-layer">
         <img src="images/demo-thumb-scatterplot.jpg" />

@@ -4,7 +4,7 @@ import DeckGL, {HexagonLayer} from 'deck.gl';
 
 const LIGHT_SETTINGS = {
   lightsPosition: [-0.144528, 49.739968, 8000, -3.807751, 54.104682, 8000],
-  ambientRatio: 0.45,
+  ambientRatio: 0.4,
   diffuseRatio: 0.6,
   specularRatio: 0.2,
   lightsStrength: [0.8, 0.0, 0.8, 0.0],
@@ -36,13 +36,13 @@ export default class DeckGLOverlay extends Component {
 
   static get defaultViewport() {
     return {
-      longitude: -1.4855092665310963,
-      latitude: 52.38821282001933,
+      longitude: -1.4157267858730052,
+      latitude: 52.232395363869415,
       zoom: 6.6,
       minZoom: 5,
       maxZoom: 15,
-      pitch: 60,
-      bearing: -14
+      pitch: 40.5,
+      bearing: -27.396674584323023
     };
   }
 

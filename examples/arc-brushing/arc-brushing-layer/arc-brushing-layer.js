@@ -25,12 +25,12 @@ import arcFragment from './arc-brushing-layer-fragment.glsl';
 
 const defaultProps = {
   ...ArcLayer.defaultProps,
-
   // show arc if source is in brush
   brushSource: true,
   // show arc if target is in brush
   brushTarget: true,
   enableBrushing: true,
+  getStrokeWidth: d => d.strokeWidth,
   // brush radius in meters
   brushRadius: 100000,
   mousePosition: [0, 0]
@@ -39,22 +39,20 @@ const defaultProps = {
 export default class ArcBrushingLayer extends ArcLayer {
 
   getShaders() {
+    // use customized shaders
     return {vs: arcVertex, fs: arcFragment, modules: []};
   }
 
   draw({uniforms}) {
-    const {viewport} = this.context;
 
-    if (this.props.mousePosition) {
-      //console.log(this.props.mousePosition)
-      console.log(this.unproject(this.props.mousePosition));
-    }
+    // add uniforms
     super.draw({uniforms: {
       ...uniforms,
-      brushSource: this.props.brushSource ? 1 : 0,
-      brushTarget: this.props.brushTarget ? 1 : 0,
+      brushSource: this.props.brushSource,
+      brushTarget: this.props.brushTarget,
       brushRadius: this.props.brushRadius,
-      mousePos: this.props.mousePosition ? new Float32Array(this.unproject(this.props.mousePosition)) : defaultProps.mousePosition,
+      mousePos: this.props.mousePosition ?
+        new Float32Array(this.unproject(this.props.mousePosition)) : defaultProps.mousePosition,
       enableBrushing: this.props.enableBrushing ? 1 : 0
     }});
   }
