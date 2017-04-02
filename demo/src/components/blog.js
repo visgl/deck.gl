@@ -50,6 +50,7 @@ export default class Blog extends Component {
         // is external link
         anchor.target = '_parent';
       }
+
     }
   }
 
