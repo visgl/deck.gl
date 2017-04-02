@@ -20,21 +20,21 @@ import DeckGL, {LineLayer} from 'deck.gl';
 // Set your mapbox token here
 const MAPBOX_TOKEN = process.env.MAPBOX_ACCESS_TOKEN;
 
+const viewport = {
+   width: 500,
+   height: 500,
+   longitude: -100,
+   latitude: 40.7,
+   zoom: 3,
+   maxZoom: 15,
+   pitch: 0,
+   bearing: 0
+}
+
 // The root React component
 class Root extends Component {
   constructor(props) {
     super(props);
-    this.state = {
-      viewport: {
-        latitude: 37.785164,
-        longitude: -122.41669,
-        zoom: 16.140440,
-        bearing: -20.55991,
-        pitch: 60
-      },
-      width: 500,
-      height: 500
-    };
   }
 
   render() {
@@ -45,15 +45,11 @@ class Root extends Component {
       <MapGL
         // Viewport props for Mapbox
         {...viewport}
-        width={width}
-        height={height}
         mapboxApiAccessToken={MAPBOX_TOKEN}>
         // deck.gl React component
         <DeckGL
           // The same viewport props for deck.gl
           {...viewport}
-          width={width}
-          height={height}
           // Create a debug deck.gl instance
           debug
           layers={[
@@ -95,4 +91,4 @@ Remarks
   unnecessary calculations using React and deck.gl lifecycle functions.
 
 
-See [full API doc (link update needed)](/docs/api-reference/deckgl.md) for the `DeckGL` component.
+See [full API doc](/docs/api-reference/deckgl.md) for the `DeckGL` component.
