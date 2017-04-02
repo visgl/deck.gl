@@ -7,63 +7,44 @@ render it as a child of another component, passing in your list of deck.gl
 layers as a property.
 
 ```jsx
-// Import React
+/// app.js
 import React, {Component} from 'react';
-import {render} from 'react-dom';
-
-// Import Mapbox via react-map-gl
 import MapGL from 'react-map-gl';
-
-// Import deck.gl and the layer you'd like to use
 import DeckGL, {LineLayer} from 'deck.gl';
 
-// Set your mapbox token here
-const MAPBOX_TOKEN = process.env.MAPBOX_ACCESS_TOKEN;
+// Set your mapbox access token here
+const MAPBOX_ACCESS_TOKEN = 'MAPBOX_ACCESS_TOKEN';
 
+// Viewport settings that is shared between mapbox and deck.gl
 const viewport = {
    width: 500,
    height: 500,
    longitude: -100,
    latitude: 40.7,
    zoom: 3,
-   maxZoom: 15,
    pitch: 0,
    bearing: 0
 }
 
-// The root React component
-class Root extends Component {
-  constructor(props) {
-    super(props);
-  }
+// Data to be used by the LineLayer
+const data = [
+  {sourcePosition: [-122.41669, 37.7853], targetPosition: [-122.41669, 37.781]}
+];
+
+export default class App extends Component {
 
   render() {
-    const {viewport, width, height} = this.state;
 
     return (
-      // Mapbox React component
-      <MapGL
-        // Viewport props for Mapbox
-        {...viewport}
-        mapboxApiAccessToken={MAPBOX_TOKEN}>
-        // deck.gl React component
-        <DeckGL
-          // The same viewport props for deck.gl
-          {...viewport}
-          // Create a debug deck.gl instance
-          debug
-          layers={[
-            new LineLayer({
-              // Data to be used by the LineLayer
-              data: [{sourcePosition: [-122.41669, 37.7853], targetPosition: [-122.41669, 37.781]}]
-            })
-          ]} />
+      <MapGL {...viewport} mapboxApiAccessToken={MAPBOX_ACCESS_TOKEN}>
+        <DeckGL {...viewport} layers={[
+          new LineLayer({id: 'line-layer', data})
+        ]} />
       </MapGL>
     );
   }
 }
 
-render(<Root />, document.body.appendChild(document.createElement('div')));
 ```
 
 Remarks
