@@ -1,4 +1,5 @@
 import React, {Component} from 'react';
+import {scaleLinear} from 'd3-scale';
 
 import DeckGL from 'deck.gl';
 import ArcBrushingLayer from './arc-brushing-layer';
@@ -16,11 +17,6 @@ export const outFlowColors = [
 const sourceColor = [166, 3, 3];
 // migrate in
 const targetColor = [35, 181, 184];
-
-export function linearScale(domain, range, value) {
-
-  return (value - domain[0]) / (domain[1] - domain[0]) * (range[1] - range[0]) + range[0];
-}
 
 export default class DeckGLOverlay extends Component {
 
@@ -119,11 +115,12 @@ export default class DeckGLOverlay extends Component {
 
     // sort targets by radius large -> small
     targets.sort((a, b) => Math.abs(b.net) - Math.abs(a.net));
-    const domain = [0, Math.abs(targets[0].net)];
-    const range = [36, 400];
+    const sizeScale = scaleLinear()
+      .domain([0, Math.abs(targets[0].net)])
+      .range([36, 400]);
 
     targets.forEach(pt => {
-      pt.radius = Math.sqrt(linearScale(domain, range, Math.abs(pt.net)));
+      pt.radius = Math.sqrt(sizeScale(Math.abs(pt.net)));
     });
 
     return {arcs, targets, sources};

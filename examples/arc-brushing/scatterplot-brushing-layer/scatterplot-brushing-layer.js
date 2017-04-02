@@ -72,13 +72,13 @@ export default class ScatterplotBrushingLayer extends ScatterplotLayer {
   calculateInstanceTargetPositions(attribute) {
     const {data, getTargetPosition} = this.props;
     const {value, size} = attribute;
-    let i = 0;
-    for (const point of data) {
+    let point;
+    for (let i = 0; i < data.length; i++) {
+      point = data[i];
       const position = getTargetPosition(point) || [0, 0, 0];
-      value[i + 0] = position[0];
-      value[i + 1] = position[1];
-      value[i + 2] = position[2];
-      i += size;
+      value[i * size + 0] = position[0];
+      value[i * size + 1] = position[1];
+      value[i * size + 2] = position[2];
     }
   }
 }

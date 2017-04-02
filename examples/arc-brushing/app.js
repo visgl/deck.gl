@@ -20,10 +20,8 @@ class Root extends Component {
         height: 500
       },
       data: null,
-      mousePosition: []
+      mousePosition: [0, 0]
     };
-
-    this._onMouseMove = this._onMouseMove.bind(this);
 
     requestJson('./data/counties.json', (error, response) => {
       if (!error) {
@@ -53,14 +51,51 @@ class Root extends Component {
   }
 
   _onMouseMove(evt) {
-    this.setState({mousePosition: [evt.pageX, evt.pageY]});
+    if (evt.nativeEvent) {
+      this.setState({mousePosition: [evt.nativeEvent.offsetX, evt.nativeEvent.offsetY]});
+    }
   }
 
-  render() {
-    const {viewport, data, selectedCounty} = this.state;
+  _onMouseEnter() {
+    this.setState({mouseEntered: true});
+  }
+
+  _onMouseLeave() {
+    this.setState({mouseEntered: false});
+  }
+
+  _onHover({x, y, object}) {
+    this.setState({x, y, hoveredObject: object});
+  }
+
+  _renderTooltip() {
+    const {x, y, hoveredObject} = this.state;
+
+    if (!hoveredObject) {
+      return null;
+    }
 
     return (
-      <div onMouseMove={this._onMouseMove}>
+      <div className="tooltip"
+           style={{left: x, top: y}}>
+        <div>{hoveredObject.name}</div>
+        <div>{`Net gain: ${hoveredObject.net}`}</div>
+        <div>{`i: ${hoveredObject.i}`}</div>
+      </div>
+    );
+  }
+  render() {
+    const {viewport, data, mousePosition, mouseEntered} = this.state;
+
+    if (!data) {
+      return null;
+    }
+
+    return (
+      <div onMouseMove={this._onMouseMove.bind(this)}
+           onMouseEnter={this._onMouseEnter.bind(this)}
+           onMouseLeave={this._onMouseLeave.bind(this)}>
+        {this._renderTooltip()}
         <MapGL
           {...viewport}
           perspectiveEnabled={true}
@@ -68,10 +103,13 @@ class Root extends Component {
           mapboxApiAccessToken={MAPBOX_TOKEN}>
           <DeckGLOverlay viewport={viewport}
             data={data}
-            selectedFeature={selectedCounty}
+            brushRadius={100000}
+            opacity={0.7}
             strokeWidth={2}
-            onClick={this._onSelectCounty.bind(this)}
-            />
+            mousePosition={mousePosition}
+            mouseEntered={mouseEntered}
+            onHover={this._onHover.bind(this)}
+          />
         </MapGL>
       </div>
     );
