@@ -15,10 +15,10 @@ export default class HeatmapDemo extends Component {
 
   static get parameters() {
     return {
-      radius: {displayName: 'Radius', type: 'range', value: 4000, step: 200, min: 500, max: 20000},
-      coverage: {displayName: 'Coverage', type: 'range', value: 1, step: 0.1, min: 0, max: 1},
+      radius: {displayName: 'Radius', type: 'range', value: 2000, step: 100, min: 500, max: 20000},
+      coverage: {displayName: 'Coverage', type: 'range', value: 0.7, step: 0.1, min: 0, max: 1},
       upperPercentile: {displayName: 'Upper Percentile',
-        type: 'range', value: 100, step: 0.1, min: 90, max: 100}
+        type: 'range', value: 100, step: 0.1, min: 80, max: 100}
     };
   }
 
