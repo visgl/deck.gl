@@ -21,15 +21,16 @@ export default class ArcBrushingDemo extends Component {
 
   static get parameters() {
     return {
-      lineWidth: {displayName: 'Width', type: 'number', value: 1, step: 1, min: 1},
-      opacity: {displayName: 'opacity', type: 'range', value: 0.3, step: 0.01, min: 0.01, max: 1}
+      lineWidth: {displayName: 'Width', type: 'range', value: 1, step: 1, min: 1, max: 10},
+      opacity: {displayName: 'Arc Opacity', type: 'range', value: 0.4, step: 0.01, min: 0, max: 1},
+      brushRadius: {displayName: 'Brush Radius', type: 'range', value: 200000, step: 1000, min: 1000, max: 1000000}
     };
   }
 
   static get viewport() {
     return {
       ...ArchBrushingOverlay.defaultViewport,
-      mapStyle: MAPBOX_STYLES.DARK
+      mapStyle: MAPBOX_STYLES.LIGHT
     };
   }
 
@@ -65,20 +66,55 @@ export default class ArcBrushingDemo extends Component {
     );
   }
 
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      hoveredObject: null
+    };
+  }
+
+  _onHover({x, y, object}) {
+    this.setState({x, y, hoveredObject: object});
+  }
+
+  _renderTooltip() {
+    const {x, y, hoveredObject} = this.state;
+
+    if (!hoveredObject) {
+      return null;
+    }
+
+    return (
+      <div className="tooltip"
+           style={{left: x, top: y}}>
+        <div>{hoveredObject.name}</div>
+        <div>{`Net gain: ${hoveredObject.net}`}</div>
+        <div>{`i: ${hoveredObject.i}`}</div>
+      </div>
+    );
+  }
+
   render() {
-    const {viewport, params, data, mousePosition} = this.props;
+    const {viewport, params, data, mousePosition, mouseEntered} = this.props;
 
     if (!data) {
       return null;
     }
 
     return (
-      <ArchBrushingOverlay viewport={viewport}
-        data={data}
-        mousePosition={mousePosition}
-        strokeWidth={params.lineWidth.value}
-        opacity={params.opacity.value}
-      />
+      <div>
+        {this._renderTooltip()}
+        <ArchBrushingOverlay viewport={viewport}
+          data={data}
+          mousePosition={mousePosition}
+          mouseEntered={mouseEntered}
+          strokeWidth={params.lineWidth.value}
+          brushRadius={params.brushRadius.value}
+          opacity={params.opacity.value}
+          onHover={this._onHover.bind(this)}
+        />
+      </div>
     );
   }
 }

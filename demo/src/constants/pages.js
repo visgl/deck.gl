@@ -21,6 +21,7 @@ function generatePath(tree, parentPath = '') {
   if (typeof tree.content === 'string') {
     markdownFiles[tree.content] = `${parentPath}/${tree.path}`;
   }
+
   return tree;
 }
 
@@ -89,7 +90,7 @@ export const examplePages = generatePath([
     expanded: true,
     children: [
       {
-        name: 'Arc Brushing',
+        name: 'Arc Brushing Layer',
         content: {
           demo: 'ArcBrushingDemo',
           code: getCodeUrl('examples/arc-brushing')

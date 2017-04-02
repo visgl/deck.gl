@@ -138,8 +138,6 @@ export default class DeckGL extends React.Component {
     if (!event || !event.event || !Number.isFinite(event.event.offsetX)) {
       return;
     }
-    console.log('on mouse move')
-    console.log('x', event.event.offsetX, 'y', event.event.offsetY)
     const {event: {offsetX: x, offsetY: y}} = event;
     const selectedInfos = this.layerManager.pickLayer({x, y, mode: 'hover'});
     if (selectedInfos.length) {
