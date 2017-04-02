@@ -1,27 +1,70 @@
 # Using deck.gl with React
 
-deck.gl is a perfect match for
-[React](https://facebook.github.io/react/) applications, since
-deck.gl layers fit naturally into React's component render flow.
+deck.gl works perfectly for [React](https://facebook.github.io/react/)-based applications. All deck.gl layers fit naturally into React's component render flow.
 
 To use deck.gl with React, simply import the `DeckGL` React component and
 render it as a child of another component, passing in your list of deck.gl
 layers as a property.
 
-    import MapGL from 'react-map-gl';
-    import DeckGL from 'deck.gl';
-    import {ScatterplotLayer} from 'deck.gl';
+```jsx
+// Import React
+import React, {Component} from 'react';
+import {render} from 'react-dom';
 
-    const viewport = new Viewport({...});
+// Import Mapbox via react-map-gl
+import MapGL from 'react-map-gl';
+
+// Import deck.gl and the layer you'd like to use
+import DeckGL, {LineLayer} from 'deck.gl';
+
+// Set your mapbox token here
+const MAPBOX_TOKEN = process.env.MAPBOX_ACCESS_TOKEN;
+
+const viewport = {
+   width: 500,
+   height: 500,
+   longitude: -100,
+   latitude: 40.7,
+   zoom: 3,
+   maxZoom: 15,
+   pitch: 0,
+   bearing: 0
+}
+
+// The root React component
+class Root extends Component {
+  constructor(props) {
+    super(props);
+  }
+
+  render() {
+    const {viewport, width, height} = this.state;
 
     return (
-      <MapGL>
+      // Mapbox React component
+      <MapGL
+        // Viewport props for Mapbox
+        {...viewport}
+        mapboxApiAccessToken={MAPBOX_TOKEN}>
+        // deck.gl React component
         <DeckGL
-          viewport={viewport}
-          layers={[new ScatterplotLayer({data: [...]})]}
-        />
+          // The same viewport props for deck.gl
+          {...viewport}
+          // Create a debug deck.gl instance
+          debug
+          layers={[
+            new LineLayer({
+              // Data to be used by the LineLayer
+              data: [{sourcePosition: [-122.41669, 37.7853], targetPosition: [-122.41669, 37.781]}]
+            })
+          ]} />
       </MapGL>
     );
+  }
+}
+
+render(<Root />, document.body.appendChild(document.createElement('div')));
+```
 
 Remarks
 
