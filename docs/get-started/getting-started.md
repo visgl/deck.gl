@@ -21,7 +21,7 @@ The deck.gl repository contains an
 with a selection of small, standalone examples that could be good starting
 points for your application.
 
-You should be able to copy these folders to other locations, and get them running simply by installing dependency:
+You should be able to copy these folders to your preferred locations, and get them running simply by installing dependencies using:
 
 ```bash
 # either
@@ -29,17 +29,16 @@ npm install
 # or
 yarn
 ```
-and run:
+and then running using:
 
 ```bash
 export MAPBOX_ACCESS_TOKEN={Your Token Here} && npm start
 ```
 
-Remark:
+Remarks:
 
-For most of the examples come with deck.gl, sample geospatial data is rendered
-on top of a Mapbox basemap. Mapbox requires each user to provide an access token before
-they serve any basemap tiles from their servers to your browser.
+MAPBOX_ACCESS_TOKEN is the Mapbox token. For most examples shipped with deck.gl, geospatial data is rendered on top of Mapbox-powered basemap. Mapbox requires users to provide an access token before
+they serve map tiles to user's browsers.
 
-For more information about map token read the sections about ["Using with Mapbox"](https://uber.github.io/deck.gl/#/examples/),
-and the [examples](https://github.com/uber/deck.gl/tree/master/examples/README.md)
+For more information about map token read the sections about ["Using with Mapbox"](/docs/get-started/using-with-mapbox-gl.md),
+and the [examples](https://github.com/uber/deck.gl/tree/master/examples/)
