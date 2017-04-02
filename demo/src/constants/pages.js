@@ -159,7 +159,7 @@ export const docPages = generatePath([
     name: 'Custom Layers',
     children: [
       {
-        name: 'Writing Layers',
+        name: 'Writing Your Own Layer',
         content: getDocUrl('advanced/custom-layers.md')
       },
       {

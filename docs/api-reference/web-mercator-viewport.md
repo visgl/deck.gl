@@ -1,47 +1,41 @@
 
 # WebMercatorViewport Class
 
-The main purpose of the `WebMercatorViewport` is to enable 3D rendering to
+A subclass of [Viewport](/docs/api-reference/viewport.md) that enables 3D rendering to
 seamlessly overlay on top of map components that take web mercator style
-map coordinates (`lat`, `lon`, `zoom`, `pitch`, `bearing` etc),
+map coordinates (`latitude`, `lon`, `zoom`, `pitch`, `bearing` etc),
 and to facilite the necessary mercator projections by breaking them into a
 minimal non-linear piece followed by a standard projection chain.
 
 Remarks:
 * Because `WebMercatorViewport` a subclass of `Viewport`, an application
   can implement support for generic 3D `Viewport`s and automatically get
-  the ability to accept web mercator style map coordinates
-  (`lat`, `lon`, `zoom`, `pitch`, `bearing` etc).
+  the ability to accept web mercator style map coordinates.
 * A limitation at the moment is that there is no way to extract
   web mercator parameters from a "generic" viewport, so for map synchronization
   applications (rendering on top of a typical map component that only accepts
   web mercator parameters) the `WebMercatorViewport` is necessary.
 
-##### `constructor`
+## Constructor
 
-| Parameter    |   Type  | Default | Description                                        |
-| ------------ | ------- | ------- | -------------------------------------------------- |
+Parameters:
 
+- `opts` (Object) - Orthogonal view options
+  * `width` (Number) - Width of "viewport" or window. Default to `1`.
+  * `height` (Number) - Height of "viewport" or window. Default to `1`.
 
-| Parameter     |  Type    | Default | Description                                                |
-| ------------- | -------- | ------- | ---------------------------------------------------------- |
-| `latitude`    | `Number` | 37      | Center of viewport on map (alternative to center)          |
-| `longitude`   | `Number` | -122    | Center of viewport on map (alternative to center)          |
-| `zoom`        | `Number` | 11      | Scale = Math.pow(2,zoom) on map (alternative to opt.scale) |
-| `width`       | `Number` | 1       | Width of "viewport" or window                              |
-| `height`      | `Number` | 1       | Height of "viewport" or window                             |
-| `center`      | `Array`  | [0, 0]  | Center of viewport [longitude, latitude] or [x, y]         |
-| `scale`       | `Number` | 1       | Either use scale or zoom                                   |
-| `pitch`       | `Number` | 0       | Camera angle in degrees (0 is straight down)               |
-| `bearing`     | `Number` | 0       | Map rotation in degrees (0 means north is up)              |
-| `altitude`    | `Number` | 1.5     | Altitude of camera in screen units                         |
+  web mercator style arguments:
+  * `latitude` (Number, optional) - Center of viewport on map (alternative to center). Default to `37`.
+  * `longitude` (Number, optional) - Center of viewport on map (alternative to center). Default to `-122`.
+  * `zoom` (Number, optional) - `center`. Default to `11`.
+  * `pitch` (Number, optional) - Camera angle in degrees (0 is straight down). Default to `0`.
+  * `bearing` (Number, optional) - Map rotation in degrees (0 means north is up). Default to `0`.
+  * `altitude` (Number, optional) - Altitude of camera in screen units. Default to `1.5`.
 
+  projection matrix arguments:
+  * farZMultiplier (Number, optional) - Default to `10`.
 
 Remarks:
- - Only one of center or [latitude, longitude] can be specified
- - [latitude, longitude] can only be specified when "mercator" is true
- - Only one of `center` or `[latitude, longitude]` can be specified.
- - `[latitude, longitude]` can only be specified when `mercator` is true
  - Altitude has a default value that matches assumptions in mapbox-gl
  - `width` and `height` are forced to 1 if supplied as 0, to avoid
    division by zero. This is intended to reduce the burden of apps to
@@ -49,76 +43,38 @@ Remarks:
  -  When using mercatorProjection, per cartographic tradition, longitudes and
    latitudes are specified as degrees.
 
+## Methods
 
-##### `WebMercatorViewport.project`
+Inherits all [Viewport methods](/docs/api-reference/viewport.md#methods).
 
-Projects latitude and longitude to pixel coordinates in window
-using viewport projection parameters
+##### `projectFlat`
 
-| Parameter      | Type      | Default  | Description                     |
-| -------------- | --------- | -------- | ------------------------------- |
-| `lnglatz`      | `Array`   | required | `[lng, lat]` or `[lng, lat, Z]` |
-| `opts`         | `Object`  | `{}`     | named options                   |
-| `opts.topLeft` | `Boolean` | `true`   | If true projected coords are top left |
-
-Returns: `[x, y]` or `[x, y, z]` - (depending on length of input array)
-  in the requested coordinate system (top left or bottom left)
-- `[longitude, latitude]` to `[x, y]`
-- `[longitude, latitude, Z]` => `[x, y, z]`
-
-Remarks:
-* By default, returns top-left coordinates suitable for canvas/SVG type
-  rendering.
-
-
-##### `WebMercatorViewport.unproject`
-
-Unproject pixel coordinates on screen onto [lon, lat] on map.
-
-| Parameter      | Type      | Default  | Description                     |
-| -------------- | --------- | -------- | ------------------------------- |
-| `xyz`          | `Array`   | required | pixel coordinates in viewport   |
-
-Returns: Unprojected coordinates in array from, depending on input:
-- `[x, y]` => `[lng, lat]`
-- `[x, y, z]` => `[lng, lat, Z]`
-
-
-####$ `WebMercatorViewport.projectFlat([lng, lat], scale = this.scale)`
-
-Project `[lng, lat]` on sphere onto "screen pixel" coordinates `[x, y]` without
+Project `[longitude, latitude]` on sphere onto "screen pixel" coordinates `[x, y]` without
 considering any perspective (effectively ignoring pitch, bearing and altitude).
 
 Parameters:
 
- - `coordinates` {Array} - `[lng, lat]` or `[xmap, ymap]` coordinates.
+ - `coordinates` (Array) - `[longitude, latitude]` coordinates.
+ - `scale` (Number) - Map zoom scale calculated from `Math.pow(2, zoom)`.
 
 Returns:
 
- - `[x, y]`, representing map or world coordinates.
+ - Screen coordinates in `[x, y]`.
 
-##### `PerspectiveViewport.unprojectFlat`
+##### `unprojectFlat`
 
-Unprojects a screen point `[x, y]` on the map or world `[lng, lat]` on sphere.
-* `lnglat` - Array `[lng, lat]` or `[xmap, ymap]` coordinates
-  Specifies a point on the map (or world) to project onto the screen.
-* `returns` - [x,y] - An Array of Numbers representing map or world coordinates.
+Unprojects a screen coordinate `[x, y]` to `[longitude, latitude]` on sphere without
+considering any perspective (effectively ignoring pitch, bearing and altitude).
 
 Parameters:
- - `pixels` {Array} - `[x, y]`
+ - `pixels` (Array) - `[x, y]`
+ - `scale` (Number) - Map zoom scale calculated from `Math.pow(2, zoom)`.
 
-
-##### `WebMercatorViewport.unprojectFlat([x, y], scale = this.scale)`
-
-
-Parameters:
- - `[lng, lat]` array xy - object with {x,y} members representing a "point on projected map
-plane
 Returns:
-* [lat, lon] or [x, y] of point on sphere.
 
+ - Map or world coordinates in `[longitude, latitude]`.
 
-##### `getDistanceScales()`
+##### `getDistanceScales`
 
 Returns:
 - An object with precalculated distance scales allowing conversion between
@@ -133,31 +89,44 @@ Remarks:
   precision, which can greatly outweigh the small linear approximation error
   mentioned above.
 
-
-##### `metersToLngLatDelta(xyz)`
+##### `metersToLngLatDelta`
 
 Converts a meter offset to a lnglat offset using linear approximation.
 For information on numerical precision, see remarks on `getDistanceScales`.
 
-* `xyz` ([Number,Number]|[Number,Number,Number])  - array of meter deltas
-returns ([Number,Number]|[Number,Number,Number]) - array of [lng,lat,z] deltas
+Parameters:
 
+- `xyz` (Array) - Array of `[x, y, z]` in meter deltas. Passing a `z` is optional.
 
-##### `lngLatDeltaToMeters(deltaLngLatZ)`
+Returns:
+
+- Array of deltas in `[longitude, latitude]` or `[longitude, latitude, altitude]`
+if `z` is provided.
+
+##### `lngLatDeltaToMeters`
 
 Converts a lnglat offset to a meter offset using linear approximation.
-For information on numerical precision, see remarks on `getDistanceScales`.
+For information on numerical precision, see remarks on
+[`getDistanceScales`](/docs/api-reference/web-mercator-viewport.md#-getdistancescales-).
 
-* `deltaLngLatZ` ([Number,Number]|[Number,Number,Number])  - array of [lng,lat,z] deltas
-Returns ([Number,Number]|[Number,Number,Number]) - array of meter deltas
+Parameters:
+- `deltaLngLatZ` - Array of `[longitude, latitude, altitude]` deltas.
+Passing a `altitude` is optional.
 
+Returns: 
+- Array of meter deltas in `[x, y]` or `[x, y, z]` if `altitude` is provided.
 
-##### `addMetersToLngLat(lngLatZ, xyz)`
+##### `addMetersToLngLat`
 
-Add a meter delta to a base lnglat coordinate, returning a new lnglat array,
-using linear approximation.
-For information on numerical precision, see remarks on `getDistanceScales`.
+Add a meter delta to a base lnglat coordinate using linear approximation.
+For information on numerical precision, see remarks on
+[`getDistanceScales`](/docs/api-reference/web-mercator-viewport.md#-getdistancescales-).
 
-* `lngLatZ` ([Number,Number]|[Number,Number,Number]) - base coordinate
-* `xyz` ([Number,Number]|[Number,Number,Number])  - array of meter deltas
-Returns ([Number,Number]|[Number,Number,Number]) array of [lng,lat,z] deltas
+Parameters:
+- `lngLatZ` (Array) - Base coordinate in `[longitude, latitude, altitude]`.
+Passing a `altitude` is optional.
+- `xyz` (Array) - Array of `[x, y, z]` in meter deltas. Passing a `z` is optional.
+
+Returns:
+- New coordinate array in `[longitude, latitude]` or `[longitude, latitude, altitude]`
+if `z` is provided.

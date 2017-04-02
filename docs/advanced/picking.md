@@ -12,86 +12,20 @@ their normal color calculation.
 The `pickingColor` is a special encoding that converts the index of a object
 of a given layer into a 3-byte color array. When the picking buffer is rendered,
 deck.gl looks at the color of the pixel under the pointer, and decodes it back
-to the index number to determine which object has been picked.
+to the index number using
+[`layer.decodePickingColor()`](/docs/api-reference/base-layer.md#-decodepickingcolor-)
+to determine which object of the layer has been picked.
 
+A `hover` event is triggered on a layer if:
+- The layer is picked, and the picked object is different from the last frame
+- The layer is not picked, but it was in the last frame
 
-## Layer Picking Methods
+A `click` event is triggered on a layer only if it's picked.
 
-Picking can be controlled by overriding the following functions.
-
-Note: 
-While deck.gl allows applications to implement picking however they want,
-special support is provided for the built-in "picking color" based picking
-system, which most layers use.
-
-##### nullPickingColor()
-
-Returns the "null" picking color which is equal the the color of pixels
-not covered by the layer. This color is guaranteed not to match any index value
-greater than or equal to zero.
-
-##### encodePickingColor(index)
-
-- `index`: Integer 
-
-Returns a color that encodes the supplied "sub-feature index" number.
-This color can be decoded later using `Layer.decodePickingColor`.
-
-To get a color that does not correspond to any "sub-feature", use
-`Layer.nullPickingColor`.
-
-Notes:
-* indices to be encoded must be integers larger than or equal to 0.
-* Picking colors are 24 bit values and can thus encode up to 16 million indices.
-
-##### decodePickingColor(color)
-
-- `color`: Array of 3 numbers [r, g, b].
-
-Returns the number that was used to encode the supplied picking color.
-See `Layer.encodePickingColor`. The null picking color (See
-`Layer.nullPickingColor`) will be decoded as -1.
-
-Note: The null picking color is returned when a pixel is picked that is not
-covered by the layer, or when they layer has selected to render a pixel
-using the null picking color to make it unpickable.
-
-##### getPickingInfo(pickParams)
-
-- `pickParams.info`: the current `info` object. By default it contains the
-following fields:
-  + `x`: mouse position x relative to the viewport.
-  + `y`: mouse position y relative to the viewport.
-  + `lngLat`: mouse position in world coordinates. Only applies if
-    `layer.props.projectionMode` is `COORDINATE_SYSTEM.LNGLAT`.
-  + `color`: the color of the pixel that is being picked. It represents a
-    "picking color" that is encoded by
-    [`layer.encodePickingColor()`](/docs/advanced/picking.md#layer-picking-methods).
-  + `index`: the index of the object that is being picked. It is the returned
-    value of
-    [`layer.decodePickingColor()`](/docs/advanced/picking.md#layer-picking-methods).
-  + `picked`: `true` if `index` is not `-1`.
-- `pickParams.mode`: one of `hover` and `click`
-- `pickParams.sourceLayer`: a composite layer can refer to the `sourceLayer` argument
-for the sublayer instance where this event originates from.
-
-This method should return an object with optional fields about
-what was picked. This `info` object is then passed to the layer's `onHover`
-or `onClick` callbacks.
-
-If this method returns `null`, the corresponding event is cancelled and no callback
-functions will be called.
-
-The default implementation populates the `info` object with an `object` field
-that is indexed from `layer.props.data`.
-
-
-##### calculateInstancePickingColors()
-
-A default picking colors attribute generator that is used for most
-instanced layers. It simply sets the picking color of each instance to
-the colors that directly encodes the the index of the instance in the
-`data` property.
+When an event is triggered,
+[`layer.getPickingInfo()`](/docs/api-reference/base-layer.md#-getpickinginfo-)
+is called on the affected layers to populate the `info` object of the event.
+This object is then passed to the `onHover` and `onClick` callbacks.
 
 
 ## Event Propagation In Composite Layers
@@ -107,4 +41,52 @@ Only the `onHover` and `onClick` callbacks of the top-level layer is called. The
 is that the user should only interface with the layer that they created, and not having
 to know the underlying implementation.
 
+
+## Implementing Custom Picking
+
+> While deck.gl allows applications to implement picking however they want,
+special support is provided for the built-in "picking color" based picking
+system, which most layers use.
+
+To take full control of picking, a layer need to take the following steps:
+
+1. Add a picking color attribute during initialization:
+  ```js
+  initializeState() {
+
+    ...
+
+    this.state.attributeManager.add({
+      pickingColors: {size: 3, type: GL.UNSIGNED_BYTE, update: this.calculatePickingColors}
+    });
+  }
+  ```
+- Calculate the attribute by providing a different picking color for every object that
+you need to differentiate, such as:
+  ```js
+  calculatePickingColors(attribute) {
+    const {data} = this.props;
+    const {value, size} = attribute;
+    
+    let i = 0;
+    for (const object of data) {
+      const pickingColor = this.encodePickingColor(i);
+      value[i++] = pickingColor[0];
+      value[i++] = pickingColor[1];
+      value[i++] = pickingColor[2];
+    }
+  }
+  ```
+- The default implementation of
+[`layer.encodePickingColor()`](/docs/api-reference/base-layer.md#-encodepickingcolor-) and
+[`layer.decodePickingColor()`](/docs/api-reference/base-layer.md#-decodepickingcolor-)
+is likely sufficient, but you may need to implement your own pair.
+- Support picking in shaders by rendering picking colors when `renderPickingBuffer`
+is `1`, like [this example](/docs/advanced/writing-shaders.md#-float-renderpickingbuffer-).
+- By default, the `object` field of the picking `info` object is indexed from
+the layer's `data` prop. Custom layers often need to define on their own terms what 
+constitutes meaningful information to the user's callbacks. A layer can achieve this 
+by overriding
+[`layer.getPickingInfo()`](/docs/api-reference/base-layer.md#-getpickinginfo-)
+to add or modify fields to the `info` object.
 

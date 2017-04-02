@@ -19,39 +19,52 @@ Remarks:
   that these still need to be converted to typed arrays.
 
 
-##### `constructor`
+## Constructor
 
-`new Viewport({viewMatrix, projectionMatrix, width, height})`
+Parameters:
 
-| Parameter    | Type        | Default | Description                                   |
-| ------------ | ----------- | ------- | --------------------------------------------- |
-| `width`      | `Number`    | 1       | Width of "viewport" or window                 |
-| `height`     | `Number`    | 1       | Height of "viewport" or window                |
-| `viewMatrix` | `Array[16]` | [0, 0]  | Center of viewport [x, y]                     |
-| `projectionMatrix` | `Array[16]` | 1 | Either use scale or zoom                      |
+- `props` (Object) - Viewport properties
+  * `props.width` (Number) - Width of "viewport" or window. Default to `1`.
+  * `props.height` (Number) - Height of "viewport" or window. Default to `1`.
+  * `props.viewMatrix` (Array[16], optional) - View matrix. Default to identidy matrix.
+  * `props.projectionMatrix` (Array[16], optional) - Projection matrix. Default to identidy matrix.
 
+```js
+const viewport = new Viewport({width: 500, height: 500});
+```
+
+## Methods
+
+##### `equals`
+
+Parameters:
+
+- `viewport` (Viewport) - The viewport to compare with.
+
+Returns:
+
+- `true` if the given viewport is identical to the current one.
 
 ##### `getMatrices`
 
 Returns an object with various matrices
 
-`Viewport.getMatrices({modelMatrix = })`
+Parameters:
 
-| Parameter     | Type        | Default  | Description                                   |
-| ------------- | ----------- | -------- | --------------------------------------------- |
-| `modelMatrix` | `Number`    | IDENTITY | Width of "viewport" or window                 |
+- `modelMatrix` (Array[16], optional) - Model matrix. Default to identity matrix.
 
-* `modelMatrix` (Matrix4) - transforms model to world space
-* `viewMatrix` (Matrix4) - transforms world to camera space
-* `projectionMatrix` (Matrix4) - transforms camera to clip space
-* `viewProjectionMatrix` (Matrix4)  - transforms world to clip space
-* `modelViewProjectionMatrix` (Matrix4) - transforms model to clip space
+Returns:
 
-* `pixelProjectionMatrix` (Matrix4)  - transforms world to pixel space
-* `pixelUnprojectionMatrix` (Matrix4) - transforms pixel to world space
-* `width` (Number) - Width of viewport
-* `height` (Height) - Height of viewport
-
+- A object of the following fields:
+  * `modelMatrix` (Matrix4) - transforms model to world space
+  * `viewMatrix` (Matrix4) - transforms world to camera space
+  * `projectionMatrix` (Matrix4) - transforms camera to clip space
+  * `viewProjectionMatrix` (Matrix4)  - transforms world to clip space
+  * `modelViewProjectionMatrix` (Matrix4) - transforms model to clip space
+  * `pixelProjectionMatrix` (Matrix4)  - transforms world to pixel space
+  * `pixelUnprojectionMatrix` (Matrix4) - transforms pixel to world space
+  * `width` (Number) - Width of viewport
+  * `height` (Height) - Height of viewport
 
 ##### `project`
 
@@ -60,16 +73,15 @@ viewport projection parameters.
 
 Parameters:
 
-  - `coordinates` {Array} - `[lng, lat, altitude]` Passing an altitude is optional.
-  - `opts` {Object}
-    - `topLeft` {Boolean} - Whether projected coords are top left.
+  - `coordinates` (Array) - `[lng, lat, altitude]` Passing an altitude is optional.
+  - `opts` (Object)
+    - `topLeft` (Boolean, optional) - Whether projected coords are top left. Default to `true`.
 
 Returns:
 
-  - Either `[x, y]` or `[x, y, z]` if an altitude was given.
+  - A screen coordinates array `[x, y]` or `[x, y, z]` if an altitude was given.
 
 Note: By default, returns top-left coordinates for canvas/SVG type render
-
 
 ##### `unproject`
 
@@ -77,8 +89,12 @@ Unproject pixel coordinates on screen onto [lng, lat, altitude] on map.
 
 Parameters:
 
-  - `pixels` {Array} - `[x, y, z]` Passing a `z` is optional.
+  - `pixels` (Array) - `[x, y, z]` Passing a `z` is optional.
+  - `opts` (Object)
+    - `topLeft` (Boolean, optional) - Whether projected coords are top left. Default to `true`.
 
 Returns:
 
-  - Either `[lng, lat]` or `[lng, lat, altitude]` if a `z` was given.
+  - A map coordinates array `[lng, lat]` or `[lng, lat, altitude]` if a `z` was given.
+
+Note: By default, takes top-left coordinates from JavaScript mouse events.

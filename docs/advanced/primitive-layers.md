@@ -1,37 +1,142 @@
 # Primitive Layers
 
+If you want to draw something completely different and you are comfortable around
+WebGL, you may consider implementing a new layer by directly extending the
+[`Layer`](/docs/api-reference/base-layer.md) class.
 
 ## Implementing the Layer Lifecycle Functions
 
 To describe how a layer's properties relate to WebGL attributes and uniforms
-you need to implement the [layers life cycle functions](/docs/layer-lifecycle.md).
+you need to implement the layer's [lifecycle functions](/docs/advanced/layer-lifecycle.md).
 
-### Creating, Destroying and Drawing Layers
+### Initializing Layer
 
-`initializeState()` - This is the one method that you must implement to create
-any WebGL resources you need for rendering your layer. A layer should create its
-[Model](/docs/advanced/primitive-layers.md#creating-models) during this phase.
+[`initializeState()`](/docs/api-reference/base-layer.md#-initializestate-) -
+This is the one method that you must implement to create
+any WebGL resources you need for rendering your layer.
 
-`draw()` - If you want to use custom uniforms or settings when drawing, you would
-typical implement the `draw` method and pass those to your render call.
-Note that `draw` is called with viewport uniforms that you need to pass
-to your shader, but you can of course add any layer
-specific uniforms to that.
+#### Creating The Model
 
-Note: the reason that the supplied uniforms need to be passed on to your
-shaders is to enable your shader to use deck.gl's GLSL shaderlibs such as
-`project` or `project64` etc). If you don't use these shaderlibs, you
-would obviously not need to supply these uniforms, but you would have to
-implement features like cartographic projection etc on your own.
+A layer should create its model during this phase. A model is a
+[luma.gl](https://github.com/uber/luma.gl) `Model` instance that defines what will
+be drawn to the WebGL context.
 
-`finalizeState()` - If implemented, this method is called when your layer
-state is discarded. This is a good time to destroy non-shared WebGL resources
-directly, rather than waiting for the garbage collector to do it.
+Most layers are **Single-model layer** - this is the predominant form among all core layers
+that deck.gl currently provides. In these layers, a single geometry model is
+created for each layer and saved to `state.model` during initialization. 
+The default implementation of the rest of the lifecycle methods will then
+look for this model for rendering and picking etc., meaning that you don't
+have to do anything more to get a working layer.
 
+```js
+import {Layer} from 'deck.gl';
+
+export default class MeshLayer extends Layer {
+
+  initializeState() {
+    this.setState({
+      model: this._getModel(this.context.gl)
+    });
+  }
+
+  getModel(gl) {
+    // create Model here
+  }
+
+}
+```
+
+A choice to make is whether your WebGL primitives (draw calls) should
+be instanced, or use dynamic geometry:
+
+* **Instanced layer** - This is type of layer renders
+  the same geometry many times. Usually the simplest way to go
+  when creating layers that renders a lot of similar objects (think
+  ScatterplotLayer, ArcLayers etc).
+  ```
+  /// examples/sample-layers/mesh-layer/mesh-layer.js
+  import {assembleShaders} from 'deck.gl';
+  import {GL, Model, Geometry} from 'luma.gl';
+
+  getModel(gl) {
+    const shaders = assembleShaders(gl, this.getShaders());
+
+    return new Model({
+      gl,
+      id: this.props.id,
+      vs: shaders.vs,
+      fs: shaders.fs,
+      geometry: new Geometry({
+        drawMode: GL.TRIANGLES,
+        indices: new Uint16Array(this.props.mesh.indices),
+        positions: new Float32Array(this.props.mesh.vertices),
+        normals: new Float32Array(this.props.mesh.vertexNormals),
+        texCoords: new Float32Array(this.props.mesh.textures)
+      }),
+      isInstanced: true
+    });
+  }
+  ```
+* **Dynamic geometry layer** - This is needed when
+  dealing with data that needs to be rendered using multiple similar but unique
+  geometries, such as polygons (i.e. the geometries are not copies of each
+  othat that only differ in terms of.
+  ```
+  /// examples/trips/trips-layer/trips-layer.js
+  import {assembleShaders} from 'deck.gl';
+  import {GL, Model, Geometry} from 'luma.gl';
+
+  getModel(gl) {
+    const shaders = assembleShaders(gl, this.getShaders());
+
+    return new Model({
+      gl,
+      id: this.props.id,
+      vs: shaders.vs,
+      fs: shaders.fs,
+      geometry: new Geometry({
+        id: this.props.id,
+        drawMode: GL.LINES
+      }),
+      vertexCount: 0,
+      isIndexed: true
+    });
+  }
+  ```
+
+It sometimes desirable to have a single layer render using multiple geometry primitives
+(e.g both circles and lines, or triangles and textured meshes etc),
+rather than creating separate layers.
+The custom
+[AxesLayer example](https://github.com/uber/deck.gl/tree/master/examples/plot/plot-layer/axes-layer.js)
+uses this technique to share attributes between grids and labels.
+
+#### Defining Attributes
+
+A layer should also define its attributes during initialization. This allows the
+[attribute manager`](/docs/api-reference/attribute-manager.md) to do the heavy lifting for
+[Attribute Management](/docs/advanced/attribute-management.md).
+
+Define attributes by
+calling [`attributeManager.add`](/docs/api-reference/attribute-manager.md#-add-):
+
+```
+initializeState() {
+  this.setState({
+    model: this._getModel(this.context.gl)
+  });
+
+  this.state.attributeManager.add({
+    instancePositions: {size: 3, accessor: 'getPosition', update: this.calculateInstancePositions},
+    instanceColors: {size: 4, type: GL.UNSIGNED_BYTE, accessor: 'getColor', update: this.calculateInstanceColors}
+  });
+}
+```
 
 ### Handling property updates
 
-`updateState()` - This is the method that you may want to implement to handle
+[`updateState()`](/docs/api-reference/base-layer.md#-updatestate-) -
+This is the method that you may want to implement to handle
 property changes.
 
 The key to writing good, performant deck.gl layers lies in understanding
@@ -57,104 +162,27 @@ better understanding of how to use these concepts in the best way.
   update some uniform or state so that rendering is affected appropriately.
 
 
-## Creating Models
+### Rendering Layer
 
-A choice to make is whether your WebGL primitives (draw calls) should
-be instanced, or use dynamic geometry:
+[`draw()`](/docs/api-reference/base-layer.md#-draw-) -
+If you want to use custom uniforms or settings when drawing, you would
+typical implement the `draw` method and pass those to your render call.
+Note that `draw` is called with viewport uniforms that you need to pass
+to your shader, but you can of course add any layer
+specific uniforms to that.
 
-* **Instanced layer** - This is type of layer renders
-  the same geometry many times. Usually the simplest way to go
-  when creating layers that renders a lot of similar objects (think
-  ScatterplotLayer, ArcLayers etc).
-  ```
-  /// examples/sample-layers/mesh-layer/mesh-layer.js
-  import {Layer, assembleShaders} from 'deck.gl';
-  import {GL, Model, Geometry, Texture2D} from 'luma.gl';
+Note: the reason that the supplied uniforms need to be passed on to your
+shaders is to enable your shader to use deck.gl's GLSL shaderlibs such as
+`project` or `project64` etc). If you don't use these shaderlibs, you
+would obviously not need to supply these uniforms, but you would have to
+implement features like cartographic projection etc on your own.
 
-  export default class MeshLayer extends Layer {
+### Destroying Layer
 
-    ...
-
-    getModel(gl) {
-      const shaders = assembleShaders(gl, this.getShaders());
-
-      // TODO - this should not be done here
-      gl.enable(GL.DEPTH_TEST);
-      gl.depthFunc(GL.LEQUAL);
-
-      return new Model({
-        gl,
-        id: this.props.id,
-        vs: shaders.vs,
-        fs: shaders.fs,
-        geometry: new Geometry({
-          drawMode: GL.TRIANGLES,
-          indices: new Uint16Array(this.props.mesh.indices),
-          positions: new Float32Array(this.props.mesh.vertices),
-          normals: new Float32Array(this.props.mesh.vertexNormals),
-          texCoords: new Float32Array(this.props.mesh.textures)
-        }),
-        isInstanced: true
-      });
-    }
-  }
-  ```
-* **Dynamic geometry layer** - This is needed when
-  dealing with data that needs to be rendered using multiple similar but unique
-  geometries, such as polygons (i.e. the geometries are not copies of each
-  othat that only differ in terms of.
-  ```
-  /// examples/trips/trips-layer/trips-layer.js
-  import {Layer, assembleShaders} from 'deck.gl';
-  import {GL, Model, Geometry} from 'luma.gl';
-
-  export default class TripsLayer extends Layer {
-
-    ...
-
-    getModel(gl) {
-      const shaders = assembleShaders(gl, this.getShaders());
-
-      return new Model({
-        gl,
-        id: this.props.id,
-        vs: shaders.vs,
-        fs: shaders.fs,
-        geometry: new Geometry({
-          id: this.props.id,
-          drawMode: GL.LINES
-        }),
-        vertexCount: 0,
-        isIndexed: true
-      });
-    }
-  }
-  ```
-
-For more information, see [luma.gl](https://github.com/uber/luma.gl)'s' `Model` class.
-
-Most layers are **Single-model layer** - this is the predominant form among all core layers
-that deck.gl currently provides. In these layers, a single geometry model is
-created for each layer and saved to `state.model` during initialization. 
-The default implementation of the rest of the lifecycle methods will then
-look for this model for rendering and picking etc., meaning that you don't
-have to do anything more to get a working layer.
-
-It sometimes desirable to have a single layer render using multiple geometry primitives
-(e.g both circles and lines, or triangles and textured meshes etc),
-rather than creating separate layers.
-The custom
-[AxesLayer example](https://github.com/uber/deck.gl/tree/master/examples/plot/plot-layer/axes-layer.js)
-uses this technique to share attributes between grids and labels.
-
-### Defining Vertex Attributes
-
-See the separate article on [Attribute Management](/docs/attribute-management.md).
-
-Some questions to ask yourself:
-- Will you support altitude?
-- Do you need 64 bit support?
-- Do you want to opt in to deck.gl's lighting system?
+[`finalizeState()`](/docs/api-reference/base-layer.md#-finalizestate-) -
+If implemented, this method is called when your layer
+state is discarded. This is a good time to destroy non-shared WebGL resources
+directly, rather than waiting for the garbage collector to do it.
 
 
 ## Handling Coordinate Systems
@@ -168,7 +196,7 @@ coordinates, as well as with positions specified in meters.
 ### Making Shaders Work with Deck.gl's Coordinate Systems
 
 Always call `assembleShaders()` with your GLSL source to make use of deck.gl's
-[family of GLSL projection methods](/docs/writing-shaders.md#projection-vertex-shader)
+[family of GLSL projection methods](/docs/advanced/writing-shaders.md#projection-vertex-shader)
 that support all three deck.gl projection modes: latlon (default), meters and neutral.
 
 By always using the following shader functions for handling projections and scaling,
@@ -189,4 +217,16 @@ a single layer class can support all projection modes for free:
 
 ## Implement Picking
 
-See [implementing picking](/docs/advanced/picking.md).
+If your layer is instanced (`data` prop is an array and each element is rendered as one
+primitive), then you may take advantage of the default implementation of the
+[layer picking methods](/docs/api-reference/base-layer.md#layer-picking-methods).
+
+By default, each layer creates an `instancePickingColors` attribute and automatically
+calculates it using the length of the `data` array.
+In your custom shader, you may switch between the actual color and the picking color
+using the technique described in
+[`renderPickingBuffer`](/docs/advanced/writing-shaders.md#-float-renderpickingbuffer-)
+and picking will just work.
+
+For more advanced scenarios, read about
+[Implementing Custom Picking](/docs/advanced/picking.md#implementing-custom-picking).
