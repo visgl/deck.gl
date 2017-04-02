@@ -8,7 +8,7 @@ manager is created under the hood to handle rendering cycles.
 ## Constructor
 
 - `opts` (Object)
-  * `gl` (([WebGLRenderingContext](https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext))
+  * `gl` ([WebGLRenderingContext](https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext))
 
 ## Methods
 
