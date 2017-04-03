@@ -77,7 +77,10 @@ void main(void) {
   // for use with arc layer, if brushTarget is truthy 
   // calculate whether instanceTargetPositions is in range
   float isTargetInBrush = isPointInRange(instanceTargetPositions.xy, mousePos, brushRadius, 1.);
-
+  
+  // if brushTarget is falsy, when pt is in brush return true
+  // if brushTarget is truthy and target is in brush return true
+  // if brushTarget is truthy and pt is in brush return false
   float isInBrush = float(float(isPtInBrush > 0. && brushTarget <= 0.) > 0. || 
   float(brushTarget > 0. && isTargetInBrush > 0.) > 0.);
   
