@@ -46,7 +46,7 @@ export default class Blog extends Component {
 
     for (let i = 0; i < anchors.length; i++) {
       const anchor = anchors[i];
-      if (anchor.href[0] !== '.') {
+      if (anchor.getAttribute('href')[0] !== '.') {
         // is external link
         anchor.target = '_parent';
       }
