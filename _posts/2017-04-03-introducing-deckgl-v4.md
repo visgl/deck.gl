@@ -152,6 +152,7 @@ Finally, just to dispel any doubt from our users, we would like to reiterate our
 ## Contributors
 
 deck.gl v4 was created by the Visualization Team at Uber. It is the result of a collaboration between a number of amazing contributors, including:
+[**Nicolas Garcia Belmonte**](https://github.com/philogb),
 [**Xiaoji Chen**](https://github.com/Pessimistress),
 [**Balthazar Gronon**](https://github.com/apercu),
 [**Shan He**](https://github.com/heshan0131),
