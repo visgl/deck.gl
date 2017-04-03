@@ -59,7 +59,7 @@ The `PathLayer` is created to render a path consists of multiple line segments s
 	<img width="900" src="../img/screenshot-polygon.png">
 </p>
 
-The `PolygonLayer` renders general flat or extruded polygons specified by a "closed" sequence of coordinates, like how polygon features are specified in the GeoJson specifications. Polygons can be rendered as filled or outline in non-extruded (2D) modet and filled or wireframe in extruded (3D) mode. This layer supports rendering convex, concave and polygon with holes.
+The `PolygonLayer` renders general flat or extruded polygons specified by a "closed" sequence of coordinates, like how polygon features are specified in the GeoJson specifications. Polygons can be rendered as filled or outline in non-extruded (2D) mode and filled or wireframe in extruded (3D) mode. This layer supports rendering convex, concave and polygon with holes.
 
 ### [`IconLayer`](https://uber.github.io/deck.gl/#/documentation/layer-catalog/icon-layer)
 
@@ -91,9 +91,9 @@ Finally, note that the new `GridLayer` and `HexagonLayer` are different from the
 
 ## Layer extrusion and lighting
 
-As mentioned in the previous sections, some of deck.gl layers now support extrusion. Extrusion can be enabled by setting the `extruded` property to true, if available. Users can provide a `getElevation` accessor to control how much each individual element should extrude.
+As mentioned in the previous sections, some deck.gl layers now support extrusion. Extrusion can be enabled by setting the `extruded` property to true, if available. Users can provide a `getElevation` accessor to control how much each individual element should extrude.
 
-To make extrusion looks natural and visually pleasing, deck.gl v4 now has an experimental lighting module that provides basic shading of 3D layers. It has very straightforward APIs and it should be easy for users to understand simply by looking at the examples that come with deck.gl. It's worth mentioning that since it's experimental, the public APIs might change in the future release of deck.gl.
+To make extrusion looks natural and visually pleasing, deck.gl v4 now has an experimental lighting module that provides basic shading of 3D layers. It has very straightforward APIs and users should be able to understand them simply by looking at the examples that come with deck.gl. It's worth mentioning that since it's experimental, the public APIs might change in the future release of deck.gl.
 
 ## Interactive Documentation
 
