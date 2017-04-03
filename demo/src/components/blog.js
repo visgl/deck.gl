@@ -39,6 +39,18 @@ export default class Blog extends Component {
       // update route to match the current url
       this.context.router.push(this._loadedUrl);
     }
+
+    // traverse all <a> elements
+    // in the child page and target external links to the parent window
+    const anchors = evt.target.contentDocument.getElementsByTagName('a');
+
+    for (let i = 0; i < anchors.length; i++) {
+      const anchor = anchors[i];
+      if (anchor.href[0] !== '.') {
+        // is external link
+        anchor.target = '_parent';
+      }
+    }
   }
 
   _getUrlFromRoute(props) {
