@@ -75,8 +75,8 @@ const defaultProps = {
  */
 export default class GraphLayer extends CompositeLayer {
   initializeState() {
-    this.simulation = GraphSimulation();
     this.state = {
+      simulation: new GraphSimulation(),
       nodes: {},
       links: {}
     };
@@ -85,18 +85,21 @@ export default class GraphLayer extends CompositeLayer {
   updateState({oldProps, props, changeFlags}) {
     if (changeFlags.dataChanged) {
       const {data} = props;
-      const {nodes, links} = this.simulation.update(data, data.length !== oldProps.data.length);
-      this.state = Object.assign({},
-        this.state,
-        nodes,
-        links
-      );
+      if (data && data.length) {
+        const {nodes, links} =
+          this.state.simulation.update(data, data.length !== oldProps.data.length);
+        this.state = Object.assign({},
+          this.state,
+          nodes,
+          links
+        );
+      }
     }
   }
 
   finalizeState() {
-    if (this.simulation) {
-      this.simulation.remove();
+    if (this.state.simulation) {
+      this.state.simulation.remove();
     }
   }
 
@@ -123,7 +126,7 @@ export default class GraphLayer extends CompositeLayer {
     // Accessor props for underlying layers
     const {alpha, getLinkPosition, getLinkColor, getLinkWidth,
       getNodePosition, getNodeColor, getNodeIcon, getNodeSize} = this.props;
-    const icon = getNodeIcon();
+    const icon = getNodeIcon() || {};
     const {getIcon, iconAtlas, iconMapping, sizeScale} = icon;
 
     // base layer props

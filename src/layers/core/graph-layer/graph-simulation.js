@@ -22,12 +22,13 @@ export default class GraphSimulation {
     this._onDrag = this._onDrag.bind(this);
     this._onMouseMove = this._onMouseMove.bind(this);
     */
+    this._simulation = null;
+
     this._strength = this._strength.bind(this);
     this._onSimulationTick = this._onSimulationTick.bind(this);
 
     this._options = Object.assign({}, DEFAULT_OPTIONS, options);
     this._processGraphData(data);
-    this._simulator.on('tick', this._onSimulationTick);
   }
 
   _onSimulationTick() {
@@ -61,8 +62,8 @@ export default class GraphSimulation {
    * "Reheat" the simulation on interaction.
    */
   _reheat(alpha = 0.01, decay = 0.0228) {
-    if (this._simulator.alpha() < alpha) {
-      this._simulator.alpha(alpha).alphaDecay(decay).restart();
+    if (this._simulation.alpha() < alpha) {
+      this._simulation.alpha(alpha).alphaDecay(decay).restart();
     }
   }
 
@@ -158,7 +159,8 @@ export default class GraphSimulation {
         .force('link', forceLink(g.links).id(n => n.id).strength(this._strength))
         .force('charge', forceManyBody().strength(nBodyStrength)
           .distanceMin(nBodyDistanceMin).distanceMax(nBodyDistanceMax))
-        .force('center', forceCenter());
+        .force('center', forceCenter())
+        .on('tick', this._onSimulationTick);
     }
   }
 
@@ -174,7 +176,7 @@ export default class GraphSimulation {
     }
 
     // if not in drag & drop mode, find if any node is hovered
-    const hoveredNode = this._simulator.find(x, y, 20);
+    const hoveredNode = this._simulation.find(x, y, 20);
 
     // if the hovered node is the same with previous, skip
     if (hoveredNode === g.hoveredNode || (!hoveredNode && !g.hoveredNode)) {
@@ -201,13 +203,13 @@ export default class GraphSimulation {
   }
 
   _onClick({x, y, rightClick = false}) {
-    const selectedNode = this._simulator.find(x, y, 20);
+    const selectedNode = this._simulation.find(x, y, 20);
     // allow surfacing empty selections
     this.props.onClick(selectedNode && {...selectedNode, rightClick});
   }
 
   _onDoubleClick({x, y}) {
-    const selectedNode = this._simulator.find(x, y, 20);
+    const selectedNode = this._simulation.find(x, y, 20);
     if (selectedNode) {
       this.props.onDoubleClick(selectedNode);
     }
@@ -218,7 +220,7 @@ export default class GraphSimulation {
 
     if (dragging) {
       // find nearest node
-      g.setDraggedNode(this._simulator.find(x, y, 20));
+      g.setDraggedNode(this._simulation.find(x, y, 20));
       // if exist, set dragging to true, but change position on hover
       if (g.draggedNode) {
         g.draggedNode.dragging = true;
@@ -251,8 +253,8 @@ export default class GraphSimulation {
   }
 
   remove() {
-    if (this._simulator) {
-      this._simulator.on('tick', null);
+    if (this._simulation) {
+      this._simulation.on('tick', null);
     }
   }
 }
