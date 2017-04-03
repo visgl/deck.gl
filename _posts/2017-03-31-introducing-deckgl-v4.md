@@ -17,7 +17,7 @@ When we did our first [external announcement](https://eng.uber.com/deck-gl-frame
 
 deck.gl v3 saw rapid adoption across a number of internal data visualization applications here at Uber, and it didn't take long before an impressive list of new layers had been developed to support these applications. For layers that were reused between multiple applications, it became clear that open sourcing them in a new official deck.gl release would be likely to benefit both to internal and external developers.
 
-In deck.gl v4, the core layer catalog in deck.gl effectively doubles in size to over a dozen [layers](https://uber.github.io/deck.gl/#/documentation/layer-catalog). These layers are carefully audited, tested and documented, covering a significantly wider array of geospatial visualization use cases.
+In deck.gl v4, the core layer catalog in deck.gl effectively doubles in size to over a dozen [layers](https://uber.github.io/deck.gl/#/documentation/layer-catalog). These layers are carefully audited, tested and documented to cover a significantly wider array of geospatial visualization use cases.
 
 Obviously, while the new layers are the big stars of the release, deck.gl v4 includes more than just the layers. It stems from almost five months of intensive development, and incorporates improvements addressing a long list of comments, suggestions, bug reports and feature requests from both internal and external users. If you are already a deck.gl v3 user, we believe that as you start working with v4, you will find few areas, whether in terms of APIs, documentation, examples or actual code, that haven't received some level of additional polish.
 
@@ -117,7 +117,7 @@ deck.gl v4 is an important milestone for us, but what's next? While we haven't f
 
 ### More and Better Layers
 
-Layers are how deck.gl creates value for most users, so adding more layers is on the top of our list. We will always keep improving support for the geospatial vusalizations while also considering supporting abstract visualizations in the InfoVis area.
+Layers are how deck.gl creates value for most users, so adding more layers is on the top of our list. We will always keep improving support for the geospatial vusalizations while also considering supporting abstract visualizations in the [InfoVis](https://en.wikipedia.org/wiki/Information_visualization) area.
 
 We also encourages all deck.gl users and developers to consider sharing your fancy new layers with the deck.gl community (github pull requests are welcome). If your layers help address some common needs and/or accomplish some common tasks in any areas of data visualization, they might even end up being included in the core layers catalog of deck.gl in the next release!
 
