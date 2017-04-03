@@ -8,19 +8,6 @@ do a standalone integration with deck.gl. Using deck.gl this way will
 likely involve extra effort and is not recommended for casual
 applications.
 
-## LayerManager class
-
-The deck.gl [LayerManager](/docs/api-reference/layer-manager.md) class handles updates, drawing and picking
-for a set of layers.
-
-* Use the `setViewport` method to update viewport.
-* Use the `updateLayers` method to update the list of layers with a
-  freshly rendered list.
-* You can use the `drawLayers` method to draw the layers - it will only
-  draw if some layer (some prop in some layer) has actually changed.
-* Call the `pickLayers` method on mouse and touch events to implement
-  picking.
-
 ## Using deck.gl without react-map-gl
 
 It is possible to use deck.gl without react-map-gl. In this case
@@ -31,6 +18,13 @@ handling.
 
 ## Using deck.gl without React
 
-In lieu of better documentation, the React integration
-uses the `LayerManager` class to render the layers, so looking at [that code](https://github.com/uber/deck.gl/blob/4.0-release/src/react/deckgl.js)
-can be a good reference for how to use it.
+The deck.gl [LayerManager](/docs/api-reference/layer-manager.md) class handles updates, drawing and picking for a set of layers. To use deck.gl without React, you may create
+your own instance of the `LayerManager` and implement the animation cycles:
+
+* Use the `setViewport` method to update viewport.
+* Use the `updateLayers` method to update the list of layers with a
+  freshly rendered list.
+* You can use the `drawLayers` method to draw the layers - it will only
+  draw if some layer (some prop in some layer) has actually changed.
+* Call the `pickLayers` method on mouse and touch events to implement
+  picking.

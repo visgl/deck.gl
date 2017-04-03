@@ -193,7 +193,7 @@ with the old name being deprecated, and in some very few cases,
 default values have changed.
 
 For more information on deprecations and how to update your code in response
-to these changes, please consult the deck.gl [Upgrade Guide](/docs/upgrade-guide.md).
+to these changes, please consult the deck.gl [Upgrade Guide](/docs/get-started/upgrade-guide.md).
 
 # deck.gl v3.0
 

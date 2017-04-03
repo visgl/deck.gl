@@ -1,6 +1,6 @@
 # DeckGL (React Component)
 
-The [`DeckGL`] is a React component that takes deck.gl layer instances and
+`DeckGL` is a React component that takes deck.gl layer instances and
 viewport parameters, and renders those layers as a transparent overlay.
 
 ```js
@@ -95,7 +95,7 @@ Callback arguments:
 Callback - called when the object under the pointer changes.
 
 Callback Arguments:
-- `info` - the [`info`](/docs/interactivity.md#the-picking-info-object)
+- `info` - the [`info`](/docs/get-started/interactivity.md#the-picking-info-object)
 object for the topmost picked layer at the coordinate
 - `pickedInfos` - an array of info objects for all pickable layers that
 are affected.
@@ -106,7 +106,7 @@ are affected.
 Callback - called when clicking on the layer.
 
 Callback Arguments:
-- `info` - the [`info`](/docs/interactivity.md#the-picking-info-object)
+- `info` - the [`info`](/docs/get-started/interactivity.md#the-picking-info-object)
 object for the topmost picked layer at the coordinate
 - `pickedInfos` - an array of info objects for all pickable layers that
 are affected.
