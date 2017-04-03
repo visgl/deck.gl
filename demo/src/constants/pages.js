@@ -2,7 +2,7 @@ function getDocUrl(filename) {
   return `docs/${filename}`;
 }
 function getCodeUrl(pathname) {
-  return `https://github.com/uber/deck.gl/tree/master/${pathname}`;
+  return `https://github.com/uber/deck.gl/tree/4.0-release/${pathname}`;
 }
 
 // mapping from file path in source to generated page url
@@ -158,7 +158,7 @@ export const docPages = generatePath([
         content: getDocUrl('get-started/using-layers.md')
       },
       {
-        name: 'Interactivity',
+        name: 'Adding Interactivity',
         content: getDocUrl('get-started/interactivity.md')
       }
     ]
@@ -196,28 +196,28 @@ export const docPages = generatePath([
         content: getDocUrl('advanced/layer-lifecycle.md')
       },
       {
-        name: 'Attribute Management',
-        content: getDocUrl('advanced/attribute-management.md')
+        name: '64 bit Layers',
+        content: getDocUrl('advanced/64-bits.md')
       },
       {
         name: 'Picking',
         content: getDocUrl('advanced/picking.md')
       },
       {
-        name: '64 bit Layers',
-        content: getDocUrl('advanced/64-bits.md')
-      },
-      {
         name: 'Performance',
         content: getDocUrl('advanced/performance.md')
       },
       {
-        name: 'Coordinate Systems',
-        content: getDocUrl('advanced/coordinate-systems.md')
+        name: 'Attribute Management',
+        content: getDocUrl('advanced/attribute-management.md')
       },
       {
         name: 'Viewports',
         content: getDocUrl('advanced/viewports.md')
+      },
+      {
+        name: 'Coordinate Systems',
+        content: getDocUrl('advanced/coordinate-systems.md')
       },
       {
         name: 'Using Standalone',
@@ -245,16 +245,8 @@ export const docPages = generatePath([
         content: getDocUrl('layers/grid-layer.md')
       },
       {
-        name: 'GridCellLayer',
-        content: getDocUrl('layers/grid-cell-layer.md')
-      },
-      {
         name: 'HexagonLayer',
         content: getDocUrl('layers/hexagon-layer.md')
-      },
-      {
-        name: 'HexagonCellLayer',
-        content: getDocUrl('layers/hexagon-cell-layer.md')
       },
       {
         name: 'IconLayer',
@@ -283,18 +275,6 @@ export const docPages = generatePath([
       {
         name: 'ScreenGridLayer',
         content: getDocUrl('layers/screen-grid-layer.md')
-      },
-      {
-        name: 'ChoroplethLayer (DEPRECATED)',
-        content: getDocUrl('layers/deprecated/choropleth-layer.md')
-      },
-      {
-        name: 'ChoroplethLayer64 (DEPRECATED)',
-        content: getDocUrl('layers/deprecated/choropleth-layer-64.md')
-      },
-      {
-        name: 'ExtrudedChoroplethLayer64 (DEPRECATED)',
-        content: getDocUrl('layers/deprecated/extruded-choropleth-layer.md')
       }
     ]
   },

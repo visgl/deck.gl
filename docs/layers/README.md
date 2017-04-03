@@ -39,7 +39,7 @@ deck.gl releases.
 ## Sample Layers
 
 Deck.gl provides a number of sample layers in the
-[examples folders](https://github.com/uber/deck.gl/tree/master/examples/sample-layers)
+[examples folders](https://github.com/uber/deck.gl/tree/4.0-release/examples/sample-layers)
 intended to illustrate various ideas and approaches to how layers
 can be designed. These layers sometimes have documentation in the example
 code, but they are not listed here in the official documentation.

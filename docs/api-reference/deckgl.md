@@ -1,6 +1,6 @@
 # DeckGL (React Component)
 
-`DeckGL` is a React component that takes deck.gl layer instances and
+The [`DeckGL`] is a React component that takes deck.gl layer instances and
 viewport parameters, and renders those layers as a transparent overlay.
 
 ```js
@@ -111,3 +111,6 @@ object for the topmost picked layer at the coordinate
 - `pickedInfos` - an array of info objects for all pickable layers that
 are affected.
 - `event` - the original [MouseEvent](https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent) object
+
+## Source
+[src/react/deckgl.js](https://github.com/uber/deck.gl/blob/4.0-release/src/react/deckgl.js)

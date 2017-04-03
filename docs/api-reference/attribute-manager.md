@@ -1,6 +1,6 @@
 # AttributeManager Class
 
-The `AttributeManager` class automated attribute allocation and updates.
+The `AttributeManage` class provides automated attribute allocations and updates.
 
 Summary:
 - keeps track of valid state for each attribute
@@ -12,6 +12,17 @@ Limitations:
 - The AttributeManager always reinitializes the entire typed array.
   There are currently no provisions for only invalidating a range of
   indices in an attribute.
+
+## Constructor
+
+Parameters:
+
+- `opts` (Object) - named parameters
+  * `opts.id` (String, optional) - identifier (for debugging)
+
+```js
+new AttributeManager({id: 'attribute-manager'});
+```
 
 ## Static Methods
 
@@ -29,15 +40,6 @@ Parameters:
   * `opts.onLog` (Function) - callback, called to print
   * `opts.onUpdateStart` (Function) - callback, called before update() starts
   * `opts.onUpdateEnd` (Function) - callback, called after update() ends
-
-## Constructor
-
-- `opts` (Object) - named parameters
-  * `opts.id` (String, optional) - identifier (for debugging)
-
-```
-new AttributeManager({id: 'attribute-manager'});
-```
 
 ## Methods
 
@@ -79,12 +81,6 @@ attributeManager.add({
 
 Shorthand for `add()` in which all attributes `instanced` field are set to `true`.
 
-##### `getAttributes`
-
-Returns:
-
-- A map of attribute names to attribute objects.
-
 ##### `invalidate`
 
 Mark an attribute as need update.
@@ -105,3 +101,6 @@ Removes defined attributes.
 Parameters:
 
 - `attributeNames` (Array) - Array of attribute names to be removed
+
+## Source
+[`src/lib/attribute-manager.js`](https://github.com/uber/deck.gl/blob/4.0-release/src/lib/attribute-manager.js)

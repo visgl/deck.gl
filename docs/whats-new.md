@@ -166,7 +166,7 @@ been made to ensure deck.gl supports several popular new tooling setups:
 
 Code examples have been improved in several ways:
 * **Multiple Examples** deck.gl now provides multiple different examples in an
-  [examples folder](https://github.com/uber/deck.gl/tree/master/examples),
+  [examples folder](https://github.com/uber/deck.gl/tree/4.0-release/examples),
   showing various interesting uses of deck.gl.
 * **Stand Alone Examples** Examples are now stand alone, each with its own
   minimal `package.json` and configuration files, enabling them to be easily
@@ -193,7 +193,7 @@ with the old name being deprecated, and in some very few cases,
 default values have changed.
 
 For more information on deprecations and how to update your code in response
-to these changes, please consult the deck.gl [Upgrade Guide](upgrade-guide.md).
+to these changes, please consult the deck.gl [Upgrade Guide](/docs/upgrade-guide.md).
 
 # deck.gl v3.0
 
@@ -201,8 +201,8 @@ Release date: November, 2016
 
 ## Highlights
 
-- New [website](http://uber.github.io/deck.gl/)
-- Comprehensive [documentation](http://uber.github.io/deck.gl/#/documentation/overview/introduction)
+- New website
+- Comprehensive documentation
 - All Core Layers updated (API, features, performance)
 - 64-bit Layers (High Precision)
 - METERS projection mode (High Precision)

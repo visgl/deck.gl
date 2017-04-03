@@ -8,7 +8,6 @@
 
 The Point Cloud Layer takes in points with 3d positions, normals and colors
 and renders them as spheres with a certain radius.
-[Source](https://github.com/uber/deck.gl/tree/master/src/layers/core/point-cloud-layer)
 
 ```js
 import DeckGL, {PointCloudLayer} from 'deck.gl';
@@ -76,3 +75,7 @@ Method called to retrieve the rgba color of each object.
 * If the alpha parameter is not provided, it will be set to `255`.
 * If the method does not return a value for the given object, fallback to
 `[0, 0, 0, 255]`.
+
+## Source
+[src/layers/core/point-cloud-layer](https://github.com/uber/deck.gl/tree/4.0-release/src/layers/core/point-cloud-layer)
+

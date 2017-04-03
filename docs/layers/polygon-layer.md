@@ -8,7 +8,6 @@
 # PolygonLayer
 
 The Polygon Layer renders filled and/or stroked polygons.
-[Source](https://github.com/uber/deck.gl/tree/master/src/layers/core/polygon-layer)
 
 ```js
 import DeckGL, {PolygonLayer} from 'deck.gl';
@@ -182,3 +181,8 @@ The width of the outline of the polygon, in meters
 * Wireframe lines are rendered with `GL.LINE` and thus will always be 1 pixel wide.
 * Wireframe and solid extrusions are exclusive, you'll need to create two layers
   with the same data if you want a combined rendering effect.
+
+## Source
+
+[src/layers/core/polygon-layer](https://github.com/uber/deck.gl/tree/4.0-release/src/layers/core/polygon-layer)
+

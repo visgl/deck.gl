@@ -26,7 +26,9 @@ of deck.gl, a check will be in place to enforce this
 
 ## Constructor
 
-- `props` (Object) - Layer properties.
+Parameters:
+
+- `props` - Layer properties.
 
 ### Basic Properties
 
@@ -95,6 +97,8 @@ Remarks
   support the `opacity` prop, it is up to each layer's fragment shader
   to implement support for opacity.
 
+---
+
 ### Interaction Properties
 
 Layers can be interacted with using these properties.
@@ -130,6 +134,8 @@ and will not bubble up to the
 callback of the `DeckGL` canvas.
 
 Requires `pickable` to be true.
+
+---
 
 ### Coordinate System Properties
 
@@ -170,6 +176,8 @@ Note that the matrix projection is applied after the non-linear mercator
 projection calculations are resolved, so be careful when using model matrices
 with longitude/latitude encoded coordinates. They normally work best with non-mercator
 viewports or meter offset based mercator layers
+
+---
 
 ### Data Properties
 
@@ -212,8 +220,8 @@ developers need to override the updateState.
 
 ## Members
 
-> Layer members are designed to support the creation of new layers or
-layer sub-classing and are **not** intended to be used by applications.
+*Remarks: Layer members are designed to support the creation of new layers or
+layer sub-classing and are NOT intended to be used by applications.*
 
 ##### `context` (Object)
 
@@ -235,8 +243,8 @@ attribute manager of this layer.
 
 ## Methods
 
-> Layer methods are designed to support the creation of new layers or
-layer sub-classing and are **not** intended to be called by applications.
+*Layer methods are designed to support the creation of new layers or
+layer sub-classing and are NOT intended to be called by applications*.
 
 ### General Methods
 
@@ -244,6 +252,8 @@ layer sub-classing and are **not** intended to be called by applications.
 
 Used to update the layers [`state`](/docs/api-reference/base-layer.md#-state-object-) object.
 Calling this method will also cause the layer to rerender.
+
+---
 
 ### Layer Lifecycle Methods
 
@@ -281,7 +291,7 @@ Returns:
 Remarks:
 
 - Prop change is determined by shallow comparison.
-- Data change is determined by shallow comparison of `props.data` unless 
+- Data change is determined by shallow comparison of `props.data` unless
 [`dataComparator`](/docs/api-reference/base-layer.md#-datacomparator-function-optional-)
 is supplied.
 - The default implementation returns `true` if any change has been detected.
@@ -359,6 +369,7 @@ with the `info.index` element from the layer's `data` prop.
 This method is called before the layer is being removed.
 A layer should release all resources created during its life span.
 
+---
 
 ### Layer Projection Methods
 
@@ -436,6 +447,7 @@ Retures:
 
   - A number in device pixels
 
+---
 
 ### Layer Picking Methods
 
@@ -485,3 +497,6 @@ Returns:
 - a "null" picking color which is equal the the color of pixels
 not covered by the layer. This color is guaranteed not to match any index value
 greater than or equal to zero.
+
+## Source
+[src/lib/layer.js](https://github.com/uber/deck.gl/blob/4.0-release/src/lib/layer.js)

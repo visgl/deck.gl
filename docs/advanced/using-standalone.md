@@ -31,6 +31,6 @@ handling.
 
 ## Using deck.gl without React
 
-In lieu of better documentation, the [React integration](/docs/api-reference/deckgl.md)
-uses the `LayerManager` class to render the layers, so looking at that code
+In lieu of better documentation, the React integration
+uses the `LayerManager` class to render the layers, so looking at [that code](https://github.com/uber/deck.gl/blob/4.0-release/src/react/deckgl.js)
 can be a good reference for how to use it.

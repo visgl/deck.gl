@@ -73,7 +73,7 @@ blocks. The core layers are the most stable and supported deck.gl layers.
 ### Sample Layers
 
 Deck.gl provides a number of sample layers in the
-[examples directory](https://github.com/uber/deck.gl/tree/master/examples/sample-layers)
+[examples directory](https://github.com/uber/deck.gl/tree/4.0-release/examples/sample-layers)
 intended to illustrate various ideas and approaches to how layers can be designed.
 These layers have documentation in their respective folders, but they are not
 listed here in the official documentation.

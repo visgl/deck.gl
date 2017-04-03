@@ -8,7 +8,6 @@
 
 The Line Layer renders flat lines joining pairs of source and target points,
 specified as latitude/longitude coordinates.
-[Source](https://github.com/uber/deck.gl/tree/master/src/layers/core/line-layer)
 
 ```js
 import DeckGL, {LineLayer} from 'deck.gl';
@@ -72,3 +71,8 @@ Method called to determine the rgba color of the source.
 * If the alpha parameter is not provided, it will be set to `255`.
 * If the method does not return a value for the given object, fallback to
 `[0, 0, 0, 255]`.
+
+## Source
+
+[src/layers/core/line-layer](https://github.com/uber/deck.gl/tree/4.0-release/src/layers/core/line-layer)
+

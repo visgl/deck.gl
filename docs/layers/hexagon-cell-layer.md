@@ -14,7 +14,6 @@ tessellated hexagons, and also enables height in 3d. The HexagonCellLayer
 takes in the vertices of a primitive hexagon as `[[longitude, latitude]]`,
 and an array of hexagon centroid as `[longitude, latitude]`.
 It renders each hexagon based on color, opacity and elevation.
-[Source](https://github.com/uber/deck.gl/tree/master/src/layers/core/hexagon-cell-layer)
 
 ```js
 import DeckGL, {HexagonCellLayer} from 'deck.gl';
@@ -120,3 +119,8 @@ Method called to retrieve the color of each object. Color should be set to
 - Default: `object => object.elevation`
 
 Method called to retrieve the elevation of each object. 1 unit approximate to 100 meters.
+
+## Source
+
+[src/layers/core/hexagon-cell-layer](https://github.com/uber/deck.gl/tree/4.0-release/src/layers/core/hexagon-cell-layer)
+
