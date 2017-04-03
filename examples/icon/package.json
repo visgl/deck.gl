@@ -6,7 +6,7 @@
   },
   "dependencies": {
     "d3-request": "^1.0.5",
-    "deck.gl": "^4.0.0-rc.4",
+    "deck.gl": "^4.0.0",
     "immutable": "^3.8.1",
     "luma.gl": "^3.0.0",
     "rbush": "^2.0.1",

@@ -15,7 +15,169 @@ Each version should:
 Ref: http://keepachangelog.com/en/0.3.0/
 -->
 
-## Latest Beta Releases
+
+## Official Releases
+
+
+### deck.gl v4.0
+
+#### [4.0.0] - Major deck.gl Release
+
+For details see [What's New](docs/whats-new.md)
+
+
+
+### deck.gl v3.0
+
+#### [3.1.3] - 2017-1-25
+
+- HOTFIX: Fixed project_fp64 issue under linux + nvidia (#315)
+
+#### [3.1.2] - 2017-1-19
+
+- HOTFIX: Fixed some 64-bit math issue on some Nvidia GPUs (#286)
+- HOTFIX: Fixed an issue in scatterplot64 that NaN got passed to GPU (#287)
+- Disable blending when rendering to picking framebuffer (#288)
+
+#### [3.1.1] - 2016-12-1
+
+- FIX: ExtrudedChoroplethLayer64 - Now updates uniforms when props change
+- HOTFIX ScatterplotLayer: Fix instancePositions regression in 3.1.0
+- HOTFIX DeckGL: Fix PropType warning regression in 3.1.0 (layers/effects props)
+
+#### [3.1.0] - 2016-11-30
+
+- LineLayer: Support elevations (z coords on positions)
+- LineLayer64: Support elevations (z coords on positions)
+- Scatterplot: Enable updateTriggers on instanceRadius, separate from positions.
+- EXPERIMENTAL FEATURE: ReflectionEffect
+- INTERNAL: Target build env moved to Node 6. Travis tests now run on 6 & 7.
+
+#### [3.0.9, 3.0.10] - 2016-11-18
+
+- Bumped viewport-mercator-project version for the unproject fix.
+- Updated dependency versions (#229)
+- Added test code for attribute-manager (#213)
+- Added minMax radius for the scatterplot-layer (#230)
+
+#### [3.0.8] - 2016-11-18
+
+- Performance optimization: remove unnecessary gl.getParameter() calls (#227)
+
+#### [3.0.7] - 2016-11-16
+
+- Fixed precision issue for vec2_mix_fp64 function (#223)
+- Added mouse event object to hover and click event parameter (#255)
+
+#### [3.0.6] - 2016-11-14
+
+- Bug fix for picking not returning x, y coordinates (#220)
+
+#### [3.0.5] - 2016-11-14
+
+- Performance optimization: prevent redundant data calculation (#222)
+
+#### [3.0.3] - 2016-11-14
+
+- Bug fixes for ScatterplotLayer not being updated with new data prop (#215)
+- Performance optimization: prevent fbo from reallocating every time (#217)
+
+#### [3.0.2] - 2016-11-12
+
+- Performance optimization for examples in gh-pages
+
+#### [3.0.1] - 2016-11-11
+
+- Enable blending by default
+- Fix syntax highlighting in gh-pages
+
+#### [3.0.0] - Major deck.gl Release
+
+For details see [What's New](docs/whats-new.md)
+
+
+
+### deck.gl v2
+
+#### [2.4.10] - 2016-09-20
+- Added line width support to the choropleth layer.
+
+#### [2.4.9] - FIX: Picking of instanced layers restored
+- Layer.calculateInstancePickingColors now gets correct numInstances argument.
+- Bumps luma.gl to include Linux fix.
+
+#### [2.4.8] - TBD
+- Move glslify to "dependencies" in package.json
+- Fix bool uniform that webgl in certain environment handles it differently
+
+#### [2.4.7] - 2016-09-06
+- Fix issue of mercatorEnabled not working on Linux
+
+#### [2.4.6] - 2016-09-06
+- Fix issue where 0 opacity is interpreted as default opacity
+- Fix issue with printing of layerName in debug messages crashes
+
+#### [2.4.5] - 2016-08-31
+- Fixed picking for the choropleth layer
+
+#### [2.4.4] - 2016-08-17
+- Added deckgl-overlay canvas ID and customize style support
+
+#### [2.4.3] - 2016-08-16
+- Fix document / add customize style support to the canvas (@contra)
+
+#### [2.4.2] - 2016-08-16
+- Added per point radius support for the scatterplot-layer
+
+#### [2.4.1] - 2016-08-15
+- Fixed primitive distortion bug for the scatterplot and hexagon-layer
+
+#### [2.4.0] - 2016-08-12
+- Added non-LatLng coordinate support for
+  - arc-layer
+  - choropleth-layer
+  - line-layer
+  - scatterplot-layer
+
+#### [2.3.0] - 2016-08-06
+- Added line-layer support
+
+#### [2.2.5] - 2016-08-02
+- Added per point color support for the scatterplot-layer
+
+#### [2.2.4] - 2016-07-13
+- Performance improvement
+
+#### [2.2.0] - 2016-07-05
+- Added perspective mode, 3D camera support
+- Added unit tests
+- Tons of refactoring and performance improvement
+
+#### [2.1.0] - 2016-03-30
+- Added precompile support
+- Added data deep comparison support
+- Added better uniform error message support
+- Changed to use the new Luma.gl API
+- Moved babel-related libraries from devDependence to dependency
+- Changed default blending function (ZERO -> ONE_MINUS_SRC_ALPHA)
+- Bug in getNumberInstances
+
+#### [2.0.0] - 2016-02-29
+- Retina display support
+- Performance refactoring
+- Switched the underlying rendering framework to
+  [luma.gl](https://github.com/uber/luma.gl)
+- Fixed picking on retina/regular display
+
+## deck.gl v1
+
+#### [1.0.0] - 2016-01-06
+- Initial commit of the open-source version of deck.gl
+
+
+
+
+# Beta Releases
 
 #### [v4.0.0-rc.6]
 - Fix: remove postinstall script
@@ -248,154 +410,6 @@ FIX: Model matrix cleanup
 Internal changes:
 - `WebGLViewport` now a wrapper around a supplied `Viewport` rather than a subclass.
 
-
-## Official Releases
-
-### deck.gl v3
-#### [3.1.3] - 2017-1-25
-
-- HOTFIX: Fixed project_fp64 issue under linux + nvidia (#315)
-
-#### [3.1.2] - 2017-1-19
-
-- HOTFIX: Fixed some 64-bit math issue on some Nvidia GPUs (#286)
-- HOTFIX: Fixed an issue in scatterplot64 that NaN got passed to GPU (#287)
-- Disable blending when rendering to picking framebuffer (#288)
-
-#### [3.1.1] - 2016-12-1
-
-- FIX: ExtrudedChoroplethLayer64 - Now updates uniforms when props change
-- HOTFIX ScatterplotLayer: Fix instancePositions regression in 3.1.0
-- HOTFIX DeckGL: Fix PropType warning regression in 3.1.0 (layers/effects props)
-
-#### [3.1.0] - 2016-11-30
-
-- LineLayer: Support elevations (z coords on positions)
-- LineLayer64: Support elevations (z coords on positions)
-- Scatterplot: Enable updateTriggers on instanceRadius, separate from positions.
-- EXPERIMENTAL FEATURE: ReflectionEffect
-- INTERNAL: Target build env moved to Node 6. Travis tests now run on 6 & 7.
-
-#### [3.0.9, 3.0.10] - 2016-11-18
-
-- Bumped viewport-mercator-project version for the unproject fix.
-- Updated dependency versions (#229)
-- Added test code for attribute-manager (#213)
-- Added minMax radius for the scatterplot-layer (#230)
-
-#### [3.0.8] - 2016-11-18
-
-- Performance optimization: remove unnecessary gl.getParameter() calls (#227)
-
-#### [3.0.7] - 2016-11-16
-
-- Fixed precision issue for vec2_mix_fp64 function (#223)
-- Added mouse event object to hover and click event parameter (#255)
-
-#### [3.0.6] - 2016-11-14
-
-- Bug fix for picking not returning x, y coordinates (#220)
-
-#### [3.0.5] - 2016-11-14
-
-- Performance optimization: prevent redundant data calculation (#222)
-
-#### [3.0.3] - 2016-11-14
-
-- Bug fixes for ScatterplotLayer not being updated with new data prop (#215)
-- Performance optimization: prevent fbo from reallocating every time (#217)
-
-#### [3.0.2] - 2016-11-12
-
-- Performance optimization for examples in gh-pages
-
-#### [3.0.1] - 2016-11-11
-
-- Enable blending by default
-- Fix syntax highlighting in gh-pages
-
-#### [3.0.0] - Major deck.gl Release
-
-For details see [What's New](docs/whats-new.md)
-
-### deck.gl v2
-
-#### [2.4.10] - 2016-09-20
-- Added line width support to the choropleth layer.
-
-#### [2.4.9] - FIX: Picking of instanced layers restored
-- Layer.calculateInstancePickingColors now gets correct numInstances argument.
-- Bumps luma.gl to include Linux fix.
-
-#### [2.4.8] - TBD
-- Move glslify to "dependencies" in package.json
-- Fix bool uniform that webgl in certain environment handles it differently
-
-#### [2.4.7] - 2016-09-06
-- Fix issue of mercatorEnabled not working on Linux
-
-#### [2.4.6] - 2016-09-06
-- Fix issue where 0 opacity is interpreted as default opacity
-- Fix issue with printing of layerName in debug messages crashes
-
-#### [2.4.5] - 2016-08-31
-- Fixed picking for the choropleth layer
-
-#### [2.4.4] - 2016-08-17
-- Added deckgl-overlay canvas ID and customize style support
-
-#### [2.4.3] - 2016-08-16
-- Fix document / add customize style support to the canvas (@contra)
-
-#### [2.4.2] - 2016-08-16
-- Added per point radius support for the scatterplot-layer
-
-#### [2.4.1] - 2016-08-15
-- Fixed primitive distortion bug for the scatterplot and hexagon-layer
-
-#### [2.4.0] - 2016-08-12
-- Added non-LatLng coordinate support for
-  - arc-layer
-  - choropleth-layer
-  - line-layer
-  - scatterplot-layer
-
-#### [2.3.0] - 2016-08-06
-- Added line-layer support
-
-#### [2.2.5] - 2016-08-02
-- Added per point color support for the scatterplot-layer
-
-#### [2.2.4] - 2016-07-13
-- Performance improvement
-
-#### [2.2.0] - 2016-07-05
-- Added perspective mode, 3D camera support
-- Added unit tests
-- Tons of refactoring and performance improvement
-
-#### [2.1.0] - 2016-03-30
-- Added precompile support
-- Added data deep comparison support
-- Added better uniform error message support
-- Changed to use the new Luma.gl API
-- Moved babel-related libraries from devDependence to dependency
-- Changed default blending function (ZERO -> ONE_MINUS_SRC_ALPHA)
-- Bug in getNumberInstances
-
-#### [2.0.0] - 2016-02-29
-- Retina display support
-- Performance refactoring
-- Switched the underlying rendering framework to
-  [luma.gl](https://github.com/uber/luma.gl)
-- Fixed picking on retina/regular display
-
-## deck.gl v1
-
-#### [1.0.0] - 2016-01-06
-- Initial commit of the open-source version of deck.gl
-
-# Previous Beta Releases
 
 ### Beta-3.0.0 Releases
 
