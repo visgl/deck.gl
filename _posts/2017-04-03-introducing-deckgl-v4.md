@@ -17,7 +17,7 @@ When we did our first [external announcement](https://eng.uber.com/deck-gl-frame
 
 deck.gl v3 saw rapid adoption across a number of internal data visualization applications here at Uber, and it didn't take long before an impressive list of new layers had been developed to support these applications. For layers that were reused between multiple applications, it became clear that open sourcing them in a new official deck.gl release would likely benefit both internal and external developers.
 
-In deck.gl v4, the core layer catalog in deck.gl effectively doubles in size to over a dozen [layers](https://uber.github.io/deck.gl/#/documentation/layer-catalog). These layers are carefully audited, tested and documented to cover a significantly wider array of geospatial visualization use cases.
+In deck.gl v4, the core layer catalog in deck.gl effectively doubles in size to over a dozen [layers](https://uber.github.io/deck.gl/#/documentation/layer-catalog). These layers are carefully audited, tested and documented, and cover a significantly wider array of geospatial visualization use cases.
 
 Obviously, while the new layers are the big stars of the release, deck.gl v4 includes more than just the layers. It stems from almost five months of intensive development, and incorporates improvements addressing a long list of comments, suggestions, bug reports and feature requests, from both internal and external users. If you are already a deck.gl v3 user, you will find few areas in v4, whether in terms of APIs, documentation, examples or actual code, that haven't received some level of additional polish.
 
@@ -151,11 +151,11 @@ Finally, just to dispel any doubt from our users, we would like to reiterate our
 
 ## Contributors
 
-deck.gl was created by the Visualization Team at Uber. It is the result of a collaboration between many amazing contributors, including:
-[Xiaoji Chen](https://github.com/Pessimistress),
-[Balthazar Gronon](https://github.com/gnavvy),
-[Shan He](https://github.com/heshan0131),
-[Shaojing Li](https://github.com/shaojingli),
-[Eric Socolofski](https://github.com/ericsoco),
-[Yang Wang](https://github.com/gnavvy)
-and many others.
+deck.gl v4 was created by the Visualization Team at Uber. It is the result of a collaboration between a number of amazing contributors, including:
+[**Xiaoji Chen**](https://github.com/Pessimistress),
+[**Balthazar Gronon**](https://github.com/apercu),
+[**Shan He**](https://github.com/heshan0131),
+[**Shaojing Li**](https://github.com/shaojingli),
+[**Eric Socolofski**](https://github.com/ericsoco),
+[**Yang Wang**](https://github.com/gnavvy)
+and [**many others**](https://github.com/uber/deck.gl/graphs/contributors).
