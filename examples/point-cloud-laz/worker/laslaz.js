@@ -206,7 +206,7 @@
 	//
 	var LAZLoader = function(arraybuffer) {
 		this.arraybuffer = arraybuffer;
-		this.ww = new Worker(`/worker/laz-loader-worker.js`);
+		this.ww = new Worker(`worker/laz-loader-worker.js`);
 
 		this.nextCB = null;
 		var o = this;
