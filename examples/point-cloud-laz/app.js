@@ -53,14 +53,15 @@ class Example extends PureComponent {
       height: 0,
       points: [],
       progress: 0,
+      rotating: true,
       viewport: {
         lookAt: [0, 0, 0],
-        distance: 10,
+        distance: 1,
         rotationX: 0,
         rotationY: 0,
         fov: 30,
-        minDistance: 0.1,
-        maxDistance: 10
+        minDistance: 0.5,
+        maxDistance: 3
       }
     };
   }
@@ -110,15 +111,18 @@ class Example extends PureComponent {
   }
 
   _onChangeViewport(viewport) {
-    this.setState({viewport: {...this.state.viewport, ...viewport}});
+    this.setState({
+      rotating: !viewport.isDragging,
+      viewport: {...this.state.viewport, ...viewport}
+    });
   }
 
   _onUpdate() {
-    const {viewport} = this.state;
+    const {rotating, viewport} = this.state;
 
     // note: when finished dragging, _onUpdate will not resume by default
     // to resume rotating, explicitly call _onUpdate or requestAnimationFrame
-    if (!viewport.isDragging) {
+    if (!rotating) {
       return;
     }
 
