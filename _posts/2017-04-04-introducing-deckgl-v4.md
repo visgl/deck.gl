@@ -1,7 +1,7 @@
 ---
 title: Introducing deck.gl v4.0
 description: We've just released a new major version of deck.gl, so this is a good time to share some information about the improvements that went into the new version, the rationale behind them, and some hints on what we are currently thinking about the future of deck.gl.
-author: xiaoji, ib, shan, shaojing, gnavvy, eric
+author: ib
 tags:
   - Vis
   - WebGL
@@ -148,3 +148,14 @@ Performance is always at the front of our minds as deck.gl, from the first day, 
 ## Final Words
 
 Finally, just to dispel any doubt from our users, we would like to reiterate our commitment that deck.gl will remain a "geospatial visualization first" framework. The non-geospatial use cases we are working on will not compromise our focus on maintaining and improving the geospatial visualization aspects of deck.gl. To the contrary, as we mentioned earlier in this article, users can expect see even more "advanced" geospatial processing functionalities to the future releases of deck.gl.
+
+## Contributors
+
+deck.gl was created by the Visualization Team at Uber. It is the result of a collaboration between many amazing contributors, including:
+[Xiaoji Chen](https://github.com/Pessimistress),
+[Balthazar Gronon](https://github.com/gnavvy),
+[Shan He](https://github.com/heshan0131),
+[Shaojing Li](https://github.com/shaojingli),
+[Eric Socolofski](https://github.com/ericsoco),
+[Yang Wang](https://github.com/gnavvy)
+and many others.
