@@ -196,7 +196,7 @@ coordinates, as well as with positions specified in meters.
 ### Making Shaders Work with Deck.gl's Coordinate Systems
 
 Always call `assembleShaders()` with your GLSL source to make use of deck.gl's
-[family of GLSL projection methods](https://github.com/uber/deck.gl/blob/4.0-release/src/shaderlib/project/project.glsl.js)
+[family of GLSL projection methods](/docs/advanced/writing-shaders.md#projection-vertex-shader-)
 that support all three deck.gl projection modes: latlon (default), meters and neutral.
 
 By always using the following shader functions for handling projections and scaling,

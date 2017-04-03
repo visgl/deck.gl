@@ -56,7 +56,7 @@ is called to perform any necessary operation before the layer is rendered.
 This usually involves recalculating an attribute by calling
 [`state.attributeManager.invalidate`](/docs/api-reference/attribute-manager.md#-invalidate-)
 and updating unforms by calling
-[`setUniform`](/docs/api-reference/base-layer.md#-setuniform-).
+`model.setUniforms`.
 By default, when `props.data` changes, all attributes are recalculated.
 
 A layer may use

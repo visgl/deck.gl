@@ -41,7 +41,7 @@ to collect the code that does this breakdown into a single composite layer.
 
 A common use case of composite layers is to augment the interface of existing
 layers. Consider the following example: the
-[ScatterplotLayer](/docs/layers/scatterplot-layer) either fills or outlines
+[ScatterplotLayer](/docs/layers/scatterplot-layer.md) either fills or outlines
 its circles. We need a layer that does both.
 
 A composite layer can be created by extending the `CompositeLayer` class:
