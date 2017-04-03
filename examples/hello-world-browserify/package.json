@@ -5,7 +5,7 @@
   },
   "dependencies": {
     "babel-polyfill": "^6.16.0",
-    "deck.gl": "^4.0.0-rc.3",
+    "deck.gl": "^4.0.0",
     "immutable": "^3.8.1",
     "luma.gl": "^3.0.0",
     "react": "^15.4.1",
