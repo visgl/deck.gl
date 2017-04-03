@@ -119,6 +119,10 @@ export default class WebMercatorViewport extends Viewport {
       farZMultiplier
     });
 
+    // The uncentered matrix allows us two move the center addition to the
+    // shader (cheap) which gives a coordinate system that has its center in
+    // the layer's center position. This makes rotations and other modelMatrx
+    // transforms much more useful.
     const viewMatrixUncentered = makeUncenteredViewMatrixFromMercatorParams({
       width,
       height,
@@ -131,6 +135,7 @@ export default class WebMercatorViewport extends Viewport {
       distanceScales
     });
 
+    // Make a centered version of the matrix for projection modes without an offset
     const center = projectFlat([longitude, latitude], scale);
 
     const viewMatrix = mat4.translate(
