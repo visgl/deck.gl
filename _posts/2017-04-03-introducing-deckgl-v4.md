@@ -1,7 +1,7 @@
 ---
 title: Introducing deck.gl v4.0
 description: We've just released a new major version of deck.gl, so this is a good time to share some information about the improvements that went into the new version, the rationale behind them, and some hints on what we are currently thinking about the future of deck.gl.
-author: xiaoji, ib, shan, shaojing, gnavvy, eric
+author: ib
 tags:
   - Vis
   - WebGL
@@ -17,7 +17,7 @@ When we did our first [external announcement](https://eng.uber.com/deck-gl-frame
 
 deck.gl v3 saw rapid adoption across a number of internal data visualization applications here at Uber, and it didn't take long before an impressive list of new layers had been developed to support these applications. For layers that were reused between multiple applications, it became clear that open sourcing them in a new official deck.gl release would likely benefit both internal and external developers.
 
-In deck.gl v4, the core layer catalog in deck.gl effectively doubles in size to over a dozen [layers](https://uber.github.io/deck.gl/#/documentation/layer-catalog). These layers are carefully audited, tested and documented to cover a significantly wider array of geospatial visualization use cases.
+In deck.gl v4, the core layer catalog in deck.gl effectively doubles in size to over a dozen [layers](https://uber.github.io/deck.gl/#/documentation/layer-catalog). These layers are carefully audited, tested and documented, and cover a significantly wider array of geospatial visualization use cases.
 
 Obviously, while the new layers are the big stars of the release, deck.gl v4 includes more than just the layers. It stems from almost five months of intensive development, and incorporates improvements addressing a long list of comments, suggestions, bug reports and feature requests, from both internal and external users. If you are already a deck.gl v3 user, you will find few areas in v4, whether in terms of APIs, documentation, examples or actual code, that haven't received some level of additional polish.
 
@@ -83,7 +83,7 @@ The `PointCloudLayer` is designed to visualize 3D point cloud data, usually gene
 
 deck.gl v4 introduces two new "auto-aggregating" layers that complement the `ScreenGridLayer` from v3. The `GridLayer` and `HexagonLayer` draw equal-area rectangular or hexagonal cells. These layers go beyond directly displaying the supplied data on the map, in that they don't draw one cell per data point, like most deck.gl layers do. They first aggregate (or "bin") the user-provided data points into cells, and then draw the cells using the aggregated values to control properties like color and height, effectively rendering grid-based **heatmaps**.
 
-Aggregation is an exciting new direction for deck.gl as we want to not only provide layers that are visually compelling to our users, but are also ***smart***.
+Aggregation is an exciting new direction for deck.gl as we want to not only provide layers that are visually compelling to our users, but that are also smart.
 
 Finally, note that the new `GridLayer` and `HexagonLayer` are different from the existing `ScreenGridLayer` as both the rendered geometry and the aggregation boundaries are in world coordinates rather than screen coordinates. Another difference is that the new layers also support both flat (2D) and extruded (3D) cells.
 
@@ -148,3 +148,14 @@ Performance is always at the front of our minds as deck.gl, from the first day, 
 ## Final Words
 
 Finally, just to dispel any doubt from our users, we would like to reiterate our commitment that deck.gl will remain a "geospatial visualization first" framework. The non-geospatial use cases we are working on will not compromise our focus on maintaining and improving the geospatial visualization aspects of deck.gl. To the contrary, as we mentioned earlier in this article, users can expect see even more "advanced" geospatial processing functionalities to the future releases of deck.gl.
+
+## Contributors
+
+deck.gl v4 was created by the Visualization Team at Uber. It is the result of a collaboration between a number of amazing contributors, including:
+[**Xiaoji Chen**](https://github.com/Pessimistress),
+[**Balthazar Gronon**](https://github.com/apercu),
+[**Shan He**](https://github.com/heshan0131),
+[**Shaojing Li**](https://github.com/shaojingli),
+[**Eric Socolofsky**](https://github.com/ericsoco),
+[**Yang Wang**](https://github.com/gnavvy)
+and [**many others**](https://github.com/uber/deck.gl/graphs/contributors).

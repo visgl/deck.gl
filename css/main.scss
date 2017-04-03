@@ -171,9 +171,10 @@ h1 {
 
 h2 {
   font-size: 20px;
-  padding: 12px;
-  font-weight: 400;
+  /* top | right | bottom | left */
+  padding: 12px 12px 12px 0px;
   border-bottom: solid 1px $white;
+  font-weight: 600;
 }
 
 h3 {

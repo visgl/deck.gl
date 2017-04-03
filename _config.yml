@@ -12,9 +12,10 @@ markdown: kramdown
 sass:
   style: compressed
 source: .
-exclude: [./blog, README.md, Gemfile, Gemfile.lock]
+exclude: [./blog, README.md, Gemfile, Gemfile.lock, node_modules, dist, dist-es6, examples, src]
 destination: ./blog
 permalink: /:year/:title
+incremental: true
 
 # Paginate settings
 paginate: 8
@@ -37,4 +38,4 @@ defaults:
 gems:
   - jekyll-paginate
   - jekyll-feed
-  
+
