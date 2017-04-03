@@ -83,7 +83,7 @@ The `PointCloudLayer` is designed to visualize 3D point cloud data, usually gene
 
 deck.gl v4 introduces two new "auto-aggregating" layers that complement the `ScreenGridLayer` from v3. The `GridLayer` and `HexagonLayer` draw equal-area rectangular or hexagonal cells. These layers go beyond directly displaying the supplied data on the map, in that they don't draw one cell per data point, like most deck.gl layers do. They first aggregate (or "bin") the user-provided data points into cells, and then draw the cells using the aggregated values to control properties like color and height, effectively rendering grid-based **heatmaps**.
 
-Aggregation is an exciting new direction for deck.gl as we want to not only provide layers that are visually compelling to our users, but are also ***smart***.
+Aggregation is an exciting new direction for deck.gl as we want to not only provide layers that are visually compelling to our users, but that are also smart.
 
 Finally, note that the new `GridLayer` and `HexagonLayer` are different from the existing `ScreenGridLayer` as both the rendered geometry and the aggregation boundaries are in world coordinates rather than screen coordinates. Another difference is that the new layers also support both flat (2D) and extruded (3D) cells.
 
