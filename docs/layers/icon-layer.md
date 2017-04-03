@@ -6,6 +6,8 @@
 
 # IconLayer
 
+The Icon Layer renders raster icons at given coordinates.
+
 ```js
 import DeckGL, {ArcLayer} from 'deck.gl';
 
@@ -32,9 +34,6 @@ const App = ({data, viewport}) => {
   return (<DeckGL {...viewport} layers={[layer]} />);
 };
 ```
-
-The Icon Layer renders raster icons at given coordinates.
-[Source](https://github.com/uber/deck.gl/tree/master/src/layers/core/icon-layer)
 
 ## Properties
 
@@ -99,3 +98,8 @@ Method called to retrieve the height of each icon, returns a number. Unit is pix
 
 Method called to retrieve the color of each object, returns `[r, g, b, a]`.
 If the alpha component is not supplied, it is set to `255`.
+
+## Source
+
+[src/layers/core/icon-layer](https://github.com/uber/deck.gl/tree/4.0-release/src/layers/core/icon-layer)
+

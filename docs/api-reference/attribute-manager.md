@@ -1,6 +1,6 @@
 # AttributeManager Class
 
-The [`AttributeManager`](https://github.com/uber/deck.gl/blob/master/src/lib/attribute-manager.js) class provides automated attribute allocations and updates.
+The `AttributeManage` class provides automated attribute allocations and updates.
 
 Summary:
 - keeps track of valid state for each attribute
@@ -15,12 +15,31 @@ Limitations:
 
 ## Constructor
 
+Parameters:
+
 - `opts` (Object) - named parameters
   * `opts.id` (String, optional) - identifier (for debugging)
 
 ```js
 new AttributeManager({id: 'attribute-manager'});
 ```
+
+## Static Methods
+
+##### `setDefaultLogFunctions`
+
+Sets log functions to help trace or time attribute updates.
+Default logging uses the luma.gl logger.
+
+Note that the app may not be in control of when update is called,
+so hooks are provided for update start and end.
+
+Parameters:
+
+- `opts` (Object) - named parameters
+  * `opts.onLog` (Function) - callback, called to print
+  * `opts.onUpdateStart` (Function) - callback, called before update() starts
+  * `opts.onUpdateEnd` (Function) - callback, called after update() ends
 
 ## Methods
 
@@ -82,3 +101,6 @@ Removes defined attributes.
 Parameters:
 
 - `attributeNames` (Array) - Array of attribute names to be removed
+
+## Source
+[`src/lib/attribute-manager.js`](https://github.com/uber/deck.gl/blob/4.0-release/src/lib/attribute-manager.js)

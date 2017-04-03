@@ -9,7 +9,7 @@ to use deck.gl for most applications.
 
 ## About react-map-gl
 
-As shown in the [examples](https://github.com/uber/deck.gl/tree/master/examples/), the `DeckGL` React component works especially
+As shown in the [examples](https://github.com/uber/deck.gl/tree/4.0-release/examples/), the `DeckGL` React component works especially
 well as the child of a React component such as react-map-gl that displays
 a map using parameters similar to the deck.gl Viewport (i.e. latitude,
 longitude, zoom etc). In this configuration your deck.gl layers will

@@ -6,6 +6,9 @@
 
 # ScatterplotLayer
 
+The Scatterplot Layer takes in paired latitude and longitude coordinated
+points and renders them as circles with a certain radius.
+
 ```js
 import DeckGL, {ScatterplotLayer} from 'deck.gl';
 
@@ -28,10 +31,6 @@ const App = ({data, viewport}) => {
   return (<DeckGL {...viewport} layers={[layer]} />);
 };
 ```
-
-The Scatterplot Layer takes in paired latitude and longitude coordinated
-points and renders them as circles with a certain radius.
-[Source](https://github.com/uber/deck.gl/tree/master/src/layers/core/scatterplot-layer)
 
 ## Properties
 
@@ -91,3 +90,8 @@ Method called to retrieve the rgba color of each object.
 * If the alpha parameter is not provided, it will be set to `255`.
 * If the method does not return a value for the given object, fallback to
 `[0, 0, 0, 255]`.
+
+## Source
+
+[src/layers/core/scatterplot-layer](https://github.com/uber/deck.gl/tree/4.0-release/src/layers/core/scatterplot-layer)
+

@@ -20,7 +20,7 @@ Remarks:
 ## Examples
 
 The deck.gl repository contains an
-[examples folder](https://github.com/uber/deck.gl/tree/master/examples)
+[examples folder](https://github.com/uber/deck.gl/tree/4.0-release/examples)
 with a selection of small, standalone examples that could be good starting
 points for your application.
 
@@ -41,4 +41,4 @@ Remarks:
 `MAPBOX_ACCESS_TOKEN` is the Mapbox token. For most examples shipped with deck.gl, geospatial data is rendered on top of Mapbox-powered basemap. Mapbox requires users to provide an access token before
 they serve map tiles to user's browsers.
 
-For more information about map token read the sections about [Using with Mapbox](/docs/get-started/using-with-mapbox-gl.md).
+For more information about map token read the sections about [Using with Mapbox GL](/docs/get-started/using-with-mapbox-gl.md).

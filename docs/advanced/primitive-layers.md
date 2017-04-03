@@ -23,7 +23,7 @@ be drawn to the WebGL context.
 
 Most layers are **Single-model layer** - this is the predominant form among all core layers
 that deck.gl currently provides. In these layers, a single geometry model is
-created for each layer and saved to `state.model` during initialization. 
+created for each layer and saved to `state.model` during initialization.
 The default implementation of the rest of the lifecycle methods will then
 look for this model for rendering and picking etc., meaning that you don't
 have to do anything more to get a working layer.
@@ -108,13 +108,13 @@ It sometimes desirable to have a single layer render using multiple geometry pri
 (e.g both circles and lines, or triangles and textured meshes etc),
 rather than creating separate layers.
 The custom
-[AxesLayer example](https://github.com/uber/deck.gl/tree/master/examples/plot/plot-layer/axes-layer.js)
+[AxesLayer example](https://github.com/uber/deck.gl/tree/4.0-release/examples/plot/plot-layer/axes-layer.js)
 uses this technique to share attributes between grids and labels.
 
 #### Defining Attributes
 
 A layer should also define its attributes during initialization. This allows the
-[attribute manager`](/docs/api-reference/attribute-manager.md) to do the heavy lifting for
+[`attribute manager`](/docs/api-reference/attribute-manager.md) to do the heavy lifting for
 [Attribute Management](/docs/advanced/attribute-management.md).
 
 Define attributes by
@@ -196,7 +196,7 @@ coordinates, as well as with positions specified in meters.
 ### Making Shaders Work with Deck.gl's Coordinate Systems
 
 Always call `assembleShaders()` with your GLSL source to make use of deck.gl's
-[family of GLSL projection methods](/docs/advanced/writing-shaders.md#projection-vertex-shader)
+[family of GLSL projection methods](https://github.com/uber/deck.gl/blob/4.0-release/src/shaderlib/project/project.glsl.js)
 that support all three deck.gl projection modes: latlon (default), meters and neutral.
 
 By always using the following shader functions for handling projections and scaling,
@@ -211,7 +211,7 @@ a single layer class can support all projection modes for free:
   (available both in JavaScript and GLSL) to convert distances
   to world coordinates (note that that distance scales are latitude dependent
   under web mercator projection
-  [see](http://wiki.openstreetmap.org/wiki/Zoom_levels),
+  (see [http://wiki.openstreetmap.org/wiki/Zoom_levels](http://wiki.openstreetmap.org/wiki/Zoom_levels) for more details),
   so scaling will depend on the viewport center and should only be expected to be locally correct.
 
 

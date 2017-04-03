@@ -1,6 +1,6 @@
 # CompositeLayer Class
 
-The [`CompositeLayer`](https://github.com/uber/deck.gl/blob/master/src/lib/composite-layer.js) class is a subclass of the
+The `CompositeLayer` class is a subclass of the
 [Layer Class](/docs/api-reference/base-layer.md), with its own implementation
 of certain
 [layer lifecycle methods](/docs/advanced/layer-lifecycle.md)
@@ -57,3 +57,6 @@ This object will be passed to the layer's `onHover` or `onClick` callbacks.
 functions called.
 
 The default implementation returns `pickParams.info` without any change.
+
+## Source
+[src/lib/composite-layer.js](https://github.com/uber/deck.gl/blob/4.0-release/src/lib/composite-layer.js)

@@ -63,7 +63,7 @@ returns the shaders used by the layer in an object:
 - `vs`: string, GLSL source of the vertex shader
 - `fs`: string, GLSL source of the fragment shader
 
-Read about [writing your own shaders](/docs/writing-shaders.md).
+Read about [writing your own shaders](/docs/advanced/writing-shaders.md).
 
 When you are implementing your own custom layers, it is encouraged that you
 also define a `getShaders()` function to retreive your shaders.

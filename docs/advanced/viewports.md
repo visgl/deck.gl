@@ -45,6 +45,6 @@ is a utility for converting to and from map
 
 * It is possible to query the WebMercatorViewport for a meters per pixel scale.
   Note that that distance scales are latitude dependent under
-  web mercator projection [see](http://wiki.openstreetmap.org/wiki/Zoom_levels),
+  web mercator projection (see [http://wiki.openstreetmap.org/wiki/Zoom_levels](http://wiki.openstreetmap.org/wiki/Zoom_levels) for more details),
   so scaling will depend on the viewport center and any linear scale factor
   should only be expected to be locally correct.

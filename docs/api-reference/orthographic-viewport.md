@@ -1,7 +1,7 @@
 
 # OrthographicViewport Class
 
-The [`OrthographicViewport`](https://github.com/uber/deck.gl/blob/master/src/lib/viewports/orthographic-viewport.js) class is a subclass of [Viewport](/docs/api-reference/viewport.md) that creates an orthogonal view.
+The `OrthographicViewport` class is a subclass of [Viewport](/docs/api-reference/viewport.md) that creates an orthogonal view.
 
 Remarks:
 * This class is just a convenience, the application can use `Viewport` directly
@@ -45,3 +45,6 @@ const viewport = new OrthographicViewport({
 ## Methods
 
 Inherits all [Viewport methods](/docs/api-reference/viewport.md#methods).
+
+## Source
+[src/lib/viewports/orthographic-viewport.js](https://github.com/uber/deck.gl/blob/4.0-release/src/lib/viewports/orthographic-viewport.js)
