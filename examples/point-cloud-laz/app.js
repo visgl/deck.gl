@@ -115,12 +115,20 @@ class Example extends PureComponent {
 
   _onUpdate() {
     const {viewport} = this.state;
+
+    // note: when finished dragging, _onUpdate will not resume by default
+    // to resume rotating, explicitly call _onUpdate or requestAnimationFrame
+    if (!viewport.isDragging) {
+      return;
+    }
+
     this.setState({
       viewport: {
         ...viewport,
         rotationY: viewport.rotationY + 1
       }
     });
+
     window.requestAnimationFrame(this._onUpdate);
   }
 
