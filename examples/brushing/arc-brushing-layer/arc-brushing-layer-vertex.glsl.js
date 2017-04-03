@@ -1,4 +1,4 @@
-// Copyright (c) 2015 Uber Technologies, Inc.
+// Copyright (c) 2015-2017 Uber Technologies, Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -107,7 +107,7 @@ void main(void) {
   vec2 source = project_position(instancePositions.xy);
   vec2 target = project_position(instancePositions.zw);
 
-  // if not enabled return true
+  // if not enabled isPointInRange will always return true
   float isSourceInBrush = isPointInRange(instancePositions.xy, mousePos, brushRadius, brushSource);
   float isTargetInBrush = isPointInRange(instancePositions.zw, mousePos, brushRadius, brushTarget);
 

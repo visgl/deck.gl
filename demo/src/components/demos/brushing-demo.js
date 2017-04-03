@@ -2,12 +2,12 @@ import React, {Component} from 'react';
 
 import {MAPBOX_STYLES} from '../../constants/defaults';
 import {readableInteger} from '../../utils/format-utils';
-import ArchBrushingOverlay, {inFlowColors, outFlowColors} from '../../../../examples/arc-brushing/deckgl-overlay';
+import BrushingOverlay, {inFlowColors, outFlowColors} from '../../../../examples/brushing/deckgl-overlay';
 
 const colorRamp = inFlowColors.slice().reverse().concat(outFlowColors)
   .map(color => `rgb(${color.join(',')})`);
 
-export default class ArcBrushingDemo extends Component {
+export default class BrushingDemo extends Component {
   static get trackMouseMove() {
     return true;
   }
@@ -21,15 +21,16 @@ export default class ArcBrushingDemo extends Component {
 
   static get parameters() {
     return {
+      enableBrushing: {displayName: 'Enable Brushing', type: 'checkbox', value: true},
       lineWidth: {displayName: 'Width', type: 'range', value: 1, step: 1, min: 1, max: 10},
       opacity: {displayName: 'Arc Opacity', type: 'range', value: 0.4, step: 0.01, min: 0, max: 1},
-      brushRadius: {displayName: 'Brush Radius', type: 'range', value: 200000, step: 1000, min: 1000, max: 1000000}
+      brushRadius: {displayName: 'Brush Radius', type: 'range', value: 200000, step: 1000, min: 50000, max: 1000000}
     };
   }
 
   static get viewport() {
     return {
-      ...ArchBrushingOverlay.defaultViewport,
+      ...BrushingOverlay.defaultViewport,
       mapStyle: MAPBOX_STYLES.LIGHT
     };
   }
@@ -56,10 +57,10 @@ export default class ArcBrushingDemo extends Component {
 
         <div className="layout">
           <div className="stat col-1-2">
-            Counties<b>{ meta.count || 0 }</b>
+            No. of Counties<b>{ meta.count || 0 }</b>
           </div>
           <div className="stat col-1-2">
-            Arcs<b>{ readableInteger(meta.flowCount || 0) }</b>
+            No. of Arcs<b>{ readableInteger(meta.flowCount || 0) }</b>
           </div>
         </div>
       </div>
@@ -90,7 +91,6 @@ export default class ArcBrushingDemo extends Component {
            style={{left: x, top: y}}>
         <div>{hoveredObject.name}</div>
         <div>{`Net gain: ${hoveredObject.net}`}</div>
-        <div>{`i: ${hoveredObject.i}`}</div>
       </div>
     );
   }
@@ -105,10 +105,11 @@ export default class ArcBrushingDemo extends Component {
     return (
       <div>
         {this._renderTooltip()}
-        <ArchBrushingOverlay viewport={viewport}
+        <BrushingOverlay viewport={viewport}
           data={data}
           mousePosition={mousePosition}
           mouseEntered={mouseEntered}
+          enableBrushing={params.enableBrushing.value}
           strokeWidth={params.lineWidth.value}
           brushRadius={params.brushRadius.value}
           opacity={params.opacity.value}

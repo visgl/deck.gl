@@ -132,8 +132,11 @@ export default class DeckGLOverlay extends Component {
   }
 
   render() {
-    const {viewport, brushRadius, strokeWidth, opacity, mouseEntered, mousePosition} = this.props;
+    const {viewport, enableBrushing, brushRadius, strokeWidth,
+      opacity, mouseEntered, mousePosition} = this.props;
     const {arcs, targets, sources} = this.state;
+
+    const startBrushing = Boolean(mouseEntered && enableBrushing);
 
     if (!arcs || !targets) {
       return null;
@@ -147,9 +150,10 @@ export default class DeckGLOverlay extends Component {
         brushTarget: true,
         mousePosition,
         opacity: 1,
-        enableBrushing: mouseEntered,
+        enableBrushing: startBrushing,
         pickable: false,
-        radiusScale: mouseEntered ? 3000 : 0,
+        // only show source points when brushing
+        radiusScale: startBrushing ? 3000 : 0,
         getColor: d => (d.gain > 0 ? targetColor : sourceColor)
       }),
       new ScatterplotBrushingLayer({
@@ -160,8 +164,9 @@ export default class DeckGLOverlay extends Component {
         strokeWidth: 2,
         outline: true,
         opacity: 1,
-        enableBrushing: Boolean(mouseEntered),
-        radiusScale: mouseEntered ? 4000 : 0,
+        enableBrushing: startBrushing,
+        // only show rings when brushing
+        radiusScale: startBrushing ? 4000 : 0,
         getColor: d => (d.net > 0 ? targetColor : sourceColor)
       }),
       new ScatterplotBrushingLayer({
@@ -170,7 +175,7 @@ export default class DeckGLOverlay extends Component {
         brushRadius,
         mousePosition,
         opacity: 1,
-        enableBrushing: Boolean(mouseEntered),
+        enableBrushing: startBrushing,
         pickable: true,
         radiusScale: 3000,
         onHover: this.props.onHover,
@@ -182,7 +187,7 @@ export default class DeckGLOverlay extends Component {
         strokeWidth,
         opacity,
         brushRadius,
-        enableBrushing: Boolean(mouseEntered),
+        enableBrushing: startBrushing,
         mousePosition,
         getSourcePosition: d => d.source,
         getTargetPosition: d => d.target,

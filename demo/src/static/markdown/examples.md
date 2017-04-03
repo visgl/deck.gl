@@ -1,8 +1,8 @@
 <div>
   <div class="thumb">
-    <div data-title="US County-to-County Migration" data-name="ArcBrushingLayer">
-      <a href="#/examples/custom-layers/arc-brushing-layer">
-        <img src="images/demo-thumb-arc-brushing.jpg" />
+    <div data-title="US County-to-County Migration" data-name="BrushingLayer">
+      <a href="#/examples/custom-layers/brushing-layer">
+        <img src="images/demo-thumb-brushing.jpg" />
       </a>
     </div>
   </div>

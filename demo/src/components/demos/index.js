@@ -1,6 +1,6 @@
 export {default as ScatterplotDemo} from './scatterplot-demo';
 export {default as ArcDemo} from './arc-demo';
-export {default as ArcBrushingDemo} from './arc-brushing-demo';
+export {default as BrushingDemo} from './brushing-demo';
 export {default as ScreenGridDemo} from './screen-grid-demo';
 export {default as GeoJsonDemo} from './geojson-demo';
 export {default as TripsDemo} from './trips-demo';
