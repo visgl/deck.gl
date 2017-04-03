@@ -157,14 +157,18 @@ class Example extends PureComponent {
     );
   }
 
-  _renderProgress() {
-    const label = `Loading ${(this.state.progress * 100).toFixed(2)}%`;
-    return this.state.progress < 1 && (
+  _renderProgressInfo() {
+    const progress = (this.state.progress * 100).toFixed(2);
+    return (
       <div style={{
-        position: 'absolute', left: '8px', top: '8px',
+        position: 'absolute', left: '8px', bottom: '8px',
         color: '#FFF', fontSize: '15px'
       }}>
-        {label}
+        {
+          this.state.progress < 1 ?
+            <div>{`Loading ${progress}% (laslaz loader by plas.io)`}</div> :
+            <div>Data source: kaarta.com</div>
+        }
       </div>
     );
   }
@@ -173,7 +177,7 @@ class Example extends PureComponent {
     const {width, height} = this.state;
     return width && height && <div>
       {this._renderDeckGLCanvas()}
-      {this._renderProgress()}
+      {this._renderProgressInfo()}
     </div>;
   }
 }
