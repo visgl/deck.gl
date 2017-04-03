@@ -1,6 +1,6 @@
 # AttributeManager Class
 
-The `AttributeManager` class automated attribute allocation and updates.
+The [`AttributeManager`](https://github.com/uber/deck.gl/blob/master/src/lib/attribute-manager.js) class provides automated attribute allocations and updates.
 
 Summary:
 - keeps track of valid state for each attribute
@@ -13,29 +13,12 @@ Limitations:
   There are currently no provisions for only invalidating a range of
   indices in an attribute.
 
-## Static Methods
-
-##### `setDefaultLogFunctions`
-
-Sets log functions to help trace or time attribute updates.
-Default logging uses the luma.gl logger.
-
-Note that the app may not be in control of when update is called,
-so hooks are provided for update start and end.
-
-Parameters:
-
-- `opts` (Object) - named parameters
-  * `opts.onLog` (Function) - callback, called to print
-  * `opts.onUpdateStart` (Function) - callback, called before update() starts
-  * `opts.onUpdateEnd` (Function) - callback, called after update() ends
-
 ## Constructor
 
 - `opts` (Object) - named parameters
   * `opts.id` (String, optional) - identifier (for debugging)
 
-```
+```js
 new AttributeManager({id: 'attribute-manager'});
 ```
 
@@ -78,12 +61,6 @@ attributeManager.add({
 ##### `addInstanced`
 
 Shorthand for `add()` in which all attributes `instanced` field are set to `true`.
-
-##### `getAttributes`
-
-Returns:
-
-- A map of attribute names to attribute objects.
 
 ##### `invalidate`
 

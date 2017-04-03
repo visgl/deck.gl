@@ -9,13 +9,6 @@
 
 # HexagonCellLayer
 
-The Hexagon Cell Layer is a variation of the grid layer. It is intended to render
-tessellated hexagons, and also enables height in 3d. The HexagonCellLayer
-takes in the vertices of a primitive hexagon as `[[longitude, latitude]]`,
-and an array of hexagon centroid as `[longitude, latitude]`.
-It renders each hexagon based on color, opacity and elevation.
-[Source](https://github.com/uber/deck.gl/tree/master/src/layers/core/hexagon-cell-layer)
-
 ```js
 import DeckGL, {HexagonCellLayer} from 'deck.gl';
 
@@ -38,6 +31,13 @@ const App = ({data, viewport}) => {
   return (<DeckGL {...viewport} layers={[layer]} />);
 };
 ```
+
+The Hexagon Cell Layer is a variation of the grid layer. It is intended to render
+tessellated hexagons, and also enables height in 3d. The HexagonCellLayer
+takes in the vertices of a primitive hexagon as `[[longitude, latitude]]`,
+and an array of hexagon centroid as `[longitude, latitude]`.
+It renders each hexagon based on color, opacity and elevation.
+[Source](https://github.com/uber/deck.gl/tree/master/src/layers/core/hexagon-cell-layer)
 
 ## Properties
 

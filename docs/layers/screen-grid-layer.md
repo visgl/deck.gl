@@ -2,11 +2,6 @@
 
 # ScreenGridLayer
 
-The Screen Grid Layer takes in an array of latitude and longitude
-coordinated points, aggregates them into histogram bins and
-renders as a grid.
-[Source](https://github.com/uber/deck.gl/tree/master/src/layers/core/screen-grid-layer)
-
 ```js
 import DeckGL, {ScreenGridLayer} from 'deck.gl';
 
@@ -28,6 +23,11 @@ const App = ({data, viewport}) => {
   return (<DeckGL {...viewport} layers={[layer]} />);
 };
 ```
+
+The Screen Grid Layer takes in an array of latitude and longitude
+coordinated points, aggregates them into histogram bins and
+renders as a grid.
+[Source](https://github.com/uber/deck.gl/tree/master/src/layers/core/screen-grid-layer)
 
 **Note:** The aggregation is done in screen space, so the data prop
 needs to be reaggregated by the layer whenever the map is zoomed or panned.

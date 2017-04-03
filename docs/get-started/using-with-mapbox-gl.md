@@ -1,4 +1,4 @@
-# Using deck.gl with mapbox-gl
+# Using deck.gl with Mapbox GL
 
 While a deck.gl application could choose to render on top of any JavaScript
 Map component (or even render without an underlying map),

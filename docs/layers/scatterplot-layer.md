@@ -6,10 +6,6 @@
 
 # ScatterplotLayer
 
-The Scatterplot Layer takes in paired latitude and longitude coordinated
-points and renders them as circles with a certain radius.
-[Source](https://github.com/uber/deck.gl/tree/master/src/layers/core/scatterplot-layer)
-
 ```js
 import DeckGL, {ScatterplotLayer} from 'deck.gl';
 
@@ -32,6 +28,10 @@ const App = ({data, viewport}) => {
   return (<DeckGL {...viewport} layers={[layer]} />);
 };
 ```
+
+The Scatterplot Layer takes in paired latitude and longitude coordinated
+points and renders them as circles with a certain radius.
+[Source](https://github.com/uber/deck.gl/tree/master/src/layers/core/scatterplot-layer)
 
 ## Properties
 

@@ -5,10 +5,6 @@
 
 # SolidPolygonLayer
 
-The SolidPolygon Layer renders filled polygons.
-
-[Source](https://github.com/uber/deck.gl/tree/master/src/layers/core/primitive-polygon-layer)
-
 ```js
 import DeckGL, {SolidPolygonLayer} from 'deck.gl';
 
@@ -22,6 +18,10 @@ new PolygonLayer({
   ]
 });
 ```
+
+The SolidPolygon Layer renders filled polygons.
+
+[Source](https://github.com/uber/deck.gl/tree/master/src/layers/core/primitive-polygon-layer)
 
 * The polypgons can be simple or complex (complex polygons are polygons with holes).
 * A simple polygon specified as an array of vertices, each vertice being an array

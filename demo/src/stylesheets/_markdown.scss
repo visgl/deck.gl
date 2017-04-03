@@ -341,7 +341,7 @@ Github Markdown Stylesheet (c) Sindre Sorhus <sindresorhus@gmail.com> (sindresor
 }
 
 .markdown-body hr {
-  height: 0.25em;
+  height: 0.05em;
   padding: 0;
   margin: 24px 0;
   background-color: #e7e7e7;
@@ -418,15 +418,15 @@ Github Markdown Stylesheet (c) Sindre Sorhus <sindresorhus@gmail.com> (sindresor
 }
 
 .markdown-body h1 {
-  padding-bottom: 0.3em;
+  padding-bottom: 0.5em;
   font-size: 2em;
-  border-bottom: 1px solid #eee;
+  border-bottom: 2px solid #eee;
 }
 
 .markdown-body h2 {
-  padding-bottom: 0.3em;
+  padding-bottom: 0.5em;
   font-size: 1.5em;
-  border-bottom: 1px solid #eee;
+  border-bottom: 2px solid #eee;
 }
 
 .markdown-body h3 {

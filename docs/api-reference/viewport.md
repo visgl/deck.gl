@@ -1,7 +1,7 @@
 
 # Viewport Class
 
-Manages projection and unprojection of coordinates between world and viewport
+The [`Viewport`](https://github.com/uber/deck.gl/blob/master/src/lib/viewports/viewport.js) manages projection and unprojection of coordinates between world and viewport
 coordinates.
 
 It provides both direct project/unproject function members as well as

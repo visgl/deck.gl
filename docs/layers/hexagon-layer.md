@@ -7,12 +7,6 @@
 
 # HexagonLayer
 
-The Hexagon Layer renders a hexagon heatmap based on an array of points.
-It takes the radius of hexagon bin, projects points into hexagon bins. The color
-and height of the hexagon is scaled by number of points it contains. HexagonLayer
-at the moment only works with COORDINATE_SYSTEM.LNGLAT.
-[Source](https://github.com/uber/deck.gl/tree/master/src/layers/core/hexagon-layer)
-
 ```js
 import DeckGL, {HexagonLayer} from 'deck.gl';
 
@@ -34,6 +28,12 @@ const App = ({data, viewport}) => {
   return (<DeckGL {...viewport} layers={[layer]} />);
 };
 ```
+
+The Hexagon Layer renders a hexagon heatmap based on an array of points.
+It takes the radius of hexagon bin, projects points into hexagon bins. The color
+and height of the hexagon is scaled by number of points it contains. HexagonLayer
+at the moment only works with COORDINATE_SYSTEM.LNGLAT.
+[Source](https://github.com/uber/deck.gl/tree/master/src/layers/core/hexagon-layer)
 
 ## Properties
 

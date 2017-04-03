@@ -6,10 +6,6 @@
 
 # LineLayer
 
-The Line Layer renders flat lines joining pairs of source and target points,
-specified as latitude/longitude coordinates.
-[Source](https://github.com/uber/deck.gl/tree/master/src/layers/core/line-layer)
-
 ```js
 import DeckGL, {LineLayer} from 'deck.gl';
 
@@ -31,6 +27,10 @@ const App = ({data, viewport}) => {
   return (<DeckGL {...viewport} layers={[layer]} />);
 };
 ```
+
+The Line Layer renders flat lines joining pairs of source and target points,
+specified as latitude/longitude coordinates.
+[Source](https://github.com/uber/deck.gl/tree/master/src/layers/core/line-layer)
 
 ## Properties
 

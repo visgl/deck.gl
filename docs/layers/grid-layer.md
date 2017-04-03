@@ -7,11 +7,6 @@
 
 # GridLayer
 
-The Grid Layer renders a grid heatmap based on an array of points.
-It takes the constant size all each cell, projects points into cells. The color
-and height of the cell is scaled by number of points it contains.
-[Source](https://github.com/uber/deck.gl/tree/master/src/layers/core/grid-layer)
-
 ```js
 import DeckGL, {GridLayer} from 'deck.gl';
 
@@ -33,6 +28,11 @@ const App = ({data, viewport}) => {
   return (<DeckGL {...viewport} layers={[layer]} />);
 };
 ```
+
+The Grid Layer renders a grid heatmap based on an array of points.
+It takes the constant size all each cell, projects points into cells. The color
+and height of the cell is scaled by number of points it contains.
+[Source](https://github.com/uber/deck.gl/tree/master/src/layers/core/grid-layer)
 
 **Note:** The `GridLayer` at the moment only works with `COORDINATE_SYSTEM.LNGLAT`.
 

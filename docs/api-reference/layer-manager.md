@@ -1,6 +1,6 @@
 # LayerManager Class
 
-The deck.gl `LayerManager` class handles updates, drawing and picking for a set of layers.
+The [`LayerManager`](https://github.com/uber/deck.gl/blob/master/src/lib/layer-manager.js) class handles updates, drawing and picking for a set of layers.
 
 If you are using the [`DeckGL`](/docs/api-reference/deckgl.md) React Component, a layer
 manager is created under the hood to handle rendering cycles.

@@ -1,6 +1,6 @@
 # DeckGL (React Component)
 
-`DeckGL` is a React component that takes deck.gl layer instances and
+The [`DeckGL`](https://github.com/uber/deck.gl/blob/master/src/react/deckgl.js) is a React component that takes deck.gl layer instances and
 viewport parameters, and renders those layers as a transparent overlay.
 
 ```js

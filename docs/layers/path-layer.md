@@ -6,9 +6,6 @@
 
 # PathLayer
 
-The Path Layer takes in lists of coordinate points and renders them as extruded lines with mitering.
-[Source](https://github.com/uber/deck.gl/tree/master/src/layers/core/path-layer)
-
 ```js
 import DeckGL, {PathLayer} from 'deck.gl';
 
@@ -35,6 +32,9 @@ const App = ({data, viewport}) => {
   return (<DeckGL {...viewport} layers={[layer]} />);
 };
 ```
+
+The Path Layer takes in lists of coordinate points and renders them as extruded lines with mitering.
+[Source](https://github.com/uber/deck.gl/tree/master/src/layers/core/path-layer)
 
 ## Properties
 

@@ -1,4 +1,4 @@
-# Interactivity
+# Adding Interactivity
 
 ## Overview
 
@@ -64,7 +64,7 @@ The callbacks for `hover` and `click` events are called with a single parameter
 and what was hovered.
 
 - `info.layer`: the layer that this event originates from.
-- `info.index`: the index of the object that is being picked. 
+- `info.index`: the index of the object that is being picked.
 - `info.object`: the object that is being picked. This may vary from layer to
 layer.
 - `info.x`: mouse position x relative to the viewport.

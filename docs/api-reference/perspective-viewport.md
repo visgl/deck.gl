@@ -1,7 +1,7 @@
 
 # PerspectiveViewport Class
 
-A subclass of [Viewport](/docs/api-reference/viewport.md) that creates a perspective view.
+The [`PerspectiveViewport`](https://github.com/uber/deck.gl/blob/master/src/lib/viewports/perspective-viewport.js) class is a subclass of [Viewport](/docs/api-reference/viewport.md) that creates a perspective view.
 
 Remarks:
 * This class is just a convenience, the application can use `Viewport` directly

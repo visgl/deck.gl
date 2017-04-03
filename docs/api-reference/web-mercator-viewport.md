@@ -1,7 +1,7 @@
 
 # WebMercatorViewport Class
 
-A subclass of [Viewport](/docs/api-reference/viewport.md) that enables 3D rendering to
+The [`WebMercatorViewport`](https://github.com/uber/deck.gl/blob/master/src/lib/viewports/web-mercator-viewport.js) class is a subclass of [Viewport](/docs/api-reference/viewport.md) that enables 3D rendering to
 seamlessly overlay on top of map components that take web mercator style
 map coordinates (`latitude`, `lon`, `zoom`, `pitch`, `bearing` etc),
 and to facilite the necessary mercator projections by breaking them into a
@@ -113,7 +113,7 @@ Parameters:
 - `deltaLngLatZ` - Array of `[longitude, latitude, altitude]` deltas.
 Passing a `altitude` is optional.
 
-Returns: 
+Returns:
 - Array of meter deltas in `[x, y]` or `[x, y, z]` if `altitude` is provided.
 
 ##### `addMetersToLngLat`

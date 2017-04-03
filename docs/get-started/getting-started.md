@@ -1,8 +1,8 @@
-# Getting Started
+# Installation
 
-## Installation
+## The deck.gl Framework
 ```bash
-npm install --save deck.gl luma.gl 
+npm install --save deck.gl luma.gl
 ```
 or
 ```bash

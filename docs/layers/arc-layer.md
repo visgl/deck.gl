@@ -6,10 +6,6 @@
 
 # ArcLayer
 
-The Arc Layer renders raised arcs joining pairs of source and target points,
-specified as latitude/longitude coordinates.
-[Source](https://github.com/uber/deck.gl/tree/master/src/layers/core/arc-layer)
-
 ```js
 import DeckGL, {ArcLayer} from 'deck.gl';
 
@@ -31,6 +27,10 @@ const App = ({data, viewport}) => {
   return (<DeckGL {...viewport} layers={[layer]} />);
 };
 ```
+
+The Arc Layer renders raised arcs joining pairs of source and target points,
+specified as latitude/longitude coordinates.
+[Source](https://github.com/uber/deck.gl/tree/master/src/layers/core/arc-layer)
 
 ## Properties
 

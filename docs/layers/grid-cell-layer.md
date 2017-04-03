@@ -9,11 +9,6 @@
 
 # GridCellLayer
 
-The Grid Cell Layer can render a grid-based heatmap.
-It takes the constant width / height of all cells and top-left coordinate of
-each cell. The grid cells can be given a height using the `getElevation` accessor.
-[Source](https://github.com/uber/deck.gl/tree/master/src/layers/core/grid-cell-layer)
-
 ```js
 import DeckGL, {GridCellLayer} from 'deck.gl';
 
@@ -35,6 +30,11 @@ const App = ({data, viewport}) => {
   return (<DeckGL {...viewport} layers={[layer]} />);
 };
 ```
+
+The Grid Cell Layer can render a grid-based heatmap.
+It takes the constant width / height of all cells and top-left coordinate of
+each cell. The grid cells can be given a height using the `getElevation` accessor.
+[Source](https://github.com/uber/deck.gl/tree/master/src/layers/core/grid-cell-layer)
 
 ## Properties
 

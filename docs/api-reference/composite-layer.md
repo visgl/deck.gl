@@ -1,6 +1,6 @@
 # CompositeLayer Class
 
-The CompositeLayer is a subclass of the
+The [`CompositeLayer`](https://github.com/uber/deck.gl/blob/master/src/lib/composite-layer.js) class is a subclass of the
 [Layer Class](/docs/api-reference/base-layer.md), with its own implementation
 of certain
 [layer lifecycle methods](/docs/advanced/layer-lifecycle.md)
@@ -17,7 +17,7 @@ Allows a layer to "render" or insert one or more deck.gl layers after itself.
 Called after a layer has been updated.
 
 Returns:
-- `null`, a single `Layer` instance, or an array of layers. 
+- `null`, a single `Layer` instance, or an array of layers.
 
 The default implementation of `renderLayers` returns `null`.
 

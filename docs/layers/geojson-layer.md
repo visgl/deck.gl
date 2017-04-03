@@ -7,10 +7,6 @@
 
 # GeoJsonLayer
 
-The GeoJson Layer takes in [GeoJson](http://geojson.org) formatted data and
-renders it as interactive polygons, lines and points.
-[Source](https://github.com/uber/deck.gl/tree/master/src/layers/core/geojson-layer)
-
 ```js
 import DeckGL, {GeoJsonLayer} from 'deck.gl';
 
@@ -32,6 +28,10 @@ const App = ({data, viewport}) => {
   return (<DeckGL {...viewport} layers={[layer]} />);
 };
 ```
+
+The GeoJson Layer takes in [GeoJson](http://geojson.org) formatted data and
+renders it as interactive polygons, lines and points.
+[Source](https://github.com/uber/deck.gl/tree/master/src/layers/core/geojson-layer)
 
 ## Properties
 

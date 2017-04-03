@@ -7,9 +7,6 @@
 
 # PolygonLayer
 
-The Polygon Layer renders filled and/or stroked polygons.
-[Source](https://github.com/uber/deck.gl/tree/master/src/layers/core/polygon-layer)
-
 ```js
 import DeckGL, {PolygonLayer} from 'deck.gl';
 
@@ -47,6 +44,9 @@ const App = ({data, viewport}) => {
   return (<DeckGL {...viewport} layers={[layer]} />);
 };
 ```
+
+The Polygon Layer renders filled and/or stroked polygons.
+[Source](https://github.com/uber/deck.gl/tree/master/src/layers/core/polygon-layer)
 
 If a cartographic projection mode is used, height will be interpreted as meters,
 otherwise will be in unit coordinates.
