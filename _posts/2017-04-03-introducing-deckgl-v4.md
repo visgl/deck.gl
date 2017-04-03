@@ -156,6 +156,6 @@ deck.gl v4 was created by the Visualization Team at Uber. It is the result of a 
 [**Balthazar Gronon**](https://github.com/apercu),
 [**Shan He**](https://github.com/heshan0131),
 [**Shaojing Li**](https://github.com/shaojingli),
-[**Eric Socolofski**](https://github.com/ericsoco),
+[**Eric Socolofsky**](https://github.com/ericsoco),
 [**Yang Wang**](https://github.com/gnavvy)
 and [**many others**](https://github.com/uber/deck.gl/graphs/contributors).
