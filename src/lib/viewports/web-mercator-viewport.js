@@ -108,8 +108,6 @@ export default class WebMercatorViewport extends Viewport {
     // TODO - just throw an Error instead?
     altitude = Math.max(0.75, altitude);
 
-    const center = projectFlat([longitude, latitude], scale);
-
     const distanceScales = calculateDistanceScales({latitude, longitude, scale});
 
     const projectionMatrix = makeProjectionMatrixFromMercatorParams({
@@ -121,7 +119,7 @@ export default class WebMercatorViewport extends Viewport {
       farZMultiplier
     });
 
-    const viewMatrix = makeViewMatrixFromMercatorParams({
+    const viewMatrixUncentered = makeUncenteredViewMatrixFromMercatorParams({
       width,
       height,
       longitude,
@@ -130,9 +128,13 @@ export default class WebMercatorViewport extends Viewport {
       pitch,
       bearing,
       altitude,
-      distanceScales,
-      center
+      distanceScales
     });
+
+    const center = projectFlat([longitude, latitude], scale);
+
+    const viewMatrix = mat4.translate(
+      createMat4(), viewMatrixUncentered, [-center[0], -center[1], 0]);
 
     super({width, height, viewMatrix, projectionMatrix});
 
@@ -144,11 +146,13 @@ export default class WebMercatorViewport extends Viewport {
     this.bearing = bearing;
     this.altitude = altitude;
 
+    // Save calculated values
     this.scale = scale;
     this.center = center;
-
+    this.viewMatrixUncentered = viewMatrixUncentered;
     this._distanceScales = distanceScales;
 
+    // Bind methods
     this.getDistanceScales = this.getDistanceScales.bind(this);
     this.metersToLngLatDelta = this.metersToLngLatDelta.bind(this);
     this.lngLatDeltaToMeters = this.lngLatDeltaToMeters.bind(this);
@@ -403,7 +407,7 @@ export function makeProjectionMatrixFromMercatorParams({
   return projectionMatrix;
 }
 
-function makeViewMatrixFromMercatorParams({
+function makeUncenteredViewMatrixFromMercatorParams({
   width,
   height,
   longitude,
@@ -429,8 +433,6 @@ function makeViewMatrixFromMercatorParams({
   // Rotate by bearing, and then by pitch (which tilts the view)
   mat4.rotateX(vm, vm, pitch * DEGREES_TO_RADIANS);
   mat4.rotateZ(vm, vm, -bearing * DEGREES_TO_RADIANS);
-  // console.log(`VIEWPT Z ${pitch * DEGREES_TO_RADIANS} ${-bearing * DEGREES_TO_RADIANS} ${vm}`);
-  mat4.translate(vm, vm, [-center[0], -center[1], 0]);
-  // console.log(`VIEWPT T ${pitch * DEGREES_TO_RADIANS} ${-bearing * DEGREES_TO_RADIANS} ${vm}`);
+
   return vm;
 }

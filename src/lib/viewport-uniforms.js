@@ -65,7 +65,7 @@ function calculateMatrixAndOffset({
       .transformVector([positionPixels[0], positionPixels[1], 0.0, 1.0]);
 
     // Always apply uncentered projection matrix (shader adds center)
-    modelViewMatrix = new Matrix4(viewMatrixUncentered)
+    modelViewMatrix = new Matrix4(viewMatrixUncentered || viewMatrix)
       // Zero out 4th coordinate ("after" model matrix) - avoids further translations
       .multiplyRight(VECTOR_TO_POINT_MATRIX);
     break;
