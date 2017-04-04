@@ -1,3 +1,12 @@
+<p align="right">
+  <a href="https://github.com/uber/deck.gl/blob/4.0-release/docs/README.md">
+    <img src="https://img.shields.io/badge/current-v4-brightgreen.svg?style=flat-square" />
+  </a>
+  <a href="https://github.com/uber/deck.gl/tree/3.0-release/docs">
+    <img src="https://img.shields.io/badge/legacy-v3-green.svg?style=flat-square" />
+  </a>
+</p>
+
 # Introduction
 
 deck.gl is designed to make visualization of large data sets simple.
@@ -15,9 +24,9 @@ To make this simple concept work, deck.gl handles a number of challenges:
 
 * Handling of large data sets and performant updates
 * Interactive event handling such as picking
-* Cartographic Projections and integration with underlying map
-* Selection of proven, well-tested layers
-* Ability for the user to create new layers and customize existing layers
+* Cartographic projections and integration with underlying map
+* A catalog of proven, well-tested layers
+* Easy to create new layers or customize existing layers
 
 ## Ecosystem
 
@@ -31,26 +40,26 @@ deck.gl has been developed in parallel with a number of companion modules:
   or other WebGL libraries.
 * [react-map-gl](https://uber.github.io/react-map-gl/#/) - A React wrapper
   around Mapbox GL which works seamlessly with deck.gl.
-* [viewport-mercator-project](https://github.com/uber-common/viewport-mercator-project) -
-  Perspective enabled Web Mercator projection and transformation class. Created
-  for deck.gl, but broken out since it is independently useful and can for instance be used with `react-map-gl` to create perspective enabled SVG overlays (which could be used together with deck.gl).
 
-In addition, in the future we hope to publish additional deck.gl layers and
+In addition, in the future we plan to publish additional deck.gl layers and
 layer packages as separate modules.
 
 ## Learning deck.gl
 
-How you approach learning deck.gl will probably depend on your previous
+How you approach learning deck.gl will depend on your previous
 knowledge and how you want to use it.
 
 Learning the layer props, and reading the basic articles in the deck.gl
-documentation should of course be the first step. But where do you go
+documentation should of course be the first step. But where to go
 after that?
 
 ### Understanding the Reactive Programming Model
 
-The key to writing good, performant deck.gl layers lies in understanding
-how to minimize updates and redundant calculations.
+deck.gl is designed according to the principles of the
+[Reactive Programming Model](https://en.wikipedia.org/wiki/Reactive_programming).
+
+The key to writing good, performant deck.gl applications and layers
+lies in understanding how to minimize updates and redundant calculations.
 
 It is important to understand the implications of the shallow equality
 comparisons deck.gl performs on layer properties, and how this implies that
@@ -70,6 +79,4 @@ new layer will likely require deeper knowledge, it is often possible to modify
 or extend existing deck.gl layers (including modifying the shader code) with
 a surprisingly limited amount of WebGL knowledge.
 
-There are many web resources for learning WebGL. The
-[luma.gl](https://uber.github.io/luma.gl/#/) documentation
-can be a starting point.
+There are many web resources for learning WebGL.
