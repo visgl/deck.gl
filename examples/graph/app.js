@@ -16,9 +16,20 @@ class Root extends Component {
       data: null
     };
 
+    this._onHover = this._onHover.bind(this);
+    this._onClick = this._onClick.bind(this);
+    this._onDoubleClick = this._onDoubleClick.bind(this);
+
     requestJson('./data/sample-graph.json', (error, response) => {
       if (!error) {
-        this.setState({data: response});
+        // apply timestamp and push loaded sample data into array
+        this.setState({
+          data: [
+            Object.assign({}, response, {
+              timestamp: Date.now()
+            })
+          ]
+        });
       }
     });
   }

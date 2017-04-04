@@ -57,7 +57,7 @@
     {"id": 54, "type": 4},
     {"id": 55, "type": 4}
   ],
-  "edges": [
+  "links": [
     {"id": 0, "source": 0, "target": 15},
     {"id": 1, "source": 1, "target": 15},
     {"id": 2, "source": 1, "target": 16},

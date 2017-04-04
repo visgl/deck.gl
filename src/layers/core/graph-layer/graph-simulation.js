@@ -1,4 +1,6 @@
 import {forceCenter, forceLink, forceManyBody, forceSimulation} from 'd3-force';
+import window from 'global/window';
+
 import Graph from './graph';
 import {LOGIC} from './constants';
 
@@ -32,29 +34,8 @@ export default class GraphSimulation {
   }
 
   _onSimulationTick() {
-    if (this._neighborNodes) {
-      this._neighborNodes.forEach(node => {
-        if (node.collapsing) {
-          node.alpha = Math.max(0, node.alpha * 0.9);
-        } else {
-          node.alpha = Math.min(1, node.alpha / 0.9);
-        }
-      });
-    }
-
-    if (this._neighborLinks) {
-      this._neighborLinks.forEach(link => {
-        if (link.collapsing) {
-          link.alpha = Math.max(0, link.alpha * 0.9);
-        } else {
-          link.alpha = Math.min(1, link.alpha / 0.9);
-        }
-      });
-    }
-
-    // TODO: verify this is not needed in the context of graph-layer / deck.gl,
-    // since graph-simulation is no longer a React component
-    // and the values flushed by render() previously are here already available to graph-layer.
+    // TODO: with simulation as reactive wrapper around layer,
+    // this call will force a re-render of the layer.
     // this.forceUpdate();
   }
 
@@ -121,14 +102,10 @@ export default class GraphSimulation {
                 fx: _node.x,
                 fy: _node.y
               });
-              // TODO: uncomment this once i have an answer on `window` in deck.gl
-              // just commenting out for now to push a WIP that lints properly
-              /*
               window.setTimeout(() => {
                 _node.fx = null;
                 _node.fy = null;
               }, 250);
-              */
             } else {
               _node = Object.assign(_node, node);
             }

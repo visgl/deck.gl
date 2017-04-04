@@ -1,7 +1,10 @@
 import React, {Component} from 'react';
-import DeckGL, {GraphLayer} from 'deck.gl';
+import DeckGL, {GraphLayer, OrthographicViewport, COORDINATE_SYSTEM} from 'deck.gl';
 
 export default class DeckGLOverlay extends Component {
+  constructor(props) {
+    super(props);
+  }
 
   // TODO: remove for this example, since it uses OrthographicViewport?
   _initialize(gl) {
@@ -16,10 +19,12 @@ export default class DeckGLOverlay extends Component {
       return null;
     }
 
+    const {width, height} = viewport;
     const layer = new GraphLayer({
       id: 'graph',
       data,
       opacity: 1.0,
+      projectionMode: COORDINATE_SYSTEM.IDENTITY,
 
       /*
       // from example.js in react-graph
@@ -49,8 +54,20 @@ export default class DeckGLOverlay extends Component {
       onDoubleClick: this.props.onDoubleClick
     });
 
+    // recalculate viewport on container size change.
+    const left = -width / 2;
+    const top = -height / 2;
+    const glViewport = new OrthographicViewport({width, height, left, top});
+
+    // TODO: clean up viewport / glViewport
     return (
-      <DeckGL {...viewport} layers={ [layer] } onWebGLInitialized={this._initialize} />
+      <DeckGL
+        width={width}
+        height={height}
+        viewport={glViewport}
+        layers={ [layer] }
+        onWebGLInitialized={this._initialize}
+      />
     );
   }
 }

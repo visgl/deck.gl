@@ -18,20 +18,12 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {CompositeLayer, COORDINATE_SYSTEM} from '../../../lib';
-
-/*
-// import {OrthographicViewport} from '../../../lib/viewports';
-// TODO: where to specify viewport? Orthographic as default, but should be overridable.
-    const {width, height} = this.props;
-    const left = -width / 2;
-    const top = -height / 2;
-    const glViewport = new OrthographicViewport({width, height, left, top});
-*/
-
-import IconLayer from '../icon-layer/icon-layer';
-import LineLayer from '../line-layer/line-layer';
-import ScatterplotLayer from '../scatterplot-layer/scatterplot-layer';
+import {
+  CompositeLayer,
+  IconLayer,
+  LineLayer,
+  ScatterplotLayer
+} from 'deck.gl';
 
 import GraphSimulation from './graph-simulation';
 
@@ -76,7 +68,7 @@ const defaultProps = {
 export default class GraphLayer extends CompositeLayer {
   initializeState() {
     this.state = {
-      simulation: new GraphSimulation(),
+      simulation: new GraphSimulation(this.props),
       nodes: {},
       links: {}
     };
@@ -85,13 +77,15 @@ export default class GraphLayer extends CompositeLayer {
   updateState({oldProps, props, changeFlags}) {
     if (changeFlags.dataChanged) {
       const {data} = props;
-      if (data && data.length) {
-        const {nodes, links} =
-          this.state.simulation.update(data, data.length !== oldProps.data.length);
+      if (data) {
+        const anchor = !oldProps.data || data.length !== oldProps.data.length;
+        const {nodes, links} = this.state.simulation.update(data, anchor);
         this.state = Object.assign({},
           this.state,
-          nodes,
-          links
+          {
+            nodes,
+            links
+          }
         );
       }
     }
@@ -115,14 +109,6 @@ export default class GraphLayer extends CompositeLayer {
   renderLayers() {
     const {nodes, links} = this.state;
 
-    // Layer composition props
-    // TODO: is this needed?
-    // const {id} = this.props;
-
-    // Rendering props underlying layer
-    // const {lineWidthScale, lineWidthMinPixels, lineWidthMaxPixels,
-    //   lineJointRounded, lineMiterLimit, fp64} = this.props;
-
     // Accessor props for underlying layers
     const {alpha, getLinkPosition, getLinkColor, getLinkWidth,
       getNodePosition, getNodeColor, getNodeIcon, getNodeSize} = this.props;
@@ -133,10 +119,11 @@ export default class GraphLayer extends CompositeLayer {
     const {opacity, pickable, visible} = this.props;
 
     // viewport props
-    const {positionOrigin, projectionMode, modelMatrix} = this.props;
+    const {projectionMode} = this.props;
 
     const drawLinks = links && links.length > 0;
     const drawNodes = nodes && nodes.length > 0;
+    const drawIcons = drawNodes && Boolean(getIcon);  // ensure a valid accessor
 
     const linksLayer = drawLinks && new LineLayer({
       id: 'link-layer',
@@ -147,9 +134,7 @@ export default class GraphLayer extends CompositeLayer {
       strokeWidth: getLinkWidth(),
       opacity,
       pickable,
-      positionOrigin,
-      projectionMode: COORDINATE_SYSTEM.IDENTITY,
-      modelMatrix,
+      projectionMode,
       updateTriggers: {
         getSourcePosition: alpha,
         getTargetPosition: alpha,
@@ -165,9 +150,7 @@ export default class GraphLayer extends CompositeLayer {
       getColor: n => n.highlighting ? [255, 255, 0, 255] : getNodeColor(n),
       opacity,
       pickable,
-      positionOrigin,
-      projectionMode: projectionMode || COORDINATE_SYSTEM.IDENTITY,
-      modelMatrix,
+      projectionMode,
       updateTriggers: {
         // TODO: do we also need to update on manual changes to fixed node positions (fx/fy),
         // to enable e.g. programmatic graph updates that don't reheat/run the simulation,
@@ -178,7 +161,7 @@ export default class GraphLayer extends CompositeLayer {
       visible
     });
 
-    const nodeIconsLayer = drawNodes && new IconLayer({
+    const nodeIconsLayer = drawIcons && new IconLayer({
       id: 'node-icon-layer',
       data: nodes,
       getColor: getNodeColor,
@@ -189,9 +172,7 @@ export default class GraphLayer extends CompositeLayer {
       iconMapping,
       opacity,
       pickable,
-      positionOrigin,
-      projectionMode: projectionMode || COORDINATE_SYSTEM.IDENTITY,
-      modelMatrix,
+      projectionMode,
       sizeScale,
       updateTriggers: {
         // TODO: do we also need to update on manual changes to fixed node positions (fx/fy),
