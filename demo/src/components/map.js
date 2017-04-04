@@ -1,7 +1,8 @@
 import React, {Component} from 'react';
 import {connect} from 'react-redux';
 import autobind from 'autobind-decorator';
-import MapGL from 'react-map-gl';
+
+import MapGL from './mapbox';
 
 import * as Demos from './demos';
 import {updateMap, updateMeta, loadData, useParams} from '../actions/app-actions';
