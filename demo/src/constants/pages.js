@@ -117,7 +117,7 @@ export const examplePages = generatePath([
         }
       },
       {
-        name: '3D Indoor Map',
+        name: '3D Indoor Scan',
         external: 'https://gnavvy.github.io/point-cloud-example/'
       }
     ]
