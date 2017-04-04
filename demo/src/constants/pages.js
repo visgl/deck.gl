@@ -115,6 +115,10 @@ export const examplePages = generatePath([
           demo: 'PlotDemo',
           code: getCodeUrl('examples/plot')
         }
+      },
+      {
+        name: '3D Indoor Map',
+        external: 'https://gnavvy.github.io/point-cloud-example/'
       }
     ]
   }

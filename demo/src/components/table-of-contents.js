@@ -23,6 +23,15 @@ export default class TableOfContents extends Component {
       );
     }
 
+    if (page.external) {
+      // is external link
+      return (
+        <li key={`page-${i}`}>
+          <a className="link" href={page.external} target="_new" >{page.name}</a>
+        </li>
+      );
+    }
+
     return (
       <li key={`page-${i}`}>
         <Link className="link" to={path} activeClassName="active">{page.name}</Link>
