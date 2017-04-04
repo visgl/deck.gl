@@ -15,6 +15,7 @@
   height: 100%;
   background: #fff;
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
   box-shadow: 2px 0 4px rgba(0,0,0,0.15);
   z-index: 1;
   transition: all 300ms;
@@ -194,6 +195,7 @@ code {
 .markdown {
   height: 100%;
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 .markdown .demo {
   height: 80vh;
