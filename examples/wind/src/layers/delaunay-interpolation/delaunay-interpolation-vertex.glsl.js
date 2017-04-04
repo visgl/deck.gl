@@ -1,5 +1,4 @@
-export default `
-// Copyright (c) 2015 Uber Technologies, Inc.
+// Copyright (c) 2017 Uber Technologies, Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -19,28 +18,21 @@ export default `
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#define SHADER_NAME wind-layer-fragment-shader
+export default `\
+#define SHADER_NAME delaunay-vertex-shader
 
-#ifdef GL_ES
-precision highp float;
-#endif
+uniform vec4 boundingBox;
+uniform vec2 size;
+
+attribute vec3 positions;
+attribute vec3 data;
 
 varying vec4 vColor;
-varying float vAltitude;
 
 void main(void) {
-  // if (vColor.a < 0.07) {
-  // 	discard;
-  // }
-
-  if (vAltitude < -90.0) {
-    discard;
-  }
-
-  vec2 diff = gl_PointCoord - vec2(.5);
-  if (length(diff) > 0.5) {
-    discard;
-  }
-  gl_FragColor = vColor;
+  float posX = mix(-1., 1., (positions.x - boundingBox.x) / (boundingBox.y - boundingBox.x));
+  float posY = mix(-1., 1., (positions.y - boundingBox.z) / (boundingBox.w - boundingBox.z));
+  vColor = vec4(data.xyz, positions.z);
+  gl_Position = vec4(posX, posY, 0, 1);
 }
 `;

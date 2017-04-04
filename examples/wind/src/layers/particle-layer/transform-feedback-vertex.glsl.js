@@ -1,4 +1,3 @@
-export default `
 // Copyright (c) 2015 Uber Technologies, Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -19,7 +18,8 @@ export default `
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#define SHADER_NAME wind-layer-vertex-shader
+export default `\
+#define SHADER_NAME particle-feedback-vertex-shader
 
 #define PI 3.1415926535
 #define PI2 1.5707963267949
@@ -35,8 +35,8 @@ uniform float delta;
 uniform float time;
 
 uniform float flip;
-uniform vec4 bbox;
-uniform vec4 originalBBox;
+uniform vec4 boundingBox;
+uniform vec4 originalBoundingBox;
 uniform vec2 bounds0;
 uniform vec2 bounds1;
 uniform vec2 bounds2;
@@ -50,13 +50,13 @@ float rand(vec2 co){
 
 void main(void) {
   // position in texture coords
-  float x = (posFrom.x - bbox.x) / (bbox.y - bbox.x);
-  float y = (posFrom.y - bbox.z) / (bbox.w - bbox.z);
+  float x = (posFrom.x - boundingBox.x) / (boundingBox.y - boundingBox.x);
+  float y = (posFrom.y - boundingBox.z) / (boundingBox.w - boundingBox.z);
   vec2 coord = vec2(x, 1. - y);
   vec4 texel1 = texture2D(dataFrom, coord);
   vec4 texel2 = texture2D(dataTo, coord);
   vec4 texel = mix(texel1, texel2, delta);
-  
+
   // angle
   float angle = texel.x * PI4;
   float anglePast = posFrom.z;
@@ -87,12 +87,14 @@ void main(void) {
   // if out of bounds then map to random position
   float r1 = rand(vec2(posFrom.x, offset.x + time));
   float r2 = rand(vec2(posFrom.y, offset.y + time));
-  r1 = r1 * (originalBBox.y - originalBBox.x) + originalBBox.x;
-  r2 = r2 * (originalBBox.w - originalBBox.z) + originalBBox.z;
+  r1 = r1 * (originalBoundingBox.y - originalBoundingBox.x) + originalBoundingBox.x;
+  r2 = r2 * (originalBoundingBox.w - originalBoundingBox.z) + originalBoundingBox.z;
   vec2 randValues = vec2(r1, r2);
 
   // endPos = vec4(offsetPos, randValues);
-  endPos.xy = mix(offsetPos, randValues, float(offsetPos.x < bbox.x || offsetPos.x > bbox.y || offsetPos.y < bbox.z || offsetPos.y > bbox.w));
+  endPos.xy = mix(offsetPos, randValues,
+    float(offsetPos.x < boundingBox.x || offsetPos.x > boundingBox.y ||
+      offsetPos.y < boundingBox.z || offsetPos.y > boundingBox.w));
   endPos.xy = mix(endPos.xy, randValues, float(length(offset) < EPSILON));
   endPos.xy = mix(endPos.xy, randValues, float(texel.x == 0. && texel.y == 0. && texel.z == 0.));
   if (flip > 0.) {

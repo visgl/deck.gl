@@ -1,5 +1,10 @@
-import React, {Component} from 'react';
+import React, {Component, PropTypes} from 'react';
 import TWEEN from 'tween.js';
+
+const propTypes = {
+  settings: PropTypes.object.isRequired,
+  onChange: PropTypes.func.isRequired
+};
 
 export default class ControlPanel extends Component {
 
@@ -19,7 +24,7 @@ export default class ControlPanel extends Component {
       <div className="input">
         <label>{displayName}</label>
         <input type="checkbox"
-          checked={this.props.params[key]}
+          checked={this.props.settings[key] || false}
           onChange={ e => this.props.onChange({[key]: e.target.checked}) } />
       </div>
     );
@@ -30,7 +35,7 @@ export default class ControlPanel extends Component {
       <div className="input">
         <label>{displayName}</label>
         <input type="range" {...props}
-          value={this.props.params[key]}
+          value={this.props.settings[key] | 0}
           onChange={ e => this.props.onChange({[key]: e.target.value}) } />
       </div>
     );
@@ -39,11 +44,13 @@ export default class ControlPanel extends Component {
   render() {
     return (
       <div>
-        { this._renderToggle('toggleParticles', 'particles') }
-        { this._renderToggle('toggleWind', 'field') }
-        { this._renderToggle('toggleElevation', 'elevation') }
+        { this._renderToggle('showParticles', 'particles') }
+        { this._renderToggle('showWind', 'field') }
+        { this._renderToggle('showElevation', 'elevation') }
         { this._renderSlider('time', 'time', {min: 0, max: 70, step: 0.1}) }
       </div>
     );
   }
 }
+
+ControlPanel.propTypes = propTypes;

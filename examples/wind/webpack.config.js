@@ -19,7 +19,7 @@ module.exports = {
       loader: 'babel-loader',
       include: resolve('./src')
     }, {
-      include: [resolve('./src'), resolve('../../src')],
+      include: [resolve('./src')],
       loader: 'transform-loader',
       query: 'brfs-babel'
     }]
@@ -27,10 +27,7 @@ module.exports = {
 
   resolve: {
     alias: {
-      'mapbox-gl$': resolve('./node_modules/mapbox-gl/dist/mapbox-gl.js'),
-      react: resolve('./node_modules/react'),
-      'deck.gl': resolve('../../src'),
-      'luma.gl': resolve('./node_modules/luma.gl')
+      'mapbox-gl$': resolve('./node_modules/mapbox-gl/dist/mapbox-gl.js')
     }
   },
 

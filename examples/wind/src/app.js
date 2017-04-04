@@ -1,9 +1,10 @@
-/* global window,document */
-import 'babel-polyfill';
+/* global window, document */
 import React, {Component} from 'react';
+import autobind from 'react-autobind';
 import {render} from 'react-dom';
 import MapGL from 'react-map-gl';
-import Wind from './wind';
+
+import WindDemo from './wind-demo';
 import ControlPanel from './control-panel';
 
 // animation
@@ -18,31 +19,28 @@ const MAPBOX_TOKEN = process.env.MAPBOX_ACCESS_TOKEN; // eslint-disable-line
 
 class Root extends Component {
 
-
-
   constructor(props) {
     super(props);
     this.state = {
       viewport: {
-        bearing:0.9642857142857792,
-        latitude:37.59651729201781,
-        longitude:-96.86543413846587,
-        //mapStyle: "mapbox://styles/uberdata/cive485h000192imn6c6cc8fc",
-        mapStyle: "mapbox://styles/mapbox/dark-v9",
-        maxZoom:8,
-        pitch:34.095940959409596,
-        zoom:4.223615382460847,
+        bearing: 0.9642857142857792,
+        latitude: 37.59651729201781,
+        longitude: -96.86543413846587,
+        mapStyle: 'mapbox://styles/mapbox/dark-v9',
+        maxZoom: 8,
+        pitch: 34.095940959409596,
+        zoom: 4.223615382460847,
         width: 500,
         height: 500
       },
-      params: {
-        // time: 11.4,
+      settings: {
         time: 0,
-        toggleParticles: true,
-        toggleWind: false,
-        toggleElevation: true
+        showParticles: false,
+        showWindDemo: false,
+        showElevation: false
       }
     };
+    autobind(this);
   }
 
   componentDidMount() {
@@ -55,29 +53,27 @@ class Root extends Component {
     window.removeEventListener('resize', this._onResize);
   }
 
-  _onResize = () => {
+  _onResize() {
     this._updateViewport({
       width: window.innerWidth,
       height: window.innerHeight
     });
   }
 
-  _updateViewport = viewport => {
-    // console.log({...this.state.viewport, ...viewport});
+  _updateViewport(viewport) {
     this.setState({
       viewport: {...this.state.viewport, ...viewport}
     });
   }
 
-  _updateParams = params => {
-    // console.log({...this.state.params, ...params});
+  _updateSettings(settings) {
     this.setState({
-      params: {...this.state.params, ...params}
+      settings: {...this.state.settings, ...settings}
     });
   }
 
   render() {
-    const {viewport, params} = this.state;
+    const {viewport, settings} = this.state;
 
     return (
       <div>
@@ -87,7 +83,7 @@ class Root extends Component {
           perspectiveEnabled
           onChangeViewport={this._updateViewport}>
 
-          <Wind viewport={viewport} params={params} />
+          <WindDemo viewport={viewport} settings={settings} />
 
         </MapGL>
 
@@ -95,15 +91,17 @@ class Root extends Component {
           <h1>Wind</h1>
           <p>Visualize wind on vector fields and particles.</p>
           <ul>
-          <li>Hold cmd + drag to tilt the map</li>
-          <li>Turn on/off between a particles or vector field layer</li>
-          <li>Slide through every hour of the day to look at wind change</li>
+            <li>Hold cmd + drag to tilt the map</li>
+            <li>Turn on/off between a particles or vector field layer</li>
+            <li>Slide through every hour of the day to look at wind change</li>
           </ul>
-          <p>Made with <a href="http://deck.gl">deck.gl</a> by <a href="https://twitter.com/philogb">@philogb</a></p>
+          <p>Made with <a href="http://deck.gl">deck.gl</a> by
+            <a href="https://twitter.com/philogb">@philogb</a>
+          </p>
           <p>Data source: <a href="http://www.census.gov">NCAA</a></p>
           <hr />
 
-          <ControlPanel params={params} onChange={this._updateParams} />
+          <ControlPanel settings={settings} onChange={this._updateSettings} />
 
         </div>
 

@@ -1,4 +1,3 @@
-export default `
 // Copyright (c) 2015 Uber Technologies, Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -19,8 +18,12 @@ export default `
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+export default `\
 #define SHADER_NAME wind-layer-vertex-shader
 
+#define PI 3.1415926535
+#define PI2 1.5707963267949
+#define PI4 0.78539816339745
 #define HEIGHT_FACTOR 25.
 #define ELEVATION_SCALE 80.
 
@@ -29,30 +32,22 @@ uniform sampler2D dataTo;
 uniform sampler2D elevationTexture;
 uniform float delta;
 
-uniform vec4 bbox;
+uniform vec4 boundingBox;
 uniform vec2 size;
 uniform vec2 bounds0;
 uniform vec2 bounds1;
 uniform vec2 bounds2;
 uniform vec4 elevationBounds;
 uniform vec2 elevationRange;
-uniform float zScale;
 
 attribute vec3 positions;
-attribute vec4 posFrom;
 attribute vec3 vertices;
+attribute vec3 normals;
 
+varying vec4 vPosition;
+varying vec4 vNormal;
 varying vec4 vColor;
 varying float vAltitude;
-
-vec3 getWorldPosition(vec2 lngLat) {
-  vec2 texCoords = (lngLat - elevationBounds.xy) / (elevationBounds.zw - elevationBounds.xy);
-  vec4 elevation = texture2D(elevationTexture, texCoords);
-
-  float altitude = mix(elevationRange.x, elevationRange.y, elevation.r);
-
-  return vec3(lngLat, altitude * zScale);
-}
 
 float getAltitude(vec2 lngLat) {
   vec2 texCoords = (lngLat - elevationBounds.xy) / (elevationBounds.zw - elevationBounds.xy);
@@ -63,32 +58,56 @@ float getAltitude(vec2 lngLat) {
 
 void main(void) {
   // position in texture coords
-  float x = (posFrom.x - bbox.x) / (bbox.y - bbox.x);
-  float y = (posFrom.y - bbox.z) / (bbox.w - bbox.z);
+  float x = (positions.x - boundingBox.x) / (boundingBox.y - boundingBox.x);
+  float y = (positions.y - boundingBox.z) / (boundingBox.w - boundingBox.z);
   vec2 coord = vec2(x, 1. - y);
-  vec4 texel = mix(texture2D(dataFrom, coord), texture2D(dataTo, coord), delta);
+  vec4 texel1 = texture2D(dataFrom, coord);
+  vec4 texel2 = texture2D(dataTo, coord);
+  vec4 texel = mix(texel1, texel2, delta);
 
-  vAltitude = getAltitude(posFrom.xy);
-  //float wind = (texel.y - bounds1.x) / (bounds1.y - bounds1.x);
-  float wind = 0.05 + (texel.y - bounds1.x) / (bounds1.y - bounds1.x) * 0.9;
-  
-  vec3 prev = getWorldPosition(posFrom.xy + vec2(1., 0.0));
-  prev = project_position(prev);
-  vec3 next = getWorldPosition(posFrom.xy - vec2(0.0, 1.));
-  next = project_position(next);  
-  vec2 pos = project_position(posFrom.xy);
-  float elevation = (project_scale(vAltitude * zScale) + prev.z + next.z) / 3.;
-  vec3 extrudedPosition = vec3(pos.xy, elevation + 1.0);
+  // angle
+  float angleFrom = texel1.x * PI4;
+  float angleTo = texel2.x * PI4;
+  if (angleFrom < 0.) {
+    angleFrom += PI * 2.;
+  }
+  if (angleTo < 0.) {
+    angleTo += PI * 2.;
+  }
+  if (angleFrom < angleTo) {
+    if (abs(angleTo - angleFrom) > abs(angleTo - (angleFrom + PI * 2.))) {
+      angleFrom += PI * 2.;
+    }
+  } else {
+    if (abs(angleFrom - angleTo) > abs(angleFrom - (angleTo + PI * 2.))) {
+      angleTo += PI * 2.;
+    }
+  }
+  float angle = mix(angleFrom, angleTo, delta);
+  mat2 rotation = mat2(cos(angle), sin(angle), -sin(angle), cos(angle));
+
+  // wind speed in 0-1
+  float wind = 0.05 + (texel.y - bounds1.x) / (bounds1.y - bounds1.x) * 0.95;
+  // float wind = (texel.y - bounds1.x) / (bounds1.y - bounds1.x);
+  float factor = wind * 4.;
+  vec2 vertex = rotation * vertices.xy;
+  vec2 normal = rotation * normals.xy;
+  vec2 pos = project_position(positions.xy + vertex.xy * factor);
+  vec3 extrudedPosition = vec3(pos.xy, 1.0);
   vec4 position_worldspace = vec4(extrudedPosition, 1.0);
   gl_Position = project_to_clipspace(position_worldspace);
-  gl_PointSize = pow(3.5 / (gl_Position.z + 0.7), 2.);
 
-  float alpha = mix(0., 0.8, pow(wind, .5));
-  if (texel.x == 0. && texel.y == 0. && texel.z == 0.) {
-    alpha = 0.;
-  }
   // temperature in 0-1
-  float temp = (texel.z - bounds2.x) / (bounds2.y - bounds2.x);
-  vColor = vec4(vec3(0.5), alpha);
+  float temp = (texel.z - bounds2.x) / (bounds2.y - bounds2.x);  
+  temp = floor((log(temp + 1.) * 3.) * 3.) / 3.;
+
+  vPosition = position_worldspace;
+  vNormal = vec4(normal, normals.z, 1);
+  vColor = vec4(vec3(temp, temp, 0.8), 1);
+  vAltitude = getAltitude(positions.xy);
+  // out of bounds
+  if (texel.x == 0. && texel.y == 0. && texel.z == 0.) {
+    vColor.a = 0.;
+  }
 }
 `;
