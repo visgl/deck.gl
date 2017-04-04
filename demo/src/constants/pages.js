@@ -115,6 +115,10 @@ export const examplePages = generatePath([
           demo: 'PlotDemo',
           code: getCodeUrl('examples/plot')
         }
+      },
+      {
+        name: '3D Indoor Scan',
+        external: 'https://gnavvy.github.io/point-cloud-example/'
       }
     ]
   }

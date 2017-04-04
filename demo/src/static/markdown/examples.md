@@ -1,5 +1,12 @@
 <div>
   <div class="thumb">
+    <div data-title="3D Indoor Scan" data-name="PointCloudLayer">
+      <a href="https://gnavvy.github.io/point-cloud-example/" target="_blank">
+        <img src="images/demo-thumb-point-cloud.jpg" />
+      </a>
+    </div>
+  </div>
+  <div class="thumb">
     <div data-title="US County-to-County Migration" data-name="BrushingLayer">
       <a href="#/examples/custom-layers/brushing-layer">
         <img src="images/demo-thumb-brushing.jpg" />
