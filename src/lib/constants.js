@@ -40,3 +40,11 @@ export const COORDINATE_SYSTEM = {
   // Positions and distances are not transformed: [x, y, z] in unit coordinates
   IDENTITY: 0.0
 };
+
+export const LIFECYCLE = {
+  NO_STATE: 'Awaiting state',
+  MATCHED: 'Matched. State transferred from previous layer',
+  INITIALIZED: 'Intialized',
+  OUTDATED: 'Outdated. Awaiting garbage collection',
+  FINALIZED: 'Finalized! Awaiting garbage collection'
+};
