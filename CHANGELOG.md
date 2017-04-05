@@ -15,6 +15,15 @@ Each version should:
 Ref: http://keepachangelog.com/en/0.3.0/
 -->
 
+## Beta Releases
+
+### deck.gl v4.1-alpha.1
+
+- HOTFIX: Fix the bug that layer is finalized at every cycle due to an incorrect if check(#552)
+- HOTFIX: Fix the bug that Model got regenerated every time data is changed for SolidPolygonLayer (#424)
+- DEMO: Fix the scrolling on iPhone (#546)
+- DEMO: Reorganized the examples (#547)
+- DEMO: Misc fixed form demo site (#548, #549)
 
 ## Official Releases
 
@@ -24,7 +33,6 @@ Ref: http://keepachangelog.com/en/0.3.0/
 #### [4.0.0] - Major deck.gl Release
 
 For details see [What's New](docs/whats-new.md)
-
 
 
 ### deck.gl v3.0
@@ -173,8 +181,6 @@ For details see [What's New](docs/whats-new.md)
 
 #### [1.0.0] - 2016-01-06
 - Initial commit of the open-source version of deck.gl
-
-
 
 
 # Beta Releases
