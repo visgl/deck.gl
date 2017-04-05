@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 
 /* global window */
-import {COORDINATE_SYSTEM} from './constants';
+import {COORDINATE_SYSTEM, LIFECYCLE} from './constants';
 import AttributeManager from './attribute-manager';
 import {log, compareProps, count} from './utils';
 import {GL} from 'luma.gl';
@@ -71,7 +71,7 @@ export default class Layer {
     this.context = null;
     this.parentLayer = null;
     this.count = counter++;
-    this.lifecycle = 'Awaiting state';
+    this.lifecycle = LIFECYCLE.NO_STATE;
     Object.seal(this);
   }
 
