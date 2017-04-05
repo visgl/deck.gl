@@ -50,6 +50,7 @@ import Layer from './layer';
 import {log} from './utils';
 import assert from 'assert';
 import {drawLayers, pickLayers} from './draw-and-pick';
+import {LIFECYCLE} from './constants';
 import {Viewport} from './viewports';
 
 import {FramebufferObject} from 'luma.gl';
@@ -282,7 +283,7 @@ export default class LayerManager {
 
     // Move state
     newLayer.state = state;
-    newLayer.lifecycle = 'Matched. State transferred from previous layer';
+    newLayer.lifecycle = LIFECYCLE.MATCHED;
     state.layer = newLayer;
 
     // Update model layer reference
@@ -292,15 +293,15 @@ export default class LayerManager {
     // Keep a temporary ref to the old props, for prop comparison
     newLayer.oldProps = props;
     // oldLayer.state = null;
-    newLayer.lifecycle = 'Awaiting garbage collection';
+    oldLayer.lifecycle = LIFECYCLE.OUTDATED;
   }
 
   // Update the old layers that were not matched
   _finalizeOldLayers(oldLayers) {
     let error = null;
-    // Unmatched layers still have state, it will be discarded
+    // Matched layers have lifecycle state "outdated"
     for (const layer of oldLayers) {
-      if (layer.state) {
+      if (layer.lifecycle !== LIFECYCLE.OUTDATED) {
         error = error || this._finalizeLayer(layer);
       }
     }
@@ -321,7 +322,7 @@ export default class LayerManager {
           context: this.context,
           changeFlags: layer.diffProps({}, layer.props, this.context)
         });
-        layer.lifecycle = 'Intialized';
+        layer.lifecycle = LIFECYCLE.INITIALIZED;
       } catch (err) {
         log.once(0, `deck.gl error during initialization of ${layerName(layer)} ${err}`, err);
         // Save first error
@@ -377,7 +378,7 @@ export default class LayerManager {
         error = err;
       }
       // layer.state = null;
-      layer.lifecycle = 'Finalized! Awaiting garbage collection';
+      layer.lifecycle = LIFECYCLE.FINALIZED;
       log(LOG_PRIORITY_LIFECYCLE, `finalizing ${layerName(layer)}`);
     }
     return error;
