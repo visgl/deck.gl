@@ -2,7 +2,7 @@ import React, {Component} from 'react';
 import {connect} from 'react-redux';
 import autobind from 'autobind-decorator';
 
-import MapGL from './mapbox';
+import MapGL from 'react-map-gl';
 
 import * as Demos from './demos';
 import {updateMap, updateMeta, loadData, useParams} from '../actions/app-actions';
@@ -15,7 +15,7 @@ class Map extends Component {
     this.state = {
       trackMouseMove: false,
       mousePosition: null
-    }
+    };
   }
 
   componentDidMount() {
