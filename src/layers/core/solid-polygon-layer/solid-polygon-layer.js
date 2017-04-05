@@ -117,10 +117,9 @@ export default class SolidPolygonLayer extends Layer {
   updateState({props, oldProps, changeFlags}) {
     super.updateState({props, oldProps, changeFlags});
 
-    const geometryChanged = this.updateGeometry({props, oldProps, changeFlags});
+    const regenerateModel = this.updateGeometry({props, oldProps, changeFlags});
 
-    // Re-generate model if geometry changed
-    if (geometryChanged) {
+    if (regenerateModel) {
       const {gl} = this.context;
       this.setState({model: this._getModel(gl)});
     }
@@ -128,11 +127,12 @@ export default class SolidPolygonLayer extends Layer {
   }
 
   updateGeometry({props, oldProps, changeFlags}) {
-    const regenerateModel = changeFlags.dataChanged ||
-      props.extruded !== oldProps.extruded ||
+    const geometryConfigChanged = props.extruded !== oldProps.extruded ||
       props.wireframe !== oldProps.wireframe || props.fp64 !== oldProps.fp64;
 
-    if (regenerateModel) {
+     // When the geometry config  or the data is changed,
+     // tessellator needs to be invoked
+    if (changeFlags.dataChanged || geometryConfigChanged) {
       const {getPolygon, extruded, wireframe, getElevation} = props;
 
       // TODO - avoid creating a temporary array here: let the tesselator iterate
@@ -150,7 +150,7 @@ export default class SolidPolygonLayer extends Layer {
       this.state.attributeManager.invalidateAll();
     }
 
-    return regenerateModel;
+    return geometryConfigChanged;
   }
 
   _getModel(gl) {
