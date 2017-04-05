@@ -1,5 +1,6 @@
 import React from 'react';
-import {Router, Route, IndexRoute, IndexRedirect, useRouterHistory} from 'react-router';
+import {Router, Route, IndexRoute,
+  IndexRedirect, Redirect, useRouterHistory} from 'react-router';
 import {createHashHistory} from 'history';
 
 import App from './components/app';
@@ -38,10 +39,12 @@ const renderRoute = (page, i) => {
 };
 
 const renderRouteGroup = (path, pages) => {
+  const defaultPage = getDefaultPath(pages);
   return (
     <Route path={path} component={Gallery} pages={pages}>
-      <IndexRedirect to={getDefaultPath(pages)} />
+      <IndexRedirect to={defaultPage} />
       {pages.map(renderRoute)}
+      <Redirect from="*" to={defaultPage} />
     </Route>
   );
 };
@@ -57,7 +60,7 @@ export default () => (
         <IndexRoute component={Blog} />
         <Route path="*" component={Blog} />
       </Route>
-      <Route path="*" component={Home} />
+      <Redirect from="*" to="/" />
     </Route>
   </Router>
 );
