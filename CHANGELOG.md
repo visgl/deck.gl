@@ -21,11 +21,12 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ### deck.gl v4.0
 
-#### [4.0.0] - Major deck.gl Release
+#### [4.0.1] - 2017-4-5
+- HOTFIX: Fix the bug that layer is finalized at every cycle due to an incorrect if check(#552)
+- HOTFIX: Fix the bug that Model got regenerated every time data is changed for SolidPolygonLayer (#424)
 
+#### [4.0.0] - 2017-4-3 - Major deck.gl Release
 For details see [What's New](docs/whats-new.md)
-
-
 
 ### deck.gl v3.0
 
