@@ -27,7 +27,7 @@ function generatePath(tree, parentPath = '') {
 
 export const examplePages = generatePath([
   {
-    name: 'Index',
+    name: 'Overview',
     content: 'markdown/examples.md'
   },
   {
