@@ -10,7 +10,7 @@ config.module.rules.push({
 module.exports = Object.assign(config, {
 
   output: {
-    path: './dist',
+    path: __dirname + '/dist',
     filename: 'bundle.js'
   }
 
