@@ -116,7 +116,8 @@ class Map extends Component {
             mouseEntered={this.state.mouseEntered}
             data={owner === demo ? data : null} />
 
-          <div className="mapbox-tip">Hold down shift to rotate</div>
+          {isInteractive && viewport.perspectiveEnabled &&
+            <div className="mapbox-tip">Hold down shift to rotate</div>}
 
         </MapGL>
       </div>
