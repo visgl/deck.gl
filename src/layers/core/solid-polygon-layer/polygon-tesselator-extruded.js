@@ -115,7 +115,7 @@ function calculateIndices({groupedVertices, wireframe = false}) {
   const multiplier = wireframe ? 2 : 5;
   const offsets = groupedVertices.reduce(
     (acc, vertices) =>
-      [...acc, acc[acc.length - 1] + countVertices(vertices) * multiplier],
+      acc.concat(acc[acc.length - 1] + countVertices(vertices) * multiplier),
     [0]
   );
 
@@ -193,7 +193,7 @@ function calculateSideNormals(vertices) {
     lastVertice = vertice;
   }
 
-  return [[...normals, normals[0]], [normals[0], ...normals]];
+  return [[normals.concat(normals[0])], [[normals[0]].concat(normals)]];
 }
 
 function calculateColors({groupedVertices, getColor, wireframe = false}) {
@@ -263,7 +263,7 @@ function calculateSurfaceIndices(vertices, offset) {
 
   if (vertices.length > 1) {
     holes = vertices.reduce(
-      (acc, polygon) => [...acc, acc[acc.length - 1] + polygon.length],
+      (acc, polygon) => acc.concat(acc[acc.length - 1] + polygon.length),
       [0]
     ).slice(1, vertices.length);
   }
@@ -277,7 +277,7 @@ function calculateSurfaceIndices(vertices, offset) {
 
     // polygon sides
     for (let i = 0; i < numVertices - 1; i++) {
-      indices.push(...drawRectangle(i));
+      indices.push(drawRectangle(i));
     }
 
     offset += numVertices;
