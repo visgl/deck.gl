@@ -273,11 +273,11 @@ function calculateSurfaceIndices(vertices, offset) {
   const sideIndices = vertices.map(polygon => {
     const numVertices = polygon.length;
     // polygon top
-    const indices = [];
+    let indices = [];
 
     // polygon sides
     for (let i = 0; i < numVertices - 1; i++) {
-      indices.push(drawRectangle(i));
+      indices = indices.concat(drawRectangle(i));
     }
 
     offset += numVertices;
