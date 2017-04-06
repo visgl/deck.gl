@@ -136,7 +136,9 @@ export default class DeckGLOverlay extends Component {
       opacity, mouseEntered, mousePosition} = this.props;
     const {arcs, targets, sources} = this.state;
 
-    const startBrushing = Boolean(mouseEntered && enableBrushing);
+    // mouseEntered is undefined when mouse is in the component while it first loads
+    // enableBrushing if mouseEntered is not defined
+    const startBrushing = Boolean(mouseEntered !== false && enableBrushing);
 
     if (!arcs || !targets) {
       return null;
