@@ -21,7 +21,7 @@
 // Inspired by screen-grid-layer vertex shader in deck.gl
 
 export default `\
-#define SHADER_NAME grid-layer-vs
+#define SHADER_NAME grid-cell-layer-vs
 
 attribute vec3 positions;
 attribute vec3 normals;
@@ -84,7 +84,7 @@ void main(void) {
 
     if (extruded > 0.5) {
       lightWeight = getLightWeight(
-        position_worldspace,
+        position_worldspace.xyz / position_worldspace.w,
         normals
       );
     }

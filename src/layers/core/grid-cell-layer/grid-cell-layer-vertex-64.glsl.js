@@ -21,7 +21,7 @@
 // Inspired by screen-grid-layer vertex shader in deck.gl
 
 export default `\
-#define SHADER_NAME grid-layer-vs
+#define SHADER_NAME grid-cell-layer-vs-64
 
 attribute vec3 positions;
 attribute vec3 normals;
@@ -38,8 +38,7 @@ uniform vec3 selectedPickingColor;
 
 // Custom uniforms
 uniform float extruded;
-uniform float lonOffset;
-uniform float latOffset;
+uniform float cellSize;
 uniform float opacity;
 uniform float elevationScale;
 
@@ -58,13 +57,18 @@ float isPicked(vec3 pickingColors, vec3 selectedColor) {
 
 void main(void) {
   vec4 instancePositions64xy = vec4(
-    instancePositions.x + (positions.x + 1.0) * lonOffset / 2.0,
+    instancePositions.x,
     instancePositions64xyLow.x,
-    instancePositions.y + (positions.y + 1.0) * latOffset / 2.0,
+    instancePositions.y,
     instancePositions64xyLow.y);
 
   vec2 projected_coord_xy[2];
   project_position_fp64(instancePositions64xy, projected_coord_xy);
+
+  projected_coord_xy[0] = sum_fp64(projected_coord_xy[0],
+    vec2((positions.x + 1.0) * cellSize / 2.0, 0.0));
+  projected_coord_xy[1] = sum_fp64(projected_coord_xy[1],
+    vec2((positions.y + 1.0) * cellSize / 2.0, 0.0));
 
   float elevation = 0.0;
 
@@ -95,7 +99,7 @@ void main(void) {
 
     if (extruded > 0.5) {
       lightWeight = getLightWeight(
-        position_worldspace,
+        position_worldspace.xyz / position_worldspace.w,
         normals
       );
     }
