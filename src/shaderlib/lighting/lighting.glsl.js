@@ -29,10 +29,9 @@ uniform float ambientRatio;
 uniform float diffuseRatio;
 uniform float specularRatio;
 
-float getLightWeight(vec4 position_worldspace, vec3 normals_worldspace) {
+float getLightWeight(vec3 position_worldspace_vec3, vec3 normals_worldspace) {
   float lightWeight = 0.0;
 
-  vec3 position_worldspace_vec3 = position_worldspace.xyz / position_worldspace.w;
   vec3 normals_worldspace_vec3 = normals_worldspace.xzy;
 
   vec3 camera_pos_worldspace = cameraPos;
