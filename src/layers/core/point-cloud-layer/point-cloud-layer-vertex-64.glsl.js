@@ -68,7 +68,7 @@ void main(void) {
     vColor = vec4(instancePickingColors / 255., 1.);
   } else {
     // Apply lighting
-    float lightWeight = getLightWeight(position_worldspace.xyz / position_worldspace.w,
+    float lightWeight = getLightWeight(position_worldspace.xyz, // the w component is always 1.0
       instanceNormals);
 
     // Apply opacity to instance color, or return instance picking color
