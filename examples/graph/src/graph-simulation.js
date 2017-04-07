@@ -47,9 +47,6 @@ export default class GraphSimulation {
     }
   }
 
-  //
-  // D3 forceSimulation management
-  //
   /**
    * "Reheat" the simulation on interaction.
    */
@@ -77,7 +74,7 @@ export default class GraphSimulation {
   /**
    * Manage graph data (add/remove nodes, etc) with logical operators
    * and initialize / restart simulation as necessary.
-   * TODO (@gnavvy) move to util?
+   * TODO: this graph data manipulation should be part of graph.js, not graph-simulation.js
    */
   _processGraphData(data, anchor = false) {
     if (!data || data.length < 1) {
