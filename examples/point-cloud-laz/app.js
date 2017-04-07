@@ -172,15 +172,25 @@ class Example extends PureComponent {
   _renderProgressInfo() {
     const progress = (this.state.progress * 100).toFixed(2);
     return (
-      <div style={{
-        position: 'absolute', left: '8px', bottom: '8px',
-        color: '#FFF', fontSize: '15px'
-      }}>
-        {
-          this.state.progress < 1 ?
-            <div>{`Loading ${progress}% (laslaz loader by plas.io)`}</div> :
-            <div>Data source: kaarta.com</div>
-        }
+      <div>
+        <div style={{
+          position: 'absolute', left: '8px', bottom: '8px',
+          color: '#FFF', fontSize: '15px'
+        }}>
+          {
+            this.state.progress < 1 ?
+              <div>
+                <div>
+                  This example might not work on mobile deivces due to browser limitations.
+                </div>
+                <div>
+                  Please try checking it with a desktop machine instead.
+                </div>
+                <div>{`Loading ${progress}% (laslaz loader by plas.io)`}</div>
+              </div> :
+              <div>Data source: kaarta.com</div>
+          }
+        </div>
       </div>
     );
   }

@@ -54,7 +54,7 @@ export function parseLazData(dataHandler, skip, onParseData) {
       const totalToRead = header.pointsCount / Math.max(1, skip);
       let totalRead = 0;
 
-      const reader = () => data.readData(1000 * 1000, 0, skip).then(chunk => {
+      const reader = () => data.readData(1000 * 100, 0, skip).then(chunk => {
         totalRead += chunk.count;
         const unpacker = new Unpacker(chunk.buffer, chunk.count, header);
         // surface unpacker and progress via call back
