@@ -21,6 +21,9 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ### deck.gl v4.0
 
+#### [4.0.2] - 2017-4-7
+- HOTFIX: Fix the bug that lighting is not working properly for 64-bit PolygonLayer on Intel Iris Pro GPU
+
 #### [4.0.1] - 2017-4-5
 - HOTFIX: Fix the bug that layer is finalized at every cycle due to an incorrect if check(#552)
 - HOTFIX: Fix the bug that Model got regenerated every time data is changed for SolidPolygonLayer (#424)
