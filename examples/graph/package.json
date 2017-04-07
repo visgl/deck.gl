@@ -14,6 +14,7 @@
   },
   "devDependencies": {
     "buble-loader": "^0.4.0",
+    "exports-loader": "^0.6.4",
     "webpack": "^2.2.0",
     "webpack-dev-server": "^2.2.0"
   }

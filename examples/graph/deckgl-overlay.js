@@ -1,5 +1,6 @@
 import React, {Component} from 'react';
-import DeckGL, {GraphLayer, OrthographicViewport, COORDINATE_SYSTEM} from 'deck.gl';
+import DeckGL, {OrthographicViewport, COORDINATE_SYSTEM} from 'deck.gl';
+import GraphLayoutLayer from './src/graph-layout-layer';
 
 export default class DeckGLOverlay extends Component {
   constructor(props) {
@@ -20,8 +21,8 @@ export default class DeckGLOverlay extends Component {
     }
 
     const {width, height} = viewport;
-    const layer = new GraphLayer({
-      id: 'graph',
+    const layer = new GraphLayoutLayer({
+      id: 'graph-layout',
       data,
       opacity: 1.0,
       projectionMode: COORDINATE_SYSTEM.IDENTITY,
@@ -48,7 +49,9 @@ export default class DeckGLOverlay extends Component {
       getLinkColor: link => [160, 160, 160],
       */
 
+      // TODO: can this be determined automatically by GraphLayoutLayer?
       pickable: Boolean(this.props.onHover || this.props.onClick || this.props.onDoubleClick),
+
       onHover: this.props.onHover,
       onClick: this.props.onClick,
       onDoubleClick: this.props.onDoubleClick

@@ -25,8 +25,6 @@ import {
   ScatterplotLayer
 } from 'deck.gl';
 
-import GraphSimulation from './graph-simulation';
-
 const noop = () => {};
 
 const defaultProps = {
@@ -53,22 +51,19 @@ const defaultProps = {
 };
 
 /**
- * GraphLayer displays a force-directed network graph
- * using [d3-force](https://github.com/d3/d3-force).
+ * GraphLayer renders a collection of nodes and links between them,
+ * for e.g. displaying a force-directed network graph.
+ * As it only handles the rendering, the layout and data must be managed
+ * by an adaptor component.
+ *
  * It is a composite layer, comprising:
  * - a LineLayer for drawing links
  * - a ScatterplotLayer for drawing nodes, or node icon backgrounds if icons are specified
  * - an IconLayer for drawing node icons, if icons are specified
- *
- * GraphLayer comprises the following components:
- * - graph-layer.js:        entry point, as deck.gl composite Layer implementation
- * - graph-simulation.js:   manages the `d3-forceSimulation` driving the network graph
- * - graph.js:              manages the graph data (nodes and links)
  */
 export default class GraphLayer extends CompositeLayer {
   initializeState() {
     this.state = {
-      simulation: new GraphSimulation(this.props),
       nodes: {},
       links: {}
     };
@@ -78,22 +73,10 @@ export default class GraphLayer extends CompositeLayer {
     if (changeFlags.dataChanged) {
       const {data} = props;
       if (data) {
-        const anchor = !oldProps.data || data.length !== oldProps.data.length;
-        const {nodes, links} = this.state.simulation.update(data, anchor);
-        this.state = Object.assign({},
-          this.state,
-          {
-            nodes,
-            links
-          }
-        );
+        this.state.nodes = data.nodes;
+        this.state.links = data.links;
+        this.state.alpha = data.alpha;
       }
-    }
-  }
-
-  finalizeState() {
-    if (this.state.simulation) {
-      this.state.simulation.remove();
     }
   }
 
@@ -107,10 +90,10 @@ export default class GraphLayer extends CompositeLayer {
   */
 
   renderLayers() {
-    const {nodes, links} = this.state;
+    const {nodes, links, alpha} = this.state;
 
     // Accessor props for underlying layers
-    const {alpha, getLinkPosition, getLinkColor, getLinkWidth,
+    const {getLinkPosition, getLinkColor, getLinkWidth,
       getNodePosition, getNodeColor, getNodeIcon, getNodeSize} = this.props;
     const icon = getNodeIcon() || {};
     const {getIcon, iconAtlas, iconMapping, sizeScale} = icon;

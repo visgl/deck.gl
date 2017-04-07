@@ -19,6 +19,7 @@ class Root extends Component {
     this._onHover = this._onHover.bind(this);
     this._onClick = this._onClick.bind(this);
     this._onDoubleClick = this._onDoubleClick.bind(this);
+    this._animate = this._animate.bind(this);
 
     requestJson('./data/sample-graph.json', (error, response) => {
       if (!error) {
@@ -37,6 +38,18 @@ class Root extends Component {
   componentDidMount() {
     window.addEventListener('resize', this._resize.bind(this));
     this._resize();
+    this._animate();
+  }
+
+  componentWillUnmount() {
+    window.cancelAnimationFrame(this._animationFrame);
+  }
+
+  _animate() {
+    this.forceUpdate();
+    if (typeof window !== 'undefined') {
+      this._animationFrame = window.requestAnimationFrame(this._animate);
+    }
   }
 
   _resize() {
