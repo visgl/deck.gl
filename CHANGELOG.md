@@ -20,7 +20,8 @@ Ref: http://keepachangelog.com/en/0.3.0/
 ### deck.gl v4.1-alpha.1
 
 - HOTFIX: Fix the bug that layer is finalized at every cycle due to an incorrect if check(#552)
-- HOTFIX: Fix the bug that Model got regenerated every time data is changed for SolidPolygonLayer (#424)
+- HOTFIX: Fix the bug that Model got regenerated every time data is changed for SolidPolygonLayer (#554)
+- HOTFIX: Fix the bug that lighting is not working properly for 64-bit PolygonLayer on Intel Iris Pro GPU (#563)
 - DEMO: Fix the scrolling on iPhone (#546)
 - DEMO: Reorganized the examples (#547)
 - DEMO: Misc fixed form demo site (#548, #549)
