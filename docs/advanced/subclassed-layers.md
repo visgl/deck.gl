@@ -204,7 +204,8 @@ void main(void) {
   gl_Position = project_to_clipspace(position_worldspace) + vec4(vertex, 0.0, 0.0);
 
   // Apply lighting
-  float lightWeight = getLightWeight(position_worldspace, instanceNormals);
+  float lightWeight = getLightWeight(position_worldspace.xyz, // the w component is always 1.0
+    instanceNormals);
 
   // Apply opacity to instance color, or return instance picking color
   vColor = vec4(lightWeight * instanceColors.rgb, instanceColors.a * opacity) / 255.;
