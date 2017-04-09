@@ -81,6 +81,9 @@ main {
     padding: 0 2px;
   }
 }
+.content {
+  margin-top: 24px;
+}
 .tag-cloud {
   margin-top: 24px;
   a {
@@ -197,27 +200,35 @@ h6 {
   font-weight: 600;
 }
 
-p {
+p, ul {
   margin-top: 0;
   margin-bottom: 10px;
 }
 
-ul, ol {
-  padding-left: 0;
+.content ul, .content ol{
+  padding-left: 36px;
 }
 
 ul ul,
 ul ol,
 ol ol,
 ol ul {
-  margin-top: 0;
+  margin-top: 0.25em;
   margin-bottom: 0;
 }
 
+li {
+  line-height: 1.5;
+}
 li>p {
   margin-top: 16px;
 }
-
 li+li {
   margin-top: 0.25em;
+}
+
+code {
+  background: $white;
+  padding: 0 4px;
+  border-radius: 2px;
 }
