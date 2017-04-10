@@ -89,8 +89,11 @@ main {
   a {
     font-size: 12px;
     color: #fff !important;
-    background: $primary;
+    background: $white-40;
     padding: 0 4px;
+  }
+  a:hover {
+    background: $primary;
   }
 }
 .pagination {
@@ -115,6 +118,21 @@ main {
   .flexbox__item--collapsed {
     flex: 0 1 auto;
   }
+}
+
+.navigation {
+  margin: 24px 0;
+}
+.clearfix:after {
+  content: '';
+  display: block;
+  clear: both;
+}
+.float--left {
+  float: left;
+}
+.float--right {
+  float: right;
 }
 
 /* Markdown */

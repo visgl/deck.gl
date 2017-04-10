@@ -3,7 +3,9 @@ title: Rendering A Minecraft World With deck.gl
 description: I built a Minecraft Chunk Viewer, featuring a custom deck.gl layer that renders Minecraft blocks. Here's an in-depth look at how it works!
 author: xiaoji
 tags:
+  - Case Study
   - Custom Layer
+  - Non-Geospatial
 ---
 
 While working on [deck.gl v4](./introducing-deckgl-v4.html), I decided to have some fun and built a [Minecraft Chunk Viewer](http://pessimistress.github.io/minecraft/) in the browser. Drag in a region file from your own world and explore the world in depth! Totally not cheating.

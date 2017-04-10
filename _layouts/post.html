@@ -11,6 +11,7 @@ layout: default
 
   <div>
     <span class="date"><b>{{ page.date | date_to_string }}</b></span>
+
     <span class="author">by 
       {% for author in authors %}
         <a href="http://github.com/{{ site.data.authors[author].github_username }}">
@@ -18,16 +19,25 @@ layout: default
         </a>
       {% endfor %}
     </span>
+
+    <div class="tag-cloud">
+      {% for tag in page.tags %}
+        <a href="{{ baseurl }}/{{ site.tag_page_dir }}/{{ tag | downcase | replace:' ','-' }}.html">{{ tag }}</a>
+      {% endfor %}
+    </div>
   </div>
 
 	<div class="content">
 		{{ content }}
 	</div>
 
-  <div class="tag-cloud">
-    {% for tag in page.tags %}
-      <a href="{{ baseurl }}/{{ site.tag_page_dir }}/{{ tag | downcase | replace:' ','-' }}.html">{{ tag }}</a>
-    {% endfor %}
+  <div class="navigation clearfix">
+    {% if page.previous.url %}
+      <a class="float--left" href="{{ baseurl }}{{page.previous.url}}">&lt; Previous post: {{page.previous.title}}</a>
+    {% endif %}
+    {% if page.next.url %}
+      <a class="float--right" href="{{ baseurl }}{{page.next.url}}">Next post: {{page.next.title}} &gt;</a>
+    {% endif %}
   </div>
 
 </article>
