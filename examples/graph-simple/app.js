@@ -21,6 +21,9 @@ class Root extends Component {
 
     this._resize = this._resize.bind(this);
     this._animate = this._animate.bind(this);
+    this._onHover = this._onHover.bind(this);
+    this._onClick = this._onClick.bind(this);
+    this._getNodeColor = this._getNodeColor.bind(this);
 
     requestJson('./data/sample-graph.json', (error, response) => {
       if (!error) {
@@ -62,13 +65,52 @@ class Root extends Component {
     });
   }
 
+  _onHover(el) {
+    if (el) {
+      this.setState({hovered: el.id});
+    }
+  }
+
+  _onClick(el) {
+    if (el) {
+      this.setState({clicked: el.id});
+    } else {
+      const {clicked} = this.state;
+      if (clicked) {
+        this.setState({clicked: null});
+      }
+    }
+  }
+
+  _getNodeColor(node) {
+    const {hovered, clicked} = this.state;
+    const {id} = node;
+    switch (id) {
+    case clicked:
+      return [255, 255, 0, 255];
+    case hovered:
+      return [255, 128, 0, 255];
+    default:
+      return [0, 128, 255, 255];
+    }
+  }
+
   render() {
     const {viewport, data} = this.state;
+    const handlers = {
+      onHover: this._onHover,
+      onClick: this._onClick
+    };
+    const accessors = {
+      getNodeColor: this._getNodeColor
+    };
 
     return (
       <DeckGLOverlay
         viewport={viewport}
-        data={data} />
+        data={data}
+        {...handlers}
+        {...accessors} />
     );
   }
 

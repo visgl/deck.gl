@@ -80,14 +80,12 @@ export default class GraphLayer extends CompositeLayer {
     }
   }
 
-  /*
   getPickingInfo({info}) {
-    return Object.assign(info, {
-      // override object with picked feature
-      object: (info.object && info.object.feature) || info.object
-    });
+    if (this.state.nodes) {
+      return Object.assign(info, this.state.nodes[info.index]);
+    }
+    return {info};
   }
-  */
 
   renderLayers() {
     const {nodes, links, alpha} = this.state;
@@ -135,9 +133,6 @@ export default class GraphLayer extends CompositeLayer {
       pickable,
       projectionMode,
       updateTriggers: {
-        // TODO: do we also need to update on manual changes to fixed node positions (fx/fy),
-        // to enable e.g. programmatic graph updates that don't reheat/run the simulation,
-        // or for manually running the simulation via sim.tick()?
         getPosition: alpha,
         getColor: alpha
       },
@@ -158,9 +153,6 @@ export default class GraphLayer extends CompositeLayer {
       projectionMode,
       sizeScale,
       updateTriggers: {
-        // TODO: do we also need to update on manual changes to fixed node positions (fx/fy),
-        // to enable e.g. programmatic graph updates that don't reheat/run the simulation,
-        // or for manually running the simulation via sim.tick()?
         getPosition: alpha
       },
       visible
@@ -172,72 +164,6 @@ export default class GraphLayer extends CompositeLayer {
       nodeIconsLayer
     ].filter(Boolean);
   }
-
-  /*
-  // TODO: not sure yet what to do with these:
-  _handleClick(e) {
-    this.props.onClick(this._getRelPosition(e));
-  }
-
-  _handleDoubleClick(e) {
-    this.props.onDoubleClick(this._getRelPosition(e));
-  }
-
-  _handleDragStart(e) {
-    this.props.onDrag({...this._getRelPosition(e), dragging: true});
-  }
-
-  _handleDragEnd(e) {
-    this.props.onDrag({...this._getRelPosition(e), dragging: false});
-  }
-
-  _handleMouseMove(e) {
-    this.props.onMouseMove(this._getRelPosition(e));
-  }
-
-  _handleWheel(e) {
-    // TODO implement zooming logic
-    this.props.onWheel(e);
-  }
-
-  _handleContextMenu(e) {
-    e.preventDefault();
-    this.props.onClick({...this._getRelPosition(e), rightClick: true});
-  }
-
-  _getRelPosition(e) {
-    if (!this._container) {
-      return {x: 0, y: 0};
-    }
-    const {pageX, pageY} = e;
-    const {width, height} = this.props;
-    const {left, top} = this._container.getBoundingClientRect();
-    return {x: pageX - left - width / 2, y: pageY - top - height / 2};
-  }
-
-  _renderInteractionLayer() {
-    const {width, height} = this.props;
-
-    return (
-      <rect ref={interactionLayer => {
-        this._container = interactionLayer;
-      }}
-        style={{pointerEvents: 'all'}}
-        width={width}
-        height={height}
-        fill="none"
-        onClick={this._handleClick}
-        onContextMenu={this._handleContextMenu}
-        onDoubleClick={this._handleDoubleClick}
-        onMouseDown={this._handleDragStart}
-        onMouseUp={this._handleDragEnd}
-        onMouseOut={this._handleDragEnd}
-        onMouseMove={this._handleMouseMove}
-        onWheel={this._handleWheel}
-      />
-    );
-  }
-  */
 
 }
 

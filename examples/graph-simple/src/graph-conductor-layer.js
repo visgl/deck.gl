@@ -11,12 +11,6 @@ import GraphSimulation from './graph-simulation';
  */
 export default class GraphConductorLayer extends Layer {
   initializeState() {
-    // TODO: validate this.props.layout with duck-typing(?):
-    // should have:
-    // - a constructor
-    // - update() method that returns {nodes, alpha}.
-    // - dispose() method.
-
     const {data} = this.props;
     const Layout = this.props.layout;
     this.state.layout = new Layout({data});
@@ -47,21 +41,40 @@ export default class GraphConductorLayer extends Layer {
     }
   }
 
-  getPickingInfo({info}) {
-    return Object.assign(info, this.state.layout.getItemAt(info.index));
-  }
-
   renderLayers() {
     const {id} = this.props;
     const {nodes, links, alpha} = this.state;
 
     // base layer props
-    const {opacity, pickable, visible} = this.props;
+    const {opacity, visible} = this.props;
+    const pickable = Boolean(this.props.onHover || this.props.onClick || this.props.onDoubleClick);
 
     // viewport props
     const {projectionMode} = this.props;
 
-    return new GraphLayer({
+    // optional handlers and accessors
+    const optional = [
+      'onHover',
+      'onClick',
+      'onDoubleClick',
+      'getNodePosition',
+      'getNodeColor',
+      'getNodeIcon',
+      'getNodeSize',
+      'getLinkPosition',
+      'getLinkWidth',
+      'getLinkColor'
+    ].filter(key => Boolean(this.props[key]))
+    .reduce((acc, key) => {
+      acc[key] = this.props[key];
+      return acc;
+    }, {});
+
+    // accessors
+    const {
+    } = this.props;
+
+    return new GraphLayer(Object.assign({
       id: `${id}-graph`,
       data: {
         nodes,
@@ -72,9 +85,7 @@ export default class GraphConductorLayer extends Layer {
       pickable,
       visible,
       projectionMode
-      // TODO: pass interaction handlers too?
-      // or can we handle that here and let GraphLayer do nothing but render sublayers?
-    });
+    }, optional));
   }
 }
 
