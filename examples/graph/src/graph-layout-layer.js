@@ -43,20 +43,18 @@ export default class GraphLayoutLayer extends Layer {
     }
   }
 
-  finalizeState() {
-    if (this.state.simulation) {
+  finalizeLayer() {
+    // console.log("TODO: why is this getting finalized? Should not be getting removed!!");
+    /*
+    if (this.state.layout) {
       this.state.layout.dispose();
     }
+    */
   }
 
-  /*
   getPickingInfo({info}) {
-    return Object.assign(info, {
-      // override object with picked feature
-      object: (info.object && info.object.feature) || info.object
-    });
+    return Object.assign(info, this.state.layout.getItemAt(info.index));
   }
-  */
 
   renderLayers() {
     const {id} = this.props;

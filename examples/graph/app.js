@@ -88,6 +88,11 @@ class Root extends Component {
 
   _onHover(el) {
     if (el) {
+      // TODO: don't have current state of graph data here,
+      // just series (array) of data states (with nodes/links/timestep/logic).
+      // so, no way to accurately get current set of nodes in order to nodes[el.index].
+      // graph data manipulation should be exposed to app,
+      // and/or picked item should be overridden (via getPickingInfo?)
       this.setState({hovered: el});
     }
   }
@@ -203,7 +208,7 @@ class Root extends Component {
       </div>
     );
   }
-  /*
+
   _renderStatusPanel() {
     const {hovered, clicked, doubleClicked} = this.state;
 
@@ -221,24 +226,24 @@ class Root extends Component {
       label = 'Hovered';
     }
     return (
-      <div className='status-panel'>
+      <div className="status-panel">
         {selected && <div>
-          <div className='label'>{label}:</div>
-          <div className='line'/>
+          <div className="label">{label}:</div>
+          <div className="line"/>
           {Object.keys(selected).map(key => (
-            <div key={key} className='item'>{key}: {selected[key]}</div>
+            <div key={key} className="item">{key}: {selected[key]}</div>
           ))}
         </div>}
       </div>
     );
   }
-  */
+
   render() {
     return (
       <div>
         { this._renderGraph() }
         { this._renderControlPanel() }
-        {/* this._renderStatusPanel() */}
+        { this._renderStatusPanel() }
       </div>
     );
   }

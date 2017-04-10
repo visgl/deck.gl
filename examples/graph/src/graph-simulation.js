@@ -47,6 +47,14 @@ export default class GraphSimulation {
     }
   }
 
+  getItemAt(index) {
+    // TODO: should work for nodes and links...
+    if (index < this._graph.nodes.length) {
+      return this._graph.nodes[index];
+    }
+    return null;
+  }
+
   /**
    * "Reheat" the simulation on interaction.
    */
