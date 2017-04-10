@@ -2,14 +2,12 @@ import {Layer, GraphLayer} from 'deck.gl';
 import GraphSimulation from './graph-simulation';
 
 /**
- * GraphConductorLayer is a convenience layer that orchestrates
- * data management, layout, and rendering of a force-directed network graph in deck.gl.
- * It accepts lists of network nodes and links with associated operations (add, remove, etc),
- * manages the resulting data structure,
- * passes that structure to a graph layout engine (default: GraphSimulation),
+ * GraphLayoutLayer displays a force-directed network graph in deck.gl.
+ * It accepts a list of nodes and a list of links,
+ * processes them with a graph layout engine (default: GraphSimulation),
  * and passes props and transformed data on to GraphLayer for rendering.
  */
-export default class GraphConductorLayer extends Layer {
+export default class GraphLayoutLayer extends Layer {
   initializeState() {
     const {data} = this.props;
     const Layout = this.props.layout;
@@ -89,8 +87,8 @@ export default class GraphConductorLayer extends Layer {
   }
 }
 
-GraphConductorLayer.layerName = 'GraphConductorLayer';
-GraphConductorLayer.defaultProps = {
+GraphLayoutLayer.layerName = 'GraphLayoutLayer';
+GraphLayoutLayer.defaultProps = {
   width: 640,
   height: 640,
   data: null,

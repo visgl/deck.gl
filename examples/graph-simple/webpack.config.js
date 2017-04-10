@@ -16,7 +16,7 @@ module.exports = {
       {
         // Compile ES2015 using buble
         // test: /\.js$/,
-        test: /^((?!graph-conductor-layer).)*\.js$/,
+        test: /^((?!graph-layout-layer).)*\.js$/,
         loader: 'buble-loader',
         include: [resolve('.')],
         exclude: [/node_modules/],
@@ -25,12 +25,12 @@ module.exports = {
         }
       },
       {
-        // ...except graph-conductor-layer.js, which needs to not be transpiled
+        // ...except graph-layout-layer.js, which needs to not be transpiled
         // when running this example within deck.gl source,
         // so that it can extend the untranspiled GraphLayer from deck.gl src.
         // TODO: when running against npm-packaged deck.gl (outside of deck.gl src),
-        // graph-conductor-layer.js should be transpiled like everything else...
-        test: /graph-conductor-layer/,
+        // graph-layout-layer.js should be transpiled like everything else...
+        test: /graph-layout-layer/,
         loader: 'exports-loader'
       }
     ]

@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 import DeckGL, {OrthographicViewport, COORDINATE_SYSTEM} from 'deck.gl';
-import GraphConductorLayer from './src/graph-conductor-layer';
+import GraphLayoutLayer from './src/graph-layout-layer';
 
 export default class DeckGLOverlay extends Component {
   constructor(props) {
@@ -15,8 +15,8 @@ export default class DeckGLOverlay extends Component {
     }
 
     const {width, height} = viewport;
-    const layer = new GraphConductorLayer({
-      id: 'graph-conductor',
+    const layer = new GraphLayoutLayer({
+      id: 'graph-layout',
       data,
       opacity: 1.0,
       projectionMode: COORDINATE_SYSTEM.IDENTITY,
