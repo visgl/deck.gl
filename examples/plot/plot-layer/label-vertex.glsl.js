@@ -29,8 +29,8 @@ attribute vec3 instanceNormals;
 attribute float instanceIsTitle;
 
 uniform vec2 viewportSize;
-uniform vec3 modelCenter;
-uniform vec3 modelDim;
+uniform vec3 gridDims;
+uniform vec3 gridCenter;
 uniform float gridOffset;
 uniform vec3 labelWidths;
 uniform float fontSize;
@@ -98,12 +98,8 @@ void main(void) {
   vTexCoords = (textureOrigin + textureSize * texCoords) / labelTextureDim;
   vTexCoords.y = 1.0 - vTexCoords.y;
 
-  vec3 position_modelspace = (vec3(instancePositions.x) - modelCenter) *
-    instanceNormals + gridVertexOffset * modelDim / 2.0;
-
-  // scale bounding box to fit into a unit cube that centers at [0, 0, 0]
-  float scale = 1.0 / max(modelDim.x, max(modelDim.y, modelDim.z));
-  position_modelspace *= scale;
+  vec3 position_modelspace = vec3(instancePositions.x) *
+    instanceNormals + gridVertexOffset * gridDims / 2.0 + gridCenter * abs(gridVertexOffset);
 
   // apply offsets
   position_modelspace += gridOffset * gridLineNormal;

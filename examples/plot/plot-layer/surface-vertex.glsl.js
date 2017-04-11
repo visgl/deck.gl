@@ -25,8 +25,6 @@ attribute vec4 positions;
 attribute vec4 colors;
 attribute vec3 pickingColors;
 
-uniform vec3 modelCenter;
-uniform float modelScale;
 uniform float lightStrength;
 uniform float opacity;
 uniform float renderPickingBuffer;
@@ -37,14 +35,14 @@ varying float shouldDiscard;
 void main(void) {
 
   // fit into a unit cube that centers at [0, 0, 0]
-  vec4 position_modelspace = vec4((positions.xyz - modelCenter) * modelScale, 1.0);
+  vec4 position_modelspace = vec4(positions.xyz, 1.0);
   gl_Position = project_to_clipspace(position_modelspace);
 
   // cheap way to produce believable front-lit effect.
   // Note: clipsspace depth is nonlinear and deltaZ depends on the near and far values
   // when creating the perspective projection matrix.
-  vec4 center_clipspace = project_to_clipspace(vec4(0.0, 0.0, 0.0, 1.0));
-  float fadeFactor = 1.0 - (gl_Position.z - center_clipspace.z) * lightStrength;
+  vec4 position_vector = project_to_clipspace(vec4(positions.xyz, 0.0));
+  float fadeFactor = 1.0 - position_vector.z * lightStrength;
 
   vec4 color = vec4(colors.rgb * fadeFactor, colors.a * opacity) / 255.0;
   vec4 pickingColor = vec4(pickingColors / 255.0, 1.0);
