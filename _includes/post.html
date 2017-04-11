@@ -2,7 +2,7 @@
 {% assign authors = post.author | replace:" ","" | split:","" %}
 
 <li class="post">
-  <h1><a href="{{ baseurl }}{{ post.url }}.html">{{ post.title }}</a></h1>
+  <h1><a href="{{ baseurl }}{{ post.url }}">{{ post.title }}</a></h1>
   <div>
     <span class="date"><b>{{ post.date | date_to_string }}</b></span>
     <span class="author">by 

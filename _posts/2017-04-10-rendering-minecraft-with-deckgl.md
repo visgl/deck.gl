@@ -6,6 +6,7 @@ tags:
   - Case Study
   - Custom Layer
   - Non-Geospatial
+thumbnail: /img/minecraft0.jpg
 ---
 
 While working on [deck.gl v4](./introducing-deckgl-v4.html), I decided to have some fun and built a [Minecraft Chunk Viewer](http://pessimistress.github.io/minecraft/) in the browser. Drag in a region file from your own world and explore the world in depth! Totally not cheating.

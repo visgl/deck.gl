@@ -3,8 +3,9 @@ title: Introducing deck.gl v4.0
 description: We've just released a new major version of deck.gl, so this is a good time to share some information about the improvements that went into the new version, the rationale behind them, and some hints on what we are currently thinking about the future of deck.gl.
 author: ib
 tags:
-  - Vis
+  - Visualization
   - WebGL
+thumbnail: /img/screenshot-hexagon.png
 ---
 
 ## Introducing deck.gl v4.0

@@ -1,17 +1,15 @@
-{% include base_url.html %}
 
-<header>
-  {% unless page.url == "/" %}
+<header class="">
+  <div class="bg"/>
   <div class="container">
-    <div class="breadcrumb">
-      <a href="{{ baseurl }}/index.html">All Posts</a>
-      &gt;
-      {% if page.title %}
-      <span>{{page.title}}</span>
-      {% else if page.tag %}
-      <span>Tag: {{page.tag}}</span>
-      {% endif %}
+    <a class="logo" href="{{ site.data.home_url }}">deck.gl</a>
+    <div class="menu-toggle" >
+      <i class="icon icon-menu" ></i>
+    </div>
+    <div class="links">
+      <a href="{{ site.data.home_url }}/#/examples">Gallery</a>
+      <a href="{{ site.data.home_url }}/#/documentation">Documentation</a>
+      <a href="{{ site.data.home_url }}/blog/latest" class="active">Blog</a>
     </div>
   </div>
-  {% endunless %}
 </header>

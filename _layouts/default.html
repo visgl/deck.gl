@@ -5,60 +5,65 @@
 {% include head.html %}
 
 <body>
-  
-  <div class="flexbox">
 
-    <div class="flexbox__item">
-      <!-- Header -->
-      {% include header.html %}
+  <!-- Header -->
+  {% include header.html %}
 
-      <!-- Main content -->
-      <div class="container">	
+  <div class="scroll-area">
+    <div class="flexbox">
 
-    	<main>
+      <div class="flexbox__item">
 
-    		{{ content }}
+        <!-- Main content -->
+        <div class="container">
 
-      </main>
-    	
-    	  <!-- Pagination links -->
-        {% if paginator.total_pages > 1 %}
-          <div class="pagination">
-            {% if paginator.previous_page == 1 %}
-              <a href="{{ baseurl }}/" class="page-item">&lt;</a>
-            {% elsif paginator.previous_page%}
-              <a href="{{ baseurl }}{{ paginator.previous_page_path}}" class="page-item">&lt;</a>
-            {% else %}
-              <span class="page-item">&lt;</span>
-            {% endif %}
-          
-            {% for page in (1..paginator.total_pages) %}
-              {% if page == paginator.page %}
-                <span class="page-item">{{ page }}</span>
-              {% elsif page == 1 %}
-                <a href="{{ baseurl }}/" class="page-item">{{ page }}</a>
+        <!-- Navigation -->
+        {% include nav.html %}
+
+      	<main>
+
+      		{{ content }}
+
+        </main>
+      	
+      	  <!-- Pagination links -->
+          {% if paginator.total_pages > 1 %}
+            <div class="pagination">
+              {% if paginator.previous_page == 1 %}
+                <a href="{{ baseurl }}/" class="page-item">&lt;</a>
+              {% elsif paginator.previous_page%}
+                <a href="{{ baseurl }}{{ paginator.previous_page_path}}" class="page-item">&lt;</a>
               {% else %}
-                <a href="{{ baseurl }}{{ site.paginate_path | replace: ':num', page }}" class="page-item">{{ page }}</a>
+                <span class="page-item">&lt;</span>
               {% endif %}
-            {% endfor %}
-          
-            {% if paginator.next_page %}
-              <a href="{{ baseurl }}{{ paginator.next_page_path }}" class="page-item">&gt;</a>
-            {% else %}
-              <span class="page-item">&gt;</span>
-            {% endif %}
-          </div>
-        {% endif %}
+            
+              {% for page in (1..paginator.total_pages) %}
+                {% if page == paginator.page %}
+                  <span class="page-item">{{ page }}</span>
+                {% elsif page == 1 %}
+                  <a href="{{ baseurl }}/" class="page-item">{{ page }}</a>
+                {% else %}
+                  <a href="{{ baseurl }}{{ site.paginate_path | replace: ':num', page }}" class="page-item">{{ page }}</a>
+                {% endif %}
+              {% endfor %}
+            
+              {% if paginator.next_page %}
+                <a href="{{ baseurl }}{{ paginator.next_page_path }}" class="page-item">&gt;</a>
+              {% else %}
+                <span class="page-item">&gt;</span>
+              {% endif %}
+            </div>
+          {% endif %}
 
+        </div>
       </div>
-    </div>
 
-    <div class="flexbox__item--collapsed">
-      <!-- Footer -->
-      {% include footer.html %}
-    </div>
+      <div class="flexbox__item--collapsed">
+        <!-- Footer -->
+        {% include footer.html %}
+      </div>
 
+    </div>
   </div>
-
 </body>
 </html>

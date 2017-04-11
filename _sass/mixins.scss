@@ -1,0 +1,25 @@
+@mixin linearGradientV($property_name, $top, $bottom){
+    #{$property_name}: $top; /* Old browsers */
+    #{$property_name}: -moz-linear-gradient(top,  $top 0%, $bottom 100%); /* FF3.6+ */
+    #{$property_name}: -webkit-linear-gradient(top,  $top 0%,$bottom 100%); /* Chrome10+,Safari5.1+ */
+    #{$property_name}: -o-linear-gradient(top,  $top 0%,$bottom 100%); /* Opera 11.10+ */
+    #{$property_name}: -ms-linear-gradient(top,  $top 0%,$bottom 100%); /* IE10+ */
+    #{$property_name}: linear-gradient(to bottom,  $top 0%,$bottom 100%); /* W3C */
+}
+
+@mixin linearGradientH($property_name, $left, $right){
+    #{$property_name}: $left; /* Old browsers */
+    #{$property_name}: -moz-linear-gradient(left,  $left 0%, $right 100%); /* FF3.6+ */
+    #{$property_name}: -webkit-linear-gradient(left,  $left 0%,$right 100%); /* Chrome10+,Safari5.1+ */
+    #{$property_name}: -o-linear-gradient(left,  $left 0%,$right 100%); /* Opera 11.10+ */
+    #{$property_name}: -ms-linear-gradient(left,  $left 0%,$right 100%); /* IE10+ */
+    #{$property_name}: linear-gradient(to right,  $left 0%,$right 100%); /* W3C */
+}
+
+@mixin venderPrefix($property_name, $value) {
+  #{$property_name}: $value;
+  -webkit-#{$property_name}: $value;
+  -moz-#{$property_name}: $value;
+  -ms-#{$property_name}: $value;
+  -o-#{$property_name}: $value;
+}

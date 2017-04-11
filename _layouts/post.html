@@ -20,16 +20,29 @@ layout: default
       {% endfor %}
     </span>
 
-    <div class="tag-cloud">
-      {% for tag in page.tags %}
-        <a href="{{ baseurl }}/{{ site.tag_page_dir }}/{{ tag | downcase | replace:' ','-' }}.html">{{ tag }}</a>
-      {% endfor %}
+    <div class="share">
+      <!-- Social media scripts -->
+      {% include script.html %}
+      <div class="fb-share-button" data-href="{{ site.data.home_url }}{{ site.baseurl }}{{ page.url }}" data-layout="button_count" data-size="small" data-mobile-iframe="true">
+        <a class="fb-xfbml-parse-ignore" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u={{ site.data.home_url }}{{ site.baseurl }}{{ page.url }}&amp;src=sdkpreparse">Share</a>
+      </div>
+      <div>
+        <a class="twitter-share-button"
+          href="https://twitter.com/intent/tweet?text={{ site.data.home_url }}{{ site.baseurl }}{{ page.url }}">
+        Tweet</a>
+      </div>
     </div>
   </div>
 
 	<div class="content">
 		{{ content }}
 	</div>
+
+  <div class="tag-cloud">
+    {% for tag in page.tags %}
+      <a href="{{ baseurl }}/{{ site.tag_page_dir }}/{{ tag | downcase | replace:' ','-' }}.html">{{ tag }}</a>
+    {% endfor %}
+  </div>
 
   <div class="navigation clearfix">
     {% if page.previous.url %}

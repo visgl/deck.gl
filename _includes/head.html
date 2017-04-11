@@ -14,4 +14,19 @@
 	<!-- RSS -->
 	<link href="{{ baseurl }}/feed.xml" type="application/atom+xml" rel="alternate" title="ATOM Feed" />
 
+  <!-— facebook open graph tags -->
+  <meta property="og:url" content="{{ site.data.home_url }}{{ site.baseurl }}{{ page.url }}" />
+  <meta property="og:title" content="{%if page.title %}{{ page.title }} | {% endif %}{{ site.title }}" />
+  <meta property="og:description" content="{%if page.description %}{{ page.description }}{% else %}{{ site.description }}{% endif %}" />
+  <meta property="og:site_name" content="deck.gl" />
+  <meta property="og:image" content="{%if page.thumbnail %}{{ site.data.home_url }}{{ site.baseurl }}{{ page.thumbnail }}{% else %}{{ site.data.home_url }}/images/trips-layer-unfurl-4.0.jpg{% endif %}" />
+  
+  <!-— twitter card tags -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@uber">
+  <meta name="twitter:creator" content="@uber">
+  <meta name="twitter:title" content="{%if page.title %}{{ page.title }} | {% endif %}{{ site.title }}">
+  <meta name="twitter:description" content="{%if page.description %}{{ page.description }}{% else %}{{ site.description }}{% endif %}">
+  <meta name="twitter:image" content="{%if page.thumbnail %}{{ site.data.home_url }}{{ site.baseurl }}{{ page.thumbnail }}{% else %}{{ site.data.home_url }}/images/trips-layer-unfurl-4.0.jpg{% endif %}" />
+
 </head>

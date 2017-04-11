@@ -1,0 +1,15 @@
+{% include base_url.html %}
+
+<div class="nav">
+{% unless page.url == "/" %}
+  <div class="breadcrumb">
+    <a href="{{ baseurl }}/">All Posts</a>
+    &gt;
+    {% if page.title %}
+    <span>{{page.title}}</span>
+    {% else if page.tag %}
+    <span>Tag: {{page.tag}}</span>
+    {% endif %}
+  </div>
+{% endunless %}
+</div>

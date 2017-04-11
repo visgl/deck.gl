@@ -10,6 +10,8 @@ $black-40: #5A666D;
 $white: #EDEDED;
 $white-40: #8D9BA3;
 
+$topbar-height: 64px;
+
 @mixin linearGradientH($property_name, $left, $right){
     #{$property_name}: $left; /* Old browsers */
     #{$property_name}: -moz-linear-gradient(left,  $left 0%, $right 100%); /* FF3.6+ */
@@ -32,7 +34,16 @@ body {
   overflow-y: auto;
   min-height: 100vh;
 }
-header {
+a {
+  outline: none;
+  text-decoration: none;
+  display: inline-block;
+  cursor: pointer;
+}
+a, a:visited {
+  color: $primary;
+}
+.nav {
   height: 24px;
 }
 footer {
@@ -84,10 +95,19 @@ main {
 .content {
   margin-top: 24px;
 }
+.share {
+  margin-top: 24px;
+   > div {
+    display: inline-block;
+    vertical-align: top;
+    line-height: 0;
+  }
+}
 .tag-cloud {
+  font-size: 11px;
+  text-transform: uppercase;
   margin-top: 24px;
   a {
-    font-size: 12px;
     color: #fff !important;
     background: $white-40;
     padding: 0 4px;
@@ -106,11 +126,20 @@ main {
     width: 18px;
   }
 }
-
+.scroll-area {
+  position: fixed;
+  top: $topbar-height;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
 .flexbox {
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
+  min-height: 100%;
 
   .flexbox__item {
     flex: 1 0 auto;
@@ -135,118 +164,6 @@ main {
   float: right;
 }
 
-/* Markdown */
-
-a {
-  outline: none;
-  text-decoration: none;
-  display: inline-block;
-  cursor: pointer;
-  transition: all 200ms;
-}
-a, a:visited {
-  color: $primary;
-}
-a:hover {
-  color: #fff !important;
-  background: $primary;
-}
-
-img {
-  max-width: 100%;
-}
-
-hr {
-  border: none;
-  background: $white;
-  display: inline-block;
-  margin: 24px 0 0;
-  width: 32px;
-  height: 2px;
-  @include linearGradientH(background, $primary, $secondary);
-}
-
-b, strong {
-  font-weight: 600;
-}
-
-h1, h2, h3, h4, h5, h6 {
-  line-height: 1;
-  margin-top: 24px;
-  margin-bottom: 12px;
-}
-
-h1 {
-  font-size: 40px;
-  font-weight: 100;
-  margin-bottom: 0;
-
-  a, a:visited {
-    color: $white-40;
-  }
-  a:hover {
-    background: none;
-    color: $black !important;
-  }
-}
-
-h2 {
-  font-size: 20px;
-  /* top | right | bottom | left */
-  padding: 12px 12px 12px 0px;
-  border-bottom: solid 1px $white;
-  font-weight: 600;
-}
-
-h3 {
-  font-size: 16px;
-  font-weight: 600;
-}
-
-h4 {
-  font-size: 14px;
-  font-weight: 600;
-}
-
-h5 {
-  font-size: 12px;
-  font-weight: 600;
-}
-
-h6 {
-  font-size: 11px;
-  font-weight: 600;
-}
-
-p, ul {
-  margin-top: 0;
-  margin-bottom: 10px;
-}
-
-.content ul, .content ol{
-  padding-left: 36px;
-}
-
-ul ul,
-ul ol,
-ol ol,
-ol ul {
-  margin-top: 0.25em;
-  margin-bottom: 0;
-}
-
-li {
-  line-height: 1.5;
-}
-li>p {
-  margin-top: 16px;
-}
-li+li {
-  margin-top: 0.25em;
-}
-
-code {
-  background: $white;
-  padding: 0 4px;
-  border-radius: 2px;
-}
+@import "mixins";
+@import "markdown";
+@import "header";

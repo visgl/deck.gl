@@ -1,0 +1,293 @@
+/* Markdown */
+main {
+  a {
+    outline: none;
+    text-decoration: none;
+    display: inline-block;
+    cursor: pointer;
+    transition: all 200ms;
+  }
+  a, a:visited {
+    color: $primary;
+  }
+  a:hover {
+    color: #fff !important;
+    background: $primary;
+  }
+
+  img {
+    max-width: 100%;
+  }
+
+  hr {
+    border: none;
+    background: $white;
+    display: inline-block;
+    margin: 24px 0 0;
+    width: 32px;
+    height: 2px;
+    @include linearGradientH(background, $primary, $secondary);
+  }
+
+  b, strong {
+    font-weight: 600;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    line-height: 1;
+    margin-top: 24px;
+    margin-bottom: 12px;
+  }
+
+  h1 {
+    font-size: 40px;
+    font-weight: 100;
+    margin-bottom: 0;
+
+    a, a:visited {
+      color: $white-40;
+    }
+    a:hover {
+      background: none;
+      color: $black !important;
+    }
+  }
+
+  h2 {
+    font-size: 20px;
+    /* top | right | bottom | left */
+    padding: 12px 12px 12px 0px;
+    border-bottom: solid 1px $white;
+    font-weight: 600;
+  }
+
+  h3 {
+    font-size: 16px;
+    font-weight: 600;
+  }
+
+  h4 {
+    font-size: 14px;
+    font-weight: 600;
+  }
+
+  h5 {
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  h6 {
+    font-size: 11px;
+    font-weight: 600;
+  }
+
+  p, ul {
+    margin-top: 0;
+    margin-bottom: 10px;
+  }
+
+  .content ul, .content ol{
+    padding-left: 36px;
+  }
+
+  ul ul,
+  ul ol,
+  ol ol,
+  ol ul {
+    margin-top: 0.25em;
+    margin-bottom: 0;
+  }
+
+  li {
+    line-height: 1.5;
+  }
+  li>p {
+    margin-top: 16px;
+  }
+  li+li {
+    margin-top: 0.25em;
+  }
+
+
+  dl {
+    padding: 0;
+  }
+
+  dl dt {
+    padding: 0;
+    margin-top: 16px;
+    font-size: 1em;
+    font-style: italic;
+    font-weight: bold;
+  }
+
+  dl dd {
+    padding: 0 16px;
+    margin-bottom: 16px;
+  }
+
+  table {
+    display: block;
+    width: 100%;
+    overflow: auto;
+  }
+
+  table th {
+    font-weight: bold;
+  }
+
+  table th,
+  table td {
+    padding: 6px 13px;
+    border: 1px solid #ddd;
+  }
+
+  table tr {
+    background-color: #fff;
+    border-top: 1px solid #ccc;
+  }
+
+  table tr:nth-child(2n) {
+    background-color: #f8f8f8;
+  }
+
+  img {
+    max-width: 100%;
+    box-sizing: content-box;
+    background-color: #fff;
+  }
+
+  code {
+    padding: 0;
+    padding-top: 0.2em;
+    padding-bottom: 0.2em;
+    margin: 0;
+    background-color: rgba(0,0,0,0.04);
+    border-radius: 3px;
+  }
+
+  code::before,
+  code::after {
+    letter-spacing: -0.2em;
+    content: "\00a0";
+  }
+
+  pre {
+    word-wrap: normal;
+  }
+
+  pre>code {
+    padding: 0;
+    margin: 0;
+    word-break: normal;
+    white-space: pre;
+    background: transparent;
+    border: 0;
+  }
+
+  .highlight {
+    margin-bottom: 16px;
+  }
+
+  .highlight pre {
+    margin-bottom: 0;
+    word-break: normal;
+  }
+
+  .highlight pre,
+  pre {
+    padding: 16px;
+    overflow: auto;
+    font-size: 85%;
+    line-height: 1.45;
+    background-color: #f7f7f7;
+    border-radius: 3px;
+  }
+
+  pre code {
+    display: inline;
+    max-width: auto;
+    padding: 0;
+    margin: 0;
+    overflow: visible;
+    line-height: inherit;
+    word-wrap: normal;
+    background-color: transparent;
+    border: 0;
+  }
+
+  pre code::before,
+  pre code::after {
+    content: normal;
+  }
+
+  .pl-0 {
+    padding-left: 0 !important;
+  }
+
+  .pl-1 {
+    padding-left: 3px !important;
+  }
+
+  .pl-2 {
+    padding-left: 6px !important;
+  }
+
+  .pl-3 {
+    padding-left: 12px !important;
+  }
+
+  .pl-4 {
+    padding-left: 24px !important;
+  }
+
+  .pl-5 {
+    padding-left: 36px !important;
+  }
+
+  .pl-6 {
+    padding-left: 48px !important;
+  }
+
+  .full-commit .btn-outline:not(:disabled):hover {
+    color: #4078c0;
+    border: 1px solid #4078c0;
+  }
+
+  kbd {
+    display: inline-block;
+    padding: 3px 5px;
+    font: 11px Consolas, "Liberation Mono", Menlo, Courier, monospace;
+    line-height: 10px;
+    color: #555;
+    vertical-align: middle;
+    background-color: #fcfcfc;
+    border: solid 1px #ccc;
+    border-bottom-color: #bbb;
+    border-radius: 3px;
+    box-shadow: inset 0 -1px 0 #bbb;
+  }
+
+  :checked+.radio-label {
+    position: relative;
+    z-index: 1;
+    border-color: #4078c0;
+  }
+
+  .task-list-item {
+    list-style-type: none;
+  }
+
+  .task-list-item+.task-list-item {
+    margin-top: 3px;
+  }
+
+  .task-list-item input {
+    margin: 0 0.2em 0.25em -1.6em;
+    vertical-align: middle;
+  }
+
+  hr {
+    border-bottom-color: #eee;
+  }
+}
