@@ -43,7 +43,6 @@
     "test-rendering": "(cd test/rendering-test && webpack-dev-server --config webpack.config.test-rendering.js --progress --hot --open)"
   },
   "dependencies": {
-    "d3-force": "^1.0.6",
     "d3-hexbin": "^0.2.1",
     "earcut": "^2.0.6",
     "gl-matrix": "^2.3.2",

@@ -5,7 +5,10 @@
     "build": "NODE_ENV=production webpack --env.prod=true"
   },
   "dependencies": {
+    "d3-array": "^1.1.1",
+    "d3-force": "^1.0.6",
     "d3-request": "^1.0.5",
+    "d3-scale": "^1.0.5",
     "deck.gl": "^4.0.0-rc.4",
     "immutable": "^3.8.1",
     "luma.gl": "^3.0.0",
