@@ -41,6 +41,21 @@ export default class OrbitController extends Component {
     });
   }
 
+  static fitBounds(viewport, [min, max]) {
+    const {fov} = viewport;
+    const size = Math.max(max[0] - min[0], max[1] - min[1], max[2] - min[2]);
+    const newDistance = size / Math.tan(fov / 180 * Math.PI / 2);
+
+    return {
+      lookAt: [
+        (min[0] + max[0]) / 2,
+        (min[1] + max[1]) / 2,
+        (min[2] + max[2]) / 2
+      ],
+      distance: newDistance
+    };
+  }
+
   constructor(props) {
     super(props);
     this._dragStartPos = null;
@@ -111,17 +126,6 @@ export default class OrbitController extends Component {
 
     const {distance, minDistance, maxDistance} = this.props;
     const newDistance = clamp(distance * Math.pow(1.01, value), minDistance, maxDistance);
-
-    this.props.onChangeViewport({
-      distance: newDistance
-    });
-  }
-
-  // public API
-  fitBounds(min, max) {
-    const {fov} = this.props;
-    const size = Math.max(max[0] - min[0], max[1] - min[1], max[2] - min[2]);
-    const newDistance = size / Math.tan(fov / 180 * Math.PI / 2) / 2;
 
     this.props.onChangeViewport({
       distance: newDistance

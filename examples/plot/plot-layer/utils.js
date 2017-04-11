@@ -17,14 +17,15 @@ function setTextStyle(ctx, fontSize) {
  * @returns {object} {texture, columnWidths}
  */
 export function textMatrixToTexture(glContext, data, fontSize = 48) {
+
   const canvas = document.createElement('canvas');
   const ctx = canvas.getContext('2d');
   setTextStyle(ctx, fontSize);
 
   // measure texts
   const columnWidths = data.map(column => {
-    return column.reduce((acc, str) => {
-      const w = ctx.measureText(str).width;
+    return column.reduce((acc, obj) => {
+      const w = ctx.measureText(obj.text).width;
       return Math.max(acc, Math.ceil(w));
     }, 0);
   });
@@ -55,8 +56,8 @@ export function textMatrixToTexture(glContext, data, fontSize = 48) {
   let x = 0;
   data.forEach((column, colIndex) => {
     x += columnWidths[colIndex] / 2;
-    column.forEach((str, i) => {
-      ctx.fillText(str, x, i * fontSize);
+    column.forEach((obj, i) => {
+      ctx.fillText(obj.text, x, i * fontSize);
     });
     x += columnWidths[colIndex] / 2;
   });
