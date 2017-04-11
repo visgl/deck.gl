@@ -10,8 +10,23 @@ import GraphSimulation from './graph-simulation';
 export default class GraphLayoutLayer extends Layer {
   initializeState() {
     const {data} = this.props;
+    const optional = [
+      'alphaOnDataChange',
+      'alphaOnDrag',
+      'alphaOnHover',
+      'linkDistance',
+      'linkStrength',
+      'nBodyStrength',
+      'nBodyDistanceMin',
+      'nBodyDistanceMax'
+    ].filter(key => Boolean(this.props[key]))
+    .reduce((acc, key) => {
+      acc[key] = this.props[key];
+      return acc;
+    }, {});
+
     const Layout = this.props.layout;
-    this.state.layout = new Layout({data});
+    this.state.layout = new Layout(Object.assign({data}, optional));
   }
 
   updateState({oldProps, props, changeFlags}) {

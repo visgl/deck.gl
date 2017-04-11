@@ -3,7 +3,8 @@ import React, {Component} from 'react';
 import {render} from 'react-dom';
 import {json as requestJson} from 'd3-request';
 
-import DeckGLOverlay from './deckgl-overlay.js';
+import DeckGLOverlay from './deckgl-overlay';
+import Graph from './src/graph';
 
 class Root extends Component {
   //
@@ -25,11 +26,13 @@ class Root extends Component {
     this._onClick = this._onClick.bind(this);
     this._getNodeColor = this._getNodeColor.bind(this);
 
-    requestJson('./data/sample-graph.json', (error, response) => {
+    // requestJson('./data/sample-graph.json', (error, response) => {
+    requestJson('./data/flare-graph.json', (error, response) => {
       if (!error) {
         // apply timestamp and push loaded sample data into array
         this.setState({
-          data: response
+          // data: response
+          data: new Graph(response)
         });
       }
     });
@@ -82,6 +85,9 @@ class Root extends Component {
     }
   }
 
+  //
+  // deck.gl rendering accessors
+  //
   _getNodeColor(node) {
     const {hovered, clicked} = this.state;
     const {id} = node;
@@ -95,6 +101,25 @@ class Root extends Component {
     }
   }
 
+  _getNodeSize(node) {
+    return node.size || 8;
+  }
+
+  //
+  // d3-force accessors
+  //
+  _linkDistance(link, i) {
+    return 20;
+  }
+
+  _linkStrength(link, i) {
+    return 1 / Math.min(link.sourceCount, link.targetCount);
+  }
+
+  _nBodyStrength(node, i) {
+    return -Math.pow(node.size, 1.5) * 3;
+  }
+
   render() {
     const {viewport, data} = this.state;
     const handlers = {
@@ -102,7 +127,11 @@ class Root extends Component {
       onClick: this._onClick
     };
     const accessors = {
-      getNodeColor: this._getNodeColor
+      getNodeColor: this._getNodeColor,
+      getNodeSize: this._getNodeSize,
+      linkDistance: this._linkDistance,
+      linkStrength: this._linkStrength,
+      nBodyStrength: this._nBodyStrength
     };
 
     return (

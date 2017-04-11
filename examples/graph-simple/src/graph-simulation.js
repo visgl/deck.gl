@@ -9,7 +9,6 @@ import {forceCenter, forceLink, forceManyBody, forceSimulation} from 'd3-force';
  */
 export default class GraphSimulation {
   constructor(props) {
-    this._strength = this._strength.bind(this);
     this.props = Object.assign({}, GraphSimulation.defaultProps, props);
   }
 
@@ -21,14 +20,16 @@ export default class GraphSimulation {
       // If new data are passed, update the simulation with the new data
       const {alphaOnDataChange} = this.props;
       this._simulation.nodes(data.nodes)
-        .force('link', forceLink(data.links).id(n => n.id).strength(this._strength))
+        .force('link', forceLink(data.links).id(n => n.id)
+          .strength(this.props.linkStrength).distance(this.props.linkDistance))
         .alpha(alphaOnDataChange);
     } else if (!this._simulation) {
       if (data) {
         // Instantiate the simulation with the passed data
         const {nBodyStrength, nBodyDistanceMin, nBodyDistanceMax} = this.props;
         this._simulation = forceSimulation(data.nodes)
-          .force('link', forceLink(data.links).id(n => n.id).strength(this._strength))
+          .force('link', forceLink(data.links).id(n => n.id)
+            .strength(this.props.linkStrength).distance(this.props.linkDistance))
           .force('charge', forceManyBody().strength(nBodyStrength)
             .distanceMin(nBodyDistanceMin).distanceMax(nBodyDistanceMax))
           .force('center', forceCenter())
@@ -68,25 +69,15 @@ export default class GraphSimulation {
       this._simulation.alpha(alpha).alphaDecay(decay);
     }
   }
-
-  /**
-   * Accessor for strength of each link in d3.forceLink().
-   */
-  _strength(link) {
-    if (link.alpha) {
-      const {linkStrength} = this.props;
-      return linkStrength;
-    }
-    return 0.5;
-  }
 }
 
 GraphSimulation.defaultProps = {
   alphaOnDataChange: 0.25,
   alphaOnDrag: 0.1,
   alphaOnHover: 0.01,
-  linkStrength: 3,
-  nBodyStrength: -120,
+  linkDistance: 200,
+  linkStrength: 0.5,
+  nBodyStrength: -60,
   nBodyDistanceMin: 1,
   nBodyDistanceMax: 200
 };
