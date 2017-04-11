@@ -31,6 +31,7 @@ class Root extends Component {
   componentDidMount() {
     window.addEventListener('resize', this._resize.bind(this));
     this._resize();
+    this._onChangeViewport(OrbitController.fitBounds(this.state.viewport, [[0, 0, 0], [1, 1, 1]]));
   }
 
   _resize() {
@@ -41,9 +42,8 @@ class Root extends Component {
   }
 
   _onChangeViewport(viewport) {
-    this.setState({
-      viewport: {...this.state.viewport, ...viewport}
-    });
+    Object.assign(this.state.viewport, viewport);
+    this.setState({viewport: this.state.viewport});
   }
 
   render() {

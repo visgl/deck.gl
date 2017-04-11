@@ -1,7 +1,7 @@
+/* global window */
 import {Layer, assembleShaders} from 'deck.gl';
 import {GL, Model, Geometry} from 'luma.gl';
 
-import {scaleLinear} from 'd3-scale';
 import {textMatrixToTexture} from './utils';
 
 import fragmentShader from './fragment.glsl';
@@ -13,10 +13,15 @@ import labelFragment from './label-fragment.glsl';
 const FONT_SIZE = 48;
 
 const defaultProps = {
-  fontSize: 12,
+  data: [],
+  fontSize: 12 * window.devicePixelRatio,
   ticksCount: 6,
-  axesOffset: 0,
-  axesColor: [0, 0, 0, 255]
+  xScale: null,
+  yScale: null,
+  zScale: null,
+  formatTick: x => x.toFixed(2),
+  padding: 0,
+  color: [0, 0, 0, 255]
 };
 
 /* Utils */
@@ -28,8 +33,12 @@ function flatten(arrayOfArrays) {
   return flatArray;
 }
 
-function getTicks([min, max], ticksCount) {
-  return scaleLinear().domain([min, max]).ticks(ticksCount);
+function getTicks({scale, axis, ticksCount, formatTick}) {
+  return scale.ticks(ticksCount).map(t => ({
+    value: t,
+    position: scale(t),
+    text: formatTick(t, axis)
+  }));
 }
 
 /*
@@ -40,10 +49,14 @@ function getTicks([min, max], ticksCount) {
  * @param {Object} [props]
  * @param {Integer} [props.ticksCount] - number of ticks along each axis, see
       https://github.com/d3/d3-axis/blob/master/README.md#axis_ticks
- * @param {Number} [props.axesOffset] - amount to set back grids from the plot,
+ * @param {Number} [props.padding] - amount to set back grids from the plot,
       relative to the size of the bounding box
+ * @param {d3.scale} [props.xScale] - a d3 scale for the x axis
+ * @param {d3.scale} [props.yScale] - a d3 scale for the y axis
+ * @param {d3.scale} [props.zScale] - a d3 scale for the z axis
+ * @param {Function} [props.formatTick] - returns a string from (value, axis)
  * @param {Number} [props.fontSize] - size of the labels
- * @param {Array} [props.axesColor] - color of the gridlines, in [r,g,b,a]
+ * @param {Array} [props.color] - color of the gridlines, in [r,g,b,a]
  */
 export default class AxesLayer extends Layer {
 
@@ -59,25 +72,42 @@ export default class AxesLayer extends Layer {
     this.setState({
       models: this._getModels(gl),
       numInstances: 0,
-      labels: null,
-      center: [0, 0, 0],
-      dim: [1, 1, 1]
+      labels: null
     });
   }
 
   updateState({oldProps, props, changeFlags}) {
     const {attributeManager} = this.state;
 
-    if (changeFlags.dataChanged || oldProps.ticksCount !== props.ticksCount) {
-      const {data, ticksCount} = props;
+    if ((oldProps.ticksCount !== props.ticksCount) ||
+      (oldProps.xScale !== props.xScale) ||
+      (oldProps.yScale !== props.yScale) ||
+      (oldProps.zScale !== props.zScale)) {
+      const {xScale, yScale, zScale} = props;
 
-      const ticks = this.calculateTicks(data, ticksCount);
+      const ticks = [
+        getTicks({...props, axis: 'x', scale: xScale}),
+        getTicks({...props, axis: 'z', scale: zScale}),
+        getTicks({...props, axis: 'y', scale: yScale})
+      ];
+
+      const xRange = xScale.range();
+      const yRange = yScale.range();
+      const zRange = zScale.range();
 
       this.setState({
         ticks,
         labelTexture: this.renderLabelTexture(ticks),
-        center: data.map(b => (b[0] + b[1]) / 2),
-        dim: data.map(b => b[1] - b[0])
+        gridDims: [
+          xRange[1] - xRange[0],
+          zRange[1] - zRange[0],
+          yRange[1] - yRange[0]
+        ],
+        gridCenter: [
+          (xRange[0] + xRange[1]) / 2,
+          (zRange[0] + zRange[1]) / 2,
+          (yRange[0] + yRange[1]) / 2
+        ]
       });
 
       attributeManager.invalidateAll();
@@ -97,16 +127,16 @@ export default class AxesLayer extends Layer {
   }
 
   draw({uniforms}) {
-    const {center, dim, models, labelTexture} = this.state;
-    const {fontSize, axesColor, axesOffset} = this.props;
+    const {gridDims, gridCenter, models, labelTexture} = this.state;
+    const {fontSize, color, padding} = this.props;
 
     if (labelTexture) {
       const baseUniforms = {
         fontSize,
-        modelCenter: center,
-        modelDim: dim,
-        gridOffset: axesOffset,
-        strokeColor: axesColor
+        gridDims,
+        gridCenter,
+        gridOffset: padding,
+        strokeColor: color
       };
 
       models.grids.render(Object.assign({}, uniforms, baseUniforms));
@@ -233,7 +263,7 @@ export default class AxesLayer extends Layer {
     const {ticks} = this.state;
 
     const positions = ticks.map(axisTicks =>
-      axisTicks.map((t, i) => [t, i])
+      axisTicks.map((t, i) => [t.position, i])
     );
 
     const value = new Float32Array(flatten(positions));
@@ -243,24 +273,15 @@ export default class AxesLayer extends Layer {
   }
 
   calculateInstanceNormals(attribute) {
-    const {ticks: [xTicks, yTicks, zTicks]} = this.state;
+    const {ticks: [xTicks, zTicks, yTicks]} = this.state;
 
     const normals = [
       xTicks.map(t => [1, 0, 0]),
-      yTicks.map(t => [0, 1, 0]),
-      zTicks.map(t => [0, 0, 1])
+      zTicks.map(t => [0, 1, 0]),
+      yTicks.map(t => [0, 0, 1])
     ];
 
     attribute.value = new Float32Array(flatten(normals));
-  }
-
-  // updates the instancePositions and instanceNormals attributes
-  calculateTicks(bounds, ticksCount) {
-    const xTicks = getTicks(bounds[0], ticksCount);
-    const yTicks = getTicks(bounds[1], ticksCount);
-    const zTicks = getTicks(bounds[2], ticksCount);
-
-    return [xTicks, yTicks, zTicks];
   }
 
   renderLabelTexture(ticks) {

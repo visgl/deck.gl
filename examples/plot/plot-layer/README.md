@@ -9,11 +9,15 @@ It can also render axes and labels around the surface. (requires `d3-scale` modu
 Inherits from all [Base Layer](/docs/layers/base-layer.md) properties.
 
 
-##### `getZ` (Function, optional)
+##### `getPosition` (Function, optional)
 
-- Default: `(x, y) => 0`
+- Default: `(u, v) => [0, 0, 0]`
 
-Called to get the `z` value from a `(x, y)` pair.
+Called to get the `[x, y, z]` value from a `(u, v)` pair.
+
+Arguments:
+- `u` (Number) - a value between `[0, 1]`
+- `v` (Number) - a value between `[0, 1]`
 
 ##### `getColor` (Function, optional)
 
@@ -23,45 +27,35 @@ Called for each `(x, y, z)` triplet to retreive surface color.
 Returns an array in the form of `[r, g, b, a]`.
 If the alpha component is not supplied, it is default to `255`.
 
-##### `xMin` (Number, optional)
+##### `getScale` (Function, optional)
 
-- Default: `-1`
+- Default: `({axis, min, max}) => d3.scaleLinear().domain([min, max]).range([min, max])`
 
-Lower bound of the `x` range.
+Called for each axis to retreive a [d3 scale](https://github.com/d3/d3-scale/blob/master/README.md).
+Default to identity.
 
-##### `xMax` (Number, optional)
+Arguments:
+- `params` (Object)
+  + `params.axis` (String) - one of `x` `y` `z`
+  + `params.min` (Number) - lower bounds of the input
+  + `params.max` (Number) - upper bounds of the input
 
-- Default: `1`
-
-Upper bound of the `x` range.
-
-##### `yMin` (Number, optional)
-
-- Default: `-1`
-
-Lower bound of the `y` range.
-
-##### `yMax` (Number, optional)
-
-- Default: `1`
-
-Upper bound of the `y` range.
-
-##### `xResolution` (Number, optional)
+##### `uCount` (Number, optional)
 
 - Default: `100`
 
-Number of points to sample in the `x` range.
+Number of points to sample `u` in the `[0, 1]` range.
 
-##### `yResolution` (Number, optional)
+##### `vCount` (Number, optional)
 
 - Default: `100`
 
-Number of points to sample in the `y` range.
+Number of points to sample `v` in the `[0, 1]` range.
+
 
 ##### `lightStrength` (Number, optional)
 
-- Default: `1`
+- Default: `0.1`
 
 Intensity of the front-lit effect for the 3d surface.
 
@@ -73,7 +67,7 @@ Whether to draw axis grids and labels.
 
 ##### `fontSize` (Number, optional)
 
-- Default: `24`
+- Default: `12`
 
 Font size of the labels.
 
@@ -84,7 +78,18 @@ Font size of the labels.
 Number of ticks on each axis.
 For details, see [d3.scale.ticks](https://github.com/d3/d3-axis/blob/master/README.md#axis_ticks).
 
-##### `axesOffset` (Number, optional)
+
+##### `formatTick` (Function, optional)
+
+- Default: `(value, axis) => value.toFixed(2)`
+
+Format a tick value to text string.
+
+Parameters:
+- `value` (Number) - tick value
+- `axis` (String) - one of `x` `y` `z`
+
+##### `axesPadding` (Number, optional)
 
 - Default: `0`
 

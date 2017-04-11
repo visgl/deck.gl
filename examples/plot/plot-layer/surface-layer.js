@@ -1,22 +1,21 @@
 import {Layer, assembleShaders} from 'deck.gl';
 import {GL, Model, Geometry} from 'luma.gl';
 
+import {scaleLinear} from 'd3-scale';
 import surfaceVertex from './surface-vertex.glsl';
 import fragmentShader from './fragment.glsl';
 
 const DEFAULT_COLOR = [0, 0, 0, 255];
+const DEFAULT_GET_SCALE = ({min, max}) => scaleLinear().domain([min, max]).range([min, max]);
 
 const defaultProps = {
   data: [],
-  getZ: () => 0,
+  getPosition: () => [0, 0, 0],
   getColor: () => DEFAULT_COLOR,
-  xMin: -1,
-  xMax: 1,
-  yMin: -1,
-  yMax: 1,
-  xResolution: 100,
-  yResolution: 100,
-  lightStrength: 1,
+  getScale: DEFAULT_GET_SCALE,
+  uCount: 100,
+  vCount: 100,
+  lightStrength: 0.1,
   onUpdate: () => {}
 };
 
@@ -26,15 +25,12 @@ const defaultProps = {
  *
  * @class
  * @param {Object} [props]
- * @param {Function} [props.getZ] - method called to get z from (x,y) values
+ * @param {Function} [props.getPosition] - method called to get [x, y, z] from (u,v) values
  * @param {Function} [props.getColor] - method called to get color from (x,y,z)
       returns [r,g,b,a].
- * @param {Number} [props.xMin] - low bound of x
- * @param {Number} [props.xMax] - high bound of x
- * @param {Number} [props.yMin] - low bound of y
- * @param {Number} [props.yMax] - high bound of y
- * @param {Integer} [props.xResolution] - number of samples within x range
- * @param {Integer} [props.yResolution] - number of samples within y range
+ * @param {Function} [props.getScale] - returns a d3 scale from (params = {axis, min, max})
+ * @param {Integer} [props.uCount] - number of samples within x range
+ * @param {Integer} [props.vCount] - number of samples within y range
  * @param {Number} [props.lightStrength] - front light strength
  */
 export default class SurfaceLayer extends Layer {
@@ -47,8 +43,8 @@ export default class SurfaceLayer extends Layer {
     /* eslint-disable max-len */
     attributeManager.add({
       indices: {size: 1, isIndexed: true, update: this.calculateIndices, noAlloc},
-      positions: {size: 4, accessor: 'getZ', update: this.calculatePositions, noAlloc},
-      colors: {size: 4, accessor: ['getZ', 'getColor'],
+      positions: {size: 4, accessor: 'getPosition', update: this.calculatePositions, noAlloc},
+      colors: {size: 4, accessor: ['getPosition', 'getColor'],
         type: GL.UNSIGNED_BYTE, update: this.calculateColors, noAlloc},
       pickingColors: {size: 3, type: GL.UNSIGNED_BYTE, update: this.calculatePickingColors, noAlloc}
     });
@@ -56,24 +52,18 @@ export default class SurfaceLayer extends Layer {
 
     gl.getExtension('OES_element_index_uint');
     this.setState({
-      model: this.getModel(gl),
-      center: [0, 0, 0],
-      scale: 1
+      model: this.getModel(gl)
     });
   }
 
   updateState({oldProps, props, changeFlags}) {
     if (changeFlags.propsChanged) {
-      const {xMin, xMax, yMin, yMax, xResolution, yResolution} = props;
+      const {uCount, vCount} = props;
 
-      if (oldProps.xMin !== xMin ||
-        oldProps.xMax !== xMax ||
-        oldProps.yMin !== yMin ||
-        oldProps.yMax !== yMax ||
-        oldProps.xResolution !== xResolution ||
-        oldProps.yResolution !== yResolution) {
+      if (oldProps.uCount !== uCount ||
+        oldProps.vCount !== vCount) {
         this.setState({
-          vertexCount: xResolution * yResolution
+          vertexCount: uCount * vCount
         });
         this.state.attributeManager.invalidateAll();
       }
@@ -103,12 +93,9 @@ export default class SurfaceLayer extends Layer {
   }
 
   draw({uniforms}) {
-    const {center, scale} = this.state;
     const {lightStrength} = this.props;
 
     this.state.model.render(Object.assign({}, uniforms, {
-      modelCenter: center,
-      modelScale: scale,
       lightStrength
     }));
   }
@@ -123,14 +110,14 @@ export default class SurfaceLayer extends Layer {
    *              x
    */
   encodePickingColor(i) {
-    const {xResolution, yResolution} = this.props;
+    const {uCount, vCount} = this.props;
 
-    const xIndex = i % xResolution;
-    const yIndex = (i - xIndex) / xResolution;
+    const xIndex = i % uCount;
+    const yIndex = (i - xIndex) / uCount;
 
     return [
-      xIndex / (xResolution - 1) * 255,
-      yIndex / (yResolution - 1) * 255,
+      xIndex / (uCount - 1) * 255,
+      yIndex / (vCount - 1) * 255,
       1
     ];
   }
@@ -146,38 +133,26 @@ export default class SurfaceLayer extends Layer {
     const {info} = opts;
 
     if (info && info.index !== -1) {
-      const {xMin, xMax, yMin, yMax, getZ} = this.props;
-      const x = info.index[0] * (xMax - xMin) + xMin;
-      const y = info.index[1] * (yMax - yMin) + yMin;
-      const z = getZ(x, y);
+      const [u, v] = info.index;
+      const {getPosition} = this.props;
 
-      info.sample = [x, y, z];
+      info.sample = getPosition(u, v);
     }
 
     return info;
   }
 
-  _setBounds(bounds) {
-    const extent = bounds.reduce((size, b) => Math.max(size, b[1] - b[0]), 0);
-
-    this.setState({
-      center: bounds.map(b => (b[0] + b[1]) / 2),
-      scale: 1 / (extent || 1)
-    });
-    this.props.onUpdate(bounds);
-  }
-
   calculateIndices(attribute) {
-    const {xResolution, yResolution} = this.props;
+    const {uCount, vCount} = this.props;
     // # of squares = (nx - 1) * (ny - 1)
     // # of triangles = squares * 2
     // # of indices = triangles * 3
-    const indicesCount = (xResolution - 1) * (yResolution - 1) * 2 * 3;
+    const indicesCount = (uCount - 1) * (vCount - 1) * 2 * 3;
     const indices = new Uint32Array(indicesCount);
 
     let i = 0;
-    for (let xIndex = 0; xIndex < xResolution - 1; xIndex++) {
-      for (let yIndex = 0; yIndex < yResolution - 1; yIndex++) {
+    for (let xIndex = 0; xIndex < uCount - 1; xIndex++) {
+      for (let yIndex = 0; yIndex < vCount - 1; yIndex++) {
         /*
          *   i0   i1
          *    +--.+---
@@ -186,9 +161,9 @@ export default class SurfaceLayer extends Layer {
          *    |   |
          *   i2   i3
          */
-        const i0 = yIndex * xResolution + xIndex;
+        const i0 = yIndex * uCount + xIndex;
         const i1 = i0 + 1;
-        const i2 = i0 + xResolution;
+        const i2 = i0 + uCount;
         const i3 = i2 + 1;
 
         indices[i++] = i0;
@@ -205,31 +180,45 @@ export default class SurfaceLayer extends Layer {
   }
 
   // the fourth component is a flag for invalid z (NaN or Infinity)
+  /* eslint-disable max-statements */
   calculatePositions(attribute) {
     const {vertexCount} = this.state;
-    const {xMin, xMax, yMin, yMax, xResolution, yResolution, getZ} = this.props;
-
-    // step between samples
-    const xDelta = (xMax - xMin) / (xResolution - 1);
-    const yDelta = (yMax - yMin) / (yResolution - 1);
+    const {uCount, vCount, getPosition, getScale} = this.props;
 
     // calculate z range
+    let xMin = Infinity;
+    let xMax = -Infinity;
+    let yMin = Infinity;
+    let yMax = -Infinity;
     let zMin = Infinity;
     let zMax = -Infinity;
 
     const value = new Float32Array(vertexCount * attribute.size);
 
     let i = 0;
-    for (let yIndex = 0; yIndex < yResolution; yIndex++) {
-      for (let xIndex = 0; xIndex < xResolution; xIndex++) {
-        const x = xIndex * xDelta + xMin;
-        const y = yIndex * yDelta + yMin;
-        let z = getZ(x, y);
+    for (let vIndex = 0; vIndex < vCount; vIndex++) {
+      for (let uIndex = 0; uIndex < uCount; uIndex++) {
+        const u = uIndex / (uCount - 1);
+        const v = vIndex / (vCount - 1);
+        let [x, y, z] = getPosition(u, v);
+
+        const isXFinite = isFinite(x);
+        const isYFinite = isFinite(y);
         const isZFinite = isFinite(z);
+        if (!isXFinite) {
+          x = 0;
+        }
+        if (!isYFinite) {
+          y = 0;
+        }
         if (!isZFinite) {
           z = 0;
         }
 
+        xMin = Math.min(xMin, x);
+        xMax = Math.max(xMax, x);
+        yMin = Math.min(yMin, y);
+        yMax = Math.max(yMax, y);
         zMin = Math.min(zMin, z);
         zMax = Math.max(zMax, z);
 
@@ -237,13 +226,27 @@ export default class SurfaceLayer extends Layer {
         value[i++] = x;
         value[i++] = z;
         value[i++] = y;
-        value[i++] = isZFinite ? 0 : 1;
+        value[i++] = isXFinite && isYFinite && isZFinite ? 0 : 1;
+      }
+    }
+
+    const xScale = getScale({axis: 'x', min: xMin, max: xMax});
+    const yScale = getScale({axis: 'y', min: yMin, max: yMax});
+    const zScale = getScale({axis: 'z', min: zMin, max: zMax});
+
+    for (let j = 0; j < vertexCount; j++) {
+      const startIndex = j * 4;
+      if (!value[startIndex + 3]) {
+        value[startIndex] = xScale(value[startIndex]);
+        value[startIndex + 1] = zScale(value[startIndex + 1]);
+        value[startIndex + 2] = yScale(value[startIndex + 2]);
       }
     }
 
     attribute.value = value;
-    this._setBounds([[xMin, xMax], [zMin, zMax], [yMin, yMax]]);
+    this.props.onUpdate({xScale, yScale, zScale});
   }
+  /* eslint-enable max-statements */
 
   calculateColors(attribute) {
     const {vertexCount, attributeManager} = this.state;
