@@ -25,6 +25,7 @@ Ref: http://keepachangelog.com/en/0.3.0/
 - DEMO: Fix the scrolling on iPhone (#546)
 - DEMO: Reorganized the examples (#547)
 - DEMO: Misc fixed form demo site (#548, #549)
+- `HexagonLayer` create `getHexagons` and `getSortedCounts` methods, make it easier to create layer subclass
 
 ## Official Releases
 
