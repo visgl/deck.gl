@@ -108,13 +108,9 @@ export default class HexagonLayer extends Layer {
 
   updateState({oldProps, props, changeFlags}) {
     if (changeFlags.dataChanged || _needsReProjectPoints(oldProps, props)) {
-      const {hexagonAggregator} = this.props;
-      const {viewport} = this.context;
-
-      const hexagons = hexagonAggregator(this.props, viewport);
-      const sortedCounts = new BinSorter(hexagons);
-
-      Object.assign(this.state, {hexagons, sortedCounts});
+      // project data into hexagons, and get sortedCounts
+      this.getHexagons();
+      this.getSortedCounts();
 
       // this needs sortedCounts to be set
       this._onPercentileChange();
@@ -123,6 +119,18 @@ export default class HexagonLayer extends Layer {
 
       this._onPercentileChange();
     }
+  }
+
+  getHexagons() {
+    const {hexagonAggregator} = this.props;
+    const {viewport} = this.context;
+    const hexagons = hexagonAggregator(this.props, viewport);
+    Object.assign(this.state, {hexagons});
+  }
+
+  getSortedCounts() {
+    const sortedCounts = new BinSorter(this.state.hexagons || []);
+    Object.assign(this.state, {sortedCounts});
   }
 
   getPickingInfo({info}) {
