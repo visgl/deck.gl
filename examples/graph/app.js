@@ -4,7 +4,9 @@ import {render} from 'react-dom';
 import {json as requestJson} from 'd3-request';
 
 import DeckGLOverlay from './deckgl-overlay';
-import Graph from './src/graph';
+import {default as GraphBasic} from './src/graph-adaptors/graph-basic';
+import {default as GraphFlare} from './src/graph-adaptors/graph-flare';
+import {default as GraphSNAP} from './src/graph-adaptors/graph-snap';
 
 class Root extends Component {
   //
@@ -26,13 +28,19 @@ class Root extends Component {
     this._onClick = this._onClick.bind(this);
     this._getNodeColor = this._getNodeColor.bind(this);
 
-    // requestJson('./data/sample-graph.json', (error, response) => {
-    requestJson('./data/flare-graph.json', (error, response) => {
+    const dataAndAdaptors = [
+      {data: './data/sample-graph.json', adaptor: GraphBasic},
+      {data: './data/flare.json', adaptor: GraphFlare},
+      {data: './data/facebook-SNAP.json', adaptor: GraphSNAP}
+    ];
+    const dataset = 0;
+
+    requestJson(dataAndAdaptors[dataset].data, (error, response) => {
       if (!error) {
         // apply timestamp and push loaded sample data into array
+        const GraphAdaptor = dataAndAdaptors[dataset].adaptor;
         this.setState({
-          // data: response
-          data: new Graph(response)
+          data: [new GraphAdaptor(response)]
         });
       }
     });
@@ -113,11 +121,17 @@ class Root extends Component {
   }
 
   _linkStrength(link, i) {
-    return 1 / Math.min(link.sourceCount, link.targetCount);
+    if (link.sourceCount || link.targetCount) {
+      return 1 / Math.min(link.sourceCount, link.targetCount);
+    }
+    return 0.5;
   }
 
   _nBodyStrength(node, i) {
-    return -Math.pow(node.size, 1.5) * 3;
+    if (node.size) {
+      return -Math.pow(node.size, 1.5) * 3;
+    }
+    return -60;
   }
 
   render() {

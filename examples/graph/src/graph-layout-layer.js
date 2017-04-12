@@ -31,20 +31,21 @@ export default class GraphLayoutLayer extends Layer {
 
   updateState({oldProps, props, changeFlags}) {
     const {layout} = this.state;
-    let data = null;
+    const data = props.data ? props.data[props.data.length - 1] : null;
+    let layoutData;
 
     // If the data have changed, send to layout;
     // else just update layout in its current state.
     if (changeFlags.dataChanged) {
-      data = props.data;
+      layoutData = data;
     }
 
-    const {nodes, alpha} = layout.update(data);
+    const {nodes, alpha} = layout.update(layoutData);
     if (alpha > 0) {
       // update state only if layout is still running
       this.state.nodes = nodes;
-      this.state.links = props.data ? props.data.links : undefined;
-      this.state.alpha = alpha;
+      this.state.links = data ? data.links : undefined;
+      this.state.layoutAlpha = alpha;
     }
   }
 
@@ -56,7 +57,7 @@ export default class GraphLayoutLayer extends Layer {
 
   renderLayers() {
     const {id} = this.props;
-    const {nodes, links, alpha} = this.state;
+    const {nodes, links, layoutAlpha} = this.state;
 
     // base layer props
     const {opacity, visible} = this.props;
@@ -92,7 +93,7 @@ export default class GraphLayoutLayer extends Layer {
       data: {
         nodes,
         links,
-        alpha
+        layoutAlpha
       },
       opacity,
       pickable,

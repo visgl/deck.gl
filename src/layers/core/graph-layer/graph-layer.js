@@ -29,7 +29,6 @@ const noop = () => {};
 
 const defaultProps = {
   offset: {x: 0, y: 0},
-  alpha: 0,
 
   getNodePosition: node => [node.x, node.y, 0],
   getNodeColor: node => node.color || [0, 128, 255, 255],
@@ -75,7 +74,7 @@ export default class GraphLayer extends CompositeLayer {
       if (data) {
         this.state.nodes = data.nodes;
         this.state.links = data.links;
-        this.state.alpha = data.alpha;
+        this.state.layoutAlpha = data.layoutAlpha;
       }
     }
   }
@@ -88,7 +87,7 @@ export default class GraphLayer extends CompositeLayer {
   }
 
   renderLayers() {
-    const {nodes, links, alpha} = this.state;
+    const {nodes, links, layoutAlpha} = this.state;
 
     // Accessor props for underlying layers
     const {getLinkPosition, getLinkColor, getLinkWidth,
@@ -117,9 +116,9 @@ export default class GraphLayer extends CompositeLayer {
       pickable,
       projectionMode,
       updateTriggers: {
-        getSourcePosition: alpha,
-        getTargetPosition: alpha,
-        getColor: alpha
+        getSourcePosition: layoutAlpha,
+        getTargetPosition: layoutAlpha,
+        getColor: layoutAlpha
       }
     });
 
@@ -133,8 +132,8 @@ export default class GraphLayer extends CompositeLayer {
       pickable,
       projectionMode,
       updateTriggers: {
-        getPosition: alpha,
-        getColor: alpha
+        getPosition: layoutAlpha,
+        getColor: layoutAlpha
       },
       visible
     });
@@ -153,7 +152,7 @@ export default class GraphLayer extends CompositeLayer {
       projectionMode,
       sizeScale,
       updateTriggers: {
-        getPosition: alpha
+        getPosition: layoutAlpha
       },
       visible
     });
