@@ -22,39 +22,73 @@
 	<!-- RSS -->
 	<link href="../feed.xml" type="application/atom+xml" rel="alternate" title="ATOM Feed" />
 
+  <!-— facebook open graph tags -->
+  <meta property="og:url" content="http://uber.github.io/deck.gl/blog/2017/introducing-deckgl-v4" />
+  <meta property="og:title" content="Introducing deck.gl v4.0 | Deck.gl Blog" />
+  <meta property="og:description" content="We've just released a new major version of deck.gl, so this is a good time to share some information about the improvements that went into the new version, the rationale behind them, and some hints on what we are currently thinking about the future of deck.gl." />
+  <meta property="og:site_name" content="deck.gl" />
+  <meta property="og:image" content="http://uber.github.io/deck.gl/blog/img/screenshot-hexagon.png" />
+  
+  <!-— twitter card tags -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@uber">
+  <meta name="twitter:creator" content="@uber">
+  <meta name="twitter:title" content="Introducing deck.gl v4.0 | Deck.gl Blog">
+  <meta name="twitter:description" content="We've just released a new major version of deck.gl, so this is a good time to share some information about the improvements that went into the new version, the rationale behind them, and some hints on what we are currently thinking about the future of deck.gl.">
+  <meta name="twitter:image" content="http://uber.github.io/deck.gl/blog/img/screenshot-hexagon.png" />
+
 </head>
 
 
 <body>
+
+  <!-- Header -->
   
-  <div class="flexbox">
-
-    <div class="flexbox__item">
-      <!-- Header -->
-      
-
-
-
-<header>
-  
+<header class="">
+  <div class="bg"/>
   <div class="container">
-    <div class="breadcrumb">
-      <a href="../index.html">Home</a>
-      &gt;
-      
-      <span>Introducing deck.gl v4.0</span>
-      
+    <a class="logo" href="http://uber.github.io/deck.gl">deck.gl</a>
+    <div class="menu-toggle" >
+      <i class="icon icon-menu" ></i>
+    </div>
+    <div class="links">
+      <a href="http://uber.github.io/deck.gl/#/examples">Gallery</a>
+      <a href="http://uber.github.io/deck.gl/#/documentation">Documentation</a>
+      <a href="http://uber.github.io/deck.gl/blog/latest" class="active">Blog</a>
     </div>
   </div>
-  
 </header>
 
-      <!-- Main content -->
-      <div class="container">	
 
-    	<main>
+  <div class="scroll-area">
+    <div class="flexbox">
 
-    		
+      <div class="flexbox__item">
+
+        <!-- Main content -->
+        <div class="container">
+
+        <!-- Navigation -->
+        
+
+
+
+<div class="nav">
+
+  <div class="breadcrumb">
+    <a href="../">All Posts</a>
+    &gt;
+    
+    <span>Introducing deck.gl v4.0</span>
+    
+  </div>
+
+</div>
+
+
+      	<main>
+
+      		
 
 
 
@@ -65,6 +99,7 @@
 
   <div>
     <span class="date"><b>03 Apr 2017</b></span>
+
     <span class="author">by 
       
         <a href="http://github.com/ibgreen">
@@ -72,6 +107,43 @@
         </a>
       
     </span>
+
+    <div class="share">
+      <!-- Social media scripts -->
+      <script>window.twttr = (function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0],
+    t = window.twttr || {};
+  if (d.getElementById(id)) return t;
+  js = d.createElement(s);
+  js.id = id;
+  js.src = "https://platform.twitter.com/widgets.js";
+  fjs.parentNode.insertBefore(js, fjs);
+
+  t._e = [];
+  t.ready = function(f) {
+    t._e.push(f);
+  };
+
+  return t;
+}(document, "script", "twitter-wjs"));</script>
+
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) return;
+  js = d.createElement(s); js.id = id;
+  js.src = "//connect.facebook.net/en_US/sdk.js#xfbml=1&version=v2.8";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+      <div class="fb-share-button" data-href="http://uber.github.io/deck.gl/blog/2017/introducing-deckgl-v4" data-layout="button_count" data-size="small" data-mobile-iframe="true">
+        <a class="fb-xfbml-parse-ignore" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=http://uber.github.io/deck.gl/blog/2017/introducing-deckgl-v4&amp;src=sdkpreparse">Share</a>
+      </div>
+      <div>
+        <a class="twitter-share-button"
+          href="https://twitter.com/intent/tweet?text=http://uber.github.io/deck.gl/blog/2017/introducing-deckgl-v4">
+        Tweet</a>
+      </div>
+    </div>
   </div>
 
 	<div class="content">
@@ -233,9 +305,16 @@ and <a href="https://github.com/uber/deck.gl/graphs/contributors"><strong>many o
 
   <div class="tag-cloud">
     
-      <a href="../tag/vis.html">Vis</a>
+      <a href="../tag/visualization.html">Visualization</a>
     
       <a href="../tag/webgl.html">WebGL</a>
+    
+  </div>
+
+  <div class="navigation clearfix">
+    
+    
+      <a class="float--right" href="../2017/rendering-minecraft-with-deckgl">Next post: Rendering A Minecraft World With deck.gl &gt;</a>
     
   </div>
 
@@ -243,17 +322,17 @@ and <a href="https://github.com/uber/deck.gl/graphs/contributors"><strong>many o
 
 
 
-      </main>
-    	
-    	  <!-- Pagination links -->
-        
+        </main>
+      	
+      	  <!-- Pagination links -->
+          
 
+        </div>
       </div>
-    </div>
 
-    <div class="flexbox__item--collapsed">
-      <!-- Footer -->
-      
+      <div class="flexbox__item--collapsed">
+        <!-- Footer -->
+        
 
 
 <footer>
@@ -262,9 +341,9 @@ and <a href="https://github.com/uber/deck.gl/graphs/contributors"><strong>many o
   </div>
 </footer>
 
+      </div>
+
     </div>
-
   </div>
-
 </body>
 </html>
