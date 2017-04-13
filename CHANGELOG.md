@@ -20,6 +20,8 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 
 ### deck.gl v4.0
+#### [4.0.3] - 2017-4-13
+- `HexagonLayer` add `getHexagons` and `getSortedCounts` methods, make it easier to create layer subclass (#569)
 
 #### [4.0.2] - 2017-4-7
 - HOTFIX: Fix the bug that lighting is not working properly for 64-bit PolygonLayer on Intel Iris Pro GPU (#563)
