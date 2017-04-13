@@ -10,6 +10,16 @@ layout:
     {% assign latest = site.posts | first %}
     window.location.href = '.{{latest.url}}';
   </script>
+
+  <ul id="posts">
+    {% for post in site.posts %}
+      <li class="post">
+        <h1><a href="{{ baseurl }}{{ post.url }}">{{ post.title }}</a></h1>
+        <p>{{ post.description }}</p>
+      </li>
+    {% endfor %}
+  </ul>
+
 </body>
 
 </html>

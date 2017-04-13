@@ -1,4 +1,52 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="http://jekyllrb.com" version="3.4.1">Jekyll</generator><link href="http://deck.gl/blog/feed.xml" rel="self" type="application/atom+xml" /><link href="http://deck.gl/blog/" rel="alternate" type="text/html" /><updated>2017-04-12T16:42:57-07:00</updated><id>http://deck.gl/blog/</id><title type="html">Deck.gl Blog</title><subtitle>A blog for deck.gl: WebGL-powered data visualization</subtitle><author><name>Uber</name></author><entry><title type="html">Rendering A Minecraft World With deck.gl</title><link href="http://deck.gl/blog/2017/rendering-minecraft-with-deckgl" rel="alternate" type="text/html" title="Rendering A Minecraft World With deck.gl" /><published>2017-04-12T00:00:00-07:00</published><updated>2017-04-12T00:00:00-07:00</updated><id>http://deck.gl/blog/2017/rendering-minecraft-with-deckgl</id><content type="html" xml:base="http://deck.gl/blog/2017/rendering-minecraft-with-deckgl">While working on [deck.gl v4](./introducing-deckgl-v4.html), I decided to have some fun and built a [Minecraft Chunk Viewer](http://pessimistress.github.io/minecraft/) in the browser. Drag in a region file from your own world and explore the world in depth! Totally not cheating.
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.4.1">Jekyll</generator><link href="http://deck.gl/blog/feed.xml" rel="self" type="application/atom+xml" /><link href="http://deck.gl/blog/" rel="alternate" type="text/html" /><updated>2017-04-17T08:48:49-07:00</updated><id>http://deck.gl/blog/</id><title type="html">Deck.gl Blog</title><subtitle>A blog for deck.gl: WebGL-powered data visualization</subtitle><author><name>Uber</name></author><entry><title type="html">Wind Map</title><link href="http://deck.gl/blog/2017/wind-map" rel="alternate" type="text/html" title="Wind Map" /><published>2017-04-17T00:00:00-07:00</published><updated>2017-04-17T00:00:00-07:00</updated><id>http://deck.gl/blog/2017/wind-map</id><content type="html" xml:base="http://deck.gl/blog/2017/wind-map">&lt;div class=&quot;youtube-wrapper&quot;&gt;
+  &lt;iframe src=&quot;https://www.youtube.com/embed/4qm_dO4nAk0&quot; frameborder=&quot;0&quot; allowfullscreen&gt;&lt;/iframe&gt;
+&lt;/div&gt;
+
+A few weeks ago I set on trying out new WebGL 2.0 features with deck.gl. WebGL 2.0 brings plenty of new goodies to be used for game development, creative coding and data visualization like instancing, floating-point textures, transform feedback, multiple render targets, and more. With this in mind, and inspired by the work of Cameron Beccario, Viegas and Wattenberg, and NASA, I created a WebGL 2.0 wind map demo using deck.gl.
+
+This [interactive demo](http://philogb.github.io/page/wind/) enables you to change the map’s perspective by using cmd + drag; toggle between vector field and particle layers on the left panel, and use the slider to change the time of day to see wind change for a 72 hour period. 
+
+## Some interesting insights
+
+The screenshot below shows wind speed near Mount Washington, which has the fastest winds in the US.
+
+![Wind speed near Mount Washington](../img/wind2.jpg)
+
+Something interesting to look at as well are the wind corridors being formed in Florida at specific times.
+
+![Extreme wind corridors in Florida](../img/wind9.gif)
+
+## Under the hood
+
+There are thousands of stations that capture wind speed, orientation and temperature with different time granularity. If you turn all layers off you’ll see yellow dots that represent each one of the stations we’re getting data from.
+
+![Wind stations across the US](../img/wind4.jpg)
+
+### The Delaunay Interpolation Layer
+
+For this example though one of the challenges was to be able to get a uniform distribution of wind speed, direction and temperature that could be sampled at any point of the map, not simply at each station. In order to do this we created a Delaunay tessellation for the stations, and then rendered the mesh to a floating-point texture, to get GPU-interpolated values into an image. In this case we map wind direction to the red channel, wind speed to green, temperature to blue and elevation to alpha.
+
+![Delaunay mesh](../img/wind-delaunay-1.jpg)
+
+You can see the interpolated wind data rendered to an image below:
+
+![Delaunay interpolation layer](../img/wind-delaunay-2.jpg)
+
+### The Vector Field Layer
+
+The next step was to use instancing to create a regular vector field layer. For this we created tetrahedron instances to serve as arrows and used the texture above to set their orientation, color and size. If you use the slider on the left you’ll also see that there’s GPU interpolation. Although we sample data every hour, we interpolate between the textures so we can estimate the values at each minute. Since we already had the Delaunay model we also used that to give an approximation of the elevation in the US:
+
+![Vector field layer](../img/wind7.jpg)
+
+### The Particle Layer
+
+Finally we used [transform feedback](https://open.gl/feedback), which enables us to only use the vertex shader for data processing and updating every particle’s position in real-time. We throw a random sample of particles (~1MM) that get updated by the texture data, and then render those on the screen. Every particle has a TTL (time-to-live); when the TTL expires it gets repositioned at a random location on the map. Blending reveals where the biggest concentration of particles are.
+
+&lt;p align=&quot;center&quot;&gt;
+  &lt;img alt=&quot;Particles&quot; src=&quot;../img/wind3.gif&quot;&gt;
+&lt;/p&gt;
+
+And that’s it! Three custom layers built with deck.gl to bring this wind map to life. Check out [the example](http://philogb.github.io/page/wind/) and feel free to provide feedback!</content><author><name>{&quot;display_name&quot;=&gt;&quot;Nicolas Belmonte&quot;, &quot;github_username&quot;=&gt;&quot;philogb&quot;}</name></author><category term="Case Study" /><category term="Visualization" /><category term="WebGL" /><summary type="html"></summary></entry><entry><title type="html">Rendering A Minecraft World With deck.gl</title><link href="http://deck.gl/blog/2017/rendering-minecraft-with-deckgl" rel="alternate" type="text/html" title="Rendering A Minecraft World With deck.gl" /><published>2017-04-12T00:00:00-07:00</published><updated>2017-04-12T00:00:00-07:00</updated><id>http://deck.gl/blog/2017/rendering-minecraft-with-deckgl</id><content type="html" xml:base="http://deck.gl/blog/2017/rendering-minecraft-with-deckgl">While working on [deck.gl v4](./introducing-deckgl-v4.html), I decided to have some fun and built a [Minecraft Chunk Viewer](http://pessimistress.github.io/minecraft/) in the browser. Drag in a region file from your own world and explore the world in depth! Totally not cheating.
 
 - [Region files](http://minecraft.gamepedia.com/Chunk_format) are in your Minecraft's save folder with names like **r.12.34.mca**. Check [this page](http://minecraft.gamepedia.com/.minecraft) to see where to find them.
 - Drag to rotate; drag while holding *shift* to pan
