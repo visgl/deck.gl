@@ -12,7 +12,9 @@ const defaultProps = {
   data: [],
   getPosition: () => [0, 0, 0],
   getColor: () => DEFAULT_COLOR,
-  getScale: DEFAULT_GET_SCALE,
+  getXScale: DEFAULT_GET_SCALE,
+  getYScale: DEFAULT_GET_SCALE,
+  getZScale: DEFAULT_GET_SCALE,
   uCount: 100,
   vCount: 100,
   lightStrength: 0.1,
@@ -28,7 +30,9 @@ const defaultProps = {
  * @param {Function} [props.getPosition] - method called to get [x, y, z] from (u,v) values
  * @param {Function} [props.getColor] - method called to get color from (x,y,z)
       returns [r,g,b,a].
- * @param {Function} [props.getScale] - returns a d3 scale from (params = {axis, min, max})
+ * @param {Function} [props.getXScale] - returns a d3 scale from (params = {min, max})
+ * @param {Function} [props.getYScale] - returns a d3 scale from (params = {min, max})
+ * @param {Function} [props.getZScale] - returns a d3 scale from (params = {min, max})
  * @param {Integer} [props.uCount] - number of samples within x range
  * @param {Integer} [props.vCount] - number of samples within y range
  * @param {Number} [props.lightStrength] - front light strength
@@ -183,7 +187,7 @@ export default class SurfaceLayer extends Layer {
   /* eslint-disable max-statements */
   calculatePositions(attribute) {
     const {vertexCount} = this.state;
-    const {uCount, vCount, getPosition, getScale} = this.props;
+    const {uCount, vCount, getPosition, getXScale, getYScale, getZScale} = this.props;
 
     // calculate z range
     let xMin = Infinity;
@@ -230,9 +234,9 @@ export default class SurfaceLayer extends Layer {
       }
     }
 
-    const xScale = getScale({axis: 'x', min: xMin, max: xMax});
-    const yScale = getScale({axis: 'y', min: yMin, max: yMax});
-    const zScale = getScale({axis: 'z', min: zMin, max: zMax});
+    const xScale = getXScale({min: xMin, max: xMax});
+    const yScale = getYScale({min: yMin, max: yMax});
+    const zScale = getZScale({min: zMin, max: zMax});
 
     for (let j = 0; j < vertexCount; j++) {
       const startIndex = j * 4;

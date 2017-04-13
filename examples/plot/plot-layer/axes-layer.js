@@ -10,16 +10,22 @@ import labelVertex from './label-vertex.glsl';
 import labelFragment from './label-fragment.glsl';
 
 /* Constants */
-const FONT_SIZE = 48;
+const DEFAULT_FONT_SIZE = 12;
+const DEFAULT_TICK_COUNT = 6;
+const DEFAULT_TICK_FORMAT = x => x.toFixed(2);
 
 const defaultProps = {
   data: [],
-  fontSize: 12 * window.devicePixelRatio,
-  ticksCount: 6,
+  fontSize: DEFAULT_FONT_SIZE * window.devicePixelRatio,
   xScale: null,
   yScale: null,
   zScale: null,
-  formatTick: x => x.toFixed(2),
+  xTicks: DEFAULT_TICK_COUNT,
+  yTicks: DEFAULT_TICK_COUNT,
+  zTicks: DEFAULT_TICK_COUNT,
+  xTickFormat: DEFAULT_TICK_FORMAT,
+  yTickFormat: DEFAULT_TICK_FORMAT,
+  zTickFormat: DEFAULT_TICK_FORMAT,
   padding: 0,
   color: [0, 0, 0, 255]
 };
@@ -33,11 +39,20 @@ function flatten(arrayOfArrays) {
   return flatArray;
 }
 
-function getTicks({scale, axis, ticksCount, formatTick}) {
-  return scale.ticks(ticksCount).map(t => ({
+function getTicks(props) {
+  const {axis} = props;
+  let ticks = props[`${axis}Ticks`];
+  const scale = props[`${axis}Scale`];
+  const tickFormat = props[`${axis}TickFormat`];
+
+  if (!Array.isArray(ticks)) {
+    ticks = scale.ticks(ticks);
+  }
+
+  return ticks.map(t => ({
     value: t,
     position: scale(t),
-    text: formatTick(t, axis)
+    text: tickFormat(t, axis)
   }));
 }
 
@@ -54,7 +69,12 @@ function getTicks({scale, axis, ticksCount, formatTick}) {
  * @param {d3.scale} [props.xScale] - a d3 scale for the x axis
  * @param {d3.scale} [props.yScale] - a d3 scale for the y axis
  * @param {d3.scale} [props.zScale] - a d3 scale for the z axis
- * @param {Function} [props.formatTick] - returns a string from (value, axis)
+ * @param {Number | [Number]} [props.xTicks] - either tick counts or an array of tick values
+ * @param {Number | [Number]} [props.yTicks] - either tick counts or an array of tick values
+ * @param {Number | [Number]} [props.zTicks] - either tick counts or an array of tick values
+ * @param {Function} [props.xTickFormat] - returns a string from value
+ * @param {Function} [props.yTickFormat] - returns a string from value
+ * @param {Function} [props.zTickFormat] - returns a string from value
  * @param {Number} [props.fontSize] - size of the labels
  * @param {Array} [props.color] - color of the gridlines, in [r,g,b,a]
  */
@@ -79,16 +99,23 @@ export default class AxesLayer extends Layer {
   updateState({oldProps, props, changeFlags}) {
     const {attributeManager} = this.state;
 
-    if ((oldProps.ticksCount !== props.ticksCount) ||
+    if (
       (oldProps.xScale !== props.xScale) ||
       (oldProps.yScale !== props.yScale) ||
-      (oldProps.zScale !== props.zScale)) {
+      (oldProps.zScale !== props.zScale) ||
+      (oldProps.xTicks !== props.xTicks) ||
+      (oldProps.yTicks !== props.yTicks) ||
+      (oldProps.zTicks !== props.zTicks) ||
+      (oldProps.xTickFormat !== props.xTickFormat) ||
+      (oldProps.yTickFormat !== props.yTickFormat) ||
+      (oldProps.zTickFormat !== props.zTickFormat)
+    ) {
       const {xScale, yScale, zScale} = props;
 
       const ticks = [
-        getTicks({...props, axis: 'x', scale: xScale}),
-        getTicks({...props, axis: 'z', scale: zScale}),
-        getTicks({...props, axis: 'y', scale: yScale})
+        getTicks({...props, axis: 'x'}),
+        getTicks({...props, axis: 'z'}),
+        getTicks({...props, axis: 'y'})
       ];
 
       const xRange = xScale.range();
@@ -291,13 +318,13 @@ export default class AxesLayer extends Layer {
     }
 
     // attach a 2d texture of all the label texts
-    const textureInfo = textMatrixToTexture(this.context.gl, ticks, FONT_SIZE);
+    const textureInfo = textMatrixToTexture(this.context.gl, ticks, DEFAULT_FONT_SIZE * 4);
     if (textureInfo) {
       // success
       const {columnWidths, texture} = textureInfo;
 
       return {
-        labelHeight: FONT_SIZE,
+        labelHeight: DEFAULT_FONT_SIZE * 4,
         labelWidths: columnWidths,
         labelTextureDim: [texture.width, texture.height],
         labelTexture: texture
