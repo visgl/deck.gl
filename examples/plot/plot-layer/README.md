@@ -29,39 +29,39 @@ If the alpha component is not supplied, it is default to `255`.
 
 ##### `getXScale` (Function, optional)
 
-- Default: `({min, max}) => d3.scaleLinear().domain([min, max]).range([min, max])`
+- Default: `({min, max}) => d3.scaleLinear()`
 
 Called to retreive a [d3 scale](https://github.com/d3/d3-scale/blob/master/README.md) for x values.
 Default to identity.
 
 Arguments:
-- `params` (Object)
-  + `params.min` (Number) - lower bounds of x values
-  + `params.max` (Number) - upper bounds of x values
+- `context` (Object)
+  + `context.min` (Number) - lower bounds of x values
+  + `context.max` (Number) - upper bounds of x values
 
 ##### `getYScale` (Function, optional)
 
-- Default: `({min, max}) => d3.scaleLinear().domain([min, max]).range([min, max])`
+- Default: `({min, max}) => d3.scaleLinear()`
 
 Called to retreive a [d3 scale](https://github.com/d3/d3-scale/blob/master/README.md) for y values.
 Default to identity.
 
 Arguments:
-- `params` (Object)
-  + `params.min` (Number) - lower bounds of y values
-  + `params.max` (Number) - upper bounds of y values
+- `context` (Object)
+  + `context.min` (Number) - lower bounds of y values
+  + `context.max` (Number) - upper bounds of y values
 
 ##### `getZScale` (Function, optional)
 
-- Default: `({min, max}) => d3.scaleLinear().domain([min, max]).range([min, max])`
+- Default: `({min, max}) => d3.scaleLinear()`
 
 Called to retreive a [d3 scale](https://github.com/d3/d3-scale/blob/master/README.md) for z values.
 Default to identity.
 
 Arguments:
-- `params` (Object)
-  + `params.min` (Number) - lower bounds of z values
-  + `params.max` (Number) - upper bounds of z values
+- `context` (Object)
+  + `context.min` (Number) - lower bounds of z values
+  + `context.max` (Number) - upper bounds of z values
 
 ##### `uCount` (Number, optional)
 
