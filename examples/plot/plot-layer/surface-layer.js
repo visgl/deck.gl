@@ -6,7 +6,7 @@ import surfaceVertex from './surface-vertex.glsl';
 import fragmentShader from './fragment.glsl';
 
 const DEFAULT_COLOR = [0, 0, 0, 255];
-const DEFAULT_GET_SCALE = ({min, max}) => scaleLinear().domain([min, max]).range([min, max]);
+const DEFAULT_GET_SCALE = () => scaleLinear();
 
 const defaultProps = {
   data: [],
