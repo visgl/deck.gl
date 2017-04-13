@@ -119,26 +119,17 @@ Either number of ticks on z axis, or an array of tick values.
 
 Format a tick value on x axis to text string.
 
-Parameters:
-- `value` (Number) - tick value
-
 ##### `yTickFormat` (Function, optional)
 
 - Default: `value => value.toFixed(2)`
 
 Format a tick value on y axis to text string.
 
-Parameters:
-- `value` (Number) - tick value
-
 ##### `zTickFormat` (Function, optional)
 
 - Default: `value => value.toFixed(2)`
 
 Format a tick value on z axis to text string.
-
-Parameters:
-- `value` (Number) - tick value
 
 ##### `axesPadding` (Number, optional)
 
