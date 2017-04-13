@@ -16,13 +16,6 @@
       </div>
   </div>
   <div class="thumb">
-    <div class="bg-black" data-title="Where Films Were Made" data-name="IconLayer">
-      <a href="#/examples/core-layers/icon-layer">
-        <img src="images/demo-thumb-icon.jpg" />
-      </a>
-    </div>
-  </div>
-  <div class="thumb">
     <div data-title="Vancouver Property Value" data-name="GeoJsonLayer">
       <a href="#/examples/core-layers/geojson-layer">
         <img src="images/demo-thumb-geojson.jpg" />
