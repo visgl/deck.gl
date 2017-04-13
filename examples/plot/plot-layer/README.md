@@ -27,18 +27,41 @@ Called for each `(x, y, z)` triplet to retreive surface color.
 Returns an array in the form of `[r, g, b, a]`.
 If the alpha component is not supplied, it is default to `255`.
 
-##### `getScale` (Function, optional)
+##### `getXScale` (Function, optional)
 
-- Default: `({axis, min, max}) => d3.scaleLinear().domain([min, max]).range([min, max])`
+- Default: `({min, max}) => d3.scaleLinear().domain([min, max]).range([min, max])`
 
-Called for each axis to retreive a [d3 scale](https://github.com/d3/d3-scale/blob/master/README.md).
+Called to retreive a [d3 scale](https://github.com/d3/d3-scale/blob/master/README.md) for x values.
 Default to identity.
 
 Arguments:
 - `params` (Object)
-  + `params.axis` (String) - one of `x` `y` `z`
-  + `params.min` (Number) - lower bounds of the input
-  + `params.max` (Number) - upper bounds of the input
+  + `params.min` (Number) - lower bounds of x values
+  + `params.max` (Number) - upper bounds of x values
+
+##### `getYScale` (Function, optional)
+
+- Default: `({min, max}) => d3.scaleLinear().domain([min, max]).range([min, max])`
+
+Called to retreive a [d3 scale](https://github.com/d3/d3-scale/blob/master/README.md) for y values.
+Default to identity.
+
+Arguments:
+- `params` (Object)
+  + `params.min` (Number) - lower bounds of y values
+  + `params.max` (Number) - upper bounds of y values
+
+##### `getZScale` (Function, optional)
+
+- Default: `({min, max}) => d3.scaleLinear().domain([min, max]).range([min, max])`
+
+Called to retreive a [d3 scale](https://github.com/d3/d3-scale/blob/master/README.md) for z values.
+Default to identity.
+
+Arguments:
+- `params` (Object)
+  + `params.min` (Number) - lower bounds of z values
+  + `params.max` (Number) - upper bounds of z values
 
 ##### `uCount` (Number, optional)
 
@@ -71,23 +94,51 @@ Whether to draw axis grids and labels.
 
 Font size of the labels.
 
-##### `ticksCount` (Number, optional)
+##### `xTicks` (Number | [Number], optional)
 
 - Default: `6`
 
-Number of ticks on each axis.
-For details, see [d3.scale.ticks](https://github.com/d3/d3-axis/blob/master/README.md#axis_ticks).
+Either number of ticks on x axis, or an array of tick values.
+
+##### `yTicks` (Number | [Number], optional)
+
+- Default: `6`
+
+Either number of ticks on y axis, or an array of tick values.
+
+##### `zTicks` (Number | [Number], optional)
+
+- Default: `6`
+
+Either number of ticks on z axis, or an array of tick values.
 
 
-##### `formatTick` (Function, optional)
+##### `xTickFormat` (Function, optional)
 
-- Default: `(value, axis) => value.toFixed(2)`
+- Default: `value => value.toFixed(2)`
 
-Format a tick value to text string.
+Format a tick value on x axis to text string.
 
 Parameters:
 - `value` (Number) - tick value
-- `axis` (String) - one of `x` `y` `z`
+
+##### `yTickFormat` (Function, optional)
+
+- Default: `value => value.toFixed(2)`
+
+Format a tick value on y axis to text string.
+
+Parameters:
+- `value` (Number) - tick value
+
+##### `zTickFormat` (Function, optional)
+
+- Default: `value => value.toFixed(2)`
+
+Format a tick value on z axis to text string.
+
+Parameters:
+- `value` (Number) - tick value
 
 ##### `axesPadding` (Number, optional)
 
