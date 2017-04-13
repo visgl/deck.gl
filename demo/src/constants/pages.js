@@ -48,13 +48,13 @@ export const examplePages = generatePath([
           code: getCodeUrl('examples/3d-heatmap')
         }
       },
-      {
-        name: 'IconLayer',
-        content: {
-          demo: 'IconDemo',
-          code: getCodeUrl('examples/icon')
-        }
-      },
+      // {
+      //   name: 'IconLayer',
+      //   content: {
+      //     demo: 'IconDemo',
+      //     code: getCodeUrl('examples/icon')
+      //   }
+      // },
       {
         name: 'GeoJsonLayer',
         content: {
