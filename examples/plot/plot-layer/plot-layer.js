@@ -5,14 +5,20 @@ import SurfaceLayer from './surface-layer';
 const defaultProps = {
   getPosition: SurfaceLayer.defaultProps.getPosition,
   getColor: SurfaceLayer.defaultProps.getColor,
-  getScale: SurfaceLayer.defaultProps.getScale,
+  getXScale: SurfaceLayer.defaultProps.getXScale,
+  getYScale: SurfaceLayer.defaultProps.getYScale,
+  getZScale: SurfaceLayer.defaultProps.getZScale,
   uCount: SurfaceLayer.defaultProps.uCount,
   vCount: SurfaceLayer.defaultProps.vCount,
   lightStrength: SurfaceLayer.defaultProps.lightStrength,
   drawAxes: true,
   fontSize: AxesLayer.defaultProps.fontSize,
-  ticksCount: AxesLayer.defaultProps.ticksCount,
-  formatTick: AxesLayer.defaultProps.formatTick,
+  xTicks: AxesLayer.defaultProps.xTicks,
+  yTicks: AxesLayer.defaultProps.yTicks,
+  zTicks: AxesLayer.defaultProps.zTicks,
+  xTickFormat: AxesLayer.defaultProps.xTickFormat,
+  yTickFormat: AxesLayer.defaultProps.yTickFormat,
+  zTickFormat: AxesLayer.defaultProps.zTickFormat,
   axesPadding: AxesLayer.defaultProps.padding,
   axesColor: AxesLayer.defaultProps.color
 };
@@ -30,8 +36,17 @@ const defaultProps = {
  * @param {Integer} [props.vCount] - number of samples within y range
  * @param {Number} [props.lightStrength] - front light strength
  * @param {Boolean} [props.drawAxes] - whether to draw axes
- * @param {Integer} [props.ticksCount] - number of ticks along each axis, see
-      https://github.com/d3/d3-axis/blob/master/README.md#axis_ticks
+
+ * @param {Function} [props.getXScale] - returns a d3 scale from (params = {min, max})
+ * @param {Function} [props.getYScale] - returns a d3 scale from (params = {min, max})
+ * @param {Function} [props.getZScale] - returns a d3 scale from (params = {min, max})
+ * @param {Number | [Number]} [props.xTicks] - either tick counts or an array of tick values
+ * @param {Number | [Number]} [props.yTicks] - either tick counts or an array of tick values
+ * @param {Number | [Number]} [props.zTicks] - either tick counts or an array of tick values
+ * @param {Function} [props.xTickFormat] - returns a string from value
+ * @param {Function} [props.yTickFormat] - returns a string from value
+ * @param {Function} [props.zTickFormat] - returns a string from value
+
  * @param {Number} [props.axesPadding] - amount to set back grids from the plot,
       relative to the size of the bounding box
  * @param {Number} [props.fontSize] - size of the labels
@@ -52,7 +67,9 @@ export default class PlotLayer extends CompositeLayer {
         getColor: this.props.getColor,
         uCount: this.props.uCount,
         vCount: this.props.vCount,
-        getScale: this.props.getScale,
+        getXScale: this.props.getXScale,
+        getYScale: this.props.getYScale,
+        getZScale: this.props.getZScale,
         opacity: this.props.opacity,
         pickable: this.props.pickable,
         visible: this.props.visible,
@@ -67,8 +84,12 @@ export default class PlotLayer extends CompositeLayer {
         yScale,
         zScale,
         fontSize: this.props.fontSize,
-        ticksCount: this.props.ticksCount,
-        formatTick: this.props.formatTick,
+        xTicks: this.props.xTicks,
+        yTicks: this.props.yTicks,
+        zTicks: this.props.zTicks,
+        xTickFormat: this.props.xTickFormat,
+        yTickFormat: this.props.yTickFormat,
+        zTickFormat: this.props.zTickFormat,
         padding: this.props.axesPadding,
         color: this.props.axesColor,
         visible: this.props.drawAxes,

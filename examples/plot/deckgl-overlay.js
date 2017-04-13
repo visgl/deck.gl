@@ -5,6 +5,10 @@ import DeckGL from 'deck.gl';
 import OrbitController from './orbit-controller';
 import {scaleLinear} from 'd3-scale';
 
+function getScale({min, max}) {
+  return scaleLinear().domain([min, max]).range([0, 1]);
+}
+
 export default class DeckGLOverlay extends Component {
 
   _onInitialized(gl) {
@@ -23,7 +27,9 @@ export default class DeckGLOverlay extends Component {
           return [x, y, equation(x, y)];
         },
         getColor: (x, y, z) => [40, z * 128 + 128, 160],
-        getScale: ({min, max}) => scaleLinear().domain([min, max]).range([0, 1]),
+        getXScale: getScale,
+        getYScale: getScale,
+        getZScale: getScale,
         uCount: resolution,
         vCount: resolution,
         drawAxes: showAxis,
@@ -33,7 +39,7 @@ export default class DeckGLOverlay extends Component {
         pickable: Boolean(this.props.onHover),
         onHover: this.props.onHover,
         updateTriggers: {
-          getZ: equation
+          getPosition: equation
         }
       })
     ] : [];
