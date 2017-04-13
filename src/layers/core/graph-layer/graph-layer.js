@@ -80,10 +80,23 @@ export default class GraphLayer extends CompositeLayer {
   }
 
   getPickingInfo({info}) {
+    const pickingInfo = [
+      'index',
+      'layer',
+      'picked',
+      'x',
+      'y'
+    ].reduce((acc, k) => {
+      acc[k] = info[k];
+      return acc;
+    }, {});
+
     if (this.state.nodes) {
-      return Object.assign(info, this.state.nodes[info.index]);
+      return Object.assign(pickingInfo, {
+        target: this.state.nodes[pickingInfo.index]
+      });
     }
-    return {info};
+    return {pickingInfo};
   }
 
   renderLayers() {

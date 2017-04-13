@@ -1,4 +1,4 @@
-import {Layer, GraphLayer} from 'deck.gl';
+import {CompositeLayer, GraphLayer} from 'deck.gl';
 import GraphSimulation from './graph-simulation';
 
 /**
@@ -7,7 +7,7 @@ import GraphSimulation from './graph-simulation';
  * processes them with a graph layout engine (default: GraphSimulation),
  * and passes props and transformed data on to GraphLayer for rendering.
  */
-export default class GraphLayoutLayer extends Layer {
+export default class GraphLayoutLayer extends CompositeLayer {
   initializeState() {
     const {data} = this.props;
     const optional = [

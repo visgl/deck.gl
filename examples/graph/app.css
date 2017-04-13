@@ -7,6 +7,23 @@ body {
   overflow:hidden;
 }
 
+svg.interaction-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+}
+svg.interaction-overlay circle {
+  fill: none;
+  stroke-width: 4;
+}
+svg.interaction-overlay circle.hovered {
+  stroke: orange;
+}
+svg.interaction-overlay circle.clicked {
+  stroke: red;
+}
+
 h4 {
 	margin-top: 24px;
 	margin-bottom: 8px;
@@ -40,36 +57,36 @@ h4 {
 }
 
 .button {
-    color: #939393;
-    box-sizing: border-box;
-    border-width: 2px;
-    border-style: solid;
-    text-decoration: none;
-    display: inline-block;
-    vertical-align: middle;
-    text-align: center;
-    margin: auto 8px 8px auto;
-    cursor: pointer;
-    background-color: #e5e5e4;
-    border-radius: 0px;
-    text-transform: uppercase;
-    line-height: 18px;
-    outline: none;
-    position: relative;
-    transition: all 400ms ease;
-    font-weight: 600;
-    font-size: 14px;
-    padding: 8px;
-    width: 240px;
-    z-index: 1;
-    box-shadow: 0 2px 2px rgba(0, 0, 0, 0.2);
-    border-color: #e5e5e4;
-    overflow: visible;
+  color: #939393;
+  box-sizing: border-box;
+  border-width: 2px;
+  border-style: solid;
+  text-decoration: none;
+  display: inline-block;
+  vertical-align: middle;
+  text-align: center;
+  margin: auto 8px 8px auto;
+  cursor: pointer;
+  background-color: #e5e5e4;
+  border-radius: 0px;
+  text-transform: uppercase;
+  line-height: 18px;
+  outline: none;
+  position: relative;
+  transition: all 400ms ease;
+  font-weight: 600;
+  font-size: 14px;
+  padding: 8px;
+  width: 240px;
+  z-index: 1;
+  box-shadow: 0 2px 2px rgba(0, 0, 0, 0.2);
+  border-color: #e5e5e4;
+  overflow: visible;
 }
 
 .button:hover {
-    background-color: #d0d0cf;
-    border-color: #d0d0cf;
+  background-color: #d0d0cf;
+  border-color: #d0d0cf;
 }
 
 .line {

@@ -90,13 +90,13 @@ class Root extends Component {
 
   _onHover(el) {
     if (el) {
-      this.setState({hovered: el.id});
+      this.setState({hovered: el.target});
     }
   }
 
   _onClick(el) {
     if (el) {
-      this.setState({clicked: el.id});
+      this.setState({clicked: el.target});
     } else {
       const {clicked} = this.state;
       if (clicked) {
@@ -109,16 +109,9 @@ class Root extends Component {
   // deck.gl rendering accessors
   //
   _getNodeColor(node) {
-    const {hovered, clicked} = this.state;
-    const {id} = node;
-    switch (id) {
-    case clicked:
-      return [255, 255, 0, 255];
-    case hovered:
-      return [255, 128, 0, 255];
-    default:
-      return [0, 128, 255, 255];
-    }
+    // TODO: demonstrate switching on e.g. node.type (for data that supply `type` field)
+    // probably better to implement icon accessor.
+    return [0, 128, 255, 255];
   }
 
   _getNodeSize(node) {
@@ -146,8 +139,31 @@ class Root extends Component {
     return -60;
   }
 
+  _renderInteractionLayer(viewport, hovered, clicked) {
+    // Note: node.x/y, calculated by d3 layout,
+    // is measured from the center of the layout (of the viewport).
+    // Therefore, we offset the node coordinates from the viewport center.
+    return (
+      <svg width={viewport.width} height={viewport.height} className="interaction-overlay">
+        {hovered && <circle
+          cx={hovered.x + viewport.width / 2}
+          cy={hovered.y + viewport.height / 2}
+          r={this._getNodeSize(hovered)}
+          className="hovered"
+        />}
+        {clicked && <circle
+          cx={clicked.x + viewport.width / 2}
+          cy={clicked.y + viewport.height / 2}
+          r={this._getNodeSize(clicked)}
+          className="clicked"
+        />}
+      </svg>
+    );
+  }
+
   render() {
     const {viewport, data} = this.state;
+    const {hovered, clicked} = this.state;
     const handlers = {
       onHover: this._onHover,
       onClick: this._onClick
@@ -161,11 +177,14 @@ class Root extends Component {
     };
 
     return (
-      <DeckGLOverlay
-        viewport={viewport}
-        data={data}
-        {...handlers}
-        {...accessors} />
+      <div>
+        <DeckGLOverlay
+          viewport={viewport}
+          data={data}
+          {...handlers}
+          {...accessors} />
+        {this._renderInteractionLayer(viewport, hovered, clicked)}
+      </div>
     );
   }
 
