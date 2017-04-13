@@ -1,7 +1,7 @@
 import {scalePow} from 'd3-scale';
 import {extent} from 'd3-array';
 
-export default class Graph {
+export default class GraphAdaptor {
   constructor(data) {
     this._processData(data);
   }

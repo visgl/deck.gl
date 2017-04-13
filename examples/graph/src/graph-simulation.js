@@ -79,5 +79,5 @@ GraphSimulation.defaultProps = {
   linkStrength: 0.5,
   nBodyStrength: -60,
   nBodyDistanceMin: 1,
-  nBodyDistanceMax: 200
+  nBodyDistanceMax: 100
 };

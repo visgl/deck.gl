@@ -1,7 +1,7 @@
 /* global window,document */
 import React, {Component} from 'react';
 import {render} from 'react-dom';
-import {json as requestJson} from 'd3-request';
+import {json as requestJSON, csv as requestCSV} from 'd3-request';
 
 import DeckGLOverlay from './deckgl-overlay';
 import {default as GraphBasic} from './src/graph-adaptors/graph-basic';
@@ -28,17 +28,29 @@ class Root extends Component {
     this._onClick = this._onClick.bind(this);
     this._getNodeColor = this._getNodeColor.bind(this);
 
-    const dataAndAdaptors = [
-      {data: './data/sample-graph.json', adaptor: GraphBasic},
-      {data: './data/flare.json', adaptor: GraphFlare},
-      {data: './data/facebook-SNAP.json', adaptor: GraphSNAP}
+    const dataConfig = [
+      {
+        data: './data/sample-graph.json',
+        loader: requestJSON,
+        adaptor: GraphBasic
+      },
+      {
+        data: './data/flare.json',
+        loader: requestJSON,
+        adaptor: GraphFlare
+      },
+      {
+        data: './data/facebook-SNAP.csv',
+        loader: requestCSV,
+        adaptor: GraphSNAP
+      }
     ];
-    const dataset = 0;
-
-    requestJson(dataAndAdaptors[dataset].data, (error, response) => {
+    const dataset = 1;
+    const loader = dataConfig[dataset].loader;
+    loader(dataConfig[dataset].data, (error, response) => {
       if (!error) {
         // apply timestamp and push loaded sample data into array
-        const GraphAdaptor = dataAndAdaptors[dataset].adaptor;
+        const GraphAdaptor = dataConfig[dataset].adaptor;
         this.setState({
           data: [new GraphAdaptor(response)]
         });

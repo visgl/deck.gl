@@ -1,4 +1,4 @@
-export default class {
+export default class GraphAdaptor {
   constructor(data) {
     this._processData(data);
   }

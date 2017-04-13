@@ -38,7 +38,7 @@ const defaultProps = {
     sourcePosition: [link.source.x, link.source.y],
     targetPosition: [link.target.x, link.target.y]
   }),
-  getLinkWidth: link => 4,
+  getLinkWidth: link => 2,
   getLinkColor: link => [160, 160, 160],
 
   onClick: noop,
