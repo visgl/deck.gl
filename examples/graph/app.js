@@ -205,7 +205,7 @@ class Root extends Component {
         x2={el.target.x + viewport.width / 2}
         y2={el.target.y + viewport.height / 2}
         className={className}
-        key={`link-${el.id}`}
+        key={`link-${className}-${el.id}`}
       />);
     } else {
       // node
@@ -214,7 +214,7 @@ class Root extends Component {
         cy={el.y + viewport.height / 2}
         r={this._getNodeSize(el)}
         className={className}
-        key={`node-${el.id}`}
+        key={`node-${className}-${el.id}`}
       />);
     }
     return element;
