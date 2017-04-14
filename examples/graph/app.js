@@ -90,13 +90,13 @@ class Root extends Component {
 
   _onHover(el) {
     if (el) {
-      this.setState({hovered: el.target});
+      this.setState({hovered: el.object});
     }
   }
 
   _onClick(el) {
     if (el) {
-      this.setState({clicked: el.target});
+      this.setState({clicked: el.object});
     } else {
       const {clicked} = this.state;
       if (clicked) {
@@ -143,20 +143,56 @@ class Root extends Component {
     // Note: node.x/y, calculated by d3 layout,
     // is measured from the center of the layout (of the viewport).
     // Therefore, we offset the node coordinates from the viewport center.
+
+    // TODO: DRY this up
+    let hoveredEl;
+    if (!hovered) {
+      hoveredEl = null;
+    } else if (hovered.source) {
+      // link
+      hoveredEl = (<line
+        x1={hovered.source.x + viewport.width / 2}
+        y1={hovered.source.y + viewport.height / 2}
+        x2={hovered.target.x + viewport.width / 2}
+        y2={hovered.target.y + viewport.height / 2}
+        className="hovered"
+      />);
+    } else {
+      // node
+      hoveredEl = (<circle
+        cx={hovered.x + viewport.width / 2}
+        cy={hovered.y + viewport.height / 2}
+        r={this._getNodeSize(hovered)}
+        className="hovered"
+      />);
+    }
+
+    let clickedEl;
+    if (!clicked) {
+      clickedEl = null;
+    } else if (clicked.source) {
+      // link
+      clickedEl = (<line
+        x1={clicked.source.x + viewport.width / 2}
+        y1={clicked.source.y + viewport.height / 2}
+        x2={clicked.target.x + viewport.width / 2}
+        y2={clicked.target.y + viewport.height / 2}
+        className="clicked"
+      />);
+    } else {
+      // node
+      clickedEl = (<circle
+        cx={clicked.x + viewport.width / 2}
+        cy={clicked.y + viewport.height / 2}
+        r={this._getNodeSize(clicked)}
+        className="clicked"
+      />);
+    }
+
     return (
       <svg width={viewport.width} height={viewport.height} className="interaction-overlay">
-        {hovered && <circle
-          cx={hovered.x + viewport.width / 2}
-          cy={hovered.y + viewport.height / 2}
-          r={this._getNodeSize(hovered)}
-          className="hovered"
-        />}
-        {clicked && <circle
-          cx={clicked.x + viewport.width / 2}
-          cy={clicked.y + viewport.height / 2}
-          r={this._getNodeSize(clicked)}
-          className="clicked"
-        />}
+        {hoveredEl}
+        {clickedEl}
       </svg>
     );
   }

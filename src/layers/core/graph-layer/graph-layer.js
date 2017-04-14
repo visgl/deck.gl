@@ -25,6 +25,13 @@ import {
   ScatterplotLayer
 } from 'deck.gl';
 
+const LAYER_IDS = {
+  LINK: 'link-layer',
+  NODE: 'node-layer',
+  NODE_BG: 'node-bg-layer',
+  NODE_ICON: 'node-icon-layer'
+};
+
 const noop = () => {};
 
 const defaultProps = {
@@ -83,6 +90,7 @@ export default class GraphLayer extends CompositeLayer {
     const pickingInfo = [
       'index',
       'layer',
+      'object',
       'picked',
       'x',
       'y'
@@ -91,12 +99,15 @@ export default class GraphLayer extends CompositeLayer {
       return acc;
     }, {});
 
-    if (this.state.nodes) {
-      return Object.assign(pickingInfo, {
-        target: this.state.nodes[pickingInfo.index]
-      });
+    if (!info.layer.context.lastPickedInfo) {
+      pickingInfo.objectType = '';
+    } else if (info.layer.context.lastPickedInfo === LAYER_IDS.LINK) {
+      pickingInfo.objectType = 'link';
+    } else {
+      pickingInfo.objectType = 'node';
     }
-    return {pickingInfo};
+
+    return pickingInfo;
   }
 
   renderLayers() {
@@ -119,7 +130,7 @@ export default class GraphLayer extends CompositeLayer {
     const drawIcons = drawNodes && Boolean(getIcon);  // ensure a valid accessor
 
     const linksLayer = drawLinks && new LineLayer({
-      id: 'link-layer',
+      id: LAYER_IDS.LINK,
       data: links,
       getSourcePosition: d => getLinkPosition(d).sourcePosition,
       getTargetPosition: d => getLinkPosition(d).targetPosition,
@@ -136,7 +147,7 @@ export default class GraphLayer extends CompositeLayer {
     });
 
     const nodesLayer = drawNodes && new ScatterplotLayer({
-      id: icon ? 'node-bg-layer' : 'node-layer',
+      id: icon ? LAYER_IDS.NODE_BG : LAYER_IDS.NODE,
       data: nodes,
       getPosition: getNodePosition,
       getRadius: getNodeSize,
@@ -152,7 +163,7 @@ export default class GraphLayer extends CompositeLayer {
     });
 
     const nodeIconsLayer = drawIcons && new IconLayer({
-      id: 'node-icon-layer',
+      id: LAYER_IDS.NODE_ICON,
       data: nodes,
       getColor: getNodeColor,
       getIcon,
