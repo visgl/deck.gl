@@ -25,7 +25,7 @@ import {
   ScatterplotLayer
 } from 'deck.gl';
 
-const LAYER_IDS = {
+export const GRAPH_LAYER_IDS = {
   LINK: 'link-layer',
   NODE: 'node-layer',
   NODE_BG: 'node-bg-layer',
@@ -86,31 +86,8 @@ export default class GraphLayer extends CompositeLayer {
     }
   }
 
-  getPickingInfo({info}) {
-    const pickingInfo = [
-      'index',
-      'layer',
-      'object',
-      'picked',
-      'x',
-      'y'
-    ].reduce((acc, k) => {
-      acc[k] = info[k];
-      return acc;
-    }, {});
-
-    if (!info.layer.context.lastPickedInfo) {
-      pickingInfo.objectType = '';
-    } else if (info.layer.context.lastPickedInfo === LAYER_IDS.LINK) {
-      pickingInfo.objectType = 'link';
-    } else {
-      pickingInfo.objectType = 'node';
-    }
-
-    return pickingInfo;
-  }
-
   renderLayers() {
+    const {id} = this.props;
     const {nodes, links, layoutAlpha} = this.state;
 
     // Accessor props for underlying layers
@@ -130,7 +107,7 @@ export default class GraphLayer extends CompositeLayer {
     const drawIcons = drawNodes && Boolean(getIcon);  // ensure a valid accessor
 
     const linksLayer = drawLinks && new LineLayer({
-      id: LAYER_IDS.LINK,
+      id: `${id}-${GRAPH_LAYER_IDS.LINK}`,
       data: links,
       getSourcePosition: d => getLinkPosition(d).sourcePosition,
       getTargetPosition: d => getLinkPosition(d).targetPosition,
@@ -147,7 +124,7 @@ export default class GraphLayer extends CompositeLayer {
     });
 
     const nodesLayer = drawNodes && new ScatterplotLayer({
-      id: icon ? LAYER_IDS.NODE_BG : LAYER_IDS.NODE,
+      id: `${id}-${icon ? GRAPH_LAYER_IDS.NODE_BG : GRAPH_LAYER_IDS.NODE}`,
       data: nodes,
       getPosition: getNodePosition,
       getRadius: getNodeSize,
@@ -163,7 +140,7 @@ export default class GraphLayer extends CompositeLayer {
     });
 
     const nodeIconsLayer = drawIcons && new IconLayer({
-      id: LAYER_IDS.NODE_ICON,
+      id: `${id}-${GRAPH_LAYER_IDS.NODE_ICON}`,
       data: nodes,
       getColor: getNodeColor,
       getIcon,

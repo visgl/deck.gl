@@ -49,7 +49,7 @@ export {default as PathLayer} from './layers/core/path-layer/path-layer';
 export {default as PolygonLayer} from './layers/core/polygon-layer/polygon-layer';
 export {default as GeoJsonLayer} from './layers/core/geojson-layer/geojson-layer';
 
-export {default as GraphLayer} from './layers/core/graph-layer/graph-layer';
+export {default as GraphLayer, GRAPH_LAYER_IDS} from './layers/core/graph-layer/graph-layer';
 
 // Deprecated Layers
 export {default as ChoroplethLayer} from './layers/deprecated/choropleth-layer/choropleth-layer';

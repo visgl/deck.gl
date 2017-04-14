@@ -19,6 +19,7 @@ class Root extends Component {
         width: 500,
         height: 500
       },
+      graph: null,
       data: null
     };
 
@@ -28,6 +29,8 @@ class Root extends Component {
     this._onClick = this._onClick.bind(this);
     this._getNodeColor = this._getNodeColor.bind(this);
 
+    // change this to load a different sample dataset
+    const DATASET = 1;
     const dataConfig = [
       {
         data: './data/sample-graph.json',
@@ -45,14 +48,15 @@ class Root extends Component {
         adaptor: GraphSNAP
       }
     ];
-    const dataset = 1;
-    const loader = dataConfig[dataset].loader;
-    loader(dataConfig[dataset].data, (error, response) => {
+    const loader = dataConfig[DATASET].loader;
+    loader(dataConfig[DATASET].data, (error, response) => {
       if (!error) {
         // apply timestamp and push loaded sample data into array
-        const GraphAdaptor = dataConfig[dataset].adaptor;
+        const GraphAdaptor = dataConfig[DATASET].adaptor;
+        const graph = new GraphAdaptor(response);
         this.setState({
-          data: [new GraphAdaptor(response)]
+          graph,
+          data: [graph]
         });
       }
     });
@@ -90,13 +94,13 @@ class Root extends Component {
 
   _onHover(el) {
     if (el) {
-      this.setState({hovered: el.object});
+      this.setState({hovered: el});
     }
   }
 
   _onClick(el) {
     if (el) {
-      this.setState({clicked: el.object});
+      this.setState({clicked: el});
     } else {
       const {clicked} = this.state;
       if (clicked) {
@@ -140,61 +144,80 @@ class Root extends Component {
   }
 
   _renderInteractionLayer(viewport, hovered, clicked) {
+    const elements = {
+      hovered: hovered && hovered.object,
+      clicked: clicked && clicked.object
+    };
+    const relatedElements = {
+      hovered: hovered && hovered.relatedObjects,
+      clicked: clicked && clicked.relatedObjects
+    };
+
+    // process related elements first, since they compare themselves to the focused elements
+    Object.keys(relatedElements).forEach(k => {
+      const els = relatedElements[k];
+      if (!els || !els.length) {
+        relatedElements[k] = null;
+      } else {
+        relatedElements[k] = [];
+        els.forEach(el => {
+          if (el.source) {
+            // highlight linked nodes, as well as the links
+            const relatedNode = el.source === elements[k] ? el.target : el.source;
+            relatedElements[k].push(
+              this._renderInteractionElement(relatedNode, `related ${k}`, viewport)
+            );
+          }
+          relatedElements[k].push(
+            this._renderInteractionElement(el, `related ${k}`, viewport)
+          );
+        });
+      }
+    });
+
+    // process the focused (hovered / clicked) elements
+    Object.keys(elements).forEach(k => {
+      const el = elements[k];
+      elements[k] = el ? this._renderInteractionElement(el, k, viewport) : null;
+    });
+
+    return (
+      <svg width={viewport.width} height={viewport.height} className="interaction-overlay">
+        {relatedElements.hovered}
+        {elements.hovered}
+        {relatedElements.clicked}
+        {elements.clicked}
+      </svg>
+    );
+  }
+
+  _renderInteractionElement(el, className, viewport) {
     // Note: node.x/y, calculated by d3 layout,
     // is measured from the center of the layout (of the viewport).
     // Therefore, we offset the node coordinates from the viewport center.
 
-    // TODO: DRY this up
-    let hoveredEl;
-    if (!hovered) {
-      hoveredEl = null;
-    } else if (hovered.source) {
+    let element;
+    if (el.source) {
       // link
-      hoveredEl = (<line
-        x1={hovered.source.x + viewport.width / 2}
-        y1={hovered.source.y + viewport.height / 2}
-        x2={hovered.target.x + viewport.width / 2}
-        y2={hovered.target.y + viewport.height / 2}
-        className="hovered"
+      element = (<line
+        x1={el.source.x + viewport.width / 2}
+        y1={el.source.y + viewport.height / 2}
+        x2={el.target.x + viewport.width / 2}
+        y2={el.target.y + viewport.height / 2}
+        className={className}
+        key={`link-${el.id}`}
       />);
     } else {
       // node
-      hoveredEl = (<circle
-        cx={hovered.x + viewport.width / 2}
-        cy={hovered.y + viewport.height / 2}
-        r={this._getNodeSize(hovered)}
-        className="hovered"
+      element = (<circle
+        cx={el.x + viewport.width / 2}
+        cy={el.y + viewport.height / 2}
+        r={this._getNodeSize(el)}
+        className={className}
+        key={`node-${el.id}`}
       />);
     }
-
-    let clickedEl;
-    if (!clicked) {
-      clickedEl = null;
-    } else if (clicked.source) {
-      // link
-      clickedEl = (<line
-        x1={clicked.source.x + viewport.width / 2}
-        y1={clicked.source.y + viewport.height / 2}
-        x2={clicked.target.x + viewport.width / 2}
-        y2={clicked.target.y + viewport.height / 2}
-        className="clicked"
-      />);
-    } else {
-      // node
-      clickedEl = (<circle
-        cx={clicked.x + viewport.width / 2}
-        cy={clicked.y + viewport.height / 2}
-        r={this._getNodeSize(clicked)}
-        className="clicked"
-      />);
-    }
-
-    return (
-      <svg width={viewport.width} height={viewport.height} className="interaction-overlay">
-        {hoveredEl}
-        {clickedEl}
-      </svg>
-    );
+    return element;
   }
 
   render() {

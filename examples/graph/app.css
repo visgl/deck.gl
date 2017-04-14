@@ -14,19 +14,27 @@ svg.interaction-overlay {
   pointer-events: none;
 }
 circle {
-  fill: none;
   stroke-width: 4;
+  fill-opacity: 0.6;
 }
 line {
   stroke-width: 4;
 }
 line.hovered,
 circle.hovered {
+  fill: orange;
   stroke: orange;
 }
 line.clicked,
 circle.clicked {
+  fill: red;
   stroke: red;
+}
+line.related,
+circle.related {
+  stroke-width: 2;
+  opacity: 0.6;
+  fill: none;
 }
 
 h4 {

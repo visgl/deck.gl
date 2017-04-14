@@ -21,6 +21,10 @@ export default class GraphAdaptor {
     };
   }
 
+  getNode(id) {
+    return this.nodeMap[id];
+  }
+
   // pass through as-is
   _processData(data) {
     this.nodes = [];

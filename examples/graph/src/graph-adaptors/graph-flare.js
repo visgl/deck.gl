@@ -18,6 +18,10 @@ export default class GraphAdaptor {
     };
   }
 
+  getNode(id) {
+    return this.nodeMap[id];
+  }
+
   // process hierarchical nested data structure
   _processData(data) {
     this.nodes = [];

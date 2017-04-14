@@ -15,9 +15,17 @@ export default class GraphAdaptor {
     };
   }
 
+  getNode(id) {
+    return this.nodeMap[id];
+  }
+
   // pass through as-is
   _processData(data) {
     this.nodes = data.nodes;
     this.links = data.links;
+    this.nodeMap = this.nodes.reduce((acc, n) => {
+      acc[n.id] = n;
+      return acc;
+    }, {});
   }
 }

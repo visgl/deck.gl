@@ -1,4 +1,4 @@
-import {CompositeLayer, GraphLayer} from 'deck.gl';
+import {CompositeLayer, GraphLayer, GRAPH_LAYER_IDS} from 'deck.gl';
 import GraphSimulation from './graph-simulation';
 
 /**
@@ -47,6 +47,49 @@ export default class GraphLayoutLayer extends CompositeLayer {
       this.state.links = data ? data.links : undefined;
       this.state.layoutAlpha = alpha;
     }
+  }
+
+  getPickingInfo({info}) {
+    const pickingInfo = [
+      'index',
+      'layer',
+      'object',
+      'picked',
+      'x',
+      'y'
+    ].reduce((acc, k) => {
+      acc[k] = info[k];
+      return acc;
+    }, {});
+
+    // determine object type (node or link) based on picked layer
+    if (!info.layer.context.lastPickedInfo) {
+      pickingInfo.objectType = '';
+    } else {
+      const {id} = this.props;
+      if (info.layer.context.lastPickedInfo.layerId === `${id}-graph-${GRAPH_LAYER_IDS.LINK}`) {
+        pickingInfo.objectType = 'link';
+      } else {
+        pickingInfo.objectType = 'node';
+      }
+    }
+
+    // find all links connected to picked node, or vice-versa
+    const {nodes, links} = this.state;
+    const {object} = pickingInfo;
+    if (object) {
+      if (pickingInfo.objectType === 'link') {
+        pickingInfo.relatedObjects = nodes.filter(n =>
+          n.id === object.source.id || n.id === object.target.id);
+      } else if (pickingInfo.objectType === 'node') {
+        pickingInfo.relatedObjects = links.filter(l =>
+          l.source.id === object.id || l.target.id === object.id);
+      }
+    } else {
+      pickingInfo.relatedObjects = [];
+    }
+
+    return pickingInfo;
   }
 
   finalizeLayer() {
