@@ -1,10 +1,17 @@
-body {
+body,
+text {
   font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+body {
   font-size: 13px;
 	-webkit-font-smoothing: antialiased;
   margin:0;
   padding:0;
   overflow:hidden;
+}
+text {
+  font-size: 20px;
+  font-weight: bold;
 }
 
 svg.interaction-overlay {
@@ -22,13 +29,13 @@ line {
 }
 line.hovered,
 circle.hovered {
-  fill: orange;
-  stroke: orange;
+  fill: #ff991f;
+  stroke: #ff991f;
 }
 line.clicked,
 circle.clicked {
-  fill: red;
-  stroke: red;
+  fill: #f15c17;
+  stroke: #f15c17;
 }
 line.related,
 circle.related {

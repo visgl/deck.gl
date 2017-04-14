@@ -115,7 +115,7 @@ class Root extends Component {
   _getNodeColor(node) {
     // TODO: demonstrate switching on e.g. node.type (for data that supply `type` field)
     // probably better to implement icon accessor.
-    return [0, 128, 255, 255];
+    return [18, 147, 154, 255];
   }
 
   _getNodeSize(node) {
@@ -144,6 +144,8 @@ class Root extends Component {
   }
 
   _renderInteractionLayer(viewport, hovered, clicked) {
+    // set flags used below to determine if SVG highlight elements should be rendered.
+    // if truthy, each flag is replaced with the corresponding element to render.
     const elements = {
       hovered: hovered && hovered.object,
       clicked: clicked && clicked.object
@@ -151,6 +153,10 @@ class Root extends Component {
     const relatedElements = {
       hovered: hovered && hovered.relatedObjects,
       clicked: clicked && clicked.relatedObjects
+    };
+    const elementInfo = {
+      hovered: hovered && hovered.object,
+      clicked: clicked && clicked.object
     };
 
     // process related elements first, since they compare themselves to the focused elements
@@ -181,12 +187,29 @@ class Root extends Component {
       elements[k] = el ? this._renderInteractionElement(el, k, viewport) : null;
     });
 
+    // render additional info about the focused elements (only nodes, not links)
+    Object.keys(elementInfo).forEach(k => {
+      const el = elementInfo[k];
+      if (el && el.name) {
+        elementInfo[k] = (<text
+          x={el.x + viewport.width / 2}
+          y={el.y + viewport.height / 2}
+          dx={this._getNodeSize(el) + 10}
+          dy={-10}
+        >{el.name}</text>);
+      } else {
+        elementInfo[k] = null;
+      }
+    });
+
     return (
       <svg width={viewport.width} height={viewport.height} className="interaction-overlay">
         {relatedElements.hovered}
         {elements.hovered}
         {relatedElements.clicked}
         {elements.clicked}
+        {elementInfo.hovered}
+        {elementInfo.clicked}
       </svg>
     );
   }

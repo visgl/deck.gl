@@ -38,7 +38,7 @@ const defaultProps = {
   offset: {x: 0, y: 0},
 
   getNodePosition: node => [node.x, node.y, 0],
-  getNodeColor: node => node.color || [0, 128, 255, 255],
+  getNodeColor: node => node.color || [18, 147, 154, 255],
   getNodeIcon: node => null,
   getNodeSize: node => node.radius || 9,
   getLinkPosition: link => ({
@@ -46,7 +46,7 @@ const defaultProps = {
     targetPosition: [link.target.x, link.target.y]
   }),
   getLinkWidth: link => 2,
-  getLinkColor: link => [160, 160, 160],
+  getLinkColor: link => [179, 173, 158, 255],
 
   onClick: noop,
   onDoubleClick: noop,
