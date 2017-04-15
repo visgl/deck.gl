@@ -1,9 +1,3 @@
-/**
- * facebook-SNAP.csv from Stanford Large Network Dataset Collection (SNAP)
- * http://snap.stanford.edu/data
- * Authors: Jure Leskovec and Andrej Krevl
- * Published June 2014
- */
 export default class GraphAdaptor {
   constructor(data) {
     this._processData(data);
