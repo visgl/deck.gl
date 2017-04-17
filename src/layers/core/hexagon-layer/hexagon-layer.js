@@ -31,6 +31,7 @@ import BinSorter from '../../../utils/bin-sorter';
 const defaultProps = {
   colorDomain: null,
   colorRange: defaultColorRange,
+  colorValueAccessor: undefined,
   elevationDomain: null,
   elevationRange: [0, 1000],
   elevationScale: 1,
@@ -54,12 +55,16 @@ const defaultProps = {
 };
 
 function _needsReProjectPoints(oldProps, props) {
-  return oldProps.radius !== props.radius;
+  return oldProps.radius !== props.radius || oldProps.hexagonAggregator !== props.hexagonAggregator;
 }
 
 function _percentileChanged(oldProps, props) {
   return oldProps.lowerPercentile !== props.lowerPercentile ||
     oldProps.upperPercentile !== props.upperPercentile;
+}
+
+function _needsReSortBins(oldProps, props) {
+  return oldProps.colorValueAccessor !== props.colorValueAccessor;
 }
 
 export default class HexagonLayer extends Layer {
@@ -116,6 +121,11 @@ export default class HexagonLayer extends Layer {
       // this needs sortedCounts to be set
       this._onPercentileChange();
 
+    } else if (_needsReSortBins(oldProps, props)) {
+
+      this.getSortedCounts();
+      this._onPercentileChange();
+
     } else if (_percentileChanged(oldProps, props)) {
 
       this._onPercentileChange();
@@ -130,7 +140,7 @@ export default class HexagonLayer extends Layer {
   }
 
   getSortedCounts() {
-    const sortedCounts = new BinSorter(this.state.hexagons || []);
+    const sortedCounts = new BinSorter(this.state.hexagons || [], this.props.colorValueAccessor);
     this.setState({sortedCounts});
   }
 
@@ -203,6 +213,7 @@ export default class HexagonLayer extends Layer {
     return new HexagonCellLayer({
       id: `${id}-hexagon-cell`,
       data: this.state.hexagons,
+      hexagonVertices: this.state.hexagonVertices,
       radius,
       elevationScale,
       angle: Math.PI,
