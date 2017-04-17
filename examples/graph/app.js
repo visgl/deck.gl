@@ -8,20 +8,15 @@ import {default as GraphBasic} from './src/graph-adaptors/graph-basic';
 import {default as GraphFlare} from './src/graph-adaptors/graph-flare';
 import {default as GraphSNAP} from './src/graph-adaptors/graph-snap';
 
+// change this to load a different sample dataset (valid: 0-2)
+const DATASET = 1;
+
 class Root extends Component {
   //
   // REACT LIFECYCLE
   //
   constructor(props) {
     super(props);
-    this.state = {
-      viewport: {
-        width: 500,
-        height: 500
-      },
-      graph: null,
-      data: null
-    };
 
     this._resize = this._resize.bind(this);
     this._animate = this._animate.bind(this);
@@ -29,23 +24,24 @@ class Root extends Component {
     this._onClick = this._onClick.bind(this);
     this._getNodeColor = this._getNodeColor.bind(this);
 
-    // change this to load a different sample dataset
-    const DATASET = 1;
     const dataConfig = [
       {
         data: './data/sample-graph.json',
         loader: requestJSON,
-        adaptor: GraphBasic
+        adaptor: GraphBasic,
+        hasNodeTypes: true
       },
       {
         data: './data/flare.json',
         loader: requestJSON,
-        adaptor: GraphFlare
+        adaptor: GraphFlare,
+        hasNodeTypes: false
       },
       {
         data: './data/facebook-SNAP.csv',
         loader: requestCSV,
-        adaptor: GraphSNAP
+        adaptor: GraphSNAP,
+        hasNodeTypes: false
       }
     ];
     const loader = dataConfig[DATASET].loader;
@@ -59,6 +55,41 @@ class Root extends Component {
           data: [graph]
         });
       }
+    });
+
+    // only set up icon accessors for sample datasets that have types to be represented as icons.
+    let getNodeIcon = {};
+    if (dataConfig[DATASET].hasNodeTypes) {
+      // specify icon accessors
+      getNodeIcon = {
+        getIcon: this._getNodeIcon.bind(this),
+        iconAtlas: './data/node-icon-atlas.png',
+        iconMapping: null,
+        sizeScale: 4
+      };
+
+      // load icon atlas
+      requestJSON('./data/node-icon-atlas.json', (error, response) => {
+        if (!error) {
+          this.setState({
+            getNodeIcon: Object.assign({}, this.state.getNodeIcon, {
+              iconMapping: response
+            })
+          });
+        }
+      });
+    }
+
+    // set initial state
+    this.state = Object.assign({
+      viewport: {
+        width: 500,
+        height: 500
+      },
+      graph: null,
+      data: null
+    }, {
+      getNodeIcon
     });
   }
 
@@ -120,6 +151,23 @@ class Root extends Component {
 
   _getNodeSize(node) {
     return node.size || 8;
+  }
+
+  // map node type to icon in texture atlas
+  _getNodeIcon(node) {
+    switch (node.type) {
+    case 0:
+      return 'burger';
+    case 1:
+      return 'fries';
+    case 2:
+      return 'soda';
+    case 3:
+    case 4:
+      return 'pie';
+    default:
+      return null;
+    }
   }
 
   //
@@ -253,6 +301,7 @@ class Root extends Component {
     const accessors = {
       getNodeColor: this._getNodeColor,
       getNodeSize: this._getNodeSize,
+      getNodeIcon: this.state.getNodeIcon,
       linkDistance: this._linkDistance,
       linkStrength: this._linkStrength,
       nBodyStrength: this._nBodyStrength

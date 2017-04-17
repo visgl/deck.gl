@@ -23,6 +23,7 @@ export default class DeckGLOverlay extends Component {
 
       getNodeColor: this.props.getNodeColor,
       getNodeSize: this.props.getNodeSize,
+      getNodeIcon: this.props.getNodeIcon,
       linkDistance: this.props.linkDistance,
       linkStrength: this.props.linkStrength,
       nBodyStrength: this.props.nBodyStrength,

@@ -20,6 +20,6 @@ Published June 2014
 
 [Icons](./data/nodeTypes.png) from [The Noun Project](https://thenounproject.com)
 - Burger: [lipi](https://thenounproject.com/search/?q=burger&i=316378)
-- Drink: [olcay kurtulus](https://thenounproject.com/search/?q=drink&i=667575)
 - Fries: [Daniel Llamas Soto](https://thenounproject.com/search/?q=fries&i=340356)
+- Soda: [olcay kurtulus](https://thenounproject.com/search/?q=drink&i=667575)
 - Pie: [Dara Ullrich](https://thenounproject.com/search/?q=pie+slice&i=674893)
