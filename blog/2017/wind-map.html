@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html>
+
+
+
+
+
+
+
+<head>
+	<!-- Meta -->
+	<meta charset="UTF-8"/>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+	<meta name="generator" content="Jekyll">
+
+	<title>Wind Map | Deck.gl Blog</title>
+
+	<!-- CSS & fonts -->
+  <link rel="stylesheet" id="font-link" href="https://d1a3f4spazzrp4.cloudfront.net/uber-fonts/3.1.0/refresh.css">
+	<link rel="stylesheet" href="../css/main.css">
+
+  <!-- Favicon -->
+  <link rel="icon" href="../img/favicon.ico" type="image/x-icon">
+  <link rel="shortcut icon" href="../img/favicon.ico" type="image/x-icon">
+
+	<!-- RSS -->
+	<link href="../feed.xml" type="application/atom+xml" rel="alternate" title="ATOM Feed" />
+
+  <!-— facebook open graph tags -->
+  <meta property="og:url" content="http://uber.github.io/deck.gl/blog/2017/wind-map" />
+  <meta property="og:title" content="Wind Map | Deck.gl Blog" />
+  <meta property="og:description" content="A few weeks ago I set on trying out new WebGL 2.0 features with deck.gl. WebGL 2.0 brings plenty of new goodies to be used for game development, creative coding and data visualization like instancing, floating-point textures, transform feedback, multiple render targets, and more. With this in mind, and inspired by the work of Cameron Beccario, Viegas and Wattenberg and NASA I created a WebGL 2.0 wind map demo using deck.gl." />
+  <meta property="og:site_name" content="deck.gl" />
+  <meta property="og:image" content="http://uber.github.io/deck.gl/blog/img/wind9.gif" />
+  
+  <!-— twitter card tags -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@uber">
+  <meta name="twitter:creator" content="@uber">
+  <meta name="twitter:title" content="Wind Map | Deck.gl Blog">
+  <meta name="twitter:description" content="A few weeks ago I set on trying out new WebGL 2.0 features with deck.gl. WebGL 2.0 brings plenty of new goodies to be used for game development, creative coding and data visualization like instancing, floating-point textures, transform feedback, multiple render targets, and more. With this in mind, and inspired by the work of Cameron Beccario, Viegas and Wattenberg and NASA I created a WebGL 2.0 wind map demo using deck.gl.">
+  <meta name="twitter:image" content="http://uber.github.io/deck.gl/blog/img/wind9.gif" />
+
+</head>
+
+
+<body>
+
+  <!-- Header -->
+  
+<header class="">
+  <div class="bg"/>
+  <div class="container">
+    <a class="logo" href="http://uber.github.io/deck.gl">deck.gl</a>
+    <div class="menu-toggle" >
+      <i class="icon icon-menu" ></i>
+    </div>
+    <div class="links">
+      <a href="http://uber.github.io/deck.gl/#/examples">Gallery</a>
+      <a href="http://uber.github.io/deck.gl/#/documentation">Documentation</a>
+      <a href="http://uber.github.io/deck.gl/blog/latest" class="active">Blog</a>
+    </div>
+  </div>
+</header>
+
+
+  <div class="scroll-area">
+    <div class="flexbox">
+
+      <div class="flexbox__item">
+
+        <!-- Main content -->
+        <div class="container">
+
+        <!-- Navigation -->
+        
+
+
+
+<div class="nav">
+
+  <div class="breadcrumb">
+    <a href="../">All Posts</a>
+    &gt;
+    
+    <span>Wind Map</span>
+    
+  </div>
+
+</div>
+
+
+      	<main>
+
+      		
+
+
+
+
+<article id="post">
+
+	<h1>Wind Map</h1>
+
+  <div>
+    <span class="date"><b>17 Apr 2017</b></span>
+
+    <span class="author">by 
+      
+        <a href="http://github.com/philogb">
+          <b>Nicolas Belmonte</b>
+        </a>
+      
+    </span>
+
+    <div class="share">
+      <!-- Social media scripts -->
+      <script>window.twttr = (function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0],
+    t = window.twttr || {};
+  if (d.getElementById(id)) return t;
+  js = d.createElement(s);
+  js.id = id;
+  js.src = "https://platform.twitter.com/widgets.js";
+  fjs.parentNode.insertBefore(js, fjs);
+
+  t._e = [];
+  t.ready = function(f) {
+    t._e.push(f);
+  };
+
+  return t;
+}(document, "script", "twitter-wjs"));</script>
+
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) return;
+  js = d.createElement(s); js.id = id;
+  js.src = "//connect.facebook.net/en_US/sdk.js#xfbml=1&version=v2.8";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+      <div class="fb-share-button" data-href="http://uber.github.io/deck.gl/blog/2017/wind-map" data-layout="button_count" data-size="small" data-mobile-iframe="true">
+        <a class="fb-xfbml-parse-ignore" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=http://uber.github.io/deck.gl/blog/2017/wind-map&amp;src=sdkpreparse">Share</a>
+      </div>
+      <div>
+        <a class="twitter-share-button"
+          href="https://twitter.com/intent/tweet?text=http://uber.github.io/deck.gl/blog/2017/wind-map">
+        Tweet</a>
+      </div>
+    </div>
+  </div>
+
+	<div class="content">
+		<div class="youtube-wrapper">
+  <iframe src="https://www.youtube.com/embed/4qm_dO4nAk0" frameborder="0" allowfullscreen=""></iframe>
+</div>
+
+<p>A few weeks ago I set on trying out new WebGL 2.0 features with deck.gl. WebGL 2.0 brings plenty of new goodies to be used for game development, creative coding and data visualization like instancing, floating-point textures, transform feedback, multiple render targets, and more. With this in mind, and inspired by the work of Cameron Beccario, Viegas and Wattenberg, and NASA, I created a WebGL 2.0 wind map demo using deck.gl.</p>
+
+<p>This <a href="http://philogb.github.io/page/wind/">interactive demo</a> enables you to change the map’s perspective by using cmd + drag; toggle between vector field and particle layers on the left panel, and use the slider to change the time of day to see wind change for a 72 hour period.</p>
+
+<h2 id="some-interesting-insights">Some interesting insights</h2>
+
+<p>The screenshot below shows wind speed near Mount Washington, which has the fastest winds in the US.</p>
+
+<p><img src="../img/wind2.jpg" alt="Wind speed near Mount Washington" /></p>
+
+<p>Something interesting to look at as well are the wind corridors being formed in Florida at specific times.</p>
+
+<p><img src="../img/wind9.gif" alt="Extreme wind corridors in Florida" /></p>
+
+<h2 id="under-the-hood">Under the hood</h2>
+
+<p>There are thousands of stations that capture wind speed, orientation and temperature with different time granularity. If you turn all layers off you’ll see yellow dots that represent each one of the stations we’re getting data from.</p>
+
+<p><img src="../img/wind4.jpg" alt="Wind stations across the US" /></p>
+
+<h3 id="the-delaunay-interpolation-layer">The Delaunay Interpolation Layer</h3>
+
+<p>For this example though one of the challenges was to be able to get a uniform distribution of wind speed, direction and temperature that could be sampled at any point of the map, not simply at each station. In order to do this we created a Delaunay tessellation for the stations, and then rendered the mesh to a floating-point texture, to get GPU-interpolated values into an image. In this case we map wind direction to the red channel, wind speed to green, temperature to blue and elevation to alpha.</p>
+
+<p><img src="../img/wind-delaunay-1.jpg" alt="Delaunay mesh" /></p>
+
+<p>You can see the interpolated wind data rendered to an image below:</p>
+
+<p><img src="../img/wind-delaunay-2.jpg" alt="Delaunay interpolation layer" /></p>
+
+<h3 id="the-vector-field-layer">The Vector Field Layer</h3>
+
+<p>The next step was to use instancing to create a regular vector field layer. For this we created tetrahedron instances to serve as arrows and used the texture above to set their orientation, color and size. If you use the slider on the left you’ll also see that there’s GPU interpolation. Although we sample data every hour, we interpolate between the textures so we can estimate the values at each minute. Since we already had the Delaunay model we also used that to give an approximation of the elevation in the US:</p>
+
+<p><img src="../img/wind7.jpg" alt="Vector field layer" /></p>
+
+<h3 id="the-particle-layer">The Particle Layer</h3>
+
+<p>Finally we used <a href="https://open.gl/feedback">transform feedback</a>, which enables us to only use the vertex shader for data processing and updating every particle’s position in real-time. We throw a random sample of particles (~1MM) that get updated by the texture data, and then render those on the screen. Every particle has a TTL (time-to-live); when the TTL expires it gets repositioned at a random location on the map. Blending reveals where the biggest concentration of particles are.</p>
+
+<p align="center">
+  <img alt="Particles" src="../img/wind3.gif" />
+</p>
+
+<p>And that’s it! Three custom layers built with deck.gl to bring this wind map to life. Check out <a href="http://philogb.github.io/page/wind/">the example</a> and feel free to provide feedback!</p>
+
+	</div>
+
+  <div class="tag-cloud">
+    
+      <a href="../tag/case-study">Case Study</a>
+    
+      <a href="../tag/visualization">Visualization</a>
+    
+      <a href="../tag/webgl">WebGL</a>
+    
+  </div>
+
+  <div class="navigation clearfix">
+    
+      <a class="float--left" href="../2017/rendering-minecraft-with-deckgl">&lt; Previous post: Rendering A Minecraft World With deck.gl</a>
+    
+    
+  </div>
+
+</article>
+
+
+
+        </main>
+      	
+      	  <!-- Pagination links -->
+          
+
+        </div>
+      </div>
+
+      <div class="flexbox__item--collapsed">
+        <!-- Footer -->
+        
+
+
+<footer>
+  <div class="container">
+    <img src="../img/logo.gif" />
+  </div>
+</footer>
+
+      </div>
+
+    </div>
+  </div>
+</body>
+</html>
