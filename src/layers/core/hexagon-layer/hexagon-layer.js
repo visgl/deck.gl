@@ -64,9 +64,9 @@ function _percentileChanged(oldProps, props) {
 
 export default class HexagonLayer extends Layer {
   constructor(props) {
-    if (!props.radius) {
-      log.once(0, 'HexagonLayer: radius in meter is needed to aggregate points into ' +
-        'hexagonal bins, Now using 1000 meter as default');
+    if (!props.radius || !typeof props.hexagonAggregator === 'function') {
+      log.once(0, 'HexagonLayer: radius or hexagonAggregator is needed to aggregate points into ' +
+        'hexagonal bins, Now using 1000 meter as default radius');
 
       props.radius = defaultProps.radius;
     }
@@ -100,6 +100,7 @@ export default class HexagonLayer extends Layer {
   initializeState() {
     this.state = {
       hexagons: [],
+      hexagonVertices: null,
       countRange: null,
       sortedCounts: null,
       valueDomain: null
@@ -124,13 +125,13 @@ export default class HexagonLayer extends Layer {
   getHexagons() {
     const {hexagonAggregator} = this.props;
     const {viewport} = this.context;
-    const hexagons = hexagonAggregator(this.props, viewport);
-    Object.assign(this.state, {hexagons});
+    const {hexagons, hexagonVertices} = hexagonAggregator(this.props, viewport);
+    this.setState({hexagons, hexagonVertices});
   }
 
   getSortedCounts() {
     const sortedCounts = new BinSorter(this.state.hexagons || []);
-    Object.assign(this.state, {sortedCounts});
+    this.setState({sortedCounts});
   }
 
   getPickingInfo({info}) {
@@ -144,11 +145,26 @@ export default class HexagonLayer extends Layer {
     });
   }
 
+  getUpdateTrigger() {
+    return {
+      getColor: {
+        colorRange: this.props.colorRange,
+        colorDomain: this.props.colorDomain,
+        lowerPercentile: this.props.lowerPercentile,
+        upperPercentile: this.props.upperPercentile
+      },
+      getElevation: {
+        elevationRange: this.props.elevationRange,
+        elevationDomain: this.props.elevationDomain
+      }
+    };
+  }
+
   _onPercentileChange() {
     const {lowerPercentile, upperPercentile} = this.props;
 
     this.state.valueDomain = this.state.sortedCounts
-      .getCountRange([lowerPercentile, upperPercentile]);
+      .getValueRange([lowerPercentile, upperPercentile]);
   }
 
   _onGetSublayerColor(cell) {
@@ -170,8 +186,8 @@ export default class HexagonLayer extends Layer {
     const {elevationDomain, elevationRange} = this.props;
     const {sortedCounts} = this.state;
 
-    // elevation is not affected by percentile
-    const domain = elevationDomain || [0, sortedCounts.getMaxCount()];
+    // elevation is based on counts, it is not affected by percentile
+    const domain = elevationDomain || [0, sortedCounts.maxCount];
     return linearScale(domain, elevationRange, cell.points.length);
   }
 
@@ -202,18 +218,7 @@ export default class HexagonLayer extends Layer {
       modelMatrix,
       getColor: this._onGetSublayerColor.bind(this),
       getElevation: this._onGetSublayerElevation.bind(this),
-      updateTriggers: {
-        getColor: {
-          colorRange: this.props.colorRange,
-          colorDomain: this.props.colorDomain,
-          lowerPercentile: this.props.lowerPercentile,
-          upperPercentile: this.props.upperPercentile
-        },
-        getElevation: {
-          elevationRange: this.props.elevationRange,
-          elevationDomain: this.props.elevationDomain
-        }
-      }
+      updateTriggers: this.getUpdateTrigger()
     });
   }
 }
