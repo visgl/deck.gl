@@ -50,10 +50,12 @@ Radius of hexagon bin in meters. The hexagons are pointy-topped (rather than fla
 
 - Default: `d3-hexbin`
 
-`hexagonAggregator` is the function to aggregate data into hexagonal bins.
-The `hexagonAggregator` takes props of the layer and current viewport as input.
-The output should be an array of hexagons with each formatted as `{centroid: [], points: []}`, where
-`centroid` is the center of the hexagon, and `points` is an array of points that contained by it.
+`hexagonAggregator` is a function to aggregate data into hexagonal bins.
+The `hexagonAggregator` takes props of the layer and current viewport as arguments.
+The output should be `{hexagons: [], hexagonVertices: []}`. `hexagons` is 
+an array of `{centroid: [], points: []}`, where `centroid` is the 
+center of the hexagon, and `points` is an array of points that contained by it.  `hexagonVertices` 
+(optional) is an array of points define the primitive hexagon geometry.
 
 By default, the `HexagonLayer` uses
 [d3-hexbin](https://github.com/d3/d3-hexbin) as `hexagonAggregator`,
