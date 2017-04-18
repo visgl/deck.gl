@@ -73,8 +73,6 @@ export default class GraphSimulation {
 
 GraphSimulation.defaultProps = {
   alphaOnDataChange: 0.25,
-  alphaOnDrag: 0.1,
-  alphaOnHover: 0.01,
   linkDistance: 200,
   linkStrength: 0.5,
   nBodyStrength: -60,
