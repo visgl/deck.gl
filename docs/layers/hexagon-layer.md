@@ -83,8 +83,8 @@ Hexagon color ranges as an array of colors formatted as `[[255, 255, 255, 255]]`
 
 `getColorValue` is the accessor function to get the value that bin color is based on. 
 It takes an array of points inside each bin as arguments, returns a value. For example, 
-You can pass in `getColorValue`to color the bins by avg/mean/max of a specific attributes of each point.
-By default `getColorValue` is undefined, color of bins will based on count of points.
+You can pass in `getColorValue` to color the bins by avg/mean/max of a specific attributes of each point.
+By default `getColorValue` returns the length of the points array.
 
 ##### `coverage` (Number, optional)
 

@@ -31,7 +31,7 @@ import BinSorter from '../../../utils/bin-sorter';
 const defaultProps = {
   colorDomain: null,
   colorRange: defaultColorRange,
-  getColorValue: undefined,
+  getColorValue: points => points.length,
   elevationDomain: null,
   elevationRange: [0, 1000],
   elevationScale: 1,
@@ -69,9 +69,9 @@ function _needsReSortBins(oldProps, props) {
 
 export default class HexagonLayer extends Layer {
   constructor(props) {
-    if (!props.radius || !typeof props.hexagonAggregator === 'function') {
-      log.once(0, 'HexagonLayer: radius or hexagonAggregator is needed to aggregate points into ' +
-        'hexagonal bins, Now using 1000 meter as default radius');
+    if (!props.radius || !props.hexagonAggregator) {
+      log.once(0, 'HexagonLayer: rDefault hexagonAggregator requires radius prop to be set, ' +
+        'Now using 1000 meter as default');
 
       props.radius = defaultProps.radius;
     }
