@@ -21,12 +21,11 @@ export default class DeckGLOverlay extends Component {
       opacity: 1.0,
       projectionMode: COORDINATE_SYSTEM.IDENTITY,
 
+      layoutAccessors: this.props.layoutAccessors,
+
       getNodeColor: this.props.getNodeColor,
       getNodeSize: this.props.getNodeSize,
       getNodeIcon: this.props.getNodeIcon,
-      linkDistance: this.props.linkDistance,
-      linkStrength: this.props.linkStrength,
-      nBodyStrength: this.props.nBodyStrength,
 
       onHover: this.props.onHover,
       onClick: this.props.onClick

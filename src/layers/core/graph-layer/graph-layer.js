@@ -39,7 +39,7 @@ const defaultProps = {
 
   getNodePosition: node => [node.x, node.y, 0],
   getNodeColor: node => node.color || [18, 147, 154, 255],
-  getNodeIcon: node => null,
+  getNodeIcon: null,
   getNodeSize: node => node.radius || 9,
   getLinkPosition: link => ({
     sourcePosition: [link.source.x, link.source.y],
@@ -93,8 +93,10 @@ export default class GraphLayer extends CompositeLayer {
     // Accessor props for underlying layers
     const {getLinkPosition, getLinkColor, getLinkWidth,
       getNodePosition, getNodeColor, getNodeIcon, getNodeSize} = this.props;
-    const icon = getNodeIcon() || {};
-    const {getIcon, iconAtlas, iconMapping, sizeScale} = icon;
+
+    // destructure individual icon-specific accessors from getNodeIcon
+    const iconAccessors = getNodeIcon || {};
+    const {getIcon, iconAtlas, iconMapping, sizeScale} = iconAccessors;
 
     // base layer props
     const {opacity, pickable, visible} = this.props;
@@ -104,7 +106,9 @@ export default class GraphLayer extends CompositeLayer {
 
     const drawLinks = links && links.length > 0;
     const drawNodes = nodes && nodes.length > 0;
-    const drawIcons = drawNodes && Boolean(getIcon);  // ensure a valid accessor
+
+    // only draw icons if all required accessors are present
+    const drawIcons = drawNodes && getIcon && iconAtlas && iconMapping;
 
     const linksLayer = drawLinks && new LineLayer({
       id: `${id}-${GRAPH_LAYER_IDS.LINK}`,
@@ -124,7 +128,7 @@ export default class GraphLayer extends CompositeLayer {
     });
 
     const nodesLayer = drawNodes && new ScatterplotLayer({
-      id: `${id}-${icon ? GRAPH_LAYER_IDS.NODE_BG : GRAPH_LAYER_IDS.NODE}`,
+      id: `${id}-${drawIcons ? GRAPH_LAYER_IDS.NODE_BG : GRAPH_LAYER_IDS.NODE}`,
       data: nodes,
       getPosition: getNodePosition,
       getRadius: getNodeSize,

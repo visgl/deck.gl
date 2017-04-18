@@ -24,6 +24,16 @@ class Root extends Component {
     this._onClick = this._onClick.bind(this);
     this._getNodeColor = this._getNodeColor.bind(this);
 
+    // set initial state
+    this.state = {
+      viewport: {
+        width: 500,
+        height: 500
+      },
+      graph: null,
+      data: null
+    };
+
     const dataConfig = [
       {
         data: './data/sample-graph.json',
@@ -58,39 +68,16 @@ class Root extends Component {
     });
 
     // only set up icon accessors for sample datasets that have types to be represented as icons.
-    let getNodeIcon = {};
     if (dataConfig[DATASET].hasNodeTypes) {
-      // specify icon accessors
-      getNodeIcon = {
-        getIcon: this._getNodeIcon.bind(this),
-        iconAtlas: './data/node-icon-atlas.png',
-        iconMapping: null,
-        sizeScale: 4
-      };
-
       // load icon atlas
       requestJSON('./data/node-icon-atlas.json', (error, response) => {
         if (!error) {
           this.setState({
-            getNodeIcon: Object.assign({}, this.state.getNodeIcon, {
-              iconMapping: response
-            })
+            iconMapping: response
           });
         }
       });
     }
-
-    // set initial state
-    this.state = Object.assign({
-      viewport: {
-        width: 500,
-        height: 500
-      },
-      graph: null,
-      data: null
-    }, {
-      getNodeIcon
-    });
   }
 
   componentDidMount() {
@@ -141,11 +128,30 @@ class Root extends Component {
   }
 
   //
-  // deck.gl rendering accessors
+  // layout (d3-force) accessors
+  //
+  _linkDistance(link, i) {
+    return 20;
+  }
+
+  _linkStrength(link, i) {
+    if (link.sourceCount || link.targetCount) {
+      return 1 / Math.min(link.sourceCount, link.targetCount);
+    }
+    return 0.5;
+  }
+
+  _nBodyStrength(node, i) {
+    if (node.size) {
+      return -Math.pow(node.size, 1.5) * 3;
+    }
+    return -60;
+  }
+
+  //
+  // rendering (deck.gl) accessors
   //
   _getNodeColor(node) {
-    // TODO: demonstrate switching on e.g. node.type (for data that supply `type` field)
-    // probably better to implement icon accessor.
     return [18, 147, 154, 255];
   }
 
@@ -171,26 +177,8 @@ class Root extends Component {
   }
 
   //
-  // d3-force accessors
+  // rendering
   //
-  _linkDistance(link, i) {
-    return 20;
-  }
-
-  _linkStrength(link, i) {
-    if (link.sourceCount || link.targetCount) {
-      return 1 / Math.min(link.sourceCount, link.targetCount);
-    }
-    return 0.5;
-  }
-
-  _nBodyStrength(node, i) {
-    if (node.size) {
-      return -Math.pow(node.size, 1.5) * 3;
-    }
-    return -60;
-  }
-
   _renderInteractionLayer(viewport, hovered, clicked) {
     // set flags used below to determine if SVG highlight elements should be rendered.
     // if truthy, each flag is replaced with the corresponding element to render.
@@ -298,14 +286,28 @@ class Root extends Component {
       onHover: this._onHover,
       onClick: this._onClick
     };
-    const accessors = {
-      getNodeColor: this._getNodeColor,
-      getNodeSize: this._getNodeSize,
-      getNodeIcon: this.state.getNodeIcon,
+
+    const layoutAccessors = {
       linkDistance: this._linkDistance,
       linkStrength: this._linkStrength,
       nBodyStrength: this._nBodyStrength
     };
+
+    const renderAccessors = {
+      getNodeColor: this._getNodeColor,
+      getNodeSize: this._getNodeSize
+    };
+
+    const {iconMapping} = this.state;
+    if (iconMapping) {
+      // specify icon accessors if icon mapping is loaded
+      renderAccessors.getNodeIcon = {
+        getIcon: this._getNodeIcon.bind(this),
+        iconAtlas: './data/node-icon-atlas.png',
+        iconMapping,
+        sizeScale: 4
+      };
+    }
 
     return (
       <div>
@@ -313,7 +315,8 @@ class Root extends Component {
           viewport={viewport}
           data={data}
           {...handlers}
-          {...accessors} />
+          layoutAccessors={layoutAccessors}
+          {...renderAccessors} />
         {this._renderInteractionLayer(viewport, hovered, clicked)}
       </div>
     );
