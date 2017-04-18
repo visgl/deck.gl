@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import DeckGL, {OrthographicViewport, COORDINATE_SYSTEM} from 'deck.gl';
+import DeckGL, {OrthographicViewport} from 'deck.gl';
 import GraphLayoutLayer from './src/graph-layout-layer';
 
 export default class DeckGLOverlay extends Component {
@@ -15,20 +15,19 @@ export default class DeckGLOverlay extends Component {
     }
 
     const {width, height} = viewport;
+    const {layoutAccessors, linkAccessors, nodeAccessors, nodeIconAccessors} = this.props;
+    const {onHover, onClick} = this.props;
     const layer = new GraphLayoutLayer({
       id: 'graph-layout',
       data,
-      opacity: 1.0,
-      projectionMode: COORDINATE_SYSTEM.IDENTITY,
 
-      layoutAccessors: this.props.layoutAccessors,
+      layoutAccessors,
+      linkAccessors,
+      nodeAccessors,
+      nodeIconAccessors,
 
-      getNodeColor: this.props.getNodeColor,
-      getNodeSize: this.props.getNodeSize,
-      getNodeIcon: this.props.getNodeIcon,
-
-      onHover: this.props.onHover,
-      onClick: this.props.onClick
+      onHover,
+      onClick
     });
 
     // recalculate viewport on container size change.

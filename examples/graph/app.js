@@ -293,15 +293,17 @@ class Root extends Component {
       nBodyStrength: this._nBodyStrength
     };
 
-    const renderAccessors = {
+    const linkAccessors = {};
+    const nodeAccessors = {
       getNodeColor: this._getNodeColor,
       getNodeSize: this._getNodeSize
     };
 
+    let nodeIconAccessors;
     const {iconMapping} = this.state;
     if (iconMapping) {
-      // specify icon accessors if icon mapping is loaded
-      renderAccessors.getNodeIcon = {
+      // pass icon accessors if icon mapping is loaded
+      nodeIconAccessors = {
         getIcon: this._getNodeIcon.bind(this),
         iconAtlas: './data/node-icon-atlas.png',
         iconMapping,
@@ -316,7 +318,10 @@ class Root extends Component {
           data={data}
           {...handlers}
           layoutAccessors={layoutAccessors}
-          {...renderAccessors} />
+          linkAccessors={linkAccessors}
+          nodeAccessors={nodeAccessors}
+          nodeIconAccessors={nodeIconAccessors}
+        />
         {this._renderInteractionLayer(viewport, hovered, clicked)}
       </div>
     );

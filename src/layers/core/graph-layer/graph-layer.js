@@ -22,7 +22,8 @@ import {
   CompositeLayer,
   IconLayer,
   LineLayer,
-  ScatterplotLayer
+  ScatterplotLayer,
+  COORDINATE_SYSTEM
 } from 'deck.gl';
 
 export const GRAPH_LAYER_IDS = {
@@ -32,15 +33,10 @@ export const GRAPH_LAYER_IDS = {
   NODE_ICON: 'node-icon-layer'
 };
 
-const noop = () => {};
-
 const defaultProps = {
   offset: {x: 0, y: 0},
+  projectionMode: COORDINATE_SYSTEM.IDENTITY,
 
-  getNodePosition: node => [node.x, node.y, 0],
-  getNodeColor: node => node.color || [18, 147, 154, 255],
-  getNodeIcon: null,
-  getNodeSize: node => node.radius || 9,
   getLinkPosition: link => ({
     sourcePosition: [link.source.x, link.source.y],
     targetPosition: [link.target.x, link.target.y]
@@ -48,12 +44,11 @@ const defaultProps = {
   getLinkWidth: link => 2,
   getLinkColor: link => [179, 173, 158, 255],
 
-  onClick: noop,
-  onDoubleClick: noop,
-  onDrag: noop,
-  onHover: noop,
-  onMouseMove: noop,
-  onWheel: noop
+  getNodePosition: node => [node.x, node.y, 0],
+  getNodeColor: node => node.color || [18, 147, 154, 255],
+  getNodeSize: node => node.radius || 8,
+
+  nodeIconAccessors: {}
 };
 
 /**
@@ -91,12 +86,11 @@ export default class GraphLayer extends CompositeLayer {
     const {nodes, links, layoutAlpha} = this.state;
 
     // Accessor props for underlying layers
-    const {getLinkPosition, getLinkColor, getLinkWidth,
-      getNodePosition, getNodeColor, getNodeIcon, getNodeSize} = this.props;
-
-    // destructure individual icon-specific accessors from getNodeIcon
-    const iconAccessors = getNodeIcon || {};
-    const {getIcon, iconAtlas, iconMapping, sizeScale} = iconAccessors;
+    const {
+      getLinkPosition, getLinkColor, getLinkWidth,
+      getNodePosition, getNodeColor, getNodeSize,
+      nodeIconAccessors} = this.props;
+    const {getIcon, iconAtlas, iconMapping, sizeScale} = nodeIconAccessors;
 
     // base layer props
     const {opacity, pickable, visible} = this.props;

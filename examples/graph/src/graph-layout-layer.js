@@ -1,5 +1,20 @@
-import {CompositeLayer, GraphLayer, GRAPH_LAYER_IDS} from 'deck.gl';
+import {
+  CompositeLayer,
+  GraphLayer,
+  GRAPH_LAYER_IDS,
+  COORDINATE_SYSTEM
+} from 'deck.gl';
 import GraphSimulation from './graph-simulation';
+
+const defaultProps = {
+  width: 640,
+  height: 640,
+  data: null,
+  opacity: 1.0,
+  layout: GraphSimulation,
+  projectionMode: COORDINATE_SYSTEM.IDENTITY,
+  nodeIconAccessors: {}
+};
 
 /**
  * GraphLayoutLayer displays a force-directed network graph in deck.gl.
@@ -89,55 +104,44 @@ export default class GraphLayoutLayer extends CompositeLayer {
 
     // base layer props
     const {opacity, visible} = this.props;
-    const pickable = Boolean(this.props.onHover || this.props.onClick || this.props.onDoubleClick);
+
+    // base layer handlers
+    const {onHover, onClick} = this.props;
+    const pickable = Boolean(this.props.onHover || this.props.onClick);
 
     // viewport props
     const {projectionMode} = this.props;
 
-    // optional handlers and accessors
-    const optional = [
-      'onHover',
-      'onClick',
-      'onDoubleClick',
-      'getNodePosition',
-      'getNodeColor',
-      'getNodeIcon',
-      'getNodeSize',
-      'getLinkPosition',
-      'getLinkWidth',
-      'getLinkColor'
-    ].filter(key => Boolean(this.props[key]))
-    .reduce((acc, key) => {
-      acc[key] = this.props[key];
-      return acc;
-    }, {});
+    // base layer accessors
+    const {linkAccessors, nodeAccessors, nodeIconAccessors} = this.props;
 
-    // accessors
-    const {
-    } = this.props;
+    return new GraphLayer(Object.assign(
+      {
+        id: `${id}-graph`,
+        data: {
+          nodes,
+          links,
+          layoutAlpha
+        },
 
-    return new GraphLayer(Object.assign({
-      id: `${id}-graph`,
-      data: {
-        nodes,
-        links,
-        layoutAlpha
+        opacity,
+        pickable,
+        visible,
+        projectionMode,
+
+        onHover,
+        onClick
       },
-      opacity,
-      pickable,
-      visible,
-      projectionMode
-    }, optional));
+
+      // deconstruct these
+      linkAccessors,
+      nodeAccessors,
+
+      // leave these accessors bundled in an object
+      {nodeIconAccessors}
+    ));
   }
 }
 
 GraphLayoutLayer.layerName = 'GraphLayoutLayer';
-GraphLayoutLayer.defaultProps = {
-  width: 640,
-  height: 640,
-  data: null,
-  onHover: () => {},
-  onClick: () => {},
-  onDoubleClick: () => {},
-  layout: GraphSimulation
-};
+GraphLayoutLayer.defaultProps = defaultProps;
