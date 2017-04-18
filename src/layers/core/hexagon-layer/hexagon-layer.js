@@ -160,6 +160,7 @@ export default class HexagonLayer extends Layer {
       getColor: {
         colorRange: this.props.colorRange,
         colorDomain: this.props.colorDomain,
+        getColorValue: this.props.getColorValue,
         lowerPercentile: this.props.lowerPercentile,
         upperPercentile: this.props.upperPercentile
       },
