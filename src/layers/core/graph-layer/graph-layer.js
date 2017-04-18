@@ -90,7 +90,7 @@ export default class GraphLayer extends CompositeLayer {
       getLinkPosition, getLinkColor, getLinkWidth,
       getNodePosition, getNodeColor, getNodeSize,
       nodeIconAccessors} = this.props;
-    const {getIcon, iconAtlas, iconMapping, sizeScale} = nodeIconAccessors;
+    const {getIcon, iconAtlas, iconMapping, sizeScale} = nodeIconAccessors || {};
 
     // base layer props
     const {opacity, pickable, visible} = this.props;
