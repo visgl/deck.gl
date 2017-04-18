@@ -17,29 +17,28 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-import {log} from '../lib/utils';
 
-// valueAccessor takes an array of points returns a value to sort the bins on.
+// getValue takes an array of points returns a value to sort the bins on.
 // by default it returns the number of points
 // this is where to pass in a function to color the bins by
 // avg/mean/max of specific value of the point
-const defaultValueAccessor = points => points.length;
+const defaultGetValue = points => points.length;
 
 export default class BinSorter {
-  constructor(bins = [], valueAccessor = defaultValueAccessor) {
-    this.sortedBins = this.getSortedBins(bins, valueAccessor);
+  constructor(bins = [], getValue = defaultGetValue) {
+    this.sortedBins = this.getSortedBins(bins, getValue);
     this.maxCount = this.getMaxCount();
   }
 
   /**
    * Get an array of object with sorted values and index of bins
    * @param {Array} bins
-   * @param {Function} valueAccessor
+   * @param {Function} getValue
    * @return {Array} array of values and index lookup
    */
-  getSortedBins(bins, valueAccessor) {
+  getSortedBins(bins, getValue) {
     return bins
-      .map((h, i) => ({i, value: valueAccessor(h.points), counts: h.points.length}))
+      .map((h, i) => ({i, value: getValue(h.points), counts: h.points.length}))
       .sort((a, b) => a.value - b.value);
   }
 
@@ -67,10 +66,5 @@ export default class BinSorter {
    */
   getMaxCount() {
     return Math.max.apply(null, this.sortedBins.map(b => b.counts));
-  }
-
-  getCountRange(args) {
-    log.once(0, 'HexagonLayer: BinSorter.getCountRange is deprecated, use getValueRange instead');
-    return this.getValueRange(args);
   }
 }

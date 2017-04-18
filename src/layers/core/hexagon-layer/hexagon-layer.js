@@ -31,7 +31,7 @@ import BinSorter from '../../../utils/bin-sorter';
 const defaultProps = {
   colorDomain: null,
   colorRange: defaultColorRange,
-  colorValueAccessor: undefined,
+  getColorValue: undefined,
   elevationDomain: null,
   elevationRange: [0, 1000],
   elevationScale: 1,
@@ -64,7 +64,7 @@ function _percentileChanged(oldProps, props) {
 }
 
 function _needsReSortBins(oldProps, props) {
-  return oldProps.colorValueAccessor !== props.colorValueAccessor;
+  return oldProps.getColorValue !== props.getColorValue;
 }
 
 export default class HexagonLayer extends Layer {
@@ -140,7 +140,7 @@ export default class HexagonLayer extends Layer {
   }
 
   getSortedCounts() {
-    const sortedCounts = new BinSorter(this.state.hexagons || [], this.props.colorValueAccessor);
+    const sortedCounts = new BinSorter(this.state.hexagons || [], this.props.getColorValue);
     this.setState({sortedCounts});
   }
 
@@ -155,7 +155,7 @@ export default class HexagonLayer extends Layer {
     });
   }
 
-  getUpdateTrigger() {
+  getUpdateTriggers() {
     return {
       getColor: {
         colorRange: this.props.colorRange,
@@ -229,7 +229,7 @@ export default class HexagonLayer extends Layer {
       modelMatrix,
       getColor: this._onGetSublayerColor.bind(this),
       getElevation: this._onGetSublayerElevation.bind(this),
-      updateTriggers: this.getUpdateTrigger()
+      updateTriggers: this.getUpdateTriggers()
     });
   }
 }

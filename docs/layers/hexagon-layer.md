@@ -77,14 +77,14 @@ to number of counts by passing in an arbitrary color domain. This property is ex
 Hexagon color ranges as an array of colors formatted as `[[255, 255, 255, 255]]`. Default is
 [colorbrewer](http://colorbrewer2.org/#type=sequential&scheme=YlOrRd&n=6) `6-class YlOrRd`.
 
-##### `colorValueAccessor` (Function, optional)
+##### `getColorValue` (Function, optional)
 
-- Default: `undefined`
+- Default: `points => points.length`
 
-`colorValueAccessor` is the accessor function to get the value that bin color is based on. 
+`getColorValue` is the accessor function to get the value that bin color is based on. 
 It takes an array of points inside each bin as arguments, returns a value. For example, 
-You can use `colorValueAccessor`to color the bins by avg/mean/max of a specific attributes of each point.
-When not specified, color of bins will based on count of points.
+You can pass in `getColorValue`to color the bins by avg/mean/max of a specific attributes of each point.
+By default `getColorValue` is undefined, color of bins will based on count of points.
 
 ##### `coverage` (Number, optional)
 
