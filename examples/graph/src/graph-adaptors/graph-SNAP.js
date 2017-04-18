@@ -1,3 +1,5 @@
+const MAX_NUM_NODES = 2000;
+
 export default class GraphAdaptor {
   constructor(data) {
     this._processData(data);
@@ -27,6 +29,10 @@ export default class GraphAdaptor {
 
     data.forEach(link => {
       const {source, target} = link;
+      if (source > MAX_NUM_NODES || target > MAX_NUM_NODES) {
+        return;
+      }
+
       this.links.push({
         id: this.links.length,
         source,
