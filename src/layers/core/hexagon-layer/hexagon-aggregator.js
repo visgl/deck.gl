@@ -45,10 +45,12 @@ export function pointToHexbin({data, radius, getPosition}, viewport) {
 
   const hexagonBins = newHexbin(screenPoints);
 
-  return hexagonBins.map(hex => ({
-    centroid: viewport.unprojectFlat([hex.x, hex.y]),
-    points: hex
-  }));
+  return {
+    hexagons: hexagonBins.map(hex => ({
+      centroid: viewport.unprojectFlat([hex.x, hex.y]),
+      points: hex
+    }))
+  };
 }
 
 /**

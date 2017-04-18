@@ -18,35 +18,46 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+// getValue takes an array of points returns a value to sort the bins on.
+// by default it returns the number of points
+// this is where to pass in a function to color the bins by
+// avg/mean/max of specific value of the point
+const defaultGetValue = points => points.length;
+
 export default class BinSorter {
-  constructor(bins) {
-    this.sortedBins = this.getSortedCounts(bins);
+  constructor(bins = [], getValue = defaultGetValue) {
+    this.sortedBins = this.getSortedBins(bins, getValue);
+    this.maxCount = this.getMaxCount();
   }
 
   /**
-   * Get an array of object with sorted count and index of bins
+   * Get an array of object with sorted values and index of bins
    * @param {Array} bins
-   * @return {Array} array of count and index lookup
+   * @param {Function} getValue
+   * @return {Array} array of values and index lookup
    */
-  getSortedCounts(bins) {
+  getSortedBins(bins, getValue) {
     return bins
-      .map((h, i) => ({i, counts: h.points.length}))
-      .sort((a, b) => a.counts - b.counts);
+      .map((h, i) => ({i, value: getValue(h.points), counts: h.points.length}))
+      .sort((a, b) => a.value - b.value);
   }
 
   /**
-   * Get an array of object with sorted count and index of bins
+   * Get range of values of all bins
    * @param {Number[]} range
    * @param {Number} range[0] - lower bound
    * @param {Number} range[1] - upper bound
-   * @return {Array} array of nuw count range
+   * @return {Array} array of new value range
    */
-  getCountRange([lower, upper]) {
+  getValueRange([lower, upper]) {
     const len = this.sortedBins.length;
+    if (!len) {
+      return [0, 0];
+    }
     const lowerIdx = Math.ceil(lower / 100 * (len - 1));
     const upperIdx = Math.floor(upper / 100 * (len - 1));
 
-    return [this.sortedBins[lowerIdx].counts, this.sortedBins[upperIdx].counts];
+    return [this.sortedBins[lowerIdx].value, this.sortedBins[upperIdx].value];
   }
 
   /**
@@ -54,6 +65,6 @@ export default class BinSorter {
    * @return {Number | Boolean} max count
    */
   getMaxCount() {
-    return this.sortedBins.length && this.sortedBins[this.sortedBins.length - 1].counts;
+    return Math.max.apply(null, this.sortedBins.map(b => b.counts));
   }
 }
