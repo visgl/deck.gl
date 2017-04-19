@@ -56,15 +56,17 @@ export default class Layer {
   constructor(props) {
     // If sublayer has static defaultProps member, getDefaultProps will return it
     const mergedDefaultProps = getDefaultProps(this);
-    // Strip undefined values from supplied props to avoid unintentionally shadowing defaults
-    props = Object.keys(props)
-      .filter(k => typeof props[k] !== 'undefined')
-      .reduce((acc, k) => {
-        acc[k] = props[k];
-        return acc;
-      }, {});
-    // Merge supplied props with pre-merged default props
-    props = Object.assign({}, mergedDefaultProps, props);
+
+    // merge all but undefined props
+    let k;
+    const mergedProps = Object.assign({}, mergedDefaultProps);
+    for (k in props) {
+      if (typeof props[k] !== 'undefined') {
+        mergedProps[k] = props[k];
+      }
+    }
+    props = mergedProps;
+
     // Accept null as data - otherwise apps and layers need to add ugly checks
     props.data = props.data || [];
     // Props are immutable
