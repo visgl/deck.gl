@@ -22,6 +22,9 @@ class Root extends Component {
     this._animate = this._animate.bind(this);
     this._onHover = this._onHover.bind(this);
     this._onClick = this._onClick.bind(this);
+    this._onDragStart = this._onDragStart.bind(this);
+    this._onDragMove = this._onDragMove.bind(this);
+    this._onDragEnd = this._onDragEnd.bind(this);
     this._getNodeColor = this._getNodeColor.bind(this);
 
     // set initial state
@@ -124,6 +127,24 @@ class Root extends Component {
       if (clicked) {
         this.setState({clicked: null});
       }
+    }
+  }
+
+  _onDragStart(el) {
+    if (el) {
+      this.setState({dragging: el});
+    }
+  }
+
+  _onDragMove(el) {
+    if (el) {
+      this.setState({dragging: el});
+    }
+  }
+
+  _onDragEnd(el) {
+    if (el) {
+      this.setState({dragging: null});
     }
   }
 
@@ -281,11 +302,18 @@ class Root extends Component {
 
   render() {
     const {viewport, data} = this.state;
-    const {hovered, clicked} = this.state;
+    const {hovered, clicked, dragging} = this.state;
     const handlers = {
       onHover: this._onHover,
-      onClick: this._onClick
+      onClick: this._onClick,
+      onDragStart: this._onDragStart,
+      onDragMove: this._onDragMove,
+      onDragEnd: this._onDragEnd
     };
+
+    if (dragging) {
+      // TODO: fix dragged nodes in graph layout and reheat simulation.
+    }
 
     const layoutAccessors = {
       linkDistance: this._linkDistance,

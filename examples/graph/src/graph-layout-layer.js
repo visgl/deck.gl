@@ -106,7 +106,7 @@ export default class GraphLayoutLayer extends CompositeLayer {
     const {opacity, visible} = this.props;
 
     // base layer handlers
-    const {onHover, onClick} = this.props;
+    const {onHover, onClick, onDragStart, onDragMove, onDragEnd} = this.props;
     const pickable = Boolean(this.props.onHover || this.props.onClick);
 
     // viewport props
@@ -130,7 +130,10 @@ export default class GraphLayoutLayer extends CompositeLayer {
         projectionMode,
 
         onHover,
-        onClick
+        onClick,
+        onDragStart,
+        onDragMove,
+        onDragEnd
       },
 
       // deconstruct these
