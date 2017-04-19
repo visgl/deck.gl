@@ -44,7 +44,8 @@
     "d3-hexbin": "^0.2.1",
     "earcut": "^2.0.6",
     "gl-matrix": "^2.3.2",
-    "lodash.flattendeep": "^4.4.0"
+    "lodash.flattendeep": "^4.4.0",
+    "prop-types": "^15.5.8"
   },
   "devDependencies": {
     "babel-cli": "^6.22.2",

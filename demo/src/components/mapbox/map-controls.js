@@ -17,7 +17,8 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-import {PropTypes, PureComponent, createElement} from 'react';
+import {PureComponent, createElement} from 'react';
+import PropTypes from 'prop-types';
 import {PerspectiveMercatorViewport} from 'viewport-mercator-project';
 
 // MapControls uses non-react event manager to register events
@@ -25,9 +26,9 @@ import EventManager from './event-manager';
 
 // import browser from 'bowser';
 const PREFIX = '-webkit-';
-  // browser.webkit || browser.blink ? '-webkit-' :
-  // browser.gecko ? '-moz-' :
-  // '';
+// browser.webkit || browser.blink ? '-webkit-' :
+// browser.gecko ? '-moz-' :
+// '';
 const CURSOR = {
   GRABBING: `${PREFIX}grabbing`,
   GRAB: `${PREFIX}grab`,

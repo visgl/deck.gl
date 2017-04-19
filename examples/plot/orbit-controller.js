@@ -1,5 +1,6 @@
 /* global window */
-import React, {Component, PropTypes} from 'react';
+import React, {Component} from 'react';
+import PropTypes from 'prop-types';
 import {PerspectiveViewport} from 'deck.gl';
 import {vec3} from 'gl-matrix';
 

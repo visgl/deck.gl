@@ -1,4 +1,5 @@
-import {PureComponent, PropTypes, createElement} from 'react';
+import {PureComponent, createElement} from 'react';
+import PropTypes from 'prop-types';
 import MapControls from './map-controls';
 
 // InteractiveMap is for browser only and should work with isomorphic rendering
