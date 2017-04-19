@@ -41,6 +41,10 @@ const propTypes = {
   onWebGLInitialized: PropTypes.func,
   onLayerClick: PropTypes.func,
   onLayerHover: PropTypes.func,
+  onLayerDragStart: PropTypes.func,
+  onLayerDragMove: PropTypes.func,
+  onLayerDragEnd: PropTypes.func,
+  onLayerDragCancel: PropTypes.func,
   onAfterRender: PropTypes.func
 };
 
@@ -52,7 +56,11 @@ const defaultProps = {
   onWebGLInitialized: noop,
   onLayerClick: noop,
   onLayerHover: noop,
-  onAfterRender: noop
+  onAfterRender: noop,
+  onLayerDragStart: noop,
+  onLayerDragMove: noop,
+  onLayerDragEnd: noop,
+  onLayerDragCancel: noop
 };
 
 export default class DeckGL extends React.Component {
@@ -100,12 +108,18 @@ export default class DeckGL extends React.Component {
     this._updateLayers(this.props);
 
     // Check if a mouse event has been specified and that at least one of the layers is pickable
-    const hasEvent = this.props.onLayerClick !== noop || this.props.onLayerHover !== noop;
+    const hasEvent =
+      this.props.onLayerClick !== noop ||
+      this.props.onLayerHover !== noop ||
+      this.props.onLayerDragStart !== noop ||
+      this.props.onLayerDragMove !== noop ||
+      this.props.onLayerDragEnd !== noop ||
+      this.props.onLayerDragCancel !== noop;
     const hasPickableLayer = this.layerManager.layers.map(l => l.props.pickable).includes(true);
     if (this.layerManager.layers.length && hasEvent && !hasPickableLayer) {
       log.once(
         0,
-        'You have supplied a mouse event handler but none of your layers got the `pickable` flag.'
+        'You have supplied a mouse event handler but none of your layers set the `pickable` flag.'
       );
     }
 
@@ -114,7 +128,11 @@ export default class DeckGL extends React.Component {
       cachePosition: false,
       centerOrigin: false,
       onClick: this._onClick,
-      onMouseMove: this._onMouseMove
+      onMouseMove: this._onMouseMove,
+      onDragStart: this._onDragEvent,
+      onDragMove: this._onDragEvent,
+      onDragEnd: this._onDragEvent,
+      onDragCancel: this._onDragCancel
     });
   }
 
@@ -135,6 +153,7 @@ export default class DeckGL extends React.Component {
 
   // Route events to layers
   _onMouseMove(event) {
+    // use offsetX|Y for relative position to the container, drop event if falsy
     if (!event || !event.event || !Number.isFinite(event.event.offsetX)) {
       return;
     }
@@ -145,6 +164,52 @@ export default class DeckGL extends React.Component {
       // Event.event holds the original MouseEvent object
       this.props.onLayerHover(firstInfo, selectedInfos, event.event);
     }
+  }
+
+  _onDragEvent(event, explicitType) {
+    // use offsetX|Y for relative position to the container, drop event if falsy
+    if (!event || !event.event || !Number.isFinite(event.event.offsetX)) {
+      return;
+    }
+    const {event: {offsetX: x, offsetY: y}} = event;
+    const type = typeof explicitType === 'string' ? explicitType : event.event.type;
+    let mode;
+    let layerEventHandler;
+    switch (type) {
+    case 'mousedown':
+      mode = 'dragstart';
+      layerEventHandler = this.props.onLayerDragStart;
+      break;
+    case 'mousemove':
+      mode = 'dragmove';
+      layerEventHandler = this.props.onLayerDragMove;
+      break;
+    case 'dragcancel':
+      mode = 'dragcancel';
+      layerEventHandler = this.props.onLayerDragCancel;
+      break;
+    case 'mouseup':
+      mode = 'dragend';
+      layerEventHandler = this.props.onLayerDragEnd;
+      break;
+    default:
+      mode = null;
+      layerEventHandler = null;
+    }
+
+    if (mode) {
+      const selectedInfos = this.layerManager.pickLayer({x, y, mode});
+      if (selectedInfos.length) {
+        const firstInfo = selectedInfos.find(info => info.index >= 0);
+        // Event.event holds the original MouseEvent object
+        layerEventHandler(firstInfo, selectedInfos, event.event);
+      }
+    }
+  }
+
+  _onDragCancel(event) {
+    // rewrite event type for dragcancel / dragend disambiguation
+    this._onDragEvent(event, 'dragcancel');
   }
 
   _onRenderFrame({gl}) {

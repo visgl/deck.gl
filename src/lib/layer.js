@@ -27,6 +27,8 @@ import assert from 'assert';
 
 const LOG_PRIORITY_UPDATE = 2;
 
+const noop = () => {};
+
 /*
  * @param {string} props.id - layer name
  * @param {array}  props.data - array of data instances
@@ -38,8 +40,12 @@ const defaultProps = {
   visible: true,
   pickable: false,
   opacity: 0.8,
-  onHover: () => {},
-  onClick: () => {},
+  onHover: noop,
+  onClick: noop,
+  onDragStart: noop,
+  onDragMove: noop,
+  onDragEnd: noop,
+  onDragCancel: noop,
   // Update triggers: a key change detection mechanism in deck.gl
   // See layer documentation
   updateTriggers: {},
