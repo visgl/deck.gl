@@ -33,16 +33,29 @@ import {
 
 import {parseColor} from 'deck.gl/lib/utils/color';
 
+import {COORDINATE_SYSTEM} from '../../src/lib/constants';
+import {getUniformsFromViewport} from '../../src/lib/viewport-uniforms';
 import {testInitializeLayer} from '../test-utils';
 
 const suite = new Suite();
-const lines = data.choropleths.features.map(f => ({path: f.geometry.coordinates[0]}));
 
 const COLOR_STRING = '#FFEEBB';
 const COLOR_ARRAY = [222, 222, 222];
 
 // add tests
 suite
+.add('getUniformsFromViewport#LNGLAT', () => {
+  return getUniformsFromViewport(data.sampleViewport, {
+    modelMatrix: data.sampleModelMatrix,
+    projectionMode: COORDINATE_SYSTEM.LNGLAT
+  });
+})
+.add('getUniformsFromViewport#METER_OFFSETS', () => {
+  return getUniformsFromViewport(data.sampleViewport, {
+    modelMatrix: data.sampleModelMatrix,
+    projectionMode: COORDINATE_SYSTEM.METER_OFFSETS
+  });
+})
 .add('color#parseColor (string)', () => {
   return parseColor(COLOR_STRING);
 })
@@ -63,7 +76,7 @@ suite
   testInitializeLayer({layer});
 })
 .add('PathLayer#initialize', () => {
-  const layer = new PathLayer({data: lines});
+  const layer = new PathLayer({data: data.lines});
   testInitializeLayer({layer});
 })
 .add('ChoroplethLayer#initialize', () => {
