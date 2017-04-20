@@ -132,19 +132,44 @@ class Root extends Component {
 
   _onDragStart(el) {
     if (el) {
-      this.setState({dragging: el});
+      const {viewport} = this.state;
+      const {width, height} = viewport;
+      const x = el.x - width / 2;
+      const y = el.y - height / 2;
+      this.setState({
+        dragging: {
+          node: el.object,
+          x,
+          y
+        }
+      });
     }
   }
 
   _onDragMove(el) {
     if (el) {
-      this.setState({dragging: el});
+      const {viewport} = this.state;
+      const {width, height} = viewport;
+      const x = el.x - width / 2;
+      const y = el.y - height / 2;
+      this.setState({
+        dragging: {
+          node: el.object,
+          x,
+          y
+        }
+      });
     }
   }
 
   _onDragEnd(el) {
     if (el) {
-      this.setState({dragging: null});
+      this.setState({
+        dragging: null,
+        lastDragged: {
+          node: el.object
+        }
+      });
     }
   }
 
@@ -302,7 +327,7 @@ class Root extends Component {
 
   render() {
     const {viewport, data} = this.state;
-    const {hovered, clicked, dragging} = this.state;
+    const {hovered, clicked, dragging, lastDragged} = this.state;
     const handlers = {
       onHover: this._onHover,
       onClick: this._onClick,
@@ -311,9 +336,10 @@ class Root extends Component {
       onDragEnd: this._onDragEnd
     };
 
-    if (dragging) {
-      // TODO: fix dragged nodes in graph layout and reheat simulation.
-    }
+    const layoutProps = {
+      fixedNodes: dragging ? [dragging] : null,
+      unfixedNodes: lastDragged ? [lastDragged] : null
+    };
 
     const layoutAccessors = {
       linkDistance: this._linkDistance,
@@ -345,12 +371,13 @@ class Root extends Component {
           viewport={viewport}
           data={data}
           {...handlers}
+          layoutProps={layoutProps}
           layoutAccessors={layoutAccessors}
           linkAccessors={linkAccessors}
           nodeAccessors={nodeAccessors}
           nodeIconAccessors={nodeIconAccessors}
         />
-        {this._renderInteractionLayer(viewport, hovered, clicked)}
+        {this._renderInteractionLayer(viewport, hovered, (dragging || clicked))}
       </div>
     );
   }

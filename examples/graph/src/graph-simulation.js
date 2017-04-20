@@ -13,12 +13,13 @@ export default class GraphSimulation {
   }
 
   /**
-   * @param {data}  Data formatted as {nodes: [], links: []}
+   * @param {data}   Data formatted as {nodes: [], links: []}
+   * @param {layoutProps}  Any props relevant to this layout update
    */
-  update(data) {
+  update(data, layoutProps) {
+    const {alphaOnDataChange, alphaOnDrag} = this.props;
     if (this._simulation && data) {
       // If new data are passed, update the simulation with the new data
-      const {alphaOnDataChange} = this.props;
       this._simulation.nodes(data.nodes)
         .force('link', forceLink(data.links).id(n => n.id)
           .strength(this.props.linkStrength).distance(this.props.linkDistance))
@@ -39,18 +40,36 @@ export default class GraphSimulation {
         // so return empty object.
         return {
           nodes: [],
-          alpha: 0
+          isUpdating: false
         };
       }
     }
 
+    const {fixedNodes, unfixedNodes} = layoutProps;
+    if (fixedNodes) {
+      fixedNodes.forEach(n => {
+        n.node.fx = n.x;
+        n.node.fy = n.y;
+      });
+      this._reheat(alphaOnDrag);
+    }
+    if (unfixedNodes) {
+      unfixedNodes.forEach(n => {
+        n.node.fx = null;
+        n.node.fy = null;
+      });
+    }
+
     // Process one simulation tick and return results.
     this._simulation.tick();
-    const alpha = this._simulation.alpha();
     return {
       nodes: this._simulation.nodes(),
-      alpha: alpha > this._simulation.alphaMin() ? alpha : 0
+      isUpdating: this.isUpdating()
     };
+  }
+
+  isUpdating() {
+    return this._simulation && this._simulation.alpha() > this._simulation.alphaMin();
   }
 
   dispose() {
@@ -73,6 +92,7 @@ export default class GraphSimulation {
 
 GraphSimulation.defaultProps = {
   alphaOnDataChange: 0.25,
+  alphaOnDrag: 0.3,
   linkDistance: 200,
   linkStrength: 0.5,
   nBodyStrength: -60,

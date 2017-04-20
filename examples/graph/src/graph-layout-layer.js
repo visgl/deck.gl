@@ -40,12 +40,14 @@ export default class GraphLayoutLayer extends CompositeLayer {
       layoutData = data;
     }
 
-    const {nodes, alpha} = layout.update(layoutData);
-    if (alpha > 0) {
+    const {layoutProps} = this.props;
+    const {nodes, isUpdating} = layout.update(layoutData, layoutProps);
+    if (isUpdating) {
       // update state only if layout is still running
       this.state.nodes = nodes;
       this.state.links = data ? data.links : undefined;
-      this.state.layoutAlpha = alpha;
+      // create new object for updateTriggers diff
+      this.state.layoutUpdating = {};
     }
   }
 
@@ -100,7 +102,7 @@ export default class GraphLayoutLayer extends CompositeLayer {
 
   renderLayers() {
     const {id} = this.props;
-    const {nodes, links, layoutAlpha} = this.state;
+    const {nodes, links, layoutUpdating} = this.state;
 
     // base layer props
     const {opacity, visible} = this.props;
@@ -120,9 +122,9 @@ export default class GraphLayoutLayer extends CompositeLayer {
         id: `${id}-graph`,
         data: {
           nodes,
-          links,
-          layoutAlpha
+          links
         },
+        layoutUpdating,
 
         opacity,
         pickable,
