@@ -1,17 +1,14 @@
-import {
-  CompositeLayer,
-  GraphLayer,
-  GRAPH_LAYER_IDS,
-  COORDINATE_SYSTEM
-} from 'deck.gl';
-import GraphSimulation from './graph-simulation';
+import {CompositeLayer, COORDINATE_SYSTEM} from 'deck.gl';
+import GraphLayer, {GRAPH_LAYER_IDS} from './graph-layer';
+
+import LayoutD3 from './layout/layout-d3';
 
 const defaultProps = {
   width: 640,
   height: 640,
   data: null,
   opacity: 1.0,
-  layout: GraphSimulation,
+  layout: LayoutD3,
   projectionMode: COORDINATE_SYSTEM.IDENTITY,
   nodeIconAccessors: {}
 };
@@ -19,7 +16,7 @@ const defaultProps = {
 /**
  * GraphLayoutLayer displays a force-directed network graph in deck.gl.
  * It accepts a list of nodes and a list of links,
- * processes them with a graph layout engine (default: GraphSimulation),
+ * processes them with a graph layout engine (default: LayoutD3),
  * and passes props and transformed data on to GraphLayer for rendering.
  */
 export default class GraphLayoutLayer extends CompositeLayer {

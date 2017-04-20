@@ -1,15 +1,15 @@
 import {forceCenter, forceLink, forceManyBody, forceSimulation} from 'd3-force';
 
 /**
- * GraphSimulation calculates a force-directed network graph.
+ * LayoutD3 calculates a force-directed network graph using D3.
  * It accepts a list of nodes and a list of links,
  * and returns {x,y} node locations and alpha (simulation "heat") on update().
  * It provides the graph data management and layout logic
  * using [d3-force](https://github.com/d3/d3-force).
  */
-export default class GraphSimulation {
+export default class LayoutD3 {
   constructor(props) {
-    this.props = Object.assign({}, GraphSimulation.defaultProps, props);
+    this.props = Object.assign({}, LayoutD3.defaultProps, props);
   }
 
   /**
@@ -90,9 +90,9 @@ export default class GraphSimulation {
   }
 }
 
-GraphSimulation.defaultProps = {
+LayoutD3.defaultProps = {
   alphaOnDataChange: 0.25,
-  alphaOnDrag: 0.3,
+  alphaOnDrag: 0.1,
   linkDistance: 200,
   linkStrength: 0.5,
   nBodyStrength: -60,

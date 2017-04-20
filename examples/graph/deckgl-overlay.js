@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 import DeckGL, {OrthographicViewport} from 'deck.gl';
-import GraphLayoutLayer from './src/graph-layout-layer';
+import GraphLayoutLayer from './graph-layer/graph-layout-layer';
 
 export default class DeckGLOverlay extends Component {
   constructor(props) {

@@ -4,9 +4,9 @@ import {render} from 'react-dom';
 import {json as requestJSON, csv as requestCSV} from 'd3-request';
 
 import DeckGLOverlay from './deckgl-overlay';
-import {default as GraphBasic} from './src/graph-adaptors/graph-basic';
-import {default as GraphFlare} from './src/graph-adaptors/graph-flare';
-import {default as GraphSNAP} from './src/graph-adaptors/graph-snap';
+import {default as GraphBasic} from './graph-layer/adaptor/graph-basic';
+import {default as GraphFlare} from './graph-layer/adaptor/graph-flare';
+import {default as GraphSNAP} from './graph-layer/adaptor/graph-snap';
 
 // change this to load a different sample dataset (valid: 0-2)
 const DATASET = 1;
