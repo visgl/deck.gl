@@ -33,7 +33,7 @@ export function drawLayers({layers, pass}) {
   let visibleCount = 0;
   // render layers in normal colors
   layers.forEach((layer, layerIndex) => {
-    if (layer.props.visible) {
+    if (!layer.isComposite && layer.props.visible) {
       layer.drawLayer({
         uniforms: Object.assign(
           {renderPickingBuffer: 0, pickingEnabled: 0},
@@ -93,7 +93,7 @@ export function pickLayers(gl, {
 
     // Render all pickable layers in picking colors
     layers.forEach((layer, layerIndex) => {
-      if (layer.props.visible && layer.props.pickable) {
+      if (!layer.isComposite && layer.props.visible && layer.props.pickable) {
 
         // Encode layerIndex with alpha
         gl.blendColor(0, 0, 0, (layerIndex + 1) / 255);
