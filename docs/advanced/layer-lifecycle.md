@@ -59,7 +59,7 @@ and updating unforms by calling
 `model.setUniforms`.
 By default, when `props.data` changes, all attributes are recalculated.
 
-A layer may use
+A composite layer may use
 [`layer.renderLayers()`](/docs/api-reference/composite-layer.md#-renderlayers-)
 to insert one or more deck.gl layers after itself.
 The generated layers will then be matched and updated,
