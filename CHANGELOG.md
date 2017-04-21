@@ -15,11 +15,14 @@ Each version should:
 Ref: http://keepachangelog.com/en/0.3.0/
 -->
 
-
 ## Official Releases
 
-
 ### deck.gl v4.0
+
+#### [4.0.5] - 2017-4-24
+- BREAKING: Only composite layers have `renderLayer` methods
+- BREAKING: Only primitive layers' `draw` methods are called during render
+
 #### [4.0.4] - 2017-4-18
 - `HexagonLayer` add `getUpdateTriggers` method, add `getColorValue` prop to enable color by value (#579)
 - `HexagonLayer` change default `hexagonAggregator` output to `{hexagons: [], hexagonVertices: []}`

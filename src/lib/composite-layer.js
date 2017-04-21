@@ -25,6 +25,10 @@ export default class CompositeLayer extends Layer {
     super(props);
   }
 
+  get isComposite() {
+    return true;
+  }
+
   // initializeState is usually not needed for composite layers
   // Provide empty definition to disable check for missing definition
   initializeState() {
@@ -41,5 +45,10 @@ export default class CompositeLayer extends Layer {
   // @return null to cancel event
   getPickingInfo({info}) {
     return info;
+  }
+
+  // Implement to generate sublayers
+  renderLayers() {
+    return null;
   }
 }
