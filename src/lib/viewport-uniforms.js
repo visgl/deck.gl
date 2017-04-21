@@ -41,7 +41,7 @@ function calculateMatrixAndOffset({
   viewport,
   modelMatrix
 }) {
-  const {viewMatrixUncentered, viewMatrix, projectionMatrix} = viewport;
+  const {viewMatrixUncentered, viewMatrix, projectionMatrix, viewProjectionMatrix} = viewport;
 
   let projectionCenter;
   let modelViewMatrix;
@@ -60,7 +60,6 @@ function calculateMatrixAndOffset({
     // This is the key to offset mode precision (avoids doing this
     // addition in 32 bit precision)
     const positionPixels = viewport.projectFlat(positionOrigin);
-    const viewProjectionMatrix = mat4.multiply([], projectionMatrix, viewMatrix);
     projectionCenter = vec4.transformMat4([],
       [positionPixels[0], positionPixels[1], 0.0, 1.0],
       viewProjectionMatrix);
