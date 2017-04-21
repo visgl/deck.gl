@@ -22,7 +22,6 @@ class Root extends Component {
     this._animate = this._animate.bind(this);
     this._onHover = this._onHover.bind(this);
     this._onClick = this._onClick.bind(this);
-    this._onDragStart = this._onDragStart.bind(this);
     this._onDragMove = this._onDragMove.bind(this);
     this._onDragEnd = this._onDragEnd.bind(this);
     this._getNodeColor = this._getNodeColor.bind(this);
@@ -153,22 +152,6 @@ class Root extends Component {
     }
   }
 
-  _onDragStart(el) {
-    if (el) {
-      const {viewport} = this.state;
-      const {width, height} = viewport;
-      const x = el.x - width / 2;
-      const y = el.y - height / 2;
-      this.setState({
-        dragging: {
-          node: el.object,
-          x,
-          y
-        }
-      });
-    }
-  }
-
   _onDragMove(el) {
     if (el) {
       const {viewport} = this.state;
@@ -176,6 +159,7 @@ class Root extends Component {
       const x = el.x - width / 2;
       const y = el.y - height / 2;
       this.setState({
+        clicked: el,
         dragging: {
           node: el.object,
           x,
@@ -354,7 +338,6 @@ class Root extends Component {
     const handlers = {
       onHover: this._onHover,
       onClick: this._onClick,
-      onDragStart: this._onDragStart,
       onDragMove: this._onDragMove,
       onDragEnd: this._onDragEnd
     };

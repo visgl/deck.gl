@@ -17,7 +17,7 @@ export default class DeckGLOverlay extends Component {
     const {width, height} = viewport;
     const {layoutProps} = this.props;
     const {layoutAccessors, linkAccessors, nodeAccessors, nodeIconAccessors} = this.props;
-    const {onHover, onClick, onDragStart, onDragMove, onDragEnd} = this.props;
+    const {onHover, onClick, onDragMove, onDragEnd} = this.props;
     const layer = new GraphLayoutLayer({
       id: 'graph-layout',
       data,
@@ -30,7 +30,6 @@ export default class DeckGLOverlay extends Component {
 
       onHover,
       onClick,
-      onDragStart,
       onDragMove,
       onDragEnd
     });
