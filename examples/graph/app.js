@@ -89,8 +89,26 @@ class Root extends Component {
     this._animate();
   }
 
+  shouldComponentUpdate() {
+    // Prevent component from updating while animation is running,
+    // to ensure layout updating and rendering are synchronized.
+    return !this._animationFrame;
+  }
+
+  componentDidUpdate() {
+    /* eslint-disable react/no-did-update-set-state */
+    // lastDragged state lasts only one frame
+    const {lastDragged} = this.state;
+    if (lastDragged) {
+      this.setState({
+        lastDragged: null
+      });
+    }
+    /* eslint-enable react/no-did-update-set-state */
+  }
+
   componentWillUnmount() {
-    window.cancelAnimationFrame(this._animationFrame);
+    this._stopAnimation();
   }
 
   _animate() {
@@ -98,6 +116,11 @@ class Root extends Component {
     if (typeof window !== 'undefined') {
       this._animationFrame = window.requestAnimationFrame(this._animate);
     }
+  }
+
+  _stopAnimation() {
+    window.cancelAnimationFrame(this._animationFrame);
+    this._animationFrame = null;
   }
 
   _resize() {
