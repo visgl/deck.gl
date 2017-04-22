@@ -39,13 +39,13 @@ const propTypes = {
   debug: PropTypes.bool,
   viewport: PropTypes.instanceOf(Viewport),
   onWebGLInitialized: PropTypes.func,
+  onAfterRender: PropTypes.func,
   onLayerClick: PropTypes.func,
   onLayerHover: PropTypes.func,
   onLayerDragStart: PropTypes.func,
   onLayerDragMove: PropTypes.func,
   onLayerDragEnd: PropTypes.func,
-  onLayerDragCancel: PropTypes.func,
-  onAfterRender: PropTypes.func
+  onLayerDragCancel: PropTypes.func
 };
 
 const defaultProps = {
@@ -118,7 +118,7 @@ export default class DeckGL extends React.Component {
     const hasPickableLayer = this.layerManager.layers.map(l => l.props.pickable).includes(true);
     if (this.layerManager.layers.length && hasEvent && !hasPickableLayer) {
       log.once(
-        0,
+        1,
         'You have supplied a mouse event handler but none of your layers set the `pickable` flag.'
       );
     }
