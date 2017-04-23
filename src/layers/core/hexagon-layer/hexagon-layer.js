@@ -69,7 +69,7 @@ function _needsReSortBins(oldProps, props) {
 
 export default class HexagonLayer extends Layer {
   constructor(props) {
-    if (!props.radius || !props.hexagonAggregator) {
+    if (!props.hexagonAggregator && !props.radius) {
       log.once(0, 'HexagonLayer: Default hexagonAggregator requires radius prop to be set, ' +
         'Now using 1000 meter as default');
 
