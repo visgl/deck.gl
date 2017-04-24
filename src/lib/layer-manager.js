@@ -247,7 +247,7 @@ export default class LayerManager {
         generatedLayers.push(newLayer);
 
         // Call layer lifecycle method: render sublayers
-        let sublayers = newLayer.renderLayers();
+        let sublayers = newLayer.isComposite ? newLayer.renderLayers() : null;
         // End layer lifecycle method: render sublayers
 
         if (sublayers) {

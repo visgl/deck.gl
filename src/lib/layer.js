@@ -107,11 +107,6 @@ export default class Layer {
   finalizeState() {
   }
 
-  // Implement to generate sublayers
-  renderLayers() {
-    return null;
-  }
-
   // If state has a model, draw it with supplied uniforms
   draw({uniforms = {}}) {
     if (this.state.model) {

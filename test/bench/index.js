@@ -28,7 +28,8 @@ import {
   PolygonLayer,
   PathLayer,
   ChoroplethLayer,
-  ExtrudedChoroplethLayer64
+  ExtrudedChoroplethLayer64,
+  WebMercatorViewport
 } from 'deck.gl';
 
 import {parseColor} from 'deck.gl/lib/utils/color';
@@ -41,6 +42,10 @@ const suite = new Suite();
 
 const COLOR_STRING = '#FFEEBB';
 const COLOR_ARRAY = [222, 222, 222];
+const VIEWPORT_PARAMS = {
+  width: 500, height: 500,
+  longitude: -122, latitude: 37, zoom: 12, pitch: 30
+};
 
 // add tests
 suite
@@ -55,6 +60,9 @@ suite
     modelMatrix: data.sampleModelMatrix,
     projectionMode: COORDINATE_SYSTEM.METER_OFFSETS
   });
+})
+.add('WebMercatorViewport', () => {
+  return new WebMercatorViewport(VIEWPORT_PARAMS);
 })
 .add('color#parseColor (string)', () => {
   return parseColor(COLOR_STRING);

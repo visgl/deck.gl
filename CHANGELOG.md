@@ -17,6 +17,11 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## Beta Releases
 
+[TBD]
+
+- BREAKING: Only composite layers have `renderLayer` methods
+- BREAKING: Only primitive layers' `draw` methods are called during render
+
 ### deck.gl v4.1-alpha.1
 
 - HOTFIX: Fix the bug that layer is finalized at every cycle due to an incorrect if check(#552)
