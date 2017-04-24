@@ -19,14 +19,15 @@
 // THE SOFTWARE.
 
 /* global window */
-import {Matrix4} from 'luma.gl';
+import {mat4, vec4} from 'gl-matrix';
+// import {Matrix4} from 'luma.gl';
 
 import assert from 'assert';
 import {COORDINATE_SYSTEM} from './constants';
 
 function fp64ify(a) {
   const hiPart = Math.fround(a);
-  const loPart = a - Math.fround(a);
+  const loPart = a - hiPart;
   return [hiPart, loPart];
 }
 
@@ -35,13 +36,16 @@ const ZERO_VECTOR = [0, 0, 0, 0];
 // 4x4 matrix that drops 4th component of vector
 const VECTOR_TO_POINT_MATRIX = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0];
 
+// The code that utilizes Matrix4 does the same calculation as their mat4 counterparts,
+// has lower performance but provides error checking.
+// Uncomment when debugging
 function calculateMatrixAndOffset({
   projectionMode,
   positionOrigin,
   viewport,
   modelMatrix
 }) {
-  const {viewMatrixUncentered, viewMatrix, projectionMatrix} = viewport;
+  const {viewMatrixUncentered, viewMatrix, projectionMatrix, viewProjectionMatrix} = viewport;
 
   let projectionCenter;
   let modelViewMatrix;
@@ -51,7 +55,8 @@ function calculateMatrixAndOffset({
   case COORDINATE_SYSTEM.IDENTITY:
   case COORDINATE_SYSTEM.LNGLAT:
     projectionCenter = ZERO_VECTOR;
-    modelViewMatrix = new Matrix4(viewMatrix);
+    // modelViewMatrix = new Matrix4(viewMatrix);
+    modelViewMatrix = mat4.copy([], viewMatrix);
     break;
 
   // TODO: make lighitng work for meter offset mode
@@ -60,28 +65,33 @@ function calculateMatrixAndOffset({
     // This is the key to offset mode precision (avoids doing this
     // addition in 32 bit precision)
     const positionPixels = viewport.projectFlat(positionOrigin);
-    const viewProjectionMatrix = new Matrix4(projectionMatrix).multiplyRight(viewMatrix);
-    projectionCenter = viewProjectionMatrix
-      .transformVector([positionPixels[0], positionPixels[1], 0.0, 1.0]);
+    // projectionCenter = new Matrix4(viewProjectionMatrix)
+    //   .transformVector([positionPixels[0], positionPixels[1], 0.0, 1.0]);
+    projectionCenter = vec4.transformMat4([],
+      [positionPixels[0], positionPixels[1], 0.0, 1.0],
+      viewProjectionMatrix);
 
     // Always apply uncentered projection matrix if available (shader adds center)
-    modelViewMatrix = new Matrix4(viewMatrixUncentered || viewMatrix)
-      // Zero out 4th coordinate ("after" model matrix) - avoids further translations
-      .multiplyRight(VECTOR_TO_POINT_MATRIX);
+    // Zero out 4th coordinate ("after" model matrix) - avoids further translations
+    // modelViewMatrix = new Matrix4(viewMatrixUncentered || viewMatrix)
+    //   .multiplyRight(VECTOR_TO_POINT_MATRIX);
+    modelViewMatrix = mat4.multiply([], viewMatrixUncentered || viewMatrix, VECTOR_TO_POINT_MATRIX);
     break;
 
   default:
     throw new Error('Unknown projection mode');
   }
 
-  const viewMatrixInv = modelViewMatrix.clone().invert();
+  const viewMatrixInv = mat4.invert([], modelViewMatrix) || modelViewMatrix;
 
   if (modelMatrix) {
     // Apply model matrix if supplied
-    modelViewMatrix.multiplyRight(modelMatrix);
+    // modelViewMatrix.multiplyRight(modelMatrix);
+    mat4.multiply(modelViewMatrix, modelViewMatrix, modelMatrix);
   }
 
-  const modelViewProjectionMatrix = new Matrix4(projectionMatrix).multiplyRight(modelViewMatrix);
+  // const modelViewProjectionMatrix = new Matrix4(projectionMatrix).multiplyRight(modelViewMatrix);
+  const modelViewProjectionMatrix = mat4.multiply([], projectionMatrix, modelViewMatrix);
   const cameraPos = [viewMatrixInv[12], viewMatrixInv[13], viewMatrixInv[14]];
 
   return {
@@ -142,7 +152,7 @@ export function getUniformsFromViewport(viewport, {
     projectionCenter,
 
     // modelMatrix: modelMatrix || new Matrix4().identity(),
-    modelViewMatrix,
+    modelViewMatrix: new Float32Array(modelViewMatrix),
 
     // Screen size
     viewportSize: [viewport.width * devicePixelRatio, viewport.height * devicePixelRatio],
