@@ -12,14 +12,14 @@
     "react": "^15.4.1",
     "react-autobind": "^1.0.6",
     "react-dom": "^15.4.1",
-    "react-map-gl": "^2.0.0",
+    "react-map-gl": "^3.0.0-alpha.5",
     "react-stats": "^0.0.5",
     "s2-geometry": "^1.2.9"
   },
   "devDependencies": {
     "buble-loader": "^0.4.0",
     "json-loader": "^0.5.4",
-    "webpack": "^2.2.0",
-    "webpack-dev-server": "^2.2.0"
+    "webpack": "^2.4.0",
+    "webpack-dev-server": "^2.4.0"
   }
 }

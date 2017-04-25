@@ -82,8 +82,8 @@
     "transform-loader": "^0.2.3",
     "uglify-js": "^2.6.1",
     "url-loader": "^0.5.7",
-    "webpack": "^2.2.0",
-    "webpack-dev-server": "^2.2.0"
+    "webpack": "^2.4.0",
+    "webpack-dev-server": "^2.4.0"
   },
   "peerDependencies": {
     "luma.gl": "^3.0.0",
