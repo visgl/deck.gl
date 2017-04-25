@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {Layer} from '../../../lib';
+import {CompositeLayer} from '../../../lib';
 import GridCellLayer from '../grid-cell-layer/grid-cell-layer';
 
 import {pointToDensityGridData} from './grid-aggregator';
@@ -54,7 +54,7 @@ function _needsReProjectPoints(oldProps, props) {
   return oldProps.cellSize !== props.cellSize;
 }
 
-export default class GridLayer extends Layer {
+export default class GridLayer extends CompositeLayer {
   initializeState() {
     this.state = {
       layerData: [],

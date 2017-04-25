@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {Layer} from '../../../lib';
+import {CompositeLayer} from '../../../lib';
 import HexagonCellLayer from '../hexagon-cell-layer/hexagon-cell-layer';
 import {log} from '../../../lib/utils';
 
@@ -67,7 +67,7 @@ function _needsReSortBins(oldProps, props) {
   return oldProps.getColorValue !== props.getColorValue;
 }
 
-export default class HexagonLayer extends Layer {
+export default class HexagonLayer extends CompositeLayer {
   constructor(props) {
     if (!props.radius || !props.hexagonAggregator) {
       log.once(0, 'HexagonLayer: Default hexagonAggregator requires radius prop to be set, ' +
