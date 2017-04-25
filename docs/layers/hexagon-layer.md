@@ -12,6 +12,8 @@ It takes the radius of hexagon bin, projects points into hexagon bins. The color
 and height of the hexagon is scaled by number of points it contains. HexagonLayer
 at the moment only works with COORDINATE_SYSTEM.LNGLAT.
 
+HexagonLayer is a `CompositeLayer`
+
 ```js
 import DeckGL, {HexagonLayer} from 'deck.gl';
 
@@ -27,7 +29,7 @@ const App = ({data, viewport}) => {
   const layer = new HexagonLayer({
     id: 'hexagon-layer',
     data,
-    cellSize: 500
+    radius: 1000
   });
 
   return (<DeckGL {...viewport} layers={[layer]} />);
