@@ -28,6 +28,7 @@ export default class BinSorter {
   constructor(bins = [], getValue = defaultGetValue) {
     this.sortedBins = this.getSortedBins(bins, getValue);
     this.maxCount = this.getMaxCount();
+    this.binMap = this.getBinMap();
   }
 
   /**
@@ -66,5 +67,16 @@ export default class BinSorter {
    */
   getMaxCount() {
     return Math.max.apply(null, this.sortedBins.map(b => b.counts));
+  }
+
+  /**
+   * Get a mapping from bin index to bins
+   * @return {Object} bin index to sortedBins
+   */
+  getBinMap() {
+    return this.sortedBins.reduce((mapper, curr) => ({
+      ...mapper,
+      [curr.i]: curr
+    }), {});
   }
 }

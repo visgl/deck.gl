@@ -119,16 +119,16 @@ export default class HexagonLayer extends CompositeLayer {
       this.getSortedCounts();
 
       // this needs sortedCounts to be set
-      this._onPercentileChange();
+      this.onPercentileChange();
 
     } else if (_needsReSortBins(oldProps, props)) {
 
       this.getSortedCounts();
-      this._onPercentileChange();
+      this.onPercentileChange();
 
     } else if (_percentileChanged(oldProps, props)) {
 
-      this._onPercentileChange();
+      this.onPercentileChange();
     }
   }
 
@@ -171,7 +171,7 @@ export default class HexagonLayer extends CompositeLayer {
     };
   }
 
-  _onPercentileChange() {
+  onPercentileChange() {
     const {lowerPercentile, upperPercentile} = this.props;
 
     this.state.valueDomain = this.state.sortedCounts
