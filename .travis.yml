@@ -16,3 +16,9 @@ node_js:
   - 7
 before_script:
   - export DISPLAY=:99.0; sh -e /etc/init.d/xvfb start
+script:
+  - npm run lint
+  - npm run cover
+after_success:
+  - npm install -g coveralls
+  - cat coverage/lcov.info | coveralls
