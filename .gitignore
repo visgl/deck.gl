@@ -3,6 +3,8 @@ dist/
 dist-es6/
 dist-demo/
 node_modules/
+coverage/
+.nyc_output/
 
 dist-bundle.js
 examples/winds/data/*.html
