@@ -168,6 +168,7 @@ export default class GridCellLayer extends Layer {
   }
 
   calculateInstancePositions64xyLow(attribute) {
+    console.log('gridCellLayer, calculate instance position')
     const {data, getPosition} = this.props;
     const {value} = attribute;
     let i = 0;

@@ -20,9 +20,9 @@
 
 import test from 'tape-catch';
 import * as data from '../data';
-import {testInitializeLayer} from '../test-utils';
+import {testInitializeLayer, testUpdateLayer} from '../test-utils';
 
-import {GridLayer} from 'deck.gl';
+import {GridLayer, GridCellLayer} from 'deck.gl';
 
 test('GridLayer#constructor', t => {
   let layer = new GridLayer({
@@ -34,11 +34,41 @@ test('GridLayer#constructor', t => {
 
   layer = new GridLayer({
     data: data.points,
+    cellSize: 400,
+    getPosition: d => d.COORDINATES,
     pickable: true
   });
   t.ok(layer instanceof GridLayer, 'GridLayer created');
 
   testInitializeLayer({layer});
+
+  const {layerData, sortedBins, valueDomain} = layer.state;
+  console.log(layer.state.sortedBins.sortedBins.length)
+
+  t.ok(layerData.length > 0, 'GridLayer.state.layerDate calculated');
+  t.ok(sortedBins, 'GridLayer.state.sortedBins calculated');
+  t.ok(Array.isArray(valueDomain), 'GridLayer.state.valueDomain calculated');
+
+  t.ok(Array.isArray(sortedBins.sortedBins), 'GridLayer.state.sortedBins.sortedBins calculated');
+  t.ok(Number.isFinite(sortedBins.maxCount), 'GridLayer.state.sortedBins.maxCount calculated');
+
+  const firstSortedBin = sortedBins.sortedBins[0];
+  const binTocell = layerData.find(d => d.index === firstSortedBin.i);
+
+  t.ok(sortedBins.binMap[binTocell.index] == firstSortedBin,
+    'Correct GridLayer.state.sortedBins.binMap created');
+
+  const subLayer = layer.renderLayers();
+  t.ok(subLayer instanceof GridCellLayer, 'GridCellLayer rendered');
+
+  testUpdateLayer({layer, newProps: {
+    data: data.points,
+
+    // change cell Size
+    cellSize: 1000,
+    getPosition: d => d.COORDINATES,
+    pickable: true
+  }});
 
   t.doesNotThrow(
     () => new GridLayer({

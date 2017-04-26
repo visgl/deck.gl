@@ -209,7 +209,6 @@ const GridCellLayerExample = {
   }
 };
 
-console.log(dataSamples.points)
 function getMean(pts, key) {
   const filtered = pts.filter(pt => Number.isFinite(pt[key]));
 

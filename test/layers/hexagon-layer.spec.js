@@ -44,7 +44,7 @@ test('HexagonLayer#constructor', t => {
     pickable: true
   });
   t.ok(layer instanceof HexagonLayer, 'HexagonLayer created');
-  t.equal(layer.props.radius, 1000, 'set to default radius if not speicified');
+  t.equal(layer.props.radius, 1000, 'set to default radius if not specified');
 
   testInitializeLayer({layer});
 
