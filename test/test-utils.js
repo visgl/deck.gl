@@ -86,3 +86,26 @@ export function testInitializeLayer({gl, layer, viewport}) {
   }
   return failures;
 }
+
+export function testUpdateLayer({gl, layer, viewport, newProps}) {
+  gl = gl || getGLContext();
+  viewport = viewport || getViewport();
+
+  const oldContext = layer.context || {gl, viewport};
+  const context = {gl, viewport};
+  const oldProps = layer.props || {};
+
+  let failures = 0;
+  try {
+    layer.updateLayer({
+      oldProps,
+      props: newProps,
+      oldContext,
+      context,
+      changeFlags: layer.diffProps(oldProps, newProps, context)
+    });
+  } catch (error) {
+    failures++;
+  }
+  return failures;
+}
