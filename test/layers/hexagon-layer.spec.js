@@ -26,7 +26,7 @@ import {testInitializeLayer, testUpdateLayer} from '../test-utils';
 
 import {HexagonLayer, CompositeLayer, HexagonCellLayer} from 'deck.gl';
 
-const getColorValue = points => 3;
+const getColorValue = points => points.length;
 
 const TEST_CASES = {
   // props to initialize layer with
@@ -109,10 +109,24 @@ const SUBLAYER_TEST_CASES = {
       getPosition: d => d.COORDINATES
     },
     assert: (subLayer, spies, t) => {
-      console.log('_onGetSublayerColor', spies._onGetSublayerColor.callCount)
-      console.log('_onGetSublayerElevation', spies._onGetSublayerElevation.callCount)
-      t.ok(spies._onGetSublayerColor.called, 'should call _onGetSublayerColor');
-      t.ok(spies._onGetSublayerElevation.called, 'should call _onGetSublayerElevation');
+      t.ok(spies._onGetSublayerColor.called,
+        'update radius should call _onGetSublayerColor');
+      t.ok(spies._onGetSublayerElevation.called,
+        'update radius should call _onGetSublayerElevation');
+    }
+  }, {
+    newProps: {
+      data: data.points,
+      radius: 800,
+      // change opacity
+      opacity: 0.1,
+      getPosition: d => d.COORDINATES
+    },
+    assert: (subLayer, spies, t) => {
+      t.ok(spies._onGetSublayerColor.notCalled,
+        'update opacity should not call _onGetSublayerColor');
+      t.ok(spies._onGetSublayerElevation.notCalled,
+        'update opacity  should not call _onGetSublayerElevation');
     }
   }, {
     newProps: {
@@ -123,10 +137,41 @@ const SUBLAYER_TEST_CASES = {
       getPosition: d => d.COORDINATES
     },
     assert: (subLayer, spies, t) => {
-      console.log('_onGetSublayerColor', spies._onGetSublayerColor.callCount)
-      console.log('_onGetSublayerElevation', spies._onGetSublayerElevation.callCount)
-      t.ok(spies._onGetSublayerColor.called, 'should call _onGetSublayerColor');
-      t.ok(spies._onGetSublayerElevation.called, 'should not call _onGetSublayerElevation');
+      t.ok(spies._onGetSublayerColor.called,
+        'update getColorValue should call _onGetSublayerColor');
+      t.ok(spies._onGetSublayerElevation.notCalled,
+        'update getColorValue  should not call _onGetSublayerElevation');
+    }
+  }, {
+    newProps: {
+      data: data.points,
+      radius: 800,
+      getColorValue,
+      // change upperPercentile
+      upperPercentile: 90,
+      getPosition: d => d.COORDINATES
+    },
+    assert: (subLayer, spies, t) => {
+      t.ok(spies._onGetSublayerColor.called,
+        'update upperPercentile should call _onGetSublayerColor');
+      t.ok(spies._onGetSublayerElevation.notCalled,
+        'update upperPercentile should not call _onGetSublayerElevation');
+    }
+  }, {
+    newProps: {
+      data: data.points,
+      radius: 800,
+      getColorValue,
+      upperPercentile: 90,
+      // change elevationRange
+      elevationRange: [0, 100],
+      getPosition: d => d.COORDINATES
+    },
+    assert: (subLayer, spies, t) => {
+      t.ok(spies._onGetSublayerColor.notCalled,
+        'update elevationRange should not call _onGetSublayerColor');
+      t.ok(spies._onGetSublayerElevation.called,
+        'update elevationRange should call _onGetSublayerElevation');
     }
   }]
 };
@@ -175,8 +220,31 @@ test('HexagonLayer#constructor', t => {
   t.ok(sortedBins.binMap[binTocell.index] === firstSortedBin,
     'Correct HexagonLayer.state.sortedBins.binMap created');
 
+  t.doesNotThrow(
+    () => new HexagonLayer({
+      id: 'nullHexagonLayer',
+      data: null,
+      pickable: true
+    }),
+    'Null HexagonLayer did not throw exception'
+  );
+
+  t.end();
+});
+
+test('HexagonLayer#renderSubLayer', t => {
+
   sinon.spy(HexagonLayer.prototype, '_onGetSublayerColor');
   sinon.spy(HexagonLayer.prototype, '_onGetSublayerElevation');
+
+  const layer = new HexagonLayer({
+    data: data.points,
+    radius: 500,
+    getPosition: d => d.COORDINATES,
+    pickable: true
+  });
+
+  testInitializeLayer({layer});
 
   // render sublayer
   const subLayer = layer.renderLayers();
@@ -186,21 +254,12 @@ test('HexagonLayer#constructor', t => {
 
   // should call attribute updater twice
   // because test util calls both initialize and update layer
-  t.equal(HexagonLayer.prototype._onGetSublayerColor.callCount, hexagons.length * 2,
+  t.ok(HexagonLayer.prototype._onGetSublayerColor.called,
     'should call _onGetSublayerColor number of hexagons times 2');
-  t.equal(HexagonLayer.prototype._onGetSublayerElevation.callCount, hexagons.length * 2,
+  t.ok(HexagonLayer.prototype._onGetSublayerElevation.called,
     'should call _onGetSublayerElevation number of hexagons times 2');
   HexagonLayer.prototype._onGetSublayerColor.restore();
   HexagonLayer.prototype._onGetSublayerElevation.restore();
-
-  t.doesNotThrow(
-    () => new HexagonLayer({
-      id: 'nullHexagonLayer',
-      data: null,
-      pickable: true
-    }),
-    'Null HexagonLayer did not throw exception'
-  );
 
   t.end();
 });
@@ -223,42 +282,47 @@ test('HexagonLayer#updateLayer', t => {
   t.end();
 });
 
-test.only('HexagonLayer#updateTriggers', t => {
-  deck.log.priority=3
+test('HexagonLayer#updateTriggers', t => {
+  // deck.log.priority = 3;
   // setup spies
-  // const spies = {
-  //   '_onGetSublayerColor': sinon.spy(HexagonLayer.prototype, '_onGetSublayerColor'),
-  //   '_onGetSublayerElevation': sinon.spy(HexagonLayer.prototype, '_onGetSublayerElevation')
-  // };
+  const FunctionsToSpy = [
+    '_onGetSublayerColor',
+    '_onGetSublayerElevation'
+  ];
+  const spies = FunctionsToSpy.reduce((accu, curr) => Object.assign(accu, {
+    [curr]: sinon.spy(HexagonLayer.prototype, curr)
+  }), {});
 
+  // initialize parent layer
   const layer = new HexagonLayer(SUBLAYER_TEST_CASES.initialProps);
   testInitializeLayer({layer});
 
   // initialize subLayer
-  let subLayer = layer.renderLayers();
+  const subLayer = layer.renderLayers();
+
   testInitializeLayer({layer: subLayer});
 
   SUBLAYER_TEST_CASES.updates.forEach(({newProps, assert}) => {
 
-    // copy subLayer oldProps
-    const oldProps = Object.assign({}, subLayer.props);
-
     // call update layer with new props
     testUpdateLayer({layer, newProps});
 
-    // render subLayer
-    subLayer = layer.renderLayers();
-    console.log(layer.state.hexagons.length)
-    console.log(subLayer.props)
-    // update subLayer with newProps
-    testUpdateLayer({layer: subLayer, oldProps, newProps: subLayer.props});
+    // layer manager should handle match subLayer and tranfer state and props
+    // here we assume subLayer matches copy over the new props
+    // from a new subLayer
+    const newSubLayer = layer.renderLayers();
+
+    testUpdateLayer({layer: subLayer, newProps: newSubLayer.props});
 
     // assert on updated subLayer
-    // assert(subLayer, spies, t);
+    assert(subLayer, spies, t);
 
-    // restore spies
-    // Object.keys(spies).forEach(k => spies[k].reset());
+    // reset spies
+    Object.keys(spies).forEach(k => spies[k].reset());
   });
+
+  // restore spies
+  Object.keys(spies).forEach(k => spies[k].restore());
 
   t.end();
 });

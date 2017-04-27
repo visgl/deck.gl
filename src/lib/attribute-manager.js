@@ -283,6 +283,7 @@ export default class AttributeManager {
         changedAttributes[attributeName] = attribute;
       }
     }
+
     return changedAttributes;
   }
 

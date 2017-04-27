@@ -178,8 +178,6 @@ export default class HexagonLayer extends CompositeLayer {
   }
 
   _onGetSublayerColor(cell) {
-    console.log('_onGetSublayerColor')
-
     const {colorRange} = this.props;
     const {valueDomain, sortedBins} = this.state;
     const value = sortedBins.binMap[cell.index] && sortedBins.binMap[cell.index].value;
@@ -195,7 +193,6 @@ export default class HexagonLayer extends CompositeLayer {
   }
 
   _onGetSublayerElevation(cell) {
-    console.log('_onGetSublayerElevation')
     const {elevationDomain, elevationRange} = this.props;
     const {sortedBins} = this.state;
 
