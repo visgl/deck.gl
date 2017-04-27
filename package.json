@@ -32,8 +32,8 @@
     "lint-yarn": "!(find . -name yarn.lock -exec grep -l unpm.u {} \\; | egrep '.*')",
     "publish-prod": "npm run build && npm run test && npm run test-dist && npm publish",
     "publish-beta": "npm run build && npm run test && npm run test-dist && npm publish --tag beta",
-    "test": "npm run lint && npm run test-node",
-    "test-cover": "NODE_ENV=test npm run lint && tape -r babel-register test/node.js",
+    "test": "npm run lint && npm run build && npm run test-node",
+    "test-cover": "NODE_ENV=test tape -r babel-register test/node.js && nyc report",
     "test-node": "node test/node.js",
     "test-dist": "node test/node-dist.js",
     "test-browser": "webpack-dev-server --config webpack.config.test-browser.js --progress --hot --open --port 3010",
@@ -99,8 +99,7 @@
     "sourceMap": false,
     "instrument": false,
     "include": [
-      "src/**/*.js",
-      "examples/**/*.js"
+      "src/**/*.js"
     ],
     "exclude": [
       "test/**/*.js"
