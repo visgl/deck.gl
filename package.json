@@ -82,6 +82,7 @@
     "react-addons-test-utils": "^15.4.2",
     "react-dom": "^15.4.0",
     "reify": "^0.4.4",
+    "sinon": "^2.1.0",
     "tap-browser-color": "^0.1.2",
     "tape": "^4.5.1",
     "tape-catch": "^1.0.4",

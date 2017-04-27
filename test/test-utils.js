@@ -20,6 +20,9 @@
 
 import {createGLContext} from 'luma.gl';
 import {WebMercatorViewport} from '../src/lib/viewports';
+import {TEST_EXPORTS} from '../src/lib/layer';
+
+const {mergeDefaultProps} = TEST_EXPORTS;
 
 /**
  * Covert all numbers in a deep structure to a given precision, allowing
@@ -87,22 +90,28 @@ export function testInitializeLayer({gl, layer, viewport}) {
   return failures;
 }
 
-export function testUpdateLayer({gl, layer, viewport, newProps}) {
+export function testUpdateLayer({gl, layer, viewport, oldProps, newProps}) {
   gl = gl || getGLContext();
   viewport = viewport || getViewport();
 
   const oldContext = layer.context || {gl, viewport};
   const context = {gl, viewport};
-  const oldProps = layer.props || {};
+  if (!oldProps) {
+    oldProps = layer.props || {};
+  }
+  //const oldProps = oldProps || layer.props || {};
+
+  const mergedDefaultProps = mergeDefaultProps(layer);
+  layer.props = Object.assign({}, mergedDefaultProps, newProps);
 
   let failures = 0;
   try {
     layer.updateLayer({
       oldProps,
-      props: newProps,
+      props: layer.props,
       oldContext,
       context,
-      changeFlags: layer.diffProps(oldProps, newProps, context)
+      changeFlags: layer.diffProps(oldProps, layer.props, context)
     });
   } catch (error) {
     failures++;
