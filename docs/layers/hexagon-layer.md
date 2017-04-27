@@ -12,6 +12,8 @@ It takes the radius of hexagon bin, projects points into hexagon bins. The color
 and height of the hexagon is scaled by number of points it contains. HexagonLayer
 at the moment only works with COORDINATE_SYSTEM.LNGLAT.
 
+HexagonLayer is a `CompositeLayer`
+
 ```js
 import DeckGL, {HexagonLayer} from 'deck.gl';
 
@@ -27,7 +29,7 @@ const App = ({data, viewport}) => {
   const layer = new HexagonLayer({
     id: 'hexagon-layer',
     data,
-    cellSize: 500
+    radius: 1000
   });
 
   return (<DeckGL {...viewport} layers={[layer]} />);
@@ -50,10 +52,12 @@ Radius of hexagon bin in meters. The hexagons are pointy-topped (rather than fla
 
 - Default: `d3-hexbin`
 
-`hexagonAggregator` is the function to aggregate data into hexagonal bins.
-The `hexagonAggregator` takes props of the layer and current viewport as input.
-The output should be an array of hexagons with each formatted as `{centroid: [], points: []}`, where
-`centroid` is the center of the hexagon, and `points` is an array of points that contained by it.
+`hexagonAggregator` is a function to aggregate data into hexagonal bins.
+The `hexagonAggregator` takes props of the layer and current viewport as arguments.
+The output should be `{hexagons: [], hexagonVertices: []}`. `hexagons` is 
+an array of `{centroid: [], points: []}`, where `centroid` is the 
+center of the hexagon, and `points` is an array of points that contained by it.  `hexagonVertices` 
+(optional) is an array of points define the primitive hexagon geometry.
 
 By default, the `HexagonLayer` uses
 [d3-hexbin](https://github.com/d3/d3-hexbin) as `hexagonAggregator`,
@@ -74,6 +78,15 @@ to number of counts by passing in an arbitrary color domain. This property is ex
 
 Hexagon color ranges as an array of colors formatted as `[[255, 255, 255, 255]]`. Default is
 [colorbrewer](http://colorbrewer2.org/#type=sequential&scheme=YlOrRd&n=6) `6-class YlOrRd`.
+
+##### `getColorValue` (Function, optional)
+
+- Default: `points => points.length`
+
+`getColorValue` is the accessor function to get the value that bin color is based on. 
+It takes an array of points inside each bin as arguments, returns a value. For example, 
+You can pass in `getColorValue` to color the bins by avg/mean/max of a specific attributes of each point.
+By default `getColorValue` returns the length of the points array.
 
 ##### `coverage` (Number, optional)
 

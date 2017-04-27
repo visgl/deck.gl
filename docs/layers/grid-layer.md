@@ -11,6 +11,8 @@ The Grid Layer renders a grid heatmap based on an array of points.
 It takes the constant size all each cell, projects points into cells. The color
 and height of the cell is scaled by number of points it contains.
 
+GridLayer is a `CompositeLayer`
+
 ```js
 import DeckGL, {GridLayer} from 'deck.gl';
 

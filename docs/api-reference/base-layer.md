@@ -148,19 +148,17 @@ Specifies how layer positions and offsets should be geographically interpreted.
 
 The default is to interpret positions as latitude and longitude, however it
 is also possible to interpret positions as meter offsets added to projection
-center specified by the `projectionCenter` prop.
+center specified by the `positionOrigin` prop.
 
 See the article on Coordinate Systems for details.
 
-##### `projectionCenter` ([Number, Number], optional)
+##### `positionOrigin` ([Number, Number], optional)
 
 Required when the `projectionMode` is set to `COORDINATE_SYSTEM.METER_OFFSETS`.
 
 Specifies a longitude and a latitude from which meter offsets are calculated.
 
 See the article on Coordinate Systems for details
-
-TODO: This section needs to be rewritten
 
 ##### `modelMatrix` (Number[16], optional)
 
