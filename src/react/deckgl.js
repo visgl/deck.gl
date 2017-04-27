@@ -18,7 +18,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import React, {PropTypes, createElement} from 'react';
+import React, {createElement} from 'react';
+import PropTypes from 'prop-types';
 import autobind from './autobind';
 import WebGLRenderer from './webgl-renderer';
 import {LayerManager, Layer} from '../lib';

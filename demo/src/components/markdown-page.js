@@ -1,4 +1,5 @@
-import React, {PureComponent, PropTypes} from 'react';
+import React, {PureComponent} from 'react';
+import PropTypes from 'prop-types';
 import marked from 'marked';
 import * as Demos from './demos';
 import {markdownFiles} from '../constants/pages';
