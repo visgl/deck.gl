@@ -1,5 +1,5 @@
 /* global window */
-import React, {Component, PropTypes} from 'react';
+import {Component, PropTypes, createElement} from 'react';
 import {PerspectiveViewport} from 'deck.gl';
 import {vec3} from 'gl-matrix';
 
@@ -20,7 +20,34 @@ const ua = typeof window.navigator !== 'undefined' ?
   window.navigator.userAgent.toLowerCase() : '';
 const firefox = ua.indexOf('firefox') !== -1;
 
-/* Interaction */
+const propTypes = {
+  // target position
+  lookAt: PropTypes.arrayOf(PropTypes.number),
+  // camera distance
+  distance: PropTypes.number.isRequired,
+  minDistance: PropTypes.number,
+  maxDistance: PropTypes.number,
+  // rotation
+  rotationX: PropTypes.number,
+  rotationY: PropTypes.number,
+  // field of view
+  fov: PropTypes.number,
+  // viewport width in pixels
+  width: PropTypes.number.isRequired,
+  // viewport height in pixels
+  height: PropTypes.number.isRequired,
+  // callback
+  onChangeViewport: PropTypes.func.isRequired
+};
+
+const defaultProps = {
+  lookAt: [0, 0, 0],
+  rotationX: 0,
+  rotationY: 0,
+  minDistance: 0,
+  maxDistance: Infinity,
+  fov: 50
+};
 
 export default class OrbitController extends Component {
 
@@ -128,45 +155,17 @@ export default class OrbitController extends Component {
   }
 
   render() {
-    return (
-      <div style={{position: 'relative', userSelect: 'none'}}
-        onMouseDown={this._onDragStart.bind(this)}
-        onMouseMove={this._onDrag.bind(this)}
-        onMouseLeave={this._onDragEnd.bind(this)}
-        onMouseUp={this._onDragEnd.bind(this)}
-        onWheel={this._onWheel.bind(this)} >
-
-        {this.props.children}
-
-      </div>);
+    return createElement('div', {
+      style: {position: 'relative', userSelect: 'none'},
+      onMouseDown: this._onDragStart.bind(this),
+      onMouseMove: this._onDrag.bind(this),
+      onMouseLeave: this._onDragEnd.bind(this),
+      onMouseUp: this._onDragEnd.bind(this),
+      onWheel: this._onWheel.bind(this),
+      children: this.props.children
+    });
   }
 }
 
-OrbitController.propTypes = {
-  // target position
-  lookAt: PropTypes.arrayOf(PropTypes.number),
-  // camera distance
-  distance: PropTypes.number.isRequired,
-  minDistance: PropTypes.number,
-  maxDistance: PropTypes.number,
-  // rotation
-  rotationX: PropTypes.number,
-  rotationY: PropTypes.number,
-  // field of view
-  fov: PropTypes.number,
-  // viewport width in pixels
-  width: PropTypes.number.isRequired,
-  // viewport height in pixels
-  height: PropTypes.number.isRequired,
-  // callback
-  onChangeViewport: PropTypes.func.isRequired
-};
-
-OrbitController.defaultProps = {
-  lookAt: [0, 0, 0],
-  rotationX: 0,
-  rotationY: 0,
-  minDistance: 0,
-  maxDistance: Infinity,
-  fov: 50
-};
+OrbitController.propTypes = propTypes;
+OrbitController.defaultProps = defaultProps;
