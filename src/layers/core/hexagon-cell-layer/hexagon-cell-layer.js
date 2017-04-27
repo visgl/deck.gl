@@ -120,9 +120,6 @@ export default class HexagonCellLayer extends Layer {
   }
 
   updateAttribute({props, oldProps, changeFlags}) {
-    console.log('hexagonCellLayer updateAttribute')
-    console.log(props)
-    console.log(oldProps)
     if (props.fp64 !== oldProps.fp64) {
       const {attributeManager} = this.state;
       attributeManager.invalidateAll();

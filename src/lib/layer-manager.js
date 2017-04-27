@@ -77,6 +77,7 @@ export default class LayerManager {
         layerId: null
       }
     };
+
     Object.seal(this.context);
   }
 
@@ -391,3 +392,7 @@ function layerName(layer) {
   }
   return !layer ? 'null layer' : 'invalid layer';
 }
+
+export const TEST_EXPORTS = {
+  transferLayerState: LayerManager.prototype._transferLayerState
+};
