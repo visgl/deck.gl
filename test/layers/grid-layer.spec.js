@@ -22,7 +22,78 @@ import test from 'tape-catch';
 import * as data from '../data';
 import {testInitializeLayer, testUpdateLayer} from '../test-utils';
 
-import {GridLayer, GridCellLayer} from 'deck.gl';
+import {GridLayer, GridCellLayer, CompositeLayer} from 'deck.gl';
+
+const getColorValue = points => 3;
+
+const TEST_CASES = {
+  // props to initialize layer with
+  initialProps: {
+    data: data.points,
+    cellSize: 400,
+    getPosition: d => d.COORDINATES,
+    pickable: true
+  },
+  // list of update props to call and asserts on the resulting layer
+  updates: [{
+    newProps: {
+      data: data.points,
+      // change cell Size
+      cellSize: 800,
+      getPosition: d => d.COORDINATES,
+      pickable: true
+    },
+    assert: (layer, oldState, t) => {
+      t.ok(oldState.layerData !== layer.state.layerData,
+        'should update layer data');
+
+      t.ok(oldState.sortedBins !== layer.state.sortedBins,
+        'should update sortedBins');
+
+      t.ok(oldState.valueDomain !== layer.state.valueDomain,
+        'should update valueDomain');
+    }
+  }, {
+    newProps: {
+      data: data.points,
+      cellSize: 800,
+      // change getColorValue
+      getColorValue,
+      getPosition: d => d.COORDINATES,
+      pickable: true
+    },
+    assert: (layer, oldState, t) => {
+      t.ok(oldState.layerData === layer.state.layerData,
+        'should not update layer data');
+
+      t.ok(oldState.sortedBins !== layer.state.sortedBins,
+        'should update sortedBins');
+
+      t.ok(oldState.valueDomain !== layer.state.valueDomain,
+        'should re calculate valueDomain');
+    }
+  }, {
+    newProps: {
+      data: data.points,
+      cellSize: 800,
+      // change getColorValue
+      getColorValue,
+      upperPercentile: 90,
+      getPosition: d => d.COORDINATES,
+      pickable: true
+    },
+    assert: (layer, oldState, t) => {
+      t.ok(oldState.layerData === layer.state.layerData,
+        'should not update layer data');
+
+      t.ok(oldState.sortedBins === layer.state.sortedBins,
+        'should not update sortedBins');
+
+      t.ok(oldState.valueDomain !== layer.state.valueDomain,
+        'should re calculate valueDomain');
+    }
+  }]
+};
 
 test('GridLayer#constructor', t => {
   let layer = new GridLayer({
@@ -31,6 +102,7 @@ test('GridLayer#constructor', t => {
     pickable: true
   });
   t.ok(layer instanceof GridLayer, 'Empty GridLayer created');
+  t.ok(layer instanceof CompositeLayer, 'GridLayer is a CompositeLayer');
 
   layer = new GridLayer({
     data: data.points,
@@ -43,7 +115,6 @@ test('GridLayer#constructor', t => {
   testInitializeLayer({layer});
 
   const {layerData, sortedBins, valueDomain} = layer.state;
-  console.log(layer.state.sortedBins.sortedBins.length)
 
   t.ok(layerData.length > 0, 'GridLayer.state.layerDate calculated');
   t.ok(sortedBins, 'GridLayer.state.sortedBins calculated');
@@ -55,20 +126,11 @@ test('GridLayer#constructor', t => {
   const firstSortedBin = sortedBins.sortedBins[0];
   const binTocell = layerData.find(d => d.index === firstSortedBin.i);
 
-  t.ok(sortedBins.binMap[binTocell.index] == firstSortedBin,
+  t.ok(sortedBins.binMap[binTocell.index] === firstSortedBin,
     'Correct GridLayer.state.sortedBins.binMap created');
 
   const subLayer = layer.renderLayers();
   t.ok(subLayer instanceof GridCellLayer, 'GridCellLayer rendered');
-
-  testUpdateLayer({layer, newProps: {
-    data: data.points,
-
-    // change cell Size
-    cellSize: 1000,
-    getPosition: d => d.COORDINATES,
-    pickable: true
-  }});
 
   t.doesNotThrow(
     () => new GridLayer({
@@ -78,6 +140,24 @@ test('GridLayer#constructor', t => {
     }),
     'Null GridLayer did not throw exception'
   );
+
+  t.end();
+});
+
+test('GridLayer#updateLayer', t => {
+  const layer = new GridLayer(TEST_CASES.initialProps);
+  testInitializeLayer({layer});
+
+  TEST_CASES.updates.forEach(({newProps, assert}) => {
+    // copy over old state
+    const oldState = Object.assign({}, layer.state);
+
+    // call update layer with new props
+    testUpdateLayer({layer, newProps});
+
+    // assert on updated layer
+    assert(layer, oldState, t);
+  });
 
   t.end();
 });

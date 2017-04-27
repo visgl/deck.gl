@@ -76,7 +76,6 @@ export default class GridLayer extends CompositeLayer {
 
   updateState({oldProps, props, changeFlags}) {
     if (changeFlags.dataChanged || _needsReProjectPoints(oldProps, props)) {
-      console.log('need reproject bins')
       // project data into hexagons, and get sortedBins
       this.getLayerData();
       this.getsortedBins();
@@ -96,7 +95,6 @@ export default class GridLayer extends CompositeLayer {
 
   getLayerData() {
     const {data, cellSize, getPosition} = this.props;
-    console.log(cellSize)
     const {layerData} = pointToDensityGridData(data, cellSize, getPosition);
 
     this.setState({layerData});
@@ -104,7 +102,6 @@ export default class GridLayer extends CompositeLayer {
 
   getsortedBins() {
     const sortedBins = new BinSorter(this.state.layerData || [], this.props.getColorValue);
-    console.log(sortedBins.sortedBins.length)
     this.setState({sortedBins});
   }
 

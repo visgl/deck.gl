@@ -18,12 +18,49 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import './polygon-tesselation.spec';
-import './core-layers.spec';
-import './polygon-layer.spec';
-import './geojson.spec';
-import './geojson-layer.spec';
-import './grid-cell-layer.spec';
-import './grid-layer.spec';
-import './hexagon-cell-layer.spec';
-import './hexagon-layer.spec';
+import test from 'tape-catch';
+import {testInitializeLayer} from '../test-utils';
+
+import {GridCellLayer} from 'deck.gl';
+
+const GRID = [
+  {position: [37, 122]}, {position: [37.1, 122.8]}
+];
+
+test('GridCellLayer#constructor', t => {
+
+  let layer = new GridCellLayer({
+    id: 'emptyGridCellLayer',
+    data: [],
+    pickable: true
+  });
+  t.ok(layer instanceof GridCellLayer, 'Empty GridCellLayer created');
+
+  layer = new GridCellLayer({
+    data: GRID,
+    pickable: true
+  });
+  t.ok(layer instanceof GridCellLayer, 'GridCellLayer created');
+
+  testInitializeLayer({layer});
+  t.ok(layer.state.model, 'GridCellLayer has state');
+
+  t.doesNotThrow(
+    () => new GridCellLayer({
+      id: 'nullGridCellLayer',
+      data: null,
+      pickable: true
+    }),
+    'Null GridCellLayer did not throw exception'
+  );
+
+  layer = new GridCellLayer({
+    data: [],
+    pickable: true
+  });
+
+  t.equal(layer.props.cellSize, 1000, 'Use default radius if not specified');
+  t.equal(layer.props.coverage, 1, 'Use default angel if not specified');
+
+  t.end();
+});
