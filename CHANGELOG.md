@@ -19,6 +19,9 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ### deck.gl v4.0
 
+#### [4.0.6] - 2017-4-27
+- HOTFIX: Fixed default hexagonAggregator radius being set to default value even when it is passed in. (#590)
+
 #### [4.0.5] - 2017-4-24
 - BREAKING: Only composite layers have `renderLayer` methods
 - BREAKING: Only primitive layers' `draw` methods are called during render
