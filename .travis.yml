@@ -20,5 +20,4 @@ script:
   - npm run lint
   - npm run cover
 after_success:
-  - npm install -g coveralls
-  - cat coverage/lcov.info | coveralls
+  - npm run cover
