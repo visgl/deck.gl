@@ -71,7 +71,6 @@ export default class DeckGL extends React.Component {
     this.needsRedraw = true;
     this.layerManager = null;
     this.effectManager = null;
-    this.shaderCache = null;
     autobind(this);
   }
 
