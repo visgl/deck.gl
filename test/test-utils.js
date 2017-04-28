@@ -66,7 +66,7 @@ export function testInitializeLayer({gl, layer, viewport}) {
 
   const oldContext = {gl, viewport};
   const context = {gl, viewport};
-  let failures = 0;
+  let failures = false;
   try {
     layer.context = context;
 
@@ -86,8 +86,9 @@ export function testInitializeLayer({gl, layer, viewport}) {
       changeFlags: layer.diffProps({}, layer.props, context)
     });
   } catch (error) {
-    failures++;
+    failures = true;
   }
+
   return failures;
 }
 
@@ -102,7 +103,7 @@ export function testUpdateLayer({gl, layer, viewport, newProps}) {
   const mergedDefaultProps = mergeDefaultProps(layer);
   layer.props = Object.assign({}, mergedDefaultProps, newProps);
 
-  let failures = 0;
+  let failures = false;
   try {
     layer.updateLayer({
       oldProps,
@@ -112,29 +113,47 @@ export function testUpdateLayer({gl, layer, viewport, newProps}) {
       changeFlags: layer.diffProps(oldProps, layer.props, context)
     });
   } catch (error) {
-    failures++;
+    failures = true;
   }
+
   return failures;
 }
 
 export function testDrawLayer({layer, uniforms = {}}) {
-  let failures = 0;
+  let failures = false;
   try {
     layer.drawLayer({uniforms});
   } catch (error) {
-    failures++;
+    failures = true;
   }
 
   return failures;
 }
-// testLayerUpdates test takes a layer component, initialize it, then call testUpdateLayer
-// on a series of test case, assert on the resulting layer
-export function testLayerUpdates({LayerComponent, testCases, t}) {
-  const layer = new LayerComponent(testCases.initialProps);
-  let failures = testInitializeLayer({layer});
-  t.ok(failures === 0, `initialize ${LayerComponent.layerName} should not return failure`);
 
-  testCases.updates.reduce((currentProps, {updateProps, assert}) => {
+/**
+ * Initialize a layer, test layer update
+ * on a series of newProps, assert on the resulting layer
+ *
+ * Note: Updates are called sequentially. updateProps will be merged
+ * with previous props
+ *
+ * @param {Function} t - test function
+ * @param {Object} opt - test options
+ * @param {Object} opt.LayerComponent - The layer component class
+ * @param {Array} opt.testCases - A list of testCases
+ * @param {Object} opt.testCases.INITIAL_PROPS - The initial prop to initialize the layer with
+ * @param {Array} opt.testCases.UPDATES - The list of updates to update
+ * @param {Object} opt.testCases.UPDATES.updateProps - updated props
+ * @param {Function} opt.testCases.UPDATES.assert - callbacks with updated layer, and oldState
+ */
+
+export function testLayerUpdates(t, {LayerComponent, testCases}) {
+  const layer = new LayerComponent(testCases.INITIAL_PROPS);
+
+  let failures = testInitializeLayer({layer});
+  t.ok(!failures, `initialize ${LayerComponent.layerName} should not return failure`);
+
+  testCases.UPDATES.reduce((currentProps, {updateProps, assert}) => {
 
     // merge updated Props with initialProps
     const newProps = Object.assign({}, currentProps, updateProps);
@@ -143,40 +162,58 @@ export function testLayerUpdates({LayerComponent, testCases, t}) {
 
     // call update layer with new props
     failures = testUpdateLayer({layer, newProps});
-    t.ok(failures === 0, `update ${LayerComponent.layerName} should not return failure`);
+    t.ok(!failures, `update ${LayerComponent.layerName} should not return failure`);
 
     // call draw layer
     failures = testDrawLayer({layer});
-    t.ok(failures === 0, `draw ${LayerComponent.layerName} should not return failure`);
+    t.ok(!failures, `draw ${LayerComponent.layerName} should not return failure`);
 
     // assert on updated layer
     assert(layer, oldState, t);
 
     return newProps;
-  }, testCases.initialProps);
+  }, testCases.INITIAL_PROPS);
 }
 
-// testSubLayerUpdateTriggers test takes a layer component, initialize the parent layer,
-// then the subLayer, call testUpdateLayer on a series of test case,
-// assert on the resulting subLayer
+/**
+ * Initialize a parent layer and its subLayer
+ * update the parent layer a series of newProps, assert on the updated subLayer
+ *
+ * Note: Updates are called sequentially. updateProps will be merged
+ * with previous props
+ *
+ * @param {Function} t - test function
+ * @param {Object} opt - test options
+ * @param {Object} opt.FunctionsToSpy - Functions that spied by sinon
+ * @param {Object} opt.LayerComponent - The layer component class
+ * @param {Array} opt.testCases - A list of testCases
+ * @param {Object} opt.testCases.INITIAL_PROPS - The initial prop to initialize the layer with
+ * @param {Array} opt.testCases.UPDATES - The list of updates to update
+ * @param {Object} opt.testCases.UPDATES.updateProps - updated props
+ * @param {Function} opt.testCases.UPDATES.assert - callbacks with updated layer, and oldState
+ */
+
 export function testSubLayerUpdateTriggers(t, {FunctionsToSpy, LayerComponent, testCases}) {
-  let failures = 0;
+  let failures = false;
   const spies = FunctionsToSpy.reduce((accu, curr) => Object.assign(accu, {
     [curr]: sinon.spy(LayerComponent.prototype, curr)
   }), {});
 
   // initialize parent layer
-  const layer = new LayerComponent(testCases.initialProps);
+  const layer = new LayerComponent(testCases.INITIAL_PROPS);
   failures = testInitializeLayer({layer});
-  t.ok(failures === 0, `initialize ${LayerComponent.layerName} subLayer should not fail`);
+  t.ok(!failures, `initialize ${LayerComponent.layerName} subLayer should not fail`);
 
   // initialize subLayer
   const subLayer = layer.renderLayers();
 
   failures = testInitializeLayer({layer: subLayer});
-  t.ok(failures === 0, `initialize ${LayerComponent.layerName} subLayer should not fail`);
+  t.ok(!failures, `initialize ${LayerComponent.layerName} subLayer should not fail`);
 
-  testCases.updates.forEach(({newProps, assert}) => {
+  testCases.UPDATES.reduce((currentProps, {updateProps, assert}) => {
+
+    // merge updated Props with initialProps
+    const newProps = Object.assign({}, currentProps, updateProps);
 
     // call update layer with new props
     testUpdateLayer({layer, newProps});
@@ -187,21 +224,23 @@ export function testSubLayerUpdateTriggers(t, {FunctionsToSpy, LayerComponent, t
     const newSubLayer = layer.renderLayers();
 
     testUpdateLayer({layer: subLayer, newProps: newSubLayer.props});
-    t.ok(failures === 0, `update ${LayerComponent.layerName} subLayer should not fail`);
+    t.ok(!failures, `update ${LayerComponent.layerName} subLayer should not fail`);
 
     // assert on updated subLayer
     assert(subLayer, spies, t);
 
     // reset spies
     Object.keys(spies).forEach(k => spies[k].reset());
-  });
+
+    return newProps;
+  }, testCases.INITIAL_PROPS);
 
   // restore spies
   Object.keys(spies).forEach(k => spies[k].restore());
 }
 
 export function testCreateLayer(t, LayerComponent, props = {}) {
-  let failures = 0;
+  let failures = false;
   try {
     const layer = new LayerComponent(Object.assign({
       id: `${LayerComponent.layerName}-0`
@@ -209,13 +248,13 @@ export function testCreateLayer(t, LayerComponent, props = {}) {
     t.ok(layer instanceof LayerComponent, `${LayerComponent.layerName} created`);
 
   } catch (error) {
-    failures++;
+    failures = true;
   }
-  t.ok(failures === 0, `creating ${LayerComponent.layerName} should not fail`);
+  t.ok(!failures, `creating ${LayerComponent.layerName} should not fail`);
 }
 
 export function testCreateEmptyLayer(t, LayerComponent, props = {}) {
-  let failures = 0;
+  let failures = false;
   try {
     const emptyLayer = new LayerComponent(Object.assign({
       id: `empty${LayerComponent.layerName}`,
@@ -225,9 +264,9 @@ export function testCreateEmptyLayer(t, LayerComponent, props = {}) {
 
     t.ok(emptyLayer instanceof LayerComponent, `Empty ${LayerComponent.layerName} created`);
   } catch (error) {
-    failures++;
+    failures = true;
   }
-  t.ok(failures === 0, `creating empty ${LayerComponent.layerName} should not fail`);
+  t.ok(!failures, `creating empty ${LayerComponent.layerName} should not fail`);
 }
 
 export function testNullLayer(t, LayerComponent) {

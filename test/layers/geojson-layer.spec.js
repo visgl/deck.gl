@@ -44,10 +44,10 @@ test('GeoJsonLayer#constructor', t => {
 
 test('GeoJsonLayer#updates', t => {
   const TEST_CASES = {
-    initialProps: {
+    INITIAL_PROPS: {
       data
     },
-    updates: [{
+    UPDATES: [{
       updateProps: {
         lineWidthScale: 3
       },
@@ -68,7 +68,7 @@ test('GeoJsonLayer#updates', t => {
     }]
   };
 
-  testLayerUpdates({LayerComponent, testCases: TEST_CASES, t});
+  testLayerUpdates(t, {LayerComponent, testCases: TEST_CASES});
 
   t.end();
 });

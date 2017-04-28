@@ -9,11 +9,16 @@ import global from 'global';
 
 global.document = jsdom('');
 global.window = global.document.defaultView;
+
+/* we dont need these properties for sinon to work,
+ * choose to add back when needed
+
 Object.keys(global.document.defaultView).forEach((property) => {
   if (typeof global[property] === 'undefined') {
     global[property] = global.document.defaultView[property];
   }
 });
+*/
 
 global.navigator = {
   userAgent: 'node.js'

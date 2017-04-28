@@ -55,11 +55,11 @@ test('ScreenGridLayer#constructor', t => {
   const data = FIXTURES.points;
 
   const TEST_CASES = {
-    initialProps: {
+    INITIAL_PROPS: {
       data,
       getPosition: getPointPosition
     },
-    updates: [{
+    UPDATES: [{
       updateProps: {
         cellSizePixels: 10
       },
@@ -85,7 +85,7 @@ test('ScreenGridLayer#constructor', t => {
   testCreateLayer(t, LayerComponent, {data, pickable: true});
   testCreateEmptyLayer(t, LayerComponent);
   testNullLayer(t, LayerComponent);
-  testLayerUpdates({LayerComponent, testCases: TEST_CASES, t});
+  testLayerUpdates(t, {LayerComponent, testCases: TEST_CASES});
 
   t.end();
 });
@@ -108,12 +108,12 @@ test('ScatterplotLayer#constructor', t => {
   const data = FIXTURES.points;
 
   const TEST_CASES = {
-    initialProps: {
+    INITIAL_PROPS: {
       data,
       radiusScale: 5,
       getPosition: getPointPosition
     },
-    updates: [{
+    UPDATES: [{
       updateProps: {
         radiusScale: 10
       },
@@ -136,7 +136,7 @@ test('ScatterplotLayer#constructor', t => {
   testCreateLayer(t, LayerComponent, {data, pickable: true});
   testCreateEmptyLayer(t, LayerComponent);
   testNullLayer(t, LayerComponent);
-  testLayerUpdates({LayerComponent, testCases: TEST_CASES, t});
+  testLayerUpdates(t, {LayerComponent, testCases: TEST_CASES});
 
   t.end();
 });
@@ -146,12 +146,12 @@ test('ArcLayer#constructor', t => {
   const data = FIXTURES.routes;
 
   const TEST_CASES = {
-    initialProps: {
+    INITIAL_PROPS: {
       data,
       getSourcePosition: d => d.START,
       getTargetPosition: d => d.END
     },
-    updates: [{
+    UPDATES: [{
       updateProps: {
         strokeWidth: 10
       },
@@ -174,7 +174,7 @@ test('ArcLayer#constructor', t => {
   testCreateLayer(t, LayerComponent, {data, pickable: true});
   testCreateEmptyLayer(t, LayerComponent);
   testNullLayer(t, LayerComponent);
-  testLayerUpdates({LayerComponent, testCases: TEST_CASES, t});
+  testLayerUpdates(t, {LayerComponent, testCases: TEST_CASES});
 
   t.end();
 });
@@ -184,10 +184,10 @@ test('PointCloudLayer#constructor', t => {
   const data = FIXTURES.getPointCloud();
 
   const TEST_CASES = {
-    initialProps: {
+    INITIAL_PROPS: {
       data
     },
-    updates: [{
+    UPDATES: [{
       updateProps: {
         radiusPixels: 10
       },
@@ -201,7 +201,7 @@ test('PointCloudLayer#constructor', t => {
   testCreateLayer(t, LayerComponent, {data, pickable: true});
   testCreateEmptyLayer(t, LayerComponent);
   testNullLayer(t, LayerComponent);
-  testLayerUpdates({LayerComponent, testCases: TEST_CASES, t});
+  testLayerUpdates(t, {LayerComponent, testCases: TEST_CASES});
 
   t.end();
 });
@@ -211,12 +211,12 @@ test('LineLayer#constructor', t => {
   const data = FIXTURES.routes;
 
   const TEST_CASES = {
-    initialProps: {
+    INITIAL_PROPS: {
       data,
       getSourcePosition: d => d.START,
       getTargetPosition: d => d.END
     },
-    updates: [{
+    UPDATES: [{
       updateProps: {
         strokeWidth: 10
       },
@@ -239,7 +239,7 @@ test('LineLayer#constructor', t => {
   testCreateLayer(t, LayerComponent, {data, pickable: true});
   testCreateEmptyLayer(t, LayerComponent);
   testNullLayer(t, LayerComponent);
-  testLayerUpdates({LayerComponent, testCases: TEST_CASES, t});
+  testLayerUpdates(t, {LayerComponent, testCases: TEST_CASES});
 
   t.end();
 });
@@ -249,12 +249,12 @@ test('IconLayer#constructor', t => {
   const data = FIXTURES.points;
 
   const TEST_CASES = {
-    initialProps: {
+    INITIAL_PROPS: {
       data,
       sizeScale: 24,
       getPosition: getPointPosition
     },
-    updates: [{
+    UPDATES: [{
       updateProps: {
         sizeScale: 10
       },
@@ -276,7 +276,7 @@ test('IconLayer#constructor', t => {
   testCreateLayer(t, LayerComponent, {data, pickable: true});
   testCreateEmptyLayer(t, LayerComponent);
   testNullLayer(t, LayerComponent);
-  testLayerUpdates({LayerComponent, testCases: TEST_CASES, t});
+  testLayerUpdates(t, {LayerComponent, testCases: TEST_CASES});
 
   t.end();
 });
@@ -286,10 +286,10 @@ test('PathLayer#constructor', t => {
   const data = FIXTURES.zigzag;
 
   const TEST_CASES = {
-    initialProps: {
+    INITIAL_PROPS: {
       data
     },
-    updates: [{
+    UPDATES: [{
       updateProps: {
         widthMinPixels: 10
       },
@@ -312,7 +312,7 @@ test('PathLayer#constructor', t => {
   testCreateLayer(t, LayerComponent, {data, pickable: true});
   testCreateEmptyLayer(t, LayerComponent);
   testNullLayer(t, LayerComponent);
-  testLayerUpdates({LayerComponent, testCases: TEST_CASES, t});
+  testLayerUpdates(t, {LayerComponent, testCases: TEST_CASES});
 
   t.end();
 });

@@ -35,14 +35,14 @@ const getPosition = d => d.COORDINATES;
 
 const TEST_CASES = {
   // props to initialize layer with
-  initialProps: {
+  INITIAL_PROPS: {
     data: data.points,
     cellSize: 400,
     getPosition,
     pickable: true
   },
   // list of update props to call and asserts on the resulting layer
-  updates: [{
+  UPDATES: [{
     updateProps: {
       cellSize: 800
     },
@@ -89,13 +89,13 @@ const TEST_CASES = {
 
 const SUBLAYER_TEST_CASES = {
   // props to initialize layer with
-  initialProps: {
+  INITIAL_PROPS: {
     data: data.points,
     cellSize: 400,
     getPosition
   },
   // list of update props to call and asserts on the resulting layer
-  updates: [{
+  UPDATES: [{
     newProps: {
       data: data.points,
       // change radius

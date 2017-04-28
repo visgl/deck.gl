@@ -29,11 +29,11 @@ const GRID = [
 
 const TEST_CASES = {
   // props to initialize layer with
-  initialProps: {
+  INITIAL_PROPS: {
     data: GRID
   },
   // list of update props to call and asserts on the resulting layer
-  updates: [{
+  UPDATES: [{
     updateProps: {
       coverage: 0.8
     },

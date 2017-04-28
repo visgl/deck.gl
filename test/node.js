@@ -22,7 +22,7 @@
 require('reify');
 
 // setup for jsDom
-require('./setup');
+require('./setup-jsdom-env');
 
 // Enables import of glsl
 const fs = require('fs');

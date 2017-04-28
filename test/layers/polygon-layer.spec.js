@@ -34,11 +34,11 @@ test('PolygonLayer#constructor', t => {
   const data = FIXTURES.polygons;
 
   const TEST_CASES = {
-    initialProps: {
+    INITIAL_PROPS: {
       data,
       getPolygon: f => f
     },
-    updates: [{
+    UPDATES: [{
       updateProps: {
         filled: false
       },
@@ -60,7 +60,7 @@ test('PolygonLayer#constructor', t => {
   testCreateLayer(t, LayerComponent, {data, pickable: true});
   testCreateEmptyLayer(t, LayerComponent);
   testNullLayer(t, LayerComponent);
-  testLayerUpdates({LayerComponent, testCases: TEST_CASES, t});
+  testLayerUpdates(t, {LayerComponent, testCases: TEST_CASES});
 
   t.end();
 });

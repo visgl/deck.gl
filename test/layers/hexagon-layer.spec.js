@@ -20,7 +20,6 @@
 
 import test from 'tape-catch';
 import sinon from 'sinon';
-/* eslint-disable no-unused-vars */
 
 import * as data from '../data';
 import {
@@ -36,13 +35,13 @@ const getPosition = d => d.COORDINATES;
 
 const TEST_CASES = {
   // props to initialize layer with
-  initialProps: {
+  INITIAL_PROPS: {
     data: data.points,
     radius: 400,
     getPosition
   },
   // list of update props to call and asserts on the resulting layer
-  updates: [{
+  UPDATES: [{
     updateProps: {
       radius: 800
     },
@@ -50,26 +49,28 @@ const TEST_CASES = {
       t.ok(oldState.hexagons !== layer.state.hexagons,
         'should update layer data');
 
+      // TODO: add it back with grid/hex PR
       // t.ok(oldState.sortedBins !== layer.state.sortedBins,
       //   'should update sortedBins');
 
       t.ok(oldState.valueDomain !== layer.state.valueDomain,
         'should update valueDomain');
     }
-  // }, {
-  //   updateProps: {
-  //     getColorValue
-  //   },
-  //   assert: (layer, oldState, t) => {
-  //     t.ok(oldState.hexagons === layer.state.hexagons,
-  //       'should not update layer data');
-  //
-  //     t.ok(oldState.sortedBins !== layer.state.sortedBins,
-  //       'should update sortedBins');
-  //
-  //     t.ok(oldState.valueDomain !== layer.state.valueDomain,
-  //       'should re calculate valueDomain');
-  //   }
+  }, {
+    updateProps: {
+      getColorValue
+    },
+    assert: (layer, oldState, t) => {
+      t.ok(oldState.hexagons === layer.state.hexagons,
+        'should not update layer data');
+
+      // TODO: add it back with grid/hex PR
+      // t.ok(oldState.sortedBins !== layer.state.sortedBins,
+      //  'should update sortedBins');
+
+      t.ok(oldState.valueDomain !== layer.state.valueDomain,
+        'should re calculate valueDomain');
+    }
   }, {
     updateProps: {
       upperPercentile: 90
@@ -78,8 +79,9 @@ const TEST_CASES = {
       t.ok(oldState.hexagons === layer.state.hexagons,
         'should not update layer data');
 
-      t.ok(oldState.sortedBins === layer.state.sortedBins,
-        'should not update sortedBins');
+      // TODO: add it back with grid/hex PR
+      // t.ok(oldState.sortedBins === layer.state.sortedBins,
+      //  'should not update sortedBins');
 
       t.ok(oldState.valueDomain !== layer.state.valueDomain,
         'should re calculate valueDomain');
@@ -89,14 +91,14 @@ const TEST_CASES = {
 
 const SUBLAYER_TEST_CASES = {
   // props to initialize layer with
-  initialProps: {
+  INITIAL_PROPS: {
     data: data.points,
     radius: 400,
     getPosition
   },
   // list of update props to call and asserts on the resulting layer
-  updates: [{
-    newProps: {
+  UPDATES: [{
+    updateProps: {
       data: data.points,
       // change radius
       radius: 800,
@@ -109,12 +111,8 @@ const SUBLAYER_TEST_CASES = {
         'update radius should call _onGetSublayerElevation');
     }
   }, {
-    newProps: {
-      data: data.points,
-      radius: 800,
-      // change opacity
-      opacity: 0.1,
-      getPosition
+    updateProps: {
+      opacity: 0.1
     },
     assert: (subLayer, spies, t) => {
       t.ok(spies._onGetSublayerColor.notCalled,
@@ -123,6 +121,7 @@ const SUBLAYER_TEST_CASES = {
         'update opacity  should not call _onGetSublayerElevation');
     }
   }, {
+  // TODO: add it back with hex/grid PR
   //   newProps: {
   //     data: data.points,
   //     radius: 800,
@@ -137,13 +136,8 @@ const SUBLAYER_TEST_CASES = {
   //       'update getColorValue  should not call _onGetSublayerElevation');
   //   }
   // }, {
-    newProps: {
-      data: data.points,
-      radius: 800,
-      getColorValue,
-      // change upperPercentile
-      upperPercentile: 90,
-      getPosition
+    updateProps: {
+      upperPercentile: 90
     },
     assert: (subLayer, spies, t) => {
       t.ok(spies._onGetSublayerColor.called,
@@ -152,14 +146,8 @@ const SUBLAYER_TEST_CASES = {
         'update upperPercentile should not call _onGetSublayerElevation');
     }
   }, {
-    newProps: {
-      data: data.points,
-      radius: 800,
-      getColorValue,
-      upperPercentile: 90,
-      // change elevationRange
-      elevationRange: [0, 100],
-      getPosition
+    updateProps: {
+      elevationRange: [0, 100]
     },
     assert: (subLayer, spies, t) => {
       t.ok(spies._onGetSublayerColor.notCalled,
@@ -241,13 +229,12 @@ test('HexagonLayer#renderSubLayer', t => {
 });
 
 test('HexagonLayer#updateLayer', t => {
-  testLayerUpdates({LayerComponent: HexagonLayer, testCases: TEST_CASES, t});
+  testLayerUpdates(t, {LayerComponent: HexagonLayer, testCases: TEST_CASES});
   t.end();
 });
 
-/*
 test('HexagonLayer#updateTriggers', t => {
-  // setup spies
+
   const FunctionsToSpy = [
     '_onGetSublayerColor',
     '_onGetSublayerElevation'
@@ -261,5 +248,3 @@ test('HexagonLayer#updateTriggers', t => {
 
   t.end();
 });
-*/
-/* eslint-enable no-unused-vars */

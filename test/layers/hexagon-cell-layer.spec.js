@@ -29,11 +29,11 @@ const HEXAGONS = [
 
 const TEST_CASES = {
   // props to initialize layer with
-  initialProps: {
+  INITIAL_PROPS: {
     data: HEXAGONS
   },
   // list of update props to call and asserts on the resulting layer
-  updates: [{
+  UPDATES: [{
     updateProps: {
       coverage: 0.8
     },
@@ -91,7 +91,7 @@ test('HexagonCellLayer#constructor', t => {
 });
 
 test('HexagonCellLayer#layerUpdate', t => {
-  testLayerUpdates({LayerComponent: HexagonCellLayer, testCases: TEST_CASES, t});
+  testLayerUpdates(t, {LayerComponent: HexagonCellLayer, testCases: TEST_CASES});
 
   t.end();
 });
