@@ -19,42 +19,56 @@
 // THE SOFTWARE.
 
 import test from 'tape-catch';
-import * as data from '../data';
-import {testInitializeLayer} from '../test-utils';
+import * as FIXTURES from '../data';
+import {
+  testCreateLayer,
+  testCreateEmptyLayer,
+  testNullLayer,
+  testLayerUpdates
+} from '../test-utils';
 
 import {GeoJsonLayer} from 'deck.gl';
 
+const LayerComponent = GeoJsonLayer;
+const data = FIXTURES.choropleths;
+
 test('GeoJsonLayer#constructor', t => {
-  let layer = new GeoJsonLayer({
-    id: 'emptyGeoJsonLayer',
-    data: [],
-    pickable: true
-  });
-  t.ok(layer instanceof GeoJsonLayer, 'Empty GeoJsonLayer created');
 
-  layer = new GeoJsonLayer({
-    data: data.choropleths,
-    pickable: true
-  });
-  t.ok(layer instanceof GeoJsonLayer, 'GeoJsonLayer created');
+  testCreateLayer(t, LayerComponent, {data, pickable: true});
+  testCreateLayer(t, LayerComponent, {data: FIXTURES.immutableChoropleths, pickable: true});
+  testCreateEmptyLayer(t, LayerComponent);
+  testNullLayer(t, LayerComponent);
 
-  testInitializeLayer({layer});
-  // t.ok(layer.state.subLayers, 'GeoJsonLayer has subLayers');
+  t.end();
+});
 
-  layer = new GeoJsonLayer({
-    data: data.immutableChoropleths,
-    pickable: true
-  });
-  t.ok(layer instanceof GeoJsonLayer, 'GeoJsonLayer created');
+test('GeoJsonLayer#updates', t => {
+  const TEST_CASES = {
+    initialProps: {
+      data
+    },
+    updates: [{
+      updateProps: {
+        lineWidthScale: 3
+      },
+      assert: (layer, oldState) => {
+        t.ok(layer.state, 'should update layer state');
+        const subLayers = layer.renderLayers();
+        t.ok(subLayers.length === 2, 'should render 2 subLayers');
+      }
+    }, {
+      updateProps: {
+        data: Object.assign({}, data)
+      },
+      assert: (layer, oldState) => {
+        t.ok(layer.state, 'should update layer state');
+        t.ok(layer.state.features !== oldState.features,
+          'should update features');
+      }
+    }]
+  };
 
-  t.doesNotThrow(
-    () => new GeoJsonLayer({
-      id: 'nullGeoJsonLayer',
-      data: null,
-      pickable: true
-    }),
-    'Null GeoJsonLayer did not throw exception'
-  );
+  testLayerUpdates({LayerComponent, testCases: TEST_CASES, t});
 
   t.end();
 });

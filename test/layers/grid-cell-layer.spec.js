@@ -19,13 +19,38 @@
 // THE SOFTWARE.
 
 import test from 'tape-catch';
-import {testInitializeLayer} from '../test-utils';
+import {testInitializeLayer, testLayerUpdates} from '../test-utils';
 
 import {GridCellLayer} from 'deck.gl';
 
 const GRID = [
   {position: [37, 122]}, {position: [37.1, 122.8]}
 ];
+
+const TEST_CASES = {
+  // props to initialize layer with
+  initialProps: {
+    data: GRID
+  },
+  // list of update props to call and asserts on the resulting layer
+  updates: [{
+    updateProps: {
+      coverage: 0.8
+    },
+    assert: (layer, oldState, t) => {
+      t.ok(layer.state, 'should update layer');
+    }
+  }, {
+    updateProps: {
+      fp64: true
+    },
+    assert: (layer, oldState, t) => {
+      t.ok(layer.state, 'should update layer');
+      t.ok(layer.state.attributeManager.attributes.instancePositions64xyLow,
+        'should add instancePositions64xyLow');
+    }
+  }]
+};
 
 test('GridCellLayer#constructor', t => {
 
@@ -61,6 +86,12 @@ test('GridCellLayer#constructor', t => {
 
   t.equal(layer.props.cellSize, 1000, 'Use default radius if not specified');
   t.equal(layer.props.coverage, 1, 'Use default angel if not specified');
+
+  t.end();
+});
+
+test('HexagonCellLayer#layerUpdate', t => {
+  testLayerUpdates({LayerComponent: GridCellLayer, testCases: TEST_CASES, t});
 
   t.end();
 });

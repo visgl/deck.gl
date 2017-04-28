@@ -71,6 +71,7 @@
     "file-loader": "^0.10.1",
     "gl": "^4.0.3",
     "immutable": "^3.8.1",
+    "jsdom": "^9.11.0",
     "luma.gl": "^4.0.0-alpha.1",
     "module-alias": "^2.0.0",
     "nyc": "^10.2.0",
@@ -103,7 +104,8 @@
       "src/**/*.js"
     ],
     "exclude": [
-      "test/**/*.js"
+      "test/**/*.js",
+      "src/layers/deprecated"
     ]
   },
   "babel": {
