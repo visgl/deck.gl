@@ -18,10 +18,10 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {createGLContext} from 'luma.gl';
 import {WebMercatorViewport} from '../src/lib/viewports';
 import {TEST_EXPORTS as LAYER_TEST_EXPORTS} from '../src/lib/layer';
 import sinon from 'sinon';
+import global from 'global';
 
 const {mergeDefaultProps} = LAYER_TEST_EXPORTS;
 
@@ -48,12 +48,9 @@ export function toLowPrecision(input, precision = 11) {
   return input;
 }
 
-// Create and reuse a default context if none is supplied
-let glContext = null;
-
+// return global glContext
 function getGLContext() {
-  glContext = glContext || createGLContext();
-  return glContext;
+  return global.glContext;
 }
 
 function getViewport() {

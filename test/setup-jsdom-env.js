@@ -9,7 +9,6 @@ import global from 'global';
 
 global.document = jsdom('');
 global.window = global.document.defaultView;
-
 /* we dont need these properties for sinon to work,
  * choose to add back when needed
 

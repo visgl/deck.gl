@@ -19,11 +19,11 @@
 // THE SOFTWARE.
 
 import test from 'tape-catch';
-import {createGLContext} from 'luma.gl';
 import {Effect, EffectManager} from 'deck.gl/experimental/lib';
 import {LayerManager} from 'deck.gl/lib';
+import global from 'global';
 
-const gl = createGLContext();
+const gl = global.glContext;
 const layerManager = new LayerManager({gl});
 
 test('EffectManager#constructor', t => {
