@@ -62,6 +62,23 @@ Color scale domain, default is set to the range of point counts in each cell.
 Color ranges as an array of colors formatted as `[255, 255, 255]`. Default is
 [colorbrewer](http://colorbrewer2.org/#type=sequential&scheme=YlOrRd&n=6) `6-class YlOrRd`.
 
+##### `getColorValue` (Function, optional)
+
+- Default: `points => points.length`
+
+`getColorValue` is the accessor function to get the value that cell color is based on. 
+It takes an array of points inside each cell as arguments, returns a value. For example, 
+You can pass in `getColorValue` to color the cells by avg/mean/max of a specific attributes of each point.
+By default `getColorValue` returns the length of the points array.
+
+##### `coverage` (Number, optional)
+
+- Default: `1`
+
+Cell size multiplier, clamped between 0 - 1. The final size of cell
+is calculated by `coverage * cellSize`. Note: coverage does not affect how points
+are binned.
+
 ##### `elevationDomain` (Array, optional)
 
 - Default: `[0, max(count)]`
@@ -87,6 +104,20 @@ Cell elevation multiplier. The elevation of cell is calculated by
 - Default: `true`
 
 Whether to enable cell elevation. Cell elevation scale by count of points in each cell. If set to false, all cell will be flat.
+
+##### `upperPercentile` (Number, optional)
+
+- Default: `100`
+
+Filter cells and re-calculate color by `upperPercentile`. Cells with value
+larger than the upperPercentile will be hidden.
+
+##### `lowerPercentile` (Number, optional)
+
+- Default: `0`
+
+Filter bins and re-calculate color by `lowerPercentile`. Cells with value
+smaller than the lowerPercentile will be hidden.
 
 ##### `fp64` (Boolean, optional)
 

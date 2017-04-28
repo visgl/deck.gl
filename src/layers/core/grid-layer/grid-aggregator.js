@@ -24,18 +24,16 @@ const R_EARTH = 6378000;
  * @param {array} points
  * @param {number} cellSize - cell size in meters
  * @param {function} getPosition - position accessor
- * @returns {object} - grid data, cell dimension and count range
+ * @returns {object} - grid data, cell dimension
  */
 export function pointToDensityGridData(points, cellSize, getPosition) {
 
   const {gridHash, gridOffset} = _pointsToGridHashing(points, cellSize, getPosition);
   const layerData = _getGridLayerDataFromGridHash(gridHash, gridOffset);
-  const countRange = _getCellCountExtent(layerData);
 
   return {
     gridOffset,
-    layerData,
-    countRange
+    layerData
   };
 }
 
@@ -92,13 +90,6 @@ function _getGridLayerDataFromGridHash(gridHash, gridOffset) {
 
     return accu;
   }, []);
-}
-
-function _getCellCountExtent(data) {
-  return data.length ? [
-    Math.min.apply(null, data.map(d => d.count)),
-    Math.max.apply(null, data.map(d => d.count))
-  ] : [0, 1];
 }
 
 /**

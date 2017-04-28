@@ -38,6 +38,7 @@ uniform vec3 selectedPickingColor;
 // Custom uniforms
 uniform float extruded;
 uniform float cellSize;
+uniform float coverage;
 uniform float opacity;
 uniform float elevationScale;
 
@@ -57,10 +58,14 @@ float isPicked(vec3 pickingColors, vec3 selectedColor) {
 void main(void) {
 
   vec2 topLeftPos = project_position(instancePositions.xy);
+  
+  // if ahpha == 0.0, do not render element
+  float finalCellSize = cellSize * mix(1.0, 0.0, float(instanceColors.a == 0.0));
 
   // cube gemoetry vertics are between -1 to 1, scale and transform it to between 0, 1
-  vec2 pos = topLeftPos + vec2((positions.x + 1.0) * cellSize
-     / 2.0, (positions.y + 1.0) * cellSize / 2.0);
+  vec2 pos = topLeftPos + vec2(
+  (positions.x * coverage + 1.0) / 2.0 * finalCellSize, 
+  (positions.y * coverage + 1.0) / 2.0 * finalCellSize);
 
   float elevation = 0.0;
 

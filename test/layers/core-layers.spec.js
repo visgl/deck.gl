@@ -19,40 +19,31 @@
 // THE SOFTWARE.
 /* eslint-disable func-style, no-console, max-len */
 import test from 'tape-catch';
-import {createGLContext} from 'luma.gl';
 
-import {ChoroplethLayer, ScatterplotLayer, ArcLayer, ScreenGridLayer, PointCloudLayer} from 'deck.gl';
+import {
+  // ChoroplethLayer is deprecated
+  ChoroplethLayer,
+  ScatterplotLayer,
+  IconLayer,
+  ArcLayer,
+  LineLayer,
+  ScreenGridLayer,
+  PointCloudLayer,
+  PathLayer
+} from 'deck.gl';
+
+import {
+  testCreateLayer,
+  testCreateEmptyLayer,
+  testNullLayer,
+  testLayerUpdates
+} from '../test-utils';
 
 // Import LayerManager to test that layers can successfully be updated
 import {LayerManager} from 'deck.gl';
+const getPointPosition = d => d.COORDINATES;
 
-// import CHOROPLETHS from '../../example/data/sf.zip.geo.json';
-// const HEXAGONS_FILE = './example/data/hexagons.csv';
-// const POINTS_FILE = './example/data/sf.bike.parking.csv';
-
-const gl = createGLContext();
-
-const FIXTURE = {
-
-  layerState: {
-    oldLayers: [],
-    gl
-  },
-
-  mapState: {
-    width: 800,
-    height: 640,
-    latitude: 37.751537058389985,
-    longitude: -122.42694203247012,
-    zoom: 11.5
-  },
-
-  choropleths: [],
-  hexagons: [],
-  points: [{position: [100, 100], color: [255, 0, 0]}],
-  arcs: [{sourcePosition: [0, 0], targetPosition: [1, 3], color: [255, 0, 0]}],
-  pointCloud: [{position: [0, 0, 0], normal: [0, 1, 0], color: [255, 0, 0]}]
-};
+import * as FIXTURES from '../data';
 
 test('imports', t => {
   t.ok(LayerManager, 'LayerManager imported');
@@ -60,133 +51,268 @@ test('imports', t => {
 });
 
 test('ScreenGridLayer#constructor', t => {
-  const {points} = FIXTURE;
+  const LayerComponent = ScreenGridLayer;
+  const data = FIXTURES.points;
 
-  const layer = new ScreenGridLayer({
-    data: points,
-    pickable: false,
-    opacity: 0.06
-  });
+  const TEST_CASES = {
+    initialProps: {
+      data,
+      getPosition: getPointPosition
+    },
+    updates: [{
+      updateProps: {
+        cellSizePixels: 10
+      },
+      assert: (layer, oldState) => {
+        t.ok(layer.state !== oldState, 'should update layer state');
+        t.ok(layer.state.cellScale !== oldState.cellScale, 'should update cellScale');
+        t.ok(layer.state.cellScale === layer.state.model.uniforms.cellScale,
+          'should update uniform cellScale');
+        t.ok(layer.state.maxCount === layer.state.model.uniforms.maxCount,
+          'should update uniform maxCount');
+      }
+    }, {
+      updateProps: {
+        minColor: [0, 0, 0]
+      },
+      assert: (layer, oldState) => {
+        t.ok(layer.state, 'should update layer state');
+        t.deepEqual(layer.state.model.uniforms.minColor, [0, 0, 0], 'should update minColor');
+      }
+    }]
+  };
 
-  t.ok(layer, 'ScreenGridLayer created');
+  testCreateLayer(t, LayerComponent, {data, pickable: true});
+  testCreateEmptyLayer(t, LayerComponent);
+  testNullLayer(t, LayerComponent);
+  testLayerUpdates({LayerComponent, testCases: TEST_CASES, t});
+
   t.end();
 });
 
 test('ChoroplethLayer#constructor', t => {
-  const {choropleths} = FIXTURE;
 
   const layer = new ChoroplethLayer({
-    data: choropleths,
-    opacity: 0.8,
+    data: FIXTURES.choropleths,
     pickable: false,
     drawContour: true
   });
 
   t.ok(layer, 'ChoroplethLayer created');
+
   t.end();
 });
 
 test('ScatterplotLayer#constructor', t => {
-  const {points} = FIXTURE;
+  const LayerComponent = ScatterplotLayer;
+  const data = FIXTURES.points;
 
-  const layer = new ScatterplotLayer({
-    data: points,
-    pickable: true
-  });
-  t.ok(layer instanceof ScatterplotLayer, 'ScatterplotLayer created');
+  const TEST_CASES = {
+    initialProps: {
+      data,
+      radiusScale: 5,
+      getPosition: getPointPosition
+    },
+    updates: [{
+      updateProps: {
+        radiusScale: 10
+      },
+      assert: (layer, oldState) => {
+        t.ok(layer.state, 'should update layer state');
+        t.ok(layer.state.model.uniforms.radiusScale === 10, 'should update radiusScale');
+      }
+    }, {
+      updateProps: {
+        fp64: true
+      },
+      assert: (layer, oldState) => {
+        t.ok(layer.state, 'should update layer state');
+        t.ok(layer.state.attributeManager.attributes.instancePositions64xyLow,
+          'should add instancePositions64xyLow');
+      }
+    }]
+  };
 
-  const emptyLayer = new ScatterplotLayer({
-    id: 'emptyScatterplotLayer',
-    data: [],
-    pickable: true
-  });
-  t.ok(emptyLayer instanceof ScatterplotLayer, 'Empty ScatterplotLayer created');
-
-  t.doesNotThrow(
-    () => new ScatterplotLayer({
-      id: 'nullScatterplotLayer',
-      data: null,
-      pickable: true
-    }),
-    'Null ScatterplotLayer did not throw exception'
-  );
-
-  // const {mapState} = FIXTURE;
-  // t.doesNotThrow(
-  //   () => {
-  //     new LayerManager({gl})
-  //       .setViewport(new WebMercatorViewport(mapState))
-  //       .updateLayers({newLayers: [layer, emptyLayer]});
-  //   },
-  //   'ScatterplotLayer update does not throw'
-  // );
+  testCreateLayer(t, LayerComponent, {data, pickable: true});
+  testCreateEmptyLayer(t, LayerComponent);
+  testNullLayer(t, LayerComponent);
+  testLayerUpdates({LayerComponent, testCases: TEST_CASES, t});
 
   t.end();
 });
 
 test('ArcLayer#constructor', t => {
-  const {arcs} = FIXTURE;
+  const LayerComponent = ArcLayer;
+  const data = FIXTURES.routes;
 
-  const layer = new ArcLayer({
-    id: 'arcLayer',
-    data: arcs,
-    pickable: true
-  });
-  t.ok(layer instanceof ArcLayer, 'ArcLayer created');
+  const TEST_CASES = {
+    initialProps: {
+      data,
+      getSourcePosition: d => d.START,
+      getTargetPosition: d => d.END
+    },
+    updates: [{
+      updateProps: {
+        strokeWidth: 10
+      },
+      assert: (layer, oldState) => {
+        t.ok(layer.state, 'should update layer state');
+        t.ok(layer.state.model.uniforms.strokeWidth === 10, 'should update strokeWidth');
+      }
+    }, {
+      updateProps: {
+        fp64: true
+      },
+      assert: (layer, oldState) => {
+        t.ok(layer.state, 'should update layer state');
+        t.ok(layer.state.attributeManager.attributes.instancePositions64Low,
+          'should add instancePositions64xyLow');
+      }
+    }]
+  };
 
-  const emptyLayer = new ArcLayer({
-    id: 'emptyArcLayer',
-    data: [],
-    pickable: true
-  });
-  t.ok(emptyLayer instanceof ArcLayer, 'Empty ArcLayer created');
-
-  t.doesNotThrow(
-    () => new ArcLayer({
-      id: 'nullArcLayer',
-      data: null,
-      pickable: true
-    }),
-    'Null ArcLayer did not throw exception'
-  );
-
-  // const {mapState} = FIXTURE;
-  // t.doesNotThrow(
-  //   () => {
-  //     const layerManager = new LayerManager({gl});
-  //     layerManager.setViewport(new WebMercatorViewport(mapState));
-  //     layerManager.updateLayers({newLayers: [layer, emptyLayer]});
-  //   },
-  //   'ArcLayer update does not throw'
-  // );
+  testCreateLayer(t, LayerComponent, {data, pickable: true});
+  testCreateEmptyLayer(t, LayerComponent);
+  testNullLayer(t, LayerComponent);
+  testLayerUpdates({LayerComponent, testCases: TEST_CASES, t});
 
   t.end();
 });
 
 test('PointCloudLayer#constructor', t => {
-  const {pointCloud} = FIXTURE;
+  const LayerComponent = PointCloudLayer;
+  const data = FIXTURES.getPointCloud();
 
-  const layer = new PointCloudLayer({
-    data: pointCloud,
-    pickable: true
-  });
-  t.ok(layer instanceof PointCloudLayer, 'PointCloudLayer created');
+  const TEST_CASES = {
+    initialProps: {
+      data
+    },
+    updates: [{
+      updateProps: {
+        radiusPixels: 10
+      },
+      assert: (layer, oldState) => {
+        t.ok(layer.state, 'should update layer state');
+        t.ok(layer.state.model.uniforms.radiusPixels === 10, 'should update strokeWidth');
+      }
+    }]
+  };
 
-  const emptyLayer = new PointCloudLayer({
-    id: 'emptyPointCloudLayer',
-    data: [],
-    pickable: true
-  });
-  t.ok(emptyLayer instanceof PointCloudLayer, 'Empty PointCloudLayer created');
+  testCreateLayer(t, LayerComponent, {data, pickable: true});
+  testCreateEmptyLayer(t, LayerComponent);
+  testNullLayer(t, LayerComponent);
+  testLayerUpdates({LayerComponent, testCases: TEST_CASES, t});
 
-  t.doesNotThrow(
-    () => new PointCloudLayer({
-      id: 'nullPointCloudLayer',
-      data: null,
-      pickable: true
-    }),
-    'Null PointCloudLayer did not throw exception'
-  );
+  t.end();
+});
+
+test('LineLayer#constructor', t => {
+  const LayerComponent = LineLayer;
+  const data = FIXTURES.routes;
+
+  const TEST_CASES = {
+    initialProps: {
+      data,
+      getSourcePosition: d => d.START,
+      getTargetPosition: d => d.END
+    },
+    updates: [{
+      updateProps: {
+        strokeWidth: 10
+      },
+      assert: (layer, oldState) => {
+        t.ok(layer.state, 'should update layer state');
+        t.ok(layer.state.model.uniforms.strokeWidth === 10, 'should update strokeWidth');
+      }
+    }, {
+      updateProps: {
+        fp64: true
+      },
+      assert: (layer, oldState) => {
+        t.ok(layer.state, 'should update layer state');
+        t.ok(layer.state.attributeManager.attributes.instanceSourceTargetPositions64xyLow,
+          'should add instancePositions64xyLow');
+      }
+    }]
+  };
+
+  testCreateLayer(t, LayerComponent, {data, pickable: true});
+  testCreateEmptyLayer(t, LayerComponent);
+  testNullLayer(t, LayerComponent);
+  testLayerUpdates({LayerComponent, testCases: TEST_CASES, t});
+
+  t.end();
+});
+
+test('IconLayer#constructor', t => {
+  const LayerComponent = IconLayer;
+  const data = FIXTURES.points;
+
+  const TEST_CASES = {
+    initialProps: {
+      data,
+      sizeScale: 24,
+      getPosition: getPointPosition
+    },
+    updates: [{
+      updateProps: {
+        sizeScale: 10
+      },
+      assert: (layer, oldState) => {
+        t.ok(layer.state, 'should update layer state');
+      }
+    }, {
+      updateProps: {
+        fp64: true
+      },
+      assert: (layer, oldState) => {
+        t.ok(layer.state, 'should update layer state');
+        t.ok(layer.state.attributeManager.attributes.instancePositions64xyLow,
+          'should add instancePositions64xyLow');
+      }
+    }]
+  };
+
+  testCreateLayer(t, LayerComponent, {data, pickable: true});
+  testCreateEmptyLayer(t, LayerComponent);
+  testNullLayer(t, LayerComponent);
+  testLayerUpdates({LayerComponent, testCases: TEST_CASES, t});
+
+  t.end();
+});
+
+test('PathLayer#constructor', t => {
+  const LayerComponent = PathLayer;
+  const data = FIXTURES.zigzag;
+
+  const TEST_CASES = {
+    initialProps: {
+      data
+    },
+    updates: [{
+      updateProps: {
+        widthMinPixels: 10
+      },
+      assert: (layer, oldState) => {
+        t.ok(layer.state, 'should update layer state');
+        t.ok(layer.state.model.uniforms.widthMinPixels === 10, 'should update strokeWidth');
+      }
+    }, {
+      updateProps: {
+        fp64: true
+      },
+      assert: (layer, oldState) => {
+        t.ok(layer.state, 'should update layer state');
+        t.ok(layer.state.attributeManager.attributes.instanceStartEndPositions64xyLow,
+          'should add instancePositions64xyLow');
+      }
+    }]
+  };
+
+  testCreateLayer(t, LayerComponent, {data, pickable: true});
+  testCreateEmptyLayer(t, LayerComponent);
+  testNullLayer(t, LayerComponent);
+  testLayerUpdates({LayerComponent, testCases: TEST_CASES, t});
 
   t.end();
 });

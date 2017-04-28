@@ -19,10 +19,156 @@
 // THE SOFTWARE.
 
 import test from 'tape-catch';
-import * as data from '../data';
-import {testInitializeLayer} from '../test-utils';
+import sinon from 'sinon';
 
-import {GridLayer} from 'deck.gl';
+import * as data from '../data';
+import {
+  testInitializeLayer,
+  testLayerUpdates,
+  testSubLayerUpdateTriggers
+} from '../test-utils';
+
+import {GridLayer, GridCellLayer, CompositeLayer} from 'deck.gl';
+
+const getColorValue = points => points.length;
+const getPosition = d => d.COORDINATES;
+
+const TEST_CASES = {
+  // props to initialize layer with
+  initialProps: {
+    data: data.points,
+    cellSize: 400,
+    getPosition,
+    pickable: true
+  },
+  // list of update props to call and asserts on the resulting layer
+  updates: [{
+    updateProps: {
+      cellSize: 800
+    },
+    assert: (layer, oldState, t) => {
+      t.ok(oldState.layerData !== layer.state.layerData,
+        'should update layer data');
+
+      t.ok(oldState.sortedBins !== layer.state.sortedBins,
+        'should update sortedBins');
+
+      t.ok(oldState.valueDomain !== layer.state.valueDomain,
+        'should update valueDomain');
+    }
+  }, {
+    updateProps: {
+      getColorValue
+    },
+    assert: (layer, oldState, t) => {
+      t.ok(oldState.layerData === layer.state.layerData,
+        'should not update layer data');
+
+      t.ok(oldState.sortedBins !== layer.state.sortedBins,
+        'should update sortedBins');
+
+      t.ok(oldState.valueDomain !== layer.state.valueDomain,
+        'should re calculate valueDomain');
+    }
+  }, {
+    updateProps: {
+      upperPercentile: 90
+    },
+    assert: (layer, oldState, t) => {
+      t.ok(oldState.layerData === layer.state.layerData,
+        'should not update layer data');
+
+      t.ok(oldState.sortedBins === layer.state.sortedBins,
+        'should not update sortedBins');
+
+      t.ok(oldState.valueDomain !== layer.state.valueDomain,
+        'should re calculate valueDomain');
+    }
+  }]
+};
+
+const SUBLAYER_TEST_CASES = {
+  // props to initialize layer with
+  initialProps: {
+    data: data.points,
+    cellSize: 400,
+    getPosition
+  },
+  // list of update props to call and asserts on the resulting layer
+  updates: [{
+    newProps: {
+      data: data.points,
+      // change radius
+      cellSize: 800,
+      getPosition
+    },
+    assert: (subLayer, spies, t) => {
+      t.ok(spies._onGetSublayerColor.called,
+        'update radius should call _onGetSublayerColor');
+      t.ok(spies._onGetSublayerElevation.called,
+        'update radius should call _onGetSublayerElevation');
+    }
+  }, {
+    newProps: {
+      data: data.points,
+      cellSize: 800,
+      // change opacity
+      opacity: 0.1,
+      getPosition
+    },
+    assert: (subLayer, spies, t) => {
+      t.ok(spies._onGetSublayerColor.notCalled,
+        'update opacity should not call _onGetSublayerColor');
+      t.ok(spies._onGetSublayerElevation.notCalled,
+        'update opacity  should not call _onGetSublayerElevation');
+    }
+  }, {
+    newProps: {
+      data: data.points,
+      cellSize: 800,
+      // change getColorValue
+      getColorValue,
+      getPosition
+    },
+    assert: (subLayer, spies, t) => {
+      t.ok(spies._onGetSublayerColor.called,
+        'update getColorValue should call _onGetSublayerColor');
+      t.ok(spies._onGetSublayerElevation.notCalled,
+        'update getColorValue  should not call _onGetSublayerElevation');
+    }
+  }, {
+    newProps: {
+      data: data.points,
+      cellSize: 800,
+      getColorValue,
+      // change upperPercentile
+      upperPercentile: 90,
+      getPosition
+    },
+    assert: (subLayer, spies, t) => {
+      t.ok(spies._onGetSublayerColor.called,
+        'update upperPercentile should call _onGetSublayerColor');
+      t.ok(spies._onGetSublayerElevation.notCalled,
+        'update upperPercentile should not call _onGetSublayerElevation');
+    }
+  }, {
+    newProps: {
+      data: data.points,
+      cellSize: 800,
+      getColorValue,
+      upperPercentile: 90,
+      // change elevationRange
+      elevationRange: [0, 100],
+      getPosition
+    },
+    assert: (subLayer, spies, t) => {
+      t.ok(spies._onGetSublayerColor.notCalled,
+        'update elevationRange should not call _onGetSublayerColor');
+      t.ok(spies._onGetSublayerElevation.called,
+        'update elevationRange should call _onGetSublayerElevation');
+    }
+  }]
+};
 
 test('GridLayer#constructor', t => {
   let layer = new GridLayer({
@@ -31,14 +177,35 @@ test('GridLayer#constructor', t => {
     pickable: true
   });
   t.ok(layer instanceof GridLayer, 'Empty GridLayer created');
+  t.ok(layer instanceof CompositeLayer, 'GridLayer is a CompositeLayer');
 
   layer = new GridLayer({
     data: data.points,
+    cellSize: 400,
+    getPosition,
     pickable: true
   });
   t.ok(layer instanceof GridLayer, 'GridLayer created');
 
   testInitializeLayer({layer});
+
+  const {layerData, sortedBins, valueDomain} = layer.state;
+
+  t.ok(layerData.length > 0, 'GridLayer.state.layerDate calculated');
+  t.ok(sortedBins, 'GridLayer.state.sortedBins calculated');
+  t.ok(Array.isArray(valueDomain), 'GridLayer.state.valueDomain calculated');
+
+  t.ok(Array.isArray(sortedBins.sortedBins), 'GridLayer.state.sortedBins.sortedBins calculated');
+  t.ok(Number.isFinite(sortedBins.maxCount), 'GridLayer.state.sortedBins.maxCount calculated');
+
+  const firstSortedBin = sortedBins.sortedBins[0];
+  const binTocell = layerData.find(d => d.index === firstSortedBin.i);
+
+  t.ok(sortedBins.binMap[binTocell.index] === firstSortedBin,
+    'Correct GridLayer.state.sortedBins.binMap created');
+
+  const subLayer = layer.renderLayers();
+  t.ok(subLayer instanceof GridCellLayer, 'GridCellLayer rendered');
 
   t.doesNotThrow(
     () => new GridLayer({
@@ -48,6 +215,58 @@ test('GridLayer#constructor', t => {
     }),
     'Null GridLayer did not throw exception'
   );
+
+  t.end();
+});
+
+test('GridLayer#renderSubLayer', t => {
+  sinon.spy(GridLayer.prototype, '_onGetSublayerColor');
+  sinon.spy(GridLayer.prototype, '_onGetSublayerElevation');
+
+  const layer = new GridLayer({
+    data: data.points,
+    cellSize: 500,
+    getPosition,
+    pickable: true
+  });
+
+  testInitializeLayer({layer});
+
+  // render sublayer
+  const subLayer = layer.renderLayers();
+  testInitializeLayer({layer: subLayer});
+
+  t.ok(subLayer instanceof GridCellLayer, 'GridCellLayer rendered');
+
+  // should call attribute updater twice
+  // because test util calls both initialize and update layer
+  t.ok(GridLayer.prototype._onGetSublayerColor.called,
+    'should call _onGetSublayerColor number of hexagons times 2');
+  t.ok(GridLayer.prototype._onGetSublayerElevation.called,
+    'should call _onGetSublayerElevation number of hexagons times 2');
+  GridLayer.prototype._onGetSublayerColor.restore();
+  GridLayer.prototype._onGetSublayerElevation.restore();
+
+  t.end();
+});
+
+test('GridLayer#updateLayer', t => {
+  testLayerUpdates({LayerComponent: GridLayer, testCases: TEST_CASES, t});
+  t.end();
+});
+
+test('GridLayer#updateTriggers', t => {
+  // setup spies
+  const FunctionsToSpy = [
+    '_onGetSublayerColor',
+    '_onGetSublayerElevation'
+  ];
+
+  testSubLayerUpdateTriggers(t, {
+    FunctionsToSpy,
+    LayerComponent: GridLayer,
+    testCases: SUBLAYER_TEST_CASES
+  });
 
   t.end();
 });
