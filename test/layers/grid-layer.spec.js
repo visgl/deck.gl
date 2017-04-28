@@ -250,9 +250,9 @@ test('GridLayer#renderSubLayer', t => {
   // should call attribute updater twice
   // because test util calls both initialize and update layer
   t.ok(GridLayer.prototype._onGetSublayerColor.called,
-    'should call _onGetSublayerColor number of hexagons times 2');
+    'should call _onGetSublayerColor');
   t.ok(GridLayer.prototype._onGetSublayerElevation.called,
-    'should call _onGetSublayerElevation number of hexagons times 2');
+    'should call _onGetSublayerElevation');
   GridLayer.prototype._onGetSublayerColor.restore();
   GridLayer.prototype._onGetSublayerElevation.restore();
 
