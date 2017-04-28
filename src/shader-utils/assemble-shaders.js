@@ -99,16 +99,16 @@ function assembleShader(gl, opts = {}) {
   return source;
 }
 
-export function assembleShaders({gl, shaderCache, opts}) {
+export function assembleShaders(gl, opts) {
   const vsSource = assembleShader(gl, opts);
   const fsSource = opts.fs;
 
   // If shaderCache presents, output compiled shaders from luma.gl/shadeCache
-  if (shaderCache) {
+  if (opts.shaderCache) {
     return {
       gl,
-      vs: shaderCache.getVertexShader(gl, vsSource),
-      fs: shaderCache.getFragmentShader(gl, fsSource)
+      vs: opts.shaderCache.getVertexShader(gl, vsSource),
+      fs: opts.shaderCache.getFragmentShader(gl, fsSource)
     }
   };
   // Otherwise just output shader source
@@ -117,5 +117,4 @@ export function assembleShaders({gl, shaderCache, opts}) {
     vs: vsSource,
     fs: fsSource
   }
-
 }

@@ -53,7 +53,7 @@ import {drawLayers, pickLayers} from './draw-and-pick';
 import {LIFECYCLE} from './constants';
 import {Viewport} from './viewports';
 import {setOverride, layerEditListener, logLayer} from '../debug/seer-integration';
-import {experimental} from 'luma.gl';
+import ShaderAssembler from './shader-assembler';
 import {FramebufferObject} from 'luma.gl';
 
 const LOG_PRIORITY_LIFECYCLE = 2;
@@ -77,7 +77,7 @@ export default class LayerManager {
         index: -1,
         layerId: null
       },
-      shaderCache: new experimental.ShaderCache({gl})
+      shaderAssembler: new ShaderAssembler({gl})
     };
 
     Object.seal(this.context);

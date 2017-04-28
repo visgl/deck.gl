@@ -19,7 +19,6 @@
 // THE SOFTWARE.
 
 import {Layer} from '../../../lib';
-import {assembleShaders} from '../../../shader-utils';
 import {COORDINATE_SYSTEM} from '../../../lib';
 import {get} from '../../../lib/utils';
 import {fp64ify, enable64bitSupport} from '../../../lib/utils/fp64';
@@ -54,8 +53,7 @@ export default class ScatterplotLayer extends Layer {
   }
 
   initializeState() {
-    const {gl} = this.context;
-    this.setState({model: this._getModel(gl)});
+    this.setState({model: this._getModel()});
 
     /* eslint-disable max-len */
     /* deprecated props check */
@@ -95,8 +93,7 @@ export default class ScatterplotLayer extends Layer {
   updateState({props, oldProps, changeFlags}) {
     super.updateState({props, oldProps, changeFlags});
     if (props.fp64 !== oldProps.fp64) {
-      const {gl} = this.context;
-      this.setState({model: this._getModel(gl)});
+      this.setState({model: this._getModel()});
     }
     this.updateAttribute({props, oldProps, changeFlags});
   }
@@ -112,14 +109,12 @@ export default class ScatterplotLayer extends Layer {
     }));
   }
 
-  _getModel(gl) {
+  _getModel() {
+    const {gl, shaderAssembler} = this.context;
+    const shaders = shaderAssembler.assemble(this.getShaders());
+
     // a square that minimally cover the unit circle
     const positions = [-1, -1, 0, -1, 1, 0, 1, 1, 0, 1, -1, 0];
-    const shaders = assembleShaders({
-      gl,
-      shaderCache: this.context.shaderCache,
-      opts: this.getShaders()
-    });
 
     return new Model({
       gl,

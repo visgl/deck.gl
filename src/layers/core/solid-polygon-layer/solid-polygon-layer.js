@@ -19,7 +19,6 @@
 // THE SOFTWARE.
 
 import {Layer} from '../../../lib';
-import {assembleShaders} from '../../../shader-utils';
 import {get} from '../../../lib/utils';
 import {GL, Model, Geometry} from 'luma.gl';
 import {enable64bitSupport} from '../../../lib/utils/fp64';
@@ -70,7 +69,7 @@ export default class SolidPolygonLayer extends Layer {
   initializeState() {
     const {gl} = this.context;
     this.setState({
-      model: this._getModel(gl),
+      model: this._getModel(),
       numInstances: 0,
       IndexType: gl.getExtension('OES_element_index_uint') ? Uint32Array : Uint16Array
     });
@@ -120,8 +119,7 @@ export default class SolidPolygonLayer extends Layer {
     const regenerateModel = this.updateGeometry({props, oldProps, changeFlags});
 
     if (regenerateModel) {
-      const {gl} = this.context;
-      this.setState({model: this._getModel(gl)});
+      this.setState({model: this._getModel()});
     }
     this.updateAttribute({props, oldProps, changeFlags});
   }
@@ -153,12 +151,10 @@ export default class SolidPolygonLayer extends Layer {
     return geometryConfigChanged;
   }
 
-  _getModel(gl) {
-    const shaders = assembleShaders({
-      gl,
-      shaderCache: this.context.shaderCache,
-      opts: this.getShaders()
-    });
+  _getModel() {
+    const {gl, shaderAssembler} = this.context;
+    const shaders = shaderAssembler.assemble(this.getShaders());
+
     return new Model({
       gl,
       id: this.props.id,

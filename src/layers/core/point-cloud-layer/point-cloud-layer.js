@@ -19,7 +19,6 @@
 // THE SOFTWARE.
 
 import {Layer} from '../../../lib';
-import {assembleShaders} from '../../../shader-utils';
 import {GL, Model, Geometry} from 'luma.gl';
 import {fp64ify, enable64bitSupport} from '../../../lib/utils/fp64';
 import {COORDINATE_SYSTEM} from '../../../lib';
@@ -58,8 +57,7 @@ export default class PointCloudLayer extends Layer {
   }
 
   initializeState() {
-    const {gl} = this.context;
-    this.setState({model: this._getModel(gl)});
+    this.setState({model: this._getModel()});
 
     /* eslint-disable max-len */
     this.state.attributeManager.addInstanced({
@@ -95,8 +93,7 @@ export default class PointCloudLayer extends Layer {
   updateState({props, oldProps, changeFlags}) {
     super.updateState({props, oldProps, changeFlags});
     if (props.fp64 !== oldProps.fp64) {
-      const {gl} = this.context;
-      this.setState({model: this._getModel(gl)});
+      this.setState({model: this._getModel()});
     }
     this.updateAttribute({props, oldProps, changeFlags});
   }
@@ -108,7 +105,10 @@ export default class PointCloudLayer extends Layer {
     }, lightSettings));
   }
 
-  _getModel(gl) {
+  _getModel() {
+    const {gl, shaderAssembler} = this.context;
+    const shaders = shaderAssembler.assemble(this.getShaders());
+
     // a triangle that minimally cover the unit circle
     const positions = [];
     for (let i = 0; i < 3; i++) {
@@ -119,11 +119,6 @@ export default class PointCloudLayer extends Layer {
         0
       );
     }
-    const shaders = assembleShaders({
-      gl,
-      shaderCache: this.context.shaderCache,
-      opts: this.getShaders()
-    });
 
     return new Model({
       gl,

@@ -19,7 +19,6 @@
 // THE SOFTWARE.
 
 import {Layer} from '../../../lib';
-import {assembleShaders} from '../../../shader-utils';
 import {GL, Model, CubeGeometry} from 'luma.gl';
 import {fp64ify, enable64bitSupport} from '../../../lib/utils/fp64';
 import {COORDINATE_SYSTEM} from '../../../lib';
@@ -74,8 +73,7 @@ export default class GridCellLayer extends Layer {
   }
 
   initializeState() {
-    const {gl} = this.context;
-    this.setState({model: this._getModel(gl)});
+    this.setState({model: this._getModel()});
 
     const {attributeManager} = this.state;
     /* eslint-disable max-len */
@@ -112,18 +110,16 @@ export default class GridCellLayer extends Layer {
     super.updateState({props, oldProps, changeFlags});
     // Re-generate model if geometry changed
     if (props.fp64 !== oldProps.fp64) {
-      const {gl} = this.context;
-      this.setState({model: this._getModel(gl)});
+      this.setState({model: this._getModel()});
     }
     this.updateAttribute({props, oldProps, changeFlags});
     this.updateUniforms();
   }
 
-  _getModel(gl) {
+  _getModel() {
+    const {gl, shaderAssembler} = this.context;
     const geometry = new CubeGeometry({});
-    const shaders = assembleShaders({gl,
-      shaderCache: this.context.shaderCache,
-      opts: this.getShaders()});
+    const shaders = shaderAssembler.assemble(this.getShaders());
 
     return new Model({
       gl,

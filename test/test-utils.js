@@ -82,6 +82,7 @@ export function testInitializeLayer({gl, layer, viewport}) {
       context,
       changeFlags: layer.diffProps({}, layer.props, context)
     });
+
   } catch (error) {
     failures = true;
   }

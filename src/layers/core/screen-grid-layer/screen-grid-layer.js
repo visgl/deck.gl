@@ -19,7 +19,6 @@
 // THE SOFTWARE.
 
 import {Layer} from '../../../lib';
-import {assembleShaders} from '../../../shader-utils';
 import {GL, Model, Geometry} from 'luma.gl';
 
 import screenGridVertex from './screen-grid-layer-vertex.glsl';
@@ -59,8 +58,7 @@ export default class ScreenGridLayer extends Layer {
     });
     /* eslint-disable max-len */
 
-    const {gl} = this.context;
-    this.setState({model: this.getModel(gl)});
+    this.setState({model: this._getModel()});
   }
 
   updateState({oldProps, props, changeFlags}) {
@@ -82,12 +80,9 @@ export default class ScreenGridLayer extends Layer {
     model.render(uniforms);
   }
 
-  getModel(gl) {
-    const shaders = assembleShaders({
-      gl,
-      shaderCache: this.context.shaderCache,
-      opts: this.getShaders()
-    });
+  _getModel() {
+    const {gl, shaderAssembler} = this.context;
+    const shaders = shaderAssembler.assemble(this.getShaders());
 
     return new Model({
       gl,

@@ -18,7 +18,6 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 import {Layer} from '../../../lib';
-import {assembleShaders} from '../../../shader-utils';
 import {GL, Model, Geometry, Texture2D, loadTextures} from 'luma.gl';
 import {fp64ify, enable64bitSupport} from '../../../lib/utils/fp64';
 import {COORDINATE_SYSTEM} from '../../../lib';
@@ -78,8 +77,7 @@ export default class IconLayer extends Layer {
     });
     /* eslint-enable max-len */
 
-    const {gl} = this.context;
-    this.setState({model: this._getModel(gl)});
+    this.setState({model: this._getModel()});
   }
 
   updateAttribute({props, oldProps, changeFlags}) {
@@ -133,8 +131,7 @@ export default class IconLayer extends Layer {
     }
 
     if (props.fp64 !== oldProps.fp64) {
-      const {gl} = this.context;
-      this.setState({model: this._getModel(gl)});
+      this.setState({model: this._getModel()});
     }
     this.updateAttribute({props, oldProps, changeFlags});
 
@@ -161,14 +158,11 @@ export default class IconLayer extends Layer {
     };
   }
 
-  _getModel(gl) {
-    const positions = [-1, -1, 0, -1, 1, 0, 1, 1, 0, 1, -1, 0];
+  _getModel() {
+    const {gl, shaderAssembler} = this.context;
 
-    const shaders = assembleShaders({
-      gl,
-      shaderCache: this.context.shaderCache,
-      opts: this.getShaders()
-    });
+    const positions = [-1, -1, 0, -1, 1, 0, 1, 1, 0, 1, -1, 0];
+    const shaders = shaderAssembler.assemble(this.getShaders());
 
     return new Model({
       gl,

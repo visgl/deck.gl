@@ -19,7 +19,6 @@
 // THE SOFTWARE.
 
 import {Layer} from '../../../lib';
-import {assembleShaders} from '../../../shader-utils';
 import {GL, Model, Geometry} from 'luma.gl';
 import {fp64ify, enable64bitSupport} from '../../../lib/utils/fp64';
 import {COORDINATE_SYSTEM} from '../../../lib';
@@ -60,8 +59,7 @@ export default class PathLayer extends Layer {
   }
 
   initializeState() {
-    const {gl} = this.context;
-    this.setState({model: this._getModel(gl)});
+    this.setState({model: this._getModel()});
 
     const {attributeManager} = this.state;
     /* eslint-disable max-len */
@@ -103,8 +101,7 @@ export default class PathLayer extends Layer {
     const {getPath} = this.props;
     const {attributeManager} = this.state;
     if (props.fp64 !== oldProps.fp64) {
-      const {gl} = this.context;
-      this.setState({model: this._getModel(gl)});
+      this.setState({model: this._getModel()});
     }
     this.updateAttribute({props, oldProps, changeFlags});
 
@@ -132,13 +129,9 @@ export default class PathLayer extends Layer {
     }));
   }
 
-  _getModel(gl) {
-    const shaders = assembleShaders({
-      gl,
-      shaderCache: this.context.shaderCache,
-      opts: this.getShaders()
-    });
-
+  _getModel() {
+    const {gl, shaderAssembler} = this.context;
+    const shaders = shaderAssembler.assemble(this.getShaders());
     /*
      *       _
      *        "-_ 1                   3                       5

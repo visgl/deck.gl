@@ -19,7 +19,6 @@
 // THE SOFTWARE.
 
 import {Layer} from '../../../lib';
-import {assembleShaders} from '../../../shader-utils';
 import {GL, Model, Geometry} from 'luma.gl';
 import {fp64ify, enable64bitSupport} from '../../../lib/utils/fp64';
 import {COORDINATE_SYSTEM} from '../../../lib';
@@ -49,9 +48,7 @@ export default class LineLayer extends Layer {
   }
 
   initializeState() {
-
-    const {gl} = this.context;
-    this.setState({model: this._getModel(gl)});
+    this.setState({model: this._getModel()});
 
     const {attributeManager} = this.state;
 
@@ -103,7 +100,9 @@ export default class LineLayer extends Layer {
     }));
   }
 
-  _getModel(gl) {
+  _getModel() {
+    const {gl, shaderAssembler} = this.context;
+
     /*
      *  (0, -1)-------------_(1, -1)
      *       |          _,-"  |
@@ -112,12 +111,7 @@ export default class LineLayer extends Layer {
      *   (0, 1)"-------------(1, 1)
      */
     const positions = [0, -1, 0, 0, 1, 0, 1, -1, 0, 1, 1, 0];
-
-    const shaders = assembleShaders({
-      gl,
-      shaderCache: this.context.shaderCache,
-      opts: this.getShaders()
-    });
+    const shaders = shaderAssembler.assemble(this.getShaders());
 
     return new Model({
       gl,

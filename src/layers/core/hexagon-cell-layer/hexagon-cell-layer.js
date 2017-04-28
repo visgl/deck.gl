@@ -19,8 +19,7 @@
 // THE SOFTWARE.
 
 import {Layer} from '../../../lib';
-import {assembleShaders} from '../../../shader-utils';
-import {Model, CylinderGeometry} from 'luma.gl';
+import {GL, Model, CylinderGeometry} from 'luma.gl';
 import {log} from '../../../lib/utils';
 import {fp64ify, enable64bitSupport} from '../../../lib/utils/fp64';
 import {COORDINATE_SYSTEM} from '../../../lib';
@@ -103,15 +102,13 @@ export default class HexagonCellLayer extends Layer {
    * Essentially a deferred constructor
    */
   initializeState() {
-    const {gl} = this.context;
-    this.setState({model: this._getModel(gl)});
-
+    this.setState({model: this._getModel()});
     const {attributeManager} = this.state;
     /* eslint-disable max-len */
     attributeManager.addInstanced({
       instancePositions: {size: 3, accessor: ['getCentroid', 'getElevation'],
         update: this.calculateInstancePositions},
-      instanceColors: {size: 4, type: gl.UNSIGNED_BYTE, accessor: 'getColor',
+      instanceColors: {size: 4, type: GL.UNSIGNED_BYTE, accessor: 'getColor',
         update: this.calculateInstanceColors}
     });
     /* eslint-enable max-len */
@@ -144,8 +141,7 @@ export default class HexagonCellLayer extends Layer {
   updateState({props, oldProps, changeFlags}) {
     super.updateState({props, oldProps, changeFlags});
     if (props.fp64 !== oldProps.fp64) {
-      const {gl} = this.context;
-      this.setState({model: this._getModel(gl)});
+      this.setState({model: this._getModel()});
     }
     this.updateAttribute({props, oldProps, changeFlags});
 
@@ -229,13 +225,9 @@ export default class HexagonCellLayer extends Layer {
     lightSettings));
   }
 
-  _getModel(gl) {
-    const shaders = assembleShaders({
-      gl,
-      shaderCache: this.context.shaderCache,
-      opts: this.getShaders()
-    });
-
+  _getModel() {
+    const {gl, shaderAssembler} = this.context;
+    const shaders = shaderAssembler.assemble(this.getShaders());
     return new Model({
       gl,
       id: this.props.id,
