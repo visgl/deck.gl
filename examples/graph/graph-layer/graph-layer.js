@@ -76,14 +76,14 @@ export default class GraphLayer extends CompositeLayer {
       if (data) {
         this.state.nodes = data.nodes;
         this.state.links = data.links;
-        this.state.layoutUpdating = props.layoutUpdating;
+        this.state.layoutTime = props.layoutTime;
       }
     }
   }
 
   renderLayers() {
     const {id} = this.props;
-    const {nodes, links, layoutUpdating} = this.state;
+    const {nodes, links, layoutTime} = this.state;
 
     // Accessor props for underlying layers
     const {
@@ -116,13 +116,13 @@ export default class GraphLayer extends CompositeLayer {
       projectionMode,
       updateTriggers: {
         getSourcePosition: {
-          layout: layoutUpdating
+          layout: layoutTime
         },
         getTargetPosition: {
-          layout: layoutUpdating
+          layout: layoutTime
         },
         getColor: {
-          layout: layoutUpdating
+          layout: layoutTime
         }
       }
     });
@@ -138,10 +138,10 @@ export default class GraphLayer extends CompositeLayer {
       projectionMode,
       updateTriggers: {
         getPosition: {
-          layout: layoutUpdating
+          layout: layoutTime
         },
         getColor: {
-          layout: layoutUpdating
+          layout: layoutTime
         }
       },
       visible
@@ -162,7 +162,7 @@ export default class GraphLayer extends CompositeLayer {
       sizeScale,
       updateTriggers: {
         getPosition: {
-          layout: layoutUpdating
+          layout: layoutTime
         }
       },
       visible
