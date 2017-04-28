@@ -119,7 +119,11 @@ export default class PointCloudLayer extends Layer {
         0
       );
     }
-    const shaders = assembleShaders(gl, this.getShaders());
+    const shaders = assembleShaders({
+      gl,
+      shaderCache: this.context.shaderCache,
+      opts: this.getShaders()
+    });
 
     return new Model({
       gl,

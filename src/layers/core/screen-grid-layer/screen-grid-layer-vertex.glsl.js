@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 
 export default `\
-#define SHADER_NAME grid-layer-vs
+#define SHADER_NAME screen-grid-layer-vertex-shader
 
 attribute vec3 vertices;
 attribute vec3 instancePositions;

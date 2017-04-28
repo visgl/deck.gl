@@ -113,7 +113,10 @@ export default class ChoroplethLayer extends Layer {
   }
 
   getModel(gl) {
-    const shaders = assembleShaders(gl, this.getShaders());
+    const shaders = assembleShaders({gl,
+      shaderCache: this.context.shaderCache,
+      opts: this.getShaders()
+    });
 
     return new Model({
       gl,

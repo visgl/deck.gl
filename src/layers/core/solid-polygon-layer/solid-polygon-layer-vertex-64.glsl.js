@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 
 export default `\
-#define SHADER_NAME polygon-layer-vertex-shader
+#define SHADER_NAME solid-polygon-layer-vertex-shader-64
 
 attribute vec3 positions;
 attribute vec2 positions64xyLow;

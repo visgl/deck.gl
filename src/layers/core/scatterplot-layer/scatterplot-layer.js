@@ -115,7 +115,11 @@ export default class ScatterplotLayer extends Layer {
   _getModel(gl) {
     // a square that minimally cover the unit circle
     const positions = [-1, -1, 0, -1, 1, 0, 1, 1, 0, 1, -1, 0];
-    const shaders = assembleShaders(gl, this.getShaders());
+    const shaders = assembleShaders({
+      gl,
+      shaderCache: this.context.shaderCache,
+      opts: this.getShaders()
+    });
 
     return new Model({
       gl,

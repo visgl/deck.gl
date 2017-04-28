@@ -130,7 +130,9 @@ export default class ExtrudedChoroplethLayer64 extends Layer {
     gl.enable(GL.DEPTH_TEST);
     gl.depthFunc(GL.LEQUAL);
 
-    const shaders = assembleShaders(gl, this.getShaders());
+    const shaders = assembleShaders({gl,
+      shaderCache: this.context.shaderCache,
+      opts: this.getShaders()});
 
     return new Model({
       gl,

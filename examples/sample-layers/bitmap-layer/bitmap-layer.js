@@ -126,7 +126,11 @@ export default class BitmapLayer extends Layer {
       texCoords.push(vertex[0] / 2 + 0.5, -vertex[1] / 2 + 0.5);
     });
 
-    const shaders = assembleShaders(gl, this.getShaders());
+    const shaders = assembleShaders({
+      gl,
+      shaderCache: this.context.shaderCache,
+      opts: this.getShaders()
+    });
 
     const model = new Model({
       gl,

@@ -59,7 +59,7 @@ be instanced, or use dynamic geometry:
   import {GL, Model, Geometry} from 'luma.gl';
 
   getModel(gl) {
-    const shaders = assembleShaders(gl, this.getShaders());
+    const shaders = assembleShaders({gl, shaderCache: this.context.shaderCache, opts: this.getShaders()});
 
     return new Model({
       gl,
@@ -87,7 +87,7 @@ be instanced, or use dynamic geometry:
   import {GL, Model, Geometry} from 'luma.gl';
 
   getModel(gl) {
-    const shaders = assembleShaders(gl, this.getShaders());
+    const shaders = assembleShaders({gl, shaderCache: this.context.shaderCache, opts: this.getShaders()});
 
     return new Model({
       gl,

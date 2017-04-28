@@ -133,7 +133,11 @@ export default class PathLayer extends Layer {
   }
 
   _getModel(gl) {
-    const shaders = assembleShaders(gl, this.getShaders());
+    const shaders = assembleShaders({
+      gl,
+      shaderCache: this.context.shaderCache,
+      opts: this.getShaders()
+    });
 
     /*
      *       _

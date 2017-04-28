@@ -118,7 +118,9 @@ export default class ArcLayer extends Layer {
       positions = positions.concat([i, -1, 0, i, 1, 0]);
     }
 
-    const shaders = assembleShaders(gl, this.getShaders());
+    const shaders = assembleShaders({gl,
+      shaderCache: this.context.shaderCache,
+      opts: this.getShaders()});
 
     const model = new Model({
       gl,

@@ -113,7 +113,11 @@ export default class LineLayer extends Layer {
      */
     const positions = [0, -1, 0, 0, 1, 0, 1, -1, 0, 1, 1, 0];
 
-    const shaders = assembleShaders(gl, this.getShaders());
+    const shaders = assembleShaders({
+      gl,
+      shaderCache: this.context.shaderCache,
+      opts: this.getShaders()
+    });
 
     return new Model({
       gl,
