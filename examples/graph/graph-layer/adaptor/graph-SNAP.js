@@ -1,5 +1,3 @@
-const MAX_NUM_NODES = 2000;
-
 export default class GraphAdaptor {
   constructor(data) {
     this._processData(data);
@@ -26,10 +24,13 @@ export default class GraphAdaptor {
     this.nodes = [];
     this.links = [];
     this.nodeMap = {};
+    this.linkMap = {};
 
     data.forEach(link => {
       const {source, target} = link;
-      if (source > MAX_NUM_NODES || target > MAX_NUM_NODES) {
+
+      if (this.linkMap[`${source}-${target}`] ||
+        this.linkMap[`${target}-${source}`]) {
         return;
       }
 
@@ -38,13 +39,15 @@ export default class GraphAdaptor {
         source,
         target
       });
+      this.linkMap[`${source}-${target}`] = true;
 
       let node = this.nodeMap[source];
       if (!node) {
         node = this.nodeMap[source] = {
           id: source,
           sourceCount: 0,
-          targetCount: 0
+          targetCount: 0,
+          size: 4
         };
         this.nodes.push(node);
       }
@@ -55,7 +58,8 @@ export default class GraphAdaptor {
         node = this.nodeMap[target] = {
           id: target,
           sourceCount: 0,
-          targetCount: 0
+          targetCount: 0,
+          size: 4
         };
         this.nodes.push(node);
       }
