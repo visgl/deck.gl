@@ -52,6 +52,7 @@ import assert from 'assert';
 import {drawLayers, pickLayers} from './draw-and-pick';
 import {LIFECYCLE} from './constants';
 import {Viewport} from './viewports';
+import {setOverride, layerEditListener, logLayer} from '../debug/seer-integration';
 
 import {FramebufferObject} from 'luma.gl';
 
@@ -77,7 +78,17 @@ export default class LayerManager {
         layerId: null
       }
     };
+
     Object.seal(this.context);
+
+    /**
+     * Set an override on the specified property and update the layers
+     */
+    layerEditListener(payload => {
+      setOverride(payload.itemKey, payload.valuePath, payload.value);
+      const newLayers = this.layers.map(layer => new layer.constructor(layer.props));
+      this.updateLayers({newLayers});
+    });
   }
 
   setViewport(viewport) {
@@ -216,6 +227,7 @@ export default class LayerManager {
   }
 
   /* eslint-disable max-statements */
+
   _matchSublayers({newLayers, oldLayerMap, generatedLayers}) {
     // Filter out any null layers
     newLayers = newLayers.filter(newLayer => newLayer !== null);
@@ -233,10 +245,12 @@ export default class LayerManager {
           log.once(0, `Multipe new layers with same id ${layerName(newLayer)}`);
         }
 
-
         // Only transfer state at this stage. We must not generate exceptions
         // until all layers' state have been transferred
         if (oldLayer) {
+
+          logLayer(newLayer);
+
           log(LOG_PRIORITY_LIFECYCLE_MINOR,
             `matched ${layerName(newLayer)}`, oldLayer, '=>', newLayer);
           this._transferLayerState(oldLayer, newLayer);
