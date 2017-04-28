@@ -8,13 +8,18 @@ import {default as GraphBasic} from './graph-layer/adaptor/graph-basic';
 import {default as GraphFlare} from './graph-layer/adaptor/graph-flare';
 import {default as GraphSNAP} from './graph-layer/adaptor/graph-snap';
 
-// change this to load a different sample dataset (valid: 0-2)
+// change this to load a different sample dataset:
+// 0: typed data, with types represented as icons
+// 1: named data, to show labeling on interaction
+// 2: larger dataset
 const DATASET = 1;
 
 class Root extends Component {
+
   //
-  // REACT LIFECYCLE
+  // React lifecycle
   //
+
   constructor(props) {
     super(props);
 
@@ -32,8 +37,12 @@ class Root extends Component {
         width: 500,
         height: 500
       },
-      graph: null,
-      data: null
+      data: null,
+      iconMapping: null,
+      hovered: null,
+      clicked: null,
+      dragging: null,
+      lastDragged: null
     };
 
     const dataConfig = [
@@ -59,11 +68,12 @@ class Root extends Component {
     const loader = dataConfig[DATASET].loader;
     loader(dataConfig[DATASET].data, (error, response) => {
       if (!error) {
-        // apply timestamp and push loaded sample data into array
+        // "adaptors" are used to parse data into the format
+        // required by your layout (e.g. nodes and links arrays for d3-force),
+        // and to manage addition / removal of graph elements.
         const GraphAdaptor = dataConfig[DATASET].adaptor;
         const graph = new GraphAdaptor(response);
         this.setState({
-          graph,
           data: [graph]
         });
       }
@@ -183,6 +193,7 @@ class Root extends Component {
   //
   // layout (d3-force) accessors
   //
+
   _linkDistance(link, i) {
     return 20;
   }
@@ -204,6 +215,7 @@ class Root extends Component {
   //
   // rendering (deck.gl) accessors
   //
+
   _getNodeColor(node) {
     return [18, 147, 154, 255];
   }
@@ -232,6 +244,11 @@ class Root extends Component {
   //
   // rendering
   //
+
+  /**
+   * The "interaction layer" is an SVG overlay used to apply highlights
+   * and labels to the targets of interaction (hovered and clicked/dragged elements).
+   */
   _renderInteractionLayer(viewport, hovered, clicked) {
     // set flags used below to determine if SVG highlight elements should be rendered.
     // if truthy, each flag is replaced with the corresponding element to render.
@@ -248,7 +265,9 @@ class Root extends Component {
       clicked: clicked && clicked.object
     };
 
-    // process related elements first, since they compare themselves to the focused elements
+    // process related elements first, since they compare themselves to the focused elements.
+    // related elements are all links attached to a node, or the nodes at each end of a link.
+    // see `graph-layout-layer::getPickingInfo()` for more information.
     Object.keys(relatedElements).forEach(k => {
       const els = relatedElements[k];
       if (!els || !els.length) {
@@ -257,7 +276,9 @@ class Root extends Component {
         relatedElements[k] = [];
         els.forEach(el => {
           if (el.source) {
-            // highlight linked nodes, as well as the links
+            // when highlighting links related to a selected node,
+            // highlight the nodes of those links as well as the links themselves.
+            // this allows us to identify nodes linked to the selected node.
             const relatedNode = el.source === elements[k] ? el.target : el.source;
             relatedElements[k].push(
               this._renderInteractionElement(relatedNode, `related ${k}`, viewport)
@@ -281,8 +302,8 @@ class Root extends Component {
       const el = elementInfo[k];
       if (el && el.name) {
         elementInfo[k] = (<text
-          x={el.x + viewport.width / 2}
-          y={el.y + viewport.height / 2}
+          x={el.x}
+          y={el.y}
           dx={this._getNodeSize(el) + 10}
           dy={-10}
         >{el.name}</text>);
@@ -291,39 +312,40 @@ class Root extends Component {
       }
     });
 
+    // Note: node.x/y, calculated by d3 layout,
+    // is measured from the center of the layout (of the viewport).
+    // Therefore, we offset the <g> container to align.
     return (
       <svg width={viewport.width} height={viewport.height} className="interaction-overlay">
-        {relatedElements.hovered}
-        {elements.hovered}
-        {relatedElements.clicked}
-        {elements.clicked}
-        {elementInfo.hovered}
-        {elementInfo.clicked}
+        <g transform={`translate(${viewport.width / 2},${viewport.height / 2})`}>
+          {relatedElements.hovered}
+          {elements.hovered}
+          {relatedElements.clicked}
+          {elements.clicked}
+          {elementInfo.hovered}
+          {elementInfo.clicked}
+        </g>
       </svg>
     );
   }
 
   _renderInteractionElement(el, className, viewport) {
-    // Note: node.x/y, calculated by d3 layout,
-    // is measured from the center of the layout (of the viewport).
-    // Therefore, we offset the node coordinates from the viewport center.
-
     let element;
     if (el.source) {
       // link
       element = (<line
-        x1={el.source.x + viewport.width / 2}
-        y1={el.source.y + viewport.height / 2}
-        x2={el.target.x + viewport.width / 2}
-        y2={el.target.y + viewport.height / 2}
+        x1={el.source.x}
+        y1={el.source.y}
+        x2={el.target.x}
+        y2={el.target.y}
         className={className}
         key={`link-${className}-${el.id}`}
       />);
     } else {
       // node
       element = (<circle
-        cx={el.x + viewport.width / 2}
-        cy={el.y + viewport.height / 2}
+        cx={el.x}
+        cy={el.y}
         r={this._getNodeSize(el)}
         className={className}
         key={`node-${className}-${el.id}`}
