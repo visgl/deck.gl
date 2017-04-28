@@ -22,26 +22,28 @@ import test from 'tape-catch';
 import sinon from 'sinon';
 
 import * as data from '../data';
-import {testInitializeLayer, testUpdateLayer} from '../test-utils';
+import {
+  testInitializeLayer,
+  testLayerUpdates,
+  testSubLayerUpdateTriggers
+} from '../test-utils';
 
 import {HexagonLayer, CompositeLayer, HexagonCellLayer} from 'deck.gl';
 
 const getColorValue = points => points.length;
+const getPosition = d => d.COORDINATES;
 
 const TEST_CASES = {
   // props to initialize layer with
   initialProps: {
     data: data.points,
     radius: 400,
-    getPosition: d => d.COORDINATES
+    getPosition
   },
   // list of update props to call and asserts on the resulting layer
   updates: [{
-    newProps: {
-      data: data.points,
-      // change radius
-      radius: 800,
-      getPosition: d => d.COORDINATES
+    updateProps: {
+      radius: 800
     },
     assert: (layer, oldState, t) => {
       t.ok(oldState.hexagons !== layer.state.hexagons,
@@ -54,12 +56,8 @@ const TEST_CASES = {
         'should update valueDomain');
     }
   }, {
-    newProps: {
-      data: data.points,
-      radius: 800,
-      // change getColorValue
-      getColorValue,
-      getPosition: d => d.COORDINATES
+    updateProps: {
+      getColorValue
     },
     assert: (layer, oldState, t) => {
       t.ok(oldState.hexagons === layer.state.hexagons,
@@ -72,13 +70,8 @@ const TEST_CASES = {
         'should re calculate valueDomain');
     }
   }, {
-    newProps: {
-      data: data.points,
-      radius: 800,
-      // change getColorValue
-      getColorValue,
-      upperPercentile: 90,
-      getPosition: d => d.COORDINATES
+    updateProps: {
+      upperPercentile: 90
     },
     assert: (layer, oldState, t) => {
       t.ok(oldState.hexagons === layer.state.hexagons,
@@ -98,7 +91,7 @@ const SUBLAYER_TEST_CASES = {
   initialProps: {
     data: data.points,
     radius: 400,
-    getPosition: d => d.COORDINATES
+    getPosition
   },
   // list of update props to call and asserts on the resulting layer
   updates: [{
@@ -106,7 +99,7 @@ const SUBLAYER_TEST_CASES = {
       data: data.points,
       // change radius
       radius: 800,
-      getPosition: d => d.COORDINATES
+      getPosition
     },
     assert: (subLayer, spies, t) => {
       t.ok(spies._onGetSublayerColor.called,
@@ -120,7 +113,7 @@ const SUBLAYER_TEST_CASES = {
       radius: 800,
       // change opacity
       opacity: 0.1,
-      getPosition: d => d.COORDINATES
+      getPosition
     },
     assert: (subLayer, spies, t) => {
       t.ok(spies._onGetSublayerColor.notCalled,
@@ -134,7 +127,7 @@ const SUBLAYER_TEST_CASES = {
       radius: 800,
       // change getColorValue
       getColorValue,
-      getPosition: d => d.COORDINATES
+      getPosition
     },
     assert: (subLayer, spies, t) => {
       t.ok(spies._onGetSublayerColor.called,
@@ -149,7 +142,7 @@ const SUBLAYER_TEST_CASES = {
       getColorValue,
       // change upperPercentile
       upperPercentile: 90,
-      getPosition: d => d.COORDINATES
+      getPosition
     },
     assert: (subLayer, spies, t) => {
       t.ok(spies._onGetSublayerColor.called,
@@ -165,7 +158,7 @@ const SUBLAYER_TEST_CASES = {
       upperPercentile: 90,
       // change elevationRange
       elevationRange: [0, 100],
-      getPosition: d => d.COORDINATES
+      getPosition
     },
     assert: (subLayer, spies, t) => {
       t.ok(spies._onGetSublayerColor.notCalled,
@@ -180,6 +173,7 @@ test('HexagonLayer#constructor', t => {
   let layer = new HexagonLayer({
     id: 'emptyGeoJsonLayer',
     data: [],
+    radius: 1,
     pickable: true
   });
   t.ok(layer instanceof HexagonLayer, 'Empty HexagonLayer created');
@@ -196,7 +190,7 @@ test('HexagonLayer#constructor', t => {
   layer = new HexagonLayer({
     data: data.points,
     radius: 500,
-    getPosition: d => d.COORDINATES,
+    getPosition,
     pickable: true
   });
   t.ok(layer instanceof HexagonLayer, 'HexagonLayer created');
@@ -240,7 +234,7 @@ test('HexagonLayer#renderSubLayer', t => {
   const layer = new HexagonLayer({
     data: data.points,
     radius: 500,
-    getPosition: d => d.COORDINATES,
+    getPosition,
     pickable: true
   });
 
@@ -265,64 +259,22 @@ test('HexagonLayer#renderSubLayer', t => {
 });
 
 test('HexagonLayer#updateLayer', t => {
-  const layer = new HexagonLayer(TEST_CASES.initialProps);
-  testInitializeLayer({layer});
-
-  TEST_CASES.updates.forEach(({newProps, assert}) => {
-    // copy over old state
-    const oldState = Object.assign({}, layer.state);
-
-    // call update layer with new props
-    testUpdateLayer({layer, newProps});
-
-    // assert on updated layer
-    assert(layer, oldState, t);
-  });
-
+  testLayerUpdates({LayerComponent: HexagonLayer, testCases: TEST_CASES, t});
   t.end();
 });
 
 test('HexagonLayer#updateTriggers', t => {
-  // deck.log.priority = 3;
   // setup spies
   const FunctionsToSpy = [
     '_onGetSublayerColor',
     '_onGetSublayerElevation'
   ];
-  const spies = FunctionsToSpy.reduce((accu, curr) => Object.assign(accu, {
-    [curr]: sinon.spy(HexagonLayer.prototype, curr)
-  }), {});
 
-  // initialize parent layer
-  const layer = new HexagonLayer(SUBLAYER_TEST_CASES.initialProps);
-  testInitializeLayer({layer});
-
-  // initialize subLayer
-  const subLayer = layer.renderLayers();
-
-  testInitializeLayer({layer: subLayer});
-
-  SUBLAYER_TEST_CASES.updates.forEach(({newProps, assert}) => {
-
-    // call update layer with new props
-    testUpdateLayer({layer, newProps});
-
-    // layer manager should handle match subLayer and tranfer state and props
-    // here we assume subLayer matches copy over the new props
-    // from a new subLayer
-    const newSubLayer = layer.renderLayers();
-
-    testUpdateLayer({layer: subLayer, newProps: newSubLayer.props});
-
-    // assert on updated subLayer
-    assert(subLayer, spies, t);
-
-    // reset spies
-    Object.keys(spies).forEach(k => spies[k].reset());
+  testSubLayerUpdateTriggers(t, {
+    FunctionsToSpy,
+    LayerComponent: HexagonLayer,
+    testCases: SUBLAYER_TEST_CASES
   });
-
-  // restore spies
-  Object.keys(spies).forEach(k => spies[k].restore());
 
   t.end();
 });
