@@ -22,6 +22,7 @@
 import {COORDINATE_SYSTEM, LIFECYCLE} from './constants';
 import AttributeManager from './attribute-manager';
 import {log, compareProps, count} from './utils';
+import {getOverrides} from '../debug/seer-integration';
 import {GL} from 'luma.gl';
 import assert from 'assert';
 
@@ -66,6 +67,8 @@ export default class Layer {
     props = Object.assign({}, mergedDefaultProps, props);
     // Accept null as data - otherwise apps and layers need to add ugly checks
     props.data = props.data || [];
+    // Get the overrides from the extension if it's active
+    getOverrides(props);
     // Props are immutable
     Object.freeze(props);
 
