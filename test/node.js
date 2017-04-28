@@ -21,6 +21,9 @@
 // Enables ES2015 import/export in Node.js
 require('reify');
 
+// setup for jsDom
+require('./setup');
+
 // Enables import of glsl
 const fs = require('fs');
 require.extensions['.glsl'] = function readShader(module, filename) {
