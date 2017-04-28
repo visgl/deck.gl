@@ -255,7 +255,7 @@ export default class HexagonCellLayer extends Layer {
       const elevation = getElevation(object);
       value[i + 0] = lon;
       value[i + 1] = lat;
-      value[i + 2] = elevation || this.props.elevation;
+      value[i + 2] = elevation || 0;
       i += size;
     }
   }

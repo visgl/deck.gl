@@ -28,6 +28,7 @@ export default class BinSorter {
   constructor(bins = [], getValue = defaultGetValue) {
     this.sortedBins = this.getSortedBins(bins, getValue);
     this.maxCount = this.getMaxCount();
+    this.binMap = this.getBinMap();
   }
 
   /**
@@ -38,7 +39,11 @@ export default class BinSorter {
    */
   getSortedBins(bins, getValue) {
     return bins
-      .map((h, i) => ({i, value: getValue(h.points), counts: h.points.length}))
+      .map((h, i) => ({
+        i: Number.isFinite(h.index) ? h.index : i,
+        value: getValue(h.points),
+        counts: h.points.length
+      }))
       .sort((a, b) => a.value - b.value);
   }
 
@@ -66,5 +71,16 @@ export default class BinSorter {
    */
   getMaxCount() {
     return Math.max.apply(null, this.sortedBins.map(b => b.counts));
+  }
+
+  /**
+   * Get a mapping from bin index to sorted bin
+   * This is used to retrieve bin values for color calculation
+   * @return {Object} bin index to sortedBins
+   */
+  getBinMap() {
+    return this.sortedBins.reduce((mapper, curr) => Object.assign(mapper, {
+      [curr.i]: curr
+    }), {});
   }
 }
