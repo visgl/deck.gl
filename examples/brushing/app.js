@@ -8,6 +8,16 @@ import {json as requestJson} from 'd3-request';
 
 // Set your mapbox token here
 const MAPBOX_TOKEN = process.env.MAPBOX_ACCESS_TOKEN; // eslint-disable-line
+const tooltipStyle = {
+  position: 'absolute',
+  padding: '4px',
+  background: 'rgba(0, 0, 0, 0.8)',
+  color: '#fff',
+  maxWidth: '300px',
+  fontSize: '10px',
+  zIndex: 9,
+  pointerEvents: 'none'
+};
 
 class Root extends Component {
 
@@ -76,8 +86,7 @@ class Root extends Component {
     }
 
     return (
-      <div className="tooltip"
-           style={{left: x, top: y}}>
+      <div style={{...tooltipStyle, left: x, top: y}}>
         <div>{hoveredObject.name}</div>
         <div>{`Net gain: ${hoveredObject.net}`}</div>
         <div>{`i: ${hoveredObject.i}`}</div>
@@ -106,6 +115,7 @@ class Root extends Component {
             brushRadius={100000}
             opacity={0.7}
             strokeWidth={2}
+            enableBrushing={true}
             mousePosition={mousePosition}
             mouseEntered={mouseEntered}
             onHover={this._onHover.bind(this)}

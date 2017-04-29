@@ -3745,6 +3745,10 @@ rx-lite@^3.1.2:
   version "3.1.2"
   resolved "https://registry.yarnpkg.com/rx-lite/-/rx-lite-3.1.2.tgz#19ce502ca572665f3b647b10939f97fd1615f102"
 
+seer@^0.0.4:
+  version "0.0.4"
+  resolved "https://registry.yarnpkg.com/seer/-/seer-0.0.4.tgz#d17b3db111f60171d0a85a7fb9bac183eb955b98"
+
 select-hose@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/select-hose/-/select-hose-2.0.0.tgz#625d8658f865af43ec962bfc376a37359a4994ca"
