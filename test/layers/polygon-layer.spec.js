@@ -19,50 +19,48 @@
 // THE SOFTWARE.
 
 import test from 'tape-catch';
-import * as data from '../data';
-import {testInitializeLayer} from '../test-utils';
+import * as FIXTURES from '../data';
+import {
+  testCreateLayer,
+  testCreateEmptyLayer,
+  testNullLayer,
+  testLayerUpdates
+} from '../test-utils';
 
 import {PolygonLayer} from 'deck.gl';
 
-const POLYGONS = [
-  [],
-  [[1, 1]],
-  [[1, 1], [1, 1], [1, 1]],
-  [[]],
-  [[[1, 1]]],
-  [[[1, 1], [1, 1], [1, 1]]]
-];
-
 test('PolygonLayer#constructor', t => {
+  const LayerComponent = PolygonLayer;
+  const data = FIXTURES.polygons;
 
-  let layer = new PolygonLayer({
-    id: 'emptyPolygonLayer',
-    data: [],
-    pickable: true
-  });
-  t.ok(layer instanceof PolygonLayer, 'Empty PolygonLayer created');
+  const TEST_CASES = {
+    INITIAL_PROPS: {
+      data,
+      getPolygon: f => f
+    },
+    UPDATES: [{
+      updateProps: {
+        filled: false
+      },
+      assert: (layer, oldState) => {
+        t.ok(layer.state, 'should update layer state');
+        const subLayers = layer.renderLayers();
+        t.ok(subLayers.length, 'subLayers rendered');
+      }
+    }, {
+      updateProps: {
+        data: data.slice(0, 10)
+      },
+      assert: (layer, oldState) => {
+        t.ok(layer.state.paths.length !== oldState.paths.length, 'should update state.paths');
+      }
+    }]
+  };
 
-  layer = new PolygonLayer({
-    data: POLYGONS,
-    getPolygon: x => x
-  });
-  t.ok(layer instanceof PolygonLayer, 'PolygonLayer created');
-
-  layer = new PolygonLayer({
-    data: data.choropleths
-  });
-  t.ok(layer instanceof PolygonLayer, 'PolygonLayer created');
-
-  testInitializeLayer({layer});
-  // t.ok(layer.state.model, 'PolygonLayer has state');
-
-  t.doesNotThrow(
-    () => new PolygonLayer({
-      id: 'nullPolygonLayer',
-      data: null
-    }),
-    'Null PolygonLayer did not throw exception'
-  );
+  testCreateLayer(t, LayerComponent, {data, pickable: true});
+  testCreateEmptyLayer(t, LayerComponent);
+  testNullLayer(t, LayerComponent);
+  testLayerUpdates(t, {LayerComponent, testCases: TEST_CASES});
 
   t.end();
 });

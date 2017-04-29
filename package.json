@@ -72,6 +72,7 @@
     "file-loader": "^0.10.1",
     "gl": "^4.0.3",
     "immutable": "^3.8.1",
+    "jsdom": "^9.11.0",
     "luma.gl": "^4.0.0-alpha.1",
     "module-alias": "^2.0.0",
     "nyc": "^10.2.0",
@@ -82,6 +83,7 @@
     "react-addons-test-utils": "^15.4.2",
     "react-dom": "^15.4.0",
     "reify": "^0.4.4",
+    "sinon": "^2.1.0",
     "tap-browser-color": "^0.1.2",
     "tape": "^4.5.1",
     "tape-catch": "^1.0.4",
@@ -103,7 +105,8 @@
       "src/**/*.js"
     ],
     "exclude": [
-      "test/**/*.js"
+      "test/**/*.js",
+      "src/layers/deprecated"
     ]
   },
   "babel": {
