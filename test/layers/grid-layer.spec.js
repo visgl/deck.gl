@@ -17,7 +17,6 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-/* eslint-disable no-unused-vars */
 import test from 'tape-catch';
 import sinon from 'sinon';
 
@@ -192,29 +191,29 @@ test('GridLayer#constructor', t => {
   const {layerData} = layer.state;
 
   t.ok(layerData.length > 0, 'GridLayer.state.layerDate calculated');
-  // t.ok(sortedBins, 'GridLayer.state.sortedBins calculated');
-  // t.ok(Array.isArray(valueDomain), 'GridLayer.state.valueDomain calculated');
+  t.ok(sortedBins, 'GridLayer.state.sortedBins calculated');
+  t.ok(Array.isArray(valueDomain), 'GridLayer.state.valueDomain calculated');
 
-  // t.ok(Array.isArray(sortedBins.sortedBins), 'GridLayer.state.sortedBins.sortedBins calculated');
-  // t.ok(Number.isFinite(sortedBins.maxCount), 'GridLayer.state.sortedBins.maxCount calculated');
+  t.ok(Array.isArray(sortedBins.sortedBins), 'GridLayer.state.sortedBins.sortedBins calculated');
+  t.ok(Number.isFinite(sortedBins.maxCount), 'GridLayer.state.sortedBins.maxCount calculated');
 
-  // const firstSortedBin = sortedBins.sortedBins[0];
-  // const binTocell = layerData.find(d => d.index === firstSortedBin.i);
+  const firstSortedBin = sortedBins.sortedBins[0];
+  const binTocell = layerData.find(d => d.index === firstSortedBin.i);
 
-  // t.ok(sortedBins.binMap[binTocell.index] === firstSortedBin,
-  //   'Correct GridLayer.state.sortedBins.binMap created');
+  t.ok(sortedBins.binMap[binTocell.index] === firstSortedBin,
+    'Correct GridLayer.state.sortedBins.binMap created');
 
-  // const subLayer = layer.renderLayers();
-  // t.ok(subLayer instanceof GridCellLayer, 'GridCellLayer rendered');
-  //
-  // testUpdateLayer({layer, newProps: {
-  //   data: data.points,
-  //
-  //   // change cell Size
-  //   cellSize: 1000,
-  //   getPosition: d => d.COORDINATES,
-  //   pickable: true
-  // }});
+  const subLayer = layer.renderLayers();
+  t.ok(subLayer instanceof GridCellLayer, 'GridCellLayer rendered');
+
+  testUpdateLayer({layer, newProps: {
+    data: data.points,
+
+    // change cell Size
+    cellSize: 1000,
+    getPosition: d => d.COORDINATES,
+    pickable: true
+  }});
 
   t.doesNotThrow(
     () => new GridLayer({
@@ -259,7 +258,6 @@ test('GridLayer#renderSubLayer', t => {
   t.end();
 });
 
-/*
 test('GridLayer#updateLayer', t => {
   testLayerUpdates({LayerComponent: GridLayer, testCases: TEST_CASES, t});
   t.end();
@@ -280,5 +278,3 @@ test('GridLayer#updateTriggers', t => {
 
   t.end();
 });
-*/
-/* eslint-enable no-unused-vars */
