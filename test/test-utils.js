@@ -19,15 +19,12 @@
 // THE SOFTWARE.
 
 import {WebMercatorViewport} from '../src/lib/viewports';
-<<<<<<< HEAD
 import {TEST_EXPORTS as LAYER_TEST_EXPORTS} from '../src/lib/layer';
 import sinon from 'sinon';
 import global from 'global';
 
 const {mergeDefaultProps} = LAYER_TEST_EXPORTS;
-=======
 import ShaderAssembler from '../src/lib/shader-assembler';
->>>>>>> Update testInitializeLayer()
 
 /**
  * Covert all numbers in a deep structure to a given precision, allowing

@@ -71,11 +71,7 @@ export default class MeshLayer extends Layer {
   }
 
   getModel(gl) {
-    const shaders = assembleShaders({
-      gl,
-      shaderCache: this.context.shaderCache,
-      opts: this.getShaders()
-    });
+    const shaders = assembleShaders(gl, this.getShaders());
 
     // TODO - this should not be done here
     gl.enable(GL.DEPTH_TEST);
