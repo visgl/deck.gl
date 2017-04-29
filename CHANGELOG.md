@@ -21,6 +21,8 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 - BREAKING: Only composite layers have `renderLayer` methods
 - BREAKING: Only primitive layers' `draw` methods are called during render
+- `GridLayer` add `coverage`, `lowerPercentile`, `upperPercentile` and `getColorValue` to layer prop
+- HOTFIX: fix `HexagonLayer` hex color calculation, use `bin.value` instead of `bin.points.count` to calculate color
 
 ### deck.gl v4.1-alpha.1
 
