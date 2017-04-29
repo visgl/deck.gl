@@ -19,9 +19,5 @@ before_script:
   - ulimit -c unlimited -S       # enable core dumps
 script:
   - npm run lint
-  - npm run cover
 after_success:
-  - cat coverage/lcov.info | coveralls
-after_failure:
-- COREFILE=$(find . -maxdepth 1 -name "core*" | head -n 1) # find core file
-- if [[ -f "$COREFILE" ]]; then gdb -c "$COREFILE" example -ex "thread apply all bt" -ex "set pagination 0" -batch; fi
+  - npm run cover

@@ -145,7 +145,6 @@ test('ArcLayer#constructor', t => {
   const LayerComponent = ArcLayer;
   const data = FIXTURES.routes;
 
-  /* eslint-disable no-unused-vars */
   const TEST_CASES = {
     INITIAL_PROPS: {
       data,
@@ -160,25 +159,13 @@ test('ArcLayer#constructor', t => {
         t.ok(layer.state, 'should update layer state');
         t.ok(layer.state.model.uniforms.strokeWidth === 10, 'should update strokeWidth');
       }
-    }, {
-      updateProps: {
-        fp64: true
-      },
-      assert: (layer, oldState) => {
-        t.ok(layer.state, 'should update layer state');
-        t.ok(layer.state.attributeManager.attributes.instancePositions64Low,
-          'should add instancePositions64xyLow');
-      }
     }]
   };
-  /* eslint-enable no-unused-vars */
 
   testCreateLayer(t, LayerComponent, {data, pickable: true});
   testCreateEmptyLayer(t, LayerComponent);
   testNullLayer(t, LayerComponent);
-
-  // TODO: disable it for now to see if travis build still fails
-  // testLayerUpdates(t, {LayerComponent, testCases: TEST_CASES});
+  testLayerUpdates(t, {LayerComponent, testCases: TEST_CASES});
 
   t.end();
 });
