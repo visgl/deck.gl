@@ -19,7 +19,6 @@
 // THE SOFTWARE.
 
 import {Layer} from '../../../lib';
-import {assembleShaders} from '../../../shader-utils';
 import {get, flatten, log} from '../../../lib/utils';
 import {extractPolygons} from './geojson';
 import {GL, Model, Geometry} from 'luma.gl';
@@ -71,7 +70,7 @@ export default class ChoroplethLayer extends Layer {
     const IndexType = gl.getExtension('OES_element_index_uint') ? Uint32Array : Uint16Array;
 
     this.setState({
-      model: this.getModel(gl),
+      model: this._getModel(),
       numInstances: 0,
       IndexType
     });
@@ -112,11 +111,9 @@ export default class ChoroplethLayer extends Layer {
     return info;
   }
 
-  getModel(gl) {
-    const shaders = assembleShaders({gl,
-      shaderCache: this.context.shaderCache,
-      opts: this.getShaders()
-    });
+  _getModel() {
+    const {gl, shaderAssembler} = this.context;
+    const shaders = shaderAssembler.assemble(this.getShaders());
 
     return new Model({
       gl,

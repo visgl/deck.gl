@@ -19,7 +19,6 @@
 // THE SOFTWARE.
 
 import {Layer} from '../../../lib';
-import {assembleShaders} from '../../../shader-utils';
 import {fp64ify} from '../../../lib/utils/fp64';
 import {GL, Model, Geometry} from 'luma.gl';
 import {flatten, log} from '../../../lib/utils';
@@ -59,10 +58,9 @@ export default class ExtrudedChoroplethLayer64 extends Layer {
       colors: {size: 4, update: this.calculateColors}
     });
 
-    const {gl} = this.context;
     this.setState({
       numInstances: 0,
-      model: this.getModel(gl)
+      model: this._getModel()
     });
   }
 
@@ -115,7 +113,10 @@ export default class ExtrudedChoroplethLayer64 extends Layer {
     };
   }
 
-  getModel(gl) {
+  _getModel() {
+    const {gl, shaderAssembler} = this.context;
+    const shaders = shaderAssembler.assemble(this.getShaders());
+
     // Make sure we have 32 bit support
     // TODO - this could be done automatically by luma in "draw"
     // when it detects 32 bit indices
@@ -129,10 +130,6 @@ export default class ExtrudedChoroplethLayer64 extends Layer {
     // setDepthTest that is on by default.
     gl.enable(GL.DEPTH_TEST);
     gl.depthFunc(GL.LEQUAL);
-
-    const shaders = assembleShaders({gl,
-      shaderCache: this.context.shaderCache,
-      opts: this.getShaders()});
 
     return new Model({
       gl,

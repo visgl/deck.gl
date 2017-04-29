@@ -39,7 +39,7 @@ export default class MeshLayer extends Layer {
     });
   }
 
-  getModel(gl) {
+  _getModel() {
     // create Model here
   }
 
@@ -58,8 +58,9 @@ be instanced, or use dynamic geometry:
   import {assembleShaders} from 'deck.gl';
   import {GL, Model, Geometry} from 'luma.gl';
 
-  getModel(gl) {
-    const shaders = assembleShaders({gl, shaderCache: this.context.shaderCache, opts: this.getShaders()});
+  _getModel() {
+    const {gl, shaderAssembler} = this.context;
+    const shaders = shaderAssembler.assemble(this.getShaders());
 
     return new Model({
       gl,
@@ -86,8 +87,9 @@ be instanced, or use dynamic geometry:
   import {assembleShaders} from 'deck.gl';
   import {GL, Model, Geometry} from 'luma.gl';
 
-  getModel(gl) {
-    const shaders = assembleShaders({gl, shaderCache: this.context.shaderCache, opts: this.getShaders()});
+  _getModel() {
+    const {gl, shaderAssembler} = this.context;
+    const shaders = shaderAssembler.assemble(this.getShaders());
 
     return new Model({
       gl,
