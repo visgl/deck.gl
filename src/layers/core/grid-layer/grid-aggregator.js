@@ -24,7 +24,7 @@ const R_EARTH = 6378000;
  * @param {array} points
  * @param {number} cellSize - cell size in meters
  * @param {function} getPosition - position accessor
- * @returns {object} - grid data, cell dimension and count range
+ * @returns {object} - grid data, cell dimension
  */
 export function pointToDensityGridData(points, cellSize, getPosition) {
 
