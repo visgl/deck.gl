@@ -238,16 +238,20 @@ export function testSubLayerUpdateTriggers(t, {FunctionsToSpy, LayerComponent, t
 
 export function testCreateLayer(t, LayerComponent, props = {}) {
   let failures = false;
+  let layer = null;
+
   try {
-    const layer = new LayerComponent(Object.assign({
+    layer = new LayerComponent(Object.assign({
       id: `${LayerComponent.layerName}-0`
     }, props));
-    t.ok(layer instanceof LayerComponent, `${LayerComponent.layerName} created`);
 
+    t.ok(layer instanceof LayerComponent, `${LayerComponent.layerName} created`);
   } catch (error) {
     failures = true;
   }
   t.ok(!failures, `creating ${LayerComponent.layerName} should not fail`);
+
+  return layer;
 }
 
 export function testCreateEmptyLayer(t, LayerComponent, props = {}) {

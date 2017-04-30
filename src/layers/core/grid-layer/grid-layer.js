@@ -38,7 +38,7 @@ const defaultProps = {
   upperPercentile: 100,
   coverage: 1,
   getPosition: x => x.position,
-  getColorValue: points => points.length,
+  c: points => points.length,
   extruded: false,
   fp64: false,
   // Optional settings for 'lighting' shader module

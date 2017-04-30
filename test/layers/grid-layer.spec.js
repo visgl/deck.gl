@@ -20,10 +20,14 @@
 import test from 'tape-catch';
 import sinon from 'sinon';
 
-import * as data from '../data';
+import * as FIXTURES from '../data';
+
 import {
+  testCreateEmptyLayer,
+  testCreateLayer,
   testInitializeLayer,
   testLayerUpdates,
+  testNullLayer,
   testSubLayerUpdateTriggers
 } from '../test-utils';
 
@@ -35,7 +39,7 @@ const getPosition = d => d.COORDINATES;
 const TEST_CASES = {
   // props to initialize layer with
   INITIAL_PROPS: {
-    data: data.points,
+    data: FIXTURES.points,
     cellSize: 400,
     getPosition,
     pickable: true
@@ -89,17 +93,14 @@ const TEST_CASES = {
 const SUBLAYER_TEST_CASES = {
   // props to initialize layer with
   INITIAL_PROPS: {
-    data: data.points,
+    data: FIXTURES.points,
     cellSize: 400,
     getPosition
   },
   // list of update props to call and asserts on the resulting layer
   UPDATES: [{
-    newProps: {
-      data: data.points,
-      // change radius
-      cellSize: 800,
-      getPosition
+    updateProps: {
+      cellSize: 800
     },
     assert: (subLayer, spies, t) => {
       t.ok(spies._onGetSublayerColor.called,
@@ -108,12 +109,8 @@ const SUBLAYER_TEST_CASES = {
         'update radius should call _onGetSublayerElevation');
     }
   }, {
-    newProps: {
-      data: data.points,
-      cellSize: 800,
-      // change opacity
-      opacity: 0.1,
-      getPosition
+    updateProps: {
+      opacity: 0.1
     },
     assert: (subLayer, spies, t) => {
       t.ok(spies._onGetSublayerColor.notCalled,
@@ -122,12 +119,8 @@ const SUBLAYER_TEST_CASES = {
         'update opacity  should not call _onGetSublayerElevation');
     }
   }, {
-    newProps: {
-      data: data.points,
-      cellSize: 800,
-      // change getColorValue
-      getColorValue,
-      getPosition
+    updateProps: {
+      getColorValue
     },
     assert: (subLayer, spies, t) => {
       t.ok(spies._onGetSublayerColor.called,
@@ -136,13 +129,8 @@ const SUBLAYER_TEST_CASES = {
         'update getColorValue  should not call _onGetSublayerElevation');
     }
   }, {
-    newProps: {
-      data: data.points,
-      cellSize: 800,
-      getColorValue,
-      // change upperPercentile
-      upperPercentile: 90,
-      getPosition
+    updateProps: {
+      upperPercentile: 90
     },
     assert: (subLayer, spies, t) => {
       t.ok(spies._onGetSublayerColor.called,
@@ -151,14 +139,8 @@ const SUBLAYER_TEST_CASES = {
         'update upperPercentile should not call _onGetSublayerElevation');
     }
   }, {
-    newProps: {
-      data: data.points,
-      cellSize: 800,
-      getColorValue,
-      upperPercentile: 90,
-      // change elevationRange
-      elevationRange: [0, 100],
-      getPosition
+    updateProps: {
+      elevationRange: [0, 100]
     },
     assert: (subLayer, spies, t) => {
       t.ok(spies._onGetSublayerColor.notCalled,
@@ -170,25 +152,16 @@ const SUBLAYER_TEST_CASES = {
 };
 
 test('GridLayer#constructor', t => {
-  let layer = new GridLayer({
-    id: 'emptyGeoJsonLayer',
-    data: [],
-    pickable: true
-  });
-  t.ok(layer instanceof GridLayer, 'Empty GridLayer created');
-  t.ok(layer instanceof GridLayer, 'Empty GridLayer created');
+  const LayerComponent = GridLayer;
+  const props = TEST_CASES.INITIAL_PROPS;
 
-  layer = new GridLayer({
-    data: data.points,
-    cellSize: 400,
-    getPosition,
-    pickable: true
-  });
-  t.ok(layer instanceof GridLayer, 'GridLayer created');
+  testCreateEmptyLayer(t, LayerComponent);
+  testNullLayer(t, LayerComponent);
+  const layer = testCreateLayer(t, LayerComponent, props);
 
   testInitializeLayer({layer});
 
-  const {layerData} = layer.state;
+  const {layerData, sortedBins, valueDomain} = layer.state;
 
   t.ok(layerData.length > 0, 'GridLayer.state.layerDate calculated');
   t.ok(sortedBins, 'GridLayer.state.sortedBins calculated');
@@ -206,24 +179,6 @@ test('GridLayer#constructor', t => {
   const subLayer = layer.renderLayers();
   t.ok(subLayer instanceof GridCellLayer, 'GridCellLayer rendered');
 
-  testUpdateLayer({layer, newProps: {
-    data: data.points,
-
-    // change cell Size
-    cellSize: 1000,
-    getPosition: d => d.COORDINATES,
-    pickable: true
-  }});
-
-  t.doesNotThrow(
-    () => new GridLayer({
-      id: 'nullGridLayer',
-      data: null,
-      pickable: true
-    }),
-    'Null GridLayer did not throw exception'
-  );
-
   t.end();
 });
 
@@ -232,7 +187,7 @@ test('GridLayer#renderSubLayer', t => {
   sinon.spy(GridLayer.prototype, '_onGetSublayerElevation');
 
   const layer = new GridLayer({
-    data: data.points,
+    data: FIXTURES.points,
     cellSize: 500,
     getPosition,
     pickable: true
@@ -259,7 +214,7 @@ test('GridLayer#renderSubLayer', t => {
 });
 
 test('GridLayer#updateLayer', t => {
-  testLayerUpdates({LayerComponent: GridLayer, testCases: TEST_CASES, t});
+  testLayerUpdates(t, {LayerComponent: GridLayer, testCases: TEST_CASES});
   t.end();
 });
 
