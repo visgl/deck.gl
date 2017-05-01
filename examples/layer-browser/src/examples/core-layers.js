@@ -31,9 +31,9 @@ const MARKER_SIZE_MAP = {
 
 const LIGHT_SETTINGS = {
   lightsPosition: [-122.45, 37.66, 8000, -122.0, 38.00, 8000],
-  ambientRatio: 0.4,
+  ambientRatio: 0.3,
   diffuseRatio: 0.6,
-  specularRatio: 0.6,
+  specularRatio: 0.4,
   lightsStrength: [1, 0.0, 0.8, 0.0],
   numberOfLights: 2
 };
@@ -209,14 +209,36 @@ const GridCellLayerExample = {
   }
 };
 
+function getMean(pts, key) {
+  const filtered = pts.filter(pt => Number.isFinite(pt[key]));
+
+  return filtered.length ?
+    filtered.reduce((accu, curr) => accu + curr[key], 0) / filtered.length : null;
+}
+
+// grid layer compares whether getColorValue has changed to
+// call out bin sorting. Here we pass in the function defined
+// outside props, so it doesn't create a new function on
+// every rendering pass
+function getColorValue(points) {
+  return getMean(points, 'SPACES');
+}
+
 const GridLayerExample = {
   layer: GridLayer,
   propTypes: {
-    cellSize: {type: 'number', min: 0, max: 1000}
+    cellSize: {type: 'number', min: 0, max: 1000},
+    coverage: {type: 'number', min: 0, max: 1},
+    lowerPercentile: {type: 'number', min: 0, max: 100},
+    upperPercentile: {type: 'number', min: 0, max: 100}
   },
   props: {
     id: 'gridLayer',
     data: dataSamples.points,
+    // instead of doing getColorValue = () => {}
+    // defined the function outside and pass in here
+    // so it doesn't generate a new function on every render
+    getColorValue,
     cellSize: 200,
     opacity: 1,
     extruded: true,

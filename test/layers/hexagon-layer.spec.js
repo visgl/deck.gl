@@ -49,9 +49,8 @@ const TEST_CASES = {
       t.ok(oldState.hexagons !== layer.state.hexagons,
         'should update layer data');
 
-      // TODO: add it back with grid/hex PR
-      // t.ok(oldState.sortedBins !== layer.state.sortedBins,
-      //   'should update sortedBins');
+      t.ok(oldState.sortedBins !== layer.state.sortedBins,
+        'should update sortedBins');
 
       t.ok(oldState.valueDomain !== layer.state.valueDomain,
         'should update valueDomain');
@@ -64,9 +63,8 @@ const TEST_CASES = {
       t.ok(oldState.hexagons === layer.state.hexagons,
         'should not update layer data');
 
-      // TODO: add it back with grid/hex PR
-      // t.ok(oldState.sortedBins !== layer.state.sortedBins,
-      //  'should update sortedBins');
+      t.ok(oldState.sortedBins !== layer.state.sortedBins,
+       'should update sortedBins');
 
       t.ok(oldState.valueDomain !== layer.state.valueDomain,
         'should re calculate valueDomain');
@@ -79,9 +77,8 @@ const TEST_CASES = {
       t.ok(oldState.hexagons === layer.state.hexagons,
         'should not update layer data');
 
-      // TODO: add it back with grid/hex PR
-      // t.ok(oldState.sortedBins === layer.state.sortedBins,
-      //  'should not update sortedBins');
+      t.ok(oldState.sortedBins === layer.state.sortedBins,
+       'should not update sortedBins');
 
       t.ok(oldState.valueDomain !== layer.state.valueDomain,
         'should re calculate valueDomain');
@@ -99,10 +96,7 @@ const SUBLAYER_TEST_CASES = {
   // list of update props to call and asserts on the resulting layer
   UPDATES: [{
     updateProps: {
-      data: data.points,
-      // change radius
-      radius: 800,
-      getPosition
+      radius: 800
     },
     assert: (subLayer, spies, t) => {
       t.ok(spies._onGetSublayerColor.called,
@@ -121,21 +115,16 @@ const SUBLAYER_TEST_CASES = {
         'update opacity  should not call _onGetSublayerElevation');
     }
   }, {
-  // TODO: add it back with hex/grid PR
-  //   newProps: {
-  //     data: data.points,
-  //     radius: 800,
-  //     // change getColorValue
-  //     getColorValue,
-  //     getPosition
-  //   },
-  //   assert: (subLayer, spies, t) => {
-  //     t.ok(spies._onGetSublayerColor.called,
-  //       'update getColorValue should call _onGetSublayerColor');
-  //     t.ok(spies._onGetSublayerElevation.notCalled,
-  //       'update getColorValue  should not call _onGetSublayerElevation');
-  //   }
-  // }, {
+    updateProps: {
+      getColorValue
+    },
+    assert: (subLayer, spies, t) => {
+      t.ok(spies._onGetSublayerColor.called,
+        'update getColorValue should call _onGetSublayerColor');
+      t.ok(spies._onGetSublayerElevation.notCalled,
+        'update getColorValue  should not call _onGetSublayerElevation');
+    }
+  }, {
     updateProps: {
       upperPercentile: 90
     },
