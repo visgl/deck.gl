@@ -11,6 +11,9 @@
   <a href="http://starveller.sigsev.io/uber/deck.gl">
     <img src="http://starveller.sigsev.io/api/repos/uber/deck.gl/badge" alt="stars" />
   </a>
+  <a href='https://coveralls.io/github/uber/deck.gl?branch=master'>
+    <img src='https://coveralls.io/repos/github/uber/deck.gl/badge.svg?branch=master' alt='Coverage Status' />
+  </a>
 </p>
 
 <h1 align="center">deck.gl | <a href="https://uber.github.io/deck.gl">Docs</a></h1>
