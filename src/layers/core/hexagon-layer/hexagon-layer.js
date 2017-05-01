@@ -106,29 +106,28 @@ export default class HexagonLayer extends CompositeLayer {
     this.state = {
       hexagons: [],
       hexagonVertices: null,
-      countRange: null,
-      sortedCounts: null,
+      sortedBins: null,
       valueDomain: null
     };
   }
 
   updateState({oldProps, props, changeFlags}) {
     if (changeFlags.dataChanged || _needsReProjectPoints(oldProps, props)) {
-      // project data into hexagons, and get sortedCounts
+      // project data into hexagons, and get sortedBins
       this.getHexagons();
-      this.getSortedCounts();
+      this.getSortedBins();
 
-      // this needs sortedCounts to be set
-      this._onPercentileChange();
+      // this needs sortedBins to be set
+      this.getValueDomain();
 
     } else if (_needsReSortBins(oldProps, props)) {
 
-      this.getSortedCounts();
-      this._onPercentileChange();
+      this.getSortedBins();
+      this.getValueDomain();
 
     } else if (_percentileChanged(oldProps, props)) {
 
-      this._onPercentileChange();
+      this.getValueDomain();
     }
   }
 
@@ -139,9 +138,9 @@ export default class HexagonLayer extends CompositeLayer {
     this.setState({hexagons, hexagonVertices});
   }
 
-  getSortedCounts() {
-    const sortedCounts = new BinSorter(this.state.hexagons || [], this.props.getColorValue);
-    this.setState({sortedCounts});
+  getSortedBins() {
+    const sortedBins = new BinSorter(this.state.hexagons || [], this.props.getColorValue);
+    this.setState({sortedBins});
   }
 
   getPickingInfo({info}) {
@@ -171,34 +170,37 @@ export default class HexagonLayer extends CompositeLayer {
     };
   }
 
-  _onPercentileChange() {
+  getValueDomain() {
     const {lowerPercentile, upperPercentile} = this.props;
 
-    this.state.valueDomain = this.state.sortedCounts
+    this.state.valueDomain = this.state.sortedBins
       .getValueRange([lowerPercentile, upperPercentile]);
   }
 
   _onGetSublayerColor(cell) {
     const {colorRange} = this.props;
-    const {valueDomain} = this.state;
+    const {valueDomain, sortedBins} = this.state;
+    const value = sortedBins.binMap[cell.index] && sortedBins.binMap[cell.index].value;
 
     const colorDomain = this.props.colorDomain || valueDomain;
-    const count = cell.points.length;
-    const color = quantizeScale(colorDomain, colorRange, count);
+    const color = quantizeScale(colorDomain, colorRange, value);
 
-    // if cell count is outside domain, set alpha to 0
-    const alpha = count >= valueDomain[0] && count <= valueDomain[1] ?
+    // if cell value is outside domain, set alpha to 0
+    const alpha = value >= valueDomain[0] && value <= valueDomain[1] ?
       (Number.isFinite(color[3]) ? color[3] : 255) : 0;
 
-    return color.concat([alpha]);
+    // add final alpha to color
+    color[3] = alpha;
+
+    return color;
   }
 
   _onGetSublayerElevation(cell) {
     const {elevationDomain, elevationRange} = this.props;
-    const {sortedCounts} = this.state;
+    const {sortedBins} = this.state;
 
     // elevation is based on counts, it is not affected by percentile
-    const domain = elevationDomain || [0, sortedCounts.maxCount];
+    const domain = elevationDomain || [0, sortedBins.maxCount];
     return linearScale(domain, elevationRange, cell.points.length);
   }
 
