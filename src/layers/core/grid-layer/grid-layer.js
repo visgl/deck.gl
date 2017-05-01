@@ -81,15 +81,15 @@ export default class GridLayer extends CompositeLayer {
       this.getSortedBins();
 
       // this needs sortedBins to be set
-      this.onPercentileChange();
+      this.getValueDomain();
     } else if (_needsReSortBins(oldProps, props)) {
 
       this.getSortedBins();
-      this.onPercentileChange();
+      this.getValueDomain();
 
     } else if (_percentileChanged(oldProps, props)) {
 
-      this.onPercentileChange();
+      this.getValueDomain();
     }
   }
 
@@ -105,7 +105,7 @@ export default class GridLayer extends CompositeLayer {
     this.setState({sortedBins});
   }
 
-  onPercentileChange() {
+  getValueDomain() {
     const {lowerPercentile, upperPercentile} = this.props;
 
     this.state.valueDomain = this.state.sortedBins

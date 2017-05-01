@@ -216,6 +216,10 @@ function getMean(pts, key) {
     filtered.reduce((accu, curr) => accu + curr[key], 0) / filtered.length : null;
 }
 
+// grid layer compares whether getColorValue has changed to
+// call out bin sorting. Here we pass in the function defined
+// outside props, so it doesn't create a new function on
+// every rendering pass
 function getColorValue(points) {
   return getMean(points, 'SPACES');
 }
@@ -231,6 +235,9 @@ const GridLayerExample = {
   props: {
     id: 'gridLayer',
     data: dataSamples.points,
+    // instead of doing getColorValue = () => {}
+    // defined the function outside and pass in here
+    // so it doesn't generate a new function on every render
     getColorValue,
     cellSize: 200,
     opacity: 1,

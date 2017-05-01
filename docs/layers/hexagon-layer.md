@@ -84,9 +84,31 @@ Hexagon color ranges as an array of colors formatted as `[[255, 255, 255, 255]]`
 - Default: `points => points.length`
 
 `getColorValue` is the accessor function to get the value that bin color is based on. 
-It takes an array of points inside each bin as arguments, returns a value. For example, 
+It takes an array of points inside each bin as arguments, returns a number. For example, 
 You can pass in `getColorValue` to color the bins by avg/mean/max of a specific attributes of each point.
 By default `getColorValue` returns the length of the points array.
+
+Note: hexagon layer compares whether `getColorValue` has changed to
+recalculate the value for each bin that its color based on. You should
+pass in the function defined outside the render function so it doesn't create a 
+new function on every rendering pass. 
+
+```
+ class MyHexagonLayer {
+    getColorValue (points) {
+        return points.length;
+    }
+    
+    renderLayers() {
+      return new HexagonLayer({
+        id: 'hexagon-layer',
+        getColorValue: this.getColorValue // instead of getColorValue: () => { return points.length; }
+        data,
+        radius: 500
+      });
+    }
+ }
+```
 
 ##### `coverage` (Number, optional)
 
@@ -94,8 +116,7 @@ By default `getColorValue` returns the length of the points array.
 
 Hexagon radius multiplier, clamped between 0 - 1. The final radius of hexagon
 is calculated by `coverage * radius`. Note: coverage does not affect how points
-are binned.
-The radius of the bin is determined only by the `radius` property.
+are binned. The radius of the bin is determined only by the `radius` property.
 
 ##### `elevationDomain` (Array, optional)
 

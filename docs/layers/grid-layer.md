@@ -67,9 +67,31 @@ Color ranges as an array of colors formatted as `[255, 255, 255]`. Default is
 - Default: `points => points.length`
 
 `getColorValue` is the accessor function to get the value that cell color is based on. 
-It takes an array of points inside each cell as arguments, returns a value. For example, 
+It takes an array of points inside each cell as arguments, returns a number. For example, 
 You can pass in `getColorValue` to color the cells by avg/mean/max of a specific attributes of each point.
 By default `getColorValue` returns the length of the points array.
+
+Note: grid layer compares whether `getColorValue` has changed to
+recalculate the value for each bin that its color based on. You should
+pass in the function defined outside the render function so it doesn't create a 
+new function on every rendering pass. 
+
+```
+ class MyGridLayer {
+    getColorValue (points) {
+        return points.length;
+    }
+    
+    renderLayers() {
+      return new GridLayer({
+        id: 'grid-layer',
+        getColorValue: this.getColorValue // instead of getColorValue: () => { return points.length; }
+        data,
+        cellSize: 500
+      });
+    }
+ }
+```
 
 ##### `coverage` (Number, optional)
 
@@ -77,7 +99,7 @@ By default `getColorValue` returns the length of the points array.
 
 Cell size multiplier, clamped between 0 - 1. The final size of cell
 is calculated by `coverage * cellSize`. Note: coverage does not affect how points
-are binned.
+are binned. Coverage are linear based.
 
 ##### `elevationDomain` (Array, optional)
 
