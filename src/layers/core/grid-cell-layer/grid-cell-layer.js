@@ -80,7 +80,8 @@ export default class GridCellLayer extends Layer {
   }
 
   initializeState() {
-    this.setState({model: this._getModel()});
+    const {gl} = this.context;
+    this.setState({model: this._getModel(gl)});
 
     const {attributeManager} = this.state;
     /* eslint-disable max-len */
@@ -117,14 +118,14 @@ export default class GridCellLayer extends Layer {
     super.updateState({props, oldProps, changeFlags});
     // Re-generate model if geometry changed
     if (props.fp64 !== oldProps.fp64) {
-      this.setState({model: this._getModel()});
+      const {gl} = this.context;
+      this.setState({model: this._getModel(gl)});
     }
     this.updateAttribute({props, oldProps, changeFlags});
     this.updateUniforms();
   }
 
-  _getModel() {
-    const {gl} = this.context;
+  _getModel(gl) {
     const geometry = new CubeGeometry({});
     const shaders = assembleShaders(gl, this.getShaders());
 

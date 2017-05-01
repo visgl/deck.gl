@@ -64,7 +64,8 @@ export default class PointCloudLayer extends Layer {
   }
 
   initializeState() {
-    this.setState({model: this._getModel()});
+    const {gl} = this.context;
+    this.setState({model: this._getModel(gl)});
 
     /* eslint-disable max-len */
     this.state.attributeManager.addInstanced({
@@ -100,7 +101,8 @@ export default class PointCloudLayer extends Layer {
   updateState({props, oldProps, changeFlags}) {
     super.updateState({props, oldProps, changeFlags});
     if (props.fp64 !== oldProps.fp64) {
-      this.setState({model: this._getModel()});
+      const {gl} = this.context;
+      this.setState({model: this._getModel(gl)});
     }
     this.updateAttribute({props, oldProps, changeFlags});
   }
@@ -112,8 +114,7 @@ export default class PointCloudLayer extends Layer {
     }, lightSettings));
   }
 
-  _getModel() {
-    const {gl} = this.context;
+  _getModel(gl) {
     const shaders = assembleShaders(gl, this.getShaders());
 
     // a triangle that minimally cover the unit circle

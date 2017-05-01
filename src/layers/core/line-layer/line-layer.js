@@ -55,7 +55,8 @@ export default class LineLayer extends Layer {
   }
 
   initializeState() {
-    this.setState({model: this._getModel()});
+    const {gl} = this.context;
+    this.setState({model: this._getModel(gl)});
 
     const {attributeManager} = this.state;
 
@@ -107,9 +108,7 @@ export default class LineLayer extends Layer {
     }));
   }
 
-  _getModel() {
-    const {gl} = this.context;
-
+  _getModel(gl) {
     /*
      *  (0, -1)-------------_(1, -1)
      *       |          _,-"  |

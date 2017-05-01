@@ -54,6 +54,8 @@ export default class ScreenGridLayer extends Layer {
 
   initializeState() {
     const {attributeManager} = this.state;
+    const {gl} = this.context;
+
     /* eslint-disable max-len */
     attributeManager.addInstanced({
       instancePositions: {size: 3, update: this.calculateInstancePositions},
@@ -61,7 +63,7 @@ export default class ScreenGridLayer extends Layer {
     });
     /* eslint-disable max-len */
 
-    this.setState({model: this._getModel()});
+    this.setState({model: this._getModel(gl)});
   }
 
   updateState({oldProps, props, changeFlags}) {
@@ -83,8 +85,7 @@ export default class ScreenGridLayer extends Layer {
     model.render(uniforms);
   }
 
-  _getModel() {
-    const {gl} = this.context;
+  _getModel(gl) {
     const shaders = assembleShaders(gl, this.getShaders());
 
     return new Model({

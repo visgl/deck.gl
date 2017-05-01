@@ -66,6 +66,7 @@ const defaultProps = {
 export default class IconLayer extends Layer {
   initializeState() {
     const {attributeManager} = this.state;
+    const {gl} = this.context;
 
     /* eslint-disable max-len */
     attributeManager.addInstanced({
@@ -78,7 +79,7 @@ export default class IconLayer extends Layer {
     });
     /* eslint-enable max-len */
 
-    this.setState({model: this._getModel()});
+    this.setState({model: this._getModel(gl)});
   }
 
   updateAttribute({props, oldProps, changeFlags}) {
@@ -132,7 +133,8 @@ export default class IconLayer extends Layer {
     }
 
     if (props.fp64 !== oldProps.fp64) {
-      this.setState({model: this._getModel()});
+      const {gl} = this.context;
+      this.setState({model: this._getModel(gl)});
     }
     this.updateAttribute({props, oldProps, changeFlags});
 
@@ -165,8 +167,7 @@ export default class IconLayer extends Layer {
     };
   }
 
-  _getModel() {
-    const {gl} = this.context;
+  _getModel(gl) {
 
     const positions = [-1, -1, 0, -1, 1, 0, 1, 1, 0, 1, -1, 0];
     const shaders = assembleShaders(gl, this.getShaders());

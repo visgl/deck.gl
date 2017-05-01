@@ -76,7 +76,7 @@ export default class SolidPolygonLayer extends Layer {
   initializeState() {
     const {gl} = this.context;
     this.setState({
-      model: this._getModel(),
+      model: this._getModel(gl),
       numInstances: 0,
       IndexType: gl.getExtension('OES_element_index_uint') ? Uint32Array : Uint16Array
     });
@@ -126,7 +126,8 @@ export default class SolidPolygonLayer extends Layer {
     const regenerateModel = this.updateGeometry({props, oldProps, changeFlags});
 
     if (regenerateModel) {
-      this.setState({model: this._getModel()});
+      const {gl} = this.context;
+      this.setState({model: this._getModel(gl)});
     }
     this.updateAttribute({props, oldProps, changeFlags});
   }
@@ -158,8 +159,7 @@ export default class SolidPolygonLayer extends Layer {
     return geometryConfigChanged;
   }
 
-  _getModel() {
-    const {gl} = this.context;
+  _getModel(gl) {
     const shaders = assembleShaders(gl, this.getShaders());
 
     return new Model({

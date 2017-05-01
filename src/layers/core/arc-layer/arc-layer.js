@@ -56,7 +56,8 @@ export default class ArcLayer extends Layer {
   }
 
   initializeState() {
-    this.setState({model: this._getModel()});
+    const {gl} = this.context;
+    this.setState({model: this._getModel(gl)});
 
     const {attributeManager} = this.state;
 
@@ -95,7 +96,8 @@ export default class ArcLayer extends Layer {
     super.updateState({props, oldProps, changeFlags});
     // Re-generate model if geometry changed
     if (props.fp64 !== oldProps.fp64) {
-      this.setState({model: this._getModel()});
+      const {gl} = this.context;
+      this.setState({model: this._getModel(gl)});
     }
     this.updateAttribute({props, oldProps, changeFlags});
   }
@@ -108,8 +110,7 @@ export default class ArcLayer extends Layer {
     }));
   }
 
-  _getModel() {
-    const {gl} = this.context;
+  _getModel(gl) {
     let positions = [];
     const NUM_SEGMENTS = 50;
     /*

@@ -109,7 +109,8 @@ export default class HexagonCellLayer extends Layer {
    * Essentially a deferred constructor
    */
   initializeState() {
-    this.setState({model: this._getModel()});
+    const {gl} = this.context;
+    this.setState({model: this._getModel(gl)});
     const {attributeManager} = this.state;
     /* eslint-disable max-len */
     attributeManager.addInstanced({
@@ -148,7 +149,8 @@ export default class HexagonCellLayer extends Layer {
   updateState({props, oldProps, changeFlags}) {
     super.updateState({props, oldProps, changeFlags});
     if (props.fp64 !== oldProps.fp64) {
-      this.setState({model: this._getModel()});
+      const {gl} = this.context;
+      this.setState({model: this._getModel(gl)});
     }
     this.updateAttribute({props, oldProps, changeFlags});
 
@@ -232,8 +234,7 @@ export default class HexagonCellLayer extends Layer {
     lightSettings));
   }
 
-  _getModel() {
-    const {gl} = this.context;
+  _getModel(gl) {
     const shaders = assembleShaders(gl, this.getShaders());
     return new Model({
       gl,

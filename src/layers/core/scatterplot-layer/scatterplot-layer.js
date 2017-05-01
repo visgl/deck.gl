@@ -60,7 +60,8 @@ export default class ScatterplotLayer extends Layer {
   }
 
   initializeState() {
-    this.setState({model: this._getModel()});
+    const {gl} = this.context;
+    this.setState({model: this._getModel(gl)});
 
     /* eslint-disable max-len */
     /* deprecated props check */
@@ -100,7 +101,8 @@ export default class ScatterplotLayer extends Layer {
   updateState({props, oldProps, changeFlags}) {
     super.updateState({props, oldProps, changeFlags});
     if (props.fp64 !== oldProps.fp64) {
-      this.setState({model: this._getModel()});
+      const {gl} = this.context;
+      this.setState({model: this._getModel(gl)});
     }
     this.updateAttribute({props, oldProps, changeFlags});
   }
@@ -116,8 +118,7 @@ export default class ScatterplotLayer extends Layer {
     }));
   }
 
-  _getModel() {
-    const {gl} = this.context;
+  _getModel(gl) {
     const shaders = assembleShaders(gl, this.getShaders());
 
     // a square that minimally cover the unit circle
