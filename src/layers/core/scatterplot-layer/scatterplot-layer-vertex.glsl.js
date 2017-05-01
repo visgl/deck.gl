@@ -41,19 +41,10 @@ varying vec2 unitPosition;
 varying float innerUnitRadius;
 
 void main(void) {
-  float radiusMin;
-  float radiusMax;
-  if (projectionMode == PROJECT_MERCATOR_OFFSETS) {
-      radiusMin = radiusMinPixels/projectionPixelsPerUnit.x;
-      radiusMax = radiusMaxPixels/projectionPixelsPerUnit.x;
-  } else {
-      radiusMin = radiusMinPixels;
-      radiusMax = radiusMaxPixels;
-  }
   // Multiply out radius and clamp to limits
   float outerRadiusPixels = clamp(
     project_scale(radiusScale * instanceRadius),
-    radiusMin, radiusMax
+    radiusMinPixels, radiusMaxPixels
   );
   // outline is centered at the radius
   // outer radius needs to offset by half stroke width
