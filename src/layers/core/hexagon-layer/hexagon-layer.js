@@ -189,7 +189,10 @@ export default class HexagonLayer extends CompositeLayer {
     const alpha = value >= valueDomain[0] && value <= valueDomain[1] ?
       (Number.isFinite(color[3]) ? color[3] : 255) : 0;
 
-    return color.concat([alpha]);
+    // add final alpha to color
+    color[3] = alpha;
+
+    return color;
   }
 
   _onGetSublayerElevation(cell) {

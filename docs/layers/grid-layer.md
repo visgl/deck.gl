@@ -85,7 +85,7 @@ new function on every rendering pass.
     renderLayers() {
       return new GridLayer({
         id: 'grid-layer',
-        getColorValue: this.getColorValue // instead of getColorValue: () => { return points.length; }
+        getColorValue: this.getColorValue // instead of getColorValue: (points) => { return points.length; }
         data,
         cellSize: 500
       });

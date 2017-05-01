@@ -102,7 +102,7 @@ new function on every rendering pass.
     renderLayers() {
       return new HexagonLayer({
         id: 'hexagon-layer',
-        getColorValue: this.getColorValue // instead of getColorValue: () => { return points.length; }
+        getColorValue: this.getColorValue // instead of getColorValue: (points) => { return points.length; }
         data,
         radius: 500
       });
