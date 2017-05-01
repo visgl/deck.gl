@@ -19,6 +19,7 @@
 // THE SOFTWARE.
 
 import {Layer} from '../../../lib';
+import {assembleShaders} from '../../../shader-utils';
 import {GL, Model, Geometry} from 'luma.gl';
 
 import screenGridVertex from './screen-grid-layer-vertex.glsl';
@@ -39,7 +40,9 @@ export default class ScreenGridLayer extends Layer {
   getShaders() {
     return {
       vs: screenGridVertex,
-      fs: screenGridFragment
+      fs: screenGridFragment,
+      modules: [],
+      shaderCache: this.context.shaderCache
     };
   }
 
@@ -81,8 +84,8 @@ export default class ScreenGridLayer extends Layer {
   }
 
   _getModel() {
-    const {gl, shaderAssembler} = this.context;
-    const shaders = shaderAssembler.assemble(this.getShaders());
+    const {gl} = this.context;
+    const shaders = assembleShaders(gl, this.getShaders());
 
     return new Model({
       gl,

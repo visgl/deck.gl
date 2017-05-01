@@ -19,6 +19,7 @@
 // THE SOFTWARE.
 
 import {Layer} from '../../../lib';
+import {assembleShaders} from '../../../shader-utils';
 import {GL, Model, Geometry} from 'luma.gl';
 import {fp64ify, enable64bitSupport} from '../../../lib/utils/fp64';
 import {COORDINATE_SYSTEM} from '../../../lib';
@@ -41,9 +42,15 @@ const defaultProps = {
 export default class LineLayer extends Layer {
   getShaders() {
     return enable64bitSupport(this.props) ? {
-      vs: lineVertex64, fs: lineFragment, modules: ['fp64', 'project64']
+      vs: lineVertex64,
+      fs: lineFragment,
+      modules: ['fp64', 'project64'],
+      shaderCache: this.context.shaderCache
     } : {
-      vs: lineVertex, fs: lineFragment, modules: []
+      vs: lineVertex,
+      fs: lineFragment,
+      modules: [],
+      shaderCache: this.context.shaderCache
     };
   }
 
@@ -101,7 +108,7 @@ export default class LineLayer extends Layer {
   }
 
   _getModel() {
-    const {gl, shaderAssembler} = this.context;
+    const {gl} = this.context;
 
     /*
      *  (0, -1)-------------_(1, -1)
@@ -111,7 +118,7 @@ export default class LineLayer extends Layer {
      *   (0, 1)"-------------(1, 1)
      */
     const positions = [0, -1, 0, 0, 1, 0, 1, -1, 0, 1, 1, 0];
-    const shaders = shaderAssembler.assemble(this.getShaders());
+    const shaders = assembleShaders(gl, this.getShaders());
 
     return new Model({
       gl,

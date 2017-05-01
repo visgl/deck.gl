@@ -19,6 +19,7 @@
 // THE SOFTWARE.
 
 import {Layer} from '../../../lib';
+import {assembleShaders} from '../../../shader-utils';
 import {get} from '../../../lib/utils';
 import {GL, Model, Geometry} from 'luma.gl';
 import {enable64bitSupport} from '../../../lib/utils/fp64';
@@ -60,9 +61,15 @@ const defaultProps = {
 export default class SolidPolygonLayer extends Layer {
   getShaders() {
     return enable64bitSupport(this.props) ? {
-      vs: solidPolygonVertex64, fs: solidPolygonFragment, modules: ['fp64', 'project64', 'lighting']
+      vs: solidPolygonVertex64,
+      fs: solidPolygonFragment,
+      modules: ['fp64', 'project64', 'lighting'],
+      shaderCache: this.context.shaderCache
     } : {
-      vs: solidPolygonVertex, fs: solidPolygonFragment, modules: ['lighting']
+      vs: solidPolygonVertex,
+      fs: solidPolygonFragment,
+      modules: ['lighting'],
+      shaderCache: this.context.shaderCache
     };
   }
 
@@ -152,8 +159,8 @@ export default class SolidPolygonLayer extends Layer {
   }
 
   _getModel() {
-    const {gl, shaderAssembler} = this.context;
-    const shaders = shaderAssembler.assemble(this.getShaders());
+    const {gl} = this.context;
+    const shaders = assembleShaders(gl, this.getShaders());
 
     return new Model({
       gl,

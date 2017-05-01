@@ -19,6 +19,7 @@
 // THE SOFTWARE.
 
 import {Layer} from '../../../lib';
+import {assembleShaders} from '../../../shader-utils';
 import {GL, Model, Geometry} from 'luma.gl';
 import {fp64ify, enable64bitSupport} from '../../../lib/utils/fp64';
 import {COORDINATE_SYSTEM} from '../../../lib';
@@ -52,9 +53,15 @@ const isClosed = path => {
 export default class PathLayer extends Layer {
   getShaders() {
     return enable64bitSupport(this.props) ? {
-      vs: pathVertex64, fs: pathFragment, modules: ['fp64', 'project64']
+      vs: pathVertex64,
+      fs: pathFragment,
+      modules: ['fp64', 'project64'],
+      shaderCache: this.context.shaderCache
     } : {
-      vs: pathVertex, fs: pathFragment, modules: []
+      vs: pathVertex,
+      fs: pathFragment,
+      modules: [],
+      shaderCache: this.context.shaderCache
     };
   }
 
@@ -130,8 +137,8 @@ export default class PathLayer extends Layer {
   }
 
   _getModel() {
-    const {gl, shaderAssembler} = this.context;
-    const shaders = shaderAssembler.assemble(this.getShaders());
+    const {gl} = this.context;
+    const shaders = assembleShaders(gl, this.getShaders());
     /*
      *       _
      *        "-_ 1                   3                       5

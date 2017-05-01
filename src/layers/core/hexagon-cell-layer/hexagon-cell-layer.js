@@ -19,6 +19,7 @@
 // THE SOFTWARE.
 
 import {Layer} from '../../../lib';
+import {assembleShaders} from '../../../shader-utils';
 import {GL, Model, CylinderGeometry} from 'luma.gl';
 import {log} from '../../../lib/utils';
 import {fp64ify, enable64bitSupport} from '../../../lib/utils/fp64';
@@ -91,9 +92,15 @@ export default class HexagonCellLayer extends Layer {
 
   getShaders() {
     return enable64bitSupport(this.props) ? {
-      vs: hexCellVertex64, fs: hexCellFragment, modules: ['fp64', 'project64', 'lighting']
+      vs: hexCellVertex64,
+      fs: hexCellFragment,
+      modules: ['fp64', 'project64', 'lighting'],
+      shaderCache: this.context.shaderCache
     } : {
-      vs: hexCellVertex, fs: hexCellFragment, modules: ['lighting']
+      vs: hexCellVertex,
+      fs: hexCellFragment,
+      modules: ['lighting'],
+      shaderCache: this.context.shaderCache
     };
   }
 
@@ -226,8 +233,8 @@ export default class HexagonCellLayer extends Layer {
   }
 
   _getModel() {
-    const {gl, shaderAssembler} = this.context;
-    const shaders = shaderAssembler.assemble(this.getShaders());
+    const {gl} = this.context;
+    const shaders = assembleShaders(gl, this.getShaders());
     return new Model({
       gl,
       id: this.props.id,

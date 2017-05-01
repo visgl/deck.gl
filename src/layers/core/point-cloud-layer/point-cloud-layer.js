@@ -19,6 +19,7 @@
 // THE SOFTWARE.
 
 import {Layer} from '../../../lib';
+import {assembleShaders} from '../../../shader-utils';
 import {GL, Model, Geometry} from 'luma.gl';
 import {fp64ify, enable64bitSupport} from '../../../lib/utils/fp64';
 import {COORDINATE_SYSTEM} from '../../../lib';
@@ -50,9 +51,15 @@ const defaultProps = {
 export default class PointCloudLayer extends Layer {
   getShaders(id) {
     return enable64bitSupport(this.props) ? {
-      vs: pointCloudVertex64, fs: pointCloudFragment, modules: ['fp64', 'project64', 'lighting']
+      vs: pointCloudVertex64,
+      fs: pointCloudFragment,
+      modules: ['fp64', 'project64', 'lighting'],
+      shaderCache: this.context.shaderCache
     } : {
-      vs: pointCloudVertex, fs: pointCloudFragment, modules: ['lighting']
+      vs: pointCloudVertex,
+      fs: pointCloudFragment,
+      modules: ['lighting'],
+      shaderCache: this.context.shaderCache
     };
   }
 
@@ -106,8 +113,8 @@ export default class PointCloudLayer extends Layer {
   }
 
   _getModel() {
-    const {gl, shaderAssembler} = this.context;
-    const shaders = shaderAssembler.assemble(this.getShaders());
+    const {gl} = this.context;
+    const shaders = assembleShaders(gl, this.getShaders());
 
     // a triangle that minimally cover the unit circle
     const positions = [];

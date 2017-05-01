@@ -18,6 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 import {Layer} from '../../../lib';
+import {assembleShaders} from '../../../shader-utils';
 import {GL, Model, Geometry, Texture2D, loadTextures} from 'luma.gl';
 import {fp64ify, enable64bitSupport} from '../../../lib/utils/fp64';
 import {COORDINATE_SYSTEM} from '../../../lib';
@@ -152,17 +153,23 @@ export default class IconLayer extends Layer {
 
   getShaders() {
     return enable64bitSupport(this.props) ? {
-      vs: iconVertex64, fs: iconFragment, modules: ['fp64', 'project64']
+      vs: iconVertex64,
+      fs: iconFragment,
+      modules: ['fp64', 'project64'],
+      shaderCache: this.context.shaderCache
     } : {
-      vs: iconVertex, fs: iconFragment, modules: []
+      vs: iconVertex,
+      fs: iconFragment,
+      modules: [],
+      shaderCache: this.context.shaderCache
     };
   }
 
   _getModel() {
-    const {gl, shaderAssembler} = this.context;
+    const {gl} = this.context;
 
     const positions = [-1, -1, 0, -1, 1, 0, 1, 1, 0, 1, -1, 0];
-    const shaders = shaderAssembler.assemble(this.getShaders());
+    const shaders = assembleShaders(gl, this.getShaders());
 
     return new Model({
       gl,

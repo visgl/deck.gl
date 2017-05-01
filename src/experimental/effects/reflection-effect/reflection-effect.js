@@ -20,6 +20,7 @@
 
 /* global window */
 import {GL, Framebuffer, Model, Geometry} from 'luma.gl';
+import {assembleShaders} from '../../../shader-utils';
 import {Effect} from '../../lib';
 import {WebMercatorViewport} from '../../../lib/viewports';
 
@@ -48,13 +49,14 @@ export default class ReflectionEffect extends Effect {
   getShaders() {
     return {
       vs: reflectionVertex,
-      fs: reflectionFragment
+      fs: reflectionFragment,
+      modules: [],
+      shaderCache: this.context.shaderCache
     };
   }
 
   initialize({gl, layerManager}) {
-    const {shaderAssembler} = this.context;
-    const shaders = shaderAssembler.assemble(this.getShaders());
+    const shaders = assembleShaders(gl, this.getShaders());
 
     this.unitQuad = new Model({
       gl,

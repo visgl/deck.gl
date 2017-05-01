@@ -24,7 +24,7 @@ import sinon from 'sinon';
 import global from 'global';
 
 const {mergeDefaultProps} = LAYER_TEST_EXPORTS;
-import ShaderAssembler from '../src/lib/shader-assembler';
+import {experimental} from 'luma.gl';
 
 /**
  * Covert all numbers in a deep structure to a given precision, allowing
@@ -64,7 +64,7 @@ export function testInitializeLayer({gl, layer, viewport}) {
 
   const oldContext = {gl, viewport};
   let failures = false;
-  const context = {gl, viewport, shaderAssembler: new ShaderAssembler({gl})};
+  const context = {gl, viewport, shaderCache: new experimental.ShaderCache({gl})};
   try {
     layer.context = context;
 
