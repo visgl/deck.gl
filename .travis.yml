@@ -19,5 +19,6 @@ before_script:
   - ulimit -c unlimited -S       # enable core dumps
 script:
   - npm run lint
-after_success:
   - npm run cover
+after_success:
+  - cat coverage/lcov.info | coveralls
