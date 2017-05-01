@@ -266,7 +266,9 @@ class Root extends Component {
     };
 
     // process related elements first, since they compare themselves to the focused elements.
-    // related elements are all links attached to a node, or the nodes at each end of a link.
+    // related elements are:
+    // - all links and nodes attached to a node; or
+    // - the nodes at each end of a link.
     // see `graph-layout-layer::getPickingInfo()` for more information.
     Object.keys(relatedElements).forEach(k => {
       const els = relatedElements[k];
@@ -275,15 +277,6 @@ class Root extends Component {
       } else {
         relatedElements[k] = [];
         els.forEach(el => {
-          if (el.source) {
-            // when highlighting links related to a selected node,
-            // highlight the nodes of those links as well as the links themselves.
-            // this allows us to identify nodes linked to the selected node.
-            const relatedNode = el.source === elements[k] ? el.target : el.source;
-            relatedElements[k].push(
-              this._renderInteractionElement(relatedNode, `related ${k}`, viewport)
-            );
-          }
           relatedElements[k].push(
             this._renderInteractionElement(el, `related ${k}`, viewport)
           );

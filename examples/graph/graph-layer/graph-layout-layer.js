@@ -1,5 +1,5 @@
 import {CompositeLayer, COORDINATE_SYSTEM} from 'deck.gl';
-import GraphLayer, {GRAPH_LAYER_IDS} from './graph-layer';
+import GraphLayer from './graph-layer';
 
 import LayoutD3 from './layout/layout-d3';
 
@@ -61,32 +61,35 @@ export default class GraphLayoutLayer extends CompositeLayer {
       return acc;
     }, {});
 
-    // determine object type (node or link) based on picked layer
-    if (!info.layer.context.lastPickedInfo) {
+    // determine object type (node or link) via duck-typing
+    const {object} = pickingInfo;
+    if (!object) {
       pickingInfo.objectType = '';
+    } else if (info.object.source) {
+      pickingInfo.objectType = 'link';
     } else {
-      const {id} = this.props;
-      if (info.layer.context.lastPickedInfo.layerId === `${id}-graph-${GRAPH_LAYER_IDS.LINK}`) {
-        pickingInfo.objectType = 'link';
-      } else {
-        pickingInfo.objectType = 'node';
-      }
+      pickingInfo.objectType = 'node';
     }
 
-    // find all links connected to picked node, or vice-versa
+    // find "related objects":
+    // nodes at either end of picked link,
+    // or all links and nodes connected to picked node
     const {nodes, links} = this.state;
-    const {object} = pickingInfo;
+    let relatedObjects = [];
     if (object) {
       if (pickingInfo.objectType === 'link') {
-        pickingInfo.relatedObjects = nodes.filter(n =>
+        relatedObjects = nodes.filter(n =>
           n.id === object.source.id || n.id === object.target.id);
       } else if (pickingInfo.objectType === 'node') {
-        pickingInfo.relatedObjects = links.filter(l =>
+        relatedObjects = links.filter(l =>
           l.source.id === object.id || l.target.id === object.id);
+        const oneDegreeNodes = relatedObjects.map(related => {
+          return related.source === object ? related.target : related.source;
+        });
+        relatedObjects = relatedObjects.concat(oneDegreeNodes);
       }
-    } else {
-      pickingInfo.relatedObjects = [];
     }
+    pickingInfo.relatedObjects = relatedObjects;
 
     return pickingInfo;
   }

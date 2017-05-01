@@ -26,13 +26,6 @@ import {
   COORDINATE_SYSTEM
 } from 'deck.gl';
 
-export const GRAPH_LAYER_IDS = {
-  LINK: 'link-layer',
-  NODE: 'node-layer',
-  NODE_BG: 'node-bg-layer',
-  NODE_ICON: 'node-icon-layer'
-};
-
 const defaultProps = {
   offset: {x: 0, y: 0},
   projectionMode: COORDINATE_SYSTEM.IDENTITY,
@@ -105,7 +98,7 @@ export default class GraphLayer extends CompositeLayer {
     const drawIcons = drawNodes && getIcon && iconAtlas && iconMapping;
 
     const linksLayer = drawLinks && new LineLayer({
-      id: `${id}-${GRAPH_LAYER_IDS.LINK}`,
+      id: `${id}-link-layer`,
       data: links,
       getSourcePosition: d => getLinkPosition(d).sourcePosition,
       getTargetPosition: d => getLinkPosition(d).targetPosition,
@@ -128,7 +121,7 @@ export default class GraphLayer extends CompositeLayer {
     });
 
     const nodesLayer = drawNodes && new ScatterplotLayer({
-      id: `${id}-${drawIcons ? GRAPH_LAYER_IDS.NODE_BG : GRAPH_LAYER_IDS.NODE}`,
+      id: `${id}-${drawIcons ? 'node-bg-layer' : 'node-layer'}`,
       data: nodes,
       getPosition: getNodePosition,
       getRadius: getNodeSize,
@@ -148,7 +141,7 @@ export default class GraphLayer extends CompositeLayer {
     });
 
     const nodeIconsLayer = drawIcons && new IconLayer({
-      id: `${id}-${GRAPH_LAYER_IDS.NODE_ICON}`,
+      id: `${id}-node-icon-layer`,
       data: nodes,
       getColor: getNodeColor,
       getIcon,
