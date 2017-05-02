@@ -1,6 +1,9 @@
 // avoid destructuring for older Node version support
 const resolve = require('path').resolve;
 const webpack = require('webpack');
+const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
+
+// ...
 
 const CONFIG = {
   entry: {
@@ -72,5 +75,10 @@ module.exports = env => {
     );
   }
 
-  return CONFIG;
+  CONFIG.plugins.push(
+    new BundleAnalyzerPlugin()
+  );
+
+  // This enables bundling against src in this repo rather than installed deck.gl module
+  return require('../webpack.config.local')(CONFIG)(env);
 };
