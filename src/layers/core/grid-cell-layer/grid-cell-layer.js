@@ -67,9 +67,15 @@ export default class GridCellLayer extends Layer {
 
   getShaders() {
     return enable64bitSupport(this.props) ? {
-      vs: gridCellVertex64, fs: gridCellFragment, modules: ['fp64', 'project64', 'lighting']
+      vs: gridCellVertex64,
+      fs: gridCellFragment,
+      modules: ['fp64', 'project64', 'lighting'],
+      shaderCache: this.context.shaderCache
     } : {
-      vs: gridCellVertex, fs: gridCellFragment, modules: ['lighting']
+      vs: gridCellVertex,
+      fs: gridCellFragment,
+      modules: ['lighting'],
+      shaderCache: this.context.shaderCache
     };
   }
 

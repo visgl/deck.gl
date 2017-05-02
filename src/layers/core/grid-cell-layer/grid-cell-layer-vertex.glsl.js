@@ -21,7 +21,7 @@
 // Inspired by screen-grid-layer vertex shader in deck.gl
 
 export default `\
-#define SHADER_NAME grid-cell-layer-vs
+#define SHADER_NAME grid-cell-layer-vertex-shader
 
 attribute vec3 positions;
 attribute vec3 normals;

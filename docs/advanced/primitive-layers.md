@@ -34,12 +34,13 @@ import {Layer} from 'deck.gl';
 export default class MeshLayer extends Layer {
 
   initializeState() {
+    const {gl} = this.context;
     this.setState({
-      model: this._getModel(this.context.gl)
+      model: this._getModel(gl)
     });
   }
 
-  getModel(gl) {
+  _getModel(gl) {
     // create Model here
   }
 
@@ -58,7 +59,7 @@ be instanced, or use dynamic geometry:
   import {assembleShaders} from 'deck.gl';
   import {GL, Model, Geometry} from 'luma.gl';
 
-  getModel(gl) {
+  _getModel(gl) {
     const shaders = assembleShaders(gl, this.getShaders());
 
     return new Model({
@@ -86,7 +87,7 @@ be instanced, or use dynamic geometry:
   import {assembleShaders} from 'deck.gl';
   import {GL, Model, Geometry} from 'luma.gl';
 
-  getModel(gl) {
+  _getModel(gl) {
     const shaders = assembleShaders(gl, this.getShaders());
 
     return new Model({
@@ -122,8 +123,9 @@ calling [`attributeManager.add`](/docs/api-reference/attribute-manager.md#-add-)
 
 ```
 initializeState() {
+  const {gl} = this.context;
   this.setState({
-    model: this._getModel(this.context.gl)
+    model: this._getModel(gl)
   });
 
   this.state.attributeManager.add({

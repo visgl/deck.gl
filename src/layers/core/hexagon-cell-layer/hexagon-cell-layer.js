@@ -20,7 +20,7 @@
 
 import {Layer} from '../../../lib';
 import {assembleShaders} from '../../../shader-utils';
-import {Model, CylinderGeometry} from 'luma.gl';
+import {GL, Model, CylinderGeometry} from 'luma.gl';
 import {log} from '../../../lib/utils';
 import {fp64ify, enable64bitSupport} from '../../../lib/utils/fp64';
 import {COORDINATE_SYSTEM} from '../../../lib';
@@ -92,9 +92,15 @@ export default class HexagonCellLayer extends Layer {
 
   getShaders() {
     return enable64bitSupport(this.props) ? {
-      vs: hexCellVertex64, fs: hexCellFragment, modules: ['fp64', 'project64', 'lighting']
+      vs: hexCellVertex64,
+      fs: hexCellFragment,
+      modules: ['fp64', 'project64', 'lighting'],
+      shaderCache: this.context.shaderCache
     } : {
-      vs: hexCellVertex, fs: hexCellFragment, modules: ['lighting']
+      vs: hexCellVertex,
+      fs: hexCellFragment,
+      modules: ['lighting'],
+      shaderCache: this.context.shaderCache
     };
   }
 
@@ -105,13 +111,12 @@ export default class HexagonCellLayer extends Layer {
   initializeState() {
     const {gl} = this.context;
     this.setState({model: this._getModel(gl)});
-
     const {attributeManager} = this.state;
     /* eslint-disable max-len */
     attributeManager.addInstanced({
       instancePositions: {size: 3, accessor: ['getCentroid', 'getElevation'],
         update: this.calculateInstancePositions},
-      instanceColors: {size: 4, type: gl.UNSIGNED_BYTE, accessor: 'getColor',
+      instanceColors: {size: 4, type: GL.UNSIGNED_BYTE, accessor: 'getColor',
         update: this.calculateInstanceColors}
     });
     /* eslint-enable max-len */
@@ -231,7 +236,6 @@ export default class HexagonCellLayer extends Layer {
 
   _getModel(gl) {
     const shaders = assembleShaders(gl, this.getShaders());
-
     return new Model({
       gl,
       id: this.props.id,

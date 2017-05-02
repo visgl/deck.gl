@@ -53,9 +53,15 @@ const isClosed = path => {
 export default class PathLayer extends Layer {
   getShaders() {
     return enable64bitSupport(this.props) ? {
-      vs: pathVertex64, fs: pathFragment, modules: ['fp64', 'project64']
+      vs: pathVertex64,
+      fs: pathFragment,
+      modules: ['fp64', 'project64'],
+      shaderCache: this.context.shaderCache
     } : {
-      vs: pathVertex, fs: pathFragment, modules: []
+      vs: pathVertex,
+      fs: pathFragment,
+      modules: [],
+      shaderCache: this.context.shaderCache
     };
   }
 
@@ -134,7 +140,6 @@ export default class PathLayer extends Layer {
 
   _getModel(gl) {
     const shaders = assembleShaders(gl, this.getShaders());
-
     /*
      *       _
      *        "-_ 1                   3                       5

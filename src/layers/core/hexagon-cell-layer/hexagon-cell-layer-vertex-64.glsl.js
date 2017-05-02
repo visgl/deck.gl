@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 
 export default `\
-#define SHADER_NAME hexagon-cell-layer-vs-64
+#define SHADER_NAME hexagon-cell-layer-vertex-shader-64
 
 attribute vec3 positions;
 attribute vec3 normals;

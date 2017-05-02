@@ -20,7 +20,7 @@
 
 /* fragment shader for the grid-layer */
 export default `\
-#define SHADER_NAME grid-layer-fs
+#define SHADER_NAME screen-grid-layer-fragment-shader
 
 #ifdef GL_ES
 precision highp float;

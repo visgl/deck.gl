@@ -19,7 +19,6 @@
 // THE SOFTWARE.
 
 import {glGetDebugInfo} from 'luma.gl';
-
 // Load shader chunks
 // import SHADER_CHUNKS from '../../dist/shaderlib/shader-chunks';
 import * as SHADER_CHUNKS from './shader-chunks';
@@ -101,9 +100,21 @@ function assembleShader(gl, opts = {}) {
 }
 
 export function assembleShaders(gl, opts) {
+  const vsSource = assembleShader(gl, opts);
+  const fsSource = opts.fs;
+
+  // If shaderCache presents, output compiled shaders from luma.gl/shadeCache
+  if (opts.shaderCache) {
+    return {
+      gl,
+      vs: opts.shaderCache.getVertexShader(gl, vsSource),
+      fs: opts.shaderCache.getFragmentShader(gl, fsSource)
+    }
+  };
+  // Otherwise just output shader source
   return {
     gl,
-    vs: assembleShader(gl, opts),
-    fs: opts.fs
-  };
+    vs: vsSource,
+    fs: fsSource
+  }
 }
