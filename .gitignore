@@ -12,6 +12,9 @@ mapbox-token.js
 TODO
 _docs
 
+*/**/yarn.lock
+yarn-error.log
+
 .project
 .idea
 .DS_Store
