@@ -1,6 +1,7 @@
 {
   "scripts": {
     "start": "webpack-dev-server --progress --hot --port 3000 --open",
+    "start-local": "webpack-dev-server --env.local --progress --hot --open",
     "build": "NODE_ENV=production webpack --env.prod=true --display-modules | awk '{print $3$4\"  \"$2}' | grep -v bytes | sort -n -r | head -50",
     "analyze": "NODE_ENV=production webpack --env.prod=true --json | webpack-bundle-size-analyzer"
   },
@@ -11,12 +12,13 @@
     "luma.gl": "^3.0.0",
     "react": "^15.4.1",
     "react-dom": "^15.4.1",
-    "react-map-gl": "^2.0.0"
+    "react-map-gl": "^3.0.0-alpha.5"
   },
   "devDependencies": {
     "buble-loader": "^0.4.0",
     "webpack": "^2.2.0",
-    "webpack-dev-server": "^2.2.0",
-    "webpack-bundle-size-analyzer": "^2.5.0"
+    "webpack-bundle-analyzer": "^2.4.0",
+    "webpack-bundle-size-analyzer": "^2.5.0",
+    "webpack-dev-server": "^2.2.0"
   }
 }
