@@ -51,9 +51,15 @@ const defaultProps = {
 export default class PointCloudLayer extends Layer {
   getShaders(id) {
     return enable64bitSupport(this.props) ? {
-      vs: pointCloudVertex64, fs: pointCloudFragment, modules: ['fp64', 'project64', 'lighting']
+      vs: pointCloudVertex64,
+      fs: pointCloudFragment,
+      modules: ['fp64', 'project64', 'lighting'],
+      shaderCache: this.context.shaderCache
     } : {
-      vs: pointCloudVertex, fs: pointCloudFragment, modules: ['lighting']
+      vs: pointCloudVertex,
+      fs: pointCloudFragment,
+      modules: ['lighting'],
+      shaderCache: this.context.shaderCache
     };
   }
 
@@ -109,6 +115,8 @@ export default class PointCloudLayer extends Layer {
   }
 
   _getModel(gl) {
+    const shaders = assembleShaders(gl, this.getShaders());
+
     // a triangle that minimally cover the unit circle
     const positions = [];
     for (let i = 0; i < 3; i++) {
@@ -119,7 +127,6 @@ export default class PointCloudLayer extends Layer {
         0
       );
     }
-    const shaders = assembleShaders(gl, this.getShaders());
 
     return new Model({
       gl,

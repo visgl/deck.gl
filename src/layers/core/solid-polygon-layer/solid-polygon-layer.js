@@ -61,9 +61,15 @@ const defaultProps = {
 export default class SolidPolygonLayer extends Layer {
   getShaders() {
     return enable64bitSupport(this.props) ? {
-      vs: solidPolygonVertex64, fs: solidPolygonFragment, modules: ['fp64', 'project64', 'lighting']
+      vs: solidPolygonVertex64,
+      fs: solidPolygonFragment,
+      modules: ['fp64', 'project64', 'lighting'],
+      shaderCache: this.context.shaderCache
     } : {
-      vs: solidPolygonVertex, fs: solidPolygonFragment, modules: ['lighting']
+      vs: solidPolygonVertex,
+      fs: solidPolygonFragment,
+      modules: ['lighting'],
+      shaderCache: this.context.shaderCache
     };
   }
 
@@ -155,6 +161,7 @@ export default class SolidPolygonLayer extends Layer {
 
   _getModel(gl) {
     const shaders = assembleShaders(gl, this.getShaders());
+
     return new Model({
       gl,
       id: this.props.id,

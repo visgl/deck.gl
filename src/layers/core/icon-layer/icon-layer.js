@@ -66,6 +66,7 @@ const defaultProps = {
 export default class IconLayer extends Layer {
   initializeState() {
     const {attributeManager} = this.state;
+    const {gl} = this.context;
 
     /* eslint-disable max-len */
     attributeManager.addInstanced({
@@ -78,7 +79,6 @@ export default class IconLayer extends Layer {
     });
     /* eslint-enable max-len */
 
-    const {gl} = this.context;
     this.setState({model: this._getModel(gl)});
   }
 
@@ -155,15 +155,21 @@ export default class IconLayer extends Layer {
 
   getShaders() {
     return enable64bitSupport(this.props) ? {
-      vs: iconVertex64, fs: iconFragment, modules: ['fp64', 'project64']
+      vs: iconVertex64,
+      fs: iconFragment,
+      modules: ['fp64', 'project64'],
+      shaderCache: this.context.shaderCache
     } : {
-      vs: iconVertex, fs: iconFragment, modules: []
+      vs: iconVertex,
+      fs: iconFragment,
+      modules: [],
+      shaderCache: this.context.shaderCache
     };
   }
 
   _getModel(gl) {
-    const positions = [-1, -1, 0, -1, 1, 0, 1, 1, 0, 1, -1, 0];
 
+    const positions = [-1, -1, 0, -1, 1, 0, 1, 1, 0, 1, -1, 0];
     const shaders = assembleShaders(gl, this.getShaders());
 
     return new Model({

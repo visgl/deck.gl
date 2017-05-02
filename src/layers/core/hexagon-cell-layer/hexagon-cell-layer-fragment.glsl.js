@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 
 export default `\
-#define SHADER_NAME hexagon-cell-layer-fs
+#define SHADER_NAME hexagon-cell-layer-fragment-shader
 
 #ifdef GL_ES
 precision highp float;

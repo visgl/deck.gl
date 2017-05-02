@@ -49,7 +49,9 @@ export default class ReflectionEffect extends Effect {
   getShaders() {
     return {
       vs: reflectionVertex,
-      fs: reflectionFragment
+      fs: reflectionFragment,
+      modules: [],
+      shaderCache: this.context.shaderCache
     };
   }
 

@@ -24,6 +24,7 @@ import sinon from 'sinon';
 import global from 'global';
 
 const {mergeDefaultProps} = LAYER_TEST_EXPORTS;
+import {experimental} from 'luma.gl';
 
 /**
  * Covert all numbers in a deep structure to a given precision, allowing
@@ -62,8 +63,8 @@ export function testInitializeLayer({gl, layer, viewport}) {
   viewport = viewport || getViewport();
 
   const oldContext = {gl, viewport};
-  const context = {gl, viewport};
   let failures = false;
+  const context = {gl, viewport, shaderCache: new experimental.ShaderCache({gl})};
   try {
     layer.context = context;
 
@@ -82,6 +83,7 @@ export function testInitializeLayer({gl, layer, viewport}) {
       context,
       changeFlags: layer.diffProps({}, layer.props, context)
     });
+
   } catch (error) {
     failures = true;
   }

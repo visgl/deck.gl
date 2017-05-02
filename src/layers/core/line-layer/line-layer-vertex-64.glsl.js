@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 
 export default `\
-#define SHADER_NAME line-layer-vertex-64-shader
+#define SHADER_NAME line-layer-vertex-shader-64
 
 attribute vec3 positions;
 attribute vec3 instanceSourcePositions;

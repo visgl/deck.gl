@@ -103,9 +103,11 @@ export default class DeckGL extends React.Component {
     // Note: avoid React setState due GL animation loop / setState timing issue
     this.layerManager = new LayerManager({gl});
     this.effectManager = new EffectManager({gl, layerManager: this.layerManager});
+
     for (const effect of this.props.effects) {
       this.effectManager.addEffect(effect);
     }
+
     this._updateLayers(this.props);
 
     // Check if a mouse event has been specified and that at least one of the layers is pickable

@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 
 export default `\
-#define SHADER_NAME icon-layer-vertex-shader
+#define SHADER_NAME icon-layer-vertex-shader-64
 
 attribute vec2 positions;
 
