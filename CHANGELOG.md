@@ -17,25 +17,28 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## Beta Releases
 
-[TBD]
+### deck.gl v4.1.0-alpha.1
 
-- BREAKING: Only composite layers have `renderLayer` methods
-- BREAKING: Only primitive layers' `draw` methods are called during render
-- `GridLayer` add `coverage`, `lowerPercentile`, `upperPercentile` and `getColorValue` to layer prop
-- HOTFIX: fix `HexagonLayer` hex color calculation, use `bin.value` instead of `bin.points.count` to calculate color
-
-### deck.gl v4.1-alpha.1
-
-- HOTFIX: Fix the bug that layer is finalized at every cycle due to an incorrect if check(#552)
-- HOTFIX: Fix the bug that Model got regenerated every time data is changed for SolidPolygonLayer (#554)
-- HOTFIX: Fix the bug that lighting is not working properly for 64-bit PolygonLayer on Intel Iris Pro GPU (#563)
-- DEMO: Fix the scrolling on iPhone (#546)
-- DEMO: Reorganized the examples (#547)
-- DEMO: Misc fixed form demo site (#548, #549)
+- PERFORMANCE: Compiled are now cached for reuse so that same shaders are not recompiled for the same type of layers (#613)
+- PERFORMANCE: getViewportUniforms optimization (#586)
+- BREAKING: Only composite layers have `renderLayer` methods (#585)
+- BREAKING: Only primitive layers' `draw` methods are called during render (#585)
+- `GridLayer` add `coverage`, `lowerPercentile`, `upperPercentile` and `getColorValue` to layer prop (#614)
+- `IconLayer` add `getAngle` for rotating each icon with a specific angles (in degrees) (#625)
 - `HexagonLayer` add interval `getHexagons`, `getSortedCounts` `getUpdateTriggers` methods, make it easier to create layer subclass
 - `HexagonLayer` add `getColorValue` (optional) prop, returns a value to base bin color on.
 - `HexagonLayer` change default `hexagonAggregator` output to `{hexagons: [], hexagonVertices: []}`
 - `HexagonLayer` add `getValue` to `BiinSorter` to support color / elevation by value
+- TEST: Implement code coverage with nyc and coverall report (#596)
+- HOTFIX: fix `HexagonLayer` hex color calculation, use `bin.value` instead of `bin.points.count` to calculate color
+- HOTFIX: Fix the bug that layer is finalized at every cycle due to an incorrect if check(#552)
+- HOTFIX: Fix the bug that Model got regenerated every time data is changed for SolidPolygonLayer (#554)
+- HOTFIX: Fix the bug that lighting is not working properly for 64-bit PolygonLayer on Intel Iris Pro GPU (#563)
+- DEMO: Fix brushing layer demo (#603)
+- DEMO: Fix the scrolling on iPhone (#546)
+- DEMO: Reorganized the examples (#547)
+- DEMO: Misc fixed form demo site (#548, #549)
+- KNOWN ISSUES: the IconLayer example doesn't work if use with luma.gl v4.0.0-alpha.1
 
 ## Official Releases
 
