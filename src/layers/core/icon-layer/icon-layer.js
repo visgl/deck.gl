@@ -60,7 +60,8 @@ const defaultProps = {
   getPosition: x => x.position,
   getIcon: x => x.icon,
   getColor: x => x.color || DEFAULT_COLOR,
-  getSize: x => x.size || 1
+  getSize: x => x.size || 1,
+  getAngle: x => x.angle || 0
 };
 
 export default class IconLayer extends Layer {
@@ -75,7 +76,8 @@ export default class IconLayer extends Layer {
       instanceOffsets: {size: 2, accessor: 'getIcon', update: this.calculateInstanceOffsets},
       instanceIconFrames: {size: 4, accessor: 'getIcon', update: this.calculateInstanceIconFrames},
       instanceColorModes: {size: 1, type: GL.UNSIGNED_BYTE, accessor: 'getIcon', update: this.calculateInstanceColorMode},
-      instanceColors: {size: 4, type: GL.UNSIGNED_BYTE, accessor: 'getColor', update: this.calculateInstanceColors}
+      instanceColors: {size: 4, type: GL.UNSIGNED_BYTE, accessor: 'getColor', update: this.calculateInstanceColors},
+      instanceAngles: {size: 1, accessor: 'getAngle', update: this.calculateInstanceAngles}
     });
     /* eslint-enable max-len */
 
@@ -214,6 +216,15 @@ export default class IconLayer extends Layer {
     let i = 0;
     for (const object of data) {
       value[i++] = getSize(object);
+    }
+  }
+
+  calculateInstanceAngles(attribute) {
+    const {data, getAngle} = this.props;
+    const {value} = attribute;
+    let i = 0;
+    for (const object of data) {
+      value[i++] = getAngle(object);
     }
   }
 

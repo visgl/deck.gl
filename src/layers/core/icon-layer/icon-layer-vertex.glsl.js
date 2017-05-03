@@ -25,6 +25,7 @@ attribute vec2 positions;
 
 attribute vec3 instancePositions;
 attribute float instanceSizes;
+attribute float instanceAngles;
 attribute vec4 instanceColors;
 attribute vec3 instancePickingColors;
 attribute vec4 instanceIconFrames;
@@ -40,15 +41,25 @@ varying float vColorMode;
 varying vec4 vColor;
 varying vec2 vTextureCoords;
 
+vec2 rotate_by_angle(vec2 vertex, float angle) {
+  float angle_radian = angle * PI / 180.0;
+  float cos_angle = cos(angle_radian);
+  float sin_angle = sqrt(1.0 - cos_angle * cos_angle);
+  mat2 rotationMatrix = mat2(cos_angle, -sin_angle, sin_angle, cos_angle);
+  return rotationMatrix * vertex;
+}
+
 void main(void) {
   vec2 iconSize = instanceIconFrames.zw;
   vec2 iconSize_clipspace = iconSize / viewportSize * 2.0;
   // scale icon height to match instanceSize
   float instanceScale = iconSize.y == 0.0 ? 0.0 : instanceSizes / iconSize.y;
   vec3 center = project_position(instancePositions);
-  vec2 vertex = (positions / 2.0 + instanceOffsets) * iconSize_clipspace *
+  vec2 vertex = (positions / 2.0 + instanceOffsets);
+  vertex = rotate_by_angle(vertex, instanceAngles) * iconSize_clipspace *
     sizeScale * instanceScale;
   vertex.y *= -1.0;
+
   gl_Position = project_to_clipspace(vec4(center, 1.0)) + vec4(vertex, 0.0, 0.0);
 
   vTextureCoords = mix(
