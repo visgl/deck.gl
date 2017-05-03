@@ -1,0 +1,22 @@
+{
+  "name": "create-react-app",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "deck.gl": "^4.0.6",
+    "immutable": "^3.8.1",
+    "luma.gl": "^3.0.2",
+    "react": "^15.5.4",
+    "react-dom": "^15.5.4",
+    "react-map-gl": "^2.0.2"
+  },
+  "devDependencies": {
+    "react-scripts": "0.9.5"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test --env=jsdom",
+    "eject": "react-scripts eject"
+  }
+}
