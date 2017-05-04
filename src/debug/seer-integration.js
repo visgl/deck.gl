@@ -48,9 +48,10 @@ export const getOverrides = props => {
 
   overs.forEach((value, valuePath) => {
     recursiveSet(props, valuePath, value);
+    if (valuePath[0] === 'data') {
+      props.data = [...props.data];
+    }
   });
-
-  props.data = [...props.data];
 
 };
 
@@ -71,6 +72,23 @@ export const layerEditListener = cb => {
   });
 };
 
+const dataBlackList = ['zoomLevels'];
+
+const transformData = data => {
+  if (!data) {
+    return [];
+  }
+
+  const out = data.type === 'FeatureCollection' ? data.features : data;
+  return out.slice(0, 20).map(item => Object.keys(item).reduce((acc, key) => {
+    if (dataBlackList.includes(key)) {
+      return acc;
+    }
+    acc[key] = item[key];
+    return acc;
+  }, {}));
+};
+
 /**
  * Log a layer properties to Seer
  */
@@ -83,9 +101,11 @@ export const logLayer = layer => {
     if (typeof layer.props[key] === 'function') {
       return acc;
     }
-    acc[key] = layer.props[key];
+
+    acc[key] = key === 'data' ? transformData(layer.props.data) : layer.props[key];
     return acc;
   }, {});
 
   seer.indexedListItem('deck.gl', layer.id, simpleProps);
+
 };
