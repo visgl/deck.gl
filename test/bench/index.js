@@ -47,6 +47,8 @@ const VIEWPORT_PARAMS = {
   longitude: -122, latitude: 37, zoom: 12, pitch: 30
 };
 
+let testIdx = 0;
+
 // add tests
 suite
 .add('getUniformsFromViewport#LNGLAT', () => {
@@ -129,6 +131,19 @@ suite
 // .add('ScatterplotLayer#initialize', () => {
 //   const layer = new ScatterplotLayer({data: data.points});
 //   testInitializeLayer({layer});
+// })
+// .add('encoding picking color', () => {
+//   testIdx++;
+//   // return [
+//   //   (testIdx + 1) & 255,
+//   //   ((testIdx + 1) >> 8) & 255,
+//   //   (((testIdx + 1) >> 8) >> 8) & 255
+//   // ];
+//   return [
+//     (testIdx + 1) % 256,
+//     Math.floor((testIdx + 1) / 256) % 256,
+//     Math.floor((testIdx + 1) / 256 / 256) % 256
+//   ];
 // })
 // add listeners
 .on('start', (event) => {
