@@ -46,6 +46,7 @@
     "d3-hexbin": "^0.2.1",
     "earcut": "^2.0.6",
     "gl-matrix": "^2.3.2",
+    "hammerjs": "^2.0.8",
     "lodash.flattendeep": "^4.4.0",
     "prop-types": "^15.5.8",
     "seer": "^0.1.0"

@@ -24,9 +24,10 @@ import autobind from './autobind';
 import WebGLRenderer from './webgl-renderer';
 import {LayerManager, Layer} from '../lib';
 import {EffectManager, Effect} from '../experimental';
-import {GL, addEvents} from 'luma.gl';
+import {GL} from 'luma.gl';
 import {Viewport, WebMercatorViewport} from '../lib/viewports';
 import {log} from '../lib/utils';
+import {createEventManager} from '../utils/event-manager';
 
 function noop() {}
 
@@ -71,6 +72,7 @@ export default class DeckGL extends React.Component {
     super(props);
     this.state = {};
     this.needsRedraw = true;
+    this.eventManager = null;
     this.layerManager = null;
     this.effectManager = null;
     autobind(this);
@@ -128,6 +130,18 @@ export default class DeckGL extends React.Component {
       );
     }
 
+    // TODO: add handlers on demand at runtime, not all at once on init
+    this.eventManager = createEventManager(canvas, {})
+    .on({
+      click: this._onClick,
+      mousemove: this._onMouseMove,
+      dragstart: this._onDragEvent,
+      dragmove: this._onDragEvent,
+      dragend: this._onDragEvent,
+      dragcancel: this._onDragCancel
+    });
+
+    /*
     this.events = addEvents(canvas, {
       cacheSize: false,
       cachePosition: false,
@@ -139,6 +153,7 @@ export default class DeckGL extends React.Component {
       onDragEnd: this._onDragEvent,
       onDragCancel: this._onDragCancel
     });
+    */
   }
 
   // Route events to layers
