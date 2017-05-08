@@ -27,9 +27,9 @@ import flattenDeep from 'lodash.flattendeep';
 
 function getPickingColor(index) {
   return [
-    (index + 1) % 256,
-    Math.floor((index + 1) / 256) % 256,
-    Math.floor((index + 1) / 256 / 256) % 256
+    (index + 1) & 255,
+    ((index + 1) >> 8) & 255,
+    (((index + 1) >> 8) >> 8) & 255
   ];
 }
 

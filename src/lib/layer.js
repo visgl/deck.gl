@@ -254,9 +254,9 @@ export default class Layer {
    */
   encodePickingColor(i) {
     return [
-      (i + 1) % 256,
-      Math.floor((i + 1) / 256) % 256,
-      Math.floor((i + 1) / 256 / 256) % 256
+      (i + 1) & 255,
+      ((i + 1) >> 8) & 255,
+      (((i + 1) >> 8) >> 8) & 255
     ];
   }
 
