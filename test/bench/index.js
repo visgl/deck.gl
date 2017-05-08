@@ -48,6 +48,7 @@ const VIEWPORT_PARAMS = {
 };
 
 let testIdx = 0;
+const testLayer = new ScatterplotLayer({data: data.points});
 
 // add tests
 suite
@@ -128,22 +129,13 @@ suite
     console.error(error);
   }
 })
+.add('encoding picking color', () => {
+  testIdx++;
+  testLayer.encodePickingColor(testIdx);
+})
 // .add('ScatterplotLayer#initialize', () => {
 //   const layer = new ScatterplotLayer({data: data.points});
 //   testInitializeLayer({layer});
-// })
-// .add('encoding picking color', () => {
-//   testIdx++;
-//   // return [
-//   //   (testIdx + 1) & 255,
-//   //   ((testIdx + 1) >> 8) & 255,
-//   //   (((testIdx + 1) >> 8) >> 8) & 255
-//   // ];
-//   return [
-//     (testIdx + 1) % 256,
-//     Math.floor((testIdx + 1) / 256) % 256,
-//     Math.floor((testIdx + 1) / 256 / 256) % 256
-//   ];
 // })
 // add listeners
 .on('start', (event) => {
