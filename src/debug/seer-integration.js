@@ -48,9 +48,11 @@ export const getOverrides = props => {
 
   overs.forEach((value, valuePath) => {
     recursiveSet(props, valuePath, value);
+    // Invalidate data array if we have a data override
+    if (valuePath[0] === 'data') {
+      props.data = [...props.data];
+    }
   });
-
-  props.data = [...props.data];
 
 };
 
@@ -71,8 +73,30 @@ export const layerEditListener = cb => {
   });
 };
 
+// Blacklist some properties that can't be stringified (eg: circular dependencies)
+const dataBlackList = ['zoomLevels'];
+
 /**
- * Log a layer properties to Seer
+ * Transform the data passed to Seer for performance purposes.
+ * Slice the data array to the first 20 items
+ */
+const transformData = data => {
+  if (!data) {
+    return [];
+  }
+
+  const out = data.type === 'FeatureCollection' ? data.features : data;
+  return out.slice(0, 20).map(item => Object.keys(item).reduce((acc, key) => {
+    if (dataBlackList.includes(key)) {
+      return acc;
+    }
+    acc[key] = item[key];
+    return acc;
+  }, {}));
+};
+
+/**
+ * Log layer's properties to Seer
  */
 export const logLayer = layer => {
   if (!window.__SEER_INITIALIZED__) {
@@ -83,9 +107,11 @@ export const logLayer = layer => {
     if (typeof layer.props[key] === 'function') {
       return acc;
     }
-    acc[key] = layer.props[key];
+
+    acc[key] = key === 'data' ? transformData(layer.props.data) : layer.props[key];
     return acc;
   }, {});
 
   seer.indexedListItem('deck.gl', layer.id, simpleProps);
+
 };
