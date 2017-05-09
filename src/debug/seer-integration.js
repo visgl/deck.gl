@@ -48,6 +48,7 @@ export const getOverrides = props => {
 
   overs.forEach((value, valuePath) => {
     recursiveSet(props, valuePath, value);
+    // Invalidate data array if we have a data override
     if (valuePath[0] === 'data') {
       props.data = [...props.data];
     }
@@ -72,8 +73,13 @@ export const layerEditListener = cb => {
   });
 };
 
+// Blacklist some properties that can't be stringified (eg: circular dependencies)
 const dataBlackList = ['zoomLevels'];
 
+/**
+ * Transform the data passed to Seer for performance purposes.
+ * Slice the data array to the first 20 items
+ */
 const transformData = data => {
   if (!data) {
     return [];
