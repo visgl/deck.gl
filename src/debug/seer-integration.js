@@ -96,7 +96,7 @@ const transformData = data => {
 };
 
 /**
- * Log a layer properties to Seer
+ * Log layer's properties to Seer
  */
 export const logLayer = layer => {
   if (!window.__SEER_INITIALIZED__) {
