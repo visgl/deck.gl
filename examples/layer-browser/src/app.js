@@ -102,6 +102,12 @@ class App extends PureComponent {
     setImmutableDataSamples(settings.immutable);
   }
 
+  _onQueryFeatures() {
+    const {deckgl} = this.refs;
+    const {width, height} = this.state;
+    console.log(deckgl.elementsInScope([0, 0], [width, height])); // eslint-disable-line
+  }
+
   _onHover(info) {
     this.setState({hoveredItem: info});
   }
@@ -186,6 +192,7 @@ class App extends PureComponent {
 
         <DeckGL
           debug
+          ref="deckgl"
           id="default-deckgl-overlay"
           width={width} height={height}
           {...mapViewState}
@@ -220,6 +227,10 @@ class App extends PureComponent {
         { this._renderMap() }
         { !MAPBOX_ACCESS_TOKEN && this._renderNoTokenWarning() }
         <div id="control-panel">
+          <div>
+            <h4 />
+            <button onClick={this._onQueryFeatures} >Query Rendered Features</button>
+          </div>
           <LayerControls
             title="Composite Settings"
             settings={settings}
