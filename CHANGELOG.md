@@ -17,6 +17,9 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## Beta Releases
 
+[TBD]
+- NEW: `pickingRadius` prop on the `DeckGL` component, enables more tolerant click and hover interaction.
+
 ### deck.gl v4.1.0-alpha.1
 
 - PERFORMANCE: Compiled are now cached for reuse so that same shaders are not recompiled for the same type of layers (#613)

@@ -68,6 +68,13 @@ updated properties derived from the current application state.
 
 Css styles for the deckgl-canvas.
 
+##### `pickingRadius` (Number, optional)
+
+Extra pixels around the pointer to include while picking.
+This is helpful when rendered objects are difficult to target, for example
+irregularly shaped icons, small moving circles or interaction by touch.
+Default `0`.
+
 ##### `pixelRatio` (Number, optional)
 
 Will use device ratio by default.
