@@ -49,7 +49,7 @@
 import Layer from './layer';
 import {log} from './utils';
 import assert from 'assert';
-import {drawLayers, pickLayers, pickLayersByBoundingBox} from './draw-and-pick';
+import {drawLayers, pickLayers} from './draw-and-pick';
 import {LIFECYCLE} from './constants';
 import {Viewport} from './viewports';
 import {setOverride, layerEditListener, logLayer} from '../debug/seer-integration';
@@ -167,26 +167,6 @@ export default class LayerManager {
       viewport: this.context.viewport,
       pickingFBO: this.context.pickingFBO,
       lastPickedInfo: this.context.lastPickedInfo
-    });
-  }
-
-  pickLayerByBoundingBox({x, y, width, height}) {
-    const {gl, uniforms} = this.context;
-
-    // Set up a frame buffer if needed
-    if (this.context.pickingFBO === null ||
-      gl.canvas.width !== this.context.pickingFBO.width ||
-      gl.canvas.height !== this.context.pickingFBO.height) {
-      this.context.pickingFBO = new FramebufferObject(gl, {
-        width: gl.canvas.width,
-        height: gl.canvas.height
-      });
-    }
-    return pickLayersByBoundingBox(gl, {
-      layers: this.layers,
-      viewport: this.context.viewport,
-      pickingFBO: this.context.pickingFBO,
-      boundingBox: {x, y, width, height}
     });
   }
 

@@ -80,17 +80,6 @@ export default class DeckGL extends React.Component {
     this._updateLayers(nextProps);
   }
 
-  /* Public API */
-  elementsInScope(topLeft, bottomRight) {
-    return this.layerManager.pickLayerByBoundingBox({
-      x: topLeft[0],
-      y: topLeft[1],
-      width: bottomRight[0] - topLeft[0],
-      height: bottomRight[1] - topLeft[1]
-    });
-  }
-  /* End Public API */
-
   _updateLayers(nextProps) {
     const {width, height, latitude, longitude, zoom, pitch, bearing, altitude} = nextProps;
     let {viewport} = nextProps;
@@ -159,12 +148,8 @@ export default class DeckGL extends React.Component {
       return;
     }
     const {event: {offsetX: x, offsetY: y}} = event;
-    const selectedInfos = this.layerManager.pickLayer({
-      x,
-      y,
-      mode: 'click',
-      radius: this.props.pickingRadius
-    });
+    const radius = this.props.pickingRadius;
+    const selectedInfos = this.layerManager.pickLayer({x, y, radius, mode: 'click'});
     if (selectedInfos.length) {
       const firstInfo = selectedInfos.find(info => info.index >= 0);
       // Event.event holds the original MouseEvent object
@@ -179,12 +164,8 @@ export default class DeckGL extends React.Component {
       return;
     }
     const {event: {offsetX: x, offsetY: y}} = event;
-    const selectedInfos = this.layerManager.pickLayer({
-      x,
-      y,
-      mode: 'hover',
-      radius: this.props.pickingRadius
-    });
+    const radius = this.props.pickingRadius;
+    const selectedInfos = this.layerManager.pickLayer({x, y, radius, mode: 'hover'});
     if (selectedInfos.length) {
       const firstInfo = selectedInfos.find(info => info.index >= 0);
       // Event.event holds the original MouseEvent object
@@ -224,12 +205,8 @@ export default class DeckGL extends React.Component {
     }
 
     if (mode) {
-      const selectedInfos = this.layerManager.pickLayer({
-        x,
-        y,
-        mode,
-        radius: this.props.pickingRadius
-      });
+      const radius = this.props.pickingRadius;
+      const selectedInfos = this.layerManager.pickLayer({x, y, radius, mode});
       if (selectedInfos.length) {
         const firstInfo = selectedInfos.find(info => info.index >= 0);
         // Event.event holds the original MouseEvent object

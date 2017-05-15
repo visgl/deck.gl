@@ -96,7 +96,7 @@ export function pickLayers(gl, {
 
   } else {
     // For all other events, run picking process normally.
-    const pickResult = pickFromBuffer(gl, {
+    const pickInfo = pickFromBuffer(gl, {
       layers,
       pickingFBO,
       deviceX,
@@ -104,9 +104,9 @@ export function pickLayers(gl, {
       deviceRadius
     });
 
-    pickedColor = pickResult.color;
-    pickedLayer = pickResult.layer;
-    pickedObjectIndex = pickResult.objectIndex;
+    pickedColor = pickInfo.pickedColor;
+    pickedLayer = pickInfo.pickedLayer;
+    pickedObjectIndex = pickInfo.pickedObjectIndex;
     affectedLayers = pickedLayer ? [pickedLayer] : [];
 
     if (mode === 'hover') {
@@ -193,65 +193,10 @@ export function pickLayers(gl, {
 
   return unhandledPickInfos;
 }
-/* eslint-enable max-depth, max-statements */
-
-export function pickLayersByBoundingBox(gl, {
-  layers,
-  pickingFBO,
-  boundingBox: {x, y, width, height},
-  viewport
-}) {
-
-  // Convert from canvas top-left to WebGL bottom-left coordinates
-  // And compensate for pixelRatio
-  const pixelRatio = typeof window !== 'undefined' ?
-    window.devicePixelRatio : 1;
-  const deviceBox = {
-    x: Math.round(x * pixelRatio),
-    y: Math.round(gl.canvas.height - (y + height) * pixelRatio),
-    width: Math.round(width * pixelRatio),
-    height: Math.round(height * pixelRatio)
-  };
-
-  // For all other events, run picking process normally.
-  const pickResults = pickFromBufferByBoundingBox(gl, {
-    layers,
-    pickingFBO,
-    deviceBox
-  });
-
-  const baseInfo = createInfo([x, y], viewport);
-  baseInfo.pixelRatio = pixelRatio;
-
-  // Convert each result to pickingInfo object
-  const infos = {};
-
-  pickResults.filter(Boolean)
-  .forEach(({color, layer, objectIndex}) => {
-    // Get unique objects
-    const objectId = `${layer.id}:${objectIndex}`;
-
-    if (!infos[objectId]) {
-      const info = Object.assign({}, baseInfo, {
-        color,
-        index: objectIndex,
-        picked: true
-      });
-
-      infos[objectId] = getLayerPickingInfo({
-        layer,
-        info,
-        mode: 'query'
-      });
-    }
-  });
-
-  return Object.values(infos);
-}
 
 /**
  * Pick at a specified pixel with a tolerance radius
- * Returns the closest object to the pixel in shape `{color, layer, objectIndex}`
+ * Returns the closest object to the pixel in shape `{pickedColor, pickedLayer, pickedObjectIndex}`
  */
 function pickFromBuffer(gl, {
   layers,
@@ -264,54 +209,9 @@ function pickFromBuffer(gl, {
   // Create a box of size `radius * 2 + 1` centered at [deviceX, deviceY]
   const x = Math.max(0, deviceX - deviceRadius);
   const y = Math.max(0, deviceY - deviceRadius);
-  const deviceBox = {
-    x,
-    y,
-    width: Math.min(pickingFBO.width, deviceX + deviceRadius) - x + 1,
-    height: Math.min(pickingFBO.height, deviceY + deviceRadius) - y + 1
-  };
+  const width = Math.min(pickingFBO.width, deviceX + deviceRadius) - x + 1;
+  const height = Math.min(pickingFBO.height, deviceY + deviceRadius) - y + 1;
 
-  const pickResults = pickFromBufferByBoundingBox(gl, {layers, pickingFBO, deviceBox});
-
-  // Traverse all pixels in picking results and find the one closest to the supplied
-  // [deviceX, deviceY]
-  let minDistanceToCenter = deviceRadius;
-  let closestResultToCenter = null;
-  /* eslint-disable max-depth */
-  for (let col = 0; col < deviceBox.width; col++) {
-    for (let row = 0; row < deviceBox.height; row++) {
-      const pickResult = pickResults[row * deviceBox.width + col];
-      if (pickResult) {
-        const dx = deviceBox.x + col - deviceX;
-        const dy = deviceBox.y + row - deviceY;
-        const d = Math.sqrt(dx * dx + dy * dy);
-        if (d <= minDistanceToCenter) {
-          minDistanceToCenter = d;
-          closestResultToCenter = pickResult;
-          pickResult.x = deviceBox.x + col;
-          pickResult.y = deviceBox.y + row;
-        }
-      }
-    }
-  }
-  /* eslint-enable max-depth */
-
-  return closestResultToCenter || {
-    color: EMPTY_PIXEL,
-    layer: null,
-    objectIndex: -1
-  };
-}
-
-/**
- * Returns an array of picked object for each pixel in bounding box
- * In the shape of `{color, layer, objectIndex}`
- */
-function pickFromBufferByBoundingBox(gl, {
-  layers,
-  pickingFBO,
-  deviceBox: {x, y, width, height}
-}) {
   // TODO - just return glContextWithState once luma updates
   // Make sure we clear scissor test and fbo bindings in case of exceptions
   // We are only interested in one pixel, no need to render anything else
@@ -357,29 +257,44 @@ function pickFromBufferByBoundingBox(gl, {
     // restore blend mode
     setBlendMode(gl, oldBlendMode);
 
-    const pickResults = [];
+    // Traverse all pixels in picking results and find the one closest to the supplied
+    // [deviceX, deviceY]
+    let minSquareDistanceToCenter = deviceRadius * deviceRadius;
+    let closestResultToCenter = null;
+    let i = 0;
 
-    for (let i = 0; i < pickedColors.length; i += 4) {
-      // Decode picked color
-      const pickedLayerIndex = pickedColors[i + 3] - 1;
-      if (pickedLayerIndex >= 0) {
-        const pickedLayer = layers[pickedLayerIndex];
-        const pickedColor = pickedColors.slice(i, i + 4);
-        const pickedObjectIndex = pickedLayer.decodePickingColor(pickedColor);
+    for (let row = 0; row < height; row++) {
+      for (let col = 0; col < width; col++) {
+        // Decode picked layer from color
+        const pickedLayerIndex = pickedColors[i + 3] - 1;
 
-        pickResults.push({
-          color: pickedColor,
-          layer: pickedLayer,
-          objectIndex: pickedObjectIndex
-        });
-      } else {
-        pickResults.push(null);
+        if (pickedLayerIndex >= 0) {
+          const dx = col + x - deviceX;
+          const dy = row + y - deviceY;
+          const d2 = dx * dx + dy * dy;
+
+          if (d2 <= minSquareDistanceToCenter) {
+            minSquareDistanceToCenter = d2;
+
+            // Decode picked object index from color
+            const pickedColor = pickedColors.slice(i, i + 4);
+            const pickedLayer = layers[pickedLayerIndex];
+            const pickedObjectIndex = pickedLayer.decodePickingColor(pickedColor);
+            closestResultToCenter = {pickedColor, pickedLayer, pickedObjectIndex};
+          }
+        }
+        i += 4;
       }
     }
 
-    return pickResults;
+    return closestResultToCenter || {
+      pickedColor: EMPTY_PIXEL,
+      pickedLayer: null,
+      pickedObjectIndex: -1
+    };
   });
 }
+/* eslint-enable max-depth, max-statements */
 
 function createInfo(pixel, viewport) {
   // Assign a number of potentially useful props to the "info" object

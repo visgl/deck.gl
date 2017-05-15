@@ -42,7 +42,8 @@ class App extends PureComponent {
         // immutable: false,
         // Effects are experimental for now. Will be enabled in the future
         // effects: false,
-        separation: 0
+        separation: 0,
+        pickingRadius: 0
         // the rotation controls works only for layers in
         // meter offset projection mode. They are commented out
         // here since layer browser currently only have one layer
@@ -100,12 +101,6 @@ class App extends PureComponent {
   _onUpdateContainerSettings(settings) {
     this.setState({settings});
     setImmutableDataSamples(settings.immutable);
-  }
-
-  _onQueryFeatures() {
-    const {deckgl} = this.refs;
-    const {width, height} = this.state;
-    console.log(deckgl.elementsInScope([0, 0], [width, height])); // eslint-disable-line
   }
 
   _onHover(info) {
@@ -181,7 +176,7 @@ class App extends PureComponent {
   }
 
   _renderMap() {
-    const {width, height, mapViewState, settings: {effects}} = this.state;
+    const {width, height, mapViewState, settings: {effects, pickingRadius}} = this.state;
     return (
       <MapboxGLMap
         mapboxApiAccessToken={MAPBOX_ACCESS_TOKEN || 'no_token'}
@@ -192,10 +187,10 @@ class App extends PureComponent {
 
         <DeckGL
           debug
-          ref="deckgl"
           id="default-deckgl-overlay"
           width={width} height={height}
           {...mapViewState}
+          pickingRadius={pickingRadius}
           onWebGLInitialized={ this._onWebGLInitialized }
           onLayerHover={ this._onHover }
           onLayerClick={ this._onClick }
@@ -227,10 +222,6 @@ class App extends PureComponent {
         { this._renderMap() }
         { !MAPBOX_ACCESS_TOKEN && this._renderNoTokenWarning() }
         <div id="control-panel">
-          <div>
-            <h4 />
-            <button onClick={this._onQueryFeatures} >Query Rendered Features</button>
-          </div>
           <LayerControls
             title="Composite Settings"
             settings={settings}
