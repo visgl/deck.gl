@@ -159,42 +159,42 @@ export default class DeckGL extends React.Component {
   // Route events to layers
   _onClick(event) {
     // use offsetX|Y for relative position to the container, drop event if falsy
-    if (!event || !event.event || !Number.isFinite(event.event.offsetX)) {
+    if (!event || !event.srcEvent || !Number.isFinite(event.srcEvent.offsetX)) {
       return;
     }
-    const {event: {offsetX: x, offsetY: y}} = event;
+    const {srcEvent: {offsetX: x, offsetY: y}} = event;
     const radius = this.props.pickingRadius;
     const selectedInfos = this.layerManager.pickLayer({x, y, radius, mode: 'click'});
     if (selectedInfos.length) {
       const firstInfo = selectedInfos.find(info => info.index >= 0);
       // Event.event holds the original MouseEvent object
-      this.props.onLayerClick(firstInfo, selectedInfos, event.event);
+      this.props.onLayerClick(firstInfo, selectedInfos, event.srcEvent);
     }
   }
 
   // Route events to layers
   _onMouseMove(event) {
     // use offsetX|Y for relative position to the container, drop event if falsy
-    if (!event || !event.event || !Number.isFinite(event.event.offsetX)) {
+    if (!event || !event.srcEvent || !Number.isFinite(event.srcEvent.offsetX)) {
       return;
     }
-    const {event: {offsetX: x, offsetY: y}} = event;
+    const {srcEvent: {offsetX: x, offsetY: y}} = event;
     const radius = this.props.pickingRadius;
     const selectedInfos = this.layerManager.pickLayer({x, y, radius, mode: 'hover'});
     if (selectedInfos.length) {
       const firstInfo = selectedInfos.find(info => info.index >= 0);
       // Event.event holds the original MouseEvent object
-      this.props.onLayerHover(firstInfo, selectedInfos, event.event);
+      this.props.onLayerHover(firstInfo, selectedInfos, event.srcEvent);
     }
   }
 
   _onDragEvent(event, explicitType) {
     // use offsetX|Y for relative position to the container, drop event if falsy
-    if (!event || !event.event || !Number.isFinite(event.event.offsetX)) {
+    if (!event || !event.srcEvent || !Number.isFinite(event.srcEvent.offsetX)) {
       return;
     }
-    const {event: {offsetX: x, offsetY: y}} = event;
-    const type = typeof explicitType === 'string' ? explicitType : event.event.type;
+    const {srcEvent: {offsetX: x, offsetY: y}} = event;
+    const type = typeof explicitType === 'string' ? explicitType : event.srcEvent.type;
     let mode;
     let layerEventHandler;
     switch (type) {
@@ -224,8 +224,8 @@ export default class DeckGL extends React.Component {
       const selectedInfos = this.layerManager.pickLayer({x, y, radius, mode});
       if (selectedInfos.length) {
         const firstInfo = selectedInfos.find(info => info.index >= 0);
-        // Event.event holds the original MouseEvent object
-        layerEventHandler(firstInfo, selectedInfos, event.event);
+        // srcEvent holds the original MouseEvent object
+        layerEventHandler(firstInfo, selectedInfos, event.srcEvent);
       }
     }
   }
