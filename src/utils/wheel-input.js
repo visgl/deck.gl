@@ -1,7 +1,4 @@
 /* global window:false */
-
-import PointerMoveEventInput from './pointer-move-event-input';
-
 const ua = typeof window.navigator !== 'undefined' ?
   window.navigator.userAgent.toLowerCase() : '';
 const firefox = ua.indexOf('firefox') !== -1;
@@ -12,27 +9,24 @@ const WHEEL_INPUT_MAP = {
   mousewheel: MOUSE_WHEEL
 };
 
-export default class WheelInput extends PointerMoveEventInput {
+export default class WheelInput {
 
-  constructor(...opts) {
-    super(...opts);
+  constructor(element, callback) {
+    this.element = element;
+    this.callback = callback;
+
+    this.handler = this.handler.bind(this);
+    element.addEventListener('wheel', this.handler);
+    element.addEventListener('mousewheel', this.handler);
 
     this._state = {
       mouseWheelPos: null
     };
-
-    // Due to hammer.js architecture, we must re-init
-    // with own events added on top of those of superclass
-    this.evEl = `${(this.evEl || '')} wheel mousewheel`;
-    this.destroy();
-    this.init();
   }
 
   /* eslint-disable complexity, max-statements */
   handler(event) {
     if (!WHEEL_INPUT_MAP[event.type]) {
-      // if not a wheel event, pass up to super.handler()
-      super.handler(event);
       return;
     }
 
@@ -73,7 +67,7 @@ export default class WheelInput extends PointerMoveEventInput {
       // to 40ms.
       timeout = window.setTimeout(function setTimeout() {
         const _type = 'wheel';
-        this._wheel(-this._state.mouseWheelLastValue, this._state.mouseWheelPos);
+        this._wheel(event, -this._state.mouseWheelLastValue, this._state.mouseWheelPos);
         this._setState({mouseWheelType: _type});
       }.bind(this), 40);
     } else if (!this._type) {
@@ -100,7 +94,7 @@ export default class WheelInput extends PointerMoveEventInput {
     // Only fire the callback if we actually know what type of scrolling device
     // the user uses.
     if (type) {
-      this._wheel(-value, pos);
+      this._wheel(event, -value, pos);
     }
 
     this._setState({
@@ -112,11 +106,12 @@ export default class WheelInput extends PointerMoveEventInput {
     });
   }
 
-  _wheel(delta, pos) {
-    this.callback(this.manager, 'wheel', {
+  _wheel(srcEvent, delta, pos) {
+    this.callback({
       center: pos,
-      target: this.element,
-      delta
+      delta,
+      srcEvent,
+      target: this.element
     });
   }
 

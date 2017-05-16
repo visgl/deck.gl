@@ -140,20 +140,6 @@ export default class DeckGL extends React.Component {
       dragend: this._onDragEvent,
       dragcancel: this._onDragCancel
     });
-
-    /*
-    this.events = addEvents(canvas, {
-      cacheSize: false,
-      cachePosition: false,
-      centerOrigin: false,
-      onClick: this._onClick,
-      onMouseMove: this._onMouseMove,
-      onDragStart: this._onDragEvent,
-      onDragMove: this._onDragEvent,
-      onDragEnd: this._onDragEvent,
-      onDragCancel: this._onDragCancel
-    });
-    */
   }
 
   // Route events to layers

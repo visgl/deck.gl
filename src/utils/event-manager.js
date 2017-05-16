@@ -7,6 +7,7 @@ import {
   Pan,
   Swipe
 } from 'hammerjs';
+import PointerMoveEventInput from './pointer-move-event-input';
 import WheelInput from './wheel-input';
 
 /**
@@ -101,7 +102,7 @@ const GESTURE_EVENT_ALIASES = {
 
 /**
  * Single API for subscribing to events about both
- * basic input events (e.g. 'mousemove', 'touchstart')
+ * basic input events (e.g. 'mousemove', 'touchstart', 'wheel')
  * and gestural input (e.g. 'click', 'tap', 'panstart').
  * Delegates event registration and handling to Hammer.js.
  */
@@ -113,7 +114,7 @@ class EventManager {
     // how to get inputClass from createInputInstance without a Manager instance?
     // mostly just need to run logic from createInputInstance...
     // Issue filed: https://github.com/hammerjs/hammer.js/issues/1106
-    const inputClass = WheelInput;
+    const inputClass = PointerMoveEventInput;
 
     this._onBasicInput = this._onBasicInput.bind(this);
     this.manager = new Manager(element, {
@@ -122,6 +123,10 @@ class EventManager {
     .on('hammer.input', this._onBasicInput);
 
     this.gestureAliases = {};
+
+    // Handle mouse wheel events as well
+    this._onWheelEvent = this._onWheelEvent.bind(this);
+    this.wheelInput = new WheelInput(element, this._onWheelEvent);
   }
 
   /**
@@ -201,6 +206,11 @@ class EventManager {
         this.manager.emit(alias, emitEvent);
       });
     }
+  }
+
+  _onWheelEvent(event) {
+    const {srcEvent: {type}} = event;
+    this.manager.emit(type, event);
   }
 
   _wrapAliasedGestureHandler(eventAlias) {
