@@ -42,7 +42,8 @@ class App extends PureComponent {
         // immutable: false,
         // Effects are experimental for now. Will be enabled in the future
         // effects: false,
-        separation: 0
+        separation: 0,
+        pickingRadius: 0
         // the rotation controls works only for layers in
         // meter offset projection mode. They are commented out
         // here since layer browser currently only have one layer
@@ -175,7 +176,7 @@ class App extends PureComponent {
   }
 
   _renderMap() {
-    const {width, height, mapViewState, settings: {effects}} = this.state;
+    const {width, height, mapViewState, settings: {effects, pickingRadius}} = this.state;
     return (
       <MapboxGLMap
         mapboxApiAccessToken={MAPBOX_ACCESS_TOKEN || 'no_token'}
@@ -189,6 +190,7 @@ class App extends PureComponent {
           id="default-deckgl-overlay"
           width={width} height={height}
           {...mapViewState}
+          pickingRadius={pickingRadius}
           onWebGLInitialized={ this._onWebGLInitialized }
           onLayerHover={ this._onHover }
           onLayerClick={ this._onClick }

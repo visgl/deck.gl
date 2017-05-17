@@ -146,7 +146,7 @@ export default class LayerManager {
     return this;
   }
 
-  pickLayer({x, y, mode}) {
+  pickLayer({x, y, mode, radius = 0}) {
     const {gl, uniforms} = this.context;
 
     // Set up a frame buffer if needed
@@ -161,10 +161,7 @@ export default class LayerManager {
     return pickLayers(gl, {
       x,
       y,
-      uniforms: {
-        renderPickingBuffer: true,
-        picking_uEnable: true
-      },
+      radius,
       layers: this.layers,
       mode,
       viewport: this.context.viewport,
