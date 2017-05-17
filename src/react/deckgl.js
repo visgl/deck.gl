@@ -38,6 +38,7 @@ const propTypes = {
   effects: PropTypes.arrayOf(PropTypes.instanceOf(Effect)),
   gl: PropTypes.object,
   debug: PropTypes.bool,
+  pickingRadius: PropTypes.number,
   viewport: PropTypes.instanceOf(Viewport),
   onWebGLInitialized: PropTypes.func,
   onAfterRender: PropTypes.func,
@@ -52,6 +53,7 @@ const propTypes = {
 const defaultProps = {
   id: 'deckgl-overlay',
   debug: false,
+  pickingRadius: 0,
   gl: null,
   effects: [],
   onWebGLInitialized: noop,
@@ -146,7 +148,8 @@ export default class DeckGL extends React.Component {
       return;
     }
     const {event: {offsetX: x, offsetY: y}} = event;
-    const selectedInfos = this.layerManager.pickLayer({x, y, mode: 'click'});
+    const radius = this.props.pickingRadius;
+    const selectedInfos = this.layerManager.pickLayer({x, y, radius, mode: 'click'});
     if (selectedInfos.length) {
       const firstInfo = selectedInfos.find(info => info.index >= 0);
       // Event.event holds the original MouseEvent object
@@ -161,7 +164,8 @@ export default class DeckGL extends React.Component {
       return;
     }
     const {event: {offsetX: x, offsetY: y}} = event;
-    const selectedInfos = this.layerManager.pickLayer({x, y, mode: 'hover'});
+    const radius = this.props.pickingRadius;
+    const selectedInfos = this.layerManager.pickLayer({x, y, radius, mode: 'hover'});
     if (selectedInfos.length) {
       const firstInfo = selectedInfos.find(info => info.index >= 0);
       // Event.event holds the original MouseEvent object
@@ -201,7 +205,8 @@ export default class DeckGL extends React.Component {
     }
 
     if (mode) {
-      const selectedInfos = this.layerManager.pickLayer({x, y, mode});
+      const radius = this.props.pickingRadius;
+      const selectedInfos = this.layerManager.pickLayer({x, y, radius, mode});
       if (selectedInfos.length) {
         const firstInfo = selectedInfos.find(info => info.index >= 0);
         // Event.event holds the original MouseEvent object
