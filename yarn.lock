@@ -3858,9 +3858,9 @@ sax@^1.2.1:
   version "1.2.2"
   resolved "https://registry.yarnpkg.com/sax/-/sax-1.2.2.tgz#fd8631a23bc7826bef5d871bdb87378c95647828"
 
-seer@^0.0.5:
-  version "0.0.5"
-  resolved "https://registry.yarnpkg.com/seer/-/seer-0.0.5.tgz#4f453b1a1443bddd88559df0618b6e90dec6905e"
+seer@^0.1.0:
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/seer/-/seer-0.1.0.tgz#e32e792577cb1ff9324b3a0a43ac0c4511f4e3fa"
 
 select-hose@^2.0.0:
   version "2.0.0"
