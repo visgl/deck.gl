@@ -2052,7 +2052,7 @@ glob-parent@^2.0.0:
     once "^1.3.0"
     path-is-absolute "^1.0.0"
 
-global@^4.3.1, global@~4.3.0:
+global@~4.3.0:
   version "4.3.1"
   resolved "https://registry.yarnpkg.com/global/-/global-4.3.1.tgz#5f757908c7cbabce54f386ae440e11e26b7916df"
   dependencies:
@@ -2244,13 +2244,9 @@ hyperquest@~1.2.0:
     duplexer2 "~0.0.2"
     through2 "~0.6.3"
 
-iconv-lite@0.4.13:
+iconv-lite@0.4.13, iconv-lite@~0.4.13:
   version "0.4.13"
   resolved "https://registry.yarnpkg.com/iconv-lite/-/iconv-lite-0.4.13.tgz#1f88aba4ab0b1508e8312acc39345f36e992e2f2"
-
-iconv-lite@~0.4.13:
-  version "0.4.15"
-  resolved "https://registry.yarnpkg.com/iconv-lite/-/iconv-lite-0.4.15.tgz#fe265a218ac6a57cfe854927e9d04c19825eddeb"
 
 ieee754@^1.1.4:
   version "1.1.8"
@@ -3862,9 +3858,9 @@ sax@^1.2.1:
   version "1.2.2"
   resolved "https://registry.yarnpkg.com/sax/-/sax-1.2.2.tgz#fd8631a23bc7826bef5d871bdb87378c95647828"
 
-seer@^0.0.4:
-  version "0.0.4"
-  resolved "https://registry.yarnpkg.com/seer/-/seer-0.0.4.tgz#d17b3db111f60171d0a85a7fb9bac183eb955b98"
+seer@^0.0.5:
+  version "0.0.5"
+  resolved "https://registry.yarnpkg.com/seer/-/seer-0.0.5.tgz#4f453b1a1443bddd88559df0618b6e90dec6905e"
 
 select-hose@^2.0.0:
   version "2.0.0"
