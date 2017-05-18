@@ -20,6 +20,12 @@ Ref: http://keepachangelog.com/en/0.3.0/
 [TBD]
 - NEW: `pickingRadius` prop on the `DeckGL` component, enables more tolerant click and hover interaction.
 
+### deck.gl v4.1.0-alpha.2
+
+- PERFORMANCE: Optimize encodePickingColor by replacing the naive math with bit-wise operations (#631)
+- FEAT: Add `pickingRadius` prop (#641)
+- FEAT: Seer integration and performace improvements
+
 ### deck.gl v4.1.0-alpha.1
 
 - PERFORMANCE: Compiled are now cached for reuse so that same shaders are not recompiled for the same type of layers (#613)
