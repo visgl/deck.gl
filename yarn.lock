@@ -3860,7 +3860,7 @@ sax@^1.2.1:
 
 seer@^0.1.0:
   version "0.1.0"
-  resolved "https://unpm.uberinternal.com/seer/-/seer-0.1.0.tgz#e32e792577cb1ff9324b3a0a43ac0c4511f4e3fa"
+  resolved "https://registry.yarnpkg.com/seer/-/seer-0.1.0.tgz#e32e792577cb1ff9324b3a0a43ac0c4511f4e3fa"
 
 select-hose@^2.0.0:
   version "2.0.0"
