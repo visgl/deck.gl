@@ -129,11 +129,7 @@ class Root extends Component {
               currentTime,
               getColor: x => x.value === 1 ? [0, 0, 255] : [255, 0, 0],
               getRadius: x => x.value === 1 ? 1 : 3,
-              updateTriggers: {
-                getPosition: {currentTime},
-                getRadius: {currentTime},
-                getColor: {currentTime}
-              }
+              getTime: x => x.time
             })
           ]} />
       </MapGL>

@@ -20,9 +20,36 @@
 
 import {ScatterplotLayer, experimental} from 'deck.gl';
 
+import vertex from './time-sliced-scatterplot-layer-vertex.glsl';
+import fragment from './time-sliced-scatterplot-layer-fragment.glsl';
+
 export default class TimeSlicedScatterplotLayer extends ScatterplotLayer {
-  isCurrentTime(time) {
-    return time === this.props.currentTime;
+  initializeState() {
+    super.initializeState();
+
+    this.state.attributeManager.addInstanced({
+      time: {size: 1, accessor: 'getTime', defaultValue: 0, update: this.calculateTime}
+    });
+    /* eslint-enable max-len */
+  }
+
+  getShaders() {
+    // use customized shaders
+    return {vs: vertex, fs: fragment, modules: []};
+  }
+
+  draw({uniforms}) {
+    const {radiusScale, radiusMinPixels, radiusMaxPixels, outline,
+      strokeWidth, currentTime} = this.props;
+    this.state.model.render(Object.assign({}, uniforms, {
+      outline: outline ? 1 : 0,
+      strokeWidth,
+      radiusScale,
+      radiusMinPixels,
+      radiusMaxPixels,
+      currentTime,
+      fadeFactor: 0.1
+    }));
   }
 
   calculateInstancePositions(attribute) {
@@ -30,35 +57,31 @@ export default class TimeSlicedScatterplotLayer extends ScatterplotLayer {
     const {value} = attribute;
     let i = 0;
     for (const point of data) {
-      if (this.isCurrentTime(point.time)) {
-        const position = getPosition(point);
-        value[i++] = experimental.get(position, 0);
-        value[i++] = experimental.get(position, 1);
-        value[i++] = experimental.get(position, 2) || 0;
-      }
+      const position = getPosition(point);
+      value[i++] = experimental.get(position, 0);
+      value[i++] = experimental.get(position, 1);
+      value[i++] = experimental.get(position, 2) || 0;
     }
   }
 
-  calculateInstancePositions64xyLow(attribute) {
-    // const {data, getPosition} = this.props;
-    // const {value} = attribute;
-    // let i = 0;
-    // for (const point of data) {
-    //   const position = getPosition(point);
-    //   value[i++] = fp64ify(experimental.get(position, 0))[1];
-    //   value[i++] = fp64ify(experimental.get(position, 1))[1];
-    // }
-  }
+  // calculateInstancePositions64xyLow(attribute) {
+  //   const {data, getPosition} = this.props;
+  //   const {value} = attribute;
+  //   let i = 0;
+  //   for (const point of data) {
+  //     const position = getPosition(point);
+  //     value[i++] = fp64ify(experimental.get(position, 0))[1];
+  //     value[i++] = fp64ify(experimental.get(position, 1))[1];
+  //   }
+  // }
 
   calculateInstanceRadius(attribute) {
     const {data, getRadius} = this.props;
     const {value} = attribute;
     let i = 0;
     for (const point of data) {
-      if (this.isCurrentTime(point.time)) {
-        const radius = getRadius(point);
-        value[i++] = isNaN(radius) ? 1 : radius;
-      }
+      const radius = getRadius(point);
+      value[i++] = isNaN(radius) ? 1 : radius;
     }
   }
 
@@ -67,13 +90,21 @@ export default class TimeSlicedScatterplotLayer extends ScatterplotLayer {
     const {value} = attribute;
     let i = 0;
     for (const point of data) {
-      if (this.isCurrentTime(point.time)) {
-        const color = getColor(point);
-        value[i++] = experimental.get(color, 0);
-        value[i++] = experimental.get(color, 1);
-        value[i++] = experimental.get(color, 2);
-        value[i++] = isNaN(experimental.get(color, 3)) ? 255 : experimental.get(color, 3);
-      }
+      const color = getColor(point);
+      value[i++] = experimental.get(color, 0);
+      value[i++] = experimental.get(color, 1);
+      value[i++] = experimental.get(color, 2);
+      value[i++] = isNaN(experimental.get(color, 3)) ? 255 : experimental.get(color, 3);
+    }
+  }
+
+  calculateInstanceTime(attribute) {
+    const {data, getTime} = this.props;
+    const {value} = attribute;
+    let i = 0;
+    for (const point of data) {
+      const time = getTime(point);
+      value[i++] = isNaN(time) ? 0 : time;
     }
   }
 }
