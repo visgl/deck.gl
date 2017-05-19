@@ -6,17 +6,19 @@ const {DeckGLJS, MapControllerJS} = experimental;
 // via geojson.xyz
 const GEOJSON = 'https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_110m_admin_1_states_provinces_shp.geojson'; //eslint-disable-line
 
+const INITIAL_VIEWPORT = {
+  latitude: 40,
+  longitude: -100,
+  zoom: 3,
+  bearing: 0,
+  pitch: 60
+};
+
 class App {
 
   constructor(props) {
     this.state = {
-      viewport: {
-        latitude: 40,
-        longitude: -100,
-        zoom: 3,
-        bearing: 0,
-        pitch: 60
-      },
+      viewport: INITIAL_VIEWPORT,
       width: 500,
       height: 500,
       data: null
