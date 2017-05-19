@@ -43,7 +43,7 @@ export const BASIC_EVENT_ALIASES = {
 export const EVENT_RECOGNIZER_MAP = {
   click: 'tap',
   tap: 'tap',
-  doubletap: 'tap',
+  doubletap: 'doubletap',
   press: 'press',
   pinch: 'pinch',
   pinchin: 'pinch',
@@ -80,7 +80,7 @@ export const RECOGNIZERS = [
   [Swipe, {enable: false}],
   [Press, {enable: false}],
   [Tap, {event: 'doubletap', taps: 2, enable: false}],
-  [Tap, {enable: false}, null, 'doubletap']
+  [Tap, {enable: false, interval: 0}]
 ];
 
 /**
