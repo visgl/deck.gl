@@ -27,7 +27,7 @@ import {EffectManager, Effect} from '../experimental';
 import {GL} from 'luma.gl';
 import {Viewport, WebMercatorViewport} from '../lib/viewports';
 import {log} from '../lib/utils';
-import {createEventManager} from '../utils/event-manager';
+import EventManager from '../utils/event-manager';
 
 function noop() {}
 
@@ -131,7 +131,7 @@ export default class DeckGL extends React.Component {
     }
 
     // TODO: add handlers on demand at runtime, not all at once on init
-    this.eventManager = createEventManager(canvas, {})
+    this.eventManager = new EventManager(canvas, {})
     .on({
       click: this._onClick,
       mousemove: this._onMouseMove,

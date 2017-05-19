@@ -13,9 +13,14 @@ export default class MoveInput {
   constructor(element, callback, events = MOVE_EVENTS) {
     this.element = element;
     this.callback = callback;
+    this.events = events;
 
     this.handler = this.handler.bind(this);
-    events.forEach(event => element.addEventListener(event, this.handler));
+    this.events.forEach(event => element.addEventListener(event, this.handler));
+  }
+
+  destroy() {
+    this.events.forEach(event => this.element.removeEventListener(event, this.handler));
   }
 
   handler(event) {
