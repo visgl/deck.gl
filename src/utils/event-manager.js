@@ -7,8 +7,8 @@ import {
   Pan,
   Swipe
 } from 'hammerjs';
-import PointerMoveEventInput from './pointer-move-event-input';
 import WheelInput from './wheel-input';
+import MoveInput from './move-input';
 
 /**
  * Only one set of basic input events will be fired by Hammer.js:
@@ -111,22 +111,16 @@ class EventManager {
     // TODO: support overriding default RECOGNIZERS by passing
     // recognizers / configs, keyed to event name.
 
-    // how to get inputClass from createInputInstance without a Manager instance?
-    // mostly just need to run logic from createInputInstance...
-    // Issue filed: https://github.com/hammerjs/hammer.js/issues/1106
-    const inputClass = PointerMoveEventInput;
-
     this._onBasicInput = this._onBasicInput.bind(this);
-    this.manager = new Manager(element, {
-      inputClass
-    })
-    .on('hammer.input', this._onBasicInput);
+    this.manager = new Manager(element)
+      .on('hammer.input', this._onBasicInput);
 
     this.gestureAliases = {};
 
-    // Handle mouse wheel events as well
-    this._onWheelEvent = this._onWheelEvent.bind(this);
-    this.wheelInput = new WheelInput(element, this._onWheelEvent);
+    // Handle mouse wheel and pointer/touch/mouse move events as well
+    this._onOtherEvent = this._onOtherEvent.bind(this);
+    this.wheelInput = new WheelInput(element, this._onOtherEvent);
+    this.moveInput = new MoveInput(element, this._onOtherEvent);
   }
 
   /**
@@ -208,7 +202,11 @@ class EventManager {
     }
   }
 
-  _onWheelEvent(event) {
+  /**
+   * Handle events not supported by Hammer.js,
+   * and pipe back out through same (Hammer) channel used by other events.
+   */
+  _onOtherEvent(event) {
     const {srcEvent: {type}} = event;
     this.manager.emit(type, event);
   }
