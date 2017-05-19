@@ -2,8 +2,9 @@
 import React, {Component} from 'react';
 import {render} from 'react-dom';
 import MapGL from 'react-map-gl';
-import DeckGL, {COORDINATE_SYSTEM, ScatterplotLayer} from 'deck.gl';
-
+import DeckGL, {COORDINATE_SYSTEM} from 'deck.gl';
+import TimeSlicedScatterplotLayer from
+ './time-sliced-scatterplot-layer/time-sliced-scatterplot-layer.js';
 import {json as requestJson} from 'd3-request';
 import assert from 'assert';
 
@@ -28,7 +29,8 @@ class Root extends Component {
     this.state = {
       viewport: INITIAL_VIEWPORT,
       width: 0,
-      height: 0
+      height: 0,
+      currentTime: 0
     };
 
     this.loadTorqueTile(TORQUE_TILE_SOURCE);
@@ -37,6 +39,7 @@ class Root extends Component {
   componentDidMount() {
     window.addEventListener('resize', this._resize.bind(this));
     this._resize();
+    this._animate();
   }
 
   _resize() {
@@ -50,6 +53,18 @@ class Root extends Component {
     this.setState({
       viewport: {...this.state.viewport, ...viewport}
     });
+  }
+
+  _animate() {
+    const {currentTime} = this.state;
+
+    this.setState({
+      currentTime: (currentTime + 1) & 255
+    });
+
+    if (typeof window !== 'undefined') {
+      this._animationFrame = window.setTimeout(this._animate.bind(this), 100);
+    }
   }
 
   loadTorqueTile(url) {
@@ -86,11 +101,12 @@ class Root extends Component {
         });
       }
     }
+
     return points;
   }
 
   render() {
-    const {viewport, width, height} = this.state;
+    const {viewport, width, height, currentTime} = this.state;
 
     return (
       <MapGL
@@ -106,12 +122,18 @@ class Root extends Component {
           height={height}
           debug
           layers={[
-            new ScatterplotLayer({
+            new TimeSlicedScatterplotLayer({
               projectionMode: COORDINATE_SYSTEM.METERS,
               positionOrigin: [INITIAL_VIEWPORT.longitude, INITIAL_VIEWPORT.latitude],
               data: this.state.points,
+              currentTime,
               getColor: x => x.value === 1 ? [0, 0, 255] : [255, 0, 0],
-              getRadius: x => x.value === 1 ? 1 : 3
+              getRadius: x => x.value === 1 ? 1 : 3,
+              updateTriggers: {
+                getPosition: {currentTime},
+                getRadius: {currentTime},
+                getColor: {currentTime}
+              }
             })
           ]} />
       </MapGL>
