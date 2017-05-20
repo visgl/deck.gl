@@ -216,6 +216,25 @@ if the app to mint a new object on every render, all attributes will be automati
 updateTriggers cannot block attribute updates, just trigger them. To block the attribute updates,
 developers need to override the updateState.
 
+---
+
+### Render Properties
+
+##### `getPolygonOffset` (Function, optional)
+
+- Default: `({layerIndex}) => [-layerIndex, -1]`
+
+When multiple layers are rendered on the same plane, [z-fighting](https://en.wikipedia.org/wiki/Z-fighting)
+may create undesirable artifects. By default, deck.gl uses `gl.polygonOffset` to offset each layer by
+a small amount to improve the visual quality of composition.
+
+This accessor takes a single parameter `uniform` - an object that contains the current render uniforms,
+and returns an array of two numbers `factor` and `units`. For more information, refer to the
+[documentation](https://www.opengl.org/archives/resources/faq/technical/polygonoffset.htm).
+
+If the accessor is assigned a falsy value, `GL.POLYGON_OFFSET_FILL` will be disabled.
+
+
 ## Members
 
 *Remarks: Layer members are designed to support the creation of new layers or
