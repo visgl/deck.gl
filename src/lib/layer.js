@@ -414,12 +414,11 @@ export default class Layer {
   // Calculates uniforms
   drawLayer({uniforms = {}}) {
     const {gl} = this.context;
-    const {getPolygonOffset} = this.props;
 
     // Apply polygon offset to avoid z-fighting
     if (this.props.getPolygonOffset) {
       gl.enable(GL.POLYGON_OFFSET_FILL);
-      const offset = getPolygonOffset(uniforms);
+      const offset = this.props.getPolygonOffset(uniforms);
       gl.polygonOffset(offset[0], offset[1]);
     } else {
       gl.disable(GL.POLYGON_OFFSET_FILL);
