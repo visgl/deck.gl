@@ -17,13 +17,13 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## Beta Releases
 
-[TBD]
-- NEW: `pickingRadius` prop on the `DeckGL` component, enables more tolerant click and hover interaction.
-- NEW: `getPolygonOffset` prop of the base Layer class
+### deck.gl v4.1.0-alpha.5
 
-Versions 4.1.0 alpha 1, 2 and 3 have been unpublished due to a wrong tagging.
+- NEW: `getPolygonOffset` prop of the base Layer class (#649)
+- NEW: Modularize support for raw and gestural input events (#636)
 
 ### deck.gl v4.1.0-alpha.4
+Versions 4.1.0 alpha 1, 2 and 3 have been unpublished due to a wrong tagging.
 
 - PERFORMANCE: Optimize encodePickingColor by replacing the naive math with bit-wise operations (#631)
 - FEAT: Add `pickingRadius` prop (#641)
