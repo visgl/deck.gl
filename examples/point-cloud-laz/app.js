@@ -9,6 +9,8 @@ import {
   loadLazFile, parseLazData
 } from './utils';
 
+const FILE_PATH = 'https://gnavvy.github.io/point-cloud-example/data/indoor.laz';
+
 function normalize(points) {
   let xMin = Infinity;
   let yMin = Infinity;
@@ -77,7 +79,7 @@ class Example extends PureComponent {
     const {points} = this.state;
 
     const skip = 10;
-    loadLazFile('data/indoor.laz').then(rawData => {
+    loadLazFile(FILE_PATH).then(rawData => {
       parseLazData(rawData, skip, (decoder, progress) => {
         for (let i = 0; i < decoder.pointsCount; i++) {
           const {color, position} = decoder.getPoint(i);

@@ -6,6 +6,8 @@ import DeckGL, {PointCloudLayer, COORDINATE_SYSTEM} from 'deck.gl';
 
 import {loadBinary, parsePLY, OrbitController} from './utils';
 
+const FILE_PATH = 'https://gnavvy.github.io/point-cloud-example/data/lucy100k.ply';
+
 class Example extends PureComponent {
   constructor(props) {
     super(props);
@@ -39,7 +41,7 @@ class Example extends PureComponent {
   componentDidMount() {
     this._canvas.fitBounds([-0.5, -0.5, -0.5], [0.5, 0.5, 0.5]);
 
-    loadBinary('data/lucy100k.ply').then(rawData => {
+    loadBinary(FILE_PATH).then(rawData => {
       const {vertex} = parsePLY(rawData);
 
       const points = [];
