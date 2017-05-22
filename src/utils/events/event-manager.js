@@ -64,9 +64,6 @@ export default class EventManager {
         // Enable recognizer for this event.
         this.manager.get(recognizerEvent).set({enable: true});
 
-        // Handle concurrent single and double tap registration as necessary.
-        this._reconcileSingleAndDoubleTap(recognizerEvent);
-
         // Alias to a recognized gesture as necessary.
         const eventAlias = GESTURE_EVENT_ALIASES[event];
         if (eventAlias && !this.aliasedEventHandlers[event]) {
@@ -150,21 +147,5 @@ export default class EventManager {
    */
   _aliasEventHandler(eventAlias) {
     return event => this.manager.emit(eventAlias, event);
-  }
-
-  /**
-   * If single and double tap are both enabled,
-   * The single tap recognizer must wait for the double tap recognizer
-   * to fail before resolving. Note that enabling both incurs a slight delay
-   * on tap/click handler resolution.
-   */
-  _reconcileSingleAndDoubleTap(event) {
-    if (event === 'tap' || event === 'doubletap') {
-      const singletapRecognizer = this.manager.get('tap');
-      const doubletapRecognizer = this.manager.get('doubletap');
-      if (singletapRecognizer.options.enable && doubletapRecognizer.options.enable) {
-        singletapRecognizer.requireFailure('doubletap');
-      }
-    }
   }
 }
