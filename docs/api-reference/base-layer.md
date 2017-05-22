@@ -222,18 +222,26 @@ developers need to override the updateState.
 
 ##### `getPolygonOffset` (Function, optional)
 
-- Default: `({layerIndex}) => [-layerIndex, -1]`
+- Default: `({layerIndex}) => [0, -layerIndex * 100]`
 
 When multiple layers are rendered on the same plane, [z-fighting](https://en.wikipedia.org/wiki/Z-fighting)
-may create undesirable artifects. By default, deck.gl uses `gl.polygonOffset` to offset each layer by
-a small amount to improve the visual quality of composition.
+may create undesirable artifacts. To improve the visual quality of composition,
+deck.gl allows layers to use `gl.polygonOffset` to apply an offset to its depth.
+By default, each layer is offset a small amount by its index so that layers are cleanly stacked
+from bottom to top.
 
 This accessor takes a single parameter `uniform` - an object that contains the current render uniforms,
-and returns an array of two numbers `factor` and `units`. For more information, refer to the
-[documentation](https://www.opengl.org/archives/resources/faq/technical/polygonoffset.htm).
+and returns an array of two numbers `factor` and `units`.
+Negative values pull layer towards the camera, and positive values push layer away from the camera.
+For more information, refer to the 
+[documentation](https://www.khronos.org/registry/OpenGL-Refpages/es2.0/xhtml/glPolygonOffset.xml) 
+and [FAQ](https://www.opengl.org/archives/resources/faq/technical/polygonoffset.htm).
 
-If the accessor is assigned a falsy value, `GL.POLYGON_OFFSET_FILL` will be disabled.
+If the accessor is assigned a falsy value, polygon offset will be set to `[0, 0]`.
 
+*Remarks: While this feature helps mitigate z-fighting, at close up zoom levels the issue
+might return because of the precision error of 32-bit projection matrices. Try set the
+`fp64` prop to `true` in this case.*
 
 ## Members
 

@@ -100,6 +100,9 @@ export default class DeckGL extends React.Component {
     gl.enable(GL.BLEND);
     gl.blendFunc(GL.SRC_ALPHA, GL.ONE_MINUS_SRC_ALPHA);
 
+    // Enable polygon offset
+    gl.enable(GL.POLYGON_OFFSET_FILL);
+
     this.props.onWebGLInitialized(gl);
 
     // Note: avoid React setState due GL animation loop / setState timing issue
