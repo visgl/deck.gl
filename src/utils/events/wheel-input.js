@@ -30,9 +30,11 @@ export default class WheelInput {
 
     WHEEL_EVENTS.forEach(eventName => element.addEventListener(eventName, this.handler));
 
-    this._state = {
-      mouseWheelPos: null
-    };
+    this.time = 0;
+    this.wheelPosition = null;
+    this.type = null;
+    this.timeout = null;
+    this.lastValue = 0;
   }
 
   destroy() {
@@ -53,15 +55,20 @@ export default class WheelInput {
       value *= WHEEL_DELTA_PER_LINE;
     }
 
-    let type = this._state.mouseWheelType;
-    let timeout = this._state.mouseWheelTimeout;
-    let lastValue = this._state.mouseWheelLastValue;
-    let time = this._state.mouseWheelTime;
+    let {
+      type,
+      timeout,
+      lastValue,
+      time
+    } = this;
 
     const now = (window.performance || Date).now();
     const timeDelta = now - (time || 0);
 
-    const pos = {x: event.clientX, y: event.clientY};
+    this.wheelPosition = {
+      x: event.clientX,
+      y: event.clientY
+    };
     time = now;
 
     if (value !== 0 && value % WHEEL_DELTA_MAGIC_SCALER === 0) {
@@ -76,16 +83,14 @@ export default class WheelInput {
       // This is likely a new scroll action.
       type = null;
       lastValue = value;
-      // Start a timeout in case this was a singular event, and delay it by up
-      // to 40ms.
+      // Start a timeout in case this was a singular event,
+      // and delay it by up to 40ms.
       timeout = window.setTimeout(function setTimeout() {
-        const _type = 'wheel';
-        this._wheel(event, -this._state.mouseWheelLastValue, this._state.mouseWheelPos);
-        this._setState({mouseWheelType: _type});
+        this._onWheel(event, -lastValue, this.wheelPosition);
+        type = 'wheel';
       }.bind(this), 40);
-    } else if (!this._type) {
-      // This is a repeating event, but we don't know the type of event just
-      // yet.
+    } else if (!type) {
+      // This is a repeating event, but we don't know the type of event just yet.
       // If the delta per time is small, we assume it's a fast trackpad;
       // otherwise we switch into wheel mode.
       type = Math.abs(timeDelta * value) < TRACKPAD_MAX_DELTA_PER_TIME ? 'trackpad' : 'wheel';
@@ -103,31 +108,19 @@ export default class WheelInput {
       value = value * SHIFT_MULTIPLIER;
     }
 
-    // Only fire the callback if we actually know what type of scrolling device
-    // the user uses.
+    // Only fire the callback if we actually know
+    // what type of scrolling device the user uses.
     if (type) {
-      this._wheel(event, -value, pos);
+      this._onWheel(event, -value, this.wheelPosition);
     }
-
-    this._setState({
-      mouseWheelTime: time,
-      mouseWheelPos: pos,
-      mouseWheelType: type,
-      mouseWheelTimeout: timeout,
-      mouseWheelLastValue: lastValue
-    });
   }
 
-  _wheel(srcEvent, delta, pos) {
+  _onWheel(srcEvent, delta, position) {
     this.callback({
-      center: pos,
+      center: position,
       delta,
       srcEvent,
       target: this.element
     });
-  }
-
-  _setState(settings) {
-    Object.assign(this._state, settings);
   }
 }
