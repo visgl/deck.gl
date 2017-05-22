@@ -19,6 +19,7 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 [TBD]
 - NEW: `pickingRadius` prop on the `DeckGL` component, enables more tolerant click and hover interaction.
+- NEW: `getPolygonOffset` prop of the base Layer class
 
 Versions 4.1.0 alpha 1, 2 and 3 have been unpublished due to a wrong tagging.
 
