@@ -131,14 +131,15 @@ export default class DeckGL extends React.Component {
     }
 
     // TODO: add handlers on demand at runtime, not all at once on init
-    this.eventManager = new EventManager(canvas, {})
-    .on({
-      click: this._onClick,
-      mousemove: this._onMouseMove,
-      dragstart: this._onDragEvent,
-      dragmove: this._onDragEvent,
-      dragend: this._onDragEvent,
-      dragcancel: this._onDragCancel
+    this.eventManager = new EventManager(canvas, {
+      events: {
+        click: this._onClick,
+        mousemove: this._onMouseMove,
+        dragstart: this._onDragEvent,
+        dragmove: this._onDragEvent,
+        dragend: this._onDragEvent,
+        dragcancel: this._onDragCancel
+      }
     });
   }
 
