@@ -254,7 +254,7 @@ function test_float_add(gl, testName) {
       }));
   program.use();
   program.setBuffers({
-    positions: new Buffer(gl, {target: GL.ARRAY_BUFFER, data: BUFFER_DATA, size: 2})
+    positions: new Buffer(gl, {target: gl.ARRAY_BUFFER, data: BUFFER_DATA, size: 2})
   }).setUniforms({
     a: float0_vec2,
     b: float1_vec2,
@@ -289,7 +289,7 @@ function test_float_sub(gl, testName) {
 
   program.use();
   program.setBuffers({
-    positions: new Buffer(gl, {target: GL.ARRAY_BUFFER, data: BUFFER_DATA, size: 2})
+    positions: new Buffer(gl, {target: gl.ARRAY_BUFFER, data: BUFFER_DATA, size: 2})
   }).setUniforms({
     a: float0_vec2,
     b: float1_vec2,
@@ -325,7 +325,7 @@ function test_float_mul(gl, testName) {
 
   program.use();
   program.setBuffers({
-    positions: new Buffer(gl, {target: GL.ARRAY_BUFFER, data: BUFFER_DATA, size: 2})
+    positions: new Buffer(gl, {target: gl.ARRAY_BUFFER, data: BUFFER_DATA, size: 2})
   }).setUniforms({
     a: float0_vec2,
     b: float1_vec2,
@@ -360,7 +360,7 @@ function test_float_div(gl, testName) {
 
   program.use();
   program.setBuffers({
-    positions: new Buffer(gl, {target: GL.ARRAY_BUFFER, data: BUFFER_DATA, size: 2})
+    positions: new Buffer(gl, {target: gl.ARRAY_BUFFER, data: BUFFER_DATA, size: 2})
   }).setUniforms({
     a: float0_vec2,
     b: float1_vec2,
@@ -393,7 +393,7 @@ function test_float_sqrt(gl, testName) {
 
   program.use();
   program.setBuffers({
-    positions: new Buffer(gl, {target: GL.ARRAY_BUFFER, data: BUFFER_DATA, size: 2})
+    positions: new Buffer(gl, {target: gl.ARRAY_BUFFER, data: BUFFER_DATA, size: 2})
   }).setUniforms({
     a: float0_vec2,
     ONE: 1.0
@@ -425,7 +425,7 @@ function test_float_exp(gl, testName) {
 
   program.use();
   program.setBuffers({
-    positions: new Buffer(gl, {target: GL.ARRAY_BUFFER, data: BUFFER_DATA, size: 2})
+    positions: new Buffer(gl, {target: gl.ARRAY_BUFFER, data: BUFFER_DATA, size: 2})
   }).setUniforms({
     a: float0_vec2,
     ONE: 1.0
@@ -457,7 +457,7 @@ function test_float_log(gl, testName) {
 
   program.use();
   program.setBuffers({
-    positions: new Buffer(gl, {target: GL.ARRAY_BUFFER, data: BUFFER_DATA, size: 2})
+    positions: new Buffer(gl, {target: gl.ARRAY_BUFFER, data: BUFFER_DATA, size: 2})
   }).setUniforms({
     a: float0_vec2,
     ONE: 1.0
@@ -490,7 +490,7 @@ function test_float_sin(gl, testName) {
 
   program.use();
   program.setBuffers({
-    positions: new Buffer(gl, {target: GL.ARRAY_BUFFER, data: BUFFER_DATA, size: 2})
+    positions: new Buffer(gl, {target: gl.ARRAY_BUFFER, data: BUFFER_DATA, size: 2})
   }).setUniforms({
     a: float0_vec2,
     ONE: 1.0
@@ -522,7 +522,7 @@ function test_float_cos(gl, testName) {
 
   program.use();
   program.setBuffers({
-    positions: new Buffer(gl, {target: GL.ARRAY_BUFFER, data: BUFFER_DATA, size: 2})
+    positions: new Buffer(gl, {target: gl.ARRAY_BUFFER, data: BUFFER_DATA, size: 2})
   }).setUniforms({
     a: float0_vec2,
     ONE: 1.0
@@ -554,7 +554,7 @@ function test_float_tan(gl, testName) {
 
   program.use();
   program.setBuffers({
-    positions: new Buffer(gl, {target: GL.ARRAY_BUFFER, data: BUFFER_DATA, size: 2})
+    positions: new Buffer(gl, {target: gl.ARRAY_BUFFER, data: BUFFER_DATA, size: 2})
   }).setUniforms({
     a: float0_vec2,
     ONE: 1.0
@@ -586,7 +586,7 @@ function test_float_radians(gl, testName) {
 
   program.use();
   program.setBuffers({
-    positions: new Buffer(gl, {target: GL.ARRAY_BUFFER, data: BUFFER_DATA, size: 2})
+    positions: new Buffer(gl, {target: gl.ARRAY_BUFFER, data: BUFFER_DATA, size: 2})
   }).setUniforms({
     a: float0_vec2,
     ONE: 1.0
