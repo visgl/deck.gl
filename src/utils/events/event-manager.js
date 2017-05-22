@@ -153,17 +153,18 @@ export default class EventManager {
   }
 
   /**
-   * If single and double tap are both enabled,
-   * The single tap recognizer must wait for the double tap recognizer
-   * to fail before resolving. Note that enabling both incurs a slight delay
-   * on tap/click handler resolution.
+   * For speedy single tap/click recognition,
+   * the single tap recognizer is set to an interval of 0.
+   * If doubletap is also enabled, the singletap interval
+   * must be bumped up to match doubletap;
+   * this allows doubletap to resolve as expected.
    */
   _reconcileSingleAndDoubleTap(event) {
     if (event === 'tap' || event === 'doubletap') {
       const singletapRecognizer = this.manager.get('tap');
       const doubletapRecognizer = this.manager.get('doubletap');
       if (singletapRecognizer.options.enable && doubletapRecognizer.options.enable) {
-        singletapRecognizer.requireFailure('doubletap');
+        singletapRecognizer.options.interval = doubletapRecognizer.options.interval;
       }
     }
   }

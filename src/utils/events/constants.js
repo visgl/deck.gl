@@ -80,7 +80,7 @@ export const RECOGNIZERS = [
   [Swipe, {enable: false}],
   [Press, {enable: false}],
   [Tap, {event: 'doubletap', taps: 2, enable: false}],
-  [Tap, {enable: false, interval: 0}]
+  [Tap, {enable: false, interval: 0}, null, 'doubletap']
 ];
 
 /**
