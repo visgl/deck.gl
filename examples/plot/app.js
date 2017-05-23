@@ -46,17 +46,31 @@ class Root extends Component {
     this.setState({viewport: this.state.viewport});
   }
 
+  _onHover(info) {
+    const hoverInfo = info.sample ? info : null;
+    if (hoverInfo !== this.state.hoverInfo) {
+      this.setState({hoverInfo});
+    }
+  }
+
   render() {
-    const {viewport} = this.state;
+    const {viewport, hoverInfo} = this.state;
 
     return (
       <OrbitController
         {...viewport}
         onChangeViewport={this._onChangeViewport.bind(this)} >
-        <DeckGLOverlay viewport={viewport}
+        <DeckGLOverlay
+          viewport={viewport}
           equation={equation}
           resolution={200}
-          showAxis={true} />
+          showAxis={true}
+          onHover={this._onHover.bind(this)} />
+
+        {hoverInfo && <div className="tooltip" style={{left: hoverInfo.x, top: hoverInfo.y}} >
+          { hoverInfo.sample.map(x => x.toFixed(3)).join(', ') }
+        </div>}
+
       </OrbitController>
     );
   }
