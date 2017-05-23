@@ -1,10 +1,11 @@
 {
   "scripts": {
-    "start-local": "webpack-dev-server --env.local --progress --hot --port 3030 --open",
+    "start-local": "webpack-dev-server --env.local --progress --hot --port 3030 --open  --no-inline",
     "start": "webpack-dev-server --progress --hot --port 3030 --open",
     "build": "NODE_ENV=production webpack --env.prod=true"
   },
   "dependencies": {
+    "d3-scale": "^1.0.6",
     "deck.gl": "^4.0.0",
     "immutable": "^3.8.1",
     "luma.gl": "^3.0.0",
