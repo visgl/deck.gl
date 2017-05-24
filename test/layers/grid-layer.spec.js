@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 import test from 'tape-catch';
-import sinon from 'sinon';
+import spy from 'spy';
 
 import * as FIXTURES from '../data';
 
@@ -113,9 +113,9 @@ const SUBLAYER_TEST_CASES = {
       opacity: 0.1
     },
     assert: (subLayer, spies, t) => {
-      t.ok(spies._onGetSublayerColor.notCalled,
+      t.ok(!spies._onGetSublayerColor.called,
         'update opacity should not call _onGetSublayerColor');
-      t.ok(spies._onGetSublayerElevation.notCalled,
+      t.ok(!spies._onGetSublayerElevation.called,
         'update opacity  should not call _onGetSublayerElevation');
     }
   }, {
@@ -125,7 +125,7 @@ const SUBLAYER_TEST_CASES = {
     assert: (subLayer, spies, t) => {
       t.ok(spies._onGetSublayerColor.called,
         'update getColorValue should call _onGetSublayerColor');
-      t.ok(spies._onGetSublayerElevation.notCalled,
+      t.ok(!spies._onGetSublayerElevation.called,
         'update getColorValue  should not call _onGetSublayerElevation');
     }
   }, {
@@ -135,7 +135,7 @@ const SUBLAYER_TEST_CASES = {
     assert: (subLayer, spies, t) => {
       t.ok(spies._onGetSublayerColor.called,
         'update upperPercentile should call _onGetSublayerColor');
-      t.ok(spies._onGetSublayerElevation.notCalled,
+      t.ok(!spies._onGetSublayerElevation.called,
         'update upperPercentile should not call _onGetSublayerElevation');
     }
   }, {
@@ -143,7 +143,7 @@ const SUBLAYER_TEST_CASES = {
       elevationRange: [0, 100]
     },
     assert: (subLayer, spies, t) => {
-      t.ok(spies._onGetSublayerColor.notCalled,
+      t.ok(!spies._onGetSublayerColor.called,
         'update elevationRange should not call _onGetSublayerColor');
       t.ok(spies._onGetSublayerElevation.called,
         'update elevationRange should call _onGetSublayerElevation');
@@ -183,8 +183,8 @@ test('GridLayer#constructor', t => {
 });
 
 test('GridLayer#renderSubLayer', t => {
-  sinon.spy(GridLayer.prototype, '_onGetSublayerColor');
-  sinon.spy(GridLayer.prototype, '_onGetSublayerElevation');
+  spy(GridLayer.prototype, '_onGetSublayerColor');
+  spy(GridLayer.prototype, '_onGetSublayerElevation');
 
   const layer = new GridLayer({
     data: FIXTURES.points,
