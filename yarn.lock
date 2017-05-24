@@ -2774,9 +2774,9 @@ lru-cache@^4.0.1:
     pseudomap "^1.0.1"
     yallist "^2.0.0"
 
-luma.gl@^4.0.0-alpha.4:
-  version "4.0.0-alpha.4"
-  resolved "https://registry.yarnpkg.com/luma.gl/-/luma.gl-4.0.0-alpha.4.tgz#a9b7f96d85daad4fae75a0c7fc63a8d8849b492d"
+luma.gl@4.0.0-alpha.5:
+  version "4.0.0-alpha.5"
+  resolved "https://registry.yarnpkg.com/luma.gl/-/luma.gl-4.0.0-alpha.5.tgz#7bbc81b6e1d89256622d0316bef7d2fcc77cdac7"
   dependencies:
     gl-constants "^1.0.0"
     gl-matrix "^2.3.2"
