@@ -208,7 +208,7 @@ export default class HexagonLayer extends CompositeLayer {
     const {id, radius, elevationScale, extruded, coverage, lightSettings, fp64} = this.props;
 
     // base layer props
-    const {opacity, pickable, visible} = this.props;
+    const {opacity, pickable, visible, getPolygonOffset} = this.props;
 
     // viewport props
     const {positionOrigin, projectionMode, modelMatrix} = this.props;
@@ -227,6 +227,7 @@ export default class HexagonLayer extends CompositeLayer {
       opacity,
       pickable,
       visible,
+      getPolygonOffset,
       projectionMode,
       positionOrigin,
       modelMatrix,

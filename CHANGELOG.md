@@ -17,6 +17,10 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## Beta Releases
 
+[TBD]
+- FIX: Composite layers now pass `getPolygonOffset` prop to children
+- FIX: `PolygonLayer` and `GeoJsonLayer` orders sublayers dynamicly for better blending behavior
+
 ### deck.gl v4.1.0-alpha.5
 
 - NEW: `getPolygonOffset` prop of the base Layer class (#649)
