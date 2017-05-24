@@ -21,12 +21,6 @@
 // Enables ES2015 import/export in Node.js
 require('reify');
 
-// setup for jsDom
-require('./setup-jsdom-env');
-// Mock addEventListener on window, required for seer
-const {window} = require('../src/lib/utils/globals');
-window.addEventListener = () => {};
-
 // Enables import of glsl
 const fs = require('fs');
 require.extensions['.glsl'] = function readShader(module, filename) {
