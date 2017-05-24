@@ -24,7 +24,7 @@ import sinon from 'sinon';
 import global from 'global';
 
 const {mergeDefaultProps} = LAYER_TEST_EXPORTS;
-import {experimental, createGLContext} from 'luma.gl';
+import {experimental} from 'luma.gl';
 
 /**
  * Covert all numbers in a deep structure to a given precision, allowing
@@ -59,7 +59,7 @@ function getViewport() {
 }
 
 export function testInitializeLayer({gl, layer, viewport}) {
-  gl = gl || createGLContext({width: 512, height: 512});
+  gl = gl || getGLContext();
   viewport = viewport || getViewport();
 
   const oldContext = {gl, viewport};
