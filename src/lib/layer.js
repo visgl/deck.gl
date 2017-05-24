@@ -47,6 +47,10 @@ const defaultProps = {
   onDragMove: noop,
   onDragEnd: noop,
   onDragCancel: noop,
+  // Offset depth based on layer index to avoid z-fighting.
+  // Negative values pull layer towards the camera
+  // https://www.opengl.org/archives/resources/faq/technical/polygonoffset.htm
+  getPolygonOffset: ({layerIndex}) => [0, -layerIndex * 100],
   // Update triggers: a key change detection mechanism in deck.gl
   // See layer documentation
   updateTriggers: {},
@@ -409,6 +413,13 @@ export default class Layer {
 
   // Calculates uniforms
   drawLayer({uniforms = {}}) {
+    const {gl} = this.context;
+    const {getPolygonOffset} = this.props;
+
+    // Apply polygon offset to avoid z-fighting
+    const offset = getPolygonOffset && getPolygonOffset(uniforms) || [0, 0];
+    gl.polygonOffset(offset[0], offset[1]);
+
     // Call subclass lifecycle method
     this.draw({uniforms});
     // End lifecycle method
