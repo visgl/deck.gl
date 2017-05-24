@@ -1,4 +1,5 @@
-/* global window:false */
+import window from '../../lib/utils/globals';
+
 const ua = typeof window.navigator !== 'undefined' ?
   window.navigator.userAgent.toLowerCase() : '';
 const firefox = ua.indexOf('firefox') !== -1;

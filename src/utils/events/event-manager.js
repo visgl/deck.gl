@@ -1,13 +1,15 @@
-import {Manager} from 'hammerjs';
+import WheelInput from './wheel-input';
+import MoveInput from './move-input';
 
-import {
+const Manager = (typeof window === 'undefined' || typeof document === 'undefined') ?
+  ManagerMock : require('hammerjs').Manager;
+const {
   BASIC_EVENT_ALIASES,
   EVENT_RECOGNIZER_MAP,
   RECOGNIZERS,
   GESTURE_EVENT_ALIASES
-} from './constants';
-import WheelInput from './wheel-input';
-import MoveInput from './move-input';
+} = (typeof window === 'undefined' || typeof document === 'undefined') ?
+  {} : require('./constants');
 
 /**
  * Single API for subscribing to events about both
@@ -148,4 +150,14 @@ export default class EventManager {
   _aliasEventHandler(eventAlias) {
     return event => this.manager.emit(eventAlias, event);
   }
+}
+
+function ManagerMock(m) {
+  const noop = () => {};
+  return {
+    on: noop,
+    off: noop,
+    destroy: noop,
+    emit: noop
+  };
 }
