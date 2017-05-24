@@ -1,13 +1,30 @@
-import {Manager} from 'hammerjs';
+import WheelInput from './wheel-input';
+import MoveInput from './move-input';
+import {isBrowser} from '../../controllers/globals';
 
-import {
+// Hammer.js directly references `document` and `window`,
+// which means that importing it in environments without
+// those objects throws errors. Therefore, instead of
+// directly `import`ing 'hammerjs' and './constants'
+// (which imports Hammer.js) we conditionally require it
+// depending on support for those globals.
+function ManagerMock(m) {
+  const noop = () => {};
+  return {
+    on: noop,
+    off: noop,
+    destroy: noop,
+    emit: noop
+  };
+}
+
+const Manager = isBrowser ? require('hammerjs').Manager : ManagerMock;
+const {
   BASIC_EVENT_ALIASES,
   EVENT_RECOGNIZER_MAP,
   RECOGNIZERS,
   GESTURE_EVENT_ALIASES
-} from './constants';
-import WheelInput from './wheel-input';
-import MoveInput from './move-input';
+} = isBrowser ? require('./constants') : {};
 
 /**
  * Single API for subscribing to events about both
