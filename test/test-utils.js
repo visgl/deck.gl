@@ -20,7 +20,7 @@
 
 import {WebMercatorViewport} from '../src/lib/viewports';
 import {TEST_EXPORTS as LAYER_TEST_EXPORTS} from '../src/lib/layer';
-import sinon from 'sinon';
+import spy from 'spy';
 import global from 'global';
 
 const {mergeDefaultProps} = LAYER_TEST_EXPORTS;
@@ -183,7 +183,7 @@ export function testLayerUpdates(t, {LayerComponent, testCases}) {
  *
  * @param {Function} t - test function
  * @param {Object} opt - test options
- * @param {Object} opt.FunctionsToSpy - Functions that spied by sinon
+ * @param {Object} opt.FunctionsToSpy - Functions that spied by spy
  * @param {Object} opt.LayerComponent - The layer component class
  * @param {Array} opt.testCases - A list of testCases
  * @param {Object} opt.testCases.INITIAL_PROPS - The initial prop to initialize the layer with
@@ -195,7 +195,7 @@ export function testLayerUpdates(t, {LayerComponent, testCases}) {
 export function testSubLayerUpdateTriggers(t, {FunctionsToSpy, LayerComponent, testCases}) {
   let failures = false;
   const spies = FunctionsToSpy.reduce((accu, curr) => Object.assign(accu, {
-    [curr]: sinon.spy(LayerComponent.prototype, curr)
+    [curr]: spy(LayerComponent.prototype, curr)
   }), {});
 
   // initialize parent layer
