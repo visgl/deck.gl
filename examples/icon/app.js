@@ -23,7 +23,7 @@ class Root extends Component {
       iconMapping: null
     };
 
-    requestJson('./data/film-locations-2016.json', (error, response) => {
+    requestJson('./data/meteorites.json', (error, response) => {
       if (!error) {
         this.setState({data: response});
       }
