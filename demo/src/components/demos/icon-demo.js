@@ -41,7 +41,7 @@ export default class IconDemo extends Component {
         <h3>Meteorites Landings</h3>
         <p>Data set from The Meteoritical Society showing information on all of
           the known meteorite landings.</p>
-        <p>Hover on a pin to see the title list</p>
+        <p>Hover on a pin to see the list of names</p>
         <p>Click on a pin to see the details</p>
         <p>Data source:
           <a href="https://data.nasa.gov/Space-Science/Meteorite-Landings/gh4g-9sfh">NASA</a>
