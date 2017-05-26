@@ -1,8 +1,6 @@
 importScripts('./util.js');
-const FLUSH_LIMIT = 200000;
 let coordinates;
 let result = [];
-let count = 0;
 
 onmessage = function(e) {
   const lines = e.data.text.split('\n');
@@ -11,7 +9,7 @@ onmessage = function(e) {
     if (!line) {
       return;
     }
-    if(!coordinates) {
+    if (!coordinates) {
       coordinates = decodePolyline(line, 5);
       return;
     }
@@ -28,11 +26,7 @@ onmessage = function(e) {
       mass: decodeNumber(parts[3], 90, 32),
       year: decodeNumber(parts[4], 90, 32)
     })
-    count++;
 
-    if (result.length >= FLUSH_LIMIT) {
-      flush();
-    }
   });
 
   if (e.data.event === 'load') {
@@ -45,7 +39,7 @@ function flush() {
   postMessage({
     action: 'add',
     data: result,
-    meta: {count: count}
+    meta: {count: result.length}
   });
   result = [];
 }
