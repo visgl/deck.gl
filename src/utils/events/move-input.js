@@ -1,4 +1,5 @@
 const MOVE_EVENTS = ['pointermove', 'touchmove', 'mousemove'];
+const EVENT_TYPES = ['pointermove', 'mousemove'];
 
 /**
  * Hammer.js swallows 'move' events (for pointer/touch/mouse)
@@ -30,3 +31,5 @@ export default class MoveInput {
     });
   }
 }
+
+MoveInput.EVENT_TYPES = EVENT_TYPES;
