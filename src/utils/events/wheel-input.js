@@ -127,3 +127,5 @@ export default class WheelInput {
     });
   }
 }
+
+WheelInput.EVENT_TYPES = [EVENT_TYPE];

@@ -56,3 +56,5 @@ export default class MoveInput {
     }
   }
 }
+
+MoveInput.EVENT_TYPES = EVENT_TYPES;
