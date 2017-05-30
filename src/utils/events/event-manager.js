@@ -153,8 +153,7 @@ export default class EventManager {
    * and pipe back out through same (Hammer) channel used by other events.
    */
   _onOtherEvent(event) {
-    const {srcEvent: {type}} = event;
-    this.manager.emit(type, event);
+    this.manager.emit(event.type, event);
   }
 
   /**

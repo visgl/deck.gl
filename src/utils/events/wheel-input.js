@@ -12,6 +12,7 @@ const WHEEL_EVENTS = [
   // legacy Firefox
   'DOMMouseScroll'
 ];
+const EVENT_TYPE = 'wheel';
 
 // Constants for normalizing input delta
 const WHEEL_DELTA_MAGIC_SCALER = 4.000244140625;
@@ -118,6 +119,7 @@ export default class WheelInput {
 
   _onWheel(srcEvent, delta, position) {
     this.callback({
+      type: EVENT_TYPE,
       center: position,
       delta,
       srcEvent,
