@@ -128,4 +128,4 @@ export default class WheelInput {
   }
 }
 
-WheelInput.EVENT_TYPES = [EVENT_TYPE];
+WheelInput.isSourceOf = eventName => eventName === EVENT_TYPE;

@@ -57,4 +57,4 @@ export default class MoveInput {
   }
 }
 
-MoveInput.EVENT_TYPES = EVENT_TYPES;
+MoveInput.isSourceOf = eventName => MOVE_EVENT_TYPES.indexOf(eventName) >= 0;
