@@ -32,4 +32,4 @@ export default class MoveInput {
   }
 }
 
-MoveInput.EVENT_TYPES = EVENT_TYPES;
+MoveInput.isSourceOf = eventName => EVENT_TYPES.indexOf(eventName) >= 0;

@@ -94,11 +94,11 @@ export default class EventManager {
           this.aliasedEventHandlers[event] = aliasedEventHandler;
         }
       }
-      if (!this.wheelInput && WheelInput.EVENT_TYPES.indexOf(event) >= 0) {
+      if (!this.wheelInput && WheelInput.isSourceOf(event)) {
         this.wheelInput = new WheelInput(this.element, this._onOtherEvent);
       }
 
-      if (!this.moveInput && MoveInput.EVENT_TYPES.indexOf(event) >= 0) {
+      if (!this.moveInput && MoveInput.isSourceOf(event)) {
         this.moveInput = new MoveInput(this.element, this._onOtherEvent);
       }
 
