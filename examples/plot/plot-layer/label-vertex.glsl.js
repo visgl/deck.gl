@@ -41,7 +41,7 @@ varying vec2 vTexCoords;
 varying float shouldDiscard;
 
 const float LABEL_OFFSET = 0.02;
-const float TITLE_OFFSET = 0.04;
+const float TITLE_OFFSET = 0.06;
 
 float sum2(vec2 v) {
   return v.x + v.y;
