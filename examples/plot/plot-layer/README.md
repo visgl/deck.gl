@@ -142,3 +142,9 @@ Amount that grids should setback from the bounding box. Relative to the size of 
 - Default: `[0, 0, 0, 255]`
 
 Color to draw the grids with, in `[r, g, b, a]`.
+
+##### `axesTitles` (Array, optional)
+
+- Default: `['x', 'z', 'y']`
+
+Strings to draw next to each axis as their titles, note that the second element is the axis that points upwards.
