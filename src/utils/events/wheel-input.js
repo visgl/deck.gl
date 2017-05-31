@@ -24,9 +24,10 @@ const SHIFT_MULTIPLIER = 0.25;
 
 export default class WheelInput {
 
-  constructor(element, callback) {
+  constructor(element, callback, options = {}) {
     this.element = element;
     this.callback = callback;
+    this.options = Object.assign({enable: true}, options);
 
     this.handleEvent = this.handleEvent.bind(this);
 
@@ -44,8 +45,19 @@ export default class WheelInput {
     WHEEL_EVENTS.forEach(eventName => element.removeEventListener(eventName, this.handleEvent));
   }
 
+  set(options) {
+    Object.assign(this.options, options);
+  }
+
+  isSourceOf(eventName) {
+    return eventName === EVENT_TYPE;
+  }
+
   /* eslint-disable complexity, max-statements */
   handleEvent(event) {
+    if (!this.options.enable) {
+      return;
+    }
 
     event.preventDefault();
     let value = event.deltaY;

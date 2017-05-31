@@ -52,8 +52,8 @@ export default class EventManager {
     // - mouse wheel
     // - pointer/touch/mouse move
     this._onOtherEvent = this._onOtherEvent.bind(this);
-    this.wheelInput = new WheelInput(element, this._onOtherEvent);
-    this.moveInput = new MoveInput(element, this._onOtherEvent);
+    this.wheelInput = new WheelInput(element, this._onOtherEvent, {enable: false});
+    this.moveInput = new MoveInput(element, this._onOtherEvent, {enable: false});
 
     // Register all passed events.
     const {events} = options;
@@ -90,6 +90,13 @@ export default class EventManager {
           // This should be an array of aliased handlers instead.
           this.aliasedEventHandlers[event] = aliasedEventHandler;
         }
+      }
+      if (this.wheelInput.isSourceOf(event)) {
+        this.wheelInput.set({enable: true});
+      }
+
+      if (this.moveInput.isSourceOf(event)) {
+        this.moveInput.set({enable: true});
       }
 
       // Register event handler.
