@@ -17,6 +17,18 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## Beta Releases
 
+### deck.gl v4.1.0-alpha.8
+
+- FIX: EventManager error in trackpad scroll
+- FIX: `mousemove` is fired twice during drag
+- FIX: drag events
+- FIX: error when dragging outside of the canvas
+- FIX: IconLayer does not rerender after texture is loaded
+
+### deck.gl v4.1.0-alpha.7
+
+- FIX: Import in node
+
 ### deck.gl v4.1.0-alpha.6
 
 - FIX: Composite layers now pass `getPolygonOffset` prop to children
