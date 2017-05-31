@@ -1,4 +1,5 @@
-/* global window:false */
+import {window} from '../../lib/utils/globals';
+
 const ua = typeof window.navigator !== 'undefined' ?
   window.navigator.userAgent.toLowerCase() : '';
 const firefox = ua.indexOf('firefox') !== -1;
@@ -11,6 +12,7 @@ const WHEEL_EVENTS = [
   // legacy Firefox
   'DOMMouseScroll'
 ];
+const EVENT_TYPE = 'wheel';
 
 // Constants for normalizing input delta
 const WHEEL_DELTA_MAGIC_SCALER = 4.000244140625;
@@ -22,13 +24,14 @@ const SHIFT_MULTIPLIER = 0.25;
 
 export default class WheelInput {
 
-  constructor(element, callback) {
+  constructor(element, callback, options = {}) {
     this.element = element;
     this.callback = callback;
+    this.options = Object.assign({enable: true}, options);
 
-    this.handler = this.handler.bind(this);
+    this.handleEvent = this.handleEvent.bind(this);
 
-    WHEEL_EVENTS.forEach(eventName => element.addEventListener(eventName, this.handler));
+    WHEEL_EVENTS.forEach(eventName => element.addEventListener(eventName, this.handleEvent));
 
     this.time = 0;
     this.wheelPosition = null;
@@ -39,11 +42,22 @@ export default class WheelInput {
 
   destroy() {
     const {element} = this;
-    WHEEL_EVENTS.forEach(eventName => element.removeEventListener(eventName, this.handler));
+    WHEEL_EVENTS.forEach(eventName => element.removeEventListener(eventName, this.handleEvent));
+  }
+
+  set(options) {
+    Object.assign(this.options, options);
+  }
+
+  isSourceOf(eventName) {
+    return eventName === EVENT_TYPE;
   }
 
   /* eslint-disable complexity, max-statements */
-  handler(event) {
+  handleEvent(event) {
+    if (!this.options.enable) {
+      return;
+    }
 
     event.preventDefault();
     let value = event.deltaY;
@@ -117,6 +131,7 @@ export default class WheelInput {
 
   _onWheel(srcEvent, delta, position) {
     this.callback({
+      type: EVENT_TYPE,
       center: position,
       delta,
       srcEvent,

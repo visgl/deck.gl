@@ -1,13 +1,30 @@
-import {Manager} from 'hammerjs';
+import WheelInput from './wheel-input';
+import MoveInput from './move-input';
+import {isBrowser} from '../../controllers/globals';
 
-import {
+// Hammer.js directly references `document` and `window`,
+// which means that importing it in environments without
+// those objects throws errors. Therefore, instead of
+// directly `import`ing 'hammerjs' and './constants'
+// (which imports Hammer.js) we conditionally require it
+// depending on support for those globals.
+function ManagerMock(m) {
+  const noop = () => {};
+  return {
+    on: noop,
+    off: noop,
+    destroy: noop,
+    emit: noop
+  };
+}
+
+const Manager = isBrowser ? require('hammerjs').Manager : ManagerMock;
+const {
   BASIC_EVENT_ALIASES,
   EVENT_RECOGNIZER_MAP,
   RECOGNIZERS,
   GESTURE_EVENT_ALIASES
-} from './constants';
-import WheelInput from './wheel-input';
-import MoveInput from './move-input';
+} = isBrowser ? require('./constants') : {};
 
 /**
  * Single API for subscribing to events about both
@@ -35,8 +52,8 @@ export default class EventManager {
     // - mouse wheel
     // - pointer/touch/mouse move
     this._onOtherEvent = this._onOtherEvent.bind(this);
-    this.wheelInput = new WheelInput(element, this._onOtherEvent);
-    this.moveInput = new MoveInput(element, this._onOtherEvent);
+    this.wheelInput = new WheelInput(element, this._onOtherEvent, {enable: false});
+    this.moveInput = new MoveInput(element, this._onOtherEvent, {enable: false});
 
     // Register all passed events.
     const {events} = options;
@@ -73,6 +90,13 @@ export default class EventManager {
           // This should be an array of aliased handlers instead.
           this.aliasedEventHandlers[event] = aliasedEventHandler;
         }
+      }
+      if (this.wheelInput.isSourceOf(event)) {
+        this.wheelInput.set({enable: true});
+      }
+
+      if (this.moveInput.isSourceOf(event)) {
+        this.moveInput.set({enable: true});
       }
 
       // Register event handler.
@@ -136,8 +160,7 @@ export default class EventManager {
    * and pipe back out through same (Hammer) channel used by other events.
    */
   _onOtherEvent(event) {
-    const {srcEvent: {type}} = event;
-    this.manager.emit(type, event);
+    this.manager.emit(event.type, event);
   }
 
   /**

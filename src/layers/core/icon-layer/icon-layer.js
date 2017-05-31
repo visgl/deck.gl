@@ -119,17 +119,15 @@ export default class IconLayer extends Layer {
     }
 
     if (oldProps.iconAtlas !== iconAtlas) {
-      const icons = {};
-      this.state.icons = icons;
 
       if (iconAtlas instanceof Texture2D) {
-        icons.texture = iconAtlas;
+        this.setState({iconsTexture: iconAtlas});
       } else if (typeof iconAtlas === 'string') {
         loadTextures(this.context.gl, {
           urls: [iconAtlas]
         })
         .then(([texture]) => {
-          icons.texture = texture;
+          this.setState({iconsTexture: texture});
         });
       }
     }
@@ -144,7 +142,7 @@ export default class IconLayer extends Layer {
 
   draw({uniforms}) {
     const {sizeScale} = this.props;
-    const iconsTexture = this.state.icons && this.state.icons.texture;
+    const {iconsTexture} = this.state;
 
     if (iconsTexture) {
       this.state.model.render(Object.assign({}, uniforms, {
