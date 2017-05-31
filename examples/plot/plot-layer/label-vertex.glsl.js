@@ -26,6 +26,7 @@ attribute vec3 normals;
 attribute vec2 texCoords;
 attribute vec2 instancePositions;
 attribute vec3 instanceNormals;
+attribute float instanceIsTitle;
 
 uniform vec2 viewportSize;
 uniform vec3 gridDims;
@@ -40,6 +41,7 @@ varying vec2 vTexCoords;
 varying float shouldDiscard;
 
 const float LABEL_OFFSET = 0.02;
+const float TITLE_OFFSET = 0.04;
 
 float sum2(vec2 v) {
   return v.x + v.y;
@@ -101,7 +103,7 @@ void main(void) {
 
   // apply offsets
   position_modelspace += gridOffset * gridLineNormal;
-  position_modelspace += LABEL_OFFSET * gridVertexOffset;
+  position_modelspace += (LABEL_OFFSET + (instanceIsTitle * TITLE_OFFSET)) * gridVertexOffset;
 
   vec4 position_clipspace = project_to_clipspace(vec4(position_modelspace, 1.0));
 

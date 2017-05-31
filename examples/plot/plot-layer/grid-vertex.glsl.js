@@ -25,6 +25,7 @@ attribute vec3 positions;
 attribute vec3 normals;
 attribute vec2 instancePositions;
 attribute vec3 instanceNormals;
+attribute float instanceIsTitle;
 
 uniform vec3 gridDims;
 uniform vec3 gridCenter;
@@ -62,7 +63,7 @@ void main(void) {
     ) * instanceNormals;
 
   // do not draw grid line in front of the graph
-  shouldDiscard = frontFacing(gridLineNormal);
+  shouldDiscard = frontFacing(gridLineNormal) + instanceIsTitle;
 
   vec3 position_modelspace = vec3(instancePositions.x) *
     instanceNormals + gridVertexOffset * gridDims / 2.0 + gridCenter * abs(gridVertexOffset);

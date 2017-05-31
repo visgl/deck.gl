@@ -19,6 +19,9 @@ const defaultProps = {
   xTickFormat: AxesLayer.defaultProps.xTickFormat,
   yTickFormat: AxesLayer.defaultProps.yTickFormat,
   zTickFormat: AxesLayer.defaultProps.zTickFormat,
+  xTitle: AxesLayer.defaultProps.xTitle,
+  yTitle: AxesLayer.defaultProps.yTitle,
+  zTitle: AxesLayer.defaultProps.zTitle,
   axesPadding: AxesLayer.defaultProps.padding,
   axesColor: AxesLayer.defaultProps.color
 };
@@ -90,6 +93,9 @@ export default class PlotLayer extends CompositeLayer {
         xTickFormat: this.props.xTickFormat,
         yTickFormat: this.props.yTickFormat,
         zTickFormat: this.props.zTickFormat,
+        xTitle: this.props.xTitle,
+        yTitle: this.props.yTitle,
+        zTitle: this.props.zTitle,
         padding: this.props.axesPadding,
         color: this.props.axesColor,
         visible: this.props.drawAxes,
