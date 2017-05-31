@@ -138,10 +138,10 @@ export default class DeckGL extends React.Component {
       events: {
         click: this._onClick,
         mousemove: this._onMouseMove,
-        dragstart: this._onDragEvent,
-        dragmove: this._onDragEvent,
-        dragend: this._onDragEvent,
-        dragcancel: this._onDragCancel
+        panstart: this._onDragEvent,
+        panmove: this._onDragEvent,
+        panend: this._onDragEvent,
+        pancancel: this._onDragEvent
       }
     });
   }
@@ -154,7 +154,8 @@ export default class DeckGL extends React.Component {
 
     if (center) {
       // processed pointer input, supports touch
-      [x, y] = center;
+      x = center.x;
+      y = center.y;
     } else if (srcEvent) {
       // fallback
       x = srcEvent.clientX;
@@ -203,28 +204,27 @@ export default class DeckGL extends React.Component {
     }
   }
 
-  _onDragEvent(event, explicitType) {
+  _onDragEvent(event) {
     const pos = this._getPos(event);
     if (!pos) {
       return;
     }
-    const type = typeof explicitType === 'string' ? explicitType : event.srcEvent.type;
     let mode;
     let layerEventHandler;
-    switch (type) {
-    case 'mousedown':
+    switch (event.type) {
+    case 'panstart':
       mode = 'dragstart';
       layerEventHandler = this.props.onLayerDragStart;
       break;
-    case 'mousemove':
+    case 'panmove':
       mode = 'dragmove';
       layerEventHandler = this.props.onLayerDragMove;
       break;
-    case 'dragcancel':
+    case 'pancancel':
       mode = 'dragcancel';
       layerEventHandler = this.props.onLayerDragCancel;
       break;
-    case 'mouseup':
+    case 'panend':
       mode = 'dragend';
       layerEventHandler = this.props.onLayerDragEnd;
       break;
@@ -242,11 +242,6 @@ export default class DeckGL extends React.Component {
         layerEventHandler(firstInfo, selectedInfos, event.srcEvent);
       }
     }
-  }
-
-  _onDragCancel(event) {
-    // rewrite event type for dragcancel / dragend disambiguation
-    this._onDragEvent(event, 'dragcancel');
   }
 
   _onRenderFrame({gl}) {
