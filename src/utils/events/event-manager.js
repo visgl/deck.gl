@@ -42,7 +42,6 @@ export default class EventManager {
     // TODO: support overriding default RECOGNIZERS by passing
     // recognizers / configs, keyed to event name.
 
-    this.element = element;
     this._onBasicInput = this._onBasicInput.bind(this);
     this.manager = new Manager(element, {recognizers: RECOGNIZERS})
       .on('hammer.input', this._onBasicInput);
@@ -53,6 +52,8 @@ export default class EventManager {
     // - mouse wheel
     // - pointer/touch/mouse move
     this._onOtherEvent = this._onOtherEvent.bind(this);
+    this.wheelInput = new WheelInput(element, this._onOtherEvent, {enable: false});
+    this.moveInput = new MoveInput(element, this._onOtherEvent, {enable: false});
 
     // Register all passed events.
     const {events} = options;
@@ -62,12 +63,8 @@ export default class EventManager {
   }
 
   destroy() {
-    if (this.wheelInput) {
-      this.wheelInput.destroy();
-    }
-    if (this.moveInput) {
-      this.moveInput.destroy();
-    }
+    this.wheelInput.destroy();
+    this.moveInput.destroy();
     this.manager.destroy();
   }
 
@@ -94,12 +91,12 @@ export default class EventManager {
           this.aliasedEventHandlers[event] = aliasedEventHandler;
         }
       }
-      if (!this.wheelInput && WheelInput.isSourceOf(event)) {
-        this.wheelInput = new WheelInput(this.element, this._onOtherEvent);
+      if (this.wheelInput.isSourceOf(event)) {
+        this.wheelInput.set({enable: true});
       }
 
-      if (!this.moveInput && MoveInput.isSourceOf(event)) {
-        this.moveInput = new MoveInput(this.element, this._onOtherEvent);
+      if (this.moveInput.isSourceOf(event)) {
+        this.moveInput.set({enable: true});
       }
 
       // Register event handler.
