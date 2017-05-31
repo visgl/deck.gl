@@ -11,21 +11,33 @@ const MOVE_EVENT_TYPES = ['mousemove', 'pointermove'];
  */
 export default class MoveInput {
 
-  constructor(element, callback, events = MOUSE_EVENTS) {
+  constructor(element, callback, options = {}) {
     this.element = element;
     this.callback = callback;
-    this.events = events;
     this.pressed = false;
+    this.options = Object.assign({events: MOUSE_EVENTS, enable: true}, options);
 
     this.handleEvent = this.handleEvent.bind(this);
-    this.events.forEach(event => element.addEventListener(event, this.handleEvent));
+    this.options.events.forEach(event => element.addEventListener(event, this.handleEvent));
   }
 
   destroy() {
-    this.events.forEach(event => this.element.removeEventListener(event, this.handleEvent));
+    this.options.events.forEach(event => this.element.removeEventListener(event, this.handleEvent));
+  }
+
+  set(options) {
+    Object.assign(this.options, options);
+  }
+
+  isSourceOf(eventName) {
+    return MOVE_EVENT_TYPES.indexOf(eventName) >= 0;
   }
 
   handleEvent(event) {
+    if (!this.options.enable) {
+      return;
+    }
+
     switch (event.type) {
     case 'mousedown':
       if (event.button === 0) {
