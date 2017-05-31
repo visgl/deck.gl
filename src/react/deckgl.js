@@ -162,6 +162,7 @@ export default class DeckGL extends React.Component {
       y = srcEvent.clientY;
     }
     if (!Number.isFinite(x)) {
+      // srcEvent.clientX may be undefined if it's not from a mouse
       return null;
     }
 
