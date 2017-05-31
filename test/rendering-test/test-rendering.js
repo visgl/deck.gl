@@ -52,36 +52,10 @@ import {join} from 'path';
 import {readFileSync} from 'fs';
 
 import DeckGL from 'deck.gl';
-import {getPoints100K} from './data-generator';
-
-import {
-  ScatterplotLayer,
-  ArcLayer,
-  LineLayer,
-  HexagonLayer,
-
-  ScreenGridLayer,
-  IconLayer,
-  GridLayer,
-  GeoJsonLayer,
-  // PolygonLayer,
-  // PathLayer,
-
-  ScatterplotLayer64,
-  ArcLayer64,
-  LineLayer64,
-
-  ChoroplethLayer,
-  ChoroplethLayer64,
-  ExtrudedChoroplethLayer64
-
-} from 'deck.gl';
+import colorDelta from './color-delta';
+import * as CONFIG from './test-config';
 
 var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
-
-// canvas size
-const width = 1600;
-const height = 900;
 
 // DeckGL container
 const deckGLContainer = document.createElement('div');
@@ -90,43 +64,82 @@ deckGLContainer.style.position = 'absolute';
 // hide deckgl canvas
 deckGLContainer.style.display = 'none';
 
+const referenceImage = createImage();
 // Show the image element so the developer could save the image as
 // the golden image
-const image = document.createElement('img');
-image.width = width;
-image.height = height;
-image.style.position = 'absolute';
-image.style.top = 0;
-image.style.left = 0;
+const resultImage = createImage();
+resultImage.style.mixBlendMode = 'difference';
 
 // Test result container
 const resultContainer = document.createElement('div');
-resultContainer.style.position = 'relative';
+resultContainer.style.position = 'absolute';
+resultContainer.style.zIndex = 1;
 
 document.body.appendChild(deckGLContainer);
-document.body.appendChild(image);
+document.body.appendChild(referenceImage);
+document.body.appendChild(resultImage);
 document.body.appendChild(resultContainer);
 
 class RenderingTest extends Component {
   constructor(props) {
     super(props);
+
+    this.state = {
+      runningTests: {},
+      currentTestIndex: 0
+    };
   }
 
-  _onDrawComplete(canvas) {
-    // Get the content of the canvas
-    const imageURL = canvas.toDataURL();
+  _diffResult(name) {
+    const referencePixelData = getPixelData(referenceImage, CONFIG.WIDTH, CONFIG.HEIGHT);
+    const resultPixelData = getPixelData(resultImage, CONFIG.WIDTH, CONFIG.HEIGHT);
 
-    // Display the rendered content as an image for the user
-    // to save to disk as a golden image, if necessary
-    image.src = imageURL;
+    const pixelCount = resultPixelData.data.length / 4;
+    const maxDeltaSq = CONFIG.COLOR_DELTA_THRESHOLD * CONFIG.COLOR_DELTA_THRESHOLD;
+    let badPixels = 0;
+    for (let i = 0; i < pixelCount; i++) {
+      const delta = colorDelta(resultPixelData.data, referencePixelData.data, i * 4, i * 4);
+      if (delta > maxDeltaSq) {
+        badPixels++;
+      }
+    }
 
-    // Check results
-    checkResults(this.props.name, imageURL);
+    // Print diff result
+    reportResult(name, 1 - badPixels / pixelCount);
 
+    // Render the next test case
+    this.setState({
+      currentTestIndex: this.state.currentTestIndex + 1
+    });
+  }
+
+  _onDrawComplete(name, referecenResult, canvas) {
+    if (this.state.runningTests[name]) {
+      return;
+    }
+    // Mark current test as running
+    this.state.runningTests[name] = true;
+
+    referenceImage.onload = () => {
+      resultImage.onload = () => {
+        // Both images are loaded, compare results
+        this._diffResult(name);
+      };
+      resultImage.src = canvas.toDataURL();
+    };
+    referenceImage.src = referecenResult;
   }
 
   render() {
-    const {width, height, mapViewState, layersList} = this.props;
+    const {currentTestIndex} = this.state;
+    const {width, height, testCases} = this.props;
+
+    if (!testCases[currentTestIndex]) {
+      return null;
+    }
+
+    const {mapViewState, layersList, name, referecenResult} = testCases[currentTestIndex];
+
     const layers = [];
 
     // constructing layers
@@ -141,114 +154,46 @@ class RenderingTest extends Component {
       width: width,
       height: height,
       debug: true,
-      onAfterRender: this._onDrawComplete.bind(this)
+      onAfterRender: this._onDrawComplete.bind(this, name, referecenResult)
     }, mapViewState, {
       layers: layers
     }))
   }
 }
 
-const testConfigs = [];
-const referecenResults = new Map();
+ReactDOM.render(React.createElement(RenderingTest, {
+  width: CONFIG.WIDTH,
+  height: CONFIG.HEIGHT,
+  testCases: CONFIG.TEST_CASES
+}, null), deckGLContainer);
 
-testConfigs.push({
-  config: {
-    name: 'scatterplot-1',
-    // viewport params
-    width: width,
-    height: height,
-    mapViewState: {
-      latitude: 37.751537058389985,
-      longitude: -122.42694203247012,
-      zoom: 10,
-      pitch: 30,
-      bearing: 0
-    },
-    // layer list
-    layersList: [{
-      type: ScatterplotLayer,
-      props: {
-        id: './golden-images/1.png',
-        data: getPoints100K(),
-        getPosition: d => d,
-        getColor: d => [255, 128, 0],
-        getRadius: d => 5.0,
-        opacity: 0.5,
-        pickable: true,
-        radiusMinPixels: 5,
-        radiusMaxPixels: 5
-      }
-    }]
-  }
-});
+function createImage() {
+  const image = document.createElement('img');
+  image.width = CONFIG.WIDTH;
+  image.height = CONFIG.HEIGHT;
+  image.style.position = 'absolute';
+  image.style.top = 0;
+  image.style.left = 0;
 
-testConfigs.push({
-  // test config
-  config: {
-    name: 'scatterplot-2',
-    // viewport params
-    width: width,
-    height: height,
-    mapViewState: {
-      latitude: 37.751537058389985,
-      longitude: -122.42694203247012,
-      zoom: 12,
-      pitch: 0,
-      bearing: 0
-    },
-    // layer list
-    layersList: [{
-      type: ScatterplotLayer,
-      props: {
-        id: './golden-images/2.png',
-        data: getPoints100K(),
-        getPosition: d => d,
-        getColor: d => [255, 128, 0],
-        getRadius: d => 5.0,
-        opacity: 0.5,
-        pickable: true,
-        radiusMinPixels: 5,
-        radiusMaxPixels: 5
-      }
-    }]
-  }});
-
-// golden image for comparison
-referecenResults.set('scatterplot-1', require(`./golden-images/1.png`));
-referecenResults.set('scatterplot-2', require(`./golden-images/2.png`));
-
-let resultCount = 0;
-let runningTests = 2;
-if (runningTests > testConfigs.length) {
-  throw Error('The number of running tests > total number of available tests');
+  return image;
 }
 
-for (let i = 0; i < runningTests; i++) {
-  const entry = testConfigs[i]
-  if (name !== null) {
-    const element = ReactDOM.render(React.createElement(RenderingTest, entry.config, null), deckGLContainer);
-  }
+function getPixelData(sourceElement, width, height) {
+  const canvas = document.createElement('canvas');
+  canvas.width = width;
+  canvas.height = height;
+  const ctx = canvas.getContext('2d');
+  ctx.drawImage(sourceElement, 0, 0, width, height);
+  return ctx.getImageData(0, 0, width, height);
 }
 
-function checkResults(name, content) {
-    const goldenImage = referecenResults.get(name);
-
-    let outputString = `testName: ${name}: `;
-    if (content === goldenImage) {
-      outputString += `passed`;
-    } else {
-      outputString += `failed`;
-    }
+function reportResult(name, percentage) {
+    const passed = percentage >= CONFIG.TEST_PASS_THRESHOLD;
+    const outputString = `${name}: ${(percentage * 100).toFixed(3)}% ${passed ? 'PASS' : 'FAIL'}`;
 
     const paragraph = document.createElement('p');
     const testResult = document.createTextNode(outputString);
     paragraph.appendChild(testResult);
     resultContainer.appendChild(paragraph);
-
-    resultCount++;
-
-    if (resultCount >= runningTests) {
-      throw new Error('This is not an error. This is just to abort the rendering test');
-    }
 }
 // testResult.style.position = 'relative';

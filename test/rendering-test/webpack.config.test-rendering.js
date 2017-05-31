@@ -30,12 +30,7 @@ module.exports = {
   },
 
   module: {
-    rules: [
-      {
-        test: /\.png$/,
-        loader: 'url-loader?mimetype=image/png'
-      }
-    ]
+    rules: []
   },
 
   node: {

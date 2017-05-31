@@ -90,7 +90,6 @@
     "tape-catch": "^1.0.4",
     "transform-loader": "^0.2.3",
     "uglify-js": "^2.6.1",
-    "url-loader": "^0.5.7",
     "webpack": "^2.4.0",
     "webpack-dev-server": "^2.4.0"
   },

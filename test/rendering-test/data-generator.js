@@ -18,6 +18,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+import {WebMercatorViewport} from 'deck.gl';
+
 // generate points in a grid
 function pointGrid(N, bbox) {
   const dLon = bbox[2] - bbox[0];
@@ -45,9 +47,23 @@ function pointGrid(N, bbox) {
   return points;
 }
 
+function lngLatToMeterOffset(points, center) {
+  const viewport = new WebMercatorViewport({longitude: center[0], latitude: center[1], zoom: 10});
+  return points.map(point =>
+    viewport.lngLatDeltaToMeters([point[0] - center[0], point[1] - center[1]]));
+}
+
 let _points100K = null;
+let _points100KMeters = null;
+
+export const positionOrigin = [-122.4, 37.7];
 
 export function getPoints100K() {
   _points100K = _points100K || pointGrid(1e5, [-122.9, 36.6, -121.9, 38.9]);
   return _points100K;
+}
+
+export function getPoints100KMeters() {
+  _points100KMeters = _points100KMeters || lngLatToMeterOffset(getPoints100K(), positionOrigin);
+  return _points100KMeters;
 }
