@@ -138,23 +138,50 @@ export default class DeckGL extends React.Component {
       events: {
         click: this._onClick,
         mousemove: this._onMouseMove,
-        dragstart: this._onDragEvent,
-        dragmove: this._onDragEvent,
-        dragend: this._onDragEvent,
-        dragcancel: this._onDragCancel
+        panstart: this._onDragEvent,
+        panmove: this._onDragEvent,
+        panend: this._onDragEvent,
+        pancancel: this._onDragEvent
       }
     });
   }
 
+  // Get mouse position {x, y} relative to the container
+  _getPos(event) {
+    const {srcEvent, center, rootElement} = event;
+    let x;
+    let y;
+
+    if (center) {
+      // processed pointer input, supports touch
+      x = center.x;
+      y = center.y;
+    } else if (srcEvent) {
+      // fallback
+      x = srcEvent.clientX;
+      y = srcEvent.clientY;
+    }
+    if (!Number.isFinite(x)) {
+      // srcEvent.clientX may be undefined if it's not from a mouse
+      return null;
+    }
+
+    const rect = rootElement.getBoundingClientRect();
+
+    return {
+      x: x - rect.left - rootElement.clientLeft,
+      y: y - rect.top - rootElement.clientTop
+    };
+  }
+
   // Route events to layers
   _onClick(event) {
-    // use offsetX|Y for relative position to the container, drop event if falsy
-    if (!event || !event.srcEvent || !Number.isFinite(event.srcEvent.offsetX)) {
+    const pos = this._getPos(event);
+    if (!pos) {
       return;
     }
-    const {srcEvent: {offsetX: x, offsetY: y}} = event;
     const radius = this.props.pickingRadius;
-    const selectedInfos = this.layerManager.pickLayer({x, y, radius, mode: 'click'});
+    const selectedInfos = this.layerManager.pickLayer({x: pos.x, y: pos.y, radius, mode: 'click'});
     if (selectedInfos.length) {
       const firstInfo = selectedInfos.find(info => info.index >= 0);
       // Event.event holds the original MouseEvent object
@@ -164,13 +191,13 @@ export default class DeckGL extends React.Component {
 
   // Route events to layers
   _onMouseMove(event) {
-    // use offsetX|Y for relative position to the container, drop event if falsy
-    if (!event || !event.srcEvent || !Number.isFinite(event.srcEvent.offsetX)) {
+    const pos = this._getPos(event);
+    if (!pos || pos.x < 0 || pos.y < 0 || pos.x > this.props.width || pos.y > this.props.height) {
+      // Check if pointer is inside the canvas
       return;
     }
-    const {srcEvent: {offsetX: x, offsetY: y}} = event;
     const radius = this.props.pickingRadius;
-    const selectedInfos = this.layerManager.pickLayer({x, y, radius, mode: 'hover'});
+    const selectedInfos = this.layerManager.pickLayer({x: pos.x, y: pos.y, radius, mode: 'hover'});
     if (selectedInfos.length) {
       const firstInfo = selectedInfos.find(info => info.index >= 0);
       // Event.event holds the original MouseEvent object
@@ -178,29 +205,27 @@ export default class DeckGL extends React.Component {
     }
   }
 
-  _onDragEvent(event, explicitType) {
-    // use offsetX|Y for relative position to the container, drop event if falsy
-    if (!event || !event.srcEvent || !Number.isFinite(event.srcEvent.offsetX)) {
+  _onDragEvent(event) {
+    const pos = this._getPos(event);
+    if (!pos) {
       return;
     }
-    const {srcEvent: {offsetX: x, offsetY: y}} = event;
-    const type = typeof explicitType === 'string' ? explicitType : event.srcEvent.type;
     let mode;
     let layerEventHandler;
-    switch (type) {
-    case 'mousedown':
+    switch (event.type) {
+    case 'panstart':
       mode = 'dragstart';
       layerEventHandler = this.props.onLayerDragStart;
       break;
-    case 'mousemove':
+    case 'panmove':
       mode = 'dragmove';
       layerEventHandler = this.props.onLayerDragMove;
       break;
-    case 'dragcancel':
+    case 'pancancel':
       mode = 'dragcancel';
       layerEventHandler = this.props.onLayerDragCancel;
       break;
-    case 'mouseup':
+    case 'panend':
       mode = 'dragend';
       layerEventHandler = this.props.onLayerDragEnd;
       break;
@@ -211,18 +236,13 @@ export default class DeckGL extends React.Component {
 
     if (mode) {
       const radius = this.props.pickingRadius;
-      const selectedInfos = this.layerManager.pickLayer({x, y, radius, mode});
+      const selectedInfos = this.layerManager.pickLayer({x: pos.x, y: pos.y, radius, mode});
       if (selectedInfos.length) {
         const firstInfo = selectedInfos.find(info => info.index >= 0);
         // srcEvent holds the original MouseEvent object
         layerEventHandler(firstInfo, selectedInfos, event.srcEvent);
       }
     }
-  }
-
-  _onDragCancel(event) {
-    // rewrite event type for dragcancel / dragend disambiguation
-    this._onDragEvent(event, 'dragcancel');
   }
 
   _onRenderFrame({gl}) {

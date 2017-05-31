@@ -42,6 +42,7 @@ export default class EventManager {
     // TODO: support overriding default RECOGNIZERS by passing
     // recognizers / configs, keyed to event name.
 
+    this.element = element;
     this._onBasicInput = this._onBasicInput.bind(this);
     this.manager = new Manager(element, {recognizers: RECOGNIZERS})
       .on('hammer.input', this._onBasicInput);
@@ -144,6 +145,9 @@ export default class EventManager {
    * See constants.BASIC_EVENT_CLASSES basic event class definitions.
    */
   _onBasicInput(event) {
+    // For calculating pointer position relative to the canvas
+    event.rootElement = this.element;
+
     const {srcEvent} = event;
     const eventAliases = BASIC_EVENT_ALIASES[srcEvent.type];
     if (eventAliases) {
@@ -160,6 +164,9 @@ export default class EventManager {
    * and pipe back out through same (Hammer) channel used by other events.
    */
   _onOtherEvent(event) {
+    // For calculating pointer position relative to the canvas
+    event.rootElement = this.element;
+
     this.manager.emit(event.type, event);
   }
 
