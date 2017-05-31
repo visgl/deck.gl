@@ -12,6 +12,7 @@ const WHEEL_EVENTS = [
   // legacy Firefox
   'DOMMouseScroll'
 ];
+const EVENT_TYPE = 'wheel';
 
 // Constants for normalizing input delta
 const WHEEL_DELTA_MAGIC_SCALER = 4.000244140625;
@@ -27,9 +28,9 @@ export default class WheelInput {
     this.element = element;
     this.callback = callback;
 
-    this.handler = this.handler.bind(this);
+    this.handleEvent = this.handleEvent.bind(this);
 
-    WHEEL_EVENTS.forEach(eventName => element.addEventListener(eventName, this.handler));
+    WHEEL_EVENTS.forEach(eventName => element.addEventListener(eventName, this.handleEvent));
 
     this.time = 0;
     this.wheelPosition = null;
@@ -40,11 +41,11 @@ export default class WheelInput {
 
   destroy() {
     const {element} = this;
-    WHEEL_EVENTS.forEach(eventName => element.removeEventListener(eventName, this.handler));
+    WHEEL_EVENTS.forEach(eventName => element.removeEventListener(eventName, this.handleEvent));
   }
 
   /* eslint-disable complexity, max-statements */
-  handler(event) {
+  handleEvent(event) {
 
     event.preventDefault();
     let value = event.deltaY;
@@ -118,6 +119,7 @@ export default class WheelInput {
 
   _onWheel(srcEvent, delta, position) {
     this.callback({
+      type: EVENT_TYPE,
       center: position,
       delta,
       srcEvent,
