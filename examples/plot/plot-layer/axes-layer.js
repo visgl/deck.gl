@@ -13,10 +13,11 @@ import labelFragment from './label-fragment.glsl';
 const FONT_SIZE = 48;
 
 const defaultProps = {
-  fontSize: 12,
+  fontSize: 16,
   ticksCount: 6,
   axesOffset: 0,
-  axesColor: [0, 0, 0, 255]
+  axesColor: [0, 0, 0, 255],
+  axesTitles: ['x', 'z', 'y']
 };
 
 /* Utils */
@@ -53,7 +54,8 @@ export default class AxesLayer extends Layer {
 
     attributeManager.addInstanced({
       instancePositions: {size: 2, update: this.calculateInstancePositions, noAlloc: true},
-      instanceNormals: {size: 3, update: this.calculateInstanceNormals, noAlloc: true}
+      instanceNormals: {size: 3, update: this.calculateInstanceNormals, noAlloc: true},
+      instanceIsTitle: {size: 1, update: this.calculateInstanceIsTitle, noAlloc: true}
     });
 
     this.setState({
@@ -69,13 +71,13 @@ export default class AxesLayer extends Layer {
     const {attributeManager} = this.state;
 
     if (changeFlags.dataChanged || oldProps.ticksCount !== props.ticksCount) {
-      const {data, ticksCount} = props;
+      const {data, ticksCount, axesTitles} = props;
 
       const ticks = this.calculateTicks(data, ticksCount);
 
       this.setState({
         ticks,
-        labelTexture: this.renderLabelTexture(ticks),
+        labelTexture: this.renderLabelTexture(ticks, axesTitles),
         center: data.map(b => (b[0] + b[1]) / 2),
         dim: data.map(b => b[1] - b[0])
       });
@@ -254,23 +256,42 @@ export default class AxesLayer extends Layer {
     attribute.value = new Float32Array(flatten(normals));
   }
 
+  calculateInstanceIsTitle(attribute) {
+    const {ticks} = this.state;
+
+    const isTitle = ticks.map(axisTicks => {
+      const ticksCount = axisTicks.length - 1;
+      return axisTicks.map((t, i) => i < ticksCount ? 0 : 1);
+    });
+
+    attribute.value = new Float32Array(flatten(isTitle));
+  }
+
   // updates the instancePositions and instanceNormals attributes
   calculateTicks(bounds, ticksCount) {
     const xTicks = getTicks(bounds[0], ticksCount);
     const yTicks = getTicks(bounds[1], ticksCount);
     const zTicks = getTicks(bounds[2], ticksCount);
 
-    return [xTicks, yTicks, zTicks];
+    return [
+      [...xTicks, (bounds[0][0] + bounds[0][1]) / 2],
+      [...yTicks, (bounds[1][0] + bounds[1][1]) / 2],
+      [...zTicks, (bounds[2][0] + bounds[2][1]) / 2]];
   }
 
-  renderLabelTexture(ticks) {
+  renderLabelTexture(ticks, axesTitles) {
 
     if (this.state.labels) {
       this.state.labels.labelTexture.delete();
     }
 
+    const axesLabels = ticks.map((axisTicks, axisId) => {
+      const ticksCount = axisTicks.length - 1;
+      return axisTicks.map((t, i) => i < ticksCount ? t : axesTitles[axisId]);
+    });
+
     // attach a 2d texture of all the label texts
-    const textureInfo = textMatrixToTexture(this.context.gl, ticks, FONT_SIZE);
+    const textureInfo = textMatrixToTexture(this.context.gl, axesLabels, FONT_SIZE);
     if (textureInfo) {
       // success
       const {columnWidths, texture} = textureInfo;

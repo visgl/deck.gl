@@ -14,10 +14,11 @@ const defaultProps = {
   yResolution: 100,
   lightStrength: 1,
   drawAxes: true,
-  fontSize: 12,
+  fontSize: 16,
   ticksCount: 6,
   axesOffset: 0,
-  axesColor: [0, 0, 0, 255]
+  axesColor: [0, 0, 0, 255],
+  axesTitles: ['x', 'z', 'y']
 };
 
 /*
@@ -84,6 +85,7 @@ export default class PlotLayer extends CompositeLayer {
         ticksCount: this.props.ticksCount,
         axesOffset: this.props.axesOffset,
         axesColor: this.props.axesColor,
+        axesTitles: this.props.axesTitles,
         visible: this.props.drawAxes,
         pickable: false
       })
