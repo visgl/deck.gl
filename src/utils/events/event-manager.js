@@ -42,6 +42,7 @@ export default class EventManager {
     // TODO: support overriding default RECOGNIZERS by passing
     // recognizers / configs, keyed to event name.
 
+    this.element = element;
     this._onBasicInput = this._onBasicInput.bind(this);
     this.manager = new Manager(element, {recognizers: RECOGNIZERS})
       .on('hammer.input', this._onBasicInput);
@@ -63,8 +64,12 @@ export default class EventManager {
   }
 
   destroy() {
-    this.wheelInput.destroy();
-    this.moveInput.destroy();
+    if (this.wheelInput) {
+      this.wheelInput.destroy();
+    }
+    if (this.moveInput) {
+      this.moveInput.destroy();
+    }
     this.manager.destroy();
   }
 
