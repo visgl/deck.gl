@@ -17,6 +17,12 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## Beta Releases
 
+### deck.gl v4.1.0-alpha.9
+- EXAMPLES: update the PlotLayer example with axis labels (#671)
+- FIX: Fix radiusMinPixels and radiusMaxPixels for METER_OFFSETS in scatterplot (#607)
+- TEST: Fix the rendering test (#672)
+- FIX: Use luma.gl v4.0.0-alpha.7 to resolve the texture loading issue (#665)
+
 ### deck.gl v4.1.0-alpha.8
 
 - FIX: EventManager error in trackpad scroll

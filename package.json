@@ -2,7 +2,7 @@
   "name": "deck.gl",
   "description": "A suite of 3D-enabled data visualization overlays, suitable for react-map-gl",
   "license": "MIT",
-  "version": "4.1.0-alpha.8",
+  "version": "4.1.0-alpha.9",
   "keywords": [
     "webgl",
     "visualization",
@@ -74,7 +74,7 @@
     "gl": "^4.0.3",
     "immutable": "^3.8.1",
     "jsdom": "^9.11.0",
-    "luma.gl": "4.0.0-alpha.5",
+    "luma.gl": "4.0.0-alpha.8",
     "module-alias": "^2.0.0",
     "nyc": "^10.2.0",
     "path-exists-cli": "^1.0.0",
@@ -94,7 +94,7 @@
     "webpack-dev-server": "^2.4.0"
   },
   "peerDependencies": {
-    "luma.gl": ">=3.x",
+    "luma.gl": ">=4.0.0-alpha.8",
     "react": "0.14.x - 15.x",
     "react-dom": "0.14.x - 15.x"
   },
