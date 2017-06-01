@@ -193,47 +193,31 @@ float tan_fp32(float a) {
 //
 
 float project_scale(float meters) {
-  if (projectionMode == PROJECT_MERCATOR_OFFSETS) {
-    return meters;
-  } else {
-    return meters * projectionPixelsPerUnit.x;
-  }
+  return meters * projectionPixelsPerUnit.x;
 }
 
 vec2 project_scale(vec2 meters) {
-  if (projectionMode == PROJECT_MERCATOR_OFFSETS) {
-    return meters;
-  } else {
-    return vec2(
-      meters.x * projectionPixelsPerUnit.x,
-      meters.y * projectionPixelsPerUnit.x
-    );
-  }
+  return vec2(
+    meters.x * projectionPixelsPerUnit.x,
+    meters.y * projectionPixelsPerUnit.x
+  );
 }
 
 vec3 project_scale(vec3 meters) {
-  if (projectionMode == PROJECT_MERCATOR_OFFSETS) {
-    return meters;
-  } else {
-    return vec3(
-      meters.x * projectionPixelsPerUnit.x,
-      meters.y * projectionPixelsPerUnit.x,
-      meters.z * projectionPixelsPerUnit.x
-    );
-  }
+  return vec3(
+    meters.x * projectionPixelsPerUnit.x,
+    meters.y * projectionPixelsPerUnit.x,
+    meters.z * projectionPixelsPerUnit.x
+  );
 }
 
 vec4 project_scale(vec4 meters) {
-  if (projectionMode == PROJECT_MERCATOR_OFFSETS) {
-    return meters;
-  } else {
-    return vec4(
-      meters.x * projectionPixelsPerUnit.x,
-      meters.y * projectionPixelsPerUnit.x,
-      meters.z * projectionPixelsPerUnit.x,
-      meters.w
-    );
-  }
+  return vec4(
+    meters.x * projectionPixelsPerUnit.x,
+    meters.y * projectionPixelsPerUnit.x,
+    meters.z * projectionPixelsPerUnit.x,
+    meters.w
+  );
 }
 
 //
@@ -253,7 +237,6 @@ vec2 project_position(vec2 position) {
     return position;
   }
   if (projectionMode == PROJECT_MERCATOR_OFFSETS) {
-    return position;
     return project_scale(position);
   }
   // Covers projectionMode == PROJECT_MERCATOR
@@ -275,9 +258,6 @@ vec4 project_to_viewspace(vec4 position) {
 }
 
 vec4 project_to_clipspace(vec4 position) {
-  if (projectionMode == PROJECT_MERCATOR_OFFSETS) {
-    position = position * projectionPixelsPerUnit.x;
-  }
   return projectionMatrix * position + projectionCenter;
 }
 
