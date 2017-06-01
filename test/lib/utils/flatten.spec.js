@@ -42,6 +42,13 @@ const FLATTEN_TEST_CASES = [
     title: 'nested three levels',
     argument: [1, [[2], 3], [[4, [5]], 6]],
     result: [1, 2, 3, 4, 5, 6]
+  }, {
+    title: 'nested three levels with predicate',
+    opts: {
+      filter: Boolean
+    },
+    argument: [1, [[2], null], [[4, [null]], 6]],
+    result: [1, 2, 4, 6]
   }
 ];
 
@@ -62,7 +69,10 @@ test('flatten#import', t => {
 
 test('flatten#tests', t => {
   for (const tc of FLATTEN_TEST_CASES) {
-    const result = flatten(tc.argument);
+    t.comment(tc.title + JSON.stringify(tc.opts));
+    const result = tc.opts ?
+      flatten(tc.argument, tc.opts) :
+      flatten(tc.argument);
     t.deepEqual(result, tc.result, `flatten ${tc.title} returned expected result`);
   }
   t.end();
@@ -71,7 +81,7 @@ test('flatten#tests', t => {
 test('fillArray#tests', t => {
   for (const tc of FILL_ARRAY_TEST_CASES) {
     const result = fillArray(tc.arguments);
-    t.deepEqual(result, tc.result, `flatten ${tc.title} returned expected result`);
+    t.deepEqual(result, tc.result, `fillArray ${tc.title} returned expected result`);
   }
   t.end();
 });

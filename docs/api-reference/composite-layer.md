@@ -9,6 +9,21 @@ to help create sublayers and handle events.
 If you intend to implement a layer that generates other layers, it is recommended
 that you extend this class.
 
+## Usage
+
+Define a composite layer that renders a set of sublayers, one of them conditionally
+```js
+class MyCompositeLayer extends CompositeLayer {
+  renderLayers() {
+    return [
+      this._renderGroupOfSubLayers(), // returns an array of layers
+      this.props.showScatterplot && new ScatterplotLayer(...)
+    ];
+  }
+}
+```
+
+
 ## Methods
 
 ##### `draw`
@@ -22,9 +37,11 @@ Allows a layer to "render" or insert one or more deck.gl layers after itself.
 Called after a layer has been updated.
 
 Returns:
-- `null`, a single `Layer` instance, or an array of layers.
+- `null`, a single `Layer` instance, or a (nested) array of layers.
 
 The default implementation of `renderLayers` returns `null`.
+
+`renderLayers` can return a nested arrays with `null` values. deck.gl will automatically flatten and filter the array. See usage above.
 
 
 ##### `getPickingInfo`

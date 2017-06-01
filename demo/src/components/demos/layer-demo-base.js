@@ -96,7 +96,7 @@ export default function createLayerDemoClass(settings) {
         renderLayer(data, params, {
           onHover: this._onHover
         })
-      ].filter(Boolean);
+      ];
 
       return (
         <div>

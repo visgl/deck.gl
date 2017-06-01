@@ -247,7 +247,7 @@ export default class GeoJsonLayer extends CompositeLayer {
       pointLayer,
       // If extruded: draw fill layer last for correct blending behavior
       extruded && polygonFillLayer
-    ].filter(Boolean);
+    ];
   }
 }
 

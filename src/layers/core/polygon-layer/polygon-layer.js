@@ -195,7 +195,7 @@ export default class PolygonLayer extends CompositeLayer {
       polygonLineLayer,
       // If extruded: draw fill layer last for correct blending behavior
       extruded && polygonLayer
-    ].filter(Boolean);
+    ];
   }
 }
 

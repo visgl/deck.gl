@@ -165,7 +165,7 @@ export default class GraphLayer extends CompositeLayer {
       linksLayer,
       nodesLayer,
       nodeIconsLayer
-    ].filter(Boolean);
+    ];
   }
 
 }

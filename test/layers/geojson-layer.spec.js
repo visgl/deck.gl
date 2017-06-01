@@ -53,7 +53,7 @@ test('GeoJsonLayer#updates', t => {
       },
       assert: (layer, oldState) => {
         t.ok(layer.state, 'should update layer state');
-        const subLayers = layer.renderLayers();
+        const subLayers = layer.renderLayers().filter(Boolean);
         t.ok(subLayers.length === 2, 'should render 2 subLayers');
       }
     }, {

@@ -48,6 +48,7 @@
 /* eslint-disable no-try-catch */
 import Layer from './layer';
 import {log} from './utils';
+import {flatten} from './utils/flatten';
 import assert from 'assert';
 import {drawLayers, pickLayers} from './draw-and-pick';
 import {LIFECYCLE} from './constants';
@@ -263,7 +264,10 @@ export default class LayerManager {
         // End layer lifecycle method: render sublayers
 
         if (sublayers) {
-          sublayers = Array.isArray(sublayers) ? sublayers : [sublayers];
+          // Flatten the returned array, removing any null, undefined or false
+          // this allows layers to render sublayers conditionally
+          // (see CompositeLayer.renderLayers docs)
+          sublayers = flatten(sublayers, {filter: Boolean});
 
           // populate reference to parent layer
           sublayers.forEach(layer => {
