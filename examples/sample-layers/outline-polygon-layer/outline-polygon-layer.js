@@ -83,7 +83,7 @@ export default class OutlinePolygonLayer extends CompositeLayer {
     return [
       polygonFillLayer
       // polygonOutlineLayer
-    ].filter(Boolean);
+    ];
   }
 }
 

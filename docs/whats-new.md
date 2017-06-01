@@ -1,3 +1,9 @@
+# deck.gl v4.1
+
+## CompositeLayer
+
+* `CompositeLayer.renderLayers` can now return a nested arrays with `null` values. deck.gl will automatically flatten and filter the array. This is a small convenience that makes the `renderLayers methods in complex composite layers a little more readable.
+
 # deck.gl v4.0
 
 Release date: March 31, 2017
