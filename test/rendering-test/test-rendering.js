@@ -52,7 +52,7 @@ import {join} from 'path';
 import {readFileSync} from 'fs';
 
 import DeckGL from 'deck.gl';
-import colorDelta from './color-delta';
+import {colorDeltaSq} from './color-delta';
 import * as CONFIG from './test-config';
 
 var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
@@ -98,7 +98,7 @@ class RenderingTest extends Component {
     const maxDeltaSq = CONFIG.COLOR_DELTA_THRESHOLD * CONFIG.COLOR_DELTA_THRESHOLD;
     let badPixels = 0;
     for (let i = 0; i < pixelCount; i++) {
-      const delta = colorDelta(resultPixelData.data, referencePixelData.data, i * 4, i * 4);
+      const delta = colorDeltaSq(resultPixelData.data, referencePixelData.data, i);
       if (delta > maxDeltaSq) {
         badPixels++;
       }

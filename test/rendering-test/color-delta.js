@@ -1,38 +1,42 @@
-// From the pixelmatch package https://github.com/mapbox/pixelmatch
-// ISC License
-// Copyright (c) 2015, Mapbox
+/*
+ * Calculate perceived color difference using YIQ NTSC transmission color space
+ * Based on 2010 paper by Yuriy Kotsarenko and Fernando Ramos
+ * http://www.progmat.uaem.mx:8080/artVol2Num2/Articulo3Vol2Num2.pdf
+ */
+const getY = (r, g, b) => r * 0.29889531 + g * 0.58662247 + b * 0.11448223;
+const getI = (r, g, b) => r * 0.59597799 - g * 0.27417610 - b * 0.32180189;
+const getQ = (r, g, b) => r * 0.21147017 - g * 0.52261711 + b * 0.31114694;
+const getESq = (dY, dI, dQ) => 0.5053 * dY * dY + 0.299 * dI * dI + 0.1957 * dQ * dQ;
 
-/* eslint-disable */
-// calculate color difference according to the paper "Measuring perceived color difference
-// using YIQ NTSC transmission color space in mobile applications" by Y. Kotsarenko and F. Ramos
+// Get blended r/g/b value after applying alpha
+const applyAlpha = (c, a) => 255 + (c - 255) * a / 255;
 
-export default function colorDelta(img1, img2, k, m, yOnly) {
-    var a1 = img1[k + 3] / 255,
-        a2 = img2[m + 3] / 255,
-
-        r1 = blend(img1[k + 0], a1),
-        g1 = blend(img1[k + 1], a1),
-        b1 = blend(img1[k + 2], a1),
-
-        r2 = blend(img2[m + 0], a2),
-        g2 = blend(img2[m + 1], a2),
-        b2 = blend(img2[m + 2], a2),
-
-        y = rgb2y(r1, g1, b1) - rgb2y(r2, g2, b2);
-
-    if (yOnly) return y; // brightness difference only
-
-    var i = rgb2i(r1, g1, b1) - rgb2i(r2, g2, b2),
-        q = rgb2q(r1, g1, b1) - rgb2q(r2, g2, b2);
-
-    return 0.5053 * y * y + 0.299 * i * i + 0.1957 * q * q;
+/**
+ * Get dE square at given index from two pixel arrays
+ * @param {Uint8ClampedArray} img1 - pixel data of first image
+ * @param {Uint8ClampedArray} img2 - pixel data of second image
+ * @param {Number} i - pixel index
+ */
+export function colorDelta(img1, img2, index) {
+  return Math.sqrt(colorDeltaSq(img1, img2, index));
 }
 
-function rgb2y(r, g, b) { return r * 0.29889531 + g * 0.58662247 + b * 0.11448223; }
-function rgb2i(r, g, b) { return r * 0.59597799 - g * 0.27417610 - b * 0.32180189; }
-function rgb2q(r, g, b) { return r * 0.21147017 - g * 0.52261711 + b * 0.31114694; }
+export function colorDeltaSq(img1, img2, index) {
+  const i = index * 4;
+  const a1 = img1[i + 3];
+  const a2 = img2[i + 3];
 
-// blend semi-transparent color with white
-function blend(c, a) {
-    return 255 + (c - 255) * a;
+  const r1 = applyAlpha(img1[i + 0], a1);
+  const g1 = applyAlpha(img1[i + 1], a1);
+  const b1 = applyAlpha(img1[i + 2], a1);
+
+  const r2 = applyAlpha(img2[i + 0], a2);
+  const g2 = applyAlpha(img2[i + 1], a2);
+  const b2 = applyAlpha(img2[i + 2], a2);
+
+  return getESq(
+    getY(r1, g1, b1) - getY(r2, g2, b2),
+    getI(r1, g1, b1) - getI(r2, g2, b2),
+    getQ(r1, g1, b1) - getQ(r2, g2, b2)
+  );
 }
