@@ -44,7 +44,7 @@ class Root extends Component {
   }
 
   componentWillUnmount() {
-    if (this._animation) {
+    if (this._animationFrame) {
       window.cancelAnimationFrame(this._animationFrame);
     }
   }
