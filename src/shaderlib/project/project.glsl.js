@@ -254,10 +254,16 @@ vec4 project_position(vec4 position) {
 //
 
 vec4 project_to_viewspace(vec4 position) {
+  if (projectionMode == PROJECT_MERCATOR_OFFSETS) {
+    position.w *= projectionPixelsPerUnit.x;
+  }
   return modelViewMatrix * position;
 }
 
 vec4 project_to_clipspace(vec4 position) {
+  if (projectionMode == PROJECT_MERCATOR_OFFSETS) {
+    position.w *= projectionPixelsPerUnit.x;
+  }
   return projectionMatrix * position + projectionCenter;
 }
 
