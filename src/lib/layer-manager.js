@@ -55,7 +55,7 @@ import {LIFECYCLE} from './constants';
 import {Viewport} from './viewports';
 import {setOverride, layerEditListener, logLayer} from '../debug/seer-integration';
 import {experimental} from 'luma.gl';
-import {FramebufferObject} from 'luma.gl';
+import {Framebuffer} from 'luma.gl';
 
 const LOG_PRIORITY_LIFECYCLE = 2;
 const LOG_PRIORITY_LIFECYCLE_MINOR = 3;
@@ -147,14 +147,18 @@ export default class LayerManager {
     return this;
   }
 
-  pickLayer({x, y, mode, radius = 0}) {
+  // Pick the closest info at given coordinate
+  pickLayer({x, y, mode, radius = 0, layerIds}) {
     const {gl} = this.context;
+    const layers = layerIds ?
+      this.layers.filter(layer => layerIds.indexOf(layer.id) >= 0) :
+      this.layers;
 
     return pickLayers(gl, {
       x,
       y,
       radius,
-      layers: this.layers,
+      layers,
       mode,
       viewport: this.context.viewport,
       pickingFBO: this._getPickingBuffer(),
@@ -162,7 +166,8 @@ export default class LayerManager {
     });
   }
 
-  queryLayer({x, y, width, height}, layerIds) {
+  // Get all unique infos within a bounding box
+  queryLayer({x, y, width, height, layerIds}) {
     const {gl} = this.context;
     const layers = layerIds ?
       this.layers.filter(layer => layerIds.indexOf(layer.id) >= 0) :
@@ -212,14 +217,16 @@ export default class LayerManager {
     const {gl} = this.context;
 
     // Set up a frame buffer if needed
-    if (this.context.pickingFBO === null ||
-      gl.canvas.width !== this.context.pickingFBO.width ||
-      gl.canvas.height !== this.context.pickingFBO.height) {
-      this.context.pickingFBO = new FramebufferObject(gl, {
+    if (this.context.pickingFBO === null) {
+      this.context.pickingFBO = new Framebuffer(gl, {
         width: gl.canvas.width,
         height: gl.canvas.height
       });
     }
+    this.context.pickingFBO.resize({
+      width: gl.canvas.width,
+      height: gl.canvas.height
+    });
 
     return this.context.pickingFBO;
   }
