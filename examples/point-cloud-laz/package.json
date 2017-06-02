@@ -7,7 +7,7 @@
     "start-local": "webpack-dev-server --env.local --progress --hot --open"
   },
   "dependencies": {
-    "deck.gl": "^4.0.0-rc.4",
+    "deck.gl": "^4.0.6",
     "is-little-endian": "0.0.0",
     "luma.gl": "^3.0.1",
     "react": "^15.5.4",
