@@ -17,6 +17,13 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## Beta Releases
 
+### deck.gl v4.1.0-alpha.10
+- FIX: fix point cloud examples bug (#680)
+- FIX: fix modelMatrix in meter offset mode (#678)
+- NEW: Add queryObjects api to DeckGL component (#673)
+- Flatten CompositeLayer.renderLayer() output (#676)
+
+
 ### deck.gl v4.1.0-alpha.9
 - EXAMPLES: update the PlotLayer example with axis labels (#671)
 - FIX: Fix radiusMinPixels and radiusMaxPixels for METER_OFFSETS in scatterplot (#607)
