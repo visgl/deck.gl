@@ -12,7 +12,7 @@ export default class LayerInfo extends PureComponent {
   }
 
   render() {
-    const {hovered, clicked} = this.props;
+    const {hovered, clicked, queried} = this.props;
 
     return (
       <div id="layer-info">
@@ -23,6 +23,10 @@ export default class LayerInfo extends PureComponent {
         { clicked && (<div>
           <h4>Click</h4>
           <span>Layer: { clicked.layer.id } Object: { this._infoToString(clicked) }</span>
+        </div>) }
+        { queried && (<div>
+          <h4>Query</h4>
+          <span>{ queried.length } Objects found</span>
         </div>) }
       </div>
     );

@@ -119,5 +119,40 @@ object for the topmost picked layer at the coordinate
 are affected.
 - `event` - the original [MouseEvent](https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent) object
 
+### Methods
+
+##### `queryObject(options)`
+
+Get the closest pickable and visible object at screen coordinate.
+
+Parameters:
+- `options` (Object)
+  + `x` (Number) - x position in pixels
+  + `y` (Number) - y position in pixels
+  + `radius` (Number, optional) - radius of tolerance in pixels. Default `0`.
+  + `layerIds` (Array, optional) - a list of layer ids to query from.
+    If not specified, then all pickable and visible layers are queried.
+
+Returns: a single [`info`](/docs/get-started/interactivity.md#the-picking-info-object) object, or `null` if nothing is found.
+
+##### `queryObjects(options)`
+
+Get all pickable and visible objects within a bounding box.
+
+Parameters:
+- `options` (Object)
+  + `x` (Number) - left of the bounding box in pixels
+  + `y` (Number) - top of the bouding box in pixels
+  + `width` (Number, optional) - width of the bouding box in pixels. Default `1`.
+  + `height` (Number, optional) - height of the bouding box in pixels. Default `1`.
+  + `layerIds` (Array, optional) - a list of layer ids to query from.
+    If not specified, then all pickable and visible layers are queried.
+
+Returns: an array of unique [`info`](/docs/get-started/interactivity.md#the-picking-info-object) objects
+
+Remarks:
+- This query methods are designed to quickly find objects by utilizing the picking buffer. They offer more flexibility for developers to handle events in addition to the built-in hover and click callbacks.
+- Note there is a limitation in the query methods: occluded objects are not returned. To improve the results, you may try setting the `layerIds` parameter to limit the query to fewer layers.
+
 ## Source
 [src/react/deckgl.js](https://github.com/uber/deck.gl/blob/4.0-release/src/react/deckgl.js)

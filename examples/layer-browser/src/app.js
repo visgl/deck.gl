@@ -52,7 +52,8 @@ class App extends PureComponent {
         // rotationX: 0
       },
       hoveredItem: null,
-      clickedItem: null
+      clickedItem: null,
+      queriedItems: null
     };
 
     this._effects = [new ReflectionEffect()];
@@ -109,6 +110,13 @@ class App extends PureComponent {
 
   _onClick(info) {
     this.setState({clickedItem: info});
+  }
+
+  _onQueryObjects() {
+    const {width, height} = this.state;
+    const infos = this.refs.deckgl.queryObjects({x: 0, y: 0, width, height});
+    console.log(infos); // eslint-disable-line
+    this.setState({queriedItems: infos});
   }
 
   _renderExampleLayer(example, settings, index) {
@@ -185,7 +193,7 @@ class App extends PureComponent {
         { ...mapViewState }
         onChangeViewport={this._onViewportChanged}>
 
-        <DeckGL
+        <DeckGL ref="deckgl"
           debug
           id="default-deckgl-overlay"
           width={width} height={height}
@@ -215,13 +223,14 @@ class App extends PureComponent {
   }
 
   render() {
-    const {settings, activeExamples, hoveredItem, clickedItem} = this.state;
+    const {settings, activeExamples, hoveredItem, clickedItem, queriedItems} = this.state;
 
     return (
       <div>
         { this._renderMap() }
         { !MAPBOX_ACCESS_TOKEN && this._renderNoTokenWarning() }
         <div id="control-panel">
+          <button onClick={this._onQueryObjects}>Query Objects</button>
           <LayerControls
             title="Composite Settings"
             settings={settings}
@@ -232,7 +241,7 @@ class App extends PureComponent {
             onToggleLayer={this._onToggleLayer}
             onUpdateLayer={this._onUpdateLayerSettings} />
         </div>
-        <LayerInfo ref="infoPanel" hovered={hoveredItem} clicked={clickedItem} />
+        <LayerInfo ref="infoPanel" hovered={hoveredItem} clicked={clickedItem} queried={queriedItems} />
       </div>
     );
   }
