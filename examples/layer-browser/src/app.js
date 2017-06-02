@@ -111,6 +111,12 @@ class App extends PureComponent {
     this.setState({clickedItem: info});
   }
 
+  _onQueryObjects() {
+    const {width, height} = this.state;
+    const infos = this.refs.deckgl.queryObjects({x: 0, y: 0, width, height});
+    console.log(infos); // eslint-disable-line
+  }
+
   _renderExampleLayer(example, settings, index) {
     const {layer: Layer, props, getData} = example;
     const layerProps = Object.assign({}, props, settings);
@@ -185,7 +191,7 @@ class App extends PureComponent {
         { ...mapViewState }
         onChangeViewport={this._onViewportChanged}>
 
-        <DeckGL
+        <DeckGL ref="deckgl"
           debug
           id="default-deckgl-overlay"
           width={width} height={height}
@@ -222,6 +228,7 @@ class App extends PureComponent {
         { this._renderMap() }
         { !MAPBOX_ACCESS_TOKEN && this._renderNoTokenWarning() }
         <div id="control-panel">
+          <button onClick={this._onQueryObjects}>Query Rendered Objects</button>
           <LayerControls
             title="Composite Settings"
             settings={settings}

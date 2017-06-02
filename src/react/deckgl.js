@@ -82,6 +82,11 @@ export default class DeckGL extends React.Component {
     this._updateLayers(nextProps);
   }
 
+  /* Public API */
+  queryObjects(boundingBox, layerIds) {
+    return this.layerManager.queryLayer(boundingBox, layerIds);
+  }
+
   _updateLayers(nextProps) {
     const {width, height, latitude, longitude, zoom, pitch, bearing, altitude} = nextProps;
     let {viewport} = nextProps;

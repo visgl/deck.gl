@@ -50,7 +50,7 @@ import Layer from './layer';
 import {log} from './utils';
 import {flatten} from './utils/flatten';
 import assert from 'assert';
-import {drawLayers, pickLayers} from './draw-and-pick';
+import {drawLayers, pickLayers, queryLayers} from './draw-and-pick';
 import {LIFECYCLE} from './constants';
 import {Viewport} from './viewports';
 import {setOverride, layerEditListener, logLayer} from '../debug/seer-integration';
@@ -148,17 +148,8 @@ export default class LayerManager {
   }
 
   pickLayer({x, y, mode, radius = 0}) {
-    const {gl, uniforms} = this.context;
+    const {gl} = this.context;
 
-    // Set up a frame buffer if needed
-    if (this.context.pickingFBO === null ||
-      gl.canvas.width !== this.context.pickingFBO.width ||
-      gl.canvas.height !== this.context.pickingFBO.height) {
-      this.context.pickingFBO = new FramebufferObject(gl, {
-        width: gl.canvas.width,
-        height: gl.canvas.height
-      });
-    }
     return pickLayers(gl, {
       x,
       y,
@@ -166,8 +157,26 @@ export default class LayerManager {
       layers: this.layers,
       mode,
       viewport: this.context.viewport,
-      pickingFBO: this.context.pickingFBO,
+      pickingFBO: this._getPickingBuffer(),
       lastPickedInfo: this.context.lastPickedInfo
+    });
+  }
+
+  queryLayer({x, y, width, height}, layerIds) {
+    const {gl} = this.context;
+    const layers = layerIds ?
+      this.layers.filter(layer => layerIds.indexOf(layer.id) >= 0) :
+      this.layers;
+
+    return queryLayers(gl, {
+      x,
+      y,
+      width,
+      height,
+      layers,
+      mode: 'query',
+      viewport: this.context.viewport,
+      pickingFBO: this._getPickingBuffer()
     });
   }
 
@@ -198,6 +207,22 @@ export default class LayerManager {
   }
 
   // PRIVATE METHODS
+
+  _getPickingBuffer() {
+    const {gl} = this.context;
+
+    // Set up a frame buffer if needed
+    if (this.context.pickingFBO === null ||
+      gl.canvas.width !== this.context.pickingFBO.width ||
+      gl.canvas.height !== this.context.pickingFBO.height) {
+      this.context.pickingFBO = new FramebufferObject(gl, {
+        width: gl.canvas.width,
+        height: gl.canvas.height
+      });
+    }
+
+    return this.context.pickingFBO;
+  }
 
   // Match all layers, checking for caught errors
   // To avoid having an exception in one layer disrupt other layers

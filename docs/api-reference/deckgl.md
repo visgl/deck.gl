@@ -119,5 +119,23 @@ object for the topmost picked layer at the coordinate
 are affected.
 - `event` - the original [MouseEvent](https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent) object
 
+### Methods
+
+##### `queryObjects(boundingBox, layerId)`
+
+Get all pickable and visible objects within a bounding box.
+
+Parameters:
+- `boundingBox` (Object) - the bounding box in screen coordinates
+  + `x` (Number) - left of the box in pixels
+  + `y` (Number) - top of the box in pixels
+  + `width` (Number) - width of the box in pixels
+  + `height` (Number) - height of the box in pixels
+- `layerIds` (Array, optional) - a list of layer ids to query from.
+  If not specified, then all pickable and visible layers are queried.
+
+Returns: an array of unique [`info`](/docs/get-started/interactivity.md#the-picking-info-object) objects
+
+
 ## Source
 [src/react/deckgl.js](https://github.com/uber/deck.gl/blob/4.0-release/src/react/deckgl.js)
