@@ -139,9 +139,14 @@ class Example extends PureComponent {
   }
 
   _renderLazPointCloudLayer() {
-    return this.state.points.length && new PointCloudLayer({
+    const {points} = this.state;
+    if (!points || points.length === 0) {
+      return null;
+    }
+
+    return new PointCloudLayer({
       id: 'laz-point-cloud-layer',
-      data: this.state.points,
+      data: points,
       projectionMode: COORDINATE_SYSTEM.IDENTITY,
       getPosition: d => d.position,
       getNormal: d => [0, 0.5, 0.2],

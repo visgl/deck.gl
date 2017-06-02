@@ -90,9 +90,14 @@ class Example extends PureComponent {
   }
 
   _renderPointCloudLayer() {
-    return this.state.points.length && new PointCloudLayer({
+    const {points} = this.state;
+    if (!points || points.length === 0) {
+      return null;
+    }
+
+    return new PointCloudLayer({
       id: 'point-cloud-layer',
-      data: this.state.points,
+      data: points,
       projectionMode: COORDINATE_SYSTEM.IDENTITY,
       getPosition: d => d.position,
       getNormal: d => d.normal,
