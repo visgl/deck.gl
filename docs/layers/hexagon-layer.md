@@ -12,6 +12,8 @@ It takes the radius of hexagon bin, projects points into hexagon bins. The color
 and height of the hexagon is scaled by number of points it contains. HexagonLayer
 at the moment only works with COORDINATE_SYSTEM.LNGLAT.
 
+HexagonLayer is a `CompositeLayer`
+
 ```js
 import DeckGL, {HexagonLayer} from 'deck.gl';
 
@@ -27,7 +29,7 @@ const App = ({data, viewport}) => {
   const layer = new HexagonLayer({
     id: 'hexagon-layer',
     data,
-    cellSize: 500
+    radius: 1000
   });
 
   return (<DeckGL {...viewport} layers={[layer]} />);
@@ -50,10 +52,12 @@ Radius of hexagon bin in meters. The hexagons are pointy-topped (rather than fla
 
 - Default: `d3-hexbin`
 
-`hexagonAggregator` is the function to aggregate data into hexagonal bins.
-The `hexagonAggregator` takes props of the layer and current viewport as input.
-The output should be an array of hexagons with each formatted as `{centroid: [], points: []}`, where
-`centroid` is the center of the hexagon, and `points` is an array of points that contained by it.
+`hexagonAggregator` is a function to aggregate data into hexagonal bins.
+The `hexagonAggregator` takes props of the layer and current viewport as arguments.
+The output should be `{hexagons: [], hexagonVertices: []}`. `hexagons` is 
+an array of `{centroid: [], points: []}`, where `centroid` is the 
+center of the hexagon, and `points` is an array of points that contained by it.  `hexagonVertices` 
+(optional) is an array of points define the primitive hexagon geometry.
 
 By default, the `HexagonLayer` uses
 [d3-hexbin](https://github.com/d3/d3-hexbin) as `hexagonAggregator`,
@@ -75,14 +79,44 @@ to number of counts by passing in an arbitrary color domain. This property is ex
 Hexagon color ranges as an array of colors formatted as `[[255, 255, 255, 255]]`. Default is
 [colorbrewer](http://colorbrewer2.org/#type=sequential&scheme=YlOrRd&n=6) `6-class YlOrRd`.
 
+##### `getColorValue` (Function, optional)
+
+- Default: `points => points.length`
+
+`getColorValue` is the accessor function to get the value that bin color is based on. 
+It takes an array of points inside each bin as arguments, returns a number. For example, 
+You can pass in `getColorValue` to color the bins by avg/mean/max of a specific attributes of each point.
+By default `getColorValue` returns the length of the points array.
+
+Note: hexagon layer compares whether `getColorValue` has changed to
+recalculate the value for each bin that its color based on. You should
+pass in the function defined outside the render function so it doesn't create a 
+new function on every rendering pass. 
+
+```
+ class MyHexagonLayer {
+    getColorValue (points) {
+        return points.length;
+    }
+    
+    renderLayers() {
+      return new HexagonLayer({
+        id: 'hexagon-layer',
+        getColorValue: this.getColorValue // instead of getColorValue: (points) => { return points.length; }
+        data,
+        radius: 500
+      });
+    }
+ }
+```
+
 ##### `coverage` (Number, optional)
 
 - Default: `1`
 
 Hexagon radius multiplier, clamped between 0 - 1. The final radius of hexagon
 is calculated by `coverage * radius`. Note: coverage does not affect how points
-are binned.
-The radius of the bin is determined only by the `radius` property.
+are binned. The radius of the bin is determined only by the `radius` property.
 
 ##### `elevationDomain` (Array, optional)
 
@@ -114,19 +148,19 @@ all hexagons without updating the data.
 
 Whether to enable cell elevation. Cell elevation scale by count of points in each cell. If set to false, all cells will be flat.
 
-##### `upperPercentile' (Number, optional)
+##### `upperPercentile` (Number, optional)
 
 - Default: `100`
 
-Filter bins and re-calculate color by `upperPercentile`. Hexagons with counts
-bigger than the upperPercentile counts will be hidden.
+Filter bins and re-calculate color by `upperPercentile`. Hexagons with value
+larger than the upperPercentile will be hidden.
 
-##### `lowerPercentile' (Number, optional)
+##### `lowerPercentile` (Number, optional)
 
 - Default: `0`
 
-Filter bins and re-calculate color by `lowerPercentile`. Hexagons with counts
-smaller than the lowerPercentile counts will be hidden.
+Filter bins and re-calculate color by `lowerPercentile`. Hexagons with value
+smaller than the lowerPercentile will be hidden.
 
 ##### `fp64` (Boolean, optional)
 

@@ -18,8 +18,13 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {createGLContext} from 'luma.gl';
 import {WebMercatorViewport} from '../src/lib/viewports';
+import {TEST_EXPORTS as LAYER_TEST_EXPORTS} from '../src/lib/layer';
+import spy from 'spy';
+import global from 'global';
+
+const {mergeDefaultProps} = LAYER_TEST_EXPORTS;
+import {experimental} from 'luma.gl';
 
 /**
  * Covert all numbers in a deep structure to a given precision, allowing
@@ -44,12 +49,9 @@ export function toLowPrecision(input, precision = 11) {
   return input;
 }
 
-// Create and reuse a default context if none is supplied
-let glContext = null;
-
+// return global glContext
 function getGLContext() {
-  glContext = glContext || createGLContext();
-  return glContext;
+  return global.glContext;
 }
 
 function getViewport() {
@@ -61,8 +63,8 @@ export function testInitializeLayer({gl, layer, viewport}) {
   viewport = viewport || getViewport();
 
   const oldContext = {gl, viewport};
-  const context = {gl, viewport};
-  let failures = 0;
+  let failures = false;
+  const context = {gl, viewport, shaderCache: new experimental.ShaderCache({gl})};
   try {
     layer.context = context;
 
@@ -81,8 +83,202 @@ export function testInitializeLayer({gl, layer, viewport}) {
       context,
       changeFlags: layer.diffProps({}, layer.props, context)
     });
+
   } catch (error) {
-    failures++;
+    failures = true;
   }
+
   return failures;
+}
+
+export function testUpdateLayer({gl, layer, viewport, newProps}) {
+  gl = gl || getGLContext();
+  viewport = viewport || getViewport();
+
+  const oldContext = layer.context || {gl, viewport};
+  const context = {gl, viewport};
+  const oldProps = layer.oldProps || layer.props || {};
+
+  const mergedDefaultProps = mergeDefaultProps(layer);
+  layer.props = Object.assign({}, mergedDefaultProps, newProps);
+
+  let failures = false;
+  try {
+    layer.updateLayer({
+      oldProps,
+      props: layer.props,
+      oldContext,
+      context,
+      changeFlags: layer.diffProps(oldProps, layer.props, context)
+    });
+  } catch (error) {
+    failures = true;
+  }
+
+  return failures;
+}
+
+export function testDrawLayer({layer, uniforms = {}}) {
+  let failures = false;
+  try {
+    layer.drawLayer({uniforms});
+  } catch (error) {
+    failures = true;
+  }
+
+  return failures;
+}
+
+/**
+ * Initialize a layer, test layer update
+ * on a series of newProps, assert on the resulting layer
+ *
+ * Note: Updates are called sequentially. updateProps will be merged
+ * with previous props
+ *
+ * @param {Function} t - test function
+ * @param {Object} opt - test options
+ * @param {Object} opt.LayerComponent - The layer component class
+ * @param {Array} opt.testCases - A list of testCases
+ * @param {Object} opt.testCases.INITIAL_PROPS - The initial prop to initialize the layer with
+ * @param {Array} opt.testCases.UPDATES - The list of updates to update
+ * @param {Object} opt.testCases.UPDATES.updateProps - updated props
+ * @param {Function} opt.testCases.UPDATES.assert - callbacks with updated layer, and oldState
+ */
+
+export function testLayerUpdates(t, {LayerComponent, testCases}) {
+  const layer = new LayerComponent(testCases.INITIAL_PROPS);
+
+  let failures = testInitializeLayer({layer});
+  t.ok(!failures, `initialize ${LayerComponent.layerName} should not return failure`);
+
+  testCases.UPDATES.reduce((currentProps, {updateProps, assert}) => {
+
+    // merge updated Props with initialProps
+    const newProps = Object.assign({}, currentProps, updateProps);
+    // copy over old state
+    const oldState = Object.assign({}, layer.state);
+
+    // call update layer with new props
+    failures = testUpdateLayer({layer, newProps});
+    t.ok(!failures, `update ${LayerComponent.layerName} should not return failure`);
+
+    // call draw layer
+    failures = testDrawLayer({layer});
+    t.ok(!failures, `draw ${LayerComponent.layerName} should not return failure`);
+
+    // assert on updated layer
+    assert(layer, oldState, t);
+
+    return newProps;
+  }, testCases.INITIAL_PROPS);
+}
+
+/**
+ * Initialize a parent layer and its subLayer
+ * update the parent layer a series of newProps, assert on the updated subLayer
+ *
+ * Note: Updates are called sequentially. updateProps will be merged
+ * with previous props
+ *
+ * @param {Function} t - test function
+ * @param {Object} opt - test options
+ * @param {Object} opt.FunctionsToSpy - Functions that spied by spy
+ * @param {Object} opt.LayerComponent - The layer component class
+ * @param {Array} opt.testCases - A list of testCases
+ * @param {Object} opt.testCases.INITIAL_PROPS - The initial prop to initialize the layer with
+ * @param {Array} opt.testCases.UPDATES - The list of updates to update
+ * @param {Object} opt.testCases.UPDATES.updateProps - updated props
+ * @param {Function} opt.testCases.UPDATES.assert - callbacks with updated layer, and oldState
+ */
+
+export function testSubLayerUpdateTriggers(t, {FunctionsToSpy, LayerComponent, testCases}) {
+  let failures = false;
+  const spies = FunctionsToSpy.reduce((accu, curr) => Object.assign(accu, {
+    [curr]: spy(LayerComponent.prototype, curr)
+  }), {});
+
+  // initialize parent layer
+  const layer = new LayerComponent(testCases.INITIAL_PROPS);
+  failures = testInitializeLayer({layer});
+  t.ok(!failures, `initialize ${LayerComponent.layerName} subLayer should not fail`);
+
+  // initialize subLayer
+  const subLayer = layer.renderLayers();
+
+  failures = testInitializeLayer({layer: subLayer});
+  t.ok(!failures, `initialize ${LayerComponent.layerName} subLayer should not fail`);
+
+  testCases.UPDATES.reduce((currentProps, {updateProps, assert}) => {
+
+    // merge updated Props with initialProps
+    const newProps = Object.assign({}, currentProps, updateProps);
+
+    // call update layer with new props
+    testUpdateLayer({layer, newProps});
+
+    // layer manager should handle match subLayer and tranfer state and props
+    // here we assume subLayer matches copy over the new props
+    // from a new subLayer
+    const newSubLayer = layer.renderLayers();
+
+    testUpdateLayer({layer: subLayer, newProps: newSubLayer.props});
+    t.ok(!failures, `update ${LayerComponent.layerName} subLayer should not fail`);
+
+    // assert on updated subLayer
+    assert(subLayer, spies, t);
+
+    // reset spies
+    Object.keys(spies).forEach(k => spies[k].reset());
+
+    return newProps;
+  }, testCases.INITIAL_PROPS);
+
+  // restore spies
+  Object.keys(spies).forEach(k => spies[k].restore());
+}
+
+export function testCreateLayer(t, LayerComponent, props = {}) {
+  let failures = false;
+  let layer = null;
+
+  try {
+    layer = new LayerComponent(Object.assign({
+      id: `${LayerComponent.layerName}-0`
+    }, props));
+
+    t.ok(layer instanceof LayerComponent, `${LayerComponent.layerName} created`);
+  } catch (error) {
+    failures = true;
+  }
+  t.ok(!failures, `creating ${LayerComponent.layerName} should not fail`);
+
+  return layer;
+}
+
+export function testCreateEmptyLayer(t, LayerComponent, props = {}) {
+  let failures = false;
+  try {
+    const emptyLayer = new LayerComponent(Object.assign({
+      id: `empty${LayerComponent.layerName}`,
+      data: [],
+      pickable: true
+    }, props));
+
+    t.ok(emptyLayer instanceof LayerComponent, `Empty ${LayerComponent.layerName} created`);
+  } catch (error) {
+    failures = true;
+  }
+  t.ok(!failures, `creating empty ${LayerComponent.layerName} should not fail`);
+}
+
+export function testNullLayer(t, LayerComponent) {
+  t.doesNotThrow(
+    () => new LayerComponent({
+      id: 'nullPathLayer',
+      data: null,
+      pickable: true
+    }),
+    `Null ${LayerComponent.layerName} did not throw exception`
+  );
 }

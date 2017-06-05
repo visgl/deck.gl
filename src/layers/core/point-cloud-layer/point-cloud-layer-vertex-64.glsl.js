@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 
 export default `\
-#define SHADER_NAME point-cloud-layer-vertex-64-shader
+#define SHADER_NAME point-cloud-layer-vertex-shader-64
 
 attribute vec3 positions;
 

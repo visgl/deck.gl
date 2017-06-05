@@ -47,9 +47,15 @@ const defaultProps = {
 export default class ScatterplotLayer extends Layer {
   getShaders(id) {
     return enable64bitSupport(this.props) ? {
-      vs: scatterplotVertex64, fs: scatterplotFragment, modules: ['fp64', 'project64']
+      vs: scatterplotVertex64,
+      fs: scatterplotFragment,
+      modules: ['fp64', 'project64'],
+      shaderCache: this.context.shaderCache
     } : {
-      vs: scatterplotVertex, fs: scatterplotFragment, modules: []
+      vs: scatterplotVertex,
+      fs: scatterplotFragment,
+      modules: [],
+      shaderCache: this.context.shaderCache
     };
   }
 
@@ -113,9 +119,10 @@ export default class ScatterplotLayer extends Layer {
   }
 
   _getModel(gl) {
+    const shaders = assembleShaders(gl, this.getShaders());
+
     // a square that minimally cover the unit circle
     const positions = [-1, -1, 0, -1, 1, 0, 1, 1, 0, 1, -1, 0];
-    const shaders = assembleShaders(gl, this.getShaders());
 
     return new Model({
       gl,

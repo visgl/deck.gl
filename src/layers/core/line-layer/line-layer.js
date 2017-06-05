@@ -42,14 +42,19 @@ const defaultProps = {
 export default class LineLayer extends Layer {
   getShaders() {
     return enable64bitSupport(this.props) ? {
-      vs: lineVertex64, fs: lineFragment, modules: ['fp64', 'project64']
+      vs: lineVertex64,
+      fs: lineFragment,
+      modules: ['fp64', 'project64'],
+      shaderCache: this.context.shaderCache
     } : {
-      vs: lineVertex, fs: lineFragment, modules: []
+      vs: lineVertex,
+      fs: lineFragment,
+      modules: [],
+      shaderCache: this.context.shaderCache
     };
   }
 
   initializeState() {
-
     const {gl} = this.context;
     this.setState({model: this._getModel(gl)});
 
@@ -112,7 +117,6 @@ export default class LineLayer extends Layer {
      *   (0, 1)"-------------(1, 1)
      */
     const positions = [0, -1, 0, 0, 1, 0, 1, -1, 0, 1, 1, 0];
-
     const shaders = assembleShaders(gl, this.getShaders());
 
     return new Model({

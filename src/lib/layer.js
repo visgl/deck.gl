@@ -22,10 +22,13 @@
 import {COORDINATE_SYSTEM, LIFECYCLE} from './constants';
 import AttributeManager from './attribute-manager';
 import {log, compareProps, count} from './utils';
+import {getOverrides} from '../debug/seer-integration';
 import {GL} from 'luma.gl';
 import assert from 'assert';
 
 const LOG_PRIORITY_UPDATE = 2;
+
+const noop = () => {};
 
 /*
  * @param {string} props.id - layer name
@@ -38,8 +41,16 @@ const defaultProps = {
   visible: true,
   pickable: false,
   opacity: 0.8,
-  onHover: () => {},
-  onClick: () => {},
+  onHover: noop,
+  onClick: noop,
+  onDragStart: noop,
+  onDragMove: noop,
+  onDragEnd: noop,
+  onDragCancel: noop,
+  // Offset depth based on layer index to avoid z-fighting.
+  // Negative values pull layer towards the camera
+  // https://www.opengl.org/archives/resources/faq/technical/polygonoffset.htm
+  getPolygonOffset: ({layerIndex}) => [0, -layerIndex * 100],
   // Update triggers: a key change detection mechanism in deck.gl
   // See layer documentation
   updateTriggers: {},
@@ -60,6 +71,8 @@ export default class Layer {
     props = Object.assign({}, mergedDefaultProps, props);
     // Accept null as data - otherwise apps and layers need to add ugly checks
     props.data = props.data || [];
+    // Get the overrides from the extension if it's active
+    getOverrides(props);
     // Props are immutable
     Object.freeze(props);
 
@@ -105,11 +118,6 @@ export default class Layer {
   // Called once when layer is no longer matched and state will be discarded
   // App can destroy WebGL resources here
   finalizeState() {
-  }
-
-  // Implement to generate sublayers
-  renderLayers() {
-    return null;
   }
 
   // If state has a model, draw it with supplied uniforms
@@ -250,9 +258,9 @@ export default class Layer {
    */
   encodePickingColor(i) {
     return [
-      (i + 1) % 256,
-      Math.floor((i + 1) / 256) % 256,
-      Math.floor((i + 1) / 256 / 256) % 256
+      (i + 1) & 255,
+      ((i + 1) >> 8) & 255,
+      (((i + 1) >> 8) >> 8) & 255
     ];
   }
 
@@ -405,6 +413,13 @@ export default class Layer {
 
   // Calculates uniforms
   drawLayer({uniforms = {}}) {
+    const {gl} = this.context;
+    const {getPolygonOffset} = this.props;
+
+    // Apply polygon offset to avoid z-fighting
+    const offset = getPolygonOffset && getPolygonOffset(uniforms) || [0, 0];
+    gl.polygonOffset(offset[0], offset[1]);
+
     // Call subclass lifecycle method
     this.draw({uniforms});
     // End lifecycle method

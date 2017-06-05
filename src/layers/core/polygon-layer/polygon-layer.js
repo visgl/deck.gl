@@ -101,7 +101,7 @@ export default class PolygonLayer extends CompositeLayer {
       getPolygon, updateTriggers, lightSettings} = this.props;
 
     // base layer props
-    const {opacity, pickable, visible} = this.props;
+    const {opacity, pickable, visible, getPolygonOffset} = this.props;
 
     // viewport props
     const {positionOrigin, projectionMode, modelMatrix} = this.props;
@@ -120,6 +120,7 @@ export default class PolygonLayer extends CompositeLayer {
       opacity,
       pickable,
       visible,
+      getPolygonOffset,
       projectionMode,
       positionOrigin,
       modelMatrix,
@@ -145,6 +146,7 @@ export default class PolygonLayer extends CompositeLayer {
         opacity,
         pickable,
         visible,
+        getPolygonOffset,
         projectionMode,
         positionOrigin,
         modelMatrix,
@@ -173,6 +175,7 @@ export default class PolygonLayer extends CompositeLayer {
         opacity,
         pickable,
         visible,
+        getPolygonOffset,
         projectionMode,
         positionOrigin,
         modelMatrix,
@@ -186,9 +189,12 @@ export default class PolygonLayer extends CompositeLayer {
       });
 
     return [
-      polygonLayer,
+      // If not extruded: flat fill layer is drawn below outlines
+      !extruded && polygonLayer,
       polygonWireframeLayer,
-      polygonLineLayer
+      polygonLineLayer,
+      // If extruded: draw fill layer last for correct blending behavior
+      extruded && polygonLayer
     ].filter(Boolean);
   }
 }

@@ -26,10 +26,14 @@ class Root extends Component {
         height: 500
       }
     };
+
+    this._resize = this._resize.bind(this);
+    this._onChangeViewport = this._onChangeViewport.bind(this);
+    this._onHover = this._onHover.bind(this);
   }
 
   componentDidMount() {
-    window.addEventListener('resize', this._resize.bind(this));
+    window.addEventListener('resize', this._resize);
     this._resize();
     this._onChangeViewport(OrbitController.fitBounds(this.state.viewport, [[0, 0, 0], [1, 1, 1]]));
   }
@@ -46,17 +50,31 @@ class Root extends Component {
     this.setState({viewport: this.state.viewport});
   }
 
+  _onHover(info) {
+    const hoverInfo = info.sample ? info : null;
+    if (hoverInfo !== this.state.hoverInfo) {
+      this.setState({hoverInfo});
+    }
+  }
+
   render() {
-    const {viewport} = this.state;
+    const {viewport, hoverInfo} = this.state;
 
     return (
       <OrbitController
         {...viewport}
-        onChangeViewport={this._onChangeViewport.bind(this)} >
-        <DeckGLOverlay viewport={viewport}
+        onChangeViewport={this._onChangeViewport} >
+        <DeckGLOverlay
+          viewport={viewport}
           equation={equation}
           resolution={200}
-          showAxis={true} />
+          showAxis={true}
+          onHover={this._onHover} />
+
+        {hoverInfo && <div className="tooltip" style={{left: hoverInfo.x, top: hoverInfo.y}} >
+          { hoverInfo.sample.map(x => x.toFixed(3)).join(', ') }
+        </div>}
+
       </OrbitController>
     );
   }

@@ -19,7 +19,8 @@
 // THE SOFTWARE.
 
 /* global window */
-import React, {PropTypes, createElement} from 'react';
+import React, {createElement} from 'react';
+import PropTypes from 'prop-types';
 import autobind from './autobind';
 import {createGLContext} from 'luma.gl';
 /* global requestAnimationFrame, cancelAnimationFrame */

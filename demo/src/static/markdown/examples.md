@@ -2,6 +2,13 @@
 
 <div>
   <div class="thumb">
+    <div class="bg-black" data-title="Meteorites Landings" data-name="IconLayer">
+      <a href="#/examples/core-layers/icon-layer">
+        <img src="images/demo-thumb-icon.jpg" />
+      </a>
+    </div>
+  </div>
+  <div class="thumb">
     <div class="bg-black" data-title="Flights at Heathrow" data-name="LineLayer">
       <a href="#/examples/core-layers/line-layer">
         <img src="images/demo-thumb-line.jpg" />
@@ -14,13 +21,6 @@
         <img src="images/demo-thumb-heatmap.jpg" />
       </a>
       </div>
-  </div>
-  <div class="thumb">
-    <div class="bg-black" data-title="Where Films Were Made" data-name="IconLayer">
-      <a href="#/examples/core-layers/icon-layer">
-        <img src="images/demo-thumb-icon.jpg" />
-      </a>
-    </div>
   </div>
   <div class="thumb">
     <div data-title="Vancouver Property Value" data-name="GeoJsonLayer">

@@ -131,6 +131,24 @@ Format a tick value on y axis to text string.
 
 Format a tick value on z axis to text string.
 
+##### `xTitle` (String, optional)
+
+- Default: `x`
+
+X axis title string.
+
+##### `yTitle` (String, optional)
+
+- Default: `y`
+
+Y axis title string.
+
+##### `zTitle` (String, optional)
+
+- Default: `z`
+
+Z axis title string.
+
 ##### `axesPadding` (Number, optional)
 
 - Default: `0`
@@ -142,3 +160,9 @@ Amount that grids should setback from the bounding box. Relative to the size of 
 - Default: `[0, 0, 0, 255]`
 
 Color to draw the grids with, in `[r, g, b, a]`.
+
+##### `axesTitles` (Array, optional)
+
+- Default: `['x', 'z', 'y']`
+
+Strings to draw next to each axis as their titles, note that the second element is the axis that points upwards.

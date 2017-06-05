@@ -1,0 +1,34 @@
+{
+  "burger": {
+    "x": 0,
+    "y": 0,
+    "width": 200,
+    "height": 200,
+    "anchorX": 100,
+    "anchorY": 100
+  },
+  "fries": {
+    "x": 200,
+    "y": 0,
+    "width": 200,
+    "height": 200,
+    "anchorX": 100,
+    "anchorY": 100
+  },
+  "soda": {
+    "x": 0,
+    "y": 200,
+    "width": 200,
+    "height": 200,
+    "anchorX": 100,
+    "anchorY": 100
+  },
+  "pie": {
+    "x": 200,
+    "y": 200,
+    "width": 200,
+    "height": 200,
+    "anchorX": 100,
+    "anchorY": 100
+  }
+}

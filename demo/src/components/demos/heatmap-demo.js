@@ -38,7 +38,7 @@ export default class HeatmapDemo extends Component {
       <div>
         <h3>United Kingdom Road Safety</h3>
         <p>Personal injury road accidents in GB from 1979</p>
-        <p>The layer aggregates data within the boundaries of each hexagon cells</p>
+        <p>The layer aggregates data within the boundary of each hexagon cell</p>
 
         <div className="layout">
           {colorRamp.map((c, i) => (

@@ -16,3 +16,9 @@ node_js:
   - 7
 before_script:
   - export DISPLAY=:99.0; sh -e /etc/init.d/xvfb start
+  - ulimit -c unlimited -S       # enable core dumps
+script:
+  - npm run lint
+  - npm run cover
+after_success:
+  - cat coverage/lcov.info | coveralls

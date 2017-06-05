@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 
 export default `\
-#define SHADER_NAME scatterplot-layer-fragment-shader
+#define SHADER_NAME icon-layer-fragment-shader
 
 #ifdef GL_ES
 precision highp float;

@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 
 export default `\
-#define SHADER_NAME polygon-layer-fragment-shader
+#define SHADER_NAME solid-polygon-layer-fragment-shader
 
 #ifdef GL_ES
 precision highp float;

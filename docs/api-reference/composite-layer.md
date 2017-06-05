@@ -11,6 +11,11 @@ that you extend this class.
 
 ## Methods
 
+##### `draw`
+
+A composite layer does not render directly into the WebGL context.
+The `draw` method inherited from the base class is therefore never called.
+
 ##### `renderLayers`
 
 Allows a layer to "render" or insert one or more deck.gl layers after itself.

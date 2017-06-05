@@ -28,21 +28,45 @@ import {
   PolygonLayer,
   PathLayer,
   ChoroplethLayer,
-  ExtrudedChoroplethLayer64
+  ExtrudedChoroplethLayer64,
+  WebMercatorViewport
 } from 'deck.gl';
 
 import {parseColor} from 'deck.gl/lib/utils/color';
 
+import {COORDINATE_SYSTEM} from '../../src/lib/constants';
+import {getUniformsFromViewport} from '../../src/lib/viewport-uniforms';
 import {testInitializeLayer} from '../test-utils';
 
 const suite = new Suite();
-const lines = data.choropleths.features.map(f => ({path: f.geometry.coordinates[0]}));
 
 const COLOR_STRING = '#FFEEBB';
 const COLOR_ARRAY = [222, 222, 222];
+const VIEWPORT_PARAMS = {
+  width: 500, height: 500,
+  longitude: -122, latitude: 37, zoom: 12, pitch: 30
+};
+
+let testIdx = 0;
+const testLayer = new ScatterplotLayer({data: data.points});
 
 // add tests
 suite
+.add('getUniformsFromViewport#LNGLAT', () => {
+  return getUniformsFromViewport(data.sampleViewport, {
+    modelMatrix: data.sampleModelMatrix,
+    projectionMode: COORDINATE_SYSTEM.LNGLAT
+  });
+})
+.add('getUniformsFromViewport#METER_OFFSETS', () => {
+  return getUniformsFromViewport(data.sampleViewport, {
+    modelMatrix: data.sampleModelMatrix,
+    projectionMode: COORDINATE_SYSTEM.METER_OFFSETS
+  });
+})
+.add('WebMercatorViewport', () => {
+  return new WebMercatorViewport(VIEWPORT_PARAMS);
+})
 .add('color#parseColor (string)', () => {
   return parseColor(COLOR_STRING);
 })
@@ -63,7 +87,7 @@ suite
   testInitializeLayer({layer});
 })
 .add('PathLayer#initialize', () => {
-  const layer = new PathLayer({data: lines});
+  const layer = new PathLayer({data: data.lines});
   testInitializeLayer({layer});
 })
 .add('ChoroplethLayer#initialize', () => {
@@ -104,6 +128,10 @@ suite
   } catch (error) {
     console.error(error);
   }
+})
+.add('encoding picking color', () => {
+  testIdx++;
+  testLayer.encodePickingColor(testIdx);
 })
 // .add('ScatterplotLayer#initialize', () => {
 //   const layer = new ScatterplotLayer({data: data.points});

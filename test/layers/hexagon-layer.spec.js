@@ -19,15 +19,139 @@
 // THE SOFTWARE.
 
 import test from 'tape-catch';
-import * as data from '../data';
-import {testInitializeLayer} from '../test-utils';
+import spy from 'spy';
 
-import {HexagonLayer} from 'deck.gl';
+import * as data from '../data';
+import {
+  testInitializeLayer,
+  testLayerUpdates,
+  testSubLayerUpdateTriggers
+} from '../test-utils';
+
+import {HexagonLayer, HexagonCellLayer} from 'deck.gl';
+
+const getColorValue = points => points.length;
+const getPosition = d => d.COORDINATES;
+
+const TEST_CASES = {
+  // props to initialize layer with
+  INITIAL_PROPS: {
+    data: data.points,
+    radius: 400,
+    getPosition
+  },
+  // list of update props to call and asserts on the resulting layer
+  UPDATES: [{
+    updateProps: {
+      radius: 800
+    },
+    assert: (layer, oldState, t) => {
+      t.ok(oldState.hexagons !== layer.state.hexagons,
+        'should update layer data');
+
+      t.ok(oldState.sortedBins !== layer.state.sortedBins,
+        'should update sortedBins');
+
+      t.ok(oldState.valueDomain !== layer.state.valueDomain,
+        'should update valueDomain');
+    }
+  }, {
+    updateProps: {
+      getColorValue
+    },
+    assert: (layer, oldState, t) => {
+      t.ok(oldState.hexagons === layer.state.hexagons,
+        'should not update layer data');
+
+      t.ok(oldState.sortedBins !== layer.state.sortedBins,
+       'should update sortedBins');
+
+      t.ok(oldState.valueDomain !== layer.state.valueDomain,
+        'should re calculate valueDomain');
+    }
+  }, {
+    updateProps: {
+      upperPercentile: 90
+    },
+    assert: (layer, oldState, t) => {
+      t.ok(oldState.hexagons === layer.state.hexagons,
+        'should not update layer data');
+
+      t.ok(oldState.sortedBins === layer.state.sortedBins,
+       'should not update sortedBins');
+
+      t.ok(oldState.valueDomain !== layer.state.valueDomain,
+        'should re calculate valueDomain');
+    }
+  }]
+};
+
+const SUBLAYER_TEST_CASES = {
+  // props to initialize layer with
+  INITIAL_PROPS: {
+    data: data.points,
+    radius: 400,
+    getPosition
+  },
+  // list of update props to call and asserts on the resulting layer
+  UPDATES: [{
+    updateProps: {
+      radius: 800
+    },
+    assert: (subLayer, spies, t) => {
+      t.ok(spies._onGetSublayerColor.called,
+        'update radius should call _onGetSublayerColor');
+      t.ok(spies._onGetSublayerElevation.called,
+        'update radius should call _onGetSublayerElevation');
+    }
+  }, {
+    updateProps: {
+      opacity: 0.1
+    },
+    assert: (subLayer, spies, t) => {
+      t.ok(!spies._onGetSublayerColor.called,
+        'update opacity should not call _onGetSublayerColor');
+      t.ok(!spies._onGetSublayerElevation.called,
+        'update opacity  should not call _onGetSublayerElevation');
+    }
+  }, {
+    updateProps: {
+      getColorValue
+    },
+    assert: (subLayer, spies, t) => {
+      t.ok(spies._onGetSublayerColor.called,
+        'update getColorValue should call _onGetSublayerColor');
+      t.ok(!spies._onGetSublayerElevation.called,
+        'update getColorValue should not call _onGetSublayerElevation');
+    }
+  }, {
+    updateProps: {
+      upperPercentile: 90
+    },
+    assert: (subLayer, spies, t) => {
+      t.ok(spies._onGetSublayerColor.called,
+        'update upperPercentile should call _onGetSublayerColor');
+      t.ok(!spies._onGetSublayerElevation.called,
+        'update upperPercentile should not call _onGetSublayerElevation');
+    }
+  }, {
+    updateProps: {
+      elevationRange: [0, 100]
+    },
+    assert: (subLayer, spies, t) => {
+      t.ok(!spies._onGetSublayerColor.called,
+        'update elevationRange should not call _onGetSublayerColor');
+      t.ok(spies._onGetSublayerElevation.called,
+        'update elevationRange should call _onGetSublayerElevation');
+    }
+  }]
+};
 
 test('HexagonLayer#constructor', t => {
   let layer = new HexagonLayer({
     id: 'emptyGeoJsonLayer',
     data: [],
+    radius: 1,
     pickable: true
   });
   t.ok(layer instanceof HexagonLayer, 'Empty HexagonLayer created');
@@ -37,14 +161,15 @@ test('HexagonLayer#constructor', t => {
     pickable: true
   });
   t.ok(layer instanceof HexagonLayer, 'HexagonLayer created');
+  t.equal(layer.props.radius, 1000, 'set to default radius if not specified');
 
   layer = new HexagonLayer({
     data: data.points,
-    radius: null,
+    radius: 500,
+    getPosition,
     pickable: true
   });
   t.ok(layer instanceof HexagonLayer, 'HexagonLayer created');
-  t.equal(layer.props.radius, 1000, 'set to default radius if not speicified');
 
   testInitializeLayer({layer});
 
@@ -56,6 +181,59 @@ test('HexagonLayer#constructor', t => {
     }),
     'Null HexagonLayer did not throw exception'
   );
+
+  t.end();
+});
+
+test('HexagonLayer#renderSubLayer', t => {
+
+  spy(HexagonLayer.prototype, '_onGetSublayerColor');
+  spy(HexagonLayer.prototype, '_onGetSublayerElevation');
+
+  const layer = new HexagonLayer({
+    data: data.points,
+    radius: 500,
+    getPosition,
+    pickable: true
+  });
+
+  testInitializeLayer({layer});
+
+  // render sublayer
+  const subLayer = layer.renderLayers();
+  testInitializeLayer({layer: subLayer});
+
+  t.ok(subLayer instanceof HexagonCellLayer, 'HexagonCellLayer rendered');
+
+  // should call attribute updater twice
+  // because test util calls both initialize and update layer
+  t.ok(HexagonLayer.prototype._onGetSublayerColor.called,
+    'should call _onGetSublayerColor number of hexagons times 2');
+  t.ok(HexagonLayer.prototype._onGetSublayerElevation.called,
+    'should call _onGetSublayerElevation number of hexagons times 2');
+  HexagonLayer.prototype._onGetSublayerColor.restore();
+  HexagonLayer.prototype._onGetSublayerElevation.restore();
+
+  t.end();
+});
+
+test('HexagonLayer#updateLayer', t => {
+  testLayerUpdates(t, {LayerComponent: HexagonLayer, testCases: TEST_CASES});
+  t.end();
+});
+
+test('HexagonLayer#updateTriggers', t => {
+
+  const FunctionsToSpy = [
+    '_onGetSublayerColor',
+    '_onGetSublayerElevation'
+  ];
+
+  testSubLayerUpdateTriggers(t, {
+    FunctionsToSpy,
+    LayerComponent: HexagonLayer,
+    testCases: SUBLAYER_TEST_CASES
+  });
 
   t.end();
 });

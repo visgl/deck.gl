@@ -52,7 +52,8 @@ import assert from 'assert';
 import {drawLayers, pickLayers} from './draw-and-pick';
 import {LIFECYCLE} from './constants';
 import {Viewport} from './viewports';
-
+import {setOverride, layerEditListener, logLayer} from '../debug/seer-integration';
+import {experimental} from 'luma.gl';
 import {FramebufferObject} from 'luma.gl';
 
 const LOG_PRIORITY_LIFECYCLE = 2;
@@ -75,9 +76,20 @@ export default class LayerManager {
       lastPickedInfo: {
         index: -1,
         layerId: null
-      }
+      },
+      shaderCache: new experimental.ShaderCache({gl})
     };
+
     Object.seal(this.context);
+
+    /**
+     * Set an override on the specified property and update the layers
+     */
+    layerEditListener(payload => {
+      setOverride(payload.itemKey, payload.valuePath, payload.value);
+      const newLayers = this.layers.map(layer => new layer.constructor(layer.props));
+      this.updateLayers({newLayers});
+    });
   }
 
   setViewport(viewport) {
@@ -134,7 +146,7 @@ export default class LayerManager {
     return this;
   }
 
-  pickLayer({x, y, mode}) {
+  pickLayer({x, y, mode, radius = 0}) {
     const {gl, uniforms} = this.context;
 
     // Set up a frame buffer if needed
@@ -149,10 +161,7 @@ export default class LayerManager {
     return pickLayers(gl, {
       x,
       y,
-      uniforms: {
-        renderPickingBuffer: true,
-        picking_uEnable: true
-      },
+      radius,
       layers: this.layers,
       mode,
       viewport: this.context.viewport,
@@ -216,6 +225,7 @@ export default class LayerManager {
   }
 
   /* eslint-disable max-statements */
+
   _matchSublayers({newLayers, oldLayerMap, generatedLayers}) {
     // Filter out any null layers
     newLayers = newLayers.filter(newLayer => newLayer !== null);
@@ -233,10 +243,12 @@ export default class LayerManager {
           log.once(0, `Multipe new layers with same id ${layerName(newLayer)}`);
         }
 
-
         // Only transfer state at this stage. We must not generate exceptions
         // until all layers' state have been transferred
         if (oldLayer) {
+
+          logLayer(newLayer);
+
           log(LOG_PRIORITY_LIFECYCLE_MINOR,
             `matched ${layerName(newLayer)}`, oldLayer, '=>', newLayer);
           this._transferLayerState(oldLayer, newLayer);
@@ -247,7 +259,7 @@ export default class LayerManager {
         generatedLayers.push(newLayer);
 
         // Call layer lifecycle method: render sublayers
-        let sublayers = newLayer.renderLayers();
+        let sublayers = newLayer.isComposite ? newLayer.renderLayers() : null;
         // End layer lifecycle method: render sublayers
 
         if (sublayers) {

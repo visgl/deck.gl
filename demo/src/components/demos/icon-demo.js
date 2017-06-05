@@ -12,8 +12,8 @@ export default class IconDemo extends Component {
   static get data() {
     return [
       {
-        url: 'data/film-locations.txt',
-        worker: 'workers/film-locations-decoder.js'
+        url: 'data/meteorites.txt',
+        worker: 'workers/meteorites-decoder.js'
       },
       {
         url: 'images/location-icon-mapping.json'
@@ -38,17 +38,17 @@ export default class IconDemo extends Component {
   static renderInfo(meta) {
     return (
       <div>
-        <h3>Where Films Were Made</h3>
-        <p>The location where films are shot, from 2007 to 2017</p>
-        <p>Hover on a pin to see the title list</p>
+        <h3>Meteorites Landings</h3>
+        <p>Data set from The Meteoritical Society showing information on all of
+          the known meteorite landings.</p>
+        <p>Hover on a pin to see the list of names</p>
         <p>Click on a pin to see the details</p>
-        <p>Data source: <a href="http://www.imdb.com/conditions">IMDB</a></p>
+        <p>Data source:
+          <a href="https://data.nasa.gov/Space-Science/Meteorite-Landings/gh4g-9sfh">NASA</a>
+        </p>
         <div className="layout">
-          <div className="stat col-1-2">No. of Movies
-            <b>{ readableInteger(meta.movies || 0) }</b>
-          </div>
-          <div className="stat col-1-2">No. of Locations
-            <b>{ readableInteger(meta.locations || 0) }</b>
+          <div className="stat col-1-2">No. of Meteorites
+            <b>{ readableInteger(meta.count || 0) }</b>
           </div>
         </div>
       </div>
@@ -74,18 +74,10 @@ export default class IconDemo extends Component {
     let hoveredItems = null;
 
     if (object) {
-      hoveredItems = {};
       if (showCluster) {
-        object.zoomLevels[z].points.forEach(p => {
-          let scenes = hoveredItems[p.name];
-          if (!scenes) {
-            scenes = [];
-            hoveredItems[p.name] = scenes;
-          }
-          scenes.push(p.scene);
-        });
+        hoveredItems = object.zoomLevels[z].points.sort((m1, m2) => m1.year - m2.year);
       } else {
-        hoveredItems[object.name] = [object.scene];
+        hoveredItems = [object];
       }
     }
 
@@ -110,11 +102,13 @@ export default class IconDemo extends Component {
              onWheel={stopPropagation}
              onMouseDown={stopPropagation}>
           {
-            Object.keys(hoveredItems).map(name => {
+            hoveredItems.map(({name, year, mass, class: meteorClass}) => {
               return (
                 <div key={name}>
                   <h5>{name}</h5>
-                  { hoveredItems[name].map((s, i) => <p key={i}>{s}</p>) }
+                  <div>Year: {year || 'unknown'}</div>
+                  <div>Class: {meteorClass}</div>
+                  <div>Mass: {mass}g</div>
                 </div>
               );
             })
@@ -125,9 +119,8 @@ export default class IconDemo extends Component {
 
     return (
       <div className="tooltip" style={{left: x, top: y}} >
-        {
-          Object.keys(hoveredItems).slice(0, 20).map(name => <div key={name}><h5>{name}</h5></div>)
-        }
+        { hoveredItems.slice(0, 20).map(({name, year}) =>
+          <div key={name}><h5>{name} {year ? `(${year})` : ''}</h5></div>) }
       </div>
     );
   }

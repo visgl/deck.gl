@@ -19,6 +19,9 @@ const defaultProps = {
   xTickFormat: AxesLayer.defaultProps.xTickFormat,
   yTickFormat: AxesLayer.defaultProps.yTickFormat,
   zTickFormat: AxesLayer.defaultProps.zTickFormat,
+  xTitle: AxesLayer.defaultProps.xTitle,
+  yTitle: AxesLayer.defaultProps.yTitle,
+  zTitle: AxesLayer.defaultProps.zTitle,
   axesPadding: AxesLayer.defaultProps.padding,
   axesColor: AxesLayer.defaultProps.color
 };
@@ -46,6 +49,9 @@ const defaultProps = {
  * @param {Function} [props.xTickFormat] - returns a string from value
  * @param {Function} [props.yTickFormat] - returns a string from value
  * @param {Function} [props.zTickFormat] - returns a string from value
+ * @param {String} [props.xTitle] - x axis title
+ * @param {String} [props.yTitle] - y axis title
+ * @param {String} [props.zTitle] - z axis title
 
  * @param {Number} [props.axesPadding] - amount to set back grids from the plot,
       relative to the size of the bounding box
@@ -90,6 +96,9 @@ export default class PlotLayer extends CompositeLayer {
         xTickFormat: this.props.xTickFormat,
         yTickFormat: this.props.yTickFormat,
         zTickFormat: this.props.zTickFormat,
+        xTitle: this.props.xTitle,
+        yTitle: this.props.yTitle,
+        zTitle: this.props.zTitle,
         padding: this.props.axesPadding,
         color: this.props.axesColor,
         visible: this.props.drawAxes,

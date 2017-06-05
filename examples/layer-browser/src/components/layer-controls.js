@@ -46,7 +46,7 @@ export default class LayerControls extends PureComponent {
     if (propType && Number.isFinite(propType.max)) {
       max = propType.max;
 
-    } else if (/radiusScale|elevationScale|width|height|pixel|size|miter/i.test(settingName) &&
+    } else if (/radius|scale|width|height|pixel|size|miter/i.test(settingName) &&
 
       (/^((?!scale).)*$/).test(settingName)) {
       max = 100;
