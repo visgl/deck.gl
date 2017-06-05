@@ -27,7 +27,10 @@ const defaultProps = {
   yTickFormat: DEFAULT_TICK_FORMAT,
   zTickFormat: DEFAULT_TICK_FORMAT,
   padding: 0,
-  color: [0, 0, 0, 255]
+  color: [0, 0, 0, 255],
+  xTitle: 'x',
+  yTitle: 'y',
+  zTitle: 'z'
 };
 
 /* Utils */
@@ -49,11 +52,20 @@ function getTicks(props) {
     ticks = scale.ticks(ticks);
   }
 
-  return ticks.map(t => ({
-    value: t,
-    position: scale(t),
-    text: tickFormat(t, axis)
-  }));
+  const titleTick = {
+    value: props[`${axis}Title`],
+    position: (scale.range()[0] + scale.range()[1]) / 2,
+    text: props[`${axis}Title`]
+  };
+
+  return [
+    ...ticks.map(t => ({
+      value: t,
+      position: scale(t),
+      text: tickFormat(t, axis)
+    })),
+    titleTick
+  ];
 }
 
 /*
@@ -75,6 +87,9 @@ function getTicks(props) {
  * @param {Function} [props.xTickFormat] - returns a string from value
  * @param {Function} [props.yTickFormat] - returns a string from value
  * @param {Function} [props.zTickFormat] - returns a string from value
+ * @param {String} [props.xTitle] - x axis title
+ * @param {String} [props.yTitle] - y axis title
+ * @param {String} [props.zTitle] - z axis title
  * @param {Number} [props.fontSize] - size of the labels
  * @param {Array} [props.color] - color of the gridlines, in [r,g,b,a]
  */
@@ -312,16 +327,22 @@ export default class AxesLayer extends Layer {
     attribute.value = new Float32Array(flatten(normals));
   }
 
+  calculateInstanceIsTitle(attribute) {
+    const {ticks} = this.state;
+
+    const isTitle = ticks.map(axisTicks => {
+      const ticksCount = axisTicks.length - 1;
+      return axisTicks.map((t, i) => i < ticksCount ? 0 : 1);
+    });
+
+    attribute.value = new Float32Array(flatten(isTitle));
+  }
+
   renderLabelTexture(ticks) {
 
     if (this.state.labels) {
       this.state.labels.labelTexture.delete();
     }
-
-    const axesLabels = ticks.map((axisTicks, axisId) => {
-      const ticksCount = axisTicks.length - 1;
-      return axisTicks.map((t, i) => i < ticksCount ? t : axesTitles[axisId]);
-    });
 
     // attach a 2d texture of all the label texts
     const textureInfo = textMatrixToTexture(this.context.gl, ticks, DEFAULT_FONT_SIZE * 4);
