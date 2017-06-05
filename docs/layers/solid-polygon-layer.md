@@ -10,7 +10,7 @@ The SolidPolygon Layer renders filled polygons.
 ```js
 import DeckGL, {SolidPolygonLayer} from 'deck.gl';
 
-new PolygonLayer({
+new SolidPolygonLayer({
   data: [
     [[0, 0], [0, 1], [1, 1], [1, 0], [0, 0]],   // Simple polygon (array of coords)
     [                                           // Complex polygon with one hole
