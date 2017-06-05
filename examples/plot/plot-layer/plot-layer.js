@@ -49,6 +49,9 @@ const defaultProps = {
  * @param {Function} [props.xTickFormat] - returns a string from value
  * @param {Function} [props.yTickFormat] - returns a string from value
  * @param {Function} [props.zTickFormat] - returns a string from value
+ * @param {String} [props.xTitle] - x axis title
+ * @param {String} [props.yTitle] - y axis title
+ * @param {String} [props.zTitle] - z axis title
 
  * @param {Number} [props.axesPadding] - amount to set back grids from the plot,
       relative to the size of the bounding box

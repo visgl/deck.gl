@@ -87,6 +87,9 @@ function getTicks(props) {
  * @param {Function} [props.xTickFormat] - returns a string from value
  * @param {Function} [props.yTickFormat] - returns a string from value
  * @param {Function} [props.zTickFormat] - returns a string from value
+ * @param {String} [props.xTitle] - x axis title
+ * @param {String} [props.yTitle] - y axis title
+ * @param {String} [props.zTitle] - z axis title
  * @param {Number} [props.fontSize] - size of the labels
  * @param {Array} [props.color] - color of the gridlines, in [r,g,b,a]
  */

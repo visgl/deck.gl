@@ -131,6 +131,24 @@ Format a tick value on y axis to text string.
 
 Format a tick value on z axis to text string.
 
+##### `xTitle` (String, optional)
+
+- Default: `x`
+
+X axis title string.
+
+##### `yTitle` (String, optional)
+
+- Default: `y`
+
+Y axis title string.
+
+##### `zTitle` (String, optional)
+
+- Default: `z`
+
+Z axis title string.
+
 ##### `axesPadding` (Number, optional)
 
 - Default: `0`
