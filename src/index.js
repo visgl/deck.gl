@@ -25,6 +25,7 @@ export {assembleShaders} from './shader-utils';
 // Lib
 export {Layer, CompositeLayer, LayerManager, AttributeManager} from './lib';
 export {COORDINATE_SYSTEM} from './lib';
+
 // Viewports
 export {default as Viewport} from './lib/viewports/viewport';
 export {default as PerspectiveViewport} from './lib/viewports/perspective-viewport';
