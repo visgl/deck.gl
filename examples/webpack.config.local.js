@@ -21,6 +21,8 @@ const LOCAL_DEV_CONFIG = {
     }
   },
 
+  devtool: 'source-map',
+
   resolve: {
     alias: {
       // Imports the deck.gl library from the src directory in this repo
@@ -33,10 +35,10 @@ const LOCAL_DEV_CONFIG = {
   module: {
     rules: [
       {
-        // Inline shaders
-        test: /\.glsl$/,
-        loader: 'raw-loader',
-        exclude: [/node_modules/]
+        // Unfortunately, webpack doesn't import library sourcemaps on its own...
+        test: /\.js$/,
+        use: ['source-map-loader'],
+        enforce: 'pre'
       }
     ]
   },
@@ -47,6 +49,7 @@ const LOCAL_DEV_CONFIG = {
 };
 
 function addLocalDevSettings(config) {
+  config = Object.assign({}, LOCAL_DEV_CONFIG, config);
   config.resolve = config.resolve || {};
   config.resolve.alias = config.resolve.alias || {};
   Object.assign(config.resolve.alias, LOCAL_DEV_CONFIG.resolve.alias);
@@ -58,10 +61,10 @@ function addLocalDevSettings(config) {
   return config;
 }
 
-module.exports = baseConfig => env => {
-  const config = baseConfig;
+module.exports = config => env => {
   if (env && env.local) {
-    addLocalDevSettings(config);
+    config = addLocalDevSettings(config);
+    // console.warn(JSON.stringify(config, null, 2));
   }
 
   return config;
