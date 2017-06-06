@@ -85,6 +85,7 @@
     "react-addons-test-utils": "^15.4.2",
     "react-dom": "^15.4.0",
     "reify": "^0.4.4",
+    "source-map-loader": "^0.2.1",
     "spy": "^1.0.0",
     "tap-browser-color": "^0.1.2",
     "tape": "^4.5.1",
