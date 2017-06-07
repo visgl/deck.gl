@@ -45,11 +45,15 @@ export default class WheelInput {
     WHEEL_EVENTS.forEach(eventName => element.removeEventListener(eventName, this.handleEvent));
   }
 
+  set(options) {
+    Object.assign(this.options, options);
+  }
+
   /**
    * Enable this input (begin processing events)
    * if the specified event type is among those handled by this input.
    */
-  enableOnEventType(eventType) {
+  enableIfEventSupported(eventType) {
     if (eventType === EVENT_TYPE) {
       this.options.enable = true;
     }

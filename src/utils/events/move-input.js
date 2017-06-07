@@ -25,11 +25,15 @@ export default class MoveInput {
     this.options.events.forEach(event => this.element.removeEventListener(event, this.handleEvent));
   }
 
+  set(options) {
+    Object.assign(this.options, options);
+  }
+
   /**
    * Enable this input (begin processing events)
    * if the specified event type is among those handled by this input.
    */
-  enableOnEventType(eventType) {
+  enableIfEventSupported(eventType) {
     if (MOVE_EVENT_TYPES.indexOf(eventType) >= 0) {
       this.options.enable = true;
     }

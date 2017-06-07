@@ -93,8 +93,8 @@ export default class EventManager {
         }
       }
 
-      this.wheelInput.enableOnEventType(event);
-      this.moveInput.enableOnEventType(event);
+      this.wheelInput.enableIfEventSupported(event);
+      this.moveInput.enableIfEventSupported(event);
 
       // Register event handler.
       this.manager.on(event, handler);
