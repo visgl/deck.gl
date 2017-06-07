@@ -63,6 +63,9 @@ export default class EventManager {
     }
   }
 
+  /**
+   * Tear down internal event management implementations.
+   */
   destroy() {
     this.wheelInput.destroy();
     this.moveInput.destroy();
@@ -76,21 +79,41 @@ export default class EventManager {
    */
   on(event, handler) {
     if (typeof event === 'string') {
-      this._onOne(event, handler);
+      this._addEventHandler(event, handler);
     } else {
       // If `event` is a map, call `on()` for each entry.
       for (const eventName in event) {
-        this._onOne(eventName, event[eventName]);
+        this._addEventHandler(eventName, event[eventName]);
       }
     }
   }
 
-  _onOne(event, handler) {
+  /**
+   * Deregister a previously-registered event handler.
+   * @param {string|Object} event   An event name (String) or map of event names to handlers
+   * @param {Function} [handler]    The function to be called on `event`.
+   */
+  off(event, handler) {
+    if (typeof event === 'string') {
+      this._removeEventHandler(event, handler);
+    } else {
+      // If `event` is a map, call `off()` for each entry.
+      for (const eventName in event) {
+        this._removeEventHandler(eventName, event[eventName]);
+      }
+    }
+  }
+
+  /**
+   * Process the event registration for a single event + handler.
+   */
+  _addEventHandler(event, handler) {
     // Special handling for gestural events.
     const recognizerEvent = EVENT_RECOGNIZER_MAP[event];
     if (recognizerEvent) {
       // Enable recognizer for this event.
-      this.manager.get(recognizerEvent).set({enable: true});
+      const recognizer = this.manager.get(recognizerEvent);
+      recognizer.set({enable: true});
 
       // Alias to a recognized gesture as necessary.
       const eventAlias = GESTURE_EVENT_ALIASES[event];
@@ -115,22 +138,9 @@ export default class EventManager {
   }
 
   /**
-   * Deregister a previously-registered event handler.
-   * @param {string|Object} event   An event name (String) or map of event names to handlers
-   * @param {Function} [handler]    The function to be called on `event`.
+   * Process the event deregistration for a single event + handler.
    */
-  off(event, handler) {
-    if (typeof event === 'string') {
-      this._offOne(event, handler);
-    } else {
-      // If `event` is a map, call `off()` for each entry.
-      for (const eventName in event) {
-        this.offOne(eventName, event[eventName]);
-      }
-    }
-  }
-
-  _offOne(event, handler) {
+  _removeEventHandler(event, handler) {
     // Clean up aliased gesture handler as necessary.
     const recognizerEvent = EVENT_RECOGNIZER_MAP[event];
     if (recognizerEvent) {
