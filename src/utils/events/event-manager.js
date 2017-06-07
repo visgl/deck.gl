@@ -42,7 +42,7 @@ export default class EventManager {
   constructor(element, options = {}) {
     this.element = element;
     this._onBasicInput = this._onBasicInput.bind(this);
-    this.manager = new Manager(element, options.recognizers || {recognizers: RECOGNIZERS})
+    this.manager = new Manager(element, {recognizers: options.recognizers || RECOGNIZERS})
       .on('hammer.input', this._onBasicInput);
 
     this.aliasedEventHandlerCounts = {};
