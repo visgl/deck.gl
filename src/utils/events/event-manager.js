@@ -47,7 +47,7 @@ export default class EventManager {
     this.manager = new Manager(element, {recognizers: RECOGNIZERS})
       .on('hammer.input', this._onBasicInput);
 
-    this.aliasedEventHandlers = {};
+    this.aliasedEventHandlerCounts = {};
 
     // Handle events not handled by Hammer.js:
     // - mouse wheel
@@ -95,15 +95,15 @@ export default class EventManager {
       // Alias to a recognized gesture as necessary.
       const eventAlias = GESTURE_EVENT_ALIASES[event];
       if (eventAlias) {
-        if (!this.aliasedEventHandlers[event]) {
+        if (!this.aliasedEventHandlerCounts[event]) {
           // Alias the event type and register the alias with Hammer.
           const aliasedEventHandler = this._aliasEventHandler(event);
           this.manager.on(eventAlias, aliasedEventHandler);
-          this.aliasedEventHandlers[event] = [];
+          this.aliasedEventHandlerCounts[event] = 0;
         }
-        // Store the handler whose event type required aliasing
-        // for later removal.
-        this.aliasedEventHandlers[event].push(handler);
+        // Keep track of the number of aliased event handlers.
+        // (The original handler is added below.)
+        this.aliasedEventHandlerCounts[event]++;
       }
     }
     
@@ -135,18 +135,13 @@ export default class EventManager {
     const recognizerEvent = EVENT_RECOGNIZER_MAP[event];
     if (recognizerEvent) {
       const eventAlias = GESTURE_EVENT_ALIASES[event];
-      const registeredHandlers = this.aliasedEventHandlers[event];
-      if (eventAlias && registeredHandlers) {
-        const handlerIndex = registeredHandlers.indexOf(handler);
-        if (handlerIndex !== -1) {
-          // Remove the registered handler.
-          registeredHandlers.splice(handlerIndex, 1);
-        }
-        if (!registeredHandlers.length) {
-          // If no registered handlers remaining for this event,
+      if (eventAlias && this.aliasedEventHandlerCounts[event]) {
+        if (--this.aliasedEventHandlerCounts[event] <= 0) {
+          // If no aliased handlers remaining for this event,
           // remove the aliased handler from Hammer.
-          this.manager.off(eventAlias, this.aliasedEventHandlers[event]);
-          delete this.aliasedEventHandlers[event];
+          // (The original handler is removed below.)
+          this.manager.off(eventAlias);
+          delete this.aliasedEventHandlerCounts[event];
         }
       }
     }
