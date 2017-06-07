@@ -18,9 +18,12 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import './layers';
-import './imports-spec';
-import './lib';
-import './utils';
-import './experimental';
-import './deprecated';
+import test from 'tape-catch';
+import MoveInput from 'deck.gl/utils/events/move-input';
+import {createEventRegistrarMock} from './test-utils';
+
+test('moveInput#constructor', t => {
+  const moveInput = new MoveInput(createEventRegistrarMock());
+  t.ok(moveInput, 'MoveInput created');
+  t.end();
+});

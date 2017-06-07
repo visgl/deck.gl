@@ -18,9 +18,29 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import './layers';
-import './imports-spec';
-import './lib';
-import './utils';
-import './experimental';
-import './deprecated';
+import test from 'tape-catch';
+import spy from 'spy';
+import EventManager from 'deck.gl/utils/events/event-manager';
+import {createEventRegistrarMock} from './test-utils';
+
+test('eventManager#constructor', t => {
+  const eventManager = new EventManager(createEventRegistrarMock());
+  t.ok(eventManager, 'EventManager created');
+  t.end();
+});
+
+test('eventManager#destroy', t => {
+  const eventManager = new EventManager(createEventRegistrarMock());
+  spy(eventManager.manager, 'destroy');
+  spy(eventManager.moveInput, 'destroy');
+  spy(eventManager.wheelInput, 'destroy');
+  eventManager.destroy();
+
+  t.equal(eventManager.manager.destroy.callCount, 1,
+    'Manager.destroy() should be called once');
+  t.equal(eventManager.moveInput.destroy.callCount, 1,
+    'MoveInput.destroy() should be called once');
+  t.equal(eventManager.wheelInput.destroy.callCount, 1,
+    'WheelInput.destroy() should be called once');
+  t.end();
+});

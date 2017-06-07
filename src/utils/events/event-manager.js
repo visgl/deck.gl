@@ -9,13 +9,13 @@ import {isBrowser} from '../../controllers/globals';
 // (which imports Hammer.js) we conditionally require it
 // depending on support for those globals.
 function ManagerMock(m) {
-  const noop = () => {};
-  return {
-    on: noop,
-    off: noop,
-    destroy: noop,
-    emit: noop
-  };
+  const instance = {};
+  const chainedNoop = () => instance;
+  instance.on = chainedNoop;
+  instance.off = chainedNoop;
+  instance.destroy = chainedNoop;
+  instance.emit = chainedNoop;
+  return instance;
 }
 
 const Manager = isBrowser ? require('hammerjs').Manager : ManagerMock;
