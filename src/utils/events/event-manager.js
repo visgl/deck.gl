@@ -34,17 +34,15 @@ const {
  * @param {DOM Element} element         DOM element on which event handlers will be registered.
  * @param {Object} options              Options for instantiation
  * @param {Object} options.events       Map of {event name: handler} to register on init.
- * @param {Object} options.recognizers  Gesture recognizers from Hammer.js to register.
- *                                      Not yet implemented.
+ * @param {Object} options.recognizers  Gesture recognizers from Hammer.js to register,
+ *                                      as an Array in Hammer.Recognizer format.
+ *                                      (http://hammerjs.github.io/api/#hammermanager)
  */
 export default class EventManager {
-  constructor(element, options) {
-    // TODO: support overriding default RECOGNIZERS by passing
-    // recognizers / configs, keyed to event name.
-
+  constructor(element, options = {}) {
     this.element = element;
     this._onBasicInput = this._onBasicInput.bind(this);
-    this.manager = new Manager(element, {recognizers: RECOGNIZERS})
+    this.manager = new Manager(element, options.recognizers || {recognizers: RECOGNIZERS})
       .on('hammer.input', this._onBasicInput);
 
     this.aliasedEventHandlerCounts = {};
