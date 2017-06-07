@@ -84,12 +84,16 @@ export default class EventManager {
 
         // Alias to a recognized gesture as necessary.
         const eventAlias = GESTURE_EVENT_ALIASES[event];
-        if (eventAlias && !this.aliasedEventHandlers[event]) {
-          const aliasedEventHandler = this._aliasEventHandler(event);
-          this.manager.on(eventAlias, aliasedEventHandler);
-          // TODO: multiple handlers for the same aliased event will override one another.
-          // This should be an array of aliased handlers instead.
-          this.aliasedEventHandlers[event] = aliasedEventHandler;
+        if (eventAlias) {
+          if (!this.aliasedEventHandlers[event]) {
+            // Alias the event type and register the alias with Hammer.
+            const aliasedEventHandler = this._aliasEventHandler(event);
+            this.manager.on(eventAlias, aliasedEventHandler);
+            this.aliasedEventHandlers[event] = [];
+          }
+          // Store the handler whose event type required aliasing
+          // for later removal.
+          this.aliasedEventHandlers[event].push(handler);
         }
       }
 
@@ -117,9 +121,19 @@ export default class EventManager {
       const recognizerEvent = EVENT_RECOGNIZER_MAP[event];
       if (recognizerEvent) {
         const eventAlias = GESTURE_EVENT_ALIASES[event];
-        if (eventAlias && this.aliasedEventHandlers[event]) {
-          this.manager.off(eventAlias, this.aliasedEventHandlers[event]);
-          delete this.aliasedEventHandlers[event];
+        const registeredHandlers = this.aliasedEventHandlers[event];
+        if (eventAlias && registeredHandlers) {
+          const handlerIndex = registeredHandlers.indexOf(handler);
+          if (handlerIndex !== -1) {
+            // Remove the registered handler.
+            registeredHandlers.splice(handlerIndex, 1);
+          }
+          if (!registeredHandlers.length) {
+            // If no registered handlers remaining for this event,
+            // remove the aliased handler from Hammer.
+            this.manager.off(eventAlias, this.aliasedEventHandlers[event]);
+            delete this.aliasedEventHandlers[event];
+          }
         }
       }
 
