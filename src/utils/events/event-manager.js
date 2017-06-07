@@ -129,7 +129,7 @@ export default class EventManager {
         this.aliasedEventHandlerCounts[event]++;
       }
     }
-    
+
     this.wheelInput.enableIfEventSupported(event);
     this.moveInput.enableIfEventSupported(event);
 
