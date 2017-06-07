@@ -92,13 +92,9 @@ export default class EventManager {
           this.aliasedEventHandlers[event] = aliasedEventHandler;
         }
       }
-      if (this.wheelInput.isSourceOf(event)) {
-        this.wheelInput.set({enable: true});
-      }
 
-      if (this.moveInput.isSourceOf(event)) {
-        this.moveInput.set({enable: true});
-      }
+      this.wheelInput.enableOnEventType(event);
+      this.moveInput.enableOnEventType(event);
 
       // Register event handler.
       this.manager.on(event, handler);
