@@ -29,8 +29,14 @@ export default class MoveInput {
     Object.assign(this.options, options);
   }
 
-  isSourceOf(eventName) {
-    return MOVE_EVENT_TYPES.indexOf(eventName) >= 0;
+  /**
+   * Enable this input (begin processing events)
+   * if the specified event type is among those handled by this input.
+   */
+  enableIfEventSupported(eventType) {
+    if (MOVE_EVENT_TYPES.indexOf(eventType) >= 0) {
+      this.options.enable = true;
+    }
   }
 
   handleEvent(event) {

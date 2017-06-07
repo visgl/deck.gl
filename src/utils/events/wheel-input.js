@@ -49,8 +49,14 @@ export default class WheelInput {
     Object.assign(this.options, options);
   }
 
-  isSourceOf(eventName) {
-    return eventName === EVENT_TYPE;
+  /**
+   * Enable this input (begin processing events)
+   * if the specified event type is among those handled by this input.
+   */
+  enableIfEventSupported(eventType) {
+    if (eventType === EVENT_TYPE) {
+      this.options.enable = true;
+    }
   }
 
   /* eslint-disable complexity, max-statements */
