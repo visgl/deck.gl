@@ -76,38 +76,42 @@ export default class EventManager {
    */
   on(event, handler) {
     if (typeof event === 'string') {
-      // Special handling for gestural events.
-      const recognizerEvent = EVENT_RECOGNIZER_MAP[event];
-      if (recognizerEvent) {
-        // Enable recognizer for this event.
-        this.manager.get(recognizerEvent).set({enable: true});
-
-        // Alias to a recognized gesture as necessary.
-        const eventAlias = GESTURE_EVENT_ALIASES[event];
-        if (eventAlias) {
-          if (!this.aliasedEventHandlers[event]) {
-            // Alias the event type and register the alias with Hammer.
-            const aliasedEventHandler = this._aliasEventHandler(event);
-            this.manager.on(eventAlias, aliasedEventHandler);
-            this.aliasedEventHandlers[event] = [];
-          }
-          // Store the handler whose event type required aliasing
-          // for later removal.
-          this.aliasedEventHandlers[event].push(handler);
-        }
-      }
-
-      this.wheelInput.enableIfEventSupported(event);
-      this.moveInput.enableIfEventSupported(event);
-
-      // Register event handler.
-      this.manager.on(event, handler);
+      this._onOne(event, handler);
     } else {
       // If `event` is a map, call `on()` for each entry.
       for (const eventName in event) {
-        this.on(eventName, event[eventName]);
+        this._onOne(eventName, event[eventName]);
       }
     }
+  }
+
+  _onOne(event, handler) {
+    // Special handling for gestural events.
+    const recognizerEvent = EVENT_RECOGNIZER_MAP[event];
+    if (recognizerEvent) {
+      // Enable recognizer for this event.
+      this.manager.get(recognizerEvent).set({enable: true});
+
+      // Alias to a recognized gesture as necessary.
+      const eventAlias = GESTURE_EVENT_ALIASES[event];
+      if (eventAlias) {
+        if (!this.aliasedEventHandlers[event]) {
+          // Alias the event type and register the alias with Hammer.
+          const aliasedEventHandler = this._aliasEventHandler(event);
+          this.manager.on(eventAlias, aliasedEventHandler);
+          this.aliasedEventHandlers[event] = [];
+        }
+        // Store the handler whose event type required aliasing
+        // for later removal.
+        this.aliasedEventHandlers[event].push(handler);
+      }
+    }
+    
+    this.wheelInput.enableIfEventSupported(event);
+    this.moveInput.enableIfEventSupported(event);
+
+    // Register event handler.
+    this.manager.on(event, handler);
   }
 
   /**
@@ -117,34 +121,38 @@ export default class EventManager {
    */
   off(event, handler) {
     if (typeof event === 'string') {
-      // Clean up aliased gesture handler as necessary.
-      const recognizerEvent = EVENT_RECOGNIZER_MAP[event];
-      if (recognizerEvent) {
-        const eventAlias = GESTURE_EVENT_ALIASES[event];
-        const registeredHandlers = this.aliasedEventHandlers[event];
-        if (eventAlias && registeredHandlers) {
-          const handlerIndex = registeredHandlers.indexOf(handler);
-          if (handlerIndex !== -1) {
-            // Remove the registered handler.
-            registeredHandlers.splice(handlerIndex, 1);
-          }
-          if (!registeredHandlers.length) {
-            // If no registered handlers remaining for this event,
-            // remove the aliased handler from Hammer.
-            this.manager.off(eventAlias, this.aliasedEventHandlers[event]);
-            delete this.aliasedEventHandlers[event];
-          }
-        }
-      }
-
-      // Deregister event handler.
-      this.manager.off(event, handler);
+      this._offOne(event, handler);
     } else {
       // If `event` is a map, call `off()` for each entry.
       for (const eventName in event) {
-        this.off(eventName, event[eventName]);
+        this.offOne(eventName, event[eventName]);
       }
     }
+  }
+
+  _offOne(event, handler) {
+    // Clean up aliased gesture handler as necessary.
+    const recognizerEvent = EVENT_RECOGNIZER_MAP[event];
+    if (recognizerEvent) {
+      const eventAlias = GESTURE_EVENT_ALIASES[event];
+      const registeredHandlers = this.aliasedEventHandlers[event];
+      if (eventAlias && registeredHandlers) {
+        const handlerIndex = registeredHandlers.indexOf(handler);
+        if (handlerIndex !== -1) {
+          // Remove the registered handler.
+          registeredHandlers.splice(handlerIndex, 1);
+        }
+        if (!registeredHandlers.length) {
+          // If no registered handlers remaining for this event,
+          // remove the aliased handler from Hammer.
+          this.manager.off(eventAlias, this.aliasedEventHandlers[event]);
+          delete this.aliasedEventHandlers[event];
+        }
+      }
+    }
+
+    // Deregister event handler.
+    this.manager.off(event, handler);
   }
 
   /**
