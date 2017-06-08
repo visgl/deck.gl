@@ -28,6 +28,7 @@ import assert from 'assert';
 
 const LOG_PRIORITY_UPDATE = 2;
 
+const EMPTY_ARRAY = [];
 const noop = () => {};
 
 /*
@@ -70,7 +71,8 @@ export default class Layer {
     // Merge supplied props with pre-merged default props
     props = Object.assign({}, mergedDefaultProps, props);
     // Accept null as data - otherwise apps and layers need to add ugly checks
-    props.data = props.data || [];
+    // Use constant fallback so that data change is not triggered
+    props.data = props.data || EMPTY_ARRAY;
     // Get the overrides from the extension if it's active
     getOverrides(props);
     // Props are immutable
