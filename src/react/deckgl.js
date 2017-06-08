@@ -265,7 +265,7 @@ export default class DeckGL extends React.Component {
     gl.clear(GL.COLOR_BUFFER_BIT | GL.DEPTH_BUFFER_BIT);
 
     this.effectManager.preDraw();
-    this.layerManager.drawLayers({pass: 'primary'});
+    this.layerManager.drawLayers({pass: 'to screen'});
     this.effectManager.draw();
   }
 

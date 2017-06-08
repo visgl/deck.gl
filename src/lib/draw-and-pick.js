@@ -36,9 +36,12 @@ export function drawLayers({layers, pass}) {
 
   // render layers in normal colors
   let visibleCount = 0;
+  let compositeCount = 0;
   // render layers in normal colors
   layers.forEach((layer, layerIndex) => {
-    if (!layer.isComposite && layer.props.visible) {
+    if (layer.isComposite) {
+      compositeCount++;
+    } else if (layer.props.visible) {
       layer.drawLayer({
         uniforms: Object.assign(
           {renderPickingBuffer: 0, pickingEnabled: 0},
@@ -50,9 +53,16 @@ export function drawLayers({layers, pass}) {
       visibleCount++;
     }
   });
+  const totalCount = layers.length;
+  const primitiveCount = totalCount - compositeCount;
+  const hiddenCount = primitiveCount - visibleCount;
 
-  log.log(3, `RENDER PASS ${pass}: ${renderCount++}
-    ${visibleCount} visible, ${layers.length} total`);
+  const message = `\
+deck.gl render ${pass} ${renderCount++}: \
+${visibleCount} visible and ${hiddenCount} hidden \
+(+ ${compositeCount} composite = ${totalCount} total)`;
+
+  log.log(3, message);
 }
 
 // Pick all objects within the given bounding box
