@@ -34,7 +34,17 @@ const LOG_PRIORITY_LIFECYCLE_MINOR = 4;
 
 export default class LayerManager {
   constructor({gl}) {
-    // TODO - this is a hack to avoid updating layers during spurious react rerenders
+    /* Currently deck.gl expects the DeckGL.layers to be different
+     whenever React rerenders. If the same layers array is used, the
+     LayerManager's diffing algorithm will generate a fatal error and
+     break the rendering.
+
+     `this.lastRenderedLayers` stores the UNFILTERED layers sent
+     down to LayerManager, so that `layers` reference can be compared.
+     If it's the same across two React render calls, the diffing logic
+     will be skipped.
+    */
+
     this.lastRenderedLayers = [];
 
     this.prevLayers = [];
