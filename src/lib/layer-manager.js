@@ -18,34 +18,6 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-// IMLEMENTATION NOTES: Why new layers are created on every render
-//
-// The key here is to understand the declarative / functional
-// programming nature of "reactive" applications.
-//
-// - In a reactive application, the entire "UI tree"
-//   is re-rendered every time something in the application changes.
-//
-// - The UI framework (such as React or deck.gl) then diffs the rendered
-//   tree of UI elements (React Elements or deck.gl Layers) against the
-//   previously tree and makes optimized changes (to the DOM or to WebGL state).
-//
-// - Deck.gl layers are not based on React.
-//   But it should be possible to wrap deck.gl layers in React components to
-//   enable use of JSX.
-//
-// The deck.gl model that for the app creates a new set of on layers on every
-// render.
-// Internally, the new layers are efficiently matched against existing layers
-// using layer ids.
-//
-// All calculated state (programs, attributes etc) are stored in a state object
-// and this state object is moved forward to the match layer on every render
-// cycle.  The new layer ends up with the state of the old layer (and the
-// props of the new layer), while the old layer is simply discarded for
-// garbage collecion.
-//
-/* eslint-disable no-try-catch */
 import Layer from './layer';
 import {log} from './utils';
 import {flatten} from './utils/flatten';
@@ -58,10 +30,13 @@ import {experimental} from 'luma.gl';
 import {Framebuffer} from 'luma.gl';
 
 const LOG_PRIORITY_LIFECYCLE = 2;
-const LOG_PRIORITY_LIFECYCLE_MINOR = 3;
+const LOG_PRIORITY_LIFECYCLE_MINOR = 4;
 
 export default class LayerManager {
   constructor({gl}) {
+    // TODO - this is a hack to avoid updating layers during spurious react rerenders
+    this.lastRenderedLayers = [];
+
     this.prevLayers = [];
     this.layers = [];
     // Tracks if any layers were drawn last update
@@ -82,6 +57,7 @@ export default class LayerManager {
     };
 
     Object.seal(this.context);
+    Object.seal(this);
 
     /**
      * Set an override on the specified property and update the layers
@@ -114,9 +90,14 @@ export default class LayerManager {
   }
 
   updateLayers({newLayers}) {
-    /* eslint-disable */
-    assert(this.context.viewport,
-      'LayerManager.updateLayers: viewport not set');
+    // TODO - something is generating state updates that cause rerender of the same
+    if (newLayers === this.lastRenderedLayers) {
+      log.log(3, 'Ignoring layer update due to layer array not changed');
+      return this;
+    }
+    this.lastRenderedLayers = newLayers;
+
+    assert(this.context.viewport, 'LayerManager.updateLayers: viewport not set');
 
     // Filter out any null layers
     newLayers = newLayers.filter(newLayer => newLayer !== null);
@@ -199,10 +180,8 @@ export default class LayerManager {
         this.screenCleared = true;
         return true;
       }
-    } else {
-      if (this.screenCleared === true) {
-        this.screenCleared = false;
-      }
+    } else if (this.screenCleared === true) {
+      this.screenCleared = false;
     }
 
     for (const layer of this.layers) {
@@ -216,13 +195,13 @@ export default class LayerManager {
   _getPickingBuffer() {
     const {gl} = this.context;
 
-    // Set up a frame buffer if needed
-    if (this.context.pickingFBO === null) {
-      this.context.pickingFBO = new Framebuffer(gl, {
-        width: gl.canvas.width,
-        height: gl.canvas.height
-      });
-    }
+    // Create a frame buffer if not already available
+    this.context.pickingFBO = this.context.pickingFBO || new Framebuffer(gl, {
+      width: gl.canvas.width,
+      height: gl.canvas.height
+    });
+
+    // Resize it to current canvas size (this is a noop if size hasn't changed)
     this.context.pickingFBO.resize({
       width: gl.canvas.width,
       height: gl.canvas.height

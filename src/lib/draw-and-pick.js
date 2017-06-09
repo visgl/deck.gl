@@ -32,8 +32,6 @@ const EMPTY_PIXEL = new Uint8Array(4);
 let renderCount = 0;
 
 export function drawLayers({layers, pass}) {
-  log.log(3, `DRAWING ${layers.length} layers`);
-
   // render layers in normal colors
   let visibleCount = 0;
   let compositeCount = 0;
@@ -58,11 +56,10 @@ export function drawLayers({layers, pass}) {
   const hiddenCount = primitiveCount - visibleCount;
 
   const message = `\
-deck.gl render ${pass} ${renderCount++}: \
-${visibleCount} visible and ${hiddenCount} hidden \
-(+ ${compositeCount} composite = ${totalCount} total)`;
+#${renderCount++}: Rendering ${visibleCount} of ${totalCount} layers ${pass} \
+(${hiddenCount} hidden, ${compositeCount} composite)`;
 
-  log.log(3, message);
+  log.log(2, message);
 }
 
 // Pick all objects within the given bounding box
@@ -79,8 +76,7 @@ export function queryLayers(gl, {
 
   // Convert from canvas top-left to WebGL bottom-left coordinates
   // And compensate for pixelRatio
-  const pixelRatio = typeof window !== 'undefined' ?
-    window.devicePixelRatio : 1;
+  const pixelRatio = typeof window !== 'undefined' ? window.devicePixelRatio : 1;
   const deviceLeft = Math.round(x * pixelRatio);
   const deviceBottom = Math.round(gl.canvas.height - y * pixelRatio);
   const deviceRight = Math.round((x + width) * pixelRatio);
@@ -132,8 +128,7 @@ export function pickLayers(gl, {
 
   // Convert from canvas top-left to WebGL bottom-left coordinates
   // And compensate for pixelRatio
-  const pixelRatio = typeof window !== 'undefined' ?
-    window.devicePixelRatio : 1;
+  const pixelRatio = typeof window !== 'undefined' ? window.devicePixelRatio : 1;
   const deviceX = Math.round(x * pixelRatio);
   const deviceY = Math.round(gl.canvas.height - y * pixelRatio);
   const deviceRadius = Math.round(radius * pixelRatio);
@@ -269,7 +264,6 @@ function getClosestFromPickingBuffer(gl, {
   deviceY,
   deviceRadius
 }) {
-
   // Create a box of size `radius * 2 + 1` centered at [deviceX, deviceY]
   const x = Math.max(0, deviceX - deviceRadius);
   const y = Math.max(0, deviceY - deviceRadius);
@@ -409,6 +403,7 @@ function createInfo(pixel, viewport) {
   // Assign a number of potentially useful props to the "info" object
   return {
     color: EMPTY_PIXEL,
+    layer: null,
     index: -1,
     picked: false,
     x: pixel[0],

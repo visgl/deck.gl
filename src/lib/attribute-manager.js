@@ -57,14 +57,14 @@ export function glArrayFromType(glType, {clamped = true} = {}) {
 
 // Default loggers
 const logFunctions = {
-  onUpdateStart: ({level, id}) => {
-    log.time(level, `Updated attributes for ${id}`);
+  onUpdateStart: ({level, id, numInstances}) => {
+    log.time(level, `Updated attributes for ${numInstances} instances in ${id} in`);
   },
   onLog: ({level, message}) => {
     log.log(level, message);
   },
-  onUpdateEnd: ({level, id}) => {
-    log.timeEnd(level, `Updated attributes for ${id}`);
+  onUpdateEnd: ({level, id, numInstances}) => {
+    log.timeEnd(level, `Updated attributes for ${numInstances} instances in ${id} in`);
   }
 };
 
@@ -253,9 +253,9 @@ export default class AttributeManager {
 
     // Only initiate alloc/update (and logging) if actually needed
     if (this._analyzeBuffers({numInstances})) {
-      logFunctions.onUpdateStart({level: LOG_START_END_PRIORITY, id: this.id});
+      logFunctions.onUpdateStart({level: LOG_START_END_PRIORITY, id: this.id, numInstances});
       this._updateBuffers({numInstances, data, props, context});
-      logFunctions.onUpdateEnd({level: LOG_START_END_PRIORITY, id: this.id});
+      logFunctions.onUpdateEnd({level: LOG_START_END_PRIORITY, id: this.id, numInstances});
     }
   }
 

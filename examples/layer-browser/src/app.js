@@ -72,7 +72,7 @@ class App extends PureComponent {
     this.setState({width: window.innerWidth, height: window.innerHeight});
   }
 
-  _onViewportChanged(mapViewState) {
+  _onViewportChange(mapViewState) {
     if (mapViewState.pitch > 60) {
       mapViewState.pitch = 60;
     }
@@ -191,7 +191,7 @@ class App extends PureComponent {
         width={width} height={height}
         perspectiveEnabled
         { ...mapViewState }
-        onChangeViewport={this._onViewportChanged}>
+        onViewportChange={this._onViewportChange}>
 
         <DeckGL ref="deckgl"
           debug
