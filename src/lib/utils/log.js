@@ -22,10 +22,23 @@
 /* global console */
 import assert from 'assert';
 
+const cache = {};
+
+function formatArgs(firstArg, ...args) {
+  if (typeof firstArg === 'string') {
+    args.unshift(`deck.gl ${firstArg}`);
+  } else {
+    args.unshift(firstArg);
+    args.unshift('deck.gl');
+  }
+  return args;
+}
+
 function log(priority, ...args) {
   assert(Number.isFinite(priority), 'log priority must be a number');
   if (priority <= log.priority) {
     // Node doesn't have console.debug, but using it looks better in browser consoles
+    args = formatArgs(...args);
     if (console.debug) {
       console.debug(...args);
     } else {
@@ -34,11 +47,9 @@ function log(priority, ...args) {
   }
 }
 
-const cache = {};
-
 function once(priority, arg, ...args) {
   if (!cache[arg] && priority <= log.priority) {
-    console.warn(...[arg, ...args]);
+    console.warn(...formatArgs(args));
     cache[arg] = true;
   }
 }
