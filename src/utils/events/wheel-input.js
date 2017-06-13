@@ -27,22 +27,22 @@ export default class WheelInput {
   constructor(element, callback, options = {}) {
     this.element = element;
     this.callback = callback;
-    this.options = Object.assign({enable: true}, options);
 
-    this.handleEvent = this.handleEvent.bind(this);
-
-    WHEEL_EVENTS.forEach(eventName => element.addEventListener(eventName, this.handleEvent));
+    const events = WHEEL_EVENTS.concat(options.events || []);
+    this.options = Object.assign({enable: true}, options, {events});
 
     this.time = 0;
     this.wheelPosition = null;
     this.type = null;
     this.timeout = null;
     this.lastValue = 0;
+
+    this.handleEvent = this.handleEvent.bind(this);
+    this.options.events.forEach(event => element.addEventListener(event, this.handleEvent));
   }
 
   destroy() {
-    const {element} = this;
-    WHEEL_EVENTS.forEach(eventName => element.removeEventListener(eventName, this.handleEvent));
+    this.options.events.forEach(event => this.element.removeEventListener(event, this.handleEvent));
   }
 
   set(options) {
@@ -67,12 +67,14 @@ export default class WheelInput {
 
     event.preventDefault();
     let value = event.deltaY;
-    // Firefox doubles the values on retina screens...
-    if (firefox && event.deltaMode === window.WheelEvent.DOM_DELTA_PIXEL) {
-      value /= window.devicePixelRatio;
-    }
-    if (event.deltaMode === window.WheelEvent.DOM_DELTA_LINE) {
-      value *= WHEEL_DELTA_PER_LINE;
+    if (window.WheelEvent) {
+      // Firefox doubles the values on retina screens...
+      if (firefox && event.deltaMode === window.WheelEvent.DOM_DELTA_PIXEL) {
+        value /= window.devicePixelRatio;
+      }
+      if (event.deltaMode === window.WheelEvent.DOM_DELTA_LINE) {
+        value *= WHEEL_DELTA_PER_LINE;
+      }
     }
 
     let {
@@ -82,7 +84,7 @@ export default class WheelInput {
       time
     } = this;
 
-    const now = (window.performance || Date).now();
+    const now = ((window && window.performance) || Date).now();
     const timeDelta = now - (time || 0);
 
     this.wheelPosition = {

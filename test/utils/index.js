@@ -18,9 +18,6 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import './layers';
-import './imports-spec';
-import './lib';
-import './utils';
-import './experimental';
-import './deprecated';
+import './event-manager.spec';
+import './move-input.spec';
+import './wheel-input.spec';
