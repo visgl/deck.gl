@@ -19,11 +19,63 @@
 // THE SOFTWARE.
 
 import test from 'tape-catch';
+import spy from 'spy';
 import MoveInput from 'deck.gl/utils/events/move-input';
 import {createEventRegistrarMock} from './test-utils';
 
 test('moveInput#constructor', t => {
+  const eventRegistrar = createEventRegistrarMock();
+  let moveInput = new MoveInput(eventRegistrar);
+  t.ok(moveInput, 'MoveInput created without optional params');
+
+  const events = ['foo', 'bar'];
+  const addELSpy = spy(eventRegistrar, 'addEventListener');
+  moveInput = new MoveInput(eventRegistrar, () => {}, {events});
+  t.equal(addELSpy.callCount, events.length,
+    'should call addEventListener once for each passed event:handler pair');
+  t.end();
+});
+
+test('moveInput#destroy', t => {
+  const eventRegistrar = createEventRegistrarMock();
+  const events = ['foo', 'bar'];
+  const removeELSpy = spy(eventRegistrar, 'removeEventListener');
+  const moveInput = new MoveInput(eventRegistrar, () => {}, {events});
+  moveInput.destroy();
+  t.equal(removeELSpy.callCount, events.length,
+    'should call removeEventListener once for each passed event:handler pair');
+  t.end();
+});
+
+test('moveInput#set', t => {
+  const options = {
+    foo: 1,
+    bar: 'two',
+    baz: () => {},
+    qux: {}
+  };
   const moveInput = new MoveInput(createEventRegistrarMock());
-  t.ok(moveInput, 'MoveInput created');
+  moveInput.set(options);
+  t.ok(Object.keys(options).every(k => moveInput.options[k] === options[k]),
+    'should add all passed options onto internal options property');
+
+  const newOptions = {
+    foo: 2,
+    bar: 'three'
+  };
+  moveInput.set(newOptions);
+  t.ok(Object.keys(newOptions).every(k => moveInput.options[k] === newOptions[k]),
+    'should merge all passed options onto internal options property');
+  t.end();
+});
+
+test('moveInput#handleEvent', t => {
+  t.pass('TODO: moveInput#handleEvent');
+  // TODO TUES:
+  // finish this test,
+  // write similar tests for wheel-input,
+  // push and check off "unit tests" subtask,
+  // move on to city-lens,
+  // also keep trying to fix flow/ava/monochrome.
   t.end();
 });

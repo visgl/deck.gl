@@ -7,7 +7,8 @@ import {isBrowser} from '../../controllers/globals';
 // those objects throws errors. Therefore, instead of
 // directly `import`ing 'hammerjs' and './constants'
 // (which imports Hammer.js) we conditionally require it
-// depending on support for those globals.
+// depending on support for those globals, and provide mocks
+// for environments without `document`/`window`.
 function ManagerMock(m) {
   const instance = {};
   const chainedNoop = () => instance;
@@ -24,7 +25,11 @@ const {
   EVENT_RECOGNIZER_MAP,
   RECOGNIZERS,
   GESTURE_EVENT_ALIASES
-} = isBrowser ? require('./constants') : {};
+} = isBrowser ? require('./constants') : {
+  BASIC_EVENT_ALIASES: {},
+  EVENT_RECOGNIZER_MAP: {},
+  GESTURE_EVENT_ALIASES: {}
+};
 
 /**
  * Single API for subscribing to events about both

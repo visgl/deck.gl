@@ -24,8 +24,22 @@ import EventManager from 'deck.gl/utils/events/event-manager';
 import {createEventRegistrarMock} from './test-utils';
 
 test('eventManager#constructor', t => {
-  const eventManager = new EventManager(createEventRegistrarMock());
+  const eventRegistrar = createEventRegistrarMock();
+  let eventManager = new EventManager(eventRegistrar);
+  const onSpy = spy();
+  const origOn = EventManager.prototype.on;
+  EventManager.prototype.on = onSpy;
+
   t.ok(eventManager, 'EventManager created');
+  t.ok(eventManager.wheelInput, 'WheelInput created');
+  t.ok(eventManager.moveInput, 'MoveInput created');
+  t.notOk(onSpy.called, 'on() not called if options.events not passed');
+
+  eventManager = new EventManager(eventRegistrar, {
+    events: {foo: () => {}}
+  });
+  t.ok(onSpy.called, 'on() is called if options.events is passed');
+  EventManager.prototype.on = origOn;
   t.end();
 });
 
@@ -42,5 +56,60 @@ test('eventManager#destroy', t => {
     'MoveInput.destroy() should be called once');
   t.equal(eventManager.wheelInput.destroy.callCount, 1,
     'WheelInput.destroy() should be called once');
+  t.end();
+});
+
+test('eventManager#on', t => {
+  const eventManager = new EventManager(createEventRegistrarMock());
+  const addEHSpy = spy(eventManager, '_addEventHandler');
+
+  eventManager.on('foo', () => {});
+  t.equal(addEHSpy.callCount, 1,
+    '_addEventHandler should be called once when passing a single event and handler');
+
+  addEHSpy.reset();
+  eventManager.on({
+    bar: () => {},
+    baz: () => {}
+  });
+  t.equal(addEHSpy.callCount, 2,
+    '_addEventHandler should be called once for each entry in an event:handler map');
+  t.end();
+});
+
+test('eventManager#off', t => {
+  const eventManager = new EventManager(createEventRegistrarMock());
+  const removeEHSpy = spy(eventManager, '_removeEventHandler');
+
+  eventManager.off('foo', () => {});
+  t.equal(removeEHSpy.callCount, 1,
+    '_removeEventHandler should be called once when passing a single event and handler');
+
+  removeEHSpy.reset();
+  eventManager.off({
+    bar: () => {},
+    baz: () => {}
+  });
+  t.equal(removeEHSpy.callCount, 2,
+    '_removeEventHandler should be called once for each entry in an event:handler map');
+  t.end();
+});
+
+test('eventManager#eventHandling', t => {
+  const eventRegistrar = createEventRegistrarMock();
+  const eventMock = {type: 'foo'};
+  const eventManager = new EventManager(eventRegistrar);
+  const emitSpy = spy(eventManager.manager, 'emit');
+
+  eventManager._onOtherEvent(eventMock);
+  t.ok(emitSpy.called, 'manager.emit() should be called from _onOtherEvent()...');
+  t.ok(emitSpy.calledWith(eventMock.type, eventMock),
+    '...and should be called with correct params');
+
+  emitSpy.reset();
+  const aliasedHandler = eventManager._aliasEventHandler('alias');
+  aliasedHandler(eventMock);
+  t.ok(emitSpy.called, 'manager.emit() should be called from aliased handler...');
+  t.ok(emitSpy.calledWith('alias', eventMock), '...and should be called with correct params');
   t.end();
 });
