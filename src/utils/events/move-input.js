@@ -15,7 +15,9 @@ export default class MoveInput {
     this.element = element;
     this.callback = callback;
     this.pressed = false;
-    this.options = Object.assign({events: MOUSE_EVENTS, enable: true}, options);
+
+    const events = MOUSE_EVENTS.concat(options.events || []);
+    this.options = Object.assign({enable: true}, options, {events});
 
     this.handleEvent = this.handleEvent.bind(this);
     this.options.events.forEach(event => element.addEventListener(event, this.handleEvent));

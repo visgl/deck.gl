@@ -29,9 +29,10 @@ test('moveInput#constructor', t => {
   t.ok(moveInput, 'MoveInput created without optional params');
 
   const events = ['foo', 'bar'];
+  const numMouseEvents = 3;   // MOUSE_EVENTS.length
   const addELSpy = spy(eventRegistrar, 'addEventListener');
   moveInput = new MoveInput(eventRegistrar, () => {}, {events});
-  t.equal(addELSpy.callCount, events.length,
+  t.equal(addELSpy.callCount, events.length + numMouseEvents,
     'should call addEventListener once for each passed event:handler pair');
   t.end();
 });
@@ -39,10 +40,11 @@ test('moveInput#constructor', t => {
 test('moveInput#destroy', t => {
   const eventRegistrar = createEventRegistrarMock();
   const events = ['foo', 'bar'];
+  const numMouseEvents = 3;   // MOUSE_EVENTS.length
   const removeELSpy = spy(eventRegistrar, 'removeEventListener');
   const moveInput = new MoveInput(eventRegistrar, () => {}, {events});
   moveInput.destroy();
-  t.equal(removeELSpy.callCount, events.length,
+  t.equal(removeELSpy.callCount, events.length + numMouseEvents,
     'should call removeEventListener once for each passed event:handler pair');
   t.end();
 });
@@ -69,13 +71,58 @@ test('moveInput#set', t => {
   t.end();
 });
 
+test('moveInput#enableIfEventSupported', t => {
+  const MOVE_EVENT_TYPES = ['mousemove', 'pointermove'];
+  const moveInput = new MoveInput(createEventRegistrarMock(), null, {enable: false});
+  moveInput.enableIfEventSupported('foo');
+  t.notOk(moveInput.options.enable, 'should not enable for unsupported event');
+
+  t.ok(MOVE_EVENT_TYPES.every(event => {
+    moveInput.options.enable = false;
+    moveInput.enableIfEventSupported(event);
+    return moveInput.options.enable;
+  }), 'should enable for all supported events');
+  t.end();
+});
+
 test('moveInput#handleEvent', t => {
-  t.pass('TODO: moveInput#handleEvent');
-  // TODO TUES:
-  // finish this test,
-  // write similar tests for wheel-input,
-  // push and check off "unit tests" subtask,
-  // move on to city-lens,
-  // also keep trying to fix flow/ava/monochrome.
+  const eventRegistrar = createEventRegistrarMock();
+  const callbackSpy = spy();
+  const mouseDownMock = {
+    type: 'mousedown',
+    button: 0
+  };
+  const mouseDragMock = {
+    type: 'mousemove',
+    which: 1
+  };
+  const mouseHoverMock = {
+    type: 'mousemove',
+    which: 0
+  };
+  const mouseUpMock = {
+    type: 'mouseup'
+  };
+  const moveInput = new MoveInput(eventRegistrar, callbackSpy, {enable: true});
+
+  moveInput.handleEvent(mouseDownMock);
+  t.notOk(callbackSpy.called, 'callback should not be called on mouse down');
+  moveInput.handleEvent(mouseDragMock);
+  t.notOk(callbackSpy.called, 'callback should not be called on mouse drag');
+  moveInput.handleEvent(mouseUpMock);
+  t.notOk(callbackSpy.called, 'callback should not be called on mouse up');
+
+  moveInput.options.enable = false;
+  moveInput.handleEvent(mouseHoverMock);
+  t.notOk(callbackSpy.called, 'callback should not be called when disabled');
+
+  moveInput.options.enable = true;
+  moveInput.handleEvent(mouseHoverMock);
+  t.ok(callbackSpy.called, 'callback should be called on mouse hover when enabled...');
+  t.deepEqual(callbackSpy.calls[0].arguments[0], {
+    type: mouseHoverMock.type,
+    srcEvent: mouseHoverMock,
+    target: eventRegistrar
+  }, '...and should be called with correct params');
   t.end();
 });
