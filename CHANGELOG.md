@@ -17,6 +17,11 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## Beta Releases
 
+### deck.gl v4.1.0-alpha.11
+- EXAMPLE: PlotLayer example improvement (#689)
+- FIX: Fix 64-bit PathLayer (#704)
+- TEST: EventManager tests (#705)
+
 ### deck.gl v4.1.0-alpha.10
 - FIX: fix point cloud examples bug (#680)
 - FIX: fix modelMatrix in meter offset mode (#678)
