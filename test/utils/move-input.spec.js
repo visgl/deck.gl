@@ -90,18 +90,22 @@ test('moveInput#handleEvent', t => {
   const callbackSpy = spy();
   const mouseDownMock = {
     type: 'mousedown',
-    button: 0
+    button: 0,
+    target: eventRegistrar
   };
   const mouseDragMock = {
     type: 'mousemove',
-    which: 1
+    which: 1,
+    target: eventRegistrar
   };
   const mouseHoverMock = {
     type: 'mousemove',
-    which: 0
+    which: 0,
+    target: eventRegistrar
   };
   const mouseUpMock = {
-    type: 'mouseup'
+    type: 'mouseup',
+    target: eventRegistrar
   };
   const moveInput = new MoveInput(eventRegistrar, callbackSpy, {enable: true});
 
@@ -122,6 +126,7 @@ test('moveInput#handleEvent', t => {
   t.deepEqual(callbackSpy.calls[0].arguments[0], {
     type: mouseHoverMock.type,
     srcEvent: mouseHoverMock,
+    pointerType: 'mouse',
     target: eventRegistrar
   }, '...and should be called with correct params');
   t.end();

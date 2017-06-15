@@ -156,37 +156,9 @@ export default class DeckGL extends React.Component {
     });
   }
 
-  // Get mouse position {x, y} relative to the container
-  _getPos(event) {
-    const {srcEvent, center, rootElement} = event;
-    let x;
-    let y;
-
-    if (center) {
-      // processed pointer input, supports touch
-      x = center.x;
-      y = center.y;
-    } else if (srcEvent) {
-      // fallback
-      x = srcEvent.clientX;
-      y = srcEvent.clientY;
-    }
-    if (!Number.isFinite(x)) {
-      // srcEvent.clientX may be undefined if it's not from a mouse
-      return null;
-    }
-
-    const rect = rootElement.getBoundingClientRect();
-
-    return {
-      x: x - rect.left - rootElement.clientLeft,
-      y: y - rect.top - rootElement.clientTop
-    };
-  }
-
   // Route events to layers
   _onClick(event) {
-    const pos = this._getPos(event);
+    const pos = event.relativeCenter;
     if (!pos) {
       return;
     }
@@ -201,7 +173,7 @@ export default class DeckGL extends React.Component {
 
   // Route events to layers
   _onMouseMove(event) {
-    const pos = this._getPos(event);
+    const pos = event.relativeCenter;
     if (!pos || pos.x < 0 || pos.y < 0 || pos.x > this.props.width || pos.y > this.props.height) {
       // Check if pointer is inside the canvas
       return;
@@ -216,7 +188,7 @@ export default class DeckGL extends React.Component {
   }
 
   _onDragEvent(event) {
-    const pos = this._getPos(event);
+    const pos = event.relativeCenter;
     if (!pos) {
       return;
     }

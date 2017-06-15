@@ -106,10 +106,5 @@ test('eventManager#eventHandling', t => {
   t.ok(emitSpy.calledWith(eventMock.type, eventMock),
     '...and should be called with correct params');
 
-  emitSpy.reset();
-  const aliasedHandler = eventManager._aliasEventHandler('alias');
-  aliasedHandler(eventMock);
-  t.ok(emitSpy.called, 'manager.emit() should be called from aliased handler...');
-  t.ok(emitSpy.calledWith('alias', eventMock), '...and should be called with correct params');
   t.end();
 });
