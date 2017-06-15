@@ -12,7 +12,7 @@
     <img src="http://starveller.sigsev.io/api/repos/uber/deck.gl/badge" alt="stars" />
   </a>
   <a href='https://coveralls.io/github/uber/deck.gl?branch=master'>
-    <img src='https://coveralls.io/repos/github/uber/deck.gl/badge.svg?branch=master' alt='Coverage Status' />
+    <img src='https://img.shields.io/coveralls/uber/deck.gl.svg?style=flat-square' alt='Coverage Status' />
   </a>
 </p>
 
