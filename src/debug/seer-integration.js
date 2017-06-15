@@ -75,81 +75,26 @@ export const layerEditListener = cb => {
   });
 };
 
-// Blacklist some properties that can't be stringified (eg: circular dependencies)
-const dataBlackList = ['zoomLevels'];
-
-/**
- * Transform the data passed to Seer for performance purposes.
- * Slice the data array to the first 20 items
- */
-const transformData = data => {
-  if (!data) {
-    return [];
-  }
-
-  const out = data.type === 'FeatureCollection' ? data.features : data;
-  return out.slice(0, 20).map(item => Object.keys(item).reduce((acc, key) => {
-    if (dataBlackList.includes(key)) {
-      return acc;
-    }
-    acc[key] = item[key];
-    return acc;
-  }, {}));
-};
-
 export const initLayer = layer => {
-  if (!window.__SEER_INITIALIZED__) {
+  if (!window.__SEER_INITIALIZED__ || !layer) {
     return;
   }
 
   seer.listItem('deck.gl', layer.id, {
     badges: [layer.constructor.layerName],
-    links: [`luma.gl:${layer.state.model.id}`],
+    links: layer.state && layer.state.model ? [`luma.gl:${layer.state.model.id}`] : undefined,
     parent: layer.parentLayer ? layer.parentLayer.id : undefined
   });
 };
 
-const getAttribute = (key, attr) => {
-  if (key === 'value') {
-    const isArray = Object.prototype.toString.call(attr).slice(8, -1).includes('Array');
-    if (isArray) {
-      return Array.prototype.slice.call(attr);
-    }
-  }
-  return attr;
-};
-
 export const logPayload = layer => {
-  const simpleProps = Object.keys(layer.props).reduce((acc, key) => {
-    if (typeof layer.props[key] === 'function') {
-      return acc;
-    }
-
-    acc[key] = key === 'data' ? transformData(layer.props.data) : layer.props[key];
-    return acc;
-  }, {});
-
   const data = [
-    {path: 'objects.props', data: simpleProps}
+    {path: 'objects.props', data: layer.props}
   ];
 
   if (layer.state && layer.state.attributeManager) {
     const attrs = layer.state.attributeManager.getAttributes();
-
-    const mod = Object.keys(attrs).reduce((acc, attrKey) => {
-
-      const attr = attrs[attrKey];
-      acc[attrKey] = Object.keys(attr).reduce((out, key) => {
-        if (typeof attr[key] !== 'function') {
-          out[key] = getAttribute(key, attr[key]);
-        }
-        return out;
-      }, {});
-
-      return acc;
-    }, {});
-
-    data.push({path: 'objects.attributes', data: mod});
+    data.push({path: 'objects.attributes', data: attrs});
   }
 
   return data;
