@@ -24,3 +24,4 @@ import './lib';
 import './utils';
 import './experimental';
 import './deprecated';
+import './debug/seer-integration';

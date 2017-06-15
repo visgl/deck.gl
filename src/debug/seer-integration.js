@@ -119,14 +119,7 @@ const getAttribute = (key, attr) => {
   return attr;
 };
 
-/**
- * Log layer's properties to Seer
- */
-export const logLayer = layer => {
-  if (!window.__SEER_INITIALIZED__ || seer.throttle(`deck.gl:${layer.id}`, 1E3)) {
-    return;
-  }
-
+export const logPayload = layer => {
   const simpleProps = Object.keys(layer.props).reduce((acc, key) => {
     if (typeof layer.props[key] === 'function') {
       return acc;
@@ -159,6 +152,17 @@ export const logLayer = layer => {
     data.push({path: 'objects.attributes', data: mod});
   }
 
-  seer.multiUpdate('deck.gl', layer.id, data);
+  return data;
+};
 
+/**
+ * Log layer's properties to Seer
+ */
+export const logLayer = layer => {
+  if (!window.__SEER_INITIALIZED__ || seer.throttle(`deck.gl:${layer.id}`, 1E3)) {
+    return;
+  }
+
+  const data = logPayload(layer);
+  seer.multiUpdate('deck.gl', layer.id, data);
 };
