@@ -26,8 +26,6 @@ import {LayerManager, Layer} from '../lib';
 import {EffectManager, Effect} from '../experimental';
 import {GL, setParameters} from 'luma.gl';
 import {Viewport, WebMercatorViewport} from '../lib/viewports';
-import {log} from '../lib/utils';
-import EventManager from '../utils/events/event-manager';
 
 function noop() {}
 
@@ -44,11 +42,7 @@ const propTypes = {
   onWebGLInitialized: PropTypes.func,
   onAfterRender: PropTypes.func,
   onLayerClick: PropTypes.func,
-  onLayerHover: PropTypes.func,
-  onLayerDragStart: PropTypes.func,
-  onLayerDragMove: PropTypes.func,
-  onLayerDragEnd: PropTypes.func,
-  onLayerDragCancel: PropTypes.func
+  onLayerHover: PropTypes.func
 };
 
 const defaultProps = {
@@ -60,11 +54,7 @@ const defaultProps = {
   onWebGLInitialized: noop,
   onLayerClick: noop,
   onLayerHover: noop,
-  onAfterRender: noop,
-  onLayerDragStart: noop,
-  onLayerDragMove: noop,
-  onLayerDragEnd: noop,
-  onLayerDragCancel: noop
+  onAfterRender: noop
 };
 
 export default class DeckGL extends React.Component {
@@ -79,6 +69,7 @@ export default class DeckGL extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
+    this._setLayerManagerProps(nextProps);
     this._updateLayers(nextProps);
   }
 
@@ -90,6 +81,26 @@ export default class DeckGL extends React.Component {
 
   queryVisibleObjects({x, y, width = 1, height = 1, layerIds = null}) {
     return this.layerManager.queryLayer({x, y, width, height, layerIds});
+  }
+
+  _setLayerManagerProps(nextProps) {
+    const {
+      pickingRadius,
+      onLayerClick,
+      onLayerHover
+    } = nextProps;
+
+    // Check if a mouse event has been specified and that at least one of the layers is pickable
+    if ([
+      onLayerClick,
+      onLayerHover
+    ].some(handler => handler !== noop)) {
+      this.layerManager.validateEventHandling();
+    }
+
+    this.layerManager.pickingRadius = pickingRadius;
+    this.layerManager.onLayerClick = onLayerClick;
+    this.layerManager.onLayerHover = onLayerHover;
   }
 
   _updateLayers(nextProps) {
@@ -118,113 +129,19 @@ export default class DeckGL extends React.Component {
     this.props.onWebGLInitialized(gl);
 
     // Note: avoid React setState due GL animation loop / setState timing issue
-    this.layerManager = new LayerManager({gl});
+    this.layerManager = new LayerManager({gl, canvas});
     this.effectManager = new EffectManager({gl, layerManager: this.layerManager});
 
     for (const effect of this.props.effects) {
       this.effectManager.addEffect(effect);
     }
 
+    this._setLayerManagerProps(this.props);
     this._updateLayers(this.props);
 
-    // Check if a mouse event has been specified and that at least one of the layers is pickable
-    const hasEvent =
-      this.props.onLayerClick !== noop ||
-      this.props.onLayerHover !== noop ||
-      this.props.onLayerDragStart !== noop ||
-      this.props.onLayerDragMove !== noop ||
-      this.props.onLayerDragEnd !== noop ||
-      this.props.onLayerDragCancel !== noop;
-    const hasPickableLayer = this.layerManager.layers.map(l => l.props.pickable).includes(true);
-    if (this.layerManager.layers.length && hasEvent && !hasPickableLayer) {
-      log.once(
-        1,
-        'You have supplied a mouse event handler but none of your layers set the `pickable` flag.'
-      );
-    }
-
     // TODO: add handlers on demand at runtime, not all at once on init
-    this.eventManager = new EventManager(canvas, {
-      events: {
-        click: this._onClick,
-        mousemove: this._onMouseMove,
-        panstart: this._onDragEvent,
-        panmove: this._onDragEvent,
-        panend: this._onDragEvent,
-        pancancel: this._onDragEvent
-      }
-    });
-  }
-
-  // Route events to layers
-  _onClick(event) {
-    const pos = event.offsetCenter;
-    if (!pos) {
-      return;
-    }
-    const radius = this.props.pickingRadius;
-    const selectedInfos = this.layerManager.pickLayer({x: pos.x, y: pos.y, radius, mode: 'click'});
-    if (selectedInfos.length) {
-      const firstInfo = selectedInfos.find(info => info.index >= 0);
-      // Event.event holds the original MouseEvent object
-      this.props.onLayerClick(firstInfo, selectedInfos, event.srcEvent);
-    }
-  }
-
-  // Route events to layers
-  _onMouseMove(event) {
-    const pos = event.offsetCenter;
-    if (!pos || pos.x < 0 || pos.y < 0 || pos.x > this.props.width || pos.y > this.props.height) {
-      // Check if pointer is inside the canvas
-      return;
-    }
-    const radius = this.props.pickingRadius;
-    const selectedInfos = this.layerManager.pickLayer({x: pos.x, y: pos.y, radius, mode: 'hover'});
-    if (selectedInfos.length) {
-      const firstInfo = selectedInfos.find(info => info.index >= 0);
-      // Event.event holds the original MouseEvent object
-      this.props.onLayerHover(firstInfo, selectedInfos, event.srcEvent);
-    }
-  }
-
-  _onDragEvent(event) {
-    const pos = event.offsetCenter;
-    if (!pos) {
-      return;
-    }
-    let mode;
-    let layerEventHandler;
-    switch (event.type) {
-    case 'panstart':
-      mode = 'dragstart';
-      layerEventHandler = this.props.onLayerDragStart;
-      break;
-    case 'panmove':
-      mode = 'dragmove';
-      layerEventHandler = this.props.onLayerDragMove;
-      break;
-    case 'pancancel':
-      mode = 'dragcancel';
-      layerEventHandler = this.props.onLayerDragCancel;
-      break;
-    case 'panend':
-      mode = 'dragend';
-      layerEventHandler = this.props.onLayerDragEnd;
-      break;
-    default:
-      mode = null;
-      layerEventHandler = null;
-    }
-
-    if (mode) {
-      const radius = this.props.pickingRadius;
-      const selectedInfos = this.layerManager.pickLayer({x: pos.x, y: pos.y, radius, mode});
-      if (selectedInfos.length) {
-        const firstInfo = selectedInfos.find(info => info.index >= 0);
-        // srcEvent holds the original MouseEvent object
-        layerEventHandler(firstInfo, selectedInfos, event.srcEvent);
-      }
-    }
+    // https://github.com/uber/deck.gl/issues/634
+    this.layerManager.addEventListeners(['click', 'pointermove']);
   }
 
   _onRenderFrame({gl}) {
@@ -252,9 +169,7 @@ export default class DeckGL extends React.Component {
       viewport: {x: 0, y: 0, width, height},
       onRendererInitialized: this._onRendererInitialized,
       onNeedRedraw: this._onNeedRedraw,
-      onRenderFrame: this._onRenderFrame,
-      onMouseMove: this._onMouseMove,
-      onClick: this._onClick
+      onRenderFrame: this._onRenderFrame
     }));
   }
 }
