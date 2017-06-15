@@ -17,6 +17,9 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## Beta Releases
 
+[TBD]
+- FIX: Use external buffers for layer attributes
+
 ### deck.gl v4.1.0-alpha.11
 - EXAMPLE: PlotLayer example improvement (#689)
 - FIX: Fix 64-bit PathLayer (#704)
