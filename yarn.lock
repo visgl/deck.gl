@@ -2817,14 +2817,14 @@ lru-cache@^4.0.1:
     pseudomap "^1.0.2"
     yallist "^2.1.2"
 
-luma.gl@4.0.0-alpha.10:
-  version "4.0.0-alpha.10"
-  resolved "https://registry.yarnpkg.com/luma.gl/-/luma.gl-4.0.0-alpha.10.tgz#683a5433b18f565f141d7956a24866e88df61ce7"
+luma.gl@4.0.0-alpha.11:
+  version "4.0.0-alpha.11"
+  resolved "https://registry.yarnpkg.com/luma.gl/-/luma.gl-4.0.0-alpha.11.tgz#f6a5bf1767116317f4752547b1c6d0085dd26e42"
   dependencies:
     gl-constants "^1.0.0"
     gl-mat4-esm "^1.1.4"
     gl-matrix "^2.3.2"
-    seer "^0.1.0"
+    seer "^0.2.0"
     webgl-debug "^1.0.2"
 
 magic-string@^0.14.0:
@@ -3931,13 +3931,9 @@ sax@^1.2.1:
   version "1.2.2"
   resolved "https://registry.yarnpkg.com/sax/-/sax-1.2.2.tgz#fd8631a23bc7826bef5d871bdb87378c95647828"
 
-seer@^0.1.0:
-  version "0.1.0"
-  resolved "https://registry.yarnpkg.com/seer/-/seer-0.1.0.tgz#e32e792577cb1ff9324b3a0a43ac0c4511f4e3fa"
-
-seer@^0.2.0:
-  version "0.2.0"
-  resolved "https://registry.yarnpkg.com/seer/-/seer-0.2.0.tgz#5028df533a3dbd6728bfd7c3943745d4747d5ee4"
+seer@^0.2.0, seer@^0.2.1:
+  version "0.2.1"
+  resolved "https://registry.yarnpkg.com/seer/-/seer-0.2.1.tgz#2718ad18b5c0165a6e8c538d2be20890cb4a6f28"
 
 select-hose@^2.0.0:
   version "2.0.0"
