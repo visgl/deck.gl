@@ -1616,10 +1616,6 @@ esprima@^2.6.0, esprima@^2.7.1:
   version "2.7.3"
   resolved "https://registry.yarnpkg.com/esprima/-/esprima-2.7.3.tgz#96e3b70d5779f6ad49cd032673d1c312767ba581"
 
-esprima@^3.1.1:
-  version "3.1.3"
-  resolved "https://registry.yarnpkg.com/esprima/-/esprima-3.1.3.tgz#fdca51cee6133895e3c88d535ce49dbff62a4633"
-
 esquery@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/esquery/-/esquery-1.0.0.tgz#cfba8b57d7fba93f17298a8a006a04cda13d80fa"
@@ -2603,19 +2599,12 @@ js-tokens@^3.0.0:
   version "3.0.1"
   resolved "https://registry.yarnpkg.com/js-tokens/-/js-tokens-3.0.1.tgz#08e9f132484a2c45a30907e9dc4d5567b7f114d7"
 
-js-yaml@3.6.1:
+js-yaml@3.6.1, js-yaml@^3.5.1:
   version "3.6.1"
   resolved "https://registry.yarnpkg.com/js-yaml/-/js-yaml-3.6.1.tgz#6e5fe67d8b205ce4d22fad05b7781e8dadcc4b30"
   dependencies:
     argparse "^1.0.7"
     esprima "^2.6.0"
-
-js-yaml@^3.5.1:
-  version "3.8.4"
-  resolved "https://registry.yarnpkg.com/js-yaml/-/js-yaml-3.8.4.tgz#520b4564f86573ba96662af85a8cafa7b4b5a6f6"
-  dependencies:
-    argparse "^1.0.7"
-    esprima "^3.1.1"
 
 jsbn@~0.1.0:
   version "0.1.1"
@@ -2828,9 +2817,9 @@ lru-cache@^4.0.1:
     pseudomap "^1.0.2"
     yallist "^2.1.2"
 
-luma.gl@4.0.0-alpha.9:
-  version "4.0.0-alpha.9"
-  resolved "https://registry.yarnpkg.com/luma.gl/-/luma.gl-4.0.0-alpha.9.tgz#52e86bf0adc7e6ed2dd82c6e03c8de8f9d4054a6"
+luma.gl@4.0.0-alpha.10:
+  version "4.0.0-alpha.10"
+  resolved "https://registry.yarnpkg.com/luma.gl/-/luma.gl-4.0.0-alpha.10.tgz#683a5433b18f565f141d7956a24866e88df61ce7"
   dependencies:
     gl-constants "^1.0.0"
     gl-mat4-esm "^1.1.4"
@@ -3945,6 +3934,10 @@ sax@^1.2.1:
 seer@^0.1.0:
   version "0.1.0"
   resolved "https://registry.yarnpkg.com/seer/-/seer-0.1.0.tgz#e32e792577cb1ff9324b3a0a43ac0c4511f4e3fa"
+
+seer@^0.2.0:
+  version "0.2.0"
+  resolved "https://registry.yarnpkg.com/seer/-/seer-0.2.0.tgz#5028df533a3dbd6728bfd7c3943745d4747d5ee4"
 
 select-hose@^2.0.0:
   version "2.0.0"

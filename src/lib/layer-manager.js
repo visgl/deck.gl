@@ -25,7 +25,7 @@ import assert from 'assert';
 import {drawLayers, pickLayers, queryLayers} from './draw-and-pick';
 import {LIFECYCLE} from './constants';
 import {Viewport} from './viewports';
-import {setOverride, layerEditListener, logLayer} from '../debug/seer-integration';
+import {setOverride, layerEditListener, initLayer, logLayer} from '../debug/seer-integration';
 import {experimental} from 'luma.gl';
 import {Framebuffer} from 'luma.gl';
 
@@ -73,7 +73,7 @@ export default class LayerManager {
      * Set an override on the specified property and update the layers
      */
     layerEditListener(payload => {
-      setOverride(payload.itemKey, payload.valuePath, payload.value);
+      setOverride(payload.itemKey, payload.valuePath.slice(1), payload.value);
       const newLayers = this.layers.map(layer => new layer.constructor(layer.props));
       this.updateLayers({newLayers});
     });
@@ -268,13 +268,12 @@ export default class LayerManager {
         // Only transfer state at this stage. We must not generate exceptions
         // until all layers' state have been transferred
         if (oldLayer) {
-
-          logLayer(newLayer);
-
           log(LOG_PRIORITY_LIFECYCLE_MINOR,
-            `matched ${layerName(newLayer)}`, oldLayer, '=>', newLayer);
+            `matched ${layerName(newLayer)}`, oldLayer, '->', newLayer);
           this._transferLayerState(oldLayer, newLayer);
           this._updateLayer(newLayer);
+
+          logLayer(newLayer);
         } else {
           this._initializeNewLayer(newLayer);
         }
@@ -352,6 +351,7 @@ export default class LayerManager {
     if (!layer.state) {
       log(LOG_PRIORITY_LIFECYCLE, `initializing ${layerName(layer)}`);
       try {
+
         layer.initializeLayer({
           oldProps: {},
           props: layer.props,
@@ -359,7 +359,11 @@ export default class LayerManager {
           context: this.context,
           changeFlags: layer.diffProps({}, layer.props, this.context)
         });
+
         layer.lifecycle = LIFECYCLE.INITIALIZED;
+
+        initLayer(layer);
+
       } catch (err) {
         log.once(0, `deck.gl error during initialization of ${layerName(layer)} ${err}`, err);
         // Save first error

@@ -5,6 +5,10 @@ import {window} from '../lib/utils/globals';
  * Recursively set a nested property of an object given a properties array and a value
  */
 const recursiveSet = (obj, path, value) => {
+  if (!obj) {
+    return;
+  }
+
   if (path.length > 1) {
     recursiveSet(obj[path[0]], path.slice(1), value);
   } else {
@@ -29,7 +33,6 @@ export const setOverride = (id, valuePath, value) => {
 
   const props = overrides.get(id);
   props.set(valuePath, value);
-
 };
 
 /**
@@ -53,7 +56,6 @@ export const getOverrides = props => {
       props.data = [...props.data];
     }
   });
-
 };
 
 /**
@@ -65,7 +67,7 @@ export const layerEditListener = cb => {
   }
 
   seer.listenFor('deck.gl', payload => {
-    if (payload.type !== 'edit') {
+    if (payload.type !== 'edit' || payload.valuePath[0] !== 'props') {
       return;
     }
 
@@ -95,14 +97,29 @@ const transformData = data => {
   }, {}));
 };
 
-/**
- * Log layer's properties to Seer
- */
-export const logLayer = layer => {
+export const initLayer = layer => {
   if (!window.__SEER_INITIALIZED__) {
     return;
   }
 
+  seer.listItem('deck.gl', layer.id, {
+    badges: [layer.constructor.layerName],
+    links: [`luma.gl:${layer.state.model.id}`],
+    parent: layer.parentLayer ? layer.parentLayer.id : undefined
+  });
+};
+
+const getAttribute = (key, attr) => {
+  if (key === 'value') {
+    const isArray = Object.prototype.toString.call(attr).slice(8, -1).includes('Array');
+    if (isArray) {
+      return Array.prototype.slice.call(attr);
+    }
+  }
+  return attr;
+};
+
+export const logPayload = layer => {
   const simpleProps = Object.keys(layer.props).reduce((acc, key) => {
     if (typeof layer.props[key] === 'function') {
       return acc;
@@ -112,6 +129,40 @@ export const logLayer = layer => {
     return acc;
   }, {});
 
-  seer.indexedListItem('deck.gl', layer.id, simpleProps);
+  const data = [
+    {path: 'objects.props', data: simpleProps}
+  ];
 
+  if (layer.state && layer.state.attributeManager) {
+    const attrs = layer.state.attributeManager.getAttributes();
+
+    const mod = Object.keys(attrs).reduce((acc, attrKey) => {
+
+      const attr = attrs[attrKey];
+      acc[attrKey] = Object.keys(attr).reduce((out, key) => {
+        if (typeof attr[key] !== 'function') {
+          out[key] = getAttribute(key, attr[key]);
+        }
+        return out;
+      }, {});
+
+      return acc;
+    }, {});
+
+    data.push({path: 'objects.attributes', data: mod});
+  }
+
+  return data;
+};
+
+/**
+ * Log layer's properties to Seer
+ */
+export const logLayer = layer => {
+  if (!window.__SEER_INITIALIZED__ || seer.throttle(`deck.gl:${layer.id}`, 1E3)) {
+    return;
+  }
+
+  const data = logPayload(layer);
+  seer.multiUpdate('deck.gl', layer.id, data);
 };
