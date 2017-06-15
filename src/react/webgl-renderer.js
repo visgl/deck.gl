@@ -44,9 +44,7 @@ const propTypes = {
 
   onInitializationFailed: PropTypes.func,
   onRendererInitialized: PropTypes.func.isRequired,
-  onRenderFrame: PropTypes.func,
-  onMouseMove: PropTypes.func,
-  onClick: PropTypes.func
+  onRenderFrame: PropTypes.func
 };
 
 const defaultProps = {
