@@ -25,7 +25,7 @@ import Stats from './stats';
 import {getDefaultProps, compareProps} from './props';
 import {log, count} from './utils';
 import {applyPropOverrides, removeLayerInSeer} from '../debug/seer-integration';
-import {GL} from 'luma.gl';
+import {GL, withParameters} from 'luma.gl';
 import assert from 'assert';
 
 const LOG_PRIORITY_UPDATE = 1;
@@ -442,11 +442,15 @@ export default class Layer {
     const {getPolygonOffset} = this.props;
 
     // Apply polygon offset to avoid z-fighting
-    const offset = getPolygonOffset && getPolygonOffset(uniforms) || [0, 0];
-    gl.polygonOffset(offset[0], offset[1]);
+    const offsets = getPolygonOffset && getPolygonOffset(uniforms) || [0, 0];
+    const polygonOffsetSettings = {
+      polygonOffset: offsets
+    };
 
     // Call subclass lifecycle method
-    this.draw({uniforms});
+    withParameters(gl, polygonOffsetSettings, () => {
+      this.draw({uniforms});
+    });
     // End lifecycle method
   }
 

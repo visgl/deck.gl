@@ -3,6 +3,7 @@
 import React, {PureComponent} from 'react';
 import {render} from 'react-dom';
 import DeckGL, {PointCloudLayer, COORDINATE_SYSTEM} from 'deck.gl';
+import {setParameters} from 'luma.gl';
 
 import {
   OrbitController,
@@ -107,9 +108,11 @@ class Example extends PureComponent {
   }
 
   _onInitialized(gl) {
-    gl.clearColor(0.07, 0.14, 0.19, 1);
-    gl.enable(gl.DEPTH_TEST);
-    gl.depthFunc(gl.LEQUAL);
+    setParameters(gl, {
+      clearColor: [0.07, 0.14, 0.19, 1],
+      depthTest: true,
+      depthFunc: gl.LEQUAL
+    });
   }
 
   _onViewportChange(viewport) {

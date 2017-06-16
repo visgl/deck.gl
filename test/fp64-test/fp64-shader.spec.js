@@ -24,7 +24,7 @@
 import 'babel-polyfill';
 
 import {document, window} from 'global';
-import {Buffer, createGLContext, Program} from 'luma.gl';
+import {Buffer, createGLContext, Program, setParameters} from 'luma.gl';
 import {assembleShaders} from 'deck.gl';
 
 const BUFFER_DATA = new Float32Array([1, 1, -1, 1, 1, -1, -1, -1]);
@@ -132,9 +132,11 @@ function getMat4Float64() {
 function initializeGL(canvas)
 {
   const gl = createGLContext(canvas);
-  gl.viewport(0, 0, canvas.width, canvas.height);
-  gl.clearColor(0, 0, 0, 1);
-  gl.clearDepth(1);
+  setParameters(gl, {
+    viewport: [0, 0, canvas.width, canvas.height],
+    clearColor: [0, 0, 0, 1],
+    clearDepth: 1
+  });
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
   var fp_texture_support = gl.getExtension('OES_texture_float');

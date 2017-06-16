@@ -1,5 +1,6 @@
 import React, {Component} from 'react';
 import {scaleLinear} from 'd3-scale';
+import {setParameters} from 'luma.gl';
 
 import DeckGL from 'deck.gl';
 import ArcBrushingLayer from './arc-brushing-layer';
@@ -127,8 +128,10 @@ export default class DeckGLOverlay extends Component {
   }
 
   _initialize(gl) {
-    gl.enable(gl.DEPTH_TEST);
-    gl.depthFunc(gl.LEQUAL);
+    setParameters(gl, {
+      depthTest: true,
+      depthFunc: gl.LEQUAL
+    });
   }
 
   render() {

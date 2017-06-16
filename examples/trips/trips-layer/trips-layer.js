@@ -50,6 +50,8 @@ export default class TripsLayer extends Layer {
       }),
       vertexCount: 0,
       isIndexed: true,
+      // TODO-state-management: onBeforeRender can go to settings, onAfterRender, we should
+      // move this settings of corresponding draw.
       onBeforeRender: () => {
         gl.enable(gl.BLEND);
         gl.enable(gl.POLYGON_OFFSET_FILL);

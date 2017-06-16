@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 
 import {Layer, assembleShaders} from 'deck.gl';
-import {GL, Model, Geometry, Texture2D} from 'luma.gl';
+import {GL, Model, Geometry, Texture2D, setParameters} from 'luma.gl';
 import meshLayerVertex from './mesh-layer-vertex.glsl';
 import meshLayerFragment from './mesh-layer-fragment.glsl';
 
@@ -74,8 +74,10 @@ export default class MeshLayer extends Layer {
     const shaders = assembleShaders(gl, this.getShaders());
 
     // TODO - this should not be done here
-    gl.enable(GL.DEPTH_TEST);
-    gl.depthFunc(GL.LEQUAL);
+    setParameters(gl, {
+      depthTest: true,
+      depthFunc: gl.LEQUAL
+    });
 
     const model = new Model({
       gl,

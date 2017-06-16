@@ -1,5 +1,6 @@
 import React, {Component} from 'react';
 import {scaleQuantile} from 'd3-scale';
+import {setParameters} from 'luma.gl';
 
 import DeckGL, {GeoJsonLayer, ArcLayer} from 'deck.gl';
 
@@ -81,8 +82,10 @@ export default class DeckGLOverlay extends Component {
   }
 
   _initialize(gl) {
-    gl.enable(gl.DEPTH_TEST);
-    gl.depthFunc(gl.LEQUAL);
+    setParameters(gl, {
+      depthTest: true,
+      depthFunc: gl.LEQUAL
+    });
   }
 
   render() {

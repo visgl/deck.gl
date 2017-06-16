@@ -8,7 +8,7 @@ import autobind from 'react-autobind';
 import MapboxGLMap from 'react-map-gl';
 import {FPSStats} from 'react-stats';
 
-import {Matrix4} from 'luma.gl';
+import {Matrix4, setParameters} from 'luma.gl';
 
 import LayerInfo from './components/layer-info';
 import LayerSelector from './components/layer-selector';
@@ -95,8 +95,10 @@ class App extends PureComponent {
   }
 
   _onWebGLInitialized(gl) {
-    gl.enable(gl.DEPTH_TEST);
-    gl.depthFunc(gl.LEQUAL);
+    setParameters(gl, {
+      depthTest: true,
+      depthFunc: gl.LEQUAL
+    });
   }
 
   _onUpdateContainerSettings(settings) {

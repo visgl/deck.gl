@@ -1,4 +1,5 @@
 import React, {Component} from 'react';
+import {setParameters} from 'luma.gl';
 
 import PlotLayer from './plot-layer';
 import DeckGL from 'deck.gl';
@@ -12,8 +13,10 @@ function getScale({min, max}) {
 export default class DeckGLOverlay extends Component {
 
   _onInitialized(gl) {
-    gl.enable(gl.DEPTH_TEST);
-    gl.depthFunc(gl.LEQUAL);
+    setParameters(gl, {
+      depthTest: true,
+      depthFunc: gl.LEQUAL
+    });
   }
 
   render() {

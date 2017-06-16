@@ -83,10 +83,13 @@ export default class ScreenGridLayer extends Layer {
   draw({uniforms}) {
     const {minColor, maxColor} = this.props;
     const {model, cellScale, maxCount} = this.state;
-    const {gl} = this.context;
-    gl.depthMask(true);
     uniforms = Object.assign({}, uniforms, {minColor, maxColor, cellScale, maxCount});
-    model.render(uniforms);
+    model.draw({
+      uniforms,
+      settings: {
+        depthMask: true
+      }
+    });
   }
 
   _getModel(gl) {
