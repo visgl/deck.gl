@@ -1,4 +1,7 @@
 language: node_js
+dist: precise
+os: linux
+group: stable
 node_js:
   - 6.9.1
   - 7
