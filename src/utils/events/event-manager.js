@@ -163,8 +163,9 @@ export default class EventManager {
       };
 
       // Calculate center relative to the root element
+      // TODO/xiaoji - avoid using getBoundingClientRect for perf?
       const rect = element.getBoundingClientRect();
-      const relativeCenter = {
+      const offsetCenter = {
         x: center.x - rect.left - element.clientLeft,
         y: center.y - rect.top - element.clientTop
       };
@@ -172,7 +173,7 @@ export default class EventManager {
       handler(Object.assign({}, event, {
         type,
         center,
-        relativeCenter,
+        offsetCenter,
         rootElement: element
       }));
     };

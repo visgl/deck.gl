@@ -158,7 +158,7 @@ export default class DeckGL extends React.Component {
 
   // Route events to layers
   _onClick(event) {
-    const pos = event.relativeCenter;
+    const pos = event.offsetCenter;
     if (!pos) {
       return;
     }
@@ -173,7 +173,7 @@ export default class DeckGL extends React.Component {
 
   // Route events to layers
   _onMouseMove(event) {
-    const pos = event.relativeCenter;
+    const pos = event.offsetCenter;
     if (!pos || pos.x < 0 || pos.y < 0 || pos.x > this.props.width || pos.y > this.props.height) {
       // Check if pointer is inside the canvas
       return;
@@ -188,7 +188,7 @@ export default class DeckGL extends React.Component {
   }
 
   _onDragEvent(event) {
-    const pos = event.relativeCenter;
+    const pos = event.offsetCenter;
     if (!pos) {
       return;
     }
