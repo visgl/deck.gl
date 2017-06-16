@@ -191,6 +191,7 @@ const PointCloudLayerExample = {
   }
 };
 
+// Uncomment to test using external buffers
 // const PointCloudLayerExample = {
 //   layer: PointCloudLayer,
 //   props: {
