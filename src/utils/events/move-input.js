@@ -65,7 +65,8 @@ export default class MoveInput {
         MOVE_EVENT_TYPES.forEach(type => this.callback({
           type,
           srcEvent: event,
-          target: this.element
+          pointerType: 'mouse',
+          target: event.target
         }));
       }
       break;

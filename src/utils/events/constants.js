@@ -14,24 +14,16 @@ import {
  * alias basic input events into "classes" of events: down, move, and up.
  * See `_onBasicInput()` for usage of these aliases.
  */
-/* eslint-disable */
-export const BASIC_EVENT_CLASSES = {
-  down: ['pointerdown', 'touchstart', 'mousedown'],
-  move: ['pointermove', 'touchmove',  'mousemove'],
-  up:   ['pointerup',   'touchend',   'mouseup']
-};
-/* eslint-enable */
-
 export const BASIC_EVENT_ALIASES = {
-  pointerdown: BASIC_EVENT_CLASSES.down,
-  pointermove: BASIC_EVENT_CLASSES.move,
-  pointerup: BASIC_EVENT_CLASSES.up,
-  touchstart: BASIC_EVENT_CLASSES.down,
-  touchmove: BASIC_EVENT_CLASSES.move,
-  touchend: BASIC_EVENT_CLASSES.up,
-  mousedown: BASIC_EVENT_CLASSES.down,
-  mousemove: BASIC_EVENT_CLASSES.move,
-  mouseup: BASIC_EVENT_CLASSES.up
+  pointerdown: 'pointerdown',
+  pointermove: 'pointermove',
+  pointerup: 'pointerup',
+  touchstart: 'pointerdown',
+  touchmove: 'pointermove',
+  touchend: 'pointerup',
+  mousedown: 'pointerdown',
+  mousemove: 'pointermove',
+  mouseup: 'pointerup'
 };
 
 /**
@@ -89,5 +81,8 @@ export const RECOGNIZERS = [
  * to corresponding Hammer.js gestures.
  */
 export const GESTURE_EVENT_ALIASES = {
-  click: 'tap'
+  click: 'tap',
+  mousedown: 'pointerdown',
+  mousemove: 'pointermove',
+  mouseup: 'pointerup'
 };

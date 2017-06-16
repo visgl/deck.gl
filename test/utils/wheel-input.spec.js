@@ -94,7 +94,8 @@ test('wheelInput#handleEvent', t => {
     preventDefault: () => {},
     deltaY: 1,
     clientX: 123,
-    clientY: 456
+    clientY: 456,
+    target: eventRegistrar
   };
   const wheelInput = new WheelInput(eventRegistrar, callbackSpy, {enable: false});
   t.notOk(callbackSpy.called, 'callback should not be called when disabled');
@@ -108,6 +109,7 @@ test('wheelInput#handleEvent', t => {
       y: wheelEventMock.clientY
     },
     delta: -wheelEventMock.deltaY,
+    pointerType: 'mouse',
     srcEvent: wheelEventMock,
     target: eventRegistrar
   }, '...and should be called with correct params');

@@ -65,7 +65,6 @@ export default class WheelInput {
       return;
     }
 
-    event.preventDefault();
     let value = event.deltaY;
     if (window.WheelEvent) {
       // Firefox doubles the values on retina screens...
@@ -143,7 +142,8 @@ export default class WheelInput {
       center: position,
       delta,
       srcEvent,
-      target: this.element
+      pointerType: 'mouse',
+      target: srcEvent.target
     });
   }
 }
