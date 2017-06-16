@@ -20,6 +20,7 @@
 
 /* eslint-disable dot-notation, max-statements, no-unused-vars */
 import AttributeManager from 'deck.gl/lib/attribute-manager';
+import {GL} from 'luma.gl';
 import test from 'tape-catch';
 
 function update(attribute, {data}) {
@@ -129,6 +130,41 @@ test('AttributeManager.update - 0 numInstances', t => {
 
   const attribute = attributeManager.getAttributes()['positions'];
   t.ok(ArrayBuffer.isView(attribute.value), 'attribute has typed array');
+
+  t.end();
+});
+
+test('AttributeManager.update - external buffers', t => {
+  const attributeManager = new AttributeManager();
+
+  const dummyUpdate = () => t.fail('updater should not be called when external buffer is present');
+
+  attributeManager.add({
+    positions: {size: 2, update: dummyUpdate},
+    colors: {size: 3, type: GL.UNSIGNED_BYTE, update: dummyUpdate}
+  });
+
+  // First update, should autoalloc and update the value array
+  attributeManager.update({
+    numInstances: 1,
+    buffers: {
+      positions: new Float32Array([0, 0]),
+      colors: new Uint8ClampedArray([0, 0, 0])
+    }
+  });
+
+  let attribute = attributeManager.getAttributes()['positions'];
+  t.ok(ArrayBuffer.isView(attribute.value), 'positions attribute has typed array');
+  attribute = attributeManager.getAttributes()['colors'];
+  t.ok(ArrayBuffer.isView(attribute.value), 'colors attribute has typed array');
+
+  t.throws(() => attributeManager.update({
+    numInstances: 1,
+    buffers: {
+      positions: new Float32Array([0, 0]),
+      colors: new Float32Array([0, 0, 0])
+    }
+  }), /Uint8ClampedArray/, 'should throw error for incorrect buffer type');
 
   t.end();
 });

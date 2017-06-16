@@ -456,8 +456,9 @@ export default class AttributeManager {
       const buffer = bufferMap[attributeName];
       attribute.isExternalBuffer = false;
       if (buffer) {
-        if (!(buffer instanceof Float32Array)) {
-          throw new Error('Attribute properties must be of type Float32Array');
+        const ArrayType = glArrayFromType(attribute.type || GL.FLOAT);
+        if (!(buffer instanceof ArrayType)) {
+          throw new Error(`Attribute ${attributeName} must be of type ${ArrayType.name}`);
         }
         if (attribute.auto && buffer.length <= numInstances * attribute.size) {
           throw new Error('Attribute prop array must match length and size');
