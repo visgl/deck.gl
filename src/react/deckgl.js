@@ -26,6 +26,7 @@ import {LayerManager, Layer} from '../lib';
 import {EffectManager, Effect} from '../experimental';
 import {GL} from 'luma.gl';
 import {Viewport, WebMercatorViewport} from '../lib/viewports';
+import LayerEventManager from '../lib/layer-event-manager';
 
 function noop() {}
 
@@ -52,9 +53,9 @@ const defaultProps = {
   gl: null,
   effects: [],
   onWebGLInitialized: noop,
+  onAfterRender: noop,
   onLayerClick: noop,
-  onLayerHover: noop,
-  onAfterRender: noop
+  onLayerHover: noop
 };
 
 export default class DeckGL extends React.Component {
@@ -62,14 +63,18 @@ export default class DeckGL extends React.Component {
     super(props);
     this.state = {};
     this.needsRedraw = true;
-    this.eventManager = null;
     this.layerManager = null;
+    this.layerEventManager = null;
     this.effectManager = null;
     autobind(this);
   }
 
   componentWillReceiveProps(nextProps) {
-    this._setLayerManagerProps(nextProps);
+    this.layerEventManager.set({
+      pickingRadius: nextProps.pickingRadius,
+      onLayerClick: nextProps.onLayerClick,
+      onLayerHover: nextProps.onLayerHover
+    });
     this._updateLayers(nextProps);
   }
 
@@ -81,26 +86,6 @@ export default class DeckGL extends React.Component {
 
   queryObjects({x, y, width = 1, height = 1, layerIds = null}) {
     return this.layerManager.queryLayer({x, y, width, height, layerIds});
-  }
-
-  _setLayerManagerProps(nextProps) {
-    const {
-      pickingRadius,
-      onLayerClick,
-      onLayerHover
-    } = nextProps;
-
-    // Check if a mouse event has been specified and that at least one of the layers is pickable
-    if ([
-      onLayerClick,
-      onLayerHover
-    ].some(handler => handler !== noop)) {
-      this.layerManager.validateEventHandling();
-    }
-
-    this.layerManager.pickingRadius = pickingRadius;
-    this.layerManager.onLayerClick = onLayerClick;
-    this.layerManager.onLayerHover = onLayerHover;
   }
 
   _updateLayers(nextProps) {
@@ -126,22 +111,27 @@ export default class DeckGL extends React.Component {
     // Enable polygon offset
     gl.enable(GL.POLYGON_OFFSET_FILL);
 
-    this.props.onWebGLInitialized(gl);
+    const {props} = this;
+    props.onWebGLInitialized(gl);
 
     // Note: avoid React setState due GL animation loop / setState timing issue
-    this.layerManager = new LayerManager({gl, canvas});
+    this.layerManager = new LayerManager({gl});
+    this.layerEventManager = new LayerEventManager(this.layerManager, canvas, {
+      pickingRadius: props.pickingRadius,
+      onLayerClick: props.onLayerClick,
+      onLayerHover: props.onLayerHover
+    });
     this.effectManager = new EffectManager({gl, layerManager: this.layerManager});
 
-    for (const effect of this.props.effects) {
+    for (const effect of props.effects) {
       this.effectManager.addEffect(effect);
     }
 
-    this._setLayerManagerProps(this.props);
-    this._updateLayers(this.props);
+    this._updateLayers(props);
 
     // TODO: add handlers on demand at runtime, not all at once on init
     // https://github.com/uber/deck.gl/issues/634
-    this.layerManager.addEventListeners(['click', 'pointermove']);
+    this.layerEventManager.addEventListeners(['click', 'pointermove']);
   }
 
   _onRenderFrame({gl}) {
