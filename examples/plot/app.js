@@ -28,24 +28,24 @@ class Root extends Component {
     };
 
     this._resize = this._resize.bind(this);
-    this._onChangeViewport = this._onChangeViewport.bind(this);
+    this._onViewportChange = this._onViewportChange.bind(this);
     this._onHover = this._onHover.bind(this);
   }
 
   componentDidMount() {
     window.addEventListener('resize', this._resize);
     this._resize();
-    this._onChangeViewport(OrbitController.fitBounds(this.state.viewport, [[0, 0, 0], [1, 1, 1]]));
+    this._onViewportChange(OrbitController.fitBounds(this.state.viewport, [[0, 0, 0], [1, 1, 1]]));
   }
 
   _resize() {
-    this._onChangeViewport({
+    this._onViewportChange({
       width: window.innerWidth,
       height: window.innerHeight
     });
   }
 
-  _onChangeViewport(viewport) {
+  _onViewportChange(viewport) {
     Object.assign(this.state.viewport, viewport);
     this.setState({viewport: this.state.viewport});
   }
@@ -63,7 +63,7 @@ class Root extends Component {
     return (
       <OrbitController
         {...viewport}
-        onChangeViewport={this._onChangeViewport} >
+        onViewportChange={this._onViewportChange} >
         <DeckGLOverlay
           viewport={viewport}
           equation={equation}

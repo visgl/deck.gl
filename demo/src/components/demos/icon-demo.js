@@ -30,7 +30,7 @@ export default class IconDemo extends Component {
   static get viewport() {
     return {
       ...IconOverlay.defaultViewport,
-      perspectiveEnabled: false,
+      dragToRotate: false,
       mapStyle: MAPBOX_STYLES.DARK
     };
   }

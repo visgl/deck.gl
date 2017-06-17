@@ -2,7 +2,7 @@ This is a minimal standalone version of the 3DHeatmap example
 on [deck.gl](http://deck.gl) website.
 
 ### Usage
-- Copy the content of this folder to your project. 
+- Copy the content of this folder to your project.
 
 - Install Package
 ```
@@ -14,11 +14,11 @@ npm install
 module.exports = require('../webpack.config.local')(module.exports);
 ```
 
-- Add [Mapbox access token](https://www.mapbox.com/help/define-access-token/) 
+- Add [Mapbox access token](https://www.mapbox.com/help/define-access-token/)
 by run this command in your terminal.
 
 ```
-export MAPBOX_ACCESS_TOKEN=<Your_Token>
+export MapboxAccessToken=<Your_Token>
 ```
 
 or you can directly add it to `app.js`
@@ -26,7 +26,7 @@ or you can directly add it to `app.js`
 // Set your mapbox token here
 const MAPBOX_TOKEN = <Your_Token>>;
 ```
-- Start the app. 
+- Start the app.
 ```
 npm start
 ```

@@ -6,7 +6,7 @@ import Deck from './deck';
 import {LineLayer, ScatterplotLayer} from 'deck.gl';
 
 // Set your mapbox token here
-const MAPBOX_TOKEN = process.env.MAPBOX_ACCESS_TOKEN; // eslint-disable-line
+const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
 
 class Root extends Component {
 

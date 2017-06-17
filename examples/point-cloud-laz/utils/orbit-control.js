@@ -48,7 +48,7 @@ export default class OrbitController extends Component {
   _onDragStart(evt) {
     const {pageX, pageY} = evt;
     this._dragStartPos = [pageX, pageY];
-    this.props.onChangeViewport({isDragging: true});
+    this.props.onViewportChange({isDragging: true});
   }
 
   _onDrag(evt) {
@@ -68,7 +68,7 @@ export default class OrbitController extends Component {
         vec3.rotateX(newLookAt, newLookAt, lookAt, rotationX / 180 * Math.PI);
         vec3.rotateY(newLookAt, newLookAt, lookAt, rotationY / 180 * Math.PI);
 
-        this.props.onChangeViewport({
+        this.props.onViewportChange({
           lookAt: newLookAt
         });
       } else {
@@ -77,7 +77,7 @@ export default class OrbitController extends Component {
         const newRotationX = clamp(rotationX - dy * 180, -90, 90);
         const newRotationY = (rotationY - dx * 180) % 360;
 
-        this.props.onChangeViewport({
+        this.props.onViewportChange({
           rotationX: newRotationX,
           rotationY: newRotationY
         });
@@ -89,7 +89,7 @@ export default class OrbitController extends Component {
 
   _onDragEnd() {
     this._dragStartPos = null;
-    this.props.onChangeViewport({isDragging: false});
+    this.props.onViewportChange({isDragging: false});
   }
 
   _onWheel(evt) {
@@ -111,7 +111,7 @@ export default class OrbitController extends Component {
     const {distance, minDistance, maxDistance} = this.props;
     const newDistance = clamp(distance * Math.pow(1.01, value), minDistance, maxDistance);
 
-    this.props.onChangeViewport({
+    this.props.onViewportChange({
       distance: newDistance
     });
   }
@@ -122,7 +122,7 @@ export default class OrbitController extends Component {
     const size = Math.max(max[0] - min[0], max[1] - min[1], max[2] - min[2]);
     const newDistance = size / Math.tan(fov / 180 * Math.PI / 2) / 2;
 
-    this.props.onChangeViewport({
+    this.props.onViewportChange({
       distance: newDistance
     });
   }
@@ -159,7 +159,7 @@ OrbitController.propTypes = {
   // viewport height in pixels
   height: PropTypes.number.isRequired,
   // callback
-  onChangeViewport: PropTypes.func.isRequired
+  onViewportChange: PropTypes.func.isRequired
 };
 
 OrbitController.defaultProps = {

@@ -6,7 +6,7 @@ import {LineLayer} from 'deck.gl';
 /* global document */
 
 // Set your mapbox token here
-const MAPBOX_TOKEN = process.env.MAPBOX_ACCESS_TOKEN; // eslint-disable-line
+const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
 
 class Root extends Component {
 
@@ -42,8 +42,7 @@ class Root extends Component {
         height={height}
         mapStyle="mapbox://styles/mapbox/dark-v9"
         mapboxApiAccessToken={MAPBOX_TOKEN}
-        perspectiveEnabled
-        onChangeViewport={v => this.setState({viewport: v})}>
+        onViewportChange={v => this.setState({viewport: v})}>
         <DeckGL
           debug
           latitude={viewport.latitude}

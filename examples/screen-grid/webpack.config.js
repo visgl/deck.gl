@@ -34,7 +34,7 @@ module.exports = {
 
   // Optional: Enables reading mapbox token from environment variable
   plugins: [
-    new webpack.EnvironmentPlugin(['MAPBOX_ACCESS_TOKEN', 'MapboxAccessToken'])
+    new webpack.EnvironmentPlugin(['MapboxAccessToken'])
   ]
 };
 
