@@ -21,15 +21,19 @@
 /* global window */
 import {COORDINATE_SYSTEM, LIFECYCLE} from './constants';
 import AttributeManager from './attribute-manager';
-import {log, compareProps, count} from './utils';
-import {getOverrides} from '../debug/seer-integration';
+import {getDefaultProps, compareProps} from './props';
+import Stats from './stats';
+import {log, count} from './utils';
+import {applyPropOverrides} from '../debug/seer-integration';
 import {GL} from 'luma.gl';
 import assert from 'assert';
 
-const LOG_PRIORITY_UPDATE = 2;
+const LOG_PRIORITY_UPDATE = 1;
 
 const EMPTY_ARRAY = [];
 const noop = () => {};
+
+// import * as PropTypes from './prop-types';
 
 /*
  * @param {string} props.id - layer name
@@ -37,25 +41,35 @@ const noop = () => {};
  * @param {bool} props.opacity - opacity of the layer
  */
 const defaultProps = {
+  // data: Special handling for null, see below
   dataComparator: null,
+  updateTriggers: {}, // Update triggers: a core change detection mechanism in deck.gl
   numInstances: undefined,
+
   visible: true,
   pickable: false,
+  // opacity: new PropTypes.Float({min: 0, max: 1, default: 0.8}),
   opacity: 0.8,
+
   onHover: noop,
   onClick: noop,
   onDragStart: noop,
   onDragMove: noop,
   onDragEnd: noop,
   onDragCancel: noop,
+
+  projectionMode: COORDINATE_SYSTEM.LNGLAT,
+
+  settings: {},
+  uniforms: {},
+  framebuffer: null,
+
+  animation: null, // Passed prop animation functions to evaluate props
+
   // Offset depth based on layer index to avoid z-fighting.
   // Negative values pull layer towards the camera
   // https://www.opengl.org/archives/resources/faq/technical/polygonoffset.htm
-  getPolygonOffset: ({layerIndex}) => [0, -layerIndex * 100],
-  // Update triggers: a key change detection mechanism in deck.gl
-  // See layer documentation
-  updateTriggers: {},
-  projectionMode: COORDINATE_SYSTEM.LNGLAT
+  getPolygonOffset: ({layerIndex}) => [0, -layerIndex * 100]
 };
 
 let counter = 0;
@@ -73,26 +87,34 @@ export default class Layer {
     // Accept null as data - otherwise apps and layers need to add ugly checks
     // Use constant fallback so that data change is not triggered
     props.data = props.data || EMPTY_ARRAY;
-    // Get the overrides from the extension if it's active
-    getOverrides(props);
+    // Apply any overrides from the seer debug extension if it is active
+    applyPropOverrides(props);
     // Props are immutable
     Object.freeze(props);
 
-    // Define all members and freeze layer
-    this.id = props.id;
-    this.props = props;
-    this.oldProps = null;
-    this.state = null;
-    this.context = null;
-    this.parentLayer = null;
-    this.count = counter++;
-    this.lifecycle = LIFECYCLE.NO_STATE;
+    // Define all members
+    this.id = props.id; // The layer's id, used for matching with layers' from last render cyckle
+    this.props = props; // Current props, a frozen object
+    this.animatedProps = null; // Computing animated props requires layer manager state
+    this.oldProps = null; // Props from last render used for change detection
+    this.state = null; // Will be set to the shared layer state object during layer matching
+    this.context = null; // Will reference layer manager's context, contains state shared by layers
+    this.count = counter++; // Keep track of how many layer instances you are generating
+    this.lifecycle = LIFECYCLE.NO_STATE; // Helps track and debug the life cycle of the layers
+    // CompositeLayer members, need to be defined here because of the `Object.seal`
+    this.parentLayer = null; // reference to the composite layer parent that rendered this layer
+    this.oldSubLayers = []; // reference to sublayers rendered in the previous cycle
+    // Seal the layer
     Object.seal(this);
   }
 
   toString() {
     const className = this.constructor.layerName || this.constructor.name;
     return className !== this.props.id ? `<${className}:'${this.props.id}'>` : `<${className}>`;
+  }
+
+  get stats() {
+    return this.state.stats;
   }
 
   // //////////////////////////////////////////////////
@@ -106,7 +128,7 @@ export default class Layer {
 
   // Let's layer control if updateState should be called
   shouldUpdateState({oldProps, props, oldContext, context, changeFlags}) {
-    return changeFlags.somethingChanged;
+    return changeFlags.propsOrDataChanged;
   }
 
   // Default implementation, all attributes will be invalidated and updated
@@ -172,8 +194,9 @@ export default class Layer {
       return;
     }
 
-    const numInstances = this.getNumInstances(props);
     // Figure out data length
+    const numInstances = this.getNumInstances(props);
+
     attributeManager.update({
       data: props.data,
       numInstances,
@@ -183,6 +206,7 @@ export default class Layer {
       // Don't worry about non-attribute props
       ignoreUnknownAttributes: true
     });
+
     if (model) {
       const changedAttributes = attributeManager.getChangedAttributes({clearChangedFlags: true});
       model.setAttributes(changedAttributes);
@@ -338,6 +362,7 @@ export default class Layer {
     assert(!this.state, 'Layer missing state');
 
     this.state = {};
+    this.state.stats = new Stats({id: 'draw'});
 
     // Initialize state only once
     this.setState({
@@ -434,39 +459,6 @@ export default class Layer {
     // End lifecycle method
   }
 
-  diffProps(oldProps, newProps, context) {
-    // First check if any props have changed (ignore props that will be examined separately)
-    const propsChangedReason = compareProps({
-      newProps,
-      oldProps,
-      ignoreProps: {data: null, updateTriggers: null}
-    });
-
-    // Now check if any data related props have changed
-    const dataChangedReason = this._diffDataProps(oldProps, newProps);
-
-    const propsChanged = Boolean(propsChangedReason);
-    const dataChanged = Boolean(dataChangedReason);
-    const viewportChanged = context.viewportChanged;
-    const somethingChanged = propsChanged || dataChanged || viewportChanged;
-
-    // Check update triggers to determine if any attributes need regeneration
-    // Note - if data has changed, all attributes will need regeneration, so skip this step
-    if (!dataChanged) {
-      this._diffUpdateTriggers(oldProps, newProps);
-    } else {
-      log.log(2, `dataChanged: ${dataChanged}`);
-    }
-
-    return {
-      propsChanged,
-      dataChanged,
-      viewportChanged,
-      somethingChanged,
-      reason: dataChangedReason || propsChangedReason
-    };
-  }
-
   // Checks state of attributes and model
   // TODO - is attribute manager needed? - Model should be enough.
   getNeedsRedraw({clearRedrawFlags = false} = {}) {
@@ -487,11 +479,55 @@ export default class Layer {
     return redraw;
   }
 
+  diffProps(oldProps, newProps, context) {
+    // First check if any props have changed (ignore props that will be examined separately)
+    const propsChangedReason = compareProps({
+      newProps,
+      oldProps,
+      ignoreProps: {data: null, updateTriggers: null}
+    });
+
+    // Now check if any data related props have changed
+    const dataChangedReason = this._diffDataProps(oldProps, newProps);
+
+    const propsChanged = Boolean(propsChangedReason);
+    const dataChanged = Boolean(dataChangedReason);
+    const propsOrDataChanged = propsChanged || dataChanged;
+    const viewportChanged = context.viewportChanged;
+    const somethingChanged = propsChanged || dataChanged || viewportChanged;
+
+    // Check update triggers to determine if any attributes need regeneration
+    // Note - if data has changed, all attributes will need regeneration, so skip this step
+    if (!dataChanged) {
+      this._diffUpdateTriggers(oldProps, newProps);
+    }
+
+    // Trace what happened
+    if (dataChanged) {
+      log.log(LOG_PRIORITY_UPDATE, `dataChanged: ${dataChangedReason} in ${this.id}`);
+    } else if (propsChanged) {
+      log.log(LOG_PRIORITY_UPDATE, `propsChanged: ${propsChangedReason} in ${this.id}`);
+    }
+
+    return {
+      propsChanged,
+      dataChanged,
+      propsOrDataChanged,
+      viewportChanged,
+      somethingChanged,
+      reason: dataChangedReason || propsChangedReason || 'Viewport changed'
+    };
+  }
+
   // PRIVATE METHODS
 
   // The comparison of the data prop requires special handling
   // the dataComparator should be used if supplied
   _diffDataProps(oldProps, newProps) {
+    if (oldProps === null) {
+      return 'oldProps is null, initial diff';
+    }
+
     // Support optional app defined comparison of data
     const {dataComparator} = newProps;
     if (dataComparator) {
@@ -512,6 +548,9 @@ export default class Layer {
   _diffUpdateTriggers(oldProps, newProps) {
     // const {attributeManager} = this.state;
     // const updateTriggerMap = attributeManager.getUpdateTriggerMap();
+    if (oldProps === null) {
+      return true; // oldProps is null, initial diff
+    }
 
     let change = false;
 
@@ -585,51 +624,5 @@ export default class Layer {
 }
 
 Layer.layerName = 'Layer';
+Layer.propTypes = defaultProps;
 Layer.defaultProps = defaultProps;
-
-// HELPERS
-
-// Constructors have their super class constructors as prototypes
-function getOwnProperty(object, prop) {
-  return object.hasOwnProperty(prop) && object[prop];
-}
-/*
- * Return merged default props stored on layers constructor, create them if needed
- */
-function getDefaultProps(layer) {
-  const mergedDefaultProps = getOwnProperty(layer.constructor, 'mergedDefaultProps');
-  if (mergedDefaultProps) {
-    return mergedDefaultProps;
-  }
-  return mergeDefaultProps(layer);
-}
-
-/*
- * Walk the prototype chain and merge all default props
- */
-function mergeDefaultProps(layer) {
-  const subClassConstructor = layer.constructor;
-  const layerName = getOwnProperty(subClassConstructor, 'layerName');
-  if (!layerName) {
-    log.once(0, `layer ${layer.constructor.name} does not specify a "layerName"`);
-  }
-  let mergedDefaultProps = {
-    id: layerName || layer.constructor.name
-  };
-
-  while (layer) {
-    const layerDefaultProps = getOwnProperty(layer.constructor, 'defaultProps');
-    Object.freeze(layerDefaultProps);
-    if (layerDefaultProps) {
-      mergedDefaultProps = Object.assign({}, layerDefaultProps, mergedDefaultProps);
-    }
-    layer = Object.getPrototypeOf(layer);
-  }
-  // Store for quick lookup
-  subClassConstructor.mergedDefaultProps = mergedDefaultProps;
-  return mergedDefaultProps;
-}
-
-export const TEST_EXPORTS = {
-  mergeDefaultProps
-};

@@ -34,11 +34,11 @@ function formatArgs(firstArg, ...args) {
   return args;
 }
 
-function log(priority, ...args) {
+function log(priority, arg, ...args) {
   assert(Number.isFinite(priority), 'log priority must be a number');
   if (priority <= log.priority) {
     // Node doesn't have console.debug, but using it looks better in browser consoles
-    args = formatArgs(...args);
+    args = formatArgs(arg, ...args);
     if (console.debug) {
       console.debug(...args);
     } else {
@@ -49,7 +49,7 @@ function log(priority, ...args) {
 
 function once(priority, arg, ...args) {
   if (!cache[arg] && priority <= log.priority) {
-    console.warn(...formatArgs(args));
+    console.warn(...formatArgs(arg, ...args));
     cache[arg] = true;
   }
 }

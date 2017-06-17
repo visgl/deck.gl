@@ -25,7 +25,8 @@ import assert from 'assert';
 import {drawLayers, pickLayers, queryLayers} from './draw-and-pick';
 import {LIFECYCLE} from './constants';
 import {Viewport} from './viewports';
-import {setOverride, layerEditListener, initLayer, logLayer} from '../debug/seer-integration';
+import {setPropOverrides, layerEditListener, initLayerInSeer, updateLayerInSeer}
+  from '../debug/seer-integration';
 import {experimental} from 'luma.gl';
 import {Framebuffer} from 'luma.gl';
 
@@ -49,10 +50,10 @@ export default class LayerManager {
 
     this.prevLayers = [];
     this.layers = [];
-    // Tracks if any layers were drawn last update
-    // Needed to ensure that screen is cleared when no layers are shown
-    this.screenCleared = false;
     this.oldContext = {};
+    this.screenCleared = false;
+    this._needsRedraw = true;
+
     this.context = {
       gl,
       uniforms: {},
@@ -73,7 +74,7 @@ export default class LayerManager {
      * Set an override on the specified property and update the layers
      */
     layerEditListener(payload => {
-      setOverride(payload.itemKey, payload.valuePath.slice(1), payload.value);
+      setPropOverrides(payload.itemKey, payload.valuePath.slice(1), payload.value);
       const newLayers = this.layers.map(layer => new layer.constructor(layer.props));
       this.updateLayers({newLayers});
     });
@@ -85,6 +86,8 @@ export default class LayerManager {
     // TODO - viewport change detection breaks METER_OFFSETS mode
     // const oldViewport = this.context.viewport;
     // const viewportChanged = !oldViewport || !viewport.equals(oldViewport);
+
+    this._needsRedraw = true;
 
     const viewportChanged = true;
 
@@ -181,7 +184,10 @@ export default class LayerManager {
       return false;
     }
 
-    let redraw = false;
+    let redraw = this._needsRedraw;
+    if (clearRedrawFlags) {
+      this._needsRedraw = false;
+    }
 
     // Make sure that buffer is cleared once when layer list becomes empty
     if (this.layers.length === 0) {
@@ -197,6 +203,7 @@ export default class LayerManager {
     for (const layer of this.layers) {
       redraw = redraw || layer.getNeedsRedraw({clearRedrawFlags});
     }
+
     return redraw;
   }
 
@@ -230,6 +237,7 @@ export default class LayerManager {
         log.once(0, `Multipe old layers with same id ${layerName(oldLayer)}`);
       } else {
         oldLayerMap[oldLayer.id] = oldLayer;
+        oldLayer.lifecycle = LIFECYCLE.AWAITING_FINALIZATION;
       }
     }
 
@@ -268,19 +276,24 @@ export default class LayerManager {
         // Only transfer state at this stage. We must not generate exceptions
         // until all layers' state have been transferred
         if (oldLayer) {
-          log(LOG_PRIORITY_LIFECYCLE_MINOR,
-            `matched ${layerName(newLayer)}`, oldLayer, '->', newLayer);
           this._transferLayerState(oldLayer, newLayer);
           this._updateLayer(newLayer);
-
-          logLayer(newLayer);
+          updateLayerInSeer(newLayer); // Updates layer seer chrome extension (if connected)
         } else {
           this._initializeNewLayer(newLayer);
+          initLayerInSeer(newLayer); // Initializes layer in seer chrome extension (if connected)
         }
         generatedLayers.push(newLayer);
 
         // Call layer lifecycle method: render sublayers
-        let sublayers = newLayer.isComposite ? newLayer.renderLayers() : null;
+        const {props, oldProps} = newLayer;
+        let sublayers = newLayer.isComposite ? newLayer._renderLayers({
+          oldProps,
+          props,
+          context: this.context,
+          oldContext: this.oldContext,
+          changeFlags: newLayer.diffProps(oldProps, props, this.context)
+        }) : null;
         // End layer lifecycle method: render sublayers
 
         if (sublayers) {
@@ -315,21 +328,30 @@ export default class LayerManager {
 
     // sanity check
     assert(state, 'deck.gl sanity check - Matching layer has no state');
-    assert(oldLayer !== newLayer, 'deck.gl sanity check - Matching layer is same');
+    if (newLayer !== oldLayer) {
+      log(LOG_PRIORITY_LIFECYCLE_MINOR,
+        `matched ${layerName(newLayer)}`, oldLayer, '->', newLayer);
 
-    // Move state
-    newLayer.state = state;
-    newLayer.lifecycle = LIFECYCLE.MATCHED;
-    state.layer = newLayer;
+      // Move state
+      state.layer = newLayer;
+      newLayer.state = state;
 
-    // Update model layer reference
-    if (state.model) {
-      state.model.userData.layer = newLayer;
+      // Update model layer reference
+      if (state.model) {
+        state.model.userData.layer = newLayer;
+      }
+      // Keep a temporary ref to the old props, for prop comparison
+      newLayer.oldProps = props;
+      // oldLayer.state = null;
+
+      newLayer.lifecycle = LIFECYCLE.MATCHED;
+      oldLayer.lifecycle = LIFECYCLE.AWAITING_GC;
+    } else {
+      log.log(LOG_PRIORITY_LIFECYCLE_MINOR, `Matching layer is unchanged ${newLayer.id}`);
+      newLayer.lifecycle = LIFECYCLE.MATCHED;
+      newLayer.oldProps = newLayer.props;
+      // TODO - we could avoid prop comparisons in this case
     }
-    // Keep a temporary ref to the old props, for prop comparison
-    newLayer.oldProps = props;
-    // oldLayer.state = null;
-    oldLayer.lifecycle = LIFECYCLE.OUTDATED;
   }
 
   // Update the old layers that were not matched
@@ -337,7 +359,7 @@ export default class LayerManager {
     let error = null;
     // Matched layers have lifecycle state "outdated"
     for (const layer of oldLayers) {
-      if (layer.lifecycle !== LIFECYCLE.OUTDATED) {
+      if (layer.lifecycle === LIFECYCLE.AWAITING_FINALIZATION) {
         error = error || this._finalizeLayer(layer);
       }
     }
@@ -361,8 +383,6 @@ export default class LayerManager {
         });
 
         layer.lifecycle = LIFECYCLE.INITIALIZED;
-
-        initLayer(layer);
 
       } catch (err) {
         log.once(0, `deck.gl error during initialization of ${layerName(layer)} ${err}`, err);
