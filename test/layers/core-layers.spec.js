@@ -37,7 +37,7 @@ import {
   testCreateEmptyLayer,
   testNullLayer,
   testLayerUpdates
-} from '../test-utils';
+} from '../test-utils/layer-utils';
 
 // Import LayerManager to test that layers can successfully be updated
 import {LayerManager} from 'deck.gl';
