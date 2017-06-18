@@ -19,9 +19,9 @@
 // THE SOFTWARE.
 
 /* global window */
-import {GL, glContextWithState} from 'luma.gl';
+import {GL, withParameters} from 'luma.gl';
 import {getUniformsFromViewport} from './viewport-uniforms';
-import {log, getBlendMode, setBlendMode} from './utils';
+import {log} from './utils';
 
 // Note: corresponding touch events, once supported, should be included here as well.
 const MOTION_EVENTS = [
@@ -350,25 +350,29 @@ function getPickedColors(gl, {
   pickingFBO,
   deviceRect: {x, y, width, height}
 }) {
-  // TODO - just return glContextWithState once luma updates
   // Make sure we clear scissor test and fbo bindings in case of exceptions
   // We are only interested in one pixel, no need to render anything else
   // Note that the callback here is called synchronously.
-  return glContextWithState(gl, {
+  return withParameters(gl, {
     frameBuffer: pickingFBO,
-    framebuffer: pickingFBO,
-    scissorTest: {x, y, w: width, h: height}
+    scissorTest: true,
+    scissor: [x, y, width, height],
+    blend: true,
+    blendFunc: [gl.ONE, gl.ZERO, gl.CONSTANT_ALPHA, gl.ZERO],
+    blendEquation: gl.FUNC_ADD
+    // TODO - Set clear color
   }, () => {
 
     // Clear the frame buffer
     gl.clear(GL.COLOR_BUFFER_BIT | GL.DEPTH_BUFFER_BIT);
+
     // Save current blend settings
-    const oldBlendMode = getBlendMode(gl);
+    // const oldBlendMode = getBlendMode(gl);
     // Set blend mode for picking
     // always overwrite existing pixel with [r,g,b,layerIndex]
-    gl.enable(gl.BLEND);
-    gl.blendFuncSeparate(gl.ONE, gl.ZERO, gl.CONSTANT_ALPHA, gl.ZERO);
-    gl.blendEquation(gl.FUNC_ADD);
+    // gl.enable(gl.BLEND);
+    // gl.blendFuncSeparate(gl.ONE, gl.ZERO, gl.CONSTANT_ALPHA, gl.ZERO);
+    // gl.blendEquation(gl.FUNC_ADD);
 
     // Render all pickable layers in picking colors
     layers.forEach((layer, layerIndex) => {
@@ -393,7 +397,7 @@ function getPickedColors(gl, {
     gl.readPixels(x, y, width, height, GL.RGBA, GL.UNSIGNED_BYTE, pickedColors);
 
     // restore blend mode
-    setBlendMode(gl, oldBlendMode);
+    // setBlendMode(gl, oldBlendMode);
 
     return pickedColors;
   });
