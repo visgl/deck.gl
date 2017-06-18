@@ -18,12 +18,13 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {WebMercatorViewport} from '../src/lib/viewports';
-import {TEST_EXPORTS as LAYER_TEST_EXPORTS} from '../src/lib/layer';
-import spy from 'spy';
+import {WebMercatorViewport} from 'deck.gl/lib/viewports';
+import {TEST_EXPORTS} from 'deck.gl/lib/layer';
+const {mergeDefaultProps} = TEST_EXPORTS;
+
+import spy from './spy';
 import global from 'global';
 
-const {mergeDefaultProps} = LAYER_TEST_EXPORTS;
 import {experimental} from 'luma.gl';
 
 /**

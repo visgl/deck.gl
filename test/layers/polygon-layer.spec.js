@@ -25,7 +25,7 @@ import {
   testCreateEmptyLayer,
   testNullLayer,
   testLayerUpdates
-} from '../test-utils';
+} from '../test-utils/layer-utils';
 
 import {PolygonLayer} from 'deck.gl';
 

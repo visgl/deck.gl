@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 import test from 'tape-catch';
-import spy from 'spy';
+import spy from '../test-utils/spy';
 
 import * as FIXTURES from '../data';
 

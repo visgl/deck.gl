@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 
 import test from 'tape-catch';
-import spy from 'spy';
+import spy from '../test-utils/spy';
 
 import * as data from '../data';
 import {

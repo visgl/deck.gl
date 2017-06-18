@@ -34,8 +34,8 @@ import {
 
 import {parseColor} from 'deck.gl/lib/utils/color';
 
-import {COORDINATE_SYSTEM} from '../../src/lib/constants';
-import {getUniformsFromViewport} from '../../src/lib/viewport-uniforms';
+import {COORDINATE_SYSTEM} from 'deck.gl/lib/constants';
+import {getUniformsFromViewport} from 'deck.gl/lib/viewport-uniforms';
 import {testInitializeLayer} from '../test-utils';
 
 const suite = new Suite();

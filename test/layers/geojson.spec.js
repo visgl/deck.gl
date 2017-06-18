@@ -47,7 +47,6 @@ const TEST_CASES = [
     argument: FEATURE_COLLECTION,
     expected: [FEATURE]
   },
-
   {
     title: 'geometry (ES6 Map)',
     argument: objectToMap(GEOMETRY),

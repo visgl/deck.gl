@@ -20,9 +20,6 @@
 
 import test from 'tape-catch';
 import {Layer} from 'deck.gl';
-import {TEST_EXPORTS} from 'deck.gl/lib/layer';
-
-const {mergeDefaultProps} = TEST_EXPORTS;
 
 const dataVariants = [
   {data: ['a', 'b', 'c'], size: 3}
@@ -70,20 +67,6 @@ SubLayer2.layerName = 'SubLayer2';
 
 class SubLayer3 extends Layer {}
 SubLayer3.layerName = 'SubLayer2';
-
-test('Layer#mergeDefaultProps', t => {
-  class A {}
-  A.defaultProps = {a: 1};
-
-  class B extends A {}
-  B.defaultProps = {b: 2};
-
-  const mergedProps = mergeDefaultProps(new B());
-
-  t.equal(mergedProps.a, 1, 'base class props merged');
-  t.equal(mergedProps.b, 2, 'sub class props merged');
-  t.end();
-});
 
 test('Layer#constructor', t => {
   for (const tc of LAYER_CONSTRUCT_TEST_CASES) {
