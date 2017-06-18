@@ -288,15 +288,15 @@ test('PathLayer#constructor', t => {
         t.ok(layer.state, 'should update layer state');
         t.ok(layer.state.model.uniforms.widthMinPixels === 10, 'should update strokeWidth');
       }
-    }, {
-      updateProps: {
-        fp64: true
-      },
-      assert: (layer, oldState) => {
-        t.ok(layer.state, 'should update layer state');
-        t.ok(layer.state.attributeManager.attributes.instanceStartEndPositions64xyLow,
-          'should add instancePositions64xyLow');
-      }
+    // }, {
+    //   updateProps: {
+    //     fp64: true
+    //   },
+    //   assert: (layer, oldState) => {
+    //     t.ok(layer.state, 'should update layer state');
+    //     t.ok(layer.state.attributeManager.attributes.instanceStartEndPositions64xyLow,
+    //       'should add instancePositions64xyLow');
+    //   }
     }]
   };
 
