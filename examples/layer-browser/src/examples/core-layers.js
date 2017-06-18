@@ -191,53 +191,6 @@ const PointCloudLayerExample = {
   }
 };
 
-// Uncomment to test using external buffers
-// const PointCloudLayerExample = {
-//   layer: PointCloudLayer,
-//   props: {
-//     id: 'pointCloudLayer',
-//     outline: true,
-//     data: null,
-//     projectionMode: 2,
-//     positionOrigin: dataSamples.positionOrigin,
-//     numInstances: dataSamples.getPointCloud().length,
-//     instancePositions: (data => {
-//       const buffer = new Float32Array(data.length * 3);
-//       let i = 0;
-//       for (const d of data) {
-//         buffer[i++] = d.position[0];
-//         buffer[i++] = d.position[1];
-//         buffer[i++] = d.position[2];
-//       }
-//       return buffer;
-//     })(dataSamples.getPointCloud()),
-//     instanceNormals: (data => {
-//       const buffer = new Float32Array(data.length * 3);
-//       let i = 0;
-//       for (const d of data) {
-//         buffer[i++] = d.normal[0];
-//         buffer[i++] = d.normal[1];
-//         buffer[i++] = d.normal[2];
-//       }
-//       return buffer;
-//     })(dataSamples.getPointCloud()),
-//     instanceColors: (data => {
-//       const buffer = new Uint8ClampedArray(data.length * 4);
-//       let i = 0;
-//       for (const d of data) {
-//         buffer[i++] = d.color[0];
-//         buffer[i++] = d.color[1];
-//         buffer[i++] = d.color[2];
-//         buffer[i++] = 255;
-//       }
-//       return buffer;
-//     })(dataSamples.getPointCloud()),
-//     opacity: 1,
-//     radiusPixels: 4,
-//     pickable: true
-//   }
-// };
-
 const GridCellLayerExample = {
   layer: GridCellLayer,
   propTypes: {
