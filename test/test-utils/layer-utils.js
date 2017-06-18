@@ -19,8 +19,7 @@
 // THE SOFTWARE.
 
 import {WebMercatorViewport} from 'deck.gl/lib/viewports';
-import {TEST_EXPORTS} from 'deck.gl/lib/layer';
-const {mergeDefaultProps} = TEST_EXPORTS;
+import {mergeDefaultProps} from '../../src/lib/props';
 
 import spy from './spy';
 import global from 'global';
