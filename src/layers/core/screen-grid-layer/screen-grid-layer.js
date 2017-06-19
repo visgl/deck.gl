@@ -66,6 +66,10 @@ export default class ScreenGridLayer extends Layer {
     this.setState({model: this._getModel(gl)});
   }
 
+  shouldUpdateState({changeFlags}) {
+    return changeFlags.somethingChanged;
+  }
+
   updateState({oldProps, props, changeFlags}) {
     super.updateState({props, oldProps, changeFlags});
     const cellSizeChanged =

@@ -139,10 +139,12 @@ export default class AttributeManager {
    */
   constructor({id = 'attribute-manager'} = {}) {
     this.id = id;
+
     this.attributes = {};
     this.updateTriggers = {};
     this.allocedInstances = -1;
     this.needsRedraw = true;
+
     this.userData = {};
     this.stats = new Stats({id: 'attr'});
 
@@ -256,7 +258,9 @@ export default class AttributeManager {
     // Only initiate alloc/update (and logging) if actually needed
     if (this._analyzeBuffers({numInstances})) {
       logFunctions.onUpdateStart({level: LOG_START_END_PRIORITY, id: this.id, numInstances});
+      this.stats.timeStart();
       this._updateBuffers({numInstances, data, props, context});
+      this.stats.timeEnd();
       logFunctions.onUpdateEnd({level: LOG_START_END_PRIORITY, id: this.id, numInstances});
     }
   }

@@ -22,15 +22,19 @@
 import {COORDINATE_SYSTEM, LIFECYCLE} from './constants';
 import AttributeManager from './attribute-manager';
 import Stats from './stats';
-import {log, compareProps, count} from './utils';
+import {getDefaultProps, compareProps} from './props';
+import {log, count} from './utils';
+import {applyPropOverrides} from '../debug/seer-integration';
 import {applyPropOverrides, removeLayerInSeer} from '../debug/seer-integration';
 import {GL} from 'luma.gl';
 import assert from 'assert';
 
-const LOG_PRIORITY_UPDATE = 2;
+const LOG_PRIORITY_UPDATE = 1;
 
 const EMPTY_ARRAY = [];
 const noop = () => {};
+
+// import * as PropTypes from './prop-types';
 
 /*
  * @param {string} props.id - layer name
@@ -45,6 +49,7 @@ const defaultProps = {
 
   visible: true,
   pickable: false,
+  // opacity: new PropTypes.Float({min: 0, max: 1, default: 0.8}),
   opacity: 0.8,
 
   onHover: noop,
@@ -124,7 +129,7 @@ export default class Layer {
 
   // Let's layer control if updateState should be called
   shouldUpdateState({oldProps, props, oldContext, context, changeFlags}) {
-    return changeFlags.somethingChanged;
+    return changeFlags.propsOrDataChanged;
   }
 
   // Default implementation, all attributes will be invalidated and updated
@@ -456,39 +461,6 @@ export default class Layer {
     // End lifecycle method
   }
 
-  diffProps(oldProps, newProps, context) {
-    // First check if any props have changed (ignore props that will be examined separately)
-    const propsChangedReason = compareProps({
-      newProps,
-      oldProps,
-      ignoreProps: {data: null, updateTriggers: null}
-    });
-
-    // Now check if any data related props have changed
-    const dataChangedReason = this._diffDataProps(oldProps, newProps);
-
-    const propsChanged = Boolean(propsChangedReason);
-    const dataChanged = Boolean(dataChangedReason);
-    const viewportChanged = context.viewportChanged;
-    const somethingChanged = propsChanged || dataChanged || viewportChanged;
-
-    // Check update triggers to determine if any attributes need regeneration
-    // Note - if data has changed, all attributes will need regeneration, so skip this step
-    if (!dataChanged) {
-      this._diffUpdateTriggers(oldProps, newProps);
-    } else {
-      log.log(2, `dataChanged: ${dataChanged}`);
-    }
-
-    return {
-      propsChanged,
-      dataChanged,
-      viewportChanged,
-      somethingChanged,
-      reason: dataChangedReason || propsChangedReason
-    };
-  }
-
   // Checks state of attributes and model
   // TODO - is attribute manager needed? - Model should be enough.
   getNeedsRedraw({clearRedrawFlags = false} = {}) {
@@ -507,6 +479,46 @@ export default class Layer {
     redraw = redraw || (model && model.getNeedsRedraw({clearRedrawFlags}));
 
     return redraw;
+  }
+
+  diffProps(oldProps, newProps, context) {
+    // First check if any props have changed (ignore props that will be examined separately)
+    const propsChangedReason = compareProps({
+      newProps,
+      oldProps,
+      ignoreProps: {data: null, updateTriggers: null}
+    });
+
+    // Now check if any data related props have changed
+    const dataChangedReason = this._diffDataProps(oldProps, newProps);
+
+    const propsChanged = Boolean(propsChangedReason);
+    const dataChanged = Boolean(dataChangedReason);
+    const propsOrDataChanged = propsChanged || dataChanged;
+    const viewportChanged = context.viewportChanged;
+    const somethingChanged = propsChanged || dataChanged || viewportChanged;
+
+    // Check update triggers to determine if any attributes need regeneration
+    // Note - if data has changed, all attributes will need regeneration, so skip this step
+    if (!dataChanged) {
+      this._diffUpdateTriggers(oldProps, newProps);
+    }
+
+    // Trace what happened
+    if (dataChanged) {
+      log.log(LOG_PRIORITY_UPDATE, `dataChanged: ${dataChangedReason} in ${this.id}`);
+    } else if (propsChanged) {
+      log.log(LOG_PRIORITY_UPDATE, `propsChanged: ${propsChangedReason} in ${this.id}`);
+    }
+
+    return {
+      propsChanged,
+      dataChanged,
+      propsOrDataChanged,
+      viewportChanged,
+      somethingChanged,
+      reason: dataChangedReason || propsChangedReason || 'Viewport changed'
+    };
   }
 
   // PRIVATE METHODS
@@ -614,52 +626,5 @@ export default class Layer {
 }
 
 Layer.layerName = 'Layer';
+Layer.propTypes = defaultProps;
 Layer.defaultProps = defaultProps;
-
-// HELPERS
-
-// Constructors have their super class constructors as prototypes
-function getOwnProperty(object, prop) {
-  return object.hasOwnProperty(prop) && object[prop];
-}
-
-/*
- * Return merged default props stored on layers constructor, create them if needed
- */
-function getDefaultProps(layer) {
-  const mergedDefaultProps = getOwnProperty(layer.constructor, 'mergedDefaultProps');
-  if (mergedDefaultProps) {
-    return mergedDefaultProps;
-  }
-  return mergeDefaultProps(layer);
-}
-
-/*
- * Walk the prototype chain and merge all default props
- */
-function mergeDefaultProps(layer) {
-  const subClassConstructor = layer.constructor;
-  const layerName = getOwnProperty(subClassConstructor, 'layerName');
-  if (!layerName) {
-    log.once(0, `layer ${layer.constructor.name} does not specify a "layerName"`);
-  }
-  let mergedDefaultProps = {
-    id: layerName || layer.constructor.name
-  };
-
-  while (layer) {
-    const layerDefaultProps = getOwnProperty(layer.constructor, 'defaultProps');
-    Object.freeze(layerDefaultProps);
-    if (layerDefaultProps) {
-      mergedDefaultProps = Object.assign({}, layerDefaultProps, mergedDefaultProps);
-    }
-    layer = Object.getPrototypeOf(layer);
-  }
-  // Store for quick lookup
-  subClassConstructor.mergedDefaultProps = mergedDefaultProps;
-  return mergedDefaultProps;
-}
-
-export const TEST_EXPORTS = {
-  mergeDefaultProps
-};
