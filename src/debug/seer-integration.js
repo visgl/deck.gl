@@ -80,7 +80,7 @@ export const removeLayer = id => {
     return;
   }
 
-  seer.removeItem('deck.gl', id);
+  seer.deleteItem('deck.gl', id);
 };
 
 export const logPayload = layer => {
