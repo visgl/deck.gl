@@ -75,6 +75,14 @@ export const layerEditListener = cb => {
   });
 };
 
+export const removeLayer = id => {
+  if (!window.__SEER_INITIALIZED__ || !id) {
+    return;
+  }
+
+  seer.removeItem('deck.gl', id);
+};
+
 export const logPayload = layer => {
   const data = [
     {path: 'objects.props', data: layer.props}
