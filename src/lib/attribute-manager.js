@@ -20,6 +20,7 @@
 
 /* eslint-disable guard-for-in */
 import {GL} from 'luma.gl';
+import Stats from './stats';
 import {log} from './utils';
 import assert from 'assert';
 
@@ -143,6 +144,7 @@ export default class AttributeManager {
     this.allocedInstances = -1;
     this.needsRedraw = true;
     this.userData = {};
+    this.stats = new Stats({id: 'attr'});
 
     // For debugging sanity, prevent uninitialized members
     Object.seal(this);

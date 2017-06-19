@@ -25,7 +25,8 @@ import assert from 'assert';
 import {drawLayers, pickLayers, queryLayers} from './draw-and-pick';
 import {LIFECYCLE} from './constants';
 import {Viewport} from './viewports';
-import {setOverride, layerEditListener, initLayer, logLayer} from '../debug/seer-integration';
+import {setPropOverrides, layerEditListener, initLayerInSeer, updateLayerInSeer}
+  from '../debug/seer-integration';
 import {experimental} from 'luma.gl';
 import {Framebuffer} from 'luma.gl';
 
@@ -70,10 +71,11 @@ export default class LayerManager {
     Object.seal(this);
 
     /**
-     * Set an override on the specified property and update the layers
-     */
+     import {setPropOverrides, layerEditListener, initLayerInSeer, updateLayerInSeer}
+  from '../debug/seer-integration';
+*/
     layerEditListener(payload => {
-      setOverride(payload.itemKey, payload.valuePath.slice(1), payload.value);
+      setPropOverrides(payload.itemKey, payload.valuePath.slice(1), payload.value);
       const newLayers = this.layers.map(layer => new layer.constructor(layer.props));
       this.updateLayers({newLayers});
     });
@@ -273,9 +275,11 @@ export default class LayerManager {
           this._transferLayerState(oldLayer, newLayer);
           this._updateLayer(newLayer);
 
-          logLayer(newLayer);
+          updateLayerInSeer(newLayer); // Initializes layer in seer chrome extension (if connected)
         } else {
           this._initializeNewLayer(newLayer);
+
+          initLayerInSeer(newLayer); // Initializes layer in seer chrome extension (if connected)
         }
         generatedLayers.push(newLayer);
 
@@ -361,8 +365,6 @@ export default class LayerManager {
         });
 
         layer.lifecycle = LIFECYCLE.INITIALIZED;
-
-        initLayer(layer);
 
       } catch (err) {
         log.once(0, `deck.gl error during initialization of ${layerName(layer)} ${err}`, err);
