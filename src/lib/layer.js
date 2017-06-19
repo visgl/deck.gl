@@ -21,8 +21,9 @@
 /* global window */
 import {COORDINATE_SYSTEM, LIFECYCLE} from './constants';
 import AttributeManager from './attribute-manager';
+import Stats from './stats';
 import {log, compareProps, count} from './utils';
-import {getOverrides} from '../debug/seer-integration';
+import {applyPropOverrides} from '../debug/seer-integration';
 import {GL} from 'luma.gl';
 import assert from 'assert';
 
@@ -37,25 +38,34 @@ const noop = () => {};
  * @param {bool} props.opacity - opacity of the layer
  */
 const defaultProps = {
+  // data: Special handling for null, see below
   dataComparator: null,
+  updateTriggers: {}, // Update triggers: a core change detection mechanism in deck.gl
   numInstances: undefined,
+
   visible: true,
   pickable: false,
   opacity: 0.8,
+
   onHover: noop,
   onClick: noop,
   onDragStart: noop,
   onDragMove: noop,
   onDragEnd: noop,
   onDragCancel: noop,
+
+  projectionMode: COORDINATE_SYSTEM.LNGLAT,
+
+  settings: {},
+  uniforms: {},
+  framebuffer: null,
+
+  animation: null, // Passed prop animation functions to evaluate props
+
   // Offset depth based on layer index to avoid z-fighting.
   // Negative values pull layer towards the camera
   // https://www.opengl.org/archives/resources/faq/technical/polygonoffset.htm
-  getPolygonOffset: ({layerIndex}) => [0, -layerIndex * 100],
-  // Update triggers: a key change detection mechanism in deck.gl
-  // See layer documentation
-  updateTriggers: {},
-  projectionMode: COORDINATE_SYSTEM.LNGLAT
+  getPolygonOffset: ({layerIndex}) => [0, -layerIndex * 100]
 };
 
 let counter = 0;
@@ -73,26 +83,34 @@ export default class Layer {
     // Accept null as data - otherwise apps and layers need to add ugly checks
     // Use constant fallback so that data change is not triggered
     props.data = props.data || EMPTY_ARRAY;
-    // Get the overrides from the extension if it's active
-    getOverrides(props);
+    // Apply any overrides from the seer debug extension if it is active
+    applyPropOverrides(props);
     // Props are immutable
     Object.freeze(props);
 
-    // Define all members and freeze layer
-    this.id = props.id;
-    this.props = props;
-    this.oldProps = null;
-    this.state = null;
-    this.context = null;
-    this.parentLayer = null;
-    this.count = counter++;
-    this.lifecycle = LIFECYCLE.NO_STATE;
+    // Define all members
+    this.id = props.id; // The layer's id, used for matching with layers' from last render cyckle
+    this.props = props; // Current props, a frozen object
+    this.animatedProps = null; // Computing animated props requires layer manager state
+    this.oldProps = null; // Props from last render used for change detection
+    this.state = null; // Will be set to the shared layer state object during layer matching
+    this.context = null; // Will reference layer manager's context, contains state shared by layers
+    this.count = counter++; // Keep track of how many layer instances you are generating
+    this.lifecycle = LIFECYCLE.NO_STATE; // Helps track and debug the life cycle of the layers
+    // CompositeLayer members, need to be defined here because of the `Object.seal`
+    this.parentLayer = null; // reference to the composite layer parent that rendered this layer
+    this.oldSubLayers = []; // reference to sublayers rendered in the previous cycle
+    // Seal the layer
     Object.seal(this);
   }
 
   toString() {
     const className = this.constructor.layerName || this.constructor.name;
     return className !== this.props.id ? `<${className}:'${this.props.id}'>` : `<${className}>`;
+  }
+
+  get stats() {
+    return this.state.stats;
   }
 
   // //////////////////////////////////////////////////
@@ -172,8 +190,9 @@ export default class Layer {
       return;
     }
 
-    const numInstances = this.getNumInstances(props);
     // Figure out data length
+    const numInstances = this.getNumInstances(props);
+
     attributeManager.update({
       data: props.data,
       numInstances,
@@ -183,6 +202,7 @@ export default class Layer {
       // Don't worry about non-attribute props
       ignoreUnknownAttributes: true
     });
+
     if (model) {
       const changedAttributes = attributeManager.getChangedAttributes({clearChangedFlags: true});
       model.setAttributes(changedAttributes);
@@ -338,6 +358,7 @@ export default class Layer {
     assert(!this.state, 'Layer missing state');
 
     this.state = {};
+    this.state.stats = new Stats({id: 'draw'});
 
     // Initialize state only once
     this.setState({
@@ -492,6 +513,10 @@ export default class Layer {
   // The comparison of the data prop requires special handling
   // the dataComparator should be used if supplied
   _diffDataProps(oldProps, newProps) {
+    if (oldProps === null) {
+      return 'oldProps is null, initial diff';
+    }
+
     // Support optional app defined comparison of data
     const {dataComparator} = newProps;
     if (dataComparator) {
@@ -512,6 +537,9 @@ export default class Layer {
   _diffUpdateTriggers(oldProps, newProps) {
     // const {attributeManager} = this.state;
     // const updateTriggerMap = attributeManager.getUpdateTriggerMap();
+    if (oldProps === null) {
+      return true; // oldProps is null, initial diff
+    }
 
     let change = false;
 
@@ -593,6 +621,7 @@ Layer.defaultProps = defaultProps;
 function getOwnProperty(object, prop) {
   return object.hasOwnProperty(prop) && object[prop];
 }
+
 /*
  * Return merged default props stored on layers constructor, create them if needed
  */
