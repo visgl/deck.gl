@@ -23,7 +23,7 @@ import {COORDINATE_SYSTEM, LIFECYCLE} from './constants';
 import AttributeManager from './attribute-manager';
 import Stats from './stats';
 import {log, compareProps, count} from './utils';
-import {applyPropOverrides, removeLayer} from '../debug/seer-integration';
+import {applyPropOverrides, removeLayerInSeer} from '../debug/seer-integration';
 import {GL} from 'luma.gl';
 import assert from 'assert';
 
@@ -432,7 +432,7 @@ export default class Layer {
     // Call subclass lifecycle method
     this.finalizeState();
     // End lifecycle method
-    removeLayer(this.id);
+    removeLayerInSeer(this.id);
   }
 
   // Calculates uniforms

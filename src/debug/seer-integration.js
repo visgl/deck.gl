@@ -75,7 +75,7 @@ export const layerEditListener = cb => {
   });
 };
 
-export const removeLayer = id => {
+export const removeLayerInSeer = id => {
   if (!window.__SEER_INITIALIZED__ || !id) {
     return;
   }
