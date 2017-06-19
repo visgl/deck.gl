@@ -34,8 +34,6 @@ const LOG_PRIORITY_UPDATE = 1;
 const EMPTY_ARRAY = [];
 const noop = () => {};
 
-// import * as PropTypes from './prop-types';
-
 /*
  * @param {string} props.id - layer name
  * @param {array}  props.data - array of data instances
@@ -49,7 +47,6 @@ const defaultProps = {
 
   visible: true,
   pickable: false,
-  // opacity: new PropTypes.Float({min: 0, max: 1, default: 0.8}),
   opacity: 0.8,
 
   onHover: noop,

@@ -1,4 +1,3 @@
-import {Type} from './prop-types';
 import {log} from './utils';
 import assert from 'assert';
 
@@ -66,22 +65,6 @@ function getOwnProperty(object, prop) {
   return object.hasOwnProperty(prop) && object[prop];
 }
 
-// Helper to get the "PropTypes" from an object
-function extractPropTypes(object) {
-  const defaultProps = {};
-  const propTypes = {};
-  for (const key in object) {
-    if (object[key] instanceof Type) {
-      const type = object[key];
-      defaultProps[key] = type.default;
-      propTypes[key] = type;
-    } else {
-      defaultProps[key] = object[key];
-    }
-  }
-  return {defaultProps, propTypes};
-}
-
 /*
  * Return merged default props stored on layers constructor, create them if needed
  */
@@ -108,7 +91,6 @@ export function mergeDefaultProps(object, objectNameKey = 'layerName') {
   let mergedDefaultProps = {
     id: objectName || object.constructor.name
   };
-  let mergedPropTypes = {};
 
   // Reverse shadowing
   // TODO - Rewrite to stop when mergedDefaultProps is available on parent?
@@ -116,58 +98,16 @@ export function mergeDefaultProps(object, objectNameKey = 'layerName') {
     const objectDefaultProps = getOwnProperty(object.constructor, 'defaultProps');
     Object.freeze(objectDefaultProps);
     if (objectDefaultProps) {
-      const {defaultProps, propTypes} = extractPropTypes(objectDefaultProps);
-      mergedDefaultProps = Object.assign({}, defaultProps, mergedDefaultProps);
-      mergedPropTypes = Object.assign({}, propTypes, mergedPropTypes);
+      mergedDefaultProps = Object.assign({}, objectDefaultProps, mergedDefaultProps);
     }
     object = Object.getPrototypeOf(object);
   }
 
   Object.freeze(mergedDefaultProps);
-  Object.freeze(mergedPropTypes);
 
   // Store for quick lookup
   subClassConstructor.mergedDefaultProps = mergedDefaultProps;
-  subClassConstructor.mergedPropTypes = mergedPropTypes;
-  // Autogenerate propTypes
-  subClassConstructor.propTypes = subClassConstructor.propTypes || mergedPropTypes;
 
   assert(mergeDefaultProps);
   return mergedDefaultProps;
 }
-
-// Animate properties (i.e. allow properties to be given as functions that
-// are called on every render)
-export function animateProperties(props, propTypes, animationParams) {
-  // Animate any props mentioned in propTypes
-  const animatedProps = {};
-  for (const key in propTypes) {
-    if (typeof props[key] === 'function') {
-      animatedProps[key] = props[key](animationParams);
-    }
-  }
-
-  // Animate setting overrides
-  let settings = null;
-  for (const key in props.settings) {
-    if (typeof props.settings[key] === 'function') {
-      settings = settings || {};
-      settings[key] = props.settings[key](animationParams);
-    }
-  }
-
-  // Animate uniform overrides
-  let uniforms = null;
-  for (const key in props.uniforms) {
-    if (typeof props.key === 'function') {
-      uniforms = uniforms || {};
-      uniforms[key] = props.uniforms[key](animationParams);
-    }
-  }
-
-  return Object.assign({}, props, animatedProps, {
-    settings: settings ? Object.assign({}, props.settings, settings) : props.settings,
-    uniforms: uniforms ? Object.assign({}, props.uniforms, uniforms) : props.uniforms
-  });
-}
-
