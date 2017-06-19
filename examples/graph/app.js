@@ -133,13 +133,13 @@ class Root extends Component {
   }
 
   _resize() {
-    this._onChangeViewport({
+    this._onViewportChange({
       width: window.innerWidth,
       height: window.innerHeight
     });
   }
 
-  _onChangeViewport(viewport) {
+  _onViewportChange(viewport) {
     this.setState({
       viewport: {...this.state.viewport, ...viewport}
     });

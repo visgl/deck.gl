@@ -7,7 +7,7 @@ import DeckGLOverlay from './deckgl-overlay.js';
 import {csv as requestCsv} from 'd3-request';
 
 // Set your mapbox token here
-const MAPBOX_TOKEN = process.env.MAPBOX_ACCESS_TOKEN; // eslint-disable-line
+const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
 
 class Root extends Component {
 
@@ -36,13 +36,13 @@ class Root extends Component {
   }
 
   _resize() {
-    this._onChangeViewport({
+    this._onViewportChange({
       width: window.innerWidth,
       height: window.innerHeight
     });
   }
 
-  _onChangeViewport(viewport) {
+  _onViewportChange(viewport) {
     this.setState({
       viewport: {...this.state.viewport, ...viewport}
     });
@@ -55,8 +55,7 @@ class Root extends Component {
       <MapGL
         {...viewport}
         mapStyle="mapbox://styles/mapbox/dark-v9"
-        perspectiveEnabled={true}
-        onChangeViewport={this._onChangeViewport.bind(this)}
+        onViewportChange={this._onViewportChange.bind(this)}
         mapboxApiAccessToken={MAPBOX_TOKEN}>
         <DeckGLOverlay
           viewport={viewport}

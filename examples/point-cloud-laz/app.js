@@ -45,7 +45,7 @@ class Example extends PureComponent {
   constructor(props) {
     super(props);
 
-    this._onChangeViewport = this._onChangeViewport.bind(this);
+    this._onViewportChange = this._onViewportChange.bind(this);
     this._onInitialized = this._onInitialized.bind(this);
     this._onResize = this._onResize.bind(this);
     this._onUpdate = this._onUpdate.bind(this);
@@ -112,7 +112,7 @@ class Example extends PureComponent {
     gl.depthFunc(gl.LEQUAL);
   }
 
-  _onChangeViewport(viewport) {
+  _onViewportChange(viewport) {
     this.setState({
       rotating: !viewport.isDragging,
       viewport: {...this.state.viewport, ...viewport}
@@ -163,7 +163,7 @@ class Example extends PureComponent {
     return width && height && (
       <OrbitController {...canvasProps} ref={canvas => {
         this._canvas = canvas;
-      }} onChangeViewport={this._onChangeViewport}>
+      }} onViewportChange={this._onViewportChange}>
         <DeckGL
           width={width}
           height={height}

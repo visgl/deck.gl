@@ -18,7 +18,7 @@ module.exports = require('../webpack.config.local')(module.exports);
 by run this command in your terminal.
 
 ```
-export MAPBOX_ACCESS_TOKEN=<Your_Token>
+export MapboxAccessToken=<Your_Token>
 ```
 
 or you can directly add it to `app.js`

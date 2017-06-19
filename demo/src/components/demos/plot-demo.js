@@ -53,7 +53,7 @@ export default class PlotDemo extends Component {
   }
 
   componentDidMount() {
-    this._onChangeViewport(OrbitController.fitBounds(this.state.viewport, [[0, 0, 0], [1, 1, 1]]));
+    this._onViewportChange(OrbitController.fitBounds(this.state.viewport, [[0, 0, 0], [1, 1, 1]]));
   }
 
   componentWillReceiveProps(nextProps) {
@@ -84,7 +84,7 @@ export default class PlotDemo extends Component {
     }
   }
 
-  @autobind _onChangeViewport(viewport) {
+  @autobind _onViewportChange(viewport) {
     this.setState({
       viewport: {...this.state.viewport, ...viewport}
     });
@@ -106,7 +106,7 @@ export default class PlotDemo extends Component {
     return (
       <OrbitController
         {...canvasProps}
-        onChangeViewport={this._onChangeViewport} >
+        onViewportChange={this._onViewportChange} >
         {resolution && <PlotOverlay
           viewport={canvasProps}
           equation={equation.valid ? equation.func : null}

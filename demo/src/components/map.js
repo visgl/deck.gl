@@ -44,7 +44,6 @@ class Map extends Component {
         });
       } else {
         demoViewport = {
-          perspectiveEnabled: true,
           minZoom: 0,
           maxZoom: 20,
           ...demoViewport
@@ -99,16 +98,16 @@ class Map extends Component {
 
     return (
       <div
-        onMouseMove={this.state.trackMouseMove? this._onMouseMove : null}
-        onMouseEnter={this.state.trackMouseMove? this._onMouseEnter : null}
-        onMouseLeave={this.state.trackMouseMove? this._onMouseLeave : null}>
+        onMouseMove={this.state.trackMouseMove ? this._onMouseMove : null}
+        onMouseEnter={this.state.trackMouseMove ? this._onMouseEnter : null}
+        onMouseLeave={this.state.trackMouseMove ? this._onMouseLeave : null}>
         <MapGL
-          mapboxApiAccessToken={MAPBOX_ACCESS_TOKEN}
+          mapboxApiAccessToken={MapboxAccessToken}
           preventStyleDiffing={true}
 
           {...viewport}
           mapStyle={viewport.mapStyle || MAPBOX_STYLES.BLANK}
-          onChangeViewport={isInteractive ? this._onUpdateMap : undefined}>
+          onViewportChange={isInteractive ? this._onUpdateMap : undefined}>
 
           <DemoComponent ref="demo" viewport={viewport} params={params}
             onStateChange={this.props.updateMeta}

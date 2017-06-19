@@ -62,7 +62,7 @@ const propTypes = {
 
   perspectiveEnabled: PropTypes.bool,  // Enables perspective control event handling
 
-  onChangeViewport: PropTypes.func, // `onChangeViewport` is fired on user interaction
+  onViewportChange: PropTypes.func, // `onViewportChange` is fired on user interaction
 
   isDragging: PropTypes.bool, // Is the component currently being dragged.
   startDragLngLat: PropTypes.arrayOf(PropTypes.number), // Position when current drag started
@@ -81,7 +81,7 @@ const defaultProps = {
   pitch: 0,
   altitude: 1.5,
   clickRadius: 15,
-  onChangeViewport: null,
+  onViewportChange: null,
 
   maxZoom: MAX_ZOOM,
   minZoom: 0,
@@ -143,7 +143,7 @@ export default class MapControls extends PureComponent {
   // Calculate a cursor style to show that we are in "dragging state"
   _getCursor() {
     const isInteractive =
-      this.props.onChangeViewport ||
+      this.props.onViewportChange ||
       this.props.onClickFeature ||
       this.props.onHoverFeatures;
 
@@ -175,7 +175,7 @@ export default class MapControls extends PureComponent {
 
     viewport = this._applyConstraints(viewport);
 
-    return this.props.onChangeViewport(viewport);
+    return this.props.onViewportChange(viewport);
   }
 
   // Apply any constraints (mathematical or defined by props) to viewport params
@@ -272,7 +272,7 @@ export default class MapControls extends PureComponent {
   }
 
   _onMouseDrag({pos}) {
-    if (!this.props.onChangeViewport) {
+    if (!this.props.onViewportChange) {
       return;
     }
 
@@ -298,7 +298,7 @@ export default class MapControls extends PureComponent {
   }
 
   _onMouseRotate({pos, startPos}) {
-    if (!this.props.onChangeViewport || !this.props.perspectiveEnabled) {
+    if (!this.props.onViewportChange || !this.props.perspectiveEnabled) {
       return;
     }
 

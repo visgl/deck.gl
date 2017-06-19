@@ -3,7 +3,7 @@ This is the source code of the demo website for deck.gl.
 ## Developing
 
     npm install
-    export MAPBOX_ACCESS_TOKEN=<insert_your_token> && npm start
+    export MapboxAccessToken=<insert_your_token> && npm start
 
 ## About the blog
 

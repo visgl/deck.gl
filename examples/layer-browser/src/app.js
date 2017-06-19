@@ -18,8 +18,8 @@ import LAYER_CATEGORIES from './examples';
 import {setImmutableDataSamples} from './immutable-data-samples';
 
 /* eslint-disable no-process-env */
-const MAPBOX_ACCESS_TOKEN = process.env.MAPBOX_ACCESS_TOKEN || // eslint-disable-line
-  'Set MAPBOX_ACCESS_TOKEN environment variable or put your token here.';
+const MapboxAccessToken = process.env.MapboxAccessToken || // eslint-disable-line
+  'Set MapboxAccessToken environment variable or put your token here.';
 
 // ---- View ---- //
 class App extends PureComponent {
@@ -187,9 +187,8 @@ class App extends PureComponent {
     const {width, height, mapViewState, settings: {effects, pickingRadius}} = this.state;
     return (
       <MapboxGLMap
-        mapboxApiAccessToken={MAPBOX_ACCESS_TOKEN || 'no_token'}
+        mapboxApiAccessToken={MapboxAccessToken || 'no_token'}
         width={width} height={height}
-        perspectiveEnabled
         { ...mapViewState }
         onViewportChange={this._onViewportChange}>
 
@@ -228,7 +227,7 @@ class App extends PureComponent {
     return (
       <div>
         { this._renderMap() }
-        { !MAPBOX_ACCESS_TOKEN && this._renderNoTokenWarning() }
+        { !MapboxAccessToken && this._renderNoTokenWarning() }
         <div id="control-panel">
           <button onClick={this._onQueryObjects}>Query Objects</button>
           <LayerControls

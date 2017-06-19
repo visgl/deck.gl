@@ -29,7 +29,7 @@
     "build": "npm run build-clean && npm run build-es6 && npm run build-es5 && webpack -d --display-modules",
     "cover": "NODE_ENV=test nyc --reporter html --reporter cobertura --reporter=lcov npm run test-cover",
     "lint": "eslint src test examples && npm run lint-yarn",
-    "lint-yarn": "!(grep -q unpm.u yarn.lock) || echo 'Please rebuild yarn file using public npmrc'",
+    "lint-yarn": "!(grep -q unpm.u yarn.lock) || (echo 'Please rebuild yarn file using public npmrc' && false)",
     "publish-prod": "npm run build && npm run test && npm run test-dist && npm publish",
     "publish-beta": "npm run build && npm run test && npm run test-dist && npm publish --tag beta",
     "test": "npm run lint && npm run build && npm run test-node",
