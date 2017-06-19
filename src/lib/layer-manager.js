@@ -70,10 +70,6 @@ export default class LayerManager {
     Object.seal(this.context);
     Object.seal(this);
 
-    /**
-     import {setPropOverrides, layerEditListener, initLayerInSeer, updateLayerInSeer}
-  from '../debug/seer-integration';
-*/
     layerEditListener(payload => {
       setPropOverrides(payload.itemKey, payload.valuePath.slice(1), payload.value);
       const newLayers = this.layers.map(layer => new layer.constructor(layer.props));
