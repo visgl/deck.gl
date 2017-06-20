@@ -11,36 +11,36 @@ import assert from 'assert';
  *   if unequal, returns a string explaining what changed.
  */
 /* eslint-disable max-statements, complexity */
-export function compareProps({oldProps, newProps, ignoreProps = {}} = {}) {
+export function compareProps({oldProps, newProps, ignoreProps = {}, triggerName = 'props'} = {}) {
   assert(oldProps !== undefined && newProps !== undefined, 'compareProps args');
 
-  // props are immutable, so shallow equality => deep equality
+  // shallow equality => deep equality
   if (oldProps === newProps) {
     return null;
   }
 
   if (typeof newProps !== 'object' || newProps === null) {
-    return 'new props is not an object';
+    return `${triggerName} changed shallowly`;
   }
 
   if (typeof oldProps !== 'object' || oldProps === null) {
-    return 'old props is not an object';
+    return `${triggerName} changed shallowly`;
   }
 
   // Test if new props different from old props
   for (const key in oldProps) {
     if (!(key in ignoreProps)) {
       if (!newProps.hasOwnProperty(key)) {
-        return `prop ${key} dropped: ${oldProps[key]} -> (undefined)`;
+        return `${triggerName} ${key} dropped: ${oldProps[key]} -> (undefined)`;
       }
 
       const equals = newProps[key] && newProps[key].equals;
       if (equals && !equals.call(newProps[key], oldProps[key])) {
-        return `prop ${key} changed deeply: ${oldProps[key]} -> ${newProps[key]}`;
+        return `${triggerName} ${key} changed deeply: ${oldProps[key]} -> ${newProps[key]}`;
       }
 
       if (!equals && oldProps[key] !== newProps[key]) {
-        return `prop ${key} changed shallowly: ${oldProps[key]} -> ${newProps[key]}`;
+        return `${triggerName} ${key} changed shallowly: ${oldProps[key]} -> ${newProps[key]}`;
       }
     }
   }
@@ -49,7 +49,7 @@ export function compareProps({oldProps, newProps, ignoreProps = {}} = {}) {
   for (const key in newProps) {
     if (!(key in ignoreProps)) {
       if (!oldProps.hasOwnProperty(key)) {
-        return `prop ${key} added: (undefined) -> ${newProps[key]}`;
+        return `${triggerName} ${key} added: (undefined) -> ${newProps[key]}`;
       }
     }
   }

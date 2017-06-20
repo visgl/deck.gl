@@ -24,7 +24,6 @@ import AttributeManager from './attribute-manager';
 import Stats from './stats';
 import {getDefaultProps, compareProps} from './props';
 import {log, count} from './utils';
-import {applyPropOverrides} from '../debug/seer-integration';
 import {applyPropOverrides, removeLayerInSeer} from '../debug/seer-integration';
 import {GL} from 'luma.gl';
 import assert from 'assert';
@@ -558,7 +557,8 @@ export default class Layer {
       const newTriggers = newProps.updateTriggers[propName] || {};
       const diffReason = compareProps({
         oldProps: oldTriggers,
-        newProps: newTriggers
+        newProps: newTriggers,
+        triggerName: propName
       });
       if (diffReason) {
         if (propName === 'all') {
