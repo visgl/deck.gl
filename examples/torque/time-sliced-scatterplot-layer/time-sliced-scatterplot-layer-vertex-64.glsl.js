@@ -19,16 +19,18 @@
 // THE SOFTWARE.
 
 export default `\
-#define SHADER_NAME time-sliced-scatterplot-layer-vertex-shader
+#define SHADER_NAME time-sliced-scatterplot-layer-vertex-shader-64
 
 attribute vec3 positions;
 
 attribute vec3 instancePositions;
+attribute vec2 instancePositions64xyLow;
 attribute float instanceRadius;
 attribute vec4 instanceColors;
 attribute vec3 instancePickingColors;
 attribute float time;
 
+// Only one-dimensional arrays may be declared in GLSL ES 1.0. specs p.24
 uniform float currentTime;
 uniform float opacity;
 uniform float radiusScale;
@@ -49,6 +51,7 @@ void main(void) {
     project_scale(radiusScale * instanceRadius),
     radiusMinPixels, radiusMaxPixels
   );
+
   // outline is centered at the radius
   // outer radius needs to offset by half stroke width
   outerRadiusPixels += outline * strokeWidth / 2.0;
@@ -58,17 +61,36 @@ void main(void) {
   // 0 - solid circle, 1 - stroke with lineWidth=0
   innerUnitRadius = outline * (1.0 - strokeWidth / outerRadiusPixels);
 
-  // Find the center of the point and add the current vertex
-  vec3 center = project_position(instancePositions);
-  vec3 vertex = positions * outerRadiusPixels;
-  gl_Position = project_to_clipspace(vec4(center + vertex, 1.0));
+  vec4 instancePositions64xy = vec4(
+    instancePositions.x, instancePositions64xyLow.x,
+    instancePositions.y, instancePositions64xyLow.y);
 
-  // Apply opacity to instance color, or return instance picking color
-  vec4 color = vec4(instanceColors.rgb, instanceColors.a * opacity) / 255.;
+  vec2 projected_coord_xy[2];
+  project_position_fp64(instancePositions64xy, projected_coord_xy);
 
-  color.a = 1.0 - abs(currentTime - time) * fadeFactor;
+  vec2 vertex_pos_localspace[4];
+  vec4_fp64(vec4(positions * outerRadiusPixels, 0.0), vertex_pos_localspace);
 
-  vec4 pickingColor = vec4(instancePickingColors / 255., 1.);
-  vColor = mix(color, pickingColor, renderPickingBuffer);
+  vec2 vertex_pos_modelspace[4];
+  vertex_pos_modelspace[0] = sum_fp64(vertex_pos_localspace[0], projected_coord_xy[0]);
+  vertex_pos_modelspace[1] = sum_fp64(vertex_pos_localspace[1], projected_coord_xy[1]);
+  vertex_pos_modelspace[2] = sum_fp64(vertex_pos_localspace[2],
+    vec2(project_scale(instancePositions.z), 0.0));
+  vertex_pos_modelspace[3] = vec2(1.0, 0.0);
+
+  gl_Position = project_to_clipspace_fp64(vertex_pos_modelspace);
+
+  if (renderPickingBuffer > 0.5) {
+    vColor = vec4(instancePickingColors / 255., 1.);
+  } else {
+    vColor = vec4(instanceColors.rgb, instanceColors.a * opacity) / 255.;
+  }
+
+  vColor.a = 1.0 - abs(currentTime - time) * fadeFactor;
+
+  // // Apply opacity to instance color, or return instance picking color
+  // vec4 color = vec4(instanceColors.rgb, instanceColors.a * opacity) / 255.;
+  // vec4 pickingColor = vec4(instancePickingColors / 255., 1.);
+  // vColor = mix(color, pickingColor, renderPickingBuffer);
 }
 `;

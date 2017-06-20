@@ -20,8 +20,14 @@
 
 import {ScatterplotLayer, experimental} from 'deck.gl';
 
-import vertex from './time-sliced-scatterplot-layer-vertex.glsl';
+import vertex from './time-sliced-scatterplot-layer-vertex-64.glsl';
 import fragment from './time-sliced-scatterplot-layer-fragment.glsl';
+
+export function fp64ify(a) {
+  const hiPart = Math.fround(a);
+  const loPart = a - Math.fround(a);
+  return [hiPart, loPart];
+}
 
 export default class TimeSlicedScatterplotLayer extends ScatterplotLayer {
   initializeState() {
@@ -35,12 +41,12 @@ export default class TimeSlicedScatterplotLayer extends ScatterplotLayer {
 
   getShaders() {
     // use customized shaders
-    return {vs: vertex, fs: fragment, modules: []};
+    return {vs: vertex, fs: fragment, modules: ['fp64', 'project64']};
   }
 
   draw({uniforms}) {
     const {radiusScale, radiusMinPixels, radiusMaxPixels, outline,
-      strokeWidth, currentTime} = this.props;
+      strokeWidth, currentTime, fadeFactor} = this.props;
     this.state.model.render(Object.assign({}, uniforms, {
       outline: outline ? 1 : 0,
       strokeWidth,
@@ -48,7 +54,7 @@ export default class TimeSlicedScatterplotLayer extends ScatterplotLayer {
       radiusMinPixels,
       radiusMaxPixels,
       currentTime,
-      fadeFactor: 0.1
+      fadeFactor
     }));
   }
 
@@ -64,16 +70,16 @@ export default class TimeSlicedScatterplotLayer extends ScatterplotLayer {
     }
   }
 
-  // calculateInstancePositions64xyLow(attribute) {
-  //   const {data, getPosition} = this.props;
-  //   const {value} = attribute;
-  //   let i = 0;
-  //   for (const point of data) {
-  //     const position = getPosition(point);
-  //     value[i++] = fp64ify(experimental.get(position, 0))[1];
-  //     value[i++] = fp64ify(experimental.get(position, 1))[1];
-  //   }
-  // }
+  calculateInstancePositions64xyLow(attribute) {
+    const {data, getPosition} = this.props;
+    const {value} = attribute;
+    let i = 0;
+    for (const point of data) {
+      const position = getPosition(point);
+      value[i++] = fp64ify(experimental.get(position, 0))[1];
+      value[i++] = fp64ify(experimental.get(position, 1))[1];
+    }
+  }
 
   calculateInstanceRadius(attribute) {
     const {data, getRadius} = this.props;
