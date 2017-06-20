@@ -19,6 +19,7 @@
 // THE SOFTWARE.
 
 import Layer from './layer';
+import {log} from './utils';
 
 export default class CompositeLayer extends Layer {
   constructor(props) {
@@ -50,5 +51,16 @@ export default class CompositeLayer extends Layer {
   // Implement to generate sublayers
   renderLayers() {
     return null;
+  }
+
+  _renderLayers(updateParams) {
+    if (!this.shouldUpdateState(updateParams)) {
+      log.log(2, 'Composite layer reusing sublayers', this.state.oldSubLayers);
+      return this.state.oldSubLayers;
+    }
+    const subLayers = this.renderLayers();
+    this.state.oldSubLayers = subLayers;
+    log.log(2, 'Composite layer saving sublayers', this.state.oldSubLayers);
+    return subLayers;
   }
 }

@@ -111,6 +111,10 @@ export default class HexagonLayer extends CompositeLayer {
     };
   }
 
+  shouldUpdateState({changeFlags}) {
+    return changeFlags.somethingChanged;
+  }
+
   updateState({oldProps, props, changeFlags}) {
     if (changeFlags.dataChanged || _needsReProjectPoints(oldProps, props)) {
       // project data into hexagons, and get sortedBins
