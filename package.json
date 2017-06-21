@@ -94,7 +94,7 @@
     "webpack-dev-server": "^2.4.0"
   },
   "peerDependencies": {
-    "luma.gl": ">=4.0.0-alpha.12",
+    "luma.gl": ">=4.0.0-alpha.13",
     "react": "0.14.x - 15.x",
     "react-dom": "0.14.x - 15.x"
   },

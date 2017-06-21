@@ -354,7 +354,7 @@ function getPickedColors(gl, {
   // We are only interested in one pixel, no need to render anything else
   // Note that the callback here is called synchronously.
   return withParameters(gl, {
-    frameBuffer: pickingFBO,
+    framebuffer: pickingFBO,
     scissorTest: true,
     scissor: [x, y, width, height],
     blend: true,
