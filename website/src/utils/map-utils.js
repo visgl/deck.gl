@@ -1,5 +1,5 @@
 /* global window */
-import TWEEN from 'tween.js';
+import TWEEN from '@tweenjs/tween.js';
 
 let viewportTween;
 
