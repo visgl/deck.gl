@@ -37,7 +37,7 @@
     "redux-actions": "^1.2.0",
     "redux-thunk": "^2.1.0",
     "stats.js": "^0.17.0",
-    "tween.js": "tweenjs/tween.js"
+    "tween.js": "@tweenjs/tween.js"
   },
   "devDependencies": {
     "autoprefixer-loader": "^3.2.0",
