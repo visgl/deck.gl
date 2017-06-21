@@ -1,6 +1,7 @@
 import React, {Component} from 'react';
 import DeckGL from 'deck.gl';
 import autobind from 'autobind-decorator';
+import {setParameters} from 'luma.gl';
 
 import {MAPBOX_STYLES} from '../../constants/defaults';
 import {getLayerParams} from '../../utils/layer-params';
@@ -86,8 +87,10 @@ export default function createLayerDemoClass(settings) {
     }
 
     _initialize(gl) {
-      gl.enable(gl.DEPTH_TEST);
-      gl.depthFunc(gl.LEQUAL);
+      setParameters(gl, {
+        depthTest: true,
+        depthFunc: gl.LEQUAL
+      });
     }
 
     render() {

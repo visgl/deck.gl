@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-
+import {setParameters} from 'luma.gl';
 import DeckGL, {LineLayer, ScatterplotLayer} from 'deck.gl';
 
 function getColor(d) {
@@ -33,8 +33,10 @@ export default class DeckGLOverlay extends Component {
   }
 
   _initialize(gl) {
-    gl.blendFuncSeparate(gl.SRC_ALPHA, gl.ONE, gl.ONE_MINUS_DST_ALPHA, gl.ONE);
-    gl.blendEquation(gl.FUNC_ADD);
+    setParameters(gl, {
+      blendFunc: [gl.SRC_ALPHA, gl.ONE, gl.ONE_MINUS_DST_ALPHA, gl.ONE],
+      blendEquation: gl.FUNC_ADD
+    });
   }
 
   render() {

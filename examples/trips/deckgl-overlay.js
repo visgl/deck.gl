@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 import DeckGL, {PolygonLayer} from 'deck.gl';
-
+import {setParameters} from 'luma.gl';
 import TripsLayer from './trips-layer';
 
 const LIGHT_SETTINGS = {
@@ -26,8 +26,10 @@ export default class DeckGLOverlay extends Component {
   }
 
   _initialize(gl) {
-    gl.enable(gl.DEPTH_TEST);
-    gl.depthFunc(gl.LEQUAL);
+    setParameters(gl, {
+      depthTest: true,
+      depthFunc: gl.LEQUAL
+    });
   }
 
   render() {

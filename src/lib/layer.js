@@ -438,15 +438,16 @@ export default class Layer {
 
   // Calculates uniforms
   drawLayer({uniforms = {}}) {
-    const {gl} = this.context;
     const {getPolygonOffset} = this.props;
 
     // Apply polygon offset to avoid z-fighting
-    const offset = getPolygonOffset && getPolygonOffset(uniforms) || [0, 0];
-    gl.polygonOffset(offset[0], offset[1]);
+    const offsets = getPolygonOffset && getPolygonOffset(uniforms) || [0, 0];
+    const settings = {
+      polygonOffset: offsets
+    };
 
     // Call subclass lifecycle method
-    this.draw({uniforms});
+    this.draw({uniforms, settings});
     // End lifecycle method
   }
 

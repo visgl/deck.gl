@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 
 /* global window */
-import {GL, withParameters} from 'luma.gl';
+import {GL, withParameters, setParameters} from 'luma.gl';
 import {getUniformsFromViewport} from './viewport-uniforms';
 import {log} from './utils';
 
@@ -366,38 +366,36 @@ function getPickedColors(gl, {
     // Clear the frame buffer
     gl.clear(GL.COLOR_BUFFER_BIT | GL.DEPTH_BUFFER_BIT);
 
-    // Save current blend settings
-    // const oldBlendMode = getBlendMode(gl);
     // Set blend mode for picking
     // always overwrite existing pixel with [r,g,b,layerIndex]
-    // gl.enable(gl.BLEND);
-    // gl.blendFuncSeparate(gl.ONE, gl.ZERO, gl.CONSTANT_ALPHA, gl.ZERO);
-    // gl.blendEquation(gl.FUNC_ADD);
+    const settings = {
+      blend: true,
+      blendFunc: [gl.ONE, gl.ZERO, gl.CONSTANT_ALPHA, gl.ZERO],
+      blendEquation: gl.FUNC_ADD
+    };
 
-    // Render all pickable layers in picking colors
-    layers.forEach((layer, layerIndex) => {
-      if (!layer.isComposite && layer.props.visible && layer.props.pickable) {
+    withParameters(gl, settings, () => {
+      // Render all pickable layers in picking colors
+      layers.forEach((layer, layerIndex) => {
+        if (!layer.isComposite && layer.props.visible && layer.props.pickable) {
 
-        // Encode layerIndex with alpha
-        gl.blendColor(0, 0, 0, (layerIndex + 1) / 255);
-
-        layer.drawLayer({
-          uniforms: Object.assign(
-            {renderPickingBuffer: 1, pickingEnabled: 1},
-            layer.context.uniforms,
-            getUniformsFromViewport(layer.context.viewport, layer.props),
-            {layerIndex}
-          )
-        });
-      }
+          // Encode layerIndex with alpha
+          setParameters(gl, {blendColor: [0, 0, 0, (layerIndex + 1) / 255]});
+          layer.drawLayer({
+            uniforms: Object.assign(
+              {renderPickingBuffer: 1, pickingEnabled: 1},
+              layer.context.uniforms,
+              getUniformsFromViewport(layer.context.viewport, layer.props),
+              {layerIndex}
+            )
+          });
+        }
+      });
     });
 
     // Read color in the central pixel, to be mapped with picking colors
     const pickedColors = new Uint8Array(width * height * 4);
     gl.readPixels(x, y, width, height, GL.RGBA, GL.UNSIGNED_BYTE, pickedColors);
-
-    // restore blend mode
-    // setBlendMode(gl, oldBlendMode);
 
     return pickedColors;
   });

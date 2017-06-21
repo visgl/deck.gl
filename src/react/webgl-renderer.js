@@ -22,7 +22,7 @@
 import React, {createElement} from 'react';
 import PropTypes from 'prop-types';
 import autobind from './autobind';
-import {createGLContext} from 'luma.gl';
+import {createGLContext, setParameters} from 'luma.gl';
 /* global requestAnimationFrame, cancelAnimationFrame */
 
 const DEFAULT_PIXEL_RATIO =
@@ -145,13 +145,7 @@ export default class WebGLRenderer extends React.Component {
     w = w * dpr;
     h = h * dpr;
 
-    if (x !== this.x || y !== this.y || w !== this.w || h !== this.h) {
-      gl.viewport(x, y, w, h);
-      this.x = x;
-      this.y = y;
-      this.w = w;
-      this.h = h;
-    }
+    setParameters(gl, {viewport: [x, y, w, h]});
   }
 
   _renderFrame() {

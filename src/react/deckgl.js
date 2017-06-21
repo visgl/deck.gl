@@ -24,7 +24,7 @@ import autobind from './autobind';
 import WebGLRenderer from './webgl-renderer';
 import {LayerManager, Layer} from '../lib';
 import {EffectManager, Effect} from '../experimental';
-import {GL} from 'luma.gl';
+import {GL, setParameters} from 'luma.gl';
 import {Viewport, WebMercatorViewport} from '../lib/viewports';
 import {log} from '../lib/utils';
 import EventManager from '../utils/events/event-manager';
@@ -109,11 +109,11 @@ export default class DeckGL extends React.Component {
   }
 
   _onRendererInitialized({gl, canvas}) {
-    gl.enable(GL.BLEND);
-    gl.blendFunc(GL.SRC_ALPHA, GL.ONE_MINUS_SRC_ALPHA);
-
-    // Enable polygon offset
-    gl.enable(GL.POLYGON_OFFSET_FILL);
+    setParameters(gl, {
+      blend: true,
+      blendFunc: [GL.SRC_ALPHA, GL.ONE_MINUS_SRC_ALPHA],
+      polygonOffsetFill: true
+    });
 
     this.props.onWebGLInitialized(gl);
 
