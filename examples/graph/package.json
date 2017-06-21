@@ -1,8 +1,7 @@
 {
   "scripts": {
     "start-local": "webpack-dev-server --env.local --progress --hot --port 3030 --open",
-    "start": "webpack-dev-server --progress --hot --port 3030 --open",
-    "build": "NODE_ENV=production webpack --env.prod=true"
+    "start": "webpack-dev-server --progress --hot --port 3030 --open"
   },
   "dependencies": {
     "d3-array": "^1.1.1",
@@ -11,7 +10,7 @@
     "d3-scale": "^1.0.5",
     "deck.gl": "^4.0.0-rc.4",
     "immutable": "^3.8.1",
-    "luma.gl": ">=4.0.0-alpha.12",
+    "luma.gl": ">=4.0.0-alpha.13",
     "react": "^15.4.1",
     "react-dom": "^15.4.1"
   },

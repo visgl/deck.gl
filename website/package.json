@@ -24,7 +24,7 @@
     "expr-eval": "^1.0.0",
     "highlight.js": "^9.7.0",
     "immutable": "^3.7.5",
-    "luma.gl": ">=4.0.0-alpha.12",
+    "luma.gl": ">=4.0.0-alpha.13",
     "marked": "^0.3.6",
     "prop-types": "^15.5.8",
     "rbush": "^2.0.1",

@@ -7,8 +7,8 @@
     "start-local": "webpack-dev-server --env.local --progress --hot --open"
   },
   "dependencies": {
-    "deck.gl": ">=4.1.0-alpha.13",
-    "luma.gl": ">=4.0.0-alpha.12",
+    "deck.gl": ">=4.1.0-alpha.14",
+    "luma.gl": ">=4.0.0-alpha.13",
     "react": "^15.4.1",
     "react-dom": "^15.4.1"
   },

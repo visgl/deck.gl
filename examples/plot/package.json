@@ -1,14 +1,13 @@
 {
   "scripts": {
     "start-local": "webpack-dev-server --env.local --progress --hot --port 3030 --open",
-    "start": "webpack-dev-server --progress --hot --port 3030 --open",
-    "build": "NODE_ENV=production webpack --env.prod=true"
+    "start": "webpack-dev-server --progress --hot --port 3030 --open"
   },
   "dependencies": {
     "d3-scale": "^1.0.6",
-    "deck.gl": ">=4.1.0-alpha.13",
+    "deck.gl": ">=4.1.0-alpha.14",
     "immutable": "^3.8.1",
-    "luma.gl": ">=4.0.0-alpha.12",
+    "luma.gl": ">=4.0.0-alpha.13",
     "prop-types": "^15.5.8",
     "react": "^15.4.1",
     "react-dom": "^15.4.1"
