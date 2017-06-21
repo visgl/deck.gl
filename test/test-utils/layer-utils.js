@@ -24,7 +24,7 @@ import {mergeDefaultProps} from '../../src/lib/props';
 import spy from './spy';
 import global from 'global';
 
-import {experimental} from 'luma.gl';
+import {ShaderCache} from 'luma.gl';
 
 /**
  * Covert all numbers in a deep structure to a given precision, allowing
@@ -64,7 +64,7 @@ export function testInitializeLayer({gl, layer, viewport}) {
 
   const oldContext = {gl, viewport};
   let failures = false;
-  const context = {gl, viewport, shaderCache: new experimental.ShaderCache({gl})};
+  const context = {gl, viewport, shaderCache: new ShaderCache({gl})};
   try {
     layer.context = context;
 
