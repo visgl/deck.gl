@@ -11,7 +11,7 @@
     "d3-scale": "^1.0.5",
     "deck.gl": "^4.0.0-rc.4",
     "immutable": "^3.8.1",
-    "luma.gl": ">=4.0.0-alpha.12",
+    "luma.gl": ">=4.0.0-alpha.13",
     "react": "^15.4.1",
     "react-dom": "^15.4.1"
   },

@@ -6,9 +6,9 @@
   },
   "dependencies": {
     "d3-request": "^1.0.5",
-    "deck.gl": ">=4.1.0-alpha.13",
+    "deck.gl": ">=4.1.0-alpha.14",
     "immutable": "^3.8.1",
-    "luma.gl": ">=4.0.0-alpha.12",
+    "luma.gl": ">=4.0.0-alpha.13",
     "react": "^15.4.1",
     "react-dom": "^15.4.1",
     "react-map-gl": ">=3.0.0-alpha.13"

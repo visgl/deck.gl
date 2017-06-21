@@ -64,7 +64,6 @@
     "brfs-babel": "^1.0.0",
     "buble": "^0.15.1",
     "buble-loader": "^0.4.0",
-    "colorbrewer": "^1.0.0",
     "coveralls": "^2.13.0",
     "eslint": "^3.0.0",
     "eslint-config-uber-es2015": "^3.0.0",
@@ -94,7 +93,7 @@
     "webpack-dev-server": "^2.4.0"
   },
   "peerDependencies": {
-    "luma.gl": ">=4.0.0-alpha.12",
+    "luma.gl": ">=4.0.0-alpha.13",
     "react": "0.14.x - 15.x",
     "react-dom": "0.14.x - 15.x"
   },

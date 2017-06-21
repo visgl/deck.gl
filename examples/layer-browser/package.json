@@ -5,10 +5,11 @@
     "build": "webpack app bundle.js --env.local --display-error-details"
   },
   "dependencies": {
-    "deck.gl": ">=4.1.0-alpha.13",
+    "deck.gl": ">=4.1.0-alpha.14",
+    "colorbrewer": "^1.0.0",
     "extrude-polyline": "^1.0.6",
     "immutable": "^3.8.1",
-    "luma.gl": ">=4.0.0-alpha.12",
+    "luma.gl": ">=4.0.0-alpha.13",
     "react": "^15.4.1",
     "react-autobind": "^1.0.6",
     "react-dom": "^15.4.1",
