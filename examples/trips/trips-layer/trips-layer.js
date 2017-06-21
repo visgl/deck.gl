@@ -39,6 +39,7 @@ export default class TripsLayer extends Layer {
 
   getModel(gl) {
     return new Model({
+      gl,
       program: new Program(gl, assembleShaders(gl, {
         vs: tripsVertex,
         fs: tripsFragment
