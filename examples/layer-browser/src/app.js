@@ -114,9 +114,9 @@ class App extends PureComponent {
     this.setState({clickedItem: info});
   }
 
-  _onQueryObjects() {
+  _onQueryVisibleObjects() {
     const {width, height} = this.state;
-    const infos = this.refs.deckgl.queryObjects({x: 0, y: 0, width, height});
+    const infos = this.refs.deckgl.queryVisibleObjects({x: 0, y: 0, width, height});
     console.log(infos); // eslint-disable-line
     this.setState({queriedItems: infos});
   }
@@ -231,7 +231,7 @@ class App extends PureComponent {
         { this._renderMap() }
         { !MapboxAccessToken && this._renderNoTokenWarning() }
         <div id="control-panel">
-          <button onClick={this._onQueryObjects}>Query Objects</button>
+          <button onClick={this._onQueryVisibleObjects}>Query Objects</button>
           <LayerControls
             title="Composite Settings"
             settings={settings}

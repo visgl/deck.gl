@@ -6,7 +6,7 @@
 
 ## Query Methods
 
-* `DeckGL.queryObject` and `DeckGL.queryObjects` allow developers to directly query the picking buffer in addition to the built-in click and hover callbacks.
+* `DeckGL.queryObject` and `DeckGL.queryVisibleObjects` allow developers to directly query the picking buffer in addition to the built-in click and hover callbacks.
 
 # deck.gl v4.0
 
