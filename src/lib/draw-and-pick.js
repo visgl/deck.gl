@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 
 /* global window */
-import {GL, withParameters} from 'luma.gl';
+import {GL, withParameters, setParameters} from 'luma.gl';
 import {getUniformsFromViewport} from './viewport-uniforms';
 import {log} from './utils';
 
@@ -380,16 +380,14 @@ function getPickedColors(gl, {
         if (!layer.isComposite && layer.props.visible && layer.props.pickable) {
 
           // Encode layerIndex with alpha
-          const blendColorSettings = {blendColor: [0, 0, 0, (layerIndex + 1) / 255]};
-          withParameters(gl, blendColorSettings, () => {
-            layer.drawLayer({
-              uniforms: Object.assign(
-                {renderPickingBuffer: 1, pickingEnabled: 1},
-                layer.context.uniforms,
-                getUniformsFromViewport(layer.context.viewport, layer.props),
-                {layerIndex}
-              )
-            });
+          setParameters(gl, {blendColor: [0, 0, 0, (layerIndex + 1) / 255]});
+          layer.drawLayer({
+            uniforms: Object.assign(
+              {renderPickingBuffer: 1, pickingEnabled: 1},
+              layer.context.uniforms,
+              getUniformsFromViewport(layer.context.viewport, layer.props),
+              {layerIndex}
+            )
           });
         }
       });
