@@ -2035,10 +2035,6 @@ gl-constants@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/gl-constants/-/gl-constants-1.0.0.tgz#597a504e364750ff50253aa35f8dea7af4a5d233"
 
-gl-mat4-esm@^1.1.4:
-  version "1.1.4"
-  resolved "https://registry.yarnpkg.com/gl-mat4-esm/-/gl-mat4-esm-1.1.4.tgz#a2bb751d70af6dc697dec8ba30d18590b4adcf27"
-
 gl-matrix@^2.3.2:
   version "2.3.2"
   resolved "https://registry.yarnpkg.com/gl-matrix/-/gl-matrix-2.3.2.tgz#aac808c74af7d5db05fe04cb60ca1a0fcb174d74"
@@ -2825,14 +2821,13 @@ lru-cache@^4.0.1:
     pseudomap "^1.0.2"
     yallist "^2.1.2"
 
-luma.gl@>=4.0.0-alpha.12:
-  version "4.0.0-alpha.12"
-  resolved "https://registry.yarnpkg.com/luma.gl/-/luma.gl-4.0.0-alpha.12.tgz#aae6cfdcc11a90ed84bfe6fc69aedc911a10730f"
+luma.gl@>=4.0.0-alpha.13:
+  version "4.0.0-alpha.13"
+  resolved "https://registry.yarnpkg.com/luma.gl/-/luma.gl-4.0.0-alpha.13.tgz#16f7b7a97218b9ff3713fefc597f8ce039830763"
   dependencies:
     gl-constants "^1.0.0"
-    gl-mat4-esm "^1.1.4"
     gl-matrix "^2.3.2"
-    seer "^0.2.1"
+    seer "^0.2.2"
     webgl-debug "^1.0.2"
 
 magic-string@^0.14.0:
@@ -3933,7 +3928,7 @@ sax@^1.2.1:
   version "1.2.2"
   resolved "https://registry.yarnpkg.com/sax/-/sax-1.2.2.tgz#fd8631a23bc7826bef5d871bdb87378c95647828"
 
-seer@^0.2.1, seer@^0.2.2:
+seer@^0.2.2:
   version "0.2.2"
   resolved "https://registry.yarnpkg.com/seer/-/seer-0.2.2.tgz#95e8fca77a063e1f9e69748038c104d2467f3dca"
 
