@@ -25,10 +25,13 @@ import assert from 'assert';
 import {drawLayers, pickLayers, queryLayers} from './draw-and-pick';
 import {LIFECYCLE} from './constants';
 import {Viewport} from './viewports';
-import {setPropOverrides, layerEditListener, initLayerInSeer, updateLayerInSeer}
-  from '../debug/seer-integration';
-import {experimental} from 'luma.gl';
-import {Framebuffer} from 'luma.gl';
+import {
+  setPropOverrides,
+  layerEditListener,
+  initLayerInSeer,
+  updateLayerInSeer
+} from '../debug/seer-integration';
+import {Framebuffer, ShaderCache} from 'luma.gl';
 
 const LOG_PRIORITY_LIFECYCLE = 2;
 const LOG_PRIORITY_LIFECYCLE_MINOR = 4;
@@ -64,7 +67,7 @@ export default class LayerManager {
         index: -1,
         layerId: null
       },
-      shaderCache: new experimental.ShaderCache({gl})
+      shaderCache: new ShaderCache({gl})
     };
 
     Object.seal(this.context);
