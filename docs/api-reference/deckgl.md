@@ -135,7 +135,7 @@ Parameters:
 
 Returns: a single [`info`](/docs/get-started/interactivity.md#the-picking-info-object) object, or `null` if nothing is found.
 
-##### `queryObjects(options)`
+##### `queryVisibleObjects(options)`
 
 Get all pickable and visible objects within a bounding box.
 

@@ -88,7 +88,7 @@ export default class DeckGL extends React.Component {
     return selectedInfos.length ? selectedInfos[0] : null;
   }
 
-  queryObjects({x, y, width = 1, height = 1, layerIds = null}) {
+  queryVisibleObjects({x, y, width = 1, height = 1, layerIds = null}) {
     return this.layerManager.queryLayer({x, y, width, height, layerIds});
   }
 
