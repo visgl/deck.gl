@@ -26,7 +26,7 @@ import {LayerManager, Layer} from '../lib';
 import {EffectManager, Effect} from '../experimental';
 import {GL, setParameters} from 'luma.gl';
 import {Viewport, WebMercatorViewport} from '../lib/viewports';
-import LayerEventManager from '../lib/layer-event-manager';
+import EventManager from '../utils/events/event-manager';
 
 function noop() {}
 
@@ -54,8 +54,8 @@ const defaultProps = {
   effects: [],
   onWebGLInitialized: noop,
   onAfterRender: noop,
-  onLayerClick: noop,
-  onLayerHover: noop
+  onLayerClick: null,
+  onLayerHover: null
 };
 
 export default class DeckGL extends React.Component {
@@ -64,13 +64,12 @@ export default class DeckGL extends React.Component {
     this.state = {};
     this.needsRedraw = true;
     this.layerManager = null;
-    this.layerEventManager = null;
     this.effectManager = null;
     autobind(this);
   }
 
   componentWillReceiveProps(nextProps) {
-    this.layerEventManager.set({
+    this.layerManager.setEventParams({
       pickingRadius: nextProps.pickingRadius,
       onLayerClick: nextProps.onLayerClick,
       onLayerHover: nextProps.onLayerHover
@@ -116,7 +115,8 @@ export default class DeckGL extends React.Component {
 
     // Note: avoid React setState due GL animation loop / setState timing issue
     this.layerManager = new LayerManager({gl});
-    this.layerEventManager = new LayerEventManager(this.layerManager, canvas, {
+    this.layerManager.setEventParams({
+      eventManager: new EventManager(canvas),
       pickingRadius: props.pickingRadius,
       onLayerClick: props.onLayerClick,
       onLayerHover: props.onLayerHover
@@ -128,10 +128,6 @@ export default class DeckGL extends React.Component {
     }
 
     this._updateLayers(props);
-
-    // TODO: add handlers on demand at runtime, not all at once on init
-    // https://github.com/uber/deck.gl/issues/634
-    this.layerEventManager.addEventListeners(['click', 'pointermove']);
   }
 
   _onRenderFrame({gl}) {
