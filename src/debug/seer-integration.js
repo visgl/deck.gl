@@ -75,6 +75,20 @@ export const layerEditListener = cb => {
   });
 };
 
+/**
+ * Listen for seer init events to resend data
+ */
+export const seerInitListener = cb => {
+  if (!window.__SEER_INITIALIZED__) {
+    return;
+  }
+
+  seer.listenFor('init', cb);
+};
+
+/**
+ * On finalyze of a specify layer, remove it from seer
+ */
 export const removeLayerInSeer = id => {
   if (!window.__SEER_INITIALIZED__ || !id) {
     return;
