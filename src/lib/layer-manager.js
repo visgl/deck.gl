@@ -110,34 +110,38 @@ export default class LayerManager {
   }
 
   /**
+   * @param {Object} eventManager   A source of DOM input events
+   *                                with on()/off() methods for registration,
+   *                                which will call handlers with
+   *                                an Event object of the following shape:
+   *                                {Object: {x, y}} offsetCenter: center of the event
+   *                                {Object} srcEvent:             native JS Event object
+   */
+  initEventHandling(eventManager) {
+    this._eventManager = eventManager;
+
+    // TODO: add/remove handlers on demand at runtime, not all at once on init.
+    // Consider both top-level handlers like onLayerClick/Hover
+    // and per-layer handlers attached to individual layers.
+    // https://github.com/uber/deck.gl/issues/634
+    this._eventManager.on({
+      click: this._onClick,
+      pointermove: this._onPointerMove
+    });
+  }
+
+  /**
    * Set parameters for input event handling.
    * Parameters are to be passed as a single object, with the following shape:
-   * @param {Object} eventManager     A source of DOM input events
-   *                                  with on()/off() methods for registration,
-   *                                  which will call handlers with an Event object
-   *                                  described in e.g. _onClick in this file.
    * @param {Number} pickingRadius    "Fuzziness" of picking (px), to support fat-fingering.
    * @param {Function} onLayerClick   A handler to be called when any layer is clicked.
    * @param {Function} onLayerHover   A handler to be called when any layer is hovered over.
    */
-  setEventParams({
-    eventManager,
+  setEventHandlingParameters({
     pickingRadius,
     onLayerClick,
     onLayerHover
   }) {
-    if (eventManager) {
-      this._eventManager = eventManager;
-
-      // TODO: add/remove handlers on demand at runtime, not all at once on init.
-      // Consider both top-level handlers like onLayerClick/Hover
-      // and per-layer handlers attached to individual layers.
-      // https://github.com/uber/deck.gl/issues/634
-      this._eventManager.on({
-        click: this._onClick,
-        pointermove: this._onPointerMove
-      });
-    }
     if (!isNaN(pickingRadius)) {
       this._pickingRadius = pickingRadius;
     }
@@ -497,9 +501,11 @@ export default class LayerManager {
     return error;
   }
 
+  /**
+   * Warn if a deck-level mouse event has been specified,
+   * but no layers are `pickable`.
+   */
   _validateEventHandling() {
-    // Check if a deck-level mouse event has been specified
-    // and that at least one of the layers in the deck is pickable
     if (
       this.onLayerClick ||
       this.onLayerHover

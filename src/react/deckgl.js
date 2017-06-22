@@ -69,11 +69,6 @@ export default class DeckGL extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    this.layerManager.setEventParams({
-      pickingRadius: nextProps.pickingRadius,
-      onLayerClick: nextProps.onLayerClick,
-      onLayerHover: nextProps.onLayerHover
-    });
     this._updateLayers(nextProps);
   }
 
@@ -88,10 +83,28 @@ export default class DeckGL extends React.Component {
   }
 
   _updateLayers(nextProps) {
-    const {width, height, latitude, longitude, zoom, pitch, bearing, altitude} = nextProps;
-    let {viewport} = nextProps;
+    const {
+      width,
+      height,
+      latitude,
+      longitude,
+      zoom,
+      pitch,
+      bearing,
+      altitude,
+      pickingRadius,
+      onLayerClick,
+      onLayerHover
+    } = nextProps;
+
+    this.layerManager.setEventHandlingParameters({
+      pickingRadius,
+      onLayerClick,
+      onLayerHover
+    });
 
     // If Viewport is not supplied, create one from mercator props
+    let {viewport} = nextProps;
     viewport = viewport || new WebMercatorViewport({
       width, height, latitude, longitude, zoom, pitch, bearing, altitude
     });
@@ -115,12 +128,7 @@ export default class DeckGL extends React.Component {
 
     // Note: avoid React setState due GL animation loop / setState timing issue
     this.layerManager = new LayerManager({gl});
-    this.layerManager.setEventParams({
-      eventManager: new EventManager(canvas),
-      pickingRadius: props.pickingRadius,
-      onLayerClick: props.onLayerClick,
-      onLayerHover: props.onLayerHover
-    });
+    this.layerManager.initEventHandling(new EventManager(canvas));
     this.effectManager = new EffectManager({gl, layerManager: this.layerManager});
 
     for (const effect of props.effects) {
