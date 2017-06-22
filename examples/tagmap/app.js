@@ -3,11 +3,13 @@ import React, {Component} from 'react';
 import {render} from 'react-dom';
 import MapGL from 'react-map-gl';
 import DeckGLOverlay from './deckgl-overlay.js';
-// load json file
-import {default as tags} from './data/hashtags10k.json';
+// handle ajax call
+import axios from 'axios';
 
 // Set your mapbox token here
 const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
+// sample data
+const filePath = 'https://rivulet-zhang.github.io/dataRepo/tagmap/hashtags10k.json';
 
 class Root extends Component {
 
@@ -45,9 +47,15 @@ class Root extends Component {
   _loadData() {
     // remove high-frequency terms
     const excludeList = new Set(['#hiring', '#job', '#jobs', '#careerarc', '#career']);
-    const data = tags.filter(x => !excludeList.has(x.label)).slice(0, 3000);
     const weightThreshold = 2;
-    this.setState({data, weightThreshold});
+
+    axios.get(filePath)
+      .then(response => {
+        const data = response.data.filter(x => !excludeList.has(x.label)).slice(0, 3000);
+        this.setState({data, weightThreshold});
+      }).catch(error => {
+        throw new Error(error.toString());
+      });
   }
 
   render() {

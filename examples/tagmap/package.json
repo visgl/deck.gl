@@ -5,6 +5,7 @@
     "build": "NODE_ENV=production webpack --env.prod=true"
   },
   "dependencies": {
+    "axios": "^0.16.2",
     "colorbrewer": "^1.0.0",
     "d3-color": "^1.0.3",
     "d3-scale": "^1.0.6",

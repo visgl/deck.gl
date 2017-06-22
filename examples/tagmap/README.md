@@ -13,4 +13,4 @@ This example is set up to read the token from the environment variable
 `MapboxAccessToken`, so you don't have to edit the code to test them.
 
 ### Data format
-Sample data is stored in the `data` folder.
+Sample data can be found [here](https://rivulet-zhang.github.io/dataRepo/tagmap/hashtags10k.json);
