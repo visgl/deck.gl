@@ -146,15 +146,15 @@ class Root extends Component {
     });
   }
 
-  _onHover(el) {
-    if (el) {
-      this.setState({hovered: el});
+  _onHover(info) {
+    if (info) {
+      this.setState({hovered: info});
     }
   }
 
-  _onClick(el) {
-    if (el) {
-      this.setState({clicked: el});
+  _onClick(info) {
+    if (info) {
+      this.setState({clicked: info});
     } else {
       const {clicked} = this.state;
       if (clicked) {
@@ -166,23 +166,21 @@ class Root extends Component {
   _onMouseDown(event) {
     // Use DeckGL.queryObject() to find the object under the mouse,
     // and store it for updating on mouse move.
-    const point = {x: event.clientX, y: event.clientY};
-    const el = this.deckGL.queryObject(point);
-    if (el) {
+    const info = this.deckGL.queryObject({x: event.clientX, y: event.clientY});
+    if (info) {
       this.setState({
-        clicked: el,
+        clicked: info,
         dragging: {
-          node: el.object
+          node: info.object
         }
       });
-      this._updateDraggedElement(point);
+      this._updateDraggedElement([event.clientX, event.clientY]);
     }
   }
 
   _onMouseMove(event) {
     if (this.state.dragging) {
-      const point = {x: event.clientX, y: event.clientY};
-      this._updateDraggedElement(point);
+      this._updateDraggedElement([event.clientX, event.clientY]);
     }
   }
 
@@ -195,15 +193,15 @@ class Root extends Component {
     });
   }
 
-  _updateDraggedElement({x, y}) {
+  _updateDraggedElement(point) {
     const {viewport: {width, height}} = this.state;
-    const dragX = x - width / 2;
-    const dragY = y - height / 2;
+    const x = point[0] - width / 2;
+    const y = point[1] - height / 2;
     this.setState({
       dragging: {
         node: this.state.dragging.node,
-        x: dragX,
-        y: dragY
+        x,
+        y
       }
     });
   }
