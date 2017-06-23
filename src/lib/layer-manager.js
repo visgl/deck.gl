@@ -82,7 +82,10 @@ export default class LayerManager {
     Object.seal(this);
 
     seerInitListener(() => {
-      this.layers.forEach(initLayerInSeer);
+      this.layers.forEach(layer => {
+        initLayerInSeer(layer);
+        updateLayerInSeer(layer);
+      });
     });
 
     layerEditListener(payload => {
