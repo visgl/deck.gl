@@ -15,9 +15,9 @@ export default class DeckGLOverlay extends Component {
     }
 
     const {width, height} = viewport;
-    const {layoutProps} = this.props;
+    const {layoutProps, deckGLRef} = this.props;
     const {layoutAccessors, linkAccessors, nodeAccessors, nodeIconAccessors} = this.props;
-    const {onHover, onClick, onDragMove, onDragEnd} = this.props;
+    const {onHover, onClick} = this.props;
     const layer = new GraphLayoutLayer({
       id: 'graph-layout',
       data,
@@ -29,9 +29,7 @@ export default class DeckGLOverlay extends Component {
       nodeIconAccessors,
 
       onHover,
-      onClick,
-      onDragMove,
-      onDragEnd
+      onClick
     });
 
     // recalculate viewport on container size change.
@@ -42,6 +40,7 @@ export default class DeckGLOverlay extends Component {
     // TODO: clean up viewport / glViewport
     return (
       <DeckGL
+        ref={deckGLRef}
         width={width}
         height={height}
         viewport={glViewport}

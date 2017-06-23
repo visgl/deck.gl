@@ -50,10 +50,6 @@ const defaultProps = {
 
   onHover: noop,
   onClick: noop,
-  onDragStart: noop,
-  onDragMove: noop,
-  onDragEnd: noop,
-  onDragCancel: noop,
 
   projectionMode: COORDINATE_SYSTEM.LNGLAT,
 

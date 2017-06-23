@@ -23,11 +23,6 @@ import {GL, withParameters, setParameters} from 'luma.gl';
 import {getUniformsFromViewport} from './viewport-uniforms';
 import {log} from './utils';
 
-// Note: corresponding touch events, once supported, should be included here as well.
-const MOTION_EVENTS = [
-  'dragmove',
-  'dragend'
-];
 const EMPTY_PIXEL = new Uint8Array(4);
 let renderCount = 0;
 
@@ -133,63 +128,41 @@ export function pickLayers(gl, {
   const deviceY = Math.round(gl.canvas.height - y * pixelRatio);
   const deviceRadius = Math.round(radius * pixelRatio);
 
-  let pickedColor;
-  let pickedLayer;
-  let pickedObjectIndex;
-  let affectedLayers = [];
+  const {
+    pickedColor,
+    pickedLayer,
+    pickedObjectIndex
+  } = getClosestFromPickingBuffer(gl, {
+    layers,
+    pickingFBO,
+    deviceX,
+    deviceY,
+    deviceRadius
+  });
+  const affectedLayers = pickedLayer ? [pickedLayer] : [];
 
-  if (MOTION_EVENTS.indexOf(mode) !== -1) {
-    // "Motion events" are those that track the motion of an interaction
-    // after its initiation. In this case, these subsequent events
-    // should be bound to the object that was first picked,
-    // e.g. to enable dragging behaviors.
-    // Therefore, the picking process does not run for these events.
-    const {layerId} = lastPickedInfo;
-    pickedLayer = layers.find(layer => layer.props.id === layerId);
-    if (pickedLayer) {
-      pickedColor = lastPickedInfo.color;
-      pickedObjectIndex = lastPickedInfo.index;
-      affectedLayers.push(pickedLayer);
-    }
+  if (mode === 'hover') {
+    // only invoke onHover events if picked object has changed
+    const lastPickedObjectIndex = lastPickedInfo.index;
+    const lastPickedLayerId = lastPickedInfo.layerId;
+    const pickedLayerId = pickedLayer && pickedLayer.props.id;
 
-  } else {
-    // For all other events, run picking process normally.
-    const pickInfo = getClosestFromPickingBuffer(gl, {
-      layers,
-      pickingFBO,
-      deviceX,
-      deviceY,
-      deviceRadius
-    });
-
-    pickedColor = pickInfo.pickedColor;
-    pickedLayer = pickInfo.pickedLayer;
-    pickedObjectIndex = pickInfo.pickedObjectIndex;
-    affectedLayers = pickedLayer ? [pickedLayer] : [];
-
-    if (mode === 'hover') {
-      // only invoke onHover events if picked object has changed
-      const lastPickedObjectIndex = lastPickedInfo.index;
-      const lastPickedLayerId = lastPickedInfo.layerId;
-      const pickedLayerId = pickedLayer && pickedLayer.props.id;
-
-      // proceed only if picked object changed
-      if (pickedLayerId !== lastPickedLayerId || pickedObjectIndex !== lastPickedObjectIndex) {
-        if (pickedLayerId !== lastPickedLayerId) {
-          // We cannot store a ref to lastPickedLayer in the context because
-          // the state of an outdated layer is no longer valid
-          // and the props may have changed
-          const lastPickedLayer = layers.find(layer => layer.props.id === lastPickedLayerId);
-          if (lastPickedLayer) {
-            // Let leave event fire before enter event
-            affectedLayers.unshift(lastPickedLayer);
-          }
+    // proceed only if picked object changed
+    if (pickedLayerId !== lastPickedLayerId || pickedObjectIndex !== lastPickedObjectIndex) {
+      if (pickedLayerId !== lastPickedLayerId) {
+        // We cannot store a ref to lastPickedLayer in the context because
+        // the state of an outdated layer is no longer valid
+        // and the props may have changed
+        const lastPickedLayer = layers.find(layer => layer.props.id === lastPickedLayerId);
+        if (lastPickedLayer) {
+          // Let leave event fire before enter event
+          affectedLayers.unshift(lastPickedLayer);
         }
-
-        // Update layer manager context
-        lastPickedInfo.layerId = pickedLayerId;
-        lastPickedInfo.index = pickedObjectIndex;
       }
+
+      // Update layer manager context
+      lastPickedInfo.layerId = pickedLayerId;
+      lastPickedInfo.index = pickedObjectIndex;
     }
   }
 
@@ -224,22 +197,18 @@ export function pickLayers(gl, {
 
   infos.forEach(info => {
     let handled = false;
-    // The onClick and onHover functions are provided by the user
-    // and out of control by deck.gl. It's very much possible that
+    // Per-layer event handlers (e.g. onClick, onHover) are provided by the
+    // user and out of deck.gl's control. It's very much possible that
     // the user calls React lifecycle methods in these function, such as
     // ReactComponent.setState(). React lifecycle methods sometimes induce
     // a re-render and re-generation of props of deck.gl and its layers,
     // which invalidates all layers currently passed to this very function.
 
-    // Therefore, calls to functions like onClick and onHover need to be done
-    // at the end of the function. NO operation relies on the states of current
+    // Therefore, per-layer event handlers must be invoked at the end
+    // of this function. NO operation that relies on the states of current
     // layers should be called after this code.
     switch (mode) {
     case 'click': handled = info.layer.props.onClick(info); break;
-    case 'dragstart': handled = info.layer.props.onDragStart(info); break;
-    case 'dragmove': handled = info.layer.props.onDragMove(info); break;
-    case 'dragend': handled = info.layer.props.onDragEnd(info); break;
-    case 'dragcancel': handled = info.layer.props.onDragCancel(info); break;
     case 'hover': handled = info.layer.props.onHover(info); break;
     case 'query': break;
     default: throw new Error('unknown pick type');
