@@ -1,4 +1,5 @@
 import React, {Component} from 'react';
+import {setParameters} from 'luma.gl';
 import DeckGL from 'deck.gl';
 import TagmapLayer from './tagmap-layer';
 
@@ -16,8 +17,10 @@ export default class DeckGLOverlay extends Component {
   }
 
   _initialize(gl) {
-    gl.blendFuncSeparate(gl.SRC_ALPHA, gl.ONE, gl.ONE_MINUS_DST_ALPHA, gl.ONE);
-    gl.blendEquation(gl.FUNC_ADD);
+    setParameters(gl, {
+      blendFunc: [gl.SRC_ALPHA, gl.ONE, gl.ONE_MINUS_DST_ALPHA, gl.ONE],
+      blendEquation: gl.FUNC_ADD
+    });
   }
 
   render() {

@@ -1,4 +1,4 @@
-/* generate tag map layout: a free-occlusion word cloud like visualization on map */
+/* generate tagmap layout: an occlusion-free tagcloud-like visualization on map */
 /* eslint-disable max-len */
 import TagMapper from './tagmapper';
 import {color} from 'd3-color';

@@ -77,7 +77,7 @@ export default class TagmapLayer extends CompositeLayer {
 
     // filter to only visualize labels in the viewport
     const transform = new WebMercatorViewport(Object.assign({}, viewport));
-    const dataInVP = this.state.data.map(x => {
+    const labelsInViewport = this.state.data.map(x => {
       const pCoords = transform.project(getPosition(x));
       return Object.assign({}, {pCoords}, x);
     }).filter(x => {
@@ -85,7 +85,7 @@ export default class TagmapLayer extends CompositeLayer {
     });
 
     // generate tagmap
-    const {tags} = tagmapLayout(dataInVP, transform, this.state.canvas, {getLabel, getPosition: x => x.pCoords, getWeight}, visParam);
+    const {tags} = tagmapLayout(labelsInViewport, transform, this.state.canvas, {getLabel, getPosition: x => x.pCoords, getWeight}, visParam);
     this.setState({tags});
   }
 
