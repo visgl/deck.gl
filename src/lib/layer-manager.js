@@ -89,6 +89,9 @@ export default class LayerManager {
     Object.seal(this);
   }
 
+  /**
+   * Called upon Seer initialization, manually sends layers data.
+   */
   _initSeer() {
     this.layers.forEach(layer => {
       initLayerInSeer(layer);
@@ -96,6 +99,9 @@ export default class LayerManager {
     });
   }
 
+  /**
+   * On Seer property edition, set override and update layers.
+   */
   _editSeer(payload) {
     if (payload.type !== 'edit' || payload.valuePath[0] !== 'props') {
       return;
@@ -106,6 +112,11 @@ export default class LayerManager {
     this.updateLayers({newLayers});
   }
 
+  /**
+   * Method to call when the layer manager is not needed anymore.
+   *
+   * Currently used in the <DeckGL> componentWillUnmount lifecycle to unbind Seer listeners.
+   */
   finalize() {
     seer.removeListener(this._initSeer);
     seer.removeListener(this._editSeer);
