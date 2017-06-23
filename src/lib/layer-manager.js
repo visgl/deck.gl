@@ -29,6 +29,7 @@ import {Viewport} from './viewports';
 import {
   setPropOverrides,
   layerEditListener,
+  seerInitListener,
   initLayerInSeer,
   updateLayerInSeer
 } from '../debug/seer-integration';
@@ -79,6 +80,13 @@ export default class LayerManager {
 
     Object.seal(this.context);
     Object.seal(this);
+
+    seerInitListener(() => {
+      this.layers.forEach(layer => {
+        initLayerInSeer(layer);
+        updateLayerInSeer(layer);
+      });
+    });
 
     layerEditListener(payload => {
       setPropOverrides(payload.itemKey, payload.valuePath.slice(1), payload.value);
