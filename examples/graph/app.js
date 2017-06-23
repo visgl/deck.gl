@@ -27,8 +27,9 @@ class Root extends Component {
     this._animate = this._animate.bind(this);
     this._onHover = this._onHover.bind(this);
     this._onClick = this._onClick.bind(this);
-    this._onDragMove = this._onDragMove.bind(this);
-    this._onDragEnd = this._onDragEnd.bind(this);
+    this._onMouseDown = this._onMouseDown.bind(this);
+    this._onMouseMove = this._onMouseMove.bind(this);
+    this._onMouseUp = this._onMouseUp.bind(this);
     this._getNodeColor = this._getNodeColor.bind(this);
 
     // set initial state
@@ -162,32 +163,49 @@ class Root extends Component {
     }
   }
 
-  _onDragMove(el) {
+  _onMouseDown(event) {
+    // Use DeckGL.queryObject() to find the object under the mouse,
+    // and store it for updating on mouse move.
+    const point = {x: event.clientX, y: event.clientY};
+    const el = this.deckGL.queryObject(point);
     if (el) {
-      const {viewport} = this.state;
-      const {width, height} = viewport;
-      const x = el.x - width / 2;
-      const y = el.y - height / 2;
       this.setState({
         clicked: el,
         dragging: {
-          node: el.object,
-          x,
-          y
-        }
-      });
-    }
-  }
-
-  _onDragEnd(el) {
-    if (el) {
-      this.setState({
-        dragging: null,
-        lastDragged: {
           node: el.object
         }
       });
+      this._updateDraggedElement(point);
     }
+  }
+
+  _onMouseMove(event) {
+    if (this.state.dragging) {
+      const point = {x: event.clientX, y: event.clientY};
+      this._updateDraggedElement(point);
+    }
+  }
+
+  _onMouseUp(event) {
+    this.setState({
+      dragging: null,
+      lastDragged: {
+        node: this.state.dragging.node
+      }
+    });
+  }
+
+  _updateDraggedElement({x, y}) {
+    const {viewport: {width, height}} = this.state;
+    const dragX = x - width / 2;
+    const dragY = y - height / 2;
+    this.setState({
+      dragging: {
+        node: this.state.dragging.node,
+        x: dragX,
+        y: dragY
+      }
+    });
   }
 
   //
@@ -350,12 +368,6 @@ class Root extends Component {
   render() {
     const {viewport, data} = this.state;
     const {hovered, clicked, dragging, lastDragged} = this.state;
-    const handlers = {
-      onHover: this._onHover,
-      onClick: this._onClick,
-      onDragMove: this._onDragMove,
-      onDragEnd: this._onDragEnd
-    };
 
     const layoutProps = {
       fixedNodes: dragging ? [dragging] : null,
@@ -387,11 +399,18 @@ class Root extends Component {
     }
 
     return (
-      <div>
+      <div
+        onMouseDown={this._onMouseDown}
+        onMouseMove={this._onMouseMove}
+        onMouseUp={this._onMouseUp}
+      >
         <DeckGLOverlay
+          // eslint-disable-next-line no-return-assign
+          deckGLRef={ref => this.deckGL = ref}
           viewport={viewport}
           data={data}
-          {...handlers}
+          onHover={this._onHover}
+          onClick={this._onClick}
           layoutProps={layoutProps}
           layoutAccessors={layoutAccessors}
           linkAccessors={linkAccessors}
