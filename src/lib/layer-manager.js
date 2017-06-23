@@ -20,6 +20,7 @@
 
 import assert from 'assert';
 import {Framebuffer, ShaderCache} from 'luma.gl';
+import seer from 'seer';
 import Layer from './layer';
 import {log} from './utils';
 import {flatten} from './utils/flatten';
@@ -65,6 +66,9 @@ export default class LayerManager {
     this._onClick = this._onClick.bind(this);
     this._onPointerMove = this._onPointerMove.bind(this);
 
+    this._initSeer = this._initSeer.bind(this);
+    this._editSeer = this._editSeer.bind(this);
+
     this.context = {
       gl,
       uniforms: {},
@@ -78,21 +82,33 @@ export default class LayerManager {
       shaderCache: new ShaderCache({gl})
     };
 
+    seerInitListener(this._initSeer);
+    layerEditListener(this._editSeer);
+
     Object.seal(this.context);
     Object.seal(this);
+  }
 
-    seerInitListener(() => {
-      this.layers.forEach(layer => {
-        initLayerInSeer(layer);
-        updateLayerInSeer(layer);
-      });
+  _initSeer() {
+    this.layers.forEach(layer => {
+      initLayerInSeer(layer);
+      updateLayerInSeer(layer);
     });
+  }
 
-    layerEditListener(payload => {
-      setPropOverrides(payload.itemKey, payload.valuePath.slice(1), payload.value);
-      const newLayers = this.layers.map(layer => new layer.constructor(layer.props));
-      this.updateLayers({newLayers});
-    });
+  _editSeer(payload) {
+    if (payload.type !== 'edit' || payload.valuePath[0] !== 'props') {
+      return;
+    }
+
+    setPropOverrides(payload.itemKey, payload.valuePath.slice(1), payload.value);
+    const newLayers = this.layers.map(layer => new layer.constructor(layer.props));
+    this.updateLayers({newLayers});
+  }
+
+  finalize() {
+    seer.removeListener(this._initSeer);
+    seer.removeListener(this._editSeer);
   }
 
   setViewport(viewport) {

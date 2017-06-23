@@ -1036,10 +1036,6 @@ code-point-at@^1.0.0:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/code-point-at/-/code-point-at-1.1.0.tgz#0d070b4d043a5bea33a2f1a40e2edb3d9a4ccf77"
 
-colorbrewer@^1.0.0:
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/colorbrewer/-/colorbrewer-1.0.0.tgz#4f97333b969ba7612382be4bc3394b341fb4c8a2"
-
 combined-stream@^1.0.5, combined-stream@~1.0.5:
   version "1.0.5"
   resolved "https://registry.yarnpkg.com/combined-stream/-/combined-stream-1.0.5.tgz#938370a57b4a51dea2c77c15d5c5fdf895164009"
@@ -4018,6 +4014,10 @@ sax@^1.2.1:
 seer@^0.2.2:
   version "0.2.2"
   resolved "https://registry.yarnpkg.com/seer/-/seer-0.2.2.tgz#95e8fca77a063e1f9e69748038c104d2467f3dca"
+
+seer@^0.2.3:
+  version "0.2.3"
+  resolved "https://registry.yarnpkg.com/seer/-/seer-0.2.3.tgz#e7ba529921330327dbbf30141fbf052296772fb7"
 
 select-hose@^2.0.0:
   version "2.0.0"
