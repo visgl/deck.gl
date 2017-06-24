@@ -1,6 +1,4 @@
 import seer from 'seer';
-import {window} from '../lib/utils/globals';
-
 /**
  * Recursively set a nested property of an object given a properties array and a value
  */
@@ -23,7 +21,7 @@ const overrides = new Map();
  * Do nothing in case Seer as not been initialized to prevent any preformance drawback.
  */
 export const setPropOverrides = (id, valuePath, value) => {
-  if (!window.__SEER_INITIALIZED__) {
+  if (!seer.isReady()) {
     return;
   }
 
@@ -40,7 +38,7 @@ export const setPropOverrides = (id, valuePath, value) => {
  * Invalidates the data to be sure new ones are always picked up.
  */
 export const applyPropOverrides = props => {
-  if (!window.__SEER_INITIALIZED__ || !props.id) {
+  if (!seer.isReady() || !props.id) {
     return;
   }
 
@@ -62,24 +60,18 @@ export const applyPropOverrides = props => {
  * Listen for deck.gl edit events
  */
 export const layerEditListener = cb => {
-  if (!window.__SEER_INITIALIZED__) {
+  if (!seer.isReady()) {
     return;
   }
 
-  seer.listenFor('deck.gl', payload => {
-    if (payload.type !== 'edit' || payload.valuePath[0] !== 'props') {
-      return;
-    }
-
-    cb(payload);
-  });
+  seer.listenFor('deck.gl', cb);
 };
 
 /**
  * Listen for seer init events to resend data
  */
 export const seerInitListener = cb => {
-  if (!window.__SEER_INITIALIZED__) {
+  if (!seer.isReady()) {
     return;
   }
 
@@ -90,7 +82,7 @@ export const seerInitListener = cb => {
  * On finalyze of a specify layer, remove it from seer
  */
 export const removeLayerInSeer = id => {
-  if (!window.__SEER_INITIALIZED__ || !id) {
+  if (!seer.isReady() || !id) {
     return;
   }
 
@@ -125,7 +117,7 @@ export const logPayload = layer => {
 };
 
 export const initLayerInSeer = layer => {
-  if (!window.__SEER_INITIALIZED__ || !layer) {
+  if (!seer.isReady() || !layer) {
     return;
   }
 
@@ -142,7 +134,7 @@ export const initLayerInSeer = layer => {
  * Log layer's properties to Seer
  */
 export const updateLayerInSeer = layer => {
-  if (!window.__SEER_INITIALIZED__ || seer.throttle(`deck.gl:${layer.id}`, 1E3)) {
+  if (!seer.isReady() || seer.throttle(`deck.gl:${layer.id}`, 1E3)) {
     return;
   }
 

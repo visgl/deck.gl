@@ -72,6 +72,12 @@ export default class DeckGL extends React.Component {
     this._updateLayers(nextProps);
   }
 
+  componentWillUnmount() {
+    if (this.layerManager) {
+      this.layerManager.finalize();
+    }
+  }
+
   /* Public API */
   queryObject({x, y, radius = 0, layerIds = null}) {
     const selectedInfos = this.layerManager.pickLayer({x, y, radius, layerIds, mode: 'query'});
