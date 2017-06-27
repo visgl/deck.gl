@@ -1,0 +1,25 @@
+{
+  "scripts": {
+    "start-local": "webpack-dev-server --env.local --progress --hot --port 3030 --open",
+    "start": "webpack-dev-server --progress --hot --port 3030 --open",
+    "build": "NODE_ENV=production webpack --env.prod=true"
+  },
+  "dependencies": {
+    "axios": "^0.16.2",
+    "colorbrewer": "^1.0.0",
+    "d3-color": "^1.0.3",
+    "d3-scale": "^1.0.6",
+    "deck.gl": "4.1.0-alpha.13",
+    "immutable": "^3.8.1",
+    "luma.gl": "4.0.0-alpha.12",
+    "rbush": "^2.0.1",
+    "react": "^15.4.1",
+    "react-dom": "^15.4.1",
+    "react-map-gl": ">=3.0.0-alpha.13"
+  },
+  "devDependencies": {
+    "buble-loader": "^0.4.0",
+    "webpack": "^2.2.0",
+    "webpack-dev-server": "^2.2.0"
+  }
+}
