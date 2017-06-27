@@ -191,7 +191,7 @@ class Example extends PureComponent {
             this.state.progress < 1 ?
               <div>
                 <div>
-                  This example might not work on mobile deivces due to browser limitations.
+                  This example might not work on mobile devices due to browser limitations.
                 </div>
                 <div>
                   Please try checking it with a desktop machine instead.
