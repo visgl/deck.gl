@@ -3,13 +3,15 @@ import React, {Component} from 'react';
 import {render} from 'react-dom';
 import MapGL from 'react-map-gl';
 import DeckGLOverlay from './deckgl-overlay.js';
+import MAP_STYLE from './style/map-style-dark-v9.json';
+import {fromJS} from 'immutable';
 // handle ajax call
 import axios from 'axios';
 
 // Set your mapbox token here
 const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
 // sample data
-const filePath = 'https://rivulet-zhang.github.io/dataRepo/tagmap/hashtags10k.json';
+const FILE_PATH = 'https://rivulet-zhang.github.io/dataRepo/tagmap/hashtags10k.json';
 
 class Root extends Component {
 
@@ -20,7 +22,8 @@ class Root extends Component {
         ...DeckGLOverlay.defaultViewport,
         width: 500,
         height: 500
-      }
+      },
+      mapStyle: this._removeLabelFromMapStyle(fromJS(MAP_STYLE))
     };
   }
 
@@ -49,7 +52,7 @@ class Root extends Component {
     const excludeList = new Set(['#hiring', '#job', '#jobs', '#careerarc', '#career']);
     const weightThreshold = 2;
 
-    axios.get(filePath)
+    axios.get(FILE_PATH)
       .then(response => {
         const data = response.data.filter(x => !excludeList.has(x.label)).slice(0, 3000);
         this.setState({data, weightThreshold});
@@ -58,13 +61,21 @@ class Root extends Component {
       });
   }
 
+  _removeLabelFromMapStyle(mapStyle) {
+    const LABEL_REG = /label|place|poi/;
+    const layers = mapStyle.get('layers').filter(layer => {
+      return !LABEL_REG.test(layer.get('id'));
+    });
+    return mapStyle.set('layers', layers);
+  }
+
   render() {
-    const {viewport, data, weightThreshold} = this.state;
+    const {viewport, mapStyle, data, weightThreshold} = this.state;
 
     return (
       <MapGL
         {...viewport}
-        mapStyle="mapbox://styles/mapbox/dark-v9"
+        mapStyle={mapStyle}
         onViewportChange={this._onViewportChange.bind(this)}
         mapboxApiAccessToken={MAPBOX_TOKEN}>
         <DeckGLOverlay
