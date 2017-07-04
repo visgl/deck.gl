@@ -125,18 +125,6 @@ class Home extends Component {
               </p>
             </div>
           </div>
-
-          <div className="container text-center buttons">
-            <a href="#/documentation/getting-started" className="btn">
-              Get Started <i className="icon icon-arrow-right" />
-            </a>
-            <a href="https://github.com/uber/deck.gl" className="btn">
-              View on Github <i className="icon icon-github" />
-            </a>
-            <a href="#/examples" className="btn">
-              See examples <i className="icon icon-gallery" />
-            </a>
-          </div>
         </section>
 
         <hr />
