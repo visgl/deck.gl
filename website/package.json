@@ -7,7 +7,7 @@
   },
   "main": "index.js",
   "scripts": {
-    "start": "webpack-dev-server --env.local --progress --content-base ./src/static --port 3000 --open",
+    "start": "webpack-dev-server --env.local --progress --content-base ./src/static --open",
     "build-clean": "rm -rf ./dist && mkdir dist",
     "build-static": "cp -r ./src/static/* dist && babel ./src/static/workers --out-dir dist/workers && cd `git rev-parse --show-toplevel` && git checkout origin/blog -- blog && mv blog demo/dist/blog && cd -",
     "build-script": "webpack -p --env.prod",
@@ -25,7 +25,7 @@
     "expr-eval": "^1.0.0",
     "highlight.js": "^9.7.0",
     "immutable": "^3.7.5",
-    "luma.gl": ">=4.0.0-alpha.13",
+    "luma.gl": ">=4.0.0-alpha.14",
     "marked": "^0.3.6",
     "prop-types": "^15.5.8",
     "rbush": "^2.0.1",
