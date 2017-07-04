@@ -17,8 +17,32 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## Beta Releases
 
-[TBD]
+### deck.gl v4.1.0-beta.1
+- Import luma.gl v4.0.0-beta.1
+- webpack configuration cleanup
+- SEER integration upgrades
+- EXAMPLES: Experimental TagMap Layer @zhan1486
+
 - FIX: Use external buffers for layer attributes
+
+### deck.gl v4.1.0-alpha.15
+
+- Graph Layer example refactor
+- Event Management Refactor
+- queryVisibleObjects (renamed from queryObject)
+- New luma state management API
+- Example config files cleaned up
+- WEBSITE: demo renamed to website
+
+
+### deck.gl v4.1.0-alpha.14
+
+- Lifecycle performance tuning
+- SEER performance badges
+- "Stateless" picking
+- Custom "spy" class to fix test-browser
+- FIX: Using external buffers for layer attributes
+
 
 ### deck.gl v4.1.0-alpha.13
 - FIX external buffers for layer attributes
