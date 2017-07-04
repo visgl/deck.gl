@@ -8,7 +8,7 @@ import Home from './components/home';
 import Gallery from './components/gallery';
 import Page from './components/page';
 
-import {examplePages, docPages} from './constants/pages';
+import {examplePages, docPages} from '../contents/pages';
 
 const appHistory = useRouterHistory(createHashHistory)({queryKey: false});
 

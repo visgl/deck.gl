@@ -2,7 +2,7 @@ import React, {PureComponent} from 'react';
 import PropTypes from 'prop-types';
 import marked from 'marked';
 import * as Demos from './demos';
-import {markdownFiles} from '../constants/pages';
+import {markdownFiles} from '../../contents/pages';
 
 /**
  * This map allows you to rewrite urls present in the markdown files
