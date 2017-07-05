@@ -1,6 +1,7 @@
 import test from 'tape-catch';
 
 import {mergeDefaultProps, compareProps} from 'deck.gl/lib/props';
+import {Vector2} from 'luma.gl';
 
 const SAME = 'equal';
 const NOT_SAME = 'not equal';
@@ -12,9 +13,19 @@ const SHALLOW_OBJECT = {
   b: 2
 };
 
-const DEEP_OBJECT = {
-  a: [1],
-  b: [2]
+const DEEP_OBJECT1 = {
+  a: new Vector2([0, 1]),
+  b: new Vector2([1, 2])
+};
+
+const DEEP_OBJECT2 = {
+  a: new Vector2([0, 1]),
+  b: new Vector2([1, 2])
+};
+
+const DEEP_OBJECT3 = {
+  a: new Vector2([0, 1]),
+  b: new Vector2([2, 3])
 };
 
 const TEST_CASES = [
@@ -39,19 +50,19 @@ const TEST_CASES = [
     object2: Object.assign({}, SHALLOW_OBJECT),
     result: SAME
   }, {
-    title: 'deep objects (same)',
-    object1: DEEP_OBJECT,
-    object2: DEEP_OBJECT,
+    title: 'deep objects (different but equal nested objects)',
+    object1: DEEP_OBJECT1,
+    object2: DEEP_OBJECT2,
     result: SAME
   }, {
-    title: 'deep objects (different, but same nested objects)',
-    object1: DEEP_OBJECT,
-    object2: Object.assign({}, DEEP_OBJECT),
-    result: SAME
+    title: 'deep objects (different)',
+    object1: DEEP_OBJECT1,
+    object2: DEEP_OBJECT3,
+    result: NOT_SAME
   }, {
-    title: 'deep objects (different nested objects)',
-    object1: DEEP_OBJECT,
-    object2: {a: [1], b: [2]},
+    title: 'deep objects (from null)',
+    object1: {a: null},
+    object2: DEEP_OBJECT1,
     result: NOT_SAME
   }, {
     title: 'different length objects (a < b)',
