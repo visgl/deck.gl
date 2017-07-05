@@ -174,8 +174,7 @@ class App extends PureComponent {
     // const {mapViewState: {longitude, latitude}} = this.props;
     // const modelMatrix = new Matrix4().fromTranslation([0, 0, 1000 * index * separation]);
 
-    const modelMatrix = new Matrix4()
-      .fromTranslation([0, 0, 1000 * index * separation]);
+    const modelMatrix = new Matrix4().translate([0, 0, 1000 * index * separation]);
 
     // if (offsetMode) {
     //   modelMatrix.rotateZ(index * rotationZ * Math.PI);
