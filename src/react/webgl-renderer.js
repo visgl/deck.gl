@@ -25,18 +25,14 @@ import autobind from './autobind';
 import {createGLContext, setParameters} from 'luma.gl';
 /* global requestAnimationFrame, cancelAnimationFrame */
 
-const DEFAULT_PIXEL_RATIO =
-  (typeof window !== 'undefined' && window.devicePixelRatio) || 1;
-
 const propTypes = {
   id: PropTypes.string.isRequired,
 
   width: PropTypes.number.isRequired,
   height: PropTypes.number.isRequired,
+  useDevicePixelRatio: PropTypes.bool.isRequired,
   style: PropTypes.object,
 
-  pixelRatio: PropTypes.number,
-  viewport: PropTypes.object.isRequired,
   events: PropTypes.object,
   gl: PropTypes.object,
   glOptions: PropTypes.object,
@@ -52,7 +48,6 @@ const defaultProps = {
   gl: null,
   glOptions: {preserveDrawingBuffer: true},
   debug: false,
-  pixelRatio: DEFAULT_PIXEL_RATIO,
 
   onInitializationFailed: error => {
     throw error;
@@ -131,23 +126,42 @@ export default class WebGLRenderer extends React.Component {
     }
   }
 
-  // Updates WebGL viewport to latest props
-  // for clean logging, only calls gl.viewport if props have changed
-  _updateGLViewport() {
-    let {viewport: {x, y, width: w, height: h}} = this.props;
-    const {pixelRatio: dpr} = this.props;
-    const {gl} = this;
+  // Calculate the drawing buffer size that would cover current canvas size and device pixel ratio
+  // Intention is that every pixel in the drawing buffer will have a 1-to-1 mapping with
+  // actual device pixels in the hardware framebuffer, allowing us to render at the full
+  // resolution of the device.
+  _calculateDrawingBufferSize(canvas, {useDevicePixelRatio = true}) {
+    const cssToDevicePixels = useDevicePixelRatio ? window.devicePixelRatio || 1 : 1;
+    // Lookup the size the browser is displaying the canvas in CSS pixels
+    // and compute a size needed to make our drawingbuffer match it in
+    // device pixels.
+    // We have set the canvas width and hieht from props, use props instead of accessing
+    // canvas.clientWidth/clientHeight for performance reasons.
+    const {width, height} = this.props;
+    return {
+      width: Math.floor(width * cssToDevicePixels),
+      height: Math.floor(height * cssToDevicePixels),
+      devicePixelRatio: cssToDevicePixels
+    };
+  }
 
-    x = x * dpr;
-    y = y * dpr;
-    w = w * dpr;
-    h = h * dpr;
-
-    setParameters(gl, {viewport: [x, y, w, h]});
+  // Resizes canvas width and height to match with device drawing buffer
+  _resizeDrawingBuffer(canvas, {useDevicePixelRatio = true}) {
+    // Resize the render buffer of the canvas to match canvas client size
+    // multiplying with dpr (Optionally can be turned off)
+    const newBufferSize = this._calculateDrawingBufferSize(canvas, {useDevicePixelRatio});
+    // Only update if the canvas size has not changed
+    if (newBufferSize.width !== canvas.width || newBufferSize.height !== canvas.height) {
+      // Note: canvas.width, canvas.height control the size of backing drawing buffer
+      // and can be set indepently of canvas.clientWidth and canvas.clientHeight
+      // which confusingly reflect canvas.style.width, canvas.style.height
+      canvas.width = newBufferSize.width;
+      canvas.height = newBufferSize.height;
+    }
   }
 
   _renderFrame() {
-    const {viewport: {width, height}} = this.props;
+    const {width, height, useDevicePixelRatio} = this.props;
     const {gl} = this;
 
     // Check for reasons not to draw
@@ -155,7 +169,12 @@ export default class WebGLRenderer extends React.Component {
       return;
     }
 
-    this._updateGLViewport();
+    this._resizeDrawingBuffer(gl.canvas, {useDevicePixelRatio});
+
+    // Updates WebGL viewport to latest props
+    setParameters(gl, {
+      viewport: [0, 0, gl.canvas.width, gl.canvas.height]
+    });
 
     // Call render callback
     this.props.onRenderFrame({gl});
@@ -165,13 +184,11 @@ export default class WebGLRenderer extends React.Component {
   }
 
   render() {
-    const {id, width, height, pixelRatio, style} = this.props;
+    const {id, width, height, style} = this.props;
     return createElement('canvas', {
       ref: 'overlay',
       key: 'overlay',
       id,
-      width: width * pixelRatio,
-      height: height * pixelRatio,
       style: Object.assign({}, style, {width, height})
     });
   }
