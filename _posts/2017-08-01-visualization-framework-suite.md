@@ -2,7 +2,7 @@
 
 ## A Simple Idea
 
-The basic idea behind the suite is Over the last two years, the Uber Visualization Team has developed and open sourced a number of Visualization frameworks. visuawas that by taking some of Uber's most popular Visualization frameworks, and aligning their websites, documentation and examples, we could make the various frameworks significantly easier to discover and use.
+The basic idea behind today's by taking Uber's most popular open source Visualization frameworks, and aligning their websites, documentation and examples, and providing links between the websites, we can make our various frameworks significantly easier to discover and use for both new and experienced users.
 
 
 ## The Frameworks
@@ -22,14 +22,13 @@ While each framework in the suite has a different focus, they are quite compleme
 
 ## The Making of the Suite?
 
-To create the suite, we had to bring all frameworks up to the same level of completion and polish, and we have spent significant efforts into improving the websites, documentation and examples of these frameworks.
-
-
 ## A push on Documentation and Examples
+
+To create the suite, we had to bring all frameworks up to the same level of completion and polish, and we have spent significant efforts into improving the websites, documentation and examples of these frameworks.
 
 Great software should have great documentation. We made a big push on documentation in the release of deck.gl about 3 months ago and the response has been overwhelmingly good. So we decided to apply the same standards to all the frameworks in the suite.
 
-The launch of the frameworks suite means that all the frameworks have consistent websites, with documentation, example gallery etc all organized in the same way and maintained at similar standards of polish and completeness.
+The launch of the frameworks suite means that all the frameworks have consistent websites, with documentation, example gallery etc are now all organized in the same way and maintained at similar standards of polish and completeness.
 
 
 ## Interlinking the Documentation Sites
