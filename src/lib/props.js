@@ -34,7 +34,7 @@ export function compareProps({oldProps, newProps, ignoreProps = {}, triggerName 
         return `${triggerName} ${key} dropped: ${oldProps[key]} -> (undefined)`;
       }
 
-      const equals = newProps[key] && newProps[key].equals;
+      const equals = newProps[key] && oldProps[key] && newProps[key].equals;
       if (equals && !equals.call(newProps[key], oldProps[key])) {
         return `${triggerName} ${key} changed deeply: ${oldProps[key]} -> ${newProps[key]}`;
       }
