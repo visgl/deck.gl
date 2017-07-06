@@ -63,20 +63,22 @@ vec3 lineJoin(vec2 prevPoint64[2], vec2 currPoint64[2], vec2 nextPoint64[2]) {
   vec2_sub_fp64(currPoint64, prevPoint64, deltaA64);
   vec2_sub_fp64(nextPoint64, currPoint64, deltaB64);
 
+  vec2 lengthA64 = vec2_length_fp64(deltaA64);
+  vec2 lengthB64 = vec2_length_fp64(deltaB64);
+
   vec2 deltaA = vec2(deltaA64[0].x, deltaA64[1].x);
   vec2 deltaB = vec2(deltaB64[0].x, deltaB64[1].x);
 
-  // vec2 deltaA = currPoint.xy - prevPoint.xy;
-  // vec2 deltaB = nextPoint.xy - currPoint.xy;
+  float lenA = lengthA64.x;
+  float lenB = lengthB64.x;
 
   vec2 offsetVec;
   float offsetScale;
   float offsetDirection;
 
-  float lenA = length(deltaA);
-  float lenB = length(deltaB);
-  vec2 dirA = lenA > 0. ? normalize(deltaA) : vec2(1.0, 0.0);
-  vec2 dirB = lenB > 0. ? normalize(deltaB) : vec2(1.0, 0.0);
+  vec2 dirA = lenA > 0. ? deltaA / lenA : vec2(1.0, 0.0);
+  vec2 dirB = lenB > 0. ? deltaB / lenB : vec2(1.0, 0.0);
+
   vec2 perpA = vec2(-dirA.y, dirA.x);
   vec2 perpB = vec2(-dirB.y, dirB.x);
 
@@ -133,8 +135,9 @@ vec3 lineJoin(vec2 prevPoint64[2], vec2 currPoint64[2], vec2 nextPoint64[2]) {
   offsetScale = mix(offsetScale, 1.0 / max(cosHalfA, 0.001), step(0.5, cornerPosition));
 
   // special treatment for start cap and end cap
-  float isStartCap = step(0.0, -lenA);
-  float isEndCap = step(0.0, -lenB);
+  // using a small number as the limit for determining if the lenA or lenB is 0
+  float isStartCap = step(lenA, 1.0e-5);
+  float isEndCap = step(lenB, 1.0e-5);
   float isCap = max(isStartCap, isEndCap);
 
   // 0: center, 1: side
