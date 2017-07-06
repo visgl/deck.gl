@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 
 import * as Polygon from './polygon';
-import {vec3} from 'gl-matrix';
+import normalize from 'gl-vec3/normalize';
 import {fp64ify} from '../../../lib/utils/fp64';
 import {get, count} from '../../../lib/utils';
 import earcut from 'earcut';
@@ -308,5 +308,5 @@ function getNormal(p1, p2) {
   const a = Math.sin(lon2 - lon1) * Math.cos(lat2);
   const b = Math.cos(lat1) * Math.sin(lat2) -
     Math.sin(lat1) * Math.cos(lat2) * Math.cos(lon2 - lon1);
-  return vec3.normalize([], [b, 0, -a]);
+  return normalize([], [b, 0, -a]);
 }

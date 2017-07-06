@@ -19,7 +19,8 @@
 // THE SOFTWARE.
 
 import Viewport from './viewport';
-import {mat4} from 'gl-matrix';
+import mat4_lookAt from 'gl-mat4/lookAt';
+import mat4_perspective from 'gl-mat4/perspective';
 
 const DEGREES_TO_RADIANS = Math.PI / 180;
 
@@ -42,8 +43,8 @@ export default class PerspectiveViewport extends Viewport {
     const fovyRadians = fovy * DEGREES_TO_RADIANS;
     aspect = Number.isFinite(aspect) ? aspect : width / height;
     super({
-      viewMatrix: mat4.lookAt([], eye, lookAt, up),
-      projectionMatrix: mat4.perspective([], fovyRadians, aspect, near, far),
+      viewMatrix: mat4_lookAt([], eye, lookAt, up),
+      projectionMatrix: mat4_perspective([], fovyRadians, aspect, near, far),
       width,
       height
     });

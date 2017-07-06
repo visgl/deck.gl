@@ -21,7 +21,13 @@
 // View and Projection Matrix calculations for mapbox-js style
 // map view properties
 import Viewport, {createMat4} from './viewport';
-import {mat4, vec2} from 'gl-matrix';
+import mat4_perspective from 'gl-mat4/perspective';
+import mat4_scale from 'gl-mat4/scale';
+import mat4_translate from 'gl-mat4/translate';
+import mat4_rotateX from 'gl-mat4/rotateX';
+import mat4_rotateZ from 'gl-mat4/rotateZ';
+import vec2_distance from 'gl-vec2/distance';
+import vec2_sub from 'gl-vec2/subtract';
 import assert from 'assert';
 
 // CONSTANTS
@@ -138,7 +144,7 @@ export default class WebMercatorViewport extends Viewport {
     // Make a centered version of the matrix for projection modes without an offset
     const center = projectFlat([longitude, latitude], scale);
 
-    const viewMatrix = mat4.translate(
+    const viewMatrix = mat4_translate(
       createMat4(), viewMatrixUncentered, [-center[0], -center[1], 0]);
 
     super({width, height, viewMatrix, projectionMatrix});
@@ -198,8 +204,8 @@ export default class WebMercatorViewport extends Viewport {
     const c = this.project(lngLat, {topLeft: false});
     const coordCenter = this.project([this.longitude, this.latitude], {topLeft: false});
     const coordAtPoint = pos;
-    const translate = vec2.sub([], coordAtPoint, c);
-    const newPos = vec2.sub([], coordCenter, translate);
+    const translate = vec2_sub([], coordAtPoint, c);
+    const newPos = vec2_sub([], coordCenter, translate);
     const newLngLat = this.unproject(newPos, {topLeft: false});
 
     return newLngLat;
@@ -333,13 +339,13 @@ function calculateDistanceScales({latitude, longitude, scale}) {
 
   // Calculate number of pixels occupied by one degree longitude
   // around current lat/lon
-  const pixelsPerDegreeX = vec2.distance(
+  const pixelsPerDegreeX = vec2_distance(
     projectFlat([longitude + 0.5, latitude], scale),
     projectFlat([longitude - 0.5, latitude], scale)
   );
   // Calculate number of pixels occupied by one degree latitude
   // around current lat/lon
-  const pixelsPerDegreeY = vec2.distance(
+  const pixelsPerDegreeY = vec2_distance(
     projectFlat([longitude, latitude + 0.5], scale),
     projectFlat([longitude, latitude - 0.5], scale)
   );
@@ -401,7 +407,7 @@ export function makeProjectionMatrixFromMercatorParams({
   const {nearZ, farZ} = getClippingPlanes({altitude, pitch});
   const fov = getFov({height, altitude});
 
-  const projectionMatrix = mat4.perspective(
+  const projectionMatrix = mat4_perspective(
     createMat4(),
     fov,              // fov in radians
     width / height,   // aspect ratio
@@ -429,15 +435,15 @@ function makeUncenteredViewMatrixFromMercatorParams({
   const vm = createMat4();
 
   // Move camera to altitude
-  mat4.translate(vm, vm, [0, 0, -altitude]);
+  mat4_translate(vm, vm, [0, 0, -altitude]);
 
   // After the rotateX, z values are in pixel units. Convert them to
   // altitude units. 1 altitude unit = the screen height.
-  mat4.scale(vm, vm, [1, -1, 1 / height]);
+  mat4_scale(vm, vm, [1, -1, 1 / height]);
 
   // Rotate by bearing, and then by pitch (which tilts the view)
-  mat4.rotateX(vm, vm, pitch * DEGREES_TO_RADIANS);
-  mat4.rotateZ(vm, vm, -bearing * DEGREES_TO_RADIANS);
+  mat4_rotateX(vm, vm, pitch * DEGREES_TO_RADIANS);
+  mat4_rotateZ(vm, vm, -bearing * DEGREES_TO_RADIANS);
 
   return vm;
 }

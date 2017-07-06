@@ -1,7 +1,9 @@
 /* global window */
 import {Component, PropTypes, createElement} from 'react';
 import {PerspectiveViewport} from 'deck.gl';
-import {vec3} from 'gl-matrix';
+import vec3_add from 'gl-vec3/add';
+import vec3_rotateX from 'gl-vec3/rotateX';
+import vec3_rotateY from 'gl-vec3/rotateY';
 
 /* Utils */
 
@@ -52,9 +54,9 @@ const defaultProps = {
 export default class OrbitController extends Component {
 
   static getViewport({width, height, lookAt, distance, rotationX, rotationY, fov}) {
-    const cameraPos = vec3.add([], lookAt, [0, 0, distance]);
-    vec3.rotateX(cameraPos, cameraPos, lookAt, rotationX / 180 * Math.PI);
-    vec3.rotateY(cameraPos, cameraPos, lookAt, rotationY / 180 * Math.PI);
+    const cameraPos = vec3_add([], lookAt, [0, 0, distance]);
+    vec3_rotateX(cameraPos, cameraPos, lookAt, rotationX / 180 * Math.PI);
+    vec3_rotateY(cameraPos, cameraPos, lookAt, rotationY / 180 * Math.PI);
 
     return new PerspectiveViewport({
       width,
@@ -91,9 +93,9 @@ export default class OrbitController extends Component {
 
         const unitsPerPixel = distance / Math.tan(fov / 180 * Math.PI / 2) / 2;
 
-        const newLookAt = vec3.add([], lookAt, [-unitsPerPixel * dx, unitsPerPixel * dy, 0]);
-        vec3.rotateX(newLookAt, newLookAt, lookAt, rotationX / 180 * Math.PI);
-        vec3.rotateY(newLookAt, newLookAt, lookAt, rotationY / 180 * Math.PI);
+        const newLookAt = vec3_add([], lookAt, [-unitsPerPixel * dx, unitsPerPixel * dy, 0]);
+        vec3_rotateX(newLookAt, newLookAt, lookAt, rotationX / 180 * Math.PI);
+        vec3_rotateY(newLookAt, newLookAt, lookAt, rotationY / 180 * Math.PI);
 
         this.props.onViewportChange({
           lookAt: newLookAt
