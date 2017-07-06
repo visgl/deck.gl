@@ -2,7 +2,7 @@
    <img width="150" heigth="150" src="https://webpack.js.org/assets/icon-square-big.svg" />
 </div>
 
-## Hello World: Webpack2
+## Example: Use deck.gl without react-map-gl
 
 Uses [Webpack](https://github.com/webpack/webpack) to bundle files and serves it
 with [webpack-dev-server](https://webpack.js.org/guides/development/#webpack-dev-server).
@@ -12,6 +12,4 @@ Commands:
 * `npm run build` is the production target, to create the final bundle.
 
 Remarks:
-* In a real application you would likely want to add things like hot reloading for development
-   and a minification step etc to the production build step etc.
-* These steps have been omitted here in order to keep the example as simple as possible.
+* MapController is an experimental component.
