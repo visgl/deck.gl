@@ -135,8 +135,9 @@ vec3 lineJoin(vec2 prevPoint64[2], vec2 currPoint64[2], vec2 nextPoint64[2]) {
   offsetScale = mix(offsetScale, 1.0 / max(cosHalfA, 0.001), step(0.5, cornerPosition));
 
   // special treatment for start cap and end cap
-  float isStartCap = lenA < 1.0e-6 ? 1.0 : 0.0;
-  float isEndCap = lenB < 1.0e-6 ? 1.0 : 0.0;
+  // using a small number as the limit for determining if the lenA or lenB is 0
+  float isStartCap = step(lenA, 1.0e-5);
+  float isEndCap = step(lenB, 1.0e-5);
   float isCap = max(isStartCap, isEndCap);
 
   // 0: center, 1: side
