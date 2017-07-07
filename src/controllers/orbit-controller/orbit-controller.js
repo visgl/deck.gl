@@ -5,6 +5,49 @@ import OrbitControls from './orbit-controls';
 
 import EventManager from '../../utils/events/event-manager';
 
+const propTypes = {
+  /* Viewport properties */
+  lookAt: PropTypes.arrayOf(PropTypes.number), // target position
+  distance: PropTypes.number, // distance from camera to the target
+  rotationX: PropTypes.number, // rotation around X axis
+  rotationY: PropTypes.number, // rotation around Y axis
+  translationX: PropTypes.number, // translation x in screen space
+  translationY: PropTypes.number, // translation y in screen space
+  zoom: PropTypes.number, // scale in screen space
+  minZoom: PropTypes.number,
+  maxZoom: PropTypes.number,
+  fov: PropTypes.number, // field of view
+  near: PropTypes.number,
+  far: PropTypes.number,
+  width: PropTypes.number.isRequired, // viewport width in pixels
+  height: PropTypes.number.isRequired, // viewport height in pixels
+
+  /* Model properties */
+  bounds: PropTypes.object, // bounds in the shape of {minX, minY, minZ, maxX, maxY, maxZ}
+
+  /* Callbacks */
+  onViewportChange: PropTypes.func.isRequired,
+
+  /* Controls */
+  orbitControls: PropTypes.object
+};
+
+const defaultProps = {
+  lookAt: [0, 0, 0],
+  rotationX: 0,
+  rotationY: 0,
+  translationX: 0,
+  translationY: 0,
+  distance: 10,
+  zoom: 1,
+  minZoom: 0,
+  maxZoom: Infinity,
+  fov: 50,
+  near: 1,
+  far: 1000,
+  orbitControls: new OrbitControls()
+};
+
 /*
  * Maps mouse interaction to a deck.gl Viewport
  */
@@ -72,48 +115,5 @@ export default class OrbitController extends React.Component {
   }
 }
 
-OrbitController.propTypes = {
-  // target position
-  lookAt: PropTypes.arrayOf(PropTypes.number),
-  // camera distance
-  distance: PropTypes.number,
-  // rotation
-  rotationX: PropTypes.number,
-  rotationY: PropTypes.number,
-  // translation
-  translationX: PropTypes.number,
-  translationY: PropTypes.number,
-  zoom: PropTypes.number,
-  minZoom: PropTypes.number,
-  maxZoom: PropTypes.number,
-  // field of view
-  fov: PropTypes.number,
-  near: PropTypes.number,
-  far: PropTypes.number,
-  // viewport width in pixels
-  width: PropTypes.number.isRequired,
-  // viewport height in pixels
-  height: PropTypes.number.isRequired,
-  // bounds (optional)
-  bounds: PropTypes.object,
-  // callback
-  onViewportChange: PropTypes.func.isRequired,
-
-  orbitControls: PropTypes.object
-};
-
-OrbitController.defaultProps = {
-  lookAt: [0, 0, 0],
-  rotationX: 0,
-  rotationY: 0,
-  translationX: 0,
-  translationY: 0,
-  distance: 10,
-  zoom: 1,
-  minZoom: 0,
-  maxZoom: Infinity,
-  fov: 50,
-  near: 1,
-  far: 1000,
-  orbitControls: new OrbitControls()
-};
+OrbitController.propTypes = propTypes;
+OrbitController.defaultProps = defaultProps;

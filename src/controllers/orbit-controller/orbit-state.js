@@ -32,7 +32,7 @@ function clamp(x, min, max) {
   return x < min ? min : (x > max ? max : x);
 }
 // Get ratio of x on domain
-function interp(x, domain0, domain1) {
+function interpolate(x, domain0, domain1) {
   if (domain0 === domain1) {
     return x === domain0 ? 0 : Infinity;
   }
@@ -349,17 +349,17 @@ export default class OrbitState {
 
     [
       // depth at intersection with X = minX
-      interp(bounds.minX, C0[0], C1[0]),
+      interpolate(bounds.minX, C0[0], C1[0]),
       // depth at intersection with X = maxX
-      interp(bounds.maxX, C0[0], C1[0]),
+      interpolate(bounds.maxX, C0[0], C1[0]),
       // depth at intersection with Y = minY
-      interp(bounds.minY, C0[1], C1[1]),
+      interpolate(bounds.minY, C0[1], C1[1]),
       // depth at intersection with Y = maxY
-      interp(bounds.maxY, C0[1], C1[1]),
+      interpolate(bounds.maxY, C0[1], C1[1]),
       // depth at intersection with Z = minZ
-      interp(bounds.minZ, C0[2], C1[2]),
+      interpolate(bounds.minZ, C0[2], C1[2]),
       // depth at intersection with Z = maxZ
-      interp(bounds.maxZ, C0[2], C1[2])
+      interpolate(bounds.maxZ, C0[2], C1[2])
     ].forEach(d => {
       // worldspace position of the intersection
       const C = vec3_lerp([], C0, C1, d);

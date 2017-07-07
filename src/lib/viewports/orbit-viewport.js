@@ -85,6 +85,10 @@ export default class OrbitViewport extends Viewport {
     return this.transformVector(this.pixelUnprojectionMatrix, [x, y2, z, 1]);
   }
 
+  /** Move camera to get a bounding box fit in the viewport.
+   * @param {Array} bounds - [[minX, minY, minZ], [maxX, maxY, maxZ]]
+   * @returns a new OrbitViewport object
+   */
   fitBounds([min, max]) {
     const {
       width,
