@@ -25,8 +25,12 @@ export default class TagmapLayer extends CompositeLayer {
     this.state = {canvas};
   }
 
+  shouldUpdateState({changeFlags}) {
+    return changeFlags.somethingChanged;
+  }
+
   updateState({props, oldProps, changeFlags}) {
-    // super.updateState({props, oldProps, changeFlags});
+    super.updateState({props, oldProps, changeFlags});
 
     if (changeFlags.dataChanged) {
       this.updateLabelAtlas();
