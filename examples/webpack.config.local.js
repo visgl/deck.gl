@@ -38,6 +38,19 @@ const LOCAL_DEV_CONFIG = {
   module: {
     rules: [
       {
+        // Compile source using buble
+        test: /\.js$/,
+        loader: 'buble-loader',
+        include: [SRC_DIR],
+        options: {
+          objectAssign: 'Object.assign',
+          transforms: {
+            dangerousForOf: true,
+            modules: false
+          }
+        }
+      },
+      {
         // Unfortunately, webpack doesn't import library sourcemaps on its own...
         test: /\.js$/,
         use: ['source-map-loader'],
