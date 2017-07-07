@@ -19,7 +19,8 @@
 // THE SOFTWARE.
 
 import Viewport from './viewport';
-import {mat4} from 'gl-matrix';
+import mat4_lookAt from 'gl-mat4/lookAt';
+import mat4_ortho from 'gl-mat4/ortho';
 
 export default class OrthographicViewport extends Viewport {
   constructor({
@@ -42,8 +43,8 @@ export default class OrthographicViewport extends Viewport {
     right = Number.isFinite(right) ? right : left + width;
     bottom = Number.isFinite(bottom) ? bottom : top + height;
     super({
-      viewMatrix: mat4.lookAt([], eye, lookAt, up),
-      projectionMatrix: mat4.ortho([], left, right, bottom, top, near, far),
+      viewMatrix: mat4_lookAt([], eye, lookAt, up),
+      projectionMatrix: mat4_ortho([], left, right, bottom, top, near, far),
       width,
       height
     });
