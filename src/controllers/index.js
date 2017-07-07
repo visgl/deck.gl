@@ -1,1 +1,2 @@
-export {default as default} from './interactive-map.js';
+export {default as MapController} from './map-controller/map-controller';
+export {default as OrbitController} from './orbit-controller';
