@@ -24,7 +24,7 @@ import {fp64ify} from '../../../lib/utils/fp64';
 import {GL, Model, Geometry} from 'luma.gl';
 import {flatten, log} from '../../../lib/utils';
 import earcut from 'earcut';
-import normalize from 'gl-vec3/normalize';
+import vec3_normalize from 'gl-vec3/normalize';
 
 import extrudedChoroplethVertex from './extruded-choropleth-layer-vertex.glsl';
 import extrudedChoroplethFragment from './extruded-choropleth-layer-fragment.glsl';
@@ -392,7 +392,7 @@ function getNormal(p1, p2) {
   const b = Math.cos(lat1) * Math.sin(lat2) -
      Math.sin(lat1) * Math.cos(lat2) * Math.cos(lon2 - lon1);
 
-  return normalize([], [b, 0, -a]);
+  return vec3_normalize([], [b, 0, -a]);
 }
 
 // count number of vertices in geojson polygon
