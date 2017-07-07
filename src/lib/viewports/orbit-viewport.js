@@ -44,7 +44,8 @@ export default class OrbitViewport extends Viewport {
     const aspect = width / height;
     const perspectiveMatrix = mat4_perspective([], fovyRadians, aspect, near, far);
     const transformMatrix = createMat4();
-    mat4_translate(transformMatrix, transformMatrix, [translationX / width * 2, translationY / height * 2, 0]);
+    mat4_translate(transformMatrix, transformMatrix,
+      [translationX / width * 2, translationY / height * 2, 0]);
     mat4_scale(transformMatrix, transformMatrix, [zoom, zoom, 1]);
 
     super({
@@ -85,12 +86,34 @@ export default class OrbitViewport extends Viewport {
   }
 
   fitBounds([min, max]) {
-    const {fov} = this;
+    const {
+      width,
+      height,
+      rotationX,
+      rotationY,
+      up,
+      fov,
+      near,
+      far,
+      translationX,
+      translationY,
+      zoom
+    } = this;
     const size = Math.max(max[0] - min[0], max[1] - min[1], max[2] - min[2]);
     const newDistance = size / Math.tan(fov / 180 * Math.PI / 2);
 
     return new OrbitViewport({
-      ...this,
+      width,
+      height,
+      rotationX,
+      rotationY,
+      up,
+      fov,
+      near,
+      far,
+      translationX,
+      translationY,
+      zoom,
       lookAt: [
         (min[0] + max[0]) / 2,
         (min[1] + max[1]) / 2,

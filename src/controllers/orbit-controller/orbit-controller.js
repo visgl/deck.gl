@@ -1,4 +1,3 @@
-/* global window */
 import React, {createElement} from 'react';
 import PropTypes from 'prop-types';
 import OrbitViewport from '../../lib/viewports/orbit-viewport';
