@@ -164,9 +164,11 @@ export default class DeckGL extends React.Component {
     return createElement(WebGLRenderer, Object.assign({}, this.props, {
       width,
       height,
+      // NOTE: Add 'useDevicePixelRatio' to 'this.props' and also pass it down to
+      // to modules where window.devicePixelRatio is used.
+      useDevicePixelRatio: true,
       gl,
       debug,
-      viewport: {x: 0, y: 0, width, height},
       onRendererInitialized: this._onRendererInitialized,
       onNeedRedraw: this._onNeedRedraw,
       onRenderFrame: this._onRenderFrame
