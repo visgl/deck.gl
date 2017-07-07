@@ -8,8 +8,6 @@ const equation = (x, y) => {
   return Math.sin(x * x + y * y) * x / Math.PI;
 };
 
-const PLOT_BOUNDS = {minX: 0, minY: 0, minZ: 0, maxX: 1, maxY: 1, maxZ: 1};
-
 class Root extends Component {
 
   constructor(props) {
@@ -40,10 +38,14 @@ class Root extends Component {
   }
 
   _resize() {
-    this._onViewportChange({
+    const size = {
       width: window.innerWidth,
       height: window.innerHeight
-    });
+    };
+    const newViewport = OrbitController.getViewport(Object.assign(this.state.viewport, size))
+      .fitBounds([[0, 0, 0], [1, 1, 1]]);
+
+    this._onViewportChange(newViewport);
   }
 
   _onViewportChange(viewport) {
@@ -64,7 +66,6 @@ class Root extends Component {
     return (
       <OrbitController
         {...viewport}
-        bounds={PLOT_BOUNDS}
         onViewportChange={this._onViewportChange} >
         <DeckGLOverlay
           viewport={OrbitController.getViewport(viewport)}

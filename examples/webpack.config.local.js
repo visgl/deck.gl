@@ -28,7 +28,6 @@ const LOCAL_DEV_CONFIG = {
       // For importing modules that are not exported at root
       'deck.gl/dist': SRC_DIR,
       // Imports the deck.gl library from the src directory in this repo
-      'deck.gl/dist': SRC_DIR,
       'deck.gl': SRC_DIR,
       // Important: ensure shared dependencies come from the main node_modules dir
       'luma.gl': resolve(LIB_DIR, './node_modules/luma.gl'),

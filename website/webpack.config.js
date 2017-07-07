@@ -47,6 +47,8 @@ const COMMON_CONFIG = {
 
   resolve: {
     alias: {
+      // For importing modules that are not exported at root
+      'deck.gl/dist': libSources,
       'deck.gl': libSources,
       'luma.gl': resolve('.', './node_modules/luma.gl'),
       react: resolve('.', './node_modules/react'),

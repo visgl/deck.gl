@@ -10,7 +10,7 @@ const defaultState = {
   rotationY: 0,
   fov: 50,
   near: 1,
-  far: 10000,
+  far: 100,
   translationX: 0,
   translationY: 0,
   zoom: 1
@@ -55,10 +55,10 @@ export default class OrbitState {
 
     // Bounding box of the model, in the shape of {minX, maxX, minY, maxY, minZ, maxZ}
     bounds,
-    
+
     /* View matrix arguments */
     lookAt, // Which point is camera looking at, default origin
-    
+
     /* Projection matrix arguments */
     fov, // Field of view covered by camera
     near, // Distance of near clipping plane
@@ -181,7 +181,8 @@ export default class OrbitState {
   rotateStart({pos}) {
     // Rotation center should be the worldspace position at the center of the
     // the screen. If not found, use the last one.
-    const startRotateCenter = this._getLocationAtCenter() || this._interactiveState.startRotateCenter;
+    const startRotateCenter = this._getLocationAtCenter() ||
+      this._interactiveState.startRotateCenter;
 
     return this._getUpdatedOrbitState({
       startRotateCenter,
@@ -213,7 +214,10 @@ export default class OrbitState {
       const oldViewport = new OrbitViewport(startRotateViewport);
       const oldCenterPos = oldViewport.project(startRotateCenter);
 
-      const newViewport = new OrbitViewport(Object.assign({}, startRotateViewport, {rotationX: newRotationX, rotationY: newRotationY}));
+      const newViewport = new OrbitViewport(Object.assign({}, startRotateViewport, {
+        rotationX: newRotationX,
+        rotationY: newRotationY
+      }));
       const newCenterPos = newViewport.project(startRotateCenter);
 
       newTranslationX += oldCenterPos[0] - newCenterPos[0];

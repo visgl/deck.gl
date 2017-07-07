@@ -53,7 +53,11 @@ export default class PlotDemo extends Component {
   }
 
   componentDidMount() {
-    this._onViewportChange(OrbitController.fitBounds(this.state.viewport, [[0, 0, 0], [1, 1, 1]]));
+    const {viewport: {width, height}} = this.props;
+    const {viewport} = this.state;
+
+    const canvasProps = {...viewport, width, height};
+    this._onViewportChange(OrbitController.getViewport(canvasProps).fitBounds([[0, 0, 0], [1, 1, 1]]));
   }
 
   componentWillReceiveProps(nextProps) {
@@ -98,7 +102,7 @@ export default class PlotDemo extends Component {
     const {viewport, equation, hoverInfo} = this.state;
 
     const canvasProps = {
-      ...viewport
+      ...viewport,
       width,
       height
     };

@@ -34,17 +34,14 @@ export default class OrbitViewport extends Viewport {
     // after projection
     translationX = 0, // in pixels
     translationY = 0, // in pixels
-    zoom = 1,
-
-    // automatically calculated
-    aspect = null // Aspect ratio (set to viewport widht/height)
+    zoom = 1
   }) {
     const eye = vec3_add([], lookAt, [0, 0, distance]);
     vec3_rotateX(eye, eye, lookAt, rotationX / 180 * Math.PI);
     vec3_rotateY(eye, eye, lookAt, rotationY / 180 * Math.PI);
 
     const fovyRadians = fov * DEGREES_TO_RADIANS;
-    aspect = Number.isFinite(aspect) ? aspect : width / height;
+    const aspect = width / height;
     const perspectiveMatrix = mat4_perspective([], fovyRadians, aspect, near, far);
     const transformMatrix = createMat4();
     mat4_translate(transformMatrix, transformMatrix, [translationX / width * 2, translationY / height * 2, 0]);
@@ -56,6 +53,20 @@ export default class OrbitViewport extends Viewport {
       width,
       height
     });
+
+    this.width = width;
+    this.height = height;
+    this.distance = distance;
+    this.rotationX = rotationX;
+    this.rotationY = rotationY;
+    this.lookAt = lookAt;
+    this.up = up;
+    this.fov = fov;
+    this.near = near;
+    this.far = far;
+    this.translationX = translationX;
+    this.translationY = translationY;
+    this.zoom = zoom;
   }
 
   project(xyz, {topLeft = false} = {}) {
@@ -71,5 +82,21 @@ export default class OrbitViewport extends Viewport {
     const y2 = topLeft ? this.height - y : y;
 
     return this.transformVector(this.pixelUnprojectionMatrix, [x, y2, z, 1]);
+  }
+
+  fitBounds([min, max]) {
+    const {fov} = this;
+    const size = Math.max(max[0] - min[0], max[1] - min[1], max[2] - min[2]);
+    const newDistance = size / Math.tan(fov / 180 * Math.PI / 2);
+
+    return new OrbitViewport({
+      ...this,
+      lookAt: [
+        (min[0] + max[0]) / 2,
+        (min[1] + max[1]) / 2,
+        (min[2] + max[2]) / 2
+      ],
+      distance: newDistance
+    });
   }
 }

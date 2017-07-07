@@ -89,6 +89,8 @@ OrbitController.propTypes = {
   maxZoom: PropTypes.number,
   // field of view
   fov: PropTypes.number,
+  near: PropTypes.number,
+  far: PropTypes.number,
   // viewport width in pixels
   width: PropTypes.number.isRequired,
   // viewport height in pixels
@@ -112,5 +114,7 @@ OrbitController.defaultProps = {
   minZoom: 0,
   maxZoom: Infinity,
   fov: 50,
+  near: 1,
+  far: 1000,
   orbitControls: new OrbitControls()
 };
