@@ -3,7 +3,6 @@ import {setParameters} from 'luma.gl';
 
 import PlotLayer from './plot-layer';
 import DeckGL from 'deck.gl';
-import OrbitController from './orbit-controller';
 import {scaleLinear} from 'd3-scale';
 
 function getScale({min, max}) {
@@ -47,14 +46,12 @@ export default class DeckGLOverlay extends Component {
       })
     ] : [];
 
-    const perspectiveViewport = OrbitController.getViewport(viewport);
-
     return (
       <DeckGL
         onWebGLInitialized={this._onInitialized}
         width={viewport.width}
         height={viewport.height}
-        viewport={perspectiveViewport}
+        viewport={viewport}
         layers={ layers } />
     );
   }

@@ -2,11 +2,13 @@
 import React, {Component} from 'react';
 import {render} from 'react-dom';
 import DeckGLOverlay from './deckgl-overlay.js';
-import OrbitController from './orbit-controller';
+import {OrbitController} from 'deck.gl/dist/controllers';
 
 const equation = (x, y) => {
   return Math.sin(x * x + y * y) * x / Math.PI;
 };
+
+const PLOT_BOUNDS = {minX: 0, minY: 0, minZ: 0, maxX: 1, maxY: 1, maxZ: 1};
 
 class Root extends Component {
 
@@ -35,7 +37,6 @@ class Root extends Component {
   componentDidMount() {
     window.addEventListener('resize', this._resize);
     this._resize();
-    this._onViewportChange(OrbitController.fitBounds(this.state.viewport, [[0, 0, 0], [1, 1, 1]]));
   }
 
   _resize() {
@@ -63,9 +64,10 @@ class Root extends Component {
     return (
       <OrbitController
         {...viewport}
+        bounds={PLOT_BOUNDS}
         onViewportChange={this._onViewportChange} >
         <DeckGLOverlay
-          viewport={viewport}
+          viewport={OrbitController.getViewport(viewport)}
           equation={equation}
           resolution={200}
           showAxis={true}

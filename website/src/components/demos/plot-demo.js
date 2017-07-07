@@ -2,7 +2,7 @@ import React, {Component} from 'react';
 import autobind from 'autobind-decorator';
 import {Parser} from 'expr-eval';
 
-import OrbitController from '../../../../examples/plot/orbit-controller';
+import {OrbitController} from 'deck.gl/dist/controllers';
 import PlotOverlay from '../../../../examples/plot/deckgl-overlay';
 
 export default class PlotDemo extends Component {
@@ -98,17 +98,18 @@ export default class PlotDemo extends Component {
     const {viewport, equation, hoverInfo} = this.state;
 
     const canvasProps = {
-      width,
-      height,
       ...viewport
+      width,
+      height
     };
+    const orbitViewport = OrbitController.getViewport(canvasProps);
 
     return (
       <OrbitController
         {...canvasProps}
         onViewportChange={this._onViewportChange} >
         {resolution && <PlotOverlay
-          viewport={canvasProps}
+          viewport={orbitViewport}
           equation={equation.valid ? equation.func : null}
           resolution={resolution.value}
           showAxis={showAxis.value}
