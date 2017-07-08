@@ -24,9 +24,9 @@ import {GL, Model, CubeGeometry} from 'luma.gl';
 import {fp64ify, enable64bitSupport} from '../../../lib/utils/fp64';
 import {COORDINATE_SYSTEM} from '../../../lib';
 
-import gridCellVertex from './grid-cell-layer-vertex.glsl';
-import gridCellVertex64 from './grid-cell-layer-vertex-64.glsl';
-import gridCellFragment from './grid-cell-layer-fragment.glsl';
+import vs from './grid-cell-layer-vertex.glsl';
+import vs64 from './grid-cell-layer-vertex-64.glsl';
+import fs from './grid-cell-layer-fragment.glsl';
 
 const DEFAULT_COLOR = [255, 0, 255, 255];
 
@@ -66,17 +66,10 @@ export default class GridCellLayer extends Layer {
    */
 
   getShaders() {
-    return enable64bitSupport(this.props) ? {
-      vs: gridCellVertex64,
-      fs: gridCellFragment,
-      modules: ['fp64', 'project64', 'lighting'],
-      shaderCache: this.context.shaderCache
-    } : {
-      vs: gridCellVertex,
-      fs: gridCellFragment,
-      modules: ['lighting'],
-      shaderCache: this.context.shaderCache
-    };
+    const {shaderCache} = this.context;
+    return enable64bitSupport(this.props) ?
+      {vs: vs64, fs, modules: ['project64', 'lighting'], shaderCache} :
+      {vs, fs, modules: ['project', 'lighting'], shaderCache};
   }
 
   initializeState() {
@@ -129,8 +122,7 @@ export default class GridCellLayer extends Layer {
     const geometry = new CubeGeometry({});
     const shaders = assembleShaders(gl, this.getShaders());
 
-    return new Model({
-      gl,
+    return new Model(gl, {
       id: this.props.id,
       vs: shaders.vs,
       fs: shaders.fs,

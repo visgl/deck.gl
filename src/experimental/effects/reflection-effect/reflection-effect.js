@@ -58,8 +58,7 @@ export default class ReflectionEffect extends Effect {
   initialize({gl, layerManager}) {
     const shaders = assembleShaders(gl, this.getShaders());
 
-    this.unitQuad = new Model({
-      gl,
+    this.unitQuad = new Model(gl, {
       id: 'reflection-effect',
       vs: shaders.vs,
       fs: shaders.fs,

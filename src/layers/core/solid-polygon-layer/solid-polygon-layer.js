@@ -29,9 +29,9 @@ import {COORDINATE_SYSTEM} from '../../../lib';
 import {PolygonTesselator} from './polygon-tesselator';
 import {PolygonTesselatorExtruded} from './polygon-tesselator-extruded';
 
-import solidPolygonVertex from './solid-polygon-layer-vertex.glsl';
-import solidPolygonVertex64 from './solid-polygon-layer-vertex-64.glsl';
-import solidPolygonFragment from './solid-polygon-layer-fragment.glsl';
+import vs from './solid-polygon-layer-vertex.glsl';
+import vs64 from './solid-polygon-layer-vertex-64.glsl';
+import fs from './solid-polygon-layer-fragment.glsl';
 
 const defaultProps = {
   // Whether to extrude
@@ -60,17 +60,10 @@ const defaultProps = {
 
 export default class SolidPolygonLayer extends Layer {
   getShaders() {
-    return enable64bitSupport(this.props) ? {
-      vs: solidPolygonVertex64,
-      fs: solidPolygonFragment,
-      modules: ['fp64', 'project64', 'lighting'],
-      shaderCache: this.context.shaderCache
-    } : {
-      vs: solidPolygonVertex,
-      fs: solidPolygonFragment,
-      modules: ['lighting'],
-      shaderCache: this.context.shaderCache
-    };
+    const {shaderCache} = this.context;
+    return enable64bitSupport(this.props) ?
+      {vs: vs64, fs, modules: ['project64', 'lighting'], shaderCache} :
+      {vs, fs, modules: ['project', 'lighting'], shaderCache};
   }
 
   initializeState() {
@@ -162,8 +155,7 @@ export default class SolidPolygonLayer extends Layer {
   _getModel(gl) {
     const shaders = assembleShaders(gl, this.getShaders());
 
-    return new Model({
-      gl,
+    return new Model(gl, {
       id: this.props.id,
       vs: shaders.vs,
       fs: shaders.fs,

@@ -18,5 +18,18 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-export * from './assemble-shaders';
-export * from './shader-chunks';
+export {assembleShaders} from 'luma.gl';
+
+export {default as fp64} from '../shaderlib/fp64';
+export {default as project} from '../shaderlib/project';
+export {default as project64} from '../shaderlib/project64';
+export {default as lighting} from '../shaderlib/lighting';
+
+import fp64 from '../shaderlib/fp64';
+import project from '../shaderlib/project';
+import project64 from '../shaderlib/project64';
+import lighting from '../shaderlib/lighting';
+
+import {registerShaderModules} from 'luma.gl';
+
+registerShaderModules([fp64, project, project64, lighting], {});

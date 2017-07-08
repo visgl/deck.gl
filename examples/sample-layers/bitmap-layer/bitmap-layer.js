@@ -128,8 +128,7 @@ export default class BitmapLayer extends Layer {
 
     const shaders = assembleShaders(gl, this.getShaders());
 
-    const model = new Model({
-      gl,
+    const model = new Model(gl, {
       id: this.props.id,
       vs: shaders.vs,
       fs: shaders.fs,

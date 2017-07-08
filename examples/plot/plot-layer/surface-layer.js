@@ -82,8 +82,7 @@ export default class SurfaceLayer extends Layer {
       fs: fragmentShader
     });
 
-    return new Model({
-      gl,
+    return new Model(gl, {
       id: `${this.props.id}-surface`,
       vs: graphShaders.vs,
       fs: graphShaders.fs,

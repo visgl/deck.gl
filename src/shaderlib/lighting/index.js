@@ -20,7 +20,7 @@
 
 import lightingShader from './lighting.glsl';
 
-export const lighting = {
-  interface: 'lighting',
-  source: lightingShader
+export default {
+  name: 'lighting',
+  vs: lightingShader
 };

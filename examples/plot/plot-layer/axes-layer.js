@@ -236,8 +236,7 @@ export default class AxesLayer extends Layer {
       0, -1, 0, 0, -1, 0
     ];
 
-    const grids = new Model({
-      gl,
+    const grids = new Model(gl, {
       id: `${this.props.id}-grids`,
       vs: gridShaders.vs,
       fs: gridShaders.fs,
@@ -284,7 +283,7 @@ export default class AxesLayer extends Layer {
       }
     }
 
-    const labels = new Model({
+    const labels = new Model(gl, {
       gl,
       id: `${this.props.id}-labels`,
       vs: labelShaders.vs,

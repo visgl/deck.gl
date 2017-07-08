@@ -22,8 +22,8 @@ import {Layer} from '../../../lib';
 import {assembleShaders} from '../../../shader-utils';
 import {GL, Model, Geometry} from 'luma.gl';
 
-import screenGridVertex from './screen-grid-layer-vertex.glsl';
-import screenGridFragment from './screen-grid-layer-fragment.glsl';
+import vs from './screen-grid-layer-vertex.glsl';
+import fs from './screen-grid-layer-fragment.glsl';
 
 const defaultProps = {
   cellSizePixels: 100,
@@ -38,12 +38,7 @@ const defaultProps = {
 
 export default class ScreenGridLayer extends Layer {
   getShaders() {
-    return {
-      vs: screenGridVertex,
-      fs: screenGridFragment,
-      modules: [],
-      shaderCache: this.context.shaderCache
-    };
+    return {vs, fs, modules: ['project'], shaderCache: this.context.shaderCache};
   }
 
   constructor(props) {
@@ -95,8 +90,7 @@ export default class ScreenGridLayer extends Layer {
   _getModel(gl) {
     const shaders = assembleShaders(gl, this.getShaders());
 
-    return new Model({
-      gl,
+    return new Model(gl, {
       id: this.props.id,
       vs: shaders.vs,
       fs: shaders.fs,

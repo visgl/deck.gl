@@ -24,9 +24,9 @@ import {GL, Model, Geometry} from 'luma.gl';
 import {fp64ify, enable64bitSupport} from '../../../lib/utils/fp64';
 import {COORDINATE_SYSTEM} from '../../../lib';
 
-import pathVertex from './path-layer-vertex.glsl';
-import pathVertex64 from './path-layer-vertex-64.glsl';
-import pathFragment from './path-layer-fragment.glsl';
+import vs from './path-layer-vertex.glsl';
+import vs64 from './path-layer-vertex-64.glsl';
+import fs from './path-layer-fragment.glsl';
 
 const DEFAULT_COLOR = [0, 0, 0, 255];
 
@@ -52,17 +52,10 @@ const isClosed = path => {
 
 export default class PathLayer extends Layer {
   getShaders() {
-    return enable64bitSupport(this.props) ? {
-      vs: pathVertex64,
-      fs: pathFragment,
-      modules: ['fp64', 'project64'],
-      shaderCache: this.context.shaderCache
-    } : {
-      vs: pathVertex,
-      fs: pathFragment,
-      modules: [],
-      shaderCache: this.context.shaderCache
-    };
+    const {shaderCache} = this.context;
+    return enable64bitSupport(this.props) ?
+      {vs: vs64, fs, modules: ['project64'], shaderCache} :
+      {vs, fs, modules: ['project'], shaderCache};
   }
 
   initializeState() {
@@ -182,8 +175,7 @@ export default class PathLayer extends Layer {
       1, 0, 1
     ];
 
-    return new Model({
-      gl,
+    return new Model(gl, {
       id: this.props.id,
       fs: shaders.fs,
       vs: shaders.vs,

@@ -24,9 +24,9 @@ import {GL, Model, Geometry} from 'luma.gl';
 import {fp64ify, enable64bitSupport} from '../../../lib/utils/fp64';
 import {COORDINATE_SYSTEM} from '../../../lib';
 
-import arcVertex from './arc-layer-vertex.glsl';
-import arcVertex64 from './arc-layer-vertex-64.glsl';
-import arcFragment from './arc-layer-fragment.glsl';
+import vs from './arc-layer-vertex.glsl';
+import vs64 from './arc-layer-vertex-64.glsl';
+import fs from './arc-layer-fragment.glsl';
 
 const DEFAULT_COLOR = [0, 0, 0, 255];
 
@@ -42,17 +42,10 @@ const defaultProps = {
 
 export default class ArcLayer extends Layer {
   getShaders() {
-    return enable64bitSupport(this.props) ? {
-      vs: arcVertex64,
-      fs: arcFragment,
-      modules: ['fp64', 'project64'],
-      shaderCache: this.context.shaderCache
-    } : {
-      vs: arcVertex,
-      fs: arcFragment,
-      modules: [],
-      shaderCache: this.context.shaderCache
-    };
+    const {shaderCache} = this.context;
+    return enable64bitSupport(this.props) ?
+      {vs: vs64, fs, modules: ['project64'], shaderCache} :
+      {vs, fs, modules: ['project'], shaderCache};
   }
 
   initializeState() {
@@ -125,7 +118,7 @@ export default class ArcLayer extends Layer {
     }
 
     const shaders = assembleShaders(gl, this.getShaders());
-    const model = new Model({
+    const model = new Model(gl, {
       gl,
       vs: shaders.vs,
       fs: shaders.fs,
