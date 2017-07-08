@@ -2084,10 +2084,6 @@ gl-mat4@^1.1.4:
   version "1.1.4"
   resolved "https://registry.yarnpkg.com/gl-mat4/-/gl-mat4-1.1.4.tgz#1e895b55892e56a896867abd837d38f37a178086"
 
-gl-matrix@^2.3.2:
-  version "2.3.2"
-  resolved "https://registry.yarnpkg.com/gl-matrix/-/gl-matrix-2.3.2.tgz#aac808c74af7d5db05fe04cb60ca1a0fcb174d74"
-
 gl-quat@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/gl-quat/-/gl-quat-1.0.0.tgz#0945ec923386f45329be5dc357b1c8c2d47586c5"
@@ -2907,9 +2903,9 @@ lru-cache@^4.0.1:
     pseudomap "^1.0.2"
     yallist "^2.1.2"
 
-luma.gl@>=4.0.0-alpha.14:
-  version "4.0.0-beta.1"
-  resolved "https://registry.yarnpkg.com/luma.gl/-/luma.gl-4.0.0-beta.1.tgz#d879908beb27082f2356931c2fb8e5c02c6903f4"
+luma.gl@>=4.0.0-beta.2:
+  version "4.0.0-beta.2"
+  resolved "https://registry.yarnpkg.com/luma.gl/-/luma.gl-4.0.0-beta.2.tgz#2ef52eb464ed54c2cd08789e69e92ca664987b3e"
   dependencies:
     gl-constants "^1.0.0"
     gl-mat4 "^1.1.4"
