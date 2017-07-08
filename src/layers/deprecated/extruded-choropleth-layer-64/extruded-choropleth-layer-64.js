@@ -132,8 +132,7 @@ export default class ExtrudedChoroplethLayer64 extends Layer {
 
     const shaders = assembleShaders(gl, this.getShaders());
 
-    return new Model({
-      gl,
+    return new Model(gl, {
       id: this.props.id,
       vs: shaders.vs,
       fs: shaders.fs,

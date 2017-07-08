@@ -24,9 +24,9 @@ import {GL, Model, Geometry} from 'luma.gl';
 import {fp64ify, enable64bitSupport} from '../../../lib/utils/fp64';
 import {COORDINATE_SYSTEM} from '../../../lib';
 
-import pointCloudVertex from './point-cloud-layer-vertex.glsl';
-import pointCloudVertex64 from './point-cloud-layer-vertex-64.glsl';
-import pointCloudFragment from './point-cloud-layer-fragment.glsl';
+import vs from './point-cloud-layer-vertex.glsl';
+import vs64 from './point-cloud-layer-vertex-64.glsl';
+import fs from './point-cloud-layer-fragment.glsl';
 
 const DEFAULT_COLOR = [0, 0, 0, 255];
 
@@ -50,17 +50,10 @@ const defaultProps = {
 
 export default class PointCloudLayer extends Layer {
   getShaders(id) {
-    return enable64bitSupport(this.props) ? {
-      vs: pointCloudVertex64,
-      fs: pointCloudFragment,
-      modules: ['fp64', 'project64', 'lighting'],
-      shaderCache: this.context.shaderCache
-    } : {
-      vs: pointCloudVertex,
-      fs: pointCloudFragment,
-      modules: ['lighting'],
-      shaderCache: this.context.shaderCache
-    };
+    const {shaderCache} = this.context;
+    return enable64bitSupport(this.props) ?
+      {vs: vs64, fs, modules: ['project64', 'lighting'], shaderCache} :
+      {vs, fs, modules: ['project', 'lighting'], shaderCache};
   }
 
   initializeState() {
@@ -128,8 +121,7 @@ export default class PointCloudLayer extends Layer {
       );
     }
 
-    return new Model({
-      gl,
+    return new Model(gl, {
       id: this.props.id,
       vs: shaders.vs,
       fs: shaders.fs,

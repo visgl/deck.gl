@@ -24,9 +24,9 @@ import {GL, Model, Geometry} from 'luma.gl';
 import {fp64ify, enable64bitSupport} from '../../../lib/utils/fp64';
 import {COORDINATE_SYSTEM} from '../../../lib';
 
-import lineVertex from './line-layer-vertex.glsl';
-import lineVertex64 from './line-layer-vertex-64.glsl';
-import lineFragment from './line-layer-fragment.glsl';
+import vs from './line-layer-vertex.glsl';
+import vs64 from './line-layer-vertex-64.glsl';
+import fs from './line-layer-fragment.glsl';
 
 const DEFAULT_COLOR = [0, 0, 0, 255];
 
@@ -41,17 +41,10 @@ const defaultProps = {
 
 export default class LineLayer extends Layer {
   getShaders() {
-    return enable64bitSupport(this.props) ? {
-      vs: lineVertex64,
-      fs: lineFragment,
-      modules: ['fp64', 'project64'],
-      shaderCache: this.context.shaderCache
-    } : {
-      vs: lineVertex,
-      fs: lineFragment,
-      modules: [],
-      shaderCache: this.context.shaderCache
-    };
+    const {shaderCache} = this.context;
+    return enable64bitSupport(this.props) ?
+      {vs: vs64, fs, modules: ['project64'], shaderCache} :
+      {vs, fs, modules: ['project'], shaderCache};
   }
 
   initializeState() {
@@ -119,8 +112,7 @@ export default class LineLayer extends Layer {
     const positions = [0, -1, 0, 0, 1, 0, 1, -1, 0, 1, 1, 0];
     const shaders = assembleShaders(gl, this.getShaders());
 
-    return new Model({
-      gl,
+    return new Model(gl, {
       id: this.props.id,
       vs: shaders.vs,
       fs: shaders.fs,

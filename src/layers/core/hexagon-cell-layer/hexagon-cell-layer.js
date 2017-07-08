@@ -25,9 +25,9 @@ import {log} from '../../../lib/utils';
 import {fp64ify, enable64bitSupport} from '../../../lib/utils/fp64';
 import {COORDINATE_SYSTEM} from '../../../lib';
 
-import hexCellVertex from './hexagon-cell-layer-vertex.glsl';
-import hexCellVertex64 from './hexagon-cell-layer-vertex-64.glsl';
-import hexCellFragment from './hexagon-cell-layer-fragment.glsl';
+import vs from './hexagon-cell-layer-vertex.glsl';
+import vs64 from './hexagon-cell-layer-vertex-64.glsl';
+import fs from './hexagon-cell-layer-fragment.glsl';
 
 function positionsAreEqual(v1, v2) {
   // Hex positions are expected to change entirely, not to maintain some
@@ -91,17 +91,10 @@ export default class HexagonCellLayer extends Layer {
   }
 
   getShaders() {
-    return enable64bitSupport(this.props) ? {
-      vs: hexCellVertex64,
-      fs: hexCellFragment,
-      modules: ['fp64', 'project64', 'lighting'],
-      shaderCache: this.context.shaderCache
-    } : {
-      vs: hexCellVertex,
-      fs: hexCellFragment,
-      modules: ['lighting'],
-      shaderCache: this.context.shaderCache
-    };
+    const {shaderCache} = this.context;
+    return enable64bitSupport(this.props) ?
+      {vs: vs64, fs, modules: ['project64', 'lighting'], shaderCache} :
+      {vs, fs, modules: ['project', 'lighting'], shaderCache};
   }
 
   /**
@@ -236,8 +229,7 @@ export default class HexagonCellLayer extends Layer {
 
   _getModel(gl) {
     const shaders = assembleShaders(gl, this.getShaders());
-    return new Model({
-      gl,
+    return new Model(gl, {
       id: this.props.id,
       vs: shaders.vs,
       fs: shaders.fs,

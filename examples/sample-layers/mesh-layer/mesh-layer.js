@@ -79,7 +79,7 @@ export default class MeshLayer extends Layer {
       depthFunc: gl.LEQUAL
     });
 
-    const model = new Model({
+    const model = new Model(gl, {
       gl,
       id: this.props.id,
       vs: shaders.vs,

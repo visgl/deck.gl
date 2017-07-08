@@ -62,8 +62,7 @@ be instanced, or use dynamic geometry:
   _getModel(gl) {
     const shaders = assembleShaders(gl, this.getShaders());
 
-    return new Model({
-      gl,
+    return new Model(gl, {
       id: this.props.id,
       vs: shaders.vs,
       fs: shaders.fs,
@@ -90,8 +89,7 @@ be instanced, or use dynamic geometry:
   _getModel(gl) {
     const shaders = assembleShaders(gl, this.getShaders());
 
-    return new Model({
-      gl,
+    return new Model(gl, {
       id: this.props.id,
       vs: shaders.vs,
       fs: shaders.fs,

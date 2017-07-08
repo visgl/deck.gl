@@ -23,9 +23,9 @@ import {GL, Model, Geometry, Texture2D, loadTextures} from 'luma.gl';
 import {fp64ify, enable64bitSupport} from '../../../lib/utils/fp64';
 import {COORDINATE_SYSTEM} from '../../../lib';
 
-import iconVertex from './icon-layer-vertex.glsl';
-import iconVertex64 from './icon-layer-vertex-64.glsl';
-import iconFragment from './icon-layer-fragment.glsl';
+import vs from './icon-layer-vertex.glsl';
+import vs64 from './icon-layer-vertex-64.glsl';
+import fs from './icon-layer-fragment.glsl';
 
 const DEFAULT_COLOR = [0, 0, 0, 255];
 
@@ -65,6 +65,13 @@ const defaultProps = {
 };
 
 export default class IconLayer extends Layer {
+  getShaders() {
+    const {shaderCache} = this.context;
+    return enable64bitSupport(this.props) ?
+      {vs: vs64, fs, modules: ['project64'], shaderCache} :
+      {vs, fs, modules: ['project'], shaderCache};
+  }
+
   initializeState() {
     const {attributeManager} = this.state;
     const {gl} = this.context;
@@ -153,27 +160,12 @@ export default class IconLayer extends Layer {
     }
   }
 
-  getShaders() {
-    return enable64bitSupport(this.props) ? {
-      vs: iconVertex64,
-      fs: iconFragment,
-      modules: ['fp64', 'project64'],
-      shaderCache: this.context.shaderCache
-    } : {
-      vs: iconVertex,
-      fs: iconFragment,
-      modules: [],
-      shaderCache: this.context.shaderCache
-    };
-  }
-
   _getModel(gl) {
 
     const positions = [-1, -1, 0, -1, 1, 0, 1, 1, 0, 1, -1, 0];
     const shaders = assembleShaders(gl, this.getShaders());
 
-    return new Model({
-      gl,
+    return new Model(gl, {
       id: this.props.id,
       vs: shaders.vs,
       fs: shaders.fs,

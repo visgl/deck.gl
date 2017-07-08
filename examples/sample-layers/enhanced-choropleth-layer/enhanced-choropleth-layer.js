@@ -92,8 +92,7 @@ export default class EnhancedChoroplethLayer extends Layer {
   getModel(gl) {
     const shaders = assembleShaders(gl, this.getShaders());
 
-    return new Model({
-      gl,
+    return new Model(gl, {
       id: this.props.id,
       vs: shaders.vs,
       fs: shaders.fs,

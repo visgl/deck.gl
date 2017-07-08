@@ -18,9 +18,13 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+import fp64 from '../fp64';
+import project from '../project';
+
 import project64Shader from './project64.glsl';
 
-export const project64 = {
-  interface: 'project64',
-  source: project64Shader
+export default {
+  name: 'project64',
+  dependencies: [project, fp64],
+  vs: project64Shader
 };

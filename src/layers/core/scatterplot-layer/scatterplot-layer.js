@@ -25,9 +25,9 @@ import {get} from '../../../lib/utils';
 import {fp64ify, enable64bitSupport} from '../../../lib/utils/fp64';
 import {GL, Model, Geometry} from 'luma.gl';
 
-import scatterplotVertex from './scatterplot-layer-vertex.glsl';
-import scatterplotVertex64 from './scatterplot-layer-vertex-64.glsl';
-import scatterplotFragment from './scatterplot-layer-fragment.glsl';
+import vs from './scatterplot-layer-vertex.glsl';
+import vs64 from './scatterplot-layer-vertex-64.glsl';
+import fs from './scatterplot-layer-fragment.glsl';
 
 const DEFAULT_COLOR = [0, 0, 0, 255];
 
@@ -46,17 +46,10 @@ const defaultProps = {
 
 export default class ScatterplotLayer extends Layer {
   getShaders(id) {
-    return enable64bitSupport(this.props) ? {
-      vs: scatterplotVertex64,
-      fs: scatterplotFragment,
-      modules: ['fp64', 'project64'],
-      shaderCache: this.context.shaderCache
-    } : {
-      vs: scatterplotVertex,
-      fs: scatterplotFragment,
-      modules: [],
-      shaderCache: this.context.shaderCache
-    };
+    const {shaderCache} = this.context;
+    return enable64bitSupport(this.props) ?
+      {vs: vs64, fs, modules: ['project64'], shaderCache} :
+      {vs, fs, modules: ['project'], shaderCache};
   }
 
   initializeState() {
@@ -124,8 +117,7 @@ export default class ScatterplotLayer extends Layer {
     // a square that minimally cover the unit circle
     const positions = [-1, -1, 0, -1, 1, 0, 1, 1, 0, 1, -1, 0];
 
-    return new Model({
-      gl,
+    return new Model(gl, {
       id: this.props.id,
       vs: shaders.vs,
       fs: shaders.fs,
