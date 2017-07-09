@@ -18,24 +18,13 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-export {assembleShaders} from 'luma.gl';
+import fp64 from '../fp64/fp64';
+import project from '../project/project';
 
-import fp32 from '../shaderlib/fp32/fp32';
-import fp64, {fp64arithmetic, fp64fs} from '../shaderlib/fp64/fp64';
-import project from '../shaderlib/project/project';
-import project64 from '../shaderlib/project64/project64';
-import lighting from '../shaderlib/lighting/lighting';
+import project64Shader from './project64.glsl';
 
-import {registerShaderModules} from 'luma.gl';
-
-registerShaderModules([
-  fp32, fp64, fp64arithmetic, fp64fs,
-  project, project64,
-  lighting
-]);
-
-export {
-  fp32, fp64, fp64arithmetic, fp64fs,
-  project, project64,
-  lighting
+export default {
+  name: 'project64',
+  dependencies: [project, fp64],
+  vs: project64Shader
 };

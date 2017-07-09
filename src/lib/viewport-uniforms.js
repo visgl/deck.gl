@@ -164,16 +164,12 @@ export function getUniformsFromViewport(viewport, {
     projectionMatrix: glProjectionMatrix,
     projectionMatrixUncentered: glProjectionMatrix,
     projectionFP64: glProjectionMatrixFP64,
+
     projectionPixelsPerUnit,
-
-    // This is the mercator scale (2 ** zoom)
-    projectionScale: viewport.scale,
-
-    // Deprecated?
-    projectionScaleFP64: fp64ify(viewport.scale),
+    projectionScale: viewport.scale, // This is the mercator scale (2 ** zoom)
+    projectionScaleFP64: fp64ify(viewport.scale), // Deprecated?
 
     // This is for lighting calculations
     cameraPos: new Float32Array(cameraPos)
-
   };
 }
