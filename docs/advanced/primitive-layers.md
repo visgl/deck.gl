@@ -56,16 +56,12 @@ be instanced, or use dynamic geometry:
   ScatterplotLayer, ArcLayers etc).
   ```
   /// examples/sample-layers/mesh-layer/mesh-layer.js
-  import {assembleShaders} from 'deck.gl';
   import {GL, Model, Geometry} from 'luma.gl';
 
   _getModel(gl) {
-    const shaders = assembleShaders(gl, this.getShaders());
 
-    return new Model(gl, {
+    return new Model(gl, Object.assign({}, this.getShaders(), {
       id: this.props.id,
-      vs: shaders.vs,
-      fs: shaders.fs,
       geometry: new Geometry({
         drawMode: GL.TRIANGLES,
         indices: new Uint16Array(this.props.mesh.indices),
@@ -74,7 +70,7 @@ be instanced, or use dynamic geometry:
         texCoords: new Float32Array(this.props.mesh.textures)
       }),
       isInstanced: true
-    });
+    }));
   }
   ```
 * **Dynamic geometry layer** - This is needed when
@@ -83,16 +79,11 @@ be instanced, or use dynamic geometry:
   othat that only differ in terms of.
   ```
   /// examples/trips/trips-layer/trips-layer.js
-  import {assembleShaders} from 'deck.gl';
   import {GL, Model, Geometry} from 'luma.gl';
 
   _getModel(gl) {
-    const shaders = assembleShaders(gl, this.getShaders());
-
-    return new Model(gl, {
+    return new Model(gl, Object.assign({}, this.getShaders(), {
       id: this.props.id,
-      vs: shaders.vs,
-      fs: shaders.fs,
       geometry: new Geometry({
         id: this.props.id,
         drawMode: GL.LINES
@@ -193,9 +184,10 @@ characteristic of the layers provided by deck.gl is that they work seamlessly
 as map overlays, both with positions specified as longitude and latitude
 coordinates, as well as with positions specified in meters.
 
-### Making Shaders Work with Deck.gl's Coordinate Systems
+### Making Shaders Work with deck.gl's Coordinate Systems
 
-Always call `assembleShaders()` with your GLSL source to make use of deck.gl's
+By supplying the `modules: ['project']` parameter when you create your layer's luma.gl `Model`
+you get access to deck.gl's
 [family of GLSL projection methods](/docs/advanced/writing-shaders.md#projection-vertex-shader-)
 that support all three deck.gl projection modes: latlon (default), meters and neutral.
 

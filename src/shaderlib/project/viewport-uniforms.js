@@ -25,7 +25,7 @@ import mat4_multiply from 'gl-mat4/multiply';
 import vec4_transformMat4 from 'gl-vec4/transformMat4';
 
 import assert from 'assert';
-import {COORDINATE_SYSTEM} from './constants';
+import {COORDINATE_SYSTEM} from '../../lib/constants';
 
 function fp64ify(a) {
   const hiPart = Math.fround(a);
@@ -113,11 +113,16 @@ function calculateMatrixAndOffset({
  * @param {WebMercatorViewport} viewport -
  * @return {Float32Array} - 4x4 projection matrix that can be used in shaders
  */
-export function getUniformsFromViewport(viewport, {
+export function getUniformsFromViewport({
+  viewport,
   modelMatrix = null,
   projectionMode = COORDINATE_SYSTEM.LNGLAT,
   positionOrigin = [0, 0]
 } = {}) {
+  if (!viewport) {
+    return {};
+  }
+
   assert(viewport.scale, 'Viewport scale missing');
 
   const {projectionCenter, modelViewMatrix, modelViewProjectionMatrix, cameraPos} =

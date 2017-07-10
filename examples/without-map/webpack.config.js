@@ -24,6 +24,12 @@ const CONFIG = {
     }]
   },
 
+  resolve: {
+    alias: {
+      'viewport-mercator-project': resolve('./node_modules/viewport-mercator-project/dist/index.js')
+    }
+  },
+
   plugins: []
 };
 

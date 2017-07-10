@@ -17,6 +17,21 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## Beta Releases
 
+### beta.3
+- NEW: `getUniformsFromViewport` refactored into `project` shader module's `getUniforms`.
+- NEW: Replaced explicit calls to `assembleShaders` with `Model` parameters.
+
+### deck.gl v4.1.0-beta.2
+- SIZE: Remove gl-matrix (#759)
+- FIX: Update canvas size to match with device framebuffer size.
+- FIX: Fix the fluctuation of the end cap for path layer 64bit (#755)
+- FIX: Avoid deep comparison error in compareProps when oldProp is empty
+- WEBSITE: Links to other frameworks
+- EXAMPLE: Fix updateState issue: add shouldUpdateState function
+
+- MapController clean up (#757)
+- OrbitController clean up (#761)
+
 ### deck.gl v4.1.0-beta.1
 - Import luma.gl v4.0.0-beta.1
 - webpack configuration cleanup

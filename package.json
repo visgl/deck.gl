@@ -40,7 +40,7 @@
     "test-browser": "webpack-dev-server --env.test --progress --hot --open",
     "bench": "node test/bench/node.js",
     "bench-browser": "webpack-dev-server --env.bench --progress --hot --open",
-    "test-fp64": "(cd test/fp64-test && webpack-dev-server --config webpack.config.test-fp64.js --progress --hot --open)",
+    "test-fp64": "(cd test/shaderlib/fp64 && webpack-dev-server --progress --hot --open)",
     "test-rendering": "(cd test/rendering-test && webpack-dev-server --config webpack.config.test-rendering.js --progress --hot --open)"
   },
   "dependencies": {

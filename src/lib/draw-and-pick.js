@@ -20,7 +20,6 @@
 
 /* global window */
 import {GL, withParameters, setParameters} from 'luma.gl';
-import {getUniformsFromViewport} from './viewport-uniforms';
 import {log} from './utils';
 
 const EMPTY_PIXEL = new Uint8Array(4);
@@ -35,13 +34,17 @@ export function drawLayers({layers, pass}) {
     if (layer.isComposite) {
       compositeCount++;
     } else if (layer.props.visible) {
+
       layer.drawLayer({
+        moduleParameters: Object.assign({}, layer.props, {
+          viewport: layer.context.viewport
+        }),
         uniforms: Object.assign(
           {renderPickingBuffer: 0, pickingEnabled: 0},
           layer.context.uniforms,
-          getUniformsFromViewport(layer.context.viewport, layer.props),
           {layerIndex}
-        )
+        ),
+        settings: layer.props.settings || {}
       });
       visibleCount++;
     }
@@ -351,12 +354,15 @@ function getPickedColors(gl, {
           // Encode layerIndex with alpha
           setParameters(gl, {blendColor: [0, 0, 0, (layerIndex + 1) / 255]});
           layer.drawLayer({
+            moduleParameters: Object.assign({}, layer.props, {
+              viewport: layer.context.viewport
+            }),
             uniforms: Object.assign(
               {renderPickingBuffer: 1, pickingEnabled: 1},
               layer.context.uniforms,
-              getUniformsFromViewport(layer.context.viewport, layer.props),
               {layerIndex}
-            )
+            ),
+            settings: layer.props.settings || {}
           });
         }
       });

@@ -19,7 +19,6 @@
 // THE SOFTWARE.
 
 import {Layer} from '../../../lib';
-import {assembleShaders} from '../../../shader-utils';
 import {GL, Model, CubeGeometry} from 'luma.gl';
 import {fp64ify, enable64bitSupport} from '../../../lib/utils/fp64';
 import {COORDINATE_SYSTEM} from '../../../lib';
@@ -119,21 +118,18 @@ export default class GridCellLayer extends Layer {
   }
 
   _getModel(gl) {
-    const geometry = new CubeGeometry({});
-    const shaders = assembleShaders(gl, this.getShaders());
-
-    return new Model(gl, {
+    return new Model(gl, Object.assign({}, this.getShaders(), {
       id: this.props.id,
-      vs: shaders.vs,
-      fs: shaders.fs,
-      geometry,
-      isInstanced: true
-    });
+      geometry: new CubeGeometry(),
+      isInstanced: true,
+      shaderCache: this.context.shaderCache
+    }));
   }
 
   updateUniforms() {
     const {opacity, extruded, elevationScale, cellSize, coverage, lightSettings} = this.props;
     const {viewport} = this.context;
+    // TODO - this should be a standard uniform in project package
     const {pixelsPerMeter} = viewport.getDistanceScales();
 
     this.setUniforms(Object.assign({}, {

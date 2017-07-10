@@ -19,7 +19,6 @@
 // THE SOFTWARE.
 
 import {Layer} from '../../../lib';
-import {assembleShaders} from '../../../shader-utils';
 import {GL, Model, Geometry} from 'luma.gl';
 import {fp64ify, enable64bitSupport} from '../../../lib/utils/fp64';
 import {COORDINATE_SYSTEM} from '../../../lib';
@@ -52,10 +51,9 @@ const isClosed = path => {
 
 export default class PathLayer extends Layer {
   getShaders() {
-    const {shaderCache} = this.context;
     return enable64bitSupport(this.props) ?
-      {vs: vs64, fs, modules: ['project64'], shaderCache} :
-      {vs, fs, modules: ['project'], shaderCache};
+      {vs: vs64, fs, modules: ['project64']} :
+      {vs, fs, modules: ['project']};
   }
 
   initializeState() {
@@ -132,7 +130,6 @@ export default class PathLayer extends Layer {
   }
 
   _getModel(gl) {
-    const shaders = assembleShaders(gl, this.getShaders());
     /*
      *       _
      *        "-_ 1                   3                       5
@@ -175,10 +172,8 @@ export default class PathLayer extends Layer {
       1, 0, 1
     ];
 
-    return new Model(gl, {
+    return new Model(gl, Object.assign({}, this.getShaders(), {
       id: this.props.id,
-      fs: shaders.fs,
-      vs: shaders.vs,
       geometry: new Geometry({
         drawMode: GL.TRIANGLES,
         attributes: {
@@ -186,8 +181,9 @@ export default class PathLayer extends Layer {
           positions: new Float32Array(SEGMENT_POSITIONS)
         }
       }),
-      isInstanced: true
-    });
+      isInstanced: true,
+      shaderCache: this.context.shaderCache
+    }));
   }
 
   calculateStartPositions(attribute) {

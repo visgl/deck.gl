@@ -322,4 +322,5 @@ export const docPages = generatePath([
         content: getDocUrl('api-reference/web-mercator-viewport.md')
       }
     ]
-  }]);
+  }
+]);

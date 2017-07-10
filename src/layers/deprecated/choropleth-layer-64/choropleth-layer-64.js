@@ -31,6 +31,14 @@ export default class ChoroplethLayer64 extends ChoroplethLayer {
     log.once('ChoroplethLayer64 is deprecated. Consider using GeoJsonLayer instead');
   }
 
+  getShaders() {
+    return {
+      vs: choroplethVertex64,
+      fs: super.getShaders().fs,
+      modules: ['project64']
+    };
+  }
+
   initializeState() {
     super.initializeState();
 
@@ -38,15 +46,6 @@ export default class ChoroplethLayer64 extends ChoroplethLayer {
       positions64: {size: 4, update: this.calculatePositions64},
       heights64: {size: 2, update: this.calculateHeights64}
     });
-  }
-
-  getShaders() {
-    return {
-      vs: choroplethVertex64,
-      fs: super.getShaders().fs,
-      fp64: true,
-      project64: true
-    };
   }
 
   calculatePositions64(attribute) {

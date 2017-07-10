@@ -4,9 +4,17 @@
 
 * `CompositeLayer.renderLayers` can now return a nested arrays with `null` values. deck.gl will automatically flatten and filter the array. This is a small convenience that makes the `renderLayers methods in complex composite layers a little more readable.
 
+
 ## Query Methods
 
 * `DeckGL.queryObject` and `DeckGL.queryVisibleObjects` allow developers to directly query the picking buffer in addition to the built-in click and hover callbacks.
+
+
+## Shader Assembly
+
+If you write your own layers, the `shadertools` shader assembly system is now integrated with the luma.gl v4 `Model` class. Note that the `shadertools` shader assembly system is now built into the luma.gl v4 `Model` class. Now you can just pass a modules parameter to the luma.gl `Model`, instead of a separate call to `assembleShaders`.
+
+
 
 # deck.gl v4.0
 

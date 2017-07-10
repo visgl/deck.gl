@@ -1,20 +1,15 @@
 # Writing Shaders
 
-A shader library facilitates creating shaders that work seamlessly with deck.gl. 
-Use the "shader compositor" (the `assembleShaders` function) to dynamically
+A shader library facilitates creating shaders that work seamlessly with deck.gl.
+Use the `modules` parameter to the `Model` class (or call the `assembleShaders` function directly) to dynamically
 include this library into your own GLSL code:
 
 ```js
-import {assembleShaders} from deck.gl;
-
-const shaders = assembleShaders({
+const model = new Model(gl, {
   vs: '// vertex shader GLSL source'
   fs: '// fragment shader GLSL source',
   modules: ['lighting'] // list of optional module names
 });
-
-// shaders.vs - assembled vertex shader
-// shaders.fs - assembled fragment shader
 ```
 
 The generated shader always contains a prologue of platform defines, and then
@@ -25,8 +20,6 @@ and finally your shader code is added.
 ## Shader Modules
 
 ### Projection (Vertex Shader)
-
-The projection modules is included by default by the `assembleShaders` function.
 
 The projection module makes it easy to write vertex shaders that
 follow deck.gl's projection methods, enabling your layer to accept coordinates

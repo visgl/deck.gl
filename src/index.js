@@ -19,9 +19,6 @@
 // THE SOFTWARE.
 /* eslint-disable max-len */
 
-// Utilities
-export {assembleShaders} from './shader-utils';
-
 // Lib
 export {Layer, CompositeLayer, LayerManager, AttributeManager} from './lib';
 export {COORDINATE_SYSTEM} from './lib';
@@ -49,14 +46,17 @@ export {default as PathLayer} from './layers/core/path-layer/path-layer';
 export {default as PolygonLayer} from './layers/core/polygon-layer/polygon-layer';
 export {default as GeoJsonLayer} from './layers/core/geojson-layer/geojson-layer';
 
+// React exports
+export {default as DeckGL} from './react/deckgl';
+export {default as default} from './react/deckgl';
+
 // Deprecated Layers
 export {default as ChoroplethLayer} from './layers/deprecated/choropleth-layer/choropleth-layer';
 export {default as ChoroplethLayer64} from './layers/deprecated/choropleth-layer-64/choropleth-layer-64';
 export {default as ExtrudedChoroplethLayer64} from './layers/deprecated/extruded-choropleth-layer-64/extruded-choropleth-layer-64';
 
-// React exports
-export {default as DeckGL} from './react/deckgl';
-export {default as default} from './react/deckgl';
+// Deprecated Exports
+export {assembleShaders} from './shader-utils'; // Just a forward for the luma.gl version (integrated with Model class)
 
 // Experimental Features (May change in minor version bumps, use at your own risk)
 import {get} from './lib/utils/get';

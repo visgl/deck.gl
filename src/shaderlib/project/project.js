@@ -20,9 +20,11 @@
 
 import fp32 from '../fp32/fp32';
 import projectShader from './project.glsl';
+import {getUniformsFromViewport} from './viewport-uniforms';
 
 export default {
   name: 'project',
   dependencies: [fp32],
-  vs: projectShader
+  vs: projectShader,
+  getUniforms: getUniformsFromViewport
 };

@@ -1,5 +1,5 @@
 /* global window */
-import {Layer, assembleShaders} from 'deck.gl';
+import {Layer} from 'deck.gl';
 import {GL, Model, Geometry} from 'luma.gl';
 
 import {textMatrixToTexture} from './utils';
@@ -195,11 +195,6 @@ export default class AxesLayer extends Layer {
      * for each z tick, draw rectangle on xy plane around the bounding box.
      * show/hide is toggled by the vertex shader
      */
-    const gridShaders = assembleShaders(gl, {
-      vs: gridVertex,
-      fs: fragmentShader
-    });
-
     /*
      * rectangles are defined in 2d and rotated in the vertex shader
      *
@@ -238,8 +233,9 @@ export default class AxesLayer extends Layer {
 
     const grids = new Model(gl, {
       id: `${this.props.id}-grids`,
-      vs: gridShaders.vs,
-      fs: gridShaders.fs,
+      vs: gridVertex,
+      fs: fragmentShader,
+      modules: ['project'],
       geometry: new Geometry({
         drawMode: GL.LINES,
         positions: new Float32Array(gridPositions),
@@ -252,11 +248,6 @@ export default class AxesLayer extends Layer {
      * one label is placed at each end of every grid line
      * show/hide is toggled by the vertex shader
      */
-    const labelShaders = assembleShaders(gl, {
-      vs: labelVertex,
-      fs: labelFragment
-    });
-
     let labelTexCoords = [];
     let labelPositions = [];
     let labelNormals = [];
@@ -284,10 +275,10 @@ export default class AxesLayer extends Layer {
     }
 
     const labels = new Model(gl, {
-      gl,
       id: `${this.props.id}-labels`,
-      vs: labelShaders.vs,
-      fs: labelShaders.fs,
+      vs: labelVertex,
+      fs: labelFragment,
+      modules: ['project'],
       geometry: new Geometry({
         drawMode: GL.TRIANGLES,
         indices: new Uint16Array(labelIndices),
