@@ -1,6 +1,6 @@
-import {Layer, assembleShaders} from 'deck.gl';
+import {Layer} from 'deck.gl';
 
-import {Model, Program, Geometry} from 'luma.gl';
+import {Model, Geometry} from 'luma.gl';
 
 import tripsVertex from './trips-layer-vertex.glsl';
 import tripsFragment from './trips-layer-fragment.glsl';
@@ -39,10 +39,10 @@ export default class TripsLayer extends Layer {
 
   getModel(gl) {
     return new Model(gl, {
-      program: new Program(gl, assembleShaders(gl, {
-        vs: tripsVertex,
-        fs: tripsFragment
-      })),
+      id: this.props.id,
+      vs: tripsVertex,
+      fs: tripsFragment,
+      modules: ['project'],
       geometry: new Geometry({
         id: this.props.id,
         drawMode: 'LINES'

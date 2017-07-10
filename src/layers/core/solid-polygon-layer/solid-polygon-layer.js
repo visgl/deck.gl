@@ -19,7 +19,6 @@
 // THE SOFTWARE.
 
 import {Layer} from '../../../lib';
-import {assembleShaders} from '../../../shader-utils';
 import {get} from '../../../lib/utils';
 import {GL, Model, Geometry} from 'luma.gl';
 import {enable64bitSupport} from '../../../lib/utils/fp64';
@@ -60,10 +59,9 @@ const defaultProps = {
 
 export default class SolidPolygonLayer extends Layer {
   getShaders() {
-    const {shaderCache} = this.context;
     return enable64bitSupport(this.props) ?
-      {vs: vs64, fs, modules: ['project64', 'lighting'], shaderCache} :
-      {vs, fs, modules: ['project', 'lighting'], shaderCache};
+      {vs: vs64, fs, modules: ['project64', 'lighting']} :
+      {vs, fs, modules: ['project', 'lighting']};
   }
 
   initializeState() {
@@ -153,18 +151,15 @@ export default class SolidPolygonLayer extends Layer {
   }
 
   _getModel(gl) {
-    const shaders = assembleShaders(gl, this.getShaders());
-
-    return new Model(gl, {
+    return new Model(gl, Object.assign({}, this.getShaders(), {
       id: this.props.id,
-      vs: shaders.vs,
-      fs: shaders.fs,
       geometry: new Geometry({
         drawMode: this.props.wireframe ? GL.LINES : GL.TRIANGLES
       }),
       vertexCount: 0,
-      isIndexed: true
-    });
+      isIndexed: true,
+      shaderCache: this.context.shaderCache
+    }));
   }
 
   calculateIndices(attribute) {

@@ -19,7 +19,6 @@
 // THE SOFTWARE.
 
 import {Layer} from '../../../lib';
-import {assembleShaders} from '../../../shader-utils';
 import {GL, Model, Geometry} from 'luma.gl';
 import {fp64ify, enable64bitSupport} from '../../../lib/utils/fp64';
 import {COORDINATE_SYSTEM} from '../../../lib';
@@ -108,8 +107,6 @@ export default class PointCloudLayer extends Layer {
   }
 
   _getModel(gl) {
-    const shaders = assembleShaders(gl, this.getShaders());
-
     // a triangle that minimally cover the unit circle
     const positions = [];
     for (let i = 0; i < 3; i++) {
@@ -121,16 +118,15 @@ export default class PointCloudLayer extends Layer {
       );
     }
 
-    return new Model(gl, {
+    return new Model(gl, Object.assign({}, this.getShaders(), {
       id: this.props.id,
-      vs: shaders.vs,
-      fs: shaders.fs,
       geometry: new Geometry({
         drawMode: GL.TRIANGLES,
         positions: new Float32Array(positions)
       }),
-      isInstanced: true
-    });
+      isInstanced: true,
+      shaderCache: this.context.shaderCache
+    }));
   }
 
   calculateInstancePositions(attribute) {

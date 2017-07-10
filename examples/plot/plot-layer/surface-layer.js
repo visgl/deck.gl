@@ -1,4 +1,4 @@
-import {Layer, assembleShaders} from 'deck.gl';
+import {Layer} from 'deck.gl';
 import {GL, Model, Geometry} from 'luma.gl';
 
 import {scaleLinear} from 'd3-scale';
@@ -77,15 +77,11 @@ export default class SurfaceLayer extends Layer {
 
   getModel(gl) {
     // 3d surface
-    const graphShaders = assembleShaders(gl, {
-      vs: surfaceVertex,
-      fs: fragmentShader
-    });
-
     return new Model(gl, {
       id: `${this.props.id}-surface`,
-      vs: graphShaders.vs,
-      fs: graphShaders.fs,
+      vs: surfaceVertex,
+      fs: fragmentShader,
+      modules: ['project'],
       geometry: new Geometry({
         drawMode: GL.TRIANGLES
       }),

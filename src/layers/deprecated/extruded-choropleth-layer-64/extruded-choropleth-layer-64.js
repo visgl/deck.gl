@@ -19,7 +19,6 @@
 // THE SOFTWARE.
 
 import {Layer} from '../../../lib';
-import {assembleShaders} from '../../../shader-utils';
 import {fp64ify} from '../../../lib/utils/fp64';
 import {GL, Model, Geometry} from 'luma.gl';
 import {flatten, log} from '../../../lib/utils';
@@ -47,6 +46,14 @@ export default class ExtrudedChoroplethLayer64 extends Layer {
   constructor(props) {
     super(props);
     log.once('ExtrudedChoroplethLayer64 is deprecated. Consider using GeoJsonLayer instead');
+  }
+
+  getShaders() {
+    return {
+      vs: extrudedChoroplethVertex,
+      fs: extrudedChoroplethFragment,
+      modules: ['project64']
+    };
   }
 
   initializeState() {
@@ -106,15 +113,6 @@ export default class ExtrudedChoroplethLayer64 extends Layer {
     return info;
   }
 
-  getShaders() {
-    return {
-      vs: extrudedChoroplethVertex,
-      fs: extrudedChoroplethFragment,
-      fp64: true,
-      project64: true
-    };
-  }
-
   getModel(gl) {
     // Make sure we have 32 bit support
     // TODO - this could be done automatically by luma in "draw"
@@ -130,18 +128,14 @@ export default class ExtrudedChoroplethLayer64 extends Layer {
     gl.enable(GL.DEPTH_TEST);
     gl.depthFunc(GL.LEQUAL);
 
-    const shaders = assembleShaders(gl, this.getShaders());
-
-    return new Model(gl, {
+    return new Model(gl, Object.assign({}, this.getShaders(), {
       id: this.props.id,
-      vs: shaders.vs,
-      fs: shaders.fs,
       geometry: new Geometry({
         drawMode: this.props.drawWireframe ? GL.LINES : GL.TRIANGLES
       }),
       vertexCount: 0,
       isIndexed: true
-    });
+    }));
   }
 
   // each top vertex is on 3 surfaces

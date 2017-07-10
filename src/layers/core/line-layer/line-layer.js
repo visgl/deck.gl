@@ -19,7 +19,6 @@
 // THE SOFTWARE.
 
 import {Layer} from '../../../lib';
-import {assembleShaders} from '../../../shader-utils';
 import {GL, Model, Geometry} from 'luma.gl';
 import {fp64ify, enable64bitSupport} from '../../../lib/utils/fp64';
 import {COORDINATE_SYSTEM} from '../../../lib';
@@ -41,10 +40,9 @@ const defaultProps = {
 
 export default class LineLayer extends Layer {
   getShaders() {
-    const {shaderCache} = this.context;
     return enable64bitSupport(this.props) ?
-      {vs: vs64, fs, modules: ['project64'], shaderCache} :
-      {vs, fs, modules: ['project'], shaderCache};
+      {vs: vs64, fs, modules: ['project64']} :
+      {vs, fs, modules: ['project']};
   }
 
   initializeState() {
@@ -110,18 +108,16 @@ export default class LineLayer extends Layer {
      *   (0, 1)"-------------(1, 1)
      */
     const positions = [0, -1, 0, 0, 1, 0, 1, -1, 0, 1, 1, 0];
-    const shaders = assembleShaders(gl, this.getShaders());
 
-    return new Model(gl, {
+    return new Model(gl, Object.assign({}, this.getShaders(), {
       id: this.props.id,
-      vs: shaders.vs,
-      fs: shaders.fs,
       geometry: new Geometry({
         drawMode: GL.TRIANGLE_STRIP,
         positions: new Float32Array(positions)
       }),
-      isInstanced: true
-    });
+      isInstanced: true,
+      shaderCache: this.context.shaderCache
+    }));
   }
 
   calculateInstanceSourcePositions(attribute) {

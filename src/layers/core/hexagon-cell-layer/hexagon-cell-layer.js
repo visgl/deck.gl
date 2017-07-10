@@ -19,7 +19,6 @@
 // THE SOFTWARE.
 
 import {Layer} from '../../../lib';
-import {assembleShaders} from '../../../shader-utils';
 import {GL, Model, CylinderGeometry} from 'luma.gl';
 import {log} from '../../../lib/utils';
 import {fp64ify, enable64bitSupport} from '../../../lib/utils/fp64';
@@ -91,10 +90,9 @@ export default class HexagonCellLayer extends Layer {
   }
 
   getShaders() {
-    const {shaderCache} = this.context;
     return enable64bitSupport(this.props) ?
-      {vs: vs64, fs, modules: ['project64', 'lighting'], shaderCache} :
-      {vs, fs, modules: ['project', 'lighting'], shaderCache};
+      {vs: vs64, fs, modules: ['project64', 'lighting']} :
+      {vs, fs, modules: ['project', 'lighting']};
   }
 
   /**
@@ -190,6 +188,7 @@ export default class HexagonCellLayer extends Layer {
 
       // if no hexagonVertices provided, try use radius & angle
       const {viewport} = this.context;
+      // TODO - this should be a standard uniform in project package
       const {pixelsPerMeter} = viewport.getDistanceScales();
 
       angle = this.props.angle;
@@ -228,14 +227,12 @@ export default class HexagonCellLayer extends Layer {
   }
 
   _getModel(gl) {
-    const shaders = assembleShaders(gl, this.getShaders());
-    return new Model(gl, {
+    return new Model(gl, Object.assign({}, this.getShaders(), {
       id: this.props.id,
-      vs: shaders.vs,
-      fs: shaders.fs,
       geometry: this.getCylinderGeometry(1),
-      isInstanced: true
-    });
+      isInstanced: true,
+      shaderCache: this.context.shaderCache
+    }));
   }
 
   draw({uniforms}) {

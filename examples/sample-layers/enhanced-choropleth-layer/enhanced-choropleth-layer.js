@@ -19,7 +19,6 @@
 // THE SOFTWARE.
 
 import {Layer} from 'deck.gl';
-import {assembleShaders} from 'deck.gl';
 import {normalizeGeojson} from './geojson';
 import flatten from 'lodash.flattendeep';
 import {GL, Model, Geometry} from 'luma.gl';
@@ -85,21 +84,19 @@ export default class EnhancedChoroplethLayer extends Layer {
   getShaders() {
     return {
       vs: require('./enhanced-choropleth-layer-vertex.glsl'),
-      fs: require('./enhanced-choropleth-layer-fragment.glsl')
+      fs: require('./enhanced-choropleth-layer-fragment.glsl'),
+      modules: ['project']
     };
   }
 
   getModel(gl) {
-    const shaders = assembleShaders(gl, this.getShaders());
-
-    return new Model(gl, {
+    return new Model(gl, Object.assign({}, this.getShaders(), {
       id: this.props.id,
-      vs: shaders.vs,
-      fs: shaders.fs,
       geometry: new Geometry({drawMode: GL.TRIANGLES}),
       vertexCount: 0,
-      isIndexed: true
-    });
+      isIndexed: true,
+      shaderCache: this.context.shaderCache
+    }));
   }
 
   calculatePositions(attribute) {

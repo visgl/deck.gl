@@ -2,7 +2,7 @@
 
 ## Rendering a Single Layer
 
-Deck.gl is designed to allow you to take any data with which you can associate
+deck.gl is designed to allow you to take any data with which you can associate
 positions, and easily render that data on a map using a deck.gl `Layer`. By
 simply instantiating that layer's class, and passing in a set of `properties`
 that would include the `data` itself, together with some `accessors` and `properties`
@@ -72,7 +72,7 @@ blocks. The core layers are the most stable and supported deck.gl layers.
 
 ### Sample Layers
 
-Deck.gl provides a number of sample layers in the
+deck.gl provides a number of sample layers in the
 [examples directory](https://github.com/uber/deck.gl/tree/4.0-release/examples/sample-layers)
 intended to illustrate various ideas and approaches to how layers can be designed.
 These layers have documentation in their respective folders, but they are not

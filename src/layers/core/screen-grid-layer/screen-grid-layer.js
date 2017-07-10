@@ -19,7 +19,6 @@
 // THE SOFTWARE.
 
 import {Layer} from '../../../lib';
-import {assembleShaders} from '../../../shader-utils';
 import {GL, Model, Geometry} from 'luma.gl';
 
 import vs from './screen-grid-layer-vertex.glsl';
@@ -38,7 +37,7 @@ const defaultProps = {
 
 export default class ScreenGridLayer extends Layer {
   getShaders() {
-    return {vs, fs, modules: ['project'], shaderCache: this.context.shaderCache};
+    return {vs, fs, modules: ['project']};
   }
 
   constructor(props) {
@@ -88,18 +87,15 @@ export default class ScreenGridLayer extends Layer {
   }
 
   _getModel(gl) {
-    const shaders = assembleShaders(gl, this.getShaders());
-
-    return new Model(gl, {
+    return new Model(gl, Object.assign({}, this.getShaders(), {
       id: this.props.id,
-      vs: shaders.vs,
-      fs: shaders.fs,
       geometry: new Geometry({
         drawMode: GL.TRIANGLE_FAN,
         vertices: new Float32Array([0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0])
       }),
-      isInstanced: true
-    });
+      isInstanced: true,
+      shaderCache: this.context.shaderCache
+    }));
   }
 
   updateCell() {

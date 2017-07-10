@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {Layer, assembleShaders} from 'deck.gl';
+import {Layer} from 'deck.gl';
 import {GL, Model, Geometry, Texture2D} from 'luma.gl';
 
 import BITMAP_VERTEX_SHADER from './bitmap-layer-vertex.glsl';
@@ -57,7 +57,8 @@ export default class BitmapLayer extends Layer {
   getShaders() {
     return {
       vs: BITMAP_VERTEX_SHADER,
-      fs: BITMAP_FRAGMENT_SHADER
+      fs: BITMAP_FRAGMENT_SHADER,
+      modules: ['project']
     };
   }
 
@@ -126,19 +127,15 @@ export default class BitmapLayer extends Layer {
       texCoords.push(vertex[0] / 2 + 0.5, -vertex[1] / 2 + 0.5);
     });
 
-    const shaders = assembleShaders(gl, this.getShaders());
-
-    const model = new Model(gl, {
+    const model = new Model(gl, Object.assign({}, this.getShaders(), {
       id: this.props.id,
-      vs: shaders.vs,
-      fs: shaders.fs,
       geometry: new Geometry({
         drawMode: GL.TRIANGLES,
         positions: new Float32Array(positions),
         texCoords: new Float32Array(texCoords)
       }),
       isInstanced: true
-    });
+    }));
 
     return model;
   }

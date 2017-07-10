@@ -19,7 +19,6 @@
 // THE SOFTWARE.
 
 import {Layer} from '../../../lib';
-import {assembleShaders} from '../../../shader-utils';
 import {COORDINATE_SYSTEM} from '../../../lib';
 import {get} from '../../../lib/utils';
 import {fp64ify, enable64bitSupport} from '../../../lib/utils/fp64';
@@ -112,21 +111,18 @@ export default class ScatterplotLayer extends Layer {
   }
 
   _getModel(gl) {
-    const shaders = assembleShaders(gl, this.getShaders());
-
     // a square that minimally cover the unit circle
     const positions = [-1, -1, 0, -1, 1, 0, 1, 1, 0, 1, -1, 0];
 
-    return new Model(gl, {
+    return new Model(gl, Object.assign(this.getShaders(), {
       id: this.props.id,
-      vs: shaders.vs,
-      fs: shaders.fs,
       geometry: new Geometry({
         drawMode: GL.TRIANGLE_FAN,
         positions: new Float32Array(positions)
       }),
-      isInstanced: true
-    });
+      isInstanced: true,
+      shaderCache: this.context.shaderCache
+    }));
   }
 
   calculateInstancePositions(attribute) {

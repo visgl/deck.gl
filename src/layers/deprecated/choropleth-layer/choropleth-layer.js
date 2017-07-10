@@ -19,7 +19,6 @@
 // THE SOFTWARE.
 
 import {Layer} from '../../../lib';
-import {assembleShaders} from '../../../shader-utils';
 import {get, flatten, log} from '../../../lib/utils';
 import {extractPolygons} from './geojson';
 import {GL, Model, Geometry} from 'luma.gl';
@@ -46,7 +45,8 @@ export default class ChoroplethLayer extends Layer {
   getShaders() {
     return {
       vs: choroplethVertex,
-      fs: choroplethFragment
+      fs: choroplethFragment,
+      modules: ['project']
     };
   }
 
@@ -113,19 +113,15 @@ export default class ChoroplethLayer extends Layer {
   }
 
   getModel(gl) {
-    const shaders = assembleShaders(gl, this.getShaders());
-
-    return new Model(gl, {
-      gl,
+    return new Model(gl, Object.assign({}, this.getShaders(), {
       id: this.props.id,
-      vs: shaders.vs,
-      fs: shaders.fs,
       geometry: new Geometry({
         drawMode: this.props.drawContour ? GL.LINES : GL.TRIANGLES
       }),
       vertexCount: 0,
-      isIndexed: true
-    });
+      isIndexed: true,
+      shaderCache: this.context.shaderCache
+    }));
   }
 
   calculateIndices(attribute) {

@@ -433,17 +433,20 @@ export default class Layer {
   }
 
   // Calculates uniforms
-  drawLayer({uniforms = {}}) {
-    const {getPolygonOffset} = this.props;
+  drawLayer({moduleParameters = null, uniforms = {}, settings = {}}) {
+
+    // TODO/ib - hack move to luma Model.draw
+    if (moduleParameters && this.state.model) {
+      this.state.model.updateModuleSettings(moduleParameters);
+    }
 
     // Apply polygon offset to avoid z-fighting
+    const {getPolygonOffset} = this.props;
     const offsets = getPolygonOffset && getPolygonOffset(uniforms) || [0, 0];
-    const settings = {
-      polygonOffset: offsets
-    };
+    settings.polygonOffset = offsets;
 
     // Call subclass lifecycle method
-    this.draw({uniforms, settings});
+    this.draw({moduleParameters, uniforms, settings});
     // End lifecycle method
   }
 

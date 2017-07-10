@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {Layer, assembleShaders} from 'deck.gl';
+import {Layer} from 'deck.gl';
 import {GL, Model, Geometry, Texture2D, setParameters} from 'luma.gl';
 import meshLayerVertex from './mesh-layer-vertex.glsl';
 import meshLayerFragment from './mesh-layer-fragment.glsl';
@@ -43,7 +43,8 @@ export default class MeshLayer extends Layer {
   getShaders() {
     return {
       vs: meshLayerVertex,
-      fs: meshLayerFragment
+      fs: meshLayerFragment,
+      modules: ['project']
     };
   }
 
@@ -71,19 +72,14 @@ export default class MeshLayer extends Layer {
   }
 
   getModel(gl) {
-    const shaders = assembleShaders(gl, this.getShaders());
-
     // TODO - this should not be done here
     setParameters(gl, {
       depthTest: true,
       depthFunc: gl.LEQUAL
     });
 
-    const model = new Model(gl, {
-      gl,
+    const model = new Model(gl, Object.assign({}, this.getShaders(), {
       id: this.props.id,
-      vs: shaders.vs,
-      fs: shaders.fs,
       geometry: new Geometry({
         drawMode: GL.TRIANGLES,
         indices: new Uint16Array(this.props.mesh.indices),
@@ -91,8 +87,9 @@ export default class MeshLayer extends Layer {
         normals: new Float32Array(this.props.mesh.vertexNormals),
         texCoords: new Float32Array(this.props.mesh.textures)
       }),
-      isInstanced: true
-    });
+      isInstanced: true,
+      shaderCache: this.context.shaderCache
+    }));
 
     /* global Image */
     const image = new Image();

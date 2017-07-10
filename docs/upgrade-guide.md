@@ -1,5 +1,22 @@
 # Upgrade Guide
 
+## Upgrading from deck.gl v4 to v4.1
+
+A highly compatible release, the biggest change is that deck.gl v4.1 brings in luma.gl v4. It is a highly compatible release but there are some changes. If you are writing deck.gl layers using luma.gl classes, please refer to the Upgrade Guide for luma.gl.
+
+## Shader Assembly
+
+A notable change if you are writing your own layers is that the `project` shader module is no longer included by default.
+```js
+new Model(gl, {
+  vs: ...,
+  fs: ...,
+  modules: ['project']
+});
+```
+Note that instead of calling `assembleShaders` directly (as was required in the v4.0), you can now just pass a `modules` parameter to the luma.gl `Model`.
+
+
 ## Upgrading from deck.gl v3 to v4
 
 ### Changed Import: The `DeckGL` React component
