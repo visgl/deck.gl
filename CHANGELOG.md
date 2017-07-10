@@ -17,11 +17,9 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## Beta Releases
 
-### beta.3
+### deck.gl v4.1.0-beta.2
 - NEW: `getUniformsFromViewport` refactored into `project` shader module's `getUniforms`.
 - NEW: Replaced explicit calls to `assembleShaders` with `Model` parameters.
-
-### deck.gl v4.1.0-beta.2
 - SIZE: Remove gl-matrix (#759)
 - FIX: Update canvas size to match with device framebuffer size.
 - FIX: Fix the fluctuation of the end cap for path layer 64bit (#755)
