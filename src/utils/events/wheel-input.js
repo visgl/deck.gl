@@ -1,4 +1,4 @@
-import {window} from '../../lib/utils/globals';
+import {window} from '../globals';
 
 const ua = typeof window.navigator !== 'undefined' ?
   window.navigator.userAgent.toLowerCase() : '';
@@ -53,9 +53,9 @@ export default class WheelInput {
    * Enable this input (begin processing events)
    * if the specified event type is among those handled by this input.
    */
-  enableIfEventSupported(eventType) {
+  toggleIfEventSupported(eventType, enabled) {
     if (eventType === EVENT_TYPE) {
-      this.options.enable = true;
+      this.options.enable = enabled;
     }
   }
 
@@ -64,6 +64,7 @@ export default class WheelInput {
     if (!this.options.enable) {
       return;
     }
+    event.preventDefault();
 
     let value = event.deltaY;
     if (window.WheelEvent) {
