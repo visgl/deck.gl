@@ -325,6 +325,8 @@ function getPickedColors(gl, {
   // Make sure we clear scissor test and fbo bindings in case of exceptions
   // We are only interested in one pixel, no need to render anything else
   // Note that the callback here is called synchronously.
+  // Set blend mode for picking
+  // always overwrite existing pixel with [r,g,b,layerIndex]
   return withParameters(gl, {
     framebuffer: pickingFBO,
     scissorTest: true,
@@ -338,34 +340,24 @@ function getPickedColors(gl, {
     // Clear the frame buffer
     gl.clear(GL.COLOR_BUFFER_BIT | GL.DEPTH_BUFFER_BIT);
 
-    // Set blend mode for picking
-    // always overwrite existing pixel with [r,g,b,layerIndex]
-    const settings = {
-      blend: true,
-      blendFunc: [gl.ONE, gl.ZERO, gl.CONSTANT_ALPHA, gl.ZERO],
-      blendEquation: gl.FUNC_ADD
-    };
+    // Render all pickable layers in picking colors
+    layers.forEach((layer, layerIndex) => {
+      if (!layer.isComposite && layer.props.visible && layer.props.pickable) {
 
-    withParameters(gl, settings, () => {
-      // Render all pickable layers in picking colors
-      layers.forEach((layer, layerIndex) => {
-        if (!layer.isComposite && layer.props.visible && layer.props.pickable) {
-
-          // Encode layerIndex with alpha
-          setParameters(gl, {blendColor: [0, 0, 0, (layerIndex + 1) / 255]});
-          layer.drawLayer({
-            moduleParameters: Object.assign({}, layer.props, {
-              viewport: layer.context.viewport
-            }),
-            uniforms: Object.assign(
-              {renderPickingBuffer: 1, pickingEnabled: 1},
-              layer.context.uniforms,
-              {layerIndex}
-            ),
-            settings: layer.props.settings || {}
-          });
-        }
-      });
+        // Encode layerIndex with alpha
+        setParameters(gl, {blendColor: [0, 0, 0, (layerIndex + 1) / 255]});
+        layer.drawLayer({
+          moduleParameters: Object.assign({}, layer.props, {
+            viewport: layer.context.viewport
+          }),
+          uniforms: Object.assign(
+            {renderPickingBuffer: 1, pickingEnabled: 1},
+            layer.context.uniforms,
+            {layerIndex}
+          ),
+          settings: layer.props.settings || {}
+        });
+      }
     });
 
     // Read color in the central pixel, to be mapped with picking colors
