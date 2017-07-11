@@ -44,7 +44,7 @@ export function drawLayers({layers, pass}) {
           layer.context.uniforms,
           {layerIndex}
         ),
-        settings: layer.props.settings || {}
+        parameters: layer.props.parameters || {}
       });
       visibleCount++;
     }
@@ -355,7 +355,7 @@ function getPickedColors(gl, {
             layer.context.uniforms,
             {layerIndex}
           ),
-          settings: layer.props.settings || {}
+          parameters: layer.props.parameters || {}
         });
       }
     });

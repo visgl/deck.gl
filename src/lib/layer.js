@@ -53,7 +53,7 @@ const defaultProps = {
 
   projectionMode: COORDINATE_SYSTEM.LNGLAT,
 
-  settings: {},
+  parameters: {},
   uniforms: {},
   framebuffer: null,
 
@@ -433,7 +433,7 @@ export default class Layer {
   }
 
   // Calculates uniforms
-  drawLayer({moduleParameters = null, uniforms = {}, settings = {}}) {
+  drawLayer({moduleParameters = null, uniforms = {}, parameters = {}}) {
 
     // TODO/ib - hack move to luma Model.draw
     if (moduleParameters && this.state.model) {
@@ -443,12 +443,12 @@ export default class Layer {
     // Apply polygon offset to avoid z-fighting
     const {getPolygonOffset} = this.props;
     const offsets = getPolygonOffset && getPolygonOffset(uniforms) || [0, 0];
-    settings.polygonOffset = offsets;
+    parameters.polygonOffset = offsets;
 
     // Call subclass lifecycle method
     withParameters(this.context.gl,
-      settings,
-      () => this.draw({moduleParameters, uniforms, settings})
+      parameters,
+      () => this.draw({moduleParameters, uniforms, parameters})
     );
     // End lifecycle method
   }
