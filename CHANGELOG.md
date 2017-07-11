@@ -17,6 +17,12 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## Beta Releases
 
+### deck.gl v4.1.0-beta.4
+- Picking clean up (#774)
+- Prevent picking when dragging (#775)
+- Controllers bug fix (#777)
+- Rename `settings` prop to `parameters`
+
 ### deck.gl v4.1.0-beta.3
 - Use luma.gl shader modules
 - FIX: polygonOffset
