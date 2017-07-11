@@ -50,14 +50,6 @@ export {default as GeoJsonLayer} from './layers/core/geojson-layer/geojson-layer
 export {default as DeckGL} from './react/deckgl';
 export {default as default} from './react/deckgl';
 
-// Deprecated Layers
-export {default as ChoroplethLayer} from './layers/deprecated/choropleth-layer/choropleth-layer';
-export {default as ChoroplethLayer64} from './layers/deprecated/choropleth-layer-64/choropleth-layer-64';
-export {default as ExtrudedChoroplethLayer64} from './layers/deprecated/extruded-choropleth-layer-64/extruded-choropleth-layer-64';
-
-// Deprecated Exports
-export {assembleShaders} from './shader-utils'; // Just a forward for the luma.gl version (integrated with Model class)
-
 // Experimental Features (May change in minor version bumps, use at your own risk)
 import {get} from './lib/utils/get';
 import {count} from './lib/utils/count';
@@ -71,3 +63,11 @@ export const experimental = {
   Effect,
   ReflectionEffect
 };
+
+// Deprecated Layers
+export {default as ChoroplethLayer} from './layers/deprecated/choropleth-layer/choropleth-layer';
+export {default as ChoroplethLayer64} from './layers/deprecated/choropleth-layer-64/choropleth-layer-64';
+export {default as ExtrudedChoroplethLayer64} from './layers/deprecated/extruded-choropleth-layer-64/extruded-choropleth-layer-64';
+
+// Deprecated Exports
+export {assembleShaders} from 'luma.gl'; // Just a forward for the luma.gl version (integrated with Model class)
