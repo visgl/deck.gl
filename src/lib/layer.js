@@ -25,7 +25,7 @@ import Stats from './stats';
 import {getDefaultProps, compareProps} from './props';
 import {log, count} from './utils';
 import {applyPropOverrides, removeLayerInSeer} from '../debug/seer-integration';
-import {GL} from 'luma.gl';
+import {GL, withParameters} from 'luma.gl';
 import assert from 'assert';
 
 const LOG_PRIORITY_UPDATE = 1;
@@ -446,7 +446,10 @@ export default class Layer {
     settings.polygonOffset = offsets;
 
     // Call subclass lifecycle method
-    this.draw({moduleParameters, uniforms, settings});
+    withParameters(this.context.gl,
+      settings,
+      () => this.draw({moduleParameters, uniforms, settings})
+    );
     // End lifecycle method
   }
 
