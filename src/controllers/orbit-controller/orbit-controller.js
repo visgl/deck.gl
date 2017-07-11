@@ -44,8 +44,7 @@ const defaultProps = {
   maxZoom: Infinity,
   fov: 50,
   near: 1,
-  far: 1000,
-  orbitControls: new OrbitControls()
+  far: 1000
 };
 
 /*
@@ -66,23 +65,23 @@ export default class OrbitController extends React.Component {
       isDragging: false
     };
 
-    this._eventManager = null;
-    this._handleEvent = this._handleEvent.bind(this);
-    this._onInteractiveStateChange = this._onInteractiveStateChange.bind(this);
+    this._orbitControls = props.orbitControls || new OrbitControls();
   }
 
   componentDidMount() {
     const {eventCanvas} = this.refs;
-    const {orbitControls} = this.props;
 
-    // Register event handlers defined by map controls
-    const events = {};
-    orbitControls.events.forEach(eventName => {
-      events[eventName] = this._handleEvent;
-    });
-
-    const eventManager = new EventManager(eventCanvas, {events});
+    const eventManager = new EventManager(eventCanvas);
     this._eventManager = eventManager;
+
+    this._orbitControls.setOptions(Object.assign({}, this.props, {
+      onStateChange: this._onInteractiveStateChange.bind(this),
+      eventManager
+    }));
+  }
+
+  componentWillUpdate(nextProps) {
+    this._orbitControls.setOptions(nextProps);
   }
 
   componentWillUnmount() {
@@ -90,14 +89,6 @@ export default class OrbitController extends React.Component {
       // Must destroy because hammer adds event listeners to window
       this._eventManager.destroy();
     }
-  }
-
-  _handleEvent(event) {
-    const controlOptions = Object.assign({}, this.props, {
-      onStateChange: this._onInteractiveStateChange
-    });
-
-    return this.props.orbitControls.handleEvent(event, controlOptions);
   }
 
   _onInteractiveStateChange({isDragging = false}) {

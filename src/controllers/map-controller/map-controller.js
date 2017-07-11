@@ -101,7 +101,6 @@ export default class MapController extends PureComponent {
 
     const eventManager = new EventManager(eventCanvas);
 
-    // Register additional event handlers for click and hover
     this._eventManager = eventManager;
 
     this._mapControls.setOptions(Object.assign({}, this.props, {
