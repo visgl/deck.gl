@@ -24,13 +24,15 @@ import project from '../shaderlib/project/project';
 import project64 from '../shaderlib/project64/project64';
 import lighting from '../shaderlib/lighting/lighting';
 
-import {registerShaderModules} from 'luma.gl';
+import {registerShaderModules, setDefaultShaderModules} from 'luma.gl';
 
 registerShaderModules([
   fp32, fp64,
   project, project64,
   lighting
 ]);
+
+setDefaultShaderModules([project]);
 
 export {
   fp32, fp64,
