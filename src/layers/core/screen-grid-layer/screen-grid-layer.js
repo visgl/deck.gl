@@ -80,7 +80,7 @@ export default class ScreenGridLayer extends Layer {
     uniforms = Object.assign({}, uniforms, {minColor, maxColor, cellScale, maxCount});
     model.draw({
       uniforms,
-      settings: {
+      parameters: {
         depthMask: true
       }
     });
