@@ -18,7 +18,10 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-/* global window, global, document, process */
+// Purpose: include this in your module to avoids adding dependencies on
+// micro modules like 'global' and 'is-browser';
+
+/* global process, window, global, document */
 const isBrowser =
   typeof process !== 'object' ||
   String(process) !== '[object process]' ||

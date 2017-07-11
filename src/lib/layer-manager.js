@@ -595,7 +595,7 @@ export default class LayerManager {
    */
   _onPointerMove(event) {
     if (event.isDown) {
-      // Is dragging
+      // Do not trigger onHover callbacks if mouse button is down
       return;
     }
     const pos = event.offsetCenter;

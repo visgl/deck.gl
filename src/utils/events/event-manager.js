@@ -1,6 +1,6 @@
 import WheelInput from './wheel-input';
 import MoveInput from './move-input';
-import {isBrowser} from '../../lib/utils/globals';
+import {isBrowser} from '../globals';
 
 // Hammer.js directly references `document` and `window`,
 // which means that importing it in environments without
@@ -142,7 +142,7 @@ export default class EventManager {
    * Process the event deregistration for a single event + handler.
    */
   _removeEventHandler(event, handler) {
-    let success = false;
+    let eventHandlerRemoved = false;
 
     // Find saved handler if any.
     for (let i = this.eventHandlers.length; i--;) {
@@ -152,11 +152,11 @@ export default class EventManager {
         this.manager.off(entry.eventAlias, entry.wrappedHandler);
         // Delete saved handler
         this.eventHandlers.splice(i, 1);
-        success = true;
+        eventHandlerRemoved = true;
       }
     }
 
-    if (success) {
+    if (eventHandlerRemoved) {
       // Alias to a recognized gesture as necessary.
       const eventAlias = GESTURE_EVENT_ALIASES[event] || event;
       // Get recognizer for this event
@@ -186,6 +186,7 @@ export default class EventManager {
       };
 
       // Calculate center relative to the root element
+      // TODO/xiaoji - avoid using getBoundingClientRect for perf?
       const rect = element.getBoundingClientRect();
       const offsetCenter = {
         x: center.x - rect.left - element.clientLeft,
