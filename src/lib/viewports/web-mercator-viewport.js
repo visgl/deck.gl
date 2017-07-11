@@ -29,7 +29,6 @@ import {
 } from '../../viewports/web-mercator-utils';
 
 import mat4_translate from 'gl-mat4/translate';
-import vec2_sub from 'gl-vec2/subtract';
 import assert from 'assert';
 
 const DEFAULT_MAP_STATE = {
@@ -196,17 +195,6 @@ export default class WebMercatorViewport extends Viewport {
    */
   _unprojectFlat(xy, scale = this.scale) {
     return unprojectFlat(xy, scale);
-  }
-
-  getLocationAtPoint({lngLat, pos}) {
-    const c = this.project(lngLat, {topLeft: false});
-    const coordCenter = this.project([this.longitude, this.latitude], {topLeft: false});
-    const coordAtPoint = pos;
-    const translate = vec2_sub([], coordAtPoint, c);
-    const newPos = vec2_sub([], coordCenter, translate);
-    const newLngLat = this.unproject(newPos, {topLeft: false});
-
-    return newLngLat;
   }
 
   /*
