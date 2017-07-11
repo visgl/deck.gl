@@ -1,4 +1,4 @@
-import {PerspectiveMercatorViewport} from 'viewport-mercator-project';
+import PerspectiveMercatorViewport from './perspective-mercator-viewport';
 import assert from 'assert';
 
 // MAPBOX LIMITS

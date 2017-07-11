@@ -23,16 +23,12 @@ import OrbitState from './orbit-state';
 // EVENT HANDLING PARAMETERS
 const ZOOM_ACCEL = 0.01;
 
-const SUBSCRIBED_EVENTS = [
-  'panstart',
-  'panmove',
-  'panend',
-  'pinchstart',
-  'pinch',
-  'pinchend',
-  'doubletap',
-  'wheel'
-];
+const EVENT_TYPES = {
+  WHEEL: ['wheel'],
+  PAN: ['panstart', 'panmove', 'panend'],
+  PINCH: ['pinchstart', 'pinchmove', 'pinchend'],
+  DOUBLE_TAP: ['doubletap']
+};
 
 export default class OrbitControls {
   /**
@@ -40,19 +36,18 @@ export default class OrbitControls {
    * A class that handles events and updates mercator style viewport parameters
    */
   constructor() {
-    this.events = SUBSCRIBED_EVENTS;
     this._state = {
       isDragging: false
     };
+    this.handleEvent = this.handleEvent.bind(this);
   }
 
   /**
    * Callback for events
    * @param {hammer.Event} event
    */
-  handleEvent(event, options) {
-    this.orbitState = new OrbitState(Object.assign({}, options, this._state));
-    this.setOptions(options);
+  handleEvent(event) {
+    this.orbitState = new OrbitState(Object.assign({}, this.orbitStateProps, this._state));
 
     switch (event.type) {
     case 'panstart':
@@ -114,25 +109,52 @@ export default class OrbitControls {
   /**
    * Extract interactivity options
    */
-  setOptions({
-    // TODO(deprecate): remove this when `onChangeViewport` gets deprecated
-    onChangeViewport,
-    onViewportChange,
-    onStateChange,
-    scrollZoom = true,
-    dragPan = true,
-    dragRotate = true,
-    doubleClickZoom = true,
-    touchZoomRotate = true
-  }) {
-    // TODO(deprecate): remove this check when `onChangeViewport` gets deprecated
-    this.onViewportChange = onViewportChange || onChangeViewport;
+  setOptions(options) {
+    const {
+      onViewportChange,
+      onStateChange = this.onStateChange,
+      eventManager = this.eventManager,
+      scrollZoom = true,
+      dragPan = true,
+      dragRotate = true,
+      doubleClickZoom = true,
+      touchZoomRotate = true
+    } = options;
+    this.onViewportChange = onViewportChange;
     this.onStateChange = onStateChange;
+    this.orbitStateProps = options;
+    if (this.eventManager !== eventManager) {
+      // EventManager has changed
+      this.eventManager = eventManager;
+      this._events = {};
+    }
+
+    // Register/unregister events
+    this.toggleEvents(EVENT_TYPES.WHEEL, scrollZoom);
+    this.toggleEvents(EVENT_TYPES.PAN, dragPan || dragRotate);
+    this.toggleEvents(EVENT_TYPES.PINCH, touchZoomRotate);
+    this.toggleEvents(EVENT_TYPES.DOUBLE_TAP, doubleClickZoom);
+
     this.scrollZoom = scrollZoom;
     this.dragPan = dragPan;
     this.dragRotate = dragRotate;
     this.doubleClickZoom = doubleClickZoom;
     this.touchZoomRotate = touchZoomRotate;
+  }
+
+  toggleEvents(eventNames, enabled) {
+    if (this.eventManager) {
+      eventNames.forEach(eventName => {
+        if (this._events[eventName] !== enabled) {
+          this._events[eventName] = enabled;
+          if (enabled) {
+            this.eventManager.on(eventName, this.handleEvent);
+          } else {
+            this.eventManager.off(eventName, this.handleEvent);
+          }
+        }
+      });
+    }
   }
 
   /* Event handlers */
