@@ -18,13 +18,22 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-attribute vec3 positions;
+import {fp32, fp64} from 'luma.gl';
 
-uniform vec2 a;
-varying vec4 vColor;
+import project from '../shaderlib/project/project';
+import project64 from '../shaderlib/project64/project64';
+import lighting from '../shaderlib/lighting/lighting';
 
-void main(void) {
-  gl_Position = vec4(positions, 1.0);
-  vec2 result = sin_fp64(a);
-  vColor = vec4(result.x, result.y, 0.0, 1.0);
-}
+import {registerShaderModules} from 'luma.gl';
+
+registerShaderModules([
+  fp32, fp64,
+  project, project64,
+  lighting
+]);
+
+export {
+  fp32, fp64,
+  project, project64,
+  lighting
+};

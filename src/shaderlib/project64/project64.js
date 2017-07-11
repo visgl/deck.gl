@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import fp64 from '../fp64/fp64';
+import {fp64} from 'luma.gl';
 import project from '../project/project';
 
 import project64Shader from './project64.glsl';

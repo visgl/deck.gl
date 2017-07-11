@@ -17,6 +17,10 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## Beta Releases
 
+### deck.gl v4.1.0-beta.3
+- Use luma.gl shader modules
+- FIX: polygonOffset
+
 ### deck.gl v4.1.0-beta.2
 - NEW: `getUniformsFromViewport` refactored into `project` shader module's `getUniforms`.
 - NEW: Replaced explicit calls to `assembleShaders` with `Model` parameters.
