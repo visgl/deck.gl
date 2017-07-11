@@ -78,9 +78,7 @@ const defaultProps = Object.assign({}, MAPBOX_LIMITS, {
   doubleClickZoom: true,
   touchZoomRotate: true,
 
-  getCursor: getDefaultCursor,
-
-  mapControls: new MapControls()
+  getCursor: getDefaultCursor
 });
 
 export default class MapController extends PureComponent {
@@ -93,23 +91,27 @@ export default class MapController extends PureComponent {
       isDragging: false
     };
 
-    this._handleEvent = this._handleEvent.bind(this);
-    this._onInteractiveStateChange = this._onInteractiveStateChange.bind(this);
+    // If props.mapControls is not provided, fallback to default MapControls instance
+    // Cannot use defaultProps here because it needs to be per map instance
+    this._mapControls = props.mapControls || new MapControls();
   }
 
   componentDidMount() {
     const {eventCanvas} = this.refs;
-    const {mapControls} = this.props;
 
-    // Register event handlers defined by map controls
-    const events = {};
-    mapControls.events.forEach(eventName => {
-      events[eventName] = this._handleEvent;
-    });
+    const eventManager = new EventManager(eventCanvas);
 
-    const eventManager = new EventManager(eventCanvas, {events});
-
+    // Register additional event handlers for click and hover
     this._eventManager = eventManager;
+
+    this._mapControls.setOptions(Object.assign({}, this.props, {
+      onStateChange: this._onInteractiveStateChange.bind(this),
+      eventManager
+    }));
+  }
+
+  componentWillUpdate(nextProps) {
+    this._mapControls.setOptions(nextProps);
   }
 
   componentWillUnmount() {
@@ -117,13 +119,6 @@ export default class MapController extends PureComponent {
       // Must destroy because hammer adds event listeners to window
       this._eventManager.destroy();
     }
-  }
-
-  _handleEvent(event) {
-    const controlOptions = Object.assign({}, this.props, {
-      onStateChange: this._onInteractiveStateChange
-    });
-    return this.props.mapControls.handleEvent(event, controlOptions);
   }
 
   _onInteractiveStateChange({isDragging = false}) {

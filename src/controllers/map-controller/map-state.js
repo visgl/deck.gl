@@ -1,4 +1,4 @@
-import {PerspectiveMercatorViewport} from 'viewport-mercator-project';
+import {WebMercatorViewport as PerspectiveMercatorViewport} from 'deck.gl';
 import assert from 'assert';
 
 // MAPBOX LIMITS

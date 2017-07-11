@@ -52,7 +52,7 @@ class Root extends Component {
         height={height}
         onViewportChange={v => this.setState({viewport: v})} >
         <DeckGL
-          viewport={viewport}
+          {...viewport}
           width={width}
           height={height}
           debug
