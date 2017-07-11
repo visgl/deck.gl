@@ -1,4 +1,4 @@
-import Viewport, {createMat4} from './viewport';
+import Viewport, {createMat4} from '../../lib/viewports/viewport';
 
 import mat4_multiply from 'gl-mat4/multiply';
 import mat4_lookAt from 'gl-mat4/lookAt';

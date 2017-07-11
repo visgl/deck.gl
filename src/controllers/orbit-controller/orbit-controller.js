@@ -1,6 +1,6 @@
 import React, {createElement} from 'react';
 import PropTypes from 'prop-types';
-import OrbitViewport from '../../lib/viewports/orbit-viewport';
+import OrbitViewport from './orbit-viewport';
 import OrbitControls from './orbit-controls';
 
 import EventManager from '../../utils/events/event-manager';
