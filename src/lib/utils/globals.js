@@ -18,9 +18,15 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-/* global window, global, document */
+/* global window, global, document, process */
+const isBrowser =
+  typeof process !== 'object' ||
+  String(process) !== '[object process]' ||
+  process.browser;
+
 module.exports = {
   window: typeof window !== 'undefined' ? window : global,
   global: typeof global !== 'undefined' ? global : window,
-  document: typeof document !== 'undefined' ? document : {}
+  document: typeof document !== 'undefined' ? document : {},
+  isBrowser
 };

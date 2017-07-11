@@ -1,6 +1,6 @@
 import WheelInput from './wheel-input';
 import MoveInput from './move-input';
-import {isBrowser} from '../globals';
+import {isBrowser} from '../../lib/utils/globals';
 
 // Hammer.js directly references `document` and `window`,
 // which means that importing it in environments without
