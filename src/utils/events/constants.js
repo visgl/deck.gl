@@ -33,7 +33,6 @@ export const BASIC_EVENT_ALIASES = {
  * this block maps event names to the Recognizers required to detect the events.
  */
 export const EVENT_RECOGNIZER_MAP = {
-  click: 'tap',
   tap: 'tap',
   doubletap: 'doubletap',
   press: 'press',

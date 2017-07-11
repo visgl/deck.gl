@@ -1,5 +1,5 @@
 const MOUSE_EVENTS = ['mousedown', 'mousemove', 'mouseup'];
-const MOVE_EVENT_TYPES = ['mousemove', 'pointermove'];
+const EVENT_TYPE = 'pointermove';
 
 /**
  * Hammer.js swallows 'move' events (for pointer/touch/mouse)
@@ -35,9 +35,9 @@ export default class MoveInput {
    * Enable this input (begin processing events)
    * if the specified event type is among those handled by this input.
    */
-  enableIfEventSupported(eventType) {
-    if (MOVE_EVENT_TYPES.indexOf(eventType) >= 0) {
-      this.options.enable = true;
+  toggleIfEventSupported(eventType, enabled) {
+    if (EVENT_TYPE === eventType) {
+      this.options.enable = enabled;
     }
   }
 
@@ -62,12 +62,13 @@ export default class MoveInput {
       if (!this.pressed) {
         // Drag events are emitted by hammer already
         // we just need to emit the move event on hover
-        MOVE_EVENT_TYPES.forEach(type => this.callback({
-          type,
+        this.callback({
+          type: EVENT_TYPE,
           srcEvent: event,
+          isDown: this.pressed,
           pointerType: 'mouse',
           target: event.target
-        }));
+        });
       }
       break;
     case 'mouseup':

@@ -71,15 +71,15 @@ test('moveInput#set', t => {
   t.end();
 });
 
-test('moveInput#enableIfEventSupported', t => {
-  const MOVE_EVENT_TYPES = ['mousemove', 'pointermove'];
+test('moveInput#toggleIfEventSupported', t => {
+  const MOVE_EVENT_TYPES = ['pointermove'];
   const moveInput = new MoveInput(createEventRegistrarMock(), null, {enable: false});
-  moveInput.enableIfEventSupported('foo');
+  moveInput.toggleIfEventSupported('foo', true);
   t.notOk(moveInput.options.enable, 'should not enable for unsupported event');
 
   t.ok(MOVE_EVENT_TYPES.every(event => {
     moveInput.options.enable = false;
-    moveInput.enableIfEventSupported(event);
+    moveInput.toggleIfEventSupported(event, true);
     return moveInput.options.enable;
   }), 'should enable for all supported events');
   t.end();

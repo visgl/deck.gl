@@ -594,6 +594,10 @@ export default class LayerManager {
    *                        {Object} srcEvent:             native JS Event object
    */
   _onPointerMove(event) {
+    if (event.isDown) {
+      // Do not trigger onHover callbacks if mouse button is down
+      return;
+    }
     const pos = event.offsetCenter;
     // TODO: consider using this.eventManager.element size instead of layerManager.context
     // but do so in a way that doesn't cause reflow (e.g. `offsetWidth/Height`).
