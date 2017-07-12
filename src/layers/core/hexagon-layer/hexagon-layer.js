@@ -54,19 +54,6 @@ const defaultProps = {
   }
 };
 
-function _needsReProjectPoints(oldProps, props) {
-  return oldProps.radius !== props.radius || oldProps.hexagonAggregator !== props.hexagonAggregator;
-}
-
-function _percentileChanged(oldProps, props) {
-  return oldProps.lowerPercentile !== props.lowerPercentile ||
-    oldProps.upperPercentile !== props.upperPercentile;
-}
-
-function _needsReSortBins(oldProps, props) {
-  return oldProps.getColorValue !== props.getColorValue;
-}
-
 export default class HexagonLayer extends CompositeLayer {
   constructor(props) {
     if (!props.hexagonAggregator && !props.radius) {
@@ -116,7 +103,7 @@ export default class HexagonLayer extends CompositeLayer {
   }
 
   updateState({oldProps, props, changeFlags}) {
-    if (changeFlags.dataChanged || _needsReProjectPoints(oldProps, props)) {
+    if (changeFlags.dataChanged || this.needsReProjectPoints(oldProps, props)) {
       // project data into hexagons, and get sortedBins
       this.getHexagons();
       this.getSortedBins();
@@ -124,15 +111,29 @@ export default class HexagonLayer extends CompositeLayer {
       // this needs sortedBins to be set
       this.getValueDomain();
 
-    } else if (_needsReSortBins(oldProps, props)) {
+    } else if (this.needsReSortBins(oldProps, props)) {
 
       this.getSortedBins();
       this.getValueDomain();
 
-    } else if (_percentileChanged(oldProps, props)) {
+    } else if (this.needsRecalculateColorDomain(oldProps, props)) {
 
       this.getValueDomain();
     }
+  }
+
+  needsReProjectPoints(oldProps, props) {
+    return oldProps.radius !== props.radius ||
+      oldProps.hexagonAggregator !== props.hexagonAggregator;
+  }
+
+  needsRecalculateColorDomain(oldProps, props) {
+    return oldProps.lowerPercentile !== props.lowerPercentile ||
+      oldProps.upperPercentile !== props.upperPercentile;
+  }
+
+  needsReSortBins(oldProps, props) {
+    return oldProps.getColorValue !== props.getColorValue;
   }
 
   getHexagons() {
@@ -208,7 +209,9 @@ export default class HexagonLayer extends CompositeLayer {
     return linearScale(domain, elevationRange, cell.points.length);
   }
 
-  renderLayers() {
+  getSubLayerProps() {
+    // for subclassing, override this method to return
+    // customized sub layer props
     const {id, radius, elevationScale, extruded, coverage, lightSettings, fp64} = this.props;
 
     // base layer props
@@ -217,7 +220,8 @@ export default class HexagonLayer extends CompositeLayer {
     // viewport props
     const {positionOrigin, projectionMode, modelMatrix} = this.props;
 
-    return new HexagonCellLayer({
+    // return props to the sublayer constructor
+    return {
       id: `${id}-hexagon-cell`,
       data: this.state.hexagons,
       hexagonVertices: this.state.hexagonVertices,
@@ -238,7 +242,21 @@ export default class HexagonLayer extends CompositeLayer {
       getColor: this._onGetSublayerColor.bind(this),
       getElevation: this._onGetSublayerElevation.bind(this),
       updateTriggers: this.getUpdateTriggers()
-    });
+    };
+  }
+
+  getSubLayerClass() {
+    // for subclassing, override this method to return
+    // customized sub layer class
+    return HexagonCellLayer;
+  }
+
+  renderLayers() {
+    const SubLayerClass = this.getSubLayerClass();
+
+    return new SubLayerClass(
+      this.getSubLayerProps()
+    );
   }
 }
 

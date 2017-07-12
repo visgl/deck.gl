@@ -18,6 +18,7 @@ Ref: http://keepachangelog.com/en/0.3.0/
 ## Beta Releases
 
 - Fix `GridCellLayer` cellSize changing on zooming (#782)
+- Add `getSubLayerClass`, `getSubLayerProps` methods to `GridLayer` and `HexagonLayer` for easy subclassing
 
 ### deck.gl v4.1.0-beta.4
 - Picking clean up (#774)
