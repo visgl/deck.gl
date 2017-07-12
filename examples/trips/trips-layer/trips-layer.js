@@ -42,7 +42,6 @@ export default class TripsLayer extends Layer {
       id: this.props.id,
       vs: tripsVertex,
       fs: tripsFragment,
-      modules: ['project'],
       geometry: new Geometry({
         id: this.props.id,
         drawMode: 'LINES'

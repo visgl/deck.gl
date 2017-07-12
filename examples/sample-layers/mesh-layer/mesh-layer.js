@@ -43,8 +43,7 @@ export default class MeshLayer extends Layer {
   getShaders() {
     return {
       vs: meshLayerVertex,
-      fs: meshLayerFragment,
-      modules: ['project']
+      fs: meshLayerFragment
     };
   }
 

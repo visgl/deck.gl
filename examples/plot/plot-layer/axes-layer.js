@@ -235,7 +235,6 @@ export default class AxesLayer extends Layer {
       id: `${this.props.id}-grids`,
       vs: gridVertex,
       fs: fragmentShader,
-      modules: ['project'],
       geometry: new Geometry({
         drawMode: GL.LINES,
         positions: new Float32Array(gridPositions),
@@ -278,7 +277,6 @@ export default class AxesLayer extends Layer {
       id: `${this.props.id}-labels`,
       vs: labelVertex,
       fs: labelFragment,
-      modules: ['project'],
       geometry: new Geometry({
         drawMode: GL.TRIANGLES,
         indices: new Uint16Array(labelIndices),
