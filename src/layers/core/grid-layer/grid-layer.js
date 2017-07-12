@@ -52,19 +52,6 @@ const defaultProps = {
   }
 };
 
-function _needsReProjectPoints(oldProps, props) {
-  return oldProps.cellSize !== props.cellSize;
-}
-
-function _percentileChanged(oldProps, props) {
-  return oldProps.lowerPercentile !== props.lowerPercentile ||
-    oldProps.upperPercentile !== props.upperPercentile;
-}
-
-function _needsReSortBins(oldProps, props) {
-  return oldProps.getColorValue !== props.getColorValue;
-}
-
 export default class GridLayer extends CompositeLayer {
   initializeState() {
     this.state = {
@@ -75,22 +62,35 @@ export default class GridLayer extends CompositeLayer {
   }
 
   updateState({oldProps, props, changeFlags}) {
-    if (changeFlags.dataChanged || _needsReProjectPoints(oldProps, props)) {
+    if (changeFlags.dataChanged || this.needsReProjectPoints(oldProps, props)) {
       // project data into hexagons, and get sortedBins
       this.getLayerData();
       this.getSortedBins();
 
       // this needs sortedBins to be set
       this.getValueDomain();
-    } else if (_needsReSortBins(oldProps, props)) {
+    } else if (this.needsReSortBins(oldProps, props)) {
 
       this.getSortedBins();
       this.getValueDomain();
 
-    } else if (_percentileChanged(oldProps, props)) {
+    } else if (this.needsRecalculateColorDomain(oldProps, props)) {
 
       this.getValueDomain();
     }
+  }
+
+  needsReProjectPoints(oldProps, props) {
+    return oldProps.cellSize !== props.cellSize;
+  }
+
+  needsRecalculateColorDomain(oldProps, props) {
+    return oldProps.lowerPercentile !== props.lowerPercentile ||
+      oldProps.upperPercentile !== props.upperPercentile;
+  }
+
+  needsReSortBins(oldProps, props) {
+    return oldProps.getColorValue !== props.getColorValue;
   }
 
   getLayerData() {
@@ -166,7 +166,7 @@ export default class GridLayer extends CompositeLayer {
     return linearScale(domain, elevationRange, cell.points.length);
   }
 
-  renderLayers() {
+  getSubLayerProps() {
     const {id, elevationScale, fp64, extruded, cellSize, coverage, lightSettings} = this.props;
 
     // base layer props
@@ -175,7 +175,7 @@ export default class GridLayer extends CompositeLayer {
     // viewport props
     const {positionOrigin, projectionMode, modelMatrix} = this.props;
 
-    return new GridCellLayer({
+    return {
       id: `${id}-grid-cell`,
       data: this.state.layerData,
       cellSize,
@@ -195,7 +195,19 @@ export default class GridLayer extends CompositeLayer {
       getElevation: this._onGetSublayerElevation.bind(this),
       getPosition: d => d.position,
       updateTriggers: this.getUpdateTriggers()
-    });
+    };
+  }
+
+  getSubLayer() {
+    return GridCellLayer;
+  }
+
+  renderLayers() {
+    const SubLayerComp = this.getSubLayer();
+
+    return new SubLayerComp(
+      this.getSubLayerProps()
+    );
   }
 }
 
