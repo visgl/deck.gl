@@ -127,23 +127,27 @@ export default class GridCellLayer extends Layer {
   }
 
   updateUniforms() {
-    const {opacity, extruded, elevationScale, cellSize, coverage, lightSettings} = this.props;
-    const {viewport} = this.context;
-    // TODO - this should be a standard uniform in project package
-    const {pixelsPerMeter} = viewport.getDistanceScales();
+    const {opacity, extruded, elevationScale, coverage, lightSettings} = this.props;
 
     this.setUniforms(Object.assign({}, {
       extruded,
       elevationScale,
       opacity,
-      cellSize: cellSize * pixelsPerMeter[0],
       coverage
     },
     lightSettings));
   }
 
   draw({uniforms}) {
-    super.draw({uniforms: Object.assign({}, uniforms)});
+    const {viewport} = this.context;
+    // TODO - this should be a standard uniform in project package
+    const {pixelsPerMeter} = viewport.getDistanceScales();
+
+    // cellSize needs to be updated on every draw call
+    // because it is based on on viewport
+    super.draw({uniforms: Object.assign({
+      cellSize: this.props.cellSize * pixelsPerMeter[0]
+    }, uniforms)});
   }
 
   calculateInstancePositions(attribute) {
