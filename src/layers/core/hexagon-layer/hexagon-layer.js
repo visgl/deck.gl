@@ -209,7 +209,7 @@ export default class HexagonLayer extends CompositeLayer {
     return linearScale(domain, elevationRange, cell.points.length);
   }
 
-  renderLayers() {
+  getSubLayerProps() {
     const {id, radius, elevationScale, extruded, coverage, lightSettings, fp64} = this.props;
 
     // base layer props
@@ -218,7 +218,7 @@ export default class HexagonLayer extends CompositeLayer {
     // viewport props
     const {positionOrigin, projectionMode, modelMatrix} = this.props;
 
-    return new HexagonCellLayer({
+    return {
       id: `${id}-hexagon-cell`,
       data: this.state.hexagons,
       hexagonVertices: this.state.hexagonVertices,
@@ -239,7 +239,19 @@ export default class HexagonLayer extends CompositeLayer {
       getColor: this._onGetSublayerColor.bind(this),
       getElevation: this._onGetSublayerElevation.bind(this),
       updateTriggers: this.getUpdateTriggers()
-    });
+    };
+  }
+
+  getSubLayer() {
+    return HexagonCellLayer;
+  }
+
+  renderLayers() {
+    const SubLayerComp = this.getSubLayer();
+
+    return new SubLayerComp(
+      this.getSubLayerProps()
+    );
   }
 }
 

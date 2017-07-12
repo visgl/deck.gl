@@ -127,12 +127,16 @@ export default class GridCellLayer extends Layer {
   }
 
   updateUniforms() {
-    const {opacity, extruded, elevationScale, coverage, lightSettings} = this.props;
+    const {opacity, extruded, elevationScale, cellSize, coverage, lightSettings} = this.props;
+    const {viewport} = this.context;
+    // TODO - this should be a standard uniform in project package
+    const {pixelsPerMeter} = viewport.getDistanceScales();
 
     this.setUniforms(Object.assign({}, {
       extruded,
       elevationScale,
       opacity,
+      cellSize: cellSize * pixelsPerMeter[0],
       coverage
     },
     lightSettings));
