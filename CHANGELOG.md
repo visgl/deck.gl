@@ -17,6 +17,8 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## Beta Releases
 
+- Fix `GridCellLayer` cellSize changing on zooming (#782)
+
 ### deck.gl v4.1.0-beta.4
 - Picking clean up (#774)
 - Prevent picking when dragging (#775)
