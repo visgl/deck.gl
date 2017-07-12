@@ -42,19 +42,19 @@ Inherits from all [Base Layer](/docs/api-reference/base-layer.md) properties.
 
 - Default: `1`
 
-Global radius across all markers.
+A global radius multiplier for all points.
 
 ##### `outline` (Boolean, optional)
 
 - Default: `false`
 
-Only draw outline of dot.
+Only draw outline of points.
 
 ##### `strokeWidth` (Number, optional)
 
 - Default: `1`
 
-Width of the outline, in meters. Requires `outline` to be `true`.
+Width of the outline, in pixels. Requires `outline` to be `true`.
 
 ##### `radiusMinPixels` (Number, optional)
 

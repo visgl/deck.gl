@@ -116,7 +116,7 @@ Only works if `lineJointRounded` is `false`.
 
 - Default: `1`
 
-Global radius across all points.
+A global radius multiplier for all points.
 
 ##### `pointRadiusMinPixels` (Number, optional)
 
