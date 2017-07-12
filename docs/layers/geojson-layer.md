@@ -112,6 +112,23 @@ Type of joint. If `true`, draw round joints. Otherwise draw miter joints.
 The maximum extent of a joint in ratio to the stroke width.
 Only works if `lineJointRounded` is `false`.
 
+##### `pointRadiusScale` (Number, optional)
+
+- Default: `1`
+
+Global radius across all points.
+
+##### `pointRadiusMinPixels` (Number, optional)
+
+- Default: `0`
+
+The minimum radius in pixels.
+
+##### `pointRadiusMaxPixels` (Number, optional)
+
+- Default: `Number.MAX_SAFE_INTEGER`
+
+The maximum radius in pixels.
 
 ##### `fp64` (Boolean, optional)
 
