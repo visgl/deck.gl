@@ -144,7 +144,7 @@ export default class GridCellLayer extends Layer {
     const {pixelsPerMeter} = viewport.getDistanceScales();
 
     // cellSize needs to be updated on every draw call
-    // because it is based on on viewport
+    // because it is based on viewport
     super.draw({uniforms: Object.assign({
       cellSize: this.props.cellSize * pixelsPerMeter[0]
     }, uniforms)});
