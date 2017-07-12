@@ -31,7 +31,7 @@ import fs from './scatterplot-layer-fragment.glsl';
 const DEFAULT_COLOR = [0, 0, 0, 255];
 
 const defaultProps = {
-  radiusScale: 1,  //  point radius in meters
+  radiusScale: 1,
   radiusMinPixels: 0, //  min point radius in pixels
   radiusMaxPixels: Number.MAX_SAFE_INTEGER, // max point radius in pixels
   strokeWidth: 1,

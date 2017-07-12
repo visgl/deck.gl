@@ -40,6 +40,11 @@ const defaultProps = {
   lineWidthMaxPixels: Number.MAX_SAFE_INTEGER,
   lineJointRounded: false,
   lineMiterLimit: 4,
+
+  pointRadiusScale: 1,
+  pointRadiusMinPixels: 0, //  min point radius in pixels
+  pointRadiusMaxPixels: Number.MAX_SAFE_INTEGER, // max point radius in pixels
+
   fp64: false,
 
   // Line and polygon outline color
@@ -97,7 +102,9 @@ export default class GeoJsonLayer extends CompositeLayer {
 
     // Rendering props underlying layer
     const {lineWidthScale, lineWidthMinPixels, lineWidthMaxPixels,
-      lineJointRounded, lineMiterLimit, fp64} = this.props;
+      lineJointRounded, lineMiterLimit,
+      pointRadiusScale, pointRadiusMinPixels, pointRadiusMaxPixels,
+      fp64} = this.props;
 
     // Accessor props for underlying layers
     const {getLineColor, getFillColor, getRadius,
@@ -221,6 +228,9 @@ export default class GeoJsonLayer extends CompositeLayer {
     const pointLayer = drawPoints && new ScatterplotLayer({
       id: `${id}-points`,
       data: pointFeatures,
+      radiusScale: pointRadiusScale,
+      radiusMinPixels: pointRadiusMinPixels,
+      radiusMaxPixels: pointRadiusMaxPixels,
       fp64,
       opacity,
       pickable,
