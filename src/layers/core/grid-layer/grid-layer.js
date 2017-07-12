@@ -167,6 +167,8 @@ export default class GridLayer extends CompositeLayer {
   }
 
   getSubLayerProps() {
+    // for subclassing, override this method to return
+    // customized sub layer props
     const {id, elevationScale, fp64, extruded, cellSize, coverage, lightSettings} = this.props;
 
     // base layer props
@@ -175,6 +177,7 @@ export default class GridLayer extends CompositeLayer {
     // viewport props
     const {positionOrigin, projectionMode, modelMatrix} = this.props;
 
+    // return props to the sublayer constructor
     return {
       id: `${id}-grid-cell`,
       data: this.state.layerData,
@@ -198,14 +201,16 @@ export default class GridLayer extends CompositeLayer {
     };
   }
 
-  getSubLayer() {
+  getSubLayerClass() {
+    // for subclassing, override this method to return
+    // customized sub layer class
     return GridCellLayer;
   }
 
   renderLayers() {
-    const SubLayerComp = this.getSubLayer();
+    const SubLayerClass = this.getSubLayerClass();
 
-    return new SubLayerComp(
+    return new SubLayerClass(
       this.getSubLayerProps()
     );
   }
