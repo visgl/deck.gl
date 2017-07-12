@@ -81,7 +81,6 @@ export default class SurfaceLayer extends Layer {
       id: `${this.props.id}-surface`,
       vs: surfaceVertex,
       fs: fragmentShader,
-      modules: ['project'],
       geometry: new Geometry({
         drawMode: GL.TRIANGLES
       }),
