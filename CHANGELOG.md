@@ -17,8 +17,13 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## Beta Releases
 
+### deck.gl v4.1.0-beta.5
+
 - Fix `GridCellLayer` cellSize changing on zooming (#782)
-- Add `getSubLayerClass`, `getSubLayerProps` methods to `GridLayer` and `HexagonLayer` for easy subclassing
+- Add `getSubLayerClass`, `getSubLayerProps` methods to `GridLayer` and `HexagonLayer` for easy subclassing (#783)
+- Add `pointRadiusScale`, `pointRadiusMinPixels` and `pointRadiusMaxPixels` props to GeoJsonLayer (#781)
+- FIX: Fix the bug in shaders of LabelLayer that rotation angle is clamped to 0 - 180 degree (#780)
+- Add the project module to the default module for our new shader system (#779)
 
 ### deck.gl v4.1.0-beta.4
 - Picking clean up (#774)
@@ -48,7 +53,6 @@ Ref: http://keepachangelog.com/en/0.3.0/
 - webpack configuration cleanup
 - SEER integration upgrades
 - EXAMPLES: Experimental TagMap Layer @zhan1486
-
 - FIX: Use external buffers for layer attributes
 
 ### deck.gl v4.1.0-alpha.15
