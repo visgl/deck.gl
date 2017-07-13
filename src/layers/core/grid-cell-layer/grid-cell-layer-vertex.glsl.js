@@ -65,7 +65,7 @@ void main(void) {
   // cube gemoetry vertics are between -1 to 1, scale and transform it to between 0, 1
   vec2 pos = topLeftPos + vec2(
   (positions.x * coverage + 1.0) / 2.0 * finalCellSize, 
-  (positions.y * coverage + 1.0) / 2.0 * finalCellSize);
+  (positions.y * coverage - 1.0) / 2.0 * finalCellSize);
 
   float elevation = 0.0;
 

@@ -47,10 +47,12 @@ export function pointToDensityGridData(points, cellSize, getPosition) {
 function _pointsToGridHashing(points, cellSize, getPosition) {
 
   // find the geometric center of sample points
-  const allLat = points.map(p => getPosition(p)[1]);
+  const allLat = points
+    .map(p => getPosition(p)[1])
+    .filter(Number.isFinite);
+
   const latMin = Math.min.apply(null, allLat);
   const latMax = Math.max.apply(null, allLat);
-
   const centerLat = (latMin + latMax) / 2;
 
   const gridOffset = _calculateGridLatLonOffset(cellSize, centerLat);
@@ -60,8 +62,15 @@ function _pointsToGridHashing(points, cellSize, getPosition) {
   }
   // calculate count per cell
   const gridHash = points.reduce((accu, pt) => {
-    const latIdx = Math.floor((getPosition(pt)[1] + 90) / gridOffset.yOffset);
-    const lonIdx = Math.floor((getPosition(pt)[0] + 180) / gridOffset.xOffset);
+    const lat = getPosition(pt)[1];
+    const lng = getPosition(pt)[0];
+
+    if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
+      return accu;
+    }
+
+    const latIdx = Math.floor((lat + 90) / gridOffset.yOffset);
+    const lonIdx = Math.floor((lng + 180) / gridOffset.xOffset);
     const key = `${latIdx}-${lonIdx}`;
 
     accu[key] = accu[key] || {count: 0, points: []};
