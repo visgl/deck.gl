@@ -28,17 +28,6 @@ import vs from './hexagon-cell-layer-vertex.glsl';
 import vs64 from './hexagon-cell-layer-vertex-64.glsl';
 import fs from './hexagon-cell-layer-fragment.glsl';
 
-function positionsAreEqual(v1, v2) {
-  // Hex positions are expected to change entirely, not to maintain some
-  // positions and change others. Right now we only check a single vertex,
-  // because H3 guarantees order, but even if that wasn't true, this would only
-  // return a false positive for adjacent hexagons, which is close enough for
-  // our purposes.
-  return v1 === v2 || (
-    v1 && v2 && v1[0][0] === v2[0][0] && v1[0][1] === v2[0][1]
-  );
-}
-
 const DEFAULT_COLOR = [255, 0, 255, 255];
 
 const defaultProps = {
@@ -111,8 +100,6 @@ export default class HexagonCellLayer extends Layer {
         update: this.calculateInstanceColors}
     });
     /* eslint-enable max-len */
-
-    this.updateRadiusAngle();
   }
 
   updateAttribute({props, oldProps, changeFlags}) {
@@ -145,16 +132,6 @@ export default class HexagonCellLayer extends Layer {
     }
     this.updateAttribute({props, oldProps, changeFlags});
 
-    const viewportChanged = changeFlags.viewportChanged;
-    const {model} = this.state;
-
-    // Update the positions in the model if they've changes
-    const verticesChanged =
-      !positionsAreEqual(oldProps.hexagonVertices, props.hexagonVertices);
-
-    if (model && (verticesChanged || viewportChanged)) {
-      this.updateRadiusAngle();
-    }
     this.updateUniforms();
   }
 
@@ -195,10 +172,7 @@ export default class HexagonCellLayer extends Layer {
       radius = this.props.radius * pixelsPerMeter[0];
     }
 
-    this.setUniforms({
-      angle,
-      radius
-    });
+    return {angle, radius};
   }
 
   getCylinderGeometry(radius) {
@@ -236,7 +210,7 @@ export default class HexagonCellLayer extends Layer {
   }
 
   draw({uniforms}) {
-    super.draw({uniforms: Object.assign({}, uniforms)});
+    super.draw({uniforms: Object.assign(this.updateRadiusAngle(), uniforms)});
   }
 
   calculateInstancePositions(attribute) {
