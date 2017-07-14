@@ -16,6 +16,7 @@ Ref: http://keepachangelog.com/en/0.3.0/
 -->
 
 ## Beta Releases
+- Fix `HexagonCellLayer` cell size changes while zomming (#785)
 - Fix point projection in `GridCellLayer` (#784)
 
 ### deck.gl v4.1.0-beta.5
