@@ -108,15 +108,9 @@ export default class GraphLayer extends CompositeLayer {
       pickable,
       projectionMode,
       updateTriggers: {
-        getSourcePosition: {
-          layout: layoutTime
-        },
-        getTargetPosition: {
-          layout: layoutTime
-        },
-        getColor: {
-          layout: layoutTime
-        }
+        getSourcePosition: layoutTime,
+        getTargetPosition: layoutTime,
+        getColor: layoutTime
       }
     });
 
@@ -130,12 +124,8 @@ export default class GraphLayer extends CompositeLayer {
       pickable,
       projectionMode,
       updateTriggers: {
-        getPosition: {
-          layout: layoutTime
-        },
-        getColor: {
-          layout: layoutTime
-        }
+        getPosition: layoutTime,
+        getColor: layoutTime
       },
       visible
     });
@@ -154,9 +144,7 @@ export default class GraphLayer extends CompositeLayer {
       projectionMode,
       sizeScale,
       updateTriggers: {
-        getPosition: {
-          layout: layoutTime
-        }
+        getPosition: layoutTime
       },
       visible
     });

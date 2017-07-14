@@ -31,7 +31,7 @@ export default class DeckGLOverlay extends Component {
       getColor: d => d[2] === 1 ? maleColor : femaleColor,
       getRadius: d => 1,
       updateTriggers: {
-        getColor: {c1: maleColor, c2: femaleColor}
+        getColor: [maleColor, femaleColor]
       }
     });
 
