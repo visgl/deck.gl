@@ -114,8 +114,8 @@ test('HexagonCellLayer#updateRadiusAngle', t => {
 
   testInitializeLayer({layer});
 
-  layer.updateRadiusAngle();
-  t.equal(toLowPrecision(layer.state.model.uniforms.angle, 5), 1.8543,
+  const {angle} = layer.updateRadiusAngle();
+  t.equal(toLowPrecision(angle, 5), 1.8543,
     'Use hexagonVertices instead of radius and angle if both provided');
 
   t.end();
