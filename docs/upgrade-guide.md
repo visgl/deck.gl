@@ -6,14 +6,6 @@ A highly compatible release, the biggest change is that deck.gl v4.1 brings in l
 
 ## Shader Assembly
 
-A notable change if you are writing your own layers is that the `project` shader module is no longer included by default.
-```js
-new Model(gl, {
-  vs: ...,
-  fs: ...,
-  modules: ['project']
-});
-```
 Note that instead of calling `assembleShaders` directly (as was required in the v4.0), you can now just pass a `modules` parameter to the luma.gl `Model`.
 
 
