@@ -85,8 +85,11 @@ export default RoundedRectangleLayer extends ScatterplotLayer {
 
   draw({uniforms}) {
     super.draw({
-      ...uniforms,
-      cornerRadius: this.props.cornerRadius
+      uniforms:
+        {
+        ...uniforms,
+        cornerRadius: this.props.cornerRadius
+        }
     })
   }
 
