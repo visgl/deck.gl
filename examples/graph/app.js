@@ -46,26 +46,29 @@ class Root extends Component {
       lastDragged: null
     };
 
+    /* eslint-disable max-len */
     const dataConfig = [
       {
-        data: './data/sample-graph.json',
+        data: 'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/graph/sample-graph.json',
         loader: requestJSON,
         adaptor: GraphBasic,
         hasNodeTypes: true
       },
       {
-        data: './data/flare.json',
+        data: 'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/graph/flare.json',
         loader: requestJSON,
         adaptor: GraphFlare,
         hasNodeTypes: false
       },
       {
-        data: './data/facebook-SNAP.csv',
+        data: 'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/graph/facebook-SNAP.csv',
         loader: requestCSV,
         adaptor: GraphSNAP,
         hasNodeTypes: false
       }
     ];
+    /* eslint-enable max-len */
+
     const loader = dataConfig[DATASET].loader;
     loader(dataConfig[DATASET].data, (error, response) => {
       if (!error) {
@@ -174,32 +177,34 @@ class Root extends Component {
           node: info.object
         }
       });
-      this._updateDraggedElement([event.clientX, event.clientY]);
+      this._updateDraggedElement([event.clientX, event.clientY], info.object);
     }
   }
 
   _onMouseMove(event) {
     if (this.state.dragging) {
-      this._updateDraggedElement([event.clientX, event.clientY]);
+      this._updateDraggedElement([event.clientX, event.clientY], this.state.dragging.node);
     }
   }
 
   _onMouseUp(event) {
-    this.setState({
-      dragging: null,
-      lastDragged: {
-        node: this.state.dragging.node
-      }
-    });
+    if (this.state.dragging) {
+      this.setState({
+        dragging: null,
+        lastDragged: {
+          node: this.state.dragging.node
+        }
+      });
+    }
   }
 
-  _updateDraggedElement(point) {
+  _updateDraggedElement(point, node) {
     const {viewport: {width, height}} = this.state;
     const x = point[0] - width / 2;
     const y = point[1] - height / 2;
     this.setState({
       dragging: {
-        node: this.state.dragging.node,
+        node,
         x,
         y
       }

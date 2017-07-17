@@ -9,6 +9,9 @@ import {json as requestJson} from 'd3-request';
 // Set your mapbox token here
 const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
 
+// Source data GeoJSON
+const DATA_URL = 'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/geojson/vancouver-blocks.json'; // eslint-disable-line
+
 const colorScale = r => [r * 255, 140, 200 * (1 - r)];
 
 class Root extends Component {
@@ -24,7 +27,7 @@ class Root extends Component {
       data: null
     };
 
-    requestJson('./data/vancouver-blocks.json', (error, response) => {
+    requestJson(DATA_URL, (error, response) => {
       if (!error) {
         this.setState({data: response});
       }

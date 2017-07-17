@@ -9,5 +9,5 @@ npm start
 ```
 
 ### Data format
-Sample data is stored in the `data` folder. To use your own data, checkout
+Sample data is stored in [deck.gl Example Data](https://github.com/uber-common/deck.gl-data/tree/master/examples/icon). To use your own data, checkout
 the [documentation of IconLayer](../../docs/layers/icon-layer.md).

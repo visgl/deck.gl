@@ -4,18 +4,14 @@ import {pointGrid} from './utils';
 import {pointsToWorldGrid} from './utils/grid-aggregator';
 
 import {default as choropleths} from '../data/sf.zip.geo.json';
-import {default as geojson} from '../data/sample.geo.json';
-import {default as hexagons} from '../data/hexagons.json';
-import {default as routes} from '../data/sfmta.routes.json';
-import {default as trips} from '../data/trips.json';
-import {default as iconAtlas} from '../data/icon-atlas.json';
+export {default as geojson} from '../data/sample.geo.json';
+export {default as hexagons} from '../data/hexagons.json';
+export {default as routes} from '../data/sfmta.routes.json';
+export {default as trips} from '../data/trips.json';
+export {default as iconAtlas} from '../data/icon-atlas.json';
+export {default as s2cells} from '../data/sf.s2cells.json';
 
 export {choropleths};
-export {geojson};
-export {hexagons};
-export {routes};
-export {trips};
-export {iconAtlas};
 
 export const points = allPoints;
 export const positionOrigin = [-122.45, 37.75, 0];

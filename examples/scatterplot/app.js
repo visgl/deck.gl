@@ -11,6 +11,9 @@ const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
 const MALE_COLOR = [0, 128, 255];
 const FEMALE_COLOR = [255, 0, 128];
 
+// Source data CSV
+const DATA_URL = 'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/scatterplot/manhattan.json';  // eslint-disable-line
+
 class Root extends Component {
 
   constructor(props) {
@@ -24,7 +27,7 @@ class Root extends Component {
       data: null
     };
 
-    requestJson('./data/manhattan.json', (error, response) => {
+    requestJson(DATA_URL, (error, response) => {
       if (!error) {
         this.setState({data: response});
       }
