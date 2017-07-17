@@ -16,6 +16,9 @@ Ref: http://keepachangelog.com/en/0.3.0/
 -->
 
 ## Beta Releases
+
+### deck.gl v4.1.0-beta.6
+- Remove 'project' module in layer model creation as it's provided by default (#787)
 - Fix `HexagonCellLayer` cell size changes while zomming (#785)
 - Fix point projection in `GridCellLayer` (#784)
 
