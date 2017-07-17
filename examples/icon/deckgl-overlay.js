@@ -130,7 +130,7 @@ export default class DeckGLOverlay extends Component {
 
     const z = Math.floor(viewport.zoom);
     const size = showCluster ? 1 : Math.min(Math.pow(1.5, viewport.zoom - 10), 1);
-    const updateTrigger = {z: z * showCluster};
+    const updateTrigger = z * showCluster;
 
     const layer = new IconLayer({
       id: 'icon',
