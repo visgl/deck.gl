@@ -68,7 +68,7 @@ export default class GridCellLayer extends Layer {
     const {shaderCache} = this.context;
     return enable64bitSupport(this.props) ?
       {vs: vs64, fs, modules: ['project64', 'lighting'], shaderCache} :
-      {vs, fs, modules: ['project', 'lighting'], shaderCache};
+      {vs, fs, modules: ['lighting'], shaderCache};  // 'project' module added by default.
   }
 
   initializeState() {

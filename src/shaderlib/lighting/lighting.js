@@ -19,8 +19,10 @@
 // THE SOFTWARE.
 
 import lightingShader from './lighting.glsl';
+import project from '../project/project';
 
 export default {
   name: 'lighting',
+  dependencies: [project],
   vs: lightingShader
 };

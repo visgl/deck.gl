@@ -61,7 +61,7 @@ export default class SolidPolygonLayer extends Layer {
   getShaders() {
     return enable64bitSupport(this.props) ?
       {vs: vs64, fs, modules: ['project64', 'lighting']} :
-      {vs, fs, modules: ['project', 'lighting']};
+      {vs, fs, modules: ['lighting']}; // 'project' module added by default.
   }
 
   initializeState() {
