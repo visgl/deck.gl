@@ -19,6 +19,9 @@ const tooltipStyle = {
   pointerEvents: 'none'
 };
 
+// Source data GeoJSON
+const DATA_URL = 'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/arc/counties.json'; // eslint-disable-line
+
 class Root extends Component {
 
   constructor(props) {
@@ -33,7 +36,7 @@ class Root extends Component {
       mousePosition: [0, 0]
     };
 
-    requestJson('./data/counties.json', (error, response) => {
+    requestJson(DATA_URL, (error, response) => {
       if (!error) {
         this.setState({
           data: response.features

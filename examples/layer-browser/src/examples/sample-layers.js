@@ -1,7 +1,5 @@
 /* eslint-disable max-len */
-import * as mainDataSamples from '../data-samples';
-import * as extraDataSamples from '../../../sample-layers/data';
-const dataSamples = Object.assign({}, mainDataSamples, extraDataSamples);
+import * as dataSamples from '../data-samples';
 
 import S2Layer from '../../../sample-layers/s2-layer/s2-layer';
 

@@ -9,6 +9,12 @@ import {json as requestJson} from 'd3-request';
 // Set your mapbox token here
 const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
 
+// Source data CSV
+const DATA_URL = {
+  AIRPORTS: 'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/line/airports.json',  // eslint-disable-line
+  FLIGHT_PATHS: 'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/line/heathrow-flights.json'  // eslint-disable-line
+};
+
 class Root extends Component {
 
   constructor(props) {
@@ -23,12 +29,12 @@ class Root extends Component {
       airports: null
     };
 
-    requestJson('./data/heathrow-flights.json', (error, response) => {
+    requestJson(DATA_URL.FLIGHT_PATHS, (error, response) => {
       if (!error) {
         this.setState({flightPaths: response});
       }
     });
-    requestJson('./data/airports.json', (error, response) => {
+    requestJson(DATA_URL.AIRPORTS, (error, response) => {
       if (!error) {
         this.setState({airports: response});
       }

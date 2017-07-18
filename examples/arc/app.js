@@ -9,6 +9,9 @@ import {json as requestJson} from 'd3-request';
 // Set your mapbox token here
 const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
 
+// Source data GeoJSON
+const DATA_URL = 'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/arc/counties.json'; // eslint-disable-line
+
 class Root extends Component {
 
   constructor(props) {
@@ -23,7 +26,7 @@ class Root extends Component {
       selectedCounty: null
     };
 
-    requestJson('./data/counties.json', (error, response) => {
+    requestJson(DATA_URL, (error, response) => {
       if (!error) {
         this.setState({
           data: response.features,
@@ -45,6 +48,15 @@ class Root extends Component {
     });
   }
 
+  _onHover(info) {
+    // Hovered over a county
+  }
+
+  _onClick(info) {
+    // Clicked a county
+    this.setState({selectedCounty: info.object});
+  }
+
   _onViewportChange(viewport) {
     this.setState({
       viewport: {...this.state.viewport, ...viewport}
@@ -62,6 +74,8 @@ class Root extends Component {
         <DeckGLOverlay viewport={viewport}
           data={data}
           selectedFeature={selectedCounty}
+          onHover={this._onHover.bind(this)}
+          onClick={this._onClick.bind(this)}
           strokeWidth={2}
           />
       </MapGL>

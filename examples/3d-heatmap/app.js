@@ -9,6 +9,9 @@ import {csv as requestCsv} from 'd3-request';
 // Set your mapbox token here
 const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
 
+// Source data CSV
+const DATA_URL = 'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/3d-heatmap/heatmap-data.csv';  // eslint-disable-line
+
 class Root extends Component {
 
   constructor(props) {
@@ -22,7 +25,7 @@ class Root extends Component {
       data: null
     };
 
-    requestCsv('./data/heatmap-data.csv', (error, response) => {
+    requestCsv(DATA_URL, (error, response) => {
       if (!error) {
         const data = response.map(d => ([Number(d.lng), Number(d.lat)]));
         this.setState({data});
