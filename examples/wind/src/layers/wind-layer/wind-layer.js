@@ -1,7 +1,6 @@
 import {Layer} from 'deck.gl';
-import {GL, Model, Geometry, loadTextures} from 'luma.gl';
+import {GL, Model, Geometry, loadTextures, Texture2D} from 'luma.gl';
 
-import DelaunayInterpolation from '../delaunay-interpolation/delaunay-interpolation';
 import {
   ELEVATION_DATA_IMAGE, ELEVATION_DATA_BOUNDS, ELEVATION_RANGE, LIGHT_UNIFORMS
 } from '../../defaults';
@@ -42,8 +41,8 @@ export default class WindLayer extends Layer {
     const model = this.getModel({gl, originalBoundingBox, nx: 80, ny: 30});
 
     const {width, height} = dataTextureSize;
-    const textureFrom = this.createTexture(gl, {width, height});
-    const textureTo = this.createTexture(gl, {width, height});
+    const textureFrom = this.createTexture(gl, {});
+    const textureTo = this.createTexture(gl, {});
 
     this.setState({
       model, textureFrom, textureTo, width, height
@@ -166,24 +165,21 @@ export default class WindLayer extends Layer {
   }
 
   createTexture(gl, opt) {
-    const options = {
-      data: {
-        format: gl.RGBA,
-        value: false,
-        type: opt.type || gl.FLOAT,
-        internalFormat: opt.internalFormat || gl.RGBA32F,
-        width: opt.width,
-        height: opt.height,
-        border: 0
-      }
-    };
 
-    if (opt.parameters) {
-      options.parameters = opt.parameters;
-    }
+    const textureOptions = Object.assign({
+      format: gl.RGBA32F,
+      dataFormat: gl.RGBA,
+      type: gl.FLOAT,
+      parameters: {
+        [gl.TEXTURE_MAG_FILTER]: gl.NEAREST,
+        [gl.TEXTURE_MIN_FILTER]: gl.NEAREST,
+        [gl.TEXTURE_WRAP_S]: gl.CLAMP_TO_EDGE,
+        [gl.TEXTURE_WRAP_T]: gl.CLAMP_TO_EDGE
+      },
+      pixelStore: {[gl.UNPACK_FLIP_Y_WEBGL]: true}
+    }, opt);
 
-    return new DelaunayInterpolation({gl})
-      .createTextureNew(gl, options);
+    return new Texture2D(gl, textureOptions);
   }
 
   calculatePositions({nx, ny, originalBoundingBox}) {

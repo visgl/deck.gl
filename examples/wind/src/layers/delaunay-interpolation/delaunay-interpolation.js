@@ -6,7 +6,6 @@ import {
 
 import vertex from './delaunay-interpolation-vertex.glsl';
 import fragment from './delaunay-interpolation-fragment.glsl';
-import assert from 'assert';
 
 export default class DelaunayInterpolation {
   constructor(opts) {
@@ -68,44 +67,22 @@ export default class DelaunayInterpolation {
     });
   }
 
-  createTextureNew(gl, options) {
+  createTexture(gl, options) {
 
-    const opt = Object.assign({
-      textureType: gl.TEXTURE_2D,
-      pixelStore: [
-        {name: gl.UNPACK_FLIP_Y_WEBGL, value: true}
-      ],
-      parameters: [
-        {name: gl.TEXTURE_MAG_FILTER, value: gl.NEAREST},
-        {name: gl.TEXTURE_MIN_FILTER, value: gl.NEAREST},
-        {name: gl.TEXTURE_WRAP_S, value: gl.CLAMP_TO_EDGE},
-        {name: gl.TEXTURE_WRAP_T, value: gl.CLAMP_TO_EDGE}
-      ],
+    const data = Object.assign({
       data: {
         internalFormat: gl.RGBA32F,
         format: gl.RGBA,
         value: false,
         type: gl.FLOAT,
-
-        width: 0,
-        height: 0,
         border: 0
       }
-    }, options);
-
-    const data = opt.data;
-    const type = data.type;
-    const format = data.format;
-    const internalFormat = data.internalFormat;
-    const hasValue = Boolean(data.value);
-
-    // TODO: remove this assert after cleanup.
-    assert(hasValue !== true, 'Handling only hasValue = true cases');
+    }, options.data);
 
     const texture = new Texture2D(gl, {
-      format: internalFormat,
-      dataFormat: format,
-      type, // TODO: type should be Float, for now defaulting to bye type
+      format: data.internalFormat,
+      dataFormat: data.format,
+      type: data.type,
       border: data.border,
       parameters: {
         [gl.TEXTURE_MAG_FILTER]: gl.NEAREST,
@@ -149,7 +126,7 @@ export default class DelaunayInterpolation {
       }
     }, options.fb);
 
-    const texture = this.createTextureNew(gl, options.txt);
+    const texture = this.createTexture(gl, options.txt);
     const rb = this.createRenderbuffer(gl, options.rb);
     const fb = new Framebuffer(gl, {
       width: opt.width,
