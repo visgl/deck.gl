@@ -4,8 +4,8 @@
     "start": "webpack-dev-server --progress --hot --port 3000 --open"
   },
   "dependencies": {
-    "deck.gl": ">=4.1.0-beta.1",
-    "luma.gl": ">=4.0.0-beta.1",
+    "deck.gl": ">=4.1.0-beta.6",
+    "luma.gl": ">=4.0.0-beta.6",
     "react": "^15.4.1",
     "react-dom": "^15.4.1"
   },
