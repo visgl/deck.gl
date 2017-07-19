@@ -169,7 +169,7 @@ export default class AxesLayer extends Layer {
     models.labels.setAttributes(changedAttributes);
   }
 
-  draw({uniforms}) {
+  draw({uniforms, moduleParameters}) {
     const {gridDims, gridCenter, models, labelTexture} = this.state;
     const {fontSize, color, padding} = this.props;
 
@@ -182,8 +182,12 @@ export default class AxesLayer extends Layer {
         strokeColor: color
       };
 
-      models.grids.render(Object.assign({}, uniforms, baseUniforms));
+      if (moduleParameters) {
+        models.grids.updateModuleSettings(moduleParameters);
+        models.labels.updateModuleSettings(moduleParameters);
+      }
 
+      models.grids.render(Object.assign({}, uniforms, baseUniforms));
       models.labels.render(Object.assign({}, uniforms, baseUniforms, labelTexture));
     }
   }
