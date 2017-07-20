@@ -1,5 +1,5 @@
 // View and Projection Matrix calculations for mapbox-js style map view properties
-import {WebMercatorViewport} from '../../lib/viewports';
+import {WebMercatorViewport} from 'deck.gl';
 
 /* eslint-disable camelcase */
 import vec2_add from 'gl-vec2/add';
