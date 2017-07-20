@@ -2,7 +2,7 @@
 import React, {Component} from 'react';
 import {render} from 'react-dom';
 import DeckGLOverlay from './deckgl-overlay.js';
-import {OrbitController} from 'deck.gl/dist/controllers';
+import {OrbitController} from 'deck.gl/dist-es6/controllers';
 
 const equation = (x, y) => {
   return Math.sin(x * x + y * y) * x / Math.PI;
