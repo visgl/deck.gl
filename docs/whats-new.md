@@ -1,19 +1,32 @@
 # deck.gl v4.1
 
-## CompositeLayer
+Release date: July 28th, 2017
 
-* `CompositeLayer.renderLayers` can now return a nested arrays with `null` values. deck.gl will automatically flatten and filter the array. This is a small convenience that makes the `renderLayers methods in complex composite layers a little more readable.
+## WebGL2 support provided by luma.gl v4
 
+While deck.gl v4.1 is not a backward-compatible minor release, its rendering functionality is backed by luma.gl v4, a WebGL2-enabled rendering framework. One all browsers that supports WebGL2, deck.gl will obtain WebGL2 context and utilize WebGL2 functionalities. To know more about WebGL2, please check [here](https://www.khronos.org/registry/webgl/specs/latest/2.0/).
 
 ## Query Methods
 
-* `DeckGL.queryObject` and `DeckGL.queryVisibleObjects` allow developers to directly query the picking buffer in addition to the built-in click and hover callbacks.
+Two new functions - `DeckGL.queryObject` and `DeckGL.queryVisibleObjects` allow developers to directly query the picking results, in addition to handling picking via built-in click and hover callbacks.
 
 
 ## Shader Assembly
 
-If you write your own layers, the `shadertools` shader assembly system is now integrated with the luma.gl v4 `Model` class. Note that the `shadertools` shader assembly system is now built into the luma.gl v4 `Model` class. Now you can just pass a modules parameter to the luma.gl `Model`, instead of a separate call to `assembleShaders`.
+For developers that write their own custome layers, the `shadertools` shader assembly system is now in place to replace the existing `assembleShaders` function in deck.gl. The new shader assemble system is integrated with luma.gl's [`Model`]() so users no longer need to call `assembleShaders` before creating the `Model` for the layer.
 
+## CompositeLayer
+
+Composite layers, which was introduced in v4.0, receive some polish and performance improvement. `CompositeLayer.renderLayers` function now returns a nested array that could contain `null` values and deck.gl will automatically flatten, filter and render all layers in the array. This is a small convenience that makes the `renderLayers methods in complex composite layers a little more readable.
+
+## New examples
+
+Several new examples are added to illustrate the wide applicability of deck.gl. To name a few:
+
+* Wind visualization in US. This example is featured on [OpenVIS 2017 by @philogb](https://www.youtube.com/watch?v=KPiONdmNOuI). This example shows how new features in WebGL2 can be used to accelerate compute intensive tasks through GPU computing right in the browsers
+* Tagmap. This example by @rivulet-zhang shows some novel approching in placing and rendering text symbols in deck.gl 
+* Point cloud example. The point cloud example shows how deck.gl could be used to render large amount of 3D point cloud data without any basemap context. 
+* Node-link Graph. This is another example showing how deck.gl could be extended to the info-vis domain. 
 
 
 # deck.gl v4.0
