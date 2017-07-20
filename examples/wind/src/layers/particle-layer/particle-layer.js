@@ -1,6 +1,5 @@
-/* global Image */
 import {Layer} from 'deck.gl';
-import {GL, Model, Geometry, Buffer, TransformFeedback, setParameters} from 'luma.gl';
+import {GL, Model, Geometry, Buffer, TransformFeedback, setParameters, loadTextures} from 'luma.gl';
 import ProgramTransformFeedback from './program-transform-feedback';
 
 import DelaunayInterpolation from '../delaunay-interpolation/delaunay-interpolation';
@@ -31,27 +30,18 @@ export default class ParticleLayer extends Layer {
     const {gl} = this.context;
     const {boundingBox, texData, originalBoundingBox} = this.props;
 
-    const data = {};
-    const image = new Image(584, 253);
-    image.onload = () => {
-      data.img = image;
-    };
-    image.src = ELEVATION_DATA_IMAGE;
-
-    const elevationWidth = 584;
-    const elevationHeight = 253;
-
-    const elevationTexture = this.createTexture(gl, {
-      width: elevationWidth,
-      height: elevationHeight,
-      type: gl.UNSIGNED_BYTE,
-      internalFormat: gl.RGBA,
-      parameters: [
-        {name: gl.TEXTURE_MAG_FILTER, value: gl.LINEAR},
-        {name: gl.TEXTURE_MIN_FILTER, value: gl.LINEAR},
-        {name: gl.TEXTURE_WRAP_S, value: gl.CLAMP_TO_EDGE},
-        {name: gl.TEXTURE_WRAP_T, value: gl.CLAMP_TO_EDGE}
-      ]
+    loadTextures(gl, {
+      urls: [ELEVATION_DATA_IMAGE],
+      parameters: {
+        parameters: {
+          [GL.TEXTURE_MAG_FILTER]: GL.LINEAR,
+          [GL.TEXTURE_MIN_FILTER]: GL.LINEAR,
+          [GL.TEXTURE_WRAP_S]: GL.CLAMP_TO_EDGE,
+          [GL.TEXTURE_WRAP_T]: GL.CLAMP_TO_EDGE
+        }
+      }
+    }).then(textures => {
+      this.setState({elevationTexture: textures[0]});
     });
 
     const {textureSize} = this.props.texData;
@@ -73,10 +63,6 @@ export default class ParticleLayer extends Layer {
       model,
       modelTF,
       texData,
-      data,
-      elevationWidth,
-      elevationHeight,
-      elevationTexture,
       textureFrom,
       textureTo,
       width,
@@ -96,9 +82,12 @@ export default class ParticleLayer extends Layer {
 
   /* eslint-disable max-statements */
   draw({uniforms}) {
+    // Return early if elevationTexture is not loaded.
+    if (!this.state.elevationTexture) {
+      return;
+    }
     const {gl} = this.context;
 
-    const state = this.state;
     const props = this.props;
     const {boundingBox, texData} = this.props;
     const {dataBounds} = texData;
@@ -109,7 +98,7 @@ export default class ParticleLayer extends Layer {
     const {textureArray} = texData;
     const {
       width, height,
-      elevationTexture, elevationWidth, elevationHeight,
+      elevationTexture,
       bufferTo, bufferFrom,
       timeInterval
     } = this.state;
@@ -158,18 +147,6 @@ export default class ParticleLayer extends Layer {
       dataFormat: gl.RGBA,
       parameters: pixelStoreParameters
     });
-
-    if (state.data && state.data.img) {
-      elevationTexture.setImageData({
-        pixels: state.data.img,
-        width: elevationWidth,
-        height: elevationHeight,
-        format: gl.RGBA,
-        type: gl.UNSIGNED_BYTE,
-        dataFormat: gl.RGBA,
-        parameters: pixelStoreParameters
-      });
-    }
 
     model.setAttributes({
       posFrom: bufferFrom

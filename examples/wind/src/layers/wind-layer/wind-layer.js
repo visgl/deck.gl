@@ -1,6 +1,5 @@
-/* global Image */
 import {Layer} from 'deck.gl';
-import {GL, Model, Geometry} from 'luma.gl';
+import {GL, Model, Geometry, loadTextures} from 'luma.gl';
 
 import DelaunayInterpolation from '../delaunay-interpolation/delaunay-interpolation';
 import {
@@ -25,37 +24,29 @@ export default class WindLayer extends Layer {
     const {gl} = this.context;
     const {dataTextureSize, originalBoundingBox} = this.props;
 
-    // FIXME - Layer API for async loading
-    const data = {};
-    const image = new Image(584, 253);
-    image.onload = () => {
-      data.img = image;
-    };
-    image.src = ELEVATION_DATA_IMAGE;
+    loadTextures(gl, {
+      urls: [ELEVATION_DATA_IMAGE],
+      // TODO open bug for this, refine the loadTextures interface
+      parameters: {
+        parameters: {
+          [GL.TEXTURE_MAG_FILTER]: GL.LINEAR,
+          [GL.TEXTURE_MIN_FILTER]: GL.LINEAR,
+          [GL.TEXTURE_WRAP_S]: GL.CLAMP_TO_EDGE,
+          [GL.TEXTURE_WRAP_T]: GL.CLAMP_TO_EDGE
+        }
+      }
+    }).then(textures => {
+      this.setState({elevationTexture: textures[0]});
+    });
 
     const model = this.getModel({gl, originalBoundingBox, nx: 80, ny: 30});
-
-    const elevationWidth = 584;
-    const elevationHeight = 253;
-    const elevationTexture = this.createTexture(gl, {
-      width: elevationWidth,
-      height: elevationHeight,
-      parameters: [
-        {name: gl.TEXTURE_MAG_FILTER, value: gl.LINEAR},
-        {name: gl.TEXTURE_MIN_FILTER, value: gl.LINEAR},
-        {name: gl.TEXTURE_WRAP_S, value: gl.CLAMP_TO_EDGE},
-        {name: gl.TEXTURE_WRAP_T, value: gl.CLAMP_TO_EDGE}
-      ]
-    });
 
     const {width, height} = dataTextureSize;
     const textureFrom = this.createTexture(gl, {width, height});
     const textureTo = this.createTexture(gl, {width, height});
 
     this.setState({
-      model, data,
-      elevationTexture, elevationWidth, elevationHeight,
-      textureFrom, textureTo, width, height
+      model, textureFrom, textureTo, width, height
     });
   }
 
@@ -78,11 +69,16 @@ export default class WindLayer extends Layer {
 
   /* eslint-disable max-statements */
   draw({uniforms}) {
+    // Return early if elevationTexture is not loaded.
+    if (!this.state.elevationTexture) {
+      return;
+    }
+
     const {gl} = this.context;
 
     const {
-      model, data,
-      elevationTexture, elevationWidth, elevationHeight,
+      model,
+      elevationTexture,
       textureFrom, textureTo, width, height,
       delta, timeInterval
     } = this.state;
@@ -111,18 +107,6 @@ export default class WindLayer extends Layer {
       dataFormat: gl.RGBA,
       parameters: pixelStoreParameters
     });
-
-    if (data && data.img) {
-      elevationTexture.setImageData({
-        pixels: data.img,
-        width: elevationWidth,
-        height: elevationHeight,
-        format: gl.RGBA,
-        type: gl.UNSIGNED_BYTE,
-        dataFormat: gl.RGBA,
-        parameters: pixelStoreParameters
-      });
-    }
 
     const parameters = {
       clearDepth: 1.0,
