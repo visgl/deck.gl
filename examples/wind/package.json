@@ -11,12 +11,12 @@
     "babel-polyfill": "^6.16.0",
     "d3-request": "^1.0.3",
     "d3-voronoi": "^1.1.1",
-    "deck.gl": "4.0.6",
-    "luma.gl": "4.0.0-beta.1",
+    "deck.gl": ">=4.1.0-beta.6",
+    "luma.gl": ">=4.0.0-beta.6",
     "react": "^15.4.1",
     "react-autobind": "^1.0.6",
     "react-dom": "^15.4.1",
-    "react-map-gl": "^1.7.2",
+    "react-map-gl": "^3.0.0-beta.3",
     "tween.js": "^16.6.0"
   },
   "devDependencies": {
