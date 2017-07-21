@@ -49,6 +49,7 @@ const DEFAULT_COLOR = [0, 0, 0, 255];
  * @param {func} props.getSize - returns icon size multiplier as a number
  * @param {func} props.getColor - returns color of the icon in [r, g, b, a]. Only works on icons
  *   with mask: true.
+ * @param {func} props.getAngle - returns rotating angle (in degree) of the icon.
  */
 const defaultProps = {
   iconAtlas: null,

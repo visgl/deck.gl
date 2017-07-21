@@ -148,7 +148,7 @@ Versions 4.1.0 alpha 1, 2 and 3 have been unpublished due to a wrong tagging.
 - `HexagonLayer` add interval `getHexagons`, `getSortedCounts` `getUpdateTriggers` methods, make it easier to create layer subclass
 - `HexagonLayer` add `getColorValue` (optional) prop, returns a value to base bin color on.
 - `HexagonLayer` change default `hexagonAggregator` output to `{hexagons: [], hexagonVertices: []}`
-- `HexagonLayer` add `getValue` to `BiinSorter` to support color / elevation by value
+- `HexagonLayer` add `getValue` to `BinSorter` to support color / elevation by value
 - TEST: Implement code coverage with nyc and coverall report (#596)
 - HOTFIX: fix `HexagonLayer` hex color calculation, use `bin.value` instead of `bin.points.count` to calculate color
 - HOTFIX: Fix the bug that layer is finalized at every cycle due to an incorrect if check(#552)
