@@ -37,12 +37,13 @@ Ref: http://keepachangelog.com/en/0.3.0/
 - Rename `settings` prop to `parameters`
 
 ### deck.gl v4.1.0-beta.3
-- Use luma.gl shader modules
-- FIX: polygonOffset
+- WEBSITE update (#768)
+- FIX: polygonOffset (#770)
+- Use luma.gl shader modules (#772)
+- DOC: Vis suite blog posts (#773)
 
 ### deck.gl v4.1.0-beta.2
 - NEW: `getUniformsFromViewport` refactored into `project` shader module's `getUniforms`.
-- NEW: Replaced explicit calls to `assembleShaders` with `Model` parameters.
 - FIX: Update canvas size to match with device framebuffer size.
 - WEBSITE: Links to other frameworks (#753)
 - FIX: Avoid deep comparison error in compareProps when oldProp is empty (#754)
@@ -51,6 +52,7 @@ Ref: http://keepachangelog.com/en/0.3.0/
 - SIZE: Remove gl-matrix (#759
 - OrbitController clean up (#761)
 - EXAMPLE: Fix updateState issue in TagMap: add shouldUpdateState function (#762)
+- NEW: Replaced explicit calls to `assembleShaders` with `Model` parameters. (#764, #765, #767)
 
 ### deck.gl v4.1.0-beta.1
 - webpack configuration cleanup
