@@ -27,7 +27,7 @@ Layers can use the state object to store persistent information cross rendering 
 
 ### Initialization
 
-This happens only once for each layer that is being added, i.e. a layer from the
+Initialization happens only once for each layer that is being added, i.e. a layer from the
 current rendering cycle whose `id` does not get matched with any layer in the previous
 cycle.
 [`layer.initializeState()`](/docs/api-reference/base-layer.md#-initializestate-) is called at
@@ -39,7 +39,7 @@ before the first render.
 
 ### Updating
 
-Happens when a new layer has been matched with a layer from the previous
+Updating happens when a new layer has been matched with a layer from the previous
 rendering cycle (resulting in new props being passed to that layer),
 or when context has changed and layers are about to be drawn.
 
@@ -55,9 +55,8 @@ If the layer does need to be updated,
 is called to perform any necessary operation before the layer is rendered.
 This usually involves recalculating an attribute by calling
 [`state.attributeManager.invalidate`](/docs/api-reference/attribute-manager.md#-invalidate-)
-and updating unforms by calling
-`model.setUniforms`.
-By default, when `props.data` changes, all attributes are recalculated.
+and updating uniforms by calling `model.setUniforms`.
+By default, when `props.data` changes, all attributes are invalidated and recalculated.
 
 A composite layer may use
 [`compositeLayer.renderLayers()`](/docs/api-reference/composite-layer.md#-renderlayers-)
@@ -68,10 +67,11 @@ into "primitive" layers.
 
 ### Rendering
 
-Happens during each rendering cycle to draw the layer to the WebGL context.
+Rendering happens during each rendering cycle to draw the layer to the WebGL context.
 
-[`layer.draw()`](/docs/api-reference/base-layer.md#-draw-)
-is called at this stage.
+For primitive layers, [`layer.draw()`](/docs/api-reference/base-layer.md#-draw-)
+is called at this stage, which invokes the layers' `model.render` calls.
+For composite layers, `layer.renderLayers` is called to genrate sublayers.
 
 ### Picking
 
