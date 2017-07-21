@@ -37,61 +37,62 @@ Ref: http://keepachangelog.com/en/0.3.0/
 - Rename `settings` prop to `parameters`
 
 ### deck.gl v4.1.0-beta.3
-- Use luma.gl shader modules
-- FIX: polygonOffset
+- WEBSITE update (#768)
+- FIX: polygonOffset (#770)
+- Use luma.gl shader modules (#772)
+- DOC: Vis suite blog posts (#773)
 
 ### deck.gl v4.1.0-beta.2
 - NEW: `getUniformsFromViewport` refactored into `project` shader module's `getUniforms`.
-- NEW: Replaced explicit calls to `assembleShaders` with `Model` parameters.
-- SIZE: Remove gl-matrix (#759)
 - FIX: Update canvas size to match with device framebuffer size.
+- WEBSITE: Links to other frameworks (#753)
+- FIX: Avoid deep comparison error in compareProps when oldProp is empty (#754)
 - FIX: Fix the fluctuation of the end cap for path layer 64bit (#755)
-- FIX: Avoid deep comparison error in compareProps when oldProp is empty
-- WEBSITE: Links to other frameworks
-- EXAMPLE: Fix updateState issue: add shouldUpdateState function
-
 - MapController clean up (#757)
+- SIZE: Remove gl-matrix (#759
 - OrbitController clean up (#761)
+- EXAMPLE: Fix updateState issue in TagMap: add shouldUpdateState function (#762)
+- NEW: Replaced explicit calls to `assembleShaders` with `Model` parameters. (#764, #765, #767)
 
 ### deck.gl v4.1.0-beta.1
-- Import luma.gl v4.0.0-beta.1
 - webpack configuration cleanup
-- SEER integration upgrades
-- EXAMPLES: Experimental TagMap Layer @zhan1486
+- EXAMPLES: Experimental TagMap Layer (#735, @zhan1486)
 - FIX: Use external buffers for layer attributes
+- SEER integration upgrades (#744)
+- Import luma.gl v4.0.0-beta.1 (#752)
 
 ### deck.gl v4.1.0-alpha.15
 
-- Graph Layer example refactor
-- Event Management Refactor
-- queryVisibleObjects (renamed from queryObject)
+- FIX: Tween.js import (#730, #734)
+- Example config files cleaned up (#731, #732)
+- queryVisibleObjects (renamed from queryObject) (#736)
+- Event Management Refactor (#738)
+- SEER integration upgrades (#740)
+- Graph Layer example refactor (#742)
 - New luma state management API
-- Example config files cleaned up
 - WEBSITE: demo renamed to website
-
 
 ### deck.gl v4.1.0-alpha.14
 
-- Lifecycle performance tuning
-- SEER performance badges
-- "Stateless" picking
+- "Stateless" picking (#717)
+- Lifecycle performance tuning (#721)
+- SEER performance badges (#720, #722)
 - Custom "spy" class to fix test-browser
 - FIX: Using external buffers for layer attributes
-
+- FIX: Shadercache import (#727)
 
 ### deck.gl v4.1.0-alpha.13
-- FIX external buffers for layer attributes
-- Event Manager API Audit fixes
-- Travis CI fixes
-- Custom spy for tests
-- Stateless picking (uses new luma.gl features)
-- Seer performance badges
-- Examples now on react-map-gl v3
-- Lifecycle tuning
-- Shadercache import
+- Lifecycle tuning (#708)
+- Seer performance badges (#709)
+- Event Manager API Audit fixes (#710)
+- FIX external buffers for layer attributes (#711)
+- Travis CI fixes (#713)
+- Examples now on react-map-gl v3 (#714)
+- Stateless picking (uses new luma.gl features) (#715)
+- Custom spy for tests (#716)
 
-### deck.gl v4.1.0-alpha.11
-- Seer fix
+### deck.gl v4.1.0-alpha.12
+- Seer fix (#706)
 
 ### deck.gl v4.1.0-alpha.11
 - EXAMPLE: PlotLayer example improvement (#689)
@@ -103,7 +104,6 @@ Ref: http://keepachangelog.com/en/0.3.0/
 - FIX: fix modelMatrix in meter offset mode (#678)
 - NEW: Add queryObjects api to DeckGL component (#673)
 - Flatten CompositeLayer.renderLayer() output (#676)
-
 
 ### deck.gl v4.1.0-alpha.9
 - EXAMPLES: update the PlotLayer example with axis labels (#671)
@@ -141,14 +141,14 @@ Versions 4.1.0 alpha 1, 2 and 3 have been unpublished due to a wrong tagging.
 - FEAT: Seer integration and performace improvements
 - PERFORMANCE: Compiled are now cached for reuse so that same shaders are not recompiled for the same type of layers (#613)
 - PERFORMANCE: getViewportUniforms optimization (#586)
-- BREAKING: Only composite layers have `renderLayer` methods (#585)
+- BREAKING: Only composite layers have `renderLayers` methods (#585)
 - BREAKING: Only primitive layers' `draw` methods are called during render (#585)
 - `GridLayer` add `coverage`, `lowerPercentile`, `upperPercentile` and `getColorValue` to layer prop (#614)
 - `IconLayer` add `getAngle` for rotating each icon with a specific angles (in degrees) (#625)
 - `HexagonLayer` add interval `getHexagons`, `getSortedCounts` `getUpdateTriggers` methods, make it easier to create layer subclass
 - `HexagonLayer` add `getColorValue` (optional) prop, returns a value to base bin color on.
 - `HexagonLayer` change default `hexagonAggregator` output to `{hexagons: [], hexagonVertices: []}`
-- `HexagonLayer` add `getValue` to `BiinSorter` to support color / elevation by value
+- `HexagonLayer` add `getValue` to `BinSorter` to support color / elevation by value
 - TEST: Implement code coverage with nyc and coverall report (#596)
 - HOTFIX: fix `HexagonLayer` hex color calculation, use `bin.value` instead of `bin.points.count` to calculate color
 - HOTFIX: Fix the bug that layer is finalized at every cycle due to an incorrect if check(#552)
