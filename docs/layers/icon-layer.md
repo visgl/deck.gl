@@ -99,6 +99,12 @@ Method called to retrieve the height of each icon, returns a number. Unit is pix
 Method called to retrieve the color of each object, returns `[r, g, b, a]`.
 If the alpha component is not supplied, it is set to `255`.
 
+##### `getAngle` (Function, optional)
+
+- Default: `d => d.angle || 0`
+
+Method called to retrieve the rotating angle (in degree) of each object, returns a number.
+
 ## Source
 
 [src/layers/core/icon-layer](https://github.com/uber/deck.gl/tree/4.0-release/src/layers/core/icon-layer)
