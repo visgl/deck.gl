@@ -71,4 +71,4 @@ Method called to retrieve the angle to rotate (CCW) of each text label. Default 
 ### Font Style and Character Set Support
 For now, the layer only supports the ASCII character set and a monospaced font style called [Lucida Console](https://en.wikipedia.org/wiki/Lucida#Lucida_Console). While this meets most of the usage scenarios, you can customize to use your own font styles or unicode characters. Basically, you need to generate the texture atlas for the character set. Look at `font.png` and `font.json` in the `font` folder for details. You may find a few open source libraries for doing this. The one used in this example can be found [here](https://github.com/rivulet-zhang/Font-Atlas-Generator).
 
-Please note that the non-monospaced fonts and unicode characters has not been tested yet. So any issue or bug reports are welcome.
+Please note that neither the non-monospaced fonts nor the unicode characters has not been tested yet. So any issue or bug reports are welcome.
