@@ -53,8 +53,8 @@ float sum3(vec3 v) {
 
 // determines if the grid line is behind or in front of the center
 float frontFacing(vec3 v) {
-  vec4 v_viewspace = projectionMatrix * modelMatrix * vec4(v, 0.0);
-  return step(v_viewspace.z, 0.0);
+  vec4 v_clipspace = projectionMatrix * modelMatrix * vec4(v, 0.0);
+  return step(v_clipspace.z, 0.0);
 }
 
 void main(void) {
