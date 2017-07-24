@@ -1,6 +1,4 @@
-This is a standalone demo of the [text layer](./text-layer) built upon [deck.gl](http://deck.gl). This example illustrates the text layer features by animating the evolving Twitter hashtags posted in the U.S. during one day. You can tweak `app.js` to generate a static text layer instead.
-
-![text-layer](demo.png)
+This is a standalone demo of the [text layer](./text-layer) built upon [deck.gl](http://deck.gl). This example illustrates the text layer features by animating a small sample of Twitter hashtags posted in the U.S. during one day. You can tweak `app.js` to generate a static text layer instead.
 
 ### Usage
 Copy the content of this folder to your project. Run

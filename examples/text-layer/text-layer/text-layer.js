@@ -11,7 +11,8 @@ const defaultProps = {
   getPosition: x => x.coordinates,
   getColor: x => x.color || DEFAULT_COLOR,
   getSize: x => x.size || 32,
-  getAngle: x => x.angle || 0
+  getAngle: x => x.angle || 0,
+  fp64: false
 };
 
 export default class TextLayer extends CompositeLayer {
@@ -20,7 +21,7 @@ export default class TextLayer extends CompositeLayer {
     this.state = {
       iconAtlas: fontInfo.data
     };
-    this.cleanIconMapping(fontInfo.metadata);
+    this.getIconMapping(fontInfo.metadata);
   }
 
   shouldUpdateState({changeFlags}) {
@@ -52,21 +53,14 @@ export default class TextLayer extends CompositeLayer {
     this.setState({data: transformedData});
   }
 
-  cleanIconMapping(iconMappingPath) {
+  getIconMapping(iconMappingPath) {
     requestJson(iconMappingPath, (error, response) => {
       if (!error) {
         const iconMapping = {};
         response.forEach(val => {
-          iconMapping[String.fromCharCode(val.index)] = {
-            x: val.x,
-            y: val.y,
-            width: val.width,
-            height: val.height,
-            mask: true
-          };
+          iconMapping[val.char] = val;
         });
         this.setState({iconMapping});
-
       } else {
         throw new Error(error.toString());
       }
@@ -75,7 +69,7 @@ export default class TextLayer extends CompositeLayer {
 
   renderLayers() {
     const {data, iconAtlas, iconMapping} = this.state;
-    const {getColor, getSize, getAngle} = this.props;
+    const {getColor, getSize, getAngle, fp64} = this.props;
 
     return [
       new MultiIconLayer(Object.assign({}, this.props, {
@@ -90,6 +84,7 @@ export default class TextLayer extends CompositeLayer {
         getColor,
         getSize,
         getAngle,
+        fp64,
         updateTriggers: {
           getAngle,
           getColor,

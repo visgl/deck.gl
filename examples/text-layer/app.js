@@ -39,6 +39,7 @@ class Root extends Component {
   componentDidMount() {
     this._loadData();
 
+    // performace monitoring panel
     this._stats = new Stats();
     this._stats.showPanel(0);
     this.refs.fps.appendChild(this._stats.dom);
@@ -50,7 +51,7 @@ class Root extends Component {
     };
     window.requestAnimationFrame(calcFPS);
 
-    this._animateData();
+    window.requestAnimationFrame(this._animateData.bind(this));
   }
 
   componentWillUnmount() {

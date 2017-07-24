@@ -28,7 +28,7 @@ export default class DeckGLOverlay extends Component {
 
     const layers = [
       new TextLayer({
-        id: 'Twitter-topics',
+        id: 'hashtag-layer',
         data,
         getColor: d => d.color
       })
