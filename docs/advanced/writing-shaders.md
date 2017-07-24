@@ -41,10 +41,6 @@ Projects input to worldspace coordinates.
 
 Projects input to worldspace sizes.
 
-##### `vec4 project_to_viewspace(vec4 position)`
-
-Projects worldspace coordinates to viewspace coordinates.
-
 ##### `vec4 project_to_clipspace(vec4 position)`
 
 Projects worldspace coordinates to clipspace coordinates.

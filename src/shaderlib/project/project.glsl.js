@@ -99,8 +99,7 @@ vec2 project_position(vec2 position) {
   return projected_position.xy;
 }
 
-//
-
+// TODO/xiaoji: this function no longer produces correct result, remove?
 vec4 project_to_viewspace(vec4 position) {
   if (projectionMode == PROJECT_MERCATOR_OFFSETS) {
     position.w *= projectionPixelsPerUnit.z;
