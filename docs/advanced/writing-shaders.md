@@ -113,9 +113,9 @@ The following uniforms are injected by deck.gl and available to all shaders:
 
 ### Viewport uniforms
 
-##### `mat4 modelViewMatrix`
+##### `mat4 projectionMatrix`
 
-The model view matrix based on the current viewport and layer.
+The view projection matrix based on the current viewport and layer.
 
 ##### `vec2 viewportSize`
 
