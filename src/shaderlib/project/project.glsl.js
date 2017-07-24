@@ -42,16 +42,10 @@ uniform mat4 projectionMatrix;
 //
 
 float project_scale(float meters) {
-  if (projectionMode == PROJECT_IDENTITY) {
-    return meters;
-  }
   return meters * projectionPixelsPerUnit.z;
 }
 
 vec2 project_scale(vec2 meters) {
-  if (projectionMode == PROJECT_IDENTITY) {
-    return meters;
-  }
   return meters * projectionPixelsPerUnit.xy;
 }
 
