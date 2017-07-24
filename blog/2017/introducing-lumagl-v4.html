@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html>
+
+
+
+
+
+
+
+<head>
+	<!-- Meta -->
+	<meta charset="UTF-8"/>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+	<meta name="generator" content="Jekyll">
+
+	<title>Introducing luma.gl v4.0 | Deck.gl Blog</title>
+
+	<!-- CSS & fonts -->
+  <link rel="stylesheet" id="font-link" href="https://d1a3f4spazzrp4.cloudfront.net/uber-fonts/3.1.0/refresh.css">
+	<link rel="stylesheet" href="../css/main.css">
+
+  <!-- Favicon -->
+  <link rel="icon" href="../img/favicon.ico" type="image/x-icon">
+  <link rel="shortcut icon" href="../img/favicon.ico" type="image/x-icon">
+
+	<!-- RSS -->
+	<link href="../feed.xml" type="application/atom+xml" rel="alternate" title="ATOM Feed" />
+
+  <!-— facebook open graph tags -->
+  <meta property="og:url" content="http://uber.github.io/deck.gl/blog/2017/introducing-lumagl-v4" />
+  <meta property="og:title" content="Introducing luma.gl v4.0 | Deck.gl Blog" />
+  <meta property="og:description" content="In many ways v4.0 is the biggest luma.gl release to date. It is a major upgrade that brings full WebGL2 support to luma.gl, as well as adding advanced features such as GL state management and a shader module system." />
+  <meta property="og:site_name" content="deck.gl" />
+  <meta property="og:image" content="http://uber.github.io/deck.gl/images/trips-layer-unfurl-4.0.jpg" />
+  
+  <!-— twitter card tags -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@uber">
+  <meta name="twitter:creator" content="@uber">
+  <meta name="twitter:title" content="Introducing luma.gl v4.0 | Deck.gl Blog">
+  <meta name="twitter:description" content="In many ways v4.0 is the biggest luma.gl release to date. It is a major upgrade that brings full WebGL2 support to luma.gl, as well as adding advanced features such as GL state management and a shader module system.">
+  <meta name="twitter:image" content="http://uber.github.io/deck.gl/images/trips-layer-unfurl-4.0.jpg" />
+
+</head>
+
+
+<body>
+
+  <!-- Header -->
+  
+<header class="">
+  <div class="bg"/>
+  <div class="container">
+    <a class="logo" href="http://uber.github.io/deck.gl">deck.gl</a>
+    <div class="menu-toggle" >
+      <i class="icon icon-menu" ></i>
+    </div>
+    <div class="links">
+      <a href="http://uber.github.io/deck.gl/#/examples">Gallery</a>
+      <a href="http://uber.github.io/deck.gl/#/documentation">Documentation</a>
+      <a href="http://uber.github.io/deck.gl/blog/latest" class="active">Blog</a>
+    </div>
+  </div>
+</header>
+
+
+  <div class="scroll-area">
+    <div class="flexbox">
+
+      <div class="flexbox__item">
+
+        <!-- Main content -->
+        <div class="container">
+
+        <!-- Navigation -->
+        
+
+
+
+<div class="nav">
+
+  <div class="breadcrumb">
+    <a href="../">All Posts</a>
+    &gt;
+    
+    <span>Introducing luma.gl v4.0</span>
+    
+  </div>
+
+</div>
+
+
+      	<main>
+
+      		
+
+
+
+
+<article id="post">
+
+	<h1>Introducing luma.gl v4.0</h1>
+
+  <div>
+    <span class="date"><b>23 Jul 2017</b></span>
+
+    <span class="author">by 
+      
+        <a href="http://github.com/ibgreen">
+          <b>Ib Green</b>
+        </a>
+      
+    </span>
+
+    <div class="share">
+      <!-- Social media scripts -->
+      <script>window.twttr = (function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0],
+    t = window.twttr || {};
+  if (d.getElementById(id)) return t;
+  js = d.createElement(s);
+  js.id = id;
+  js.src = "https://platform.twitter.com/widgets.js";
+  fjs.parentNode.insertBefore(js, fjs);
+
+  t._e = [];
+  t.ready = function(f) {
+    t._e.push(f);
+  };
+
+  return t;
+}(document, "script", "twitter-wjs"));</script>
+
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) return;
+  js = d.createElement(s); js.id = id;
+  js.src = "//connect.facebook.net/en_US/sdk.js#xfbml=1&version=v2.8";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+      <div class="fb-share-button" data-href="http://uber.github.io/deck.gl/blog/2017/introducing-lumagl-v4" data-layout="button_count" data-size="small" data-mobile-iframe="true">
+        <a class="fb-xfbml-parse-ignore" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=http://uber.github.io/deck.gl/blog/2017/introducing-lumagl-v4&amp;src=sdkpreparse">Share</a>
+      </div>
+      <div>
+        <a class="twitter-share-button"
+          href="https://twitter.com/intent/tweet?text=http://uber.github.io/deck.gl/blog/2017/introducing-lumagl-v4">
+        Tweet</a>
+      </div>
+    </div>
+  </div>
+
+	<div class="content">
+		<h1 id="introducing-lumagl-v40">Introducing luma.gl v4.0</h1>
+
+<h2 id="version-40">Version 4.0</h2>
+
+<p>In many ways v4.0 is the biggest luma.gl release to date. It is a major upgrade that brings full WebGL2 support to luma.gl, as well as adding advanced features such as GL state management and a shader module system.</p>
+
+<h2 id="major-updates">Major Updates</h2>
+
+<ul>
+  <li>New Documentation</li>
+  <li>Full WebGL2 Support with WebGL Capability Management</li>
+  <li>WebGL State Management</li>
+  <li>GLSL Module System</li>
+  <li>Seer Debug Integration</li>
+</ul>
+
+<h3 id="new-documentation">New Documentation</h3>
+
+<p>Before even going into the wealth of new features in luma.gl v4, the documentation has been completely rewritten</p>
+<ul>
+  <li>New documentation site, aligned with other frameworks in the same visualization suite, such as deck.gl, react-map-gl and react-vis.</li>
+  <li>Extensive overhaul of documentation structure and contents
+If you are an existing user of luma.gl this might be the biggest immediate benefit for you.</li>
+</ul>
+
+<h3 id="complete-webgl2-support">Complete WebGL2 support</h3>
+
+<p>A short overview of WebGL2 and some of the additions to the luma.gl API that have been made to support it.</p>
+
+<h2 id="new-classes">New Classes</h2>
+
+<ul>
+  <li><code class="highlighter-rouge">Texture2DArray</code>, - e.g. for texture atlases</li>
+  <li><code class="highlighter-rouge">Texture3D</code> - for volumetric rendering or 3D lookup tables</li>
+  <li><code class="highlighter-rouge">Query</code> - Asynchronously query for occlusions, transform feedback, timings</li>
+  <li><code class="highlighter-rouge">Sampler</code> - Let’s shaders sample same texture in different ways</li>
+  <li><code class="highlighter-rouge">FenceSync</code> - Get notified when GPU reaches certain point in command stream</li>
+  <li><code class="highlighter-rouge">TransformFeedback</code> - Get output from vertex shaders</li>
+  <li><code class="highlighter-rouge">VertexArrayObject</code> - Stores multiple attribute bindings</li>
+</ul>
+
+<p>Note that <code class="highlighter-rouge">VertexArrayObject</code> and <code class="highlighter-rouge">Query</code> can be used in WebGL1 with certain restrictions.</p>
+
+<p>WebGL2 introduces objects that collect state allowing applications to switch state with a single call:</p>
+
+<ul>
+  <li><code class="highlighter-rouge">VertexArrayObject</code>s - holds a set of vertex array buffer bindings</li>
+  <li><code class="highlighter-rouge">Sampler</code> - holds a set of texture sampling parameters</li>
+  <li><code class="highlighter-rouge">TransformFeedback</code> - holds a set of transform feedback output buffer bindings.</li>
+  <li><code class="highlighter-rouge">UniformBufferLayout</code> - a helper class to simplify manipulation of uniform values in “std140” memory layout.</li>
+</ul>
+
+<h3 id="webgl2-support">WebGL2 Support</h3>
+
+<ul>
+  <li>luma.gl classes for the new WebGL2 objects (<code class="highlighter-rouge">FenceSync</code>, <code class="highlighter-rouge">Query</code>, <code class="highlighter-rouge">Sampler</code>, <code class="highlighter-rouge">Texture2DArray</code>, <code class="highlighter-rouge">Texture3D</code>, <code class="highlighter-rouge">TransformFeedback</code>).</li>
+  <li>New <code class="highlighter-rouge">UniformBufferLayout</code> helper class to make uniform buffer usage easy.</li>
+  <li><code class="highlighter-rouge">Textures</code>, <code class="highlighter-rouge">Renderbuffers</code> and <code class="highlighter-rouge">Framebuffers</code> updated to handle all the new WebGL2 image formats, including floating point textures, and multiple render targets.</li>
+  <li>Every existing WebGL class has been overhauled and has received additional methods that expose WebGL2 functionality whenever available.</li>
+</ul>
+
+<h3 id="new-features">New Features</h3>
+
+<p><code class="highlighter-rouge">WebGL state management and shader module</code>: after the launch of luma.gl v3, the feedback we received from some long-time WebGL programmers suggested that luma.gl had the right API surface with two big exceptions: it lacked a system for managing global WebGL state, and a solution for managing shader modules. Both of these deficiencies have been addressed in luma.gl v4.</p>
+
+<h3 id="webgl-capability-management">WebGL Capability Management</h3>
+
+<ul>
+  <li>Dramatically simplifies building apps that run on both WebGL1 and WebGL2, seamlessly leveraging extensions when available.</li>
+  <li>Helps apps to query if a WebGL feature is available on the current platform - regardless of whether it is available through WebGL2 or a WebGL1 extension.</li>
+  <li>When a feature can be provided either through WebGL2 or a WebGL1 extension, luma.gl provides a single API that transparently uses the available implementation.</li>
+</ul>
+
+<h3 id="webgl-state-management">WebGL State Management</h3>
+
+<ul>
+  <li>Enables apps to work with WebGL context state without having to worry about global side effects, addressing one of the major weak spots of the WebGL API.</li>
+  <li>Lets apps temporarily change global context state without having to do expensive queries to remember what values to restore it to.</li>
+  <li>Tracks changes to the context happening outside of luma.gl to ensure that global state always remains synchronized.</li>
+  <li>Prevents unnecessary calls to set state to current value.</li>
+</ul>
+
+<h3 id="glsl-module-system">GLSL Module System</h3>
+
+<ul>
+  <li>The <code class="highlighter-rouge">ShaderAssembler</code> system allows shader code to be split into composable pieces.</li>
+  <li>It is completely optional, the application can use raw shader strings, <code class="highlighter-rouge">glslify</code>, the <code class="highlighter-rouge">ShaderAssembler</code> system or any other tools in isolation or combination to generate its shaders.</li>
+  <li>Optionally integrates with a <code class="highlighter-rouge">ShaderCache</code> to ensure textually equivalent shaders are only compiled once.</li>
+</ul>
+
+<h3 id="seer-integration-debug-and-profiling">Seer Integration (Debug and Profiling)</h3>
+
+<p>Debugging GLSL shaders can be one of the more frustrating part of WebGL programming, and from the start, luma.gl has included strong debugging support (including optionally logging values attributes and uniforms before draw calls, throwing exceptions showing the exact location of parsing errors in GLSL source code etc). In v4 we have taken this to the next level by integrating with the Seer chrome plugin. It is now possible to list and inspect all your <code class="highlighter-rouge">Model</code> instances directly in the Chrome dev tools, check attributes and uniforms, and even see performance timings from the last draw calls directly in the debugger.</p>
+
+<h2 id="webgl2-api-highlights">WebGL2 API highlights</h2>
+
+<ul>
+  <li>
+    <p>WebGL2 constants added to <code class="highlighter-rouge">GL</code> export</p>
+  </li>
+  <li>Textures
+    <ul>
+      <li>Can now create from <code class="highlighter-rouge">WebGLBuffers</code> in addition to typed arrays</li>
+      <li>Tons of new texture formats</li>
+      <li>
+        <p>Compressed textures from</p>
+      </li>
+      <li>GLSL <code class="highlighter-rouge">dFdx</code>, <code class="highlighter-rouge">dFdy</code> Texture derivatives - (e.g. to compute normals in fragment shader)</li>
+      <li>GLSL <code class="highlighter-rouge">texelFetch</code> - (e.g. for manual bilinear filtering)</li>
+      <li>GLSL <code class="highlighter-rouge">textureGrad</code> - (e.g. for tweaking mipmap levels)</li>
+      <li>Immutable texture?</li>
+      <li>Integer texture - uint sampler</li>
+      <li>Texture LOD</li>
+      <li>GLSL <code class="highlighter-rouge">textureOffset</code></li>
+      <li>pixelStore</li>
+      <li>sRGB</li>
+      <li>texture vertex (e.g. for displacement mapping)</li>
+    </ul>
+  </li>
+  <li>
+    <p>Vertex Formats (GL.HALF_FLOAT)</p>
+  </li>
+  <li>GLSL
+    <ul>
+      <li>centroid</li>
+      <li>discard</li>
+      <li>flat_smooth_interpolators</li>
+      <li>non_square_matrix</li>
+    </ul>
+  </li>
+  <li>TBD
+    <ul>
+      <li>Uniform buffers</li>
+    </ul>
+  </li>
+  <li>Misc
+    <ul>
+      <li>New blending modes: <code class="highlighter-rouge">GL.MIN</code> and <code class="highlighter-rouge">GL.MAX</code></li>
+    </ul>
+  </li>
+  <li>Efficiency</li>
+</ul>
+
+<h2 id="gpgpu-programming-highlights">GPGPU Programming Highlights</h2>
+
+<p>Enabling GPGPU (General Purpose GPU) programming, i.e. the use of the GPU for computations in addition to rendering is a major goal for luma.gl.</p>
+
+<p>While much more is planned for future releases, this is a quick overview of some of the features in v4 that facilitate GPGPU use cases:</p>
+
+<h3 id="buffers">Buffers</h3>
+
+<p>Memory Management* - A big part of efficient GPGPU computing is setting up memory so that the GPU can access it, and manipulating and reading back that memory in an efficient way. It is therefore important to be aware of what tools WebGL and luma.gl provide to manipulate memory.</p>
+
+<p>Buffers represent memory on the GPU. One can think of it as “uploading”
+a memory to the GPU. The cost of the upload depends on the GPU architecture
+but it should not be considered free.</p>
+
+<p>The buffers are just memory block, the interpretation depends on how they
+are used.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Method</th>
+      <th>Version</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Buffer.subData</td>
+      <td>WebGL1*</td>
+      <td>Enables updating only part of a buffer on the GPU. Note that WebGL2 provides additional control parameters</td>
+    </tr>
+    <tr>
+      <td>Buffer.copySubData</td>
+      <td>WebGL2</td>
+      <td>Enables direct copy between buffers on GPU without moving memory to the CPU</td>
+    </tr>
+    <tr>
+      <td>Buffer.getSubData</td>
+      <td>WebGL2</td>
+      <td>Enables readback of memory from</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="textures">Textures</h3>
+
+<p>Textures also contain memory and is organized depending on the texture width, height, format etc.</p>
+
+<p>Textures can be used as a source of data to the GPU so they can be quite useful in GPGPU computing, either when the WebGL API does not directly support buffers (often the case in WebGL1) or to achieve special results (e.g. implementing accumulation through blending).</p>
+
+<ul>
+  <li><strong>Floating Point Textures</strong> - Usually, the most useful textures for GPGPU computing are floating point textures (i.e. each color value can be a 16 bit or 32 bit float, rather than just a small integer). In WebGL1, the support for floating point textures depends on the availability of extensions, and there are many limitations and variations between platforms. In WebGL2, the situation is much better, floating point textures are available by default, although some uses are still dependent on extensions (the luma.gl capability management system makes this easy to check).</li>
+</ul>
+
+<h3 id="transform-feedback">Transform Feedback</h3>
+
+<p>While WebGL2 does not support pure compute shaders, it does allow the application to capture the output of the vertex shader stage (in WebGL1 the processed vertices are sent directly to the fragment shader and are not accessible to the application).</p>
+
+<p>To use transform feedback, instantiate the <code class="highlighter-rouge">TransformFeedback</code> class and add the buffers you want the GPU to store processed vertex data in. Also, let your program know what varyings you want to extract into <code class="highlighter-rouge">Buffers</code> before you link it:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>const transformFeedback = new TransformFeedback(gl, {})
+.bindBuffersForVaryings({
+  gl_Position: new Buffer(gl, {}),
+  vColor: new Buffer(gl, {}),
+  vNormal: new Buffer(gl, {}),
+});
+
+transformFeedback.begin(GL.POINTS);
+const program = new Program(gl, {vs, fs, transformFeedback}})
+const program = new Program(gl, {vs, fs, transformFeedback}})
+</code></pre>
+</div>
+
+<p>For more details on how transform feedback works refer to the <a href="https://www.khronos.org/opengl/wiki/Transform_Feedback">OpenGL Wiki</a>.</p>
+
+<h3 id="disabling-the-fragment-shader">Disabling the Fragment Shader</h3>
+
+<p>When using transform feedback, you are often not interested in the output of the fragment shader. If so, you can stop it from running to improve performance. Just turn off rasterization in your draw calls.</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>program.draw({
+  settings: {
+    [GL.RASTERIZER_DISCARD]: true
+  }
+});
+</code></pre>
+</div>
+
+<h2 id="whats-next">What’s Next</h2>
+
+<p>Development luma.gl is by no means finished and here are some highlights of what can be expected in coming releases:</p>
+
+<ul>
+  <li><strong>Library Size</strong> - WebGL2 is a big API and together with the new advanced features in luma.gl, it means that the luma.gl library has grown considerably in size. Expect a bigger effort already for the next minor release to reduce the size of the library and the impact it has on the size of application bundles.</li>
+  <li><strong>GPGPU computing</strong> - This remains an area of active development for luma.gl and deck.gl. We expect to add new examples to demonstrate GPGPU techniques, and the luma.gl API will continue to evolve to make sure the necessary code in applications becomes as clean and easy to work with as possible.</li>
+  <li><strong>More Shader Modules</strong> - More shader modules will be provided. While the shader module system introduced in v4 is already useful, the real power will come from having a library of composable, documented, and tested shader modules. More examples will also be rewritten to take advantage of the shader module system.</li>
+  <li><strong>WebGL2 (Continued)</strong> - More WEBGL2 enabled examples will be added, giving developers an easy way to start using the new classes and methods, and we plan to track and integrate any new extensions for WebGL2 as they become available in browsers.</li>
+  <li><strong>Seer Integration</strong> - The Seer Chrome extension is a highly flexible and extensible system, and further leveraging Seer should surface much more information about the state of various luma.gl objects in future releases, further simplifying debugging and profiling of luma.gl applications.</li>
+</ul>
+
+	</div>
+
+  <div class="tag-cloud">
+    
+      <a href="../tag/visualization">Visualization</a>
+    
+      <a href="../tag/webgl">WebGL</a>
+    
+      <a href="../tag/luma.gl">Luma.gl</a>
+    
+  </div>
+
+  <div class="navigation clearfix">
+    
+      <a class="float--left" href="../2017/wind-map">&lt; Previous post: Wind Map</a>
+    
+    
+      <a class="float--right" href="../2017/visualization-framework-suite">Next post: The Birth of a Visualization Framework Suite &gt;</a>
+    
+  </div>
+
+</article>
+
+
+
+        </main>
+      	
+      	  <!-- Pagination links -->
+          
+
+        </div>
+      </div>
+
+      <div class="flexbox__item--collapsed">
+        <!-- Footer -->
+        
+
+
+<footer>
+  <div class="container">
+    <img src="../img/logo.gif" />
+  </div>
+</footer>
+
+      </div>
+
+    </div>
+  </div>
+</body>
+</html>

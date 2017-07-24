@@ -25,3 +25,5 @@ package-lock.json
 .sass-cache
 .bundle
 Gemfile.lockbuild/
+Gemfile.lock
+.jekyll-metadata

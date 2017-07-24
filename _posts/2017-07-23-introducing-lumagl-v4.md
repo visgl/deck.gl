@@ -1,3 +1,13 @@
+---
+title: Introducing luma.gl v4.0
+description: In many ways v4.0 is the biggest luma.gl release to date. It is a major upgrade that brings full WebGL2 support to luma.gl, as well as adding advanced features such as GL state management and a shader module system.
+author: ib
+tags:
+  - Visualization
+  - WebGL
+  - Luma.gl
+---
+
 # Introducing luma.gl v4.0
 
 ## Version 4.0
@@ -49,21 +59,20 @@ WebGL2 introduces objects that collect state allowing applications to switch sta
 
 * luma.gl classes for the new WebGL2 objects (`FenceSync`, `Query`, `Sampler`, `Texture2DArray`, `Texture3D`, `TransformFeedback`).
 * New `UniformBufferLayout` helper class to make uniform buffer usage easy.
-* `Textures`, `Renderbuffers` and `Framebuffers` updated to handle all the new WebGL2 image formats, including floating point textures, and multiple rendertargets.
+* `Textures`, `Renderbuffers` and `Framebuffers` updated to handle all the new WebGL2 image formats, including floating point textures, and multiple render targets.
 * Every existing WebGL class has been overhauled and has received additional methods that expose WebGL2 functionality whenever available.
 
 
 ### New Features
 
-After the launch of luma.gl v3, feedback we received from some long-time WebGL programmers suggested that luma.gl had the right API surface with two big exceptions: it lacked a system for managing global WebGL state, and a solution for managing shader modules. Both of these deficiencies have been addressed in luma.gl v4.
-
+`WebGL state management and shader module`: after the launch of luma.gl v3, the feedback we received from some long-time WebGL programmers suggested that luma.gl had the right API surface with two big exceptions: it lacked a system for managing global WebGL state, and a solution for managing shader modules. Both of these deficiencies have been addressed in luma.gl v4.
 
 
 ### WebGL Capability Management
 
 * Dramatically simplifies building apps that run on both WebGL1 and WebGL2, seamlessly leveraging extensions when available.
-* Helps apps to query if a WebGL feature is available on the current platform - regardless of whether it is available through WebGL2 or through a WebGL extension.
-* When a feature can be provided either through WebGL2 or through a WebGL1 extension, luma.gl provides a single API that transparently uses the available implementation.
+* Helps apps to query if a WebGL feature is available on the current platform - regardless of whether it is available through WebGL2 or a WebGL1 extension.
+* When a feature can be provided either through WebGL2 or a WebGL1 extension, luma.gl provides a single API that transparently uses the available implementation.
 
 
 ### WebGL State Management
@@ -87,12 +96,12 @@ Debugging GLSL shaders can be one of the more frustrating part of WebGL programm
 
 
 
-## WebGL2 API hightlights
+## WebGL2 API highlights
 
 * WebGL2 constants added to `GL` export
 
 * Textures
-    * Can now created from `WebGLBuffers` in addition to typed arrays
+    * Can now create from `WebGLBuffers` in addition to typed arrays
     * Tons of new texture formats
     * Compressed textures from
 
@@ -104,7 +113,7 @@ Debugging GLSL shaders can be one of the more frustrating part of WebGL programm
     * Texture LOD
     * GLSL `textureOffset`
     * pixelStore
-    * srbg
+    * sRGB
     * texture vertex (e.g. for displacement mapping)
 
 * Vertex Formats (GL.HALF_FLOAT)
@@ -132,7 +141,7 @@ While much more is planned for future releases, this is a quick overview of some
 
 ### Buffers
 
-Memory Management* - A big part of efficient GPPGU computing is setting up memory so that the GPU can access it, and manipulating and reading back that memory in an efficient way. It is therefore important to be aware of what tools WebGL and luma.gl provides to manipulate memory.
+Memory Management* - A big part of efficient GPGPU computing is setting up memory so that the GPU can access it, and manipulating and reading back that memory in an efficient way. It is therefore important to be aware of what tools WebGL and luma.gl provide to manipulate memory.
 
 Buffers represent memory on the GPU. One can think of it as "uploading"
 a memory to the GPU. The cost of the upload depends on the GPU architecture
@@ -152,9 +161,9 @@ are used.
 
 Textures also contain memory and is organized depending on the texture width, height, format etc.
 
-Textures can be used as a source of data to the GPU so they can be quite useful in GPGPU computing, either when the WebGL API does not directly support buffers (often the case in WebGL1) but also to achieve special results (e.g. implementing accumulation through blending).
+Textures can be used as a source of data to the GPU so they can be quite useful in GPGPU computing, either when the WebGL API does not directly support buffers (often the case in WebGL1) or to achieve special results (e.g. implementing accumulation through blending).
 
-* **Floating Point Textures** - Usually, the most useful textures for GPGPU computing are floating point textures (i.e. each color value can be a 16 bit or 32 bit float, rather than just a small integer). In WebGL1, support for floating point textures depends on the availability of extensions, and there are many limitations and variations between platforms. In WebGL2, the situation is much better, floating point textures are available by default, although some uses are still depenendent on extensions (the luma.gl capability management system makes this easy to check).
+* **Floating Point Textures** - Usually, the most useful textures for GPGPU computing are floating point textures (i.e. each color value can be a 16 bit or 32 bit float, rather than just a small integer). In WebGL1, the support for floating point textures depends on the availability of extensions, and there are many limitations and variations between platforms. In WebGL2, the situation is much better, floating point textures are available by default, although some uses are still dependent on extensions (the luma.gl capability management system makes this easy to check).
 
 
 ### Transform Feedback
@@ -197,6 +206,6 @@ Development luma.gl is by no means finished and here are some highlights of what
 
 * **Library Size** - WebGL2 is a big API and together with the new advanced features in luma.gl, it means that the luma.gl library has grown considerably in size. Expect a bigger effort already for the next minor release to reduce the size of the library and the impact it has on the size of application bundles.
 * **GPGPU computing** - This remains an area of active development for luma.gl and deck.gl. We expect to add new examples to demonstrate GPGPU techniques, and the luma.gl API will continue to evolve to make sure the necessary code in applications becomes as clean and easy to work with as possible.
-* **More Shader Modules** - More shader modules will be provided. While the shader module systemn introduced in v4 is already useful, the real power will come from having a library of composable, documented, and tested shader modules. More examples will also be rewritten to take advantage of the shader module system.
-* **WebGL2 (Continued)** - More WEBGL2 enabled examples will be added, giving developers an easy way to start using the new classes and methods, a nd we plan to track and integrate any new extensions for WebGL2 as they become available in browsers.
+* **More Shader Modules** - More shader modules will be provided. While the shader module system introduced in v4 is already useful, the real power will come from having a library of composable, documented, and tested shader modules. More examples will also be rewritten to take advantage of the shader module system.
+* **WebGL2 (Continued)** - More WEBGL2 enabled examples will be added, giving developers an easy way to start using the new classes and methods, and we plan to track and integrate any new extensions for WebGL2 as they become available in browsers.
 * **Seer Integration** - The Seer Chrome extension is a highly flexible and extensible system, and further leveraging Seer should surface much more information about the state of various luma.gl objects in future releases, further simplifying debugging and profiling of luma.gl applications.

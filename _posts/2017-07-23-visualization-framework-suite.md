@@ -1,3 +1,12 @@
+---
+title: The Birth of a Visualization Framework Suite
+description: The basic idea behind today's by taking Uber's most popular open source Visualization frameworks, and aligning their websites, documentation and examples, and providing links between the websites, we can make our various frameworks significantly easier to discover and use for both new and experienced users.
+author: ib
+tags:
+  - Visualization
+  - Framework Suite
+---
+
 # The Birth of a Visualization Framework Suite
 
 ## A Simple Idea
@@ -79,9 +88,9 @@ deck.gl v4.1 is now based on luma.gl v4. The blog post [introducing deck.gl v4](
 The new release also  adds a couple of previously "teased" WebGL2 example layers, the [Wind Map](http://uber.github.io/deck.gl/blog/2017/wind-map) layers. These layers are now offered as part of a reusable, stand-alone example.
 
 
-### react-vis
+### react-vis 1.7
 
-react-vis has already quietly been aligning with the documentation style introduced by deck.gl v3 and v4 and is also one of Uber's most popular repositories, so including it in the suite was an obvious choice. No new specific release was made, we've just added the link menu to the react-vis website.
+The priority of react-vis version 1.7 is documentation. Every documentation page has been written from scratch, entirely rewritten or reviewed since version 1.6. Since version 1.5, we've been publishing react-vis as a bundle, making it easy to use on sandbox environments such as codepen or codesandbox for quick experimentation. We also unified the documentation style introduced by deck.gl v3.
 
 
 ## What's Next for the Suite?
@@ -101,5 +110,3 @@ Enjoy!
 
 Ib Green, on behalf of
 The Visualization Team at Uber
-
-
