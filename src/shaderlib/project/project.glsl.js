@@ -57,12 +57,11 @@ vec2 project_scale(vec2 meters) {
   if (projectionMode == PROJECT_IDENTITY) {
     return meters;
   }
-  if (projectionMode == PROJECT_MERCATOR) {
-    return project_mercator_(meters) * WORLD_SCALE * projectionScale;
-  }
   if (projectionMode == PROJECT_MERCATOR_OFFSETS) {
     return meters * projectionPixelsPerUnit.xy;
   }
+  // projectionMode == PROJECT_MERCATOR
+  return project_mercator_(meters) * WORLD_SCALE * projectionScale;
 }
 
 vec3 project_scale(vec3 meters) {
