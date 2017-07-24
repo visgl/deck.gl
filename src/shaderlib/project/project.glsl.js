@@ -37,19 +37,14 @@ uniform mat4 modelMatrix;
 uniform mat4 viewMatrix;
 uniform mat4 projectionMatrix;
 
-// non-linear projection: lnglats => unit tile [0-1, 0-1]
-vec2 project_mercator_(vec2 lnglat) {
-  return vec2(
-    radians(lnglat.x) + PI,
-    PI - log(tan_fp32(PI * 0.25 + radians(lnglat.y) * 0.5))
-  );
-}
-
 //
 // Scaling offsets
 //
 
 float project_scale(float meters) {
+  if (projectionMode == PROJECT_IDENTITY) {
+    return meters;
+  }
   return meters * projectionPixelsPerUnit.z;
 }
 
@@ -57,11 +52,7 @@ vec2 project_scale(vec2 meters) {
   if (projectionMode == PROJECT_IDENTITY) {
     return meters;
   }
-  if (projectionMode == PROJECT_MERCATOR_OFFSETS) {
-    return meters * projectionPixelsPerUnit.xy;
-  }
-  // projectionMode == PROJECT_MERCATOR
-  return project_mercator_(meters) * WORLD_SCALE * projectionScale;
+  return meters * projectionPixelsPerUnit.xy;
 }
 
 vec3 project_scale(vec3 meters) {
@@ -82,7 +73,24 @@ vec4 project_scale(vec4 meters) {
 // Projecting positions
 //
 
+// non-linear projection: lnglats => unit tile [0-1, 0-1]
+vec2 project_mercator_(vec2 lnglat) {
+  return vec2(
+    radians(lnglat.x) + PI,
+    PI - log(tan_fp32(PI * 0.25 + radians(lnglat.y) * 0.5))
+  );
+}
+
 vec4 project_position(vec4 position) {
+
+  if (projectionMode == PROJECT_MERCATOR) {
+    return vec4(
+      project_mercator_(position.xy) * WORLD_SCALE * projectionScale,
+      project_scale(position.z),
+      position.w
+    );
+  }
+
   // Apply model matrix
   vec4 position_modelspace = modelMatrix * position;
   return project_scale(position_modelspace);
