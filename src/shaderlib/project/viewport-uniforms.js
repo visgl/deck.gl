@@ -19,7 +19,6 @@
 // THE SOFTWARE.
 
 /* global window */
-import mat4_copy from 'gl-mat4/copy';
 import mat4_invert from 'gl-mat4/invert';
 import mat4_multiply from 'gl-mat4/multiply';
 import vec4_transformMat4 from 'gl-vec4/transformMat4';
@@ -37,6 +36,7 @@ function fp64ify(a) {
 const ZERO_VECTOR = [0, 0, 0, 0];
 // 4x4 matrix that drops 4th component of vector
 const VECTOR_TO_POINT_MATRIX = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0];
+const IDENTITY_MATRIX = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
 
 // The code that utilizes Matrix4 does the same calculation as their mat4 counterparts,
 // has lower performance but provides error checking.
@@ -44,21 +44,17 @@ const VECTOR_TO_POINT_MATRIX = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0];
 function calculateMatrixAndOffset({
   projectionMode,
   positionOrigin,
-  viewport,
-  modelMatrix
+  viewport
 }) {
-  const {viewMatrixUncentered, viewMatrix, projectionMatrix, viewProjectionMatrix} = viewport;
-
+  const {viewMatrixUncentered, projectionMatrix} = viewport;
+  let {viewMatrix, viewProjectionMatrix} = viewport;
   let projectionCenter;
-  let modelViewMatrix;
 
   switch (projectionMode) {
 
   case COORDINATE_SYSTEM.IDENTITY:
   case COORDINATE_SYSTEM.LNGLAT:
     projectionCenter = ZERO_VECTOR;
-    // modelViewMatrix = new Matrix4(viewMatrix);
-    modelViewMatrix = mat4_copy([], viewMatrix);
     break;
 
   // TODO: make lighitng work for meter offset mode
@@ -75,30 +71,22 @@ function calculateMatrixAndOffset({
 
     // Always apply uncentered projection matrix if available (shader adds center)
     // Zero out 4th coordinate ("after" model matrix) - avoids further translations
-    // modelViewMatrix = new Matrix4(viewMatrixUncentered || viewMatrix)
+    // viewMatrix = new Matrix4(viewMatrixUncentered || viewMatrix)
     //   .multiplyRight(VECTOR_TO_POINT_MATRIX);
-    modelViewMatrix = mat4_multiply([], viewMatrixUncentered || viewMatrix, VECTOR_TO_POINT_MATRIX);
+    viewMatrix = mat4_multiply([], viewMatrixUncentered || viewMatrix, VECTOR_TO_POINT_MATRIX);
+    viewProjectionMatrix = mat4_multiply([], projectionMatrix, viewMatrix);
     break;
 
   default:
     throw new Error('Unknown projection mode');
   }
 
-  const viewMatrixInv = mat4_invert([], modelViewMatrix) || modelViewMatrix;
-
-  if (modelMatrix) {
-    // Apply model matrix if supplied
-    // modelViewMatrix.multiplyRight(modelMatrix);
-    mat4_multiply(modelViewMatrix, modelViewMatrix, modelMatrix);
-  }
-
-  // const modelViewProjectionMatrix = new Matrix4(projectionMatrix).multiplyRight(modelViewMatrix);
-  const modelViewProjectionMatrix = mat4_multiply([], projectionMatrix, modelViewMatrix);
+  const viewMatrixInv = mat4_invert([], viewMatrix) || viewMatrix;
   const cameraPos = [viewMatrixInv[12], viewMatrixInv[13], viewMatrixInv[14]];
 
   return {
-    modelViewMatrix,
-    modelViewProjectionMatrix,
+    viewMatrix,
+    viewProjectionMatrix,
     projectionCenter,
     cameraPos
   };
@@ -125,19 +113,12 @@ export function getUniformsFromViewport({
 
   assert(viewport.scale, 'Viewport scale missing');
 
-  const {projectionCenter, modelViewMatrix, modelViewProjectionMatrix, cameraPos} =
-    calculateMatrixAndOffset({projectionMode, positionOrigin, modelMatrix, viewport});
-
-  assert(modelViewProjectionMatrix, 'Viewport missing modelViewProjectionMatrix');
+  const {projectionCenter, viewMatrix, viewProjectionMatrix, cameraPos} =
+    calculateMatrixAndOffset({projectionMode, positionOrigin, viewport});
 
   // Calculate projection pixels per unit
-  const projectionPixelsPerUnit = viewport.getDistanceScales().pixelsPerMeter;
-  assert(projectionPixelsPerUnit, 'Viewport missing pixelsPerMeter');
-
-  // calculate WebGL matrices
-
-  // Convert to Float32
-  const glProjectionMatrix = new Float32Array(modelViewProjectionMatrix);
+  const {pixelsPerMeter} = viewport.getDistanceScales();
+  assert(pixelsPerMeter, 'Viewport missing pixelsPerMeter');
 
   // "Float64Array"
   // Transpose the projection matrix to column major for GLSL.
@@ -147,7 +128,7 @@ export function getUniformsFromViewport({
       [
         glProjectionMatrixFP64[(i * 4 + j) * 2],
         glProjectionMatrixFP64[(i * 4 + j) * 2 + 1]
-      ] = fp64ify(modelViewProjectionMatrix[j * 4 + i]);
+      ] = fp64ify(viewProjectionMatrix[j * 4 + i]);
     }
   }
 
@@ -158,19 +139,17 @@ export function getUniformsFromViewport({
     projectionMode,
     projectionCenter,
 
-    // modelMatrix: modelMatrix || new Matrix4().identity(),
-    modelViewMatrix: new Float32Array(modelViewMatrix),
-
     // Screen size
     viewportSize: [viewport.width * devicePixelRatio, viewport.height * devicePixelRatio],
     devicePixelRatio,
 
     // Main projection matrices
-    projectionMatrix: glProjectionMatrix,
-    projectionMatrixUncentered: glProjectionMatrix,
+    modelMatrix: new Float32Array(modelMatrix || IDENTITY_MATRIX),
+    viewMatrix: new Float32Array(viewMatrix),
+    projectionMatrix: new Float32Array(viewProjectionMatrix),
     projectionFP64: glProjectionMatrixFP64,
 
-    projectionPixelsPerUnit,
+    projectionPixelsPerUnit: pixelsPerMeter,
     projectionScale: viewport.scale, // This is the mercator scale (2 ** zoom)
     projectionScaleFP64: fp64ify(viewport.scale), // Deprecated?
 
