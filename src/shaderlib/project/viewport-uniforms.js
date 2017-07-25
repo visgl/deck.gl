@@ -151,8 +151,12 @@ export function getUniformsFromViewport({
     projectionFP64: glProjectionMatrixFP64,
 
     projectionPixelsPerUnit: pixelsPerMeter,
-    projectionPixelsPerDegree: pixelsPerDegree,
-    degreesPerUnit: degreesPerMeter,
+    projectionPixelsPerUnitUTM: [
+      degreesPerMeter[0] * pixelsPerDegree[0],
+      degreesPerMeter[1] * pixelsPerDegree[1],
+      degreesPerMeter[2] * pixelsPerDegree[0],
+      degreesPerMeter[3] * pixelsPerDegree[1]
+    ],
     projectionScale: viewport.scale, // This is the mercator scale (2 ** zoom)
     projectionScaleFP64: fp64ify(viewport.scale), // Deprecated?
 

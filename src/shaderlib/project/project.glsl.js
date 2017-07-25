@@ -33,8 +33,7 @@ uniform float projectionMode;
 uniform float projectionScale;
 uniform vec4 projectionCenter;
 uniform vec3 projectionPixelsPerUnit;
-uniform vec3 projectionPixelsPerDegree;
-uniform mat2 degreesPerUnit;
+uniform mat2 projectionPixelsPerUnitUTM;
 
 uniform mat4 modelMatrix;
 uniform mat4 projectionMatrix;
@@ -50,9 +49,7 @@ float project_scale(float meters) {
 
 vec2 project_scale(vec2 meters) {
   if (projectionMode == PROJECT_UTM_OFFSETS) {
-    return vec2(
-      meters * degreesPerUnit * projectionPixelsPerDegree.xy
-    );
+    return meters * projectionPixelsPerUnitUTM;
   }
   return meters * projectionPixelsPerUnit.xy;
 }
