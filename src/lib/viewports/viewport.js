@@ -35,7 +35,9 @@ const DEFAULT_DISTANCE_SCALES = {
   pixelsPerMeter: [1, 1, 1],
   metersPerPixel: [1, 1, 1],
   pixelsPerDegree: [1, 1, 1],
-  degreesPerPixel: [1, 1, 1]
+  degreesPerPixel: [1, 1, 1],
+  metersPerDegree: [1, 0, 0, 1],
+  degreesPerMeter: [1, 0, 0, 1]
 };
 
 const ERR_ARGUMENT = 'Illegal argument to Viewport';

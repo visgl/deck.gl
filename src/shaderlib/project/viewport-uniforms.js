@@ -59,6 +59,7 @@ function calculateMatrixAndOffset({
 
   // TODO: make lighitng work for meter offset mode
   case COORDINATE_SYSTEM.METER_OFFSETS:
+  case COORDINATE_SYSTEM.UTM_OFFSETS:
     // Calculate transformed projectionCenter (in 64 bit precision)
     // This is the key to offset mode precision (avoids doing this
     // addition in 32 bit precision)
@@ -117,7 +118,7 @@ export function getUniformsFromViewport({
     calculateMatrixAndOffset({projectionMode, positionOrigin, viewport});
 
   // Calculate projection pixels per unit
-  const {pixelsPerMeter} = viewport.getDistanceScales();
+  const {pixelsPerMeter, pixelsPerDegree, degreesPerMeter} = viewport.getDistanceScales();
   assert(pixelsPerMeter, 'Viewport missing pixelsPerMeter');
 
   // "Float64Array"
@@ -150,6 +151,8 @@ export function getUniformsFromViewport({
     projectionFP64: glProjectionMatrixFP64,
 
     projectionPixelsPerUnit: pixelsPerMeter,
+    projectionPixelsPerDegree: pixelsPerDegree,
+    degreesPerUnit: degreesPerMeter,
     projectionScale: viewport.scale, // This is the mercator scale (2 ** zoom)
     projectionScaleFP64: fp64ify(viewport.scale), // Deprecated?
 
