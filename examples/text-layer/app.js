@@ -4,13 +4,14 @@ import React, {Component} from 'react';
 import {render} from 'react-dom';
 import MapGL from 'react-map-gl';
 import DeckGLOverlay from './deckgl-overlay.js';
-import MAP_STYLE from './style/map-style-dark-v9.json';
 import {fromJS} from 'immutable';
 import {json as requestJson} from 'd3-request';
 import Stats from 'stats.js';
 
 // Set your mapbox token here
 const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
+// mapbox style file path
+const MAPBOX_STYLE_FILE = 'https://rivulet-zhang.github.io/dataRepo/mapbox/style/map-style-dark-v9-no-labels.json';
 // sample data
 const FILE_PATH = 'https://rivulet-zhang.github.io/dataRepo/text-layer/hashtagsOneDayWithTime.json';
 const SECONDS_PER_DAY = 24 * 60 * 60;
@@ -27,9 +28,9 @@ class Root extends Component {
         ...DeckGLOverlay.defaultViewport,
         width: 500,
         height: 500
-      },
-      mapStyle: this._removeLabelFromMapStyle(fromJS(MAP_STYLE))
+      }
     };
+    this._loadMapStyle();
   }
 
   componentWillMount() {
@@ -69,6 +70,17 @@ class Root extends Component {
     });
   }
 
+  _loadMapStyle() {
+    requestJson(MAPBOX_STYLE_FILE, (error, response) => {
+      if (!error) {
+        const mapStyle = fromJS(response);
+        this.setState({mapStyle});
+      } else {
+        throw new Error(error.toString());
+      }
+    });
+  }
+
   _loadData() {
     requestJson(FILE_PATH, (error, response) => {
       if (!error) {
@@ -83,14 +95,6 @@ class Root extends Component {
         throw new Error(error.toString());
       }
     });
-  }
-
-  _removeLabelFromMapStyle(mapStyle) {
-    const LABEL_REG = /label|place|poi/;
-    const layers = mapStyle.get('layers').filter(layer => {
-      return !LABEL_REG.test(layer.get('id'));
-    });
-    return mapStyle.set('layers', layers);
   }
 
   _animateData() {
@@ -137,6 +141,7 @@ class Root extends Component {
         <MapGL
           {...viewport}
           mapStyle={mapStyle}
+          preventStyleDiffing={true}
           onViewportChange={this._onViewportChange.bind(this)}
           mapboxApiAccessToken={MAPBOX_TOKEN}>
           <DeckGLOverlay
