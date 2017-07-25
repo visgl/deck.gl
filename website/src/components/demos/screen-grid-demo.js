@@ -1,13 +1,13 @@
 import React, {Component} from 'react';
 import {readableInteger} from '../../utils/format-utils';
-import {MAPBOX_STYLES} from '../../constants/defaults';
+import {MAPBOX_STYLES, DATA_URI} from '../../constants/defaults';
 import ScreenGridOverlay from '../../../../examples/screen-grid/deckgl-overlay';
 
 export default class ScreenGridDemo extends Component {
 
   static get data() {
     return {
-      url: 'data/screen-grid-data.txt',
+      url: `${DATA_URI}/screen-grid-data.txt`,
       worker: 'workers/screen-grid-data-decoder.js'
     };
   }

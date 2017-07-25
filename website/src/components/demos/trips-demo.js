@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 
-import {MAPBOX_STYLES} from '../../constants/defaults';
+import {MAPBOX_STYLES, DATA_URI} from '../../constants/defaults';
 import {readableInteger} from '../../utils/format-utils';
 import ViewportAnimation from '../../utils/map-utils';
 import TripsOverlay from '../../../../examples/trips/deckgl-overlay';
@@ -10,11 +10,11 @@ export default class TripsDemo extends Component {
   static get data() {
     return [
       {
-        url: 'data/trips-data.txt',
+        url: `${DATA_URI}/trips-data.txt`,
         worker: 'workers/trips-data-decoder.js?loop=1800&trail=180'
       },
       {
-        url: 'data/building-data.txt',
+        url: `${DATA_URI}/building-data.txt`,
         worker: 'workers/building-data-decoder.js'
       }
     ];

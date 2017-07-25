@@ -36,3 +36,5 @@ export const DEFAULT_APP_STATE = {
   headerOpacity: 1,
   isMenuOpen: false
 };
+
+export const DATA_URI = 'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/website';

@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import {MAPBOX_STYLES} from '../../constants/defaults';
+import {MAPBOX_STYLES, DATA_URI} from '../../constants/defaults';
 import {readableInteger} from '../../utils/format-utils';
 import ScatterplotOverlay from '../../../../examples/scatterplot/deckgl-overlay';
 
@@ -7,7 +7,7 @@ export default class ScatterPlotDemo extends Component {
 
   static get data() {
     return {
-      url: 'data/scatterplot-data.txt',
+      url: `${DATA_URI}/scatterplot-data.txt`,
       worker: 'workers/scatterplot-data-decoder.js'
     };
   }

@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import {MAPBOX_STYLES} from '../../constants/defaults';
+import {MAPBOX_STYLES, DATA_URI} from '../../constants/defaults';
 import {readableInteger} from '../../utils/format-utils';
 import IconOverlay from '../../../../examples/icon/deckgl-overlay';
 
@@ -12,7 +12,7 @@ export default class IconDemo extends Component {
   static get data() {
     return [
       {
-        url: 'data/meteorites.txt',
+        url: `${DATA_URI}/meteorites.txt`,
         worker: 'workers/meteorites-decoder.js'
       },
       {

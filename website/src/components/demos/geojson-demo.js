@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 import {readableInteger} from '../../utils/format-utils';
-import {MAPBOX_STYLES} from '../../constants/defaults';
+import {MAPBOX_STYLES, DATA_URI} from '../../constants/defaults';
 import GeoJsonOverlay from '../../../../examples/geojson/deckgl-overlay';
 
 const COLOR_SCALE = [
@@ -34,7 +34,7 @@ export default class GeoJsonDemo extends Component {
 
   static get data() {
     return {
-      url: 'data/vancouver-blocks.txt',
+      url: `${DATA_URI}/vancouver-blocks.txt`,
       worker: 'workers/geojson-data-decoder.js'
     };
   }
