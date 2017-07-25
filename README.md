@@ -9,7 +9,7 @@ This blog is part of the deck.gl demo website. It is designed to work both stand
 
 ### Start Local Server
 
-    jekyll serve
+    (bundle exec) jekyll serve
 
 Open `localhost:4000/blog/` in your browser (mind the last slash).
 
@@ -27,4 +27,4 @@ Open `localhost:4000/blog/` in your browser (mind the last slash).
 
 ### Build
 
-    jekyll build
+    (bundle exec) jekyll build
