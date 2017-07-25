@@ -113,7 +113,7 @@ export function getUniformsFromViewport({
 
   assert(viewport.scale, 'Viewport scale missing');
 
-  const {projectionCenter, viewMatrix, viewProjectionMatrix, cameraPos} =
+  const {projectionCenter, viewProjectionMatrix, cameraPos} =
     calculateMatrixAndOffset({projectionMode, positionOrigin, viewport});
 
   // Calculate projection pixels per unit
@@ -145,7 +145,7 @@ export function getUniformsFromViewport({
 
     // Main projection matrices
     modelMatrix: new Float32Array(modelMatrix || IDENTITY_MATRIX),
-    viewMatrix: new Float32Array(viewMatrix),
+    // viewMatrix: new Float32Array(viewMatrix),
     projectionMatrix: new Float32Array(viewProjectionMatrix),
     projectionFP64: glProjectionMatrixFP64,
 
