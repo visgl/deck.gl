@@ -33,38 +33,32 @@ uniform float projectionScale;
 uniform vec4 projectionCenter;
 uniform vec3 projectionPixelsPerUnit;
 
-uniform mat4 modelViewMatrix;
+uniform mat4 modelMatrix;
 uniform mat4 projectionMatrix;
-uniform mat4 projectionMatrixUncentered;
 
 //
 // Scaling offsets
 //
 
+// the scalar version of project_scale is for scaling the z component only
 float project_scale(float meters) {
-  return meters * projectionPixelsPerUnit.x;
+  return meters * projectionPixelsPerUnit.z;
 }
 
 vec2 project_scale(vec2 meters) {
-  return vec2(
-    meters.x * projectionPixelsPerUnit.x,
-    meters.y * projectionPixelsPerUnit.x
-  );
+  return meters * projectionPixelsPerUnit.xy;
 }
 
 vec3 project_scale(vec3 meters) {
   return vec3(
-    meters.x * projectionPixelsPerUnit.x,
-    meters.y * projectionPixelsPerUnit.x,
-    meters.z * projectionPixelsPerUnit.x
+    project_scale(meters.xy),
+    project_scale(meters.z)
   );
 }
 
 vec4 project_scale(vec4 meters) {
   return vec4(
-    meters.x * projectionPixelsPerUnit.x,
-    meters.y * projectionPixelsPerUnit.x,
-    meters.z * projectionPixelsPerUnit.x,
+    project_scale(meters.xyz),
     meters.w
   );
 }
@@ -81,37 +75,34 @@ vec2 project_mercator_(vec2 lnglat) {
   );
 }
 
-vec2 project_position(vec2 position) {
-  if (projectionMode == PROJECT_IDENTITY) {
-    return position;
+vec4 project_position(vec4 position) {
+
+  if (projectionMode == PROJECT_MERCATOR) {
+    return vec4(
+      project_mercator_(position.xy) * WORLD_SCALE * projectionScale,
+      project_scale(position.z),
+      position.w
+    );
   }
-  if (projectionMode == PROJECT_MERCATOR_OFFSETS) {
-    return project_scale(position);
-  }
-  // Covers projectionMode == PROJECT_MERCATOR
-  return project_mercator_(position) * WORLD_SCALE * projectionScale;
+
+  // Apply model matrix
+  vec4 position_modelspace = modelMatrix * position;
+  return project_scale(position_modelspace);
 }
 
 vec3 project_position(vec3 position) {
-  return vec3(project_position(position.xy), project_scale(position.z));
+  vec4 projected_position = project_position(vec4(position, 1.0));
+  return projected_position.xyz;
 }
 
-vec4 project_position(vec4 position) {
-  return vec4(project_position(position.xyz), position.w);
-}
-
-//
-
-vec4 project_to_viewspace(vec4 position) {
-  if (projectionMode == PROJECT_MERCATOR_OFFSETS) {
-    position.w *= projectionPixelsPerUnit.x;
-  }
-  return modelViewMatrix * position;
+vec2 project_position(vec2 position) {
+  vec4 projected_position = project_position(vec4(position, 0.0, 1.0));
+  return projected_position.xy;
 }
 
 vec4 project_to_clipspace(vec4 position) {
   if (projectionMode == PROJECT_MERCATOR_OFFSETS) {
-    position.w *= projectionPixelsPerUnit.x;
+    position.w *= projectionPixelsPerUnit.z;
   }
   return projectionMatrix * position + projectionCenter;
 }

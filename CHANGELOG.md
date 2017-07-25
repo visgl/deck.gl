@@ -17,6 +17,9 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## Beta Releases
 
+[TBD]
+- Fix projection error when using `modelMatrix` with `METER_OFFSETS` mode
+
 ### deck.gl v4.1.0-beta.6
 - Remove 'project' module in layer model creation as it's provided by default (#787)
 - Fix `HexagonCellLayer` cell size changes while zomming (#785)

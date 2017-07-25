@@ -51,7 +51,6 @@ uniform float projectionScale;
 uniform vec4 projectionCenter;
 uniform vec3 projectionPixelsPerUnit;
 uniform mat4 projectionMatrix;
-uniform mat4 projectionMatrixUncentered;
 
 #ifdef INTEL_TAN_WORKAROUND
 
