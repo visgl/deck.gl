@@ -103,9 +103,9 @@ const addProdConfig = config => {
     loader: 'babel-loader'
   });
 
-  module.exports = Object.assign(config, {
+  return Object.assign(config, {
     output: {
-      path: resolve(__dirname, '../dist'),
+      path: resolve(__dirname, './dist'),
       filename: 'bundle.js'
     }
   });
