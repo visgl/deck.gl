@@ -1,4 +1,5 @@
 import createLayerDemoClass from './layer-demo-base';
+import {DATA_URI} from '../../constants/defaults';
 
 import {
   ScatterplotLayer,
@@ -18,7 +19,7 @@ import {colorToRGBArray} from '../../utils/format-utils';
 
 export const ScatterplotLayerDemo = createLayerDemoClass({
   Layer: ScatterplotLayer,
-  dataUrl: 'data/bart-stations.json',
+  dataUrl: `${DATA_URI}/bart-stations.json`,
   formatTooltip: d => `${d.name}\n${d.address}`,
   props: {
     pickable: true,
@@ -34,7 +35,7 @@ export const ScatterplotLayerDemo = createLayerDemoClass({
 
 export const ArcLayerDemo = createLayerDemoClass({
   Layer: ArcLayer,
-  dataUrl: 'data/bart-segments.json',
+  dataUrl: `${DATA_URI}/bart-segments.json`,
   formatTooltip: d => `${d.from.name} to ${d.to.name}`,
   props: {
     pickable: true,
@@ -48,7 +49,7 @@ export const ArcLayerDemo = createLayerDemoClass({
 
 export const LineLayerDemo = createLayerDemoClass({
   Layer: LineLayer,
-  dataUrl: 'data/bart-segments.json',
+  dataUrl: `${DATA_URI}/bart-segments.json`,
   formatTooltip: d => `${d.from.name} to ${d.to.name}`,
   props: {
     pickable: true,
@@ -61,7 +62,7 @@ export const LineLayerDemo = createLayerDemoClass({
 
 export const PathLayerDemo = createLayerDemoClass({
   Layer: PathLayer,
-  dataUrl: 'data/bart-lines.json',
+  dataUrl: `${DATA_URI}/bart-lines.json`,
   formatTooltip: d => d.name,
   props: {
     pickable: true,
@@ -75,7 +76,7 @@ export const PathLayerDemo = createLayerDemoClass({
 
 export const IconLayerDemo = createLayerDemoClass({
   Layer: IconLayer,
-  dataUrl: 'data/bart-stations.json',
+  dataUrl: `${DATA_URI}/bart-stations.json`,
   formatTooltip: d => `${d.name}\n${d.address}`,
   props: {
     pickable: true,
@@ -100,7 +101,7 @@ export const IconLayerDemo = createLayerDemoClass({
 
 export const ScreenGridLayerDemo = createLayerDemoClass({
   Layer: ScreenGridLayer,
-  dataUrl: 'data/sf-bike-parking.json',
+  dataUrl: `${DATA_URI}/sf-bike-parking.json`,
   formatTooltip: d => 'aggregated cell',
   props: {
     pickable: false,
@@ -115,7 +116,7 @@ export const ScreenGridLayerDemo = createLayerDemoClass({
 
 export const GridLayerDemo = createLayerDemoClass({
   Layer: GridLayer,
-  dataUrl: 'data/sf-bike-parking.json',
+  dataUrl: `${DATA_URI}/sf-bike-parking.json`,
   formatTooltip: d => `${d.position.join(', ')}\nCount: ${d.count}`,
   props: {
     pickable: true,
@@ -128,7 +129,7 @@ export const GridLayerDemo = createLayerDemoClass({
 
 export const HexagonLayerDemo = createLayerDemoClass({
   Layer: HexagonLayer,
-  dataUrl: 'data/sf-bike-parking.json',
+  dataUrl: `${DATA_URI}/sf-bike-parking.json`,
   formatTooltip: d => `${d.centroid.join(', ')}\nCount: ${d.points.length}`,
   props: {
     pickable: true,
@@ -141,7 +142,7 @@ export const HexagonLayerDemo = createLayerDemoClass({
 
 export const PolygonLayerDemo = createLayerDemoClass({
   Layer: PolygonLayer,
-  dataUrl: 'data/sf-zipcodes.json',
+  dataUrl: `${DATA_URI}/sf-zipcodes.json`,
   formatTooltip: d => `${d.zipcode}\nPopulation: ${d.population}`,
   props: {
     pickable: true,
@@ -159,7 +160,7 @@ export const PolygonLayerDemo = createLayerDemoClass({
 
 export const GeoJsonLayerDemo = createLayerDemoClass({
   Layer: GeoJsonLayer,
-  dataUrl: 'data/bart.geo.json',
+  dataUrl: `${DATA_URI}/bart.geo.json`,
   formatTooltip: d => d.properties.name || d.properties.station,
   props: {
     pickable: true,
@@ -178,7 +179,7 @@ export const GeoJsonLayerDemo = createLayerDemoClass({
 
 export const PointCloudLayerDemo = createLayerDemoClass({
   Layer: PointCloudLayer,
-  dataUrl: 'data/pointcloud.json',
+  dataUrl: `${DATA_URI}/pointcloud.json`,
   formatTooltip: d => d.position.join(', '),
   props: {
     pickable: false,

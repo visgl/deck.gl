@@ -2,13 +2,13 @@ import React, {Component} from 'react';
 import {readableInteger} from '../../utils/format-utils';
 import HeatmapOverlay from '../../../../examples/3d-heatmap/deckgl-overlay';
 
-import {MAPBOX_STYLES} from '../../constants/defaults';
+import {MAPBOX_STYLES, DATA_URI} from '../../constants/defaults';
 
 export default class HeatmapDemo extends Component {
 
   static get data() {
     return {
-      url: 'data/heatmap-data.txt',
+      url: `${DATA_URI}/heatmap-data.txt`,
       worker: 'workers/heatmap-data-decoder.js'
     };
   }

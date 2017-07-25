@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 
-import {MAPBOX_STYLES} from '../../constants/defaults';
+import {MAPBOX_STYLES, DATA_URI} from '../../constants/defaults';
 import {readableInteger} from '../../utils/format-utils';
 import ArcOverlay, {inFlowColors, outFlowColors} from '../../../../examples/arc/deckgl-overlay';
 
@@ -11,7 +11,7 @@ export default class ArcDemo extends Component {
 
   static get data() {
     return {
-      url: 'data/arc-data.txt',
+      url: `${DATA_URI}/arc-data.txt`,
       worker: 'workers/arc-data-decoder.js'
     };
   }

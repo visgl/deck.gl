@@ -102,6 +102,10 @@ export const examplePages = generatePath([
           demo: 'TripsDemo',
           code: getCodeUrl('examples/trips')
         }
+      },
+      {
+        name: 'Wind Map',
+        external: 'http://philogb.github.io/page/wind/'
       }
     ]
   },

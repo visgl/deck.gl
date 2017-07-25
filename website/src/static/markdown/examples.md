@@ -69,6 +69,13 @@
       </a>
       </div>
   </div>
+  <div class="thumb">
+    <div class="bg-black" data-title="Wind Map" data-name="WebGL2">
+      <a href="http://philogb.github.io/page/wind/">
+        <img src="images/demo-thumb-wind.jpg" />
+      </a>
+      </div>
+  </div>
 </div>
 
 ### Beyond Maps

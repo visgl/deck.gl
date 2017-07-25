@@ -72,7 +72,7 @@ class Map extends Component {
   }
 
   @autobind
-  _onMouseMove(evt){
+  _onMouseMove(evt) {
     if (evt.nativeEvent) {
       this.setState({mousePosition: [evt.nativeEvent.offsetX, evt.nativeEvent.offsetY]});
     }

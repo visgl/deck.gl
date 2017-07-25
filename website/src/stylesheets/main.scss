@@ -103,6 +103,10 @@ header {
       @include linearGradientH(border-image, $primary, $secondary);
       border-image-slice: 2;
     }
+    .icon {
+      line-height: 0;
+      margin-left: 4px;
+    }
   }
 }
 

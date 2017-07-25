@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 import {readableInteger} from '../../utils/format-utils';
-import {MAPBOX_STYLES} from '../../constants/defaults';
+import {MAPBOX_STYLES, DATA_URI} from '../../constants/defaults';
 import LineOverlay from '../../../../examples/line/deckgl-overlay';
 
 export default class LineDemo extends Component {
@@ -8,11 +8,11 @@ export default class LineDemo extends Component {
   static get data() {
     return [
       {
-        url: 'data/flight-path-data.txt',
+        url: `${DATA_URI}/flight-path-data.txt`,
         worker: 'workers/flight-path-data-decoder.js'
       },
       {
-        url: 'data/airports.json'
+        url: `${DATA_URI}/airports.json`
       }
     ];
   }
