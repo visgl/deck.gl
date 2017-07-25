@@ -25,6 +25,7 @@ import Viewport, {createMat4} from './viewport';
 import {
   projectFlat, unprojectFlat,
   calculateDistanceScales,
+  calculateDistanceScalesUTM,
   makeProjectionMatrixFromMercatorParams, makeUncenteredViewMatrixFromMercatorParams
 } from '../../viewports/web-mercator-utils';
 
@@ -198,6 +199,13 @@ export default class WebMercatorViewport extends Viewport {
     return unprojectFlat(xy, scale);
   }
 
+  getDistanceScales({positionOrigin} = {}) {
+    if (positionOrigin) {
+      return Object.assign({}, this.distanceScales, calculateDistanceScalesUTM(positionOrigin));
+    }
+    return this.distanceScales;
+  }
+
   /*
   getLngLatAtViewportPosition(lnglat, xy) {
     const c = this.locationCoordinate(lnglat);
@@ -217,10 +225,10 @@ export default class WebMercatorViewport extends Viewport {
    * @param {[Number,Number]|[Number,Number,Number]) xyz - array of meter deltas
    * @return {[Number,Number]|[Number,Number,Number]) - array of [lng,lat,z] deltas
    */
-  metersToLngLatDelta(xyz) {
+  metersToLngLatDelta(lngLatZ, xyz) {
     const [x, y, z = 0] = xyz;
     assert(Number.isFinite(x) && Number.isFinite(y) && Number.isFinite(z), ERR_ARGUMENT);
-    const {degreesPerMeter} = this.distanceScales;
+    const {degreesPerMeter} = calculateDistanceScalesUTM(lngLatZ);
     const [deltaLng, deltaLat] = vec2_transformMat2([], xyz, degreesPerMeter);
     return xyz.length === 2 ? [deltaLng, deltaLat] : [deltaLng, deltaLat, z];
   }
@@ -234,11 +242,11 @@ export default class WebMercatorViewport extends Viewport {
    * @param {[Number,Number]|[Number,Number,Number]) deltaLngLatZ - array of [lng,lat,z] deltas
    * @return {[Number,Number]|[Number,Number,Number]) - array of meter deltas
    */
-  lngLatDeltaToMeters(deltaLngLatZ) {
+  lngLatDeltaToMeters(lngLatZ, deltaLngLatZ) {
     const [deltaLng, deltaLat, deltaZ = 0] = deltaLngLatZ;
     assert(Number.isFinite(deltaLng) && Number.isFinite(deltaLat) && Number.isFinite(deltaZ),
       ERR_ARGUMENT);
-    const {metersPerDegree} = this.distanceScales;
+    const {metersPerDegree} = calculateDistanceScalesUTM(lngLatZ);
     const [deltaX, deltaY] = vec2_transformMat2([], deltaLngLatZ, metersPerDegree);
     return deltaLngLatZ.length === 2 ? [deltaX, deltaY] : [deltaX, deltaY, deltaZ];
   }
@@ -255,7 +263,7 @@ export default class WebMercatorViewport extends Viewport {
    */
   addMetersToLngLat(lngLatZ, xyz) {
     const [lng, lat, Z = 0] = lngLatZ;
-    const [deltaLng, deltaLat, deltaZ = 0] = this.metersToLngLatDelta(xyz);
+    const [deltaLng, deltaLat, deltaZ = 0] = this.metersToLngLatDelta(lngLatZ, xyz);
     return lngLatZ.length === 2 ?
       [lng + deltaLng, lat + deltaLat] :
       [lng + deltaLng, lat + deltaLat, Z + deltaZ];

@@ -165,8 +165,8 @@ test('WebMercatorViewport.meterDeltas', t => {
     const viewport = new WebMercatorViewport(vc.mapState);
     for (const tc of TEST_VIEWPORTS) {
       const coordinate = [tc.mapState.longitude, tc.mapState.latitude, 0];
-      const deltaLngLat = viewport.metersToLngLatDelta(coordinate);
-      const deltaMeters = viewport.lngLatDeltaToMeters(deltaLngLat);
+      const deltaLngLat = viewport.metersToLngLatDelta(coordinate, coordinate);
+      const deltaMeters = viewport.lngLatDeltaToMeters(coordinate, deltaLngLat);
       t.comment(`Comparing [${deltaMeters}] to [${coordinate}]`);
       t.ok(equals(deltaMeters, coordinate));
     }

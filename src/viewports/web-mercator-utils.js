@@ -79,15 +79,35 @@ export function calculateDistanceScales({latitude, longitude, zoom, scale}) {
   // Calculate number of pixels occupied by one degree longitude
   // around current lat/lon
   const pixelsPerDegreeX = vec2_distance(
-    projectFlat([longitude + 0.005, latitude], scale),
-    projectFlat([longitude - 0.005, latitude], scale)
-  ) * 100;
+    projectFlat([longitude + 0.5, latitude], scale),
+    projectFlat([longitude - 0.5, latitude], scale)
+  );
   // Calculate number of pixels occupied by one degree latitude
   // around current lat/lon
   const pixelsPerDegreeY = vec2_distance(
-    projectFlat([longitude, latitude + 0.005], scale),
-    projectFlat([longitude, latitude - 0.005], scale)
-  ) * 100;
+    projectFlat([longitude, latitude + 0.5], scale),
+    projectFlat([longitude, latitude - 0.5], scale)
+  );
+
+  const worldSize = TILE_SIZE * scale;
+  const altPixelsPerMeter = worldSize / (4e7 * latCosine);
+  const pixelsPerMeter = [altPixelsPerMeter, altPixelsPerMeter, altPixelsPerMeter];
+  const metersPerPixel = [1 / altPixelsPerMeter, 1 / altPixelsPerMeter, 1 / altPixelsPerMeter];
+
+  const pixelsPerDegree = [pixelsPerDegreeX, pixelsPerDegreeY, altPixelsPerMeter];
+  const degreesPerPixel = [1 / pixelsPerDegreeX, 1 / pixelsPerDegreeY, 1 / altPixelsPerMeter];
+
+  // Main results, used for converting meters to latlng deltas and scaling offsets
+  return {
+    pixelsPerMeter,
+    metersPerPixel,
+    pixelsPerDegree,
+    degreesPerPixel
+  };
+}
+
+export function calculateDistanceScalesUTM(positionOrigin) {
+  const [longitude, latitude] = positionOrigin;
 
   // Calculate easting/northing difference per degree change in longitude/latitude
   // Reference points
@@ -105,20 +125,7 @@ export function calculateDistanceScales({latitude, longitude, zoom, scale}) {
     (north.northing - south.northing) * 100
   ];
 
-  const worldSize = TILE_SIZE * scale;
-  const altPixelsPerMeter = worldSize / (4e7 * latCosine);
-  const pixelsPerMeter = [altPixelsPerMeter, altPixelsPerMeter, altPixelsPerMeter];
-  const metersPerPixel = [1 / altPixelsPerMeter, 1 / altPixelsPerMeter, 1 / altPixelsPerMeter];
-
-  const pixelsPerDegree = [pixelsPerDegreeX, pixelsPerDegreeY, altPixelsPerMeter];
-  const degreesPerPixel = [1 / pixelsPerDegreeX, 1 / pixelsPerDegreeY, 1 / altPixelsPerMeter];
-
-  // Main results, used for converting meters to latlng deltas and scaling offsets
   return {
-    pixelsPerMeter,
-    metersPerPixel,
-    pixelsPerDegree,
-    degreesPerPixel,
     metersPerDegree,
     degreesPerMeter: mat2_invert([], metersPerDegree)
   };

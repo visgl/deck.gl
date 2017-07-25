@@ -43,7 +43,7 @@ const IDENTITY_MATRIX = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
 // Uncomment when debugging
 function calculateMatrixAndOffset({
   projectionMode,
-  positionOrigin,
+  positionOrigin = [0, 0],
   viewport
 }) {
   const {viewMatrixUncentered, projectionMatrix} = viewport;
@@ -106,7 +106,7 @@ export function getUniformsFromViewport({
   viewport,
   modelMatrix = null,
   projectionMode = COORDINATE_SYSTEM.LNGLAT,
-  positionOrigin = [0, 0]
+  positionOrigin
 } = {}) {
   if (!viewport) {
     return {};
@@ -118,8 +118,19 @@ export function getUniformsFromViewport({
     calculateMatrixAndOffset({projectionMode, positionOrigin, viewport});
 
   // Calculate projection pixels per unit
-  const {pixelsPerMeter, pixelsPerDegree, degreesPerMeter} = viewport.getDistanceScales();
+  const {pixelsPerMeter, pixelsPerDegree, degreesPerMeter} =
+    viewport.getDistanceScales({positionOrigin});
   assert(pixelsPerMeter, 'Viewport missing pixelsPerMeter');
+
+  let pixelsPerMeterUTM = ZERO_VECTOR;
+  if (projectionMode === COORDINATE_SYSTEM.UTM_OFFSETS) {
+    pixelsPerMeterUTM = [
+      degreesPerMeter[0] * pixelsPerDegree[0],
+      degreesPerMeter[1] * pixelsPerDegree[1],
+      degreesPerMeter[2] * pixelsPerDegree[0],
+      degreesPerMeter[3] * pixelsPerDegree[1]
+    ];
+  }
 
   // "Float64Array"
   // Transpose the projection matrix to column major for GLSL.
@@ -151,12 +162,7 @@ export function getUniformsFromViewport({
     projectionFP64: glProjectionMatrixFP64,
 
     projectionPixelsPerUnit: pixelsPerMeter,
-    projectionPixelsPerUnitUTM: [
-      degreesPerMeter[0] * pixelsPerDegree[0],
-      degreesPerMeter[1] * pixelsPerDegree[1],
-      degreesPerMeter[2] * pixelsPerDegree[0],
-      degreesPerMeter[3] * pixelsPerDegree[1]
-    ],
+    projectionPixelsPerUnitUTM: pixelsPerMeterUTM,
     projectionScale: viewport.scale, // This is the mercator scale (2 ** zoom)
     projectionScaleFP64: fp64ify(viewport.scale), // Deprecated?
 
