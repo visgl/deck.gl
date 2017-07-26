@@ -66,12 +66,6 @@ class Map extends Component {
   }
 
   @autobind
-  _onUpdateMap(viewport) {
-    this.props.onInteract();
-    this.props.updateMap(viewport);
-  }
-
-  @autobind
   _onMouseMove(evt) {
     if (evt.nativeEvent) {
       this.setState({mousePosition: [evt.nativeEvent.offsetX, evt.nativeEvent.offsetY]});
@@ -107,7 +101,8 @@ class Map extends Component {
 
           {...viewport}
           mapStyle={viewport.mapStyle || MAPBOX_STYLES.BLANK}
-          onViewportChange={isInteractive ? this._onUpdateMap : undefined}>
+          scrollZoom={isInteractive}
+          onViewportChange={isInteractive ? this.props.updateMap : undefined}>
 
           <DemoComponent ref="demo" viewport={viewport} params={params}
             onStateChange={this.props.updateMeta}
@@ -115,7 +110,7 @@ class Map extends Component {
             mouseEntered={this.state.mouseEntered}
             data={owner === demo ? data : null} />
 
-          {isInteractive && viewport.perspectiveEnabled &&
+          {isInteractive &&
             <div className="mapbox-tip">Hold down shift to rotate</div>}
 
         </MapGL>
@@ -131,7 +126,6 @@ const mapStateToProps = state => ({
 });
 
 Map.defaultProps = {
-  onInteract: () => {},
   isInteractive: true
 };
 

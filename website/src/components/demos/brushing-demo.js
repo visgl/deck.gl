@@ -2,7 +2,8 @@ import React, {Component} from 'react';
 
 import {MAPBOX_STYLES, DATA_URI} from '../../constants/defaults';
 import {readableInteger} from '../../utils/format-utils';
-import BrushingOverlay, {inFlowColors, outFlowColors} from '../../../../examples/brushing/deckgl-overlay';
+import BrushingOverlay, {inFlowColors, outFlowColors}
+  from '../../../../examples/brushing/deckgl-overlay';
 
 const colorRamp = inFlowColors.slice().reverse().concat(outFlowColors)
   .map(color => `rgb(${color.join(',')})`);
@@ -24,7 +25,8 @@ export default class BrushingDemo extends Component {
       enableBrushing: {displayName: 'Enable Brushing', type: 'checkbox', value: true},
       lineWidth: {displayName: 'Width', type: 'range', value: 1, step: 1, min: 1, max: 10},
       opacity: {displayName: 'Arc Opacity', type: 'range', value: 0.4, step: 0.01, min: 0, max: 1},
-      brushRadius: {displayName: 'Brush Radius', type: 'range', value: 200000, step: 1000, min: 50000, max: 1000000}
+      brushRadius: {displayName: 'Brush Radius', type: 'range', value: 200000, step: 1000,
+        min: 50000, max: 1000000}
     };
   }
 

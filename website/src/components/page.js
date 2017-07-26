@@ -14,7 +14,6 @@ class Page extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      mapHasFocus: true,
       content: this._loadContent(props.route.content)
     };
   }
@@ -53,32 +52,11 @@ class Page extends Component {
     });
   }
 
-  _setMapFocus(state) {
-    if (this.state.mapHasFocus !== state) {
-      this.setState({mapHasFocus: state});
-    }
-  }
-
-  @autobind _onMapFocus() {
-    this._setMapFocus(true);
-  }
-
-  @autobind _onMapBlur() {
-    this._setMapFocus(false);
-  }
-
   @autobind _renderDemo(name, sourceLink) {
-    const {mapHasFocus} = this.state;
-
     return (
       <div className="demo">
-        <Map
-          demo={name}
-          onInteract={this._onMapFocus} />
-        <InfoPanel
-          demo={name}
-          hasFocus={!mapHasFocus}
-          onInteract={this._onMapBlur} >
+        <Map demo={name} />
+        <InfoPanel demo={name} >
 
           {sourceLink && (<div className="source-link">
             <a href={sourceLink} target="_new">View Code ↗</a>
