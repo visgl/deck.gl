@@ -141,7 +141,7 @@ export const docPages = generatePath([
         content: getDocUrl('whats-new.md')
       },
       {
-        name: 'Upgrade From V3',
+        name: 'Upgrade Guide',
         content: getDocUrl('upgrade-guide.md')
       }
     ]

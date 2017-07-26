@@ -103,4 +103,4 @@ Parameters:
 - `attributeNames` (Array) - Array of attribute names to be removed
 
 ## Source
-[`src/lib/attribute-manager.js`](https://github.com/uber/deck.gl/blob/4.0-release/src/lib/attribute-manager.js)
+[`src/lib/attribute-manager.js`](https://github.com/uber/deck.gl/blob/4.1-release/src/lib/attribute-manager.js)

@@ -155,4 +155,4 @@ Remarks:
 - Note there is a limitation in the query methods: occluded objects are not returned. To improve the results, you may try setting the `layerIds` parameter to limit the query to fewer layers.
 
 ## Source
-[src/react/deckgl.js](https://github.com/uber/deck.gl/blob/4.0-release/src/react/deckgl.js)
+[src/react/deckgl.js](https://github.com/uber/deck.gl/blob/4.1-release/src/react/deckgl.js)
