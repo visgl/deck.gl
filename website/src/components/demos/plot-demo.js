@@ -57,7 +57,8 @@ export default class PlotDemo extends Component {
     const {viewport} = this.state;
 
     const canvasProps = {...viewport, width, height};
-    this._onViewportChange(OrbitController.getViewport(canvasProps).fitBounds([[0, 0, 0], [1, 1, 1]]));
+    this._onViewportChange(OrbitController.getViewport(canvasProps)
+      .fitBounds([[0, 0, 0], [1, 1, 1]]));
   }
 
   componentWillReceiveProps(nextProps) {
