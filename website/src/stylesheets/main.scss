@@ -163,6 +163,9 @@ button:focus, input:focus {
   width: 100%;
   overflow: hidden;
 }
+.container.stretch {
+  max-width: 100%;
+}
 .container.soft-left {
   padding-left: 72px;
 }

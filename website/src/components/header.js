@@ -30,7 +30,7 @@ export default class Header extends Component {
     return (
       <header className={isMenuOpen ? 'open' : ''}>
         <div className="bg" style={{opacity}} />
-        <div className="container">
+        <div className="container stretch">
           <a className="logo" href="#">
             {FRAMEWORK_NAME}
           </a>
