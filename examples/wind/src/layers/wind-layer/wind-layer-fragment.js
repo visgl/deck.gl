@@ -53,6 +53,7 @@ uniform vec4 projectionCenter;
 uniform vec3 projectionPixelsPerUnit;
 uniform mat4 projectionMatrix;
 
+// TODO: this should get added by assembleShaders, verify and remove (other layers too).
 #ifdef INTEL_TAN_WORKAROUND
 
 // All these functions are for substituting tan() function from Intel GPU only
@@ -337,9 +338,11 @@ void main(void) {
   if (vColor.a == 0.) {
     discard;
   }
-  if (vAltitude < -90.) {
-    discard;
-  }
+  // TODO: this is not needed since we should remove vAltitude,
+  // but commenting this out renders wind outside of us too. (check boundingBox prop.)
+  // if (vAltitude < -90.) {
+  //   discard;
+  // }
   float lightWeight = getLightWeight(vPosition, vNormal.xyz);
   gl_FragColor = vec4(vColor.xyz * lightWeight, 1);
 }

@@ -3,7 +3,8 @@ import React, {Component, PropTypes} from 'react';
 import DeckGL, {ScatterplotLayer} from 'deck.gl';
 
 import WindLayer from './layers/wind-layer/wind-layer';
-import ElevationLayer from './layers/elevation-layer/elevation-layer';
+// import ElevationLayer from './layers/elevation-layer/elevation-layer';
+import DelaunayCoverLayer from './layers/delaunay-cover-layer/delaunay-cover-layer';
 import ParticleLayer from './layers/particle-layer/particle-layer';
 
 import {loadData} from './utils/load-data';
@@ -102,13 +103,17 @@ export default class WindDemo extends Component {
         dataTextureSize: texData.textureSize,
         time: settings.time
       }),
-      settings.showElevation && new ElevationLayer({
-        id: 'elevation',
-        boundingBox,
-        triangulation,
-        lngResolution: 200,
-        latResolution: 100,
-        zScale: 100
+      // settings.showElevation && new ElevationLayer({
+      //   id: 'elevation',
+      //   boundingBox,
+      //   triangulation,
+      //   lngResolution: 200,
+      //   latResolution: 100,
+      //   zScale: 100
+      // })
+      settings.showElevation && new DelaunayCoverLayer({
+        id: 'delaunay-cover',
+        triangulation
       })
       // FIXME - deck.gl should automatically cull null/false layers
     ].filter(Boolean);

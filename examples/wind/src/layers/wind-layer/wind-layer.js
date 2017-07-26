@@ -21,7 +21,8 @@ export default class WindLayer extends Layer {
 
   initializeState() {
     const {gl} = this.context;
-    const {dataTextureSize, originalBoundingBox} = this.props;
+    const {dataTextureSize, boundingBox} = this.props;
+    const originalBoundingBox = boundingBox;
 
     loadTextures(gl, {
       urls: [ELEVATION_DATA_IMAGE],
