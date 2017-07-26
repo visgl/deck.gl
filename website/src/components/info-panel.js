@@ -36,7 +36,7 @@ class InfoPanel extends Component {
 
     return (
       <div className={`options-panel top-right ${hasFocus ? 'focus' : ''}`}
-        ref="container" tabIndex="0"
+        tabIndex="0"
         onFocus={this._onFocus}
         onBlur={this._onBlur} >
 
