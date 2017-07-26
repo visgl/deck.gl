@@ -1,11 +1,12 @@
 import TripsDemo from './trips-demo';
+import {DATA_URI} from '../../constants/defaults';
 
 export default class HomeDemo extends TripsDemo {
 
   static get data() {
     return [
-      {...TripsDemo.data[0], url: 'data/trips-data-s.txt'},
-      {...TripsDemo.data[1], url: 'data/building-data-s.txt'}
+      {...TripsDemo.data[0], url: `${DATA_URI}/trips-data-s.txt`},
+      {...TripsDemo.data[1], url: `${DATA_URI}/building-data-s.txt`}
     ];
   }
 
