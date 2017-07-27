@@ -15,7 +15,23 @@ Each version should:
 Ref: http://keepachangelog.com/en/0.3.0/
 -->
 
+## Pre Releases
+
+### deck.gl v4.2
+
+#### [4.2.0-alpha.2]
+
+- Add: UTM_OFFSETS projection mode
+
+
 ## Official Releases
+
+### deck.gl v4.1
+
+#### [4.1.0] - 2017-7-27 Minor deck.gl Release
+
+For details see [What's New](https://github.com/uber/deck.gl/blob/4.1-release/docs/whats-new.md)
+
 
 ### deck.gl v4.0
 
