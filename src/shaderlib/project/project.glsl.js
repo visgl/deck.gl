@@ -49,6 +49,8 @@ float project_scale(float meters) {
 
 vec2 project_scale(vec2 meters) {
   if (projectionMode == PROJECT_UTM_OFFSETS) {
+    // In UTM projection mode, latitude and longitude are no longer independent
+    // in the scaling transformation. The scaler is therefore a mat2.
     return meters * projectionPixelsPerUnitUTM;
   }
   return meters * projectionPixelsPerUnit.xy;

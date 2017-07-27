@@ -222,6 +222,8 @@ export default class WebMercatorViewport extends Viewport {
    * Note: Uses simple linear approximation around the viewport center
    * Error increases with size of offset (roughly 1% per 100km)
    *
+   * @param {[Number,Number]|[Number,Number,Number]) lngLatZ - base coordinate
+   *   from which the delta is calculated
    * @param {[Number,Number]|[Number,Number,Number]) xyz - array of meter deltas
    * @return {[Number,Number]|[Number,Number,Number]) - array of [lng,lat,z] deltas
    */
@@ -239,6 +241,8 @@ export default class WebMercatorViewport extends Viewport {
    * Note: Uses simple linear approximation around the viewport center
    * Error increases with size of offset (roughly 1% per 100km)
    *
+   * @param {[Number,Number]|[Number,Number,Number]) lngLatZ - base coordinate
+   *   from which the delta is calculated
    * @param {[Number,Number]|[Number,Number,Number]) deltaLngLatZ - array of [lng,lat,z] deltas
    * @return {[Number,Number]|[Number,Number,Number]) - array of meter deltas
    */

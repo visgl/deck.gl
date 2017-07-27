@@ -106,6 +106,11 @@ export function calculateDistanceScales({latitude, longitude, zoom, scale}) {
   };
 }
 
+/**
+ * Calculate distance scales in meters around the given lat/lon
+ * In UTM projection mode, latitude and longitude are no longer independent
+ * in the scaling transformation. The scaler is therefore a mat2.
+ */
 export function calculateDistanceScalesUTM(positionOrigin) {
   const [longitude, latitude] = positionOrigin;
 
