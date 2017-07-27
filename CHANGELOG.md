@@ -15,158 +15,7 @@ Each version should:
 Ref: http://keepachangelog.com/en/0.3.0/
 -->
 
-## Beta Releases
-
-### deck.gl v4.1.0-beta.6
-- Remove 'project' module in layer model creation as it's provided by default (#787)
-- Fix `HexagonCellLayer` cell size changes while zomming (#785)
-- Fix point projection in `GridCellLayer` (#784)
-
-### deck.gl v4.1.0-beta.5
-
-- Fix `GridCellLayer` cellSize changing on zooming (#782)
-- Add `getSubLayerClass`, `getSubLayerProps` methods to `GridLayer` and `HexagonLayer` for easy subclassing (#783)
-- Add `pointRadiusScale`, `pointRadiusMinPixels` and `pointRadiusMaxPixels` props to GeoJsonLayer (#781)
-- FIX: Fix the bug in shaders of LabelLayer that rotation angle is clamped to 0 - 180 degree (#780)
-- Add the project module to the default module for our new shader system (#779)
-
-### deck.gl v4.1.0-beta.4
-- Picking clean up (#774)
-- Prevent picking when dragging (#775)
-- Controllers bug fix (#777)
-- Rename `settings` prop to `parameters`
-
-### deck.gl v4.1.0-beta.3
-- WEBSITE update (#768)
-- FIX: polygonOffset (#770)
-- Use luma.gl shader modules (#772)
-- DOC: Vis suite blog posts (#773)
-
-### deck.gl v4.1.0-beta.2
-- NEW: `getUniformsFromViewport` refactored into `project` shader module's `getUniforms`.
-- FIX: Update canvas size to match with device framebuffer size.
-- WEBSITE: Links to other frameworks (#753)
-- FIX: Avoid deep comparison error in compareProps when oldProp is empty (#754)
-- FIX: Fix the fluctuation of the end cap for path layer 64bit (#755)
-- MapController clean up (#757)
-- SIZE: Remove gl-matrix (#759
-- OrbitController clean up (#761)
-- EXAMPLE: Fix updateState issue in TagMap: add shouldUpdateState function (#762)
-- NEW: Replaced explicit calls to `assembleShaders` with `Model` parameters. (#764, #765, #767)
-
-### deck.gl v4.1.0-beta.1
-- webpack configuration cleanup
-- EXAMPLES: Experimental TagMap Layer (#735, @zhan1486)
-- FIX: Use external buffers for layer attributes
-- SEER integration upgrades (#744)
-- Import luma.gl v4.0.0-beta.1 (#752)
-
-### deck.gl v4.1.0-alpha.15
-
-- FIX: Tween.js import (#730, #734)
-- Example config files cleaned up (#731, #732)
-- queryVisibleObjects (renamed from queryObject) (#736)
-- Event Management Refactor (#738)
-- SEER integration upgrades (#740)
-- Graph Layer example refactor (#742)
-- New luma state management API
-- WEBSITE: demo renamed to website
-
-### deck.gl v4.1.0-alpha.14
-
-- "Stateless" picking (#717)
-- Lifecycle performance tuning (#721)
-- SEER performance badges (#720, #722)
-- Custom "spy" class to fix test-browser
-- FIX: Using external buffers for layer attributes
-- FIX: Shadercache import (#727)
-
-### deck.gl v4.1.0-alpha.13
-- Lifecycle tuning (#708)
-- Seer performance badges (#709)
-- Event Manager API Audit fixes (#710)
-- FIX external buffers for layer attributes (#711)
-- Travis CI fixes (#713)
-- Examples now on react-map-gl v3 (#714)
-- Stateless picking (uses new luma.gl features) (#715)
-- Custom spy for tests (#716)
-
-### deck.gl v4.1.0-alpha.12
-- Seer fix (#706)
-
-### deck.gl v4.1.0-alpha.11
-- EXAMPLE: PlotLayer example improvement (#689)
-- FIX: Fix 64-bit PathLayer (#704)
-- TEST: EventManager tests (#705)
-
-### deck.gl v4.1.0-alpha.10
-- FIX: fix point cloud examples bug (#680)
-- FIX: fix modelMatrix in meter offset mode (#678)
-- NEW: Add queryObjects api to DeckGL component (#673)
-- Flatten CompositeLayer.renderLayer() output (#676)
-
-### deck.gl v4.1.0-alpha.9
-- EXAMPLES: update the PlotLayer example with axis labels (#671)
-- FIX: Fix radiusMinPixels and radiusMaxPixels for METER_OFFSETS in scatterplot (#607)
-- TEST: Fix the rendering test (#672)
-- FIX: Use luma.gl v4.0.0-alpha.7 to resolve the texture loading issue (#665)
-
-### deck.gl v4.1.0-alpha.8
-
-- FIX: EventManager error in trackpad scroll
-- FIX: `mousemove` is fired twice during drag
-- FIX: drag events
-- FIX: error when dragging outside of the canvas
-- FIX: IconLayer does not rerender after texture is loaded
-
-### deck.gl v4.1.0-alpha.7
-
-- FIX: Import in node
-
-### deck.gl v4.1.0-alpha.6
-
-- FIX: Composite layers now pass `getPolygonOffset` prop to children
-- FIX: `PolygonLayer` and `GeoJsonLayer` order sublayers dynamically for better blending behavior
-
-### deck.gl v4.1.0-alpha.5
-
-- NEW: `getPolygonOffset` prop of the base Layer class (#649)
-- NEW: Modularize support for raw and gestural input events (#636)
-
-### deck.gl v4.1.0-alpha.4
-Versions 4.1.0 alpha 1, 2 and 3 have been unpublished due to a wrong tagging.
-
-- PERFORMANCE: Optimize encodePickingColor by replacing the naive math with bit-wise operations (#631)
-- FEAT: Add `pickingRadius` prop (#641)
-- FEAT: Seer integration and performace improvements
-- PERFORMANCE: Compiled are now cached for reuse so that same shaders are not recompiled for the same type of layers (#613)
-- PERFORMANCE: getViewportUniforms optimization (#586)
-- BREAKING: Only composite layers have `renderLayers` methods (#585)
-- BREAKING: Only primitive layers' `draw` methods are called during render (#585)
-- `GridLayer` add `coverage`, `lowerPercentile`, `upperPercentile` and `getColorValue` to layer prop (#614)
-- `IconLayer` add `getAngle` for rotating each icon with a specific angles (in degrees) (#625)
-- `HexagonLayer` add interval `getHexagons`, `getSortedCounts` `getUpdateTriggers` methods, make it easier to create layer subclass
-- `HexagonLayer` add `getColorValue` (optional) prop, returns a value to base bin color on.
-- `HexagonLayer` change default `hexagonAggregator` output to `{hexagons: [], hexagonVertices: []}`
-- `HexagonLayer` add `getValue` to `BinSorter` to support color / elevation by value
-- TEST: Implement code coverage with nyc and coverall report (#596)
-- HOTFIX: fix `HexagonLayer` hex color calculation, use `bin.value` instead of `bin.points.count` to calculate color
-- HOTFIX: Fix the bug that layer is finalized at every cycle due to an incorrect if check(#552)
-- HOTFIX: Fix the bug that Model got regenerated every time data is changed for SolidPolygonLayer (#554)
-- HOTFIX: Fix the bug that lighting is not working properly for 64-bit PolygonLayer on Intel Iris Pro GPU (#563)
-- DEMO: Fix brushing layer demo (#603)
-- DEMO: Fix the scrolling on iPhone (#546)
-- DEMO: Reorganized the examples (#547)
-- DEMO: Misc fixed form demo site (#548, #549)
-- KNOWN ISSUES: the IconLayer example doesn't work if use with luma.gl v4.0.0-alpha.1
-
 ## Official Releases
-
-### deck.gl v4.1
-
-#### [4.1.0] - 2017-7-26
-
-For details see [What's New](https://github.com/uber/deck.gl/blob/4.1-release/docs/whats-new.md)
 
 ### deck.gl v4.0
 
@@ -243,8 +92,6 @@ For details see [What's New](https://github.com/uber/deck.gl/blob/4.0-release/do
 
 For details see [What's New](docs/whats-new.md)
 
-
-
 ### deck.gl v2
 
 #### [2.4.10] - 2016-09-20
@@ -317,13 +164,159 @@ For details see [What's New](docs/whats-new.md)
   [luma.gl](https://github.com/uber/luma.gl)
 - Fixed picking on retina/regular display
 
-## deck.gl v1
+### deck.gl v1
 
 #### [1.0.0] - 2016-01-06
 - Initial commit of the open-source version of deck.gl
 
+## Beta Releases
 
-# Beta Releases
+### v4.1 Beta Releases
+
+#### deck.gl v4.1.0-beta.6
+- Remove 'project' module in layer model creation as it's provided by default (#787)
+- Fix `HexagonCellLayer` cell size changes while zomming (#785)
+- Fix point projection in `GridCellLayer` (#784)
+
+#### deck.gl v4.1.0-beta.5
+
+- Fix `GridCellLayer` cellSize changing on zooming (#782)
+- Add `getSubLayerClass`, `getSubLayerProps` methods to `GridLayer` and `HexagonLayer` for easy subclassing (#783)
+- Add `pointRadiusScale`, `pointRadiusMinPixels` and `pointRadiusMaxPixels` props to GeoJsonLayer (#781)
+- FIX: Fix the bug in shaders of LabelLayer that rotation angle is clamped to 0 - 180 degree (#780)
+- Add the project module to the default module for our new shader system (#779)
+
+#### deck.gl v4.1.0-beta.4
+- Picking clean up (#774)
+- Prevent picking when dragging (#775)
+- Controllers bug fix (#777)
+- Rename `settings` prop to `parameters`
+
+#### deck.gl v4.1.0-beta.3
+- WEBSITE update (#768)
+- FIX: polygonOffset (#770)
+- Use luma.gl shader modules (#772)
+- DOC: Vis suite blog posts (#773)
+
+#### deck.gl v4.1.0-beta.2
+- NEW: `getUniformsFromViewport` refactored into `project` shader module's `getUniforms`.
+- FIX: Update canvas size to match with device framebuffer size.
+- WEBSITE: Links to other frameworks (#753)
+- FIX: Avoid deep comparison error in compareProps when oldProp is empty (#754)
+- FIX: Fix the fluctuation of the end cap for path layer 64bit (#755)
+- MapController clean up (#757)
+- SIZE: Remove gl-matrix (#759
+- OrbitController clean up (#761)
+- EXAMPLE: Fix updateState issue in TagMap: add shouldUpdateState function (#762)
+- NEW: Replaced explicit calls to `assembleShaders` with `Model` parameters. (#764, #765, #767)
+
+#### deck.gl v4.1.0-beta.1
+- webpack configuration cleanup
+- EXAMPLES: Experimental TagMap Layer (#735, @zhan1486)
+- FIX: Use external buffers for layer attributes
+- SEER integration upgrades (#744)
+- Import luma.gl v4.0.0-beta.1 (#752)
+
+#### deck.gl v4.1.0-alpha.15
+
+- FIX: Tween.js import (#730, #734)
+- Example config files cleaned up (#731, #732)
+- queryVisibleObjects (renamed from queryObject) (#736)
+- Event Management Refactor (#738)
+- SEER integration upgrades (#740)
+- Graph Layer example refactor (#742)
+- New luma state management API
+- WEBSITE: demo renamed to website
+
+#### deck.gl v4.1.0-alpha.14
+
+- "Stateless" picking (#717)
+- Lifecycle performance tuning (#721)
+- SEER performance badges (#720, #722)
+- Custom "spy" class to fix test-browser
+- FIX: Using external buffers for layer attributes
+- FIX: Shadercache import (#727)
+
+#### deck.gl v4.1.0-alpha.13
+- Lifecycle tuning (#708)
+- Seer performance badges (#709)
+- Event Manager API Audit fixes (#710)
+- FIX external buffers for layer attributes (#711)
+- Travis CI fixes (#713)
+- Examples now on react-map-gl v3 (#714)
+- Stateless picking (uses new luma.gl features) (#715)
+- Custom spy for tests (#716)
+
+#### deck.gl v4.1.0-alpha.12
+- Seer fix (#706)
+
+#### deck.gl v4.1.0-alpha.11
+- EXAMPLE: PlotLayer example improvement (#689)
+- FIX: Fix 64-bit PathLayer (#704)
+- TEST: EventManager tests (#705)
+
+#### deck.gl v4.1.0-alpha.10
+- FIX: fix point cloud examples bug (#680)
+- FIX: fix modelMatrix in meter offset mode (#678)
+- NEW: Add queryObjects api to DeckGL component (#673)
+- Flatten CompositeLayer.renderLayer() output (#676)
+
+#### deck.gl v4.1.0-alpha.9
+- EXAMPLES: update the PlotLayer example with axis labels (#671)
+- FIX: Fix radiusMinPixels and radiusMaxPixels for METER_OFFSETS in scatterplot (#607)
+- TEST: Fix the rendering test (#672)
+- FIX: Use luma.gl v4.0.0-alpha.7 to resolve the texture loading issue (#665)
+
+#### deck.gl v4.1.0-alpha.8
+
+- FIX: EventManager error in trackpad scroll
+- FIX: `mousemove` is fired twice during drag
+- FIX: drag events
+- FIX: error when dragging outside of the canvas
+- FIX: IconLayer does not rerender after texture is loaded
+
+#### deck.gl v4.1.0-alpha.7
+
+- FIX: Import in node
+
+#### deck.gl v4.1.0-alpha.6
+
+- FIX: Composite layers now pass `getPolygonOffset` prop to children
+- FIX: `PolygonLayer` and `GeoJsonLayer` order sublayers dynamically for better blending behavior
+
+#### deck.gl v4.1.0-alpha.5
+
+- NEW: `getPolygonOffset` prop of the base Layer class (#649)
+- NEW: Modularize support for raw and gestural input events (#636)
+
+#### deck.gl v4.1.0-alpha.4
+Versions 4.1.0 alpha 1, 2 and 3 have been unpublished due to a wrong tagging.
+
+- PERFORMANCE: Optimize encodePickingColor by replacing the naive math with bit-wise operations (#631)
+- FEAT: Add `pickingRadius` prop (#641)
+- FEAT: Seer integration and performace improvements
+- PERFORMANCE: Compiled are now cached for reuse so that same shaders are not recompiled for the same type of layers (#613)
+- PERFORMANCE: getViewportUniforms optimization (#586)
+- BREAKING: Only composite layers have `renderLayers` methods (#585)
+- BREAKING: Only primitive layers' `draw` methods are called during render (#585)
+- `GridLayer` add `coverage`, `lowerPercentile`, `upperPercentile` and `getColorValue` to layer prop (#614)
+- `IconLayer` add `getAngle` for rotating each icon with a specific angles (in degrees) (#625)
+- `HexagonLayer` add interval `getHexagons`, `getSortedCounts` `getUpdateTriggers` methods, make it easier to create layer subclass
+- `HexagonLayer` add `getColorValue` (optional) prop, returns a value to base bin color on.
+- `HexagonLayer` change default `hexagonAggregator` output to `{hexagons: [], hexagonVertices: []}`
+- `HexagonLayer` add `getValue` to `BinSorter` to support color / elevation by value
+- TEST: Implement code coverage with nyc and coverall report (#596)
+- HOTFIX: fix `HexagonLayer` hex color calculation, use `bin.value` instead of `bin.points.count` to calculate color
+- HOTFIX: Fix the bug that layer is finalized at every cycle due to an incorrect if check(#552)
+- HOTFIX: Fix the bug that Model got regenerated every time data is changed for SolidPolygonLayer (#554)
+- HOTFIX: Fix the bug that lighting is not working properly for 64-bit PolygonLayer on Intel Iris Pro GPU (#563)
+- DEMO: Fix brushing layer demo (#603)
+- DEMO: Fix the scrolling on iPhone (#546)
+- DEMO: Reorganized the examples (#547)
+- DEMO: Misc fixed form demo site (#548, #549)
+- KNOWN ISSUES: the IconLayer example doesn't work if use with luma.gl v4.0.0-alpha.1
+
+### v4.0 Beta Releases
 
 #### [v4.0.0-rc.6]
 - Fix: remove postinstall script
@@ -381,7 +374,6 @@ For details see [What's New](docs/whats-new.md)
 - FIX: `ScatterplotLayer` calls Layer.updateState() to invalidate all attributes when data changed
 - FIX: Fix the `ExtrudedChoroplethLayer64` in deprecated layer examples
 - Replace all readFileSync() calls with Javascript imports for all GLSL shaders
-
 
 #### [v4.0.0-rc1]
 
@@ -465,7 +457,7 @@ DOCS
   - Moved docs into 4.0 subfolder to support publishing multiple doc versions
     from a single tree.
 
-
+### v3.1 Beta Releases
 
 #### [v3.1.0-beta.16] -
 - NEW: Main example now provides UI to modify layer props
@@ -557,7 +549,7 @@ Internal changes:
 - `WebGLViewport` now a wrapper around a supplied `Viewport` rather than a subclass.
 
 
-### Beta-3.0.0 Releases
+### v3.0 Beta Releases
 
 #### [v3.0.0-rc6] -
 - Support layerIndex uniform to solve z-fighting
