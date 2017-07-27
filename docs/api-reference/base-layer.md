@@ -204,17 +204,76 @@ manually override it using this prop.
 
 ##### `updateTriggers` (Object, optional)
 
-This prop expects an object of which the keys matching the accessor names of a layer.
-If any values in this object are changed between props update, the attribute corresponding
-to the accessors named by the key will be invalidated.
+Accessors such as `getColor` and `getPosition` are called to retrieve colors
+ and positions when a layer is first added. From then on, to maximize performance,
+ deck.gl does not recalculate colors or positions unless the `data` prop changes
+ by shallow comparison.
 
-Using this method, the attribute update can happen not only when the content of `data` prop
-changed, but also when the developer would like to manually force an attribute update.
+Sometimes `data` remains the same, but the outcome of an accessor has changed.
+ In the following example, this is caused by changes in the external values
+ `maleColor` and `femaleColor`:
+```
+  const layer = new ScatterplotLayer({
+    ... // Other props
+    getColor: d => d.male ? maleColor : femaleColor
+  });
+```
 
-Note: shallow comparision of the `data` prop has higher priority than the `updateTriggers`. So
-if the app to mint a new object on every render, all attributes will be automatically updated.
-updateTriggers cannot block attribute updates, just trigger them. To block the attribute updates,
-developers need to override the updateState.
+In this case, you need to explicitly inform deck.gl to re-evaluate `getColor`
+ for all data items. You do so by defining `updateTriggers`:
+```
+  const layer = new ScatterplotLayer({
+    ... // Other props
+    getColor: d => d.male ? maleColor : femaleColor,
+    updateTriggers: {
+        getColor: [maleColor, femaleColor]
+    }
+  });
+```
+
+`updateTriggers` expect an object whose keys are names of accessor props of this layer,
+ and values are one or more variables that affect the output of the accessors.
+
+For example, `updateTriggers.getColor` is a list of variables that affect the output of
+ `getColor`. If either value in the array changes, all attributes that depend on
+ `getColor` will be updated.
+The variables may be numbers, strings, objects or functions. During each rendering
+ cycle, deck.gl shallow-compares them with the previous values.
+
+
+Note: change of the `data` prop has higher priority than the `updateTriggers`.
+If the app supplies a new `data` object, then all attributes will be automatically updated,
+even if the updateTriggers have not changed.
+To block excessive attribute updates, set the
+[`dataComparator`](/docs/api-reference/base-layer.md#-datacomparator-function-optional-)
+prop.
+
+---
+
+### Render Properties
+
+##### `getPolygonOffset` (Function, optional)
+
+- Default: `({layerIndex}) => [0, -layerIndex * 100]`
+
+When multiple layers are rendered on the same plane, [z-fighting](https://en.wikipedia.org/wiki/Z-fighting)
+may create undesirable artifacts. To improve the visual quality of composition,
+deck.gl allows layers to use `gl.polygonOffset` to apply an offset to its depth.
+By default, each layer is offset a small amount by its index so that layers are cleanly stacked
+from bottom to top.
+
+This accessor takes a single parameter `uniform` - an object that contains the current render uniforms,
+and returns an array of two numbers `factor` and `units`.
+Negative values pull layer towards the camera, and positive values push layer away from the camera.
+For more information, refer to the
+[documentation](https://www.khronos.org/registry/OpenGL-Refpages/es2.0/xhtml/glPolygonOffset.xml)
+and [FAQ](https://www.opengl.org/archives/resources/faq/technical/polygonoffset.htm).
+
+If the accessor is assigned a falsy value, polygon offset will be set to `[0, 0]`.
+
+*Remarks: While this feature helps mitigate z-fighting, at close up zoom levels the issue
+might return because of the precision error of 32-bit projection matrices. Try set the
+`fp64` prop to `true` in this case.*
 
 ## Members
 
@@ -497,4 +556,4 @@ not covered by the layer. This color is guaranteed not to match any index value
 greater than or equal to zero.
 
 ## Source
-[src/lib/layer.js](https://github.com/uber/deck.gl/blob/4.0-release/src/lib/layer.js)
+[src/lib/layer.js](https://github.com/uber/deck.gl/blob/4.1-release/src/lib/layer.js)

@@ -1,19 +1,21 @@
+'use strict';
+
 importScripts('./util.js');
-let total = 0;
+var total = 0;
 
-onmessage = function(e) {
-  const lines = e.data.text.split('\n');
-  const result = [];
+onmessage = function onmessage(e) {
+  var lines = e.data.text.split('\n');
+  var result = [];
 
-  lines.forEach(function(line) {
+  lines.forEach(function (line) {
     if (!line) {
       return;
     }
-    const count = decodeNumber(line.slice(0, 2), 90, 32);
-    const coords = decodePolyline(line.slice(2));
-    for (let i = 0; i < coords.length; i++) {
-      const c = coords[i];
-      for (let j = 0; j < count; j++) {
+    var count = decodeNumber(line.slice(0, 2), 90, 32);
+    var coords = decodePolyline(line.slice(2));
+    for (var i = 0; i < coords.length; i++) {
+      var c = coords[i];
+      for (var j = 0; j < count; j++) {
         result.push(c);
         total++;
       }
@@ -22,6 +24,6 @@ onmessage = function(e) {
   postMessage({
     action: 'add',
     data: result,
-    meta: {count: total}
+    meta: { count: total }
   });
 };

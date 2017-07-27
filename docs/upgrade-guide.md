@@ -1,5 +1,47 @@
 # Upgrade Guide
 
+## Upgrading from deck.gl v4 to v4.1
+
+deck.gl v4.1 is a backward-compatible release. Most of the functionality and APIs remain unchanged but there are smaller changes that might requires developers' attention if they /**develop their own layers**.
+
+### luma.gl `Model` class API change
+The `gl` parameter is provided as a separate argument in luma.gl v4, instead of part of the options object.
+
+old: `new Model({gl: webglContext, ...opts})`
+
+new: `new Model(gl, {opts})`
+
+### Shader Assembly
+
+Custom layers are **not required** to call `assembleShaders` directly. Instead, the new `Model` class from luma.gl v4 will take shaders and the modules they are using as parameters and assemble shaders automatically.
+
+old:
+```
+const shaders = assembleShaders(gl, {
+	vs: arcVertex64,
+	fs: arcFragment,
+	modules: ['fp64', 'project64'],
+	shaderCache: this.context.shaderCache
+	});
+const model = new Model({
+	gl,
+	vs: shaders.vs,
+	fs: shaders.fs,
+	...
+	});
+```
+
+new:
+```
+const model = new Model(gl, {
+	vs: vertexShader,
+	fs: fragmentShader,
+	modules: ['fp64', ...],
+	shaderCache: this.context.shaderCache
+	...
+}));
+```
+
 ## Upgrading from deck.gl v3 to v4
 
 ### Changed Import: The `DeckGL` React component

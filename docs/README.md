@@ -1,6 +1,6 @@
 <p align="right">
-  <a href="https://github.com/uber/deck.gl/blob/4.0-release/docs/README.md">
-    <img src="https://img.shields.io/badge/current-v4-brightgreen.svg?style=flat-square" />
+  <a href="https://github.com/uber/deck.gl/blob/4.1-release/docs/README.md">
+    <img src="https://img.shields.io/badge/current-v4.1-brightgreen.svg?style=flat-square" />
   </a>
   <a href="https://github.com/uber/deck.gl/tree/3.0-release/docs">
     <img src="https://img.shields.io/badge/legacy-v3-green.svg?style=flat-square" />

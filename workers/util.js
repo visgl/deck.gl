@@ -1,16 +1,18 @@
+"use strict";
+
 function decodeNumberArr(str, b, shift, length) {
-  const result = [];
-  for (let j = 0; j < str.length; j += length) {
-    const token = str.slice(j, j + length);
+  var result = [];
+  for (var j = 0; j < str.length; j += length) {
+    var token = str.slice(j, j + length);
     result.push(decodeNumber(token, b, shift));
   }
   return result;
 }
 
 function decodeNumber(str, b, shift) {
-  let x = 0;
-  let p = 1;
-  for (let i = str.length; i--;) {
+  var x = 0;
+  var p = 1;
+  for (var i = str.length; i--;) {
     x += (str.charCodeAt(i) - shift) * p;
     p *= b;
   }
@@ -31,23 +33,23 @@ function decodeNumber(str, b, shift) {
  * @see https://github.com/Project-OSRM/osrm-frontend/blob/master/WebContent/routing/OSRM.RoutingGeometry.js
  */
 function decodePolyline(str, precision) {
-  let index = 0,
-    lat = 0,
-    lng = 0,
-    coordinates = [],
-    shift = 0,
-    result = 0,
-    byte = null,
-    latitude_change,
-    longitude_change,
-    factor = Math.pow(10, precision || 5);
+  var index = 0,
+      lat = 0,
+      lng = 0,
+      coordinates = [],
+      shift = 0,
+      result = 0,
+      byte = null,
+      latitude_change = void 0,
+      longitude_change = void 0,
+      factor = Math.pow(10, precision || 5);
 
-    // Coordinates have variable length when encoded, so just keep
-    // track of whether we've hit the end of the string. In each
-    // loop iteration, a single coordinate is decoded.
+  // Coordinates have variable length when encoded, so just keep
+  // track of whether we've hit the end of the string. In each
+  // loop iteration, a single coordinate is decoded.
   while (index < str.length) {
 
-        // Reset shift, result, and byte
+    // Reset shift, result, and byte
     byte = null;
     shift = 0;
     result = 0;
@@ -58,7 +60,7 @@ function decodePolyline(str, precision) {
       shift += 5;
     } while (byte >= 0x20);
 
-    latitude_change = ((result & 1) ? ~(result >> 1) : (result >> 1));
+    latitude_change = result & 1 ? ~(result >> 1) : result >> 1;
 
     shift = result = 0;
 
@@ -68,7 +70,7 @@ function decodePolyline(str, precision) {
       shift += 5;
     } while (byte >= 0x20);
 
-    longitude_change = ((result & 1) ? ~(result >> 1) : (result >> 1));
+    longitude_change = result & 1 ? ~(result >> 1) : result >> 1;
 
     lat += latitude_change;
     lng += longitude_change;

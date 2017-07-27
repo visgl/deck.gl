@@ -9,7 +9,7 @@
 The Icon Layer renders raster icons at given coordinates.
 
 ```js
-import DeckGL, {ArcLayer} from 'deck.gl';
+import DeckGL, {IconLayer} from 'deck.gl';
 
 const ICON_MAPPING = {
   marker: {x: 0, y: 0, width: 32, height: 32, mask: true}
@@ -98,6 +98,12 @@ Method called to retrieve the height of each icon, returns a number. Unit is pix
 
 Method called to retrieve the color of each object, returns `[r, g, b, a]`.
 If the alpha component is not supplied, it is set to `255`.
+
+##### `getAngle` (Function, optional)
+
+- Default: `d => d.angle || 0`
+
+Method called to retrieve the rotating angle (in degree) of each object, returns a number.
 
 ## Source
 

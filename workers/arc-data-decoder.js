@@ -1,21 +1,23 @@
+'use strict';
+
 importScripts('./util.js');
 
-const result = [];
-let flowCount = 0;
+var result = [];
+var flowCount = 0;
 
-onmessage = function(e) {
+onmessage = function onmessage(e) {
 
-  const lines = e.data.text.split('\n');
+  var lines = e.data.text.split('\n');
 
-  lines.forEach(function(line) {
+  lines.forEach(function (line) {
     if (!line) {
       return;
     }
-    const parts = line.split('\x01');
-    const f = {
+    var parts = line.split('\x01');
+    var f = {
       type: 'Feature',
       properties: {
-        name: `${parts[0].slice(0, -2) }, ${ parts[0].slice(-2)}`,
+        name: parts[0].slice(0, -2) + ', ' + parts[0].slice(-2),
         flows: decodeLinks(parts[1])
       },
       geometry: {
@@ -25,13 +27,13 @@ onmessage = function(e) {
 
     result.push(f);
 
-    let sumX = 0;
-    let sumY = 0;
-    let len = 0;
+    var sumX = 0;
+    var sumY = 0;
+    var len = 0;
 
-    f.geometry.coordinates = parts.slice(2).map(function(str) {
-      const coords = decodePolyline(str);
-      coords.forEach(function(c) {
+    f.geometry.coordinates = parts.slice(2).map(function (str) {
+      var coords = decodePolyline(str);
+      coords.forEach(function (c) {
         sumX += c[0];
         sumY += c[1];
         len++;
@@ -43,9 +45,9 @@ onmessage = function(e) {
   });
 
   if (e.data.event === 'load') {
-    result.forEach(function(f, i) {
-      const flows = f.properties.flows;
-      for (const toId in flows) {
+    result.forEach(function (f, i) {
+      var flows = f.properties.flows;
+      for (var toId in flows) {
         result[toId].properties.flows[i] = -flows[toId];
         flowCount++;
       }
@@ -56,19 +58,19 @@ onmessage = function(e) {
       data: result,
       meta: {
         count: result.length,
-        flowCount
+        flowCount: flowCount
       }
     });
-    postMessage({action: 'end'});
+    postMessage({ action: 'end' });
   }
 };
 
 function decodeLinks(str) {
-  const links = {};
-  const tokens = str.split(/([\x28-\x5b]+)/);
-  for (let i = 0; i < tokens.length - 1; i += 2) {
-    const index = decodeNumber(tokens[i], 32, 93);
-    const flow = decodeNumber(tokens[i + 1], 52, 40);
+  var links = {};
+  var tokens = str.split(/([\x28-\x5b]+)/);
+  for (var i = 0; i < tokens.length - 1; i += 2) {
+    var index = decodeNumber(tokens[i], 32, 93);
+    var flow = decodeNumber(tokens[i + 1], 52, 40);
     links[index] = flow;
   }
   return links;
