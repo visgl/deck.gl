@@ -44,4 +44,4 @@ Parameters:
   * `mode` (String) - One of `hover` or `click`
 
 ## Source
-[src/lib/layer-manager.js](https://github.com/uber/deck.gl/blob/4.0-release/src/lib/layer-manager.js)
+[src/lib/layer-manager.js](https://github.com/uber/deck.gl/blob/4.1-release/src/lib/layer-manager.js)

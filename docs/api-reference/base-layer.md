@@ -205,12 +205,12 @@ manually override it using this prop.
 ##### `updateTriggers` (Object, optional)
 
 Accessors such as `getColor` and `getPosition` are called to retrieve colors
- and positions when a layer is first added. From then on, to maximize performance, 
+ and positions when a layer is first added. From then on, to maximize performance,
  deck.gl does not recalculate colors or positions unless the `data` prop changes
  by shallow comparison.
 
 Sometimes `data` remains the same, but the outcome of an accessor has changed.
- In the following example, this is caused by changes in the external values 
+ In the following example, this is caused by changes in the external values
  `maleColor` and `femaleColor`:
 ```
   const layer = new ScatterplotLayer({
@@ -219,7 +219,7 @@ Sometimes `data` remains the same, but the outcome of an accessor has changed.
   });
 ```
 
-In this case, you need to explicitly inform deck.gl to re-evaluate `getColor` 
+In this case, you need to explicitly inform deck.gl to re-evaluate `getColor`
  for all data items. You do so by defining `updateTriggers`:
 ```
   const layer = new ScatterplotLayer({
@@ -244,7 +244,7 @@ The variables may be numbers, strings, objects or functions. During each renderi
 Note: change of the `data` prop has higher priority than the `updateTriggers`.
 If the app supplies a new `data` object, then all attributes will be automatically updated,
 even if the updateTriggers have not changed.
-To block excessive attribute updates, set the 
+To block excessive attribute updates, set the
 [`dataComparator`](/docs/api-reference/base-layer.md#-datacomparator-function-optional-)
 prop.
 
@@ -265,8 +265,8 @@ from bottom to top.
 This accessor takes a single parameter `uniform` - an object that contains the current render uniforms,
 and returns an array of two numbers `factor` and `units`.
 Negative values pull layer towards the camera, and positive values push layer away from the camera.
-For more information, refer to the 
-[documentation](https://www.khronos.org/registry/OpenGL-Refpages/es2.0/xhtml/glPolygonOffset.xml) 
+For more information, refer to the
+[documentation](https://www.khronos.org/registry/OpenGL-Refpages/es2.0/xhtml/glPolygonOffset.xml)
 and [FAQ](https://www.opengl.org/archives/resources/faq/technical/polygonoffset.htm).
 
 If the accessor is assigned a falsy value, polygon offset will be set to `[0, 0]`.
@@ -556,4 +556,4 @@ not covered by the layer. This color is guaranteed not to match any index value
 greater than or equal to zero.
 
 ## Source
-[src/lib/layer.js](https://github.com/uber/deck.gl/blob/4.0-release/src/lib/layer.js)
+[src/lib/layer.js](https://github.com/uber/deck.gl/blob/4.1-release/src/lib/layer.js)

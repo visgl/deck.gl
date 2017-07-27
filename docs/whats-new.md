@@ -1,6 +1,6 @@
 # deck.gl v4.1
 
-Release date: July 28th, 2017
+Release date: July 27th, 2017
 
 ## WebGL2 support provided by luma.gl v4
 
