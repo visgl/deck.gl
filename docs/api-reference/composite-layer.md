@@ -81,4 +81,4 @@ functions called.
 The default implementation returns `pickParams.info` without any change.
 
 ## Source
-[src/lib/composite-layer.js](https://github.com/uber/deck.gl/blob/4.0-release/src/lib/composite-layer.js)
+[src/lib/composite-layer.js](https://github.com/uber/deck.gl/blob/4.1-release/src/lib/composite-layer.js)
