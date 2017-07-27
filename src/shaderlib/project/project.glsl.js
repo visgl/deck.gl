@@ -27,11 +27,13 @@ const float WORLD_SCALE = TILE_SIZE / (PI * 2.0);
 const float PROJECT_IDENTITY = 0.;
 const float PROJECT_MERCATOR = 1.;
 const float PROJECT_MERCATOR_OFFSETS = 2.;
+const float PROJECT_UTM_OFFSETS = 4.;
 
 uniform float projectionMode;
 uniform float projectionScale;
 uniform vec4 projectionCenter;
 uniform vec3 projectionPixelsPerUnit;
+uniform mat2 projectionPixelsPerUnitUTM;
 
 uniform mat4 modelMatrix;
 uniform mat4 projectionMatrix;
@@ -46,6 +48,11 @@ float project_scale(float meters) {
 }
 
 vec2 project_scale(vec2 meters) {
+  if (projectionMode == PROJECT_UTM_OFFSETS) {
+    // In UTM projection mode, latitude and longitude are no longer independent
+    // in the scaling transformation. The scaler is therefore a mat2.
+    return meters * projectionPixelsPerUnitUTM;
+  }
   return meters * projectionPixelsPerUnit.xy;
 }
 
@@ -101,7 +108,7 @@ vec2 project_position(vec2 position) {
 }
 
 vec4 project_to_clipspace(vec4 position) {
-  if (projectionMode == PROJECT_MERCATOR_OFFSETS) {
+  if (projectionMode == PROJECT_MERCATOR_OFFSETS || projectionMode == PROJECT_UTM_OFFSETS) {
     position.w *= projectionPixelsPerUnit.z;
   }
   return projectionMatrix * position + projectionCenter;

@@ -5,7 +5,9 @@ import mat4_translate from 'gl-mat4/translate';
 import mat4_rotateX from 'gl-mat4/rotateX';
 import mat4_rotateZ from 'gl-mat4/rotateZ';
 import vec2_distance from 'gl-vec2/distance';
+import mat2_invert from 'gl-mat2/invert';
 import assert from 'assert';
+import * as utm from 'utm';
 
 // CONSTANTS
 const PI = Math.PI;
@@ -15,7 +17,7 @@ const RADIANS_TO_DEGREES = 180 / PI;
 const TILE_SIZE = 512;
 const WORLD_SCALE = TILE_SIZE;
 
-const METERS_PER_DEGREE_AT_EQUATOR = 111000; // Approximately 111km per degree at equator
+// const METERS_PER_DEGREE_AT_EQUATOR = 111000; // Approximately 111km per degree at equator
 
 // Helper, avoids low-precision 32 bit matrices from gl-matrix mat4.create()
 function createMat4() {
@@ -71,7 +73,8 @@ export function calculateDistanceScales({latitude, longitude, zoom, scale}) {
 
   const latCosine = Math.cos(latitude * Math.PI / 180);
 
-  const metersPerDegree = METERS_PER_DEGREE_AT_EQUATOR * latCosine;
+  // const metersPerDegreeX = METERS_PER_DEGREE_AT_EQUATOR * latCosine;
+  // const metersPerDegreeY = METERS_PER_DEGREE_AT_EQUATOR;
 
   // Calculate number of pixels occupied by one degree longitude
   // around current lat/lon
@@ -86,18 +89,13 @@ export function calculateDistanceScales({latitude, longitude, zoom, scale}) {
     projectFlat([longitude, latitude - 0.5], scale)
   );
 
-  const pixelsPerMeterX = pixelsPerDegreeX / metersPerDegree;
-  const pixelsPerMeterY = pixelsPerDegreeY / metersPerDegree;
-  const pixelsPerMeterZ = (pixelsPerMeterX + pixelsPerMeterY) / 2;
-  // const pixelsPerMeter = [pixelsPerMeterX, pixelsPerMeterY, pixelsPerMeterZ];
-
   const worldSize = TILE_SIZE * scale;
   const altPixelsPerMeter = worldSize / (4e7 * latCosine);
   const pixelsPerMeter = [altPixelsPerMeter, altPixelsPerMeter, altPixelsPerMeter];
-  const metersPerPixel = [1 / altPixelsPerMeter, 1 / altPixelsPerMeter, 1 / pixelsPerMeterZ];
+  const metersPerPixel = [1 / altPixelsPerMeter, 1 / altPixelsPerMeter, 1 / altPixelsPerMeter];
 
-  const pixelsPerDegree = [pixelsPerDegreeX, pixelsPerDegreeY, pixelsPerMeterZ];
-  const degreesPerPixel = [1 / pixelsPerDegreeX, 1 / pixelsPerDegreeY, 1 / pixelsPerMeterZ];
+  const pixelsPerDegree = [pixelsPerDegreeX, pixelsPerDegreeY, altPixelsPerMeter];
+  const degreesPerPixel = [1 / pixelsPerDegreeX, 1 / pixelsPerDegreeY, 1 / altPixelsPerMeter];
 
   // Main results, used for converting meters to latlng deltas and scaling offsets
   return {
@@ -105,6 +103,36 @@ export function calculateDistanceScales({latitude, longitude, zoom, scale}) {
     metersPerPixel,
     pixelsPerDegree,
     degreesPerPixel
+  };
+}
+
+/**
+ * Calculate distance scales in meters around the given lat/lon
+ * In UTM projection mode, latitude and longitude are no longer independent
+ * in the scaling transformation. The scaler is therefore a mat2.
+ */
+export function calculateDistanceScalesUTM(positionOrigin) {
+  const [longitude, latitude] = positionOrigin;
+
+  // Calculate easting/northing difference per degree change in longitude/latitude
+  // Reference points
+  const center = utm.fromLatLon(latitude, longitude);
+  const east = utm.fromLatLon(latitude, longitude + 0.005, center.zoneNum);
+  const west = utm.fromLatLon(latitude, longitude - 0.005, center.zoneNum);
+  const north = utm.fromLatLon(latitude + 0.005, longitude, center.zoneNum);
+  const south = utm.fromLatLon(latitude - 0.005, longitude, center.zoneNum);
+
+  // UTM northing/easting is not aligned with longitude/latitude
+  const metersPerDegree = [
+    (east.easting - west.easting) * 100,
+    (east.northing - west.northing) * 100,
+    (north.easting - south.easting) * 100,
+    (north.northing - south.northing) * 100
+  ];
+
+  return {
+    metersPerDegree,
+    degreesPerMeter: mat2_invert([], metersPerDegree)
   };
 }
 
