@@ -108,5 +108,19 @@ We'd love to hear from you if you have ideas about the suite and how we could im
 
 Enjoy!
 
-Ib Green, on behalf of
-The Visualization Team at Uber
+## Contributors
+
+This suite of frameworks was created by the Visualization Team at Uber. It is the result of a collaboration between a number of amazing contributors, including:
+[**Nicolas Garcia Belmonte**](https://github.com/philogb),
+[**Xiaoji Chen**](https://github.com/Pessimistress),
+[**Anh Mai**](https://github.com/abmai),
+[**Ib Green**](https://github.com/ibgreen),
+[**Shan He**](https://github.com/heshan0131),
+[**Eric Socolofsky**](https://github.com/ericsoco),
+[**Balthazar Gronon**](https://github.com/apercu),
+[**Yang Wang**](https://github.com/gnavvy),
+[**Ravi Akkenapally**](https://github.com/1chandu),
+[**Shaojing Li**](https://github.com/shaojingli)
+
+
+

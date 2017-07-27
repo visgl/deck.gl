@@ -1,7 +1,7 @@
 ---
 title: Introducing luma.gl v4.0
 description: In many ways v4.0 is the biggest luma.gl release to date. It is a major upgrade that brings full WebGL2 support to luma.gl, as well as adding advanced features such as GL state management and a shader module system.
-author: ib
+author: ib,
 tags:
   - Visualization
   - WebGL
@@ -135,7 +135,7 @@ Debugging GLSL shaders can be one of the more frustrating part of WebGL programm
 
 ## GPGPU Programming Highlights
 
-Enabling GPGPU (General Purpose GPU) programming, i.e. the use of the GPU for computations in addition to rendering is a major goal for luma.gl.
+Enabling [GPGPU (General Purpose GPU) programming](https://en.wikipedia.org/wiki/General-purpose_computing_on_graphics_processing_units), i.e. the use of the GPU for computations in addition to rendering is a major goal for luma.gl.
 
 While much more is planned for future releases, this is a quick overview of some of the features in v4 that facilitate GPGPU use cases:
 
@@ -209,3 +209,13 @@ Development luma.gl is by no means finished and here are some highlights of what
 * **More Shader Modules** - More shader modules will be provided. While the shader module system introduced in v4 is already useful, the real power will come from having a library of composable, documented, and tested shader modules. More examples will also be rewritten to take advantage of the shader module system.
 * **WebGL2 (Continued)** - More WEBGL2 enabled examples will be added, giving developers an easy way to start using the new classes and methods, and we plan to track and integrate any new extensions for WebGL2 as they become available in browsers.
 * **Seer Integration** - The Seer Chrome extension is a highly flexible and extensible system, and further leveraging Seer should surface much more information about the state of various luma.gl objects in future releases, further simplifying debugging and profiling of luma.gl applications.
+
+## Contributors
+
+luma.gl v4 was created by the Visualization Team at Uber. It is the result of a collaboration between a number of amazing contributors, including:
+[**Ravi Akkenapally**](https://github.com/1chandu),
+[**Yang Wang**](https://github.com/gnavvy),
+[**Ib Green**](https://github.com/ibgreen),
+[**Shaojing Li**](https://github.com/shaojingli),
+and [**many others**](https://github.com/uber/luma.gl/graphs/contributors).
+
