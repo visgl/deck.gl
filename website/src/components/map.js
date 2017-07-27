@@ -101,7 +101,6 @@ class Map extends Component {
 
           {...viewport}
           mapStyle={viewport.mapStyle || MAPBOX_STYLES.BLANK}
-          scrollZoom={isInteractive}
           onViewportChange={isInteractive ? this.props.updateMap : undefined}>
 
           <DemoComponent ref="demo" viewport={viewport} params={params}

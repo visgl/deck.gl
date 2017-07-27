@@ -60,7 +60,7 @@ export default class MapControls {
       return this._onPanEnd(event);
     case 'pinchstart':
       return this._onPinchStart(event);
-    case 'pinch':
+    case 'pinchmove':
       return this._onPinch(event);
     case 'pinchend':
       return this._onPinchEnd(event);
@@ -134,12 +134,13 @@ export default class MapControls {
       this.eventManager = eventManager;
       this._events = {};
     }
+    const isInteractive = Boolean(this.onViewportChange);
 
     // Register/unregister events
-    this.toggleEvents(EVENT_TYPES.WHEEL, scrollZoom);
-    this.toggleEvents(EVENT_TYPES.PAN, dragPan || dragRotate);
-    this.toggleEvents(EVENT_TYPES.PINCH, touchZoomRotate);
-    this.toggleEvents(EVENT_TYPES.DOUBLE_TAP, doubleClickZoom);
+    this.toggleEvents(EVENT_TYPES.WHEEL, isInteractive && scrollZoom);
+    this.toggleEvents(EVENT_TYPES.PAN, isInteractive && (dragPan || dragRotate));
+    this.toggleEvents(EVENT_TYPES.PINCH, isInteractive && touchZoomRotate);
+    this.toggleEvents(EVENT_TYPES.DOUBLE_TAP, isInteractive && doubleClickZoom);
 
     // Interaction toggles
     this.scrollZoom = scrollZoom;
