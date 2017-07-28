@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.4.3">Jekyll</generator><link href="http://deck.gl/blog/feed.xml" rel="self" type="application/atom+xml" /><link href="http://deck.gl/blog/" rel="alternate" type="text/html" /><updated>2017-07-26T23:50:47-07:00</updated><id>http://deck.gl/blog/</id><title type="html">Deck.gl Blog</title><subtitle>A blog for deck.gl: WebGL-powered data visualization</subtitle><author><name>Uber</name></author><entry><title type="html">The Birth of a Visualization Framework Suite</title><link href="http://deck.gl/blog/2017/visualization-framework-suite" rel="alternate" type="text/html" title="The Birth of a Visualization Framework Suite" /><published>2017-07-25T00:00:00-07:00</published><updated>2017-07-25T00:00:00-07:00</updated><id>http://deck.gl/blog/2017/visualization-framework-suite</id><content type="html" xml:base="http://deck.gl/blog/2017/visualization-framework-suite">&lt;h2 id=&quot;a-simple-idea&quot;&gt;A Simple Idea&lt;/h2&gt;
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.4.3">Jekyll</generator><link href="http://deck.gl/blog/feed.xml" rel="self" type="application/atom+xml" /><link href="http://deck.gl/blog/" rel="alternate" type="text/html" /><updated>2017-07-28T09:41:13-07:00</updated><id>http://deck.gl/blog/</id><title type="html">Deck.gl Blog</title><subtitle>A blog for deck.gl: WebGL-powered data visualization</subtitle><author><name>Uber</name></author><entry><title type="html">The Birth of a Visualization Framework Suite</title><link href="http://deck.gl/blog/2017/visualization-framework-suite" rel="alternate" type="text/html" title="The Birth of a Visualization Framework Suite" /><published>2017-07-25T00:00:00-07:00</published><updated>2017-07-25T00:00:00-07:00</updated><id>http://deck.gl/blog/2017/visualization-framework-suite</id><content type="html" xml:base="http://deck.gl/blog/2017/visualization-framework-suite">&lt;h2 id=&quot;a-simple-idea&quot;&gt;A Simple Idea&lt;/h2&gt;
 
 &lt;p&gt;The basic idea behind today’s by taking Uber’s most popular open source Visualization frameworks, and aligning their websites, documentation and examples, and providing links between the websites, we can make our various frameworks significantly easier to discover and use for both new and experienced users.&lt;/p&gt;
 
@@ -94,7 +94,6 @@
 &lt;h2 id=&quot;contributors&quot;&gt;Contributors&lt;/h2&gt;
 
 &lt;p&gt;This suite of frameworks was created by the Visualization Team at Uber. It is the result of a collaboration between a number of amazing contributors, including:
-&lt;a href=&quot;https://github.com/philogb&quot;&gt;&lt;strong&gt;Nicolas Garcia Belmonte&lt;/strong&gt;&lt;/a&gt;,
 &lt;a href=&quot;https://github.com/Pessimistress&quot;&gt;&lt;strong&gt;Xiaoji Chen&lt;/strong&gt;&lt;/a&gt;,
 &lt;a href=&quot;https://github.com/abmai&quot;&gt;&lt;strong&gt;Anh Mai&lt;/strong&gt;&lt;/a&gt;,
 &lt;a href=&quot;https://github.com/ibgreen&quot;&gt;&lt;strong&gt;Ib Green&lt;/strong&gt;&lt;/a&gt;,
@@ -103,7 +102,10 @@
 &lt;a href=&quot;https://github.com/apercu&quot;&gt;&lt;strong&gt;Balthazar Gronon&lt;/strong&gt;&lt;/a&gt;,
 &lt;a href=&quot;https://github.com/gnavvy&quot;&gt;&lt;strong&gt;Yang Wang&lt;/strong&gt;&lt;/a&gt;,
 &lt;a href=&quot;https://github.com/1chandu&quot;&gt;&lt;strong&gt;Ravi Akkenapally&lt;/strong&gt;&lt;/a&gt;,
-&lt;a href=&quot;https://github.com/shaojingli&quot;&gt;&lt;strong&gt;Shaojing Li&lt;/strong&gt;&lt;/a&gt;&lt;/p&gt;</content><author><name>{&quot;display_name&quot;=&gt;&quot;Ib Green&quot;, &quot;github_username&quot;=&gt;&quot;ibgreen&quot;}</name></author><category term="Visualization" /><category term="Framework Suite" /><summary type="html">A Simple Idea</summary></entry><entry><title type="html">Introducing luma.gl v4.0</title><link href="http://deck.gl/blog/2017/introducing-lumagl-v4" rel="alternate" type="text/html" title="Introducing luma.gl v4.0" /><published>2017-07-25T00:00:00-07:00</published><updated>2017-07-25T00:00:00-07:00</updated><id>http://deck.gl/blog/2017/introducing-lumagl-v4</id><content type="html" xml:base="http://deck.gl/blog/2017/introducing-lumagl-v4">&lt;h2 id=&quot;version-40&quot;&gt;Version 4.0&lt;/h2&gt;
+&lt;a href=&quot;https://github.com/jckr&quot;&gt;&lt;strong&gt;Jerome Cukier&lt;/strong&gt;&lt;/a&gt;,
+&lt;a href=&quot;https://github.com/mcnuttandrew&quot;&gt;&lt;strong&gt;Andrew McNutt&lt;/strong&gt;&lt;/a&gt;,
+&lt;a href=&quot;https://github.com/shaojingli&quot;&gt;&lt;strong&gt;Shaojing Li&lt;/strong&gt;&lt;/a&gt;,
+&lt;a href=&quot;https://github.com/philogb&quot;&gt;&lt;strong&gt;Nicolas Garcia Belmonte&lt;/strong&gt;&lt;/a&gt;,&lt;/p&gt;</content><author><name>{&quot;display_name&quot;=&gt;&quot;Ib Green&quot;, &quot;github_username&quot;=&gt;&quot;ibgreen&quot;}</name></author><category term="Visualization" /><category term="Framework Suite" /><summary type="html">A Simple Idea</summary></entry><entry><title type="html">Introducing luma.gl v4.0</title><link href="http://deck.gl/blog/2017/introducing-lumagl-v4" rel="alternate" type="text/html" title="Introducing luma.gl v4.0" /><published>2017-07-25T00:00:00-07:00</published><updated>2017-07-25T00:00:00-07:00</updated><id>http://deck.gl/blog/2017/introducing-lumagl-v4</id><content type="html" xml:base="http://deck.gl/blog/2017/introducing-lumagl-v4">&lt;h2 id=&quot;version-40&quot;&gt;Version 4.0&lt;/h2&gt;
 
 &lt;p&gt;In many ways v4.0 is the biggest luma.gl release to date. It is a major upgrade that brings full WebGL2 support to luma.gl, as well as adding advanced features such as GL state management and a shader module system.&lt;/p&gt;
 
@@ -351,158 +353,147 @@ const program = new Program(gl, {vs, fs, transformFeedback}})
 &lt;a href=&quot;https://github.com/ibgreen&quot;&gt;&lt;strong&gt;Ib Green&lt;/strong&gt;&lt;/a&gt;,
 &lt;a href=&quot;https://github.com/shaojingli&quot;&gt;&lt;strong&gt;Shaojing Li&lt;/strong&gt;&lt;/a&gt;,
 and &lt;a href=&quot;https://github.com/uber/luma.gl/graphs/contributors&quot;&gt;&lt;strong&gt;many others&lt;/strong&gt;&lt;/a&gt;.&lt;/p&gt;</content><author><name>ib,</name></author><category term="Visualization" /><category term="WebGL" /><category term="Luma.gl" /><summary type="html">Version 4.0</summary></entry><entry><title type="html">Wind Map</title><link href="http://deck.gl/blog/2017/wind-map" rel="alternate" type="text/html" title="Wind Map" /><published>2017-04-17T00:00:00-07:00</published><updated>2017-04-17T00:00:00-07:00</updated><id>http://deck.gl/blog/2017/wind-map</id><content type="html" xml:base="http://deck.gl/blog/2017/wind-map">&lt;div class=&quot;youtube-wrapper&quot;&gt;
-  &lt;iframe src=&quot;https://www.youtube.com/embed/4qm_dO4nAk0&quot; frameborder=&quot;0&quot; allowfullscreen=&quot;&quot;&gt;&lt;/iframe&gt;
+  &lt;iframe src=&quot;https://www.youtube.com/embed/4qm_dO4nAk0&quot; frameborder=&quot;0&quot; allowfullscreen&gt;&lt;/iframe&gt;
 &lt;/div&gt;
 
-&lt;p&gt;A few weeks ago I set on trying out new WebGL 2.0 features with deck.gl. WebGL 2.0 brings plenty of new goodies to be used for game development, creative coding and data visualization like instancing, floating-point textures, transform feedback, multiple render targets, and more. With this in mind, and inspired by the work of Cameron Beccario, Viegas and Wattenberg, and NASA, I created a WebGL 2.0 wind map demo using deck.gl.&lt;/p&gt;
+A few weeks ago I set on trying out new WebGL 2.0 features with deck.gl. WebGL 2.0 brings plenty of new goodies to be used for game development, creative coding and data visualization like instancing, floating-point textures, transform feedback, multiple render targets, and more. With this in mind, and inspired by the work of Cameron Beccario, Viegas and Wattenberg, and NASA, I created a WebGL 2.0 wind map demo using deck.gl.
 
-&lt;p&gt;This &lt;a href=&quot;http://philogb.github.io/page/wind/&quot;&gt;interactive demo&lt;/a&gt; enables you to change the map’s perspective by using cmd + drag; toggle between vector field and particle layers on the left panel, and use the slider to change the time of day to see wind change for a 72 hour period.&lt;/p&gt;
+This [interactive demo](http://philogb.github.io/page/wind/) enables you to change the map’s perspective by using cmd + drag; toggle between vector field and particle layers on the left panel, and use the slider to change the time of day to see wind change for a 72 hour period. 
 
-&lt;h2 id=&quot;some-interesting-insights&quot;&gt;Some interesting insights&lt;/h2&gt;
+## Some interesting insights
 
-&lt;p&gt;The screenshot below shows wind speed near Mount Washington, which has the fastest winds in the US.&lt;/p&gt;
+The screenshot below shows wind speed near Mount Washington, which has the fastest winds in the US.
 
-&lt;p&gt;&lt;img src=&quot;../img/wind2.jpg&quot; alt=&quot;Wind speed near Mount Washington&quot; /&gt;&lt;/p&gt;
+![Wind speed near Mount Washington](../img/wind2.jpg)
 
-&lt;p&gt;Something interesting to look at as well are the wind corridors being formed in Florida at specific times.&lt;/p&gt;
+Something interesting to look at as well are the wind corridors being formed in Florida at specific times.
 
-&lt;p&gt;&lt;img src=&quot;../img/wind9.gif&quot; alt=&quot;Extreme wind corridors in Florida&quot; /&gt;&lt;/p&gt;
+![Extreme wind corridors in Florida](../img/wind9.gif)
 
-&lt;h2 id=&quot;under-the-hood&quot;&gt;Under the hood&lt;/h2&gt;
+## Under the hood
 
-&lt;p&gt;There are thousands of stations that capture wind speed, orientation and temperature with different time granularity. If you turn all layers off you’ll see yellow dots that represent each one of the stations we’re getting data from.&lt;/p&gt;
+There are thousands of stations that capture wind speed, orientation and temperature with different time granularity. If you turn all layers off you’ll see yellow dots that represent each one of the stations we’re getting data from.
 
-&lt;p&gt;&lt;img src=&quot;../img/wind4.jpg&quot; alt=&quot;Wind stations across the US&quot; /&gt;&lt;/p&gt;
+![Wind stations across the US](../img/wind4.jpg)
 
-&lt;h3 id=&quot;the-delaunay-interpolation-layer&quot;&gt;The Delaunay Interpolation Layer&lt;/h3&gt;
+### The Delaunay Interpolation Layer
 
-&lt;p&gt;For this example though one of the challenges was to be able to get a uniform distribution of wind speed, direction and temperature that could be sampled at any point of the map, not simply at each station. In order to do this we created a Delaunay tessellation for the stations, and then rendered the mesh to a floating-point texture, to get GPU-interpolated values into an image. In this case we map wind direction to the red channel, wind speed to green, temperature to blue and elevation to alpha.&lt;/p&gt;
+For this example though one of the challenges was to be able to get a uniform distribution of wind speed, direction and temperature that could be sampled at any point of the map, not simply at each station. In order to do this we created a Delaunay tessellation for the stations, and then rendered the mesh to a floating-point texture, to get GPU-interpolated values into an image. In this case we map wind direction to the red channel, wind speed to green, temperature to blue and elevation to alpha.
 
-&lt;p&gt;&lt;img src=&quot;../img/wind-delaunay-1.jpg&quot; alt=&quot;Delaunay mesh&quot; /&gt;&lt;/p&gt;
+![Delaunay mesh](../img/wind-delaunay-1.jpg)
 
-&lt;p&gt;You can see the interpolated wind data rendered to an image below:&lt;/p&gt;
+You can see the interpolated wind data rendered to an image below:
 
-&lt;p&gt;&lt;img src=&quot;../img/wind-delaunay-2.jpg&quot; alt=&quot;Delaunay interpolation layer&quot; /&gt;&lt;/p&gt;
+![Delaunay interpolation layer](../img/wind-delaunay-2.jpg)
 
-&lt;h3 id=&quot;the-vector-field-layer&quot;&gt;The Vector Field Layer&lt;/h3&gt;
+### The Vector Field Layer
 
-&lt;p&gt;The next step was to use instancing to create a regular vector field layer. For this we created tetrahedron instances to serve as arrows and used the texture above to set their orientation, color and size. If you use the slider on the left you’ll also see that there’s GPU interpolation. Although we sample data every hour, we interpolate between the textures so we can estimate the values at each minute. Since we already had the Delaunay model we also used that to give an approximation of the elevation in the US:&lt;/p&gt;
+The next step was to use instancing to create a regular vector field layer. For this we created tetrahedron instances to serve as arrows and used the texture above to set their orientation, color and size. If you use the slider on the left you’ll also see that there’s GPU interpolation. Although we sample data every hour, we interpolate between the textures so we can estimate the values at each minute. Since we already had the Delaunay model we also used that to give an approximation of the elevation in the US:
 
-&lt;p&gt;&lt;img src=&quot;../img/wind7.jpg&quot; alt=&quot;Vector field layer&quot; /&gt;&lt;/p&gt;
+![Vector field layer](../img/wind7.jpg)
 
-&lt;h3 id=&quot;the-particle-layer&quot;&gt;The Particle Layer&lt;/h3&gt;
+### The Particle Layer
 
-&lt;p&gt;Finally we used &lt;a href=&quot;https://open.gl/feedback&quot;&gt;transform feedback&lt;/a&gt;, which enables us to only use the vertex shader for data processing and updating every particle’s position in real-time. We throw a random sample of particles (~1MM) that get updated by the texture data, and then render those on the screen. Every particle has a TTL (time-to-live); when the TTL expires it gets repositioned at a random location on the map. Blending reveals where the biggest concentration of particles are.&lt;/p&gt;
+Finally we used [transform feedback](https://open.gl/feedback), which enables us to only use the vertex shader for data processing and updating every particle’s position in real-time. We throw a random sample of particles (~1MM) that get updated by the texture data, and then render those on the screen. Every particle has a TTL (time-to-live); when the TTL expires it gets repositioned at a random location on the map. Blending reveals where the biggest concentration of particles are.
 
 &lt;p align=&quot;center&quot;&gt;
-  &lt;img alt=&quot;Particles&quot; src=&quot;../img/wind3.gif&quot; /&gt;
+  &lt;img alt=&quot;Particles&quot; src=&quot;../img/wind3.gif&quot;&gt;
 &lt;/p&gt;
 
-&lt;p&gt;And that’s it! Three custom layers built with deck.gl to bring this wind map to life. Check out &lt;a href=&quot;http://philogb.github.io/page/wind/&quot;&gt;the example&lt;/a&gt; and feel free to provide feedback!&lt;/p&gt;</content><author><name>{&quot;display_name&quot;=&gt;&quot;Nicolas Belmonte&quot;, &quot;github_username&quot;=&gt;&quot;philogb&quot;}</name></author><category term="Case Study" /><category term="Visualization" /><category term="WebGL" /><summary type="html"></summary></entry><entry><title type="html">Rendering A Minecraft World With deck.gl</title><link href="http://deck.gl/blog/2017/rendering-minecraft-with-deckgl" rel="alternate" type="text/html" title="Rendering A Minecraft World With deck.gl" /><published>2017-04-12T00:00:00-07:00</published><updated>2017-04-12T00:00:00-07:00</updated><id>http://deck.gl/blog/2017/rendering-minecraft-with-deckgl</id><content type="html" xml:base="http://deck.gl/blog/2017/rendering-minecraft-with-deckgl">&lt;p&gt;While working on &lt;a href=&quot;./introducing-deckgl-v4.html&quot;&gt;deck.gl v4&lt;/a&gt;, I decided to have some fun and built a &lt;a href=&quot;http://pessimistress.github.io/minecraft/&quot;&gt;Minecraft Chunk Viewer&lt;/a&gt; in the browser. Drag in a region file from your own world and explore the world in depth! Totally not cheating.&lt;/p&gt;
+And that’s it! Three custom layers built with deck.gl to bring this wind map to life. Check out [the example](http://philogb.github.io/page/wind/) and feel free to provide feedback!</content><author><name>{&quot;display_name&quot;=&gt;&quot;Nicolas Belmonte&quot;, &quot;github_username&quot;=&gt;&quot;philogb&quot;}</name></author><category term="Case Study" /><category term="Visualization" /><category term="WebGL" /><summary type="html"></summary></entry><entry><title type="html">Rendering A Minecraft World With deck.gl</title><link href="http://deck.gl/blog/2017/rendering-minecraft-with-deckgl" rel="alternate" type="text/html" title="Rendering A Minecraft World With deck.gl" /><published>2017-04-12T00:00:00-07:00</published><updated>2017-04-12T00:00:00-07:00</updated><id>http://deck.gl/blog/2017/rendering-minecraft-with-deckgl</id><content type="html" xml:base="http://deck.gl/blog/2017/rendering-minecraft-with-deckgl">While working on [deck.gl v4](./introducing-deckgl-v4.html), I decided to have some fun and built a [Minecraft Chunk Viewer](http://pessimistress.github.io/minecraft/) in the browser. Drag in a region file from your own world and explore the world in depth! Totally not cheating.
 
-&lt;ul&gt;
-  &lt;li&gt;&lt;a href=&quot;http://minecraft.gamepedia.com/Chunk_format&quot;&gt;Region files&lt;/a&gt; are in your Minecraft’s save folder with names like &lt;strong&gt;r.12.34.mca&lt;/strong&gt;. Check &lt;a href=&quot;http://minecraft.gamepedia.com/.minecraft&quot;&gt;this page&lt;/a&gt; to see where to find them.&lt;/li&gt;
-  &lt;li&gt;Drag to rotate; drag while holding &lt;em&gt;shift&lt;/em&gt; to pan&lt;/li&gt;
-  &lt;li&gt;Use the slider to slice the world&lt;/li&gt;
-  &lt;li&gt;Hover over a block to see details&lt;/li&gt;
-  &lt;li&gt;Click on the minimap to select other chunks; click while holding &lt;em&gt;shift&lt;/em&gt; to select multiple chunks&lt;/li&gt;
-&lt;/ul&gt;
+- [Region files](http://minecraft.gamepedia.com/Chunk_format) are in your Minecraft's save folder with names like **r.12.34.mca**. Check [this page](http://minecraft.gamepedia.com/.minecraft) to see where to find them.
+- Drag to rotate; drag while holding *shift* to pan
+- Use the slider to slice the world
+- Hover over a block to see details
+- Click on the minimap to select other chunks; click while holding *shift* to select multiple chunks
 
 &lt;p aligh=&quot;center&quot;&gt;
-  &lt;img width=&quot;900&quot; src=&quot;../img/minecraft1.gif&quot; /&gt;
+  &lt;img width=&quot;900&quot; src=&quot;../img/minecraft1.gif&quot;&gt;
 &lt;/p&gt;
 
-&lt;p&gt;For those who are interested, I’ll dive into how this was built.&lt;/p&gt;
+For those who are interested, I'll dive into how this was built.
 
-&lt;h2 id=&quot;an-overview-of-the-app&quot;&gt;An Overview of the App&lt;/h2&gt;
+## An Overview of the App
 
-&lt;p&gt;The chunk viewer itself is a pretty straight forward React one page app. Here are some of the critical components of the &lt;a href=&quot;https://github.com/Pessimistress/minecraft-chunk-viewer/tree/master/src&quot;&gt;source code&lt;/a&gt;:&lt;/p&gt;
+The chunk viewer itself is a pretty straight forward React one page app. Here are some of the critical components of the [source code](https://github.com/Pessimistress/minecraft-chunk-viewer/tree/master/src):
 
-&lt;ul&gt;
-  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;app.js&lt;/code&gt; - Root. Lays out all the components and stores all the states.&lt;/li&gt;
-  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;components/orbit-controller.js&lt;/code&gt;
-  &lt;br /&gt;The component that handles user interaction with the 3D view. It maps pointer and wheel input to changes in the deck.gl viewport. It is rendered as the parent of the &lt;code class=&quot;highlighter-rouge&quot;&gt;DeckGL&lt;/code&gt; canvas to capture all pointer events.&lt;/li&gt;
-  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;minecraft-layer/&lt;/code&gt;
-  &lt;br /&gt;A custom deck.gl layer that does the rendering magic.&lt;/li&gt;
-  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;utils/mca-parser.js&lt;/code&gt;
-  &lt;br /&gt;Util functions that parse a &lt;strong&gt;.mca&lt;/strong&gt; file. Based on the work of &lt;a href=&quot;https://github.com/maxogden/minecraft-region&quot;&gt;minecraft-region&lt;/a&gt;.&lt;/li&gt;
-  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;utils/orbit-viewport.js&lt;/code&gt;
-  &lt;br /&gt;An implementation of the deck.gl &lt;a href=&quot;http://uber.github.io/deck.gl/#/documentation/api-reference/viewport&quot;&gt;Viewport&lt;/a&gt; class, used by the &lt;code class=&quot;highlighter-rouge&quot;&gt;OrbitController&lt;/code&gt;.&lt;/li&gt;
-&lt;/ul&gt;
++ `app.js` - Root. Lays out all the components and stores all the states.
++ `components/orbit-controller.js`
+    &lt;br /&gt;The component that handles user interaction with the 3D view. It maps pointer and wheel input to changes in the deck.gl viewport. It is rendered as the parent of the `DeckGL` canvas to capture all pointer events.
++ `minecraft-layer/`
+    &lt;br /&gt;A custom deck.gl layer that does the rendering magic.
++ `utils/mca-parser.js`
+    &lt;br /&gt;Util functions that parse a **.mca** file. Based on the work of [minecraft-region](https://github.com/maxogden/minecraft-region).
++ `utils/orbit-viewport.js`
+    &lt;br /&gt;An implementation of the deck.gl [Viewport](http://uber.github.io/deck.gl/#/documentation/api-reference/viewport) class, used by the `OrbitController`.
 
-&lt;p&gt;When the file is loaded and chunks are selected, the app calls &lt;code class=&quot;highlighter-rouge&quot;&gt;readChunks()&lt;/code&gt; from the parser utils to update the data. The world is represented as an array of block objects, each containing information such as position (in-game &lt;code class=&quot;highlighter-rouge&quot;&gt;x&lt;/code&gt; &lt;code class=&quot;highlighter-rouge&quot;&gt;y&lt;/code&gt; &lt;code class=&quot;highlighter-rouge&quot;&gt;z&lt;/code&gt; coordinates), block id (type of block), block data (block-specific metadata), biome and light level.&lt;/p&gt;
+When the file is loaded and chunks are selected, the app calls `readChunks()` from the parser utils to update the data. The world is represented as an array of block objects, each containing information such as position (in-game `x` `y` `z` coordinates), block id (type of block), block data (block-specific metadata), biome and light level.
 
-&lt;p&gt;Because deck.gl does not do dynamic z-sorting (to prioritize performance), it’s important to draw the solid blocks before the transparent ones to avoid depth clipping.
-Luckily, in this use case the interesting view angle is always from top down. When loading the blocks, they are sorted by &lt;code class=&quot;highlighter-rouge&quot;&gt;y&lt;/code&gt; from bottom to top, so that the lower levels are rendered first.&lt;/p&gt;
+Because deck.gl does not do dynamic z-sorting (to prioritize performance), it's important to draw the solid blocks before the transparent ones to avoid depth clipping.
+Luckily, in this use case the interesting view angle is always from top down. When loading the blocks, they are sorted by `y` from bottom to top, so that the lower levels are rendered first.
 
-&lt;p&gt;The data is then passed in to create an instance of the &lt;code class=&quot;highlighter-rouge&quot;&gt;MinecraftLayer&lt;/code&gt; - the custom layer that renders Minecraft blocks.&lt;/p&gt;
+The data is then passed in to create an instance of the `MinecraftLayer` - the custom layer that renders Minecraft blocks.
 
-&lt;h2 id=&quot;the-minecraft-layer&quot;&gt;The Minecraft Layer&lt;/h2&gt;
+## The Minecraft Layer
 
-&lt;h3 id=&quot;the-minecraftlayer-class&quot;&gt;The MinecraftLayer Class&lt;/h3&gt;
+### The MinecraftLayer Class
 
-&lt;p&gt;&lt;a href=&quot;https://github.com/Pessimistress/minecraft-chunk-viewer/tree/master/src/minecraft-layer/index.js&quot;&gt;MinecraftLayer&lt;/a&gt; extends deck.gl’s base &lt;code class=&quot;highlighter-rouge&quot;&gt;Layer&lt;/code&gt; class. At initialization (&lt;code class=&quot;highlighter-rouge&quot;&gt;initializeState()&lt;/code&gt;), it does the following:&lt;/p&gt;
+[MinecraftLayer](https://github.com/Pessimistress/minecraft-chunk-viewer/tree/master/src/minecraft-layer/index.js) extends deck.gl's base `Layer` class. At initialization (`initializeState()`), it does the following:
 
-&lt;ul&gt;
-  &lt;li&gt;Creates a single instanced model that defines what to render. An instanced model duplicates the same geometry (“instance”) many times with slight variations. Naturally in Minecraft, each instance is a cube.&lt;/li&gt;
-  &lt;li&gt;Adds attributes. The attributes are per instance and determines how each cube will look. Each attribute has an &lt;code class=&quot;highlighter-rouge&quot;&gt;update&lt;/code&gt; function that will only be called once when &lt;code class=&quot;highlighter-rouge&quot;&gt;props.data&lt;/code&gt; changes. The attributes carry the following information to the vertex shader:
-    &lt;ul&gt;
-      &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;position&lt;/code&gt; - the &lt;code class=&quot;highlighter-rouge&quot;&gt;x&lt;/code&gt; &lt;code class=&quot;highlighter-rouge&quot;&gt;y&lt;/code&gt; &lt;code class=&quot;highlighter-rouge&quot;&gt;z&lt;/code&gt; coordinates of the block&lt;/li&gt;
-      &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;blockId&lt;/code&gt; and &lt;code class=&quot;highlighter-rouge&quot;&gt;blockData&lt;/code&gt; - &lt;a href=&quot;http://minecraft.gamepedia.com/Data_values&quot;&gt;block data values&lt;/a&gt;&lt;/li&gt;
-      &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;temperature&lt;/code&gt; and &lt;code class=&quot;highlighter-rouge&quot;&gt;humidity&lt;/code&gt; - used to calculate biome shading&lt;/li&gt;
-      &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;lighting&lt;/code&gt; - the light level of a block, either from sky light or self illumination&lt;/li&gt;
-    &lt;/ul&gt;
-  &lt;/li&gt;
-  &lt;li&gt;Loads textures. The layer loads three textures that are sent to the shaders as uniforms:
-    &lt;ul&gt;
-      &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;blocks.png&lt;/code&gt; - this is the encoded block metadata, will discuss below.&lt;/li&gt;
-      &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;textures.png&lt;/code&gt; - this is an all-up texture atlas of all Minecraft textures.&lt;/li&gt;
-      &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;foliage.png&lt;/code&gt; - this is the definition of biome colors, as explained &lt;a href=&quot;http://www.planetminecraft.com/blog/biomes-controlling-color/&quot;&gt;here&lt;/a&gt;.&lt;/li&gt;
-    &lt;/ul&gt;
-  &lt;/li&gt;
-&lt;/ul&gt;
+- Creates a single instanced model that defines what to render. An instanced model duplicates the same geometry (&quot;instance&quot;) many times with slight variations. Naturally in Minecraft, each instance is a cube.
+- Adds attributes. The attributes are per instance and determines how each cube will look. Each attribute has an `update` function that will only be called once when `props.data` changes. The attributes carry the following information to the vertex shader:
+  + `position` - the `x` `y` `z` coordinates of the block
+  + `blockId` and `blockData` - [block data values](http://minecraft.gamepedia.com/Data_values)
+  + `temperature` and `humidity` - used to calculate biome shading
+  + `lighting` - the light level of a block, either from sky light or self illumination
+- Loads textures. The layer loads three textures that are sent to the shaders as uniforms:
+  + `blocks.png` - this is the encoded block metadata, will discuss below.
+  + `textures.png` - this is an all-up texture atlas of all Minecraft textures.
+  + `foliage.png` - this is the definition of biome colors, as explained [here](http://www.planetminecraft.com/blog/biomes-controlling-color/).
 
-&lt;p&gt;At each rendering cycle, the method &lt;code class=&quot;highlighter-rouge&quot;&gt;draw()&lt;/code&gt; is called to render the model to the WebGL context.&lt;/p&gt;
+At each rendering cycle, the method `draw()` is called to render the model to the WebGL context.
 
-&lt;h3 id=&quot;passing-block-metadata-to-the-gpu&quot;&gt;Passing Block Metadata to the GPU&lt;/h3&gt;
+### Passing Block Metadata to the GPU
 
-&lt;p&gt;An unique challenge in this project is that there are many variables playing into the appearance of a block. Each face of the cube has its own texture and biome shading behavior. To make a single cube geometry work with as many block types as possible, I introduced “transforms” that can be applied to each the block: rotation (e.g. logs), size (e.g. half slabs), translation (e.g. ladders) and face offset (e.g. flowers).&lt;/p&gt;
+An unique challenge in this project is that there are many variables playing into the appearance of a block. Each face of the cube has its own texture and biome shading behavior. To make a single cube geometry work with as many block types as possible, I introduced &quot;transforms&quot; that can be applied to each the block: rotation (e.g. logs), size (e.g. half slabs), translation (e.g. ladders) and face offset (e.g. flowers).
 
-&lt;p&gt;&lt;img src=&quot;../img/minecraft2.png&quot; alt=&quot;Block Definition Examples&quot; /&gt;&lt;/p&gt;
+![Block Definition Examples](../img/minecraft2.png)
 
-&lt;p&gt;All together the texture properties and block transforms add up to 20+ float attributes per instance. Sadly WebGL1 does not handle arrays easily. To avoid creating a long list of attributes, I opt to encode all the block definitions into one image texture. There is an 8-pixels slot assigned to each (&lt;code class=&quot;highlighter-rouge&quot;&gt;blockId&lt;/code&gt;, &lt;code class=&quot;highlighter-rouge&quot;&gt;blockData&lt;/code&gt;) combination, and each channel (&lt;code class=&quot;highlighter-rouge&quot;&gt;r&lt;/code&gt; &lt;code class=&quot;highlighter-rouge&quot;&gt;g&lt;/code&gt; &lt;code class=&quot;highlighter-rouge&quot;&gt;b&lt;/code&gt; &lt;code class=&quot;highlighter-rouge&quot;&gt;a&lt;/code&gt;) can be used to store one property. Now the vertex shader can look up block definitions on the fly:&lt;/p&gt;
+All together the texture properties and block transforms add up to 20+ float attributes per instance. Sadly WebGL1 does not handle arrays easily. To avoid creating a long list of attributes, I opt to encode all the block definitions into one image texture. There is an 8-pixels slot assigned to each (`blockId`, `blockData`) combination, and each channel (`r` `g` `b` `a`) can be used to store one property. Now the vertex shader can look up block definitions on the fly:
 
-&lt;p&gt;&lt;img src=&quot;https://github.com/Pessimistress/minecraft-chunk-viewer/blob/master/static/data/blocks.png?raw=true&quot; alt=&quot;Encoded Block Definition&quot; /&gt;&lt;/p&gt;
+![Encoded Block Definition](https://github.com/Pessimistress/minecraft-chunk-viewer/blob/master/static/data/blocks.png?raw=true)
 
-&lt;h3 id=&quot;the-shaders&quot;&gt;The Shaders&lt;/h3&gt;
+### The Shaders
 
-&lt;p&gt;At render time, the vertex shader looks up block definitions using id, data value and face index. The block-level transforms are applied to vertex positions and normals. Texture coordinates are passed to the fragment shader, where colors are touched up with biome shading, lighting, mouse hover highlight, etc.&lt;/p&gt;
+At render time, the vertex shader looks up block definitions using id, data value and face index. The block-level transforms are applied to vertex positions and normals. Texture coordinates are passed to the fragment shader, where colors are touched up with biome shading, lighting, mouse hover highlight, etc.
 
-&lt;p&gt;The Y-slicer position is passed in as a uniform and essentially reduces the alpha of all blocks above the given level. It is an inexpensive operation but extremely useful when you need to peek into the belly of a chunk. I am quite pleased with how it works out.&lt;/p&gt;
+The Y-slicer position is passed in as a uniform and essentially reduces the alpha of all blocks above the given level. It is an inexpensive operation but extremely useful when you need to peek into the belly of a chunk. I am quite pleased with how it works out.
 
 &lt;p&gt;&lt;a href=&quot;../img/minecraft3.png&quot; title=&quot;This is a very dry diagram. Click with discretion&quot; target=&quot;_blank&quot;&gt;&lt;img width=&quot;900&quot; src=&quot;../img/minecraft3.png&quot; /&gt;&lt;/a&gt;&lt;/p&gt;
 
-&lt;p&gt;Here’s a big gotcha regarding the block definition lookup. When I first implemented it, the rendering result was a mess: grass blocks were consistently rendered as wood planks, dirt as cobble stones, and block orientations were all weird. I double and then triple checked my asset generation script, but everything looked correct. It seemed that the vertex shader was just reading the wrong rgb values out of the texture.&lt;/p&gt;
+Here's a big gotcha regarding the block definition lookup. When I first implemented it, the rendering result was a mess: grass blocks were consistently rendered as wood planks, dirt as cobble stones, and block orientations were all weird. I double and then triple checked my asset generation script, but everything looked correct. It seemed that the vertex shader was just reading the wrong rgb values out of the texture.
 
-&lt;p&gt;Turns out that &lt;em&gt;the rgb precision is affected by the alpha channel&lt;/em&gt;. When alpha is 255, the rgb values are read exactly as what I wrote into the image. As the alpha decreases, the rgb values start to show an increasing margin of error. It makes sense in image display because when opacity is very low, the single-digit difference is rounded away by blending; but this becomes a big problem when I use them to encode texture indices. This behavior is also apparently GPU-dependent, because the same image worked on my Macbook and did not on iOS. The advice is to avoid using the alpha channel if possible, or at least keep the number in the upper range.&lt;/p&gt;
+Turns out that *the rgb precision is affected by the alpha channel*. When alpha is 255, the rgb values are read exactly as what I wrote into the image. As the alpha decreases, the rgb values start to show an increasing margin of error. It makes sense in image display because when opacity is very low, the single-digit difference is rounded away by blending; but this becomes a big problem when I use them to encode texture indices. This behavior is also apparently GPU-dependent, because the same image worked on my Macbook and did not on iOS. The advice is to avoid using the alpha channel if possible, or at least keep the number in the upper range.
 
-&lt;h3 id=&quot;optimization&quot;&gt;Optimization&lt;/h3&gt;
+### Optimization
 
-&lt;p&gt;A typical chunk is over 20k blocks, that is 240k triangles to render. When multiple chunks are selected, it quickly becomes too much for the browser. A cheap improvement is to turn on face culling (&lt;code class=&quot;highlighter-rouge&quot;&gt;gl.enable(gl.CULL_FACE)&lt;/code&gt;), which immediately reduce the number of fragments in half.&lt;/p&gt;
+A typical chunk is over 20k blocks, that is 240k triangles to render. When multiple chunks are selected, it quickly becomes too much for the browser. A cheap improvement is to turn on face culling (`gl.enable(gl.CULL_FACE)`), which immediately reduce the number of fragments in half.
 
-&lt;p&gt;To make things even faster, we can skip the surfaces that are right against a solid block. Only those that are behind air, transparent texture (e.g. water, leaves) or irregular shaped blocks (e.g. stairs) need to be rendered.&lt;/p&gt;
+To make things even faster, we can skip the surfaces that are right against a solid block. Only those that are behind air, transparent texture (e.g. water, leaves) or irregular shaped blocks (e.g. stairs) need to be rendered.
 
-&lt;p&gt;When parsing the region file, a hashmap is built to track whether each block is opaque or not. An accessor &lt;code class=&quot;highlighter-rouge&quot;&gt;getIsBlockOpaque&lt;/code&gt; is introduced to the Minecraft Layer to look up the transparency flag for any block coordinates. The layer then creates an attribute &lt;code class=&quot;highlighter-rouge&quot;&gt;instanceVisibilities&lt;/code&gt; which tells the vertex shader what’s next to each face of the cube. Here’s a comparison between rendering without and with this optimization:&lt;/p&gt;
+When parsing the region file, a hashmap is built to track whether each block is opaque or not. An accessor `getIsBlockOpaque` is introduced to the Minecraft Layer to look up the transparency flag for any block coordinates. The layer then creates an attribute `instanceVisibilities` which tells the vertex shader what's next to each face of the cube. Here's a comparison between rendering without and with this optimization:
 
-&lt;p&gt;&lt;img src=&quot;../img/minecraft4.jpg&quot; alt=&quot;Face Visibility&quot; /&gt;&lt;/p&gt;
+![Face Visibility](../img/minecraft4.jpg)
 
-&lt;h2 id=&quot;cool-whats-next&quot;&gt;Cool, What’s Next?&lt;/h2&gt;
 
-&lt;p&gt;This all started as a weekend project. deck.gl was great as a foundation for this kind of experiment – it took care of most of the chores such as attribute mangement, update cycles, projection and picking. I was able to spend most of my time focusing on Minecraft-specific code.&lt;/p&gt;
+## Cool, What's Next?
 
-&lt;p&gt;Right now the chunk viewer only supports limited Minecraft block types, because I got lazy halfway into scraping the Wiki. My hacky tricks with cubes obviously will not work with every entity out there (no mobs, for example). But surely there are a lot more improvements I can make. Checkout the &lt;a href=&quot;https://github.com/Pessimistress/minecraft-chunk-viewer/issues&quot;&gt;issues list&lt;/a&gt; and make a suggestion!&lt;/p&gt;
+This all started as a weekend project. deck.gl was great as a foundation for this kind of experiment -- it took care of most of the chores such as attribute mangement, update cycles, projection and picking. I was able to spend most of my time focusing on Minecraft-specific code.
 
-&lt;p&gt;Now pardon me as I go dig up that diamond ore.&lt;/p&gt;</content><author><name>{&quot;display_name&quot;=&gt;&quot;Xiaoji Chen&quot;, &quot;github_username&quot;=&gt;&quot;Pessimistress&quot;}</name></author><category term="Case Study" /><category term="Custom Layer" /><category term="Non-Geospatial" /><summary type="html">While working on deck.gl v4, I decided to have some fun and built a Minecraft Chunk Viewer in the browser. Drag in a region file from your own world and explore the world in depth! Totally not cheating.</summary></entry><entry><title type="html">Introducing deck.gl v4.0</title><link href="http://deck.gl/blog/2017/introducing-deckgl-v4" rel="alternate" type="text/html" title="Introducing deck.gl v4.0" /><published>2017-04-03T00:00:00-07:00</published><updated>2017-04-03T00:00:00-07:00</updated><id>http://deck.gl/blog/2017/introducing-deckgl-v4</id><content type="html" xml:base="http://deck.gl/blog/2017/introducing-deckgl-v4">&lt;h2 id=&quot;introducing-deckgl-v40&quot;&gt;Introducing deck.gl v4.0&lt;/h2&gt;
+Right now the chunk viewer only supports limited Minecraft block types, because I got lazy halfway into scraping the Wiki. My hacky tricks with cubes obviously will not work with every entity out there (no mobs, for example). But surely there are a lot more improvements I can make. Checkout the [issues list](https://github.com/Pessimistress/minecraft-chunk-viewer/issues) and make a suggestion!
+
+Now pardon me as I go dig up that diamond ore.</content><author><name>{&quot;display_name&quot;=&gt;&quot;Xiaoji Chen&quot;, &quot;github_username&quot;=&gt;&quot;Pessimistress&quot;}</name></author><category term="Case Study" /><category term="Custom Layer" /><category term="Non-Geospatial" /><summary type="html">While working on deck.gl v4, I decided to have some fun and built a Minecraft Chunk Viewer in the browser. Drag in a region file from your own world and explore the world in depth! Totally not cheating.</summary></entry><entry><title type="html">Introducing deck.gl v4.0</title><link href="http://deck.gl/blog/2017/introducing-deckgl-v4" rel="alternate" type="text/html" title="Introducing deck.gl v4.0" /><published>2017-04-03T00:00:00-07:00</published><updated>2017-04-03T00:00:00-07:00</updated><id>http://deck.gl/blog/2017/introducing-deckgl-v4</id><content type="html" xml:base="http://deck.gl/blog/2017/introducing-deckgl-v4">&lt;h2 id=&quot;introducing-deckgl-v40&quot;&gt;Introducing deck.gl v4.0&lt;/h2&gt;
 
 &lt;p&gt;We’ve just released a new major version of deck.gl, so this is a good time to share some information about the improvements that went into the new version the rationale behind them, and provide some hints on our thoughts about the future of deck.gl.&lt;/p&gt;
 
