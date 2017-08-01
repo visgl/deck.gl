@@ -25,9 +25,9 @@ export default `\
 #define PI2 1.5707963267949
 #define PI4 0.78539816339745
 #define HEIGHT_FACTOR 25.
-#define EPSILON 0.013
+#define EPSILON 0.01
 #define DELTA 5.
-#define FACTOR .015
+#define FACTOR .05
 
 uniform sampler2D dataFrom;
 uniform sampler2D dataTo;
@@ -35,8 +35,7 @@ uniform float delta;
 uniform float time;
 
 uniform float flip;
-uniform vec4 boundingBox;
-uniform vec4 originalBoundingBox;
+uniform vec4 bbox;
 uniform vec2 bounds0;
 uniform vec2 bounds1;
 uniform vec2 bounds2;
@@ -50,8 +49,8 @@ float rand(vec2 co){
 
 void main(void) {
   // position in texture coords
-  float x = (posFrom.x - boundingBox.x) / (boundingBox.y - boundingBox.x);
-  float y = (posFrom.y - boundingBox.z) / (boundingBox.w - boundingBox.z);
+  float x = (posFrom.x - bbox.x) / (bbox.y - bbox.x);
+  float y = (posFrom.y - bbox.z) / (bbox.w - bbox.z);
   vec2 coord = vec2(x, 1. - y);
   vec4 texel1 = texture2D(dataFrom, coord);
   vec4 texel2 = texture2D(dataTo, coord);
@@ -73,13 +72,13 @@ void main(void) {
   }
 
   // wind speed
-  float wind = 0.05 + 0.95 * (texel.y - bounds1.x) / (bounds1.y - bounds1.x);
+  float wind = 0.05 + 0.9 * (texel.y - bounds1.x) / (bounds1.y - bounds1.x);
   float windPast = posFrom.w;
   if (windPast > -1.) {
     wind = wind * FACTOR + windPast * (1. - FACTOR);
   }
 
-  vec2 offset = vec2(cos(angle), sin(angle)) * (wind * 0.2 + 0.002);
+  vec2 offset = vec2(cos(angle), sin(angle)) * wind * 0.2;
   vec2 offsetPos = posFrom.xy + offset;
 
   vec4 endPos = vec4(offsetPos, mod(angle, PI * 2.), wind);
@@ -87,14 +86,14 @@ void main(void) {
   // if out of bounds then map to random position
   float r1 = rand(vec2(posFrom.x, offset.x + time));
   float r2 = rand(vec2(posFrom.y, offset.y + time));
-  r1 = r1 * (originalBoundingBox.y - originalBoundingBox.x) + originalBoundingBox.x;
-  r2 = r2 * (originalBoundingBox.w - originalBoundingBox.z) + originalBoundingBox.z;
+  r1 = r1 * (bbox.y - bbox.x) + bbox.x;
+  r2 = r2 * (bbox.w - bbox.z) + bbox.z;
   vec2 randValues = vec2(r1, r2);
 
   // endPos = vec4(offsetPos, randValues);
   endPos.xy = mix(offsetPos, randValues,
-    float(offsetPos.x < boundingBox.x || offsetPos.x > boundingBox.y ||
-      offsetPos.y < boundingBox.z || offsetPos.y > boundingBox.w));
+    float(offsetPos.x < bbox.x || offsetPos.x > bbox.y ||
+      offsetPos.y < bbox.z || offsetPos.y > bbox.w));
   endPos.xy = mix(endPos.xy, randValues, float(length(offset) < EPSILON));
   endPos.xy = mix(endPos.xy, randValues, float(texel.x == 0. && texel.y == 0. && texel.z == 0.));
   if (flip > 0.) {

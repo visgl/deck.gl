@@ -9,8 +9,7 @@ import vertex from './wind-layer-vertex';
 import fragment from './wind-layer-fragment';
 
 const defaultProps = {
-  boundingBox: null,
-  originalBoundingBox: null,
+  bbox: null,
   dataBounds: null,
   dataTextureArray: null,
   dataTextureSize: null,
@@ -21,8 +20,7 @@ export default class WindLayer extends Layer {
 
   initializeState() {
     const {gl} = this.context;
-    const {dataTextureSize, boundingBox} = this.props;
-    const originalBoundingBox = boundingBox;
+    const {dataTextureSize, bbox} = this.props;
 
     loadTextures(gl, {
       urls: [ELEVATION_DATA_IMAGE],
@@ -39,7 +37,7 @@ export default class WindLayer extends Layer {
       this.setState({elevationTexture: textures[0]});
     });
 
-    const model = this.getModel({gl, originalBoundingBox, nx: 80, ny: 30});
+    const model = this.getModel({gl, bbox, nx: 80, ny: 30});
 
     const {width, height} = dataTextureSize;
     const textureFrom = this.createTexture(gl, {});
@@ -83,7 +81,7 @@ export default class WindLayer extends Layer {
       delta, timeInterval
     } = this.state;
 
-    const {boundingBox, dataBounds, dataTextureArray} = this.props;
+    const {bbox, dataBounds, dataTextureArray} = this.props;
     const pixelStoreParameters = {
       [GL.UNPACK_FLIP_Y_WEBGL]: true
     };
@@ -115,7 +113,7 @@ export default class WindLayer extends Layer {
     };
 
     uniforms = Object.assign({}, uniforms, LIGHT_UNIFORMS, {
-      boundingBox: [boundingBox.minLng, boundingBox.maxLng, boundingBox.minLat, boundingBox.maxLat],
+      bbox: [bbox.minLng, bbox.maxLng, bbox.minLat, bbox.maxLat],
       size: [width, height],
       delta,
       bounds0: [dataBounds[0].min, dataBounds[0].max],
@@ -135,11 +133,11 @@ export default class WindLayer extends Layer {
   }
   /* eslint-enable max-statements */
 
-  getModel({gl, originalBoundingBox, nx, ny}) {
+  getModel({gl, bbox, nx, ny}) {
     // This will be a grid of elements
     this.state.numInstances = nx * ny;
 
-    const positions = this.calculatePositions({nx, ny, originalBoundingBox});
+    const positions = this.calculatePositions({nx, ny, bbox});
     const vertices = new Float32Array([0.3, 0, 250, 0, 0.10, 0, 1, 0, 0, 0, -0.10, 0, 0, 0.10, 0]);
     const normals = new Float32Array([0, 0, 1, 0, 0.10, 0, 1, 0, 0, 0, -0.10, 0, 0, 0.10, 0]);
 
@@ -183,9 +181,9 @@ export default class WindLayer extends Layer {
     return new Texture2D(gl, textureOptions);
   }
 
-  calculatePositions({nx, ny, originalBoundingBox}) {
-    const diffX = originalBoundingBox.maxLng - originalBoundingBox.minLng;
-    const diffY = originalBoundingBox.maxLat - originalBoundingBox.minLat;
+  calculatePositions({nx, ny, bbox}) {
+    const diffX = bbox.maxLng - bbox.minLng;
+    const diffY = bbox.maxLat - bbox.minLat;
     const spanX = diffX / (nx - 1);
     const spanY = diffY / (ny - 1);
 
@@ -195,8 +193,8 @@ export default class WindLayer extends Layer {
     for (let i = 0; i < nx; ++i) {
       for (let j = 0; j < ny; ++j) {
         const index = (i + j * nx) * 3;
-        positions[index + 0] = i * spanX + originalBoundingBox.minLng + ((j % 2) ? spanX / 2 : 0);
-        positions[index + 1] = j * spanY + originalBoundingBox.minLat;
+        positions[index + 0] = i * spanX + bbox.minLng + ((j % 2) ? spanX / 2 : 0);
+        positions[index + 1] = j * spanY + bbox.minLat;
         positions[index + 2] = 0;
       }
     }

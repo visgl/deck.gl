@@ -26,9 +26,9 @@ export default class DelaunayInterpolation {
 
   generateTextures() {
     const gl = this.context;
-    const {boundingBox, measures, triangulation} = this.props;
+    const {bbox, measures, triangulation} = this.props;
     const {txt, bounds, textures, width, height} =
-      this._generateTextures(gl, boundingBox, triangulation, measures);
+      this._generateTextures(gl, bbox, triangulation, measures);
 
     return {
       textureObject: txt,
@@ -90,7 +90,10 @@ export default class DelaunayInterpolation {
         [gl.TEXTURE_WRAP_S]: gl.CLAMP_TO_EDGE,
         [gl.TEXTURE_WRAP_T]: gl.CLAMP_TO_EDGE
       },
-      pixelStore: {[gl.UNPACK_FLIP_Y_WEBGL]: true}
+      pixelStore: {
+        [gl.UNPACK_FLIP_Y_WEBGL]: true,
+        [gl.UNPACK_ALIGNMENT]: 1
+      }
     });
 
     return texture;
@@ -139,10 +142,10 @@ export default class DelaunayInterpolation {
     return {fb, rb, texture};
   }
 
-  _generateTextures(gl, boundingBox, triangulation, measures) {
+  _generateTextures(gl, bbox, triangulation, measures) {
     const delaunayModel = this.getDelaunayModel(gl, triangulation);
-    const lngDiff = Math.abs(boundingBox.maxLng - boundingBox.minLng);
-    const latDiff = Math.abs(boundingBox.maxLat - boundingBox.minLat);
+    const lngDiff = Math.abs(bbox.maxLng - bbox.minLng);
+    const latDiff = Math.abs(bbox.maxLat - bbox.minLat);
     const width = this.getTextureWidth();
     const height = Math.ceil(latDiff * width / lngDiff);
     const bounds = [];
@@ -251,8 +254,8 @@ export default class DelaunayInterpolation {
         });
 
         delaunayModel.render({
-          boundingBox: [
-            boundingBox.minLng, boundingBox.maxLng, boundingBox.minLat, boundingBox.maxLat
+          bbox: [
+            bbox.minLng, bbox.maxLng, bbox.minLat, bbox.maxLat
           ],
           size: [width, height]
         });

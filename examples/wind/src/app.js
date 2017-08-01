@@ -23,15 +23,14 @@ class Root extends Component {
     super(props);
     this.state = {
       viewport: {
-        bearing: 0.9642857142857792,
-        latitude: 37.59651729201781,
-        longitude: -96.86543413846587,
-        mapStyle: 'mapbox://styles/mapbox/dark-v9',
-        maxZoom: 8,
-        pitch: 34.095940959409596,
-        zoom: 4.223615382460847,
         width: 500,
-        height: 500
+        height: 500,
+        longitude: -98.31907156932937,
+        latitude: 37.613897372628045,
+        zoom: 4.241754140284522,
+        maxZoom: 16,
+        pitch: 37.11535300402728,
+        bearing: -0.6424747174301046
       },
       settings: {
         time: 0,
@@ -79,6 +78,7 @@ class Root extends Component {
       <div>
         <MapGL
           {...viewport}
+          mapStyle="mapbox://styles/mapbox/dark-v9"
           mapboxApiAccessToken={MAPBOX_TOKEN}
           perspectiveEnabled
           onChangeViewport={this._updateViewport}>
