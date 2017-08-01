@@ -30,7 +30,8 @@ export default class ParticleLayer extends Layer {
 
   initializeState() {
     const {gl} = this.context;
-    const {boundingBox, texData, originalBoundingBox} = this.props;
+    const {boundingBox, texData} = this.props;
+    const originalBoundingBox = boundingBox;
 
     loadTextures(gl, {
       urls: [ELEVATION_DATA_IMAGE],
@@ -186,7 +187,9 @@ export default class ParticleLayer extends Layer {
     // Run transform feedback
     const {modelTF, textureFrom, textureTo, delta} = this.state;
 
-    const {boundingBox, originalBoundingBox} = this.props;
+    const {boundingBox} = this.props;
+    const originalBoundingBox = boundingBox;
+
     const {dataBounds, textureArray, textureSize} = this.props.texData;
     const {width, height} = textureSize;
     const timeInterval = 0;

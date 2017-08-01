@@ -1,12 +1,12 @@
 import {Layer} from 'deck.gl';
-// import {Model, Geometry, Program} from 'luma.gl';
-//
-// import vertex from './delaunay-cover-layer-vertex.glsl';
-// import fragment from './delaunay-cover-layer-fragment.glsl';
+import {Model, Geometry, setParameters} from 'luma.gl';
+
+import vertex from './delaunay-cover-layer-vertex.glsl';
+import fragment from './delaunay-cover-layer-fragment.glsl';
 
 export default class DelaunayCoverLayer extends Layer {
 // NOTE: commenting out, it is not used anywhere.
-/*
+
   getShaders() {
     return {
       vs: vertex,
@@ -58,7 +58,9 @@ export default class DelaunayCoverLayer extends Layer {
 
     const model = new Model(gl, {
       id: 'delaunay',
-      program: new Program(gl, shaders),
+      // program: new Program(gl, shaders),
+      vs: shaders.vs,
+      fs: shaders.fs,
       geometry: new Geometry({
         drawMode: 'TRIANGLES',
         attributes: {
@@ -76,6 +78,7 @@ export default class DelaunayCoverLayer extends Layer {
         }
       }),
       isIndexed: false,
+      // modules: ['project'],
       onBeforeRender: () => {
         model.program.setUniforms({
           lightsPosition: [-100, 25, 15000],
@@ -86,11 +89,12 @@ export default class DelaunayCoverLayer extends Layer {
           numberOfLights: 2,
           bounds
         });
-        // gl.disable(gl.BLEND);
-        gl.enable(gl.BLEND);
-        gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
-        gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
-        gl.blendEquation(gl.FUNC_ADD);
+        setParameters(gl, {
+          blend: true,
+          blendFunc: [gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA],
+          blendEquation: gl.FUNC_ADD
+        });
+
       },
       onAfterRender: () => {
         // gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
@@ -99,5 +103,4 @@ export default class DelaunayCoverLayer extends Layer {
 
     return model;
   }
-*/
 }

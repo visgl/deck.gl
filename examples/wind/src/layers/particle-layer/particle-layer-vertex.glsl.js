@@ -77,18 +77,39 @@ void main(void) {
   vec3 next = getWorldPosition(posFrom.xy - vec2(0.0, 1.));
   next = project_position(next);
   vec2 pos = project_position(posFrom.xy);
-  float elevation = (project_scale(vAltitude * zScale) + prev.z + next.z) / 3.;
+
+  // OLD
+  // float elevation = (project_scale(vAltitude * zScale) + prev.z + next.z) / 3.;
+
+  // NEW
+  float elevation = project_scale((texel.w + 100.) * ELEVATION_SCALE);
+
   vec3 extrudedPosition = vec3(pos.xy, elevation + 1.0);
   vec4 position_worldspace = vec4(extrudedPosition, 1.0);
   gl_Position = project_to_clipspace(position_worldspace);
-  gl_PointSize = pow(3.5 / (gl_Position.z + 0.7), 2.);
 
-  float alpha = mix(0., 0.8, pow(wind, .5));
+  // OLD
+  // gl_PointSize = pow(3.5 / (gl_Position.z + 0.7), 2.);
+
+  // NEW
+  gl_PointSize = 3.5;
+
+  // OLD
+  // float alpha = mix(0., 0.8, pow(wind, .5));
+
+  // NEW
+  float alpha = mix(0., .8, pow(wind, .8));
+
   if (texel.x == 0. && texel.y == 0. && texel.z == 0.) {
     alpha = 0.;
   }
   // temperature in 0-1
   float temp = (texel.z - bounds2.x) / (bounds2.y - bounds2.x);
-  vColor = vec4(vec3(0.5), alpha);
+
+  // OLD
+  // vColor = vec4(vec3(0.5), alpha);
+
+  // NEW
+  vColor = vec4((1. - vec3(0.4, 0.4, 0.4)), alpha);
 }
 `;

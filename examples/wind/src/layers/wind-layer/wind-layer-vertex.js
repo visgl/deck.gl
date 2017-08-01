@@ -93,17 +93,30 @@ void main(void) {
   vec2 vertex = rotation * vertices.xy;
   vec2 normal = rotation * normals.xy;
   vec2 pos = project_position(positions.xy + vertex.xy * factor);
-  vec3 extrudedPosition = vec3(pos.xy, 1.0);
+
+  // OLD
+  // vec3 extrudedPosition = vec3(pos.xy, 1.0);
+
+  // NEW
+  float elevation = project_scale((vertices.z + texel.w) * ELEVATION_SCALE);
+  vec3 extrudedPosition = vec3(pos.xy, elevation + 1.0);
+
   vec4 position_worldspace = vec4(extrudedPosition, 1.0);
   gl_Position = project_to_clipspace(position_worldspace);
 
   // temperature in 0-1
-  float temp = (texel.z - bounds2.x) / (bounds2.y - bounds2.x);  
-  temp = floor((log(temp + 1.) * 3.) * 3.) / 3.;
+  float temp = (texel.z - bounds2.x) / (bounds2.y - bounds2.x);
+
+  // OLD
+  // temp = floor((log(temp + 1.) * 3.) * 3.) / 3.;
+  // vColor = vec4(vec3(temp, temp, 0.8), 1);
+
+  // NEW
+  temp = floor(temp * 3.) / 3.;
+  vColor = vec4((1. - vec3(3. * temp, 0.25, 0.4)), 1);
 
   vPosition = position_worldspace;
   vNormal = vec4(normal, normals.z, 1);
-  vColor = vec4(vec3(temp, temp, 0.8), 1);
   vAltitude = getAltitude(positions.xy);
   // out of bounds
   if (texel.x == 0. && texel.y == 0. && texel.z == 0.) {

@@ -1,7 +1,7 @@
 import {request, json} from 'd3-request';
 import {voronoi} from 'd3-voronoi';
 import DelaunayInterpolation from '../layers/delaunay-interpolation/delaunay-interpolation';
-import {MARGIN, SAMPLE} from '../defaults';
+import {SAMPLE} from '../defaults';
 
 const STATIONS_DATA_URL = 'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/wind/stations.json';  // eslint-disable-line
 const WEATHER_DATA_URL = 'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/wind/weather.bin';  // eslint-disable-line
@@ -36,6 +36,7 @@ function loadStations() {
   return new Promise((resolve, reject) => {
     json(STATIONS_DATA_URL)
       .on('load', (stations) => {
+        /**
         // add four dummy stations at the end
         const boundingBox = getBBox(stations);
         const boundingBoxMargin = {
@@ -57,6 +58,8 @@ function loadStations() {
           return {long, lat, elv: 10};
         });
         resolve(stations.concat(dummy));
+        **/
+        resolve(stations);
       })
       .on('error', reject)
       .get();

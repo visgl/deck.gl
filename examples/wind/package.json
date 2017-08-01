@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "start": "webpack-dev-server --progress --hot --port 3000 --open --content-base static",
+    "start": "webpack-dev-server --progress --hot --open --content-base static",
     "start-local": "webpack-dev-server --env.local --progress --hot --open --content-base static",
     "build-clean": "rm -rf dist && mkdir dist",
     "build-copy": "cp -r static/* dist",
