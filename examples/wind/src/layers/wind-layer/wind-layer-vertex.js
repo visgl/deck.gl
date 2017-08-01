@@ -32,7 +32,7 @@ uniform sampler2D dataTo;
 uniform sampler2D elevationTexture;
 uniform float delta;
 
-uniform vec4 boundingBox;
+uniform vec4 bbox;
 uniform vec2 size;
 uniform vec2 bounds0;
 uniform vec2 bounds1;
@@ -58,8 +58,8 @@ float getAltitude(vec2 lngLat) {
 
 void main(void) {
   // position in texture coords
-  float x = (positions.x - boundingBox.x) / (boundingBox.y - boundingBox.x);
-  float y = (positions.y - boundingBox.z) / (boundingBox.w - boundingBox.z);
+  float x = (positions.x - bbox.x) / (bbox.y - bbox.x);
+  float y = (positions.y - bbox.z) / (bbox.w - bbox.z);
   vec2 coord = vec2(x, 1. - y);
   vec4 texel1 = texture2D(dataFrom, coord);
   vec4 texel2 = texture2D(dataTo, coord);

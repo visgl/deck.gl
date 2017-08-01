@@ -35,7 +35,7 @@ export default class ControlPanel extends Component {
       <div className="input">
         <label>{displayName}</label>
         <input type="range" {...props}
-          value={this.props.settings[key] | 0}
+          value={this.props.settings[key] || 0}
           onChange={ e => this.props.onChange({[key]: e.target.value}) } />
       </div>
     );

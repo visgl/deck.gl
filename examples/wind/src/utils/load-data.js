@@ -1,7 +1,6 @@
 import {request, json} from 'd3-request';
 import {voronoi} from 'd3-voronoi';
 import DelaunayInterpolation from '../layers/delaunay-interpolation/delaunay-interpolation';
-import {SAMPLE} from '../defaults';
 
 const STATIONS_DATA_URL = 'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/wind/stations.json';  // eslint-disable-line
 const WEATHER_DATA_URL = 'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/wind/weather.bin';  // eslint-disable-line
@@ -12,10 +11,10 @@ export function loadData() {
     loadWeatherData()
   ])
   .then(([stations, weather]) => {
-    const boundingBox = getBBox(stations);
+    const bbox = getBBox(stations);
     const triangulation = triangulate(stations);
     const delaunayInterpolation = new DelaunayInterpolation({
-      boundingBox,
+      bbox,
       triangulation,
       measures: weather,
       textureWidth: 1024
@@ -25,7 +24,7 @@ export function loadData() {
     return {
       stations,
       weather,
-      boundingBox,
+      bbox,
       triangulation,
       texData
     };
@@ -130,22 +129,6 @@ function createHourlyData(bufferData, i, l, hours, components) {
       bufferData[j + 2]
     ]));
   }
-  // four dummy stations all point towards the centroid of the states
-  // array.push(new Float32Array([ 1,0,0]),
-  //            new Float32Array([ 7,0,0]),
-  //            new Float32Array([ 3,0,0]),
-  //            new Float32Array([ 5,0,0]));
-
-  // four dummy stations all point against the centroid of the states
-  // array.push(new Float32Array([ 5,10,10]),
-  //            new Float32Array([ 3,10,10]),
-  //            new Float32Array([ 7,10,10]),
-  //            new Float32Array([ 1,10,10]));
-
-  Array.from(Array(SAMPLE)).forEach((_, i) => { // eslint-disable-line
-    const angle = Math.round(((Math.PI * 2 / SAMPLE * i) % (Math.PI * 2)) / (Math.PI / 4));
-    array.push(new Float32Array([angle, 0, 0]));
-  });
 
   return array;
 }

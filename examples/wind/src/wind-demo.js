@@ -3,12 +3,10 @@ import React, {Component, PropTypes} from 'react';
 import DeckGL, {ScatterplotLayer} from 'deck.gl';
 
 import WindLayer from './layers/wind-layer/wind-layer';
-// import ElevationLayer from './layers/elevation-layer/elevation-layer';
 import DelaunayCoverLayer from './layers/delaunay-cover-layer/delaunay-cover-layer';
 import ParticleLayer from './layers/particle-layer/particle-layer';
 
 import {loadData} from './utils/load-data';
-import {MARGIN, SAMPLE} from './defaults';
 
 import TWEEN from 'tween.js';
 
@@ -66,38 +64,28 @@ export default class WindDemo extends Component {
       return null;
     }
 
-    const {stations, triangulation, texData, boundingBox} = data;
-
-    // FIXME - calculate slice and bounding box when loaded, not in render
-    const newStations = stations.slice(0, -SAMPLE);
-    const originalBoundingBox = {
-      minLng: boundingBox.minLng + MARGIN,
-      maxLng: boundingBox.maxLng - MARGIN,
-      minLat: boundingBox.minLat + MARGIN,
-      maxLat: boundingBox.maxLat - MARGIN
-    };
+    const {stations, triangulation, texData, bbox} = data;
 
     const layers = [
       new ScatterplotLayer({
         id: 'stations',
-        data: newStations,
+        data: stations,
         getPosition: d => [-d.long, d.lat, d.elv],
         getColor: d => [200, 200, 100],
         getRadius: d => 150,
-        opacity: 0.2
+        opacity: 0.2,
+        radiusScale: 30
       }),
       settings.showParticles && new ParticleLayer({
         id: 'particles',
-        boundingBox,
-        originalBoundingBox,
+        bbox,
         texData,
         time: settings.time,
         zScale: 100
       }),
       settings.showWind && new WindLayer({
         id: 'wind',
-        boundingBox,
-        originalBoundingBox,
+        bbox,
         dataBounds: texData.dataBounds,
         dataTextureArray: texData.textureArray,
         dataTextureSize: texData.textureSize,
