@@ -1,7 +1,7 @@
 
 # Tagmap Layer
 
-The tagmap layer generates and visualizes an occlusion-free text label layout on map. (A map-independent layout can be found [here](tagmapper/README.md).)
+The tagmap layer generates and visualizes [an occlusion-free label layout on map](https://github.com/rivulet-zhang/tagmap.js).
 
 ```js
 import DeckGL from 'deck.gl';
