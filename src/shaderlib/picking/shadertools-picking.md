@@ -1,8 +1,10 @@
 # picking (Shader Module)
 
-Provides support for color-coding-based picking. In particular, supports picking a specific instance in an instanced draw call.
+Provides support for color-coding-based picking and highlighting. In particular, supports picking a specific instance in an instanced draw call and highlighting an instance based on its picking color, and correspondingly, supports picking and highlighting groups of primitives with the same picking color in non-instanced draw-calls
 
 Color based picking lets the application draw a primitive with a color that can later be used to index this specific primitive.
+
+Highlighting allows application to specify a picking color corresponding to an object that need to be highlighted and the highlight color to be used.
 
 ## Usage
 
@@ -37,16 +39,16 @@ main() {
 
 ### getUniforms
 
-`getUniforms` returns an object with key/value pairs representing the uniforms that the `picking` module shaders need.
+`getUniforms` takes an object takes a set of key/value pairs, returns an object with key/value pairs representing the uniforms that the `picking` module shaders need.
 
-`getUniforms({enabled, })`
+`getUniforms(opts)`
+opts can contain following keys:
+* `pickingValid` (*boolean*) - When true current instance picking color is ignored, hence no instance is highlighted.
+* `pickingSelectedColor` (*array*) - Picking color of the currently selected instance.
+* `pickingHighlightColor` (*array*)- Color used to highlight the currently selected instance.
+* `pickingActive`=`false` (*boolean*) - When true, renders the picking colors instead of the normal colors. Normally only used with an off-screen framebuffer during picking. Default value is `false`.
 
-* `enabled`=`true` (*boolean*) - Activates picking
-* `selectedIndex`=-1 (*number*) - The index of the selected item, or -1 if no selection.
-* `highlightColor`= (*array*)- Color used to highlight the currently selected
-* `active`=`false` (*boolean*) - Renders the picking colors instead of the normal colors. Normally only used with an off-screen framebuffer during picking.
-
-Note that the selected item will be rendered using `highlightColor`.
+Note that the selected item will be rendered using `pickingHighlightColor`, if blending is enabled for the draw, alpha channel can be used to control the blending result.
 
 
 ## Vertex Shader Functions

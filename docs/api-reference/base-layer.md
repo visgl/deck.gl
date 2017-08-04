@@ -135,6 +135,26 @@ callback of the `DeckGL` canvas.
 
 Requires `pickable` to be true.
 
+##### `highlightColor` (Array, optional)
+
+- Default: `[0, 0, 128, 128]`
+
+RGBA color to be used to render highlighted object.
+
+##### `highlightedObjectIndex` (Integer, optional)
+
+- Default: `-1`
+
+When provided a valid value corresponding object (one instance in instanced rendering or group of primitives with same picking color) will be highlighted with `highlightColor`.
+
+##### `autoHighlight` (Boolean, optional)
+
+- Default: `false`
+
+When true, current object pointed by mouse pointer (when hovered over) is highlighted with `highlightColor`.
+
+Requires `pickable` to be true.
+
 ---
 
 ### Coordinate System Properties

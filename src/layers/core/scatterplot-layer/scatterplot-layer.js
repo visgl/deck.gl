@@ -47,8 +47,8 @@ export default class ScatterplotLayer extends Layer {
   getShaders(id) {
     const {shaderCache} = this.context;
     return enable64bitSupport(this.props) ?
-      {vs: vs64, fs, modules: ['project64'], shaderCache} :
-      {vs, fs, shaderCache}; // 'project' module added by default.
+      {vs: vs64, fs, modules: ['project64', 'picking'], shaderCache} :
+      {vs, fs, modules: ['picking'], shaderCache}; // 'project' module added by default.
   }
 
   initializeState() {

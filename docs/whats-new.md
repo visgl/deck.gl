@@ -1,3 +1,9 @@
+# deck.gl v4.2
+
+## Automatic and custom highlighting
+
+Three new props (`highlightColor`, `highlightedObjectIndex` and `autoHighlight`) are added to `Layer` class to support object highlighting.
+
 # deck.gl v4.1
 
 Release date: July 27th, 2017

@@ -175,5 +175,8 @@ void main() {
   pos = lineJoin(prevPosition, currPosition, nextPosition);
 
   gl_Position = project_to_clipspace(vec4(pos, 1.0));
+
+  // Set color to be rendered to picking fbo (also used to check for selection highlight).
+  picking_setPickingColor(instancePickingColors);
 }
 `;

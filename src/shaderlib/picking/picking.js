@@ -1,3 +1,5 @@
+import log from '../../utils/log';
+
 const DEFAULT_HIGHLIGHT_COLOR = new Uint8Array([0, 64, 128, 64]);
 
 const DEFAULT_MODULE_OPTIONS = {
@@ -5,13 +7,19 @@ const DEFAULT_MODULE_OPTIONS = {
   pickingHighlightColor: DEFAULT_HIGHLIGHT_COLOR, // Color of visual highlight of "selected" item
   pickingThreshold: 1.0,
   pickingActive: false, // Set to true when rendering to off-screen "picking" buffer
-  pickingValid: false
+  pickingSelectedColorValid: false
 };
 
 /* eslint-disable camelcase */
 function getUniforms(opts = DEFAULT_MODULE_OPTIONS) {
   const uniforms = {};
-  uniforms.picking_uValid = opts.pickingValid ? 1 : 0;
+  if (opts.pickingSelectedColorValid !== undefined) {
+    uniforms.picking_uSelectedPickingColorValid = opts.pickingSelectedColorValid ? 1 : 0;
+  }
+  if (opts.pickingValid !== undefined) {
+    uniforms.picking_uSelectedPickingColorValid = opts.pickingValid ? 1 : 0;
+    log.deprecated('pickingValid', 'pickingSelectedColorValid');
+  }
   if (opts.pickingSelectedColor !== undefined) {
     if (opts.pickingSelectedColor) {
       const selectedColor = [
@@ -39,24 +47,24 @@ function getUniforms(opts = DEFAULT_MODULE_OPTIONS) {
 const vs = `\
 uniform vec3 picking_uSelectedPickingColor;
 uniform float picking_uThreshold;
-uniform bool picking_uValid;
+uniform bool picking_uSelectedPickingColorValid;
 
 varying vec4 picking_vRGBcolor_Aselected;
 
-const float COLOR_SCALE = 1. / 256.;
+const float COLOR_SCALE = 1. / 255.;
 
-bool isVertexPicked(vec3 vertexColor, vec3 pickedColor, bool pickingValid) {
+bool isVertexPicked(vec3 vertexColor) {
   return
-    pickingValid &&
-    abs(vertexColor.r - pickedColor.r) < picking_uThreshold &&
-    abs(vertexColor.g - pickedColor.g) < picking_uThreshold &&
-    abs(vertexColor.b - pickedColor.b) < picking_uThreshold;
+    picking_uSelectedPickingColorValid &&
+    abs(vertexColor.r - picking_uSelectedPickingColor.r) < picking_uThreshold &&
+    abs(vertexColor.g - picking_uSelectedPickingColor.g) < picking_uThreshold &&
+    abs(vertexColor.b - picking_uSelectedPickingColor.b) < picking_uThreshold;
 }
 
 void picking_setPickingColor(vec3 pickingColor) {
   // Do the comparison with selected item color in vertex shader as it should mean fewer compares
   picking_vRGBcolor_Aselected.a =
-    float(isVertexPicked(pickingColor, picking_uSelectedPickingColor, picking_uValid));
+    float(isVertexPicked(pickingColor));
 
   // Stores the picking color so that the fragment shader can render it during picking
   picking_vRGBcolor_Aselected.rgb = pickingColor * COLOR_SCALE;
@@ -70,14 +78,14 @@ uniform vec4 picking_uHighlightColor;
 
 varying vec4 picking_vRGBcolor_Aselected;
 
-const float COLOR_SCALE = 1. / 256.;
+const float COLOR_SCALE = 1. / 255.;
 
 /*
  * Returns highlight color if this item is selected.
  */
 vec4 picking_filterHighlightColor(vec4 color) {
   bool selected = bool(picking_vRGBcolor_Aselected.a);
-  return selected ? picking_uHighlightColor : color;
+  return selected ? (picking_uHighlightColor * COLOR_SCALE) : color;
 }
 
 /*
