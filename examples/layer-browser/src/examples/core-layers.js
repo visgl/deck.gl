@@ -168,6 +168,7 @@ const ScatterplotLayerExample = {
     getRadius: d => get(d, 'SPACES'),
     opacity: 0.5,
     pickable: true,
+    pickingHighlightColor: [1, 0, 0, 1],
     radiusScale: 30,
     radiusMinPixels: 1,
     radiusMaxPixels: 30

@@ -25,7 +25,7 @@ import Stats from './stats';
 import {getDefaultProps, compareProps} from './props';
 import {log, count} from './utils';
 import {applyPropOverrides, removeLayerInSeer} from '../debug/seer-integration';
-import {GL, withParameters} from 'luma.gl';
+import {GL, withParameters, NULL_PICKING_COLOR} from 'luma.gl';
 import assert from 'assert';
 
 const LOG_PRIORITY_UPDATE = 1;
@@ -62,7 +62,10 @@ const defaultProps = {
   // Offset depth based on layer index to avoid z-fighting.
   // Negative values pull layer towards the camera
   // https://www.opengl.org/archives/resources/faq/technical/polygonoffset.htm
-  getPolygonOffset: ({layerIndex}) => [0, -layerIndex * 100]
+  getPolygonOffset: ({layerIndex}) => [0, -layerIndex * 100],
+
+  // Picking
+  pickingHighlightColor: NULL_PICKING_COLOR
 };
 
 let counter = 0;
@@ -608,7 +611,10 @@ export default class Layer {
     this.setUniforms({
       // apply gamma to opacity to make it visually "linear"
       opacity: Math.pow(this.props.opacity, 1 / 2.2),
-      ONE: 1.0
+      ONE: 1.0,
+      // Picking
+      pickingSelectedColor: NULL_PICKING_COLOR,
+      pickingHighlightColor: this.props.pickingHighlightColor
     });
   }
 
