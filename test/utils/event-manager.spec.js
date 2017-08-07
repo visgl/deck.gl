@@ -20,7 +20,7 @@
 
 import test from 'tape-catch';
 import spy from '../test-utils/spy';
-import EventManager from 'deck.gl/utils/events/event-manager';
+import EventManager from 'deck.gl/controls/events/event-manager';
 import {createEventRegistrarMock} from './test-utils';
 
 test('eventManager#constructor', t => {

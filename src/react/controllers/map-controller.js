@@ -1,7 +1,7 @@
 import {PureComponent, createElement} from 'react';
 import PropTypes from 'prop-types';
 
-import EventManager from '../../utils/events/event-manager';
+import EventManager from '../../controls/events/event-manager';
 import MapControls from '../../controls/map-controls/map-controls';
 import {MAPBOX_LIMITS} from '../../controls/map-controls/map-state';
 import config from './config';
