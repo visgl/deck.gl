@@ -73,7 +73,6 @@ export default class LayerManager {
       gl,
       uniforms: {},
       viewport: null,
-      zoom: 1,
       viewportChanged: true,
       pickingFBO: null,
       lastPickedInfo: {
@@ -137,10 +136,6 @@ export default class LayerManager {
     if (viewportChanged) {
       Object.assign(this.oldContext, this.context);
       this.context.viewport = viewport;
-      if (zoom !== undefined) {
-        // zoom is stored for non-perspective viewports in geospatial mode
-        this.context.zoom = zoom;
-      }
       this.context.viewportChanged = true;
       this.context.uniforms = {};
       log(4, viewport);
