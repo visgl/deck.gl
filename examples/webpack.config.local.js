@@ -38,19 +38,6 @@ const LOCAL_DEV_CONFIG = {
   module: {
     rules: [
       {
-        // Compile source using buble
-        test: /\.js$/,
-        loader: 'buble-loader',
-        include: [SRC_DIR],
-        options: {
-          objectAssign: 'Object.assign',
-          transforms: {
-            dangerousForOf: true,
-            modules: false
-          }
-        }
-      },
-      {
         // Unfortunately, webpack doesn't import library sourcemaps on its own...
         test: /\.js$/,
         use: ['source-map-loader'],
@@ -62,6 +49,26 @@ const LOCAL_DEV_CONFIG = {
   plugins: [
     new webpack.EnvironmentPlugin(['MapboxAccessToken'])
   ]
+};
+
+const BUBLE_CONFIG = {
+  module: {
+    rules: [
+      {
+        // Compile source using buble
+        test: /\.js$/,
+        loader: 'buble-loader',
+        include: [SRC_DIR],
+        options: {
+          objectAssign: 'Object.assign',
+          transforms: {
+            dangerousForOf: true,
+            modules: false
+          }
+        }
+      }
+    ]
+  }
 };
 
 function addLocalDevSettings(config) {
@@ -77,8 +84,24 @@ function addLocalDevSettings(config) {
   return config;
 }
 
+function addBubleSettings(config) {
+  config.module = config.module || {};
+  Object.assign(config.module, {
+    rules: (config.module.rules || []).concat(BUBLE_CONFIG.module.rules)
+  });
+  return config;
+}
+
 module.exports = config => env => {
+  // npm run start-local now transpiles the lib
   if (env && env.local) {
+    config = addLocalDevSettings(config);
+    config = addBubleSettings(config);
+    // console.warn(JSON.stringify(config, null, 2));
+  }
+
+  // npm run start-es6 does not transpile the lib
+  if (env && env.es6) {
     config = addLocalDevSettings(config);
     // console.warn(JSON.stringify(config, null, 2));
   }
