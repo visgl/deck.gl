@@ -23,10 +23,10 @@
 export {Layer, CompositeLayer, LayerManager, AttributeManager} from './lib';
 export {COORDINATE_SYSTEM} from './lib';
 // Viewports
-export {default as Viewport} from './lib/viewports/viewport';
-export {default as PerspectiveViewport} from './lib/viewports/perspective-viewport';
-export {default as OrthographicViewport} from './lib/viewports/orthographic-viewport';
-export {default as WebMercatorViewport} from './lib/viewports/web-mercator-viewport';
+export {default as Viewport} from './viewports/viewport';
+export {default as PerspectiveViewport} from './viewports/perspective-viewport';
+export {default as OrthographicViewport} from './viewports/orthographic-viewport';
+export {default as WebMercatorViewport} from './viewports/web-mercator-viewport';
 
 // Core Layers
 export {default as ArcLayer} from './layers/core/arc-layer/arc-layer';

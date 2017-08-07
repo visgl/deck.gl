@@ -26,7 +26,7 @@ import {log} from './utils';
 import {flatten} from './utils/flatten';
 import {drawLayers, pickLayers, queryLayers} from './draw-and-pick';
 import {LIFECYCLE} from './constants';
-import {Viewport} from './viewports';
+import {Viewport} from '../viewports';
 import {
   setPropOverrides,
   layerEditListener,
@@ -122,7 +122,7 @@ export default class LayerManager {
     seer.removeListener(this._editSeer);
   }
 
-  setViewport(viewport) {
+  setViewport(viewport, zoom) {
     assert(viewport instanceof Viewport, 'Invalid viewport');
 
     // TODO - viewport change detection breaks METER_OFFSETS mode

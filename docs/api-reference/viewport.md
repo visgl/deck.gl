@@ -79,4 +79,4 @@ Returns:
 Note: By default, takes top-left coordinates from JavaScript mouse events.
 
 ## Source
-[src/lib/viewports/viewport.js](https://github.com/uber/deck.gl/blob/4.1-release/src/lib/viewports/viewport.js)
+[src/viewports/viewport.js](https://github.com/uber/deck.gl/blob/4.1release/src/viewports/viewport.js)

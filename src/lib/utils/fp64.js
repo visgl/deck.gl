@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 
 // TODO - move to shaderlib utilities
-import log from './log';
+import log from '../../utils/log';
 import {COORDINATE_SYSTEM} from '../constants';
 
 export function fp64ify(a) {

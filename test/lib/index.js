@@ -19,7 +19,6 @@
 // THE SOFTWARE.
 
 import './utils';
-import './viewports';
 import './attribute-manager.spec';
 import './layer.spec';
 import './props.spec';

@@ -79,10 +79,29 @@ function timeEnd(priority, label) {
   }
 }
 
+function warn(priority, arg, ...args) {
+  if (priority <= log.priority && !cache[arg]) {
+    console.warn(`luma.gl: ${arg}`, ...args);
+  }
+  cache[arg] = true;
+}
+
+function error(priority, arg, ...args) {
+  console.error(`luma.gl: ${arg}`, ...args);
+}
+
+function deprecated(oldUsage, newUsage) {
+  log.warn(0, `luma.gl: \`${oldUsage}\` is deprecated and will be removed \
+in a later version. Use \`${newUsage}\` instead`);
+}
+
 log.priority = 0;
 log.log = log;
 log.once = once;
 log.time = time;
 log.timeEnd = timeEnd;
+log.warn = warn;
+log.error = error;
+log.deprecated = deprecated;
 
 export default log;

@@ -25,7 +25,7 @@ import WebGLRenderer from './webgl-renderer';
 import {LayerManager, Layer} from '../lib';
 import {EffectManager, Effect} from '../experimental';
 import {GL, setParameters} from 'luma.gl';
-import {Viewport, WebMercatorViewport} from '../lib/viewports';
+import {Viewport, WebMercatorViewport} from '../viewports';
 import EventManager from '../utils/events/event-manager';
 
 function noop() {}
