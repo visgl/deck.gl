@@ -37,8 +37,7 @@ export function drawLayers({layers, pass}) {
 
       layer.drawLayer({
         moduleParameters: Object.assign({}, layer.props, {
-          viewport: layer.context.viewport,
-          coordinateZoom: layer.context.zoom
+          viewport: layer.context.viewport
         }),
         uniforms: Object.assign(
           {renderPickingBuffer: 0, pickingEnabled: 0},
@@ -349,8 +348,7 @@ function getPickedColors(gl, {
         setParameters(gl, {blendColor: [0, 0, 0, (layerIndex + 1) / 255]});
         layer.drawLayer({
           moduleParameters: Object.assign({}, layer.props, {
-            viewport: layer.context.viewport,
-            coordinateZoom: layer.context.zoom
+            viewport: layer.context.viewport
           }),
           uniforms: Object.assign(
             {renderPickingBuffer: 1, pickingEnabled: 1},
