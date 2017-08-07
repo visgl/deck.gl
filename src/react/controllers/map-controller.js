@@ -1,10 +1,10 @@
 import {PureComponent, createElement} from 'react';
 import PropTypes from 'prop-types';
 
-import {MAPBOX_LIMITS} from './map-state';
 import EventManager from '../../utils/events/event-manager';
-import MapControls from './map-controls';
-import config from '../config';
+import MapControls from '../../controls/map-controls/map-controls';
+import {MAPBOX_LIMITS} from '../../controls/map-controls/map-state';
+import config from './config';
 
 const propTypes = {
   /** The width of the map. */
@@ -60,7 +60,7 @@ const propTypes = {
   // A map control instance to replace the default map controls
   // The object must expose one property: `events` as an array of subscribed
   // event names; and two methods: `setState(state)` and `handle(event)`
-  mapControls: PropTypes.shape({
+  controls: PropTypes.shape({
     events: PropTypes.arrayOf(PropTypes.string),
     handleEvent: PropTypes.func
   })
@@ -91,9 +91,9 @@ export default class MapController extends PureComponent {
       isDragging: false
     };
 
-    // If props.mapControls is not provided, fallback to default MapControls instance
+    // If props.controls is not provided, fallback to default MapControls instance
     // Cannot use defaultProps here because it needs to be per map instance
-    this._mapControls = props.mapControls || new MapControls();
+    this._controls = props.controls || new MapControls();
   }
 
   componentDidMount() {
@@ -103,14 +103,14 @@ export default class MapController extends PureComponent {
 
     this._eventManager = eventManager;
 
-    this._mapControls.setOptions(Object.assign({}, this.props, {
+    this._controls.setOptions(Object.assign({}, this.props, {
       onStateChange: this._onInteractiveStateChange.bind(this),
       eventManager
     }));
   }
 
   componentWillUpdate(nextProps) {
-    this._mapControls.setOptions(nextProps);
+    this._controls.setOptions(nextProps);
   }
 
   componentWillUnmount() {

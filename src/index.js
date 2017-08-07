@@ -22,6 +22,7 @@
 // Lib
 export {Layer, CompositeLayer, LayerManager, AttributeManager} from './lib';
 export {COORDINATE_SYSTEM} from './lib';
+
 // Viewports
 export {default as Viewport} from './viewports/viewport';
 export {default as PerspectiveViewport} from './viewports/perspective-viewport';
@@ -46,9 +47,11 @@ export {default as PathLayer} from './layers/core/path-layer/path-layer';
 export {default as PolygonLayer} from './layers/core/polygon-layer/polygon-layer';
 export {default as GeoJsonLayer} from './layers/core/geojson-layer/geojson-layer';
 
-// React exports
+// React bindings
 export {default as DeckGL} from './react/deckgl';
 export {default as default} from './react/deckgl';
+export {default as MapController} from './react/controllers/map-controller';
+export {default as OrbitController} from './react/controllers/orbit-controller';
 
 // Experimental Features (May change in minor version bumps, use at your own risk)
 import {get} from './lib/utils/get';
