@@ -18,9 +18,6 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-// Log
-export {default as log} from './log';
-
 // Object and array support
 export {flatten, flattenVertices, fillArray} from './flatten';
 export {compareProps, areEqualShallow} from './compare-objects';
@@ -33,3 +30,6 @@ export {parseColor} from './color';
 // ES6 Container and Immutable support
 export {get} from './get';
 export {count} from './count';
+
+// TODO - remove (backwards compatiblity export)
+export {default as log} from '../../utils/log';

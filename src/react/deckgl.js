@@ -25,7 +25,7 @@ import WebGLRenderer from './webgl-renderer';
 import {LayerManager, Layer} from '../lib';
 import {EffectManager, Effect} from '../experimental';
 import {GL, setParameters} from 'luma.gl';
-import {Viewport, WebMercatorViewport} from '../lib/viewports';
+import {Viewport, WebMercatorViewport} from '../viewports';
 import EventManager from '../utils/events/event-manager';
 
 function noop() {}
@@ -117,7 +117,7 @@ export default class DeckGL extends React.Component {
 
     if (this.layerManager) {
       this.layerManager
-        .setViewport(viewport)
+        .setViewport(viewport, zoom)
         .updateLayers({newLayers: nextProps.layers});
     }
   }

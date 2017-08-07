@@ -18,8 +18,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {global} from '../utils/globals';
-import log from './utils/log';
+import {global} from '.,/utils/globals';
+import log from '../utils/log';
 
 // Version detection
 // TODO - this imports a rather large JSON file, we only need one field

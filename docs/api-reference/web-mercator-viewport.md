@@ -132,4 +132,4 @@ Returns:
 if `z` is provided.
 
 ## Source
-[src/lib/viewports/web-mercator-viewport.js](https://github.com/uber/deck.gl/blob/4.1-release/src/lib/viewports/web-mercator-viewport.js)
+[src/viewports/web-mercator-viewport.js](https://github.com/uber/deck.gl/blob/4.1-release/src/viewports/web-mercator-viewport.js)

@@ -47,4 +47,4 @@ const viewport = new OrthographicViewport({
 Inherits all [Viewport methods](/docs/api-reference/viewport.md#methods).
 
 ## Source
-[src/lib/viewports/orthographic-viewport.js](https://github.com/uber/deck.gl/blob/4.1-release/src/lib/viewports/orthographic-viewport.js)
+[src/viewports/orthographic-viewport.js](https://github.com/uber/deck.gl/blob/4.1-release/src/viewports/orthographic-viewport.js)

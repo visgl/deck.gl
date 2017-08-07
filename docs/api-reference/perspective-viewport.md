@@ -44,4 +44,4 @@ const viewport = new PerspectiveViewport({
 Inherits all [Viewport methods](/docs/api-reference/viewport.md#methods).
 
 ## Source
-[src/lib/viewports/perspective-viewport.js](https://github.com/uber/deck.gl/blob/4.1-release/src/lib/viewports/perspective-viewport.js)
+[src/viewports/perspective-viewport.js](https://github.com/uber/deck.gl/blob/4.1-release/src/viewports/perspective-viewport.js)

@@ -18,13 +18,12 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-/* eslint-disable no-unused-vars */
 import test from 'tape-catch';
-import React, {createElement} from 'react';
-import utils from 'react-dom/test-utils';
+import {Matrix4} from 'luma.gl';
 
-import DeckGL from 'deck.gl';
-import {Viewport, WebMercatorViewport} from 'deck.gl/viewports';
+import {getUniformsFromViewport} from 'deck.gl/shaderlib/project/viewport-uniforms';
+import {Viewport, WebMercatorViewport} from 'deck.gl/lib/viewports';
+import {COORDINATE_SYSTEM} from 'deck.gl/lib/constants';
 
 const TEST_DATA = {
   mapState: {
@@ -39,37 +38,27 @@ const TEST_DATA = {
   }
 };
 
-test('Rendering DeckGL overlay without viewport params', t => {
-  // TODO - should this work? A default WebMercatorViewport?
-  const component = utils.renderIntoDocument(
-    createElement(DeckGL, {width: 100, height: 100, layers: []})
-  );
-  t.ok(component, 'WebGLOverlay is rendered.');
-  t.end();
-});
-
-test('Rendering DeckGL overlay with viewport params', t => {
-  const component = utils.renderIntoDocument(
-    createElement(DeckGL, Object.assign({}, TEST_DATA.mapState, {layers: []}))
-  );
-  t.ok(component, 'WebGLOverlay is rendered.');
-  t.end();
-});
-
-test('Rendering DeckGL overlay with Viewport', t => {
-  const viewport = new Viewport();
-  const component = utils.renderIntoDocument(
-    createElement(DeckGL, {width: 100, height: 100, viewport, layers: []})
-  );
-  t.ok(component, 'WebGLOverlay is rendered.');
-  t.end();
-});
-
-test('Rendering DeckGL overlay with WebMercatorViewport', t => {
+test('Viewport#constructors', t => {
   const viewport = new WebMercatorViewport(TEST_DATA.mapState);
-  const component = utils.renderIntoDocument(
-    createElement(DeckGL, {width: 100, height: 100, viewport, layers: []})
-  );
-  t.ok(component, 'WebGLOverlay is rendered.');
+  t.ok(viewport instanceof Viewport, 'Created new WebMercatorViewport');
+  t.end();
+});
+
+test('getUniformsFromViewport', t => {
+  const viewport = new WebMercatorViewport(TEST_DATA.mapState);
+  t.ok(viewport instanceof Viewport, 'Created new WebMercatorViewport');
+
+  let uniforms = getUniformsFromViewport(viewport);
+  t.ok(uniforms.devicePixelRatio > 0, 'Returned devicePixelRatio');
+  t.ok((uniforms.projectionMatrix instanceof Float32Array) ||
+    (uniforms.projectionMatrix instanceof Matrix4), 'Returned projectionMatrix');
+  t.ok((uniforms.modelViewMatrix instanceof Float32Array) ||
+    (uniforms.modelViewMatrix instanceof Matrix4), 'Returned modelViewMatrix');
+
+  uniforms = getUniformsFromViewport(viewport, {
+    projectionMode: COORDINATE_SYSTEM.METER_OFFSETS
+  });
+  t.ok(uniforms.projectionCenter.some(x => x), 'Returned non-trivial projection center');
+
   t.end();
 });

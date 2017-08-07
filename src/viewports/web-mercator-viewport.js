@@ -23,11 +23,13 @@
 import Viewport, {createMat4} from './viewport';
 
 import {
-  projectFlat, unprojectFlat,
+  projectFlat,
+  unprojectFlat,
   calculateDistanceScales,
   calculateDistanceScalesUTM,
-  makeProjectionMatrixFromMercatorParams, makeUncenteredViewMatrixFromMercatorParams
-} from '../../viewports/web-mercator-utils';
+  makeProjectionMatrixFromMercatorParams,
+  makeUncenteredViewMatrixFromMercatorParams
+} from '../viewport-mercator-project/web-mercator-utils';
 
 import mat4_translate from 'gl-mat4/translate';
 import vec2_transformMat2 from 'gl-vec2/transformMat2';

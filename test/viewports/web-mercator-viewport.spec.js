@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 
 import test from 'tape-catch';
-import {equals} from '../../../src/lib/math';
+import {equals} from 'deck.gl/utils/math';
 import {WebMercatorViewport} from 'deck.gl';
 import utm from 'utm';
 

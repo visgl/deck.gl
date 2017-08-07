@@ -19,9 +19,10 @@
 // THE SOFTWARE.
 
 import './imports-spec';
-import './layers';
+import './viewports';
 import './lib';
 import './utils';
+import './layers';
 import './experimental';
 import './deprecated';
 import './debug/seer-integration.spec';

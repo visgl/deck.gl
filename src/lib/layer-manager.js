@@ -26,7 +26,7 @@ import {log} from './utils';
 import {flatten} from './utils/flatten';
 import {drawLayers, pickLayers, queryLayers} from './draw-and-pick';
 import {LIFECYCLE} from './constants';
-import {Viewport} from './viewports';
+import {Viewport} from '../viewports';
 import {
   setPropOverrides,
   layerEditListener,
@@ -73,6 +73,7 @@ export default class LayerManager {
       gl,
       uniforms: {},
       viewport: null,
+      zoom: 1,
       viewportChanged: true,
       pickingFBO: null,
       lastPickedInfo: {
@@ -122,7 +123,7 @@ export default class LayerManager {
     seer.removeListener(this._editSeer);
   }
 
-  setViewport(viewport) {
+  setViewport(viewport, zoom) {
     assert(viewport instanceof Viewport, 'Invalid viewport');
 
     // TODO - viewport change detection breaks METER_OFFSETS mode
@@ -136,6 +137,10 @@ export default class LayerManager {
     if (viewportChanged) {
       Object.assign(this.oldContext, this.context);
       this.context.viewport = viewport;
+      if (zoom !== undefined) {
+        // zoom is stored for non-perspective viewports in geospatial mode
+        this.context.zoom = zoom;
+      }
       this.context.viewportChanged = true;
       this.context.uniforms = {};
       log(4, viewport);
