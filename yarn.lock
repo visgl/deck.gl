@@ -2076,6 +2076,10 @@ gl-constants@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/gl-constants/-/gl-constants-1.0.0.tgz#597a504e364750ff50253aa35f8dea7af4a5d233"
 
+gl-mat2@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/gl-mat2/-/gl-mat2-1.0.0.tgz#22c06f06bbc141a8bfac7d8573f5528f1de29d46"
+
 gl-mat3@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/gl-mat3/-/gl-mat3-1.0.0.tgz#89633219ca429379a16b9185d95d41713453b912"
@@ -2903,9 +2907,9 @@ lru-cache@^4.0.1:
     pseudomap "^1.0.2"
     yallist "^2.1.2"
 
-luma.gl@>=4.0.0-beta.5:
-  version "4.0.0-beta.6"
-  resolved "https://registry.yarnpkg.com/luma.gl/-/luma.gl-4.0.0-beta.6.tgz#a5bd77aa5f21782f67341dcb0b91493e1b107b18"
+luma.gl@^4.0.0:
+  version "4.0.0"
+  resolved "https://registry.yarnpkg.com/luma.gl/-/luma.gl-4.0.0.tgz#3ec92b3a45f7b94f739f41e8bcb1b3ddecf30f33"
   dependencies:
     gl-constants "^1.0.0"
     gl-mat4 "^1.1.4"
@@ -4710,6 +4714,10 @@ util@0.10.3, util@^0.10.3:
 utils-merge@1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/utils-merge/-/utils-merge-1.0.0.tgz#0294fb922bb9375153541c4f7096231f287c8af8"
+
+utm@^1.1.1:
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/utm/-/utm-1.1.1.tgz#c6ec8789a59aae21ffad160e7b51bd4bdebec18f"
 
 uuid@^2.0.2:
   version "2.0.3"
