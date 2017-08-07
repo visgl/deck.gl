@@ -1,4 +1,4 @@
-import {window} from '../globals';
+import {window} from '../../utils/globals';
 
 const ua = typeof window.navigator !== 'undefined' ?
   window.navigator.userAgent.toLowerCase() : '';

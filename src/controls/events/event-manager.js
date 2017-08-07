@@ -1,6 +1,7 @@
 import WheelInput from './wheel-input';
 import MoveInput from './move-input';
-import {isBrowser} from '../globals';
+// import KeyInput from './key-input';
+import {isBrowser} from '../../utils/globals';
 
 // Hammer.js directly references `document` and `window`,
 // which means that importing it in environments without
@@ -59,6 +60,7 @@ export default class EventManager {
     this._onOtherEvent = this._onOtherEvent.bind(this);
     this.wheelInput = new WheelInput(element, this._onOtherEvent, {enable: false});
     this.moveInput = new MoveInput(element, this._onOtherEvent, {enable: false});
+    // this.keyInput = new KeyInput(element, this._onOtherEvent, {enable: false});
 
     // Register all passed events.
     const {events} = options;
@@ -73,6 +75,7 @@ export default class EventManager {
   destroy() {
     this.wheelInput.destroy();
     this.moveInput.destroy();
+    // this.keyInput.destroy();
     this.manager.destroy();
   }
 
@@ -118,6 +121,7 @@ export default class EventManager {
     }
     this.wheelInput.toggleIfEventSupported(name, enabled);
     this.moveInput.toggleIfEventSupported(name, enabled);
+    // this.keyInput.toggleIfEventSupported(name, enabled);
   }
 
   /**

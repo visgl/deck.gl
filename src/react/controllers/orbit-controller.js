@@ -1,9 +1,8 @@
 import React, {createElement} from 'react';
 import PropTypes from 'prop-types';
-import OrbitViewport from './orbit-viewport';
-import OrbitControls from './orbit-controls';
-
-import EventManager from '../../utils/events/event-manager';
+import OrbitViewport from '../../controls/orbit-controls/orbit-viewport';
+import OrbitControls from '../../controls/orbit-controls/orbit-controls';
+import EventManager from '../../controls/events/event-manager';
 
 const propTypes = {
   /* Viewport properties */

@@ -19,6 +19,13 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ### deck.gl v4.2
 
+#### [4.2.0-alpha.X]
+
+- Move react controllers to react directory, export from index.js
+- Move viewports and some utils out of `lib` folder.
+- Add `start-es6` script to layer-browser
+
+
 #### [4.2.0-alpha.2]
 
 - Add: UTM_OFFSETS projection mode

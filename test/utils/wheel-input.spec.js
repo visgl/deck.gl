@@ -20,7 +20,7 @@
 
 import test from 'tape-catch';
 import spy from '../test-utils/spy';
-import WheelInput from 'deck.gl/utils/events/wheel-input';
+import WheelInput from 'deck.gl/controls/events/wheel-input';
 import {createEventRegistrarMock} from './test-utils';
 
 test('wheelInput#constructor', t => {
