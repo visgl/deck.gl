@@ -117,7 +117,7 @@ export default class DeckGL extends React.Component {
 
     if (this.layerManager) {
       this.layerManager
-        .setViewport(viewport)
+        .setViewport(viewport, zoom)
         .updateLayers({newLayers: nextProps.layers});
     }
   }

@@ -20,16 +20,13 @@
 
 // import browser from 'bowser';
 
-const PREFIX = '-webkit';
+const PREFIX = '-webkit-';
   // browser.webkit || browser.blink ? '-webkit-' :
   // browser.gecko ? '-moz-' :
   // '';
 
 export default {
-  DEFAULTS: {},
-  CURSOR: {
-    GRABBING: `${PREFIX}grabbing`,
-    GRAB: `${PREFIX}grab`,
-    POINTER: 'pointer'
-  }
+  GRABBING: `${PREFIX}grabbing`,
+  GRAB: `${PREFIX}grab`,
+  POINTER: 'pointer'
 };

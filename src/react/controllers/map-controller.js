@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import EventManager from '../../controls/events/event-manager';
 import MapControls from '../../controls/map-controls/map-controls';
 import {MAPBOX_LIMITS} from '../../controls/map-controls/map-state';
-import config from './config';
+import CURSOR from './cursors';
 
 const propTypes = {
   /** The width of the map. */
@@ -66,8 +66,7 @@ const propTypes = {
   })
 };
 
-const getDefaultCursor = ({isDragging}) => isDragging ?
-  config.CURSOR.GRABBING : config.CURSOR.GRAB;
+const getDefaultCursor = ({isDragging}) => isDragging ? CURSOR.GRABBING : CURSOR.GRAB;
 
 const defaultProps = Object.assign({}, MAPBOX_LIMITS, {
   onViewportChange: null,
@@ -87,13 +86,9 @@ export default class MapController extends PureComponent {
     super(props);
 
     this.state = {
-      // Whether the cursor is down
-      isDragging: false
-    };
+      isDragging: false      // Whether the cursor is down
 
-    // If props.controls is not provided, fallback to default MapControls instance
-    // Cannot use defaultProps here because it needs to be per map instance
-    this._controls = props.controls || new MapControls();
+    };
   }
 
   componentDidMount() {
@@ -103,6 +98,9 @@ export default class MapController extends PureComponent {
 
     this._eventManager = eventManager;
 
+    // If props.controls is not provided, fallback to default MapControls instance
+    // Cannot use defaultProps here because it needs to be per map instance
+    this._controls = this.props.controls || new MapControls();
     this._controls.setOptions(Object.assign({}, this.props, {
       onStateChange: this._onInteractiveStateChange.bind(this),
       eventManager
@@ -114,10 +112,7 @@ export default class MapController extends PureComponent {
   }
 
   componentWillUnmount() {
-    if (this._eventManager) {
-      // Must destroy because hammer adds event listeners to window
-      this._eventManager.destroy();
-    }
+    this._eventManager.destroy();
   }
 
   _onInteractiveStateChange({isDragging = false}) {

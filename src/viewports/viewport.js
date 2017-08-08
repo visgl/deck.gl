@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 
 // TODO - replace with math.gl
-import {equals} from '../utils/math';
+import {equals} from '../math/equals';
 import mat4_scale from 'gl-mat4/scale';
 import mat4_translate from 'gl-mat4/translate';
 import mat4_multiply from 'gl-mat4/multiply';

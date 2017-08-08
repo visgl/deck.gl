@@ -193,9 +193,16 @@ export default class EventManager {
       // Calculate center relative to the root element
       // TODO/xiaoji - avoid using getBoundingClientRect for perf?
       const rect = element.getBoundingClientRect();
+
+      // Fix scale for map affected by a CSS transform.
+      // See https://stackoverflow.com/a/26893663/3528533
+      const scaleX = rect.width / element.offsetWidth;
+      const scaleY = rect.height / element.offsetHeight;
+
+      // Calculate center relative to the root element
       const offsetCenter = {
-        x: center.x - rect.left - element.clientLeft,
-        y: center.y - rect.top - element.clientTop
+        x: (center.x - rect.left - element.clientLeft) / scaleX,
+        y: (center.y - rect.top - element.clientTop) / scaleY
       };
 
       handler(Object.assign({}, event, {

@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import OrbitState from './orbit-state';
+import assert from 'assert';
 
 // EVENT HANDLING PARAMETERS
 const ZOOM_ACCEL = 0.01;
@@ -30,16 +30,22 @@ const EVENT_TYPES = {
   DOUBLE_TAP: ['doubletap']
 };
 
-export default class OrbitControls {
+export default class GenericControls {
   /**
    * @classdesc
    * A class that handles events and updates mercator style viewport parameters
    */
-  constructor() {
+  constructor(options) {
+    assert(options.StateClass);
+    this.StateClass = options.StateClass;
+
     this._state = {
       isDragging: false
     };
+
     this.handleEvent = this.handleEvent.bind(this);
+
+    this.setOptions(options);
   }
 
   /**
@@ -47,7 +53,8 @@ export default class OrbitControls {
    * @param {hammer.Event} event
    */
   handleEvent(event) {
-    this.orbitState = new OrbitState(Object.assign({}, this.orbitStateProps, this._state));
+    this.viewportState =
+      new this.StateClass(Object.assign({}, this.viewportStateProps, this._state));
 
     switch (event.type) {
     case 'panstart':
@@ -80,8 +87,11 @@ export default class OrbitControls {
 
   isFunctionKeyPressed(event) {
     const {srcEvent} = event;
-    return Boolean(srcEvent.metaKey || srcEvent.altKey ||
-      srcEvent.ctrlKey || srcEvent.shiftKey);
+    return Boolean(srcEvent.metaKey || srcEvent.altKey || srcEvent.ctrlKey || srcEvent.shiftKey);
+  }
+
+  isDragging() {
+    return this._state.isDragging;
   }
 
   setState(newState) {
@@ -93,9 +103,9 @@ export default class OrbitControls {
 
   /* Callback util */
   // formats map state and invokes callback function
-  updateViewport(newOrbitState, extraState = {}) {
-    const oldViewport = this.orbitState.getViewportProps();
-    const newViewport = newOrbitState.getViewportProps();
+  updateViewport(newViewportState, extraState = {}) {
+    const oldViewport = this.viewportState.getViewportProps();
+    const newViewport = newViewportState.getViewportProps();
 
     if (this.onViewportChange &&
       Object.keys(newViewport).some(key => oldViewport[key] !== newViewport[key])) {
@@ -103,7 +113,7 @@ export default class OrbitControls {
       this.onViewportChange(newViewport);
     }
 
-    this.setState(Object.assign({}, newOrbitState.getInteractiveState(), extraState));
+    this.setState(Object.assign({}, newViewportState.getInteractiveState(), extraState));
   }
 
   /**
@@ -111,6 +121,8 @@ export default class OrbitControls {
    */
   setOptions(options) {
     const {
+      // TODO(deprecate): remove this when `onChangeViewport` gets deprecated
+      onChangeViewport,
       onViewportChange,
       onStateChange = this.onStateChange,
       eventManager = this.eventManager,
@@ -120,9 +132,12 @@ export default class OrbitControls {
       doubleClickZoom = true,
       touchZoomRotate = true
     } = options;
-    this.onViewportChange = onViewportChange;
+
+    // TODO(deprecate): remove this check when `onChangeViewport` gets deprecated
+    this.onViewportChange = onViewportChange || onChangeViewport;
     this.onStateChange = onStateChange;
-    this.orbitStateProps = options;
+    this.viewportStateProps = options;
+
     if (this.eventManager !== eventManager) {
       // EventManager has changed
       this.eventManager = eventManager;
@@ -130,10 +145,11 @@ export default class OrbitControls {
     }
 
     // Register/unregister events
-    this.toggleEvents(EVENT_TYPES.WHEEL, scrollZoom);
-    this.toggleEvents(EVENT_TYPES.PAN, dragPan || dragRotate);
-    this.toggleEvents(EVENT_TYPES.PINCH, touchZoomRotate);
-    this.toggleEvents(EVENT_TYPES.DOUBLE_TAP, doubleClickZoom);
+    const isInteractive = Boolean(this.onViewportChange);
+    this.toggleEvents(EVENT_TYPES.WHEEL, isInteractive && scrollZoom);
+    this.toggleEvents(EVENT_TYPES.PAN, isInteractive && (dragPan || dragRotate));
+    this.toggleEvents(EVENT_TYPES.PINCH, isInteractive && touchZoomRotate);
+    this.toggleEvents(EVENT_TYPES.DOUBLE_TAP, isInteractive && doubleClickZoom);
 
     this.scrollZoom = scrollZoom;
     this.dragPan = dragPan;
@@ -161,8 +177,8 @@ export default class OrbitControls {
   // Default handler for the `panstart` event.
   _onPanStart(event) {
     const pos = this.getCenter(event);
-    const newOrbitState = this.orbitState.panStart({pos}).rotateStart({pos});
-    return this.updateViewport(newOrbitState, {isDragging: true});
+    const newViewportState = this.viewportState.panStart({pos}).rotateStart({pos});
+    return this.updateViewport(newViewportState, {isDragging: true});
   }
 
   // Default handler for the `panmove` event.
@@ -172,8 +188,8 @@ export default class OrbitControls {
 
   // Default handler for the `panend` event.
   _onPanEnd(event) {
-    const newOrbitState = this.orbitState.panEnd().rotateEnd();
-    return this.updateViewport(newOrbitState, {isDragging: false});
+    const newViewportState = this.viewportState.panEnd().rotateEnd();
+    return this.updateViewport(newViewportState, {isDragging: false});
   }
 
   // Default handler for panning to move.
@@ -183,8 +199,8 @@ export default class OrbitControls {
       return false;
     }
     const pos = this.getCenter(event);
-    const newOrbitState = this.orbitState.pan({pos});
-    return this.updateViewport(newOrbitState);
+    const newViewportState = this.viewportState.pan({pos});
+    return this.updateViewport(newViewportState);
   }
 
   // Default handler for panning to rotate.
@@ -195,13 +211,13 @@ export default class OrbitControls {
     }
 
     const {deltaX, deltaY} = event;
-    const {width, height} = this.orbitState.getViewportProps();
+    const {width, height} = this.viewportState.getViewportProps();
 
     const deltaScaleX = deltaX / width;
     const deltaScaleY = deltaY / height;
 
-    const newOrbitState = this.orbitState.rotate({deltaScaleX, deltaScaleY});
-    return this.updateViewport(newOrbitState);
+    const newViewportState = this.viewportState.rotate({deltaScaleX, deltaScaleY});
+    return this.updateViewport(newViewportState);
   }
 
   // Default handler for the `wheel` event.
@@ -220,15 +236,15 @@ export default class OrbitControls {
       scale = 1 / scale;
     }
 
-    const newOrbitState = this.orbitState.zoom({pos, scale});
-    return this.updateViewport(newOrbitState);
+    const newViewportState = this.viewportState.zoom({pos, scale});
+    return this.updateViewport(newViewportState);
   }
 
   // Default handler for the `pinchstart` event.
   _onPinchStart(event) {
     const pos = this.getCenter(event);
-    const newOrbitState = this.orbitState.zoomStart({pos});
-    return this.updateViewport(newOrbitState, {isDragging: true});
+    const newViewportState = this.viewportState.zoomStart({pos});
+    return this.updateViewport(newViewportState, {isDragging: true});
   }
 
   // Default handler for the `pinch` event.
@@ -238,14 +254,14 @@ export default class OrbitControls {
     }
     const pos = this.getCenter(event);
     const {scale} = event;
-    const newOrbitState = this.orbitState.zoom({pos, scale});
-    return this.updateViewport(newOrbitState);
+    const newViewportState = this.viewportState.zoom({pos, scale});
+    return this.updateViewport(newViewportState);
   }
 
   // Default handler for the `pinchend` event.
   _onPinchEnd(event) {
-    const newOrbitState = this.orbitState.zoomEnd();
-    return this.updateViewport(newOrbitState, {isDragging: false});
+    const newViewportState = this.viewportState.zoomEnd();
+    return this.updateViewport(newViewportState, {isDragging: false});
   }
 
   // Default handler for the `doubletap` event.
@@ -256,7 +272,7 @@ export default class OrbitControls {
     const pos = this.getCenter(event);
     const isZoomOut = this.isFunctionKeyPressed(event);
 
-    const newOrbitState = this.orbitState.zoom({pos, scale: isZoomOut ? 0.5 : 2});
-    return this.updateViewport(newOrbitState);
+    const newViewportState = this.viewportState.zoom({pos, scale: isZoomOut ? 0.5 : 2});
+    return this.updateViewport(newViewportState);
   }
 }

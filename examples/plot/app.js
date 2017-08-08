@@ -4,9 +4,7 @@ import {render} from 'react-dom';
 import DeckGLOverlay from './deckgl-overlay.js';
 import {OrbitController} from 'deck.gl/dist/controllers';
 
-const equation = (x, y) => {
-  return Math.sin(x * x + y * y) * x / Math.PI;
-};
+const EQUATION = (x, y) => Math.sin(x * x + y * y) * x / Math.PI;
 
 class Root extends Component {
 
@@ -69,7 +67,7 @@ class Root extends Component {
         onViewportChange={this._onViewportChange} >
         <DeckGLOverlay
           viewport={OrbitController.getViewport(viewport)}
-          equation={equation}
+          equation={EQUATION}
           resolution={200}
           showAxis={true}
           onHover={this._onHover} />
