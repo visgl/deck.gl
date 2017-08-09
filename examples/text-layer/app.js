@@ -115,7 +115,7 @@ class Root extends Component {
             // use non-linear function to achieve smooth animation
             const opac = Math.cos(offset * Math.PI / 2);
             const color = [...TEXT_COLOR, opac * 255];
-            return Object.assign({}, val, {color});
+            return Object.assign({}, val, {color}, {size: 12 * (opac + 1)});
           });
           dataSlice = [...dataSlice, ...slice];
         }

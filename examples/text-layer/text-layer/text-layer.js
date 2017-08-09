@@ -1,4 +1,5 @@
 /* eslint-disable max-len */
+/* global window */
 import {CompositeLayer} from 'deck.gl';
 import MultiIconLayer from './multi-icon-layer';
 import {json as requestJson} from 'd3-request';
@@ -81,6 +82,7 @@ export default class TextLayer extends CompositeLayer {
         getPosition: d => d.position,
         getLetterIndexInString: d => d.index,
         getStringLength: d => d.len,
+        sizeScale: window.devicePixelRatio,
         getColor,
         getSize,
         getAngle,

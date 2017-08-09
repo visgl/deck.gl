@@ -44,11 +44,18 @@ varying float vColorMode;
 varying vec4 vColor;
 varying vec2 vTextureCoords;
 
-vec2 rotate_by_angle(vec2 vertex, float angle) {
+// rotation should factor in the aspect ratio
+vec2 rotate_by_angle(vec2 vertex, float angle, float aspectRatio) {
   float angle_radian = angle * PI / 180.0;
   float cos_angle = cos(angle_radian);
   float sin_angle = sqrt(1.0 - cos_angle * cos_angle);
-  mat2 rotationMatrix = mat2(cos_angle, -sin_angle, sin_angle, cos_angle);
+  float aspectRatioInverse = aspectRatio == 0.0 ? 1.0 : 1.0 / aspectRatio;
+  mat2 rotationMatrix = mat2(
+    cos_angle,
+    - aspectRatioInverse * sin_angle,
+    aspectRatio * sin_angle,
+    cos_angle
+  );
   return rotationMatrix * vertex;
 }
 
@@ -72,9 +79,9 @@ void main(void) {
   vec2 vertex = (positions / 2.0 + instanceOffsets);
   vertex += getShift(instanceLetterIndexInString, instanceStringLength);
 
-  vertex = rotate_by_angle(vertex, instanceAngles) * iconSize_clipspace *
-    sizeScale * instanceScale;
-
+  float aspectRatio = viewportSize.x == 0.0 ? 1.0 : viewportSize.y / viewportSize.x;
+  vertex *= iconSize_clipspace;
+  vertex = rotate_by_angle(vertex, instanceAngles, aspectRatio) * sizeScale * instanceScale;
   vertex.y *= -1.0;
 
   vec4 instancePositions64xy = vec4(

@@ -30,7 +30,9 @@ export default class DeckGLOverlay extends Component {
       new TextLayer({
         id: 'hashtag-layer',
         data,
-        getColor: d => d.color
+        getColor: d => d.color,
+        getSize: d => d.size,
+        fp64: true
       })
     ];
 
