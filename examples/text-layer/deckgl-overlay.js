@@ -31,8 +31,7 @@ export default class DeckGLOverlay extends Component {
         id: 'hashtag-layer',
         data,
         getColor: d => d.color,
-        getSize: d => d.size,
-        fp64: true
+        getSize: d => d.size
       })
     ];
 
