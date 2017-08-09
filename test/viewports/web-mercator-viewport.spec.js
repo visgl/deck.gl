@@ -21,7 +21,6 @@
 import test from 'tape-catch';
 import {equals} from 'deck.gl/utils/math';
 import {WebMercatorViewport} from 'deck.gl';
-import utm from 'utm';
 
 /* eslint-disable */
 const TEST_VIEWPORTS = [
@@ -53,29 +52,6 @@ const TEST_VIEWPORTS = [
       bearing: -44.48928121059271,
       pitch: 43.670797287818566
     }
-  }
-];
-
-const TEST_METER_OFFSETS = [
-  {
-    title: '1m',
-    radius: 1
-  },
-  {
-    title: '10m',
-    radius: 10
-  },
-  {
-    title: '100m',
-    radius: 100
-  },
-  {
-    title: '1km',
-    radius: 1000
-  },
-  {
-    title: '10km',
-    radius: 10000
   }
 ];
 
@@ -165,62 +141,10 @@ test('WebMercatorViewport.meterDeltas', t => {
     const viewport = new WebMercatorViewport(vc.mapState);
     for (const tc of TEST_VIEWPORTS) {
       const coordinate = [tc.mapState.longitude, tc.mapState.latitude, 0];
-      const deltaLngLat = viewport.metersToLngLatDelta(coordinate, coordinate);
-      const deltaMeters = viewport.lngLatDeltaToMeters(coordinate, deltaLngLat);
+      const deltaLngLat = viewport.metersToLngLatDelta(coordinate);
+      const deltaMeters = viewport.lngLatDeltaToMeters(deltaLngLat);
       t.comment(`Comparing [${deltaMeters}] to [${coordinate}]`);
       t.ok(equals(deltaMeters, coordinate));
-    }
-  }
-  t.end();
-});
-
-/* Test error in metersToLngLatDelta */
-
-// get meter offset [x, y] from one coordinate to another
-function getMeterOffset(fromLngLat, toLngLat) {
-  const fromUtm = utm.fromLatLon(fromLngLat[1], fromLngLat[0]);
-  const toUtm = utm.fromLatLon(toLngLat[1], toLngLat[0], fromUtm.zoneNum);
-  return [
-    toUtm.easting - fromUtm.easting,
-    toUtm.northing - fromUtm.northing
-  ];
-}
-
-function applyMeterOffset(fromLngLat, meterOffset) {
-  const fromUtm = utm.fromLatLon(fromLngLat[1], fromLngLat[0]);
-  const p = utm.toLatLon(
-    fromUtm.easting + meterOffset[0],
-    fromUtm.northing + meterOffset[1],
-    fromUtm.zoneNum,
-    fromUtm.zoneLetter
-  );
-  return [p.longitude, p.latitude];
-}
-
-test('WebMercatorViewport.meterOffsetModePrecision', t => {
-  for (const vc of TEST_VIEWPORTS) {
-    const viewport = new WebMercatorViewport(vc.mapState);
-    const centerLngLat = [viewport.longitude, viewport.latitude];
-
-    for (const pc of TEST_METER_OFFSETS) {
-      const POINT_SAMPLE_COUNT = 4;
-      let error = 0;
-
-      for (let i = 0; i < POINT_SAMPLE_COUNT; i++) {
-        const meterOffset = [
-          Math.cos(i / POINT_SAMPLE_COUNT * Math.PI * 2) * pc.radius,
-          Math.sin(i / POINT_SAMPLE_COUNT * Math.PI * 2) * pc.radius
-        ];
-
-        const centerLngLat2 = applyMeterOffset(centerLngLat, meterOffset);
-        const offsetLngLat = viewport.addMetersToLngLat(centerLngLat, meterOffset);
-        const offsetPt = getMeterOffset(centerLngLat2, offsetLngLat);
-
-        error = Math.max(error, Math.sqrt(offsetPt[0] * offsetPt[0] + offsetPt[1] * offsetPt[1]));
-      }
-
-      // Error must be less than 0.1m or 0.1%
-      t.ok(error < 0.1 || error / pc.radius < 0.001, `${pc.title}: ${error.toFixed(5)}`);
     }
   }
   t.end();
