@@ -38,10 +38,6 @@ export const COORDINATE_SYSTEM = {
   // distances as meters.
   LNGLAT_OFFSETS: 3.0,
 
-  // Positions are interpreted as UTM offsets: [deltaX, deltaY, elevation]
-  // distances in meters
-  UTM_OFFSETS: 4.0,
-
   // Positions and distances are not transformed: [x, y, z] in unit coordinates
   IDENTITY: 0.0
 };

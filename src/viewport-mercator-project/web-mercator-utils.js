@@ -5,9 +5,7 @@ import mat4_translate from 'gl-mat4/translate';
 import mat4_rotateX from 'gl-mat4/rotateX';
 import mat4_rotateZ from 'gl-mat4/rotateZ';
 import vec2_distance from 'gl-vec2/distance';
-import mat2_invert from 'gl-mat2/invert';
 import assert from 'assert';
-import * as utm from 'utm';
 
 // CONSTANTS
 const PI = Math.PI;
@@ -103,36 +101,6 @@ export function calculateDistanceScales({latitude, longitude, zoom, scale}) {
     metersPerPixel,
     pixelsPerDegree,
     degreesPerPixel
-  };
-}
-
-/**
- * Calculate distance scales in meters around the given lat/lon
- * In UTM projection mode, latitude and longitude are no longer independent
- * in the scaling transformation. The scaler is therefore a mat2.
- */
-export function calculateDistanceScalesUTM(positionOrigin) {
-  const [longitude, latitude] = positionOrigin;
-
-  // Calculate easting/northing difference per degree change in longitude/latitude
-  // Reference points
-  const center = utm.fromLatLon(latitude, longitude);
-  const east = utm.fromLatLon(latitude, longitude + 0.005, center.zoneNum);
-  const west = utm.fromLatLon(latitude, longitude - 0.005, center.zoneNum);
-  const north = utm.fromLatLon(latitude + 0.005, longitude, center.zoneNum);
-  const south = utm.fromLatLon(latitude - 0.005, longitude, center.zoneNum);
-
-  // UTM northing/easting is not aligned with longitude/latitude
-  const metersPerDegree = [
-    (east.easting - west.easting) * 100,
-    (east.northing - west.northing) * 100,
-    (north.easting - south.easting) * 100,
-    (north.northing - south.northing) * 100
-  ];
-
-  return {
-    metersPerDegree,
-    degreesPerMeter: mat2_invert([], metersPerDegree)
   };
 }
 

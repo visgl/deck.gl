@@ -24,7 +24,7 @@ Ref: http://keepachangelog.com/en/0.3.0/
 - Move react controllers to react directory, export from index.js
 - Move viewports and some utils out of `lib` folder.
 - Add `start-es6` script to layer-browser
-
+- Remove UTM_OFFSETS projection mode
 
 #### [4.2.0-alpha.2]
 
