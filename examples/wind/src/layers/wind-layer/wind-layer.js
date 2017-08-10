@@ -37,7 +37,7 @@ export default class WindLayer extends Layer {
       this.setState({elevationTexture: textures[0]});
     });
 
-    const model = this.getModel({gl, bbox, nx: 80, ny: 30});
+    const model = this.getModel({gl, bbox, nx: 100, ny: 30});
 
     const {width, height} = dataTextureSize;
     const textureFrom = this.createTexture(gl, {});
