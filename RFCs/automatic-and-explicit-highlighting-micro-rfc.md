@@ -4,9 +4,11 @@ Ravi Akkenapally and Ib Green
 
 August 9, 2017
 
+Please add comments as reviews to the [PR](https://github.com/uber/deck.gl/pull/839)
+
 ## Overview
 
-The new **picking** shader module in luma.gl v4 offers a simple, unified way to implement picking in all deck.gl layers. It is expected that all core layers will be converted to use this module early in the the deck.gl 4.2 dev cycle. 
+The new **picking** shader module in luma.gl v4 offers a simple, unified way to implement picking in all deck.gl layers. It is expected that all core layers will be converted to use this module early in the the deck.gl 4.2 dev cycle.
 
 In addition to handling normal picking color selection, the picking module also supports highlighting of one object by specifying  **pickingSelectedColor** module parameter.
 
@@ -16,11 +18,11 @@ This RFC explores how this feature can be exposed to deck.gl applications, both 
 
 Use cases:
 
-1. [**Already supported**]: Hover over objects and get information of currently pointed object. 
+1. [**Already supported**]: Hover over objects and get information of currently pointed object.
 
 2. [**Proposed**] Specify an object that should to be highlighted with a highlight color .
 
-3. [**Proposed**] Hover over objects and automatically highlight currently pointed object with a default/given highlight color. 
+3. [**Proposed**] Hover over objects and automatically highlight currently pointed object with a default/given highlight color.
 
 The following use case is not covered in the current proposal, and would likely require a different technical approach, but is mentioned for completeness:
 
@@ -34,46 +36,15 @@ Layer props:
 
 3. **autoHighlight** {Boolean, default: false} : [**Proposed**] for now, this is a boolean value, indicating that deck.gl will automatically track the hovered over object. Note: This could be extended in future to specify ‘hover’ , ‘click’ etc events, for different types of tracking. **selectedObjectIndex** prop takes precedence when both **selectedObjectIndex**and **autoHighlight** are set to valid values.
 
-4. **highlightColor **{vec3: default: light-blue color [0, 0, 128]} : [**Proposed**] - This indicates which color should be used to display the selected object, if any.
+4. **highlightColor **{vec4: default: transparent light-blue color [0, 0, 128, 128]} : [**Proposed**] - This indicates which color should be used to display the selected object, if any.
 
 
-This table describes what these prop values should be to for above mentioned use cases:
-
-<table>
-  <tr>
-    <td>Use case #</td>
-    <td>pickable</td>
-    <td>autoHighlight</td>
-    <td>selectedObjectIndex
-</td>
-    <td>highlightColor </td>
-    <td>Implementation notes</td>
-  </tr>
-  <tr>
-    <td>1</td>
-    <td>true</td>
-    <td>*</td>
-    <td>*</td>
-    <td>Vec3 or default color </td>
-    <td>- Render to FBO and perform readPixels to obtain current object details.</td>
-  </tr>
-  <tr>
-    <td>2</td>
-    <td>*</td>
-    <td>Value ignored.</td>
-    <td>Valid index value.</td>
-    <td>Vec3 or default colo</td>
-    <td>- Retrieve objects picking color at ‘selectedObjectIndex’, pass it to picking shader module.</td>
-  </tr>
-  <tr>
-    <td>3</td>
-    <td>true</td>
-    <td>true</td>
-    <td>Must be nulll or -1 (default).</td>
-    <td>vec or default color</td>
-    <td>- Render to FBO and perform readPixels to obtain current object details. Pass its picking color to picking shader module.</td>
-  </tr>
-</table>
+This table describes what these prop values should be for above mentioned use cases:
+| Use case # | pickable | autoHighlight | selectedObjectIndex | highlightColor | Implementation notes |
+|------------|----------|---------------|---------------------| -------------- |---------------------|
+|1           |true      |*              |*                    |*               |- Render to FBO and perform readPixels to obtain current object details.|
+|2           |*         |value ignored  |valid index value    |Vec4 or default color |- Retrieve objects picking color at ‘selectedObjectIndex’, pass it to picking shader module.|
+|3           |true      |true           |default (-1) or null |Vec4 or default color |- Render to FBO and perform readPixels to obtain current object details. Pass its picking color to picking shader module.|
 
 
 **autoHighlight issues**
@@ -84,19 +55,9 @@ This table describes what these prop values should be to for above mentioned use
 
 **Considerations**
 
-* How to calculate picking colors:
-
-    * Layer class can export a method, that takes an index and returns the picking color.
-
-    * Or applications will need to calculate picking colors to specify the selected object.
-
 * Which prop should take precedence - **selectedObject** or **autoHighlight**?
 
     * Current spec says **selectedObject**
-
-* Default color for highlighting
-
-    * A transparent light blue is proposed. Name a specific RGBA value?
 
 * Naming and number of props
 
