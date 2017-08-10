@@ -3,6 +3,8 @@
 * Ib Green
 * August 10, 2017
 
+Please add comments as reviews to the [PR](https://github.com/uber/deck.gl/pull/838)
+
 
 ## Motivation
 
