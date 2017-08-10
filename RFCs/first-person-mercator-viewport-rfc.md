@@ -171,16 +171,19 @@ The separation between Viewports / State / Controls / React Controllers is power
 
 References:
 
-Initial Viewport system design
+Initial [Infovis Viewport RFC]() for deck.gl v4.
 
-PRs so far:
+deck.gl PRs:
 * [Reorganize projection module files](https://github.com/uber/deck.gl/pull/825)
 * [Reorganize controllers phase 1](https://github.com/uber/deck.gl/pull/827)
 * [Reorganize controllers phase 2](https://github.com/uber/deck.gl/pull/833)
 * [Remove UTM offsets mode](https://github.com/uber/deck.gl/pull/836)
 
+deck.gl PRs:
+* [Expose Euler angles, Add SphericalCoordinates](https://github.com/uber/luma.gl/pull/295)
 
-Appendix: The `project` shader module
+
+Appendix: Notes on the `project` shader module
 
 * In cartographic coordinate systems, the `project` shader module internally deals with mercator coordinates projected to current zoom level.
 
