@@ -92,9 +92,10 @@ export default class DelaunayCoverLayer extends Layer {
         setParameters(gl, {
           blend: true,
           blendFunc: [gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA],
-          blendEquation: gl.FUNC_ADD
+          blendEquation: gl.FUNC_ADD,
+          depthTest: true,
+          depthFunc: gl.LEQUAL
         });
-
       },
       onAfterRender: () => {
         // gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);

@@ -129,7 +129,9 @@ export default class ParticleLayer extends Layer {
 
     setParameters(gl, {
       blend: true,
-      blendFunc: [gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA]
+      blendFunc: [gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA],
+      depthTest: true,
+      depthFunc: gl.LEQUAL
     });
     const pixelStoreParameters = {
       [GL.UNPACK_FLIP_Y_WEBGL]: true
