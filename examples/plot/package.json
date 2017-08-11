@@ -1,13 +1,13 @@
 {
   "scripts": {
-    "start-local": "webpack-dev-server --env.local --progress --hot --port 3030 --open",
-    "start": "webpack-dev-server --progress --hot --port 3030 --open"
+    "start": "webpack-dev-server --progress --hot --open",
+    "start-local": "webpack-dev-server --env.local --progress --hot --open",
+    "start-es6": "webpack-dev-server --env.es6 --progress --hot --open"
   },
   "dependencies": {
     "d3-scale": "^1.0.6",
     "deck.gl": "^4.1.0",
     "luma.gl": "^4.0.0",
-    "prop-types": "^15.5.8",
     "react": "^15.4.1",
     "react-dom": "^15.4.1"
   },

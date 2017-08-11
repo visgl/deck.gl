@@ -1,7 +1,8 @@
 import React, {createElement} from 'react';
 import PropTypes from 'prop-types';
 import OrbitViewport from '../../controls/orbit-controls/orbit-viewport';
-import OrbitControls from '../../controls/orbit-controls/orbit-controls';
+import OrbitState from '../../controls/orbit-controls/orbit-state';
+import GenericControls from '../../controls/generic-controls';
 import EventManager from '../../controls/events/event-manager';
 
 const propTypes = {
@@ -64,7 +65,7 @@ export default class OrbitController extends React.Component {
       isDragging: false
     };
 
-    this._orbitControls = props.orbitControls || new OrbitControls();
+    this._orbitControls = props.orbitControls || new GenericControls(OrbitState);
   }
 
   componentDidMount() {

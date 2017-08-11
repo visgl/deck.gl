@@ -19,12 +19,17 @@
 // THE SOFTWARE.
 
 /* global window */
-import mat4_invert from 'gl-mat4/invert';
 import mat4_multiply from 'gl-mat4/multiply';
 import vec4_transformMat4 from 'gl-vec4/transformMat4';
 
+import log from '../../utils/log';
 import assert from 'assert';
 import {COORDINATE_SYSTEM} from '../../lib/constants';
+
+import {
+  projectFlat,
+  calculateDistanceScales
+} from '../../viewport-mercator-project/web-mercator-utils';
 
 function fp64ify(a) {
   const hiPart = Math.fround(a);
@@ -42,15 +47,22 @@ const IDENTITY_MATRIX = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
 // has lower performance but provides error checking.
 // Uncomment when debugging
 function calculateMatrixAndOffset({
+  // OLD PARAMS
   projectionMode,
   positionOrigin = [0, 0],
-  viewport
+  // NEW PARAMS
+  coordinateSystem,
+  coordinateOrigin,
+  coordinateZoom,
+  // UNCHANGED
+  viewport,
+  modelMatrix
 }) {
   const {viewMatrixUncentered, projectionMatrix} = viewport;
   let {viewMatrix, viewProjectionMatrix} = viewport;
   let projectionCenter;
 
-  switch (projectionMode) {
+  switch (coordinateSystem) {
 
   case COORDINATE_SYSTEM.IDENTITY:
   case COORDINATE_SYSTEM.LNGLAT:
@@ -62,7 +74,7 @@ function calculateMatrixAndOffset({
     // Calculate transformed projectionCenter (in 64 bit precision)
     // This is the key to offset mode precision (avoids doing this
     // addition in 32 bit precision)
-    const positionPixels = viewport.projectFlat(positionOrigin);
+    const positionPixels = projectFlat(coordinateOrigin, Math.pow(2, coordinateZoom));
     // projectionCenter = new Matrix4(viewProjectionMatrix)
     //   .transformVector([positionPixels[0], positionPixels[1], 0.0, 1.0]);
     projectionCenter = vec4_transformMat4([],
@@ -81,14 +93,11 @@ function calculateMatrixAndOffset({
     throw new Error('Unknown projection mode');
   }
 
-  const viewMatrixInv = mat4_invert([], viewMatrix) || viewMatrix;
-  const cameraPos = [viewMatrixInv[12], viewMatrixInv[13], viewMatrixInv[14]];
-
   return {
     viewMatrix,
     viewProjectionMatrix,
     projectionCenter,
-    cameraPos
+    cameraPos: viewport.cameraPosition
   };
 }
 
@@ -104,21 +113,66 @@ function calculateMatrixAndOffset({
 export function getUniformsFromViewport({
   viewport,
   modelMatrix = null,
-  projectionMode = COORDINATE_SYSTEM.LNGLAT,
+  coordinateSystem = COORDINATE_SYSTEM.LNGLAT,
+  coordinateOrigin = [0, 0],
+  coordinateZoom,
+  // Deprecated
+  projectionMode,
   positionOrigin
 } = {}) {
+  // TODO - this dummy return is needed to make test cases pass
+  // assert(viewport);
   if (!viewport) {
     return {};
   }
 
-  assert(viewport.scale, 'Viewport scale missing');
+  if (projectionMode !== undefined) {
+    coordinateSystem = projectionMode;
+    log.deprecated('projectionMode', 'coordinateSystem');
+  }
+  if (positionOrigin !== undefined) {
+    coordinateOrigin = positionOrigin;
+    log.deprecated('positionOrigin', 'coordinateOrigin');
+  }
+
+  coordinateZoom = coordinateZoom || viewport.zoom;
+  assert(coordinateZoom);
 
   const {projectionCenter, viewProjectionMatrix, cameraPos} =
-    calculateMatrixAndOffset({projectionMode, positionOrigin, viewport});
+    calculateMatrixAndOffset({
+      coordinateSystem, coordinateOrigin, coordinateZoom, modelMatrix, viewport
+    });
+
+  //   // Calculate projection pixels per unit
+  //   const {pixelsPerMeter, pixelsPerDegree, degreesPerMeter} =
+  //     viewport.getDistanceScales({positionOrigin});
+  //   assert(pixelsPerMeter, 'Viewport missing pixelsPerMeter');
+
+  //   let pixelsPerMeterUTM = ZERO_VECTOR;
+  //   if (projectionMode === COORDINATE_SYSTEM.UTM_OFFSETS) {
+  //     pixelsPerMeterUTM = [
+  //       degreesPerMeter[0] * pixelsPerDegree[0],
+  //       degreesPerMeter[1] * pixelsPerDegree[1],
+  //       degreesPerMeter[2] * pixelsPerDegree[0],
+  //       degreesPerMeter[3] * pixelsPerDegree[1]
+  //     ];
+  //   }
+
+  assert(viewProjectionMatrix, 'Viewport missing modelViewProjectionMatrix');
 
   // Calculate projection pixels per unit
-  const {pixelsPerMeter} = viewport.getDistanceScales();
-  assert(pixelsPerMeter, 'Viewport missing pixelsPerMeter');
+
+  const distanceScales = coordinateZoom === undefined ?
+    viewport.getDistanceScales() :
+    calculateDistanceScales({
+      longitude: coordinateOrigin[0],
+      latitude: coordinateOrigin[1],
+      zoom: coordinateZoom
+    });
+
+  const scale = Math.pow(2, coordinateZoom);
+
+  // calculate WebGL matrices
 
   // "Float64Array"
   // Transpose the projection matrix to column major for GLSL.
@@ -149,9 +203,9 @@ export function getUniformsFromViewport({
     projectionMatrix: new Float32Array(viewProjectionMatrix),
     projectionFP64: glProjectionMatrixFP64,
 
-    projectionPixelsPerUnit: pixelsPerMeter,
-    projectionScale: viewport.scale, // This is the mercator scale (2 ** zoom)
-    projectionScaleFP64: fp64ify(viewport.scale), // Deprecated?
+    projectionPixelsPerUnit: distanceScales.pixelsPerMeter,
+    projectionScale: scale, // This is the mercator scale (2 ** zoom)
+    projectionScaleFP64: fp64ify(scale), // Deprecated?
 
     // This is for lighting calculations
     cameraPos: new Float32Array(cameraPos)

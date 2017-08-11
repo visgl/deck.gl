@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 
 import test from 'tape-catch';
-import {equals} from 'deck.gl/utils/math';
+import {equals} from 'deck.gl/math/equals';
 import {WebMercatorViewport} from 'deck.gl';
 
 /* eslint-disable */
