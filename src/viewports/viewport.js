@@ -19,16 +19,31 @@
 // THE SOFTWARE.
 
 // TODO - replace with math.gl
+import log from '../utils/log';
+
 import {equals} from '../math/equals';
 import mat4_scale from 'gl-mat4/scale';
 import mat4_translate from 'gl-mat4/translate';
 import mat4_multiply from 'gl-mat4/multiply';
 import mat4_invert from 'gl-mat4/invert';
-import vec4_multiply from 'gl-vec4/multiply';
-import vec4_transformMat4 from 'gl-vec4/transformMat4';
 import vec2_lerp from 'gl-vec2/lerp';
 
+import mat4_perspective from 'gl-mat4/perspective';
+import mat4_ortho from 'gl-mat4/ortho';
+
+import {transformVector, createMat4, extractCameraVectors} from '../math/utils';
+
+import {
+  projectFlat,
+  // unprojectFlat,
+  calculateDistanceScales
+  // makeProjectionMatrixFromMercatorParams,
+  // makeUncenteredViewMatrixFromMercatorParams
+} from '../viewport-mercator-project/web-mercator-utils';
+
 import assert from 'assert';
+
+const DEGREES_TO_RADIANS = Math.PI / 180;
 
 const IDENTITY = createMat4();
 
@@ -49,26 +64,72 @@ export default class Viewport {
    * Note: The Viewport is immutable in the sense that it only has accessors.
    * A new viewport instance should be created if any parameters have changed.
    */
-  constructor({
-    // Window width/height in pixels (for pixel projection)
-    width = 1,
-    height = 1,
-    // Description
-    viewMatrix = IDENTITY,
-    projectionMatrix = IDENTITY,
-    distanceScales = DEFAULT_DISTANCE_SCALES
-  } = {}) {
+  constructor(opts = {}) {
+    const {
+      // Window width/height in pixels (for pixel projection)
+      width = 1,
+      height = 1,
+
+      // view matrix
+      viewMatrix = IDENTITY,
+
+      projectionMatrix = IDENTITY, // Projection matrix: option 1
+      // Projection matrix: option 2, perspective
+      fovy = 75,
+      aspect = null,
+      // projection matrix: option 3, orthographic
+      left, // Left bound of the frustum
+      top, // Top bound of the frustum
+      right = null, // Right bound of the frustum (automatically calculated)
+      bottom = null, // Bottom bound of the frustum (automatically calculated)
+      // Projection matrix clipping planes
+      near = 1, // Distance of near clipping plane
+      far = 100, // Distance of far clipping plane
+
+      // Optional: A lnglat anchor will make this viewport work with geospatial coordinate systems
+      longitude = null,
+      latitude = null,
+      zoom = null,
+
+      distanceScales = null
+    } = opts;
+
     // Silently allow apps to send in 0,0
     this.width = width || 1;
     this.height = height || 1;
-    this.scale = 1;
+    this.scale = Number.isFinite(zoom) ? Math.pow(2, zoom) : 1;
 
-    this.viewMatrix = viewMatrix;
-    this.projectionMatrix = projectionMatrix;
-    this.distanceScales = distanceScales;
+    // Calculate distance scales if lng/lat/zoom are provided
+    const geospatialParamsSupplied = !isNaN(latitude) || !isNaN(longitude) || !isNaN(zoom);
+    if (geospatialParamsSupplied) {
+      this.distanceScales = calculateDistanceScales({latitude, longitude, scale: this.scale});
+    } else {
+      this.distanceScales = distanceScales || DEFAULT_DISTANCE_SCALES;
+    }
 
+    this.viewMatrixUncentered = viewMatrix;
+
+    // Make a centered version of the matrix for projection modes without an offset
+    this.center = geospatialParamsSupplied ?
+      projectFlat([longitude, latitude], this.scale) :
+      [0, 0, 0];
+
+    const centerTranslation = [-this.center[0], -this.center[1], 0];
+    this.viewMatrix = mat4_translate(createMat4(), this.viewMatrixUncentered, centerTranslation);
+
+    this.projectionMatrix = this._createProjectionMatrix({
+      width: this.width,
+      height: this.height,
+      projectionMatrix,
+      fovy, aspect, // perspective matrix opts
+      left, top, right, bottom, // orthographic matrix opts, bounds of the frustum
+      near, far // Distance of near/far clipping plane
+    });
+
+    // Init pixel matrices
     this._initMatrices();
 
+    // Bind methods for easy access
     this.equals = this.equals.bind(this);
     this.project = this.project.bind(this);
     this.unproject = this.unproject.bind(this);
@@ -108,7 +169,7 @@ export default class Viewport {
     assert(Number.isFinite(x0) && Number.isFinite(y0) && Number.isFinite(z0), ERR_ARGUMENT);
 
     const [X, Y] = this.projectFlat([x0, y0]);
-    const v = this.transformVector(this.pixelProjectionMatrix, [X, Y, z0, 1]);
+    const v = transformVector(this.pixelProjectionMatrix, [X, Y, z0, 1]);
 
     const [x, y] = v;
     const y2 = topLeft ? this.height - y : y;
@@ -130,8 +191,8 @@ export default class Viewport {
 
     // since we don't know the correct projected z value for the point,
     // unproject two points to get a line and then find the point on that line with z=0
-    const coord0 = this.transformVector(this.pixelUnprojectionMatrix, [x, y2, 0, 1]);
-    const coord1 = this.transformVector(this.pixelUnprojectionMatrix, [x, y2, 1, 1]);
+    const coord0 = transformVector(this.pixelUnprojectionMatrix, [x, y2, 0, 1]);
+    const coord1 = transformVector(this.pixelUnprojectionMatrix, [x, y2, 1, 1]);
 
     const z0 = coord0[2];
     const z1 = coord1[2];
@@ -141,13 +202,6 @@ export default class Viewport {
 
     const vUnprojected = this.unprojectFlat(v);
     return xyz.length === 2 ? vUnprojected : [vUnprojected[0], vUnprojected[1], 0];
-  }
-
-  transformVector(matrix, vector) {
-    const result = vec4_transformMat4([0, 0, 0, 0], vector, matrix);
-    const scale = 1 / result[3];
-    vec4_multiply(result, result, [scale, scale, scale, scale]);
-    return result;
   }
 
   // NON_LINEAR PROJECTION HOOKS
@@ -176,6 +230,15 @@ export default class Viewport {
    */
   unprojectFlat(xyz, scale = this.scale) {
     return this._unprojectFlat(...arguments);
+  }
+
+  // TODO - why do we need these?
+  _projectFlat(xyz, scale = this.scale) {
+    return xyz;
+  }
+
+  _unprojectFlat(xyz, scale = this.scale) {
+    return xyz;
   }
 
   getMatrices({modelMatrix = null} = {}) {
@@ -215,6 +278,14 @@ export default class Viewport {
     return this.cameraPosition;
   }
 
+  getCameraDirection() {
+    return this.cameraDirection;
+  }
+
+  getCameraUp() {
+    return this.cameraUp;
+  }
+
   // INTERNAL METHODS
 
   _initMatrices() {
@@ -228,24 +299,14 @@ export default class Viewport {
     // Calculate inverse view matrix
     this.viewMatrixInverse = mat4_invert([], this.viewMatrix) || this.viewMatrix;
 
-    // Read the translation from the inverse view matrix
-    this.cameraPosition = [
-      this.viewMatrixInverse[12],
-      this.viewMatrixInverse[13],
-      this.viewMatrixInverse[14]
-    ];
-
-    this.cameraDirection = [
-      this.viewMatrix[2],
-      this.viewMatrix[6],
-      this.viewMatrix[10]
-    ];
-
-    this.cameraUp = [
-      this.viewMatrix[1],
-      this.viewMatrix[5],
-      this.viewMatrix[9]
-    ];
+    // Decompose camera directions
+    const {eye, direction, up} = extractCameraVectors({
+      viewMatrix: this.viewMatrix,
+      viewMatrixInverse: this.viewMatrixInverse
+    });
+    this.cameraPosition = eye;
+    this.cameraDirection = direction;
+    this.cameraUp = up;
 
     /*
      * Builds matrices that converts preprojected lngLats to screen pixels
@@ -266,20 +327,47 @@ export default class Viewport {
 
     this.pixelUnprojectionMatrix = mat4_invert(createMat4(), this.pixelProjectionMatrix);
     if (!this.pixelUnprojectionMatrix) {
+      log.warn('Pixel project matrix not invertible');
       throw new Error('Pixel project matrix not invertible');
     }
   }
 
-  _projectFlat(xyz, scale = this.scale) {
-    return xyz;
-  }
+  // Extracts or creates projection matrix from supplied options
+  // Optionally creates a perspective or orthographic matrix
+  _createProjectionMatrix({ // viewport arguments
+    width, // Width of viewport
+    height, // Height of viewport
 
-  _unprojectFlat(xyz, scale = this.scale) {
-    return xyz;
-  }
-}
+    // Projection matrix: option 1
+    projectionMatrix = null,
+    // Projection matrix: option 2, perspective
+    fovy = 75, // Field of view covered by camera
+    aspect = null,
+    // projection matrix: option 3, orthographic
+    left, // Left bound of the frustum
+    top, // Top bound of the frustum
+    right = null, // Right bound of the frustum (automatically calculated)
+    bottom = null, // Bottom bound of the frustum (automatically calculated)
+    // Projection matrix clipping planes
+    near = 1, // Distance of near clipping plane
+    far = 100 // Distance of far clipping plane
+  }) {
+    // If left and top are supplied, create an ortographic projection matrix
+    if (!projectionMatrix && Number.isFinite(left) && Number.isFinite(top)) {
+      right = Number.isFinite(right) ? right : left + width;
+      bottom = Number.isFinite(bottom) ? bottom : top + height;
+      projectionMatrix = mat4_ortho([], left, right, bottom, top, near, far);
+    }
 
-// Helper, avoids low-precision 32 bit matrices from gl-matrix mat4.create()
-export function createMat4() {
-  return [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
+    // If fovy is provided, create a perspective projection matrix
+    if (!projectionMatrix && Number.isFinite(fovy)) {
+      const fovyRadians = fovy * DEGREES_TO_RADIANS;
+      aspect = Number.isFinite(aspect) ? aspect : width / height;
+      return mat4_perspective([], fovyRadians, aspect, near, far);
+    }
+
+    assert(projectionMatrix);
+
+    return projectionMatrix;
+  }
 }

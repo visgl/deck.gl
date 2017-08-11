@@ -1,13 +1,8 @@
 # CompositeLayer Class
 
-The `CompositeLayer` class is a subclass of the
-[Layer Class](/docs/api-reference/base-layer.md), with its own implementation
-of certain
-[layer lifecycle methods](/docs/advanced/layer-lifecycle.md)
-to help create sublayers and handle events.
+The `CompositeLayer` class is a subclass of the [Layer Class](/docs/api-reference/base-layer.md), with its own implementation of certain [layer lifecycle methods](/docs/advanced/layer-lifecycle.md) to help create sublayers and handle events.
 
-If you intend to implement a layer that generates other layers, it is recommended
-that you extend this class.
+If you intend to implement a layer that generates other layers, it is recommended that you extend this class.
 
 ## Usage
 
@@ -28,8 +23,7 @@ class MyCompositeLayer extends CompositeLayer {
 
 ##### `draw`
 
-A composite layer does not render directly into the WebGL context.
-The `draw` method inherited from the base class is therefore never called.
+A composite layer does not render directly into the WebGL context. The `draw` method inherited from the base class is therefore never called.
 
 ##### `renderLayers`
 
