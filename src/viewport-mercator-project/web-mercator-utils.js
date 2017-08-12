@@ -22,6 +22,15 @@ function createMat4() {
   return [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
 }
 
+// Returns the zoom level that gives a 1 meter pixel at a certain latitude
+// S=C*cos(y)/2^(z+8)
+export function getMeterZoom({latitude}) {
+  assert(latitude);
+  const EARTH_CIRCUMFERENCE = 40.075e6;
+  const radians = degrees => degrees / 180 * Math.PI;
+  return Math.log2(EARTH_CIRCUMFERENCE * Math.cos(radians(latitude))) - 8;
+}
+
 /**
  * Project [lng,lat] on sphere onto [x,y] on 512*512 Mercator Zoom 0 tile.
  * Performs the nonlinear part of the web mercator projection.
