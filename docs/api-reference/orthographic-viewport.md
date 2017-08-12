@@ -1,5 +1,7 @@
 
-# OrthographicViewport Class
+# OrthographicViewport Class (Deprecated in 4.2)
+
+Note: The `OrthographicViewport` class is deprecated. Use `FirstPersonViewport` instead and specify the `fov` parameter to generate perspective projection matrix.
 
 The `OrthographicViewport` class is a subclass of [Viewport](/docs/api-reference/viewport.md) that creates an orthogonal view.
 
