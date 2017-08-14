@@ -27,7 +27,8 @@ const EVENT_TYPES = {
   WHEEL: ['wheel'],
   PAN: ['panstart', 'panmove', 'panend'],
   PINCH: ['pinchstart', 'pinchmove', 'pinchend'],
-  DOUBLE_TAP: ['doubletap']
+  DOUBLE_TAP: ['doubletap'],
+  KEYBOARD: ['keydown', 'keyup']
 };
 
 export default class GenericControls {
@@ -73,6 +74,10 @@ export default class GenericControls {
       return this._onDoubleTap(event);
     case 'wheel':
       return this._onWheel(event);
+    case 'keydown':
+      return this._onKeyDown(event);
+    case 'keyup':
+      return this._onKeyUp(event);
     default:
       return false;
     }
@@ -130,7 +135,8 @@ export default class GenericControls {
       dragPan = true,
       dragRotate = true,
       doubleClickZoom = true,
-      touchZoomRotate = true
+      touchZoomRotate = true,
+      keyboard = true
     } = options;
 
     // TODO(deprecate): remove this check when `onChangeViewport` gets deprecated
@@ -150,6 +156,7 @@ export default class GenericControls {
     this.toggleEvents(EVENT_TYPES.PAN, isInteractive && (dragPan || dragRotate));
     this.toggleEvents(EVENT_TYPES.PINCH, isInteractive && touchZoomRotate);
     this.toggleEvents(EVENT_TYPES.DOUBLE_TAP, isInteractive && doubleClickZoom);
+    this.toggleEvents(EVENT_TYPES.KEYBOARD, isInteractive && keyboard);
 
     this.scrollZoom = scrollZoom;
     this.dragPan = dragPan;
@@ -274,5 +281,41 @@ export default class GenericControls {
 
     const newViewportState = this.viewportState.zoom({pos, scale: isZoomOut ? 0.5 : 2});
     return this.updateViewport(newViewportState);
+  }
+
+  _onKeyDown(event) {
+    if (this.viewportState.isDragging) {
+      return;
+    }
+
+    const KEY_BINDINGS = {
+      KeyW: 'moveForward',
+      ArrowUp: 'moveForward',
+
+      KeyS: 'moveBackward',
+      ArrowDown: 'moveBackward',
+
+      KeyA: 'moveLeft',
+      ArrowLeft: 'moveLeft',
+
+      KeyD: 'moveRight',
+      ArrowRight: 'moveRight',
+
+      Equal: 'zoomIn',
+      Plus: 'zoomIn',
+
+      Minus: 'zoomOut'
+    };
+
+    const key = event.srcEvent.code;
+    const handler = KEY_BINDINGS[key];
+    if (this.viewportState[handler]) {
+      const newViewportState = this.viewportState[handler]();
+      this.updateViewport(newViewportState);
+    }
+  }
+  /* eslint-enable complexity */
+
+  _onKeyUp(event) {
   }
 }
