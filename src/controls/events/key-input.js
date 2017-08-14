@@ -1,5 +1,6 @@
+/* global window */
 const KEY_EVENTS = ['keydown', 'keyup'];
-const EVENT_TYPE = 'KeyboardEvent';
+// const EVENT_TYPE = 'KeyboardEvent';
 
 /**
  * Hammer.js swallows 'move' events (for pointer/touch/mouse)
@@ -10,7 +11,6 @@ const EVENT_TYPE = 'KeyboardEvent';
  * pointer/touch events, calculating speed/direction, etc.
  */
 export default class KeyInput {
-
   constructor(element, callback, options = {}) {
     this.element = element;
     this.callback = callback;
@@ -20,11 +20,11 @@ export default class KeyInput {
     this.options = Object.assign({enable: true}, options, {events});
 
     this.handleEvent = this.handleEvent.bind(this);
-    this.options.events.forEach(event => element.addEventListener(event, this.handleEvent));
+    this.options.events.forEach(event => window.addEventListener(event, this.handleEvent));
   }
 
   destroy() {
-    this.options.events.forEach(event => this.element.removeEventListener(event, this.handleEvent));
+    this.options.events.forEach(event => window.removeEventListener(event, this.handleEvent));
   }
 
   set(options) {
@@ -36,22 +36,34 @@ export default class KeyInput {
    * if the specified event type is among those handled by this input.
    */
   toggleIfEventSupported(eventType, enabled) {
-    if (EVENT_TYPE === eventType) {
+    if (eventType === 'keydown' || eventType === 'keyup') {
       this.options.enable = enabled;
     }
   }
 
   handleEvent(event) {
     if (!this.options.enable) {
-      return;
+      // return;
     }
 
     switch (event.type) {
     case 'keydown':
-      this.pressed = true;
+      this.callback({
+        type: 'keydown',
+        srcEvent: event,
+        isDown: true,
+        pointerType: 'mouse',
+        target: event.target
+      });
       break;
     case 'keyup':
-      this.pressed = false;
+      this.callback({
+        type: 'keyup',
+        srcEvent: event,
+        isDown: true,
+        pointerType: 'mouse',
+        target: event.target
+      });
       break;
     default:
     }

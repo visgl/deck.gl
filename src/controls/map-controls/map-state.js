@@ -266,6 +266,42 @@ export default class MapState {
     });
   }
 
+  moveLeft() {
+    return this._getUpdatedMapState({
+      bearing: this._viewportProps.bearing - 3
+    });
+  }
+
+  moveRight() {
+    return this._getUpdatedMapState({
+      bearing: this._viewportProps.bearing + 3
+    });
+  }
+
+  moveForward() {
+    return this._getUpdatedMapState({
+      pitch: this._viewportProps.pitch + 3
+    });
+  }
+
+  moveBackward() {
+    return this._getUpdatedMapState({
+      pitch: this._viewportProps.pitch - 3
+    });
+  }
+
+  zoomIn() {
+    return this._getUpdatedMapState({
+      zoom: this._viewportProps.zoom + 0.2
+    });
+  }
+
+  zoomOut() {
+    return this._getUpdatedMapState({
+      zoom: this._viewportProps.zoom - 0.2
+    });
+  }
+
   /* Private methods */
 
   _getUpdatedMapState(newProps) {
@@ -332,5 +368,4 @@ export default class MapState {
       bearing
     };
   }
-
 }
