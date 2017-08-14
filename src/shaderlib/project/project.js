@@ -22,9 +22,18 @@ import {fp32} from 'luma.gl';
 import projectShader from './project.glsl';
 import {getUniformsFromViewport} from './viewport-uniforms';
 
+const DEFAULT_MODULE_OPTIONS = {};
+
+function getUniforms(opts = DEFAULT_MODULE_OPTIONS) {
+  if (opts.viewport) {
+    return getUniformsFromViewport(opts);
+  }
+  return {};
+}
+
 export default {
   name: 'project',
   dependencies: [fp32],
   vs: projectShader,
-  getUniforms: getUniformsFromViewport
+  getUniforms
 };

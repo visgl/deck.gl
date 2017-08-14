@@ -18,9 +18,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-// TODO - replace with math.gl
 import log from '../utils/log';
 
+// TODO - replace with math.gl
 import {equals} from '../math/equals';
 import mat4_scale from 'gl-mat4/scale';
 import mat4_translate from 'gl-mat4/translate';
@@ -73,10 +73,13 @@ export default class Viewport {
       // view matrix
       viewMatrix = IDENTITY,
 
-      projectionMatrix = IDENTITY, // Projection matrix: option 1
+      // Projection matrix: option 1
+      projectionMatrix = null,
+
       // Projection matrix: option 2, perspective
       fovy = 75,
       aspect = null,
+
       // projection matrix: option 3, orthographic
       left, // Left bound of the frustum
       top, // Top bound of the frustum
@@ -97,7 +100,8 @@ export default class Viewport {
     // Silently allow apps to send in 0,0
     this.width = width || 1;
     this.height = height || 1;
-    this.scale = Number.isFinite(zoom) ? Math.pow(2, zoom) : 1;
+    this.zoom = Number.isFinite(zoom) ? zoom : 0;
+    this.scale = Math.pow(2, zoom);
 
     // Calculate distance scales if lng/lat/zoom are provided
     const geospatialParamsSupplied = !isNaN(latitude) || !isNaN(longitude) || !isNaN(zoom);
@@ -115,7 +119,10 @@ export default class Viewport {
       [0, 0, 0];
 
     const centerTranslation = [-this.center[0], -this.center[1], 0];
-    this.viewMatrix = mat4_translate(createMat4(), this.viewMatrixUncentered, centerTranslation);
+    this.viewMatrix = createMat4();
+    this.viewMatrix = mat4_translate(this.viewMatrix, this.viewMatrixUncentered, [0, 0, 0]);
+    // mat4_scale(this.viewMatrix, this.viewMatrixUncentered, [1, -1, 1 / height]);
+    this.viewMatrix = mat4_translate(this.viewMatrix, this.viewMatrix, centerTranslation);
 
     this.projectionMatrix = this._createProjectionMatrix({
       width: this.width,
@@ -125,6 +132,9 @@ export default class Viewport {
       left, top, right, bottom, // orthographic matrix opts, bounds of the frustum
       near, far // Distance of near/far clipping plane
     });
+
+    // console.log(this.constructor.name,
+    //   this.viewMatrixUncentered, this.viewMatrix, this.projectionMatrix);
 
     // Init pixel matrices
     this._initMatrices();
@@ -296,6 +306,8 @@ export default class Viewport {
     mat4_multiply(vpm, vpm, this.viewMatrix);
     this.viewProjectionMatrix = vpm;
 
+    // console.log('VPM', this.viewMatrix, this.projectionMatrix, this.viewProjectionMatrix);
+
     // Calculate inverse view matrix
     this.viewMatrixInverse = mat4_invert([], this.viewMatrix) || this.viewMatrix;
 
@@ -307,6 +319,8 @@ export default class Viewport {
     this.cameraPosition = eye;
     this.cameraDirection = direction;
     this.cameraUp = up;
+
+    // console.log(this.cameraPosition, this.cameraDirection, this.cameraUp);
 
     /*
      * Builds matrices that converts preprojected lngLats to screen pixels
@@ -328,7 +342,7 @@ export default class Viewport {
     this.pixelUnprojectionMatrix = mat4_invert(createMat4(), this.pixelProjectionMatrix);
     if (!this.pixelUnprojectionMatrix) {
       log.warn('Pixel project matrix not invertible');
-      throw new Error('Pixel project matrix not invertible');
+      // throw new Error('Pixel project matrix not invertible');
     }
   }
 

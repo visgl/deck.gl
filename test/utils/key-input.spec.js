@@ -20,7 +20,7 @@
 
 import test from 'tape-catch';
 import spy from '../test-utils/spy';
-import KeyInput from 'deck.gl/controls/events/key-input';
+import KeyInput from 'deck.gl/controllers/events/key-input';
 import {createEventRegistrarMock} from './test-utils';
 
 test('keyInput#constructor', t => {

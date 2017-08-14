@@ -1,5 +1,4 @@
-/* global window */
-import {isBrowser} from '../../utils/globals';
+import {isBrowser, window} from '../../utils/globals';
 
 const KEY_EVENTS = ['keydown', 'keyup'];
 const DOWN_EVENT_TYPE = 'keydown';

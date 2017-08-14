@@ -18,26 +18,20 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import Viewport from './viewport';
-import {Vector3, Matrix4} from 'math.gl';
+export default `\
+#define SHADER_NAME trips-layer-fragment-shader
 
-export default class FirstPersonViewport extends Viewport {
-  constructor(opts = {}) {
-    // TODO - push direction handling into Matrix4.lookAt
-    const {
-      // view matrix arguments
-      position, // alias
-      lookAt, // Which point is camera looking at, default along y axis
-      direction, // Which direction camera is looking at
-      up = [0, 1, 0] // Defines up direction, default positive y axis
-    } = opts;
+#ifdef GL_ES
+precision highp float;
+#endif
 
-    const eye = opts.eye || opts.position; // Defines eye position
+varying float vTime;
+varying vec4 vColor;
 
-    super(Object.assign({}, opts, {
-      viewMatrix: direction ?
-        new Matrix4().lookAt({eye, center: new Vector3(position).add(direction), up}) :
-        new Matrix4().lookAt({eye, center: lookAt, up})
-    }));
+void main(void) {
+  if (vTime > 1.0 || vTime < 0.0) {
+    discard;
   }
+  gl_FragColor = vec4(vColor.rgb, vColor.a * vTime);
 }
+`;

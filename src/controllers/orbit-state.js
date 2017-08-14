@@ -1,4 +1,4 @@
-import OrbitViewport from './orbit-viewport';
+import OrbitViewport from '../viewports/orbit-viewport';
 import vec3_add from 'gl-vec3/add';
 import vec3_scale from 'gl-vec3/scale';
 import vec3_lerp from 'gl-vec3/lerp';

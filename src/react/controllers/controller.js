@@ -2,28 +2,11 @@ import {PureComponent, createElement} from 'react';
 import PropTypes from 'prop-types';
 
 import EventManager from '../../controllers/events/event-manager';
-import MapControls from '../../controllers/map-controls';
-import {MAPBOX_LIMITS} from '../../controllers/map-state';
+import Controls from '../../controllers/controls';
 import CURSOR from './cursors';
 
 const propTypes = {
-  /** The width of the map. */
-  width: PropTypes.number.isRequired,
-  /** The height of the map. */
-  height: PropTypes.number.isRequired,
-  /** The longitude of the center of the map. */
-  longitude: PropTypes.number.isRequired,
-  /** The latitude of the center of the map. */
-  latitude: PropTypes.number.isRequired,
-  /** The tile zoom level of the map. */
-  zoom: PropTypes.number.isRequired,
-  /** Specify the bearing of the viewport */
-  bearing: PropTypes.number,
-  /** Specify the pitch of the viewport */
-  pitch: PropTypes.number,
-  /** Altitude of the viewport camera. Default 1.5 "screen heights" */
-  // Note: Non-public API, see https://github.com/mapbox/mapbox-gl-js/issues/1137
-  altitude: PropTypes.number,
+  state: PropTypes.object,
 
   /** Viewport constraints */
   // Max zoom level
@@ -68,7 +51,7 @@ const propTypes = {
 
 const getDefaultCursor = ({isDragging}) => isDragging ? CURSOR.GRABBING : CURSOR.GRAB;
 
-const defaultProps = Object.assign({}, MAPBOX_LIMITS, {
+const defaultProps = {
   onViewportChange: null,
 
   scrollZoom: true,
@@ -78,32 +61,30 @@ const defaultProps = Object.assign({}, MAPBOX_LIMITS, {
   touchZoomRotate: true,
 
   getCursor: getDefaultCursor
-});
+};
 
-export default class MapController extends PureComponent {
+export default class Controller extends PureComponent {
 
   constructor(props) {
     super(props);
 
     this.state = {
       isDragging: false      // Whether the cursor is down
-
     };
   }
 
   componentDidMount() {
     const {eventCanvas} = this.refs;
 
-    const eventManager = new EventManager(eventCanvas);
-
-    this._eventManager = eventManager;
+    this._eventManager = new EventManager(eventCanvas);
 
     // If props.controls is not provided, fallback to default MapControls instance
     // Cannot use defaultProps here because it needs to be per map instance
-    this._controls = this.props.controls || new MapControls();
+    this._controls = this.props.controls || new Controls();
+
     this._controls.setOptions(Object.assign({}, this.props, {
       onStateChange: this._onInteractiveStateChange.bind(this),
-      eventManager
+      eventManager: this._eventManager
     }));
   }
 
@@ -143,6 +124,6 @@ export default class MapController extends PureComponent {
   }
 }
 
-MapController.displayName = 'MapController';
-MapController.propTypes = propTypes;
-MapController.defaultProps = defaultProps;
+Controller.displayName = 'Controller';
+Controller.propTypes = propTypes;
+Controller.defaultProps = defaultProps;

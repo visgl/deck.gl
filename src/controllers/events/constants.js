@@ -1,11 +1,4 @@
-import {
-  Tap,
-  Press,
-  Pinch,
-  Rotate,
-  Pan,
-  Swipe
-} from 'hammerjs';
+import {Tap, Press, Pinch, Rotate, Pan, Swipe} from 'hammerjs';
 
 /**
  * Only one set of basic input events will be fired by Hammer.js:

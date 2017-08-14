@@ -31,14 +31,14 @@ const EVENT_TYPES = {
   KEYBOARD: ['keydown', 'keyup']
 };
 
-export default class GenericControls {
+export default class Controls {
   /**
    * @classdesc
    * A class that handles events and updates mercator style viewport parameters
    */
-  constructor(options) {
-    assert(options.StateClass);
-    this.StateClass = options.StateClass;
+  constructor(StateClass, options = {}) {
+    assert(StateClass);
+    this.StateClass = StateClass;
 
     this._state = {
       isDragging: false
@@ -115,7 +115,7 @@ export default class GenericControls {
     if (this.onViewportChange &&
       Object.keys(newViewport).some(key => oldViewport[key] !== newViewport[key])) {
       // Viewport has changed
-      this.onViewportChange(newViewport);
+      this.onViewportChange(newViewport, this.viewportState.getViewport());
     }
 
     this.setState(Object.assign({}, newViewportState.getInteractiveState(), extraState));
@@ -126,8 +126,6 @@ export default class GenericControls {
    */
   setOptions(options) {
     const {
-      // TODO(deprecate): remove this when `onChangeViewport` gets deprecated
-      onChangeViewport,
       onViewportChange,
       onStateChange = this.onStateChange,
       eventManager = this.eventManager,
@@ -139,8 +137,7 @@ export default class GenericControls {
       keyboard = true
     } = options;
 
-    // TODO(deprecate): remove this check when `onChangeViewport` gets deprecated
-    this.onViewportChange = onViewportChange || onChangeViewport;
+    this.onViewportChange = onViewportChange;
     this.onStateChange = onStateChange;
     this.viewportStateProps = options;
 

@@ -1,0 +1,21 @@
+{
+  "scripts": {
+    "start": "webpack-dev-server --progress --hot --open",
+    "start-local": "webpack-dev-server --env.local --progress --hot --open",
+    "start-es6": "webpack-dev-server --env.es6 --progress --hot --open"
+  },
+  "dependencies": {
+    "d3-request": "^1.0.5",
+    "deck.gl": ">=4.1.0",
+    "luma.gl": ">=4.1.0-alpha.1",
+    "math.gl": ">=1.0.0-alpha.3",
+    "react": "^15.4.1",
+    "react-dom": "^15.4.1",
+    "react-map-gl": "^3.0.0"
+  },
+  "devDependencies": {
+    "buble-loader": "^0.4.0",
+    "webpack": "^2.2.0",
+    "webpack-dev-server": "^2.2.0"
+  }
+}

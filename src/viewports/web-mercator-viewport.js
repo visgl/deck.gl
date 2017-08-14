@@ -32,6 +32,7 @@ import {
 // TODO - import from viewport-mercator-project
 // import {fitBounds} from '../viewport-mercator-project/fit-bounds';
 
+// TODO - import from math.gl
 /* eslint-disable camelcase */
 import vec2_add from 'gl-vec2/add';
 import vec2_negate from 'gl-vec2/negate';
