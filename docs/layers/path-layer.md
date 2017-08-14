@@ -27,7 +27,7 @@ const App = ({data, viewport}) => {
   const layer = new PathLayer({
     id: 'path-layer',
     data,
-    rounded: true
+    rounded: true,
     widthScale: 100
   });
 
