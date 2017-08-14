@@ -18,26 +18,27 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import Viewport from './viewport';
-import {Vector3, Matrix4} from 'math.gl';
+export default `\
+#define SHADER_NAME trips-layer-vertex-shader
 
-export default class FirstPersonViewport extends Viewport {
-  constructor(opts = {}) {
-    // TODO - push direction handling into Matrix4.lookAt
-    const {
-      // view matrix arguments
-      position, // alias
-      lookAt, // Which point is camera looking at, default along y axis
-      direction, // Which direction camera is looking at
-      up = [0, 1, 0] // Defines up direction, default positive y axis
-    } = opts;
+attribute vec3 positions;
+attribute vec3 colors;
 
-    const eye = opts.eye || opts.position; // Defines eye position
+uniform float opacity;
+uniform float currentTime;
+uniform float trailLength;
 
-    super(Object.assign({}, opts, {
-      viewMatrix: direction ?
-        new Matrix4().lookAt({eye, center: new Vector3(position).add(direction), up}) :
-        new Matrix4().lookAt({eye, center: lookAt, up})
-    }));
-  }
+varying float vTime;
+varying vec4 vColor;
+
+void main(void) {
+  vec2 p = preproject(positions.xy);
+  // the magic de-flickering factor
+  vec4 shift = vec4(0., 0., mod(positions.z, trailLength) * 1e-4, 0.);
+
+  gl_Position = project(vec4(p, 1., 1.)) + shift;
+
+  vColor = vec4(colors / 255.0, opacity);
+  vTime = 1.0 - (currentTime - positions.z) / trailLength;
 }
+`;

@@ -1,4 +1,5 @@
-// TODO - THESE UTILITIES COULD BE IMPORTED FROM WEB_MERCATOR_VIEWPORT
+// TODO - THE UTILITIES IN THIS FILE SHOULD BE IMPORTED FROM WEB-MERCATOR-VIEWPORT MODULE
+
 import mat4_perspective from 'gl-mat4/perspective';
 import mat4_scale from 'gl-mat4/scale';
 import mat4_translate from 'gl-mat4/translate';
@@ -159,6 +160,7 @@ export function makeProjectionMatrixFromMercatorParams({
   return projectionMatrix;
 }
 
+// TODO - rename this matrix
 export function makeUncenteredViewMatrixFromMercatorParams({
   width,
   height,

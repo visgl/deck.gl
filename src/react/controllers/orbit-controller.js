@@ -1,9 +1,9 @@
 import React, {createElement} from 'react';
 import PropTypes from 'prop-types';
-import OrbitViewport from '../../controls/orbit-controls/orbit-viewport';
-import OrbitState from '../../controls/orbit-controls/orbit-state';
-import GenericControls from '../../controls/generic-controls';
-import EventManager from '../../controls/events/event-manager';
+import OrbitViewport from '../../viewports/orbit-viewport';
+import OrbitState from '../../controllers/orbit-state';
+import Controls from '../../controllers/controls';
+import EventManager from '../../controllers/events/event-manager';
 
 const propTypes = {
   /* Viewport properties */
@@ -65,7 +65,7 @@ export default class OrbitController extends React.Component {
       isDragging: false
     };
 
-    this._orbitControls = props.orbitControls || new GenericControls(OrbitState);
+    this._orbitControls = props.orbitControls || new Controls(OrbitState);
   }
 
   componentDidMount() {

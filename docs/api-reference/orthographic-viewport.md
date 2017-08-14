@@ -6,9 +6,8 @@ Note: The `OrthographicViewport` class is deprecated. Use `FirstPersonViewport` 
 The `OrthographicViewport` class is a subclass of [Viewport](/docs/api-reference/viewport.md) that creates an orthogonal view.
 
 Remarks:
-* This class is just a convenience, the application can use `Viewport` directly
-  together with e.g. the `mat4.ortho` and `mat4.lookAt` functions from the
-  `gl-matrix` module.
+* This class is just a convenience, the application can use `Viewport` directly together with e.g. the `mat4.ortho` and `mat4.lookAt` functions from the `gl-matrix` module.
+
 
 ## Constructor
 
