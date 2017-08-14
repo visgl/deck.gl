@@ -10,7 +10,7 @@ import {isBrowser} from '../../utils/globals';
 // (which imports Hammer.js) we conditionally require it
 // depending on support for those globals, and provide mocks
 // for environments without `document`/`window`.
-function ManagerMock(m) {
+function HammerManagerMock(m) {
   const instance = {};
   const chainedNoop = () => instance;
   instance.get = () => null;
@@ -22,7 +22,7 @@ function ManagerMock(m) {
   return instance;
 }
 
-const Manager = isBrowser ? require('hammerjs').Manager : ManagerMock;
+const Manager = isBrowser ? require('hammerjs').Manager : HammerManagerMock;
 const {
   BASIC_EVENT_ALIASES,
   EVENT_RECOGNIZER_MAP,
@@ -34,18 +34,10 @@ const {
   GESTURE_EVENT_ALIASES: {}
 };
 
-/**
- * Single API for subscribing to events about both
- * basic input events (e.g. 'mousemove', 'touchstart', 'wheel')
- * and gestural input (e.g. 'click', 'tap', 'panstart').
- * Delegates event registration and handling to Hammer.js.
- * @param {DOM Element} element         DOM element on which event handlers will be registered.
- * @param {Object} options              Options for instantiation
- * @param {Object} options.events       Map of {event name: handler} to register on init.
- * @param {Object} options.recognizers  Gesture recognizers from Hammer.js to register,
- *                                      as an Array in Hammer.Recognizer format.
- *                                      (http://hammerjs.github.io/api/#hammermanager)
- */
+// Unified API for subscribing to events about both
+// basic input events (e.g. 'mousemove', 'touchstart', 'wheel')
+// and gestural input (e.g. 'click', 'tap', 'panstart').
+// Delegates gesture related event registration and handling to Hammer.js.
 export default class EventManager {
   constructor(element, options = {}) {
     this.element = element;
@@ -70,9 +62,7 @@ export default class EventManager {
     }
   }
 
-  /**
-   * Tear down internal event management implementations.
-   */
+  // Tear down internal event management implementations.
   destroy() {
     this.wheelInput.destroy();
     this.moveInput.destroy();
@@ -80,11 +70,7 @@ export default class EventManager {
     this.manager.destroy();
   }
 
-  /**
-   * Register an event handler function to be called on `event`.
-   * @param {string|Object} event   An event name (String) or map of event names to handlers.
-   * @param {Function} [handler]    The function to be called on `event`.
-   */
+  // Register an event handler function to be called on `event`.
   on(event, handler) {
     if (typeof event === 'string') {
       this._addEventHandler(event, handler);
@@ -214,6 +200,16 @@ export default class EventManager {
     };
   }
 
+  _callEventHandler(event) {
+    const handler = this.eventHandlers.find(
+      entry => entry.event === event.type
+    );
+
+    if (handler) {
+      handler.handler(event);
+    }
+  }
+
   /**
    * Handle basic events using the 'hammer.input' Hammer.js API:
    * Before running Recognizers, Hammer emits a 'hammer.input' event
@@ -236,7 +232,15 @@ export default class EventManager {
    * and pipe back out through same (Hammer) channel used by other events.
    */
   _onOtherEvent(event) {
-    this.manager.emit(event.type, event);
+    // TODO - maybe integrate with hammer event handling
+    switch (event.type) {
+    case 'keyup':
+    case 'keydown':
+      this._callEventHandler(event);
+      break;
+    default:
+      this.manager.emit(event.type, event);
+      break;
+    }
   }
-
 }
