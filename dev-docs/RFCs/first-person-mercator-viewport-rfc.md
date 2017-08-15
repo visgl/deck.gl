@@ -42,16 +42,14 @@ Note: There are subtleties around the positioning of the camera which is handled
 
 ### Viewport
 
-The current base viewport class would be extended with a lnglat property
-
+The current base viewport class would be extended with a lnglat property, meaning that any viewport can calculate the uniforms required for layers with geospatial coordinate systems.
 - lnglat anchor
 - zoom scale
-- offset
 
-This means that any viewport can calculate
+As background, there are a couple critical uniforms needed by the `project` shader module when handling layers with data using geospatial coordinates.
 - projection center
 - distance scales
-which are two critical uniforms needed by the `project` shader module when handling geospatial coordinates.
+
 
 
 ## Proposal: An Alternative Viewport Hierarchy
@@ -62,13 +60,20 @@ In retrospect this separation adds little value as it captures a trivial part of
 
 As an alternative to the `Perspective`/`Orthographic` camera class, a `FirstPerson`/`ThirdPerson` approach.
 
+### Viewport
+
+- lnglat anchor
+- zoom scale
+- viewMatrix
+- projectionMatrix - allows for complete application control of all **projection** matrix parameters (including fovs, near/far clipping planes, aspect ratios etc, e.g. using `Matrix4.projection` or `Matrix4.ortho` etc).
+
 
 ### FirstPersonViewport
 
 extends `Viewport`
 
 - player position (lngLat anchor + offset)
-- player direction
+- player direction (TBD)
 
 
 ### ThirdPersonViewport
@@ -80,8 +85,10 @@ extends `Viewport`
 - camera direction, relative to player direction
 - camera distance, from player
 
+The idea here with two directions being that one might want a third person camera to alwas look at the "player" or object at `position` from a certain relative angle. The absolute directions would be the "sum" of these two directions, modulo wrap-arounds.
 
-### MapboxViewport (aka WebMercatorViewport)
+
+### WebMercatorViewport
 
 inherits from `ThirdPersonViewport`, setting parameters as follows
 - player position: lnglat
@@ -90,26 +97,9 @@ inherits from `ThirdPersonViewport`, setting parameters as follows
 - camera distance: altitude & zoom (zoom dependent, 1.5 screen "heights")
 - fov: pitch dependent
 
-The current WebMercatorViewport would become a subclass of a "Third Person Viewport:
+The current WebMercatorViewport could become a subclass of a "Third Person Viewport:
 
 It is really a `MapboxViewport` (at least when it comes to perspective mode) as it emulates mapbox-gl's choices of perspective projection.
-
-
-## Alternative proposal: Generalize WebMercatorViewport
-
-For completeness: As an alternate proposal to refactoring the entire Viewport hierarchy, we might be able to just generalize the `WebMercatorViewport`
-
-Currently takes lat/lon/zoom/pitch/bearing “props”.
-
-Propose adding the following props:
-* `fov`: (radian) - Allows the application to set fov. Defaults to map synched fov (> 60 degrees pitch gives fov at 60 degrees).
-* `position`: [x, y, z]: Position in METER_OFFSETS, from [lng lat] base point.
-Relation to altitude - Allows the application to set the height of the camera in meters (without affecting other parameters).
-* etc
-
-This proposal is not favored, mainly because:
-* it keeps adding to an already complicated class
-* it does not handle geospatial coordinates in the general case
 
 
 ## Proposal: Add `Viewport.isMapSynched` method to control map display
@@ -167,23 +157,26 @@ The separation between Viewports / State / Controls / React Controllers is power
 * `modelMatrix`: Allows the application to apply a modelMatrix that transforms both the position and the direction of the camera. Should this be part of the camera
 * meterOffset? - it might convenient to allow the camera to be moved around using meter offsets compared to a lngLat anchor rather than having to recalculate lngLats on every mode.
 - project/unproject - Pixel project/unproject to flat mercator coordinates may not work when pitch exceeds > 85 degrees.
+* VR view matrices - can support for left and right eye matrices be integrated somehow?
 
 
-References:
+## References:
 
 Initial [Infovis Viewport RFC]() for deck.gl v4.
 
-deck.gl PRs:
+deck.gl implementation PRs:
+* [Viewport class refactor](https://github.com/uber/deck.gl/pull/841)
+* [Keyboard Event Handling](https://github.com/uber/deck.gl/pull/842)
+deck.gl preparatory PRs:
 * [Reorganize projection module files](https://github.com/uber/deck.gl/pull/825)
 * [Reorganize controllers phase 1](https://github.com/uber/deck.gl/pull/827)
 * [Reorganize controllers phase 2](https://github.com/uber/deck.gl/pull/833)
 * [Remove UTM offsets mode](https://github.com/uber/deck.gl/pull/836)
-
-deck.gl PRs:
+luma.gl PRs:
 * [Expose Euler angles, Add SphericalCoordinates](https://github.com/uber/luma.gl/pull/295)
 
 
-Appendix: Notes on the `project` shader module
+## Appendix A: Notes on the `project` shader module
 
 * In cartographic coordinate systems, the `project` shader module internally deals with mercator coordinates projected to current zoom level.
 
@@ -231,3 +224,19 @@ As can be seen, the position will:
 * Step 3: 'viewProjectionMatrix' is applied
 * Step 4: 'projectionCenter' is added (subtracted)
 
+
+## Appendix B: Alternative proposal: Generalize WebMercatorViewport
+
+For completeness: As an alternate proposal to refactoring the entire Viewport hierarchy, we might be able to just generalize the `WebMercatorViewport`
+
+Currently takes lat/lon/zoom/pitch/bearing “props”.
+
+Propose adding the following props:
+* `fov`: (radian) - Allows the application to set fov. Defaults to map synched fov (> 60 degrees pitch gives fov at 60 degrees).
+* `position`: [x, y, z]: Position in METER_OFFSETS, from [lng lat] base point.
+Relation to altitude - Allows the application to set the height of the camera in meters (without affecting other parameters).
+* etc
+
+This proposal is not favored, mainly because:
+* it keeps adding to an already complicated class
+* it does not handle geospatial coordinates in the general case
