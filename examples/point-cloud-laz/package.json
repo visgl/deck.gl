@@ -9,7 +9,7 @@
   "dependencies": {
     "deck.gl": "^4.1.0",
     "is-little-endian": "0.0.0",
-    "luma.gl": "^4.0.0",
+    "luma.gl": "^4.0.1",
     "react": "^15.5.4",
     "react-dom": "^15.5.4",
     "gl-matrix": "^2.3.2"

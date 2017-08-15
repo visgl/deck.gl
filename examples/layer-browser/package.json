@@ -8,7 +8,7 @@
     "deck.gl": ">=4.1.0-beta.2",
     "colorbrewer": "^1.0.0",
     "extrude-polyline": "^1.0.6",
-    "luma.gl": ">=4.0.0-beta.3",
+    "luma.gl": "^4.0.1",
     "react": "^15.4.1",
     "react-autobind": "^1.0.6",
     "react-dom": "^15.4.1",
