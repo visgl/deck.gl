@@ -12,7 +12,7 @@
     "d3-request": "^1.0.3",
     "d3-voronoi": "^1.1.1",
     "deck.gl": "^4.1.0",
-    "luma.gl": "^4.0.0",
+    "luma.gl": "^4.0.1",
     "react": "^15.4.1",
     "react-autobind": "^1.0.6",
     "react-dom": "^15.4.1",
