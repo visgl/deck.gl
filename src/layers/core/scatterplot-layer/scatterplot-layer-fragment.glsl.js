@@ -35,6 +35,8 @@ void main(void) {
 
   if (distToCenter <= 1.0 && distToCenter >= innerUnitRadius) {
     gl_FragColor = vColor;
+    gl_FragColor = picking_filterHighlightColor(gl_FragColor);
+    gl_FragColor = picking_filterPickingColor(gl_FragColor);
   } else {
     discard;
   }

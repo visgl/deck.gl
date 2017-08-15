@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 
 /* global window */
-import {GL, withParameters, setParameters} from 'luma.gl';
+import {GL, withParameters, setParameters, NULL_PICKING_COLOR} from 'luma.gl';
 import {log} from './utils';
 
 const EMPTY_PIXEL = new Uint8Array(4);
@@ -40,7 +40,7 @@ export function drawLayers({layers, pass}) {
           viewport: layer.context.viewport
         }),
         uniforms: Object.assign(
-          {renderPickingBuffer: 0, pickingEnabled: 0},
+          {renderPickingBuffer: 0, pickingEnabled: 0, picking_uActive: 0},
           layer.context.uniforms,
           {layerIndex}
         ),
@@ -196,6 +196,15 @@ export function pickLayers(gl, {
     if (info) {
       infos.set(info.layer.id, info);
     }
+
+    // update pickingSelectedColor so picked model is highlighted.
+    if (layer.props.pickingHighlightColor !== NULL_PICKING_COLOR) {
+      layer.state.model.updateModuleSettings({
+        pickingSelectedColor: pickedColor,
+        pickingValid: pickedLayer === layer
+      });
+    }
+
   });
 
   infos.forEach(info => {
@@ -333,8 +342,8 @@ function getPickedColors(gl, {
     scissor: [x, y, width, height],
     blend: true,
     blendFunc: [gl.ONE, gl.ZERO, gl.CONSTANT_ALPHA, gl.ZERO],
-    blendEquation: gl.FUNC_ADD
-    // TODO - Set clear color
+    blendEquation: gl.FUNC_ADD,
+    clearColor: NULL_PICKING_COLOR
   }, () => {
 
     // Clear the frame buffer
@@ -351,7 +360,9 @@ function getPickedColors(gl, {
             viewport: layer.context.viewport
           }),
           uniforms: Object.assign(
-            {renderPickingBuffer: 1, pickingEnabled: 1},
+            // TODO: Update all layers to use 'picking_uActive' and then
+            // remove 'renderPickingBuffer' and 'pickingEnabled'.
+            {renderPickingBuffer: 1, pickingEnabled: 1, picking_uActive: 1},
             layer.context.uniforms,
             {layerIndex}
           ),
