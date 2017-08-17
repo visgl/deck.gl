@@ -19,6 +19,8 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ### deck.gl v4.2
 
+- Automatic/custom highlighting using picking shader module.
+
 #### [4.2.0-alpha.X]
 
 - Move react controllers to react directory, export from index.js
