@@ -108,5 +108,5 @@ Unit is meters.
 
 ## Source
 
-[src/layers/core/path-layer](https://github.com/uber/deck.gl/tree/4.0-release/src/layers/core/path-layer)
+[src/layers/core/path-layer](https://github.com/uber/deck.gl/tree/4.1-release/src/layers/core/path-layer)
 

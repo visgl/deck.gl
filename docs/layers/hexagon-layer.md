@@ -182,4 +182,4 @@ Method called to retrieve the position of each point.
 
 ## Source
 
-[src/layers/core/hexagon-layer](https://github.com/uber/deck.gl/tree/4.0-release/src/layers/core/hexagon-layer)
+[src/layers/core/hexagon-layer](https://github.com/uber/deck.gl/tree/4.1-release/src/layers/core/hexagon-layer)

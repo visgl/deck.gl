@@ -46,9 +46,7 @@ For details see [What's New](https://github.com/uber/deck.gl/blob/4.1-release/do
 
 #### [4.0.0] - 2017-4-6 Major deck.gl Release
 
-For details see [What's New](https://github.com/uber/deck.gl/blob/4.0-release/docs/whats-new.md)
-
-
+For details see What's New
 ### deck.gl v3.0
 
 #### [3.1.3] - 2017-1-25

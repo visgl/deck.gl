@@ -163,6 +163,6 @@ Be aware that this prop will likely be changed in a future version of deck.gl.
 Method called to retrieve the position of each point.
 
 ## Source
-[src/layers/core/grid-layer](https://github.com/uber/deck.gl/tree/4.0-release/src/layers/core/grid-layer)
+[src/layers/core/grid-layer](https://github.com/uber/deck.gl/tree/4.1-release/src/layers/core/grid-layer)
 
 
