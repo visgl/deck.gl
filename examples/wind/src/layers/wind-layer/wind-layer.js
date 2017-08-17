@@ -108,7 +108,7 @@ export default class WindLayer extends Layer {
 
     const parameters = {
       clearDepth: 1.0,
-      depth: true,
+      depthTest: true,
       depthFunc: gl.LEQUAL
     };
 
