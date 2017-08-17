@@ -121,9 +121,11 @@ are affected.
 
 ### Methods
 
-##### `queryObject(options)`
+##### queryObject
 
 Get the closest pickable and visible object at screen coordinate.
+
+`queryObject({x, y, radius, layerIds})`
 
 Parameters:
 - `options` (Object)
@@ -135,9 +137,11 @@ Parameters:
 
 Returns: a single [`info`](/docs/get-started/interactivity.md#the-picking-info-object) object, or `null` if nothing is found.
 
-##### `queryVisibleObjects(options)`
+##### queryVisibleObjects
 
 Get all pickable and visible objects within a bounding box.
+
+`queryVisibleObjects({x, y, width, height, layerIds})`
 
 Parameters:
 - `options` (Object)
