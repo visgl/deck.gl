@@ -5,13 +5,13 @@
 * **Status**: Early draft, not ready for formal review.
 
 
-## Problem
+## Motivation
 
 * deck.gl + luma.gl keeps growing > 1MB
 * react-map-gl pulls in mapbox which is already big
-* Users are complaining
+* Users are starting to show concern
 
-While one might be tempted to focus on prod sizes, many users look at the debug sizes (which affects build/load/debug cycle speeds) so optimizing both are important.
+It is the premise of this RFC that there is no single bullet to help us solve the distribution size issue. While we'd love to be proven wrong, it is expected that we will have to apply a combination of continued efforts in multiple areas and be thoughtful about how we organize code going forward.
 
 
 ## Critera
@@ -19,6 +19,8 @@ While one might be tempted to focus on prod sizes, many users look at the debug 
 * Size of bundle after application minification (prod)
 * Size of bundle before application minification (debug)
 * Easy of debugging
+
+While one might be tempted to focus on prod sizes, many users look at the debug sizes (which affects build/load/debug cycle speeds) so optimizing both are important.
 
 
 ## Proposed Techniques
@@ -45,6 +47,10 @@ WORK ITEMS:
 * Measure size (dev and prod)
 * ...
 
+
+### Dependency Management
+
+We have already made sure that luma.gl and deck.gl have a minimal number of dependencies.
 
 
 ### gl-matrix is a huge dependency
