@@ -24,7 +24,7 @@ Next generation of deck.gl should have official support for effects (shadows, re
 
 | RFC | Author | Status | Description |
 | --- | --- | --- | --- |
-| **Shadowmap RFC** | @1chandu? | Proposed |  |
+| **[Effects Engine RFC]()** | @1chandu & @ibgreen | Proposed | Draft |
 
 
 ### Core Animation RFCs
@@ -33,8 +33,8 @@ Next generation of deck.gl should have official support for effects (shadows, re
 | --- | --- | --- | --- |
 | [**Auto Highlighting RFC**](./auto-highlighting-rfc.md) | @ibgreen + @1chandu | Approved | Auto highlight hovered object via `picking` module |
 | **Viewport interpolation RFC** | @1chandu? | Proposed | This should build on the new Viewport system in the First Person RFC. Also needs to consider react-map-gl. |
-| **Attribute interpolation RFC** | @Pessimistress? | Proposed | Automatically interpolate between two copies of a vertex attributes (Could build on a GeometryBuilder RFC, @ibgreen has been doing some work in this area). Probably interesting updateTrigger implications... |
 | [**Uniform and Parameter Animation RFC**](wip/property-animation-rfc.md) | @ibgreen | Proposed | Allow Layer props and GL parameters to accept functions in addition to values and call these on every render to update values |
+| [**Attribute interpolation RFC**]() | @Pessimistress? | Proposed | Automatically interpolate between two copies of a vertex attributes (Could build on a GeometryBuilder RFC, @ibgreen has been doing some work in this area). Probably interesting updateTrigger implications... |
 | **Layer-Independent `AttributeManager`s RFC** | @ibgreen | Proposed | simplifies pregenerating attributes in apps for fast animation.
 
 Possible other animation related RFCs:

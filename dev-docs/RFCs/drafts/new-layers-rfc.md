@@ -5,11 +5,11 @@
 * **Status**: WIP
 
 
-# Overview
+# Motivation
 
 Most people use deck.gl through the layers that we provide with it and beefing up the layer catalog is always the best way to increase the customer base of deck.gl.
 
-In the next version of deck.gl, we will add more layers to the layer catalog.
+In the next version of deck.gl, we want to add more layers to the layer catalog.
 
 
 ## Candidate layers
