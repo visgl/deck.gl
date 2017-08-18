@@ -32,18 +32,18 @@ Layer props:
 
 1. **pickable** {Boolean, default: false} : Indicates whether deck.gl performs picking [**Existing**]
 
-2. **selectedObjectIndex** {Int: default: -1} : [**Proposed**] - If set, the object (if any) at that index will be shown as selected. If the value doesn’t point to valid index, no object is selected.
+2. **highlightedObjectIndex** {Int: default: -1} : [**Proposed**] - If set, the object (if any) at that index will be shown as selected. If the value doesn’t point to valid index, no object is selected.
 
-3. **autoHighlight** {Boolean, default: false} : [**Proposed**] for now, this is a boolean value, indicating that deck.gl will automatically track the hovered over object. Note: This could be extended in future to specify ‘hover’ , ‘click’ etc events, for different types of tracking. **selectedObjectIndex** prop takes precedence when both **selectedObjectIndex**and **autoHighlight** are set to valid values.
+3. **autoHighlight** {Boolean, default: false} : [**Proposed**] for now, this is a boolean value, indicating that deck.gl will automatically track the hovered over object. Note: This could be extended in future to specify ‘hover’ , ‘click’ etc events, for different types of tracking. **highlightedObjectIndex** prop takes precedence when both **highlightedObjectIndex**and **autoHighlight** are set to valid values.
 
 4. **highlightColor **{vec4: default: transparent light-blue color [0, 0, 128, 128]} : [**Proposed**] - This indicates which color should be used to display the selected object, if any.
 
 
 This table describes what these prop values should be for above mentioned use cases:
-| Use case # | pickable | autoHighlight | selectedObjectIndex | highlightColor | Implementation notes |
+| Use case # | pickable | autoHighlight | highlightedObjectIndex | highlightColor | Implementation notes |
 |------------|----------|---------------|---------------------| -------------- |---------------------|
 |1           |true      |*              |*                    |*               |- Render to FBO and perform readPixels to obtain current object details.|
-|2           |*         |value ignored  |valid index value    |Vec4 or default color |- Retrieve objects picking color at ‘selectedObjectIndex’, pass it to picking shader module.|
+|2           |*         |value ignored  |valid index value    |Vec4 or default color |- Retrieve objects picking color at ‘highlightedObjectIndex’, pass it to picking shader module.|
 |3           |true      |true           |default (-1) or null |Vec4 or default color |- Render to FBO and perform readPixels to obtain current object details. Pass its picking color to picking shader module.|
 
 

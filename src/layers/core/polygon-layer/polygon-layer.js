@@ -101,7 +101,8 @@ export default class PolygonLayer extends CompositeLayer {
       getPolygon, updateTriggers, lightSettings} = this.props;
 
     // base layer props
-    const {opacity, pickable, visible, getPolygonOffset} = this.props;
+    const {opacity, pickable, visible, getPolygonOffset,
+    highlightedObjectIndex, autoHighlight, highlightColor} = this.props;
 
     // viewport props
     const {positionOrigin, projectionMode, modelMatrix} = this.props;
@@ -127,6 +128,9 @@ export default class PolygonLayer extends CompositeLayer {
       getPolygon,
       getElevation,
       getColor: getFillColor,
+      highlightedObjectIndex,
+      autoHighlight,
+      highlightColor,
       updateTriggers: {
         getElevation: updateTriggers.getElevation,
         getColor: updateTriggers.getFillColor

@@ -30,20 +30,17 @@ uniform float maxCount;
 uniform float opacity;
 uniform vec4 minColor;
 uniform vec4 maxColor;
-uniform float renderPickingBuffer;
 uniform vec3 cellScale;
-uniform vec3 selectedPickingColor;
 
 varying vec4 vColor;
 
 void main(void) {
   vec4 color = mix(minColor, maxColor, instanceCount / maxCount) / 255.;
 
-  vColor = mix(
-    vec4(color.rgb, color.a * opacity),
-    vec4(instancePickingColors / 255., 1.),
-    renderPickingBuffer
-  );
+  vColor = vec4(color.rgb, color.a * opacity);
+
+  // Set color to be rendered to picking fbo (also used to check for selection highlight).
+  picking_setPickingColor(instancePickingColors);
 
   gl_Position = vec4(instancePositions + vertices * cellScale, 1.);
 }

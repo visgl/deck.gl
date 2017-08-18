@@ -89,10 +89,6 @@ Whether to extrude hexagon. If se to false, all hexagons will be set to flat.
 
 Whether the layer should be rendered in high-precision 64-bit mode
 
-##### `selectedPickingColor` (Array, optional) **EXPERIMENTAL**
-
-Shader based highlighting of a selected object
-
 ##### `lightSettings` (Object, optional) **EXPERIMENTAL**
 
 This is an object that contains light settings for extruded polygons.

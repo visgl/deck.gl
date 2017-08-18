@@ -172,7 +172,8 @@ export default class GridLayer extends CompositeLayer {
     const {id, elevationScale, fp64, extruded, cellSize, coverage, lightSettings} = this.props;
 
     // base layer props
-    const {opacity, pickable, visible, getPolygonOffset} = this.props;
+    const {opacity, pickable, visible, getPolygonOffset,
+    highlightedObjectIndex, autoHighlight, highlightColor} = this.props;
 
     // viewport props
     const {positionOrigin, projectionMode, modelMatrix} = this.props;
@@ -194,6 +195,9 @@ export default class GridLayer extends CompositeLayer {
       projectionMode,
       positionOrigin,
       modelMatrix,
+      highlightedObjectIndex,
+      autoHighlight,
+      highlightColor,
       getColor: this._onGetSublayerColor.bind(this),
       getElevation: this._onGetSublayerElevation.bind(this),
       getPosition: d => d.position,

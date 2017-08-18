@@ -32,10 +32,16 @@ void main(void) {
 
   float distToCenter = length(unitPosition);
 
-  if (distToCenter <= 1.0) {
-    gl_FragColor = vColor;
-  } else {
+  if (distToCenter > 1.0) {
     discard;
   }
+
+  gl_FragColor = vColor;
+
+  // use highlight color if this fragment belongs to the selected object.
+  gl_FragColor = picking_filterHighlightColor(gl_FragColor);
+
+  // use picking color if rendering to picking FBO.
+  gl_FragColor = picking_filterPickingColor(gl_FragColor);
 }
 `;

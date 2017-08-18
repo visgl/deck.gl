@@ -32,7 +32,6 @@ uniform float opacity;
 uniform float radiusScale;
 uniform float radiusMinPixels;
 uniform float radiusMaxPixels;
-uniform float renderPickingBuffer;
 uniform float outline;
 uniform float strokeWidth;
 
@@ -60,10 +59,10 @@ void main(void) {
   vec3 vertex = positions * outerRadiusPixels;
   gl_Position = project_to_clipspace(vec4(center + vertex, 1.0));
 
-  // Set color to be rendered to picking fbo (also used to check for selection highlight).
-  picking_setPickingColor(instancePickingColors);
-
   // Apply opacity to instance color, or return instance picking color
   vColor = vec4(instanceColors.rgb, instanceColors.a * opacity) / 255.;
+
+  // Set color to be rendered to picking fbo (also used to check for selection highlight).
+  picking_setPickingColor(instancePickingColors);
 }
 `;

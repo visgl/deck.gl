@@ -111,7 +111,8 @@ export default class GeoJsonLayer extends CompositeLayer {
       getLineWidth, getElevation, updateTriggers} = this.props;
 
     // base layer props
-    const {opacity, pickable, visible, getPolygonOffset} = this.props;
+    const {opacity, pickable, visible, getPolygonOffset,
+    highlightedObjectIndex, autoHighlight, highlightColor} = this.props;
 
     // viewport props
     const {positionOrigin, projectionMode, modelMatrix} = this.props;
@@ -141,6 +142,9 @@ export default class GeoJsonLayer extends CompositeLayer {
         getPolygon: getCoordinates,
         getElevation,
         getColor: getFillColor,
+        highlightedObjectIndex,
+        autoHighlight,
+        highlightColor,
         updateTriggers: {
           getElevation: updateTriggers.getElevation,
           getColor: updateTriggers.getFillColor
@@ -219,6 +223,9 @@ export default class GeoJsonLayer extends CompositeLayer {
       getPath: getCoordinates,
       getColor: getLineColor,
       getWidth: getLineWidth,
+      highlightedObjectIndex,
+      autoHighlight,
+      highlightColor,
       updateTriggers: {
         getColor: updateTriggers.getLineColor,
         getWidth: updateTriggers.getLineWidth
@@ -242,6 +249,9 @@ export default class GeoJsonLayer extends CompositeLayer {
       getPosition: getCoordinates,
       getColor: getFillColor,
       getRadius,
+      highlightedObjectIndex,
+      autoHighlight,
+      highlightColor,
       updateTriggers: {
         getColor: updateTriggers.getFillColor,
         getRadius: updateTriggers.getRadius

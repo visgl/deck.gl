@@ -30,11 +30,6 @@ attribute vec4 instancePositions;
 attribute vec4 instanceColors;
 attribute vec3 instancePickingColors;
 
-// Picking uniforms
-// Set to 1.0 if rendering picking buffer, 0.0 if rendering for display
-uniform float renderPickingBuffer;
-uniform vec3 selectedPickingColor;
-
 // Custom uniforms
 uniform float extruded;
 uniform float cellSize;
@@ -48,23 +43,16 @@ uniform float elevationScale;
 // Result
 varying vec4 vColor;
 
-// whether is point picked
-float isPicked(vec3 pickingColors, vec3 selectedColor) {
- return float(pickingColors.x == selectedColor.x
- && pickingColors.y == selectedColor.y
- && pickingColors.z == selectedColor.z);
-}
-
 void main(void) {
 
   vec2 topLeftPos = project_position(instancePositions.xy);
-  
+
   // if ahpha == 0.0, do not render element
   float finalCellSize = cellSize * mix(1.0, 0.0, float(instanceColors.a == 0.0));
 
   // cube gemoetry vertics are between -1 to 1, scale and transform it to between 0, 1
   vec2 pos = topLeftPos + vec2(
-  (positions.x * coverage + 1.0) / 2.0 * finalCellSize, 
+  (positions.x * coverage + 1.0) / 2.0 * finalCellSize,
   (positions.y * coverage - 1.0) / 2.0 * finalCellSize);
 
   float elevation = 0.0;
@@ -79,30 +67,20 @@ void main(void) {
   vec4 position_worldspace = vec4(extrudedPosition, 1.0);
   gl_Position = project_to_clipspace(position_worldspace);
 
-  if (renderPickingBuffer < 0.5) {
+  float lightWeight = 1.0;
 
-    // TODO: we should allow the user to specify the color for "selected element"
-    // check whether a bar is currently picked.
-    float selected = isPicked(instancePickingColors, selectedPickingColor);
-
-    float lightWeight = 1.0;
-
-    if (extruded > 0.5) {
-      lightWeight = getLightWeight(
-        position_worldspace.xyz, // the w component is always 1.0
-        normals
-      );
-    }
-
-    vec3 lightWeightedColor = lightWeight * instanceColors.rgb;
-    vec4 color = vec4(lightWeightedColor, instanceColors.a * opacity) / 255.0;
-    vColor = color;
-
-  } else {
-
-    vec4 pickingColor = vec4(instancePickingColors / 255.0, 1.0);
-     vColor = pickingColor;
-
+  if (extruded > 0.5) {
+    lightWeight = getLightWeight(
+      position_worldspace.xyz, // the w component is always 1.0
+      normals
+    );
   }
+
+  vec3 lightWeightedColor = lightWeight * instanceColors.rgb;
+  vec4 color = vec4(lightWeightedColor, instanceColors.a * opacity) / 255.0;
+  vColor = color;
+
+  // Set color to be rendered to picking fbo (also used to check for selection highlight).
+  picking_setPickingColor(instancePickingColors);
 }
 `;

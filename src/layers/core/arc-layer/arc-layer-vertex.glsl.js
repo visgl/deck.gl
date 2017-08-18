@@ -31,7 +31,6 @@ uniform float numSegments;
 uniform vec2 viewportSize;
 uniform float strokeWidth;
 uniform float opacity;
-uniform float renderPickingBuffer;
 
 varying vec4 vColor;
 
@@ -93,11 +92,9 @@ void main(void) {
   gl_Position = curr + vec4(offset, 0.0, 0.0);
 
   vec4 color = mix(instanceSourceColors, instanceTargetColors, segmentRatio) / 255.;
+  vColor = vec4(color.rgb, color.a * opacity);
 
-  vColor = mix(
-    vec4(color.rgb, color.a * opacity),
-    vec4(instancePickingColors / 255., 1.),
-    renderPickingBuffer
-  );
+  // Set color to be rendered to picking fbo (also used to check for selection highlight).
+  picking_setPickingColor(instancePickingColors);
 }
 `;

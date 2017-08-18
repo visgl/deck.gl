@@ -141,7 +141,10 @@ uniform.
 
 ### Picking uniforms
 
-##### `float renderPickingBuffer`
+##### `float renderPickingBuffer` (Deprecated)
+
+Note: This uniform is deprecated and will be removed in future releases.
+For picking functionality please refer to `picking` shader module.
 
 If you choose to implement picking through picking colors, make sure
 the `pickingColors` or `instancePickingColors` attribute is correctly set up,
@@ -161,11 +164,6 @@ gl_FragColor = mix(
 );
 ```
 
-##### `vec3 selectedPickingColor`
-
-This uniform is set if `props.pickable` is enabled on the layer and reflects the color
-of the last picked pixel. If no pixel is selected, the value will be `[0, 0, 0]`.
-
 ## Use With Other GLSL Code Assemblers
 
 Your code can be run through another GLSL code assembler like
@@ -174,4 +172,3 @@ before you pass it to `assembleShaders`. The `assembleShaders` function
 does **not** do any kind of syntax analysis so is not able to prevent naming conflicts
 when variable or function names from different modules. You can use multiple
 techniques to organize your shader code to fit your project needs.
-

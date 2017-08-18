@@ -29,11 +29,6 @@ attribute vec2 instancePositions64xyLow;
 attribute vec4 instanceColors;
 attribute vec3 instancePickingColors;
 
-// Picking uniforms
-// Set to 1.0 if rendering picking buffer, 0.0 if rendering for display
-uniform float renderPickingBuffer;
-uniform vec3 selectedPickingColor;
-
 // Custom uniforms
 uniform float opacity;
 uniform float radius;
@@ -47,12 +42,6 @@ varying vec4 vColor;
 
 // A magic number to scale elevation so that 1 unit approximate to 1 meter.
 #define ELEVATION_SCALE 0.8
-
-float isPicked(vec3 pickingColors, vec3 selectedColor) {
- return float(pickingColors.x == selectedColor.x
- && pickingColors.y == selectedColor.y
- && pickingColors.z == selectedColor.z);
-}
 
 void main(void) {
 
@@ -99,39 +88,26 @@ void main(void) {
 
   gl_Position = project_to_clipspace_fp64(vertex_pos_modelspace);
 
-  // render display
-  if (renderPickingBuffer < 0.5) {
+  // Light calculations
+  // Worldspace is the linear space after Mercator projection
 
-    // TODO: we should allow the user to specify the color for "selected element"
-    // check whether hexagon is currently picked.
-    float selected = isPicked(instancePickingColors, selectedPickingColor);
+  vec3 normals_worldspace = rotatedNormals;
 
-    // Light calculations
-    // Worldspace is the linear space after Mercator projection
+  float lightWeight = 1.0;
 
-    vec3 normals_worldspace = rotatedNormals;
-
-    float lightWeight = 1.0;
-
-    if (extruded > 0.5) {
-      lightWeight = getLightWeight(
-        position_worldspace.xyz, // the w component is always 1.0
-        normals_worldspace
-      );
-    }
-
-    vec3 lightWeightedColor = lightWeight * instanceColors.rgb;
-
-    // Color: Either opacity-multiplied instance color, or picking color
-    vec4 color = vec4(lightWeightedColor, opacity * instanceColors.a) / 255.0;
-
-    vColor = color;
-
-  } else {
-
-    vec4 pickingColor = vec4(instancePickingColors / 255.0, 1.0);
-    vColor = pickingColor;
-
+  if (extruded > 0.5) {
+    lightWeight = getLightWeight(
+      position_worldspace.xyz, // the w component is always 1.0
+      normals_worldspace
+    );
   }
+
+  vec3 lightWeightedColor = lightWeight * instanceColors.rgb;
+
+  // Color: Either opacity-multiplied instance color, or picking color
+  vColor = vec4(lightWeightedColor, opacity * instanceColors.a) / 255.0;
+
+  // Set color to be rendered to picking fbo (also used to check for selection highlight).
+  picking_setPickingColor(instancePickingColors);
 }
 `;

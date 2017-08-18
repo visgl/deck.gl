@@ -29,42 +29,33 @@ attribute vec3 pickingColors;
 uniform float extruded;
 uniform float opacity;
 
-uniform float renderPickingBuffer;
-uniform vec3 selectedPickingColor;
-
-// PICKING
-uniform float pickingEnabled;
-varying vec4 vPickingColor;
+varying vec4 vColor;
 
 void main(void) {
   vec4 position_worldspace = vec4(project_position(positions), 1.0);
   gl_Position = project_to_clipspace(position_worldspace);
 
-  if (pickingEnabled < 0.5) {
-    float lightWeight = 1.0;
+  float lightWeight = 1.0;
 
-    if (extruded > 0.5) {
-      // Here, the input parameters should be
-      // position_worldspace.xyz / position_worldspace.w.
-      // However, this calculation generates all zeros on
-      // MacBook Pro with Intel Iris Pro GPUs for unclear reasons.
-      // (see https://github.com/uber/deck.gl/issues/559)
-      // Since the w component is always 1.0 in our shaders,
-      // we decided to just provide xyz component of position_worldspace
-      // to the getLightWeight() function
-      lightWeight = getLightWeight(
-        position_worldspace.xyz,
-        normals
-      );
-    }
-
-    vec3 lightWeightedColor = lightWeight * colors.rgb;
-    vec4 color = vec4(lightWeightedColor, colors.a * opacity) / 255.0;
-
-    vPickingColor = color;
-
-  } else {
-    vPickingColor = vec4(pickingColors.rgb / 255.0, 1.0);
+  if (extruded > 0.5) {
+    // Here, the input parameters should be
+    // position_worldspace.xyz / position_worldspace.w.
+    // However, this calculation generates all zeros on
+    // MacBook Pro with Intel Iris Pro GPUs for unclear reasons.
+    // (see https://github.com/uber/deck.gl/issues/559)
+    // Since the w component is always 1.0 in our shaders,
+    // we decided to just provide xyz component of position_worldspace
+    // to the getLightWeight() function
+    lightWeight = getLightWeight(
+      position_worldspace.xyz,
+      normals
+    );
   }
+
+  vec3 lightWeightedColor = lightWeight * colors.rgb;
+  vColor = vec4(lightWeightedColor, colors.a * opacity) / 255.0;
+
+  // Set color to be rendered to picking fbo (also used to check for selection highlight).
+  picking_setPickingColor(pickingColors);
 }
 `;

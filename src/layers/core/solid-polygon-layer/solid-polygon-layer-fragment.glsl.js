@@ -27,13 +27,15 @@ precision highp float;
 
 // PICKING
 // uniform bool pickingEnabled;
-varying vec4 vPickingColor;
-vec4 picking_getColor() {
-  return vPickingColor;
-}
-// PICKING
+varying vec4 vColor;
 
 void main(void) {
-  gl_FragColor = picking_getColor();
+  gl_FragColor = vColor;
+
+  // use highlight color if this fragment belongs to the selected object.
+  gl_FragColor = picking_filterHighlightColor(gl_FragColor);
+
+  // use picking color if rendering to picking FBO.
+  gl_FragColor = picking_filterPickingColor(gl_FragColor);
 }
 `;
