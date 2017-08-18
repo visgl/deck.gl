@@ -49,28 +49,6 @@ test('wheelInput#destroy', t => {
   t.end();
 });
 
-test('wheelInput#set', t => {
-  const options = {
-    foo: 1,
-    bar: 'two',
-    baz: () => {},
-    qux: {}
-  };
-  const wheelInput = new WheelInput(createEventRegistrarMock());
-  wheelInput.set(options);
-  t.ok(Object.keys(options).every(k => wheelInput.options[k] === options[k]),
-    'should add all passed options onto internal options property');
-
-  const newOptions = {
-    foo: 2,
-    bar: 'three'
-  };
-  wheelInput.set(newOptions);
-  t.ok(Object.keys(newOptions).every(k => wheelInput.options[k] === newOptions[k]),
-    'should merge all passed options onto internal options property');
-  t.end();
-});
-
 test('moveInput#toggleIfEventSupported', t => {
   const WHEEL_EVENT_TYPES = ['wheel'];	// wheel-input.EVENT_TYPE
   const wheelInput = new WheelInput(createEventRegistrarMock(), null, {enable: false});

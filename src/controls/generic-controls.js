@@ -289,25 +289,31 @@ export default class GenericControls {
     }
 
     const KEY_BINDINGS = {
-      KeyW: 'moveForward',
+      w: 'moveForward',
+      W: 'moveForward',
       ArrowUp: 'moveForward',
 
-      KeyS: 'moveBackward',
+      s: 'moveBackward',
+      S: 'moveBackward',
       ArrowDown: 'moveBackward',
 
-      KeyA: 'moveLeft',
+      a: 'moveLeft',
+      A: 'moveLeft',
       ArrowLeft: 'moveLeft',
 
-      KeyD: 'moveRight',
+      d: 'moveRight',
+      D: 'moveRight',
       ArrowRight: 'moveRight',
 
-      Equal: 'zoomIn',
-      Plus: 'zoomIn',
+      '=': 'zoomIn',
+      '+': 'zoomIn',
 
-      Minus: 'zoomOut'
+      '-': 'zoomOut'
     };
 
-    const key = event.srcEvent.code;
+    // keyCode is deprecated from web standards
+    // code is not supported by IE/Edge
+    const key = event.key;
     const handler = KEY_BINDINGS[key];
     if (this.viewportState[handler]) {
       const newViewportState = this.viewportState[handler]();
