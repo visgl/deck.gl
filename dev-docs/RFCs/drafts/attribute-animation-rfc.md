@@ -4,6 +4,8 @@
 * **Date**: Aug 2017
 * **Status**: Early draft, not ready for formal review.
 
+Notes:
+*  This could build on a "GeometryBuilder RFC", @ibgreen has been doing some work in this area.
 
 ## Motivation
 
@@ -42,3 +44,6 @@ while
 ```
 
 
+## Questions
+
+* Probably interesting updateTrigger implications...
