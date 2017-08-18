@@ -1,8 +1,10 @@
-# RFC: Event Handling for deck.gl/luma.gl/react-map-gl
+# deck.gl RFC: Event Handling
 
 Author: Ib Green, Xiaoji Chen, Eric Socolofski, Shaojing Li and others
 Date: April 2017
-Status:
+Status: **Approved And Implemented**
+
+Notes:
 * Approved as a general direction for development
 * Implemented in parts, used internally by deck.gl 4.1
 * Available to apps as "experimental" exports in deck.gl 4.1

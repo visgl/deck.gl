@@ -1,10 +1,12 @@
-Micro-RFC: Automatic and Explicit Highlighting using the luma.gl "picking" Shader Module
+# deck.gl RFC: Automatic and Explicit Highlighting
 
-Ravi Akkenapally and Ib Green
+Authors: Ravi Akkenapally and Ib Green
+Date: August 9, 2017
+Status: **Approved and Implementd**
 
-August 9, 2017
+Notes:
+* Please add comments as reviews to the [PR](https://github.com/uber/deck.gl/pull/839)
 
-Please add comments as reviews to the [PR](https://github.com/uber/deck.gl/pull/839)
 
 ## Overview
 

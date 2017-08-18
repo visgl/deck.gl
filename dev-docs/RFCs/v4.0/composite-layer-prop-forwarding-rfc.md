@@ -1,18 +1,26 @@
 # RFC: Composite Layer Interface Convention
 
+Author: Shaojing Li
+Date: April 4, 2017
+Status: **Approved and Implemented**
+
+
 ## Summary
 
 Composite layers are for constructing, processing and rendering complex visualizations through compositing multiple “related” underlying layers.
 
 In deck.gl, there are two types of composite layers,
-* The “real” or “complex” composite layer that draws multiple different types of primitive layers, such as the GeoJson layer that draws PolygonLayer, PathLayer and ScatterPlotLayer.
-* The “Adaptor” layer that provides a slight specialization / enhancement of an existing layer but otherwise very similar functionality to the underlying layer, such as the S2Layer.
+1. The “real” or “**complex**” composite layer that draws multiple different types of primitive layers, such as the GeoJson layer that draws PolygonLayer, PathLayer and ScatterPlotLayer.
+* The “**Adaptor**” layer that provides a slight specialization / enhancement of an existing layer but otherwise very similar functionality to the underlying layer, such as the S2Layer.
 
 In this document, we are aiming at establishing a convention that guides the API design principles for the first type of composite layers.
 
 In general, we would like the interfaces of the composite layer, including the props and accessors, to be explicitly declared in the `defaultProps` object. The composite layer, when creating its underlying layers, will NOT automatically forward props it receives to them. The author of the composite layer needs to manually select appropriate props from its prop list (all should be defined in the defaultProps object) and pass them as the specific props of the underlying layers, usually in renderLayers() method.
 
 Remark: This deviates from the general pattern that React components pass their props.
+
+
+## Rationale
 
 The rationale behind this convention is “separation of the interface from the implementation”:
 * Manual prop forwarding hides the underlying implementation of a composite layer completely from its user.
