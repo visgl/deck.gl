@@ -1,9 +1,11 @@
-# deck.gl RFC - First Person Mercator Controls
+# RFC - First Person Mercator Controls
 
-* Ib Green
-* August 10, 2017
+* **Author**: Ib Green
+* **Date**: August 10, 2017
+* **Status**: **Approved**
 
-Please add comments as reviews to the [PR](https://github.com/uber/deck.gl/pull/838)
+Notes:
+* Please add comments as reviews to the [PR](https://github.com/uber/deck.gl/pull/838)
 
 
 ## Motivation
