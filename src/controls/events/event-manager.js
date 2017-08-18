@@ -106,9 +106,9 @@ export default class EventManager {
     if (recognizer) {
       recognizer.set({enable: enabled});
     }
-    this.wheelInput.toggleIfEventSupported(name, enabled);
-    this.moveInput.toggleIfEventSupported(name, enabled);
-    this.keyInput.toggleIfEventSupported(name, enabled);
+    this.wheelInput.enableEventType(name, enabled);
+    this.moveInput.enableEventType(name, enabled);
+    this.keyInput.enableEventType(name, enabled);
   }
 
   /**

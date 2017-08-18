@@ -49,15 +49,15 @@ test('wheelInput#destroy', t => {
   t.end();
 });
 
-test('moveInput#toggleIfEventSupported', t => {
+test('moveInput#enableEventType', t => {
   const WHEEL_EVENT_TYPES = ['wheel'];	// wheel-input.EVENT_TYPE
   const wheelInput = new WheelInput(createEventRegistrarMock(), null, {enable: false});
-  wheelInput.toggleIfEventSupported('foo', true);
+  wheelInput.enableEventType('foo', true);
   t.notOk(wheelInput.options.enable, 'should not enable for unsupported event');
 
   t.ok(WHEEL_EVENT_TYPES.every(event => {
     wheelInput.options.enable = false;
-    wheelInput.toggleIfEventSupported(event, true);
+    wheelInput.enableEventType(event, true);
     return wheelInput.options.enable;
   }), 'should enable for all supported events');
   t.end();

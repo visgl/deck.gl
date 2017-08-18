@@ -49,7 +49,7 @@ test('keyInput#destroy', t => {
   t.end();
 });
 
-test('keyInput#toggleIfEventSupported', t => {
+test('keyInput#enableEventType', t => {
   const eventRegistrar = createEventRegistrarMock();
   const keyDownMock = {
     type: 'keydown',
@@ -65,22 +65,22 @@ test('keyInput#toggleIfEventSupported', t => {
   let callbackSpy = spy();
   let keyInput = new KeyInput(eventRegistrar, callbackSpy, {enable: true});
 
-  keyInput.toggleIfEventSupported('keydown', false);
+  keyInput.enableEventType('keydown', false);
   keyInput.handleEvent(keyDownMock);
   t.notOk(callbackSpy.called, 'callback should not be called when disabled');
 
-  keyInput.toggleIfEventSupported('keydown', true);
+  keyInput.enableEventType('keydown', true);
   keyInput.handleEvent(keyDownMock);
   t.ok(callbackSpy.called, 'callback should be called on key down when enabled...');
 
   callbackSpy = spy();
   keyInput = new KeyInput(eventRegistrar, callbackSpy, {enable: true});
 
-  keyInput.toggleIfEventSupported('keyup', false);
+  keyInput.enableEventType('keyup', false);
   keyInput.handleEvent(keyUpMock);
   t.notOk(callbackSpy.called, 'callback should not be called when disabled');
 
-  keyInput.toggleIfEventSupported('keyup', true);
+  keyInput.enableEventType('keyup', true);
   keyInput.handleEvent(keyUpMock);
   t.ok(callbackSpy.called, 'callback should be called on key up when enabled...');
 

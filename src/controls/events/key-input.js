@@ -18,6 +18,7 @@ export default class KeyInput {
 
     this.handleEvent = this.handleEvent.bind(this);
 
+    // Use mock in test environment
     const parent = isBrowser ? window : element;
     this.events.forEach(event => parent.addEventListener(event, this.handleEvent));
   }
@@ -31,7 +32,7 @@ export default class KeyInput {
    * Enable this input (begin processing events)
    * if the specified event type is among those handled by this input.
    */
-  toggleIfEventSupported(eventType, enabled) {
+  enableEventType(eventType, enabled) {
     if (eventType === DOWN_EVENT_TYPE) {
       this.enableDownEvent = enabled;
     }

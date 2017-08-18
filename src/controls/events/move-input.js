@@ -35,7 +35,7 @@ export default class MoveInput {
    * Enable this input (begin processing events)
    * if the specified event type is among those handled by this input.
    */
-  toggleIfEventSupported(eventType, enabled) {
+  enableEventType(eventType, enabled) {
     if (eventType === MOVE_EVENT_TYPE) {
       this.enableMoveEvent = enabled;
     }

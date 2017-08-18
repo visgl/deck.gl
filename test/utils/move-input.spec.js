@@ -92,7 +92,7 @@ test('moveInput#handleEvent', t => {
   t.end();
 });
 
-test('moveInput#toggleIfEventSupported', t => {
+test('moveInput#enableEventType', t => {
   const eventRegistrar = createEventRegistrarMock();
   const mouseHoverMock = {
     type: 'mousemove',
@@ -107,22 +107,22 @@ test('moveInput#toggleIfEventSupported', t => {
   let callbackSpy = spy();
   let moveInput = new MoveInput(eventRegistrar, callbackSpy, {enable: true});
 
-  moveInput.toggleIfEventSupported('pointermove', false);
+  moveInput.enableEventType('pointermove', false);
   moveInput.handleEvent(mouseHoverMock);
   t.notOk(callbackSpy.called, 'callback should not be called when disabled');
 
-  moveInput.toggleIfEventSupported('pointermove', true);
+  moveInput.enableEventType('pointermove', true);
   moveInput.handleEvent(mouseHoverMock);
   t.ok(callbackSpy.called, 'callback should be called on mouse hover when enabled...');
 
   callbackSpy = spy();
   moveInput = new MoveInput(eventRegistrar, callbackSpy, {enable: true});
 
-  moveInput.toggleIfEventSupported('pointerleave', false);
+  moveInput.enableEventType('pointerleave', false);
   moveInput.handleEvent(mouseLeaveMock);
   t.notOk(callbackSpy.called, 'callback should not be called when disabled');
 
-  moveInput.toggleIfEventSupported('pointerleave', true);
+  moveInput.enableEventType('pointerleave', true);
   moveInput.handleEvent(mouseLeaveMock);
   t.ok(callbackSpy.called, 'callback should be called on mouse hover when enabled...');
 
