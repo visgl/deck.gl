@@ -1,4 +1,4 @@
-# RFC: Property Animation
+# RFC: Effects Manager
 
 * **Authors**: Ravi Akkenapally & Ib Green
 * **Date**: Aug 2017

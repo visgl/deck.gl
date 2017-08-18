@@ -1,4 +1,4 @@
-# RFC: Property Animation
+# RFC: Attribute Animation
 
 * **Authors**: Xiaoji Chen
 * **Date**: Aug 2017

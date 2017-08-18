@@ -23,7 +23,7 @@ Next generation of deck.gl should have official support for effects (shadows, re
 
 | RFC | Author | Status | Description |
 | --- | --- | --- | --- |
-| **[Effects Engine RFC]()** | @1chandu & @ibgreen | Draft | Complete and officially release experimental `EffectsManager` |
+| **[EffectsManager RFC](drafts/effects-manager-rfc.md)** | @1chandu & @ibgreen | Draft | Complete and officially release experimental `EffectsManager` |
 
 
 ### Core Animation RFCs
@@ -34,7 +34,7 @@ Next generation of deck.gl should have official support for effects (shadows, re
 | [**Viewport interpolation RFC**](drafts/viewport-animation-rfc.md) | @1chandu? | Proposed | This should build on the new Viewport system in the First Person RFC. Also needs to consider react-map-gl. |
 | [**Uniform and Parameter Animation RFC**](drafts/property-animation-rfc.md) | @ibgreen | Draft | Allow Layer props and GL parameters to accept functions in addition to values and call these on every render to update values |
 | [**Attribute Animation RFC**](drafts/attribute-animation-rfc.md) | @Pessimistress? | Proposed | Automatically interpolate between two copies of a vertex attributes |
-| [**Expose Layer `AttributeManager`s RFC**](drafts/expose-attribute-managers.md) | @ibgreen | Draft | simplifies pregenerating attributes in apps for fast animation. |
+| [**Expose Layer AttributeManager RFC**](drafts/expose-attribute-manager.md) | @ibgreen | Draft | simplifies pregenerating attributes in apps for fast animation. |
 
 Possible other animation related RFCs:
 - integration with event handling (enter leave triggers for animations)
@@ -46,8 +46,8 @@ These RFCs implement features that are considered to be supporting or complemeti
 
 | RFC | Author | Status | Description |
 | --- | --- | --- | --- |
-| [**First Person Viewport RFC**](approved./first-person-mercator-viewport-rfc.md) | @ibgreen | **Approved** | Geospatially enable all viewports |
-| [**PropTypes RFC**](drafts/property-types-rfc.md) | ? | Draft | Validate e.g ranges for numeric attributes, support animation/auto-interpolation. |
+| [**First Person Viewport RFC**](approved/first-person-mercator-viewport-rfc.md) | @ibgreen | **Approved** | Geospatially enable all viewports |
+| [**PropTypes RFC**](drafts/prop-types-rfc.md) | ? | Draft | Validate e.g ranges for numeric attributes, support animation/auto-interpolation. |
 
 
 ### Ease-of-Use RFCs
@@ -78,12 +78,12 @@ These are RFCs that have been implemented (fully or partially) in past releases.
 
 | RFC | Author | Status | Description |
 | --- | --- | --- | --- |
-| [**Event Handling RFC**](4.1/event-handling-rfc.md) | Many authors | Approved & Implemented | Attempt to define enduring event handling architecture |
+| [**Event Handling RFC**](v4.1/event-handling-rfc.md) | Many authors | **Approved** & Implemented | Attempt to define enduring event handling architecture |
 
 
 ### deck.gl v4.0
 
 | RFC | Author | Status | Description |
 | --- | --- | --- | --- |
-| [**Non-Geospatial Viewports RFC**](4.0/non-geospatial-viewports.md) | @ibgreen & @gnavvy | Approved & Implemented | Support for non-geospatial viewports |
-| [**Composite Layer Prop Forwarding RFC**](4.0/composite-layer-prop-forwarding.md) | @shaojingli | Approved & Implemented | Conventions for prop forwarding |
+| [**Non-Geospatial Viewports RFC**](v4.0/non-geospatial-viewports-rfc.md) | @ibgreen & @gnavvy | **Approved** & Implemented | Support for non-geospatial viewports |
+| [**Composite Layer Prop Forwarding RFC**](v4.0/composite-layer-prop-forwarding-rfc.md) | @shaojingli | **Approved** & Implemented | Conventions for prop forwarding |

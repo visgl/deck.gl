@@ -1,4 +1,4 @@
- RFC: dataUrl Layer property
+# RFC: dataUrl Layer property
 
 * **Authors**: Xiaoji Chen and Ib Green
 * **Date**: Aug 2017
