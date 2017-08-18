@@ -16,13 +16,19 @@ Note: This was copy pasted from a google doc, so formatting needs some work.
 ## Summary
 
 We are currently building up about 4 or 5 different almost identical event handling systems (luma.gl, react-map-gl’s new InteractiveMap and StaticMap, deck.gl viewport controllers and main component).
+
 Some of this event handling is for viewport interaction (essentially manipulating the view matrix) and some event handling is for model interaction (hovering/clicking/dragging) features.
+
 These event handling solutions will all eventually need the same features and bug fixes (touch event support, support screen offset relative coordinates, etc), so duplicating code in so many places is an issue.
+
 The user will want to compose and customize these event handlers in flexible ways. If we have 5 different implementations with subtly different APIs and behaviours, this will not help.
+
 How will these event handlers interact? If a user embeds a model interaction handler that supports dragging data in a viewport controller that also supports dragging (but for panning or rotating), will (should?) the model interaction handler still get called?
+
 This RFC was created because there now seems to be an opportunity to come up with a clean event handling architecture that covers all cases and shares code and principles.
+
 The alternative is that we keep making incremental improvements in all of these places and end up with a patchwork of slightly different APIs with different capabilities and bugs.
-It may well be that this is the right design, still, I think this merits a design discussion before we merge.
+
 
 ### Efforts that could be Unified
 
@@ -111,12 +117,13 @@ If Touch handlers not provided, touch events will call Mouse event handlers, sim
 
 ### Observations
 
-90% users want event handling for free so we need good default event handling setup.
-5% of users won’t be happy whatever we do so good if we can make our system replaceable with reasonable effort.
-Browser compatibility can be significant work -- and hard to test outside of our regular dev environment (especially IE and Android).
-Using some existing supported DOM event registration system (even just React’s synthetic events) will free us from chasing down endless bugs on other platforms.
-If we implement DOM event handling this should absolutely be shared code - no reason to implement (and fix bugs twice). Either as a separate repo, or just as a separate module from a future “monorepo” version of luma.gl.
-Existing DOM Event Handlers
+* 90% users want event handling for free so we need good default event handling setup.
+* 5% of users won’t be happy whatever we do so good if we can make our system replaceable with reasonable effort.
+* Browser compatibility can be significant work -- and hard to test outside of our regular dev environment (especially IE and Android).
+* Using some existing supported DOM event registration system (even just React’s synthetic events) will free us from chasing down endless bugs on other platforms.
+* If we implement DOM event handling this should absolutely be shared code - no reason to implement (and fix bugs twice). Either as a separate repo, or just as a separate module from a future “monorepo” version of luma.gl.
+* Existing DOM Event Handlers
+
 
 ## Remarks
 
@@ -224,10 +231,10 @@ export default class OrbitControllerState {
 ## Proposal: React Controller Components (Viewport Event Handling)
 
 These are built as trivial wrappers over the ES6 controllers. They just create a transparent div and pass it to the controller component which installs events using a DOM API. Almost all the logic go into the ES6 class, and the React component is rather small. These components render the dom element and translate DOM events (emitted from EventManager) to viewport events (transform calculated by ControllerState classes), and invoke user callbacks. This allows us to build components that can be easily extended for scenarios like:
-Toggle features on/off (scroll to zoom, rotate, etc)
-Change key mappings (swap left/right drag, press key to rotate, keyboard navigation, etc)
-Use a custom event manager
-Add custom callbacks
+* Toggle features on/off (scroll to zoom, rotate, etc)
+* Change key mappings (swap left/right drag, press key to rotate, keyboard navigation, etc)
+* Use a custom event manager
+* Add custom callbacks
 
 ```js
 export default class MercatorController {
@@ -278,27 +285,32 @@ export default class MercatorController {
 
 Most of these components would go into deck.gl/src/react. One would go into react-map-gl/src/components. They should be very compatible and based on the same luma.gl EventManager class.
 
-## Questions
+### Questions
 
-Should the React component create a deck.gl Viewport or should the controller do it?
-Model Event Handling
+* Should the React component create a deck.gl Viewport or should the controller do it?
+
+## Model Event Handling
+
 In react-map-gl we have StaticMap which handles mapbox interaction events (still passing the click events to mapbox, even though we no longer pass in viewport events).
+
 In deck.gl we have the DeckGL React component which handles the events but this makes it harder to do non-react integrations with deck.gl
+
 Consider implementing the event handling in the LayerManager and have the React component pass in its canvas for event registration.
+
 Base event handling registration - build on same click handlers as the Viewport Event Handling to make things simple?
-Work Breakdown
-luma.gl 4.0 - Propose a common event handling solution- evaluate our own solutions vs. Hammer.js etc
-luma.gl 4.0 - Decide where to put the core event handling solution
-luma.gl monorepo, new separate repo, new utils monorepo.
-react-map-gl 3.0 Solve event forwarding / event separation
-react-map-gl 3.0 Update with all fixes from deck.gl
-deck.gl-4.1 - update OrbitController to use new core event handling
-deck.gl-4.1 - copy MercatorController from react-map-gl
-deck.gl-4.1 - separate controllers from React - new React component to wrap ES6 controllers.
-deck.gl-4.1 -  separate model event handling from DeckGL React component and move it to the new core event handler.
-Other
-Start writing docs for the various classes
-Settle on a test strategy for event handling
+
+
+### Work Breakdown
+* luma.gl 4.0 - Propose a common event handling solution- evaluate our own solutions vs. Hammer.js etc
+* luma.gl 4.0 - Decide where to put the core event handling solution: luma.gl monorepo, new separate repo, new utils monorepo.
+* react-map-gl 3.0 Solve event forwarding / event separation
+* react-map-gl 3.0 Update with all fixes from deck.gl
+* deck.gl-4.1 - update OrbitController to use new core event handling
+* deck.gl-4.1 - copy MercatorController from react-map-gl
+* deck.gl-4.1 - separate controllers from React - new React component to wrap ES6 controllers.
+( deck.gl-4.1 -  separate model event handling from DeckGL React component and move it to the new core event handler.
+* Start writing docs for the various classes
+* Settle on a test strategy for event handling
 
 
 ## Event Handling User’s Guide (Proposal)
@@ -306,15 +318,9 @@ Settle on a test strategy for event handling
 Note: Ultimately we will need to document everything we discuss in this RFC so we might as well write down the proposal in a form that can be used as a user’s guide
 
 
-ReactController -> Viewport Event Controller -> DeckGL Model Events -> Map Model Events
-DOM Event Handling
-Proposal: EventManager (event registration class)
-Contains logic of wiring up events with the DOM (react independent).
-Makes touch and mouse events work the same way (single callback)
-Implements basic touch gestures (zoom and rotate) and calls same callbacks as for mouse
-Implements support for scroll wheel and distinguishes touch pad and scroll wheel.
-Normalizes event parameters
-Any browser/platform specific hacks
+* ReactController -> Viewport Event Controller -> DeckGL Model ( * Events -> Map Model Events
+* DOM Event Handling
+
 
 
 ## From May 5 2017
