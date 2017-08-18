@@ -33,7 +33,7 @@ Ordered loosely after expected size savings
 STATUS: PROMISING - 20% REDUCTION?
 EFFORT: FAIRLY BIG (depends on ambition level)
 
-We don't run any serious minification on our code before we . At a minimum, we should strip comments from our published code, but we could do a lot more.
+We currently don't run any serious minification on our code before we publish it to npm. At a minimum, we should strip comments from our published code, but we could do a lot more.
 
 Stripping transpiled code and es6 code has different challenges. Each minifier has its own set of problems.
 
