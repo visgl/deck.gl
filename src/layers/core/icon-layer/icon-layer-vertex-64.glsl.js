@@ -35,7 +35,6 @@ attribute vec2 instanceOffsets;
 
 uniform vec2 viewportSize;
 uniform float sizeScale;
-uniform float renderPickingBuffer;
 uniform vec2 iconsTextureDim;
 
 varying float vColorMode;
@@ -86,10 +85,11 @@ void main(void) {
 
   vTextureCoords.y = 1.0 - vTextureCoords.y;
 
-  vec4 color = instanceColors / 255.;
-  vec4 pickingColor = vec4(instancePickingColors / 255., 1.);
-  vColor = mix(color, pickingColor, renderPickingBuffer);
+  vColor = instanceColors / 255.;
 
   vColorMode = instanceColorModes;
+
+  // Set color to be rendered to picking fbo (also used to check for selection highlight).
+  picking_setPickingColor(instancePickingColors);
 }
 `;

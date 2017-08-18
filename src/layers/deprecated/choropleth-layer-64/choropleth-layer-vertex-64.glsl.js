@@ -27,8 +27,6 @@ attribute vec4 colors;
 attribute vec3 pickingColors;
 
 uniform float opacity;
-uniform float renderPickingBuffer;
-uniform vec3 selectedPickingColor;
 
 uniform float pickingEnabled;
 varying vec4 vPickingColor;

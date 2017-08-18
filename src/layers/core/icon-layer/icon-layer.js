@@ -67,8 +67,8 @@ const defaultProps = {
 export default class IconLayer extends Layer {
   getShaders() {
     return enable64bitSupport(this.props) ?
-      {vs: vs64, fs, modules: ['project64']} :
-      {vs, fs};  // 'project' module added by default.
+      {vs: vs64, fs, modules: ['project64', 'picking']} :
+      {vs, fs, modules: ['picking']};  // 'project' module added by default.
   }
 
   initializeState() {

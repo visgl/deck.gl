@@ -30,12 +30,7 @@ attribute vec3 pickingColors;
 uniform float extruded;
 uniform float opacity;
 
-uniform float renderPickingBuffer;
-uniform vec3 selectedPickingColor;
-
-// PICKING
-uniform float pickingEnabled;
-varying vec4 vPickingColor;
+varying vec4 vColor;
 
 void main(void) {
   vec4 positions64xy = vec4(positions.x, positions64xyLow.x, positions.y, positions64xyLow.y);
@@ -55,23 +50,19 @@ void main(void) {
     vertex_pos_modelspace[0].x, vertex_pos_modelspace[1].x,
     vertex_pos_modelspace[2].x, vertex_pos_modelspace[3].x);
 
-  if (pickingEnabled < 0.5) {
-    float lightWeight = 1.0;
+  float lightWeight = 1.0;
 
-    if (extruded > 0.5) {
-      lightWeight = getLightWeight(
-        position_worldspace.xyz, // the w component is always 1.0
-        normals
-      );
-    }
-
-    vec3 lightWeightedColor = lightWeight * colors.rgb;
-    vec4 color = vec4(lightWeightedColor, colors.a * opacity) / 255.0;
-
-    vPickingColor = color;
-
-  } else {
-    vPickingColor = vec4(pickingColors.rgb / 255.0, 1.0);
+  if (extruded > 0.5) {
+    lightWeight = getLightWeight(
+      position_worldspace.xyz, // the w component is always 1.0
+      normals
+    );
   }
+
+  vec3 lightWeightedColor = lightWeight * colors.rgb;
+  vColor = vec4(lightWeightedColor, colors.a * opacity) / 255.0;
+
+  // Set color to be rendered to picking fbo (also used to check for selection highlight).
+  picking_setPickingColor(pickingColors);
 }
 `;

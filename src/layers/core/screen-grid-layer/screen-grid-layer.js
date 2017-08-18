@@ -37,7 +37,7 @@ const defaultProps = {
 
 export default class ScreenGridLayer extends Layer {
   getShaders() {
-    return {vs, fs}; // 'project' module added by default.
+    return {vs, fs, modules: ['picking']}; // 'project' module added by default.
   }
 
   constructor(props) {

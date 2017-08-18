@@ -26,7 +26,6 @@ precision highp float;
 #endif
 
 uniform float opacity;
-uniform float renderPickingBuffer;
 uniform sampler2D iconsTexture;
 
 varying float vColorMode;
@@ -40,19 +39,19 @@ void main(void) {
 
   // if colorMode == 0, use pixel color from the texture
   // if colorMode == 1 or rendering picking buffer, use texture as transparency mask
-  vec3 color = mix(texColor.rgb, vColor.rgb,
-    max(vColorMode, renderPickingBuffer)
-  );
+  vec3 color = mix(texColor.rgb, vColor.rgb, vColorMode);
   float a = texColor.a * opacity * mix(1.0, vColor.a, vColorMode);
 
   if (a < MIN_ALPHA) {
     discard;
   }
 
-  // if rendering to screen, use mixed alpha
-  // if rendering picking buffer, use binary alpha
-  a = mix(a, 1.0, renderPickingBuffer);
-
   gl_FragColor = vec4(color, a);
+
+  // use highlight color if this fragment belongs to the selected object.
+  gl_FragColor = picking_filterHighlightColor(gl_FragColor);
+
+  // use picking color if rendering to picking FBO.
+  gl_FragColor = picking_filterPickingColor(gl_FragColor);
 }
 `;

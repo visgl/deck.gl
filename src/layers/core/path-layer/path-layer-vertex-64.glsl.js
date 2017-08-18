@@ -40,7 +40,6 @@ uniform float jointType;
 uniform float miterLimit;
 
 uniform float opacity;
-uniform float renderPickingBuffer;
 
 varying vec4 vColor;
 varying vec2 vCornerOffset;
@@ -168,9 +167,10 @@ vec3 lineJoin(vec2 prevPoint64[2], vec2 currPoint64[2], vec2 nextPoint64[2]) {
 }
 
 void main() {
-  vec4 color = vec4(instanceColors.rgb, instanceColors.a * opacity) / 255.;
-  vec4 pickingColor = vec4(instancePickingColors, 255.) / 255.;
-  vColor = mix(color, pickingColor, renderPickingBuffer);
+  vColor = vec4(instanceColors.rgb, instanceColors.a * opacity) / 255.;
+
+  // Set color to be rendered to picking fbo (also used to check for selection highlight).
+  picking_setPickingColor(instancePickingColors);
 
   float isEnd = positions.x;
 

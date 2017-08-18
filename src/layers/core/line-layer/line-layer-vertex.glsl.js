@@ -30,7 +30,6 @@ attribute vec3 instancePickingColors;
 uniform vec2 viewportSize;
 uniform float strokeWidth;
 uniform float opacity;
-uniform float renderPickingBuffer;
 
 varying vec4 vColor;
 
@@ -64,12 +63,9 @@ void main(void) {
   gl_Position = p + vec4(offset, 0.0, 0.0);
 
   // Color
-  vec4 color = vec4(instanceColors.rgb, instanceColors.a * opacity) / 255.;
-  vec4 pickingColor = vec4(instancePickingColors / 255., 1.);
-  vColor = mix(
-    color,
-    pickingColor,
-    renderPickingBuffer
-  );
+  vColor = vec4(instanceColors.rgb, instanceColors.a * opacity) / 255.;
+
+  // Set color to be rendered to picking fbo (also used to check for selection highlight).
+  picking_setPickingColor(instancePickingColors);
 }
 `;

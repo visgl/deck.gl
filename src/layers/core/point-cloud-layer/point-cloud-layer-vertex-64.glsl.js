@@ -29,7 +29,6 @@ attribute vec3 instanceNormals;
 attribute vec4 instanceColors;
 attribute vec3 instancePickingColors;
 
-uniform float renderPickingBuffer;
 uniform float opacity;
 uniform float radiusPixels;
 uniform vec2 screenSize;
@@ -64,15 +63,14 @@ void main(void) {
     projected_coord_xy[0].x, projected_coord_xy[1].x,
     project_scale(instancePositions.z), 1.0);
 
-  if (renderPickingBuffer > 0.5) {
-    vColor = vec4(instancePickingColors / 255., 1.);
-  } else {
-    // Apply lighting
-    float lightWeight = getLightWeight(position_worldspace.xyz, // the w component is always 1.0
-      instanceNormals);
+  // Apply lighting
+  float lightWeight = getLightWeight(position_worldspace.xyz, // the w component is always 1.0
+    instanceNormals);
 
-    // Apply opacity to instance color, or return instance picking color
-    vColor = vec4(lightWeight * instanceColors.rgb, instanceColors.a * opacity) / 255.;
-  }
+  // Apply opacity to instance color, or return instance picking color
+  vColor = vec4(lightWeight * instanceColors.rgb, instanceColors.a * opacity) / 255.;
+
+  // Set color to be rendered to picking fbo (also used to check for selection highlight).
+  picking_setPickingColor(instancePickingColors);
 }
 `;

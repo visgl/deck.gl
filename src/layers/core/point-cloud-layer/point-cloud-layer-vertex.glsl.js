@@ -28,7 +28,6 @@ attribute vec3 instanceNormals;
 attribute vec4 instanceColors;
 attribute vec3 instancePickingColors;
 
-uniform float renderPickingBuffer;
 uniform float opacity;
 uniform float radiusPixels;
 uniform vec2 viewportSize;
@@ -50,8 +49,9 @@ void main(void) {
     instanceNormals);
 
   // Apply opacity to instance color, or return instance picking color
-  vec4 color = vec4(lightWeight * instanceColors.rgb, instanceColors.a * opacity) / 255.;
-  vec4 pickingColor = vec4(instancePickingColors / 255., 1.);
-  vColor = mix(color, pickingColor, renderPickingBuffer);
+  vColor = vec4(lightWeight * instanceColors.rgb, instanceColors.a * opacity) / 255.;
+
+  // Set color to be rendered to picking fbo (also used to check for selection highlight).
+  picking_setPickingColor(instancePickingColors);
 }
 `;
