@@ -1,8 +1,9 @@
 # RFC: New layers in deck.gl v.Next
 
-Author: Shaojing Li
-Date: May 10, 2017
-Status: WIP
+* **Author**: Shaojing Li
+* **Date**: May 10, 2017
+* **Status**: WIP
+
 
 # Overview
 

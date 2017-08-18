@@ -1,8 +1,8 @@
-# deck.gl RFC: Automatic and Explicit Highlighting
+# RFC: Automatic and Explicit Highlighting
 
-Authors: Ravi Akkenapally and Ib Green
-Date: August 9, 2017
-Status: **Approved and Implementd**
+* **Authors**: Ravi Akkenapally and Ib Green
+* **Date**: August 9, 2017
+* **Status**: **Approved and Implementd**
 
 Notes:
 * Please add comments as reviews to the [PR](https://github.com/uber/deck.gl/pull/839)

@@ -1,8 +1,8 @@
-# deck.gl RFC: Event Handling
+# RFC: Event Handling
 
-Author: Ib Green, Xiaoji Chen, Eric Socolofski, Shaojing Li and others
-Date: April 2017
-Status: **Approved And Implemented**
+* **Author**: Ib Green, Xiaoji Chen, Eric Socolofski, Shaojing Li and others
+* **Date**: April 2017
+* **Status**: **Approved And Implemented**
 
 Notes:
 * Approved as a general direction for development

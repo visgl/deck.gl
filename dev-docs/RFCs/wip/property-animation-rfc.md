@@ -1,6 +1,7 @@
-# Master RFC: Animation Support in deck.gl
+# RFC: Animation Support in deck.gl
 
 * **Authors**: Ib Green, ...
+* **Date**: Aug 2017
 * **Status**: Early draft, not ready for formal review.
 
 

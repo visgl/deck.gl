@@ -1,8 +1,8 @@
 # RFC: Composite Layer Interface Convention
 
-Author: Shaojing Li
-Date: April 4, 2017
-Status: **Approved and Implemented**
+* **Author**: Shaojing Li
+* **Date**: April 4, 2017
+* **Status**: **Approved and Implemented**
 
 
 ## Summary

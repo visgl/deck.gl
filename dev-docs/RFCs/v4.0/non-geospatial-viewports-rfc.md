@@ -1,8 +1,8 @@
 # RFC - Viewport Support for Infovis
 
-Author: Ib Green
-Date: Dec 7, 2016
-Status: **Approved and Implemented**
+* **Author**: Ib Green
+* **Date**: Dec 7, 2016
+* **Status**: **Approved and Implemented**
 
 Notes:
 * Implemented (with a different class hierarchy) as part of deck.gl v4.

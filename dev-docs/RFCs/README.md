@@ -57,7 +57,7 @@ These RFCs represent features that are not listed as part of focus areas for nex
 
 | RFC | Author | Status | Description |
 | --- | --- | --- | --- |
-| **dataUrl RFC** | @Pessimistress? | Proposed | Allow deck.gl layers to specify a URL and asynchronously download the resulting data |
+| **dataUrl RFC** | @pessimistress? | Proposed | Allow deck.gl layers to specify a URL and asynchronously download the resulting data |
 
 
 ## Deferred RFCs
@@ -67,11 +67,11 @@ These are RFCs that were deferred in the initial review (usually due to more lim
 | RFC | Author | Status | Description |
 | --- | --- | --- | --- |
 | [**Partial Updates RFC**](deferred/partial-updates-rfc.md) | @ibgreen | Deferred | Allow partial updates of vertex attributes to support high-performance editing. Deferred due to performance of complete updates being so good this was not needed. |
-| **Off-thread attribute generation RFC** | @Pessimistress | Deferred | Generate attributes off-thread (to avoid locking the main thread). Deferred due to issues with supporting the more general use cases. **dataUrl RFC** could be broken out. |
+| [**Off-thread attribute generation RFC**]() | @pessimistress | Deferred | Generate attributes off-thread (to avoid locking the main thread). Deferred due to issues with supporting the more general use cases. **dataUrl RFC** could be broken out. |
 
 
 
-## Historic RFCs
+## Implemented RFCs
 
 These are RFCs that have been implemented (fully or partially) in past releases.
 
@@ -79,11 +79,12 @@ These are RFCs that have been implemented (fully or partially) in past releases.
 
 | RFC | Author | Status | Description |
 | --- | --- | --- | --- |
-| TBA | - | - | - |
+| [**Event Handling RFC**]() | Many authors | Approved & Implemented | Attempt to define enduring event handling architecture |
 
 
 ### deck.gl v4.0
 
 | RFC | Author | Status | Description |
 | --- | --- | --- | --- |
-| **Infovis Viewports RFC** | @ibgreen & Yang | Approved & Implemented | Support for non-geospatial viewports |
+| [**Non-Geospatial Viewports RFC**]() | @ibgreen & @gnavvy | Approved & Implemented | Support for non-geospatial viewports |
+| [**Composite Layer Prop Forwarding RFC**]() | @shaojingli | Approved & Implemented | Conventions for prop forwarding |

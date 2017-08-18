@@ -1,8 +1,10 @@
 # RFC: Property Types System for deck.gl
 
 * **Authors**: Ib Green, ...
+* **Date**: Aug 2017
 * **Status**: Initial draft, not ready for review
 
+# Overview
 
 It would be useful to support a prop types system similar to React
 ```js
