@@ -6,7 +6,7 @@ Implementation of non-trivial new deck.gl features should typically be started o
 | ---          | --- |
 | Proposed     | Call for an RFC to be written |
 | Draft        | WIP version available, not ready for formal review |
-| In Review    | In formal review |
+| **Review**   | In formal review |
 | **Approved** | Approved, ready for implementation |
 | **Deferred** | Review uncovered reasons not to proceed at this time |
 | **Rejected** | Review uncovered reasons not to proceed at this time |
@@ -50,13 +50,12 @@ These RFCs implement features that are considered to be supporting or complemeti
 | [**PropTypes RFC**](drafts/prop-types-rfc.md) | ? | Draft | Validate e.g ranges for numeric attributes, support animation/auto-interpolation. |
 
 
-### Ease-of-Use RFCs
-
-These RFCs represent features that are not listed as part of focus areas for next generation but can help the ease-of-use of deck.gl which is a constant background priority for all deck.gl releases.
+### General RFCs
 
 | RFC | Author | Status | Description |
 | --- | --- | --- | --- |
-| [**dataUrl RFC**](drafts/data-url-rfc.md) | @pessimistress & @ibgreen | Draft | Allow deck.gl layers to specify a URL and asynchronously download the resulting data |
+| [**dataUrl RFC**](drafts/data-url-rfc.md) | @pessimistress & @ibgreen | Draft | **Ease-of-Use** Allow deck.gl layers to specify a URL and asynchronously download the resulting data |
+| [**Reduce Distribution Size RFC**](drafts/reduce-distribution-size-rfc.md) | @ibgreen | **Review** | **Hygiene** Reduce size of distribution and the bundle size of apps consuming deck.gl |
 
 
 ## Deferred RFCs

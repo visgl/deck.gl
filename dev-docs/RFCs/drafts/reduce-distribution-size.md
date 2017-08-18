@@ -4,6 +4,8 @@
 * **Date**: Aug 2017
 * **Status**: Early draft, not ready for formal review.
 
+Notes:
+* Add comments as reviews in [PR 859](https://github.com/uber/deck.gl/pull/859)
 
 ## Motivation
 
