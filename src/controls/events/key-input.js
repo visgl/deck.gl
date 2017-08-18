@@ -1,71 +1,63 @@
 /* global window */
-const KEY_EVENTS = ['keydown', 'keyup'];
-// const EVENT_TYPE = 'KeyboardEvent';
+import {isBrowser} from '../../utils/globals';
 
-/**
- * Hammer.js swallows 'move' events (for pointer/touch/mouse)
- * when the pointer is not down. This class sets up a handler
- * specifically for these events to work around this limitation.
- * Note that this could be extended to more intelligently handle
- * move events across input types, e.g. storing multiple simultaneous
- * pointer/touch events, calculating speed/direction, etc.
- */
+const KEY_EVENTS = ['keydown', 'keyup'];
+const DOWN_EVENT_TYPE = 'keydown';
+const UP_EVENT_TYPE = 'keyup';
+
 export default class KeyInput {
   constructor(element, callback, options = {}) {
     this.element = element;
     this.callback = callback;
-    this.pressed = false;
 
-    const events = KEY_EVENTS.concat(options.events || []);
-    this.options = Object.assign({enable: true}, options, {events});
+    this.options = Object.assign({enable: true}, options);
+    this.enableDownEvent = this.options.enable;
+    this.enableUpEvent = this.options.enable;
+
+    this.events = KEY_EVENTS.concat(options.events || []);
 
     this.handleEvent = this.handleEvent.bind(this);
-    this.options.events.forEach(event => window.addEventListener(event, this.handleEvent));
+
+    // Use mock in test environment
+    const parent = isBrowser ? window : element;
+    this.events.forEach(event => parent.addEventListener(event, this.handleEvent));
   }
 
   destroy() {
-    this.options.events.forEach(event => window.removeEventListener(event, this.handleEvent));
-  }
-
-  set(options) {
-    Object.assign(this.options, options);
+    const parent = isBrowser ? window : this.element;
+    this.events.forEach(event => parent.removeEventListener(event, this.handleEvent));
   }
 
   /**
    * Enable this input (begin processing events)
    * if the specified event type is among those handled by this input.
    */
-  toggleIfEventSupported(eventType, enabled) {
-    if (eventType === 'keydown' || eventType === 'keyup') {
-      this.options.enable = enabled;
+  enableEventType(eventType, enabled) {
+    if (eventType === DOWN_EVENT_TYPE) {
+      this.enableDownEvent = enabled;
+    }
+    if (eventType === UP_EVENT_TYPE) {
+      this.enableUpEvent = enabled;
     }
   }
 
   handleEvent(event) {
-    if (!this.options.enable) {
-      // return;
+    if (this.enableDownEvent && event.type === 'keydown') {
+      this.callback({
+        type: DOWN_EVENT_TYPE,
+        srcEvent: event,
+        key: event.key,
+        target: event.target
+      });
     }
 
-    switch (event.type) {
-    case 'keydown':
+    if (this.enableUpEvent && event.type === 'keyup') {
       this.callback({
-        type: 'keydown',
+        type: UP_EVENT_TYPE,
         srcEvent: event,
-        isDown: true,
-        pointerType: 'mouse',
+        key: event.key,
         target: event.target
       });
-      break;
-    case 'keyup':
-      this.callback({
-        type: 'keyup',
-        srcEvent: event,
-        isDown: true,
-        pointerType: 'mouse',
-        target: event.target
-      });
-      break;
-    default:
     }
   }
 }
