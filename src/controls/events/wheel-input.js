@@ -28,8 +28,7 @@ export default class WheelInput {
     this.element = element;
     this.callback = callback;
 
-    const events = WHEEL_EVENTS.concat(options.events || []);
-    this.options = Object.assign({enable: true}, options, {events});
+    this.options = Object.assign({enable: true}, options);
 
     this.time = 0;
     this.wheelPosition = null;
@@ -37,23 +36,21 @@ export default class WheelInput {
     this.timeout = null;
     this.lastValue = 0;
 
+    this.events = WHEEL_EVENTS.concat(options.events || []);
+
     this.handleEvent = this.handleEvent.bind(this);
-    this.options.events.forEach(event => element.addEventListener(event, this.handleEvent));
+    this.events.forEach(event => element.addEventListener(event, this.handleEvent));
   }
 
   destroy() {
-    this.options.events.forEach(event => this.element.removeEventListener(event, this.handleEvent));
-  }
-
-  set(options) {
-    Object.assign(this.options, options);
+    this.events.forEach(event => this.element.removeEventListener(event, this.handleEvent));
   }
 
   /**
    * Enable this input (begin processing events)
    * if the specified event type is among those handled by this input.
    */
-  toggleIfEventSupported(eventType, enabled) {
+  enableEventType(eventType, enabled) {
     if (eventType === EVENT_TYPE) {
       this.options.enable = enabled;
     }

@@ -1,6 +1,6 @@
 import WheelInput from './wheel-input';
 import MoveInput from './move-input';
-// import KeyInput from './key-input';
+import KeyInput from './key-input';
 import {isBrowser} from '../../utils/globals';
 
 // Hammer.js directly references `document` and `window`,
@@ -53,7 +53,7 @@ export default class EventManager {
     this._onOtherEvent = this._onOtherEvent.bind(this);
     this.wheelInput = new WheelInput(element, this._onOtherEvent, {enable: false});
     this.moveInput = new MoveInput(element, this._onOtherEvent, {enable: false});
-    // this.keyInput = new KeyInput(element, this._onOtherEvent, {enable: false});
+    this.keyInput = new KeyInput(element, this._onOtherEvent, {enable: false});
 
     // Register all passed events.
     const {events} = options;
@@ -66,7 +66,7 @@ export default class EventManager {
   destroy() {
     this.wheelInput.destroy();
     this.moveInput.destroy();
-    // this.keyInput.destroy();
+    this.keyInput.destroy();
     this.manager.destroy();
   }
 
@@ -106,9 +106,9 @@ export default class EventManager {
     if (recognizer) {
       recognizer.set({enable: enabled});
     }
-    this.wheelInput.toggleIfEventSupported(name, enabled);
-    this.moveInput.toggleIfEventSupported(name, enabled);
-    // this.keyInput.toggleIfEventSupported(name, enabled);
+    this.wheelInput.enableEventType(name, enabled);
+    this.moveInput.enableEventType(name, enabled);
+    this.keyInput.enableEventType(name, enabled);
   }
 
   /**
@@ -200,16 +200,6 @@ export default class EventManager {
     };
   }
 
-  _callEventHandler(event) {
-    const handler = this.eventHandlers.find(
-      entry => entry.event === event.type
-    );
-
-    if (handler) {
-      handler.handler(event);
-    }
-  }
-
   /**
    * Handle basic events using the 'hammer.input' Hammer.js API:
    * Before running Recognizers, Hammer emits a 'hammer.input' event
@@ -232,15 +222,6 @@ export default class EventManager {
    * and pipe back out through same (Hammer) channel used by other events.
    */
   _onOtherEvent(event) {
-    // TODO - maybe integrate with hammer event handling
-    switch (event.type) {
-    case 'keyup':
-    case 'keydown':
-      this._callEventHandler(event);
-      break;
-    default:
-      this.manager.emit(event.type, event);
-      break;
-    }
+    this.manager.emit(event.type, event);
   }
 }

@@ -83,5 +83,6 @@ export const GESTURE_EVENT_ALIASES = {
   click: 'tap',
   mousedown: 'pointerdown',
   mousemove: 'pointermove',
-  mouseup: 'pointerup'
+  mouseup: 'pointerup',
+  mouseleave: 'pointerleave'
 };
