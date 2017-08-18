@@ -1,4 +1,4 @@
-# RFC: Animation Support in deck.gl
+# RFC: Animation Support
 
 * **Authors**: Ib Green, ...
 * **Date**: Aug 2017
