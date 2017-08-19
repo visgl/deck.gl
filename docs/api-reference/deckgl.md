@@ -75,9 +75,13 @@ This is helpful when rendered objects are difficult to target, for example
 irregularly shaped icons, small moving circles or interaction by touch.
 Default `0`.
 
-##### `pixelRatio` (Number, optional)
+##### `useDevicePixelRatio` (Boolean, optional)
 
-Will use device ratio by default.
+Default value is true.
+
+When true, device's full resolution will be used for rendering, this value can change per frame, like when moving windows between screens or when changing zoom level of the browser.
+
+Note: Set it false unless it is required, as it affects your application performance.
 
 ##### `gl` (Object, optional)
 

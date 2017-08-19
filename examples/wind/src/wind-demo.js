@@ -110,7 +110,8 @@ export default class WindDemo extends Component {
       <DeckGL
         glOptions={{webgl2: true}}
         {...viewport}
-        layers={layers} />
+        layers={layers}
+        useDevicePixelRatio={true} />
     );
   }
 }
