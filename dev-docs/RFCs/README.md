@@ -36,6 +36,8 @@ Current direction for deck.gl v5 (v.Next) is to focus on effects and animation, 
 | [**dataUrl**](v5.0/data-url-rfc.md) | @pessimistress & @ibgreen | Draft | **Ease-of-Use** Allow deck.gl layers to specify a URL and asynchronously download the resulting data |
 | [**Reduce Distribution Size**](v5.0/reduce-distribution-size-rfc.md) | @ibgreen | **Review** | **Hygiene** Reduce size of distribution and the bundle size of apps consuming deck.gl |
 | [**Reduce Repository Size**](v5.0/reduce-repo-size-rfc.md) | @ibgreen | **Draft** | **Hygiene** Reduce size of deck.gl github repository |
+| [**Break out Math Module**](v5.0/break-out-math-module-rfc.md) | @ibgreen | **Draft** | **Hygiene** Break out luma.gl math module |
+| [**Break out EventManager**](v5.0/break-out-event-manager.md) | @ibgreen | **Draft** | **Hygiene** Break out shared event manager code |
 | [**Partial Updates**](deferred/partial-updates-rfc.md) | @ibgreen | **Deferred** | Allow partial updates of vertex attributes to support high-performance editing. Deferred due to performance of complete updates being so good this was not needed. |
 | [**Off-thread attribute generation**](deferred/off-thread-attribute-generation.md) | @pessimistress | **Deferred** | Generate attributes off-thread (to avoid locking the main thread). Deferred due to issues with supporting the more general use cases. **dataUrl RFC** could be broken out. |
 
