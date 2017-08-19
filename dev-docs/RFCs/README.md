@@ -21,23 +21,24 @@ Current direction for deck.gl v5 (v.Next) is to focus on effects and animation, 
 | RFC | Author | Status | Description |
 | --- | --- | --- | --- |
 | **Effect RFCs** | | | Next generation of deck.gl should have official support for effects (shadows, reflections, better lighting, postprocessing, framebuffer composition etc). |
-| **[EffectsManager RFC](v5.0/effects-manager-rfc.md)** | @1chandu & @ibgreen | Draft | Complete and officially release experimental `EffectsManager` |
+| **[EffectsManager](v5.0/effects-manager-rfc.md)** | @1chandu & @ibgreen | Draft | Complete and officially release experimental `EffectsManager` |
 | | | | |
 | **Core Animation RFCs** | | | |
-| [**Auto Highlighting RFC**](v5.0/auto-highlighting-rfc.md) | @ibgreen + @1chandu | **Approved** | Auto highlight hovered object via `picking` module |
-| [**Viewport interpolation RFC**](v5.0/viewport-animation-rfc.md) | @1chandu? | Proposed | This should build on the new Viewport system in the First Person RFC. Also needs to consider react-map-gl. |
-| [**Uniform and Parameter Animation RFC**](v5.0/property-animation-rfc.md) | @ibgreen | Draft | Allow Layer props and GL parameters to accept functions in addition to values and call these on every render to update values |
-| [**Attribute Animation RFC**](v5.0/attribute-animation-rfc.md) | @Pessimistress? | Proposed | Automatically interpolate between two copies of a vertex attributes |
-| [**Expose Layer AttributeManager RFC**](v5.0/expose-attribute-manager.md) | @ibgreen | Draft | simplifies pregenerating attributes in apps for fast animation. |
-| Supporting RFCs | --- | --- | --- |
-| [**First Person Viewport RFC**](v5.0/first-person-mercator-viewport-rfc.md) | @ibgreen | **Approved** | Geospatially enable all viewports |
-| [**PropTypes RFC**](v5.0/prop-types-rfc.md) | ? | Draft | Validate e.g ranges for numeric attributes, support animation/auto-interpolation. |
-| General RFCs | --- | --- | --- |
-| [**dataUrl RFC**](v5.0/data-url-rfc.md) | @pessimistress & @ibgreen | Draft | **Ease-of-Use** Allow deck.gl layers to specify a URL and asynchronously download the resulting data |
-| [**Reduce Distribution Size RFC**](v5.0/reduce-distribution-size-rfc.md) | @ibgreen | **Review** | **Hygiene** Reduce size of distribution and the bundle size of apps consuming deck.gl |
-| Performance RFCs | --- | --- | --- |
-| [**Partial Updates RFC**](deferred/partial-updates-rfc.md) | @ibgreen | **Deferred** | Allow partial updates of vertex attributes to support high-performance editing. Deferred due to performance of complete updates being so good this was not needed. |
-| [**Off-thread attribute generation RFC**](deferred/off-thread-attribute-generation.md) | @pessimistress | **Deferred** | Generate attributes off-thread (to avoid locking the main thread). Deferred due to issues with supporting the more general use cases. **dataUrl RFC** could be broken out. |
+| [**Auto Highlighting**](v5.0/auto-highlighting-rfc.md) | @ibgreen + @1chandu | **Approved** | Auto highlight hovered object via `picking` module |
+| [**Viewport interpolation**](v5.0/viewport-animation-rfc.md) | @1chandu? | Proposed | This should build on the new Viewport system in the First Person RFC. Also needs to consider react-map-gl. |
+| [**Uniform and Parameter Animation**](v5.0/property-animation-rfc.md) | @ibgreen | Draft | Allow Layer props and GL parameters to accept functions in addition to values and call these on every render to update values |
+| [**Attribute Animation**](v5.0/attribute-animation-rfc.md) | @Pessimistress? | Proposed | Automatically interpolate between two copies of a vertex attributes |
+| [**Expose Layer AttributeManager**](v5.0/expose-attribute-manager.md) | @ibgreen | Draft | simplifies pregenerating attributes in apps for fast animation. |
+| Supporting RFCs | | | |
+| [**First Person Viewport**](v5.0/first-person-mercator-viewport-rfc.md) | @ibgreen | **Approved** | Geospatially enable all viewports |
+| [**PropTypes**](v5.0/prop-types-rfc.md) | ? | Draft | Validate e.g ranges for numeric attributes, support animation/auto-interpolation. |
+| | | | |
+| **General RFCs** | | | |
+| [**dataUrl**](v5.0/data-url-rfc.md) | @pessimistress & @ibgreen | Draft | **Ease-of-Use** Allow deck.gl layers to specify a URL and asynchronously download the resulting data |
+| [**Reduce Distribution Size**](v5.0/reduce-distribution-size-rfc.md) | @ibgreen | **Review** | **Hygiene** Reduce size of distribution and the bundle size of apps consuming deck.gl |
+| [**Reduce Repository Size**](v5.0/reduce-repo-size-rfc.md) | @ibgreen | **Draft** | **Hygiene** Reduce size of deck.gl github repository |
+| [**Partial Updates**](deferred/partial-updates-rfc.md) | @ibgreen | **Deferred** | Allow partial updates of vertex attributes to support high-performance editing. Deferred due to performance of complete updates being so good this was not needed. |
+| [**Off-thread attribute generation**](deferred/off-thread-attribute-generation.md) | @pessimistress | **Deferred** | Generate attributes off-thread (to avoid locking the main thread). Deferred due to issues with supporting the more general use cases. **dataUrl RFC** could be broken out. |
 
 Possible other animation related RFCs:
 - integration with event handling (enter leave triggers for animations)
@@ -49,8 +50,8 @@ These RFCs that have been implemented (fully or partially) in v4.1.
 
 | RFC | Author | Status | Description |
 | --- | --- | --- | --- |
-| [**Picking Improvements RFC**](v4.1/picking-improvements-rfc.md) | Shaojing Li | "Direction" RFC | Outlines a number of improvements to picking |
-| [**Event Handling RFC**](v4.1/event-handling-rfc.md) | Many authors | **Approved** & Implemented | Attempt to define enduring event handling architecture |
+| [**Picking Improvements**](v4.1/picking-improvements-rfc.md) | Shaojing Li | "Direction" RFC | Outlines a number of improvements to picking |
+| [**Event Handling**](v4.1/event-handling-rfc.md) | Many authors | **Approved** & Implemented | Attempt to define enduring event handling architecture |
 
 
 ## v4.0 RFCs
@@ -59,5 +60,5 @@ These RFCs that have been implemented (fully or partially) in v4.0.
 
 | RFC | Author | Status | Description |
 | --- | --- | --- | --- |
-| [**Non-Geospatial Viewports RFC**](v4.0/non-geospatial-viewports-rfc.md) | @ibgreen & @gnavvy | **Approved** & Implemented | Support for non-geospatial viewports |
-| [**Composite Layer Prop Forwarding RFC**](v4.0/composite-layer-prop-forwarding-rfc.md) | @shaojingli | **Approved** & Implemented | Conventions for prop forwarding |
+| [**Non-Geospatial Viewports**](v4.0/non-geospatial-viewports-rfc.md) | @ibgreen & @gnavvy | **Approved** & Implemented | Support for non-geospatial viewports |
+| [**Composite Layer Prop Forwarding**](v4.0/composite-layer-prop-forwarding-rfc.md) | @shaojingli | **Approved** & Implemented | Conventions for prop forwarding |
