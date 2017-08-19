@@ -21,13 +21,13 @@ Current direction for deck.gl v5 (v.Next) is to focus on effects and animation, 
 | RFC | Author | Status | Description |
 | --- | --- | --- | --- |
 | **Effect Management** | | | |
-| **[EffectsManager](v5.0/effects-manager-rfc.md)** | @1chandu & @ibgreen | Draft | Official support for effects (shadows, reflections, better lighting, postprocessing, framebuffer composition etc).  |
+| **[EffectsManager](v5.0/effects-manager-rfc.md)** | @1chandu @ibgreen | Draft | Official support for effects (shadows, reflections, better lighting, postprocessing, framebuffer composition etc).  |
 | | | | |
 | **Animation** | | | |
-| [**Auto Highlighting**](v5.0/auto-highlighting-rfc.md) | @ibgreen + @1chandu | **Approved** | Auto highlight hovered object via `picking` module |
-| [**Viewport interpolation**](v5.0/viewport-animation-rfc.md) | @1chandu? | Proposed | This should build on the new Viewport system in the First Person RFC. Also needs to consider react-map-gl. |
+| [**Auto Highlighting**](v5.0/auto-highlighting-rfc.md) | @ibgreen @1chandu | **Approved** | Auto highlight hovered object via `picking` module |
+| [**Viewport interpolation**](v5.0/viewport-animation-rfc.md) | @1chandu | Proposed | This should build on the new Viewport system in the First Person RFC. Also needs to consider react-map-gl. |
 | [**Uniform and Parameter Animation**](v5.0/property-animation-rfc.md) | @ibgreen | Draft | Allow Layer props and GL parameters to accept functions in addition to values and call these on every render to update values |
-| [**Attribute Animation**](v5.0/attribute-animation-rfc.md) | @Pessimistress? | Proposed | Automatically interpolate between two copies of a vertex attributes |
+| [**Attribute Animation**](v5.0/attribute-animation-rfc.md) | @pessimistress | Proposed | Automatically interpolate between two copies of a vertex attributes |
 | [**Expose Layer AttributeManager**](v5.0/expose-attribute-manager.md) | @ibgreen | Draft | simplifies pregenerating attributes in apps for fast animation. |
 | [**First Person Viewport**](v5.0/first-person-mercator-viewport-rfc.md) | @ibgreen | **Approved** | Geospatially enable all viewports |
 | [**PropTypes**](v5.0/prop-types-rfc.md) | ? | Draft | Validate e.g ranges for numeric attributes, support animation/auto-interpolation. |
@@ -49,7 +49,7 @@ These RFCs that have been implemented (fully or partially) in v4.1.
 
 | RFC | Author | Status | Description |
 | --- | --- | --- | --- |
-| [**Picking Improvements**](v4.1/picking-improvements-rfc.md) | Shaojing Li | "Direction" RFC | Outlines a number of improvements to picking |
+| [**Picking Improvements**](v4.1/picking-improvements-rfc.md) | @shaojingli | "Direction" RFC | Outlines a number of improvements to picking |
 | [**Event Handling**](v4.1/event-handling-rfc.md) | Many authors | **Approved** & Implemented | Attempt to define enduring event handling architecture |
 
 
@@ -59,5 +59,5 @@ These RFCs that have been implemented (fully or partially) in v4.0.
 
 | RFC | Author | Status | Description |
 | --- | --- | --- | --- |
-| [**Non-Geospatial Viewports**](v4.0/non-geospatial-viewports-rfc.md) | @ibgreen & @gnavvy | **Approved** & Implemented | Support for non-geospatial viewports |
+| [**Non-Geospatial Viewports**](v4.0/non-geospatial-viewports-rfc.md) | @ibgreen @gnavvy | **Approved** & Implemented | Support for non-geospatial viewports |
 | [**Composite Layer Prop Forwarding**](v4.0/composite-layer-prop-forwarding-rfc.md) | @shaojingli | **Approved** & Implemented | Conventions for prop forwarding |
