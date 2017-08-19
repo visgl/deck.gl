@@ -27,17 +27,18 @@ const EVENT_TYPES = {
   WHEEL: ['wheel'],
   PAN: ['panstart', 'panmove', 'panend'],
   PINCH: ['pinchstart', 'pinchmove', 'pinchend'],
-  DOUBLE_TAP: ['doubletap']
+  DOUBLE_TAP: ['doubletap'],
+  KEYBOARD: ['keydown', 'keyup']
 };
 
-export default class GenericControls {
+export default class Controls {
   /**
    * @classdesc
    * A class that handles events and updates mercator style viewport parameters
    */
-  constructor(options) {
-    assert(options.StateClass);
-    this.StateClass = options.StateClass;
+  constructor(StateClass, options = {}) {
+    assert(StateClass);
+    this.StateClass = StateClass;
 
     this._state = {
       isDragging: false
@@ -73,6 +74,10 @@ export default class GenericControls {
       return this._onDoubleTap(event);
     case 'wheel':
       return this._onWheel(event);
+    case 'keydown':
+      return this._onKeyDown(event);
+    case 'keyup':
+      return this._onKeyUp(event);
     default:
       return false;
     }
@@ -110,7 +115,7 @@ export default class GenericControls {
     if (this.onViewportChange &&
       Object.keys(newViewport).some(key => oldViewport[key] !== newViewport[key])) {
       // Viewport has changed
-      this.onViewportChange(newViewport);
+      this.onViewportChange(newViewport, this.viewportState.getViewport());
     }
 
     this.setState(Object.assign({}, newViewportState.getInteractiveState(), extraState));
@@ -121,8 +126,6 @@ export default class GenericControls {
    */
   setOptions(options) {
     const {
-      // TODO(deprecate): remove this when `onChangeViewport` gets deprecated
-      onChangeViewport,
       onViewportChange,
       onStateChange = this.onStateChange,
       eventManager = this.eventManager,
@@ -130,11 +133,11 @@ export default class GenericControls {
       dragPan = true,
       dragRotate = true,
       doubleClickZoom = true,
-      touchZoomRotate = true
+      touchZoomRotate = true,
+      keyboard = true
     } = options;
 
-    // TODO(deprecate): remove this check when `onChangeViewport` gets deprecated
-    this.onViewportChange = onViewportChange || onChangeViewport;
+    this.onViewportChange = onViewportChange;
     this.onStateChange = onStateChange;
     this.viewportStateProps = options;
 
@@ -150,6 +153,7 @@ export default class GenericControls {
     this.toggleEvents(EVENT_TYPES.PAN, isInteractive && (dragPan || dragRotate));
     this.toggleEvents(EVENT_TYPES.PINCH, isInteractive && touchZoomRotate);
     this.toggleEvents(EVENT_TYPES.DOUBLE_TAP, isInteractive && doubleClickZoom);
+    this.toggleEvents(EVENT_TYPES.KEYBOARD, isInteractive && keyboard);
 
     this.scrollZoom = scrollZoom;
     this.dragPan = dragPan;
@@ -274,5 +278,47 @@ export default class GenericControls {
 
     const newViewportState = this.viewportState.zoom({pos, scale: isZoomOut ? 0.5 : 2});
     return this.updateViewport(newViewportState);
+  }
+
+  _onKeyDown(event) {
+    if (this.viewportState.isDragging) {
+      return;
+    }
+
+    const KEY_BINDINGS = {
+      w: 'moveForward',
+      W: 'moveForward',
+      ArrowUp: 'moveForward',
+
+      s: 'moveBackward',
+      S: 'moveBackward',
+      ArrowDown: 'moveBackward',
+
+      a: 'moveLeft',
+      A: 'moveLeft',
+      ArrowLeft: 'moveLeft',
+
+      d: 'moveRight',
+      D: 'moveRight',
+      ArrowRight: 'moveRight',
+
+      '=': 'zoomIn',
+      '+': 'zoomIn',
+
+      '-': 'zoomOut'
+    };
+
+    // keyCode is deprecated from web standards
+    // code is not supported by IE/Edge
+    const key = event.key;
+    const handler = KEY_BINDINGS[key];
+    if (this.viewportState[handler]) {
+      const newViewportState = this.viewportState[handler]();
+      this.updateViewport(newViewportState);
+    }
+  }
+  /* eslint-enable complexity */
+
+  _onKeyUp(event) {
   }
 }

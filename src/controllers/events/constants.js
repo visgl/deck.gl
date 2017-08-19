@@ -1,11 +1,4 @@
-import {
-  Tap,
-  Press,
-  Pinch,
-  Rotate,
-  Pan,
-  Swipe
-} from 'hammerjs';
+import {Tap, Press, Pinch, Rotate, Pan, Swipe} from 'hammerjs';
 
 /**
  * Only one set of basic input events will be fired by Hammer.js:
@@ -83,5 +76,6 @@ export const GESTURE_EVENT_ALIASES = {
   click: 'tap',
   mousedown: 'pointerdown',
   mousemove: 'pointermove',
-  mouseup: 'pointerup'
+  mouseup: 'pointerup',
+  mouseleave: 'pointerleave'
 };

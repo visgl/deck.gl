@@ -1,4 +1,5 @@
-// TODO - THESE UTILITIES COULD BE IMPORTED FROM WEB_MERCATOR_VIEWPORT
+// TODO - THE UTILITIES IN THIS FILE SHOULD BE IMPORTED FROM WEB-MERCATOR-VIEWPORT MODULE
+
 import mat4_perspective from 'gl-mat4/perspective';
 import mat4_scale from 'gl-mat4/scale';
 import mat4_translate from 'gl-mat4/translate';
@@ -20,6 +21,15 @@ const WORLD_SCALE = TILE_SIZE;
 // Helper, avoids low-precision 32 bit matrices from gl-matrix mat4.create()
 function createMat4() {
   return [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
+}
+
+// Returns the zoom level that gives a 1 meter pixel at a certain latitude
+// S=C*cos(y)/2^(z+8)
+export function getMeterZoom({latitude}) {
+  assert(latitude);
+  const EARTH_CIRCUMFERENCE = 40.075e6;
+  const radians = degrees => degrees / 180 * Math.PI;
+  return Math.log2(EARTH_CIRCUMFERENCE * Math.cos(radians(latitude))) - 8;
 }
 
 /**
@@ -150,6 +160,7 @@ export function makeProjectionMatrixFromMercatorParams({
   return projectionMatrix;
 }
 
+// TODO - rename this matrix
 export function makeUncenteredViewMatrixFromMercatorParams({
   width,
   height,

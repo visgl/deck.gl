@@ -18,22 +18,26 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {fp32} from 'luma.gl';
-import projectShader from './project.glsl';
-import {getUniformsFromViewport} from './viewport-uniforms';
+import Viewport from './viewport';
+import {Vector3, Matrix4} from 'math.gl';
 
-const DEFAULT_MODULE_OPTIONS = {};
+export default class FirstPersonViewport extends Viewport {
+  constructor(opts = {}) {
+    // TODO - push direction handling into Matrix4.lookAt
+    const {
+      // view matrix arguments
+      position, // alias
+      lookAt, // Which point is camera looking at, default along y axis
+      direction, // Which direction camera is looking at
+      up = [0, 1, 0] // Defines up direction, default positive y axis
+    } = opts;
 
-function getUniforms(opts = DEFAULT_MODULE_OPTIONS) {
-  if (opts.viewport) {
-    return getUniformsFromViewport(opts);
+    const eye = opts.eye || opts.position; // Defines eye position
+
+    super(Object.assign({}, opts, {
+      viewMatrix: direction ?
+        new Matrix4().lookAt({eye, center: new Vector3(position).add(direction), up}) :
+        new Matrix4().lookAt({eye, center: lookAt, up})
+    }));
   }
-  return {};
 }
-
-export default {
-  name: 'project',
-  dependencies: [fp32],
-  vs: projectShader,
-  getUniforms
-};

@@ -23,8 +23,8 @@
   "scripts": {
     "start": "(cd examples/layer-browser && (path-exists node_modules || npm i) && npm run start-local)",
     "build-clean": "rm -fr dist dist-es6 && mkdir -p dist dist-es6",
-    "build-es6": "rm -fr dist-es6 && babel src --out-dir dist-es6 --plugins=static-fs --source-maps inline",
-    "build-es5": "rm -fr dist && babel src --out-dir dist --plugins=static-fs,transform-es2015-modules-commonjs --source-maps inline",
+    "build-es6": "rm -fr dist-es6 && babel src --out-dir dist-es6 --source-maps inline",
+    "build-es5": "rm -fr dist && babel src --out-dir dist --plugins=transform-es2015-modules-commonjs --source-maps inline",
     "build": "npm run build-clean && npm run build-es6 && npm run build-es5",
     "cover": "NODE_ENV=test nyc --reporter html --reporter cobertura --reporter=lcov npm run test-cover",
     "lint": "eslint src test examples && npm run lint-yarn",
@@ -42,6 +42,7 @@
     "test-rendering": "(cd test/rendering-test && webpack-dev-server --config webpack.config.test-rendering.js --progress --hot --open)"
   },
   "dependencies": {
+    "babel-plugin-transform-builtin-extend": "^1.1.2",
     "d3-hexbin": "^0.2.1",
     "earcut": "^2.0.6",
     "gl-mat4": "^1.1.4",
@@ -75,7 +76,8 @@
     "gl": "^4.0.3",
     "immutable": "^3.8.1",
     "jsdom": "^9.11.0",
-    "luma.gl": "^4.0.1",
+    "luma.gl": ">=4.1.0-alpha.1",
+    "math.gl": ">=1.0.0-alpha.3",
     "module-alias": "^2.0.0",
     "nyc": "^10.2.0",
     "path-exists-cli": "^1.0.0",
@@ -94,7 +96,7 @@
     "webpack-dev-server": "^2.4.0"
   },
   "peerDependencies": {
-    "luma.gl": "^4.0.1",
+    "luma.gl": ">=4.1.0-alpha.1",
     "react": "0.14.x - 15.x",
     "react-dom": "0.14.x - 15.x"
   },
