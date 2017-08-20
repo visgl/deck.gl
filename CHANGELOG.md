@@ -19,16 +19,22 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ### deck.gl v4.2
 
-- Automatic/custom highlighting using picking shader module.
-
-#### [4.2.0-alpha.X]
-
-- Move react controllers to react directory, export from index.js
-- Move viewports and some utils out of `lib` folder.
-- Add `start-es6` script to layer-browser
-- Remove UTM_OFFSETS projection mode
 
 #### [4.2.0-alpha.2]
+
+* MASTER
+    - Automatic/custom highlighting using picking shader module.
+
+* 4.2-DEV
+    - Unifiy react controllers as `ViewportController`, export from react dir.
+    - Add FirstPersonState
+    - Add FirstPersonViewport, ThirdPersonViewport
+    - Move viewports and some utils out of `lib` folder.
+    - Add `start-es6` script to layer-browser
+    - Remove UTM_OFFSETS projection mode
+
+
+#### [4.2.0-alpha.1]
 
 - Add: UTM_OFFSETS projection mode
 
