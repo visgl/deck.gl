@@ -296,6 +296,10 @@ export default class Viewport {
     return this.cameraUp;
   }
 
+  isMapSynched() {
+    return false;
+  }
+
   // INTERNAL METHODS
 
   _initMatrices() {

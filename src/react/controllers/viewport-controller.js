@@ -6,6 +6,7 @@ import Controls from '../../controllers/controls';
 import CURSOR from './cursors';
 
 const propTypes = {
+  StateClass: PropTypes.func,
   state: PropTypes.object,
 
   /** Viewport constraints */
@@ -80,7 +81,7 @@ export default class Controller extends PureComponent {
 
     // If props.controls is not provided, fallback to default MapControls instance
     // Cannot use defaultProps here because it needs to be per map instance
-    this._controls = this.props.controls || new Controls();
+    this._controls = this.props.controls || new Controls(this.props.StateClass);
 
     this._controls.setOptions(Object.assign({}, this.props, {
       onStateChange: this._onInteractiveStateChange.bind(this),
@@ -89,7 +90,9 @@ export default class Controller extends PureComponent {
   }
 
   componentWillUpdate(nextProps) {
-    this._controls.setOptions(nextProps);
+    if (this._controls) {
+      this._controls.setOptions(nextProps);
+    }
   }
 
   componentWillUnmount() {

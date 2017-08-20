@@ -2,14 +2,16 @@
 import React, {Component} from 'react';
 import {render} from 'react-dom';
 
-// import MapGL from 'react-map-gl';
-// import {MapController} from 'deck.gl';
-// import {WebMercatorViewport} from 'deck.gl';
+import {StaticMap} from 'react-map-gl';
 
-import {FirstPersonController} from 'deck.gl';
+import DeckGL, {ViewportController} from 'deck.gl';
+import {FirstPersonState} from 'deck.gl';
 import {FirstPersonViewport} from 'deck.gl';
 
-import DeckGL, {PolygonLayer} from 'deck.gl';
+// import {MapController} from 'deck.gl';
+import {WebMercatorViewport} from 'deck.gl';
+
+import {PolygonLayer} from 'deck.gl';
 import TripsLayer from './trips-layer';
 
 import {setParameters} from 'luma.gl';
@@ -24,7 +26,7 @@ const LIGHT_SETTINGS = {
   ambientRatio: 0.05,
   diffuseRatio: 0.6,
   specularRatio: 0.8,
-  lightsStrength: [2.0, 0.0, 0.0, 0.0],
+  lightsStrength: [3.0, 0.0, 0.5, 0.0],
   numberOfLights: 2
 };
 
@@ -47,6 +49,7 @@ class Root extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      viewportMode: true,
       viewportProps: {
         ...DEFAULT_VIEWPORT_PROPS,
         width: 500,
@@ -71,12 +74,13 @@ class Root extends Component {
     });
 
     this._onViewportChange = this._onViewportChange.bind(this);
+    this._onViewportModeChange = this._onViewportModeChange.bind(this);
   }
 
   componentDidMount() {
-    window.addEventListener('resize', this._resize.bind(this));
-    this._resize();
-    this._animate();
+    window.addEventListener('resize', this._onResize.bind(this));
+    this._onResize();
+    this._onAnimate();
   }
 
   componentWillUnmount() {
@@ -92,7 +96,7 @@ class Root extends Component {
     });
   }
 
-  _animate() {
+  _onAnimate() {
     const timestamp = Date.now();
     const loopLength = 1800;
     const loopTime = 60000;
@@ -100,10 +104,10 @@ class Root extends Component {
     this.setState({
       time: ((timestamp % loopTime) / loopTime) * loopLength
     });
-    this._animationFrame = window.requestAnimationFrame(this._animate.bind(this));
+    this._animationFrame = window.requestAnimationFrame(this._onAnimate.bind(this));
   }
 
-  _resize() {
+  _onResize() {
     this._onViewportChange({
       width: window.innerWidth,
       height: window.innerHeight
@@ -115,6 +119,20 @@ class Root extends Component {
       viewportProps: {...this.state.viewportProps, ...viewportProps},
       viewport
     });
+  }
+
+  _onViewportModeChange() {
+    this.setState({viewportMode: !this.state.viewportMode});
+  }
+
+  _renderOptionsPanel() {
+    return (
+      <div style={{position: 'absolute', top: '8px', right: '8px'}}>
+        <button onClick={this._onViewportModeChange}>
+          {this.state.viewportMode ? 'First Person' : 'Mercator'}
+        </button>
+      </div>
+    );
   }
 
   _renderLayers() {
@@ -140,7 +158,7 @@ class Root extends Component {
         data: buildings,
         extruded: true,
         wireframe: false,
-        // fp64: true,
+        fp64: true,
         opacity: 0.5,
         getPolygon: f => f.polygon,
         getElevation: f => f.height,
@@ -153,9 +171,9 @@ class Root extends Component {
   render() {
     const {viewportProps} = this.state;
 
-    // const mapViewport = new WebMercatorViewport({
-    //   ...viewportProps
-    // });
+    const mapViewport = new WebMercatorViewport({
+      ...viewportProps
+    });
 
     const firstPersonViewport = new FirstPersonViewport(Object.assign({}, viewportProps, {
       // // viewportProps arguments
@@ -176,44 +194,44 @@ class Root extends Component {
 
     console.log(viewportProps.position, viewportProps.direction, viewportProps.lookAt); // eslint-disable-line
 
-    // const deckViewport = ((Math.round(++counter / 1) % 2) === 0) ?
-    //   mapViewport :
-    //   firstPersonViewport;
+    const viewport = this.state.viewportMode ? firstPersonViewport : mapViewport;
 
     return (
       <div style={{backgroundColor: '#000'}}>
-        <FirstPersonController
+
+        <ViewportController
+          StateClass={FirstPersonState}
           {...viewportProps}
           width={viewportProps.width}
           height={viewportProps.height}
           onViewportChange={this._onViewportChange} >
-          <DeckGL
-            id="first-person"
-            viewport={firstPersonViewport}
+
+          <StaticMap
+            visible={viewport.isMapSynched()}
+            {...viewportProps}
             width={viewportProps.width}
             height={viewportProps.height}
-            layers={this._renderLayers()}
-            onWebGLInitialized={this._initialize} />
-        </FirstPersonController>
+            zoom={viewportProps.zoom}
+            mapStyle="mapbox://styles/mapbox/dark-v9"
+            onViewportChange={this._onViewportChange.bind(this)}
+            mapboxApiAccessToken={MAPBOX_TOKEN}>
+
+            <DeckGL
+              id="first-person"
+              viewport={viewport}
+              width={viewportProps.width}
+              height={viewportProps.height}
+              layers={this._renderLayers()}
+              onWebGLInitialized={this._initialize} />
+
+          </StaticMap>
+
+        </ViewportController>
+
+        {this._renderOptionsPanel()}
+
       </div>
     );
-
-    // <MapGL
-    //   {...viewport}
-    //   width={viewport.width}
-    //   height={viewport.height}
-    //   zoom={viewport.zoom}
-    //   mapStyle="mapbox://styles/mapbox/dark-v9"
-    //   onViewportChange={this._onViewportChange.bind(this)}
-    //   mapboxApiAccessToken={MAPBOX_TOKEN}>
-    //   <DeckGL
-    //     viewport={deckViewport}
-    //     width={viewport.width}
-    //     height={viewport.height}
-    //     layers={this._renderLayers()}
-    //     onWebGLInitialized={this._initialize} />
-    // </MapGL>
-
   }
 }
 
