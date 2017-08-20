@@ -197,7 +197,10 @@ export default class FirstPersonState {
       newTranslationY -= oldCenterPos[1] - newCenterPos[1];
     }
 
+    const {direction} = this._viewportProps;
+
     return this._getUpdatedState({
+      direction: new Vector3(direction).rotateZ({radians: deltaScaleX / 50}),
       rotationX: newRotationX,
       rotationY: newRotationY,
       translationX: newTranslationX,
@@ -247,14 +250,19 @@ export default class FirstPersonState {
     // Zoom around the center position
     const cx = startZoomPos[0] - width / 2;
     const cy = height / 2 - startZoomPos[1];
+    /* eslint-disable no-unused-vars */
     const newTranslationX = cx - (cx - translationX) * newZoom / zoom + deltaX;
     const newTranslationY = cy - (cy - translationY) * newZoom / zoom - deltaY;
+    /* eslint-enable no-unused-vars */
 
-    return this._getUpdatedState({
-      zoom: newZoom,
-      translationX: newTranslationX,
-      translationY: newTranslationY
-    });
+    // return this._getUpdatedState({
+    //   position
+    //   translationX: newTranslationX,
+    //   translationY: newTranslationY
+    // });
+
+    // TODO HACK
+    return newZoom / zoom < 1 ? this.moveBackward() : this.moveForward();
   }
 
   /**
@@ -270,7 +278,7 @@ export default class FirstPersonState {
 
   moveLeft() {
     const {position, direction} = this._viewportProps;
-    const newDirection = new Vector3(direction).rotateZ(ROTATION_STEP_RADIANS);
+    const newDirection = new Vector3(direction).rotateZ({radians: ROTATION_STEP_RADIANS});
     return this._getUpdatedState({
       direction: newDirection,
       lookAt: new Vector3(position).add(newDirection.normalize()),
@@ -280,7 +288,7 @@ export default class FirstPersonState {
 
   moveRight() {
     const {position, direction} = this._viewportProps;
-    const newDirection = new Vector3(direction).rotateZ(-ROTATION_STEP_RADIANS);
+    const newDirection = new Vector3(direction).rotateZ({radians: -ROTATION_STEP_RADIANS});
     return this._getUpdatedState({
       direction: newDirection,
       lookAt: new Vector3(position).add(newDirection.normalize()),

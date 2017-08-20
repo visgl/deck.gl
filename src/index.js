@@ -29,8 +29,10 @@ export {default as FirstPersonViewport} from './viewports/first-person-viewport'
 export {default as ThirdPersonViewport} from './viewports/third-person-viewport';
 export {default as WebMercatorViewport} from './viewports/web-mercator-viewport';
 
-export {default as PerspectiveViewport} from './viewports/perspective-viewport';
-export {default as OrthographicViewport} from './viewports/orthographic-viewport';
+// Do we need to export?
+export {default as FirstPersonState} from './controllers/first-person-state';
+export {default as MapState} from './controllers/map-state';
+export {default as OrbitState} from './controllers/orbit-state';
 
 // Core Layers
 export {default as ArcLayer} from './layers/core/arc-layer/arc-layer';
@@ -54,10 +56,8 @@ export {default as GeoJsonLayer} from './layers/core/geojson-layer/geojson-layer
 export {default as DeckGL} from './react/deckgl';
 export {default as default} from './react/deckgl';
 
-export {default as Controller} from './react/controllers/controller';
+export {default as ViewportController} from './react/controllers/viewport-controller';
 export {default as MapController} from './react/controllers/map-controller';
-export {default as OrbitController} from './react/controllers/orbit-controller';
-export {default as FirstPersonController} from './react/controllers/first-person-controller';
 
 // Experimental Features (May change in minor version bumps, use at your own risk)
 import {get} from './lib/utils/get';
@@ -72,6 +72,13 @@ export const experimental = {
   Effect,
   ReflectionEffect
 };
+
+// Deprecated Controllers
+export {default as OrbitController} from './react/controllers/orbit-controller';
+
+// Deprecated Viewports
+export {default as PerspectiveViewport} from './viewports/perspective-viewport';
+export {default as OrthographicViewport} from './viewports/orthographic-viewport';
 
 // Deprecated Layers
 export {default as ChoroplethLayer} from './layers/deprecated/choropleth-layer/choropleth-layer';

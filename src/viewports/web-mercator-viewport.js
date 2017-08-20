@@ -255,6 +255,18 @@ export default class WebMercatorViewport extends Viewport {
     const {longitude, latitude, zoom} = fitBounds(Object.assign({width, height, bounds}, options));
     return new WebMercatorViewport({width, height, longitude, latitude, zoom});
   }
+
+  // TODO - should support user supplied constraints
+  isMapSynched() {
+    const MAPBOX_LIMITS = {
+      pitch: 60,
+      zoom: 40
+    };
+
+    const {pitch, zoom} = this;
+
+    return pitch <= MAPBOX_LIMITS.pitch && zoom <= MAPBOX_LIMITS.zoom;
+  }
 }
 
 // TODO - investigate if we can move this viewport-mercator-project
