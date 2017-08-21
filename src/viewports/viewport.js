@@ -356,27 +356,15 @@ export default class Viewport {
     width, // Width of viewport
     height, // Height of viewport
 
-    // Projection matrix: option 1
-    projectionMatrix = null,
-    // Projection matrix: option 2, perspective
+    // Projection matrix: option 1, perspective
     fovy = 75, // Field of view covered by camera
     aspect = null,
-    // projection matrix: option 3, orthographic
-    left, // Left bound of the frustum
-    top, // Top bound of the frustum
-    right = null, // Right bound of the frustum (automatically calculated)
-    bottom = null, // Bottom bound of the frustum (automatically calculated)
-    // Projection matrix clipping planes
     near = 1, // Distance of near clipping plane
-    far = 100 // Distance of far clipping plane
-  }) {
-    // If left and top are supplied, create an ortographic projection matrix
-    if (!projectionMatrix && Number.isFinite(left) && Number.isFinite(top)) {
-      right = Number.isFinite(right) ? right : left + width;
-      bottom = Number.isFinite(bottom) ? bottom : top + height;
-      projectionMatrix = mat4_ortho([], left, right, bottom, top, near, far);
-    }
+    far = 100, // Distance of far clipping plane
 
+    // Projection matrix: option 2 - override
+    projectionMatrix = null
+  }) {
     // If fovy is provided, create a perspective projection matrix
     if (!projectionMatrix && Number.isFinite(fovy)) {
       const fovyRadians = fovy * DEGREES_TO_RADIANS;
@@ -385,7 +373,6 @@ export default class Viewport {
     }
 
     assert(projectionMatrix);
-
     return projectionMatrix;
   }
 }

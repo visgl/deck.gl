@@ -11,7 +11,7 @@ import {FirstPersonViewport} from 'deck.gl';
 // import {MapController} from 'deck.gl';
 import {WebMercatorViewport} from 'deck.gl';
 
-import {PolygonLayer} from 'deck.gl';
+import {PolygonLayer, PointCloudLayer, COORDINATE_SYSTEM} from 'deck.gl';
 import TripsLayer from './trips-layer';
 
 import {setParameters} from 'luma.gl';
@@ -138,6 +138,9 @@ class Root extends Component {
   _renderLayers() {
     const {buildings, trips, trailLength, time} = this.state;
 
+    const {viewportProps} = this.state;
+    const {longitude, latitude} = viewportProps;
+
     if (!buildings || !trips) {
       return [];
     }
@@ -164,6 +167,17 @@ class Root extends Component {
         getElevation: f => f.height,
         getFillColor: f => [74, 80, 87],
         lightSettings: LIGHT_SETTINGS
+      }),
+      new PointCloudLayer({
+        id: 'point-cloud',
+        data: new Array(100).fill(0).map((v, i) => ({
+          position: [Math.random() * i, Math.random() * i, Math.random() * i],
+          color: [255, 0, 0]
+        })),
+        projectionMode: COORDINATE_SYSTEM.METER_OFFSETS,
+        positionOrigin: [longitude, latitude],
+        opacity: 1,
+        radiusPixels: 4
       })
     ];
   }
