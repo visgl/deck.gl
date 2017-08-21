@@ -278,7 +278,6 @@ const HexagonLayerExample = {
   props: {
     id: 'HexagonLayer',
     data: dataSamples.points,
-    getColorValue,
     extruded: true,
     pickable: true,
     radius: 1000,
