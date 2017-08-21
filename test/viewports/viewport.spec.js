@@ -9,6 +9,37 @@ const TEST_DATA = {
   }
 };
 
+/* eslint-disable */
+const TEST_VIEWPORTS = [
+  {
+    mapState: {
+      width: 793,
+      height: 775,
+      latitude: 37.751537058389985,
+      longitude: -122.42694203247012,
+      zoom: 11.5
+    }
+  },
+  {
+    mapState: {
+      width: 793,
+      height: 775,
+      latitude: 20.751537058389985,
+      longitude: 22.42694203247012,
+      zoom: 15.5
+    }
+  },
+  {
+    mapState: {
+      width: 793,
+      height: 775,
+      latitude: 50.751537058389985,
+      longitude: 42.42694203247012,
+      zoom: 15.5
+    }
+  }
+];
+
 test('Viewport#imports', t => {
   t.ok(Viewport, 'Viewport import ok');
   t.end();
@@ -45,3 +76,16 @@ test('Viewport#equals', t => {
     'Viewport equality correct');
   t.end();
 });
+
+test('Viewport.getScales', t => {
+  for (const vc of TEST_VIEWPORTS) {
+    const viewport = new Viewport(vc.mapState);
+    const distanceScales = viewport.getDistanceScales();
+    t.ok(Array.isArray(distanceScales.metersPerPixel), 'metersPerPixel defined');
+    t.ok(Array.isArray(distanceScales.pixelsPerMeter), 'pixelsPerMeter defined');
+    t.ok(Array.isArray(distanceScales.degreesPerPixel), 'degreesPerPixel defined');
+    t.ok(Array.isArray(distanceScales.pixelsPerDegree), 'pixelsPerDegree defined');
+  }
+  t.end();
+});
+

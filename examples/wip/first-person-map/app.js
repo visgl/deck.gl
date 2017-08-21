@@ -11,7 +11,7 @@ import {FirstPersonViewport} from 'deck.gl';
 // import {MapController} from 'deck.gl';
 import {WebMercatorViewport} from 'deck.gl';
 
-import {PolygonLayer} from 'deck.gl';
+import {PolygonLayer, PointCloudLayer, COORDINATE_SYSTEM} from 'deck.gl';
 import TripsLayer from './trips-layer';
 
 import {setParameters} from 'luma.gl';
@@ -35,12 +35,13 @@ const DEFAULT_VIEWPORT_PROPS = {
   latitude: 40.72,
   zoom: 13,
   maxZoom: 16,
-  pitch: 45,
-  bearing: 0,
+  pitch: 60,
+  bearing: 270,
 
   // view matrix arguments
-  position: [100, 0, 2], // Defines eye position
-  direction: [-0.9, 0.5, 0], // Which direction is camera looking at, default origin
+  // position: [100, 0, 2], // Defines eye position
+  position: [0, 0, 2], // Defines eye position
+  // direction: [-0.9, 0.5, 0], // Which direction is camera looking at, default origin
   up: [0, 0, 1] // Defines up direction, default positive y axis
 };
 
@@ -50,6 +51,8 @@ class Root extends Component {
     super(props);
     this.state = {
       viewportMode: true,
+      fov: 75,
+
       viewportProps: {
         ...DEFAULT_VIEWPORT_PROPS,
         width: 500,
@@ -75,6 +78,7 @@ class Root extends Component {
 
     this._onViewportChange = this._onViewportChange.bind(this);
     this._onViewportModeChange = this._onViewportModeChange.bind(this);
+    this._onFovChange = this._onFovChange.bind(this);
   }
 
   componentDidMount() {
@@ -125,18 +129,39 @@ class Root extends Component {
     this.setState({viewportMode: !this.state.viewportMode});
   }
 
+  _onFovChange() {
+    this.setState({fov: this.state.fov === 75 ? 35 : 75});
+  }
+
   _renderOptionsPanel() {
     return (
       <div style={{position: 'absolute', top: '8px', right: '8px'}}>
-        <button onClick={this._onViewportModeChange}>
-          {this.state.viewportMode ? 'First Person' : 'Mercator'}
-        </button>
+        <div style={{
+          display: 'flex', flexDirection: 'column',
+          alignItems: 'center', justifyContent: 'center'}}>
+          <button key="mode" onClick={this._onViewportModeChange}>
+            {this.state.viewportMode ? 'First Person' : 'Mercator'}
+          </button>
+          <button key="fov" onClick={this._onFovChange}>
+            {this.state.fov}
+          </button>
+          <div style={{color: 'white'}}>
+            {Object.keys(this.state.viewportProps).map(key => (
+              <div key={key}>{key}:{String(this.state.viewportProps[key])}</div>
+            ))}
+          </div>
+        </div>
       </div>
     );
   }
 
   _renderLayers() {
     const {buildings, trips, trailLength, time} = this.state;
+
+    const {viewportProps} = this.state;
+    const {position} = viewportProps;
+
+    const {longitude, latitude} = DEFAULT_VIEWPORT_PROPS;
 
     if (!buildings || !trips) {
       return [];
@@ -164,12 +189,37 @@ class Root extends Component {
         getElevation: f => f.height,
         getFillColor: f => [74, 80, 87],
         lightSettings: LIGHT_SETTINGS
+      }),
+      new PointCloudLayer({
+        id: 'point-cloud',
+        outline: true,
+        data: new Array(100).fill(0).map((v, i) => ({
+          position: [(Math.random() - 0.5) * i, (Math.random() - 0.5) * i, Math.random() * i],
+          color: [255, 0, 0, 255],
+          normal: [1, 0, 0]
+        })),
+        projectionMode: COORDINATE_SYSTEM.METER_OFFSETS,
+        positionOrigin: [longitude, latitude],
+        opacity: 1,
+        radiusPixels: 4
+      }),
+      new PointCloudLayer({
+        id: 'player',
+        data: [{
+          position,
+          color: [0, 255, 255, 255],
+          normal: [1, 0, 0]
+        }],
+        projectionMode: COORDINATE_SYSTEM.METER_OFFSETS,
+        positionOrigin: [longitude, latitude],
+        opacity: 1,
+        radiusPixels: 40
       })
     ];
   }
 
   render() {
-    const {viewportProps} = this.state;
+    const {viewportProps, fov} = this.state;
 
     const mapViewport = new WebMercatorViewport({
       ...viewportProps
@@ -187,12 +237,13 @@ class Root extends Component {
       // lookAt: [0, 1, 0], // Which point is camera looking at, default origin
       // up: [0, 0, 1], // Defines up direction, default positive y axis
       // projection matrix arguments
-      fovy: 75, // Field of view covered by camera
+      fovy: fov, // Field of view covered by camera
       near: 1, // Distance of near clipping plane
       far: 10000 // Distance of far clipping plane
     }));
 
-    console.log(viewportProps.position, viewportProps.direction, viewportProps.lookAt); // eslint-disable-line
+    // console.log(viewportProps.position, viewportProps.direction, viewportProps.lookAt);
+    // eslint-disable-line
 
     const viewport = this.state.viewportMode ? firstPersonViewport : mapViewport;
 

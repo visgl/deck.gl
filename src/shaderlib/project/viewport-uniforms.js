@@ -26,10 +26,7 @@ import log from '../../utils/log';
 import assert from 'assert';
 import {COORDINATE_SYSTEM} from '../../lib/constants';
 
-import {
-  projectFlat
-  // calculateDistanceScales
-} from '../../viewport-mercator-project/web-mercator-utils';
+import {projectFlat} from '../../viewport-mercator-project/web-mercator-utils';
 
 // To quickly set a vector to zero
 const ZERO_VECTOR = [0, 0, 0, 0];
@@ -117,17 +114,20 @@ function calculateMatrixAndOffset({
 
   // TODO: make lighitng work for meter offset mode
   case COORDINATE_SYSTEM.METER_OFFSETS:
+    projectionCenter = calculateProjectionCenter({
+      coordinateOrigin, coordinateZoom, viewProjectionMatrix
+    });
+
     // Always apply uncentered projection matrix if available (shader adds center)
     viewMatrix = viewMatrixUncentered || viewMatrix;
+
     // Zero out 4th coordinate ("after" model matrix) - avoids further translations
     // viewMatrix = new Matrix4(viewMatrixUncentered || viewMatrix)
     //   .multiplyRight(VECTOR_TO_POINT_MATRIX);
-    viewMatrix = mat4_multiply([], viewMatrix, VECTOR_TO_POINT_MATRIX);
-    // Need to recalculate view project matrix
     viewProjectionMatrix = mat4_multiply([], projectionMatrix, viewMatrix);
 
-    projectionCenter =
-      calculateProjectionCenter({coordinateOrigin, coordinateZoom, viewProjectionMatrix});
+    viewProjectionMatrix = mat4_multiply([], viewProjectionMatrix, VECTOR_TO_POINT_MATRIX);
+
     break;
 
   default:

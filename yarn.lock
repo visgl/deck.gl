@@ -2946,9 +2946,9 @@ map-obj@^1.0.0, map-obj@^1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/map-obj/-/map-obj-1.0.1.tgz#d933ceb9205d82bdcf4886f6742bdc2b4dea146d"
 
-math.gl@>=1.0.0-alpha.3:
-  version "1.0.0-alpha.3"
-  resolved "https://registry.yarnpkg.com/math.gl/-/math.gl-1.0.0-alpha.3.tgz#3678d0f5c8f05f53f4bdace21812811e29a4c7c7"
+math.gl@>=1.0.0-alpha.6:
+  version "1.0.0-alpha.6"
+  resolved "https://registry.yarnpkg.com/math.gl/-/math.gl-1.0.0-alpha.6.tgz#ec92aeae4b9f2614df04e82c50d8a7db930fd34b"
   dependencies:
     gl-mat4 "^1.1.4"
     gl-quat "^1.0.0"

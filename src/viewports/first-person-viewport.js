@@ -19,25 +19,43 @@
 // THE SOFTWARE.
 
 import Viewport from './viewport';
-import {Vector3, Matrix4} from 'math.gl';
+import {Vector3, Matrix4, experimental} from 'math.gl';
+const {SphericalCoordinates} = experimental;
+
+// import {projectFlat} from '../viewport-mercator-project/web-mercator-utils';
+// import assert from 'assert';
+
+function getDirectionFromBearingAndPitch({bearing, pitch}) {
+  const spherical = new SphericalCoordinates({bearing, pitch});
+  const direction = spherical.toVector3().normalize();
+  return direction;
+}
 
 export default class FirstPersonViewport extends Viewport {
   constructor(opts = {}) {
     // TODO - push direction handling into Matrix4.lookAt
     const {
       // view matrix arguments
-      position, // alias
+      bearing,
+      pitch,
       lookAt, // Which point is camera looking at, default along y axis
       direction, // Which direction camera is looking at
-      up = [0, 1, 0] // Defines up direction, default positive y axis
+      up = [0, 1, 0] // Defines up direction, default positive y axis,
     } = opts;
 
     const eye = opts.eye || opts.position; // Defines eye position
+    // const dir = direction || getDirectionFromBearingAndPitch({bearing, pitch: 90}).scale([1, -1, 1]);
+    // const center = dir ? new Vector3(eye).add(dir) : lookAt;
+    const dir = direction || getDirectionFromBearingAndPitch({bearing, pitch: 90}); // .scale([1, -1, 1]);
+    const center = dir ? dir : lookAt;
+
+    const viewMatrix = new Matrix4()
+      .scale([-1, 1, 1])
+      .multiplyRight(new Matrix4().lookAt({eye: [0, 0, 0], center, up}));
 
     super(Object.assign({}, opts, {
-      viewMatrix: direction ?
-        new Matrix4().lookAt({eye, center: new Vector3(position).add(direction), up}) :
-        new Matrix4().lookAt({eye, center: lookAt, up})
+      viewMatrix,
+      position: eye
     }));
   }
 }

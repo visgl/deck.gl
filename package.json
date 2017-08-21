@@ -77,7 +77,7 @@
     "immutable": "^3.8.1",
     "jsdom": "^9.11.0",
     "luma.gl": ">=4.1.0-alpha.1",
-    "math.gl": ">=1.0.0-alpha.3",
+    "math.gl": ">=1.0.0-alpha.6",
     "module-alias": "^2.0.0",
     "nyc": "^10.2.0",
     "path-exists-cli": "^1.0.0",

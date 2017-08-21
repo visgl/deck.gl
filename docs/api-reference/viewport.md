@@ -5,6 +5,9 @@ The `Viewport` manages projection and unprojection of coordinates between world 
 
 The viewport class provides both direct `project`/`unproject` function members as well as projection matrices including `view` and `projection` matrices, and can generate their inverses as well to facilitate e.g. lighting calculations in WebGL shaders.
 
+
+In geospatial setups
+
 ## Usage
 
 ```js
@@ -19,23 +22,16 @@ Parameters:
 - `props` (Object) - Viewport properties
   * `props.width` (Number) - Width of "viewport" or window. Default to `1`.
   * `props.height` (Number) - Height of "viewport" or window. Default to `1`.
-  * `props.viewMatrix` (Array[16], optional) - View matrix. Default to identidy matrix.
+  * `props.viewMatrix` (Array[16], optional) - View matrix. Default to identity matrix.
 
 Projection Matrix Options
-  - Option 1: Supply a **custom** `projectionMatrix`
-      * `props.projectionMatrix` (Array[16], optional) - Projection matrix. Defaults to identity matrix.
-  - Option 2: Specify a **perspective** projection matrix arguments
+  - Option 1: Specify arguments for a a perspective projection matrix
       * `fov` (Number, optional) - Field of view covered by camera. Default to `75`.
       * `aspect` (Number, optional) - Aspect ratio. Defaults to the viewport's `width/height`.
       * `near` (Number, optional) - Distance of near clipping plane. Default to `1`.
       * `far` (Number, optional) - Distance of far clipping plane. Default to `100`.
-  - Option 3: Specify an **orthographic** projection matrix arguments:
-      * `left` (Number) - Left bound of the frustum
-      * `top` (Number) - Top bound of the frustum
-      * `right` (Number, optional) - Right bound of the frustum (Defaults to `left` + viewport's `width`)
-      * `bottom` (Number, optional) - Bottom bound of the frustum (Defaults to `top` + viewport's `height`)
-      * `near` (Number, optional) - Distance of near clipping plane. Default to `1`.
-      * `far` (Number, optional) - Distance of far clipping plane. Default to `100`.
+  - Option 2: Supply a **custom** `projectionMatrix`
+      * `props.projectionMatrix` (Array[16], optional) - Projection matrix. Defaults to identity matrix. Can be used to 
 
 Geospatial Anchor Options (Optional)
   * `latitude` (Number, optional) - Center of viewport on map (alternative to center). Default to `37`.

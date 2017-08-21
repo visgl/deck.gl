@@ -1,9 +1,12 @@
 import FirstPersonViewport from '../viewports/first-person-viewport';
-import {Vector3} from 'math.gl';
+import {Vector3, experimental} from 'math.gl';
+const {SphericalCoordinates} = experimental;
 import assert from 'assert';
 
-const MOVEMENT_SPEED = 1;  // 1 meter per keyboard click
-const ROTATION_STEP_RADIANS = 0.01;
+const MOVEMENT_SPEED = 2;  // 1 meter per keyboard click
+// const ROTATION_STEP_RADIANS = 0.03;
+const ROTATION_STEP_DEGREES = 3;
+const Y_AXIS_INVERSION = [1, -1, 1];
 
 const defaultState = {
   position: [0, 0, 0],
@@ -42,6 +45,9 @@ export default class FirstPersonState {
 
     bearing, // Rotation around y axis
     pitch, // Rotation around x axis
+    zoom,
+
+    syncBearing = true, // Whether to lock bearing to direction
 
     // Constraints - simple movement limit
     // Bounding box of the world, in the shape of {minX, maxX, minY, maxY, minZ, maxZ}
@@ -64,18 +70,20 @@ export default class FirstPersonState {
     assert(Number.isFinite(height), '`height` must be supplied');
     // assert(Number.isFinite(distance), '`distance` must be supplied');
 
+    bearing = ensureFinite(bearing, defaultState.bearing);
+
     this._viewportProps = this._applyConstraints({
       width,
       height,
-      position: [
+      position: new Vector3(
         ensureFinite(position[0], defaultState.position[0]),
         ensureFinite(position[1], defaultState.position[1]),
         ensureFinite(position[2], defaultState.position[2])
-      ],
-      direction,
-      bearing: ensureFinite(bearing, defaultState.bearing),
+      ),
+      direction: this._getDirectionFromBearing(bearing),
+      bearing,
       pitch: ensureFinite(pitch, defaultState.pitch),
-
+      zoom,
       bounds
     });
 
@@ -276,23 +284,47 @@ export default class FirstPersonState {
     });
   }
 
+  _getDirectionFromBearing(bearing) {
+    const spherical = new SphericalCoordinates({bearing, pitch: 90});
+    const direction = spherical.toVector3().normalize();
+    return direction;
+  }
+
   moveLeft() {
-    const {position, direction} = this._viewportProps;
-    const newDirection = new Vector3(direction).rotateZ({radians: ROTATION_STEP_RADIANS});
+    // const {position, direction} = this._viewportProps;
+    // const newDirection = new Vector3(direction).rotateZ({radians: ROTATION_STEP_RADIANS});
+    // return this._getUpdatedState({
+    //   direction: newDirection,
+    //   lookAt: new Vector3(position).add(newDirection.normalize()),
+    //   bearing: this._viewportProps.bearing - ROTATION_STEP_DEGREES
+    // });
+
+    const {position, bearing} = this._viewportProps;
+    const newBearing = bearing - ROTATION_STEP_DEGREES;
+    const newDirection = this._getDirectionFromBearing(newBearing);
     return this._getUpdatedState({
       direction: newDirection,
-      lookAt: new Vector3(position).add(newDirection.normalize()),
-      bearing: this._viewportProps.bearing - 3
+      lookAt: new Vector3(position).add(newDirection),
+      bearing: newBearing
     });
   }
 
   moveRight() {
-    const {position, direction} = this._viewportProps;
-    const newDirection = new Vector3(direction).rotateZ({radians: -ROTATION_STEP_RADIANS});
+    // const {position, direction} = this._viewportProps;
+    // const newDirection = new Vector3(direction).rotateZ({radians: -ROTATION_STEP_RADIANS});
+    // return this._getUpdatedState({
+    //   direction: newDirection,
+    //   lookAt: new Vector3(position).add(newDirection.normalize()),
+    //   bearing: this._viewportProps.bearing + ROTATION_STEP_DEGREES
+    // });
+
+    const {position, bearing} = this._viewportProps;
+    const newBearing = bearing + ROTATION_STEP_DEGREES;
+    const newDirection = this._getDirectionFromBearing(newBearing);
     return this._getUpdatedState({
       direction: newDirection,
-      lookAt: new Vector3(position).add(newDirection.normalize()),
-      bearing: this._viewportProps.bearing + 3
+      lookAt: new Vector3(position).add(newDirection),
+      bearing: newBearing
     });
   }
 
