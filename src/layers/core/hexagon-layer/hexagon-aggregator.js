@@ -33,10 +33,14 @@ export function pointToHexbin({data, radius, getPosition}, viewport) {
   // get hexagon radius in mercator world unit
   const radiusInPixel = getRadiusInPixel(radius, viewport);
 
+  const screenPoints = [];
+
   // add world space coordinates to points
-  const screenPoints = data.map(pt => Object.assign({
-    screenCoord: viewport.projectFlat(getPosition(pt))
-  }, pt));
+  for (let i = 0; i < data.length; i++) {
+    screenPoints.push(Object.assign({
+      screenCoord: viewport.projectFlat(getPosition(data[i]))
+    }, data[i]));
+  }
 
   const newHexbin = hexbin()
     .radius(radiusInPixel)
