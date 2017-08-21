@@ -38,7 +38,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {Layer, PolygonLayer} from 'deck.gl';
+import {CompositeLayer, PolygonLayer} from 'deck.gl';
 
 import {getS2Polygon} from './s2-utils';
 
@@ -47,9 +47,9 @@ const defaultFillColor = [0xBD, 0xE2, 0x7A, 0xFF];
 
 const defaultProps = {
   drawCells: true,
-  fillCells: true,
+  filled: true,
 
-  extrusion: false,
+  extruded: false,
   wireframe: false,
 
   // Cell geometry
@@ -64,13 +64,13 @@ const defaultProps = {
   getFillColor: f => f.fillColor || defaultFillColor
 };
 
-export default class S2Layer extends Layer {
+export default class S2Layer extends CompositeLayer {
   initializeState() {
   }
 
   renderLayers() {
     const {id, getS2Token, getFillColor, getHeight} = this.props;
-    const {extruded, wireframe} = this.props;
+    const {extruded, wireframe, filled} = this.props;
 
     // Filled Polygon Layer
     // TODO - use a composite polygon layer that renders outlines etc
@@ -81,6 +81,7 @@ export default class S2Layer extends Layer {
       getColor: getFillColor,
       extruded,
       wireframe,
+      filled,
       updateTriggers: Object.assign({}, this.props.updateTriggers, {
         getColor: this.props.updateTriggers.getFillColor
       })
