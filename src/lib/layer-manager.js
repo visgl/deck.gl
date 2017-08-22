@@ -75,6 +75,7 @@ export default class LayerManager {
       viewport: null,
       viewportChanged: true,
       pickingFBO: null,
+      useDevicePixelRatio: true,
       lastPickedInfo: {
         index: -1,
         layerId: null
@@ -189,6 +190,15 @@ export default class LayerManager {
     this._validateEventHandling();
   }
 
+  /**
+   * Set parameters needed for layer rendering and picking.
+   * Parameters are to be passed as a single object, with the following values:
+   * @param {Boolean} useDevicePixelRatio
+   */
+  setParameters(parameters) {
+    this.context = Object.assign({}, this.context, parameters);
+  }
+
   updateLayers({newLayers}) {
     // TODO - something is generating state updates that cause rerender of the same
     if (newLayers === this.lastRenderedLayers) {
@@ -230,7 +240,7 @@ export default class LayerManager {
 
   // Pick the closest info at given coordinate
   pickLayer({x, y, mode, radius = 0, layerIds}) {
-    const {gl} = this.context;
+    const {gl, useDevicePixelRatio} = this.context;
     const layers = layerIds ?
       this.layers.filter(layer => layerIds.indexOf(layer.id) >= 0) :
       this.layers;
@@ -243,13 +253,14 @@ export default class LayerManager {
       mode,
       viewport: this.context.viewport,
       pickingFBO: this._getPickingBuffer(),
-      lastPickedInfo: this.context.lastPickedInfo
+      lastPickedInfo: this.context.lastPickedInfo,
+      useDevicePixelRatio
     });
   }
 
   // Get all unique infos within a bounding box
   queryLayer({x, y, width, height, layerIds}) {
-    const {gl} = this.context;
+    const {gl, useDevicePixelRatio} = this.context;
     const layers = layerIds ?
       this.layers.filter(layer => layerIds.indexOf(layer.id) >= 0) :
       this.layers;
@@ -262,7 +273,8 @@ export default class LayerManager {
       layers,
       mode: 'query',
       viewport: this.context.viewport,
-      pickingFBO: this._getPickingBuffer()
+      pickingFBO: this._getPickingBuffer(),
+      useDevicePixelRatio
     });
   }
 

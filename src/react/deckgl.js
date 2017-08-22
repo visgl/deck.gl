@@ -43,7 +43,8 @@ const propTypes = {
   onWebGLInitialized: PropTypes.func,
   onAfterRender: PropTypes.func,
   onLayerClick: PropTypes.func,
-  onLayerHover: PropTypes.func
+  onLayerHover: PropTypes.func,
+  useDevicePixelRatio: PropTypes.bool
 };
 
 const defaultProps = {
@@ -55,7 +56,8 @@ const defaultProps = {
   onWebGLInitialized: noop,
   onAfterRender: noop,
   onLayerClick: null,
-  onLayerHover: null
+  onLayerHover: null,
+  useDevicePixelRatio: true
 };
 
 export default class DeckGL extends React.Component {
@@ -100,13 +102,19 @@ export default class DeckGL extends React.Component {
       altitude,
       pickingRadius,
       onLayerClick,
-      onLayerHover
+      onLayerHover,
+      useDevicePixelRatio
     } = nextProps;
 
     this.layerManager.setEventHandlingParameters({
       pickingRadius,
       onLayerClick,
       onLayerHover
+    });
+
+    // If more parameters need to be udpated on layerManager add them to this method.
+    this.layerManager.setParameters({
+      useDevicePixelRatio
     });
 
     // If Viewport is not supplied, create one from mercator props
@@ -164,9 +172,6 @@ export default class DeckGL extends React.Component {
     return createElement(WebGLRenderer, Object.assign({}, this.props, {
       width,
       height,
-      // NOTE: Add 'useDevicePixelRatio' to 'this.props' and also pass it down to
-      // to modules where window.devicePixelRatio is used.
-      useDevicePixelRatio: true,
       gl,
       debug,
       onRendererInitialized: this._onRendererInitialized,

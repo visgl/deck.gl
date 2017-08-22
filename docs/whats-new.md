@@ -1,5 +1,9 @@
 # deck.gl v4.2
 
+## useDevicePixelRatio
+
+This new prop for DeckGL component can be used to toggle usage of full resolution of retina/HD displays.
+
 ## Automatic and custom highlighting
 
 Three new props (`highlightColor`, `highlightedObjectIndex` and `autoHighlight`) are added to `Layer` class to support object highlighting.
