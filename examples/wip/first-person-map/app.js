@@ -4,7 +4,9 @@ import {render} from 'react-dom';
 
 import {StaticMap} from 'react-map-gl';
 
-import DeckGL, {ViewportController} from 'deck.gl';
+// import DeckGL from 'deck.gl';
+import DeckGL from './deckgl-multiview';
+import {ViewportController} from 'deck.gl';
 import {FirstPersonState} from 'deck.gl';
 import {FirstPersonViewport} from 'deck.gl';
 
@@ -222,10 +224,12 @@ class Root extends Component {
     const {viewportProps, fov} = this.state;
 
     const mapViewport = new WebMercatorViewport({
-      ...viewportProps
+      ...viewportProps,
+      width: viewportProps.width / 2
     });
 
     const firstPersonViewport = new FirstPersonViewport(Object.assign({}, viewportProps, {
+      width: viewportProps.width / 2,
       // // viewportProps arguments
       // width: viewportProps.width, // Width of viewportProps
       // height: viewportProps.height, // Height of viewportProps
@@ -260,7 +264,7 @@ class Root extends Component {
           <StaticMap
             visible={viewport.isMapSynched()}
             {...viewportProps}
-            width={viewportProps.width}
+            width={viewportProps.width / 2}
             height={viewportProps.height}
             zoom={viewportProps.zoom}
             mapStyle="mapbox://styles/mapbox/dark-v9"
@@ -269,7 +273,8 @@ class Root extends Component {
 
             <DeckGL
               id="first-person"
-              viewport={viewport}
+              rightViewport={mapViewport}
+              leftViewport={firstPersonViewport}
               width={viewportProps.width}
               height={viewportProps.height}
               layers={this._renderLayers()}
