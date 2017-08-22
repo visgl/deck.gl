@@ -20,6 +20,13 @@ Parameters:
 
 - `viewport` ([Viewport](/docs/api-reference/viewport.md)) - The new viewport
 
+##### `setParameters`
+
+Parameters:
+
+- `parameters` (Object)
+  * `useDevicePixelRatio` (Boolean) - Whether to use retina/HD display or not.
+
 ##### `updateLayers`
 
 Parameters:

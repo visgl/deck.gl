@@ -83,12 +83,14 @@ export function queryLayers(gl, {
   width,
   height,
   viewport,
-  mode
+  mode,
+  useDevicePixelRatio
 }) {
 
   // Convert from canvas top-left to WebGL bottom-left coordinates
   // And compensate for pixelRatio
-  const pixelRatio = typeof window !== 'undefined' ? window.devicePixelRatio : 1;
+  const pixelRatio = useDevicePixelRatio && typeof window !== 'undefined' ?
+    window.devicePixelRatio : 1;
   const deviceLeft = Math.round(x * pixelRatio);
   const deviceBottom = Math.round(gl.canvas.height - y * pixelRatio);
   const deviceRight = Math.round((x + width) * pixelRatio);
@@ -135,12 +137,14 @@ export function pickLayers(gl, {
   radius,
   viewport,
   mode,
-  lastPickedInfo
+  lastPickedInfo,
+  useDevicePixelRatio
 }) {
 
   // Convert from canvas top-left to WebGL bottom-left coordinates
   // And compensate for pixelRatio
-  const pixelRatio = typeof window !== 'undefined' ? window.devicePixelRatio : 1;
+  const pixelRatio = useDevicePixelRatio && typeof window !== 'undefined' ?
+    window.devicePixelRatio : 1;
   const deviceX = Math.round(x * pixelRatio);
   const deviceY = Math.round(gl.canvas.height - y * pixelRatio);
   const deviceRadius = Math.round(radius * pixelRatio);
