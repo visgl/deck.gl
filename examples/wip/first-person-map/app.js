@@ -36,12 +36,12 @@ const DEFAULT_VIEWPORT_PROPS = {
   zoom: 13,
   maxZoom: 16,
   pitch: 60,
-  bearing: 0,
+  bearing: 270,
 
   // view matrix arguments
   // position: [100, 0, 2], // Defines eye position
   position: [0, 0, 2], // Defines eye position
-  direction: [-0.9, 0.5, 0], // Which direction is camera looking at, default origin
+  // direction: [-0.9, 0.5, 0], // Which direction is camera looking at, default origin
   up: [0, 0, 1] // Defines up direction, default positive y axis
 };
 
@@ -51,6 +51,8 @@ class Root extends Component {
     super(props);
     this.state = {
       viewportMode: true,
+      fov: 75,
+
       viewportProps: {
         ...DEFAULT_VIEWPORT_PROPS,
         width: 500,
@@ -76,6 +78,7 @@ class Root extends Component {
 
     this._onViewportChange = this._onViewportChange.bind(this);
     this._onViewportModeChange = this._onViewportModeChange.bind(this);
+    this._onFovChange = this._onFovChange.bind(this);
   }
 
   componentDidMount() {
@@ -126,12 +129,28 @@ class Root extends Component {
     this.setState({viewportMode: !this.state.viewportMode});
   }
 
+  _onFovChange() {
+    this.setState({fov: this.state.fov === 75 ? 35 : 75});
+  }
+
   _renderOptionsPanel() {
     return (
       <div style={{position: 'absolute', top: '8px', right: '8px'}}>
-        <button onClick={this._onViewportModeChange}>
-          {this.state.viewportMode ? 'First Person' : 'Mercator'}
-        </button>
+        <div style={{
+          display: 'flex', flexDirection: 'column',
+          alignItems: 'center', justifyContent: 'center'}}>
+          <button key="mode" onClick={this._onViewportModeChange}>
+            {this.state.viewportMode ? 'First Person' : 'Mercator'}
+          </button>
+          <button key="fov" onClick={this._onFovChange}>
+            {this.state.fov}
+          </button>
+          <div style={{color: 'white'}}>
+            {Object.keys(this.state.viewportProps).map(key => (
+              <div key={key}>{key}:{String(this.state.viewportProps[key])}</div>
+            ))}
+          </div>
+        </div>
       </div>
     );
   }
@@ -200,7 +219,7 @@ class Root extends Component {
   }
 
   render() {
-    const {viewportProps} = this.state;
+    const {viewportProps, fov} = this.state;
 
     const mapViewport = new WebMercatorViewport({
       ...viewportProps
@@ -218,7 +237,7 @@ class Root extends Component {
       // lookAt: [0, 1, 0], // Which point is camera looking at, default origin
       // up: [0, 0, 1], // Defines up direction, default positive y axis
       // projection matrix arguments
-      fovy: 75, // Field of view covered by camera
+      fovy: fov, // Field of view covered by camera
       near: 1, // Distance of near clipping plane
       far: 10000 // Distance of far clipping plane
     }));

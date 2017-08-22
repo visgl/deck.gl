@@ -21,6 +21,7 @@
 import log from '../utils/log';
 
 // TODO - replace with math.gl
+import {Vector3} from 'math.gl';
 import {equals} from '../math/equals';
 import mat4_scale from 'gl-mat4/scale';
 import mat4_translate from 'gl-mat4/translate';
@@ -35,14 +36,14 @@ import {transformVector, createMat4, extractCameraVectors} from '../math/utils';
 import {
   projectFlat,
   // unprojectFlat,
-  calculateDistanceScales
+  getMercatorDistanceScales,
+  getMercatorWorldPosition
   // makeProjectionMatrixFromMercatorParams,
   // makeUncenteredViewMatrixFromMercatorParams
+  // makeViewMatricesFromMercatorParams
 } from '../viewport-mercator-project/web-mercator-utils';
 
 import assert from 'assert';
-
-const DEGREES_TO_RADIANS = Math.PI / 180;
 
 const IDENTITY = createMat4();
 
@@ -54,6 +55,25 @@ const DEFAULT_DISTANCE_SCALES = {
 };
 
 const ERR_ARGUMENT = 'Illegal argument to Viewport';
+
+// Extracts or creates projection matrix from supplied options
+// Optionally creates a perspective or orthographic matrprojectionMatrix || ix
+function createPerspectiveProjectionMatrix({ // viewport arguments
+  // Projection matrix: option 1, perspective
+  fovy = 75, // Field of view covered by camera
+  near = 1, // Distance of near clipping plane
+  far = 100, // Distance of far clipping plane
+  aspect = null,
+  width, // Width of viewport
+  height // Height of viewport
+}) {
+  const DEGREES_TO_RADIANS = Math.PI / 180;
+
+  assert(Number.isFinite(fovy));
+  const fovyRadians = fovy * DEGREES_TO_RADIANS;
+  aspect = Number.isFinite(aspect) ? aspect : width / height;
+  return mat4_perspective([], fovyRadians, aspect, near, far);
+}
 
 export default class Viewport {
   /**
@@ -72,26 +92,22 @@ export default class Viewport {
       // view matrix
       viewMatrix = IDENTITY,
 
-      // Projection matrix: option 1
+      // Projection matrix
       projectionMatrix = null,
 
-      // Projection matrix: option 2, perspective
+      // Perspective projection matrix parameters, used if projectionMatrix not supplied
       fovy = 75,
-      aspect = null,
+      near = 1,  // Distance of near clipping plane
+      far = 10000, // Distance of far clipping plane
+      aspect = null, // Defaults to width/height
 
-      // projection matrix: option 3, orthographic
-      left, // Left bound of the frustum
-      top, // Top bound of the frustum
-      right = null, // Right bound of the frustum (automatically calculated)
-      bottom = null, // Bottom bound of the frustum (automatically calculated)
-      // Projection matrix clipping planes
-      near = 1, // Distance of near clipping plane
-      far = 100, // Distance of far clipping plane
-
-      // Optional: A lnglat anchor will make this viewport work with geospatial coordinate systems
+      // Anchor: lng lat zoom will make this viewport work with geospatial coordinate systems
       longitude = null,
       latitude = null,
       zoom = null,
+
+      // Anchor position offset (in meters for geospatial viewports)
+      position = [0, 0, 0],
 
       distanceScales = null
     } = opts;
@@ -105,31 +121,30 @@ export default class Viewport {
     // Calculate distance scales if lng/lat/zoom are provided
     const geospatialParamsSupplied = !isNaN(latitude) || !isNaN(longitude) || !isNaN(zoom);
     if (geospatialParamsSupplied) {
-      this.distanceScales = calculateDistanceScales({latitude, longitude, scale: this.scale});
+      this.distanceScales = getMercatorDistanceScales({latitude, longitude, scale: this.scale});
     } else {
       this.distanceScales = distanceScales || DEFAULT_DISTANCE_SCALES;
     }
 
     this.viewMatrixUncentered = viewMatrix;
 
-    // Make a centered version of the matrix for projection modes without an offset
+    // Determine camera center
     this.center = geospatialParamsSupplied ?
-      projectFlat([longitude, latitude], this.scale) :
-      [0, 0, 0];
+      getMercatorWorldPosition({longitude, latitude, zoom, meterOffset: position}) :
+      position;
 
-    const centerTranslation = [-this.center[0], -this.center[1], 0];
+    // Make a centered version of the matrix for projection modes without an offset
     this.viewMatrix = createMat4();
     this.viewMatrix = mat4_translate(this.viewMatrix, this.viewMatrixUncentered, [0, 0, 0]);
-    // mat4_scale(this.viewMatrix, this.viewMatrixUncentered, [1, -1, 1 / height]);
-    this.viewMatrix = mat4_translate(this.viewMatrix, this.viewMatrix, centerTranslation);
+    this.viewMatrix = mat4_translate(
+      this.viewMatrix, this.viewMatrix, this.center.clone().negate());
 
-    this.projectionMatrix = this._createProjectionMatrix({
+    // Create a projection matrix if not supplied
+    this.projectionMatrix = projectionMatrix || createPerspectiveProjectionMatrix({
       width: this.width,
       height: this.height,
-      projectionMatrix,
       fovy, aspect, // perspective matrix opts
-      left, top, right, bottom, // orthographic matrix opts, bounds of the frustum
-      near, far // Distance of near/far clipping plane
+      near, far     // Distance of near/far clipping plane
     });
 
     // console.log(this.constructor.name,
@@ -191,7 +206,7 @@ export default class Viewport {
    * - [x, y] => [lng, lat]
    * - [x, y, z] => [lng, lat, Z]
    * @param {Array} xyz -
-   * @return {Array} - [lng, lat, Z] or [X, Y, Z]
+   * @return {Array|null} - [lng, lat, Z] or [X, Y, Z]
    */
   unproject(xyz, {topLeft = false} = {}) {
     const [x, y, targetZ = 0] = xyz;
@@ -202,6 +217,10 @@ export default class Viewport {
     // unproject two points to get a line and then find the point on that line with z=0
     const coord0 = transformVector(this.pixelUnprojectionMatrix, [x, y2, 0, 1]);
     const coord1 = transformVector(this.pixelUnprojectionMatrix, [x, y2, 1, 1]);
+
+    if (!coord0 || !coord1) {
+      return null;
+    }
 
     const z0 = coord0[2];
     const z1 = coord1[2];
@@ -335,7 +354,7 @@ export default class Viewport {
      *       and does not need this step.
      */
 
-    // matrix for conversion from location to screen coordinates
+    // matrix for conversion from world location to screen (pixel) coordinates
     const m = createMat4();
     mat4_scale(m, m, [this.width / 2, -this.height / 2, 1]);
     mat4_translate(m, m, [1, -1, 0]);
@@ -347,31 +366,5 @@ export default class Viewport {
       log.warn('Pixel project matrix not invertible');
       // throw new Error('Pixel project matrix not invertible');
     }
-  }
-
-  // Extracts or creates projection matrix from supplied options
-  // Optionally creates a perspective or orthographic matrix
-  _createProjectionMatrix({ // viewport arguments
-    width, // Width of viewport
-    height, // Height of viewport
-
-    // Projection matrix: option 1, perspective
-    fovy = 75, // Field of view covered by camera
-    aspect = null,
-    near = 1, // Distance of near clipping plane
-    far = 100, // Distance of far clipping plane
-
-    // Projection matrix: option 2 - override
-    projectionMatrix = null
-  }) {
-    // If fovy is provided, create a perspective projection matrix
-    if (!projectionMatrix && Number.isFinite(fovy)) {
-      const fovyRadians = fovy * DEGREES_TO_RADIANS;
-      aspect = Number.isFinite(aspect) ? aspect : width / height;
-      return mat4_perspective([], fovyRadians, aspect, near, far);
-    }
-
-    assert(projectionMatrix);
-    return projectionMatrix;
   }
 }

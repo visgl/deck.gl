@@ -6,6 +6,7 @@ import assert from 'assert';
 const MOVEMENT_SPEED = 2;  // 1 meter per keyboard click
 // const ROTATION_STEP_RADIANS = 0.03;
 const ROTATION_STEP_DEGREES = 3;
+const Y_AXIS_INVERSION = [1, -1, 1];
 
 const defaultState = {
   position: [0, 0, 0],
@@ -74,11 +75,11 @@ export default class FirstPersonState {
     this._viewportProps = this._applyConstraints({
       width,
       height,
-      position: [
+      position: new Vector3(
         ensureFinite(position[0], defaultState.position[0]),
         ensureFinite(position[1], defaultState.position[1]),
         ensureFinite(position[2], defaultState.position[2])
-      ],
+      ),
       direction: this._getDirectionFromBearing(bearing),
       bearing,
       pitch: ensureFinite(pitch, defaultState.pitch),
@@ -286,7 +287,6 @@ export default class FirstPersonState {
   _getDirectionFromBearing(bearing) {
     const spherical = new SphericalCoordinates({bearing, pitch: 90});
     const direction = spherical.toVector3().normalize();
-    // console.debug(bearing, direction);
     return direction;
   }
 
@@ -300,7 +300,7 @@ export default class FirstPersonState {
     // });
 
     const {position, bearing} = this._viewportProps;
-    const newBearing = bearing + ROTATION_STEP_DEGREES;
+    const newBearing = bearing - ROTATION_STEP_DEGREES;
     const newDirection = this._getDirectionFromBearing(newBearing);
     return this._getUpdatedState({
       direction: newDirection,
@@ -319,7 +319,7 @@ export default class FirstPersonState {
     // });
 
     const {position, bearing} = this._viewportProps;
-    const newBearing = bearing - ROTATION_STEP_DEGREES;
+    const newBearing = bearing + ROTATION_STEP_DEGREES;
     const newDirection = this._getDirectionFromBearing(newBearing);
     return this._getUpdatedState({
       direction: newDirection,

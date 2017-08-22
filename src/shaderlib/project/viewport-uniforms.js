@@ -26,10 +26,7 @@ import log from '../../utils/log';
 import assert from 'assert';
 import {COORDINATE_SYSTEM} from '../../lib/constants';
 
-import {
-  projectFlat
-  // calculateDistanceScales
-} from '../../viewport-mercator-project/web-mercator-utils';
+import {projectFlat} from '../../viewport-mercator-project/web-mercator-utils';
 
 // To quickly set a vector to zero
 const ZERO_VECTOR = [0, 0, 0, 0];
