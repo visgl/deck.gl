@@ -19,6 +19,8 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ### deck.gl v4.2
 
+#### [4.2.0-alpha.3]
+- Fixes for first person viewports in METER_OFFSET mode
 
 #### [4.2.0-alpha.2]
 

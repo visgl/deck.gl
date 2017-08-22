@@ -29,7 +29,6 @@ import mat4_invert from 'gl-mat4/invert';
 import vec2_lerp from 'gl-vec2/lerp';
 
 import mat4_perspective from 'gl-mat4/perspective';
-import mat4_ortho from 'gl-mat4/ortho';
 
 import {transformVector, createMat4, extractCameraVectors} from '../math/utils';
 

@@ -35,11 +35,12 @@ const DEFAULT_VIEWPORT_PROPS = {
   latitude: 40.72,
   zoom: 13,
   maxZoom: 16,
-  pitch: 45,
+  pitch: 60,
   bearing: 0,
 
   // view matrix arguments
-  position: [100, 0, 2], // Defines eye position
+  // position: [100, 0, 2], // Defines eye position
+  position: [0, 0, 2], // Defines eye position
   direction: [-0.9, 0.5, 0], // Which direction is camera looking at, default origin
   up: [0, 0, 1] // Defines up direction, default positive y axis
 };
@@ -139,7 +140,9 @@ class Root extends Component {
     const {buildings, trips, trailLength, time} = this.state;
 
     const {viewportProps} = this.state;
-    const {longitude, latitude} = viewportProps;
+    const {position} = viewportProps;
+
+    const {longitude, latitude} = DEFAULT_VIEWPORT_PROPS;
 
     if (!buildings || !trips) {
       return [];
@@ -170,14 +173,28 @@ class Root extends Component {
       }),
       new PointCloudLayer({
         id: 'point-cloud',
+        outline: true,
         data: new Array(100).fill(0).map((v, i) => ({
-          position: [Math.random() * i, Math.random() * i, Math.random() * i],
-          color: [255, 0, 0]
+          position: [(Math.random() - 0.5) * i, (Math.random() - 0.5) * i, Math.random() * i],
+          color: [255, 0, 0, 255],
+          normal: [1, 0, 0]
         })),
         projectionMode: COORDINATE_SYSTEM.METER_OFFSETS,
         positionOrigin: [longitude, latitude],
         opacity: 1,
         radiusPixels: 4
+      }),
+      new PointCloudLayer({
+        id: 'player',
+        data: [{
+          position,
+          color: [0, 255, 255, 255],
+          normal: [1, 0, 0]
+        }],
+        projectionMode: COORDINATE_SYSTEM.METER_OFFSETS,
+        positionOrigin: [longitude, latitude],
+        opacity: 1,
+        radiusPixels: 40
       })
     ];
   }
@@ -206,7 +223,8 @@ class Root extends Component {
       far: 10000 // Distance of far clipping plane
     }));
 
-    console.log(viewportProps.position, viewportProps.direction, viewportProps.lookAt); // eslint-disable-line
+    // console.log(viewportProps.position, viewportProps.direction, viewportProps.lookAt);
+    // eslint-disable-line
 
     const viewport = this.state.viewportMode ? firstPersonViewport : mapViewport;
 
