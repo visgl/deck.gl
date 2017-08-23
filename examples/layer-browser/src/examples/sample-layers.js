@@ -10,8 +10,7 @@ const S2LayerExample = {
     opacity: 0.6,
     getS2Token: f => f.token,
     getPath: f => f.path,
-    getStrokeColor: f => [255, 255, 128],
-    getFillColor: f => [255, 255, 128],
+    getFillColor: f => [f.value * 255, (1 - f.value) * 255, (1 - f.value) * 128],
     getStrokeWidth: f => 10,
     pickable: true
   }
