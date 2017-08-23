@@ -225,11 +225,12 @@ class Root extends Component {
 
     const mapViewport = new WebMercatorViewport({
       ...viewportProps,
-      width: viewportProps.width / 2
+      height: viewportProps.height / 2
     });
 
     const firstPersonViewport = new FirstPersonViewport(Object.assign({}, viewportProps, {
-      width: viewportProps.width / 2,
+      y: viewportProps.height / 2,
+      height: viewportProps.height / 2,
       // // viewportProps arguments
       // width: viewportProps.width, // Width of viewportProps
       // height: viewportProps.height, // Height of viewportProps
@@ -249,7 +250,7 @@ class Root extends Component {
     // console.log(viewportProps.position, viewportProps.direction, viewportProps.lookAt);
     // eslint-disable-line
 
-    const viewport = this.state.viewportMode ? firstPersonViewport : mapViewport;
+    // const viewport = this.state.viewportMode ? firstPersonViewport : mapViewport;
 
     return (
       <div style={{backgroundColor: '#000'}}>
@@ -261,12 +262,12 @@ class Root extends Component {
           height={viewportProps.height}
           onViewportChange={this._onViewportChange} >
 
-          <div style={{position: 'absolute', left: 0, top: 0}}>
+          <div style={{position: 'absolute', left: 0, bottom: 0}}>
             <StaticMap
               visible={mapViewport.isMapSynched()}
               {...viewportProps}
-              width={viewportProps.width / 2}
-              height={viewportProps.height}
+              width={viewportProps.width}
+              height={viewportProps.height / 2}
               zoom={viewportProps.zoom}
               mapStyle="mapbox://styles/mapbox/dark-v9"
               onViewportChange={this._onViewportChange.bind(this)}

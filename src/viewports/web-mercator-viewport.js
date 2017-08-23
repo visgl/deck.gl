@@ -60,6 +60,8 @@ export default class WebMercatorViewport extends Viewport {
   /* eslint-disable complexity, max-statements */
   constructor({
     // Map state
+    x = 0,
+    y = 0,
     width,
     height,
     latitude,
@@ -113,7 +115,7 @@ export default class WebMercatorViewport extends Viewport {
     });
 
     super({
-      width, height,
+      x, y, width, height,
       viewMatrix: viewMatrixUncentered,
       longitude,
       latitude,

@@ -86,6 +86,8 @@ export default class Viewport {
   constructor(opts = {}) {
     const {
       // Window width/height in pixels (for pixel projection)
+      x = 0,
+      y = 0,
       width = 1,
       height = 1,
 
@@ -113,6 +115,8 @@ export default class Viewport {
     } = opts;
 
     // Silently allow apps to send in 0,0
+    this.x = x;
+    this.y = y;
     this.width = width || 1;
     this.height = height || 1;
     this.zoom = Number.isFinite(zoom) ? zoom : 0;
