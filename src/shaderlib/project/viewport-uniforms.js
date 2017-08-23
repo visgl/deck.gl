@@ -26,16 +26,7 @@ import log from '../../utils/log';
 import assert from 'assert';
 import {COORDINATE_SYSTEM} from '../../lib/constants';
 
-import {
-  projectFlat,
-  calculateDistanceScales
-} from '../../viewport-mercator-project/web-mercator-utils';
-
-function fp64ify(a) {
-  const hiPart = Math.fround(a);
-  const loPart = a - hiPart;
-  return [hiPart, loPart];
-}
+import {projectFlat} from '../../viewport-mercator-project/web-mercator-utils';
 
 // To quickly set a vector to zero
 const ZERO_VECTOR = [0, 0, 0, 0];
@@ -43,23 +34,75 @@ const ZERO_VECTOR = [0, 0, 0, 0];
 const VECTOR_TO_POINT_MATRIX = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0];
 const IDENTITY_MATRIX = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
 
+// TODO - import these utils from fp64 package
+function fp64ify(a) {
+  const hiPart = Math.fround(a);
+  const loPart = a - hiPart;
+  return [hiPart, loPart];
+}
+
+// calculate WebGL 64 bit matrix (transposed "Float64Array")
+function fp64ifyMatrix4(matrix) {
+  // Transpose the projection matrix to column major for GLSL.
+  const matrixFP64 = new Float32Array(32);
+  for (let i = 0; i < 4; ++i) {
+    for (let j = 0; j < 4; ++j) {
+      [
+        matrixFP64[(i * 4 + j) * 2],
+        matrixFP64[(i * 4 + j) * 2 + 1]
+      ] = fp64ify(matrix[j * 4 + i]);
+    }
+  }
+  return matrixFP64;
+}
+
+//   // Calculate projection pixels per unit
+//   const {pixelsPerMeter, pixelsPerDegree, degreesPerMeter} =
+//     viewport.getDistanceScales({positionOrigin});
+//   assert(pixelsPerMeter, 'Viewport missing pixelsPerMeter');
+
+//   let pixelsPerMeterUTM = ZERO_VECTOR;
+//   if (projectionMode === COORDINATE_SYSTEM.UTM_OFFSETS) {
+//     pixelsPerMeterUTM = [
+//       degreesPerMeter[0] * pixelsPerDegree[0],
+//       degreesPerMeter[1] * pixelsPerDegree[1],
+//       degreesPerMeter[2] * pixelsPerDegree[0],
+//       degreesPerMeter[3] * pixelsPerDegree[1]
+//     ];
+//   }
+
+// Calculate transformed projectionCenter (using 64 bit precision JS)
+// This is the key to offset mode precision
+// (avoids doing this addition in 32 bit precision in GLSL)
+function calculateProjectionCenter({coordinateOrigin, coordinateZoom, viewProjectionMatrix}) {
+  const positionPixels = projectFlat(coordinateOrigin, Math.pow(2, coordinateZoom));
+  // projectionCenter = new Matrix4(viewProjectionMatrix)
+  //   .transformVector([positionPixels[0], positionPixels[1], 0.0, 1.0]);
+  return vec4_transformMat4([],
+    [positionPixels[0], positionPixels[1], 0.0, 1.0],
+    viewProjectionMatrix);
+}
+
 // The code that utilizes Matrix4 does the same calculation as their mat4 counterparts,
 // has lower performance but provides error checking.
 // Uncomment when debugging
 function calculateMatrixAndOffset({
-  // OLD PARAMS
-  projectionMode,
-  positionOrigin = [0, 0],
+  // UNCHANGED
+  viewport,
+  modelMatrix,
   // NEW PARAMS
   coordinateSystem,
   coordinateOrigin,
   coordinateZoom,
-  // UNCHANGED
-  viewport,
-  modelMatrix
+  // DEPRECATED PARAMS
+  projectionMode,
+  positionOrigin = [0, 0]
 }) {
-  const {viewMatrixUncentered, projectionMatrix} = viewport;
-  let {viewMatrix, viewProjectionMatrix} = viewport;
+  const {viewMatrixUncentered} = viewport;
+  let {viewMatrix} = viewport;
+  const {projectionMatrix} = viewport;
+  let {viewProjectionMatrix} = viewport;
+
   let projectionCenter;
 
   switch (coordinateSystem) {
@@ -71,22 +114,20 @@ function calculateMatrixAndOffset({
 
   // TODO: make lighitng work for meter offset mode
   case COORDINATE_SYSTEM.METER_OFFSETS:
-    // Calculate transformed projectionCenter (in 64 bit precision)
-    // This is the key to offset mode precision (avoids doing this
-    // addition in 32 bit precision)
-    const positionPixels = projectFlat(coordinateOrigin, Math.pow(2, coordinateZoom));
-    // projectionCenter = new Matrix4(viewProjectionMatrix)
-    //   .transformVector([positionPixels[0], positionPixels[1], 0.0, 1.0]);
-    projectionCenter = vec4_transformMat4([],
-      [positionPixels[0], positionPixels[1], 0.0, 1.0],
-      viewProjectionMatrix);
+    projectionCenter = calculateProjectionCenter({
+      coordinateOrigin, coordinateZoom, viewProjectionMatrix
+    });
 
     // Always apply uncentered projection matrix if available (shader adds center)
+    viewMatrix = viewMatrixUncentered || viewMatrix;
+
     // Zero out 4th coordinate ("after" model matrix) - avoids further translations
     // viewMatrix = new Matrix4(viewMatrixUncentered || viewMatrix)
     //   .multiplyRight(VECTOR_TO_POINT_MATRIX);
-    viewMatrix = mat4_multiply([], viewMatrixUncentered || viewMatrix, VECTOR_TO_POINT_MATRIX);
     viewProjectionMatrix = mat4_multiply([], projectionMatrix, viewMatrix);
+
+    viewProjectionMatrix = mat4_multiply([], viewProjectionMatrix, VECTOR_TO_POINT_MATRIX);
+
     break;
 
   default:
@@ -120,11 +161,7 @@ export function getUniformsFromViewport({
   projectionMode,
   positionOrigin
 } = {}) {
-  // TODO - this dummy return is needed to make test cases pass
-  // assert(viewport);
-  if (!viewport) {
-    return {};
-  }
+  assert(viewport);
 
   if (projectionMode !== undefined) {
     coordinateSystem = projectionMode;
@@ -136,55 +173,20 @@ export function getUniformsFromViewport({
   }
 
   coordinateZoom = coordinateZoom || viewport.zoom;
-  assert(coordinateZoom);
+  assert(coordinateZoom >= 0);
 
   const {projectionCenter, viewProjectionMatrix, cameraPos} =
     calculateMatrixAndOffset({
       coordinateSystem, coordinateOrigin, coordinateZoom, modelMatrix, viewport
     });
 
-  //   // Calculate projection pixels per unit
-  //   const {pixelsPerMeter, pixelsPerDegree, degreesPerMeter} =
-  //     viewport.getDistanceScales({positionOrigin});
-  //   assert(pixelsPerMeter, 'Viewport missing pixelsPerMeter');
-
-  //   let pixelsPerMeterUTM = ZERO_VECTOR;
-  //   if (projectionMode === COORDINATE_SYSTEM.UTM_OFFSETS) {
-  //     pixelsPerMeterUTM = [
-  //       degreesPerMeter[0] * pixelsPerDegree[0],
-  //       degreesPerMeter[1] * pixelsPerDegree[1],
-  //       degreesPerMeter[2] * pixelsPerDegree[0],
-  //       degreesPerMeter[3] * pixelsPerDegree[1]
-  //     ];
-  //   }
-
   assert(viewProjectionMatrix, 'Viewport missing modelViewProjectionMatrix');
+
+  // console.log(viewport, viewProjectionMatrix);
 
   // Calculate projection pixels per unit
 
-  const distanceScales = coordinateZoom === undefined ?
-    viewport.getDistanceScales() :
-    calculateDistanceScales({
-      longitude: coordinateOrigin[0],
-      latitude: coordinateOrigin[1],
-      zoom: coordinateZoom
-    });
-
-  const scale = Math.pow(2, coordinateZoom);
-
-  // calculate WebGL matrices
-
-  // "Float64Array"
-  // Transpose the projection matrix to column major for GLSL.
-  const glProjectionMatrixFP64 = new Float32Array(32);
-  for (let i = 0; i < 4; ++i) {
-    for (let j = 0; j < 4; ++j) {
-      [
-        glProjectionMatrixFP64[(i * 4 + j) * 2],
-        glProjectionMatrixFP64[(i * 4 + j) * 2 + 1]
-      ] = fp64ify(viewProjectionMatrix[j * 4 + i]);
-    }
-  }
+  const distanceScales = viewport.getDistanceScales();
 
   const devicePixelRatio = (window && window.devicePixelRatio) || 1;
 
@@ -197,15 +199,17 @@ export function getUniformsFromViewport({
     viewportSize: [viewport.width * devicePixelRatio, viewport.height * devicePixelRatio],
     devicePixelRatio,
 
-    // Main projection matrices
+    projectionPixelsPerUnit: distanceScales.pixelsPerMeter,
+    projectionScale: viewport.scale, // This is the mercator scale (2 ** zoom)
+
+    // Projection matrices
     modelMatrix: new Float32Array(modelMatrix || IDENTITY_MATRIX),
     // viewMatrix: new Float32Array(viewMatrix),
     projectionMatrix: new Float32Array(viewProjectionMatrix),
-    projectionFP64: glProjectionMatrixFP64,
 
-    projectionPixelsPerUnit: distanceScales.pixelsPerMeter,
-    projectionScale: scale, // This is the mercator scale (2 ** zoom)
-    projectionScaleFP64: fp64ify(scale), // Deprecated?
+    // 64 bit support
+    projectionFP64: fp64ifyMatrix4(viewProjectionMatrix),
+    projectionScaleFP64: fp64ify(viewport.scale), // Deprecated?
 
     // This is for lighting calculations
     cameraPos: new Float32Array(cameraPos)

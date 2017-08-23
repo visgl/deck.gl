@@ -2,6 +2,10 @@ import vec4_multiply from 'gl-vec4/multiply';
 import vec4_transformMat4 from 'gl-vec4/transformMat4';
 
 export function transformVector(matrix, vector) {
+  // Handle non-invertible matrix
+  if (!matrix) {
+    return null;
+  }
   const result = vec4_transformMat4([0, 0, 0, 0], vector, matrix);
   const scale = 1 / result[3];
   vec4_multiply(result, result, [scale, scale, scale, scale]);

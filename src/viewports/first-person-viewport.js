@@ -19,34 +19,43 @@
 // THE SOFTWARE.
 
 import Viewport from './viewport';
-import mat4_lookAt from 'gl-mat4/lookAt';
-import mat4_perspective from 'gl-mat4/perspective';
+import {Vector3, Matrix4, experimental} from 'math.gl';
+const {SphericalCoordinates} = experimental;
 
-const DEGREES_TO_RADIANS = Math.PI / 180;
+// import {projectFlat} from '../viewport-mercator-project/web-mercator-utils';
+// import assert from 'assert';
+
+function getDirectionFromBearingAndPitch({bearing, pitch}) {
+  const spherical = new SphericalCoordinates({bearing, pitch});
+  const direction = spherical.toVector3().normalize();
+  return direction;
+}
 
 export default class FirstPersonViewport extends Viewport {
-  constructor({
-    // viewport arguments
-    width, // Width of viewport
-    height, // Height of viewport
-    // view matrix arguments
-    eye, // Defines eye position
-    lookAt = [0, 0, 0], // Which point is camera looking at, default origin
-    up = [0, 1, 0], // Defines up direction, default positive y axis
-    // projection matrix arguments
-    fovy = 75, // Field of view covered by camera
-    near = 1, // Distance of near clipping plane
-    far = 100, // Distance of far clipping plane
-    // automatically calculated
-    aspect = null // Aspect ratio (set to viewport widht/height)
-  }) {
-    const fovyRadians = fovy * DEGREES_TO_RADIANS;
-    aspect = Number.isFinite(aspect) ? aspect : width / height;
-    super({
-      viewMatrix: mat4_lookAt([], eye, lookAt, up),
-      projectionMatrix: mat4_perspective([], fovyRadians, aspect, near, far),
-      width,
-      height
-    });
+  constructor(opts = {}) {
+    // TODO - push direction handling into Matrix4.lookAt
+    const {
+      // view matrix arguments
+      bearing,
+      pitch,
+      lookAt, // Which point is camera looking at, default along y axis
+      direction, // Which direction camera is looking at
+      up = [0, 1, 0] // Defines up direction, default positive y axis,
+    } = opts;
+
+    const eye = opts.eye || opts.position; // Defines eye position
+    // const dir = direction || getDirectionFromBearingAndPitch({bearing, pitch: 90}).scale([1, -1, 1]);
+    // const center = dir ? new Vector3(eye).add(dir) : lookAt;
+    const dir = direction || getDirectionFromBearingAndPitch({bearing, pitch: 90}); // .scale([1, -1, 1]);
+    const center = dir ? dir : lookAt;
+
+    const viewMatrix = new Matrix4()
+      .scale([-1, 1, 1])
+      .multiplyRight(new Matrix4().lookAt({eye: [0, 0, 0], center, up}));
+
+    super(Object.assign({}, opts, {
+      viewMatrix,
+      position: eye
+    }));
   }
 }

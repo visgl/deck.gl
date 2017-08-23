@@ -32,6 +32,7 @@ import {
 // TODO - import from viewport-mercator-project
 // import {fitBounds} from '../viewport-mercator-project/fit-bounds';
 
+// TODO - import from math.gl
 /* eslint-disable camelcase */
 import vec2_add from 'gl-vec2/add';
 import vec2_negate from 'gl-vec2/negate';
@@ -59,6 +60,8 @@ export default class WebMercatorViewport extends Viewport {
   /* eslint-disable complexity, max-statements */
   constructor({
     // Map state
+    x = 0,
+    y = 0,
     width,
     height,
     latitude,
@@ -112,7 +115,7 @@ export default class WebMercatorViewport extends Viewport {
     });
 
     super({
-      width, height,
+      x, y, width, height,
       viewMatrix: viewMatrixUncentered,
       longitude,
       latitude,
@@ -253,6 +256,18 @@ export default class WebMercatorViewport extends Viewport {
     const {width, height} = this;
     const {longitude, latitude, zoom} = fitBounds(Object.assign({width, height, bounds}, options));
     return new WebMercatorViewport({width, height, longitude, latitude, zoom});
+  }
+
+  // TODO - should support user supplied constraints
+  isMapSynched() {
+    const MAPBOX_LIMITS = {
+      pitch: 60,
+      zoom: 40
+    };
+
+    const {pitch, zoom} = this;
+
+    return pitch <= MAPBOX_LIMITS.pitch && zoom <= MAPBOX_LIMITS.zoom;
   }
 }
 

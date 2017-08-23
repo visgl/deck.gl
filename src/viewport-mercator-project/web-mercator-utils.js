@@ -1,4 +1,6 @@
-// TODO - THESE UTILITIES COULD BE IMPORTED FROM WEB_MERCATOR_VIEWPORT
+// TODO - THE UTILITIES IN THIS FILE SHOULD BE IMPORTED FROM WEB-MERCATOR-VIEWPORT MODULE
+
+import {Vector3} from 'math.gl';
 import mat4_perspective from 'gl-mat4/perspective';
 import mat4_scale from 'gl-mat4/scale';
 import mat4_translate from 'gl-mat4/translate';
@@ -72,7 +74,7 @@ export function unprojectFlat([x, y], scale) {
  * In mercator projection mode, the distance scales vary significantly
  * with latitude.
  */
-export function calculateDistanceScales({latitude, longitude, zoom, scale}) {
+export function getMercatorDistanceScales({latitude, longitude, zoom, scale}) {
   // Calculate scale from zoom if not provided
   scale = scale !== undefined ? scale : Math.pow(2, zoom);
 
@@ -137,7 +139,114 @@ export function getClippingPlanes({altitude, pitch}) {
   return {farZ, nearZ: 0.1};
 }
 
+/**
+ * Calculates a mercator world position ("pixels" in given zoom level)
+ * from a lng/lat and meterOffset
+ */
+export function getMercatorWorldPosition({
+  longitude,
+  latitude,
+  zoom,
+  meterOffset,
+  distanceScales = null
+}) {
+  const scale = Math.pow(2, zoom);
+
+  // Calculate distance scales if lng/lat/zoom are provided
+  distanceScales = distanceScales || getMercatorDistanceScales({latitude, longitude, scale});
+
+  // Make a centered version of the matrix for projection modes without an offset
+  const center2d = projectFlat([longitude, latitude], scale);
+  const center = new Vector3(center2d[0], center2d[1], 0);
+
+  if (meterOffset) {
+    const pixelPosition = new Vector3(meterOffset)
+      // Convert to pixels in current zoom
+      .scale(distanceScales.pixelsPerMeter)
+      // We want positive Y to represent an offset towards north,
+      // but web mercator world coordinates is top-left
+      .scale([1, -1, 1]);
+    center.add(pixelPosition);
+  }
+
+  return center;
+}
+
+// TODO - rename this matrix
+export function makeUncenteredViewMatrixFromMercatorParams({
+  width,
+  height,
+  longitude,
+  latitude,
+  zoom,
+  pitch,
+  bearing,
+  altitude,
+  center
+}) {
+  // VIEW MATRIX: PROJECTS FROM VIRTUAL PIXELS TO CAMERA SPACE
+  // Note: As usual, matrix operation orders should be read in reverse
+  // since vectors will be multiplied from the right during transformation
+  const vm = createMat4();
+
+  // The Mercator world coordinate system is upper left,
+  // but GL expects lower left, so we flip it around the center
+  mat4_scale(vm, vm, [1, -1, 1]);
+
+  // Move camera to altitude
+  mat4_translate(vm, vm, [0, 0, -altitude]);
+
+  // After the rotateX, z values are in pixel units. Convert them to
+  // altitude units. 1 altitude unit = the screen height.
+  mat4_scale(vm, vm, [1, 1, 1 / height]);
+
+  // Rotate by bearing, and then by pitch (which tilts the view)
+  mat4_rotateX(vm, vm, pitch * DEGREES_TO_RADIANS);
+  mat4_rotateZ(vm, vm, -bearing * DEGREES_TO_RADIANS);
+
+  return vm;
+}
+
+export function makeViewMatricesFromMercatorParams({
+  width,
+  height,
+  longitude,
+  latitude,
+  zoom,
+  pitch,
+  bearing,
+  altitude,
+  centerLngLat,
+  meterOffset = null
+}) {
+  const center = getMercatorWorldPosition({longitude, latitude, zoom, meterOffset});
+
+  // VIEW MATRIX: PROJECTS FROM VIRTUAL PIXELS TO CAMERA SPACE
+  // Note: As usual, matrix operation orders should be read in reverse
+  // since vectors will be multiplied from the right during transformation
+  const viewMatrixUncentered = makeUncenteredViewMatrixFromMercatorParams({
+    width,
+    height,
+    longitude,
+    latitude,
+    zoom,
+    pitch,
+    bearing,
+    altitude
+  });
+
+  const vm = createMat4();
+  const viewMatrixCentered = mat4_translate(vm, viewMatrixUncentered, center.clone.negate());
+
+  return {
+    viewMatrixCentered,
+    viewMatrixUncentered,
+    center
+  };
+}
+
 // PROJECTION MATRIX: PROJECTS FROM CAMERA (VIEW) SPACE TO CLIPSPACE
+// This is a "Mapbox" projection matrix - matches mapbox exactly if farZMultiplier === 1
 export function makeProjectionMatrixFromMercatorParams({
   width,
   height,
@@ -157,34 +266,4 @@ export function makeProjectionMatrixFromMercatorParams({
   );
 
   return projectionMatrix;
-}
-
-export function makeUncenteredViewMatrixFromMercatorParams({
-  width,
-  height,
-  longitude,
-  latitude,
-  zoom,
-  pitch,
-  bearing,
-  altitude,
-  center
-}) {
-  // VIEW MATRIX: PROJECTS FROM VIRTUAL PIXELS TO CAMERA SPACE
-  // Note: As usual, matrix operation orders should be read in reverse
-  // since vectors will be multiplied from the right during transformation
-  const vm = createMat4();
-
-  // Move camera to altitude
-  mat4_translate(vm, vm, [0, 0, -altitude]);
-
-  // After the rotateX, z values are in pixel units. Convert them to
-  // altitude units. 1 altitude unit = the screen height.
-  mat4_scale(vm, vm, [1, -1, 1 / height]);
-
-  // Rotate by bearing, and then by pitch (which tilts the view)
-  mat4_rotateX(vm, vm, pitch * DEGREES_TO_RADIANS);
-  mat4_rotateZ(vm, vm, -bearing * DEGREES_TO_RADIANS);
-
-  return vm;
 }
