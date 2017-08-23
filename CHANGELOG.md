@@ -19,19 +19,28 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ### deck.gl v4.2
 
-- Automatic/custom highlighting using picking shader module.
+#### [4.2.0-alpha.4] -
 
-#### [4.2.0-alpha.X]
+- NEW: Automatic/custom highlighting using picking shader module.
+- FIX: ScreenGridLayer `depthTest`
+- FIX: CompositeLayer `parameters` forwarding
+- FIX: S2Layer prop forwarding
+- FIX: GridLayer crash: max call stack size
+- NEW: Add `devicePixelRatio` prop
+- NEW: RFCs
+- DOCS: picking/event handling refresh
+- DEMO: Wind demo fixes
+
+#### [4.2.0-alpha.3] -
 
 - Move react controllers to react directory, export from index.js
 - Move viewports and some utils out of `lib` folder.
 - Add `start-es6` script to layer-browser
 - Remove UTM_OFFSETS projection mode
 
-#### [4.2.0-alpha.2]
+#### [4.2.0-alpha.2]  -
 
 - Add: UTM_OFFSETS projection mode
-
 
 ## Official Releases
 
