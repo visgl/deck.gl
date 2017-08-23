@@ -252,6 +252,13 @@ prop.
 
 ### Render Properties
 
+##### `parameters` (Function, optional)
+
+The `parameters` allows applications to specify values for WebGL parameters such as blending mode, depth testing etc. Any `parameters` will be applied temporarily while rendering this layer only.
+
+Please refer to the luma.gl v4 [setParameters](http://uber.github.io/luma.gl/#/documentation/api-reference/get-parameter) API for documentation on supported parameters and values.
+
+
 ##### `getPolygonOffset` (Function, optional)
 
 - Default: `({layerIndex}) => [0, -layerIndex * 100]`
@@ -274,6 +281,7 @@ If the accessor is assigned a falsy value, polygon offset will be set to `[0, 0]
 *Remarks: While this feature helps mitigate z-fighting, at close up zoom levels the issue
 might return because of the precision error of 32-bit projection matrices. Try set the
 `fp64` prop to `true` in this case.*
+
 
 ## Members
 
