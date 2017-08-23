@@ -58,13 +58,17 @@ import {get} from './lib/utils/get';
 import {count} from './lib/utils/count';
 import {EffectManager, Effect} from './experimental/lib';
 import {default as ReflectionEffect} from './experimental/effects/reflection-effect';
+import DeckGLMultiView from './experimental/react/deckgl-multiview';
+import ViewportLayout from './experimental/react/viewport-layout';
 
 export const experimental = {
   get,
   count,
   EffectManager,
   Effect,
-  ReflectionEffect
+  ReflectionEffect,
+  DeckGLMultiView,
+  ViewportLayout
 };
 
 // Deprecated Layers
