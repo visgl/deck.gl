@@ -24,6 +24,10 @@ Two new functions - `DeckGL.queryObject` and `DeckGL.queryVisibleObjects` allow 
 
 For developers that write their own custome layers, the `shadertools` shader assembly system is now in place to replace the existing `assembleShaders` function in deck.gl. The new shader assembler system supports organizing shader codes into modules and is integrated with luma.gl's [`Model`]() so users no longer need to call `assembleShaders` before creating the `Model` for the layer.
 
+## Per-Layer control of WebGL Parameters
+
+The base `Layer` class (which is inherited by all layers) supports a new property `parameters` that allows applications to specify the state of WebGL parameters such as blending mode, depth testing etc. This provides significant control over the detailed rendering of layers to applications. Note that the new `parameters` prop directly leverages the luma.gl v4 [setParameters](http://uber.github.io/luma.gl/#/documentation/api-reference/get-parameter) API, which allows all WebGL parameters to be specified as keys in a single parameter object.
+
 ## CompositeLayer
 
 Composite layers, which were introduced in v4.0, have received some polish and performance improvements. `CompositeLayer.renderLayers` function now returns a nested array that could contain `null` values, and deck.gl will automatically flatten, filter and render all layers in the array. This is a small convenience that makes using the `renderLayers` methods in complex composite layers a little more readable. deck.gl now also avoids rerendering sublayers of `CompositeLayer` whose props haven't changed.
