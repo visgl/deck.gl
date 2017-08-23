@@ -1,7 +1,8 @@
 /* global window */
+import {INPUT_EVENT_TYPES} from './constants';
 import {isBrowser} from '../../utils/globals';
 
-const KEY_EVENTS = ['keydown', 'keyup'];
+const {KEY_EVENTS} = INPUT_EVENT_TYPES;
 const DOWN_EVENT_TYPE = 'keydown';
 const UP_EVENT_TYPE = 'keyup';
 

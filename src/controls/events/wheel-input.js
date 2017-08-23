@@ -1,17 +1,11 @@
+import {INPUT_EVENT_TYPES} from './constants';
 import {window} from '../../utils/globals';
 
 const ua = typeof window.navigator !== 'undefined' ?
   window.navigator.userAgent.toLowerCase() : '';
 const firefox = ua.indexOf('firefox') !== -1;
 
-const WHEEL_EVENTS = [
-  // Chrome, Safari
-  'wheel',
-  // IE
-  'mousewheel',
-  // legacy Firefox
-  'DOMMouseScroll'
-];
+const {WHEEL_EVENTS} = INPUT_EVENT_TYPES;
 const EVENT_TYPE = 'wheel';
 
 // Constants for normalizing input delta

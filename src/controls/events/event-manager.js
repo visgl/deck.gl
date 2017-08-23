@@ -1,15 +1,14 @@
 import WheelInput from './wheel-input';
 import MoveInput from './move-input';
 import KeyInput from './key-input';
+import {
+  BASIC_EVENT_ALIASES,
+  EVENT_RECOGNIZER_MAP,
+  GESTURE_EVENT_ALIASES
+} from './constants';
 import {isBrowser} from '../../utils/globals';
 
-// Hammer.js directly references `document` and `window`,
-// which means that importing it in environments without
-// those objects throws errors. Therefore, instead of
-// directly `import`ing 'hammerjs' and './constants'
-// (which imports Hammer.js) we conditionally require it
-// depending on support for those globals, and provide mocks
-// for environments without `document`/`window`.
+// Hammer.Manager mock for use in environments without `document` / `window`.
 function HammerManagerMock(m) {
   const instance = {};
   const chainedNoop = () => instance;
@@ -21,18 +20,8 @@ function HammerManagerMock(m) {
   instance.emit = chainedNoop;
   return instance;
 }
-
 const Manager = isBrowser ? require('hammerjs').Manager : HammerManagerMock;
-const {
-  BASIC_EVENT_ALIASES,
-  EVENT_RECOGNIZER_MAP,
-  RECOGNIZERS,
-  GESTURE_EVENT_ALIASES
-} = isBrowser ? require('./constants') : {
-  BASIC_EVENT_ALIASES: {},
-  EVENT_RECOGNIZER_MAP: {},
-  GESTURE_EVENT_ALIASES: {}
-};
+const {RECOGNIZERS} = isBrowser ? require('./constants-hammer') : {};
 
 // Unified API for subscribing to events about both
 // basic input events (e.g. 'mousemove', 'touchstart', 'wheel')

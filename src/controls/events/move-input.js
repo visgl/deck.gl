@@ -1,4 +1,6 @@
-const MOUSE_EVENTS = ['mousedown', 'mousemove', 'mouseup', 'mouseleave'];
+import {INPUT_EVENT_TYPES} from './constants';
+
+const {MOUSE_EVENTS} = INPUT_EVENT_TYPES;
 const MOVE_EVENT_TYPE = 'pointermove';
 const LEAVE_EVENT_TYPE = 'pointerleave';
 
