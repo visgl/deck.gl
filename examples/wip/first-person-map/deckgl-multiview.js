@@ -38,7 +38,7 @@ export default class DeckGLVR extends DeckGL {
 
   _updateLayers(nextProps) {
     const {leftViewport, width, height} = nextProps;
-    const viewport = leftViewport; //  || new Viewport({width: width / 2, height});
+    const viewport = leftViewport || new Viewport({width: width / 2, height});
 
     super._updateLayers({...nextProps, viewport});
   }
@@ -69,19 +69,18 @@ export default class DeckGLVR extends DeckGL {
 
     this.effectManager.preDraw();
 
-    // render left viewport
     const {width, height} = gl.canvas;
-    // setParameters(gl, {
-    //   viewport: [0, 0, width / 2, height]
-    // });
-    // this.layerManager.setViewport(leftViewport).drawLayers({pass: 'left viewport'});
+    // render left viewport
+    setParameters(gl, {
+      viewport: [0, 0, width / 2, height]
+    });
+    this.layerManager.setViewport(leftViewport).drawLayers({pass: 'left viewport'});
 
     // render right viewport
     setParameters(gl, {
-      viewport: [width / 3, 0, width, height]
-      // viewport: [width / 2, 0, width / 2, height]
+      viewport: [width / 2, 0, width / 2, height]
     });
-    this.layerManager.setViewport(leftViewport).drawLayers({pass: 'right viewport'});
+    this.layerManager.setViewport(rightViewport).drawLayers({pass: 'right viewport'});
 
     this.effectManager.draw();
 

@@ -261,26 +261,29 @@ class Root extends Component {
           height={viewportProps.height}
           onViewportChange={this._onViewportChange} >
 
-          <StaticMap
-            visible={viewport.isMapSynched()}
-            {...viewportProps}
-            width={viewportProps.width / 2}
-            height={viewportProps.height}
-            zoom={viewportProps.zoom}
-            mapStyle="mapbox://styles/mapbox/dark-v9"
-            onViewportChange={this._onViewportChange.bind(this)}
-            mapboxApiAccessToken={MAPBOX_TOKEN}>
+          <div style={{position: 'absolute', left: 0, top: 0}}>
+            <StaticMap
+              visible={mapViewport.isMapSynched()}
+              {...viewportProps}
+              width={viewportProps.width / 2}
+              height={viewportProps.height}
+              zoom={viewportProps.zoom}
+              mapStyle="mapbox://styles/mapbox/dark-v9"
+              onViewportChange={this._onViewportChange.bind(this)}
+              mapboxApiAccessToken={MAPBOX_TOKEN}/>
+          </div>
 
+          <div style={{position: 'absolute', left: 0, top: 0}}>
             <DeckGL
               id="first-person"
-              rightViewport={mapViewport}
-              leftViewport={firstPersonViewport}
               width={viewportProps.width}
               height={viewportProps.height}
+              useDevicePixelRatio={false}
+              leftViewport={mapViewport}
+              rightViewport={firstPersonViewport}
               layers={this._renderLayers()}
               onWebGLInitialized={this._initialize} />
-
-          </StaticMap>
+          </div>
 
         </ViewportController>
 
