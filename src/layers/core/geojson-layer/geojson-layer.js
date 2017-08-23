@@ -110,63 +110,55 @@ export default class GeoJsonLayer extends CompositeLayer {
     const {getLineColor, getFillColor, getRadius,
       getLineWidth, getElevation, updateTriggers} = this.props;
 
-    // base layer props
-    const {opacity, pickable, visible, getPolygonOffset,
-    highlightedObjectIndex, autoHighlight, highlightColor} = this.props;
-
-    // viewport props
-    const {positionOrigin, projectionMode, modelMatrix} = this.props;
-
     const drawPoints = pointFeatures && pointFeatures.length > 0;
     const drawLines = lineFeatures && lineFeatures.length > 0;
     const hasPolygonLines = polygonOutlineFeatures && polygonOutlineFeatures.length > 0;
     const hasPolygon = polygonFeatures && polygonFeatures.length > 0;
 
+    // base layer props
+    const {opacity, pickable, visible, parameters, getPolygonOffset,
+      highlightedObjectIndex, autoHighlight, highlightColor} = this.props;
+    // viewport props
+    const {positionOrigin, projectionMode, modelMatrix} = this.props;
+
+    const forwardProps = {
+      // Forward layer props
+      opacity, pickable, visible, parameters, getPolygonOffset,
+      highlightedObjectIndex, autoHighlight, highlightColor,
+      // Forward viewport props
+      projectionMode, positionOrigin, modelMatrix,
+      // Forward common props
+      fp64
+    };
+
     // Filled Polygon Layer
     const polygonFillLayer = filled &&
       hasPolygon &&
-      new SolidPolygonLayer({
+      new SolidPolygonLayer(Object.assign({}, forwardProps, {
         id: `${id}-polygon-fill`,
         data: polygonFeatures,
+
         extruded,
         wireframe: false,
         lightSettings,
-        fp64,
-        opacity,
-        pickable,
-        visible,
-        getPolygonOffset,
-        projectionMode,
-        positionOrigin,
-        modelMatrix,
         getPolygon: getCoordinates,
         getElevation,
         getColor: getFillColor,
-        highlightedObjectIndex,
-        autoHighlight,
-        highlightColor,
         updateTriggers: {
           getElevation: updateTriggers.getElevation,
           getColor: updateTriggers.getFillColor
         }
-      });
+      }));
 
     const polygonWireframeLayer = wireframe &&
       extruded &&
       hasPolygon &&
-      new SolidPolygonLayer({
+      new SolidPolygonLayer(Object.assign({}, forwardProps, {
         id: `${id}-polygon-wireframe`,
         data: polygonFeatures,
+
         extruded,
         wireframe: true,
-        fp64,
-        opacity,
-        pickable,
-        visible,
-        getPolygonOffset,
-        projectionMode,
-        positionOrigin,
-        modelMatrix,
         getPolygon: getCoordinates,
         getElevation,
         getColor: getLineColor,
@@ -174,12 +166,12 @@ export default class GeoJsonLayer extends CompositeLayer {
           getElevation: updateTriggers.getElevation,
           getColor: updateTriggers.getLineColor
         }
-      });
+      }));
 
     const polygonLineLayer = !extruded &&
       stroked &&
       hasPolygonLines &&
-      new PathLayer({
+      new PathLayer(Object.assign({}, forwardProps, {
         id: `${id}-polygon-outline`,
         data: polygonOutlineFeatures,
         widthScale: lineWidthScale,
@@ -187,14 +179,7 @@ export default class GeoJsonLayer extends CompositeLayer {
         widthMaxPixels: lineWidthMaxPixels,
         rounded: lineJointRounded,
         miterLimit: lineMiterLimit,
-        fp64,
-        opacity,
-        pickable,
-        visible,
-        getPolygonOffset,
-        projectionMode,
-        positionOrigin,
-        modelMatrix,
+
         getPath: getCoordinates,
         getColor: getLineColor,
         getWidth: getLineWidth,
@@ -202,61 +187,43 @@ export default class GeoJsonLayer extends CompositeLayer {
           getColor: updateTriggers.getLineColor,
           getWidth: updateTriggers.getLineWidth
         }
-      });
+      }));
 
-    const pathLayer = drawLines && new PathLayer({
+    const pathLayer = drawLines && new PathLayer(Object.assign({}, forwardProps, {
       id: `${id}-line-paths`,
       data: lineFeatures,
+
       widthScale: lineWidthScale,
       widthMinPixels: lineWidthMinPixels,
       widthMaxPixels: lineWidthMaxPixels,
       rounded: lineJointRounded,
       miterLimit: lineMiterLimit,
-      fp64,
-      opacity,
-      pickable,
-      visible,
-      getPolygonOffset,
-      projectionMode,
-      positionOrigin,
-      modelMatrix,
+
       getPath: getCoordinates,
       getColor: getLineColor,
       getWidth: getLineWidth,
-      highlightedObjectIndex,
-      autoHighlight,
-      highlightColor,
       updateTriggers: {
         getColor: updateTriggers.getLineColor,
         getWidth: updateTriggers.getLineWidth
       }
-    });
+    }));
 
-    const pointLayer = drawPoints && new ScatterplotLayer({
+    const pointLayer = drawPoints && new ScatterplotLayer(Object.assign({}, forwardProps, {
       id: `${id}-points`,
       data: pointFeatures,
+
       radiusScale: pointRadiusScale,
       radiusMinPixels: pointRadiusMinPixels,
       radiusMaxPixels: pointRadiusMaxPixels,
-      fp64,
-      opacity,
-      pickable,
-      visible,
-      getPolygonOffset,
-      projectionMode,
-      positionOrigin,
-      modelMatrix,
+
       getPosition: getCoordinates,
       getColor: getFillColor,
       getRadius,
-      highlightedObjectIndex,
-      autoHighlight,
-      highlightColor,
       updateTriggers: {
         getColor: updateTriggers.getFillColor,
         getRadius: updateTriggers.getRadius
       }
-    });
+    }));
 
     return [
       // If not extruded: flat fill layer is drawn below outlines
