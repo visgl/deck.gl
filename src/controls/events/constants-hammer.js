@@ -1,3 +1,5 @@
+// This module contains constants that must be conditionally required
+// due to `window`/`document` references downstream.
 import {
   Tap,
   Press,
