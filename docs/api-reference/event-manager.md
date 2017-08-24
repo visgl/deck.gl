@@ -75,13 +75,21 @@ Register an event handler function to be called on `event`.
 
 ## Event objects
 
-Wrapper for native event objects dispatched by the browser on input.
+Event handlers subscribed via [`EventManager.on()`](#user-content-on) will be called with one parameter. This event parameter always has the following properties:
 
-TODO: finish this
+* `type` (string) -  The event type to which the event handler is subscribed, e.g. `'click'` or `'pointermove'`
+* `center` (Object `{x, y}`) - The center of the event location (e.g. the centroid of a touch) relative to the viewport (basically, [`clientX/Y`](https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent/clientX))
+* `offsetCenter` (Object `{x, y}`) - The center of the event location (e.g. the centroid of a touch)
+* `target` (Object) - The target of the event, as specified by the original `srcEvent`
+* `srcEvent` (Object) - The original event object dispatched by the browser to the JS runtime
 
-- `srcEvent`: Original event object
-- `offsetCenter`: `{x, y}`
-- `isDown`
+Additionally, event objects for different event types contain a subset of the following properties:
+
+* `key` (number) - The keycode of the keyboard event
+* `isDown` (boolean) - Flag indicating whether an input button is down during the event
+* `pointerType` (string) - A string indicating the type of input (e.g. `'mouse'`, `'touch'`, `'pointer'`)
+* `delta` (number) - The scroll magnitude/distance of a wheel event
+
 
 
 ## Supported Events and Gestures
