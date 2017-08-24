@@ -48,7 +48,7 @@ varying vec2 vTextureCoords;
 vec2 rotate_by_angle(vec2 vertex, float angle, float aspectRatio) {
   float angle_radian = angle * PI / 180.0;
   float cos_angle = cos(angle_radian);
-  float sin_angle = sqrt(1.0 - cos_angle * cos_angle);
+  float sin_angle = sin(angle_radian);
   float aspectRatioInverse = aspectRatio == 0.0 ? 1.0 : 1.0 / aspectRatio;
   mat2 rotationMatrix = mat2(
     cos_angle,
