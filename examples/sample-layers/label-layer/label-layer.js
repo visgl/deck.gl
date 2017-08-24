@@ -4,8 +4,10 @@ import {makeTextureAtlasFromLabels} from './label-utils';
 /* Constants */
 const defaultProps = {
   getLabel: x => x.label,
-  fontSize: 24,
-  fp64: false
+  getPosition: x => x.position,
+  getSize: x => 1,
+  getColor: x => [0, 0, 0, 255],
+  fontSize: 24
 };
 
 /*
@@ -19,6 +21,8 @@ const defaultProps = {
  * @param {Array} [props.axesColor] - color of the gridlines, in [r,g,b,a]
  */
 export default class LabelLayer extends CompositeLayer {
+  initializeState() {}
+
   updateState({props, oldProps, changeFlags}) {
     if (changeFlags.dataChanged || props.fontSize !== oldProps.fontSize) {
       this.updateLabelAtlas(props);
@@ -37,12 +41,14 @@ export default class LabelLayer extends CompositeLayer {
   }
 
   renderLayers() {
+    const {fontSize} = this.props;
+
     return new IconLayer(Object.assign({}, this.props, {
       id: 'label-icons',
       iconAtlas: this.state.texture,
       iconMapping: this.state.mapping,
       data: this.state.mapping,
-      sizeScale: 24,
+      sizeScale: fontSize,
       getIcon: d => d.index,
       getPosition: d => this.props.getPosition(d.object),
       getColor: d => this.props.getColor(d.object),
