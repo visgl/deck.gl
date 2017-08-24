@@ -22,9 +22,10 @@ export default class MultiIconLayer extends IconLayer {
   }
 
   getShaders() {
-    return this.enable64bitSupport(this.props) ?
-      {vs: vs64, fs: super.getShaders().fs, modules: ['project64']} :
-      {vs, fs: super.getShaders().fs};  // 'project' module added by default.
+    const multiIconVs = this.enable64bitSupport(this.props) ? vs64 : vs;
+    return Object.assign({}, super.getShaders(), {
+      vs: multiIconVs
+    });
   }
 
   initializeState() {

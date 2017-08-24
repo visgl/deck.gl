@@ -40,7 +40,10 @@ export default class ArcBrushingLayer extends ArcLayer {
 
   getShaders() {
     // use customized shaders
-    return {vs: arcVertex, fs: arcFragment, modules: []};
+    return Object.assign({}, super.getShaders(), {
+      vs: arcVertex,
+      fs: arcFragment
+    });
   }
 
   draw({uniforms}) {

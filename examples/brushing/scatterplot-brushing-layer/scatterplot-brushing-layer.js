@@ -38,7 +38,10 @@ export default class ScatterplotBrushingLayer extends ScatterplotLayer {
 
   getShaders() {
     // get customized shaders
-    return {vs: scatterplotVertex, fs: scatterplotFragment, modules: []};
+    return Object.assign({}, super.getShaders(), {
+      vs: scatterplotVertex,
+      fs: scatterplotFragment
+    });
   }
 
   // add instanceSourcePositions as attribute
