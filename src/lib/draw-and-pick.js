@@ -359,11 +359,7 @@ function getPickedColors(gl, {
   return withParameters(gl, {
     framebuffer: pickingFBO,
     scissorTest: true,
-    scissor: [x, y, width, height],
-    blend: true,
-    blendFunc: [gl.ONE, gl.ZERO, gl.CONSTANT_ALPHA, gl.ZERO],
-    blendEquation: gl.FUNC_ADD,
-    clearColor: [0, 0, 0, 0]
+    scissor: [x, y, width, height]
   }, () => {
 
     // Clear the frame buffer
@@ -390,7 +386,13 @@ function getPickedColors(gl, {
             layer.context.uniforms,
             {layerIndex}
           ),
-          parameters: layer.props.parameters || {}
+          // Blend parameters must not be overriden
+          parameters: Object.assign({}, layer.props.parameters || {}, {
+            blend: true,
+            blendFunc: [gl.ONE, gl.ZERO, gl.CONSTANT_ALPHA, gl.ZERO],
+            blendEquation: gl.FUNC_ADD,
+            clearColor: [0, 0, 0, 0]
+          })
         });
       }
     });
