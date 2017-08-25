@@ -20,20 +20,25 @@ Current direction for deck.gl v5 (v.Next) is to focus on effects and animation, 
 
 | RFC | Author | Status | Description |
 | --- | --- | --- | --- |
-| **Effect Management** | | | |
-| **[EffectsManager](v5.0/effects-manager-rfc.md)** | @1chandu @ibgreen | Draft | Official support for effects (shadows, reflections, better lighting, postprocessing, framebuffer composition etc).  |
-| | | | |
 | **Animation** | | | |
 | [**Auto Highlighting**](v5.0/auto-highlighting-rfc.md) | @ibgreen @1chandu | **Approved** | Auto highlight hovered object via `picking` module |
 | [**Viewport interpolation**](v5.0/viewport-animation-rfc.md) | @1chandu | Proposed | This should build on the new Viewport system in the First Person RFC. Also needs to consider react-map-gl. |
-| [**Uniform and Parameter Animation**](v5.0/property-animation-rfc.md) | @ibgreen | Draft | Allow Layer props and GL parameters to accept functions in addition to values and call these on every render to update values |
+| [**Property Animation**](v5.0/property-animation-rfc.md) | @ibgreen | Draft | Allow Layer props and GL parameters to accept functions in addition to values and call these on every render to update values |
 | [**Attribute Animation**](v5.0/attribute-animation-rfc.md) | @pessimistress | Proposed | Automatically interpolate between two copies of a vertex attributes |
 | [**Expose Layer AttributeManager**](v5.0/expose-attribute-manager.md) | @ibgreen | Draft | simplifies pregenerating attributes in apps for fast animation. |
-| [**First Person Viewport**](v5.0/first-person-mercator-viewport-rfc.md) | @ibgreen | **Approved** | Geospatially enable all viewports |
 | [**PropTypes**](v5.0/prop-types-rfc.md) | ? | Draft | Validate e.g ranges for numeric attributes, support animation/auto-interpolation. |
 | | | | |
-| **General** | | | |
+| **Effects** | | | |
+| **[Effects Manager](v5.0/effects-manager-rfc.md)** | @1chandu @ibgreen | Draft | Official support for effects (shadows, reflections, better lighting, postprocessing, framebuffer composition etc).  |
+| | | | |
+| **Viewports** | | | |
+| [**Multiple Viewports**](v5.0/multi-viewport-rfc.md) | @ibgreen | Review | Supoort for multiple, synchronized or unsynchronized viewports |
+| [**First Person Viewport**](v5.0/first-person-mercator-viewport-rfc.md) | @ibgreen | **Approved** | Geospatially enable all viewports |
+| | | | |
+| **Ease-of-Use** | | | |
 | [**dataUrl**](v5.0/data-url-rfc.md) | @pessimistress & @ibgreen | Draft | **Ease-of-Use** Allow deck.gl layers to specify a URL and asynchronously download the resulting data |
+| | | | |
+| **Internals** | | | |
 | [**Reduce Distribution Size**](v5.0/reduce-distribution-size-rfc.md) | @ibgreen | **Review** | **Hygiene** Reduce size of distribution and the bundle size of apps consuming deck.gl |
 | [**Reduce Repository Size**](v5.0/reduce-repo-size-rfc.md) | @ibgreen | **Draft** | **Hygiene** Reduce size of deck.gl github repository |
 | [**Break out Math Module**](v5.0/break-out-math-module-rfc.md) | @ibgreen | **Draft** | **Hygiene** Break out luma.gl math module |
