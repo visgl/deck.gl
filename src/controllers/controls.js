@@ -30,7 +30,7 @@ const EVENT_TYPES = {
   DOUBLE_TAP: ['doubletap']
 };
 
-export default class GenericControls {
+export default class Controls {
   /**
    * @classdesc
    * A class that handles events and updates mercator style viewport parameters
