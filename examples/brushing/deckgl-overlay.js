@@ -160,7 +160,8 @@ export default class DeckGLOverlay extends Component {
         pickable: false,
         // only show source points when brushing
         radiusScale: startBrushing ? 3000 : 0,
-        getColor: d => (d.gain > 0 ? targetColor : sourceColor)
+        getColor: d => (d.gain > 0 ? targetColor : sourceColor),
+        getTargetPosition: d => [d[0], d[1], 0]
       }),
       new ScatterplotBrushingLayer({
         id: 'targets-ring',

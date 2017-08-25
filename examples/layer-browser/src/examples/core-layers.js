@@ -87,7 +87,8 @@ const GeoJsonLayerExample = {
     getElevation: f => 500,
     lineWidthScale: 10,
     lineWidthMinPixels: 1,
-    pickable: true
+    pickable: true,
+    fp64: true
   }
 };
 
