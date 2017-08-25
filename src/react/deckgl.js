@@ -26,7 +26,7 @@ import {LayerManager, Layer} from '../lib';
 import {EffectManager, Effect} from '../experimental';
 import {GL, setParameters} from 'luma.gl';
 import {Viewport, WebMercatorViewport} from '../viewports';
-import EventManager from '../controls/events/event-manager';
+import EventManager from '../controllers/events/event-manager';
 
 function noop() {}
 
