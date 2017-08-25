@@ -17,6 +17,23 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## Official Releases
 
+#### [4.1.1] - 2017-8-25
+
+- Example fixes. (#884)
+- getShaders() : update docs and examples. (#876)
+- Make sure blend modes override layer parameters during picking (#879)
+- Add depthTest:false to ScreenGridLayer (#875)
+- Layer.parameters: Update docs and forward in GeojsonLayer (#874)
+- Fix S2Layer fill color (#870)
+- Fix Maximum call stack size exceeded error in grid aggregator (#868)
+- Fix S2Layer base class and props. (#869)
+- Doc paragraph reformatting. Bump code links to 4.1-release (#854)
+- A pass on refreshing picking and event handling docs (#850)
+- Update dependencies to use luma 4.0.1 version (#849)
+- interaction bug fixes (#817)
+
+### deck.gl v4.1
+
 ### deck.gl v4.0
 
 #### [4.0.0] - 2017-4-6 Major deck.gl Release
