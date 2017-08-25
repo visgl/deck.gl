@@ -208,6 +208,10 @@ export const docPages = generatePath([
         content: getDocUrl('advanced/64-bits.md')
       },
       {
+        name: 'Updates',
+        content: getDocUrl('advanced/updates.md')
+      },
+      {
         name: 'Picking',
         content: getDocUrl('advanced/picking.md')
       },

@@ -126,20 +126,17 @@ export default class LayerManager {
   setViewport(viewport, zoom) {
     assert(viewport instanceof Viewport, 'Invalid viewport');
 
-    // TODO - viewport change detection breaks METER_OFFSETS mode
-    // const oldViewport = this.context.viewport;
-    // const viewportChanged = !oldViewport || !viewport.equals(oldViewport);
-
-    this._needsRedraw = true;
-
-    const viewportChanged = true;
+    const oldViewport = this.context.viewport;
+    const viewportChanged = !oldViewport || !viewport.equals(oldViewport);
 
     if (viewportChanged) {
       Object.assign(this.oldContext, this.context);
       this.context.viewport = viewport;
       this.context.viewportChanged = true;
       this.context.uniforms = {};
-      log(4, viewport);
+      log(4, 'Updating viewport', viewport);
+
+      this._needsRedraw = true;
     }
 
     return this;

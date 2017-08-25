@@ -13,15 +13,17 @@ import {
 
   GeoJsonLayer,
   PolygonLayer,
-  PathLayer
+  PathLayer,
+
+  COORDINATE_SYSTEM
 } from 'deck.gl';
 
-// Demonstrate immutable support
+import {parseColor, setOpacity} from '../utils/color';
+
+// TODO - we have given up on immutable support
 import {experimental} from 'deck.gl';
 const {get} = experimental;
-
 import dataSamples from '../immutable-data-samples';
-import {parseColor, setOpacity} from '../utils/color';
 
 const MARKER_SIZE_MAP = {
   small: 200,
@@ -175,21 +177,41 @@ const ScatterplotLayerExample = {
   }
 };
 
+// Point cloud data as pregenerated attributes
+// using the PointCloudLayer's AttributeManager
+// NOTE: this is a new and experimental API
+const pointCloudAttributes = PointCloudLayer.getAttributeManager();
+pointCloudAttributes.update({
+  data: dataSamples.getPointCloud(),
+  numInstances: dataSamples.getPointCloud().length,
+  props: {
+    data: dataSamples.getPointCloud(),
+    getPosition: d => d.position,
+    getNormal: d => d.normal,
+    getColor: d => d.color
+  }
+});
+
 const PointCloudLayerExample = {
   layer: PointCloudLayer,
-  getData: dataSamples.getPointCloud,
   props: {
     id: 'pointCloudLayer',
     outline: true,
-    projectionMode: 2,
+    projectionMode: COORDINATE_SYSTEM.METER_OFFSETS,
     positionOrigin: dataSamples.positionOrigin,
-    getPosition: d => get(d, 'position'),
-    getNormal: d => get(d, 'normal'),
-    getColor: d => get(d, 'color'),
     opacity: 1,
     radiusPixels: 4,
-    pickable: true
+    pickable: true,
+
+    // Pregenerated attributes
+    ...pointCloudAttributes.getTypedArrays()
+
+    // UNCOMMENT to generate attributes the norma way
+    // getPosition: d => get(d, 'position'),
+    // getNormal: d => get(d, 'normal'),
+    // getColor: d => get(d, 'color'),
   }
+  // getData: dataSamples.getPointCloud,
 };
 
 const GridCellLayerExample = {

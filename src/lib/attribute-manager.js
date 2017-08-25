@@ -143,6 +143,7 @@ export default class AttributeManager {
     this.attributes = {};
     this.updateTriggers = {};
     this.allocedInstances = -1;
+    this.numInstances = 0;
     this.needsRedraw = true;
 
     this.userData = {};
@@ -174,6 +175,7 @@ export default class AttributeManager {
    */
   add(attributes, updaters = {}) {
     this._add(attributes, updaters);
+    return this;
   }
 
  /**
@@ -189,10 +191,29 @@ export default class AttributeManager {
   remove(attributeNameArray) {
     for (let i = 0; i < attributeNameArray.length; i++) {
       const name = attributeNameArray[i];
-      if (this.attributes[name] !== undefined) {
+      if (name in this.attributes) {
         delete this.attributes[name];
       }
     }
+    return this;
+  }
+
+ /**
+   * Enables and disables attributes
+   * Disabled attributes will not be updated, and will not be
+   * returned from the getAttributes and getTypedArrays
+   *
+   * @example
+   * attributeManager.enable('instancePositions64', this.props.fp64);
+   *
+   * @param {Object} attributeNameArray - attribute name array (see above)
+   */
+  enable(attributeName, enabled = true) {
+    if (enabled && !this.attributes[attributeName].enabled) {
+      // If enabling a disabled attribute, make sure it gets updated
+      this.invalidate(attributeName);
+    }
+    this.attributes[attributeName].enabled = enabled;
   }
 
   /* Marks an attribute for update
@@ -220,6 +241,7 @@ export default class AttributeManager {
       message: `invalidated attribute ${attributesToUpdate} for ${this.id}`,
       id: this.identifier
     });
+    return this;
   }
 
   invalidateAll() {
@@ -227,6 +249,7 @@ export default class AttributeManager {
     for (const attributeName in attributes) {
       this.invalidate(attributeName);
     }
+    return this;
   }
 
   /**
@@ -257,12 +280,14 @@ export default class AttributeManager {
 
     // Only initiate alloc/update (and logging) if actually needed
     if (this._analyzeBuffers({numInstances})) {
+      this.numInstances = numInstances;
       logFunctions.onUpdateStart({level: LOG_START_END_PRIORITY, id: this.id, numInstances});
       this.stats.timeStart();
       this._updateBuffers({numInstances, data, props, context});
       this.stats.timeEnd();
       logFunctions.onUpdateEnd({level: LOG_START_END_PRIORITY, id: this.id, numInstances});
     }
+    return this;
   }
 
   /**
@@ -271,7 +296,14 @@ export default class AttributeManager {
    * @return {Object} attributes - descriptors
    */
   getAttributes() {
-    return this.attributes;
+    const result = {};
+    for (const attributeName in this.attributes) {
+      const attribute = this.attributes[attributeName];
+      if (attribute.enabled) {
+        result[attributeName] = attribute;
+      }
+    }
+    return result;
   }
 
   /**
@@ -284,12 +316,30 @@ export default class AttributeManager {
     const changedAttributes = {};
     for (const attributeName in attributes) {
       const attribute = attributes[attributeName];
-      if (attribute.changed) {
+      if (attribute.changed && attribute.enabled) {
         attribute.changed = attribute.changed && !clearChangedFlags;
         changedAttributes[attributeName] = attribute;
       }
     }
     return changedAttributes;
+  }
+
+  /**
+   * Returns all attribute typed arrays
+   * Note: Format suitable for pregenerating arrays and passing to layers
+   * @return {Object} attributes - types arrays keyed by attribute name
+   */
+  getTypedArrays() {
+    const result = {
+      numInstances: this.numInstances
+    };
+    for (const attributeName in this.attributes) {
+      const attribute = this.attributes[attributeName];
+      if (attribute.enabled) {
+        result[attributeName] = attribute.value;
+      }
+    }
+    return result;
   }
 
   /**
@@ -328,6 +378,7 @@ export default class AttributeManager {
    */
   addInstanced(attributes, updaters = {}) {
     this._add(attributes, updaters, {instanced: 1});
+    return this;
   }
 
   // PRIVATE METHODS
@@ -363,6 +414,7 @@ export default class AttributeManager {
         attribute,
         {
           // State
+          enabled: true,
           isExternalBuffer: false,
           needsAlloc: false,
           needsUpdate: false,

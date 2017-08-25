@@ -80,6 +80,10 @@ export default class Viewport {
   // Two viewports are equal if width and height are identical, and if
   // their view and projection matrices are (approximately) equal.
   equals(viewport) {
+    if (viewport === this) {
+      return true;
+    }
+
     if (!(viewport instanceof Viewport)) {
       return false;
     }

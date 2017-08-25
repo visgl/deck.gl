@@ -23,6 +23,7 @@ import './viewports';
 import './lib';
 import './utils';
 import './layers';
+
+import './debug/seer-integration.spec';
 import './experimental';
 import './deprecated';
-import './debug/seer-integration.spec';
