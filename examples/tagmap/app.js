@@ -1,17 +1,19 @@
+/* eslint-disable max-len */
 /* global window,document */
 import React, {Component} from 'react';
 import {render} from 'react-dom';
 import MapGL from 'react-map-gl';
 import DeckGLOverlay from './deckgl-overlay.js';
-import MAP_STYLE from './style/map-style-dark-v9.json';
 import {fromJS} from 'immutable';
-// handle ajax call
-import axios from 'axios';
+import Stats from 'stats.js';
+import {json as requestJson} from 'd3-request';
 
 // Set your mapbox token here
 const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
 // sample data
 const FILE_PATH = 'https://rivulet-zhang.github.io/dataRepo/tagmap/hashtags10k.json';
+// mapbox style file path
+const MAPBOX_STYLE_FILE = 'https://rivulet-zhang.github.io/dataRepo/mapbox/style/map-style-dark-v9-no-labels.json';
 
 class Root extends Component {
 
@@ -22,16 +24,38 @@ class Root extends Component {
         ...DeckGLOverlay.defaultViewport,
         width: 500,
         height: 500
-      },
-      mapStyle: this._removeLabelFromMapStyle(fromJS(MAP_STYLE))
+      }
     };
+    this._loadMapStyle();
+  }
+
+  // use this instead of componentDidMount to avoid pickingFBO incorrect size issue
+  componentWillMount() {
+    window.addEventListener('resize', this._resize.bind(this));
+    this._resize();
   }
 
   componentDidMount() {
-    window.addEventListener('resize', this._resize.bind(this));
-    this._resize();
     // set data in component state
     this._loadData();
+
+    this._stats = new Stats();
+    this._stats.showPanel(0);
+    this.refs.fps.appendChild(this._stats.dom);
+
+    const calcFPS = () => {
+      this._stats.begin();
+      this._stats.end();
+      this._animateRef = window.requestAnimationFrame(calcFPS);
+    };
+
+    this._animateRef = window.requestAnimationFrame(calcFPS);
+  }
+
+  componentWillUnmount() {
+    if (this._animateRef) {
+      window.cancelAnimationFrame(this._animateRef);
+    }
   }
 
   _resize() {
@@ -49,41 +73,49 @@ class Root extends Component {
 
   _loadData() {
     // remove high-frequency terms
-    const excludeList = new Set(['#hiring', '#job', '#jobs', '#careerarc', '#career']);
-    const weightThreshold = 2;
+    const excludeList = new Set(['#hiring', '#job', '#jobs', '#careerarc', '#career', '#photo']);
+    const weightThreshold = 1;
 
-    axios.get(FILE_PATH)
-      .then(response => {
-        const data = response.data.filter(x => !excludeList.has(x.label)).slice(0, 3000);
+    requestJson(FILE_PATH, (error, response) => {
+      if (!error) {
+        const data = response.filter(x => !excludeList.has(x.label)).slice(0, 1000);
         this.setState({data, weightThreshold});
-      }).catch(error => {
+      } else {
         throw new Error(error.toString());
-      });
+      }
+    });
   }
 
-  _removeLabelFromMapStyle(mapStyle) {
-    const LABEL_REG = /label|place|poi/;
-    const layers = mapStyle.get('layers').filter(layer => {
-      return !LABEL_REG.test(layer.get('id'));
+  _loadMapStyle() {
+    requestJson(MAPBOX_STYLE_FILE, (error, response) => {
+      if (!error) {
+        const mapStyle = fromJS(response);
+        this.setState({mapStyle});
+      } else {
+        throw new Error(error.toString());
+      }
     });
-    return mapStyle.set('layers', layers);
   }
 
   render() {
     const {viewport, mapStyle, data, weightThreshold} = this.state;
 
     return (
-      <MapGL
-        {...viewport}
-        mapStyle={mapStyle}
-        onViewportChange={this._onViewportChange.bind(this)}
-        mapboxApiAccessToken={MAPBOX_TOKEN}>
-        <DeckGLOverlay
-          viewport={viewport}
-          data={data}
-          weightThreshold={weightThreshold}
-        />
-      </MapGL>
+      <div>
+        <MapGL
+          {...viewport}
+          mapStyle={mapStyle}
+          preventStyleDiffing={true}
+          onViewportChange={this._onViewportChange.bind(this)}
+          mapboxApiAccessToken={MAPBOX_TOKEN}>
+          <DeckGLOverlay
+            viewport={viewport}
+            data={data}
+            weightThreshold={weightThreshold}
+          />
+        </MapGL>
+        <div ref="fps" className="fps" />
+      </div>
     );
   }
 }

@@ -1,6 +1,6 @@
 This is a standalone version of the TagMap example built upon [deck.gl](http://deck.gl).
 
-![tagmap](demo.png)
+![tagmap](https://raw.githubusercontent.com/rivulet-zhang/rivulet-zhang.github.io/master/dataRepo/static/tagmap.png)
 
 ### Usage
 Copy the content of this folder to your project. Run

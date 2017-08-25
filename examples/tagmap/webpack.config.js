@@ -29,6 +29,10 @@ module.exports = {
     }]
   },
 
+  node: {
+    __dirname: true
+  },
+
   resolve: {
     alias: {
       // From mapbox-gl-js README. Required for non-browserify bundlers (e.g. webpack):
