@@ -343,6 +343,30 @@ export default class AttributeManager {
   }
 
   /**
+   * Updates from props and returns all attribute typed arrays
+   * Note: Format suitable for pregenerating arrays and passing to layers
+   * @return {Object} attributes - types arrays keyed by attribute name
+   */
+  getTypedArraysFromProps(props) {
+    this.update({
+      data: props.data,
+      numInstances: props.numInstances,
+      props
+    });
+
+    const result = {
+      numInstances: this.numInstances
+    };
+    for (const attributeName in this.attributes) {
+      const attribute = this.attributes[attributeName];
+      if (attribute.enabled) {
+        result[attributeName] = attribute.value;
+      }
+    }
+    return result;
+  }
+
+  /**
    * Returns the redraw flag, optionally clearing it.
    * Redraw flag will be set if any attributes attributes changed since
    * flag was last cleared.
