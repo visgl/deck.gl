@@ -5,23 +5,27 @@ Implementation of non-trivial new deck.gl features should typically be started o
 | RFC Status   | Description |
 | ---          | --- |
 | Proposed     | Call for an RFC to be written |
-| Draft        | WIP version available, not ready for formal review |
-| **Review**   | In formal review |
+| Draft        | Work-in-progress, not ready for formal review, not approved for prototyping |
+| **Pre-Approved** | Draft approved for prototyping, initial comment round did not uncover major objectsions |
+| **Review**   | Ready for formal review |
 | **Approved** | Approved, ready for implementation |
+| **Implemented** | Approved and implemented |
 | **Deferred** | Review uncovered reasons not to proceed at this time |
 | **Rejected** | Review uncovered reasons not to proceed at this time |
+
+## Reviews
+
+The core developers will review RFCs (and of course, comments from the community are always welcome). Recommended review criteria are being documented in [RFC Review Guidelines](../common/RFC-REVIEW-GUIDELINES.md).
 
 
 ## v5.0 RFCs
 
-Current direction for deck.gl v5 (v.Next) is to focus on effects and animation, so we want to prioritize related RFCs. In particular, the topic of animation is big, below are some potential RFCs that could move us in the right direction.
-
-
+Current direction for [deck.gl v5 (v.Next)](https://github.com/uber/deck.gl/projects/3) is to focus on **animation** and **visual effects**, so we want to prioritize related RFCs. In particular, the topic of animation is big, and it has been broken down into a number of separete RFCs that should all move us in the right direction.
 
 | RFC | Author | Status | Description |
 | --- | --- | --- | --- |
 | **Animation** | | | |
-| [**Auto Highlighting**](v5.0/auto-highlighting-rfc.md) | @ibgreen @1chandu | **Approved** | Auto highlight hovered object via `picking` module |
+| [**Auto Highlighting**](v5.0/auto-highlighting-rfc.md) | @ibgreen @1chandu | **Implemented** | Auto highlight hovered object via `picking` module |
 | [**Viewport interpolation**](v5.0/viewport-animation-rfc.md) | @1chandu | Proposed | This should build on the new Viewport system in the First Person RFC. Also needs to consider react-map-gl. |
 | [**Property Animation**](v5.0/property-animation-rfc.md) | @ibgreen | Draft | Allow Layer props and GL parameters to accept functions in addition to values and call these on every render to update values |
 | [**Attribute Animation**](v5.0/attribute-animation-rfc.md) | @pessimistress | Proposed | Automatically interpolate between two copies of a vertex attributes |
@@ -31,9 +35,10 @@ Current direction for deck.gl v5 (v.Next) is to focus on effects and animation, 
 | **Effects** | | | |
 | **[Effects Manager](v5.0/effects-manager-rfc.md)** | @1chandu @ibgreen | Draft | Official support for effects (shadows, reflections, better lighting, postprocessing, framebuffer composition etc).  |
 | | | | |
-| **Viewports** | | | |
-| [**Multiple Viewports**](v5.0/multi-viewport-rfc.md) | @ibgreen | Review | Supoort for multiple, synchronized or unsynchronized viewports |
-| [**First Person Viewport**](v5.0/first-person-mercator-viewport-rfc.md) | @ibgreen | **Approved** | Geospatially enable all viewports |
+| **Viewports and Controllers** | | | |
+| [**First Person Viewport**](v5.0/first-person-mercator-viewport-rfc.md) | @ibgreen | **Pre-Approved** | Geospatially enable all viewports |
+| [**Multiple Viewports**](v5.0/multi-viewport-rfc.md) | @ibgreen | Review | Supoort for multiple viewports, synchronized or unsynchronized |
+| [**Controller Architecture**](v5.0/controller-architecture-rfc.md) | @ibgreen | **Approved** | Generalize and Freeze experimental Controller Architecture from v4.1 |
 | | | | |
 | **Ease-of-Use** | | | |
 | [**dataUrl**](v5.0/data-url-rfc.md) | @pessimistress & @ibgreen | Draft | **Ease-of-Use** Allow deck.gl layers to specify a URL and asynchronously download the resulting data |
@@ -42,9 +47,9 @@ Current direction for deck.gl v5 (v.Next) is to focus on effects and animation, 
 | [**Reduce Distribution Size**](v5.0/reduce-distribution-size-rfc.md) | @ibgreen | **Review** | **Hygiene** Reduce size of distribution and the bundle size of apps consuming deck.gl |
 | [**Reduce Repository Size**](v5.0/reduce-repo-size-rfc.md) | @ibgreen | **Draft** | **Hygiene** Reduce size of deck.gl github repository |
 | [**Break out Math Module**](v5.0/break-out-math-module-rfc.md) | @ibgreen | **Draft** | **Hygiene** Break out luma.gl math module |
-| [**Break out EventManager**](v5.0/break-out-event-manager.md) | @ibgreen | **Draft** | **Hygiene** Break out shared event manager code |
-| [**Partial Updates**](deferred/partial-updates-rfc.md) | @ibgreen | **Deferred** | Allow partial updates of vertex attributes to support high-performance editing. Deferred due to performance of complete updates being so good this was not needed. |
-| [**Off-thread attribute generation**](deferred/off-thread-attribute-generation.md) | @pessimistress | **Deferred** | Generate attributes off-thread (to avoid locking the main thread). Deferred due to issues with supporting the more general use cases. **dataUrl RFC** could be broken out. |
+| [**Break out EventManager**](v5.0/break-out-event-manager-rfc.md) | @ibgreen | **Draft** | **Hygiene** Break out shared event manager code |
+| [**Partial Updates**](v5.0/partial-updates-rfc.md) | @ibgreen | **Deferred** | Allow partial updates of vertex attributes to support high-performance editing. Deferred due to performance of complete updates being so good this was not needed. |
+| [**Off-thread attribute generation**](v5.0/off-thread-attribute-generation.md) | @pessimistress | **Deferred** | Generate attributes off-thread (to avoid locking the main thread). Deferred due to issues with supporting the more general use cases. **dataUrl RFC** could be broken out. |
 
 Possible other animation related RFCs:
 - integration with event handling (enter leave triggers for animations)

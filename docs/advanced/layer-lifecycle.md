@@ -44,8 +44,7 @@ rendering cycle (resulting in new props being passed to that layer),
 or when context has changed and layers are about to be drawn.
 
 [`layer.shouldUpdateState()`](/docs/api-reference/base-layer.md#-shouldupdatestate-)
-is called to determine if the layer needs an update.
-By default, it does a shallow equal comparison on the props and context.
+is called to determine if the layer needs an update. The default implementation updates on prop and data changes, but not on viewport changes, so screen-space based layers may want to override this (see e.g. ScreenGridLayer).
 Under more complicated circumstances, additional checks can be supplied through the
 [`dataComparator`](/docs/api-reference/base-layer.md#-datacomparator-function-optional-)
 prop.
