@@ -48,14 +48,13 @@ test('getUniformsFromViewport', t => {
   const viewport = new WebMercatorViewport(TEST_DATA.mapState);
   t.ok(viewport instanceof Viewport, 'Created new WebMercatorViewport');
 
-  let uniforms = getUniformsFromViewport(viewport);
+  let uniforms = getUniformsFromViewport({viewport});
   t.ok(uniforms.devicePixelRatio > 0, 'Returned devicePixelRatio');
   t.ok((uniforms.projectionMatrix instanceof Float32Array) ||
     (uniforms.projectionMatrix instanceof Matrix4), 'Returned projectionMatrix');
-  t.ok((uniforms.modelViewMatrix instanceof Float32Array) ||
-    (uniforms.modelViewMatrix instanceof Matrix4), 'Returned modelViewMatrix');
 
-  uniforms = getUniformsFromViewport(viewport, {
+  uniforms = getUniformsFromViewport({
+    viewport,
     projectionMode: COORDINATE_SYSTEM.METER_OFFSETS
   });
   t.ok(uniforms.projectionCenter.some(x => x), 'Returned non-trivial projection center');

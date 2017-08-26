@@ -13,6 +13,13 @@ The new `useDevicePixelRatio` prop for DeckGL component can be used to toggle us
 Three new props (`highlightColor`, `highlightedObjectIndex` and `autoHighlight`) are added to `Layer` class to support highlighting of a single object in a layer, either automatically on hover or through programmatically specifying a selected object. Note that this highlighting is done on GPU and is thus very performant.
 
 
+## Layer: AttributeManager access
+
+It is now possible to create an instance of a layer's `AttributeManager` outside of the layer, and use that instance to pre-generate a set of typed "attribute" arrays that can then be passed back into the layer, rather than having the layer auto update the attributes for you.
+
+This technique complements the ability to supply pre-calculated attributes using properties that was introduced in 4.1. That feature had limited usability since the application needed to know how to generate the attributes). It can be used to increase performance in certain scenarios. It makes it possible to calculate large attribute arrays in workers instead of on the main thread, and also enables precalculation of a set of attributes that the app can switch quickly back and forth among, without constantly retriggering the layer's attribute updates.
+
+
 # deck.gl v4.1
 
 Release date: July 27th, 2017
