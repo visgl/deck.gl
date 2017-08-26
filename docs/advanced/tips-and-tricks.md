@@ -1,5 +1,10 @@
 # Tips and Tricks
 
+## Notes on Rendering Control
+
+The base `Layer` class (which is inherited by all layers) supports a new property `parameters` that allows applications to specify the state of WebGL parameters such as blending mode, depth testing etc. This provides a tremendous amount of extra flexibility to applications. The new `parameters` prop leverages the luma.gl v4 [setParameters](http://uber.github.io/luma.gl/#/documentation/api-reference/get-parameter) API, which allows all WebGL parameters to be specified as keys in a single parameter object.
+
+
 ## Notes on Blending Modes
 
 To get a handle on blending modes, it helps to consider that deck.gl

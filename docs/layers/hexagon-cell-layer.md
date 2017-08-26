@@ -67,7 +67,7 @@ they will be used to calculate primitive hexagon instead of `hexagonVertices`
 - Default: `1`
 
 Hexagon radius multiplier, between 0 - 1. The radius of hexagon is calculated by
-`coverage * getRadius(d)`
+`coverage * radius`
 
 ##### `elevationScale` (Number, optional)
 

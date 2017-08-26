@@ -44,15 +44,21 @@ export function pointToDensityGridData(points, cellSize, getPosition) {
  * @param {function} getPosition - position accessor
  * @returns {object} - grid hash and cell dimension
  */
-function _pointsToGridHashing(points, cellSize, getPosition) {
+function _pointsToGridHashing(points = [], cellSize, getPosition) {
 
   // find the geometric center of sample points
-  const allLat = points
-    .map(p => getPosition(p)[1])
-    .filter(Number.isFinite);
+  let latMin = Infinity;
+  let latMax = -Infinity;
+  let pLat;
 
-  const latMin = Math.min.apply(null, allLat);
-  const latMax = Math.max.apply(null, allLat);
+  for (let p = 0; p < points.length; p++) {
+    pLat = getPosition(points[p])[1];
+    if (Number.isFinite(pLat)) {
+      latMin = pLat < latMin ? pLat : latMin;
+      latMax = pLat > latMax ? pLat : latMax;
+    }
+  }
+
   const centerLat = (latMin + latMax) / 2;
 
   const gridOffset = _calculateGridLatLonOffset(cellSize, centerLat);
