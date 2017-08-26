@@ -155,3 +155,9 @@ WORK ITEM:
 * If good results, include example/recipe in our webpage
 * Use in our own apps
 
+
+### Use Automatic Attribute Updaters
+
+Most layer attribute updaters are doing the same thing which could easily be automated, especially if we had prop types for accessors. This could remove 10-20% of the code from each layer, at the cost of layer source code being a little less easily understood.
+
+
