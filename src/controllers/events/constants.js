@@ -1,12 +1,3 @@
-import {
-  Tap,
-  Press,
-  Pinch,
-  Rotate,
-  Pan,
-  Swipe
-} from 'hammerjs';
-
 /**
  * Only one set of basic input events will be fired by Hammer.js:
  * either pointer, touch, or mouse, depending on system support.
@@ -24,6 +15,27 @@ export const BASIC_EVENT_ALIASES = {
   mousedown: 'pointerdown',
   mousemove: 'pointermove',
   mouseup: 'pointerup'
+};
+
+export const INPUT_EVENT_TYPES = {
+  KEY_EVENTS: [
+    'keydown',
+    'keyup'
+  ],
+  MOUSE_EVENTS: [
+    'mousedown',
+    'mousemove',
+    'mouseup',
+    'mouseleave'
+  ],
+  WHEEL_EVENTS: [
+    // Chrome, Safari
+    'wheel',
+    // IE
+    'mousewheel',
+    // legacy Firefox
+    'DOMMouseScroll'
+  ]
 };
 
 /**
@@ -64,16 +76,6 @@ export const EVENT_RECOGNIZER_MAP = {
   swipedown: 'swipe'
 };
 
-export const RECOGNIZERS = [
-  [Rotate, {enable: false}],
-  [Pinch, {enable: false}, ['rotate']],
-  [Pan, {threshold: 10, enable: false}],
-  [Swipe, {enable: false}],
-  [Press, {enable: false}],
-  [Tap, {event: 'doubletap', taps: 2, enable: false}],
-  [Tap, {enable: false}]
-];
-
 /**
  * Map gestural events typically provided by browsers
  * that are not reported in 'hammer.input' events
@@ -83,5 +85,6 @@ export const GESTURE_EVENT_ALIASES = {
   click: 'tap',
   mousedown: 'pointerdown',
   mousemove: 'pointermove',
-  mouseup: 'pointerup'
+  mouseup: 'pointerup',
+  mouseleave: 'pointerleave'
 };

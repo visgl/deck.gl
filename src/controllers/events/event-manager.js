@@ -1,16 +1,15 @@
 import WheelInput from './wheel-input';
 import MoveInput from './move-input';
-// import KeyInput from './key-input';
+import KeyInput from './key-input';
+import {
+  BASIC_EVENT_ALIASES,
+  EVENT_RECOGNIZER_MAP,
+  GESTURE_EVENT_ALIASES
+} from './constants';
 import {isBrowser} from '../../utils/globals';
 
-// Hammer.js directly references `document` and `window`,
-// which means that importing it in environments without
-// those objects throws errors. Therefore, instead of
-// directly `import`ing 'hammerjs' and './constants'
-// (which imports Hammer.js) we conditionally require it
-// depending on support for those globals, and provide mocks
-// for environments without `document`/`window`.
-function ManagerMock(m) {
+// Hammer.Manager mock for use in environments without `document` / `window`.
+function HammerManagerMock(m) {
   const instance = {};
   const chainedNoop = () => instance;
   instance.get = () => null;
@@ -21,31 +20,13 @@ function ManagerMock(m) {
   instance.emit = chainedNoop;
   return instance;
 }
+const Manager = isBrowser ? require('hammerjs').Manager : HammerManagerMock;
+const {RECOGNIZERS} = isBrowser ? require('./constants-hammer') : {};
 
-const Manager = isBrowser ? require('hammerjs').Manager : ManagerMock;
-const {
-  BASIC_EVENT_ALIASES,
-  EVENT_RECOGNIZER_MAP,
-  RECOGNIZERS,
-  GESTURE_EVENT_ALIASES
-} = isBrowser ? require('./constants') : {
-  BASIC_EVENT_ALIASES: {},
-  EVENT_RECOGNIZER_MAP: {},
-  GESTURE_EVENT_ALIASES: {}
-};
-
-/**
- * Single API for subscribing to events about both
- * basic input events (e.g. 'mousemove', 'touchstart', 'wheel')
- * and gestural input (e.g. 'click', 'tap', 'panstart').
- * Delegates event registration and handling to Hammer.js.
- * @param {DOM Element} element         DOM element on which event handlers will be registered.
- * @param {Object} options              Options for instantiation
- * @param {Object} options.events       Map of {event name: handler} to register on init.
- * @param {Object} options.recognizers  Gesture recognizers from Hammer.js to register,
- *                                      as an Array in Hammer.Recognizer format.
- *                                      (http://hammerjs.github.io/api/#hammermanager)
- */
+// Unified API for subscribing to events about both
+// basic input events (e.g. 'mousemove', 'touchstart', 'wheel')
+// and gestural input (e.g. 'click', 'tap', 'panstart').
+// Delegates gesture related event registration and handling to Hammer.js.
 export default class EventManager {
   constructor(element, options = {}) {
     this.element = element;
@@ -61,7 +42,7 @@ export default class EventManager {
     this._onOtherEvent = this._onOtherEvent.bind(this);
     this.wheelInput = new WheelInput(element, this._onOtherEvent, {enable: false});
     this.moveInput = new MoveInput(element, this._onOtherEvent, {enable: false});
-    // this.keyInput = new KeyInput(element, this._onOtherEvent, {enable: false});
+    this.keyInput = new KeyInput(element, this._onOtherEvent, {enable: false});
 
     // Register all passed events.
     const {events} = options;
@@ -70,21 +51,15 @@ export default class EventManager {
     }
   }
 
-  /**
-   * Tear down internal event management implementations.
-   */
+  // Tear down internal event management implementations.
   destroy() {
     this.wheelInput.destroy();
     this.moveInput.destroy();
-    // this.keyInput.destroy();
+    this.keyInput.destroy();
     this.manager.destroy();
   }
 
-  /**
-   * Register an event handler function to be called on `event`.
-   * @param {string|Object} event   An event name (String) or map of event names to handlers.
-   * @param {Function} [handler]    The function to be called on `event`.
-   */
+  // Register an event handler function to be called on `event`.
   on(event, handler) {
     if (typeof event === 'string') {
       this._addEventHandler(event, handler);
@@ -120,9 +95,9 @@ export default class EventManager {
     if (recognizer) {
       recognizer.set({enable: enabled});
     }
-    this.wheelInput.toggleIfEventSupported(name, enabled);
-    this.moveInput.toggleIfEventSupported(name, enabled);
-    // this.keyInput.toggleIfEventSupported(name, enabled);
+    this.wheelInput.enableEventType(name, enabled);
+    this.moveInput.enableEventType(name, enabled);
+    this.keyInput.enableEventType(name, enabled);
   }
 
   /**
@@ -238,5 +213,4 @@ export default class EventManager {
   _onOtherEvent(event) {
     this.manager.emit(event.type, event);
   }
-
 }
