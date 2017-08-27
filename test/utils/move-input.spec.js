@@ -29,7 +29,7 @@ test('moveInput#constructor', t => {
   t.ok(moveInput, 'MoveInput created without optional params');
 
   const events = ['foo', 'bar'];
-  const numMouseEvents = 3;   // MOUSE_EVENTS.length
+  const numMouseEvents = 4;   // MOUSE_EVENTS.length
   const addELSpy = spy(eventRegistrar, 'addEventListener');
   moveInput = new MoveInput(eventRegistrar, () => {}, {events});
   t.equal(addELSpy.callCount, events.length + numMouseEvents,
@@ -40,48 +40,12 @@ test('moveInput#constructor', t => {
 test('moveInput#destroy', t => {
   const eventRegistrar = createEventRegistrarMock();
   const events = ['foo', 'bar'];
-  const numMouseEvents = 3;   // MOUSE_EVENTS.length
+  const numMouseEvents = 4;   // MOUSE_EVENTS.length
   const removeELSpy = spy(eventRegistrar, 'removeEventListener');
   const moveInput = new MoveInput(eventRegistrar, () => {}, {events});
   moveInput.destroy();
   t.equal(removeELSpy.callCount, events.length + numMouseEvents,
     'should call removeEventListener once for each passed event:handler pair');
-  t.end();
-});
-
-test('moveInput#set', t => {
-  const options = {
-    foo: 1,
-    bar: 'two',
-    baz: () => {},
-    qux: {}
-  };
-  const moveInput = new MoveInput(createEventRegistrarMock());
-  moveInput.set(options);
-  t.ok(Object.keys(options).every(k => moveInput.options[k] === options[k]),
-    'should add all passed options onto internal options property');
-
-  const newOptions = {
-    foo: 2,
-    bar: 'three'
-  };
-  moveInput.set(newOptions);
-  t.ok(Object.keys(newOptions).every(k => moveInput.options[k] === newOptions[k]),
-    'should merge all passed options onto internal options property');
-  t.end();
-});
-
-test('moveInput#toggleIfEventSupported', t => {
-  const MOVE_EVENT_TYPES = ['pointermove'];
-  const moveInput = new MoveInput(createEventRegistrarMock(), null, {enable: false});
-  moveInput.toggleIfEventSupported('foo', true);
-  t.notOk(moveInput.options.enable, 'should not enable for unsupported event');
-
-  t.ok(MOVE_EVENT_TYPES.every(event => {
-    moveInput.options.enable = false;
-    moveInput.toggleIfEventSupported(event, true);
-    return moveInput.options.enable;
-  }), 'should enable for all supported events');
   t.end();
 });
 
@@ -115,14 +79,9 @@ test('moveInput#handleEvent', t => {
   t.notOk(callbackSpy.called, 'callback should not be called on mouse drag');
   moveInput.handleEvent(mouseUpMock);
   t.notOk(callbackSpy.called, 'callback should not be called on mouse up');
-
-  moveInput.options.enable = false;
   moveInput.handleEvent(mouseHoverMock);
-  t.notOk(callbackSpy.called, 'callback should not be called when disabled');
+  t.ok(callbackSpy.called, 'callback should be called on mouse hover');
 
-  moveInput.options.enable = true;
-  moveInput.handleEvent(mouseHoverMock);
-  t.ok(callbackSpy.called, 'callback should be called on mouse hover when enabled...');
   // TODO - fix spy
   // t.deepEqual(callbackSpy.calls[0].arguments[0], {
   //   type: mouseHoverMock.type,
@@ -130,5 +89,42 @@ test('moveInput#handleEvent', t => {
   //   pointerType: 'mouse',
   //   target: eventRegistrar
   // }, '...and should be called with correct params');
+  t.end();
+});
+
+test('moveInput#enableEventType', t => {
+  const eventRegistrar = createEventRegistrarMock();
+  const mouseHoverMock = {
+    type: 'mousemove',
+    which: 0,
+    target: eventRegistrar
+  };
+  const mouseLeaveMock = {
+    type: 'mouseleave',
+    target: eventRegistrar
+  };
+
+  let callbackSpy = spy();
+  let moveInput = new MoveInput(eventRegistrar, callbackSpy, {enable: true});
+
+  moveInput.enableEventType('pointermove', false);
+  moveInput.handleEvent(mouseHoverMock);
+  t.notOk(callbackSpy.called, 'callback should not be called when disabled');
+
+  moveInput.enableEventType('pointermove', true);
+  moveInput.handleEvent(mouseHoverMock);
+  t.ok(callbackSpy.called, 'callback should be called on mouse hover when enabled...');
+
+  callbackSpy = spy();
+  moveInput = new MoveInput(eventRegistrar, callbackSpy, {enable: true});
+
+  moveInput.enableEventType('pointerleave', false);
+  moveInput.handleEvent(mouseLeaveMock);
+  t.notOk(callbackSpy.called, 'callback should not be called when disabled');
+
+  moveInput.enableEventType('pointerleave', true);
+  moveInput.handleEvent(mouseLeaveMock);
+  t.ok(callbackSpy.called, 'callback should be called on mouse hover when enabled...');
+
   t.end();
 });

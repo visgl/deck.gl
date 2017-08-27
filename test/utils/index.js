@@ -19,5 +19,6 @@
 // THE SOFTWARE.
 
 import './event-manager.spec';
+import './key-input.spec';
 import './move-input.spec';
 import './wheel-input.spec';
