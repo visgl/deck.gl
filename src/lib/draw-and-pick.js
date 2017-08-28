@@ -265,6 +265,17 @@ function getClosestFromPickingBuffer(gl, {
   deviceY,
   deviceRadius
 }) {
+  let closestResultToCenter = {
+    pickedColor: EMPTY_PIXEL,
+    pickedLayer: null,
+    pickedObjectIndex: -1
+  };
+
+  if (deviceX < 0 || deviceY < 0 || deviceX > pickingFBO.width || deviceY > pickingFBO.height) {
+    // x, y out of bounds
+    return closestResultToCenter;
+  }
+
   // Create a box of size `radius * 2 + 1` centered at [deviceX, deviceY]
   const x = Math.max(0, deviceX - deviceRadius);
   const y = Math.max(0, deviceY - deviceRadius);
@@ -276,11 +287,6 @@ function getClosestFromPickingBuffer(gl, {
   // Traverse all pixels in picking results and find the one closest to the supplied
   // [deviceX, deviceY]
   let minSquareDistanceToCenter = deviceRadius * deviceRadius;
-  let closestResultToCenter = {
-    pickedColor: EMPTY_PIXEL,
-    pickedLayer: null,
-    pickedObjectIndex: -1
-  };
   let i = 0;
 
   for (let row = 0; row < height; row++) {

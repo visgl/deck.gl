@@ -43,13 +43,11 @@ export default class MoveInput {
     }
     if (eventType === LEAVE_EVENT_TYPE) {
       this.enableLeaveEvent = enabled;
-      console.log(this.enableLeaveEvent); // eslint-disable-line
     }
   }
 
   handleEvent(event) {
     if (this.enableLeaveEvent) {
-      console.log(this.enableLeaveEvent, event); // eslint-disable-line
       if (event.type === 'mouseleave') {
         this.callback({
           type: LEAVE_EVENT_TYPE,
