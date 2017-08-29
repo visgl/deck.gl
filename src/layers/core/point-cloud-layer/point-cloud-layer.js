@@ -55,45 +55,24 @@ export default class PointCloudLayer extends Layer {
       {vs, fs, modules: ['lighting', 'picking'], shaderCache}; // 'project' module added by default.
   }
 
-  initializeState() {
-    const {gl} = this.context;
+  initializeState({gl}) {
     this.setState({model: this._getModel(gl)});
-
-    /* eslint-disable max-len */
-    this.state.attributeManager.addInstanced({
-      instancePositions: {size: 3, accessor: 'getPosition', update: this.calculateInstancePositions},
-      instanceNormals: {size: 3, accessor: 'getNormal', defaultValue: 1, update: this.calculateInstanceNormals},
-      instanceColors: {size: 4, type: GL.UNSIGNED_BYTE, accessor: 'getColor', update: this.calculateInstanceColors}
-    });
-    /* eslint-enable max-len */
+    PointCloudLayer.getAttributeManager(this.state.attributeManager);
   }
 
   updateAttribute({props, oldProps, changeFlags}) {
     if (props.fp64 !== oldProps.fp64) {
       const {attributeManager} = this.state;
+      attributeManager.enable('instancePositions64xyLow',
+        props.fp64 && props.projectionMode === COORDINATE_SYSTEM.LNGLAT);
+      // TODO - this invalidation should not be needed???
       attributeManager.invalidateAll();
-
-      if (props.fp64 && props.projectionMode === COORDINATE_SYSTEM.LNGLAT) {
-        attributeManager.addInstanced({
-          instancePositions64xyLow: {
-            size: 2,
-            accessor: 'getPosition',
-            update: this.calculateInstancePositions64xyLow
-          }
-        });
-      } else {
-        attributeManager.remove([
-          'instancePositions64xyLow'
-        ]);
-      }
-
     }
   }
 
-  updateState({props, oldProps, changeFlags}) {
+  updateState({gl, props, oldProps, changeFlags}) {
     super.updateState({props, oldProps, changeFlags});
     if (props.fp64 !== oldProps.fp64) {
-      const {gl} = this.context;
       this.setState({model: this._getModel(gl)});
     }
     this.updateAttribute({props, oldProps, changeFlags});
@@ -128,55 +107,65 @@ export default class PointCloudLayer extends Layer {
       shaderCache: this.context.shaderCache
     }));
   }
-
-  calculateInstancePositions(attribute) {
-    const {data, getPosition} = this.props;
-    const {value} = attribute;
-    let i = 0;
-    for (const point of data) {
-      const position = getPosition(point);
-      value[i++] = position[0];
-      value[i++] = position[1];
-      value[i++] = position[2] || 0;
-    }
-  }
-
-  calculateInstancePositions64xyLow(attribute) {
-    const {data, getPosition} = this.props;
-    const {value} = attribute;
-    let i = 0;
-    for (const point of data) {
-      const position = getPosition(point);
-      value[i++] = fp64ify(position[0])[1];
-      value[i++] = fp64ify(position[1])[1];
-    }
-  }
-
-  calculateInstanceNormals(attribute) {
-    const {data, getNormal} = this.props;
-    const {value} = attribute;
-    let i = 0;
-    for (const point of data) {
-      const normal = getNormal(point);
-      value[i++] = normal[0];
-      value[i++] = normal[1];
-      value[i++] = normal[2];
-    }
-  }
-
-  calculateInstanceColors(attribute) {
-    const {data, getColor} = this.props;
-    const {value} = attribute;
-    let i = 0;
-    for (const point of data) {
-      const color = getColor(point);
-      value[i++] = color[0];
-      value[i++] = color[1];
-      value[i++] = color[2];
-      value[i++] = isNaN(color[3]) ? 255 : color[3];
-    }
-  }
 }
 
 PointCloudLayer.layerName = 'PointCloudLayer';
 PointCloudLayer.defaultProps = defaultProps;
+
+// ATTRIBUTE MANAGEMENT
+
+const calculateInstancePositions = ({value}, {props}) => {
+  const {data, getPosition} = props;
+  let i = 0;
+  for (const point of data) {
+    const position = getPosition(point);
+    value[i++] = position[0];
+    value[i++] = position[1];
+    value[i++] = position[2] || 0;
+  }
+};
+
+const calculateInstancePositions64xyLow = ({value}, {props}) => {
+  const {data, getPosition} = props;
+  let i = 0;
+  for (const point of data) {
+    const position = getPosition(point);
+    value[i++] = fp64ify(position[0])[1];
+    value[i++] = fp64ify(position[1])[1];
+  }
+};
+
+const calculateInstanceNormals = ({value}, {props}) => {
+  const {data, getNormal} = props;
+  let i = 0;
+  for (const point of data) {
+    const normal = getNormal(point);
+    value[i++] = normal[0];
+    value[i++] = normal[1];
+    value[i++] = normal[2];
+  }
+};
+
+const calculateInstanceColors = ({value}, {props}) => {
+  const {data, getColor} = props;
+  let i = 0;
+  for (const point of data) {
+    const color = getColor(point);
+    value[i++] = color[0];
+    value[i++] = color[1];
+    value[i++] = color[2];
+    value[i++] = isNaN(color[3]) ? 255 : color[3];
+  }
+};
+
+PointCloudLayer.getAttributeManager = attributeManager => {
+  return Layer.getAttributeManager(attributeManager || 'point-cloud-attributes')
+  .addInstanced({
+    /* eslint-disable max-len */
+    instancePositions: {size: 3, accessor: 'getPosition', update: calculateInstancePositions},
+    instancePositions64xyLow: {size: 2, accessor: 'getPosition', update: calculateInstancePositions64xyLow},
+    instanceNormals: {size: 3, accessor: 'getNormal', defaultValue: 1, update: calculateInstanceNormals},
+    instanceColors: {size: 4, type: GL.UNSIGNED_BYTE, accessor: 'getColor', update: calculateInstanceColors}
+    /* eslint-enable max-len */
+  });
+};

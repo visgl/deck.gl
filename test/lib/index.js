@@ -20,5 +20,7 @@
 
 import './utils';
 import './attribute-manager.spec';
+import './viewport-uniforms.spec';
+import './props.spec';
 import './layer.spec';
 import './props.spec';

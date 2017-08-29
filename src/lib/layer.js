@@ -124,9 +124,12 @@ export default class Layer {
     throw new Error(`Layer ${this} has not defined initializeState`);
   }
 
-  // Let's layer control if updateState should be called
+  // Lets layer control if updateState should be called
   shouldUpdateState({oldProps, props, oldContext, context, changeFlags}) {
-    return changeFlags.propsOrDataChanged;
+    // TODO - in deck.gl v5, we may want to change the default to not include viewport updates
+    //        No need to disturb most layers in this case
+    // return changeFlags.propsOrDataChanged;
+    return changeFlags.somethingChanged;
   }
 
   // Default implementation, all attributes will be invalidated and updated
@@ -140,6 +143,9 @@ export default class Layer {
   // Called once when layer is no longer matched and state will be discarded
   // App can destroy WebGL resources here
   finalizeState() {
+    if (this.state.model) {
+      this.state.model.destroy();
+    }
   }
 
   // If state has a model, draw it with supplied uniforms
@@ -294,17 +300,6 @@ export default class Layer {
     return index;
   }
 
-  calculateInstancePickingColors(attribute, {numInstances}) {
-    const {value, size} = attribute;
-    // add 1 to index to seperate from no selection
-    for (let i = 0; i < numInstances; i++) {
-      const pickingColor = this.encodePickingColor(i);
-      value[i * size + 0] = pickingColor[0];
-      value[i * size + 1] = pickingColor[1];
-      value[i * size + 2] = pickingColor[2];
-    }
-  }
-
   // DATA ACCESS API
   // Data can use iterators and may not be random access
 
@@ -348,35 +343,27 @@ export default class Layer {
   // Called by layer manager when a new layer is found
   /* eslint-disable max-statements */
   initializeLayer(updateParams) {
-    assert(this.context.gl, 'Layer context missing gl');
+    const {gl} = this.context;
+    assert(gl, 'Layer context missing gl');
     assert(!this.state, 'Layer missing state');
 
     this.state = {};
     this.state.stats = new Stats({id: 'draw'});
 
+    // Initialize the attribute manager
+    const attributeManager = Layer.getAttributeManager(this.props.id);
+
     // Initialize state only once
     this.setState({
-      attributeManager: new AttributeManager({id: this.props.id}),
+      attributeManager,
       model: null,
       needsRedraw: true,
       dataChanged: true
     });
 
-    const {attributeManager} = this.state;
-    // All instanced layers get instancePickingColors attribute by default
-    // Their shaders can use it to render a picking scene
-    // TODO - this slows down non instanced layers
-    attributeManager.addInstanced({
-      instancePickingColors: {
-        type: GL.UNSIGNED_BYTE,
-        size: 3,
-        update: this.calculateInstancePickingColors
-      }
-    });
-
     // Call subclass lifecycle methods
-    this.initializeState();
-    this.updateState(updateParams);
+    this.initializeState(this.context);
+    this.updateState(Object.assign({}, this.context, updateParams));
     // End subclass lifecycle methods
 
     // Add any subclass attributes
@@ -401,13 +388,16 @@ export default class Layer {
       log.once(0, `deck.gl v3 ${this}: "shouldUpdate" deprecated, renamed to "shouldUpdateState"`);
     }
 
+    // Add {gl} etc to the updateParams
+    const params = Object.assign({}, this.context, updateParams);
+
     // Call subclass lifecycle method
-    const stateNeedsUpdate = this.shouldUpdateState(updateParams);
+    const stateNeedsUpdate = this.shouldUpdateState(params);
     // End lifecycle method
 
     if (stateNeedsUpdate) {
       // Call subclass lifecycle method
-      this.updateState(updateParams);
+      this.updateState(params);
       // End lifecycle method
 
       // Run the attribute updaters
@@ -425,8 +415,8 @@ export default class Layer {
   // Called by manager when layer is about to be disposed
   // Note: not guaranteed to be called on application shutdown
   finalizeLayer() {
-    // Call subclass lifecycle method
-    this.finalizeState();
+   // Call subclass lifecycle method
+    this.finalizeState(this.context);
     // End lifecycle method
     removeLayerInSeer(this.id);
   }
@@ -635,3 +625,46 @@ export default class Layer {
 Layer.layerName = 'Layer';
 Layer.propTypes = defaultProps;
 Layer.defaultProps = defaultProps;
+
+// ATTRIBUTE MANAGEMENT
+
+// TODO - We have too many copies of this function (here and in luma.gl)
+const encodePickingColor = (i) => [
+  (i + 1) & 255,
+  ((i + 1) >> 8) & 255,
+  (((i + 1) >> 8) >> 8) & 255
+];
+
+const calculateInstancePickingColors = ({value, size}, {numInstances}) => {
+  // add 1 to index to seperate from no selection
+  for (let i = 0; i < numInstances; i++) {
+    const pickingColor = encodePickingColor(i);
+    value[i * size + 0] = pickingColor[0];
+    value[i * size + 1] = pickingColor[1];
+    value[i * size + 2] = pickingColor[2];
+  }
+};
+
+/**
+ * Creates and initializes an attribute manager
+ * If the argument is an attributeManager, initializes it.
+ * If the argument is a string, uses it as the id when creating a new manager
+ * returns the newly created and initialized AttributeManager
+ */
+Layer.getAttributeManager = attributeManager => {
+  // Create a new attribute manager unless already supplied
+  attributeManager = attributeManager || 'attribute-manager';
+  if (typeof attributeManager === 'string') {
+    attributeManager = new AttributeManager({id: attributeManager});
+  }
+
+  // All instanced layers get instancePickingColors attribute by default
+  // Their shaders can use it to render a picking scene
+  // TODO - this slows down non instanced layers
+  // TODO - share this buffer between layers
+  return attributeManager.addInstanced({
+    /* eslint-disable max-len */
+    instancePickingColors: {size: 3, type: GL.UNSIGNED_BYTE, update: calculateInstancePickingColors}
+    /* eslint-enable max-len */
+  });
+};

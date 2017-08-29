@@ -20,6 +20,7 @@
 
 import test from 'tape-catch';
 import {Layer} from 'deck.gl';
+import {mergeDefaultProps} from 'deck.gl/lib/props';
 
 const dataVariants = [
   {data: ['a', 'b', 'c'], size: 3}

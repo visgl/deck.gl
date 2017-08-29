@@ -86,6 +86,7 @@ In the above code, deck.gl compares the value of the `getColor` update trigger w
 
 While the built-in attribute generation functionality is a major part of a `Layer`s functionality, it is possible for applications to bypass it, and supply the layer with precalculated attributes.
 
+The `Layer.getAttributeManager()` static method is available to get an instance of a layer's attribute manager. This can be used to pre-generate attributes outside of the layer.
 
 ## Future Possibilities
 

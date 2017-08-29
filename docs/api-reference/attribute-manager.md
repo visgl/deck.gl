@@ -43,6 +43,10 @@ Parameters:
 
 ## Methods
 
+##### `getTypedArraysFromProps`
+
+
+
 ##### `add`
 
 Adds attribute descriptions to the AttributeManager that describe
