@@ -65,6 +65,7 @@ export default class LayerManager {
     this._onLayerHover = null;
     this._onClick = this._onClick.bind(this);
     this._onPointerMove = this._onPointerMove.bind(this);
+    this._onPointerLeave = this._onPointerLeave.bind(this);
 
     this._initSeer = this._initSeer.bind(this);
     this._editSeer = this._editSeer.bind(this);
@@ -162,7 +163,8 @@ export default class LayerManager {
     // https://github.com/uber/deck.gl/issues/634
     this._eventManager.on({
       click: this._onClick,
-      pointermove: this._onPointerMove
+      pointermove: this._onPointerMove,
+      pointerleave: this._onPointerLeave
     });
   }
 
@@ -611,15 +613,6 @@ export default class LayerManager {
       return;
     }
     const pos = event.offsetCenter;
-    // TODO: consider using this.eventManager.element size instead of layerManager.context
-    // but do so in a way that doesn't cause reflow (e.g. `offsetWidth/Height`).
-    // maybe the event object offers offsetCenter as a 0<>1 value as well?
-    // since it's already doing size calculations...
-    const {width, height} = this.context.viewport;
-    if (!pos || pos.x < 0 || pos.y < 0 || pos.x > width || pos.y > height) {
-      // Check if pointer is inside the canvas
-      return;
-    }
     const selectedInfos = this.pickLayer({
       x: pos.x,
       y: pos.y,
@@ -632,6 +625,15 @@ export default class LayerManager {
         this._onLayerHover(firstInfo, selectedInfos, event.srcEvent);
       }
     }
+  }
+
+  _onPointerLeave(event) {
+    this.pickLayer({
+      x: -1,
+      y: -1,
+      radius: this._pickingRadius,
+      mode: 'hover'
+    });
   }
 }
 
