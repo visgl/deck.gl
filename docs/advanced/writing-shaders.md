@@ -19,46 +19,6 @@ and finally your shader code is added.
 
 ## Shader Modules
 
-### Projection (Vertex Shader)
-
-The projection module makes it easy to write vertex shaders that
-follow deck.gl's projection methods, enabling your layer to accept coordinates
-in both [longitude,latitude,altitude] or [metersX,metersY,metersZ] format.
-To support the basic features expected of a deck.gl layer, such as various viewport
-types and coordinate systems, your own shaders should always use the built-in
-projection functions.
-
-##### `vec2 project_position(vec2 position)`
-##### `vec3 project_position(vec3 position)`
-##### `vec4 project_position(vec4 position)`
-
-Projects input to worldspace coordinates.
-
-##### `float project_scale(float meters)`
-##### `vec2 project_scale(vec2 meters)`
-##### `vec3 project_scale(vec3 meters)`
-##### `vec4 project_scale(vec4 meters)`
-
-Projects input to worldspace sizes.
-
-##### `vec4 project_to_clipspace(vec4 position)`
-
-Projects worldspace coordinates to clipspace coordinates.
-
-```glsl
-// instanced geometry
-attribute vec3 positions;
-// instance attributes
-attribute vec3 instanceCenter;
-attribute float instanceSize;
-
-void main(void) {
-  vec3 center = project_position(instanceCenter);
-  vec3 vertex = positions * project_scale(instanceSize);
-  gl_Position = project_to_clipspace(center + vertex);
-}
-```
-
 ### Filtering and Brushing (Vertex and Fragment Shaders)
 
 When rendering large data sets (especially a lot of intersecting lines or

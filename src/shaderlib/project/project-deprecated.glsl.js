@@ -18,23 +18,43 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {fp32} from 'luma.gl';
-import projectShader from './project.glsl';
-import projectDeprecatedShader from './project-deprecated.glsl';
-import {getUniformsFromViewport} from './viewport-uniforms';
+export default `\
+// Backwards compatibility
+uniform mat4 modelMatrix;
+uniform mat4 projectionMatrix;
+uniform vec3 projectionPixelsPerUnit;
+uniform float projectionScale; // This is the mercator scale (2 ** zoom)
 
-const DEFAULT_MODULE_OPTIONS = {};
 
-function getUniforms(opts = DEFAULT_MODULE_OPTIONS) {
-  if (opts.viewport) {
-    return getUniformsFromViewport(opts);
-  }
-  return {};
+float scale(float position) {
+  return project_scale(position);
 }
 
-export default {
-  name: 'project',
-  dependencies: [fp32],
-  vs: `${projectShader}${projectDeprecatedShader}`,
-  getUniforms
-};
+vec2 scale(vec2 position) {
+  return project_scale(position);
+}
+
+vec3 scale(vec3 position) {
+  return project_scale(position);
+}
+
+vec4 scale(vec4 position) {
+  return project_scale(position);
+}
+
+vec2 preproject(vec2 position) {
+  return project_position(position);
+}
+
+vec3 preproject(vec3 position) {
+  return project_position(position);
+}
+
+vec4 preproject(vec4 position) {
+  return project_position(position);
+}
+
+vec4 project(vec4 position) {
+  return project_to_clipspace(position);
+}
+`;
