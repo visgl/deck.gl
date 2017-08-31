@@ -21,3 +21,11 @@ Since the math code was already open sourced in luma.gl I could set up a [new re
 We have also secured `math.gl` on npm.
 
 ## Proposal: Move the prototype to our org domain.
+
+
+## Proposal: SphericalCoordinates class
+
+While projection matrix creation functions typically take a `lookAt` (Vector3) parameter, directions are often specified as spherical coordinates (pitch and bearing).
+* To make is easy to use both spherical coordinates and direction vectors for the camera, we can extend our math library with a SphericalCoordinates class to make transformations between direction vectors and spherical coordinates easy. We already have an initial implementation.
+
+

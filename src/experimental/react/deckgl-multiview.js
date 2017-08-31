@@ -21,6 +21,7 @@
 import DeckGL, {Viewport} from 'deck.gl';
 import {GL, withParameters} from 'luma.gl';
 import {flatten} from '../../lib/utils/flatten';
+/* global window */
 
 /* A flavor of the DeckGL component that renders using multiple viewports */
 export default class DeckGLMultiView extends DeckGL {
@@ -59,7 +60,7 @@ export default class DeckGLMultiView extends DeckGL {
   }
 
   _onRenderFrame({gl}) {
-    const {height} = this.props;
+    const {height, useDevicePixelRatio} = this.props;
 
     // UpdateLayers
     const viewports = this._getViewports();
@@ -67,6 +68,7 @@ export default class DeckGLMultiView extends DeckGL {
     // clear depth and color buffers
     gl.clear(GL.COLOR_BUFFER_BIT | GL.DEPTH_BUFFER_BIT);
 
+    // TODO - this should be moved into LayerManager
     this.effectManager.preDraw();
 
     viewports.forEach((viewportOrDescriptor, i) => {
@@ -75,8 +77,13 @@ export default class DeckGLMultiView extends DeckGL {
       // this._updateLayers(Object.assign({}, this.props, {viewport}));
 
       // Convert viewport top-left CSS coordinates to bottom up WebGL coordinates
+      const pixelRatio = useDevicePixelRatio && typeof window !== 'undefined' ?
+        window.devicePixelRatio : 1;
       const glViewport = [
-        viewport.x, height - viewport.y - viewport.height, viewport.width, viewport.height
+        viewport.x * pixelRatio,
+        (height - viewport.y - viewport.height) * pixelRatio,
+        viewport.width * pixelRatio,
+        viewport.height * pixelRatio
       ];
 
       // render this viewport
