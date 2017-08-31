@@ -13,6 +13,10 @@ The new `useDevicePixelRatio` prop for DeckGL component can be used to toggle us
 Three new props (`highlightColor`, `highlightedObjectIndex` and `autoHighlight`) are added to `Layer` class to support highlighting of a single object in a layer, either automatically on hover or through programmatically specifying a selected object. Note that this highlighting is done on GPU and is thus very performant.
 
 
+## PathLayer: dashed line support
+
+Added new props (`getDashArray` and `justified`) to render paths as dashed lines.
+
 # deck.gl v4.1
 
 Release date: July 27th, 2017
