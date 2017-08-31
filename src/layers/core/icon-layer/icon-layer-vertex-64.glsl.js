@@ -36,6 +36,7 @@ attribute vec2 instanceOffsets;
 uniform vec2 viewportSize;
 uniform float sizeScale;
 uniform vec2 iconsTextureDim;
+uniform float devicePixelRatio;
 
 varying float vColorMode;
 varying vec4 vColor;
@@ -51,15 +52,13 @@ vec2 rotate_by_angle(vec2 vertex, float angle) {
 
 void main(void) {
   vec2 iconSize = instanceIconFrames.zw;
-  vec2 iconSize_clipspace = iconSize / viewportSize * 2.0;
   // scale icon height to match instanceSize
   float instanceScale = iconSize.y == 0.0 ? 0.0 : instanceSizes / iconSize.y;
 
-  // The vertex variable is in clip space and should not go through project_to_clipspace call
-  vec2 vertex = (positions / 2.0 + instanceOffsets);
-  vertex = rotate_by_angle(vertex, instanceAngles) * iconSize_clipspace *
-    sizeScale * instanceScale;
-
+  // scale and rotate vertex in "pixel" value and convert back to fraction in clipspace
+  vec2 vertex = positions / 2.0 * iconSize + instanceOffsets;
+  vertex = rotate_by_angle(vertex, instanceAngles) / viewportSize * sizeScale *
+    instanceScale * devicePixelRatio;
   vertex.y *= -1.0;
 
   vec4 instancePositions64xy = vec4(

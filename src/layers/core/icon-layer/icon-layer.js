@@ -236,8 +236,8 @@ export default class IconLayer extends Layer {
     for (const object of data) {
       const icon = getIcon(object);
       const rect = iconMapping[icon] || {};
-      value[i++] = (1 / 2 - rect.anchorX / rect.width) || 0;
-      value[i++] = (1 / 2 - rect.anchorY / rect.height) || 0;
+      value[i++] = (rect.width / 2 - rect.anchorX) || 0;
+      value[i++] = (rect.height / 2 - rect.anchorY) || 0;
     }
   }
 
