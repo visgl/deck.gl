@@ -56,21 +56,6 @@ function fp64ifyMatrix4(matrix) {
   return matrixFP64;
 }
 
-//   // Calculate projection pixels per unit
-//   const {pixelsPerMeter, pixelsPerDegree, degreesPerMeter} =
-//     viewport.getDistanceScales({positionOrigin});
-//   assert(pixelsPerMeter, 'Viewport missing pixelsPerMeter');
-
-//   let pixelsPerMeterUTM = ZERO_VECTOR;
-//   if (projectionMode === COORDINATE_SYSTEM.UTM_OFFSETS) {
-//     pixelsPerMeterUTM = [
-//       degreesPerMeter[0] * pixelsPerDegree[0],
-//       degreesPerMeter[1] * pixelsPerDegree[1],
-//       degreesPerMeter[2] * pixelsPerDegree[0],
-//       degreesPerMeter[3] * pixelsPerDegree[1]
-//     ];
-//   }
-
 // Calculate transformed projectionCenter (using 64 bit precision JS)
 // This is the key to offset mode precision
 // (avoids doing this addition in 32 bit precision in GLSL)
@@ -125,9 +110,7 @@ function calculateMatrixAndOffset({
     // viewMatrix = new Matrix4(viewMatrixUncentered || viewMatrix)
     //   .multiplyRight(VECTOR_TO_POINT_MATRIX);
     viewProjectionMatrix = mat4_multiply([], projectionMatrix, viewMatrix);
-
     viewProjectionMatrix = mat4_multiply([], viewProjectionMatrix, VECTOR_TO_POINT_MATRIX);
-
     break;
 
   default:
@@ -182,17 +165,18 @@ export function getUniformsFromViewport({
 
   assert(viewProjectionMatrix, 'Viewport missing modelViewProjectionMatrix');
 
-  // console.log(viewport, viewProjectionMatrix);
-
   // Calculate projection pixels per unit
-
   const distanceScales = viewport.getDistanceScales();
 
+  // TODO - does this depend on useDevicePixelRatio?
   const devicePixelRatio = (window && window.devicePixelRatio) || 1;
   const viewportSize = [viewport.width * devicePixelRatio, viewport.height * devicePixelRatio];
 
   const glModelMatrix = new Float32Array(modelMatrix || IDENTITY_MATRIX);
   const glViewProjectionMatrix = new Float32Array(viewProjectionMatrix);
+
+  const glViewProjectionMatrixFP64 = fp64ifyMatrix4(viewProjectionMatrix);
+  const scaleFP64 = fp64ify(viewport.scale);
 
   return {
     // Projection mode values
@@ -216,23 +200,21 @@ export function getUniformsFromViewport({
     // This is for lighting calculations
     project_uCameraPosition: new Float32Array(cameraPos),
 
-    //
-    // BACKWARDS COMPAT
-    //
+    project64_uViewProjectionMatrix: glViewProjectionMatrixFP64,
+    project64_uScale: scaleFP64,
 
+    //
+    // DEPRECATED UNIFORMS - For backwards compatibility with old custom layers
+    //
     modelMatrix: glModelMatrix,
     projectionMatrix: glViewProjectionMatrix,
-
     projectionPixelsPerUnit: distanceScales.pixelsPerMeter,
     projectionScale: viewport.scale, // This is the mercator scale (2 ** zoom)
-
     viewportSize,
     devicePixelRatio,
-
-    // This is for lighting calculations
     cameraPos: new Float32Array(cameraPos),
 
-    projectionFP64: fp64ifyMatrix4(viewProjectionMatrix),
-    projectionScaleFP64: fp64ify(viewport.scale) // Deprecated?
+    projectionFP64: glViewProjectionMatrixFP64,
+    projectionScaleFP64: scaleFP64
   };
 }
