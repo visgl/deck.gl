@@ -30,6 +30,7 @@ attribute vec3 instanceRightDeltas;
 attribute float instanceStrokeWidths;
 attribute vec4 instanceColors;
 attribute vec3 instancePickingColors;
+attribute vec2 instanceDashArrays;
 
 uniform float widthScale;
 uniform float widthMinPixels;
@@ -42,6 +43,9 @@ uniform float opacity;
 varying vec4 vColor;
 varying vec2 vCornerOffset;
 varying float vMiterLength;
+varying vec2 vDashArray;
+varying float vPathPosition;
+varying float vPathLength;
 
 const float EPSILON = 0.001;
 
@@ -149,6 +153,14 @@ vec3 lineJoin(vec3 prevPoint, vec3 currPoint, vec3 nextPoint) {
   );
 
   vCornerOffset = offsetVec * offsetDirection * offsetScale;
+
+  // Generate variables for dash calculation
+  vDashArray = instanceDashArrays;
+  vPathLength = L / width;
+  float isEnd = positions.x;
+  vec2 offsetFromStartOfPath = mix(vCornerOffset, vCornerOffset + deltaA / width, isEnd);
+  vec2 dir = mix(dirB, dirA, isEnd);
+  vPathPosition = dot(offsetFromStartOfPath, dir);
 
   return currPoint + vec3(vCornerOffset * width, 0.0);
 }

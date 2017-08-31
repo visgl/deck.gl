@@ -36,10 +36,12 @@ const defaultProps = {
   rounded: false,
   miterLimit: 4,
   fp64: false,
+  justified: false,
 
   getPath: object => object.path,
   getColor: object => object.color || DEFAULT_COLOR,
-  getWidth: object => object.width || 1
+  getWidth: object => object.width || 1,
+  getDashArray: null
 };
 
 const isClosed = path => {
@@ -68,6 +70,7 @@ export default class PathLayer extends Layer {
       instanceLeftDeltas: {size: 3, update: this.calculateLeftDeltas},
       instanceRightDeltas: {size: 3, update: this.calculateRightDeltas},
       instanceStrokeWidths: {size: 1, accessor: 'getWidth', update: this.calculateStrokeWidths},
+      instanceDashArrays: {size: 2, accessor: 'getDashArray', update: this.calculateDashArrays},
       instanceColors: {size: 4, type: GL.UNSIGNED_BYTE, accessor: 'getColor', update: this.calculateColors},
       instancePickingColors: {size: 3, type: GL.UNSIGNED_BYTE, update: this.calculatePickingColors}
     });
@@ -117,11 +120,12 @@ export default class PathLayer extends Layer {
 
   draw({uniforms}) {
     const {
-      rounded, miterLimit, widthScale, widthMinPixels, widthMaxPixels
+      rounded, miterLimit, widthScale, widthMinPixels, widthMaxPixels, justified
     } = this.props;
 
     this.state.model.render(Object.assign({}, uniforms, {
       jointType: Number(rounded),
+      alignMode: Number(justified),
       widthScale,
       miterLimit,
       widthMinPixels,
@@ -284,6 +288,24 @@ export default class PathLayer extends Layer {
       const width = getWidth(data[index], index);
       for (let ptIndex = 1; ptIndex < path.length; ptIndex++) {
         value[i++] = width;
+      }
+    });
+  }
+
+  calculateDashArrays(attribute) {
+    const {data, getDashArray} = this.props;
+    if (!getDashArray) {
+      return;
+    }
+
+    const {paths} = this.state;
+    const {value} = attribute;
+    let i = 0;
+    paths.forEach((path, index) => {
+      const dashArray = getDashArray(data[index], index);
+      for (let ptIndex = 1; ptIndex < path.length; ptIndex++) {
+        value[i++] = dashArray[0];
+        value[i++] = dashArray[1];
       }
     });
   }
