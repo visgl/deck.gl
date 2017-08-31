@@ -2,10 +2,13 @@
 
 * **Author**: Ib Green
 * **Date**: August 10, 2017
-* **Status**: **Approved**
+* **Status**: **Pre-Approved**
 
 Notes:
 * Please add comments as reviews to the [PR](https://github.com/uber/deck.gl/pull/838)
+
+References:
+* Initial [Infovis Viewport RFC]() for deck.gl v4.
 
 
 ## Motivation
@@ -162,83 +165,13 @@ The separation between Viewports / State / Controls / React Controllers is power
 * VR view matrices - can support for left and right eye matrices be integrated somehow?
 
 
-## References:
-
-Initial [Infovis Viewport RFC]() for deck.gl v4.
-
-deck.gl implementation PRs:
-* [Viewport class refactor](https://github.com/uber/deck.gl/pull/841)
-* [Keyboard Event Handling](https://github.com/uber/deck.gl/pull/842)
-deck.gl preparatory PRs:
-* [Reorganize projection module files](https://github.com/uber/deck.gl/pull/825)
-* [Reorganize controllers phase 1](https://github.com/uber/deck.gl/pull/827)
-* [Reorganize controllers phase 2](https://github.com/uber/deck.gl/pull/833)
-* [Remove UTM offsets mode](https://github.com/uber/deck.gl/pull/836)
-luma.gl PRs:
-* [Expose Euler angles, Add SphericalCoordinates](https://github.com/uber/luma.gl/pull/295)
-
 
 ## Appendix A: Notes on the `project` shader module
 
 * In cartographic coordinate systems, the `project` shader module internally deals with mercator coordinates projected to current zoom level.
-
-* The projection center is calculated separately
-
-```
-// non-linear projection: lnglats => unit tile [0-1, 0-1]
-vec2 project_mercator_(vec2 lnglat) {
-  return vec2(
-    radians(lnglat.x) + PI,
-    PI - log(tan_fp32(PI * 0.25 + radians(lnglat.y) * 0.5))
-  );
-}
-
-vec2 project_scale(vec2 meters) {
-  return meters * projectionPixelsPerUnit.xy;
-}
-
-vec4 project_position(vec4 position) {
-  if (projectionMode == PROJECT_MERCATOR) {
-    return vec4(
-      project_mercator_(position.xy) * WORLD_SCALE * projectionScale,
-      project_scale(position.z),
-      position.w
-    );
-  }
-
-  // Apply model matrix
-  vec4 position_modelspace = modelMatrix * position;
-
-  return project_scale(position_modelspace);
-}
-
-vec4 project_to_clipspace(vec4 position) {
-  if (projectionMode == PROJECT_MERCATOR_OFFSETS || projectionMode == PROJECT_UTM_OFFSETS) {
-    position.w *= projectionPixelsPerUnit.z;
-  }
-  return projectionMatrix * position + projectionCenter;
-}
-```
 
 As can be seen, the position will:
 * Step 1: For linear coordinate systems, `modelMatrix` is applied => normally brings positions to axis aligned (meter) offsets from an anchor point.
 * Step 2: positions are "scaled" => this converts coordinates (meters) to "pixel" units
 * Step 3: 'viewProjectionMatrix' is applied
 * Step 4: 'projectionCenter' is added (subtracted)
-
-
-## Appendix B: Alternative proposal: Generalize WebMercatorViewport
-
-For completeness: As an alternate proposal to refactoring the entire Viewport hierarchy, we might be able to just generalize the `WebMercatorViewport`
-
-Currently takes lat/lon/zoom/pitch/bearing “props”.
-
-Propose adding the following props:
-* `fov`: (radian) - Allows the application to set fov. Defaults to map synched fov (> 60 degrees pitch gives fov at 60 degrees).
-* `position`: [x, y, z]: Position in METER_OFFSETS, from [lng lat] base point.
-Relation to altitude - Allows the application to set the height of the camera in meters (without affecting other parameters).
-* etc
-
-This proposal is not favored, mainly because:
-* it keeps adding to an already complicated class
-* it does not handle geospatial coordinates in the general case

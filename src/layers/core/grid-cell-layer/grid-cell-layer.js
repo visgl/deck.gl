@@ -89,7 +89,7 @@ export default class GridCellLayer extends Layer {
       const {attributeManager} = this.state;
       attributeManager.invalidateAll();
 
-      if (props.fp64 && props.projectionMode === COORDINATE_SYSTEM.LNGLAT) {
+      if (props.fp64 && props.coordinateSystem === COORDINATE_SYSTEM.LNGLAT) {
         attributeManager.addInstanced({
           instancePositions64xyLow: {
             size: 2,

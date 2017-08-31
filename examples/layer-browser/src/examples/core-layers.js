@@ -1,4 +1,6 @@
 import {
+  COORDINATE_SYSTEM,
+
   ScatterplotLayer,
   ArcLayer,
   LineLayer,
@@ -181,8 +183,8 @@ const PointCloudLayerExample = {
   props: {
     id: 'pointCloudLayer',
     outline: true,
-    projectionMode: 2,
-    positionOrigin: dataSamples.positionOrigin,
+    coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
+    coordinateOrigin: dataSamples.positionOrigin,
     getPosition: d => get(d, 'position'),
     getNormal: d => get(d, 'normal'),
     getColor: d => get(d, 'color'),

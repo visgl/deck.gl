@@ -78,10 +78,14 @@ function calculateMatrixAndOffset({
   // NEW PARAMS
   coordinateSystem,
   coordinateOrigin,
+<<<<<<< HEAD
   coordinateZoom,
   // DEPRECATED PARAMS
   projectionMode,
   positionOrigin = [0, 0]
+=======
+  coordinateZoom
+>>>>>>> Rename coordinateSystem props
 }) {
   const {viewMatrixUncentered} = viewport;
   let {viewMatrix} = viewport;
@@ -139,7 +143,6 @@ export function getUniformsFromViewport({
   modelMatrix = null,
   coordinateSystem = COORDINATE_SYSTEM.LNGLAT,
   coordinateOrigin = [0, 0],
-  coordinateZoom,
   // Deprecated
   projectionMode,
   positionOrigin
@@ -155,7 +158,7 @@ export function getUniformsFromViewport({
     log.deprecated('positionOrigin', 'coordinateOrigin');
   }
 
-  coordinateZoom = coordinateZoom || viewport.zoom;
+  const coordinateZoom = viewport.zoom;
   assert(coordinateZoom >= 0);
 
   const {projectionCenter, viewProjectionMatrix, cameraPos} =
@@ -180,7 +183,7 @@ export function getUniformsFromViewport({
 
   return {
     // Projection mode values
-    project_uCoordinateSystem: projectionMode,
+    project_uCoordinateSystem: coordinateSystem,
     project_uCenter: projectionCenter,
 
     // Screen size
@@ -207,7 +210,10 @@ export function getUniformsFromViewport({
     //
     // DEPRECATED UNIFORMS - For backwards compatibility with old custom layers
     //
+    projectionMode: coordinateSystem,
+    projectionOrigin: coordinateOrigin,
     modelMatrix: glModelMatrix,
+
     projectionMatrix: glViewProjectionMatrix,
     projectionPixelsPerUnit: distanceScales.pixelsPerMeter,
     projectionScale: viewport.scale, // This is the mercator scale (2 ** zoom)

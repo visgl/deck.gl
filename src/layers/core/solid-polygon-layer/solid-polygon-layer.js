@@ -90,7 +90,7 @@ export default class SolidPolygonLayer extends Layer {
       const {attributeManager} = this.state;
       attributeManager.invalidateAll();
 
-      if (props.fp64 && props.projectionMode === COORDINATE_SYSTEM.LNGLAT) {
+      if (props.fp64 && props.coordinateSystem === COORDINATE_SYSTEM.LNGLAT) {
         attributeManager.add({
           positions64xyLow: {size: 2, update: this.calculatePositionsLow}
         });

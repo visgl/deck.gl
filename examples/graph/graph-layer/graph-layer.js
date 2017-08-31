@@ -28,7 +28,7 @@ import {
 
 const defaultProps = {
   offset: {x: 0, y: 0},
-  projectionMode: COORDINATE_SYSTEM.IDENTITY,
+  coordinateSystem: COORDINATE_SYSTEM.IDENTITY,
 
   getLinkPosition: link => ({
     sourcePosition: [link.source.x, link.source.y],
@@ -89,7 +89,7 @@ export default class GraphLayer extends CompositeLayer {
     const {opacity, pickable, visible} = this.props;
 
     // viewport props
-    const {projectionMode} = this.props;
+    const {coordinateSystem} = this.props;
 
     const drawLinks = links && links.length > 0;
     const drawNodes = nodes && nodes.length > 0;
@@ -106,7 +106,7 @@ export default class GraphLayer extends CompositeLayer {
       strokeWidth: getLinkWidth(),
       opacity,
       pickable,
-      projectionMode,
+      coordinateSystem,
       updateTriggers: {
         getSourcePosition: layoutTime,
         getTargetPosition: layoutTime,
@@ -122,7 +122,7 @@ export default class GraphLayer extends CompositeLayer {
       getColor: n => n.highlighting ? [255, 255, 0, 255] : getNodeColor(n),
       opacity,
       pickable,
-      projectionMode,
+      coordinateSystem,
       updateTriggers: {
         getPosition: layoutTime,
         getColor: layoutTime
@@ -141,7 +141,7 @@ export default class GraphLayer extends CompositeLayer {
       iconMapping,
       opacity,
       pickable,
-      projectionMode,
+      coordinateSystem,
       sizeScale,
       updateTriggers: {
         getPosition: layoutTime

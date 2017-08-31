@@ -150,7 +150,7 @@ class Example extends PureComponent {
     return new PointCloudLayer({
       id: 'laz-point-cloud-layer',
       data: points,
-      projectionMode: COORDINATE_SYSTEM.IDENTITY,
+      coordinateSystem: COORDINATE_SYSTEM.IDENTITY,
       getPosition: d => d.position,
       getNormal: d => [0, 0.5, 0.2],
       getColor: d => [255, 255, 255, 128],

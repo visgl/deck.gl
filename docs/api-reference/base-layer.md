@@ -162,19 +162,19 @@ Requires `pickable` to be true.
 Normally only used when the application wants to work with coordinates
 that are not Web Mercator projected longitudes/latitudes.
 
-##### `projectionMode` (Number, optional)
+##### `coordinateSystem` (Number, optional)
 
 Specifies how layer positions and offsets should be geographically interpreted.
 
 The default is to interpret positions as latitude and longitude, however it
 is also possible to interpret positions as meter offsets added to projection
-center specified by the `positionOrigin` prop.
+center specified by the `coordinateOrigin` prop.
 
 See the article on Coordinate Systems for details.
 
-##### `positionOrigin` ([Number, Number], optional)
+##### `coordinateOrigin` ([Number, Number], optional)
 
-Required when the `projectionMode` is set to `COORDINATE_SYSTEM.METER_OFFSETS`.
+Required when the `coordinateSystem` is set to `COORDINATE_SYSTEM.METER_OFFSETS`.
 
 Specifies a longitude and a latitude from which meter offsets are calculated.
 
@@ -428,7 +428,7 @@ Parameters:
     + `x` (Number) - Mouse position x relative to the viewport.
     + `y` (Number) - Mouse position y relative to the viewport.
     + `lngLat` ([Number, Number]) - Mouse position in world coordinates. Only applies if
-      [`projectionMode`](/docs/api-reference/base-layer.md#-projectionmode-number-optional-)
+      [`coordinateSystem`](/docs/api-reference/base-layer.md#-projectionmode-number-optional-)
       is `COORDINATE_SYSTEM.LNGLAT`.
     + `color` (Number[4]) - The color of the pixel that is being picked. It represents a
       "picking color" that is encoded by

@@ -9,7 +9,7 @@ const defaultProps = {
   data: null,
   opacity: 1.0,
   layout: LayoutD3,
-  projectionMode: COORDINATE_SYSTEM.IDENTITY,
+  coordinateSystem: COORDINATE_SYSTEM.IDENTITY,
   nodeIconAccessors: {}
 };
 
@@ -112,7 +112,7 @@ export default class GraphLayoutLayer extends CompositeLayer {
     const pickable = Boolean(this.props.onHover || this.props.onClick);
 
     // viewport props
-    const {projectionMode} = this.props;
+    const {coordinateSystem} = this.props;
 
     // base layer accessors
     const {linkAccessors, nodeAccessors, nodeIconAccessors} = this.props;
@@ -129,7 +129,7 @@ export default class GraphLayoutLayer extends CompositeLayer {
         opacity,
         pickable,
         visible,
-        projectionMode,
+        coordinateSystem,
 
         onHover,
         onClick

@@ -119,14 +119,14 @@ export default class GeoJsonLayer extends CompositeLayer {
     const {opacity, pickable, visible, parameters, getPolygonOffset,
       highlightedObjectIndex, autoHighlight, highlightColor} = this.props;
     // viewport props
-    const {positionOrigin, projectionMode, modelMatrix} = this.props;
+    const {coordinateSystem, coordinateOrigin, modelMatrix} = this.props;
 
     const forwardProps = {
       // Forward layer props
       opacity, pickable, visible, parameters, getPolygonOffset,
       highlightedObjectIndex, autoHighlight, highlightColor,
       // Forward viewport props
-      projectionMode, positionOrigin, modelMatrix,
+      coordinateSystem, coordinateOrigin, modelMatrix,
       // Forward common props
       fp64
     };

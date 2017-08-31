@@ -14,7 +14,7 @@ export default class MultiIconLayer extends IconLayer {
   // copied from src/lib/utils/fp64.js for now as it is not visible outside the deck.gl repo
   enable64bitSupport(props) {
     if (props.fp64) {
-      if (props.projectionMode === COORDINATE_SYSTEM.LNGLAT) {
+      if (props.coordinateSystem === COORDINATE_SYSTEM.LNGLAT) {
         return true;
       }
     }

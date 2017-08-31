@@ -1,5 +1,17 @@
 # Upgrade Guide
 
+## Upgrading from deck.gl v4.1 to v4.2
+
+### Layer Props
+
+* Coordinate system related props have been renamed for clarity
+
+| Layer            | Old Prop           | New Prop             | Comment |
+| ---              | ---                | ---                  | ---     |
+| Layer            | `projectionMode`   | `coordinateSystem`   | Any constant from `COORDINATE_SYSTEM`  |
+| Layer            | `projectionOrigin` | `coordinateOrigin`   | |
+
+
 ## Upgrading from deck.gl v4 to v4.1
 
 deck.gl v4.1 is a backward-compatible release. Most of the functionality and APIs remain unchanged but there are smaller changes that might requires developers' attention if they **develop custom layers**. Note that applications that are only using the provided layers should not need to make any changes issues.

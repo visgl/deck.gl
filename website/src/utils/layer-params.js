@@ -1,5 +1,5 @@
 const blackList = [
-  'projectionMode',
+  'coordinateSystem',
   'modelMatrix'
 ];
 

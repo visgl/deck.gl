@@ -176,7 +176,7 @@ export default class GridLayer extends CompositeLayer {
     highlightedObjectIndex, autoHighlight, highlightColor} = this.props;
 
     // viewport props
-    const {positionOrigin, projectionMode, modelMatrix} = this.props;
+    const {coordinateSystem, coordinateOrigin, modelMatrix} = this.props;
 
     // return props to the sublayer constructor
     return {
@@ -192,8 +192,8 @@ export default class GridLayer extends CompositeLayer {
       pickable,
       visible,
       getPolygonOffset,
-      projectionMode,
-      positionOrigin,
+      coordinateSystem,
+      coordinateOrigin,
       modelMatrix,
       highlightedObjectIndex,
       autoHighlight,

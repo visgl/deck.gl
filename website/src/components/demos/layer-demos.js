@@ -2,6 +2,7 @@ import createLayerDemoClass from './layer-demo-base';
 import {DATA_URI} from '../../constants/defaults';
 
 import {
+  COORDINATE_SYSTEM,
   ScatterplotLayer,
   LineLayer,
   ArcLayer,
@@ -183,8 +184,8 @@ export const PointCloudLayerDemo = createLayerDemoClass({
   formatTooltip: d => d.position.join(', '),
   props: {
     pickable: false,
-    projectionMode: 2,
-    positionOrigin: [-122.4, 37.74],
+    coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
+    coordinateOrigin: [-122.4, 37.74],
     radiusPixels: 4,
     getPosition: d => d.position,
     getNormal: d => d.normal,
