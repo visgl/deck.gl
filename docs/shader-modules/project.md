@@ -23,6 +23,20 @@ void main(void) {
 }
 ```
 
+## getUniforms
+
+The JavaScript uniforms are extracted mainly from the viewport with a few additional parameters (which deck.gl supplies from `LayerManager` state or `Layer` props of course).
+
+Provided by `LayerManager`:
+* `viewport`
+* `devicePixelRatio`
+
+Provided by `Layer` props:
+* `coordinateSystem`
+* `coordinateOrigin`
+* `modelMatrix`
+
+
 ## GLSL Uniforms
 
 The GLSL uniforms of the `project` module are quite central to shader code and are often needed by other shader modules (in particular for lighting calculations, or screen space type calculations), so to avoid having duplicate uniforms, some `project` uniforms are considered documented and stable and can be used directly in other modules.
