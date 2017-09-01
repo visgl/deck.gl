@@ -1,4 +1,4 @@
-import {getPoints100K, getPoints100KMeters, positionOrigin} from './data-generator';
+import {getPoints100K, getPoints100KMeters, coordinateOrigin} from './data-generator';
 
 import {
   COORDINATE_SYSTEM,
@@ -98,8 +98,8 @@ export const TEST_CASES = [
       props: {
         id: 'scatterplot-1-meters',
         data: getPoints100KMeters(),
-        projectionMode: COORDINATE_SYSTEM.METERS,
-        positionOrigin,
+        coordinateSystem: COORDINATE_SYSTEM.METERS,
+        coordinateOrigin,
         getPosition: d => d,
         getColor: d => [255, 128, 0],
         getRadius: d => 5.0,

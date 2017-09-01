@@ -55,13 +55,13 @@ suite
 .add('getUniformsFromViewport#LNGLAT', () => {
   return getUniformsFromViewport(data.sampleViewport, {
     modelMatrix: data.sampleModelMatrix,
-    projectionMode: COORDINATE_SYSTEM.LNGLAT
+    coordinateSystem: COORDINATE_SYSTEM.LNGLAT
   });
 })
 .add('getUniformsFromViewport#METER_OFFSETS', () => {
   return getUniformsFromViewport(data.sampleViewport, {
     modelMatrix: data.sampleModelMatrix,
-    projectionMode: COORDINATE_SYSTEM.METER_OFFSETS
+    coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS
   });
 })
 .add('WebMercatorViewport', () => {

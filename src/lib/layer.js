@@ -51,7 +51,8 @@ const defaultProps = {
   onHover: noop,
   onClick: noop,
 
-  projectionMode: COORDINATE_SYSTEM.LNGLAT,
+  coordinateSystem: COORDINATE_SYSTEM.LNGLAT,
+  coordinateOrigin: [0, 0, 0],
 
   parameters: {},
   uniforms: {},

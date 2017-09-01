@@ -101,7 +101,7 @@ class Example extends PureComponent {
     return new PointCloudLayer({
       id: 'point-cloud-layer',
       data: points,
-      projectionMode: COORDINATE_SYSTEM.IDENTITY,
+      coordinateSystem: COORDINATE_SYSTEM.IDENTITY,
       getPosition: d => d.position,
       getNormal: d => d.normal,
       radiusPixels: 2

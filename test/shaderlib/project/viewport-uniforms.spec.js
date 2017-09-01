@@ -56,7 +56,7 @@ test('getUniformsFromViewport', t => {
     (uniforms.modelViewMatrix instanceof Matrix4), 'Returned modelViewMatrix');
 
   uniforms = getUniformsFromViewport(viewport, {
-    projectionMode: COORDINATE_SYSTEM.METER_OFFSETS
+    coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS
   });
   t.ok(uniforms.projectionCenter.some(x => x), 'Returned non-trivial projection center');
 

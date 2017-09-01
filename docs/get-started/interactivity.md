@@ -23,7 +23,7 @@ The picking engine returns "picking info" objects which contains a variety of fi
 | `object` | The object that was picked. This is typically an entry in the layer's `props.data` array, but can vary from layer to layer. |
 | `x`      | Mouse position x relative to the viewport. |
 | `y`      | Mouse position y relative to the viewport. |
-| `lngLat` | Mouse position in geospatial coordinates. Only applies if `layer.props.projectionMode` is a geospatial mode such as `COORDINATE_SYSTEM.LNGLAT`. |
+| `lngLat` | Mouse position in geospatial coordinates. Only applies if `layer.props.coordinateSystem` is a geospatial mode such as `COORDINATE_SYSTEM.LNGLAT`. |
 
 > Specific deck.gl Layers may add additional fields to the picking `info` object. Check the documentation of each layer.
 

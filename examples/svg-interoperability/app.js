@@ -115,7 +115,7 @@ class Root extends PureComponent {
       updateTriggers: {
         getPosition: this.points._lastUpdate
       },
-      projectionMode: COORDINATE_SYSTEM.IDENTITY,
+      coordinateSystem: COORDINATE_SYSTEM.IDENTITY,
       // there's a bug that the radius calculated with project_scale
       radiusMinPixels: 2
     });

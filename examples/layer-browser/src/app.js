@@ -1,5 +1,5 @@
 /* global window, document */
-import DeckGL, {experimental} from 'deck.gl';
+import DeckGL, {COORDINATE_SYSTEM, experimental} from 'deck.gl';
 const {ReflectionEffect} = experimental;
 
 import React, {PureComponent} from 'react';
@@ -129,8 +129,9 @@ class App extends PureComponent {
       Object.assign(layerProps, {data: getData()});
     }
 
+    const useModelMatrix = layerProps.coordinateSystem === COORDINATE_SYSTEM.METER_OFFSETS;
     Object.assign(layerProps, {
-      modelMatrix: this._getModelMatrix(index, layerProps.projectionMode === 2)
+      modelMatrix: this._getModelMatrix(index, useModelMatrix)
     });
 
     return new Layer(layerProps);
