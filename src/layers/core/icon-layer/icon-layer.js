@@ -27,6 +27,7 @@ import vs64 from './icon-layer-vertex-64.glsl';
 import fs from './icon-layer-fragment.glsl';
 
 const DEFAULT_COLOR = [0, 0, 0, 255];
+const DEFAULT_TEXTURE_MIN_FILTER = GL.LINEAR_MIPMAP_LINEAR;
 
 /*
  * @param {object} props
@@ -127,12 +128,18 @@ export default class IconLayer extends Layer {
     if (oldProps.iconAtlas !== iconAtlas) {
 
       if (iconAtlas instanceof Texture2D) {
+        iconAtlas.setParameters({
+          [GL.TEXTURE_MIN_FILTER]: DEFAULT_TEXTURE_MIN_FILTER
+        });
         this.setState({iconsTexture: iconAtlas});
       } else if (typeof iconAtlas === 'string') {
         loadTextures(this.context.gl, {
           urls: [iconAtlas]
         })
         .then(([texture]) => {
+          texture.setParameters({
+            [GL.TEXTURE_MIN_FILTER]: DEFAULT_TEXTURE_MIN_FILTER
+          });
           this.setState({iconsTexture: texture});
         });
       }
