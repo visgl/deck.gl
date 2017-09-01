@@ -67,7 +67,7 @@ they will be used to calculate primitive hexagon instead of `hexagonVertices`
 - Default: `1`
 
 Hexagon radius multiplier, between 0 - 1. The radius of hexagon is calculated by
-`coverage * getRadius(d)`
+`coverage * radius`
 
 ##### `elevationScale` (Number, optional)
 
@@ -122,5 +122,5 @@ Method called to retrieve the elevation of each object. 1 unit approximate to 10
 
 ## Source
 
-[src/layers/core/hexagon-cell-layer](https://github.com/uber/deck.gl/tree/4.0-release/src/layers/core/hexagon-cell-layer)
+[src/layers/core/hexagon-cell-layer](https://github.com/uber/deck.gl/tree/4.1-release/src/layers/core/hexagon-cell-layer)
 

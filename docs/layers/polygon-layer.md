@@ -184,5 +184,5 @@ The width of the outline of the polygon, in meters
 
 ## Source
 
-[src/layers/core/polygon-layer](https://github.com/uber/deck.gl/tree/4.0-release/src/layers/core/polygon-layer)
+[src/layers/core/polygon-layer](https://github.com/uber/deck.gl/tree/4.1-release/src/layers/core/polygon-layer)
 

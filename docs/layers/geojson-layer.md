@@ -196,5 +196,5 @@ Note: This accessor is only called for `Polygon` and `MultiPolygon` features.
   the color of that `Feature`.
 
 ## Source
-[src/layers/core/geojson-layer](https://github.com/uber/deck.gl/tree/4.0-release/src/layers/core/geojson-layer)
+[src/layers/core/geojson-layer](https://github.com/uber/deck.gl/tree/4.1-release/src/layers/core/geojson-layer)
 

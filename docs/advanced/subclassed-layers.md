@@ -59,16 +59,21 @@ export default MultiColorPathLayer extends PathLayer {
 
 You can replace the shaders used in a layer by overriding the `getShaders()`
 method. Every core layer calls this method during initialization. It
-returns the shaders used by the layer in an object:
+returns the shaders and modules used by the layer in an object:
 - `vs`: string, GLSL source of the vertex shader
 - `fs`: string, GLSL source of the fragment shader
+- `modules`: Array, list of shader modules to be used
 
 Read about [writing your own shaders](/docs/advanced/writing-shaders.md).
 
-When you are implementing your own custom layers, it is encouraged that you
-also define a `getShaders()` function to retreive your shaders.
+When you are implementing your own custom layers, and want to change the shaders
+it is encouraged that you also define a `getShaders()` function and selectively
+overwrite required shader(s) with custom shaders.
 This makes it much easier for others to subclass your layer and make small
 changes to the shaders.
+
+Note: When overwriting `getShaders()` you should pass down any unmodified shader(s)
+and `modules` as is. See code example below.
 
 ## Defining Additional Uniforms
 
@@ -79,7 +84,7 @@ the `draw()` method:
 /// my-scatterplot-layer.js
 // Example to draw rounded rectangles instead of circles in ScatterplotLayer
 import {ScatterplotLayer} from 'deck.gl';
-import fragmentShader from 'my-scatterplot-layer-fragment';
+import customFragmentShader from 'my-scatterplot-layer-fragment';
 
 export default RoundedRectangleLayer extends ScatterplotLayer {
 
@@ -94,10 +99,11 @@ export default RoundedRectangleLayer extends ScatterplotLayer {
   }
 
   getShaders() {
-    return {
-      vs: super.getShaders().vs,
-      fs: fragmentShader
-    }
+    // use object.assign to make sure we don't overwrite existing fields like `vs`, `modules`...
+    const shaders = Object.assign({}, super.getShaders(), {
+      fs: customFragmentShader
+    });
+    return shaders;
   }
 }
 RoundedRectangleLayer.defaultProps = {

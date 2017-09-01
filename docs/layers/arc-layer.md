@@ -81,8 +81,8 @@ Method called to determine the rgba color of the source.
 * If the method does not return a value for the given object, fallback to `[0, 0, 255, 255]`.
 
 ## Source
-[src/layers/core/arc-layer](https://github.com/uber/deck.gl/tree/4.0-release/src/layers/core/arc-layer)
+[src/layers/core/arc-layer](https://github.com/uber/deck.gl/tree/4.1-release/src/layers/core/arc-layer)
 
-<a href="https://github.com/uber/deck.gl/tree/4.0-release/src/layers/core/arc-layer">
+<a href="https://github.com/uber/deck.gl/tree/4.1-release/src/layers/core/arc-layer">
 </a>
 
