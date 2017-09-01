@@ -21,15 +21,19 @@
 // lighting
 
 export default `\
-#define NUM_OF_LIGHTS 2
+// TODO - this is expected to be set by project module
 uniform vec3 cameraPos;
+
+#define NUM_OF_LIGHTS 2
+
+// TODO these should be using lighting_ prefix
 uniform vec3 lightsPosition[16];
 uniform vec2 lightsStrength[16];
 uniform float ambientRatio;
 uniform float diffuseRatio;
 uniform float specularRatio;
 
-float getLightWeight(vec3 position_worldspace_vec3, vec3 normals_worldspace) {
+float lighting_getLightWeight(vec3 position_worldspace_vec3, vec3 normals_worldspace) {
   float lightWeight = 0.0;
 
   vec3 normals_worldspace_vec3 = normals_worldspace.xzy;
@@ -55,5 +59,11 @@ float getLightWeight(vec3 position_worldspace_vec3, vec3 normals_worldspace) {
   }
 
   return lightWeight;
+}
+
+// DEPRECATED - Backwards compatibility
+
+float getLightWeight(vec3 position_worldspace_vec3, vec3 normals_worldspace) {
+  return lighting_getLightWeight(position_worldspace_vec3, normals_worldspace);
 }
 `;

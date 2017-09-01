@@ -18,23 +18,43 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {fp64} from 'luma.gl';
-import project from '../project/project';
+export default `\
+// Backwards compatibility
+uniform mat4 modelMatrix;
+uniform mat4 projectionMatrix;
+uniform vec3 projectionPixelsPerUnit;
+uniform float projectionScale; // This is the mercator scale (2 ** zoom)
 
-import project64Shader from './project64.glsl';
 
-export default {
-  name: 'project64',
-  dependencies: [project, fp64],
-  vs: project64Shader,
-  getUniforms
-};
-
-// TODO - this module should calculate the 64 bit uniforms
-// It is currently done by project to minimize duplicated work
-
-const DEFAULT_MODULE_OPTIONS = {};
-
-function getUniforms(opts = DEFAULT_MODULE_OPTIONS) {
-  return {};
+float scale(float position) {
+  return project_scale(position);
 }
+
+vec2 scale(vec2 position) {
+  return project_scale(position);
+}
+
+vec3 scale(vec3 position) {
+  return project_scale(position);
+}
+
+vec4 scale(vec4 position) {
+  return project_scale(position);
+}
+
+vec2 preproject(vec2 position) {
+  return project_position(position);
+}
+
+vec3 preproject(vec3 position) {
+  return project_position(position);
+}
+
+vec4 preproject(vec4 position) {
+  return project_position(position);
+}
+
+vec4 project(vec4 position) {
+  return project_to_clipspace(position);
+}
+`;

@@ -5,7 +5,7 @@ Release date: TBD, late 2017
 
 ## Control over DevicePixelRatio
 
-The new `useDevicePixelRatio` prop for DeckGL component can be used to toggle usage of full resolution of retina/HD displays. Disabling device pixel ratio can reduce the render buffer size with 4x on retina devices and lead to big improvements, especially on mobile.
+The new `useDevicePixelRatio` prop for DeckGL component can be used to toggle usage of full resolution of retina/HD displays. Disabling device pixel ratio can reduce the render buffer size with 4x on retina devices and lead to big performance improvements, especially on mobile.
 
 
 ## Layer: Automatic and Manual Highlighting
@@ -13,9 +13,17 @@ The new `useDevicePixelRatio` prop for DeckGL component can be used to toggle us
 Three new props (`highlightColor`, `highlightedObjectIndex` and `autoHighlight`) are added to `Layer` class to support highlighting of a single object in a layer, either automatically on hover or through programmatically specifying a selected object. Note that this highlighting is done on GPU and is thus very performant.
 
 
-## PathLayer: dashed line support
+## PathLayer: Dashed Line Support
 
 Added new props (`getDashArray` and `justified`) to render paths as dashed lines.
+
+
+## Shader Modules
+
+* Shader module documenation is much improved, both in deck.gl and luma.gl. Shader Modules are listed under the "API Reference" heading after the JavaScript classes.
+* The `project` module provides a new function `project_pixel_to_clipspace` for screen space calculations that takes variable `useDevicePixelRatio` and focal distance into account, making such calculation simpler and less prone to fail when parameters change.
+* The core deck.gl shader modules (`project` etc) now conform to the luma.gl shadertools conventions.
+
 
 # deck.gl v4.1
 

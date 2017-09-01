@@ -13,7 +13,8 @@ function generatePath(tree, parentPath = '') {
     tree.forEach(branch => generatePath(branch, parentPath));
   }
   if (tree.name) {
-    tree.path = tree.name.match(/(GeoJson|3D|API|([A-Z]|^)[a-z'0-9]+|\d+)/g).join('-').toLowerCase().replace(/[^\w-]/g, '');
+    tree.path = tree.name.match(/(GeoJson|3D|API|([A-Z]|^)[a-z'0-9]+|\d+)/g)
+      .join('-').toLowerCase().replace(/[^\w-]/g, '');
   }
   if (tree.children) {
     generatePath(tree.children, `${parentPath}/${tree.path}`);
@@ -324,6 +325,18 @@ export const docPages = generatePath([
       {
         name: 'WebMercatorViewport',
         content: getDocUrl('api-reference/web-mercator-viewport.md')
+      },
+      {
+        name: 'project (Shader Module)',
+        content: getDocUrl('shader-modules/project.md')
+      },
+      {
+        name: 'project64 (Shader Module)',
+        content: getDocUrl('shader-modules/project-64.md')
+      },
+      {
+        name: 'lighting (Shader Module)',
+        content: getDocUrl('shader-modules/lighting.md')
       }
     ]
   }

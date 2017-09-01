@@ -19,56 +19,49 @@
 // THE SOFTWARE.
 
 export default `\
+// EXTERNAL CONSTANTS: these must match JavaScript constants in "src/lib/constants.js"
+const float COORDINATE_SYSTEM_IDENTITY = 0.;
+const float COORDINATE_SYSTEM_LNG_LAT = 1.;
+const float COORDINATE_SYSTEM_METER_OFFSETS = 2.;
+
+uniform float project_uCoordinateSystem;
+uniform float project_uScale;
+uniform vec3 project_uPixelsPerUnit;
+uniform vec4 project_uCenter;
+uniform mat4 project_uModelMatrix;
+uniform mat4 project_uViewProjectionMatrix;
+uniform vec2 project_uViewportSize;
+uniform float project_uDevicePixelRatio;
+uniform float project_uFocalDistance;
+uniform vec3 project_uCameraPosition;
+
 const float TILE_SIZE = 512.0;
 const float PI = 3.1415926536;
 const float WORLD_SCALE = TILE_SIZE / (PI * 2.0);
 
-// ref: lib/constants.js
-const float PROJECT_IDENTITY = 0.;
-const float PROJECT_MERCATOR = 1.;
-const float PROJECT_MERCATOR_OFFSETS = 2.;
-
-uniform float projectionMode;
-uniform float projectionScale;
-uniform vec4 projectionCenter;
-uniform vec3 projectionPixelsPerUnit;
-uniform mat2 projectionPixelsPerUnitUTM;
-
-uniform mat4 modelMatrix;
-uniform mat4 projectionMatrix;
-
 //
-// Scaling offsets
+// Scaling offsets - scales meters to "pixels"
+// Note the scalar version of project_scale is for scaling the z component only
 //
-
-// the scalar version of project_scale is for scaling the z component only
 float project_scale(float meters) {
-  return meters * projectionPixelsPerUnit.z;
+  return meters * project_uPixelsPerUnit.z;
 }
 
 vec2 project_scale(vec2 meters) {
-  return meters * projectionPixelsPerUnit.xy;
+  return meters * project_uPixelsPerUnit.xy;
 }
 
 vec3 project_scale(vec3 meters) {
-  return vec3(
-    project_scale(meters.xy),
-    project_scale(meters.z)
-  );
+  return vec3(project_scale(meters.xy), project_scale(meters.z));
 }
 
 vec4 project_scale(vec4 meters) {
-  return vec4(
-    project_scale(meters.xyz),
-    meters.w
-  );
+  return vec4(project_scale(meters.xyz), meters.w);
 }
 
 //
-// Projecting positions
+// Projecting positions - non-linear projection: lnglats => unit tile [0-1, 0-1]
 //
-
-// non-linear projection: lnglats => unit tile [0-1, 0-1]
 vec2 project_mercator_(vec2 lnglat) {
   return vec2(
     radians(lnglat.x) + PI,
@@ -76,18 +69,21 @@ vec2 project_mercator_(vec2 lnglat) {
   );
 }
 
+//
+// Projects lnglats (or meter offsets, depending on mode) to pixels
+//
 vec4 project_position(vec4 position) {
-
-  if (projectionMode == PROJECT_MERCATOR) {
+  // TODO - why not simply subtract center and fall through?
+  if (project_uCoordinateSystem == COORDINATE_SYSTEM_LNG_LAT) {
     return vec4(
-      project_mercator_(position.xy) * WORLD_SCALE * projectionScale,
+      project_mercator_(position.xy) * WORLD_SCALE * project_uScale,
       project_scale(position.z),
       position.w
     );
   }
 
   // Apply model matrix
-  vec4 position_modelspace = modelMatrix * position;
+  vec4 position_modelspace = project_uModelMatrix * position;
   return project_scale(position_modelspace);
 }
 
@@ -101,44 +97,21 @@ vec2 project_position(vec2 position) {
   return projected_position.xy;
 }
 
+//
+// Projects from "world" coordinates to clip space.
+// Uses project_uViewProjectionMatrix
+//
 vec4 project_to_clipspace(vec4 position) {
-  if (projectionMode == PROJECT_MERCATOR_OFFSETS) {
-    position.w *= projectionPixelsPerUnit.z;
+  if (project_uCoordinateSystem == COORDINATE_SYSTEM_METER_OFFSETS) {
+    // Needs to be divided with project_uPixelsPerUnit
+    position.w *= project_uPixelsPerUnit.z;
   }
-  return projectionMatrix * position + projectionCenter;
+  return project_uViewProjectionMatrix * position + project_uCenter;
 }
 
-// Backwards compatibility
-
-float scale(float position) {
-  return project_scale(position);
-}
-
-vec2 scale(vec2 position) {
-  return project_scale(position);
-}
-
-vec3 scale(vec3 position) {
-  return project_scale(position);
-}
-
-vec4 scale(vec4 position) {
-  return project_scale(position);
-}
-
-vec2 preproject(vec2 position) {
-  return project_position(position);
-}
-
-vec3 preproject(vec3 position) {
-  return project_position(position);
-}
-
-vec4 preproject(vec4 position) {
-  return project_position(position);
-}
-
-vec4 project(vec4 position) {
-  return project_to_clipspace(position);
+// Returns a clip space offset that corresponds to a given number of **non-device** pixels
+vec4 project_pixel_to_clipspace(vec2 pixels) {
+  vec2 offset = pixels / project_uViewportSize * project_uDevicePixelRatio;
+  return vec4(offset * project_uFocalDistance, 0.0, 0.0);
 }
 `;

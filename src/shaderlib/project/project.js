@@ -20,11 +20,21 @@
 
 import {fp32} from 'luma.gl';
 import projectShader from './project.glsl';
+import projectDeprecatedShader from './project-deprecated.glsl';
 import {getUniformsFromViewport} from './viewport-uniforms';
+
+const INITIAL_MODULE_OPTIONS = {};
+
+function getUniforms(opts = INITIAL_MODULE_OPTIONS) {
+  if (opts.viewport) {
+    return getUniformsFromViewport(opts);
+  }
+  return {};
+}
 
 export default {
   name: 'project',
   dependencies: [fp32],
-  vs: projectShader,
-  getUniforms: getUniformsFromViewport
+  vs: `${projectShader}${projectDeprecatedShader}`,
+  getUniforms
 };
