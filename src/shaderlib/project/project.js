@@ -23,9 +23,9 @@ import projectShader from './project.glsl';
 import projectDeprecatedShader from './project-deprecated.glsl';
 import {getUniformsFromViewport} from './viewport-uniforms';
 
-const DEFAULT_MODULE_OPTIONS = {};
+const INITIAL_MODULE_OPTIONS = {};
 
-function getUniforms(opts = DEFAULT_MODULE_OPTIONS) {
+function getUniforms(opts = INITIAL_MODULE_OPTIONS) {
   if (opts.viewport) {
     return getUniformsFromViewport(opts);
   }

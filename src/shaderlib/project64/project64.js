@@ -26,5 +26,15 @@ import project64Shader from './project64.glsl';
 export default {
   name: 'project64',
   dependencies: [project, fp64],
-  vs: project64Shader
+  vs: project64Shader,
+  getUniforms
 };
+
+// TODO - this module should calculate the 64 bit uniforms
+// It is currently done by project to minimize duplicated work
+
+const DEFAULT_MODULE_OPTIONS = {};
+
+function getUniforms(opts = DEFAULT_MODULE_OPTIONS) {
+  return {};
+}
