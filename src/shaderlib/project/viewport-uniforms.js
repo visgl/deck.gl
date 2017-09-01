@@ -180,14 +180,15 @@ export function getUniformsFromViewport({
 
   return {
     // Projection mode values
-    project_uMode: projectionMode,
+    project_uCoordinateSystem: projectionMode,
     project_uCenter: projectionCenter,
 
     // Screen size
     project_uViewportSize: viewportSize,
     project_uDevicePixelRatio: devicePixelRatio,
 
-    project_uFocalDistance: viewport.focalDistance, // Distance at which screen pixels are projected
+    // Distance at which screen pixels are projected
+    project_uFocalDistance: viewport.focalDistance || 1,
     project_uPixelsPerUnit: distanceScales.pixelsPerMeter,
     project_uScale: viewport.scale, // This is the mercator scale (2 ** zoom)
 

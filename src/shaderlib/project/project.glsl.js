@@ -24,7 +24,7 @@ const float COORDINATE_SYSTEM_IDENTITY = 0.;
 const float COORDINATE_SYSTEM_LNG_LAT = 1.;
 const float COORDINATE_SYSTEM_METER_OFFSETS = 2.;
 
-uniform float project_uMode;
+uniform float project_uCoordinateSystem;
 uniform float project_uScale;
 uniform vec3 project_uPixelsPerUnit;
 uniform vec4 project_uCenter;
@@ -33,17 +33,16 @@ uniform mat4 project_uViewProjectionMatrix;
 uniform vec2 project_uViewportSize;
 uniform float project_uDevicePixelRatio;
 uniform float project_uFocalDistance;
+uniform vec3 project_uCameraPosition;
 
 const float TILE_SIZE = 512.0;
 const float PI = 3.1415926536;
 const float WORLD_SCALE = TILE_SIZE / (PI * 2.0);
 
 //
-// Scaling offsets
-// Scales meters to "pixels"
-//
-
+// Scaling offsets - scales meters to "pixels"
 // Note the scalar version of project_scale is for scaling the z component only
+//
 float project_scale(float meters) {
   return meters * project_uPixelsPerUnit.z;
 }
@@ -61,10 +60,8 @@ vec4 project_scale(vec4 meters) {
 }
 
 //
-// Projecting positions
+// Projecting positions - non-linear projection: lnglats => unit tile [0-1, 0-1]
 //
-
-// non-linear projection: lnglats => unit tile [0-1, 0-1]
 vec2 project_mercator_(vec2 lnglat) {
   return vec2(
     radians(lnglat.x) + PI,
@@ -73,11 +70,11 @@ vec2 project_mercator_(vec2 lnglat) {
 }
 
 //
-// projects lnglats (or meter offsets, depending on mode) to pixels
+// Projects lnglats (or meter offsets, depending on mode) to pixels
 //
 vec4 project_position(vec4 position) {
   // TODO - why not simply subtract center and fall through?
-  if (project_uMode == COORDINATE_SYSTEM_LNG_LAT) {
+  if (project_uCoordinateSystem == COORDINATE_SYSTEM_LNG_LAT) {
     return vec4(
       project_mercator_(position.xy) * WORLD_SCALE * project_uScale,
       project_scale(position.z),
@@ -95,19 +92,17 @@ vec3 project_position(vec3 position) {
   return projected_position.xyz;
 }
 
-//
-//
 vec2 project_position(vec2 position) {
   vec4 projected_position = project_position(vec4(position, 0.0, 1.0));
   return projected_position.xy;
 }
 
 //
-// Projects from "pixel" coordinates to clip space
+// Projects from "world" coordinates to clip space.
 // Uses project_uViewProjectionMatrix
 //
 vec4 project_to_clipspace(vec4 position) {
-  if (project_uMode == COORDINATE_SYSTEM_METER_OFFSETS) {
+  if (project_uCoordinateSystem == COORDINATE_SYSTEM_METER_OFFSETS) {
     // Needs to be divided with project_uPixelsPerUnit
     position.w *= project_uPixelsPerUnit.z;
   }
@@ -119,36 +114,4 @@ vec4 project_pixel_to_clipspace(vec2 pixels) {
   vec2 offset = pixels / project_uViewportSize * project_uDevicePixelRatio;
   return vec4(offset * project_uFocalDistance, 0.0, 0.0);
 }
-
-// // Returns a clip space offset that corresponds to a given number of **device** pixels
-// vec2 project_devicePixelOffset_toClipspace(vec2 pixels) {
-//   return pixels / project_uViewportSize;
-// }
-
-// // Adds a pixel offset that does vary with distance
-// // Note that for consistent results, pixels are logical pixels, not device pixels
-// //
-// vec4 project_add_absolutePixelOffset_toClipspace(vec4 position, vec2 pixels) {
-//   vec2 clipspaceOffset = pixels / project_uViewportSize * project_uDevicePixelRatio;
-//   clipspaceOffset = clipspaceOffset * position.w;
-//   return position + vec4(clipspaceOffset, 0.0, 0.0);
-// }
-
-// // Adds a pixel offset that does vary with distance
-// // Note that for consistent results, pixels are logical pixels, not device pixels
-// //
-// vec4 project_add_perspective_pixel_offset_to_clipspace(vec4 position, vec2 pixels) {
-//   vec2 clipspaceOffset = pixels / project_uViewportSize * project_uDevicePixelRatio;
-//   return position + vec4(clipspaceOffset, 0.0, 0.0);
-// }
-
-// Convenience
-
-// vec4 project_position(vec4 position) {
-//   return project_position_to_pixels(position);
-// }
-
-// vec4 project_to_clipspace(vec4 position) {
-//   return project_pixels_to_clipspace(position);
-// }
 `;
