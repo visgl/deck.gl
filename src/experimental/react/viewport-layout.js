@@ -23,7 +23,7 @@ export default class ViewportLayout extends React.Component {
           visible: viewport.isMapSynched(),
           width: viewport.width,
           height: viewport.height
-        });
+        }, viewport.getMercatorParams());
 
         // Check if we should create or just modify a supplied React component
         const newComponent = component ?
