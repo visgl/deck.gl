@@ -28,6 +28,8 @@ import fs from './icon-layer-fragment.glsl';
 
 const DEFAULT_COLOR = [0, 0, 0, 255];
 const DEFAULT_TEXTURE_MIN_FILTER = GL.LINEAR_MIPMAP_LINEAR;
+// GL.LINEAR is the default value but explicitly set it here
+const DEFAULT_TEXTURE_MAG_FILTER = GL.LINEAR;
 
 /*
  * @param {object} props
@@ -129,7 +131,8 @@ export default class IconLayer extends Layer {
 
       if (iconAtlas instanceof Texture2D) {
         iconAtlas.setParameters({
-          [GL.TEXTURE_MIN_FILTER]: DEFAULT_TEXTURE_MIN_FILTER
+          [GL.TEXTURE_MIN_FILTER]: DEFAULT_TEXTURE_MIN_FILTER,
+          [GL.TEXTURE_MAG_FILTER]: DEFAULT_TEXTURE_MAG_FILTER
         });
         this.setState({iconsTexture: iconAtlas});
       } else if (typeof iconAtlas === 'string') {
@@ -138,7 +141,8 @@ export default class IconLayer extends Layer {
         })
         .then(([texture]) => {
           texture.setParameters({
-            [GL.TEXTURE_MIN_FILTER]: DEFAULT_TEXTURE_MIN_FILTER
+            [GL.TEXTURE_MIN_FILTER]: DEFAULT_TEXTURE_MIN_FILTER,
+            [GL.TEXTURE_MAG_FILTER]: DEFAULT_TEXTURE_MAG_FILTER
           });
           this.setState({iconsTexture: texture});
         });
