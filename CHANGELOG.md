@@ -17,6 +17,12 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## Official Releases
 
+#### [4.1.2] - 2017-9-1
+
+- Bump luma.gl dependency from 4.0.1 to 4.0.2.
+- Fix the icon rotation issue (#900)
+- Fix sin calculation using sin() (#885)
+
 #### [4.1.1] - 2017-8-25
 
 - Example fixes. (#884)
