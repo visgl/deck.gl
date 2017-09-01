@@ -36,6 +36,8 @@ uniform vec2 viewportSize;
 uniform float sizeScale;
 uniform float renderPickingBuffer;
 uniform vec2 iconsTextureDim;
+// devicePixelRatio is set up as uniform but not declared in the shader function
+uniform float devicePixelRatio;
 
 varying float vColorMode;
 varying vec4 vColor;
@@ -51,16 +53,17 @@ vec2 rotate_by_angle(vec2 vertex, float angle) {
 
 void main(void) {
   vec2 iconSize = instanceIconFrames.zw;
-  vec2 iconSize_clipspace = iconSize / viewportSize * 2.0;
   // scale icon height to match instanceSize
   float instanceScale = iconSize.y == 0.0 ? 0.0 : instanceSizes / iconSize.y;
-  vec3 center = project_position(instancePositions);
-  vec2 vertex = (positions / 2.0 + instanceOffsets);
-  vertex = rotate_by_angle(vertex, instanceAngles) * iconSize_clipspace *
-    sizeScale * instanceScale;
-  vertex.y *= -1.0;
 
-  gl_Position = project_to_clipspace(vec4(center, 1.0)) + vec4(vertex, 0.0, 0.0);
+  // scale and rotate vertex in "pixel" value and convert back to fraction in clipspace
+  vec2 pixelOffset = positions / 2.0 * iconSize + instanceOffsets;
+  pixelOffset = rotate_by_angle(pixelOffset, instanceAngles) / viewportSize * sizeScale *
+    instanceScale * devicePixelRatio;
+  pixelOffset.y *= -1.0;
+
+  vec3 center = project_position(instancePositions);
+  gl_Position = project_to_clipspace(vec4(center, 1.0)) + vec4(pixelOffset, 0.0, 0.0);
 
   vTextureCoords = mix(
     instanceIconFrames.xy,
