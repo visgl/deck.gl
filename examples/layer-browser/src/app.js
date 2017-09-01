@@ -129,8 +129,9 @@ class App extends PureComponent {
       Object.assign(layerProps, {data: getData()});
     }
 
+    const useModelMatrix = layerProps.coordinateSystem === COORDINATE_SYSTEM.METER_OFFSETS;
     Object.assign(layerProps, {
-      modelMatrix: this._getModelMatrix(index, layerProps.coordinateSystem === COORDINATE_SYSTEM.METER_OFFSETS)
+      modelMatrix: this._getModelMatrix(index, useModelMatrix)
     });
 
     return new Layer(layerProps);

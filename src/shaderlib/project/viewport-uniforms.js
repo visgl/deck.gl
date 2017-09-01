@@ -78,14 +78,7 @@ function calculateMatrixAndOffset({
   // NEW PARAMS
   coordinateSystem,
   coordinateOrigin,
-<<<<<<< HEAD
-  coordinateZoom,
-  // DEPRECATED PARAMS
-  projectionMode,
-  positionOrigin = [0, 0]
-=======
   coordinateZoom
->>>>>>> Rename coordinateSystem props
 }) {
   const {viewMatrixUncentered} = viewport;
   let {viewMatrix} = viewport;
