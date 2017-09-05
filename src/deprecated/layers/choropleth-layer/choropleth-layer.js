@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {Layer} from '../../../lib';
+import Layer from '../../../lib/layer';
 import {get, flatten, log} from '../../../lib/utils';
 import {extractPolygons} from './geojson';
 import {GL, Model, Geometry} from 'luma.gl';

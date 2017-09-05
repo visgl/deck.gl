@@ -2,16 +2,16 @@
 
 Implementation of non-trivial new deck.gl features should typically be started off with the creation of an RFC (Request for Comments) to make sure we have a complete story. It also allow the bigger team (as well as the community) to comment and contribute insights.
 
-| RFC Status   | Description |
-| ---          | --- |
-| Proposed     | Call for an RFC to be written |
-| Draft        | Work-in-progress, not ready for formal review, not approved for prototyping |
-| **Pre-Approved** | Draft approved for prototyping, initial comment round did not uncover major objectsions |
-| **Review**   | Ready for formal review |
-| **Approved** | Approved, ready for implementation |
-| **Implemented** | Approved and implemented |
-| **Deferred** | Review uncovered reasons not to proceed at this time |
-| **Rejected** | Review uncovered reasons not to proceed at this time |
+| RFC Status       | Description |
+| ---              | --- |
+| **Proposed**     | Call for an RFC to be written |
+| **Draft**        | Work-in-progress, not ready for formal review |
+| **Pre-Approved** | No major initial objections, draft pre-approved for prototyping |
+| **Review**       | Ready for formal review |
+| **Approved**     | Approved, ready for implementation |
+| **Implemented**  | Approved and implemented |
+| **Deferred**     | Review uncovered reasons not to proceed at this time |
+| **Rejected**     | Review uncovered reasons not to proceed |
 
 ## Reviews
 
@@ -26,10 +26,10 @@ Current direction for [deck.gl v5 (v.Next)](https://github.com/uber/deck.gl/proj
 | --- | --- | --- | --- |
 | **Animation** | | | |
 | [**Auto Highlighting**](v5.0/auto-highlighting-rfc.md) | @ibgreen @1chandu | **Implemented** | Auto highlight hovered object via `picking` module |
+| [**Expose Layer AttributeManager**](v5.0/expose-attribute-manager.md) | @ibgreen | **Review** | simplifies pregenerating attributes in apps for fast animation. |
 | [**Viewport interpolation**](v5.0/viewport-animation-rfc.md) | @1chandu | Proposed | This should build on the new Viewport system in the First Person RFC. Also needs to consider react-map-gl. |
 | [**Property Animation**](v5.0/property-animation-rfc.md) | @ibgreen | Draft | Allow Layer props and GL parameters to accept functions in addition to values and call these on every render to update values |
 | [**Attribute Animation**](v5.0/attribute-animation-rfc.md) | @pessimistress | Proposed | Automatically interpolate between two copies of a vertex attributes |
-| [**Expose Layer AttributeManager**](v5.0/expose-attribute-manager.md) | @ibgreen | Draft | simplifies pregenerating attributes in apps for fast animation. |
 | [**PropTypes**](v5.0/prop-types-rfc.md) | ? | Draft | Validate e.g ranges for numeric attributes, support animation/auto-interpolation. |
 | | | | |
 | **Effects** | | | |
@@ -37,8 +37,8 @@ Current direction for [deck.gl v5 (v.Next)](https://github.com/uber/deck.gl/proj
 | | | | |
 | **Viewports and Controllers** | | | |
 | [**First Person Viewport**](v5.0/first-person-mercator-viewport-rfc.md) | @ibgreen | **Pre-Approved** | Geospatially enable all viewports |
-| [**Multiple Viewports**](v5.0/multi-viewport-rfc.md) | @ibgreen | Review | Supoort for multiple viewports, synchronized or unsynchronized |
-| [**Controller Architecture**](v5.0/controller-architecture-rfc.md) | @ibgreen | **Approved** | Generalize and Freeze experimental Controller Architecture from v4.1 |
+| [**Multiple Viewports**](v5.0/multi-viewport-rfc.md) | @ibgreen | **Pre-Approved** | Supoort for multiple viewports, synchronized or unsynchronized |
+| [**Controller Architecture**](v5.0/controller-architecture-rfc.md) | @ibgreen | **Draft** | Generalize and Freeze experimental Controller Architecture from v4.1 |
 | | | | |
 | **Ease-of-Use** | | | |
 | [**dataUrl**](v5.0/data-url-rfc.md) | @pessimistress & @ibgreen | Draft | **Ease-of-Use** Allow deck.gl layers to specify a URL and asynchronously download the resulting data |

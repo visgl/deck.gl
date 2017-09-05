@@ -20,10 +20,11 @@
 /* eslint-disable max-len */
 
 // Core Library
-export {COORDINATE_SYSTEM} from './lib';
-export {LayerManager, AttributeManager} from './lib';
-export {Layer} from './lib';
-export {CompositeLayer} from './lib';
+export {COORDINATE_SYSTEM} from './lib/constants';
+export {default as LayerManager} from './lib/layer-manager';
+export {default as AttributeManager} from './lib/attribute-manager';
+export {default as Layer} from './lib/layer';
+export {default as CompositeLayer} from './lib/composite-layer';
 
 // Viewports
 export {default as Viewport} from './viewports/viewport';
@@ -47,18 +48,18 @@ export {default as PathLayer} from './layers/core/path-layer/path-layer';
 export {default as PolygonLayer} from './layers/core/polygon-layer/polygon-layer';
 export {default as GeoJsonLayer} from './layers/core/geojson-layer/geojson-layer';
 
+// React bindings
+export {default as DeckGL} from './react/deckgl';
+export {default as default} from './react/deckgl';
+export {default as MapController} from './react/controllers/map-controller';
+export {default as OrbitController} from './react/controllers/orbit-controller';
+
 // Experimental Features (May change in minor version bumps, use at your own risk)
 import {get} from './lib/utils/get';
 import {count} from './lib/utils/count';
 import {default as EffectManager} from './experimental/lib/effect-manager';
 import {default as Effect} from './experimental/lib/effect';
 import {default as ReflectionEffect} from './experimental/effects/reflection-effect/reflection-effect';
-
-// React bindings
-export {default as DeckGL} from './react/deckgl';
-export {default as default} from './react/deckgl';
-export {default as MapController} from './react/controllers/map-controller';
-export {default as OrbitController} from './react/controllers/orbit-controller';
 
 // Experimental React bindings
 import {default as DeckGLMultiView} from './experimental/react/deckgl-multiview';
@@ -85,4 +86,4 @@ export {default as ChoroplethLayer64} from './deprecated/layers/choropleth-layer
 export {default as ExtrudedChoroplethLayer64} from './deprecated/layers/extruded-choropleth-layer-64/extruded-choropleth-layer-64';
 
 // Deprecated Exports
-export {assembleShaders} from 'luma.gl'; // Just a forward for the luma.gl version (integrated with Model class)
+export {assembleShaders} from 'luma.gl'; // Just a forward from luma.gl (now integrated with Model class)

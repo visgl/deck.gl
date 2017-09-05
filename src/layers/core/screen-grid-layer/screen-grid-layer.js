@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {Layer} from '../../../lib';
+import Layer from '../../../lib/layer';
 import {GL, Model, Geometry} from 'luma.gl';
 
 import vs from './screen-grid-layer-vertex.glsl';

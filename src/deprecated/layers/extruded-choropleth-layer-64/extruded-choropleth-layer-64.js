@@ -18,10 +18,11 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {Layer} from '../../../lib';
+import Layer from '../../../lib/layer';
 import {fp64ify} from '../../../lib/utils/fp64';
-import {GL, Model, Geometry} from 'luma.gl';
 import {flatten, log} from '../../../lib/utils';
+
+import {GL, Model, Geometry} from 'luma.gl';
 import earcut from 'earcut';
 import vec3_normalize from 'gl-vec3/normalize';
 

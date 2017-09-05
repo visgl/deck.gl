@@ -17,10 +17,10 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-import {Layer} from '../../../lib';
-import {GL, Model, Geometry, Texture2D, loadTextures} from 'luma.gl';
-import {fp64ify, enable64bitSupport} from '../../../lib/utils/fp64';
+import Layer from '../../../lib/layer';
 import {COORDINATE_SYSTEM} from '../../../lib';
+import {fp64ify, enable64bitSupport} from '../../../lib/utils/fp64';
+import {GL, Model, Geometry, Texture2D, loadTextures} from 'luma.gl';
 
 import vs from './icon-layer-vertex.glsl';
 import vs64 from './icon-layer-vertex-64.glsl';
