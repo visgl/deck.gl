@@ -21,12 +21,18 @@
 import React, {createElement} from 'react';
 import PropTypes from 'prop-types';
 import autobind from './autobind';
+
 import WebGLRenderer from './webgl-renderer';
-import {LayerManager, Layer} from '../lib';
-import {EffectManager, Effect} from '../experimental';
-import {GL, setParameters} from 'luma.gl';
-import {Viewport, WebMercatorViewport} from '../viewports';
+
+import LayerManager from '../lib/layer-manager';
+import Layer from '../lib/layer';
+import EffectManager from '../experimental/lib/effect-manager';
+import Effect from '../experimental/lib/effect';
+import Viewport from '../viewports/viewport';
+import WebMercatorViewport from '../viewports/web-mercator-viewport';
 import EventManager from '../controllers/events/event-manager';
+
+import {GL, setParameters} from 'luma.gl';
 
 function noop() {}
 

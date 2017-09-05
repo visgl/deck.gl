@@ -18,11 +18,11 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {Layer} from '../../../lib';
-import {get} from '../../../lib/utils';
-import {GL, Model, Geometry} from 'luma.gl';
-import {enable64bitSupport} from '../../../lib/utils/fp64';
+import Layer from '../../../lib/layer';
 import {COORDINATE_SYSTEM} from '../../../lib';
+import {get} from '../../../lib/utils';
+import {enable64bitSupport} from '../../../lib/utils/fp64';
+import {GL, Model, Geometry} from 'luma.gl';
 
 // Polygon geometry generation is managed by the polygon tesselator
 import {PolygonTesselator} from './polygon-tesselator';
