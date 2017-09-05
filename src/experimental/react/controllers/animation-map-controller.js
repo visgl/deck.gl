@@ -96,7 +96,7 @@ const defaultProps = Object.assign({}, MAPBOX_LIMITS, {
   getCursor: getDefaultCursor
 });
 
-export default class MapController extends PureComponent {
+export default class AnimationMapController extends PureComponent {
 
   constructor(props) {
     super(props);
@@ -234,7 +234,7 @@ export default class MapController extends PureComponent {
       }
       // TODO: we need to filter chidren and only update those that require
       // updated viewport prop.
-      const childProps = {...viewport, viewport};
+      const childProps = Object.assign({}, viewport, {viewport});
       childProps.children = this._recursiveUpdateChildren(child.props.children, viewport);
       return cloneElement(child, childProps);
     });
@@ -266,6 +266,6 @@ export default class MapController extends PureComponent {
   }
 }
 
-MapController.displayName = 'MapController';
-MapController.propTypes = propTypes;
-MapController.defaultProps = defaultProps;
+AnimationMapController.displayName = 'AnimationMapController';
+AnimationMapController.propTypes = propTypes;
+AnimationMapController.defaultProps = defaultProps;

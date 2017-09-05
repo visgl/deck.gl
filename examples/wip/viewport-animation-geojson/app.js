@@ -1,13 +1,12 @@
 /* global window,document, setInterval*/
 import React, {Component} from 'react';
 import {render} from 'react-dom';
-// import MapGL from 'react-map-gl';
 import {StaticMap} from 'react-map-gl';
 import DeckGLOverlay from './deckgl-overlay.js';
-import MapController from '../../../../src/experimental/react/controllers/map-controller';
-// import EventManager from '../../src/controllers/events/event-manager';
-
+import {experimental} from 'deck.gl';
 import {json as requestJson} from 'd3-request';
+
+const {AnimationMapController} = experimental;
 
 // Set your mapbox token here
 const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
@@ -30,7 +29,9 @@ class Root extends Component {
       viewport: {
         ...DeckGLOverlay.defaultViewport,
         width: 500,
-        height: 500
+        height: 500,
+        pitch: 10,
+        bearing: 10
       },
       data: null
     };
@@ -45,7 +46,7 @@ class Root extends Component {
   componentDidMount() {
     window.addEventListener('resize', this._resize.bind(this));
     this._resize();
-    // this is to just simulate viwport prop change and test animation.
+    // TODO: this is to just simulate viwport prop change and test animation.
     this._interval = setInterval(() => this._toggleViewport(), 7000);
   }
 
@@ -62,22 +63,23 @@ class Root extends Component {
     });
   }
 
-  // this is to just simulate viwport prop change and test animation.
+  // TODO: this is to just simulate viwport prop change and test animation.
+  // Add proper UI to change viewport.
   _toggleViewport() {
     const newViewport = {};
-    // console.log(`bearing: ${this.state.viewport.bearing}`)
-    newViewport.pitch = (this.state.viewport.pitch === 0) ? 60.0 : 10.0;
-    newViewport.bearing = (this.state.viewport.bearing === 0) ? 90.0 : 10.0;
-    this.setState({
-      viewport: {...this.state.viewport, ...newViewport}
-    });
+    newViewport.pitch = (this.state.viewport.pitch === 10.0) ? 60.0 : 10.0;
+    newViewport.bearing = (this.state.viewport.bearing === 10.0) ? 90.0 : 10.0;
+    this.setState(prevState => ({
+      viewport: {...prevState.viewport, ...newViewport}
+    }));
+
   }
 
   render() {
     const {viewport, data} = this.state;
 
     return (
-      <MapController
+      <AnimationMapController
         {...viewport}
         onViewportChange={this._onViewportChange.bind(this)}
         animateViewport={true}
@@ -92,7 +94,7 @@ class Root extends Component {
             data={data}
             colorScale={colorScale}/>
         </StaticMap>
-      </MapController>
+      </AnimationMapController>
     );
   }
 }
