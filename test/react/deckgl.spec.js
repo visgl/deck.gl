@@ -23,8 +23,7 @@ import test from 'tape-catch';
 import React, {createElement} from 'react';
 import utils from 'react-dom/test-utils';
 
-import DeckGL from 'deck.gl';
-import {Viewport, WebMercatorViewport} from 'deck.gl/viewports';
+import DeckGL, {Viewport, WebMercatorViewport} from 'deck.gl';
 
 const TEST_DATA = {
   mapState: {
