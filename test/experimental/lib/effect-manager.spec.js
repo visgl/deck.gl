@@ -19,8 +19,9 @@
 // THE SOFTWARE.
 
 import test from 'tape-catch';
-import {Effect, EffectManager} from 'deck.gl/experimental/lib';
-import {LayerManager} from 'deck.gl/lib';
+import EffectManager from 'deck.gl/experimental/lib/effect-manager';
+import Effect from 'deck.gl/experimental/lib/effect';
+import LayerManager from 'deck.gl/lib/layer-manager';
 import global from 'global';
 
 const gl = global.glContext;

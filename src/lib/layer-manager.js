@@ -26,7 +26,7 @@ import {log} from './utils';
 import {flatten} from './utils/flatten';
 import {drawLayers, pickLayers, queryLayers} from './draw-and-pick';
 import {LIFECYCLE} from './constants';
-import {Viewport} from '../viewports';
+import Viewport from '../viewports/viewport';
 import {
   setPropOverrides,
   layerEditListener,

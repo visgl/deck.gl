@@ -20,7 +20,7 @@
 
 import {fp32} from 'luma.gl';
 import projectShader from './project.glsl';
-import projectDeprecatedShader from './project-deprecated.glsl';
+import projectDeprecatedShader from '../../deprecated/shaderlib/project/project-deprecated.glsl';
 import {getUniformsFromViewport} from './viewport-uniforms';
 
 const INITIAL_MODULE_OPTIONS = {};

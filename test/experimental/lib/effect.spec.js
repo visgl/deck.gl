@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 
 import test from 'tape-catch';
-import {Effect} from 'deck.gl/experimental/lib';
+import Effect from 'deck.gl/experimental/lib/effect';
 
 test('Effect#constructor', t => {
   const effect = new Effect();

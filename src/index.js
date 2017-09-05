@@ -19,14 +19,14 @@
 // THE SOFTWARE.
 /* eslint-disable max-len */
 
-// Lib
-export {Layer, CompositeLayer, LayerManager, AttributeManager} from './lib';
+// Core Library
 export {COORDINATE_SYSTEM} from './lib';
+export {LayerManager, AttributeManager} from './lib';
+export {Layer} from './lib';
+export {CompositeLayer} from './lib';
 
 // Viewports
 export {default as Viewport} from './viewports/viewport';
-export {default as PerspectiveViewport} from './viewports/perspective-viewport';
-export {default as OrthographicViewport} from './viewports/orthographic-viewport';
 export {default as WebMercatorViewport} from './viewports/web-mercator-viewport';
 
 // Core Layers
@@ -47,19 +47,22 @@ export {default as PathLayer} from './layers/core/path-layer/path-layer';
 export {default as PolygonLayer} from './layers/core/polygon-layer/polygon-layer';
 export {default as GeoJsonLayer} from './layers/core/geojson-layer/geojson-layer';
 
+// Experimental Features (May change in minor version bumps, use at your own risk)
+import {get} from './lib/utils/get';
+import {count} from './lib/utils/count';
+import {default as EffectManager} from './experimental/lib/effect-manager';
+import {default as Effect} from './experimental/lib/effect';
+import {default as ReflectionEffect} from './experimental/effects/reflection-effect/reflection-effect';
+
 // React bindings
 export {default as DeckGL} from './react/deckgl';
 export {default as default} from './react/deckgl';
 export {default as MapController} from './react/controllers/map-controller';
 export {default as OrbitController} from './react/controllers/orbit-controller';
 
-// Experimental Features (May change in minor version bumps, use at your own risk)
-import {get} from './lib/utils/get';
-import {count} from './lib/utils/count';
-import {EffectManager, Effect} from './experimental/lib';
-import {default as ReflectionEffect} from './experimental/effects/reflection-effect';
-import DeckGLMultiView from './experimental/react/deckgl-multiview';
-import ViewportLayout from './experimental/react/viewport-layout';
+// Experimental React bindings
+import {default as DeckGLMultiView} from './experimental/react/deckgl-multiview';
+import {default as ViewportLayout} from './experimental/react/viewport-layout';
 
 export const experimental = {
   get,
@@ -67,14 +70,19 @@ export const experimental = {
   EffectManager,
   Effect,
   ReflectionEffect,
+
   DeckGLMultiView,
   ViewportLayout
 };
 
+// Deprecated Core Lib Classes
+export {default as PerspectiveViewport} from './deprecated/viewports/perspective-viewport';
+export {default as OrthographicViewport} from './deprecated/viewports/orthographic-viewport';
+
 // Deprecated Layers
-export {default as ChoroplethLayer} from './layers/deprecated/choropleth-layer/choropleth-layer';
-export {default as ChoroplethLayer64} from './layers/deprecated/choropleth-layer-64/choropleth-layer-64';
-export {default as ExtrudedChoroplethLayer64} from './layers/deprecated/extruded-choropleth-layer-64/extruded-choropleth-layer-64';
+export {default as ChoroplethLayer} from './deprecated/layers/choropleth-layer/choropleth-layer';
+export {default as ChoroplethLayer64} from './deprecated/layers/choropleth-layer-64/choropleth-layer-64';
+export {default as ExtrudedChoroplethLayer64} from './deprecated/layers/extruded-choropleth-layer-64/extruded-choropleth-layer-64';
 
 // Deprecated Exports
 export {assembleShaders} from 'luma.gl'; // Just a forward for the luma.gl version (integrated with Model class)

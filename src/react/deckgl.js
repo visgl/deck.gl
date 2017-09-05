@@ -23,9 +23,11 @@ import PropTypes from 'prop-types';
 import autobind from './autobind';
 import WebGLRenderer from './webgl-renderer';
 import {LayerManager, Layer} from '../lib';
-import {EffectManager, Effect} from '../experimental';
+import EffectManager from '../experimental/lib/effect-manager';
+import Effect from '../experimental/lib/effect';
 import {GL, setParameters} from 'luma.gl';
-import {Viewport, WebMercatorViewport} from '../viewports';
+import Viewport from '../viewports/viewport';
+import WebMercatorViewport from '../viewports/web-mercator-viewport';
 import EventManager from '../controllers/events/event-manager';
 
 function noop() {}

@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {WebMercatorViewport} from 'deck.gl/viewports';
+import WebMercatorViewport from 'deck.gl/viewports/web-mercator-viewport';
 import {mergeDefaultProps} from '../../src/lib/props';
 
 import spy from './spy';
