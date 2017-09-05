@@ -21,9 +21,9 @@
 import test from 'tape-catch';
 import {Matrix4} from 'luma.gl';
 
+import {COORDINATE_SYSTEM} from 'deck.gl';
+import {Viewport, WebMercatorViewport} from 'deck.gl';
 import {getUniformsFromViewport} from 'deck.gl/shaderlib/project/viewport-uniforms';
-import {Viewport, WebMercatorViewport} from 'deck.gl/lib/viewports';
-import {COORDINATE_SYSTEM} from 'deck.gl/lib/constants';
 
 const TEST_DATA = {
   mapState: {

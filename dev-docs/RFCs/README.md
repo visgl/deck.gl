@@ -34,6 +34,7 @@ Current direction for [deck.gl v5 (v.Next)](https://github.com/uber/deck.gl/proj
 | | | | |
 | **Effects** | | | |
 | **[Effects Manager](v5.0/effects-manager-rfc.md)** | @1chandu @ibgreen | Draft | Official support for effects (shadows, reflections, better lighting, postprocessing, framebuffer composition etc).  |
+| **[Render Layer to Texture](v5.0/render-layer-to-texture-rfc.md)** | TBD | Proposed | Allow layers to render to texture and then use texture in subsequent layers.  |
 | | | | |
 | **Viewports and Controllers** | | | |
 | [**First Person Viewport**](v5.0/first-person-mercator-viewport-rfc.md) | @ibgreen | **Pre-Approved** | Geospatially enable all viewports |
