@@ -4,7 +4,7 @@ import {render} from 'react-dom';
 
 import {StaticMap} from 'react-map-gl';
 
-// import DeckGL from 'deck.gl';
+// TODO - import DeckGL from 'deck.gl';
 import {experimental} from 'deck.gl';
 const {DeckGLMultiView: DeckGL, ViewportLayout} = experimental;
 
@@ -19,17 +19,13 @@ import {
   COORDINATE_SYSTEM,
   PolygonLayer,
   PointCloudLayer
-  // ScatterplotLayer, ArcLayer, HexagonCellLayer
 } from 'deck.gl';
 
 import TripsLayer from '../../trips/trips-layer';
 
 import {setParameters} from 'luma.gl';
-import {Matrix4} from 'math.gl';
 
 import {json as requestJson} from 'd3-request';
-
-const modelMatrix = new Matrix4().rotateZ(Math.PI / 4);
 
 // Source data CSV
 const DATA_URL = {
@@ -58,7 +54,6 @@ const DEFAULT_VIEWPORT_PROPS = {
   bearing: 270,
 
   // view matrix arguments
-  // position: [100, 0, 2], // Defines eye position
   position: [0, 0, 2], // Defines eye position
   // direction: [-0.9, 0.5, 0], // Which direction is camera looking at, default origin
   up: [0, 0, 1] // Defines up direction, default positive y axis
@@ -208,19 +203,6 @@ class Root extends Component {
         getFillColor: f => [74, 80, 87],
         lightSettings: LIGHT_SETTINGS
       }),
-      // new PointCloudLayer({
-      //   id: 'point-cloud',
-      //   outline: true,
-      //   data: new Array(100).fill(0).map((v, i) => ({
-      //     position: [(Math.random() - 0.5) * i, (Math.random() - 0.5) * i, Math.random() * i],
-      //     color: [255, 255, 255, 255],
-      //     normal: [1, 1, 1]
-      //   })),
-      //   projectionMode: COORDINATE_SYSTEM.METER_OFFSETS,
-      //   positionOrigin: [longitude, latitude],
-      //   opacity: 1,
-      //   radiusPixels: 3
-      // }),
       new PointCloudLayer({
         id: 'player',
         data: [{
@@ -230,7 +212,6 @@ class Root extends Component {
         }],
         projectionMode: COORDINATE_SYSTEM.METER_OFFSETS,
         positionOrigin: [longitude, latitude],
-        modelMatrix,
         opacity: 1,
         radiusPixels: 20
       }),
@@ -243,51 +224,9 @@ class Root extends Component {
         }],
         projectionMode: COORDINATE_SYSTEM.METER_OFFSETS,
         positionOrigin: [longitude, latitude],
-        modelMatrix,
         opacity: 1,
         radiusPixels: 20
       })
-      // new ScatterplotLayer({
-      //   id: 'player2',
-      //   data: [{
-      //     position: new Vector3(position).clone().add([-200, -200, 0]),
-      //     color: [0, 255, 0, 255],
-      //     radius: 1,
-      //     normal: [1, 0, 0]
-      //   }],
-      //   fp64: true,
-      //   projectionMode: COORDINATE_SYSTEM.METER_OFFSETS,
-      //   positionOrigin: [longitude, latitude],
-      //   opacity: 1,
-      //   radiusScale: 20
-      // }),
-      // new ArcLayer({
-      //   id: 'player2',
-      //   data: [{
-      //     sourcePosition: [-400, -400, 0],
-      //     targetPosition: [-200, -200, 0],
-      //     color: [0, 255, 0, 255],
-      //     normal: [1, 0, 0]
-      //   }],
-      //   fp64: true,
-      //   projectionMode: COORDINATE_SYSTEM.METER_OFFSETS,
-      //   positionOrigin: [longitude, latitude],
-      //   opacity: 1,
-      //   strokeWidth: 2
-      // }),
-      // new HexagonCellLayer({
-      //   id: 'player-hex',
-      //   data: [{
-      //     centroid: [0, 0, 0],
-      //     color: [0, 255, 255, 255],
-      //     elevation: 0
-      //   }],
-      //   projectionMode: COORDINATE_SYSTEM.METER_OFFSETS,
-      //   positionOrigin: [longitude, latitude],
-      //   opacity: 1,
-      //   radius: 100,
-      //   angle: 0
-      // })
     ];
   }
 
@@ -297,9 +236,8 @@ class Root extends Component {
     return [
       new FirstPersonViewport({
         ...viewportProps,
-        modelMatrix,
         height: viewportProps.height / 2,
-        fovy: fov // Field of view covered by camera
+        fovy: fov
       }),
       {
         viewport: new WebMercatorViewport({
@@ -319,7 +257,6 @@ class Root extends Component {
   render() {
     const viewports = this._renderViewports();
 
-    // TODO - should ViewportController accept a viewport?
     const {viewportProps} = this.state;
 
     return (
@@ -353,10 +290,5 @@ class Root extends Component {
     );
   }
 }
-
-// <div style={{position: 'absolute', left: 0, bottom: 0}}>
-// </div>
-
-// <div style={{position: 'absolute', left: 0, top: 0}}>
 
 render(<Root />, document.body.appendChild(document.createElement('div')));
