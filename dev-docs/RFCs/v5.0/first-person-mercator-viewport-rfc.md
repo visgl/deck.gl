@@ -36,11 +36,13 @@ The map system typically locks in FoV (Field of view), viewing angle (always pit
 When rendering 3D environments on top of pre-rendered video (e.g. overlaying perception data on top of vehicle log cameras)
 
 
-## Proposal: Support for Cartographic Projection in all Viewports
+## Proposal 1: Geospatially Enable all Viewports
 
-In deck.gl 4.1 only the WebMercatorViewport can handle layers with geospatial coordinates, as it is the only viewport that can produce the uniforms required by the project module.
+The key insight here is that through the addition of "meters mode", we now have the general capability of overlaying a normal linear coordinate system (which is what all non-geospatial viewports use) on top of a geospatial coordinate system using an anchor point.
 
-By moving some of the required properties into the base viewport, it would be possible to extend cartographic projection to all cameras.
+While METER_OFFSETS mode was initially introduced to solve a narrow use-case, the technique is very general, and there is no reason why we could not (optionally) support this for all viewports, including first person and orbit (i.e. third person) viewports.
+
+In deck.gl 4.1 only the WebMercatorViewport can handle layers with geospatial coordinates: it is the only viewport that can produce the uniforms required by the project module. But moving some properties from the `WebMercatorViewport` class into the base viewport, it is possible to extend cartographic projection to all viewpott.
 
 Note: There are subtleties around the positioning of the camera which is handled in the next proposal.
 
@@ -55,22 +57,23 @@ As background, there are a couple critical uniforms needed by the `project` shad
 - projection center
 - distance scales
 
-
-
-## Proposal: An Alternative Viewport Hierarchy
-
-In deck.gl v4.0, a viewport class hierarchy was introduced to support non-geospatial viewports. It separates between Perspective and Orthographic cameras (inspired by common WebGL frameworks).
-
-In retrospect this separation adds little value as it captures a trivial part of the camera (the projection matrix), while leaving the more difficult problems unsolved, such as control of camera position and direction. Such aspects are important, particularly for the planned animation extensions to deck.gl.
-
-As an alternative to the `Perspective`/`Orthographic` camera class, a `FirstPerson`/`ThirdPerson` approach.
-
 ### Viewport
 
 - lnglat anchor
 - zoom scale
 - viewMatrix
 - projectionMatrix - allows for complete application control of all **projection** matrix parameters (including fovs, near/far clipping planes, aspect ratios etc, e.g. using `Matrix4.projection` or `Matrix4.ortho` etc).
+
+
+
+
+## Proposal 2: An Alternative Viewport Hierarchy
+
+In deck.gl v4.0, a viewport class hierarchy was introduced to support non-geospatial viewports. It separates between `Perspective` and `Orthographic` cameras (inspired by common WebGL frameworks). But in retrospect this separation adds little value as it captures a trivial part of the camera (the projection matrix), while leaving the more difficult problems unsolved, such as control of camera position and direction. Such aspects are very important, particularly for the planned animation extensions to deck.gl.
+
+As an alternative to the `Perspective`/`Orthographic` camera class, this RFC recommends a `FirstPerson`/`ThirdPerson` division.
+
+
 
 
 ### FirstPersonViewport
@@ -107,11 +110,21 @@ The current WebMercatorViewport could become a subclass of a "Third Person Viewp
 It is really a `MapboxViewport` (at least when it comes to perspective mode) as it emulates mapbox-gl's choices of perspective projection.
 
 
-## Proposal: Add `Viewport.isMapSynched` method to control map display
 
-As the application will now switch between cameras (viewports), some of which can occasionally display the base map, it would be good to offer an easy way for the app to determine if the base map can be displayed
 
-A new method or property, `isMapSynched` would return false by default, however `WebMercatorViewport` would override it.
+## Proposal 3: Add `Viewport.isMapSynched` method to control map display
+
+The application can now switch freely between `Viewport`s, however the base map is typically (mapbox-gl) very constrained in what view points it allows. It would therefore be good to offer an easy way for the app to easily determine if the base map can be displayed.
+
+
+### Viewport changes
+
+* `Viewport.isMapSynched()` (`Boolean`, `false`)- A new method (intended to be overriden by subclasses) indicating if the map can be displayed with these viewport settings. Would return false by default.
+
+
+### WebMercatorViewport changes
+
+* `WebMercatorViewport.isMapSynched()` - Overrides `Viewport.isMapSynched()`
 
 * if true, the generated projection matrix works with mapbox. false, the generated view projection matrices do not match the map. Normally the application would disable map display when isMapSynched() returns false
 
@@ -121,24 +134,6 @@ A new method or property, `isMapSynched` would return false by default, however 
     * If `altitude is !== 0.5
     * If `pitch > 60 degrees
 We could also check zoom levels, potentially moving all mapbox limit checks into the `WebMercatorViewport` viewport.
-
-
-## Proposal: Viewport View Matrix Decomposition support
-
-Extract traditional camera parameters from any Viewport? We have the `viewMatrix`, which can be decomposed using standard 4x4 matrix techniques.
-
-Possible methods:
-* `WebMercatorViewport.getCameraPosition`
-* `WebMercatorViewport.getCameraLookAt`
-* `WebMercatorViewport.getCameraUp`
-* `WebMercatorViewport.getFov`
-* `WebMercatorViewport.getClippingPlanes` -> [near, far]
-
-
-## Proposal: SphericalCoordinates class
-
-While projection matrix creation functions typically take a `lookAt` (Vector3) parameter, directions are often specified as spherical coordinates (pitch and bearing).
-* To make is easy to use both spherical coordinates and direction vectors for the camera, we can extend our math library with a SphericalCoordinates class to make transformations between direction vectors and spherical coordinates easy. We already have an initial implementation.
 
 
 ## Additional Work: Event Handling
