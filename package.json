@@ -44,14 +44,12 @@
   "dependencies": {
     "d3-hexbin": "^0.2.1",
     "earcut": "^2.0.6",
-    "gl-mat4": "^1.1.4",
-    "gl-vec2": "^1.0.0",
-    "gl-vec3": "^1.0.3",
-    "gl-vec4": "^1.0.1",
+    "math.gl": ">= 1.0.0-alpha.7",
     "hammerjs": "^2.0.8",
     "lodash.flattendeep": "^4.4.0",
     "prop-types": "^15.5.8",
-    "seer": "^0.2.3"
+    "seer": "^0.2.3",
+    "viewport-mercator-project": ">= 4.2.0-alpha.1"
   },
   "devDependencies": {
     "babel-cli": "^6.22.2",

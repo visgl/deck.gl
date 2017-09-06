@@ -28,7 +28,7 @@ import {
   calculateDistanceScales,
   makeProjectionMatrixFromMercatorParams,
   makeUncenteredViewMatrixFromMercatorParams
-} from '../viewport-mercator-project/web-mercator-utils';
+} from 'viewport-mercator-project';
 
 // TODO - import from viewport-mercator-project
 // import {fitBounds} from '../viewport-mercator-project/fit-bounds';
