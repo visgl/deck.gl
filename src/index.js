@@ -64,6 +64,7 @@ import {default as ReflectionEffect} from './experimental/effects/reflection-eff
 // Experimental React bindings
 import {default as DeckGLMultiView} from './experimental/react/deckgl-multiview';
 import {default as ViewportLayout} from './experimental/react/viewport-layout';
+import AnimationMapController from './experimental/react/controllers/animation-map-controller';
 
 export const experimental = {
   get,
@@ -73,7 +74,8 @@ export const experimental = {
   ReflectionEffect,
 
   DeckGLMultiView,
-  ViewportLayout
+  ViewportLayout,
+  AnimationMapController
 };
 
 // Deprecated Core Lib Classes
