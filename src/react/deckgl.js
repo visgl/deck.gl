@@ -122,28 +122,6 @@ export default class DeckGL extends React.Component {
 
   // Private Methods
 
-  _onRendererInitialized({gl, canvas}) {
-    setParameters(gl, {
-      blend: true,
-      blendFunc: [GL.SRC_ALPHA, GL.ONE_MINUS_SRC_ALPHA],
-      polygonOffsetFill: true
-    });
-
-    const {props} = this;
-    props.onWebGLInitialized(gl);
-
-    // Note: avoid React setState due GL animation loop / setState timing issue
-    this.layerManager = new LayerManager({gl});
-    this.layerManager.initEventHandling(new EventManager(canvas));
-    this.effectManager = new EffectManager({gl, layerManager: this.layerManager});
-
-    for (const effect of props.effects) {
-      this.effectManager.addEffect(effect);
-    }
-
-    this._updateLayers(props);
-  }
-
   _updateLayers(nextProps) {
     const {
       width,
@@ -182,6 +160,28 @@ export default class DeckGL extends React.Component {
         .setViewport(viewport, zoom)
         .updateLayers({newLayers: nextProps.layers});
     }
+  }
+
+  _onRendererInitialized({gl, canvas}) {
+    setParameters(gl, {
+      blend: true,
+      blendFunc: [GL.SRC_ALPHA, GL.ONE_MINUS_SRC_ALPHA],
+      polygonOffsetFill: true
+    });
+
+    const {props} = this;
+    props.onWebGLInitialized(gl);
+
+    // Note: avoid React setState due GL animation loop / setState timing issue
+    this.layerManager = new LayerManager({gl});
+    this.layerManager.initEventHandling(new EventManager(canvas));
+    this.effectManager = new EffectManager({gl, layerManager: this.layerManager});
+
+    for (const effect of props.effects) {
+      this.effectManager.addEffect(effect);
+    }
+
+    this._updateLayers(props);
   }
 
   _onRenderFrame({gl}) {
