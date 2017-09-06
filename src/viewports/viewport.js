@@ -33,15 +33,10 @@ import vec2_lerp from 'gl-vec2/lerp';
 const ZERO_VECTOR = [0, 0, 0];
 
 import {
-  // projectFlat,
-  // unprojectFlat,
   getMercatorDistanceScales,
   getMercatorWorldPosition,
-  getMeterZoom
-  // makeProjectionMatrixFromMercatorParams,
-  // makeUncenteredViewMatrixFromMercatorParams
-  // makeViewMatricesFromMercatorParams
-} from '../viewport-mercator-project/web-mercator-utils';
+  getMercatorMeterZoom
+} from 'viewport-mercator-project';
 
 import assert from 'assert';
 
@@ -57,25 +52,6 @@ const DEFAULT_DISTANCE_SCALES = {
 const DEFAULT_ZOOM = 0;
 
 const ERR_ARGUMENT = 'Illegal argument to Viewport';
-
-// Extracts or creates projection matrix from supplied options
-// Optionally creates a perspective or orthographic matrprojectionMatrix || ix
-function createPerspectiveProjectionMatrix({ // viewport arguments
-  // Projection matrix: option 1, perspective
-  fovy = 75, // Field of view covered by camera
-  near = 1, // Distance of near clipping plane
-  far = 100, // Distance of far clipping plane
-  aspect = null,
-  width, // Width of viewport
-  height // Height of viewport
-}) {
-  const DEGREES_TO_RADIANS = Math.PI / 180;
-
-  assert(Number.isFinite(fovy));
-  const fovyRadians = fovy * DEGREES_TO_RADIANS;
-  aspect = Number.isFinite(aspect) ? aspect : width / height;
-  return mat4_perspective([], fovyRadians, aspect, near, far);
-}
 
 export default class Viewport {
   /**
@@ -104,7 +80,6 @@ export default class Viewport {
       fovy = 75,
       near = 0.01,  // Distance of near clipping plane
       far = 10000, // Distance of far clipping plane
-      aspect = null, // Defaults to width/height
 
       // Anchor: lng lat zoom will make this viewport work with geospatial coordinate systems
       longitude = null,
@@ -130,7 +105,7 @@ export default class Viewport {
 
     this.zoom = zoom;
     if (!Number.isFinite(this.zoom)) {
-      this.zoom = this.isGeospatial ? getMeterZoom({latitude}) : DEFAULT_ZOOM;
+      this.zoom = this.isGeospatial ? getMercatorMeterZoom({latitude}) : DEFAULT_ZOOM;
     }
     this.scale = Math.pow(2, this.zoom);
 
@@ -140,13 +115,8 @@ export default class Viewport {
       distanceScales || DEFAULT_DISTANCE_SCALES;
 
     this.focalDistance = opts.focalDistance || 1;
-
-    const SCALE = 1;
-
-    this.distanceScales.metersPerPixel =
-      new Vector3(this.distanceScales.metersPerPixel).scale(SCALE);
-    this.distanceScales.pixelsPerMeter =
-      new Vector3(this.distanceScales.pixelsPerMeter).scale(1 / SCALE);
+    this.distanceScales.metersPerPixel = new Vector3(this.distanceScales.metersPerPixel);
+    this.distanceScales.pixelsPerMeter = new Vector3(this.distanceScales.pixelsPerMeter);
 
     this.position = ZERO_VECTOR;
     if (position) {
@@ -178,12 +148,15 @@ export default class Viewport {
       .translate(new Vector3(this.center || ZERO_VECTOR).negate());
 
     // Create a projection matrix if not supplied
-    this.projectionMatrix = projectionMatrix || createPerspectiveProjectionMatrix({
-      width: this.width,
-      height: this.height,
-      fovy, aspect, // perspective matrix opts
-      near, far     // Distance of near/far clipping plane
-    });
+    if (projectionMatrix) {
+      this.projectionMatrix = projectionMatrix;
+    } else {
+      assert(Number.isFinite(fovy));
+      const DEGREES_TO_RADIANS = Math.PI / 180;
+      const fovyRadians = fovy * DEGREES_TO_RADIANS;
+      const aspect = this.width / this.height;
+      this.projectionMatrix = mat4_perspective([], fovyRadians, aspect, near, far);
+    }
 
     // console.log(this.constructor.name,
     //   this.viewMatrixUncentered, this.viewMatrix, this.projectionMatrix);

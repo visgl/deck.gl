@@ -22,9 +22,6 @@ import Viewport from './viewport';
 import {Matrix4, experimental} from 'math.gl';
 const {SphericalCoordinates} = experimental;
 
-// import {projectFlat} from '../viewport-mercator-project/web-mercator-utils';
-// import assert from 'assert';
-
 function getDirectionFromBearingAndPitch({bearing, pitch}) {
   const spherical = new SphericalCoordinates({bearing, pitch});
   const direction = spherical.toVector3().normalize();
@@ -38,7 +35,6 @@ export default class FirstPersonViewport extends Viewport {
       // view matrix arguments
       modelMatrix = null,
       bearing,
-      // pitch,
       direction, // Which direction camera is looking at
       up = [0, 0, 1] // Defines up direction, default positive y axis,
     } = opts;
@@ -47,18 +43,12 @@ export default class FirstPersonViewport extends Viewport {
       bearing,
       pitch: 90
     });
-    // const center = dir ? new Vector3(eye).add(dir) : lookAt;
-    // dir.scale([1, -1, 1]);
 
     // Direction is relative to model coordinates, of course
     const center = modelMatrix ? modelMatrix.transformDirection(dir) : dir;
-    // center.scale(12);
 
     // Just the direction. All the positioning is done in viewport.js
-    const viewMatrix = new Matrix4()
-      .multiplyRight(
-        new Matrix4().lookAt({eye: [0, 0, 0], center, up})
-      );
+    const viewMatrix = new Matrix4().lookAt({eye: [0, 0, 0], center, up});
 
     super(Object.assign({}, opts, {
       zoom: null, // triggers meter level zoom
