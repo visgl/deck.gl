@@ -49,7 +49,7 @@
     "lodash.flattendeep": "^4.4.0",
     "prop-types": "^15.5.8",
     "seer": "^0.2.3",
-    "viewport-mercator-project": ">= 4.2.0-alpha.1"
+    "viewport-mercator-project": ">= 4.2.0-alpha.2"
   },
   "devDependencies": {
     "babel-cli": "^6.22.2",
@@ -75,7 +75,6 @@
     "immutable": "^3.8.1",
     "jsdom": "^9.11.0",
     "luma.gl": ">=4.1.0-alpha.2",
-    "math.gl": ">=1.0.0-alpha.7",
     "module-alias": "^2.0.0",
     "nyc": "^10.2.0",
     "path-exists-cli": "^1.0.0",

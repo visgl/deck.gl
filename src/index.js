@@ -28,6 +28,8 @@ export {default as CompositeLayer} from './lib/composite-layer';
 
 // Viewports
 export {default as Viewport} from './viewports/viewport';
+export {default as FirstPersonViewport} from './viewports/first-person-viewport';
+export {default as ThirdPersonViewport} from './viewports/third-person-viewport';
 export {default as WebMercatorViewport} from './viewports/web-mercator-viewport';
 
 // Core Layers
@@ -51,8 +53,8 @@ export {default as GeoJsonLayer} from './layers/core/geojson-layer/geojson-layer
 // React bindings
 export {default as DeckGL} from './react/deckgl';
 export {default as default} from './react/deckgl';
+
 export {default as MapController} from './react/controllers/map-controller';
-export {default as OrbitController} from './react/controllers/orbit-controller';
 
 // Experimental Features (May change in minor version bumps, use at your own risk)
 import {get} from './lib/utils/get';
@@ -81,6 +83,7 @@ export const experimental = {
 // Deprecated Core Lib Classes
 export {default as PerspectiveViewport} from './deprecated/viewports/perspective-viewport';
 export {default as OrthographicViewport} from './deprecated/viewports/orthographic-viewport';
+export {default as OrbitController} from './react/controllers/orbit-controller';
 
 // Deprecated Layers
 export {default as ChoroplethLayer} from './deprecated/layers/choropleth-layer/choropleth-layer';
@@ -88,4 +91,4 @@ export {default as ChoroplethLayer64} from './deprecated/layers/choropleth-layer
 export {default as ExtrudedChoroplethLayer64} from './deprecated/layers/extruded-choropleth-layer-64/extruded-choropleth-layer-64';
 
 // Deprecated Exports
-export {assembleShaders} from 'luma.gl'; // Just a forward from luma.gl (now integrated with Model class)
+export {assembleShaders} from 'luma.gl'; // Forward the luma.gl version (note: now integrated with Model)

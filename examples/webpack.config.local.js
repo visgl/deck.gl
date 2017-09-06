@@ -31,6 +31,8 @@ const LOCAL_DEV_CONFIG = {
       'deck.gl': SRC_DIR,
       // Important: ensure shared dependencies come from the main node_modules dir
       'luma.gl': resolve(LIB_DIR, './node_modules/luma.gl'),
+      'math.gl': resolve(LIB_DIR, './node_modules/math.gl'),
+      'viewport-mercator-project': resolve(LIB_DIR, './node_modules/viewport-mercator-project'),
       seer: resolve(LIB_DIR, './node_modules/seer'),
       react: resolve(LIB_DIR, './node_modules/react')
     }
