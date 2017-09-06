@@ -15,12 +15,21 @@ Each version should:
 Ref: http://keepachangelog.com/en/0.3.0/
 -->
 
-## Pre Releases
+## Latest Beta Releases
 
-### deck.gl v4.2
+For Earlier Beta Releases see below
+
+## Beta Releases
+
+### deck.gl v4.2 Beta Releases
+
+#### [4.2.0-alpha.6] -
+- First person view merged to master
+
+#### [4.2.0-alpha.5] -
+- FIXES for First Person View
 
 #### [4.2.0-alpha.4] -
-
 - NEW: Automatic/custom highlighting using picking shader module.
 - FIX: ScreenGridLayer `depthTest`
 - FIX: CompositeLayer `parameters` forwarding
@@ -48,9 +57,24 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 - Add: UTM_OFFSETS projection mode
 
+
 ## Official Releases
 
 ### deck.gl v4.1
+
+#### [4.1.2] - Patch Release
+- FIX: IconLayer texture filter and rotation:
+
+#### [4.1.1] - Patch Release
+- NEW: Automatic/custom highlighting using picking shader module.
+- FIX: ScreenGridLayer `depthTest`
+- FIX: CompositeLayer `parameters` forwarding
+- FIX: S2Layer prop forwarding
+- FIX: GridLayer crash: max call stack size
+- NEW: Add `devicePixelRatio` prop
+- NEW: RFCs
+- DOCS: picking/event handling refresh
+- DEMO: Wind demo fixes
 
 #### [4.1.0] - 2017-7-27 Minor deck.gl Release
 
@@ -206,6 +230,7 @@ For details see [What's New](docs/whats-new.md)
 
 #### [1.0.0] - 2016-01-06
 - Initial commit of the open-source version of deck.gl
+
 
 ## Beta Releases
 
