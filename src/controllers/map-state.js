@@ -113,7 +113,7 @@ export default class MapState {
    * @param {[Number, Number]} pos - position on screen where the pointer grabs
    */
   panStart({pos}) {
-    return this._getUpdatedMapState({
+    return this._getUpdatedState({
       startPanLngLat: this._unproject(pos)
     });
   }
@@ -133,7 +133,7 @@ export default class MapState {
 
     const [longitude, latitude] = this._calculateNewLngLat({startPanLngLat, pos});
 
-    return this._getUpdatedMapState({
+    return this._getUpdatedState({
       longitude,
       latitude
     });
@@ -144,7 +144,7 @@ export default class MapState {
    * Must call if `panStart()` was called
    */
   panEnd() {
-    return this._getUpdatedMapState({
+    return this._getUpdatedState({
       startPanLngLat: null
     });
   }
@@ -154,7 +154,7 @@ export default class MapState {
    * @param {[Number, Number]} pos - position on screen where the center is
    */
   rotateStart({pos}) {
-    return this._getUpdatedMapState({
+    return this._getUpdatedState({
       startBearing: this._viewportProps.bearing,
       startPitch: this._viewportProps.pitch
     });
@@ -189,7 +189,7 @@ export default class MapState {
       startPitch
     });
 
-    return this._getUpdatedMapState({
+    return this._getUpdatedState({
       bearing,
       pitch
     });
@@ -200,7 +200,7 @@ export default class MapState {
    * Must call if `rotateStart()` was called
    */
   rotateEnd() {
-    return this._getUpdatedMapState({
+    return this._getUpdatedState({
       startBearing: null,
       startPitch: null
     });
@@ -211,7 +211,7 @@ export default class MapState {
    * @param {[Number, Number]} pos - position on screen where the center is
    */
   zoomStart({pos}) {
-    return this._getUpdatedMapState({
+    return this._getUpdatedState({
       startZoomLngLat: this._unproject(pos),
       startZoom: this._viewportProps.zoom
     });
@@ -248,7 +248,7 @@ export default class MapState {
     );
     const [longitude, latitude] = zoomedViewport.getLocationAtPoint({lngLat: startZoomLngLat, pos});
 
-    return this._getUpdatedMapState({
+    return this._getUpdatedState({
       zoom,
       longitude,
       latitude
@@ -260,15 +260,51 @@ export default class MapState {
    * Must call if `zoomStart()` was called
    */
   zoomEnd() {
-    return this._getUpdatedMapState({
+    return this._getUpdatedState({
       startZoomLngLat: null,
       startZoom: null
     });
   }
 
+  moveLeft() {
+    return this._getUpdatedState({
+      bearing: this._viewportProps.bearing - 3
+    });
+  }
+
+  moveRight() {
+    return this._getUpdatedState({
+      bearing: this._viewportProps.bearing + 3
+    });
+  }
+
+  moveForward() {
+    return this._getUpdatedState({
+      pitch: this._viewportProps.pitch + 3
+    });
+  }
+
+  moveBackward() {
+    return this._getUpdatedState({
+      pitch: this._viewportProps.pitch - 3
+    });
+  }
+
+  zoomIn() {
+    return this._getUpdatedState({
+      zoom: this._viewportProps.zoom + 0.2
+    });
+  }
+
+  zoomOut() {
+    return this._getUpdatedState({
+      zoom: this._viewportProps.zoom - 0.2
+    });
+  }
+
   /* Private methods */
 
-  _getUpdatedMapState(newProps) {
+  _getUpdatedState(newProps) {
     // Update _viewportProps
     return new MapState(Object.assign({}, this._viewportProps, this._interactiveState, newProps));
   }
@@ -332,5 +368,4 @@ export default class MapState {
       bearing
     };
   }
-
 }

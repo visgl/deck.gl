@@ -115,6 +115,7 @@ export default class Viewport {
       distanceScales || DEFAULT_DISTANCE_SCALES;
 
     this.focalDistance = opts.focalDistance || 1;
+
     this.distanceScales.metersPerPixel = new Vector3(this.distanceScales.metersPerPixel);
     this.distanceScales.pixelsPerMeter = new Vector3(this.distanceScales.pixelsPerMeter);
 
@@ -157,9 +158,6 @@ export default class Viewport {
       const aspect = this.width / this.height;
       this.projectionMatrix = mat4_perspective([], fovyRadians, aspect, near, far);
     }
-
-    // console.log(this.constructor.name,
-    //   this.viewMatrixUncentered, this.viewMatrix, this.projectionMatrix);
 
     // Init pixel matrices
     this._initMatrices();
