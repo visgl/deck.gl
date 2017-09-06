@@ -47,10 +47,8 @@ function fp64ifyMatrix4(matrix) {
   const matrixFP64 = new Float32Array(32);
   for (let i = 0; i < 4; ++i) {
     for (let j = 0; j < 4; ++j) {
-      [
-        matrixFP64[(i * 4 + j) * 2],
-        matrixFP64[(i * 4 + j) * 2 + 1]
-      ] = fp64ify(matrix[j * 4 + i]);
+      const index = i * 4 + j;
+      [matrixFP64[index * 2], matrixFP64[index * 2 + 1]] = fp64ify(matrix[j * 4 + i]);
     }
   }
   return matrixFP64;

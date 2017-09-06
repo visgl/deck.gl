@@ -41,8 +41,8 @@ void main(void) {
 
   // Find the center of the point and add the current vertex
   vec4 position_worldspace = vec4(project_position(instancePositions), 1.0);
-  vec2 vertex = positions.xy * radiusPixels / viewportSize * 2.0;
-  gl_Position = project_to_clipspace(position_worldspace) + vec4(vertex, 0.0, 0.0);
+  gl_Position = project_to_clipspace(position_worldspace) ;
+  gl_Position += project_pixel_to_clipspace(positions.xy * radiusPixels);
 
   // Apply lighting
   float lightWeight = getLightWeight(position_worldspace.xyz, // the w component is always 1.0

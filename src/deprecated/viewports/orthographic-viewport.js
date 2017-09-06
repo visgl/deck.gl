@@ -18,11 +18,11 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import Viewport from '../../viewports/viewport';
+import FirstPersonViewport from '../../viewports/first-person-viewport';
 import mat4_lookAt from 'gl-mat4/lookAt';
 import mat4_ortho from 'gl-mat4/ortho';
 
-export default class OrthographicViewport extends Viewport {
+export default class OrthographicViewport extends FirstPersonViewport {
   constructor({
     // viewport arguments
     width, // Width of viewport

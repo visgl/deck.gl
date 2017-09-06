@@ -20,12 +20,11 @@
 
 // View and Projection Matrix calculations for mapbox-js style
 // map view properties
-import Viewport, {createMat4} from './viewport';
+import Viewport from './viewport';
 
 import {
   projectFlat,
   unprojectFlat,
-  calculateDistanceScales,
   makeProjectionMatrixFromMercatorParams,
   makeUncenteredViewMatrixFromMercatorParams
 } from 'viewport-mercator-project';
@@ -33,8 +32,8 @@ import {
 // TODO - import from viewport-mercator-project
 // import {fitBounds} from '../viewport-mercator-project/fit-bounds';
 
+// TODO - import from math.gl
 /* eslint-disable camelcase */
-import mat4_translate from 'gl-mat4/translate';
 import vec2_add from 'gl-vec2/add';
 import vec2_negate from 'gl-vec2/negate';
 
@@ -59,18 +58,23 @@ export default class WebMercatorViewport extends Viewport {
    * A new viewport instance should be created if any parameters have changed.
    */
   /* eslint-disable complexity, max-statements */
-  constructor({
-    // Map state
-    width,
-    height,
-    latitude,
-    longitude,
-    zoom,
-    pitch,
-    bearing,
-    altitude,
-    farZMultiplier = 10
-  } = {}) {
+  constructor(opts = {}) {
+    let {
+      width,
+      height,
+      latitude,
+      longitude,
+      zoom,
+      pitch,
+      bearing,
+      altitude
+    } = opts;
+
+    const {
+      // x, y, position, ...
+      farZMultiplier = 10
+    } = opts;
+
     // Viewport - support undefined arguments
     width = width !== undefined ? width : DEFAULT_MAP_STATE.width;
     height = height !== undefined ? height : DEFAULT_MAP_STATE.height;
@@ -85,12 +89,9 @@ export default class WebMercatorViewport extends Viewport {
     width = width || 1;
     height = height || 1;
 
-    const scale = Math.pow(2, zoom);
     // Altitude - prevent division by 0
     // TODO - just throw an Error instead?
     altitude = Math.max(0.75, altitude);
-
-    const distanceScales = calculateDistanceScales({latitude, longitude, scale});
 
     const projectionMatrix = makeProjectionMatrixFromMercatorParams({
       width,
@@ -113,17 +114,21 @@ export default class WebMercatorViewport extends Viewport {
       zoom,
       pitch,
       bearing,
-      altitude,
-      distanceScales
+      altitude
     });
 
-    // Make a centered version of the matrix for projection modes without an offset
-    const center = projectFlat([longitude, latitude], scale);
-    const centerTranslation = [-center[0], -center[1], 0];
-
-    const viewMatrix = mat4_translate(createMat4(), viewMatrixUncentered, centerTranslation);
-
-    super({width, height, viewMatrix, projectionMatrix, distanceScales});
+    super(Object.assign({}, opts, {
+      // x, y, position, ...
+      // TODO / hack - prevent vertical offsets if not FirstPersonViewport
+      position: opts.position && [opts.position[0], opts.position[1], 0],
+      width, height,
+      viewMatrix: viewMatrixUncentered,
+      longitude,
+      latitude,
+      zoom,
+      projectionMatrix,
+      focalDistance: 1 // Viewport is already carefully set up to "focus" on ground
+    }));
 
     // Save parameters
     this.latitude = latitude;
@@ -132,11 +137,6 @@ export default class WebMercatorViewport extends Viewport {
     this.pitch = pitch;
     this.bearing = bearing;
     this.altitude = altitude;
-
-    // Save calculated values
-    this.scale = scale;
-    this.center = center;
-    this.viewMatrixUncentered = viewMatrixUncentered;
 
     // Bind methods
     this.metersToLngLatDelta = this.metersToLngLatDelta.bind(this);
@@ -263,6 +263,18 @@ export default class WebMercatorViewport extends Viewport {
     const {width, height} = this;
     const {longitude, latitude, zoom} = fitBounds(Object.assign({width, height, bounds}, options));
     return new WebMercatorViewport({width, height, longitude, latitude, zoom});
+  }
+
+  // TODO - should support user supplied constraints
+  isMapSynched() {
+    const MAPBOX_LIMITS = {
+      pitch: 60,
+      zoom: 40
+    };
+
+    const {pitch, zoom} = this;
+
+    return pitch <= MAPBOX_LIMITS.pitch && zoom <= MAPBOX_LIMITS.zoom;
   }
 }
 
