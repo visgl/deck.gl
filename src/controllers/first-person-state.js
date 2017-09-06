@@ -173,7 +173,7 @@ export default class FirstPersonState {
     const {direction} = this._viewportProps;
 
     return this._getUpdatedState({
-      direction: new Vector3(direction).rotateZ({radians: deltaScaleX / 50}),
+      direction: new Vector3(direction).rotateZ({radians: deltaScaleX / 50})
     });
   }
 
