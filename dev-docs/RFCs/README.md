@@ -17,6 +17,14 @@ Implementation of non-trivial new deck.gl features should typically be started o
 
 The core developers will review RFCs (and of course, comments from the community are always welcome). Recommended review criteria are being documented in [RFC Review Guidelines](../common/RFC-REVIEW-GUIDELINES.md).
 
+## Longer-Terms RFCs
+
+These are early ideas not yet associated with any release
+
+| RFC | Author | Status | Description |
+| --- | --- | --- | --- |
+| [**Projection Mode Improvements**](vNext/projection-mode-improvements-rfc.md) | @ibgreen @pessimistress | **Draft** | Improvements to projection system |
+
 
 ## v5.0 RFCs
 

@@ -166,48 +166,35 @@ export default class GridLayer extends CompositeLayer {
     return linearScale(domain, elevationRange, cell.points.length);
   }
 
+  // for subclassing, override this method to return
+  // customized sub layer props
   getSubLayerProps() {
-    // for subclassing, override this method to return
-    // customized sub layer props
     const {id, elevationScale, fp64, extruded, cellSize, coverage, lightSettings} = this.props;
 
-    // base layer props
-    const {opacity, pickable, visible, getPolygonOffset,
-    highlightedObjectIndex, autoHighlight, highlightColor} = this.props;
-
-    // viewport props
-    const {coordinateSystem, coordinateOrigin, modelMatrix} = this.props;
+    const forwardProps = this.getForwardProps();
 
     // return props to the sublayer constructor
-    return {
+    return Object.assign({}, forwardProps, {
       id: `${id}-grid-cell`,
       data: this.state.layerData,
+
+      fp64,
       cellSize,
       coverage,
       lightSettings,
       elevationScale,
       extruded,
-      fp64,
-      opacity,
-      pickable,
-      visible,
-      getPolygonOffset,
-      coordinateSystem,
-      coordinateOrigin,
-      modelMatrix,
-      highlightedObjectIndex,
-      autoHighlight,
-      highlightColor,
+
       getColor: this._onGetSublayerColor.bind(this),
       getElevation: this._onGetSublayerElevation.bind(this),
       getPosition: d => d.position,
       updateTriggers: this.getUpdateTriggers()
-    };
+    });
   }
 
+  // for subclassing, override this method to return
+  // customized sub layer class
   getSubLayerClass() {
-    // for subclassing, override this method to return
-    // customized sub layer class
     return GridCellLayer;
   }
 

@@ -115,21 +115,7 @@ export default class GeoJsonLayer extends CompositeLayer {
     const hasPolygonLines = polygonOutlineFeatures && polygonOutlineFeatures.length > 0;
     const hasPolygon = polygonFeatures && polygonFeatures.length > 0;
 
-    // base layer props
-    const {opacity, pickable, visible, parameters, getPolygonOffset,
-      highlightedObjectIndex, autoHighlight, highlightColor} = this.props;
-    // viewport props
-    const {coordinateSystem, coordinateOrigin, modelMatrix} = this.props;
-
-    const forwardProps = {
-      // Forward layer props
-      opacity, pickable, visible, parameters, getPolygonOffset,
-      highlightedObjectIndex, autoHighlight, highlightColor,
-      // Forward viewport props
-      coordinateSystem, coordinateOrigin, modelMatrix,
-      // Forward common props
-      fp64
-    };
+    const forwardProps = this.getForwardProps();
 
     // Filled Polygon Layer
     const polygonFillLayer = filled &&
@@ -138,6 +124,7 @@ export default class GeoJsonLayer extends CompositeLayer {
         id: `${id}-polygon-fill`,
         data: polygonFeatures,
 
+        fp64,
         extruded,
         wireframe: false,
         lightSettings,
@@ -157,6 +144,7 @@ export default class GeoJsonLayer extends CompositeLayer {
         id: `${id}-polygon-wireframe`,
         data: polygonFeatures,
 
+        fp64,
         extruded,
         wireframe: true,
         getPolygon: getCoordinates,
@@ -174,6 +162,8 @@ export default class GeoJsonLayer extends CompositeLayer {
       new PathLayer(Object.assign({}, forwardProps, {
         id: `${id}-polygon-outline`,
         data: polygonOutlineFeatures,
+
+        fp64,
         widthScale: lineWidthScale,
         widthMinPixels: lineWidthMinPixels,
         widthMaxPixels: lineWidthMaxPixels,
@@ -193,6 +183,7 @@ export default class GeoJsonLayer extends CompositeLayer {
       id: `${id}-line-paths`,
       data: lineFeatures,
 
+      fp64,
       widthScale: lineWidthScale,
       widthMinPixels: lineWidthMinPixels,
       widthMaxPixels: lineWidthMaxPixels,
@@ -212,6 +203,7 @@ export default class GeoJsonLayer extends CompositeLayer {
       id: `${id}-points`,
       data: pointFeatures,
 
+      fp64,
       radiusScale: pointRadiusScale,
       radiusMinPixels: pointRadiusMinPixels,
       radiusMaxPixels: pointRadiusMaxPixels,

@@ -36,7 +36,8 @@ export function drawLayers({layers, pass}) {
     } else if (layer.props.visible) {
 
       const pickingSelectedColor = _selectedObjectPickingColor(layer);
-      if (pickingSelectedColor) {
+      // TODO - handle multimodel layers?
+      if (pickingSelectedColor && layer.state.model) {
         layer.state.model.updateModuleSettings({
           pickingSelectedColor,
           pickingSelectedColorValid: true
@@ -221,10 +222,13 @@ export function pickLayers(gl, {
       pickedLayer === layer &&
       pickingSelectedColor !== EMPTY_PIXEL
     );
-    layer.state.model.updateModuleSettings({
-      pickingSelectedColor,
-      pickingSelectedColorValid
-    });
+    // TODO - handle multi model layers?
+    if (layer.state.model) {
+      layer.state.model.updateModuleSettings({
+        pickingSelectedColor,
+        pickingSelectedColorValid
+      });
+    }
   });
 
   infos.forEach(info => {

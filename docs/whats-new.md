@@ -12,9 +12,14 @@ Release date: TBD, late 2017
 The new `useDevicePixelRatio` prop for DeckGL component can be used to toggle usage of full resolution of retina/HD displays. Disabling device pixel ratio can reduce the render buffer size with 4x on retina devices and lead to big performance improvements, especially on mobile.
 
 
-## Layer: Automatic and Manual Highlighting
+## Automatic Highlighting of Hovered Elements
 
-Three new props (`highlightColor`, `highlightedObjectIndex` and `autoHighlight`) are added to `Layer` class to support highlighting of a single object in a layer, either automatically on hover or through programmatically specifying a selected object. Note that this highlighting is done on GPU and is thus very performant.
+Three new `Layer` props (`autoHighlight`, `highlightColor` and `highlightedObjectIndex`) have been added to support highlighting of a single object in a layer. Highlighting is either automatic on hover, or controllded through programmatically specifying the index of a selected object. Note that this highlighting is done on the GPU and is thus very performant.
+
+
+## CompositeLayer Improvements
+
+* **Prop Forwarding Support** - A new method `CompositeLayer.getForwardProps()` simplifies forwarding base layer props to sub layers, removing code clutter and reducing the risk of not forwarding a core prop.
 
 
 ## PathLayer: Dashed Line Support
