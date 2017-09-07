@@ -18,10 +18,14 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+import MapState from './map-state';
 import assert from 'assert';
 
 // EVENT HANDLING PARAMETERS
 const ZOOM_ACCEL = 0.01;
+
+const PITCH_MOUSE_THRESHOLD = 5;
+const PITCH_ACCEL = 1.2;
 
 const EVENT_TYPES = {
   WHEEL: ['wheel'],
@@ -36,9 +40,13 @@ export default class Controls {
    * @classdesc
    * A class that handles events and updates mercator style viewport parameters
    */
-  constructor(StateClass, options = {}) {
-    assert(StateClass);
-    this.StateClass = StateClass;
+  constructor(ViewportState, options = {}) {
+    assert(ViewportState);
+    this.ViewportState = ViewportState;
+    this.viewportState = null;
+    this.viewportStateProps = null;
+    this.eventManager = null;
+    this._events = null;
 
     this._state = {
       isDragging: false
@@ -47,6 +55,10 @@ export default class Controls {
     this.handleEvent = this.handleEvent.bind(this);
 
     this.setOptions(options);
+
+    if (this.constructor === Controls) {
+      Object.seal(this);
+    }
   }
 
   /**
@@ -54,8 +66,8 @@ export default class Controls {
    * @param {hammer.Event} event
    */
   handleEvent(event) {
-    this.viewportState =
-      new this.StateClass(Object.assign({}, this.viewportStateProps, this._state));
+    const {ViewportState} = this;
+    this.viewportState = new ViewportState(Object.assign({}, this.viewportStateProps, this._state));
 
     switch (event.type) {
     case 'panstart':
@@ -115,7 +127,8 @@ export default class Controls {
     if (this.onViewportChange &&
       Object.keys(newViewport).some(key => oldViewport[key] !== newViewport[key])) {
       // Viewport has changed
-      this.onViewportChange(newViewport, this.viewportState.getViewport());
+      const viewport = this.viewportState.getViewport ? this.viewportState.getViewport() : null;
+      this.onViewportChange(newViewport, viewport);
     }
 
     this.setState(Object.assign({}, newViewportState.getInteractiveState(), extraState));
@@ -210,6 +223,13 @@ export default class Controls {
   // Default handler for panning to rotate.
   // Called by `_onPan` when panning with function key pressed.
   _onPanRotate(event) {
+    return this.viewportState instanceof MapState ?
+      this._onPanRotateMap(event) :
+      this._onPanRotateStandard(event);
+  }
+
+  // Normal pan to rotate
+  _onPanRotateStandard(event) {
     if (!this.dragRotate) {
       return false;
     }
@@ -222,6 +242,38 @@ export default class Controls {
 
     const newViewportState = this.viewportState.rotate({deltaScaleX, deltaScaleY});
     return this.updateViewport(newViewportState);
+  }
+
+  // Map specific pan to rotate
+  // TODO - is this mapStateSpecific?
+  _onPanRotateMap(event) {
+    if (!this.dragRotate) {
+      return false;
+    }
+
+    const {deltaX, deltaY} = event;
+    const [, centerY] = this.getCenter(event);
+    const startY = centerY - deltaY;
+    const {width, height} = this.viewportState.getViewportProps();
+
+    const deltaScaleX = deltaX / width;
+    let deltaScaleY = 0;
+
+    if (deltaY > 0) {
+      if (Math.abs(height - startY) > PITCH_MOUSE_THRESHOLD) {
+        // Move from 0 to -1 as we drag upwards
+        deltaScaleY = deltaY / (startY - height) * PITCH_ACCEL;
+      }
+    } else if (deltaY < 0) {
+      if (startY > PITCH_MOUSE_THRESHOLD) {
+        // Move from 0 to 1 as we drag upwards
+        deltaScaleY = 1 - centerY / startY;
+      }
+    }
+    deltaScaleY = Math.min(1, Math.max(-1, deltaScaleY));
+
+    const newMapState = this.viewportState.rotate({deltaScaleX, deltaScaleY});
+    return this.updateViewport(newMapState);
   }
 
   // Default handler for the `wheel` event.

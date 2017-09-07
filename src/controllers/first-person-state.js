@@ -43,6 +43,10 @@ export default class FirstPersonState {
 
     bearing, // Rotation around y axis
     pitch, // Rotation around x axis
+
+    // Geospatial anchor
+    longitude,
+    latitude,
     zoom,
 
     syncBearing = true, // Whether to lock bearing to direction
@@ -74,13 +78,15 @@ export default class FirstPersonState {
       width,
       height,
       position: new Vector3(
-        ensureFinite(position[0], defaultState.position[0]),
-        ensureFinite(position[1], defaultState.position[1]),
-        ensureFinite(position[2], defaultState.position[2])
+        ensureFinite(position && position[0], defaultState.position[0]),
+        ensureFinite(position && position[1], defaultState.position[1]),
+        ensureFinite(position && position[2], defaultState.position[2])
       ),
       direction: this._getDirectionFromBearing(bearing),
       bearing,
       pitch: ensureFinite(pitch, defaultState.pitch),
+      longitude,
+      latitude,
       zoom,
       bounds
     });
