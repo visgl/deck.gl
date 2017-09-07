@@ -74,5 +74,11 @@ functions called.
 
 The default implementation returns `pickParams.info` without any change.
 
+
+##### `getForwardProps`
+
+Returns an object with the key base `Layer` props that `CompositeLayer`s typically forward to their sublayers.
+
+
 ## Source
 [src/lib/composite-layer.js](https://github.com/uber/deck.gl/blob/4.1-release/src/lib/composite-layer.js)
