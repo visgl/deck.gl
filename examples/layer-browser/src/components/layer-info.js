@@ -25,8 +25,8 @@ export default class LayerInfo extends PureComponent {
           <span>Layer: { clicked.layer.id } Object: { this._infoToString(clicked) }</span>
         </div>) }
         { queried && (<div>
-          <h4>Query</h4>
-          <span>{ queried.length } Objects found</span>
+          <h4>Query Visible Objects</h4>
+          <span>{ queried.length } visible objects found (see console)</span>
         </div>) }
       </div>
     );

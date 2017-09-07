@@ -2,10 +2,12 @@
 /* eslint-disable no-console */
 import React, {PureComponent} from 'react';
 import {render} from 'react-dom';
-import DeckGL, {PointCloudLayer, COORDINATE_SYSTEM} from 'deck.gl';
+import DeckGL, {COORDINATE_SYSTEM, PointCloudLayer, experimental} from 'deck.gl';
+const {OrbitController} = experimental;
+
 import {setParameters} from 'luma.gl';
 
-import {OrbitController, loadLazFile, parseLazData} from './utils';
+import {loadLazFile, parseLazData} from './utils/laslaz-loader';
 
 const DATA_REPO = 'https://raw.githubusercontent.com/uber-common/deck.gl-data/master';
 const FILE_PATH = 'examples/point-cloud-laz/indoor.laz';
@@ -72,8 +74,6 @@ class Example extends PureComponent {
   }
 
   componentDidMount() {
-    this._canvas.fitBounds([-0.5, -0.5, -0.5], [0.5, 0.5, 0.5]);
-
     const {points} = this.state;
 
     const skip = 10;
@@ -100,8 +100,11 @@ class Example extends PureComponent {
   }
 
   _onResize() {
-    const {innerWidth: width, innerHeight: height} = window;
-    this.setState({width, height});
+    const size = {width: window.innerWidth, height: window.innerHeight};
+    this.setState(size);
+    const newViewport = OrbitController.getViewport(Object.assign(this.state.viewport, size))
+      .fitBounds([[0, 0, 0], [1, 1, 1]]);
+    this._onViewportChange(newViewport);
   }
 
   _onInitialized(gl) {

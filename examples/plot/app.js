@@ -1,8 +1,8 @@
 /* global window,document */
 import React, {Component} from 'react';
 import {render} from 'react-dom';
-import DeckGLOverlay from './deckgl-overlay.js';
-import {OrbitController} from 'deck.gl/dist/controllers';
+import DeckGLOverlay, {experimental} from './deckgl-overlay.js';
+const {OrbitController} = experimental;
 
 const EQUATION = (x, y) => Math.sin(x * x + y * y) * x / Math.PI;
 
@@ -10,7 +10,6 @@ class Root extends Component {
 
   constructor(props) {
     super(props);
-
     this.state = {
       viewport: {
         lookAt: [0, 0, 0],
@@ -24,7 +23,6 @@ class Root extends Component {
         height: 500
       }
     };
-
     this._resize = this._resize.bind(this);
     this._onViewportChange = this._onViewportChange.bind(this);
     this._onHover = this._onHover.bind(this);

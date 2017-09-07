@@ -1,11 +1,26 @@
 /* global window, document */
-import DeckGL, {COORDINATE_SYSTEM, experimental} from 'deck.gl';
-const {ReflectionEffect} = experimental;
+
+import {
+  COORDINATE_SYSTEM,
+  WebMercatorViewport,
+  FirstPersonViewport,
+  MapState,
+  // FirstPersonState,
+  experimental
+} from 'deck.gl';
+
+ // deck.gl react components
+import DeckGL, {ViewportController, ViewportLayout} from 'deck.gl';
+
+const {
+  ReflectionEffect
+} = experimental;
 
 import React, {PureComponent} from 'react';
 import ReactDOM from 'react-dom';
 import autobind from 'react-autobind';
-import MapboxGLMap from 'react-map-gl';
+
+import {StaticMap} from 'react-map-gl';
 import {FPSStats} from 'react-stats';
 
 import {Matrix4, setParameters} from 'luma.gl';
@@ -42,6 +57,7 @@ class App extends PureComponent {
         // immutable: false,
         // Effects are experimental for now. Will be enabled in the future
         // effects: false,
+        multiview: false,
         separation: 0,
         pickingRadius: 0
         // the rotation controls works only for layers in
@@ -185,33 +201,6 @@ class App extends PureComponent {
     return modelMatrix;
   }
 
-  _renderMap() {
-    const {width, height, mapViewState, settings: {effects, pickingRadius}} = this.state;
-    return (
-      <MapboxGLMap
-        mapboxApiAccessToken={MapboxAccessToken || 'no_token'}
-        width={width} height={height}
-        { ...mapViewState }
-        onViewportChange={this._onViewportChange}>
-
-        <DeckGL ref="deckgl"
-          debug
-          id="default-deckgl-overlay"
-          width={width} height={height}
-          {...mapViewState}
-          pickingRadius={pickingRadius}
-          onWebGLInitialized={ this._onWebGLInitialized }
-          onLayerHover={ this._onHover }
-          onLayerClick={ this._onClick }
-          layers={this._renderExamples()}
-          effects={effects ? this._effects : []}
-        />
-
-        <FPSStats isActive/>
-      </MapboxGLMap>
-    );
-  }
-
   _renderNoTokenWarning() {
     /* eslint-disable max-len */
     return (
@@ -223,17 +212,86 @@ class App extends PureComponent {
     /* eslint-disable max-len */
   }
 
+  _getViewports() {
+    const {width, height, mapViewState, settings: {multiview}} = this.state;
+    return [
+      multiview && new FirstPersonViewport({
+        ...mapViewState,
+        width,
+        height: multiview ? height / 2 : height,
+        position: [0, 0, 50]
+      }),
+      new WebMercatorViewport({
+        id: 'basemap', ...mapViewState,
+        width,
+        height: multiview ? height / 2 : height,
+        y: multiview ? height / 2 : 0
+      })
+    ];
+  }
+
+  _renderMap() {
+    const {width, height, mapViewState, settings: {effects, pickingRadius}} = this.state;
+
+    const viewports = this._getViewports();
+
+    return (
+      <div style={{backgroundColor: '#eeeeee'}}>
+        <ViewportController
+          viewportState={MapState}
+          {...mapViewState}
+          width={width}
+          height={height}
+          onViewportChange={this._onViewportChange} >
+
+          <ViewportLayout viewports={viewports}>
+            <StaticMap
+              viewportId="basemap"
+              {...mapViewState}
+              mapboxApiAccessToken={MapboxAccessToken || 'no_token'}
+              width={width}
+              height={height}
+              onViewportChange={this._onViewportChange}/>
+
+            <FPSStats isActive/>
+
+            <DeckGL
+              ref="deckgl"
+              id="default-deckgl-overlay"
+              width={width}
+              height={height}
+              viewports={viewports}
+              layers={this._renderExamples()}
+              effects={effects ? this._effects : []}
+              debug={false}
+              pickingRadius={pickingRadius}
+              onWebGLInitialized={this._onWebGLInitialized}
+              onLayerHover={this._onHover}
+              onLayerClick={this._onClick}
+            />
+
+          </ViewportLayout>
+
+        </ViewportController>
+      </div>
+    );
+  }
+
   render() {
     const {settings, activeExamples, hoveredItem, clickedItem, queriedItems} = this.state;
 
     return (
       <div>
-        { this._renderMap() }
-        { !MapboxAccessToken && this._renderNoTokenWarning() }
+        {this._renderMap()}
+        {!MapboxAccessToken && this._renderNoTokenWarning()}
         <div id="control-panel">
-          <button onClick={this._onQueryVisibleObjects}>Query Objects</button>
+          <div style={{textAlign: 'center', padding: '5px 0 5px'}}>
+            <button onClick={this._onQueryVisibleObjects}>
+              <b>Query Visble Objects</b>
+            </button>
+          </div>
           <LayerControls
-            title="Composite Settings"
+            title="Common Settings"
             settings={settings}
             onChange={this._onUpdateContainerSettings}/>
           <LayerSelector
@@ -242,7 +300,11 @@ class App extends PureComponent {
             onToggleLayer={this._onToggleLayer}
             onUpdateLayer={this._onUpdateLayerSettings} />
         </div>
-        <LayerInfo ref="infoPanel" hovered={hoveredItem} clicked={clickedItem} queried={queriedItems} />
+        <LayerInfo
+          ref="infoPanel"
+          hovered={hoveredItem}
+          clicked={clickedItem}
+          queried={queriedItems} />
       </div>
     );
   }

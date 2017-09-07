@@ -2,7 +2,8 @@ import {PureComponent, createElement} from 'react';
 import PropTypes from 'prop-types';
 
 import {EventManager} from 'mjolnir.js';
-import MapControls from '../../controllers/map-controls';
+import Controls from '../../controllers/controls';
+import MapState from '../../controllers/map-state';
 import {MAPBOX_LIMITS} from '../../controllers/map-state';
 import CURSOR from './cursors';
 
@@ -98,9 +99,9 @@ export default class MapController extends PureComponent {
 
     this._eventManager = eventManager;
 
-    // If props.controls is not provided, fallback to default MapControls instance
+    // If props.controls is not provided, fallback to default MapState Controls instance
     // Cannot use defaultProps here because it needs to be per map instance
-    this._controls = this.props.controls || new MapControls();
+    this._controls = this.props.controls || new Controls(MapState);
     this._controls.setOptions(Object.assign({}, this.props, {
       onStateChange: this._onInteractiveStateChange.bind(this),
       eventManager
