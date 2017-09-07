@@ -8,14 +8,16 @@
 ## Motivation
 
 * In deckgl v4.0 we introduced non-geospatial (orbit) controllers and viewports
-* For deck.gl v5.0 we started working on first person controllers and viewports,
-* For deck.gl v5.0 plus we are introducing a multiviewport architecture.
+* For deck.gl v5.0 we started working on **first person controllers** and **first person viewports**, and we are also introducing a **multiviewport** architecture, and **viewport animation**.
 
-The combination of various viewports in a single render, feeding them off the same "map" state data
+The combination of various viewports in a single render, feeding them off the same "map" state data opens questions about controllers.
+
 
 ## Details
 
-A critical step in this development was the decision to geospatially enable all viewports. This unifies the viewports to a significant extent
+A critical step in this development was the decision to [geospatially enable all viewports](first-person-mercator-viewport-rfc.md). This unifies the API and capabilities of the various `Viewport` subclasses to a significant extent, in that they can all accept (optionally) a geospatial "anchor" or reference point, and on top of that a "meter" offset linear coordinate system.
+
+
 
 
 # Proposal

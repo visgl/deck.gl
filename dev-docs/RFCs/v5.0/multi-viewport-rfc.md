@@ -138,24 +138,49 @@ react-map-gl provides a `StaticMap` that is a perfect backdrop for `WebMercatorV
 
 In fact, the DeckGL component is usually set to a child of the MapGL component. When using multiple base maps, this obviously won't work.
 
-The suggestion is to supply a new React component `<ViewportBaseComponents>` that walks the viewport descriptor list and looks for some attributes and renders base map components (absolutely positioned in CSS) in the same place as the deck.gl viewport will appear in the overlay.
+The suggestion is to supply a new React component that walks the viewport descriptor list and looks for some attributes and renders base map components (absolutely positioned in CSS) in the same place as the deck.gl viewport will appear in the overlay.
+
+
+## ViewportLayout
+
+`ViewportLayout` is a react helper component that is intended to render base maps (or other base React components underneath DeckGL viewports.
+
+Since deck.gl is WebGL based, all its viewports need to be in the same canvas (unless you use multiple DeckGL instances, but that can have significant resource and performance impact)
+
+`ViewportLayout` takes a`viewports` prop and positions any children with `viewportId` prop matching the a viewport id under that viewport.  (`viewports` is intended to be the same array passed to the `DeckGL` componentcontaining a possibly mixed array of `Viewports` and "viewport descriptors" ).
+
+
+## Usage
 
 ```js
-const viewports = [
-  // Non geospatial viewport
-  new Viewport({...}),
-  {viewport: new WebMercatorViewport({}), baseComponent: ReactMapGL, ...},
-  ...
-];
+  const viewports = [
+    new FirstPersonViewport({...}),
+    new WebMercatorViewport({id: 'basemap', ...})
+  ];
 
-render() {
-  return (
-    <*Controller ...>
-      <ViewportBaseComponents width={} height={} viewports={viewports}/>
-      <DeckGL width={} height={} viewports={viewports} layers={...} .../>
-    </Controller>
-  )
-}
+  render() {
+    <ViewportLayout viewports={viewports}>
+
+      <StaticMap
+        viewportId='basemap'
+        {...viewportProps}/>
+
+      <DeckGL
+        width={viewportProps.width}
+        height={viewportProps.height}
+        viewports={viewports}
+        useDevicePixelRatio={false}
+        layers={this._renderLayers()}
+        onWebGLInitialized={this._initialize} />
+
+    </ViewportLayout>
+  }
+```
+
+New Properties
+* `children` - Normally the DeckGL component is the last child is intentionally rendered on top.
+* `viewports` - A singe viewport, or an array of `Viewport`s or "Viewport Descriptors". Will walk the list looking for viewport ids matching children viewportIds, rendering those components in the position and size specified by that viewport. Positioning is done with CSS styling on a wrapper div, sizing by width and height properties. Also injects the `visible: viewport.isMapSynched()` prop.
+
 
 ```
 
