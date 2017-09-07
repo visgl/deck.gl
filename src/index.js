@@ -28,12 +28,15 @@ export {default as CompositeLayer} from './lib/composite-layer';
 
 // Viewports
 export {default as Viewport} from './viewports/viewport';
+export {default as FirstPersonViewport} from './viewports/first-person-viewport';
+export {default as ThirdPersonViewport} from './viewports/third-person-viewport';
 export {default as WebMercatorViewport} from './viewports/web-mercator-viewport';
 
 // TODO - Do we need to export? Move to experimental?
+export {default as ViewportControls} from './controllers/controls';
 export {default as FirstPersonState} from './controllers/first-person-state';
-export {default as MapState} from './controllers/map-state';
 export {default as OrbitState} from './controllers/orbit-state';
+export {default as MapState} from './controllers/map-state';
 
 // Core Layers
 export {default as ArcLayer} from './layers/core/arc-layer/arc-layer';
@@ -58,6 +61,7 @@ export {default as DeckGL} from './react/deckgl';
 export {default as default} from './react/deckgl';
 
 export {default as ViewportController} from './react/controllers/viewport-controller';
+// MapController is just a convenience to set up a ViewportController
 export {default as MapController} from './react/controllers/map-controller';
 
 // Experimental Features (May change in minor version bumps, use at your own risk)

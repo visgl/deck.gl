@@ -3,7 +3,8 @@ import {PureComponent, createElement, cloneElement, Children, isValidElement} fr
 import PropTypes from 'prop-types';
 
 import EventManager from '../../../controllers/events/event-manager';
-import MapControls from '../../../controllers/map-controls';
+import Controls from '../../../controllers/controls';
+import MapState from '../../../controllers/map-state';
 import {MAPBOX_LIMITS} from '../../../controllers/map-state';
 import CURSOR from '../../../react/controllers/cursors';
 
@@ -117,7 +118,7 @@ export default class AnimationMapController extends PureComponent {
 
     // If props.controls is not provided, fallback to default MapControls instance
     // Cannot use defaultProps here because it needs to be per map instance
-    this._controls = this.props.controls || new MapControls();
+    this._controls = this.props.controls || new Controls(MapState);
     this._controls.setOptions(Object.assign({}, this.props, {
       onStateChange: this._onInteractiveStateChange.bind(this),
       eventManager
