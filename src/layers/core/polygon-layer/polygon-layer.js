@@ -100,60 +100,42 @@ export default class PolygonLayer extends CompositeLayer {
     const {getFillColor, getLineColor, getLineWidth, getElevation,
       getPolygon, updateTriggers, lightSettings} = this.props;
 
-    // base layer props
-    const {opacity, pickable, visible, getPolygonOffset,
-    highlightedObjectIndex, autoHighlight, highlightColor} = this.props;
-
-    // viewport props
-    const {coordinateSystem, coordinateOrigin, modelMatrix} = this.props;
+    const forwardProps = this.getForwardProps();
 
     const {paths} = this.state;
 
     const hasData = data && data.length > 0;
 
     // Filled Polygon Layer
-    const polygonLayer = filled && hasData && new SolidPolygonLayer({
-      id: `${id}-fill`,
-      data,
-      extruded,
-      wireframe: false,
-      fp64,
-      opacity,
-      pickable,
-      visible,
-      getPolygonOffset,
-      coordinateSystem,
-      coordinateOrigin,
-      modelMatrix,
-      getPolygon,
-      getElevation,
-      getColor: getFillColor,
-      highlightedObjectIndex,
-      autoHighlight,
-      highlightColor,
-      updateTriggers: {
-        getElevation: updateTriggers.getElevation,
-        getColor: updateTriggers.getFillColor
-      },
-      lightSettings
-    });
+    const polygonLayer = filled && hasData &&
+      new SolidPolygonLayer(Object.assign({}, forwardProps, {
+        id: `${id}-fill`,
+        data,
+        extruded,
 
-    const polygonWireframeLayer = extruded &&
-      wireframe &&
-      hasData &&
-      new SolidPolygonLayer({
+        fp64,
+        wireframe: false,
+
+        getPolygon,
+        getElevation,
+        getColor: getFillColor,
+        updateTriggers: {
+          getElevation: updateTriggers.getElevation,
+          getColor: updateTriggers.getFillColor
+        },
+
+        lightSettings
+      }));
+
+    const polygonWireframeLayer = extruded && wireframe && hasData &&
+      new SolidPolygonLayer(Object.assign({}, forwardProps, {
         id: `${id}-wireframe`,
         data,
+
+        fp64,
         extruded: true,
         wireframe: true,
-        fp64,
-        opacity,
-        pickable,
-        visible,
-        getPolygonOffset,
-        coordinateSystem,
-        coordinateOrigin,
-        modelMatrix,
+
         getPolygon,
         getElevation,
         getColor: getLineColor,
@@ -161,28 +143,21 @@ export default class PolygonLayer extends CompositeLayer {
           getElevation: updateTriggers.getElevation,
           getColor: updateTriggers.getLineColor
         }
-      });
+      }));
 
     // Polygon line layer
-    const polygonLineLayer = !extruded &&
-      stroked &&
-      hasData &&
-      new PathLayer({
+    const polygonLineLayer = !extruded && stroked && hasData &&
+      new PathLayer(Object.assign({}, forwardProps, {
         id: `${id}-stroke`,
         data: paths,
+
+        fp64,
         widthScale: lineWidthScale,
         widthMinPixels: lineWidthMinPixels,
         widthMaxPixels: lineWidthMaxPixels,
         rounded: lineJointRounded,
         miterLimit: lineMiterLimit,
-        fp64,
-        opacity,
-        pickable,
-        visible,
-        getPolygonOffset,
-        coordinateSystem,
-        coordinateOrigin,
-        modelMatrix,
+
         getPath: x => x.path,
         getColor: getLineColor,
         getWidth: getLineWidth,
@@ -190,7 +165,7 @@ export default class PolygonLayer extends CompositeLayer {
           getWidth: updateTriggers.getLineWidth,
           getColor: updateTriggers.getLineColor
         }
-      });
+      }));
 
     return [
       // If not extruded: flat fill layer is drawn below outlines

@@ -209,22 +209,19 @@ export default class HexagonLayer extends CompositeLayer {
     return linearScale(domain, elevationRange, cell.points.length);
   }
 
+  // for subclassing, override this method to return
+  // customized sub layer props
   getSubLayerProps() {
-    // for subclassing, override this method to return
-    // customized sub layer props
     const {id, radius, elevationScale, extruded, coverage, lightSettings, fp64} = this.props;
 
-    // base layer props
-    const {opacity, pickable, visible, getPolygonOffset,
-    highlightedObjectIndex, autoHighlight, highlightColor} = this.props;
-
-    // viewport props
-    const {coordinateSystem, coordinateOrigin, modelMatrix} = this.props;
+    const forwardProps = this.getForwardProps();
 
     // return props to the sublayer constructor
-    return {
+    return Object.assign({}, forwardProps, {
       id: `${id}-hexagon-cell`,
       data: this.state.hexagons,
+
+      fp64,
       hexagonVertices: this.state.hexagonVertices,
       radius,
       elevationScale,
@@ -232,26 +229,16 @@ export default class HexagonLayer extends CompositeLayer {
       extruded,
       coverage,
       lightSettings,
-      fp64,
-      opacity,
-      pickable,
-      visible,
-      getPolygonOffset,
-      coordinateSystem,
-      coordinateOrigin,
-      modelMatrix,
-      highlightedObjectIndex,
-      autoHighlight,
-      highlightColor,
+
       getColor: this._onGetSublayerColor.bind(this),
       getElevation: this._onGetSublayerElevation.bind(this),
       updateTriggers: this.getUpdateTriggers()
-    };
+    });
   }
 
+  // for subclassing, override this method to return
+  // customized sub layer class
   getSubLayerClass() {
-    // for subclassing, override this method to return
-    // customized sub layer class
     return HexagonCellLayer;
   }
 

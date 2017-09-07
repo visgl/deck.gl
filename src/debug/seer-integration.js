@@ -78,44 +78,6 @@ export const seerInitListener = cb => {
   seer.listenFor('init', cb);
 };
 
-/**
- * On finalyze of a specify layer, remove it from seer
- */
-export const removeLayerInSeer = id => {
-  if (!seer.isReady() || !id) {
-    return;
-  }
-
-  seer.deleteItem('deck.gl', id);
-};
-
-export const logPayload = layer => {
-  const data = [
-    {path: 'objects.props', data: layer.props}
-  ];
-
-  const badges = [layer.constructor.layerName];
-
-  if (layer.state) {
-    if (layer.state.attributeManager) {
-      const attrs = layer.state.attributeManager.getAttributes();
-      data.push({path: 'objects.attributes', data: attrs});
-      badges.push(layer.state.attributeManager.stats.getTimeString());
-    }
-    if (layer.state.model) {
-      layer.state.model.timerQueryEnabled = true;
-      const {lastFrameTime} = layer.state.model.stats;
-      if (lastFrameTime) {
-        badges.push(`${(lastFrameTime * 1000).toFixed(0)}μs`);
-      }
-    }
-  }
-
-  data.push({path: 'badges', data: badges});
-
-  return data;
-};
-
 export const initLayerInSeer = layer => {
   if (!seer.isReady() || !layer) {
     return;
@@ -141,3 +103,41 @@ export const updateLayerInSeer = layer => {
   const data = logPayload(layer);
   seer.multiUpdate('deck.gl', layer.id, data);
 };
+
+/**
+ * On finalize of a specify layer, remove it from seer
+ */
+export const removeLayerInSeer = id => {
+  if (!seer.isReady() || !id) {
+    return;
+  }
+
+  seer.deleteItem('deck.gl', id);
+};
+
+function logPayload(layer) {
+  const data = [
+    {path: 'objects.props', data: layer.props}
+  ];
+
+  const badges = [layer.constructor.layerName];
+
+  if (layer.state) {
+    if (layer.state.attributeManager) {
+      const attrs = layer.state.attributeManager.getAttributes();
+      data.push({path: 'objects.attributes', data: attrs});
+      badges.push(layer.state.attributeManager.stats.getTimeString());
+    }
+    if (layer.state.model) {
+      layer.state.model.timerQueryEnabled = true;
+      const {lastFrameTime} = layer.state.model.stats;
+      if (lastFrameTime) {
+        badges.push(`${(lastFrameTime * 1000).toFixed(0)}μs`);
+      }
+    }
+  }
+
+  data.push({path: 'badges', data: badges});
+
+  return data;
+}
