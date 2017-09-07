@@ -239,18 +239,12 @@ class Root extends Component {
         height: viewportProps.height / 2,
         fovy: fov
       }),
-      {
-        viewport: new WebMercatorViewport({
-          ...viewportProps,
-          y: viewportProps.height / 2,
-          height: viewportProps.height / 2
-        }),
-        component: <StaticMap
-          {...viewportProps}
-          mapStyle="mapbox://styles/mapbox/dark-v9"
-          onViewportChange={this._onViewportChange.bind(this)}
-          mapboxApiAccessToken={MAPBOX_TOKEN}/>
-      }
+      new WebMercatorViewport({
+        id: 'basemap',
+        ...viewportProps,
+        y: viewportProps.height / 2,
+        height: viewportProps.height / 2
+      })
     ];
   }
 
@@ -263,13 +257,20 @@ class Root extends Component {
       <div style={{backgroundColor: '#000'}}>
 
         <ViewportController
-          StateClass={FirstPersonState}
+          viewportState={FirstPersonState}
           {...viewportProps}
           width={viewportProps.width}
           height={viewportProps.height}
           onViewportChange={this._onViewportChange} >
 
           <ViewportLayout viewports={viewports}>
+
+            <StaticMap
+              viewportId="basemap"
+              {...viewportProps}
+              mapStyle="mapbox://styles/mapbox/dark-v9"
+              onViewportChange={this._onViewportChange.bind(this)}
+              mapboxApiAccessToken={MAPBOX_TOKEN}/>
 
             <DeckGL
               id="first-person"

@@ -4,26 +4,23 @@
 
 Since deck.gl is WebGL based, all its viewports need to be in the same canvas (unless you use multiple DeckGL instances, but that can have significant resource and performance impact)
 
-`ViewportLayout` takes a `viewport` prop that contains a mixed array of `Viewports` and "viewport descriptors" (intended to be the same array passed to the `DeckGL` component, and renders any base components specified by viewport descriptors.
-
-
+`ViewportLayout` takes a`viewports` prop and positions any children with `viewportId` prop matching the a viewport id under that viewport.  (`viewports` is intended to be the same array passed to the `DeckGL` componentcontaining a possibly mixed array of `Viewports` and "viewport descriptors" ).
 
 
 ## Usage
 
 ```js
   const viewports = [
-    // viewport
     new FirstPersonViewport({...}),
-    // viewport descriptor
-    {
-      viewport: new WebMercatorViewport({...}),
-      component: <StaticMap {...viewportProps}/>
-    }
+    new WebMercatorViewport({id: 'basemap', ...})
   ];
 
   render() {
 	  <ViewportLayout viewports={viewports}>
+
+      <StaticMap
+        viewportId='basemap'
+        {...viewportProps}/>
 
 	    <DeckGL
 	      id="first-person"

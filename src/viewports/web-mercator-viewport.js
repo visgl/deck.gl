@@ -333,3 +333,5 @@ export function fitBounds({
     zoom
   };
 }
+
+WebMercatorViewport.displayName = 'WebMercatorViewport';

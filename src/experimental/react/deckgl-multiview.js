@@ -19,9 +19,7 @@
 // THE SOFTWARE.
 
 import DeckGL, {Viewport} from 'deck.gl';
-import {GL, withParameters} from 'luma.gl';
 import {flatten} from '../../lib/utils/flatten';
-/* global window */
 
 /* A flavor of the DeckGL component that renders using multiple viewports */
 export default class DeckGLMultiView extends DeckGL {
@@ -33,7 +31,7 @@ export default class DeckGLMultiView extends DeckGL {
   _getViewports() {
     const {viewports, viewport} = this.props;
     if (viewports) {
-      return flatten(viewports);
+      return flatten(viewports, {filter: Boolean});
     }
     if (viewport) {
       return [viewport];
@@ -60,49 +58,8 @@ export default class DeckGLMultiView extends DeckGL {
   }
 
   _onRenderFrame({gl}) {
-    const {height, useDevicePixelRatio} = this.props;
-
-    // UpdateLayers
     const viewports = this._getViewports();
-
-    // clear depth and color buffers
-    gl.clear(GL.COLOR_BUFFER_BIT | GL.DEPTH_BUFFER_BIT);
-
-    // TODO - this should be moved into LayerManager
-    this.effectManager.preDraw();
-
-    viewports.forEach((viewportOrDescriptor, i) => {
-      const viewport = this._getViewportFromDescriptor(viewportOrDescriptor);
-
-      // this._updateLayers(Object.assign({}, this.props, {viewport}));
-
-      // Convert viewport top-left CSS coordinates to bottom up WebGL coordinates
-      const pixelRatio = useDevicePixelRatio && typeof window !== 'undefined' ?
-        window.devicePixelRatio : 1;
-      const glViewport = [
-        viewport.x * pixelRatio,
-        (height - viewport.y - viewport.height) * pixelRatio,
-        viewport.width * pixelRatio,
-        viewport.height * pixelRatio
-      ];
-
-      // render this viewport
-      withParameters(gl, {viewport: glViewport}, () => {
-        this.layerManager.setViewport(viewport).drawLayers({pass: `viewport ${i}`});
-      });
-    });
-
-    this.effectManager.draw();
-
-    // Picking
-    // if (this.props.onLayerHover) {
-    //   // Arbitrary gaze location
-    //   const x = this.props.width * 2 / 3;
-    //   const y = this.props.height / 2;
-
-    //   const info = this.queryObject({x, y, radius: this.props.pickingRadius});
-    //   this.props.onLayerHover(info);
-    // }
+    this.layerManager.setViewports(viewports);
+    this.layerManager.drawLayers({pass: 'render'});
   }
-
 }

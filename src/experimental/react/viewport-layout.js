@@ -1,4 +1,5 @@
 import React, {createElement, cloneElement} from 'react';
+import {flatten} from '../../lib/utils/flatten';
 
 export default class ViewportLayout extends React.Component {
 
@@ -7,28 +8,35 @@ export default class ViewportLayout extends React.Component {
   }
 
   // Iterate over viewport descriptors and render viewports at specified positions
-  _renderViewportComponents() {
-    const {viewports} = this.props;
+  _renderChildrenUnderViewports() {
+    // Flatten out nested viewports array
+    const viewports = flatten(this.props.viewports, {filter: Boolean});
 
-    const children = [];
+    // Build a viewport id to viewport index
+    const viewportMap = {};
+    viewports.forEach(viewportOrDescriptor => {
+      const viewport = viewportOrDescriptor.viewport || viewportOrDescriptor;
+      if (viewport.id) {
+        viewportMap[viewport.id] = viewport;
+      }
+    });
 
-    viewports.forEach((viewportOrDescriptor, i) => {
-      const {viewport, component, Component, props = {}} = viewportOrDescriptor;
+    const originalChildren = React.Children.toArray(this.props.children);
+    const lastElement = originalChildren.pop();
 
-      // Check if this is a descriptor with a component, otherwise ignore
-      if (viewport && (component || Component)) {
+    const children = originalChildren.map((child, i) => {
+      // If viewportId is provided, match with viewport
+      if (child.props.viewportId) {
+        const viewport = viewportMap[child.props.viewportId];
 
         // TODO - this is too react-map-gl specific
-        const newProps = Object.assign({}, props, {
+        const newProps = Object.assign({}, child.props, {
           visible: viewport.isMapSynched(),
           width: viewport.width,
           height: viewport.height
         }, viewport.getMercatorParams());
 
-        // Check if we should create or just modify a supplied React component
-        const newComponent = component ?
-          cloneElement(component, newProps) :
-          createElement(Component, newProps);
+        const clone = cloneElement(child, newProps);
 
         const style = {
           position: 'absolute',
@@ -38,9 +46,14 @@ export default class ViewportLayout extends React.Component {
           height: viewport.height
         };
 
-        children.push(createElement('div', {key: `viewport-component-${i}`, style}, newComponent));
+        child = createElement('div', {key: `viewport-component-${i}`, style}, clone);
       }
+
+      return child;
     });
+
+    const style = {position: 'absolute', left: 0, top: 0};
+    children.push(createElement('div', {key: 'children', style}, lastElement));
 
     return children;
   }
@@ -48,13 +61,7 @@ export default class ViewportLayout extends React.Component {
   render() {
     // Render the background elements (typically react-map-gl instances)
     // using the viewport descriptors
-    const elements = this._renderViewportComponents();
-
-    // Render the foreground elements, after (i.e. on top of) the background elements
-    // This will typically be the DeckGL component
-    const style = {position: 'absolute', left: 0, top: 0};
-    elements.push(createElement('div', {key: 'children', style}, this.props.children));
-
-    return createElement('div', {}, elements);
+    const children = this._renderChildrenUnderViewports();
+    return createElement('div', {}, children);
   }
 }

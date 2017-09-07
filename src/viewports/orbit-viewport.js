@@ -132,3 +132,6 @@ export default class OrbitViewport extends Viewport {
     });
   }
 }
+
+OrbitViewport.displayName = 'OrbitViewport';
+
