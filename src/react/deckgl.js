@@ -30,7 +30,7 @@ import EffectManager from '../experimental/lib/effect-manager';
 import Effect from '../experimental/lib/effect';
 import Viewport from '../viewports/viewport';
 import WebMercatorViewport from '../viewports/web-mercator-viewport';
-import EventManager from '../controllers/events/event-manager';
+import {EventManager} from 'mjolnir.js';
 
 import {GL, setParameters} from 'luma.gl';
 
