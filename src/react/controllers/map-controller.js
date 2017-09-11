@@ -1,7 +1,7 @@
 import {PureComponent, createElement} from 'react';
 import PropTypes from 'prop-types';
 
-import EventManager from '../../controllers/events/event-manager';
+import {EventManager} from 'mjolnir.js';
 import MapControls from '../../controllers/map-controls';
 import {MAPBOX_LIMITS} from '../../controllers/map-state';
 import CURSOR from './cursors';

@@ -1,7 +1,7 @@
 import {PureComponent, createElement} from 'react';
 import PropTypes from 'prop-types';
 
-import EventManager from '../../controllers/events/event-manager';
+import {EventManager} from 'mjolnir.js';
 import Controls from '../../controllers/controls';
 import CURSOR from './cursors';
 

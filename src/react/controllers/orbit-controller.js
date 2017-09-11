@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import OrbitViewport from '../../viewports/orbit-viewport';
 import OrbitState from '../../controllers/orbit-state';
 import Controls from '../../controllers/controls';
-import EventManager from '../../controllers/events/event-manager';
+import {EventManager} from 'mjolnir.js';
 
 const propTypes = {
   /* Viewport properties */
