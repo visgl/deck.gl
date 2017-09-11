@@ -1,9 +1,11 @@
-# LayerManager Class
+# LayerManager Class (Advanced)
+
+Note: The `LayerManager` class is an internal class that is exposed primarily to enable deck.gl to be used without React. If you are using the [`DeckGL`](/docs/api-reference/deckgl.md) React Component, a layer manager is created under the hood to handle layer management, and you do not need to use this class.
 
 The `LayerManager` class handles updates, drawing and picking for a set of layers.
 
-If you are using the [`DeckGL`](/docs/api-reference/deckgl.md) React Component, a layer
-manager is created under the hood to handle rendering cycles.
+For more information consult the [Using Standalone](/docs/advanced/using-standalone.md) article.
+
 
 ## Constructor
 

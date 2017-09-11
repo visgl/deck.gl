@@ -5,9 +5,11 @@ The `WebMercatorViewport` class is a subclass of [ThirdPersonViewport](/docs/api
 
 When in perspective mode, the `WebMercatorViewport` is carefully tuned to work in synchronization with `mapbox-gl`'s projection matrix.
 
+For more information consult the [Viewports](/docs/advanced/viewports.md) article.
+
 ## Usage
 
-The `WebMercatorViewport` is the default viewport for deck.gl. If you are using the `DeckGL` React component ou may not even need to instantiate it explicitly.
+The `WebMercatorViewport` is the default viewport for deck.gl. If you are using the `DeckGL` React component you may not even need to instantiate it explicitly.
 ```js
 import DeckGL from 'deck.gl';
 <DeckGL width={...} heigh={...} longitude={} latitude={} zoom={} pitch={} bearing={} layers=[...]/>

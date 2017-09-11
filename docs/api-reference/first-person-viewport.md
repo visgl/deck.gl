@@ -2,6 +2,8 @@
 
 The [`FirstPersonViewport`] class is a subclass of [Viewport](/docs/api-reference/viewport.md) that creates a "camera" at the exact position, direction and orientation specified by the application. This is in contrast with e.g. [ThirdPersonViewport](/docs/api-reference/viewport.md) where the camera will be offset from and look "down" on the specified position.
 
+For more information consult the [Viewports](/docs/advanced/viewports.md) article.
+
 ## Usage
 
 ```js

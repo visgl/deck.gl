@@ -1,25 +1,25 @@
 # Coordinate Systems
 
-By default deck.gl layers interprets positions in the [Web Mercator](https://en.wikipedia.org/wiki/Web_Mercator  coordinate system, so when working with geospatial data (i.e your data has longitude and latitude encoded positions) deck.gl will automatically interpret them correctly.
+By default deck.gl layers interprets positions in the [Web Mercator](https://en.wikipedia.org/wiki/Web_Mercator) coordinate system, so when working with geospatial data (i.e with longitude and latitude encoded positions) deck.gl will automatically interpret it correctly.
 
-deck.gl also supports a meter offset based coordinate system, which can be very convenient when modelling geographical data on small (city/city block) scales.
+In addition, deck.gl supports "meter offset" based local coordinate systems, which can be extremely convenient when modelling geographical data on small scales (e.g. city block level).
 
-Naturally, positions specified in non-geospatial coordinates can also be used when working with non-geospatial data sets.
+Naturally, non-geospatial coordinates can also be used when working with non-geospatial data sets
 
-Supported Coordinate systems are:
+## Supported Coordinate Systems
 
 | Coordinate System Mode               | Coordinates                   | Description |
 | ---                                  | ---
 | `COORDINATE_SYSTEM.LNGLAT` (default) | [longitude, latitude, altitude] | Longitude and latitude are specified as **Web Mercator coordinates** in degrees from Greenwich meridian / equator respectively, and altitude is specified in meters above sea level. |
 | `COORDINATE_SYSTEM.METER_OFFSETS`    | [Δx, Δy, Δz]   | Positions are given in meter offsets from a reference point that is specified separately (the `coordinateOrigin` prop) |
-| `COORDINATE_SYSTEM.IDENTITY`         | [x, y, z] | A linear system with no interpretation for pure info-vis layers. Non-geospatial viewports should be used. |
+| `COORDINATE_SYSTEM.IDENTITY`         | [x, y, z] | A linear system with no interpretation for pure info-vis layers. Viewports can be used without supplying geospatial reference points. |
 
 
 ## Choosing the Right Coordinate System
 
 The choice of coordinate system is often dictated by your data. If your data is specified in `lng`/`lat`s or meter offsets the natural thing is to just use the corresponding coordinate system mode in deck.gl.
 
-It is however important to be aware that the different coordinate systems come with different trade-offs. Specifying mercator coordinates (lng/lats) will cause every coordinate to be individually projected on the GPU and will yield the most correct results when visualizing data spread out over large distances (e.g. several degrees of longitude or latitude, i.e. 100s of kilometers).
+It is however important to be aware that the different coordinate systems come with different trade-offs. Specifying mercator coordinates (lng/lats) will cause every coordinate to be individually projected on the GPU and will yield the most correct results when visualizing data spread out over large distances (e.g. several degrees of longitude or latitude, or hundreds of kilometers/miles).
 
 However, longitude and latitude coordinates tend to run into precision issues at high zoom levels on a map, (around 1 million times, or about the city block level), which can lead to some "jitter" or "wobble". This can be mitigated by activating 64-bit computation, but this in turn can have an impact on rendering performance (for very large data sets). Many visualization apps focus on countries and counties, and at those scale there is no issue, but for other visualizations high-precision operation at city-block level is critical.
 
@@ -28,11 +28,11 @@ The meter offset system on the other hand is very performant, but uses a lineari
 
 ## Combining Different Coordinate Systems
 
-The choice of coordinate system can be specified per layer, meaning that different layers can have data with positions specified in "different" coordinate systems. However, if some care is taken, they can all be rendered and drawn at the same time, and correctly overlaid.
+The choice of coordinate system can be specified per layer, meaning that different layers can have data with positions specified in "different" coordinate systems. If some care is taken, they can all be rendered and drawn at the same time, and correctly overlaid.
 
-An example of a common technique is to:
+An example of a use case where different coordinate systems are combined:
 * Render a layer showing 3D buildings could have vertices specified in longitudes and latitudes (simply because available building data sources tend to be encoded this way)
-* Render layer showing cars or pedestrians moving between the buildings with all positions specified using meter offsets from an anchor point somewhere in the city), because meter offsets make more sense..
+* Render layer showing cars or pedestrians moving between the buildings with all positions specified using meter offsets from an anchor point somewhere in the city), because meter offsets are more natural encoding for this data.
 
 
 ### About Geospatial Positions

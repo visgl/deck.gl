@@ -180,6 +180,14 @@ export const docPages = generatePath([
         content: getDocUrl('advanced/custom-layers.md')
       },
       {
+        name: 'Layer Lifecycle',
+        content: getDocUrl('advanced/layer-lifecycle.md')
+      },
+      {
+        name: 'Picking',
+        content: getDocUrl('advanced/picking.md')
+      },
+      {
         name: 'Composite Layers',
         content: getDocUrl('advanced/composite-layers.md')
       },
@@ -192,6 +200,10 @@ export const docPages = generatePath([
         content: getDocUrl('advanced/primitive-layers.md')
       },
       {
+        name: 'Attribute Management',
+        content: getDocUrl('advanced/attribute-management.md')
+      },
+      {
         name: 'Writing Shaders',
         content: getDocUrl('advanced/writing-shaders.md')
       }
@@ -201,24 +213,8 @@ export const docPages = generatePath([
     name: 'Advanced Topics',
     children: [
       {
-        name: 'Layer Lifecycle',
-        content: getDocUrl('advanced/layer-lifecycle.md')
-      },
-      {
-        name: '64 bit Layers',
-        content: getDocUrl('advanced/64-bits.md')
-      },
-      {
-        name: 'Picking',
-        content: getDocUrl('advanced/picking.md')
-      },
-      {
-        name: 'Performance',
-        content: getDocUrl('advanced/performance.md')
-      },
-      {
-        name: 'Attribute Management',
-        content: getDocUrl('advanced/attribute-management.md')
+        name: 'Updates',
+        content: getDocUrl('advanced/updates.md')
       },
       {
         name: 'Viewports',
@@ -227,6 +223,14 @@ export const docPages = generatePath([
       {
         name: 'Coordinate Systems',
         content: getDocUrl('advanced/coordinate-systems.md')
+      },
+      {
+        name: 'Performance',
+        content: getDocUrl('advanced/performance.md')
+      },
+      {
+        name: '64 bit Layers',
+        content: getDocUrl('advanced/64-bits.md')
       },
       {
         name: 'Using Standalone',
@@ -241,6 +245,14 @@ export const docPages = generatePath([
   {
     name: 'Layer Catalog',
     children: [
+      {
+        name: 'Layer',
+        content: getDocUrl('api-reference/layer.md')
+      },
+      {
+        name: 'CompositeLayer',
+        content: getDocUrl('api-reference/composite-layer.md')
+      },
       {
         name: 'ArcLayer',
         content: getDocUrl('layers/arc-layer.md')
@@ -291,32 +303,20 @@ export const docPages = generatePath([
     name: 'API Reference',
     children: [
       {
-        name: 'AttributeManager',
+        name: 'AttributeManager (Advanced)',
         content: getDocUrl('api-reference/attribute-manager.md')
       },
       {
-        name: 'CompositeLayer',
-        content: getDocUrl('api-reference/composite-layer.md')
+        name: 'FirstPersonViewport',
+        content: getDocUrl('api-reference/first-person-viewport.md')
       },
       {
-        name: 'DeckGL',
-        content: getDocUrl('api-reference/deckgl.md')
-      },
-      {
-        name: 'Layer',
-        content: getDocUrl('api-reference/base-layer.md')
-      },
-      {
-        name: 'LayerManager',
+        name: 'LayerManager (Advanced)',
         content: getDocUrl('api-reference/layer-manager.md')
       },
       {
-        name: 'OrthographicViewport',
-        content: getDocUrl('api-reference/orthographic-viewport.md')
-      },
-      {
-        name: 'PerspectiveViewport',
-        content: getDocUrl('api-reference/perspective-viewport.md')
+        name: 'ThirdPersonViewport',
+        content: getDocUrl('api-reference/third-person-viewport.md')
       },
       {
         name: 'Viewport',
@@ -337,6 +337,23 @@ export const docPages = generatePath([
       {
         name: 'lighting (Shader Module)',
         content: getDocUrl('shader-modules/lighting.md')
+      }
+    ]
+  },
+  {
+    name: 'React Reference',
+    children: [
+      {
+        name: 'DeckGL',
+        content: getDocUrl('api-reference/react/deckgl.md')
+      },
+      {
+        name: 'ViewportLayout',
+        content: getDocUrl('api-reference/react/viewport-layout.md')
+      },
+      {
+        name: 'ViewportController',
+        content: getDocUrl('api-reference/react/viewport-controller.md')
       }
     ]
   }
