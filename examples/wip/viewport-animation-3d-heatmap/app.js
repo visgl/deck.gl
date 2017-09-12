@@ -40,7 +40,7 @@ class Root extends Component {
     this._resize();
 
     // TODO: this is to just simulate viwport prop change and test animation.
-    this._interval = setInterval(() => this._toggleViewport(), 5000);
+    this._interval = setInterval(() => this._toggleViewport(), 7000);
   }
 
   _resize() {
@@ -61,7 +61,7 @@ class Root extends Component {
   _toggleViewport() {
     const newViewport = {};
     newViewport.pitch = (this.state.viewport.pitch === 0) ? 60.0 : 0.0;
-    newViewport.bearing = (this.state.viewport.bearing === 0) ? -60.0 : 0.0;
+    newViewport.bearing = (this.state.viewport.bearing === 0) ? -90.0 : 0.0;
     this.setState({
       viewport: {...this.state.viewport, ...newViewport}
     });
@@ -73,7 +73,7 @@ class Root extends Component {
       <AnimationMapController
         {...viewport}
         onViewportChange={this._onViewportChange.bind(this)}
-        animateViewport={true}>
+        viewportAnimationDuration={2000}>
         <StaticMap
           {...viewport}
           mapStyle="mapbox://styles/mapbox/dark-v9"

@@ -8,9 +8,11 @@ import MapState from '../../core/controllers/map-state';
 import {MAPBOX_LIMITS} from '../../core/controllers/map-state';
 import CURSOR from '../utils/cursors';
 
+import {viewportLinearAnimation} from './viewport-animation-utils.js';
+
 const VIEWPORT_ANIMATE_PROPS = ['longitude', 'latitude', 'zoom', 'bearing', 'pitch'];
 const VIEWPORT_ANIMATE_FREQUENCY = 0.01;
-const VIEWPORT_ANIMATION_DURATION = 5000;
+const VIEWPORT_ANIMATION_DURATION = 0;
 const VIEWPORT_ANIMATION_EASING_FUNC = t => t;
 
 const propTypes = {
@@ -49,10 +51,11 @@ const propTypes = {
    */
   onViewportChange: PropTypes.func,
 
-  // animate viewport change.
-  animateViewport: PropTypes.bool,
+  /** Viewport animation **/
   // animation duration for viewport change
   viewportAnimationDuration: PropTypes.number,
+  // function called for each animation step, can be used to perform custom animations.
+  viewportAnimationFunc: PropTypes.func,
   // easing function
   viewportAnimationEasingFunc: PropTypes.func,
 
@@ -84,8 +87,8 @@ const getDefaultCursor = ({isDragging}) => isDragging ? CURSOR.GRABBING : CURSOR
 
 const defaultProps = Object.assign({}, MAPBOX_LIMITS, {
   onViewportChange: null,
-  animateViewport: false,
   viewportAnimationDuration: VIEWPORT_ANIMATION_DURATION,
+  viewportAnimationFunc: viewportLinearAnimation,
   viewportAnimationEasingFunc: VIEWPORT_ANIMATION_EASING_FUNC,
 
   scrollZoom: true,
@@ -103,8 +106,7 @@ export default class AnimationMapController extends PureComponent {
     super(props);
 
     this.state = {
-      isDragging: false,      // Whether the cursor is down
-      animationInProgress: false
+      isDragging: false      // Whether the cursor is down
 
     };
   }
@@ -164,21 +166,19 @@ export default class AnimationMapController extends PureComponent {
   }
 
   _animateViewportProp(nextProps) {
-    if (this.props.animateViewport !== true) {
-      return;
-    }
-    const startViewport = this._extractViewportFromProps(this.props);
-    const endViewport = this._extractViewportFromProps(nextProps);
-    if (this._didViewportAnimatePropChanged(startViewport, endViewport)) {
-      const animationInterval = this._createAnimationInterval();
-      this.setState({
-        animationInProgress: true,
-        animationT: 0.0,
-        animationStartViewport: startViewport,
-        animationEndViewport: endViewport,
-        animationInterval,
-        animatedViewport: startViewport
-      });
+    if (this._isViewportAnimationEnabled()) {
+      const startViewport = this._extractViewportFromProps(this.props);
+      const endViewport = this._extractViewportFromProps(nextProps);
+      if (this._didViewportAnimatePropChanged(startViewport, endViewport)) {
+        const animationInterval = this._createAnimationInterval();
+        this.setState({
+          animationT: 0.0,
+          animationStartViewport: startViewport,
+          animationEndViewport: endViewport,
+          animationInterval,
+          animatedViewport: startViewport
+        });
+      }
     }
   }
 
@@ -194,13 +194,12 @@ export default class AnimationMapController extends PureComponent {
   }
 
   _updateViewport() {
-    const animatedViewport = Object.assign({}, this.state.animationEndViewport);
     const t = this.props.viewportAnimationEasingFunc(this.state.animationT);
-    for (const p of VIEWPORT_ANIMATE_PROPS) {
-      const startValue = this.state.animationStartViewport[p];
-      const endValue = this.state.animationEndViewport[p];
-      animatedViewport[p] = this._interpolate(startValue, endValue, t);
-    }
+    const animatedViewport = this.props.viewportAnimationFunc(
+      this.state.animationStartViewport,
+      this.state.animationEndViewport,
+      t
+    );
 
     if (this.state.animationT <= 1.0) {
       this.setState(prevState => ({
@@ -212,16 +211,11 @@ export default class AnimationMapController extends PureComponent {
     }
   }
 
-  _interpolate(start, end, t) {
-    return t * end + (1 - t) * start;
-  }
-
   _endAnimation() {
     clearInterval(this.state.animationInterval);
     this.setState({
       animationT: 0,
       animationInterval: null,
-      animationInProgress: false,
       animationStartState: null,
       animationEndState: null,
       animatedViewport: null
@@ -241,6 +235,10 @@ export default class AnimationMapController extends PureComponent {
     });
   }
 
+  _isViewportAnimationEnabled() {
+    return this.props.viewportAnimationDuration !== 0;
+  }
+
   render() {
     const {width, height, getCursor} = this.props;
 
@@ -251,10 +249,10 @@ export default class AnimationMapController extends PureComponent {
       cursor: getCursor(this.state)
     };
 
-    const viewport = this.state.animatedViewport;
-
-    const childrenWithProps = this.state.animationInProgress === true ?
+    const viewport = this.state.animatedViewport || this._extractViewportFromProps(this.props);
+    const childrenWithProps = this._isViewportAnimationEnabled() ?
       this._recursiveUpdateChildren(this.props.children, viewport) : this.props.children;
+
     return (
       createElement('div', {
         key: 'map-controls',

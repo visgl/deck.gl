@@ -83,7 +83,7 @@ class Root extends Component {
         {...viewport}
         onViewportChange={this._onViewportChange.bind(this)}
         animateViewport={true}
-        viewportAnimateDuration={4000}
+        viewportAnimationDuration={4000}
         viewportAnimationEasingFunc={easeInOutElastic}>
         <StaticMap
           {...viewport}
