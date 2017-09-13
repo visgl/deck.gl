@@ -236,6 +236,23 @@ function getClosestFromPickingBuffer(gl, {
   deviceY,
   deviceRadius
 }) {
+  let closestResultToCenter = {
+    pickedColor: EMPTY_PIXEL,
+    pickedLayer: null,
+    pickedObjectIndex: -1
+  };
+
+  if (
+    deviceX < 0 ||
+    deviceY < 0 ||
+    deviceX > pickingFBO.width ||
+    deviceY > pickingFBO.height ||
+    layers.length <= 0
+  ) {
+    // x, y out of bounds or no layers to pick.
+    return closestResultToCenter;
+  }
+
   // Create a box of size `radius * 2 + 1` centered at [deviceX, deviceY]
   const x = Math.max(0, deviceX - deviceRadius);
   const y = Math.max(0, deviceY - deviceRadius);
@@ -247,11 +264,6 @@ function getClosestFromPickingBuffer(gl, {
   // Traverse all pixels in picking results and find the one closest to the supplied
   // [deviceX, deviceY]
   let minSquareDistanceToCenter = deviceRadius * deviceRadius;
-  let closestResultToCenter = {
-    pickedColor: EMPTY_PIXEL,
-    pickedLayer: null,
-    pickedObjectIndex: -1
-  };
   let i = 0;
 
   for (let row = 0; row < height; row++) {
@@ -330,7 +342,8 @@ function getPickedColors(gl, {
   return withParameters(gl, {
     framebuffer: pickingFBO,
     scissorTest: true,
-    scissor: [x, y, width, height]
+    scissor: [x, y, width, height],
+    clearColor: [0, 0, 0, 0]
   }, () => {
 
     // Clear the frame buffer
@@ -355,8 +368,7 @@ function getPickedColors(gl, {
           parameters: Object.assign({}, layer.props.parameters || {}, {
             blend: true,
             blendFunc: [gl.ONE, gl.ZERO, gl.CONSTANT_ALPHA, gl.ZERO],
-            blendEquation: gl.FUNC_ADD,
-            clearColor: [0, 0, 0, 0]
+            blendEquation: gl.FUNC_ADD
           })
         });
       }
