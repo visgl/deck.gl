@@ -2,29 +2,24 @@
 import React, {Component} from 'react';
 import {render} from 'react-dom';
 
-import {StaticMap} from 'react-map-gl';
-
-// TODO - import DeckGL from 'deck.gl';
-import {experimental} from 'deck.gl';
-const {DeckGLMultiView: DeckGL, ViewportLayout} = experimental;
-
-// Unified controller, together with state that determines interaction model
-import {ViewportController} from 'deck.gl';
-import {FirstPersonState} from 'deck.gl';
-
-// Viewport classes provides various views on the state
-import {FirstPersonViewport, WebMercatorViewport} from 'deck.gl';
-
 import {
   COORDINATE_SYSTEM,
+  // Unified controller, together with state that determines interaction model
+  FirstPersonState,
+  // Viewport classes provides various views on the state
+  FirstPersonViewport,
+  WebMercatorViewport,
   PolygonLayer,
   PointCloudLayer
 } from 'deck.gl';
 
 import TripsLayer from '../../trips/trips-layer';
 
-import {setParameters} from 'luma.gl';
+// deck.gl React components
+import {DeckGL, ViewportLayout, ViewportController} from 'deck.gl';
 
+import {StaticMap} from 'react-map-gl';
+import {setParameters} from 'luma.gl';
 import {json as requestJson} from 'd3-request';
 
 // Source data CSV

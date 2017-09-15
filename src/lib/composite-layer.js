@@ -55,7 +55,7 @@ export default class CompositeLayer extends Layer {
 
   // Returns props that should be forwarded to children
   // TODO - implement autoforwarding?
-  getForwardProps() {
+  getBaseLayerProps() {
     const {
       // base layer props
       opacity, pickable, visible, parameters, getPolygonOffset,

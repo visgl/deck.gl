@@ -1,17 +1,18 @@
 /* global window, document */
+
 import {
   COORDINATE_SYSTEM,
   WebMercatorViewport,
   FirstPersonViewport,
-  ViewportController,
-  // FirstPersonState,
   MapState,
+  // FirstPersonState,
   experimental
 } from 'deck.gl';
 
+ // deck.gl react components
+import DeckGL, {ViewportController, ViewportLayout} from 'deck.gl';
+
 const {
-  DeckGLMultiView: DeckGL,
-  ViewportLayout,
   ReflectionEffect
 } = experimental;
 

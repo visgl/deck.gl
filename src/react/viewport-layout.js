@@ -1,5 +1,5 @@
 import React, {createElement, cloneElement} from 'react';
-import {flatten} from '../../lib/utils/flatten';
+import {flatten} from '../lib/utils/flatten';
 
 export default class ViewportLayout extends React.Component {
 

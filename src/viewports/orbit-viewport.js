@@ -9,6 +9,8 @@ import vec3_add from 'gl-vec3/add';
 import vec3_rotateX from 'gl-vec3/rotateX';
 import vec3_rotateY from 'gl-vec3/rotateY';
 
+import {transformVector} from '../math/utils';
+
 const DEGREES_TO_RADIANS = Math.PI / 180;
 
 // Helper, avoids low-precision 32 bit matrices from gl-matrix mat4.create()
@@ -76,7 +78,7 @@ export default class OrbitViewport extends Viewport {
   }
 
   project(xyz, {topLeft = false} = {}) {
-    const v = this.transformVector(this.pixelProjectionMatrix, [...xyz, 1]);
+    const v = transformVector(this.pixelProjectionMatrix, [...xyz, 1]);
 
     const [x, y, z] = v;
     const y2 = topLeft ? this.height - y : y;
@@ -87,7 +89,7 @@ export default class OrbitViewport extends Viewport {
     const [x, y, z] = xyz;
     const y2 = topLeft ? this.height - y : y;
 
-    return this.transformVector(this.pixelUnprojectionMatrix, [x, y2, z, 1]);
+    return transformVector(this.pixelUnprojectionMatrix, [x, y2, z, 1]);
   }
 
   /** Move camera to get a bounding box fit in the viewport.

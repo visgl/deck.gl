@@ -57,11 +57,11 @@ export {default as PolygonLayer} from './layers/core/polygon-layer/polygon-layer
 export {default as GeoJsonLayer} from './layers/core/geojson-layer/geojson-layer';
 
 // React bindings
-export {default as DeckGL} from './react/deckgl';
 export {default as default} from './react/deckgl';
 
+export {default as DeckGL} from './react/deckgl';
+export {default as ViewportLayout} from './react/viewport-layout';
 export {default as ViewportController} from './react/controllers/viewport-controller';
-// MapController is just a convenience to set up a ViewportController
 export {default as MapController} from './react/controllers/map-controller';
 
 // Experimental Features (May change in minor version bumps, use at your own risk)
@@ -72,9 +72,11 @@ import {default as Effect} from './experimental/lib/effect';
 import {default as ReflectionEffect} from './experimental/effects/reflection-effect/reflection-effect';
 
 // Experimental React bindings
-import {default as DeckGLMultiView} from './experimental/react/deckgl-multiview';
-import {default as ViewportLayout} from './experimental/react/viewport-layout';
 import AnimationMapController from './experimental/react/controllers/animation-map-controller';
+
+// TODO - these are no longer experimental - remove before release
+import {default as DeckGLMultiView} from './react/deckgl';
+import {default as ViewportLayout} from './react/viewport-layout';
 
 export const experimental = {
   get,
@@ -83,9 +85,11 @@ export const experimental = {
   Effect,
   ReflectionEffect,
 
+  AnimationMapController,
+
+  // TODO - remove before release
   DeckGLMultiView,
-  ViewportLayout,
-  AnimationMapController
+  ViewportLayout
 };
 
 // Deprecated Core Lib Classes
