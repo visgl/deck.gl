@@ -22,8 +22,6 @@ import React, {createElement} from 'react';
 import PropTypes from 'prop-types';
 import autobind from './autobind';
 
-import WebGLRenderer from './webgl-renderer';
-
 import LayerManager from '../lib/layer-manager';
 import Layer from '../lib/layer';
 import EffectManager from '../experimental/lib/effect-manager';
@@ -32,7 +30,7 @@ import Viewport from '../viewports/viewport';
 import WebMercatorViewport from '../viewports/web-mercator-viewport';
 import {EventManager} from 'mjolnir.js';
 
-import {GL, setParameters} from 'luma.gl';
+import {GL, AnimationLoop, createGLContext, setParameters} from 'luma.gl';
 
 function noop() {}
 
@@ -42,6 +40,7 @@ const propTypes = {
   height: PropTypes.number.isRequired,
   layers: PropTypes.arrayOf(PropTypes.instanceOf(Layer)).isRequired,
   effects: PropTypes.arrayOf(PropTypes.instanceOf(Effect)),
+  glOptions: PropTypes.object,
   gl: PropTypes.object,
   debug: PropTypes.bool,
   pickingRadius: PropTypes.number,
@@ -67,6 +66,7 @@ const defaultProps = {
 };
 
 export default class DeckGL extends React.Component {
+
   constructor(props) {
     super(props);
     this.state = {};
@@ -76,17 +76,41 @@ export default class DeckGL extends React.Component {
     autobind(this);
   }
 
-  componentWillReceiveProps(nextProps) {
-    this._updateLayers(nextProps);
-  }
+  componentDidMount() {
+    const {width, height, useDevicePixelRatio, gl, glOptions, debug} = this.props;
+    const canvas = this.refs.overlay;
 
-  componentWillUnmount() {
+    this.animationLoop = new AnimationLoop({
+      width,
+      height,
+      useDevicePixelRatio,
+      onCreateContext: (opts) =>
+        gl || createGLContext(Object.assign({}, glOptions, {canvas, debug})),
+      onInitialize: this._onRendererInitialized,
+      onRender: this._onRenderFrame
+    });
+    this.animationLoop.start();
+
     if (this.layerManager) {
       this.layerManager.finalize();
     }
   }
 
-  /* Public API */
+  componentWillReceiveProps(nextProps) {
+    this._updateLayers(nextProps);
+  }
+
+  componentWillUnmount() {
+    this.animationLoop.stop();
+    this.animationLoop = null;
+
+    if (this.layerManager) {
+      this.layerManager.finalize();
+    }
+  }
+
+  // Public API
+
   queryObject({x, y, radius = 0, layerIds = null}) {
     const selectedInfos = this.layerManager.pickLayer({x, y, radius, layerIds, mode: 'query'});
     return selectedInfos.length ? selectedInfos[0] : null;
@@ -94,6 +118,30 @@ export default class DeckGL extends React.Component {
 
   queryVisibleObjects({x, y, width = 1, height = 1, layerIds = null}) {
     return this.layerManager.queryLayer({x, y, width, height, layerIds});
+  }
+
+  // Private Methods
+
+  _onRendererInitialized({gl, canvas}) {
+    setParameters(gl, {
+      blend: true,
+      blendFunc: [GL.SRC_ALPHA, GL.ONE_MINUS_SRC_ALPHA],
+      polygonOffsetFill: true
+    });
+
+    const {props} = this;
+    props.onWebGLInitialized(gl);
+
+    // Note: avoid React setState due GL animation loop / setState timing issue
+    this.layerManager = new LayerManager({gl});
+    this.layerManager.initEventHandling(new EventManager(canvas));
+    this.effectManager = new EffectManager({gl, layerManager: this.layerManager});
+
+    for (const effect of props.effects) {
+      this.effectManager.addEffect(effect);
+    }
+
+    this._updateLayers(props);
   }
 
   _updateLayers(nextProps) {
@@ -136,28 +184,6 @@ export default class DeckGL extends React.Component {
     }
   }
 
-  _onRendererInitialized({gl, canvas}) {
-    setParameters(gl, {
-      blend: true,
-      blendFunc: [GL.SRC_ALPHA, GL.ONE_MINUS_SRC_ALPHA],
-      polygonOffsetFill: true
-    });
-
-    const {props} = this;
-    props.onWebGLInitialized(gl);
-
-    // Note: avoid React setState due GL animation loop / setState timing issue
-    this.layerManager = new LayerManager({gl});
-    this.layerManager.initEventHandling(new EventManager(canvas));
-    this.effectManager = new EffectManager({gl, layerManager: this.layerManager});
-
-    for (const effect of props.effects) {
-      this.effectManager.addEffect(effect);
-    }
-
-    this._updateLayers(props);
-  }
-
   _onRenderFrame({gl}) {
     const redraw = this.layerManager.needsRedraw({clearRedrawFlags: true});
     if (!redraw) {
@@ -173,17 +199,13 @@ export default class DeckGL extends React.Component {
   }
 
   render() {
-    const {width, height, gl, debug} = this.props;
-
-    return createElement(WebGLRenderer, Object.assign({}, this.props, {
-      width,
-      height,
-      gl,
-      debug,
-      onRendererInitialized: this._onRendererInitialized,
-      onNeedRedraw: this._onNeedRedraw,
-      onRenderFrame: this._onRenderFrame
-    }));
+    const {id, width, height, style} = this.props;
+    return createElement('canvas', {
+      ref: 'overlay',
+      key: 'overlay',
+      id,
+      style: Object.assign({}, style, {width, height})
+    });
   }
 }
 
