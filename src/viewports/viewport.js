@@ -64,6 +64,8 @@ export default class Viewport {
   /* eslint-disable complexity, max-statements */
   constructor(opts = {}) {
     const {
+      id = null,
+
       // Window width/height in pixels (for pixel projection)
       x = 0,
       y = 0,
@@ -78,8 +80,8 @@ export default class Viewport {
 
       // Perspective projection matrix parameters, used if projectionMatrix not supplied
       fovy = 75,
-      near = 0.01,  // Distance of near clipping plane
-      far = 10000, // Distance of far clipping plane
+      near = 0.1,  // Distance of near clipping plane
+      far = 1000, // Distance of far clipping plane
 
       // Anchor: lng lat zoom will make this viewport work with geospatial coordinate systems
       longitude = null,
@@ -93,6 +95,8 @@ export default class Viewport {
 
       distanceScales = null
     } = opts;
+
+    this.id = id || this.constructor.displayName || 'viewport';
 
     // Check if we have a geospatial anchor
     this.isGeospatial = Number.isFinite(latitude) && Number.isFinite(longitude);
@@ -120,6 +124,7 @@ export default class Viewport {
     this.distanceScales.pixelsPerMeter = new Vector3(this.distanceScales.pixelsPerMeter);
 
     this.position = ZERO_VECTOR;
+    this.meterOffset = ZERO_VECTOR;
     if (position) {
       // Apply model matrix if supplied
       this.position = position;
@@ -409,3 +414,5 @@ export default class Viewport {
     }
   }
 }
+
+Viewport.displayName = 'Viewport';

@@ -53,3 +53,6 @@ export default class ThirdPersonViewport extends Viewport {
   //   }));
   // }
 }
+
+ThirdPersonViewport.displayName = 'ThirdPersonViewport';
+

@@ -35,13 +35,14 @@ export default class FirstPersonViewport extends Viewport {
       // view matrix arguments
       modelMatrix = null,
       bearing,
+      // pitch,
       direction, // Which direction camera is looking at
       up = [0, 0, 1] // Defines up direction, default positive y axis,
     } = opts;
 
     const dir = direction || getDirectionFromBearingAndPitch({
       bearing,
-      pitch: 90
+      pitch: 110
     });
 
     // Direction is relative to model coordinates, of course
@@ -56,3 +57,5 @@ export default class FirstPersonViewport extends Viewport {
     }));
   }
 }
+
+FirstPersonViewport.displayName = 'FirstPersonViewport';

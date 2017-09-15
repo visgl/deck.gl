@@ -171,7 +171,7 @@ export default class GridLayer extends CompositeLayer {
   getSubLayerProps() {
     const {id, elevationScale, fp64, extruded, cellSize, coverage, lightSettings} = this.props;
 
-    const forwardProps = this.getForwardProps();
+    const forwardProps = this.getBaseLayerProps();
 
     // return props to the sublayer constructor
     return Object.assign({}, forwardProps, {

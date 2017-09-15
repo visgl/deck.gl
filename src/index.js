@@ -28,12 +28,15 @@ export {default as CompositeLayer} from './lib/composite-layer';
 
 // Viewports
 export {default as Viewport} from './viewports/viewport';
+export {default as FirstPersonViewport} from './viewports/first-person-viewport';
+export {default as ThirdPersonViewport} from './viewports/third-person-viewport';
 export {default as WebMercatorViewport} from './viewports/web-mercator-viewport';
 
 // TODO - Do we need to export? Move to experimental?
+export {default as ViewportControls} from './controllers/controls';
 export {default as FirstPersonState} from './controllers/first-person-state';
-export {default as MapState} from './controllers/map-state';
 export {default as OrbitState} from './controllers/orbit-state';
+export {default as MapState} from './controllers/map-state';
 
 // Core Layers
 export {default as ArcLayer} from './layers/core/arc-layer/arc-layer';
@@ -54,9 +57,10 @@ export {default as PolygonLayer} from './layers/core/polygon-layer/polygon-layer
 export {default as GeoJsonLayer} from './layers/core/geojson-layer/geojson-layer';
 
 // React bindings
-export {default as DeckGL} from './react/deckgl';
 export {default as default} from './react/deckgl';
 
+export {default as DeckGL} from './react/deckgl';
+export {default as ViewportLayout} from './react/viewport-layout';
 export {default as ViewportController} from './react/controllers/viewport-controller';
 export {default as MapController} from './react/controllers/map-controller';
 
@@ -68,9 +72,11 @@ import {default as Effect} from './experimental/lib/effect';
 import {default as ReflectionEffect} from './experimental/effects/reflection-effect/reflection-effect';
 
 // Experimental React bindings
-import {default as DeckGLMultiView} from './experimental/react/deckgl-multiview';
-import {default as ViewportLayout} from './experimental/react/viewport-layout';
 import AnimationMapController from './experimental/react/controllers/animation-map-controller';
+
+// TODO - these are no longer experimental - remove before release
+import {default as DeckGLMultiView} from './react/deckgl';
+import {default as ViewportLayout} from './react/viewport-layout';
 
 export const experimental = {
   get,
@@ -79,9 +85,11 @@ export const experimental = {
   Effect,
   ReflectionEffect,
 
+  AnimationMapController,
+
+  // TODO - remove before release
   DeckGLMultiView,
-  ViewportLayout,
-  AnimationMapController
+  ViewportLayout
 };
 
 // Deprecated Core Lib Classes

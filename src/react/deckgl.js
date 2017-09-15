@@ -27,9 +27,10 @@ import Layer from '../lib/layer';
 import EffectManager from '../experimental/lib/effect-manager';
 import Effect from '../experimental/lib/effect';
 import Viewport from '../viewports/viewport';
+import {flatten} from '../lib/utils/flatten';
 import WebMercatorViewport from '../viewports/web-mercator-viewport';
-import {EventManager} from 'mjolnir.js';
 
+import {EventManager} from 'mjolnir.js';
 import {GL, AnimationLoop, createGLContext, setParameters} from 'luma.gl';
 
 function noop() {}
@@ -92,9 +93,6 @@ export default class DeckGL extends React.Component {
     });
     this.animationLoop.start();
 
-    if (this.layerManager) {
-      this.layerManager.finalize();
-    }
   }
 
   componentWillReceiveProps(nextProps) {
@@ -107,6 +105,7 @@ export default class DeckGL extends React.Component {
 
     if (this.layerManager) {
       this.layerManager.finalize();
+      this.layerManager = null;
     }
   }
 
@@ -121,23 +120,45 @@ export default class DeckGL extends React.Component {
     return this.layerManager.queryLayer({x, y, width, height, layerIds});
   }
 
+  // Private Helper Methods
+
+  // Extracts a list of viewports from the supplied props
+  _getViewports() {
+    const {viewports, viewport} = this.props;
+    if (viewports) {
+      return flatten(viewports, {filter: Boolean});
+    }
+    if (viewport) {
+      return [viewport];
+    }
+
+    const {width, height, latitude, longitude, zoom, pitch, bearing, altitude} = this.props;
+    return [
+      new WebMercatorViewport({width, height, latitude, longitude, zoom, pitch, bearing, altitude})
+    ];
+  }
+
+  // Gets actual viewport from a viewport "descriptor" object: viewport || {viewport: ..., ...}
+  _getViewportFromDescriptor(viewportOrDescriptor) {
+    return viewportOrDescriptor.viewport ?
+      viewportOrDescriptor.viewport :
+      viewportOrDescriptor;
+  }
+
   // Private Methods
 
   _updateLayers(nextProps) {
     const {
-      width,
-      height,
-      latitude,
-      longitude,
       zoom,
-      pitch,
-      bearing,
-      altitude,
       pickingRadius,
       onLayerClick,
       onLayerHover,
       useDevicePixelRatio
     } = nextProps;
+
+    if (!this.layerManager) {
+      return;
+    }
 
     this.layerManager.setEventHandlingParameters({
       pickingRadius,
@@ -150,17 +171,11 @@ export default class DeckGL extends React.Component {
       useDevicePixelRatio
     });
 
-    // If Viewport is not supplied, create one from mercator props
-    let {viewport} = nextProps;
-    viewport = viewport || new WebMercatorViewport({
-      width, height, latitude, longitude, zoom, pitch, bearing, altitude
-    });
-
-    if (this.layerManager) {
-      this.layerManager
-        .setViewport(viewport, zoom)
-        .updateLayers({newLayers: nextProps.layers});
-    }
+    // TODO - this is a HACK: UpdateLayers need the viewport prop set
+    const viewports = this._getViewports();
+    this.layerManager
+      .setViewport(this._getViewportFromDescriptor(viewports[0]), zoom)
+      .updateLayers({newLayers: nextProps.layers});
   }
 
   _onRendererInitialized({gl, canvas}) {
@@ -186,20 +201,9 @@ export default class DeckGL extends React.Component {
   }
 
   _onRenderFrame({gl}) {
-    const redraw = this.layerManager.needsRedraw({clearRedrawFlags: true});
-    if (!redraw) {
-      return;
-    }
-
-    // clear depth and color buffers
-    gl.clear(GL.COLOR_BUFFER_BIT | GL.DEPTH_BUFFER_BIT);
-
-    this.effectManager.preDraw();
-    this.layerManager.drawLayers({pass: 'to screen'});
-    this.effectManager.draw();
-
-    // Used by test harness
-    this.props.onAfterRender(this.refs.overlay);
+    const viewports = this._getViewports();
+    this.layerManager.setViewports(viewports);
+    this.layerManager.drawLayers({pass: 'render to screen'});
   }
 
   render() {

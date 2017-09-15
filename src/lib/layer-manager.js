@@ -24,7 +24,7 @@ import seer from 'seer';
 import Layer from './layer';
 import {log} from './utils';
 import {flatten} from './utils/flatten';
-import {drawLayers, pickLayers, queryLayers} from './draw-and-pick';
+import {clearCanvas, drawLayers, pickLayers, queryLayers} from './draw-and-pick';
 import {LIFECYCLE} from './constants';
 import Viewport from '../viewports/viewport';
 import {
@@ -40,17 +40,15 @@ const LOG_PRIORITY_LIFECYCLE_MINOR = 4;
 
 export default class LayerManager {
   constructor({gl}) {
-    /* Currently deck.gl expects the DeckGL.layers to be different
-     whenever React rerenders. If the same layers array is used, the
-     LayerManager's diffing algorithm will generate a fatal error and
-     break the rendering.
+     // Currently deck.gl expects the DeckGL.layers array to be different
+     // whenever React rerenders. If the same layers array is used, the
+     // LayerManager's diffing algorithm will generate a fatal error and
+     // break the rendering.
 
-     `this.lastRenderedLayers` stores the UNFILTERED layers sent
-     down to LayerManager, so that `layers` reference can be compared.
-     If it's the same across two React render calls, the diffing logic
-     will be skipped.
-    */
-
+     // `this.lastRenderedLayers` stores the UNFILTERED layers sent
+     // down to LayerManager, so that `layers` reference can be compared.
+     // If it's the same across two React render calls, the diffing logic
+     // will be skipped.
     this.lastRenderedLayers = [];
 
     this.prevLayers = [];
@@ -73,6 +71,7 @@ export default class LayerManager {
     this.context = {
       gl,
       uniforms: {},
+      viewports: [],
       viewport: null,
       viewportChanged: true,
       pickingFBO: null,
@@ -92,29 +91,6 @@ export default class LayerManager {
   }
 
   /**
-   * Called upon Seer initialization, manually sends layers data.
-   */
-  _initSeer() {
-    this.layers.forEach(layer => {
-      initLayerInSeer(layer);
-      updateLayerInSeer(layer);
-    });
-  }
-
-  /**
-   * On Seer property edition, set override and update layers.
-   */
-  _editSeer(payload) {
-    if (payload.type !== 'edit' || payload.valuePath[0] !== 'props') {
-      return;
-    }
-
-    setPropOverrides(payload.itemKey, payload.valuePath.slice(1), payload.value);
-    const newLayers = this.layers.map(layer => new layer.constructor(layer.props));
-    this.updateLayers({newLayers});
-  }
-
-  /**
    * Method to call when the layer manager is not needed anymore.
    *
    * Currently used in the <DeckGL> componentWillUnmount lifecycle to unbind Seer listeners.
@@ -124,7 +100,10 @@ export default class LayerManager {
     seer.removeListener(this._editSeer);
   }
 
-  setViewport(viewport, zoom) {
+  setViewports(viewports) {
+    viewports = flatten(viewports, {filter: Boolean});
+
+    const viewport = viewports[0];
     assert(viewport instanceof Viewport, 'Invalid viewport');
 
     // TODO - viewport change detection breaks METER_OFFSETS mode
@@ -137,6 +116,7 @@ export default class LayerManager {
 
     if (viewportChanged) {
       Object.assign(this.oldContext, this.context);
+      this.context.viewports = viewports;
       this.context.viewport = viewport;
       this.context.viewportChanged = true;
       this.context.uniforms = {};
@@ -147,12 +127,11 @@ export default class LayerManager {
   }
 
   /**
-   * @param {Object} eventManager   A source of DOM input events
-   *                                with on()/off() methods for registration,
-   *                                which will call handlers with
-   *                                an Event object of the following shape:
-   *                                {Object: {x, y}} offsetCenter: center of the event
-   *                                {Object} srcEvent:             native JS Event object
+   * @param {Object} eventManager  - A source of DOM input events
+   *   with on()/off() methods for registration, which will call handlers with
+   *   an Event object of the following shape:
+   *     {Object: {x, y}} offsetCenter: center of the event
+   *     {Object} srcEvent:             native JS Event object
    */
   initEventHandling(eventManager) {
     this._eventManager = eventManager;
@@ -233,9 +212,36 @@ export default class LayerManager {
   }
 
   drawLayers({pass}) {
-    assert(this.context.viewport, 'LayerManager.drawLayers: viewport not set');
+    const {gl, useDevicePixelRatio} = this.context;
+    clearCanvas(gl, {useDevicePixelRatio});
 
-    drawLayers({layers: this.layers, pass});
+    // this.effectManager.preDraw();
+
+    this.context.viewports.forEach((viewportOrDescriptor, i) => {
+      const viewport = this._getViewportFromDescriptor(viewportOrDescriptor);
+
+      // Update context to point to this viewport
+      this.context.viewport = viewport;
+      assert(this.context.viewport, 'LayerManager.drawLayers: viewport not set');
+
+      // Update layers states
+      // Let screen space layers update their state based on viewport
+      // TODO - reimplement viewport change detection (single viewport optimization)
+      // TODO - don't set viewportChanged during setViewports?
+      if (this.context.viewportChanged) {
+        this._updateLayerStates({viewportChanged: true});
+      }
+
+      // render this viewport
+      drawLayers(gl, {
+        layers: this.layers,
+        viewport,
+        useDevicePixelRatio,
+        pass
+      });
+    });
+
+    // this.effectManager.draw();
 
     return this;
   }
@@ -243,21 +249,46 @@ export default class LayerManager {
   // Pick the closest info at given coordinate
   pickLayer({x, y, mode, radius = 0, layerIds}) {
     const {gl, useDevicePixelRatio} = this.context;
+
     const layers = layerIds ?
-      this.layers.filter(layer => layerIds.indexOf(layer.id) >= 0) :
+      // FIlter on start of id to capture sublayers (which by convention add suffixes to id)
+      this.layers.filter(layer => layerIds.find(layerId => layer.id.indexOf(layerId) === 0)) :
       this.layers;
 
-    return pickLayers(gl, {
-      x,
-      y,
-      radius,
-      layers,
-      mode,
-      viewport: this.context.viewport,
-      pickingFBO: this._getPickingBuffer(),
-      lastPickedInfo: this.context.lastPickedInfo,
-      useDevicePixelRatio
+    const pickInfos = [];
+
+    this.context.viewports.forEach((viewportOrDescriptor, i) => {
+      const viewport = this._getViewportFromDescriptor(viewportOrDescriptor);
+
+      // Update context to point to this viewport
+      this.context.viewport = viewport;
+      assert(this.context.viewport, 'LayerManager.drawLayers: viewport not set');
+
+      // Update layers states
+      // Let screen space layers update their state based on viewport
+      // TODO - reimplement viewport change detection (single viewport optimization)
+      // TODO - don't set viewportChanged during setViewports?
+      if (this.context.viewportChanged) {
+        this._updateLayerStates({viewportChanged: true});
+      }
+
+      // TODO this causes one readback per viewport, we must consolidate
+      const pickInfo = pickLayers(gl, {
+        x,
+        y,
+        radius,
+        layers,
+        mode,
+        viewport: this.context.viewport,
+        pickingFBO: this._getPickingBuffer(),
+        lastPickedInfo: this.context.lastPickedInfo,
+        useDevicePixelRatio
+      });
+
+      pickInfos.push(...pickInfo);
     });
+
+    return pickInfos;
   }
 
   // Get all unique infos within a bounding box
@@ -309,8 +340,32 @@ export default class LayerManager {
   }
 
   //
+  // DEPRECATED METHODS
+  //
+
+  setViewport(viewport) {
+    log.deprecated('setViewport', 'setViewports');
+    this.setViewports([viewport]);
+    return this;
+  }
+
+  //
   // PRIVATE METHODS
   //
+
+  // Walk the layers and update their states
+  _updateLayerStates(changeFlags) {
+    for (const layer of this.layers) {
+      layer.updateLayer({changeFlags});
+    }
+  }
+
+  // Get a viewport from a viewport descriptor (which can be a plain viewport)
+  _getViewportFromDescriptor(viewportOrDescriptor) {
+    return viewportOrDescriptor.viewport ?
+      viewportOrDescriptor.viewport :
+      viewportOrDescriptor;
+  }
 
   _getPickingBuffer() {
     const {gl} = this.context;
@@ -634,6 +689,29 @@ export default class LayerManager {
       radius: this._pickingRadius,
       mode: 'hover'
     });
+  }
+
+  /**
+   * Called upon Seer initialization, manually sends layers data.
+   */
+  _initSeer() {
+    this.layers.forEach(layer => {
+      initLayerInSeer(layer);
+      updateLayerInSeer(layer);
+    });
+  }
+
+  /**
+   * On Seer property edition, set override and update layers.
+   */
+  _editSeer(payload) {
+    if (payload.type !== 'edit' || payload.valuePath[0] !== 'props') {
+      return;
+    }
+
+    setPropOverrides(payload.itemKey, payload.valuePath.slice(1), payload.value);
+    const newLayers = this.layers.map(layer => new layer.constructor(layer.props));
+    this.updateLayers({newLayers});
   }
 }
 

@@ -115,7 +115,7 @@ export default class GeoJsonLayer extends CompositeLayer {
     const hasPolygonLines = polygonOutlineFeatures && polygonOutlineFeatures.length > 0;
     const hasPolygon = polygonFeatures && polygonFeatures.length > 0;
 
-    const forwardProps = this.getForwardProps();
+    const forwardProps = this.getBaseLayerProps();
 
     // Filled Polygon Layer
     const polygonFillLayer = filled &&
