@@ -1,21 +1,21 @@
 # Updates
 
-The key is getting good performance and desired behavior from deck.gl is to understand how and when deck.gl updates data.
+One of the keys to getting good performance and desired behavior from deck.gl is to understand how and when deck.gl updates data.
 
 
 ## The Reactive Programming Paradigm
 
 Before jumping into the details, it might be helpful review the reactive programming paradigm that the deck.gl is architecture is based on:
 
-- In a reactive application, the entire UI is "re-rendered" every time something in the application state changes.
-- There is no application logic that checks what part of the state changed to check what UI updates are required.
-- Instead, the UI framework makes the choices about what to update, by comparing (or "diffing") the newly rendered UI a against the last rendered UI.
-- The framework (deck.gl) then the makes minimal changes to the DOM or to WebGL state to account for the differences, and redraws.
+- In a reactive application, a complete UI description is "re-rendered" every time something in the application state changes (in the case of a deck.gl application, a new list of layers is created whenever something changes).
+- The UI framework (in this case, deck.gl) makes the choices about what to update, by comparing (or "diffing") the newly rendered UI description with the last rendered UI description.
+- The framework then the makes minimal necessary changes to account for the differences, and then redraws.
+- The required changes are made to "WebGL state" in case of deck.gl, and to the Browser's DOM (HTML element tree) in case of React.
 
 
-## Creating new layers on every render?
+## Creating New Layers on Every Render?
 
-The deck.gl model means that applications are expected to create a new set of on layers every time application state changes, which can seem surprisingly inefficient to someone who hasn't done reactive programming before. The trick is that internally, the new layers are efficiently matched against existing layers so that no updates are performed unless actually needed.
+The deck.gl model means that applications are expected to create a new set of on layers every time application state changes, which can seem surprisingly inefficient to someone who hasn't done reactive programming before. The trick is that layers are just descriptor objects that are very cheap to instantiate, and internally, the new layers are efficiently matched against existing layers so that no updates are performed unless actually needed.
 
 So, even though the application creates new "layers", those layers are only "descriptors" containing props that specify what needs to be rendered and how. All calculated state (WebGL "programs", "vertex attributes" etc) are stored in a state object and this state object is moved forward to the newly matched layer on every render cycle.  The new layer ends up with the state of the old layer (and the props of the new layer), while the old layer is simply discarded for garbage collecion.
 
@@ -85,6 +85,14 @@ In the above code, deck.gl compares the value of the `getColor` update trigger w
 ### Supplying Attributes Directly
 
 While the built-in attribute generation functionality is a major part of a `Layer`s functionality, it is possible for applications to bypass it, and supply the layer with precalculated attributes.
+
+
+### shouldUpdateState
+
+When rendering with many viewports there is a concern that `updateState` gets called many times per frame (potentially recalculating other things that have nothing to do with viewport updates, in less strictly coded layers). Because of this, since most layers do not need to update state when viewport changes, the `updateState` function is not automatically called on viewport change. To make sure it is called, the layer needs to override `shouldUpdateState`.
+
+So layers that want `updateState` to be called when viewports change (like `ScreenGridLayer`) need to redefine `shouldUpdateState`. This will mean that even though all layer’s will have `shouldUpdateState` called every viewport every frame, only a few will typically get calls to `updateState`.
+
 
 
 ## Future Possibilities

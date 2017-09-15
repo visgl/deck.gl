@@ -1,19 +1,23 @@
-
 # Viewport Class
 
-The `Viewport` manages projection and unprojection of coordinates between world and viewport coordinates.
+The `Viewport` combines a number of responsibilities:
+* A deck.gl `Viewport` is essentially a geospatially enabled camera.
+* In this sense it manages projection and unprojection of coordinates between world and viewport coordinates, both in JavaScript and in GLSL.
+* `Viewport`s also contains information about the size and position of the target rectangle on screen where the camera will render.
 
 The viewport class provides both direct `project`/`unproject` function members as well as projection matrices including `view` and `projection` matrices, and can generate their inverses as well to facilitate e.g. lighting calculations in WebGL shaders.
 
+In geospatial setups, Viewports can contain geospatial anchors.
 
-In geospatial setups
+Note: The `Viewport` class is normally not instantiated directly but rather one of its subclasses is used. However, in cases where the application needs to use "externally" generated view or projection matrices (such as WebVR), the `Viewport` class can be used directly.
+
+For more information consult the [Viewports](/docs/advanced/viewports.md) article.
 
 ## Usage
 
 ```js
 const viewport = new Viewport({width: 500, height: 500, ...});
 ```
-Note: The `Viewport` class is normally not instantiated directly but rather one of it's subclasses is used.
 
 ## Constructor
 
@@ -93,4 +97,4 @@ Note: By default, takes top-left coordinates from JavaScript mouse events.
 
 ## Source
 
-[src/viewports/viewport.js](https://github.com/uber/deck.gl/blob/4.1release/src/viewports/viewport.js)
+[src/viewports/viewport.js](https://github.com/uber/deck.gl/blob/4.1-release/src/viewports/viewport.js)
