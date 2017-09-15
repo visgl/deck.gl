@@ -5,12 +5,10 @@ import {render} from 'react-dom';
 import DeckGL, {PointCloudLayer, COORDINATE_SYSTEM} from 'deck.gl';
 import {setParameters} from 'luma.gl';
 
-import {
-  OrbitController,
-  loadLazFile, parseLazData
-} from './utils';
+import {OrbitController, loadLazFile, parseLazData} from './utils';
 
-const FILE_PATH = 'https://gnavvy.github.io/point-cloud-example/data/indoor.laz';
+const DATA_REPO = 'https://raw.githubusercontent.com/uber-common/deck.gl-data/master';
+const FILE_PATH = 'examples/point-cloud-laz/indoor.laz';
 
 function normalize(points) {
   let xMin = Infinity;
@@ -42,7 +40,6 @@ function normalize(points) {
 }
 
 class Example extends PureComponent {
-
   constructor(props) {
     super(props);
 
@@ -80,7 +77,7 @@ class Example extends PureComponent {
     const {points} = this.state;
 
     const skip = 10;
-    loadLazFile(FILE_PATH).then(rawData => {
+    loadLazFile(`${DATA_REPO}/${FILE_PATH}`).then(rawData => {
       parseLazData(rawData, skip, (decoder, progress) => {
         for (let i = 0; i < decoder.pointsCount; i++) {
           const {color, position} = decoder.getPoint(i);
@@ -163,18 +160,21 @@ class Example extends PureComponent {
     const canvasProps = {width, height, ...viewport};
     const glViewport = OrbitController.getViewport(canvasProps);
 
-    return width && height && (
-      <OrbitController {...canvasProps} ref={canvas => {
-        this._canvas = canvas;
-      }} onViewportChange={this._onViewportChange}>
+    return (
+      <OrbitController
+        {...canvasProps}
+        ref={canvas => {
+          this._canvas = canvas;
+        }}
+        onViewportChange={this._onViewportChange}
+      >
         <DeckGL
           width={width}
           height={height}
           viewport={glViewport}
-          layers={[
-            this._renderLazPointCloudLayer()
-          ]}
-          onWebGLInitialized={this._onInitialized}/>
+          layers={[this._renderLazPointCloudLayer()]}
+          onWebGLInitialized={this._onInitialized}
+        />
       </OrbitController>
     );
   }
@@ -183,23 +183,24 @@ class Example extends PureComponent {
     const progress = (this.state.progress * 100).toFixed(2);
     return (
       <div>
-        <div style={{
-          position: 'absolute', left: '8px', bottom: '8px',
-          color: '#FFF', fontSize: '15px'
-        }}>
-          {
-            this.state.progress < 1 ?
-              <div>
-                <div>
-                  This example might not work on mobile devices due to browser limitations.
-                </div>
-                <div>
-                  Please try checking it with a desktop machine instead.
-                </div>
-                <div>{`Loading ${progress}% (laslaz loader by plas.io)`}</div>
-              </div> :
-              <div>Data source: kaarta.com</div>
-          }
+        <div
+          style={{
+            position: 'absolute',
+            left: '8px',
+            bottom: '8px',
+            color: '#FFF',
+            fontSize: '15px'
+          }}
+        >
+          {this.state.progress < 1 ? (
+            <div>
+              <div>This example might not work on mobile devices due to browser limitations.</div>
+              <div>Please try checking it with a desktop machine instead.</div>
+              <div>{`Loading ${progress}% (laslaz loader by plas.io)`}</div>
+            </div>
+          ) : (
+            <div>Data source: kaarta.com</div>
+          )}
         </div>
       </div>
     );
@@ -207,10 +208,16 @@ class Example extends PureComponent {
 
   render() {
     const {width, height} = this.state;
-    return width && height && <div>
-      {this._renderDeckGLCanvas()}
-      {this._renderProgressInfo()}
-    </div>;
+    if (width <= 0 || height <= 0) {
+      return null;
+    }
+
+    return (
+      <div>
+        {this._renderDeckGLCanvas()}
+        {this._renderProgressInfo()}
+      </div>
+    );
   }
 }
 
