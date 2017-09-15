@@ -56,6 +56,7 @@ const defaultProps = {
   id: 'deckgl-overlay',
   debug: false,
   pickingRadius: 0,
+  glOptions: {},
   gl: null,
   effects: [],
   onWebGLInitialized: noop,
@@ -196,6 +197,9 @@ export default class DeckGL extends React.Component {
     this.effectManager.preDraw();
     this.layerManager.drawLayers({pass: 'to screen'});
     this.effectManager.draw();
+
+    // Used by test harness
+    this.props.onAfterRender(this.refs.overlay);
   }
 
   render() {
