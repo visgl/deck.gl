@@ -31,9 +31,7 @@ export default class MapControls extends Controls {
    * A class that handles events and updates mercator style viewport parameters
    */
   constructor(options) {
-    super(Object.assign({}, options, {
-      StateClass: MapState
-    }));
+    super(MapState, options);
   }
 
   // Default handler for the `panmove` event.
