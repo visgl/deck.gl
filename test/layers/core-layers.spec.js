@@ -21,8 +21,6 @@
 import test from 'tape-catch';
 
 import {
-  // ChoroplethLayer is deprecated
-  ChoroplethLayer,
   ScatterplotLayer,
   IconLayer,
   ArcLayer,
@@ -39,16 +37,9 @@ import {
   testLayerUpdates
 } from '../test-utils/layer-utils';
 
-// Import LayerManager to test that layers can successfully be updated
-import {LayerManager} from 'deck.gl';
-const getPointPosition = d => d.COORDINATES;
-
 import * as FIXTURES from '../data';
 
-test('imports', t => {
-  t.ok(LayerManager, 'LayerManager imported');
-  t.end();
-});
+const getPointPosition = d => d.COORDINATES;
 
 test('ScreenGridLayer#constructor', t => {
   const LayerComponent = ScreenGridLayer;
@@ -86,19 +77,6 @@ test('ScreenGridLayer#constructor', t => {
   testCreateEmptyLayer(t, LayerComponent);
   testNullLayer(t, LayerComponent);
   testLayerUpdates(t, {LayerComponent, testCases: TEST_CASES});
-
-  t.end();
-});
-
-test('ChoroplethLayer#constructor', t => {
-
-  const layer = new ChoroplethLayer({
-    data: FIXTURES.choropleths,
-    pickable: false,
-    drawContour: true
-  });
-
-  t.ok(layer, 'ChoroplethLayer created');
 
   t.end();
 });

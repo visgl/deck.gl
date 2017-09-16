@@ -16,6 +16,18 @@ Parameters:
 
 ## Methods
 
+##### `getLayers`
+
+Returns an "expanded" list of layers, optionally be filtered by a list of layer ids. The list of layers is "expanded" in the sense that composite layers will have been recursively rendered and will thus only contain primitive layers. When supplying a layer id corresponding to a composite layer, all the sub layers rendered by that layer will be included.
+
+`layerManager.getLayers({layerIds=[]})`
+
+Parameters:
+
+- `layerIds` (String[], optional) - A list of layer id strings. If supplied, the returned list will only contain layers whose `id` property matches (see note) one of the strings in the list.
+
+Note: layer id matching checks that a layer id *starts with* one of the supplied strings. This ensures that sublayers rendered by a composite layer with the given id will also be included in the matched list.
+
 ##### `setViewport`
 
 Parameters:

@@ -91,6 +91,16 @@ export default class LayerManager {
     Object.seal(this);
   }
 
+  // Gets an (optionally) filtered list of layers
+  // Filtering by layerId compares beginning of strings, so that sub layers that
+  // follow the convention of adding suffixes to the parent's layer name will
+  getLayers({layerIds = null} = {}) {
+    // Filter on start of id to capture sublayers (which by convention add suffixes to id)
+    return layerIds ?
+      this.layers.filter(layer => layerIds.find(layerId => layer.id.indexOf(layerId) === 0)) :
+      this.layers;
+  }
+
   /**
    * Called upon Seer initialization, manually sends layers data.
    */
@@ -243,9 +253,8 @@ export default class LayerManager {
   // Pick the closest info at given coordinate
   pickLayer({x, y, mode, radius = 0, layerIds}) {
     const {gl, useDevicePixelRatio} = this.context;
-    const layers = layerIds ?
-      this.layers.filter(layer => layerIds.indexOf(layer.id) >= 0) :
-      this.layers;
+
+    const layers = this.getLayers({layerIds});
 
     return pickLayers(gl, {
       x,

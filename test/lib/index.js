@@ -19,7 +19,8 @@
 // THE SOFTWARE.
 
 import './utils';
+import './props.spec';
 import './attribute-manager.spec';
 import './layer.spec';
 import './composite-layer.spec';
-import './props.spec';
+import './layer-manager.spec';
