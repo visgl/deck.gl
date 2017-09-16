@@ -99,28 +99,6 @@ export default class Controls {
     return this._state.isDragging;
   }
 
-  setState(newState) {
-    Object.assign(this._state, newState);
-    if (this.onStateChange) {
-      this.onStateChange(this._state);
-    }
-  }
-
-  /* Callback util */
-  // formats map state and invokes callback function
-  updateViewport(newViewportState, extraState = {}) {
-    const oldViewport = this.viewportState.getViewportProps();
-    const newViewport = newViewportState.getViewportProps();
-
-    if (this.onViewportChange &&
-      Object.keys(newViewport).some(key => oldViewport[key] !== newViewport[key])) {
-      // Viewport has changed
-      this.onViewportChange(newViewport, this.viewportState.getViewport());
-    }
-
-    this.setState(Object.assign({}, newViewportState.getInteractiveState(), extraState));
-  }
-
   /**
    * Extract interactivity options
    */
@@ -175,6 +153,30 @@ export default class Controls {
         }
       });
     }
+  }
+
+  // Private Methods
+
+  setState(newState) {
+    Object.assign(this._state, newState);
+    if (this.onStateChange) {
+      this.onStateChange(this._state);
+    }
+  }
+
+  /* Callback util */
+  // formats map state and invokes callback function
+  updateViewport(newViewportState, extraState = {}) {
+    const oldViewport = this.viewportState.getViewportProps();
+    const newViewport = newViewportState.getViewportProps();
+
+    if (this.onViewportChange &&
+      Object.keys(newViewport).some(key => oldViewport[key] !== newViewport[key])) {
+      // Viewport has changed
+      this.onViewportChange(newViewport);
+    }
+
+    this.setState(Object.assign({}, newViewportState.getInteractiveState(), extraState));
   }
 
   /* Event handlers */
