@@ -38,6 +38,10 @@ import {
 const LOG_PRIORITY_LIFECYCLE = 2;
 const LOG_PRIORITY_LIFECYCLE_MINOR = 4;
 
+const layerName = layer => layer instanceof Layer ?
+  `${layer}` :
+  (!layer ? 'null layer' : 'invalid layer');
+
 export default class LayerManager {
   constructor({gl}) {
     /* Currently deck.gl expects the DeckGL.layers to be different
@@ -92,36 +96,12 @@ export default class LayerManager {
   }
 
   // Gets an (optionally) filtered list of layers
-  // Filtering by layerId compares beginning of strings, so that sub layers that
-  // follow the convention of adding suffixes to the parent's layer name will
   getLayers({layerIds = null} = {}) {
-    // Filter on start of id to capture sublayers (which by convention add suffixes to id)
+    // Filtering by layerId compares beginning of strings, so that sublayers will be included
+    // Dependes on the convention of adding suffixes to the parent's layer name
     return layerIds ?
       this.layers.filter(layer => layerIds.find(layerId => layer.id.indexOf(layerId) === 0)) :
       this.layers;
-  }
-
-  /**
-   * Called upon Seer initialization, manually sends layers data.
-   */
-  _initSeer() {
-    this.layers.forEach(layer => {
-      initLayerInSeer(layer);
-      updateLayerInSeer(layer);
-    });
-  }
-
-  /**
-   * On Seer property edition, set override and update layers.
-   */
-  _editSeer(payload) {
-    if (payload.type !== 'edit' || payload.valuePath[0] !== 'props') {
-      return;
-    }
-
-    setPropOverrides(payload.itemKey, payload.valuePath.slice(1), payload.value);
-    const newLayers = this.layers.map(layer => new layer.constructor(layer.props));
-    this.updateLayers({newLayers});
   }
 
   /**
@@ -134,7 +114,7 @@ export default class LayerManager {
     seer.removeListener(this._editSeer);
   }
 
-  setViewport(viewport, zoom) {
+  setViewport(viewport) {
     assert(viewport instanceof Viewport, 'Invalid viewport');
 
     // TODO - viewport change detection breaks METER_OFFSETS mode
@@ -157,12 +137,16 @@ export default class LayerManager {
   }
 
   /**
+   * Set parameters needed for layer rendering and picking.
+   * Parameters are to be passed as a single object, with the following values:
+   * @param {Boolean} useDevicePixelRatio
+   */
+  setParameters(parameters) {
+    this.context = Object.assign({}, this.context, parameters);
+  }
+
+  /**
    * @param {Object} eventManager   A source of DOM input events
-   *                                with on()/off() methods for registration,
-   *                                which will call handlers with
-   *                                an Event object of the following shape:
-   *                                {Object: {x, y}} offsetCenter: center of the event
-   *                                {Object} srcEvent:             native JS Event object
    */
   initEventHandling(eventManager) {
     this._eventManager = eventManager;
@@ -178,13 +162,7 @@ export default class LayerManager {
     });
   }
 
-  /**
-   * Set parameters for input event handling.
-   * Parameters are to be passed as a single object, with the following shape:
-   * @param {Number} pickingRadius    "Fuzziness" of picking (px), to support fat-fingering.
-   * @param {Function} onLayerClick   A handler to be called when any layer is clicked.
-   * @param {Function} onLayerHover   A handler to be called when any layer is hovered over.
-   */
+  // Set parameters for input event handling.
   setEventHandlingParameters({
     pickingRadius,
     onLayerClick,
@@ -200,15 +178,6 @@ export default class LayerManager {
       this._onLayerHover = onLayerHover;
     }
     this._validateEventHandling();
-  }
-
-  /**
-   * Set parameters needed for layer rendering and picking.
-   * Parameters are to be passed as a single object, with the following values:
-   * @param {Boolean} useDevicePixelRatio
-   */
-  setParameters(parameters) {
-    this.context = Object.assign({}, this.context, parameters);
   }
 
   updateLayers({newLayers}) {
@@ -644,11 +613,29 @@ export default class LayerManager {
       mode: 'hover'
     });
   }
-}
 
-function layerName(layer) {
-  if (layer instanceof Layer) {
-    return `${layer}`;
+  // SEER INTEGRATION
+
+  /**
+   * Called upon Seer initialization, manually sends layers data.
+   */
+  _initSeer() {
+    this.layers.forEach(layer => {
+      initLayerInSeer(layer);
+      updateLayerInSeer(layer);
+    });
   }
-  return !layer ? 'null layer' : 'invalid layer';
+
+  /**
+   * On Seer property edition, set override and update layers.
+   */
+  _editSeer(payload) {
+    if (payload.type !== 'edit' || payload.valuePath[0] !== 'props') {
+      return;
+    }
+
+    setPropOverrides(payload.itemKey, payload.valuePath.slice(1), payload.value);
+    const newLayers = this.layers.map(layer => new layer.constructor(layer.props));
+    this.updateLayers({newLayers});
+  }
 }
