@@ -21,4 +21,5 @@
 import './utils';
 import './attribute-manager.spec';
 import './layer.spec';
+import './composite-layer.spec';
 import './props.spec';

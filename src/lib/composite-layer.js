@@ -55,25 +55,24 @@ export default class CompositeLayer extends Layer {
 
   // Returns props that should be forwarded to children
   // TODO - implement autoforwarding?
-  getForwardProps() {
+  getBaseLayerProps() {
     const {
-      // base layer props
-      opacity, pickable, visible, parameters, getPolygonOffset,
+      opacity, pickable, visible,
+      parameters, getPolygonOffset,
       highlightedObjectIndex, autoHighlight, highlightColor,
-      // viewport props
       coordinateSystem, coordinateOrigin, modelMatrix
     } = this.props;
 
     return {
-      // Forward layer props
-      opacity, pickable, visible, parameters, getPolygonOffset,
+      opacity, pickable, visible,
+      parameters, getPolygonOffset,
       highlightedObjectIndex, autoHighlight, highlightColor,
       coordinateSystem, coordinateOrigin, modelMatrix
     };
   }
 
   _renderLayers(updateParams) {
-    if (!this.shouldUpdateState(updateParams)) {
+    if (this.state.oldSubLayers && !this.shouldUpdateState(updateParams)) {
       log.log(2, 'Composite layer reusing sublayers', this.state.oldSubLayers);
       return this.state.oldSubLayers;
     }
