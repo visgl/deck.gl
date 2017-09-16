@@ -1,7 +1,6 @@
 # Composite Layers
 
-Composite layer is a special kind of layers that creates other layers. It is often convenient to change the behavior of an existing layer using
-an composite (or "adaptor") layer instead of modifying the layer itself.
+A composite layer is a special kind of layer that creates other layers. It enables the creation of new layers by careful composition of existing layers (a primary example being the `GeoJsonLayer`). In addition, it is often convenient to change the interface and behavior of an existing layer using a composite "adaptor" layer instead of modifying the layer itself (the sample `S2Layer` is a simple adaptor on top of the `PolygonLayer`).
 
 ## Use Cases
 
@@ -37,7 +36,7 @@ class NiceScatterplotLayer extends CompositeLayer {
 NiceScatterplotLayer.layerName = 'NiceScatterplotLayer';
 ```
 
-### Defining Layer Properties
+### Defining Composite Layer Properties
 
 We will need to define the layer-specific properties of the new layer. In this example, the new layer's interface is almost identical to that of the ScatterplotLayer, except instead of one `getColor` accessor, you need two accessors `getStrokeColor` and `getFillColor`:
 
@@ -51,20 +50,29 @@ NiceScatterplotLayer.defaultProps = {
 
 ### Rendering Sublayers
 
-A composite layer should implement the `renderLayers()` method and return an array of layers. In this example, the idea is to draw two ScatterplotLayers, one for fill and one for the outline:
+A composite layer should implement the `renderLayers()` method and return an array of layers.
+
+By convention, the `id` of sublayers should be the `id` of the composite layer plus a suffix, typically separated by a dash.
+
+In this example, the idea is to draw two ScatterplotLayers, one for fill and one on top for the outline:
 
 ```
 class NiceScatterplotLayer extends CompositeLayer {
 
   renderLayers() {
+
+    const baseProps = this.getBaseLayerProps();
+
     return [
       // the filled circles
       new ScatterplotLayer({
-        id: 'fill'
+        id: `{this.props.id}-fill`
+        ...baseProps,
       }),
       // the outlines
       new ScatterplotLayer({
-        id: 'outline'
+        id: `{this.props.id}-outline`
+        ...baseProps,
       })
     ];
   }

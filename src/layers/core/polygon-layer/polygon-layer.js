@@ -100,7 +100,7 @@ export default class PolygonLayer extends CompositeLayer {
     const {getFillColor, getLineColor, getLineWidth, getElevation,
       getPolygon, updateTriggers, lightSettings} = this.props;
 
-    const forwardProps = this.getForwardProps();
+    const forwardProps = this.getBaseLayerProps();
 
     const {paths} = this.state;
 

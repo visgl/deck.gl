@@ -19,7 +19,7 @@ Three new `Layer` props (`autoHighlight`, `highlightColor` and `highlightedObjec
 
 ## CompositeLayer Improvements
 
-* **Prop Forwarding Support** - A new method `CompositeLayer.getForwardProps()` simplifies forwarding base layer props to sub layers, removing code clutter and reducing the risk of not forwarding a core prop.
+* **Prop Forwarding Support** - A new method `CompositeLayer.getBaseLayerProps()` simplifies forwarding base layer props to sub layers, removing code clutter and reducing the risk of not forwarding a core prop.
 
 
 ## PathLayer: Dashed Line Support

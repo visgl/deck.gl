@@ -214,7 +214,7 @@ export default class HexagonLayer extends CompositeLayer {
   getSubLayerProps() {
     const {id, radius, elevationScale, extruded, coverage, lightSettings, fp64} = this.props;
 
-    const forwardProps = this.getForwardProps();
+    const forwardProps = this.getBaseLayerProps();
 
     // return props to the sublayer constructor
     return Object.assign({}, forwardProps, {
