@@ -42,7 +42,7 @@ export function getQuantizeScale(domain, range) {
     const clampIdx = Math.max(Math.min(idx, range.length - 1), 0);
 
     return range[clampIdx];
-  }
+  };
 }
 
 // return a linear scale funciton

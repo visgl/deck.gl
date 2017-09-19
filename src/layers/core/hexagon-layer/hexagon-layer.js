@@ -176,13 +176,14 @@ export default class HexagonLayer extends CompositeLayer {
   }
 
   getDimensionChanges(oldProps, props) {
-    const dimensionUpdaters = this.getDimensionUpdaters();
+    const {dimensionUpdaters} = this.state;
     // dimension should be updated
 
     const updaters = Object.keys(dimensionUpdaters).reduce((accu, key) => {
 
-      // return the first triggered updater
-      const updater = dimensionUpdaters[key].find(item => item.triggers.some(t => oldProps[t] !== props[t]));
+      // return the first triggered updater for each dimension
+      const updater = dimensionUpdaters[key]
+        .find(item => item.triggers.some(t => oldProps[t] !== props[t]));
 
       if (updater) {
         accu.push(updater.updater);
@@ -192,19 +193,6 @@ export default class HexagonLayer extends CompositeLayer {
     }, []);
 
     return updaters.length ? updaters : null;
-  }
-
-  needsReSortBins(oldProps, props) {
-    log.once(0, 'needsReSortBins is deprecated, use getDimensionUpdaters instead');
-
-    /* not used anymore */
-    return oldProps.getColorValue !== props.getColorValue;
-  }
-
-  needsRecalculateColorDomain(oldProps, props) {
-    log.once(0, 'needsRecalculateColorDomain is deprecated, use getDimensionUpdaters instead');
-    return oldProps.lowerPercentile !== props.lowerPercentile ||
-      oldProps.upperPercentile !== props.upperPercentile;
   }
 
   getHexagons() {
@@ -228,33 +216,20 @@ export default class HexagonLayer extends CompositeLayer {
 
   getUpdateTriggers() {
     const {dimensionUpdaters} = this.state;
+    // merge all dimension triggers
+    return Object.keys(dimensionUpdaters).reduce((accu, dimension) => {
 
-    // merge all the dimension triggers
-    const getUpdateTriggers = Object.keys(dimensionUpdaters).reduce((accu, key) => ({
-      ...accu,
-      [key]: dimensionUpdaters[key].reduce((triggers, step) => ({
-        ...triggers,
-        ...step.triggers.reduce((prev, key) => ({...prev, [key]: this.props[key]}), {})
-      }), {})
-    }), {});
+      accu[dimension] = dimensionUpdaters[dimension].reduce((triggers, step) => {
 
-    return getUpdateTriggers;
-    // return {
-    //   getColor: {
-    //     colorRange: this.props.colorRange,
-    //     colorDomain: this.props.colorDomain,
-    //     getColorValue: this.props.getColorValue,
-    //     lowerPercentile: this.props.lowerPercentile,
-    //     upperPercentile: this.props.upperPercentile
-    //   },
-    //   getElevation: {
-    //     elevationRange: this.props.elevationRange,
-    //     elevationDomain: this.props.elevationDomain,
-    //     getElevationValue: this.props.getElevationValue,
-    //     elevationLowerPercentile: this.props.elevationLowerPercentile,
-    //     elevationUpperPercentile: this.props.elevationUpperPercentile
-    //   }
-    // };
+        step.triggers.forEach(key => {
+          triggers[key] = this.props[key];
+        });
+
+        return triggers;
+      }, {});
+
+      return accu;
+    }, {});
   }
 
   getValueDomain() {
@@ -268,7 +243,6 @@ export default class HexagonLayer extends CompositeLayer {
   }
 
   getSortedColorBins() {
-    console.log('getSortedColorBins')
     const {getColorValue} = this.props;
     const sortedColorBins = new BinSorter(this.state.hexagons || [], getColorValue);
 
@@ -277,7 +251,6 @@ export default class HexagonLayer extends CompositeLayer {
   }
 
   getSortedElevationBins() {
-    console.log('getSortedElevationBins')
     const {getElevationValue} = this.props;
     const sortedElevationBins = new BinSorter(this.state.hexagons || [], getElevationValue);
     this.setState({sortedElevationBins});
@@ -285,8 +258,6 @@ export default class HexagonLayer extends CompositeLayer {
   }
 
   getColorValueDomain() {
-    console.log('getColorValueDomain')
-
     const {lowerPercentile, upperPercentile, onSetColorDomain} = this.props;
 
     this.state.colorValueDomain = this.state.sortedColorBins
@@ -295,22 +266,21 @@ export default class HexagonLayer extends CompositeLayer {
     if (typeof onSetColorDomain === 'function') {
       onSetColorDomain(this.state.colorValueDomain);
     }
-    this.getColorScale()
 
+    this.getColorScale();
   }
 
   getElevationValueDomain() {
-    console.log('getElevationValueDomain')
-    const {elevationLowerPercentile, elevationUpperPercentile} = this.props;
+    const {elevationLowerPercentile, elevationUpperPercentile, onSetElevationDomain} = this.props;
 
     this.state.elevationValueDomain = this.state.sortedElevationBins
       .getValueRange([elevationLowerPercentile, elevationUpperPercentile]);
-    console.log(this.state.elevationValueDomain);
 
     if (typeof onSetElevationDomain === 'function') {
       onSetElevationDomain(this.state.elevationValueDomain);
     }
-    this.getElevationScale()
+
+    this.getElevationScale();
   }
 
   getColorScale() {
@@ -336,7 +306,7 @@ export default class HexagonLayer extends CompositeLayer {
     const isColorValueInDomain = cv >= colorDomain[0] && cv <= colorDomain[colorDomain.length - 1];
 
     // if cell value is outside domain, set alpha to 0
-    const color = isColorValueInDomain  ? colorScaleFunc(cv) : [0, 0, 0, 0];
+    const color = isColorValueInDomain ? colorScaleFunc(cv) : [0, 0, 0, 0];
 
     // add alpha to color if not defined in colorRange
     color[3] = Number.isFinite(color[3]) ? color[3] : 255;
@@ -346,10 +316,13 @@ export default class HexagonLayer extends CompositeLayer {
 
   _onGetSublayerElevation(cell) {
     const {sortedElevationBins, elevationScaleFunc, elevationValueDomain} = this.state;
-    const ev = sortedElevationBins.binMap[cell.index] && sortedElevationBins.binMap[cell.index].value;
+    const ev = sortedElevationBins.binMap[cell.index] &&
+      sortedElevationBins.binMap[cell.index].value;
+
     const elevationDomain = this.props.elevationDomain || elevationValueDomain;
 
-    const isColorValueInDomain = ev >= elevationDomain[0] && ev <= elevationDomain[elevationDomain.length - 1];
+    const isColorValueInDomain = ev >= elevationDomain[0] &&
+      ev <= elevationDomain[elevationDomain.length - 1];
 
     // if cell value is outside domain, set elevation to -1
     return isColorValueInDomain ? elevationScaleFunc(ev) : -1;
