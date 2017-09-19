@@ -22,21 +22,32 @@ import {CompositeLayer} from '../../../lib';
 import HexagonCellLayer from '../hexagon-cell-layer/hexagon-cell-layer';
 import {log} from '../../../lib/utils';
 
-import {quantizeScale, linearScale} from '../../../utils/scale-utils';
+import {getQuantizeScale, getLinearScale} from '../../../utils/scale-utils';
 import {defaultColorRange} from '../../../utils/color-utils';
 import {pointToHexbin} from './hexagon-aggregator';
 
 import BinSorter from '../../../utils/bin-sorter';
 
+function nop() {}
+
 const defaultProps = {
+  // color
   colorDomain: null,
   colorRange: defaultColorRange,
   getColorValue: points => points.length,
-  elevationDomain: null,
-  elevationRange: [0, 1000],
-  elevationScale: 1,
   lowerPercentile: 0,
   upperPercentile: 100,
+  onSetColorDomain: nop,
+
+  // elevation
+  elevationDomain: null,
+  elevationRange: [0, 1000],
+  getElevationValue: points => points.length,
+  elevationLowerPercentile: 0,
+  elevationUpperPercentile: 100,
+  elevationScale: 1,
+  onSetElevationDomain: nop,
+
   radius: 1000,
   coverage: 1,
   extruded: false,
@@ -93,8 +104,13 @@ export default class HexagonLayer extends CompositeLayer {
     this.state = {
       hexagons: [],
       hexagonVertices: null,
-      sortedBins: null,
-      valueDomain: null
+      sortedColorBins: null,
+      sortedElevationBins: null,
+      colorValueDomain: null,
+      elevationValueDomain: null,
+      colorScaleFunc: nop,
+      elevationScaleFunc: nop,
+      dimensionUpdaters: this.getDimensionUpdaters()
     };
   }
 
@@ -103,22 +119,14 @@ export default class HexagonLayer extends CompositeLayer {
   }
 
   updateState({oldProps, props, changeFlags}) {
+    const dimensionChanges = this.getDimensionChanges(oldProps, props);
+
     if (changeFlags.dataChanged || this.needsReProjectPoints(oldProps, props)) {
-      // project data into hexagons, and get sortedBins
+      // project data into hexagons, and get sortedColorBins
       this.getHexagons();
-      this.getSortedBins();
 
-      // this needs sortedBins to be set
-      this.getValueDomain();
-
-    } else if (this.needsReSortBins(oldProps, props)) {
-
-      this.getSortedBins();
-      this.getValueDomain();
-
-    } else if (this.needsRecalculateColorDomain(oldProps, props)) {
-
-      this.getValueDomain();
+    } else if (dimensionChanges) {
+      dimensionChanges.forEach(f => typeof f === 'function' && f.apply(this));
     }
   }
 
@@ -127,13 +135,76 @@ export default class HexagonLayer extends CompositeLayer {
       oldProps.hexagonAggregator !== props.hexagonAggregator;
   }
 
-  needsRecalculateColorDomain(oldProps, props) {
-    return oldProps.lowerPercentile !== props.lowerPercentile ||
-      oldProps.upperPercentile !== props.upperPercentile;
+  getDimensionUpdaters() {
+    // dimension updaters are sequential,
+    // if the first ones needs to be called, the 2nd and third one will automatically
+    // be called. e.g. if value needs to be updated, domain and scaleFunc
+    // will automatically be called
+
+    return {
+      getColor: [
+        {
+          id: 'value',
+          triggers: ['getColorValue'],
+          updater: this.getSortedColorBins
+        }, {
+          id: 'domain',
+          triggers: ['lowerPercentile', 'upperPercentile'],
+          updater: this.getColorValueDomain
+        }, {
+          id: 'scaleFunc',
+          triggers: ['colorDomain', 'colorRange'],
+          updater: this.getColorScale
+        }
+      ],
+      getElevation: [
+        {
+          id: 'value',
+          triggers: ['getElevationValue'],
+          updater: this.getSortedElevationBins
+        }, {
+          id: 'domain',
+          triggers: ['elevationLowerPercentile', 'elevationUpperPercentile'],
+          updater: this.getElevationValueDomain
+        }, {
+          id: 'scaleFunc',
+          triggers: ['elevationDomain', 'elevationRange'],
+          updater: this.getElevationScale
+        }
+      ]
+    };
+  }
+
+  getDimensionChanges(oldProps, props) {
+    const dimensionUpdaters = this.getDimensionUpdaters();
+    // dimension should be updated
+
+    const updaters = Object.keys(dimensionUpdaters).reduce((accu, key) => {
+
+      // return the first triggered updater
+      const updater = dimensionUpdaters[key].find(item => item.triggers.some(t => oldProps[t] !== props[t]));
+
+      if (updater) {
+        accu.push(updater.updater);
+      }
+
+      return accu;
+    }, []);
+
+    return updaters.length ? updaters : null;
   }
 
   needsReSortBins(oldProps, props) {
+    log.once(0, 'needsReSortBins is deprecated, use getDimensionUpdaters instead');
+
+    /* not used anymore */
     return oldProps.getColorValue !== props.getColorValue;
+  }
+
+  needsRecalculateColorDomain(oldProps, props) {
+    log.once(0, 'needsRecalculateColorDomain is deprecated, use getDimensionUpdaters instead');
+    return oldProps.lowerPercentile !== props.lowerPercentile ||
+      oldProps.upperPercentile !== props.upperPercentile;
   }
 
   getHexagons() {
@@ -141,11 +212,7 @@ export default class HexagonLayer extends CompositeLayer {
     const {viewport} = this.context;
     const {hexagons, hexagonVertices} = hexagonAggregator(this.props, viewport);
     this.setState({hexagons, hexagonVertices});
-  }
-
-  getSortedBins() {
-    const sortedBins = new BinSorter(this.state.hexagons || [], this.props.getColorValue);
-    this.setState({sortedBins});
+    this.getSortedBins();
   }
 
   getPickingInfo({info}) {
@@ -160,53 +227,132 @@ export default class HexagonLayer extends CompositeLayer {
   }
 
   getUpdateTriggers() {
-    return {
-      getColor: {
-        colorRange: this.props.colorRange,
-        colorDomain: this.props.colorDomain,
-        getColorValue: this.props.getColorValue,
-        lowerPercentile: this.props.lowerPercentile,
-        upperPercentile: this.props.upperPercentile
-      },
-      getElevation: {
-        elevationRange: this.props.elevationRange,
-        elevationDomain: this.props.elevationDomain
-      }
-    };
+    const {dimensionUpdaters} = this.state;
+
+    // merge all the dimension triggers
+    const getUpdateTriggers = Object.keys(dimensionUpdaters).reduce((accu, key) => ({
+      ...accu,
+      [key]: dimensionUpdaters[key].reduce((triggers, step) => ({
+        ...triggers,
+        ...step.triggers.reduce((prev, key) => ({...prev, [key]: this.props[key]}), {})
+      }), {})
+    }), {});
+
+    return getUpdateTriggers;
+    // return {
+    //   getColor: {
+    //     colorRange: this.props.colorRange,
+    //     colorDomain: this.props.colorDomain,
+    //     getColorValue: this.props.getColorValue,
+    //     lowerPercentile: this.props.lowerPercentile,
+    //     upperPercentile: this.props.upperPercentile
+    //   },
+    //   getElevation: {
+    //     elevationRange: this.props.elevationRange,
+    //     elevationDomain: this.props.elevationDomain,
+    //     getElevationValue: this.props.getElevationValue,
+    //     elevationLowerPercentile: this.props.elevationLowerPercentile,
+    //     elevationUpperPercentile: this.props.elevationUpperPercentile
+    //   }
+    // };
   }
 
   getValueDomain() {
-    const {lowerPercentile, upperPercentile} = this.props;
+    this.getColorValueDomain();
+    this.getElevationValueDomain();
+  }
 
-    this.state.valueDomain = this.state.sortedBins
+  getSortedBins() {
+    this.getSortedColorBins();
+    this.getSortedElevationBins();
+  }
+
+  getSortedColorBins() {
+    console.log('getSortedColorBins')
+    const {getColorValue} = this.props;
+    const sortedColorBins = new BinSorter(this.state.hexagons || [], getColorValue);
+
+    this.setState({sortedColorBins});
+    this.getColorValueDomain();
+  }
+
+  getSortedElevationBins() {
+    console.log('getSortedElevationBins')
+    const {getElevationValue} = this.props;
+    const sortedElevationBins = new BinSorter(this.state.hexagons || [], getElevationValue);
+    this.setState({sortedElevationBins});
+    this.getElevationValueDomain();
+  }
+
+  getColorValueDomain() {
+    console.log('getColorValueDomain')
+
+    const {lowerPercentile, upperPercentile, onSetColorDomain} = this.props;
+
+    this.state.colorValueDomain = this.state.sortedColorBins
       .getValueRange([lowerPercentile, upperPercentile]);
+
+    if (typeof onSetColorDomain === 'function') {
+      onSetColorDomain(this.state.colorValueDomain);
+    }
+    this.getColorScale()
+
+  }
+
+  getElevationValueDomain() {
+    console.log('getElevationValueDomain')
+    const {elevationLowerPercentile, elevationUpperPercentile} = this.props;
+
+    this.state.elevationValueDomain = this.state.sortedElevationBins
+      .getValueRange([elevationLowerPercentile, elevationUpperPercentile]);
+    console.log(this.state.elevationValueDomain);
+
+    if (typeof onSetElevationDomain === 'function') {
+      onSetElevationDomain(this.state.elevationValueDomain);
+    }
+    this.getElevationScale()
+  }
+
+  getColorScale() {
+    const {colorRange} = this.props;
+    const colorDomain = this.props.colorDomain || this.state.colorValueDomain;
+
+    this.state.colorScaleFunc = getQuantizeScale(colorDomain, colorRange);
+  }
+
+  getElevationScale() {
+    const {elevationRange} = this.props;
+    const elevationDomain = this.props.elevationDomain || this.state.elevationValueDomain;
+
+    this.state.elevationScaleFunc = getLinearScale(elevationDomain, elevationRange);
   }
 
   _onGetSublayerColor(cell) {
-    const {colorRange} = this.props;
-    const {valueDomain, sortedBins} = this.state;
-    const value = sortedBins.binMap[cell.index] && sortedBins.binMap[cell.index].value;
+    const {sortedColorBins, colorScaleFunc, colorValueDomain} = this.state;
 
-    const colorDomain = this.props.colorDomain || valueDomain;
-    const color = quantizeScale(colorDomain, colorRange, value);
+    const cv = sortedColorBins.binMap[cell.index] && sortedColorBins.binMap[cell.index].value;
+    const colorDomain = this.props.colorDomain || colorValueDomain;
+
+    const isColorValueInDomain = cv >= colorDomain[0] && cv <= colorDomain[colorDomain.length - 1];
 
     // if cell value is outside domain, set alpha to 0
-    const alpha = value >= valueDomain[0] && value <= valueDomain[1] ?
-      (Number.isFinite(color[3]) ? color[3] : 255) : 0;
+    const color = isColorValueInDomain  ? colorScaleFunc(cv) : [0, 0, 0, 0];
 
-    // add final alpha to color
-    color[3] = alpha;
+    // add alpha to color if not defined in colorRange
+    color[3] = Number.isFinite(color[3]) ? color[3] : 255;
 
     return color;
   }
 
   _onGetSublayerElevation(cell) {
-    const {elevationDomain, elevationRange} = this.props;
-    const {sortedBins} = this.state;
+    const {sortedElevationBins, elevationScaleFunc, elevationValueDomain} = this.state;
+    const ev = sortedElevationBins.binMap[cell.index] && sortedElevationBins.binMap[cell.index].value;
+    const elevationDomain = this.props.elevationDomain || elevationValueDomain;
 
-    // elevation is based on counts, it is not affected by percentile
-    const domain = elevationDomain || [0, sortedBins.maxCount];
-    return linearScale(domain, elevationRange, cell.points.length);
+    const isColorValueInDomain = ev >= elevationDomain[0] && ev <= elevationDomain[elevationDomain.length - 1];
+
+    // if cell value is outside domain, set elevation to -1
+    return isColorValueInDomain ? elevationScaleFunc(ev) : -1;
   }
 
   // for subclassing, override this method to return

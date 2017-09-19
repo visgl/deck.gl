@@ -276,7 +276,9 @@ const HexagonLayerExample = {
     coverage: {type: 'number', min: 0, max: 1},
     radius: {type: 'number', min: 0, max: 3000},
     lowerPercentile: {type: 'number', min: 0, max: 100},
-    upperPercentile: {type: 'number', min: 0, max: 100}
+    upperPercentile: {type: 'number', min: 0, max: 100},
+    elevationLowerPercentile: {type: 'number', min: 0, max: 100},
+    elevationUpperPercentile: {type: 'number', min: 0, max: 100}
   },
   props: {
     id: 'HexagonLayer',
@@ -289,6 +291,8 @@ const HexagonLayerExample = {
     elevationRange: [0, 3000],
     coverage: 1,
     getPosition: d => get(d, 'COORDINATES'),
+    getColorValue,
+    getElevationValue: getColorValue,
     lightSettings: LIGHT_SETTINGS
   }
 };

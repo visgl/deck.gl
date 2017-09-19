@@ -34,6 +34,22 @@ export function quantizeScale(domain, range, value) {
   return range[clampIdx];
 }
 
+// return a quantize scale function
+export function getQuantizeScale(domain, range) {
+  return value => {
+    const step = (domain[1] - domain[0]) / range.length;
+    const idx = Math.floor((value - domain[0]) / step);
+    const clampIdx = Math.max(Math.min(idx, range.length - 1), 0);
+
+    return range[clampIdx];
+  }
+}
+
+// return a linear scale funciton
+export function getLinearScale(domain, range) {
+  return value => (value - domain[0]) / (domain[1] - domain[0]) * (range[1] - range[0]) + range[0];
+}
+
 export function clamp([min, max], value) {
   return Math.min(max, Math.max(min, value));
 }

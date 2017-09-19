@@ -39,11 +39,20 @@ export default class BinSorter {
    */
   getSortedBins(bins, getValue) {
     return bins
-      .map((h, i) => ({
-        i: Number.isFinite(h.index) ? h.index : i,
-        value: getValue(h.points),
-        counts: h.points.length
-      }))
+      .reduce((accu, h, i) => {
+        const value = getValue(h.points);
+
+        if (value !== null || value !== undefined) {
+          // filter bins if value is null or undefined
+          accu.push({
+            i: Number.isFinite(h.index) ? h.index : i,
+            value,
+            counts: h.points.length
+          });
+        }
+
+        return accu;
+      }, [])
       .sort((a, b) => a.value - b.value);
   }
 
@@ -70,7 +79,7 @@ export default class BinSorter {
    * @return {Number | Boolean} max count
    */
   getMaxCount() {
-    return Math.max.apply(null, this.sortedBins.map(b => b.counts));
+    return Math.max(...this.sortedBins.map(b => b.counts));
   }
 
   /**
