@@ -8,12 +8,18 @@ import MapState from '../../core/controllers/map-state';
 import {MAPBOX_LIMITS} from '../../core/controllers/map-state';
 import CURSOR from '../utils/cursors';
 
-import {viewportLinearAnimation} from './viewport-animation-utils.js';
+import {viewportLinearInterpolator} from './viewport-animation-utils.js';
 
 const VIEWPORT_ANIMATE_PROPS = ['longitude', 'latitude', 'zoom', 'bearing', 'pitch'];
 const VIEWPORT_ANIMATE_FREQUENCY = 0.01;
 const VIEWPORT_ANIMATION_DURATION = 0;
 const VIEWPORT_ANIMATION_EASING_FUNC = t => t;
+
+export const ANIMATION_EVENTS = {
+  BREAK: 1,
+  SNAP_TO_END: 2,
+  IGNORE: 3
+};
 
 const propTypes = {
   /** The width of the map. */
@@ -53,9 +59,9 @@ const propTypes = {
 
   /** Viewport animation **/
   // animation duration for viewport change
-  viewportAnimationDuration: PropTypes.number,
+  animaitonDuration: PropTypes.number,
   // function called for each animation step, can be used to perform custom animations.
-  viewportAnimationFunc: PropTypes.func,
+  animationInterpolator: PropTypes.func,
   // easing function
   viewportAnimationEasingFunc: PropTypes.func,
 
@@ -87,8 +93,8 @@ const getDefaultCursor = ({isDragging}) => isDragging ? CURSOR.GRABBING : CURSOR
 
 const defaultProps = Object.assign({}, MAPBOX_LIMITS, {
   onViewportChange: null,
-  viewportAnimationDuration: VIEWPORT_ANIMATION_DURATION,
-  viewportAnimationFunc: viewportLinearAnimation,
+  animaitonDuration: VIEWPORT_ANIMATION_DURATION,
+  animationInterpolator: viewportLinearInterpolator,
   viewportAnimationEasingFunc: VIEWPORT_ANIMATION_EASING_FUNC,
 
   scrollZoom: true,
@@ -107,8 +113,27 @@ export default class AnimationMapController extends PureComponent {
 
     this.state = {
       isDragging: false      // Whether the cursor is down
-
     };
+
+    // Private animation state
+    this.animationContext = {
+      animationT: 0,
+      animationInterval: null,
+      animationStartState: null,
+      animationEndState: null,
+      animatedViewport: null
+    };
+
+    this._updateViewport = this._updateViewport.bind(this);
+    this._createAnimationInterval = this._createAnimationInterval.bind(this);
+    this._isTheUpdateDueToCurrentAnimation = this._isTheUpdateDueToCurrentAnimation.bind(this);
+    this._animateViewportProp = this._animateViewportProp.bind(this);
+    this._endAnimation = this._endAnimation.bind(this);
+    this._recursiveUpdateChildren = this._recursiveUpdateChildren.bind(this);
+    this._isViewportAnimationEnabled = this._isViewportAnimationEnabled.bind(this);
+    this._isAnimationInProgress = this._isAnimationInProgress.bind(this);
+    this._processViewportChange = this._processViewportChange.bind(this);
+    this._shouldIgnoreViewportChange = this._shouldIgnoreViewportChange.bind(this);
   }
 
   componentDidMount() {
@@ -125,22 +150,86 @@ export default class AnimationMapController extends PureComponent {
       onStateChange: this._onInteractiveStateChange.bind(this),
       eventManager
     }));
+
+    this.animationContext = {
+      animationT: 0,
+      animationInterval: null,
+      animationStartState: null,
+      animationEndState: null,
+      animatedViewport: null
+    };
   }
 
   componentWillUpdate(nextProps) {
+    this.someVar = 'componentWillUpdate';
     this._controls.setOptions(nextProps);
-    this._animateViewportProp(nextProps);
+    this._processViewportChange(nextProps);
+  }
+
+  componentDidUpdate() {
+    if (this.animationEndCallback) {
+      this.animationEndCallback({t: this.animationEndTime});
+      this.animationEndCallback = null;
+    }
   }
 
   componentWillUnmount() {
     this._eventManager.destroy();
   }
 
-  _onInteractiveStateChange(interactiveState) {
-    const {isDragging = false} = interactiveState;
-    if (isDragging !== this.state.isDragging) {
-      this.setState({isDragging});
+  // Helper methods
+
+  _animateViewportProp(startViewport, nextProps) {
+    const endViewport = this._extractViewportFromProps(nextProps);
+    if (this._didViewportAnimatePropChanged(startViewport, endViewport)) {
+      const animationInterval = this._createAnimationInterval(nextProps);
+      this.animationContext = {
+        animationT: 0.0,
+        animationStartViewport: startViewport,
+        animationEndViewport: endViewport,
+        animationInterval,
+        animatedViewport: startViewport,
+        onAnimationInterruption: nextProps.onAnimationInterruption,
+        onAnimationStop: nextProps.onAnimationStop
+      };
+      this.forceUpdate();
     }
+  }
+
+  _createAnimationInterval(nextProps) {
+    if (this.animationContext.animationInterval) {
+      clearInterval(this.animationContext.animationInterval);
+    }
+    const updateFrequency = nextProps.animaitonDuration * VIEWPORT_ANIMATE_FREQUENCY;
+    return setInterval(() => this._updateViewport(), updateFrequency);
+  }
+
+  _didViewportAnimatePropChanged(startViewport, endViewport) {
+    // TODO: also check for `animationDuration` `animationFreeze`
+    for (const p of VIEWPORT_ANIMATE_PROPS) {
+      if (startViewport[p] !== undefined &&
+        endViewport[p] !== undefined &&
+        startViewport[p] !== endViewport[p]) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  _endAnimation() {
+    clearInterval(this.animationContext.animationInterval);
+    this.animationEndCallback = this.animationContext.onAnimationStop;
+    this.animationEndTime = this.animationContext.animationT;
+    // TODO: may be just set animationContext to null
+    this.animationContext = {
+      animationT: 0,
+      animationInterval: null,
+      animationStartState: null,
+      animationEndState: null,
+      animatedViewport: null,
+      onAnimationStop: null,
+      onAnimationInterruption: null
+    };
   }
 
   // TODO: add viewport or viewportState prop to avoid this extraction.
@@ -153,73 +242,61 @@ export default class AnimationMapController extends PureComponent {
       zoom: props.zoom,
       bearing: props.bearing,
       pitch: props.pitch,
-      altitude: props.altitude
+      minZoom: props.minZoom,
+      maxZoom: props.maxZoom
     };
   }
 
-  _createAnimationInterval() {
-    if (this.state.animationInterval) {
-      clearInterval(this.state.animationInterval);
-    }
-    const updateFrequency = this.props.viewportAnimationDuration * VIEWPORT_ANIMATE_FREQUENCY;
-    return setInterval(() => this._updateViewport(), updateFrequency);
+  _isAnimationInProgress() {
+    return this.animationContext.animationInterval;
   }
 
-  _animateViewportProp(nextProps) {
-    if (this._isViewportAnimationEnabled()) {
-      const startViewport = this._extractViewportFromProps(this.props);
-      const endViewport = this._extractViewportFromProps(nextProps);
-      if (this._didViewportAnimatePropChanged(startViewport, endViewport)) {
-        const animationInterval = this._createAnimationInterval();
-        this.setState({
-          animationT: 0.0,
-          animationStartViewport: startViewport,
-          animationEndViewport: endViewport,
-          animationInterval,
-          animatedViewport: startViewport
-        });
-      }
-    }
+  _isViewportAnimationEnabled(props) {
+    return props.animaitonDuration !== 0;
   }
 
-  _didViewportAnimatePropChanged(startViewport, endViewport) {
-    for (const p of VIEWPORT_ANIMATE_PROPS) {
-      if (startViewport[p] !== undefined &&
-        endViewport[p] !== undefined &&
-        startViewport[p] !== endViewport[p]) {
-        return true;
+  _isTheUpdateDueToCurrentAnimation(nextProps) {
+    if (this.animationContext.animatedViewport) {
+      const newViewport = this._extractViewportFromProps(nextProps);
+      for (const p of VIEWPORT_ANIMATE_PROPS) {
+        if (newViewport[p] !== this.animationContext.animatedViewport[p]) {
+          return false;
+        }
       }
+      return true;
     }
     return false;
   }
 
-  _updateViewport() {
-    const t = this.props.viewportAnimationEasingFunc(this.state.animationT);
-    const animatedViewport = this.props.viewportAnimationFunc(
-      this.state.animationStartViewport,
-      this.state.animationEndViewport,
-      t
-    );
-
-    if (this.state.animationT <= 1.0) {
-      this.setState(prevState => ({
-        animationT: prevState.animationT + VIEWPORT_ANIMATE_FREQUENCY,
-        animatedViewport
-      }));
-    } else {
-      this._endAnimation();
+  _onInteractiveStateChange(interactiveState) {
+    const {isDragging = false} = interactiveState;
+    if (isDragging !== this.state.isDragging) {
+      this.setState({isDragging});
     }
   }
 
-  _endAnimation() {
-    clearInterval(this.state.animationInterval);
-    this.setState({
-      animationT: 0,
-      animationInterval: null,
-      animationStartState: null,
-      animationEndState: null,
-      animatedViewport: null
-    });
+  _processViewportChange(nextProps) {
+
+    if (this._shouldIgnoreViewportChange(nextProps)) {
+      return;
+    }
+
+    const animationEndViewport = this.animationContext ?
+      this.animationContext.animationEndViewport : null;
+    const shouldSnapToEnd = this._shouldEndAnimation();
+    if (this._isAnimationInProgress()) {
+      this._endAnimation();
+    }
+
+    if (this._isViewportAnimationEnabled(nextProps)) {
+      let startViewport;
+      if (shouldSnapToEnd) {
+        startViewport = animationEndViewport || this._extractViewportFromProps(this.props);
+      } else {
+        startViewport = this._extractViewportFromProps(this.props);
+      }
+      this._animateViewportProp(startViewport, nextProps);
+    }
   }
 
   _recursiveUpdateChildren(children, viewport) {
@@ -231,12 +308,63 @@ export default class AnimationMapController extends PureComponent {
       // updated viewport prop.
       const childProps = Object.assign({}, viewport, {viewport});
       childProps.children = this._recursiveUpdateChildren(child.props.children, viewport);
-      return cloneElement(child, childProps);
+      const cloned = cloneElement(child, childProps);
+      return cloned;
     });
   }
 
-  _isViewportAnimationEnabled() {
-    return this.props.viewportAnimationDuration !== 0;
+  _shouldEndAnimation() {
+    return (this.animationContext &&
+      this.animationContext.onAnimationInterruption === ANIMATION_EVENTS.SNAP_TO_END);
+  }
+
+  _shouldIgnoreViewportChange(nextProps) {
+    // Ignore update if it is due to current active animation.
+    if (this._isTheUpdateDueToCurrentAnimation(nextProps)) {
+      return true;
+    }
+
+    // Ignore update if it is requested to ignore
+    if (this.animationContext &&
+      this.animationContext.onAnimationInterruption === ANIMATION_EVENTS.IGNORE) {
+      return true;
+    }
+
+    // Ignore if none of the viewport props changed.
+    const start = this._extractViewportFromProps(this.props);
+    const end = this._extractViewportFromProps(nextProps);
+    if (!this._didViewportAnimatePropChanged(start, end)) {
+      return true;
+    }
+
+    return false;
+  }
+
+  _updateViewport() {
+    const t = this.props.viewportAnimationEasingFunc(this.animationContext.animationT);
+    const animatedViewport = this.props.animationInterpolator(
+      this.animationContext.animationStartViewport,
+      this.animationContext.animationEndViewport,
+      t
+    );
+    const currentTime = this.animationContext.animationT;
+    if (currentTime <= 1.0) {
+      // console.log(`Controller update pitch: ${animatedViewport.pitch} t: ${t}`);
+      this.animationContext.animationT = (
+        currentTime + VIEWPORT_ANIMATE_FREQUENCY > 1.0 &&
+        currentTime + VIEWPORT_ANIMATE_FREQUENCY < 1.0 + VIEWPORT_ANIMATE_FREQUENCY
+        ) ? 1.0 : currentTime + VIEWPORT_ANIMATE_FREQUENCY;
+      this.animationContext.animatedViewport = Object.assign(
+        {},
+        this.animationContext.animationEndViewport,
+        animatedViewport);
+      if (this.props.onViewportChange) {
+        this.props.onViewportChange(animatedViewport);
+      }
+    } else {
+      this._endAnimation();
+    }
+    this.forceUpdate();
   }
 
   render() {
@@ -249,9 +377,17 @@ export default class AnimationMapController extends PureComponent {
       cursor: getCursor(this.state)
     };
 
-    const viewport = this.state.animatedViewport || this._extractViewportFromProps(this.props);
-    const childrenWithProps = this._isViewportAnimationEnabled() ?
-      this._recursiveUpdateChildren(this.props.children, viewport) : this.props.children;
+    let childrenWithProps;
+    if (this._isAnimationInProgress()) {
+      childrenWithProps = this._recursiveUpdateChildren(
+        this.props.children,
+        this.animationContext.animatedViewport);
+    } else {
+      // console.log('=== AnimationController Render using original props for children');
+      childrenWithProps = this._recursiveUpdateChildren(
+        this.props.children,
+        this._extractViewportFromProps(this.props));
+    }
 
     return (
       createElement('div', {

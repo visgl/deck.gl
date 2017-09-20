@@ -6,10 +6,8 @@ import TWEEN from 'tween.js';
 
 import ControlPanel from './control-panel';
 
-const {AnimationMapController, viewportFlyToAnimation} = experimental;
+const {AnimationMapController, viewportFlyToInterpolator, ANIMATION_EVENTS} = experimental;
 const token = process.env.MapboxAccessToken; // eslint-disable-line
-const ENABLE_ZOOM_CHANGE = false;
-const RANDOMIZE_ZOOM = false;
 
 if (!token) {
   throw new Error('Please specify a valid mapbox token');
@@ -35,7 +33,7 @@ export default class App extends Component {
         width: 500,
         height: 500
       },
-      zoomDelta: ENABLE_ZOOM_CHANGE ? -1.0 : 0.0
+      onAnimationInterruption: ANIMATION_EVENTS.SNAP_TO_END
     };
   }
 
@@ -64,27 +62,26 @@ export default class App extends Component {
 
     const {viewport} = this.state;
 
-    let zoom = viewport.zoom + this.state.zoomDelta;
-    zoom = RANDOMIZE_ZOOM ? Math.floor((Math.random() * 15)) : zoom;
-    const newViewport = Object.assign({}, viewport, {longitude, latitude, zoom});
+    const newViewport = Object.assign({}, viewport, {longitude, latitude, zoom: 11});
     this._onViewportChange(newViewport);
   }
 
   _onViewportChange(viewport) {
-    this.setState({viewport, zoomDelta: this.state.zoomDelta * -1.0});
+    this.setState({viewport});
   }
 
   render() {
 
-    const {viewport, settings} = this.state;
+    const {viewport, settings, onAnimationInterruption} = this.state;
 
     return (
       <AnimationMapController
         {...viewport}
         onViewportChange={this._onViewportChange.bind(this)}
         animateViewport={true}
-        viewportAnimationFunc={viewportFlyToAnimation}
-        viewportAnimationDuration={5000}>
+        animationInterpolator={viewportFlyToInterpolator}
+        animaitonDuration={5000}
+        onAnimationInterruption={onAnimationInterruption}>
         <StaticMap
           {...viewport}
           {...settings}

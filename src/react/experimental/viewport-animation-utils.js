@@ -12,7 +12,11 @@ const EPSILON = 0.01;
  * @param {Number} t - animation step.
  * @return {Object} - animated viewport for given step.
 */
-export function viewportLinearAnimation(startViewport, endViewport, t) {
+export function viewportLinearInterpolator(startViewport, endViewport, t) {
+  // here t is easing, check against actual t
+  if (t >= 1.0) {
+    return endViewport;
+  }
   const animatedViewport = Object.assign({}, endViewport);
   function lerp(start, end, step) {
     return step * end + (1 - step) * start;
@@ -38,8 +42,14 @@ export function viewportLinearAnimation(startViewport, endViewport, t) {
  * @param {Number} t - animation step.
  * @return {Object} - animated viewport for given step.
 */
-export function viewportFlyToAnimation(startViewport, endViewport, t) {
+export function viewportFlyToInterpolator(startViewport, endViewport, t) {
   // Equations from above paper are referred where needed.
+
+  // here t is easing, check against actual t
+  if (t >= 1.0) {
+    return endViewport;
+  }
+
   const animatedViewport = Object.assign({}, endViewport);
 
   function lerp(start, end, step) {

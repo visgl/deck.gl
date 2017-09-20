@@ -30,10 +30,12 @@ class Root extends Component {
         ...DeckGLOverlay.defaultViewport,
         width: 500,
         height: 500,
-        pitch: 10,
-        bearing: 10
+        pitch: 0,
+        bearing: 0
       },
-      data: null
+      data: null,
+      animationDuration: 5000,
+      viewportToggled: false
     };
 
     requestJson(DATA_URL, (error, response) => {
@@ -47,7 +49,7 @@ class Root extends Component {
     window.addEventListener('resize', this._resize.bind(this));
     this._resize();
     // TODO: this is to just simulate viwport prop change and test animation.
-    this._interval = setInterval(() => this._toggleViewport(), 7000);
+    this._interval = setInterval(() => this._toggleViewport(), 4000);
   }
 
   _resize() {
@@ -67,24 +69,28 @@ class Root extends Component {
   // Add proper UI to change viewport.
   _toggleViewport() {
     const newViewport = {};
-    newViewport.pitch = (this.state.viewport.pitch === 10.0) ? 60.0 : 10.0;
-    newViewport.bearing = (this.state.viewport.bearing === 10.0) ? 90.0 : 10.0;
+    // newViewport.pitch = (this.state.viewport.pitch === 10.0) ? 60.0 : 10.0;
+    // newViewport.bearing = (this.state.viewport.bearing === 10.0) ? 90.0 : 10.0;
+    newViewport.pitch = this.state.viewportToggled ? 0.0 : 60.0;
+    newViewport.bearing = this.state.viewportToggled ? 0.0 : 90.0;
     this.setState(prevState => ({
-      viewport: {...prevState.viewport, ...newViewport}
+      viewport: {...prevState.viewport, ...newViewport},
+      viewportToggled: !this.state.viewportToggled
     }));
 
   }
 
   render() {
-    const {viewport, data} = this.state;
+    const {viewport, data, animationDuration, onAnimationInterruption} = this.state;
 
     return (
       <AnimationMapController
         {...viewport}
         onViewportChange={this._onViewportChange.bind(this)}
         animateViewport={true}
-        viewportAnimationDuration={4000}
-        viewportAnimationEasingFunc={easeInOutElastic}>
+        animaitonDuration={animationDuration}
+        viewportAnimationEasingFunc={easeInOutElastic}
+        onAnimationInterruption={onAnimationInterruption}>
         <StaticMap
           {...viewport}
           onViewportChange={this._onViewportChange.bind(this)}
