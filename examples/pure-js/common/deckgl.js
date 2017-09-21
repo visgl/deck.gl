@@ -64,7 +64,7 @@ const defaultProps = {
   onAfterRender: noop,
   onLayerClick: null,
   onLayerHover: null,
-  useDevicePixelRatio: true
+  useDevicePixelRatio: false
 };
 
 export default class DeckGL {
