@@ -26,7 +26,9 @@ const CONFIG = {
 
   resolve: {
     alias: {
-      'viewport-mercator-project': resolve('./node_modules/viewport-mercator-project/dist/index.js')
+      'viewport-mercator-project':
+        resolve('./node_modules/viewport-mercator-project/dist/index.js'),
+      'deck.gl': resolve('./node_modules/deck.gl/dist-es6')
     }
   },
 
