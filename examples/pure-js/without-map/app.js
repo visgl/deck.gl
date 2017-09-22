@@ -1,7 +1,6 @@
 /* global window, fetch */
-import DeckGL from '../common/deckgl';
-import MapController from '../common/map-controller';
-import {GeoJsonLayer} from 'deck.gl';
+import {experimental, GeoJsonLayer} from 'deck.gl';
+const {DeckGLJS, MapControllerJS} = experimental;
 
 // source: Natural Earth http://www.naturalearthdata.com/
 // via geojson.xyz
@@ -10,7 +9,6 @@ const GEOJSON = 'https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_110
 class App {
 
   constructor(props) {
-
     this.state = {
       viewport: {
         latitude: 40,
@@ -72,7 +70,7 @@ class App {
 
     const {viewport, width, height} = this.state;
 
-    this.deckgl = new DeckGL({
+    this.deckgl = new DeckGLJS({
       ...viewport,
       width,
       height,
@@ -80,7 +78,7 @@ class App {
       layers: []
     });
 
-    this.controller = new MapController({
+    this.controller = new MapControllerJS({
       canvas: this.deckgl.canvas,
       ...viewport,
       width,

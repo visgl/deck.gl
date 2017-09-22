@@ -3,7 +3,14 @@ import PropTypes from 'prop-types';
 import {EventManager} from 'mjolnir.js';
 import MapControls from 'deck.gl/controllers/map-controls';
 import {MAPBOX_LIMITS} from 'deck.gl/controllers/map-state';
-import CURSOR from './cursors';
+
+const PREFIX = '-webkit-';
+
+const CURSOR = {
+  GRABBING: `${PREFIX}grabbing`,
+  GRAB: `${PREFIX}grab`,
+  POINTER: 'pointer'
+};
 
 const propTypes = {
   /** The width of the map. */

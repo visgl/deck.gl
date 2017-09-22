@@ -64,6 +64,10 @@ export {default as ViewportLayout} from './react/viewport-layout';
 export {default as ViewportController} from './react/controllers/viewport-controller';
 export {default as MapController} from './react/controllers/map-controller';
 
+// Experimental Pure JS (non-React) bindings
+import {default as DeckGLJS} from './pure-js/deck';
+import {default as MapControllerJS} from './pure-js/map-controller';
+
 // Experimental Features (May change in minor version bumps, use at your own risk)
 import {get} from './lib/utils/get';
 import {count} from './lib/utils/count';
@@ -86,12 +90,15 @@ export const experimental = {
   Effect,
   ReflectionEffect,
 
-  AnimationMapController,
+  // Experimental react bindings
   OrbitController,
+  AnimationMapController,
+  DeckGLMultiView, // TODO - being built in to deck.gl component - remove before release
+  ViewportLayout, // TODO - being built in to deck.gl component - remove before release
 
-  // TODO - remove before release
-  DeckGLMultiView,
-  ViewportLayout
+  // Pure JS (i.e. non-React) support
+  DeckGLJS,        // Integrate into `LayerManager`?
+  MapControllerJS  // Integrate into `MapController` JS class?
 };
 
 // Deprecated Core Lib Classes
