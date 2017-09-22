@@ -18,21 +18,22 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import autobind from './autobind';
-import PropTypes from 'prop-types';
-
 import LayerManager from 'deck.gl/lib/layer-manager';
-import Layer from 'deck.gl/lib/layer';
 import EffectManager from 'deck.gl/experimental/lib/effect-manager';
-import Effect from 'deck.gl/experimental/lib/effect';
-import Viewport from 'deck.gl/viewports/viewport';
 import {flatten} from 'deck.gl/lib/utils/flatten';
 import WebMercatorViewport from 'deck.gl/viewports/web-mercator-viewport';
+
+import Layer from '../lib/layer';
+import Effect from '../experimental/lib/effect';
+import Viewport from '../viewports/viewport';
 
 import {EventManager} from 'mjolnir.js';
 import {GL, AnimationLoop, createGLContext, setParameters} from 'luma.gl';
 
+import PropTypes from 'prop-types';
+
 /* global document */
+
 function noop() {}
 
 const propTypes = {
@@ -47,6 +48,7 @@ const propTypes = {
   pickingRadius: PropTypes.number,
   viewport: PropTypes.instanceOf(Viewport),
   onWebGLInitialized: PropTypes.func,
+  onBeforeRender: PropTypes.func,
   onAfterRender: PropTypes.func,
   onLayerClick: PropTypes.func,
   onLayerHover: PropTypes.func,
@@ -61,13 +63,15 @@ const defaultProps = {
   gl: null,
   effects: [],
   onWebGLInitialized: noop,
+  onBeforeRender: noop,
   onAfterRender: noop,
   onLayerClick: null,
   onLayerHover: null,
   useDevicePixelRatio: false
 };
 
-export default class DeckGL {
+// TODO - should this class be joined with `LayerManager`?
+export default class Deck {
 
   constructor(props) {
     props = Object.assign({}, defaultProps, props);
@@ -76,31 +80,27 @@ export default class DeckGL {
     this.needsRedraw = true;
     this.layerManager = null;
     this.effectManager = null;
-    autobind(this);
+
+    // Bind methods
+    this._onRendererInitialized = this._onRendererInitialized.bind(this);
+    this._onRenderFrame = this._onRenderFrame.bind(this);
+
+    this.canvas = this._createCanvas(props);
 
     const {width, height, gl, glOptions, debug} = props;
-
-    const {id, style} = props;
-    const canvas = props.canvas || document.createElement('canvas');
-    canvas.id = id;
-    canvas.width = width;
-    canvas.height = height;
-    canvas.style = style;
-
-    const parent = props.parent || document.body;
-    parent.appendChild(canvas);
-
-    this.canvas = canvas;
 
     this.animationLoop = new AnimationLoop({
       width,
       height,
       useDevicePixelRatio: false,
-      onCreateContext: (opts) =>
+      onCreateContext: opts =>
         gl || createGLContext(Object.assign({}, glOptions, {canvas: this.canvas, debug})),
       onInitialize: this._onRendererInitialized,
-      onRender: this._onRenderFrame
+      onRender: this._onRenderFrame,
+      onBeforeRender: props.onBeforeRender,
+      onAfterRender: props.onAfterRender
     });
+
     this.animationLoop.start();
 
     this.setProps(props);
@@ -164,6 +164,24 @@ export default class DeckGL {
 
   // Private Methods
 
+  _createCanvas(props) {
+    if (props.canvas) {
+      return props.canvas;
+    }
+
+    const {id, width, height, style} = props;
+    const canvas = document.createElement('canvas');
+    canvas.id = id;
+    canvas.width = width;
+    canvas.height = height;
+    canvas.style = style;
+
+    const parent = props.parent || document.body;
+    parent.appendChild(canvas);
+
+    return canvas;
+  }
+
   // Extracts a list of viewports from the supplied props
   _getViewports(props) {
     const {viewports, viewport} = props;
@@ -187,6 +205,8 @@ export default class DeckGL {
       viewportOrDescriptor;
   }
 
+  // Callbacks
+
   _onRendererInitialized({gl, canvas}) {
     setParameters(gl, {
       blend: true,
@@ -209,12 +229,13 @@ export default class DeckGL {
   }
 
   _onRenderFrame({gl}) {
+    this.props.onBeforeRender({gl}); // TODO - should be called by AnimationLoop
     const {viewports} = this;
     this.layerManager.setViewport(viewports[0]);
     this.layerManager.drawLayers({pass: 'render to screen'});
+    this.props.onAfterRender({gl}); // TODO - should be called by AnimationLoop
   }
 }
 
-DeckGL.displayName = 'DeckGL';
-DeckGL.propTypes = propTypes;
-DeckGL.defaultProps = defaultProps;
+Deck.propTypes = propTypes;
+Deck.defaultProps = defaultProps;

@@ -23,6 +23,10 @@ For Earlier Beta Releases see below
 
 ### deck.gl v4.2 Beta Releases
 
+#### [4.2.0-alpha.9] -
+- React and JS implementations now share code
+- Cleanup of exported symbols
+
 #### [4.2.0-alpha.8] -
 - Fixes for pure-js example
 
