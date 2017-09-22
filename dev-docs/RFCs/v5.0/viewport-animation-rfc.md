@@ -27,13 +27,13 @@ When rendering deck.gl layers on top of Mapbox map.
 ```js
       <AnimationMapController
          {...viewport}
-         // Any other MapController props
+         // Any other AnimationMapController props
          <StaticMap
             {...viewport}
             // Any other StaticMap props
            <DeckGL
               {...viewport}
-          	  // Any other StaticMap props
+          	  // Any other DeckGL props
             </DeckGL>
          </StaticMap>
       </AnimationMapController>
@@ -43,10 +43,10 @@ When rendering deck.gl layers without map.
 ```js
       <AnimationMapController
          {...viewport}
-         // Any other MapController props
+         // Any other AnimationMapController props
          <DeckGL
             {...viewport}
-          	// Any other StaticMap props
+          	// Any other DeckGL props
           </DeckGL>
       </AnimationMapController>
 ```
@@ -60,11 +60,23 @@ viewportAnimationDuration: (Number) Animation duration in milliseconds, default 
 
 1. **animationDuration** {Number, default: 0} : Animation duration in milliseconds, default value disables animation.
 
-2. **easingFunction** {Function, default: t => t} : Easing function that can be used to achieve effects like "Ease-In-Cubic", "Ease-Out-Cubic", etc. Default value performs Linear easing. (list of sample easing functions: http://easings.net/)
+2. **animaitonEasingFunction** {Function, default: t => t} : Easing function that can be used to achieve effects like "Ease-In-Cubic", "Ease-Out-Cubic", etc. Default value performs Linear easing. (list of sample easing functions: http://easings.net/)
 
-3. **animationFunction** {Function, default: Linear} : Function that gets called for each animation step to calculated animated viewport. This function takes start, end viewports and animation step, and returns animated viewport. We provide couple of utility functions, `viewportLinearAnimation` and `viewportFlyToAnimation`. By default `viewportLinearAnimation` is used where all viewport props are linearly animated. `viewportFlyToAnimation` animates viewports similar to MapBox `flyTo` API, this is pretty useful when camera center changes. But a user can provide any function for this prop to perform custom viewport animations.
+3. **animationFunction** {Function, default: `viewportLinearAnimation`} : Function that gets called for each animation step to calculated animated viewport. It takes start, end viewports and animation step, returns animated viewport. We provide couple of utility functions, `viewportLinearAnimation` and `viewportFlyToAnimation`. By default `viewportLinearAnimation` is used where all viewport props are linearly animated. `viewportFlyToAnimation` animates viewports similar to MapBox `flyTo` API, this is pretty useful when camera center changes. But a user can provide any function for this prop to perform custom viewport animations.
+
+4. **animationFreeze** {bool, optional} : When set to `true` and if `animationDuration` not equal to 0, any following viewport updates are ignored until animation resulting this update is finished. This prop has no effect if `animationDuration` is 0. When it is set to `false` or not set, any following viewport updates will stop the current animation and update viewport according to other props.
+
+5. **animationCompleteOnUpdate** {bool, false} : This prop can be used to control how to end current animation, when new animation requested before it is completed, following table describes in more details.
+
+| Current viewport animating | Current Viewport start value| Current Viewport end value| Current Viewport value | Current Viewport AnimationCompleteOnUpdate | Viewport update animation requested | Viewport update value | Result |
+| ----- | --- | --------- | ------------- | ------------------------- | ------------------- | ----- | ------ |
+| YES   | VX1 | VX2       |  VXt          |   **TRUE**                    | YES                 |  VY   | New animation starts between **VX2** and VY |
+| YES   | VX1 | VX2       |  VXt          |   **NO**                    | YES                 |  VY   | New animation starts between **VXt** and VY |
+| NO   | VX | VX       |  VX2          |   **TRUE/FALSE**               | YES                 |  VY   | New animation starts between **VX** and VY |
+| YES   | VX1 | VX2       |  VXt          |   **TRUE/FALSE**               | NO                 |  VY   | Stop current animation and *jump* from VXt to VY |
+
+6. **onAnimationStop** {Function, optional} : This callback will be fired when requested animation is stopped. The object ({animationStep}) will be passed as an argument, which can be used to whether animation was interrupted or completed. This prop can be used to generate continuous animations, that loop animating between set of viewports.
 
 ## Open questions:
 
 1. Should this be part of deck.gl or react-map-gl ?
-2. Should we support this with Interactive Map also? Should we end animation when user interacts with the map?
