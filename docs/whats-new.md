@@ -7,31 +7,59 @@ Interesting in what is coming down the road? The deck.gl roadmap is now public. 
 
 Release date: TBD, late 2017
 
-## Control over DevicePixelRatio
+## Multi-Viewport Support
 
-The new `useDevicePixelRatio` prop for DeckGL component can be used to toggle usage of full resolution of retina/HD displays. Disabling device pixel ratio can reduce the render buffer size with 4x on retina devices and lead to big performance improvements, especially on mobile.
+deck.gl can now render your layers to multiple viewports. It is e.g. possible to mix map-overlaid views with first person views for dramatic new perspectives on your data. E.g. you can walk around in the city on which your data is overlaid.
+
+A new `ViewportLayout` React component makes it trivial to precisely position multiple base maps and other background HTML components under multi-viewport layouts, automatically taking care of complexities like `devicePixelRatio`, inverted WebGL/CSS coordinate systems etc. This component will also automatically hide base maps when the viewport parameters can not be supported by the underlying map component.
+
+
+## All Viewports Now Geospatially Enabled
+
+All `Viewport` classes are now geospatially enabled: they now take an optional `longitude`/`latitude` reference point. In this mode, `position`s will be treated as meter offsets from that reference point per `COORDINATE_SYSTEM.METER_OFFSET` conventions.
+
+This means that you can now use a FirstPersonViewport (the successor to the `PerspectiveViewport` with layers encoded in `COORDINATE_SYSTEM.LNG_LAT` and `COORDINATE_SYSTEM.METER_OFFSETS`) and place a camera anywhere in the scene (in contrast to the `WebMercatorViewport` which only allows you to look "down" on a position on the map).
+
+Viewports even accept a `modelMatrix` to allow viewport/camera positions to be specified in exactly the same coordinates as `METER_OFFSET` layers, making it possible to place a camera at the exact location any of your existing data points without having to think or do any math.
+
+
+## WebVR Support and Example
+
+Multi viewport support can be used to integrate with the WebVR API and create dual WebVR compatible viewports that render a first person view of your data for left and right eye respectively which will display as stereoscopic 3D in supporting hardware.
+
+
+## Controller Classes
+
+deck.gl's controller classes have been significantly refactored, providing you with lots of options for how to control how the user interacts with your viewports. Also the controllers are no longer categorized as "experimental" exports, so you can import and use them in your apps knowing that they will be supported in future releases the same way as any other deck.gl feature.
+
+TBA...
 
 
 ## Automatic Highlighting of Hovered Elements
 
-Three new `Layer` props (`autoHighlight`, `highlightColor` and `highlightedObjectIndex`) have been added to support highlighting of a single object in a layer. Highlighting is either automatic on hover, or controllded through programmatically specifying the index of a selected object. Note that this highlighting is done on the GPU and is thus very performant.
+Three new `Layer` props (`autoHighlight`, `highlightColor` and `highlightedObjectIndex`) have been added to enable simple and efficient highlighting of a single object in a layer. Highlighting is either automatic on hover, or programmatically controlled through specifying the index of the selected object. The actual highlighting is done on the GPU and this feature is thus very performant, in particular as it lets applications avoid cumbersome techniques like modifying data or using a secondary layer for highlighting.
+
+
+## Control over DevicePixelRatio
+
+The new `useDevicePixelRatio` prop on the `DeckGL` React component can be used to disable usage of full resolution on retina/HD displays. Disabling deck.gl's default behavior of always rendering at maximum device resolution can reduce the render buffer size with a factor of 4x on retina devices and lead to significant performance improvements on typical fragment shader bound rendering. This option can be especially interesting on "retina" type mobile phone displays where pixels are so small that the visual quality loss may be largely imperceptible.
 
 
 ## CompositeLayer Improvements
 
-* **Prop Forwarding Support** - A new method `CompositeLayer.getBaseLayerProps()` simplifies forwarding base layer props to sub layers, removing code clutter and reducing the risk of not forwarding a core prop.
+* **Property Forwarding Support** - A new method `CompositeLayer.getBaseLayerProps()` simplifies forwarding base layer props to sub layers, removing code clutter and reducing the risk of forgetting to forward an important base layer property.
 
 
 ## PathLayer: Dashed Line Support
 
-Added new props (`getDashArray` and `justified`) to render paths as dashed lines.
+Added new props (`getDashArray` and `justified`) enabling you render paths as dashed lines. Naturally these props are also accessible in composite layers built on top of the `PathLayer`, such as the `GeoJsonLayer`.
 
 
 ## Shader Modules
 
-* Shader module documenation is much improved, both in deck.gl and luma.gl. In the deck.gl docs, shader modules are listed under the "API Reference" heading, after the JavaScript classes.
-* The `project` module provides a new function `project_pixel_to_clipspace` for screen space calculations that takes variable `useDevicePixelRatio` and focal distance into account, making such calculation simpler and less prone to fail when parameters change.
-* The core deck.gl shader modules (`project` etc) now conform to the luma.gl shadertools conventions.
+* Shader module documentation is much improved, both in deck.gl and luma.gl. In the deck.gl docs, shader modules are listed in the "API Reference" section, after the JavaScript classes.
+* The `project` module provides a new function `project_pixel_to_clipspace` for screen space calculations that takes variables like `useDevicePixelRatio` and "focal distance" into account, making pixel space calculation simpler and less prone to fail when parameters change.
+* The core deck.gl shader modules (`project` etc) now conform to the luma.gl shadertools conventions, making this module easier to describe and use. In spite of these changes, backwards compatible uniforms are of course provided to ensure that existing layers do not break.
 
 
 # deck.gl v4.1
@@ -299,7 +327,7 @@ A set of new high precision layers that support extreme zoom levels
 
 ### Sample Layers
 
-Sample layers now available through `import 'deck.gl/samples';
+Sample layers now available through `import 'deck.gl/samples';`
 
 ## Changes affecting Custom Layers
 

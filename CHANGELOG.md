@@ -23,6 +23,11 @@ For Earlier Beta Releases see below
 
 ### deck.gl v4.2 Beta Releases
 
+#### [4.2.0-alpha.8] -
+- Fixes for pure-js example
+
+#### [4.2.0-alpha.6] -
+
 #### [4.2.0-alpha.6] -
 - First person view merged to master
 

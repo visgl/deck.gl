@@ -2,7 +2,8 @@ import React, {Component} from 'react';
 import autobind from 'autobind-decorator';
 import {Parser} from 'expr-eval';
 
-import {OrbitController} from 'deck.gl';
+import {experimental} from 'deck.gl';
+const {OrbitController} = experimental;
 import PlotOverlay from '../../../../examples/plot/deckgl-overlay';
 
 export default class PlotDemo extends Component {

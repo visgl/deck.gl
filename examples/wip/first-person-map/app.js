@@ -2,29 +2,24 @@
 import React, {Component} from 'react';
 import {render} from 'react-dom';
 
-import {StaticMap} from 'react-map-gl';
-
-// TODO - import DeckGL from 'deck.gl';
-import {experimental} from 'deck.gl';
-const {DeckGLMultiView: DeckGL, ViewportLayout} = experimental;
-
-// Unified controller, together with state that determines interaction model
-import {ViewportController} from 'deck.gl';
-import {FirstPersonState} from 'deck.gl';
-
-// Viewport classes provides various views on the state
-import {FirstPersonViewport, WebMercatorViewport} from 'deck.gl';
-
 import {
   COORDINATE_SYSTEM,
+  // Unified controller, together with state that determines interaction model
+  FirstPersonState,
+  // Viewport classes provides various views on the state
+  FirstPersonViewport,
+  WebMercatorViewport,
   PolygonLayer,
   PointCloudLayer
 } from 'deck.gl';
 
 import TripsLayer from '../../trips/trips-layer';
 
-import {setParameters} from 'luma.gl';
+// deck.gl React components
+import {DeckGL, ViewportLayout, ViewportController} from 'deck.gl';
 
+import {StaticMap} from 'react-map-gl';
+import {setParameters} from 'luma.gl';
 import {json as requestJson} from 'd3-request';
 
 // Source data CSV
@@ -239,18 +234,12 @@ class Root extends Component {
         height: viewportProps.height / 2,
         fovy: fov
       }),
-      {
-        viewport: new WebMercatorViewport({
-          ...viewportProps,
-          y: viewportProps.height / 2,
-          height: viewportProps.height / 2
-        }),
-        component: <StaticMap
-          {...viewportProps}
-          mapStyle="mapbox://styles/mapbox/dark-v9"
-          onViewportChange={this._onViewportChange.bind(this)}
-          mapboxApiAccessToken={MAPBOX_TOKEN}/>
-      }
+      new WebMercatorViewport({
+        id: 'basemap',
+        ...viewportProps,
+        y: viewportProps.height / 2,
+        height: viewportProps.height / 2
+      })
     ];
   }
 
@@ -263,13 +252,20 @@ class Root extends Component {
       <div style={{backgroundColor: '#000'}}>
 
         <ViewportController
-          StateClass={FirstPersonState}
+          viewportState={FirstPersonState}
           {...viewportProps}
           width={viewportProps.width}
           height={viewportProps.height}
           onViewportChange={this._onViewportChange} >
 
           <ViewportLayout viewports={viewports}>
+
+            <StaticMap
+              viewportId="basemap"
+              {...viewportProps}
+              mapStyle="mapbox://styles/mapbox/dark-v9"
+              onViewportChange={this._onViewportChange.bind(this)}
+              mapboxApiAccessToken={MAPBOX_TOKEN}/>
 
             <DeckGL
               id="first-person"

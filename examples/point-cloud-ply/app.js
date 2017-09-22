@@ -2,10 +2,12 @@
 /* eslint-disable no-console */
 import React, {PureComponent} from 'react';
 import {render} from 'react-dom';
-import DeckGL, {PointCloudLayer, COORDINATE_SYSTEM} from 'deck.gl';
+import DeckGL, {COORDINATE_SYSTEM, PointCloudLayer, experimental} from 'deck.gl';
+const {OrbitController} = experimental;
+
 import {setParameters} from 'luma.gl';
 
-import {loadBinary, parsePLY, OrbitController} from './utils';
+import {loadBinary, parsePLY} from './utils/ply-loader';
 
 const DATA_REPO = 'https://raw.githubusercontent.com/uber-common/deck.gl-data/master';
 const FILE_PATH = 'examples/point-cloud-ply/lucy100k.ply';
@@ -41,8 +43,6 @@ class Example extends PureComponent {
   }
 
   componentDidMount() {
-    this._canvas.fitBounds([-0.5, -0.5, -0.5], [0.5, 0.5, 0.5]);
-
     loadBinary(`${DATA_REPO}/${FILE_PATH}`).then(rawData => {
       const {vertex} = parsePLY(rawData);
 
@@ -65,8 +65,11 @@ class Example extends PureComponent {
   }
 
   _onResize() {
-    const {innerWidth: width, innerHeight: height} = window;
-    this.setState({width, height});
+    const size = {width: window.innerWidth, height: window.innerHeight};
+    this.setState(size);
+    const newViewport = OrbitController.getViewport(Object.assign(this.state.viewport, size))
+      .fitBounds([[0, 0, 0], [1, 1, 1]]);
+    this._onViewportChange(newViewport);
   }
 
   _onInitialized(gl) {
@@ -119,13 +122,7 @@ class Example extends PureComponent {
     const glViewport = OrbitController.getViewport(canvasProps);
 
     return (
-      <OrbitController
-        {...canvasProps}
-        ref={canvas => {
-          this._canvas = canvas;
-        }}
-        onViewportChange={this._onViewportChange}
-      >
+      <OrbitController {...canvasProps} onViewportChange={this._onViewportChange}>
         <DeckGL
           width={width}
           height={height}
