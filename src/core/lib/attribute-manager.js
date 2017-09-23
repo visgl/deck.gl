@@ -24,6 +24,8 @@ import Stats from './stats';
 import {log} from './utils';
 import assert from 'assert';
 
+import {getAttributeAnimation} from './attribute-animation';
+
 const LOG_START_END_PRIORITY = 1;
 const LOG_DETAIL_PRIORITY = 2;
 
@@ -286,6 +288,9 @@ export default class AttributeManager {
       const attribute = attributes[attributeName];
       if (attribute.changed) {
         attribute.changed = attribute.changed && !clearChangedFlags;
+        if (clearChangedFlags) {
+          attribute.needsAnimation = true;
+        }
         changedAttributes[attributeName] = attribute;
       }
     }
@@ -366,7 +371,10 @@ export default class AttributeManager {
           isExternalBuffer: false,
           needsAlloc: false,
           needsUpdate: false,
+          needsAnimation: false,
           changed: false,
+
+          animation: null,
 
           // Luma fields
           isIndexed,
@@ -499,7 +507,8 @@ export default class AttributeManager {
         // Do we need to reallocate the attribute's typed array?
         const needsAlloc =
           attribute.value === null ||
-          attribute.value.length / attribute.size < numInstances;
+          attribute.value.length / attribute.size < numInstances ||
+          attribute.animationDuration > 0;
         if (needsAlloc && (attribute.update || attribute.accessor)) {
           attribute.needsAlloc = true;
           needsUpdate = true;
@@ -620,4 +629,30 @@ export default class AttributeManager {
       }
     }
   }
+
+  /* Attribute animation */
+  animate({gl, animationDuration}) {
+    const {attributes} = this;
+    const changedAttributes = {};
+
+    for (const attributeName in attributes) {
+      const attribute = attributes[attributeName];
+
+      if (attribute.needsAnimation) {
+        attribute.animation = getAttributeAnimation({gl, attribute, attributeName, animationDuration,
+          id: `${this.id}-${attributeName}`});
+        attribute.needsAnimation = false;
+      }
+
+      if (attribute.animation) {
+        const updatedBuffer = attribute.animation.run();
+        if (updatedBuffer) {
+          changedAttributes[attributeName] = updatedBuffer;
+          this.needsRedraw = true;
+        }
+      }
+    }
+    return changedAttributes;
+  }
+
 }

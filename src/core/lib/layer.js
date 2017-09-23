@@ -59,6 +59,7 @@ const defaultProps = {
   framebuffer: null,
 
   animation: null, // Passed prop animation functions to evaluate props
+  animationDuration: 600,
 
   // Offset depth based on layer index to avoid z-fighting.
   // Negative values pull layer towards the camera
@@ -141,6 +142,18 @@ export default class Layer {
   // Called once when layer is no longer matched and state will be discarded
   // App can destroy WebGL resources here
   finalizeState() {
+  }
+
+  animate() {
+    const {model, attributeManager} = this.state;
+    const changedAttributes = attributeManager.animate({
+      gl: this.context.gl,
+      animationDuration: this.props.animationDuration
+    });
+
+    if (model) {
+      model.setAttributes(changedAttributes);
+    }
   }
 
   // If state has a model, draw it with supplied uniforms
@@ -371,7 +384,8 @@ export default class Layer {
       instancePickingColors: {
         type: GL.UNSIGNED_BYTE,
         size: 3,
-        update: this.calculateInstancePickingColors
+        update: this.calculateInstancePickingColors,
+        noAnimation: true
       }
     });
 
