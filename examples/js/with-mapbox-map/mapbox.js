@@ -18,21 +18,17 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 import PropTypes from 'prop-types';
-
-import isBrowser from '../utils/is-browser';
-import autobind from '../utils/autobind';
-import {getAccessToken} from '../utils/access-token';
-
-let mapboxgl = null;
-if (isBrowser) {
-  mapboxgl = require('mapbox-gl');
-}
+// import isBrowser from '../utils/is-browser';
+const isBrowser = true;
+const mapboxgl = isBrowser ? require('mapbox-gl') : null;
+/* global window, document */
 
 function noop() {}
 
 /* eslint-disable max-len */
 const propTypes = {
   // Creation parameters
+  // container:
   mapboxApiAccessToken: PropTypes.string, /** Mapbox API access token for mapbox-gl-js. Required when using Mapbox vector tiles/styles. */
   attributionControl: PropTypes.bool, /** Show attribution control or not. */
   preserveDrawingBuffer: PropTypes.bool, /** Mapbox WebGL context creation option. Useful when you want to export the canvas as a PNG. */
@@ -66,9 +62,26 @@ const defaultProps = {
 };
 /* eslint-enable max-len */
 
+// Try to get access token from URL, env, local storage or config
+export function getAccessToken() {
+  let accessToken = null;
+
+  if (window.location) {
+    const match = window.location.search.match(/access_token=([^&\/]*)/);
+    accessToken = match && match[1];
+  }
+
+  if (!accessToken) {
+    // Note: This depends on the bundler (e.g. webpack) inmporting environment correctly
+    accessToken =
+      process.env.MapboxAccessToken || process.env.MAPBOX_ACCESS_TOKEN; // eslint-disable-line
+  }
+
+  return accessToken || null;
+}
+
 // Helper function to merge defaultProps and check prop types
-function resolveProps(props, component = 'component') {
-  props = Object.assign({}, defaultProps, props);
+function checkPropTypes(props, component = 'component') {
   // TODO - check for production (unless done by prop types package?)
   if (props.debug) {
     PropTypes.checkPropTypes(propTypes, props, 'prop', component);
@@ -85,18 +98,11 @@ export default class ReusableMapboxMap {
       throw new Error('Mapbox not supported');
     }
 
+    // autobind(this);
+    this._queryParams = {};
     this.props = {};
 
-    props = resolveProps(props, 'Mapbox');
-
-    autobind(this);
-    this._queryParams = {};
-
-    if (mapboxgl) {
-      mapboxgl.accessToken = props.mapboxApiAccessToken;
-    }
-
-    this.create(props);
+    this._initialize(props);
   }
 
   finalize() {
@@ -104,12 +110,7 @@ export default class ReusableMapboxMap {
       return this;
     }
 
-    if (!ReusableMapboxMap.savedMap) {
-      ReusableMapboxMap.savedMap = this._map;
-    } else {
-      this._map.remove();
-    }
-
+    this._destroy();
     return this;
   }
 
@@ -118,55 +119,25 @@ export default class ReusableMapboxMap {
       return this;
     }
 
-    props = resolveProps(props, 'Mapbox');
-
-    this._updateStateFromProps(props);
-    this._updateMapViewport(props);
-    this._updateMapStyle(props);
-
-    // Save width/height so that we can check them in componentDidUpdate
-    this.state = {
-      width: props.width,
-      height: props.height
-    };
-
-    this.props = {};
-
+    this._update(this.props, props);
     return this;
   }
 
-  // Since Mapbox's map.resize() reads size from DOM, so DOM element must already be resized
+  // Mapbox's map.resize() reads size from DOM, so DOM element must already be resized
   // In a system like React we must wait to read size until after render
   // (e.g. until "componentDidUpdate")
-  afterDOMUpdate() {
+  resize() {
     if (!mapboxgl) {
       return this;
     }
 
-    this._updateMapSize(this.state, this.props);
+    this._map.resize();
     return this;
   }
 
   // External apps can access map this way
   getMap() {
     return this._map;
-  }
-
-  /** Uses Mapbox's
-    * queryRenderedFeatures API to find features at point or in a bounding box.
-    * https://www.mapbox.com/mapbox-gl-js/api/#Map#queryRenderedFeatures
-    * To query only some of the layers, set the `interactive` property in the
-    * layer style to `true`.
-    * @param {[Number, Number]|[[Number, Number], [Number, Number]]} geometry -
-    *   Point or an array of two points defining the bounding box
-    * @param {Object} parameters - query options
-    */
-  queryRenderedFeatures(geometry, parameters) {
-    const queryParams = parameters || this._queryParams;
-    if (queryParams.layers && queryParams.layers.length === 0) {
-      return [];
-    }
-    return this._map.queryRenderedFeatures(geometry, queryParams);
   }
 
   // PRIVATE API
@@ -177,45 +148,65 @@ export default class ReusableMapboxMap {
       this._map = this.map = ReusableMapboxMap.savedMap;
       ReusableMapboxMap.savedMap = null;
       // TODO - need to call onload again, need to track with Promise?
-      this.props.onLoad();
+      props.onLoad();
     } else {
       this._map = this.map = new mapboxgl.Map({
-        container: this._mapboxMap,
-        center: [this.props.longitude, this.props.latitude],
-        zoom: this.props.zoom,
-        pitch: this.props.pitch,
-        bearing: this.props.bearing,
-        style: this.props.mapStyle,
+        container: props.container || document.body,
+        center: [props.longitude, props.latitude],
+        zoom: props.zoom,
+        pitch: props.pitch,
+        bearing: props.bearing,
+        style: props.mapStyle,
         interactive: false,
-        attributionControl: this.props.attributionControl,
-        preserveDrawingBuffer: this.props.preserveDrawingBuffer
+        attributionControl: props.attributionControl,
+        preserveDrawingBuffer: props.preserveDrawingBuffer
       });
       // Attach optional onLoad function
-      this.map.once('load', this.props.onLoad);
+      this.map.once('load', props.onLoad);
     }
 
-    this._initialize(props);
     return this;
   }
 
+  _destroy() {
+    if (!ReusableMapboxMap.savedMap) {
+      ReusableMapboxMap.savedMap = this._map;
+    } else {
+      this._map.remove();
+    }
+  }
+
   _initialize(props) {
+    props = Object.assign({}, defaultProps, props);
+    checkPropTypes(props, 'Mapbox');
+
+    // Creation only props
+    if (mapboxgl) {
+      mapboxgl.accessToken = props.mapboxApiAccessToken;
+    }
+
+    this._create(props);
+
     // Disable outline style
     const canvas = this.map.getCanvas();
     if (canvas) {
       canvas.style.outline = 'none';
     }
 
-    this._updateMapViewport({}, this.props);
-    this._updateQueryParams(this.props.mapStyle);
-    this.props = props;
+    this._updateMapViewport({}, props);
+    this._updateMapSize({}, props);
 
-    return this;
+    this.props = props;
   }
 
-  _updateStateFromProps(props) {
-    if (mapboxgl) {
-      mapboxgl.accessToken = props.mapboxApiAccessToken;
-    }
+  _update(oldProps, newProps) {
+    newProps = Object.assign({}, this.props, newProps);
+    checkPropTypes(newProps, 'Mapbox');
+
+    this._updateMapViewport(oldProps, newProps);
+    this._updateMapSize(oldProps, newProps);
+
+    this.props = newProps;
   }
 
   _updateMapViewport(oldProps, newProps) {
@@ -244,9 +235,7 @@ export default class ReusableMapboxMap {
 
   // Note: needs to be called after render (e.g. in componentDidUpdate)
   _updateMapSize(oldProps, newProps) {
-    const sizeChanged =
-      oldProps.width !== newProps.width || oldProps.height !== newProps.height;
-
+    const sizeChanged = oldProps.width !== newProps.width || oldProps.height !== newProps.height;
     if (sizeChanged) {
       this._map.resize();
     }
