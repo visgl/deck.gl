@@ -58,7 +58,7 @@ const defaultProps = {
   uniforms: {},
   framebuffer: null,
 
-  animation: {}, // Passed prop animation functions to evaluate props
+  animation: null, // Passed prop animation functions to evaluate props
 
   // Offset depth based on layer index to avoid z-fighting.
   // Negative values pull layer towards the camera
@@ -135,6 +135,9 @@ export default class Layer {
   updateState({oldProps, props, oldContext, context, changeFlags}) {
     if (changeFlags.dataChanged) {
       this.invalidateAttribute('all');
+    }
+    if (changeFlags.propsChanged) {
+      this.state.attributeManager.setAnimationOptions(props.animation);
     }
   }
 
@@ -366,7 +369,11 @@ export default class Layer {
 
     // Initialize state only once
     this.setState({
-      attributeManager: new AttributeManager({id: this.props.id, gl: this.context.gl}),
+      attributeManager: new AttributeManager({
+        id: this.props.id,
+        gl: this.context.gl,
+        animation: this.props.animation
+      }),
       model: null,
       needsRedraw: true,
       dataChanged: true
@@ -446,7 +453,7 @@ export default class Layer {
 
   // Calculates uniforms
   drawLayer({moduleParameters = null, uniforms = {}, parameters = {}}) {
-    if (!uniforms.renderPickingBuffer) {
+    if (!uniforms.renderPickingBuffer && this.props.animation) {
       this.animate();
     }
 

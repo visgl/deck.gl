@@ -35,9 +35,10 @@ class ProgramTransformFeedback extends Program {
 
 export class AttributeAnimationManager {
 
-  constructor({id, gl}) {
+  constructor({id, gl}, opts) {
     this.id = id;
     this.gl = gl;
+    this.opts = opts;
 
     this.attributeAnimations = {};
 
@@ -46,6 +47,9 @@ export class AttributeAnimationManager {
   }
 
   /* Public methods */
+  setOptions(opts) {
+    this.opts = opts;
+  }
 
   // Called when attribute manager updates
   // Extracts the list of attributes that need animation
@@ -107,7 +111,7 @@ export class AttributeAnimationManager {
 
   // Called every render cycle, run transform feedback
   // Returns `true` if anything changes
-  run(settings) {
+  run() {
     if (!this.model) {
       return {};
     }
@@ -121,7 +125,7 @@ export class AttributeAnimationManager {
       const animation = this.attributeAnimations[attributeName];
 
       if (animation.needsUpdate) {
-        this._updateAnimation(animation, settings);
+        this._updateAnimation(animation, this.opts);
         animation.needsUpdate = false;
         needsRedraw = true;
       }
@@ -243,24 +247,24 @@ void main(void) {
       settings[accessor];
 
     let fromValues;
-    const needsNewBuffer = !buffer ||
-      buffer.bytes / Float32Array.BYTES_PER_ELEMENT !== value.length;
+    const oldBufferSize = buffer ? buffer.bytes / Float32Array.BYTES_PER_ELEMENT : 0;
+    const needsNewBuffer = !buffer || oldBufferSize !== value.length;
 
     if (animationSettings) {
       // Enter from 0
-      fromValues = new Float32Array(value.length);
+      fromValues = new (value.constructor)(value.length);
       // No entrance animation
       // fromValues = value.slice();
       if (buffer) {
         // Transfer old buffer data to the new one
-        const oldBufferData = new Float32Array(value.length);
+        const oldBufferData = new Float32Array(oldBufferSize);
 
         // TODO - luma.gl's buffer.getData is not working
         this.gl.bindBuffer(GL_COPY_READ_BUFFER, buffer.handle);
         this.gl.getBufferSubData(GL_COPY_READ_BUFFER, 0, oldBufferData);
         this.gl.bindBuffer(GL_COPY_READ_BUFFER, null);
 
-        const len = Math.min(oldBufferData.length, fromValues.length);
+        const len = Math.min(oldBufferSize, fromValues.length);
         for (let i = 0; i < len; i++) {
           fromValues[i] = oldBufferData[i];
         }

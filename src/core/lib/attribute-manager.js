@@ -139,8 +139,9 @@ export default class AttributeManager {
    * @param {Object} [props]
    * @param {String} [props.id] - identifier (for debugging)
    */
-  constructor({id = 'attribute-manager', gl} = {}) {
+  constructor({id = 'attribute-manager', gl, animation} = {}) {
     this.id = id;
+    this.gl = gl;
 
     this.attributes = {};
     this.updateTriggers = {};
@@ -150,7 +151,7 @@ export default class AttributeManager {
     this.userData = {};
     this.stats = new Stats({id: 'attr'});
 
-    this.attributeAnimation = new AttributeAnimationManager({id, gl});
+    this.setAnimationOptions(animation);
 
     // For debugging sanity, prevent uninitialized members
     Object.seal(this);
@@ -268,7 +269,9 @@ export default class AttributeManager {
       logFunctions.onUpdateEnd({level: LOG_START_END_PRIORITY, id: this.id, numInstances});
     }
 
-    this.attributeAnimation.update(this.attributes);
+    if (this.attributeAnimation) {
+      this.attributeAnimation.update(this.attributes);
+    }
   }
 
   /**
@@ -293,7 +296,7 @@ export default class AttributeManager {
       if (attribute.changed) {
         attribute.changed = attribute.changed && !clearChangedFlags;
 
-        if (!attribute.animate) {
+        if (!this.attributeAnimation || !attribute.animate) {
           changedAttributes[attributeName] = attribute;
         }
       }
@@ -631,17 +634,28 @@ export default class AttributeManager {
     }
   }
 
+  setAnimationOptions(opts) {
+    if (!opts) {
+      this.attributeAnimation = null;
+    } else if (this.attributeAnimation) {
+      this.attributeAnimation.setOptions(opts);
+    } else {
+      this.attributeAnimation = new AttributeAnimationManager(this, opts);
+    }
+  }
+
   /**
    * Attribute animation
    * @params {Object} settings - animation settings
    * Returns updated attributes
    */
-  animate(settings) {
+  animate() {
     const {attributeAnimation} = this;
-    const needsRedraw = attributeAnimation.run(settings);
-
+    if (!attributeAnimation) {
+      return {};
+    }
+    const needsRedraw = attributeAnimation.run();
     this.needsRedraw = needsRedraw;
-
     return needsRedraw ? attributeAnimation.getAttributes() : {};
   }
 
