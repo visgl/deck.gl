@@ -42,6 +42,7 @@ export class AttributeAnimationManager {
 
     this.attributeAnimations = {};
 
+    this.needsRedraw = false;
     this.model = null;
     this.transformFeedback = new TransformFeedback(gl, {});
   }
@@ -60,17 +61,22 @@ export class AttributeAnimationManager {
       const attribute = attributes[attributeName];
 
       if (attribute.animate) {
-        const animation = this.attributeAnimations[attributeName];
+        let needsUpdate;
+        let animation = this.attributeAnimations[attributeName];
         if (animation) {
-          animation.needsUpdate = attribute.changed;
+          needsUpdate = attribute.changed;
         } else {
           // New animated attributes have been added
-          this.attributeAnimations[attributeName] = {
-            name: attributeName,
-            attribute,
-            needsUpdate: true
-          };
+          animation = {name: attributeName, attribute};
+          this.attributeAnimations[attributeName] = animation;
+          needsUpdate = true;
           needsNewModel = true;
+        }
+
+        if (needsUpdate) {
+          this._updateAnimation(animation, this.opts);
+          this._updateModel(attributeName, animation);
+          this.needsRedraw = true;
         }
       }
     }
@@ -86,10 +92,7 @@ export class AttributeAnimationManager {
     }
 
     if (needsNewModel) {
-      if (this.model) {
-        this.model.destroy();
-      }
-      this.model = this._getModel();
+      this._createModel();
     }
 
   }
@@ -113,68 +116,67 @@ export class AttributeAnimationManager {
   // Returns `true` if anything changes
   run() {
     if (!this.model) {
-      return {};
+      return false;
     }
 
     const currentTime = Date.now();
     const uniforms = {};
     const buffers = {};
-    let needsRedraw = false;
+
+    let needsRedraw = this.needsRedraw;
+    this.needsRedraw = false;
 
     for (const attributeName in this.attributeAnimations) {
       const animation = this.attributeAnimations[attributeName];
 
-      if (animation.needsUpdate) {
-        this._updateAnimation(animation, this.opts);
-        animation.needsUpdate = false;
-        needsRedraw = true;
-      }
-      
       // Cannot bind to transform feedback if it's already used as attribute
       buffers[animation.bufferIndex] = animation.buffer;
 
       let time = 1;
-      switch (animation.state) {
-      case ANIMATION_STATE.PENDING:
+      if (animation.state === ANIMATION_STATE.PENDING) {
         animation.startTime = currentTime;
         animation.state = ANIMATION_STATE.STARTED;
+      }
 
-      case ANIMATION_STATE.STARTED:
+      if (animation.state === ANIMATION_STATE.STARTED) {
         time = (currentTime - animation.startTime) / animation.duration;
         if (time > 1) {
           time = 1;
           animation.state = ANIMATION_STATE.COMPLETE;
         }
         needsRedraw = true;
-        break;
-
-      default:
       }
 
       uniforms[`${animation.name}Time`] = time;
     }
 
     if (needsRedraw) {
-      Object.values(buffers).forEach(buffer => buffer.unbind());
-
-      this.model.program.use();
-      this.transformFeedback.bindBuffers(buffers, {clear: true});
-      this.transformFeedback.begin(GL.POINTS);
-
-      const parameters = {
-        [GL.RASTERIZER_DISCARD]: true
-      };
-
-      this.model.draw({uniforms, parameters});
-
-      this.transformFeedback.end();
+      this._runTransformFeedback({uniforms, buffers});
     }
 
     return needsRedraw;
   }
 
+  _runTransformFeedback({uniforms, buffers}) {
+    const {model, transformFeedback} = this;
+
+    Object.values(buffers).forEach(buffer => buffer.unbind());
+
+    model.program.use();
+    transformFeedback.bindBuffers(buffers, {clear: true});
+    transformFeedback.begin(GL.POINTS);
+
+    const parameters = {
+      [GL.RASTERIZER_DISCARD]: true
+    };
+
+    model.draw({uniforms, parameters});
+
+    transformFeedback.end();
+  }
+
   /* Private methods */
-  _getModel() {
+  _createModel() {
     // Build shaders
     const varyings = [];
     const attributeDeclarations = [];
@@ -194,7 +196,8 @@ export class AttributeAnimationManager {
         attributeDeclarations.push(`attribute ${attributeType} ${attributeName}To;`);
         uniformsDeclarations.push(`uniform float ${attributeName}Time;`);
         varyingDeclarations.push(`varying ${attributeType} ${attributeName};`);
-        calculations.push(`${attributeName} = mix(${attributeName}From, ${attributeName}To, ${attributeName}Time);`);
+        calculations.push(`${attributeName} = mix(${attributeName}From, ${attributeName}To,
+          ${attributeName}Time);`);
       }
     }
 
@@ -210,7 +213,7 @@ void main(void) {
 }
 `;
 
-    const fs =  `\
+    const fs = `\
 #define SHADER_NAME feedback-fragment-shader
 
 #ifdef GL_ES
@@ -224,7 +227,11 @@ void main(void) {
 }
 `;
 
-    return new Model(this.gl, {
+    if (this.model) {
+      this.model.destroy();
+    }
+
+    this.model = new Model(this.gl, {
       id: this.id,
       program: new ProgramTransformFeedback(this.gl, {vs, fs, varyings}),
       geometry: new Geometry({
@@ -235,41 +242,52 @@ void main(void) {
       isIndexed: true
     });
 
+    this._updateModel(this.attributeAnimations);
+  }
+
+  // get current values of an attribute, clipped/padded to the size of the new buffer
+  _getCurrentAttributeState(animation) {
+    const {attribute, buffer, bufferSize} = animation;
+    const {value, type, size} = attribute;
+
+    // Enter from 0
+    const currentValues = new (value.constructor)(value.length);
+    // No entrance animation
+    // const currentValues = value.slice();
+    if (buffer) {
+      // Transfer old buffer data to the new one
+      const oldBufferData = new Float32Array(bufferSize);
+
+      // TODO - luma.gl's buffer.getData is not working
+      this.gl.bindBuffer(GL_COPY_READ_BUFFER, buffer.handle);
+      this.gl.getBufferSubData(GL_COPY_READ_BUFFER, 0, oldBufferData);
+      this.gl.bindBuffer(GL_COPY_READ_BUFFER, null);
+
+      const len = Math.min(bufferSize, currentValues.length);
+      for (let i = 0; i < len; i++) {
+        currentValues[i] = oldBufferData[i];
+      }
+    }
+
+    return {size, type, value: currentValues};
   }
 
   // Updates animation from/to and buffer
   _updateAnimation(animation, settings) {
-    const {attribute, name, buffer} = animation;
+    const {attribute, buffer} = animation;
     const {accessor, value, type, size} = attribute;
 
     const animationSettings = Array.isArray(accessor) ?
-      accessor.map(name => settings[name]).find(Boolean) :
+      accessor.map(a => settings[a]).find(Boolean) :
       settings[accessor];
 
-    let fromValues;
-    const oldBufferSize = buffer ? buffer.bytes / Float32Array.BYTES_PER_ELEMENT : 0;
-    const needsNewBuffer = !buffer || oldBufferSize !== value.length;
+    const needsNewBuffer = !buffer || animation.bufferSize !== value.length;
 
+    let fromState;
     if (animationSettings) {
-      // Enter from 0
-      fromValues = new (value.constructor)(value.length);
-      // No entrance animation
-      // fromValues = value.slice();
-      if (buffer) {
-        // Transfer old buffer data to the new one
-        const oldBufferData = new Float32Array(oldBufferSize);
-
-        // TODO - luma.gl's buffer.getData is not working
-        this.gl.bindBuffer(GL_COPY_READ_BUFFER, buffer.handle);
-        this.gl.getBufferSubData(GL_COPY_READ_BUFFER, 0, oldBufferData);
-        this.gl.bindBuffer(GL_COPY_READ_BUFFER, null);
-
-        const len = Math.min(oldBufferSize, fromValues.length);
-        for (let i = 0; i < len; i++) {
-          fromValues[i] = oldBufferData[i];
-        }
-      }
+      fromState = this._getCurrentAttributeState(animation);
     }
+    const toState = {size, type, value};
 
     if (needsNewBuffer) {
       if (buffer) {
@@ -283,32 +301,34 @@ void main(void) {
         data: new Float32Array(value.length),
         usage: GL.DYNAMIC_COPY
       });
+      animation.bufferSize = value.length;
     }
 
     if (animationSettings) {
-      this._updateAttribute(name, {
-        fromState: {size, type, value: fromValues},
-        toState: {size, type, value}
-      });
+      animation.fromState = fromState;
+      animation.toState = toState;
       animation.duration = animationSettings.duration;
       animation.state = ANIMATION_STATE.PENDING;
     } else {
       // No animation needed
-      this._updateAttribute(name, {
-        fromState: {size, type, value},
-        toState: {size, type, value}
-      });
+      animation.fromState = toState;
+      animation.toState = toState;
       animation.state = ANIMATION_STATE.NONE;
     }
   }
 
-  _updateAttribute(name, {fromState, toState}) {
-    if (this.model) {
+  _updateModel(attributeName, animation) {
+    if (animation === undefined) {
+      const animations = attributeName;
+      for (const name in animations) {
+        this._updateModel(name, animations[name]);
+      }
+    } else if (this.model) {
       this.model.setAttributes({
-        [`${name}From`]: fromState,
-        [`${name}To`]: toState
+        [`${attributeName}From`]: animation.fromState,
+        [`${attributeName}To`]: animation.toState
       });
-      this.model.setVertexCount(fromState.value.length / fromState.size);
+      this.model.setVertexCount(animation.bufferSize / animation.fromState.size);
     }
   }
 }
