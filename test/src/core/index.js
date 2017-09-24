@@ -18,10 +18,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import './src/imports-spec';
-import './src/core';
-import './src/core-layers';
-import './src/deprecated-layers';
-
-// React test cases currently only work in browser
-// import './src/react';
+import './viewports';
+import './lib';
+import './utils';
+import './shaderlib';
+import './experimental';

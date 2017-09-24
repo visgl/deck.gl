@@ -18,10 +18,29 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import './src/imports-spec';
-import './src/core';
-import './src/core-layers';
-import './src/deprecated-layers';
+import {global} from '../utils/globals';
+import log from '../utils/log';
 
-// React test cases currently only work in browser
-// import './src/react';
+// Version detection
+// TODO - this imports a rather large JSON file, we only need one field
+import {version} from '../../../package.json';
+
+const STARTUP_MESSAGE = 'set deck.log.priority=1 (or higher) to trace attribute updates';
+
+if (global.deck && global.deck.VERSION !== version) {
+  throw new Error(`deck.gl - multiple versions detected: ${global.deck.VERSION} vs ${version}`);
+}
+
+if (!global.deck) {
+  /* global console */
+  /* eslint-disable no-console */
+  console.log(`deck.gl ${version} - ${STARTUP_MESSAGE}`);
+
+  global.deck = global.deck || {
+    VERSION: version,
+    log
+  };
+}
+
+// Make sure we register shader modules
+require('../shaderlib');

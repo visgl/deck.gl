@@ -21,7 +21,7 @@
 /* eslint-disable no-console, no-invalid-this */
 /* global console */
 import {Suite} from 'benchmark';
-import * as data from '../data';
+import * as data from 'deck.gl/test/data';
 
 import {
   ScatterplotLayer,
@@ -32,11 +32,12 @@ import {
   WebMercatorViewport
 } from 'deck.gl';
 
-import {parseColor} from 'deck.gl/lib/utils/color';
+import {parseColor} from 'deck.gl/core/lib/utils/color';
 
-import {COORDINATE_SYSTEM} from 'deck.gl/lib/constants';
+import {COORDINATE_SYSTEM} from 'deck.gl/core/lib/constants';
 import {getUniformsFromViewport} from 'deck.gl/shaderlib/project/viewport-uniforms';
-import {testInitializeLayer} from '../test-utils';
+
+import {testInitializeLayer} from 'deck.gl/test/test-utils';
 
 const suite = new Suite();
 

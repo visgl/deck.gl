@@ -18,10 +18,10 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import './src/imports-spec';
-import './src/core';
-import './src/core-layers';
-import './src/deprecated-layers';
-
-// React test cases currently only work in browser
-// import './src/react';
+import './utils';
+import './props.spec';
+import './attribute-manager.spec';
+import './layer.spec';
+import './composite-layer.spec';
+import './layer-manager.spec';
+import './seer-integration.spec';

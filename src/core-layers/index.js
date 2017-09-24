@@ -17,11 +17,22 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
+/* eslint-disable max-len */
 
-import './src/imports-spec';
-import './src/core';
-import './src/core-layers';
-import './src/deprecated-layers';
+// Core Layers
+export {default as ArcLayer} from './arc-layer/arc-layer';
+export {default as IconLayer} from './icon-layer/icon-layer';
+export {default as LineLayer} from './line-layer/line-layer';
+export {default as PointCloudLayer} from './point-cloud-layer/point-cloud-layer';
+export {default as ScatterplotLayer} from './scatterplot-layer/scatterplot-layer';
 
-// React test cases currently only work in browser
-// import './src/react';
+export {default as ScreenGridLayer} from './screen-grid-layer/screen-grid-layer';
+export {default as GridLayer} from './grid-layer/grid-layer';
+export {default as GridCellLayer} from './grid-cell-layer/grid-cell-layer';
+
+export {default as HexagonLayer} from './hexagon-layer/hexagon-layer';
+export {default as HexagonCellLayer} from './hexagon-cell-layer/hexagon-cell-layer';
+
+export {default as PathLayer} from './path-layer/path-layer';
+export {default as PolygonLayer} from './polygon-layer/polygon-layer';
+export {default as GeoJsonLayer} from './geojson-layer/geojson-layer';

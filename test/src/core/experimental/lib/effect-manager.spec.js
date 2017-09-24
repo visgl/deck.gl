@@ -18,10 +18,25 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import './src/imports-spec';
-import './src/core';
-import './src/core-layers';
-import './src/deprecated-layers';
+import test from 'tape-catch';
+import EffectManager from 'deck.gl/core/experimental/lib/effect-manager';
+import Effect from 'deck.gl/core/experimental/lib/effect';
+import LayerManager from 'deck.gl/core/lib/layer-manager';
+import global from 'global';
 
-// React test cases currently only work in browser
-// import './src/react';
+const gl = global.glContext;
+const layerManager = new LayerManager({gl});
+
+test('EffectManager#constructor', t => {
+  const effectManager = new EffectManager({gl, layerManager});
+  t.ok(effectManager, 'Effect Manager created');
+  t.end();
+});
+
+test('EffectManager#add and remove effects', t => {
+  const effectManager = new EffectManager({gl, layerManager});
+  const effect = new Effect();
+  effectManager.addEffect(effect);
+  t.ok(effectManager.removeEffect(effect), 'Effect added and removed successfully');
+  t.end();
+});
