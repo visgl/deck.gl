@@ -58,8 +58,7 @@ const defaultProps = {
   uniforms: {},
   framebuffer: null,
 
-  animation: null, // Passed prop animation functions to evaluate props
-  animationDuration: 600,
+  animation: {}, // Passed prop animation functions to evaluate props
 
   // Offset depth based on layer index to avoid z-fighting.
   // Negative values pull layer towards the camera
@@ -146,13 +145,10 @@ export default class Layer {
 
   animate() {
     const {model, attributeManager} = this.state;
-    const changedAttributes = attributeManager.animate({
-      gl: this.context.gl,
-      animationDuration: this.props.animationDuration
-    });
+    const animatedAttributes = attributeManager.animate(this.props.animation);
 
     if (model) {
-      model.setAttributes(changedAttributes);
+      model.setAttributes(animatedAttributes);
     }
   }
 
@@ -370,7 +366,7 @@ export default class Layer {
 
     // Initialize state only once
     this.setState({
-      attributeManager: new AttributeManager({id: this.props.id}),
+      attributeManager: new AttributeManager({id: this.props.id, gl: this.context.gl}),
       model: null,
       needsRedraw: true,
       dataChanged: true
@@ -384,8 +380,7 @@ export default class Layer {
       instancePickingColors: {
         type: GL.UNSIGNED_BYTE,
         size: 3,
-        update: this.calculateInstancePickingColors,
-        noAnimation: true
+        update: this.calculateInstancePickingColors
       }
     });
 
@@ -451,6 +446,9 @@ export default class Layer {
 
   // Calculates uniforms
   drawLayer({moduleParameters = null, uniforms = {}, parameters = {}}) {
+    if (!uniforms.renderPickingBuffer) {
+      this.animate();
+    }
 
     // TODO/ib - hack move to luma Model.draw
     if (moduleParameters && this.state.model) {

@@ -173,7 +173,11 @@ const ScatterplotLayerExample = {
     pickable: true,
     radiusScale: 30,
     radiusMinPixels: 1,
-    radiusMaxPixels: 30
+    radiusMaxPixels: 30,
+    animation: {
+      getRadius: {duration: 600},
+      getColor: {duration: 600}
+    }
   }
 };
 

@@ -1,36 +1,4 @@
 import {GL, Program, Model, Geometry, Buffer, TransformFeedback} from 'luma.gl';
-import {glArrayFromType} from './attribute-manager';
-
-const vertexTF = `
-#define SHADER_NAME feedback-vertex-shader
-
-attribute <attributeType> fromValues;
-attribute <attributeType> toValues;
-
-uniform float duration;
-uniform float time;
-
-varying <attributeType> value;
-
-void main(void) {
-  value = mix(fromValues, toValues, time / duration);
-  gl_Position = vec4(0.0);
-}
-`;
-
-const fragmentTF = `\
-#define SHADER_NAME feedback-fragment-shader
-
-#ifdef GL_ES
-precision highp float;
-#endif
-
-varying <attributeType> value;
-
-void main(void) {
-  gl_FragColor = vec4(0.0);
-}
-`;
 
 const ATTRIBUTE_MAPPING = {
   1: 'float',
@@ -39,6 +7,15 @@ const ATTRIBUTE_MAPPING = {
   4: 'vec4'
 };
 
+const ANIMATION_STATE = {
+  NONE: 0,
+  PENDING: 1,
+  STARTED: 2,
+  COMPLETE: 3
+};
+
+const GL_COPY_READ_BUFFER = 0x8F36;
+
 class ProgramTransformFeedback extends Program {
 
   _compileAndLink() {
@@ -46,7 +23,7 @@ class ProgramTransformFeedback extends Program {
     gl.attachShader(this.handle, this.vs.handle);
     gl.attachShader(this.handle, this.fs.handle);
     // enable transform feedback for this program
-    gl.transformFeedbackVaryings(this.handle, ['value'], gl.SEPARATE_ATTRIBS);
+    gl.transformFeedbackVaryings(this.handle, this.opts.varyings, gl.SEPARATE_ATTRIBS);
     gl.linkProgram(this.handle);
     gl.validateProgram(this.handle);
     const linked = gl.getProgramParameter(this.handle, gl.LINK_STATUS);
@@ -56,143 +33,278 @@ class ProgramTransformFeedback extends Program {
   }
 }
 
-function getTFShaders(attribute) {
-  const {size} = attribute;
-  const attributeType = ATTRIBUTE_MAPPING[size];
+export class AttributeAnimationManager {
 
-  if (!attributeType) {
-    return null;
+  constructor({id, gl}) {
+    this.id = id;
+    this.gl = gl;
+
+    this.attributeAnimations = {};
+
+    this.model = null;
+    this.transformFeedback = new TransformFeedback(gl, {});
   }
 
-  return {
-    vs: vertexTF.replace(/<attributeType>/g, attributeType),
-    fs: fragmentTF.replace(/<attributeType>/g, attributeType)
-  };
-}
+  /* Public methods */
 
-const GL_COPY_READ_BUFFER = 0x8F36;
+  // Called when attribute manager updates
+  // Extracts the list of attributes that need animation
+  update(attributes) {
+    let needsNewModel = false;
 
-function createTransformFeedbackAnimation({gl, attribute, model, transformFeedback, duration}) {
-  let startTime = -1;
-  let complete = false;
-  const {type, size, value} = attribute;
-  const ArrayType = glArrayFromType(type || GL.FLOAT);
+    for (const attributeName in attributes) {
+      const attribute = attributes[attributeName];
 
-  const targetBuffers = [
-    new Buffer(gl, {size, data: new Float32Array(value.length), usage: gl.DYNAMIC_COPY}),
-    new Buffer(gl, {size, data: new Float32Array(value.length), usage: gl.DYNAMIC_COPY})
-  ];
-  let bufferIndex = 0;
+      if (attribute.animate) {
+        const animation = this.attributeAnimations[attributeName];
+        if (animation) {
+          animation.needsUpdate = attribute.changed;
+        } else {
+          // New animated attributes have been added
+          this.attributeAnimations[attributeName] = {
+            name: attributeName,
+            attribute,
+            needsUpdate: true
+          };
+          needsNewModel = true;
+        }
+      }
+    }
 
-  // Runs animation. Returns an updated buffer if successful.
-  const run = (forced = false) => {
-    if (complete && !forced) {
-      // No need to run
-      return null;
+    for (const attributeName in this.attributeAnimations) {
+      const attribute = attributes[attributeName];
+
+      if (!attribute || !attribute.animate) {
+        // Animated attribute has been removed
+        delete this.attributeAnimations[attributeName];
+        needsNewModel = true;
+      }
+    }
+
+    if (needsNewModel) {
+      if (this.model) {
+        this.model.destroy();
+      }
+      this.model = this._getModel();
+    }
+
+  }
+
+  // Get all the animated attributes
+  getAttributes() {
+    const animatedAttributes = {};
+
+    for (const attributeName in this.attributeAnimations) {
+      const animation = this.attributeAnimations[attributeName];
+
+      if (animation.buffer) {
+        animatedAttributes[attributeName] = animation.buffer;
+      }
+    }
+
+    return animatedAttributes;
+  }
+
+  // Called every render cycle, run transform feedback
+  // Returns `true` if anything changes
+  run(settings) {
+    if (!this.model) {
+      return {};
     }
 
     const currentTime = Date.now();
-    if (startTime < 0) {
-      // first call
-      startTime = currentTime;
+    const uniforms = {};
+    const buffers = {};
+    let needsRedraw = false;
+
+    for (const attributeName in this.attributeAnimations) {
+      const animation = this.attributeAnimations[attributeName];
+
+      if (animation.needsUpdate) {
+        this._updateAnimation(animation, settings);
+        animation.needsUpdate = false;
+        needsRedraw = true;
+      }
+      
+      // Cannot bind to transform feedback if it's already used as attribute
+      buffers[animation.bufferIndex] = animation.buffer;
+
+      let time = 1;
+      switch (animation.state) {
+      case ANIMATION_STATE.PENDING:
+        animation.startTime = currentTime;
+        animation.state = ANIMATION_STATE.STARTED;
+
+      case ANIMATION_STATE.STARTED:
+        time = (currentTime - animation.startTime) / animation.duration;
+        if (time > 1) {
+          time = 1;
+          animation.state = ANIMATION_STATE.COMPLETE;
+        }
+        needsRedraw = true;
+        break;
+
+      default:
+      }
+
+      uniforms[`${animation.name}Time`] = time;
     }
-    let time = currentTime - startTime;
-    if (time > duration) {
-      time = duration;
-      complete = true;
+
+    if (needsRedraw) {
+      Object.values(buffers).forEach(buffer => buffer.unbind());
+
+      this.model.program.use();
+      this.transformFeedback.bindBuffers(buffers, {clear: true});
+      this.transformFeedback.begin(GL.POINTS);
+
+      const parameters = {
+        [GL.RASTERIZER_DISCARD]: true
+      };
+
+      this.model.draw({uniforms, parameters});
+
+      this.transformFeedback.end();
     }
 
-    // Swap buffer
-    bufferIndex = 1 - bufferIndex;
-    const buffer = targetBuffers[bufferIndex];
+    return needsRedraw;
+  }
 
-    model.program.use();
+  /* Private methods */
+  _getModel() {
+    // Build shaders
+    const varyings = [];
+    const attributeDeclarations = [];
+    const uniformsDeclarations = [];
+    const varyingDeclarations = [];
+    const calculations = [];
 
-    transformFeedback.bindBuffers({0: buffer}, {clear: true});
+    for (const attributeName in this.attributeAnimations) {
+      const animation = this.attributeAnimations[attributeName];
+      const attributeType = ATTRIBUTE_MAPPING[animation.attribute.size];
 
-    transformFeedback.begin(GL.POINTS);
+      if (attributeType) {
+        animation.bufferIndex = varyings.length;
+        varyings.push(attributeName);
 
-    const uniforms = {duration, time};
+        attributeDeclarations.push(`attribute ${attributeType} ${attributeName}From;`);
+        attributeDeclarations.push(`attribute ${attributeType} ${attributeName}To;`);
+        uniformsDeclarations.push(`uniform float ${attributeName}Time;`);
+        varyingDeclarations.push(`varying ${attributeType} ${attributeName};`);
+        calculations.push(`${attributeName} = mix(${attributeName}From, ${attributeName}To, ${attributeName}Time);`);
+      }
+    }
 
-    const parameters = {
-      [GL.RASTERIZER_DISCARD]: true
-    };
+    const vs = `
+#define SHADER_NAME feedback-vertex-shader
+${attributeDeclarations.join('\n')}
+${uniformsDeclarations.join('\n')}
+${varyingDeclarations.join('\n')}
 
-    model.draw({uniforms, parameters});
-
-    transformFeedback.end();
-
-    return buffer;
-  };
-
-  const getData = () => {
-    const buffer = run(true);
-
-    const dstData = new Float32Array(value.length);
-
-    // luma.gl's buffer.getData is not working
-    buffer.gl.bindBuffer(GL_COPY_READ_BUFFER, buffer.handle);
-    buffer.gl.getBufferSubData(GL_COPY_READ_BUFFER, 0, dstData);
-    buffer.gl.bindBuffer(GL_COPY_READ_BUFFER, null);
-
-    return dstData;
-  };
-
-  return {model, transformFeedback, run, getData};
+void main(void) {
+  ${calculations.join('\n')}
+  gl_Position = vec4(0.0);
 }
+`;
 
-export function getAttributeAnimation({gl, attribute, animationDuration, id}) {
+    const fs =  `\
+#define SHADER_NAME feedback-fragment-shader
 
-  if (!animationDuration || attribute.noAnimation) {
-    return null;
-  }
+#ifdef GL_ES
+precision highp float;
+#endif
 
-  const {value, type, size} = attribute;
-  const fromValues = value.slice();
+${varyingDeclarations.join('\n')}
 
-  if (attribute.animation) {
-    // Transfer old buffer data to the new one
-    const oldBufferData = attribute.animation.getData();
-    const len = Math.min(oldBufferData.length, fromValues.length);
-    for (let i = 0; i < len; i++) {
-      fromValues[i] = oldBufferData[i];
-    }
-  }
+void main(void) {
+  gl_FragColor = vec4(0.0);
+}
+`;
 
-  const shaders = getTFShaders(attribute);
-
-  if (!shaders) {
-    return null;
-  }
-
-  let {model, transformFeedback} = attribute.animation || {};
-
-  if (!model || !transformFeedback) {
-    model = new Model(gl, {
-      id,
-      program: new ProgramTransformFeedback(gl, shaders),
+    return new Model(this.gl, {
+      id: this.id,
+      program: new ProgramTransformFeedback(this.gl, {vs, fs, varyings}),
       geometry: new Geometry({
-        id,
+        id: this.id,
         drawMode: GL.POINTS
       }),
       vertexCount: 0,
       isIndexed: true
     });
 
-    transformFeedback = new TransformFeedback(gl, {});
   }
 
-  model.setAttributes({
-    fromValues: {size, type, value: fromValues},
-    toValues: {size, type, value}
-  });
-  model.setVertexCount(value.length / size);
+  // Updates animation from/to and buffer
+  _updateAnimation(animation, settings) {
+    const {attribute, name, buffer} = animation;
+    const {accessor, value, type, size} = attribute;
 
-  return createTransformFeedbackAnimation({
-    gl,
-    attribute,
-    duration: animationDuration,
-    model,
-    transformFeedback
-  });
+    const animationSettings = Array.isArray(accessor) ?
+      accessor.map(name => settings[name]).find(Boolean) :
+      settings[accessor];
+
+    let fromValues;
+    const needsNewBuffer = !buffer ||
+      buffer.bytes / Float32Array.BYTES_PER_ELEMENT !== value.length;
+
+    if (animationSettings) {
+      // Enter from 0
+      fromValues = new Float32Array(value.length);
+      // No entrance animation
+      // fromValues = value.slice();
+      if (buffer) {
+        // Transfer old buffer data to the new one
+        const oldBufferData = new Float32Array(value.length);
+
+        // TODO - luma.gl's buffer.getData is not working
+        this.gl.bindBuffer(GL_COPY_READ_BUFFER, buffer.handle);
+        this.gl.getBufferSubData(GL_COPY_READ_BUFFER, 0, oldBufferData);
+        this.gl.bindBuffer(GL_COPY_READ_BUFFER, null);
+
+        const len = Math.min(oldBufferData.length, fromValues.length);
+        for (let i = 0; i < len; i++) {
+          fromValues[i] = oldBufferData[i];
+        }
+      }
+    }
+
+    if (needsNewBuffer) {
+      if (buffer) {
+        buffer.unbind();
+        buffer._deleteHandle();
+      }
+
+      animation.buffer = new Buffer(this.gl, {
+        size,
+        instanced: attribute.instanced,
+        data: new Float32Array(value.length),
+        usage: GL.DYNAMIC_COPY
+      });
+    }
+
+    if (animationSettings) {
+      this._updateAttribute(name, {
+        fromState: {size, type, value: fromValues},
+        toState: {size, type, value}
+      });
+      animation.duration = animationSettings.duration;
+      animation.state = ANIMATION_STATE.PENDING;
+    } else {
+      // No animation needed
+      this._updateAttribute(name, {
+        fromState: {size, type, value},
+        toState: {size, type, value}
+      });
+      animation.state = ANIMATION_STATE.NONE;
+    }
+  }
+
+  _updateAttribute(name, {fromState, toState}) {
+    if (this.model) {
+      this.model.setAttributes({
+        [`${name}From`]: fromState,
+        [`${name}To`]: toState
+      });
+      this.model.setVertexCount(fromState.value.length / fromState.size);
+    }
+  }
 }

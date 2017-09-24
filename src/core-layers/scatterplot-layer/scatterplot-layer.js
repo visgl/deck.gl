@@ -59,9 +59,9 @@ export default class ScatterplotLayer extends Layer {
     this._checkRemovedProp('drawOutline', 'outline');
 
     this.state.attributeManager.addInstanced({
-      instancePositions: {size: 3, accessor: 'getPosition', update: this.calculateInstancePositions, noAnimation: true},
-      instanceRadius: {size: 1, accessor: 'getRadius', defaultValue: 1, update: this.calculateInstanceRadius, noAnimation: true},
-      instanceColors: {size: 4, type: GL.UNSIGNED_BYTE, accessor: 'getColor', update: this.calculateInstanceColors}
+      instancePositions: {size: 3, accessor: 'getPosition', update: this.calculateInstancePositions, animate: true},
+      instanceRadius: {size: 1, accessor: 'getRadius', defaultValue: 1, update: this.calculateInstanceRadius, animate: true},
+      instanceColors: {size: 4, type: GL.UNSIGNED_BYTE, accessor: 'getColor', update: this.calculateInstanceColors, animate: true}
     });
     /* eslint-enable max-len */
   }
@@ -98,8 +98,6 @@ export default class ScatterplotLayer extends Layer {
   }
 
   draw({uniforms}) {
-    super.animate();
-
     const {radiusScale, radiusMinPixels, radiusMaxPixels, outline, strokeWidth} = this.props;
     this.state.model.render(Object.assign({}, uniforms, {
       outline: outline ? 1 : 0,

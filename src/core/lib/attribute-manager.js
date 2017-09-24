@@ -24,7 +24,7 @@ import Stats from './stats';
 import {log} from './utils';
 import assert from 'assert';
 
-import {getAttributeAnimation} from './attribute-animation';
+import {AttributeAnimationManager} from './attribute-animation';
 
 const LOG_START_END_PRIORITY = 1;
 const LOG_DETAIL_PRIORITY = 2;
@@ -139,7 +139,7 @@ export default class AttributeManager {
    * @param {Object} [props]
    * @param {String} [props.id] - identifier (for debugging)
    */
-  constructor({id = 'attribute-manager'} = {}) {
+  constructor({id = 'attribute-manager', gl} = {}) {
     this.id = id;
 
     this.attributes = {};
@@ -149,6 +149,8 @@ export default class AttributeManager {
 
     this.userData = {};
     this.stats = new Stats({id: 'attr'});
+
+    this.attributeAnimation = new AttributeAnimationManager({id, gl});
 
     // For debugging sanity, prevent uninitialized members
     Object.seal(this);
@@ -265,6 +267,8 @@ export default class AttributeManager {
       this.stats.timeEnd();
       logFunctions.onUpdateEnd({level: LOG_START_END_PRIORITY, id: this.id, numInstances});
     }
+
+    this.attributeAnimation.update(this.attributes);
   }
 
   /**
@@ -288,10 +292,10 @@ export default class AttributeManager {
       const attribute = attributes[attributeName];
       if (attribute.changed) {
         attribute.changed = attribute.changed && !clearChangedFlags;
-        if (clearChangedFlags) {
-          attribute.needsAnimation = true;
+
+        if (!attribute.animate) {
+          changedAttributes[attributeName] = attribute;
         }
-        changedAttributes[attributeName] = attribute;
       }
     }
     return changedAttributes;
@@ -371,10 +375,7 @@ export default class AttributeManager {
           isExternalBuffer: false,
           needsAlloc: false,
           needsUpdate: false,
-          needsAnimation: false,
           changed: false,
-
-          animation: null,
 
           // Luma fields
           isIndexed,
@@ -630,29 +631,18 @@ export default class AttributeManager {
     }
   }
 
-  /* Attribute animation */
-  animate({gl, animationDuration}) {
-    const {attributes} = this;
-    const changedAttributes = {};
+  /**
+   * Attribute animation
+   * @params {Object} settings - animation settings
+   * Returns updated attributes
+   */
+  animate(settings) {
+    const {attributeAnimation} = this;
+    const needsRedraw = attributeAnimation.run(settings);
 
-    for (const attributeName in attributes) {
-      const attribute = attributes[attributeName];
+    this.needsRedraw = needsRedraw;
 
-      if (attribute.needsAnimation) {
-        attribute.animation = getAttributeAnimation({gl, attribute, attributeName, animationDuration,
-          id: `${this.id}-${attributeName}`});
-        attribute.needsAnimation = false;
-      }
-
-      if (attribute.animation) {
-        const updatedBuffer = attribute.animation.run();
-        if (updatedBuffer) {
-          changedAttributes[attributeName] = updatedBuffer;
-          this.needsRedraw = true;
-        }
-      }
-    }
-    return changedAttributes;
+    return needsRedraw ? attributeAnimation.getAttributes() : {};
   }
 
 }
