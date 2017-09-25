@@ -1,7 +1,7 @@
 /* global window,document,fetch */
 import React, {Component} from 'react';
 import {render} from 'react-dom';
-import {MapController} from 'deck.gl/dist/controllers';
+import {MapController} from 'deck.gl';
 import DeckGL, {GeoJsonLayer} from 'deck.gl';
 
 // source: Natural Earth http://www.naturalearthdata.com/

@@ -13,33 +13,21 @@ const CURSOR = {
 };
 
 const propTypes = {
-  /** The width of the map. */
-  width: PropTypes.number.isRequired,
-  /** The height of the map. */
-  height: PropTypes.number.isRequired,
-  /** The longitude of the center of the map. */
-  longitude: PropTypes.number.isRequired,
-  /** The latitude of the center of the map. */
-  latitude: PropTypes.number.isRequired,
-  /** The tile zoom level of the map. */
-  zoom: PropTypes.number.isRequired,
-  /** Specify the bearing of the viewport */
-  bearing: PropTypes.number,
-  /** Specify the pitch of the viewport */
-  pitch: PropTypes.number,
-  /** Altitude of the viewport camera. Default 1.5 "screen heights" */
+  width: PropTypes.number.isRequired, /** The width of the map. */
+  height: PropTypes.number.isRequired, /** The height of the map. */
+  longitude: PropTypes.number.isRequired, /** The longitude of the center of the map. */
+  latitude: PropTypes.number.isRequired, /** The latitude of the center of the map. */
+  zoom: PropTypes.number.isRequired, /** The tile zoom level of the map. */
+  bearing: PropTypes.number, /** Specify the bearing of the viewport */
+  pitch: PropTypes.number, /** Specify the pitch of the viewport */
   // Note: Non-public API, see https://github.com/mapbox/mapbox-gl-js/issues/1137
-  altitude: PropTypes.number,
+  altitude: PropTypes.number, /** Altitude of the viewport camera. Default 1.5 "screen heights" */
 
   /** Viewport constraints */
-  // Max zoom level
-  maxZoom: PropTypes.number,
-  // Min zoom level
-  minZoom: PropTypes.number,
-  // Max pitch in degrees
-  maxPitch: PropTypes.number,
-  // Min pitch in degrees
-  minPitch: PropTypes.number,
+  maxZoom: PropTypes.number, // Max zoom level
+  minZoom: PropTypes.number, // Min zoom level
+  maxPitch: PropTypes.number, // Max pitch in degrees
+  minPitch: PropTypes.number, // Min pitch in degrees
 
   /**
    * `onViewportChange` callback is fired when the user interacted with the
@@ -49,16 +37,11 @@ const propTypes = {
   onViewportChange: PropTypes.func,
 
   /** Enables control event handling */
-  // Scroll to zoom
-  scrollZoom: PropTypes.bool,
-  // Drag to pan
-  dragPan: PropTypes.bool,
-  // Drag to rotate
-  dragRotate: PropTypes.bool,
-  // Double click to zoom
-  doubleClickZoom: PropTypes.bool,
-  // Pinch to zoom / rotate
-  touchZoomRotate: PropTypes.bool,
+  scrollZoom: PropTypes.bool, // Scroll to zoom
+  dragPan: PropTypes.bool, // Drag to pan
+  dragRotate: PropTypes.bool, // Drag to rotate
+  doubleClickZoom: PropTypes.bool, // Double click to zoom
+  touchZoomRotate: PropTypes.bool, // Pinch to zoom / rotate
 
   /** Accessor that returns a cursor style to show interactive state */
   getCursor: PropTypes.func,
@@ -76,25 +59,21 @@ const getDefaultCursor = ({isDragging}) => isDragging ? CURSOR.GRABBING : CURSOR
 
 const defaultProps = Object.assign({}, MAPBOX_LIMITS, {
   onViewportChange: null,
-
   scrollZoom: true,
   dragPan: true,
   dragRotate: true,
   doubleClickZoom: true,
   touchZoomRotate: true,
-
   getCursor: getDefaultCursor
 });
 
 export default class MapController {
-
   constructor(props) {
     props = Object.assign({}, defaultProps, props);
 
     this.props = props;
     this.state = {
       isDragging: false      // Whether the cursor is down
-
     };
 
     this.canvas = props.canvas;
