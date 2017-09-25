@@ -19,11 +19,9 @@
 // THE SOFTWARE.
 
 import React, {createElement} from 'react';
-import autobind from './autobind';
-import Deck from '../pure-js/deck';
-
-const propTypes = Deck.propTypes;
-const defaultProps = Deck.defaultProps;
+import autobind from './utils/autobind';
+import {experimental} from '../core';
+const {DeckGLJS} = experimental;
 
 export default class DeckGL extends React.Component {
 
@@ -34,7 +32,7 @@ export default class DeckGL extends React.Component {
   }
 
   componentDidMount() {
-    this.deck = new Deck(Object.assign({}, this.props, {canvas: this.refs.overlay}));
+    this.deck = new DeckGLJS(Object.assign({}, this.props, {canvas: this.refs.overlay}));
   }
 
   componentWillReceiveProps(nextProps) {
@@ -68,5 +66,5 @@ export default class DeckGL extends React.Component {
   }
 }
 
-DeckGL.propTypes = propTypes;
-DeckGL.defaultProps = defaultProps;
+DeckGL.propTypes = DeckGLJS.propTypes;
+DeckGL.defaultProps = DeckGLJS.defaultProps;

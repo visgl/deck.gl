@@ -18,10 +18,11 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import './src/imports-spec';
-import './src/core';
-import './src/core-layers';
-import './src/deprecated-layers';
+import test from 'tape-catch';
+import Effect from 'deck.gl/core/experimental/lib/effect';
 
-// React test cases currently only work in browser
-// import './src/react';
+test('Effect#constructor', t => {
+  const effect = new Effect();
+  t.ok(effect, 'Effect created');
+  t.end();
+});

@@ -24,4 +24,4 @@ require('babel-polyfill');
 require('./test-utils/setup-gl');
 
 require('./index');
-require('./react');
+require('./src/react');
