@@ -1,3 +1,8 @@
+# deck.gl v4.1.3
+
+## HexagonLayer / GridLayer: Elevation by Value Support
+Add `getElevationValue` to `HexagonLayer` and `GridLayer` to enable elevation aggregation by value. This allow both color and elevation to be calculated based on customized aggregation function.
+
 # deck.gl v4.1
 
 Release date: July 27th, 2017
