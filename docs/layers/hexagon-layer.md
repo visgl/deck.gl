@@ -133,6 +133,19 @@ with the same elevation scale for comparison.
 
 Elevation scale output range
 
+##### `getElevationValue` (Function, optional)
+
+- Default: `points => points.length`
+
+Similar to `getColorValue`, `getElevationValue` is the accessor function to get the value that bin elevation is based on.
+It takes an array of points inside each bin as arguments, returns a number.
+By default `getElevationValue` returns the length of the points array.
+
+Note: hexagon layer compares whether `getElevationValue` has changed to
+recalculate the value for each bin for elevation. You should
+pass in the function defined outside the render function so it doesn't create a
+new function on every rendering pass.
+
 ##### `elevationScale` (Number, optional)
 
 - Default: `1`
@@ -151,15 +164,29 @@ Whether to enable cell elevation. Cell elevation scale by count of points in eac
 
 - Default: `100`
 
-Filter bins and re-calculate color by `upperPercentile`. Hexagons with value
+Filter bins and re-calculate color by `upperPercentile`. Hexagons with color value
 larger than the upperPercentile will be hidden.
 
 ##### `lowerPercentile` (Number, optional)
 
 - Default: `0`
 
-Filter bins and re-calculate color by `lowerPercentile`. Hexagons with value
+Filter bins and re-calculate color by `lowerPercentile`. Hexagons with color value
 smaller than the lowerPercentile will be hidden.
+
+##### `elevationUpperPercentile` (Number, optional)
+
+- Default: `100`
+
+Filter bins and re-calculate elevation by `elevationUpperPercentile`. Hexagons with elevation value
+larger than the elevationUpperPercentile will be hidden.
+
+##### `elevationLowerPercentile` (Number, optional)
+
+- Default: `100`
+
+Filter bins and re-calculate elevation by `elevationLowerPercentile`. Hexagons with elevation value
+smaller than the elevationLowerPercentile will be hidden.
 
 ##### `fp64` (Boolean, optional)
 
@@ -179,6 +206,18 @@ This is an object that contains light settings for extruded polygons.
 - Default: `object => object.position`
 
 Method called to retrieve the position of each point.
+
+##### `onSetColorDomain` (Function, optional)
+
+- Default: `() => {}`
+
+This callback will be called when bin color domain has been calculated.
+
+##### `onSetElevationDomain` (Function, optional)
+
+- Default: `() => {}`
+
+This callback will be called when bin elevation domain has been calculated.
 
 ## Source
 
