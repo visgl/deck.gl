@@ -217,12 +217,23 @@ function getMean(pts, key) {
     filtered.reduce((accu, curr) => accu + curr[key], 0) / filtered.length : null;
 }
 
-// grid layer compares whether getColorValue has changed to
+function getMax(pts, key) {
+  const filtered = pts.filter(pt => Number.isFinite(pt[key]));
+
+  return filtered.length ?
+    filtered.reduce((accu, curr) => curr[key] > accu ? curr[key] : accu, -Infinity) : null;
+}
+
+// hexagon/grid layer compares whether getColorValue / getElevationValue has changed to
 // call out bin sorting. Here we pass in the function defined
 // outside props, so it doesn't create a new function on
 // every rendering pass
 function getColorValue(points) {
   return getMean(points, 'SPACES');
+}
+
+function getElevationValue(points) {
+  return getMax(points, 'SPACES');
 }
 
 const GridLayerExample = {
@@ -274,7 +285,9 @@ const HexagonLayerExample = {
     coverage: {type: 'number', min: 0, max: 1},
     radius: {type: 'number', min: 0, max: 3000},
     lowerPercentile: {type: 'number', min: 0, max: 100},
-    upperPercentile: {type: 'number', min: 0, max: 100}
+    upperPercentile: {type: 'number', min: 0, max: 100},
+    elevationLowerPercentile: {type: 'number', min: 0, max: 100},
+    elevationUpperPercentile: {type: 'number', min: 0, max: 100}
   },
   props: {
     id: 'HexagonLayer',
@@ -287,6 +300,8 @@ const HexagonLayerExample = {
     elevationRange: [0, 3000],
     coverage: 1,
     getPosition: d => get(d, 'COORDINATES'),
+    getColorValue,
+    getElevationValue,
     lightSettings: LIGHT_SETTINGS
   }
 };
