@@ -45,7 +45,6 @@ export default class DeckGLOverlay extends Component {
         height={height}
         viewport={glViewport}
         layers={ [layer] }
-        onWebGLInitialized={this._initialize}
       />
     );
   }

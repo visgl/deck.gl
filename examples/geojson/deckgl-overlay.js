@@ -1,5 +1,4 @@
 import React, {Component} from 'react';
-import {setParameters} from 'luma.gl';
 import DeckGL, {GeoJsonLayer} from 'deck.gl';
 
 const LIGHT_SETTINGS = {
@@ -22,13 +21,6 @@ export default class DeckGLOverlay extends Component {
       pitch: 45,
       bearing: 0
     };
-  }
-
-  _initialize(gl) {
-    setParameters(gl, {
-      depthTest: true,
-      depthFunc: gl.LEQUAL
-    });
   }
 
   render() {
@@ -56,7 +48,7 @@ export default class DeckGLOverlay extends Component {
     });
 
     return (
-      <DeckGL {...viewport} layers={ [layer] } onWebGLInitialized={this._initialize} />
+      <DeckGL {...viewport} layers={ [layer] } initWebGLParameters />
     );
   }
 }

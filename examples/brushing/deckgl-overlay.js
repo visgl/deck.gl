@@ -1,6 +1,5 @@
 import React, {Component} from 'react';
 import {scaleLinear} from 'd3-scale';
-import {setParameters} from 'luma.gl';
 
 import DeckGL from 'deck.gl';
 import ArcBrushingLayer from './arc-brushing-layer';
@@ -127,13 +126,6 @@ export default class DeckGLOverlay extends Component {
     return {arcs, targets, sources};
   }
 
-  _initialize(gl) {
-    setParameters(gl, {
-      depthTest: true,
-      depthFunc: gl.LEQUAL
-    });
-  }
-
   render() {
     const {viewport, enableBrushing, brushRadius, strokeWidth,
       opacity, mouseEntered, mousePosition} = this.props;
@@ -204,7 +196,7 @@ export default class DeckGLOverlay extends Component {
     ];
 
     return (
-      <DeckGL {...viewport} layers={ layers } onWebGLInitialized={this._initialize}/>
+      <DeckGL {...viewport} layers={ layers } initWebGLParameters />
     );
   }
 }

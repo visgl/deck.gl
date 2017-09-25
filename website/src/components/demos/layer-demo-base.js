@@ -86,13 +86,6 @@ export default function createLayerDemoClass(settings) {
       return null;
     }
 
-    _initialize(gl) {
-      setParameters(gl, {
-        depthTest: true,
-        depthFunc: gl.LEQUAL
-      });
-    }
-
     render() {
       const {viewport, params, data} = this.props;
       const layers = [
@@ -103,7 +96,7 @@ export default function createLayerDemoClass(settings) {
 
       return (
         <div>
-          <DeckGL {...viewport} layers={ layers } onWebGLInitialized={this._initialize} />
+          <DeckGL {...viewport} layers={ layers } initWebGLParameters />
           { this._renderTooltip() }
         </div>
       );

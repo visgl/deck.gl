@@ -170,8 +170,7 @@ Since deck.gl is WebGL based, all its viewports need to be in the same canvas (u
         height={viewportProps.height}
         viewports={viewports}
         useDevicePixelRatio={false}
-        layers={this._renderLayers()}
-        onWebGLInitialized={this._initialize} />
+        layers={this._renderLayers()} />
 
     </ViewportLayout>
   }

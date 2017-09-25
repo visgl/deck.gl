@@ -1,6 +1,5 @@
 import React, {Component} from 'react';
 import DeckGL, {PolygonLayer} from 'deck.gl';
-import {setParameters} from 'luma.gl';
 import TripsLayer from './trips-layer';
 
 const LIGHT_SETTINGS = {
@@ -23,13 +22,6 @@ export default class DeckGLOverlay extends Component {
       pitch: 45,
       bearing: 0
     };
-  }
-
-  _initialize(gl) {
-    setParameters(gl, {
-      depthTest: true,
-      depthFunc: gl.LEQUAL
-    });
   }
 
   render() {
@@ -65,7 +57,7 @@ export default class DeckGLOverlay extends Component {
     ];
 
     return (
-      <DeckGL {...viewport} layers={layers} onWebGLInitialized={this._initialize} />
+      <DeckGL {...viewport} layers={layers} initWebGLParameters />
     );
   }
 }

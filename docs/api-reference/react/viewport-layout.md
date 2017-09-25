@@ -27,8 +27,7 @@
           height={viewportProps.height}
           viewports={viewports}
           useDevicePixelRatio={false}
-          layers={this._renderLayers()}
-          onWebGLInitialized={this._initialize} />
+          layers={this._renderLayers()} />
 
       </ViewportLayout>
     );
