@@ -113,6 +113,19 @@ Elevation scale input domain, default is set to the extent of point counts in ea
 
 Elevation scale output range
 
+##### `getElevationValue` (Function, optional)
+
+- Default: `points => points.length`
+
+Similar to `getColorValue`, `getElevationValue` is the accessor function to get the value that cell elevation is based on.
+It takes an array of points inside each cell as arguments, returns a number.
+By default `getElevationValue` returns the length of the points array.
+
+Note: grid layer compares whether `getElevationValue` has changed to
+recalculate the value for each cell for its elevation. You should
+pass in the function defined outside the render function so it doesn't create a
+new function on every rendering pass.
+
 ##### `elevationScale` (Number, optional)
 
 - Default: `1`
@@ -138,8 +151,23 @@ larger than the upperPercentile will be hidden.
 
 - Default: `0`
 
-Filter bins and re-calculate color by `lowerPercentile`. Cells with value
+Filter cells and re-calculate color by `lowerPercentile`. Cells with value
 smaller than the lowerPercentile will be hidden.
+
+##### `elevationUpperPercentile` (Number, optional)
+
+- Default: `100`
+
+Filter cells and re-calculate elevation by `elevationUpperPercentile`. Cells with elevation value
+larger than the elevationUpperPercentile will be hidden.
+
+##### `elevationLowerPercentile` (Number, optional)
+
+- Default: `100`
+
+Filter cells and re-calculate elevation by `elevationLowerPercentile`. Cells with elevation value
+smaller than the elevationLowerPercentile will be hidden.
+
 
 ##### `fp64` (Boolean, optional)
 
@@ -161,6 +189,18 @@ Be aware that this prop will likely be changed in a future version of deck.gl.
 - Default: `object => object.position`
 
 Method called to retrieve the position of each point.
+
+##### `onSetColorDomain` (Function, optional)
+
+- Default: `() => {}`
+
+This callback will be called when bin color domain has been calculated.
+
+##### `onSetElevationDomain` (Function, optional)
+
+- Default: `() => {}`
+
+This callback will be called when bin elevation domain has been calculated.
 
 ## Source
 [src/layers/core/grid-layer](https://github.com/uber/deck.gl/tree/4.1-release/src/layers/core/grid-layer)
