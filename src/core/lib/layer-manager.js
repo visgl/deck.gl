@@ -116,21 +116,28 @@ export default class LayerManager {
   setViewports(viewports) {
     viewports = flatten(viewports, {filter: Boolean});
 
+    // Need to ensure one viewport is activated
     const viewport = viewports[0];
-
     assert(viewport instanceof Viewport, 'Invalid viewport');
+
+    this.context.viewports = viewports;
+    this._activateViewport(viewport);
+  }
+
+  getViewports() {
+    return this.context.viewports;
+  }
+
+  _activateViewport(viewport) {
+    this._needsRedraw = true;
 
     // TODO - viewport change detection breaks METER_OFFSETS mode
     // const oldViewport = this.context.viewport;
     // const viewportChanged = !oldViewport || !viewport.equals(oldViewport);
-
-    this._needsRedraw = true;
-
     const viewportChanged = true;
 
     if (viewportChanged) {
       Object.assign(this.oldContext, this.context);
-      this.context.viewports = viewports;
       this.context.viewport = viewport;
       this.context.viewportChanged = true;
       this.context.uniforms = {};

@@ -26,26 +26,32 @@
  * @param {Array} array The array to flatten.
  * @param {Function} filter= - Optional predicate called on each `value` to
  *   determine if it should be included (pushed onto) the resulting array.
+ * @param {Function} map= - Optional transform applied to each array elements.
  * @param {Array} result=[] - Optional array to push value into
  * @return {Array} Returns the new flattened array (new array or `result` if provided)
  */
 export function flatten(array, {
   filter = () => true,
+  map = x => x,
   result = []
 } = {}) {
-  array = Array.isArray(array) ? array : [array];
-  return flattenArray(array, filter, result);
+  // Wrap single object in array
+  if (!Array.isArray(array)) {
+    return filter(array) ? [map(array)] : [];
+  }
+  // Deep flatten and filter the array
+  return flattenArray(array, filter, map, result);
 }
 
 // Deep flattens an array. Helper to `flatten`, see its parameters
-function flattenArray(array, filter, result) {
+function flattenArray(array, filter, map, result) {
   let index = -1;
   while (++index < array.length) {
     const value = array[index];
     if (Array.isArray(value)) {
-      flattenArray(value, filter, result);
+      flattenArray(value, filter, map, result);
     } else if (filter(value)) {
-      result.push(value);
+      result.push(map(value));
     }
   }
   return result;
