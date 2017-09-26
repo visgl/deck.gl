@@ -5,7 +5,6 @@
     "start-es6": "webpack-dev-server --env.es6 --progress --hot --open"
   },
   "dependencies": {
-    "d3-request": "^1.0.5",
     "deck.gl": ">=4.1.0",
     "luma.gl": ">=4.1.0-alpha.1",
     "math.gl": ">=1.0.0-alpha.3",

@@ -10,7 +10,7 @@ import {
 } from 'deck.gl';
 
  // deck.gl react components
-import DeckGL, {ViewportController, ViewportLayout} from 'deck.gl';
+import DeckGL, {ViewportController} from 'deck.gl';
 
 const {
   ReflectionEffect
@@ -208,17 +208,17 @@ class App extends PureComponent {
   _getViewports() {
     const {width, height, mapViewState, settings: {multiview}} = this.state;
     return [
-      multiview && new FirstPersonViewport({
-        ...mapViewState,
-        width,
-        height: multiview ? height / 2 : height,
-        position: [0, 0, 50]
-      }),
       new WebMercatorViewport({
         id: 'basemap', ...mapViewState,
         width,
         height: multiview ? height / 2 : height,
         y: multiview ? height / 2 : 0
+      }),
+      multiview && new FirstPersonViewport({
+        ...mapViewState,
+        width,
+        height: multiview ? height / 2 : height,
+        position: [0, 0, 50]
       })
     ];
   }
@@ -237,7 +237,23 @@ class App extends PureComponent {
           height={height}
           onViewportChange={this._onViewportChange} >
 
-          <ViewportLayout viewports={viewports}>
+          <DeckGL
+            ref="deckgl"
+            id="default-deckgl-overlay"
+            width={width}
+            height={height}
+            viewports={viewports}
+            layers={this._renderExamples()}
+            effects={effects ? this._effects : []}
+            debug={false}
+            useDefaultGLSettings
+            pickingRadius={pickingRadius}
+            onLayerHover={this._onHover}
+            onLayerClick={this._onClick}
+            initWebGLParameters
+          >
+            <FPSStats isActive/>
+
             <StaticMap
               viewportId="basemap"
               {...mapViewState}
@@ -246,24 +262,7 @@ class App extends PureComponent {
               height={height}
               onViewportChange={this._onViewportChange}/>
 
-            <FPSStats isActive/>
-
-            <DeckGL
-              ref="deckgl"
-              id="default-deckgl-overlay"
-              width={width}
-              height={height}
-              viewports={viewports}
-              layers={this._renderExamples()}
-              effects={effects ? this._effects : []}
-              debug={false}
-              pickingRadius={pickingRadius}
-              onLayerHover={this._onHover}
-              onLayerClick={this._onClick}
-              initWebGLParameters
-            />
-
-          </ViewportLayout>
+          </DeckGL>
 
         </ViewportController>
       </div>

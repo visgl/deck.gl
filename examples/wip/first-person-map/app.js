@@ -1,4 +1,4 @@
-/* global window,document */
+/* global window, document, fetch */
 import React, {Component} from 'react';
 import {render} from 'react-dom';
 
@@ -16,10 +16,9 @@ import {
 import TripsLayer from '../../trips/trips-layer';
 
 // deck.gl React components
-import {DeckGL, ViewportLayout, ViewportController} from 'deck.gl';
+import {DeckGL, ViewportController} from 'deck.gl';
 
 import {StaticMap} from 'react-map-gl';
-import {json as requestJson} from 'd3-request';
 
 // Source data CSV
 const DATA_URL = {
@@ -72,17 +71,13 @@ class Root extends Component {
       trailLength: 50
     };
 
-    requestJson(DATA_URL.BUILDINGS, (error, response) => {
-      if (!error) {
-        this.setState({buildings: response});
-      }
-    });
+    fetch(DATA_URL.BUILDINGS)
+      .then(response => response.json())
+      .then(data => this.setState({buildings: data}));
 
-    requestJson(DATA_URL.TRIPS, (error, response) => {
-      if (!error) {
-        this.setState({trips: response});
-      }
-    });
+    fetch(DATA_URL.TRIPS)
+      .then(response => response.json())
+      .then(data => this.setState({trips: data}));
 
     this._onViewportChange = this._onViewportChange.bind(this);
     this._onViewportModeChange = this._onViewportModeChange.bind(this);
@@ -197,8 +192,8 @@ class Root extends Component {
           color: [0, 255, 255, 255],
           normal: [1, 0, 0]
         }],
-        projectionMode: COORDINATE_SYSTEM.METER_OFFSETS,
-        positionOrigin: [longitude, latitude],
+        coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
+        coordinateOrigin: [longitude, latitude],
         opacity: 1,
         radiusPixels: 20
       }),
@@ -209,8 +204,8 @@ class Root extends Component {
           color: [255, 0, 0, 255],
           normal: [1, 0, 0]
         }],
-        projectionMode: COORDINATE_SYSTEM.METER_OFFSETS,
-        positionOrigin: [longitude, latitude],
+        coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
+        coordinateOrigin: [longitude, latitude],
         opacity: 1,
         radiusPixels: 20
       })
@@ -250,7 +245,15 @@ class Root extends Component {
           height={viewportProps.height}
           onViewportChange={this._onViewportChange} >
 
-          <ViewportLayout viewports={viewports}>
+          <DeckGL
+            id="first-person"
+            width={viewportProps.width}
+            height={viewportProps.height}
+            viewports={viewports}
+            useDevicePixelRatio={false}
+            layers={this._renderLayers()}
+            initWebGLParameters
+            >
 
             <StaticMap
               viewportId="basemap"
@@ -259,16 +262,7 @@ class Root extends Component {
               onViewportChange={this._onViewportChange.bind(this)}
               mapboxApiAccessToken={MAPBOX_TOKEN}/>
 
-            <DeckGL
-              id="first-person"
-              width={viewportProps.width}
-              height={viewportProps.height}
-              viewports={viewports}
-              useDevicePixelRatio={true}
-              layers={this._renderLayers()}
-              initWebGLParameters />
-
-          </ViewportLayout>
+          </DeckGL>
 
           {this._renderOptionsPanel()}
 

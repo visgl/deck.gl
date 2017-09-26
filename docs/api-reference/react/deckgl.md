@@ -1,8 +1,12 @@
 # DeckGL (React Component)
 
-`DeckGL` is a React component that takes deck.gl layer instances and
-viewport parameters, and renders those layers as a transparent overlay.
+`DeckGL` is a React component that takes deck.gl layer instances and viewport parameters, and renders those layers as a transparent overlay.
 
+`DeckGL` can accept child components. Child components can be automatically positioned underneath the deck.gl `viewports`. Such child components are often maps (e.g. represented by instances of the `StaticMap` component from [react-map-gl]()), but can be any React components.
+
+## Usage
+
+// Basic standalone use
 ```js
 import DeckGL, {ScatterplotLayer} from 'deck.gl';
 
@@ -13,13 +17,48 @@ const App = (viewport, data) => (
 );
 ```
 
+// Multiple viewports and a base map
+```js
+  const viewports = [
+    new FirstPersonViewport({...}),
+    new WebMercatorViewport({id: 'basemap', ...})
+  ];
+
+  render() {
+    return (
+      <DeckGL
+        viewports={viewports}
+        layers={this._renderLayers()}
+        width={viewportProps.width}
+        height={viewportProps.height} />
+
+        <StaticMap
+          viewportId='basemap'
+          {...viewportProps}/>
+
+      </DeckGL>
+    );
+  }
+```
+
+
 ### Properties
 
 ##### `id` (String, optional)
 
 Canvas ID to allow style customization in CSS.
 
+##### `children`
+
+`DeckGL` implements special processing of the normal React `children` prop. It attempts to reposition any top-level children with `viewportId` prop matching a viewport with that id. When renderering, deck.gl walk the list looking for viewport ids matching children viewportIds, rendering those components in the position and size specified by that viewport.
+* Positioning is done with CSS styling on a wrapper div, sizing by width and height properties.
+* Also injects the `visible: viewport.isMapSynched()` prop to hide base maps that cannot display per the current viewport parameters.
+
+The DeckGL component own `canvas` element is rendered last, intentionally on top of all the base maps.
+
 ##### `viewports`
+
+A singe viewport, or an array of `Viewport`s or "Viewport Descriptors".
 
 * (`Viewport`|`Viewports[]`, optional) - A singe viewport, or an array of `Viewports` or "Viewport Descriptors".
 
@@ -169,6 +208,7 @@ Returns: an array of unique [`info`](/docs/get-started/interactivity.md#the-pick
 Remarks:
 - This query methods are designed to quickly find objects by utilizing the picking buffer. They offer more flexibility for developers to handle events in addition to the built-in hover and click callbacks.
 - Note there is a limitation in the query methods: occluded objects are not returned. To improve the results, you may try setting the `layerIds` parameter to limit the query to fewer layers.
+- * Since deck.gl is WebGL based, it can only render into a single canvas. Thus all its viewports need to be in the same canvas (unless you use multiple DeckGL instances, but that can have significant resource and performance impact).
 
 ## Source
 [src/react/deckgl.js](https://github.com/uber/deck.gl/blob/4.1-release/src/react/deckgl.js)

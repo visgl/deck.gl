@@ -334,6 +334,19 @@ export default class Viewport {
 
   // EXPERIMENTAL METHODS
 
+  // Support for relative viewport dimensions
+  // TODO - parses same strings a number of times
+  getDimensions({width, height}) {
+    return {
+      /* eslint-disable max-len */
+      x: typeof this.x === 'string' ? Math.round(parseFloat(this.x) / 100 * width) : this.x,
+      y: typeof this.y === 'string' ? Math.round(parseFloat(this.y) / 100 * height) : this.y,
+      width: typeof this.width === 'string' ? Math.round(parseFloat(this.width) / 100 * width) : this.width,
+      height: typeof this.height === 'string' ? Math.round(parseFloat(this.x) / 100 * height) : this.height
+      /* eslint-enable max-len */
+    };
+  }
+
   getCameraPosition() {
     return this.cameraPosition;
   }

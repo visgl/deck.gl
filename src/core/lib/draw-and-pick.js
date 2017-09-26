@@ -30,12 +30,15 @@ const getPixelRatio = ({useDevicePixelRatio}) =>
 
 // Convert viewport top-left CSS coordinates to bottom up WebGL coordinates
 const getGLViewport = (gl, {viewport, pixelRatio}) => {
+  const width = gl.canvas.clientWidth;
   const height = gl.canvas.clientHeight;
+  // Convert viewport top-left CSS coordinates to bottom up WebGL coordinates
+  const dimensions = viewport.getDimensions({width, height});
   return [
-    viewport.x * pixelRatio,
-    (height - viewport.y - viewport.height) * pixelRatio,
-    viewport.width * pixelRatio,
-    viewport.height * pixelRatio
+    dimensions.x * pixelRatio,
+    (height - dimensions.y - dimensions.height) * pixelRatio,
+    dimensions.width * pixelRatio,
+    dimensions.height * pixelRatio
   ];
 };
 
