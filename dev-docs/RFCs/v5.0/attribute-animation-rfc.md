@@ -9,9 +9,9 @@ Notes:
 
 ## Motivation
 
-For a general motivation of animation, see the [Property Animation RFC]().
+For a general motivation of animation, see the [Property Animation RFC](./property-animation-rfc.md).
 
-The goal of this supplmentary RFC is to investigate to what extend deck.gl could provide automatic interpolation of vertex attribute arrays, in addition to primitive values like properties, uniforms and gl parameters.
+The goal of this supplementary RFC is to investigate to what extend deck.gl could provide automatic interpolation of vertex attribute arrays, in addition to primitive values like properties, uniforms and gl parameters.
 
 ## Proposal: Attribute Array Interpolation
 
@@ -32,23 +32,27 @@ this.state.attributeManager.add({
 });
 ```
 
-When creating layers, animation can be enabled by supplying an `animation` prop. Animation parameters are defined per attribute by using attribute names or accessor names as keys, similar to that of `updateTriggers`:
+When creating layers, animation can be enabled by supplying an `transition` prop. Animation parameters are defined per attribute by using attribute names or accessor names as keys, similar to that of `updateTriggers`:
 ```js
 new Layer({
-  animation: {
+  transition: {
     getPositions: {
-      duration: 600  //ms
-      // easing defaults to EASING.LINEAR
+      duration: 600
     },
     getColors: {
-      duration: 300,  //ms
-      easing: EASING.CIRCULAR_IN_OUT
+      duration: 300,
+      easing: d3.easeCubicInOut
     }
   }
 });
 ```
 
-Because we intend to implement the easing functions in a shader module, the users will need to choose from a fixed preset. An `EASING` constant will be exported for referencing the supported easing functions. As a start, we may include the [d3-ease](https://github.com/d3/d3-ease) functions with default parameters.
+| Parameter | Type     | Description |
+| --------- | -------- | ----------- |
+| duration  | Number   | Duration of the transition animation, in milliseconds |
+| easing    | Function | Easing function that maps a value from [0, 1] to [0, 1], see http://easings.net/ |
+| onComplete | Function   | Callback when the transition is done |
+
 
 ### Implementation
 
@@ -56,10 +60,19 @@ Because we intend to implement the easing functions in a shader module, the user
     + The animation states will be tracked in the attribute manager.
     + The base `Layer` class will ensure that the animated attributes are updated every render cycle before the `draw` call.
 - In WebGL2 enabled browsers, use TransformFeedback for interpolation:
-    + The inputs are from and to value arrays, and current time as a uniform
+    + The inputs are from and to value arrays, and current ratio (float between 0, 1) as a uniform
     + The output is passed to the vertex shader for the target attribute
-    + Easing functions are implemented as a shader module.
 - In non-WebGL2 enabled browsers, we either drop the feature, or fall back to interpolation on the CPU.
+
+### TransformFeedback vs VertexShader
+
+VertexShader pros:
+- Available in all supported browsers
+
+VertexShader cons:
+- Must rewrite existing layers’ vertex shaders to double each animatable attribute and perform interpolation before other calculations. The cost of a heavier shader and double attribute upload applies even if transition is disabled on a layer.
+- Interpolation must run every frame, cannot be disabled after animations complete.
+- Current state is not captured if a transition is interrupted. (Scenario: array is updated to C while transitioning from A to B. The attribute should start from the current state in between A and B and end at C)
 
 
 ## Impact on performance
@@ -67,9 +80,9 @@ Because we intend to implement the easing functions in a shader module, the user
 If interpolation is done on the CPU: both calculating the attribute and uploading it to the GPU will be expensive. Framerate is expected to stagger.
 
 If using TransformFeedback:
-- At initialization: there is a cost to compile shaders and create the model for the transform feedback. We should minimize it by only doing it for the layers that have animation enabled.
-- At attribute update: new value arrays are uploaded to GPU once at the beginning of the animation, which is the same as today. There is a cost to calculate and upload the "current" state of the attribute to animate from.
-- During animation: The transform feedback is updated every frame till the end of the transition. It renders to buffers that are directly transfered to the vertex shader, so perf cost should be minimal.
+- At initialization: there is a cost to compile shaders and create the model for the transform feedback. We should minimize it by only doing it for the layers that have transition enabled.
+- At attribute update: new value arrays are uploaded to GPU once at the beginning of the animation, which is the same as today. There is a cost to calculating and uploading the "current" state of the attribute to animate from.
+- During animation: The transform feedback is updated every frame till the end of the transition. It renders to buffers that are directly transferred to the vertex shader, so perf cost should be minimal.
 
 
 ## Questions
@@ -98,7 +111,7 @@ this.state.attributeManager.add({
 - Add fields `enter` and `exit` to animation parameters. The attribute updater is called with these functions substituting the regular accessor to retrieve the from value for enter animation, or to value for exit animation. This allows the user to control the animations per object, but more expensive at run time:
 ```js
 new Layer({
-  animation: {
+  transition: {
     getColors: {
       duration: 300,
       enter: feature => feature.properties.fill.concat(0),
