@@ -1,5 +1,4 @@
 import React, {Component} from 'react';
-import {setParameters} from 'luma.gl';
 
 import PlotLayer from './plot-layer';
 import DeckGL from 'deck.gl';
@@ -10,13 +9,6 @@ function getScale({min, max}) {
 }
 
 export default class DeckGLOverlay extends Component {
-
-  _onInitialized(gl) {
-    setParameters(gl, {
-      depthTest: true,
-      depthFunc: gl.LEQUAL
-    });
-  }
 
   render() {
     const {viewport, resolution, showAxis, equation} = this.props;
@@ -48,11 +40,11 @@ export default class DeckGLOverlay extends Component {
 
     return (
       <DeckGL
-        onWebGLInitialized={this._onInitialized}
         width={viewport.width}
         height={viewport.height}
         viewport={viewport}
-        layers={ layers } />
+        layers={ layers }
+        initWebGLParameters />
     );
   }
 }

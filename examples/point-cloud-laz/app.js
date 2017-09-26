@@ -109,9 +109,7 @@ class Example extends PureComponent {
 
   _onInitialized(gl) {
     setParameters(gl, {
-      clearColor: [0.07, 0.14, 0.19, 1],
-      depthTest: true,
-      depthFunc: gl.LEQUAL
+      clearColor: [0.07, 0.14, 0.19, 1]
     });
   }
 
@@ -177,6 +175,7 @@ class Example extends PureComponent {
           viewport={glViewport}
           layers={[this._renderLazPointCloudLayer()]}
           onWebGLInitialized={this._onInitialized}
+          initWebGLParameters
         />
       </OrbitController>
     );

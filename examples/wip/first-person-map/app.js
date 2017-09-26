@@ -19,7 +19,6 @@ import TripsLayer from '../../trips/trips-layer';
 import {DeckGL, ViewportLayout, ViewportController} from 'deck.gl';
 
 import {StaticMap} from 'react-map-gl';
-import {setParameters} from 'luma.gl';
 import {json as requestJson} from 'd3-request';
 
 // Source data CSV
@@ -100,13 +99,6 @@ class Root extends Component {
     if (this._animationFrame) {
       window.cancelAnimationFrame(this._animationFrame);
     }
-  }
-
-  _initialize(gl) {
-    setParameters(gl, {
-      depthTest: true,
-      depthFunc: gl.LEQUAL
-    });
   }
 
   _onAnimate() {
@@ -274,7 +266,7 @@ class Root extends Component {
               viewports={viewports}
               useDevicePixelRatio={true}
               layers={this._renderLayers()}
-              onWebGLInitialized={this._initialize} />
+              initWebGLParameters />
 
           </ViewportLayout>
 

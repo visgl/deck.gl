@@ -79,11 +79,11 @@ Default `0`.
 
 ##### `useDevicePixelRatio` (Boolean, optional)
 
-Default value is true.
-
 When true, device's full resolution will be used for rendering, this value can change per frame, like when moving windows between screens or when changing zoom level of the browser.
 
-Note: Set it false unless it is required, as it affects your application performance.
+Default value is `true`.
+
+Note: Consider setting to `false` unless you require high resolution, as it affects rendering performance.
 
 ##### `gl` (Object, optional)
 
@@ -93,7 +93,15 @@ gl context, will be autocreated if not supplied.
 
 Flag to enable debug mode.
 
+Default value is `false`.
+
 Note: debug mode is somewhat slower as it will use synchronous operations to keep track of GPU state.
+
+##### `initWebGLParameters` (Boolean, optional)
+
+Sets WebGL parameters to recommended defaults on initialization, e.g. turning on depth checking. Recommended for most applications. `onWebGLInitialized`, if supplied, will be called after these parameters are set.
+
+Default value is `false` (to ensure backwards compatbility, this will be changed in a future major release).
 
 ##### `onWebGLInitialized` (Function, optional)
 

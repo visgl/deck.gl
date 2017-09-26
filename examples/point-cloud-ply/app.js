@@ -4,9 +4,6 @@ import React, {PureComponent} from 'react';
 import {render} from 'react-dom';
 import DeckGL, {COORDINATE_SYSTEM, PointCloudLayer, experimental} from 'deck.gl';
 const {OrbitController} = experimental;
-
-import {setParameters} from 'luma.gl';
-
 import {loadBinary, parsePLY} from './utils/ply-loader';
 
 const DATA_REPO = 'https://raw.githubusercontent.com/uber-common/deck.gl-data/master';
@@ -72,13 +69,6 @@ class Example extends PureComponent {
     this._onViewportChange(newViewport);
   }
 
-  _onInitialized(gl) {
-    setParameters(gl, {
-      depthTest: true,
-      depthFunc: gl.LEQUAL
-    });
-  }
-
   _onViewportChange(viewport) {
     this.setState({
       viewport: {...this.state.viewport, ...viewport}
@@ -128,7 +118,7 @@ class Example extends PureComponent {
           height={height}
           viewport={glViewport}
           layers={[this._renderPointCloudLayer()]}
-          onWebGLInitialized={this._onInitialized}
+          initWebGLParameters
         />
       </OrbitController>
     );

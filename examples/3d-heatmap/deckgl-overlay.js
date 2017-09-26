@@ -97,11 +97,6 @@ export default class DeckGLOverlay extends Component {
     }
   }
 
-  _initialize(gl) {
-    gl.enable(gl.DEPTH_TEST);
-    gl.depthFunc(gl.LEQUAL);
-  }
-
   render() {
     const {viewport, data, radius, coverage, upperPercentile} = this.props;
 
@@ -128,7 +123,7 @@ export default class DeckGLOverlay extends Component {
       })
     ];
 
-    return <DeckGL {...viewport} layers={layers} onWebGLInitialized={this._initialize} />;
+    return <DeckGL {...viewport} layers={layers} initWebGLParameters />;
   }
 }
 

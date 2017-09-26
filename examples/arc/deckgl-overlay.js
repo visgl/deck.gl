@@ -1,6 +1,5 @@
 import React, {Component} from 'react';
 import {scaleQuantile} from 'd3-scale';
-import {setParameters} from 'luma.gl';
 
 import DeckGL, {GeoJsonLayer, ArcLayer} from 'deck.gl';
 
@@ -81,13 +80,6 @@ export default class DeckGLOverlay extends Component {
     return arcs;
   }
 
-  _initialize(gl) {
-    setParameters(gl, {
-      depthTest: true,
-      depthFunc: gl.LEQUAL
-    });
-  }
-
   render() {
     const {viewport, strokeWidth, data} = this.props;
     const {arcs} = this.state;
@@ -119,7 +111,7 @@ export default class DeckGLOverlay extends Component {
     ];
 
     return (
-      <DeckGL {...viewport} layers={ layers } onWebGLInitialized={this._initialize} />
+      <DeckGL {...viewport} layers={ layers } initWebGLParameters />
     );
   }
 }

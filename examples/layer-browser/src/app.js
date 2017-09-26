@@ -23,7 +23,7 @@ import autobind from 'react-autobind';
 import {StaticMap} from 'react-map-gl';
 import {FPSStats} from 'react-stats';
 
-import {Matrix4, setParameters} from 'luma.gl';
+import {Matrix4} from 'luma.gl';
 
 import LayerInfo from './components/layer-info';
 import LayerSelector from './components/layer-selector';
@@ -108,13 +108,6 @@ class App extends PureComponent {
       ...settings
     };
     this.setState({activeExamples});
-  }
-
-  _onWebGLInitialized(gl) {
-    setParameters(gl, {
-      depthTest: true,
-      depthFunc: gl.LEQUAL
-    });
   }
 
   _onUpdateContainerSettings(settings) {
@@ -265,9 +258,9 @@ class App extends PureComponent {
               effects={effects ? this._effects : []}
               debug={false}
               pickingRadius={pickingRadius}
-              onWebGLInitialized={this._onWebGLInitialized}
               onLayerHover={this._onHover}
               onLayerClick={this._onClick}
+              initWebGLParameters
             />
 
           </ViewportLayout>
