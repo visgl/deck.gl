@@ -131,15 +131,15 @@ export default class HexagonLayer extends CompositeLayer {
 
   needsReProjectPoints(oldProps, props) {
     return oldProps.radius !== props.radius ||
-      oldProps.hexagonAggregator !== props.hexagonAggregator;
+      oldProps.hexagonAggregator !== props.hexagonAggregator ||
+      oldProps.getPosition !== props.getPosition;
   }
 
   getDimensionUpdaters() {
     // dimension updaters are sequential,
-    // if the first ones needs to be called, the 2nd and third one will automatically
-    // be called. e.g. if value needs to be updated, domain and scaleFunc
+    // if the first one needs to be called, the 2nd and 3rd one will automatically
+    // be called. e.g. if ColorValue needs to be updated, getColorValueDomain and getColorScale
     // will automatically be called
-
     return {
       getColor: [
         {
@@ -203,13 +203,30 @@ export default class HexagonLayer extends CompositeLayer {
   }
 
   getPickingInfo({info}) {
-    const pickedCell = info.picked && info.index > -1 ?
-      this.state.hexagons[info.index] : null;
+    const {sortedColorBins, sortedElevationBins} = this.state;
+    const isPicked = info.picked && info.index > -1;
 
+    let object = null;
+    if (isPicked) {
+
+      const cell = this.state.hexagons[info.index];
+
+      const colorValue = sortedColorBins.binMap[cell.index] &&
+        sortedColorBins.binMap[cell.index].value;
+      const elevationValue = sortedElevationBins.binMap[cell.index] &&
+        sortedElevationBins.binMap[cell.index].value;
+
+      object = Object.assign({
+        colorValue,
+        elevationValue
+      }, cell);
+    }
+
+    // add bin colorValue and elevationValue to info
     return Object.assign(info, {
-      picked: Boolean(pickedCell),
+      picked: Boolean(object),
       // override object with picked cell
-      object: pickedCell
+      object
     });
   }
 
