@@ -19,6 +19,8 @@
 // THE SOFTWARE.
 /* eslint-disable max-len */
 
+const experimental = {};
+
 //
 // CORE LIBRARY
 //
@@ -56,6 +58,17 @@ export {default as PerspectiveViewport} from './core/deprecated/viewports/perspe
 export {default as OrthographicViewport} from './core/deprecated/viewports/orthographic-viewport';
 export {assembleShaders} from 'luma.gl'; // Forward the luma.gl version (note: now integrated with Model)
 
+Object.assign(experimental, {
+  get,
+  count,
+  EffectManager,
+  Effect,
+
+  // Pure JS (i.e. non-React) support
+  DeckGLJS,        // Integrate into `LayerManager`?
+  MapControllerJS  // Integrate into `MapController` JS class?
+});
+
 //
 // CORE LAYERS PACKAGE
 //
@@ -91,6 +104,10 @@ export {default as ExtrudedChoroplethLayer64} from './deprecated-layers/extruded
 
 import {default as ReflectionEffect} from './effects/experimental/reflection-effect/reflection-effect';
 
+Object.assign(experimental, {
+  ReflectionEffect
+});
+
 //
 // REACT BINDINGS PACKAGE
 //
@@ -103,29 +120,15 @@ export {default as MapController} from './react/map-controller';
 // Experimental React bindings
 import {default as OrbitController} from './react/experimental/orbit-controller';
 import AnimationMapController from './react/experimental/animation-map-controller';
-// TODO - remove before beta-release
-export {default as ViewportLayout} from './react/experimental/viewport-layout';
-import {default as DeckGL} from './react/deckgl';
-import {default as ViewportLayout} from './react/experimental/viewport-layout';
+
+  // Experimental react bindings
+Object.assign(experimental, {
+  OrbitController,
+  AnimationMapController
+});
 
 //
 // EXPERIMENTAL EXPORTS
 //
 
-export const experimental = {
-  get,
-  count,
-  EffectManager,
-  Effect,
-  ReflectionEffect,
-
-  // Experimental react bindings
-  OrbitController,
-  AnimationMapController,
-  DeckGLMultiView: DeckGL, // TODO - being built in to deck.gl component - remove before release
-  ViewportLayout, // TODO - being built in to deck.gl component - remove before release
-
-  // Pure JS (i.e. non-React) support
-  DeckGLJS,        // Integrate into `LayerManager`?
-  MapControllerJS  // Integrate into `MapController` JS class?
-};
+export {experimental};
