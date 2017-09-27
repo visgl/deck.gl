@@ -111,7 +111,7 @@ export default class WindDemo extends Component {
         glOptions={{webgl2: true}}
         {...viewport}
         layers={layers}
-        useDevicePixelRatio={true} />
+      />
     );
   }
 }
