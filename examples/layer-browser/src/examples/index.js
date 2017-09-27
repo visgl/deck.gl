@@ -4,6 +4,6 @@ import sampleLayerExamples from './sample-layers';
 
 export default {
   ...coreLayerExamples,
-  ...deprecatedLayerExamples,
-  ...sampleLayerExamples
+  ...sampleLayerExamples,
+  ...deprecatedLayerExamples
 };

@@ -47,7 +47,7 @@ class App extends PureComponent {
         latitude: 37.751537058389985,
         longitude: -122.42694203247012,
         zoom: 11.5,
-        pitch: 30,
+        pitch: 0,
         bearing: 0
       },
       activeExamples: {
@@ -245,7 +245,7 @@ class App extends PureComponent {
             viewports={viewports}
             layers={this._renderExamples()}
             effects={effects ? this._effects : []}
-            debug={false}
+            debug={true}
             useDefaultGLSettings
             pickingRadius={pickingRadius}
             onLayerHover={this._onHover}

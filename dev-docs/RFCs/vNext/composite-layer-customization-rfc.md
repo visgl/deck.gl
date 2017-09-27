@@ -70,7 +70,7 @@ const GeoJsonLayer extends CompositeLayer {
   ...
   renderLayers() {
   	return [
-  	  new this.props.subLayers.PointLayer({
+  	  new this.props.subLayerProps.PointLayer({
   	  }),
   	];
   }

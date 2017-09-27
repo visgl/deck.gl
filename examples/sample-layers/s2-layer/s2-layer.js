@@ -65,9 +65,6 @@ const defaultProps = {
 };
 
 export default class S2Layer extends CompositeLayer {
-  initializeState() {
-  }
-
   renderLayers() {
     const {id, getS2Token, getFillColor, getHeight} = this.props;
     const {extruded, wireframe, filled} = this.props;

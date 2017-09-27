@@ -1,4 +1,5 @@
 /* eslint-disable max-len */
+import {GL} from 'luma.gl';
 import * as dataSamples from '../data-samples';
 
 import S2Layer from '../../../sample-layers/s2-layer/s2-layer';
@@ -13,6 +14,30 @@ const S2LayerExample = {
     getFillColor: f => [f.value * 255, (1 - f.value) * 255, (1 - f.value) * 128],
     getStrokeWidth: f => 10,
     pickable: true
+  }
+};
+
+import SegmentLayer from '../../../sample-layers/segment-layer/segment-layer';
+
+const SegmentLayerExample = {
+  layer: SegmentLayer,
+  // getData: () => dataSamples.zigzag,
+  getData: () => dataSamples.routes,
+  props: {
+    id: 'segment-layer',
+    opacity: 0.6,
+    // getPath: f => f.path,
+    getPath: f => [f.START, f.END],
+    getColor: f => [128, 0, 0],
+    getZLevel: f => Math.random() * 255,
+    getWidth: f => 10,
+    widthMinPixels: 1,
+    pickable: true,
+    strokeWidth: 5,
+    widthScale: 10,
+    parameters: {
+      blendEquation: GL.MAX
+    }
   }
 };
 
@@ -67,6 +92,7 @@ const LabelLayerExample = {
 export default {
   'Sample Layers': {
     'S2Layer': S2LayerExample,
+    'SegmentLayer': SegmentLayerExample,
     'EnhancedChoroplethLayer': EnhancedChoroplethLayerExample,
     // BitmapLayer and MeshLayer examples are current commented out
     // They going to be added in the future.
