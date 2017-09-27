@@ -46,7 +46,7 @@ const defaultProps = {
 export default class ExtrudedChoroplethLayer64 extends Layer {
   constructor(props) {
     super(props);
-    log.once('ExtrudedChoroplethLayer64 is deprecated. Consider using GeoJsonLayer instead');
+    log.deprecated('ExtrudedChoroplethLayer64', 'GeoJsonLayer');
   }
 
   getShaders() {

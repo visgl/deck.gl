@@ -73,12 +73,12 @@ export default class CompositeLayer extends Layer {
 
   _renderLayers(updateParams) {
     if (this.state.oldSubLayers && !this.shouldUpdateState(updateParams)) {
-      log.log(2, 'Composite layer reusing sublayers', this.state.oldSubLayers);
+      log.log(2, `Composite layer reused sublayers ${this}`, this.state.oldSubLayers);
       return this.state.oldSubLayers;
     }
     const subLayers = this.renderLayers();
     this.state.oldSubLayers = subLayers;
-    log.log(2, 'Composite layer saving sublayers', this.state.oldSubLayers);
+    log.log(2, `Composite layer rendered new sublayers ${this}`, this.state.oldSubLayers);
     return subLayers;
   }
 }

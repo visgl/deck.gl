@@ -39,7 +39,7 @@ export default class ChoroplethLayer extends Layer {
 
   constructor(props) {
     super(props);
-    log.once('ChoroplethLayer is deprecated. Consider using GeoJsonLayer instead');
+    log.deprecated('ChoroplethLayer', 'GeoJsonLayer');
   }
 
   getShaders() {

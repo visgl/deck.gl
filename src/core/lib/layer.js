@@ -109,7 +109,7 @@ export default class Layer {
 
   toString() {
     const className = this.constructor.layerName || this.constructor.name;
-    return className !== this.props.id ? `<${className}:'${this.props.id}'>` : `<${className}>`;
+    return `${className}({id: '${this.props.id}'})`;
   }
 
   get stats() {
@@ -376,7 +376,7 @@ export default class Layer {
     });
 
     // Call subclass lifecycle methods
-    this.initializeState();
+    this.initializeState(this.context);
     this.updateState(updateParams);
     // End subclass lifecycle methods
 
@@ -399,8 +399,11 @@ export default class Layer {
   updateLayer(updateParams) {
     // Check for deprecated method
     if (this.shouldUpdate) {
-      log.once(0, `deck.gl v3 ${this}: "shouldUpdate" deprecated, renamed to "shouldUpdateState"`);
+      log.deprecated('shouldUpdate', 'shouldUpdateState');
     }
+
+    // Ensure context is available
+    updateParams = Object.assign({}, this.context, updateParams);
 
     // Call subclass lifecycle method
     const stateNeedsUpdate = this.shouldUpdateState(updateParams);
@@ -427,7 +430,7 @@ export default class Layer {
   // Note: not guaranteed to be called on application shutdown
   finalizeLayer() {
     // Call subclass lifecycle method
-    this.finalizeState();
+    this.finalizeState(this.context);
     // End lifecycle method
     removeLayerInSeer(this.id);
   }
@@ -446,10 +449,9 @@ export default class Layer {
     parameters.polygonOffset = offsets;
 
     // Call subclass lifecycle method
-    withParameters(this.context.gl,
-      parameters,
-      () => this.draw({moduleParameters, uniforms, parameters})
-    );
+    withParameters(this.context.gl, parameters, () => {
+      this.draw({moduleParameters, uniforms, parameters, context: this.context});
+    });
     // End lifecycle method
   }
 
