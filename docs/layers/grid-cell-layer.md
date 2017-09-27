@@ -47,6 +47,13 @@ Inherits from all [Base Layer](/docs/api-reference/base-layer.md) properties.
 
 Size of each grid cell in meters
 
+##### `coverage` (Number, optional)
+
+- Default: `1`
+
+Cell size scale factor. The size of cell is calculated by
+`cellSize * coverage`.
+
 ##### `elevationScale` (Number, optional)
 
 - Default: `1`

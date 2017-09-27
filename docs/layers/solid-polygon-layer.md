@@ -50,6 +50,12 @@ Whether to generate a line wireframe of the hexagon. The outline will have
 "horizontal" lines closing the top and bottom polygons and a vertical line
 (a "strut") for each vertex on the polygon.
 
+##### `fp64` (Boolean, optional)
+
+- Default: `false`
+
+Whether the layer should be rendered in high-precision 64-bit mode.
+
 **Remarks:**
 
 * These lines are rendered with `GL.LINE` and will thus always be 1 pixel wide.
