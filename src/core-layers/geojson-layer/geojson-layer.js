@@ -59,6 +59,12 @@ const defaultProps = {
   // Polygon extrusion accessor
   getElevation: f => get(f, 'properties.elevation') || 1000,
 
+  subLayers: {
+    PointLayer: ScatterplotLayer,
+    LineLayer: PathLayer,
+    PolygonLayer: SolidPolygonLayer
+  },
+
   // Optional settings for 'lighting' shader module
   lightSettings: {
     lightsPosition: [-122.45, 37.75, 8000, -122.0, 38.00, 5000],
@@ -99,7 +105,7 @@ export default class GeoJsonLayer extends CompositeLayer {
     const {pointFeatures, lineFeatures, polygonFeatures, polygonOutlineFeatures} = features;
 
     // Layer composition props
-    const {id, stroked, filled, extruded, wireframe, lightSettings} = this.props;
+    const {id, stroked, filled, extruded, wireframe, subLayers, lightSettings} = this.props;
 
     // Rendering props underlying layer
     const {lineWidthScale, lineWidthMinPixels, lineWidthMaxPixels,
@@ -119,9 +125,8 @@ export default class GeoJsonLayer extends CompositeLayer {
     const forwardProps = this.getBaseLayerProps();
 
     // Filled Polygon Layer
-    const polygonFillLayer = filled &&
-      hasPolygon &&
-      new SolidPolygonLayer(Object.assign({}, forwardProps, {
+    const polygonFillLayer = filled && hasPolygon &&
+      new subLayers.PolygonLayer(Object.assign({}, forwardProps, {
         id: `${id}-polygon-fill`,
         data: polygonFeatures,
 
@@ -138,10 +143,8 @@ export default class GeoJsonLayer extends CompositeLayer {
         }
       }));
 
-    const polygonWireframeLayer = wireframe &&
-      extruded &&
-      hasPolygon &&
-      new SolidPolygonLayer(Object.assign({}, forwardProps, {
+    const polygonWireframeLayer = wireframe && extruded && hasPolygon &&
+      new subLayers.PolygonLayer(Object.assign({}, forwardProps, {
         id: `${id}-polygon-wireframe`,
         data: polygonFeatures,
 
@@ -157,10 +160,8 @@ export default class GeoJsonLayer extends CompositeLayer {
         }
       }));
 
-    const polygonLineLayer = !extruded &&
-      stroked &&
-      hasPolygonLines &&
-      new PathLayer(Object.assign({}, forwardProps, {
+    const polygonLineLayer = !extruded && stroked && hasPolygonLines &&
+      new subLayers.LineLayer(Object.assign({}, forwardProps, {
         id: `${id}-polygon-outline`,
         data: polygonOutlineFeatures,
 
@@ -180,43 +181,45 @@ export default class GeoJsonLayer extends CompositeLayer {
         }
       }));
 
-    const pathLayer = drawLines && new PathLayer(Object.assign({}, forwardProps, {
-      id: `${id}-line-paths`,
-      data: lineFeatures,
+    const pathLayer = drawLines &&
+      new subLayers.LineLayer(Object.assign({}, forwardProps, {
+        id: `${id}-line-paths`,
+        data: lineFeatures,
 
-      fp64,
-      widthScale: lineWidthScale,
-      widthMinPixels: lineWidthMinPixels,
-      widthMaxPixels: lineWidthMaxPixels,
-      rounded: lineJointRounded,
-      miterLimit: lineMiterLimit,
+        fp64,
+        widthScale: lineWidthScale,
+        widthMinPixels: lineWidthMinPixels,
+        widthMaxPixels: lineWidthMaxPixels,
+        rounded: lineJointRounded,
+        miterLimit: lineMiterLimit,
 
-      getPath: getCoordinates,
-      getColor: getLineColor,
-      getWidth: getLineWidth,
-      updateTriggers: {
-        getColor: updateTriggers.getLineColor,
-        getWidth: updateTriggers.getLineWidth
-      }
-    }));
+        getPath: getCoordinates,
+        getColor: getLineColor,
+        getWidth: getLineWidth,
+        updateTriggers: {
+          getColor: updateTriggers.getLineColor,
+          getWidth: updateTriggers.getLineWidth
+        }
+      }));
 
-    const pointLayer = drawPoints && new ScatterplotLayer(Object.assign({}, forwardProps, {
-      id: `${id}-points`,
-      data: pointFeatures,
+    const pointLayer = drawPoints &&
+      new subLayers.PointLayer(Object.assign({}, forwardProps, {
+        id: `${id}-points`,
+        data: pointFeatures,
 
-      fp64,
-      radiusScale: pointRadiusScale,
-      radiusMinPixels: pointRadiusMinPixels,
-      radiusMaxPixels: pointRadiusMaxPixels,
+        fp64,
+        radiusScale: pointRadiusScale,
+        radiusMinPixels: pointRadiusMinPixels,
+        radiusMaxPixels: pointRadiusMaxPixels,
 
-      getPosition: getCoordinates,
-      getColor: getFillColor,
-      getRadius,
-      updateTriggers: {
-        getColor: updateTriggers.getFillColor,
-        getRadius: updateTriggers.getRadius
-      }
-    }));
+        getPosition: getCoordinates,
+        getColor: getFillColor,
+        getRadius,
+        updateTriggers: {
+          getColor: updateTriggers.getFillColor,
+          getRadius: updateTriggers.getRadius
+        }
+      }));
 
     return [
       // If not extruded: flat fill layer is drawn below outlines

@@ -482,8 +482,7 @@ export default class LayerManager {
           });
         }
       } catch (err) {
-        log.once(0,
-          `deck.gl error during matching of ${layerName(newLayer)} ${err}`, err);
+        log.once(0, `error during matching of ${layerName(newLayer)}`, err);
         // Save first error
         error = error || err;
       }
@@ -553,7 +552,7 @@ export default class LayerManager {
         layer.lifecycle = LIFECYCLE.INITIALIZED;
 
       } catch (err) {
-        log.once(0, `deck.gl error during initialization of ${layerName(layer)} ${err}`, err);
+        log.once(0, `error while initializing ${layerName(layer)}\n`, err);
         // Save first error
         error = error || err;
       }
@@ -584,7 +583,7 @@ export default class LayerManager {
           changeFlags: layer.diffProps(oldProps, layer.props, this.context)
         });
       } catch (err) {
-        log.once(0, `deck.gl error during update of ${layerName(layer)}`, err);
+        log.once(0, `error during update of ${layerName(layer)}`, err);
         // Save first error
         error = err;
       }
@@ -602,7 +601,7 @@ export default class LayerManager {
         layer.finalizeLayer();
       } catch (err) {
         log.once(0,
-          `deck.gl error during finalization of ${layerName(layer)}`, err);
+          `error during finalization of ${layerName(layer)}`, err);
         // Save first error
         error = err;
       }
@@ -623,7 +622,7 @@ export default class LayerManager {
       this.onLayerHover
     ) {
       if (this.layers.length && !this.layers.some(layer => layer.props.pickable)) {
-        log.once(1,
+        log.warn(1,
           'You have supplied a top-level input event handler (e.g. `onLayerClick`), ' +
           'but none of your layers have set the `pickable` flag.'
         );

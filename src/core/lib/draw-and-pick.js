@@ -366,8 +366,12 @@ function getClosestFromPickingBuffer(gl, {
           // Decode picked object index from color
           const pickedColor = pickedColors.slice(i, i + 4);
           const pickedLayer = layers[pickedLayerIndex];
-          const pickedObjectIndex = pickedLayer.decodePickingColor(pickedColor);
-          closestResultToCenter = {pickedColor, pickedLayer, pickedObjectIndex};
+          if (pickedLayer) {
+            const pickedObjectIndex = pickedLayer.decodePickingColor(pickedColor);
+            closestResultToCenter = {pickedColor, pickedLayer, pickedObjectIndex};
+          } else {
+            log.error('Picked non-existent layer. Is picking buffer corrupt?');
+          }
         }
       }
       i += 4;

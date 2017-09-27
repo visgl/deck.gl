@@ -47,11 +47,42 @@ function log(priority, arg, ...args) {
   }
 }
 
+// Assertions don't generate standard exceptions and don't print nicely
+function checkForAssertionErrors(args) {
+  const isAssertion =
+    args && args.length > 0 &&
+    typeof args[0] === 'object' && args[0] !== null &&
+    args[0].name === 'AssertionError';
+
+  if (isAssertion) {
+    args = Array.prototype.slice.call(args);
+    args.unshift(`assert(${args[0].message})`);
+  }
+  return args;
+}
+
 function once(priority, arg, ...args) {
   if (!cache[arg] && priority <= log.priority) {
-    console.warn(...formatArgs(arg, ...args));
+    args = checkForAssertionErrors(args);
+    console.error(...formatArgs(arg, ...args));
     cache[arg] = true;
   }
+}
+
+function warn(priority, arg, ...args) {
+  if (priority <= log.priority && !cache[arg]) {
+    console.warn(`luma.gl: ${arg}`, ...args);
+  }
+  cache[arg] = true;
+}
+
+function error(priority, arg, ...args) {
+  console.error(`luma.gl: ${arg}`, ...args);
+}
+
+function deprecated(oldUsage, newUsage) {
+  log.warn(0, `luma.gl: \`${oldUsage}\` is deprecated and will be removed \
+in a later version. Use \`${newUsage}\` instead`);
 }
 
 // Logs a message with a time
@@ -77,22 +108,6 @@ function timeEnd(priority, label) {
       console.info(label);
     }
   }
-}
-
-function warn(priority, arg, ...args) {
-  if (priority <= log.priority && !cache[arg]) {
-    console.warn(`luma.gl: ${arg}`, ...args);
-  }
-  cache[arg] = true;
-}
-
-function error(priority, arg, ...args) {
-  console.error(`luma.gl: ${arg}`, ...args);
-}
-
-function deprecated(oldUsage, newUsage) {
-  log.warn(0, `luma.gl: \`${oldUsage}\` is deprecated and will be removed \
-in a later version. Use \`${newUsage}\` instead`);
 }
 
 log.priority = 0;
