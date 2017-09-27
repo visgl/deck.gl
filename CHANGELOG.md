@@ -23,11 +23,23 @@ For Earlier Beta Releases see below
 
 ### deck.gl v4.2 Beta Releases
 
-#### [4.2.0-alpha.9] -
+#### [4.2.0-alpha.10] - Sep 27
+- SAMPLE: Outline shadow layer, first cut (#957)
+- Update docs with missing layer props (#959)
+- Simplify GL parameter initialization (#952)
+- Split deck.gl into "package" directories (#948)
+- [HexagonLayer] Add getElevationValue to calculate hexagon elevation by aggregation (#938)
+- Pure js mapbox base map example (#947)
+- Small example that loads a Carto Torque tile (#946)
+- Multi viewport cleanup (#953)
+- WindMap fix: use default useDevicePixelRatio = false (#956)
+- Layer lifecycle log polish. Guard against corrupt picking buffer. RFC updates. (#958)
+
+#### [4.2.0-alpha.9] - Sep 23
 - React and JS implementations now share code
 - Cleanup of exported symbols
 
-#### [4.2.0-alpha.8] -
+#### [4.2.0-alpha.8] - Sep 21
 - Fixes for pure-js example
 
 #### [4.2.0-alpha.6] -
