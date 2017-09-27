@@ -68,6 +68,12 @@ The minimum radius in pixels.
 
 The maximum radius in pixels.
 
+##### `fp64` (Boolean, optional)
+
+- Default: `false`
+
+Whether the layer should be rendered in high-precision 64-bit mode.
+
 ### Data Accessors
 
 ##### `getPosition` (Function, optional)
