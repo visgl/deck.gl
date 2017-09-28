@@ -25,10 +25,10 @@ class Root extends Component {
       viewport: {
         latitude: 37.75,
         longitude: -122.45,
-        zoom: 12
+        zoom: 12,
+        width: window.innerWidth,
+        height: window.innerHeight
       },
-      width: window.innerWidth,
-      height: window.innerHeight,
       data: this._pointGenerator.points,
       pointsUpdated: 0,
       radiusUpdated: 0,
@@ -75,7 +75,7 @@ class Root extends Component {
   }
 
   render() {
-    const {viewport, width, height, data,
+    const {viewport, data,
       positionsUpdated, radiusUpdated, colorsUpdated} = this.state;
 
     const layer = new ScatterplotLayer({
@@ -98,14 +98,11 @@ class Root extends Component {
     return (
       <MapGL
         {...viewport}
-        width={width}
-        height={height}
+        mapStyle="mapbox://styles/uberdata/cive48w2e001a2imn5mcu2vrs"
         onViewportChange={this._onViewportChange}
         mapboxApiAccessToken={MAPBOX_TOKEN}>
         <DeckGL
           {...viewport}
-          width={width}
-          height={height}
           layers={[layer]} />
         <div id="control-panel">
           <button onClick={this._randomizePositions}>Randomize Positions</button>
