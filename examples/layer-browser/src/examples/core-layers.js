@@ -244,20 +244,20 @@ const GridLayerExample = {
     cellSize: {type: 'number', min: 0, max: 1000},
     coverage: {type: 'number', min: 0, max: 1},
     lowerPercentile: {type: 'number', min: 0, max: 100},
-    upperPercentile: {type: 'number', min: 0, max: 100}
+    upperPercentile: {type: 'number', min: 0, max: 100},
+    elevationLowerPercentile: {type: 'number', min: 0, max: 100},
+    elevationUpperPercentile: {type: 'number', min: 0, max: 100}
   },
   props: {
     id: 'gridLayer',
     data: dataSamples.points,
-    // instead of doing getColorValue = () => {}
-    // defined the function outside and pass in here
-    // so it doesn't generate a new function on every render
-    getColorValue,
     cellSize: 200,
     opacity: 1,
     extruded: true,
     pickable: true,
     getPosition: d => get(d, 'COORDINATES'),
+    getColorValue,
+    getElevationValue,
     lightSettings: LIGHT_SETTINGS
   }
 };
