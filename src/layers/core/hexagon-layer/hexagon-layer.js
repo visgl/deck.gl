@@ -137,10 +137,9 @@ export default class HexagonLayer extends CompositeLayer {
 
   getDimensionUpdaters() {
     // dimension updaters are sequential,
-    // if the first ones needs to be called, the 2nd and third one will automatically
-    // be called. e.g. if value needs to be updated, domain and scaleFunc
+    // if the first one needs to be called, the 2nd and 3rd one will automatically
+    // be called. e.g. if ColorValue needs to be updated, getColorValueDomain and getColorScale
     // will automatically be called
-
     return {
       getColor: [
         {
@@ -177,20 +176,19 @@ export default class HexagonLayer extends CompositeLayer {
 
   getDimensionChanges(oldProps, props) {
     const {dimensionUpdaters} = this.state;
-    // dimension should be updated
+    const updaters = [];
 
-    const updaters = Object.keys(dimensionUpdaters).reduce((accu, key) => {
+    // get dimension to be updated
+    for (const dimensionKey in dimensionUpdaters) {
 
       // return the first triggered updater for each dimension
-      const updater = dimensionUpdaters[key]
+      const needUpdate = dimensionUpdaters[dimensionKey]
         .find(item => item.triggers.some(t => oldProps[t] !== props[t]));
 
-      if (updater) {
-        accu.push(updater.updater);
+      if (needUpdate) {
+        updaters.push(needUpdate.updater);
       }
-
-      return accu;
-    }, []);
+    }
 
     return updaters.length ? updaters : null;
   }
@@ -204,32 +202,53 @@ export default class HexagonLayer extends CompositeLayer {
   }
 
   getPickingInfo({info}) {
-    const pickedCell = info.picked && info.index > -1 ?
-      this.state.hexagons[info.index] : null;
+    const {sortedColorBins, sortedElevationBins} = this.state;
+    const isPicked = info.picked && info.index > -1;
 
+    let object = null;
+    if (isPicked) {
+
+      const cell = this.state.hexagons[info.index];
+
+      const colorValue = sortedColorBins.binMap[cell.index] &&
+        sortedColorBins.binMap[cell.index].value;
+      const elevationValue = sortedElevationBins.binMap[cell.index] &&
+        sortedElevationBins.binMap[cell.index].value;
+
+      object = Object.assign({
+        colorValue,
+        elevationValue
+      }, cell);
+    }
+
+    // add bin colorValue and elevationValue to info
     return Object.assign(info, {
-      picked: Boolean(pickedCell),
+      picked: Boolean(object),
       // override object with picked cell
-      object: pickedCell
+      object
     });
   }
 
   getUpdateTriggers() {
     const {dimensionUpdaters} = this.state;
+
     // merge all dimension triggers
-    return Object.keys(dimensionUpdaters).reduce((accu, dimension) => {
+    const updateTriggers = {};
 
-      accu[dimension] = dimensionUpdaters[dimension].reduce((triggers, step) => {
+    for (const dimensionKey in dimensionUpdaters) {
 
-        step.triggers.forEach(key => {
-          triggers[key] = this.props[key];
+      updateTriggers[dimensionKey] = {};
+
+      for (const step of dimensionUpdaters[dimensionKey]) {
+
+        step.triggers.forEach(prop => {
+          updateTriggers[dimensionKey][prop] = this.props[prop];
         });
 
-        return triggers;
-      }, {});
+      }
+    }
 
-      return accu;
-    }, {});
+    return updateTriggers;
   }
 
   getValueDomain() {
