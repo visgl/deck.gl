@@ -34,6 +34,7 @@ import {
 import {GridLayer, GridCellLayer} from 'deck.gl';
 
 const getColorValue = points => points.length;
+const getElevationValue = points => points.length;
 const getPosition = d => d.COORDINATES;
 
 const TEST_CASES = {
@@ -53,11 +54,23 @@ const TEST_CASES = {
       t.ok(oldState.layerData !== layer.state.layerData,
         'should update layer data');
 
-      t.ok(oldState.sortedBins !== layer.state.sortedBins,
-        'should update sortedBins');
+      t.ok(oldState.sortedColorBins !== layer.state.sortedColorBins,
+        'should update sortedColorBins');
 
-      t.ok(oldState.valueDomain !== layer.state.valueDomain,
+      t.ok(oldState.colorValueDomain !== layer.state.colorValueDomain,
         'should update valueDomain');
+
+      t.ok(oldState.colorScaleFunc !== layer.state.colorScaleFunc,
+        'should update colorScaleFunc');
+
+      t.ok(oldState.sortedElevationBins !== layer.state.sortedElevationBins,
+        'should update sortedElevationBins');
+
+      t.ok(oldState.elevationValueDomain !== layer.state.elevationValueDomain,
+        'should update elevationValueDomain');
+
+      t.ok(oldState.elevationScaleFunc !== layer.state.elevationScaleFunc,
+        'should update elevationScaleFunc');
     }
   }, {
     updateProps: {
@@ -67,11 +80,23 @@ const TEST_CASES = {
       t.ok(oldState.layerData === layer.state.layerData,
         'should not update layer data');
 
-      t.ok(oldState.sortedBins !== layer.state.sortedBins,
-        'should update sortedBins');
+      t.ok(oldState.sortedColorBins !== layer.state.sortedColorBins,
+        'should not update sortedColorBins');
 
-      t.ok(oldState.valueDomain !== layer.state.valueDomain,
-        'should re calculate valueDomain');
+      t.ok(oldState.sortedElevationBins === layer.state.sortedElevationBins,
+        'should update sortedElevationBins');
+
+      t.ok(oldState.colorValueDomain !== layer.state.colorValueDomain,
+        'should re calculate colorValueDomain');
+
+      t.ok(oldState.elevationValueDomain === layer.state.elevationValueDomain,
+        'should not update elevationValueDomain');
+
+      t.ok(oldState.colorScaleFunc !== layer.state.colorScaleFunc,
+        'should update colorScaleFunc');
+
+      t.ok(oldState.elevationScaleFunc === layer.state.elevationScaleFunc,
+        'should not update colorScaleFunc');
     }
   }, {
     updateProps: {
@@ -81,11 +106,127 @@ const TEST_CASES = {
       t.ok(oldState.layerData === layer.state.layerData,
         'should not update layer data');
 
-      t.ok(oldState.sortedBins === layer.state.sortedBins,
-        'should not update sortedBins');
+      t.ok(oldState.sortedColorBins === layer.state.sortedColorBins,
+        'should not update sortedColorBins');
 
-      t.ok(oldState.valueDomain !== layer.state.valueDomain,
-        'should re calculate valueDomain');
+      t.ok(oldState.colorValueDomain !== layer.state.colorValueDomain,
+        'should re calculate colorValueDomain');
+
+      t.ok(oldState.colorScaleFunc !== layer.state.colorScaleFunc,
+        'should update colorScaleFunc');
+
+      t.ok(oldState.sortedElevationBins === layer.state.sortedElevationBins,
+        'should not update sortedElevationBins');
+
+      t.ok(oldState.elevationValueDomain === layer.state.elevationValueDomain,
+        'should not update elevationValueDomain');
+
+      t.ok(oldState.elevationScaleFunc === layer.state.elevationScaleFunc,
+        'should not update elevationScaleFunc');
+    }
+  }, {
+    updateProps: {
+      colorDomain: [0, 10]
+    },
+    assert: (layer, oldState, t) => {
+      t.ok(oldState.layerData === layer.state.layerData,
+        'should not update layer data');
+
+      t.ok(oldState.sortedColorBins === layer.state.sortedColorBins,
+        'should not update sortedColorBins');
+
+      t.ok(oldState.colorValueDomain === layer.state.colorValueDomain,
+        'should not re calculate colorValueDomain');
+
+      t.ok(oldState.colorScaleFunc !== layer.state.colorScaleFunc,
+        'should update colorScaleFunc');
+
+      t.ok(oldState.sortedElevationBins === layer.state.sortedElevationBins,
+        'should not update sortedElevationBins');
+
+      t.ok(oldState.elevationValueDomain === layer.state.elevationValueDomain,
+        'should not update elevationValueDomain');
+
+      t.ok(oldState.elevationScaleFunc === layer.state.elevationScaleFunc,
+        'should not update elevationScaleFunc');
+    }
+  }, {
+    updateProps: {
+      getElevationValue
+    },
+    assert: (layer, oldState, t) => {
+      t.ok(oldState.layerData === layer.state.layerData,
+        'should not update layer data');
+
+      t.ok(oldState.sortedElevationBins !== layer.state.sortedElevationBins,
+        'should update sortedElevationBins');
+
+      t.ok(oldState.elevationValueDomain !== layer.state.elevationValueDomain,
+        'should re calculate elevationValueDomain');
+
+      t.ok(oldState.elevationScaleFunc !== layer.state.elevationScaleFunc,
+        'should update elevationScaleFunc');
+
+      t.ok(oldState.sortedColorBins === layer.state.sortedColorBins,
+        'should not update sortedColorBins');
+
+      t.ok(oldState.colorValueDomain === layer.state.colorValueDomain,
+        'should not re calculate colorValueDomain');
+
+      t.ok(oldState.colorScaleFunc === layer.state.colorScaleFunc,
+        'should not update colorScaleFunc');
+    }
+  }, {
+    updateProps: {
+      elevationLowerPercentile: 1
+    },
+    assert: (layer, oldState, t) => {
+      t.ok(oldState.layerData === layer.state.layerData,
+        'should not update layer data');
+
+      t.ok(oldState.sortedElevationBins === layer.state.sortedElevationBins,
+        'should not update sortedElevationBins');
+
+      t.ok(oldState.elevationValueDomain !== layer.state.elevationValueDomain,
+        'should re calculate elevationValueDomain');
+
+      t.ok(oldState.elevationScaleFunc !== layer.state.elevationScaleFunc,
+        'should update elevationScaleFunc');
+
+      t.ok(oldState.sortedColorBins === layer.state.sortedColorBins,
+        'should not update sortedColorBins');
+
+      t.ok(oldState.colorValueDomain === layer.state.colorValueDomain,
+        'should not re calculate colorValueDomain');
+
+      t.ok(oldState.colorScaleFunc === layer.state.colorScaleFunc,
+        'should not update colorScaleFunc');
+    }
+  }, {
+    updateProps: {
+      elevationRange: [1, 10]
+    },
+    assert: (layer, oldState, t) => {
+      t.ok(oldState.layerData === layer.state.layerData,
+        'should not update layer data');
+
+      t.ok(oldState.sortedElevationBins === layer.state.sortedElevationBins,
+        'should not update sortedElevationBins');
+
+      t.ok(oldState.elevationValueDomain === layer.state.elevationValueDomain,
+        'should not re calculate elevationValueDomain');
+
+      t.ok(oldState.elevationScaleFunc !== layer.state.elevationScaleFunc,
+        'should update elevationScaleFunc');
+
+      t.ok(oldState.sortedColorBins === layer.state.sortedColorBins,
+        'should not update sortedColorBins');
+
+      t.ok(oldState.colorValueDomain === layer.state.colorValueDomain,
+        'should not re calculate colorValueDomain');
+
+      t.ok(oldState.colorScaleFunc === layer.state.colorScaleFunc,
+        'should not update colorScaleFunc');
     }
   }]
 };
@@ -140,6 +281,26 @@ const SUBLAYER_TEST_CASES = {
     }
   }, {
     updateProps: {
+      getElevationValue
+    },
+    assert: (subLayer, spies, t) => {
+      t.ok(!spies._onGetSublayerColor.called,
+        'update getElevationValue should not call _onGetSublayerColor');
+      t.ok(spies._onGetSublayerElevation.called,
+        'update getElevationValue should call _onGetSublayerElevation');
+    }
+  }, {
+    updateProps: {
+      elevationUpperPercentile: 99
+    },
+    assert: (subLayer, spies, t) => {
+      t.ok(!spies._onGetSublayerColor.called,
+        'update elevationUpperPercentile should not call _onGetSublayerColor');
+      t.ok(spies._onGetSublayerElevation.called,
+        'update elevationUpperPercentile should call _onGetSublayerElevation');
+    }
+  }, {
+    updateProps: {
       elevationRange: [0, 100]
     },
     assert: (subLayer, spies, t) => {
@@ -161,20 +322,29 @@ test('GridLayer#constructor', t => {
 
   testInitializeLayer({layer});
 
-  const {layerData, sortedBins, valueDomain} = layer.state;
+  const {layerData, sortedColorBins, sortedElevationBins,
+    colorValueDomain, elevationValueDomain} = layer.state;
 
   t.ok(layerData.length > 0, 'GridLayer.state.layerDate calculated');
-  t.ok(sortedBins, 'GridLayer.state.sortedBins calculated');
-  t.ok(Array.isArray(valueDomain), 'GridLayer.state.valueDomain calculated');
+  t.ok(sortedColorBins, 'GridLayer.state.sortedColorBins calculated');
+  t.ok(sortedElevationBins, 'GridLayer.state.sortedColorBins calculated');
+  t.ok(Array.isArray(colorValueDomain), 'GridLayer.state.valueDomain calculated');
+  t.ok(Array.isArray(elevationValueDomain), 'GridLayer.state.valueDomain calculated');
 
-  t.ok(Array.isArray(sortedBins.sortedBins), 'GridLayer.state.sortedBins.sortedBins calculated');
-  t.ok(Number.isFinite(sortedBins.maxCount), 'GridLayer.state.sortedBins.maxCount calculated');
+  t.ok(Array.isArray(sortedColorBins.sortedBins),
+    'GridLayer.state.sortedColorBins.sortedBins calculated');
+  t.ok(Array.isArray(sortedElevationBins.sortedBins),
+    'GridLayer.state.sortedColorBins.sortedBins calculated');
+  t.ok(Number.isFinite(sortedColorBins.maxCount),
+    'GridLayer.state.sortedColorBins.maxCount calculated');
+  t.ok(Number.isFinite(sortedElevationBins.maxCount),
+    'GridLayer.state.sortedColorBins.maxCount calculated');
 
-  const firstSortedBin = sortedBins.sortedBins[0];
+  const firstSortedBin = sortedColorBins.sortedBins[0];
   const binTocell = layerData.find(d => d.index === firstSortedBin.i);
 
-  t.ok(sortedBins.binMap[binTocell.index] === firstSortedBin,
-    'Correct GridLayer.state.sortedBins.binMap created');
+  t.ok(sortedColorBins.binMap[binTocell.index] === firstSortedBin,
+    'Correct GridLayer.state.sortedColorBins.binMap created');
 
   const subLayer = layer.renderLayers();
   t.ok(subLayer instanceof GridCellLayer, 'GridCellLayer rendered');
