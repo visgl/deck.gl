@@ -238,9 +238,6 @@ function getElevationValue(points) {
   return getMax(points, 'SPACES');
 }
 
-function getPointPosition(d) {
-  return get(d, 'COORDINATES');
-}
 const GridLayerExample = {
   layer: GridLayer,
   propTypes: {
@@ -258,10 +255,7 @@ const GridLayerExample = {
     opacity: 1,
     extruded: true,
     pickable: true,
-    // instead of calling getPosition = () => {}
-    // defined the function outside and pass in here
-    // so it doesn't generate a new function on every render
-    getPosition: getPointPosition,
+    getPosition: d => get(d, 'COORDINATES'),
     getColorValue,
     getElevationValue,
     lightSettings: LIGHT_SETTINGS
@@ -307,7 +301,7 @@ const HexagonLayerExample = {
     elevationScale: 1,
     elevationRange: [0, 3000],
     coverage: 1,
-    getPosition: getPointPosition,
+    getPosition: d => get(d, 'COORDINATES'),
     getColorValue,
     getElevationValue,
     lightSettings: LIGHT_SETTINGS

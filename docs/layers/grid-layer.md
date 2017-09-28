@@ -62,37 +62,6 @@ Color scale domain, default is set to the range of point counts in each cell.
 Color ranges as an array of colors formatted as `[255, 255, 255]`. Default is
 [colorbrewer](http://colorbrewer2.org/#type=sequential&scheme=YlOrRd&n=6) `6-class YlOrRd`.
 
-##### `getColorValue` (Function, optional)
-
-- Default: `points => points.length`
-
-`getColorValue` is the accessor function to get the value that cell color is based on. 
-It takes an array of points inside each cell as arguments, returns a number. For example, 
-You can pass in `getColorValue` to color the cells by avg/mean/max of a specific attributes of each point.
-By default `getColorValue` returns the length of the points array.
-
-Note: grid layer compares whether `getColorValue` has changed to
-recalculate the value for each bin that its color based on. You should
-pass in the function defined outside the render function so it doesn't create a 
-new function on every rendering pass. 
-
-```
- class MyGridLayer {
-    getColorValue (points) {
-        return points.length;
-    }
-    
-    renderLayers() {
-      return new GridLayer({
-        id: 'grid-layer',
-        getColorValue: this.getColorValue // instead of getColorValue: (points) => { return points.length; }
-        data,
-        cellSize: 500
-      });
-    }
- }
-```
-
 ##### `coverage` (Number, optional)
 
 - Default: `1`
@@ -112,19 +81,6 @@ Elevation scale input domain, default is set to the extent of point counts in ea
 - Default: `[0, 1000]`
 
 Elevation scale output range
-
-##### `getElevationValue` (Function, optional)
-
-- Default: `points => points.length`
-
-Similar to `getColorValue`, `getElevationValue` is the accessor function to get the value that cell elevation is based on.
-It takes an array of points inside each cell as arguments, returns a number.
-By default `getElevationValue` returns the length of the points array.
-
-Note: grid layer compares whether `getElevationValue` has changed to
-recalculate the value for each cell for its elevation. You should
-pass in the function defined outside the render function so it doesn't create a
-new function on every rendering pass.
 
 ##### `elevationScale` (Number, optional)
 
@@ -189,6 +145,46 @@ Be aware that this prop will likely be changed in a future version of deck.gl.
 - Default: `object => object.position`
 
 Method called to retrieve the position of each point.
+
+##### `getColorValue` (Function, optional)
+
+- Default: `points => points.length`
+
+`getColorValue` is the accessor function to get the value that cell color is based on.
+It takes an array of points inside each cell as arguments, returns a number. For example,
+You can pass in `getColorValue` to color the cells by avg/mean/max of a specific attributes of each point.
+By default `getColorValue` returns the length of the points array.
+
+Note: grid layer compares whether `getColorValue` has changed to recalculate the value for each bin that its color based on.
+You should pass in the function defined outside the render function so it doesn't create a new function on every rendering pass.
+
+```
+ class MyGridLayer {
+    getColorValue (points) {
+        return points.length;
+    }
+
+    renderLayers() {
+      return new GridLayer({
+        id: 'grid-layer',
+        getColorValue: this.getColorValue // instead of getColorValue: (points) => { return points.length; }
+        data,
+        cellSize: 500
+      });
+    }
+ }
+```
+
+##### `getElevationValue` (Function, optional)
+
+- Default: `points => points.length`
+
+Similar to `getColorValue`, `getElevationValue` is the accessor function to get the value that cell elevation is based on.
+It takes an array of points inside each cell as arguments, returns a number.
+By default `getElevationValue` returns the length of the points array.
+
+Note: grid layer compares whether `getElevationValue` has changed to recalculate the value for each cell for its elevation.
+You should pass in the function defined outside the render function so it doesn't create a new function on every rendering pass.
 
 ##### `onSetColorDomain` (Function, optional)
 

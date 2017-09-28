@@ -131,8 +131,7 @@ export default class HexagonLayer extends CompositeLayer {
 
   needsReProjectPoints(oldProps, props) {
     return oldProps.radius !== props.radius ||
-      oldProps.hexagonAggregator !== props.hexagonAggregator ||
-      oldProps.getPosition !== props.getPosition;
+      oldProps.hexagonAggregator !== props.hexagonAggregator;
   }
 
   getDimensionUpdaters() {
@@ -176,20 +175,19 @@ export default class HexagonLayer extends CompositeLayer {
 
   getDimensionChanges(oldProps, props) {
     const {dimensionUpdaters} = this.state;
-    // dimension should be updated
+    const updaters = [];
 
-    const updaters = Object.keys(dimensionUpdaters).reduce((accu, key) => {
+    // get dimension to be updated
+    for (const dimensionKey in dimensionUpdaters) {
 
       // return the first triggered updater for each dimension
-      const updater = dimensionUpdaters[key]
+      const needUpdate = dimensionUpdaters[dimensionKey]
         .find(item => item.triggers.some(t => oldProps[t] !== props[t]));
 
-      if (updater) {
-        accu.push(updater.updater);
+      if (needUpdate) {
+        updaters.push(needUpdate.updater);
       }
-
-      return accu;
-    }, []);
+    }
 
     return updaters.length ? updaters : null;
   }
@@ -232,20 +230,24 @@ export default class HexagonLayer extends CompositeLayer {
 
   getUpdateTriggers() {
     const {dimensionUpdaters} = this.state;
+
     // merge all dimension triggers
-    return Object.keys(dimensionUpdaters).reduce((accu, dimension) => {
+    const updateTriggers = {};
 
-      accu[dimension] = dimensionUpdaters[dimension].reduce((triggers, step) => {
+    for (const dimensionKey in dimensionUpdaters) {
 
-        step.triggers.forEach(key => {
-          triggers[key] = this.props[key];
+      updateTriggers[dimensionKey] = {};
+
+      for (const step of dimensionUpdaters[dimensionKey]) {
+
+        step.triggers.forEach(prop => {
+          updateTriggers[dimensionKey][prop] = this.props[prop];
         });
 
-        return triggers;
-      }, {});
+      }
+    }
 
-      return accu;
-    }, {});
+    return updateTriggers;
   }
 
   getValueDomain() {
