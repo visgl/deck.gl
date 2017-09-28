@@ -136,7 +136,7 @@ export default class DeckGLJS {
     });
 
     // Update viewports (creating one if not supplied)
-    let viewports = props.viewports || [props.viewport];
+    let viewports = props.viewports || props.viewport;
     if (!viewports) {
       const {width, height, latitude, longitude, zoom, pitch, bearing} = props;
       viewports = [
