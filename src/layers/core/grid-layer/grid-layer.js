@@ -299,11 +299,11 @@ export default class GridLayer extends CompositeLayer {
 
     const elevationDomain = this.props.elevationDomain || elevationValueDomain;
 
-    const isColorValueInDomain = ev >= elevationDomain[0] &&
+    const isElevationValueInDomain = ev >= elevationDomain[0] &&
       ev <= elevationDomain[elevationDomain.length - 1];
 
     // if cell value is outside domain, set elevation to -1
-    return isColorValueInDomain ? elevationScaleFunc(ev) : -1;
+    return isElevationValueInDomain ? elevationScaleFunc(ev) : -1;
   }
 
   getSubLayerProps() {
@@ -336,7 +336,6 @@ export default class GridLayer extends CompositeLayer {
       modelMatrix,
       getColor: this._onGetSublayerColor.bind(this),
       getElevation: this._onGetSublayerElevation.bind(this),
-      getPosition: d => d.position,
       updateTriggers: this.getUpdateTriggers()
     };
   }

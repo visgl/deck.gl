@@ -340,11 +340,11 @@ export default class HexagonLayer extends CompositeLayer {
 
     const elevationDomain = this.props.elevationDomain || elevationValueDomain;
 
-    const isColorValueInDomain = ev >= elevationDomain[0] &&
+    const isElevationValueInDomain = ev >= elevationDomain[0] &&
       ev <= elevationDomain[elevationDomain.length - 1];
 
     // if cell value is outside domain, set elevation to -1
-    return isColorValueInDomain ? elevationScaleFunc(ev) : -1;
+    return isElevationValueInDomain ? elevationScaleFunc(ev) : -1;
   }
 
   getSubLayerProps() {
