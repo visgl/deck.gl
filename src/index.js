@@ -119,12 +119,16 @@ export {default as MapController} from './react/map-controller';
 
 // Experimental React bindings
 import {default as OrbitController} from './react/experimental/orbit-controller';
-import AnimationMapController from './react/experimental/animation-map-controller';
+import AnimationMapController, {ANIMATION_EVENTS} from './react/experimental/animation-map-controller';
+import {viewportLinearInterpolator, viewportFlyToInterpolator} from './react/experimental/viewport-animation-utils';
 
-  // Experimental react bindings
+// Experimental react bindings
 Object.assign(experimental, {
   OrbitController,
-  AnimationMapController
+  AnimationMapController,
+  viewportLinearInterpolator,
+  viewportFlyToInterpolator,
+  ANIMATION_EVENTS
 });
 
 //

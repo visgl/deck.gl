@@ -1,4 +1,4 @@
-/* global window,document, setInterval*/
+/* global window,document */
 import React, {Component} from 'react';
 import {render} from 'react-dom';
 import {StaticMap} from 'react-map-gl';
@@ -18,13 +18,18 @@ class Root extends Component {
 
   constructor(props) {
     super(props);
+    this.rotationStep = 0;
     this.state = {
       viewport: {
         ...DeckGLOverlay.defaultViewport,
         width: 500,
-        height: 500
+        height: 500,
+        bearing: 0
       },
-      data: null
+      data: null,
+      animaitonDuration: 0,
+      viewportToggled: false,
+      onAnimationStop: this.rotateCameara.bind(this)
     };
 
     requestCsv(DATA_URL, (error, response) => {
@@ -40,7 +45,8 @@ class Root extends Component {
     this._resize();
 
     // TODO: this is to just simulate viwport prop change and test animation.
-    this._interval = setInterval(() => this._toggleViewport(), 5000);
+    // this._interval = setInterval(() => this._toggleViewport(), 8000);
+    this.rotateCameara({t: 1.0});
   }
 
   _resize() {
@@ -52,7 +58,8 @@ class Root extends Component {
 
   _onViewportChange(viewport) {
     this.setState({
-      viewport: {...this.state.viewport, ...viewport}
+      viewport: {...this.state.viewport, ...viewport},
+      animaitonDuration: 0
     });
   }
 
@@ -60,20 +67,49 @@ class Root extends Component {
   // Add proper UI to change viewport.
   _toggleViewport() {
     const newViewport = {};
-    newViewport.pitch = (this.state.viewport.pitch === 0) ? 60.0 : 0.0;
-    newViewport.bearing = (this.state.viewport.bearing === 0) ? -60.0 : 0.0;
+    // newViewport.pitch = this.state.viewportToggled ? 60.0 : 0.0;
+    // newViewport.bearing = this.state.viewportToggled ? -90.0 : 0.0;
+    newViewport.bearing = (this.state.viewport.bearing + 120) % 360;
     this.setState({
-      viewport: {...this.state.viewport, ...newViewport}
+      viewport: {...this.state.viewport, ...newViewport},
+      animaitonDuration: 4000,
+      viewportToggled: !this.state.viewportToggled
+    });
+  }
+
+  rotateCameara(opts) {
+    if (opts && opts.t < 1.0) {
+      return;
+    }
+    const angleDelta = 120.0;
+    const bearing = (this.state.viewport.bearing + angleDelta);
+    const animaitonDuration = angleDelta * 35;
+    this.setState({
+      viewport: {
+        ...this.state.viewport,
+        bearing,
+        width: window.innerWidth,
+        height: window.innerHeight
+      },
+      animaitonDuration
     });
   }
 
   render() {
-    const {viewport, data} = this.state;
+    const {
+      viewport,
+      data,
+      animaitonDuration,
+      onAnimationInterruption,
+      onAnimationStop
+    } = this.state;
     return (
       <AnimationMapController
         {...viewport}
         onViewportChange={this._onViewportChange.bind(this)}
-        animateViewport={true}>
+        animaitonDuration={animaitonDuration}
+        onAnimationInterruption={onAnimationInterruption}
+        onAnimationStop={onAnimationStop}>
         <StaticMap
           {...viewport}
           mapStyle="mapbox://styles/mapbox/dark-v9"
