@@ -62,13 +62,13 @@ export default class SegmentLayer extends PathLayer {
 
     // Create an attribute manager
     this.state.attributeManager.addInstanced({
-      instanceZLevel: {size: 4, type: GL.UNSIGNED_BYTE,
+      instanceZLevel: {size: 1, type: GL.UNSIGNED_BYTE,
         update: this.calculateZLevels, accessor: 'getZLevel'}
     });
   }
 
   // Override draw to add render module
-  draw({moduleParameters = {}, uniforms, context}) {
+  draw({moduleParameters = {}, parameters, uniforms, context}) {
     const {rounded, miterLimit, widthScale, widthMinPixels, widthMaxPixels} = this.props;
     const jointType = Number(rounded);
 
@@ -85,8 +85,8 @@ export default class SegmentLayer extends PathLayer {
     const {outlineFramebuffer, dummyFramebuffer} = this.state;
 
     // TODO - working around some framebuffer bugs, will clean up when  luma.gl fixes are available
-    outlineFramebuffer.resize({width: gl.canvas.clientWidth, height: gl.canvas.clientHeight});
-    dummyFramebuffer.resize({width: gl.canvas.clientWidth, height: gl.canvas.clientHeight});
+    outlineFramebuffer.resize({width: gl.drawingBufferWidth, height: gl.drawingBufferHeight});
+    dummyFramebuffer.resize({width: gl.drawingBufferWidth, height: gl.drawingBufferHeight});
 
     // withParameters(gl, {framebuffer: outlineFramebuffer},
     //   () => clear(context.gl, {framebuffer: outlineFramebuffer,
@@ -117,6 +117,16 @@ export default class SegmentLayer extends PathLayer {
 
     gl.bindFramebuffer(gl.FRAMEBUFFER, prevFramebuffer);
 
+    // this.state.model.draw({
+    //   moduleParameters,
+    //   uniforms: Object.assign({}, uniforms, {
+    //     widthScale: this.props.widthScale * 1.2
+    //   }),
+    //   parameters: {
+    //     depthTest: false
+    //   }
+    // });
+
     // // Now use the outline shadowmap to render the lines (with outlines)
 
     moduleParameters = Object.assign({}, moduleParameters, {
@@ -128,11 +138,10 @@ export default class SegmentLayer extends PathLayer {
     this.state.model.draw({
       moduleParameters,
       uniforms: Object.assign({}, uniforms, {
-        widthScale: 1.0
+        widthScale: this.props.widthScale
       }),
       parameters: {
-        depthTest: false,
-        blendEquation: GL.MAX
+        depthTest: false
       }
     });
   }
@@ -147,9 +156,6 @@ export default class SegmentLayer extends PathLayer {
       let zLevel = getZLevel(data[index], index);
       zLevel = isNaN(zLevel) ? 0 : zLevel;
       for (let ptIndex = 1; ptIndex < path.length; ptIndex++) {
-        value[i++] = zLevel;
-        value[i++] = zLevel;
-        value[i++] = zLevel;
         value[i++] = zLevel;
       }
     });
