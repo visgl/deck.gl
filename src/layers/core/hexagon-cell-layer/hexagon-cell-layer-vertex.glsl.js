@@ -75,6 +75,7 @@ void main(void) {
       ELEVATION_SCALE * elevationScale);
   }
   
+  // if ahpha == 0.0 or z < 0.0, do not render element
   float noRender = float(instanceColors.a == 0.0 || instancePositions.z < 0.0);
   float dotRadius = radius * mix(coverage, 0.0, noRender);
   
