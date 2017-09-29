@@ -66,7 +66,6 @@ void main(void) {
   // if ahpha == 0.0 or z < 0.0, do not render element  
   float noRender = float(instanceColors.a == 0.0 || instancePositions.z < 0.0);
   float dotRadius = radius * mix(coverage, 0.0, noRender);
-  // float dotRadius = radius * clamp(coverage, 0.0, 1.0);
   
   // project center of hexagon
 
