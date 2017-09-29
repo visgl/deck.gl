@@ -41,6 +41,7 @@ const propTypes = {
   pickingRadius: PropTypes.number,
   viewport: PropTypes.instanceOf(Viewport),
   onWebGLInitialized: PropTypes.func,
+  initWebGLParameters: PropTypes.bool,
   onAfterRender: PropTypes.func,
   onLayerClick: PropTypes.func,
   onLayerHover: PropTypes.func
@@ -53,6 +54,7 @@ const defaultProps = {
   gl: null,
   effects: [],
   onWebGLInitialized: noop,
+  initWebGLParameters: false,
   onAfterRender: noop,
   onLayerClick: null,
   onLayerHover: null
@@ -128,6 +130,14 @@ export default class DeckGL extends React.Component {
       blendFunc: [GL.SRC_ALPHA, GL.ONE_MINUS_SRC_ALPHA],
       polygonOffsetFill: true
     });
+
+    // TODO - these will be set by default starting from next major release
+    if (this.props.initWebGLParameters) {
+      setParameters(gl, {
+        depthTest: true,
+        depthFunc: GL.LEQUAL
+      });
+    }
 
     const {props} = this;
     props.onWebGLInitialized(gl);
