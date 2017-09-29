@@ -47,8 +47,9 @@ void main(void) {
 
   vec2 topLeftPos = project_position(instancePositions.xy);
 
-  // if ahpha == 0.0, do not render element
-  float finalCellSize = cellSize * mix(1.0, 0.0, float(instanceColors.a == 0.0));
+  // if ahpha == 0.0 or z < 0.0, do not render element
+  float noRender = float(instanceColors.a == 0.0 || instancePositions.w < 0.0);
+  float finalCellSize = cellSize * mix(1.0, 0.0, noRender);
 
   // cube gemoetry vertics are between -1 to 1, scale and transform it to between 0, 1
   vec2 pos = topLeftPos + vec2(

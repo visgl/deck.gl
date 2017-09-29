@@ -61,10 +61,14 @@ void main(void) {
   if (extruded > 0.5) {
     elevation = project_scale(instancePositions.z * (positions.y + 0.5) *
       ELEVATION_SCALE * elevationScale);
-}
-
-  float dotRadius = radius * clamp(coverage, 0.0, 1.0);
-  // // project center of hexagon
+  }
+  
+  // if ahpha == 0.0 or z < 0.0, do not render element  
+  float noRender = float(instanceColors.a == 0.0 || instancePositions.z < 0.0);
+  float dotRadius = radius * mix(coverage, 0.0, noRender);
+  // float dotRadius = radius * clamp(coverage, 0.0, 1.0);
+  
+  // project center of hexagon
 
   vec4 instancePositions64xy = vec4(
     instancePositions.x, instancePositions64xyLow.x,
