@@ -17,6 +17,16 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## Official Releases
 
+#### [4.1.3] - 2017-9-29
+
+- Fix picking buffer clear color. (#931)
+- Handle recursive layer ids, update LayerManager docs and tests. (#933)
+- Hexagon Layer: Add getElevationValue to calculate hexagon elevation by aggregation (#938)
+- Update docs with missing layer props. (#959)
+- Grid Layer: Add getElevationValue to enable grid elevation by aggregation (#954)
+- Hexagon/Grid Layer: Fix FP64 mode rendering when elevation < 0.0 (#968)
+- DeckGL: Add initWebGLParameters prop to ensure examples on master work (#969)
+
 #### [4.1.2] - 2017-9-1
 
 - Bump luma.gl dependency from 4.0.1 to 4.0.2.
