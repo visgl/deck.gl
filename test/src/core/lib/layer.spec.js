@@ -29,7 +29,8 @@ const dataVariants = [
 
 const LAYER_PROPS = {
   id: 'testLayer',
-  data: []
+  data: [],
+  updateTriggers: {}
 };
 
 const LAYER_CONSTRUCT_TEST_CASES = [
@@ -133,6 +134,14 @@ test('Layer#diffProps', t => {
   diff = layer.diffProps(LAYER_PROPS,
     Object.assign({}, LAYER_PROPS, {size: 0}), context);
   t.true(diff.propsChanged, 'props changed');
+
+  // Dummy attribute manager to avoid diffUpdateTriggers failure
+  layer.state = {
+    attributeManager: {invalidate: () => {}}
+  };
+  diff = layer.diffProps(LAYER_PROPS,
+    Object.assign({}, LAYER_PROPS, {updateTriggers: {time: 100}}), context);
+  t.true(diff.propsOrDataChanged, 'props changed');
 
   let invalidatedName = null;
   layer.state = {
