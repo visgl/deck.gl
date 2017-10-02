@@ -493,15 +493,17 @@ export default class Layer {
 
     const propsChanged = Boolean(propsChangedReason);
     const dataChanged = Boolean(dataChangedReason);
-    const propsOrDataChanged = propsChanged || dataChanged;
     const viewportChanged = context.viewportChanged;
-    const somethingChanged = propsChanged || dataChanged || viewportChanged;
 
+    let updateTriggersChanged = false;
     // Check update triggers to determine if any attributes need regeneration
     // Note - if data has changed, all attributes will need regeneration, so skip this step
     if (!dataChanged) {
-      this._diffUpdateTriggers(oldProps, newProps);
+      updateTriggersChanged = this._diffUpdateTriggers(oldProps, newProps);
     }
+
+    const propsOrDataChanged = propsChanged || dataChanged || updateTriggersChanged;
+    const somethingChanged = propsOrDataChanged || viewportChanged;
 
     // Trace what happened
     if (dataChanged) {
@@ -513,6 +515,7 @@ export default class Layer {
     return {
       propsChanged,
       dataChanged,
+      updateTriggersChanged,
       propsOrDataChanged,
       viewportChanged,
       somethingChanged,
