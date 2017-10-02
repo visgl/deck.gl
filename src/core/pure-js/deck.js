@@ -19,10 +19,8 @@
 // THE SOFTWARE.
 
 import LayerManager from '../lib/layer-manager';
-import Layer from '../lib/layer';
 import EffectManager from '../experimental/lib/effect-manager';
 import Effect from '../experimental/lib/effect';
-import Viewport from '../viewports/viewport';
 import WebMercatorViewport from '../viewports/web-mercator-viewport';
 
 import {EventManager} from 'mjolnir.js';
@@ -38,13 +36,12 @@ const propTypes = {
   id: PropTypes.string,
   width: PropTypes.number.isRequired,
   height: PropTypes.number.isRequired,
-  layers: PropTypes.arrayOf(PropTypes.instanceOf(Layer)).isRequired,
+  layers: PropTypes.array.isRequired, // Array can contain falsy values
+  viewports: PropTypes.array, // Array can contain falsy values
   effects: PropTypes.arrayOf(PropTypes.instanceOf(Effect)),
   glOptions: PropTypes.object,
   gl: PropTypes.object,
-  debug: PropTypes.bool,
   pickingRadius: PropTypes.number,
-  viewport: PropTypes.instanceOf(Viewport),
   initWebGLParameters: PropTypes.bool,
   onWebGLInitialized: PropTypes.func,
   onBeforeRender: PropTypes.func,
@@ -52,24 +49,28 @@ const propTypes = {
   onLayerClick: PropTypes.func,
   onLayerHover: PropTypes.func,
   useDevicePixelRatio: PropTypes.bool,
-  useDefaultGLSettings: PropTypes.bool
+
+  // Debug settings
+  debug: PropTypes.bool,
+  drawPickingColors: PropTypes.bool
 };
 
 const defaultProps = {
   id: 'deckgl-overlay',
-  debug: false,
   pickingRadius: 0,
   glOptions: {},
   gl: null,
   effects: [],
-  initWebGLParameters: false,
+  initWebGLParameters: false, // Will be set to true in next major release
   onWebGLInitialized: noop,
   onBeforeRender: noop,
   onAfterRender: noop,
   onLayerClick: null,
   onLayerHover: null,
   useDevicePixelRatio: false,
-  useDefaultGLSettings: false // Will be set to true in next major release
+
+  debug: false,
+  drawPickingColors: false
 };
 
 // TODO - should this class be joined with `LayerManager`?
@@ -121,12 +122,14 @@ export default class DeckGLJS {
       pickingRadius,
       onLayerClick,
       onLayerHover,
-      useDevicePixelRatio
+      useDevicePixelRatio,
+      drawPickingColors
     } = props;
 
     // If more parameters need to be updated on layerManager add them to this method.
     this.layerManager.setParameters({
-      useDevicePixelRatio
+      useDevicePixelRatio,
+      drawPickingColors
     });
 
     this.layerManager.setEventHandlingParameters({
@@ -164,12 +167,12 @@ export default class DeckGLJS {
   // Public API
 
   queryObject({x, y, radius = 0, layerIds = null}) {
-    const selectedInfos = this.layerManager.pickLayer({x, y, radius, layerIds, mode: 'query'});
+    const selectedInfos = this.layerManager.pickObject({x, y, radius, layerIds, mode: 'query'});
     return selectedInfos.length ? selectedInfos[0] : null;
   }
 
   queryVisibleObjects({x, y, width = 1, height = 1, layerIds = null}) {
-    return this.layerManager.queryLayer({x, y, width, height, layerIds});
+    return this.layerManager.pickVisibleObjects({x, y, width, height, layerIds});
   }
 
   getViewports() {
@@ -239,8 +242,13 @@ export default class DeckGLJS {
     if (!redraw) {
       return;
     }
+
     this.props.onBeforeRender({gl}); // TODO - should be called by AnimationLoop
-    this.layerManager.drawLayers({pass: 'render to screen'});
+    this.layerManager.drawLayers({
+      pass: 'render to screen',
+      // Helps debug layer picking, especially in framebuffer powered layers
+      drawPickingColors: this.props.drawPickingColors
+    });
     this.props.onAfterRender({gl}); // TODO - should be called by AnimationLoop
   }
 }

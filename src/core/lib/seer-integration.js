@@ -1,4 +1,5 @@
 import seer from 'seer';
+
 /**
  * Recursively set a nested property of an object given a properties array and a value
  */

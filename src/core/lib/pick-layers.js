@@ -18,167 +18,21 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-/* global window */
-import {GL, withParameters, setParameters} from 'luma.gl';
 import {log} from './utils';
+import {drawPickingBuffer, getPixelRatio} from './draw-layers';
 
 const EMPTY_PIXEL = new Uint8Array(4);
-let renderCount = 0;
-
-const getPixelRatio = ({useDevicePixelRatio}) =>
-  useDevicePixelRatio && typeof window !== 'undefined' ? window.devicePixelRatio : 1;
-
-// Convert viewport top-left CSS coordinates to bottom up WebGL coordinates
-const getGLViewport = (gl, {viewport, pixelRatio}) => {
-  const width = gl.canvas.clientWidth;
-  const height = gl.canvas.clientHeight;
-  // Convert viewport top-left CSS coordinates to bottom up WebGL coordinates
-  const dimensions = viewport.getDimensions({width, height});
-  return [
-    dimensions.x * pixelRatio,
-    (height - dimensions.y - dimensions.height) * pixelRatio,
-    dimensions.width * pixelRatio,
-    dimensions.height * pixelRatio
-  ];
-};
-
-export function clearCanvas(gl, {useDevicePixelRatio}) {
-  const pixelRatio = getPixelRatio({useDevicePixelRatio});
-  // TODO - use width and height directly?
-  const width = gl.canvas.clientWidth;
-  const height = gl.canvas.clientHeight;
-
-  // clear depth and color buffers, restoring transparency
-  withParameters(gl, {viewport: [0, 0, width * pixelRatio, height * pixelRatio]}, () => {
-    gl.clear(GL.COLOR_BUFFER_BIT | GL.DEPTH_BUFFER_BIT);
-  });
-}
-
-export function drawLayers(gl, {layers, viewport, useDevicePixelRatio, pass}) {
-  const pixelRatio = getPixelRatio({useDevicePixelRatio});
-  const glViewport = getGLViewport(gl, {viewport, pixelRatio});
-
-  // render layers in normal colors
-  let visibleCount = 0;
-  let compositeCount = 0;
-
-  // render layers in normal colors
-  layers.forEach((layer, layerIndex) => {
-    if (layer.isComposite) {
-      compositeCount++;
-    } else if (layer.props.visible) {
-
-      const pickingSelectedColor = _selectedObjectPickingColor(layer);
-      // TODO - handle multimodel layers?
-      if (pickingSelectedColor && layer.state.model) {
-        layer.state.model.updateModuleSettings({
-          pickingSelectedColor,
-          pickingSelectedColorValid: true
-        });
-      }
-
-      withParameters(gl, {viewport: glViewport}, () => {
-
-        layer.drawLayer({
-          moduleParameters: Object.assign({}, layer.props, {
-            viewport: layer.context.viewport
-          }),
-          uniforms: Object.assign(
-            // TODO: Update all layers to use 'picking_uActive' (picking shader module)
-            // and then remove 'renderPickingBuffer' and 'pickingEnabled'.
-            {
-              renderPickingBuffer: 0,
-              pickingEnabled: 0,
-              picking_uActive: 0
-            },
-            layer.context.uniforms,
-            {layerIndex}
-          ),
-          parameters: layer.props.parameters || {}
-        });
-
-      });
-
-      visibleCount++;
-    }
-  });
-  const totalCount = layers.length;
-  const primitiveCount = totalCount - compositeCount;
-  const hiddenCount = primitiveCount - visibleCount;
-
-  const message = `\
-#${renderCount++}: Rendering ${visibleCount} of ${totalCount} layers ${pass} \
-(${hiddenCount} hidden, ${compositeCount} composite)`;
-
-  log.log(2, message);
-}
-
-// Pick all objects within the given bounding box
-export function queryLayers(gl, {
-  layers,
-  pickingFBO,
-  x,
-  y,
-  width,
-  height,
-  viewport,
-  mode,
-  useDevicePixelRatio
-}) {
-
-  // Convert from canvas top-left to WebGL bottom-left coordinates
-  // And compensate for pixelRatio
-  const pixelRatio = getPixelRatio({useDevicePixelRatio});
-  const glViewport = getGLViewport(gl, {viewport, pixelRatio});
-
-  const deviceLeft = Math.round(x * pixelRatio);
-  const deviceBottom = Math.round(gl.canvas.height - y * pixelRatio);
-  const deviceRight = Math.round((x + width) * pixelRatio);
-  const deviceTop = Math.round(gl.canvas.height - (y + height) * pixelRatio);
-
-  // Only return unique infos, identified by info.object
-  const uniqueInfos = new Map();
-
-  withParameters(gl, {viewport: glViewport}, () => {
-
-    const pickInfos = getUniquesFromPickingBuffer(gl, {
-      layers,
-      pickingFBO,
-      deviceRect: {
-        x: deviceLeft,
-        y: deviceTop,
-        width: deviceRight - deviceLeft,
-        height: deviceBottom - deviceTop
-      }
-    });
-
-    pickInfos.forEach(pickInfo => {
-      let info = createInfo([pickInfo.x / pixelRatio, pickInfo.y / pixelRatio], viewport);
-      info.devicePixel = [pickInfo.x, pickInfo.y];
-      info.pixelRatio = pixelRatio;
-      info.color = pickInfo.pickedColor;
-      info.index = pickInfo.pickedObjectIndex;
-      info.picked = true;
-
-      info = getLayerPickingInfo({layer: pickInfo.pickedLayer, info, mode});
-      if (!uniqueInfos.has(info.object)) {
-        uniqueInfos.set(info.object, info);
-      }
-    });
-  });
-
-  return Array.from(uniqueInfos.values());
-}
 
 /* eslint-disable max-depth, max-statements */
 // Pick the closest object at the given (x,y) coordinate
-export function pickLayers(gl, {
+export function pickObject(gl, {
   layers,
+  viewports,
+  onViewportActive,
   pickingFBO,
   x,
   y,
   radius,
-  viewport,
   mode,
   lastPickedInfo,
   useDevicePixelRatio
@@ -186,24 +40,18 @@ export function pickLayers(gl, {
   // Convert from canvas top-left to WebGL bottom-left coordinates
   // And compensate for pixelRatio
   const pixelRatio = getPixelRatio({useDevicePixelRatio});
-  const glViewport = getGLViewport(gl, {viewport, pixelRatio});
-
   const deviceX = Math.round(x * pixelRatio);
   const deviceY = Math.round(gl.canvas.height - y * pixelRatio);
   const deviceRadius = Math.round(radius * pixelRatio);
 
-  let pickInfo = null;
-
-  withParameters(gl, {viewport: glViewport}, () => {
-
-    pickInfo = getClosestFromPickingBuffer(gl, {
-      layers,
-      pickingFBO,
-      deviceX,
-      deviceY,
-      deviceRadius
-    });
-
+  const pickInfo = getClosestFromPickingBuffer(gl, {
+    layers,
+    viewports,
+    onViewportActive,
+    pickingFBO,
+    deviceX,
+    deviceY,
+    deviceRadius
   });
 
   const {
@@ -238,6 +86,8 @@ export function pickLayers(gl, {
       lastPickedInfo.index = pickedObjectIndex;
     }
   }
+
+  const viewport = getViewportFromCoordinates({viewports}); // TODO - add coords
 
   const baseInfo = createInfo([x, y], viewport);
   baseInfo.devicePixel = [deviceX, deviceY];
@@ -309,12 +159,104 @@ export function pickLayers(gl, {
   return unhandledPickInfos;
 }
 
+// Pick all objects within the given bounding box
+export function pickVisibleObjects(gl, {
+  layers,
+  viewports,
+  onViewportActive,
+  pickingFBO,
+  x,
+  y,
+  width,
+  height,
+  mode,
+  useDevicePixelRatio
+}) {
+
+  // Convert from canvas top-left to WebGL bottom-left coordinates
+  // And compensate for pixelRatio
+  const pixelRatio = getPixelRatio({useDevicePixelRatio});
+
+  const deviceLeft = Math.round(x * pixelRatio);
+  const deviceBottom = Math.round(gl.canvas.height - y * pixelRatio);
+  const deviceRight = Math.round((x + width) * pixelRatio);
+  const deviceTop = Math.round(gl.canvas.height - (y + height) * pixelRatio);
+
+  // Only return unique infos, identified by info.object
+  const uniqueInfos = new Map();
+
+  const pickInfos = getUniquesFromPickingBuffer(gl, {
+    layers,
+    viewports,
+    onViewportActive,
+    pickingFBO,
+    deviceRect: {
+      x: deviceLeft,
+      y: deviceTop,
+      width: deviceRight - deviceLeft,
+      height: deviceBottom - deviceTop
+    }
+  });
+
+  pickInfos.forEach(pickInfo => {
+    const viewport = getViewportFromCoordinates({viewports}); // TODO - add coords
+    let info = createInfo([pickInfo.x / pixelRatio, pickInfo.y / pixelRatio], viewport);
+    info.devicePixel = [pickInfo.x, pickInfo.y];
+    info.pixelRatio = pixelRatio;
+    info.color = pickInfo.pickedColor;
+    info.index = pickInfo.pickedObjectIndex;
+    info.picked = true;
+
+    info = getLayerPickingInfo({layer: pickInfo.pickedLayer, info, mode});
+    if (!uniqueInfos.has(info.object)) {
+      uniqueInfos.set(info.object, info);
+    }
+  });
+
+  return Array.from(uniqueInfos.values());
+}
+
+// HELPER METHODS
+
+// Indentifies which viewport, if any corresponds to x and y
+// Returns first viewport if no match
+// TODO - need to determine which viewport we are in
+// TODO - document concept of "primary viewport" that matches all coords?
+// TODO - static method on Viewport class?
+function getViewportFromCoordinates({viewports}) {
+  const viewport = viewports[0];
+  return viewport;
+}
+
+function getPickedColors(gl, {layers, viewports, onViewportActive, pickingFBO, deviceRect}) {
+  drawPickingBuffer(gl, {layers, viewports, onViewportActive, pickingFBO, deviceRect});
+  // TODO - restore when luma patch lands
+  // const dataUrl = pickingFBO.readDataUrl();
+  // window.open(dataUrl, 'picking buffer');
+
+  const pickedColors = samplePickingBuffer(gl, {pickingFBO, deviceRect});
+  return pickedColors;
+}
+
+// Read from an already rendered picking buffer
+// Returns an Uint8ClampedArray of picked pixels
+export function samplePickingBuffer(gl, {
+  pickingFBO,
+  deviceRect: {x, y, width, height}
+}) {
+  const pickedColors = new Uint8Array(width * height * 4);
+  pickingFBO.readPixels({x, y, width, height, pixelArray: pickedColors});
+  return pickedColors;
+}
+
 /**
  * Pick at a specified pixel with a tolerance radius
  * Returns the closest object to the pixel in shape `{pickedColor, pickedLayer, pickedObjectIndex}`
  */
 function getClosestFromPickingBuffer(gl, {
   layers,
+  viewports,
+  onViewportActive,
   pickingFBO,
   deviceX,
   deviceY,
@@ -326,14 +268,15 @@ function getClosestFromPickingBuffer(gl, {
     pickedObjectIndex: -1
   };
 
-  if (
-    deviceX < 0 ||
-    deviceY < 0 ||
-    deviceX > pickingFBO.width ||
-    deviceY > pickingFBO.height ||
-    layers.length <= 0
-  ) {
-    // x, y out of bounds or no layers to pick.
+  // x, y out of bounds or no layers to pick.
+  const valid =
+    layers.length > 0 &&
+    deviceX >= 0 &&
+    deviceY >= 0 &&
+    deviceX < pickingFBO.width &&
+    deviceY < pickingFBO.height;
+
+  if (!valid) {
     return closestResultToCenter;
   }
 
@@ -343,7 +286,13 @@ function getClosestFromPickingBuffer(gl, {
   const width = Math.min(pickingFBO.width, deviceX + deviceRadius) - x + 1;
   const height = Math.min(pickingFBO.height, deviceY + deviceRadius) - y + 1;
 
-  const pickedColors = getPickedColors(gl, {layers, pickingFBO, deviceRect: {x, y, width, height}});
+  const pickedColors = getPickedColors(gl, {
+    layers,
+    viewports,
+    onViewportActive,
+    pickingFBO,
+    deviceRect: {x, y, width, height}
+  });
 
   // Traverse all pixels in picking results and find the one closest to the supplied
   // [deviceX, deviceY]
@@ -388,10 +337,18 @@ function getClosestFromPickingBuffer(gl, {
  */
 function getUniquesFromPickingBuffer(gl, {
   layers,
+  viewports,
+  onViewportActive,
   pickingFBO,
   deviceRect: {x, y, width, height}
 }) {
-  const pickedColors = getPickedColors(gl, {layers, pickingFBO, deviceRect: {x, y, width, height}});
+  const pickedColors = getPickedColors(gl, {
+    layers,
+    viewports,
+    onViewportActive,
+    pickingFBO,
+    deviceRect: {x, y, width, height}
+  });
   const uniqueColors = new Map();
 
   // Traverse all pixels in picking results and get unique colors
@@ -404,76 +361,20 @@ function getUniquesFromPickingBuffer(gl, {
       const colorKey = pickedColor.join(',');
       if (!uniqueColors.has(colorKey)) {
         const pickedLayer = layers[pickedLayerIndex];
-        uniqueColors.set(colorKey, {
-          pickedColor,
-          pickedLayer,
-          pickedObjectIndex: pickedLayer.decodePickingColor(pickedColor)
-        });
+        if (pickedLayer) { // eslint-disable-line
+          uniqueColors.set(colorKey, {
+            pickedColor,
+            pickedLayer,
+            pickedObjectIndex: pickedLayer.decodePickingColor(pickedColor)
+          });
+        } else {
+          log.error(0, 'Picked non-existent layer. Is picking buffer corrupt?');
+        }
       }
     }
   }
 
   return Array.from(uniqueColors.values());
-}
-
-// Returns an Uint8ClampedArray of picked pixels
-function getPickedColors(gl, {
-  layers,
-  pickingFBO,
-  deviceRect: {x, y, width, height}
-}) {
-  // Make sure we clear scissor test and fbo bindings in case of exceptions
-  // We are only interested in one pixel, no need to render anything else
-  // Note that the callback here is called synchronously.
-  // Set blend mode for picking
-  // always overwrite existing pixel with [r,g,b,layerIndex]
-  return withParameters(gl, {
-    framebuffer: pickingFBO,
-    scissorTest: true,
-    scissor: [x, y, width, height],
-    clearColor: [0, 0, 0, 0]
-  }, () => {
-
-    // Clear the frame buffer
-    gl.clear(GL.COLOR_BUFFER_BIT | GL.DEPTH_BUFFER_BIT);
-
-    // Render all pickable layers in picking colors
-    layers.forEach((layer, layerIndex) => {
-      if (!layer.isComposite && layer.props.visible && layer.props.pickable) {
-
-        // Encode layerIndex with alpha
-        setParameters(gl, {blendColor: [0, 0, 0, (layerIndex + 1) / 255]});
-        layer.drawLayer({
-          moduleParameters: Object.assign({}, layer.props, {
-            viewport: layer.context.viewport
-          }),
-          uniforms: Object.assign(
-            // TODO: Update all layers to use 'picking_uActive' (picking shader module)
-            // and then remove 'renderPickingBuffer' and 'pickingEnabled'.
-            {
-              renderPickingBuffer: 1,
-              pickingEnabled: 1,
-              picking_uActive: 1
-            },
-            layer.context.uniforms,
-            {layerIndex}
-          ),
-          // Blend parameters must not be overriden
-          parameters: Object.assign({}, layer.props.parameters || {}, {
-            blend: true,
-            blendFunc: [gl.ONE, gl.ZERO, gl.CONSTANT_ALPHA, gl.ZERO],
-            blendEquation: gl.FUNC_ADD
-          })
-        });
-      }
-    });
-
-    // Read color in the central pixel, to be mapped with picking colors
-    const pickedColors = new Uint8Array(width * height * 4);
-    gl.readPixels(x, y, width, height, GL.RGBA, GL.UNSIGNED_BYTE, pickedColors);
-
-    return pickedColors;
-  });
 }
 
 function createInfo(pixel, viewport) {
@@ -506,16 +407,4 @@ function getLayerPickingInfo({layer, info, mode}) {
     layer = layer.parentLayer;
   }
   return info;
-}
-
-/**
- * Returns the picking color of currenlty selected object of the given 'layer'.
- * @return {Array} - the picking color or null if layers selected object is invalid.
- */
-function _selectedObjectPickingColor(layer) {
-  if (layer.props.highlightedObjectIndex < 0) {
-    return null;
-  }
-  // TODO: Add warning if 'highlightedObjectIndex' is > numberOfInstances of the model.
-  return layer.encodePickingColor(layer.props.highlightedObjectIndex);
 }

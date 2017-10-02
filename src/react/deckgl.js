@@ -52,7 +52,7 @@ export default class DeckGL extends React.Component {
   }
 
   queryVisibleObjects({x, y, width = 1, height = 1, layerIds = null}) {
-    return this.deck.queryVisibleObject({x, y, width, height, layerIds});
+    return this.deck.queryVisibleObjects({x, y, width, height, layerIds});
   }
 
   // Private Helpers

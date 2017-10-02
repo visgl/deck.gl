@@ -24,7 +24,8 @@ import seer from 'seer';
 import Layer from './layer';
 import {log} from './utils';
 import {flatten} from './utils/flatten';
-import {clearCanvas, drawLayers, pickLayers, queryLayers} from './draw-and-pick';
+import {drawLayers} from './draw-layers';
+import {pickObject, pickVisibleObjects} from './pick-layers';
 import {LIFECYCLE} from './constants';
 import Viewport from '../viewports/viewport';
 import {
@@ -94,15 +95,6 @@ export default class LayerManager {
     Object.seal(this);
   }
 
-  // Gets an (optionally) filtered list of layers
-  getLayers({layerIds = null} = {}) {
-    // Filtering by layerId compares beginning of strings, so that sublayers will be included
-    // Dependes on the convention of adding suffixes to the parent's layer name
-    return layerIds ?
-      this.layers.filter(layer => layerIds.find(layerId => layer.id.indexOf(layerId) === 0)) :
-      this.layers;
-  }
-
   /**
    * Method to call when the layer manager is not needed anymore.
    *
@@ -113,38 +105,17 @@ export default class LayerManager {
     seer.removeListener(this._editSeer);
   }
 
-  setViewports(viewports) {
-    viewports = flatten(viewports, {filter: Boolean});
-
-    // Need to ensure one viewport is activated
-    const viewport = viewports[0];
-    assert(viewport instanceof Viewport, 'Invalid viewport');
-
-    this.context.viewports = viewports;
-    this._activateViewport(viewport);
+  // Gets an (optionally) filtered list of layers
+  getLayers({layerIds = null} = {}) {
+    // Filtering by layerId compares beginning of strings, so that sublayers will be included
+    // Dependes on the convention of adding suffixes to the parent's layer name
+    return layerIds ?
+      this.layers.filter(layer => layerIds.find(layerId => layer.id.indexOf(layerId) === 0)) :
+      this.layers;
   }
 
   getViewports() {
     return this.context.viewports;
-  }
-
-  _activateViewport(viewport) {
-    this._needsRedraw = true;
-
-    // TODO - viewport change detection breaks METER_OFFSETS mode
-    // const oldViewport = this.context.viewport;
-    // const viewportChanged = !oldViewport || !viewport.equals(oldViewport);
-    const viewportChanged = true;
-
-    if (viewportChanged) {
-      Object.assign(this.oldContext, this.context);
-      this.context.viewport = viewport;
-      this.context.viewportChanged = true;
-      this.context.uniforms = {};
-      log(4, viewport);
-    }
-
-    return this;
   }
 
   /**
@@ -153,7 +124,45 @@ export default class LayerManager {
    * @param {Boolean} useDevicePixelRatio
    */
   setParameters(parameters) {
+    if ('eventManager' in parameters) {
+      this.initEventHandling(parameters.eventManager);
+    }
+
+    if ('pickingRadius' in parameters ||
+      'onLayerClick' in parameters ||
+      'onLayerHover' in parameters) {
+      this.setEventHandlingParameters(parameters);
+    }
+
+    if ('viewports' in parameters) {
+      this.setViewports(parameters.viewports);
+    }
+
+    if ('layers' in parameters) {
+      this.updateLayers({newLayers: parameters.layers});
+    }
+
     this.context = Object.assign({}, this.context, parameters);
+  }
+
+  setViewports(viewports) {
+    viewports = flatten(viewports, {filter: Boolean});
+
+    // Viewports are "immutable", so we can shallow compare
+    const oldViewports = this.context.viewports;
+    const viewportsChanged = viewports.length !== oldViewports.length ||
+      viewports.some((_, i) => viewports[i] !== oldViewports[i]);
+
+    if (viewportsChanged) {
+      this._needsRedraw = true;
+
+      // Need to ensure one viewport is activated
+      const viewport = viewports[0];
+      assert(viewport instanceof Viewport, 'Invalid viewport');
+
+      this.context.viewports = viewports;
+      this._activateViewport(viewport);
+    }
   }
 
   /**
@@ -222,98 +231,59 @@ export default class LayerManager {
     return this;
   }
 
-  drawLayers({pass}) {
-    const {gl, useDevicePixelRatio} = this.context;
-    clearCanvas(gl, {useDevicePixelRatio});
+  drawLayers({pass = 'render to screen'}) {
+    const {gl, useDevicePixelRatio, drawPickingColors} = this.context;
 
-    // this.effectManager.preDraw();
-
-    this.context.viewports.forEach((viewportOrDescriptor, i) => {
-      const viewport = this._getViewportFromDescriptor(viewportOrDescriptor);
-
-      // Update context to point to this viewport
-      this.context.viewport = viewport;
-      assert(this.context.viewport, 'LayerManager.drawLayers: viewport not set');
-
-      // Update layers states
-      // Let screen space layers update their state based on viewport
-      // TODO - reimplement viewport change detection (single viewport optimization)
-      // TODO - don't set viewportChanged during setViewports?
-      if (this.context.viewportChanged) {
-        this._updateLayerStates({viewportChanged: true});
-      }
-
-      // render this viewport
-      drawLayers(gl, {
-        layers: this.layers,
-        viewport,
-        useDevicePixelRatio,
-        pass
-      });
+    // render this viewport
+    drawLayers(gl, {
+      pass,
+      layers: this.layers,
+      viewports: this.context.viewports,
+      onViewportActive: this._activateViewport.bind(this),
+      useDevicePixelRatio,
+      drawPickingColors
     });
-
-    // this.effectManager.draw();
 
     return this;
   }
 
   // Pick the closest info at given coordinate
-  pickLayer({x, y, mode, radius = 0, layerIds}) {
+  pickObject({x, y, mode, radius = 0, layerIds}) {
     const {gl, useDevicePixelRatio} = this.context;
 
     const layers = this.getLayers({layerIds});
 
-    const pickInfos = [];
-
-    this.context.viewports.forEach((viewportOrDescriptor, i) => {
-      const viewport = this._getViewportFromDescriptor(viewportOrDescriptor);
-
-      // Update context to point to this viewport
-      this.context.viewport = viewport;
-      assert(this.context.viewport, 'LayerManager.drawLayers: viewport not set');
-
-      // Update layers states
-      // Let screen space layers update their state based on viewport
-      // TODO - reimplement viewport change detection (single viewport optimization)
-      // TODO - don't set viewportChanged during setViewports?
-      if (this.context.viewportChanged) {
-        this._updateLayerStates({viewportChanged: true});
-      }
-
-      // TODO this causes one readback per viewport, we must consolidate
-      const pickInfo = pickLayers(gl, {
-        x,
-        y,
-        radius,
-        layers,
-        mode,
-        viewport: this.context.viewport,
-        pickingFBO: this._getPickingBuffer(),
-        lastPickedInfo: this.context.lastPickedInfo,
-        useDevicePixelRatio
-      });
-
-      pickInfos.push(...pickInfo);
+    return pickObject(gl, {
+      x,
+      y,
+      radius,
+      layers,
+      mode,
+      viewports: this.context.viewports,
+      onViewportActive: this._activateViewport.bind(this),
+      pickingFBO: this._getPickingBuffer(),
+      lastPickedInfo: this.context.lastPickedInfo,
+      useDevicePixelRatio
     });
-
-    return pickInfos;
   }
 
   // Get all unique infos within a bounding box
-  queryLayer({x, y, width, height, layerIds}) {
+  pickVisibleObjects({x, y, width, height, layerIds}) {
     const {gl, useDevicePixelRatio} = this.context;
-    const layers = layerIds ?
-      this.layers.filter(layer => layerIds.indexOf(layer.id) >= 0) :
-      this.layers;
 
-    return queryLayers(gl, {
+    const layers = this.getLayers({layerIds});
+
+    return pickVisibleObjects(gl, {
       x,
       y,
       width,
       height,
       layers,
       mode: 'query',
+      // TODO - how does this interact with multiple viewports?
       viewport: this.context.viewport,
+      viewports: this.context.viewports,
+      onViewportActive: this._activateViewport.bind(this),
       pickingFBO: this._getPickingBuffer(),
       useDevicePixelRatio
     });
@@ -361,6 +331,34 @@ export default class LayerManager {
   // PRIVATE METHODS
   //
 
+  // Make a viewport "current" in layer context, primed for draw
+  _activateViewport(viewport) {
+    // TODO - viewport change detection breaks METER_OFFSETS mode
+    // const oldViewport = this.context.viewport;
+    // const viewportChanged = !oldViewport || !viewport.equals(oldViewport);
+    const viewportChanged = true;
+
+    if (viewportChanged) {
+      Object.assign(this.oldContext, this.context);
+      this.context.viewport = viewport;
+      this.context.viewportChanged = true;
+      this.context.uniforms = {};
+      log(4, viewport);
+
+      // Update layers states
+      // Let screen space layers update their state based on viewport
+      // TODO - reimplement viewport change detection (single viewport optimization)
+      // TODO - don't set viewportChanged during setViewports?
+      if (this.context.viewportChanged) {
+        this._updateLayerStates({viewportChanged: true});
+      }
+    }
+
+    assert(this.context.viewport, 'LayerManager: viewport not set');
+
+    return this;
+  }
+
   // Walk the layers and update their states
   _updateLayerStates(changeFlags) {
     for (const layer of this.layers) {
@@ -370,31 +368,21 @@ export default class LayerManager {
 
   // Get a viewport from a viewport descriptor (which can be a plain viewport)
   _getViewportFromDescriptor(viewportOrDescriptor) {
-    return viewportOrDescriptor.viewport ?
-      viewportOrDescriptor.viewport :
-      viewportOrDescriptor;
+    return viewportOrDescriptor.viewport ? viewportOrDescriptor.viewport : viewportOrDescriptor;
   }
 
   _getPickingBuffer() {
     const {gl} = this.context;
-
     // Create a frame buffer if not already available
-    this.context.pickingFBO = this.context.pickingFBO || new Framebuffer(gl, {
-      width: gl.canvas.width,
-      height: gl.canvas.height
-    });
-
+    this.context.pickingFBO = this.context.pickingFBO || new Framebuffer(gl);
     // Resize it to current canvas size (this is a noop if size hasn't changed)
-    this.context.pickingFBO.resize({
-      width: gl.canvas.width,
-      height: gl.canvas.height
-    });
-
+    this.context.pickingFBO.resize({width: gl.canvas.width, height: gl.canvas.height});
     return this.context.pickingFBO;
   }
 
   // Match all layers, checking for caught errors
   // To avoid having an exception in one layer disrupt other layers
+  // TODO - mark layers with exceptions as bad and remove from rendering cycle?
   _updateLayers({oldLayers, newLayers}) {
     // Create old layer map
     const oldLayerMap = {};
@@ -617,10 +605,7 @@ export default class LayerManager {
    * but no layers are `pickable`.
    */
   _validateEventHandling() {
-    if (
-      this.onLayerClick ||
-      this.onLayerHover
-    ) {
+    if (this.onLayerClick || this.onLayerHover) {
       if (this.layers.length && !this.layers.some(layer => layer.props.pickable)) {
         log.warn(1,
           'You have supplied a top-level input event handler (e.g. `onLayerClick`), ' +
@@ -645,17 +630,12 @@ export default class LayerManager {
     if (!pos) {
       return;
     }
-    const selectedInfos = this.pickLayer({
-      x: pos.x,
-      y: pos.y,
-      radius: this._pickingRadius,
-      mode: 'click'
-    });
-    if (selectedInfos.length) {
-      const firstInfo = selectedInfos.find(info => info.index >= 0);
-      if (this._onLayerClick) {
-        this._onLayerClick(firstInfo, selectedInfos, event.srcEvent);
-      }
+    const radius = this._pickingRadius;
+    const selectedInfos = this.pickObject({x: pos.x, y: pos.y, radius, mode: 'click'});
+
+    const firstInfo = selectedInfos.find(info => info.index >= 0);
+    if (firstInfo && this._onLayerClick) {
+      this._onLayerClick(firstInfo, selectedInfos, event.srcEvent);
     }
   }
 
@@ -675,22 +655,17 @@ export default class LayerManager {
       return;
     }
     const pos = event.offsetCenter;
-    const selectedInfos = this.pickLayer({
-      x: pos.x,
-      y: pos.y,
-      radius: this._pickingRadius,
-      mode: 'hover'
-    });
-    if (selectedInfos.length) {
-      const firstInfo = selectedInfos.find(info => info.index >= 0);
-      if (this._onLayerHover) {
-        this._onLayerHover(firstInfo, selectedInfos, event.srcEvent);
-      }
+    const radius = this._pickingRadius;
+    const selectedInfos = this.pickObject({x: pos.x, y: pos.y, radius, mode: 'hover'});
+
+    const firstInfo = selectedInfos.find(info => info.index >= 0);
+    if (firstInfo && this._onLayerHover) {
+      this._onLayerHover(firstInfo, selectedInfos, event.srcEvent);
     }
   }
 
   _onPointerLeave(event) {
-    this.pickLayer({
+    this.pickObject({
       x: -1,
       y: -1,
       radius: this._pickingRadius,
