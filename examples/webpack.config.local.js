@@ -13,45 +13,50 @@ const LIB_DIR = resolve(__dirname, '..');
 const SRC_DIR = resolve(LIB_DIR, './src');
 
 // Support for hot reloading changes to the deck.gl library:
-const LOCAL_DEV_CONFIG = {
-  // suppress warnings about bundle size
-  devServer: {
-    stats: {
-      warnings: false
-    }
-  },
-
-  devtool: 'source-map',
-
-  resolve: {
-    alias: {
-      // For importing modules that are not exported at root
-      'deck.gl/dist': SRC_DIR,
-      // Imports the deck.gl library from the src directory in this repo
-      'deck.gl': SRC_DIR,
-      // Important: ensure shared dependencies come from the main node_modules dir
-      'luma.gl': resolve(LIB_DIR, './node_modules/luma.gl'),
-      'math.gl': resolve(LIB_DIR, './node_modules/math.gl'),
-      'viewport-mercator-project': resolve(LIB_DIR, './node_modules/viewport-mercator-project'),
-      seer: resolve(LIB_DIR, './node_modules/seer'),
-      react: resolve(LIB_DIR, './node_modules/react')
-    }
-  },
-  module: {
-    rules: [
-      {
-        // Unfortunately, webpack doesn't import library sourcemaps on its own...
-        test: /\.js$/,
-        use: ['source-map-loader'],
-        enforce: 'pre'
+function makeLocalDevConfig(EXAMPLE_DIR = LIB_DIR) {
+  return {
+    // suppress warnings about bundle size
+    devServer: {
+      stats: {
+        warnings: false
       }
+    },
+
+    devtool: 'source-map',
+
+    resolve: {
+      alias: {
+        // For importing modules that are not exported at root
+        'deck.gl/dist': SRC_DIR,
+        // Imports the deck.gl library from the src directory in this repo
+        'deck.gl': SRC_DIR,
+        // luma version should be controlled by example's package.json
+        'luma.gl': resolve(EXAMPLE_DIR, './node_modules/luma.gl'),
+        // Important: ensure shared dependencies come from the main node_modules dir
+        // Versions will be controlled by the deck.gl top level package.json
+        'math.gl': resolve(LIB_DIR, './node_modules/math.gl'),
+        'viewport-mercator-project':
+          resolve(LIB_DIR, './node_modules/viewport-mercator-project'),
+        seer: resolve(LIB_DIR, './node_modules/seer'),
+        react: resolve(LIB_DIR, './node_modules/react')
+      }
+    },
+    module: {
+      rules: [
+        {
+          // Unfortunately, webpack doesn't import library sourcemaps on its own...
+          test: /\.js$/,
+          use: ['source-map-loader'],
+          enforce: 'pre'
+        }
+      ]
+    },
+    // Optional: Enables reading mapbox token from environment variable
+    plugins: [
+      new webpack.EnvironmentPlugin(['MapboxAccessToken'])
     ]
-  },
-  // Optional: Enables reading mapbox token from environment variable
-  plugins: [
-    new webpack.EnvironmentPlugin(['MapboxAccessToken'])
-  ]
-};
+  };
+}
 
 const BUBLE_CONFIG = {
   module: {
@@ -73,7 +78,8 @@ const BUBLE_CONFIG = {
   }
 };
 
-function addLocalDevSettings(config) {
+function addLocalDevSettings(config, exampleDir) {
+  const LOCAL_DEV_CONFIG = makeLocalDevConfig(exampleDir);
   config = Object.assign({}, LOCAL_DEV_CONFIG, config);
   config.resolve = config.resolve || {};
   config.resolve.alias = config.resolve.alias || {};
@@ -94,17 +100,17 @@ function addBubleSettings(config) {
   return config;
 }
 
-module.exports = config => env => {
+module.exports = (config, exampleDir) => env => {
   // npm run start-local now transpiles the lib
   if (env && env.local) {
-    config = addLocalDevSettings(config);
+    config = addLocalDevSettings(config, exampleDir);
     config = addBubleSettings(config);
     // console.warn(JSON.stringify(config, null, 2));
   }
 
   // npm run start-es6 does not transpile the lib
   if (env && env.es6) {
-    config = addLocalDevSettings(config);
+    config = addLocalDevSettings(config, exampleDir);
     // console.warn(JSON.stringify(config, null, 2));
   }
 

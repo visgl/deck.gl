@@ -59,7 +59,8 @@ class App extends PureComponent {
         // effects: false,
         multiview: false,
         separation: 0,
-        pickingRadius: 0
+        pickingRadius: 0,
+        drawPickingColors: false
         // the rotation controls works only for layers in
         // meter offset projection mode. They are commented out
         // here since layer browser currently only have one layer
@@ -224,7 +225,8 @@ class App extends PureComponent {
   }
 
   _renderMap() {
-    const {width, height, mapViewState, settings: {effects, pickingRadius}} = this.state;
+    const {width, height, mapViewState, settings} = this.state;
+    const {effects, pickingRadius, drawPickingColors} = settings;
 
     const viewports = this._getViewports();
 
@@ -245,12 +247,14 @@ class App extends PureComponent {
             viewports={viewports}
             layers={this._renderExamples()}
             effects={effects ? this._effects : []}
-            debug={true}
             useDefaultGLSettings
             pickingRadius={pickingRadius}
             onLayerHover={this._onHover}
             onLayerClick={this._onClick}
             initWebGLParameters
+
+            debug={true}
+            drawPickingColors={drawPickingColors}
           >
             <FPSStats isActive/>
 
