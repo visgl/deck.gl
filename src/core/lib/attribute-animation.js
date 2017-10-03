@@ -250,20 +250,21 @@ void main(void) {
     const {attribute, buffer, bufferSize} = animation;
     const {value, type, size} = attribute;
 
+    const newBufferSize = value.length;
     // Enter from 0
-    const currentValues = new (value.constructor)(value.length);
+    const currentValues = new (value.constructor)(newBufferSize);
     // No entrance animation
     // const currentValues = value.slice();
     if (buffer) {
       // Transfer old buffer data to the new one
       const oldBufferData = new Float32Array(bufferSize);
 
-      // TODO - luma.gl's buffer.getData is not working
-      this.gl.bindBuffer(GL_COPY_READ_BUFFER, buffer.handle);
-      this.gl.getBufferSubData(GL_COPY_READ_BUFFER, 0, oldBufferData);
-      this.gl.bindBuffer(GL_COPY_READ_BUFFER, null);
+      buffer.getData({
+        dstData: oldBufferData,
+        srcByteOffset: 0
+      });
 
-      const len = Math.min(bufferSize, currentValues.length);
+      const len = Math.min(bufferSize, newBufferSize);
       for (let i = 0; i < len; i++) {
         currentValues[i] = oldBufferData[i];
       }
