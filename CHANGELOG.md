@@ -23,6 +23,16 @@ For Earlier Beta Releases see below
 
 ### deck.gl v4.2 Beta Releases
 
+#### [4.2.0-alpha.11] - Oct 2
+- Bump to luma.gl v4.1.0-alpha.4 - Framebuffer improvements
+- Update segment layer example to latest luma.gl
+- Layer browser updates (#965)
+- Draw and pick refactor (#964)
+- fix bug where layer does not update on updateTriggers change (#971)
+- [Hexagon/Grid] add no render when elevation < 0.0 to vertex-64 (#968)
+- Viewport Animation: Adding flyTo style animation support. (#937)
+- Minor fixes - after refactorings (#960)
+
 #### [4.2.0-alpha.10] - Sep 27
 - SAMPLE: Outline shadow layer, first cut (#957)
 - Update docs with missing layer props (#959)

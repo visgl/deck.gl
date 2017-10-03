@@ -2063,10 +2063,6 @@ github-from-package@0.0.0:
   version "0.0.0"
   resolved "https://registry.yarnpkg.com/github-from-package/-/github-from-package-0.0.0.tgz#97fb5d96bfde8973313f20e8288ef9a167fa64ce"
 
-gl-constants@^1.0.0:
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/gl-constants/-/gl-constants-1.0.0.tgz#597a504e364750ff50253aa35f8dea7af4a5d233"
-
 gl-mat3@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/gl-mat3/-/gl-mat3-1.0.0.tgz#89633219ca429379a16b9185d95d41713453b912"
@@ -2894,11 +2890,10 @@ lru-cache@^4.0.1:
     pseudomap "^1.0.2"
     yallist "^2.1.2"
 
-luma.gl@>=4.1.0-alpha.2:
-  version "4.1.0-alpha.2"
-  resolved "https://registry.yarnpkg.com/luma.gl/-/luma.gl-4.1.0-alpha.2.tgz#8544fee260b72be6115ba0ec85c1d0f23a46f7a4"
+luma.gl@>=4.1.0-alpha.4:
+  version "4.1.0-alpha.4"
+  resolved "https://registry.yarnpkg.com/luma.gl/-/luma.gl-4.1.0-alpha.4.tgz#67d23ad2d1e15444fb6d8b09bed5494ba829443f"
   dependencies:
-    gl-constants "^1.0.0"
     gl-mat4 "^1.1.4"
     gl-quat "^1.0.0"
     gl-vec2 "^1.0.0"

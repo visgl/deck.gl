@@ -42,5 +42,10 @@ if (!global.deck) {
   };
 }
 
+// TODO - Hack, remove when luma.gl 4.1.0-alpha.5 is published
+if (!console.table) {
+  console.table = () => {};
+}
+
 // Make sure we register shader modules
 require('../shaderlib');
