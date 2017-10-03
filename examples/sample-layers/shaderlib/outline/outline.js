@@ -21,24 +21,22 @@ function getUniforms({outlineEnabled, outlineRenderShadowmap, outlineShadowmap} 
 
 const vs = `\
 varying float outline_vzLevel;
-// varying vec2 outline_vUV;
 varying vec4 outline_vPosition;
-
-// Note - fairly generic, move to a UV or screen package, or even project?
-vec2 project_clipspace_to_uv(vec4 position) {
-  vec2 p = vec2(position.x / position.w, position.y / position.w);
-  return vec2((p.x + 1.0) / 2.0, (p.y + 1.0) / 2.0);
-}
 
 // Set the z level for the outline shadowmap rendering
 void outline_setZLevel(float zLevel) {
   outline_vzLevel = zLevel;
 }
 
-// Outline set the UV coordinates on the screen
+// Store an adjusted position for texture2DProj
 void outline_setUV(vec4 position) {
-  // outline_vUV = project_clipspace_to_uv(position);
-  outline_vPosition = position;
+  // mat4(
+  //   0.5, 0.0, 0.0, 0.0,
+  //   0.0, 0.5, 0.0, 0.0,
+  //   0.0, 0.0, 0.5, 0.0,
+  //   0.5, 0.5, 0.5, 1.0
+  // ) * position;
+  outline_vPosition = vec4(position.xyz * 0.5 + position.w * 0.5, position.w);
 }
 `;
 

@@ -5,10 +5,10 @@
     "start-es6": "webpack-dev-server --env.es6 --progress --hot --open"
   },
   "dependencies": {
-    "deck.gl": ">=4.1.0-alpha.10",
+    "deck.gl": ">=4.2.0-alpha.10",
     "colorbrewer": "^1.0.0",
     "extrude-polyline": "^1.0.6",
-    "luma.gl": ">=4.1.0-alpha.3",
+    "luma.gl": ">=4.1.0-alpha.4",
     "react": "^15.4.1",
     "react-autobind": "^1.0.6",
     "react-dom": "^15.4.1",

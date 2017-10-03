@@ -1,42 +1,42 @@
 import {PathLayer} from 'deck.gl';
-import {GL, Framebuffer, registerShaderModules} from 'luma.gl';
+import {GL, Framebuffer, Texture2D, registerShaderModules} from 'luma.gl';
 
-import VS from './path-layer-vertex.glsl';
-import VS64 from './path-layer-vertex-64.glsl';
-import FS from './path-layer-fragment.glsl';
+// import VS from './path-layer-vertex.glsl';
+// import VS64 from './path-layer-vertex-64.glsl';
+// import FS from './path-layer-fragment.glsl';
 
 import outline from '../shaderlib/outline/outline';
 
 registerShaderModules([outline]);
 
-const VS_PROLOGUE = `\
+// TODO - this should be built into assembleShaders
+function injectShaderCode({source, declarations = '', code = ''}) {
+  const INJECT_DECLARATIONS = /^/;
+  const INJECT_CODE = /}[^{}]*$/;
+
+  return source
+    .replace(INJECT_DECLARATIONS, declarations)
+    .replace(INJECT_CODE, code.concat('\n}\n'));
+}
+
+const VS_DECLARATIONS = `\
 #ifdef MODULE_OUTLINE
   attribute float instanceZLevel;
 #endif
 `;
 
-const VS_EPILOGUE = `\
+const VS_CODE = `\
 #ifdef MODULE_OUTLINE
   outline_setUV(gl_Position);
   outline_setZLevel(instanceZLevel);
 #endif
 `;
 
-const FS_EPILOGUE = `\
+const FS_CODE = `\
 #ifdef MODULE_OUTLINE
   gl_FragColor = outline_filterColor(gl_FragColor);
 #endif
 `;
-
-// TODO - Build injection support into assembleShaders
-const vs = VS
-  .replace('// INJECT-PROLOGUE', VS_PROLOGUE)
-  .replace('// INJECT-EPILOGUE', VS_EPILOGUE);
-const vs64 = VS64
-  .replace('// INJECT-PROLOGUE', VS_PROLOGUE)
-  .replace('// INJECT-EPILOGUE', VS_EPILOGUE);
-const fs = FS
-  .replace('// INJECT-EPILOGUE', FS_EPILOGUE);
 
 const defaultProps = {
   getZLevel: object => object.zLevel | 0
@@ -45,9 +45,12 @@ const defaultProps = {
 export default class SegmentLayer extends PathLayer {
   // Override getShaders to add the outline module
   getShaders() {
-    return this.props.fp64 ?
-      {vs: vs64, fs, modules: ['project64', 'outline']} :
-      {vs, fs, modules: ['outline']};
+    const shaders = super.getShaders();
+    return Object.assign({}, shaders, {
+      modules: shaders.modules.concat(['outline']),
+      vs: injectShaderCode({source: shaders.vs, declarations: VS_DECLARATIONS, code: VS_CODE}),
+      fs: injectShaderCode({source: shaders.fs, code: FS_CODE})
+    });
   }
 
   initializeState(context) {
@@ -57,7 +60,7 @@ export default class SegmentLayer extends PathLayer {
     // TODO - we should create a single outlineMap for all layers
     this.setState({
       outlineFramebuffer: new Framebuffer(context.gl),
-      dummyFramebuffer: new Framebuffer(context.gl)
+      dummyTexture: new Texture2D(context.gl)
     });
 
     // Create an attribute manager
@@ -69,11 +72,11 @@ export default class SegmentLayer extends PathLayer {
 
   // Override draw to add render module
   draw({moduleParameters = {}, parameters, uniforms, context}) {
-    const {rounded, miterLimit, widthScale, widthMinPixels, widthMaxPixels} = this.props;
-    const jointType = Number(rounded);
-
+    // Need to calculate same uniforms as base layer
+    const {rounded, miterLimit, widthScale, widthMinPixels, widthMaxPixels, justified} = this.props;
     uniforms = Object.assign({}, uniforms, {
-      jointType,
+      jointType: Number(rounded),
+      alignMode: Number(justified),
       widthScale,
       miterLimit,
       widthMinPixels,
@@ -81,31 +84,17 @@ export default class SegmentLayer extends PathLayer {
     });
 
     // Render the outline shadowmap (based on segment z orders)
-    const {gl} = context;
-    const {outlineFramebuffer, dummyFramebuffer} = this.state;
+    const {outlineFramebuffer, dummyTexture} = this.state;
+    outlineFramebuffer.resize();
+    outlineFramebuffer.clear({color: true, depth: true});
 
-    // TODO - working around some framebuffer bugs, will clean up when  luma.gl fixes are available
-    outlineFramebuffer.resize({width: gl.drawingBufferWidth, height: gl.drawingBufferHeight});
-    dummyFramebuffer.resize({width: gl.drawingBufferWidth, height: gl.drawingBufferHeight});
-
-    // withParameters(gl, {framebuffer: outlineFramebuffer},
-    //   () => clear(context.gl, {framebuffer: outlineFramebuffer,
-    // color: true, depth: true, stencil: true});
-
-    const prevFramebuffer = gl.luma.getParameter(gl.FRAMEBUFFER_BINDING);
-    gl.bindFramebuffer(gl.FRAMEBUFFER, outlineFramebuffer.handle);
-
-    gl.clear(GL.COLOR_BUFFER_BIT | GL.DEPTH_BUFFER_BIT);
-
-    moduleParameters = Object.assign({}, moduleParameters, {
+    this.state.model.updateModuleSettings(Object.assign({}, moduleParameters, {
       outlineEnabled: true,
       outlineRenderShadowmap: true,
-      outlineShadowmap: dummyFramebuffer.texture
-    });
-    this.state.model.updateModuleSettings(moduleParameters);
+      outlineShadowmap: dummyTexture
+    }));
 
     this.state.model.draw({
-      moduleParameters,
       uniforms: Object.assign({}, uniforms, {
         widthScale: this.props.widthScale * 1.2
       }),
@@ -115,28 +104,13 @@ export default class SegmentLayer extends PathLayer {
       framebuffer: outlineFramebuffer
     });
 
-    gl.bindFramebuffer(gl.FRAMEBUFFER, prevFramebuffer);
-
-    // this.state.model.draw({
-    //   moduleParameters,
-    //   uniforms: Object.assign({}, uniforms, {
-    //     widthScale: this.props.widthScale * 1.2
-    //   }),
-    //   parameters: {
-    //     depthTest: false
-    //   }
-    // });
-
     // // Now use the outline shadowmap to render the lines (with outlines)
-
-    moduleParameters = Object.assign({}, moduleParameters, {
+    this.state.model.updateModuleSettings(Object.assign({}, moduleParameters, {
       outlineEnabled: true,
       outlineRenderShadowmap: false,
-      outlineShadowmap: outlineFramebuffer.texture
-    });
-    this.state.model.updateModuleSettings(moduleParameters);
+      outlineShadowmap: outlineFramebuffer
+    }));
     this.state.model.draw({
-      moduleParameters,
       uniforms: Object.assign({}, uniforms, {
         widthScale: this.props.widthScale
       }),
