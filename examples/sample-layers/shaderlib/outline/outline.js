@@ -21,22 +21,22 @@ function getUniforms({outlineEnabled, outlineRenderShadowmap, outlineShadowmap} 
 
 const vs = `\
 varying float outline_vzLevel;
-varying vec2 outline_vUV;
-
-// Note - fairly generic, move to a UV or screen package, or even project?
-vec2 _getScreenPositionUV(vec4 position) {
-  vec2 p = vec2(position.x / position.w, position.y / position.w);
-  return vec2((p.x + 1.0) / 2.0, (p.y + 1.0) / 2.0);
-}
+varying vec4 outline_vPosition;
 
 // Set the z level for the outline shadowmap rendering
 void outline_setZLevel(float zLevel) {
   outline_vzLevel = zLevel;
 }
 
-// Outline set the UV coordinates on the screen
+// Store an adjusted position for texture2DProj
 void outline_setUV(vec4 position) {
-  outline_vUV = _getScreenPositionUV(position);
+  // mat4(
+  //   0.5, 0.0, 0.0, 0.0,
+  //   0.0, 0.5, 0.0, 0.0,
+  //   0.0, 0.0, 0.5, 0.0,
+  //   0.5, 0.5, 0.5, 1.0
+  // ) * position;
+  outline_vPosition = vec4(position.xyz * 0.5 + position.w * 0.5, position.w);
 }
 `;
 
@@ -46,7 +46,8 @@ uniform bool outline_uRenderOutlines;
 uniform sampler2D outline_uShadowmap;
 
 varying float outline_vzLevel;
-varying vec2 outline_vUV;
+// varying vec2 outline_vUV;
+varying vec4 outline_vPosition;
 
 const float OUTLINE_Z_LEVEL_ERROR = 0.01;
 
@@ -58,7 +59,12 @@ vec4 outline_filterShadowColor(vec4 color) {
 // Return a darker color if in shadowmap
 vec4 outline_filterDarkenColor(vec4 color) {
   if (outline_uEnabled) {
-    float maxZLevel = texture2D(outline_uShadowmap, outline_vUV).r * 255.;
+    float maxZLevel;
+    if (outline_vPosition.q > 0.0) {
+      maxZLevel = texture2DProj(outline_uShadowmap, outline_vPosition).r * 255.;
+    } else {
+      discard;
+    }
     if (maxZLevel < outline_vzLevel + OUTLINE_Z_LEVEL_ERROR) {
       vec4(color.rgb * 0.5, color.a);
     } else {

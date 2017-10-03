@@ -253,7 +253,7 @@ class App extends PureComponent {
             onLayerClick={this._onClick}
             initWebGLParameters
 
-            debug={true}
+            debug={false}
             drawPickingColors={drawPickingColors}
           >
             <FPSStats isActive/>

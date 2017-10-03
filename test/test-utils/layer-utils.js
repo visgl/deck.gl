@@ -85,7 +85,7 @@ export function testInitializeLayer({gl, layer, viewport}) {
     });
 
   } catch (error) {
-    failures = true;
+    failures = error;
   }
 
   return failures;
@@ -102,7 +102,7 @@ export function testUpdateLayer({gl, layer, viewport, newProps}) {
   const mergedDefaultProps = mergeDefaultProps(layer);
   layer.props = Object.assign({}, mergedDefaultProps, newProps);
 
-  let failures = false;
+  let failure = false;
   try {
     layer.updateLayer({
       oldProps,
@@ -112,21 +112,21 @@ export function testUpdateLayer({gl, layer, viewport, newProps}) {
       changeFlags: layer.diffProps(oldProps, layer.props, context)
     });
   } catch (error) {
-    failures = true;
+    failure = error;
   }
 
-  return failures;
+  return failure;
 }
 
 export function testDrawLayer({layer, uniforms = {}}) {
-  let failures = false;
+  let failure = false;
   try {
     layer.drawLayer({uniforms});
   } catch (error) {
-    failures = true;
+    failure = error;
   }
 
-  return failures;
+  return failure;
 }
 
 /**
@@ -149,8 +149,8 @@ export function testDrawLayer({layer, uniforms = {}}) {
 export function testLayerUpdates(t, {LayerComponent, testCases}) {
   const layer = new LayerComponent(testCases.INITIAL_PROPS);
 
-  let failures = testInitializeLayer({layer});
-  t.ok(!failures, `initialize ${LayerComponent.layerName} should not return failure`);
+  let failure = testInitializeLayer({layer});
+  t.notOk(failure, `initialize ${LayerComponent.layerName} should not return failure`);
 
   testCases.UPDATES.reduce((currentProps, {updateProps, assert}) => {
 
@@ -160,12 +160,12 @@ export function testLayerUpdates(t, {LayerComponent, testCases}) {
     const oldState = Object.assign({}, layer.state);
 
     // call update layer with new props
-    failures = testUpdateLayer({layer, newProps});
-    t.ok(!failures, `update ${LayerComponent.layerName} should not return failure`);
+    failure = testUpdateLayer({t, layer, newProps});
+    t.notOk(failure, `update ${LayerComponent.layerName} should not return failure`);
 
     // call draw layer
-    failures = testDrawLayer({layer});
-    t.ok(!failures, `draw ${LayerComponent.layerName} should not return failure`);
+    failure = testDrawLayer({layer});
+    t.notOk(failure, `draw ${LayerComponent.layerName} should not return failure`);
 
     // assert on updated layer
     assert(layer, oldState, t);
