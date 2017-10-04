@@ -88,14 +88,17 @@ export default class LineLayer extends Layer {
       this.setState({model: this._getModel(gl)});
     }
     this.updateAttribute({props, oldProps, changeFlags});
+
+    if (changeFlags.propsChanged) {
+      const {strokeWidth} = this.props;
+      this.state.model.setUniforms({
+        strokeWidth
+      });
+    }
   }
 
-  draw({uniforms}) {
-    const {strokeWidth} = this.props;
-
-    this.state.model.render(Object.assign({}, uniforms, {
-      strokeWidth
-    }));
+  draw(opts) {
+    this.state.model.draw(opts);
   }
 
   _getModel(gl) {

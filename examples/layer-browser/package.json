@@ -1,8 +1,8 @@
 {
   "scripts": {
     "start": "webpack-dev-server --progress --hot --open",
-    "start-local": "webpack-dev-server --env.local --progress --hot --open",
-    "start-es6": "webpack-dev-server --env.es6 --progress --hot --open"
+    "start-local": "webpack-dev-server --env.es6 --progress --hot --open",
+    "start-local-es5": "webpack-dev-server --env.local --progress --hot --open"
   },
   "dependencies": {
     "deck.gl": ">=4.2.0-alpha.10",

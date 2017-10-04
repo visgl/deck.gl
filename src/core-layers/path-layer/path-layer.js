@@ -99,7 +99,6 @@ export default class PathLayer extends Layer {
   updateState({oldProps, props, changeFlags}) {
     super.updateState({props, oldProps, changeFlags});
 
-    const {getPath} = this.props;
     const {attributeManager} = this.state;
     if (props.fp64 !== oldProps.fp64) {
       const {gl} = this.context;
@@ -109,27 +108,32 @@ export default class PathLayer extends Layer {
 
     if (changeFlags.dataChanged) {
       // this.state.paths only stores point positions in each path
+      const {getPath} = this.props;
       const paths = props.data.map(getPath);
       const numInstances = paths.reduce((count, path) => count + path.length - 1, 0);
 
       this.setState({paths, numInstances});
       attributeManager.invalidateAll();
     }
+
+    if (changeFlags.propsChanged) {
+      const {
+        rounded, miterLimit, widthScale, widthMinPixels, widthMaxPixels, justified
+      } = this.props;
+
+      this.state.model.setUniforms({
+        jointType: Number(rounded),
+        alignMode: Number(justified),
+        widthScale,
+        miterLimit,
+        widthMinPixels,
+        widthMaxPixels
+      });
+    }
   }
 
-  draw({uniforms}) {
-    const {
-      rounded, miterLimit, widthScale, widthMinPixels, widthMaxPixels, justified
-    } = this.props;
-
-    this.state.model.render(Object.assign({}, uniforms, {
-      jointType: Number(rounded),
-      alignMode: Number(justified),
-      widthScale,
-      miterLimit,
-      widthMinPixels,
-      widthMaxPixels
-    }));
+  draw(opts) {
+    this.state.model.draw(opts);
   }
 
   _getModel(gl) {

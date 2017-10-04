@@ -27,32 +27,8 @@ import fs from './icon-layer-fragment.glsl';
 
 const DEFAULT_COLOR = [0, 0, 0, 255];
 const DEFAULT_TEXTURE_MIN_FILTER = GL.LINEAR_MIPMAP_LINEAR;
-// GL.LINEAR is the default value but explicitly set it here
-const DEFAULT_TEXTURE_MAG_FILTER = GL.LINEAR;
+const DEFAULT_TEXTURE_MAG_FILTER = GL.LINEAR; // GL.LINEAR is default, but explicitly set it here
 
-/*
- * @param {object} props
- * @param {Texture2D | string} props.iconAtlas - atlas image url or texture
- * @param {object} props.iconMapping - icon names mapped to icon definitions
- * @param {object} props.iconMapping[icon_name].x - x position of icon on the atlas image
- * @param {object} props.iconMapping[icon_name].y - y position of icon on the atlas image
- * @param {object} props.iconMapping[icon_name].width - width of icon on the atlas image
- * @param {object} props.iconMapping[icon_name].height - height of icon on the atlas image
- * @param {object} props.iconMapping[icon_name].anchorX - x anchor of icon on the atlas image,
- *   default to width / 2
- * @param {object} props.iconMapping[icon_name].anchorY - y anchor of icon on the atlas image,
- *   default to height / 2
- * @param {object} props.iconMapping[icon_name].mask - whether icon is treated as a transparency
- *   mask. If true, user defined color is applied. If false, original color from the image is
- *   applied. Default to false.
- * @param {number} props.size - icon size in pixels
- * @param {func} props.getPosition - returns anchor position of the icon, in [lng, lat, z]
- * @param {func} props.getIcon - returns icon name as a string
- * @param {func} props.getSize - returns icon size multiplier as a number
- * @param {func} props.getColor - returns color of the icon in [r, g, b, a]. Only works on icons
- *   with mask: true.
- * @param {func} props.getAngle - returns rotating angle (in degree) of the icon.
- */
 const defaultProps = {
   iconAtlas: null,
   iconMapping: {},
@@ -117,6 +93,19 @@ export default class IconLayer extends Layer {
   updateState({oldProps, props, changeFlags}) {
     super.updateState({props, oldProps, changeFlags});
 
+    if (props.fp64 !== oldProps.fp64) {
+      const {gl} = this.context;
+      this.setState({model: this._getModel(gl)});
+    }
+    this.updateAttribute({props, oldProps, changeFlags});
+
+    if (changeFlags.propsChanged) {
+      const {sizeScale} = this.props;
+      this.state.model.setUniforms({
+        sizeScale
+      });
+    }
+
     const {iconAtlas, iconMapping} = props;
 
     if (oldProps.iconMapping !== iconMapping) {
@@ -128,49 +117,40 @@ export default class IconLayer extends Layer {
 
     if (oldProps.iconAtlas !== iconAtlas) {
 
-      if (iconAtlas instanceof Texture2D) {
-        iconAtlas.setParameters({
+      const setIconsTexture = texture => {
+        texture.setParameters({
           [GL.TEXTURE_MIN_FILTER]: DEFAULT_TEXTURE_MIN_FILTER,
           [GL.TEXTURE_MAG_FILTER]: DEFAULT_TEXTURE_MAG_FILTER
         });
-        this.setState({iconsTexture: iconAtlas});
+        this.setState({
+          iconsTexture: texture
+        });
+        this.state.model.setUniforms({
+          iconsTexture: texture,
+          iconsTextureDim: [texture.width, texture.height]
+        });
+      };
+
+      if (iconAtlas instanceof Texture2D) {
+        setIconsTexture(iconAtlas);
       } else if (typeof iconAtlas === 'string') {
         loadTextures(this.context.gl, {
           urls: [iconAtlas]
         })
         .then(([texture]) => {
-          texture.setParameters({
-            [GL.TEXTURE_MIN_FILTER]: DEFAULT_TEXTURE_MIN_FILTER,
-            [GL.TEXTURE_MAG_FILTER]: DEFAULT_TEXTURE_MAG_FILTER
-          });
-          this.setState({iconsTexture: texture});
+          setIconsTexture(texture);
         });
       }
     }
-
-    if (props.fp64 !== oldProps.fp64) {
-      const {gl} = this.context;
-      this.setState({model: this._getModel(gl)});
-    }
-    this.updateAttribute({props, oldProps, changeFlags});
-
   }
 
-  draw({uniforms}) {
-    const {sizeScale} = this.props;
-    const {iconsTexture} = this.state;
-
-    if (iconsTexture) {
-      this.state.model.render(Object.assign({}, uniforms, {
-        iconsTexture,
-        iconsTextureDim: [iconsTexture.width, iconsTexture.height],
-        sizeScale
-      }));
+  draw(opts) {
+    if (this.state.iconsTexture) {
+      this.state.model.draw(opts);
     }
   }
 
   _getModel(gl) {
-
     const positions = [-1, -1, 0, -1, 1, 0, 1, 1, 0, 1, -1, 0];
 
     return new Model(gl, Object.assign({}, this.getShaders(), {
