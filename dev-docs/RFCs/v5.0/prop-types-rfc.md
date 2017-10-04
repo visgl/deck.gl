@@ -115,6 +115,26 @@ new CustomLayer({
 Most layer attribute updaters are doing the same thing which could easily be automated, especially if we had prop types for accessors. This could remove 10-20% of the code from each layer, at the cost of layer source code being a little less easily understood.
 
 
+## Proposal: Layer accessors can be constant values
+
+In cases where there is a direct correspondence between an accessor and a vertex attributes  would allow for a nice optimization where a vertex attribute could simply be set to a single value (using a so called “generic vertex attribute” from luma.gl)
+
+Allowing an accessor to be set to a value instead of a function could be a nice way to enable generic vertex attributes. I.e.
+```
+const propTypes = {
+  getColor: Types.Vector4
+};
+```
+Will accept either a Vector4 value or a function that returns a Vector4 value:
+```js
+   new Layer({getColor: x => [255, 0, 0]}) // would create a full array/WebGLBuffer with colors, each set to [255, 0, 0], just like today
+```
+Or
+```js
+   new Layer({getColor: [255, 0, 0]}) // would set a generic vertex attribute (one value shared by all verts, not allocating any array/buffers at all)
+```
+
+
 ### Proposal: Deep-equal on short arrays?
 
 Cut from feature scratch-pad
