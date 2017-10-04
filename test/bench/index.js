@@ -27,15 +27,14 @@ import {
   ScatterplotLayer,
   PolygonLayer,
   PathLayer,
-  ChoroplethLayer,
-  ExtrudedChoroplethLayer64,
+  GeoJsonLayer,
   WebMercatorViewport
 } from 'deck.gl';
 
 import {parseColor} from 'deck.gl/core/lib/utils/color';
 
 import {COORDINATE_SYSTEM} from 'deck.gl/core/lib/constants';
-import {getUniformsFromViewport} from 'deck.gl/shaderlib/project/viewport-uniforms';
+import {getUniformsFromViewport} from 'deck.gl/core/shaderlib/project/viewport-uniforms';
 
 import {testInitializeLayer} from 'deck.gl/test/test-utils';
 
@@ -54,13 +53,15 @@ const testLayer = new ScatterplotLayer({data: data.points});
 // add tests
 suite
 .add('getUniformsFromViewport#LNGLAT', () => {
-  return getUniformsFromViewport(data.sampleViewport, {
+  return getUniformsFromViewport({
+    viewport: data.sampleViewport,
     modelMatrix: data.sampleModelMatrix,
     coordinateSystem: COORDINATE_SYSTEM.LNGLAT
   });
 })
 .add('getUniformsFromViewport#METER_OFFSETS', () => {
-  return getUniformsFromViewport(data.sampleViewport, {
+  return getUniformsFromViewport({
+    viewport: data.sampleViewport,
     modelMatrix: data.sampleModelMatrix,
     coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS
   });
@@ -77,22 +78,22 @@ suite
 .add('ScatterplotLayer#construct', () => {
   return new ScatterplotLayer({data: data.points});
 })
-.add('ChoroplethLayer#construct', () => {
-  return new ChoroplethLayer({data: data.choropleths});
+.add('GeoJsonLayer#construct', () => {
+  return new GeoJsonLayer({data: data.choropleths});
 })
 .add('PolygonLayer#construct', () => {
   return new PolygonLayer({data: data.choropleths});
 })
 .add('ScatterplotLayer#initialize', () => {
-  const layer = new ChoroplethLayer({data: data.points});
+  const layer = new ScatterplotLayer({data: data.points});
   testInitializeLayer({layer});
 })
 .add('PathLayer#initialize', () => {
   const layer = new PathLayer({data: data.lines});
   testInitializeLayer({layer});
 })
-.add('ChoroplethLayer#initialize', () => {
-  const layer = new ChoroplethLayer({data: data.choropleths});
+.add('GeoJsonLayer#initialize', () => {
+  const layer = new GeoJsonLayer({data: data.choropleths});
   testInitializeLayer({layer});
 })
 .add('PolygonLayer#initialize (flat)', () => {
@@ -106,29 +107,6 @@ suite
 .add('PolygonLayer#initialize (wireframe)', () => {
   const layer = new PolygonLayer({data: data.choropleths, extruded: true, wireframe: true});
   testInitializeLayer({layer});
-})
-// .add('PolygonLayer#initialize from Immutable', () => {
-//   const layer = new PolygonLayer({data: data.immutableChoropleths});
-//   testInitializeLayer({layer});
-// })
-.add('ExtrudedChoroplethLayer64#initialize', () => {
-  try {
-    const layer = new ExtrudedChoroplethLayer64({
-      id: 'extrudedChoroplethLayer64',
-      data: data.choropleths,
-      getColor: f => [128, 0, 0],
-      pointLightLocation: [
-        37.751537058389985,
-        -122.42694203247012,
-        1e4
-      ],
-      opacity: 1.0,
-      pickable: true
-    });
-    testInitializeLayer({layer});
-  } catch (error) {
-    console.error(error);
-  }
 })
 .add('encoding picking color', () => {
   testIdx++;
