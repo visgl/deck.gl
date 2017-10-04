@@ -9,7 +9,7 @@ Notes:
 
 ## Motivation
 
-For a general motivation of animation, see the [Property Animation RFC](./property-animation-rfc.md).
+Adding animation to an visualization, especially an interactive visualization, can take it from great to extraordinary impact. Well-executed animations add a very deep level of polish and interest. However implementing good animations often requires considerable custom work in applications.
 
 The goal of this supplementary RFC is to investigate to what extend deck.gl could provide automatic interpolation of vertex attribute arrays, in addition to primitive values like properties, uniforms and gl parameters.
 
@@ -21,14 +21,14 @@ When attribute updates are triggered by data change or updateTriggers, instead o
 
 ### APIs
 
-In deck.gl layer classes, certain attributes can declare themselves to be "animatable", which allows for smooth interpolation when their values are updated. This will be desirable for attributes such as sizes, widths, positions and colors. Animation will be an opt-in feature for backward compatibility:
+In deck.gl layer classes, certain attributes can declare themselves to be "transition-enabled", which allows for smooth interpolation when their values are updated. This will be desirable for attributes such as sizes, widths, positions and colors. Animation will be an opt-in feature for backward compatibility:
 ```js
 this.state.attributeManager.add({
-  // Not animatable
+  // Transition disabled
   pickingColors: {size: 3, type: GL.UNSIGNED_BYTE, update: this.calculatePickingColors},
-  // Animatable
-  positions: {size: 3, accessor: 'getPosition', update: this.calculatePositions, animate: true},
-  colors: {size: 4, type: GL.UNSIGNED_BYTE, accessor: 'getColor', update: this.calculateColors, animate: true}
+  // Transition enabled
+  positions: {size: 3, accessor: 'getPosition', update: this.calculatePositions, transition: true},
+  colors: {size: 4, type: GL.UNSIGNED_BYTE, accessor: 'getColor', update: this.calculateColors, transition: true}
 });
 ```
 
@@ -36,9 +36,7 @@ When creating layers, animation can be enabled by supplying an `transition` prop
 ```js
 new Layer({
   transition: {
-    getPositions: {
-      duration: 600
-    },
+    getPositions: 600,
     getColors: {
       duration: 300,
       easing: d3.easeCubicInOut
@@ -52,6 +50,8 @@ new Layer({
 | duration  | Number   | Duration of the transition animation, in milliseconds |
 | easing    | Function | Easing function that maps a value from [0, 1] to [0, 1], see http://easings.net/ |
 | onComplete | Function   | Callback when the transition is done |
+
+As a shorthand, if an accessor key maps to a number rather than an object, then the number is assigned to the `duration` parameter.
 
 
 ### Implementation
