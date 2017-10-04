@@ -78,7 +78,7 @@ suite
 .add('ScatterplotLayer#construct', () => {
   return new ScatterplotLayer({data: data.points});
 })
-.add('ChoroplethLayer#construct', () => {
+.add('GeoJsonLayer#construct', () => {
   return new GeoJsonLayer({data: data.choropleths});
 })
 .add('PolygonLayer#construct', () => {
