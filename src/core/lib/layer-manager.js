@@ -658,8 +658,8 @@ export default class LayerManager {
     const radius = this._pickingRadius;
     const selectedInfos = this.pickObject({x: pos.x, y: pos.y, radius, mode: 'hover'});
 
-    const firstInfo = selectedInfos.find(info => info.index >= 0);
-    if (firstInfo && this._onLayerHover) {
+    const firstInfo = selectedInfos.find(info => info.index >= 0) || null;
+    if (this._onLayerHover) {
       this._onLayerHover(firstInfo, selectedInfos, event.srcEvent);
     }
   }
