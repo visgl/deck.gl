@@ -155,7 +155,7 @@ Callback - called when the object under the pointer changes.
 
 Callback Arguments:
 - `info` - the [`info`](/docs/get-started/interactivity.md#the-picking-info-object)
-object for the topmost picked layer at the coordinate
+object for the topmost picked layer at the coordinate, null when no object is picked.
 - `pickedInfos` - an array of info objects for all pickable layers that
 are affected.
 - `event` - the original [MouseEvent](https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent) object
@@ -166,7 +166,7 @@ Callback - called when clicking on the layer.
 
 Callback Arguments:
 - `info` - the [`info`](/docs/get-started/interactivity.md#the-picking-info-object)
-object for the topmost picked layer at the coordinate
+object for the topmost picked layer at the coordinate, null when no object is picked.
 - `pickedInfos` - an array of info objects for all pickable layers that are affected.
 - `event` - the original [MouseEvent](https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent) object
 

@@ -197,10 +197,10 @@ function drawLayersInViewport(gl, {
       );
 
       // Blend parameters must not be overriden
-      let layerParameters = Object.assign({viewport: glViewport}, layer.props.parameters || {});
+      const layerParameters = Object.assign({viewport: glViewport}, layer.props.parameters || {});
 
       if (drawPickingColors) {
-        layerParameters = Object.assign(layerParameters, {
+        Object.assign(layerParameters, {
           blendColor: [0, 0, 0, (layerIndex + 1) / 255]
         });
       }
