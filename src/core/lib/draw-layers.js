@@ -197,10 +197,10 @@ function drawLayersInViewport(gl, {
       );
 
       // Blend parameters must not be overriden
-      parameters = Object.assign({viewport: glViewport}, layer.props.parameters || {}, parameters);
+      const layerParameters = Object.assign({viewport: glViewport}, layer.props.parameters || {});
 
       if (drawPickingColors) {
-        parameters = Object.assign(parameters, {
+        Object.assign(layerParameters, {
           blendColor: [0, 0, 0, (layerIndex + 1) / 255]
         });
       }
@@ -208,7 +208,7 @@ function drawLayersInViewport(gl, {
       withParameters(gl, parameters, () => {
         layer.drawLayer({
           uniforms,
-          parameters
+          parameters: layerParameters
         });
       });
     }
@@ -239,11 +239,11 @@ function updateLayerHighlightColor(layer) {
   // TODO - inefficient to update settings every render?
   // TODO: Add warning if 'highlightedObjectIndex' is > numberOfInstances of the model.
 
-  if (layer.state.model) {
-    const pickingSelectedColorValid = layer.props.highlightedObjectIndex >= 0;
-    const pickingSelectedColor = pickingSelectedColorValid ?
-      layer.encodePickingColor(layer.props.highlightedObjectIndex) :
-      layer.nullPickingColor();
+  // Update picking module settings if highlightedObjectIndex is set.
+  // This will overwrite any settings from auto highlighting.
+  const pickingSelectedColorValid = layer.props.highlightedObjectIndex >= 0;
+  if (layer.state.model && pickingSelectedColorValid) {
+    const pickingSelectedColor = layer.encodePickingColor(layer.props.highlightedObjectIndex);
 
     // TODO - handle multimodel layers?
     layer.state.model.updateModuleSettings({

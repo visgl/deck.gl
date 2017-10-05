@@ -69,6 +69,7 @@ export default class LayerManager {
     this._onClick = this._onClick.bind(this);
     this._onPointerMove = this._onPointerMove.bind(this);
     this._onPointerLeave = this._onPointerLeave.bind(this);
+    this._pickAndCallback = this._pickAndCallback.bind(this);
 
     this._initSeer = this._initSeer.bind(this);
     this._editSeer = this._editSeer.bind(this);
@@ -626,17 +627,15 @@ export default class LayerManager {
    *                        {Object} srcEvent:             native JS Event object
    */
   _onClick(event) {
-    const pos = event.offsetCenter;
-    if (!pos) {
+    if (!event.offsetCenter) {
+      // Do not trigger onHover callbacks when click position is invalid.
       return;
     }
-    const radius = this._pickingRadius;
-    const selectedInfos = this.pickObject({x: pos.x, y: pos.y, radius, mode: 'click'});
-
-    const firstInfo = selectedInfos.find(info => info.index >= 0);
-    if (firstInfo && this._onLayerClick) {
-      this._onLayerClick(firstInfo, selectedInfos, event.srcEvent);
-    }
+    this._pickAndCallback({
+      callback: this._onLayerClick,
+      event,
+      mode: 'click'
+    });
   }
 
   /**
@@ -651,17 +650,14 @@ export default class LayerManager {
    */
   _onPointerMove(event) {
     if (event.isDown) {
-      // Do not trigger onHover callbacks if mouse button is down
+      // Do not trigger onHover callbacks if mouse button is down.
       return;
     }
-    const pos = event.offsetCenter;
-    const radius = this._pickingRadius;
-    const selectedInfos = this.pickObject({x: pos.x, y: pos.y, radius, mode: 'hover'});
-
-    const firstInfo = selectedInfos.find(info => info.index >= 0);
-    if (firstInfo && this._onLayerHover) {
-      this._onLayerHover(firstInfo, selectedInfos, event.srcEvent);
-    }
+    this._pickAndCallback({
+      callback: this._onLayerHover,
+      event,
+      mode: 'hover'
+    });
   }
 
   _onPointerLeave(event) {
@@ -671,6 +667,17 @@ export default class LayerManager {
       radius: this._pickingRadius,
       mode: 'hover'
     });
+  }
+
+  _pickAndCallback(options) {
+    const pos = options.event.offsetCenter;
+    const radius = this._pickingRadius;
+    const selectedInfos = this.pickObject({x: pos.x, y: pos.y, radius, mode: options.mode});
+    if (options.callback) {
+      const firstInfo = selectedInfos.find(info => info.index >= 0) || null;
+      // As per documentation, send null value when no valid object is picked.
+      options.callback(firstInfo, selectedInfos, options.event.srcEvent);
+    }
   }
 
   // SEER INTEGRATION
