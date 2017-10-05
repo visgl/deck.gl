@@ -1,8 +1,10 @@
-/* global document, window */
+/* global document, window, console */
+/* eslint-disable no-console */
 import React, {Component} from 'react';
 import {render} from 'react-dom';
 import MapGL from 'react-map-gl';
 import DeckGL, {ScatterplotLayer} from 'deck.gl';
+import * as d3 from 'd3-ease';
 
 import PointGenerator from './point-generator';
 
@@ -15,8 +17,8 @@ class Root extends Component {
     super(props);
 
     this._pointGenerator = new PointGenerator({
-      center: [-122.45, 37.75],
-      distanceRange: [0, 0.05],
+      center: [-122.44, 37.75],
+      distance: [0.064, 0.05],
       radiusRange: [5, 100],
       count: 10000
     });
@@ -24,7 +26,7 @@ class Root extends Component {
     this.state = {
       viewport: {
         latitude: 37.75,
-        longitude: -122.45,
+        longitude: -122.44,
         zoom: 12,
         width: window.innerWidth,
         height: window.innerHeight
@@ -88,10 +90,16 @@ class Root extends Component {
         getRadius: radiusUpdated,
         getColor: colorsUpdated
       },
-      animation: {
-        getPosition: {duration: 2000},
-        getRadius: {duration: 600},
-        getColor: {duration: 600}
+      transition: {
+        getPosition: {
+          duration: 2000,
+          easing: d3.easeCubicInOut,
+          onStart: evt => console.log('position animation started', evt),
+          onEnd: evt => console.log('position animation ended', evt),
+          onInterrupt: evt => console.log('position animation interrupted', evt)
+        },
+        getRadius: 600,
+        getColor: 600
       }
     });
 

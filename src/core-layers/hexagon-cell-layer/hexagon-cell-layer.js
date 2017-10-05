@@ -94,9 +94,9 @@ export default class HexagonCellLayer extends Layer {
     /* eslint-disable max-len */
     attributeManager.addInstanced({
       instancePositions: {size: 3, accessor: ['getCentroid', 'getElevation'],
-        update: this.calculateInstancePositions},
+        update: this.calculateInstancePositions, transition: true},
       instanceColors: {size: 4, type: GL.UNSIGNED_BYTE, accessor: 'getColor',
-        update: this.calculateInstanceColors}
+        update: this.calculateInstanceColors, transition: true}
     });
     /* eslint-enable max-len */
   }

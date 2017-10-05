@@ -60,14 +60,16 @@ export default class CompositeLayer extends Layer {
       opacity, pickable, visible,
       parameters, getPolygonOffset,
       highlightedObjectIndex, autoHighlight, highlightColor,
-      coordinateSystem, coordinateOrigin, modelMatrix
+      coordinateSystem, coordinateOrigin, modelMatrix,
+      transition
     } = this.props;
 
     return {
       opacity, pickable, visible,
       parameters, getPolygonOffset,
       highlightedObjectIndex, autoHighlight, highlightColor,
-      coordinateSystem, coordinateOrigin, modelMatrix
+      coordinateSystem, coordinateOrigin, modelMatrix,
+      transition
     };
   }
 

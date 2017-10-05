@@ -24,7 +24,7 @@ import Stats from './stats';
 import {log} from './utils';
 import assert from 'assert';
 
-import {AttributeAnimationManager} from './attribute-animation';
+import AttributeTransitionsManager from './attribute-transition-manager';
 
 const LOG_START_END_PRIORITY = 1;
 const LOG_DETAIL_PRIORITY = 2;
@@ -139,7 +139,7 @@ export default class AttributeManager {
    * @param {Object} [props]
    * @param {String} [props.id] - identifier (for debugging)
    */
-  constructor({id = 'attribute-manager', gl, animation} = {}) {
+  constructor({id = 'attribute-manager', gl, transition} = {}) {
     this.id = id;
     this.gl = gl;
 
@@ -151,7 +151,7 @@ export default class AttributeManager {
     this.userData = {};
     this.stats = new Stats({id: 'attr'});
 
-    this.setAnimationOptions(animation);
+    this.setTransitionOptions(transition);
 
     // For debugging sanity, prevent uninitialized members
     Object.seal(this);
@@ -269,8 +269,8 @@ export default class AttributeManager {
       logFunctions.onUpdateEnd({level: LOG_START_END_PRIORITY, id: this.id, numInstances});
     }
 
-    if (this.attributeAnimation) {
-      this.attributeAnimation.update(this.attributes);
+    if (this.attributeTransition) {
+      this.attributeTransition.update(this.attributes);
     }
   }
 
@@ -296,7 +296,8 @@ export default class AttributeManager {
       if (attribute.changed) {
         attribute.changed = attribute.changed && !clearChangedFlags;
 
-        if (!this.attributeAnimation || !attribute.animate) {
+        // If there is transition, let the transition manager handle the update
+        if (!this.attributeTransition || !attribute.transition) {
           changedAttributes[attributeName] = attribute;
         }
       }
@@ -634,29 +635,33 @@ export default class AttributeManager {
     }
   }
 
-  setAnimationOptions(opts) {
+  /**
+   * Set transition options
+   * @params {Object} opts - transition options
+   * Returns updated attributes
+   */
+  setTransitionOptions(opts) {
     if (!opts) {
-      this.attributeAnimation = null;
-    } else if (this.attributeAnimation) {
-      this.attributeAnimation.setOptions(opts);
+      this.attributeTransition = null;
+    } else if (this.attributeTransition) {
+      this.attributeTransition.setOptions(opts);
     } else {
-      this.attributeAnimation = new AttributeAnimationManager(this, opts);
+      this.attributeTransition = new AttributeTransitionsManager(this, opts);
     }
   }
 
   /**
-   * Attribute animation
-   * @params {Object} settings - animation settings
+   * Update attribute transition to the current timestamp
    * Returns updated attributes
    */
-  animate() {
-    const {attributeAnimation} = this;
-    if (!attributeAnimation) {
+  updateTransition() {
+    const {attributeTransition} = this;
+    if (!attributeTransition) {
       return {};
     }
-    const needsRedraw = attributeAnimation.run();
-    this.needsRedraw = needsRedraw;
-    return needsRedraw ? attributeAnimation.getAttributes() : {};
+    const transitionUpdated = attributeTransition.run();
+    this.needsRedraw = this.needsRedraw || transitionUpdated;
+    return transitionUpdated ? attributeTransition.getAttributes() : {};
   }
 
 }

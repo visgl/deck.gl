@@ -4,6 +4,7 @@
     "start": "webpack-dev-server --progress --hot --port 3000 --open"
   },
   "dependencies": {
+    "d3-ease": "^1.0.3",
     "deck.gl": "^4.1.0",
     "luma.gl": "^4.0.1",
     "react": "^15.4.1",

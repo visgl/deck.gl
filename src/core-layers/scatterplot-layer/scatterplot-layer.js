@@ -59,9 +59,9 @@ export default class ScatterplotLayer extends Layer {
     this._checkRemovedProp('drawOutline', 'outline');
 
     this.state.attributeManager.addInstanced({
-      instancePositions: {size: 3, accessor: 'getPosition', update: this.calculateInstancePositions, animate: true},
-      instanceRadius: {size: 1, accessor: 'getRadius', defaultValue: 1, update: this.calculateInstanceRadius, animate: true},
-      instanceColors: {size: 4, type: GL.UNSIGNED_BYTE, accessor: 'getColor', update: this.calculateInstanceColors, animate: true}
+      instancePositions: {size: 3, accessor: 'getPosition', update: this.calculateInstancePositions, transition: true},
+      instanceRadius: {size: 1, accessor: 'getRadius', defaultValue: 1, update: this.calculateInstanceRadius, transition: true},
+      instanceColors: {size: 4, type: GL.UNSIGNED_BYTE, accessor: 'getColor', update: this.calculateInstanceColors, transition: true}
     });
     /* eslint-enable max-len */
   }

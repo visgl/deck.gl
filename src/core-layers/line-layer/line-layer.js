@@ -52,9 +52,9 @@ export default class LineLayer extends Layer {
 
     /* eslint-disable max-len */
     attributeManager.addInstanced({
-      instanceSourcePositions: {size: 3, accessor: 'getSourcePosition', update: this.calculateInstanceSourcePositions},
-      instanceTargetPositions: {size: 3, accessor: 'getTargetPosition', update: this.calculateInstanceTargetPositions},
-      instanceColors: {size: 4, type: GL.UNSIGNED_BYTE, accessor: 'getColor', update: this.calculateInstanceColors}
+      instanceSourcePositions: {size: 3, accessor: 'getSourcePosition', update: this.calculateInstanceSourcePositions, transition: true},
+      instanceTargetPositions: {size: 3, accessor: 'getTargetPosition', update: this.calculateInstanceTargetPositions, transition: true},
+      instanceColors: {size: 4, type: GL.UNSIGNED_BYTE, accessor: 'getColor', update: this.calculateInstanceColors, transition: true}
     });
     /* eslint-enable max-len */
   }

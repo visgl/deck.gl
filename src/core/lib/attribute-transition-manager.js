@@ -7,14 +7,14 @@ const ATTRIBUTE_MAPPING = {
   4: 'vec4'
 };
 
-const ANIMATION_STATE = {
+const TRANSITION_STATE = {
   NONE: 0,
   PENDING: 1,
   STARTED: 2,
-  COMPLETE: 3
+  ENDED: 3
 };
 
-const GL_COPY_READ_BUFFER = 0x8F36;
+const noop = () => {};
 
 class ProgramTransformFeedback extends Program {
 
@@ -33,14 +33,14 @@ class ProgramTransformFeedback extends Program {
   }
 }
 
-export class AttributeAnimationManager {
+export default class AttributeTransitionManager {
 
   constructor({id, gl}, opts) {
     this.id = id;
     this.gl = gl;
     this.opts = opts;
 
-    this.attributeAnimations = {};
+    this.attributeTransitions = {};
 
     this.needsRedraw = false;
     this.model = null;
@@ -49,44 +49,44 @@ export class AttributeAnimationManager {
 
   /* Public methods */
   setOptions(opts) {
-    this.opts = opts;
+    this.opts = opts || {};
   }
 
   // Called when attribute manager updates
-  // Extracts the list of attributes that need animation
+  // Extracts the list of attributes that need transition
   update(attributes) {
     let needsNewModel = false;
 
     for (const attributeName in attributes) {
       const attribute = attributes[attributeName];
 
-      if (attribute.animate) {
+      if (attribute.transition) {
         let needsUpdate;
-        let animation = this.attributeAnimations[attributeName];
-        if (animation) {
+        let transition = this.attributeTransitions[attributeName];
+        if (transition) {
           needsUpdate = attribute.changed;
         } else {
           // New animated attributes have been added
-          animation = {name: attributeName, attribute};
-          this.attributeAnimations[attributeName] = animation;
+          transition = {name: attributeName, attribute};
+          this.attributeTransitions[attributeName] = transition;
           needsUpdate = true;
           needsNewModel = true;
         }
 
         if (needsUpdate) {
-          this._updateAnimation(animation, this.opts);
-          this._updateModel(attributeName, animation);
+          this._updateAnimation(transition);
+          this._updateModel(attributeName, transition);
           this.needsRedraw = true;
         }
       }
     }
 
-    for (const attributeName in this.attributeAnimations) {
+    for (const attributeName in this.attributeTransitions) {
       const attribute = attributes[attributeName];
 
-      if (!attribute || !attribute.animate) {
+      if (!attribute || !attribute.transition) {
         // Animated attribute has been removed
-        delete this.attributeAnimations[attributeName];
+        delete this.attributeTransitions[attributeName];
         needsNewModel = true;
       }
     }
@@ -101,17 +101,18 @@ export class AttributeAnimationManager {
   getAttributes() {
     const animatedAttributes = {};
 
-    for (const attributeName in this.attributeAnimations) {
-      const animation = this.attributeAnimations[attributeName];
+    for (const attributeName in this.attributeTransitions) {
+      const transition = this.attributeTransitions[attributeName];
 
-      if (animation.buffer) {
-        animatedAttributes[attributeName] = animation.buffer;
+      if (transition.buffer) {
+        animatedAttributes[attributeName] = transition.buffer;
       }
     }
 
     return animatedAttributes;
   }
 
+  /* eslint-disable max-statements */
   // Called every render cycle, run transform feedback
   // Returns `true` if anything changes
   run() {
@@ -126,28 +127,29 @@ export class AttributeAnimationManager {
     let needsRedraw = this.needsRedraw;
     this.needsRedraw = false;
 
-    for (const attributeName in this.attributeAnimations) {
-      const animation = this.attributeAnimations[attributeName];
+    for (const attributeName in this.attributeTransitions) {
+      const transition = this.attributeTransitions[attributeName];
 
-      // Cannot bind to transform feedback if it's already used as attribute
-      buffers[animation.bufferIndex] = animation.buffer;
+      buffers[transition.bufferIndex] = transition.buffer;
 
       let time = 1;
-      if (animation.state === ANIMATION_STATE.PENDING) {
-        animation.startTime = currentTime;
-        animation.state = ANIMATION_STATE.STARTED;
+      if (transition.state === TRANSITION_STATE.PENDING) {
+        transition.startTime = currentTime;
+        transition.state = TRANSITION_STATE.STARTED;
+        transition.onStart(transition);
       }
 
-      if (animation.state === ANIMATION_STATE.STARTED) {
-        time = (currentTime - animation.startTime) / animation.duration;
-        if (time > 1) {
+      if (transition.state === TRANSITION_STATE.STARTED) {
+        time = (currentTime - transition.startTime) / transition.duration;
+        if (time >= 1) {
           time = 1;
-          animation.state = ANIMATION_STATE.COMPLETE;
+          transition.state = TRANSITION_STATE.ENDED;
+          transition.onEnd(transition);
         }
         needsRedraw = true;
       }
 
-      uniforms[`${animation.name}Time`] = time;
+      uniforms[`${transition.name}Time`] = transition.easing(time);
     }
 
     if (needsRedraw) {
@@ -156,10 +158,14 @@ export class AttributeAnimationManager {
 
     return needsRedraw;
   }
+  /* eslint-enable max-statements */
 
+  /* Private methods */
+  // Redraw the transform feedback
   _runTransformFeedback({uniforms, buffers}) {
     const {model, transformFeedback} = this;
 
+    // Cannot bind to transform feedback if it's already used as attribute
     Object.values(buffers).forEach(buffer => buffer.unbind());
 
     model.program.use();
@@ -175,7 +181,7 @@ export class AttributeAnimationManager {
     transformFeedback.end();
   }
 
-  /* Private methods */
+  // Create a model for the transform feedback
   _createModel() {
     // Build shaders
     const varyings = [];
@@ -184,12 +190,12 @@ export class AttributeAnimationManager {
     const varyingDeclarations = [];
     const calculations = [];
 
-    for (const attributeName in this.attributeAnimations) {
-      const animation = this.attributeAnimations[attributeName];
-      const attributeType = ATTRIBUTE_MAPPING[animation.attribute.size];
+    for (const attributeName in this.attributeTransitions) {
+      const transition = this.attributeTransitions[attributeName];
+      const attributeType = ATTRIBUTE_MAPPING[transition.attribute.size];
 
       if (attributeType) {
-        animation.bufferIndex = varyings.length;
+        transition.bufferIndex = varyings.length;
         varyings.push(attributeName);
 
         attributeDeclarations.push(`attribute ${attributeType} ${attributeName}From;`);
@@ -242,19 +248,19 @@ void main(void) {
       isIndexed: true
     });
 
-    this._updateModel(this.attributeAnimations);
+    this._updateModel(this.attributeTransitions);
   }
 
   // get current values of an attribute, clipped/padded to the size of the new buffer
-  _getCurrentAttributeState(animation) {
-    const {attribute, buffer, bufferSize} = animation;
+  _getCurrentAttributeState(transition) {
+    const {attribute, buffer, bufferSize} = transition;
     const {value, type, size} = attribute;
 
     const newBufferSize = value.length;
     // Enter from 0
-    const currentValues = new (value.constructor)(newBufferSize);
-    // No entrance animation
-    // const currentValues = value.slice();
+    // const currentValues = new (value.constructor)(newBufferSize);
+    // No entrance transition
+    const currentValues = value.slice();
     if (buffer) {
       // Transfer old buffer data to the new one
       const oldBufferData = new Float32Array(bufferSize);
@@ -273,22 +279,42 @@ void main(void) {
     return {size, type, value: currentValues};
   }
 
-  // Updates animation from/to and buffer
-  _updateAnimation(animation, settings) {
-    const {attribute, buffer} = animation;
-    const {accessor, value, type, size} = attribute;
+  _getTransitionSettings(transition) {
+    const {opts} = this;
+    const {accessor} = transition.attribute;
 
-    const animationSettings = Array.isArray(accessor) ?
-      accessor.map(a => settings[a]).find(Boolean) :
-      settings[accessor];
+    let settings = Array.isArray(accessor) ?
+      accessor.map(a => opts[a]).find(Boolean) :
+      opts[accessor];
 
-    const needsNewBuffer = !buffer || animation.bufferSize !== value.length;
+    // Shorthand: use duration instead of parameter object
+    if (Number.isFinite(settings) && settings > 0) {
+      settings = {duration: settings};
+    }
+
+    return settings && settings.duration ? {
+      duration: settings.duration,
+      easing: settings.easing || (t => t),
+      onStart: settings.onStart || noop,
+      onEnd: settings.onEnd || noop,
+      onInterrupt: settings.onInterrupt || noop
+    } : null;
+  }
+
+  // Updates transition from/to and buffer
+  _updateAnimation(transition) {
+    const {attribute, buffer} = transition;
+    const {value, size} = attribute;
+
+    const transitionSettings = this._getTransitionSettings(transition);
+
+    const needsNewBuffer = !buffer || transition.bufferSize !== value.length;
 
     let fromState;
-    if (animationSettings) {
-      fromState = this._getCurrentAttributeState(animation);
+    if (transitionSettings) {
+      fromState = this._getCurrentAttributeState(transition);
     }
-    const toState = {size, type, value};
+    const toState = new Buffer(this.gl, {size, data: value});
 
     if (needsNewBuffer) {
       if (buffer) {
@@ -296,40 +322,46 @@ void main(void) {
         buffer._deleteHandle();
       }
 
-      animation.buffer = new Buffer(this.gl, {
+      transition.buffer = new Buffer(this.gl, {
         size,
         instanced: attribute.instanced,
         data: new Float32Array(value.length),
         usage: GL.DYNAMIC_COPY
       });
-      animation.bufferSize = value.length;
+      transition.bufferSize = value.length;
     }
 
-    if (animationSettings) {
-      animation.fromState = fromState;
-      animation.toState = toState;
-      animation.duration = animationSettings.duration;
-      animation.state = ANIMATION_STATE.PENDING;
+    if (transitionSettings) {
+      Object.assign(transition, transitionSettings);
+      transition.fromState = fromState;
+      transition.toState = toState;
+
+      // Reset transition state
+      const oldState = transition.state;
+      transition.state = TRANSITION_STATE.PENDING;
+      if (oldState === TRANSITION_STATE.STARTED) {
+        transition.onInterrupt(transition);
+      }
     } else {
-      // No animation needed
-      animation.fromState = toState;
-      animation.toState = toState;
-      animation.state = ANIMATION_STATE.NONE;
+      // No transition needed
+      transition.fromState = toState;
+      transition.toState = toState;
+      transition.state = TRANSITION_STATE.NONE;
     }
   }
 
-  _updateModel(attributeName, animation) {
-    if (animation === undefined) {
-      const animations = attributeName;
-      for (const name in animations) {
-        this._updateModel(name, animations[name]);
+  // Update attributes and vertex count
+  _updateModel(attributeName, transition) {
+    if (transition === undefined) {
+      for (const name in attributeName) {
+        this._updateModel(name, attributeName[name]);
       }
     } else if (this.model) {
       this.model.setAttributes({
-        [`${attributeName}From`]: animation.fromState,
-        [`${attributeName}To`]: animation.toState
+        [`${attributeName}From`]: transition.fromState,
+        [`${attributeName}To`]: transition.toState
       });
-      this.model.setVertexCount(animation.bufferSize / animation.fromState.size);
+      this.model.setVertexCount(transition.bufferSize / transition.fromState.size);
     }
   }
 }

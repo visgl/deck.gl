@@ -5,9 +5,9 @@ function interpolate(range, r) {
 
 export default class PointGenerator {
 
-  constructor({center, distanceRange, radiusRange, count}) {
+  constructor({center, distance, radiusRange, count}) {
     this.center = center;
-    this.distanceRange = distanceRange;
+    this.distance = distance;
     this.radiusRange = radiusRange;
 
     this.points = new Array(count).fill(0).map(() => ({}));
@@ -18,12 +18,15 @@ export default class PointGenerator {
   }
 
   randomizePositions() {
-    const {points, center, distanceRange} = this;
+    const {points, center, distance} = this;
+    const aspectRatio = distance[0] / distance[1];
+    const distanceRange = [0, distance[1]];
+
     points.forEach(p => {
       const a = Math.PI * 2 * Math.random();
       const d = interpolate(distanceRange, Math.random());
       p.position = [
-        center[0] + Math.cos(a) * d,
+        center[0] + Math.cos(a) * d * aspectRatio,
         center[1] + Math.sin(a) * d
       ];
     });
@@ -39,9 +42,9 @@ export default class PointGenerator {
   randomizeColors() {
     const {points} = this;
     const color = [
-      interpolate([0, 255], Math.random()),
-      interpolate([0, 255], Math.random()),
-      interpolate([0, 255], Math.random())
+      interpolate([0, 128], Math.random()),
+      interpolate([0, 128], Math.random()),
+      interpolate([0, 128], Math.random())
     ];
 
     points.forEach(p => {

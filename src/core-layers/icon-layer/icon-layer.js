@@ -79,13 +79,13 @@ export default class IconLayer extends Layer {
 
     /* eslint-disable max-len */
     attributeManager.addInstanced({
-      instancePositions: {size: 3, accessor: 'getPosition', update: this.calculateInstancePositions},
-      instanceSizes: {size: 1, accessor: 'getSize', update: this.calculateInstanceSizes},
+      instancePositions: {size: 3, accessor: 'getPosition', update: this.calculateInstancePositions, transition: true},
+      instanceSizes: {size: 1, accessor: 'getSize', update: this.calculateInstanceSizes, transition: true},
       instanceOffsets: {size: 2, accessor: 'getIcon', update: this.calculateInstanceOffsets},
       instanceIconFrames: {size: 4, accessor: 'getIcon', update: this.calculateInstanceIconFrames},
       instanceColorModes: {size: 1, type: GL.UNSIGNED_BYTE, accessor: 'getIcon', update: this.calculateInstanceColorMode},
-      instanceColors: {size: 4, type: GL.UNSIGNED_BYTE, accessor: 'getColor', update: this.calculateInstanceColors},
-      instanceAngles: {size: 1, accessor: 'getAngle', update: this.calculateInstanceAngles}
+      instanceColors: {size: 4, type: GL.UNSIGNED_BYTE, accessor: 'getColor', update: this.calculateInstanceColors, transition: true},
+      instanceAngles: {size: 1, accessor: 'getAngle', update: this.calculateInstanceAngles, transition: true}
     });
     /* eslint-enable max-len */
 

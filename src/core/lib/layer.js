@@ -137,7 +137,7 @@ export default class Layer {
       this.invalidateAttribute('all');
     }
     if (changeFlags.propsChanged) {
-      this.state.attributeManager.setAnimationOptions(props.animation);
+      this.state.attributeManager.setTransitionOptions(props.transition);
     }
   }
 
@@ -146,12 +146,12 @@ export default class Layer {
   finalizeState() {
   }
 
-  animate() {
+  updateTransition() {
     const {model, attributeManager} = this.state;
-    const animatedAttributes = attributeManager.animate(this.props.animation);
+    const changedAttributes = attributeManager.updateTransition();
 
     if (model) {
-      model.setAttributes(animatedAttributes);
+      model.setAttributes(changedAttributes);
     }
   }
 
@@ -453,8 +453,8 @@ export default class Layer {
 
   // Calculates uniforms
   drawLayer({moduleParameters = null, uniforms = {}, parameters = {}}) {
-    if (!uniforms.renderPickingBuffer && this.props.animation) {
-      this.animate();
+    if (!uniforms.renderPickingBuffer && this.props.transition) {
+      this.updateTransition();
     }
 
     // TODO/ib - hack move to luma Model.draw

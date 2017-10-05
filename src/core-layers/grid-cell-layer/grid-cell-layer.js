@@ -77,8 +77,8 @@ export default class GridCellLayer extends Layer {
     const {attributeManager} = this.state;
     /* eslint-disable max-len */
     attributeManager.addInstanced({
-      instancePositions: {size: 4, accessor: ['getPosition', 'getElevation'], update: this.calculateInstancePositions},
-      instanceColors: {size: 4, type: GL.UNSIGNED_BYTE, accessor: 'getColor', update: this.calculateInstanceColors}
+      instancePositions: {size: 4, accessor: ['getPosition', 'getElevation'], update: this.calculateInstancePositions, transition: true},
+      instanceColors: {size: 4, type: GL.UNSIGNED_BYTE, accessor: 'getColor', update: this.calculateInstanceColors, transition: true}
     });
     /* eslint-enable max-len */
   }
