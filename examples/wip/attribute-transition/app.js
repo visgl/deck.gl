@@ -20,7 +20,7 @@ class Root extends Component {
       center: [-122.44, 37.75],
       distance: [0.064, 0.05],
       radiusRange: [5, 100],
-      count: 10000
+      countRange: [1000, 10000]
     });
 
     this.state = {
@@ -39,6 +39,7 @@ class Root extends Component {
 
     this._onViewportChange = this._onViewportChange.bind(this);
     this._resize = this._resize.bind(this);
+    this._randomizeCount = this._randomizeCount.bind(this);
     this._randomizePositions = this._randomizePositions.bind(this);
     this._randomizeRadius = this._randomizeRadius.bind(this);
     this._randomizeColors = this._randomizeColors.bind(this);
@@ -61,6 +62,11 @@ class Root extends Component {
     });
   }
 
+  _randomizeCount() {
+    this._pointGenerator.randomizeCount();
+    this.setState({data: this._pointGenerator.points});
+  }
+
   _randomizePositions() {
     this._pointGenerator.randomizePositions();
     this.setState({positionsUpdated: Date.now()});
@@ -77,11 +83,10 @@ class Root extends Component {
   }
 
   render() {
-    const {viewport, data,
-      positionsUpdated, radiusUpdated, colorsUpdated} = this.state;
+    const {viewport, positionsUpdated, radiusUpdated, colorsUpdated} = this.state;
 
     const layer = new ScatterplotLayer({
-      data,
+      data: this._pointGenerator.points,
       getPosition: d => d.position,
       getColor: d => d.color,
       getRadius: d => d.radius,
@@ -113,6 +118,7 @@ class Root extends Component {
           {...viewport}
           layers={[layer]} />
         <div id="control-panel">
+          <button onClick={this._randomizeCount}>Randomize All</button>
           <button onClick={this._randomizePositions}>Randomize Positions</button>
           <button onClick={this._randomizeRadius}>Randomize Radius</button>
           <button onClick={this._randomizeColors}>Randomize Colors</button>

@@ -16,24 +16,11 @@ const TRANSITION_STATE = {
 
 const noop = () => {};
 
-class ProgramTransformFeedback extends Program {
-
-  _compileAndLink() {
-    const {gl} = this;
-    gl.attachShader(this.handle, this.vs.handle);
-    gl.attachShader(this.handle, this.fs.handle);
-    // enable transform feedback for this program
-    gl.transformFeedbackVaryings(this.handle, this.opts.varyings, gl.SEPARATE_ATTRIBS);
-    gl.linkProgram(this.handle);
-    gl.validateProgram(this.handle);
-    const linked = gl.getProgramParameter(this.handle, gl.LINK_STATUS);
-    if (!linked) {
-      throw new Error(`Error linking ${gl.getProgramInfoLog(this.handle)}`);
-    }
-  }
-}
-
 export default class AttributeTransitionManager {
+
+  static isSupported(gl) {
+    return TransformFeedback.isSupported(gl);
+  }
 
   constructor({id, gl}, opts) {
     this.id = id;
@@ -44,7 +31,7 @@ export default class AttributeTransitionManager {
 
     this.needsRedraw = false;
     this.model = null;
-    this.transformFeedback = new TransformFeedback(gl, {});
+    this.transformFeedback = new TransformFeedback(gl);
   }
 
   /* Public methods */
@@ -239,7 +226,7 @@ void main(void) {
 
     this.model = new Model(this.gl, {
       id: this.id,
-      program: new ProgramTransformFeedback(this.gl, {vs, fs, varyings}),
+      program: new Program(this.gl, {vs, fs, varyings}),
       geometry: new Geometry({
         id: this.id,
         drawMode: GL.POINTS
@@ -253,30 +240,19 @@ void main(void) {
 
   // get current values of an attribute, clipped/padded to the size of the new buffer
   _getCurrentAttributeState(transition) {
-    const {attribute, buffer, bufferSize} = transition;
+    const {attribute, buffer} = transition;
     const {value, type, size} = attribute;
 
-    const newBufferSize = value.length;
-    // Enter from 0
-    // const currentValues = new (value.constructor)(newBufferSize);
-    // No entrance transition
-    const currentValues = value.slice();
     if (buffer) {
-      // Transfer old buffer data to the new one
-      const oldBufferData = new Float32Array(bufferSize);
-
-      buffer.getData({
-        dstData: oldBufferData,
-        srcByteOffset: 0
-      });
-
-      const len = Math.min(bufferSize, newBufferSize);
-      for (let i = 0; i < len; i++) {
-        currentValues[i] = oldBufferData[i];
+      // No entrance transition
+      let oldBufferData = new Float32Array(value);
+      buffer.getData({dstData: oldBufferData});
+      if (!(value instanceof Float32Array)) {
+        oldBufferData = new (value.constructor)(oldBufferData);
       }
+      return {size, type, value: oldBufferData};
     }
-
-    return {size, type, value: currentValues};
+    return {size, type, value};
   }
 
   _getTransitionSettings(transition) {
@@ -318,8 +294,7 @@ void main(void) {
 
     if (needsNewBuffer) {
       if (buffer) {
-        buffer.unbind();
-        buffer._deleteHandle();
+        buffer.delete();
       }
 
       transition.buffer = new Buffer(this.gl, {
@@ -337,11 +312,10 @@ void main(void) {
       transition.toState = toState;
 
       // Reset transition state
-      const oldState = transition.state;
-      transition.state = TRANSITION_STATE.PENDING;
-      if (oldState === TRANSITION_STATE.STARTED) {
+      if (transition.state === TRANSITION_STATE.STARTED) {
         transition.onInterrupt(transition);
       }
+      transition.state = TRANSITION_STATE.PENDING;
     } else {
       // No transition needed
       transition.fromState = toState;

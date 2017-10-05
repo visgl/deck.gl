@@ -24,7 +24,7 @@ import Stats from './stats';
 import {log} from './utils';
 import assert from 'assert';
 
-import AttributeTransitionsManager from './attribute-transition-manager';
+import AttributeTransitionManager from './attribute-transition-manager';
 
 const LOG_START_END_PRIORITY = 1;
 const LOG_DETAIL_PRIORITY = 2;
@@ -151,6 +151,7 @@ export default class AttributeManager {
     this.userData = {};
     this.stats = new Stats({id: 'attr'});
 
+    this.isTransitionSupported = true; // AttributeTransitionManager.isSupported(gl);
     this.setTransitionOptions(transition);
 
     // For debugging sanity, prevent uninitialized members
@@ -644,8 +645,8 @@ export default class AttributeManager {
       this.attributeTransition = null;
     } else if (this.attributeTransition) {
       this.attributeTransition.setOptions(opts);
-    } else {
-      this.attributeTransition = new AttributeTransitionsManager(this, opts);
+    } else if (this.isTransitionSupported) {
+      this.attributeTransition = new AttributeTransitionManager(this, opts);
     }
   }
 
