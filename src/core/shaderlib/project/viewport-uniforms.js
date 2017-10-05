@@ -206,7 +206,7 @@ export function getUniformsFromViewport({
 
     projectionOrigin: coordinateOrigin,
     modelMatrix: glModelMatrix,
-
+    viewMatrix: viewport.viewMatrix,
     projectionMatrix: glViewProjectionMatrix,
     projectionPixelsPerUnit: distanceScales.pixelsPerMeter,
     projectionScale: viewport.scale, // This is the mercator scale (2 ** zoom)
