@@ -23,6 +23,22 @@ For Earlier Beta Releases see below
 
 ### deck.gl v4.2 Beta Releases
 
+#### [4.2.0-alpha.12] - Oct 5
+- Fix picking and highlighting regressions. (#982)
+- add viewMatrix back so users can access it in their own vertex shader (#984)
+- Fix npm run bench (#978)
+- Attribute Transition RFC (#961)
+- Segment Layer Example Updates (#973)
+- Update controller-architecture-rfc.md
+- Layer browser updates (#965)
+- Draw and pick refactor (#964)
+- fix bug where layer does not update on updateTriggers change (#971)
+-  [Hexagon/Grid] add no render when elevation < 0.0 to vertex-64 (#968)
+- Viewport Animation: Adding flyTo style animation support. (#937)
+- Minor fixes - after refactorings (#960)
+- [GridLayer] Add getElevationValue to enable grid elevation by aggregation (#954)
+- Fix test-dist
+
 #### [4.2.0-alpha.11] - Oct 2
 - Bump to luma.gl v4.1.0-alpha.4 - Framebuffer improvements
 - Update segment layer example to latest luma.gl
