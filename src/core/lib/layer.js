@@ -146,11 +146,12 @@ export default class Layer {
   finalizeState() {
   }
 
+  // Update attribute transition
   updateTransition() {
     const {model, attributeManager} = this.state;
     const changedAttributes = attributeManager.updateTransition();
 
-    if (model) {
+    if (model && changedAttributes) {
       model.setAttributes(changedAttributes);
     }
   }

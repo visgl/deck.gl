@@ -2,6 +2,6 @@
    <img width="150" heigth="150" src="https://webpack.js.org/assets/icon-square-big.svg" />
 </div>
 
-## Attribute Animation
+## Attribute Transition
 
-Demonstrate the abilities to transition attribute arrays.
+Demonstrate the abilities to interpolate attribute arrays.

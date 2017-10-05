@@ -94,9 +94,9 @@ class Root extends Component {
         getPosition: {
           duration: 2000,
           easing: d3.easeCubicInOut,
-          onStart: evt => console.log('position animation started', evt),
-          onEnd: evt => console.log('position animation ended', evt),
-          onInterrupt: evt => console.log('position animation interrupted', evt)
+          onStart: evt => console.log('position transition started', evt),
+          onEnd: evt => console.log('position transition ended', evt),
+          onInterrupt: evt => console.log('position transition interrupted', evt)
         },
         getRadius: 600,
         getColor: 600

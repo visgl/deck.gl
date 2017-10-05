@@ -512,8 +512,7 @@ export default class AttributeManager {
         // Do we need to reallocate the attribute's typed array?
         const needsAlloc =
           attribute.value === null ||
-          attribute.value.length / attribute.size < numInstances ||
-          attribute.animationDuration > 0;
+          attribute.value.length / attribute.size < numInstances;
         if (needsAlloc && (attribute.update || attribute.accessor)) {
           attribute.needsAlloc = true;
           needsUpdate = true;
@@ -652,16 +651,13 @@ export default class AttributeManager {
 
   /**
    * Update attribute transition to the current timestamp
-   * Returns updated attributes
+   * Returns updated attributes if any, otherwise `null`
    */
   updateTransition() {
     const {attributeTransition} = this;
-    if (!attributeTransition) {
-      return {};
-    }
-    const transitionUpdated = attributeTransition.run();
+    const transitionUpdated = Boolean(attributeTransition) && attributeTransition.run();
     this.needsRedraw = this.needsRedraw || transitionUpdated;
-    return transitionUpdated ? attributeTransition.getAttributes() : {};
+    return transitionUpdated ? attributeTransition.getAttributes() : null;
   }
 
 }
