@@ -17,6 +17,9 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## Official Releases
 
+#### [4.1.4] - 2017-10-06
+- fix bug where layer does not update on updateTriggers change (#971)
+
 #### [4.1.3] - 2017-9-29
 
 - Fix picking buffer clear color. (#931)
