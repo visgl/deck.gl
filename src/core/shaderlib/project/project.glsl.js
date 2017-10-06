@@ -75,7 +75,7 @@ vec2 project_mercator_(vec2 lnglat) {
 vec4 project_position(vec4 position) {
   // TODO - why not simply subtract center and fall through?
   if (project_uCoordinateSystem == COORDINATE_SYSTEM_LNG_LAT) {
-    return vec4(
+    return project_uModelMatrix * vec4(
       project_mercator_(position.xy) * WORLD_SCALE * project_uScale,
       project_scale(position.z),
       position.w

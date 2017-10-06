@@ -1,7 +1,7 @@
 /* global window, document */
 
 import {
-  COORDINATE_SYSTEM,
+  // COORDINATE_SYSTEM,
   WebMercatorViewport,
   FirstPersonViewport,
   MapState,
@@ -139,9 +139,8 @@ class App extends PureComponent {
       Object.assign(layerProps, {data: getData()});
     }
 
-    const useModelMatrix = layerProps.coordinateSystem === COORDINATE_SYSTEM.METER_OFFSETS;
     Object.assign(layerProps, {
-      modelMatrix: this._getModelMatrix(index, useModelMatrix)
+      modelMatrix: this._getModelMatrix(index, layerProps.coordinateSystem)
     });
 
     return new Layer(layerProps);
@@ -174,20 +173,16 @@ class App extends PureComponent {
   }
   /* eslint-enable max-depth */
 
-  _getModelMatrix(index, offsetMode) {
+  _getModelMatrix(index, coordinateSystem) {
     // the rotation controls works only for layers in
     // meter offset projection mode. They are commented out
     // here since layer browser currently only have one layer
     // in this mode.
-
-    // const {settings: {separation, rotationZ, rotationX}} = this.state;
     const {settings: {separation}} = this.state;
-    // const {mapViewState: {longitude, latitude}} = this.props;
-    // const modelMatrix = new Matrix4().fromTranslation([0, 0, 1000 * index * separation]);
-
     const modelMatrix = new Matrix4().translate([0, 0, 1000 * index * separation]);
 
-    // if (offsetMode) {
+    // if (coordinateSystem === COORDINATE_SYSTEM.METER_OFFSETS) {
+    //   const {settings: {rotationZ, rotationX}} = this.state;
     //   modelMatrix.rotateZ(index * rotationZ * Math.PI);
     //   modelMatrix.rotateX(index * rotationX * Math.PI);
     // }
