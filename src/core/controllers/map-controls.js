@@ -18,14 +18,14 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import Controls from './controls';
+import ViewportControls from './viewport-controls';
 import MapState from './map-state';
 
 // EVENT HANDLING PARAMETERS
 const PITCH_MOUSE_THRESHOLD = 5;
 const PITCH_ACCEL = 1.2;
 
-export default class MapControls extends Controls {
+export default class MapControls extends ViewportControls {
   /**
    * @classdesc
    * A class that handles events and updates mercator style viewport parameters

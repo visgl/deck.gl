@@ -64,7 +64,7 @@ const defaultProps = {
   getCursor: getDefaultCursor
 };
 
-export default class Controller extends PureComponent {
+export default class ViewportController extends PureComponent {
 
   constructor(props) {
     super(props);
@@ -127,6 +127,6 @@ export default class Controller extends PureComponent {
   }
 }
 
-Controller.displayName = 'Controller';
-Controller.propTypes = propTypes;
-Controller.defaultProps = defaultProps;
+ViewportController.displayName = 'ViewportController';
+ViewportController.propTypes = propTypes;
+ViewportController.defaultProps = defaultProps;

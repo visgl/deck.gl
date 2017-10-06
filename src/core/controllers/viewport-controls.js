@@ -35,7 +35,7 @@ const EVENT_TYPES = {
   KEYBOARD: ['keydown', 'keyup']
 };
 
-export default class Controls {
+export default class ViewportControls {
   /**
    * @classdesc
    * A class that handles events and updates mercator style viewport parameters
@@ -56,7 +56,7 @@ export default class Controls {
 
     this.setOptions(options);
 
-    if (this.constructor === Controls) {
+    if (this.constructor === ViewportControls) {
       Object.seal(this);
     }
   }
