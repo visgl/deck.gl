@@ -54,19 +54,23 @@ class App extends PureComponent {
         ScatterplotLayer: true
       },
       settings: {
-        // immutable: false,
-        // Effects are experimental for now. Will be enabled in the future
-        // effects: false,
         multiview: false,
-        separation: 0,
+        useDevicePixelRatio: false,
         pickingRadius: 0,
-        drawPickingColors: false
+        drawPickingColors: false,
+
+        separation: 0
         // the rotation controls works only for layers in
         // meter offset projection mode. They are commented out
         // here since layer browser currently only have one layer
-        // in this mode.
+        // in this mode, and that layer's data is rotation symmetrical
         // rotationZ: 0,
         // rotationX: 0
+
+        // immutable: false,
+        // Effects are experimental for now. Will be enabled in the future
+        // effects: false,
+
       },
       hoveredItem: null,
       clickedItem: null,
@@ -226,7 +230,7 @@ class App extends PureComponent {
 
   _renderMap() {
     const {width, height, mapViewState, settings} = this.state;
-    const {effects, pickingRadius, drawPickingColors} = settings;
+    const {effects, pickingRadius, drawPickingColors, useDevicePixelRatio} = settings;
 
     const viewports = this._getViewports();
 
@@ -252,6 +256,8 @@ class App extends PureComponent {
             onLayerHover={this._onHover}
             onLayerClick={this._onClick}
             initWebGLParameters
+
+            useDevicePixelRatio={useDevicePixelRatio}
 
             debug={false}
             drawPickingColors={drawPickingColors}
