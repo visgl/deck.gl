@@ -1,5 +1,5 @@
 import {PureComponent, createElement} from 'react';
-import MapControllerJS from '../core/pure-js/map-controller';
+import MapControllerJS from '../core/pure-js/map-controller-js';
 
 export default class MapController extends PureComponent {
 

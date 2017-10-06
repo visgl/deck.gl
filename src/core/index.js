@@ -33,14 +33,14 @@ export {default as ThirdPersonViewport} from './viewports/third-person-viewport'
 export {default as WebMercatorViewport} from './viewports/web-mercator-viewport';
 
 // TODO - Do we need to export? Move to experimental?
-export {default as ViewportControls} from './controllers/controls';
+export {default as ViewportControls} from './controllers/viewport-controls';
 export {default as FirstPersonState} from './controllers/first-person-state';
 export {default as OrbitState} from './controllers/orbit-state';
 export {default as MapState} from './controllers/map-state';
 
 // Experimental Pure JS (non-React) bindings
-import {default as DeckGLJS} from './pure-js/deck';
-import {default as MapControllerJS} from './pure-js/map-controller';
+import {default as DeckGLJS} from './pure-js/deck-js';
+import {default as MapControllerJS} from './pure-js/map-controller-js';
 
 // Experimental Features (May change in minor version bumps, use at your own risk)
 import {get} from './lib/utils/get';
