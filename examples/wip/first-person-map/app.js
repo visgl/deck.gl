@@ -60,7 +60,7 @@ class Root extends Component {
     super(props);
     this.state = {
       viewportMode: true,
-      fov: 60,
+      fov: 50,
 
       viewportProps: {
         ...DEFAULT_VIEWPORT_PROPS,

@@ -1,3 +1,4 @@
+import ViewState from './view-state';
 import PerspectiveMercatorViewport from '../viewports/web-mercator-viewport';
 import assert from 'assert';
 
@@ -25,7 +26,7 @@ function ensureFinite(value, fallbackValue) {
   return Number.isFinite(value) ? value : fallbackValue;
 }
 
-export default class MapState {
+export default class MapState extends ViewState {
 
   constructor({
     /** Mapbox viewport properties */
@@ -68,20 +69,19 @@ export default class MapState {
     /** Zoom when current zoom operation started */
     startZoom
   } = {}) {
-    assert(Number.isFinite(width), '`width` must be supplied');
-    assert(Number.isFinite(height), '`height` must be supplied');
     assert(Number.isFinite(longitude), '`longitude` must be supplied');
     assert(Number.isFinite(latitude), '`latitude` must be supplied');
     assert(Number.isFinite(zoom), '`zoom` must be supplied');
 
-    this._viewportProps = this._applyConstraints({
+    super({
       width,
       height,
       latitude,
       longitude,
       zoom,
-      bearing: ensureFinite(bearing, defaultState.bearing),
-      pitch: ensureFinite(pitch, defaultState.pitch),
+      bearing,
+      pitch,
+
       altitude: ensureFinite(altitude, defaultState.altitude),
       maxZoom: ensureFinite(maxZoom, MAPBOX_LIMITS.maxZoom),
       minZoom: ensureFinite(minZoom, MAPBOX_LIMITS.minZoom),
@@ -99,10 +99,6 @@ export default class MapState {
   }
 
   /* Public API */
-
-  getViewportProps() {
-    return this._viewportProps;
-  }
 
   getInteractiveState() {
     return this._interactiveState;

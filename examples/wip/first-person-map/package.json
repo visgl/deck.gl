@@ -5,9 +5,9 @@
     "start-es6": "webpack-dev-server --env.es6 --progress --hot --open"
   },
   "dependencies": {
-    "deck.gl": ">=4.1.0",
-    "luma.gl": ">=4.1.0-alpha.1",
-    "math.gl": ">=1.0.0-alpha.3",
+    "deck.gl": ">=4.2.0-alpha.12",
+    "luma.gl": ">=4.1.0-alpha.4",
+    "math.gl": ">=1.0.0-alpha.7",
     "react": "^15.4.1",
     "react-dom": "^15.4.1",
     "react-map-gl": "^3.0.0"

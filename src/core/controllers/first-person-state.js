@@ -1,23 +1,10 @@
-import {Vector3, experimental} from 'math.gl';
-const {SphericalCoordinates} = experimental;
+import ViewState from './view-state';
+
+import {Vector3} from 'math.gl';
 import assert from 'assert';
 
 const MOVEMENT_SPEED = 1;  // 1 meter per keyboard click
-// const ROTATION_STEP_RADIANS = 0.03;
 const ROTATION_STEP_DEGREES = 2;
-
-const defaultState = {
-  position: [0, 0, 0],
-  lookAt: [0, 0, 0],
-  up: [0, 0, 1],
-
-  rotationX: 0,
-  rotationY: 0,
-
-  fov: 50,
-  near: 1,
-  far: 100
-};
 
 /* Helpers */
 
@@ -30,7 +17,7 @@ function ensureFinite(value, fallbackValue) {
   return Number.isFinite(value) ? value : fallbackValue;
 }
 
-export default class FirstPersonState {
+export default class FirstPersonState extends ViewState {
 
   constructor({
     /* Viewport arguments */
@@ -39,7 +26,6 @@ export default class FirstPersonState {
 
     // Position and orientation
     position, // typically in meters from anchor point
-    direction,
 
     bearing, // Rotation around y axis
     pitch, // Rotation around x axis
@@ -68,27 +54,15 @@ export default class FirstPersonState {
     startZoomPos,
     startZoom
   }) {
-    assert(Number.isFinite(width), '`width` must be supplied');
-    assert(Number.isFinite(height), '`height` must be supplied');
-    // assert(Number.isFinite(distance), '`distance` must be supplied');
-
-    bearing = ensureFinite(bearing, defaultState.bearing);
-
-    this._viewportProps = this._applyConstraints({
+    super({
       width,
       height,
-      position: new Vector3(
-        ensureFinite(position && position[0], defaultState.position[0]),
-        ensureFinite(position && position[1], defaultState.position[1]),
-        ensureFinite(position && position[2], defaultState.position[2])
-      ),
-      direction: this._getDirectionFromBearing(bearing),
+      position,
       bearing,
-      pitch: ensureFinite(pitch, defaultState.pitch),
+      pitch,
       longitude,
       latitude,
-      zoom,
-      bounds
+      zoom
     });
 
     this._interactiveState = {
@@ -103,16 +77,8 @@ export default class FirstPersonState {
 
   /* Public API */
 
-  getViewportProps() {
-    return this._viewportProps;
-  }
-
   getInteractiveState() {
     return this._interactiveState;
-  }
-
-  getLookAt() {
-    return [];
   }
 
   /**
@@ -176,10 +142,11 @@ export default class FirstPersonState {
    * @param {[Number, Number]} pos - position on screen where the pointer is
    */
   rotate({deltaScaleX, deltaScaleY}) {
-    const {direction} = this._viewportProps;
+    const {bearing, pitch} = this._viewportProps;
 
     return this._getUpdatedState({
-      direction: new Vector3(direction).rotateZ({radians: deltaScaleX / 50})
+      bearing: bearing + deltaScaleX * 10,
+      pitch: pitch - deltaScaleY * 10
     });
   }
 
@@ -251,90 +218,53 @@ export default class FirstPersonState {
     });
   }
 
-  _getDirectionFromBearing(bearing) {
-    const spherical = new SphericalCoordinates({
-      bearing,
-      pitch: 90
-    });
-    const direction = spherical.toVector3().normalize();
-    return direction;
-  }
-
   moveLeft() {
-    // const {position, direction} = this._viewportProps;
-    // const newDirection = new Vector3(direction).rotateZ({radians: ROTATION_STEP_RADIANS});
-    // return this._getUpdatedState({
-    //   direction: newDirection,
-    //   lookAt: new Vector3(position).add(newDirection.normalize()),
-    //   bearing: this._viewportProps.bearing - ROTATION_STEP_DEGREES
-    // });
-
-    const {position, bearing} = this._viewportProps;
+    const {bearing} = this._viewportProps;
     const newBearing = bearing - ROTATION_STEP_DEGREES;
-    const newDirection = this._getDirectionFromBearing(newBearing);
     return this._getUpdatedState({
-      direction: newDirection,
-      lookAt: new Vector3(position).add(newDirection),
       bearing: newBearing
     });
   }
 
   moveRight() {
-    // const {position, direction} = this._viewportProps;
-    // const newDirection = new Vector3(direction).rotateZ({radians: -ROTATION_STEP_RADIANS});
-    // return this._getUpdatedState({
-    //   direction: newDirection,
-    //   lookAt: new Vector3(position).add(newDirection.normalize()),
-    //   bearing: this._viewportProps.bearing + ROTATION_STEP_DEGREES
-    // });
-
-    const {position, bearing} = this._viewportProps;
+    const {bearing} = this._viewportProps;
     const newBearing = bearing + ROTATION_STEP_DEGREES;
-    const newDirection = this._getDirectionFromBearing(newBearing);
     return this._getUpdatedState({
-      direction: newDirection,
-      lookAt: new Vector3(position).add(newDirection),
       bearing: newBearing
     });
   }
 
   moveForward() {
-    const {position, direction} = this._viewportProps;
+    const {position} = this._viewportProps;
+    const direction = this.getDirection();
     const delta = new Vector3(direction).normalize().scale(MOVEMENT_SPEED);
     return this._getUpdatedState({
-      // pitch: this._viewportProps.pitch + 3
-      position: new Vector3(position).add(delta),
-      lookAt: new Vector3(position).add(direction)
+      position: new Vector3(position).add(delta)
     });
   }
 
   moveBackward() {
-    const {position, direction} = this._viewportProps;
+    const {position} = this._viewportProps;
+    const direction = this.getDirection();
     const delta = new Vector3(direction).normalize().scale(-MOVEMENT_SPEED);
     return this._getUpdatedState({
-      // pitch: this._viewportProps.pitch - 3
-      position: new Vector3(position).add(delta),
-      lookAt: new Vector3(position).add(direction)
+      position: new Vector3(position).add(delta)
     });
   }
 
   moveUp() {
-    const {position, direction} = this._viewportProps;
+    const {position} = this._viewportProps;
     const delta = [0, 0, 1];
     return this._getUpdatedState({
-      // pitch: this._viewportProps.pitch + 3
-      position: new Vector3(position).add(delta),
-      lookAt: new Vector3(position).add(direction)
+      position: new Vector3(position).add(delta)
     });
   }
 
   moveDown() {
-    const {position, direction} = this._viewportProps;
+    const {position} = this._viewportProps;
     const delta = position[2] >= 1 ? [0, 0, -1] : [0, 0, 0];
     return this._getUpdatedState({
-      // pitch: this._viewportProps.pitch + 3
-      position: new Vector3(position).add(delta),
-      lookAt: new Vector3(position).add(direction)
+      position: new Vector3(position).add(delta)
     });
   }
 
@@ -357,11 +287,5 @@ export default class FirstPersonState {
     return new FirstPersonState(
       Object.assign({}, this._viewportProps, this._interactiveState, newProps)
     );
-  }
-
-  // Apply any constraints (mathematical or defined by _viewportProps) to map state
-  _applyConstraints(props) {
-    // TODO/ib - Ensure position is within bounds
-    return props;
   }
 }
