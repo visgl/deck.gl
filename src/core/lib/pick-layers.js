@@ -20,6 +20,7 @@
 
 import {log} from './utils';
 import {drawPickingBuffer, getPixelRatio} from './draw-layers';
+import assert from 'assert';
 
 const EMPTY_PIXEL = new Uint8Array(4);
 
@@ -228,8 +229,24 @@ function getViewportFromCoordinates({viewports}) {
   return viewport;
 }
 
+// returns pickedColor or null if no pickable layers found.
 function getPickedColors(gl, {layers, viewports, onViewportActive, pickingFBO, deviceRect}) {
-  drawPickingBuffer(gl, {layers, viewports, onViewportActive, pickingFBO, deviceRect});
+
+  assert((Number.isFinite(deviceRect.width) && deviceRect.width > 0), '`width` must be > 0');
+  assert((Number.isFinite(deviceRect.height) && deviceRect.height > 0), '`height` must be > 0');
+
+  const pickableLayers = layers.filter(layer => layer.isPickable());
+
+  if (pickableLayers.length < 1) {
+    return null;
+  }
+
+  drawPickingBuffer(gl, {
+    layers: pickableLayers,
+    viewports, onViewportActive,
+    pickingFBO,
+    deviceRect
+  });
   // TODO - restore when luma patch lands
   // const dataUrl = pickingFBO.readDataUrl();
   // window.open(dataUrl, 'picking buffer');
@@ -268,9 +285,8 @@ function getClosestFromPickingBuffer(gl, {
     pickedObjectIndex: -1
   };
 
-  // x, y out of bounds or no layers to pick.
+  // x, y out of bounds.
   const valid =
-    layers.length > 0 &&
     deviceX >= 0 &&
     deviceY >= 0 &&
     deviceX < pickingFBO.width &&
@@ -293,6 +309,10 @@ function getClosestFromPickingBuffer(gl, {
     pickingFBO,
     deviceRect: {x, y, width, height}
   });
+
+  if (!pickedColors) {
+    return closestResultToCenter;
+  }
 
   // Traverse all pixels in picking results and find the one closest to the supplied
   // [deviceX, deviceY]
@@ -352,7 +372,7 @@ function getUniquesFromPickingBuffer(gl, {
   const uniqueColors = new Map();
 
   // Traverse all pixels in picking results and get unique colors
-  for (let i = 0; i < pickedColors.length; i += 4) {
+  for (let i = 0; i < pickedColors && pickedColors.length; i += 4) {
     // Decode picked layer from color
     const pickedLayerIndex = pickedColors[i + 3] - 1;
 

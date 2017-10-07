@@ -177,6 +177,11 @@ export default class Layer {
     }
   }
 
+  // Returns true if the layer is pickable and visible.
+  isPickable() {
+    return this.props.pickable && this.props.visible;
+  }
+
   // Calls attribute manager to update any WebGL attributes, can be redefined
   updateAttributes(props) {
     const {attributeManager, model} = this.state;
