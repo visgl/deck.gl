@@ -181,14 +181,9 @@ function drawLayersInViewport(gl, {
         // TODO - Disable during picking
       }
 
-      for (const model of layer.getModels()) {
-        // Update project module parameters
-        model.updateModuleSettings(
-          Object.assign({}, layer.props, {
-            viewport: layer.context.viewport
-          })
-        );
-      }
+      const moduleParameters = Object.assign({}, layer.props, {
+        viewport: layer.context.viewport
+      });
 
       const uniforms = Object.assign(
         pickingUniforms,
@@ -207,6 +202,7 @@ function drawLayersInViewport(gl, {
 
       withParameters(gl, parameters, () => {
         layer.drawLayer({
+          moduleParameters,
           uniforms,
           parameters: layerParameters
         });

@@ -388,7 +388,7 @@ export default class Layer {
     // Add any subclass attributes
     this.updateAttributes(this.props);
     this._updateBaseUniforms();
-    this._updateModuleSettings();
+    this._updateBaseModuleSettings();
 
     const {model} = this.state;
     if (model) {
@@ -422,7 +422,7 @@ export default class Layer {
       // Run the attribute updaters
       this.updateAttributes(updateParams.props);
       this._updateBaseUniforms();
-      this._updateModuleSettings();
+      this._updateBaseModuleSettings();
 
       // Note: Automatic instance count update only works for single layers
       if (this.state.model) {
@@ -446,9 +446,7 @@ export default class Layer {
 
     // TODO/ib - hack move to luma Model.draw
     if (moduleParameters) {
-      for (const model of this.getModels()) {
-        model.updateModuleSettings(moduleParameters);
-      }
+      this.updateModuleSettings(moduleParameters);
     }
 
     // Apply polygon offset to avoid z-fighting
@@ -631,10 +629,14 @@ export default class Layer {
     this.state.needsRedraw = true;
   }
 
-  _updateModuleSettings() {
+  _updateBaseModuleSettings() {
     const settings = {
       pickingHighlightColor: this.props.highlightColor
     };
+    this.updateModuleSettings(settings);
+  }
+
+  updateModuleSettings(settings) {
     for (const model of this.getModels()) {
       model.updateModuleSettings(settings);
     }
