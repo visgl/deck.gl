@@ -54,6 +54,7 @@ import {default as EffectManager} from './core/experimental/lib/effect-manager';
 import {default as Effect} from './core/experimental/lib/effect';
 
 // Deprecated Core Lib Classes
+export {default as OrbitViewport} from './core/viewports/orbit-viewport';
 export {default as PerspectiveViewport} from './core/deprecated/viewports/perspective-viewport';
 export {default as OrthographicViewport} from './core/deprecated/viewports/orthographic-viewport';
 export {assembleShaders} from 'luma.gl'; // Forward the luma.gl version (note: now integrated with Model)

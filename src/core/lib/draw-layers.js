@@ -181,9 +181,9 @@ function drawLayersInViewport(gl, {
         // TODO - Disable during picking
       }
 
-      if (layer.state.model) {
+      for (const model of layer.getModels()) {
         // Update project module parameters
-        layer.state.model.updateModuleSettings(
+        model.updateModuleSettings(
           Object.assign({}, layer.props, {
             viewport: layer.context.viewport
           })
@@ -242,10 +242,9 @@ function updateLayerHighlightColor(layer) {
   // Update picking module settings if highlightedObjectIndex is set.
   // This will overwrite any settings from auto highlighting.
   const pickingSelectedColorValid = layer.props.highlightedObjectIndex >= 0;
+  // Note: Autohighlighting only works for single model layers
   if (layer.state.model && pickingSelectedColorValid) {
     const pickingSelectedColor = layer.encodePickingColor(layer.props.highlightedObjectIndex);
-
-    // TODO - handle multimodel layers?
     layer.state.model.updateModuleSettings({
       pickingSelectedColor,
       pickingSelectedColorValid
