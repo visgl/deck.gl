@@ -88,6 +88,7 @@ export const initLayerInSeer = layer => {
 
   seer.listItem('deck.gl', layer.id, {
     badges,
+    // TODO: Seer currently only handles single model layers
     links: layer.state && layer.state.model ? [`luma.gl:${layer.state.model.id}`] : undefined,
     parent: layer.parentLayer ? layer.parentLayer.id : undefined
   });
@@ -129,6 +130,7 @@ function logPayload(layer) {
       data.push({path: 'objects.attributes', data: attrs});
       badges.push(layer.state.attributeManager.stats.getTimeString());
     }
+    // TODO: Seer currently only handles single model layers
     if (layer.state.model) {
       layer.state.model.timerQueryEnabled = true;
       const {lastFrameTime} = layer.state.model.stats;

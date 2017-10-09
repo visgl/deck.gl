@@ -31,6 +31,7 @@ export {default as Viewport} from './viewports/viewport';
 export {default as FirstPersonViewport} from './viewports/first-person-viewport';
 export {default as ThirdPersonViewport} from './viewports/third-person-viewport';
 export {default as WebMercatorViewport} from './viewports/web-mercator-viewport';
+export {default as OrbitViewport} from './viewports/orbit-viewport';
 
 // TODO - Do we need to export? Move to experimental?
 export {default as ViewportControls} from './controllers/viewport-controls';

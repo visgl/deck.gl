@@ -493,8 +493,8 @@ export default class LayerManager {
       newLayer.state = state;
 
       // Update model layer reference
-      if (state.model) {
-        state.model.userData.layer = newLayer;
+      for (const model of newLayer.getModels()) {
+        model.userData.layer = newLayer;
       }
       // Keep a temporary ref to the old props, for prop comparison
       newLayer.oldProps = props;
@@ -551,8 +551,10 @@ export default class LayerManager {
         // Save layer on model for picking purposes
         // TODO - store on model.userData rather than directly on model
       }
-      if (layer.state && layer.state.model) {
-        layer.state.model.userData.layer = layer;
+      if (layer.state) {
+        for (const model of layer.getModels()) {
+          model.userData.layer = layer;
+        }
       }
     }
     return error;

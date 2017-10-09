@@ -144,9 +144,9 @@ export default class Layer {
   }
 
   // If state has a model, draw it with supplied uniforms
-  draw({uniforms = {}}) {
-    if (this.state.model) {
-      this.state.model.render(uniforms);
+  draw(opts) {
+    for (const model of this.getModels()) {
+      model.draw(opts);
     }
   }
 
@@ -220,6 +220,11 @@ export default class Layer {
     if (this.state) {
       this.state.needsRedraw = redraw;
     }
+  }
+
+  // Return an array of models used by this layer, can be overriden by layer subclass
+  getModels() {
+    return this.state.models || (this.state.model ? [this.state.model] : []);
   }
 
   // PROJECTION METHODS
@@ -424,6 +429,7 @@ export default class Layer {
       this._updateBaseUniforms();
       this._updateModuleSettings();
 
+      // Note: Automatic instance count update only works for single layers
       if (this.state.model) {
         this.state.model.setInstanceCount(this.getNumInstances());
       }
@@ -444,8 +450,10 @@ export default class Layer {
   drawLayer({moduleParameters = null, uniforms = {}, parameters = {}}) {
 
     // TODO/ib - hack move to luma Model.draw
-    if (moduleParameters && this.state.model) {
-      this.state.model.updateModuleSettings(moduleParameters);
+    if (moduleParameters) {
+      for (const model of this.getModels()) {
+        model.updateModuleSettings(moduleParameters);
+      }
     }
 
     // Apply polygon offset to avoid z-fighting
@@ -615,18 +623,25 @@ export default class Layer {
   }
 
   _updateBaseUniforms() {
-    this.setUniforms({
+    const uniforms = {
       // apply gamma to opacity to make it visually "linear"
       opacity: Math.pow(this.props.opacity, 1 / 2.2),
       ONE: 1.0
-    });
+    };
+    for (const model of this.getModels()) {
+      model.setUniforms(uniforms);
+    }
+
+    // TODO - set needsRedraw on the model(s)?
+    this.state.needsRedraw = true;
   }
 
   _updateModuleSettings() {
-    if (this.state.model) {
-      this.state.model.updateModuleSettings({
-        pickingHighlightColor: this.props.highlightColor
-      });
+    const settings = {
+      pickingHighlightColor: this.props.highlightColor
+    };
+    for (const model of this.getModels()) {
+      model.updateModuleSettings(settings);
     }
   }
 
@@ -634,10 +649,11 @@ export default class Layer {
 
   // Updates selected state members and marks the object for redraw
   setUniforms(uniformMap) {
-    if (this.state.model) {
-      this.state.model.setUniforms(uniformMap);
+    for (const model of this.getModels()) {
+      model.setUniforms(uniformMap);
     }
-    // TODO - set needsRedraw on the model?
+
+    // TODO - set needsRedraw on the model(s)?
     this.state.needsRedraw = true;
     log(3, 'layer.setUniforms', uniformMap);
   }

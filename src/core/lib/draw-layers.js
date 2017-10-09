@@ -176,19 +176,9 @@ function drawLayersInViewport(gl, {
 
       visibleCount++;
 
-      if (!drawPickingColors) {
-        updateLayerHighlightColor(layer);
-        // TODO - Disable during picking
-      }
-
-      if (layer.state.model) {
-        // Update project module parameters
-        layer.state.model.updateModuleSettings(
-          Object.assign({}, layer.props, {
-            viewport: layer.context.viewport
-          })
-        );
-      }
+      const moduleParameters = Object.assign({}, layer.props, {
+        viewport: layer.context.viewport
+      });
 
       const uniforms = Object.assign(
         pickingUniforms,
@@ -200,6 +190,9 @@ function drawLayersInViewport(gl, {
       const layerParameters = Object.assign({viewport: glViewport}, layer.props.parameters || {});
 
       if (drawPickingColors) {
+        // TODO - Disable during picking
+        Object.assign(moduleParameters, getPickingModuleParameters(layer));
+
         Object.assign(layerParameters, {
           blendColor: [0, 0, 0, (layerIndex + 1) / 255]
         });
@@ -207,6 +200,7 @@ function drawLayersInViewport(gl, {
 
       withParameters(gl, parameters, () => {
         layer.drawLayer({
+          moduleParameters,
           uniforms,
           parameters: layerParameters
         });
@@ -235,20 +229,20 @@ function getViewportFromDescriptor(viewportOrDescriptor) {
  * Returns the picking color of currenlty selected object of the given 'layer'.
  * @return {Array} - the picking color or null if layers selected object is invalid.
  */
-function updateLayerHighlightColor(layer) {
+function getPickingModuleParameters(layer) {
   // TODO - inefficient to update settings every render?
   // TODO: Add warning if 'highlightedObjectIndex' is > numberOfInstances of the model.
 
   // Update picking module settings if highlightedObjectIndex is set.
   // This will overwrite any settings from auto highlighting.
   const pickingSelectedColorValid = layer.props.highlightedObjectIndex >= 0;
-  if (layer.state.model && pickingSelectedColorValid) {
+  if (pickingSelectedColorValid) {
     const pickingSelectedColor = layer.encodePickingColor(layer.props.highlightedObjectIndex);
 
-    // TODO - handle multimodel layers?
-    layer.state.model.updateModuleSettings({
+    return {
       pickingSelectedColor,
       pickingSelectedColorValid
-    });
+    };
   }
+  return null;
 }

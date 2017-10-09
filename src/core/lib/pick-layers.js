@@ -124,12 +124,14 @@ export function pickObject(gl, {
       pickedLayer === layer &&
       pickingSelectedColor !== EMPTY_PIXEL
     );
-    // TODO - handle multi model layers?
-    if (layer.state.model) {
-      layer.state.model.updateModuleSettings({
-        pickingSelectedColor,
-        pickingSelectedColorValid
-      });
+    // Note: Auto highlighting only works for single model layers
+    const pickingParameters = {
+      pickingSelectedColor,
+      pickingSelectedColorValid
+    };
+
+    for (const model of layer.getModels()) {
+      model.updateModuleSettings(pickingParameters);
     }
   });
 
