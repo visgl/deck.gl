@@ -176,11 +176,6 @@ function drawLayersInViewport(gl, {
 
       visibleCount++;
 
-      if (!drawPickingColors) {
-        updateLayerHighlightColor(layer);
-        // TODO - Disable during picking
-      }
-
       const moduleParameters = Object.assign({}, layer.props, {
         viewport: layer.context.viewport
       });
@@ -195,6 +190,9 @@ function drawLayersInViewport(gl, {
       const layerParameters = Object.assign({viewport: glViewport}, layer.props.parameters || {});
 
       if (drawPickingColors) {
+        // TODO - Disable during picking
+        Object.assign(moduleParameters, getLayerHighlightColor(layer));
+
         Object.assign(layerParameters, {
           blendColor: [0, 0, 0, (layerIndex + 1) / 255]
         });
@@ -231,24 +229,20 @@ function getViewportFromDescriptor(viewportOrDescriptor) {
  * Returns the picking color of currenlty selected object of the given 'layer'.
  * @return {Array} - the picking color or null if layers selected object is invalid.
  */
-function updateLayerHighlightColor(layer) {
+function getLayerHighlightColor(layer) {
   // TODO - inefficient to update settings every render?
   // TODO: Add warning if 'highlightedObjectIndex' is > numberOfInstances of the model.
 
   // Update picking module settings if highlightedObjectIndex is set.
   // This will overwrite any settings from auto highlighting.
   const pickingSelectedColorValid = layer.props.highlightedObjectIndex >= 0;
-  // Note: Autohighlighting only works for single model layers
-  if (layer.state.model && pickingSelectedColorValid) {
+  if (pickingSelectedColorValid) {
     const pickingSelectedColor = layer.encodePickingColor(layer.props.highlightedObjectIndex);
 
-    const pickingParameters = {
+    return {
       pickingSelectedColor,
       pickingSelectedColorValid
     };
-
-    for (const model of layer.getModels()) {
-      model.updateModuleSettings(pickingParameters);
-    }
   }
+  return null;
 }
