@@ -186,8 +186,13 @@ function drawLayersInViewport(gl, {
         {layerIndex}
       );
 
+      // All parameter resolving is done here instead of the layer
       // Blend parameters must not be overriden
-      const layerParameters = Object.assign({viewport: glViewport}, layer.props.parameters || {});
+      const layerParameters = Object.assign({}, layer.props.parameters || {}, parameters);
+
+      Object.assign(layerParameters, {
+        viewport: glViewport
+      });
 
       if (drawPickingColors) {
         // TODO - Disable during picking
@@ -198,7 +203,7 @@ function drawLayersInViewport(gl, {
         });
       }
 
-      withParameters(gl, parameters, () => {
+      withParameters(gl, layerParameters, () => {
         layer.drawLayer({
           moduleParameters,
           uniforms,
@@ -215,7 +220,7 @@ function drawLayersInViewport(gl, {
   const message = `\
 #${renderCount++}: Rendering ${pass} : ${visibleCount} of ${totalCount} layers \
 (${hiddenCount} hidden, ${compositeCount} composite ${pickableCount} unpickable) \
-DPR={pixelRatio} pick={$drawPickingColors}`;
+DPR={pixelRatio} pick=${drawPickingColors}`;
 
   log.log(2, message);
 }

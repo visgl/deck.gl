@@ -46,8 +46,8 @@
     "earcut": "^2.0.6",
     "mjolnir.js": ">=0.1.0",
     "lodash.flattendeep": "^4.4.0",
-    "luma.gl": ">=4.1.0-alpha.4",
-    "math.gl": ">= 1.0.0-alpha.7",
+    "luma.gl": ">=4.1.0-alpha.5",
+    "math.gl": ">= 1.0.0-alpha.8",
     "prop-types": "^15.5.8",
     "seer": "^0.2.3",
     "viewport-mercator-project": ">= 4.2.0-alpha.2"
