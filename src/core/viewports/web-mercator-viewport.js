@@ -223,7 +223,7 @@ export default class WebMercatorViewport extends Viewport {
    */
   addMetersToLngLat(lngLatZ, xyz) {
     const [lng, lat, Z = 0] = lngLatZ;
-    const [deltaLng, deltaLat, deltaZ = 0] = this.metersToLngLatDelta(lngLatZ, xyz);
+    const [deltaLng, deltaLat, deltaZ = 0] = this.metersToLngLatDelta(xyz);
     return lngLatZ.length === 2 ?
       [lng + deltaLng, lat + deltaLat] :
       [lng + deltaLng, lat + deltaLat, Z + deltaZ];
