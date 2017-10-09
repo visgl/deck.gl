@@ -124,11 +124,13 @@ export function pickObject(gl, {
       pickingSelectedColor !== EMPTY_PIXEL
     );
     // Note: Auto highlighting only works for single model layers
-    if (layer.state.model) {
-      layer.state.model.updateModuleSettings({
-        pickingSelectedColor,
-        pickingSelectedColorValid
-      });
+    const pickingParameters = {
+      pickingSelectedColor,
+      pickingSelectedColorValid
+    };
+
+    for (const model of layer.getModels()) {
+      model.updateModuleSettings(pickingParameters);
     }
   });
 

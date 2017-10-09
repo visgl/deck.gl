@@ -241,9 +241,14 @@ function updateLayerHighlightColor(layer) {
   // Note: Autohighlighting only works for single model layers
   if (layer.state.model && pickingSelectedColorValid) {
     const pickingSelectedColor = layer.encodePickingColor(layer.props.highlightedObjectIndex);
-    layer.state.model.updateModuleSettings({
+
+    const pickingParameters = {
       pickingSelectedColor,
       pickingSelectedColorValid
-    });
+    };
+
+    for (const model of layer.getModels()) {
+      model.updateModuleSettings(pickingParameters);
+    }
   }
 }
