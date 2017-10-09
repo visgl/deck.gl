@@ -151,7 +151,7 @@ export default class AttributeManager {
     this.userData = {};
     this.stats = new Stats({id: 'attr'});
 
-    this.isTransitionSupported = true; // AttributeTransitionManager.isSupported(gl);
+    this.isTransitionSupported = AttributeTransitionManager.isSupported(gl);
     this.setTransitionOptions(transition);
 
     // For debugging sanity, prevent uninitialized members
@@ -270,8 +270,8 @@ export default class AttributeManager {
       logFunctions.onUpdateEnd({level: LOG_START_END_PRIORITY, id: this.id, numInstances});
     }
 
-    if (this.attributeTransition) {
-      this.attributeTransition.update(this.attributes);
+    if (this.attributeTranstionManger) {
+      this.attributeTranstionManger.update(this.attributes);
     }
   }
 
@@ -298,7 +298,7 @@ export default class AttributeManager {
         attribute.changed = attribute.changed && !clearChangedFlags;
 
         // If there is transition, let the transition manager handle the update
-        if (!this.attributeTransition || !attribute.transition) {
+        if (!this.attributeTranstionManger || !attribute.transition) {
           changedAttributes[attributeName] = attribute;
         }
       }
@@ -642,11 +642,13 @@ export default class AttributeManager {
    */
   setTransitionOptions(opts) {
     if (!opts) {
-      this.attributeTransition = null;
-    } else if (this.attributeTransition) {
-      this.attributeTransition.setOptions(opts);
+      this.attributeTranstionManger = null;
+    } else if (this.attributeTranstionManger) {
+      this.attributeTranstionManger.setOptions(opts);
     } else if (this.isTransitionSupported) {
-      this.attributeTransition = new AttributeTransitionManager(this, opts);
+      this.attributeTranstionManger = new AttributeTransitionManager(this, opts);
+    } else {
+      log.warn(0, 'WebGL2 not supported by this browser. Transition animation is disabled.');
     }
   }
 
@@ -655,10 +657,10 @@ export default class AttributeManager {
    * Returns updated attributes if any, otherwise `null`
    */
   updateTransition() {
-    const {attributeTransition} = this;
-    const transitionUpdated = Boolean(attributeTransition) && attributeTransition.run();
+    const {attributeTranstionManger} = this;
+    const transitionUpdated = Boolean(attributeTranstionManger) && attributeTranstionManger.run();
     this.needsRedraw = this.needsRedraw || transitionUpdated;
-    return transitionUpdated ? attributeTransition.getAttributes() : null;
+    return transitionUpdated ? attributeTranstionManger.getAttributes() : null;
   }
 
 }
