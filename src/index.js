@@ -43,31 +43,57 @@ export {default as FirstPersonState} from './core/controllers/first-person-state
 export {default as OrbitState} from './core/controllers/orbit-state';
 export {default as MapState} from './core/controllers/map-state';
 
-// Experimental Pure JS (non-React) bindings
-import {default as DeckGLJS} from './core/pure-js/deck-js';
-import {default as MapControllerJS} from './core/pure-js/map-controller-js';
-
-// Experimental Features (May change in minor version bumps, use at your own risk)
-import {get} from './core/lib/utils/get';
-import {count} from './core/lib/utils/count';
-import {default as EffectManager} from './core/experimental/lib/effect-manager';
-import {default as Effect} from './core/experimental/lib/effect';
-
 // Deprecated Core Lib Classes
 export {default as OrbitViewport} from './core/viewports/orbit-viewport';
 export {default as PerspectiveViewport} from './core/deprecated/viewports/perspective-viewport';
 export {default as OrthographicViewport} from './core/deprecated/viewports/orthographic-viewport';
 export {assembleShaders} from 'luma.gl'; // Forward the luma.gl version (note: now integrated with Model)
 
+// EXPERIMENTAL FEATURES (May change in minor version bumps, use at your own risk)
+import {default as EffectManager} from './core/experimental/lib/effect-manager';
+import {default as Effect} from './core/experimental/lib/effect';
+
+// Experimental Pure JS (non-React) bindings
+import {default as DeckGLJS} from './core/pure-js/deck-js';
+import {default as MapControllerJS} from './core/pure-js/map-controller-js';
+
+// Experimental Data Accessor Helpers
+import {get} from './core/lib/utils/get';
+import {count} from './core/lib/utils/count';
+
+// Experimental Aggregation Utilities
+import {default as BinSorter} from './core/utils/bin-sorter';
+import {linearScale} from './core/utils/scale-utils';
+import {quantizeScale} from './core/utils/scale-utils';
+import {clamp} from './core/utils/scale-utils';
+import {defaultColorRange} from './core/utils/color-utils';
+
+// Experimental 64 bit helpers
+// TODO - just expose as layer methods instead?
+import {enable64bitSupport} from './core/lib/utils/fp64';
+import {fp64ify} from './core/lib/utils/fp64';
+
 Object.assign(experimental, {
-  get,
-  count,
+  // Pure JS (non-React) support
+  DeckGLJS,
+  MapControllerJS,
+
+  // Effects base classes
   EffectManager,
   Effect,
 
-  // Pure JS (i.e. non-React) support
-  DeckGLJS,        // Integrate into `LayerManager`?
-  MapControllerJS  // Integrate into `MapController` JS class?
+  // The following are mainly for sub-layers
+  get,
+  count,
+
+  BinSorter,
+  linearScale,
+  quantizeScale,
+  clamp,
+  defaultColorRange,
+
+  enable64bitSupport,
+  fp64ify
 });
 
 //
