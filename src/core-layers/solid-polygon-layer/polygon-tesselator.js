@@ -226,7 +226,8 @@ function calculatePositions({polygons, pointCount, fp64}) {
 function calculateNormals({polygons, pointCount}) {
   // TODO - use generic vertex attribute?
   const attribute = new Float32Array(pointCount * 3);
-  fillArray({target: attribute, source: [0, 1, 0], start: 0, count: pointCount});
+  // normals is not used in flat polygon shader
+  // fillArray({target: attribute, source: [0, 0, 1], start: 0, count: pointCount});
   return attribute;
 }
 

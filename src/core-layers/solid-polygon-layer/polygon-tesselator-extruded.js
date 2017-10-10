@@ -19,7 +19,6 @@
 // THE SOFTWARE.
 
 import * as Polygon from './polygon';
-import vec3_normalize from 'gl-vec3/normalize';
 import {fp64ify} from '../../core/lib/utils/fp64';
 import {get, count, fillArray} from '../../core/lib/utils';
 import earcut from 'earcut';
@@ -60,7 +59,6 @@ function flatten(values, level, result = []) {
 }
 
 const DEFAULT_COLOR = [0, 0, 0, 255]; // Black
-const DEGREES_TO_RADIANS = Math.PI / 180;
 
 export class PolygonTesselatorExtruded {
 
@@ -206,7 +204,7 @@ function calculatePositions(positionsJS, fp64) {
 }
 
 function calculateNormals({groupedVertices, pointCount, wireframe}) {
-  const up = [0, 1, 0];
+  const up = [0, 0, 1];
   const multiplier = wireframe ? 2 : 5;
 
   const normals = new Float32Array(pointCount * 3 * multiplier);
@@ -365,21 +363,5 @@ function calculateSurfaceIndices(vertices, offset) {
 
 // get normal vector of line segment
 function getNormal(p1, p2) {
-  const p1x = p1[0];
-  const p1y = p1[1];
-  const p2x = p2[0];
-  const p2y = p2[1];
-
-  if (p1x === p2x && p1y === p2y) {
-    return [1, 0, 0];
-  }
-
-  const lon1 = DEGREES_TO_RADIANS * p1x;
-  const lon2 = DEGREES_TO_RADIANS * p2x;
-  const lat1 = DEGREES_TO_RADIANS * p1y;
-  const lat2 = DEGREES_TO_RADIANS * p2y;
-  const a = Math.sin(lon2 - lon1) * Math.cos(lat2);
-  const b = Math.cos(lat1) * Math.sin(lat2) -
-    Math.sin(lat1) * Math.cos(lat2) * Math.cos(lon2 - lon1);
-  return vec3_normalize([], [b, 0, -a]);
+  return [p1[1] - p2[1], p2[0] - p1[0], 0];
 }

@@ -28,6 +28,7 @@ attribute vec3 pickingColors;
 
 uniform float extruded;
 uniform float opacity;
+uniform vec3 pixelsPerUnit;
 
 varying vec4 vColor;
 
@@ -48,7 +49,7 @@ void main(void) {
     // to the getLightWeight() function
     lightWeight = getLightWeight(
       position_worldspace.xyz,
-      normals
+      normalize(normals * pixelsPerUnit)
     );
   }
 
