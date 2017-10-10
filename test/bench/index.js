@@ -38,6 +38,8 @@ import {getUniformsFromViewport} from 'deck.gl/core/shaderlib/project/viewport-u
 
 import {testInitializeLayer} from 'deck.gl/test/test-utils';
 
+import SolidPolygonLayer from 'deck.gl/core-layers/solid-polygon-layer/solid-polygon-layer';
+
 const suite = new Suite();
 
 const COLOR_STRING = '#FFEEBB';
@@ -82,10 +84,13 @@ suite
   return new GeoJsonLayer({data: data.choropleths});
 })
 .add('PolygonLayer#construct', () => {
-  return new PolygonLayer({data: data.choropleths});
+  return new PolygonLayer({data: data.choropleths.features});
+})
+.add('SolidPolygonLayer#construct', () => {
+  return new PolygonLayer({data: data.choropleths.features});
 })
 .add('ScatterplotLayer#initialize', () => {
-  const layer = new ScatterplotLayer({data: data.points});
+  const layer = new ScatterplotLayer({data: data.points, getPosition: d => d.COORDINATES});
   testInitializeLayer({layer});
 })
 .add('PathLayer#initialize', () => {
@@ -97,25 +102,48 @@ suite
   testInitializeLayer({layer});
 })
 .add('PolygonLayer#initialize (flat)', () => {
-  const layer = new PolygonLayer({data: data.choropleths});
+  const layer = new PolygonLayer({data: data.choropleths.features,
+    getPolygon: f => f.geometry.coordinates
+  });
   testInitializeLayer({layer});
 })
 .add('PolygonLayer#initialize (extruded)', () => {
-  const layer = new PolygonLayer({data: data.choropleths, extruded: true});
+  const layer = new PolygonLayer({data: data.choropleths.features,
+    getPolygon: f => f.geometry.coordinates,
+    extruded: true
+  });
   testInitializeLayer({layer});
 })
 .add('PolygonLayer#initialize (wireframe)', () => {
-  const layer = new PolygonLayer({data: data.choropleths, extruded: true, wireframe: true});
+  const layer = new PolygonLayer({data: data.choropleths.features,
+    getPolygon: f => f.geometry.coordinates,
+    extruded: true, wireframe: true
+  });
+  testInitializeLayer({layer});
+})
+.add('SolidPolygonLayer#initialize (extruded)', () => {
+  const layer = new SolidPolygonLayer({data: data.choropleths.features});
+  testInitializeLayer({layer});
+})
+.add('SolidPolygonLayer#initialize (extruded)', () => {
+  const layer = new SolidPolygonLayer({data: data.choropleths.features,
+    extruded: true
+  });
+  testInitializeLayer({layer});
+})
+.add('SolidPolygonLayer#initialize (wireframe)', () => {
+  const layer = new SolidPolygonLayer({data: data.choropleths.features,
+    extruded: true, wireframe: true
+  });
   testInitializeLayer({layer});
 })
 .add('encoding picking color', () => {
   testIdx++;
+  if ((testIdx + 1) >> 24) {
+    testIdx = 0;
+  }
   testLayer.encodePickingColor(testIdx);
 })
-// .add('ScatterplotLayer#initialize', () => {
-//   const layer = new ScatterplotLayer({data: data.points});
-//   testInitializeLayer({layer});
-// })
 // add listeners
 .on('start', (event) => {
   console.log('Starting bench...');

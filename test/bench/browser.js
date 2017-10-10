@@ -41,4 +41,5 @@ window.Benchmark = Benchmark;
   }
 })();
 
+require('../test-utils/setup-gl');
 require('./index');

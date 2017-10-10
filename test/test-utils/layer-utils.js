@@ -85,6 +85,7 @@ export function testInitializeLayer({gl, layer, viewport}) {
     });
 
   } catch (error) {
+    console.log(error.message);
     failures = error;
   }
 
