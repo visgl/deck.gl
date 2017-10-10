@@ -85,7 +85,7 @@ export function testInitializeLayer({gl, layer, viewport}) {
     });
 
   } catch (error) {
-    console.log(error.message);
+    console.log(error.message); // eslint-disable-line
     failures = error;
   }
 
