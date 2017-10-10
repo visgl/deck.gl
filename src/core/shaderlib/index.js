@@ -18,12 +18,11 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {fp32, fp64} from 'luma.gl';
+import {fp32, fp64, picking} from 'luma.gl';
 
 import project from '../shaderlib/project/project';
 import project64 from '../shaderlib/project64/project64';
 import lighting from '../shaderlib/lighting/lighting';
-import picking from '../shaderlib/picking/picking';
 
 import {registerShaderModules, setDefaultShaderModules} from 'luma.gl';
 

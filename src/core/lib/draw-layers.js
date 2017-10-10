@@ -158,7 +158,6 @@ function drawLayersInViewport(gl, {
   // TODO: Update all layers to use 'picking_uActive' (picking shader module)
   // and then remove 'renderPickingBuffer' and 'pickingEnabled'.
   const pickingUniforms = {
-    picking_uActive: drawPickingColors ? 1 : 0,
     renderPickingBuffer: drawPickingColors ? 1 : 0,
     pickingEnabled: drawPickingColors ? 1 : 0
   };
@@ -180,7 +179,8 @@ function drawLayersInViewport(gl, {
       visibleCount++;
 
       const moduleParameters = Object.assign({}, layer.props, {
-        viewport: layer.context.viewport
+        viewport: layer.context.viewport,
+        pickingActive: drawPickingColors ? 1 : 0
       });
 
       const uniforms = Object.assign(

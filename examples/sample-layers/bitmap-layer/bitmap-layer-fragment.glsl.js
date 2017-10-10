@@ -17,11 +17,8 @@ uniform sampler2D uBitmap8;
 uniform sampler2D uBitmap9;
 uniform sampler2D uBitmap10;
 
-uniform float renderPickingBuffer;
-
 varying vec2 vTexCoord;
 varying float vBitmapType;
-varying vec4 vPickingColor;
 
 uniform float desaturate;
 
@@ -61,11 +58,7 @@ void main(void) {
     discard;
   }
 
-
-  gl_FragColor = mix(
-    color_desaturate(bitmapColor),
-    vPickingColor,
-    renderPickingBuffer
-  );
+  gl_FragColor = color_desaturate(bitmapColor);
+  gl_FragColor = picking_filterPickingColor(gl_FragColor);
 }
 `;

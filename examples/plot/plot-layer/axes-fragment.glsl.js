@@ -18,22 +18,20 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-module.exports = `\
-#define SHADER_NAME enhanced-choropleth-layer-vertex-shader
+export default `\
+#define SHADER_NAME graph-layer-fragment-shader
 
-attribute vec3 positions;
-attribute vec3 colors;
-attribute vec3 pickingColors;
-
-uniform float opacity;
+#ifdef GL_ES
+precision highp float;
+#endif
 
 varying vec4 vColor;
+varying float shouldDiscard;
 
 void main(void) {
-  vec2 pos = preproject(positions.xy);
-  gl_Position = project(vec4(pos, 0., 1.));
-
-  vColor = vec4(colors / 255., opacity);
-  picking_setPickingColor(pickingColors);
+  if (shouldDiscard > 0.0) {
+    discard;
+  }
+  gl_FragColor = vColor;
 }
 `;

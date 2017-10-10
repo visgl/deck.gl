@@ -34,7 +34,6 @@ uniform float numSegments;
 uniform vec2 viewportSize;
 uniform float strokeWidth;
 uniform float opacity;
-uniform float renderPickingBuffer;
 
 // uniform for brushing
 uniform vec2 mousePos;
@@ -111,12 +110,12 @@ void main(void) {
   float isSourceInBrush = isPointInRange(instancePositions.xy, mousePos, brushRadius, brushSource);
   float isTargetInBrush = isPointInRange(instancePositions.zw, mousePos, brushRadius, brushTarget);
 
-  float isInBrush = float(enableBrushing <= 0. || 
+  float isInBrush = float(enableBrushing <= 0. ||
   (brushSource * isSourceInBrush > 0. || brushTarget * isTargetInBrush > 0.));
 
   float segmentIndex = positions.x;
   float segmentRatio = getSegmentRatio(segmentIndex);
-  
+
   // if it's the first point, use next - current as direction
   // otherwise use current - prev
   float indexDir = mix(-1.0, 1.0, step(segmentIndex, 0.0));
@@ -126,20 +125,17 @@ void main(void) {
   vec3 nextPos = getPos(source, target, nextSegmentRatio);
   vec4 curr = project_to_clipspace(vec4(currPos, 1.0));
   vec4 next = project_to_clipspace(vec4(nextPos, 1.0));
-   
+
   // mix strokeWidth with brush, if not in brush, return 0
   float finalWidth = mix(0.0, strokeWidth, isInBrush);
-  
+
   // extrude
   vec2 offset = getExtrusionOffset((next.xy - curr.xy) * indexDir, positions.y, finalWidth);
   gl_Position = curr + vec4(offset, 0.0, 0.0);
 
   vec4 color = mix(instanceSourceColors, instanceTargetColors, segmentRatio) / 255.;
-  
-  vColor = mix(
-    vec4(color.rgb, color.a * opacity),
-    vec4(instancePickingColors / 255., 1.),
-    renderPickingBuffer
-  );
+
+  picking_setPickingColor(instancePickingColors);
+  vColor = vec4(color.rgb, color.a * opacity);
 }
 `;

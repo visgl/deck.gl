@@ -84,7 +84,8 @@ export default class EnhancedChoroplethLayer extends Layer {
   getShaders() {
     return {
       vs: require('./enhanced-choropleth-layer-vertex.glsl'),
-      fs: require('./enhanced-choropleth-layer-fragment.glsl')
+      fs: require('./enhanced-choropleth-layer-fragment.glsl'),
+      modules: ['picking']
     };
   }
 

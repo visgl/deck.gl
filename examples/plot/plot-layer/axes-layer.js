@@ -4,7 +4,7 @@ import {GL, Model, Geometry} from 'luma.gl';
 
 import {textMatrixToTexture} from './utils';
 
-import fragmentShader from './fragment.glsl';
+import fragmentShader from './axes-fragment.glsl';
 import gridVertex from './grid-vertex.glsl';
 import labelVertex from './label-vertex.glsl';
 import labelFragment from './label-fragment.glsl';
