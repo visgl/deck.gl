@@ -152,7 +152,8 @@ export default class SolidPolygonLayer extends Layer {
     return new Model(gl, Object.assign({}, this.getShaders(), {
       id: this.props.id,
       geometry: new Geometry({
-        drawMode: this.props.wireframe ? GL.LINES : GL.TRIANGLES
+        drawMode: this.props.wireframe ? GL.LINES : GL.TRIANGLES,
+        attributes: {}
       }),
       vertexCount: 0,
       isIndexed: true,

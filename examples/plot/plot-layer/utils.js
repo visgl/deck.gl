@@ -66,7 +66,7 @@ export function textMatrixToTexture(glContext, data, fontSize = 48) {
     columnWidths,
     texture: new Texture2D(glContext, {
       pixels: canvas,
-      magFilter: GL.LINEAR
+      [GL.TEXTURE_MAG_FILTER]: GL.LINEAR
     })
   };
 }

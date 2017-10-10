@@ -241,8 +241,10 @@ export default class AxesLayer extends Layer {
       fs: fragmentShader,
       geometry: new Geometry({
         drawMode: GL.LINES,
-        positions: new Float32Array(gridPositions),
-        normals: new Float32Array(gridNormals)
+        attributes: {
+          positions: new Float32Array(gridPositions),
+          normals: new Float32Array(gridNormals)
+        }
       }),
       isInstanced: true
     });
@@ -283,10 +285,12 @@ export default class AxesLayer extends Layer {
       fs: labelFragment,
       geometry: new Geometry({
         drawMode: GL.TRIANGLES,
-        indices: new Uint16Array(labelIndices),
-        positions: new Float32Array(labelPositions),
-        texCoords: {size: 2, value: new Float32Array(labelTexCoords)},
-        normals: new Float32Array(labelNormals)
+        attributes: {
+          indices: new Uint16Array(labelIndices),
+          positions: new Float32Array(labelPositions),
+          texCoords: {size: 2, value: new Float32Array(labelTexCoords)},
+          normals: new Float32Array(labelNormals)
+        }
       }),
       isInstanced: true
     });
