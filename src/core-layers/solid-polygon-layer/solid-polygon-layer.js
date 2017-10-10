@@ -24,7 +24,7 @@ import {GL, Model, Geometry} from 'luma.gl';
 
 // Polygon geometry generation is managed by the polygon tesselator
 import {PolygonTesselator} from './polygon-tesselator';
-import {PolygonTesselatorExtruded} from './polygon-tesselator-extruded';
+import {PolygonTesselatorExtruded} from './polygon-tesselator-extruded-2';
 
 import vs from './solid-polygon-layer-vertex.glsl';
 import vs64 from './solid-polygon-layer-vertex-64.glsl';
