@@ -244,9 +244,12 @@ void main(void) {
     const {value, type, size} = attribute;
 
     if (buffer) {
-      // No entrance transition
+      // If new buffer is bigger than old buffer, back fill with destination values
       let oldBufferData = new Float32Array(value);
       buffer.getData({dstData: oldBufferData});
+      // Hack/Xiaoji: WebGL2 throws error if TransformFeedback does not render to
+      // a buffer of type Float32Array.
+      // Therefore we need to read data as a Float32Array then re-cast to attribute type
       if (!(value instanceof Float32Array)) {
         oldBufferData = new (value.constructor)(oldBufferData);
       }
@@ -284,12 +287,16 @@ void main(void) {
 
     const transitionSettings = this._getTransitionSettings(transition);
 
-    const needsNewBuffer = !buffer || transition.bufferSize !== value.length;
+    const needsNewBuffer = !buffer || transition.bufferSize < value.length;
 
+    // Attribute descriptor to transition from
     let fromState;
     if (transitionSettings) {
+      // _getCurrentAttributeState must be called before the current buffer is deleted
       fromState = this._getCurrentAttributeState(transition);
     }
+    // Attribute descriptor to transition to
+    // Pre-converting to buffer to reuse in the case where no transition is needed
     const toState = new Buffer(this.gl, {size, data: value});
 
     if (needsNewBuffer) {
@@ -300,6 +307,8 @@ void main(void) {
       transition.buffer = new Buffer(this.gl, {
         size,
         instanced: attribute.instanced,
+        // WebGL2 throws error if `value` is not cast to Float32Array:
+        // `transformfeedback buffers : buffer or buffer range not large enough`
         data: new Float32Array(value.length),
         usage: GL.DYNAMIC_COPY
       });
@@ -331,11 +340,14 @@ void main(void) {
         this._updateModel(name, attributeName[name]);
       }
     } else if (this.model) {
+      const {fromState, toState, attribute} = transition;
+
       this.model.setAttributes({
-        [`${attributeName}From`]: transition.fromState,
-        [`${attributeName}To`]: transition.toState
+        [`${attributeName}From`]: fromState,
+        [`${attributeName}To`]: toState
       });
-      this.model.setVertexCount(transition.bufferSize / transition.fromState.size);
+
+      this.model.setVertexCount(attribute.value.length / attribute.size);
     }
   }
 }
