@@ -121,7 +121,9 @@ export default class PointCloudLayer extends Layer {
       id: this.props.id,
       geometry: new Geometry({
         drawMode: GL.TRIANGLES,
-        positions: new Float32Array(positions)
+        attributes: {
+          positions: new Float32Array(positions)
+        }
       }),
       isInstanced: true,
       shaderCache: this.context.shaderCache

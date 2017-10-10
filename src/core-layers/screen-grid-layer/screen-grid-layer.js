@@ -92,7 +92,9 @@ export default class ScreenGridLayer extends Layer {
       id: this.props.id,
       geometry: new Geometry({
         drawMode: GL.TRIANGLE_FAN,
-        vertices: new Float32Array([0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0])
+        attributes: {
+          vertices: new Float32Array([0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0])
+        }
       }),
       isInstanced: true,
       shaderCache: this.context.shaderCache

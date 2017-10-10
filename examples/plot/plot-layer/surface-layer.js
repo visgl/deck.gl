@@ -82,7 +82,8 @@ export default class SurfaceLayer extends Layer {
       vs: surfaceVertex,
       fs: fragmentShader,
       geometry: new Geometry({
-        drawMode: GL.TRIANGLES
+        drawMode: GL.TRIANGLES,
+        attributes: {}
       }),
       vertexCount: 0,
       isIndexed: true

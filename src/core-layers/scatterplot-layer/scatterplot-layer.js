@@ -116,7 +116,9 @@ export default class ScatterplotLayer extends Layer {
       id: this.props.id,
       geometry: new Geometry({
         drawMode: GL.TRIANGLE_FAN,
-        positions: new Float32Array(positions)
+        attributes: {
+          positions: new Float32Array(positions)
+        }
       }),
       isInstanced: true,
       shaderCache: this.context.shaderCache
