@@ -31,7 +31,6 @@ attribute vec3 instancePickingColors;
 
 uniform float opacity;
 uniform float radiusPixels;
-uniform vec2 viewportSize;
 
 varying vec4 vColor;
 varying vec2 unitPosition;
@@ -54,7 +53,7 @@ void main(void) {
   vertex_pos_modelspace[3] = vec2(1.0, 0.0);
 
   gl_Position = project_to_clipspace_fp64(vertex_pos_modelspace);
-  gl_Position += vec4(positions.xy * radiusPixels / viewportSize * 2.0, 0.0, 0.0);
+  gl_Position += project_pixel_to_clipspace(positions.xy * radiusPixels);
 
   vec4 position_worldspace = vec4(
     projected_coord_xy[0].x, projected_coord_xy[1].x,
