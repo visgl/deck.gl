@@ -14,7 +14,7 @@ export {default as s2cells} from '../data/sf.s2cells.json';
 export {choropleths};
 
 export const points = allPoints;
-export const positionOrigin = [-122.45, 37.75, 0];
+export const positionOrigin = [-122.42694203247012, 37.751537058389985];
 
 export const worldGrid = pointsToWorldGrid(points, 500);
 
@@ -24,6 +24,21 @@ export const zigzag = [
       positionOrigin[0] + i * i * 0.001,
       positionOrigin[1] + Math.cos(i * Math.PI) * 0.2 / (i + 4)
     ])
+  },
+  {
+    path: new Array(6).fill(0).map((d, i) => [
+      positionOrigin[0] + Math.cos(i * Math.PI) * 0.05 / (i + 4),
+      positionOrigin[1] - i * i * 0.0003
+    ])
+  },
+  {
+    path: [[
+      positionOrigin[0] - 0.005,
+      positionOrigin[1] + 0.005
+    ], [
+      positionOrigin[0] - 0.005,
+      positionOrigin[1] - 0.005
+    ]]
   }
 ];
 
