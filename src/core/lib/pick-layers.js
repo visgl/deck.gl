@@ -374,23 +374,25 @@ function getUniquesFromPickingBuffer(gl, {
   const uniqueColors = new Map();
 
   // Traverse all pixels in picking results and get unique colors
-  for (let i = 0; i < pickedColors && pickedColors.length; i += 4) {
-    // Decode picked layer from color
-    const pickedLayerIndex = pickedColors[i + 3] - 1;
+  if (pickedColors) {
+    for (let i = 0; i < pickedColors.length; i += 4) {
+      // Decode picked layer from color
+      const pickedLayerIndex = pickedColors[i + 3] - 1;
 
-    if (pickedLayerIndex >= 0) {
-      const pickedColor = pickedColors.slice(i, i + 4);
-      const colorKey = pickedColor.join(',');
-      if (!uniqueColors.has(colorKey)) {
-        const pickedLayer = layers[pickedLayerIndex];
-        if (pickedLayer) { // eslint-disable-line
-          uniqueColors.set(colorKey, {
-            pickedColor,
-            pickedLayer,
-            pickedObjectIndex: pickedLayer.decodePickingColor(pickedColor)
-          });
-        } else {
-          log.error(0, 'Picked non-existent layer. Is picking buffer corrupt?');
+      if (pickedLayerIndex >= 0) {
+        const pickedColor = pickedColors.slice(i, i + 4);
+        const colorKey = pickedColor.join(',');
+        if (!uniqueColors.has(colorKey)) { // eslint-disable-line
+          const pickedLayer = layers[pickedLayerIndex];
+          if (pickedLayer) { // eslint-disable-line
+            uniqueColors.set(colorKey, {
+              pickedColor,
+              pickedLayer,
+              pickedObjectIndex: pickedLayer.decodePickingColor(pickedColor)
+            });
+          } else {
+            log.error(0, 'Picked non-existent layer. Is picking buffer corrupt?');
+          }
         }
       }
     }
