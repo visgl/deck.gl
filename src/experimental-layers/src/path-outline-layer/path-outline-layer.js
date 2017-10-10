@@ -1,10 +1,7 @@
+// Note: This file will either be moved back to deck.gl or reformatted to web-monorepo standards
+// Disabling lint temporarily to facilitate copying code in and out of this repo
 import {PathLayer} from 'deck.gl';
 import {GL, Framebuffer, Texture2D, registerShaderModules} from 'luma.gl';
-
-// import VS from './path-layer-vertex.glsl';
-// import VS64 from './path-layer-vertex-64.glsl';
-// import FS from './path-layer-fragment.glsl';
-
 import outline from '../shaderlib/outline/outline';
 
 registerShaderModules([outline]);
@@ -42,8 +39,8 @@ const defaultProps = {
   getZLevel: object => object.zLevel | 0
 };
 
-export default class SegmentLayer extends PathLayer {
-  // Override getShaders to add the outline module
+export default class PathOutlineLayer extends PathLayer {
+  // Override getShaders to inject the outline module
   getShaders() {
     const shaders = super.getShaders();
     return Object.assign({}, shaders, {
@@ -96,15 +93,17 @@ export default class SegmentLayer extends PathLayer {
 
     this.state.model.draw({
       uniforms: Object.assign({}, uniforms, {
-        widthScale: this.props.widthScale * 1.2
+        jointType: 0,
+        widthScale: this.props.widthScale * 1.3
       }),
       parameters: {
-        depthTest: false
+        depthTest: false,
+        blendEquation: GL.MAX // Biggest value needs to go into buffer
       },
       framebuffer: outlineFramebuffer
     });
 
-    // // Now use the outline shadowmap to render the lines (with outlines)
+    // Now use the outline shadowmap to render the lines (with outlines)
     this.state.model.updateModuleSettings(Object.assign({}, moduleParameters, {
       outlineEnabled: true,
       outlineRenderShadowmap: false,
@@ -112,6 +111,7 @@ export default class SegmentLayer extends PathLayer {
     }));
     this.state.model.draw({
       uniforms: Object.assign({}, uniforms, {
+        jointType: Number(rounded),
         widthScale: this.props.widthScale
       }),
       parameters: {
@@ -136,5 +136,5 @@ export default class SegmentLayer extends PathLayer {
   }
 }
 
-SegmentLayer.layerName = 'SegmentLayer';
-SegmentLayer.defaultProps = defaultProps;
+PathOutlineLayer.layerName = 'PathOutlineLayer';
+PathOutlineLayer.defaultProps = defaultProps;
