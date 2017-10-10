@@ -67,7 +67,7 @@ const defaultProps = {
   onAfterRender: noop,
   onLayerClick: null,
   onLayerHover: null,
-  useDevicePixelRatio: false,
+  useDevicePixelRatio: true,
 
   debug: false,
   drawPickingColors: false
@@ -91,12 +91,12 @@ export default class DeckGLJS {
 
     this.canvas = this._createCanvas(props);
 
-    const {width, height, gl, glOptions, debug} = props;
+    const {width, height, gl, glOptions, debug, useDevicePixelRatio} = props;
 
     this.animationLoop = new AnimationLoop({
       width,
       height,
-      useDevicePixelRatio: false,
+      useDevicePixelRatio,
       onCreateContext: opts =>
         gl || createGLContext(Object.assign({}, glOptions, {canvas: this.canvas, debug})),
       onInitialize: this._onRendererInitialized,
@@ -152,6 +152,8 @@ export default class DeckGLJS {
     if (props.layers) {
       this.layerManager.updateLayers({newLayers: props.layers});
     }
+
+    this.animationLoop.setViewParameters({useDevicePixelRatio});
   }
 
   finalize() {
