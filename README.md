@@ -22,12 +22,22 @@
 
 [![docs](http://i.imgur.com/mvfvgf0.jpg)](https://uber.github.io/deck.gl)
 
-Provides tested, highly performant layers for data visualization
-use cases, such as scatterplots, choropleths etc in 2 and 3 dimensions.
+Provides tested, highly performant layers for data visualization,
+such as scatterplots, arcs, geometries defined in GeoJSON, etc...
 
     npm install --save deck.gl
 
-## Example
+## Using deck.gl
+
+To learn how to use deck.gl through examples coming with the deck.gl repo,
+please clone the latest **release** branch.
+
+`git clone -b 4.1-release --single-branch https://github.com/uber/deck.gl.git`
+
+A very simple usage of deck.gl is showcased in the [hello-world examples](./examples),
+using both [webpack2](./examples/hello-world-webpack2) and
+[browserify](./examples/hello-world-browserify),
+so you can choose which setup you prefer or are more familiar with.
 
 ```javascript
 import DeckGL from 'deck.gl';
@@ -41,15 +51,12 @@ const flights = new ArcLayer({
 <DeckGL width={1920} height={1080} layers={[flights]} />
 ```
 
-A very simple usage of deck.gl is showcased in the [hello-world examples](./examples),
-using both [webpack2](./examples/hello-world-webpack2) and
-[browserify](./examples/hello-world-browserify),
-so you can choose which setup you prefer or are more familiar with.
-
 You can also take a look at the [docs website](https://uber.github.io/deck.gl)
 or browse directly the [docs folder](./docs).
 
-## Developing
+## Developing deck.gl
+
+The **master** branch is the active development branch.
 
     npm install # or yarn
     npm test
@@ -81,6 +88,7 @@ Either upgrade to a supported version, or install something like
 #### Install yarn
 On macOS deck.gl uses [yarn](https://www.npmjs.com/package/yarn) to manage packages.
 To develop deck.gl, [install yarn](https://yarnpkg.com/en/docs/install) with brew
+
 ```
 brew update
 brew install yarn
