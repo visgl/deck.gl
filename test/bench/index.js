@@ -121,7 +121,7 @@ suite
   });
   testInitializeLayer({layer});
 })
-.add('SolidPolygonLayer#initialize (extruded)', () => {
+.add('SolidPolygonLayer#initialize (flat)', () => {
   const layer = new SolidPolygonLayer({data: data.choropleths.features});
   testInitializeLayer({layer});
 })
