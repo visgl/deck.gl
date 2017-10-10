@@ -36,7 +36,8 @@ class Root extends Component {
         time: 0,
         showParticles: false,
         showWindDemo: false,
-        showElevation: false
+        showElevation: false,
+        useDevicePixelRatio: true
       }
     };
     autobind(this);

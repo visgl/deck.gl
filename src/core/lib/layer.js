@@ -262,6 +262,7 @@ export default class Layer {
   }
 
   screenToDevicePixels(screenPixels) {
+    log.deprecated('screenToDevicePixels', 'DeckGL prop useDevicePixelRatio for conversion');
     const devicePixelRatio = typeof window !== 'undefined' ?
       window.devicePixelRatio : 1;
     return screenPixels * devicePixelRatio;
