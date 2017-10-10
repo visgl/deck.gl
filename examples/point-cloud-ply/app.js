@@ -7,7 +7,8 @@ import {setParameters} from 'luma.gl';
 
 import {loadBinary, parsePLY, OrbitController} from './utils';
 
-const FILE_PATH = 'https://gnavvy.github.io/point-cloud-example/data/lucy100k.ply';
+const DATA_REPO = 'https://raw.githubusercontent.com/uber-common/deck.gl-data/master';
+const FILE_PATH = 'examples/point-cloud-ply/lucy100k.ply';
 
 class Example extends PureComponent {
   constructor(props) {
@@ -42,7 +43,7 @@ class Example extends PureComponent {
   componentDidMount() {
     this._canvas.fitBounds([-0.5, -0.5, -0.5], [0.5, 0.5, 0.5]);
 
-    loadBinary(FILE_PATH).then(rawData => {
+    loadBinary(`${DATA_REPO}/${FILE_PATH}`).then(rawData => {
       const {vertex} = parsePLY(rawData);
 
       const points = [];
