@@ -23,6 +23,21 @@ For Earlier Beta Releases see below
 
 ### deck.gl v4.2 Beta Releases
 
+#### [4.2.0-alpha.13] - Oct 10
+- Add experimental exports (#1010)
+- Fix benchmark tests (#1005)
+- Change the README.md, asking users to use the release branch and developers to use the master branch
+- Fix useDevicePixelRatio prop usage (#1006)
+- Update examples/README.md to fix broken links
+- Fix point missing issue for 64 bits point cloud layer vertex shader (#1004)
+- Fixes to drawlayers (#1002)
+- Multi model fixes, OrbitController fix in plot layer (#996)
+- fix WebMercatorViewport.addMetersToLngLat (#1001)
+- Skip picking flow when no layer is pickable (#980)
+- Fix modelMatrix in lnglat layers. Fixes separation slider in layer-browser. (#993)
+- Add useDevicePixelRadius toggle to layer-browser (#989)
+- Class name cleanup (#990)
+
 #### [4.2.0-alpha.12] - Oct 5
 - Fix picking and highlighting regressions. (#982)
 - add viewMatrix back so users can access it in their own vertex shader (#984)
