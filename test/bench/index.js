@@ -42,8 +42,6 @@ import SolidPolygonLayer from 'deck.gl/core-layers/solid-polygon-layer/solid-pol
 import {PolygonTesselator} from 'deck.gl/core-layers/solid-polygon-layer/polygon-tesselator';
 import {PolygonTesselatorExtruded}
   from 'deck.gl/core-layers/solid-polygon-layer/polygon-tesselator-extruded';
-import {PolygonTesselatorExtruded as PolygonTesselatorExtruded2}
-  from 'deck.gl/core-layers/solid-polygon-layer/polygon-tesselator-extruded-2';
 
 const suite = new Suite();
 
@@ -71,24 +69,16 @@ function testTesselator(tesselator) {
 
 // add tests
 suite
-.add('current - flat', () => {
+.add('polygonTesselator#flat', () => {
   const tesselator = new PolygonTesselator({polygons});
   testTesselator(tesselator);
 })
-.add('current - solid', () => {
+.add('polygonTesselator#extruded', () => {
   const tesselator = new PolygonTesselatorExtruded({polygons});
   testTesselator(tesselator);
 })
-.add('proposed - solid', () => {
-  const tesselator = new PolygonTesselatorExtruded2({polygons});
-  testTesselator(tesselator);
-})
-.add('current - wireframe', () => {
+.add('polygonTesselator#wireframe', () => {
   const tesselator = new PolygonTesselatorExtruded({polygons, wireframe: true});
-  testTesselator(tesselator);
-})
-.add('proposed - wireframe', () => {
-  const tesselator = new PolygonTesselatorExtruded2({polygons, wireframe: true});
   testTesselator(tesselator);
 })
 .add('getUniformsFromViewport#LNGLAT', () => {
