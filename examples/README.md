@@ -17,10 +17,10 @@ These are intended to be absolutely minimal (in terms of application code,
 package.json, webpack config etc) examples of how to get deck.gl and a base
 map working together.
 
-* [Hello World (webpack2)](./hello-world-webpack2/README.md): Bundles a minimal app with
+* [Hello World (webpack2)](./react/hello-world-webpack2/README.md): Bundles a minimal app with
   [webpack 2](https://github.com/webpack/webpack) and serves it with webpack-dev-server.
   Transpiles with buble.
-* [Hello World (browserify)](./hello-world-browserify/README.md) Bundles a minimal app with
+* [Hello World (browserify)](./react/hello-world-browserify/README.md) Bundles a minimal app with
   [browserify](https://github.com/substack/node-browserify) and serves it with
   [budo](https://github.com/mattdesl/budo).
   Transpiles with babel.
