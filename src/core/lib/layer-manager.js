@@ -352,7 +352,7 @@ export default class LayerManager {
       // TODO - don't set viewportChanged during setViewports?
       if (this.context.viewportChanged) {
         for (const layer of this.layers) {
-          this._updateLayer(layer, {viewportChanged: true, somethingChanged: true});
+          this._updateLayer(layer, {viewportChanged: true});
         }
       }
     }
@@ -360,10 +360,6 @@ export default class LayerManager {
     assert(this.context.viewport, 'LayerManager: viewport not set');
 
     return this;
-  }
-
-  // Walk the layers and update their states
-  _updateLayerStates(changeFlags) {
   }
 
   // Get a viewport from a viewport descriptor (which can be a plain viewport)
