@@ -351,20 +351,15 @@ export default class LayerManager {
       // TODO - reimplement viewport change detection (single viewport optimization)
       // TODO - don't set viewportChanged during setViewports?
       if (this.context.viewportChanged) {
-        this._updateLayerStates({viewportChanged: true});
+        for (const layer of this.layers) {
+          this._updateLayer(layer, {viewportChanged: true});
+        }
       }
     }
 
     assert(this.context.viewport, 'LayerManager: viewport not set');
 
     return this;
-  }
-
-  // Walk the layers and update their states
-  _updateLayerStates(changeFlags) {
-    for (const layer of this.layers) {
-      layer.updateLayer({changeFlags});
-    }
   }
 
   // Get a viewport from a viewport descriptor (which can be a plain viewport)
@@ -560,18 +555,19 @@ export default class LayerManager {
     return error;
   }
 
-  // Updates a single layer, calling layer methods
-  _updateLayer(layer) {
+  // Updates a single layer, calling layer methods, calculates changeFlags if not provided
+  _updateLayer(layer, changeFlags = null) {
     const {oldProps, props} = layer;
     let error = null;
     if (oldProps) {
+      changeFlags = changeFlags || layer.diffProps(oldProps, props, this.context);
       try {
         layer.updateLayer({
           oldProps,
           props,
           context: this.context,
           oldContext: this.oldContext,
-          changeFlags: layer.diffProps(oldProps, layer.props, this.context)
+          changeFlags
         });
       } catch (err) {
         log.once(0, `error during update of ${layerName(layer)}`, err);
