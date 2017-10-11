@@ -252,7 +252,7 @@ function getPickedColors(gl, {
   }
 
   drawPickingBuffer(gl, {
-    layers: pickableLayers,
+    layers,
     viewports,
     onViewportActive,
     useDevicePixelRatio,
