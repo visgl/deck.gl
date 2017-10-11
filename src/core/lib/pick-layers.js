@@ -52,7 +52,8 @@ export function pickObject(gl, {
     pickingFBO,
     deviceX,
     deviceY,
-    deviceRadius
+    deviceRadius,
+    useDevicePixelRatio
   });
 
   const {
@@ -232,7 +233,14 @@ function getViewportFromCoordinates({viewports}) {
 }
 
 // returns pickedColor or null if no pickable layers found.
-function getPickedColors(gl, {layers, viewports, onViewportActive, pickingFBO, deviceRect}) {
+function getPickedColors(gl, {
+  layers,
+  viewports,
+  onViewportActive,
+  useDevicePixelRatio,
+  pickingFBO,
+  deviceRect
+}) {
 
   assert((Number.isFinite(deviceRect.width) && deviceRect.width > 0), '`width` must be > 0');
   assert((Number.isFinite(deviceRect.height) && deviceRect.height > 0), '`height` must be > 0');
@@ -245,7 +253,9 @@ function getPickedColors(gl, {layers, viewports, onViewportActive, pickingFBO, d
 
   drawPickingBuffer(gl, {
     layers: pickableLayers,
-    viewports, onViewportActive,
+    viewports,
+    onViewportActive,
+    useDevicePixelRatio,
     pickingFBO,
     deviceRect
   });
@@ -279,7 +289,8 @@ function getClosestFromPickingBuffer(gl, {
   pickingFBO,
   deviceX,
   deviceY,
-  deviceRadius
+  deviceRadius,
+  useDevicePixelRatio
 }) {
   let closestResultToCenter = {
     pickedColor: EMPTY_PIXEL,
@@ -308,6 +319,7 @@ function getClosestFromPickingBuffer(gl, {
     layers,
     viewports,
     onViewportActive,
+    useDevicePixelRatio,
     pickingFBO,
     deviceRect: {x, y, width, height}
   });

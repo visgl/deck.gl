@@ -21,12 +21,15 @@
 /* global window */
 import {GL, withParameters, setParameters} from 'luma.gl';
 import {log} from './utils';
+import assert from 'assert';
 
 let renderCount = 0;
 
 // TODO - Exported for pick-layers.js - Move to util?
-export const getPixelRatio = ({useDevicePixelRatio}) =>
-  useDevicePixelRatio && typeof window !== 'undefined' ? window.devicePixelRatio : 1;
+export const getPixelRatio = ({useDevicePixelRatio}) => {
+  assert(typeof useDevicePixelRatio === 'boolean', 'Invalid useDevicePixelRatio');
+  return useDevicePixelRatio && typeof window !== 'undefined' ? window.devicePixelRatio : 1;
+};
 
 // Convert viewport top-left CSS coordinates to bottom up WebGL coordinates
 const getGLViewport = (gl, {viewport, pixelRatio}) => {
