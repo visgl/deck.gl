@@ -194,6 +194,7 @@ export function pickVisibleObjects(gl, {
     viewports,
     onViewportActive,
     pickingFBO,
+    useDevicePixelRatio,
     deviceRect: {
       x: deviceLeft,
       y: deviceTop,
@@ -374,6 +375,7 @@ function getUniquesFromPickingBuffer(gl, {
   viewports,
   onViewportActive,
   pickingFBO,
+  useDevicePixelRatio,
   deviceRect: {x, y, width, height}
 }) {
   const pickedColors = getPickedColors(gl, {
@@ -381,6 +383,7 @@ function getUniquesFromPickingBuffer(gl, {
     viewports,
     onViewportActive,
     pickingFBO,
+    useDevicePixelRatio,
     deviceRect: {x, y, width, height}
   });
   const uniqueColors = new Map();
