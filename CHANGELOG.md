@@ -23,6 +23,10 @@ For Earlier Beta Releases see below
 
 ### deck.gl v4.2 Beta Releases
 
+#### [4.2.0-alpha.15] - Oct 11
+- Pass useDevicePixelRatio to picking flow (#1021)
+- Fix multi viewport update state (#1019)
+- Bump luma.gl peer dependency to '4.1.0-alpha.6'
 
 #### [4.2.0-alpha.14] - Oct 10
 - Fix picking when rendereing pickable and non-pickable layers (#1018)
