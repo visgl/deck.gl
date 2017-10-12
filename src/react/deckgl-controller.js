@@ -1,7 +1,7 @@
 import {PureComponent, createElement} from 'react';
-import MapControllerJS from '../core/pure-js/map-controller-js';
+import DeckGLControllerJS from '../core/pure-js/deckgl-controller-js';
 
-export default class MapController extends PureComponent {
+export default class DeckGLController extends PureComponent {
 
   constructor(props) {
     super(props);
@@ -10,7 +10,7 @@ export default class MapController extends PureComponent {
 
   componentDidMount() {
     const {eventCanvas} = this.refs;
-    this.controller = new MapControllerJS(Object.assign({}, this.props, {canvas: eventCanvas}));
+    this.controller = new DeckGLControllerJS(Object.assign({}, this.props, {canvas: eventCanvas}));
   }
 
   componentWillUpdate(nextProps) {
@@ -42,6 +42,6 @@ export default class MapController extends PureComponent {
   }
 }
 
-MapController.displayName = 'MapController';
-MapController.propTypes = MapControllerJS.propTypes;
-MapController.defaultProps = MapControllerJS.defaultProps;
+DeckGLController.displayName = 'DeckGLController';
+DeckGLController.propTypes = DeckGLControllerJS.propTypes;
+DeckGLController.defaultProps = DeckGLControllerJS.defaultProps;

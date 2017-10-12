@@ -3,12 +3,12 @@ import {PureComponent, createElement, cloneElement, Children, isValidElement} fr
 import PropTypes from 'prop-types';
 
 import {EventManager} from 'mjolnir.js';
-import ViewportControls from '../../core/controllers/viewport-controls';
+import ViewStateController from '../../core/controllers/view-state-controller';
 import MapState from '../../core/controllers/map-state';
 import {MAPBOX_LIMITS} from '../../core/controllers/map-state';
 import CURSOR from '../utils/cursors';
 
-import {viewportLinearInterpolator} from './viewport-animation-utils.js';
+import {viewportLinearInterpolator} from './viewport-animation-utils';
 
 const VIEWPORT_ANIMATE_PROPS = ['longitude', 'latitude', 'zoom', 'bearing', 'pitch'];
 const VIEWPORT_ANIMATE_FREQUENCY = 0.01;
@@ -145,7 +145,7 @@ export default class AnimationMapController extends PureComponent {
 
     // If props.controls is not provided, fallback to default MapControls instance
     // Cannot use defaultProps here because it needs to be per map instance
-    this._controls = this.props.controls || new ViewportControls(MapState);
+    this._controls = this.props.controls || new ViewStateController(MapState);
     this._controls.setOptions(Object.assign({}, this.props, {
       onStateChange: this._onInteractiveStateChange.bind(this),
       eventManager

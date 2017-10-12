@@ -1,7 +1,6 @@
 import PropTypes from 'prop-types';
-
 import {EventManager} from 'mjolnir.js';
-import MapControls from '../controllers/map-controls';
+import ViewStateController from '../controllers/view-state-controller';
 import {MAPBOX_LIMITS} from '../controllers/map-state';
 
 const PREFIX = '-webkit-';
@@ -46,10 +45,10 @@ const propTypes = {
   /** Accessor that returns a cursor style to show interactive state */
   getCursor: PropTypes.func,
 
-  // A map control instance to replace the default map controls
+  // A controller instance to replace the default controller
   // The object must expose one property: `events` as an array of subscribed
   // event names; and two methods: `setState(state)` and `handle(event)`
-  controls: PropTypes.shape({
+  controller: PropTypes.shape({
     events: PropTypes.arrayOf(PropTypes.string),
     handleEvent: PropTypes.func
   })
@@ -67,7 +66,7 @@ const defaultProps = Object.assign({}, MAPBOX_LIMITS, {
   getCursor: getDefaultCursor
 });
 
-export default class MapControllerJS {
+export default class DeckGLControllerJS {
 
   constructor(props) {
     props = Object.assign({}, defaultProps, props);
@@ -83,10 +82,10 @@ export default class MapControllerJS {
 
     this._eventManager = eventManager;
 
-    // If props.controls is not provided, fallback to default MapControls instance
+    // If props.controller is not provided, fallback to default ViewStateController instance
     // Cannot use defaultProps here because it needs to be per map instance
-    this._controls = this.props.controls || new MapControls();
-    this._controls.setOptions(Object.assign({}, this.props, {
+    this._controller = this.props.controller || new ViewStateController();
+    this._controller.setOptions(Object.assign({}, this.props, {
       onStateChange: this._onInteractiveStateChange.bind(this),
       eventManager
     }));
@@ -96,7 +95,7 @@ export default class MapControllerJS {
     props = Object.assign({}, this.props, props);
     this.props = props;
 
-    this._controls.setOptions(props);
+    this._controller.setOptions(props);
   }
 
   finalize() {
@@ -112,6 +111,6 @@ export default class MapControllerJS {
   }
 }
 
-MapControllerJS.displayName = 'MapController';
-MapControllerJS.propTypes = propTypes;
-MapControllerJS.defaultProps = defaultProps;
+DeckGLControllerJS.displayName = 'DeckGLController';
+DeckGLControllerJS.propTypes = propTypes;
+DeckGLControllerJS.defaultProps = defaultProps;
