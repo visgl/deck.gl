@@ -95,17 +95,21 @@ export default class ScatterplotLayer extends Layer {
       this.setState({model: this._getModel(gl)});
     }
     this.updateAttribute({props, oldProps, changeFlags});
+
+    if (changeFlags.propsChanged) {
+      const {radiusScale, radiusMinPixels, radiusMaxPixels, outline, strokeWidth} = this.props;
+      this.state.model.setUniforms({
+        outline: outline ? 1 : 0,
+        strokeWidth,
+        radiusScale,
+        radiusMinPixels,
+        radiusMaxPixels
+      });
+    }
   }
 
-  draw({uniforms}) {
-    const {radiusScale, radiusMinPixels, radiusMaxPixels, outline, strokeWidth} = this.props;
-    this.state.model.render(Object.assign({}, uniforms, {
-      outline: outline ? 1 : 0,
-      strokeWidth,
-      radiusScale,
-      radiusMinPixels,
-      radiusMaxPixels
-    }));
+  draw(opts) {
+    this.state.model.draw(opts);
   }
 
   _getModel(gl) {

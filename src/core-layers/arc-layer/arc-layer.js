@@ -85,20 +85,25 @@ export default class ArcLayer extends Layer {
 
   updateState({props, oldProps, changeFlags}) {
     super.updateState({props, oldProps, changeFlags});
+
     // Re-generate model if geometry changed
     if (props.fp64 !== oldProps.fp64) {
       const {gl} = this.context;
       this.setState({model: this._getModel(gl)});
     }
     this.updateAttribute({props, oldProps, changeFlags});
+
+    // Update props if needed
+    if (changeFlags.propsChanged) {
+      const {strokeWidth} = this.props;
+      this.state.model.setUniforms({
+        strokeWidth
+      });
+    }
   }
 
-  draw({uniforms}) {
-    const {strokeWidth} = this.props;
-
-    this.state.model.render(Object.assign({}, uniforms, {
-      strokeWidth
-    }));
+  draw(opts) {
+    this.state.model.draw(opts);
   }
 
   _getModel(gl) {

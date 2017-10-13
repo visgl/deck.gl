@@ -96,13 +96,17 @@ export default class PointCloudLayer extends Layer {
       this.setState({model: this._getModel(gl)});
     }
     this.updateAttribute({props, oldProps, changeFlags});
+
+    if (changeFlags.propsChanged) {
+      const {radiusPixels, lightSettings} = this.props;
+      this.state.model.setUniforms(Object.assign({
+        radiusPixels
+      }, lightSettings));
+    }
   }
 
-  draw({uniforms}) {
-    const {radiusPixels, lightSettings} = this.props;
-    this.state.model.render(Object.assign({}, uniforms, {
-      radiusPixels
-    }, lightSettings));
+  draw(opts) {
+    this.state.model.draw(opts);
   }
 
   _getModel(gl) {

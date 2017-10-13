@@ -100,15 +100,6 @@ export default class SolidPolygonLayer extends Layer {
     }
   }
 
-  draw({uniforms}) {
-    const {extruded, lightSettings} = this.props;
-
-    this.state.model.render(Object.assign({}, uniforms, {
-      extruded: extruded ? 1.0 : 0.0
-    },
-    lightSettings));
-  }
-
   updateState({props, oldProps, changeFlags}) {
     super.updateState({props, oldProps, changeFlags});
 
@@ -119,6 +110,18 @@ export default class SolidPolygonLayer extends Layer {
       this.setState({model: this._getModel(gl)});
     }
     this.updateAttribute({props, oldProps, changeFlags});
+
+    if (changeFlags.propsChanged) {
+      const {extruded, lightSettings} = this.props;
+      this.state.model.setUniforms(lightSettings);
+      this.state.model.setUniforms({
+        extruded: Number(extruded)
+      });
+    }
+  }
+
+  draw(opts) {
+    this.state.model.draw(opts);
   }
 
   updateGeometry({props, oldProps, changeFlags}) {

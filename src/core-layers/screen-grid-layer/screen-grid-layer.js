@@ -60,6 +60,7 @@ export default class ScreenGridLayer extends Layer {
     this.setState({model: this._getModel(gl)});
   }
 
+  // Responds to viewport changes
   shouldUpdateState({changeFlags}) {
     return changeFlags.somethingChanged;
   }
@@ -70,21 +71,28 @@ export default class ScreenGridLayer extends Layer {
       props.cellSizePixels !== oldProps.cellSizePixels;
 
     if (cellSizeChanged || changeFlags.viewportChanged) {
-      this.updateCell();
+      this._updateCell();
+    }
+
+    if (changeFlags.propsChanged) {
+      const {minColor, maxColor} = this.props;
+      this.state.model.setUniforms({minColor, maxColor});
     }
   }
 
-  draw({uniforms}) {
-    const {minColor, maxColor, parameters = {}} = this.props;
-    const {model, cellScale, maxCount} = this.state;
-    uniforms = Object.assign({}, uniforms, {minColor, maxColor, cellScale, maxCount});
-    model.draw({
-      uniforms,
+  draw(opts) {
+    const {cellScale, maxCount} = this.state;
+
+    this.state.model.draw(Object.assign({}, opts, {
+      uniforms: Object.assign({}, opts.uniforms, {
+        cellScale,
+        maxCount
+      }),
       parameters: Object.assign({
         depthTest: false,
         depthMask: false
-      }, parameters)
-    });
+      }, opts.parameters)
+    }));
   }
 
   _getModel(gl) {
@@ -101,7 +109,7 @@ export default class ScreenGridLayer extends Layer {
     }));
   }
 
-  updateCell() {
+  _updateCell() {
     const {width, height} = this.context.viewport;
     const {cellSizePixels} = this.props;
 
