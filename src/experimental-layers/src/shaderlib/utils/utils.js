@@ -1,3 +1,5 @@
+// TODO - this module is a WIP
+
 /* eslint-disable camelcase */
 const INITIAL_STATE = {};
 
