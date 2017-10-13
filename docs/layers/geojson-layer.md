@@ -169,7 +169,7 @@ Called to retrieve the radius of `Point` and `MultiPoint` feature.
 
 - Default: `f => f.properties.lineWidth || 1`
 
-Called to retrieve the line width for a GeoJson feature.
+Called to retrieve the line width in meters for a GeoJson feature.
 
 Note: This accessor is called for `LineString` and `MultiLineString`
 features. It is called for `Polygon` and `MultiPolygon` features if the
