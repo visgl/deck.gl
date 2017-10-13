@@ -31,6 +31,8 @@ void main(void) {
   pos = vec3(rotationMatrix * pos.xy, pos.z);
   gl_Position = project_to_clipspace(vec4(instancePos + pos, 1.0));
 
+  // TODO - transform normals
+
   picking_setPickingColor(instancePickingColors / 255.0);
 
   vTexCoord = texCoords;

@@ -170,8 +170,6 @@ export default class MeshLayer extends Layer {
     const isValidMesh =
       this.props.mesh instanceof Geometry &&
       this.props.mesh.attributes.positions;
-      // this.props.mesh.attributes.normals &&
-      // this.props.mesh.attributes.texCoords;
     assert (isValidMesh);
 
     return new Model(gl, Object.assign({}, this.getShaders(), {
@@ -184,7 +182,10 @@ export default class MeshLayer extends Layer {
   loadTexture(src) {
     const {gl} = this.context;
     const {model} = this.state;
-    getTexture(gl, src).then(texture => model.setUniforms({sampler1: texture}));
+    getTexture(gl, src).then(texture => {
+      model.setUniforms({sampler1: texture});
+      this.setNeedsRedraw();
+    });
   }
 
   calculateInstancePositions(attribute) {
@@ -193,9 +194,9 @@ export default class MeshLayer extends Layer {
     let i = 0;
     for (const point of data) {
       const position = getPosition(point);
-      value[i + 0] = position[0] || 0;
-      value[i + 1] = position[1] || 0;
-      value[i + 2] = position[2] || 0;
+      value[i + 0] = get(position, 0);
+      value[i + 1] = get(position, 1);
+      value[i + 2] = get(position, 2) || 0;
       i += size;
     }
   }
