@@ -89,7 +89,8 @@ const GeoJsonLayerExample = {
     lineWidthScale: 10,
     lineWidthMinPixels: 1,
     pickable: true,
-    fp64: true
+    fp64: true,
+    lightSettings: LIGHT_SETTINGS
   }
 };
 
@@ -103,7 +104,8 @@ const GeoJsonLayerExtrudedExample = {
     getLineColor: f => [200, 0, 80],
     extruded: true,
     wireframe: true,
-    pickable: true
+    pickable: true,
+    lightSettings: LIGHT_SETTINGS
   }
 };
 
@@ -112,12 +114,13 @@ const PolygonLayerExample = {
   getData: () => dataSamples.polygons,
   props: {
     getPolygon: f => f,
-    getFillColor: f => [Math.floor(Math.random() * 255), 0, 0],
+    getFillColor: f => [200 + Math.random() * 55, 0, 0],
     getLineColor: f => [0, 0, 0, 255],
     getWidth: f => 20,
     getHeight: f => Math.random() * 1000,
     opacity: 0.8,
-    pickable: true
+    pickable: true,
+    lightSettings: LIGHT_SETTINGS
   }
 };
 
@@ -189,7 +192,8 @@ const PointCloudLayerExample = {
     getColor: d => get(d, 'color'),
     opacity: 1,
     radiusPixels: 4,
-    pickable: true
+    pickable: true,
+    lightSettings: LIGHT_SETTINGS
   }
 };
 

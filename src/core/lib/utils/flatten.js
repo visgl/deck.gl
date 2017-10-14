@@ -95,10 +95,11 @@ export function flattenVertices(nestedArray, {result = [], dimensions = 3} = {})
 
 // Uses copyWithin to significantly speed up typed array value filling
 export function fillArray({target, source, start = 0, count = 1}) {
-  const total = count * source.length;
+  const length = source.length;
+  const total = count * length;
   let copied = 0;
-  for (let i = 0; i < source.length; ++i) {
-    target[start + copied++] = source[i];
+  for (let i = start; copied < length; copied++) {
+    target[i++] = source[copied];
   }
 
   while (copied < total) {

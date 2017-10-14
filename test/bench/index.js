@@ -39,6 +39,9 @@ import {getUniformsFromViewport} from 'deck.gl/core/shaderlib/project/viewport-u
 import {testInitializeLayer} from 'deck.gl/test/test-utils';
 
 import SolidPolygonLayer from 'deck.gl/core-layers/solid-polygon-layer/solid-polygon-layer';
+import {PolygonTesselator} from 'deck.gl/core-layers/solid-polygon-layer/polygon-tesselator';
+import {PolygonTesselatorExtruded}
+  from 'deck.gl/core-layers/solid-polygon-layer/polygon-tesselator-extruded';
 
 const suite = new Suite();
 
@@ -52,8 +55,32 @@ const VIEWPORT_PARAMS = {
 let testIdx = 0;
 const testLayer = new ScatterplotLayer({data: data.points});
 
+const polygons = data.choropleths.features.map(f => f.geometry.coordinates);
+
+function testTesselator(tesselator) {
+  return {
+    indices: tesselator.indices(),
+    positions: tesselator.positions(),
+    normals: tesselator.normals(),
+    colors: tesselator.colors(),
+    pickingColors: tesselator.pickingColors()
+  };
+}
+
 // add tests
 suite
+.add('polygonTesselator#flat', () => {
+  const tesselator = new PolygonTesselator({polygons});
+  testTesselator(tesselator);
+})
+.add('polygonTesselator#extruded', () => {
+  const tesselator = new PolygonTesselatorExtruded({polygons});
+  testTesselator(tesselator);
+})
+.add('polygonTesselator#wireframe', () => {
+  const tesselator = new PolygonTesselatorExtruded({polygons, wireframe: true});
+  testTesselator(tesselator);
+})
 .add('getUniformsFromViewport#LNGLAT', () => {
   return getUniformsFromViewport({
     viewport: data.sampleViewport,
