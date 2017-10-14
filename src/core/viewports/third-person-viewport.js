@@ -19,40 +19,41 @@
 // THE SOFTWARE.
 
 import Viewport from './viewport';
-// import {Matrix4, experimental} from 'math.gl';
-// const {SphericalCoordinates} = experimental;
+import {Vector3, Matrix4, experimental} from 'math.gl';
+const {SphericalCoordinates} = experimental;
+
+function getDirectionFromBearingAndPitch({bearing, pitch}) {
+  const spherical = new SphericalCoordinates({bearing, pitch});
+  return spherical.toVector3().normalize();
+}
 
 export default class ThirdPersonViewport extends Viewport {
-  // constructor(opts) {
-  //   const {
-  //     // view matrix arguments
-  //     position,   // Defines player position
-  //     direction,  // Defines player direction
-  //     cameraDirection, // Defines camera direction
-  //     up = [0, 0, 1] // Defines up direction, default positive y axis
-  //   } = opts;
+  constructor(opts) {
+    const {bearing, pitch, position, up, zoom} = opts;
 
-  //   // const direction = new SphericalCoordinates({bearing, pitch}).toVector3().normalize();
+    const direction = getDirectionFromBearingAndPitch({
+      bearing,
+      pitch
+    });
 
-  //   const dir = direction || getDirectionFromBearingAndPitch({
-  //     bearing: 180 - bearing,
-  //     pitch: 90
-  //   });
-  //   // const center = dir ? new Vector3(eye).add(dir) : lookAt;
+    const distance = zoom * 50;
 
-  //   const center = dir ? dir : lookAt;
+    // TODO somehow need to flip z to make it work
+    // check if the position offset is done in the base viewport
+    const eye = direction.scale(-distance).multiply(new Vector3(1, 1, -1));
 
-  //   // Just the direction. All the positioning is done in viewport.js
-  //   const viewMatrix = new Matrix4()
-  //     .multiplyRight(
-  //       new Matrix4().lookAt({eye: [0, 0, 0], center: direction.normalize, up})
-  //     );
+    const viewMatrix = new Matrix4().multiplyRight(
+      new Matrix4().lookAt({eye, center: position, up})
+    );
 
-  //   super(Object.assign({}, opts, {
-  //     viewMatrix
-  //   }));
-  // }
+    super(
+      Object.assign({}, opts, {
+        // use meter level
+        zoom: null,
+        viewMatrix
+      })
+    );
+  }
 }
 
 ThirdPersonViewport.displayName = 'ThirdPersonViewport';
-
