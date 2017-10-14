@@ -160,8 +160,8 @@ export default class PolygonLayer extends CompositeLayer {
         miterLimit: lineMiterLimit,
 
         getPath: x => x.path,
-        getColor: getLineColor,
-        getWidth: getLineWidth,
+        getColor: x => getLineColor(x.object),
+        getWidth: x => getLineWidth(x.object),
         updateTriggers: {
           getWidth: updateTriggers.getLineWidth,
           getColor: updateTriggers.getLineColor
