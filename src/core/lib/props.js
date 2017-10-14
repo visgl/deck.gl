@@ -96,7 +96,7 @@ export function compareProps({
 }
 /* eslint-enable max-statements, max-depth, complexity */
 
-// PRIVATE METHODS
+// HELPERS
 
 // The comparison of the data prop requires special handling
 // the dataComparator should be used if supplied
@@ -121,7 +121,6 @@ function diffDataProps(oldProps, props) {
 
 // Checks if any update triggers have changed, and invalidate
 // attributes accordingly.
-/* eslint-disable max-statements */
 function diffUpdateTriggers(oldProps, props, onUpdateTriggered) {
   // const {attributeManager} = this.state;
   // const updateTriggerMap = attributeManager.getUpdateTriggerMap();
@@ -147,9 +146,6 @@ function diffUpdateTriggers(oldProps, props, onUpdateTriggered) {
 
   return change;
 }
-/* eslint-enable max-statements */
-
-// HELPERS
 
 // Constructors have their super class constructors as prototypes
 function getOwnProperty(object, prop) {

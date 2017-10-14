@@ -116,8 +116,9 @@ export default class Layer {
   // Default implementation, all attributes will be invalidated and updated
   // when data changes
   updateState({oldProps, props, oldContext, context, changeFlags}) {
-    if (changeFlags.dataChanged) {
-      this.invalidateAttribute('all');
+    const {attributeManager} = this.state;
+    if (changeFlags.dataChanged && attributeManager) {
+      attributeManager.invalidateAll();
     }
   }
 
@@ -150,15 +151,6 @@ export default class Layer {
 
   // END LIFECYCLE METHODS
   // //////////////////////////////////////////////////
-
-  // Default implementation of attribute invalidation, can be redefine
-  invalidateAttribute(name = 'all') {
-    if (name === 'all') {
-      this.state.attributeManager.invalidateAll();
-    } else {
-      this.state.attributeManager.invalidate(name);
-    }
-  }
 
   // Returns true if the layer is pickable and visible.
   isPickable() {
@@ -346,34 +338,35 @@ export default class Layer {
   // Called by layer manager when a new layer is found
   /* eslint-disable max-statements */
   initializeLayer(updateParams) {
-    assert(this.context.gl, 'Layer context missing gl');
-    assert(!this.state, 'Layer missing state');
+    assert(this.context.gl);
+    assert(!this.state);
 
-    this.state = {};
-    this.state.stats = new Stats({id: 'draw'});
-
-    // Initialize state only once
-    this.setState({
-      attributeManager: new AttributeManager({id: this.props.id}),
-      model: null,
-      needsRedraw: true,
-      dataChanged: true
-    });
-
-    const {attributeManager} = this.state;
+    const attributeManager = new AttributeManager({id: this.props.id});
     // All instanced layers get instancePickingColors attribute by default
     // Their shaders can use it to render a picking scene
-    // TODO - this slows down non instanced layers
+    // TODO - this slightly slows down non instanced layers
     attributeManager.addInstanced({
       instancePickingColors: {
-        type: GL.UNSIGNED_BYTE,
-        size: 3,
-        update: this.calculateInstancePickingColors
+        type: GL.UNSIGNED_BYTE, size: 3, update: this.calculateInstancePickingColors
       }
     });
 
-    // Call subclass lifecycle methods
+    this.state = {
+      attributeManager,
+      model: null,
+      needsRedraw: true,
+      stats: new Stats({id: 'draw'})
+    };
+    this.setChangeFlags({dataChanged: true, propsChange: true, viewportChanged: true});
+
     this.initializeState(this.context);
+
+    this.setChangeFlags({dataChanged: true, propsChange: true, viewportChanged: true});
+    updateParams = Object.assign({}, this.context, updateParams, {
+      changeFlags: this.state.changeFlags
+    });
+
+    // Call subclass lifecycle methods
     this.updateState(updateParams);
     // End subclass lifecycle methods
 
@@ -390,17 +383,29 @@ export default class Layer {
       model.geometry.id = `${this.props.id}-geometry`;
       model.setAttributes(attributeManager.getAttributes());
     }
+
+    this.clearChangeFlags();
   }
 
-  // Called by layer manager when existing layer is getting new props
-  updateLayer(updateParams) {
-    // Check for deprecated method
-    if (this.shouldUpdate) {
-      log.deprecated('shouldUpdate', 'shouldUpdateState');
-    }
+  // Called by layer manager
+  // if this layer is new (not matched with an existing layer) oldProps will be empty object
+  updateLayer({oldProps = {}, oldContext = {}}) {
+    this.oldProps = oldProps;
 
-    // Ensure context is available
-    updateParams = Object.assign({}, this.context, updateParams);
+    this.diffProps(this.props, oldProps);
+
+    // TODO - check change flags and return if no change?
+    // if (!state.changeFlags.somethingChanged) {
+    // return
+    // }
+
+    const updateParams = {
+      props: this.props,
+      oldProps,
+      context: this.context,
+      oldContext,
+      changeFlags: this.state.changeFlags
+    };
 
     // Call subclass lifecycle method
     const stateNeedsUpdate = this.shouldUpdateState(updateParams);
@@ -420,6 +425,8 @@ export default class Layer {
       if (this.state.model) {
         this.state.model.setInstanceCount(this.getNumInstances());
       }
+
+      this.clearChangeFlags();
     }
   }
   /* eslint-enable max-statements */
@@ -484,9 +491,66 @@ export default class Layer {
     return redraw;
   }
 
+  // Helper methods
+
+  // Dirty some change flags, will be handled by updateLayer
+  setChangeFlags(flags) {
+    this.state.changeFlags = this.state.changeFlags || {};
+    const changeFlags = this.state.changeFlags;
+    if (flags.dataChanged && !changeFlags.dataChanged) {
+      changeFlags.dataChanged = flags.dataChanged;
+      changeFlags.propsOrDataChanged = flags.dataChanged;
+      changeFlags.somethingChanged = flags.dataChanged;
+      log.log(LOG_PRIORITY_UPDATE,
+        `dataChanged: ${flags.dataChanged} in ${this.id}`);
+    }
+    if (flags.updateTriggersChanged && !changeFlags.dataChanged) {
+      changeFlags.updateTriggersChanged = flags.updateTriggersChanged;
+      changeFlags.propsOrDataChanged = flags.updateTriggersChanged;
+      changeFlags.somethingChanged = flags.updateTriggersChanged;
+      log.log(LOG_PRIORITY_UPDATE,
+        `updateTriggersChanged: ${flags.updateTriggersChanged} in ${this.id}`);
+    }
+    if (flags.propsChanged && !changeFlags.propsChanged) {
+      changeFlags.propsChanged = true;
+      changeFlags.propsOrDataChanged = true;
+      changeFlags.somethingChanged = true;
+      log.log(LOG_PRIORITY_UPDATE,
+        `propsChanged: ${flags.reason} in ${this.id}`);
+    }
+    if (flags.viewportChanged && !changeFlags.viewportChanged) {
+      changeFlags.viewportChanged = true;
+      changeFlags.somethingChanged = true;
+    }
+
+    return changeFlags;
+  }
+
+  // Clear all changeFlags, typically after an update
+  clearChangeFlags() {
+    this.state.changeFlags = {
+      // Primary changeFlags, can be strings stating reason for change
+      propsChanged: false,
+      dataChanged: false,
+      updateTriggersChanged: false,
+      viewportChanged: false,
+
+      // Derived changeFlags
+      propsOrDataChanged: false,
+      somethingChanged: false
+    };
+  }
+
   // Compares the layers props with old props from a matched older layer
   // and extracts change flags that describe what has change so that state
   // can be update correctly with minimal effort
+  diffProps(oldProps, newProps) {
+    let changeFlags = diffProps(oldProps, newProps, this._onUpdateTriggered.bind(this));
+    changeFlags = this.setChangeFlags(changeFlags);
+    return changeFlags;
+  }
+
+  /*
   diffProps(oldProps, newProps) {
     const changeFlags = diffProps(oldProps, newProps, this._onUpdateTriggered.bind(this));
     const {propsChanged, dataChanged, updateTriggersChanged} = changeFlags;
@@ -517,6 +581,7 @@ export default class Layer {
         'unknown reason'
     };
   }
+  */
 
   // PRIVATE METHODS
 
