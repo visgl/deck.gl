@@ -20,8 +20,6 @@
 
 // Object and array support
 export {flatten, flattenVertices, fillArray} from './flatten';
-export {compareProps, areEqualShallow} from './compare-objects';
-export {compareArrays, checkArray} from './compare-arrays';
 
 // FP64 and Color support
 export {fp64ify} from './fp64';

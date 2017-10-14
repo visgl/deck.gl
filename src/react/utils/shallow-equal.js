@@ -20,7 +20,7 @@
 
 // Shallow compare
 /* eslint-disable complexity */
-export function areEqualShallow(a, b, {ignore = {}} = {}) {
+export function shallowEqual(a, b, {ignore = {}} = {}) {
 
   if (a === b) {
     return true;

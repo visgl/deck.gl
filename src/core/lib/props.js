@@ -36,8 +36,10 @@ export function diffProps(oldProps, newProps, onUpdateTriggered = () => {}) {
  * @returns {null|String} - null when values of all keys are strictly equal.
  *   if unequal, returns a string explaining what changed.
  */
-/* eslint-disable max-statements, complexity */
-export function compareProps({oldProps, newProps, ignoreProps = {}, triggerName = 'props'} = {}) {
+/* eslint-disable max-statements, max-depth, complexity */
+export function compareProps({
+  oldProps, newProps, ignoreProps = {}, propTypes = {}, triggerName = 'props'
+} = {}) {
   assert(oldProps !== undefined && newProps !== undefined, 'compareProps args');
 
   // shallow equality => deep equality
@@ -45,6 +47,7 @@ export function compareProps({oldProps, newProps, ignoreProps = {}, triggerName 
     return null;
   }
 
+  // TODO - do we need these checks? Should never happen...
   if (typeof newProps !== 'object' || newProps === null) {
     return `${triggerName} changed shallowly`;
   }
@@ -60,9 +63,18 @@ export function compareProps({oldProps, newProps, ignoreProps = {}, triggerName 
         return `${triggerName} ${key} dropped: ${oldProps[key]} -> (undefined)`;
       }
 
-      const equals = newProps[key] && oldProps[key] && newProps[key].equals;
+      // If object has an equals function, invoke it
+      let equals = newProps[key] && oldProps[key] && newProps[key].equals;
       if (equals && !equals.call(newProps[key], oldProps[key])) {
         return `${triggerName} ${key} changed deeply: ${oldProps[key]} -> ${newProps[key]}`;
+      }
+
+      // If both new and old value are functions, ignore differences
+      if (key in propTypes) {
+        const type = typeof newProps[key];
+        if (type === 'function' && typeof oldProps[key] === 'function') {
+          equals = true;
+        }
       }
 
       if (!equals && oldProps[key] !== newProps[key]) {
@@ -82,7 +94,7 @@ export function compareProps({oldProps, newProps, ignoreProps = {}, triggerName 
 
   return null;
 }
-/* eslint-enable max-statements, complexity */
+/* eslint-enable max-statements, max-depth, complexity */
 
 // PRIVATE METHODS
 

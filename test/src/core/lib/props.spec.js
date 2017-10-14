@@ -6,6 +6,8 @@ import {Vector2} from 'luma.gl';
 const SAME = 'equal';
 const NOT_SAME = 'not equal';
 
+const func = x => x;
+
 const NULL_OBJECT = {};
 
 const SHALLOW_OBJECT = {
@@ -89,6 +91,27 @@ const TEST_CASES = [
     object1: [1, 2, 3],
     object2: [1, 2, 3],
     result: SAME
+  }, {
+    title: 'equal functions',
+    object1: {prop: func},
+    object2: {prop: func},
+    result: SAME
+  }, {
+    title: 'not equal functions, no prop types',
+    object1: {prop: x => x},
+    object2: {prop: x => x * 2},
+    result: NOT_SAME
+  }, {
+    title: 'not equal functions, with prop types',
+    object1: {prop: x => x},
+    object2: {prop: x => x * 2},
+    propTypes: {prop: true},
+    result: SAME
+  }, {
+    title: 'function vs array',
+    object1: {prop: x => x},
+    object2: {prop: [1, 2, 3]},
+    result: NOT_SAME
   }
 ];
 
@@ -99,17 +122,24 @@ test('compareProps#import', t => {
 
 test('compareProps#tests', t => {
   for (const tc of TEST_CASES) {
-    const result = compareProps({oldProps: tc.object1, newProps: tc.object2});
+    const result = compareProps({
+      oldProps: tc.object1,
+      newProps: tc.object2,
+      propTypes: tc.propTypes || {}
+    });
     t.ok(result === null || typeof result === 'string',
       `compareProps ${tc.title} returned expected type`);
-    let equal = 'illegal value';
     if (typeof result === 'string') {
-      equal = NOT_SAME;
+      // Hack to make tape show the return value string from compareProps on failure
+      const expectedResult = tc.result === SAME ? null : result;
+      t.equal(result, expectedResult,
+        `compareProps ${tc.title} returned expected result`);
     } else if (result === null) {
-      equal = SAME;
+      t.equal(SAME, tc.result,
+        `compareProps ${tc.title} returned expected result`);
+    } else {
+      t.fail(`compareProps ${tc.title} returned illegal value`);
     }
-    t.equal(equal, tc.result,
-      `compareProps ${tc.title} returned expected result`);
   }
   t.end();
 });

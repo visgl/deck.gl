@@ -318,6 +318,21 @@ export default class AttributeManager {
     return this;
   }
 
+  /**
+   * Returns object containing all accessors as keys
+   * @return {Object} - accessors object
+   */
+  getAccessors() {
+    const accessors = {};
+    for (const attributeName in this.attributes) {
+      const attribute = this.attributes[attributeName];
+      if (attribute.accessor) {
+        accessors[attribute.accessor] = true;
+      }
+    }
+    return accessors;
+  }
+
   // DEPRECATED METHODS
 
   /**
