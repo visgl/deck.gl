@@ -299,13 +299,12 @@ export default class AttributeManager {
    *
    * @param {Object} [opts]
    * @param {String} [opts.clearRedrawFlags=false] - whether to clear the flag
-   * @return {Boolean} - whether a redraw is needed.
+   * @return {false|String} - reason a redraw is needed.
    */
   getNeedsRedraw({clearRedrawFlags = false} = {}) {
-    let redraw = this.needsRedraw;
-    redraw = redraw || this.needsRedraw;
+    const redraw = this.needsRedraw;
     this.needsRedraw = this.needsRedraw && !clearRedrawFlags;
-    return redraw;
+    return redraw && this.id;
   }
 
   /**

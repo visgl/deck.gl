@@ -23,6 +23,8 @@ import {GL, withParameters, setParameters} from 'luma.gl';
 import {log} from './utils';
 import assert from 'assert';
 
+const LOG_PRIORITY_DRAW = 2;
+
 let renderCount = 0;
 
 // TODO - Exported for pick-layers.js - Move to util?
@@ -66,7 +68,8 @@ export function drawLayers(gl, {
   drawPickingColors = false,
   deviceRect = null,
   parameters = {},
-  pass = 'draw'
+  pass = 'draw',
+  redrawReason = ''
 }) {
   clearCanvas(gl, {useDevicePixelRatio});
 
@@ -86,7 +89,8 @@ export function drawLayers(gl, {
       drawPickingColors,
       deviceRect,
       parameters,
-      pass
+      pass,
+      redrawReason
     });
   });
 
@@ -101,7 +105,8 @@ export function drawPickingBuffer(gl, {
   onViewportActive,
   useDevicePixelRatio,
   pickingFBO,
-  deviceRect: {x, y, width, height}
+  deviceRect: {x, y, width, height},
+  redrawReason = ''
 }) {
   // Make sure we clear scissor test and fbo bindings in case of exceptions
   // We are only interested in one pixel, no need to render anything else
@@ -122,6 +127,7 @@ export function drawPickingBuffer(gl, {
       useDevicePixelRatio,
       drawPickingColors: true,
       pass: 'picking',
+      redrawReason,
       parameters: {
         blend: true,
         blendFunc: [gl.ONE, gl.ZERO, gl.CONSTANT_ALPHA, gl.ZERO],
@@ -143,15 +149,19 @@ function drawLayersInViewport(gl, {
   drawPickingColors = false,
   deviceRect = null,
   parameters = {},
-  pass = 'draw'
+  pass = 'draw',
+  redrawReason = ''
 }) {
   const pixelRatio = getPixelRatio({useDevicePixelRatio});
   const glViewport = getGLViewport(gl, {viewport, pixelRatio});
 
   // render layers in normal colors
-  let visibleCount = 0;
-  let compositeCount = 0;
-  let pickableCount = 0;
+  const renderStats = {
+    totalCount: layers.length,
+    visibleCount: 0,
+    compositeCount: 0,
+    pickableCount: 0
+  };
 
   // const {x, y, width, height} = deviceRect || [];
 
@@ -168,16 +178,18 @@ function drawLayersInViewport(gl, {
   // render layers in normal colors
   layers.forEach((layer, layerIndex) => {
     if (layer.isComposite) {
-      compositeCount++;
+      renderStats.compositeCount++;
     }
 
     if (layer.props.pickable) {
-      pickableCount++;
+      renderStats.pickableCount++;
     }
 
     if (layer.props.visible && (layer.props.pickable || !drawPickingColors)) {
 
-      visibleCount++;
+      if (!layer.isComposite) {
+        renderStats.visibleCount++;
+      }
 
       const moduleParameters = Object.assign({}, layer.props, {
         viewport: layer.context.viewport
@@ -216,16 +228,27 @@ function drawLayersInViewport(gl, {
     }
   });
 
-  const totalCount = layers.length;
-  const primitiveCount = totalCount - compositeCount;
-  const hiddenCount = primitiveCount - visibleCount;
+  renderCount++;
 
-  const message = `\
-#${renderCount++}: Rendering ${pass} : ${visibleCount} of ${totalCount} layers \
-(${hiddenCount} hidden, ${compositeCount} composite ${pickableCount} unpickable) \
-DPR={pixelRatio} pick=${drawPickingColors}`;
+  logRenderStats({renderStats, pass, redrawReason});
+}
 
-  log.log(2, message);
+function logRenderStats({renderStats, pass, redrawReason}) {
+  if (log.priority >= LOG_PRIORITY_DRAW) {
+    const {totalCount, visibleCount, compositeCount, pickableCount} = renderStats;
+    const primitiveCount = totalCount - compositeCount;
+    const hiddenCount = primitiveCount - visibleCount;
+
+    let message = '';
+    message += `RENDER #${renderCount} \
+${visibleCount} (of ${totalCount} layers) to ${pass} because ${redrawReason} `;
+    if (log.priority > LOG_PRIORITY_DRAW) {
+      message += `\
+(${hiddenCount} hidden, ${compositeCount} composite ${pickableCount} unpickable)`;
+    }
+
+    log.log(LOG_PRIORITY_DRAW, message);
+  }
 }
 
 // Get a viewport from a viewport descriptor (which can be a plain viewport)
