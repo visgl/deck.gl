@@ -53,11 +53,11 @@ void main(void) {
 
   vec2 projected_coord_xy[2];
   project_position_fp64(instancePositions64xy, projected_coord_xy);
-  
+
   // if ahpha == 0.0 or z < 0.0, do not render element
   float noRender = float(instanceColors.a == 0.0 || instancePositions.w < 0.0);
   float finalCellSize = cellSize * mix(1.0, 0.0, noRender);
-  
+
   projected_coord_xy[0] = sum_fp64(projected_coord_xy[0],
     vec2((positions.x * coverage + 1.0) * finalCellSize / 2.0, 0.0));
   projected_coord_xy[1] = sum_fp64(projected_coord_xy[1],
