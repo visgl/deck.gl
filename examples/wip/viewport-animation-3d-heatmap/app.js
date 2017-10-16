@@ -3,10 +3,8 @@ import React, {Component} from 'react';
 import {render} from 'react-dom';
 import {StaticMap} from 'react-map-gl';
 import DeckGLOverlay from './deckgl-overlay.js';
-import {experimental} from 'deck.gl';
+import {ViewportController, MapState} from 'deck.gl';
 import {csv as requestCsv} from 'd3-request';
-
-const {AnimationMapController} = experimental;
 
 // Set your mapbox token here
 const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
@@ -27,9 +25,9 @@ class Root extends Component {
         bearing: 0
       },
       data: null,
-      animaitonDuration: 0,
+      transitionDuration: 0,
       viewportToggled: false,
-      onAnimationStop: this.rotateCameara.bind(this)
+      onTransitionEnd: this.rotateCameara.bind(this)
     };
 
     requestCsv(DATA_URL, (error, response) => {
@@ -46,7 +44,7 @@ class Root extends Component {
 
     // TODO: this is to just simulate viwport prop change and test animation.
     // this._interval = setInterval(() => this._toggleViewport(), 8000);
-    this.rotateCameara({t: 1.0});
+    this.rotateCameara();
   }
 
   _resize() {
@@ -59,7 +57,7 @@ class Root extends Component {
   _onViewportChange(viewport) {
     this.setState({
       viewport: {...this.state.viewport, ...viewport},
-      animaitonDuration: 0
+      transitionDuration: 0
     });
   }
 
@@ -72,18 +70,15 @@ class Root extends Component {
     newViewport.bearing = (this.state.viewport.bearing + 120) % 360;
     this.setState({
       viewport: {...this.state.viewport, ...newViewport},
-      animaitonDuration: 4000,
+      transitionDuration: 4000,
       viewportToggled: !this.state.viewportToggled
     });
   }
 
-  rotateCameara(opts) {
-    if (opts && opts.t < 1.0) {
-      return;
-    }
+  rotateCameara() {
     const angleDelta = 120.0;
     const bearing = (this.state.viewport.bearing + angleDelta);
-    const animaitonDuration = angleDelta * 35;
+    const transitionDuration = angleDelta * 35;
     this.setState({
       viewport: {
         ...this.state.viewport,
@@ -91,7 +86,7 @@ class Root extends Component {
         width: window.innerWidth,
         height: window.innerHeight
       },
-      animaitonDuration
+      transitionDuration
     });
   }
 
@@ -99,17 +94,16 @@ class Root extends Component {
     const {
       viewport,
       data,
-      animaitonDuration,
-      onAnimationInterruption,
-      onAnimationStop
+      transitionDuration,
+      onTransitionEnd
     } = this.state;
     return (
-      <AnimationMapController
+      <ViewportController
+        viewportState={MapState}
         {...viewport}
         onViewportChange={this._onViewportChange.bind(this)}
-        animaitonDuration={animaitonDuration}
-        onAnimationInterruption={onAnimationInterruption}
-        onAnimationStop={onAnimationStop}>
+        transitionDuration={transitionDuration}
+        onTransitionEnd={onTransitionEnd}>
         <StaticMap
           {...viewport}
           mapStyle="mapbox://styles/mapbox/dark-v9"
@@ -120,7 +114,7 @@ class Root extends Component {
             data={data || []}
           />
         </StaticMap>
-      </AnimationMapController>
+      </ViewportController>
     );
   }
 }

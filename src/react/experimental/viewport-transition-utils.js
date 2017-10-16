@@ -4,30 +4,50 @@ import {projectFlat, unprojectFlat} from 'viewport-mercator-project';
 import {Vector2} from 'math.gl';
 
 const EPSILON = 0.01;
+export const VIEWPORT_PROPS = ['longitude', 'latitude', 'zoom', 'bearing', 'pitch',
+  'position', 'width', 'height', 'minZoom', 'maxZoom'];
+
+export function extractViewportFrom(params) {
+  const viewport = {};
+  VIEWPORT_PROPS.forEach((key) => {
+    if (typeof params[key] !== 'undefined') {
+      viewport[key] = params[key];
+    }
+  });
+  return viewport;
+}
 
 /**
  * Performs linear interpolation of two viewports.
  * @param {Object} startViewport - object containing starting viewport parameters.
  * @param {Object} endViewport - object containing ending viewport parameters.
- * @param {Number} t - animation step.
- * @return {Object} - animated viewport for given step.
+ * @param {Number} t - interpolation step.
+ * @return {Object} - interpolated viewport for given step.
 */
 export function viewportLinearInterpolator(startViewport, endViewport, t) {
   // here t is easing, check against actual t
   if (t >= 1.0) {
     return endViewport;
   }
-  const animatedViewport = Object.assign({}, endViewport);
+  const viewport = Object.assign({}, endViewport);
   function lerp(start, end, step) {
+    if (Array.isArray(start)) {
+      return start.map((element, index) => {
+        return lerp(element, end[index], step);
+      });
+    }
     return step * end + (1 - step) * start;
   }
 
-  for (const p of ['longitude', 'latitude', 'zoom', 'bearing', 'pitch']) {
+  for (const p of ['longitude', 'latitude', 'zoom', 'bearing', 'pitch', 'position']) {
     const startValue = startViewport[p];
     const endValue = endViewport[p];
-    animatedViewport[p] = lerp(startValue, endValue, t);
+    // TODO: 'position' is not always specified
+    if (typeof startValue !== 'undefined' && typeof endValue !== 'undefined') {
+      viewport[p] = lerp(startValue, endValue, t);
+    }
   }
-  return animatedViewport;
+  return viewport;
 }
 
 /**
@@ -39,8 +59,8 @@ export function viewportLinearInterpolator(startViewport, endViewport, t) {
  *
  * @param {Object} startViewport - object containing starting viewport parameters.
  * @param {Object} endViewport - object containing ending viewport parameters.
- * @param {Number} t - animation step.
- * @return {Object} - animated viewport for given step.
+ * @param {Number} t - interpolation step.
+ * @return {Object} - interpolated viewport for given step.
 */
 export function viewportFlyToInterpolator(startViewport, endViewport, t) {
   // Equations from above paper are referred where needed.
@@ -50,7 +70,7 @@ export function viewportFlyToInterpolator(startViewport, endViewport, t) {
     return endViewport;
   }
 
-  const animatedViewport = Object.assign({}, endViewport);
+  const viewport = Object.assign({}, endViewport);
 
   function lerp(start, end, step) {
     return step * end + (1 - step) * start;
@@ -85,7 +105,7 @@ export function viewportFlyToInterpolator(startViewport, endViewport, t) {
   for (const p of ['bearing', 'pitch']) {
     const startValue = startViewport[p];
     const endValue = endViewport[p];
-    animatedViewport[p] = lerp(startValue, endValue, t);
+    viewport[p] = lerp(startValue, endValue, t);
   }
 
   // If change in center is too small, do linear interpolaiton.
@@ -93,9 +113,9 @@ export function viewportFlyToInterpolator(startViewport, endViewport, t) {
     for (const p of ['latitude', 'longitude', 'zoom']) {
       const startValue = startViewport[p];
       const endValue = endViewport[p];
-      animatedViewport[p] = lerp(startValue, endValue, t);
+      viewport[p] = lerp(startValue, endValue, t);
     }
-    return animatedViewport;
+    return viewport;
   }
 
   // Implement Equation (9) from above algorithm.
@@ -118,8 +138,8 @@ export function viewportFlyToInterpolator(startViewport, endViewport, t) {
   const newCenter = unprojectFlat(
     (startCenterXY.add(uDelta.scale(u(s)))).scale(scaleIncrement),
     zoomToScale(newZoom));
-  animatedViewport.longitude = newCenter[0];
-  animatedViewport.latitude = newCenter[1];
-  animatedViewport.zoom = newZoom;
-  return animatedViewport;
+  viewport.longitude = newCenter[0];
+  viewport.latitude = newCenter[1];
+  viewport.zoom = newZoom;
+  return viewport;
 }

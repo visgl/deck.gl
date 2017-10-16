@@ -1,13 +1,37 @@
-import {PureComponent, createElement} from 'react';
+import {PureComponent, createElement, cloneElement, Children, isValidElement} from 'react';
 import PropTypes from 'prop-types';
 
 import {EventManager} from 'mjolnir.js';
 import {ViewportControls} from '../core';
 import CURSOR from './utils/cursors';
 
+import TransitionManager from './experimental/transition-manager';
+import {extractViewportFrom} from './experimental/viewport-transition-utils';
+
 const propTypes = {
   viewportState: PropTypes.func,
   state: PropTypes.object,
+
+  /** Viewport props */
+  /** The width of the map. */
+  width: PropTypes.number.isRequired,
+  /** The height of the map. */
+  height: PropTypes.number.isRequired,
+  /** The longitude of the center of the map. */
+  longitude: PropTypes.number.isRequired,
+  /** The latitude of the center of the map. */
+  latitude: PropTypes.number.isRequired,
+  /** The tile zoom level of the map. */
+  zoom: PropTypes.number.isRequired,
+  /** Specify the bearing of the viewport */
+  bearing: PropTypes.number,
+  /** Specify the pitch of the viewport */
+  pitch: PropTypes.number,
+  /** Altitude of the viewport camera. Default 1.5 "screen heights" */
+  // Note: Non-public API, see https://github.com/mapbox/mapbox-gl-js/issues/1137
+  altitude: PropTypes.number,
+  // Camera position for FirstPersonViewport
+  position: PropTypes.object,
 
   /** Viewport constraints */
   // Max zoom level
@@ -25,6 +49,20 @@ const propTypes = {
    * such as `longitude`, `latitude`, `zoom` etc.
    */
   onViewportChange: PropTypes.func,
+
+  /** Viewport transition **/
+  // transition duration for viewport change
+  transitionDuration: PropTypes.number,
+  // function called for each transition step, can be used to perform custom transitions.
+  transitionInterpolator: PropTypes.func,
+  // type of interruption of current transition on update.
+  transitionInterruption: PropTypes.number,
+  // easing function
+  transitionEasing: PropTypes.func,
+  // transition status update functions
+  onTransitionStart: PropTypes.func,
+  onTransitionInterrupt: PropTypes.func,
+  onTransitionEnd: PropTypes.func,
 
   /** Enables control event handling */
   // Scroll to zoom
@@ -72,6 +110,10 @@ export default class ViewportController extends PureComponent {
     this.state = {
       isDragging: false      // Whether the cursor is down
     };
+
+    this._recursiveUpdateChildren = this._recursiveUpdateChildren.bind(this);
+    this._updateChildrenViewport = this._updateChildrenViewport.bind(this);
+    this._onTransitionUpdate = this._onTransitionUpdate.bind(this);
   }
 
   componentDidMount() {
@@ -87,11 +129,16 @@ export default class ViewportController extends PureComponent {
       onStateChange: this._onInteractiveStateChange.bind(this),
       eventManager: this._eventManager
     }));
+
+    this._transitionManger = new TransitionManager(this.props, this._onTransitionUpdate);
   }
 
   componentWillUpdate(nextProps) {
     if (this._controls) {
       this._controls.setOptions(nextProps);
+    }
+    if (this._transitionManger) {
+      this._transitionManger.processViewportChange(this.props, nextProps);
     }
   }
 
@@ -99,10 +146,50 @@ export default class ViewportController extends PureComponent {
     this._eventManager.destroy();
   }
 
+  // Helper methods
+  _onTransitionUpdate(viewport) {
+    if (this.props.onViewportChange) {
+      this.props.onViewportChange(viewport);
+    }
+    // Application onViewportChange may or may not trigger a render
+    this.forceUpdate();
+  }
+
   _onInteractiveStateChange({isDragging = false}) {
     if (isDragging !== this.state.isDragging) {
       this.setState({isDragging});
     }
+  }
+
+  _recursiveUpdateChildren(children, viewport) {
+    // TODO: use component key or a custom prop to identify which child to modify.
+    return Children.map(children, child => {
+      if (!isValidElement(child)) {
+        return child;
+      }
+      let childProps = {};
+      if (child.props.viewports) {
+        const childViewports = [];
+        child.props.viewports.forEach((childViewport) => {
+          childViewports.push(Object.assign({}, childViewport, viewport));
+        });
+        childProps = Object.assign({}, {viewports: childViewports});
+      } else {
+        childProps = Object.assign({}, viewport, {viewport});
+      }
+      childProps.children = this._recursiveUpdateChildren(child.props.children, viewport);
+      const cloned = cloneElement(child, childProps);
+      return cloned;
+    });
+  }
+
+  _updateChildrenViewport() {
+    const viewport = (this._transitionManger && this._transitionManger.getTransionedViewport()) ||
+      extractViewportFrom(this.props);
+    const childrenWithProps = this._recursiveUpdateChildren(
+        this.props.children,
+        viewport);
+    return childrenWithProps;
   }
 
   render() {
@@ -115,13 +202,15 @@ export default class ViewportController extends PureComponent {
       cursor: getCursor(this.state)
     };
 
+    const childrenWithProps = this._updateChildrenViewport();
+
     return (
       createElement('div', {
         key: 'map-controls',
         ref: 'eventCanvas',
         style: eventCanvasStyle
       },
-        this.props.children
+        childrenWithProps
       )
     );
   }
