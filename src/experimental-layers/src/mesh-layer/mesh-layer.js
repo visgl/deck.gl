@@ -117,7 +117,7 @@ export default class MeshLayer extends Layer {
 
     const {attributeManager} = this.state;
 
-    if (this.state.dataChanged) {
+    if (changeFlags.dataChanged) {
       attributeManager.invalidateAll();
     }
 
