@@ -8,6 +8,7 @@ import {
   FirstPersonState,
   // Viewport classes provides various views on the state
   FirstPersonViewport,
+  ThirdPersonViewport,
   WebMercatorViewport,
   PolygonLayer,
   PointCloudLayer
@@ -22,8 +23,10 @@ import {StaticMap} from 'react-map-gl';
 
 // Source data CSV
 const DATA_URL = {
-  BUILDINGS: 'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/trips/buildings.json',  // eslint-disable-line
-  TRIPS: 'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/trips/trips.json'  // eslint-disable-line
+  BUILDINGS:
+    'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/trips/buildings.json', // eslint-disable-line
+  TRIPS:
+    'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/trips/trips.json' // eslint-disable-line
 };
 
 // Set your mapbox token here
@@ -53,7 +56,6 @@ const DEFAULT_VIEWPORT_PROPS = {
 };
 
 class Root extends Component {
-
   constructor(props) {
     super(props);
     this.state = {
@@ -102,7 +104,7 @@ class Root extends Component {
     const loopTime = 20000;
 
     this.setState({
-      time: ((timestamp % loopTime) / loopTime) * loopLength
+      time: (timestamp % loopTime) / loopTime * loopLength
     });
     this._animationFrame = window.requestAnimationFrame(this._onAnimate.bind(this));
   }
@@ -132,9 +134,14 @@ class Root extends Component {
   _renderOptionsPanel() {
     return (
       <div style={{position: 'absolute', top: '8px', right: '8px'}}>
-        <div style={{
-          display: 'flex', flexDirection: 'column',
-          alignItems: 'center', justifyContent: 'center'}}>
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}
+        >
           <button key="mode" onClick={this._onViewportModeChange}>
             {this.state.viewportMode ? 'First Person' : 'Mercator'}
           </button>
@@ -143,7 +150,9 @@ class Root extends Component {
           </button>
           <div style={{color: 'white'}}>
             {Object.keys(this.state.viewportProps).map(key => (
-              <div key={key}>{key}:{String(this.state.viewportProps[key])}</div>
+              <div key={key}>
+                {key}:{String(this.state.viewportProps[key])}
+              </div>
             ))}
           </div>
         </div>
@@ -167,7 +176,7 @@ class Root extends Component {
         id: 'trips',
         data: trips,
         getPath: d => d.segments,
-        getColor: d => d.vendor === 0 ? [253, 128, 93] : [23, 184, 190],
+        getColor: d => (d.vendor === 0 ? [253, 128, 93] : [23, 184, 190]),
         opacity: 0.3,
         strokeWidth: 2,
         trailLength,
@@ -187,11 +196,13 @@ class Root extends Component {
       }),
       new PointCloudLayer({
         id: 'player',
-        data: [{
-          position,
-          color: [0, 255, 255, 255],
-          normal: [1, 0, 0]
-        }],
+        data: [
+          {
+            position,
+            color: [0, 255, 255, 255],
+            normal: [1, 0, 0]
+          }
+        ],
         coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
         coordinateOrigin: [longitude, latitude],
         opacity: 1,
@@ -199,11 +210,13 @@ class Root extends Component {
       }),
       new PointCloudLayer({
         id: 'ref-point',
-        data: [{
-          position: [-1, 0, 2],
-          color: [255, 0, 0, 255],
-          normal: [1, 0, 0]
-        }],
+        data: [
+          {
+            position: [-1, 0, 2],
+            color: [255, 0, 0, 255],
+            normal: [1, 0, 0]
+          }
+        ],
         coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
         coordinateOrigin: [longitude, latitude],
         opacity: 1,
@@ -217,15 +230,22 @@ class Root extends Component {
 
     return [
       new FirstPersonViewport({
+        id: '1st-person',
         ...viewportProps,
-        height: viewportProps.height / 2,
+        height: viewportProps.height / 3,
         fovy: fov
+      }),
+      new ThirdPersonViewport({
+        id: '3rd-person',
+        ...viewportProps,
+        y: viewportProps.height / 3,
+        height: viewportProps.height / 3
       }),
       new WebMercatorViewport({
         id: 'basemap',
         ...viewportProps,
-        y: viewportProps.height / 2,
-        height: viewportProps.height / 2
+        y: viewportProps.height / 3 * 2,
+        height: viewportProps.height / 3
       })
     ];
   }
@@ -237,14 +257,13 @@ class Root extends Component {
 
     return (
       <div style={{backgroundColor: '#000'}}>
-
         <ViewportController
           viewportState={FirstPersonState}
           {...viewportProps}
           width={viewportProps.width}
           height={viewportProps.height}
-          onViewportChange={this._onViewportChange} >
-
+          onViewportChange={this._onViewportChange}
+        >
           <DeckGL
             id="first-person"
             width={viewportProps.width}
@@ -253,21 +272,23 @@ class Root extends Component {
             useDevicePixelRatio={false}
             layers={this._renderLayers()}
             initWebGLParameters
-            >
-
+          >
+            <StaticMap
+              viewportId="3rd-person"
+              {...viewportProps}
+              mapStyle="mapbox://styles/mapbox/light-v9"
+              mapboxApiAccessToken={MAPBOX_TOKEN}
+            />
             <StaticMap
               viewportId="basemap"
               {...viewportProps}
               mapStyle="mapbox://styles/mapbox/dark-v9"
-              onViewportChange={this._onViewportChange.bind(this)}
-              mapboxApiAccessToken={MAPBOX_TOKEN}/>
-
+              mapboxApiAccessToken={MAPBOX_TOKEN}
+            />
           </DeckGL>
 
           {this._renderOptionsPanel()}
-
         </ViewportController>
-
       </div>
     );
   }
