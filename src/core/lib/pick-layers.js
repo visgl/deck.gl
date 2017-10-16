@@ -24,6 +24,12 @@ import assert from 'assert';
 
 const EMPTY_PIXEL = new Uint8Array(4);
 
+const NO_PICKED_OBJECT = {
+  pickedColor: EMPTY_PIXEL,
+  pickedLayer: null,
+  pickedObjectIndex: -1
+};
+
 /* eslint-disable max-depth, max-statements */
 // Pick the closest object at the given (x,y) coordinate
 export function pickObject(gl, {
@@ -45,17 +51,51 @@ export function pickObject(gl, {
   const deviceY = Math.round(gl.canvas.height - y * pixelRatio);
   const deviceRadius = Math.round(radius * pixelRatio);
 
-  const pickInfo = getClosestFromPickingBuffer(gl, {
+  const deviceRect = getPickingRect({
+    deviceX, deviceY, deviceRadius,
+    deviceWidth: pickingFBO.width,
+    deviceHeight: pickingFBO.height
+  });
+
+  if (!deviceRect) {
+    return null;
+  }
+
+  const pickedColors = drawAndSamplePickingBuffer(gl, {
     layers,
     viewports,
     onViewportActive,
+    useDevicePixelRatio,
     pickingFBO,
+    deviceRect,
+    redrawReason: mode
+  });
+
+  if (!pickedColors) {
+    return null;
+  }
+
+  const pickInfo = getClosestFromPickingBuffer(gl, {
+    pickedColors,
+    layers,
     deviceX,
     deviceY,
     deviceRadius,
-    useDevicePixelRatio
+    deviceRect
   });
 
+  if (!pickInfo) {
+    return null;
+  }
+
+  return processPickInfo({
+    pickInfo, lastPickedInfo, mode, layers, viewports, x, y, deviceX, deviceY, pixelRatio
+  });
+}
+
+function processPickInfo({
+  pickInfo, lastPickedInfo, mode, layers, viewports, x, y, deviceX, deviceY, pixelRatio
+}) {
   const {
     pickedColor,
     pickedLayer,
@@ -186,22 +226,27 @@ export function pickVisibleObjects(gl, {
   const deviceRight = Math.round((x + width) * pixelRatio);
   const deviceTop = Math.round(gl.canvas.height - (y + height) * pixelRatio);
 
-  // Only return unique infos, identified by info.object
-  const uniqueInfos = new Map();
+  const deviceRect = {
+    x: deviceLeft,
+    y: deviceTop,
+    width: deviceRight - deviceLeft,
+    height: deviceBottom - deviceTop
+  };
 
-  const pickInfos = getUniquesFromPickingBuffer(gl, {
+  const pickedColors = drawAndSamplePickingBuffer(gl, {
     layers,
     viewports,
     onViewportActive,
     pickingFBO,
     useDevicePixelRatio,
-    deviceRect: {
-      x: deviceLeft,
-      y: deviceTop,
-      width: deviceRight - deviceLeft,
-      height: deviceBottom - deviceTop
-    }
+    deviceRect,
+    redrawReason: mode
   });
+
+  const pickInfos = getUniquesFromPickingBuffer(gl, {pickedColors, layers});
+
+  // Only return unique infos, identified by info.object
+  const uniqueInfos = new Map();
 
   pickInfos.forEach(pickInfo => {
     const viewport = getViewportFromCoordinates({viewports}); // TODO - add coords
@@ -234,20 +279,20 @@ function getViewportFromCoordinates({viewports}) {
 }
 
 // returns pickedColor or null if no pickable layers found.
-function getPickedColors(gl, {
+function drawAndSamplePickingBuffer(gl, {
   layers,
   viewports,
   onViewportActive,
   useDevicePixelRatio,
   pickingFBO,
-  deviceRect
+  deviceRect,
+  redrawReason
 }) {
 
   assert((Number.isFinite(deviceRect.width) && deviceRect.width > 0), '`width` must be > 0');
   assert((Number.isFinite(deviceRect.height) && deviceRect.height > 0), '`height` must be > 0');
 
   const pickableLayers = layers.filter(layer => layer.isPickable());
-
   if (pickableLayers.length < 1) {
     return null;
   }
@@ -258,25 +303,39 @@ function getPickedColors(gl, {
     onViewportActive,
     useDevicePixelRatio,
     pickingFBO,
-    deviceRect
+    deviceRect,
+    redrawReason
   });
-  // TODO - restore when luma patch lands
-  // const dataUrl = pickingFBO.readDataUrl();
-  // window.open(dataUrl, 'picking buffer');
 
-  const pickedColors = samplePickingBuffer(gl, {pickingFBO, deviceRect});
-  return pickedColors;
-}
-
-// Read from an already rendered picking buffer
-// Returns an Uint8ClampedArray of picked pixels
-export function samplePickingBuffer(gl, {
-  pickingFBO,
-  deviceRect: {x, y, width, height}
-}) {
+  // Read from an already rendered picking buffer
+  // Returns an Uint8ClampedArray of picked pixels
+  const {x, y, width, height} = deviceRect;
   const pickedColors = new Uint8Array(width * height * 4);
   pickingFBO.readPixels({x, y, width, height, pixelArray: pickedColors});
   return pickedColors;
+}
+
+// Calculate a picking rect centered on deviceX and deviceY and clipped to device
+// Returns null if pixel is outside of device
+function getPickingRect({deviceX, deviceY, deviceRadius, deviceWidth, deviceHeight}) {
+  const valid =
+    deviceX >= 0 &&
+    deviceY >= 0 &&
+    deviceX < deviceWidth &&
+    deviceY < deviceHeight;
+
+  // x, y out of bounds.
+  if (!valid) {
+    return null;
+  }
+
+  // Create a box of size `radius * 2 + 1` centered at [deviceX, deviceY]
+  const x = Math.max(0, deviceX - deviceRadius);
+  const y = Math.max(0, deviceY - deviceRadius);
+  const width = Math.min(deviceWidth, deviceX + deviceRadius) - x + 1;
+  const height = Math.min(deviceHeight, deviceY + deviceRadius) - y + 1;
+
+  return {x, y, width, height};
 }
 
 /**
@@ -284,64 +343,28 @@ export function samplePickingBuffer(gl, {
  * Returns the closest object to the pixel in shape `{pickedColor, pickedLayer, pickedObjectIndex}`
  */
 function getClosestFromPickingBuffer(gl, {
+  pickedColors,
   layers,
-  viewports,
-  onViewportActive,
-  pickingFBO,
   deviceX,
   deviceY,
   deviceRadius,
-  useDevicePixelRatio
+  deviceRect
 }) {
-  let closestResultToCenter = {
-    pickedColor: EMPTY_PIXEL,
-    pickedLayer: null,
-    pickedObjectIndex: -1
-  };
-
-  // x, y out of bounds.
-  const valid =
-    deviceX >= 0 &&
-    deviceY >= 0 &&
-    deviceX < pickingFBO.width &&
-    deviceY < pickingFBO.height;
-
-  if (!valid) {
-    return closestResultToCenter;
-  }
-
-  // Create a box of size `radius * 2 + 1` centered at [deviceX, deviceY]
-  const x = Math.max(0, deviceX - deviceRadius);
-  const y = Math.max(0, deviceY - deviceRadius);
-  const width = Math.min(pickingFBO.width, deviceX + deviceRadius) - x + 1;
-  const height = Math.min(pickingFBO.height, deviceY + deviceRadius) - y + 1;
-
-  const pickedColors = getPickedColors(gl, {
-    layers,
-    viewports,
-    onViewportActive,
-    useDevicePixelRatio,
-    pickingFBO,
-    deviceRect: {x, y, width, height}
-  });
-
-  if (!pickedColors) {
-    return closestResultToCenter;
-  }
+  let closestResultToCenter = NO_PICKED_OBJECT;
 
   // Traverse all pixels in picking results and find the one closest to the supplied
   // [deviceX, deviceY]
   let minSquareDistanceToCenter = deviceRadius * deviceRadius;
   let i = 0;
 
-  for (let row = 0; row < height; row++) {
-    for (let col = 0; col < width; col++) {
+  for (let row = 0; row < deviceRect.height; row++) {
+    for (let col = 0; col < deviceRect.width; col++) {
       // Decode picked layer from color
       const pickedLayerIndex = pickedColors[i + 3] - 1;
 
       if (pickedLayerIndex >= 0) {
-        const dx = col + x - deviceX;
-        const dy = row + y - deviceY;
+        const dx = col + deviceRect.x - deviceX;
+        const dy = row + deviceRect.y - deviceY;
         const d2 = dx * dx + dy * dy;
 
         if (d2 <= minSquareDistanceToCenter) {
@@ -367,25 +390,10 @@ function getClosestFromPickingBuffer(gl, {
 /* eslint-enable max-depth, max-statements */
 
 /**
- * Query within a specified rectangle
+ * Examines a picking buffer for unique colors
  * Returns array of unique objects in shape `{x, y, pickedColor, pickedLayer, pickedObjectIndex}`
  */
-function getUniquesFromPickingBuffer(gl, {
-  layers,
-  viewports,
-  onViewportActive,
-  pickingFBO,
-  useDevicePixelRatio,
-  deviceRect: {x, y, width, height}
-}) {
-  const pickedColors = getPickedColors(gl, {
-    layers,
-    viewports,
-    onViewportActive,
-    pickingFBO,
-    useDevicePixelRatio,
-    deviceRect: {x, y, width, height}
-  });
+function getUniquesFromPickingBuffer(gl, {pickedColors, layers}) {
   const uniqueColors = new Map();
 
   // Traverse all pixels in picking results and get unique colors
