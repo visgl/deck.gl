@@ -22,7 +22,7 @@
 import {COORDINATE_SYSTEM, LIFECYCLE} from './constants';
 import AttributeManager from './attribute-manager';
 import Stats from './stats';
-import {getDefaultProps, compareProps} from './props';
+import {getDefaultProps, diffProps} from './props';
 import {log, count} from './utils';
 import {applyPropOverrides, removeLayerInSeer} from './seer-integration';
 import {GL, withParameters} from 'luma.gl';
@@ -33,11 +33,6 @@ const LOG_PRIORITY_UPDATE = 1;
 const EMPTY_ARRAY = [];
 const noop = () => {};
 
-/*
- * @param {string} props.id - layer name
- * @param {array}  props.data - array of data instances
- * @param {bool} props.opacity - opacity of the layer
- */
 const defaultProps = {
   // data: Special handling for null, see below
   dataComparator: null,
@@ -74,35 +69,23 @@ const defaultProps = {
 let counter = 0;
 
 export default class Layer {
-  /**
-   * @class
-   * @param {object} props - See docs and defaults above
-   */
   constructor(props) {
-    // If sublayer has static defaultProps member, getDefaultProps will return it
-    const mergedDefaultProps = getDefaultProps(this);
-    // Merge supplied props with pre-merged default props
-    props = Object.assign({}, mergedDefaultProps, props);
-    // Accept null as data - otherwise apps and layers need to add ugly checks
-    // Use constant fallback so that data change is not triggered
-    props.data = props.data || EMPTY_ARRAY;
-    // Apply any overrides from the seer debug extension if it is active
-    applyPropOverrides(props);
-    // Props are immutable
-    Object.freeze(props);
+    // Call a helper function to merge the incoming props with defaults and freeze them.
+    this.props = this._normalizeProps(props);
 
-    // Define all members
-    this.id = props.id; // The layer's id, used for matching with layers' from last render cyckle
-    this.props = props; // Current props, a frozen object
+    // Define all members before layer is sealed
+    this.id = this.props.id; // The layer's id, used for matching with layers from last render cycle
     this.animatedProps = null; // Computing animated props requires layer manager state
     this.oldProps = null; // Props from last render used for change detection
     this.state = null; // Will be set to the shared layer state object during layer matching
     this.context = null; // Will reference layer manager's context, contains state shared by layers
     this.count = counter++; // Keep track of how many layer instances you are generating
     this.lifecycle = LIFECYCLE.NO_STATE; // Helps track and debug the life cycle of the layers
+
     // CompositeLayer members, need to be defined here because of the `Object.seal`
     this.parentLayer = null; // reference to the composite layer parent that rendered this layer
     this.oldSubLayers = []; // reference to sublayers rendered in the previous cycle
+
     // Seal the layer
     Object.seal(this);
   }
@@ -216,6 +199,7 @@ export default class Layer {
     this.state.needsRedraw = true;
   }
 
+  // Sets the redraw flag for this layer, will trigger a redraw next animation frame
   setNeedsRedraw(redraw = true) {
     if (this.state) {
       this.state.needsRedraw = redraw;
@@ -496,36 +480,23 @@ export default class Layer {
     return redraw;
   }
 
-  diffProps(oldProps, newProps, context) {
-    // First check if any props have changed (ignore props that will be examined separately)
-    const propsChangedReason = compareProps({
-      newProps,
-      oldProps,
-      ignoreProps: {data: null, updateTriggers: null}
-    });
+  // Compares the layers props with old props from a matched older layer
+  // and extracts change flags that describe what has change so that state
+  // can be update correctly with minimal effort
+  diffProps(oldProps, newProps) {
+    const changeFlags = diffProps(oldProps, newProps, this._onUpdateTriggered.bind(this));
 
-    // Now check if any data related props have changed
-    const dataChangedReason = this._diffDataProps(oldProps, newProps);
+    const {propsChanged, dataChanged, updateTriggersChanged} = changeFlags;
 
-    const propsChanged = Boolean(propsChangedReason);
-    const dataChanged = Boolean(dataChangedReason);
-    const viewportChanged = context.viewportChanged;
-
-    let updateTriggersChanged = false;
-    // Check update triggers to determine if any attributes need regeneration
-    // Note - if data has changed, all attributes will need regeneration, so skip this step
-    if (!dataChanged) {
-      updateTriggersChanged = this._diffUpdateTriggers(oldProps, newProps);
-    }
-
+    const viewportChanged = this.context.viewportChanged;
     const propsOrDataChanged = propsChanged || dataChanged || updateTriggersChanged;
     const somethingChanged = propsOrDataChanged || viewportChanged;
 
     // Trace what happened
     if (dataChanged) {
-      log.log(LOG_PRIORITY_UPDATE, `dataChanged: ${dataChangedReason} in ${this.id}`);
+      log.log(LOG_PRIORITY_UPDATE, `dataChanged: ${dataChanged} in ${this.id}`);
     } else if (propsChanged) {
-      log.log(LOG_PRIORITY_UPDATE, `propsChanged: ${propsChangedReason} in ${this.id}`);
+      log.log(LOG_PRIORITY_UPDATE, `propsChanged: ${propsChanged} in ${this.id}`);
     }
 
     return {
@@ -535,72 +506,47 @@ export default class Layer {
       propsOrDataChanged,
       viewportChanged,
       somethingChanged,
-      reason: dataChangedReason || propsChangedReason || 'Viewport changed'
+      reason: dataChanged || propsChanged || 'Viewport changed'
     };
   }
 
   // PRIVATE METHODS
 
-  // The comparison of the data prop requires special handling
-  // the dataComparator should be used if supplied
-  _diffDataProps(oldProps, newProps) {
-    if (oldProps === null) {
-      return 'oldProps is null, initial diff';
-    }
-
-    // Support optional app defined comparison of data
-    const {dataComparator} = newProps;
-    if (dataComparator) {
-      if (!dataComparator(newProps.data, oldProps.data)) {
-        return 'Data comparator detected a change';
-      }
-    // Otherwise, do a shallow equal on props
-    } else if (newProps.data !== oldProps.data) {
-      return 'A new data container was supplied';
-    }
-
-    return null;
+  // Helper for constructor, merges props with default props and freezes them
+  _normalizeProps(props) {
+    // If sublayer has static defaultProps member, getDefaultProps will return it
+    const mergedDefaultProps = getDefaultProps(this);
+    // Merge supplied props with pre-merged default props
+    props = Object.assign({}, mergedDefaultProps, props);
+    // Accept null as data - otherwise apps and layers need to add ugly checks
+    // Use constant fallback so that data change is not triggered
+    props.data = props.data || EMPTY_ARRAY;
+    // Apply any overrides from the seer debug extension if it is active
+    applyPropOverrides(props);
+    // Props are immutable
+    Object.freeze(props);
+    return props;
   }
 
-  // Checks if any update triggers have changed, and invalidate
-  // attributes accordingly.
-  /* eslint-disable max-statements */
-  _diffUpdateTriggers(oldProps, newProps) {
-    // const {attributeManager} = this.state;
-    // const updateTriggerMap = attributeManager.getUpdateTriggerMap();
-    if (oldProps === null) {
-      return true; // oldProps is null, initial diff
-    }
-
-    let change = false;
-
-    for (const propName in newProps.updateTriggers) {
-      const oldTriggers = oldProps.updateTriggers[propName] || {};
-      const newTriggers = newProps.updateTriggers[propName] || {};
-      const diffReason = compareProps({
-        oldProps: oldTriggers,
-        newProps: newTriggers,
-        triggerName: propName
-      });
-      if (diffReason) {
-        if (propName === 'all') {
-          log.log(LOG_PRIORITY_UPDATE,
-            `updateTriggers invalidating all attributes: ${diffReason}`);
-          this.invalidateAttribute('all');
-          change = true;
-        } else {
-          log.log(LOG_PRIORITY_UPDATE,
-            `updateTriggers invalidating attribute ${propName}: ${diffReason}`);
-          this.invalidateAttribute(propName);
-          change = true;
-        }
+  // Callback for `diffProps`, will be called when an updateTrigger fires
+  _onUpdateTriggered(propName, diffReason) {
+    const {attributeManager} = this.state;
+    if (attributeManager) {
+      switch (propName) {
+      case 'all':
+        log.log(LOG_PRIORITY_UPDATE,
+          `updateTriggers invalidating all attributes: ${diffReason}`);
+        attributeManager.invalidateAll();
+        break;
+      default:
+        log.log(LOG_PRIORITY_UPDATE,
+          `updateTriggers invalidating attribute ${propName}: ${diffReason}`);
+        attributeManager.invalidate(propName);
       }
     }
-
-    return change;
   }
-  /* eslint-enable max-statements */
 
+  //  Helper to check that required props are supplied
   _checkRequiredProp(propertyName, condition) {
     const value = this.props[propertyName];
     if (value === undefined) {
