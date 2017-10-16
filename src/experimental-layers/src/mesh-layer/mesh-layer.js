@@ -113,7 +113,7 @@ export default class MeshLayer extends Layer {
   }
 
   updateState({props, oldProps, changeFlags}) {
-    super.updateState({props, oldProps, changeFlags});
+    // super.updateState({props, oldProps, changeFlags});
 
     const {attributeManager} = this.state;
 
@@ -122,26 +122,13 @@ export default class MeshLayer extends Layer {
     }
 
     if (changeFlags.propsChanged) {
-      if (props.fp64 !== oldProps.fp64) {
-        const {gl} = this.context;
-        this.setState({model: this.getModel(gl)});
-      }
 
-      if (props.fp64 && props.coordinateSystem === COORDINATE_SYSTEM.LNGLAT) {
-        attributeManager.invalidateAll();
-        attributeManager.addInstanced({
-          instancePositions64xy: {
-            size: 2,
-            accessor: 'getPosition',
-            update: this.calculateInstancePositions64xyLow
-          }
-        });
-      } else {
-        attributeManager.remove(['instancePositions64xy']);
-      }
+      this._updateFP64(props, oldProps);
 
-      const {sizeScale} = props;
-      this.setUniforms({sizeScale});
+      if (props.sizeScale !== oldProps.sizeScale) {
+        const {sizeScale} = props;
+        this.setUniforms({sizeScale});
+      }
 
       if (props.texture !== oldProps.texture) {
         if (props.texture) {
@@ -157,13 +144,29 @@ export default class MeshLayer extends Layer {
     }
   }
 
-  draw({uniforms}) {
-    const {sizeScale} = this.props;
-    this.setUniforms({sizeScale});
+  _updateFP64(props, oldProps) {
+    if (props.fp64 !== oldProps.fp64) {
+      const {gl} = this.context;
+      this.setState({model: this.getModel(gl)});
 
-    this.state.model.render(Object.assign({}, uniforms, {
-      sizeScale
-    }));
+      const {attributeManager} = this.state;
+      if (props.fp64 && props.coordinateSystem === COORDINATE_SYSTEM.LNGLAT) {
+        attributeManager.invalidateAll();
+        attributeManager.addInstanced({
+          instancePositions64xy: {
+            size: 2,
+            accessor: 'getPosition',
+            update: this.calculateInstancePositions64xyLow
+          }
+        });
+      } else {
+        attributeManager.remove(['instancePositions64xy']);
+      }
+    }
+  }
+
+  draw({uniforms}) {
+    this.state.model.render(uniforms);
   }
 
   getModel(gl) {
