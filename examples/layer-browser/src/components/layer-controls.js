@@ -6,13 +6,17 @@ export default class LayerControls extends PureComponent {
 
   _onValueChange(settingName, newValue) {
 
-    const {settings} = this.props;
+    const {settings, propTypes = {}} = this.props;
     // Only update if we have a confirmed change
     if (settings[settingName] !== newValue) {
       // Create a new object so that shallow-equal detects a change
       const newSettings = {...this.props.settings};
 
-      if (settingName.indexOf('get') === 0) {
+      if (propTypes[settingName] && propTypes[settingName].onUpdate) {
+        propTypes[settingName].onUpdate(newValue, newSettings,
+          (name, value) => this._onValueChange(name, value));
+        return;
+      } else if (settingName.indexOf('get') === 0) {
         newSettings[settingName] = d => newValue;
         newSettings.updateTriggers = {
           ...newSettings.updateTriggers,
@@ -98,6 +102,10 @@ export default class LayerControls extends PureComponent {
       switch (propType.type) {
       case 'number':
         return this._renderSlider(settingName, value, propType);
+      case 'compound':
+        const {settings, propTypes = {}} = this.props;
+        return propType.elements.map(name =>
+          this._renderSetting(name, settings[name], propTypes[name]));
       default:
         break;
       }
