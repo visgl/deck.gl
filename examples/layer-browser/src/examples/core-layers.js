@@ -171,7 +171,7 @@ const ScatterplotLayerExample = {
     getPosition: d => get(d, 'COORDINATES'),
     getColor: d => [255, 128, 0],
     getRadius: d => get(d, 'SPACES'),
-    opacity: 0.5,
+    opacity: 1,
     pickable: true,
     radiusScale: 30,
     radiusMinPixels: 1,
