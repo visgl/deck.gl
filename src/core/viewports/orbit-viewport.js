@@ -1,4 +1,4 @@
-import {Viewport} from 'deck.gl';
+import Viewport from './viewport';
 
 import mat4_multiply from 'gl-mat4/multiply';
 import mat4_lookAt from 'gl-mat4/lookAt';
