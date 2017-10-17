@@ -93,6 +93,14 @@ Whether to generate a line wireframe of the hexagon. The outline will have
 
 Requires the `extruded` prop to be true.
 
+##### `elevationScale` (Number, optional)
+
+- Default: `1`
+
+Elevation multiplier. The final elevation is calculated by
+  `elevationScale * getElevation(d)`. `elevationScale` is a handy property to scale
+all elevation without updating the data.
+
 ##### `lineWidthScale` (Boolean, optional)
 
 - Default: `1`
