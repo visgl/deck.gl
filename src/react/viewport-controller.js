@@ -168,15 +168,18 @@ export default class ViewportController extends PureComponent {
         return child;
       }
       let childProps = {};
-      if (child.props.viewports) {
-        const childViewports = [];
-        child.props.viewports.forEach((childViewport) => {
-          childViewports.push(Object.assign({}, childViewport, viewport));
-        });
-        childProps = Object.assign({}, {viewports: childViewports});
-      } else {
-        childProps = Object.assign({}, viewport, {viewport});
-      }
+      // NOTE: disabling until full multi-vewport transition is added.
+      // if (child.props.viewports) {
+      //   const childViewports = [];
+      //   child.props.viewports.forEach((childViewport) => {
+      //     childViewports.push(Object.assign({}, childViewport, viewport));
+      //   });
+      //   childProps = Object.assign({}, {viewports: childViewports});
+      // } else {
+      //   childProps = Object.assign({}, viewport, {viewport});
+      // }
+      childProps = Object.assign({}, viewport, {viewport});
+
       childProps.children = this._recursiveUpdateChildren(child.props.children, viewport);
       const cloned = cloneElement(child, childProps);
       return cloned;

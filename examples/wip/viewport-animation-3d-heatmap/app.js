@@ -27,7 +27,7 @@ class Root extends Component {
       data: null,
       transitionDuration: 0,
       viewportToggled: false,
-      onTransitionEnd: this.rotateCameara.bind(this)
+      onTransitionEnd: this.rotateCamera.bind(this)
     };
 
     requestCsv(DATA_URL, (error, response) => {
@@ -44,7 +44,7 @@ class Root extends Component {
 
     // TODO: this is to just simulate viwport prop change and test animation.
     // this._interval = setInterval(() => this._toggleViewport(), 8000);
-    this.rotateCameara();
+    this.rotateCamera();
   }
 
   _resize() {
@@ -75,7 +75,7 @@ class Root extends Component {
     });
   }
 
-  rotateCameara() {
+  rotateCamera() {
     const angleDelta = 120.0;
     const bearing = (this.state.viewport.bearing + angleDelta);
     const transitionDuration = angleDelta * 35;

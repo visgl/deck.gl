@@ -44,7 +44,8 @@ export default class App extends Component {
         pitch: 0,
         width: 500,
         height: 500
-      }
+      },
+      transitionDuration: 0
     };
     this._interruptionStyle = TRANSITION_EVENTS.BREAK;
     this._resize = this._resize.bind(this);
@@ -64,17 +65,19 @@ export default class App extends Component {
       viewport: {
         ...this.state.viewport,
         width: this.props.width || window.innerWidth,
-        height: this.props.height || window.innerHeight
+        height: this.props.height || window.innerHeight,
+        transitionDuration: 0
       }
     });
   }
 
   _easeTo({longitude, latitude}) {
 
-    const {viewport} = this.state;
-
-    const newViewport = Object.assign({}, viewport, {longitude, latitude, zoom: 11});
-    this._onViewportChange(newViewport);
+    this.setState({
+      viewport: {...this.state.viewport, longitude, latitude, zoom: 11},
+      transitionDuration: 5000,
+      viewportToggled: !this.state.viewportToggled
+    });
   }
 
   _onStyleChange(style) {
@@ -82,12 +85,15 @@ export default class App extends Component {
   }
 
   _onViewportChange(viewport) {
-    this.setState({viewport});
+    this.setState({
+      viewport: {...this.state.viewport, ...viewport},
+      transitionDuration: 0
+    });
   }
 
   render() {
 
-    const {viewport, settings} = this.state;
+    const {viewport, settings, transitionDuration} = this.state;
 
     return (
       <ViewportController
@@ -95,7 +101,7 @@ export default class App extends Component {
         {...viewport}
         onViewportChange={this._onViewportChange.bind(this)}
         transitionInterpolator={viewportFlyToInterpolator}
-        transitionDuration={5000}
+        transitionDuration={transitionDuration}
         transitionInterruption={this._interruptionStyle}>
         <StaticMap
           {...viewport}

@@ -7,11 +7,11 @@ const EPSILON = 0.01;
 export const VIEWPORT_PROPS = ['longitude', 'latitude', 'zoom', 'bearing', 'pitch',
   'position', 'width', 'height', 'minZoom', 'maxZoom'];
 
-export function extractViewportFrom(params) {
+export function extractViewportFrom(props) {
   const viewport = {};
   VIEWPORT_PROPS.forEach((key) => {
-    if (typeof params[key] !== 'undefined') {
-      viewport[key] = params[key];
+    if (typeof props[key] !== 'undefined') {
+      viewport[key] = props[key];
     }
   });
   return viewport;
@@ -25,10 +25,6 @@ export function extractViewportFrom(params) {
  * @return {Object} - interpolated viewport for given step.
 */
 export function viewportLinearInterpolator(startViewport, endViewport, t) {
-  // here t is easing, check against actual t
-  if (t >= 1.0) {
-    return endViewport;
-  }
   const viewport = Object.assign({}, endViewport);
   function lerp(start, end, step) {
     if (Array.isArray(start)) {
@@ -64,11 +60,6 @@ export function viewportLinearInterpolator(startViewport, endViewport, t) {
 */
 export function viewportFlyToInterpolator(startViewport, endViewport, t) {
   // Equations from above paper are referred where needed.
-
-  // here t is easing, check against actual t
-  if (t >= 1.0) {
-    return endViewport;
-  }
 
   const viewport = Object.assign({}, endViewport);
 

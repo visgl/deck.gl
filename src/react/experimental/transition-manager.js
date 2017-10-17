@@ -1,6 +1,3 @@
-
-/* eslint-disable max-depth */
-
 /* global setInterval, clearInterval */
 import assert from 'assert';
 import {
@@ -9,8 +6,7 @@ import {
   VIEWPORT_PROPS
 } from './viewport-transition-utils';
 
-// TODO: make the frequency customizalbe , adapt to frame rate
-const VIEWPORT_TRANSITION_FREQUENCY = 0.01;
+const VIEWPORT_TRANSITION_FREQUENCY = 0.06; // 60 times per second.
 const VIEWPORT_TRANSITION_EASING_FUNC = t => t;
 
 export const TRANSITION_EVENTS = {
@@ -36,33 +32,27 @@ export default class TransitionManager {
     this.onTransitionUpdate = onTransitionUpdate;
     this.transitionContext = {
       time: 0,
+      delta: 0,
       interval: null,
       viewport: null,
       startViewport: null,
       endViewport: null
     };
-
-    this._updateViewport = this._updateViewport.bind(this);
-    this._createTransitionInterval = this._createTransitionInterval.bind(this);
-    this._isTheUpdateDueToCurrentTransition = this._isTheUpdateDueToCurrentTransition.bind(this);
-    this._triggerTransition = this._triggerTransition.bind(this);
-    this._endTransition = this._endTransition.bind(this);
-    this._isTransitionEnabled = this._isTransitionEnabled.bind(this);
-    this._isTransitionInProgress = this._isTransitionInProgress.bind(this);
-    this.processViewportChange = this.processViewportChange.bind(this);
-    this._shouldIgnoreViewportChange = this._shouldIgnoreViewportChange.bind(this);
   }
 
+  // Returns current transitioned viewport.
   getTransionedViewport() {
     return this.transitionContext.viewport;
   }
 
+  // Process the vewiport change, either ignore or trigger a new transiton.
   processViewportChange(props, nextProps) {
     // NOTE: Be cautious re-ordering statements in this function.
     if (this._shouldIgnoreViewportChange(nextProps)) {
       return;
     }
 
+    // Save current transtion details before ending it.
     const shouldSnapToEnd = this._shouldSnapToEnd();
     const endViewport = this.transitionContext.endViewport;
     if (this._isTransitionInProgress()) {
@@ -87,6 +77,7 @@ export default class TransitionManager {
 
   // Helper methods
 
+  /* eslint-disable max-depth */
   _areViewportsEqual(startViewport, endViewport) {
     for (const p of VIEWPORT_PROPS) {
       if (Array.isArray(startViewport[p])) {
@@ -101,12 +92,12 @@ export default class TransitionManager {
     }
     return true;
   }
+  /* eslint-enable max-depth */
 
-  _createTransitionInterval(nextProps) {
+  _createTransitionInterval(updateFrequency) {
     if (this.transitionContext.interval) {
       clearInterval(this.transitionContext.interval);
     }
-    const updateFrequency = nextProps.transitionDuration * VIEWPORT_TRANSITION_FREQUENCY;
     return setInterval(() => this._updateViewport(), updateFrequency);
   }
 
@@ -114,6 +105,7 @@ export default class TransitionManager {
     clearInterval(this.transitionContext.interval);
     this.transitionContext = {
       time: 0,
+      delta: 0,
       interval: null,
       viewport: null,
       startViewport: null,
@@ -129,7 +121,7 @@ export default class TransitionManager {
     return props.transitionDuration !== 0;
   }
 
-  _isTheUpdateDueToCurrentTransition(nextProps) {
+  _isUpdateDueToCurrentTransition(nextProps) {
     if (this.transitionContext.viewport) {
       const newViewport = extractViewportFrom(nextProps);
       return this._areViewportsEqual(newViewport, this.transitionContext.viewport);
@@ -139,7 +131,7 @@ export default class TransitionManager {
 
   _shouldIgnoreViewportChange(nextProps) {
     // Ignore update if it is due to current active transition.
-    if (this._isTheUpdateDueToCurrentTransition(nextProps)) {
+    if (this._isUpdateDueToCurrentTransition(nextProps)) {
       return true;
     }
 
@@ -165,10 +157,13 @@ export default class TransitionManager {
   }
 
   _triggerTransition(startViewport, nextProps) {
+    assert(nextProps.transitionDuration !== 0);
+    const delta = 1.0 / (nextProps.transitionDuration * VIEWPORT_TRANSITION_FREQUENCY);
     const endViewport = extractViewportFrom(nextProps);
-    const interval = this._createTransitionInterval(nextProps);
+    const interval = this._createTransitionInterval(VIEWPORT_TRANSITION_FREQUENCY);
     this.transitionContext = {
-      time: VIEWPORT_TRANSITION_FREQUENCY,
+      time: delta,
+      delta,
       startViewport,
       endViewport,
       interval,
@@ -179,6 +174,7 @@ export default class TransitionManager {
   _updateViewport() {
     // NOTE: Be cautious re-ordering statements in this function.
     const time = this.transitionContext.time;
+    const delta = this.transitionContext.delta;
     const easing = this.props.transitionEasing(time);
     const viewport = this.props.transitionInterpolator(
       this.transitionContext.startViewport,
@@ -198,10 +194,10 @@ export default class TransitionManager {
       this._endTransition();
       this.props.onTransitionEnd();
     } else {
-      let newTime = time + VIEWPORT_TRANSITION_FREQUENCY;
+      let newTime = time + delta;
       // Make sure interplation step is always ends with time = 1.0
       if (newTime > 1.0) {
-        newTime = 1.0 - VIEWPORT_TRANSITION_FREQUENCY;
+        newTime = 1.0 - delta;
       }
       this.transitionContext.time = newTime;
     }
