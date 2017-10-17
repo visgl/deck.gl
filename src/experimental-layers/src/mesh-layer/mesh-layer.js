@@ -30,6 +30,7 @@ import assert from 'assert';
 import vs from './mesh-layer-vertex.glsl';
 import vs64 from './mesh-layer-vertex-64.glsl';
 import fs from './mesh-layer-fragment.glsl';
+import project64utils from '../shaderlib/project64utils/project64utils';
 
 function degreeToRadian(degree) {
   return degree * Math.PI / 180;
@@ -96,7 +97,7 @@ export default class MeshLayer extends Layer {
   getShaders(id) {
     const {shaderCache} = this.context;
     return enable64bitSupport(this.props) ?
-      {vs: vs64, fs, modules: ['project64', 'picking', 'lighting'], shaderCache} :
+      {vs: vs64, fs, modules: [project64utils, 'picking', 'lighting'], shaderCache} :
       {vs, fs, modules: ['picking', 'lighting'], shaderCache}; // 'project' module added by default.
   }
 
