@@ -21,6 +21,7 @@
 import {COORDINATE_SYSTEM, Layer, experimental} from '../../core';
 const {enable64bitSupport, get} = experimental;
 import {GL, Model, Geometry} from 'luma.gl';
+import {compareProps} from '../../core/lib/props';
 
 // Polygon geometry generation is managed by the polygon tesselator
 import {PolygonTesselator} from './polygon-tesselator';
@@ -36,6 +37,9 @@ const defaultProps = {
   // Whether to draw a GL.LINES wireframe of the polygon
   wireframe: false,
   fp64: false,
+
+  // elevation multiplier
+  elevationScale: 1,
 
   // Accessor for polygon geometry
   getPolygon: f => get(f, 'polygon') || get(f, 'geometry.coordinates'),
@@ -101,11 +105,12 @@ export default class SolidPolygonLayer extends Layer {
   }
 
   draw({uniforms}) {
-    const {extruded, lightSettings} = this.props;
+    const {extruded, lightSettings, elevationScale} = this.props;
     const {viewport} = this.context;
 
     this.state.model.render(Object.assign({}, uniforms, {
       extruded: extruded ? 1.0 : 0.0,
+      elevationScale,
       pixelsPerUnit: viewport.getDistanceScales().pixelsPerDegree
     },
     lightSettings));
@@ -127,9 +132,17 @@ export default class SolidPolygonLayer extends Layer {
     const geometryConfigChanged = props.extruded !== oldProps.extruded ||
       props.wireframe !== oldProps.wireframe || props.fp64 !== oldProps.fp64;
 
-     // When the geometry config  or the data is changed,
-     // tessellator needs to be invoked
-    if (changeFlags.dataChanged || geometryConfigChanged) {
+    // check if updateTriggers.getElevation has been triggered
+    const getElevationTriggered = changeFlags.updateTriggersChanged &&
+      compareProps({
+        oldProps: oldProps.updateTriggers.getElevation || {},
+        newProps: props.updateTriggers.getElevation || {},
+        triggerName: 'getElevation'
+      });
+
+    // When the geometry config  or the data is changed,
+    // tessellator needs to be invoked
+    if (changeFlags.dataChanged || geometryConfigChanged || getElevationTriggered) {
       const {getPolygon, extruded, wireframe, getElevation} = props;
 
       // TODO - avoid creating a temporary array here: let the tesselator iterate
