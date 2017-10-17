@@ -38,6 +38,7 @@ const defaultProps = {
   lineWidthMaxPixels: Number.MAX_SAFE_INTEGER,
   lineJointRounded: false,
   lineMiterLimit: 4,
+  lineDashJustified: false,
   fp64: false,
 
   getPolygon: f => get(f, 'polygon'),
@@ -47,6 +48,8 @@ const defaultProps = {
   getLineColor: f => get(f, 'lineColor') || defaultLineColor,
   // Line and polygon outline accessors
   getLineWidth: f => get(f, 'lineWidth') || 1,
+  // Line dash array accessor
+  getLineDashArray: null,
   // Polygon extrusion accessor
   getElevation: f => get(f, 'elevation') || 1000,
 
@@ -95,10 +98,10 @@ export default class PolygonLayer extends CompositeLayer {
 
     // Rendering props underlying layer
     const {lineWidthScale, lineWidthMinPixels, lineWidthMaxPixels,
-      lineJointRounded, lineMiterLimit, fp64} = this.props;
+      lineJointRounded, lineMiterLimit, lineDashJustified, fp64} = this.props;
 
     // Accessor props for underlying layers
-    const {getFillColor, getLineColor, getLineWidth, getElevation,
+    const {getFillColor, getLineColor, getLineWidth, getLineDashArray, getElevation,
       getPolygon, updateTriggers, lightSettings} = this.props;
 
     const forwardProps = this.getBaseLayerProps();
@@ -158,13 +161,16 @@ export default class PolygonLayer extends CompositeLayer {
         widthMaxPixels: lineWidthMaxPixels,
         rounded: lineJointRounded,
         miterLimit: lineMiterLimit,
+        justified: lineDashJustified,
 
         getPath: x => x.path,
         getColor: x => getLineColor(x.object),
         getWidth: x => getLineWidth(x.object),
+        getDashArray: getLineDashArray && (x => getLineDashArray(x.object)),
         updateTriggers: {
           getWidth: updateTriggers.getLineWidth,
-          getColor: updateTriggers.getLineColor
+          getColor: updateTriggers.getLineColor,
+          getDashArray: updateTriggers.getLineDashArray
         }
       }));
 

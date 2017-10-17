@@ -125,6 +125,13 @@ Type of joint. If `true`, draw round joints. Otherwise draw miter joints.
 The maximum extent of a joint in ratio to the stroke width.
 Only works if `lineJointRounded` is `false`.
 
+##### `lineDashJustified` (Boolean, optional)
+
+- Default: `false`
+
+Justify dashes together.
+Only works if `getLineDashArray` is specified.
+
 ##### `fp64` (Boolean, optional)
 
 - Default: `false`
@@ -171,6 +178,12 @@ The width of the outline of the polygon, in meters
 ##### `getElevation` (Function, optional)
 
 - Default: `object => object.elevation || 1000`
+
+##### `getLineDashArray` (Function, optional)
+
+- Default: `null`
+
+Method called to get the dash array to draw each outline with. (See Path Layer)
 
 ### Remarks
 

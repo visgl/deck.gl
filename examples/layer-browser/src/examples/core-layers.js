@@ -112,14 +112,22 @@ const GeoJsonLayerExtrudedExample = {
 const PolygonLayerExample = {
   layer: PolygonLayer,
   getData: () => dataSamples.polygons,
+  propTypes: {
+    getLineDashArray: {type: 'compound', elements: ['lineDashSizeLine']},
+    lineDashSizeLine: {type: 'number', max: 20, onUpdate: (newValue, newSettings, change) => {
+      change('getLineDashArray', [newValue, 20 - newValue]);
+    }}
+  },
   props: {
     getPolygon: f => f,
     getFillColor: f => [200 + Math.random() * 55, 0, 0],
     getLineColor: f => [0, 0, 0, 255],
+    getLineDashArray: f => [20, 0],
     getWidth: f => 20,
     getHeight: f => Math.random() * 1000,
     opacity: 0.8,
     pickable: true,
+    lineDashJustified: true,
     lightSettings: LIGHT_SETTINGS
   }
 };
