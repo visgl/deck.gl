@@ -1,13 +1,26 @@
 /* global window */
 import React, {Component} from 'react';
 import {StaticMap} from 'react-map-gl';
-import {experimental} from 'deck.gl';
-import TWEEN from 'tween.js';
+import {experimental, ViewportController, MapState} from 'deck.gl';
 
 import ControlPanel from './control-panel';
 
-const {AnimationMapController, viewportFlyToInterpolator, ANIMATION_EVENTS} = experimental;
+const {viewportFlyToInterpolator, TRANSITION_EVENTS} = experimental;
 const token = process.env.MapboxAccessToken; // eslint-disable-line
+const interruptionStyles = [
+  {
+    title: 'BREAK',
+    style: TRANSITION_EVENTS.BREAK
+  },
+  {
+    title: 'SNAP_TO_END',
+    style: TRANSITION_EVENTS.SNAP_TO_END
+  },
+  {
+    title: 'IGNORE',
+    style: TRANSITION_EVENTS.IGNORE
+  }
+];
 
 if (!token) {
   throw new Error('Please specify a valid mapbox token');
@@ -15,7 +28,6 @@ if (!token) {
 
 // Required by tween.js
 function animate() {
-  TWEEN.update();
   window.requestAnimationFrame(animate);
 }
 animate();
@@ -33,8 +45,10 @@ export default class App extends Component {
         width: 500,
         height: 500
       },
-      onAnimationInterruption: ANIMATION_EVENTS.SNAP_TO_END
+      transitionDuration: 0
     };
+    this._interruptionStyle = TRANSITION_EVENTS.BREAK;
+    this._resize = this._resize.bind(this);
   }
 
   componentDidMount() {
@@ -51,37 +65,44 @@ export default class App extends Component {
       viewport: {
         ...this.state.viewport,
         width: this.props.width || window.innerWidth,
-        height: this.props.height || window.innerHeight
+        height: this.props.height || window.innerHeight,
+        transitionDuration: 0
       }
     });
   }
 
   _easeTo({longitude, latitude}) {
-    // Remove existing animations
-    TWEEN.removeAll();
 
-    const {viewport} = this.state;
+    this.setState({
+      viewport: {...this.state.viewport, longitude, latitude, zoom: 11},
+      transitionDuration: 5000,
+      viewportToggled: !this.state.viewportToggled
+    });
+  }
 
-    const newViewport = Object.assign({}, viewport, {longitude, latitude, zoom: 11});
-    this._onViewportChange(newViewport);
+  _onStyleChange(style) {
+    this._interruptionStyle = style;
   }
 
   _onViewportChange(viewport) {
-    this.setState({viewport});
+    this.setState({
+      viewport: {...this.state.viewport, ...viewport},
+      transitionDuration: 0
+    });
   }
 
   render() {
 
-    const {viewport, settings, onAnimationInterruption} = this.state;
+    const {viewport, settings, transitionDuration} = this.state;
 
     return (
-      <AnimationMapController
+      <ViewportController
+        viewportState={MapState}
         {...viewport}
         onViewportChange={this._onViewportChange.bind(this)}
-        animateViewport={true}
-        animationInterpolator={viewportFlyToInterpolator}
-        animaitonDuration={5000}
-        onAnimationInterruption={onAnimationInterruption}>
+        transitionInterpolator={viewportFlyToInterpolator}
+        transitionDuration={transitionDuration}
+        transitionInterruption={this._interruptionStyle}>
         <StaticMap
           {...viewport}
           {...settings}
@@ -90,8 +111,10 @@ export default class App extends Component {
           dragToRotate={false}
           mapboxApiAccessToken={token} />
         <ControlPanel containerComponent={this.props.containerComponent}
-          onViewportChange={this._easeTo.bind(this)} />
-      </AnimationMapController>
+          onViewportChange={this._easeTo.bind(this)}
+          interruptionStyles={interruptionStyles}
+          onStyleChange={this._onStyleChange.bind(this)} />
+      </ViewportController>
     );
   }
 

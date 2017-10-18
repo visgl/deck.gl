@@ -3,10 +3,8 @@ import React, {Component} from 'react';
 import {render} from 'react-dom';
 import {StaticMap} from 'react-map-gl';
 import DeckGLOverlay from './deckgl-overlay.js';
-import {experimental} from 'deck.gl';
+import {ViewportController, MapState, experimental} from 'deck.gl';
 import {json as requestJson} from 'd3-request';
-
-const {AnimationMapController} = experimental;
 
 // Set your mapbox token here
 const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
@@ -34,7 +32,7 @@ class Root extends Component {
         bearing: 0
       },
       data: null,
-      animationDuration: 5000,
+      transitionInterruption: experimental.TRANSITION_EVENTS.SNAP_TO_END,
       viewportToggled: false
     };
 
@@ -49,7 +47,7 @@ class Root extends Component {
     window.addEventListener('resize', this._resize.bind(this));
     this._resize();
     // TODO: this is to just simulate viwport prop change and test animation.
-    this._interval = setInterval(() => this._toggleViewport(), 4000);
+    this._interval = setInterval(() => this._toggleViewport(), 7000);
   }
 
   _resize() {
@@ -61,7 +59,8 @@ class Root extends Component {
 
   _onViewportChange(viewport) {
     this.setState({
-      viewport: {...this.state.viewport, ...viewport}
+      viewport: {...this.state.viewport, ...viewport},
+      transitionDuration: 0
     });
   }
 
@@ -75,22 +74,24 @@ class Root extends Component {
     newViewport.bearing = this.state.viewportToggled ? 0.0 : 90.0;
     this.setState(prevState => ({
       viewport: {...prevState.viewport, ...newViewport},
-      viewportToggled: !this.state.viewportToggled
+      viewportToggled: !this.state.viewportToggled,
+      transitionDuration: 5000
     }));
 
   }
 
   render() {
-    const {viewport, data, animationDuration, onAnimationInterruption} = this.state;
+    const {viewport, data, transitionDuration, transitionInterruption} = this.state;
 
     return (
-      <AnimationMapController
+      <ViewportController
+        viewportState={MapState}
         {...viewport}
         onViewportChange={this._onViewportChange.bind(this)}
         animateViewport={true}
-        animaitonDuration={animationDuration}
-        viewportAnimationEasingFunc={easeInOutElastic}
-        onAnimationInterruption={onAnimationInterruption}>
+        transitionDuration={transitionDuration}
+        transitionEasing={easeInOutElastic}
+        transitionInterruption={transitionInterruption}>
         <StaticMap
           {...viewport}
           onViewportChange={this._onViewportChange.bind(this)}
@@ -100,7 +101,7 @@ class Root extends Component {
             data={data}
             colorScale={colorScale}/>
         </StaticMap>
-      </AnimationMapController>
+      </ViewportController>
     );
   }
 }

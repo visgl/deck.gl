@@ -18,6 +18,18 @@ export default class ControlPanel extends PureComponent {
     );
   }
 
+  _renderStyleOptions(style, index) {
+    return (
+      <div key={`style-${index}`} className="style" >
+        <input type="radio" name="style"
+          id={`style-${index}`}
+          defaultChecked={style.title === 'BREAK'}
+          onClick={() => this.props.onStyleChange(style.style)} />
+        <label htmlFor={`style-${index}`}>{style.title}</label>
+      </div>
+    );
+  }
+
   render() {
     const Container = this.props.containerComponent || defaultContainer;
 
@@ -35,6 +47,10 @@ export default class ControlPanel extends PureComponent {
         <hr />
 
         { CITIES.map(this._renderButton.bind(this)) }
+
+        <hr />
+        <p>Transition Interuption sytle</p>
+        { this.props.interruptionStyles.map(this._renderStyleOptions.bind(this)) }
       </Container>
     );
   }
