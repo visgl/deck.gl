@@ -2,7 +2,7 @@ import {PureComponent, createElement} from 'react';
 import PropTypes from 'prop-types';
 
 import {EventManager} from 'mjolnir.js';
-import {ViewportControls} from '../core';
+import {ViewStateController} from '../core';
 import CURSOR from './utils/cursors';
 
 const propTypes = {
@@ -81,7 +81,7 @@ export default class ViewportController extends PureComponent {
 
     // If props.controls is not provided, fallback to default MapControls instance
     // Cannot use defaultProps here because it needs to be per map instance
-    this._controls = this.props.controls || new ViewportControls(this.props.viewportState);
+    this._controls = this.props.controls || new ViewStateController(this.props.viewportState);
 
     this._controls.setOptions(Object.assign({}, this.props, {
       onStateChange: this._onInteractiveStateChange.bind(this),

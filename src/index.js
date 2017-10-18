@@ -38,7 +38,7 @@ export {default as ThirdPersonViewport} from './core/viewports/third-person-view
 export {default as WebMercatorViewport} from './core/viewports/web-mercator-viewport';
 
 // TODO - Do we need to export? Move to experimental?
-export {default as ViewportControls} from './core/controllers/viewport-controls';
+export {default as ViewStateController} from './core/controllers/view-state-controller';
 export {default as FirstPersonState} from './core/controllers/first-person-state';
 export {default as OrbitState} from './core/controllers/orbit-state';
 export {default as MapState} from './core/controllers/map-state';
@@ -54,8 +54,8 @@ import {default as EffectManager} from './core/experimental/lib/effect-manager';
 import {default as Effect} from './core/experimental/lib/effect';
 
 // Experimental Pure JS (non-React) bindings
-import {default as DeckGLJS} from './core/pure-js/deck-js';
-import {default as MapControllerJS} from './core/pure-js/map-controller-js';
+import {default as DeckGLJS} from './core/pure-js/deckgl-js';
+import {default as DeckGLControllerJS} from './core/pure-js/deckgl-controller-js';
 
 // Experimental Data Accessor Helpers
 import {get} from './core/lib/utils/get';
@@ -76,7 +76,7 @@ import {fp64ify} from './core/lib/utils/fp64';
 Object.assign(experimental, {
   // Pure JS (non-React) support
   DeckGLJS,
-  MapControllerJS,
+  DeckGLControllerJS,
 
   // Effects base classes
   EffectManager,
@@ -141,8 +141,11 @@ Object.assign(experimental, {
 
 export {default as default} from './react/deckgl';
 export {default as DeckGL} from './react/deckgl';
+export {default as DeckGLController} from './react/deckgl-controller';
 export {default as ViewportController} from './react/viewport-controller';
-export {default as MapController} from './react/map-controller';
+
+// Deprecated
+export {default as MapController} from './react/deckgl-controller';
 
 // Experimental React bindings
 import {default as OrbitController} from './react/experimental/orbit-controller';

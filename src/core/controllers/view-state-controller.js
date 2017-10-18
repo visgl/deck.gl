@@ -35,7 +35,7 @@ const EVENT_TYPES = {
   KEYBOARD: ['keydown', 'keyup']
 };
 
-export default class ViewportControls {
+export default class ViewStateController {
   /**
    * @classdesc
    * A class that handles events and updates mercator style viewport parameters
@@ -56,7 +56,7 @@ export default class ViewportControls {
 
     this.setOptions(options);
 
-    if (this.constructor === ViewportControls) {
+    if (this.constructor === ViewStateController) {
       Object.seal(this);
     }
   }
@@ -225,6 +225,7 @@ export default class ViewportControls {
   // Default handler for panning to rotate.
   // Called by `_onPan` when panning with function key pressed.
   _onPanRotate(event) {
+    // TODO - hack, should be configured in a different way
     return this.viewportState instanceof MapState ?
       this._onPanRotateMap(event) :
       this._onPanRotateStandard(event);

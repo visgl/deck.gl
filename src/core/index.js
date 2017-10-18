@@ -34,14 +34,14 @@ export {default as WebMercatorViewport} from './viewports/web-mercator-viewport'
 export {default as OrbitViewport} from './viewports/orbit-viewport';
 
 // TODO - Do we need to export? Move to experimental?
-export {default as ViewportControls} from './controllers/viewport-controls';
+export {default as ViewStateController} from './controllers/view-state-controller';
 export {default as FirstPersonState} from './controllers/first-person-state';
 export {default as OrbitState} from './controllers/orbit-state';
 export {default as MapState} from './controllers/map-state';
 
 // Experimental Pure JS (non-React) bindings
-import {default as DeckGLJS} from './pure-js/deck-js';
-import {default as MapControllerJS} from './pure-js/map-controller-js';
+import {default as DeckGLJS} from './pure-js/deckgl-js';
+import {default as DeckGLControllerJS} from './pure-js/deckgl-controller-js';
 
 // Experimental Features (May change in minor version bumps, use at your own risk)
 import {get} from './lib/utils/get';
@@ -76,5 +76,5 @@ export const experimental = {
   Effect,
 
   DeckGLJS,
-  MapControllerJS
+  DeckGLControllerJS
 };
