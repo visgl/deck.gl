@@ -14,7 +14,6 @@ class Example extends PureComponent {
     super(props);
 
     this._onResize = this._onResize.bind(this);
-    this._onInitialized = this._onInitialized.bind(this);
     this._onViewportChange = this._onViewportChange.bind(this);
     this._onUpdate = this._onUpdate.bind(this);
 
