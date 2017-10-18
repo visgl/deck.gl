@@ -136,16 +136,12 @@ class App extends PureComponent {
   }
 
   _renderExampleLayer(example, settings, index) {
-    const {layer: Layer, props, getData, getUpdateTriggers} = example;
+    const {layer: Layer, props, getData} = example;
 
     const layerProps = Object.assign({}, props, settings);
 
     if (getData) {
       Object.assign(layerProps, {data: getData()});
-    }
-
-    if (getUpdateTriggers) {
-      Object.assign(layerProps, {updateTriggers: getUpdateTriggers(settings)});
     }
 
     Object.assign(layerProps, {
