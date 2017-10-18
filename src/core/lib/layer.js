@@ -506,7 +506,12 @@ export default class Layer {
       propsOrDataChanged,
       viewportChanged,
       somethingChanged,
-      reason: dataChanged || propsChanged || 'Viewport changed'
+      reason:
+        dataChanged ||
+        propsChanged ||
+        (viewportChanged && 'Viewport changed') ||
+        (updateTriggersChanged && 'updateTriggers changed') ||
+        'unknown reason'
     };
   }
 
