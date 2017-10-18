@@ -120,19 +120,19 @@ test('Layer#getNumInstances', t => {
 
 test('Layer#diffProps', t => {
   const layer = new SubLayer(LAYER_PROPS);
-  const context = {viewportChanged: false};
+  layer.context = {viewportChanged: false};
   let diff;
 
   diff = layer.diffProps(LAYER_PROPS,
-    Object.assign({}, LAYER_PROPS), context);
+    Object.assign({}, LAYER_PROPS));
   t.false(diff.somethingChanged, 'same props');
 
   diff = layer.diffProps(LAYER_PROPS,
-    Object.assign({}, LAYER_PROPS, {data: dataVariants[0]}), context);
+    Object.assign({}, LAYER_PROPS, {data: dataVariants[0]}));
   t.true(diff.dataChanged, 'data changed');
 
   diff = layer.diffProps(LAYER_PROPS,
-    Object.assign({}, LAYER_PROPS, {size: 0}), context);
+    Object.assign({}, LAYER_PROPS, {size: 0}));
   t.true(diff.propsChanged, 'props changed');
 
   // Dummy attribute manager to avoid diffUpdateTriggers failure
@@ -140,7 +140,7 @@ test('Layer#diffProps', t => {
     attributeManager: {invalidate: () => {}}
   };
   diff = layer.diffProps(LAYER_PROPS,
-    Object.assign({}, LAYER_PROPS, {updateTriggers: {time: 100}}), context);
+    Object.assign({}, LAYER_PROPS, {updateTriggers: {time: 100}}));
   t.true(diff.propsOrDataChanged, 'props changed');
 
   let invalidatedName = null;
@@ -153,7 +153,7 @@ test('Layer#diffProps', t => {
   };
 
   diff = layer.diffProps(layer.props,
-    Object.assign({}, LAYER_PROPS, {updateTriggers: {color: {version: 0}}}), context);
+    Object.assign({}, LAYER_PROPS, {updateTriggers: {color: {version: 0}}}));
   t.is(invalidatedName, 'color', 'updateTriggers fired');
 
   t.end();
