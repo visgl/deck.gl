@@ -485,7 +485,6 @@ export default class Layer {
   // can be update correctly with minimal effort
   diffProps(oldProps, newProps) {
     const changeFlags = diffProps(oldProps, newProps, this._onUpdateTriggered.bind(this));
-
     const {propsChanged, dataChanged, updateTriggersChanged} = changeFlags;
 
     const viewportChanged = this.context.viewportChanged;

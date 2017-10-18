@@ -18,14 +18,14 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {areEqualShallow} from '../lib/utils';
+import {shallowEqual} from './shallow-equal';
 
 /**
  * Does a shallow comparison for React props and state.
  */
 export default function shallowCompare(instance, nextProps, nextState) {
   return (
-    !areEqualShallow(instance.props, nextProps) ||
-    !areEqualShallow(instance.state, nextState)
+    !shallowEqual(instance.props, nextProps) ||
+    !shallowEqual(instance.state, nextState)
   );
 }

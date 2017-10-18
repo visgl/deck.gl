@@ -136,25 +136,27 @@ test('Layer#diffProps', t => {
   t.true(diff.propsChanged, 'props changed');
 
   // Dummy attribute manager to avoid diffUpdateTriggers failure
-  layer.state = {
-    attributeManager: {invalidate: () => {}}
-  };
+  initMockLayerState(layer);
   diff = layer.diffProps(LAYER_PROPS,
     Object.assign({}, LAYER_PROPS, {updateTriggers: {time: 100}}));
   t.true(diff.propsOrDataChanged, 'props changed');
 
-  let invalidatedName = null;
-  layer.state = {
-    attributeManager: {
-      invalidate: name => {
-        invalidatedName = name;
-      }
-    }
-  };
-
+  initMockLayerState(layer);
   diff = layer.diffProps(layer.props,
     Object.assign({}, LAYER_PROPS, {updateTriggers: {color: {version: 0}}}));
-  t.is(invalidatedName, 'color', 'updateTriggers fired');
+  t.is(layer.state.invalidatedName, 'color', 'updateTriggers fired');
 
   t.end();
 });
+
+function initMockLayerState(layer) {
+  layer.state = {
+    attributeManager: {
+      invalidate: name => {
+        layer.state.invalidatedName = name;
+      },
+      getAccessors: () => ({})
+    },
+    invaldiateName: null
+  };
+}
