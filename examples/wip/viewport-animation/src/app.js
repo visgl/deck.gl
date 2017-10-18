@@ -75,7 +75,7 @@ export default class App extends Component {
 
     this.setState({
       viewport: {...this.state.viewport, longitude, latitude, zoom: 11},
-      transitionDuration: 5000,
+      transitionDuration: 8000,
       viewportToggled: !this.state.viewportToggled
     });
   }

@@ -32,7 +32,6 @@ class Root extends Component {
         bearing: 0
       },
       data: null,
-      transitionInterruption: experimental.TRANSITION_EVENTS.SNAP_TO_END,
       viewportToggled: false
     };
 
@@ -81,17 +80,16 @@ class Root extends Component {
   }
 
   render() {
-    const {viewport, data, transitionDuration, transitionInterruption} = this.state;
+    const {viewport, data, transitionDuration} = this.state;
 
     return (
       <ViewportController
         viewportState={MapState}
         {...viewport}
         onViewportChange={this._onViewportChange.bind(this)}
-        animateViewport={true}
         transitionDuration={transitionDuration}
         transitionEasing={easeInOutElastic}
-        transitionInterruption={transitionInterruption}>
+        transitionInterruption={experimental.TRANSITION_EVENTS.SNAP_TO_END}>
         <StaticMap
           {...viewport}
           onViewportChange={this._onViewportChange.bind(this)}
