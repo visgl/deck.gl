@@ -38,7 +38,7 @@ export function diffProps(oldProps, newProps, onUpdateTriggered = () => {}) {
  */
 /* eslint-disable max-statements, max-depth, complexity */
 export function compareProps({
-  oldProps, newProps, ignoreProps = {}, propTypes = {}, triggerName = 'props'
+  oldProps, newProps, ignoreProps = {}, shallowCompareProps = {}, triggerName = 'props'
 } = {}) {
   assert(oldProps !== undefined && newProps !== undefined, 'compareProps args');
 
@@ -70,7 +70,7 @@ export function compareProps({
       }
 
       // If both new and old value are functions, ignore differences
-      if (key in propTypes) {
+      if (key in shallowCompareProps) {
         const type = typeof newProps[key];
         if (type === 'function' && typeof oldProps[key] === 'function') {
           equals = true;

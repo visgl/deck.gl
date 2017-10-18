@@ -142,6 +142,7 @@ export default class AttributeManager {
 
     this.attributes = {};
     this.updateTriggers = {};
+    this.accessors = {};
     this.allocedInstances = -1;
     this.needsRedraw = true;
 
@@ -318,21 +319,6 @@ export default class AttributeManager {
     return this;
   }
 
-  /**
-   * Returns object containing all accessors as keys
-   * @return {Object} - accessors object
-   */
-  getAccessors() {
-    const accessors = {};
-    for (const attributeName in this.attributes) {
-      const attribute = this.attributes[attributeName];
-      if (attribute.accessor) {
-        accessors[attribute.accessor] = true;
-      }
-    }
-    return accessors;
-  }
-
   // DEPRECATED METHODS
 
   /**
@@ -343,6 +329,16 @@ export default class AttributeManager {
    */
   addInstanced(attributes, updaters = {}) {
     this._add(attributes, updaters, {instanced: 1});
+  }
+
+  // PROTECTED METHODS - Only to be used by collaborating classes, not by apps
+
+  /**
+   * Returns object containing all accessors as keys, with non-null values
+   * @return {Object} - accessors object
+   */
+  getAccessors() {
+    return this.updateTriggers;
   }
 
   // PRIVATE METHODS
@@ -413,7 +409,7 @@ export default class AttributeManager {
       const attribute = this.attributes[attributeName];
       let {accessor} = attribute;
 
-      // use attribute name as update trigger key
+      // Backards compatibility: allow attribute name to be used as update trigger key
       triggers[attributeName] = [attributeName];
 
       // use accessor name as update trigger key
@@ -427,6 +423,7 @@ export default class AttributeManager {
           }
           triggers[accessorName].push(attributeName);
         });
+
       }
     }
 
