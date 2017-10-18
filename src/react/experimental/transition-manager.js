@@ -28,7 +28,7 @@ const DEFAULT_PROPS = {
 export default class TransitionManager {
   constructor(props, onTransitionUpdate) {
 
-    this.props = Object.assign({}, DEFAULT_PROPS, props);
+    this.props = Object.assign({}, props);
     this.onTransitionUpdate = onTransitionUpdate;
     this.transitionContext = {
       time: 0,
@@ -200,3 +200,5 @@ export default class TransitionManager {
     }
   }
 }
+
+TransitionManager.defaultProps = DEFAULT_PROPS;
