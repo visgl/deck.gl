@@ -5,7 +5,7 @@ import {Vector2} from 'math.gl';
 
 const EPSILON = 0.01;
 export const VIEWPORT_PROPS = ['longitude', 'latitude', 'zoom', 'bearing', 'pitch',
-  'position', 'width', 'height', 'minZoom', 'maxZoom'];
+  'position', 'width', 'height'];
 
 export function extractViewportFrom(props) {
   const viewport = {};
@@ -26,6 +26,8 @@ export function extractViewportFrom(props) {
 */
 export function viewportLinearInterpolator(startViewport, endViewport, t) {
   const viewport = Object.assign({}, endViewport);
+  const VIEWPORT_INTERPOLATION_PROPS =
+    ['longitude', 'latitude', 'zoom', 'bearing', 'pitch', 'position'];
   function lerp(start, end, step) {
     if (Array.isArray(start)) {
       return start.map((element, index) => {
@@ -35,7 +37,7 @@ export function viewportLinearInterpolator(startViewport, endViewport, t) {
     return step * end + (1 - step) * start;
   }
 
-  for (const p of ['longitude', 'latitude', 'zoom', 'bearing', 'pitch', 'position']) {
+  for (const p of VIEWPORT_INTERPOLATION_PROPS) {
     const startValue = startViewport[p];
     const endValue = endViewport[p];
     // TODO: 'position' is not always specified

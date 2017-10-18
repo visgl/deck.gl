@@ -26,8 +26,7 @@ class Root extends Component {
       },
       data: null,
       transitionDuration: 0,
-      viewportToggled: false,
-      onTransitionEnd: this.rotateCamera.bind(this)
+      viewportToggled: false
     };
 
     requestCsv(DATA_URL, (error, response) => {
@@ -44,7 +43,7 @@ class Root extends Component {
 
     // TODO: this is to just simulate viwport prop change and test animation.
     // this._interval = setInterval(() => this._toggleViewport(), 8000);
-    this.rotateCamera();
+    this._rotateCamera();
   }
 
   _resize() {
@@ -75,7 +74,7 @@ class Root extends Component {
     });
   }
 
-  rotateCamera() {
+  _rotateCamera() {
     const angleDelta = 120.0;
     const bearing = (this.state.viewport.bearing + angleDelta);
     const transitionDuration = angleDelta * 35;
@@ -94,8 +93,7 @@ class Root extends Component {
     const {
       viewport,
       data,
-      transitionDuration,
-      onTransitionEnd
+      transitionDuration
     } = this.state;
     return (
       <ViewportController
@@ -103,7 +101,7 @@ class Root extends Component {
         {...viewport}
         onViewportChange={this._onViewportChange.bind(this)}
         transitionDuration={transitionDuration}
-        onTransitionEnd={onTransitionEnd}>
+        onTransitionEnd={this._rotateCamera.bind(this)}>
         <StaticMap
           {...viewport}
           mapStyle="mapbox://styles/mapbox/dark-v9"

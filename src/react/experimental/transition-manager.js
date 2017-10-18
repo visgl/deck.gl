@@ -161,6 +161,7 @@ export default class TransitionManager {
     const delta = 1.0 / (nextProps.transitionDuration * VIEWPORT_TRANSITION_FREQUENCY);
     const endViewport = extractViewportFrom(nextProps);
     const interval = this._createTransitionInterval(VIEWPORT_TRANSITION_FREQUENCY);
+    assert(delta < 1.0);
     this.transitionContext = {
       time: delta,
       delta,
@@ -194,12 +195,8 @@ export default class TransitionManager {
       this._endTransition();
       this.props.onTransitionEnd();
     } else {
-      let newTime = time + delta;
       // Make sure interplation step is always ends with time = 1.0
-      if (newTime > 1.0) {
-        newTime = 1.0 - delta;
-      }
-      this.transitionContext.time = newTime;
+      this.transitionContext.time = (time + delta) > 1.0 ? 1.0 : (time + delta);
     }
   }
 }
