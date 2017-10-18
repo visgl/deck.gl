@@ -57,7 +57,8 @@ export default class BitmapLayer extends Layer {
   getShaders() {
     return {
       vs: BITMAP_VERTEX_SHADER,
-      fs: BITMAP_FRAGMENT_SHADER
+      fs: BITMAP_FRAGMENT_SHADER,
+      modules: ['picking']
     };
   }
 

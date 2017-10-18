@@ -36,7 +36,6 @@ uniform float opacity;
 uniform float radiusScale;
 uniform float radiusMinPixels;
 uniform float radiusMaxPixels;
-uniform float renderPickingBuffer;
 uniform float outline;
 uniform float strokeWidth;
 uniform float fadeFactor;
@@ -80,17 +79,8 @@ void main(void) {
 
   gl_Position = project_to_clipspace_fp64(vertex_pos_modelspace);
 
-  if (renderPickingBuffer > 0.5) {
-    vColor = vec4(instancePickingColors / 255., 1.);
-  } else {
-    vColor = vec4(instanceColors.rgb, instanceColors.a * opacity) / 255.;
-  }
-
-  vColor.a = 1.0 - abs(currentTime - time) * fadeFactor;
-
-  // // Apply opacity to instance color, or return instance picking color
-  // vec4 color = vec4(instanceColors.rgb, instanceColors.a * opacity) / 255.;
-  // vec4 pickingColor = vec4(instancePickingColors / 255., 1.);
-  // vColor = mix(color, pickingColor, renderPickingBuffer);
+  picking_setPickingColor(instancePickingColors);
+  float alpha = 1.0 - abs(currentTime - time) * fadeFactor;
+  vColor = vec4(instanceColors.rgb / 255., alpha);
 }
 `;

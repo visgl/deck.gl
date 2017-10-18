@@ -11,12 +11,10 @@ attribute vec3 instancePickingColors;
 
 uniform float opacity;
 uniform vec2 imageSize;
-uniform float renderPickingBuffer;
 uniform float layerIndex;
 
 varying vec2 vTexCoord;
 varying float vBitmapType;
-varying vec4 vPickingColor;
 
 void main(void) {
   vec2 offset = instancePositions.wz;
@@ -37,6 +35,6 @@ void main(void) {
   vTexCoord = texCoords;
   vBitmapType = instanceBitmapType;
 
-  vPickingColor = vec4(instancePickingColors / 255.0, 1.);
+  picking_setPickingColor(instancePickingColors);
 }
 `;

@@ -33,5 +33,6 @@ void main(void) {
     discard;
   }
   gl_FragColor = vColor;
+  gl_FragColor = picking_filterPickingColor(gl_FragColor);
 }
 `;

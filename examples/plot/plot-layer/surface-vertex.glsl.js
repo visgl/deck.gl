@@ -27,7 +27,6 @@ attribute vec3 pickingColors;
 
 uniform float lightStrength;
 uniform float opacity;
-uniform float renderPickingBuffer;
 
 varying vec4 vColor;
 varying float shouldDiscard;
@@ -44,10 +43,10 @@ void main(void) {
   vec4 position_vector = project_to_clipspace(vec4(positions.xyz, 0.0));
   float fadeFactor = 1.0 - position_vector.z * lightStrength;
 
-  vec4 color = vec4(colors.rgb * fadeFactor, colors.a * opacity) / 255.0;
-  vec4 pickingColor = vec4(pickingColors / 255.0, 1.0);
+  vColor = vec4(colors.rgb * fadeFactor, colors.a * opacity) / 255.0;;
 
-  vColor = mix(color, pickingColor, renderPickingBuffer);
+  picking_setPickingColor(pickingColors);
+
   shouldDiscard = positions.w;
 }
 `;

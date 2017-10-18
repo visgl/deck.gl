@@ -41,7 +41,7 @@ export default class TimeSlicedScatterplotLayer extends ScatterplotLayer {
 
   getShaders() {
     // use customized shaders
-    return {vs: vertex, fs: fragment, modules: ['fp64', 'project64']};
+    return {vs: vertex, fs: fragment, modules: ['fp64', 'project64', 'picking']};
   }
 
   draw({uniforms}) {

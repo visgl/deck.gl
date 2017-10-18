@@ -34,7 +34,6 @@ uniform float opacity;
 uniform float radiusScale;
 uniform float radiusMinPixels;
 uniform float radiusMaxPixels;
-uniform float renderPickingBuffer;
 uniform float outline;
 uniform float strokeWidth;
 uniform float fadeFactor;
@@ -68,7 +67,7 @@ void main(void) {
 
   color.a = 1.0 - abs(currentTime - time) * fadeFactor;
 
-  vec4 pickingColor = vec4(instancePickingColors / 255., 1.);
-  vColor = mix(color, pickingColor, renderPickingBuffer);
+  picking_setPickingColor(instancePickingColors);
+  vColor = color;
 }
 `;

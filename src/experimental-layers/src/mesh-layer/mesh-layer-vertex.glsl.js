@@ -33,7 +33,7 @@ void main(void) {
 
   // TODO - transform normals
 
-  picking_setPickingColor(instancePickingColors / 255.0);
+  picking_setPickingColor(instancePickingColors);
 
   vTexCoord = texCoords;
   vColor = instanceColors;

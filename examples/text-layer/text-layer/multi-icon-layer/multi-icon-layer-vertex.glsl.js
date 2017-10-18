@@ -36,7 +36,6 @@ attribute float instanceStringLength;
 
 uniform vec2 viewportSize;
 uniform float sizeScale;
-uniform float renderPickingBuffer;
 uniform vec2 iconsTextureDim;
 
 varying float vColorMode;
@@ -93,9 +92,8 @@ void main(void) {
 
   vTextureCoords.y = 1.0 - vTextureCoords.y;
 
-  vec4 color = instanceColors / 255.;
-  vec4 pickingColor = vec4(instancePickingColors / 255., 1.);
-  vColor = mix(color, pickingColor, renderPickingBuffer);
+  vColor = instanceColors / 255.;
+  picking_setPickingColor(instancePickingColors);
 
   vColorMode = instanceColorModes;
 }

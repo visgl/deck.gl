@@ -52,7 +52,7 @@ void main(void) {
     instancePositions, instancePositions64xy, offset
   );
 
-  picking_setPickingColor(instancePickingColors / 255.0);
+  picking_setPickingColor(instancePickingColors);
 
   vTexCoord = texCoords;
 

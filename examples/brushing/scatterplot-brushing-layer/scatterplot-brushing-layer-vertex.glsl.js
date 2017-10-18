@@ -34,7 +34,6 @@ uniform float opacity;
 uniform float radiusScale;
 uniform float radiusMinPixels;
 uniform float radiusMaxPixels;
-uniform float renderPickingBuffer;
 uniform float outline;
 uniform float strokeWidth;
 
@@ -74,16 +73,16 @@ void main(void) {
   // if enableBrushing is truthy calculate whether instancePosition is in range
   float isPtInBrush = isPointInRange(instancePositions.xy, mousePos, brushRadius, enableBrushing);
 
-  // for use with arc layer, if brushTarget is truthy 
+  // for use with arc layer, if brushTarget is truthy
   // calculate whether instanceTargetPositions is in range
   float isTargetInBrush = isPointInRange(instanceTargetPositions.xy, mousePos, brushRadius, 1.);
-  
+
   // if brushTarget is falsy, when pt is in brush return true
   // if brushTarget is truthy and target is in brush return true
   // if brushTarget is truthy and pt is in brush return false
-  float isInBrush = float(float(isPtInBrush > 0. && brushTarget <= 0.) > 0. || 
+  float isInBrush = float(float(isPtInBrush > 0. && brushTarget <= 0.) > 0. ||
   float(brushTarget > 0. && isTargetInBrush > 0.) > 0.);
-  
+
   float finalRadius = mix(0., instanceRadius, isInBrush);
 
   // Multiply out radius and clamp to limits
@@ -104,10 +103,12 @@ void main(void) {
   vec3 center = project_position(instancePositions);
   vec3 vertex = positions * outerRadiusPixels;
   gl_Position = project_to_clipspace(vec4(center + vertex, 1.));
-    
-  // Apply opacity to instance color, or return instance picking color
-  vec4 color = vec4(instanceColors.rgb, instanceColors.a * opacity) / 255.;
-  vec4 pickingColor = vec4(instancePickingColors / 255., 1.);
-  vColor = mix(color, pickingColor, renderPickingBuffer);
+
+  // Apply opacity to instance color
+  vColor = vec4(instanceColors.rgb, instanceColors.a * opacity) / 255.;
+
+  // Set picking color
+  picking_setPickingColor(instancePickingColors);
+
 }
 `;
