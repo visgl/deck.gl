@@ -57,11 +57,7 @@ export function pickObject(gl, {
     deviceHeight: pickingFBO.height
   });
 
-  if (!deviceRect) {
-    return null;
-  }
-
-  const pickedColors = drawAndSamplePickingBuffer(gl, {
+  const pickedColors = deviceRect && drawAndSamplePickingBuffer(gl, {
     layers,
     viewports,
     onViewportActive,
@@ -71,22 +67,14 @@ export function pickObject(gl, {
     redrawReason: mode
   });
 
-  if (!pickedColors) {
-    return null;
-  }
-
-  const pickInfo = getClosestFromPickingBuffer(gl, {
+  const pickInfo = (pickedColors && getClosestFromPickingBuffer(gl, {
     pickedColors,
     layers,
     deviceX,
     deviceY,
     deviceRadius,
     deviceRect
-  });
-
-  if (!pickInfo) {
-    return null;
-  }
+  })) || NO_PICKED_OBJECT;
 
   return processPickInfo({
     pickInfo, lastPickedInfo, mode, layers, viewports, x, y, deviceX, deviceY, pixelRatio
@@ -289,6 +277,7 @@ function drawAndSamplePickingBuffer(gl, {
   redrawReason
 }) {
 
+  assert(deviceRect);
   assert((Number.isFinite(deviceRect.width) && deviceRect.width > 0), '`width` must be > 0');
   assert((Number.isFinite(deviceRect.height) && deviceRect.height > 0), '`height` must be > 0');
 
@@ -350,6 +339,7 @@ function getClosestFromPickingBuffer(gl, {
   deviceRadius,
   deviceRect
 }) {
+  assert(pickedColors);
   let closestResultToCenter = NO_PICKED_OBJECT;
 
   // Traverse all pixels in picking results and find the one closest to the supplied
