@@ -3,8 +3,7 @@
 
 ### About
 
-The text layer renders text labels on the map using texture mapping. Compared to the existing label-layer in deck.gl, this version is more scalable as it does not require dynamically generating texture for each label. Instead, each character in the label is regarded as an icon in a [font atlas](./font) and is iteratively rendered.
-This Layer is extended based on [Icon Layer](/docs/layers/icon-layer.md) and wrapped using [Composite Layer](/docs/api-reference/composite-layer.md).
+The text layer renders text labels on the map using texture mapping. This Layer is extended based on [Icon Layer](/docs/layers/icon-layer.md) and wrapped using [Composite Layer](/docs/api-reference/composite-layer.md).
 
 ### Example
 
@@ -101,6 +100,4 @@ Method called to specify the alignment baseline. Available options include `'top
 Method called to specify screen space offset relative to the `coordinates` in pixel unit. This function is rarely used in common cases.
 
 ### Font Style and Character Set Support
-Currently, the layer uses a monospaced font style called [Lucida Console](https://en.wikipedia.org/wiki/Lucida#Lucida_Console). While this meets most of the usage scenarios, you can customize to use your own font styles or unicode characters. Basically, you need to generate the texture atlas for the character set. Look at `font.png` and `font.json` in the `font` folder for details. You may find a few open source libraries for doing this. The one used in this example can be found [here](https://github.com/rivulet-zhang/Font-Atlas-Generator).
-
-In addition, the layer only supports the ASCII character set for now. If the text label happens to contain unicode characters, the layer replaces them with a single space and renders the text label without throwing an error.
+Currently, the layer uses a monospaced font style called [Lucida Console](https://en.wikipedia.org/wiki/Lucida#Lucida_Console) and only supports the ASCII character set. If the text label happens to contain unicode characters, the layer replaces them with a single space and renders the text label without throwing an error.
