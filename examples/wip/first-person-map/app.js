@@ -269,7 +269,6 @@ class Root extends Component {
             width={viewportProps.width}
             height={viewportProps.height}
             viewports={viewports}
-            useDevicePixelRatio={false}
             layers={this._renderLayers()}
             initWebGLParameters
           >

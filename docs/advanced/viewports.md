@@ -141,7 +141,6 @@ In this example the `StaticMap` component gets automatically position under the 
           width={viewportProps.width}
           height={viewportProps.height}
           viewports={viewports}
-          useDevicePixelRatio={false}
           layers={this._renderLayers()} />
 
       </ViewportLayout>
