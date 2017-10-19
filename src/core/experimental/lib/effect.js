@@ -23,6 +23,7 @@ let counter = 0;
 export default class Effect {
 
   constructor() {
+    this.id = 'effect';
     this.count = counter++;
     this.visible = true;
     this.priority = 0;

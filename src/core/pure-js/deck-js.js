@@ -240,14 +240,15 @@ export default class DeckGLJS {
   }
 
   _onRenderFrame({gl}) {
-    const redraw = this.layerManager.needsRedraw({clearRedrawFlags: true});
-    if (!redraw) {
+    const redrawReason = this.layerManager.needsRedraw({clearRedrawFlags: true});
+    if (!redrawReason) {
       return;
     }
 
     this.props.onBeforeRender({gl}); // TODO - should be called by AnimationLoop
     this.layerManager.drawLayers({
-      pass: 'render to screen',
+      pass: 'screen',
+      redrawReason,
       // Helps debug layer picking, especially in framebuffer powered layers
       drawPickingColors: this.props.drawPickingColors
     });

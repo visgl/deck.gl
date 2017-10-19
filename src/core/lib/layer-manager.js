@@ -60,7 +60,7 @@ export default class LayerManager {
     this.layers = [];
     this.oldContext = {};
     this.screenCleared = false;
-    this._needsRedraw = true;
+    this._needsRedraw = 'Initial render';
 
     this._eventManager = null;
     this._pickingRadius = 0;
@@ -155,7 +155,7 @@ export default class LayerManager {
       viewports.some((_, i) => viewports[i] !== oldViewports[i]);
 
     if (viewportsChanged) {
-      this._needsRedraw = true;
+      this._needsRedraw = 'Viewport changed';
 
       // Need to ensure one viewport is activated
       const viewport = viewports[0];
@@ -232,17 +232,18 @@ export default class LayerManager {
     return this;
   }
 
-  drawLayers({pass = 'render to screen'}) {
+  drawLayers({pass = 'render to screen', redrawReason}) {
     const {gl, useDevicePixelRatio, drawPickingColors} = this.context;
 
     // render this viewport
     drawLayers(gl, {
-      pass,
       layers: this.layers,
       viewports: this.context.viewports,
       onViewportActive: this._activateViewport.bind(this),
       useDevicePixelRatio,
-      drawPickingColors
+      drawPickingColors,
+      pass,
+      redrawReason
     });
 
     return this;
@@ -295,20 +296,20 @@ export default class LayerManager {
       return false;
     }
 
-    let redraw = this._needsRedraw;
-    if (clearRedrawFlags) {
-      this._needsRedraw = false;
-    }
-
     // Make sure that buffer is cleared once when layer list becomes empty
+    // TODO - this should consider visible layers, not all layers
     if (this.layers.length === 0) {
       if (this.screenCleared === false) {
-        redraw = true;
+        this._needsRedraw = this._needsRedraw || 'no layers, clearing screen';
         this.screenCleared = true;
-        return true;
       }
     } else if (this.screenCleared === true) {
       this.screenCleared = false;
+    }
+
+    let redraw = this._needsRedraw;
+    if (clearRedrawFlags) {
+      this._needsRedraw = false;
     }
 
     for (const layer of this.layers) {

@@ -167,7 +167,7 @@ export default class Layer {
 
   // Calls attribute manager to update any WebGL attributes, can be redefined
   updateAttributes(props) {
-    const {attributeManager, model} = this.state;
+    const {attributeManager} = this.state;
     if (!attributeManager) {
       return;
     }
@@ -185,6 +185,8 @@ export default class Layer {
       ignoreUnknownAttributes: true
     });
 
+    // TODO - Use getModels?
+    const {model} = this.state;
     if (model) {
       const changedAttributes = attributeManager.getChangedAttributes({clearChangedFlags: true});
       model.setAttributes(changedAttributes);
@@ -461,7 +463,6 @@ export default class Layer {
   }
 
   // Checks state of attributes and model
-  // TODO - is attribute manager needed? - Model should be enough.
   getNeedsRedraw({clearRedrawFlags = false} = {}) {
     // this method may be called by the render loop as soon a the layer
     // has been created, so guard against uninitialized state
@@ -470,12 +471,15 @@ export default class Layer {
     }
 
     let redraw = false;
-    redraw = redraw || this.state.needsRedraw;
+    redraw = redraw || (this.state.needsRedraw && this.id);
     this.state.needsRedraw = this.state.needsRedraw && !clearRedrawFlags;
 
-    const {attributeManager, model} = this.state;
+    // TODO - is attribute manager needed? - Model should be enough.
+    const {attributeManager} = this.state;
     redraw = redraw || (attributeManager && attributeManager.getNeedsRedraw({clearRedrawFlags}));
-    redraw = redraw || (model && model.getNeedsRedraw({clearRedrawFlags}));
+    for (const model of this.getModels()) {
+      redraw = redraw || (model.getNeedsRedraw({clearRedrawFlags}) && model.id);
+    }
 
     return redraw;
   }
