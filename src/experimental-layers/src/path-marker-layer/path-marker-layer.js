@@ -91,6 +91,7 @@ export default class PathMarkerLayer extends CompositeLayer {
         data: this.state.markers,
         sizeScale: this.props.sizeScale,
         fp64: this.props.fp64,
+        pickable: false,
         parameters: {
           blend: false,
           depthTest: false
