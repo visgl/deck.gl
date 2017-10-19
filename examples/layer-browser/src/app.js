@@ -55,7 +55,7 @@ class App extends PureComponent {
       },
       settings: {
         multiview: false,
-        useDevicePixelRatio: false,
+        useDevicePixelRatio: true,
         pickingRadius: 0,
         drawPickingColors: false,
 
