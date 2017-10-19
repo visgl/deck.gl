@@ -1,13 +1,12 @@
-/* global setInterval, clearInterval */
+/* global requestAnimationFrame, cancelAnimationFrame */
 import assert from 'assert';
 import {
   viewportLinearInterpolator,
   extractViewportFrom,
-  VIEWPORT_PROPS
+  areViewportsEqual
 } from './viewport-transition-utils';
 
-const VIEWPORT_TRANSITION_FREQUENCY = 0.06; // 60 times per second.
-const VIEWPORT_TRANSITION_EASING_FUNC = t => t;
+const noop = () => {};
 
 export const TRANSITION_EVENTS = {
   BREAK: 1,
@@ -18,185 +17,159 @@ export const TRANSITION_EVENTS = {
 const DEFAULT_PROPS = {
   transitionDuration: 0,
   transitionInterpolator: viewportLinearInterpolator,
-  transitionEasing: VIEWPORT_TRANSITION_EASING_FUNC,
+  transitionEasing: t => t,
   transitionInterruption: TRANSITION_EVENTS.BREAK,
-  onTransitionStart: () => {},
-  onTransitionInterrupt: () => {},
-  onTransitionEnd: () => {}
+  onTransitionStart: noop,
+  onTransitionInterrupt: noop,
+  onTransitionEnd: noop
+};
+
+const DEFAULT_STATE = {
+  animation: null,
+  viewport: null,
+  startViewport: null,
+  endViewport: null
 };
 
 export default class TransitionManager {
-  constructor(props, onTransitionUpdate) {
+  constructor(props) {
+    this.props = props;
+    this.state = DEFAULT_STATE;
 
-    this.props = Object.assign({}, props);
-    this.onTransitionUpdate = onTransitionUpdate;
-    this.transitionContext = {
-      time: 0,
-      delta: 0,
-      interval: null,
-      viewport: null,
-      startViewport: null,
-      endViewport: null
-    };
+    this._onTransitionFrame = this._onTransitionFrame.bind(this);
   }
 
   // Returns current transitioned viewport.
-  getTransionedViewport() {
-    return this.transitionContext.viewport;
+  getViewportInTransition() {
+    return this.state.viewport;
   }
 
   // Process the vewiport change, either ignore or trigger a new transiton.
-  processViewportChange(props, nextProps) {
+  processViewportChange(nextProps) {
+
     // NOTE: Be cautious re-ordering statements in this function.
     if (this._shouldIgnoreViewportChange(nextProps)) {
+      this.props = nextProps;
       return;
     }
 
-    // Save current transtion details before ending it.
-    const shouldSnapToEnd = this._shouldSnapToEnd();
-    const endViewport = this.transitionContext.endViewport;
-    if (this._isTransitionInProgress()) {
+    const isTransitionInProgress = this._isTransitionInProgress();
+
+    if (this._isTransitionEnabled(nextProps)) {
+      const currentViewport = this.state.viewport || extractViewportFrom(this.props);
+      const endViewport = this.state.endViewport;
+
+      const startViewport = this.state.interruption === TRANSITION_EVENTS.SNAP_TO_END ?
+        (endViewport || currentViewport) :
+        currentViewport;
+
+      this._triggerTransition(startViewport, nextProps);
+
+      if (isTransitionInProgress) {
+        this.props.onTransitionInterrupt();
+      }
+      nextProps.onTransitionStart();
+    } else if (isTransitionInProgress) {
       this.props.onTransitionInterrupt();
       this._endTransition();
     }
 
-    if (this._isTransitionEnabled(nextProps)) {
-      const currentViewport = extractViewportFrom(props);
-      const startViewport = shouldSnapToEnd ?
-        (endViewport || currentViewport) :
-        currentViewport;
-      this._triggerTransition(startViewport, nextProps);
-      if (nextProps.onTransitionStart) {
-        nextProps.onTransitionStart();
-      }
-    }
-
-    const newProps = Object.assign({}, this.props, nextProps);
-    this.props = newProps;
+    this.props = nextProps;
   }
 
   // Helper methods
 
-  /* eslint-disable max-depth */
-  _areViewportsEqual(startViewport, endViewport) {
-    for (const p of VIEWPORT_PROPS) {
-      if (Array.isArray(startViewport[p])) {
-        for (let i = 0; i < startViewport[p].length; ++i) {
-          if (startViewport[p][i] !== endViewport[p][i]) {
-            return false;
-          }
-        }
-      } else if (startViewport[p] !== endViewport[p]) {
-        return false;
-      }
-    }
-    return true;
-  }
-  /* eslint-enable max-depth */
-
-  _createTransitionInterval(updateFrequency) {
-    if (this.transitionContext.interval) {
-      clearInterval(this.transitionContext.interval);
-    }
-    return setInterval(() => this._updateViewport(), updateFrequency);
-  }
-
-  _endTransition() {
-    clearInterval(this.transitionContext.interval);
-    this.transitionContext = {
-      time: 0,
-      delta: 0,
-      interval: null,
-      viewport: null,
-      startViewport: null,
-      endViewport: null
-    };
-  }
-
   _isTransitionInProgress() {
-    return this.transitionContext.interval;
+    return this.state.viewport;
   }
 
   _isTransitionEnabled(props) {
-    return props.transitionDuration !== 0;
+    return props.transitionDuration > 0;
   }
 
-  _isUpdateDueToCurrentTransition(nextProps) {
-    if (this.transitionContext.viewport) {
-      const newViewport = extractViewportFrom(nextProps);
-      return this._areViewportsEqual(newViewport, this.transitionContext.viewport);
+  _isUpdateDueToCurrentTransition(props) {
+    if (this.state.viewport) {
+      return areViewportsEqual(props, this.state.viewport);
     }
     return false;
   }
 
   _shouldIgnoreViewportChange(nextProps) {
     // Ignore update if it is due to current active transition.
-    if (this._isUpdateDueToCurrentTransition(nextProps)) {
-      return true;
-    }
-
     // Ignore update if it is requested to be ignored
-    if (this._isTransitionInProgress() &&
-      this.props.transitionInterruption === TRANSITION_EVENTS.IGNORE) {
+    if (this._isTransitionInProgress()) {
+      if (this.state.interruption === TRANSITION_EVENTS.IGNORE ||
+        this._isUpdateDueToCurrentTransition(nextProps)) {
+        return true;
+      }
+    } else if (!this._isTransitionEnabled(nextProps)) {
       return true;
     }
 
     // Ignore if none of the viewport props changed.
-    const start = extractViewportFrom(this.props);
-    const end = extractViewportFrom(nextProps);
-    if (this._areViewportsEqual(start, end)) {
+    if (areViewportsEqual(this.props, nextProps)) {
       return true;
     }
 
     return false;
   }
 
-  _shouldSnapToEnd() {
-    return (this.transitionContext.interval &&
-      this.props.transitionInterruption === TRANSITION_EVENTS.SNAP_TO_END);
-  }
-
   _triggerTransition(startViewport, nextProps) {
     assert(nextProps.transitionDuration !== 0);
-    const delta = 1.0 / (nextProps.transitionDuration * VIEWPORT_TRANSITION_FREQUENCY);
     const endViewport = extractViewportFrom(nextProps);
-    const interval = this._createTransitionInterval(VIEWPORT_TRANSITION_FREQUENCY);
-    assert(delta < 1.0);
-    this.transitionContext = {
-      time: delta,
-      delta,
+
+    cancelAnimationFrame(this.state.animation);
+
+    this.state = {
+      // Save current transition props
+      duration: nextProps.transitionDuration,
+      easing: nextProps.transitionEasing,
+      interpolator: nextProps.transitionInterpolator,
+      interruption: nextProps.transitionInterruption,
+
+      startTime: Date.now(),
       startViewport,
       endViewport,
-      interval,
+      animation: null,
       viewport: startViewport
     };
+
+    this._onTransitionFrame();
+  }
+
+  _onTransitionFrame() {
+    // _updateViewport() may cancel the animation
+    this.state.animation = requestAnimationFrame(this._onTransitionFrame);
+    this._updateViewport();
+  }
+
+  _endTransition() {
+    cancelAnimationFrame(this.state.animation);
+    this.state = DEFAULT_STATE;
   }
 
   _updateViewport() {
     // NOTE: Be cautious re-ordering statements in this function.
-    const time = this.transitionContext.time;
-    const delta = this.transitionContext.delta;
-    const easing = this.props.transitionEasing(time);
-    const viewport = this.props.transitionInterpolator(
-      this.transitionContext.startViewport,
-      this.transitionContext.endViewport,
-      easing
-    );
-    assert(time <= 1.0);
-    this.transitionContext.viewport = Object.assign(
-      {},
-      this.transitionContext.endViewport,
-      viewport);
-    if (this.onTransitionUpdate) {
-      this.onTransitionUpdate(viewport);
+    const currentTime = Date.now();
+    const {startTime, duration, easing, interpolator, startViewport, endViewport} = this.state;
+
+    let shouldEnd = false;
+    let t = (currentTime - startTime) / duration;
+    if (t >= 1) {
+      t = 1;
+      shouldEnd = true;
+    }
+    t = easing(t);
+
+    const viewport = interpolator(startViewport, endViewport, t);
+    this.state.viewport = Object.assign({}, endViewport, viewport);
+    if (this.props.onViewportChange) {
+      this.props.onViewportChange(this.state.viewport);
     }
 
-    if (time === 1.0) {
+    if (shouldEnd) {
       this._endTransition();
       this.props.onTransitionEnd();
-    } else {
-      // Make sure interplation step is always ends with time = 1.0
-      this.transitionContext.time = (time + delta) > 1.0 ? 1.0 : (time + delta);
     }
   }
 }
