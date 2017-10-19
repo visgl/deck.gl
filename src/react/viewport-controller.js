@@ -90,7 +90,7 @@ const propTypes = {
 
 const getDefaultCursor = ({isDragging}) => isDragging ? CURSOR.GRABBING : CURSOR.GRAB;
 
-const defaultProps = {
+const defaultProps = Object.assign({}, TransitionManager.defaultProps, {
   onViewportChange: null,
 
   scrollZoom: true,
@@ -100,7 +100,7 @@ const defaultProps = {
   touchZoomRotate: true,
 
   getCursor: getDefaultCursor
-};
+});
 
 export default class ViewportController extends PureComponent {
 
