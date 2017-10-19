@@ -1,4 +1,10 @@
-import {MeshLayer, PathOutlineLayer, PathMarkerLayer, Arrow2DGeometry} from 'deck.gl-layers';
+import {
+  MeshLayer,
+  PathOutlineLayer,
+  PathMarkerLayer,
+  Arrow2DGeometry,
+  TextLayer
+} from 'deck.gl-layers';
 
 import {GL} from 'luma.gl';
 import dataSamples from '../immutable-data-samples';
@@ -64,11 +70,29 @@ const PathMarkerExample = {
   }
 };
 
+const TextLayerExample = {
+  layer: TextLayer,
+  getData: () => dataSamples.points.slice(0, 50),
+  props: {
+    id: 'text-layer',
+    getText: x => `${x.PLACEMENT}-${x.YR_INSTALLED}`,
+    getPosition: x => x.COORDINATES,
+    getColor: x => [153, 0, 0],
+    getSize: x => 32,
+    getAngle: x => 0,
+    sizeScale: 1,
+    getTextAnchor: x => 'start',
+    getAlignmentBaseline: x => 'center',
+    getPixelOffset: x => [10, 0]
+  }
+};
+
 /* eslint-disable quote-props */
 export default {
   'Experimental Layers': {
     'MeshLayer': MeshLayerExample,
     'PathOutlineLayer': PathOutlineExample,
-    'PathMarkerLayer': PathMarkerExample
+    'PathMarkerLayer': PathMarkerExample,
+    'TextLayer': TextLayerExample
   }
 };
