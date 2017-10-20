@@ -162,7 +162,7 @@ export default class TransitionManager {
     t = easing(t);
 
     const viewport = interpolator(startViewport, endViewport, t);
-    this.state.viewport = Object.assign({}, endViewport, viewport);
+    this.state.viewport = extractViewportFrom(Object.assign({}, this.props, viewport));
     if (this.props.onViewportChange) {
       this.props.onViewportChange(this.state.viewport);
     }

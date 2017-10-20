@@ -62,7 +62,7 @@ export function areViewportsEqual(startViewport, endViewport) {
  * @return {Object} - interpolated viewport for given step.
 */
 export function viewportLinearInterpolator(startViewport, endViewport, t) {
-  const viewport = Object.assign({}, endViewport);
+  const viewport = {};
 
   for (const p of VIEWPORT_INTERPOLATION_PROPS) {
     const startValue = startViewport[p];
@@ -90,7 +90,7 @@ export function viewportLinearInterpolator(startViewport, endViewport, t) {
 export function viewportFlyToInterpolator(startViewport, endViewport, t) {
   // Equations from above paper are referred where needed.
 
-  const viewport = Object.assign({}, endViewport);
+  const viewport = {};
 
   // TODO: add this as an option for applications.
   const rho = 1.414;
