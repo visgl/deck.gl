@@ -113,7 +113,6 @@ export default class ViewportController extends PureComponent {
 
     this._recursiveUpdateChildren = this._recursiveUpdateChildren.bind(this);
     this._updateChildrenViewport = this._updateChildrenViewport.bind(this);
-    this._onTransitionUpdate = this._onTransitionUpdate.bind(this);
   }
 
   componentDidMount() {
@@ -130,7 +129,7 @@ export default class ViewportController extends PureComponent {
       eventManager: this._eventManager
     }));
 
-    this._transitionManger = new TransitionManager(this.props, this._onTransitionUpdate);
+    this._transitionManger = new TransitionManager(this.props);
   }
 
   componentWillUpdate(nextProps) {
@@ -138,21 +137,12 @@ export default class ViewportController extends PureComponent {
       this._controls.setOptions(nextProps);
     }
     if (this._transitionManger) {
-      this._transitionManger.processViewportChange(this.props, nextProps);
+      this._transitionManger.processViewportChange(nextProps);
     }
   }
 
   componentWillUnmount() {
     this._eventManager.destroy();
-  }
-
-  // Helper methods
-  _onTransitionUpdate(viewport) {
-    if (this.props.onViewportChange) {
-      this.props.onViewportChange(viewport);
-    }
-    // Application onViewportChange may or may not trigger a render
-    this.forceUpdate();
   }
 
   _onInteractiveStateChange({isDragging = false}) {
@@ -187,7 +177,7 @@ export default class ViewportController extends PureComponent {
   }
 
   _updateChildrenViewport() {
-    const viewport = (this._transitionManger && this._transitionManger.getTransionedViewport()) ||
+    const viewport = (this._transitionManger && this._transitionManger.getViewportInTransition()) ||
       extractViewportFrom(this.props);
     const childrenWithProps = this._recursiveUpdateChildren(
         this.props.children,
