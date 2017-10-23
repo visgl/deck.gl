@@ -48,7 +48,7 @@ vec4 project_position_and_offset_to_clipspace_fp64(
 `;
 
 export default {
-  name: 'project64-utils',
+  name: 'project64utils',
   dependencies: ['project64'],
   vs,
   fs: null,

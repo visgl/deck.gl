@@ -114,10 +114,9 @@ export default class MeshLayer extends Layer {
   }
 
   updateState({props, oldProps, changeFlags}) {
-    // super.updateState({props, oldProps, changeFlags});
-
     const {attributeManager} = this.state;
 
+    // super.updateState({props, oldProps, changeFlags});
     if (changeFlags.dataChanged) {
       attributeManager.invalidateAll();
     }
@@ -128,7 +127,7 @@ export default class MeshLayer extends Layer {
 
       if (props.sizeScale !== oldProps.sizeScale) {
         const {sizeScale} = props;
-        this.setUniforms({sizeScale});
+        this.state.model.setUniforms({sizeScale});
       }
 
       if (props.texture !== oldProps.texture) {
@@ -140,19 +139,23 @@ export default class MeshLayer extends Layer {
       }
 
       if (props.lightSettings !== oldProps.lightSettings) {
-        this.setUniforms(props.lightSettings);
+        this.state.model.setUniforms(props.lightSettings);
       }
     }
   }
 
   _updateFP64(props, oldProps) {
     if (props.fp64 !== oldProps.fp64) {
-      const {gl} = this.context;
-      this.setState({model: this.getModel(gl)});
+      this.setState({model: this.getModel(this.context.gl)});
+
+      this.state.model.setUniforms({
+        sizeScale: props.sizeScale
+      });
 
       const {attributeManager} = this.state;
-      if (props.fp64 && props.coordinateSystem === COORDINATE_SYSTEM.LNGLAT) {
-        attributeManager.invalidateAll();
+      attributeManager.invalidateAll();
+
+      if (enable64bitSupport(this.props)) {
         attributeManager.addInstanced({
           instancePositions64xy: {
             size: 2,
