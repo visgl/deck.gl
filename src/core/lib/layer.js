@@ -494,37 +494,47 @@ export default class Layer {
   // Helper methods
 
   // Dirty some change flags, will be handled by updateLayer
+  /* eslint-disable complexity */
   setChangeFlags(flags) {
     this.state.changeFlags = this.state.changeFlags || {};
     const changeFlags = this.state.changeFlags;
+
+    // Update primary flags
     if (flags.dataChanged && !changeFlags.dataChanged) {
       changeFlags.dataChanged = flags.dataChanged;
-      changeFlags.propsOrDataChanged = flags.dataChanged;
-      changeFlags.somethingChanged = flags.dataChanged;
       log.log(LOG_PRIORITY_UPDATE,
         `dataChanged: ${flags.dataChanged} in ${this.id}`);
     }
-    if (flags.updateTriggersChanged && !changeFlags.dataChanged) {
+    if (flags.updateTriggersChanged && !changeFlags.updateTriggersChanged) {
       changeFlags.updateTriggersChanged = flags.updateTriggersChanged;
-      changeFlags.propsOrDataChanged = flags.updateTriggersChanged;
-      changeFlags.somethingChanged = flags.updateTriggersChanged;
       log.log(LOG_PRIORITY_UPDATE,
         `updateTriggersChanged: ${flags.updateTriggersChanged} in ${this.id}`);
     }
     if (flags.propsChanged && !changeFlags.propsChanged) {
-      changeFlags.propsChanged = true;
-      changeFlags.propsOrDataChanged = true;
-      changeFlags.somethingChanged = true;
+      changeFlags.propsChanged = changeFlags.propsChanged;
       log.log(LOG_PRIORITY_UPDATE,
-        `propsChanged: ${flags.reason} in ${this.id}`);
+        `propsChanged: ${flags.propsChanged} in ${this.id}`);
     }
     if (flags.viewportChanged && !changeFlags.viewportChanged) {
-      changeFlags.viewportChanged = true;
-      changeFlags.somethingChanged = true;
+      changeFlags.viewportChanged = flags.viewportChanged;
+      log.log(LOG_PRIORITY_UPDATE + 2,
+        `propsChanged: ${flags.viewportChanged} in ${this.id}`);
     }
+
+    // Update composite flags
+    changeFlags.propsOrDataChanged = changeFlags.propsOrDataChanged ||
+      flags.dataChanged ||
+      flags.updateTriggersChanged ||
+      flags.propsChanged;
+    changeFlags.somethingChanged = changeFlags.somethingChanged ||
+      flags.dataChanged ||
+      flags.updateTriggersChanged ||
+      flags.propsChanged ||
+      flags.viewportChanged;
 
     return changeFlags;
   }
+  /* eslint-enable complexity */
 
   // Clear all changeFlags, typically after an update
   clearChangeFlags() {
@@ -549,39 +559,6 @@ export default class Layer {
     changeFlags = this.setChangeFlags(changeFlags);
     return changeFlags;
   }
-
-  /*
-  diffProps(oldProps, newProps) {
-    const changeFlags = diffProps(oldProps, newProps, this._onUpdateTriggered.bind(this));
-    const {propsChanged, dataChanged, updateTriggersChanged} = changeFlags;
-
-    const viewportChanged = this.context.viewportChanged;
-    const propsOrDataChanged = propsChanged || dataChanged || updateTriggersChanged;
-    const somethingChanged = propsOrDataChanged || viewportChanged;
-
-    // Trace what happened
-    if (dataChanged) {
-      log.log(LOG_PRIORITY_UPDATE, `dataChanged: ${dataChanged} in ${this.id}`);
-    } else if (propsChanged) {
-      log.log(LOG_PRIORITY_UPDATE, `propsChanged: ${propsChanged} in ${this.id}`);
-    }
-
-    return {
-      propsChanged,
-      dataChanged,
-      updateTriggersChanged,
-      propsOrDataChanged,
-      viewportChanged,
-      somethingChanged,
-      reason:
-        dataChanged ||
-        propsChanged ||
-        (viewportChanged && 'Viewport changed') ||
-        (updateTriggersChanged && 'updateTriggers changed') ||
-        'unknown reason'
-    };
-  }
-  */
 
   // PRIVATE METHODS
 
