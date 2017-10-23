@@ -31,7 +31,7 @@ const propTypes = {
   // Note: Non-public API, see https://github.com/mapbox/mapbox-gl-js/issues/1137
   altitude: PropTypes.number,
   // Camera position for FirstPersonViewport
-  position: PropTypes.object,
+  position: PropTypes.array,
 
   /** Viewport constraints */
   // Max zoom level
