@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 
 import Viewport from './viewport';
-import {Vector3, Matrix4, experimental} from 'math.gl';
+import {Matrix4, experimental} from 'math.gl';
 const {SphericalCoordinates} = experimental;
 
 function getDirectionFromBearingAndPitch({bearing, pitch}) {
@@ -35,16 +35,14 @@ export default class FirstPersonViewport extends Viewport {
       // view matrix arguments
       modelMatrix = null,
       bearing,
-      direction, // Which direction camera is looking at
       up = [0, 0, 1] // Defines up direction, default positive z axis,
     } = opts;
 
-    const dir =
-      new Vector3(direction) ||
-      getDirectionFromBearingAndPitch({
-        bearing,
-        pitch: 89
-      });
+    // Always calculate direction from bearing and pitch
+    const dir = getDirectionFromBearingAndPitch({
+      bearing,
+      pitch: 89
+    });
 
     // Direction is relative to model coordinates, of course
     const center = modelMatrix ? modelMatrix.transformDirection(dir) : dir;

@@ -59,8 +59,7 @@ class Root extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      viewportMode: true,
-      fov: 60,
+      fov: 50,
 
       viewportProps: {
         ...DEFAULT_VIEWPORT_PROPS,
@@ -82,7 +81,6 @@ class Root extends Component {
       .then(data => this.setState({trips: data}));
 
     this._onViewportChange = this._onViewportChange.bind(this);
-    this._onViewportModeChange = this._onViewportModeChange.bind(this);
     this._onFovChange = this._onFovChange.bind(this);
   }
 
@@ -123,10 +121,6 @@ class Root extends Component {
     });
   }
 
-  _onViewportModeChange() {
-    this.setState({viewportMode: !this.state.viewportMode});
-  }
-
   _onFovChange() {
     this.setState({fov: this.state.fov === 60 ? 35 : 60});
   }
@@ -142,11 +136,8 @@ class Root extends Component {
             justifyContent: 'center'
           }}
         >
-          <button key="mode" onClick={this._onViewportModeChange}>
-            {this.state.viewportMode ? 'First Person' : 'Mercator'}
-          </button>
           <button key="fov" onClick={this._onFovChange}>
-            {this.state.fov}
+            {`FOV : ${this.state.fov}`}
           </button>
           <div style={{color: 'white'}}>
             {Object.keys(this.state.viewportProps).map(key => (
