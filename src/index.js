@@ -32,10 +32,16 @@ export {default as Layer} from './core/lib/layer';
 export {default as CompositeLayer} from './core/lib/composite-layer';
 
 // Viewports
-export {default as Viewport} from './core/viewports/viewport';
-export {default as FirstPersonViewport} from './core/viewports/first-person-viewport';
-export {default as ThirdPersonViewport} from './core/viewports/third-person-viewport';
-export {default as WebMercatorViewport} from './core/viewports/web-mercator-viewport';
+export {
+  Viewport,
+  FirstPersonViewport,
+  ThirdPersonViewport,
+  WebMercatorViewport,
+  PerspectiveViewport,
+  OrthographicViewport,
+  // TODO: orbit-viewport to be merged w/ third-person-viewport
+  OrbitViewport
+} from './core';
 
 // TODO - Do we need to export? Move to experimental?
 export {default as ViewportControls} from './core/controllers/viewport-controls';
@@ -44,9 +50,6 @@ export {default as OrbitState} from './core/controllers/orbit-state';
 export {default as MapState} from './core/controllers/map-state';
 
 // Deprecated Core Lib Classes
-export {default as OrbitViewport} from './core/viewports/orbit-viewport';
-export {default as PerspectiveViewport} from './core/deprecated/viewports/perspective-viewport';
-export {default as OrthographicViewport} from './core/deprecated/viewports/orthographic-viewport';
 export {assembleShaders} from 'luma.gl'; // Forward the luma.gl version (note: now integrated with Model)
 
 // EXPERIMENTAL FEATURES (May change in minor version bumps, use at your own risk)

@@ -14,15 +14,7 @@ Coordinate system related props have been renamed for clarity
 
 ### Viewports
 
-The `PerspectiveViewport` and `OrthographicViewport` classes have been deprecated as they are no longer needed in the new `Viewport` system.
-
-| Class                  | Replacement           | New Prop             | Comment |
-| ---                    | ---                | ---                  | ---     |
-| `PerspectiveViewport`  | `FirstPersonViewport`* | Use projection matrix props: `fov`, `near`, `far`, or supply a custom `projectionMatrix` |
-| `OrthographicViewport` | `FirstPersonViewport`* | Set `projectionMatrix: new Matrix4().ortho({...})` (Using `Matrix4` from math.gl) |
-
-* `FirstPersonViewport` is not the only option. Any `Viewport` class can now accept a `projectionMatrix` (and will by default create a perspective projection matrix).
-
+TODO: add a document explaining the hierarchies and recommended practices of using the provided viewports.
 
 ## Upgrading from deck.gl v4 to v4.1
 
