@@ -34,8 +34,8 @@ export default class DeckGLOverlay extends Component {
 
     // recalculate viewport on container size change.
     const left = -width / 2;
-    const top = -height / 2;
-    const glViewport = new OrthographicViewport({width, height, left, top});
+    const bottom = -height / 2;
+    const glViewport = new OrthographicViewport({width, height, left, bottom});
 
     // TODO: clean up viewport / glViewport
     return (

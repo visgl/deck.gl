@@ -124,8 +124,8 @@ class Root extends PureComponent {
   render() {
     const {width, height, viewMode} = this.state;
     const left = -Math.min(width, height) / 2;
-    const top = -Math.min(width, height) / 2;
-    const glViewport = new OrthographicViewport({width, height, left, top});
+    const bottom = -Math.min(width, height) / 2;
+    const glViewport = new OrthographicViewport({width, height, left, bottom});
 
     return width && height && <div>
       {(viewMode === VIEW_MODE.SVG || viewMode === VIEW_MODE.HYBRID) &&
