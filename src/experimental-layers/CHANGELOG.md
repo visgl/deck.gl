@@ -1,3 +1,5 @@
+0.0.6
+- Fix MeshLayer fp64 mode (#1068)
 0.0.5
 - Set pickable to false for marker layer
 0.0.4
