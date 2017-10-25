@@ -92,7 +92,6 @@ export default class LayerManager {
     seerInitListener(this._initSeer);
     layerEditListener(this._editSeer);
 
-    Object.seal(this.context);
     Object.seal(this);
   }
 
@@ -143,7 +142,7 @@ export default class LayerManager {
       this.updateLayers({newLayers: parameters.layers});
     }
 
-    this.context = Object.assign({}, this.context, parameters);
+    Object.assign(this.context, parameters);
   }
 
   setViewports(viewports) {
