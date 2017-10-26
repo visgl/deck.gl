@@ -502,23 +502,23 @@ export default class Layer {
     // Update primary flags
     if (flags.dataChanged && !changeFlags.dataChanged) {
       changeFlags.dataChanged = flags.dataChanged;
-      log.log(LOG_PRIORITY_UPDATE,
-        `dataChanged: ${flags.dataChanged} in ${this.id}`);
+      log.log(LOG_PRIORITY_UPDATE + 1,
+        () => `dataChanged: ${flags.dataChanged} in ${this.id}`);
     }
     if (flags.updateTriggersChanged && !changeFlags.updateTriggersChanged) {
       changeFlags.updateTriggersChanged = flags.updateTriggersChanged;
-      log.log(LOG_PRIORITY_UPDATE,
-        `updateTriggersChanged: ${flags.updateTriggersChanged} in ${this.id}`);
+      log.log(LOG_PRIORITY_UPDATE + 1,
+        () => `updateTriggersChanged: ${flags.updateTriggersChanged} in ${this.id}`);
     }
     if (flags.propsChanged && !changeFlags.propsChanged) {
-      changeFlags.propsChanged = changeFlags.propsChanged;
-      log.log(LOG_PRIORITY_UPDATE,
-        `propsChanged: ${flags.propsChanged} in ${this.id}`);
+      changeFlags.propsChanged = flags.propsChanged;
+      log.log(LOG_PRIORITY_UPDATE + 1,
+        () => `propsChanged: ${flags.propsChanged} in ${this.id}`);
     }
     if (flags.viewportChanged && !changeFlags.viewportChanged) {
       changeFlags.viewportChanged = flags.viewportChanged;
       log.log(LOG_PRIORITY_UPDATE + 2,
-        `propsChanged: ${flags.viewportChanged} in ${this.id}`);
+        () => `propsChanged: ${flags.viewportChanged} in ${this.id}`);
     }
 
     // Update composite flags

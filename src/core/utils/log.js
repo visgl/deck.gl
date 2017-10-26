@@ -24,16 +24,6 @@ import assert from 'assert';
 
 const cache = {};
 
-function formatArgs(firstArg, ...args) {
-  if (typeof firstArg === 'string') {
-    args.unshift(`deck.gl ${firstArg}`);
-  } else {
-    args.unshift(firstArg);
-    args.unshift('deck.gl');
-  }
-  return args;
-}
-
 function log(priority, arg, ...args) {
   assert(Number.isFinite(priority), 'log priority must be a number');
   if (priority <= log.priority) {
@@ -47,20 +37,6 @@ function log(priority, arg, ...args) {
   }
 }
 
-// Assertions don't generate standard exceptions and don't print nicely
-function checkForAssertionErrors(args) {
-  const isAssertion =
-    args && args.length > 0 &&
-    typeof args[0] === 'object' && args[0] !== null &&
-    args[0].name === 'AssertionError';
-
-  if (isAssertion) {
-    args = Array.prototype.slice.call(args);
-    args.unshift(`assert(${args[0].message})`);
-  }
-  return args;
-}
-
 function once(priority, arg, ...args) {
   if (!cache[arg] && priority <= log.priority) {
     args = checkForAssertionErrors(args);
@@ -72,8 +48,8 @@ function once(priority, arg, ...args) {
 function warn(priority, arg, ...args) {
   if (priority <= log.priority && !cache[arg]) {
     console.warn(`deck.gl: ${arg}`, ...args);
+    cache[arg] = true;
   }
-  cache[arg] = true;
 }
 
 function error(priority, arg, ...args) {
@@ -108,6 +84,35 @@ function timeEnd(priority, label) {
       console.info(label);
     }
   }
+}
+
+// Helper functions
+
+function formatArgs(firstArg, ...args) {
+  if (typeof firstArg === 'function') {
+    firstArg = firstArg();
+  }
+  if (typeof firstArg === 'string') {
+    args.unshift(`deck.gl ${firstArg}`);
+  } else {
+    args.unshift(firstArg);
+    args.unshift('deck.gl');
+  }
+  return args;
+}
+
+// Assertions don't generate standard exceptions and don't print nicely
+function checkForAssertionErrors(args) {
+  const isAssertion =
+    args && args.length > 0 &&
+    typeof args[0] === 'object' && args[0] !== null &&
+    args[0].name === 'AssertionError';
+
+  if (isAssertion) {
+    args = Array.prototype.slice.call(args);
+    args.unshift(`assert(${args[0].message})`);
+  }
+  return args;
 }
 
 log.priority = 0;
