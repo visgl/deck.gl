@@ -35,11 +35,6 @@ export default class CompositeLayer extends Layer {
   initializeState() {
   }
 
-  // No-op for the invalidateAttribute function as the composite
-  // layer has no AttributeManager
-  invalidateAttribute() {
-  }
-
   // called to augment the info object that is bubbled up from a sublayer
   // override Layer.getPickingInfo() because decoding / setting uniform do
   // not apply to a composite layer.
@@ -71,7 +66,12 @@ export default class CompositeLayer extends Layer {
     };
   }
 
+  // Called by layer manager to render sublayers
   _renderLayers(updateParams) {
+    // TODO - won't updateLayer also be called? Avoid "double diffing"
+    const {oldProps, props} = updateParams;
+    this.diffProps(oldProps, props);
+
     if (this.state.oldSubLayers && !this.shouldUpdateState(updateParams)) {
       log.log(2, `Composite layer reused sublayers ${this}`, this.state.oldSubLayers);
       return this.state.oldSubLayers;
