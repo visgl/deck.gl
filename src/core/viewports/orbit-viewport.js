@@ -92,8 +92,8 @@ export default class OrbitViewport extends Viewport {
     return transformVector(this.pixelUnprojectionMatrix, [x, y2, z, 1]);
   }
 
-  /** Move camera to get a bounding box fit in the viewport.
-   * @param {Array} bounds - [[minX, minY, minZ], [maxX, maxY, maxZ]]
+  /** Move camera to make a model bounding box centered at lookat position fit in the viewport.
+   * @param {Array} max - [maxX, maxY, maxZ]], define the dimensions of bounding box
    * @returns a new OrbitViewport object
    */
   fitBounds(max) {
