@@ -522,15 +522,11 @@ export default class Layer {
     }
 
     // Update composite flags
-    changeFlags.propsOrDataChanged = changeFlags.propsOrDataChanged ||
-      flags.dataChanged ||
-      flags.updateTriggersChanged ||
-      flags.propsChanged;
+    const propsOrDataChanged =
+      flags.dataChanged || flags.updateTriggersChanged || flags.propsChanged;
+    changeFlags.propsOrDataChanged = changeFlags.propsOrDataChanged || propsOrDataChanged;
     changeFlags.somethingChanged = changeFlags.somethingChanged ||
-      flags.dataChanged ||
-      flags.updateTriggersChanged ||
-      flags.propsChanged ||
-      flags.viewportChanged;
+      propsOrDataChanged || flags.viewportChanged;
 
     return changeFlags;
   }
