@@ -20,7 +20,8 @@
 
 import {Layer} from '../../core';
 import {fp64ify} from '../../core/lib/utils/fp64';
-import {flatten, log} from '../../core/lib/utils';
+import {flatten} from '../../core/lib/utils';
+import log from '../../core/utils/log';
 
 import {GL, Model, Geometry} from 'luma.gl';
 import earcut from 'earcut';

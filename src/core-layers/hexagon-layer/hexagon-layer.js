@@ -18,13 +18,11 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {CompositeLayer} from '../../core';
+import {CompositeLayer, experimental} from '../../core';
 import HexagonCellLayer from '../hexagon-cell-layer/hexagon-cell-layer';
-import log from '../../core/utils/log';
 
-import BinSorter from '../../core/utils/bin-sorter';
-import {getQuantizeScale, getLinearScale} from '../../core/utils/scale-utils';
-import {defaultColorRange} from '../../core/utils/color-utils';
+const {log, BinSorter, getQuantizeScale, getLinearScale, defaultColorRange} = experimental;
+
 import {pointToHexbin} from './hexagon-aggregator';
 
 function nop() {}
