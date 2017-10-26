@@ -22,7 +22,7 @@ import assert from 'assert';
 import {Framebuffer, ShaderCache} from 'luma.gl';
 import seer from 'seer';
 import Layer from './layer';
-import {log} from './utils';
+import log from '../utils/log';
 import {flatten} from './utils/flatten';
 import {drawLayers} from './draw-layers';
 import {pickObject, pickVisibleObjects} from './pick-layers';
@@ -299,7 +299,7 @@ export default class LayerManager {
     // TODO - this should consider visible layers, not all layers
     if (this.layers.length === 0) {
       if (this.screenCleared === false) {
-        this._needsRedraw = this._needsRedraw || 'no layers, clearing screen';
+        this._needsRedraw = 'no layers, clearing screen';
         this.screenCleared = true;
       }
     } else if (this.screenCleared === true) {

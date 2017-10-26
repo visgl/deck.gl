@@ -42,20 +42,31 @@ export {default as FirstPersonState} from './controllers/first-person-state';
 export {default as OrbitState} from './controllers/orbit-state';
 export {default as MapState} from './controllers/map-state';
 
+export {TRANSITION_EVENTS} from './lib/transition-manager';
+export {viewportLinearInterpolator, viewportFlyToInterpolator} from './lib/viewport-transition-utils';
+
+// Experimental Features (May change in minor version bumps, use at your own risk)
 // Experimental Pure JS (non-React) bindings
 import {default as DeckGLJS} from './pure-js/deck-js';
 import {default as MapControllerJS} from './pure-js/map-controller-js';
-
-// Experimental Features (May change in minor version bumps, use at your own risk)
-import {get} from './lib/utils/get';
-import {count} from './lib/utils/count';
+// Experimental Effects (non-React) bindings
 import {default as EffectManager} from './experimental/lib/effect-manager';
 import {default as Effect} from './experimental/lib/effect';
 
+import TransitionManager from './lib/transition-manager';
+import {extractViewportFrom} from './lib/viewport-transition-utils';
+
+// Layer utilities
+import log from './utils/log';
+import {get} from './lib/utils/get';
+import {count} from './lib/utils/count';
+
 import {default as BinSorter} from './utils/bin-sorter';
-import {linearScale} from './utils/scale-utils';
-import {quantizeScale} from './utils/scale-utils';
-import {clamp} from './utils/scale-utils';
+import {
+  linearScale, getLinearScale,
+  quantizeScale, getQuantizeScale,
+  clamp
+} from './utils/scale-utils';
 import {defaultColorRange} from './utils/color-utils';
 
 // TODO - just expose as layer methods instead?
@@ -63,21 +74,27 @@ import {enable64bitSupport} from './lib/utils/fp64';
 import {fp64ify} from './lib/utils/fp64';
 
 export const experimental = {
-  BinSorter,
-  linearScale,
-  quantizeScale,
-  clamp,
-  defaultColorRange,
-
-  get,
-  count,
-
-  enable64bitSupport,
-  fp64ify,
-
+  DeckGLJS,
+  MapControllerJS,
   EffectManager,
   Effect,
 
-  DeckGLJS,
-  MapControllerJS
+  // For react module
+  TransitionManager,
+  extractViewportFrom,
+
+  // For layers
+  BinSorter,
+  linearScale,
+  getLinearScale,
+  quantizeScale,
+  getQuantizeScale,
+  clamp,
+  defaultColorRange,
+
+  log,
+  get,
+  count,
+  enable64bitSupport,
+  fp64ify
 };
