@@ -3,7 +3,7 @@ import React, {Component} from 'react';
 import {render} from 'react-dom';
 import {StaticMap} from 'react-map-gl';
 import DeckGLOverlay from './deckgl-overlay.js';
-import {ViewportController, MapState, experimental} from 'deck.gl';
+import {ViewportController, MapState, TRANSITION_EVENTS} from 'deck.gl';
 import {json as requestJson} from 'd3-request';
 
 // Set your mapbox token here
@@ -89,7 +89,7 @@ class Root extends Component {
         onViewportChange={this._onViewportChange.bind(this)}
         transitionDuration={transitionDuration}
         transitionEasing={easeInOutElastic}
-        transitionInterruption={experimental.TRANSITION_EVENTS.SNAP_TO_END}>
+        transitionInterruption={TRANSITION_EVENTS.SNAP_TO_END}>
         <StaticMap
           {...viewport}
           onViewportChange={this._onViewportChange.bind(this)}

@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 
 import {EventManager} from 'mjolnir.js';
 import {ViewportControls, experimental} from '../core';
-const {TransitionManager, extractViewportFrom} = experimental;
+const {TransitionManager} = experimental;
 
 import CURSOR from './utils/cursors';
 

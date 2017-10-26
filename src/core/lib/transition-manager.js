@@ -57,6 +57,7 @@ export default class TransitionManager {
 
     const isTransitionInProgress = this._isTransitionInProgress();
     const currentProps = this.props;
+    // Set this.props here as '_triggerTransition' calls '_updateViewport' that uses this.props.
     this.props = nextProps;
 
     if (this._isTransitionEnabled(nextProps)) {
