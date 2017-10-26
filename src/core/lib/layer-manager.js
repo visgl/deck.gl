@@ -462,11 +462,6 @@ export default class LayerManager {
     return this;
   }
 
-  // Get a viewport from a view descriptor (which can be a plain viewport)
-  _getViewportFromDescriptor(viewportOrDescriptor) {
-    return viewportOrDescriptor.viewport ? viewportOrDescriptor.viewport : viewportOrDescriptor;
-  }
-
   _getPickingBuffer() {
     const {gl} = this.context;
     // Create a frame buffer if not already available
