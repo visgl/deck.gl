@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 
 import Layer from './layer';
-import {log} from './utils';
+import log from '../utils/log';
 
 export default class CompositeLayer extends Layer {
   constructor(props) {

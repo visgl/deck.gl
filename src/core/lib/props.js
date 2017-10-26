@@ -1,4 +1,4 @@
-import {log} from './utils';
+import log from '../utils/log';
 import assert from 'assert';
 
 // Returns an object with "change flags", either false or strings indicating reason for change

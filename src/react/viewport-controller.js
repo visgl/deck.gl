@@ -2,11 +2,10 @@ import {PureComponent, createElement, cloneElement, Children, isValidElement} fr
 import PropTypes from 'prop-types';
 
 import {EventManager} from 'mjolnir.js';
-import {ViewportControls} from '../core';
-import CURSOR from './utils/cursors';
+import {ViewportControls, experimental} from '../core';
+const {TransitionManager, extractViewportFrom} = experimental;
 
-import TransitionManager from './experimental/transition-manager';
-import {extractViewportFrom} from './experimental/viewport-transition-utils';
+import CURSOR from './utils/cursors';
 
 const propTypes = {
   viewportState: PropTypes.func,

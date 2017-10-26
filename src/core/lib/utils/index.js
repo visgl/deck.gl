@@ -28,6 +28,3 @@ export {parseColor} from './color';
 // ES6 Container and Immutable support
 export {get} from './get';
 export {count} from './count';
-
-// TODO - remove (backwards compatiblity export)
-export {default as log} from '../../utils/log';

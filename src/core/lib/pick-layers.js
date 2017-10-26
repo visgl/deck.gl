@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {log} from './utils';
+import log from '../utils/log';
 import {drawPickingBuffer, getPixelRatio} from './draw-layers';
 import assert from 'assert';
 

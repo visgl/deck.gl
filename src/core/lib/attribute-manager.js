@@ -21,7 +21,7 @@
 /* eslint-disable guard-for-in */
 import {GL} from 'luma.gl';
 import Stats from './stats';
-import {log} from './utils';
+import log from '../utils/log';
 import assert from 'assert';
 
 const LOG_START_END_PRIORITY = 1;
