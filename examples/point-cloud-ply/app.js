@@ -64,7 +64,7 @@ class Example extends PureComponent {
     const size = {width: window.innerWidth, height: window.innerHeight};
     this.setState(size);
     const newViewport = OrbitController.getViewport(Object.assign(this.state.viewport, size))
-      .fitBounds([[0, 0, 0], [1, 1, 1]]);
+      .fitBounds([1, 1, 1]);
     this._onViewportChange(newViewport);
   }
 
