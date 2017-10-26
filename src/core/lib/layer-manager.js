@@ -28,6 +28,8 @@ import {drawLayers} from './draw-layers';
 import {pickObject, pickVisibleObjects} from './pick-layers';
 import {LIFECYCLE} from './constants';
 import Viewport from '../viewports/viewport';
+// TODO - remove, just for dummy initialization
+import WebMercatorViewport from '../viewports/web-mercator-viewport';
 import {
   setPropOverrides,
   layerEditListener,
@@ -53,12 +55,11 @@ const initialContext = {
   }
 };
 
-const layerName = layer => layer instanceof Layer ?
-  `${layer}` :
-  (!layer ? 'null layer' : 'invalid layer');
+const layerName = layer => layer instanceof Layer ? `${layer}` : (!layer ? 'null' : 'invalid');
 
 export default class LayerManager {
-  constructor({gl}) {
+
+  constructor(gl, {eventManager} = {}) { // eslint-disable-line
      // Currently deck.gl expects the DeckGL.layers array to be different
      // whenever React rerenders. If the same layers array is used, the
      // LayerManager's diffing algorithm will generate a fatal error and
@@ -71,18 +72,26 @@ export default class LayerManager {
     this.lastRenderedLayers = [];
     this.prevLayers = [];
     this.layers = [];
+
     this.oldContext = {};
-    this.screenCleared = false;
-    this._needsRedraw = 'Initial render';
     this.context = Object.assign({}, initialContext, {
       gl,
       shaderCache: new ShaderCache({gl})
     });
-    this.error = null;
+
+    // List of view descriptors, gets re-evaluated when width/height changes
+    this.width = 100;
+    this.height = 100;
+    this.viewDescriptors = [];
+    this.viewDescriptorsChanged = true;
+    this.viewports = []; // Generated viewports
+    this.screenCleared = false;
+    this._needsRedraw = 'Initial render';
 
     // Event handling
-    this._eventManager = null;
     this._pickingRadius = 0;
+
+    this._eventManager = null;
     this._onLayerClick = null;
     this._onLayerHover = null;
     this._onClick = this._onClick.bind(this);
@@ -97,6 +106,15 @@ export default class LayerManager {
     layerEditListener(this._editSeer);
 
     Object.seal(this);
+
+    if (eventManager) {
+      this._initEventHandling(eventManager);
+    }
+
+    // Init with dummy viewport
+    this.setViewports([
+      new WebMercatorViewport({width: 1, height: 1, latitude: 0, longitude: 0, zoom: 1})
+    ]);
   }
 
   /**
@@ -109,6 +127,15 @@ export default class LayerManager {
     seer.removeListener(this._editSeer);
   }
 
+  needsRedraw({clearRedrawFlags = false} = {}) {
+    return this._checkIfNeedsRedraw(clearRedrawFlags);
+  }
+
+  // Normally not called by app
+  setNeedsRedraw(reason) {
+    this._needsRedraw = this._needsRedraw || reason;
+  }
+
   // Gets an (optionally) filtered list of layers
   getLayers({layerIds = null} = {}) {
     // Filtering by layerId compares beginning of strings, so that sublayers will be included
@@ -118,27 +145,63 @@ export default class LayerManager {
       this.layers;
   }
 
-  getViewports() {
-    return this.context.viewports;
+  // Get a set of viewports for a given width and height
+  getViewports({width, height} = {}) {
+    if (width !== this.width || height !== this.height || this.viewDescriptorsChanged) {
+      this._rebuildViewportsFromViews({viewDescriptors: this.viewDescriptors, width, height});
+      this.width = width;
+      this.height = height;
+    }
+    return this.viewports;
   }
 
+  /**
+   * Set parameters needed for layer rendering and picking.
+   * Parameters are to be passed as a single object, with the following values:
+   * @param {Boolean} useDevicePixelRatio
+   */
+  setParameters(parameters) {
+    if ('eventManager' in parameters) {
+      this._initEventHandling(parameters.eventManager);
+    }
+
+    if ('pickingRadius' in parameters ||
+      'onLayerClick' in parameters ||
+      'onLayerHover' in parameters) {
+      this._setEventHandlingParameters(parameters);
+    }
+
+    // TODO - For now we set layers before viewports to preservenchangeFlags
+    if ('layers' in parameters) {
+      this.setLayers(parameters.layers);
+    }
+
+    if ('layerFilter' in parameters) {
+      this.context.layerFilter = parameters.layerFilter;
+    }
+
+    if ('viewports' in parameters) {
+      this.setViewports(parameters.viewports);
+    }
+
+    Object.assign(this.context, parameters);
+  }
+
+  // Update the view descriptor list and set change flag if needed
   setViewports(viewports) {
-    viewports = flatten(viewports, {filter: Boolean});
+    // Ensure viewports are wrapped in descriptors
+    const viewDescriptors = flatten(viewports, {filter: Boolean})
+      .map(viewport => viewport instanceof Viewport ? {viewport} : viewport);
 
-    // Viewports are "immutable", so we can shallow compare
-    const oldViewports = this.context.viewports;
-    const viewportsChanged = viewports.length !== oldViewports.length ||
-      viewports.some((_, i) => viewports[i] !== oldViewports[i]);
+    this.viewDescriptorsChanged =
+      this.viewDescriptorsChanged ||
+      this._diffViews(viewDescriptors, this.viewDescriptors);
 
-    if (viewportsChanged) {
-      this._needsRedraw = 'Viewport changed';
-
-      // Need to ensure one viewport is activated
-      const viewport = viewports[0];
-      assert(viewport instanceof Viewport, 'Invalid viewport');
-
-      this.context.viewports = viewports;
-      this._activateViewport(viewport);
+    // Try to not actually rebuild the viewports until `getViewports` is called
+    if (this.viewDescriptorsChanged) {
+      this.viewDescriptors = viewDescriptors;
+      this._rebuildViewportsFromViews({viewDescriptors: this.viewDescriptors});
+      this.viewDescriptorsChanged = false;
     }
   }
 
@@ -155,6 +218,10 @@ export default class LayerManager {
 
     newLayers = flatten(newLayers, {filter: Boolean});
 
+    for (const layer of newLayers) {
+      layer.context = this.context;
+    }
+
     this.prevLayers = this.layers;
     const {error, generatedLayers} = this._updateLayers({
       oldLayers: this.prevLayers,
@@ -169,35 +236,20 @@ export default class LayerManager {
     return this;
   }
 
-  /**
-   * Set parameters needed for layer rendering and picking.
-   * Parameters are to be passed as a single object, with the following values:
-   * @param {Boolean} useDevicePixelRatio
-   */
-  setParameters(parameters) {
-    if ('eventManager' in parameters) {
-      this.initEventHandling(parameters.eventManager);
-    }
+  drawLayers({pass = 'render to screen', redrawReason = 'unknown reason'} = {}) {
+    const {gl, useDevicePixelRatio, drawPickingColors} = this.context;
 
-    if ('pickingRadius' in parameters ||
-      'onLayerClick' in parameters ||
-      'onLayerHover' in parameters) {
-      this.setEventHandlingParameters(parameters);
-    }
-
-    if ('viewports' in parameters) {
-      this.setViewports(parameters.viewports);
-    }
-
-    if ('layers' in parameters) {
-      this.updateLayers({newLayers: parameters.layers});
-    }
-
-    if ('layerFilter' in parameters) {
-      this.context.layerFilter = parameters.layerFilter;
-    }
-
-    Object.assign(this.context, parameters);
+    // render this viewport
+    drawLayers(gl, {
+      layers: this.layers,
+      viewports: this.getViewports(),
+      onViewportActive: this._activateViewport.bind(this),
+      useDevicePixelRatio,
+      drawPickingColors,
+      pass,
+      layerFilter: this.context.layerFilter,
+      redrawReason
+    });
   }
 
   // Pick the closest info at given coordinate
@@ -215,7 +267,7 @@ export default class LayerManager {
       mode,
       layerFilter,
       // Injected params
-      viewports: this.context.viewports,
+      viewports: this.getViewports(),
       onViewportActive: this._activateViewport.bind(this),
       pickingFBO: this._getPickingBuffer(),
       lastPickedInfo: this.context.lastPickedInfo,
@@ -224,7 +276,7 @@ export default class LayerManager {
   }
 
   // Get all unique infos within a bounding box
-  pickVisibleObjects({x, y, width, height, layerIds, layerFilter}) {
+  pickObjects({x, y, width, height, layerIds, layerFilter}) {
     const {gl, useDevicePixelRatio} = this.context;
 
     const layers = this.getLayers({layerIds});
@@ -236,21 +288,36 @@ export default class LayerManager {
       height,
       layers,
       layerFilter,
-      mode: 'queryObjects',
+      mode: 'pickObjects',
       // TODO - how does this interact with multiple viewports?
       viewport: this.context.viewport,
-      viewports: this.context.viewports,
+      viewports: this.getViewports(),
       onViewportActive: this._activateViewport.bind(this),
       pickingFBO: this._getPickingBuffer(),
       useDevicePixelRatio
     });
   }
 
-  needsRedraw({clearRedrawFlags = false} = {}) {
-    if (!this.context.viewport) {
-      return false;
-    }
+  //
+  // DEPRECATED METHODS
+  //
 
+  updateLayers({newLayers}) {
+    log.deprecated('updateLayers', 'setLayers');
+    this.setLayers(newLayers);
+  }
+
+  setViewport(viewport) {
+    log.deprecated('setViewport', 'setViewports');
+    this.setViewports([viewport]);
+    return this;
+  }
+
+  //
+  // PRIVATE METHODS
+  //
+
+  _checkIfNeedsRedraw(clearRedrawFlags) {
     // Make sure that buffer is cleared once when layer list becomes empty
     // TODO - this should consider visible layers, not all layers
     if (this.layers.length === 0) {
@@ -275,26 +342,107 @@ export default class LayerManager {
     return redraw;
   }
 
-  drawLayers({pass = 'render to screen', redrawReason = 'unknown reason'} = {}) {
-    const {gl, useDevicePixelRatio, drawPickingColors} = this.context;
+  // Rebuilds viewports from descriptors towards a certain window size
+  _rebuildViewportsFromViews({viewDescriptors, width, height}) {
+    const newViewports = viewDescriptors.map(viewDescriptor =>
+      // If a `Viewport` instance was supplied, use it, otherwise build it
+      viewDescriptor.viewport instanceof Viewport ?
+        viewDescriptor.viewport :
+        this._makeViewportFromViewDescriptor({viewDescriptor, width, height})
+    );
 
-    // render this viewport
-    drawLayers(gl, {
-      layers: this.layers,
-      viewports: this.context.viewports,
-      onViewportActive: this._activateViewport.bind(this),
-      useDevicePixelRatio,
-      drawPickingColors,
-      pass,
-      layerFilter: this.context.layerFilter,
-      redrawReason
+    this.setNeedsRedraw('Viewport(s) changed');
+
+    // Ensure one viewport is activated, layers may expect it
+    // TODO - handle empty viewport list (using dummy viewport), or assert
+    // const oldViewports = this.context.viewports;
+    // if (viewportsChanged) {
+
+    const viewport = newViewports[0];
+    assert(viewport instanceof Viewport, 'Invalid viewport');
+
+    this.context.viewports = newViewports;
+    this._activateViewport(viewport);
+    // }
+
+    // We've just rebuilt the viewports to match the descriptors, so clear the flag
+    this.viewports = newViewports;
+    this.viewDescriptorsChanged = false;
+  }
+
+  // Build a `Viewport` from a view descriptor
+  _makeViewportFromViewDescriptor({viewDescriptor, width, height}) {
+    // Get the type of the viewport
+    // TODO - default to WebMercator?
+    const {type: ViewportType, viewState} = viewDescriptor;
+
+    // Resolve relative viewport dimensions
+    // TODO - we need to have width and height available
+    const viewportDimensions = this._getViewDimensions({viewDescriptor});
+
+    // Create the viewport, giving preference to view state in `viewState`
+    return new ViewportType(Object.assign({},
+      viewDescriptor,
+      viewportDimensions,
+      viewState // Object.assign handles undefined
+    ));
+  }
+
+  // Check if viewport array has changed, returns true if any change
+  // Note that descriptors can be the same
+  _diffViews(newViews, oldViews) {
+    if (newViews.length !== oldViews.length) {
+      return true;
+    }
+
+    return newViews.some(
+      (_, i) => this._diffView(newViews[i], oldViews[i])
+    );
+  }
+
+  // TODO: this will be true always if descriptors are used as we create new object
+  _diffView(newView, oldView) {
+    // `View` hiearchy supports an `equals` method
+    if (newView.viewport) {
+      return !oldView.viewport || !newView.viewport.equals(oldView.viewport);
+    }
+    return newView !== oldView;
+  }
+
+  // Support for relative viewport dimensions (e.g {y: '50%', height: '50%'})
+  _getViewDimensions({viewDescriptor, width, height}) {
+    const parsePercent = (value, max) => value;
+    // ?
+    //   Math.round(parseFloat(value) / 100 * max) :
+    //   (value === null ? max : value);
+
+    return {
+      x: parsePercent(viewDescriptor.x, width),
+      y: parsePercent(viewDescriptor.y, height),
+      width: parsePercent(viewDescriptor.width, width),
+      height: parsePercent(viewDescriptor.height, height)
+    };
+  }
+
+  /**
+   * @param {Object} eventManager   A source of DOM input events
+   */
+  _initEventHandling(eventManager) {
+    this._eventManager = eventManager;
+
+    // TODO: add/remove handlers on demand at runtime, not all at once on init.
+    // Consider both top-level handlers like onLayerClick/Hover
+    // and per-layer handlers attached to individual layers.
+    // https://github.com/uber/deck.gl/issues/634
+    this._eventManager.on({
+      click: this._onClick,
+      pointermove: this._onPointerMove,
+      pointerleave: this._onPointerLeave
     });
-
-    return this;
   }
 
   // Set parameters for input event handling.
-  setEventHandlingParameters({
+  _setEventHandlingParameters({
     pickingRadius,
     onLayerClick,
     onLayerHover
@@ -309,42 +457,6 @@ export default class LayerManager {
       this._onLayerHover = onLayerHover;
     }
     this._validateEventHandling();
-  }
-
-  //
-  // DEPRECATED METHODS
-  //
-
-  updateLayers({newLayers}) {
-    log.deprecated('updateLayers', 'setLayers');
-    this.setLayers(newLayers);
-  }
-
-  setViewport(viewport) {
-    log.deprecated('setViewport', 'setViewports');
-    this.setViewports([viewport]);
-    return this;
-  }
-
-  //
-  // PRIVATE METHODS
-  //
-
-  /**
-   * @param {Object} eventManager   A source of DOM input events
-   */
-  initEventHandling(eventManager) {
-    this._eventManager = eventManager;
-
-    // TODO: add/remove handlers on demand at runtime, not all at once on init.
-    // Consider both top-level handlers like onLayerClick/Hover
-    // and per-layer handlers attached to individual layers.
-    // https://github.com/uber/deck.gl/issues/634
-    this._eventManager.on({
-      click: this._onClick,
-      pointermove: this._onPointerMove,
-      pointerleave: this._onPointerLeave
-    });
   }
 
   // Make a viewport "current" in layer context, primed for draw
@@ -376,11 +488,6 @@ export default class LayerManager {
     assert(this.context.viewport, 'LayerManager: viewport not set');
 
     return this;
-  }
-
-  // Get a viewport from a viewport descriptor (which can be a plain viewport)
-  _getViewportFromDescriptor(viewportOrDescriptor) {
-    return viewportOrDescriptor.viewport ? viewportOrDescriptor.viewport : viewportOrDescriptor;
   }
 
   _getPickingBuffer() {

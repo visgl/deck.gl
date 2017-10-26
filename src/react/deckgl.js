@@ -66,8 +66,7 @@ export default class DeckGL extends React.Component {
 
     // Build a viewport id to viewport index
     const viewportMap = {};
-    viewports.forEach(viewportDescriptor => {
-      const viewport = this.deck._getViewportFromDescriptor(viewportDescriptor);
+    viewports.forEach(viewport => {
       if (viewport.id) {
         viewportMap[viewport.id] = viewport;
       }
@@ -79,8 +78,7 @@ export default class DeckGL extends React.Component {
       const viewport = viewportId && viewportMap[viewportId];
       if (viewport) {
         // Resolve potentially relative dimensions using the deck.gl container size
-        const {x, y, width, height} =
-          viewport.getDimensions({width: this.props.width, height: this.props.height});
+        const {x, y, width, height} = viewport;
 
         // Clone the element with width and height set per viewport
         const newProps = Object.assign({}, child.props, {
