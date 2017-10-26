@@ -18,8 +18,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {COORDINATE_SYSTEM, Layer} from '../../core';
-import {fp64ify, enable64bitSupport} from '../../core/lib/utils/fp64';
+import {COORDINATE_SYSTEM, Layer, experimental} from '../../core';
+const {fp64ify, enable64bitSupport} = experimental;
 import {GL, Model, CubeGeometry} from 'luma.gl';
 
 import vs from './grid-cell-layer-vertex.glsl';

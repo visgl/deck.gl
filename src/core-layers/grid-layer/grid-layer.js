@@ -18,14 +18,12 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {CompositeLayer} from '../../core';
+import {CompositeLayer, experimental} from '../../core';
+const {BinSorter, defaultColorRange, getQuantizeScale, getLinearScale} = experimental;
+
 import GridCellLayer from '../grid-cell-layer/grid-cell-layer';
 
 import {pointToDensityGridData} from './grid-aggregator';
-import {defaultColorRange} from '../../core/utils/color-utils';
-import {getQuantizeScale, getLinearScale} from '../../core/utils/scale-utils';
-
-import BinSorter from '../../core/utils/bin-sorter';
 
 function nop() {}
 
