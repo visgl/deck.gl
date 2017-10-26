@@ -40,7 +40,7 @@ class Root extends Component {
       height: window.innerHeight
     };
     const newViewport = OrbitController.getViewport(Object.assign(this.state.viewport, size))
-      .fitBounds([[0, 0, 0], [1, 1, 1]]);
+      .fitBounds([3, 3, 3]);
 
     this._onViewportChange(newViewport);
   }
