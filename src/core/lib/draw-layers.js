@@ -68,6 +68,7 @@ export function drawLayers(gl, {
   drawPickingColors = false,
   deviceRect = null,
   parameters = {},
+  layerFilter = (layer, viewport) => true,
   pass = 'draw',
   redrawReason = ''
 }) {
@@ -89,6 +90,7 @@ export function drawLayers(gl, {
       drawPickingColors,
       deviceRect,
       parameters,
+      layerFilter,
       pass,
       redrawReason
     });
@@ -106,6 +108,7 @@ export function drawPickingBuffer(gl, {
   useDevicePixelRatio,
   pickingFBO,
   deviceRect: {x, y, width, height},
+  layerFilter = (layer, viewport) => true,
   redrawReason = ''
 }) {
   // Make sure we clear scissor test and fbo bindings in case of exceptions
@@ -126,6 +129,7 @@ export function drawPickingBuffer(gl, {
       onViewportActive,
       useDevicePixelRatio,
       drawPickingColors: true,
+      layerFilter,
       pass: 'picking',
       redrawReason,
       parameters: {
@@ -149,6 +153,7 @@ function drawLayersInViewport(gl, {
   drawPickingColors = false,
   deviceRect = null,
   parameters = {},
+  layerFilter,
   pass = 'draw',
   redrawReason = ''
 }) {
@@ -165,6 +170,51 @@ function drawLayersInViewport(gl, {
 
   // const {x, y, width, height} = deviceRect || [];
 
+  setParameters(gl, parameters || {});
+
+  // render layers in normal colors
+  layers.forEach((layer, layerIndex) => {
+
+    // Check if we should draw layer
+    let shouldDrawLayer = layer.props.visible;
+    if (drawPickingColors) {
+      shouldDrawLayer = shouldDrawLayer && layer.props.pickable;
+    }
+    if (shouldDrawLayer && layerFilter) {
+      shouldDrawLayer = layerFilter(layer, viewport);
+    }
+
+    // Calculate stats
+    if (shouldDrawLayer && layer.props.pickable) {
+      renderStats.pickableCount++;
+    }
+    if (layer.isComposite) {
+      renderStats.compositeCount++;
+    }
+
+    // Draw the layer
+    if (shouldDrawLayer) {
+
+      if (!layer.isComposite) {
+        renderStats.visibleCount++;
+      }
+
+      drawLayerInViewport({gl, layer, layerIndex, drawPickingColors, glViewport, parameters});
+    }
+
+  });
+
+  renderCount++;
+
+  logRenderStats({renderStats, pass, redrawReason});
+}
+
+function drawLayerInViewport({gl, layer, layerIndex, drawPickingColors, glViewport, parameters}) {
+  const moduleParameters = Object.assign({}, layer.props, {
+    viewport: layer.context.viewport,
+    pickingActive: drawPickingColors ? 1 : 0
+  });
+
   // TODO: Update all layers to use 'picking_uActive' (picking shader module)
   // and then remove 'renderPickingBuffer' and 'pickingEnabled'.
   const pickingUniforms = {
@@ -172,65 +222,36 @@ function drawLayersInViewport(gl, {
     pickingEnabled: drawPickingColors ? 1 : 0
   };
 
-  setParameters(gl, parameters || {});
+  const uniforms = Object.assign(
+    pickingUniforms,
+    layer.context.uniforms,
+    {layerIndex}
+  );
 
-  // render layers in normal colors
-  layers.forEach((layer, layerIndex) => {
-    if (layer.isComposite) {
-      renderStats.compositeCount++;
-    }
+  // All parameter resolving is done here instead of the layer
+  // Blend parameters must not be overriden
+  const layerParameters = Object.assign({}, layer.props.parameters || {}, parameters);
 
-    if (layer.props.pickable) {
-      renderStats.pickableCount++;
-    }
-
-    if (layer.props.visible && (layer.props.pickable || !drawPickingColors)) {
-
-      if (!layer.isComposite) {
-        renderStats.visibleCount++;
-      }
-
-      const moduleParameters = Object.assign({}, layer.props, {
-        viewport: layer.context.viewport,
-        pickingActive: drawPickingColors ? 1 : 0
-      });
-
-      const uniforms = Object.assign(
-        pickingUniforms,
-        layer.context.uniforms,
-        {layerIndex}
-      );
-
-      // All parameter resolving is done here instead of the layer
-      // Blend parameters must not be overriden
-      const layerParameters = Object.assign({}, layer.props.parameters || {}, parameters);
-
-      Object.assign(layerParameters, {
-        viewport: glViewport
-      });
-
-      if (drawPickingColors) {
-        // TODO - Disable during picking
-        Object.assign(moduleParameters, getPickingModuleParameters(layer));
-
-        Object.assign(layerParameters, {
-          blendColor: [0, 0, 0, (layerIndex + 1) / 255]
-        });
-      }
-
-      withParameters(gl, layerParameters, () => {
-        layer.drawLayer({
-          moduleParameters,
-          uniforms,
-          parameters: layerParameters
-        });
-      });
-    }
+  Object.assign(layerParameters, {
+    viewport: glViewport
   });
 
-  renderCount++;
+  if (drawPickingColors) {
+    // TODO - Disable during picking
+    Object.assign(moduleParameters, getPickingModuleParameters(layer));
 
-  logRenderStats({renderStats, pass, redrawReason});
+    Object.assign(layerParameters, {
+      blendColor: [0, 0, 0, (layerIndex + 1) / 255]
+    });
+  }
+
+  withParameters(gl, layerParameters, () => {
+    layer.drawLayer({
+      moduleParameters,
+      uniforms,
+      parameters: layerParameters
+    });
+  });
 }
 
 function logRenderStats({renderStats, pass, redrawReason}) {
