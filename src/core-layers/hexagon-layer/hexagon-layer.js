@@ -20,7 +20,7 @@
 
 import {CompositeLayer} from '../../core';
 import HexagonCellLayer from '../hexagon-cell-layer/hexagon-cell-layer';
-import {log} from '../../core/lib/utils';
+import log from '../../core/utils/log';
 
 import BinSorter from '../../core/utils/bin-sorter';
 import {getQuantizeScale, getLinearScale} from '../../core/utils/scale-utils';

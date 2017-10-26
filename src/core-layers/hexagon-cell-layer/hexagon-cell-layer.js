@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 
 import {COORDINATE_SYSTEM, Layer} from '../../core';
-import {log} from '../../core/lib/utils';
+import log from '../../core/utils/log';
 import {fp64ify, enable64bitSupport} from '../../core/lib/utils/fp64';
 import {GL, Model, CylinderGeometry} from 'luma.gl';
 
