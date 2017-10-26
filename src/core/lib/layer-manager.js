@@ -58,26 +58,23 @@ export default class LayerManager {
 
     this.prevLayers = [];
     this.layers = [];
-    this.oldContext = {};
+    // List of view descriptors, gets re-evaluated when width/height changes
+    this.viewDescriptors = [];
+    this.viewDescriptorsChanged = true;
+    this.width = 100;
+    this.height = 100;
+
+    // Generated viewports
+    this.viewports = [];
+
     this.screenCleared = false;
     this._needsRedraw = 'Initial render';
 
-    this._eventManager = null;
-    this._pickingRadius = 0;
-    this._onLayerClick = null;
-    this._onLayerHover = null;
-    this._onClick = this._onClick.bind(this);
-    this._onPointerMove = this._onPointerMove.bind(this);
-    this._onPointerLeave = this._onPointerLeave.bind(this);
-    this._pickAndCallback = this._pickAndCallback.bind(this);
-
-    this._initSeer = this._initSeer.bind(this);
-    this._editSeer = this._editSeer.bind(this);
-
+    // TODO - everything in this object is exposed to the layers
+    // We should only have information here that is API stable
     this.context = {
       gl,
       uniforms: {},
-      viewports: [],
       viewport: null,
       viewportChanged: true,
       pickingFBO: null,
@@ -88,7 +85,21 @@ export default class LayerManager {
       },
       shaderCache: new ShaderCache({gl})
     };
+    this.oldContext = {};
 
+    // Event handling
+    this._eventManager = null;
+    this._pickingRadius = 0;
+    this._onLayerClick = null;
+    this._onLayerHover = null;
+    this._onClick = this._onClick.bind(this);
+    this._onPointerMove = this._onPointerMove.bind(this);
+    this._onPointerLeave = this._onPointerLeave.bind(this);
+    this._pickAndCallback = this._pickAndCallback.bind(this);
+
+    // Seer integration
+    this._initSeer = this._initSeer.bind(this);
+    this._editSeer = this._editSeer.bind(this);
     seerInitListener(this._initSeer);
     layerEditListener(this._editSeer);
 
@@ -105,6 +116,15 @@ export default class LayerManager {
     seer.removeListener(this._editSeer);
   }
 
+  needsRedraw({clearRedrawFlags = false} = {}) {
+    return this._checkIfNeedsRedraw(clearRedrawFlags);
+  }
+
+  // Normally not called by app
+  setNeedsRedraw(reason) {
+    this._needsRedraw = this._needsRedraw || reason;
+  }
+
   // Gets an (optionally) filtered list of layers
   getLayers({layerIds = null} = {}) {
     // Filtering by layerId compares beginning of strings, so that sublayers will be included
@@ -114,8 +134,14 @@ export default class LayerManager {
       this.layers;
   }
 
-  getViewports() {
-    return this.context.viewports;
+  // Get a set of viewports for a given width and height
+  getViewports({width, height} = {}) {
+    if (width !== this.width || height !== this.height || this.viewDescriptorsChanged) {
+      this._rebuildViewportsFromViews({viewDescriptors: this.viewDescriptors, width, height});
+      this.width = width;
+      this.height = height;
+    }
+    return this.viewports;
   }
 
   /**
@@ -145,23 +171,21 @@ export default class LayerManager {
     Object.assign(this.context, parameters);
   }
 
+  // Update the view descriptor list and set change flag if needed
   setViewports(viewports) {
-    viewports = flatten(viewports, {filter: Boolean});
+    // Ensure viewports are wrapped in descriptors
+    const viewDescriptors = flatten(viewports, {filter: Boolean})
+      .map(viewport => viewport instanceof Viewport ? {viewport} : viewport);
 
-    // Viewports are "immutable", so we can shallow compare
-    const oldViewports = this.context.viewports;
-    const viewportsChanged = viewports.length !== oldViewports.length ||
-      viewports.some((_, i) => viewports[i] !== oldViewports[i]);
+    this.viewDescriptorsChanged =
+      this.viewDescriptorsChanged ||
+      this._diffViews(viewDescriptors, this.viewDescriptors);
 
-    if (viewportsChanged) {
-      this._needsRedraw = 'Viewport changed';
-
-      // Need to ensure one viewport is activated
-      const viewport = viewports[0];
-      assert(viewport instanceof Viewport, 'Invalid viewport');
-
-      this.context.viewports = viewports;
-      this._activateViewport(viewport);
+    // Try to not actually rebuild the viewports until `getViewports` is called
+    if (this.viewDescriptorsChanged) {
+      this.viewDescriptors = viewDescriptors;
+      this._rebuildViewportsFromViews({viewDescriptors: this.viewDescriptors});
+      this.viewDescriptorsChanged = false;
     }
   }
 
@@ -208,7 +232,7 @@ export default class LayerManager {
     }
     this.lastRenderedLayers = newLayers;
 
-    assert(this.context.viewport, 'LayerManager.updateLayers: viewport not set');
+    // assert(this.context.viewport, 'LayerManager.updateLayers: viewport not set');
 
     // Filter out any null layers
     newLayers = newLayers.filter(newLayer => newLayer !== null);
@@ -237,7 +261,7 @@ export default class LayerManager {
     // render this viewport
     drawLayers(gl, {
       layers: this.layers,
-      viewports: this.context.viewports,
+      viewports: this.getViewports(),
       onViewportActive: this._activateViewport.bind(this),
       useDevicePixelRatio,
       drawPickingColors,
@@ -260,7 +284,7 @@ export default class LayerManager {
       radius,
       layers,
       mode,
-      viewports: this.context.viewports,
+      viewports: this.getViewports(),
       onViewportActive: this._activateViewport.bind(this),
       pickingFBO: this._getPickingBuffer(),
       lastPickedInfo: this.context.lastPickedInfo,
@@ -281,20 +305,28 @@ export default class LayerManager {
       height,
       layers,
       mode: 'query',
-      // TODO - how does this interact with multiple viewports?
-      viewport: this.context.viewport,
-      viewports: this.context.viewports,
+      viewports: this.getViewports(),
       onViewportActive: this._activateViewport.bind(this),
       pickingFBO: this._getPickingBuffer(),
       useDevicePixelRatio
     });
   }
 
-  needsRedraw({clearRedrawFlags = false} = {}) {
-    if (!this.context.viewport) {
-      return false;
-    }
+  //
+  // DEPRECATED METHODS
+  //
 
+  setViewport(viewport) {
+    log.deprecated('setViewport', 'setViewports');
+    this.setViewports([viewport]);
+    return this;
+  }
+
+  //
+  // PRIVATE METHODS
+  //
+
+  _checkIfNeedsRedraw(clearRedrawFlags) {
     // Make sure that buffer is cleared once when layer list becomes empty
     // TODO - this should consider visible layers, not all layers
     if (this.layers.length === 0) {
@@ -318,19 +350,87 @@ export default class LayerManager {
     return redraw;
   }
 
-  //
-  // DEPRECATED METHODS
-  //
+  // Rebuilds viewports from descriptors towards a certain window size
+  _rebuildViewportsFromViews({viewDescriptors, width, height}) {
+    const newViewports = viewDescriptors.map(viewDescriptor =>
+      // If a `Viewport` instance was supplied, use it, otherwise build it
+      viewDescriptor.viewport instanceof Viewport ?
+        viewDescriptor.viewport :
+        this._makeViewportFromViewDescriptor({viewDescriptor, width, height})
+    );
 
-  setViewport(viewport) {
-    log.deprecated('setViewport', 'setViewports');
-    this.setViewports([viewport]);
-    return this;
+    this.setNeedsRedraw('Viewport(s) changed');
+
+    // Ensure one viewport is activated, layers may expect it
+    // TODO - handle empty viewport list (using dummy viewport), or assert
+    // const oldViewports = this.context.viewports;
+    // if (viewportsChanged) {
+
+    const viewport = newViewports[0];
+    assert(viewport instanceof Viewport, 'Invalid viewport');
+
+    this.context.viewports = newViewports;
+    this._activateViewport(viewport);
+    // }
+
+    // We've just rebuilt the viewports to match the descriptors, so clear the flag
+    this.viewports = newViewports;
+    this.viewDescriptorsChanged = false;
   }
 
-  //
-  // PRIVATE METHODS
-  //
+  // Build a `Viewport` from a view descriptor
+  _makeViewportFromViewDescriptor({viewDescriptor, width, height}) {
+    // Get the type of the viewport
+    // TODO - default to WebMercator?
+    const {type: ViewportType, viewState} = viewDescriptor;
+
+    // Resolve relative viewport dimensions
+    // TODO - we need to have width and height available
+    const viewportDimensions = this._getViewDimensions({viewDescriptor});
+
+    // Create the viewport, giving preference to view state in `viewState`
+    return new ViewportType(Object.assign({},
+      viewDescriptor,
+      viewportDimensions,
+      viewState // Object.assign handles undefined
+    ));
+  }
+
+  // Check if viewport array has changed, returns true if any change
+  // Note that descriptors can be the same
+  _diffViews(newViews, oldViews) {
+    if (newViews.length !== oldViews.length) {
+      return true;
+    }
+
+    return newViews.some(
+      (_, i) => this._diffView(newViews[i], oldViews[i])
+    );
+  }
+
+  // TODO: this will be true always if descriptors are used as we create new object
+  _diffView(newView, oldView) {
+    // `View` hiearchy supports an `equals` method
+    if (newView.viewport) {
+      return !oldView.viewport || !newView.viewport.equals(oldView.viewport);
+    }
+    return newView !== oldView;
+  }
+
+  // Support for relative viewport dimensions (e.g {y: '50%', height: '50%'})
+  _getViewDimensions({viewDescriptor, width, height}) {
+    const parsePercent = (value, max) => value;
+    // ?
+    //   Math.round(parseFloat(value) / 100 * max) :
+    //   (value === null ? max : value);
+
+    return {
+      x: parsePercent(viewDescriptor.x, width),
+      y: parsePercent(viewDescriptor.y, height),
+      width: parsePercent(viewDescriptor.width, width),
+      height: parsePercent(viewDescriptor.height, height)
+    };
+  }
 
   // Make a viewport "current" in layer context, primed for draw
   _activateViewport(viewport) {
@@ -362,7 +462,7 @@ export default class LayerManager {
     return this;
   }
 
-  // Get a viewport from a viewport descriptor (which can be a plain viewport)
+  // Get a viewport from a view descriptor (which can be a plain viewport)
   _getViewportFromDescriptor(viewportOrDescriptor) {
     return viewportOrDescriptor.viewport ? viewportOrDescriptor.viewport : viewportOrDescriptor;
   }
