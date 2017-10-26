@@ -39,6 +39,7 @@ const propTypes = {
   layers: PropTypes.array.isRequired, // Array can contain falsy values
   viewports: PropTypes.array, // Array can contain falsy values
   effects: PropTypes.arrayOf(PropTypes.instanceOf(Effect)),
+  layerFilter: PropTypes.func,
   glOptions: PropTypes.object,
   gl: PropTypes.object,
   pickingRadius: PropTypes.number,
@@ -58,6 +59,7 @@ const propTypes = {
 const defaultProps = {
   id: 'deckgl-overlay',
   pickingRadius: 0,
+  layerFilter: null,
   glOptions: {},
   gl: null,
   effects: [],
@@ -123,13 +125,15 @@ export default class DeckGLJS {
       onLayerClick,
       onLayerHover,
       useDevicePixelRatio,
-      drawPickingColors
+      drawPickingColors,
+      layerFilter
     } = props;
 
     // If more parameters need to be updated on layerManager add them to this method.
     this.layerManager.setParameters({
       useDevicePixelRatio,
-      drawPickingColors
+      drawPickingColors,
+      layerFilter
     });
 
     this.layerManager.setEventHandlingParameters({

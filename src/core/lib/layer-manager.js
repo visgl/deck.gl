@@ -79,6 +79,7 @@ export default class LayerManager {
       uniforms: {},
       viewports: [],
       viewport: null,
+      layerFilter: null,
       viewportChanged: true,
       pickingFBO: null,
       useDevicePixelRatio: true,
@@ -140,6 +141,10 @@ export default class LayerManager {
 
     if ('layers' in parameters) {
       this.updateLayers({newLayers: parameters.layers});
+    }
+
+    if ('layerFilter' in parameters) {
+      this.context.layerFilter = parameters.layerFilter;
     }
 
     Object.assign(this.context, parameters);
@@ -242,6 +247,7 @@ export default class LayerManager {
       useDevicePixelRatio,
       drawPickingColors,
       pass,
+      layerFilter: this.context.layerFilter,
       redrawReason
     });
 
@@ -249,17 +255,20 @@ export default class LayerManager {
   }
 
   // Pick the closest info at given coordinate
-  pickObject({x, y, mode, radius = 0, layerIds}) {
+  pickObject({x, y, mode, radius = 0, layerIds, layerFilter}) {
     const {gl, useDevicePixelRatio} = this.context;
 
     const layers = this.getLayers({layerIds});
 
     return pickObject(gl, {
+      // User params
       x,
       y,
       radius,
       layers,
       mode,
+      layerFilter,
+      // Injected params
       viewports: this.context.viewports,
       onViewportActive: this._activateViewport.bind(this),
       pickingFBO: this._getPickingBuffer(),
@@ -269,7 +278,7 @@ export default class LayerManager {
   }
 
   // Get all unique infos within a bounding box
-  pickVisibleObjects({x, y, width, height, layerIds}) {
+  pickVisibleObjects({x, y, width, height, layerIds, layerFilter}) {
     const {gl, useDevicePixelRatio} = this.context;
 
     const layers = this.getLayers({layerIds});
@@ -280,7 +289,8 @@ export default class LayerManager {
       width,
       height,
       layers,
-      mode: 'query',
+      layerFilter,
+      mode: 'queryObjects',
       // TODO - how does this interact with multiple viewports?
       viewport: this.context.viewport,
       viewports: this.context.viewports,
