@@ -72,7 +72,7 @@ void main(void) {
   vertex_pos_modelspace[3] = vec2(1.0, 0.0);
 
   gl_Position = project_to_clipspace_fp64(vertex_pos_modelspace);
-  gl_Position += vec4(pixelOffset / viewportSize * devicePixelRatio, 0.0, 0.0);
+  gl_Position += project_pixel_to_clipspace(pixelOffset);
 
   vTextureCoords = mix(
     instanceIconFrames.xy,

@@ -63,11 +63,6 @@ void main(void) {
 
   vec3 center = project_position(instancePositions);
   gl_Position = project_to_clipspace(vec4(center, 1.0));
-
-  // vec2 clipspaceOffset =
-  //   rotate_by_angle(pixelOffset, instanceAngles) / viewportSize * devicePixelRatio;
-  // gl_Position += vec4(clipspaceOffset, 0.0, 0.0);
-
   gl_Position += project_pixel_to_clipspace(pixelOffset);
 
   vTextureCoords = mix(
