@@ -35,15 +35,15 @@ const NO_PICKED_OBJECT = {
 export function pickObject(gl, {
   layers,
   viewports,
-  onViewportActive,
-  pickingFBO,
   x,
   y,
   radius,
-  lastPickedInfo,
-  useDevicePixelRatio,
+  layerFilter,
   mode,
-  layerFilter
+  onViewportActive,
+  pickingFBO,
+  lastPickedInfo,
+  useDevicePixelRatio
 }) {
   // Convert from canvas top-left to WebGL bottom-left coordinates
   // And compensate for pixelRatio
@@ -87,13 +87,14 @@ export function pickObject(gl, {
 export function pickVisibleObjects(gl, {
   layers,
   viewports,
-  onViewportActive,
-  pickingFBO,
   x,
   y,
   width,
   height,
   mode,
+  layerFilter,
+  onViewportActive,
+  pickingFBO,
   useDevicePixelRatio
 }) {
 

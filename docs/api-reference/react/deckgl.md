@@ -56,6 +56,14 @@ Canvas ID to allow style customization in CSS.
 
 The DeckGL component own `canvas` element is rendered last, intentionally on top of all the base maps.
 
+##### `layers` (Array, required)
+
+The array of deck.gl layers to be rendered. This array is expected to be an array of newly allocated instances of your deck.gl layers, created with updated properties derived from the current application state.
+
+##### `layerFilter`
+
+Optionally takes a function `(layer, viewport) => Boolean` that is called before a layer is rendered. Gives the application an opportunity to filter out layers from the layer list during either rendering or picking. Filtering can be done per viewport or per layer or both. This enables techniques like adding helper layers that work as masks during picking but do not show up during rendering.
+
 ##### `viewports`
 
 A singe viewport, or an array of `Viewport`s or "Viewport Descriptors".
@@ -101,10 +109,6 @@ Current bearing - used to define a mercator projection if `viewport` is not supp
 ##### `pitch` (Number, optional)
 
 Current pitch - used to define a mercator projection if `viewport` is not supplied.
-
-##### `layers` (Array, required)
-
-The array of deck.gl layers to be rendered. This array is expected to be an array of newly allocated instances of your deck.gl layers, created with updated properties derived from the current application state.
 
 ##### `style` (Object, optional)
 
