@@ -35,12 +35,13 @@ const NO_PICKED_OBJECT = {
 export function pickObject(gl, {
   layers,
   viewports,
-  onViewportActive,
-  pickingFBO,
   x,
   y,
   radius,
+  layerFilter,
   mode,
+  onViewportActive,
+  pickingFBO,
   lastPickedInfo,
   useDevicePixelRatio
 }) {
@@ -64,6 +65,7 @@ export function pickObject(gl, {
     useDevicePixelRatio,
     pickingFBO,
     deviceRect,
+    layerFilter,
     redrawReason: mode
   });
 
@@ -81,6 +83,146 @@ export function pickObject(gl, {
   });
 }
 
+// Pick all objects within the given bounding box
+export function pickVisibleObjects(gl, {
+  layers,
+  viewports,
+  x,
+  y,
+  width,
+  height,
+  mode,
+  layerFilter,
+  onViewportActive,
+  pickingFBO,
+  useDevicePixelRatio
+}) {
+
+  // Convert from canvas top-left to WebGL bottom-left coordinates
+  // And compensate for pixelRatio
+  const pixelRatio = getPixelRatio({useDevicePixelRatio});
+
+  const deviceLeft = Math.round(x * pixelRatio);
+  const deviceBottom = Math.round(gl.canvas.height - y * pixelRatio);
+  const deviceRight = Math.round((x + width) * pixelRatio);
+  const deviceTop = Math.round(gl.canvas.height - (y + height) * pixelRatio);
+
+  const deviceRect = {
+    x: deviceLeft,
+    y: deviceTop,
+    width: deviceRight - deviceLeft,
+    height: deviceBottom - deviceTop
+  };
+
+  const pickedColors = drawAndSamplePickingBuffer(gl, {
+    layers,
+    viewports,
+    onViewportActive,
+    pickingFBO,
+    useDevicePixelRatio,
+    deviceRect,
+    layerFilter,
+    redrawReason: mode
+  });
+
+  const pickInfos = getUniquesFromPickingBuffer(gl, {pickedColors, layers});
+
+  // Only return unique infos, identified by info.object
+  const uniqueInfos = new Map();
+
+  pickInfos.forEach(pickInfo => {
+    const viewport = getViewportFromCoordinates({viewports}); // TODO - add coords
+    let info = createInfo([pickInfo.x / pixelRatio, pickInfo.y / pixelRatio], viewport);
+    info.devicePixel = [pickInfo.x, pickInfo.y];
+    info.pixelRatio = pixelRatio;
+    info.color = pickInfo.pickedColor;
+    info.index = pickInfo.pickedObjectIndex;
+    info.picked = true;
+
+    info = getLayerPickingInfo({layer: pickInfo.pickedLayer, info, mode});
+    if (!uniqueInfos.has(info.object)) {
+      uniqueInfos.set(info.object, info);
+    }
+  });
+
+  return Array.from(uniqueInfos.values());
+}
+
+// HELPER METHODS
+
+// returns pickedColor or null if no pickable layers found.
+function drawAndSamplePickingBuffer(gl, {
+  layers,
+  viewports,
+  onViewportActive,
+  useDevicePixelRatio,
+  pickingFBO,
+  deviceRect,
+  layerFilter,
+  redrawReason
+}) {
+  assert(deviceRect);
+  assert((Number.isFinite(deviceRect.width) && deviceRect.width > 0), '`width` must be > 0');
+  assert((Number.isFinite(deviceRect.height) && deviceRect.height > 0), '`height` must be > 0');
+
+  const pickableLayers = layers.filter(layer => layer.isPickable());
+  if (pickableLayers.length < 1) {
+    return null;
+  }
+
+  drawPickingBuffer(gl, {
+    layers,
+    viewports,
+    onViewportActive,
+    useDevicePixelRatio,
+    pickingFBO,
+    deviceRect,
+    layerFilter,
+    redrawReason
+  });
+
+  // Read from an already rendered picking buffer
+  // Returns an Uint8ClampedArray of picked pixels
+  const {x, y, width, height} = deviceRect;
+  const pickedColors = new Uint8Array(width * height * 4);
+  pickingFBO.readPixels({x, y, width, height, pixelArray: pickedColors});
+  return pickedColors;
+}
+
+// Indentifies which viewport, if any corresponds to x and y
+// Returns first viewport if no match
+// TODO - need to determine which viewport we are in
+// TODO - document concept of "primary viewport" that matches all coords?
+// TODO - static method on Viewport class?
+function getViewportFromCoordinates({viewports}) {
+  const viewport = viewports[0];
+  return viewport;
+}
+
+// Calculate a picking rect centered on deviceX and deviceY and clipped to device
+// Returns null if pixel is outside of device
+function getPickingRect({deviceX, deviceY, deviceRadius, deviceWidth, deviceHeight}) {
+  const valid =
+    deviceX >= 0 &&
+    deviceY >= 0 &&
+    deviceX < deviceWidth &&
+    deviceY < deviceHeight;
+
+  // x, y out of bounds.
+  if (!valid) {
+    return null;
+  }
+
+  // Create a box of size `radius * 2 + 1` centered at [deviceX, deviceY]
+  const x = Math.max(0, deviceX - deviceRadius);
+  const y = Math.max(0, deviceY - deviceRadius);
+  const width = Math.min(deviceWidth, deviceX + deviceRadius) - x + 1;
+  const height = Math.min(deviceHeight, deviceY + deviceRadius) - y + 1;
+
+  return {x, y, width, height};
+}
+
+// TODO - break this monster function into 3+ parts
 function processPickInfo({
   pickInfo, lastPickedInfo, mode, layers, viewports, x, y, deviceX, deviceY, pixelRatio
 }) {
@@ -128,7 +270,6 @@ function processPickInfo({
   // https://github.com/uber/deck.gl/issues/443
   // Please be very careful when changing this pattern
   const infos = new Map();
-  const unhandledPickInfos = [];
 
   affectedLayers.forEach(layer => {
     let info = Object.assign({}, baseInfo);
@@ -164,18 +305,26 @@ function processPickInfo({
     }
   });
 
+  const unhandledPickInfos = callLayerPickingCallbacks(infos, mode);
+
+  return unhandledPickInfos;
+}
+
+// Per-layer event handlers (e.g. onClick, onHover) are provided by the
+// user and out of deck.gl's control. It's very much possible that
+// the user calls React lifecycle methods in these function, such as
+// ReactComponent.setState(). React lifecycle methods sometimes induce
+// a re-render and re-generation of props of deck.gl and its layers,
+// which invalidates all layers currently passed to this very function.
+
+// Therefore, per-layer event handlers must be invoked at the end
+// of the picking operation. NO operation that relies on the states of current
+// layers should be called after this code.
+function callLayerPickingCallbacks(infos, mode) {
+  const unhandledPickInfos = [];
+
   infos.forEach(info => {
     let handled = false;
-    // Per-layer event handlers (e.g. onClick, onHover) are provided by the
-    // user and out of deck.gl's control. It's very much possible that
-    // the user calls React lifecycle methods in these function, such as
-    // ReactComponent.setState(). React lifecycle methods sometimes induce
-    // a re-render and re-generation of props of deck.gl and its layers,
-    // which invalidates all layers currently passed to this very function.
-
-    // Therefore, per-layer event handlers must be invoked at the end
-    // of this function. NO operation that relies on the states of current
-    // layers should be called after this code.
     switch (mode) {
     case 'click': handled = info.layer.props.onClick(info); break;
     case 'hover': handled = info.layer.props.onHover(info); break;
@@ -189,142 +338,6 @@ function processPickInfo({
   });
 
   return unhandledPickInfos;
-}
-
-// Pick all objects within the given bounding box
-export function pickVisibleObjects(gl, {
-  layers,
-  viewports,
-  onViewportActive,
-  pickingFBO,
-  x,
-  y,
-  width,
-  height,
-  mode,
-  useDevicePixelRatio
-}) {
-
-  // Convert from canvas top-left to WebGL bottom-left coordinates
-  // And compensate for pixelRatio
-  const pixelRatio = getPixelRatio({useDevicePixelRatio});
-
-  const deviceLeft = Math.round(x * pixelRatio);
-  const deviceBottom = Math.round(gl.canvas.height - y * pixelRatio);
-  const deviceRight = Math.round((x + width) * pixelRatio);
-  const deviceTop = Math.round(gl.canvas.height - (y + height) * pixelRatio);
-
-  const deviceRect = {
-    x: deviceLeft,
-    y: deviceTop,
-    width: deviceRight - deviceLeft,
-    height: deviceBottom - deviceTop
-  };
-
-  const pickedColors = drawAndSamplePickingBuffer(gl, {
-    layers,
-    viewports,
-    onViewportActive,
-    pickingFBO,
-    useDevicePixelRatio,
-    deviceRect,
-    redrawReason: mode
-  });
-
-  const pickInfos = getUniquesFromPickingBuffer(gl, {pickedColors, layers});
-
-  // Only return unique infos, identified by info.object
-  const uniqueInfos = new Map();
-
-  pickInfos.forEach(pickInfo => {
-    const viewport = getViewportFromCoordinates({viewports}); // TODO - add coords
-    let info = createInfo([pickInfo.x / pixelRatio, pickInfo.y / pixelRatio], viewport);
-    info.devicePixel = [pickInfo.x, pickInfo.y];
-    info.pixelRatio = pixelRatio;
-    info.color = pickInfo.pickedColor;
-    info.index = pickInfo.pickedObjectIndex;
-    info.picked = true;
-
-    info = getLayerPickingInfo({layer: pickInfo.pickedLayer, info, mode});
-    if (!uniqueInfos.has(info.object)) {
-      uniqueInfos.set(info.object, info);
-    }
-  });
-
-  return Array.from(uniqueInfos.values());
-}
-
-// HELPER METHODS
-
-// Indentifies which viewport, if any corresponds to x and y
-// Returns first viewport if no match
-// TODO - need to determine which viewport we are in
-// TODO - document concept of "primary viewport" that matches all coords?
-// TODO - static method on Viewport class?
-function getViewportFromCoordinates({viewports}) {
-  const viewport = viewports[0];
-  return viewport;
-}
-
-// returns pickedColor or null if no pickable layers found.
-function drawAndSamplePickingBuffer(gl, {
-  layers,
-  viewports,
-  onViewportActive,
-  useDevicePixelRatio,
-  pickingFBO,
-  deviceRect,
-  redrawReason
-}) {
-
-  assert(deviceRect);
-  assert((Number.isFinite(deviceRect.width) && deviceRect.width > 0), '`width` must be > 0');
-  assert((Number.isFinite(deviceRect.height) && deviceRect.height > 0), '`height` must be > 0');
-
-  const pickableLayers = layers.filter(layer => layer.isPickable());
-  if (pickableLayers.length < 1) {
-    return null;
-  }
-
-  drawPickingBuffer(gl, {
-    layers,
-    viewports,
-    onViewportActive,
-    useDevicePixelRatio,
-    pickingFBO,
-    deviceRect,
-    redrawReason
-  });
-
-  // Read from an already rendered picking buffer
-  // Returns an Uint8ClampedArray of picked pixels
-  const {x, y, width, height} = deviceRect;
-  const pickedColors = new Uint8Array(width * height * 4);
-  pickingFBO.readPixels({x, y, width, height, pixelArray: pickedColors});
-  return pickedColors;
-}
-
-// Calculate a picking rect centered on deviceX and deviceY and clipped to device
-// Returns null if pixel is outside of device
-function getPickingRect({deviceX, deviceY, deviceRadius, deviceWidth, deviceHeight}) {
-  const valid =
-    deviceX >= 0 &&
-    deviceY >= 0 &&
-    deviceX < deviceWidth &&
-    deviceY < deviceHeight;
-
-  // x, y out of bounds.
-  if (!valid) {
-    return null;
-  }
-
-  // Create a box of size `radius * 2 + 1` centered at [deviceX, deviceY]
-  const x = Math.max(0, deviceX - deviceRadius);
-  const y = Math.max(0, deviceY - deviceRadius);
-  const width = Math.min(deviceWidth, deviceX + deviceRadius) - x + 1;
-  const height = Math.min(deviceHeight, deviceY + deviceRadius) - y + 1;
-
-  return {x, y, width, height};
 }
 
 /**
