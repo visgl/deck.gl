@@ -1,9 +1,9 @@
-import {PureComponent, createElement, cloneElement, Children, isValidElement} from 'react';
+import {PureComponent, createElement} from 'react';
 import PropTypes from 'prop-types';
 
 import {EventManager} from 'mjolnir.js';
 import {ViewportControls, experimental} from '../core';
-const {TransitionManager, extractViewportFrom} = experimental;
+const {TransitionManager} = experimental;
 
 import CURSOR from './utils/cursors';
 
@@ -109,9 +109,6 @@ export default class ViewportController extends PureComponent {
     this.state = {
       isDragging: false      // Whether the cursor is down
     };
-
-    this._recursiveUpdateChildren = this._recursiveUpdateChildren.bind(this);
-    this._updateChildrenViewport = this._updateChildrenViewport.bind(this);
   }
 
   componentDidMount() {
@@ -131,12 +128,18 @@ export default class ViewportController extends PureComponent {
     this._transitionManger = new TransitionManager(this.props);
   }
 
+  shouldComponentUpdate(nextProps, nextState) {
+    if (this._transitionManger) {
+      const transitionTriggered = this._transitionManger.processViewportChange(nextProps);
+      // Skip this render to avoid jump during viewport transitions.
+      return !transitionTriggered;
+    }
+    return true;
+  }
+
   componentWillUpdate(nextProps) {
     if (this._controls) {
       this._controls.setOptions(nextProps);
-    }
-    if (this._transitionManger) {
-      this._transitionManger.processViewportChange(nextProps);
     }
   }
 
@@ -150,40 +153,6 @@ export default class ViewportController extends PureComponent {
     }
   }
 
-  _recursiveUpdateChildren(children, viewport) {
-    // TODO: use component key or a custom prop to identify which child to modify.
-    return Children.map(children, child => {
-      if (!isValidElement(child)) {
-        return child;
-      }
-      let childProps = {};
-      // NOTE: disabling until full multi-vewport transition is added.
-      // if (child.props.viewports) {
-      //   const childViewports = [];
-      //   child.props.viewports.forEach((childViewport) => {
-      //     childViewports.push(Object.assign({}, childViewport, viewport));
-      //   });
-      //   childProps = Object.assign({}, {viewports: childViewports});
-      // } else {
-      //   childProps = Object.assign({}, viewport, {viewport});
-      // }
-      childProps = Object.assign({}, viewport, {viewport});
-
-      childProps.children = this._recursiveUpdateChildren(child.props.children, viewport);
-      const cloned = cloneElement(child, childProps);
-      return cloned;
-    });
-  }
-
-  _updateChildrenViewport() {
-    const viewport = (this._transitionManger && this._transitionManger.getViewportInTransition()) ||
-      extractViewportFrom(this.props);
-    const childrenWithProps = this._recursiveUpdateChildren(
-        this.props.children,
-        viewport);
-    return childrenWithProps;
-  }
-
   render() {
     const {width, height, getCursor} = this.props;
 
@@ -194,15 +163,13 @@ export default class ViewportController extends PureComponent {
       cursor: getCursor(this.state)
     };
 
-    const childrenWithProps = this._updateChildrenViewport();
-
     return (
       createElement('div', {
         key: 'map-controls',
         ref: 'eventCanvas',
         style: eventCanvasStyle
       },
-        childrenWithProps
+        this.props.children
       )
     );
   }

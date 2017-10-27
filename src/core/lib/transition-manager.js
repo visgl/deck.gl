@@ -45,36 +45,43 @@ export default class TransitionManager {
   }
 
   // Process the vewiport change, either ignore or trigger a new transiton.
+  // Return true if a new transition is triggered, false otherwise.
   processViewportChange(nextProps) {
+    let transitionTriggered = false;
 
     // NOTE: Be cautious re-ordering statements in this function.
     if (this._shouldIgnoreViewportChange(nextProps)) {
       this.props = nextProps;
-      return;
+      return transitionTriggered;
     }
 
     const isTransitionInProgress = this._isTransitionInProgress();
+    const currentProps = this.props;
+    // Set this.props here as '_triggerTransition' calls '_updateViewport' that uses this.props.
+    this.props = nextProps;
 
     if (this._isTransitionEnabled(nextProps)) {
-      const currentViewport = this.state.viewport || extractViewportFrom(this.props);
+      const currentViewport = this.state.viewport || extractViewportFrom(currentProps);
       const endViewport = this.state.endViewport;
 
       const startViewport = this.state.interruption === TRANSITION_EVENTS.SNAP_TO_END ?
         (endViewport || currentViewport) :
         currentViewport;
 
-      this._triggerTransition(startViewport, nextProps);
-
       if (isTransitionInProgress) {
-        this.props.onTransitionInterrupt();
+        currentProps.onTransitionInterrupt();
       }
-      nextProps.onTransitionStart();
+      this.props.onTransitionStart();
+
+      this._triggerTransition(startViewport);
+
+      transitionTriggered = true;
     } else if (isTransitionInProgress) {
-      this.props.onTransitionInterrupt();
+      currentProps.onTransitionInterrupt();
       this._endTransition();
     }
 
-    this.props = nextProps;
+    return transitionTriggered;
   }
 
   // Helper methods
@@ -114,18 +121,18 @@ export default class TransitionManager {
     return false;
   }
 
-  _triggerTransition(startViewport, nextProps) {
-    assert(nextProps.transitionDuration !== 0);
-    const endViewport = extractViewportFrom(nextProps);
+  _triggerTransition(startViewport) {
+    assert(this.props.transitionDuration !== 0);
+    const endViewport = extractViewportFrom(this.props);
 
     cancelAnimationFrame(this.state.animation);
 
     this.state = {
       // Save current transition props
-      duration: nextProps.transitionDuration,
-      easing: nextProps.transitionEasing,
-      interpolator: nextProps.transitionInterpolator,
-      interruption: nextProps.transitionInterruption,
+      duration: this.props.transitionDuration,
+      easing: this.props.transitionEasing,
+      interpolator: this.props.transitionInterpolator,
+      interruption: this.props.transitionInterruption,
 
       startTime: Date.now(),
       startViewport,
@@ -163,6 +170,7 @@ export default class TransitionManager {
 
     const viewport = interpolator(startViewport, endViewport, t);
     this.state.viewport = extractViewportFrom(Object.assign({}, this.props, viewport));
+
     if (this.props.onViewportChange) {
       this.props.onViewportChange(this.state.viewport);
     }
