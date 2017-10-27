@@ -60,13 +60,13 @@ export function compareProps({
   for (const key in oldProps) {
     if (!(key in ignoreProps)) {
       if (!newProps.hasOwnProperty(key)) {
-        return `${triggerName} ${key} dropped: ${oldProps[key]} -> (undefined)`;
+        return `${triggerName}.${key} dropped: ${oldProps[key]} -> undefined`;
       }
 
       // If object has an equals function, invoke it
       let equals = newProps[key] && oldProps[key] && newProps[key].equals;
       if (equals && !equals.call(newProps[key], oldProps[key])) {
-        return `${triggerName} ${key} changed deeply: ${oldProps[key]} -> ${newProps[key]}`;
+        return `${triggerName}.${key} changed deeply: ${oldProps[key]} -> ${newProps[key]}`;
       }
 
       // If both new and old value are functions, ignore differences
@@ -78,7 +78,7 @@ export function compareProps({
       }
 
       if (!equals && oldProps[key] !== newProps[key]) {
-        return `${triggerName} ${key} changed shallowly: ${oldProps[key]} -> ${newProps[key]}`;
+        return `${triggerName}.${key} changed shallowly: ${oldProps[key]} -> ${newProps[key]}`;
       }
     }
   }
@@ -87,7 +87,7 @@ export function compareProps({
   for (const key in newProps) {
     if (!(key in ignoreProps)) {
       if (!oldProps.hasOwnProperty(key)) {
-        return `${triggerName} ${key} added: (undefined) -> ${newProps[key]}`;
+        return `${triggerName}.${key} added: undefined -> ${newProps[key]}`;
       }
     }
   }
@@ -96,7 +96,7 @@ export function compareProps({
 }
 /* eslint-enable max-statements, max-depth, complexity */
 
-// PRIVATE METHODS
+// HELPERS
 
 // The comparison of the data prop requires special handling
 // the dataComparator should be used if supplied
@@ -119,37 +119,50 @@ function diffDataProps(oldProps, props) {
   return null;
 }
 
-// Checks if any update triggers have changed, and invalidate
-// attributes accordingly.
-/* eslint-disable max-statements */
+// Checks if any update triggers have changed
+// also calls callback to invalidate attributes accordingly.
 function diffUpdateTriggers(oldProps, props, onUpdateTriggered) {
   // const {attributeManager} = this.state;
   // const updateTriggerMap = attributeManager.getUpdateTriggerMap();
   if (oldProps === null) {
-    return true; // oldProps is null, initial diff
+    return 'oldProps is null, initial diff';
   }
 
-  let change = false;
+  let reason = false;
 
-  for (const propName in props.updateTriggers) {
-    const oldTriggers = oldProps.updateTriggers[propName] || {};
-    const newTriggers = props.updateTriggers[propName] || {};
-    const diffReason = compareProps({
-      oldProps: oldTriggers,
-      newProps: newTriggers,
-      triggerName: propName
-    });
+  // If the 'all' updateTrigger fires, ignore testing others
+  if ('all' in props.updateTriggers) {
+    const diffReason = diffUpdateTrigger(oldProps, props, 'all');
     if (diffReason) {
-      onUpdateTriggered(propName);
-      change = true;
+      onUpdateTriggered('all');
+      return diffReason;
     }
   }
 
-  return change;
-}
-/* eslint-enable max-statements */
+  // If the 'all' updateTrigger didn't fire, need to check all others
+  for (const triggerName in props.updateTriggers) {
+    if (triggerName !== 'all') {
+      const diffReason = diffUpdateTrigger(oldProps, props, triggerName);
+      if (diffReason) {
+        onUpdateTriggered(triggerName);
+        reason = reason || diffReason;
+      }
+    }
+  }
 
-// HELPERS
+  return reason;
+}
+
+function diffUpdateTrigger(oldProps, props, triggerName) {
+  const oldTriggers = oldProps.updateTriggers[triggerName] || {};
+  const newTriggers = props.updateTriggers[triggerName] || {};
+  const diffReason = compareProps({
+    oldProps: oldTriggers,
+    newProps: newTriggers,
+    triggerName
+  });
+  return diffReason;
+}
 
 // Constructors have their super class constructors as prototypes
 function getOwnProperty(object, prop) {

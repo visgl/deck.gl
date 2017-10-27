@@ -19,7 +19,6 @@
 // THE SOFTWARE.
 
 import WebMercatorViewport from 'deck.gl/core/viewports/web-mercator-viewport';
-import {mergeDefaultProps} from 'deck.gl/core/lib/props';
 
 import spy from './spy';
 import global from 'global';
@@ -68,22 +67,8 @@ export function testInitializeLayer({gl, layer, viewport}) {
   try {
     layer.context = context;
 
-    layer.initializeLayer({
-      oldProps: {},
-      props: layer.props,
-      oldContext,
-      context,
-      changeFlags: layer.diffProps({}, layer.props, context)
-    });
-
-    layer.updateLayer({
-      oldProps: {},
-      props: layer.props,
-      oldContext,
-      context,
-      changeFlags: layer.diffProps({}, layer.props, context)
-    });
-
+    layer.initializeLayer({props: layer.props, oldProps: {}, context, oldContext});
+    layer.updateLayer({props: layer.props, oldProps: {}, context, oldContext});
   } catch (error) {
     console.log(error.message); // eslint-disable-line
     failures = error;
@@ -98,20 +83,13 @@ export function testUpdateLayer({gl, layer, viewport, newProps}) {
 
   const oldContext = layer.context || {gl, viewport};
   const context = {gl, viewport};
-  const oldProps = layer.oldProps || layer.props || {};
 
-  const mergedDefaultProps = mergeDefaultProps(layer);
-  layer.props = Object.assign({}, mergedDefaultProps, newProps);
+  layer.oldProps = layer.props;
+  layer.props = layer._normalizeProps(newProps);
 
   let failure = false;
   try {
-    layer.updateLayer({
-      oldProps,
-      props: layer.props,
-      oldContext,
-      context,
-      changeFlags: layer.diffProps(oldProps, layer.props, context)
-    });
+    layer.updateLayer({props: layer.props, oldProps: layer.oldProps, context, oldContext});
   } catch (error) {
     failure = error;
   }
