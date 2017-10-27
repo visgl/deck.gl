@@ -25,7 +25,6 @@ import vs from './multi-icon-layer-vertex.glsl';
 import vs64 from './multi-icon-layer-vertex-64.glsl';
 
 const defaultProps = {
-  ...IconLayer.defaultProps,
   getIndexOfIcon: x => x.index || 0,
   getNumOfIcon: x => x.len || 1,
   // 1: left, 0: middle, -1: right
