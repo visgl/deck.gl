@@ -439,13 +439,9 @@ export default class LayerManager {
         generatedLayers.push(newLayer);
 
         // Call layer lifecycle method: render sublayers
-        const {props, oldProps} = newLayer;
-        let sublayers = newLayer.isComposite ? newLayer._renderLayers({
-          oldProps,
-          props,
-          context: this.context,
-          oldContext: this.oldContext
-        }) : null;
+        let sublayers = newLayer.isComposite ?
+          newLayer._renderLayers({oldContext: this.oldContext}) :
+          null;
         // End layer lifecycle method: render sublayers
 
         if (sublayers) {
@@ -519,79 +515,58 @@ export default class LayerManager {
 
   // Initializes a single layer, calling layer methods
   _initializeNewLayer(layer) {
+    assert(!layer.state);
+    log(LOG_PRIORITY_LIFECYCLE, `initializing ${layerName(layer)}`);
+
     let error = null;
-    // Check if new layer, and initialize it's state
-    if (!layer.state) {
-      log(LOG_PRIORITY_LIFECYCLE, `initializing ${layerName(layer)}`);
-      try {
-        layer.initializeLayer({
-          oldProps: {},
-          props: layer.props,
-          oldContext: this.oldContext,
-          context: this.context
-        });
-
-        layer.lifecycle = LIFECYCLE.INITIALIZED;
-
-      } catch (err) {
-        log.once(0, `error while initializing ${layerName(layer)}\n`, err);
-        // Save first error
-        error = error || err;
-      }
-      // Set back pointer (used in picking)
-      if (layer.state) {
-        layer.state.layer = layer;
-        // Save layer on model for picking purposes
-        // TODO - store on model.userData rather than directly on model
-      }
-      if (layer.state) {
-        for (const model of layer.getModels()) {
-          model.userData.layer = layer;
-        }
-      }
+    try {
+      layer.initializeLayer({oldContext: this.oldContext});
+      layer.lifecycle = LIFECYCLE.INITIALIZED;
+    } catch (err) {
+      log.once(0, `error while initializing ${layerName(layer)}\n`, err);
+      error = error || err;
+      // TODO - what should the lifecycle state be here? LIFECYCLE.INITIALIZATION_FAILED?
     }
+
+    assert(layer.state);
+
+    // Set back pointer (used in picking)
+    layer.state.layer = layer;
+
+    // Save layer on model for picking purposes
+    // store on model.userData rather than directly on model
+    for (const model of layer.getModels()) {
+      model.userData.layer = layer;
+    }
+
     return error;
   }
 
   // Updates a single layer, calling layer methods
   _updateLayer(layer) {
-    const {oldProps, props} = layer;
-    let error = null;
-    if (oldProps) {
-      try {
-        layer.updateLayer({
-          oldProps,
-          props,
-          context: this.context,
-          oldContext: this.oldContext
-        });
-      } catch (err) {
-        log.once(0, `error during update of ${layerName(layer)}`, err);
-        // Save first error
-        error = err;
-      }
-      log(LOG_PRIORITY_LIFECYCLE_MINOR, `updating ${layerName(layer)}`);
+    log(LOG_PRIORITY_LIFECYCLE_MINOR, `updating ${layerName(layer)}`);
+    try {
+      layer.updateLayer({oldContext: this.oldContext});
+    } catch (error) {
+      log.once(0, `error during update of ${layerName(layer)}`, error);
+      // TODO - what should the lifecycle state be here? LIFECYCLE.UPDATE_FAILED?
+      return error;
     }
-    return error;
+    return null;
   }
 
   // Finalizes a single layer
   _finalizeLayer(layer) {
+    assert(layer.state);
     let error = null;
-    const {state} = layer;
-    if (state) {
-      try {
-        layer.finalizeLayer();
-      } catch (err) {
-        log.once(0,
-          `error during finalization of ${layerName(layer)}`, err);
-        // Save first error
-        error = err;
-      }
-      // layer.state = null;
-      layer.lifecycle = LIFECYCLE.FINALIZED;
-      log(LOG_PRIORITY_LIFECYCLE, `finalizing ${layerName(layer)}`);
+    try {
+      layer.finalizeLayer();
+    } catch (err) {
+      log.once(0, `error during finalization of ${layerName(layer)}`, err);
+      error = err;
     }
+    layer.lifecycle = LIFECYCLE.FINALIZED;
+    log(LOG_PRIORITY_LIFECYCLE, `finalizing ${layerName(layer)}`);
     return error;
   }
 
