@@ -48,7 +48,7 @@ const LIBRARY_BUNDLE_CONFIG = {
     // leave minification to app
     // new webpack.optimize.UglifyJsPlugin({comments: false})
     new webpack.DefinePlugin({
-      VERSION: JSON.stringify(require('./package.json').version)
+      DECK_VERSION: JSON.stringify(require('./package.json').version)
     })
   ]
 };
