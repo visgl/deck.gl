@@ -182,13 +182,6 @@ export default class DeckGLJS {
     return this.layerManager ? this.layerManager.getViewports() : [];
   }
 
-  // Experimental
-
-  // Gets actual viewport from a viewport "descriptor" object: viewport || {viewport: ..., ...}
-  _getViewportFromDescriptor(viewportOrDescriptor) {
-    return this.layerManager._getViewportFromDescriptor(viewportOrDescriptor);
-  }
-
   // Private Methods
 
   _createCanvas(props) {
