@@ -62,7 +62,7 @@ The array of deck.gl layers to be rendered. This array is expected to be an arra
 
 ##### `layerFilter`
 
-Optionally takes a function `(layer, viewport) => Boolean` that is called before a layer is rendered. Gives the application an opportunity to filter out layers from the layer list during either rendering or picking. Filtering can be done per viewport or per layer or both. This enables techniques like adding helper layers that work as masks during picking but do not show up during rendering.
+Optionally takes a function `({layer, viewport, isPicking}) => Boolean` that is called before a layer is rendered. Gives the application an opportunity to filter out layers from the layer list during either rendering or picking. Filtering can be done per viewport or per layer or both. This enables techniques like adding helper layers that work as masks during picking but do not show up during rendering.
 
 ##### `viewports`
 

@@ -68,7 +68,7 @@ export function drawLayers(gl, {
   drawPickingColors = false,
   deviceRect = null,
   parameters = {},
-  layerFilter = (layer, viewport) => true,
+  layerFilter = null,
   pass = 'draw',
   redrawReason = ''
 }) {
@@ -108,7 +108,7 @@ export function drawPickingBuffer(gl, {
   useDevicePixelRatio,
   pickingFBO,
   deviceRect: {x, y, width, height},
-  layerFilter = (layer, viewport) => true,
+  layerFilter = null,
   redrawReason = ''
 }) {
   // Make sure we clear scissor test and fbo bindings in case of exceptions
@@ -181,7 +181,7 @@ function drawLayersInViewport(gl, {
       shouldDrawLayer = shouldDrawLayer && layer.props.pickable;
     }
     if (shouldDrawLayer && layerFilter) {
-      shouldDrawLayer = layerFilter(layer, viewport);
+      shouldDrawLayer = layerFilter({layer, viewport, isPicking: drawPickingColors});
     }
 
     // Calculate stats
