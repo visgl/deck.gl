@@ -1,10 +1,5 @@
 // Inspired by https://github.com/popomore/spy
-// Attach a spy to the function. The spy has the following methods and fields
-//  * restore() - remove spy completely
-//  * reset() - reset call count
-//  * callCount - number of calls
-//  * called - whether spy was called
-export default function makeSpy(obj, func) {
+export default function(obj, func) {
   let methodName;
 
   if (!obj && !func) {
