@@ -1,5 +1,3 @@
-// Note: This file will either be moved back to deck.gl or reformatted to web-monorepo standards
-// Disabling lint temporarily to facilitate copying code in and out of this repo
 import {PathLayer} from 'deck.gl';
 import {GL, Framebuffer, Texture2D, registerShaderModules} from 'luma.gl';
 import outline from '../shaderlib/outline/outline';

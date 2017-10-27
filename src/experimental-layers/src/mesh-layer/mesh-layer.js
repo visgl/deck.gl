@@ -109,7 +109,7 @@ export default class MeshLayer extends Layer {
     attributeManager.addInstanced({
       instancePositions: {size: 3, accessor: 'getPosition', update: this.calculateInstancePositions},
       instanceAngles: {size: 1, accessor: 'getAngleDegreesCW', update: this.calculateInstanceAngles},
-      instanceColors: {size: 3, accessor: 'getColor', update: this.calculateInstanceColors}
+      instanceColors: {size: 4, accessor: 'getColor', update: this.calculateInstanceColors}
     });
   }
 

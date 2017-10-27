@@ -33,9 +33,11 @@ attribute vec2 texCoords;
 attribute vec3 instancePositions;
 attribute vec2 instancePositions64xy;
 attribute float instanceAngles;
+attribute vec4 instanceColors;
 attribute vec3 instancePickingColors;
 
 // Outputs to fragment shader
+varying vec4 vColor;
 varying vec2 vTexCoord;
 varying float vLightWeight;
 
@@ -55,6 +57,7 @@ void main(void) {
   picking_setPickingColor(instancePickingColors);
 
   vTexCoord = texCoords;
+  vColor = instanceColors;
 
   //   lightWeight = getLightWeight(
   //     position_worldspace.xyz, // the w component is always 1.0
