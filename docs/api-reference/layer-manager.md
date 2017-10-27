@@ -77,7 +77,7 @@ layerManager.setEventHandlingParameters({
 * `onLayerClick` (`Function`, optional) - A handler to be called when any layer is clicked.
 * `onLayerHover` (`Function`, optional) - A handler to be called when any layer is hovered over.
 
-##### updateLayers
+##### setLayers
 
 Provide a new list of layers. Layers will be matched against old layers, and any composite layers will be recursively expanded into primitive layers.
 

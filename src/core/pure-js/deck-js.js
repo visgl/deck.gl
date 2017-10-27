@@ -142,8 +142,11 @@ export default class DeckGLJS {
       onLayerHover
     });
 
-    // Update viewports (creating one if not supplied)
+    if (props.layers) {
+      this.layerManager.setLayers(props.layers);
+    }
 
+    // Update viewports (creating one if not supplied)
     let viewports = props.viewports || props.viewport;
     if (!viewports) {
       const {width, height, latitude, longitude, zoom, pitch, bearing} = props;
@@ -152,11 +155,6 @@ export default class DeckGLJS {
       ];
     }
     this.layerManager.setViewports(viewports);
-
-    // TODO - this is a HACK: UpdateLayers needs one viewport prop set each time
-    if (props.layers) {
-      this.layerManager.updateLayers({newLayers: props.layers});
-    }
 
     this.animationLoop.setViewParameters({useDevicePixelRatio});
   }
@@ -235,6 +233,10 @@ export default class DeckGLJS {
     // Note: avoid React setState due GL animation loop / setState timing issue
     this.layerManager = new LayerManager({gl});
     this.layerManager.initEventHandling(new EventManager(canvas));
+    // Init with dummy viewport
+    this.layerManager.setViewports([
+      new WebMercatorViewport({width: 1, height: 1, latitude: 0, longitude: 0, zoom: 1})
+    ]);
     this.effectManager = new EffectManager({gl, layerManager: this.layerManager});
 
     for (const effect of this.props.effects) {
