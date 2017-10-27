@@ -50,6 +50,14 @@ Whether to generate a line wireframe of the hexagon. The outline will have
 "horizontal" lines closing the top and bottom polygons and a vertical line
 (a "strut") for each vertex on the polygon.
 
+##### `elevationScale` (Number, optional)
+
+- Default: `1`
+
+Elevation multiplier. The final elevation is calculated by
+  `elevationScale * getElevation(d)`. `elevationScale` is a handy property to scale
+all elevation without updating the data.
+
 ##### `fp64` (Boolean, optional)
 
 - Default: `false`
