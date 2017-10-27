@@ -352,8 +352,7 @@ export default class LayerManager {
       // TODO - don't set viewportChanged during setViewports?
       if (this.context.viewportChanged) {
         for (const layer of this.layers) {
-          layer.setChangeFlags({viewportChanged: 'Viewport changed'});
-          this._updateLayer(layer);
+          this._updateLayer(layer, {viewportChanged: true});
         }
       }
     }
@@ -444,7 +443,8 @@ export default class LayerManager {
           oldProps,
           props,
           context: this.context,
-          oldContext: this.oldContext
+          oldContext: this.oldContext,
+          changeFlags: newLayer.diffProps(oldProps, props, this.context)
         }) : null;
         // End layer lifecycle method: render sublayers
 
@@ -524,11 +524,13 @@ export default class LayerManager {
     if (!layer.state) {
       log(LOG_PRIORITY_LIFECYCLE, `initializing ${layerName(layer)}`);
       try {
+
         layer.initializeLayer({
           oldProps: {},
           props: layer.props,
           oldContext: this.oldContext,
-          context: this.context
+          context: this.context,
+          changeFlags: layer.diffProps({}, layer.props, this.context)
         });
 
         layer.lifecycle = LIFECYCLE.INITIALIZED;
@@ -553,17 +555,19 @@ export default class LayerManager {
     return error;
   }
 
-  // Updates a single layer, calling layer methods
-  _updateLayer(layer) {
+  // Updates a single layer, calling layer methods, calculates changeFlags if not provided
+  _updateLayer(layer, changeFlags = null) {
     const {oldProps, props} = layer;
     let error = null;
     if (oldProps) {
+      changeFlags = changeFlags || layer.diffProps(oldProps, props, this.context);
       try {
         layer.updateLayer({
           oldProps,
           props,
           context: this.context,
-          oldContext: this.oldContext
+          oldContext: this.oldContext,
+          changeFlags
         });
       } catch (err) {
         log.once(0, `error during update of ${layerName(layer)}`, err);
