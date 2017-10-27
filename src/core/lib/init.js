@@ -22,6 +22,8 @@ import {global} from '../utils/globals';
 import log from '../utils/log';
 
 const STARTUP_MESSAGE = 'set deck.log.priority=1 (or higher) to trace attribute updates';
+
+// Fallback for tests and SSR since global variable is defined by Webpack.
 const version = global.DECK_VERSION || 'NODE';
 
 if (global.deck && global.deck.VERSION !== version) {
