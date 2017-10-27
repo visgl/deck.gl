@@ -46,7 +46,7 @@ The new `useDevicePixelRatio` prop on the `DeckGL` React component can be used t
 
 ## Layer Filtering
 
-A new `layerFilter: (layer, viewport) => true` prop gives the application an opportunity to filter out layers from the layer list during either rendering or picking. Filtering can be done per viewport or per layer or both. This enables techniques like adding helper layers that work as masks during picking but do not show up during rendering.
+A new prop gives the application an opportunity to filter out layers from the layer list during either rendering or picking. Filtering can be done per viewport or per layer or both. This enables techniques like adding helper layers that work as masks during picking but do not show up during rendering.
 
 
 ## CompositeLayer Improvements
