@@ -1,3 +1,5 @@
+0.0.7
+- Specify arrow colors
 0.0.6
 - Fix MeshLayer fp64 mode (#1068)
 0.0.5

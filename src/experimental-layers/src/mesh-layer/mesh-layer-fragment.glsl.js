@@ -16,12 +16,12 @@ varying float vLightWeight;
 void main(void) {
   // TODO - restore color rendering
 
-  gl_FragColor = vec4(0., 0., 0., 1.);
-  // gl_FragColor = vColor / 255.;
+  gl_FragColor = vColor / 255.;
+
   // hasTexture ? texture2D(sampler, vTexCoord) : color / 255.;
   // color = vec4(color_transform(color.rgb), color.a * opacity);
 
-  //   gl_FragColor = gl_FragColor * vLightWeight;
+  // gl_FragColor = gl_FragColor * vLightWeight;
 
   // use highlight color if this fragment belongs to the selected object.
   // gl_FragColor = picking_filterHighlightColor(gl_FragColor);

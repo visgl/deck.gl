@@ -27,8 +27,9 @@ const defaultProps = Object.assign({}, PathOutlineLayer.defaultProps, {
   hightlightIndex: -1,
   highlightPoint: null,
 
-  // getPath: x => x.path,
-  // getColor: x => x.color,
+  getPath: x => x.path,
+  getColor: x => x.color,
+  getMarkerColor: x => [0, 0, 0, 255],
   getDirection: x => x.direction,
   getMarkerPercentages: (object, {lineLength}) =>
    lineLength > DISTANCE_FOR_MULTI_ARROWS ? [0.25, 0.5, 0.75] : [0.5]
@@ -45,9 +46,9 @@ export default class PathMarkerLayer extends CompositeLayer {
 
   updateState({props, oldProps, changeFlags}) {
     if (changeFlags.dataChanged) {
-      const {data, getPath, getDirection, getColor, getMarkerPercentages} = this.props;
+      const {data, getPath, getDirection, getMarkerColor, getMarkerPercentages} = this.props;
       this.state.markers = createPathMarkers({
-        data, getPath, getDirection, getColor, getMarkerPercentages
+        data, getPath, getDirection, getColor: getMarkerColor, getMarkerPercentages
       });
       this._recalculateClosestPoint();
     }
