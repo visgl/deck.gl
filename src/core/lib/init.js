@@ -21,14 +21,15 @@
 import {global} from '../utils/globals';
 import log from '../utils/log';
 
-// Version detection
-// TODO - this imports a rather large JSON file, we only need one field
-import {version} from '../../../package.json';
-
 const STARTUP_MESSAGE = 'set deck.log.priority=1 (or higher) to trace attribute updates';
 
+// Fallback for tests and SSR since global variable is defined by Webpack.
+const version = global.DECK_VERSION || 'NODE';
+
 if (global.deck && global.deck.VERSION !== version) {
-  throw new Error(`deck.gl - multiple versions detected: ${global.deck.VERSION} vs ${version}`);
+  throw new Error(
+    `deck.gl - multiple versions detected: ${global.deck.VERSION} vs ${version}`
+  );
 }
 
 if (!global.deck) {
