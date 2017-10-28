@@ -267,6 +267,7 @@ export default class WebMercatorViewport extends Viewport {
 
   // TODO - should support user supplied constraints
   isMapSynched() {
+    const EPSILON = 0.000001;
     const MAPBOX_LIMITS = {
       pitch: 60,
       zoom: 40
@@ -274,7 +275,8 @@ export default class WebMercatorViewport extends Viewport {
 
     const {pitch, zoom} = this;
 
-    return pitch <= MAPBOX_LIMITS.pitch && zoom <= MAPBOX_LIMITS.zoom;
+    return pitch <= (MAPBOX_LIMITS.pitch + EPSILON) &&
+      zoom <= (MAPBOX_LIMITS.zoom + EPSILON);
   }
 }
 
