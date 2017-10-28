@@ -13,6 +13,7 @@ const DEFAULT_COLOR = [0, 0, 0, 255];
 
 export default function createPathMarkers({
   data,
+  viewport,
   getPath = x => x.path,
   getDirection = x => true,
   getColor = x => DEFAULT_COLOR,
@@ -39,7 +40,8 @@ export default function createPathMarkers({
 
     // Create the markers
     for (const percentage of percentages) {
-      const marker = createMarkerAlongPath(vPoints, percentage, lineLength, color, object);
+      const marker = createMarkerAlongPath(
+        {path: vPoints, percentage, lineLength, color, object, viewport});
       markers.push(marker);
     }
   }
@@ -47,7 +49,7 @@ export default function createPathMarkers({
   return markers;
 }
 
-function createMarkerAlongPath(path, percentage, lineLength, color, object) {
+function createMarkerAlongPath({path, percentage, lineLength, color, object, viewport}) {
   const distanceAlong = lineLength * percentage;
   let currentDistance = 0;
   let previousDistance = 0;
@@ -64,12 +66,15 @@ function createMarkerAlongPath(path, percentage, lineLength, color, object) {
     .clone()
     .subtract(path[i])
     .normalize();
-  const along = distanceAlong - previousDistance; // + ARROW_CENTER_ADJUST;
+  const along = distanceAlong - previousDistance;
   const vCenter = vDirection
     .clone()
     .multiply(new Vector2(along, along))
     .add(path[i]);
-  const angle = vDirection.verticalAngle() * 180 / Math.PI;
+
+  const vDirection2 = new Vector2(viewport.projectFlat(path[i + 1]))
+    .subtract(viewport.projectFlat(path[i]));
+  const angle = -vDirection2.verticalAngle() * 180 / Math.PI;
 
   return ({
     position: [vCenter.x, vCenter.y, 0], angle, color, object
