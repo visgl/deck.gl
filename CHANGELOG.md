@@ -23,6 +23,71 @@ For Earlier Beta Releases see below
 
 ### deck.gl v4.2 Beta Releases
 
+
+#### [4.2.0-alpha.16] - Oct 27
+- MultiViewport Transitions: Add example, and fix `isMapSynced`.(#1099)
+- path+mesh layer: Specify arrow colors (#1098)
+- Add `layerFilter` prop (#1086)
+- Use global version from webpack (#1091)
+- Fix multi icon layer default props (#1094)
+- ViewportTransitions: remove recursive children update, fix props update (#10
+82)
+- Fix multi icon layer default props (#1089)
+- Move text layer to experimental layers (#1062)
+- Handle IconLayer pixel size in first person viewports (#1084)
+- core and deprecated layers only import from core/index.js (#1085)
+- Quick fix of fitBounds API in orbit-viewport and examples (#1083)
+    * Quick fix of fitBounds API in orbit-viewport and examples
+- Clean up sub-module imports (#1081)
+- Fix layer context update (#1072)
+- refactoring on ortho- and perspective-viewports related files, exports and d
+ocs (#1057)
+- Correct brackets on `Complex polygon with holes` example (#1061)
+    - The `polygon` property requires arrays of Polygons (i.e. `polygon: Polygon |
+ Polygon[]`). Update the example to reflect this
+- Fix MeshLayer fp64 mode (#1068)
+- Separate common ViewState from FirstPersonState and MapState (#995)
+- Transition manager improvements (#1063)
+    - Fix incorrect timer, replace `setInterval` with `requestAnimationFrame`
+    - Always use the transition settings from when the transition is triggered (
+removes the burden from app: set and forget)
+    - Use `onViewportChange` for transition update callback
+    - Do not trigger transition on viewport size change
+    - Do not compare viewports if there's no transition
+    - Remove nested function definitions in utils
+- Examples: set useDevicePixelRatio by default (#1060)
+    * Layer-browser: set useDevicePixelRation by default
+- Remove excessive nesting in picking code (#1036)
+    * Remove excessive nesting in picking code
+- Improved tracking and logging of redraw reason (#1037)
+    - Experimental Layers: Set pickable to false for marker layer
+- Apply default values for transition props (#1058)
+- temporary fix for orthographic-viewport dependent apps (#1055)
+    * have PerspectiveViewport extends Viewport
+    * minor bug fix for the point-cloud-ply example
+- ViewportTransition minor fixes (#1054)
+- Viewport Transitions : add pure-js TransitionManager (#1038)
+- Remove deck.gl picking module, use luma.gl's version. (#1045)
+- Optimize prop diffing when using inline functions as accessors. (#1033)
+- Move prop diffing from layer.js to props.js (#1035)
+- Fix mesh layer (#1041)
+- experimental `project64utils` (#1050)
+    - Add new project64util shader module hat removes raw fp64 math from layer s
+haders
+- Add getLineDashArray and lineDashJustified in PolygonLayer
+- Fix blending in ScatterplotLayer example (#1034)
+- Fix Viewport import in OrbitViewport (#1044)
+- Fix PolygonLayer issue with Data Accessors
+- Fix plot layer (#1031)
+- Add 3rd person viewport support (#1030)
+- Improve Extruded Polygon Tesselation (#1011)
+    - improve polygon tesselator perf
+    - fix normal calculation
+- Specify meter unit for getLineWidth in geojson layer (#1029)
+- Publish work-in-progress layers in new `deck.gl-layers` module (#1003)
+    - Includes PathMarkerLayer, PathOutlineLayer and MeshLayer
+- RFC page, added 4.2 section (#1025)
+
 #### [4.2.0-alpha.15] - Oct 11
 - Pass useDevicePixelRatio to picking flow (#1021)
 - Fix multi viewport update state (#1019)
