@@ -314,13 +314,13 @@ export default class MapState extends ViewState {
     // Ensure zoom is within specified range
     const {maxZoom, minZoom, zoom} = props;
     props.zoom = zoom > maxZoom ? maxZoom : zoom;
-    props.zoom = zoom < minZoom ? minZoom : zoom;
+    props.zoom = props.zoom < minZoom ? minZoom : props.zoom;
 
     // Ensure pitch is within specified range
     const {maxPitch, minPitch, pitch} = props;
 
     props.pitch = pitch > maxPitch ? maxPitch : pitch;
-    props.pitch = pitch < minPitch ? minPitch : pitch;
+    props.pitch = props.pitch < minPitch ? minPitch : props.pitch;
 
     return props;
   }
