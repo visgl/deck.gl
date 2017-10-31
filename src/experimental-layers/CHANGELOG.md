@@ -1,3 +1,5 @@
+0.0.8
+- Fix arrows
 0.0.7
 - Specify arrow colors
 0.0.6
