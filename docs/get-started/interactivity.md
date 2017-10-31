@@ -79,7 +79,7 @@ const layer = new ScatterplotLayer({
 />
 ```
 
-The callbacks for `hover` and `click` events are called with a single parameter `info` that contains the mouse or touch event and what was hovered, including which layer was selected. Thus event handlers registered directly on the `DeckGL` compionents are also able to distinguish between clicks in different layers.
+The callbacks for `hover` and `click` events are called with a single parameter `info` that contains the mouse or touch event and what was hovered, including which layer was selected. Thus event handlers registered directly on the `DeckGL` components are also able to distinguish between clicks in different layers.
 
 ### Behavior of Built-in Event Handling
 
