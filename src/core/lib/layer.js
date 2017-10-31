@@ -152,18 +152,25 @@ export default class Layer {
   // END LIFECYCLE METHODS
   // //////////////////////////////////////////////////
 
-  // Default implementation of attribute invalidation, can be redefine
-  invalidateAttribute(name = 'all') {
-    if (name === 'all') {
-      this.state.attributeManager.invalidateAll();
-    } else {
-      this.state.attributeManager.invalidate(name);
-    }
-  }
-
   // Returns true if the layer is pickable and visible.
   isPickable() {
     return this.props.pickable && this.props.visible;
+  }
+
+  // Default implementation of attribute invalidation, can be redefined
+  invalidateAttribute(name = 'all', diffReason = '') {
+    const {attributeManager} = this.state;
+    if (!attributeManager) {
+      return;
+    }
+
+    if (name === 'all') {
+      log.log(LOG_PRIORITY_UPDATE, `updateTriggers invalidating all attributes: ${diffReason}`);
+      attributeManager.invalidateAll();
+    } else {
+      log.log(LOG_PRIORITY_UPDATE, `updateTriggers invalidating attribute ${name}: ${diffReason}`);
+      attributeManager.invalidate(name);
+    }
   }
 
   // Calls attribute manager to update any WebGL attributes, can be redefined
@@ -539,19 +546,12 @@ export default class Layer {
 
   // Callback for `diffProps`, will be called when an updateTrigger fires
   _onUpdateTriggered(propName, diffReason) {
-    const {attributeManager} = this.state;
-    if (attributeManager) {
-      switch (propName) {
-      case 'all':
-        log.log(LOG_PRIORITY_UPDATE,
-          `updateTriggers invalidating all attributes: ${diffReason}`);
-        attributeManager.invalidateAll();
-        break;
-      default:
-        log.log(LOG_PRIORITY_UPDATE,
-          `updateTriggers invalidating attribute ${propName}: ${diffReason}`);
-        attributeManager.invalidate(propName);
-      }
+    switch (propName) {
+    case 'all':
+      this.invalidateAttribute('all', diffReason);
+      break;
+    default:
+      this.invalidateAttribute(propName, diffReason);
     }
   }
 
