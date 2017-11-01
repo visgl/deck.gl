@@ -19,7 +19,8 @@
 // THE SOFTWARE.
 
 import test from 'tape-catch';
-import {parseColor} from 'deck.gl/core/lib/utils/color';
+import color from 'deck.gl/core/lib/utils/color';
+const {parseColor} = color;
 
 const TEST_CASES = [
   {

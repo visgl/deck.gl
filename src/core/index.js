@@ -73,6 +73,8 @@ import {defaultColorRange} from './utils/color-utils';
 import {enable64bitSupport} from './lib/utils/fp64';
 import {fp64ify} from './lib/utils/fp64';
 
+import {flatten, countVertices, flattenVertices, fillArray} from './lib/utils/flatten';
+
 export const experimental = {
   DeckGLJS,
   MapControllerJS,
@@ -96,5 +98,10 @@ export const experimental = {
   get,
   count,
   enable64bitSupport,
-  fp64ify
+  fp64ify,
+
+  flatten,
+  countVertices,
+  flattenVertices,
+  fillArray
 };

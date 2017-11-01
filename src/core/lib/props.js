@@ -153,13 +153,14 @@ function diffUpdateTriggers(oldProps, props, onUpdateTriggered) {
 
 // Constructors have their super class constructors as prototypes
 function getOwnProperty(object, prop) {
-  return object.hasOwnProperty(prop) && object[prop];
+  return Object.prototype.hasOwnProperty.call(object, prop) && object[prop];
 }
 
 /*
  * Return merged default props stored on layers constructor, create them if needed
  */
 export function getDefaultProps(layer) {
+  // TODO - getOwnProperty is very slow, reduces layer construction speed 3x
   const mergedDefaultProps = getOwnProperty(layer.constructor, 'mergedDefaultProps');
   if (mergedDefaultProps) {
     return mergedDefaultProps;

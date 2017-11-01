@@ -18,7 +18,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {get, count} from '../../core/lib/utils';
+import {experimental} from '../../core';
+const {get, count} = experimental;
 
 // Basic polygon support
 //
