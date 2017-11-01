@@ -24,6 +24,13 @@ For Earlier Beta Releases see below
 ### deck.gl v4.2 Beta Releases
 
 
+#### [4.2.0-alpha.17 - Nov 1
+- Use probe.gl instead of benchmark.js (#1110)
+- Fix MapState constraints check (#1105)
+- Fix attribute updates for composite layers (#1104)
+- Fix typo (#1107)
+- Fix path-marker-layer angle issue (#1100)
+
 #### [4.2.0-alpha.16] - Oct 27
 - MultiViewport Transitions: Add example, and fix `isMapSynced`.(#1099)
 - path+mesh layer: Specify arrow colors (#1098)
