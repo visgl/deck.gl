@@ -23,7 +23,7 @@ import {COORDINATE_SYSTEM, LIFECYCLE} from './constants';
 import AttributeManager from './attribute-manager';
 import Stats from './stats';
 import {getDefaultProps, diffProps} from './props';
-import {count} from './utils';
+import {count} from './utils/count';
 import log from '../utils/log';
 import {applyPropOverrides, removeLayerInSeer} from './seer-integration';
 import {GL, withParameters} from 'luma.gl';

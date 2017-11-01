@@ -19,7 +19,8 @@
 // THE SOFTWARE.
 
 import {Layer} from '../../core';
-import {get, flatten} from '../../core/lib/utils';
+import {get} from '../../core/lib/utils/get';
+import {flatten} from '../../core/lib/utils/flatten';
 import log from '../../core/utils/log';
 import {extractPolygons} from './geojson';
 import {GL, Model, Geometry} from 'luma.gl';

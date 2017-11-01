@@ -25,8 +25,8 @@
 // - 3D wireframes (not yet)
 import * as Polygon from './polygon';
 import earcut from 'earcut';
-import {get, count, flattenVertices, fillArray} from '../../core/lib/utils';
-import {fp64ify} from '../../core/lib/utils/fp64';
+import {experimental} from '../../core';
+const {fp64ify, get, count, flattenVertices, fillArray} = experimental;
 
 // Maybe deck.gl or luma.gl needs to export this
 function getPickingColor(index) {

@@ -82,27 +82,7 @@ const TEST_BROWSER_CONFIG = {
   },
 
   module: {
-    rules: [
-      {
-        // Compile ES2015 using buble
-        test: /\.js$/,
-        loader: 'buble-loader',
-        include: [/src/],
-        options: {
-          objectAssign: 'Object.assign',
-          transforms: {
-            dangerousForOf: true,
-            modules: false
-          }
-        }
-      },
-      {
-        // Inline shaders
-        test: /\.glsl$/,
-        exclude: /node_modules/,
-        loader: 'raw-loader'
-      }
-    ]
+    rules: []
   },
 
   node: {

@@ -19,8 +19,8 @@
 // THE SOFTWARE.
 
 import * as Polygon from './polygon';
-import {fp64ify} from '../../core/lib/utils/fp64';
-import {get, count, fillArray} from '../../core/lib/utils';
+import {experimental} from '../../core';
+const {fp64ify, get, count, fillArray} = experimental;
 import earcut from 'earcut';
 
 function getPickingColor(index) {

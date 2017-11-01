@@ -19,43 +19,56 @@
 // THE SOFTWARE.
 
 // Parse array or string color
-export function parseColor(color) {
-  if (Array.isArray(color)) {
-    if (color.length === 3) {
-      return [color[0], color[1], color[2], 255];
+function parseColor(color, target, index = 0) {
+  if (Array.isArray(color) || ArrayBuffer.isView(color)) {
+    if (!target && color.length === 4) {
+      return color;
     }
-    return color;
+
+    target = target || [];
+    target[index + 0] = color[0];
+    target[index + 1] = color[1];
+    target[index + 2] = color[2];
+    target[index + 3] = color.length === 4 ? color[4] : 255;
+    return target;
   }
+
   if (typeof color === 'string') {
-    return parseHexColor(color);
+    target = target || [];
+    parseHexColor(color, target, index);
+    return target;
   }
-  return null;
+
+  return [0, 0, 0, 255];
 }
 
 // Parse a hex color
-export function parseHexColor(color) {
-  const array = new Uint8ClampedArray(4);
+function parseHexColor(color, target, index) {
   if (color.length === 7) {
     const value = parseInt(color.substring(1), 16);
-    array[0] = value / 65536;
-    array[1] = (value / 256) % 256;
-    array[2] = value % 256;
-    array[3] = 255;
+    target[index + 0] = Math.floor(value / 65536);
+    target[index + 1] = Math.floor((value / 256) % 256);
+    target[index + 2] = value % 256;
+    target[index + 3] = 255;
   } else if (color.length === 9) {
     const value = parseInt(color.substring(1), 16);
-    array[0] = value / 16777216;
-    array[1] = (value / 65536) % 256;
-    array[2] = (value / 256) % 256;
-    array[3] = value % 256;
+    target[index + 0] = Math.floor(value / 16777216);
+    target[index + 1] = Math.floor((value / 65536) % 256);
+    target[index + 2] = Math.floor(value / 256 % 256);
+    target[index + 3] = value % 256;
   }
-  return array;
+  return index + 4;
 }
 
-export function setOpacity(color, opacity = 127) {
+function setOpacity(color, opacity = 127) {
   return [color[0], color[1], color[2], opacity];
 }
 
-export function applyOpacity(color, opacity = 127) {
+function applyOpacity(color, opacity = 127) {
   return [color[0], color[1], color[2], opacity];
 }
+
+// Named exports have a small perf hit in webpack, normally OK
+// but for utils that will be called in tight inner loops, export as object
+export default {parseColor, setOpacity, applyOpacity};
 
