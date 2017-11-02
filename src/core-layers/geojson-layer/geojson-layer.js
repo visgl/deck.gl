@@ -42,6 +42,8 @@ const defaultProps = {
   lineJointRounded: false,
   lineMiterLimit: 4,
 
+  elevationScale: 1,
+
   pointRadiusScale: 1,
   pointRadiusMinPixels: 0, //  min point radius in pixels
   pointRadiusMaxPixels: Number.MAX_SAFE_INTEGER, // max point radius in pixels
@@ -111,6 +113,7 @@ export default class GeoJsonLayer extends CompositeLayer {
     const {lineWidthScale, lineWidthMinPixels, lineWidthMaxPixels,
       lineJointRounded, lineMiterLimit,
       pointRadiusScale, pointRadiusMinPixels, pointRadiusMaxPixels,
+      elevationScale,
       fp64} = this.props;
 
     // Accessor props for underlying layers
@@ -132,6 +135,7 @@ export default class GeoJsonLayer extends CompositeLayer {
 
         fp64,
         extruded,
+        elevationScale,
         wireframe: false,
         lightSettings,
         getPolygon: getCoordinates,
@@ -150,6 +154,7 @@ export default class GeoJsonLayer extends CompositeLayer {
 
         fp64,
         extruded,
+        elevationScale,
         wireframe: true,
         getPolygon: getCoordinates,
         getElevation,

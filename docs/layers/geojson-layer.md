@@ -112,6 +112,14 @@ Type of joint. If `true`, draw round joints. Otherwise draw miter joints.
 The maximum extent of a joint in ratio to the stroke width.
 Only works if `lineJointRounded` is `false`.
 
+##### `elevationScale` (Number, optional)
+
+- Default: `1`
+
+Elevation multiplier. The final elevation is calculated by
+  `elevationScale * getElevation(d)`. `elevationScale` is a handy property to scale
+all polygon elevation without updating the data.
+
 ##### `pointRadiusScale` (Number, optional)
 
 - Default: `1`

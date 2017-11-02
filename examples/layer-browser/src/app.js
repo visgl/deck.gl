@@ -137,6 +137,7 @@ class App extends PureComponent {
 
   _renderExampleLayer(example, settings, index) {
     const {layer: Layer, props, getData} = example;
+
     const layerProps = Object.assign({}, props, settings);
 
     if (getData) {
