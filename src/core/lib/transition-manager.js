@@ -98,9 +98,9 @@ export default class TransitionManager {
     return props.transitionDuration > 0;
   }
 
-  _isUpdateDueToCurrentTransition(props) {
+  _isUpdateDueToCurrentTransition(nextViewport) {
     if (this.state.viewport) {
-      return areViewportsEqual(extractViewportFrom(props), this.state.viewport);
+      return areViewportsEqual(nextViewport, this.state.viewport);
     }
     return false;
   }
@@ -108,9 +108,10 @@ export default class TransitionManager {
   _shouldIgnoreViewportChange(nextProps) {
     // Ignore update if it is due to current active transition.
     // Ignore update if it is requested to be ignored
+    const nextViewport = extractViewportFrom(nextProps);
     if (this._isTransitionInProgress()) {
       if (this.state.interruption === TRANSITION_EVENTS.IGNORE ||
-        this._isUpdateDueToCurrentTransition(nextProps)) {
+        this._isUpdateDueToCurrentTransition(nextViewport)) {
         return true;
       }
     } else if (!this._isTransitionEnabled(nextProps)) {
@@ -118,7 +119,7 @@ export default class TransitionManager {
     }
 
     // Ignore if none of the viewport props changed.
-    if (areViewportsEqual(extractViewportFrom(this.props), extractViewportFrom(nextProps))) {
+    if (areViewportsEqual(extractViewportFrom(this.props), nextViewport)) {
       return true;
     }
 
@@ -188,6 +189,9 @@ export default class TransitionManager {
     t = easing(t);
 
     const viewport = interpolator(startViewport, endViewport, t);
+
+    // This extractViewportFrom gurantees angle props (bearing, longitude) are normalized
+    // So when viewports are compared they are in same range.
     this.state.viewport = extractViewportFrom(Object.assign({}, this.props, viewport));
 
     if (this.props.onViewportChange) {

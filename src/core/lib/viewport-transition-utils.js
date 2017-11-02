@@ -1,8 +1,7 @@
 /* eslint max-statements: ["error", 50] */
 
 import {projectFlat, unprojectFlat} from 'viewport-mercator-project';
-import {Vector2} from 'math.gl';
-import {equals} from '../math/equals';
+import {Vector2, equals} from 'math.gl';
 import {mod} from '../math/utils';
 import assert from 'assert';
 
@@ -37,7 +36,7 @@ export function extractViewportFrom(props) {
     assert(isValid(props[key]));
     viewport[key] = props[key];
     // Normalize longitude and bearing into [-180, 180) range
-    // This gurantees they props are in same range when they are interpolated.
+    // This gurantees the props are in same range when they are interpolated.
     if (key === 'longitude' || key === 'bearing') {
       viewport[key] = mod(viewport[key] + 180, 360) - 180;
     }
