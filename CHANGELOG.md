@@ -23,6 +23,9 @@ For Earlier Beta Releases see below
 
 ### deck.gl v4.2 Beta Releases
 
+#### [4.2.0-alpha.18 - Nov 2
+- Viewport Transitions: Add transitionProps,
+  fix bearing and longitude interpolation. (#1111)
 
 #### [4.2.0-alpha.17 - Nov 1
 - Use probe.gl instead of benchmark.js (#1110)
