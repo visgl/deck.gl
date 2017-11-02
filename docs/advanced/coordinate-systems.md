@@ -9,7 +9,7 @@ Naturally, non-geospatial coordinates can also be used when working with non-geo
 ## Supported Coordinate Systems
 
 | Coordinate System Mode               | Coordinates                   | Description |
-| ---                                  | ---
+| ---                                  | ---                           | --- |
 | `COORDINATE_SYSTEM.LNGLAT` (default) | [longitude, latitude, altitude] | Longitude and latitude are specified as **Web Mercator coordinates** in degrees from Greenwich meridian / equator respectively, and altitude is specified in meters above sea level. |
 | `COORDINATE_SYSTEM.METER_OFFSETS`    | [Δx, Δy, Δz]   | Positions are given in meter offsets from a reference point that is specified separately (the `coordinateOrigin` prop) |
 | `COORDINATE_SYSTEM.IDENTITY`         | [x, y, z] | A linear system with no interpretation for pure info-vis layers. Viewports can be used without supplying geospatial reference points. |
