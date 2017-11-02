@@ -114,9 +114,10 @@ const PolygonLayerExample = {
     getFillColor: f => [Math.floor(Math.random() * 255), 0, 0],
     getLineColor: f => [0, 0, 0, 255],
     getWidth: f => 20,
-    getHeight: f => Math.random() * 1000,
+    getElevation: f => Math.random() * 1000,
     opacity: 0.8,
-    pickable: true
+    pickable: true,
+    elevationScale: 0.6
   }
 };
 
