@@ -313,6 +313,7 @@ class Root extends Component {
           height={viewportProps.height}
           onViewportChange={this._onViewportChange}
           transitionDuration={transitionDuration}
+          transitionProps={['longitude', 'latitude', 'zoom', 'bearing', 'pitch', 'position']}
         >
           <DeckGL
             id="first-person"

@@ -106,6 +106,7 @@ export default class App extends Component {
         onViewportChange={this._onViewportChange.bind(this)}
         transitionInterpolator={viewportFlyToInterpolator}
         transitionDuration={transitionDuration}
+        transitionProps={['longitude', 'latitude', 'zoom', 'bearing', 'pitch', 'width', 'height']}
         transitionInterruption={this._interruptionStyle}>
         <StaticMap
           {...viewport}

@@ -1,5 +1,6 @@
 import vec4_multiply from 'gl-vec4/multiply';
 import vec4_transformMat4 from 'gl-vec4/transformMat4';
+import assert from 'assert';
 
 export function transformVector(matrix, vector) {
   // Handle non-invertible matrix
@@ -25,4 +26,10 @@ export function extractCameraVectors({viewMatrix, viewMatrixInverse}) {
     direction: [viewMatrix[2], viewMatrix[6], viewMatrix[10]],
     up: [viewMatrix[1], viewMatrix[5], viewMatrix[9]]
   };
+}
+
+export function mod(value, divisor) {
+  assert(Number.isFinite(value) && Number.isFinite(value));
+  const modulus = value % divisor;
+  return modulus < 0 ? divisor + modulus : modulus;
 }

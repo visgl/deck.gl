@@ -58,6 +58,8 @@ const propTypes = {
   transitionInterruption: PropTypes.number,
   // easing function
   transitionEasing: PropTypes.func,
+  // props to transition
+  transitionProps: PropTypes.array,
   // transition status update functions
   onTransitionStart: PropTypes.func,
   onTransitionInterrupt: PropTypes.func,

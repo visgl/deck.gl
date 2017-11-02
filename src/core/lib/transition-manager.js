@@ -8,6 +8,9 @@ import {
 
 const noop = () => {};
 
+const VIEWPORT_TRANSITION_PROPS =
+  ['longitude', 'latitude', 'zoom', 'bearing', 'pitch'];
+
 export const TRANSITION_EVENTS = {
   BREAK: 1,
   SNAP_TO_END: 2,
@@ -16,9 +19,10 @@ export const TRANSITION_EVENTS = {
 
 const DEFAULT_PROPS = {
   transitionDuration: 0,
-  transitionInterpolator: viewportLinearInterpolator,
   transitionEasing: t => t,
+  transitionInterpolator: viewportLinearInterpolator,
   transitionInterruption: TRANSITION_EVENTS.BREAK,
+  transitionProps: VIEWPORT_TRANSITION_PROPS,
   onTransitionStart: noop,
   onTransitionInterrupt: noop,
   onTransitionEnd: noop
@@ -94,9 +98,9 @@ export default class TransitionManager {
     return props.transitionDuration > 0;
   }
 
-  _isUpdateDueToCurrentTransition(props) {
+  _isUpdateDueToCurrentTransition(nextViewport) {
     if (this.state.viewport) {
-      return areViewportsEqual(props, this.state.viewport);
+      return areViewportsEqual(nextViewport, this.state.viewport);
     }
     return false;
   }
@@ -104,9 +108,10 @@ export default class TransitionManager {
   _shouldIgnoreViewportChange(nextProps) {
     // Ignore update if it is due to current active transition.
     // Ignore update if it is requested to be ignored
+    const nextViewport = extractViewportFrom(nextProps);
     if (this._isTransitionInProgress()) {
       if (this.state.interruption === TRANSITION_EVENTS.IGNORE ||
-        this._isUpdateDueToCurrentTransition(nextProps)) {
+        this._isUpdateDueToCurrentTransition(nextViewport)) {
         return true;
       }
     } else if (!this._isTransitionEnabled(nextProps)) {
@@ -114,7 +119,7 @@ export default class TransitionManager {
     }
 
     // Ignore if none of the viewport props changed.
-    if (areViewportsEqual(this.props, nextProps)) {
+    if (areViewportsEqual(extractViewportFrom(this.props), nextViewport)) {
       return true;
     }
 
@@ -124,6 +129,7 @@ export default class TransitionManager {
   _triggerTransition(startViewport) {
     assert(this.props.transitionDuration !== 0);
     const endViewport = extractViewportFrom(this.props);
+    this._updateAngles(startViewport, endViewport);
 
     cancelAnimationFrame(this.state.animation);
 
@@ -155,6 +161,20 @@ export default class TransitionManager {
     this.state = DEFAULT_STATE;
   }
 
+  // Update angle props so they take shortest interpolation path.
+  _updateAngles(startViewport, endViewport) {
+    const angularProps = ['longitude', 'bearing'];
+    angularProps.forEach((key) => {
+      if (Number.isFinite(startViewport[key])) {
+        assert(Number.isFinite(endViewport[key]));
+        if (Math.abs(endViewport[key] - startViewport[key]) > 180) {
+          endViewport[key] =
+            (endViewport[key] < 0) ? endViewport[key] + 360 : endViewport[key] - 360;
+        }
+      }
+    });
+  }
+
   _updateViewport() {
     // NOTE: Be cautious re-ordering statements in this function.
     const currentTime = Date.now();
@@ -169,6 +189,9 @@ export default class TransitionManager {
     t = easing(t);
 
     const viewport = interpolator(startViewport, endViewport, t);
+
+    // This extractViewportFrom gurantees angle props (bearing, longitude) are normalized
+    // So when viewports are compared they are in same range.
     this.state.viewport = extractViewportFrom(Object.assign({}, this.props, viewport));
 
     if (this.props.onViewportChange) {
