@@ -8,6 +8,9 @@ import {
 
 const noop = () => {};
 
+const VIEWPORT_TRANSITION_PROPS =
+  ['longitude', 'latitude', 'zoom', 'bearing', 'pitch'];
+
 export const TRANSITION_EVENTS = {
   BREAK: 1,
   SNAP_TO_END: 2,
@@ -16,9 +19,10 @@ export const TRANSITION_EVENTS = {
 
 const DEFAULT_PROPS = {
   transitionDuration: 0,
-  transitionInterpolator: viewportLinearInterpolator,
   transitionEasing: t => t,
+  transitionInterpolator: viewportLinearInterpolator,
   transitionInterruption: TRANSITION_EVENTS.BREAK,
+  transitionProps: VIEWPORT_TRANSITION_PROPS,
   onTransitionStart: noop,
   onTransitionInterrupt: noop,
   onTransitionEnd: noop
@@ -96,7 +100,7 @@ export default class TransitionManager {
 
   _isUpdateDueToCurrentTransition(props) {
     if (this.state.viewport) {
-      return areViewportsEqual(props, this.state.viewport);
+      return areViewportsEqual(extractViewportFrom(props), this.state.viewport);
     }
     return false;
   }
@@ -114,7 +118,7 @@ export default class TransitionManager {
     }
 
     // Ignore if none of the viewport props changed.
-    if (areViewportsEqual(this.props, nextProps)) {
+    if (areViewportsEqual(extractViewportFrom(this.props), extractViewportFrom(nextProps))) {
       return true;
     }
 
@@ -124,6 +128,7 @@ export default class TransitionManager {
   _triggerTransition(startViewport) {
     assert(this.props.transitionDuration !== 0);
     const endViewport = extractViewportFrom(this.props);
+    this._updateAngles(startViewport, endViewport);
 
     cancelAnimationFrame(this.state.animation);
 
@@ -153,6 +158,20 @@ export default class TransitionManager {
   _endTransition() {
     cancelAnimationFrame(this.state.animation);
     this.state = DEFAULT_STATE;
+  }
+
+  // Update angle props so they take shortest interpolation path.
+  _updateAngles(startViewport, endViewport) {
+    const angularProps = ['longitude', 'bearing'];
+    angularProps.forEach((key) => {
+      if (Number.isFinite(startViewport[key])) {
+        assert(Number.isFinite(endViewport[key]));
+        if (Math.abs(endViewport[key] - startViewport[key]) > 180) {
+          endViewport[key] =
+            (endViewport[key] < 0) ? endViewport[key] + 360 : endViewport[key] - 360;
+        }
+      }
+    });
   }
 
   _updateViewport() {

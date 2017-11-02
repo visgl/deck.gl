@@ -1,6 +1,7 @@
 import ViewState from './view-state';
 import PerspectiveMercatorViewport from '../viewports/web-mercator-viewport';
 import assert from 'assert';
+import {mod} from '../math/utils';
 
 // MAPBOX LIMITS
 export const MAPBOX_LIMITS = {
@@ -15,12 +16,6 @@ const defaultState = {
   bearing: 0,
   altitude: 1.5
 };
-
-/* Utils */
-function mod(value, divisor) {
-  const modulus = value % divisor;
-  return modulus < 0 ? divisor + modulus : modulus;
-}
 
 function ensureFinite(value, fallbackValue) {
   return Number.isFinite(value) ? value : fallbackValue;

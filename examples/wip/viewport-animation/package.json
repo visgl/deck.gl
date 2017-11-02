@@ -4,6 +4,7 @@
     "start-local": "webpack-dev-server --env.local --progress --hot --open"
   },
   "dependencies": {
+    "deck.gl": ">=4.2.0-alpha.17",
     "immutable": "^3.8.1",
     "react": "^15.4.1",
     "react-dom": "^15.4.1",
@@ -12,10 +13,10 @@
   },
   "devDependencies": {
     "babel-core": "^6.21.0",
-    "babel-loader": "^6.2.10",
     "babel-preset-es2015": "^6.18.0",
     "babel-preset-react": "^6.16.0",
     "babel-preset-stage-2": "^6.18.0",
+    "buble-loader": "^0.4.0",
     "webpack": "^2.4.0",
     "webpack-dev-server": "^2.4.0"
   }

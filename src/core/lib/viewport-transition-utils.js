@@ -2,12 +2,11 @@
 
 import {projectFlat, unprojectFlat} from 'viewport-mercator-project';
 import {Vector2} from 'math.gl';
+import {equals} from '../math/equals';
+import {mod} from '../math/utils';
+import assert from 'assert';
 
 const EPSILON = 0.01;
-const VIEWPORT_PROPS = ['longitude', 'latitude', 'zoom', 'bearing', 'pitch',
-  'position', 'width', 'height'];
-const VIEWPORT_INTERPOLATION_PROPS =
-  ['longitude', 'latitude', 'zoom', 'bearing', 'pitch', 'position'];
 
 /** Util functions */
 function lerp(start, end, step) {
@@ -27,11 +26,20 @@ function scaleToZoom(scale) {
   return Math.log2(scale);
 }
 
+function isValid(prop) {
+  return Number.isFinite(prop) || Array.isArray(prop);
+}
+
 export function extractViewportFrom(props) {
   const viewport = {};
-  VIEWPORT_PROPS.forEach((key) => {
-    if (typeof props[key] !== 'undefined') {
-      viewport[key] = props[key];
+  assert(Array.isArray(props.transitionProps));
+  props.transitionProps.forEach((key) => {
+    assert(isValid(props[key]));
+    viewport[key] = props[key];
+    // Normalize longitude and bearing into [-180, 180) range
+    // This gurantees they props are in same range when they are interpolated.
+    if (key === 'longitude' || key === 'bearing') {
+      viewport[key] = mod(viewport[key] + 180, 360) - 180;
     }
   });
   return viewport;
@@ -39,14 +47,11 @@ export function extractViewportFrom(props) {
 
 /* eslint-disable max-depth */
 export function areViewportsEqual(startViewport, endViewport) {
-  for (const p of VIEWPORT_INTERPOLATION_PROPS) {
-    if (Array.isArray(startViewport[p])) {
-      for (let i = 0; i < startViewport[p].length; ++i) {
-        if (startViewport[p][i] !== endViewport[p][i]) {
-          return false;
-        }
-      }
-    } else if (startViewport[p] !== endViewport[p]) {
+  assert(Object.keys(startViewport).length === Object.keys(endViewport).length);
+  for (const key in startViewport) {
+    assert(isValid(startViewport[key]));
+    assert(isValid(endViewport[key]));
+    if (!equals(startViewport[key], endViewport[key])) {
       return false;
     }
   }
@@ -63,14 +68,12 @@ export function areViewportsEqual(startViewport, endViewport) {
 */
 export function viewportLinearInterpolator(startViewport, endViewport, t) {
   const viewport = {};
+  assert(Object.keys(startViewport).length === Object.keys(endViewport).length);
 
-  for (const p of VIEWPORT_INTERPOLATION_PROPS) {
-    const startValue = startViewport[p];
-    const endValue = endViewport[p];
-    // TODO: 'position' is not always specified
-    if (typeof startValue !== 'undefined' && typeof endValue !== 'undefined') {
-      viewport[p] = lerp(startValue, endValue, t);
-    }
+  for (const key in startViewport) {
+    assert(isValid(startViewport[key]));
+    assert(isValid(endViewport[key]));
+    viewport[key] = lerp(startViewport[key], endViewport[key], t);
   }
   return viewport;
 }
@@ -89,6 +92,12 @@ export function viewportLinearInterpolator(startViewport, endViewport, t) {
 */
 export function viewportFlyToInterpolator(startViewport, endViewport, t) {
   // Equations from above paper are referred where needed.
+
+  // Assert minimum required props
+  for (const key of ['latitude', 'longitude', 'zoom', 'width', 'height']) {
+    Number.isFinite(startViewport[key]);
+    Number.isFinite(endViewport[key]);
+  }
 
   const viewport = {};
 
@@ -111,19 +120,20 @@ export function viewportFlyToInterpolator(startViewport, endViewport, t) {
   const u1 = Math.sqrt((uDelta.x * uDelta.x) + (uDelta.y * uDelta.y));
   // u0 is treated as '0' in Eq (9).
 
-  // Linearly interpolate 'bearing' and 'pitch'
-  for (const p of ['bearing', 'pitch']) {
-    const startValue = startViewport[p];
-    const endValue = endViewport[p];
-    viewport[p] = lerp(startValue, endValue, t);
+  // Linearly interpolate 'bearing' and 'pitch' if exist.
+  for (const key of ['bearing', 'pitch']) {
+    if (Number.isFinite(startViewport[key])) {
+      assert(Number.isFinite(endViewport[key]));
+      viewport[key] = lerp(startViewport[key], endViewport[key], t);
+    }
   }
 
   // If change in center is too small, do linear interpolaiton.
   if (Math.abs(u1) < EPSILON) {
-    for (const p of ['latitude', 'longitude', 'zoom']) {
-      const startValue = startViewport[p];
-      const endValue = endViewport[p];
-      viewport[p] = lerp(startValue, endValue, t);
+    for (const key of ['latitude', 'longitude', 'zoom']) {
+      const startValue = startViewport[key];
+      const endValue = endViewport[key];
+      viewport[key] = lerp(startValue, endValue, t);
     }
     return viewport;
   }

@@ -101,6 +101,7 @@ class Root extends Component {
         {...viewport}
         onViewportChange={this._onViewportChange.bind(this)}
         transitionDuration={transitionDuration}
+        transitionProps={['bearing']}
         onTransitionEnd={this._rotateCamera.bind(this)}>
         <StaticMap
           {...viewport}

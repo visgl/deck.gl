@@ -45,6 +45,8 @@ export {default as MapState} from './controllers/map-state';
 export {TRANSITION_EVENTS} from './lib/transition-manager';
 export {viewportLinearInterpolator, viewportFlyToInterpolator} from './lib/viewport-transition-utils';
 
+export {equals} from './math/equals';
+
 // Experimental Features (May change in minor version bumps, use at your own risk)
 // Experimental Pure JS (non-React) bindings
 import {default as DeckGLJS} from './pure-js/deck-js';
