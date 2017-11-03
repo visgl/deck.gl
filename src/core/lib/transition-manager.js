@@ -195,7 +195,7 @@ export default class TransitionManager {
     this.state.viewport = extractViewportFrom(Object.assign({}, this.props, viewport));
 
     if (this.props.onViewportChange) {
-      this.props.onViewportChange(this.state.viewport);
+      this.props.onViewportChange(this.state.viewport, {inTransition: true});
     }
 
     if (shouldEnd) {
