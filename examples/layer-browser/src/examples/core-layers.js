@@ -188,24 +188,6 @@ const ScatterplotLayerExample = {
   }
 };
 
-const PointCloudLayerExample = {
-  layer: PointCloudLayer,
-  getData: dataSamples.getPointCloud,
-  props: {
-    id: 'pointCloudLayer',
-    outline: true,
-    coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
-    coordinateOrigin: dataSamples.positionOrigin,
-    getPosition: d => get(d, 'position'),
-    getNormal: d => get(d, 'normal'),
-    getColor: d => get(d, 'color'),
-    opacity: 1,
-    radiusPixels: 4,
-    pickable: true,
-    lightSettings: LIGHT_SETTINGS
-  }
-};
-
 const GridCellLayerExample = {
   layer: GridCellLayer,
   propTypes: {
@@ -320,6 +302,76 @@ const HexagonLayerExample = {
   }
 };
 
+// METER MODE EXAMPLES
+
+const PointCloudLayerExample = {
+  layer: PointCloudLayer,
+  getData: dataSamples.getPointCloud,
+  props: {
+    id: 'pointCloudLayer',
+    outline: true,
+    coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
+    coordinateOrigin: dataSamples.positionOrigin,
+    getPosition: d => get(d, 'position'),
+    getNormal: d => get(d, 'normal'),
+    getColor: d => get(d, 'color'),
+    opacity: 1,
+    radiusPixels: 4,
+    pickable: true,
+    lightSettings: LIGHT_SETTINGS
+  }
+};
+
+const LineLayerMetersExample = {
+  layer: LineLayer,
+  getData: () => dataSamples.meterLines,
+  props: {
+    id: 'lineLayer',
+    // getSourcePosition: d => get(d, 'START'),
+    // getTargetPosition: d => get(d, 'END'),
+    // getColor: d => get(d, 'SERVICE') === 'WEEKDAY' ? [255, 64, 0] : [255, 200, 0],
+    getColor: f => [Math.random() * 255, 0, 0],
+    pickable: true,
+    coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
+    coordinateOrigin: dataSamples.positionOrigin,
+    strokeWidth: 20
+  }
+};
+
+const PathLayerMetersFilteredExample = {
+  layer: PathLayer,
+  getData: () => dataSamples.meterPathsFiltered,
+  props: {
+    id: 'pathLayer-meters-filtered',
+    opacity: 0.6,
+    getPath: f => f.path,
+    getColor: f => [128, 0, 0],
+    getWidth: f => 10,
+    widthMinPixels: 1,
+    pickable: true,
+    coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
+    coordinateOrigin: dataSamples.positionOrigin
+  }
+};
+
+const PathLayerMetersUnfilteredExample = {
+  layer: PathLayer,
+  getData: () => dataSamples.meterPaths,
+  props: {
+    id: 'pathLayer-meters',
+    opacity: 0.6,
+    getPath: f => f.path,
+    getColor: f => [128, 0, 0],
+    getWidth: f => 10,
+    widthMinPixels: 1,
+    pickable: true,
+    coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
+    coordinateOrigin: dataSamples.positionOrigin
+  }
+};
+
+// PERF EXAMPLES
+
 // perf test examples
 const ScatterplotLayerPerfExample = (id, getData) => ({
   layer: ScatterplotLayer,
@@ -363,8 +415,14 @@ export default {
     GridLayer: GridLayerExample,
     ScreenGridLayer: ScreenGridLayerExample,
     HexagonCellLayer: HexagonCellLayerExample,
-    HexagonLayer: HexagonLayerExample,
-    PointCloudLayer: PointCloudLayerExample
+    HexagonLayer: HexagonLayerExample
+  },
+
+  'Meter Offsets': {
+    'PointCloudLayer': PointCloudLayerExample,
+    'LineLayer (Small Feature)': LineLayerMetersExample,
+    'PathLayer (Small Filtered)': PathLayerMetersFilteredExample,
+    'PathLayer (Small Unfiltered)': PathLayerMetersUnfilteredExample
   },
 
   'Performance Tests': {
