@@ -327,9 +327,6 @@ const LineLayerMetersExample = {
   getData: () => dataSamples.meterLines,
   props: {
     id: 'lineLayer',
-    // getSourcePosition: d => get(d, 'START'),
-    // getTargetPosition: d => get(d, 'END'),
-    // getColor: d => get(d, 'SERVICE') === 'WEEKDAY' ? [255, 64, 0] : [255, 200, 0],
     getColor: f => [Math.random() * 255, 0, 0],
     pickable: true,
     coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
