@@ -8,7 +8,6 @@ import mat4_translate from 'gl-mat4/translate';
 import mat4_rotateX from 'gl-mat4/rotateX';
 import mat4_rotateY from 'gl-mat4/rotateY';
 import mat4_rotateZ from 'gl-mat4/rotateZ';
-import vec3_add from 'gl-vec3/add';
 
 import {transformVector} from '../math/utils';
 
@@ -52,18 +51,19 @@ export default class OrbitViewport extends Viewport {
       mat4_rotateY(rotationMatrix, rotationMatrix, -orbitAngle / 180 * Math.PI);
     }
 
-    const transformMatrix = mat4_translate([], createMat4(),
+    const translateMatrix = mat4_translate([], createMat4(),
       [translationX / width * 2, translationY / height * 2, 0]);
-    mat4_scale(transformMatrix, transformMatrix, [zoom, zoom, zoom]);
-    mat4_multiply(rotationMatrix, rotationMatrix, transformMatrix);
+    mat4_scale(translateMatrix, translateMatrix, [zoom, zoom, zoom]);
+    mat4_translate(translateMatrix, translateMatrix, [-lookAt[0], -lookAt[1], -lookAt[2]]);
 
-    const viewMatrix = mat4_lookAt([], vec3_add([], lookAt, [0, 0, distance]), lookAt, up);
+    const viewMatrix = mat4_lookAt([], [0, 0, distance], [0, 0, 0], up);
     const fovRadians = fov * DEGREES_TO_RADIANS;
     const aspect = width / height;
     const perspectiveMatrix = mat4_perspective([], fovRadians, aspect, near, far);
 
     super({
-      viewMatrix: mat4_multiply(viewMatrix, viewMatrix, rotationMatrix),
+      viewMatrix: mat4_multiply(viewMatrix, viewMatrix,
+        mat4_multiply(rotationMatrix, rotationMatrix, translateMatrix)),
       projectionMatrix: perspectiveMatrix,
       width,
       height
