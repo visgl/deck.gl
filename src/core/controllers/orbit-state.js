@@ -6,8 +6,8 @@ import assert from 'assert';
 
 const defaultState = {
   lookAt: [0, 0, 0],
-  rotationX: 0,
-  rotationY: 0,
+  pitchAngle: 0,
+  orbitAngle: 0,
   fov: 50,
   near: 1,
   far: 100,
@@ -50,8 +50,8 @@ export default class OrbitState {
     width, // Width of viewport
     height, // Height of viewport
     distance, // From eye to target
-    rotationX, // Rotation around x axis
-    rotationY, // Rotation around y axis
+    pitchAngle, // Rotation around x axis
+    orbitAngle, // Rotation around orbit axis
 
     // Bounding box of the model, in the shape of {minX, maxX, minY, maxY, minZ, maxZ}
     bounds,
@@ -92,8 +92,8 @@ export default class OrbitState {
       width,
       height,
       distance,
-      rotationX: ensureFinite(rotationX, defaultState.rotationX),
-      rotationY: ensureFinite(rotationY, defaultState.rotationY),
+      pitchAngle: ensureFinite(pitchAngle, defaultState.pitchAngle),
+      orbitAngle: ensureFinite(orbitAngle, defaultState.orbitAngle),
 
       bounds,
       lookAt: lookAt || defaultState.lookAt,
@@ -197,14 +197,14 @@ export default class OrbitState {
   rotate({deltaScaleX, deltaScaleY}) {
     const {startRotateCenter, startRotateViewport} = this._interactiveState;
 
-    let {rotationX, rotationY, translationX, translationY} = startRotateViewport || {};
-    rotationX = ensureFinite(rotationX, this._viewportProps.rotationX);
-    rotationY = ensureFinite(rotationY, this._viewportProps.rotationY);
+    let {pitchAngle, orbitAngle, translationX, translationY} = startRotateViewport || {};
+    pitchAngle = ensureFinite(pitchAngle, this._viewportProps.pitchAngle);
+    orbitAngle = ensureFinite(orbitAngle, this._viewportProps.orbitAngle);
     translationX = ensureFinite(translationX, this._viewportProps.translationX);
     translationY = ensureFinite(translationY, this._viewportProps.translationY);
 
-    const newRotationX = clamp(rotationX - deltaScaleY * 180, -89.999, 89.999);
-    const newRotationY = (rotationY - deltaScaleX * 180) % 360;
+    const newPitchAngle = clamp(pitchAngle - deltaScaleY * 180, -89.999, 89.999);
+    const newOrbitAngle = (orbitAngle - deltaScaleX * 180) % 360;
 
     let newTranslationX = translationX;
     let newTranslationY = translationY;
@@ -215,8 +215,8 @@ export default class OrbitState {
       const oldCenterPos = oldViewport.project(startRotateCenter);
 
       const newViewport = new OrbitViewport(Object.assign({}, startRotateViewport, {
-        rotationX: newRotationX,
-        rotationY: newRotationY
+        pitchAngle: newPitchAngle,
+        orbitAngle: newOrbitAngle
       }));
       const newCenterPos = newViewport.project(startRotateCenter);
 
@@ -225,8 +225,8 @@ export default class OrbitState {
     }
 
     return this._getUpdatedOrbitState({
-      rotationX: newRotationX,
-      rotationY: newRotationY,
+      pitchAngle: newPitchAngle,
+      orbitAngle: newOrbitAngle,
       translationX: newTranslationX,
       translationY: newTranslationY
     });

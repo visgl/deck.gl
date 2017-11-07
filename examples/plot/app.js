@@ -15,8 +15,9 @@ class Root extends Component {
       viewport: {
         lookAt: [0, 0, 0],
         distance: 3,
-        rotationX: -30,
-        rotationY: 30,
+        pitchAngle: -30,
+        orbitAngle: 30,
+        orbitAxis: 'Y',
         fov: 50,
         minDistance: 1,
         maxDistance: 20,

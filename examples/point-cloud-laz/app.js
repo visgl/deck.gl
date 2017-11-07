@@ -59,8 +59,9 @@ class Example extends PureComponent {
       viewport: {
         lookAt: [0, 0, 0],
         distance: 1,
-        rotationX: 0,
-        rotationY: 0,
+        pitchAngle: 0,
+        orbitAngle: 0,
+        orbitAxis: 'Y',
         fov: 30,
         minDistance: 0.5,
         maxDistance: 3
@@ -132,7 +133,7 @@ class Example extends PureComponent {
     this.setState({
       viewport: {
         ...viewport,
-        rotationY: viewport.rotationY + 1
+        orbitAngle: viewport.orbitAngle + 1
       }
     });
 
