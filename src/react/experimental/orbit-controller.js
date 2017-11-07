@@ -98,9 +98,19 @@ export default class OrbitController extends React.Component {
   }
 
   render() {
+    const {width, height} = this.props;
+
+    // Create canvas style with right size
+    const eventCanvasStyle = {
+      width,
+      height,
+      position: 'relative'
+    };
+
     return (
       createElement('div', {
-        ref: 'eventCanvas'
+        ref: 'eventCanvas',
+        style: eventCanvasStyle
       }, this.props.children)
     );
   }
