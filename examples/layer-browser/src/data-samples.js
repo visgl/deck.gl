@@ -1,7 +1,10 @@
+import {Vector3} from 'math.gl';
+
 /* load data samples for display */
 import allPoints from '../data/sf.bike.parking.json';
 import {pointGrid} from './utils';
 import {pointsToWorldGrid} from './utils/grid-aggregator';
+import {default as meterTrajectorySmall} from '../data/meter-trajectory-small.json';
 
 import {default as choropleths} from '../data/sf.zip.geo.json';
 export {default as geojson} from '../data/sample.geo.json';
@@ -10,8 +13,41 @@ export {default as routes} from '../data/sfmta.routes.json';
 export {default as trips} from '../data/trips.json';
 export {default as iconAtlas} from '../data/icon-atlas.json';
 export {default as s2cells} from '../data/sf.s2cells.json';
-
 export {choropleths};
+
+export const meterPaths = [{path: []}];
+
+const path = meterPaths[0].path;
+for (let i = 0; i < meterTrajectorySmall.length / 3; ++i) {
+  path.push(new Vector3(
+    meterTrajectorySmall[i * 3],
+    meterTrajectorySmall[i * 3 + 1],
+    meterTrajectorySmall[i * 3 + 2]
+  ));
+}
+
+export const meterPathsFiltered = [{path: []}];
+const filteredPath = meterPathsFiltered[0].path;
+
+let lastPoint;
+for (let i = 0; i < path.length; ++i) {
+  const point = path[i];
+  if (!lastPoint || lastPoint.distance(point) > 0.01) {
+    filteredPath.push(point);
+  }
+  lastPoint = point;
+}
+
+export const meterLines = [];
+for (let i = 0; i < path.length - 1; ++i) {
+  const v = new Vector3(path[i]);
+  if (v.distance(path[i + 1]) > 0.01) {
+    meterLines.push({
+      sourcePosition: path[i],
+      targetPosition: path[i + 1]
+    });
+  }
+}
 
 export const points = allPoints;
 export const positionOrigin = [-122.42694203247012, 37.751537058389985];
