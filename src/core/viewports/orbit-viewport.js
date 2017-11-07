@@ -31,7 +31,7 @@ export default class OrbitViewport extends Viewport {
     distance, // From eye position to lookAt
     pitchAngle = 0, // Rotating angle around X axis
     orbitAngle = 0, // Rotating angle around orbit axis
-    orbitAxis = 'Z', // Orbit axis with 360 degrees rotating freedom
+    orbitAxis = 'Z', // Orbit axis with 360 degrees rotating freedom, can only be 'Y' or 'Z'
     lookAt = [0, 0, 0], // Which point is camera looking at, default origin
     up = [0, 1, 0], // Defines up direction, default positive y axis
     // projection matrix arguments
