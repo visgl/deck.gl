@@ -132,26 +132,27 @@ export default class Viewport {
       this.meterOffset = modelMatrix ? modelMatrix.transformVector(position) : position;
     }
 
-    // Determine camera center
-    this.center = this.isGeospatial ?
-      getMercatorWorldPosition({
-        longitude, latitude, zoom: this.zoom, meterOffset: this.meterOffset
-      }) :
-      position;
-
-    // console.log(this.scale, this.distanceScales.pixelsPerMeter);
-
     this.viewMatrixUncentered = viewMatrix;
 
-    // Make a centered version of the matrix for projection modes without an offset
-    this.viewMatrix = new Matrix4()
+    if (this.isGeospatial) {
+      // Determine camera center
+      this.center = getMercatorWorldPosition({
+        longitude, latitude, zoom: this.zoom, meterOffset: this.meterOffset
+      });
+
+      // Make a centered version of the matrix for projection modes without an offset
+      this.viewMatrix = new Matrix4()
       // Apply the uncentered view matrix
-      .multiplyRight(this.viewMatrixUncentered)
-      // The Mercator world coordinate system is upper left,
-      // but GL expects lower left, so we flip it around the center after all transforms are done
-      .scale([1, -1, 1])
-      // And center it
-      .translate(new Vector3(this.center || ZERO_VECTOR).negate());
+        .multiplyRight(this.viewMatrixUncentered)
+        // The Mercator world coordinate system is upper left,
+        // but GL expects lower left, so we flip it around the center after all transforms are done
+        .scale([1, -1, 1])
+        // And center it
+        .translate(new Vector3(this.center || ZERO_VECTOR).negate());
+    } else {
+      this.center = position;
+      this.viewMatrix = viewMatrix;
+    }
 
     // Create a projection matrix if not supplied
     if (projectionMatrix) {
