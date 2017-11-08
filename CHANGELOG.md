@@ -23,11 +23,18 @@ For Earlier Beta Releases see below
 
 ### deck.gl v4.2 Beta Releases
 
-#### [4.2.0-alpha.18 - Nov 2
+#### [4.2.0-alpha.19] - Nov 7
+- Remove the y-flip scale and camera re-center logic for non-geospatial viewport (#1125)
+- Add small "degenerate" PathLayer example (#1123)
+- Fix the pan event handling of orbit controller (#1124)
+- Fix issues in Orbit Viewport and update examples (#1119)
+- Add flag for viewport transition updates (#1115)
+
+#### [4.2.0-alpha.18] - Nov 2
 - Viewport Transitions: Add transitionProps,
   fix bearing and longitude interpolation. (#1111)
 
-#### [4.2.0-alpha.17 - Nov 1
+#### [4.2.0-alpha.17] - Nov 1
 - Use probe.gl instead of benchmark.js (#1110)
 - Fix MapState constraints check (#1105)
 - Fix attribute updates for composite layers (#1104)
