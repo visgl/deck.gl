@@ -204,8 +204,9 @@ export default class Layer {
   // Public API
 
   // Updates selected state members and marks the object for redraw
-  setState(updateObject) {
-    Object.assign(this.state, updateObject);
+  setState(newState) {
+    this._deleteResources(newState);
+    Object.assign(this.state, newState);
     this.state.needsRedraw = true;
   }
 
@@ -575,6 +576,17 @@ export default class Layer {
         message += `\nPlease use props.${newProp} instead.`;
       }
       log.once(0, message);
+    }
+  }
+
+  _deleteResources(newState) {
+    // model
+    if (
+      this.state.model &&
+      newState.model &&
+      this.state.model !== newState.model
+    ) {
+      this.state.model.delete();
     }
   }
 
