@@ -1,4 +1,5 @@
 import {Vector2} from 'math.gl';
+import {COORDINATE_SYSTEM} from 'deck.gl';
 
 function getLineLength(vPoints) {
   // calculate total length
@@ -18,7 +19,8 @@ export default function createPathMarkers({
   getDirection = x => true,
   getColor = x => DEFAULT_COLOR,
   getMarkerPercentages = x => [0.5],
-  project = x => x
+  coordinateSystem,
+  coordinateOrigin
 }) {
   const markers = [];
 
@@ -41,7 +43,7 @@ export default function createPathMarkers({
     // Create the markers
     for (const percentage of percentages) {
       const marker = createMarkerAlongPath(
-        {path: vPoints, percentage, lineLength, color, object, viewport});
+        {path: vPoints, percentage, lineLength, color, object, viewport, coordinateSystem, coordinateOrigin});
       markers.push(marker);
     }
   }
@@ -49,7 +51,7 @@ export default function createPathMarkers({
   return markers;
 }
 
-function createMarkerAlongPath({path, percentage, lineLength, color, object, viewport}) {
+function createMarkerAlongPath({path, percentage, lineLength, color, object, viewport, coordinateSystem, coordinateOrigin}) {
   const distanceAlong = lineLength * percentage;
   let currentDistance = 0;
   let previousDistance = 0;
@@ -72,9 +74,20 @@ function createMarkerAlongPath({path, percentage, lineLength, color, object, vie
     .multiply(new Vector2(along, along))
     .add(path[i]);
 
-  const vDirection2 = new Vector2(viewport.projectFlat(path[i + 1]))
-    .subtract(viewport.projectFlat(path[i]));
+  const projectFlat = coordinateSystem === COORDINATE_SYSTEM.METER_OFFSETS ?
+   obj => {
+    const [dx,dy] = viewport.metersToLngLatDelta(obj);
+    const [x,y] = coordinateOrigin;
+    console.log(obj, [x,y], [dx,dy]);
+    return viewport.projectFlat([x-dx, dy+y]); // <<< TODO signs
+  } : obj => console.log(obj) || viewport.projectFlat(obj);
+
+  const vDirection2 = new Vector2(projectFlat(path[i + 1]))
+    .subtract(projectFlat(path[i]));
   const angle = -vDirection2.verticalAngle() * 180 / Math.PI;
+  console.log(">>>>>", angle);
+
+  console.log("<><><><><><><===", viewport.metersToLngLatDelta([10,10]), viewport.metersToLngLatDelta([-10,-10]));
 
   return ({
     position: [vCenter.x, vCenter.y, 0], angle, color, object

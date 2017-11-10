@@ -6,6 +6,7 @@ import {
   TextLayer
 } from 'deck.gl-layers';
 
+import {COORDINATE_SYSTEM} from 'deck.gl';
 import {GL} from 'luma.gl';
 import dataSamples from '../immutable-data-samples';
 
@@ -70,6 +71,40 @@ const PathMarkerExample = {
   }
 };
 
+const PathMarkerExampleMeterData = new Array(10).fill(true).map(
+  f => ({
+    path: [
+      [Math.random() * 9000, Math.random() * 9000],
+      [Math.random() * 9000, Math.random() * 9000]
+    ],
+    direction: true
+  })
+);
+const PathMarkerExampleMeter = {
+  layer: PathMarkerLayer,
+  getData: () => PathMarkerExampleMeterData,
+  props: {
+    id: 'path-outline-layer-meter',
+    opacity: 0.8,
+    getColor: f => [230, 230, 230],
+    getZLevel: f => Math.random() * 255,
+    getWidth: f => 10,
+    widthMinPixels: 1,
+    pickable: true,
+    strokeWidth: 5,
+    widthScale: 10,
+    autoHighlight: true,
+    highlightColor: [255, 255, 255, 255],
+    parameters: {
+      blendEquation: GL.MAX
+    },
+    sizeScale: 200,
+    getMarkerPercentages: () => [0.5],
+    coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
+    coordinateOrigin: dataSamples.positionOrigin
+  }
+};
+
 const TextLayerExample = {
   layer: TextLayer,
   getData: () => dataSamples.points.slice(0, 50),
@@ -93,6 +128,7 @@ export default {
     'MeshLayer': MeshLayerExample,
     'PathOutlineLayer': PathOutlineExample,
     'PathMarkerLayer': PathMarkerExample,
+    'PathMarkerLayer (Meter)': PathMarkerExampleMeter,
     'TextLayer': TextLayerExample
   }
 };

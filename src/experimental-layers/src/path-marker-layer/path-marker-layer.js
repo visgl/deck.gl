@@ -46,10 +46,10 @@ export default class PathMarkerLayer extends CompositeLayer {
 
   updateState({props, oldProps, changeFlags}) {
     if (changeFlags.dataChanged) {
-      const {data, getPath, getDirection, getMarkerColor, getMarkerPercentages} = this.props;
+      const {data, getPath, getDirection, getMarkerColor, getMarkerPercentages, coordinateSystem, coordinateOrigin} = this.props;
       const {viewport} = this.context;
       this.state.markers = createPathMarkers({
-        data, getPath, getDirection, getColor: getMarkerColor, getMarkerPercentages, viewport
+        data, getPath, getDirection, getColor: getMarkerColor, getMarkerPercentages, viewport, coordinateSystem, coordinateOrigin
       });
       this._recalculateClosestPoint();
     }
