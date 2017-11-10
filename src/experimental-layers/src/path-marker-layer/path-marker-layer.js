@@ -1,4 +1,4 @@
-import {CompositeLayer, ScatterplotLayer} from 'deck.gl';
+import {CompositeLayer, ScatterplotLayer, COORDINATE_SYSTEM} from 'deck.gl';
 import PathOutlineLayer from '../path-outline-layer/path-outline-layer';
 import MeshLayer from '../mesh-layer/mesh-layer';
 import Arrow2DGeometry from './arrow-2d-geometry';
@@ -44,12 +44,24 @@ export default class PathMarkerLayer extends CompositeLayer {
     };
   }
 
+  projectFlat(xyz, viewport, coordinateSystem, coordinateOrigin) {
+    if (coordinateSystem === COORDINATE_SYSTEM.METER_OFFSETS) {
+      const [dx, dy] = viewport.metersToLngLatDelta(xyz);
+      const [x, y] = coordinateOrigin;
+      return viewport.projectFlat([x - dx, dy + y]);
+    }
+
+    return viewport.projectFlat(xyz);
+  }
+
   updateState({props, oldProps, changeFlags}) {
     if (changeFlags.dataChanged) {
-      const {data, getPath, getDirection, getMarkerColor, getMarkerPercentages, coordinateSystem, coordinateOrigin} = this.props;
+      const {data, getPath, getDirection, getMarkerColor, getMarkerPercentages,
+        coordinateSystem, coordinateOrigin} = this.props;
       const {viewport} = this.context;
+      const projectFlat = o => this.projectFlat(o, viewport, coordinateSystem, coordinateOrigin);
       this.state.markers = createPathMarkers({
-        data, getPath, getDirection, getColor: getMarkerColor, getMarkerPercentages, viewport, coordinateSystem, coordinateOrigin
+        data, getPath, getDirection, getColor: getMarkerColor, getMarkerPercentages, projectFlat
       });
       this._recalculateClosestPoint();
     }
