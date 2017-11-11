@@ -73,37 +73,39 @@ export default class DeckGL extends React.Component {
       }
     });
 
-    return React.Children.toArray(this.props.children).map((child, i) => {
-      // If viewportId prop is provided, match with viewport
-      const {viewportId} = child.props;
-      const viewport = viewportId && viewportMap[viewportId];
-      if (viewport) {
-        // Resolve potentially relative dimensions using the deck.gl container size
-        const {x, y, width, height} =
-          viewport.getDimensions({width: this.props.width, height: this.props.height});
+    return React.Children.toArray(this.props.children).map(
+      // If child specifies props.viewportId, position under viewport, otherwise render as normal
+      (child, i) => child.props.viewportId ? this._positionChild({child, viewportMap, i}) : child);
+  }
 
-        // Clone the element with width and height set per viewport
-        const newProps = Object.assign({}, child.props, {
-          width,
-          height
-        });
+  _positionChild({child, viewportMap, i}) {
+    const {viewportId} = child.props;
+    const viewport = viewportId && viewportMap[viewportId];
 
-        // Inject map properties
-        // TODO - this is too react-map-gl specific
-        Object.assign(newProps, viewport.getMercatorParams(), {
-          visible: viewport.isMapSynched()
-        });
+    // Drop (aut-hide) elements with viewportId that are not matched by any current viewport
+    if (!viewport) {
+      return null;
+    }
 
-        const clone = cloneElement(child, newProps);
+    // Resolve potentially relative dimensions using the deck.gl container size
+    const {x, y, width, height} =
+      viewport.getDimensions({width: this.props.width, height: this.props.height});
 
-        // Wrap it in an absolutely positioning div
-        const style = {position: 'absolute', left: x, top: y, width, height};
-        const key = `viewport-${viewportId}-${i}`;
-        child = createElement('div', {key, id: key, style}, clone);
-      }
+    // Clone the element with width and height set per viewport
+    const newProps = Object.assign({}, child.props, {width, height});
 
-      return child;
+    // Inject map properties
+    // TODO - this is too react-map-gl specific
+    Object.assign(newProps, viewport.getMercatorParams(), {
+      visible: viewport.isMapSynched()
     });
+
+    const clone = cloneElement(child, newProps);
+
+    // Wrap it in an absolutely positioning div
+    const style = {position: 'absolute', left: x, top: y, width, height};
+    const key = `viewport-child-${viewportId}-${i}`;
+    return createElement('div', {key, id: key, style}, clone);
   }
 
   render() {
