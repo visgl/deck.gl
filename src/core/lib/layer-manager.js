@@ -146,6 +146,7 @@ export default class LayerManager {
   }
 
   // Get a set of viewports for a given width and height
+  // TODO - Intention is for deck.gl to autodeduce width and height and drop the need for props
   getViewports({width, height} = {}) {
     if (width !== this.width || height !== this.height || this.viewDescriptorsChanged) {
       this._rebuildViewportsFromViews({viewDescriptors: this.viewDescriptors, width, height});
@@ -371,6 +372,7 @@ export default class LayerManager {
   }
 
   // Build a `Viewport` from a view descriptor
+  // TODO - add support for autosizing viewports using width and height
   _makeViewportFromViewDescriptor({viewDescriptor, width, height}) {
     // Get the type of the viewport
     // TODO - default to WebMercator?
@@ -400,19 +402,20 @@ export default class LayerManager {
     );
   }
 
-  // TODO: this will be true always if descriptors are used as we create new object
   _diffView(newView, oldView) {
     // `View` hiearchy supports an `equals` method
     if (newView.viewport) {
       return !oldView.viewport || !newView.viewport.equals(oldView.viewport);
     }
+    // TODO - implement deep equal on view descriptors
     return newView !== oldView;
   }
 
   // Support for relative viewport dimensions (e.g {y: '50%', height: '50%'})
   _getViewDimensions({viewDescriptor, width, height}) {
     const parsePercent = (value, max) => value;
-    // ?
+    // TODO - enable to support percent size specifiers
+    // const parsePercent = (value, max) => value ?
     //   Math.round(parseFloat(value) / 100 * max) :
     //   (value === null ? max : value);
 
