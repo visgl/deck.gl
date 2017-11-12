@@ -2,22 +2,22 @@ import log from '../utils/log';
 import assert from 'assert';
 
 // Returns an object with "change flags", either false or strings indicating reason for change
-export function diffProps(oldProps, newProps, onUpdateTriggered = () => {}) {
+export function diffProps(props, oldProps, onUpdateTriggered = () => {}) {
   // First check if any props have changed (ignore props that will be examined separately)
   const propsChangedReason = compareProps({
-    newProps,
+    newProps: props,
     oldProps,
     ignoreProps: {data: null, updateTriggers: null}
   });
 
   // Now check if any data related props have changed
-  const dataChangedReason = diffDataProps(oldProps, newProps);
+  const dataChangedReason = diffDataProps(props, oldProps);
 
   // Check update triggers to determine if any attributes need regeneration
   // Note - if data has changed, all attributes will need regeneration, so skip this step
   let updateTriggersChangedReason = false;
   if (!dataChangedReason) {
-    updateTriggersChangedReason = diffUpdateTriggers(oldProps, newProps, onUpdateTriggered);
+    updateTriggersChangedReason = diffUpdateTriggers(props, oldProps, onUpdateTriggered);
   }
 
   return {
@@ -38,7 +38,7 @@ export function diffProps(oldProps, newProps, onUpdateTriggered = () => {}) {
  */
 /* eslint-disable max-statements, max-depth, complexity */
 export function compareProps({
-  oldProps, newProps, ignoreProps = {}, shallowCompareProps = {}, triggerName = 'props'
+  newProps, oldProps, ignoreProps = {}, shallowCompareProps = {}, triggerName = 'props'
 } = {}) {
   assert(oldProps !== undefined && newProps !== undefined, 'compareProps args');
 
@@ -100,7 +100,7 @@ export function compareProps({
 
 // The comparison of the data prop requires special handling
 // the dataComparator should be used if supplied
-function diffDataProps(oldProps, props) {
+function diffDataProps(props, oldProps) {
   if (oldProps === null) {
     return 'oldProps is null, initial diff';
   }
@@ -121,7 +121,7 @@ function diffDataProps(oldProps, props) {
 
 // Checks if any update triggers have changed
 // also calls callback to invalidate attributes accordingly.
-function diffUpdateTriggers(oldProps, props, onUpdateTriggered) {
+function diffUpdateTriggers(props, oldProps, onUpdateTriggered) {
   // const {attributeManager} = this.state;
   // const updateTriggerMap = attributeManager.getUpdateTriggerMap();
   if (oldProps === null) {
@@ -153,9 +153,9 @@ function diffUpdateTriggers(oldProps, props, onUpdateTriggered) {
   return reason;
 }
 
-function diffUpdateTrigger(oldProps, props, triggerName) {
-  const oldTriggers = oldProps.updateTriggers[triggerName] || {};
+function diffUpdateTrigger(props, oldProps, triggerName) {
   const newTriggers = props.updateTriggers[triggerName] || {};
+  const oldTriggers = oldProps.updateTriggers[triggerName] || {};
   const diffReason = compareProps({
     oldProps: oldTriggers,
     newProps: newTriggers,

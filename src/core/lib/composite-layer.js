@@ -17,9 +17,9 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-
 import Layer from './layer';
 import log from '../utils/log';
+import {flatten} from './utils/flatten';
 
 export default class CompositeLayer extends Layer {
   constructor(props) {
@@ -28,6 +28,10 @@ export default class CompositeLayer extends Layer {
 
   get isComposite() {
     return true;
+  }
+
+  getSubLayers() {
+    return this.internalState.subLayers || [];
   }
 
   // initializeState is usually not needed for composite layers
@@ -43,7 +47,7 @@ export default class CompositeLayer extends Layer {
     return info;
   }
 
-  // Implement to generate sublayers
+  // Implement to generate subLayers
   renderLayers() {
     return null;
   }
@@ -66,19 +70,25 @@ export default class CompositeLayer extends Layer {
     };
   }
 
-  // Called by layer manager to render sublayers
-  _renderLayers(updateParams) {
-    // TODO - won't updateLayer also be called? Avoid "double diffing"
-    const {oldProps, props} = updateParams;
-    this.diffProps(oldProps, props);
-
-    if (this.state.oldSubLayers && !this.shouldUpdateState(updateParams)) {
-      log.log(2, `Composite layer reused sublayers ${this}`, this.state.oldSubLayers);
-      return this.state.oldSubLayers;
+  // Called by layer manager to render subLayers
+  _renderLayers() {
+    let {subLayers} = this.internalState;
+    if (subLayers && !this.needsUpdate()) {
+      log.log(3, `Composite layer reused subLayers ${this}`, this.internalState.subLayers);
+    } else {
+      subLayers = this.renderLayers();
+      // Flatten the returned array, removing any null, undefined or false
+      // this allows layers to render sublayers conditionally
+      // (see CompositeLayer.renderLayers docs)
+      subLayers = flatten(subLayers, {filter: Boolean});
+      this.internalState.subLayers = subLayers;
+      log.log(2, `Composite layer rendered new subLayers ${this}`, subLayers);
     }
-    const subLayers = this.renderLayers();
-    this.state.oldSubLayers = subLayers;
-    log.log(2, `Composite layer rendered new sublayers ${this}`, this.state.oldSubLayers);
-    return subLayers;
+
+    // populate reference to parent layer (this layer)
+    // NOTE: needs to be done even when reusing layers as the parent may have changed
+    for (const layer of subLayers) {
+      layer.parentLayer = this;
+    }
   }
 }

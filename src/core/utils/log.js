@@ -86,6 +86,22 @@ function timeEnd(priority, label) {
   }
 }
 
+function group(priority, arg, {collapsed = false} = {}) {
+  if (priority <= log.priority) {
+    if (collapsed) {
+      console.groupCollapsed(`luma.gl: ${arg}`);
+    } else {
+      console.group(`luma.gl: ${arg}`);
+    }
+  }
+}
+
+function groupEnd(priority, arg) {
+  if (priority <= log.priority) {
+    console.groupEnd(`luma.gl: ${arg}`);
+  }
+}
+
 // Helper functions
 
 function formatArgs(firstArg, ...args) {
@@ -123,5 +139,7 @@ log.timeEnd = timeEnd;
 log.warn = warn;
 log.error = error;
 log.deprecated = deprecated;
+log.group = group;
+log.groupEnd = groupEnd;
 
 export default log;
