@@ -44,19 +44,25 @@ Three new `Layer` props (`autoHighlight`, `highlightColor` and `highlightedObjec
 
 The new `useDevicePixelRatio` prop on the `DeckGL` React component can be used to disable usage of full resolution on retina/HD displays. Disabling deck.gl's default behavior of always rendering at maximum device resolution can reduce the render buffer size with a factor of 4x on retina devices and lead to significant performance improvements on typical fragment shader bound rendering. This option can be especially interesting on "retina" type mobile phone displays where pixels are so small that the visual quality loss may be largely imperceptible.
 
+
 ## Layer Filtering
 
-A new prop gives the application an opportunity to filter out layers from the layer list during either rendering or picking. Filtering can be done per viewport or per layer or both. This enables techniques like adding helper layers that work as masks during picking but do not show up during rendering.
+A new `DeckGL` prop `layerFilter` gives the application an opportunity to filter out layers from the layer list during rendering and/or picking. Filtering can be done per viewport or per layer or both. This enables techniques like adding helper layers that work as masks during picking but do not show up during rendering, or rendering different additional information in different viewports.
 
 
-## CompositeLayer Improvements
+## CompositeLayer: Property Forwarding Support
 
-* **Property Forwarding Support** - A new method `CompositeLayer.getBaseLayerProps()` simplifies forwarding base layer props to sub layers, removing code clutter and reducing the risk of forgetting to forward an important base layer property.
+A new method `CompositeLayer.getBaseLayerProps()` simplifies forwarding base layer props to sub layers, removing code clutter and reducing the risk of forgetting to forward an important base layer property.
 
 
-## PathLayer: Dashed Line Support
+## PathLayer & GeoJsonLayer: Dashed Line Support
 
 Added new props (`getDashArray` and `justified`) enabling you render paths as dashed lines. Naturally these props are also accessible in composite layers built on top of the `PathLayer`, such as the `GeoJsonLayer`.
+
+
+## HexagonLayer / GridLayer: Elevation by Value Support
+
+Add `getElevationValue` to `HexagonLayer` and `GridLayer` to enable elevation aggregation by value. This allow both color and elevation to be calculated based on customized aggregation function.
 
 
 ## Shader Modules
@@ -65,8 +71,6 @@ Added new props (`getDashArray` and `justified`) enabling you render paths as da
 * The `project` module provides a new function `project_pixel_to_clipspace` for screen space calculations that takes variables like `useDevicePixelRatio` and "focal distance" into account, making pixel space calculation simpler and less prone to fail when parameters change.
 * The core deck.gl shader modules (`project` etc) now conform to the luma.gl shadertools conventions, making this module easier to describe and use. In spite of these changes, backwards compatible uniforms are of course provided to ensure that existing layers do not break.
 
-## HexagonLayer / GridLayer: Elevation by Value Support
-Add `getElevationValue` to `HexagonLayer` and `GridLayer` to enable elevation aggregation by value. This allow both color and elevation to be calculated based on customized aggregation function.
 
 # deck.gl v4.1
 

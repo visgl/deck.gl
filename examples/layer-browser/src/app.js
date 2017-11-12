@@ -36,6 +36,24 @@ import {setImmutableDataSamples} from './immutable-data-samples';
 const MapboxAccessToken = process.env.MapboxAccessToken || // eslint-disable-line
   'Set MapboxAccessToken environment variable or put your token here.';
 
+const VIEW_LABEL_STYLES = {
+  zIndex: 10,
+  // position: 'relative',
+  padding: 5,
+  margin: 20,
+  fontSize: 12,
+  backgroundColor: '#282727',
+  color: '#FFFFFF'
+};
+
+const ViewportLabel = props => (
+  <div style={{position: 'absolute'}}>
+    <div style={{...VIEW_LABEL_STYLES, display: ''}}>
+      {props.children}
+    </div>
+  </div>
+);
+
 // ---- View ---- //
 class App extends PureComponent {
   constructor(props) {
@@ -216,6 +234,7 @@ class App extends PureComponent {
         y: multiview ? height / 2 : 0
       }),
       multiview && new FirstPersonViewport({
+        id: 'first-person',
         ...mapViewState,
         width,
         height: multiview ? height / 2 : height,
@@ -267,6 +286,16 @@ class App extends PureComponent {
               width={width}
               height={height}
               onViewportChange={this._onViewportChange}/>
+
+            <ViewportLabel viewportId="first-person">
+              First Person View
+            </ViewportLabel>
+
+            { viewports[1] && (
+              <ViewportLabel viewportId="basemap">
+                Map View
+              </ViewportLabel>
+            )}
 
           </DeckGL>
 

@@ -27,10 +27,10 @@ const App = (viewport, data) => (
   render() {
     return (
       <DeckGL
-        viewports={viewports}
-        layers={this._renderLayers()}
         width={viewportProps.width}
-        height={viewportProps.height} />
+        height={viewportProps.height}
+        layers={this._renderLayers()}
+        viewports={viewports} />
 
         <StaticMap
           viewportId='basemap'
@@ -44,17 +44,13 @@ const App = (viewport, data) => (
 
 ### Properties
 
-##### `id` (String, optional)
+##### `width` (Number, required)
 
-Canvas ID to allow style customization in CSS.
+Width of the canvas.
 
-##### `children`
+##### `height` (Number, required)
 
-`DeckGL` implements special processing of the normal React `children` prop. It attempts to reposition any top-level children with `viewportId` prop matching a viewport with that id. When renderering, deck.gl walk the list looking for viewport ids matching children viewportIds, rendering those components in the position and size specified by that viewport.
-* Positioning is done with CSS styling on a wrapper div, sizing by width and height properties.
-* Also injects the `visible: viewport.isMapSynched()` prop to hide base maps that cannot display per the current viewport parameters.
-
-The DeckGL component own `canvas` element is rendered last, intentionally on top of all the base maps.
+Height of the canvas.
 
 ##### `layers` (Array, required)
 
@@ -78,17 +74,26 @@ deck.gl will render all the viewports in order.
 
 If `viewports` is not supplied, deck.gl will look for web mercator projection parameters (latitude, longitude, zoom, bearing and pitch) and create a `WebMercatorViewport` (which is a subclass of `Viewport`).
 
-##### `viewport`
+##### `children`
 
-Deprecated. Use `viewports` property instead, it can accept a single `Viewport` or an array with a single `Viewport`.
+To make it easy to use React components in combination with deck.gl viewports (e.g. to place a base map under a viewport, or add a label on top of a viewport), deck.gl can make such components automatically adjust as that viewport is added, removed or resized.
 
-##### `width` (Number, required)
+`DeckGL` classifies any top-level children (`props.children`) that have a `viewportId` property as "viewport base components". It will perform special processing on them as follows:
+* It resizes and repositions any `viewportId` children to precisely match the extends of the deck.gl viewport with the corresponding id.
+* It automatically hides any `viewportId` children whose id is not matched by any current deck.gl viewport.
+* It injects viewport properties (`longitude`, `latitude` etc).
+* Also injects the `visible: viewport.isMapSynched()` prop to hide base maps that cannot display per the current viewport parameters.
 
-Width of the canvas.
+Additional Notes:
+* The DeckGL components own `canvas` element is added last to the child list, to sit on top of all the base components, however Z index can be used to override this.
+* Child repositioning is done with CSS styling on a wrapper div, resizing is done through width and height properties.
+* Hiding of children is performed by removing the elements from the child list
+* Children without the `viewportId` property are rendered as is.
 
-##### `height` (Number, required)
 
-Height of the canvas.
+#### View State Properties
+
+If you do not supply any `viewports` deck.gl will attempt to autocreate one from the following props.
 
 ##### `latitude` (Number, optional)
 
@@ -110,15 +115,20 @@ Current bearing - used to define a mercator projection if `viewport` is not supp
 
 Current pitch - used to define a mercator projection if `viewport` is not supplied.
 
+
+#### Configuration Properties
+
+##### `id` (String, optional)
+
+Canvas ID to allow style customization in CSS.
+
 ##### `style` (Object, optional)
 
 Css styles for the deckgl-canvas.
 
 ##### `pickingRadius` (Number, optional)
 
-Extra pixels around the pointer to include while picking. This is helpful when rendered objects are difficult to target, for example
-irregularly shaped icons, small moving circles or interaction by touch.
-Default `0`.
+Extra pixels around the pointer to include while picking. This is helpful when rendered objects are difficult to target, for example irregularly shaped icons, small moving circles or interaction by touch. Default `0`.
 
 ##### `useDevicePixelRatio` (Boolean, optional)
 
@@ -174,13 +184,16 @@ object for the topmost picked layer at the coordinate, null when no object is pi
 - `pickedInfos` - an array of info objects for all pickable layers that are affected.
 - `event` - the original [MouseEvent](https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent) object
 
+
 ### Methods
+
+The picking methods are supplied to enable applications to use their own event handling.
 
 ##### queryObject
 
 Get the closest pickable and visible object at screen coordinate.
 
-`queryObject({x, y, radius, layerIds})`
+`deck.queryObject({x, y, radius, layerIds})`
 
 Parameters:
 - `options` (Object)
@@ -196,7 +209,7 @@ Returns: a single [`info`](/docs/get-started/interactivity.md#the-picking-info-o
 
 Get all pickable and visible objects within a bounding box.
 
-`queryVisibleObjects({x, y, width, height, layerIds})`
+`deck.queryVisibleObjects({x, y, width, height, layerIds})`
 
 Parameters:
 - `options` (Object)
@@ -213,6 +226,13 @@ Remarks:
 - This query methods are designed to quickly find objects by utilizing the picking buffer. They offer more flexibility for developers to handle events in addition to the built-in hover and click callbacks.
 - Note there is a limitation in the query methods: occluded objects are not returned. To improve the results, you may try setting the `layerIds` parameter to limit the query to fewer layers.
 - * Since deck.gl is WebGL based, it can only render into a single canvas. Thus all its viewports need to be in the same canvas (unless you use multiple DeckGL instances, but that can have significant resource and performance impact).
+
+
+### Deprecated Properties
+
+##### `viewport`
+
+Deprecated. Use `viewports` property instead, that prop can accept a single `Viewport` or an array with a single `Viewport`.
 
 ## Source
 [src/react/deckgl.js](https://github.com/uber/deck.gl/blob/4.1-release/src/react/deckgl.js)
