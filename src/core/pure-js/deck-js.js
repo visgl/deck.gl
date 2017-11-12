@@ -121,6 +121,7 @@ export default class DeckGLJS {
     }
 
     const {
+      layers,
       pickingRadius,
       onLayerClick,
       onLayerHover,
@@ -128,23 +129,6 @@ export default class DeckGLJS {
       drawPickingColors,
       layerFilter
     } = props;
-
-    // If more parameters need to be updated on layerManager add them to this method.
-    this.layerManager.setParameters({
-      useDevicePixelRatio,
-      drawPickingColors,
-      layerFilter
-    });
-
-    this.layerManager.setEventHandlingParameters({
-      pickingRadius,
-      onLayerClick,
-      onLayerHover
-    });
-
-    if (props.layers) {
-      this.layerManager.setLayers(props.layers);
-    }
 
     // Update viewports (creating one if not supplied)
     let viewports = props.viewports || props.viewport;
@@ -154,9 +138,23 @@ export default class DeckGLJS {
         new WebMercatorViewport({width, height, latitude, longitude, zoom, pitch, bearing})
       ];
     }
-    this.layerManager.setViewports(viewports);
 
-    this.animationLoop.setViewParameters({useDevicePixelRatio});
+    // If more parameters need to be updated on layerManager add them to this method.
+    this.layerManager.setParameters({
+      layers,
+      viewports,
+      useDevicePixelRatio,
+      drawPickingColors,
+      layerFilter,
+      pickingRadius,
+      onLayerClick,
+      onLayerHover
+    });
+
+    // TODO - unify setParameters/setOptions/setProps etc naming.
+    this.animationLoop.setViewParameters({
+      useDevicePixelRatio
+    });
   }
 
   finalize() {
@@ -177,18 +175,11 @@ export default class DeckGLJS {
   }
 
   queryVisibleObjects({x, y, width = 1, height = 1, layerIds = null}) {
-    return this.layerManager.pickVisibleObjects({x, y, width, height, layerIds});
+    return this.layerManager.pickObjects({x, y, width, height, layerIds});
   }
 
   getViewports() {
     return this.layerManager ? this.layerManager.getViewports() : [];
-  }
-
-  // Experimental
-
-  // Gets actual viewport from a viewport "descriptor" object: viewport || {viewport: ..., ...}
-  _getViewportFromDescriptor(viewportOrDescriptor) {
-    return this.layerManager._getViewportFromDescriptor(viewportOrDescriptor);
   }
 
   // Private Methods
@@ -231,12 +222,10 @@ export default class DeckGLJS {
     this.props.onWebGLInitialized(gl);
 
     // Note: avoid React setState due GL animation loop / setState timing issue
-    this.layerManager = new LayerManager({gl});
-    this.layerManager.initEventHandling(new EventManager(canvas));
-    // Init with dummy viewport
-    this.layerManager.setViewports([
-      new WebMercatorViewport({width: 1, height: 1, latitude: 0, longitude: 0, zoom: 1})
-    ]);
+    this.layerManager = new LayerManager(gl, {
+      eventManager: new EventManager(canvas)
+    });
+
     this.effectManager = new EffectManager({gl, layerManager: this.layerManager});
 
     for (const effect of this.props.effects) {

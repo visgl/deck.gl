@@ -25,7 +25,7 @@ import LayerManager from 'deck.gl/core/lib/layer-manager';
 import global from 'global';
 
 const gl = global.glContext;
-const layerManager = new LayerManager({gl});
+const layerManager = new LayerManager(gl);
 
 test('EffectManager#constructor', t => {
   const effectManager = new EffectManager({gl, layerManager});
