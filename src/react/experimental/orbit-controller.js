@@ -1,8 +1,8 @@
 import React, {createElement} from 'react';
 import PropTypes from 'prop-types';
+import Controller from '../../core/controllers/controller';
+import OrbitState from '../../core/deprecated/controllers/orbit-state';
 import OrbitViewport from '../../core/viewports/orbit-viewport';
-import OrbitState from '../../core/controllers/orbit-state';
-import ViewportControls from '../../core/controllers/viewport-controls';
 import {EventManager} from 'mjolnir.js';
 
 const propTypes = {
@@ -65,7 +65,7 @@ export default class OrbitController extends React.Component {
       isDragging: false
     };
 
-    this._orbitControls = props.orbitControls || new ViewportControls(OrbitState);
+    this._orbitControls = props.orbitControls || new Controller(OrbitState);
   }
 
   componentDidMount() {
