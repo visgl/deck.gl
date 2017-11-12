@@ -43,6 +43,7 @@ Current direction for [deck.gl v5.0](https://github.com/uber/deck.gl/projects/3)
 | [**Property Animation**](v5.0/property-animation-rfc.md) | @ibgreen | Draft | Allow Layer props and GL parameters to accept functions in addition to values and call these on every render to update values |
 | [**Attribute Animation**](v5.0/attribute-animation-rfc.md) | @pessimistress | Proposed | Automatically interpolate between two copies of a vertex attributes |
 | [**PropTypes**](v5.0/prop-types-rfc.md) | ? | Draft | Validate e.g ranges for numeric attributes, support animation/auto-interpolation. |
+| [**Expose Layer AttributeManager**](v5.0/expose-attribute-manager.md) | @ibgreen | **Review** | simplifies pregenerating attributes in apps for fast animation. |
 | | | | |
 | **Effects** | | | |
 | **[Effects Manager](v5.0/effects-manager-rfc.md)** | @1chandu @ibgreen | Draft | Official support for effects (shadows, reflections, better lighting, postprocessing, framebuffer composition etc).  |
@@ -66,18 +67,17 @@ These RFCs are being implemented (fully or partially) in v4.2.
 | RFC | Author | Status | Description |
 | --- | --- | --- | --- |
 | **Animation** | | | |
-| [**Auto Highlighting**](v5.0/auto-highlighting-rfc.md) | @ibgreen @1chandu | **Implemented** | Auto highlight hovered object via `picking` module |
-| [**Expose Layer AttributeManager**](v5.0/expose-attribute-manager.md) | @ibgreen | **Review** | simplifies pregenerating attributes in apps for fast animation. |
-| [**Viewport interpolation**](v5.0/viewport-animation-rfc.md) | @1chandu | Proposed | This should build on the new Viewport system in the First Person RFC. Also needs to consider react-map-gl. |
+| [**Auto Highlighting**](v4.2/auto-highlighting-rfc.md) | @ibgreen @1chandu | **Implemented** | Auto highlight hovered object via `picking` module |
+| [**Viewport interpolation**](v4.2/viewport-animation-rfc.md) | @1chandu | Proposed | This should build on the new Viewport system in the First Person RFC. Also needs to consider react-map-gl. |
 | | | | |
 | **Viewports and Controllers** | | | |
-| [**First Person Viewport**](v5.0/first-person-mercator-viewport-rfc.md) | @ibgreen | **Pre-Approved** | Geospatially enable all viewports |
-| [**Multiple Viewports**](v5.0/multi-viewport-rfc.md) | @ibgreen | **Pre-Approved** | Supoort for multiple viewports, synchronized or unsynchronized |
-| [**Controller Architecture**](v5.0/controller-architecture-rfc.md) | @ibgreen | **Draft** | Generalize and Freeze experimental Controller Architecture from v4.1 |
+| [**First Person Viewport**](v4.2/first-person-mercator-viewport-rfc.md) | @ibgreen | **Pre-Approved** | Geospatially enable all viewports |
+| [**Multiple Viewports**](v4.2/multi-viewport-rfc.md) | @ibgreen | **Pre-Approved** | Supoort for multiple viewports, synchronized or unsynchronized |
+| [**Controller Architecture**](v4.2/controller-architecture-rfc.md) | @ibgreen | **Draft** | Generalize and Freeze experimental Controller Architecture from v4.1 |
 | | | | |
 | **General** | | | |
-| [**Break out Math Module**](v5.0/break-out-math-module-rfc.md) | @ibgreen | **Draft** | **Hygiene** Break out luma.gl math module |
-| [**Break out EventManager**](v5.0/break-out-event-manager-rfc.md) | @ibgreen | **Draft** | **Hygiene** Break out shared event manager code |
+| [**Break out EventManager**](v4.2/break-out-event-manager-rfc.md) | @ibgreen | **Draft** | **Hygiene** Break out shared event manager code |
+| [**Break out Math Module**](v4.2/break-out-math-module-rfc.md) | @ibgreen | **Draft** | **Hygiene** Break out luma.gl math module |
 
 
 ## v4.1 RFCs
