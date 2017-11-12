@@ -201,8 +201,8 @@ test('AttributeManager.setDefaultLogFunctions', t => {
     onUpdateStart: () => {
       updaterCalled.start = true;
     },
-    onLog: () => {
-      updaterCalled.log = true;
+    onUpdate: () => {
+      updaterCalled.update = true;
     },
     onUpdateEnd: () => {
       updaterCalled.end = true;
@@ -222,7 +222,7 @@ test('AttributeManager.setDefaultLogFunctions', t => {
   t.ok(ArrayBuffer.isView(attribute.value), 'logged attribute has typed array');
 
   t.ok(updaterCalled.start, 'onUpdateStart called');
-  t.ok(updaterCalled.log, 'onLog called');
+  t.ok(updaterCalled.update, 'onUpdate called');
   t.ok(updaterCalled.end, 'onUpdateEnd called');
   t.end();
 });

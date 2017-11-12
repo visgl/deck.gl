@@ -19,20 +19,41 @@
 // THE SOFTWARE.
 
 /* eslint-disable no-console, no-invalid-this */
-import {Bench} from 'probe.gl';
+import * as data from 'deck.gl/test/data';
 
-import coreLayersBench from './core-layers.bench';
-import layerBench from './layer.bench';
-import viewportBench from './viewport.bench';
-import colorBench from './color.bench';
+import {
+  WebMercatorViewport
+} from 'deck.gl';
 
-const suite = new Bench();
+import {COORDINATE_SYSTEM} from 'deck.gl/core/lib/constants';
+import {getUniformsFromViewport} from 'deck.gl/core/shaderlib/project/viewport-uniforms';
+
+const VIEWPORT_PARAMS = {
+  width: 500, height: 500,
+  longitude: -122, latitude: 37, zoom: 12, pitch: 30
+};
 
 // add tests
-coreLayersBench(suite);
-layerBench(suite);
-viewportBench(suite);
-colorBench(suite);
 
-// Run the suite
-suite.run();
+export default function viewportBench(suite) {
+  return suite
+    .group('VIEWPORTS')
+    .add('getUniformsFromViewport#LNGLAT', () => {
+      return getUniformsFromViewport({
+        viewport: data.sampleViewport,
+        modelMatrix: data.sampleModelMatrix,
+        coordinateSystem: COORDINATE_SYSTEM.LNGLAT
+      });
+    })
+    .add('getUniformsFromViewport#METER_OFFSETS', () => {
+      return getUniformsFromViewport({
+        viewport: data.sampleViewport,
+        modelMatrix: data.sampleModelMatrix,
+        coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS
+      });
+    })
+    .add('WebMercatorViewport', () => {
+      return new WebMercatorViewport(VIEWPORT_PARAMS);
+    })
+    ;
+}
