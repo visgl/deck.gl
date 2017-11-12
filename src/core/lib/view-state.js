@@ -16,6 +16,7 @@ const defaultProps = {
 export default class ViewState {
 
   constructor(props, constraints, userData = {}) {
+    props = this._translateOrbitProps(props);
     props = this._mergeProps(props, defaultProps);
     props = this._applyConstraints(props, constraints);
     props = this._checkProps(props);
@@ -28,8 +29,12 @@ export default class ViewState {
     return this._formatString(opts);
   }
 
+  getProps() {
+    return Object.assign({}, this._getOrbitProps(), this.props);
+  }
+
   getViewportProps() {
-    return this.props;
+    return this.getProps();
   }
 
   isGeospatial() {
@@ -88,6 +93,7 @@ export default class ViewState {
 
   // Returns same object if nothing changes (after clamping)
   getUpdatedState(props, constraints) {
+    props = this._translateOrbitProps(props);
     props = this._mergeProps(props, this.props);
     const newViewState = new ViewState(props, constraints, this.userData);
 
@@ -97,8 +103,46 @@ export default class ViewState {
     return viewStateChanged ? newViewState : this;
   }
 
+  // Support for orbit controller props
+  // TODO - audit these names, compare with math.gl
+  get rotationOrbit() {
+    return this.props.pitch;
+  }
+
+  get rotationX() {
+    return this.props.bearing;
+  }
+
+  get lookAt() {
+    return this.props.position;
+  }
+
+  _getOrbitProps() {
+    return {
+      rotationOrbit: this.props.pitch,
+      rotationX: this.props.bearing,
+      lookAt: this.props.position
+    };
+  }
+
+  // Support for orbit controller props
+  _translateOrbitProps(props) {
+    const newProps = Object.assign({}, props);
+    if (props.rotationOrbit !== undefined) {
+      newProps.pitch = props.rotationOrbit;
+    }
+    if (props.rotationX !== undefined) {
+      newProps.bearing = props.rotationX;
+    }
+    if (props.lookAt !== undefined) {
+      newProps.position = props.lookAt;
+    }
+    return newProps;
+  }
+
   // Private
 
+  // TODO - delete?
   getDirectionFromBearing(bearing) {
     const spherical = new SphericalCoordinates({
       bearing,
@@ -106,6 +150,11 @@ export default class ViewState {
     });
     const direction = spherical.toVector3().normalize();
     return direction;
+  }
+
+  // Apply any constraints to map state
+  _applyConstraints(props, constraints) {
+    return this._checkProps(props);
   }
 
   // ensure only supported props are included and merge with existing props
@@ -119,11 +168,6 @@ export default class ViewState {
       latitude: props.latitude !== undefined ? props.latitude : oldProps.latitude,
       zoom: props.zoom !== undefined ? props.zoom : oldProps.zoom
     };
-  }
-
-  // Apply any constraints to map state
-  _applyConstraints(props, constraints) {
-    return this._checkProps(props);
   }
 
   _checkProps(props) {
