@@ -32,6 +32,8 @@ import assert from 'assert';
 const LOG_PRIORITY_UPDATE = 1;
 
 const EMPTY_ARRAY = [];
+const EMPTY_PROPS = {};
+Object.freeze(EMPTY_PROPS);
 const noop = () => {};
 
 const defaultProps = {
@@ -76,16 +78,15 @@ export default class Layer {
 
     // Define all members before layer is sealed
     this.id = this.props.id; // The layer's id, used for matching with layers from last render cycle
-    this.animatedProps = null; // Computing animated props requires layer manager state
-    this.oldProps = null; // Props from last render used for change detection
-    this.state = null; // Will be set to the shared layer state object during layer matching
-    this.context = null; // Will reference layer manager's context, contains state shared by layers
+    this.oldProps = EMPTY_PROPS; // Props from last render used for change detection
     this.count = counter++; // Keep track of how many layer instances you are generating
     this.lifecycle = LIFECYCLE.NO_STATE; // Helps track and debug the life cycle of the layers
+    this.state = null; // Will be set to the shared layer state object during layer matching
+    this.context = null; // Will reference layer manager's context, contains state shared by layers
+    this.parentLayer = null; // reference to the composite layer parent that rendered this layer
 
     // CompositeLayer members, need to be defined here because of the `Object.seal`
-    this.parentLayer = null; // reference to the composite layer parent that rendered this layer
-    this.oldSubLayers = []; // reference to sublayers rendered in the previous cycle
+    this.internalState = null;
 
     // Seal the layer
     Object.seal(this);
@@ -97,7 +98,13 @@ export default class Layer {
   }
 
   get stats() {
-    return this.state.stats;
+    return this.internalState.stats;
+  }
+
+  needsUpdate() {
+    // Call subclass lifecycle method
+    return this.shouldUpdateState(this._getUpdateParams());
+    // End lifecycle method
   }
 
   // //////////////////////////////////////////////////
@@ -256,6 +263,7 @@ export default class Layer {
     return viewport.unprojectFlat(xy);
   }
 
+  // TODO - needs to refer to context
   screenToDevicePixels(screenPixels) {
     log.deprecated('screenToDevicePixels', 'DeckGL prop useDevicePixelRatio for conversion');
     const devicePixelRatio = typeof window !== 'undefined' ?
@@ -349,12 +357,18 @@ export default class Layer {
     return count(data);
   }
 
+  // clone this layer with modified props
+  clone(newProps) {
+    return new this.constructor(Object.assign({}, this.props, newProps));
+  }
+
   // LAYER MANAGER API
   // Should only be called by the deck.gl LayerManager class
 
   // Called by layer manager when a new layer is found
   /* eslint-disable max-statements */
-  initializeLayer(updateParams) {
+  _initialize() {
+    assert(arguments.length === 0);
     assert(this.context.gl);
     assert(!this.state);
 
@@ -368,21 +382,81 @@ export default class Layer {
       }
     });
 
+    this.internalState = {
+      subLayers: null,     // reference to sublayers rendered in a previous cycle
+      stats: new Stats({id: 'draw'})
+      // animatedProps: null, // Computing animated props requires layer manager state
+      // TODO - move these fields here (risks breaking layers)
+      // attributeManager,
+      // needsRedraw: true,
+    };
+
     this.state = {
       attributeManager,
       model: null,
-      needsRedraw: true,
-      stats: new Stats({id: 'draw'})
+      needsRedraw: true
     };
-    this.setChangeFlags({dataChanged: true, propsChange: true, viewportChanged: true});
 
+    // Call subclass lifecycle methods
     this.initializeState(this.context);
+    // End subclass lifecycle methods
 
+    // initializeState callback tends to clear state
     this.setChangeFlags({dataChanged: true, propsChange: true, viewportChanged: true});
-    updateParams = Object.assign({}, this.context, updateParams, {
-      changeFlags: this.state.changeFlags
-    });
 
+    this._updateState(this._getUpdateParams());
+
+    if (this.isComposite) {
+      this._renderLayers(true);
+    }
+
+    const {model} = this.state;
+    if (model) {
+      model.id = this.props.id;
+      model.program.id = `${this.props.id}-program`;
+      model.geometry.id = `${this.props.id}-geometry`;
+      model.setAttributes(attributeManager.getAttributes());
+    }
+
+    // Last but not least, update any sublayers
+    if (this.isComposite) {
+      this._renderLayers();
+    }
+
+    this.clearChangeFlags();
+  }
+
+  // Called by layer manager
+  // if this layer is new (not matched with an existing layer) oldProps will be empty object
+  _update() {
+    assert(arguments.length === 0);
+
+    // Call subclass lifecycle method
+    const stateNeedsUpdate = this.needsUpdate();
+    // End lifecycle method
+
+    const updateParams = {
+      props: this.props,
+      oldProps: this.oldProps,
+      context: this.context,
+      oldContext: this.oldContext,
+      changeFlags: this.internalState.changeFlags
+    };
+
+    if (stateNeedsUpdate) {
+      this._updateState(updateParams);
+    }
+
+    // Render or update previously rendered sublayers
+    if (this.isComposite) {
+      this._renderLayers(stateNeedsUpdate);
+    }
+
+    this.clearChangeFlags();
+  }
+  /* eslint-enable max-statements */
+
+  _updateState(updateParams) {
     // Call subclass lifecycle methods
     this.updateState(updateParams);
     // End subclass lifecycle methods
@@ -392,65 +466,16 @@ export default class Layer {
     this._updateBaseUniforms();
     this._updateModuleSettings();
 
-    const {model} = this.state;
-    if (model) {
-      model.setInstanceCount(this.getNumInstances());
-      model.id = this.props.id;
-      model.program.id = `${this.props.id}-program`;
-      model.geometry.id = `${this.props.id}-geometry`;
-      model.setAttributes(attributeManager.getAttributes());
-    }
-
-    this.clearChangeFlags();
-  }
-
-  // Called by layer manager
-  // if this layer is new (not matched with an existing layer) oldProps will be empty object
-  updateLayer({oldProps = {}, oldContext = {}}) {
-    this.oldProps = oldProps;
-
-    this.diffProps(this.props, oldProps);
-
-    // TODO - check change flags and return if no change?
-    // if (!state.changeFlags.somethingChanged) {
-    // return
-    // }
-
-    const updateParams = {
-      props: this.props,
-      oldProps,
-      context: this.context,
-      oldContext,
-      changeFlags: this.state.changeFlags
-    };
-
-    // Call subclass lifecycle method
-    const stateNeedsUpdate = this.shouldUpdateState(updateParams);
-    // End lifecycle method
-
-    if (stateNeedsUpdate) {
-      // Call subclass lifecycle method
-      this.updateState(updateParams);
-      // End lifecycle method
-
-      // Run the attribute updaters
-      this.updateAttributes(updateParams.props);
-      this._updateBaseUniforms();
-      this._updateModuleSettings();
-
-      // Note: Automatic instance count update only works for single layers
-      if (this.state.model) {
-        this.state.model.setInstanceCount(this.getNumInstances());
-      }
-
-      this.clearChangeFlags();
+    // Note: Automatic instance count update only works for single layers
+    if (this.state.model) {
+      this.state.model.setInstanceCount(this.getNumInstances());
     }
   }
-  /* eslint-enable max-statements */
 
   // Called by manager when layer is about to be disposed
   // Note: not guaranteed to be called on application shutdown
-  finalizeLayer() {
+  _finalize() {
+    assert(arguments.length === 0);
     // Call subclass lifecycle method
     this.finalizeState(this.context);
     // End lifecycle method
@@ -468,6 +493,7 @@ export default class Layer {
     }
 
     // Apply polygon offset to avoid z-fighting
+    // TODO - move to draw-layers
     const {getPolygonOffset} = this.props;
     const offsets = getPolygonOffset && getPolygonOffset(uniforms) || [0, 0];
     parameters.polygonOffset = offsets;
@@ -509,12 +535,15 @@ export default class Layer {
   }
 
   // Helper methods
+  getChangeFlags() {
+    return this.internalState.changeFlags;
+  }
 
   // Dirty some change flags, will be handled by updateLayer
   /* eslint-disable complexity */
   setChangeFlags(flags) {
-    this.state.changeFlags = this.state.changeFlags || {};
-    const changeFlags = this.state.changeFlags;
+    this.internalState.changeFlags = this.internalState.changeFlags || {};
+    const changeFlags = this.internalState.changeFlags;
 
     // Update primary flags
     if (flags.dataChanged && !changeFlags.dataChanged) {
@@ -535,7 +564,7 @@ export default class Layer {
     if (flags.viewportChanged && !changeFlags.viewportChanged) {
       changeFlags.viewportChanged = flags.viewportChanged;
       log.log(LOG_PRIORITY_UPDATE + 2,
-        () => `propsChanged: ${flags.viewportChanged} in ${this.id}`);
+        () => `viewportChanged: ${flags.viewportChanged} in ${this.id}`);
     }
 
     // Update composite flags
@@ -544,17 +573,15 @@ export default class Layer {
     changeFlags.propsOrDataChanged = changeFlags.propsOrDataChanged || propsOrDataChanged;
     changeFlags.somethingChanged = changeFlags.somethingChanged ||
       propsOrDataChanged || flags.viewportChanged;
-
-    return changeFlags;
   }
   /* eslint-enable complexity */
 
   // Clear all changeFlags, typically after an update
   clearChangeFlags() {
-    this.state.changeFlags = {
+    this.internalState.changeFlags = {
       // Primary changeFlags, can be strings stating reason for change
-      propsChanged: false,
       dataChanged: false,
+      propsChanged: false,
       updateTriggersChanged: false,
       viewportChanged: false,
 
@@ -564,16 +591,36 @@ export default class Layer {
     };
   }
 
+  printChangeFlags() {
+    const flags = this.internalState.changeFlags;
+    return `\
+${flags.dataChanged ? 'data ' : ''}\
+${flags.propsChanged ? 'props ' : ''}\
+${flags.updateTriggersChanged ? 'triggers ' : ''}\
+${flags.viewportChanged ? 'viewport' : ''}\
+`;
+  }
+
   // Compares the layers props with old props from a matched older layer
   // and extracts change flags that describe what has change so that state
   // can be update correctly with minimal effort
-  diffProps(oldProps, newProps) {
-    let changeFlags = diffProps(oldProps, newProps, this._onUpdateTriggered.bind(this));
-    changeFlags = this.setChangeFlags(changeFlags);
-    return changeFlags;
+  // TODO - arguments for testing only
+  diffProps(newProps = this.props, oldProps = this.oldProps) {
+    const changeFlags = diffProps(newProps, oldProps, this._onUpdateTriggered.bind(this));
+    return this.setChangeFlags(changeFlags);
   }
 
   // PRIVATE METHODS
+
+  _getUpdateParams() {
+    return {
+      props: this.props,
+      oldProps: this.oldProps,
+      context: this.context,
+      oldContext: this.oldContext || {},
+      changeFlags: this.internalState.changeFlags
+    };
+  }
 
   // Helper for constructor, merges props with default props and freezes them
   _normalizeProps(props) {
@@ -589,6 +636,29 @@ export default class Layer {
     // Props are immutable
     Object.freeze(props);
     return props;
+  }
+
+  // Called by layer manager to transfer state from an old layer
+  _transferState(oldLayer) {
+    const {state, internalState, props} = oldLayer;
+    assert(state && internalState);
+
+    // Move state
+    state.layer = this;
+    this.state = state;
+    this.internalState = internalState;
+    // Note: We keep the state ref on old layers to support async actions
+    // oldLayer.state = null;
+
+    // Keep a temporary ref to the old props, for prop comparison
+    this.oldProps = props;
+
+    // Update model layer reference
+    for (const model of this.getModels()) {
+      model.userData.layer = this;
+    }
+
+    this.diffProps();
   }
 
   // Callback for `diffProps`, will be called when an updateTrigger fires
@@ -658,7 +728,7 @@ export default class Layer {
 
     // TODO - set needsRedraw on the model(s)?
     this.state.needsRedraw = true;
-    log(3, 'layer.setUniforms', uniformMap);
+    log.deprecated('layer.setUniforms', 'model.setUniforms');
   }
 }
 

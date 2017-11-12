@@ -126,28 +126,36 @@ test('Layer#diffProps', t => {
   const layer = new SubLayer(LAYER_PROPS);
   testInitializeLayer({layer});
 
-  let diff;
+  layer.diffProps(
+    Object.assign({}, LAYER_PROPS),
+    LAYER_PROPS
+  );
+  t.false(layer.getChangeFlags().somethingChanged, 'same props');
 
-  diff = layer.diffProps(LAYER_PROPS,
-    Object.assign({}, LAYER_PROPS));
-  t.false(diff.somethingChanged, 'same props');
+  layer.diffProps(
+    Object.assign({}, LAYER_PROPS, {data: dataVariants[0]}),
+    LAYER_PROPS
+  );
+  t.true(layer.getChangeFlags().dataChanged, 'data changed');
 
-  diff = layer.diffProps(LAYER_PROPS,
-    Object.assign({}, LAYER_PROPS, {data: dataVariants[0]}));
-  t.true(diff.dataChanged, 'data changed');
-
-  diff = layer.diffProps(LAYER_PROPS,
-    Object.assign({}, LAYER_PROPS, {size: 0}));
-  t.true(diff.propsChanged, 'props changed');
+  layer.diffProps(
+    Object.assign({}, LAYER_PROPS, {size: 0}),
+    LAYER_PROPS
+  );
+  t.true(layer.getChangeFlags().propsChanged, 'props changed');
 
   // Dummy attribute manager to avoid diffUpdateTriggers failure
-  diff = layer.diffProps(LAYER_PROPS,
-    Object.assign({}, LAYER_PROPS, {updateTriggers: {time: 100}}));
-  t.true(diff.propsOrDataChanged, 'props changed');
+  layer.diffProps(
+    Object.assign({}, LAYER_PROPS, {updateTriggers: {time: 100}}),
+    LAYER_PROPS
+  );
+  t.true(layer.getChangeFlags().propsOrDataChanged, 'props changed');
 
   const spy = makeSpy(AttributeManager.prototype, 'invalidate');
-  diff = layer.diffProps(layer.props,
-    Object.assign({}, LAYER_PROPS, {updateTriggers: {time: {version: 0}}}));
+  layer.diffProps(
+    Object.assign({}, LAYER_PROPS, {updateTriggers: {time: {version: 0}}}),
+    layer.props
+  );
   t.ok(spy.called, 'updateTriggers fired');
   spy.restore();
 

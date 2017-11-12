@@ -39,6 +39,20 @@ import {
 const LOG_PRIORITY_LIFECYCLE = 2;
 const LOG_PRIORITY_LIFECYCLE_MINOR = 4;
 
+const initialContext = {
+  uniforms: {},
+  viewports: [],
+  viewport: null,
+  layerFilter: null,
+  viewportChanged: true,
+  pickingFBO: null,
+  useDevicePixelRatio: true,
+  lastPickedInfo: {
+    index: -1,
+    layerId: null
+  }
+};
+
 const layerName = layer => layer instanceof Layer ?
   `${layer}` :
   (!layer ? 'null layer' : 'invalid layer');
@@ -55,13 +69,18 @@ export default class LayerManager {
      // If it's the same across two React render calls, the diffing logic
      // will be skipped.
     this.lastRenderedLayers = [];
-
     this.prevLayers = [];
     this.layers = [];
     this.oldContext = {};
     this.screenCleared = false;
     this._needsRedraw = 'Initial render';
+    this.context = Object.assign({}, initialContext, {
+      gl,
+      shaderCache: new ShaderCache({gl})
+    });
+    this.error = null;
 
+    // Event handling
     this._eventManager = null;
     this._pickingRadius = 0;
     this._onLayerClick = null;
@@ -71,25 +90,9 @@ export default class LayerManager {
     this._onPointerLeave = this._onPointerLeave.bind(this);
     this._pickAndCallback = this._pickAndCallback.bind(this);
 
+    // Seer integration
     this._initSeer = this._initSeer.bind(this);
     this._editSeer = this._editSeer.bind(this);
-
-    this.context = {
-      gl,
-      uniforms: {},
-      viewports: [],
-      viewport: null,
-      layerFilter: null,
-      viewportChanged: true,
-      pickingFBO: null,
-      useDevicePixelRatio: true,
-      lastPickedInfo: {
-        index: -1,
-        layerId: null
-      },
-      shaderCache: new ShaderCache({gl})
-    };
-
     seerInitListener(this._initSeer);
     layerEditListener(this._editSeer);
 
@@ -117,6 +120,53 @@ export default class LayerManager {
 
   getViewports() {
     return this.context.viewports;
+  }
+
+  setViewports(viewports) {
+    viewports = flatten(viewports, {filter: Boolean});
+
+    // Viewports are "immutable", so we can shallow compare
+    const oldViewports = this.context.viewports;
+    const viewportsChanged = viewports.length !== oldViewports.length ||
+      viewports.some((_, i) => viewports[i] !== oldViewports[i]);
+
+    if (viewportsChanged) {
+      this._needsRedraw = 'Viewport changed';
+
+      // Need to ensure one viewport is activated
+      const viewport = viewports[0];
+      assert(viewport instanceof Viewport, 'Invalid viewport');
+
+      this.context.viewports = viewports;
+      this._activateViewport(viewport);
+    }
+  }
+
+  // Supply a new layer list, initiating sublayer generation and layer matching
+  setLayers(newLayers) {
+    assert(this.context.viewport, 'LayerManager.updateLayers: viewport not set');
+
+    // TODO - something is generating state updates that cause rerender of the same
+    if (newLayers === this.lastRenderedLayers) {
+      log.log(3, 'Ignoring layer update due to layer array not changed');
+      return this;
+    }
+    this.lastRenderedLayers = newLayers;
+
+    newLayers = flatten(newLayers, {filter: Boolean});
+
+    this.prevLayers = this.layers;
+    const {error, generatedLayers} = this._updateLayers({
+      oldLayers: this.prevLayers,
+      newLayers
+    });
+
+    this.layers = generatedLayers;
+    // Throw first error found, if any
+    if (error) {
+      throw error;
+    }
+    return this;
   }
 
   /**
@@ -148,110 +198,6 @@ export default class LayerManager {
     }
 
     Object.assign(this.context, parameters);
-  }
-
-  setViewports(viewports) {
-    viewports = flatten(viewports, {filter: Boolean});
-
-    // Viewports are "immutable", so we can shallow compare
-    const oldViewports = this.context.viewports;
-    const viewportsChanged = viewports.length !== oldViewports.length ||
-      viewports.some((_, i) => viewports[i] !== oldViewports[i]);
-
-    if (viewportsChanged) {
-      this._needsRedraw = 'Viewport changed';
-
-      // Need to ensure one viewport is activated
-      const viewport = viewports[0];
-      assert(viewport instanceof Viewport, 'Invalid viewport');
-
-      this.context.viewports = viewports;
-      this._activateViewport(viewport);
-    }
-  }
-
-  /**
-   * @param {Object} eventManager   A source of DOM input events
-   */
-  initEventHandling(eventManager) {
-    this._eventManager = eventManager;
-
-    // TODO: add/remove handlers on demand at runtime, not all at once on init.
-    // Consider both top-level handlers like onLayerClick/Hover
-    // and per-layer handlers attached to individual layers.
-    // https://github.com/uber/deck.gl/issues/634
-    this._eventManager.on({
-      click: this._onClick,
-      pointermove: this._onPointerMove,
-      pointerleave: this._onPointerLeave
-    });
-  }
-
-  // Set parameters for input event handling.
-  setEventHandlingParameters({
-    pickingRadius,
-    onLayerClick,
-    onLayerHover
-  }) {
-    if (!isNaN(pickingRadius)) {
-      this._pickingRadius = pickingRadius;
-    }
-    if (typeof onLayerClick !== 'undefined') {
-      this._onLayerClick = onLayerClick;
-    }
-    if (typeof onLayerHover !== 'undefined') {
-      this._onLayerHover = onLayerHover;
-    }
-    this._validateEventHandling();
-  }
-
-  updateLayers({newLayers}) {
-    // TODO - something is generating state updates that cause rerender of the same
-    if (newLayers === this.lastRenderedLayers) {
-      log.log(3, 'Ignoring layer update due to layer array not changed');
-      return this;
-    }
-    this.lastRenderedLayers = newLayers;
-
-    assert(this.context.viewport, 'LayerManager.updateLayers: viewport not set');
-
-    // Filter out any null layers
-    newLayers = newLayers.filter(newLayer => newLayer !== null);
-
-    for (const layer of newLayers) {
-      layer.context = this.context;
-    }
-
-    this.prevLayers = this.layers;
-    const {error, generatedLayers} = this._updateLayers({
-      oldLayers: this.prevLayers,
-      newLayers
-    });
-
-    this.layers = generatedLayers;
-    // Throw first error found, if any
-    if (error) {
-      throw error;
-    }
-    return this;
-  }
-
-  drawLayers({pass = 'render to screen', redrawReason}) {
-    const {gl, useDevicePixelRatio, drawPickingColors} = this.context;
-
-    // render this viewport
-    drawLayers(gl, {
-      layers: this.layers,
-      viewports: this.context.viewports,
-      onViewportActive: this._activateViewport.bind(this),
-      useDevicePixelRatio,
-      drawPickingColors,
-      pass,
-      layerFilter: this.context.layerFilter,
-      redrawReason
-    });
-
-    return this;
   }
 
   // Pick the closest info at given coordinate
@@ -321,6 +267,7 @@ export default class LayerManager {
       this._needsRedraw = false;
     }
 
+    // This layers list doesn't include sublayers, relying on composite layers
     for (const layer of this.layers) {
       redraw = redraw || layer.getNeedsRedraw({clearRedrawFlags});
     }
@@ -328,9 +275,50 @@ export default class LayerManager {
     return redraw;
   }
 
+  drawLayers({pass = 'render to screen', redrawReason = 'unknown reason'} = {}) {
+    const {gl, useDevicePixelRatio, drawPickingColors} = this.context;
+
+    // render this viewport
+    drawLayers(gl, {
+      layers: this.layers,
+      viewports: this.context.viewports,
+      onViewportActive: this._activateViewport.bind(this),
+      useDevicePixelRatio,
+      drawPickingColors,
+      pass,
+      layerFilter: this.context.layerFilter,
+      redrawReason
+    });
+
+    return this;
+  }
+
+  // Set parameters for input event handling.
+  setEventHandlingParameters({
+    pickingRadius,
+    onLayerClick,
+    onLayerHover
+  }) {
+    if (!isNaN(pickingRadius)) {
+      this._pickingRadius = pickingRadius;
+    }
+    if (typeof onLayerClick !== 'undefined') {
+      this._onLayerClick = onLayerClick;
+    }
+    if (typeof onLayerHover !== 'undefined') {
+      this._onLayerHover = onLayerHover;
+    }
+    this._validateEventHandling();
+  }
+
   //
   // DEPRECATED METHODS
   //
+
+  updateLayers({newLayers}) {
+    log.deprecated('updateLayers', 'setLayers');
+    this.setLayers(newLayers);
+  }
 
   setViewport(viewport) {
     log.deprecated('setViewport', 'setViewports');
@@ -341,6 +329,23 @@ export default class LayerManager {
   //
   // PRIVATE METHODS
   //
+
+  /**
+   * @param {Object} eventManager   A source of DOM input events
+   */
+  initEventHandling(eventManager) {
+    this._eventManager = eventManager;
+
+    // TODO: add/remove handlers on demand at runtime, not all at once on init.
+    // Consider both top-level handlers like onLayerClick/Hover
+    // and per-layer handlers attached to individual layers.
+    // https://github.com/uber/deck.gl/issues/634
+    this._eventManager.on({
+      click: this._onClick,
+      pointermove: this._onPointerMove,
+      pointerleave: this._onPointerLeave
+    });
+  }
 
   // Make a viewport "current" in layer context, primed for draw
   _activateViewport(viewport) {
@@ -395,10 +400,9 @@ export default class LayerManager {
     const oldLayerMap = {};
     for (const oldLayer of oldLayers) {
       if (oldLayerMap[oldLayer.id]) {
-        log.once(0, `Multiple old layers with same id ${layerName(oldLayer)}`);
+        log.warn(`Multiple old layers with same id ${layerName(oldLayer)}`);
       } else {
         oldLayerMap[oldLayer.id] = oldLayer;
-        oldLayer.lifecycle = LIFECYCLE.AWAITING_FINALIZATION;
       }
     }
 
@@ -406,121 +410,72 @@ export default class LayerManager {
     const generatedLayers = [];
 
     // Match sublayers
-    const error = this._matchSublayers({
+    const error = this._updateSublayersRecursively({
       newLayers, oldLayerMap, generatedLayers
     });
 
-    const error2 = this._finalizeOldLayers(oldLayers);
+    // Finalize unmatched layers
+    const error2 = this._finalizeOldLayers(oldLayerMap);
+
     const firstError = error || error2;
     return {error: firstError, generatedLayers};
   }
 
-  /* eslint-disable max-statements */
-
-  _matchSublayers({newLayers, oldLayerMap, generatedLayers}) {
-    // Filter out any null layers
-    newLayers = newLayers.filter(newLayer => newLayer !== null);
-
+  // Note: adds generated layers to `generatedLayers` array parameter
+  _updateSublayersRecursively({newLayers, oldLayerMap, generatedLayers}) {
     let error = null;
+
     for (const newLayer of newLayers) {
       newLayer.context = this.context;
 
+      // Given a new coming layer, find its matching old layer (if any)
+      const oldLayer = oldLayerMap[newLayer.id];
+      if (oldLayer === null) { // null, rather than undefined, means this id was originally there
+        log.warn(`Multiple new layers with same id ${layerName(newLayer)}`);
+      }
+      // Remove the old layer from candidates, as it has been matched with this layer
+      oldLayerMap[newLayer.id] = null;
+
+      let sublayers = null;
+
+      // We must not generate exceptions until after layer matching is complete
       try {
-        // 1. given a new coming layer, find its matching layer
-        const oldLayer = oldLayerMap[newLayer.id];
-        oldLayerMap[newLayer.id] = null;
-
-        if (oldLayer === null) {
-          log.once(0, `Multiple new layers with same id ${layerName(newLayer)}`);
-        }
-
-        // Only transfer state at this stage. We must not generate exceptions
-        // until all layers' state have been transferred
-        if (oldLayer) {
+        if (!oldLayer) {
+          this._initializeLayer(newLayer);
+          initLayerInSeer(newLayer); // Initializes layer in seer chrome extension (if connected)
+        } else {
           this._transferLayerState(oldLayer, newLayer);
           this._updateLayer(newLayer);
-
-          updateLayerInSeer(newLayer); // Initializes layer in seer chrome extension (if connected)
-        } else {
-          this._initializeNewLayer(newLayer);
-
-          initLayerInSeer(newLayer); // Initializes layer in seer chrome extension (if connected)
+          updateLayerInSeer(newLayer); // Updates layer in seer chrome extension (if connected)
         }
         generatedLayers.push(newLayer);
 
         // Call layer lifecycle method: render sublayers
-        const {props, oldProps} = newLayer;
-        let sublayers = newLayer.isComposite ? newLayer._renderLayers({
-          oldProps,
-          props,
-          context: this.context,
-          oldContext: this.oldContext
-        }) : null;
+        sublayers = newLayer.isComposite && newLayer.getSubLayers();
         // End layer lifecycle method: render sublayers
-
-        if (sublayers) {
-          // Flatten the returned array, removing any null, undefined or false
-          // this allows layers to render sublayers conditionally
-          // (see CompositeLayer.renderLayers docs)
-          sublayers = flatten(sublayers, {filter: Boolean});
-
-          // populate reference to parent layer
-          sublayers.forEach(layer => {
-            layer.parentLayer = newLayer;
-          });
-
-          this._matchSublayers({
-            newLayers: sublayers,
-            oldLayerMap,
-            generatedLayers
-          });
-        }
       } catch (err) {
-        log.once(0, `error during matching of ${layerName(newLayer)}`, err);
-        // Save first error
-        error = error || err;
+        log.warn(`error during matching of ${layerName(newLayer)}`, err);
+        error = error || err; // Record first exception
+      }
+
+      if (sublayers) {
+        this._updateSublayersRecursively({
+          newLayers: sublayers,
+          oldLayerMap,
+          generatedLayers
+        });
       }
     }
+
     return error;
   }
 
-  _transferLayerState(oldLayer, newLayer) {
-    const {state, props} = oldLayer;
-
-    // sanity check
-    assert(state, 'deck.gl sanity check - Matching layer has no state');
-    if (newLayer !== oldLayer) {
-      log(LOG_PRIORITY_LIFECYCLE_MINOR,
-        `matched ${layerName(newLayer)}`, oldLayer, '->', newLayer);
-
-      // Move state
-      state.layer = newLayer;
-      newLayer.state = state;
-
-      // Update model layer reference
-      for (const model of newLayer.getModels()) {
-        model.userData.layer = newLayer;
-      }
-      // Keep a temporary ref to the old props, for prop comparison
-      newLayer.oldProps = props;
-      // oldLayer.state = null;
-
-      newLayer.lifecycle = LIFECYCLE.MATCHED;
-      oldLayer.lifecycle = LIFECYCLE.AWAITING_GC;
-    } else {
-      log.log(LOG_PRIORITY_LIFECYCLE_MINOR, `Matching layer is unchanged ${newLayer.id}`);
-      newLayer.lifecycle = LIFECYCLE.MATCHED;
-      newLayer.oldProps = newLayer.props;
-      // TODO - we could avoid prop comparisons in this case
-    }
-  }
-
-  // Update the old layers that were not matched
-  _finalizeOldLayers(oldLayers) {
+  // Finalize any old layers that were not matched
+  _finalizeOldLayers(oldLayerMap) {
     let error = null;
-    // Matched layers have lifecycle state "outdated"
-    for (const layer of oldLayers) {
-      if (layer.lifecycle === LIFECYCLE.AWAITING_FINALIZATION) {
+    for (const layerId in oldLayerMap) {
+      const layer = oldLayerMap[layerId];
+      if (layer) {
         error = error || this._finalizeLayer(layer);
       }
     }
@@ -528,80 +483,75 @@ export default class LayerManager {
   }
 
   // Initializes a single layer, calling layer methods
-  _initializeNewLayer(layer) {
+  _initializeLayer(layer) {
+    assert(!layer.state);
+    log(LOG_PRIORITY_LIFECYCLE, `initializing ${layerName(layer)}`);
+
     let error = null;
-    // Check if new layer, and initialize it's state
-    if (!layer.state) {
-      log(LOG_PRIORITY_LIFECYCLE, `initializing ${layerName(layer)}`);
-      try {
-        layer.initializeLayer({
-          oldProps: {},
-          props: layer.props,
-          oldContext: this.oldContext,
-          context: this.context
-        });
-
-        layer.lifecycle = LIFECYCLE.INITIALIZED;
-
-      } catch (err) {
-        log.once(0, `error while initializing ${layerName(layer)}\n`, err);
-        // Save first error
-        error = error || err;
-      }
-      // Set back pointer (used in picking)
-      if (layer.state) {
-        layer.state.layer = layer;
-        // Save layer on model for picking purposes
-        // TODO - store on model.userData rather than directly on model
-      }
-      if (layer.state) {
-        for (const model of layer.getModels()) {
-          model.userData.layer = layer;
-        }
-      }
+    try {
+      layer._initialize();
+      layer.lifecycle = LIFECYCLE.INITIALIZED;
+    } catch (err) {
+      log.warn(`error while initializing ${layerName(layer)}\n`, err);
+      error = error || err;
+      // TODO - what should the lifecycle state be here? LIFECYCLE.INITIALIZATION_FAILED?
     }
+
+    assert(layer.state);
+
+    // Set back pointer (used in picking)
+    layer.state.layer = layer;
+
+    // Save layer on model for picking purposes
+    // store on model.userData rather than directly on model
+    for (const model of layer.getModels()) {
+      model.userData.layer = layer;
+    }
+
     return error;
   }
 
-  // Updates a single layer, calling layer methods
+  _transferLayerState(oldLayer, newLayer) {
+    if (newLayer !== oldLayer) {
+      log(LOG_PRIORITY_LIFECYCLE_MINOR, `matched ${layerName(newLayer)}`, oldLayer, '->', newLayer);
+      newLayer.lifecycle = LIFECYCLE.MATCHED;
+      oldLayer.lifecycle = LIFECYCLE.AWAITING_GC;
+      newLayer._transferState(oldLayer);
+    } else {
+      log.log(LOG_PRIORITY_LIFECYCLE_MINOR, `Matching layer is unchanged ${newLayer.id}`);
+      newLayer.lifecycle = LIFECYCLE.MATCHED;
+      newLayer.oldProps = newLayer.props;
+    }
+  }
+
+  // Updates a single layer, cleaning all flags
   _updateLayer(layer) {
-    const {oldProps, props} = layer;
+    log.log(LOG_PRIORITY_LIFECYCLE_MINOR, `updating ${layer} because: ${layer.printChangeFlags()}`);
     let error = null;
-    if (oldProps) {
-      try {
-        layer.updateLayer({
-          oldProps,
-          props,
-          context: this.context,
-          oldContext: this.oldContext
-        });
-      } catch (err) {
-        log.once(0, `error during update of ${layerName(layer)}`, err);
-        // Save first error
-        error = err;
-      }
-      log(LOG_PRIORITY_LIFECYCLE_MINOR, `updating ${layerName(layer)}`);
+    try {
+      layer._update();
+    } catch (err) {
+      log.warn(`error during update of ${layerName(layer)}`, err);
+      // Save first error
+      error = err;
     }
     return error;
   }
 
   // Finalizes a single layer
   _finalizeLayer(layer) {
+    assert(layer.state);
+    assert(layer.lifecycle !== LIFECYCLE.AWAITING_FINALIZATION);
+    layer.lifecycle = LIFECYCLE.AWAITING_FINALIZATION;
     let error = null;
-    const {state} = layer;
-    if (state) {
-      try {
-        layer.finalizeLayer();
-      } catch (err) {
-        log.once(0,
-          `error during finalization of ${layerName(layer)}`, err);
-        // Save first error
-        error = err;
-      }
-      // layer.state = null;
-      layer.lifecycle = LIFECYCLE.FINALIZED;
-      log(LOG_PRIORITY_LIFECYCLE, `finalizing ${layerName(layer)}`);
+    try {
+      layer._finalize();
+    } catch (err) {
+      log.warn(`error during finalization of ${layerName(layer)}`, err);
+      error = err;
     }
+    layer.lifecycle = LIFECYCLE.FINALIZED;
+    log(LOG_PRIORITY_LIFECYCLE, `finalizing ${layerName(layer)}`);
     return error;
   }
 
