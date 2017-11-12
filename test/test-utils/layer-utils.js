@@ -23,7 +23,7 @@ import spy from './spy';
 import gl from './setup-gl';
 
 export function testInitializeLayer({layer, viewport}) {
-  const layerManager = new LayerManager({gl});
+  const layerManager = new LayerManager(gl);
   layerManager.setViewport(new WebMercatorViewport(100, 100));
 
   try {
@@ -36,7 +36,7 @@ export function testInitializeLayer({layer, viewport}) {
 }
 
 export function testUpdateLayer({layer, viewport, newProps}) {
-  const layerManager = new LayerManager({gl});
+  const layerManager = new LayerManager(gl);
   layerManager.setViewport(new WebMercatorViewport(100, 100));
 
   try {
@@ -50,7 +50,7 @@ export function testUpdateLayer({layer, viewport, newProps}) {
 }
 
 export function testDrawLayer({layer, uniforms = {}}) {
-  const layerManager = new LayerManager({gl});
+  const layerManager = new LayerManager(gl);
   layerManager.setViewport(new WebMercatorViewport(100, 100));
 
   try {
@@ -81,7 +81,7 @@ export function testDrawLayer({layer, uniforms = {}}) {
  */
 
 export function testLayerUpdates(t, {LayerComponent, testCases}) {
-  const layerManager = new LayerManager({gl});
+  const layerManager = new LayerManager(gl);
   layerManager.setViewport(new WebMercatorViewport(100, 100));
 
   const newProps = Object.assign({}, testCases.INITIAL_PROPS);
@@ -135,7 +135,7 @@ export function testLayerUpdates(t, {LayerComponent, testCases}) {
  */
 
 export function testSubLayerUpdateTriggers(t, {FunctionsToSpy, LayerComponent, testCases}) {
-  const layerManager = new LayerManager({gl});
+  const layerManager = new LayerManager(gl);
   layerManager.setViewport(new WebMercatorViewport(100, 100));
 
   const newProps = Object.assign({}, testCases.INITIAL_PROPS);

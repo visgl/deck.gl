@@ -66,8 +66,7 @@ export default class DeckGL extends React.Component {
 
     // Build a viewport id to viewport index
     const viewportMap = {};
-    viewports.forEach(viewportDescriptor => {
-      const viewport = this.deck._getViewportFromDescriptor(viewportDescriptor);
+    viewports.forEach(viewport => {
       if (viewport.id) {
         viewportMap[viewport.id] = viewport;
       }
