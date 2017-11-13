@@ -107,6 +107,11 @@ export default class Layer {
     // End lifecycle method
   }
 
+  // Checks state of attributes and model
+  getNeedsRedraw({clearRedrawFlags = false} = {}) {
+    return this. _getNeedsRedraw(clearRedrawFlags);
+  }
+
   // //////////////////////////////////////////////////
   // LIFECYCLE METHODS, overridden by the layer subclasses
 
@@ -512,28 +517,6 @@ export default class Layer {
     // End lifecycle method
   }
 
-  // Checks state of attributes and model
-  getNeedsRedraw({clearRedrawFlags = false} = {}) {
-    // this method may be called by the render loop as soon a the layer
-    // has been created, so guard against uninitialized state
-    if (!this.state) {
-      return false;
-    }
-
-    let redraw = false;
-    redraw = redraw || (this.state.needsRedraw && this.id);
-    this.state.needsRedraw = this.state.needsRedraw && !clearRedrawFlags;
-
-    // TODO - is attribute manager needed? - Model should be enough.
-    const {attributeManager} = this.state;
-    redraw = redraw || (attributeManager && attributeManager.getNeedsRedraw({clearRedrawFlags}));
-    for (const model of this.getModels()) {
-      redraw = redraw || (model.getNeedsRedraw({clearRedrawFlags}) && model.id);
-    }
-
-    return redraw;
-  }
-
   // Helper methods
   getChangeFlags() {
     return this.internalState.changeFlags;
@@ -620,6 +603,35 @@ ${flags.viewportChanged ? 'viewport' : ''}\
       oldContext: this.oldContext || {},
       changeFlags: this.internalState.changeFlags
     };
+  }
+
+  // Checks state of attributes and model
+  _getNeedsRedraw(clearRedrawFlags) {
+    // this method may be called by the render loop as soon a the layer
+    // has been created, so guard against uninitialized state
+    if (!this.state) {
+      return false;
+    }
+
+    let redraw = false;
+    redraw = redraw || (this.state.needsRedraw && this.id);
+    this.state.needsRedraw = this.state.needsRedraw && !clearRedrawFlags;
+
+    // TODO - is attribute manager needed? - Model should be enough.
+    const {attributeManager} = this.state;
+    const attributeManagerNeedsRedraw =
+      attributeManager && attributeManager.getNeedsRedraw({clearRedrawFlags});
+    redraw = redraw || attributeManagerNeedsRedraw;
+
+    for (const model of this.getModels()) {
+      let modelNeedsRedraw = model.getNeedsRedraw({clearRedrawFlags});
+      if (modelNeedsRedraw && typeof modelNeedsRedraw !== 'string') {
+        modelNeedsRedraw = `model ${model.id}`;
+      }
+      redraw = redraw || modelNeedsRedraw;
+    }
+
+    return redraw;
   }
 
   // Helper for constructor, merges props with default props and freezes them
