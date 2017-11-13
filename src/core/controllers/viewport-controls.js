@@ -43,8 +43,8 @@ export default class ViewportControls {
   constructor(ViewportState, options = {}) {
     assert(ViewportState);
     this.ViewportState = ViewportState;
-    this.viewportState = null;
-    this.viewportStateProps = null;
+    this.viewState = null;
+    this.viewStateProps = null;
     this.eventManager = null;
     this._events = null;
 
@@ -67,7 +67,7 @@ export default class ViewportControls {
    */
   handleEvent(event) {
     const {ViewportState} = this;
-    this.viewportState = new ViewportState(Object.assign({}, this.viewportStateProps, this._state));
+    this.viewState = new ViewportState(Object.assign({}, this.viewStateProps, this._state));
 
     switch (event.type) {
     case 'panstart':
@@ -129,7 +129,7 @@ export default class ViewportControls {
 
     this.onViewportChange = onViewportChange;
     this.onStateChange = onStateChange;
-    this.viewportStateProps = options;
+    this.viewStateProps = options;
 
     if (this.eventManager !== eventManager) {
       // EventManager has changed
@@ -179,13 +179,13 @@ export default class ViewportControls {
   /* Callback util */
   // formats map state and invokes callback function
   updateViewport(newViewportState, extraState = {}) {
-    const oldViewport = this.viewportState.getViewportProps();
+    const oldViewport = this.viewState.getViewportProps();
     const newViewport = newViewportState.getViewportProps();
 
     if (this.onViewportChange &&
       Object.keys(newViewport).some(key => oldViewport[key] !== newViewport[key])) {
       // Viewport has changed
-      const viewport = this.viewportState.getViewport ? this.viewportState.getViewport() : null;
+      const viewport = this.viewState.getViewport ? this.viewState.getViewport() : null;
       this.onViewportChange(newViewport, viewport);
     }
 
@@ -196,7 +196,7 @@ export default class ViewportControls {
   // Default handler for the `panstart` event.
   _onPanStart(event) {
     const pos = this.getCenter(event);
-    const newViewportState = this.viewportState.panStart({pos}).rotateStart({pos});
+    const newViewportState = this.viewState.panStart({pos}).rotateStart({pos});
     return this.updateViewport(newViewportState, {isDragging: true});
   }
 
@@ -207,7 +207,7 @@ export default class ViewportControls {
 
   // Default handler for the `panend` event.
   _onPanEnd(event) {
-    const newViewportState = this.viewportState.panEnd().rotateEnd();
+    const newViewportState = this.viewState.panEnd().rotateEnd();
     return this.updateViewport(newViewportState, {isDragging: false});
   }
 
@@ -218,14 +218,14 @@ export default class ViewportControls {
       return false;
     }
     const pos = this.getCenter(event);
-    const newViewportState = this.viewportState.pan({pos});
+    const newViewportState = this.viewState.pan({pos});
     return this.updateViewport(newViewportState);
   }
 
   // Default handler for panning to rotate.
   // Called by `_onPan` when panning with function key pressed.
   _onPanRotate(event) {
-    return this.viewportState instanceof MapState ?
+    return this.viewState instanceof MapState ?
       this._onPanRotateMap(event) :
       this._onPanRotateStandard(event);
   }
@@ -237,12 +237,12 @@ export default class ViewportControls {
     }
 
     const {deltaX, deltaY} = event;
-    const {width, height} = this.viewportState.getViewportProps();
+    const {width, height} = this.viewState.getViewportProps();
 
     const deltaScaleX = deltaX / width;
     const deltaScaleY = deltaY / height;
 
-    const newViewportState = this.viewportState.rotate({deltaScaleX, deltaScaleY});
+    const newViewportState = this.viewState.rotate({deltaScaleX, deltaScaleY});
     return this.updateViewport(newViewportState);
   }
 
@@ -256,7 +256,7 @@ export default class ViewportControls {
     const {deltaX, deltaY} = event;
     const [, centerY] = this.getCenter(event);
     const startY = centerY - deltaY;
-    const {width, height} = this.viewportState.getViewportProps();
+    const {width, height} = this.viewState.getViewportProps();
 
     const deltaScaleX = deltaX / width;
     let deltaScaleY = 0;
@@ -274,7 +274,7 @@ export default class ViewportControls {
     }
     deltaScaleY = Math.min(1, Math.max(-1, deltaScaleY));
 
-    const newMapState = this.viewportState.rotate({deltaScaleX, deltaScaleY});
+    const newMapState = this.viewState.rotate({deltaScaleX, deltaScaleY});
     return this.updateViewport(newMapState);
   }
 
@@ -294,14 +294,14 @@ export default class ViewportControls {
       scale = 1 / scale;
     }
 
-    const newViewportState = this.viewportState.zoom({pos, scale});
+    const newViewportState = this.viewState.zoomTo({pos, scale});
     return this.updateViewport(newViewportState);
   }
 
   // Default handler for the `pinchstart` event.
   _onPinchStart(event) {
     const pos = this.getCenter(event);
-    const newViewportState = this.viewportState.zoomStart({pos});
+    const newViewportState = this.viewState.zoomStart({pos});
     return this.updateViewport(newViewportState, {isDragging: true});
   }
 
@@ -312,13 +312,13 @@ export default class ViewportControls {
     }
     const pos = this.getCenter(event);
     const {scale} = event;
-    const newViewportState = this.viewportState.zoom({pos, scale});
+    const newViewportState = this.viewState.zoomTo({pos, scale});
     return this.updateViewport(newViewportState);
   }
 
   // Default handler for the `pinchend` event.
   _onPinchEnd(event) {
-    const newViewportState = this.viewportState.zoomEnd();
+    const newViewportState = this.viewState.zoomEnd();
     return this.updateViewport(newViewportState, {isDragging: false});
   }
 
@@ -330,12 +330,12 @@ export default class ViewportControls {
     const pos = this.getCenter(event);
     const isZoomOut = this.isFunctionKeyPressed(event);
 
-    const newViewportState = this.viewportState.zoom({pos, scale: isZoomOut ? 0.5 : 2});
+    const newViewportState = this.viewState.zoomTo({pos, scale: isZoomOut ? 0.5 : 2});
     return this.updateViewport(newViewportState);
   }
 
   _onKeyDown(event) {
-    if (this.viewportState.isDragging) {
+    if (this.viewState.isDragging) {
       return;
     }
 
@@ -369,8 +369,8 @@ export default class ViewportControls {
     // code is not supported by IE/Edge
     const key = event.key;
     const handler = KEY_BINDINGS[key];
-    if (this.viewportState[handler]) {
-      const newViewportState = this.viewportState[handler]();
+    if (this.viewState[handler]) {
+      const newViewportState = this.viewState[handler]();
       this.updateViewport(newViewportState);
     }
   }

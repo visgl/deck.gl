@@ -1,4 +1,4 @@
-import ViewState from './view-state';
+import ViewState from '../lib/view-state';
 import PerspectiveMercatorViewport from '../viewports/web-mercator-viewport';
 import assert from 'assert';
 import {mod} from '../math/utils';
@@ -216,7 +216,7 @@ export default class MapState extends ViewState {
    * @param {Number} scale - a number between [0, 1] specifying the accumulated
    *   relative scale.
    */
-  zoom({pos, startPos, scale}) {
+  zoomTo({pos, startPos, scale}) {
     assert(scale > 0, '`scale` must be a positive number');
 
     // Make sure we zoom around the current mouse position rather than map center
