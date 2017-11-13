@@ -1,20 +1,16 @@
 /* global window, document */
 
+// deck.gl react components
+import DeckGL, {ViewportController} from 'deck.gl';
+
+// deck.gl core components
 import {
-  // COORDINATE_SYSTEM,
   WebMercatorViewport,
   FirstPersonViewport,
-  MapState,
-  // FirstPersonState,
   experimental
 } from 'deck.gl';
 
- // deck.gl react components
-import DeckGL, {ViewportController} from 'deck.gl';
-
-const {
-  ReflectionEffect
-} = experimental;
+const {ReflectionEffect} = experimental;
 
 import React, {PureComponent} from 'react';
 import ReactDOM from 'react-dom';
@@ -252,8 +248,8 @@ class App extends PureComponent {
     return (
       <div style={{backgroundColor: '#eeeeee'}}>
         <ViewportController
-          viewportState={MapState}
-          {...mapViewState}
+          {...mapViewState /* TODO/remove */}
+          viewState={mapViewState}
           width={width}
           height={height}
           onViewportChange={this._onViewportChange} >
