@@ -1,7 +1,4 @@
 import OrbitViewport from '../viewports/orbit-viewport';
-import vec3_add from 'gl-vec3/add';
-import vec3_scale from 'gl-vec3/scale';
-import vec3_lerp from 'gl-vec3/lerp';
 import assert from 'assert';
 
 const defaultState = {
@@ -23,20 +20,9 @@ const defaultConstraints = {
 
 /* Helpers */
 
-// Whether number is between bounds
-function inRange(x, min, max) {
-  return x >= min && x <= max;
-}
 // Constrain number between bounds
 function clamp(x, min, max) {
   return x < min ? min : (x > max ? max : x);
-}
-// Get ratio of x on domain
-function interpolate(x, domain0, domain1) {
-  if (domain0 === domain1) {
-    return x === domain0 ? 0 : Infinity;
-  }
-  return (x - domain0) / (domain1 - domain0);
 }
 
 function ensureFinite(value, fallbackValue) {
@@ -75,16 +61,15 @@ export default class OrbitState {
 
     /** Interaction states, required to calculate change during transform */
     // Model state when the pan operation first started
-    startPanPos,
     startPanViewport,
+    startPanPos,
     isPanning,
     // Model state when the rotate operation first started
-    startRotateCenter,
     startRotateViewport,
     isRotating,
     // Model state when the zoom operation first started
-    startZoomPos,
-    startZoom
+    startZoomViewport,
+    startZoomPos
   }) {
     assert(Number.isFinite(width), '`width` must be supplied');
     assert(Number.isFinite(height), '`height` must be supplied');
@@ -113,14 +98,13 @@ export default class OrbitState {
     });
 
     this._interactiveState = {
-      startPanPos,
       startPanViewport,
+      startPanPos,
       isPanning,
-      startRotateCenter,
       startRotateViewport,
       isRotating,
-      startZoomPos,
-      startZoom
+      startZoomViewport,
+      startZoomPos
     };
   }
 
@@ -193,12 +177,10 @@ export default class OrbitState {
   rotateStart({pos}) {
     // Rotation center should be the worldspace position at the center of the
     // the screen. If not found, use the last one.
-    const startRotateCenter = this._getLocationAtCenter() ||
-      this._interactiveState.startRotateCenter;
+    const viewport = new OrbitViewport(this._viewportProps);
 
     return this._getUpdatedOrbitState({
-      startRotateCenter,
-      startRotateViewport: this._viewportProps
+      startRotateViewport: viewport
     });
   }
 
@@ -211,40 +193,18 @@ export default class OrbitState {
       return this._getUpdatedOrbitState();
     }
 
-    const {startRotateCenter, startRotateViewport} = this._interactiveState;
+    const {startRotateViewport} = this._interactiveState;
 
-    let {pitchAngle, orbitAngle, translationX, translationY} = startRotateViewport || {};
+    let {pitchAngle, orbitAngle} = startRotateViewport || {};
     pitchAngle = ensureFinite(pitchAngle, this._viewportProps.pitchAngle);
     orbitAngle = ensureFinite(orbitAngle, this._viewportProps.orbitAngle);
-    translationX = ensureFinite(translationX, this._viewportProps.translationX);
-    translationY = ensureFinite(translationY, this._viewportProps.translationY);
 
     const newPitchAngle = clamp(pitchAngle - deltaScaleY * 180, -89.999, 89.999);
     const newOrbitAngle = (orbitAngle - deltaScaleX * 180) % 360;
 
-    let newTranslationX = translationX;
-    let newTranslationY = translationY;
-
-    if (startRotateCenter) {
-      // Keep rotation center at the center of the screen
-      const oldViewport = new OrbitViewport(startRotateViewport);
-      const oldCenterPos = oldViewport.project(startRotateCenter);
-
-      const newViewport = new OrbitViewport(Object.assign({}, startRotateViewport, {
-        pitchAngle: newPitchAngle,
-        orbitAngle: newOrbitAngle
-      }));
-      const newCenterPos = newViewport.project(startRotateCenter);
-
-      newTranslationX += oldCenterPos[0] - newCenterPos[0];
-      newTranslationY -= oldCenterPos[1] - newCenterPos[1];
-    }
-
     return this._getUpdatedOrbitState({
       pitchAngle: newPitchAngle,
       orbitAngle: newOrbitAngle,
-      translationX: newTranslationX,
-      translationY: newTranslationY,
       isRotating: true
     });
   }
@@ -255,7 +215,6 @@ export default class OrbitState {
    */
   rotateEnd() {
     return this._getUpdatedOrbitState({
-      startRotateCenter: null,
       startRotateViewport: null,
       isRotating: null
     });
@@ -266,9 +225,10 @@ export default class OrbitState {
    * @param {[Number, Number]} pos - position on screen where the pointer grabs
    */
   zoomStart({pos}) {
+    const viewport = new OrbitViewport(this._viewportProps);
     return this._getUpdatedOrbitState({
-      startZoomPos: pos,
-      startZoom: this._viewportProps.zoom
+      startZoomViewport: viewport,
+      startZoomPos: pos
     });
   }
 
@@ -281,9 +241,11 @@ export default class OrbitState {
    *   relative scale.
    */
   zoom({pos, startPos, scale}) {
-    const {zoom, minZoom, maxZoom, width, height, translationX, translationY} = this._viewportProps;
 
+    const {zoom, minZoom, maxZoom, width, height} = this._viewportProps;
     const startZoomPos = this._interactiveState.startZoomPos || startPos || pos;
+    const viewport = this._interactiveState.startZoomViewport ||
+      new OrbitViewport(this._viewportProps);
 
     const newZoom = clamp(zoom * scale, minZoom, maxZoom);
     const deltaX = pos[0] - startZoomPos[0];
@@ -292,13 +254,15 @@ export default class OrbitState {
     // Zoom around the center position
     const cx = startZoomPos[0] - width / 2;
     const cy = height / 2 - startZoomPos[1];
-    const newTranslationX = cx - (cx - translationX) * newZoom / zoom + deltaX;
-    const newTranslationY = cy - (cy - translationY) * newZoom / zoom - deltaY;
+    const center = viewport.project(viewport.lookAt);
+    const newCenterX = center[0] - cx + cx * newZoom / zoom + deltaX;
+    const newCenterY = center[1] + cy - cy * newZoom / zoom - deltaY;
+
+    const newLookAt = viewport.unproject([newCenterX, newCenterY, center[2]]);
 
     return this._getUpdatedOrbitState({
-      zoom: newZoom,
-      translationX: newTranslationX,
-      translationY: newTranslationY
+      lookAt: newLookAt,
+      zoom: newZoom
     });
   }
 
@@ -308,8 +272,7 @@ export default class OrbitState {
    */
   zoomEnd() {
     return this._getUpdatedOrbitState({
-      startZoomPos: null,
-      startZoom: null
+      startZoomPos: null
     });
   }
 
@@ -328,68 +291,5 @@ export default class OrbitState {
     props.zoom = zoom < minZoom ? minZoom : zoom;
 
     return props;
-  }
-
-  /* Cast a ray into the screen center and take the average of all
-   * intersections with the bounding box:
-   *
-   *                         (x=w/2)
-   *                          .
-   *                          .
-   *   (bounding box)         .
-   *           _-------------_.
-   *          | "-_           :-_
-   *         |     "-_        .  "-_
-   *        |         "-------+-----:
-   *       |.........|........C....|............. (y=h/2)
-   *      |         |         .   |
-   *     |         |          .  |
-   *    |         |           . |
-   *   |         |            .|
-   *  |         |             |                      Y
-   *   "-_     |             |.             Z       |
-   *      "-_ |             | .              "-_   |
-   *         "-------------"                    "-|_____ X
-   */
-  _getLocationAtCenter() {
-    const {width, height, bounds} = this._viewportProps;
-
-    if (!bounds) {
-      return null;
-    }
-
-    const viewport = new OrbitViewport(this._viewportProps);
-
-    const C0 = viewport.unproject([width / 2, height / 2, 0]);
-    const C1 = viewport.unproject([width / 2, height / 2, 1]);
-    const sum = [0, 0, 0];
-    let count = 0;
-
-    [
-      // depth at intersection with X = minX
-      interpolate(bounds.minX, C0[0], C1[0]),
-      // depth at intersection with X = maxX
-      interpolate(bounds.maxX, C0[0], C1[0]),
-      // depth at intersection with Y = minY
-      interpolate(bounds.minY, C0[1], C1[1]),
-      // depth at intersection with Y = maxY
-      interpolate(bounds.maxY, C0[1], C1[1]),
-      // depth at intersection with Z = minZ
-      interpolate(bounds.minZ, C0[2], C1[2]),
-      // depth at intersection with Z = maxZ
-      interpolate(bounds.maxZ, C0[2], C1[2])
-    ].forEach(d => {
-      // worldspace position of the intersection
-      const C = vec3_lerp([], C0, C1, d);
-      // check if position is on the bounding box
-      if (inRange(C[0], bounds.minX, bounds.maxX) &&
-          inRange(C[1], bounds.minY, bounds.maxY) &&
-          inRange(C[2], bounds.minZ, bounds.maxZ)) {
-        count++;
-        vec3_add(sum, sum, C);
-      }
-    });
-
-    return count > 0 ? vec3_scale([], sum, 1 / count) : null;
   }
 }
