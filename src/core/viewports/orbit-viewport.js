@@ -38,10 +38,6 @@ export default class OrbitViewport extends Viewport {
     fov = 75, // Field of view covered by camera
     near = 1, // Distance of near clipping plane
     far = 100, // Distance of far clipping plane
-
-    // after projection
-    translationX = 0, // in pixels
-    translationY = 0, // in pixels
     zoom = 1
   }) {
     const rotationMatrix = mat4_rotateX([], createMat4(), -pitchAngle / 180 * Math.PI);
@@ -51,8 +47,7 @@ export default class OrbitViewport extends Viewport {
       mat4_rotateY(rotationMatrix, rotationMatrix, -orbitAngle / 180 * Math.PI);
     }
 
-    const translateMatrix = mat4_translate([], createMat4(),
-      [translationX / width * 2, translationY / height * 2, 0]);
+    const translateMatrix = createMat4();
     mat4_scale(translateMatrix, translateMatrix, [zoom, zoom, zoom]);
     mat4_translate(translateMatrix, translateMatrix, [-lookAt[0], -lookAt[1], -lookAt[2]]);
 
@@ -74,13 +69,12 @@ export default class OrbitViewport extends Viewport {
     this.distance = distance;
     this.pitchAngle = pitchAngle;
     this.orbitAngle = orbitAngle;
+    this.orbitAxis = orbitAxis;
     this.lookAt = lookAt;
     this.up = up;
     this.fov = fov;
     this.near = near;
     this.far = far;
-    this.translationX = translationX;
-    this.translationY = translationY;
     this.zoom = zoom;
   }
 
@@ -109,6 +103,7 @@ export default class OrbitViewport extends Viewport {
       height,
       pitchAngle,
       orbitAngle,
+      orbitAxis,
       lookAt,
       up,
       fov,
@@ -126,6 +121,7 @@ export default class OrbitViewport extends Viewport {
       height,
       pitchAngle,
       orbitAngle,
+      orbitAxis,
       up,
       fov,
       near,

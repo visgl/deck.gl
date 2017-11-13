@@ -52,7 +52,7 @@ export default class OrbitState {
     distance, // From eye to target
     pitchAngle, // Rotation around x axis
     orbitAngle, // Rotation around orbit axis
-
+    orbitAxis, // Orbit axis with 360 degrees rotating freedom, can only be 'Y' or 'Z'
     // Bounding box of the model, in the shape of {minX, maxX, minY, maxY, minZ, maxZ}
     bounds,
 
@@ -76,10 +76,12 @@ export default class OrbitState {
     /** Interaction states, required to calculate change during transform */
     // Model state when the pan operation first started
     startPanPos,
-    startPanTranslation,
+    startPanViewport,
+    isPanning,
     // Model state when the rotate operation first started
     startRotateCenter,
     startRotateViewport,
+    isRotating,
     // Model state when the zoom operation first started
     startZoomPos,
     startZoom
@@ -94,6 +96,7 @@ export default class OrbitState {
       distance,
       pitchAngle: ensureFinite(pitchAngle, defaultState.pitchAngle),
       orbitAngle: ensureFinite(orbitAngle, defaultState.orbitAngle),
+      orbitAxis,
 
       bounds,
       lookAt: lookAt || defaultState.lookAt,
@@ -111,9 +114,11 @@ export default class OrbitState {
 
     this._interactiveState = {
       startPanPos,
-      startPanTranslation,
+      startPanViewport,
+      isPanning,
       startRotateCenter,
       startRotateViewport,
+      isRotating,
       startZoomPos,
       startZoom
     };
@@ -134,11 +139,11 @@ export default class OrbitState {
    * @param {[Number, Number]} pos - position on screen where the pointer grabs
    */
   panStart({pos}) {
-    const {translationX, translationY} = this._viewportProps;
+    const viewport = new OrbitViewport(this._viewportProps);
 
     return this._getUpdatedOrbitState({
-      startPanTranslation: [translationX, translationY],
-      startPanPos: pos
+      startPanPos: pos,
+      startPanViewport: viewport
     });
   }
 
@@ -147,19 +152,25 @@ export default class OrbitState {
    * @param {[Number, Number]} pos - position on screen where the pointer is
    */
   pan({pos, startPos}) {
+    if (this._interactiveState.isRotating) {
+      return this._getUpdatedOrbitState();
+    }
+
     const startPanPos = this._interactiveState.startPanPos || startPos;
     assert(startPanPos, '`startPanPos` props is required');
 
-    let [translationX, translationY] = this._interactiveState.startPanTranslation || [];
-    translationX = ensureFinite(translationX, this._viewportProps.translationX);
-    translationY = ensureFinite(translationY, this._viewportProps.translationY);
+    const viewport = this._interactiveState.startPanViewport ||
+      new OrbitViewport(this._viewportProps);
 
     const deltaX = pos[0] - startPanPos[0];
     const deltaY = pos[1] - startPanPos[1];
 
+    const center = viewport.project(viewport.lookAt);
+    const newLookAt = viewport.unproject([center[0] - deltaX, center[1] - deltaY, center[2]]);
+
     return this._getUpdatedOrbitState({
-      translationX: translationX + deltaX,
-      translationY: translationY - deltaY
+      lookAt: newLookAt,
+      isPanning: true
     });
   }
 
@@ -169,8 +180,9 @@ export default class OrbitState {
    */
   panEnd() {
     return this._getUpdatedOrbitState({
-      startPanTranslation: null,
-      startPanPos: null
+      startPanViewport: null,
+      startPanPos: null,
+      isPanning: null
     });
   }
 
@@ -195,6 +207,10 @@ export default class OrbitState {
    * @param {[Number, Number]} pos - position on screen where the pointer is
    */
   rotate({deltaScaleX, deltaScaleY}) {
+    if (this._interactiveState.isPanning) {
+      return this._getUpdatedOrbitState();
+    }
+
     const {startRotateCenter, startRotateViewport} = this._interactiveState;
 
     let {pitchAngle, orbitAngle, translationX, translationY} = startRotateViewport || {};
@@ -228,7 +244,8 @@ export default class OrbitState {
       pitchAngle: newPitchAngle,
       orbitAngle: newOrbitAngle,
       translationX: newTranslationX,
-      translationY: newTranslationY
+      translationY: newTranslationY,
+      isRotating: true
     });
   }
 
@@ -239,7 +256,8 @@ export default class OrbitState {
   rotateEnd() {
     return this._getUpdatedOrbitState({
       startRotateCenter: null,
-      startRotateViewport: null
+      startRotateViewport: null,
+      isRotating: null
     });
   }
 
