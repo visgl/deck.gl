@@ -85,7 +85,6 @@ export default class LayerManager {
     this.viewDescriptors = [];
     this.viewDescriptorsChanged = true;
     this.viewports = []; // Generated viewports
-    this.screenCleared = false;
     this._needsRedraw = 'Initial render';
 
     // Event handling
@@ -127,7 +126,7 @@ export default class LayerManager {
     seer.removeListener(this._editSeer);
   }
 
-  needsRedraw({clearRedrawFlags = false} = {}) {
+  needsRedraw({clearRedrawFlags = true} = {}) {
     return this._checkIfNeedsRedraw(clearRedrawFlags);
   }
 
@@ -319,17 +318,6 @@ export default class LayerManager {
   //
 
   _checkIfNeedsRedraw(clearRedrawFlags) {
-    // Make sure that buffer is cleared once when layer list becomes empty
-    // TODO - this should consider visible layers, not all layers
-    if (this.layers.length === 0) {
-      if (this.screenCleared === false) {
-        this._needsRedraw = 'no layers, clearing screen';
-        this.screenCleared = true;
-      }
-    } else if (this.screenCleared === true) {
-      this.screenCleared = false;
-    }
-
     let redraw = this._needsRedraw;
     if (clearRedrawFlags) {
       this._needsRedraw = false;
@@ -337,7 +325,9 @@ export default class LayerManager {
 
     // This layers list doesn't include sublayers, relying on composite layers
     for (const layer of this.layers) {
-      redraw = redraw || layer.getNeedsRedraw({clearRedrawFlags});
+      // Call every layer to clear their flags
+      const layerNeedsRedraw = layer.getNeedsRedraw({clearRedrawFlags});
+      redraw = redraw || layerNeedsRedraw;
     }
 
     return redraw;
@@ -654,6 +644,7 @@ export default class LayerManager {
     assert(layer.lifecycle !== LIFECYCLE.AWAITING_FINALIZATION);
     layer.lifecycle = LIFECYCLE.AWAITING_FINALIZATION;
     let error = null;
+    this.setNeedsRedraw(`finalized ${layerName(layer)}`);
     try {
       layer._finalize();
     } catch (err) {

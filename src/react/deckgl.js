@@ -87,8 +87,7 @@ export default class DeckGL extends React.Component {
     }
 
     // Resolve potentially relative dimensions using the deck.gl container size
-    const {x, y, width, height} =
-      viewport.getDimensions({width: this.props.width, height: this.props.height});
+    const {x, y, width, height} = viewport;
 
     // Clone the element with width and height set per viewport
     const newProps = Object.assign({}, child.props, {width, height});
