@@ -204,8 +204,9 @@ export default class Layer {
   // Public API
 
   // Updates selected state members and marks the object for redraw
-  setState(updateObject) {
-    Object.assign(this.state, updateObject);
+  setState(newState) {
+    this._deleteResources({newState});
+    Object.assign(this.state, newState);
     this.state.needsRedraw = true;
   }
 
@@ -435,6 +436,8 @@ export default class Layer {
   // Called by manager when layer is about to be disposed
   // Note: not guaranteed to be called on application shutdown
   finalizeLayer() {
+    this._deleteResources({forceDelete: true});
+
     // Call subclass lifecycle method
     this.finalizeState(this.context);
     // End lifecycle method
@@ -576,6 +579,31 @@ export default class Layer {
       }
       log.once(0, message);
     }
+  }
+
+  _deleteModels({newState = null, forceDelete = false} = {}) {
+    const models = this.getModels();
+    if (models.length === 0) {
+      return;
+    }
+    let modelsToDelete = [];
+    if (forceDelete) {
+      modelsToDelete = models;
+    } else {
+      const newModels = newState &&
+        (newState.models || (newState.model ? [newState.model] : null));
+      if (newModels) {
+        modelsToDelete = models.filter((model) => !newModels.includes(model));
+      }
+    }
+    for (const model of modelsToDelete) {
+      model.delete();
+    }
+  }
+
+  _deleteResources(opts) {
+    this._deleteModels(opts);
+    // Add any other resource recyling here.
   }
 
   _updateBaseUniforms() {
