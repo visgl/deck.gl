@@ -3,8 +3,8 @@ import assert from 'assert';
 
 const defaultState = {
   lookAt: [0, 0, 0],
-  pitchAngle: 0,
-  orbitAngle: 0,
+  rotationX: 0,
+  rotationOrbit: 0,
   fov: 50,
   near: 1,
   far: 100,
@@ -36,8 +36,8 @@ export default class OrbitState {
     width, // Width of viewport
     height, // Height of viewport
     distance, // From eye to target
-    pitchAngle, // Rotation around x axis
-    orbitAngle, // Rotation around orbit axis
+    rotationX, // Rotation around x axis
+    rotationOrbit, // Rotation around orbit axis
     orbitAxis, // Orbit axis with 360 degrees rotating freedom, can only be 'Y' or 'Z'
     // Bounding box of the model, in the shape of {minX, maxX, minY, maxY, minZ, maxZ}
     bounds,
@@ -79,8 +79,8 @@ export default class OrbitState {
       width,
       height,
       distance,
-      pitchAngle: ensureFinite(pitchAngle, defaultState.pitchAngle),
-      orbitAngle: ensureFinite(orbitAngle, defaultState.orbitAngle),
+      rotationX: ensureFinite(rotationX, defaultState.rotationX),
+      rotationOrbit: ensureFinite(rotationOrbit, defaultState.rotationOrbit),
       orbitAxis,
 
       bounds,
@@ -195,16 +195,16 @@ export default class OrbitState {
 
     const {startRotateViewport} = this._interactiveState;
 
-    let {pitchAngle, orbitAngle} = startRotateViewport || {};
-    pitchAngle = ensureFinite(pitchAngle, this._viewportProps.pitchAngle);
-    orbitAngle = ensureFinite(orbitAngle, this._viewportProps.orbitAngle);
+    let {rotationX, rotationOrbit} = startRotateViewport || {};
+    rotationX = ensureFinite(rotationX, this._viewportProps.rotationX);
+    rotationOrbit = ensureFinite(rotationOrbit, this._viewportProps.rotationOrbit);
 
-    const newPitchAngle = clamp(pitchAngle - deltaScaleY * 180, -89.999, 89.999);
-    const newOrbitAngle = (orbitAngle - deltaScaleX * 180) % 360;
+    const newRotationX = clamp(rotationX - deltaScaleY * 180, -89.999, 89.999);
+    const newRotationOrbit = (rotationOrbit - deltaScaleX * 180) % 360;
 
     return this._getUpdatedOrbitState({
-      pitchAngle: newPitchAngle,
-      orbitAngle: newOrbitAngle,
+      rotationX: newRotationX,
+      rotationOrbit: newRotationOrbit,
       isRotating: true
     });
   }

@@ -29,8 +29,8 @@ export default class OrbitViewport extends Viewport {
     height, // Height of viewport
     // view matrix arguments
     distance, // From eye position to lookAt
-    pitchAngle = 0, // Rotating angle around X axis
-    orbitAngle = 0, // Rotating angle around orbit axis
+    rotationX = 0, // Rotating angle around X axis
+    rotationOrbit = 0, // Rotating angle around orbit axis
     orbitAxis = 'Z', // Orbit axis with 360 degrees rotating freedom, can only be 'Y' or 'Z'
     lookAt = [0, 0, 0], // Which point is camera looking at, default origin
     up = [0, 1, 0], // Defines up direction, default positive y axis
@@ -40,11 +40,11 @@ export default class OrbitViewport extends Viewport {
     far = 100, // Distance of far clipping plane
     zoom = 1
   }) {
-    const rotationMatrix = mat4_rotateX([], createMat4(), -pitchAngle / 180 * Math.PI);
+    const rotationMatrix = mat4_rotateX([], createMat4(), -rotationX / 180 * Math.PI);
     if (orbitAxis === 'Z') {
-      mat4_rotateZ(rotationMatrix, rotationMatrix, -orbitAngle / 180 * Math.PI);
+      mat4_rotateZ(rotationMatrix, rotationMatrix, -rotationOrbit / 180 * Math.PI);
     } else {
-      mat4_rotateY(rotationMatrix, rotationMatrix, -orbitAngle / 180 * Math.PI);
+      mat4_rotateY(rotationMatrix, rotationMatrix, -rotationOrbit / 180 * Math.PI);
     }
 
     const translateMatrix = createMat4();
@@ -67,8 +67,8 @@ export default class OrbitViewport extends Viewport {
     this.width = width;
     this.height = height;
     this.distance = distance;
-    this.pitchAngle = pitchAngle;
-    this.orbitAngle = orbitAngle;
+    this.rotationX = rotationX;
+    this.rotationOrbit = rotationOrbit;
     this.orbitAxis = orbitAxis;
     this.lookAt = lookAt;
     this.up = up;
@@ -101,8 +101,8 @@ export default class OrbitViewport extends Viewport {
     const {
       width,
       height,
-      pitchAngle,
-      orbitAngle,
+      rotationX,
+      rotationOrbit,
       orbitAxis,
       lookAt,
       up,
@@ -119,8 +119,8 @@ export default class OrbitViewport extends Viewport {
     return new OrbitViewport({
       width,
       height,
-      pitchAngle,
-      orbitAngle,
+      rotationX,
+      rotationOrbit,
       orbitAxis,
       up,
       fov,

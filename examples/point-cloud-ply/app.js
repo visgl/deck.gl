@@ -24,8 +24,8 @@ class Example extends PureComponent {
       viewport: {
         lookAt: [0, 0, 0],
         distance: 100,
-        pitchAngle: 0,
-        orbitAngle: 0,
+        rotationX: 0,
+        rotationOrbit: 0,
         orbitAxis: 'Y',
         fov: 30,
         minDistance: 1.5,
@@ -80,7 +80,7 @@ class Example extends PureComponent {
     this.setState({
       viewport: {
         ...viewport,
-        orbitAngle: viewport.orbitAngle + 1
+        rotationOrbit: viewport.rotationOrbit + 1
       }
     });
     window.requestAnimationFrame(this._onUpdate);
