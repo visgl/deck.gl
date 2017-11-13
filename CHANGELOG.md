@@ -23,6 +23,9 @@ For Earlier Beta Releases see below
 
 ### deck.gl v4.2 Beta Releases
 
+#### [4.2.0-alpha.20] - Nov 13
+Auto hide viewport base elements (#1134)
+
 #### [4.2.0-alpha.19] - Nov 7
 - Remove the y-flip scale and camera re-center logic for non-geospatial viewport (#1125)
 - Add small "degenerate" PathLayer example (#1123)
