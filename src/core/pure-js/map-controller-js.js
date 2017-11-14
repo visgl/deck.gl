@@ -2,7 +2,7 @@ import PropTypes from 'prop-types';
 
 import {EventManager} from 'mjolnir.js';
 import MapControls from '../controllers/map-controls';
-import {MAPBOX_LIMITS} from '../controllers/map-state';
+import {MAPBOX_LIMITS} from '../deprecated/controllers/map-state';
 
 const PREFIX = '-webkit-';
 

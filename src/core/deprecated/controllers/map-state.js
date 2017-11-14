@@ -1,7 +1,7 @@
-import ViewState from '../lib/view-state';
-import PerspectiveMercatorViewport from '../viewports/web-mercator-viewport';
+import ViewState from '../../lib/view-state';
+import PerspectiveMercatorViewport from '../../viewports/web-mercator-viewport';
 import assert from 'assert';
-import {mod} from '../math/utils';
+import {mod} from '../../math/utils';
 
 // MAPBOX LIMITS
 export const MAPBOX_LIMITS = {

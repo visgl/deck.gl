@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 
 import ViewportControls from './viewport-controls';
-import MapState from './map-state';
+import MapState from '../deprecated/controllers/map-state';
 
 // EVENT HANDLING PARAMETERS
 const PITCH_MOUSE_THRESHOLD = 5;

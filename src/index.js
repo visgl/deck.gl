@@ -163,14 +163,9 @@ export {
   default as default,
   DeckGL,
   ViewportController,
-  MapController
-} from './react';
-
-// Experimental React bindings
-import {default as OrbitController} from './react/experimental/orbit-controller';
-Object.assign(experimental, {
+  MapController,
   OrbitController
-});
+} from './react';
 
 //
 // EXPERIMENTAL EXPORTS

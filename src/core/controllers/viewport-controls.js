@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import MapState from './map-state';
+import MapState from '../deprecated/controllers/map-state';
 import assert from 'assert';
 
 // EVENT HANDLING PARAMETERS
