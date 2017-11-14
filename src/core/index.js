@@ -34,17 +34,23 @@ export {default as ThirdPersonViewport} from './viewports/third-person-viewport'
 export {default as WebMercatorViewport} from './viewports/web-mercator-viewport';
 export {default as PerspectiveViewport} from './viewports/perspective-viewport';
 export {default as OrthographicViewport} from './viewports/orthographic-viewport';
-// TODO: orbit-viewport to be merged w/ third-person-viewport
-export {default as OrbitViewport} from './viewports/orbit-viewport';
 
-// TODO - Do we need to export? Move to experimental?
-export {default as ViewportControls} from './controllers/viewport-controls';
-export {default as FirstPersonState} from './deprecated/controllers/first-person-state';
-export {default as OrbitState} from './deprecated/controllers/orbit-state';
-export {default as MapState} from './deprecated/controllers/map-state';
+// Controllers
+export {default as Controller} from './controllers/controller';
+export {default as FirstPersonController} from './controllers/first-person-controller';
+export {default as OrbitController} from './controllers/orbit-controller';
+export {default as MapController} from './controllers/map-controller';
 
+// Transitions
 export {TRANSITION_EVENTS} from './lib/transition-manager';
 export {viewportLinearInterpolator, viewportFlyToInterpolator} from './lib/viewport-transition-utils';
+
+// deprecated
+// export {default as FirstPersonState} from './controllers/deprecated/first-person-state';
+// export {default as OrbitState} from './controllers/deprecated/orbit-state';
+// export {default as MapState} from './controllers/deprecated/map-state';
+// TODO: orbit-viewport to be merged w/ third-person-viewport
+export {default as OrbitViewport} from './viewports/orbit-viewport';
 
 // Experimental Features (May change in minor version bumps, use at your own risk)
 // Experimental Pure JS (non-React) bindings

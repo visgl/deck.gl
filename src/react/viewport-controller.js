@@ -1,97 +1,78 @@
 import {PureComponent, createElement} from 'react';
 import PropTypes from 'prop-types';
 
-import {EventManager} from 'mjolnir.js';
-import {ViewportControls, experimental} from '../core';
+import {ViewState, Controller, MapController, experimental} from '../core';
 const {TransitionManager} = experimental;
-
 import CURSOR from './utils/cursors';
+import {EventManager} from 'mjolnir.js';
 
 const propTypes = {
+  // A controller class or instance
+  controller: PropTypes.oneOfType([
+    PropTypes.instanceOf(Controller), // An instance of a controller
+    PropTypes.func                    // A controller class (will be instanced)
+  ]),
+
+  // Width and height
+  width: PropTypes.number.isRequired, // The width of the map.
+  height: PropTypes.number.isRequired, // The height of the map.
+
+  // Viewport props
   viewState: PropTypes.func,
   state: PropTypes.object,
 
-  /** Viewport props */
-  /** The width of the map. */
-  width: PropTypes.number.isRequired,
-  /** The height of the map. */
-  height: PropTypes.number.isRequired,
-  /** The longitude of the center of the map. */
-  longitude: PropTypes.number.isRequired,
-  /** The latitude of the center of the map. */
-  latitude: PropTypes.number.isRequired,
-  /** The tile zoom level of the map. */
-  zoom: PropTypes.number.isRequired,
-  /** Specify the bearing of the viewport */
-  bearing: PropTypes.number,
-  /** Specify the pitch of the viewport */
-  pitch: PropTypes.number,
-  /** Altitude of the viewport camera. Default 1.5 "screen heights" */
-  // Note: Non-public API, see https://github.com/mapbox/mapbox-gl-js/issues/1137
-  altitude: PropTypes.number,
-  // Camera position for FirstPersonViewport
-  position: PropTypes.array,
+  // Alternative props (a `ViewState` will be created from these)
+  longitude: PropTypes.number,  // The longitude of the center of the map.
+  latitude: PropTypes.number, // The latitude of the center of the map.
+  zoom: PropTypes.number, // The tile zoom level of the map.
 
-  /** Viewport constraints */
-  // Max zoom level
-  maxZoom: PropTypes.number,
-  // Min zoom level
-  minZoom: PropTypes.number,
-  // Max pitch in degrees
-  maxPitch: PropTypes.number,
-  // Min pitch in degrees
-  minPitch: PropTypes.number,
+  position: PropTypes.array, // Camera position, e.g. for FirstPersonViewport
+  bearing: PropTypes.number, // Specify the bearing of the viewport
+  pitch: PropTypes.number, // Specify the pitch of the viewport
+  altitude: PropTypes.number, // Not fully implemented, mapbox restrictions
 
-  /**
-   * `onViewportChange` callback is fired when the user interacted with the
-   * map. The object passed to the callback contains viewport properties
-   * such as `longitude`, `latitude`, `zoom` etc.
-   */
+  // Viewport constraints
+  // TODO - define constraints object
+  maxZoom: PropTypes.number, // Max zoom level
+  minZoom: PropTypes.number, // Min zoom level
+  maxPitch: PropTypes.number, // Max pitch in degrees
+  minPitch: PropTypes.number, // Min pitch in degrees
+
+  // `onViewportChange` callback is fired when the user interacted with the
+  // map. The object passed to the callback contains viewport properties
+  // such as `longitude`, `latitude`, `zoom` etc.
   onViewportChange: PropTypes.func,
 
-  /** Viewport transition **/
-  // transition duration for viewport change
-  transitionDuration: PropTypes.number,
+  // Viewport transition
+  // TODO - a lot of props, audit these?
+  transitionDuration: PropTypes.number, // transition duration for viewport change
   // function called for each transition step, can be used to perform custom transitions.
   transitionInterpolator: PropTypes.func,
-  // type of interruption of current transition on update.
-  transitionInterruption: PropTypes.number,
-  // easing function
-  transitionEasing: PropTypes.func,
-  // props to transition
-  transitionProps: PropTypes.array,
+  transitionInterruption: PropTypes.number, // type of interruption of current transition on update.
+  transitionEasing: PropTypes.func, // easing function
+  transitionProps: PropTypes.array, // props to transition
   // transition status update functions
   onTransitionStart: PropTypes.func,
   onTransitionInterrupt: PropTypes.func,
   onTransitionEnd: PropTypes.func,
 
-  /** Enables control event handling */
-  // Scroll to zoom
-  scrollZoom: PropTypes.bool,
-  // Drag to pan
-  dragPan: PropTypes.bool,
-  // Drag to rotate
-  dragRotate: PropTypes.bool,
-  // Double click to zoom
-  doubleClickZoom: PropTypes.bool,
-  // Pinch to zoom / rotate
-  touchZoomRotate: PropTypes.bool,
+  // Enables control event handling
+  // TODO - audit these names?
+  scrollZoom: PropTypes.bool, // Scroll to zoom
+  dragPan: PropTypes.bool, // Drag to pan
+  dragRotate: PropTypes.bool, // Drag to rotate
+  doubleClickZoom: PropTypes.bool, // Double click to zoom
+  touchZoomRotate: PropTypes.bool, // Pinch to zoom / rotate
 
-  /** Accessor that returns a cursor style to show interactive state */
-  getCursor: PropTypes.func,
-
-  // A map control instance to replace the default map controls
-  // The object must expose one property: `events` as an array of subscribed
-  // event names; and two methods: `setState(state)` and `handle(event)`
-  controls: PropTypes.shape({
-    events: PropTypes.arrayOf(PropTypes.string),
-    handleEvent: PropTypes.func
-  })
+  // Accessor that returns a cursor style to show interactive state
+  getCursor: PropTypes.func
 };
 
 const getDefaultCursor = ({isDragging}) => isDragging ? CURSOR.GRABBING : CURSOR.GRAB;
 
 const defaultProps = Object.assign({}, TransitionManager.defaultProps, {
+  controller: MapController,
+  onViewStateChange: null,
   onViewportChange: null,
 
   scrollZoom: true,
@@ -107,42 +88,45 @@ export default class ViewportController extends PureComponent {
 
   constructor(props) {
     super(props);
-
     this.state = {
       isDragging: false      // Whether the cursor is down
     };
   }
 
   componentDidMount() {
-    const {eventCanvas} = this.refs;
+    this._eventManager = new EventManager(this.refs.eventCanvas);
+    if (typeof this.props.controller === 'function') {
+      const ControllerClass = this.props.controller;
+      // If props.controls is not provided, fallback to default MapControls instance
+      // Cannot use defaultProps here because it needs to be per map instance
+      this._controller = new ControllerClass((this.props.viewState));
+    } else {
+      this._controller = this.props.controller;
+    }
 
-    this._eventManager = new EventManager(eventCanvas);
+    // this._transitionManger = new TransitionManager(this.props);
 
-    // If props.controls is not provided, fallback to default MapControls instance
-    // Cannot use defaultProps here because it needs to be per map instance
-    this._controls = this.props.controls || new ViewportControls(this.props.viewState);
-
-    this._controls.setOptions(Object.assign({}, this.props, {
+    this._controller.setOptions(Object.assign({}, this.props, {
+      eventManager: this._eventManager,
       onStateChange: this._onInteractiveStateChange.bind(this),
-      eventManager: this._eventManager
+      viewState: this._getViewState(this.props)
     }));
-
-    this._transitionManger = new TransitionManager(this.props);
   }
 
+  // Skip this render to avoid jump during viewport transitions.
   shouldComponentUpdate(nextProps, nextState) {
     if (this._transitionManger) {
       const transitionTriggered = this._transitionManger.processViewportChange(nextProps);
-      // Skip this render to avoid jump during viewport transitions.
       return !transitionTriggered;
     }
     return true;
   }
 
   componentWillUpdate(nextProps) {
-    if (this._controls) {
-      this._controls.setOptions(nextProps);
-    }
+    this._viewState = this._getViewState(nextProps);
+    this._controller.setOptions(Object.assign({}, nextProps, {
+      viewState: this._getViewState(nextProps)
+    }));
   }
 
   componentWillUnmount() {
@@ -153,6 +137,10 @@ export default class ViewportController extends PureComponent {
     if (isDragging !== this.state.isDragging) {
       this.setState({isDragging});
     }
+  }
+
+  _getViewState(props) {
+    return props.viewState || new ViewState(props);
   }
 
   render() {

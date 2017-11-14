@@ -41,16 +41,17 @@ export {
   WebMercatorViewport,
   PerspectiveViewport,
   OrthographicViewport,
-  // TODO: orbit-viewport to be merged w/ third-person-viewport
+  // Deprecated: orbit-viewport to be merged w/ third-person-viewport
   OrbitViewport
 } from './core';
 
 // TODO - Do we need to export? Move to experimental?
 export {
-  ViewportControls,
-  FirstPersonState,
-  OrbitState,
-  MapState
+  ViewState,
+  Controller,
+  FirstPersonController,
+  OrbitController,
+  MapController
 } from './core';
 
 // Transition bindings
@@ -162,9 +163,11 @@ Object.assign(experimental, {
 export {
   default as default,
   DeckGL,
+  // TODO - merge with deck.gl?
   ViewportController,
-  MapController,
-  OrbitController
+  // TODO - do we need to expose these?
+  MapController as ReactMapController,
+  OrbitController as ReactOrbitController
 } from './react';
 
 //

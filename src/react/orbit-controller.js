@@ -65,7 +65,7 @@ export default class OrbitController extends React.Component {
       isDragging: false
     };
 
-    this._orbitControls = props.orbitControls || new ViewportControls(OrbitState);
+    this._orbitControls = props.orbitControls || new Controller(OrbitState);
   }
 
   componentDidMount() {
