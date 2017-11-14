@@ -76,7 +76,8 @@ export default class LayerManager {
     this.oldContext = {};
     this.context = Object.assign({}, initialContext, {
       gl,
-      shaderCache: new ShaderCache({gl})
+      // Enabling luma.gl Program caching using private API (_cachePrograms)
+      shaderCache: new ShaderCache({gl, _cachePrograms: true})
     });
 
     // List of view descriptors, gets re-evaluated when width/height changes
