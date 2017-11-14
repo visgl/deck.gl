@@ -59,6 +59,7 @@
     "babel-plugin-istanbul": "^4.1.1",
     "babel-plugin-transform-builtin-extend": "^1.1.2",
     "babel-plugin-transform-es2015-modules-commonjs": "^6.22.0",
+    "babel-plugin-version-inline": "^1.0.0",
     "babel-polyfill": "^6.20.0",
     "babel-preset-es2015": "^6.4.3",
     "benchmark": "^2.1.3",
@@ -103,22 +104,5 @@
       "test/**/*.js",
       "src/layers/deprecated"
     ]
-  },
-  "babel": {
-    "presets": [
-      [
-        "es2015",
-        {
-          "modules": false
-        }
-      ]
-    ],
-    "env": {
-      "test": {
-        "plugins": [
-          "istanbul"
-        ]
-      }
-    }
   }
 }

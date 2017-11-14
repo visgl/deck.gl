@@ -20,11 +20,13 @@
 
 import {global} from '../utils/globals';
 import log from '../utils/log';
+// Version detection using babel plugin
+// Fallback for tests and SSR since global variable is defined by Webpack.
+/* global __VERSION__ */
+const version = typeof __VERSION__ !== 'undefined' ? __VERSION__ :
+  (global.DECK_VERSION || 'untranspiled source');
 
 const STARTUP_MESSAGE = 'set deck.log.priority=1 (or higher) to trace attribute updates';
-
-// Fallback for tests and SSR since global variable is defined by Webpack.
-const version = global.DECK_VERSION || 'NODE';
 
 if (global.deck && global.deck.VERSION !== version) {
   throw new Error(
@@ -39,6 +41,7 @@ if (!global.deck) {
 
   global.deck = global.deck || {
     VERSION: version,
+    version,
     log
   };
 }
