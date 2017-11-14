@@ -29,8 +29,8 @@ export default class OrbitViewport extends Viewport {
     height, // Height of viewport
     // view matrix arguments
     distance, // From eye position to lookAt
-    pitchAngle = 0, // Rotating angle around X axis
-    orbitAngle = 0, // Rotating angle around orbit axis
+    rotationX = 0, // Rotating angle around X axis
+    rotationOrbit = 0, // Rotating angle around orbit axis
     orbitAxis = 'Z', // Orbit axis with 360 degrees rotating freedom, can only be 'Y' or 'Z'
     lookAt = [0, 0, 0], // Which point is camera looking at, default origin
     up = [0, 1, 0], // Defines up direction, default positive y axis
@@ -38,21 +38,16 @@ export default class OrbitViewport extends Viewport {
     fov = 75, // Field of view covered by camera
     near = 1, // Distance of near clipping plane
     far = 100, // Distance of far clipping plane
-
-    // after projection
-    translationX = 0, // in pixels
-    translationY = 0, // in pixels
     zoom = 1
   }) {
-    const rotationMatrix = mat4_rotateX([], createMat4(), -pitchAngle / 180 * Math.PI);
+    const rotationMatrix = mat4_rotateX([], createMat4(), -rotationX / 180 * Math.PI);
     if (orbitAxis === 'Z') {
-      mat4_rotateZ(rotationMatrix, rotationMatrix, -orbitAngle / 180 * Math.PI);
+      mat4_rotateZ(rotationMatrix, rotationMatrix, -rotationOrbit / 180 * Math.PI);
     } else {
-      mat4_rotateY(rotationMatrix, rotationMatrix, -orbitAngle / 180 * Math.PI);
+      mat4_rotateY(rotationMatrix, rotationMatrix, -rotationOrbit / 180 * Math.PI);
     }
 
-    const translateMatrix = mat4_translate([], createMat4(),
-      [translationX / width * 2, translationY / height * 2, 0]);
+    const translateMatrix = createMat4();
     mat4_scale(translateMatrix, translateMatrix, [zoom, zoom, zoom]);
     mat4_translate(translateMatrix, translateMatrix, [-lookAt[0], -lookAt[1], -lookAt[2]]);
 
@@ -72,15 +67,14 @@ export default class OrbitViewport extends Viewport {
     this.width = width;
     this.height = height;
     this.distance = distance;
-    this.pitchAngle = pitchAngle;
-    this.orbitAngle = orbitAngle;
+    this.rotationX = rotationX;
+    this.rotationOrbit = rotationOrbit;
+    this.orbitAxis = orbitAxis;
     this.lookAt = lookAt;
     this.up = up;
     this.fov = fov;
     this.near = near;
     this.far = far;
-    this.translationX = translationX;
-    this.translationY = translationY;
     this.zoom = zoom;
   }
 
@@ -107,8 +101,9 @@ export default class OrbitViewport extends Viewport {
     const {
       width,
       height,
-      pitchAngle,
-      orbitAngle,
+      rotationX,
+      rotationOrbit,
+      orbitAxis,
       lookAt,
       up,
       fov,
@@ -124,8 +119,9 @@ export default class OrbitViewport extends Viewport {
     return new OrbitViewport({
       width,
       height,
-      pitchAngle,
-      orbitAngle,
+      rotationX,
+      rotationOrbit,
+      orbitAxis,
       up,
       fov,
       near,
