@@ -4,8 +4,8 @@ import {render} from 'react-dom';
 
 import {
   COORDINATE_SYSTEM,
-  // Unified controller, together with state that determines interaction model
-  FirstPersonState,
+  // Unified controller
+  FirstPersonController,
   // Viewport classes provides various views on the state
   FirstPersonViewport,
   ThirdPersonViewport,
@@ -249,7 +249,7 @@ class Root extends Component {
     return (
       <div style={{backgroundColor: '#000'}}>
         <ViewportController
-          viewportState={FirstPersonState}
+          controller={FirstPersonController}
           {...viewportProps}
           width={viewportProps.width}
           height={viewportProps.height}

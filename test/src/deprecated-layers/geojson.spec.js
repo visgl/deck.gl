@@ -21,7 +21,7 @@
 import test from 'tape-catch';
 import {extractPolygons, normalizeGeojson}
   from 'deck.gl/deprecated-layers/choropleth-layer/geojson';
-import {toJS} from 'deck.gl/core/experimental/container';
+import {toJS} from 'deck.gl/core/experimental/utils/container';
 
 import GEOJSON from 'deck.gl/test/data/geojson-data';
 

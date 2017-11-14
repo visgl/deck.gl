@@ -1,4 +1,4 @@
-import ViewState from './view-state';
+import ViewState from '../../lib/view-state';
 
 import {Vector3} from 'math.gl';
 import assert from 'assert';

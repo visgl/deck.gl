@@ -2,8 +2,7 @@
 import React, {Component} from 'react';
 import {render} from 'react-dom';
 import DeckGLOverlay from './deckgl-overlay.js';
-import {experimental} from 'deck.gl';
-const {OrbitController} = experimental;
+import {ViewportController, OrbitController, OrbitViewport} from 'deck.gl';
 
 const EQUATION = (x, y) => Math.sin(x * x + y * y) * x / Math.PI;
 
@@ -15,8 +14,8 @@ class Root extends Component {
       viewport: {
         lookAt: [0, 0, 0],
         distance: 3,
-        pitchAngle: -30,
-        orbitAngle: 30,
+        rotationX: -30,
+        rotationOrbit: 30,
         orbitAxis: 'Y',
         fov: 50,
         minDistance: 1,
@@ -40,7 +39,7 @@ class Root extends Component {
       width: window.innerWidth,
       height: window.innerHeight
     };
-    const newViewport = OrbitController.getViewport(Object.assign(this.state.viewport, size))
+    const newViewport = new OrbitViewport(Object.assign(this.state.viewport, size))
       .fitBounds([3, 3, 3]);
 
     this._onViewportChange(newViewport);
@@ -62,11 +61,12 @@ class Root extends Component {
     const {viewport, hoverInfo} = this.state;
 
     return (
-      <OrbitController
+      <ViewportController
+        controller={OrbitController}
         {...viewport}
         onViewportChange={this._onViewportChange} >
         <DeckGLOverlay
-          viewport={OrbitController.getViewport(viewport)}
+          viewport={new OrbitViewport(viewport)}
           equation={EQUATION}
           resolution={200}
           showAxis={true}
@@ -76,7 +76,7 @@ class Root extends Component {
           { hoverInfo.sample.map(x => x.toFixed(3)).join(', ') }
         </div>}
 
-      </OrbitController>
+      </ViewportController>
     );
   }
 }
