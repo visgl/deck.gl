@@ -162,7 +162,7 @@ export function getUniformsFromViewport({
   // Calculate projection pixels per unit
   const distanceScales = viewport.getDistanceScales();
 
-  // TODO - does this depend on useDevicePixelRatio?
+  // TODO - does this depend on useDevicePixels?
   const devicePixelRatio = (window && window.devicePixelRatio) || 1;
   const viewportSize = [viewport.width * devicePixelRatio, viewport.height * devicePixelRatio];
 

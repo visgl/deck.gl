@@ -45,14 +45,14 @@ Updates the current viewport.
 Updates parameters
 
 `layerManager.setParameters({
-	useDevicePixelRatio,
+	useDevicePixels,
     pickingRadius,
     onLayerClick,
     onLayerHover
 })
 `
 
-* `useDevicePixelRatio` (`Boolean`, optional) - Whether to use retina/HD display or not.
+* `useDevicePixels` (`Boolean`, optional) - Whether to use retina/HD display or not.
 * `eventManager` - A source of DOM input events
 
 * `pickingRadius` (`Number`, optional) - "Fuzziness" of picking (px), to support fat-fingering.

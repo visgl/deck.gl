@@ -35,7 +35,7 @@ const defaultProps = {
   rounded: false,
   miterLimit: 4,
   fp64: false,
-  justified: false,
+  dashJustified: false,
 
   getPath: object => object.path,
   getColor: object => object.color || DEFAULT_COLOR,
@@ -124,12 +124,12 @@ export default class PathLayer extends Layer {
 
   draw({uniforms}) {
     const {
-      rounded, miterLimit, widthScale, widthMinPixels, widthMaxPixels, justified
+      rounded, miterLimit, widthScale, widthMinPixels, widthMaxPixels, dashJustified
     } = this.props;
 
     this.state.model.render(Object.assign({}, uniforms, {
       jointType: Number(rounded),
-      alignMode: Number(justified),
+      alignMode: Number(dashJustified),
       widthScale,
       miterLimit,
       widthMinPixels,

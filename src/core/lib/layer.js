@@ -270,7 +270,7 @@ export default class Layer {
 
   // TODO - needs to refer to context
   screenToDevicePixels(screenPixels) {
-    log.deprecated('screenToDevicePixels', 'DeckGL prop useDevicePixelRatio for conversion');
+    log.deprecated('screenToDevicePixels', 'DeckGL prop useDevicePixels for conversion');
     const devicePixelRatio = typeof window !== 'undefined' ?
       window.devicePixelRatio : 1;
     return screenPixels * devicePixelRatio;

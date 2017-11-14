@@ -167,9 +167,9 @@ class Root extends Component {
   }
 
   _onMouseDown(event) {
-    // Use DeckGL.queryObject() to find the object under the mouse,
+    // Use DeckGL.pickObject() to find the object under the mouse,
     // and store it for updating on mouse move.
-    const info = this.deckGL.queryObject({x: event.clientX, y: event.clientY});
+    const info = this.deckGL.pickObject({x: event.clientX, y: event.clientY});
     if (info) {
       this.setState({
         clicked: info,

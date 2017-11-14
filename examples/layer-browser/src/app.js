@@ -73,7 +73,7 @@ class App extends PureComponent {
       },
       settings: {
         multiview: false,
-        useDevicePixelRatio: true,
+        useDevicePixels: true,
         pickingRadius: 0,
         drawPickingColors: false,
 
@@ -146,9 +146,9 @@ class App extends PureComponent {
     this.setState({clickedItem: info});
   }
 
-  _onQueryVisibleObjects() {
+  _onPickObjects() {
     const {width, height} = this.state;
-    const infos = this.refs.deckgl.queryVisibleObjects({x: 0, y: 0, width, height});
+    const infos = this.refs.deckgl.pickObjects({x: 0, y: 0, width, height});
     console.log(infos); // eslint-disable-line
     this.setState({queriedItems: infos});
   }
@@ -245,7 +245,7 @@ class App extends PureComponent {
 
   _renderMap() {
     const {width, height, mapViewState, settings} = this.state;
-    const {effects, pickingRadius, drawPickingColors, useDevicePixelRatio} = settings;
+    const {effects, pickingRadius, drawPickingColors, useDevicePixels} = settings;
 
     const viewports = this._getViewports();
 
@@ -272,7 +272,7 @@ class App extends PureComponent {
             onLayerClick={this._onClick}
             initWebGLParameters
 
-            useDevicePixelRatio={useDevicePixelRatio}
+            useDevicePixels={useDevicePixels}
 
             debug={false}
             drawPickingColors={drawPickingColors}
@@ -313,8 +313,8 @@ class App extends PureComponent {
         {!MapboxAccessToken && this._renderNoTokenWarning()}
         <div id="control-panel">
           <div style={{textAlign: 'center', padding: '5px 0 5px'}}>
-            <button onClick={this._onQueryVisibleObjects}>
-              <b>Query Visble Objects</b>
+            <button onClick={this._onPickObjects}>
+              <b>Pick Objects</b>
             </button>
           </div>
           <LayerControls

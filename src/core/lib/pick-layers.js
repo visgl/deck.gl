@@ -43,11 +43,11 @@ export function pickObject(gl, {
   onViewportActive,
   pickingFBO,
   lastPickedInfo,
-  useDevicePixelRatio
+  useDevicePixels
 }) {
   // Convert from canvas top-left to WebGL bottom-left coordinates
   // And compensate for pixelRatio
-  const pixelRatio = getPixelRatio({useDevicePixelRatio});
+  const pixelRatio = getPixelRatio({useDevicePixels});
   const deviceX = Math.round(x * pixelRatio);
   const deviceY = Math.round(gl.canvas.height - y * pixelRatio);
   const deviceRadius = Math.round(radius * pixelRatio);
@@ -62,7 +62,7 @@ export function pickObject(gl, {
     layers,
     viewports,
     onViewportActive,
-    useDevicePixelRatio,
+    useDevicePixels,
     pickingFBO,
     deviceRect,
     layerFilter,
@@ -95,12 +95,12 @@ export function pickVisibleObjects(gl, {
   layerFilter,
   onViewportActive,
   pickingFBO,
-  useDevicePixelRatio
+  useDevicePixels
 }) {
 
   // Convert from canvas top-left to WebGL bottom-left coordinates
   // And compensate for pixelRatio
-  const pixelRatio = getPixelRatio({useDevicePixelRatio});
+  const pixelRatio = getPixelRatio({useDevicePixels});
 
   const deviceLeft = Math.round(x * pixelRatio);
   const deviceBottom = Math.round(gl.canvas.height - y * pixelRatio);
@@ -119,7 +119,7 @@ export function pickVisibleObjects(gl, {
     viewports,
     onViewportActive,
     pickingFBO,
-    useDevicePixelRatio,
+    useDevicePixels,
     deviceRect,
     layerFilter,
     redrawReason: mode
@@ -155,7 +155,7 @@ function drawAndSamplePickingBuffer(gl, {
   layers,
   viewports,
   onViewportActive,
-  useDevicePixelRatio,
+  useDevicePixels,
   pickingFBO,
   deviceRect,
   layerFilter,
@@ -174,7 +174,7 @@ function drawAndSamplePickingBuffer(gl, {
     layers,
     viewports,
     onViewportActive,
-    useDevicePixelRatio,
+    useDevicePixels,
     pickingFBO,
     deviceRect,
     layerFilter,

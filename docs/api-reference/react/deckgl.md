@@ -58,7 +58,7 @@ The array of deck.gl layers to be rendered. This array is expected to be an arra
 
 ##### `layerFilter`
 
-Optionally takes a function `({layer, viewport, isPicking}) => Boolean` that is called before a layer is rendered. Gives the application an opportunity to filter out layers from the layer list during either rendering or picking. Filtering can be done per viewport or per layer or both. This enables techniques like adding helper layers that work as masks during picking but do not show up during rendering.
+Optionally takes a function `({layer, viewport, isPicking}) => Boolean` that is called before a layer is rendered. Gives the application an opportunity to filter out layers from the layer list during either rendering or picking. Filtering can be done per viewport or per layer or both. This enables techniques like adding helper layers that work as masks during picking but do not show up during rendering. All the lifecycle methods are still triggered even a if a layer is filtered out using this prop.
 
 ##### `viewports`
 
@@ -130,7 +130,7 @@ Css styles for the deckgl-canvas.
 
 Extra pixels around the pointer to include while picking. This is helpful when rendered objects are difficult to target, for example irregularly shaped icons, small moving circles or interaction by touch. Default `0`.
 
-##### `useDevicePixelRatio` (Boolean, optional)
+##### `useDevicePixels` (Boolean, optional)
 
 When true, device's full resolution will be used for rendering, this value can change per frame, like when moving windows between screens or when changing zoom level of the browser.
 
@@ -189,11 +189,13 @@ object for the topmost picked layer at the coordinate, null when no object is pi
 
 The picking methods are supplied to enable applications to use their own event handling.
 
-##### queryObject
+##### pickObject
+
+NOTE: replaces deprecated method `queryObject`.
 
 Get the closest pickable and visible object at screen coordinate.
 
-`deck.queryObject({x, y, radius, layerIds})`
+`deck.pickObject({x, y, radius, layerIds})`
 
 Parameters:
 - `options` (Object)
@@ -205,11 +207,13 @@ Parameters:
 
 Returns: a single [`info`](/docs/get-started/interactivity.md#the-picking-info-object) object, or `null` if nothing is found.
 
-##### queryVisibleObjects
+##### pickObjects
+
+NOTE: replaces deprecated method `queryVisibleObjects`.
 
 Get all pickable and visible objects within a bounding box.
 
-`deck.queryVisibleObjects({x, y, width, height, layerIds})`
+`deck.pickObjects({x, y, width, height, layerIds})`
 
 Parameters:
 - `options` (Object)

@@ -68,10 +68,18 @@ export default class PathOutlineLayer extends PathLayer {
   // Override draw to add render module
   draw({moduleParameters = {}, parameters, uniforms, context}) {
     // Need to calculate same uniforms as base layer
-    const {rounded, miterLimit, widthScale, widthMinPixels, widthMaxPixels, justified} = this.props;
+    const {
+      rounded,
+      miterLimit,
+      widthScale,
+      widthMinPixels,
+      widthMaxPixels,
+      dashJustified
+    } = this.props;
+
     uniforms = Object.assign({}, uniforms, {
       jointType: Number(rounded),
-      alignMode: Number(justified),
+      alignMode: Number(dashJustified),
       widthScale,
       miterLimit,
       widthMinPixels,

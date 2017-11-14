@@ -46,7 +46,7 @@ The GLSL uniforms of the `project` module are quite central to shader code and a
 | project_uModelMatrix | mat4 | model matrix (identity if not supplied) |
 | project_uViewProjectionMatrix | mat4 | combined view projection matrix |
 | project_uViewportSize | vec2 | size of viewport in pixels |
-| project_uDevicePixelRatio | float | device pixel ratio of current viewport (aligned with `useDevicePixelRatio` prop) |
+| project_uDevicePixelRatio | float | device pixel ratio of current viewport (aligned with `useDevicePixels` prop) |
 | project_uFocalDistance | float | distance where "pixel sizes" are display in 1:1 ratio (modulo `devicePixelRatio`) |
 | project_uCameraPosition | float | position of camera in world space |
 
