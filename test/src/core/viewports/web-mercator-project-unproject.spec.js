@@ -68,12 +68,12 @@ test('Viewport constructor', t => {
 
   t.ok(viewport, 'Viewport construction successful');
 
-  const viewportState = {};
+  const viewState = {};
   Object.keys(viewportProps).forEach(key => {
-    viewportState[key] = viewport[key];
+    viewState[key] = viewport[key];
   });
 
-  t.deepEquals(viewportState, viewportProps, 'Viewport props assigned');
+  t.deepEquals(viewState, viewportProps, 'Viewport props assigned');
   t.end();
 });
 

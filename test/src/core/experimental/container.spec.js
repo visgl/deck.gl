@@ -20,7 +20,7 @@
 
 import test from 'tape-catch';
 import {count, map, values, isKeyedContainer, keys, entries}
-  from 'deck.gl/core/experimental/container';
+  from 'deck.gl/core/experimental/utils/container';
 // import Immutable from 'immutable';
 
 const ITERATOR_TEST_CASES = [

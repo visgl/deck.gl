@@ -348,10 +348,6 @@ export const docPages = generatePath([
         content: getDocUrl('api-reference/react/deckgl.md')
       },
       {
-        name: 'ViewportLayout',
-        content: getDocUrl('api-reference/react/viewport-layout.md')
-      },
-      {
         name: 'ViewportController',
         content: getDocUrl('api-reference/react/viewport-controller.md')
       }

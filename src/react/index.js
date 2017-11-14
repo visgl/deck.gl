@@ -21,13 +21,9 @@
 export {default as DeckGL} from './deckgl';
 export {default as default} from './deckgl';
 
+// TODO - should react controllers be exported or just integrated into deck.gl API?
 export {default as ViewportController} from './viewport-controller';
 export {default as MapController} from './map-controller';
+export {default as OrbitController} from './orbit-controller';
 
 export {default as autobind} from './utils/autobind';
-
-// Experimental React bindings
-import {default as OrbitController} from './experimental/orbit-controller';
-export const experimental = {
-  OrbitController
-};

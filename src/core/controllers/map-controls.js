@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 
 import ViewportControls from './viewport-controls';
-import MapState from './map-state';
+import MapState from '../deprecated/controllers/map-state';
 
 // EVENT HANDLING PARAMETERS
 const PITCH_MOUSE_THRESHOLD = 5;
@@ -49,7 +49,7 @@ export default class MapControls extends ViewportControls {
     const {deltaX, deltaY} = event;
     const [, centerY] = this.getCenter(event);
     const startY = centerY - deltaY;
-    const {width, height} = this.viewportState.getViewportProps();
+    const {width, height} = this.viewState.getViewportProps();
 
     const deltaScaleX = deltaX / width;
     let deltaScaleY = 0;
@@ -67,7 +67,7 @@ export default class MapControls extends ViewportControls {
     }
     deltaScaleY = Math.min(1, Math.max(-1, deltaScaleY));
 
-    const newMapState = this.viewportState.rotate({deltaScaleX, deltaScaleY});
+    const newMapState = this.viewState.rotate({deltaScaleX, deltaScaleY});
     return this.updateViewport(newMapState);
   }
 }

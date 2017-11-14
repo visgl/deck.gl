@@ -307,7 +307,7 @@ class Root extends Component {
     return (
       <div style={{backgroundColor: '#000'}}>
         <ViewportController
-          viewportState={FirstPersonState}
+          viewState={FirstPersonState}
           {...viewportProps}
           width={viewportProps.width}
           height={viewportProps.height}

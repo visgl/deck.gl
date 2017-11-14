@@ -25,6 +25,7 @@ export {default as LayerManager} from './lib/layer-manager';
 export {default as AttributeManager} from './lib/attribute-manager';
 export {default as Layer} from './lib/layer';
 export {default as CompositeLayer} from './lib/composite-layer';
+export {default as ViewState} from './lib/view-state';
 
 // Viewports
 export {default as Viewport} from './viewports/viewport';
@@ -38,9 +39,9 @@ export {default as OrbitViewport} from './viewports/orbit-viewport';
 
 // TODO - Do we need to export? Move to experimental?
 export {default as ViewportControls} from './controllers/viewport-controls';
-export {default as FirstPersonState} from './controllers/first-person-state';
-export {default as OrbitState} from './controllers/orbit-state';
-export {default as MapState} from './controllers/map-state';
+export {default as FirstPersonState} from './deprecated/controllers/first-person-state';
+export {default as OrbitState} from './deprecated/controllers/orbit-state';
+export {default as MapState} from './deprecated/controllers/map-state';
 
 export {TRANSITION_EVENTS} from './lib/transition-manager';
 export {viewportLinearInterpolator, viewportFlyToInterpolator} from './lib/viewport-transition-utils';

@@ -1,4 +1,4 @@
-import ViewState from './view-state';
+import ViewState from '../../lib/view-state';
 
 import {Vector3} from 'math.gl';
 import assert from 'assert';
@@ -180,7 +180,7 @@ export default class FirstPersonState extends ViewState {
    * @param {Number} scale - a number between [0, 1] specifying the accumulated
    *   relative scale.
    */
-  zoom({pos, startPos, scale}) {
+  zoomTo({pos, startPos, scale}) {
     const {zoom, minZoom, maxZoom, width, height, translationX, translationY} = this._viewportProps;
 
     const startZoomPos = this._interactiveState.startZoomPos || startPos || pos;

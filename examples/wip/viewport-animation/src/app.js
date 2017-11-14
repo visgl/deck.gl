@@ -101,7 +101,7 @@ export default class App extends Component {
 
     return (
       <ViewportController
-        viewportState={MapState}
+        viewState={MapState}
         {...viewport}
         onViewportChange={this._onViewportChange.bind(this)}
         transitionInterpolator={viewportFlyToInterpolator}

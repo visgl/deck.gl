@@ -68,21 +68,23 @@ These RFCs are being implemented (fully or partially) in v4.2.
 | --- | --- | --- | --- |
 | **Animation** | | | |
 | [**Auto Highlighting**](v4.2/auto-highlighting-rfc.md) | @ibgreen @1chandu | **Implemented** | Auto highlight hovered object via `picking` module |
-| [**Viewport interpolation**](v4.2/viewport-animation-rfc.md) | @1chandu | Proposed | This should build on the new Viewport system in the First Person RFC. Also needs to consider react-map-gl. |
+| [**Viewport Transitions**](v4.2/viewport-transition-rfc.md) | @1chandu | **Implemented** | Builds on the new Viewport system in the First Person RFC. Will be used by react-map-gl. |
 | | | | |
 | **Viewports and Controllers** | | | |
-| [**First Person Viewport**](v4.2/first-person-mercator-viewport-rfc.md) | @ibgreen | **Pre-Approved** | Geospatially enable all viewports |
+| [**First Person Viewport**](v4.2/first-person-mercator-viewport-rfc.md) | @ibgreen | **Implemented** | Geospatially enable all viewports |
 | [**Multiple Viewports**](v4.2/multi-viewport-rfc.md) | @ibgreen | **Pre-Approved** | Supoort for multiple viewports, synchronized or unsynchronized |
-| [**Controller Architecture**](v4.2/controller-architecture-rfc.md) | @ibgreen | **Draft** | Generalize and Freeze experimental Controller Architecture from v4.1 |
+| [**Controller Architecture**](v4.2/controller-architecture-rfc.md) | @ibgreen | **Draft** | Generalize experimental Controller Architecture from v4.1 |
 | | | | |
 | **General** | | | |
 | [**Break out EventManager**](v4.2/break-out-event-manager-rfc.md) | @ibgreen | **Draft** | **Hygiene** Break out shared event manager code |
+| | | | |
+| **luma.gl RFC** | | | |
 | [**Break out Math Module**](v4.2/break-out-math-module-rfc.md) | @ibgreen | **Draft** | **Hygiene** Break out luma.gl math module |
 
 
 ## v4.1 RFCs
 
-These RFCs that have been implemented (fully or partially) in v4.1.
+These RFCs have been implemented (fully or partially) in v4.1.
 
 | RFC | Author | Status | Description |
 | --- | --- | --- | --- |
@@ -92,7 +94,7 @@ These RFCs that have been implemented (fully or partially) in v4.1.
 
 ## v4.0 RFCs
 
-These RFCs that have been implemented (fully or partially) in v4.0.
+These RFCs have been implemented (fully or partially) in v4.0.
 
 | RFC | Author | Status | Description |
 | --- | --- | --- | --- |
