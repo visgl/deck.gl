@@ -30,7 +30,7 @@ export function parseTile({tileParams, tileData}) {
 
     // const scale = Math.pow(2, tileParams.zoom);
     // Generate a linear set of points from the vals and dates arrays
-    for (let i = 0; i < vals; ++i) {
+    for (let i = 0; i < vals.length; ++i) {
       points.push({
         // TODO - for some reason divisor had to be changed from 256
         position: [corners.west + x / 128 * xTileSize, corners.south + y / 128 * yTileSize],
