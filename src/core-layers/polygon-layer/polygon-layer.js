@@ -105,77 +105,81 @@ export default class PolygonLayer extends CompositeLayer {
     const {getFillColor, getLineColor, getLineWidth, getLineDashArray, getElevation,
       getPolygon, updateTriggers, lightSettings} = this.props;
 
-    const forwardProps = this.getBaseLayerProps();
-
     const {paths} = this.state;
 
     const hasData = data && data.length > 0;
 
     // Filled Polygon Layer
     const polygonLayer = filled && hasData &&
-      new SolidPolygonLayer(Object.assign({}, forwardProps, {
-        id: `${id}-fill`,
-        data,
-        extruded,
-        elevationScale,
+      new SolidPolygonLayer(
+        this.getSubLayerProps({
+          id: `${id}-fill`,
+          data,
+          extruded,
+          elevationScale,
 
-        fp64,
-        wireframe: false,
+          fp64,
+          wireframe: false,
 
-        getPolygon,
-        getElevation,
-        getColor: getFillColor,
-        updateTriggers: {
-          getElevation: updateTriggers.getElevation,
-          getColor: updateTriggers.getFillColor
-        },
+          getPolygon,
+          getElevation,
+          getColor: getFillColor,
+          updateTriggers: {
+            getElevation: updateTriggers.getElevation,
+            getColor: updateTriggers.getFillColor
+          },
 
-        lightSettings
-      }));
+          lightSettings
+        })
+      );
 
     const polygonWireframeLayer = extruded && wireframe && hasData &&
-      new SolidPolygonLayer(Object.assign({}, forwardProps, {
-        id: `${id}-wireframe`,
-        data,
+      new SolidPolygonLayer(
+        this.getSubLayerProps({
+          id: `${id}-wireframe`,
+          data,
 
-        fp64,
-        extruded: true,
-        elevationScale,
-        wireframe: true,
+          fp64,
+          extruded: true,
+          elevationScale,
+          wireframe: true,
 
-        getPolygon,
-        getElevation,
-        getColor: getLineColor,
-        updateTriggers: {
-          getElevation: updateTriggers.getElevation,
-          getColor: updateTriggers.getLineColor
-        }
-      }));
+          getPolygon,
+          getElevation,
+          getColor: getLineColor,
+          updateTriggers: {
+            getElevation: updateTriggers.getElevation,
+            getColor: updateTriggers.getLineColor
+          }
+        })
+      );
 
     // Polygon line layer
     const polygonLineLayer = !extruded && stroked && hasData &&
-      new PathLayer(Object.assign({}, forwardProps, {
-        id: `${id}-stroke`,
-        data: paths,
+      new PathLayer(
+        this.getSubLayerProps({
+          id: `${id}-stroke`,
+          data: paths,
 
-        fp64,
-        widthScale: lineWidthScale,
-        widthMinPixels: lineWidthMinPixels,
-        widthMaxPixels: lineWidthMaxPixels,
-        rounded: lineJointRounded,
-        miterLimit: lineMiterLimit,
-        justified: lineDashJustified,
+          fp64,
+          widthScale: lineWidthScale,
+          widthMinPixels: lineWidthMinPixels,
+          widthMaxPixels: lineWidthMaxPixels,
+          rounded: lineJointRounded,
+          miterLimit: lineMiterLimit,
+          justified: lineDashJustified,
 
-        getPath: x => x.path,
-        getColor: x => getLineColor(x.object),
-        getWidth: x => getLineWidth(x.object),
-        getDashArray: getLineDashArray && (x => getLineDashArray(x.object)),
-        updateTriggers: {
-          getWidth: updateTriggers.getLineWidth,
-          getColor: updateTriggers.getLineColor,
-          getDashArray: updateTriggers.getLineDashArray
-        }
-      }));
+          getPath: x => x.path,
+          getColor: x => getLineColor(x.object),
+          getWidth: x => getLineWidth(x.object),
+          getDashArray: getLineDashArray && (x => getLineDashArray(x.object)),
+          updateTriggers: {
+            getWidth: updateTriggers.getLineWidth,
+            getColor: updateTriggers.getLineColor,
+            getDashArray: updateTriggers.getLineDashArray
+          }
+        })
+      );
 
     return [
       // If not extruded: flat fill layer is drawn below outlines

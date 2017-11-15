@@ -75,7 +75,7 @@ export default class CompositeLayer extends Layer {
     const newProps = this.getBaseLayerProps();
 
     if (sublayerProps) {
-      Object.assign(newProps, {
+      Object.assign(newProps, sublayerProps, {
         id: `${this.props.id}-${sublayerProps.id}`,
         updateTriggers: Object.assign({
           all: this.props.updateTriggers.all
