@@ -78,9 +78,10 @@ functions called.
 The default implementation returns `pickParams.info` without any change.
 
 
-##### `getBaseLayerProps`
+##### `getSubLayerProps`
 
-Returns an object with the key base `Layer` props that `CompositeLayer`s typically forward to their sublayers.
+Returns an object with the key base `Layer` props that `CompositeLayer`s typically forward to their sublayers,
+merged with the additinal properties object passed as first argument.
 
 
 ## Source

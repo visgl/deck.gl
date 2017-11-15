@@ -58,21 +58,15 @@ In this example, the idea is to draw two ScatterplotLayers, one for fill and one
 
 ```
 class NiceScatterplotLayer extends CompositeLayer {
-
   renderLayers() {
-
-    const baseProps = this.getBaseLayerProps();
-
     return [
       // the filled circles
-      new ScatterplotLayer({
-        id: `{this.props.id}-fill`
-        ...baseProps,
+      new ScatterplotLayer(this.getSubLayerProps({
+        id: 'fill'
       }),
       // the outlines
-      new ScatterplotLayer({
-        id: `{this.props.id}-outline`
-        ...baseProps,
+      new ScatterplotLayer(this.getSubLayerProps({
+        id: 'outline'
       })
     ];
   }
