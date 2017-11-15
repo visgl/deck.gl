@@ -95,7 +95,7 @@ export default class PolygonLayer extends CompositeLayer {
 
   renderLayers() {
     // Layer composition props
-    const {data, id, stroked, filled, extruded, wireframe, elevationScale} = this.props;
+    const {data, stroked, filled, extruded, wireframe, elevationScale} = this.props;
 
     // Rendering props underlying layer
     const {lineWidthScale, lineWidthMinPixels, lineWidthMaxPixels,
@@ -113,7 +113,7 @@ export default class PolygonLayer extends CompositeLayer {
     const polygonLayer = filled && hasData &&
       new SolidPolygonLayer(
         this.getSubLayerProps({
-          id: `${id}-fill`,
+          id: 'fill',
           data,
           extruded,
           elevationScale,
@@ -136,7 +136,7 @@ export default class PolygonLayer extends CompositeLayer {
     const polygonWireframeLayer = extruded && wireframe && hasData &&
       new SolidPolygonLayer(
         this.getSubLayerProps({
-          id: `${id}-wireframe`,
+          id: 'wireframe',
           data,
 
           fp64,
@@ -158,7 +158,7 @@ export default class PolygonLayer extends CompositeLayer {
     const polygonLineLayer = !extruded && stroked && hasData &&
       new PathLayer(
         this.getSubLayerProps({
-          id: `${id}-stroke`,
+          id: 'stroke',
           data: paths,
 
           fp64,

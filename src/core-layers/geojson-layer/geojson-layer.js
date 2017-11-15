@@ -107,7 +107,7 @@ export default class GeoJsonLayer extends CompositeLayer {
     const {pointFeatures, lineFeatures, polygonFeatures, polygonOutlineFeatures} = features;
 
     // Layer composition props
-    const {id, stroked, filled, extruded, wireframe, subLayers, lightSettings} = this.props;
+    const {stroked, filled, extruded, wireframe, subLayers, lightSettings} = this.props;
 
     // Rendering props underlying layer
     const {lineWidthScale, lineWidthMinPixels, lineWidthMaxPixels,
@@ -192,7 +192,7 @@ export default class GeoJsonLayer extends CompositeLayer {
     const pathLayer = drawLines &&
       new subLayers.LineLayer(
         this.getSubLayerProps({
-          id: `${id}-line-paths`,
+          id: 'line-paths',
           data: lineFeatures,
 
           fp64,
@@ -215,7 +215,7 @@ export default class GeoJsonLayer extends CompositeLayer {
     const pointLayer = drawPoints &&
       new subLayers.PointLayer(
         this.getSubLayerProps({
-          id: `${id}-points`,
+          id: 'points',
           data: pointFeatures,
 
           fp64,

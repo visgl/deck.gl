@@ -347,13 +347,11 @@ export default class HexagonLayer extends CompositeLayer {
   // for subclassing, override this method to return
   // customized sub layer props
   getSubLayerProps() {
-    const {id, radius, elevationScale, extruded, coverage, lightSettings, fp64} = this.props;
-
-    const forwardProps = this.getBaseLayerProps();
+    const {radius, elevationScale, extruded, coverage, lightSettings, fp64} = this.props;
 
     // return props to the sublayer constructor
-    return Object.assign({}, forwardProps, {
-      id: `${id}-hexagon-cell`,
+    return super.getSubLayerProps({
+      id: 'hexagon-cell',
       data: this.state.hexagons,
 
       fp64,
