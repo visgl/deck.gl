@@ -29,7 +29,7 @@ export function extractCameraVectors({viewMatrix, viewMatrixInverse}) {
 }
 
 export function mod(value, divisor) {
-  assert(Number.isFinite(value) && Number.isFinite(value));
+  assert(Number.isFinite(value) && Number.isFinite(divisor));
   const modulus = value % divisor;
   return modulus < 0 ? divisor + modulus : modulus;
 }

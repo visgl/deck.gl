@@ -23,7 +23,7 @@ export default class Stats {
 
   timestampMs() {
     /* global window */
-    return typeof window !== undefined && window.performance ?
+    return typeof window !== 'undefined' && window.performance ?
       window.performance.now() :
       Date.now();
   }

@@ -44,7 +44,7 @@
 		var sub = buf.slice(offset, offset + Type.BYTES_PER_ELEMENT * count);
 
 		var r = new Type(sub);
-		if (count === undefined || count === 1)
+		if (count === 1)
 			return r[0];
 
 		var ret = [];
