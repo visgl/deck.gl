@@ -129,23 +129,23 @@ export default class GeoJsonLayer extends CompositeLayer {
 
     // Filled Polygon Layer
     const polygonFillLayer = filled && hasPolygon &&
-      new subLayers.PolygonLayer(Object.assign({}, forwardProps, {
-        id: `${id}-polygon-fill`,
-        data: polygonFeatures,
-
-        fp64,
-        extruded,
-        elevationScale,
-        wireframe: false,
-        lightSettings,
-        getPolygon: getCoordinates,
-        getElevation,
-        getColor: getFillColor,
-        updateTriggers: {
-          getElevation: updateTriggers.getElevation,
-          getColor: updateTriggers.getFillColor
-        }
-      }));
+      new subLayers.PolygonLayer(
+        this.getSubLayerProps({
+          id: 'polygon-fill',
+          data: polygonFeatures,
+          fp64,
+          extruded,
+          elevationScale,
+          wireframe: false,
+          lightSettings,
+          getPolygon: getCoordinates,
+          getElevation,
+          getColor: getFillColor,
+          updateTriggers: {
+            getElevation: updateTriggers.getElevation,
+            getColor: updateTriggers.getFillColor
+          }
+        }));
 
     const polygonWireframeLayer = wireframe && extruded && hasPolygon &&
       new subLayers.PolygonLayer(Object.assign({}, forwardProps, {
