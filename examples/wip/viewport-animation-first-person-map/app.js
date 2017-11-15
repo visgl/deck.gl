@@ -11,7 +11,8 @@ import {
   ThirdPersonViewport,
   WebMercatorViewport,
   PolygonLayer,
-  PointCloudLayer
+  PointCloudLayer,
+  ViewportLinearInterpolator
 } from 'deck.gl';
 
 import TripsLayer from '../../trips/trips-layer';
@@ -40,6 +41,8 @@ const LIGHT_SETTINGS = {
   lightsStrength: [3.0, 0.0, 0.5, 0.0],
   numberOfLights: 2
 };
+
+const TRANSITION_PROPS = ['longitude', 'latitude', 'zoom', 'bearing', 'pitch', 'position'];
 
 const DEFAULT_VIEWPORT_PROPS = {
   longitude: -74,
@@ -313,7 +316,7 @@ class Root extends Component {
           height={viewportProps.height}
           onViewportChange={this._onViewportChange}
           transitionDuration={transitionDuration}
-          transitionProps={['longitude', 'latitude', 'zoom', 'bearing', 'pitch', 'position']}
+          transitionInterpolator={new ViewportLinearInterpolator(TRANSITION_PROPS)}
         >
           <DeckGL
             id="first-person"

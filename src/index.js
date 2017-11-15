@@ -56,8 +56,8 @@ export {
 // Transition bindings
 export {
   TRANSITION_EVENTS,
-  viewportLinearInterpolator,
-  viewportFlyToInterpolator
+  ViewportLinearInterpolator,
+  ViewportFlyToInterpolator
   // TransitionManager (Does the TransitionManager need to be exported?)
 } from './core';
 

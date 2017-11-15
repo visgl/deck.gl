@@ -43,7 +43,10 @@ export {default as OrbitState} from './controllers/orbit-state';
 export {default as MapState} from './controllers/map-state';
 
 export {TRANSITION_EVENTS} from './lib/transition-manager';
-export {viewportLinearInterpolator, viewportFlyToInterpolator} from './lib/viewport-transition-utils';
+export {
+  ViewportLinearInterpolator,
+  ViewportFlyToInterpolator
+} from './lib/viewport-transition-interpolator';
 
 // Experimental Features (May change in minor version bumps, use at your own risk)
 // Experimental Pure JS (non-React) bindings

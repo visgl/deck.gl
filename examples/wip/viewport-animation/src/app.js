@@ -2,7 +2,7 @@
 import React, {Component} from 'react';
 import {StaticMap} from 'react-map-gl';
 import {
-  viewportFlyToInterpolator,
+  ViewportFlyToInterpolator,
   TRANSITION_EVENTS,
   ViewportController,
   MapState
@@ -78,7 +78,7 @@ export default class App extends Component {
   _easeTo({longitude, latitude}) {
 
     this.setState({
-      viewport: {...this.state.viewport, longitude, latitude, zoom: 11},
+      viewport: {...this.state.viewport, longitude, latitude, zoom: 11, pitch: 0, bearing: 0},
       transitionDuration: 8000,
       viewportToggled: !this.state.viewportToggled
     });
@@ -104,9 +104,8 @@ export default class App extends Component {
         viewportState={MapState}
         {...viewport}
         onViewportChange={this._onViewportChange.bind(this)}
-        transitionInterpolator={viewportFlyToInterpolator}
+        transitionInterpolator={new ViewportFlyToInterpolator()}
         transitionDuration={transitionDuration}
-        transitionProps={['longitude', 'latitude', 'zoom', 'bearing', 'pitch', 'width', 'height']}
         transitionInterruption={this._interruptionStyle}>
         <StaticMap
           {...viewport}
