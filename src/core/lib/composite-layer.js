@@ -70,6 +70,22 @@ export default class CompositeLayer extends Layer {
     };
   }
 
+  // Returns sub layer props for a specific sublayer
+  getSubLayerProps(sublayerProps) {
+    const newProps = this.getBaseLayerProps();
+
+    if (sublayerProps) {
+      Object.assign(newProps, sublayerProps, {
+        id: `${this.props.id}-${sublayerProps.id}`,
+        updateTriggers: Object.assign({
+          all: this.props.updateTriggers.all
+        }, sublayerProps.updateTriggers)
+      });
+    }
+
+    return newProps;
+  }
+
   // Called by layer manager to render subLayers
   _renderLayers() {
     let {subLayers} = this.internalState;

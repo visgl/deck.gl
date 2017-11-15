@@ -125,106 +125,113 @@ export default class GeoJsonLayer extends CompositeLayer {
     const hasPolygonLines = polygonOutlineFeatures && polygonOutlineFeatures.length > 0;
     const hasPolygon = polygonFeatures && polygonFeatures.length > 0;
 
-    const forwardProps = this.getBaseLayerProps();
-
     // Filled Polygon Layer
     const polygonFillLayer = filled && hasPolygon &&
-      new subLayers.PolygonLayer(Object.assign({}, forwardProps, {
-        id: `${id}-polygon-fill`,
-        data: polygonFeatures,
-
-        fp64,
-        extruded,
-        elevationScale,
-        wireframe: false,
-        lightSettings,
-        getPolygon: getCoordinates,
-        getElevation,
-        getColor: getFillColor,
-        updateTriggers: {
-          getElevation: updateTriggers.getElevation,
-          getColor: updateTriggers.getFillColor
-        }
-      }));
+      new subLayers.PolygonLayer(
+        this.getSubLayerProps({
+          id: 'polygon-fill',
+          data: polygonFeatures,
+          fp64,
+          extruded,
+          elevationScale,
+          wireframe: false,
+          lightSettings,
+          getPolygon: getCoordinates,
+          getElevation,
+          getColor: getFillColor,
+          updateTriggers: {
+            getElevation: updateTriggers.getElevation,
+            getColor: updateTriggers.getFillColor
+          }
+        })
+      );
 
     const polygonWireframeLayer = wireframe && extruded && hasPolygon &&
-      new subLayers.PolygonLayer(Object.assign({}, forwardProps, {
-        id: `${id}-polygon-wireframe`,
-        data: polygonFeatures,
+      new subLayers.PolygonLayer(
+        this.getSubLayerProps({
+          id: 'polygon-wireframe',
+          data: polygonFeatures,
 
-        fp64,
-        extruded,
-        elevationScale,
-        wireframe: true,
-        getPolygon: getCoordinates,
-        getElevation,
-        getColor: getLineColor,
-        updateTriggers: {
-          getElevation: updateTriggers.getElevation,
-          getColor: updateTriggers.getLineColor
-        }
-      }));
+          fp64,
+          extruded,
+          elevationScale,
+          wireframe: true,
+          getPolygon: getCoordinates,
+          getElevation,
+          getColor: getLineColor,
+          updateTriggers: {
+            getElevation: updateTriggers.getElevation,
+            getColor: updateTriggers.getLineColor
+          }
+        })
+      );
 
     const polygonLineLayer = !extruded && stroked && hasPolygonLines &&
-      new subLayers.LineLayer(Object.assign({}, forwardProps, {
-        id: `${id}-polygon-outline`,
-        data: polygonOutlineFeatures,
+      new subLayers.LineLayer(
+        this.getSubLayerProps({
+          id: 'polygon-outline',
+          data: polygonOutlineFeatures,
 
-        fp64,
-        widthScale: lineWidthScale,
-        widthMinPixels: lineWidthMinPixels,
-        widthMaxPixels: lineWidthMaxPixels,
-        rounded: lineJointRounded,
-        miterLimit: lineMiterLimit,
+          fp64,
+          widthScale: lineWidthScale,
+          widthMinPixels: lineWidthMinPixels,
+          widthMaxPixels: lineWidthMaxPixels,
+          rounded: lineJointRounded,
+          miterLimit: lineMiterLimit,
 
-        getPath: getCoordinates,
-        getColor: getLineColor,
-        getWidth: getLineWidth,
-        updateTriggers: {
-          getColor: updateTriggers.getLineColor,
-          getWidth: updateTriggers.getLineWidth
-        }
-      }));
+          getPath: getCoordinates,
+          getColor: getLineColor,
+          getWidth: getLineWidth,
+          updateTriggers: {
+            getColor: updateTriggers.getLineColor,
+            getWidth: updateTriggers.getLineWidth
+          }
+        })
+      );
 
     const pathLayer = drawLines &&
-      new subLayers.LineLayer(Object.assign({}, forwardProps, {
-        id: `${id}-line-paths`,
-        data: lineFeatures,
+      new subLayers.LineLayer(
+        this.getSubLayerProps({
+          id: `${id}-line-paths`,
+          data: lineFeatures,
 
-        fp64,
-        widthScale: lineWidthScale,
-        widthMinPixels: lineWidthMinPixels,
-        widthMaxPixels: lineWidthMaxPixels,
-        rounded: lineJointRounded,
-        miterLimit: lineMiterLimit,
+          fp64,
+          widthScale: lineWidthScale,
+          widthMinPixels: lineWidthMinPixels,
+          widthMaxPixels: lineWidthMaxPixels,
+          rounded: lineJointRounded,
+          miterLimit: lineMiterLimit,
 
-        getPath: getCoordinates,
-        getColor: getLineColor,
-        getWidth: getLineWidth,
-        updateTriggers: {
-          getColor: updateTriggers.getLineColor,
-          getWidth: updateTriggers.getLineWidth
-        }
-      }));
+          getPath: getCoordinates,
+          getColor: getLineColor,
+          getWidth: getLineWidth,
+          updateTriggers: {
+            getColor: updateTriggers.getLineColor,
+            getWidth: updateTriggers.getLineWidth
+          }
+        })
+      );
 
     const pointLayer = drawPoints &&
-      new subLayers.PointLayer(Object.assign({}, forwardProps, {
-        id: `${id}-points`,
-        data: pointFeatures,
+      new subLayers.PointLayer(
+        this.getSubLayerProps({
+          id: `${id}-points`,
+          data: pointFeatures,
 
-        fp64,
-        radiusScale: pointRadiusScale,
-        radiusMinPixels: pointRadiusMinPixels,
-        radiusMaxPixels: pointRadiusMaxPixels,
+          fp64,
+          radiusScale: pointRadiusScale,
+          radiusMinPixels: pointRadiusMinPixels,
+          radiusMaxPixels: pointRadiusMaxPixels,
 
-        getPosition: getCoordinates,
-        getColor: getFillColor,
-        getRadius,
-        updateTriggers: {
-          getColor: updateTriggers.getFillColor,
-          getRadius: updateTriggers.getRadius
-        }
-      }));
+          getPosition: getCoordinates,
+          getColor: getFillColor,
+          getRadius,
+          updateTriggers: {
+            getColor: updateTriggers.getFillColor,
+            getRadius: updateTriggers.getRadius
+          }
+        })
+      );
 
     return [
       // If not extruded: flat fill layer is drawn below outlines
