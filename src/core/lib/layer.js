@@ -537,7 +537,8 @@ export default class Layer {
     if (flags.updateTriggersChanged && !changeFlags.updateTriggersChanged) {
       changeFlags.updateTriggersChanged = flags.updateTriggersChanged;
       log.log(LOG_PRIORITY_UPDATE + 1,
-        () => `updateTriggersChanged: ${flags.updateTriggersChanged} in ${this.id}`);
+        () => `updateTriggersChanged: 
+        ${Object.keys(flags.updateTriggersChanged).join(', ')} in ${this.id}`);
     }
     if (flags.propsChanged && !changeFlags.propsChanged) {
       changeFlags.propsChanged = flags.propsChanged;

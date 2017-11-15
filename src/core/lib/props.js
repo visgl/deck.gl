@@ -122,35 +122,32 @@ function diffDataProps(props, oldProps) {
 // Checks if any update triggers have changed
 // also calls callback to invalidate attributes accordingly.
 function diffUpdateTriggers(props, oldProps, onUpdateTriggered) {
-  // const {attributeManager} = this.state;
-  // const updateTriggerMap = attributeManager.getUpdateTriggerMap();
   if (oldProps === null) {
     return 'oldProps is null, initial diff';
   }
-
-  let reason = false;
 
   // If the 'all' updateTrigger fires, ignore testing others
   if ('all' in props.updateTriggers) {
     const diffReason = diffUpdateTrigger(oldProps, props, 'all');
     if (diffReason) {
       onUpdateTriggered('all');
-      return diffReason;
+      return {all: true};
     }
   }
 
+  const triggerChanged = {};
   // If the 'all' updateTrigger didn't fire, need to check all others
   for (const triggerName in props.updateTriggers) {
     if (triggerName !== 'all') {
       const diffReason = diffUpdateTrigger(oldProps, props, triggerName);
       if (diffReason) {
         onUpdateTriggered(triggerName);
-        reason = reason || diffReason;
+        triggerChanged[triggerName] = true;
       }
     }
   }
 
-  return reason;
+  return Object.keys(triggerChanged).length > 0 && triggerChanged;
 }
 
 function diffUpdateTrigger(props, oldProps, triggerName) {
