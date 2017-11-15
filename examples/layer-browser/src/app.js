@@ -237,7 +237,7 @@ class App extends PureComponent {
         id: 'first-person',
         ...mapViewState,
         width,
-        height: multiview ? height / 2 : height,
+        height: height / 2,
         position: [0, 0, 50]
       })
     ];
