@@ -535,10 +535,13 @@ export default class Layer {
         () => `dataChanged: ${flags.dataChanged} in ${this.id}`);
     }
     if (flags.updateTriggersChanged && !changeFlags.updateTriggersChanged) {
-      changeFlags.updateTriggersChanged = flags.updateTriggersChanged;
+      changeFlags.updateTriggersChanged =
+        changeFlags.updateTriggersChanged && flags.updateTriggersChanged ?
+          Object.assign({}, flags.updateTriggersChanged, changeFlags.updateTriggersChanged) :
+          flags.updateTriggersChanged || changeFlags.updateTriggersChanged;
       log.log(LOG_PRIORITY_UPDATE + 1,
-        () => `updateTriggersChanged: 
-        ${Object.keys(flags.updateTriggersChanged).join(', ')} in ${this.id}`);
+        () => 'updateTriggersChanged: ' +
+        `${Object.keys(flags.updateTriggersChanged).join(', ')} in ${this.id}`);
     }
     if (flags.propsChanged && !changeFlags.propsChanged) {
       changeFlags.propsChanged = flags.propsChanged;
@@ -590,7 +593,17 @@ ${flags.viewportChanged ? 'viewport' : ''}\
   // can be update correctly with minimal effort
   // TODO - arguments for testing only
   diffProps(newProps = this.props, oldProps = this.oldProps) {
-    const changeFlags = diffProps(newProps, oldProps, this._onUpdateTriggered.bind(this));
+    const changeFlags = diffProps(newProps, oldProps);
+
+    // iterate over changedTriggers
+    if (changeFlags.updateTriggersChanged) {
+      for (const key in changeFlags.updateTriggersChanged) {
+        if (changeFlags.updateTriggersChanged[key]) {
+          this._onUpdateTriggered(key);
+        }
+      }
+    }
+
     return this.setChangeFlags(changeFlags);
   }
 
