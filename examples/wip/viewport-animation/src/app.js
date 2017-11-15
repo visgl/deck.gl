@@ -30,12 +30,6 @@ if (!token) {
   throw new Error('Please specify a valid mapbox token');
 }
 
-// Required by tween.js
-function animate() {
-  window.requestAnimationFrame(animate);
-}
-animate();
-
 export default class App extends Component {
   constructor(props) {
     super(props);
