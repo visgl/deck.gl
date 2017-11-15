@@ -234,9 +234,8 @@ export default class AttributeManager {
   }
 
   invalidateAll() {
-    const {attributes} = this;
-    for (const attributeName in attributes) {
-      this._invalidateTrigger(attributeName);
+    for (const attributeName in this.attributes) {
+      this.attributes[attributeName].needsUpdate = true;
     }
 
     // For performance tuning
