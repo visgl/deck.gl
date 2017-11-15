@@ -41,7 +41,7 @@ TestLayer.layerName = 'TestLayer';
 
 class TestCompositeLayer extends CompositeLayer {
   renderLayers() {
-    return [new TestLayer(this.getBaseLayerProps())];
+    return [new TestLayer(this.getSubLayerProps())];
   }
 }
 
@@ -55,11 +55,11 @@ test('CompositeLayer#constructor', t => {
   t.end();
 });
 
-test('CompositeLayer#getBaseLayerProps', t => {
+test('CompositeLayer#getSubLayerProps', t => {
   const layer = new TestCompositeLayer(Object.assign({id: 'composite-layer'}, BASE_LAYER_PROPS));
 
   // TODO - add table driven test cases for all forwarded sublayer props
-  const baseProps = layer.getBaseLayerProps();
+  const baseProps = layer.getSubLayerProps();
   t.comment(JSON.stringify(baseProps));
   for (const propName in BASE_LAYER_PROPS) {
     t.equal(baseProps[propName], BASE_LAYER_PROPS[propName],

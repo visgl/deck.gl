@@ -52,27 +52,20 @@ export default class CompositeLayer extends Layer {
     return null;
   }
 
-  // Returns props that should be forwarded to children
-  // TODO - implement autoforwarding?
-  getBaseLayerProps() {
+  // Returns sub layer props for a specific sublayer
+  getSubLayerProps(sublayerProps) {
     const {
       opacity, pickable, visible,
       parameters, getPolygonOffset,
       highlightedObjectIndex, autoHighlight, highlightColor,
       coordinateSystem, coordinateOrigin, modelMatrix
     } = this.props;
-
-    return {
+    const newProps = {
       opacity, pickable, visible,
       parameters, getPolygonOffset,
       highlightedObjectIndex, autoHighlight, highlightColor,
       coordinateSystem, coordinateOrigin, modelMatrix
     };
-  }
-
-  // Returns sub layer props for a specific sublayer
-  getSubLayerProps(sublayerProps) {
-    const newProps = this.getBaseLayerProps();
 
     if (sublayerProps) {
       Object.assign(newProps, sublayerProps, {

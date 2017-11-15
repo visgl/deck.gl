@@ -52,7 +52,7 @@ A new `DeckGL` prop `layerFilter` gives the application an opportunity to filter
 
 ## CompositeLayer: Property Forwarding Support
 
-A new method `CompositeLayer.getBaseLayerProps()` simplifies forwarding base layer props to sub layers, removing code clutter and reducing the risk of forgetting to forward an important base layer property.
+A new method `CompositeLayer.getSubLayerProps()` simplifies forwarding base layer props to sub layers, removing code clutter and reducing the risk of forgetting to forward an important base layer property.
 
 
 ## PathLayer & GeoJsonLayer: Dashed Line Support

@@ -94,23 +94,26 @@ export default class PathMarkerLayer extends CompositeLayer {
   }
 
   renderLayers() {
-    const forwardProps = this.getBaseLayerProps();
     return [
       new PathOutlineLayer(Object.assign({}, this.props, {
         id: `${this.props.id}-paths`,
         fp64: this.props.fp64
       })),
-      new this.props.MarkerLayer(Object.assign(forwardProps, this.props.markerLayerProps, {
-        id: `${this.props.id}-markers`,
-        data: this.state.markers,
-        sizeScale: this.props.sizeScale,
-        fp64: this.props.fp64,
-        pickable: false,
-        parameters: {
-          blend: false,
-          depthTest: false
-        }
-      })),
+      new this.props.MarkerLayer(
+        this.getSubLayerProps(
+          Object.assign({}, this.props.markerLayerProps, {
+            id: 'markers',
+            data: this.state.markers,
+            sizeScale: this.props.sizeScale,
+            fp64: this.props.fp64,
+            pickable: false,
+            parameters: {
+              blend: false,
+              depthTest: false
+            }
+          })
+        )
+      ),
       this.state.closestPoints &&
       new ScatterplotLayer({
         id: `${this.props.id}-highlight`,
