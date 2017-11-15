@@ -113,7 +113,7 @@ export class ViewportFlyToInterpolator extends ViewportTransitionInterpolator {
     // Equations from above paper are referred where needed.
 
     // Assert minimum required props
-    for (const key of VIEWPORT_TRANSITION_PROPS) {
+    for (const key of ['latitude', 'longitude', 'zoom', 'width', 'height']) {
       assert(isValid(startProps[key]));
       assert(isValid(endProps[key]));
     }

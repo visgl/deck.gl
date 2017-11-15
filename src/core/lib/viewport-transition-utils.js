@@ -25,7 +25,7 @@ export function extractViewportFrom(props) {
     viewport[key] = props[key];
     // Normalize longitude and bearing into [-180, 180) range
     // This gurantees the props are in same range when they are interpolated.
-    if (ANGULAR_PROPS[key]) {
+    if (isAngularProp(key)) {
       viewport[key] = mod(viewport[key] + 180, 360) - 180;
     }
   });
