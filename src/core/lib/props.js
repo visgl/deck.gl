@@ -2,7 +2,7 @@ import log from '../utils/log';
 import assert from 'assert';
 
 // Returns an object with "change flags", either false or strings indicating reason for change
-export function diffProps(props, oldProps, onUpdateTriggered = () => {}) {
+export function diffProps(props, oldProps) {
   // First check if any props have changed (ignore props that will be examined separately)
   const propsChangedReason = compareProps({
     newProps: props,
@@ -17,7 +17,7 @@ export function diffProps(props, oldProps, onUpdateTriggered = () => {}) {
   // Note - if data has changed, all attributes will need regeneration, so skip this step
   let updateTriggersChangedReason = false;
   if (!dataChangedReason) {
-    updateTriggersChangedReason = diffUpdateTriggers(props, oldProps, onUpdateTriggered);
+    updateTriggersChangedReason = diffUpdateTriggers(props, oldProps);
   }
 
   return {
@@ -121,31 +121,28 @@ function diffDataProps(props, oldProps) {
 
 // Checks if any update triggers have changed
 // also calls callback to invalidate attributes accordingly.
-function diffUpdateTriggers(props, oldProps, onUpdateTriggered) {
-  // const {attributeManager} = this.state;
-  // const updateTriggerMap = attributeManager.getUpdateTriggerMap();
+function diffUpdateTriggers(props, oldProps) {
   if (oldProps === null) {
     return 'oldProps is null, initial diff';
   }
-
-  let reason = false;
 
   // If the 'all' updateTrigger fires, ignore testing others
   if ('all' in props.updateTriggers) {
     const diffReason = diffUpdateTrigger(oldProps, props, 'all');
     if (diffReason) {
-      onUpdateTriggered('all');
-      return diffReason;
+      return {all: true};
     }
   }
 
+  const triggerChanged = {};
+  let reason = false;
   // If the 'all' updateTrigger didn't fire, need to check all others
   for (const triggerName in props.updateTriggers) {
     if (triggerName !== 'all') {
       const diffReason = diffUpdateTrigger(oldProps, props, triggerName);
       if (diffReason) {
-        onUpdateTriggered(triggerName);
-        reason = reason || diffReason;
+        triggerChanged[triggerName] = true;
+        reason = triggerChanged;
       }
     }
   }
