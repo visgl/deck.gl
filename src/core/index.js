@@ -44,9 +44,9 @@ export {default as MapState} from './controllers/map-state';
 
 export {TRANSITION_EVENTS} from './lib/transition-manager';
 export {
-  ViewportLinearInterpolator,
+  LinearInterpolator,
   ViewportFlyToInterpolator
-} from './lib/viewport-transition-interpolator';
+} from './lib/transition';
 
 // Experimental Features (May change in minor version bumps, use at your own risk)
 // Experimental Pure JS (non-React) bindings
@@ -57,7 +57,7 @@ import {default as EffectManager} from './experimental/lib/effect-manager';
 import {default as Effect} from './experimental/lib/effect';
 
 import TransitionManager from './lib/transition-manager';
-import {extractViewportFrom} from './lib/viewport-transition-utils';
+import {extractViewportFrom} from './lib/transition';
 
 // Layer utilities
 import log from './utils/log';

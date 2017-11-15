@@ -1,12 +1,8 @@
 /* global requestAnimationFrame, cancelAnimationFrame */
 import assert from 'assert';
-import {extractViewportFrom} from './viewport-transition-utils';
-import {ViewportLinearInterpolator} from './viewport-transition-interpolator';
+import {extractViewportFrom, LinearInterpolator} from './transition';
 
 const noop = () => {};
-
-const VIEWPORT_TRANSITION_PROPS =
-  ['longitude', 'latitude', 'zoom', 'bearing', 'pitch'];
 
 export const TRANSITION_EVENTS = {
   BREAK: 1,
@@ -17,9 +13,8 @@ export const TRANSITION_EVENTS = {
 const DEFAULT_PROPS = {
   transitionDuration: 0,
   transitionEasing: t => t,
-  transitionInterpolator: new ViewportLinearInterpolator(),
+  transitionInterpolator: new LinearInterpolator(),
   transitionInterruption: TRANSITION_EVENTS.BREAK,
-  transitionProps: VIEWPORT_TRANSITION_PROPS,
   onTransitionStart: noop,
   onTransitionInterrupt: noop,
   onTransitionEnd: noop
@@ -28,8 +23,8 @@ const DEFAULT_PROPS = {
 const DEFAULT_STATE = {
   animation: null,
   viewport: null,
-  startViewport: null,
-  endViewport: null
+  startProps: null,
+  endProps: null
 };
 
 export default class TransitionManager {
@@ -42,7 +37,7 @@ export default class TransitionManager {
 
   // Returns current transitioned viewport.
   getViewportInTransition() {
-    return this.state.viewport;
+    return this.state.propsInTransition;
   }
 
   // Process the vewiport change, either ignore or trigger a new transiton.
@@ -62,19 +57,17 @@ export default class TransitionManager {
     this.props = nextProps;
 
     if (this._isTransitionEnabled(nextProps)) {
-      const currentViewport = this.state.viewport || currentProps;
-      const endViewport = this.state.endViewport;
+      const {propsInTransition, endProps} = this.state;
 
-      const startViewport = this.state.interruption === TRANSITION_EVENTS.SNAP_TO_END ?
-        (endViewport || currentViewport) :
-        currentViewport;
+      const startProps = this.state.interruption === TRANSITION_EVENTS.SNAP_TO_END ?
+        endProps : (propsInTransition || currentProps);
 
       if (isTransitionInProgress) {
         currentProps.onTransitionInterrupt();
       }
       this.props.onTransitionStart();
 
-      this._triggerTransition(startViewport);
+      this._triggerTransition(startProps);
 
       transitionTriggered = true;
     } else if (isTransitionInProgress) {
@@ -88,7 +81,7 @@ export default class TransitionManager {
   // Helper methods
 
   _isTransitionInProgress() {
-    return this.state.viewport;
+    return this.state.propsInTransition;
   }
 
   _isTransitionEnabled(props) {
@@ -96,8 +89,8 @@ export default class TransitionManager {
   }
 
   _isUpdateDueToCurrentTransition(props) {
-    if (this.state.viewport) {
-      return this.state.interpolator.arePropsEqual(props, this.state.viewport);
+    if (this.state.propsInTransition) {
+      return this.state.interpolator.arePropsEqual(props, this.state.propsInTransition);
     }
     return false;
   }
@@ -115,7 +108,7 @@ export default class TransitionManager {
     return true;
   }
 
-  _triggerTransition(startViewport) {
+  _triggerTransition(startProps) {
     assert(this.props.transitionDuration !== 0);
 
     cancelAnimationFrame(this.state.animation);
@@ -128,10 +121,10 @@ export default class TransitionManager {
       interruption: this.props.transitionInterruption,
 
       startTime: Date.now(),
-      startViewport: Object.assign({}, startViewport),
-      endViewport: Object.assign({}, this.props),
+      startProps: Object.assign({}, startProps),
+      endProps: Object.assign({}, this.props),
       animation: null,
-      viewport: startViewport
+      viewport: startProps
     };
 
     this._onTransitionFrame();
@@ -151,7 +144,7 @@ export default class TransitionManager {
   _updateViewport() {
     // NOTE: Be cautious re-ordering statements in this function.
     const currentTime = Date.now();
-    const {startTime, duration, easing, interpolator, startViewport, endViewport} = this.state;
+    const {startTime, duration, easing, interpolator, startProps, endProps} = this.state;
 
     let shouldEnd = false;
     let t = (currentTime - startTime) / duration;
@@ -161,14 +154,14 @@ export default class TransitionManager {
     }
     t = easing(t);
 
-    const viewport = interpolator.interpolateProps(startViewport, endViewport, t);
+    const viewport = interpolator.interpolateProps(startProps, endProps, t);
 
     // This extractViewportFrom gurantees angle props (bearing, longitude) are normalized
     // So when viewports are compared they are in same range.
-    this.state.viewport = extractViewportFrom(Object.assign({}, this.props, viewport));
+    this.state.propsInTransition = extractViewportFrom(Object.assign({}, this.props, viewport));
 
     if (this.props.onViewportChange) {
-      this.props.onViewportChange(this.state.viewport, {inTransition: true});
+      this.props.onViewportChange(this.state.propsInTransition, {inTransition: true});
     }
 
     if (shouldEnd) {

@@ -3,7 +3,7 @@ import React, {Component} from 'react';
 import {render} from 'react-dom';
 import {StaticMap} from 'react-map-gl';
 import DeckGLOverlay from './deckgl-overlay.js';
-import {ViewportController, MapState} from 'deck.gl';
+import {ViewportController, MapState, LinearInterpolator} from 'deck.gl';
 import {csv as requestCsv} from 'd3-request';
 
 // Set your mapbox token here
@@ -11,6 +11,8 @@ const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
 
 // Source data CSV
 const DATA_URL = 'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/3d-heatmap/heatmap-data.csv';  // eslint-disable-line
+
+const transitionInterpolator = new LinearInterpolator(['bearing']);
 
 class Root extends Component {
 
@@ -101,6 +103,7 @@ class Root extends Component {
         {...viewport}
         onViewportChange={this._onViewportChange.bind(this)}
         transitionDuration={transitionDuration}
+        transitionInterpolator={transitionInterpolator}
         onTransitionEnd={this._rotateCamera.bind(this)}>
         <StaticMap
           {...viewport}

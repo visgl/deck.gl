@@ -96,7 +96,6 @@ export default class App extends Component {
   }
 
   render() {
-
     const {viewport, settings, transitionDuration} = this.state;
 
     return (
