@@ -599,7 +599,7 @@ ${flags.viewportChanged ? 'viewport' : ''}\
     if (changeFlags.updateTriggersChanged) {
       for (const key in changeFlags.updateTriggersChanged) {
         if (changeFlags.updateTriggersChanged[key]) {
-          this._onUpdateTriggered(key);
+          this._activeUpdateTrigger(key);
         }
       }
     }
@@ -687,15 +687,9 @@ ${flags.viewportChanged ? 'viewport' : ''}\
     this.diffProps();
   }
 
-  // Callback for `diffProps`, will be called when an updateTrigger fires
-  _onUpdateTriggered(propName, diffReason) {
-    switch (propName) {
-    case 'all':
-      this.invalidateAttribute('all', diffReason);
-      break;
-    default:
-      this.invalidateAttribute(propName, diffReason);
-    }
+  // Operate on each changed triggers, will be called when an updateTrigger changes
+  _activeUpdateTrigger(propName) {
+    this.invalidateAttribute(propName);
   }
 
   //  Helper to check that required props are supplied
