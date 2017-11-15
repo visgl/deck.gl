@@ -328,7 +328,7 @@ export default class GridLayer extends CompositeLayer {
   }
 
   // for subclassing, override this method to return
-  // customized sub layer classx
+  // customized sub layer class
   getSubLayerClass() {
     return GridCellLayer;
   }

@@ -80,8 +80,9 @@ The default implementation returns `pickParams.info` without any change.
 
 ##### `getSubLayerProps`
 
-Returns an object with the key base `Layer` props that `CompositeLayer`s typically forward to their sublayers,
-merged with the additinal properties object passed as first argument.
+Returns an object with the properties of the sublayer buit using the passed props and
+key base `Layer` props that `CompositeLayer`s typically forward to their sublayers.
+Prepends the parent layer `id` to the sublayer id and merges `updateTriggers`.
 
 
 ## Source

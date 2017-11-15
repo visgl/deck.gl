@@ -101,7 +101,7 @@ export default class PathMarkerLayer extends CompositeLayer {
       })),
       new this.props.MarkerLayer(
         this.getSubLayerProps(
-          Object.assign(this.props.markerLayerProps, {
+          Object.assign({}, this.props.markerLayerProps, {
             id: 'markers',
             data: this.state.markers,
             sizeScale: this.props.sizeScale,
