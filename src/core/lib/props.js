@@ -130,7 +130,6 @@ function diffUpdateTriggers(props, oldProps) {
   if ('all' in props.updateTriggers) {
     const diffReason = diffUpdateTrigger(oldProps, props, 'all');
     if (diffReason) {
-      // onUpdateTriggered('all');
       return {all: true};
     }
   }
@@ -142,7 +141,6 @@ function diffUpdateTriggers(props, oldProps) {
     if (triggerName !== 'all') {
       const diffReason = diffUpdateTrigger(oldProps, props, triggerName);
       if (diffReason) {
-        // onUpdateTriggered(triggerName);
         triggerChanged[triggerName] = true;
         reason = triggerChanged;
       }
