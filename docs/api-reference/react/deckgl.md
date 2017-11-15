@@ -191,8 +191,6 @@ The picking methods are supplied to enable applications to use their own event h
 
 ##### pickObject
 
-NOTE: replaces deprecated method `queryObject`.
-
 Get the closest pickable and visible object at screen coordinate.
 
 `deck.pickObject({x, y, radius, layerIds})`
@@ -207,9 +205,9 @@ Parameters:
 
 Returns: a single [`info`](/docs/get-started/interactivity.md#the-picking-info-object) object, or `null` if nothing is found.
 
-##### pickObjects
+NOTE: replaces deprecated method `queryObject`.
 
-NOTE: replaces deprecated method `queryVisibleObjects`.
+##### pickObjects
 
 Get all pickable and visible objects within a bounding box.
 
@@ -230,6 +228,8 @@ Remarks:
 - This query methods are designed to quickly find objects by utilizing the picking buffer. They offer more flexibility for developers to handle events in addition to the built-in hover and click callbacks.
 - Note there is a limitation in the query methods: occluded objects are not returned. To improve the results, you may try setting the `layerIds` parameter to limit the query to fewer layers.
 - * Since deck.gl is WebGL based, it can only render into a single canvas. Thus all its viewports need to be in the same canvas (unless you use multiple DeckGL instances, but that can have significant resource and performance impact).
+
+NOTE: replaces deprecated method `queryVisibleObjects`.
 
 
 ### Deprecated Properties

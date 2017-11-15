@@ -64,7 +64,7 @@ Added new props (`getDashArray` and `dashJustified`) enabling you render paths a
 
 Add `getElevationValue` to `HexagonLayer` and `GridLayer` to enable elevation aggregation by value. This allow both color and elevation to be calculated based on customized aggregation function.
 
-## Query methods renamed
+## Picking methods renamed
 To avoid confusion, `DeckGL.queryObject` is renamed to `DeckGL.pickObject` and `DeckGL.queryVisibleObjects` is renamed to `DeckGL.pickObjects`. Old functions are still supported with deprecated warning, and will be removed in next version.
 
 ## Shader Modules

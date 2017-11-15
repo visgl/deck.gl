@@ -46,7 +46,7 @@ The GLSL uniforms of the `project` module are quite central to shader code and a
 | project_uModelMatrix | mat4 | model matrix (identity if not supplied) |
 | project_uViewProjectionMatrix | mat4 | combined view projection matrix |
 | project_uViewportSize | vec2 | size of viewport in pixels |
-| project_uDevicePixelRatio | float | device pixel ratio of current viewport (aligned with `useDevicePixels` prop) |
+| project_uDevicePixelRatio | float | device pixel ratio of current viewport (value depends on `useDevicePixels` prop) |
 | project_uFocalDistance | float | distance where "pixel sizes" are display in 1:1 ratio (modulo `devicePixelRatio`) |
 | project_uCameraPosition | float | position of camera in world space |
 
@@ -95,4 +95,4 @@ Returns values in clip space offsets that can be added directly to `gl_Position`
 
 * For consistent results, pixels are logical pixels, not device pixels, i.e. this method multiplies `pixels` with `project_uDevicePixelRatio`.
 * The pixels offsets will be divided by the `w` coordinate of `gl_Position`. This is simply the GPUs standard treatment of any coordinate. This means that there will be more pixels closer to the camera and less pixels further away from the camer. Setting the `focalDistance` uniform controls this.
-* To avoid pixel sizes scaling with distance from camera, simply set `focalDistance` to 1 and multiply clispace poffset with `gl_Position.w`
+* To avoid pixel sizes scaling with distance from camera, simply set `focalDistance` to 1 and multiply clipspace offset with `gl_Position.w`
