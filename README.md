@@ -5,6 +5,7 @@
   <a href="https://travis-ci.org/uber/deck.gl">
     <img src="https://img.shields.io/travis/uber/deck.gl/master.svg?style=flat-square" alt="build" />
   </a>
+  [![Build status](https://badge.buildkite.com/6fb0e59c3c390c392ce334eceb981748290a7d4a1ea515f2ce.svg?branch=master)](https://buildkite.com/uberopensource/deck-gl)
   <a href="https://npmjs.org/package/deck.gl">
     <img src="https://img.shields.io/npm/dm/deck.gl.svg?style=flat-square" alt="downloads" />
   </a>
