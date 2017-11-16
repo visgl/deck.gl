@@ -109,8 +109,6 @@ export default class OrbitViewport extends Viewport {
       fov,
       near,
       far,
-      translationX,
-      translationY,
       zoom
     } = this;
     const size = Math.max(sizes[0], sizes[1], sizes[2]) / 2;
@@ -126,8 +124,6 @@ export default class OrbitViewport extends Viewport {
       fov,
       near,
       far,
-      translationX,
-      translationY,
       zoom,
       lookAt,
       distance: newDistance
