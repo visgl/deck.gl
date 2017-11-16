@@ -94,10 +94,10 @@ export default class OrbitViewport extends Viewport {
   }
 
   /** Move camera to make a model bounding box centered at lookat position fit in the viewport.
-   * @param {Array} max - [maxX, maxY, maxZ]], define the dimensions of bounding box
+   * @param {Array} sizes - [sizeX, sizeY, sizeZ]], define the dimensions of bounding box
    * @returns a new OrbitViewport object
    */
-  fitBounds(max) {
+  fitBounds(sizes) {
     const {
       width,
       height,
@@ -113,7 +113,7 @@ export default class OrbitViewport extends Viewport {
       translationY,
       zoom
     } = this;
-    const size = Math.max(max[0], max[1], max[2]);
+    const size = Math.max(sizes[0], sizes[1], sizes[2]) / 2;
     const newDistance = size / Math.tan(fov / 180 * Math.PI / 2);
 
     return new OrbitViewport({
