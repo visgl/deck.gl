@@ -108,7 +108,9 @@ export default class PathLayer extends Layer {
     this.updateAttribute({props, oldProps, changeFlags});
 
     const geometryChanged = changeFlags.dataChanged ||
-      (changeFlags.updateTriggersChanged && changeFlags.updateTriggersChanged.all);
+      (changeFlags.updateTriggersChanged && (
+        changeFlags.updateTriggersChanged.all ||
+        changeFlags.updateTriggersChanged.getPath));
 
     if (geometryChanged) {
       // this.state.paths only stores point positions in each path
