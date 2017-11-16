@@ -407,7 +407,7 @@ export default class Layer {
     // End subclass lifecycle methods
 
     // initializeState callback tends to clear state
-    this.setChangeFlags({dataChanged: true, propsChange: true, viewportChanged: true});
+    this.setChangeFlags({dataChanged: true, propsChanged: true, viewportChanged: true});
 
     this._updateState(this._getUpdateParams());
 
