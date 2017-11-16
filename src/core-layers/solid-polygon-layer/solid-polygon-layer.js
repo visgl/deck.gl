@@ -130,7 +130,10 @@ export default class SolidPolygonLayer extends Layer {
 
   updateGeometry({props, oldProps, changeFlags}) {
     const geometryConfigChanged = props.extruded !== oldProps.extruded ||
-      props.wireframe !== oldProps.wireframe || props.fp64 !== oldProps.fp64;
+      props.wireframe !== oldProps.wireframe || props.fp64 !== oldProps.fp64 ||
+      (changeFlags.updateTriggersChanged && (
+        changeFlags.updateTriggersChanged.all ||
+        changeFlags.updateTriggersChanged.getPolygon));
 
     // check if updateTriggers.getElevation has been triggered
     const getElevationTriggered = changeFlags.updateTriggersChanged &&
