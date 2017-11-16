@@ -95,10 +95,14 @@ export default class PathMarkerLayer extends CompositeLayer {
 
   renderLayers() {
     return [
-      new PathOutlineLayer(Object.assign({}, this.props, {
-        id: `${this.props.id}-paths`,
-        fp64: this.props.fp64
-      })),
+      new PathOutlineLayer(
+        this.getSubLayerProps(
+          Object.assign({}, this.props, {
+            id: 'paths',
+            fp64: this.props.fp64
+          })
+        )
+      ),
       new this.props.MarkerLayer(
         this.getSubLayerProps(
           Object.assign({}, this.props.markerLayerProps, {

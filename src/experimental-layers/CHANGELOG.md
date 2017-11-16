@@ -1,3 +1,5 @@
+0.0.10
+- Use getSubLayerProps
 0.0.9
 - Fix arrows when using COORDINATE_SYSTEM.METER_OFFSETS
 0.0.8
