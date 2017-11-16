@@ -23,6 +23,9 @@ For Earlier Beta Releases see below
 
 ### deck.gl v4.2 Beta Releases
 
+#### [4.2.0-alpha.22] - Nov 15
+- Fixes for updateTriggers
+
 #### [4.2.0-alpha.21] - Nov 15
 - Fix bug in layer.js
 - Create and use getSubLayerProps()

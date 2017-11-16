@@ -73,7 +73,12 @@ export default class PolygonLayer extends CompositeLayer {
   }
 
   updateState({oldProps, props, changeFlags}) {
-    if (changeFlags.dataChanged) {
+    const geometryChanged = changeFlags.dataChanged ||
+      (changeFlags.updateTriggersChanged && (
+        changeFlags.updateTriggersChanged.all ||
+        changeFlags.updateTriggersChanged.getPolygon));
+
+    if (geometryChanged) {
       const {data, getPolygon} = this.props;
       this.state.paths = [];
       data.forEach(object => {
