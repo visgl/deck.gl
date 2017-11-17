@@ -57,7 +57,7 @@ import TransitionManager from './lib/transition-manager';
 import {extractViewportFrom} from './lib/viewport-transition-utils';
 
 // Layer utilities
-import log from './utils/log';
+import {default as log} from './utils/log';
 import {get} from './lib/utils/get';
 import {count} from './lib/utils/count';
 

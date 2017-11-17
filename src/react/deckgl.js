@@ -20,8 +20,8 @@
 
 import React, {createElement, cloneElement} from 'react';
 import autobind from './utils/autobind';
-import {experimental, log} from '../core';
-const {DeckGLJS} = experimental;
+import {experimental} from '../core';
+const {DeckGLJS, log} = experimental;
 
 export default class DeckGL extends React.Component {
 
