@@ -1,6 +1,7 @@
 /* global, window */
 import React, {Component, PropTypes} from 'react';
 import DeckGL, {ScatterplotLayer} from 'deck.gl';
+import {isWebGL2} from 'luma.gl';
 
 import WindLayer from './layers/wind-layer/wind-layer';
 import DelaunayCoverLayer from './layers/delaunay-cover-layer/delaunay-cover-layer';
@@ -21,7 +22,8 @@ export default class WindDemo extends Component {
     super(props);
 
     this.state = {
-      data: null
+      data: null,
+      webGL2Supported: true
     };
 
     const particleState = {particleTime: 0};
@@ -56,9 +58,23 @@ export default class WindDemo extends Component {
     this._particleAnimation.stop();
   }
 
+  _onWebGLInitialized(gl) {
+    const webGL2Supported = isWebGL2(gl);
+    this.setState({webGL2Supported});
+  }
+
   render() {
+    const {data, webGL2Supported} = this.state;
+    if (!webGL2Supported) {
+      return (
+        <div style={{
+          display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh'
+        }}>
+          <h2> {'THIS DEMO REQUIRES WEBLG2, BUT YOUR BRWOSER DOESN\'T SUPPORT IT'} </h2>
+        </div>
+      );
+    }
     const {viewport, settings} = this.props;
-    const {data} = this.state;
 
     if (!data) {
       return null;
@@ -112,6 +128,7 @@ export default class WindDemo extends Component {
         {...viewport}
         layers={layers}
         useDevicePixels={settings.useDevicePixels}
+        onWebGLInitialized={this._onWebGLInitialized.bind(this)}
       />
     );
   }
