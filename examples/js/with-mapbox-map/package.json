@@ -7,7 +7,6 @@
   "dependencies": {
     "d3-request": "^1.0.5",
     "deck.gl": ">=4.2.0-alpha.9",
-    "luma.gl": ">=4.1.0-alpha.2",
     "mapbox-gl": "0.38.0",
     "stats.js": "^0.17.0"
   },
