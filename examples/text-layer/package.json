@@ -8,7 +8,6 @@
     "d3-request": "^1.0.5",
     "deck.gl": "^4.2.0-alpha.12",
     "loglevel": "^1.4.1",
-    "luma.gl": "^4.1.0-alpha.6",
     "react": "^15.4.1",
     "react-dom": "^15.4.1",
     "react-map-gl": ">=3.0.0-beta.1",

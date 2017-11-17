@@ -10,7 +10,6 @@
     "d3-request": "^1.0.5",
     "d3-scale": "^1.0.6",
     "deck.gl": "^4.2.0-alpha.15",
-    "luma.gl": "^4.1.0-alpha.6",
     "react": "^15.4.1",
     "react-dom": "^15.4.1",
     "react-map-gl": "^3.0.0",
