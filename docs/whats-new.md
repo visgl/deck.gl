@@ -35,19 +35,24 @@ deck.gl's controller classes have been significantly refactored, providing you w
 TBA...
 
 
-## Automatic Highlighting of Hovered Elements
+## DeckGL: Control over DevicePixelRatio
 
-Three new `Layer` props (`autoHighlight`, `highlightColor` and `highlightedObjectIndex`) have been added to enable simple and efficient highlighting of a single object in a layer. Highlighting is either automatic on hover, or programmatically controlled through specifying the index of the selected object. The actual highlighting is done on the GPU and this feature is thus very performant, in particular as it lets applications avoid cumbersome techniques like modifying data or using a secondary layer for highlighting.
-
-
-## Control over DevicePixelRatio
-
-The new `useDevicePixelRatio` prop on the `DeckGL` React component can be used to disable usage of full resolution on retina/HD displays. Disabling deck.gl's default behavior of always rendering at maximum device resolution can reduce the render buffer size with a factor of 4x on retina devices and lead to significant performance improvements on typical fragment shader bound rendering. This option can be especially interesting on "retina" type mobile phone displays where pixels are so small that the visual quality loss may be largely imperceptible.
+The new `useDevicePixels` prop on the `DeckGL` React component can be used to disable usage of full resolution on retina/HD displays. Disabling deck.gl's default behavior of always rendering at maximum device resolution can reduce the render buffer size with a factor of 4x on retina devices and lead to significant performance improvements on typical fragment shader bound rendering. This option can be especially interesting on "retina" type mobile phone displays where pixels are so small that the visual quality loss may be largely imperceptible.
 
 
-## Layer Filtering
+## DeckGL: Layer Filtering
 
 A new `DeckGL` prop `layerFilter` gives the application an opportunity to filter out layers from the layer list during rendering and/or picking. Filtering can be done per viewport or per layer or both. This enables techniques like adding helper layers that work as masks during picking but do not show up during rendering, or rendering different additional information in different viewports.
+
+
+## DeckGL: Picking methods renamed
+
+To avoid confusion, `DeckGL.queryObject` is renamed to `DeckGL.pickObject` and `DeckGL.queryVisibleObjects` is renamed to `DeckGL.pickObjects`. Old functions are still supported with deprecated warning, and will be removed in next version.
+
+
+## Layer: Automatic Highlighting of Hovered Elements
+
+Three new `Layer` props (`autoHighlight`, `highlightColor` and `highlightedObjectIndex`) have been added to enable simple and efficient highlighting of a single object in a layer. Highlighting is either automatic on hover, or programmatically controlled through specifying the index of the selected object. The actual highlighting is done on the GPU and this feature is thus very performant, in particular as it lets applications avoid cumbersome techniques like modifying data or using a secondary layer for highlighting.
 
 
 ## CompositeLayer: Property Forwarding Support
@@ -57,18 +62,17 @@ A new method `CompositeLayer.getSubLayerProps()` simplifies forwarding base laye
 
 ## PathLayer & GeoJsonLayer: Dashed Line Support
 
-Added new props (`getDashArray` and `justified`) enabling you render paths as dashed lines. Naturally these props are also accessible in composite layers built on top of the `PathLayer`, such as the `GeoJsonLayer`.
+Added new props (`getDashArray` and `dashJustified`) enabling you render paths as dashed lines. Naturally these props are also accessible in composite layers built on top of the `PathLayer`, such as the `GeoJsonLayer`.
 
 
 ## HexagonLayer / GridLayer: Elevation by Value Support
 
 Add `getElevationValue` to `HexagonLayer` and `GridLayer` to enable elevation aggregation by value. This allow both color and elevation to be calculated based on customized aggregation function.
 
-
 ## Shader Modules
 
 * Shader module documentation is much improved, both in deck.gl and luma.gl. In the deck.gl docs, shader modules are listed in the "API Reference" section, after the JavaScript classes.
-* The `project` module provides a new function `project_pixel_to_clipspace` for screen space calculations that takes variables like `useDevicePixelRatio` and "focal distance" into account, making pixel space calculation simpler and less prone to fail when parameters change.
+* The `project` module provides a new function `project_pixel_to_clipspace` for screen space calculations that takes variables like `useDevicePixels` and "focal distance" into account, making pixel space calculation simpler and less prone to fail when parameters change.
 * The core deck.gl shader modules (`project` etc) now conform to the luma.gl shadertools conventions, making this module easier to describe and use. In spite of these changes, backwards compatible uniforms are of course provided to ensure that existing layers do not break.
 
 

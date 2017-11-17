@@ -83,10 +83,9 @@ Some profiling techniques:
 ## Common Issues
 
 A couple of particular things to watch out for that tend to have a big impact on performance:
-* Be careful when enabling Retina/High DPI rendering. It generetes 4x the number of pixels (fragments) and can have a big performance impact that depends on which computer or monitor is being used. This feature can be controlled using `useDevicePixelRatio` prop of `DeckGL` component.
+* If not needed disable Retina/High DPI rendering. It generetes 4x the number of pixels (fragments) and can have a big performance impact that depends on which computer or monitor is being used. This feature can be controlled using `useDevicePixels` prop of `DeckGL` component and it is on by default.
 
 * Avoid using luma.gl debug mode in production. It queries the GPU error status after each operation which has a big impact on performance.
 
 Smaller considerations:
 * Enabling picking can have a small performance penalty so make sure the `pickable` property is `false` in layers that do not need picking (this is the default value).
-

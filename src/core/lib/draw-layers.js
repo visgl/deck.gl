@@ -28,9 +28,9 @@ const LOG_PRIORITY_DRAW = 2;
 let renderCount = 0;
 
 // TODO - Exported for pick-layers.js - Move to util?
-export const getPixelRatio = ({useDevicePixelRatio}) => {
-  assert(typeof useDevicePixelRatio === 'boolean', 'Invalid useDevicePixelRatio');
-  return useDevicePixelRatio && typeof window !== 'undefined' ? window.devicePixelRatio : 1;
+export const getPixelRatio = ({useDevicePixels}) => {
+  assert(typeof useDevicePixels === 'boolean', 'Invalid useDevicePixels');
+  return useDevicePixels && typeof window !== 'undefined' ? window.devicePixelRatio : 1;
 };
 
 // Convert viewport top-left CSS coordinates to bottom up WebGL coordinates
@@ -49,8 +49,8 @@ const getGLViewport = (gl, {viewport, pixelRatio}) => {
 
 // Helper functions
 
-function clearCanvas(gl, {useDevicePixelRatio}) {
-  // const pixelRatio = getPixelRatio({useDevicePixelRatio});
+function clearCanvas(gl, {useDevicePixels}) {
+  // const pixelRatio = getPixelRatio({useDevicePixels});
   const width = gl.drawingBufferWidth;
   const height = gl.drawingBufferHeight;
   // clear depth and color buffers, restoring transparency
@@ -64,7 +64,7 @@ export function drawLayers(gl, {
   layers,
   viewports,
   onViewportActive,
-  useDevicePixelRatio,
+  useDevicePixels,
   drawPickingColors = false,
   deviceRect = null,
   parameters = {},
@@ -72,7 +72,7 @@ export function drawLayers(gl, {
   pass = 'draw',
   redrawReason = ''
 }) {
-  clearCanvas(gl, {useDevicePixelRatio});
+  clearCanvas(gl, {useDevicePixels});
 
   // effectManager.preDraw();
 
@@ -86,7 +86,7 @@ export function drawLayers(gl, {
     drawLayersInViewport(gl, {
       layers,
       viewport,
-      useDevicePixelRatio,
+      useDevicePixels,
       drawPickingColors,
       deviceRect,
       parameters,
@@ -105,7 +105,7 @@ export function drawPickingBuffer(gl, {
   layers,
   viewports,
   onViewportActive,
-  useDevicePixelRatio,
+  useDevicePixels,
   pickingFBO,
   deviceRect: {x, y, width, height},
   layerFilter = null,
@@ -127,7 +127,7 @@ export function drawPickingBuffer(gl, {
       layers,
       viewports,
       onViewportActive,
-      useDevicePixelRatio,
+      useDevicePixels,
       drawPickingColors: true,
       layerFilter,
       pass: 'picking',
@@ -149,7 +149,7 @@ export function drawPickingBuffer(gl, {
 function drawLayersInViewport(gl, {
   layers,
   viewport,
-  useDevicePixelRatio,
+  useDevicePixels,
   drawPickingColors = false,
   deviceRect = null,
   parameters = {},
@@ -157,7 +157,7 @@ function drawLayersInViewport(gl, {
   pass = 'draw',
   redrawReason = ''
 }) {
-  const pixelRatio = getPixelRatio({useDevicePixelRatio});
+  const pixelRatio = getPixelRatio({useDevicePixels});
   const glViewport = getGLViewport(gl, {viewport, pixelRatio});
 
   // render layers in normal colors

@@ -73,7 +73,7 @@ To have better picking arbitration when using “color-coded” picking, we need
 
 ### Proposal: Rectangular selection using color-coding picking
 
-The process of rectangular selection starts with correctly identifying a mouse down, mouse drag and mouse up event sequence. deck.gl will rely on its new event handling system to detect this kind of gesture. Then, a new deck.gl method named `queryVisibleObjects(topLeft, bottomRight)` is triggered to calculate the actual picked elements. In this new function, the picking framebuffer is read back and pixels within the rectangle area specified by the` topLeft` and `bottomRight` arguments are checked in a loop. Indices of rendered element present in this rectangular picking area will then by put into an array for output.
+The process of rectangular selection starts with correctly identifying a mouse down, mouse drag and mouse up event sequence. deck.gl will rely on its new event handling system to detect this kind of gesture. Then, a new deck.gl method named `pickObjects(topLeft, bottomRight)` is triggered to calculate the actual picked elements. In this new function, the picking framebuffer is read back and pixels within the rectangle area specified by the` topLeft` and `bottomRight` arguments are checked in a loop. Indices of rendered element present in this rectangular picking area will then by put into an array for output.
 
 After the array of picked elements is assembled, a callback function send in as the `onElementSelected` prop of deck.gl will get called and so that the application could manipulate the list of picked elements.
 

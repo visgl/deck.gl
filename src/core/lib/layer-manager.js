@@ -48,7 +48,7 @@ const initialContext = {
   layerFilter: null,
   viewportChanged: true,
   pickingFBO: null,
-  useDevicePixelRatio: true,
+  useDevicePixels: true,
   lastPickedInfo: {
     index: -1,
     layerId: null
@@ -159,7 +159,7 @@ export default class LayerManager {
   /**
    * Set parameters needed for layer rendering and picking.
    * Parameters are to be passed as a single object, with the following values:
-   * @param {Boolean} useDevicePixelRatio
+   * @param {Boolean} useDevicePixels
    */
   setParameters(parameters) {
     if ('eventManager' in parameters) {
@@ -238,14 +238,14 @@ export default class LayerManager {
   }
 
   drawLayers({pass = 'render to screen', redrawReason = 'unknown reason'} = {}) {
-    const {gl, useDevicePixelRatio, drawPickingColors} = this.context;
+    const {gl, useDevicePixels, drawPickingColors} = this.context;
 
     // render this viewport
     drawLayers(gl, {
       layers: this.layers,
       viewports: this.getViewports(),
       onViewportActive: this._activateViewport.bind(this),
-      useDevicePixelRatio,
+      useDevicePixels,
       drawPickingColors,
       pass,
       layerFilter: this.context.layerFilter,
@@ -255,7 +255,7 @@ export default class LayerManager {
 
   // Pick the closest info at given coordinate
   pickObject({x, y, mode, radius = 0, layerIds, layerFilter}) {
-    const {gl, useDevicePixelRatio} = this.context;
+    const {gl, useDevicePixels} = this.context;
 
     const layers = this.getLayers({layerIds});
 
@@ -272,13 +272,13 @@ export default class LayerManager {
       onViewportActive: this._activateViewport.bind(this),
       pickingFBO: this._getPickingBuffer(),
       lastPickedInfo: this.context.lastPickedInfo,
-      useDevicePixelRatio
+      useDevicePixels
     });
   }
 
   // Get all unique infos within a bounding box
   pickObjects({x, y, width, height, layerIds, layerFilter}) {
-    const {gl, useDevicePixelRatio} = this.context;
+    const {gl, useDevicePixels} = this.context;
 
     const layers = this.getLayers({layerIds});
 
@@ -295,7 +295,7 @@ export default class LayerManager {
       viewports: this.getViewports(),
       onViewportActive: this._activateViewport.bind(this),
       pickingFBO: this._getPickingBuffer(),
-      useDevicePixelRatio
+      useDevicePixels
     });
   }
 

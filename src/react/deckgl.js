@@ -20,7 +20,7 @@
 
 import React, {createElement, cloneElement} from 'react';
 import autobind from './utils/autobind';
-import {experimental} from '../core';
+import {experimental, log} from '../core';
 const {DeckGLJS} = experimental;
 
 export default class DeckGL extends React.Component {
@@ -47,12 +47,22 @@ export default class DeckGL extends React.Component {
 
   // Public API
 
-  queryObject({x, y, radius = 0, layerIds = null}) {
-    return this.deck.queryObject({x, y, radius, layerIds});
+  queryObject(opts) {
+    log.deprecated('queryObject', 'pickObject');
+    return this.deck.pickObject(opts);
   }
 
-  queryVisibleObjects({x, y, width = 1, height = 1, layerIds = null}) {
-    return this.deck.queryVisibleObjects({x, y, width, height, layerIds});
+  pickObject({x, y, radius = 0, layerIds = null}) {
+    return this.deck.pickObject({x, y, radius, layerIds});
+  }
+
+  queryVisibleObjects(opts) {
+    log.deprecated('queryVisibleObjects', 'pickObjects');
+    return this.pickObjects(opts);
+  }
+
+  pickObjects({x, y, width = 1, height = 1, layerIds = null}) {
+    return this.deck.pickObjects({x, y, width, height, layerIds});
   }
 
   // Private Helpers

@@ -47,7 +47,7 @@ export default class ControlPanel extends Component {
         { this._renderToggle('showParticles', 'particles') }
         { this._renderToggle('showWind', 'field') }
         { this._renderToggle('showElevation', 'elevation') }
-        { this._renderToggle('useDevicePixelRatio', 'retina') }
+        { this._renderToggle('useDevicePixels', 'Retina/HD') }
         { this._renderSlider('time', 'time', {min: 0, max: 70, step: 0.1}) }
       </div>
     );

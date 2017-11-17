@@ -49,7 +49,7 @@ const propTypes = {
   onAfterRender: PropTypes.func,
   onLayerClick: PropTypes.func,
   onLayerHover: PropTypes.func,
-  useDevicePixelRatio: PropTypes.bool,
+  useDevicePixels: PropTypes.bool,
 
   // Debug settings
   debug: PropTypes.bool,
@@ -69,7 +69,7 @@ const defaultProps = {
   onAfterRender: noop,
   onLayerClick: null,
   onLayerHover: null,
-  useDevicePixelRatio: true,
+  useDevicePixels: true,
 
   debug: false,
   drawPickingColors: false
@@ -93,12 +93,12 @@ export default class DeckGLJS {
 
     this.canvas = this._createCanvas(props);
 
-    const {width, height, gl, glOptions, debug, useDevicePixelRatio} = props;
+    const {width, height, gl, glOptions, debug, useDevicePixels} = props;
 
     this.animationLoop = new AnimationLoop({
       width,
       height,
-      useDevicePixelRatio,
+      useDevicePixelRatio: useDevicePixels,
       onCreateContext: opts =>
         gl || createGLContext(Object.assign({}, glOptions, {canvas: this.canvas, debug})),
       onInitialize: this._onRendererInitialized,
@@ -125,7 +125,7 @@ export default class DeckGLJS {
       pickingRadius,
       onLayerClick,
       onLayerHover,
-      useDevicePixelRatio,
+      useDevicePixels,
       drawPickingColors,
       layerFilter
     } = props;
@@ -143,7 +143,7 @@ export default class DeckGLJS {
     this.layerManager.setParameters({
       layers,
       viewports,
-      useDevicePixelRatio,
+      useDevicePixels,
       drawPickingColors,
       layerFilter,
       pickingRadius,
@@ -153,7 +153,7 @@ export default class DeckGLJS {
 
     // TODO - unify setParameters/setOptions/setProps etc naming.
     this.animationLoop.setViewParameters({
-      useDevicePixelRatio
+      useDevicePixelRatio: useDevicePixels
     });
   }
 
@@ -169,12 +169,12 @@ export default class DeckGLJS {
 
   // Public API
 
-  queryObject({x, y, radius = 0, layerIds = null}) {
+  pickObject({x, y, radius = 0, layerIds = null}) {
     const selectedInfos = this.layerManager.pickObject({x, y, radius, layerIds, mode: 'query'});
     return selectedInfos.length ? selectedInfos[0] : null;
   }
 
-  queryVisibleObjects({x, y, width = 1, height = 1, layerIds = null}) {
+  pickObjects({x, y, width = 1, height = 1, layerIds = null}) {
     return this.layerManager.pickObjects({x, y, width, height, layerIds});
   }
 

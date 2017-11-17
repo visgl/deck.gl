@@ -172,7 +172,7 @@ export default class PolygonLayer extends CompositeLayer {
           widthMaxPixels: lineWidthMaxPixels,
           rounded: lineJointRounded,
           miterLimit: lineMiterLimit,
-          justified: lineDashJustified,
+          dashJustified: lineDashJustified,
 
           getPath: x => x.path,
           getColor: x => getLineColor(x.object),
