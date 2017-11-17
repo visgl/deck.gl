@@ -23,6 +23,10 @@ For Earlier Beta Releases see below
 
 ### deck.gl v4.2 Beta Releases
 
+#### [4.2.0-alpha.23] - Nov 17
+-Fix log import errors (#1169)
+-WindDemo: Display a warning when run on non webgl2 browsers. (#1166)
+
 #### [4.2.0-alpha.23] - Nov 16
 - Fix module import (#1168)
 - Remove luma.gl dependency in package.json to avoid conflict with deck.gl (#1164)
