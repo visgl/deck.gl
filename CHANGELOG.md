@@ -23,6 +23,12 @@ For Earlier Beta Releases see below
 
 ### deck.gl v4.2 Beta Releases
 
+#### [4.2.0-alpha.23] - Nov 16
+- Fix module import (#1168)
+- Remove luma.gl dependency in package.json to avoid conflict with deck.gl (#1164)
+- Fix the bug of distance calculation in orbit controller (#1163)
+- Part-1 : 4.2 API changes as per Audit. (#1158)
+
 #### [4.2.0-alpha.22] - Nov 15
 - Fixes for updateTriggers
 
