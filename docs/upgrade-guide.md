@@ -4,12 +4,28 @@
 
 ### Layer Props
 
-Coordinate system related props have been renamed for clarity
+Coordinate system related props have been renamed for clarity.
 
 | Layer            | Old Prop           | New Prop             | Comment |
 | ---              | ---                | ---                  | ---     |
 | Layer            | `projectionMode`   | `coordinateSystem`   | Any constant from `COORDINATE_SYSTEM`  |
 | Layer            | `projectionOrigin` | `coordinateOrigin`   | |
+
+
+### DeckGL component
+
+Following methods and props have been renamed for clarity.
+
+
+| Old Method            | New Method        | Comment |
+| ---                   | ---               | ---     |
+| `queryVisibleObjects` | `pickObjects`     | |
+| `queryObject`         | `pickObject`      | |
+
+
+| Old Prop              | New Props         | Comment |
+| ---                   | ---               | ---     |
+| `useDevicePixelRatio` | `useDevicePixels` | |
 
 
 ### Viewports
