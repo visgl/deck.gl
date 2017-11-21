@@ -23,7 +23,11 @@ For Earlier Beta Releases see below
 
 ### deck.gl v4.2 Beta Releases
 
-#### [4.2.0-alpha.23] - Nov 17
+#### [4.2.0-alpha.25] - Nov 20
+- Part-2 : 4.2 API changes as per Audit (#1170)
+- Bump luma.gl peer dependency to '4.1.0-alpha.9'
+
+#### [4.2.0-alpha.24] - Nov 17
 -Fix log import errors (#1169)
 -WindDemo: Display a warning when run on non webgl2 browsers. (#1166)
 
