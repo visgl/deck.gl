@@ -205,7 +205,7 @@ export default class DeckGLJS {
   _onRendererInitialized({gl, canvas}) {
     setParameters(gl, {
       blend: true,
-      blendFuncSeparate: [GL.SRC_ALPHA, GL.ONE_MINUS_SRC_ALPHA, GL.ONE, GL.ONE_MINUS_SRC_ALPHA],
+      blendFunc: [GL.SRC_ALPHA, GL.ONE_MINUS_SRC_ALPHA],
       polygonOffsetFill: true
     });
 
