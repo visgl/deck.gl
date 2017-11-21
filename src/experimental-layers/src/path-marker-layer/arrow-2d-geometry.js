@@ -11,7 +11,8 @@ export default class Arrow2DGeometry extends Geometry {
 function getArrowAttributes({
   length = 1,
   headSize = 0.2,
-  tailWidth = 0.05
+  tailWidth = 0.05,
+  tailStart = 0.05
 }) {
   const texCoords = [
     // HEAD
@@ -19,11 +20,11 @@ function getArrowAttributes({
     0.5 - headSize / 2, 1.0 - headSize, 0,
     0.5 + headSize / 2, 1.0 - headSize, 0,
 
-    0.5 - tailWidth / 2, 0, 0,
+    0.5 - tailWidth / 2, tailStart, 0,
     0.5 + tailWidth / 2, 1.0 - headSize, 0,
-    0.5 + tailWidth / 2, 0, 0,
+    0.5 + tailWidth / 2, tailStart, 0,
 
-    0.5 - tailWidth / 2, 0, 0,
+    0.5 - tailWidth / 2, tailStart, 0,
     0.5 - tailWidth / 2, 1.0 - headSize, 0,
     0.5 + tailWidth / 2, 1.0 - headSize, 0
   ];

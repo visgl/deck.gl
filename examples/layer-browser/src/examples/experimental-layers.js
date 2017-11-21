@@ -77,7 +77,7 @@ const PathMarkerExampleMeterData = new Array(10).fill(true).map(
       [Math.random() * 9000, Math.random() * 9000],
       [Math.random() * 9000, Math.random() * 9000]
     ],
-    direction: true
+    direction: {forward: Math.random() >= 0.5, backward: Math.random() >= 0.5}
   })
 );
 const PathMarkerExampleMeter = {
