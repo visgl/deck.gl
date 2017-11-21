@@ -322,7 +322,7 @@ export default class MapState extends ViewState {
 
   _unproject(pos) {
     const viewport = new PerspectiveMercatorViewport(this._viewportProps);
-    return pos && viewport.unproject(pos, {topLeft: false});
+    return pos && viewport.unproject(pos, {topLeft: true});
   }
 
   // Calculate a new lnglat based on pixel dragging position

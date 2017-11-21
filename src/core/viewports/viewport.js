@@ -204,7 +204,7 @@ export default class Viewport {
    * @param {Object} opts.topLeft=true - Whether projected coords are top left
    * @return {Array} - [x, y] or [x, y, z] in top left coords
    */
-  project(xyz, {topLeft = false} = {}) {
+  project(xyz, {topLeft = true} = {}) {
     const [x0, y0, z0 = 0] = xyz;
     assert(Number.isFinite(x0) && Number.isFinite(y0) && Number.isFinite(z0), ERR_ARGUMENT);
 
@@ -212,7 +212,7 @@ export default class Viewport {
     const v = transformVector(this.pixelProjectionMatrix, [X, Y, z0, 1]);
 
     const [x, y] = v;
-    const y2 = topLeft ? this.height - y : y;
+    const y2 = topLeft ? y : this.height - y;
     return xyz.length === 2 ? [x, y2] : [x, y2, 0];
   }
 
@@ -222,12 +222,14 @@ export default class Viewport {
    * - [x, y] => [lng, lat]
    * - [x, y, z] => [lng, lat, Z]
    * @param {Array} xyz -
+   * @param {Object} opts - options
+   * @param {Object} opts.topLeft=true - Whether origin is top left
    * @return {Array|null} - [lng, lat, Z] or [X, Y, Z]
    */
-  unproject(xyz, {topLeft = false} = {}) {
+  unproject(xyz, {topLeft = true} = {}) {
     const [x, y, targetZ = 0] = xyz;
 
-    const y2 = topLeft ? this.height - y : y;
+    const y2 = topLeft ? y : this.height - y;
 
     // since we don't know the correct projected z value for the point,
     // unproject two points to get a line and then find the point on that line with z=0
