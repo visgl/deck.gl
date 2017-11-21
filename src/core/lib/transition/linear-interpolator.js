@@ -1,7 +1,7 @@
 import assert from 'assert';
 import TransitionInterpolator from './transition-interpolator';
 
-import {isValid, lerp, isWrappedAngularProp} from './transition-utils';
+import {isValid, lerp, getEndValueByShortestPath} from './transition-utils';
 
 const VIEWPORT_TRANSITION_PROPS = ['longitude', 'latitude', 'zoom', 'bearing', 'pitch'];
 
@@ -18,20 +18,29 @@ export default class LinearInterpolator extends TransitionInterpolator {
     this.propNames = transitionProps;
   }
 
-  interpolateProps(startProps, endProps, t) {
-    const viewport = {};
+  initializeProps(startProps, endProps) {
+    const startViewportProps = {};
+    const endViewportProps = {};
 
     for (const key of this.propNames) {
       const startValue = startProps[key];
-      let endValue = endProps[key];
-      assert(isValid(startValue));
-      assert(isValid(endValue));
+      const endValue = endProps[key];
+      assert(isValid(startValue) && isValid(endValue), `${key} must be supplied for transition`);
 
-      if (isWrappedAngularProp(key) && Math.abs(endValue - startValue) > 180) {
-        endValue = (endValue < 0) ? endValue + 360 : endValue - 360;
-      }
+      startViewportProps[key] = startValue;
+      endViewportProps[key] = getEndValueByShortestPath(key, startValue, endValue);
+    }
 
-      viewport[key] = lerp(startValue, endValue, t);
+    return {
+      start: startViewportProps,
+      end: endViewportProps
+    };
+  }
+
+  interpolateProps(startProps, endProps, t) {
+    const viewport = {};
+    for (const key of this.propNames) {
+      viewport[key] = lerp(startProps[key], endProps[key], t);
     }
     return viewport;
   }

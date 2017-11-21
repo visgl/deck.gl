@@ -19,6 +19,17 @@ export default class TransitionInterpolator {
   }
 
   /**
+   * Called before transition starts to validate/pre-process start and end props
+   * @param startProps {object} - a list of starting viewport props
+   * @param endProps {object} - a list of target viewport props
+   * @returns {Object} {start, end} - start and end props to be passed
+   *   to `interpolateProps`
+   */
+  initializeProps(startProps, endProps) {
+    return {start: startProps, end: endProps};
+  }
+
+  /**
    * Returns viewport props in transition
    * @param startProps {object} - a list of starting viewport props
    * @param endProps {object} - a list of target viewport props

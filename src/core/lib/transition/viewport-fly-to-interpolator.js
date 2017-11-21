@@ -3,7 +3,7 @@ import TransitionInterpolator from './transition-interpolator';
 
 import {Vector2} from 'math.gl';
 import {projectFlat, unprojectFlat} from 'viewport-mercator-project';
-import {isValid, lerp} from './transition-utils';
+import {isValid, lerp, getEndValueByShortestPath} from './transition-utils';
 
 const EPSILON = 0.01;
 const VIEWPORT_TRANSITION_PROPS = ['longitude', 'latitude', 'zoom', 'bearing', 'pitch'];
@@ -25,6 +25,32 @@ export default class ViewportFlyToInterpolator extends TransitionInterpolator {
     this.propNames = VIEWPORT_TRANSITION_PROPS;
   }
 
+  initializeProps(startProps, endProps) {
+    const startViewportProps = {};
+    const endViewportProps = {};
+
+    // Check minimum required props
+    for (const key of REQUIRED_PROPS) {
+      const startValue = startProps[key];
+      const endValue = endProps[key];
+      assert(isValid(startValue) && isValid(endValue), `${key} must be supplied for transition`);
+      startViewportProps[key] = startValue;
+      endViewportProps[key] = getEndValueByShortestPath(key, startValue, endValue);
+    }
+
+    for (const key of LINEARLY_INTERPOLATED_PROPS) {
+      const startValue = startProps[key] || 0;
+      const endValue = endProps[key] || 0;
+      startViewportProps[key] = startValue;
+      endViewportProps[key] = getEndValueByShortestPath(key, startValue, endValue);
+    }
+
+    return {
+      start: startViewportProps,
+      end: endViewportProps
+    };
+  }
+
   interpolateProps(startProps, endProps, t) {
     return viewportFlyToInterpolator(startProps, endProps, t);
   }
@@ -43,12 +69,6 @@ function scaleToZoom(scale) {
 /* eslint-disable max-statements */
 function viewportFlyToInterpolator(startProps, endProps, t) {
   // Equations from above paper are referred where needed.
-
-  // Assert minimum required props
-  for (const key of REQUIRED_PROPS) {
-    assert(isValid(startProps[key]));
-    assert(isValid(endProps[key]));
-  }
 
   const viewport = {};
 
@@ -73,10 +93,7 @@ function viewportFlyToInterpolator(startProps, endProps, t) {
 
   // Linearly interpolate 'bearing' and 'pitch' if exist.
   for (const key of LINEARLY_INTERPOLATED_PROPS) {
-    if (isValid(startProps[key])) {
-      assert(isValid(endProps[key]));
-      viewport[key] = lerp(startProps[key], endProps[key], t);
-    }
+    viewport[key] = lerp(startProps[key], endProps[key], t);
   }
 
   // If change in center is too small, do linear interpolaiton.

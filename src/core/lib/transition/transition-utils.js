@@ -21,8 +21,15 @@ export function isValid(prop) {
   return Number.isFinite(prop) || Array.isArray(prop);
 }
 
-export function isWrappedAngularProp(propName) {
+function isWrappedAngularProp(propName) {
   return WRAPPED_ANGULAR_PROPS[propName];
+}
+
+export function getEndValueByShortestPath(propName, startValue, endValue) {
+  if (isWrappedAngularProp(propName) && Math.abs(endValue - startValue) > 180) {
+    endValue = (endValue < 0) ? endValue + 360 : endValue - 360;
+  }
+  return endValue;
 }
 
 // TODO/xiaoji: This should be merged with the controller's prop constraint system
