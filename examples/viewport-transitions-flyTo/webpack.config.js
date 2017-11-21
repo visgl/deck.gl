@@ -56,4 +56,4 @@ const config = {
 
 // Enables bundling against src in this repo rather than the installed version
 module.exports = env => env && env.local ?
-  require('../../webpack.config.local')(config)(env) : config;
+  require('../webpack.config.local')(config)(env) : config;
