@@ -98,7 +98,7 @@ export default class DeckGLJS {
     this.animationLoop = new AnimationLoop({
       width,
       height,
-      useDevicePixelRatio: useDevicePixels,
+      useDevicePixels,
       onCreateContext: opts =>
         gl || createGLContext(Object.assign({}, glOptions, {canvas: this.canvas, debug})),
       onInitialize: this._onRendererInitialized,
@@ -152,9 +152,7 @@ export default class DeckGLJS {
     });
 
     // TODO - unify setParameters/setOptions/setProps etc naming.
-    this.animationLoop.setViewParameters({
-      useDevicePixelRatio: useDevicePixels
-    });
+    this.animationLoop.setViewParameters({useDevicePixels});
   }
 
   finalize() {
