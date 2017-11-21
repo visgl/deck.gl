@@ -40,15 +40,6 @@ import vec2_negate from 'gl-vec2/negate';
 
 import assert from 'assert';
 
-const DEFAULT_MAP_STATE = {
-  latitude: 37,
-  longitude: -122,
-  zoom: 11,
-  pitch: 0,
-  bearing: 0,
-  altitude: 1.5
-};
-
 const ERR_ARGUMENT = 'Illegal argument to WebMercatorViewport';
 
 export default class WebMercatorViewport extends Viewport {
@@ -60,31 +51,20 @@ export default class WebMercatorViewport extends Viewport {
    */
   /* eslint-disable complexity, max-statements */
   constructor(opts = {}) {
-    let {
-      width,
-      height,
-      latitude,
-      longitude,
-      zoom,
-      pitch,
-      bearing,
-      altitude
-    } = opts;
-
     const {
-      // x, y, position, ...
+      latitude = 0,
+      longitude = 0,
+      zoom = 11,
+      pitch = 0,
+      bearing = 0,
       farZMultiplier = 10
     } = opts;
 
-    // Viewport - support undefined arguments
-    width = width !== undefined ? width : DEFAULT_MAP_STATE.width;
-    height = height !== undefined ? height : DEFAULT_MAP_STATE.height;
-    zoom = zoom !== undefined ? zoom : DEFAULT_MAP_STATE.zoom;
-    latitude = latitude !== undefined ? latitude : DEFAULT_MAP_STATE.latitude;
-    longitude = longitude !== undefined ? longitude : DEFAULT_MAP_STATE.longitude;
-    bearing = bearing !== undefined ? bearing : DEFAULT_MAP_STATE.bearing;
-    pitch = pitch !== undefined ? pitch : DEFAULT_MAP_STATE.pitch;
-    altitude = altitude !== undefined ? altitude : DEFAULT_MAP_STATE.altitude;
+    let {
+      width,
+      height,
+      altitude = 1.5
+    } = opts;
 
     // Silently allow apps to send in 0,0 to facilitate isomorphic render etc
     width = width || 1;
@@ -98,7 +78,6 @@ export default class WebMercatorViewport extends Viewport {
       width,
       height,
       pitch,
-      bearing,
       altitude,
       farZMultiplier
     });
@@ -108,11 +87,7 @@ export default class WebMercatorViewport extends Viewport {
     // the layer's center position. This makes rotations and other modelMatrx
     // transforms much more useful.
     const viewMatrixUncentered = getUncenteredViewMatrix({
-      width,
       height,
-      longitude,
-      latitude,
-      zoom,
       pitch,
       bearing,
       altitude
