@@ -1,15 +1,8 @@
 /* global requestAnimationFrame, cancelAnimationFrame */
 import assert from 'assert';
-import {
-  viewportLinearInterpolator,
-  extractViewportFrom,
-  areViewportsEqual
-} from './viewport-transition-utils';
+import {extractViewportFrom, LinearInterpolator} from './transition';
 
 const noop = () => {};
-
-const VIEWPORT_TRANSITION_PROPS =
-  ['longitude', 'latitude', 'zoom', 'bearing', 'pitch'];
 
 export const TRANSITION_EVENTS = {
   BREAK: 1,
@@ -20,9 +13,8 @@ export const TRANSITION_EVENTS = {
 const DEFAULT_PROPS = {
   transitionDuration: 0,
   transitionEasing: t => t,
-  transitionInterpolator: viewportLinearInterpolator,
+  transitionInterpolator: new LinearInterpolator(),
   transitionInterruption: TRANSITION_EVENTS.BREAK,
-  transitionProps: VIEWPORT_TRANSITION_PROPS,
   onTransitionStart: noop,
   onTransitionInterrupt: noop,
   onTransitionEnd: noop
@@ -30,9 +22,9 @@ const DEFAULT_PROPS = {
 
 const DEFAULT_STATE = {
   animation: null,
-  viewport: null,
-  startViewport: null,
-  endViewport: null
+  propsInTransition: null,
+  startProps: null,
+  endProps: null
 };
 
 export default class TransitionManager {
@@ -45,39 +37,36 @@ export default class TransitionManager {
 
   // Returns current transitioned viewport.
   getViewportInTransition() {
-    return this.state.viewport;
+    return this.state.propsInTransition;
   }
 
   // Process the vewiport change, either ignore or trigger a new transiton.
   // Return true if a new transition is triggered, false otherwise.
   processViewportChange(nextProps) {
     let transitionTriggered = false;
-
-    // NOTE: Be cautious re-ordering statements in this function.
-    if (this._shouldIgnoreViewportChange(nextProps)) {
-      this.props = nextProps;
-      return transitionTriggered;
-    }
-
-    const isTransitionInProgress = this._isTransitionInProgress();
     const currentProps = this.props;
     // Set this.props here as '_triggerTransition' calls '_updateViewport' that uses this.props.
     this.props = nextProps;
 
-    if (this._isTransitionEnabled(nextProps)) {
-      const currentViewport = this.state.viewport || extractViewportFrom(currentProps);
-      const endViewport = this.state.endViewport;
+    // NOTE: Be cautious re-ordering statements in this function.
+    if (this._shouldIgnoreViewportChange(currentProps, nextProps)) {
+      return transitionTriggered;
+    }
 
-      const startViewport = this.state.interruption === TRANSITION_EVENTS.SNAP_TO_END ?
-        (endViewport || currentViewport) :
-        currentViewport;
+    const isTransitionInProgress = this._isTransitionInProgress();
+
+    if (this._isTransitionEnabled(nextProps)) {
+      const startProps = Object.assign({}, currentProps,
+        this.state.interruption === TRANSITION_EVENTS.SNAP_TO_END ?
+        this.state.endProps : (this.state.propsInTransition || currentProps)
+      );
 
       if (isTransitionInProgress) {
         currentProps.onTransitionInterrupt();
       }
-      this.props.onTransitionStart();
+      nextProps.onTransitionStart();
 
-      this._triggerTransition(startViewport);
+      this._triggerTransition(startProps, nextProps);
 
       transitionTriggered = true;
     } else if (isTransitionInProgress) {
@@ -91,60 +80,55 @@ export default class TransitionManager {
   // Helper methods
 
   _isTransitionInProgress() {
-    return this.state.viewport;
+    return this.state.propsInTransition;
   }
 
   _isTransitionEnabled(props) {
-    return props.transitionDuration > 0;
+    return props.transitionDuration > 0 && props.transitionInterpolator;
   }
 
-  _isUpdateDueToCurrentTransition(nextViewport) {
-    if (this.state.viewport) {
-      return areViewportsEqual(nextViewport, this.state.viewport);
+  _isUpdateDueToCurrentTransition(props) {
+    if (this.state.propsInTransition) {
+      return this.state.interpolator.arePropsEqual(props, this.state.propsInTransition);
     }
     return false;
   }
 
-  _shouldIgnoreViewportChange(nextProps) {
-    // Ignore update if it is due to current active transition.
-    // Ignore update if it is requested to be ignored
-    const nextViewport = extractViewportFrom(nextProps);
+  _shouldIgnoreViewportChange(currentProps, nextProps) {
     if (this._isTransitionInProgress()) {
-      if (this.state.interruption === TRANSITION_EVENTS.IGNORE ||
-        this._isUpdateDueToCurrentTransition(nextViewport)) {
-        return true;
-      }
-    } else if (!this._isTransitionEnabled(nextProps)) {
-      return true;
+      // Ignore update if it is requested to be ignored
+      return this.state.interruption === TRANSITION_EVENTS.IGNORE ||
+        // Ignore update if it is due to current active transition.
+        this._isUpdateDueToCurrentTransition(nextProps);
+    } else if (this._isTransitionEnabled(nextProps)) {
+      // Ignore if none of the viewport props changed.
+      return nextProps.transitionInterpolator.arePropsEqual(currentProps, nextProps);
     }
-
-    // Ignore if none of the viewport props changed.
-    if (areViewportsEqual(extractViewportFrom(this.props), nextViewport)) {
-      return true;
-    }
-
-    return false;
+    return true;
   }
 
-  _triggerTransition(startViewport) {
-    assert(this.props.transitionDuration !== 0);
-    const endViewport = extractViewportFrom(this.props);
-    this._updateAngles(startViewport, endViewport);
+  _triggerTransition(startProps, endProps) {
+    assert(this._isTransitionEnabled(endProps), 'Transition is not enabled');
 
     cancelAnimationFrame(this.state.animation);
 
+    const initialProps = endProps.transitionInterpolator.initializeProps(
+      startProps,
+      endProps
+    );
+
     this.state = {
       // Save current transition props
-      duration: this.props.transitionDuration,
-      easing: this.props.transitionEasing,
-      interpolator: this.props.transitionInterpolator,
-      interruption: this.props.transitionInterruption,
+      duration: endProps.transitionDuration,
+      easing: endProps.transitionEasing,
+      interpolator: endProps.transitionInterpolator,
+      interruption: endProps.transitionInterruption,
 
       startTime: Date.now(),
-      startViewport,
-      endViewport,
+      startProps: initialProps.start,
+      endProps: initialProps.end,
       animation: null,
-      viewport: startViewport
+      propsInTransition: {}
     };
 
     this._onTransitionFrame();
@@ -161,24 +145,10 @@ export default class TransitionManager {
     this.state = DEFAULT_STATE;
   }
 
-  // Update angle props so they take shortest interpolation path.
-  _updateAngles(startViewport, endViewport) {
-    const angularProps = ['longitude', 'bearing'];
-    angularProps.forEach((key) => {
-      if (Number.isFinite(startViewport[key])) {
-        assert(Number.isFinite(endViewport[key]));
-        if (Math.abs(endViewport[key] - startViewport[key]) > 180) {
-          endViewport[key] =
-            (endViewport[key] < 0) ? endViewport[key] + 360 : endViewport[key] - 360;
-        }
-      }
-    });
-  }
-
   _updateViewport() {
     // NOTE: Be cautious re-ordering statements in this function.
     const currentTime = Date.now();
-    const {startTime, duration, easing, interpolator, startViewport, endViewport} = this.state;
+    const {startTime, duration, easing, interpolator, startProps, endProps} = this.state;
 
     let shouldEnd = false;
     let t = (currentTime - startTime) / duration;
@@ -188,14 +158,14 @@ export default class TransitionManager {
     }
     t = easing(t);
 
-    const viewport = interpolator(startViewport, endViewport, t);
+    const viewport = interpolator.interpolateProps(startProps, endProps, t);
 
     // This extractViewportFrom gurantees angle props (bearing, longitude) are normalized
     // So when viewports are compared they are in same range.
-    this.state.viewport = extractViewportFrom(Object.assign({}, this.props, viewport));
+    this.state.propsInTransition = extractViewportFrom(Object.assign({}, this.props, viewport));
 
     if (this.props.onViewportChange) {
-      this.props.onViewportChange(this.state.viewport, {inTransition: true});
+      this.props.onViewportChange(this.state.propsInTransition, {inTransition: true});
     }
 
     if (shouldEnd) {

@@ -11,7 +11,8 @@ import {
   ThirdPersonViewport,
   WebMercatorViewport,
   PolygonLayer,
-  PointCloudLayer
+  PointCloudLayer,
+  LinearInterpolator
 } from 'deck.gl';
 
 import TripsLayer from '../../trips/trips-layer';
@@ -54,6 +55,10 @@ const DEFAULT_VIEWPORT_PROPS = {
   // direction: [-0.9, 0.5, 0], // Which direction is camera looking at, default origin
   up: [0, 0, 1] // Defines up direction, default positive y axis
 };
+
+const transitionInterpolator = new LinearInterpolator(
+  ['longitude', 'latitude', 'zoom', 'bearing', 'pitch', 'position']
+);
 
 class Root extends Component {
   constructor(props) {
@@ -313,7 +318,7 @@ class Root extends Component {
           height={viewportProps.height}
           onViewportChange={this._onViewportChange}
           transitionDuration={transitionDuration}
-          transitionProps={['longitude', 'latitude', 'zoom', 'bearing', 'pitch', 'position']}
+          transitionInterpolator={transitionInterpolator}
         >
           <DeckGL
             id="first-person"
