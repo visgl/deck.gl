@@ -33,9 +33,9 @@ import vec2_lerp from 'gl-vec2/lerp';
 const ZERO_VECTOR = [0, 0, 0];
 
 import {
-  getMercatorDistanceScales,
-  getMercatorWorldPosition,
-  getMercatorMeterZoom
+  getDistanceScales,
+  getWorldPosition,
+  getMeterZoom
 } from 'viewport-mercator-project';
 
 import assert from 'assert';
@@ -109,13 +109,13 @@ export default class Viewport {
 
     this.zoom = zoom;
     if (!Number.isFinite(this.zoom)) {
-      this.zoom = this.isGeospatial ? getMercatorMeterZoom({latitude}) : DEFAULT_ZOOM;
+      this.zoom = this.isGeospatial ? getMeterZoom({latitude}) : DEFAULT_ZOOM;
     }
     this.scale = Math.pow(2, this.zoom);
 
     // Calculate distance scales if lng/lat/zoom are provided
     this.distanceScales = this.isGeospatial ?
-      getMercatorDistanceScales({latitude, longitude, scale: this.scale}) :
+      getDistanceScales({latitude, longitude, scale: this.scale}) :
       distanceScales || DEFAULT_DISTANCE_SCALES;
 
     this.focalDistance = opts.focalDistance || 1;
@@ -136,7 +136,7 @@ export default class Viewport {
 
     if (this.isGeospatial) {
       // Determine camera center
-      this.center = getMercatorWorldPosition({
+      this.center = getWorldPosition({
         longitude, latitude, zoom: this.zoom, meterOffset: this.meterOffset
       });
 
