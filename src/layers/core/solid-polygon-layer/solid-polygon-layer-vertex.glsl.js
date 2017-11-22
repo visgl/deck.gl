@@ -27,6 +27,7 @@ attribute vec4 colors;
 attribute vec3 pickingColors;
 
 uniform float extruded;
+uniform float elevationScale;
 uniform float opacity;
 
 uniform float renderPickingBuffer;
@@ -37,7 +38,11 @@ uniform float pickingEnabled;
 varying vec4 vPickingColor;
 
 void main(void) {
-  vec4 position_worldspace = vec4(project_position(positions), 1.0);
+  
+  vec4 position_worldspace = vec4(project_position(
+    vec3(positions.x, positions.y, positions.z * elevationScale)),
+    1.0
+  );
   gl_Position = project_to_clipspace(position_worldspace);
 
   if (pickingEnabled < 0.5) {
