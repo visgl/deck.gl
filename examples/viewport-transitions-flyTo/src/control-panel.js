@@ -1,6 +1,6 @@
 import React, {PureComponent} from 'react';
 
-import CITIES from '../../data/cities.json';
+import CITIES from '../data/cities.json';
 
 const defaultContainer = ({children}) => <div className="control-panel">{children}</div>;
 
