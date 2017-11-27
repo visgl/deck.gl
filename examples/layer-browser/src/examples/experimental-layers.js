@@ -99,7 +99,7 @@ const PathMarkerExampleMeter = {
       blendEquation: GL.MAX
     },
     sizeScale: 200,
-    getMarkerPercentages: () => [0.5],
+    getMarkerPercentages: () => [0.25, 0.5, 0.75],
     coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
     coordinateOrigin: dataSamples.positionOrigin
   }
