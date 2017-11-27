@@ -4,10 +4,14 @@
   "license": "MIT",
   "scripts": {
     "start": "webpack-dev-server --progress --hot --open",
-    "start-local": "webpack-dev-server --env.local --progress --hot --open"
+    "start-local": "webpack-dev-server --env.local --progress --hot --open",
+    "build-clean": "rm -rf dist && mkdir dist",
+    "build-script": "NODE_ENV=production webpack --env.prod=true",
+    "build-copy": "cp index.html dist",
+    "build": "npm run build-clean && npm run build-script && npm run build-copy"
   },
   "dependencies": {
-    "deck.gl": ">=4.2.0-alpha.9",
+    "deck.gl": "4.2.0-alpha.24",
     "is-little-endian": "0.0.0",
     "react": "^15.5.4",
     "react-dom": "^15.5.4",

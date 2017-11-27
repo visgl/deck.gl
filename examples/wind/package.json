@@ -11,7 +11,7 @@
     "babel-polyfill": "^6.16.0",
     "d3-request": "^1.0.3",
     "d3-voronoi": "^1.1.1",
-    "deck.gl": "^4.2.0-alpha.20",
+    "deck.gl": "4.2.0-alpha.24",
     "react": "^15.4.1",
     "react-autobind": "^1.0.6",
     "react-dom": "^15.4.1",

@@ -33,10 +33,10 @@ class Root extends Component {
         bearing: -0.6424747174301046
       },
       settings: {
-        time: 0,
-        showParticles: false,
-        showWindDemo: false,
-        showElevation: false,
+        time: 30,
+        showParticles: true,
+        showWind: true,
+        showElevation: true,
         useDevicePixels: true
       }
     };
