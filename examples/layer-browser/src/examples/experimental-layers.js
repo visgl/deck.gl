@@ -77,7 +77,7 @@ const PathMarkerExampleMeterData = new Array(10).fill(true).map(
       [Math.random() * 9000, Math.random() * 9000],
       [Math.random() * 9000, Math.random() * 9000]
     ],
-    direction: true
+    direction: {forward: Math.random() >= 0.5, backward: Math.random() >= 0.5}
   })
 );
 const PathMarkerExampleMeter = {
@@ -99,7 +99,7 @@ const PathMarkerExampleMeter = {
       blendEquation: GL.MAX
     },
     sizeScale: 200,
-    getMarkerPercentages: () => [0.5],
+    getMarkerPercentages: () => [0.25, 0.5, 0.75],
     coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
     coordinateOrigin: dataSamples.positionOrigin
   }

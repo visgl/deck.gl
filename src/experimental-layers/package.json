@@ -2,7 +2,7 @@
   "name": "deck.gl-layers",
   "description": "Additional layers for deck.gl",
   "license": "MIT",
-  "version": "0.0.10",
+  "version": "0.0.11",
   "keywords": [
     "webgl",
     "visualization",

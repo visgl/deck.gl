@@ -1,3 +1,5 @@
+0.0.11
+- Support bi-directional arrows
 0.0.10
 - Use getSubLayerProps
 0.0.9

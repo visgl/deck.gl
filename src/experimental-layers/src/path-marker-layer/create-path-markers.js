@@ -10,11 +10,12 @@ function getLineLength(vPoints) {
 }
 
 const DEFAULT_COLOR = [0, 0, 0, 255];
+const DEFAULT_DIRECTION = {forward: true, backward: false};
 
 export default function createPathMarkers({
   data,
   getPath = x => x.path,
-  getDirection = x => true,
+  getDirection = x => x.direction,
   getColor = x => DEFAULT_COLOR,
   getMarkerPercentages = x => [0.5],
   projectFlat
@@ -23,13 +24,11 @@ export default function createPathMarkers({
 
   for (const object of data) {
     const path = getPath(object);
-    const direction = getDirection(object);
+    const direction = getDirection(object) || DEFAULT_DIRECTION;
     const color = getColor(object);
 
     const vPoints = path.map(p => new Vector2(p));
-    if (!direction) {
-      vPoints.reverse();
-    }
+    const vPointsReverse = vPoints.slice(0).reverse();
 
     // calculate total length
     const lineLength = getLineLength(vPoints);
@@ -39,9 +38,19 @@ export default function createPathMarkers({
 
     // Create the markers
     for (const percentage of percentages) {
-      const marker = createMarkerAlongPath(
-        {path: vPoints, percentage, lineLength, color, object, projectFlat});
-      markers.push(marker);
+
+      if (direction.forward) {
+        const marker = createMarkerAlongPath(
+          {path: vPoints, percentage, lineLength, color, object, projectFlat});
+        markers.push(marker);
+      }
+
+      if (direction.backward) {
+        const marker = createMarkerAlongPath(
+          {path: vPointsReverse, percentage, lineLength, color, object, projectFlat});
+        markers.push(marker);
+      }
+
     }
   }
 
