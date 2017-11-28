@@ -64,6 +64,34 @@ The layerIndex is a small integer that starts at zero and is incremented for eac
 
 In the fragment shader, multiply the fragment color with the opacity uniform.
 
+### Picking uniforms (deprecated)
+
+NOTE: Following uniforms (`renderPickingBuffer` and `selectedPickingColor`) are supported as deprecated, and will be removed in next major version. It is recommended to use `luma.gl` picking module for any picking needs. For more details refer to [`Picking`](/docs/advanced/picking.md).
+
+##### `float renderPickingBuffer`
+
+If you choose to implement picking through picking colors, make sure
+the `pickingColors` or `instancePickingColors` attribute is correctly set up,
+and ensure that you return the picking color when `renderPickingBuffer`
+uniform is set. Alternatively call the `layerColor` method on your
+fragment color before assigning to `gl_FragColor`.
+
+Note that the picking color must be rendered exactly as is with an alpha
+channel of 1. Beware blending in opacity as it can result in the rendered
+color not matching the picking color, causing the wrong index to be picked.
+
+```glsl
+gl_FragColor = mix(
+  vec4(instanceColor.rgb, instanceColor.a * opacity),
+  vec4(instancePickingColor, 1.),
+  renderPickingBuffer
+);
+```
+
+##### `vec3 selectedPickingColor`
+
+This uniform is set if `props.pickable` is enabled on the layer and reflects the color
+of the last picked pixel. If no pixel is selected, the value will be `[0, 0, 0]`.
 
 ### Shader Module Uniforms
 

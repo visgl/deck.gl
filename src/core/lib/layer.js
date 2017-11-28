@@ -26,7 +26,7 @@ import {getDefaultProps, diffProps} from './props';
 import {count} from './utils/count';
 import log from '../utils/log';
 import {applyPropOverrides, removeLayerInSeer} from './seer-integration';
-import {GL, withParameters} from 'luma.gl';
+import {GL, withParameters, PICKING_NULL_COLOR} from 'luma.gl';
 import assert from 'assert';
 
 const LOG_PRIORITY_UPDATE = 1;
@@ -150,12 +150,24 @@ export default class Layer {
   // called to populate the info object that is passed to the event handler
   // @return null to cancel event
   getPickingInfo({info, mode}) {
-    const {index} = info;
+    const {color, index} = info;
 
     if (index >= 0) {
       // If props.data is an indexable array, get the object
       if (Array.isArray(this.props.data)) {
         info.object = this.props.data[index];
+      }
+    }
+
+    // Backward compitability for old custom picking feature.
+    // This uniform should be removed in 5.0 version.
+    if (mode === 'hover') {
+      const selectedPickingColor = new Float32Array(3);
+      selectedPickingColor[0] = color[0] === PICKING_NULL_COLOR[0] ? 0 : color[0];
+      selectedPickingColor[1] = color[1] === PICKING_NULL_COLOR[1] ? 0 : color[1];
+      selectedPickingColor[2] = color[2] === PICKING_NULL_COLOR[2] ? 0 : color[2];
+      for (const model of this.getModels()) {
+        model.setUniforms({selectedPickingColor});
       }
     }
 

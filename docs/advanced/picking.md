@@ -73,12 +73,36 @@ calculatePickingColors(attribute) {
 
 ## Custom Shaders
 
-Deck.gl layers use luma.gl's [`Picking Module`](http://uber.github.io/luma.gl/#/documentation/api-reference/shader-module). If you are writing custom shaders for your layers, please refer to above luma.gl documentation on how to add picking logic to your shaders. Also make sure to create `Model` object with `picking` module. ()
+All core layers (including composite layers) support picking using luma.gl's `picking module`. If you are using custom shaders with any of the core layers or building custom layers with your own shaders following steps are needed to achieve `Picking`.
+
+### getShaders()
+
+`getShaders()` return value should include picking module in `modules` array.
 
 ```
-const model = new Model(gl, {
-  fs: CUSTOM_FS,
-  vs: CUSTOM_VS,
-  modules: ['picking', ...],
-});
+getShaders() {
+  return {
+    vs: CUSTOM_VS,
+    fs: CUSTOM_FS,
+    modules: ['picking', ...]
+  }
+}
 ```
+
+### Vertex Shader
+
+Vertex shader should set current picking color using `picking_setPickingColor` method provided by picking shader module.
+
+```
+attribute vec3 instancePickingColors;
+
+void main(void) {
+  ...
+
+  picking_setPickingColor(instancePickingColors);
+
+  ....
+}
+```
+
+For more details refer to luma.gl's [`Picking Module`](http://uber.github.io/luma.gl/#/documentation/api-reference/shader-toosl/shadertools-picking.md).
