@@ -61,7 +61,9 @@ export default class DelaunayInterpolation {
       fs: shaders.fs,
       geometry: new Geometry({
         drawMode: gl.TRIANGLES,
-        positions: new Float32Array(positions)
+        attributes: {
+          positions: new Float32Array(positions)
+        }
       }),
       isInstanced: false
     });

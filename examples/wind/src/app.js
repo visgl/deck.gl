@@ -81,8 +81,8 @@ class Root extends Component {
           {...viewport}
           mapStyle="mapbox://styles/mapbox/dark-v9"
           mapboxApiAccessToken={MAPBOX_TOKEN}
-          perspectiveEnabled
-          onChangeViewport={this._updateViewport}>
+          dragRotate
+          onViewportChange={this._updateViewport}>
 
           <WindDemo viewport={viewport} settings={settings} />
 
