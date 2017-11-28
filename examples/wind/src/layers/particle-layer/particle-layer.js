@@ -2,9 +2,8 @@
 import {Layer} from 'deck.gl';
 import {
   GL, Model, Geometry, Buffer, TransformFeedback,
-  setParameters, loadTextures, Texture2D
+  setParameters, loadTextures, Texture2D, Program
 } from 'luma.gl';
-import ProgramTransformFeedback from './program-transform-feedback';
 
 import {ELEVATION_DATA_IMAGE, ELEVATION_DATA_BOUNDS, ELEVATION_RANGE} from '../../defaults';
 
@@ -291,9 +290,11 @@ export default class ParticleLayer extends Layer {
 
     const modelTF = new Model(gl, {
       id: 'ParticleLayer-modelTF',
-      program: new ProgramTransformFeedback(gl, {
+      program: new Program(gl, {
         vs: vertexTF,
-        fs: fragmentTF
+        fs: fragmentTF,
+        varyings: ['gl_Position'],
+        bufferMode: gl.SEPARATE_ATTRIBS
       }),
       geometry: new Geometry({
         id: this.props.id,

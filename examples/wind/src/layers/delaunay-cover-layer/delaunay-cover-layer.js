@@ -105,3 +105,5 @@ export default class DelaunayCoverLayer extends Layer {
     return model;
   }
 }
+
+DelaunayCoverLayer.layerName = 'DelaunayCoverLayer';
