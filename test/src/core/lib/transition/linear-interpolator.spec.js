@@ -1,5 +1,5 @@
 import test from 'tape-catch';
-import {LinearInterpolator} from 'deck.gl/core/lib/transition';
+import LinearInterpolator from 'deck.gl/core/transitions/linear-interpolator';
 
 const TEST_CASES = [
   {

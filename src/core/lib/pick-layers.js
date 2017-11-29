@@ -18,10 +18,10 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import log from '../utils/log';
 import {drawPickingBuffer, getPixelRatio} from './draw-layers';
-import assert from 'assert';
+import log from '../utils/log';
 import {PICKING_NULL_COLOR} from 'luma.gl';
+import assert from 'assert';
 
 const NO_PICKED_OBJECT = {
   pickedColor: PICKING_NULL_COLOR,

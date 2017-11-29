@@ -1,9 +1,9 @@
-import assert from 'assert';
 import TransitionInterpolator from './transition-interpolator';
+import {isValid, lerp, getEndValueByShortestPath} from './transition-utils';
 
 import {Vector2} from 'math.gl';
 import {projectFlat, unprojectFlat} from 'viewport-mercator-project';
-import {isValid, lerp, getEndValueByShortestPath} from './transition-utils';
+import assert from 'assert';
 
 const EPSILON = 0.01;
 const VIEWPORT_TRANSITION_PROPS = ['longitude', 'latitude', 'zoom', 'bearing', 'pitch'];

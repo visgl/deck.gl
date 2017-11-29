@@ -1,1 +1,0 @@
-Extensions to luma.gl math library. Intended to be folded back.

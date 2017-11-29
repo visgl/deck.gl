@@ -18,25 +18,30 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+import {registerShaderModules, setDefaultShaderModules} from 'luma.gl';
 import {fp32, fp64, picking} from 'luma.gl';
-
 import project from '../shaderlib/project/project';
 import project64 from '../shaderlib/project64/project64';
 import lighting from '../shaderlib/lighting/lighting';
 
-import {registerShaderModules, setDefaultShaderModules} from 'luma.gl';
+export function initializeShaderModules() {
+  registerShaderModules([
+    fp32, fp64,
+    project, project64,
+    lighting,
+    picking
+  ]);
 
-registerShaderModules([
-  fp32, fp64,
-  project, project64,
-  lighting,
-  picking
-]);
+  setDefaultShaderModules([project]);
+}
 
-setDefaultShaderModules([project]);
+initializeShaderModules();
 
 export {
-  fp32, fp64,
-  project, project64,
+  fp32,
+  fp64,
+  picking,
+  project,
+  project64,
   lighting
 };

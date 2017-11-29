@@ -18,7 +18,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {get} from '../../core/lib';
+import {experimental} from '../../core';
+const {get} = experimental;
 
 /**
  * "Normalizes" complete or partial GeoJSON data into iterable list of features

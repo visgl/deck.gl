@@ -19,8 +19,11 @@
 // THE SOFTWARE.
 
 import test from 'tape-catch';
-import {equals} from 'deck.gl/core/math/equals';
+import {equals, config} from 'math.gl';
 import {WebMercatorViewport} from 'deck.gl';
+
+// Adjust sensitivity of math.gl's equals
+config.EPSILON = 0.000001;
 
 /* eslint-disable */
 const TEST_VIEWPORTS = [

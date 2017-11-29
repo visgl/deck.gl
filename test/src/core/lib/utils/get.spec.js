@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 
 import test from 'tape-catch';
-import {get} from 'deck.gl/core/lib/utils/get';
+import {get} from 'deck.gl/core/utils/get';
 import Immutable from 'immutable';
 
 const GET_TEST_CASES = [

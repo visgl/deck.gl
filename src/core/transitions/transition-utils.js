@@ -1,4 +1,4 @@
-import {mod} from '../../math/utils';
+import {mod} from '../utils/math-utils';
 
 const VIEWPORT_PROPS =
   ['width', 'height', 'longitude', 'latitude', 'zoom', 'bearing', 'pitch', 'position'];
