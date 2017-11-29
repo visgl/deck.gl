@@ -71,22 +71,21 @@ calculatePickingColors(attribute) {
 - For more information about how to implement picking in shaders see: [`renderPickingBuffer`](/docswriting-shaders.md#-float-renderpickingbuffer-)
 
 
-## Custom Shaders
+## Implementing Picking in Custom Shaders
 
 All core layers (including composite layers) support picking using luma.gl's `picking module`. If you are using custom shaders with any of the core layers or building custom layers with your own shaders following steps are needed to achieve `Picking`.
 
-### getShaders()
+### Model object creation.
 
-`getShaders()` return value should include picking module in `modules` array.
+When creating `Model` object, add picking module to `modules` array.
 
 ```
-getShaders() {
-  return {
-    vs: CUSTOM_VS,
-    fs: CUSTOM_FS,
-    modules: ['picking', ...]
-  }
-}
+new Model(gl, {
+  ...
+  vs: CUSTOM_VS,
+  fs: CUSTOM_FS,
+  modules: ['picking', ...]
+});
 ```
 
 ### Vertex Shader
@@ -102,6 +101,21 @@ void main(void) {
   picking_setPickingColor(instancePickingColors);
 
   ....
+}
+```
+
+### Fragment Shader
+
+Fragment shader should use `picking_filterPickingColor` to update `gl_FragColor`, which outputs picking color if it is the picking pass.
+
+```
+attribute vec3 instancePickingColors;
+
+void main(void) {
+  ...
+
+  // Should be the last Fragment shader instruction that updates gl_FragColor
+  gl_FragColor = picking_filterPickingColor(gl_FragColor);
 }
 ```
 
