@@ -322,22 +322,44 @@ const PointCloudLayerExample = {
   }
 };
 
-const LineLayerMetersExample = {
+const PathLayerMetersExample = {
+  layer: PathLayer,
+  getData: () => dataSamples.meterPaths,
+  props: {
+    id: 'path-outline-layer-meter',
+    opacity: 1.0,
+    getColor: f => [255, 0, 0],
+    getWidth: f => 10,
+    widthMinPixels: 1,
+    pickable: false,
+    strokeWidth: 5,
+    widthScale: 10,
+    autoHighlight: false,
+    highlightColor: [255, 255, 255, 255],
+    sizeScale: 200,
+    rounded: false,
+    getMarkerPercentages: () => [],
+    coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
+    coordinateOrigin: dataSamples.positionOrigin
+  }
+};
+
+const LineLayerMillimetersExample = {
   layer: LineLayer,
-  getData: () => dataSamples.meterLines,
+  getData: () => dataSamples.milliMeterLines,
   props: {
     id: 'lineLayer',
     getColor: f => [Math.random() * 255, 0, 0],
     pickable: true,
     coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
-    coordinateOrigin: dataSamples.positionOrigin,
+    coordinateOrigin: dataSamples.milliMeterOrigin,
     strokeWidth: 20
   }
 };
 
-const PathLayerMetersFilteredExample = {
+const PathLayerMillimetersFilteredExample = {
   layer: PathLayer,
-  getData: () => dataSamples.meterPathsFiltered,
+  getData: () => dataSamples.milliMeterPathsFiltered,
   props: {
     id: 'pathLayer-meters-filtered',
     opacity: 0.6,
@@ -347,13 +369,13 @@ const PathLayerMetersFilteredExample = {
     widthMinPixels: 1,
     pickable: true,
     coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
-    coordinateOrigin: dataSamples.positionOrigin
+    coordinateOrigin: dataSamples.milliMeterOrigin
   }
 };
 
-const PathLayerMetersUnfilteredExample = {
+const PathLayerMillimetersUnfilteredExample = {
   layer: PathLayer,
-  getData: () => dataSamples.meterPaths,
+  getData: () => dataSamples.milliMeterPaths,
   props: {
     id: 'pathLayer-meters',
     opacity: 0.6,
@@ -363,7 +385,7 @@ const PathLayerMetersUnfilteredExample = {
     widthMinPixels: 1,
     pickable: true,
     coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
-    coordinateOrigin: dataSamples.positionOrigin
+    coordinateOrigin: dataSamples.milliMeterOrigin
   }
 };
 
@@ -399,7 +421,7 @@ const ScatterplotLayer64PerfExample = (id, getData) => ({
 
 /* eslint-disable quote-props */
 export default {
-  'Core Layers': {
+  'Core Layers - LngLat': {
     'GeoJsonLayer': GeoJsonLayerExample,
     'GeoJsonLayer (Extruded)': GeoJsonLayerExtrudedExample,
     PolygonLayer: PolygonLayerExample,
@@ -415,11 +437,12 @@ export default {
     HexagonLayer: HexagonLayerExample
   },
 
-  'Meter Offsets': {
+  'Core Layers - Meter Offsets': {
     'PointCloudLayer': PointCloudLayerExample,
-    'LineLayer (Small Feature)': LineLayerMetersExample,
-    'PathLayer (Small Filtered)': PathLayerMetersFilteredExample,
-    'PathLayer (Small Unfiltered)': PathLayerMetersUnfilteredExample
+    'Path Layer (Meters)': PathLayerMetersExample,
+    'PathLayer (Mm Filtered: Zoom Map)': PathLayerMillimetersFilteredExample,
+    'PathLayer (Mm Unfiltered: Zoom Map)': PathLayerMillimetersUnfilteredExample,
+    'LineLayer (Mm - Zoom Map)': LineLayerMillimetersExample
   },
 
   'Performance Tests': {
