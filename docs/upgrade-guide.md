@@ -28,9 +28,15 @@ Following methods and props have been renamed for clarity.
 | `useDevicePixelRatio` | `useDevicePixels` | |
 
 
+### Picking uniforms
+
+`renderPickingBuffer` and `selectedPickingColor` are deprecated, and will be removed in next major version. It is recommended to use `luma.gl` picking module.
+
+
 ### Viewports
 
 TODO: add a document explaining the hierarchies and recommended practices of using the provided viewports.
+
 
 ## Upgrading from deck.gl v4 to v4.1
 
