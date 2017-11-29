@@ -2938,15 +2938,16 @@ lru-cache@^4.0.1:
     pseudomap "^1.0.2"
     yallist "^2.1.2"
 
-luma.gl@>=4.1.0-alpha.6:
-  version "4.1.0-alpha.8"
-  resolved "https://registry.yarnpkg.com/luma.gl/-/luma.gl-4.1.0-alpha.8.tgz#85cd34f76fc9d97ac168c7ca6e5c414f8c33584d"
+luma.gl@>=4.1.0-alpha.9:
+  version "4.1.0-alpha.9"
+  resolved "https://registry.yarnpkg.com/luma.gl/-/luma.gl-4.1.0-alpha.9.tgz#1a58ffb6df8db03d5cdd3ab780d00b51404ccdb9"
   dependencies:
     gl-mat4 "^1.1.4"
     gl-quat "^1.0.0"
     gl-vec2 "^1.0.0"
     gl-vec3 "^1.0.3"
     gl-vec4 "^1.0.1"
+    math.gl "^1.0.0-alpha.8"
     seer "^0.2.2"
     webgl-debug "^1.0.2"
 
@@ -2960,7 +2961,7 @@ map-obj@^1.0.0, map-obj@^1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/map-obj/-/map-obj-1.0.1.tgz#d933ceb9205d82bdcf4886f6742bdc2b4dea146d"
 
-"math.gl@>= 1.0.0-alpha.8", math.gl@^1.0.0-alpha.7:
+"math.gl@>= 1.0.0-alpha.8", math.gl@^1.0.0-alpha.7, math.gl@^1.0.0-alpha.8:
   version "1.0.0-alpha.8"
   resolved "https://registry.yarnpkg.com/math.gl/-/math.gl-1.0.0-alpha.8.tgz#51dd8d03e5c50096851e8a268d888c1eda766cd1"
   dependencies:
@@ -4797,9 +4798,9 @@ verror@1.10.0:
     core-util-is "1.0.2"
     extsprintf "^1.2.0"
 
-"viewport-mercator-project@>= 4.2.0-alpha.2":
-  version "4.2.0-alpha.2"
-  resolved "https://registry.yarnpkg.com/viewport-mercator-project/-/viewport-mercator-project-4.2.0-alpha.2.tgz#5c6e39ce936644cede160336267e8af805b74c94"
+viewport-mercator-project@^5.0.0-alpha.1:
+  version "5.0.0-alpha.1"
+  resolved "https://registry.yarnpkg.com/viewport-mercator-project/-/viewport-mercator-project-5.0.0-alpha.1.tgz#637b849517f4fc3898028a89210d244b412011e0"
   dependencies:
     math.gl "^1.0.0-alpha.7"
 

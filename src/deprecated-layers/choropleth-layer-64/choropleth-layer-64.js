@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 
 import ChoroplethLayer from '../choropleth-layer/choropleth-layer';
-import {fp64ify} from '../../core/lib/utils/fp64';
+import {fp64ify} from '../../core/utils/fp64';
 import log from '../../core/utils/log';
 import flattenDeep from 'lodash.flattendeep';
 

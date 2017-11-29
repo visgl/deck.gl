@@ -22,14 +22,15 @@ import assert from 'assert';
 import {Framebuffer, ShaderCache} from 'luma.gl';
 import seer from 'seer';
 import Layer from './layer';
-import log from '../utils/log';
-import {flatten} from './utils/flatten';
 import {drawLayers} from './draw-layers';
 import {pickObject, pickVisibleObjects} from './pick-layers';
 import {LIFECYCLE} from './constants';
 import Viewport from '../viewports/viewport';
 // TODO - remove, just for dummy initialization
 import WebMercatorViewport from '../viewports/web-mercator-viewport';
+import log from '../utils/log';
+import {flatten} from '../utils/flatten';
+
 import {
   setPropOverrides,
   layerEditListener,

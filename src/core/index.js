@@ -43,10 +43,11 @@ export {default as OrbitState} from './controllers/orbit-state';
 export {default as MapState} from './controllers/map-state';
 
 export {TRANSITION_EVENTS} from './lib/transition-manager';
-export {
-  LinearInterpolator,
-  ViewportFlyToInterpolator
-} from './lib/transition';
+export {default as LinearInterpolator} from './transitions/linear-interpolator';
+export {default as ViewportFlyToInterpolator} from './transitions/viewport-fly-to-interpolator';
+
+// Import shaderlib to make sure shader modules are initialized
+import './shaderlib';
 
 // Experimental Features (May change in minor version bumps, use at your own risk)
 // Experimental Pure JS (non-React) bindings
@@ -57,12 +58,12 @@ import {default as EffectManager} from './experimental/lib/effect-manager';
 import {default as Effect} from './experimental/lib/effect';
 
 import TransitionManager from './lib/transition-manager';
-import {extractViewportFrom} from './lib/transition';
+import {extractViewportFrom} from './transitions/transition-utils';
 
 // Layer utilities
 import {default as log} from './utils/log';
-import {get} from './lib/utils/get';
-import {count} from './lib/utils/count';
+import {get} from './utils/get';
+import {count} from './utils/count';
 
 import {default as BinSorter} from './utils/bin-sorter';
 import {
@@ -73,10 +74,10 @@ import {
 import {defaultColorRange} from './utils/color-utils';
 
 // TODO - just expose as layer methods instead?
-import {enable64bitSupport} from './lib/utils/fp64';
-import {fp64ify} from './lib/utils/fp64';
+import {enable64bitSupport} from './utils/fp64';
+import {fp64ify} from './utils/fp64';
 
-import {flatten, countVertices, flattenVertices, fillArray} from './lib/utils/flatten';
+import {flatten, countVertices, flattenVertices, fillArray} from './utils/flatten';
 
 export const experimental = {
   DeckGLJS,

@@ -28,6 +28,3 @@ export {default as Layer} from './layer';
 export {default as CompositeLayer} from './composite-layer';
 export {default as AttributeManager} from './attribute-manager';
 export {default as LayerManager} from './layer-manager';
-
-// Ability to extract data from ES6 containers (Maps, Immutable.maps etc)
-export {get} from './utils/get';

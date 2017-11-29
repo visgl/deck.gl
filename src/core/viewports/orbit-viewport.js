@@ -1,5 +1,7 @@
 import Viewport from './viewport';
 
+import {createMat4, transformVector} from '../utils/math-utils';
+
 import mat4_multiply from 'gl-mat4/multiply';
 import mat4_lookAt from 'gl-mat4/lookAt';
 import mat4_scale from 'gl-mat4/scale';
@@ -9,14 +11,7 @@ import mat4_rotateX from 'gl-mat4/rotateX';
 import mat4_rotateY from 'gl-mat4/rotateY';
 import mat4_rotateZ from 'gl-mat4/rotateZ';
 
-import {transformVector} from '../math/utils';
-
 const DEGREES_TO_RADIANS = Math.PI / 180;
-
-// Helper, avoids low-precision 32 bit matrices from gl-matrix mat4.create()
-export function createMat4() {
-  return [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
-}
 
 /*
  * A deck.gl Viewport class used by OrbitController

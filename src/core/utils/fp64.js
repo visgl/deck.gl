@@ -19,8 +19,8 @@
 // THE SOFTWARE.
 
 // TODO - move to shaderlib utilities
-import log from '../../utils/log';
-import {COORDINATE_SYSTEM} from '../constants';
+import log from './log';
+import {COORDINATE_SYSTEM} from '../lib/constants'; // TODO - utils should not import from lib
 
 export function fp64ify(a) {
   const hiPart = Math.fround(a);

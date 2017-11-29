@@ -1,3 +1,5 @@
+// Extensions to math.gl library. Intended to be folded back.
+
 import vec4_multiply from 'gl-vec4/multiply';
 import vec4_transformMat4 from 'gl-vec4/transformMat4';
 import assert from 'assert';

@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 import Layer from './layer';
 import log from '../utils/log';
-import {flatten} from './utils/flatten';
+import {flatten} from '../utils/flatten';
 
 export default class CompositeLayer extends Layer {
   constructor(props) {

@@ -1,5 +1,5 @@
 import test from 'tape-catch';
-import {ViewportFlyToInterpolator} from 'deck.gl/core/lib/transition';
+import ViewportFlyToInterpolator from 'deck.gl/core/transitions/viewport-fly-to-interpolator';
 import {toLowPrecision} from 'deck.gl/test/test-utils';
 
 /* eslint-disable max-len */

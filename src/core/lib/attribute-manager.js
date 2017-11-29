@@ -19,9 +19,9 @@
 // THE SOFTWARE.
 
 /* eslint-disable guard-for-in */
-import {GL} from 'luma.gl';
 import Stats from './stats';
 import log from '../utils/log';
+import {GL} from 'luma.gl';
 import assert from 'assert';
 
 const LOG_START_END_PRIORITY = 1;

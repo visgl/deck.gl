@@ -82,8 +82,8 @@ Object.assign(experimental, {
 // Core utilities for layers
 
 // Experimental Data Accessor Helpers
-import {get} from './core/lib/utils/get';
-import {count} from './core/lib/utils/count';
+import {get} from './core/utils/get';
+import {count} from './core/utils/count';
 
 // Experimental Aggregation Utilities
 import {default as BinSorter} from './core/utils/bin-sorter';
@@ -94,8 +94,8 @@ import {defaultColorRange} from './core/utils/color-utils';
 
 // Experimental 64 bit helpers
 // TODO - just expose as layer methods instead?
-import {enable64bitSupport} from './core/lib/utils/fp64';
-import {fp64ify} from './core/lib/utils/fp64';
+import {enable64bitSupport} from './core/utils/fp64';
+import {fp64ify} from './core/utils/fp64';
 
 Object.assign(experimental, {
   // The following are mainly for sub-layers

@@ -19,9 +19,9 @@
 // THE SOFTWARE.
 
 import log from '../utils/log';
+import {transformVector, createMat4, extractCameraVectors} from '../utils/math-utils';
 
 import {Matrix4, Vector3, equals} from 'math.gl';
-import {transformVector, createMat4, extractCameraVectors} from '../math/utils';
 import mat4_scale from 'gl-mat4/scale';
 import mat4_translate from 'gl-mat4/translate';
 import mat4_multiply from 'gl-mat4/multiply';
