@@ -1,7 +1,7 @@
 {
   "scripts": {
     "start": "webpack-dev-server --progress --hot --open",
-    "start-local": "webpack-dev-server --env.es6 --progress --hot --open",
+    "start-local": "webpack-dev-server --env.es6 --progress --hot --open --host 0.0.0.0",
     "start-local-es5": "webpack-dev-server --env.local --progress --hot --open"
   },
   "dependencies": {

@@ -6,7 +6,7 @@ import {
   TextLayer
 } from 'deck.gl-layers';
 
-import {COORDINATE_SYSTEM} from 'deck.gl';
+import {PathLayer, COORDINATE_SYSTEM} from 'deck.gl';
 import {GL} from 'luma.gl';
 import dataSamples from '../immutable-data-samples';
 
@@ -48,21 +48,24 @@ const PathOutlineExample = {
   }
 };
 
+const XXX = dataSamples.routes.slice(250);
+
 const PathMarkerExample = {
   layer: PathMarkerLayer,
-  getData: () => dataSamples.routes,
+  getData: () => XXX,
   props: {
     id: 'path-outline-layer',
     opacity: 0.6,
     getPath: f => [f.START, f.END],
-    getColor: f => [230, 230, 230],
+    getColor: f => [0, 0, 255],
     getZLevel: f => Math.random() * 255,
     getWidth: f => 10,
+    rounded: true,
     widthMinPixels: 1,
     pickable: true,
     strokeWidth: 5,
     widthScale: 10,
-    autoHighlight: true,
+    autoHighlight: false,
     highlightColor: [255, 255, 255, 255],
     parameters: {
       blendEquation: GL.MAX
@@ -71,35 +74,36 @@ const PathMarkerExample = {
   }
 };
 
-const PathMarkerExampleMeterData = new Array(10).fill(true).map(
+const PathMarkerExampleMeterData = new Array(1).fill(true).map(
   f => ({
     path: [
-      [Math.random() * 9000, Math.random() * 9000],
-      [Math.random() * 9000, Math.random() * 9000]
+      [8584.484798702775, 6742.5945553739575],
+      [2908.5139320879325, 429.453672569738]
     ],
     direction: {forward: Math.random() >= 0.5, backward: Math.random() >= 0.5}
   })
 );
 const PathMarkerExampleMeter = {
-  layer: PathMarkerLayer,
+  layer: PathLayer,
   getData: () => PathMarkerExampleMeterData,
   props: {
     id: 'path-outline-layer-meter',
-    opacity: 0.8,
-    getColor: f => [230, 230, 230],
-    getZLevel: f => Math.random() * 255,
+    opacity: 1.0,
+    getColor: f => [255, 0, 0],
+    getZLevel: f => 0,
     getWidth: f => 10,
     widthMinPixels: 1,
-    pickable: true,
+    pickable: false,
     strokeWidth: 5,
     widthScale: 10,
-    autoHighlight: true,
+    autoHighlight: false,
     highlightColor: [255, 255, 255, 255],
     parameters: {
       blendEquation: GL.MAX
     },
     sizeScale: 200,
-    getMarkerPercentages: () => [0.25, 0.5, 0.75],
+    rounded: false,
+    getMarkerPercentages: () => [],
     coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
     coordinateOrigin: dataSamples.positionOrigin
   }
