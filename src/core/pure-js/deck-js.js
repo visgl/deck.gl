@@ -212,6 +212,7 @@ export default class DeckGLJS {
     // TODO - these should be set by default starting from next major release
     if (this.props.initWebGLParameters) {
       setParameters(gl, {
+        blendFuncSeparate: [GL.SRC_ALPHA, GL.ONE_MINUS_SRC_ALPHA, GL.ONE, GL.ONE_MINUS_SRC_ALPHA],
         depthTest: true,
         depthFunc: GL.LEQUAL
       });
