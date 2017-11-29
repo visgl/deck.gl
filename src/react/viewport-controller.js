@@ -2,8 +2,8 @@ import {PureComponent, createElement} from 'react';
 import PropTypes from 'prop-types';
 
 import {EventManager} from 'mjolnir.js';
-import {ViewportControls, experimental} from '../core';
-const {TransitionManager} = experimental;
+import {experimental} from '../core';
+const {ViewportControls, TransitionManager} = experimental;
 
 import CURSOR from './utils/cursors';
 
