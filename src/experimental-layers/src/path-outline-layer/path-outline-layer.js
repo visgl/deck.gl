@@ -14,6 +14,16 @@ function injectShaderCode({source, declarations = '', code = ''}) {
     .replace(INJECT_CODE, code.concat('\n}\n'));
 }
 
+function hackyFixForTangent(source) {
+  return source
+    .replace(
+      'lenA > 0. ? normalize(deltaA) : vec2(1.0, 0.0)',
+      'lenA > 0.1 ? normalize(deltaA) : vec2(0.0, 0.0)')
+    .replace(
+      'lenB > 0. ? normalize(deltaB) : vec2(1.0, 0.0)',
+      'lenB > 0.1 ? normalize(deltaB) : vec2(0.0, 0.0)');
+}
+
 const VS_DECLARATIONS = `\
 #ifdef MODULE_OUTLINE
   attribute float instanceZLevel;
@@ -43,7 +53,9 @@ export default class PathOutlineLayer extends PathLayer {
     const shaders = super.getShaders();
     return Object.assign({}, shaders, {
       modules: shaders.modules.concat(['outline']),
-      vs: injectShaderCode({source: shaders.vs, declarations: VS_DECLARATIONS, code: VS_CODE}),
+      vs: hackyFixForTangent(
+        injectShaderCode({source: shaders.vs, declarations: VS_DECLARATIONS, code: VS_CODE})
+      ),
       fs: injectShaderCode({source: shaders.fs, code: FS_CODE})
     });
   }
