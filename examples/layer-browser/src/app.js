@@ -3,9 +3,6 @@
 import {
   // COORDINATE_SYSTEM,
   WebMercatorViewport,
-  FirstPersonViewport,
-  MapState,
-  // FirstPersonState,
   experimental
 } from 'deck.gl';
 
@@ -13,6 +10,9 @@ import {
 import DeckGL, {ViewportController} from 'deck.gl';
 
 const {
+  FirstPersonViewport,
+  MapState,
+  // FirstPersonState,
   ReflectionEffect
 } = experimental;
 

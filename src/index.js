@@ -26,91 +26,82 @@ const experimental = {};
 //
 
 export {
+  // LIB
   COORDINATE_SYSTEM,
   LayerManager,
   AttributeManager,
   Layer,
-  CompositeLayer
-} from './core';
+  CompositeLayer,
 
-// Viewports
-export {
+  // Viewports
   Viewport,
   FirstPersonViewport,
-  ThirdPersonViewport,
   WebMercatorViewport,
   PerspectiveViewport,
   OrthographicViewport,
-  // TODO: orbit-viewport to be merged w/ third-person-viewport
-  OrbitViewport
-} from './core';
 
-// TODO - Do we need to export? Move to experimental?
-export {
-  ViewportControls,
-  FirstPersonState,
-  OrbitState,
-  MapState
-} from './core';
-
-// Transition bindings
-export {
+  // Transition bindings
   TRANSITION_EVENTS,
   LinearInterpolator,
   ViewportFlyToInterpolator
-  // TransitionManager (Does the TransitionManager need to be exported?)
 } from './core';
 
 // Deprecated Core Lib Classes
 export {assembleShaders} from 'luma.gl'; // Forward the luma.gl version (note: now integrated with Model)
 
 // EXPERIMENTAL CORE LIB CLASSES (May change in minor version bumps, use at your own risk)
-import {default as DeckGLJS} from './core/pure-js/deck-js';
-import {default as MapControllerJS} from './core/pure-js/map-controller-js';
-import {default as EffectManager} from './core/experimental/lib/effect-manager';
-import {default as Effect} from './core/experimental/lib/effect';
+import {experimental as CoreExperimental} from './core';
 
-Object.assign(experimental, {
-  // Pure JS (non-React) support
+const {
+  // View States
+  ViewState,
+  FirstPersonState,
+  OrbitState,
+  MapState,
+
+  // Controllers
+  Controller,
+  MapController,
+  FirstPersonController,
+  OrbitController,
+
+  // Viewports
+  OrbitViewport,
+
   DeckGLJS,
   MapControllerJS,
+
+  EffectManager,
+  Effect
+} = CoreExperimental;
+
+Object.assign(experimental, {
+  // Unfinished controller/viewport classes
+  ViewState,
+  FirstPersonState,
+  OrbitState,
+  MapState,
+
+  Controller,
+  MapController,
+  FirstPersonController,
+  OrbitController,
+
+  OrbitViewport,
+
+  // Pure JS (non-React) API
+  DeckGLJS,
+  MapControllerJS,
+
   // Effects base classes
   EffectManager,
   Effect
 });
 
-// Core utilities for layers
-
 // Experimental Data Accessor Helpers
-import {get} from './core/utils/get';
-import {count} from './core/utils/count';
-
-// Experimental Aggregation Utilities
-import {default as BinSorter} from './core/utils/bin-sorter';
-import {linearScale} from './core/utils/scale-utils';
-import {quantizeScale} from './core/utils/scale-utils';
-import {clamp} from './core/utils/scale-utils';
-import {defaultColorRange} from './core/utils/color-utils';
-
-// Experimental 64 bit helpers
-// TODO - just expose as layer methods instead?
-import {enable64bitSupport} from './core/utils/fp64';
-import {fp64ify} from './core/utils/fp64';
-
-Object.assign(experimental, {
-  // The following are mainly for sub-layers
-  get,
-  count,
-
-  BinSorter,
-  linearScale,
-  quantizeScale,
-  clamp,
-  defaultColorRange,
-
-  enable64bitSupport,
-  fp64ify
-});
+// INTERNAL - TODO remove from experimental exports
+const {get, count} = CoreExperimental;
+Object.assign(experimental, {get, count});
 
 //
 // CORE LAYERS PACKAGE
@@ -162,14 +153,18 @@ Object.assign(experimental, {
 export {
   default as default,
   DeckGL,
-  ViewportController,
-  MapController
+  ViewportController // TODO - merge with deck.gl?
 } from './react';
 
-// Experimental React bindings
-import {default as OrbitController} from './react/experimental/orbit-controller';
+// TODO - do we need to expose these?
+import {
+  MapController as ReactMapController,
+  OrbitController as ReactOrbitController
+} from './react';
+
 Object.assign(experimental, {
-  OrbitController
+  ReactMapController,
+  ReactOrbitController
 });
 
 //
