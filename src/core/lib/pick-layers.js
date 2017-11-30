@@ -20,11 +20,10 @@
 
 import {drawPickingBuffer, getPixelRatio} from './draw-layers';
 import log from '../utils/log';
-import {PICKING_NULL_COLOR} from 'luma.gl';
 import assert from 'assert';
 
 const NO_PICKED_OBJECT = {
-  pickedColor: PICKING_NULL_COLOR,
+  pickedColor: null,
   pickedLayer: null,
   pickedObjectIndex: -1
 };
@@ -290,7 +289,7 @@ function processPickInfo({
     const pickingSelectedColor = (
       layer.props.autoHighlight &&
       pickedLayer === layer
-    ) ? pickedColor : PICKING_NULL_COLOR;
+    ) ? pickedColor : null;
 
     const pickingParameters = {
       pickingSelectedColor
@@ -426,7 +425,7 @@ function getUniquesFromPickingBuffer(gl, {pickedColors, layers}) {
 function createInfo(pixel, viewport) {
   // Assign a number of potentially useful props to the "info" object
   return {
-    color: PICKING_NULL_COLOR,
+    color: null,
     layer: null,
     index: -1,
     picked: false,
