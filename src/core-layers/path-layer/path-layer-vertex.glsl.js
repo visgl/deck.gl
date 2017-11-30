@@ -68,8 +68,10 @@ vec3 lineJoin(vec3 prevPoint, vec3 currPoint, vec3 nextPoint) {
 
   float lenA = length(deltaA);
   float lenB = length(deltaB);
-  vec2 dirA = lenA > 0. ? normalize(deltaA) : vec2(1.0, 0.0);
-  vec2 dirB = lenB > 0. ? normalize(deltaB) : vec2(1.0, 0.0);
+  lenA = lenA > 0.1 ? lenA : 0.0;
+  lenB = lenB > 0.1 ? lenB : 0.0;
+  vec2 dirA = lenA > 0. ? normalize(deltaA) : vec2(0.0, 0.0);
+  vec2 dirB = lenB > 0. ? normalize(deltaB) : vec2(0.0, 0.0);
   vec2 perpA = vec2(-dirA.y, dirA.x);
   vec2 perpB = vec2(-dirB.y, dirB.x);
 
