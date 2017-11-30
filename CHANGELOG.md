@@ -23,6 +23,19 @@ For Earlier Beta Releases see below
 
 ### deck.gl v4.2 Beta Releases
 
+#### [4.2.0-alpha.27] - Nov 30
+- update sharp end fix for 64bits pathlayer shader (#1202)
+- Fix spike issue in path layer (#1200)
+- Move unaudited APIs to experimental (#1193)
+- Reorganize file structure (#1192)
+- add new blend mode to initWebGLParameters (#1188)
+- Add support for old picking uniforms (#1191)
+- Use Program 'varyings' option (#1190)
+- Viewport transition tests (#1183)
+- PathMarkerLayer: Support bi-directional arrows (#1181)
+- add build command for point cloud example and change default settings of wind example (#1189)
+- Example rename (#1182)
+
 #### [4.2.0-alpha.26] - Nov 21
 - Upgrade to viewport-mercator-project@5.0 (#1178)
 - Transition interpolator class (#1154)
