@@ -98,7 +98,15 @@ export default class DeckGLOverlay extends Component {
   }
 
   render() {
-    const {viewport, data, radius, coverage, upperPercentile} = this.props;
+    const {
+      viewport,
+      data,
+      radius,
+      coverage,
+      upperPercentile,
+      transitions,
+      ControllerType
+    } = this.props;
 
     if (!data) {
       return null;
@@ -123,7 +131,15 @@ export default class DeckGLOverlay extends Component {
       })
     ];
 
-    return <DeckGL {...viewport} layers={layers} initWebGLParameters />;
+    return (
+      <DeckGL
+        {...viewport}
+        {...transitions}
+        ControllerType={ControllerType}
+        layers={layers}
+        initWebGLParameters
+      />
+    );
   }
 }
 

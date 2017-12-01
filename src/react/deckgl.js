@@ -41,6 +41,12 @@ export default class DeckGL extends React.Component {
     }
   }
 
+  shouldComponentUpdate(nextProps, nextState) {
+    const transitionTriggered = this.deck.triggerViewportTransition(nextProps);
+    // Skip render to avoid initial jump when viewport transition is triggered.
+    return !transitionTriggered;
+  }
+
   componentWillUnmount() {
     this.deck.finalize();
   }

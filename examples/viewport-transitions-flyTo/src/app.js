@@ -1,15 +1,15 @@
 /* global window */
 import React, {Component} from 'react';
 import {StaticMap} from 'react-map-gl';
-import {
+import DeckGL, {
   ViewportFlyToInterpolator,
   TRANSITION_EVENTS,
-  ViewportController,
-  MapState
+  experimental
 } from 'deck.gl';
 
 import ControlPanel from './control-panel';
 
+const {MapControllerJS} = experimental;
 const token = process.env.MapboxAccessToken; // eslint-disable-line
 const interruptionStyles = [
   {
@@ -93,25 +93,28 @@ export default class App extends Component {
     const {viewport, settings, transitionDuration} = this.state;
 
     return (
-      <ViewportController
-        viewportState={MapState}
-        {...viewport}
-        onViewportChange={this._onViewportChange.bind(this)}
-        transitionInterpolator={new ViewportFlyToInterpolator()}
-        transitionDuration={transitionDuration}
-        transitionInterruption={this._interruptionStyle}>
-        <StaticMap
+      <div>
+        <DeckGL
           {...viewport}
-          {...settings}
-          mapStyle="mapbox://styles/mapbox/dark-v9"
-          onViewportChange={this._onViewportChange}
-          dragToRotate={false}
-          mapboxApiAccessToken={token} />
+          layers = {[]}
+          ControllerType = {MapControllerJS}
+          onViewportChange={this._onViewportChange.bind(this)}
+          transitionInterpolator={new ViewportFlyToInterpolator()}
+          transitionDuration={transitionDuration}
+          transitionInterruption={this._interruptionStyle}>
+          <StaticMap
+            {...viewport}
+            {...settings}
+            mapStyle="mapbox://styles/mapbox/dark-v9"
+            onViewportChange={this._onViewportChange}
+            dragToRotate={false}
+            mapboxApiAccessToken={token} />
+        </DeckGL>
         <ControlPanel containerComponent={this.props.containerComponent}
           onViewportChange={this._easeTo.bind(this)}
           interruptionStyles={interruptionStyles}
           onStyleChange={this._onStyleChange.bind(this)} />
-      </ViewportController>
+      </div>
     );
   }
 

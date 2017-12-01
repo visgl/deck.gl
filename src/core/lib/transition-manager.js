@@ -2,6 +2,7 @@
 import LinearInterpolator from '../transitions/linear-interpolator';
 import {extractViewportFrom} from '../transitions/transition-utils';
 import assert from 'assert';
+import PropTypes from 'prop-types';
 
 const noop = () => {};
 
@@ -9,6 +10,28 @@ export const TRANSITION_EVENTS = {
   BREAK: 1,
   SNAP_TO_END: 2,
   IGNORE: 3
+};
+
+const PROP_TYPES = {
+  // transition duration for viewport change
+  transitionDuration: PropTypes.number,
+  // an instance of ViewportTransitionInterpolator, can be used to perform custom transitions.
+  transitionInterpolator: PropTypes.object,
+  // type of interruption of current transition on update.
+  transitionInterruption: PropTypes.number,
+  // easing function
+  transitionEasing: PropTypes.func,
+  // transition status update functions
+  onTransitionStart: PropTypes.func,
+  onTransitionInterrupt: PropTypes.func,
+  onTransitionEnd: PropTypes.func,
+
+  /**
+   * `onViewportChange` callback is fired when the user interacted with the
+   * map. The object passed to the callback contains viewport properties
+   * such as `longitude`, `latitude`, `zoom` etc.
+   */
+  onViewportChange: PropTypes.func
 };
 
 const DEFAULT_PROPS = {
@@ -176,4 +199,5 @@ export default class TransitionManager {
   }
 }
 
+TransitionManager.propTypes = PROP_TYPES;
 TransitionManager.defaultProps = DEFAULT_PROPS;
