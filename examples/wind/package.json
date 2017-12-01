@@ -4,7 +4,7 @@
     "start-local": "webpack-dev-server --env.local --progress --hot --open --content-base static",
     "build-clean": "rm -rf dist && mkdir dist",
     "build-copy": "cp -r static/* dist",
-    "build-script": "NODE_ENV=production webpack --env.prod=true",
+    "build-script": "webpack -p",
     "build": "npm run build-clean && npm run build-script && npm run build-copy"
   },
   "dependencies": {

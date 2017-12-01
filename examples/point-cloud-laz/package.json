@@ -6,7 +6,7 @@
     "start": "webpack-dev-server --progress --hot --open",
     "start-local": "webpack-dev-server --env.local --progress --hot --open",
     "build-clean": "rm -rf dist && mkdir dist",
-    "build-script": "NODE_ENV=production webpack --env.prod=true",
+    "build-script": "webpack -p",
     "build-copy": "cp index.html dist",
     "build": "npm run build-clean && npm run build-script && npm run build-copy"
   },
