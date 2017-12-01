@@ -15,9 +15,22 @@ export {default as iconAtlas} from '../data/icon-atlas.json';
 export {default as s2cells} from '../data/sf.s2cells.json';
 export {choropleths};
 
-export const meterPaths = [{path: []}];
+export const positionOrigin = [-122.42694203247012, 37.751537058389985];
 
-const path = meterPaths[0].path;
+export const milliMeterOrigin = [-122.47030581871572, 37.744657531698184];
+
+export const meterPaths = [
+  {
+    path: [
+      new Vector3(2584.484798702775, 3742.5945553739575, 0),
+      new Vector3(-4908.5139320879325, -2429.453672569738, 0)
+    ]
+  }
+];
+
+export const milliMeterPaths = [{path: []}];
+
+const path = milliMeterPaths[0].path;
 for (let i = 0; i < meterTrajectorySmall.length / 3; ++i) {
   path.push(new Vector3(
     meterTrajectorySmall[i * 3],
@@ -26,8 +39,8 @@ for (let i = 0; i < meterTrajectorySmall.length / 3; ++i) {
   ));
 }
 
-export const meterPathsFiltered = [{path: []}];
-const filteredPath = meterPathsFiltered[0].path;
+export const milliMeterPathsFiltered = [{path: []}];
+const filteredPath = milliMeterPathsFiltered[0].path;
 
 let lastPoint;
 for (let i = 0; i < path.length; ++i) {
@@ -38,11 +51,11 @@ for (let i = 0; i < path.length; ++i) {
   lastPoint = point;
 }
 
-export const meterLines = [];
+export const milliMeterLines = [];
 for (let i = 0; i < path.length - 1; ++i) {
   const v = new Vector3(path[i]);
   if (v.distance(path[i + 1]) > 0.01) {
-    meterLines.push({
+    milliMeterLines.push({
       sourcePosition: path[i],
       targetPosition: path[i + 1]
     });
@@ -50,7 +63,6 @@ for (let i = 0; i < path.length - 1; ++i) {
 }
 
 export const points = allPoints;
-export const positionOrigin = [-122.42694203247012, 37.751537058389985];
 
 export const worldGrid = pointsToWorldGrid(points, 500);
 
