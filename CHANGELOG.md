@@ -17,6 +17,11 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## Official Releases
 
+#### [4.1.6] - 2017-12-01
+- PolygonLayer- add elevationScale, fix updateTriggers.getElevation doesn't trigger updateGeometry (#1046)
+- Fix spike issue in path layer (#1200)
+- update sharp end fix for 64bits pathlayer shader (#1202)
+
 #### [4.1.5] - 2017-10-13
 - Specify meter unit for getLineWidth in geojson layer (#1029)
 - Fix point missing issue for 64 bits point cloud layer vertex shader(#1028)
