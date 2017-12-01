@@ -100,8 +100,61 @@ Object.assign(experimental, {
 
 // Experimental Data Accessor Helpers
 // INTERNAL - TODO remove from experimental exports
-const {get, count} = CoreExperimental;
-Object.assign(experimental, {get, count});
+const {
+  // For react module
+  TransitionManager,
+  extractViewportFrom,
+
+  // For layers
+  BinSorter,
+  linearScale,
+  getLinearScale,
+  quantizeScale,
+  getQuantizeScale,
+  clamp,
+  defaultColorRange,
+
+  log,
+
+  get,
+  count,
+
+  flatten,
+  countVertices,
+  flattenVertices,
+  fillArray,
+
+  enable64bitSupport,
+  fp64ify
+} = CoreExperimental;
+
+Object.assign(experimental, {
+  // For react module
+  TransitionManager,
+  extractViewportFrom,
+
+  // For layers
+  BinSorter,
+  linearScale,
+  getLinearScale,
+  quantizeScale,
+  getQuantizeScale,
+  clamp,
+  defaultColorRange,
+
+  log,
+
+  get,
+  count,
+
+  flatten,
+  countVertices,
+  flattenVertices,
+  fillArray,
+
+  enable64bitSupport,
+  fp64ify
+});
 
 //
 // CORE LAYERS PACKAGE
