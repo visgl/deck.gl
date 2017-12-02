@@ -93,6 +93,8 @@ Object.assign(experimental, {
   LinearInterpolator,
   ViewportFlyToInterpolator,
 
+  TRANSITION_EVENTS,
+
   // Pure JS (non-React) API
   DeckGLJS,
   MapControllerJS,
