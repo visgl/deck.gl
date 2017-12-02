@@ -1,4 +1,3 @@
-
 # WebMercatorViewport Class
 
 The `WebMercatorViewport` class is a subclass of [ThirdPersonViewport](/docs/api-reference/third-person-viewport.md) that enables 3D rendering to seamlessly overlay on top of map components that take web mercator style map coordinates (`latitude`, `lon`, `zoom`, `pitch`, `bearing` etc).
