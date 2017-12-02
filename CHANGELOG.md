@@ -23,6 +23,12 @@ For Earlier Beta Releases see below
 
 ### deck.gl v4.2 Beta Releases
 
+#### [4.2.0-alpha.29] - Dec 1
+- Picking null color fix
+
+#### [4.2.0-alpha.28] - Nov 30
+- Add back experimental exports
+
 #### [4.2.0-alpha.27] - Nov 30
 - update sharp end fix for 64bits pathlayer shader (#1202)
 - Fix spike issue in path layer (#1200)
