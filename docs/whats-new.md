@@ -2,12 +2,23 @@
 
 Release date: TBD, Dec 2017
 
-All new additions to the official deck.gl 4.2 API are listed here. Note that while the official new features in this release are fairly minor, deck.gl 4.2 also contains a number of signficant under the hoods changes to prepare for new features and optimizations. Some of these are available as experimental APIs, see below.
+All new additions to the official deck.gl 4.2 API are listed here. Note that in addition to the official new features in this release, deck.gl 4.2 also contains a number of signficant under the hoods changes to prepare for new features and optimizations. Some of these are available as experimental APIs, see below.
 
 As always, for information on deprecations and how to update your code in response to any API changes, please read the deck.gl [Upgrade Guide](/docs/get-started/upgrade-guide.md).
 
+> TODO - Add a row of small square GIFs/PNGs of Viewport Transitions, Automatic Highlighting, Dashed Lines, Multiple Viewports. Would be really nice with a screenshot (or GIF) of Seer.
+
+
+## DeckGL: Viewport Transitions
+
+A major new feature is support for Viewport Transitions.
+
+> TODO - Add more extensive description. This is our major official feature after all...
+
 
 ## DeckGL: Control over DevicePixelRatio
+
+> TODO - is this really a new prop? - it is listed as a changed prop in the Upgrade Guide
 
 The new `useDevicePixels` prop on the `DeckGL` React component can be used to disable usage of full resolution on retina/HD displays. Disabling deck.gl's default behavior of always rendering at maximum device resolution can reduce the render buffer size with a factor of 4x on retina devices and lead to significant performance improvements on typical fragment shader bound rendering. This option can be especially interesting on "retina" type mobile phone displays where pixels are so small that the visual quality loss may be largely imperceptible.
 
@@ -40,6 +51,11 @@ Added new props (`getDashArray` and `dashJustified`) enabling you render paths a
 ## HexagonLayer / GridLayer: Elevation by Value Support
 
 Add `getElevationValue` to `HexagonLayer` and `GridLayer` to enable elevation aggregation by value. This allow both color and elevation to be calculated based on customized aggregation function.
+
+
+## Seer Improvements
+
+The [Seer](https://chrome.google.com/webstore/detail/seer/eogckabefmgphfgngjdmmlfbddmonfdh?hl=en) Chrome Debug Extension now remembers its "on/off" setting across application reloads. This is significant because it means that the Seer extension can be left installed even in heavy deck.gl applications with lots of layers, and turned on only during debugging, without any performance impact during normal usage.
 
 
 ## Shader Modules
@@ -117,7 +133,7 @@ deck.gl's default event handling now includes support for multitouch gestures to
 
 ## Seer Integration
 
-deck.gl is now integrated with the new Seer Chrome extension. Simply installing Seer and rerunning your application opens up a new tab in the Chrome developer tools, providing you with the ability to see all your deck.gl layers, inspect (and edit) their properties and attributes and check per layer timings, such as the latest GPU draw calls or attribute updates.
+deck.gl is now integrated with the new [Seer Chrome extension](https://chrome.google.com/webstore/detail/seer/eogckabefmgphfgngjdmmlfbddmonfdh?hl=en). Simply installing Seer and rerunning your application opens up a new tab in the Chrome developer tools, providing you with the ability to see all your deck.gl layers, inspect (and edit) their properties and attributes and check per layer timings, such as the latest GPU draw calls or attribute updates.
 
 And note that since luma.gl v4 also has a Seer integration, it is possible to follow links from deck.gl layer to luma.gl models inside Seer, enabling you to further drill down and understand what data is ultimately being generated and processed by the GPU.
 

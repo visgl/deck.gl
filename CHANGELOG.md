@@ -23,6 +23,11 @@ For Earlier Beta Releases see below
 
 ### deck.gl v4.2 Beta Releases
 
+#### [4.2.0-...] -
+- DOCS: updates to clarify what is experimental in 4.2, in "What's New" and "API Reference".
+- DOCS: New Roadmap doc, linking to RFCs.
+- DOCS: List experimental 4.2 features in Roadmap doc.
+
 #### [4.2.0-alpha.29] - Dec 1
 - Picking null color fix
 
