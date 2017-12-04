@@ -1,5 +1,7 @@
 steps:
   - name: ":docker: :package:"
+    agents:
+      queue: 'uber-builders'
     plugins:
       docker-compose#v1.5.2:
         build: deck-gl
