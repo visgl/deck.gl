@@ -34,9 +34,7 @@ Following methods and props have been renamed for clarity. The semantics are unc
 
 ### Picking Uniforms
 
-The shader uniforms `renderPickingBuffer` and `selectedPickingColor` are deprecated, and will be removed in next major version. The props are still available but will generate a deprecation warning.
-
-It is recommended that custom layers that implement picking use luma.gl `picking` shader module.
+The shader uniforms `renderPickingBuffer` and `selectedPickingColor` are deprecated, and will be removed in next major version. The old uniforms are still being set for now, but it is recommended that custom layers that implement picking start using the luma.gl `picking` shader module which automatically sets the required uniforms.
 
 
 ## Upgrading from deck.gl v4 to v4.1
