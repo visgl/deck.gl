@@ -1,0 +1,5 @@
+XVFB=/usr/bin/Xvfb
+XVFBARGS="$DISPLAY -screen 0 1024x768x24 -ac +extension GLX +render -noreset"
+PIDFILE=/var/run/xvfb.pid
+
+start-stop-daemon --start --quiet --pidfile $PIDFILE --make-pidfile --background --exec $XVFB -- $XVFBARGS
