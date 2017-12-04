@@ -61,9 +61,7 @@ const {
 
   // Controllers
   Controller,
-  MapController,
   FirstPersonController,
-  OrbitController,
 
   // Viewports
   OrbitViewport,
@@ -83,9 +81,7 @@ Object.assign(experimental, {
   MapState,
 
   Controller,
-  MapController,
   FirstPersonController,
-  OrbitController,
 
   OrbitViewport,
 
@@ -211,13 +207,13 @@ export {
 
 // TODO - do we need to expose these?
 import {
-  MapController as ReactMapController,
-  OrbitController as ReactOrbitController
+  MapController,
+  OrbitController
 } from './react';
 
 Object.assign(experimental, {
-  ReactMapController,
-  ReactOrbitController
+  MapController,
+  OrbitController
 });
 
 //

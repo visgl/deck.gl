@@ -11,7 +11,7 @@
     "build": "npm run build-clean && npm run build-script && npm run build-copy"
   },
   "dependencies": {
-    "deck.gl": "4.2.0-alpha.24",
+    "deck.gl": "4.2.0-alpha.29",
     "is-little-endian": "0.0.0",
     "react": "^15.5.4",
     "react-dom": "^15.5.4",
