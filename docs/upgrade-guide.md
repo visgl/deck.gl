@@ -2,45 +2,52 @@
 
 ## Upgrading from deck.gl v4.1 to v4.2
 
+### Dependencies
+
+deck.gl 4.1 requires luma.gl as peer dependency, but 4.2 specifies it as a normal "dependency". This means that many applications no longer need to list luma.gl in their package.json. Applications that do might get multiple copies of luma.gl installed, which will not work. **luma.gl will detect this situtation during run-time throwing an exception**, but **npm and yarn will not detect it during install time**. Thus your build can look successful but will fail during upgrade.
+
 ### Layer Props
 
-Coordinate system related props have been renamed for clarity.
+Coordinate system related props have been renamed for clarity. The old props are still available but will generate a deprecation warning.
 
 | Layer            | Old Prop           | New Prop             | Comment |
 | ---              | ---                | ---                  | ---     |
 | Layer            | `projectionMode`   | `coordinateSystem`   | Any constant from `COORDINATE_SYSTEM`  |
 | Layer            | `projectionOrigin` | `coordinateOrigin`   | |
 
+Note; There is also an important semantical change in that using `coordinateSystem` instead of `projectionMode` causes the superimposed `METER_OFFSET` system's y-axis to point north instead of south. This was always the intention so in some sense this was regarded as a bug fix.
 
 ### DeckGL component
 
-Following methods and props have been renamed for clarity.
-
+Following methods and props have been renamed for clarity. The semantics are unchanged. The old props are still available but will generate a deprecation warning.
 
 | Old Method            | New Method        | Comment |
 | ---                   | ---               | ---     |
-| `queryVisibleObjects` | `pickObjects`     | |
-| `queryObject`         | `pickObject`      | |
+| `queryObject`         | `pickObject`      | These names were previously aligned with react-map-gl, but ended up confusing users. Since rest of the deck.gl documentation talks extensively about "picking" it made sense to stay with that terminology. |
+| `queryVisibleObjects` | `pickObjects`     | The word "visible" was intended to remind the user that this function only selects the objects that are actually visible in at least one pixel, but again it confused more than it helped. |
 
 
 | Old Prop              | New Props         | Comment |
 | ---                   | ---               | ---     |
-| `useDevicePixelRatio` | `useDevicePixels` | |
+| `useDevicePixelRatio` | `useDevicePixels` | Changed due to feedback that the original name was confusing. |
 
 
-### Picking uniforms
+### Picking Uniforms
 
-`renderPickingBuffer` and `selectedPickingColor` are deprecated, and will be removed in next major version. It is recommended to use `luma.gl` picking module.
-
-
-### Viewports
-
-TODO: add a document explaining the hierarchies and recommended practices of using the provided viewports.
+The shader uniforms `renderPickingBuffer` and `selectedPickingColor` are deprecated, and will be removed in next major version. The old uniforms are still being set for now, but it is recommended that custom layers that implement picking start using the luma.gl `picking` shader module which automatically sets the required uniforms.
 
 
 ## Upgrading from deck.gl v4 to v4.1
 
 deck.gl v4.1 is a backward-compatible release. Most of the functionality and APIs remain unchanged but there are smaller changes that might requires developers' attention if they **develop custom layers**. Note that applications that are only using the provided layers should not need to make any changes issues.
+
+
+### Dependencies
+
+Be aware that deck.gl 4.1 bumps the luma.gl peer dependency from 3.0 to 4.0. There have been instances where this was not detected by the installer during update.
+
+
+### Layer Life Cycle Optimization
 
 * **shouldUpdateState** - deck.gl v4.1 contains additional optimizations of the layer lifecycle and layer diffing algorithms. Most of these changes are completely under the hood but one  visible change is that the default implementation of `Layer.shouldUpdate` no longer returns true if only the viewport has changed. This means that layers that need to update state in response to changes in screen space (viewport) will need to redefine `shouldUpdate`:
 ```js
@@ -49,7 +56,6 @@ deck.gl v4.1 is a backward-compatible release. Most of the functionality and API
   }
 ```
 Note that this change has already been done in all the provided deck.gl layers that are screen space based, including the `ScreenGridLayer` and the `HexagonLayer`.
-
 
 ### luma.gl `Model` class API change
 

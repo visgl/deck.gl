@@ -1,6 +1,6 @@
 # AttributeManager Class (Advanced)
 
-Note: The `AttributeManager` is used internally by deck.gl layers. Unless you are writing custom deck.gl layers, or you are working with some very narrow advanced performance optimization use cases, you do not need to use this class.
+> The `AttributeManager` is used internally by deck.gl layers. Unless you are writing custom deck.gl layers, or you are working with some very narrow advanced performance optimization use cases, you do not need to use this class.
 
 The `AttributeManager` class provides automated attribute allocations and updates.
 

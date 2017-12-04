@@ -144,6 +144,10 @@ export const docPages = generatePath([
       {
         name: 'Upgrade Guide',
         content: getDocUrl('upgrade-guide.md')
+      },
+      {
+        name: 'Roadmap',
+        content: getDocUrl('roadmap.md')
       }
     ]
   },
@@ -307,16 +311,8 @@ export const docPages = generatePath([
         content: getDocUrl('api-reference/attribute-manager.md')
       },
       {
-        name: 'FirstPersonViewport',
-        content: getDocUrl('api-reference/first-person-viewport.md')
-      },
-      {
         name: 'LayerManager (Advanced)',
         content: getDocUrl('api-reference/layer-manager.md')
-      },
-      {
-        name: 'ThirdPersonViewport',
-        content: getDocUrl('api-reference/third-person-viewport.md')
       },
       {
         name: 'Viewport',
@@ -348,12 +344,21 @@ export const docPages = generatePath([
         content: getDocUrl('api-reference/react/deckgl.md')
       },
       {
-        name: 'ViewportLayout',
-        content: getDocUrl('api-reference/react/viewport-layout.md')
-      },
-      {
         name: 'ViewportController',
         content: getDocUrl('api-reference/react/viewport-controller.md')
+      }
+    ]
+  },
+  {
+    name: 'API Reference (Experimental)',
+    children: [
+      {
+        name: 'FirstPersonViewport',
+        content: getDocUrl('api-reference/first-person-viewport.md')
+      },
+      {
+        name: 'ThirdPersonViewport',
+        content: getDocUrl('api-reference/third-person-viewport.md')
       }
     ]
   }

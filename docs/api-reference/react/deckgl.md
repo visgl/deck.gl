@@ -2,8 +2,6 @@
 
 `DeckGL` is a React component that takes deck.gl layer instances and viewport parameters, and renders those layers as a transparent overlay.
 
-`DeckGL` can accept child components. Child components can be automatically positioned underneath the deck.gl `viewports`. Such child components are often maps (e.g. represented by instances of the `StaticMap` component from [react-map-gl]()), but can be any React components.
-
 ## Usage
 
 // Basic standalone use
@@ -16,6 +14,10 @@ const App = (viewport, data) => (
     layers={[new ScatterplotLayer({data})]} />
 );
 ```
+
+## Experimental Usage
+
+`DeckGL` can accept child components. Child components can be automatically positioned underneath the deck.gl `viewports`. Such child components are often maps (e.g. represented by instances of the `StaticMap` component from [react-map-gl]()), but can be any React components.
 
 // Multiple viewports and a base map
 ```js
@@ -59,36 +61,6 @@ The array of deck.gl layers to be rendered. This array is expected to be an arra
 ##### `layerFilter`
 
 Optionally takes a function `({layer, viewport, isPicking}) => Boolean` that is called before a layer is rendered. Gives the application an opportunity to filter out layers from the layer list during either rendering or picking. Filtering can be done per viewport or per layer or both. This enables techniques like adding helper layers that work as masks during picking but do not show up during rendering. All the lifecycle methods are still triggered even a if a layer is filtered out using this prop.
-
-##### `viewports`
-
-A singe viewport, or an array of `Viewport`s or "Viewport Descriptors".
-
-* (`Viewport`|`Viewports[]`, optional) - A singe viewport, or an array of `Viewports` or "Viewport Descriptors".
-
-Default: If not supplied, deck.gl will try to create a `WebMercatorViewport` from other props (longitude, latitude, ...).
-
-This property should contain one or more ([`Viewport`](/docs/api-reference/viewport.md), optional)instances which represents your "camera" (essentially view and projection matrices, together with viewport width and height). By changing the `viewport` you change the view of your layers, e.g. as a result of mouse events or through programmatic animations.
-
-deck.gl will render all the viewports in order.
-
-If `viewports` is not supplied, deck.gl will look for web mercator projection parameters (latitude, longitude, zoom, bearing and pitch) and create a `WebMercatorViewport` (which is a subclass of `Viewport`).
-
-##### `children`
-
-To make it easy to use React components in combination with deck.gl viewports (e.g. to place a base map under a viewport, or add a label on top of a viewport), deck.gl can make such components automatically adjust as that viewport is added, removed or resized.
-
-`DeckGL` classifies any top-level children (`props.children`) that have a `viewportId` property as "viewport base components". It will perform special processing on them as follows:
-* It resizes and repositions any `viewportId` children to precisely match the extends of the deck.gl viewport with the corresponding id.
-* It automatically hides any `viewportId` children whose id is not matched by any current deck.gl viewport.
-* It injects viewport properties (`longitude`, `latitude` etc).
-* Also injects the `visible: viewport.isMapSynched()` prop to hide base maps that cannot display per the current viewport parameters.
-
-Additional Notes:
-* The DeckGL components own `canvas` element is added last to the child list, to sit on top of all the base components, however Z index can be used to override this.
-* Child repositioning is done with CSS styling on a wrapper div, resizing is done through width and height properties.
-* Hiding of children is performed by removing the elements from the child list
-* Children without the `viewportId` property are rendered as is.
 
 
 #### View State Properties
@@ -232,11 +204,42 @@ Remarks:
 NOTE: replaces deprecated method `queryVisibleObjects`.
 
 
-### Deprecated Properties
+### Experimental Properties
 
-##### `viewport`
+These properties are considered experimental and can change in the next minor version of deck.gl. They are included as previews of functionality that is being developed.
 
-Deprecated. Use `viewports` property instead, that prop can accept a single `Viewport` or an array with a single `Viewport`.
+##### `viewports`
+
+A singe viewport, or an array of `Viewport`s or "Viewport Descriptors".
+
+* (`Viewport`|`Viewports[]`, optional) - A singe viewport, or an array of `Viewports` or "Viewport Descriptors".
+
+Default: If not supplied, deck.gl will try to create a `WebMercatorViewport` from other props (longitude, latitude, ...).
+
+This property should contain one or more ([`Viewport`](/docs/api-reference/viewport.md), optional)instances which represents your "camera" (essentially view and projection matrices, together with viewport width and height). By changing the `viewport` you change the view of your layers, e.g. as a result of mouse events or through programmatic animations.
+
+deck.gl will render all the viewports in order.
+
+If `viewports` is not supplied, deck.gl will look for web mercator projection parameters (latitude, longitude, zoom, bearing and pitch) and create a `WebMercatorViewport` (which is a subclass of `Viewport`).
+
+##### `children`
+
+The following semantics of the children property are considered experimental.
+
+To make it easy to use React components in combination with deck.gl viewports (e.g. to place a base map under a viewport, or add a label on top of a viewport), deck.gl can make such components automatically adjust as that viewport is added, removed or resized.
+
+`DeckGL` classifies any top-level children (`props.children`) that have a `viewportId` property as "viewport base components". It will perform special processing on them as follows:
+* It resizes and repositions any `viewportId` children to precisely match the extends of the deck.gl viewport with the corresponding id.
+* It automatically hides any `viewportId` children whose id is not matched by any current deck.gl viewport.
+* It injects viewport properties (`longitude`, `latitude` etc).
+* Also injects the `visible: viewport.isMapSynched()` prop to hide base maps that cannot display per the current viewport parameters.
+
+Additional Notes:
+* The DeckGL components own `canvas` element is added last to the child list, to sit on top of all the base components, however Z index can be used to override this.
+* Child repositioning is done with CSS styling on a wrapper div, resizing is done through width and height properties.
+* Hiding of children is performed by removing the elements from the child list
+* Children without the `viewportId` property are rendered as is.
+
 
 ## Source
 [src/react/deckgl.js](https://github.com/uber/deck.gl/blob/4.1-release/src/react/deckgl.js)

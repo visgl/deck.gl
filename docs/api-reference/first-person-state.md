@@ -1,5 +1,4 @@
-# FirstPersonState Class
-
+# FirstPersonState Class (Experimental)
 
 ## Constructor
 
