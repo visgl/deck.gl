@@ -76,7 +76,7 @@ export default class ExtrudedChoroplethLayer64 extends Layer {
   }
 
   updateState({changeFlags}) {
-    const {attributeManager} = this.state;
+    const {attributeManager, model} = this.state;
     if (changeFlags.dataChanged) {
       this.extractExtrudedChoropleth();
       attributeManager.invalidateAll();
@@ -89,7 +89,7 @@ export default class ExtrudedChoroplethLayer64 extends Layer {
       pointLightAttenuation, materialSpecularColor, materialShininess
     } = this.props;
 
-    this.setUniforms({
+    model.setUniforms({
       elevation: Number.isFinite(elevation) ? elevation : 1,
       uAmbientColor: ambientColor || DEFAULT_AMBIENT_COLOR,
       uPointLightAmbientCoefficient:

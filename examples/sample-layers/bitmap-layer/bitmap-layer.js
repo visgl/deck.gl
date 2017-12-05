@@ -93,7 +93,8 @@ export default class BitmapLayer extends Layer {
     }
     this.calculateRadius();
     const {imageSize, desaturate} = props;
-    this.setUniforms({imageSize, desaturate});
+    const {model} = this.state;
+    model.setUniforms({imageSize, desaturate});
   }
 
   calculateRadius(props) {

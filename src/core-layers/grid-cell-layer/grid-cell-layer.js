@@ -127,8 +127,9 @@ export default class GridCellLayer extends Layer {
 
   updateUniforms() {
     const {opacity, extruded, elevationScale, coverage, lightSettings} = this.props;
+    const {model} = this.state;
 
-    this.setUniforms(Object.assign({}, {
+    model.setUniforms(Object.assign({}, {
       extruded,
       elevationScale,
       opacity,

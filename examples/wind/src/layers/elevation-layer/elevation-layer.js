@@ -51,9 +51,10 @@ export default class ElevationLayer extends Layer {
       this.setState({data: textures[0]});
     });
 
-    this.setState({model: this.getModel(gl)});
+    const model = this.getModel(gl);
+    this.setState({model});
 
-    this.setUniforms({
+    model.setUniforms({
       ...LIGHT_UNIFORMS,
       elevationBounds: ELEVATION_DATA_BOUNDS,
       elevationRange: ELEVATION_RANGE

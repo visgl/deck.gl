@@ -68,8 +68,6 @@
 		o.scale = readAs(arraybuffer, Float64Array, start, 3); start += 24; // 8*3
 		o.offset = readAs(arraybuffer, Float64Array, start, 3); start += 24;
 
-		console.log("Read stuff:", o.scale, o.offset);
-
 
 		var bounds = readAs(arraybuffer, Float64Array, start, 6); start += 48; // 8*6;
 		o.maxs = [bounds[0], bounds[2], bounds[4]];
@@ -157,7 +155,6 @@
 					count = Math.min(count, o.header.pointsCount - o.readOffset);
 					start = o.header.pointsOffset + o.readOffset * o.header.pointsStructSize;
 					var end = start + count * o.header.pointsStructSize;
-					console.log(start, end);
 					res({
 						buffer: o.arraybuffer.slice(start, end),
 						count: count,
@@ -170,7 +167,6 @@
 					var pointsRead = 0;
 
 					var buf = new Uint8Array(bufferSize * o.header.pointsStructSize);
-					console.log("Destination size:", buf.byteLength);
 					for (var i = 0 ; i < pointsToRead ; i ++) {
 						if (i % skip === 0) {
 							start = o.header.pointsOffset + o.readOffset * o.header.pointsStructSize;
@@ -213,14 +209,12 @@
 
 		this.ww.onmessage = function(e) {
 			if (o.nextCB !== null) {
-				console.log('dorr: >>', e.data);
 				o.nextCB(e.data);
 				o.nextCB = null;
 			}
 		};
 
 		this.dorr = function(req, cb) {
-			console.log('dorr: <<', req);
 			o.nextCB = cb;
 			o.ww.postMessage(req);
 		};
@@ -337,8 +331,6 @@
 	// Decodes LAS records into points
 	//
 	var LASDecoder = function(buffer, len, header) {
-    console.log(header);
-		// console.log("POINT FORMAT ID:", header.pointsFormatId);
 		this.arrayb = buffer;
 		this.decoder = pointFormatReaders[header.pointsFormatId];
 		this.pointsCount = len;

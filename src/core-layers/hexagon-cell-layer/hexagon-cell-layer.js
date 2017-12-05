@@ -188,8 +188,9 @@ export default class HexagonCellLayer extends Layer {
 
   updateUniforms() {
     const {opacity, elevationScale, extruded, coverage, lightSettings} = this.props;
+    const {model} = this.state;
 
-    this.setUniforms(Object.assign({}, {
+    model.setUniforms(Object.assign({}, {
       extruded,
       opacity,
       coverage,
