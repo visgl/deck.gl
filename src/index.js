@@ -35,15 +35,9 @@ export {
 
   // Viewports
   Viewport,
-  FirstPersonViewport,
   WebMercatorViewport,
   PerspectiveViewport,
-  OrthographicViewport,
-
-  // Transition bindings
-  TRANSITION_EVENTS,
-  LinearInterpolator,
-  ViewportFlyToInterpolator
+  OrthographicViewport
 } from './core';
 
 // Deprecated Core Lib Classes
@@ -65,6 +59,13 @@ const {
 
   // Viewports
   OrbitViewport,
+  ThirdPersonViewport,
+  FirstPersonViewport,
+
+  // Transition bindings
+  TRANSITION_EVENTS,
+  LinearInterpolator,
+  ViewportFlyToInterpolator,
 
   DeckGLJS,
   MapControllerJS,
@@ -84,6 +85,13 @@ Object.assign(experimental, {
   FirstPersonController,
 
   OrbitViewport,
+  ThirdPersonViewport,
+  FirstPersonViewport,
+
+  // Transition bindings
+  TRANSITION_EVENTS,
+  LinearInterpolator,
+  ViewportFlyToInterpolator,
 
   // Pure JS (non-React) API
   DeckGLJS,
@@ -201,19 +209,20 @@ Object.assign(experimental, {
 
 export {
   default as default,
-  DeckGL,
-  ViewportController // TODO - merge with deck.gl?
+  DeckGL
 } from './react';
 
 // TODO - do we need to expose these?
 import {
   MapController,
-  OrbitController
+  OrbitController,
+  ViewportController // TODO - merge with deck.gl?
 } from './react';
 
 Object.assign(experimental, {
   MapController,
-  OrbitController
+  OrbitController,
+  ViewportController
 });
 
 //

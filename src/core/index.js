@@ -28,15 +28,9 @@ export {default as CompositeLayer} from './lib/composite-layer';
 
 // Viewports
 export {default as Viewport} from './viewports/viewport';
-export {default as FirstPersonViewport} from './viewports/first-person-viewport';
 export {default as WebMercatorViewport} from './viewports/web-mercator-viewport';
 export {default as PerspectiveViewport} from './viewports/perspective-viewport';
 export {default as OrthographicViewport} from './viewports/orthographic-viewport';
-
-// Transitions
-export {TRANSITION_EVENTS} from './lib/transition-manager';
-export {default as LinearInterpolator} from './transitions/linear-interpolator';
-export {default as ViewportFlyToInterpolator} from './transitions/viewport-fly-to-interpolator';
 
 // Import shaderlib to make sure shader modules are initialized
 import './shaderlib';
@@ -47,7 +41,9 @@ import {default as OrbitState} from './controllers/orbit-state';
 import {default as MapState} from './controllers/map-state';
 
 // EXPERIMENTAL EXPORTS
-// Controllers
+// Experimental Features (May change in minor version bumps, use at your own risk)
+
+// Experimental Controllers
 import {default as Controller} from './controllers/viewport-controls';
 import {default as MapController} from './controllers/map-controls';
 // import {default as FirstPersonController} from './controllers/first-person-controller';
@@ -55,14 +51,19 @@ import {default as MapController} from './controllers/map-controls';
 
 import {default as OrbitViewport} from './viewports/orbit-viewport';
 import {default as ThirdPersonViewport} from './viewports/third-person-viewport';
+import {default as FirstPersonViewport} from './viewports/first-person-viewport';
 
-// Experimental Features (May change in minor version bumps, use at your own risk)
 // Experimental Pure JS (non-React) bindings
 import {default as DeckGLJS} from './pure-js/deck-js';
 import {default as MapControllerJS} from './pure-js/map-controller-js';
 // Experimental Effects (non-React) bindings
 import {default as EffectManager} from './experimental/lib/effect-manager';
 import {default as Effect} from './experimental/lib/effect';
+
+// Eperimental Transitions
+import {TRANSITION_EVENTS} from './lib/transition-manager';
+import {default as LinearInterpolator} from './transitions/linear-interpolator';
+import {default as ViewportFlyToInterpolator} from './transitions/viewport-fly-to-interpolator';
 
 // INTERNAL EXPORTS
 
@@ -99,11 +100,17 @@ export const experimental = {
 
   OrbitViewport,
   ThirdPersonViewport,
+  FirstPersonViewport,
 
   DeckGLJS,
   MapControllerJS,
   EffectManager,
   Effect,
+
+  // Transitions
+  TRANSITION_EVENTS,
+  LinearInterpolator,
+  ViewportFlyToInterpolator,
 
   // For react module
   TransitionManager,
