@@ -1,11 +1,9 @@
 /* global window */
 import React, {Component} from 'react';
 import {StaticMap} from 'react-map-gl';
-import {
+import DeckGL, {
   ViewportFlyToInterpolator,
-  TRANSITION_EVENTS,
-  ViewportController,
-  MapState
+  TRANSITION_EVENTS
 } from 'deck.gl';
 
 import ControlPanel from './control-panel';
@@ -69,7 +67,7 @@ export default class App extends Component {
     });
   }
 
-  _easeTo({longitude, latitude}) {
+  _flyTo({longitude, latitude}) {
 
     this.setState({
       viewport: {...this.state.viewport, longitude, latitude, zoom: 11, pitch: 0, bearing: 0},
@@ -93,25 +91,28 @@ export default class App extends Component {
     const {viewport, settings, transitionDuration} = this.state;
 
     return (
-      <ViewportController
-        viewportState={MapState}
-        {...viewport}
-        onViewportChange={this._onViewportChange.bind(this)}
-        transitionInterpolator={new ViewportFlyToInterpolator()}
-        transitionDuration={transitionDuration}
-        transitionInterruption={this._interruptionStyle}>
-        <StaticMap
+      <div>
+        <DeckGL
           {...viewport}
-          {...settings}
-          mapStyle="mapbox://styles/mapbox/dark-v9"
-          onViewportChange={this._onViewportChange}
-          dragToRotate={false}
-          mapboxApiAccessToken={token} />
+          layers = {[]}
+          ControllerType = {'MapController'}
+          onViewportChange={this._onViewportChange.bind(this)}
+          transitionInterpolator={new ViewportFlyToInterpolator()}
+          transitionDuration={transitionDuration}
+          transitionInterruption={this._interruptionStyle}>
+          <StaticMap
+            {...viewport}
+            {...settings}
+            mapStyle="mapbox://styles/mapbox/dark-v9"
+            onViewportChange={this._onViewportChange}
+            dragToRotate={false}
+            mapboxApiAccessToken={token} />
+        </DeckGL>
         <ControlPanel containerComponent={this.props.containerComponent}
-          onViewportChange={this._easeTo.bind(this)}
+          flyTo={this._flyTo.bind(this)}
           interruptionStyles={interruptionStyles}
           onStyleChange={this._onStyleChange.bind(this)} />
-      </ViewportController>
+      </div>
     );
   }
 

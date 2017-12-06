@@ -65,6 +65,7 @@ const {
 
   // Viewports
   OrbitViewport,
+  ThirdPersonViewport,
 
   DeckGLJS,
   MapControllerJS,
@@ -84,6 +85,7 @@ Object.assign(experimental, {
   FirstPersonController,
 
   OrbitViewport,
+  ThirdPersonViewport,
 
   // Pure JS (non-React) API
   DeckGLJS,

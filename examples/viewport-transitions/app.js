@@ -1,13 +1,9 @@
 /* global window,document */
 import React, {Component} from 'react';
 import {render} from 'react-dom';
-import {StaticMap} from 'react-map-gl';
 import DeckGLOverlay from './deckgl-overlay.js';
-import {ViewportController, MapState, LinearInterpolator} from 'deck.gl';
+import {LinearInterpolator} from 'deck.gl';
 import {csv as requestCsv} from 'd3-request';
-
-// Set your mapbox token here
-const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
 
 // Source data CSV
 const DATA_URL = 'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/3d-heatmap/heatmap-data.csv';  // eslint-disable-line
@@ -26,8 +22,13 @@ class Root extends Component {
         height: 500,
         bearing: 0
       },
+      transitions: {
+        transitionDuration: 0,
+        transitionInterpolator,
+        onViewportChange: this._onViewportChange.bind(this),
+        onTransitionEnd: this._rotateCamera.bind(this)
+      },
       data: null,
-      transitionDuration: 0,
       viewportToggled: false
     };
 
@@ -42,9 +43,6 @@ class Root extends Component {
   componentDidMount() {
     window.addEventListener('resize', this._resize.bind(this));
     this._resize();
-
-    // TODO: this is to just simulate viwport prop change and test animation.
-    // this._interval = setInterval(() => this._toggleViewport(), 8000);
     this._rotateCamera();
   }
 
@@ -58,21 +56,10 @@ class Root extends Component {
   _onViewportChange(viewport) {
     this.setState({
       viewport: {...this.state.viewport, ...viewport},
-      transitionDuration: 0
-    });
-  }
-
-  // TODO: this is to just simulate viwport prop change and test animation.
-  // Add proper UI to change viewport.
-  _toggleViewport() {
-    const newViewport = {};
-    // newViewport.pitch = this.state.viewportToggled ? 60.0 : 0.0;
-    // newViewport.bearing = this.state.viewportToggled ? -90.0 : 0.0;
-    newViewport.bearing = (this.state.viewport.bearing + 120) % 360;
-    this.setState({
-      viewport: {...this.state.viewport, ...newViewport},
-      transitionDuration: 4000,
-      viewportToggled: !this.state.viewportToggled
+      transitions: {
+        ...this.state.transitions,
+        transitionDuration: 0
+      }
     });
   }
 
@@ -87,7 +74,10 @@ class Root extends Component {
         width: window.innerWidth,
         height: window.innerHeight
       },
-      transitionDuration
+      transitions: {
+        ...this.state.transitions,
+        transitionDuration
+      }
     });
   }
 
@@ -95,27 +85,14 @@ class Root extends Component {
     const {
       viewport,
       data,
-      transitionDuration
+      transitions
     } = this.state;
     return (
-      <ViewportController
-        viewportState={MapState}
-        {...viewport}
-        onViewportChange={this._onViewportChange.bind(this)}
-        transitionDuration={transitionDuration}
-        transitionInterpolator={transitionInterpolator}
-        onTransitionEnd={this._rotateCamera.bind(this)}>
-        <StaticMap
-          {...viewport}
-          mapStyle="mapbox://styles/mapbox/dark-v9"
-          onViewportChange={this._onViewportChange.bind(this)}
-          mapboxApiAccessToken={MAPBOX_TOKEN}>
-          <DeckGLOverlay
-            viewport={viewport}
-            data={data || []}
-          />
-        </StaticMap>
-      </ViewportController>
+      <DeckGLOverlay
+        viewport={viewport}
+        transitions={transitions}
+        data={data || []}
+        ControllerType = {'MapController'}/>
     );
   }
 }

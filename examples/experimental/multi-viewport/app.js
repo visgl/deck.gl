@@ -4,22 +4,25 @@ import {render} from 'react-dom';
 
 import {
   COORDINATE_SYSTEM,
-  // Unified controller, together with state that determines interaction model
-  FirstPersonState,
   // Viewport classes provides various views on the state
   FirstPersonViewport,
-  ThirdPersonViewport,
   WebMercatorViewport,
   PolygonLayer,
-  PointCloudLayer
+  PointCloudLayer,
+  experimental
 } from 'deck.gl';
 
 import TripsLayer from '../../trips/trips-layer';
 
 // deck.gl React components
-import {DeckGL, ViewportController} from 'deck.gl';
+import {DeckGL} from 'deck.gl';
 
 import {StaticMap} from 'react-map-gl';
+
+const {
+  // Viewport classes provides various views on the state
+  ThirdPersonViewport
+} = experimental;
 
 // Source data CSV
 const DATA_URL = {
@@ -248,37 +251,29 @@ class Root extends Component {
 
     return (
       <div style={{backgroundColor: '#000'}}>
-        <ViewportController
-          viewportState={FirstPersonState}
-          {...viewportProps}
+        <DeckGL
+          id="first-person"
           width={viewportProps.width}
           height={viewportProps.height}
+          viewports={viewports}
           onViewportChange={this._onViewportChange}
+          layers={this._renderLayers()}
+          initWebGLParameters
         >
-          <DeckGL
-            id="first-person"
-            width={viewportProps.width}
-            height={viewportProps.height}
-            viewports={viewports}
-            layers={this._renderLayers()}
-            initWebGLParameters
-          >
-            <StaticMap
-              viewportId="3rd-person"
-              {...viewportProps}
-              mapStyle="mapbox://styles/mapbox/light-v9"
-              mapboxApiAccessToken={MAPBOX_TOKEN}
-            />
-            <StaticMap
-              viewportId="basemap"
-              {...viewportProps}
-              mapStyle="mapbox://styles/mapbox/dark-v9"
-              mapboxApiAccessToken={MAPBOX_TOKEN}
-            />
-          </DeckGL>
-
-          {this._renderOptionsPanel()}
-        </ViewportController>
+          <StaticMap
+            viewportId="3rd-person"
+            {...viewportProps}
+            mapStyle="mapbox://styles/mapbox/light-v9"
+            mapboxApiAccessToken={MAPBOX_TOKEN}
+          />
+          <StaticMap
+            viewportId="basemap"
+            {...viewportProps}
+            mapStyle="mapbox://styles/mapbox/dark-v9"
+            mapboxApiAccessToken={MAPBOX_TOKEN}
+          />
+        </DeckGL>
+        {this._renderOptionsPanel()}
       </div>
     );
   }

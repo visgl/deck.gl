@@ -22,6 +22,8 @@ import LayerManager from '../lib/layer-manager';
 import EffectManager from '../experimental/lib/effect-manager';
 import Effect from '../experimental/lib/effect';
 import WebMercatorViewport from '../viewports/web-mercator-viewport';
+import TransitionManager from '../lib/transition-manager';
+import MapControllerJS from './map-controller-js';
 
 import {EventManager} from 'mjolnir.js';
 import {GL, AnimationLoop, createGLContext, setParameters} from 'luma.gl';
@@ -32,7 +34,7 @@ import PropTypes from 'prop-types';
 
 function noop() {}
 
-const propTypes = {
+const propTypes = Object.assign({}, TransitionManager.propTypes, {
   id: PropTypes.string,
   width: PropTypes.number.isRequired,
   height: PropTypes.number.isRequired,
@@ -50,13 +52,14 @@ const propTypes = {
   onLayerClick: PropTypes.func,
   onLayerHover: PropTypes.func,
   useDevicePixels: PropTypes.bool,
+  ControllerType: PropTypes.string,
 
   // Debug settings
   debug: PropTypes.bool,
   drawPickingColors: PropTypes.bool
-};
+});
 
-const defaultProps = {
+const defaultProps = Object.assign({}, TransitionManager.defaultProps, {
   id: 'deckgl-overlay',
   pickingRadius: 0,
   layerFilter: null,
@@ -73,7 +76,7 @@ const defaultProps = {
 
   debug: false,
   drawPickingColors: false
-};
+});
 
 // TODO - should this class be joined with `LayerManager`?
 export default class DeckGLJS {
@@ -106,16 +109,19 @@ export default class DeckGLJS {
       onBeforeRender: props.onBeforeRender,
       onAfterRender: props.onAfterRender
     });
+    this._transitionManager = new TransitionManager(props);
+    this._controller = this._createController(props);
 
     this.animationLoop.start();
-
     this.setProps(props);
   }
 
   setProps(props) {
     props = Object.assign({}, this.props, props);
     this.props = props;
-
+    if (this._controller) {
+      this._controller.setProps(props);
+    }
     if (!this.layerManager) {
       return;
     }
@@ -163,6 +169,17 @@ export default class DeckGLJS {
       this.layerManager.finalize();
       this.layerManager = null;
     }
+
+    if (this._conroller) {
+      this._controller.finalize();
+      this._controller = null;
+    }
+  }
+
+  // Trigger transition, retur true if a new transition is triggered, false otherwise.
+  triggerViewportTransition(nextProps) {
+    return this._transitionManager ?
+      this._transitionManager.processViewportChange(nextProps) : false;
   }
 
   // Public API
@@ -198,6 +215,14 @@ export default class DeckGLJS {
     parent.appendChild(canvas);
 
     return canvas;
+  }
+
+  _createController(props) {
+    // For now only 'MapController' is supported
+    if (props.ControllerType !== 'MapController') {
+      return null;
+    }
+    return new MapControllerJS(Object.assign({}, props, {canvas: this.canvas}));
   }
 
   // Callbacks
