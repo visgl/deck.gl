@@ -1,6 +1,7 @@
 /* global window */
 import React, {Component} from 'react';
 import DeckGL, {HexagonLayer} from 'deck.gl';
+import {StaticMap} from 'react-map-gl';
 
 const LIGHT_SETTINGS = {
   lightsPosition: [-0.144528, 49.739968, 8000, -3.807751, 54.104682, 8000],
@@ -27,6 +28,9 @@ const defaultProps = {
   upperPercentile: 100,
   coverage: 1
 };
+
+// Set your mapbox token here
+const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
 
 export default class DeckGLOverlay extends Component {
 
@@ -137,8 +141,13 @@ export default class DeckGLOverlay extends Component {
         {...transitions}
         ControllerType={ControllerType}
         layers={layers}
-        initWebGLParameters
-      />
+        initWebGLParameters>
+        <StaticMap
+          {...viewport}
+          mapStyle="mapbox://styles/mapbox/dark-v9"
+          onViewportChange={transitions.onViewportChange}
+          mapboxApiAccessToken={MAPBOX_TOKEN} />
+      </DeckGL>
     );
   }
 }

@@ -1,13 +1,9 @@
 /* global window,document */
 import React, {Component} from 'react';
 import {render} from 'react-dom';
-import {StaticMap} from 'react-map-gl';
 import DeckGLOverlay from './deckgl-overlay.js';
 import {LinearInterpolator} from 'deck.gl';
 import {csv as requestCsv} from 'd3-request';
-
-// Set your mapbox token here
-const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
 
 // Source data CSV
 const DATA_URL = 'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/3d-heatmap/heatmap-data.csv';  // eslint-disable-line
@@ -92,18 +88,11 @@ class Root extends Component {
       transitions
     } = this.state;
     return (
-      <StaticMap
-        {...viewport}
-        mapStyle="mapbox://styles/mapbox/dark-v9"
-        onViewportChange={this._onViewportChange.bind(this)}
-        mapboxApiAccessToken={MAPBOX_TOKEN}>
-        <DeckGLOverlay
-          viewport={viewport}
-          transitions={transitions}
-          data={data || []}
-          ControllerType = {'MapController'}
-        />
-      </StaticMap>
+      <DeckGLOverlay
+        viewport={viewport}
+        transitions={transitions}
+        data={data || []}
+        ControllerType = {'MapController'}/>
     );
   }
 }
