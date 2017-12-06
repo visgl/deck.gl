@@ -23,6 +23,7 @@ import EffectManager from '../experimental/lib/effect-manager';
 import Effect from '../experimental/lib/effect';
 import WebMercatorViewport from '../viewports/web-mercator-viewport';
 import TransitionManager from '../lib/transition-manager';
+import MapControllerJS from './map-controller-js';
 
 import {EventManager} from 'mjolnir.js';
 import {GL, AnimationLoop, createGLContext, setParameters} from 'luma.gl';
@@ -51,7 +52,7 @@ const propTypes = Object.assign({}, TransitionManager.propTypes, {
   onLayerClick: PropTypes.func,
   onLayerHover: PropTypes.func,
   useDevicePixels: PropTypes.bool,
-  ControllerType: PropTypes.func,
+  ControllerType: PropTypes.string,
 
   // Debug settings
   debug: PropTypes.bool,
@@ -108,7 +109,7 @@ export default class DeckGLJS {
       onBeforeRender: props.onBeforeRender,
       onAfterRender: props.onAfterRender
     });
-    this._transitionManger = new TransitionManager(props);
+    this._transitionManager = new TransitionManager(props);
     this._controller = this._createController(props);
 
     this.animationLoop.start();
@@ -177,8 +178,8 @@ export default class DeckGLJS {
 
   // Trigger transition, retur true if a new transition is triggered, false otherwise.
   triggerViewportTransition(nextProps) {
-    return this._transitionManger ?
-      this._transitionManger.processViewportChange(nextProps) : false;
+    return this._transitionManager ?
+      this._transitionManager.processViewportChange(nextProps) : false;
   }
 
   // Public API
@@ -217,11 +218,11 @@ export default class DeckGLJS {
   }
 
   _createController(props) {
-    if (!props.ControllerType) {
+    // For now only 'MapController' is supported
+    if (props.ControllerType !== 'MapController') {
       return null;
     }
-    const ControllerType = props.ControllerType;
-    return new ControllerType(Object.assign({}, props, {canvas: this.canvas}));
+    return new MapControllerJS(Object.assign({}, props, {canvas: this.canvas}));
   }
 
   // Callbacks

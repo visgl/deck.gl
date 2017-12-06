@@ -1,6 +1,8 @@
 /* global requestAnimationFrame, cancelAnimationFrame */
 import LinearInterpolator from '../transitions/linear-interpolator';
 import {extractViewportFrom} from '../transitions/transition-utils';
+import WebMercatorViewport from '../viewports/web-mercator-viewport';
+
 import assert from 'assert';
 import PropTypes from 'prop-types';
 
@@ -69,17 +71,22 @@ export default class TransitionManager {
   processViewportChange(nextProps) {
     let transitionTriggered = false;
     const currentProps = this.props;
+
+    // extract viewport props if needed.
+    const viewportProps = this._getViewportProps(nextProps);
+    const newProps = Object.assign({}, nextProps, viewportProps);
+
     // Set this.props here as '_triggerTransition' calls '_updateViewport' that uses this.props.
-    this.props = nextProps;
+    this.props = newProps;
 
     // NOTE: Be cautious re-ordering statements in this function.
-    if (this._shouldIgnoreViewportChange(currentProps, nextProps)) {
+    if (this._shouldIgnoreViewportChange(currentProps, newProps)) {
       return transitionTriggered;
     }
 
     const isTransitionInProgress = this._isTransitionInProgress();
 
-    if (this._isTransitionEnabled(nextProps)) {
+    if (this._isTransitionEnabled(newProps)) {
       const startProps = Object.assign({}, currentProps,
         this.state.interruption === TRANSITION_EVENTS.SNAP_TO_END ?
         this.state.endProps : (this.state.propsInTransition || currentProps)
@@ -88,9 +95,9 @@ export default class TransitionManager {
       if (isTransitionInProgress) {
         currentProps.onTransitionInterrupt();
       }
-      nextProps.onTransitionStart();
+      newProps.onTransitionStart();
 
-      this._triggerTransition(startProps, nextProps);
+      this._triggerTransition(startProps, newProps);
 
       transitionTriggered = true;
     } else if (isTransitionInProgress) {
@@ -102,6 +109,27 @@ export default class TransitionManager {
   }
 
   // Helper methods
+
+  // extracts required viewport props when multi-viewports are used
+  _getViewportProps(nextProps) {
+    const viewportProps = nextProps.viewports ?
+      nextProps.viewports.filter(viewport => viewport instanceof WebMercatorViewport)[0] :
+      nextProps.viewport;
+
+    if (!viewportProps) {
+      return {};
+    }
+
+    const {
+      longitude, latitude, zoom, bearing, pitch, position
+    } = viewportProps;
+    const {width, height} = nextProps;
+
+    return {
+      width, height,
+      longitude, latitude, zoom, bearing, pitch, position
+    };
+  }
 
   _isTransitionInProgress() {
     return this.state.propsInTransition;

@@ -3,10 +3,9 @@ import React, {Component} from 'react';
 import {render} from 'react-dom';
 import {StaticMap} from 'react-map-gl';
 import DeckGLOverlay from './deckgl-overlay.js';
-import {LinearInterpolator, experimental} from 'deck.gl';
+import {LinearInterpolator} from 'deck.gl';
 import {csv as requestCsv} from 'd3-request';
 
-const {MapControllerJS} = experimental;
 // Set your mapbox token here
 const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
 
@@ -102,7 +101,7 @@ class Root extends Component {
           viewport={viewport}
           transitions={transitions}
           data={data || []}
-          ControllerType = {MapControllerJS}
+          ControllerType = {'MapController'}
         />
       </StaticMap>
     );
