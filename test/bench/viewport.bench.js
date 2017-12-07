@@ -52,6 +52,22 @@ export default function viewportBench(suite) {
         coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS
       });
     })
+    .add('getUniformsFromViewport#LNGLAT - FP64', () => {
+      return getUniformsFromViewport({
+        viewport: data.sampleViewport,
+        fp64: true,
+        modelMatrix: data.sampleModelMatrix,
+        coordinateSystem: COORDINATE_SYSTEM.LNGLAT
+      });
+    })
+    .add('getUniformsFromViewport#METER_OFFSETS - FP64', () => {
+      return getUniformsFromViewport({
+        viewport: data.sampleViewport,
+        fp64: true,
+        modelMatrix: data.sampleModelMatrix,
+        coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS
+      });
+    })
     .add('WebMercatorViewport', () => {
       return new WebMercatorViewport(VIEWPORT_PARAMS);
     })
