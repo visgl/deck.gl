@@ -35,10 +35,12 @@ const VECTOR_TO_POINT_MATRIX = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0];
 const IDENTITY_MATRIX = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
 
 // TODO - import these utils from fp64 package
-function fp64ify(a) {
+function fp64ify(a, array = [], startIndex = 0) {
   const hiPart = Math.fround(a);
   const loPart = a - hiPart;
-  return [hiPart, loPart];
+  array[startIndex] = hiPart;
+  array[startIndex + 1] = loPart;
+  return array;
 }
 
 // calculate WebGL 64 bit matrix (transposed "Float64Array")
@@ -48,7 +50,7 @@ function fp64ifyMatrix4(matrix) {
   for (let i = 0; i < 4; ++i) {
     for (let j = 0; j < 4; ++j) {
       const index = i * 4 + j;
-      [matrixFP64[index * 2], matrixFP64[index * 2 + 1]] = fp64ify(matrix[j * 4 + i]);
+      fp64ify(matrix[j * 4 + i], matrixFP64, index * 2);
     }
   }
   return matrixFP64;
@@ -134,6 +136,7 @@ export function getUniformsFromViewport({
   modelMatrix = null,
   coordinateSystem = COORDINATE_SYSTEM.LNGLAT,
   coordinateOrigin = [0, 0],
+  fp64 = false,
   // Deprecated
   projectionMode,
   positionOrigin
@@ -166,13 +169,9 @@ export function getUniformsFromViewport({
   const devicePixelRatio = (window && window.devicePixelRatio) || 1;
   const viewportSize = [viewport.width * devicePixelRatio, viewport.height * devicePixelRatio];
 
-  const glModelMatrix = new Float32Array(modelMatrix || IDENTITY_MATRIX);
-  const glViewProjectionMatrix = new Float32Array(viewProjectionMatrix);
+  const glModelMatrix = modelMatrix || IDENTITY_MATRIX;
 
-  const glViewProjectionMatrixFP64 = fp64ifyMatrix4(viewProjectionMatrix);
-  const scaleFP64 = fp64ify(viewport.scale);
-
-  return {
+  const uniforms = {
     // Projection mode values
     project_uCoordinateSystem: coordinateSystem,
     project_uCenter: projectionCenter,
@@ -187,16 +186,10 @@ export function getUniformsFromViewport({
     project_uScale: viewport.scale, // This is the mercator scale (2 ** zoom)
 
     project_uModelMatrix: glModelMatrix,
-    project_uViewProjectionMatrix: glViewProjectionMatrix,
-
-    // 64 bit support
-    project_uViewProjectionMatrixFP64: fp64ifyMatrix4(viewProjectionMatrix),
+    project_uViewProjectionMatrix: viewProjectionMatrix,
 
     // This is for lighting calculations
-    project_uCameraPosition: new Float32Array(cameraPos),
-
-    project64_uViewProjectionMatrix: glViewProjectionMatrixFP64,
-    project64_uScale: scaleFP64,
+    project_uCameraPosition: cameraPos,
 
     //
     // DEPRECATED UNIFORMS - For backwards compatibility with old custom layers
@@ -207,14 +200,30 @@ export function getUniformsFromViewport({
     projectionOrigin: coordinateOrigin,
     modelMatrix: glModelMatrix,
     viewMatrix: viewport.viewMatrix,
-    projectionMatrix: glViewProjectionMatrix,
+    projectionMatrix: viewProjectionMatrix,
     projectionPixelsPerUnit: distanceScales.pixelsPerMeter,
     projectionScale: viewport.scale, // This is the mercator scale (2 ** zoom)
     viewportSize,
     devicePixelRatio,
-    cameraPos: new Float32Array(cameraPos),
-
-    projectionFP64: glViewProjectionMatrixFP64,
-    projectionScaleFP64: scaleFP64
+    cameraPos
   };
+
+  // TODO - fp64 flag should be from shader module, not layer props
+  return fp64 ? addFP64Uniforms(uniforms) : uniforms;
+}
+
+// 64 bit projection support
+function addFP64Uniforms(uniforms) {
+  const glViewProjectionMatrixFP64 = fp64ifyMatrix4(uniforms.project_uViewProjectionMatrix);
+  const scaleFP64 = fp64ify(uniforms.project_uScale);
+
+  uniforms.project_uViewProjectionMatrixFP64 = glViewProjectionMatrixFP64;
+  uniforms.project64_uViewProjectionMatrix = glViewProjectionMatrixFP64;
+  uniforms.project64_uScale = scaleFP64;
+
+  // DEPRECATED UNIFORMS - For backwards compatibility with old custom layers
+  uniforms.projectionFP64 = glViewProjectionMatrixFP64;
+  uniforms.projectionScaleFP64 = scaleFP64;
+
+  return uniforms;
 }
