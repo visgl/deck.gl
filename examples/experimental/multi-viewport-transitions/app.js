@@ -4,21 +4,24 @@ import {render} from 'react-dom';
 
 import {
   COORDINATE_SYSTEM,
+  DeckGL,
+  WebMercatorViewport,
+  PolygonLayer,
+  PointCloudLayer,
+  experimental
+} from 'deck.gl';
+
+const {
   // Unified controller, together with state that determines interaction model
   FirstPersonState,
   // Viewport classes provides various views on the state
   FirstPersonViewport,
   ThirdPersonViewport,
-  WebMercatorViewport,
-  PolygonLayer,
-  PointCloudLayer,
+  ViewportController,
   LinearInterpolator
-} from 'deck.gl';
+} = experimental;
 
 import TripsLayer from '../../trips/trips-layer';
-
-// deck.gl React components
-import {DeckGL, ViewportController} from 'deck.gl';
 
 import {StaticMap} from 'react-map-gl';
 

@@ -7,13 +7,14 @@ import {
 } from 'deck.gl';
 
  // deck.gl react components
-import DeckGL, {ViewportController} from 'deck.gl';
+import DeckGL from 'deck.gl';
 
 const {
   FirstPersonViewport,
   MapState,
   // FirstPersonState,
-  ReflectionEffect
+  ReflectionEffect,
+  ViewportController
 } = experimental;
 
 import React, {PureComponent} from 'react';

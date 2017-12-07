@@ -1,14 +1,15 @@
 /* global window */
 import React, {Component} from 'react';
 import {StaticMap} from 'react-map-gl';
-import {
+import {experimental} from 'deck.gl';
+import ControlPanel from './control-panel';
+
+const {
   ViewportFlyToInterpolator,
   TRANSITION_EVENTS,
   ViewportController,
   MapState
-} from 'deck.gl';
-
-import ControlPanel from './control-panel';
+} = experimental;
 
 const token = process.env.MapboxAccessToken; // eslint-disable-line
 const interruptionStyles = [
