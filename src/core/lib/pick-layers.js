@@ -339,7 +339,7 @@ function callLayerPickingCallbacks(infos, mode) {
  * Pick at a specified pixel with a tolerance radius
  * Returns the closest object to the pixel in shape `{pickedColor, pickedLayer, pickedObjectIndex}`
  */
-function getClosestFromPickingBuffer(gl, {
+export function getClosestFromPickingBuffer(gl, {
   pickedColors,
   layers,
   deviceX,

@@ -25,10 +25,12 @@ import coreLayersBench from './core-layers.bench';
 import layerBench from './layer.bench';
 import viewportBench from './viewport.bench';
 import colorBench from './color.bench';
+import pickLayersBench from './pick-layers.bench';
 
 const suite = new Bench();
 
 // add tests
+pickLayersBench(suite);
 coreLayersBench(suite);
 layerBench(suite);
 viewportBench(suite);
