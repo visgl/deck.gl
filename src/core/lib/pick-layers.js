@@ -348,42 +348,53 @@ export function getClosestFromPickingBuffer(gl, {
   deviceRect
 }) {
   assert(pickedColors);
-  let closestResultToCenter = NO_PICKED_OBJECT;
 
   // Traverse all pixels in picking results and find the one closest to the supplied
   // [deviceX, deviceY]
+  const {x, y, width, height} = deviceRect;
   let minSquareDistanceToCenter = deviceRadius * deviceRadius;
+  let closestPixelIndex = -1;
   let i = 0;
 
-  for (let row = 0; row < deviceRect.height; row++) {
-    for (let col = 0; col < deviceRect.width; col++) {
-      // Decode picked layer from color
-      const pickedLayerIndex = pickedColors[i + 3] - 1;
+  for (let row = 0; row < height; row++) {
+    const dy = row + y - deviceY;
+    const dy2 = dy * dy;
 
-      if (pickedLayerIndex >= 0) {
-        const dx = col + deviceRect.x - deviceX;
-        const dy = row + deviceRect.y - deviceY;
-        const d2 = dx * dx + dy * dy;
+    if (dy2 > minSquareDistanceToCenter) {
+      // skip this row
+      i += 4 * width;
+    } else {
+      for (let col = 0; col < width; col++) {
+        // Decode picked layer from color
+        const pickedLayerIndex = pickedColors[i + 3] - 1;
 
-        if (d2 <= minSquareDistanceToCenter) {
-          minSquareDistanceToCenter = d2;
+        if (pickedLayerIndex >= 0) {
+          const dx = col + x - deviceX;
+          const d2 = dx * dx + dy2;
 
-          // Decode picked object index from color
-          const pickedColor = pickedColors.slice(i, i + 4);
-          const pickedLayer = layers[pickedLayerIndex];
-          if (pickedLayer) {
-            const pickedObjectIndex = pickedLayer.decodePickingColor(pickedColor);
-            closestResultToCenter = {pickedColor, pickedLayer, pickedObjectIndex};
-          } else {
-            log.error(0, 'Picked non-existent layer. Is picking buffer corrupt?');
+          if (d2 <= minSquareDistanceToCenter) {
+            minSquareDistanceToCenter = d2;
+            closestPixelIndex = i;
           }
         }
+        i += 4;
       }
-      i += 4;
     }
   }
 
-  return closestResultToCenter;
+  if (closestPixelIndex >= 0) {
+    // Decode picked object index from color
+    const pickedLayerIndex = pickedColors[closestPixelIndex + 3] - 1;
+    const pickedColor = pickedColors.slice(closestPixelIndex, closestPixelIndex + 4);
+    const pickedLayer = layers[pickedLayerIndex];
+    if (pickedLayer) {
+      const pickedObjectIndex = pickedLayer.decodePickingColor(pickedColor);
+      return {pickedColor, pickedLayer, pickedObjectIndex};
+    }
+    log.error(0, 'Picked non-existent layer. Is picking buffer corrupt?');
+  }
+
+  return NO_PICKED_OBJECT;
 }
 /* eslint-enable max-depth, max-statements */
 
