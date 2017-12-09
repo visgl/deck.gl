@@ -316,7 +316,7 @@ export default class Layer {
    * @return {Array} - the decoded picking color
    */
   decodePickingColor(color) {
-    assert(color instanceof Uint8Array);
+    assert(color instanceof Uint8Array, 'color must be Uint8Array');
     const [i1, i2, i3] = color;
     // 1 was added to seperate from no selection
     const index = i1 + i2 * 256 + i3 * 65536 - 1;
@@ -382,9 +382,8 @@ export default class Layer {
   // Called by layer manager when a new layer is found
   /* eslint-disable max-statements */
   _initialize() {
-    assert(arguments.length === 0);
-    assert(this.context.gl);
-    assert(!this.state);
+    assert(this.context.gl, 'missing gl context');
+    assert(!this.state, 'layer has already been initialized');
 
     const attributeManager = new AttributeManager({id: this.props.id});
     // All instanced layers get instancePickingColors attribute by default
@@ -443,8 +442,6 @@ export default class Layer {
   // Called by layer manager
   // if this layer is new (not matched with an existing layer) oldProps will be empty object
   _update() {
-    assert(arguments.length === 0);
-
     // Call subclass lifecycle method
     const stateNeedsUpdate = this.needsUpdate();
     // End lifecycle method
@@ -489,7 +486,6 @@ export default class Layer {
   // Called by manager when layer is about to be disposed
   // Note: not guaranteed to be called on application shutdown
   _finalize() {
-    assert(arguments.length === 0);
     // Call subclass lifecycle method
     this.finalizeState(this.context);
     // End lifecycle method
@@ -676,7 +672,7 @@ ${flags.viewportChanged ? 'viewport' : ''}\
   // Called by layer manager to transfer state from an old layer
   _transferState(oldLayer) {
     const {state, internalState, props} = oldLayer;
-    assert(state && internalState);
+    assert(state && internalState, 'old layer missing state or internalState');
 
     // Move state
     state.layer = this;

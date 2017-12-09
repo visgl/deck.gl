@@ -210,6 +210,5 @@ export function mergeDefaultProps(object, objectNameKey = 'layerName') {
   // Store for quick lookup
   subClassConstructor.mergedDefaultProps = mergedDefaultProps;
 
-  assert(mergeDefaultProps);
   return mergedDefaultProps;
 }

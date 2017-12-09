@@ -158,7 +158,7 @@ export default class Viewport {
     if (projectionMatrix) {
       this.projectionMatrix = projectionMatrix;
     } else {
-      assert(Number.isFinite(fovy));
+      assert(Number.isFinite(fovy), 'fovy is not a number');
       const DEGREES_TO_RADIANS = Math.PI / 180;
       const fovyRadians = fovy * DEGREES_TO_RADIANS;
       const aspect = this.width / this.height;
