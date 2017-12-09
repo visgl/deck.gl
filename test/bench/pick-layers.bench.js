@@ -14,6 +14,7 @@ const TEST_CASES = [
     })
   },
   {
+    // radius 5 circle centered in 20x20 rect.
     title: 'Circle',
     data: generateSampleData({
       pickingRadius: 10,
@@ -21,6 +22,7 @@ const TEST_CASES = [
     })
   },
   {
+    // half of rect on top left
     title: 'Triangle',
     data: generateSampleData({
       pickingRadius: 10,
@@ -38,13 +40,13 @@ const TEST_CASES = [
 
 export default function pickLayersBench(bench) {
 
-  return TEST_CASES.reduce(
-    (b, testCase) => {
-      return b.add(testCase.title, () => getClosestFromPickingBuffer(null, testCase.data));
-    },
-    bench.group('getClosestFromPickingBuffer')
-  );
+  bench = bench.group('getClosestFromPickingBuffer');
 
+  TEST_CASES.forEach(testCase => {
+    bench = bench.add(testCase.title, () => getClosestFromPickingBuffer(null, testCase.data));
+  });
+
+  return bench;
 }
 
 function generateSampleData({pickingRadius, getColor}) {
