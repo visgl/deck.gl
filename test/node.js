@@ -26,6 +26,8 @@ const path = require('path');
 const moduleAlias = require('module-alias');
 moduleAlias.addAlias('deck.gl/test', path.resolve('./test'));
 moduleAlias.addAlias('deck.gl', path.resolve('./src'));
+moduleAlias.addAlias('deck.gl/dist', path.resolve('./src'));
+moduleAlias.addAlias('deck.gl-layers', path.resolve('./src/experimental-layers/src'));
 
 require('babel-polyfill');
 
