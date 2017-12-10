@@ -19,6 +19,12 @@
 // THE SOFTWARE.
 /* eslint-disable max-len */
 
+// Intialize globals, check version
+import './lib/init';
+
+// Import shaderlib to make sure shader modules are initialized
+import './shaderlib';
+
 // Core Library
 export {COORDINATE_SYSTEM} from './lib/constants';
 export {default as LayerManager} from './lib/layer-manager';
@@ -32,30 +38,25 @@ export {default as WebMercatorViewport} from './viewports/web-mercator-viewport'
 export {default as PerspectiveViewport} from './viewports/perspective-viewport';
 export {default as OrthographicViewport} from './viewports/orthographic-viewport';
 
-// Import shaderlib to make sure shader modules are initialized
-import './shaderlib';
+// EXPERIMENTAL EXPORTS
+// Experimental Features (May change in minor version bumps, use at your own risk)
 
-// DEPREPECATED EXPORTS
 import {default as FirstPersonState} from './controllers/first-person-state';
 import {default as OrbitState} from './controllers/orbit-state';
 import {default as MapState} from './controllers/map-state';
 
-// EXPERIMENTAL EXPORTS
-// Experimental Features (May change in minor version bumps, use at your own risk)
-
 // Experimental Controllers
 import {default as Controller} from './controllers/viewport-controls';
 import {default as MapController} from './controllers/map-controls';
-// import {default as FirstPersonController} from './controllers/first-person-controller';
-// import {default as OrbitController} from './controllers/orbit-controller';
 
-import {default as OrbitViewport} from './viewports/orbit-viewport';
-import {default as ThirdPersonViewport} from './viewports/third-person-viewport';
 import {default as FirstPersonViewport} from './viewports/first-person-viewport';
+import {default as ThirdPersonViewport} from './viewports/third-person-viewport';
+import {default as OrbitViewport} from './viewports/orbit-viewport';
 
 // Experimental Pure JS (non-React) bindings
 import {default as DeckGLJS} from './pure-js/deck-js';
 import {default as MapControllerJS} from './pure-js/map-controller-js';
+
 // Experimental Effects (non-React) bindings
 import {default as EffectManager} from './experimental/lib/effect-manager';
 import {default as Effect} from './experimental/lib/effect';
@@ -98,12 +99,13 @@ export const experimental = {
   // FirstPersonController,
   // OrbitController,
 
-  OrbitViewport,
-  ThirdPersonViewport,
   FirstPersonViewport,
+  ThirdPersonViewport,
+  OrbitViewport,
 
   DeckGLJS,
   MapControllerJS,
+
   EffectManager,
   Effect,
 

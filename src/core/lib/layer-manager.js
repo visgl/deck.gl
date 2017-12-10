@@ -178,12 +178,21 @@ export default class LayerManager {
       this.setLayers(parameters.layers);
     }
 
-    if ('layerFilter' in parameters) {
-      this.context.layerFilter = parameters.layerFilter;
-    }
-
     if ('viewports' in parameters) {
       this.setViewports(parameters.viewports);
+    }
+
+    if ('layerFilter' in parameters) {
+      this.context.layerFilter = parameters.layerFilter;
+      if (this.context.layerFilter !== parameters.layerFilter) {
+        this.setNeedsRedraw('layerFilter changed');
+      }
+    }
+
+    if ('drawPickingColors' in parameters) {
+      if (this.context.drawPickingColors !== parameters.drawPickingColors) {
+        this.setNeedsRedraw('drawPickingColors changed');
+      }
     }
 
     Object.assign(this.context, parameters);
