@@ -58,9 +58,9 @@ const {
   FirstPersonController,
 
   // Viewports
+  FirstPersonViewport,
   OrbitViewport,
   ThirdPersonViewport,
-  FirstPersonViewport,
 
   // Transition bindings
   TRANSITION_EVENTS,
@@ -84,9 +84,9 @@ Object.assign(experimental, {
   Controller,
   FirstPersonController,
 
+  FirstPersonViewport,
   OrbitViewport,
   ThirdPersonViewport,
-  FirstPersonViewport,
 
   // Transition bindings
   TRANSITION_EVENTS,

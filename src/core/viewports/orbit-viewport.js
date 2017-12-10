@@ -19,6 +19,7 @@ const DEGREES_TO_RADIANS = Math.PI / 180;
  */
 export default class OrbitViewport extends Viewport {
   constructor({
+    id = 'orbit-viewport',
     // viewport arguments
     width, // Width of viewport
     height, // Height of viewport
@@ -52,6 +53,7 @@ export default class OrbitViewport extends Viewport {
     const perspectiveMatrix = mat4_perspective([], fovRadians, aspect, near, far);
 
     super({
+      id,
       viewMatrix: mat4_multiply(viewMatrix, viewMatrix,
         mat4_multiply(rotationMatrix, rotationMatrix, translateMatrix)),
       projectionMatrix: perspectiveMatrix,

@@ -1,4 +1,4 @@
-import {CompositeLayer} from 'deck.gl';
+import {CompositeLayer, COORDINATE_SYSTEM} from 'deck.gl';
 import {scaleLinear} from 'd3-scale';
 
 import AxesLayer from './axes-layer';
@@ -27,7 +27,8 @@ const defaultProps = {
   yTitle: AxesLayer.defaultProps.yTitle,
   zTitle: AxesLayer.defaultProps.zTitle,
   axesPadding: AxesLayer.defaultProps.padding,
-  axesColor: AxesLayer.defaultProps.color
+  axesColor: AxesLayer.defaultProps.color,
+  coordinateSystem: COORDINATE_SYSTEM.IDENTITY
 };
 
 /*
@@ -107,7 +108,8 @@ export default class PlotLayer extends CompositeLayer {
     const {xScale, yScale, zScale} = this.state;
 
     return [
-      new SurfaceLayer({
+      new SurfaceLayer(this.getSubLayerProps({
+        id: 'surface',
         getPosition: this.props.getPosition,
         getColor: this.props.getColor,
         uCount: this.props.uCount,
@@ -115,15 +117,13 @@ export default class PlotLayer extends CompositeLayer {
         xScale,
         yScale,
         zScale,
-        opacity: this.props.opacity,
-        pickable: this.props.pickable,
-        visible: this.props.visible,
         lightStrength: this.props.lightStrength,
         onHover: this.props.onHover,
         onClick: this.props.onClick,
         updateTriggers: this.props.updateTriggers
-      }),
-      new AxesLayer({
+      })),
+      new AxesLayer(this.getSubLayerProps({
+        id: 'axes',
         xScale,
         yScale,
         zScale,
@@ -141,8 +141,8 @@ export default class PlotLayer extends CompositeLayer {
         color: this.props.axesColor,
         visible: this.props.drawAxes,
         pickable: false
-      })
-    ].filter(Boolean);
+      }))
+    ];
   }
 
 }
