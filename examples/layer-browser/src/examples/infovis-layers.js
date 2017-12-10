@@ -79,7 +79,7 @@ const PointCloudLayerInfovisExample = {
 */
 
 export default {
-  'Infovis Layers': {
+  'Infovis Layers (turn on infovis setting)': {
     'PlotLayer (No Navigation)': PlotLayerInfovisExample
     // PointCloudLayerInfovisExample
   }

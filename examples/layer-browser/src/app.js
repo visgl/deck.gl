@@ -35,7 +35,6 @@ import LayerControls from './components/layer-controls';
 import LAYER_CATEGORIES from './examples';
 import {setImmutableDataSamples} from './immutable-data-samples';
 
-// TODO - isn't the autodetection of mapbox token handled by react-map-gl now?
 /* eslint-disable no-process-env */
 const MapboxAccessToken = process.env.MapboxAccessToken || // eslint-disable-line
   'Set MapboxAccessToken environment variable or put your token here.';
