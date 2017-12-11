@@ -26,7 +26,7 @@
 import * as Polygon from './polygon';
 import earcut from 'earcut';
 import {experimental} from '../../core';
-const {fp64ify, get, count, flattenVertices, fillArray} = experimental;
+const {fp64ify, flattenVertices, fillArray} = experimental;
 
 // Maybe deck.gl or luma.gl needs to export this
 function getPickingColor(index) {
@@ -35,14 +35,6 @@ function getPickingColor(index) {
     Math.floor((index + 1) / 256) % 256,
     Math.floor((index + 1) / 256 / 256) % 256
   ];
-}
-
-function parseColor(color) {
-  if (!Array.isArray(color)) {
-    color = [get(color, 0), get(color, 1), get(color, 2), get(color, 3)];
-  }
-  color[3] = Number.isFinite(color[3]) ? color[3] : 255;
-  return color;
 }
 
 const DEFAULT_COLOR = [0, 0, 0, 255]; // Black
@@ -101,7 +93,7 @@ function getTriangleCount(polygons) {
 
 // Returns the offsets of each complex polygon in the combined array of all polygons
 function getPolygonOffsets(polygons) {
-  const offsets = new Array(count(polygons) + 1);
+  const offsets = new Array(polygons.length + 1);
   offsets[0] = 0;
   let offset = 0;
   polygons.forEach((polygon, i) => {
@@ -114,11 +106,11 @@ function getPolygonOffsets(polygons) {
 // Returns the offset of each hole polygon in the flattened array for that polygon
 function getHoleIndices(complexPolygon) {
   let holeIndices = null;
-  if (count(complexPolygon) > 1) {
+  if (complexPolygon.length > 1) {
     let polygonStartIndex = 0;
     holeIndices = [];
     complexPolygon.forEach(polygon => {
-      polygonStartIndex += count(polygon);
+      polygonStartIndex += polygon.length;
       holeIndices.push(polygonStartIndex);
     });
     // Last element points to end of the flat array, remove it
@@ -161,39 +153,9 @@ function calculateSurfaceIndices(complexPolygon) {
   // Prepare an array of hole indices as expected by earcut
   const holeIndices = getHoleIndices(complexPolygon);
   // Flatten the polygon as expected by earcut
-  const verts = flattenVertices2(complexPolygon);
+  const verts = flattenVertices(complexPolygon);
   // Let earcut triangulate the polygon
   return earcut(verts, holeIndices, 3);
-}
-
-// TODO - refactor
-function isContainer(value) {
-  return Array.isArray(value) || ArrayBuffer.isView(value) ||
-    value !== null && typeof value === 'object';
-}
-
-// TODO - refactor, this file should not need a separate flatten func
-// Flattens nested array of vertices, padding third coordinate as needed
-export function flattenVertices2(nestedArray, {result = [], dimensions = 3} = {}) {
-  let index = -1;
-  let vertexLength = 0;
-  const length = count(nestedArray);
-  while (++index < length) {
-    const value = get(nestedArray, index);
-    if (isContainer(value)) {
-      flattenVertices(value, {result, dimensions});
-    } else {
-      if (vertexLength < dimensions) { // eslint-disable-line
-        result.push(value);
-        vertexLength++;
-      }
-    }
-  }
-  // Add a third coordinate if needed
-  if (vertexLength > 0 && vertexLength < dimensions) {
-    result.push(0);
-  }
-  return result;
 }
 
 function calculatePositions({polygons, pointCount, fp64}) {
@@ -208,9 +170,9 @@ function calculatePositions({polygons, pointCount, fp64}) {
   let j = 0;
   for (const polygon of polygons) {
     Polygon.forEachVertex(polygon, vertex => { // eslint-disable-line
-      const x = get(vertex, 0);
-      const y = get(vertex, 1);
-      const z = get(vertex, 2) || 0;
+      const x = vertex[0];
+      const y = vertex[1];
+      const z = vertex[2] || 0;
       attribute[i++] = x;
       attribute[i++] = y;
       attribute[i++] = z;
@@ -236,8 +198,8 @@ function calculateColors({polygons, pointCount, getColor}) {
   let i = 0;
   polygons.forEach((complexPolygon, polygonIndex) => {
     // Calculate polygon color
-    let color = getColor(polygonIndex);
-    color = parseColor(color);
+    const color = getColor(polygonIndex);
+    color[3] = Number.isFinite(color[3]) ? color[3] : 255;
 
     const vertexCount = Polygon.getVertexCount(complexPolygon);
     fillArray({target: attribute, source: color, start: i, count: vertexCount});

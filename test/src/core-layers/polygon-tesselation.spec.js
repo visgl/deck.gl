@@ -52,11 +52,12 @@ test('polygon#functions', t => {
     t.ok(Number.isFinite(Polygon.getVertexCount(polygon)), 'Polygon.getVertexCount');
   }
 
-  for (const polygon of IMMUTABLE_POLYGONS) {
-    t.ok(Polygon.normalize(polygon), 'Polygon.normalize(immutable)');
-    t.ok(Number.isFinite(Polygon.getTriangleCount(polygon)), 'Polygon.getTriangleCount(immutable)');
-    t.ok(Number.isFinite(Polygon.getVertexCount(polygon)), 'Polygon.getVertexCount(immutable)');
-  }
+  // for (const polygon of IMMUTABLE_POLYGONS) {
+  //   t.ok(Polygon.normalize(polygon), 'Polygon.normalize(immutable)');
+  //   t.ok(Number.isFinite(Polygon.getTriangleCount(polygon)),
+  //     'Polygon.getTriangleCount(immutable)');
+  //   t.ok(Number.isFinite(Polygon.getVertexCount(polygon)), 'Polygon.getVertexCount(immutable)');
+  // }
   t.end();
 });
 
@@ -98,7 +99,7 @@ test('PolygonTesselatorExtruded#methods', t => {
   t.end();
 });
 
-test('PolygonTesselator#methods(immutable)', t => {
+test.skip('PolygonTesselator#methods(immutable)', t => {
   const tesselator = new PolygonTesselator({polygons: IMMUTABLE_POLYGONS});
   t.ok(tesselator instanceof PolygonTesselator, 'PolygonTesselator created');
   const indices = tesselator.indices();
@@ -110,7 +111,7 @@ test('PolygonTesselator#methods(immutable)', t => {
   t.end();
 });
 
-test('PolygonTesselatorExtruded#methods(immutable)', t => {
+test.skip('PolygonTesselatorExtruded#methods(immutable)', t => {
   const tesselator = new PolygonTesselatorExtruded({polygons: IMMUTABLE_POLYGONS});
   t.ok(tesselator instanceof PolygonTesselatorExtruded, 'PolygonTesselatorExtruded created');
   const indices = tesselator.indices();

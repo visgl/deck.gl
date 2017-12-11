@@ -20,7 +20,7 @@
 
 import * as Polygon from './polygon';
 import {experimental} from '../../core';
-const {fp64ify, get, count, fillArray} = experimental;
+const {fp64ify, fillArray} = experimental;
 import earcut from 'earcut';
 
 function getPickingColor(index) {
@@ -29,14 +29,6 @@ function getPickingColor(index) {
     ((index + 1) >> 8) & 255,
     (((index + 1) >> 8) >> 8) & 255
   ];
-}
-
-function parseColor(color) {
-  if (!Array.isArray(color)) {
-    color = [get(color, 0), get(color, 1), get(color, 2), get(color, 3)];
-  }
-  color[3] = Number.isFinite(color[3]) ? color[3] : 255;
-  return color;
 }
 
 function arrayPush(array, values) {
@@ -75,7 +67,7 @@ export class PolygonTesselatorExtruded {
     polygons = polygons.map((complexPolygon, polygonIndex) => {
       const height = getHeight(polygonIndex) || 0;
       return Polygon.normalize(complexPolygon).map(
-        polygon => polygon.map(coord => [get(coord, 0), get(coord, 1), height])
+        polygon => polygon.map(coord => [coord[0], coord[1], height])
       );
     });
 
@@ -264,8 +256,8 @@ function calculateColors({groupedVertices, pointCount, getColor, wireframe = fal
   let vertexIndex = 0;
 
   groupedVertices.forEach((complexPolygon, polygonIndex) => {
-    let color = getColor(polygonIndex);
-    color = parseColor(color);
+    const color = getColor(polygonIndex);
+    color[3] = Number.isFinite(color[3]) ? color[3] : 255;
 
     const numVertices = Polygon.getVertexCount(complexPolygon);
 
@@ -297,7 +289,7 @@ function calculateContourIndices(vertices, offset) {
 
   vertices.forEach(polygon => {
     indices.push(offset);
-    const numVertices = count(polygon);
+    const numVertices = polygon.length;
 
     // polygon top
     // use vertex pairs for GL.LINES => [0, 1, 1, 2, 2, ..., n-1, n-1, 0]
@@ -332,13 +324,13 @@ function calculateSurfaceIndices(vertices, offset) {
   const stride = Polygon.getVertexCount(vertices);
 
   let holes = null;
-  const holeCount = count(vertices) - 1;
+  const holeCount = vertices.length - 1;
 
   if (holeCount) {
     holes = [];
     let vertexIndex = 0;
     for (let i = 0; i < holeCount; i++) {
-      vertexIndex += count(vertices[i]);
+      vertexIndex += vertices[i].length;
       holes[i] = vertexIndex;
     }
   }
@@ -346,7 +338,7 @@ function calculateSurfaceIndices(vertices, offset) {
   const indices = earcut(flatten(vertices, 3), holes, 3).map(index => index + offset);
 
   vertices.forEach(polygon => {
-    const numVertices = count(polygon);
+    const numVertices = polygon.length;
 
     // polygon sides
     for (let i = 0; i < numVertices - 1; i++) {
