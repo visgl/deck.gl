@@ -502,7 +502,7 @@ export default class LayerManager {
     const oldLayerMap = {};
     for (const oldLayer of oldLayers) {
       if (oldLayerMap[oldLayer.id]) {
-        log.warn(0, `Multiple old layers with same id ${layerName(oldLayer)}`);
+        log.warn(`Multiple old layers with same id ${layerName(oldLayer)}`);
       } else {
         oldLayerMap[oldLayer.id] = oldLayer;
       }
@@ -533,7 +533,7 @@ export default class LayerManager {
       // Given a new coming layer, find its matching old layer (if any)
       const oldLayer = oldLayerMap[newLayer.id];
       if (oldLayer === null) { // null, rather than undefined, means this id was originally there
-        log.warn(0, `Multiple new layers with same id ${layerName(newLayer)}`);
+        log.warn(`Multiple new layers with same id ${layerName(newLayer)}`);
       }
       // Remove the old layer from candidates, as it has been matched with this layer
       oldLayerMap[newLayer.id] = null;
@@ -556,7 +556,7 @@ export default class LayerManager {
         sublayers = newLayer.isComposite && newLayer.getSubLayers();
         // End layer lifecycle method: render sublayers
       } catch (err) {
-        log.warn(0, `error during matching of ${layerName(newLayer)}`, err);
+        log.warn(`error during matching of ${layerName(newLayer)}`, err);
         error = error || err; // Record first exception
       }
 
@@ -594,7 +594,7 @@ export default class LayerManager {
       layer._initialize();
       layer.lifecycle = LIFECYCLE.INITIALIZED;
     } catch (err) {
-      log.warn(0, `error while initializing ${layerName(layer)}\n`, err);
+      log.warn(`error while initializing ${layerName(layer)}\n`, err);
       error = error || err;
       // TODO - what should the lifecycle state be here? LIFECYCLE.INITIALIZATION_FAILED?
     }
@@ -633,7 +633,7 @@ export default class LayerManager {
     try {
       layer._update();
     } catch (err) {
-      log.warn(0, `error during update of ${layerName(layer)}`, err);
+      log.warn(`error during update of ${layerName(layer)}`, err);
       // Save first error
       error = err;
     }
@@ -650,7 +650,7 @@ export default class LayerManager {
     try {
       layer._finalize();
     } catch (err) {
-      log.warn(0, `error during finalization of ${layerName(layer)}`, err);
+      log.warn(`error during finalization of ${layerName(layer)}`, err);
       error = err;
     }
     layer.lifecycle = LIFECYCLE.FINALIZED;
@@ -665,7 +665,7 @@ export default class LayerManager {
   _validateEventHandling() {
     if (this.onLayerClick || this.onLayerHover) {
       if (this.layers.length && !this.layers.some(layer => layer.props.pickable)) {
-        log.warn(1,
+        log.warn(
           'You have supplied a top-level input event handler (e.g. `onLayerClick`), ' +
           'but none of your layers have set the `pickable` flag.'
         );
