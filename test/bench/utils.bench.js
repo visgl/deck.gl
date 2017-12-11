@@ -19,24 +19,25 @@
 // THE SOFTWARE.
 
 /* eslint-disable no-console, no-invalid-this */
-import {Bench} from 'probe.gl';
 
-import coreLayersBench from './core-layers.bench';
-import layerBench from './layer.bench';
-import viewportBench from './viewport.bench';
-import colorBench from './color.bench';
-import pickLayersBench from './pick-layers.bench';
-import utilsBench from './utils.bench';
+import {
+  experimental
+} from 'deck.gl';
 
-const suite = new Bench();
+const {get} = experimental;
+
+const POSITION = [-122.4, 37.8, 0];
 
 // add tests
-pickLayersBench(suite);
-coreLayersBench(suite);
-layerBench(suite);
-viewportBench(suite);
-colorBench(suite);
-utilsBench(suite);
 
-// Run the suite
-suite.run();
+export default function utilsBench(suite) {
+  return suite
+    .group('UTILS')
+    .add('get#Array', () => {
+      return get(POSITION, 0);
+    })
+    .add('direct access#Array', () => {
+      return POSITION[0];
+    })
+    ;
+}
