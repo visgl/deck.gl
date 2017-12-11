@@ -674,7 +674,7 @@ export default class LayerManager {
   _validateEventHandling() {
     if (this.onLayerClick || this.onLayerHover) {
       if (this.layers.length && !this.layers.some(layer => layer.props.pickable)) {
-        log.warn(1,
+        log.warn(
           'You have supplied a top-level input event handler (e.g. `onLayerClick`), ' +
           'but none of your layers have set the `pickable` flag.'
         );

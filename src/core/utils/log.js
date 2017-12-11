@@ -45,19 +45,19 @@ function once(priority, arg, ...args) {
   }
 }
 
-function warn(priority, arg, ...args) {
-  if (priority <= log.priority && !cache[arg]) {
+function warn(arg, ...args) {
+  if (!cache[arg]) {
     console.warn(`deck.gl: ${arg}`, ...args);
     cache[arg] = true;
   }
 }
 
-function error(priority, arg, ...args) {
+function error(arg, ...args) {
   console.error(`deck.gl: ${arg}`, ...args);
 }
 
 function deprecated(oldUsage, newUsage) {
-  log.warn(0, `deck.gl: \`${oldUsage}\` is deprecated and will be removed \
+  log.warn(`deck.gl: \`${oldUsage}\` is deprecated and will be removed \
 in a later version. Use \`${newUsage}\` instead`);
 }
 
