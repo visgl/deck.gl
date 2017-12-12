@@ -184,16 +184,6 @@ export {
 } from './core-layers';
 
 //
-// DEPRECATED LAYERS PACKAGE
-//
-
-export {
-  ChoroplethLayer,
-  ChoroplethLayer64,
-  ExtrudedChoroplethLayer64
-} from './deprecated-layers';
-
-//
 // EFFECTS PACKAGE
 //
 
