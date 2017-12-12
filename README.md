@@ -66,7 +66,7 @@ Note that you will also need to do an npm install in the main example (`examples
 since the npm start command tries to build and run that example.
 
     cd examples/layer-browser
-    npm install
+    npm install # or yarn
     cd ../..
 
 Note that `npm start` in the main directory actually runs `examples/main`.
