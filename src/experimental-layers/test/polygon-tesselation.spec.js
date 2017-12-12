@@ -21,9 +21,8 @@
 import test from 'tape-catch';
 
 import * as Polygon from 'deck.gl-layers/solid-polygon-layer/polygon';
-import {PolygonTesselator} from 'deck.gl-layers/solid-polygon-layer/polygon-tesselator';
-import {PolygonTesselatorExtruded}
-  from 'deck.gl-layers/solid-polygon-layer/polygon-tesselator-extruded';
+import {PolygonTesselator}
+  from 'deck.gl-layers/solid-polygon-layer/polygon-tesselator';
 
 const POLYGONS = [
   [],
@@ -43,33 +42,19 @@ const TEST_DATA = [
 const TEST_CASES = [
   {
     title: 'Tesselation(flat)',
-    TesselatorClass: PolygonTesselator,
     params: {}
   },
   {
     title: 'Tesselation(extruded)',
-    TesselatorClass: PolygonTesselatorExtruded,
     params: {extruded: true}
   },
   {
-    title: 'Tesselation(wireframe)',
-    TesselatorClass: PolygonTesselatorExtruded,
-    params: {extruded: true, wireframe: true}
-  },
-  {
     title: 'Tesselation(flat,fp64)',
-    TesselatorClass: PolygonTesselator,
     params: {fp64: true}
   },
   {
     title: 'Tesselation(extruded,fp64)',
-    TesselatorClass: PolygonTesselatorExtruded,
     params: {extruded: true, fp64: true}
-  },
-  {
-    title: 'Tesselation(wireframe,fp64)',
-    TesselatorClass: PolygonTesselatorExtruded,
-    params: {extruded: true, wireframe: true, fp64: true}
   }
 ];
 
@@ -93,7 +78,6 @@ test('polygon#functions', t => {
 
 test('polygonTesselator#imports', t => {
   t.ok(typeof PolygonTesselator === 'function', 'PolygonTesselator imported');
-  t.ok(typeof PolygonTesselatorExtruded === 'function', 'PolygonTesselatorExtruded imported');
   t.end();
 });
 
@@ -101,30 +85,43 @@ test('PolygonTesselator#constructor', t => {
   TEST_DATA.forEach(testData => {
 
     t.comment(`Polygon data: ${testData.title}`);
+    const tesselator = new PolygonTesselator({polygons: testData.polygons});
+    t.ok(tesselator instanceof PolygonTesselator, 'PolygonTesselator created');
 
     TEST_CASES.forEach(testCase => {
       t.comment(`  ${testCase.title}`);
-      const tesselator = new testCase.TesselatorClass(Object.assign({
-        polygons: testData.polygons
-      }, testCase.params));
-      t.ok(tesselator, 'PolygonTesselator created');
+      tesselator.updatePositions(testCase.params);
 
-      t.ok(ArrayBuffer.isView(tesselator.indices()),
-        'PolygonTesselator.indices');
-      t.ok(ArrayBuffer.isView(tesselator.positions().positions),
+      t.ok(ArrayBuffer.isView(tesselator.positions()),
         'PolygonTesselator.positions');
-      t.ok(ArrayBuffer.isView(tesselator.colors()),
-        'PolygonTesselator.colors');
+      t.ok(ArrayBuffer.isView(tesselator.nextPositions()),
+        'PolygonTesselator.nextPositions');
 
       if (testCase.params.fp64) {
-        t.ok(ArrayBuffer.isView(tesselator.positions().positions64xyLow),
+        t.ok(ArrayBuffer.isView(tesselator.positions64xyLow()),
           'PolygonTesselator.positions64xyLow');
-      }
-      if (testCase.params.extruded) {
-        t.ok(ArrayBuffer.isView(tesselator.normals()),
-          'PolygonTesselator.normals');
+        t.ok(ArrayBuffer.isView(tesselator.nextPositions64xyLow()),
+          'PolygonTesselator.nextPositions64xyLow');
       }
     });
+  });
+
+  t.end();
+});
+
+test('PolygonTesselator#methods', t => {
+
+  TEST_DATA.forEach(testData => {
+
+    t.comment(`Polygon data: ${testData.title}`);
+    const tesselator = new PolygonTesselator({polygons: testData.polygons});
+
+    t.ok(ArrayBuffer.isView(tesselator.indices()),
+      'PolygonTesselator.indices');
+    t.ok(ArrayBuffer.isView(tesselator.colors()),
+      'PolygonTesselator.colors');
+    t.ok(ArrayBuffer.isView(tesselator.pickingColors()),
+      'PolygonTesselator.pickingColors');
   });
 
   t.end();
