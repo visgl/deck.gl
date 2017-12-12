@@ -237,20 +237,17 @@ function drawLayerInViewport({gl, layer, layerIndex, drawPickingColors, glViewpo
   });
 
   if (drawPickingColors) {
-    // TODO - Disable during picking
-    Object.assign(moduleParameters, getPickingModuleParameters(layer));
-
     Object.assign(layerParameters, {
       blendColor: [0, 0, 0, (layerIndex + 1) / 255]
     });
+  } else {
+    Object.assign(moduleParameters, getObjectHighlightParameters(layer));
   }
 
-  withParameters(gl, layerParameters, () => {
-    layer.drawLayer({
-      moduleParameters,
-      uniforms,
-      parameters: layerParameters
-    });
+  layer.drawLayer({
+    moduleParameters,
+    uniforms,
+    parameters: layerParameters
   });
 }
 
@@ -281,7 +278,7 @@ function getViewportFromDescriptor(viewportOrDescriptor) {
  * Returns the picking color of currenlty selected object of the given 'layer'.
  * @return {Array} - the picking color or null if layers selected object is invalid.
  */
-function getPickingModuleParameters(layer) {
+function getObjectHighlightParameters(layer) {
   // TODO - inefficient to update settings every render?
   // TODO: Add warning if 'highlightedObjectIndex' is > numberOfInstances of the model.
 
