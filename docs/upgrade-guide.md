@@ -100,6 +100,18 @@ const model = new Model({
 });
 ```
 
+### Removed Layers
+
+| Layer              | Status       | Replacement         |
+| ---                | ---          | ---                 |
+| `ChoroplethLayer`  | Removed | `GeoJsonLayer`, `PolygonLayer` and `PathLayer`    |
+| `ChoroplethLayer64` | Removed | `GeoJsonLayer`, `PolygonLayer` and `PathLayer`    |
+| `ExtrudedChoroplethLayer` | Removed | `GeoJsonLayer`, `PolygonLayer` and `PathLayer`    |
+
+* ChoroplethLayer, ChoroplethLayer64, ExtrudedChoroplethLayer
+
+These set of layers were deprecated in deck.gl v4, and are now removed in v5. You can still get same functionality using more unified, flexible and performant layers:
+ `GeoJsonLayer`, `PolygonLayer` and `PathLayer`.
 
 ## Upgrading from deck.gl v3 to v4
 
