@@ -8,13 +8,19 @@ As always, for information on deprecations and how to update your code in respon
 
 > TODO - Add a row of small square GIFs/PNGs of Viewport Transitions, Automatic Highlighting, Dashed Lines, Multiple Viewports. Would be really nice with a screenshot (or GIF) of Seer.
 
-
 ## DeckGL: Viewport Transitions
 
 A major new feature is support for Viewport Transitions.
 
 > TODO - Add more extensive description. This is our major official feature after all...
 
+## DeckGL: Performance Boost
+
+Immutable support is dropped.
+
+Layer initialization, rendering and picking performance are improved.
+
+> TODO - Add more description
 
 ## DeckGL: Control over DevicePixelRatio
 
