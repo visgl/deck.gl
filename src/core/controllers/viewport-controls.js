@@ -41,7 +41,7 @@ export default class ViewportControls {
    * A class that handles events and updates mercator style viewport parameters
    */
   constructor(ViewportState, options = {}) {
-    assert(ViewportState);
+    assert(ViewportState, 'ViewportState constructor must be supplied');
     this.ViewportState = ViewportState;
     this.viewportState = null;
     this.viewportStateProps = null;

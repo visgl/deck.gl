@@ -159,7 +159,7 @@ function drawAndSamplePickingBuffer(gl, {
   layerFilter,
   redrawReason
 }) {
-  assert(deviceRect);
+  assert(deviceRect, 'deviceRect is not supplied');
   assert((Number.isFinite(deviceRect.width) && deviceRect.width > 0), '`width` must be > 0');
   assert((Number.isFinite(deviceRect.height) && deviceRect.height > 0), '`height` must be > 0');
 
@@ -347,7 +347,7 @@ export function getClosestFromPickingBuffer(gl, {
   deviceRadius,
   deviceRect
 }) {
-  assert(pickedColors);
+  assert(pickedColors, 'pickedColors is not supplied');
 
   // Traverse all pixels in picking results and find the one closest to the supplied
   // [deviceX, deviceY]

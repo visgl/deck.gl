@@ -141,7 +141,7 @@ export function getUniformsFromViewport({
   projectionMode,
   positionOrigin
 } = {}) {
-  assert(viewport);
+  assert(viewport, 'missing viewport');
 
   if (projectionMode !== undefined) {
     coordinateSystem = projectionMode;
@@ -153,7 +153,7 @@ export function getUniformsFromViewport({
   }
 
   const coordinateZoom = viewport.zoom;
-  assert(coordinateZoom >= 0);
+  assert(coordinateZoom >= 0, 'viewport zoom is negative');
 
   const {projectionCenter, viewProjectionMatrix, cameraPos} =
     calculateMatrixAndOffset({

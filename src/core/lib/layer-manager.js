@@ -595,7 +595,7 @@ export default class LayerManager {
 
   // Initializes a single layer, calling layer methods
   _initializeLayer(layer) {
-    assert(!layer.state);
+    assert(!layer.state, 'layer has already been initialized');
     log(LOG_PRIORITY_LIFECYCLE, `initializing ${layerName(layer)}`);
 
     let error = null;
@@ -608,7 +608,7 @@ export default class LayerManager {
       // TODO - what should the lifecycle state be here? LIFECYCLE.INITIALIZATION_FAILED?
     }
 
-    assert(layer.state);
+    assert(layer.state, 'layer state is missing after initialization');
 
     // Set back pointer (used in picking)
     layer.state.layer = layer;
@@ -651,8 +651,8 @@ export default class LayerManager {
 
   // Finalizes a single layer
   _finalizeLayer(layer) {
-    assert(layer.state);
-    assert(layer.lifecycle !== LIFECYCLE.AWAITING_FINALIZATION);
+    assert(layer.state, 'finalizing a layer that is not initialized');
+    assert(layer.lifecycle !== LIFECYCLE.AWAITING_FINALIZATION, 'layer is already finalizing');
     layer.lifecycle = LIFECYCLE.AWAITING_FINALIZATION;
     let error = null;
     this.setNeedsRedraw(`finalized ${layerName(layer)}`);
