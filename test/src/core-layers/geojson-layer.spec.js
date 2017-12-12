@@ -35,7 +35,7 @@ const data = FIXTURES.choropleths;
 test('GeoJsonLayer#constructor', t => {
 
   testCreateLayer(t, LayerComponent, {data, pickable: true});
-  testCreateLayer(t, LayerComponent, {data: FIXTURES.immutableChoropleths, pickable: true});
+  // testCreateLayer(t, LayerComponent, {data: FIXTURES.immutableChoropleths, pickable: true});
   testCreateEmptyLayer(t, LayerComponent);
   testNullLayer(t, LayerComponent);
 

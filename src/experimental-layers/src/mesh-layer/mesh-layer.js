@@ -23,7 +23,7 @@
 // THE SOFTWARE.
 
 import {Layer, COORDINATE_SYSTEM, experimental} from 'deck.gl';
-const {fp64ify, enable64bitSupport, get} = experimental;
+const {fp64ify, enable64bitSupport} = experimental;
 import {GL, Model, Geometry, loadTextures, Texture2D} from 'luma.gl';
 import assert from 'assert';
 
@@ -201,9 +201,9 @@ export default class MeshLayer extends Layer {
     let i = 0;
     for (const point of data) {
       const position = getPosition(point);
-      value[i + 0] = get(position, 0);
-      value[i + 1] = get(position, 1);
-      value[i + 2] = get(position, 2) || 0;
+      value[i++] = position[0];
+      value[i++] = position[1];
+      value[i++] = position[2] || 0;
       i += size;
     }
   }
@@ -214,8 +214,8 @@ export default class MeshLayer extends Layer {
     let i = 0;
     for (const point of data) {
       const position = getPosition(point);
-      value[i++] = fp64ify(get(position, 0))[1];
-      value[i++] = fp64ify(get(position, 1))[1];
+      value[i++] = fp64ify(position[0])[1];
+      value[i++] = fp64ify(position[1])[1];
     }
   }
 
@@ -236,10 +236,10 @@ export default class MeshLayer extends Layer {
     let i = 0;
     for (const point of data) {
       const color = getColor(point) || DEFAULT_COLOR;
-      value[i++] = get(color, 0);
-      value[i++] = get(color, 1);
-      value[i++] = get(color, 2);
-      value[i++] = isNaN(get(color, 3)) ? 255 : get(color, 3);
+      value[i++] = color[0];
+      value[i++] = color[1];
+      value[i++] = color[2];
+      value[i++] = isNaN(color[3]) ? 255 : color[3];
     }
   }
 }
