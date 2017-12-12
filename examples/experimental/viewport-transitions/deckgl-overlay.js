@@ -123,7 +123,7 @@ export default class DeckGLOverlay extends Component {
       })
     ];
 
-    return <DeckGL {...viewport} layers={layers} initWebGLParameters />;
+    return <DeckGL {...viewport} layers={layers} />;
   }
 }
 

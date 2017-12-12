@@ -205,18 +205,11 @@ export default class DeckGLJS {
   _onRendererInitialized({gl, canvas}) {
     setParameters(gl, {
       blend: true,
-      blendFunc: [GL.SRC_ALPHA, GL.ONE_MINUS_SRC_ALPHA],
-      polygonOffsetFill: true
+      blendFuncSeparate: [GL.SRC_ALPHA, GL.ONE_MINUS_SRC_ALPHA, GL.ONE, GL.ONE_MINUS_SRC_ALPHA],
+      polygonOffsetFill: true,
+      depthTest: true,
+      depthFunc: GL.LEQUAL
     });
-
-    // TODO - these should be set by default starting from next major release
-    if (this.props.initWebGLParameters) {
-      setParameters(gl, {
-        blendFuncSeparate: [GL.SRC_ALPHA, GL.ONE_MINUS_SRC_ALPHA, GL.ONE, GL.ONE_MINUS_SRC_ALPHA],
-        depthTest: true,
-        depthFunc: GL.LEQUAL
-      });
-    }
 
     this.props.onWebGLInitialized(gl);
 

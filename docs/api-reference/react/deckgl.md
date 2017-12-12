@@ -122,12 +122,6 @@ Default value is `false`.
 
 Note: debug mode is somewhat slower as it will use synchronous operations to keep track of GPU state.
 
-##### `initWebGLParameters` (Boolean, optional)
-
-Sets WebGL parameters to recommended defaults on initialization, e.g. turning on depth checking. Recommended for most applications. `onWebGLInitialized`, if supplied, will be called after these parameters are set.
-
-Default value is `false` (to ensure backwards compatbility, this will be changed in a future major release).
-
 ##### `onWebGLInitialized` (Function, optional)
 
 Callback, called once the WebGL context has been initiated
