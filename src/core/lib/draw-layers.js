@@ -237,8 +237,6 @@ function drawLayerInViewport({gl, layer, layerIndex, drawPickingColors, glViewpo
   });
 
   if (drawPickingColors) {
-    // TODO - Disable during picking
-
     Object.assign(layerParameters, {
       blendColor: [0, 0, 0, (layerIndex + 1) / 255]
     });
@@ -246,12 +244,10 @@ function drawLayerInViewport({gl, layer, layerIndex, drawPickingColors, glViewpo
     Object.assign(moduleParameters, getObjectHighlightParameters(layer));
   }
 
-  withParameters(gl, layerParameters, () => {
-    layer.drawLayer({
-      moduleParameters,
-      uniforms,
-      parameters: layerParameters
-    });
+  layer.drawLayer({
+    moduleParameters,
+    uniforms,
+    parameters: layerParameters
   });
 }
 
