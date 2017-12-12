@@ -23,10 +23,32 @@ For Earlier Beta Releases see below
 
 ### deck.gl v4.2 Beta Releases
 
-#### [4.2.0-...] -
+#### [4.2.0-alpha.30] - Dec 12
 - DOCS: updates to clarify what is experimental in 4.2, in "What's New" and "API Reference".
 - DOCS: New Roadmap doc, linking to RFCs.
 - DOCS: List experimental 4.2 features in Roadmap doc.
+- Remove deprecated Choropleth layers (#1231)
+- Fix Picking Module object highlighting (#1230)
+- Add initial CODE-GUIDELINES.md. Adjust RFC versions (#1232)
+- Remove container support from core layers (#1227)
+- Add '#or yarn' to README.md (#1220)
+- Path Layer vertex shader cleanup (#1198)
+- add "babel-loader" dependency for wind example (#1228)
+- Fix `log.warn` usage (#1225)
+- Add initial capability to show infovis layers in layer-browser (#1210)
+- Fixes: global init, LayerBrowser drawPickingColors, experimental exports (#1209)
+- Improve perf of picking with large `pickingRadius` (#1222)
+- Experimental Layers 0.0.12 (#1223)
+- Conditionally generate fp64 viewport uniforms (#1219)
+- Make ViewportController and Transition exports experimental (#1218)
+- Remove deprecated API usage (#1214)
+- Clarify whats experimental in 4.2 (#1211)
+- Merge pull request #1212 from KevinGrandon/fix_buildkite_badge
+- Remove buildkite badge
+- Merge pull request #1153 from KevinGrandon/buildkite
+- Optimize building by building on warm machines
+- Use buildkite and docker for CI
+- Minify example bundle (#1206)
 
 #### [4.2.0-alpha.29] - Dec 1
 - Picking null color fix
