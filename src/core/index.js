@@ -56,6 +56,7 @@ import {default as OrbitViewport} from './viewports/orbit-viewport';
 // Experimental Pure JS (non-React) bindings
 import {default as DeckGLJS} from './pure-js/deck-js';
 import {default as MapControllerJS} from './pure-js/map-controller-js';
+import {default as OrbitControllerJS} from './pure-js/orbit-controller-js';
 
 // Experimental Effects (non-React) bindings
 import {default as EffectManager} from './experimental/lib/effect-manager';
@@ -105,6 +106,7 @@ export const experimental = {
 
   DeckGLJS,
   MapControllerJS,
+  OrbitControllerJS,
 
   EffectManager,
   Effect,
