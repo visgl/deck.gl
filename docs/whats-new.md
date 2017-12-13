@@ -53,6 +53,9 @@ A new method `CompositeLayer.getSubLayerProps()` simplifies forwarding base laye
 
 Added new props (`getDashArray` and `dashJustified`) enabling you render paths as dashed lines. Naturally these props are also accessible in composite layers built on top of the `PathLayer`, such as the `GeoJsonLayer`.
 
+## PolygonLayer & GeoJsonLayer: Elevation Scale
+
+Added new prop `elevationScale` to enable fast scaling elevation of all extruded polygons.
 
 ## HexagonLayer / GridLayer: Elevation by Value Support
 
