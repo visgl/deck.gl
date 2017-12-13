@@ -186,11 +186,6 @@ test('AttributeManager.invalidate', t => {
   t.ok(attributeManager.getAttributes()['colors'].needsUpdate,
     'invalidated attribute by accessor name');
 
-  t.throws(
-    () => attributeManager.invalidate('lineWidths'),
-    'throws on unmatched attribute name'
-  );
-
   t.end();
 });
 
