@@ -49,7 +49,7 @@ Following WebGL parameters are set during DeckGL component initialization.
 
 All our layers enable depth test so we are going set this state during initialization. We are also changing blend function for more appropriate rendering when multiple elements are blended.
 
-For any custom needs, these parameters can be overwritten by passing them in `parameters` object to `drawLayer` method of `Layer` class.
+For any custom needs, these parameters can be overwritten by updating them in [`onWebGLInitialized`](docs/api-reference/react/deckgl.md#onWebGLInitialized) callback or by passing them in `parameters` object to `drawLayer` method of `Layer` class.
 
 
 ## Upgrading from deck.gl v4 to v4.1
