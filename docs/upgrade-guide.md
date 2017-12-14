@@ -34,7 +34,22 @@ Following methods and props have been renamed for clarity. The semantics are unc
 
 ### Picking Uniforms
 
-The shader uniforms `renderPickingBuffer` and `selectedPickingColor` are deprecated, and will be removed in next major version. The old uniforms are still being set for now, but it is recommended that custom layers that implement picking start using the luma.gl `picking` shader module which automatically sets the required uniforms.
+The shader uniforms `renderPickingBuffer`, `pickingEnabled` and `selectedPickingColor` are deprecated, and will be removed in next major version. The old uniforms are still being set for now, but it is recommended that custom layers that implement picking start using the luma.gl `picking` shader module which automatically sets the required uniforms.
+
+
+### Initial WebGL State
+
+Following WebGL parameters are set during DeckGL component initialization.
+
+| WebGL State   |  Value |
+|----           |----    |
+| depthTest     | true         |
+| depthFunc     | gl.LEQUAL |
+| blendFuncSeparate | [gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE_MINUS_SRC_ALPHA] |
+
+All our layers enable depth test so we are going set this state during initialization. We are also changing blend function for more appropriate rendering when multiple elements are blended.
+
+For any custom needs, these parameters can be overwritten by updating them in [`onWebGLInitialized`](docs/api-reference/react/deckgl.md#onWebGLInitialized) callback or by passing them in `parameters` object to `drawLayer` method of `Layer` class.
 
 
 ## Upgrading from deck.gl v4 to v4.1
