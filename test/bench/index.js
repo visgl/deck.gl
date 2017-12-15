@@ -27,6 +27,7 @@ import viewportBench from './viewport.bench';
 import colorBench from './color.bench';
 import pickLayersBench from './pick-layers.bench';
 import utilsBench from './utils.bench';
+import tesselationBench from './tesselation.bench';
 
 const suite = new Bench();
 
@@ -37,6 +38,7 @@ layerBench(suite);
 viewportBench(suite);
 colorBench(suite);
 utilsBench(suite);
+tesselationBench(suite);
 
 // Run the suite
 suite.run();

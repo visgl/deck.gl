@@ -31,21 +31,7 @@ import {
 import {testInitializeLayer} from 'deck.gl/test/test-utils';
 
 import SolidPolygonLayer from 'deck.gl/core-layers/solid-polygon-layer/solid-polygon-layer';
-import {PolygonTesselator} from 'deck.gl/core-layers/solid-polygon-layer/polygon-tesselator';
-import {PolygonTesselatorExtruded}
-  from 'deck.gl/core-layers/solid-polygon-layer/polygon-tesselator-extruded';
-
-const polygons = data.choropleths.features.map(f => f.geometry.coordinates);
-
-function testTesselator(tesselator) {
-  return {
-    indices: tesselator.indices(),
-    positions: tesselator.positions(),
-    normals: tesselator.normals(),
-    colors: tesselator.colors(),
-    pickingColors: tesselator.pickingColors()
-  };
-}
+import {SolidPolygonLayer as SolidPolygonLayer2} from 'deck.gl/experimental-layers/src';
 
 // add tests
 export default function coreLayersBench(suite) {
@@ -86,6 +72,7 @@ export default function coreLayersBench(suite) {
       const layer = new PathLayer({data: data.lines});
       testInitializeLayer({layer});
     })
+
     .add('SolidPolygonLayer#initialize (flat)', () => {
       const layer = new SolidPolygonLayer({data: data.choropleths.features});
       testInitializeLayer({layer});
@@ -102,6 +89,55 @@ export default function coreLayersBench(suite) {
       });
       testInitializeLayer({layer});
     })
+    .add('SolidPolygonLayer#initialize (flat,fp64)', () => {
+      const layer = new SolidPolygonLayer({data: data.choropleths.features, fp64: true});
+      testInitializeLayer({layer});
+    })
+    .add('SolidPolygonLayer#initialize (extruded,fp64)', () => {
+      const layer = new SolidPolygonLayer({data: data.choropleths.features,
+        extruded: true, fp64: true
+      });
+      testInitializeLayer({layer});
+    })
+    .add('SolidPolygonLayer#initialize (wireframe,fp64)', () => {
+      const layer = new SolidPolygonLayer({data: data.choropleths.features,
+        extruded: true, wireframe: true, fp64: true
+      });
+      testInitializeLayer({layer});
+    })
+
+    .add('SolidPolygonLayer2#initialize (flat)', () => {
+      const layer = new SolidPolygonLayer2({data: data.choropleths.features});
+      testInitializeLayer({layer});
+    })
+    .add('SolidPolygonLayer2#initialize (extruded)', () => {
+      const layer = new SolidPolygonLayer2({data: data.choropleths.features,
+        extruded: true
+      });
+      testInitializeLayer({layer});
+    })
+    .add('SolidPolygonLayer2#initialize (wireframe)', () => {
+      const layer = new SolidPolygonLayer2({data: data.choropleths.features,
+        extruded: true, wireframe: true
+      });
+      testInitializeLayer({layer});
+    })
+    .add('SolidPolygonLayer2#initialize (flat,fp64)', () => {
+      const layer = new SolidPolygonLayer2({data: data.choropleths.features, fp64: true});
+      testInitializeLayer({layer});
+    })
+    .add('SolidPolygonLayer2#initialize (extruded,fp64)', () => {
+      const layer = new SolidPolygonLayer2({data: data.choropleths.features,
+        extruded: true, fp64: true
+      });
+      testInitializeLayer({layer});
+    })
+    .add('SolidPolygonLayer2#initialize (wireframe,fp64)', () => {
+      const layer = new SolidPolygonLayer2({data: data.choropleths.features,
+        extruded: true, wireframe: true, fp64: true
+      });
+      testInitializeLayer({layer});
+    })
 
     .group('LAYER CONSTRUCTION (NOTE: 3x REDUCED from 250K/s due to getOwnProperty)')
     .add('ScatterplotLayer#construct', () => {
@@ -115,20 +151,6 @@ export default function coreLayersBench(suite) {
     })
     .add('SolidPolygonLayer#construct', () => {
       return new PolygonLayer({data: data.choropleths.features});
-    })
-
-    .group('TESSELATOR')
-    .add('polygonTesselator#flat', () => {
-      const tesselator = new PolygonTesselator({polygons});
-      testTesselator(tesselator);
-    })
-    .add('polygonTesselator#extruded', () => {
-      const tesselator = new PolygonTesselatorExtruded({polygons});
-      testTesselator(tesselator);
-    })
-    .add('polygonTesselator#wireframe', () => {
-      const tesselator = new PolygonTesselatorExtruded({polygons, wireframe: true});
-      testTesselator(tesselator);
     })
 
     ;

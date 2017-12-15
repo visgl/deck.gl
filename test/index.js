@@ -24,3 +24,6 @@ import './src/core-layers';
 
 // React test cases currently only work in browser
 // import './src/react';
+
+// deck.gl-layers
+import '../src/experimental-layers/test';
