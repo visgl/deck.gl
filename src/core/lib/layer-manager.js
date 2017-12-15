@@ -310,7 +310,7 @@ export default class LayerManager {
   }
 
   //
-  // DEPRECATED METHODS
+  // DEPRECATED METHODS in V5
   //
 
   updateLayers({newLayers}) {

@@ -54,10 +54,6 @@ export default class ScatterplotLayer extends Layer {
     this.setState({model: this._getModel(gl)});
 
     /* eslint-disable max-len */
-    /* deprecated props check */
-    this._checkRemovedProp('radius', 'radiusScale');
-    this._checkRemovedProp('drawOutline', 'outline');
-
     this.state.attributeManager.addInstanced({
       instancePositions: {size: 3, accessor: 'getPosition', update: this.calculateInstancePositions},
       instanceRadius: {size: 1, accessor: 'getRadius', defaultValue: 1, update: this.calculateInstanceRadius},
