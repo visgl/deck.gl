@@ -2,7 +2,7 @@
 
 Release date: TBD, Dec 2017
 
-All new additions to the official deck.gl 4.2 API are listed here. Note that in addition to the official new features in this release, deck.gl 4.2 also contains a number of signficant under the hoods changes to prepare for new features and optimizations. Some of these are available as experimental APIs, see below.
+All new additions to the official deck.gl 5.0 API are listed here. Note that in addition to the official new features in this release, deck.gl 5.0 also contains a number of significant under the hoods changes to prepare for new features and optimizations. Some of these are available as experimental APIs, see below.
 
 As always, for information on deprecations and how to update your code in response to any API changes, please read the deck.gl [Upgrade Guide](/docs/get-started/upgrade-guide.md).
 
@@ -72,7 +72,7 @@ Note: This change is mainly relevant to developers who write custom deck.gl laye
 
 ## Experimental Features
 
-As usual, deck.gl 4.2 contains a number of experimental features, e.g. `multi viewport`, `first person viewport` and `viewport transitions`. These features are still being finalized and the APIs have not been frozen, but can still be accessed by early adopters. See the roadmap article for more information on these.
+As usual, deck.gl 5.0 contains a number of experimental features, e.g. "multi viewport", "first person viewport" and "viewport transitions". These features are still being finalized and the APIs have not been frozen, but can still be accessed by early adopters. See the roadmap article for more information on these.
 
 
 # deck.gl v4.1
