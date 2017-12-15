@@ -40,12 +40,6 @@ export default class ScreenGridLayer extends Layer {
     return {vs, fs, modules: ['picking']}; // 'project' module added by default.
   }
 
-  constructor(props) {
-    super(props);
-    this._checkRemovedProp('unitWidth', 'cellSizePixels');
-    this._checkRemovedProp('unitHeight', 'cellSizePixels');
-  }
-
   initializeState() {
     const {attributeManager} = this.state;
     const {gl} = this.context;

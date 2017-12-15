@@ -1,4 +1,4 @@
-# deck.gl v4.2 (Under development)
+# deck.gl v5 (Under development)
 
 Release date: TBD, Dec 2017
 
@@ -7,12 +7,6 @@ All new additions to the official deck.gl 4.2 API are listed here. Note that in 
 As always, for information on deprecations and how to update your code in response to any API changes, please read the deck.gl [Upgrade Guide](/docs/get-started/upgrade-guide.md).
 
 > TODO - Add a row of small square GIFs/PNGs of Viewport Transitions, Automatic Highlighting, Dashed Lines, Multiple Viewports. Would be really nice with a screenshot (or GIF) of Seer.
-
-## DeckGL: Viewport Transitions
-
-A major new feature is support for Viewport Transitions.
-
-> TODO - Add more extensive description. This is our major official feature after all...
 
 ## DeckGL: Performance Boost
 
@@ -78,7 +72,7 @@ Note: This change is mainly relevant to developers who write custom deck.gl laye
 
 ## Experimental Features
 
-As usual, deck.gl 4.2 contains a number of experimental features, e.g. multi viewport and first person viewport support. These features are still being finalized and the APIs have not been frozen, but can still be accessed by early adopters. See the roadmap article for more information on these.
+As usual, deck.gl 4.2 contains a number of experimental features, e.g. `multi viewport`, `first person viewport` and `viewport transitions`. These features are still being finalized and the APIs have not been frozen, but can still be accessed by early adopters. See the roadmap article for more information on these.
 
 
 # deck.gl v4.1

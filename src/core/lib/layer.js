@@ -712,18 +712,6 @@ ${flags.viewportChanged ? 'viewport' : ''}\
     }
   }
 
-  // Emits a warning if an old prop is used, optionally suggesting a replacement
-  _checkRemovedProp(oldProp, newProp = null) {
-    if (this.props[oldProp] !== undefined) {
-      const layerName = this.constructor;
-      let message = `${layerName} no longer accepts props.${oldProp} in this version of deck.gl.`;
-      if (newProp) {
-        message += `\nPlease use props.${newProp} instead.`;
-      }
-      log.once(0, message);
-    }
-  }
-
   _updateBaseUniforms() {
     const uniforms = {
       // apply gamma to opacity to make it visually "linear"
