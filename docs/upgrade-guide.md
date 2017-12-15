@@ -1,6 +1,6 @@
 # Upgrade Guide
 
-## Upgrading from deck.gl v4.1 to v4.2
+## Upgrading from deck.gl v4.1 to v5
 
 ### Dependencies
 
