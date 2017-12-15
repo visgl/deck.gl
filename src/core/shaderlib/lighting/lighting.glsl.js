@@ -36,7 +36,7 @@ uniform float specularRatio;
 float lighting_getLightWeight(vec3 position_worldspace_vec3, vec3 normals_worldspace) {
   float lightWeight = 0.0;
 
-  vec3 normals_worldspace_vec3 = normals_worldspace.xzy;
+  vec3 normals_worldspace_vec3 = normals_worldspace.xyz;
 
   vec3 camera_pos_worldspace = cameraPos;
   vec3 view_direction = normalize(camera_pos_worldspace - position_worldspace_vec3);
