@@ -1,6 +1,6 @@
 # Writing Shaders
 
-A shader library facilitates creating shaders that work seamlessly with deck.gl. Use the `modules` parameter to the `Model` class (or call the `assembleShaders` function directly) to dynamically include this library into your own GLSL code:
+A shader library facilitates creating shaders that work seamlessly with deck.gl. Use the `modules` parameter to the `Model` class to dynamically include this library into your own GLSL code:
 
 ```js
 const model = new Model(gl, {

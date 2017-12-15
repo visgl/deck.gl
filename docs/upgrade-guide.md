@@ -52,6 +52,10 @@ All our layers enable depth test so we are going set this state during initializ
 For any custom needs, these parameters can be overwritten by updating them in [`onWebGLInitialized`](docs/api-reference/react/deckgl.md#onWebGLInitialized) callback or by passing them in `parameters` object to `drawLayer` method of `Layer` class.
 
 
+### assembleShaders
+
+`assembleShaders` was deprecated in v4.1 and now removed in v5. As described in v4.1 upgrade guide please use `Model` class instead.
+
 ## Upgrading from deck.gl v4 to v4.1
 
 deck.gl v4.1 is a backward-compatible release. Most of the functionality and APIs remain unchanged but there are smaller changes that might requires developers' attention if they **develop custom layers**. Note that applications that are only using the provided layers should not need to make any changes issues.

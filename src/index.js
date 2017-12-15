@@ -40,9 +40,6 @@ export {
   OrthographicViewport
 } from './core';
 
-// Deprecated Core Lib Classes
-export {assembleShaders} from 'luma.gl'; // Forward the luma.gl version (note: now integrated with Model)
-
 // EXPERIMENTAL CORE LIB CLASSES (May change in minor version bumps, use at your own risk)
 import {experimental as CoreExperimental} from './core';
 
