@@ -144,12 +144,10 @@ export function getUniformsFromViewport({
   assert(viewport);
 
   if (projectionMode !== undefined) {
-    coordinateSystem = projectionMode;
-    log.deprecated('projectionMode', 'coordinateSystem');
+    log.removed('projectionMode', 'coordinateSystem');
   }
   if (positionOrigin !== undefined) {
-    coordinateOrigin = positionOrigin;
-    log.deprecated('positionOrigin', 'coordinateOrigin');
+    log.removed('positionOrigin', 'coordinateOrigin');
   }
 
   const coordinateZoom = viewport.zoom;
