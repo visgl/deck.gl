@@ -15,8 +15,8 @@ import {
   // PathLayer
 } from 'deck.gl';
 
-export const WIDTH = 1600;
-export const HEIGHT = 900;
+export const WIDTH = 800;
+export const HEIGHT = 450;
 
 // Max color delta in the YIQ difference metric for two pixels to be considered the same
 export const COLOR_DELTA_THRESHOLD = 255 * 0.05;

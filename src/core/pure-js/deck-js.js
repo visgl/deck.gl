@@ -237,7 +237,8 @@ export default class DeckGLJS {
       // Helps debug layer picking, especially in framebuffer powered layers
       drawPickingColors: this.props.drawPickingColors
     });
-    this.props.onAfterRender({gl}); // TODO - should be called by AnimationLoop
+    // TODO - should be called by AnimationLoop
+    this.props.onAfterRender({gl, canvas: this.props.canvas});
   }
 }
 
