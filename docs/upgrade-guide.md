@@ -8,9 +8,9 @@ deck.gl 4.1 requires luma.gl as peer dependency, but 4.2 specifies it as a norma
 
 ### Layer Props
 
-Coordinate system related props have been renamed for clarity. The old props are still available but will generate a deprecation warning.
+Coordinate system related props have been renamed for clarity. The old props are no longer supported and will generate errors when used.
 
-| Layer            | Old Prop           | New Prop             | Comment |
+| Layer            | Removed Prop       | New Prop             | Comment |
 | ---              | ---                | ---                  | ---     |
 | Layer            | `projectionMode`   | `coordinateSystem`   | Any constant from `COORDINATE_SYSTEM`  |
 | Layer            | `projectionOrigin` | `coordinateOrigin`   | |

@@ -57,8 +57,13 @@ function error(arg, ...args) {
 }
 
 function deprecated(oldUsage, newUsage) {
-  log.warn(`deck.gl: \`${oldUsage}\` is deprecated and will be removed \
+  log.warn(`\`${oldUsage}\` is deprecated and will be removed \
 in a later version. Use \`${newUsage}\` instead`);
+}
+
+function removed(oldUsage, newUsage) {
+  log.error(`\`${oldUsage}\` is no longer supported. Use \`${newUsage}\` instead,\
+ check our upgrade-guide.md for more details`);
 }
 
 // Logs a message with a time
@@ -139,6 +144,7 @@ log.timeEnd = timeEnd;
 log.warn = warn;
 log.error = error;
 log.deprecated = deprecated;
+log.removed = removed;
 log.group = group;
 log.groupEnd = groupEnd;
 
