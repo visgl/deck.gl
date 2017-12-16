@@ -106,12 +106,10 @@ export default class SolidPolygonLayer extends Layer {
 
   draw({uniforms}) {
     const {extruded, lightSettings, elevationScale} = this.props;
-    const {viewport} = this.context;
 
     this.state.model.render(Object.assign({}, uniforms, {
       extruded: extruded ? 1.0 : 0.0,
-      elevationScale,
-      pixelsPerUnit: viewport.getDistanceScales().pixelsPerDegree
+      elevationScale
     },
     lightSettings));
   }

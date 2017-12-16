@@ -27,6 +27,7 @@ const float COORDINATE_SYSTEM_METER_OFFSETS = 2.;
 uniform float project_uCoordinateSystem;
 uniform float project_uScale;
 uniform vec3 project_uPixelsPerUnit;
+uniform vec3 project_uPixelsPerDegree;
 uniform vec4 project_uCenter;
 uniform mat4 project_uModelMatrix;
 uniform mat4 project_uViewProjectionMatrix;
@@ -48,6 +49,9 @@ float project_scale(float meters) {
 }
 
 vec2 project_scale(vec2 meters) {
+  if (project_uCoordinateSystem == COORDINATE_SYSTEM_LNG_LAT) {
+    return meters * project_uPixelsPerDegree.xy;
+  }
   return meters * project_uPixelsPerUnit.xy;
 }
 
