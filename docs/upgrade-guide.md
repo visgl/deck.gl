@@ -1,10 +1,10 @@
 # Upgrade Guide
 
-## Upgrading from deck.gl v4.1 to v4.2
+## Upgrading from deck.gl v4.1 to v5
 
 ### Dependencies
 
-deck.gl 4.1 requires luma.gl as peer dependency, but 4.2 specifies it as a normal "dependency". This means that many applications no longer need to list luma.gl in their package.json. Applications that do might get multiple copies of luma.gl installed, which will not work. **luma.gl will detect this situtation during run-time throwing an exception**, but **npm and yarn will not detect it during install time**. Thus your build can look successful but will fail during upgrade.
+deck.gl 4.1 requires luma.gl as peer dependency, but 5.0 specifies it as a normal "dependency". This means that many applications no longer need to list luma.gl in their package.json. Applications that do might get multiple copies of luma.gl installed, which will not work. **luma.gl will detect this situattion during run-time throwing an exception**, but **npm and yarn will not detect it during install time**. Thus your build can look successful but will fail during upgrade.
 
 ### Layer Props
 
@@ -51,6 +51,10 @@ All our layers enable depth test so we are going set this state during initializ
 
 For any custom needs, these parameters can be overwritten by updating them in [`onWebGLInitialized`](docs/api-reference/react/deckgl.md#onWebGLInitialized) callback or by passing them in `parameters` object to `drawLayer` method of `Layer` class.
 
+
+### assembleShaders
+
+The `assembleShaders` function was moved to luma.gl in v4.1 and is no longer re-exported from deck.gl. As described in v4.1 upgrade guide please use `Model` class instead or import it from luma.gl.
 
 ## Upgrading from deck.gl v4 to v4.1
 

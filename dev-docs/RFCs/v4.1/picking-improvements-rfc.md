@@ -54,7 +54,7 @@ Sometimes, a highlighted layer following the mouse pointer during the drag is us
 Provide default behavior to highlighted picked element. The default behavior should be able to be turned off without impacting rendering performance. This was originally implemented “ad-hoc” for some iteration of HexagonLayer and GridLayer but later removed during API audit.
 
 NOTE:
-* Automatic highlighting has been implmented in 4.2 and is covered in detail in a separate [RFC]().
+* Automatic highlighting has been implmented in 5.0 and is covered in detail in a separate [RFC]().
 
 
 ### Proposal: Better picking arbitration algorithm

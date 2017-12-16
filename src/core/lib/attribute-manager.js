@@ -357,7 +357,6 @@ export default class AttributeManager {
   // DEPRECATED METHODS
 
   /**
-   * @deprecated since version 2.5, use add() instead
    * Adds attributes
    * @param {Object} attributes - attribute map (see above)
    * @param {Object} updaters - separate map of update functions (deprecated)

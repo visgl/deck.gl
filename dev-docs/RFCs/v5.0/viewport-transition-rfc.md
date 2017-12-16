@@ -21,7 +21,7 @@ Viewport transition functionality will be added to `ViewportController` componen
 
 For each viewport change, if a transition is requested, `TransitionManager` takes old and new props, interpolates the viewport and updates `ViewportController` using a callback.
 
-![Viewport Transition architecture](https://github.com/uber/deck.gl/blob/master/dev-docs/RFCs/v4.2/viewport-transition-architecture.png "Viewport Transition architecture")
+![Viewport Transition architecture](https://github.com/uber/deck.gl/blob/master/dev-docs/RFCs/v5.0/viewport-transition-architecture.png "Viewport Transition architecture")
 
 
 ### Transition props:

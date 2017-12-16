@@ -13,10 +13,10 @@ Naturally, the github issues also contains relevant information, but in a less s
 
 ## deck.gl v.Next
 
-* **Pure JavaScript support** - deck.gl is today a React library, but in 4.2 the internal code is essentially 100% independent of React. We want to define an official JavaScript API and publish the React "wrappers" as an optional add-on module. (Please don't worry if you are a React user, deck.gl will continue to be "React-first", designed from the ground up with the "reactive programming paradigm" in mind).
-* **Multi-viewport** support - Extensive work has been done in 4.2 (available in the `experimental` namespace), we expect to finalize and make much of this functionality official in next release.
+* **Pure JavaScript support** - deck.gl is today a React library, but in 5.0 the internal code is essentially 100% independent of React. We want to define an official JavaScript API and publish the React "wrappers" as an optional add-on module. (Please don't worry if you are a React user, deck.gl will continue to be "React-first", designed from the ground up with the "reactive programming paradigm" in mind).
+* **Multi-viewport** support - Extensive work has been done in 5.0 (available in the `experimental` namespace), we expect to finalize and make much of this functionality official in next release.
 * **Visual Effects** - Shadows, blur, postprocessing etc. This continues to be strong goal that unfortunately has been pushed forward.
-* **Transitions and Animations** - 4.2 introduces viewport transitions. Expect to see similar support for layer properties and attributes.
+* **Transitions and Animations** - 5.0 introduces viewport transitions. Expect to see similar support for layer properties and attributes.
 * **Code Size** - deck.gl has gone through rapid development and we need to overhaul the code and build processes to reduce the size.
 
 In addition, in the future we plan to publish separate modules with deck.gl layers and core functionality.
@@ -29,9 +29,9 @@ Other themes we want to develop are:
 * **Better GPGPU/WebGL2 Support** - Many stones are still left unturned here. Expect better performance, and new features (such as animations of entire attributes), especially in WebGL2 capable browsers.
 
 
-## Short Term: Experimental Features in 4.2
+## Short Term: Experimental Features in 5.0
 
-A lot of multi-viewport support was added during deck.gl 4.2 development. The APIs are still not considered stable so the related classes are exported as part of the "experimental" namespace, and in most cases.
+A lot of multi-viewport support was added during deck.gl 5.0 development. The APIs are still not considered stable so the related classes are exported as part of the "experimental" namespace, and in most cases.
 
 ### Multi-Viewport Support
 
