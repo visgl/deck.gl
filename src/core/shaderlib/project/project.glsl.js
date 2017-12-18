@@ -27,6 +27,7 @@ const float COORDINATE_SYSTEM_METER_OFFSETS = 2.;
 uniform float project_uCoordinateSystem;
 uniform float project_uScale;
 uniform vec3 project_uPixelsPerUnit;
+uniform vec3 project_uPixelsPerDegree;
 uniform vec4 project_uCenter;
 uniform mat4 project_uModelMatrix;
 uniform mat4 project_uViewProjectionMatrix;
@@ -57,6 +58,17 @@ vec3 project_scale(vec3 meters) {
 
 vec4 project_scale(vec4 meters) {
   return vec4(project_scale(meters.xyz), meters.w);
+}
+
+//
+// Projecting normal - transform deltas from current coordinate system to
+// normals in the worldspace
+//
+vec3 project_normal(vec3 vector) {
+  if (project_uCoordinateSystem == COORDINATE_SYSTEM_LNG_LAT) {
+    return normalize(vector * project_uPixelsPerDegree);
+  }
+  return normalize(vector * project_uPixelsPerUnit);
 }
 
 //

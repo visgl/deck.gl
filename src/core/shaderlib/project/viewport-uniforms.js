@@ -181,6 +181,7 @@ export function getUniformsFromViewport({
     // Distance at which screen pixels are projected
     project_uFocalDistance: viewport.focalDistance || 1,
     project_uPixelsPerUnit: distanceScales.pixelsPerMeter,
+    project_uPixelsPerDegree: distanceScales.pixelsPerDegree,
     project_uScale: viewport.scale, // This is the mercator scale (2 ** zoom)
 
     project_uModelMatrix: glModelMatrix,
