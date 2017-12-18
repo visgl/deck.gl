@@ -21,11 +21,14 @@
 export default `\
 #define SHADER_NAME solid-polygon-layer-vertex-shader
 
+attribute vec2 vertexPositions;
 attribute vec3 positions;
-attribute vec3 normals;
+attribute vec3 nextPositions;
+attribute float elevations;
 attribute vec4 colors;
 attribute vec3 pickingColors;
 
+uniform float isSideVertex;
 uniform float extruded;
 uniform float elevationScale;
 uniform float opacity;
@@ -34,9 +37,21 @@ uniform vec3 pixelsPerUnit;
 varying vec4 vColor;
 
 void main(void) {
-  
+
+  vec3 pos;
+  vec3 normal;
+
+  if (isSideVertex > 0.5) {
+    pos = mix(positions, nextPositions, vertexPositions.x);
+  } else {
+    pos = positions;
+  }
+  if (extruded > 0.5) {
+    pos.z += elevations * vertexPositions.y;
+  }
+
   vec4 position_worldspace = vec4(project_position(
-    vec3(positions.x, positions.y, positions.z * elevationScale)),
+    vec3(pos.xy, pos.z * elevationScale)),
     1.0
   );
   gl_Position = project_to_clipspace(position_worldspace);
@@ -44,6 +59,13 @@ void main(void) {
   float lightWeight = 1.0;
   
   if (extruded > 0.5) {
+    if (isSideVertex > 0.5) {
+      normal = vec3(positions.y - nextPositions.y, nextPositions.x - positions.x, 0.0);
+      normal = normalize(normal * pixelsPerUnit);
+    } else {
+      normal = vec3(0.0, 0.0, 1.0);
+    }
+
     // Here, the input parameters should be
     // position_worldspace.xyz / position_worldspace.w.
     // However, this calculation generates all zeros on
@@ -52,10 +74,7 @@ void main(void) {
     // Since the w component is always 1.0 in our shaders,
     // we decided to just provide xyz component of position_worldspace
     // to the getLightWeight() function
-    lightWeight = getLightWeight(
-      position_worldspace.xyz,
-      normalize(normals * pixelsPerUnit)
-    );
+    lightWeight = getLightWeight(position_worldspace.xyz, normal);
   }
 
   vec3 lightWeightedColor = lightWeight * colors.rgb;

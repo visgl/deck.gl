@@ -120,7 +120,8 @@ const SolidPolygonLayerExample = {
   getData: () => dataSamples.polygons,
   props: {
     getPolygon: f => f,
-    getColor: f => [200 + Math.random() * 55, 0, 0],
+    getFillColor: f => [200 + Math.random() * 55, 0, 0],
+    getLineColor: f => [0, 0, 0],
     getElevation: f => Math.random() * 1000,
     opacity: 0.8,
     pickable: true,
