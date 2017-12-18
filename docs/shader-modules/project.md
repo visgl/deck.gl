@@ -74,6 +74,13 @@ Projects positions (coordinates) to worldspace coordinates. The coordinates are 
 Projects sizes in meters to worldspace offsets. These offsets can be added directly to values returned by `project_position`.
 
 
+### project_normal
+
+`vec3 project_normal(vec3 vector)`
+
+Projects position deltas in the current coordinate system to worldspace normals.
+
+
 ### project_to_clipspace
 
 Projects world space coordinates to clipspace, which can be assigned to `gl_Position` as the "return value" from the vertex shader.
