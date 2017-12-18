@@ -282,9 +282,8 @@ export default class SolidPolygonLayer extends Layer {
           const newAttribute = Object.assign({}, attribute, attributeOverride);
 
           // Hack: elevations is ignored when not extruded
-          if (!this.props.extruded && attributeName === 'elevations') {
-            newAttribute.instanced = true;
-          }
+          // TODO/xiaoji: replace with generic vertex
+          newAttribute.instanced |= (!this.props.extruded && attributeName === 'elevations');
           newAttributes[attributeOverride.name || attributeName] = newAttribute;
         }
       }

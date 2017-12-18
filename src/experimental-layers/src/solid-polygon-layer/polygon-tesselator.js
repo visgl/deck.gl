@@ -25,7 +25,7 @@
 // - 3D wireframes (not yet)
 import * as Polygon from './polygon';
 import {experimental} from 'deck.gl';
-const {fillArray} = experimental;
+const {fillArray, fp64ify} = experimental;
 
 // Maybe deck.gl or luma.gl needs to export this
 function getPickingColor(index) {
@@ -53,6 +53,7 @@ export class PolygonTesselator {
     this.pointCount = pointCount;
     this.IndexType = IndexType;
 
+    // TODO: dynamically decide IndexType in tesselator?
     // Check if the vertex count excedes index type limit
     if (IndexType === Uint16Array && pointCount > 65535) {
       throw new Error('Vertex count exceeds browser\'s limit');
@@ -77,7 +78,7 @@ export class PolygonTesselator {
         new Float32Array(pointCount * 2);
     }
 
-    updatePositions(attributes, {polygons, extruded, fp64});
+    updatePositions({cache: attributes, polygons, extruded, fp64});
   }
 
   indices() {
@@ -101,14 +102,16 @@ export class PolygonTesselator {
 
   elevations({key = 'elevations', getElevation = x => 100} = {}) {
     const {attributes, polygons, pointCount} = this;
-    attributes[key] = attributes[key] || new Float32Array(pointCount);
-    return updateElevations(attributes[key], {polygons, getElevation});
+    const values = updateElevations({cache: attributes[key], polygons, pointCount, getElevation});
+    attributes[key] = values;
+    return values;
   }
 
   colors({key = 'colors', getColor = x => DEFAULT_COLOR} = {}) {
     const {attributes, polygons, pointCount} = this;
-    attributes[key] = attributes[key] || new Uint8ClampedArray(pointCount * 4);
-    return updateColors(attributes[key], {polygons, getColor});
+    const values = updateColors({cache: attributes[key], polygons, pointCount, getColor});
+    attributes[key] = values;
+    return values;
   }
 
   pickingColors() {
@@ -159,26 +162,32 @@ function calculateIndices({polygons, IndexType = Uint32Array}) {
   return attribute;
 }
 
-function updatePositions(
-  {positions, positions64xyLow, nextPositions, nextPositions64xyLow},
-  {polygons, extruded, fp64}
-) {
+function updatePositions({
+  cache: {positions, positions64xyLow, nextPositions, nextPositions64xyLow},
+  polygons, extruded, fp64
+}) {
   // Flatten out all the vertices of all the sub subPolygons
   let i = 0;
-  let j = 0;
   let nextI = 0;
-  let nextJ = 0;
   let startVertex = null;
 
+  const pushStartVertex = (x, y, z, xLow, yLow) => {
+    if (extruded) {
+      // Save first vertex for setting nextPositions at the end of the loop
+      startVertex = {x, y, z, xLow, yLow};
+    }
+  };
+
   const popStartVertex = () => {
-    if (startVertex && extruded) {
-      nextPositions[nextI++] = startVertex.x;
-      nextPositions[nextI++] = startVertex.y;
-      nextPositions[nextI++] = startVertex.z;
+    if (startVertex) {
+      nextPositions[nextI * 3] = startVertex.x;
+      nextPositions[nextI * 3 + 1] = startVertex.y;
+      nextPositions[nextI * 3 + 2] = startVertex.z;
       if (fp64) {
-        nextPositions64xyLow[nextJ++] = startVertex.xLow;
-        nextPositions64xyLow[nextJ++] = startVertex.yLow;
+        nextPositions64xyLow[nextI * 2] = startVertex.xLow;
+        nextPositions64xyLow[nextI * 2 + 1] = startVertex.yLow;
       }
+      nextI++;
     }
     startVertex = null;
   };
@@ -191,34 +200,38 @@ function updatePositions(
       let xLow;
       let yLow;
 
-      positions[i++] = x;
-      positions[i++] = y;
-      positions[i++] = z;
+      positions[i * 3] = x;
+      positions[i * 3 + 1] = y;
+      positions[i * 3 + 2] = z;
       if (fp64) {
-        xLow = x - Math.fround(x);
-        yLow = y - Math.fround(y);
-        positions64xyLow[j++] = xLow;
-        positions64xyLow[j++] = yLow;
+        xLow = fp64ify(x)[1];
+        yLow = fp64ify(y)[1];
+        positions64xyLow[i * 2] = xLow;
+        positions64xyLow[i * 2 + 1] = yLow;
       }
+      i++;
+
       if (extruded && vertexIndex > 0) {
-        nextPositions[nextI++] = x;
-        nextPositions[nextI++] = y;
-        nextPositions[nextI++] = z;
+        nextPositions[nextI * 3] = x;
+        nextPositions[nextI * 3 + 1] = y;
+        nextPositions[nextI * 3 + 2] = z;
         if (fp64) {
-          nextPositions64xyLow[nextJ++] = xLow;
-          nextPositions64xyLow[nextJ++] = yLow;
+          nextPositions64xyLow[nextI * 2] = xLow;
+          nextPositions64xyLow[nextI * 2 + 1] = yLow;
         }
+        nextI++;
       }
       if (vertexIndex === 0) {
         popStartVertex();
-        startVertex = {x, y, z, xLow, yLow};
+        pushStartVertex(x, y, z, xLow, yLow);
       }
     });
   });
   popStartVertex();
 }
 
-function updateElevations(elevations, {polygons, getElevation}) {
+function updateElevations({cache, polygons, pointCount, getElevation}) {
+  const elevations = cache || new Float32Array(pointCount);
   let i = 0;
   polygons.forEach((complexPolygon, polygonIndex) => {
     // Calculate polygon color
@@ -231,7 +244,8 @@ function updateElevations(elevations, {polygons, getElevation}) {
   return elevations;
 }
 
-function updateColors(colors, {polygons, getColor}) {
+function updateColors({cache, polygons, pointCount, getColor}) {
+  const colors = cache || new Uint8ClampedArray(pointCount * 4);
   let i = 0;
   polygons.forEach((complexPolygon, polygonIndex) => {
     // Calculate polygon color
