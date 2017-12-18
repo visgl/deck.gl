@@ -49,9 +49,6 @@ float project_scale(float meters) {
 }
 
 vec2 project_scale(vec2 meters) {
-  if (project_uCoordinateSystem == COORDINATE_SYSTEM_LNG_LAT) {
-    return meters * project_uPixelsPerDegree.xy;
-  }
   return meters * project_uPixelsPerUnit.xy;
 }
 
@@ -61,6 +58,17 @@ vec3 project_scale(vec3 meters) {
 
 vec4 project_scale(vec4 meters) {
   return vec4(project_scale(meters.xyz), meters.w);
+}
+
+//
+// Projecting normal - transform deltas from current coordinate system to
+// normals in the model space
+//
+vec3 project_normal(vec3 normal) {
+  if (project_uCoordinateSystem == COORDINATE_SYSTEM_LNG_LAT) {
+    return normalize(normal * project_uPixelsPerDegree);
+  }
+  return normalize(normal * project_uPixelsPerUnit);
 }
 
 //

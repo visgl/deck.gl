@@ -53,7 +53,7 @@ void main(void) {
     // to the getLightWeight() function
     lightWeight = getLightWeight(
       position_worldspace.xyz,
-      normalize(project_scale(normals))
+      project_normal(normals)
     );
   }
 
