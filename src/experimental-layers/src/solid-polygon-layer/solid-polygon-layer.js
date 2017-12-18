@@ -85,11 +85,33 @@ const SIDE_WIRE_POSITIONS = new Float32Array([
 ]);
 
 // Model types
-const MODEL_TYPES = {
-  TOP: 1,
-  SIDE: 2,
-  WIRE: 4,
-  ALL: 7
+const ATTRIBUTE_MAPS = {
+  TOP: {
+    indices: {instanced: false},
+    positions: {instanced: false},
+    positions64xyLow: {instanced: false},
+    elevations: {instanced: false},
+    fillColors: {name: 'colors', instanced: false},
+    pickingColors: {instanced: false}
+  },
+  SIDE: {
+    positions: {instanced: true},
+    positions64xyLow: {instanced: true},
+    nextPositions: {instanced: true},
+    nextPositions64xyLow: {instanced: true},
+    elevations: {instanced: true},
+    fillColors: {name: 'colors', instanced: true},
+    pickingColors: {instanced: true}
+  },
+  WIRE: {
+    positions: {instanced: true},
+    positions64xyLow: {instanced: true},
+    nextPositions: {instanced: true},
+    nextPositions64xyLow: {instanced: true},
+    elevations: {instanced: true},
+    lineColors: {name: 'colors', instanced: true},
+    pickingColors: {instanced: true}
+  }
 };
 
 export default class SolidPolygonLayer extends Layer {
@@ -110,20 +132,13 @@ export default class SolidPolygonLayer extends Layer {
     const noAlloc = true;
     /* eslint-disable max-len */
     attributeManager.add({
-      indices: {size: 1, isIndexed: true, update: this.calculateIndices, noAlloc,
-        modelType: MODEL_TYPES.TOP},
-      positions: {size: 3, accessor: ['extruded', 'fp64'], update: this.calculatePositions, noAlloc,
-        modelType: MODEL_TYPES.ALL},
-      nextPositions: {size: 3, accessor: ['extruded', 'fp64'], update: this.calculateNextPositions, noAlloc,
-        modelType: MODEL_TYPES.SIDE + MODEL_TYPES.WIRE},
-      elevations: {size: 1, accessor: ['extruded', 'getElevation'], update: this.calculateElevations, noAlloc,
-        modelType: MODEL_TYPES.ALL},
-      fillColors: {alias: 'colors', size: 4, type: GL.UNSIGNED_BYTE, accessor: 'getFillColor', update: this.calculateFillColors, noAlloc,
-        modelType: MODEL_TYPES.TOP + MODEL_TYPES.SIDE},
-      lineColors: {alias: 'colors', size: 4, type: GL.UNSIGNED_BYTE, accessor: 'getLineColor', update: this.calculateLineColors, noAlloc,
-        modelType: MODEL_TYPES.WIRE},
-      pickingColors: {size: 3, type: GL.UNSIGNED_BYTE, update: this.calculatePickingColors, noAlloc,
-        modelType: MODEL_TYPES.ALL}
+      indices: {size: 1, isIndexed: true, update: this.calculateIndices, noAlloc},
+      positions: {size: 3, accessor: ['extruded', 'fp64'], update: this.calculatePositions, noAlloc},
+      nextPositions: {size: 3, accessor: ['extruded', 'fp64'], update: this.calculateNextPositions, noAlloc},
+      elevations: {size: 1, accessor: ['extruded', 'getElevation'], update: this.calculateElevations, noAlloc},
+      fillColors: {alias: 'colors', size: 4, type: GL.UNSIGNED_BYTE, accessor: 'getFillColor', update: this.calculateFillColors, noAlloc},
+      lineColors: {alias: 'colors', size: 4, type: GL.UNSIGNED_BYTE, accessor: 'getLineColor', update: this.calculateLineColors, noAlloc},
+      pickingColors: {size: 3, type: GL.UNSIGNED_BYTE, update: this.calculatePickingColors, noAlloc}
     });
     /* eslint-enable max-len */
   }
@@ -135,10 +150,8 @@ export default class SolidPolygonLayer extends Layer {
       if (props.fp64 && props.coordinateSystem === COORDINATE_SYSTEM.LNGLAT) {
         /* eslint-disable max-len */
         attributeManager.add({
-          positions64xyLow: {size: 2, accessor: 'fp64', update: this.calculatePositionsLow,
-            modelType: MODEL_TYPES.ALL},
-          nextPositions64xyLow: {size: 2, accessor: 'fp64', update: this.calculateNextPositionsLow,
-            modelType: MODEL_TYPES.SIDE + MODEL_TYPES.WIRE}
+          positions64xyLow: {size: 2, accessor: 'fp64', update: this.calculatePositionsLow},
+          nextPositions64xyLow: {size: 2, accessor: 'fp64', update: this.calculateNextPositionsLow}
         });
         /* eslint-enable max-len */
       } else {
@@ -252,25 +265,27 @@ export default class SolidPolygonLayer extends Layer {
 
     for (const modelName in modelsByName) {
       const model = modelsByName[modelName];
-      const isInstanced = modelName !== 'TOP';
 
-      if (isInstanced) {
-        model.setInstanceCount(this.state.numInstances);
-      } else {
+      if (modelName === 'TOP') {
         model.setVertexCount(this.state.numVertex);
+      } else {
+        model.setInstanceCount(this.state.numInstances);
       }
 
+      const attributeMap = ATTRIBUTE_MAPS[modelName];
       const newAttributes = {};
       for (const attributeName in attributes) {
         const attribute = attributes[attributeName];
+        const attributeOverride = attributeMap[attributeName];
 
-        if (attribute.modelType & MODEL_TYPES[modelName]) {
-          newAttributes[attribute.alias || attributeName] = {
-            isIndexed: attribute.isIndexed,
-            instanced: isInstanced || (!this.props.extruded && attributeName === 'elevations'),
-            size: attribute.size,
-            value: attribute.value
-          };
+        if (attributeOverride) {
+          const newAttribute = Object.assign({}, attribute, attributeOverride);
+
+          // Hack: elevations is ignored when not extruded
+          if (!this.props.extruded && attributeName === 'elevations') {
+            newAttribute.instanced = true;
+          }
+          newAttributes[attributeOverride.name || attributeName] = newAttribute;
         }
       }
       model.setAttributes(newAttributes);
