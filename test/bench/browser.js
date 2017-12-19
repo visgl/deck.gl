@@ -21,7 +21,7 @@
 require('babel-polyfill');
 
 const {experimental} = require('probe.gl');
-experimental.logToDOM('Activate DOM logging');
+experimental.enableDOMLogging();
 
 require('../test-utils/setup-gl');
 require('./index');

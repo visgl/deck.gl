@@ -2938,16 +2938,16 @@ lru-cache@^4.0.1:
     pseudomap "^1.0.2"
     yallist "^2.1.2"
 
-luma.gl@>=4.1.0-alpha.9:
-  version "4.1.0-alpha.9"
-  resolved "https://registry.yarnpkg.com/luma.gl/-/luma.gl-4.1.0-alpha.9.tgz#1a58ffb6df8db03d5cdd3ab780d00b51404ccdb9"
+luma.gl@>=5.0.0-beta.1:
+  version "5.0.0-beta.1"
+  resolved "https://registry.yarnpkg.com/luma.gl/-/luma.gl-5.0.0-beta.1.tgz#7a0c6dda99feb774e94d6686a1c0734afbce28de"
   dependencies:
     gl-mat4 "^1.1.4"
     gl-quat "^1.0.0"
     gl-vec2 "^1.0.0"
     gl-vec3 "^1.0.3"
     gl-vec4 "^1.0.1"
-    math.gl "^1.0.0-alpha.8"
+    math.gl "1.0.0-alpha.8"
     seer "^0.2.2"
     webgl-debug "^1.0.2"
 
@@ -2961,7 +2961,7 @@ map-obj@^1.0.0, map-obj@^1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/map-obj/-/map-obj-1.0.1.tgz#d933ceb9205d82bdcf4886f6742bdc2b4dea146d"
 
-"math.gl@>= 1.0.0-alpha.8", math.gl@^1.0.0-alpha.7, math.gl@^1.0.0-alpha.8:
+math.gl@1.0.0-alpha.8, "math.gl@>= 1.0.0-alpha.8", math.gl@^1.0.0-alpha.7:
   version "1.0.0-alpha.8"
   resolved "https://registry.yarnpkg.com/math.gl/-/math.gl-1.0.0-alpha.8.tgz#51dd8d03e5c50096851e8a268d888c1eda766cd1"
   dependencies:
@@ -3624,9 +3624,9 @@ private@^0.1.6, private@^0.1.7:
   version "0.1.8"
   resolved "https://registry.yarnpkg.com/private/-/private-0.1.8.tgz#2381edb3689f7a53d653190060fcf822d2f368ff"
 
-probe.gl@^0.0.2:
-  version "0.0.2"
-  resolved "https://registry.yarnpkg.com/probe.gl/-/probe.gl-0.0.2.tgz#2edf4bae97692f7e62c8f309e20c91e4adb10a81"
+probe.gl@^0.0.3:
+  version "0.0.3"
+  resolved "https://registry.yarnpkg.com/probe.gl/-/probe.gl-0.0.3.tgz#b53e5bc6f5f77f46dfa18c89a30a33363378a4e2"
   dependencies:
     babel-runtime "^6.11.6"
     d3-format "^1.2.0"
