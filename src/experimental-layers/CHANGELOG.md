@@ -1,3 +1,5 @@
+0.0.13
+- Add SolidPolygonLayer
 0.0.12
 - Bug fixes + build against 4.2.0-alpha.29
 0.0.11
