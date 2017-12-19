@@ -10,7 +10,7 @@
     "rbush": "^2.0.1",
     "react": "^16.2.0",
     "react-dom": "^16.2.0",
-    "react-map-gl": "^3.0.0"
+    "react-map-gl": "3.2.0-alpha.3"
   },
   "devDependencies": {
     "buble-loader": "^0.4.0",

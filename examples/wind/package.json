@@ -12,10 +12,11 @@
     "d3-request": "^1.0.3",
     "d3-voronoi": "^1.1.1",
     "deck.gl": "4.2.0-alpha.24",
+    "prop-types": "^15.6.0",
     "react": "^16.2.0",
     "react-autobind": "^1.0.6",
     "react-dom": "^16.2.0",
-    "react-map-gl": "^3.0.0-beta.3",
+    "react-map-gl": "3.2.0-alpha.3",
     "tween.js": "^16.6.0"
   },
   "devDependencies": {
