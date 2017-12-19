@@ -34,7 +34,6 @@ uniform float isSideVertex;
 uniform float extruded;
 uniform float elevationScale;
 uniform float opacity;
-uniform vec3 pixelsPerUnit;
 
 varying vec4 vColor;
 
@@ -77,7 +76,7 @@ void main(void) {
   if (extruded > 0.5) {
     if (isSideVertex > 0.5) {
       normal = vec3(positions.y - nextPositions.y, nextPositions.x - positions.x, 0.0);
-      normal = normalize(normal * pixelsPerUnit);
+      normal = project_normal(normal);
     } else {
       normal = vec3(0.0, 0.0, 1.0);
     }
