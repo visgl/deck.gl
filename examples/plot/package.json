@@ -7,8 +7,8 @@
   "dependencies": {
     "d3-scale": "^1.0.6",
     "deck.gl": ">=4.2.0-alpha.29",
-    "react": "^15.4.1",
-    "react-dom": "^15.4.1"
+    "react": "^16.2.0",
+    "react-dom": "^16.2.0"
   },
   "devDependencies": {
     "buble-loader": "^0.4.0",

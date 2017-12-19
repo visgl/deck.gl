@@ -5,21 +5,15 @@ import DeckGL from 'deck.gl';
 import ArcBrushingLayer from './arc-brushing-layer';
 import ScatterplotBrushingLayer from './scatterplot-brushing-layer';
 
-export const inFlowColors = [
-  [35, 181, 184]
-];
-
-export const outFlowColors = [
-  [166, 3, 3]
-];
+export const inFlowColors = [[35, 181, 184]];
+export const outFlowColors = [[166, 3, 3]];
 
 // migrate out
-const sourceColor = [166, 3, 3];
+const SOURCE_COLOR = [166, 3, 3];
 // migrate in
-const targetColor = [35, 181, 184];
+const TARGET_COLOR = [35, 181, 184];
 
 export default class DeckGLOverlay extends Component {
-
   static get defaultViewport() {
     return {
       longitude: -100,
@@ -152,8 +146,8 @@ export default class DeckGLOverlay extends Component {
         pickable: false,
         // only show source points when brushing
         radiusScale: startBrushing ? 3000 : 0,
-        getColor: d => (d.gain > 0 ? targetColor : sourceColor),
-        getTargetPosition: d => [d[0], d[1], 0]
+        getColor: d => (d.gain > 0 ? TARGET_COLOR : SOURCE_COLOR),
+        getTargetPosition: d => [d.position[0], d.position[1], 0]
       }),
       new ScatterplotBrushingLayer({
         id: 'targets-ring',
@@ -166,7 +160,7 @@ export default class DeckGLOverlay extends Component {
         enableBrushing: startBrushing,
         // only show rings when brushing
         radiusScale: startBrushing ? 4000 : 0,
-        getColor: d => (d.net > 0 ? targetColor : sourceColor)
+        getColor: d => (d.net > 0 ? TARGET_COLOR : SOURCE_COLOR)
       }),
       new ScatterplotBrushingLayer({
         id: 'targets',
@@ -178,7 +172,7 @@ export default class DeckGLOverlay extends Component {
         pickable: true,
         radiusScale: 3000,
         onHover: this.props.onHover,
-        getColor: d => (d.net > 0 ? targetColor : sourceColor)
+        getColor: d => (d.net > 0 ? TARGET_COLOR : SOURCE_COLOR)
       }),
       new ArcBrushingLayer({
         id: 'arc',
@@ -190,8 +184,8 @@ export default class DeckGLOverlay extends Component {
         mousePosition,
         getSourcePosition: d => d.source,
         getTargetPosition: d => d.target,
-        getSourceColor: d => sourceColor,
-        getTargetColor: d => targetColor
+        getSourceColor: d => SOURCE_COLOR,
+        getTargetColor: d => TARGET_COLOR
       })
     ];
 
