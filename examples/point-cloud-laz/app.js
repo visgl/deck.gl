@@ -176,7 +176,6 @@ class Example extends PureComponent {
           viewport={glViewport}
           layers={[this._renderLazPointCloudLayer()]}
           onWebGLInitialized={this._onInitialized}
-          initWebGLParameters
         />
       </OrbitController>
     );

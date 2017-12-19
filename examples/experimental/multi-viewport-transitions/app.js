@@ -329,7 +329,6 @@ class Root extends Component {
             height={viewportProps.height}
             viewports={viewports}
             layers={this._renderLayers()}
-            initWebGLParameters
           >
             <StaticMap
               viewportId="3rd-person"

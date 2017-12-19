@@ -21,7 +21,16 @@ For Earlier Beta Releases see below
 
 ## Beta Releases
 
-### deck.gl v4.2 Beta Releases
+### deck.gl v5.0 Beta Releases
+
+#### [5.0.0-beta.1] - Dec 18
+- Improve perf of experimental SolidPolygonLayer (#1224)
+- Fix polygon normals in meter offset mode (#1244)
+- Remove deprecated API (#1240)
+- Remove old Coordinate system props. (#1242)
+- Add SolidPolygonLayer to experimental layers (#1233)
+- Fix the normal direction of the hexagon layer and additional transform in the lighting module associated with it (#1039)
+- Fix blending parameter (#1241)
 
 #### [4.2.0-alpha.31] - Dec 14
 - API Audit: remove initWebGLParameters and move pure-js example  (#1235)

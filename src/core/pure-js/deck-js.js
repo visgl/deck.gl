@@ -43,7 +43,6 @@ const propTypes = {
   glOptions: PropTypes.object,
   gl: PropTypes.object,
   pickingRadius: PropTypes.number,
-  initWebGLParameters: PropTypes.bool,
   onWebGLInitialized: PropTypes.func,
   onBeforeRender: PropTypes.func,
   onAfterRender: PropTypes.func,
@@ -63,7 +62,6 @@ const defaultProps = {
   glOptions: {},
   gl: null,
   effects: [],
-  initWebGLParameters: false, // Will be set to true in next major release
   onWebGLInitialized: noop,
   onBeforeRender: noop,
   onAfterRender: noop,

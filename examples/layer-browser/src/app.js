@@ -297,7 +297,6 @@ class App extends PureComponent {
             onLayerHover={this._onHover}
             onLayerClick={this._onClick}
 
-            initWebGLParameters
             useDevicePixels={useDevicePixels}
             debug={false}
             drawPickingColors={drawPickingColors}

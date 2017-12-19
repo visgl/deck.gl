@@ -118,7 +118,6 @@ class Example extends PureComponent {
           height={height}
           viewport={glViewport}
           layers={[this._renderPointCloudLayer()]}
-          initWebGLParameters
         />
       </OrbitController>
     );
