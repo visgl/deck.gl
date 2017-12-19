@@ -15,8 +15,11 @@ export default class OrbitController extends PureComponent {
   }
 
   componentDidMount() {
-    const {eventCanvas} = this.refs;
-    this.controller = new OrbitControllerJS(Object.assign({}, this.props, {canvas: eventCanvas}));
+    this.controller = new OrbitControllerJS(Object.assign(
+      {},
+      this.props,
+      {canvas: this.eventCanvas})
+    );
   }
 
   componentWillUpdate(nextProps) {
@@ -39,7 +42,7 @@ export default class OrbitController extends PureComponent {
     return (
       createElement('div', {
         key: 'map-controls',
-        ref: 'eventCanvas',
+        ref: c => (this.eventCanvas = c),
         style: eventCanvasStyle
       },
         this.props.children

@@ -43,7 +43,7 @@ class Root extends Component {
     // performace monitoring panel
     this._stats = new Stats();
     this._stats.showPanel(0);
-    this.refs.fps.appendChild(this._stats.dom);
+    this.fps.appendChild(this._stats.dom);
 
     const calcFPS = () => {
       this._stats.begin();
@@ -149,7 +149,7 @@ class Root extends Component {
             data={dataSlice}
           />
         </MapGL>
-        <div ref="fps" className="fps" />
+        <div ref={c => (this.fps = c)} className="fps" />
       </div>
     );
   }
