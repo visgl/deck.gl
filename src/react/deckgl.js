@@ -32,7 +32,7 @@ export default class DeckGL extends React.Component {
   }
 
   componentDidMount() {
-    this.deck = new DeckGLJS(Object.assign({}, this.props, {canvas: this.refs.overlay}));
+    this.deck = new DeckGLJS(Object.assign({}, this.props, {canvas: this.overlay}));
   }
 
   componentWillReceiveProps(nextProps) {
@@ -124,7 +124,7 @@ export default class DeckGL extends React.Component {
     // Render deck.gl as last child
     const {id, width, height, style} = this.props;
     const deck = createElement('canvas', {
-      ref: 'overlay',
+      ref: c => (this.overlay = c),
       key: 'overlay',
       id,
       style: Object.assign({}, style, {position: 'absolute', left: 0, top: 0, width, height})

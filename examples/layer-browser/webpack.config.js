@@ -33,7 +33,7 @@ const CONFIG = {
         options: {
           objectAssign: 'Object.assign', // Note: may need polyfill on old browsers
           transforms: {
-            modules: false,      // Let Webpack take care of import/exports
+            modules: false, // Let Webpack take care of import/exports
             dangerousForOf: true // Use for/of in spite of buble's limitations
           }
         }

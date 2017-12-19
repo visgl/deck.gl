@@ -200,7 +200,7 @@ export default class AttributeManager {
     this._add(attributes, updaters);
   }
 
- /**
+  /**
    * Removes attributes
    * Takes an array of attribute names and delete them from
    * the attribute map if they exists
@@ -402,7 +402,7 @@ export default class AttributeManager {
         {
           // Ensure that fields are present before Object.seal()
           target: undefined,
-          userData: {}        // Reserved for application
+          userData: {} // Reserved for application
         },
         // Metadata
         attribute,

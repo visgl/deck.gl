@@ -11,8 +11,8 @@
     "deck.gl": "^4.1.0-beta.6",
     "immutable": "^3.8.1",
     "luma.gl": "^4.0.1",
-    "react": "^15.4.1",
-    "react-dom": "^15.4.1"
+    "react": "^16.2.0",
+    "react-dom": "^16.2.0"
   },
   "devDependencies": {
     "buble-loader": "^0.4.0",

@@ -70,7 +70,7 @@ class Root extends Component {
           iconAtlas="data/location-icon-atlas.png"
           iconMapping={iconMapping}
           showCluster={true}
-          />
+        />
       </MapGL>
     );
   }

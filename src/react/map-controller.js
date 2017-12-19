@@ -9,8 +9,11 @@ export default class MapController extends PureComponent {
   }
 
   componentDidMount() {
-    const {eventCanvas} = this.refs;
-    this.controller = new MapControllerJS(Object.assign({}, this.props, {canvas: eventCanvas}));
+    this.controller = new MapControllerJS(Object.assign(
+      {},
+      this.props,
+      {canvas: this.eventCanvas})
+    );
   }
 
   componentWillUpdate(nextProps) {
@@ -33,10 +36,10 @@ export default class MapController extends PureComponent {
     return (
       createElement('div', {
         key: 'map-controls',
-        ref: 'eventCanvas',
+        ref: c => (this.eventCanvas = c),
         style: eventCanvasStyle
       },
-        this.props.children
+      this.props.children
       )
     );
   }

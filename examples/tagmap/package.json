@@ -10,8 +10,8 @@
     "d3-request": "^1.0.5",
     "d3-scale": "^1.0.6",
     "deck.gl": "^4.2.0-alpha.15",
-    "react": "^15.4.1",
-    "react-dom": "^15.4.1",
+    "react": "^16.2.0",
+    "react-dom": "^16.2.0",
     "react-map-gl": "^3.0.0",
     "stats.js": "^0.17.0",
     "tagmap.js": "^1.1.0"

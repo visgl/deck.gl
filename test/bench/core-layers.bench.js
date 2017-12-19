@@ -153,5 +153,5 @@ export default function coreLayersBench(suite) {
       return new PolygonLayer({data: data.choropleths.features});
     })
 
-    ;
+  ;
 }

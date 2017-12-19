@@ -107,14 +107,12 @@ export default class ViewportController extends PureComponent {
     super(props);
 
     this.state = {
-      isDragging: false      // Whether the cursor is down
+      isDragging: false // Whether the cursor is down
     };
   }
 
   componentDidMount() {
-    const {eventCanvas} = this.refs;
-
-    this._eventManager = new EventManager(eventCanvas);
+    this._eventManager = new EventManager(this.eventCanvas);
 
     // If props.controls is not provided, fallback to default MapControls instance
     // Cannot use defaultProps here because it needs to be per map instance
@@ -166,10 +164,10 @@ export default class ViewportController extends PureComponent {
     return (
       createElement('div', {
         key: 'map-controls',
-        ref: 'eventCanvas',
+        ref: c => (this.eventCanvas = c),
         style: eventCanvasStyle
       },
-        this.props.children
+      this.props.children
       )
     );
   }

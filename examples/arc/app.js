@@ -77,7 +77,7 @@ class Root extends Component {
           onHover={this._onHover.bind(this)}
           onClick={this._onClick.bind(this)}
           strokeWidth={2}
-          />
+        />
       </MapGL>
     );
   }

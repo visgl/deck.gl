@@ -1,4 +1,4 @@
-  // Note: This file will either be moved back to deck.gl or reformatted to web-monorepo standards
+// Note: This file will either be moved back to deck.gl or reformatted to web-monorepo standards
 // Disabling lint temporarily to facilitate copying code in and out of this repo
 /* eslint-disable */
 

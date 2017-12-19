@@ -45,8 +45,8 @@ export default class ColorPalettePicker extends PureComponent {
             onChange={() => onChange(colors.map(getColorArray))}/>
         </div>
         {colors.map(color =>
-          <div className="block" key={color}
-               style={{background: color, width}}/>)}
+          (<div className="block" key={color}
+            style={{background: color, width}}/>))}
       </div>
     );
   }

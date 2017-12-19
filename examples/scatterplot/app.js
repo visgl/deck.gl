@@ -65,7 +65,7 @@ class Root extends Component {
           maleColor={MALE_COLOR}
           femaleColor={FEMALE_COLOR}
           radius={30}
-          />
+        />
       </MapGL>
     );
   }

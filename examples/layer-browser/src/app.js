@@ -15,7 +15,7 @@ const {
   ReflectionEffect
 } = experimental;
 
- // deck.gl react components
+// deck.gl react components
 import DeckGL from 'deck.gl';
 const {ViewportController} = experimental;
 
@@ -24,7 +24,7 @@ import ReactDOM from 'react-dom';
 import autobind from 'react-autobind';
 
 import {StaticMap} from 'react-map-gl';
-import {FPSStats} from 'react-stats';
+import FPSStats from 'react-stats-zavatta';
 
 import {Matrix4} from 'math.gl';
 
@@ -296,12 +296,11 @@ class App extends PureComponent {
             pickingRadius={pickingRadius}
             onLayerHover={this._onHover}
             onLayerClick={this._onClick}
-
             useDevicePixels={useDevicePixels}
             debug={false}
             drawPickingColors={drawPickingColors}
           >
-            <FPSStats isActive/>
+            <FPSStats isActive />
 
             <StaticMap
               viewportId="basemap"

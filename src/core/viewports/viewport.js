@@ -80,7 +80,7 @@ export default class Viewport {
 
       // Perspective projection matrix parameters, used if projectionMatrix not supplied
       fovy = 75,
-      near = 0.1,  // Distance of near clipping plane
+      near = 0.1, // Distance of near clipping plane
       far = 1000, // Distance of far clipping plane
 
       // Anchor: lng lat zoom will make this viewport work with geospatial coordinate systems
@@ -189,7 +189,7 @@ export default class Viewport {
       viewport.height === this.height &&
       equals(viewport.projectionMatrix, this.projectionMatrix) &&
       equals(viewport.viewMatrix, this.viewMatrix);
-      // TODO - check distance scales?
+    // TODO - check distance scales?
   }
 
   /**

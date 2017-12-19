@@ -39,5 +39,5 @@ export default function utilsBench(suite) {
     .add('direct access#Array', () => {
       return POSITION[0];
     })
-    ;
+  ;
 }

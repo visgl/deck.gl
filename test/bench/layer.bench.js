@@ -40,5 +40,5 @@ export default function layerBench(suite) {
       }
       testLayer.encodePickingColor(testIdx);
     })
-    ;
+  ;
 }

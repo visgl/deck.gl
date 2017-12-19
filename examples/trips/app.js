@@ -93,7 +93,7 @@ class Root extends Component {
           trips={trips}
           trailLength={180}
           time={time}
-          />
+        />
       </MapGL>
     );
   }

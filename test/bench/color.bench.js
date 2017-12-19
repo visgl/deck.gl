@@ -57,5 +57,5 @@ export default function benchColor(bench) {
       () => new Uint8ClampedArray(4),
       target => parseColor(COLOR_STRING, target)
     )
-    ;
+  ;
 }
