@@ -12,7 +12,7 @@ import {GL} from 'luma.gl';
 import dataSamples from '../immutable-data-samples';
 
 const LIGHT_SETTINGS = {
-  lightsPosition: [-122.45, 37.66, 8000, -122.0, 38.00, 8000],
+  lightsPosition: [-122.45, 37.66, 8000, -122.0, 38.0, 8000],
   ambientRatio: 0.3,
   diffuseRatio: 0.6,
   specularRatio: 0.4,
@@ -81,15 +81,13 @@ const PathMarkerExample = {
   }
 };
 
-const PathMarkerExampleMeterData = new Array(10).fill(true).map(
-  f => ({
-    path: [
-      [Math.random() * 9000, Math.random() * 9000],
-      [Math.random() * 9000, Math.random() * 9000]
-    ],
-    direction: {forward: Math.random() >= 0.5, backward: Math.random() >= 0.5}
-  })
-);
+const PathMarkerExampleMeterData = new Array(10).fill(true).map(f => ({
+  path: [
+    [Math.random() * 9000, Math.random() * 9000],
+    [Math.random() * 9000, Math.random() * 9000]
+  ],
+  direction: {forward: Math.random() >= 0.5, backward: Math.random() >= 0.5}
+}));
 const PathMarkerExampleMeter = {
   layer: PathMarkerLayer,
   getData: () => PathMarkerExampleMeterData,
@@ -150,11 +148,11 @@ const TextLayerExample = {
 /* eslint-disable quote-props */
 export default {
   'Experimental Layers': {
-    'MeshLayer': MeshLayerExample,
-    'PathOutlineLayer': PathOutlineExample,
-    'PathMarkerLayer': PathMarkerExample,
+    MeshLayer: MeshLayerExample,
+    PathOutlineLayer: PathOutlineExample,
+    PathMarkerLayer: PathMarkerExample,
     'PathMarkerLayer (Meter)': PathMarkerExampleMeter,
     'New SolidPolygonLayer': SolidPolygonLayerExample,
-    'TextLayer': TextLayerExample
+    TextLayer: TextLayerExample
   }
 };

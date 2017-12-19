@@ -30,11 +30,7 @@
  * @param {Array} result=[] - Optional array to push value into
  * @return {Array} Returns the new flattened array (new array or `result` if provided)
  */
-export function flatten(array, {
-  filter = () => true,
-  map = x => x,
-  result = []
-} = {}) {
+export function flatten(array, {filter = () => true, map = x => x, result = []} = {}) {
   // Wrap single object in array
   if (!Array.isArray(array)) {
     return filter(array) ? [map(array)] : [];
@@ -80,7 +76,8 @@ export function flattenVertices(nestedArray, {result = [], dimensions = 3} = {})
     if (Array.isArray(value) || ArrayBuffer.isView(value)) {
       flattenVertices(value, {result, dimensions});
     } else {
-      if (vertexLength < dimensions) { // eslint-disable-line
+      // eslint-disable-next-line
+      if (vertexLength < dimensions) {
         result.push(value);
         vertexLength++;
       }

@@ -4,12 +4,7 @@ import {StaticMap} from 'react-map-gl';
 import {experimental} from 'deck.gl';
 import ControlPanel from './control-panel';
 
-const {
-  ViewportFlyToInterpolator,
-  TRANSITION_EVENTS,
-  ViewportController,
-  MapState
-} = experimental;
+const {ViewportFlyToInterpolator, TRANSITION_EVENTS, ViewportController, MapState} = experimental;
 
 const token = process.env.MapboxAccessToken; // eslint-disable-line
 const interruptionStyles = [
@@ -71,7 +66,6 @@ export default class App extends Component {
   }
 
   _easeTo({longitude, latitude}) {
-
     this.setState({
       viewport: {...this.state.viewport, longitude, latitude, zoom: 11, pitch: 0, bearing: 0},
       transitionDuration: 8000,
@@ -100,20 +94,23 @@ export default class App extends Component {
         onViewportChange={this._onViewportChange.bind(this)}
         transitionInterpolator={new ViewportFlyToInterpolator()}
         transitionDuration={transitionDuration}
-        transitionInterruption={this._interruptionStyle}>
+        transitionInterruption={this._interruptionStyle}
+      >
         <StaticMap
           {...viewport}
           {...settings}
           mapStyle="mapbox://styles/mapbox/dark-v9"
           onViewportChange={this._onViewportChange}
           dragToRotate={false}
-          mapboxApiAccessToken={token} />
-        <ControlPanel containerComponent={this.props.containerComponent}
+          mapboxApiAccessToken={token}
+        />
+        <ControlPanel
+          containerComponent={this.props.containerComponent}
           onViewportChange={this._easeTo.bind(this)}
           interruptionStyles={interruptionStyles}
-          onStyleChange={this._onStyleChange.bind(this)} />
+          onStyleChange={this._onStyleChange.bind(this)}
+        />
       </ViewportController>
     );
   }
-
 }

@@ -34,9 +34,14 @@ export function pointToHexbin({data, radius, getPosition}, viewport) {
   const radiusInPixel = getRadiusInPixel(radius, viewport);
 
   // add world space coordinates to points
-  const screenPoints = data.map(pt => Object.assign({
-    screenCoord: viewport.projectFlat(getPosition(pt))
-  }, pt));
+  const screenPoints = data.map(pt =>
+    Object.assign(
+      {
+        screenCoord: viewport.projectFlat(getPosition(pt))
+      },
+      pt
+    )
+  );
 
   const newHexbin = hexbin()
     .radius(radiusInPixel)
@@ -62,7 +67,6 @@ export function pointToHexbin({data, radius, getPosition}, viewport) {
  * @return {Number} radius in mercator world spcae coordinates
  */
 export function getRadiusInPixel(radius, viewport) {
-
   const {pixelsPerMeter} = viewport.getDistanceScales();
 
   // x, y distance should be the same

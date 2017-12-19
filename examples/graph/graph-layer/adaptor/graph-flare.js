@@ -42,10 +42,14 @@ export default class GraphAdaptor {
 
     // count links per node for force-directed graph layout
     this.links.forEach(l => {
-      l.sourceCount = this.links.reduce((count, ll) =>
-        (ll.source === l.source || ll.target === l.source) ? count + 1 : count, 0);
-      l.targetCount = this.links.reduce((count, ll) =>
-        (ll.source === l.target || ll.target === l.target) ? count + 1 : count, 0);
+      l.sourceCount = this.links.reduce(
+        (count, ll) => (ll.source === l.source || ll.target === l.source ? count + 1 : count),
+        0
+      );
+      l.targetCount = this.links.reduce(
+        (count, ll) => (ll.source === l.target || ll.target === l.target ? count + 1 : count),
+        0
+      );
     });
   }
 

@@ -21,13 +21,11 @@
 // Shallow compare
 /* eslint-disable complexity */
 export function shallowEqual(a, b, {ignore = {}} = {}) {
-
   if (a === b) {
     return true;
   }
 
-  if (typeof a !== 'object' || a === null ||
-    typeof b !== 'object' || b === null) {
+  if (typeof a !== 'object' || a === null || typeof b !== 'object' || b === null) {
     return false;
   }
 
@@ -41,7 +39,7 @@ export function shallowEqual(a, b, {ignore = {}} = {}) {
     }
   }
   for (const key in b) {
-    if (!(key in ignore) && (!(key in a))) {
+    if (!(key in ignore) && !(key in a)) {
       return false;
     }
   }

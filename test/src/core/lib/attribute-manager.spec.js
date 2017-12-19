@@ -40,8 +40,10 @@ const fixture = {
 
 test('AttributeManager imports', t => {
   t.equals(typeof AttributeManager, 'function', 'AttributeManager import successful');
-  t.ok(AttributeManager.setDefaultLogFunctions,
-    'AttributeManager.setDefaultLogFunctions available');
+  t.ok(
+    AttributeManager.setDefaultLogFunctions,
+    'AttributeManager.setDefaultLogFunctions available'
+  );
   t.end();
 });
 
@@ -66,11 +68,15 @@ test('AttributeManager.add', t => {
   );
 
   attributeManager.add({positions: {size: 2, accessor: 'getPosition', update}});
-  t.ok(attributeManager.getAttributes()['positions'],
-    'AttributeManager.add - add attribute successful');
-  t.deepEquals(attributeManager.updateTriggers,
+  t.ok(
+    attributeManager.getAttributes()['positions'],
+    'AttributeManager.add - add attribute successful'
+  );
+  t.deepEquals(
+    attributeManager.updateTriggers,
     {positions: ['positions'], getPosition: ['positions']},
-    'AttributeManager.add - build update triggers mapping');
+    'AttributeManager.add - build update triggers mapping'
+  );
   t.end();
 });
 
@@ -100,8 +106,7 @@ test('AttributeManager.update', t => {
 
   attribute = attributeManager.getAttributes()['positions'];
   t.ok(ArrayBuffer.isView(attribute.value), 'attribute has typed array');
-  t.equals(attribute.value[1], 2,
-    'Second update, attribute value was not changed');
+  t.equals(attribute.value[1], 2, 'Second update, attribute value was not changed');
 
   // Third update, with invalidation, should update
   attributeManager.invalidateAll();
@@ -112,8 +117,7 @@ test('AttributeManager.update', t => {
 
   attribute = attributeManager.getAttributes()['positions'];
   t.ok(ArrayBuffer.isView(attribute.value), 'attribute has typed array');
-  t.equals(attribute.value[1], 1,
-    'Third update, attribute value was updated');
+  t.equals(attribute.value[1], 1, 'Third update, attribute value was updated');
 
   t.end();
 });
@@ -158,13 +162,18 @@ test('AttributeManager.update - external buffers', t => {
   attribute = attributeManager.getAttributes()['colors'];
   t.ok(ArrayBuffer.isView(attribute.value), 'colors attribute has typed array');
 
-  t.throws(() => attributeManager.update({
-    numInstances: 1,
-    buffers: {
-      positions: new Float32Array([0, 0]),
-      colors: new Float32Array([0, 0, 0])
-    }
-  }), /Uint8ClampedArray/, 'should throw error for incorrect buffer type');
+  t.throws(
+    () =>
+      attributeManager.update({
+        numInstances: 1,
+        buffers: {
+          positions: new Float32Array([0, 0]),
+          colors: new Float32Array([0, 0, 0])
+        }
+      }),
+    /Uint8ClampedArray/,
+    'should throw error for incorrect buffer type'
+  );
 
   t.end();
 });
@@ -179,12 +188,13 @@ test('AttributeManager.invalidate', t => {
   });
 
   attributeManager.invalidate('positions');
-  t.ok(attributeManager.getAttributes()['positions'].needsUpdate,
-    'invalidated attribute by name');
+  t.ok(attributeManager.getAttributes()['positions'].needsUpdate, 'invalidated attribute by name');
 
   attributeManager.invalidate('getColor');
-  t.ok(attributeManager.getAttributes()['colors'].needsUpdate,
-    'invalidated attribute by accessor name');
+  t.ok(
+    attributeManager.getAttributes()['colors'].needsUpdate,
+    'invalidated attribute by accessor name'
+  );
 
   t.end();
 });

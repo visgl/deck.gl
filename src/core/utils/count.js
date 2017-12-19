@@ -52,11 +52,7 @@ export function count(container) {
 
   // Note that getting the count of an object is O(N)
   if (isPlainObject(container)) {
-    let counter = 0;
-    for (const key in container) { // eslint-disable-line
-      counter++;
-    }
-    return counter;
+    return Object.keys(container).length;
   }
 
   throw new Error(ERR_NOT_CONTAINER);
@@ -79,4 +75,3 @@ function isPlainObject(value) {
 function isObject(value) {
   return value !== null && typeof value === 'object';
 }
-

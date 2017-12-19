@@ -10,12 +10,12 @@ import {json as requestJson} from 'd3-request';
 const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
 
 // Source data GeoJSON
-const DATA_URL = 'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/geojson/vancouver-blocks.json'; // eslint-disable-line
+const DATA_URL =
+  'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/geojson/vancouver-blocks.json'; // eslint-disable-line
 
 const colorScale = r => [r * 255, 140, 200 * (1 - r)];
 
 class Root extends Component {
-
   constructor(props) {
     super(props);
     this.state = {
@@ -59,10 +59,9 @@ class Root extends Component {
       <MapGL
         {...viewport}
         onViewportChange={this._onViewportChange.bind(this)}
-        mapboxApiAccessToken={MAPBOX_TOKEN}>
-        <DeckGLOverlay viewport={viewport}
-          data={data}
-          colorScale={colorScale} />
+        mapboxApiAccessToken={MAPBOX_TOKEN}
+      >
+        <DeckGLOverlay viewport={viewport} data={data} colorScale={colorScale} />
       </MapGL>
     );
   }

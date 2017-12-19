@@ -36,10 +36,7 @@ function pointGrid(N, bbox) {
 
   for (let x = 0; x < sizeX; x++) {
     for (let y = 0; y < sizeY; y++) {
-      points[index] = [
-        bbox[0] + stepX * x,
-        bbox[1] + stepY * y
-      ];
+      points[index] = [bbox[0] + stepX * x, bbox[1] + stepY * y];
       index++;
     }
   }
@@ -50,7 +47,8 @@ function pointGrid(N, bbox) {
 function lngLatToMeterOffset(points, center) {
   const viewport = new WebMercatorViewport({longitude: center[0], latitude: center[1], zoom: 10});
   return points.map(point =>
-    viewport.lngLatDeltaToMeters([point[0] - center[0], point[1] - center[1]]));
+    viewport.lngLatDeltaToMeters([point[0] - center[0], point[1] - center[1]])
+  );
 }
 
 let _points100K = null;

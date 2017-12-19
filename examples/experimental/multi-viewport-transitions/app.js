@@ -59,9 +59,14 @@ const DEFAULT_VIEWPORT_PROPS = {
   up: [0, 0, 1] // Defines up direction, default positive y axis
 };
 
-const transitionInterpolator = new LinearInterpolator(
-  ['longitude', 'latitude', 'zoom', 'bearing', 'pitch', 'position']
-);
+const transitionInterpolator = new LinearInterpolator([
+  'longitude',
+  'latitude',
+  'zoom',
+  'bearing',
+  'pitch',
+  'position'
+]);
 
 class Root extends Component {
   constructor(props) {
@@ -183,7 +188,7 @@ class Root extends Component {
             {'AnimateViewport'}
           </button>
 
-          <div className="input-group" >
+          <div className="input-group">
             <label htmlFor={'animatePosition'} style={{color: 'white'}}>
               <span>{'animatePosition'}</span>
             </label>
@@ -191,10 +196,11 @@ class Root extends Component {
               type="checkbox"
               id={'animatePosition'}
               checked={this.state.animatePosition}
-              onChange={ e => this._onValueChange('animatePosition', e.target.checked) }/>
+              onChange={e => this._onValueChange('animatePosition', e.target.checked)}
+            />
           </div>
 
-          <div className="input-group" >
+          <div className="input-group">
             <label htmlFor={'animateBearing'} style={{color: 'white'}}>
               <span>{'animateBearing'}</span>
             </label>
@@ -202,7 +208,8 @@ class Root extends Component {
               type="checkbox"
               id={'animateBearing'}
               checked={this.state.animateBearing}
-              onChange={ e => this._onValueChange('animateBearing', e.target.checked) }/>
+              onChange={e => this._onValueChange('animateBearing', e.target.checked)}
+            />
           </div>
 
           <div style={{color: 'white'}}>

@@ -2,7 +2,10 @@ import {Layer} from 'deck.gl';
 import {GL, Model, Geometry, loadTextures, Texture2D} from 'luma.gl';
 
 import {
-  ELEVATION_DATA_IMAGE, ELEVATION_DATA_BOUNDS, ELEVATION_RANGE, LIGHT_UNIFORMS
+  ELEVATION_DATA_IMAGE,
+  ELEVATION_DATA_BOUNDS,
+  ELEVATION_RANGE,
+  LIGHT_UNIFORMS
 } from '../../defaults';
 
 import vertex from './wind-layer-vertex';
@@ -17,7 +20,6 @@ const defaultProps = {
 };
 
 export default class WindLayer extends Layer {
-
   initializeState() {
     const {gl} = this.context;
     const {dataTextureSize, bbox} = this.props;
@@ -44,7 +46,11 @@ export default class WindLayer extends Layer {
     const textureTo = this.createTexture(gl, {});
 
     this.setState({
-      model, textureFrom, textureTo, width, height
+      model,
+      textureFrom,
+      textureTo,
+      width,
+      height
     });
   }
 
@@ -77,8 +83,12 @@ export default class WindLayer extends Layer {
     const {
       model,
       elevationTexture,
-      textureFrom, textureTo, width, height,
-      delta, timeInterval
+      textureFrom,
+      textureTo,
+      width,
+      height,
+      delta,
+      timeInterval
     } = this.state;
 
     const {bbox, dataBounds, dataTextureArray} = this.props;
@@ -97,7 +107,7 @@ export default class WindLayer extends Layer {
     });
 
     textureTo.setImageData({
-      pixels: dataTextureArray[timeInterval | 0 + 1],
+      pixels: dataTextureArray[timeInterval | (0 + 1)],
       width,
       height,
       format: gl.RGBA32F,
@@ -138,8 +148,8 @@ export default class WindLayer extends Layer {
     this.state.numInstances = nx * ny;
 
     const positions = this.calculatePositions({nx, ny, bbox});
-    const vertices = new Float32Array([0.3, 0, 250, 0, 0.10, 0, 1, 0, 0, 0, -0.10, 0, 0, 0.10, 0]);
-    const normals = new Float32Array([0, 0, 1, 0, 0.10, 0, 1, 0, 0, 0, -0.10, 0, 0, 0.10, 0]);
+    const vertices = new Float32Array([0.3, 0, 250, 0, 0.1, 0, 1, 0, 0, 0, -0.1, 0, 0, 0.1, 0]);
+    const normals = new Float32Array([0, 0, 1, 0, 0.1, 0, 1, 0, 0, 0, -0.1, 0, 0, 0.1, 0]);
 
     const geometry = new Geometry({
       id: this.props.id,
@@ -164,19 +174,21 @@ export default class WindLayer extends Layer {
   }
 
   createTexture(gl, opt) {
-
-    const textureOptions = Object.assign({
-      format: gl.RGBA32F,
-      dataFormat: gl.RGBA,
-      type: gl.FLOAT,
-      parameters: {
-        [gl.TEXTURE_MAG_FILTER]: gl.NEAREST,
-        [gl.TEXTURE_MIN_FILTER]: gl.NEAREST,
-        [gl.TEXTURE_WRAP_S]: gl.CLAMP_TO_EDGE,
-        [gl.TEXTURE_WRAP_T]: gl.CLAMP_TO_EDGE
+    const textureOptions = Object.assign(
+      {
+        format: gl.RGBA32F,
+        dataFormat: gl.RGBA,
+        type: gl.FLOAT,
+        parameters: {
+          [gl.TEXTURE_MAG_FILTER]: gl.NEAREST,
+          [gl.TEXTURE_MIN_FILTER]: gl.NEAREST,
+          [gl.TEXTURE_WRAP_S]: gl.CLAMP_TO_EDGE,
+          [gl.TEXTURE_WRAP_T]: gl.CLAMP_TO_EDGE
+        },
+        pixelStore: {[gl.UNPACK_FLIP_Y_WEBGL]: true}
       },
-      pixelStore: {[gl.UNPACK_FLIP_Y_WEBGL]: true}
-    }, opt);
+      opt
+    );
 
     return new Texture2D(gl, textureOptions);
   }
@@ -193,7 +205,7 @@ export default class WindLayer extends Layer {
     for (let i = 0; i < nx; ++i) {
       for (let j = 0; j < ny; ++j) {
         const index = (i + j * nx) * 3;
-        positions[index + 0] = i * spanX + bbox.minLng + ((j % 2) ? spanX / 2 : 0);
+        positions[index + 0] = i * spanX + bbox.minLng + (j % 2 ? spanX / 2 : 0);
         positions[index + 1] = j * spanY + bbox.minLat;
         positions[index + 2] = 0;
       }

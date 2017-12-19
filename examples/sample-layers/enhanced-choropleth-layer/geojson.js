@@ -18,25 +18,23 @@ export function getGeojsonFeatures(geojson) {
 
   const type = geojson.type;
   switch (type) {
-  case 'Point':
-  case 'MultiPoint':
-  case 'LineString':
-  case 'MultiLineString':
-  case 'Polygon':
-  case 'MultiPolygon':
-  case 'GeometryCollection':
-    // Wrap the geometry object in a 'Feature' object and wrap in an array
-    return [
-      {type: 'Feature', properties: {}, geometry: geojson}
-    ];
-  case 'Feature':
-    // Wrap the feature in a 'Features' array
-    return [geojson];
-  case 'FeatureCollection':
-    // Just return the 'Features' array from the collection
-    return geojson.features;
-  default:
-    throw new Error('Unknown geojson type');
+    case 'Point':
+    case 'MultiPoint':
+    case 'LineString':
+    case 'MultiLineString':
+    case 'Polygon':
+    case 'MultiPolygon':
+    case 'GeometryCollection':
+      // Wrap the geometry object in a 'Feature' object and wrap in an array
+      return [{type: 'Feature', properties: {}, geometry: geojson}];
+    case 'Feature':
+      // Wrap the feature in a 'Features' array
+      return [geojson];
+    case 'FeatureCollection':
+      // Just return the 'Features' array from the collection
+      return geojson.features;
+    default:
+      throw new Error('Unknown geojson type');
   }
 }
 
@@ -57,22 +55,22 @@ export function featureToPolygons(feature) {
 
   let polygons;
   switch (type) {
-  case 'MultiPolygon':
-    polygons = coordinates;
-    break;
-  case 'Polygon':
-    polygons = [coordinates];
-    break;
-  case 'LineString':
-    // TODO - should lines really be handled in this switch?
-    polygons = [[coordinates]];
-    break;
-  case 'MultiLineString':
-    // TODO - should lines really be handled in this switch?
-    polygons = coordinates.map(coords => [coords]);
-    break;
-  default:
-    polygons = [];
+    case 'MultiPolygon':
+      polygons = coordinates;
+      break;
+    case 'Polygon':
+      polygons = [coordinates];
+      break;
+    case 'LineString':
+      // TODO - should lines really be handled in this switch?
+      polygons = [[coordinates]];
+      break;
+    case 'MultiLineString':
+      // TODO - should lines really be handled in this switch?
+      polygons = coordinates.map(coords => [coords]);
+      break;
+    default:
+      polygons = [];
   }
   return polygons;
 }
@@ -94,16 +92,8 @@ export function extractPolygons(data) {
     let choropleths = featureToPolygons(feature);
 
     /* eslint-disable max-nested-callbacks */
-    choropleths = choropleths.map(
-      choropleth => choropleth.map(
-        polygon => polygon.map(
-          coord => [
-            coord[0],
-            coord[1],
-            coord[2] || 0
-          ]
-        )
-      )
+    choropleths = choropleths.map(choropleth =>
+      choropleth.map(polygon => polygon.map(coord => [coord[0], coord[1], coord[2] || 0]))
     );
     /* eslint-enable max-nested-callbacks */
 
@@ -125,30 +115,28 @@ export function extractPolygons(data) {
 export function normalizeGeojson(geojson) {
   const type = geojson.type;
   switch (type) {
-  case 'Point':
-  case 'MultiPoint':
-  case 'LineString':
-  case 'MultiLineString':
-  case 'Polygon':
-  case 'MultiPolygon':
-  case 'GeometryCollection':
-    // Wrap the geometry object in a "Feature" and add the feature to a "FeatureCollection"
-    return {
-      type: 'FeatureCollection',
-      features: [
-        {type: 'Feature', properties: {}, geometry: geojson}
-      ]
-    };
-  case 'Feature':
-    // Add the feature to a "FeatureCollection"
-    return {
-      type: 'FeatureCollection',
-      features: [geojson]
-    };
-  case 'FeatureCollection':
-    // Just return the feature collection
-    return geojson;
-  default:
-    throw new Error('Unknown geojson type');
+    case 'Point':
+    case 'MultiPoint':
+    case 'LineString':
+    case 'MultiLineString':
+    case 'Polygon':
+    case 'MultiPolygon':
+    case 'GeometryCollection':
+      // Wrap the geometry object in a "Feature" and add the feature to a "FeatureCollection"
+      return {
+        type: 'FeatureCollection',
+        features: [{type: 'Feature', properties: {}, geometry: geojson}]
+      };
+    case 'Feature':
+      // Add the feature to a "FeatureCollection"
+      return {
+        type: 'FeatureCollection',
+        features: [geojson]
+      };
+    case 'FeatureCollection':
+      // Just return the feature collection
+      return geojson;
+    default:
+      throw new Error('Unknown geojson type');
   }
 }

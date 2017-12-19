@@ -36,8 +36,7 @@ export default class CompositeLayer extends Layer {
 
   // initializeState is usually not needed for composite layers
   // Provide empty definition to disable check for missing definition
-  initializeState() {
-  }
+  initializeState() {}
 
   // called to augment the info object that is bubbled up from a sublayer
   // override Layer.getPickingInfo() because decoding / setting uniform do
@@ -55,24 +54,41 @@ export default class CompositeLayer extends Layer {
   // Returns sub layer props for a specific sublayer
   getSubLayerProps(sublayerProps) {
     const {
-      opacity, pickable, visible,
-      parameters, getPolygonOffset,
-      highlightedObjectIndex, autoHighlight, highlightColor,
-      coordinateSystem, coordinateOrigin, modelMatrix
+      opacity,
+      pickable,
+      visible,
+      parameters,
+      getPolygonOffset,
+      highlightedObjectIndex,
+      autoHighlight,
+      highlightColor,
+      coordinateSystem,
+      coordinateOrigin,
+      modelMatrix
     } = this.props;
     const newProps = {
-      opacity, pickable, visible,
-      parameters, getPolygonOffset,
-      highlightedObjectIndex, autoHighlight, highlightColor,
-      coordinateSystem, coordinateOrigin, modelMatrix
+      opacity,
+      pickable,
+      visible,
+      parameters,
+      getPolygonOffset,
+      highlightedObjectIndex,
+      autoHighlight,
+      highlightColor,
+      coordinateSystem,
+      coordinateOrigin,
+      modelMatrix
     };
 
     if (sublayerProps) {
       Object.assign(newProps, sublayerProps, {
         id: `${this.props.id}-${sublayerProps.id}`,
-        updateTriggers: Object.assign({
-          all: this.props.updateTriggers.all
-        }, sublayerProps.updateTriggers)
+        updateTriggers: Object.assign(
+          {
+            all: this.props.updateTriggers.all
+          },
+          sublayerProps.updateTriggers
+        )
       });
     }
 

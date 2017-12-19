@@ -19,8 +19,10 @@
 // THE SOFTWARE.
 
 import test from 'tape-catch';
-import {getGeojsonFeatures, separateGeojsonFeatures}
-  from 'deck.gl/core-layers/geojson-layer/geojson';
+import {
+  getGeojsonFeatures,
+  separateGeojsonFeatures
+} from 'deck.gl/core-layers/geojson-layer/geojson';
 import {toJS} from 'deck.gl/core/experimental/container';
 
 const GEOMETRY = {type: 'Point'};

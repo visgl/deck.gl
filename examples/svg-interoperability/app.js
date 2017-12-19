@@ -2,9 +2,7 @@
 /* eslint-disable no-console */
 import React, {PureComponent} from 'react';
 import {render} from 'react-dom';
-import DeckGL, {
-  ScatterplotLayer, OrthographicViewport, COORDINATE_SYSTEM
-} from 'deck.gl';
+import DeckGL, {ScatterplotLayer, OrthographicViewport, COORDINATE_SYSTEM} from 'deck.gl';
 
 const DEGREE_TO_RADIAN = Math.PI / 180;
 const NUM_POINTS = 2000;
@@ -58,17 +56,17 @@ class Root extends PureComponent {
     let nextViewMode;
 
     switch (this.state.viewMode) {
-    case VIEW_MODE.WEBGL:
-      nextViewMode = VIEW_MODE.SVG;
-      break;
-    case VIEW_MODE.SVG:
-      nextViewMode = VIEW_MODE.HYBRID;
-      break;
-    case VIEW_MODE.HYBRID:
-      nextViewMode = VIEW_MODE.WEBGL;
-      break;
-    default:
-      nextViewMode = VIEW_MODE.WEBGL;
+      case VIEW_MODE.WEBGL:
+        nextViewMode = VIEW_MODE.SVG;
+        break;
+      case VIEW_MODE.SVG:
+        nextViewMode = VIEW_MODE.HYBRID;
+        break;
+      case VIEW_MODE.HYBRID:
+        nextViewMode = VIEW_MODE.WEBGL;
+        break;
+      default:
+        nextViewMode = VIEW_MODE.WEBGL;
     }
 
     this.setState({viewMode: nextViewMode});
@@ -90,11 +88,17 @@ class Root extends PureComponent {
 
     return (
       <g transform={`translate(${size}, ${size})`}>
-        {this.points && this.points.length && this.points.map((p, i) => (
-          <circle key={i} r={2} fill="#08F"
-            cx={p.radius * Math.cos(p.theta * DEGREE_TO_RADIAN) * size}
-            cy={p.radius * Math.sin(p.theta * DEGREE_TO_RADIAN) * size}/>
-        ))}
+        {this.points &&
+          this.points.length &&
+          this.points.map((p, i) => (
+            <circle
+              key={i}
+              r={2}
+              fill="#08F"
+              cx={p.radius * Math.cos(p.theta * DEGREE_TO_RADIAN) * size}
+              cy={p.radius * Math.sin(p.theta * DEGREE_TO_RADIAN) * size}
+            />
+          ))}
       </g>
     );
   }
@@ -127,18 +131,28 @@ class Root extends PureComponent {
     const top = -Math.min(width, height) / 2;
     const glViewport = new OrthographicViewport({width, height, left, top});
 
-    return width && height && <div>
-      {(viewMode === VIEW_MODE.SVG || viewMode === VIEW_MODE.HYBRID) &&
-        <svg viewBox={`0 0 ${width} ${height}`}>
-          { this._renderSVGPoints() }
-        </svg>}
-      {(viewMode === VIEW_MODE.WEBGL || viewMode === VIEW_MODE.HYBRID) &&
-        <DeckGL width={width} height={height} viewport={glViewport}
-          style={{position: 'absolute', top: '0px', left: '0px'}}
-          layers={[this._renderScatterplotLayer()]}/>}
-      <button style={{position: 'absolute', top: '8px', left: '8px'}}
-        onClick={this._onClick}>switch</button>
-    </div>;
+    return (
+      width &&
+      height && (
+        <div>
+          {(viewMode === VIEW_MODE.SVG || viewMode === VIEW_MODE.HYBRID) && (
+            <svg viewBox={`0 0 ${width} ${height}`}>{this._renderSVGPoints()}</svg>
+          )}
+          {(viewMode === VIEW_MODE.WEBGL || viewMode === VIEW_MODE.HYBRID) && (
+            <DeckGL
+              width={width}
+              height={height}
+              viewport={glViewport}
+              style={{position: 'absolute', top: '0px', left: '0px'}}
+              layers={[this._renderScatterplotLayer()]}
+            />
+          )}
+          <button style={{position: 'absolute', top: '8px', left: '8px'}} onClick={this._onClick}>
+            switch
+          </button>
+        </div>
+      )
+    );
   }
 }
 

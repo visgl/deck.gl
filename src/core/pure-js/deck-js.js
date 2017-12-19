@@ -75,7 +75,6 @@ const defaultProps = {
 
 // TODO - should this class be joined with `LayerManager`?
 export default class DeckGLJS {
-
   constructor(props) {
     props = Object.assign({}, defaultProps, props);
 

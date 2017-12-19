@@ -7,7 +7,6 @@ const R_EARTH = 6378000;
  * @returns {object} - grid data and cell dimension
  */
 export function pointsToWorldGrid(points, cellSize) {
-
   // find the geometric center of sample points
   const allLat = points.map(p => p.COORDINATES[1]);
   const latMin = Math.min.apply(null, allLat);
@@ -35,10 +34,7 @@ export function pointsToWorldGrid(points, cellSize) {
     const lonIdx = parseInt(idxs[1], 10);
 
     accu.push({
-      position: [
-        -180 + gridOffset.lonOffset * lonIdx,
-        -90 + gridOffset.latOffset * latIdx
-      ],
+      position: [-180 + gridOffset.lonOffset * lonIdx, -90 + gridOffset.latOffset * latIdx],
       value: gridHash[key] / maxHeight
     });
 
@@ -68,7 +64,7 @@ export function _calculateGridLatLonOffset(cellSize, latitude) {
  * @return {number} - increment in latitude
  */
 export function calculateLatOffset(dy) {
-  return (dy / R_EARTH) * (180 / Math.PI);
+  return dy / R_EARTH * (180 / Math.PI);
 }
 
 /**
@@ -80,5 +76,5 @@ export function calculateLatOffset(dy) {
  * @return {number} - increment in longitude
  */
 export function calculateLonOffset(lat, dx) {
-  return (dx / R_EARTH) * (180 / Math.PI) / Math.cos(lat * Math.PI / 180);
+  return dx / R_EARTH * (180 / Math.PI) / Math.cos(lat * Math.PI / 180);
 }

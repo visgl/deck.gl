@@ -98,7 +98,7 @@ export const initLayerInSeer = layer => {
  * Log layer's properties to Seer
  */
 export const updateLayerInSeer = layer => {
-  if (!seer.isReady() || seer.throttle(`deck.gl:${layer.id}`, 1E3)) {
+  if (!seer.isReady() || seer.throttle(`deck.gl:${layer.id}`, 1e3)) {
     return;
   }
 
@@ -118,9 +118,7 @@ export const removeLayerInSeer = id => {
 };
 
 function logPayload(layer) {
-  const data = [
-    {path: 'objects.props', data: layer.props}
-  ];
+  const data = [{path: 'objects.props', data: layer.props}];
 
   const badges = [layer.constructor.layerName];
 

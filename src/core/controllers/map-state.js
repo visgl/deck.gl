@@ -22,48 +22,49 @@ function ensureFinite(value, fallbackValue) {
 }
 
 export default class MapState extends ViewState {
-
-  constructor({
-    /** Mapbox viewport properties */
-    /** The width of the viewport */
-    width,
-    /** The height of the viewport */
-    height,
-    /** The latitude at the center of the viewport */
-    latitude,
-    /** The longitude at the center of the viewport */
-    longitude,
-    /** The tile zoom level of the map. */
-    zoom,
-    /** The bearing of the viewport in degrees */
-    bearing,
-    /** The pitch of the viewport in degrees */
-    pitch,
-    /**
+  constructor(
+    {
+      /** Mapbox viewport properties */
+      /** The width of the viewport */
+      width,
+      /** The height of the viewport */
+      height,
+      /** The latitude at the center of the viewport */
+      latitude,
+      /** The longitude at the center of the viewport */
+      longitude,
+      /** The tile zoom level of the map. */
+      zoom,
+      /** The bearing of the viewport in degrees */
+      bearing,
+      /** The pitch of the viewport in degrees */
+      pitch,
+      /**
     * Specify the altitude of the viewport camera
     * Unit: map heights, default 1.5
     * Non-public API, see https://github.com/mapbox/mapbox-gl-js/issues/1137
     */
-    altitude,
+      altitude,
 
-    /** Viewport constraints */
-    maxZoom,
-    minZoom,
-    maxPitch,
-    minPitch,
+      /** Viewport constraints */
+      maxZoom,
+      minZoom,
+      maxPitch,
+      minPitch,
 
-    /** Interaction states, required to calculate change during transform */
-    /* The point on map being grabbed when the operation first started */
-    startPanLngLat,
-    /* Center of the zoom when the operation first started */
-    startZoomLngLat,
-    /** Bearing when current perspective rotate operation started */
-    startBearing,
-    /** Pitch when current perspective rotate operation started */
-    startPitch,
-    /** Zoom when current zoom operation started */
-    startZoom
-  } = {}) {
+      /** Interaction states, required to calculate change during transform */
+      /* The point on map being grabbed when the operation first started */
+      startPanLngLat,
+      /* Center of the zoom when the operation first started */
+      startZoomLngLat,
+      /** Bearing when current perspective rotate operation started */
+      startBearing,
+      /** Pitch when current perspective rotate operation started */
+      startPitch,
+      /** Zoom when current zoom operation started */
+      startZoom
+    } = {}
+  ) {
     assert(Number.isFinite(longitude), '`longitude` must be supplied');
     assert(Number.isFinite(latitude), '`latitude` must be supplied');
     assert(Number.isFinite(zoom), '`zoom` must be supplied');
@@ -119,8 +120,11 @@ export default class MapState extends ViewState {
     const startPanLngLat = this._interactiveState.startPanLngLat || this._unproject(startPos);
 
     // take the start lnglat and put it where the mouse is down.
-    assert(startPanLngLat, '`startPanLngLat` prop is required ' +
-      'for mouse pan behavior to calculate where to position the map.');
+    assert(
+      startPanLngLat,
+      '`startPanLngLat` prop is required ' +
+        'for mouse pan behavior to calculate where to position the map.'
+    );
 
     const [longitude, latitude] = this._calculateNewLngLat({startPanLngLat, pos});
 
@@ -159,10 +163,8 @@ export default class MapState extends ViewState {
    *   change to pitch. -1 sets to minPitch and 1 sets to maxPitch.
    */
   rotate({deltaScaleX, deltaScaleY}) {
-    assert(deltaScaleX >= -1 && deltaScaleX <= 1,
-      '`deltaScaleX` must be a number between [-1, 1]');
-    assert(deltaScaleY >= -1 && deltaScaleY <= 1,
-      '`deltaScaleY` must be a number between [-1, 1]');
+    assert(deltaScaleX >= -1 && deltaScaleX <= 1, '`deltaScaleX` must be a number between [-1, 1]');
+    assert(deltaScaleY >= -1 && deltaScaleY <= 1, '`deltaScaleY` must be a number between [-1, 1]');
 
     let {startBearing, startPitch} = this._interactiveState;
 
@@ -220,8 +222,8 @@ export default class MapState extends ViewState {
     assert(scale > 0, '`scale` must be a positive number');
 
     // Make sure we zoom around the current mouse position rather than map center
-    const startZoomLngLat = this._interactiveState.startZoomLngLat ||
-      this._unproject(startPos) || this._unproject(pos);
+    const startZoomLngLat =
+      this._interactiveState.startZoomLngLat || this._unproject(startPos) || this._unproject(pos);
     let {startZoom} = this._interactiveState;
 
     if (!Number.isFinite(startZoom)) {
@@ -229,8 +231,11 @@ export default class MapState extends ViewState {
     }
 
     // take the start lnglat and put it where the mouse is down.
-    assert(startZoomLngLat, '`startZoomLngLat` prop is required ' +
-      'for zoom behavior to calculate where to position the map.');
+    assert(
+      startZoomLngLat,
+      '`startZoomLngLat` prop is required ' +
+        'for zoom behavior to calculate where to position the map.'
+    );
 
     const zoom = this._calculateNewZoom({scale, startZoom});
 

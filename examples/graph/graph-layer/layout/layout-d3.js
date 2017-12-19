@@ -20,19 +20,35 @@ export default class LayoutD3 {
     const {alphaOnDataChange, alphaOnDrag} = this.props;
     if (this._simulation && data) {
       // If new data are passed, update the simulation with the new data
-      this._simulation.nodes(data.nodes)
-        .force('link', forceLink(data.links).id(n => n.id)
-          .strength(this.props.linkStrength).distance(this.props.linkDistance))
+      this._simulation
+        .nodes(data.nodes)
+        .force(
+          'link',
+          forceLink(data.links)
+            .id(n => n.id)
+            .strength(this.props.linkStrength)
+            .distance(this.props.linkDistance)
+        )
         .alpha(alphaOnDataChange);
     } else if (!this._simulation) {
       if (data) {
         // Instantiate the simulation with the passed data
         const {nBodyStrength, nBodyDistanceMin, nBodyDistanceMax} = this.props;
         this._simulation = forceSimulation(data.nodes)
-          .force('link', forceLink(data.links).id(n => n.id)
-            .strength(this.props.linkStrength).distance(this.props.linkDistance))
-          .force('charge', forceManyBody().strength(nBodyStrength)
-            .distanceMin(nBodyDistanceMin).distanceMax(nBodyDistanceMax))
+          .force(
+            'link',
+            forceLink(data.links)
+              .id(n => n.id)
+              .strength(this.props.linkStrength)
+              .distance(this.props.linkDistance)
+          )
+          .force(
+            'charge',
+            forceManyBody()
+              .strength(nBodyStrength)
+              .distanceMin(nBodyDistanceMin)
+              .distanceMax(nBodyDistanceMax)
+          )
           .force('center', forceCenter())
           .stop();
       } else {

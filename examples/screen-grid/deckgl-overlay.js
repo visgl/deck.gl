@@ -3,7 +3,6 @@ import React, {Component} from 'react';
 import DeckGL, {ScreenGridLayer} from 'deck.gl';
 
 export default class DeckGLOverlay extends Component {
-
   static get defaultViewport() {
     return {
       longitude: -119.3,
@@ -30,8 +29,6 @@ export default class DeckGLOverlay extends Component {
       cellSizePixels: cellSize
     });
 
-    return (
-      <DeckGL {...viewport} layers={ [layer] } />
-    );
+    return <DeckGL {...viewport} layers={[layer]} />;
   }
 }

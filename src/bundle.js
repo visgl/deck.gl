@@ -28,4 +28,4 @@ import * as DeckGL from './index';
   if (typeof window !== 'undefined') {
     window.DeckGL = DeckGL;
   }
-}());
+})();

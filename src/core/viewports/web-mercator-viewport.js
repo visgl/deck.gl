@@ -60,11 +60,7 @@ export default class WebMercatorViewport extends Viewport {
       farZMultiplier = 10
     } = opts;
 
-    let {
-      width,
-      height,
-      altitude = 1.5
-    } = opts;
+    let {width, height, altitude = 1.5} = opts;
 
     // Silently allow apps to send in 0,0 to facilitate isomorphic render etc
     width = width || 1;
@@ -93,18 +89,21 @@ export default class WebMercatorViewport extends Viewport {
       altitude
     });
 
-    super(Object.assign({}, opts, {
-      // x, y, position, ...
-      // TODO / hack - prevent vertical offsets if not FirstPersonViewport
-      position: opts.position && [opts.position[0], opts.position[1], 0],
-      width, height,
-      viewMatrix: viewMatrixUncentered,
-      longitude,
-      latitude,
-      zoom,
-      projectionMatrix,
-      focalDistance: 1 // Viewport is already carefully set up to "focus" on ground
-    }));
+    super(
+      Object.assign({}, opts, {
+        // x, y, position, ...
+        // TODO / hack - prevent vertical offsets if not FirstPersonViewport
+        position: opts.position && [opts.position[0], opts.position[1], 0],
+        width,
+        height,
+        viewMatrix: viewMatrixUncentered,
+        longitude,
+        latitude,
+        zoom,
+        projectionMatrix,
+        focalDistance: 1 // Viewport is already carefully set up to "focus" on ground
+      })
+    );
 
     // Save parameters
     this.latitude = latitude;
@@ -179,8 +178,10 @@ export default class WebMercatorViewport extends Viewport {
    */
   lngLatDeltaToMeters(deltaLngLatZ) {
     const [deltaLng, deltaLat, deltaZ = 0] = deltaLngLatZ;
-    assert(Number.isFinite(deltaLng) && Number.isFinite(deltaLat) && Number.isFinite(deltaZ),
-      ERR_ARGUMENT);
+    assert(
+      Number.isFinite(deltaLng) && Number.isFinite(deltaLat) && Number.isFinite(deltaZ),
+      ERR_ARGUMENT
+    );
     const {pixelsPerDegree, metersPerPixel} = this.distanceScales;
     const deltaX = deltaLng * pixelsPerDegree[0] * metersPerPixel[0];
     const deltaY = deltaLat * pixelsPerDegree[1] * metersPerPixel[1];
@@ -200,9 +201,9 @@ export default class WebMercatorViewport extends Viewport {
   addMetersToLngLat(lngLatZ, xyz) {
     const [lng, lat, Z = 0] = lngLatZ;
     const [deltaLng, deltaLat, deltaZ = 0] = this.metersToLngLatDelta(xyz);
-    return lngLatZ.length === 2 ?
-      [lng + deltaLng, lat + deltaLat] :
-      [lng + deltaLng, lat + deltaLat, Z + deltaZ];
+    return lngLatZ.length === 2
+      ? [lng + deltaLng, lat + deltaLat]
+      : [lng + deltaLng, lat + deltaLat, Z + deltaZ];
   }
 
   /**
@@ -251,8 +252,7 @@ export default class WebMercatorViewport extends Viewport {
 
     const {pitch, zoom} = this;
 
-    return pitch <= (MAPBOX_LIMITS.pitch + EPSILON) &&
-      zoom <= (MAPBOX_LIMITS.zoom + EPSILON);
+    return pitch <= MAPBOX_LIMITS.pitch + EPSILON && zoom <= MAPBOX_LIMITS.zoom + EPSILON;
   }
 }
 

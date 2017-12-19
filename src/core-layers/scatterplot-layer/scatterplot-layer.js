@@ -44,9 +44,9 @@ const defaultProps = {
 export default class ScatterplotLayer extends Layer {
   getShaders(id) {
     const {shaderCache} = this.context;
-    return enable64bitSupport(this.props) ?
-      {vs: vs64, fs, modules: ['project64', 'picking'], shaderCache} :
-      {vs, fs, modules: ['picking'], shaderCache}; // 'project' module added by default.
+    return enable64bitSupport(this.props)
+      ? {vs: vs64, fs, modules: ['project64', 'picking'], shaderCache}
+      : {vs, fs, modules: ['picking'], shaderCache}; // 'project' module added by default.
   }
 
   initializeState() {
@@ -55,9 +55,23 @@ export default class ScatterplotLayer extends Layer {
 
     /* eslint-disable max-len */
     this.state.attributeManager.addInstanced({
-      instancePositions: {size: 3, accessor: 'getPosition', update: this.calculateInstancePositions},
-      instanceRadius: {size: 1, accessor: 'getRadius', defaultValue: 1, update: this.calculateInstanceRadius},
-      instanceColors: {size: 4, type: GL.UNSIGNED_BYTE, accessor: 'getColor', update: this.calculateInstanceColors}
+      instancePositions: {
+        size: 3,
+        accessor: 'getPosition',
+        update: this.calculateInstancePositions
+      },
+      instanceRadius: {
+        size: 1,
+        accessor: 'getRadius',
+        defaultValue: 1,
+        update: this.calculateInstanceRadius
+      },
+      instanceColors: {
+        size: 4,
+        type: GL.UNSIGNED_BYTE,
+        accessor: 'getColor',
+        update: this.calculateInstanceColors
+      }
     });
     /* eslint-enable max-len */
   }
@@ -76,11 +90,8 @@ export default class ScatterplotLayer extends Layer {
           }
         });
       } else {
-        attributeManager.remove([
-          'instancePositions64xyLow'
-        ]);
+        attributeManager.remove(['instancePositions64xyLow']);
       }
-
     }
   }
 
@@ -95,30 +106,35 @@ export default class ScatterplotLayer extends Layer {
 
   draw({uniforms}) {
     const {radiusScale, radiusMinPixels, radiusMaxPixels, outline, strokeWidth} = this.props;
-    this.state.model.render(Object.assign({}, uniforms, {
-      outline: outline ? 1 : 0,
-      strokeWidth,
-      radiusScale,
-      radiusMinPixels,
-      radiusMaxPixels
-    }));
+    this.state.model.render(
+      Object.assign({}, uniforms, {
+        outline: outline ? 1 : 0,
+        strokeWidth,
+        radiusScale,
+        radiusMinPixels,
+        radiusMaxPixels
+      })
+    );
   }
 
   _getModel(gl) {
     // a square that minimally cover the unit circle
     const positions = [-1, -1, 0, -1, 1, 0, 1, 1, 0, 1, -1, 0];
 
-    return new Model(gl, Object.assign(this.getShaders(), {
-      id: this.props.id,
-      geometry: new Geometry({
-        drawMode: GL.TRIANGLE_FAN,
-        attributes: {
-          positions: new Float32Array(positions)
-        }
-      }),
-      isInstanced: true,
-      shaderCache: this.context.shaderCache
-    }));
+    return new Model(
+      gl,
+      Object.assign(this.getShaders(), {
+        id: this.props.id,
+        geometry: new Geometry({
+          drawMode: GL.TRIANGLE_FAN,
+          attributes: {
+            positions: new Float32Array(positions)
+          }
+        }),
+        isInstanced: true,
+        shaderCache: this.context.shaderCache
+      })
+    );
   }
 
   calculateInstancePositions(attribute) {

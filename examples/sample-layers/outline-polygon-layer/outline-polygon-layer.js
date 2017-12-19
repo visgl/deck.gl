@@ -1,7 +1,7 @@
 import {CompositeLayer, PolygonLayer} from 'deck.gl';
 
-const defaultStrokeColor = [0x33, 0x33, 0x33, 0xFF];
-const defaultFillColor = [0xBD, 0xE2, 0x7A, 0xFF];
+const defaultStrokeColor = [0x33, 0x33, 0x33, 0xff];
+const defaultFillColor = [0xbd, 0xe2, 0x7a, 0xff];
 
 const defaultProps = {
   drawCells: true,
@@ -23,25 +23,26 @@ const defaultProps = {
 };
 
 export default class OutlinePolygonLayer extends CompositeLayer {
-  initializeState() {
-  }
+  initializeState() {}
 
   renderLayers() {
     const {id, getPolygon, getFillColor, getHeight} = this.props;
     const {extruded, wireframe} = this.props;
 
     // Filled Polygon Layer
-    const polygonFillLayer = new PolygonLayer(Object.assign({}, this.props, {
-      id: `${id}-polygon-fill`,
-      getPolygon: x => getPolygon(x),
-      getHeight,
-      getColor: getFillColor,
-      extruded,
-      wireframe,
-      updateTriggers: Object.assign({}, this.props.updateTriggers, {
-        getColor: this.props.updateTriggers.getFillColor
+    const polygonFillLayer = new PolygonLayer(
+      Object.assign({}, this.props, {
+        id: `${id}-polygon-fill`,
+        getPolygon: x => getPolygon(x),
+        getHeight,
+        getColor: getFillColor,
+        extruded,
+        wireframe,
+        updateTriggers: Object.assign({}, this.props.updateTriggers, {
+          getColor: this.props.updateTriggers.getFillColor
+        })
       })
-    }));
+    );
 
     // // Polygon outline or wireframe
     // let polygonOutlineLayer = null;

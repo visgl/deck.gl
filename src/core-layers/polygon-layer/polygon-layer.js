@@ -24,8 +24,8 @@ import SolidPolygonLayer from '../solid-polygon-layer/solid-polygon-layer';
 import PathLayer from '../path-layer/path-layer';
 import * as Polygon from '../solid-polygon-layer/polygon';
 
-const defaultLineColor = [0x0, 0x0, 0x0, 0xFF];
-const defaultFillColor = [0x0, 0x0, 0x0, 0xFF];
+const defaultLineColor = [0x0, 0x0, 0x0, 0xff];
+const defaultFillColor = [0x0, 0x0, 0x0, 0xff];
 
 const defaultProps = {
   stroked: true,
@@ -56,7 +56,7 @@ const defaultProps = {
 
   // Optional settings for 'lighting' shader module
   lightSettings: {
-    lightsPosition: [-122.45, 37.75, 8000, -122.0, 38.00, 5000],
+    lightsPosition: [-122.45, 37.75, 8000, -122.0, 38.0, 5000],
     ambientRatio: 0.05,
     diffuseRatio: 0.6,
     specularRatio: 0.8,
@@ -73,20 +73,22 @@ export default class PolygonLayer extends CompositeLayer {
   }
 
   updateState({oldProps, props, changeFlags}) {
-    const geometryChanged = changeFlags.dataChanged ||
-      (changeFlags.updateTriggersChanged && (
-        changeFlags.updateTriggersChanged.all ||
-        changeFlags.updateTriggersChanged.getPolygon));
+    const geometryChanged =
+      changeFlags.dataChanged ||
+      (changeFlags.updateTriggersChanged &&
+        (changeFlags.updateTriggersChanged.all || changeFlags.updateTriggersChanged.getPolygon));
 
     if (geometryChanged) {
       const {data, getPolygon} = this.props;
       this.state.paths = [];
       data.forEach(object => {
         const complexPolygon = Polygon.normalize(getPolygon(object));
-        complexPolygon.forEach(polygon => this.state.paths.push({
-          path: polygon,
-          object
-        }));
+        complexPolygon.forEach(polygon =>
+          this.state.paths.push({
+            path: polygon,
+            object
+          })
+        );
       });
     }
   }
@@ -103,19 +105,36 @@ export default class PolygonLayer extends CompositeLayer {
     const {data, stroked, filled, extruded, wireframe, elevationScale} = this.props;
 
     // Rendering props underlying layer
-    const {lineWidthScale, lineWidthMinPixels, lineWidthMaxPixels,
-      lineJointRounded, lineMiterLimit, lineDashJustified, fp64} = this.props;
+    const {
+      lineWidthScale,
+      lineWidthMinPixels,
+      lineWidthMaxPixels,
+      lineJointRounded,
+      lineMiterLimit,
+      lineDashJustified,
+      fp64
+    } = this.props;
 
     // Accessor props for underlying layers
-    const {getFillColor, getLineColor, getLineWidth, getLineDashArray, getElevation,
-      getPolygon, updateTriggers, lightSettings} = this.props;
+    const {
+      getFillColor,
+      getLineColor,
+      getLineWidth,
+      getLineDashArray,
+      getElevation,
+      getPolygon,
+      updateTriggers,
+      lightSettings
+    } = this.props;
 
     const {paths} = this.state;
 
     const hasData = data && data.length > 0;
 
     // Filled Polygon Layer
-    const polygonLayer = filled && hasData &&
+    const polygonLayer =
+      filled &&
+      hasData &&
       new SolidPolygonLayer(
         this.getSubLayerProps({
           id: 'fill',
@@ -138,7 +157,10 @@ export default class PolygonLayer extends CompositeLayer {
         })
       );
 
-    const polygonWireframeLayer = extruded && wireframe && hasData &&
+    const polygonWireframeLayer =
+      extruded &&
+      wireframe &&
+      hasData &&
       new SolidPolygonLayer(
         this.getSubLayerProps({
           id: 'wireframe',
@@ -160,7 +182,10 @@ export default class PolygonLayer extends CompositeLayer {
       );
 
     // Polygon line layer
-    const polygonLineLayer = !extruded && stroked && hasData &&
+    const polygonLineLayer =
+      !extruded &&
+      stroked &&
+      hasData &&
       new PathLayer(
         this.getSubLayerProps({
           id: 'stroke',

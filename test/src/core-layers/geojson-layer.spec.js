@@ -33,7 +33,6 @@ const LayerComponent = GeoJsonLayer;
 const data = FIXTURES.choropleths;
 
 test('GeoJsonLayer#constructor', t => {
-
   testCreateLayer(t, LayerComponent, {data, pickable: true});
   // testCreateLayer(t, LayerComponent, {data: FIXTURES.immutableChoropleths, pickable: true});
   testCreateEmptyLayer(t, LayerComponent);
@@ -47,25 +46,27 @@ test('GeoJsonLayer#updates', t => {
     INITIAL_PROPS: {
       data
     },
-    UPDATES: [{
-      updateProps: {
-        lineWidthScale: 3
+    UPDATES: [
+      {
+        updateProps: {
+          lineWidthScale: 3
+        },
+        assert: (layer, oldState) => {
+          t.ok(layer.state, 'should update layer state');
+          const subLayers = layer.renderLayers().filter(Boolean);
+          t.ok(subLayers.length === 2, 'should render 2 subLayers');
+        }
       },
-      assert: (layer, oldState) => {
-        t.ok(layer.state, 'should update layer state');
-        const subLayers = layer.renderLayers().filter(Boolean);
-        t.ok(subLayers.length === 2, 'should render 2 subLayers');
+      {
+        updateProps: {
+          data: Object.assign({}, data)
+        },
+        assert: (layer, oldState) => {
+          t.ok(layer.state, 'should update layer state');
+          t.ok(layer.state.features !== oldState.features, 'should update features');
+        }
       }
-    }, {
-      updateProps: {
-        data: Object.assign({}, data)
-      },
-      assert: (layer, oldState) => {
-        t.ok(layer.state, 'should update layer state');
-        t.ok(layer.state.features !== oldState.features,
-          'should update features');
-      }
-    }]
+    ]
   };
 
   testLayerUpdates(t, {LayerComponent, testCases: TEST_CASES});

@@ -3,7 +3,6 @@ import React, {Component} from 'react';
 import DeckGL, {ScatterplotLayer} from 'deck.gl';
 
 export default class DeckGLOverlay extends Component {
-
   static get defaultViewport() {
     return {
       longitude: -74,
@@ -28,15 +27,13 @@ export default class DeckGLOverlay extends Component {
       radiusScale: radius,
       radiusMinPixels: 0.25,
       getPosition: d => [d[0], d[1], 0],
-      getColor: d => d[2] === 1 ? maleColor : femaleColor,
+      getColor: d => (d[2] === 1 ? maleColor : femaleColor),
       getRadius: d => 1,
       updateTriggers: {
         getColor: [maleColor, femaleColor]
       }
     });
 
-    return (
-      <DeckGL {...viewport} layers={ [layer] } />
-    );
+    return <DeckGL {...viewport} layers={[layer]} />;
   }
 }

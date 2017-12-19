@@ -54,8 +54,11 @@ export default class OrbitViewport extends Viewport {
 
     super({
       id,
-      viewMatrix: mat4_multiply(viewMatrix, viewMatrix,
-        mat4_multiply(rotationMatrix, rotationMatrix, translateMatrix)),
+      viewMatrix: mat4_multiply(
+        viewMatrix,
+        viewMatrix,
+        mat4_multiply(rotationMatrix, rotationMatrix, translateMatrix)
+      ),
       projectionMatrix: perspectiveMatrix,
       width,
       height
@@ -129,4 +132,3 @@ export default class OrbitViewport extends Viewport {
 }
 
 OrbitViewport.displayName = 'OrbitViewport';
-

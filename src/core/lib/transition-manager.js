@@ -57,9 +57,12 @@ export default class TransitionManager {
     const isTransitionInProgress = this._isTransitionInProgress();
 
     if (this._isTransitionEnabled(nextProps)) {
-      const startProps = Object.assign({}, currentProps,
-        this.state.interruption === TRANSITION_EVENTS.SNAP_TO_END ?
-          this.state.endProps : (this.state.propsInTransition || currentProps)
+      const startProps = Object.assign(
+        {},
+        currentProps,
+        this.state.interruption === TRANSITION_EVENTS.SNAP_TO_END
+          ? this.state.endProps
+          : this.state.propsInTransition || currentProps
       );
 
       if (isTransitionInProgress) {
@@ -98,9 +101,11 @@ export default class TransitionManager {
   _shouldIgnoreViewportChange(currentProps, nextProps) {
     if (this._isTransitionInProgress()) {
       // Ignore update if it is requested to be ignored
-      return this.state.interruption === TRANSITION_EVENTS.IGNORE ||
+      return (
+        this.state.interruption === TRANSITION_EVENTS.IGNORE ||
         // Ignore update if it is due to current active transition.
-        this._isUpdateDueToCurrentTransition(nextProps);
+        this._isUpdateDueToCurrentTransition(nextProps)
+      );
     } else if (this._isTransitionEnabled(nextProps)) {
       // Ignore if none of the viewport props changed.
       return nextProps.transitionInterpolator.arePropsEqual(currentProps, nextProps);
@@ -113,10 +118,7 @@ export default class TransitionManager {
 
     cancelAnimationFrame(this.state.animation);
 
-    const initialProps = endProps.transitionInterpolator.initializeProps(
-      startProps,
-      endProps
-    );
+    const initialProps = endProps.transitionInterpolator.initializeProps(startProps, endProps);
 
     this.state = {
       // Save current transition props

@@ -23,15 +23,13 @@ import log from '../utils/log';
 // Version detection using babel plugin
 // Fallback for tests and SSR since global variable is defined by Webpack.
 /* global __VERSION__ */
-const version = typeof __VERSION__ !== 'undefined' ? __VERSION__ :
-  (global.DECK_VERSION || 'untranspiled source');
+const version =
+  typeof __VERSION__ !== 'undefined' ? __VERSION__ : global.DECK_VERSION || 'untranspiled source';
 
 const STARTUP_MESSAGE = 'set deck.log.priority=1 (or higher) to trace attribute updates';
 
 if (global.deck && global.deck.VERSION !== version) {
-  throw new Error(
-    `deck.gl - multiple versions detected: ${global.deck.VERSION} vs ${version}`
-  );
+  throw new Error(`deck.gl - multiple versions detected: ${global.deck.VERSION} vs ${version}`);
 }
 
 if (!global.deck) {

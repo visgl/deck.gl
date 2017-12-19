@@ -4,7 +4,7 @@
  * http://www.progmat.uaem.mx:8080/artVol2Num2/Articulo3Vol2Num2.pdf
  */
 const getY = (r, g, b) => r * 0.29889531 + g * 0.58662247 + b * 0.11448223;
-const getI = (r, g, b) => r * 0.59597799 - g * 0.27417610 - b * 0.32180189;
+const getI = (r, g, b) => r * 0.59597799 - g * 0.2741761 - b * 0.32180189;
 const getQ = (r, g, b) => r * 0.21147017 - g * 0.52261711 + b * 0.31114694;
 const getESq = (dY, dI, dQ) => 0.5053 * dY * dY + 0.299 * dI * dI + 0.1957 * dQ * dQ;
 

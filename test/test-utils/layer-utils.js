@@ -148,9 +148,13 @@ export function testSubLayerUpdateTriggers(t, {FunctionsToSpy, LayerComponent, t
   );
 
   // Create a map of spies that the test case can inspect
-  const spies = FunctionsToSpy.reduce((accu, curr) => Object.assign(accu, {
-    [curr]: spy(LayerComponent.prototype, curr)
-  }), {});
+  const spies = FunctionsToSpy.reduce(
+    (accu, curr) =>
+      Object.assign(accu, {
+        [curr]: spy(LayerComponent.prototype, curr)
+      }),
+    {}
+  );
 
   for (const {updateProps, assert} of testCases.UPDATES) {
     // Add on new props every iteration
@@ -197,9 +201,14 @@ export function testCreateLayer(t, LayerComponent, props = {}) {
   let layer = null;
 
   try {
-    layer = new LayerComponent(Object.assign({
-      id: `${LayerComponent.layerName}-0`
-    }, props));
+    layer = new LayerComponent(
+      Object.assign(
+        {
+          id: `${LayerComponent.layerName}-0`
+        },
+        props
+      )
+    );
 
     t.ok(layer instanceof LayerComponent, `${LayerComponent.layerName} created`);
   } catch (error) {
@@ -213,11 +222,16 @@ export function testCreateLayer(t, LayerComponent, props = {}) {
 export function testCreateEmptyLayer(t, LayerComponent, props = {}) {
   let failures = false;
   try {
-    const emptyLayer = new LayerComponent(Object.assign({
-      id: `empty${LayerComponent.layerName}`,
-      data: [],
-      pickable: true
-    }, props));
+    const emptyLayer = new LayerComponent(
+      Object.assign(
+        {
+          id: `empty${LayerComponent.layerName}`,
+          data: [],
+          pickable: true
+        },
+        props
+      )
+    );
 
     t.ok(emptyLayer instanceof LayerComponent, `Empty ${LayerComponent.layerName} created`);
   } catch (error) {
@@ -228,11 +242,12 @@ export function testCreateEmptyLayer(t, LayerComponent, props = {}) {
 
 export function testNullLayer(t, LayerComponent) {
   t.doesNotThrow(
-    () => new LayerComponent({
-      id: 'nullPathLayer',
-      data: null,
-      pickable: true
-    }),
+    () =>
+      new LayerComponent({
+        id: 'nullPathLayer',
+        data: null,
+        pickable: true
+      }),
     `Null ${LayerComponent.layerName} did not throw exception`
   );
 }

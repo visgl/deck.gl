@@ -7,19 +7,22 @@ const TEST_CASES = [
     props: {width: 100, height: 100},
     nextProps: {width: 200, height: 200},
     expect: true
-  }, {
+  },
+  {
     title: 'prop changes',
     propNames: ['width', 'height'],
     props: {width: 100, height: 100},
     nextProps: {width: 200, height: 200},
     expect: false
-  }, {
+  },
+  {
     title: 'no valid prop changes',
     propNames: ['width', 'height'],
     props: {width: 100, height: 100, rotation: 0},
     nextProps: {width: 100, height: 100, rotation: 30},
     expect: true
-  }, {
+  },
+  {
     title: 'array prop changes',
     propNames: ['position'],
     props: {position: [0, 0, 0]},
@@ -29,12 +32,14 @@ const TEST_CASES = [
 ];
 
 test('TransitionInterpolator#arePropsEqual', t => {
-
   TEST_CASES.forEach(testCase => {
     const interpolator = new TransitionInterpolator();
     interpolator.propNames = testCase.propNames;
-    t.is(interpolator.arePropsEqual(testCase.props, testCase.nextProps),
-      testCase.expect, testCase.title);
+    t.is(
+      interpolator.arePropsEqual(testCase.props, testCase.nextProps),
+      testCase.expect,
+      testCase.title
+    );
   });
 
   t.end();

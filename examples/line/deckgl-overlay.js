@@ -20,7 +20,6 @@ function getSize(type) {
 }
 
 export default class DeckGLOverlay extends Component {
-
   static get defaultViewport() {
     return {
       latitude: 47.65,
@@ -70,8 +69,6 @@ export default class DeckGLOverlay extends Component {
       })
     ];
 
-    return (
-      <DeckGL {...viewport} layers={ layers } onWebGLInitialized={this._initialize} />
-    );
+    return <DeckGL {...viewport} layers={layers} onWebGLInitialized={this._initialize} />;
   }
 }

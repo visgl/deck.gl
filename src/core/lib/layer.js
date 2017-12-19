@@ -109,7 +109,7 @@ export default class Layer {
 
   // Checks state of attributes and model
   getNeedsRedraw({clearRedrawFlags = false} = {}) {
-    return this. _getNeedsRedraw(clearRedrawFlags);
+    return this._getNeedsRedraw(clearRedrawFlags);
   }
 
   // //////////////////////////////////////////////////
@@ -137,8 +137,7 @@ export default class Layer {
 
   // Called once when layer is no longer matched and state will be discarded
   // App can destroy WebGL resources here
-  finalizeState() {
-  }
+  finalizeState() {}
 
   // If state has a model, draw it with supplied uniforms
   draw(opts) {
@@ -280,8 +279,7 @@ export default class Layer {
   // TODO - needs to refer to context
   screenToDevicePixels(screenPixels) {
     log.deprecated('screenToDevicePixels', 'DeckGL prop useDevicePixels for conversion');
-    const devicePixelRatio = typeof window !== 'undefined' ?
-      window.devicePixelRatio : 1;
+    const devicePixelRatio = typeof window !== 'undefined' ? window.devicePixelRatio : 1;
     return screenPixels * devicePixelRatio;
   }
 
@@ -301,12 +299,8 @@ export default class Layer {
    * @return {Array} - the decoded color
    */
   encodePickingColor(i) {
-    assert(((((i + 1) >> 24) & 255) === 0), 'index out of picking color range');
-    return [
-      (i + 1) & 255,
-      ((i + 1) >> 8) & 255,
-      (((i + 1) >> 8) >> 8) & 255
-    ];
+    assert((((i + 1) >> 24) & 255) === 0, 'index out of picking color range');
+    return [(i + 1) & 255, ((i + 1) >> 8) & 255, (((i + 1) >> 8) >> 8) & 255];
   }
 
   /**
@@ -392,7 +386,9 @@ export default class Layer {
     // TODO - this slightly slows down non instanced layers
     attributeManager.addInstanced({
       instancePickingColors: {
-        type: GL.UNSIGNED_BYTE, size: 3, update: this.calculateInstancePickingColors
+        type: GL.UNSIGNED_BYTE,
+        size: 3,
+        update: this.calculateInstancePickingColors
       }
     });
 
@@ -498,7 +494,6 @@ export default class Layer {
 
   // Calculates uniforms
   drawLayer({moduleParameters = null, uniforms = {}, parameters = {}}) {
-
     // TODO/ib - hack move to luma Model.draw
     if (moduleParameters) {
       for (const model of this.getModels()) {
@@ -509,7 +504,7 @@ export default class Layer {
     // Apply polygon offset to avoid z-fighting
     // TODO - move to draw-layers
     const {getPolygonOffset} = this.props;
-    const offsets = getPolygonOffset && getPolygonOffset(uniforms) || [0, 0];
+    const offsets = (getPolygonOffset && getPolygonOffset(uniforms)) || [0, 0];
     parameters.polygonOffset = offsets;
 
     // Call subclass lifecycle method
@@ -540,35 +535,38 @@ export default class Layer {
     // Update primary flags
     if (flags.dataChanged && !changeFlags.dataChanged) {
       changeFlags.dataChanged = flags.dataChanged;
-      log.log(LOG_PRIORITY_UPDATE + 1,
-        () => `dataChanged: ${flags.dataChanged} in ${this.id}`);
+      log.log(LOG_PRIORITY_UPDATE + 1, () => `dataChanged: ${flags.dataChanged} in ${this.id}`);
     }
     if (flags.updateTriggersChanged && !changeFlags.updateTriggersChanged) {
       changeFlags.updateTriggersChanged =
-        changeFlags.updateTriggersChanged && flags.updateTriggersChanged ?
-          Object.assign({}, flags.updateTriggersChanged, changeFlags.updateTriggersChanged) :
-          flags.updateTriggersChanged || changeFlags.updateTriggersChanged;
-      log.log(LOG_PRIORITY_UPDATE + 1,
-        () => 'updateTriggersChanged: ' +
-        `${Object.keys(flags.updateTriggersChanged).join(', ')} in ${this.id}`);
+        changeFlags.updateTriggersChanged && flags.updateTriggersChanged
+          ? Object.assign({}, flags.updateTriggersChanged, changeFlags.updateTriggersChanged)
+          : flags.updateTriggersChanged || changeFlags.updateTriggersChanged;
+      log.log(
+        LOG_PRIORITY_UPDATE + 1,
+        () =>
+          'updateTriggersChanged: ' +
+          `${Object.keys(flags.updateTriggersChanged).join(', ')} in ${this.id}`
+      );
     }
     if (flags.propsChanged && !changeFlags.propsChanged) {
       changeFlags.propsChanged = flags.propsChanged;
-      log.log(LOG_PRIORITY_UPDATE + 1,
-        () => `propsChanged: ${flags.propsChanged} in ${this.id}`);
+      log.log(LOG_PRIORITY_UPDATE + 1, () => `propsChanged: ${flags.propsChanged} in ${this.id}`);
     }
     if (flags.viewportChanged && !changeFlags.viewportChanged) {
       changeFlags.viewportChanged = flags.viewportChanged;
-      log.log(LOG_PRIORITY_UPDATE + 2,
-        () => `viewportChanged: ${flags.viewportChanged} in ${this.id}`);
+      log.log(
+        LOG_PRIORITY_UPDATE + 2,
+        () => `viewportChanged: ${flags.viewportChanged} in ${this.id}`
+      );
     }
 
     // Update composite flags
     const propsOrDataChanged =
       flags.dataChanged || flags.updateTriggersChanged || flags.propsChanged;
     changeFlags.propsOrDataChanged = changeFlags.propsOrDataChanged || propsOrDataChanged;
-    changeFlags.somethingChanged = changeFlags.somethingChanged ||
-      propsOrDataChanged || flags.viewportChanged;
+    changeFlags.somethingChanged =
+      changeFlags.somethingChanged || propsOrDataChanged || flags.viewportChanged;
   }
   /* eslint-enable complexity */
 

@@ -1,7 +1,15 @@
 import {mod} from '../utils/math-utils';
 
-const VIEWPORT_PROPS =
-  ['width', 'height', 'longitude', 'latitude', 'zoom', 'bearing', 'pitch', 'position'];
+const VIEWPORT_PROPS = [
+  'width',
+  'height',
+  'longitude',
+  'latitude',
+  'zoom',
+  'bearing',
+  'pitch',
+  'position'
+];
 
 const WRAPPED_ANGULAR_PROPS = {
   longitude: 1,
@@ -27,7 +35,7 @@ function isWrappedAngularProp(propName) {
 
 export function getEndValueByShortestPath(propName, startValue, endValue) {
   if (isWrappedAngularProp(propName) && Math.abs(endValue - startValue) > 180) {
-    endValue = (endValue < 0) ? endValue + 360 : endValue - 360;
+    endValue = endValue < 0 ? endValue + 360 : endValue - 360;
   }
   return endValue;
 }
@@ -35,7 +43,7 @@ export function getEndValueByShortestPath(propName, startValue, endValue) {
 // TODO/xiaoji: This should be merged with the controller's prop constraint system
 export function extractViewportFrom(props) {
   const viewport = {};
-  VIEWPORT_PROPS.forEach((key) => {
+  VIEWPORT_PROPS.forEach(key => {
     const value = props[key];
     if (isValid(value)) {
       viewport[key] = value;

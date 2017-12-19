@@ -11,7 +11,8 @@ import Stats from 'stats.js';
 // Set your mapbox token here
 const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
 // mapbox style file path
-const MAPBOX_STYLE_FILE = 'https://rivulet-zhang.github.io/dataRepo/mapbox/style/map-style-dark-v9-no-labels.json';
+const MAPBOX_STYLE_FILE =
+  'https://rivulet-zhang.github.io/dataRepo/mapbox/style/map-style-dark-v9-no-labels.json';
 // sample data
 const FILE_PATH = 'https://rivulet-zhang.github.io/dataRepo/text-layer/hashtagsOneDayWithTime.json';
 const SECONDS_PER_DAY = 24 * 60 * 60;
@@ -20,7 +21,6 @@ const TIME_WINDOW = 2;
 const TEXT_COLOR = [12, 123, 234];
 
 class Root extends Component {
-
   constructor(props) {
     super(props);
     this.state = {
@@ -100,8 +100,8 @@ class Root extends Component {
   _animateData() {
     const {data} = this.state;
     const now = Date.now();
-    const getSecCeil = (ms) => Math.ceil(ms / 1000, 10) % SECONDS_PER_DAY;
-    const getSecFloor = (ms) => Math.floor(ms / 1000, 10) % SECONDS_PER_DAY;
+    const getSecCeil = ms => Math.ceil(ms / 1000, 10) % SECONDS_PER_DAY;
+    const getSecFloor = ms => Math.floor(ms / 1000, 10) % SECONDS_PER_DAY;
     const timeWindow = [
       getSecCeil(now - TIME_WINDOW * 1000),
       getSecFloor(now + TIME_WINDOW * 1000)
@@ -143,11 +143,9 @@ class Root extends Component {
           mapStyle={mapStyle}
           preventStyleDiffing={true}
           onViewportChange={this._onViewportChange.bind(this)}
-          mapboxApiAccessToken={MAPBOX_TOKEN}>
-          <DeckGLOverlay
-            viewport={viewport}
-            data={dataSlice}
-          />
+          mapboxApiAccessToken={MAPBOX_TOKEN}
+        >
+          <DeckGLOverlay viewport={viewport} data={dataSlice} />
         </MapGL>
         <div ref={c => (this.fps = c)} className="fps" />
       </div>

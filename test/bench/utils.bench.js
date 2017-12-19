@@ -20,9 +20,7 @@
 
 /* eslint-disable no-console, no-invalid-this */
 
-import {
-  experimental
-} from 'deck.gl';
+import {experimental} from 'deck.gl';
 
 const {get} = experimental;
 
@@ -38,6 +36,5 @@ export default function utilsBench(suite) {
     })
     .add('direct access#Array', () => {
       return POSITION[0];
-    })
-  ;
+    });
 }

@@ -10,7 +10,7 @@ const ROTATION_STEP_DEGREES = 2;
 
 // Constrain number between bounds
 function clamp(x, min, max) {
-  return x < min ? min : (x > max ? max : x);
+  return x < min ? min : x > max ? max : x;
 }
 
 function ensureFinite(value, fallbackValue) {
@@ -18,7 +18,6 @@ function ensureFinite(value, fallbackValue) {
 }
 
 export default class FirstPersonState extends ViewState {
-
   constructor({
     /* Viewport arguments */
     width, // Width of viewport

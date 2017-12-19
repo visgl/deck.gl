@@ -1,1 +1,1 @@
-export {default as default} from './multi-icon-layer';
+export {default} from './multi-icon-layer';

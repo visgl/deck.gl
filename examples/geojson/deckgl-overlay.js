@@ -11,7 +11,6 @@ const LIGHT_SETTINGS = {
 };
 
 export default class DeckGLOverlay extends Component {
-
   static get defaultViewport() {
     return {
       latitude: 49.254,
@@ -47,8 +46,6 @@ export default class DeckGLOverlay extends Component {
       onHover: this.props.onHover
     });
 
-    return (
-      <DeckGL {...viewport} layers={ [layer] } />
-    );
+    return <DeckGL {...viewport} layers={[layer]} />;
   }
 }

@@ -24,7 +24,6 @@ import {experimental} from '../core';
 const {DeckGLJS, log} = experimental;
 
 export default class DeckGL extends React.Component {
-
   constructor(props) {
     super(props);
     this.state = {};
@@ -84,7 +83,8 @@ export default class DeckGL extends React.Component {
 
     return React.Children.toArray(this.props.children).map(
       // If child specifies props.viewportId, position under viewport, otherwise render as normal
-      (child, i) => child.props.viewportId ? this._positionChild({child, viewportMap, i}) : child);
+      (child, i) => (child.props.viewportId ? this._positionChild({child, viewportMap, i}) : child)
+    );
   }
 
   _positionChild({child, viewportMap, i}) {
@@ -132,7 +132,6 @@ export default class DeckGL extends React.Component {
     children.push(deck);
 
     return createElement('div', {id: 'deckgl-wrapper'}, children);
-
   }
 }
 

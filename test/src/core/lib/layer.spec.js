@@ -23,9 +23,7 @@ import {Layer, AttributeManager} from 'deck.gl';
 import {testInitializeLayer} from 'deck.gl/test/test-utils/layer-utils';
 import makeSpy from 'deck.gl/test/test-utils/spy';
 
-const dataVariants = [
-  {data: ['a', 'b', 'c'], size: 3}
-];
+const dataVariants = [{data: ['a', 'b', 'c'], size: 3}];
 
 const LAYER_PROPS = {
   id: 'testLayer',
@@ -126,29 +124,17 @@ test('Layer#diffProps', t => {
   const layer = new SubLayer(LAYER_PROPS);
   testInitializeLayer({layer});
 
-  layer.diffProps(
-    Object.assign({}, LAYER_PROPS),
-    LAYER_PROPS
-  );
+  layer.diffProps(Object.assign({}, LAYER_PROPS), LAYER_PROPS);
   t.false(layer.getChangeFlags().somethingChanged, 'same props');
 
-  layer.diffProps(
-    Object.assign({}, LAYER_PROPS, {data: dataVariants[0]}),
-    LAYER_PROPS
-  );
+  layer.diffProps(Object.assign({}, LAYER_PROPS, {data: dataVariants[0]}), LAYER_PROPS);
   t.true(layer.getChangeFlags().dataChanged, 'data changed');
 
-  layer.diffProps(
-    Object.assign({}, LAYER_PROPS, {size: 0}),
-    LAYER_PROPS
-  );
+  layer.diffProps(Object.assign({}, LAYER_PROPS, {size: 0}), LAYER_PROPS);
   t.true(layer.getChangeFlags().propsChanged, 'props changed');
 
   // Dummy attribute manager to avoid diffUpdateTriggers failure
-  layer.diffProps(
-    Object.assign({}, LAYER_PROPS, {updateTriggers: {time: 100}}),
-    LAYER_PROPS
-  );
+  layer.diffProps(Object.assign({}, LAYER_PROPS, {updateTriggers: {time: 100}}), LAYER_PROPS);
   t.true(layer.getChangeFlags().propsOrDataChanged, 'props changed');
 
   const spy = makeSpy(AttributeManager.prototype, 'invalidate');

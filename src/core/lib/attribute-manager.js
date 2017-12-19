@@ -33,25 +33,25 @@ function noop() {}
 export function glArrayFromType(glType, {clamped = true} = {}) {
   // Sorted in some order of likelihood to reduce amount of comparisons
   switch (glType) {
-  case GL.FLOAT:
-    return Float32Array;
-  case GL.UNSIGNED_SHORT:
-  case GL.UNSIGNED_SHORT_5_6_5:
-  case GL.UNSIGNED_SHORT_4_4_4_4:
-  case GL.UNSIGNED_SHORT_5_5_5_1:
-    return Uint16Array;
-  case GL.UNSIGNED_INT:
-    return Uint32Array;
-  case GL.UNSIGNED_BYTE:
-    return clamped ? Uint8ClampedArray : Uint8Array;
-  case GL.BYTE:
-    return Int8Array;
-  case GL.SHORT:
-    return Int16Array;
-  case GL.INT:
-    return Int32Array;
-  default:
-    throw new Error('Failed to deduce type from array');
+    case GL.FLOAT:
+      return Float32Array;
+    case GL.UNSIGNED_SHORT:
+    case GL.UNSIGNED_SHORT_5_6_5:
+    case GL.UNSIGNED_SHORT_4_4_4_4:
+    case GL.UNSIGNED_SHORT_5_5_5_1:
+      return Uint16Array;
+    case GL.UNSIGNED_INT:
+      return Uint32Array;
+    case GL.UNSIGNED_BYTE:
+      return clamped ? Uint8ClampedArray : Uint8Array;
+    case GL.BYTE:
+      return Int8Array;
+    case GL.SHORT:
+      return Int16Array;
+    case GL.INT:
+      return Int32Array;
+    default:
+      throw new Error('Failed to deduce type from array');
   }
 }
 /* eslint-enable complexity */
@@ -76,10 +76,9 @@ const logFunctions = {
   onUpdateEnd: ({level, id, numInstances}) => {
     const timeMs = Math.round(new Date() - logFunctions.timeStart);
     const time = `${timeMs}ms`;
-    log.group(level,
-      `Updated attributes for ${numInstances} instances in ${id} in ${time}`,
-      {collapsed: true}
-    );
+    log.group(level, `Updated attributes for ${numInstances} instances in ${id} in ${time}`, {
+      collapsed: true
+    });
     for (const message of logFunctions.savedMessages) {
       log.log(level, message);
     }
@@ -103,12 +102,7 @@ export default class AttributeManager {
    * @param {String} [opts.onUpdateStart=] - called before update() starts
    * @param {String} [opts.onUpdateEnd=] - called after update() ends
    */
-  static setDefaultLogFunctions({
-    onLog,
-    onUpdateStart,
-    onUpdate,
-    onUpdateEnd
-  } = {}) {
+  static setDefaultLogFunctions({onLog, onUpdateStart, onUpdate, onUpdateEnd} = {}) {
     if (onLog !== undefined) {
       logFunctions.onLog = onLog || noop;
     }
@@ -251,8 +245,7 @@ export default class AttributeManager {
     const invalidatedAttributes = updateTriggers[triggerName];
 
     if (!invalidatedAttributes) {
-      let message =
-        `invalidating non-existent trigger ${triggerName} for ${this.id}\n`;
+      let message = `invalidating non-existent trigger ${triggerName} for ${this.id}\n`;
       message += `Valid triggers: ${Object.keys(attributes).join(', ')}`;
       log.warn(message, invalidatedAttributes);
     } else {
@@ -280,14 +273,16 @@ export default class AttributeManager {
    * @param {Object} opts.props - passed to updaters
    * @param {Object} opts.context - Used as "this" context for updaters
    */
-  update({
-    data,
-    numInstances,
-    props = {},
-    buffers = {},
-    context = {},
-    ignoreUnknownAttributes = false
-  } = {}) {
+  update(
+    {
+      data,
+      numInstances,
+      props = {},
+      buffers = {},
+      context = {},
+      ignoreUnknownAttributes = false
+    } = {}
+  ) {
     // First apply any application provided buffers
     this._checkExternalBuffers({buffers, ignoreUnknownAttributes});
     this._setExternalBuffers(buffers);
@@ -379,7 +374,6 @@ export default class AttributeManager {
 
   // Used to register an attribute
   _add(attributes, updaters = {}, _extraProps = {}) {
-
     const newAttributes = {};
 
     for (const attributeName in attributes) {
@@ -387,8 +381,11 @@ export default class AttributeManager {
       // For now, just copy any attributes from that map into the main map
       // TODO - Attribute maps are a deprecated feature, remove
       if (attributeName in updaters) {
-        attributes[attributeName] =
-          Object.assign({}, attributes[attributeName], updaters[attributeName]);
+        attributes[attributeName] = Object.assign(
+          {},
+          attributes[attributeName],
+          updaters[attributeName]
+        );
       }
 
       const attribute = attributes[attributeName];
@@ -464,11 +461,14 @@ export default class AttributeManager {
   }
 
   _validateAttributeDefinition(attributeName, attribute) {
-    assert(attribute.size >= 1 && attribute.size <= 4,
-      `Attribute definition for ${attributeName} invalid size`);
+    assert(
+      attribute.size >= 1 && attribute.size <= 4,
+      `Attribute definition for ${attributeName} invalid size`
+    );
 
     // Check that either 'accessor' or 'update' is a valid function
-    const hasUpdater = attribute.noAlloc ||
+    const hasUpdater =
+      attribute.noAlloc ||
       typeof attribute.update === 'function' ||
       typeof attribute.accessor === 'string';
     if (!hasUpdater) {
@@ -478,10 +478,7 @@ export default class AttributeManager {
 
   // Checks that any attribute buffers in props are valid
   // Note: This is just to help app catch mistakes
-  _checkExternalBuffers({
-    buffers = {},
-    ignoreUnknownAttributes = false
-  } = {}) {
+  _checkExternalBuffers({buffers = {}, ignoreUnknownAttributes = false} = {}) {
     const {attributes} = this;
     for (const attributeName in buffers) {
       const attribute = attributes[attributeName];
@@ -543,8 +540,7 @@ export default class AttributeManager {
       if (!attribute.isExternalBuffer) {
         // Do we need to reallocate the attribute's typed array?
         const needsAlloc =
-          attribute.value === null ||
-          attribute.value.length / attribute.size < numInstances;
+          attribute.value === null || attribute.value.length / attribute.size < numInstances;
         if (needsAlloc && (attribute.update || attribute.accessor)) {
           attribute.needsAlloc = true;
           needsUpdate = true;
@@ -652,10 +648,14 @@ export default class AttributeManager {
       objectValue = Array.isArray(objectValue) ? objectValue : [objectValue];
       /* eslint-disable no-fallthrough, default-case */
       switch (size) {
-      case 4: value[i + 3] = Number.isFinite(objectValue[3]) ? objectValue[3] : defaultValue[3];
-      case 3: value[i + 2] = Number.isFinite(objectValue[2]) ? objectValue[2] : defaultValue[2];
-      case 2: value[i + 1] = Number.isFinite(objectValue[1]) ? objectValue[1] : defaultValue[1];
-      case 1: value[i + 0] = Number.isFinite(objectValue[0]) ? objectValue[0] : defaultValue[0];
+        case 4:
+          value[i + 3] = Number.isFinite(objectValue[3]) ? objectValue[3] : defaultValue[3];
+        case 3:
+          value[i + 2] = Number.isFinite(objectValue[2]) ? objectValue[2] : defaultValue[2];
+        case 2:
+          value[i + 1] = Number.isFinite(objectValue[1]) ? objectValue[1] : defaultValue[1];
+        case 1:
+          value[i + 0] = Number.isFinite(objectValue[0]) ? objectValue[0] : defaultValue[0];
       }
       i += size;
     }
@@ -665,8 +665,10 @@ export default class AttributeManager {
     const {value} = attribute;
     if (value && value.length >= 4) {
       const valid =
-        Number.isFinite(value[0]) && Number.isFinite(value[1]) &&
-        Number.isFinite(value[2]) && Number.isFinite(value[3]);
+        Number.isFinite(value[0]) &&
+        Number.isFinite(value[1]) &&
+        Number.isFinite(value[2]) &&
+        Number.isFinite(value[3]);
       if (!valid) {
         throw new Error(`Illegal attribute generated for ${attributeName}`);
       }

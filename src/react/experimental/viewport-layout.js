@@ -2,7 +2,6 @@ import React, {createElement, cloneElement} from 'react';
 import {flatten} from '../../core/utils/flatten';
 
 export default class ViewportLayout extends React.Component {
-
   constructor(props) {
     super(props);
   }
@@ -30,11 +29,16 @@ export default class ViewportLayout extends React.Component {
         const viewport = viewportMap[child.props.viewportId];
 
         // TODO - this is too react-map-gl specific
-        const newProps = Object.assign({}, child.props, {
-          visible: viewport.isMapSynched(),
-          width: viewport.width,
-          height: viewport.height
-        }, viewport.getMercatorParams());
+        const newProps = Object.assign(
+          {},
+          child.props,
+          {
+            visible: viewport.isMapSynched(),
+            width: viewport.width,
+            height: viewport.height
+          },
+          viewport.getMercatorParams()
+        );
 
         const clone = cloneElement(child, newProps);
 

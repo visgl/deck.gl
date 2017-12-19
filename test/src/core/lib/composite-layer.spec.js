@@ -62,15 +62,21 @@ test('CompositeLayer#getSubLayerProps', t => {
   const baseProps = layer.getSubLayerProps();
   t.comment(JSON.stringify(baseProps));
   for (const propName in BASE_LAYER_PROPS) {
-    t.equal(baseProps[propName], BASE_LAYER_PROPS[propName],
-      `CompositeLayer baseLayerProp ${propName} ok`);
+    t.equal(
+      baseProps[propName],
+      BASE_LAYER_PROPS[propName],
+      `CompositeLayer baseLayerProp ${propName} ok`
+    );
   }
 
   const sublayers = layer.renderLayers();
   const subProps = sublayers[0].props;
   for (const propName in BASE_LAYER_PROPS) {
-    t.equal(subProps[propName], BASE_LAYER_PROPS[propName],
-      `CompositeLayer subLayerProp ${propName} ok`);
+    t.equal(
+      subProps[propName],
+      BASE_LAYER_PROPS[propName],
+      `CompositeLayer subLayerProp ${propName} ok`
+    );
   }
 
   t.end();

@@ -64,7 +64,6 @@ const defaultProps = {
  * @param {Array} [props.axesColor] - color of the gridlines, in [r,g,b,a]
  */
 export default class PlotLayer extends CompositeLayer {
-
   updateState() {
     const {uCount, vCount, getPosition, getXScale, getYScale, getZScale} = this.props;
 
@@ -108,43 +107,46 @@ export default class PlotLayer extends CompositeLayer {
     const {xScale, yScale, zScale} = this.state;
 
     return [
-      new SurfaceLayer(this.getSubLayerProps({
-        id: 'surface',
-        getPosition: this.props.getPosition,
-        getColor: this.props.getColor,
-        uCount: this.props.uCount,
-        vCount: this.props.vCount,
-        xScale,
-        yScale,
-        zScale,
-        lightStrength: this.props.lightStrength,
-        onHover: this.props.onHover,
-        onClick: this.props.onClick,
-        updateTriggers: this.props.updateTriggers
-      })),
-      new AxesLayer(this.getSubLayerProps({
-        id: 'axes',
-        xScale,
-        yScale,
-        zScale,
-        fontSize: this.props.fontSize,
-        xTicks: this.props.xTicks,
-        yTicks: this.props.yTicks,
-        zTicks: this.props.zTicks,
-        xTickFormat: this.props.xTickFormat,
-        yTickFormat: this.props.yTickFormat,
-        zTickFormat: this.props.zTickFormat,
-        xTitle: this.props.xTitle,
-        yTitle: this.props.yTitle,
-        zTitle: this.props.zTitle,
-        padding: this.props.axesPadding,
-        color: this.props.axesColor,
-        visible: this.props.drawAxes,
-        pickable: false
-      }))
+      new SurfaceLayer(
+        this.getSubLayerProps({
+          id: 'surface',
+          getPosition: this.props.getPosition,
+          getColor: this.props.getColor,
+          uCount: this.props.uCount,
+          vCount: this.props.vCount,
+          xScale,
+          yScale,
+          zScale,
+          lightStrength: this.props.lightStrength,
+          onHover: this.props.onHover,
+          onClick: this.props.onClick,
+          updateTriggers: this.props.updateTriggers
+        })
+      ),
+      new AxesLayer(
+        this.getSubLayerProps({
+          id: 'axes',
+          xScale,
+          yScale,
+          zScale,
+          fontSize: this.props.fontSize,
+          xTicks: this.props.xTicks,
+          yTicks: this.props.yTicks,
+          zTicks: this.props.zTicks,
+          xTickFormat: this.props.xTickFormat,
+          yTickFormat: this.props.yTickFormat,
+          zTickFormat: this.props.zTickFormat,
+          xTitle: this.props.xTitle,
+          yTitle: this.props.yTitle,
+          zTitle: this.props.zTitle,
+          padding: this.props.axesPadding,
+          color: this.props.axesColor,
+          visible: this.props.drawAxes,
+          pickable: false
+        })
+      )
     ];
   }
-
 }
 
 PlotLayer.layerName = 'PlotLayer';

@@ -21,16 +21,9 @@
 import test from 'tape-catch';
 
 import * as Polygon from 'deck.gl-layers/solid-polygon-layer/polygon';
-import {PolygonTesselator}
-  from 'deck.gl-layers/solid-polygon-layer/polygon-tesselator';
+import {PolygonTesselator} from 'deck.gl-layers/solid-polygon-layer/polygon-tesselator';
 
-const POLYGONS = [
-  [],
-  [[1, 1]],
-  [[1, 1], [1, 1], [1, 1]],
-  [[[1, 1]]],
-  [[[1, 1], [1, 1], [1, 1]]]
-];
+const POLYGONS = [[], [[1, 1]], [[1, 1], [1, 1], [1, 1]], [[[1, 1]]], [[[1, 1], [1, 1], [1, 1]]]];
 
 const TEST_DATA = [
   {
@@ -83,7 +76,6 @@ test('polygonTesselator#imports', t => {
 
 test('PolygonTesselator#constructor', t => {
   TEST_DATA.forEach(testData => {
-
     t.comment(`Polygon data: ${testData.title}`);
     const tesselator = new PolygonTesselator({polygons: testData.polygons});
     t.ok(tesselator instanceof PolygonTesselator, 'PolygonTesselator created');
@@ -92,16 +84,18 @@ test('PolygonTesselator#constructor', t => {
       t.comment(`  ${testCase.title}`);
       tesselator.updatePositions(testCase.params);
 
-      t.ok(ArrayBuffer.isView(tesselator.positions()),
-        'PolygonTesselator.positions');
-      t.ok(ArrayBuffer.isView(tesselator.nextPositions()),
-        'PolygonTesselator.nextPositions');
+      t.ok(ArrayBuffer.isView(tesselator.positions()), 'PolygonTesselator.positions');
+      t.ok(ArrayBuffer.isView(tesselator.nextPositions()), 'PolygonTesselator.nextPositions');
 
       if (testCase.params.fp64) {
-        t.ok(ArrayBuffer.isView(tesselator.positions64xyLow()),
-          'PolygonTesselator.positions64xyLow');
-        t.ok(ArrayBuffer.isView(tesselator.nextPositions64xyLow()),
-          'PolygonTesselator.nextPositions64xyLow');
+        t.ok(
+          ArrayBuffer.isView(tesselator.positions64xyLow()),
+          'PolygonTesselator.positions64xyLow'
+        );
+        t.ok(
+          ArrayBuffer.isView(tesselator.nextPositions64xyLow()),
+          'PolygonTesselator.nextPositions64xyLow'
+        );
       }
     });
   });
@@ -110,18 +104,13 @@ test('PolygonTesselator#constructor', t => {
 });
 
 test('PolygonTesselator#methods', t => {
-
   TEST_DATA.forEach(testData => {
-
     t.comment(`Polygon data: ${testData.title}`);
     const tesselator = new PolygonTesselator({polygons: testData.polygons});
 
-    t.ok(ArrayBuffer.isView(tesselator.indices()),
-      'PolygonTesselator.indices');
-    t.ok(ArrayBuffer.isView(tesselator.colors()),
-      'PolygonTesselator.colors');
-    t.ok(ArrayBuffer.isView(tesselator.pickingColors()),
-      'PolygonTesselator.pickingColors');
+    t.ok(ArrayBuffer.isView(tesselator.indices()), 'PolygonTesselator.indices');
+    t.ok(ArrayBuffer.isView(tesselator.colors()), 'PolygonTesselator.colors');
+    t.ok(ArrayBuffer.isView(tesselator.pickingColors()), 'PolygonTesselator.pickingColors');
   });
 
   t.end();

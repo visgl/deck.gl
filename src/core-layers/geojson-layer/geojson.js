@@ -41,25 +41,23 @@ export function getGeojsonFeatures(geojson) {
 
   const type = get(geojson, 'type');
   switch (type) {
-  case 'Point':
-  case 'MultiPoint':
-  case 'LineString':
-  case 'MultiLineString':
-  case 'Polygon':
-  case 'MultiPolygon':
-  case 'GeometryCollection':
-    // Wrap the geometry object in a 'Feature' object and wrap in an array
-    return [
-      {type: 'Feature', properties: {}, geometry: geojson}
-    ];
-  case 'Feature':
-    // Wrap the feature in a 'Features' array
-    return [geojson];
-  case 'FeatureCollection':
-    // Just return the 'Features' array from the collection
-    return get(geojson, 'features');
-  default:
-    throw new Error('Unknown geojson type');
+    case 'Point':
+    case 'MultiPoint':
+    case 'LineString':
+    case 'MultiLineString':
+    case 'Polygon':
+    case 'MultiPolygon':
+    case 'GeometryCollection':
+      // Wrap the geometry object in a 'Feature' object and wrap in an array
+      return [{type: 'Feature', properties: {}, geometry: geojson}];
+    case 'Feature':
+      // Wrap the feature in a 'Features' array
+      return [geojson];
+    case 'FeatureCollection':
+      // Just return the 'Features' array from the collection
+      return get(geojson, 'features');
+    default:
+      throw new Error('Unknown geojson type');
   }
 }
 
@@ -75,45 +73,45 @@ export function separateGeojsonFeatures(features) {
     const coordinates = get(feature, 'geometry.coordinates');
     const properties = get(feature, 'properties');
     switch (type) {
-    case 'Point':
-      pointFeatures.push(feature);
-      break;
-    case 'MultiPoint':
-      // TODO - split multipoints
-      coordinates.forEach(point => {
-        pointFeatures.push({geometry: {coordinates: point}, properties, feature});
-      });
-      break;
-    case 'LineString':
-      lineFeatures.push(feature);
-      break;
-    case 'MultiLineString':
-      // Break multilinestrings into multiple lines with same properties
-      coordinates.forEach(path => {
-        lineFeatures.push({geometry: {coordinates: path}, properties, feature});
-      });
-      break;
-    case 'Polygon':
-      polygonFeatures.push(feature);
-      // Break polygon into multiple lines with same properties
-      coordinates.forEach(path => {
-        polygonOutlineFeatures.push({geometry: {coordinates: path}, properties, feature});
-      });
-      break;
-    case 'MultiPolygon':
-      // Break multipolygons into multiple polygons with same properties
-      coordinates.forEach(polygon => {
-        polygonFeatures.push({geometry: {coordinates: polygon}, properties, feature});
+      case 'Point':
+        pointFeatures.push(feature);
+        break;
+      case 'MultiPoint':
+        // TODO - split multipoints
+        coordinates.forEach(point => {
+          pointFeatures.push({geometry: {coordinates: point}, properties, feature});
+        });
+        break;
+      case 'LineString':
+        lineFeatures.push(feature);
+        break;
+      case 'MultiLineString':
+        // Break multilinestrings into multiple lines with same properties
+        coordinates.forEach(path => {
+          lineFeatures.push({geometry: {coordinates: path}, properties, feature});
+        });
+        break;
+      case 'Polygon':
+        polygonFeatures.push(feature);
         // Break polygon into multiple lines with same properties
-        polygon.forEach(path => {
+        coordinates.forEach(path => {
           polygonOutlineFeatures.push({geometry: {coordinates: path}, properties, feature});
         });
-      });
-      break;
+        break;
+      case 'MultiPolygon':
+        // Break multipolygons into multiple polygons with same properties
+        coordinates.forEach(polygon => {
+          polygonFeatures.push({geometry: {coordinates: polygon}, properties, feature});
+          // Break polygon into multiple lines with same properties
+          polygon.forEach(path => {
+            polygonOutlineFeatures.push({geometry: {coordinates: path}, properties, feature});
+          });
+        });
+        break;
       // Not yet supported
-    case 'GeometryCollection':
-    default:
-      throw new Error(`GeoJsonLayer: ${type} not supported.`);
+      case 'GeometryCollection':
+      default:
+        throw new Error(`GeoJsonLayer: ${type} not supported.`);
     }
   });
 

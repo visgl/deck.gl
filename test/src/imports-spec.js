@@ -27,7 +27,6 @@ import {ScatterplotLayer, ScreenGridLayer, ArcLayer, LineLayer} from 'deck.gl';
 
 test('Top-level imports', t0 => {
   t0.test('import "deck.gl"', t => {
-
     t.ok(Layer, 'Layer symbol imported');
     t.ok(Layer, 'Layer symbol imported');
     t.ok(ScatterplotLayer, 'ScatterplotLayer symbol imported');

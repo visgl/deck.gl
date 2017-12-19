@@ -30,11 +30,7 @@ const {fillArray, fp64ify} = experimental;
 // Maybe deck.gl or luma.gl needs to export this
 function getPickingColor(index) {
   index++;
-  return [
-    index & 255,
-    (index >> 8) & 255,
-    (index >> 16) & 255
-  ];
+  return [index & 255, (index >> 8) & 255, (index >> 16) & 255];
 }
 
 const DEFAULT_COLOR = [0, 0, 0, 255]; // Black
@@ -56,7 +52,7 @@ export class PolygonTesselator {
     // TODO: dynamically decide IndexType in tesselator?
     // Check if the vertex count excedes index type limit
     if (IndexType === Uint16Array && pointCount > 65535) {
-      throw new Error('Vertex count exceeds browser\'s limit');
+      throw new Error("Vertex count exceeds browser's limit");
     }
 
     this.attributes = {
@@ -72,10 +68,9 @@ export class PolygonTesselator {
 
     if (fp64) {
       // We only need x, y component
-      attributes.positions64xyLow = attributes.positions64xyLow ||
-        new Float32Array(pointCount * 2);
-      attributes.nextPositions64xyLow = attributes.nextPositions64xyLow ||
-        new Float32Array(pointCount * 2);
+      attributes.positions64xyLow = attributes.positions64xyLow || new Float32Array(pointCount * 2);
+      attributes.nextPositions64xyLow =
+        attributes.nextPositions64xyLow || new Float32Array(pointCount * 2);
     }
 
     updatePositions({cache: attributes, polygons, extruded, fp64});
@@ -117,7 +112,6 @@ export class PolygonTesselator {
   pickingColors() {
     return this.attributes.pickingColors;
   }
-
 }
 
 // Count number of points in a list of complex polygons
@@ -164,7 +158,9 @@ function calculateIndices({polygons, IndexType = Uint32Array}) {
 
 function updatePositions({
   cache: {positions, positions64xyLow, nextPositions, nextPositions64xyLow},
-  polygons, extruded, fp64
+  polygons,
+  extruded,
+  fp64
 }) {
   // Flatten out all the vertices of all the sub subPolygons
   let i = 0;
@@ -193,7 +189,8 @@ function updatePositions({
   };
 
   polygons.forEach((polygon, polygonIndex) => {
-    Polygon.forEachVertex(polygon, (vertex, vertexIndex) => { // eslint-disable-line
+    Polygon.forEachVertex(polygon, (vertex, vertexIndex) => {
+      // eslint-disable-line
       const x = vertex[0];
       const y = vertex[1];
       const z = vertex[2] || 0;

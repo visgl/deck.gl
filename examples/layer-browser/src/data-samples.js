@@ -32,11 +32,13 @@ export const milliMeterPaths = [{path: []}];
 
 const path = milliMeterPaths[0].path;
 for (let i = 0; i < meterTrajectorySmall.length / 3; ++i) {
-  path.push(new Vector3(
-    meterTrajectorySmall[i * 3],
-    meterTrajectorySmall[i * 3 + 1],
-    meterTrajectorySmall[i * 3 + 2]
-  ));
+  path.push(
+    new Vector3(
+      meterTrajectorySmall[i * 3],
+      meterTrajectorySmall[i * 3 + 1],
+      meterTrajectorySmall[i * 3 + 2]
+    )
+  );
 }
 
 export const milliMeterPathsFiltered = [{path: []}];
@@ -68,31 +70,31 @@ export const worldGrid = pointsToWorldGrid(points, 500);
 
 export const zigzag = [
   {
-    path: new Array(12).fill(0).map((d, i) => [
-      positionOrigin[0] + i * i * 0.001,
-      positionOrigin[1] + Math.cos(i * Math.PI) * 0.2 / (i + 4)
-    ])
+    path: new Array(12)
+      .fill(0)
+      .map((d, i) => [
+        positionOrigin[0] + i * i * 0.001,
+        positionOrigin[1] + Math.cos(i * Math.PI) * 0.2 / (i + 4)
+      ])
   },
   {
-    path: new Array(6).fill(0).map((d, i) => [
-      positionOrigin[0] + Math.cos(i * Math.PI) * 0.05 / (i + 4),
-      positionOrigin[1] - i * i * 0.0003
-    ])
+    path: new Array(6)
+      .fill(0)
+      .map((d, i) => [
+        positionOrigin[0] + Math.cos(i * Math.PI) * 0.05 / (i + 4),
+        positionOrigin[1] - i * i * 0.0003
+      ])
   },
   {
-    path: [[
-      positionOrigin[0] - 0.005,
-      positionOrigin[1] + 0.005
-    ], [
-      positionOrigin[0] - 0.005,
-      positionOrigin[1] - 0.005
-    ]]
+    path: [
+      [positionOrigin[0] - 0.005, positionOrigin[1] + 0.005],
+      [positionOrigin[0] - 0.005, positionOrigin[1] - 0.005]
+    ]
   }
 ];
 
 // Extract simple/complex polygons arrays from geojson
-export const polygons = choropleths.features
-  .map(choropleth => choropleth.geometry.coordinates);
+export const polygons = choropleths.features.map(choropleth => choropleth.geometry.coordinates);
 
 // time consuming - only generate on demand
 

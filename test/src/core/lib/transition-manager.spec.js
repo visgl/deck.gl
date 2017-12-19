@@ -12,29 +12,91 @@ if (typeof global !== 'undefined' && !global.requestAnimationFrame) {
 const TEST_CASES = [
   {
     title: 'No transition-able viewport change',
-    initialProps:
-      {width: 100, height: 100, longitude: -122.45, latitude: 37.78, zoom: 12, pitch: 0, bearing: 0, transitionDuration: 200},
+    initialProps: {
+      width: 100,
+      height: 100,
+      longitude: -122.45,
+      latitude: 37.78,
+      zoom: 12,
+      pitch: 0,
+      bearing: 0,
+      transitionDuration: 200
+    },
     input: [
       // no change
-      {width: 100, height: 100, longitude: -122.45, latitude: 37.78, zoom: 12, pitch: 0, bearing: 0, transitionDuration: 200},
+      {
+        width: 100,
+        height: 100,
+        longitude: -122.45,
+        latitude: 37.78,
+        zoom: 12,
+        pitch: 0,
+        bearing: 0,
+        transitionDuration: 200
+      },
       // no valid prop change
-      {width: 200, height: 100, longitude: -122.45, latitude: 37.78, zoom: 12, pitch: 0, bearing: 0, transitionDuration: 200},
+      {
+        width: 200,
+        height: 100,
+        longitude: -122.45,
+        latitude: 37.78,
+        zoom: 12,
+        pitch: 0,
+        bearing: 0,
+        transitionDuration: 200
+      },
       // transitionDuration is 0
       {width: 100, height: 100, longitude: -70.9, latitude: 41, zoom: 12, pitch: 60, bearing: 0},
       // transitionInterpolator is empty
-      {width: 100, height: 100, longitude: -70.9, latitude: 41, zoom: 12, pitch: 60, bearing: 0, transitionDuration: 200, transitionInterpolator: null}
+      {
+        width: 100,
+        height: 100,
+        longitude: -70.9,
+        latitude: 41,
+        zoom: 12,
+        pitch: 60,
+        bearing: 0,
+        transitionDuration: 200,
+        transitionInterpolator: null
+      }
     ],
     expect: [false, false, false, false]
   },
   {
     title: 'Trigger viewport transition',
-    initialProps:
-      {width: 100, height: 100, longitude: -70.9, latitude: 41, zoom: 12, pitch: 60, bearing: 0, transitionDuration: 200},
+    initialProps: {
+      width: 100,
+      height: 100,
+      longitude: -70.9,
+      latitude: 41,
+      zoom: 12,
+      pitch: 60,
+      bearing: 0,
+      transitionDuration: 200
+    },
     input: [
       // viewport change
-      {width: 100, height: 100, longitude: -122.45, latitude: 37.78, zoom: 12, pitch: 0, bearing: 0, transitionDuration: 200},
+      {
+        width: 100,
+        height: 100,
+        longitude: -122.45,
+        latitude: 37.78,
+        zoom: 12,
+        pitch: 0,
+        bearing: 0,
+        transitionDuration: 200
+      },
       // viewport change interrupting transition
-      {width: 100, height: 100, longitude: -122.45, latitude: 37.78, zoom: 12, pitch: 0, bearing: 0, transitionDuration: 200}
+      {
+        width: 100,
+        height: 100,
+        longitude: -122.45,
+        latitude: 37.78,
+        zoom: 12,
+        pitch: 0,
+        bearing: 0,
+        transitionDuration: 200
+      }
     ],
     expect: [true, true]
   }
@@ -49,15 +111,17 @@ test('TransitionManager#constructor', t => {
 });
 
 test('TransitionManager#processViewportChange', t => {
-
   const mergeProps = props => Object.assign({}, TransitionManager.defaultProps, props);
 
   TEST_CASES.forEach(testCase => {
     const transitionManager = new TransitionManager(mergeProps(testCase.initialProps));
 
     testCase.input.forEach((props, i) => {
-      t.is(transitionManager.processViewportChange(mergeProps(props)), testCase.expect[i],
-        testCase.title);
+      t.is(
+        transitionManager.processViewportChange(mergeProps(props)),
+        testCase.expect[i],
+        testCase.title
+      );
     });
   });
 
@@ -65,7 +129,6 @@ test('TransitionManager#processViewportChange', t => {
 });
 
 test('TransitionManager#callbacks', t => {
-
   const testCase = TEST_CASES[1];
 
   let startCount = 0;
@@ -84,13 +147,14 @@ test('TransitionManager#callbacks', t => {
     },
     onTransitionInterrupt: () => interruptCount++,
     onTransitionEnd: () => {
-      t.ok(transitionInterpolator.arePropsEqual(viewport, transitionProps),
-        'viewport matches end props');
+      t.ok(
+        transitionInterpolator.arePropsEqual(viewport, transitionProps),
+        'viewport matches end props'
+      );
       endCount++;
     },
     onViewportChange: newViewport => {
-      t.ok(!transitionInterpolator.arePropsEqual(viewport, newViewport),
-        'viewport has changed');
+      t.ok(!transitionInterpolator.arePropsEqual(viewport, newViewport), 'viewport has changed');
       viewport = newViewport;
       // update props in transition, should not trigger interruption
       transitionManager.processViewportChange(Object.assign({}, transitionProps, viewport));

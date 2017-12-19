@@ -24,7 +24,6 @@ export const outFlowColors = [
 ];
 
 export default class DeckGLOverlay extends Component {
-
   static get defaultViewport() {
     return {
       longitude: -100,
@@ -44,8 +43,10 @@ export default class DeckGLOverlay extends Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    if (nextProps.data !== this.props.data ||
-        nextProps.selectedFeature !== this.props.selectedFeature) {
+    if (
+      nextProps.data !== this.props.data ||
+      nextProps.selectedFeature !== this.props.selectedFeature
+    ) {
       this.setState({
         arcs: this._getArcs(nextProps)
       });
@@ -110,8 +111,6 @@ export default class DeckGLOverlay extends Component {
       })
     ];
 
-    return (
-      <DeckGL {...viewport} layers={ layers } />
-    );
+    return <DeckGL {...viewport} layers={layers} />;
   }
 }

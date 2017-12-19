@@ -19,9 +19,15 @@
 // THE SOFTWARE.
 
 const PREDEFINED = [
-  'constructor', 'render', 'componentWillMount', 'componentDidMount',
-  'componentWillReceiveProps', 'shouldComponentUpdate', 'componentWillUpdate',
-  'componentDidUpdate', 'componentWillUnmount'
+  'constructor',
+  'render',
+  'componentWillMount',
+  'componentDidMount',
+  'componentWillReceiveProps',
+  'shouldComponentUpdate',
+  'componentWillUpdate',
+  'componentDidUpdate',
+  'componentWillUnmount'
 ];
 
 /**

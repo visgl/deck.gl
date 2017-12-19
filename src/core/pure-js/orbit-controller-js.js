@@ -42,7 +42,7 @@ const propTypes = {
   orbitControls: PropTypes.object
 };
 
-const getDefaultCursor = ({isDragging}) => isDragging ? CURSOR.GRABBING : CURSOR.GRAB;
+const getDefaultCursor = ({isDragging}) => (isDragging ? CURSOR.GRABBING : CURSOR.GRAB);
 
 const defaultProps = {
   lookAt: [0, 0, 0],
@@ -64,7 +64,6 @@ const defaultProps = {
  * Maps mouse interaction to a deck.gl Viewport
  */
 export default class OrbitControllerJS {
-
   // Returns a deck.gl Viewport instance, to be used with the DeckGL component
   static getViewport(viewport) {
     return new OrbitViewport(viewport);
@@ -87,10 +86,12 @@ export default class OrbitControllerJS {
     this._eventManager = eventManager;
 
     this._controls = props.orbitControls || new ViewportControls(OrbitState);
-    this._controls.setOptions(Object.assign({}, this.props, {
-      onStateChange: this._onInteractiveStateChange.bind(this),
-      eventManager
-    }));
+    this._controls.setOptions(
+      Object.assign({}, this.props, {
+        onStateChange: this._onInteractiveStateChange.bind(this),
+        eventManager
+      })
+    );
   }
 
   setProps(props) {

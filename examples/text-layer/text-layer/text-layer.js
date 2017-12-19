@@ -17,7 +17,6 @@ const defaultProps = {
 };
 
 export default class TextLayer extends CompositeLayer {
-
   initializeState() {
     this.state = {
       iconAtlas: fontInfo.data
@@ -41,15 +40,19 @@ export default class TextLayer extends CompositeLayer {
       return;
     }
 
-    const transformedData = data.map(val => {
-      const text = getText(val);
-      const letters = Array.from(text);
-      const position = getPosition(val);
-      if (!text) {
-        return [];
-      }
-      return letters.map((letter, i) => Object.assign({}, val, {text: letter, position, index: i, len: text.length}));
-    }).reduce((prev, curr) => [...prev, ...curr]);
+    const transformedData = data
+      .map(val => {
+        const text = getText(val);
+        const letters = Array.from(text);
+        const position = getPosition(val);
+        if (!text) {
+          return [];
+        }
+        return letters.map((letter, i) =>
+          Object.assign({}, val, {text: letter, position, index: i, len: text.length})
+        );
+      })
+      .reduce((prev, curr) => [...prev, ...curr]);
 
     this.setState({data: transformedData});
   }
@@ -73,26 +76,28 @@ export default class TextLayer extends CompositeLayer {
     const {getColor, getSize, getAngle, fp64} = this.props;
 
     return [
-      new MultiIconLayer(Object.assign({}, this.props, {
-        id: 'multi-icon-layer-for-text-rendering',
-        data,
-        iconAtlas,
-        iconMapping,
-        getIcon: d => d.text,
-        getPosition: d => d.position,
-        getLetterIndexInString: d => d.index,
-        getStringLength: d => d.len,
-        sizeScale: window.devicePixelRatio,
-        getColor,
-        getSize,
-        getAngle,
-        fp64,
-        updateTriggers: {
-          getAngle,
+      new MultiIconLayer(
+        Object.assign({}, this.props, {
+          id: 'multi-icon-layer-for-text-rendering',
+          data,
+          iconAtlas,
+          iconMapping,
+          getIcon: d => d.text,
+          getPosition: d => d.position,
+          getLetterIndexInString: d => d.index,
+          getStringLength: d => d.len,
+          sizeScale: window.devicePixelRatio,
           getColor,
-          getSize
-        }
-      }))
+          getSize,
+          getAngle,
+          fp64,
+          updateTriggers: {
+            getAngle,
+            getColor,
+            getSize
+          }
+        })
+      )
     ];
   }
 }

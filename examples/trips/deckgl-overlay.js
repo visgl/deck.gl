@@ -12,7 +12,6 @@ const LIGHT_SETTINGS = {
 };
 
 export default class DeckGLOverlay extends Component {
-
   static get defaultViewport() {
     return {
       longitude: -74,
@@ -36,7 +35,7 @@ export default class DeckGLOverlay extends Component {
         id: 'trips',
         data: trips,
         getPath: d => d.segments,
-        getColor: d => d.vendor === 0 ? [253, 128, 93] : [23, 184, 190],
+        getColor: d => (d.vendor === 0 ? [253, 128, 93] : [23, 184, 190]),
         opacity: 0.3,
         strokeWidth: 2,
         trailLength,
@@ -56,8 +55,6 @@ export default class DeckGLOverlay extends Component {
       })
     ];
 
-    return (
-      <DeckGL {...viewport} layers={layers} />
-    );
+    return <DeckGL {...viewport} layers={layers} />;
   }
 }

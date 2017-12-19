@@ -94,7 +94,6 @@ function getTicks(props) {
  * @param {Array} [props.color] - color of the gridlines, in [r,g,b,a]
  */
 export default class AxesLayer extends Layer {
-
   initializeState() {
     const {gl} = this.context;
     const {attributeManager} = this.state;
@@ -116,15 +115,15 @@ export default class AxesLayer extends Layer {
     const {attributeManager} = this.state;
 
     if (
-      (oldProps.xScale !== props.xScale) ||
-      (oldProps.yScale !== props.yScale) ||
-      (oldProps.zScale !== props.zScale) ||
-      (oldProps.xTicks !== props.xTicks) ||
-      (oldProps.yTicks !== props.yTicks) ||
-      (oldProps.zTicks !== props.zTicks) ||
-      (oldProps.xTickFormat !== props.xTickFormat) ||
-      (oldProps.yTickFormat !== props.yTickFormat) ||
-      (oldProps.zTickFormat !== props.zTickFormat)
+      oldProps.xScale !== props.xScale ||
+      oldProps.yScale !== props.yScale ||
+      oldProps.zScale !== props.zScale ||
+      oldProps.xTicks !== props.xTicks ||
+      oldProps.yTicks !== props.yTicks ||
+      oldProps.zTicks !== props.zTicks ||
+      oldProps.xTickFormat !== props.xTickFormat ||
+      oldProps.yTickFormat !== props.yTickFormat ||
+      oldProps.zTickFormat !== props.zTickFormat
     ) {
       const {xScale, yScale, zScale} = props;
 
@@ -141,11 +140,7 @@ export default class AxesLayer extends Layer {
       this.setState({
         ticks,
         labelTexture: this.renderLabelTexture(ticks),
-        gridDims: [
-          xRange[1] - xRange[0],
-          zRange[1] - zRange[0],
-          yRange[1] - yRange[0]
-        ],
+        gridDims: [xRange[1] - xRange[0], zRange[1] - zRange[0], yRange[1] - yRange[0]],
         gridCenter: [
           (xRange[0] + xRange[1]) / 2,
           (zRange[0] + zRange[1]) / 2,
@@ -215,24 +210,64 @@ export default class AxesLayer extends Layer {
     // offset of each corner
     const gridPositions = [
       // left edge
-      -1, -1, 0, -1, 1, 0,
+      -1,
+      -1,
+      0,
+      -1,
+      1,
+      0,
       // top edge
-      -1, 1, 0, 1, 1, 0,
+      -1,
+      1,
+      0,
+      1,
+      1,
+      0,
       // right edge
-      1, 1, 0, 1, -1, 0,
+      1,
+      1,
+      0,
+      1,
+      -1,
+      0,
       // bottom edge
-      1, -1, 0, -1, -1, 0
+      1,
+      -1,
+      0,
+      -1,
+      -1,
+      0
     ];
     // normal of each edge
     const gridNormals = [
       // left edge
-      -1, 0, 0, -1, 0, 0,
+      -1,
+      0,
+      0,
+      -1,
+      0,
+      0,
       // top edge
-      0, 1, 0, 0, 1, 0,
+      0,
+      1,
+      0,
+      0,
+      1,
+      0,
       // right edge
-      1, 0, 0, 1, 0, 0,
+      1,
+      0,
+      0,
+      1,
+      0,
+      0,
       // bottom edge
-      0, -1, 0, 0, -1, 0
+      0,
+      -1,
+      0,
+      0,
+      -1,
+      0
     ];
 
     const grids = new Model(gl, {
@@ -268,8 +303,12 @@ export default class AxesLayer extends Layer {
        */
       labelTexCoords = labelTexCoords.concat([0, 0, 0, 1, 1, 0, 1, 1]);
       labelIndices = labelIndices.concat([
-        i * 4 + 0, i * 4 + 1, i * 4 + 2,
-        i * 4 + 2, i * 4 + 1, i * 4 + 3
+        i * 4 + 0,
+        i * 4 + 1,
+        i * 4 + 2,
+        i * 4 + 2,
+        i * 4 + 1,
+        i * 4 + 3
       ]);
 
       // all four vertices of this label's rectangle is anchored at the same grid endpoint
@@ -301,9 +340,7 @@ export default class AxesLayer extends Layer {
   calculateInstancePositions(attribute) {
     const {ticks} = this.state;
 
-    const positions = ticks.map(axisTicks =>
-      axisTicks.map((t, i) => [t.position, i])
-    );
+    const positions = ticks.map(axisTicks => axisTicks.map((t, i) => [t.position, i]));
 
     const value = new Float32Array(flatten(positions));
     attribute.value = value;
@@ -328,14 +365,13 @@ export default class AxesLayer extends Layer {
 
     const isTitle = ticks.map(axisTicks => {
       const ticksCount = axisTicks.length - 1;
-      return axisTicks.map((t, i) => i < ticksCount ? 0 : 1);
+      return axisTicks.map((t, i) => (i < ticksCount ? 0 : 1));
     });
 
     attribute.value = new Float32Array(flatten(isTitle));
   }
 
   renderLabelTexture(ticks) {
-
     if (this.state.labels) {
       this.state.labels.labelTexture.delete();
     }
@@ -355,7 +391,6 @@ export default class AxesLayer extends Layer {
     }
     return null;
   }
-
 }
 
 AxesLayer.layerName = 'AxesLayer';

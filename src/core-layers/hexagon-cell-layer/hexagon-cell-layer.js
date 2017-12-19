@@ -42,7 +42,7 @@ const defaultProps = {
   getElevation: x => x.elevation,
 
   lightSettings: {
-    lightsPosition: [-122.45, 37.75, 8000, -122.0, 38.00, 5000],
+    lightsPosition: [-122.45, 37.75, 8000, -122.0, 38.0, 5000],
     ambientRatio: 0.4,
     diffuseRatio: 0.6,
     specularRatio: 0.8,
@@ -52,16 +52,19 @@ const defaultProps = {
 };
 
 export default class HexagonCellLayer extends Layer {
-
   constructor(props) {
     let missingProps = false;
     if (!props.hexagonVertices && (!props.radius || !Number.isFinite(props.angle))) {
-      log.once(0, 'HexagonCellLayer: Either hexagonVertices or radius and angle are ' +
-        'needed to calculate primitive hexagon.');
+      log.once(
+        0,
+        'HexagonCellLayer: Either hexagonVertices or radius and angle are ' +
+          'needed to calculate primitive hexagon.'
+      );
       missingProps = true;
-
-    } else if (props.hexagonVertices && (!Array.isArray(props.hexagonVertices) ||
-      props.hexagonVertices.length < 6)) {
+    } else if (
+      props.hexagonVertices &&
+      (!Array.isArray(props.hexagonVertices) || props.hexagonVertices.length < 6)
+    ) {
       log.once(0, 'HexagonCellLayer: hexagonVertices needs to be an array of 6 points');
 
       missingProps = true;
@@ -77,9 +80,9 @@ export default class HexagonCellLayer extends Layer {
   }
 
   getShaders() {
-    return enable64bitSupport(this.props) ?
-      {vs: vs64, fs, modules: ['project64', 'lighting', 'picking']} :
-      {vs, fs, modules: ['lighting', 'picking']}; // 'project' module added by default.
+    return enable64bitSupport(this.props)
+      ? {vs: vs64, fs, modules: ['project64', 'lighting', 'picking']}
+      : {vs, fs, modules: ['lighting', 'picking']}; // 'project' module added by default.
   }
 
   /**
@@ -92,10 +95,17 @@ export default class HexagonCellLayer extends Layer {
     const {attributeManager} = this.state;
     /* eslint-disable max-len */
     attributeManager.addInstanced({
-      instancePositions: {size: 3, accessor: ['getCentroid', 'getElevation'],
-        update: this.calculateInstancePositions},
-      instanceColors: {size: 4, type: GL.UNSIGNED_BYTE, accessor: 'getColor',
-        update: this.calculateInstanceColors}
+      instancePositions: {
+        size: 3,
+        accessor: ['getCentroid', 'getElevation'],
+        update: this.calculateInstancePositions
+      },
+      instanceColors: {
+        size: 4,
+        type: GL.UNSIGNED_BYTE,
+        accessor: 'getColor',
+        update: this.calculateInstanceColors
+      }
     });
     /* eslint-enable max-len */
   }
@@ -114,11 +124,8 @@ export default class HexagonCellLayer extends Layer {
           }
         });
       } else {
-        attributeManager.remove([
-          'instancePositions64xyLow'
-        ]);
+        attributeManager.remove(['instancePositions64xyLow']);
       }
-
     }
   }
 
@@ -139,7 +146,6 @@ export default class HexagonCellLayer extends Layer {
     const {hexagonVertices} = this.props;
 
     if (Array.isArray(hexagonVertices) && hexagonVertices.length >= 6) {
-
       // calculate angle and vertices from hexagonVertices if provided
       const vertices = this.props.hexagonVertices;
 
@@ -158,9 +164,7 @@ export default class HexagonCellLayer extends Layer {
       // Calculate angle that the perpendicular hexagon vertex axis is tilted
       angle = Math.acos(dx / dxy) * -Math.sign(dy) + Math.PI / 2;
       radius = dxy / 2;
-
     } else if (this.props.radius && Number.isFinite(this.props.angle)) {
-
       // if no hexagonVertices provided, try use radius & angle
       const {viewport} = this.context;
       // TODO - this should be a standard uniform in project package
@@ -190,22 +194,30 @@ export default class HexagonCellLayer extends Layer {
     const {opacity, elevationScale, extruded, coverage, lightSettings} = this.props;
     const {model} = this.state;
 
-    model.setUniforms(Object.assign({}, {
-      extruded,
-      opacity,
-      coverage,
-      elevationScale
-    },
-    lightSettings));
+    model.setUniforms(
+      Object.assign(
+        {},
+        {
+          extruded,
+          opacity,
+          coverage,
+          elevationScale
+        },
+        lightSettings
+      )
+    );
   }
 
   _getModel(gl) {
-    return new Model(gl, Object.assign({}, this.getShaders(), {
-      id: this.props.id,
-      geometry: this.getCylinderGeometry(1),
-      isInstanced: true,
-      shaderCache: this.context.shaderCache
-    }));
+    return new Model(
+      gl,
+      Object.assign({}, this.getShaders(), {
+        id: this.props.id,
+        geometry: this.getCylinderGeometry(1),
+        isInstanced: true,
+        shaderCache: this.context.shaderCache
+      })
+    );
   }
 
   draw({uniforms}) {

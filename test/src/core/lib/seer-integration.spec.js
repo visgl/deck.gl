@@ -4,7 +4,6 @@ import {window} from 'deck.gl/core/utils/globals';
 import {setPropOverrides, applyPropOverrides} from 'deck.gl/core/lib/seer-integration';
 
 test('Seer overrides', t => {
-
   const props = {
     id: 'arc-layer',
     opacity: {data: {value: 0.4}},
@@ -24,5 +23,4 @@ test('Seer overrides', t => {
   t.equal(props.opacity.data.value, 0.5, 'The value should now have been changed');
 
   t.end();
-
 });

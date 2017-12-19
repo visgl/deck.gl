@@ -15,7 +15,6 @@ const defaultProps = {
 };
 
 export default class TagmapLayer extends CompositeLayer {
-
   initializeState() {
     this.state = {
       tags: []
@@ -32,10 +31,12 @@ export default class TagmapLayer extends CompositeLayer {
     if (changeFlags.dataChanged) {
       this.updateTagMapData();
       this.updateTagMapVis();
-    } else if (changeFlags.viewportChanged ||
-        props.minFontSize !== oldProps.minFontSize ||
-        props.maxFontSize !== oldProps.maxFontSize ||
-        props.weightThreshold !== oldProps.weightThreshold) {
+    } else if (
+      changeFlags.viewportChanged ||
+      props.minFontSize !== oldProps.minFontSize ||
+      props.maxFontSize !== oldProps.maxFontSize ||
+      props.weightThreshold !== oldProps.weightThreshold
+    ) {
       this.updateTagMapVis();
     }
   }

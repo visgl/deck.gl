@@ -4,10 +4,10 @@ const {DeckGLJS, MapControllerJS} = experimental;
 import MapBox from './mapbox';
 
 // source: Natural Earth http://www.naturalearthdata.com/ via geojson.xyz
-const GEOJSON = 'https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_110m_admin_1_states_provinces_shp.geojson'; //eslint-disable-line
+const GEOJSON =
+  'https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_110m_admin_1_states_provinces_shp.geojson'; //eslint-disable-line
 
 class App {
-
   constructor(props) {
     this.state = {
       viewport: {

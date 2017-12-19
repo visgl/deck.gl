@@ -35,9 +35,7 @@ import earcut from 'earcut';
  * @return {Boolean} - true if the polygon is a simple polygon (i.e. not an array of polygons)
  */
 export function isSimple(polygon) {
-  return polygon.length >= 1 &&
-    polygon[0].length >= 2 &&
-    Number.isFinite(polygon[0][0]);
+  return polygon.length >= 1 && polygon[0].length >= 2 && Number.isFinite(polygon[0][0]);
 }
 
 /**
@@ -57,9 +55,9 @@ export function normalize(polygon, {dimensions = 3} = {}) {
  * @return {Boolean} - true if the polygon is a simple polygon (i.e. not an array of polygons)
  */
 export function getVertexCount(polygon) {
-  return isSimple(polygon) ?
-    polygon.length :
-    polygon.reduce((length, simplePolygon) => length + simplePolygon.length, 0);
+  return isSimple(polygon)
+    ? polygon.length
+    : polygon.reduce((length, simplePolygon) => length + simplePolygon.length, 0);
 }
 
 // Return number of triangles needed to tesselate the polygon

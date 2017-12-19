@@ -63,9 +63,11 @@ function calculateProjectionCenter({coordinateOrigin, coordinateZoom, viewProjec
   const positionPixels = projectFlat(coordinateOrigin, Math.pow(2, coordinateZoom));
   // projectionCenter = new Matrix4(viewProjectionMatrix)
   //   .transformVector([positionPixels[0], positionPixels[1], 0.0, 1.0]);
-  return vec4_transformMat4([],
+  return vec4_transformMat4(
+    [],
     [positionPixels[0], positionPixels[1], 0.0, 1.0],
-    viewProjectionMatrix);
+    viewProjectionMatrix
+  );
 }
 
 // The code that utilizes Matrix4 does the same calculation as their mat4 counterparts,
@@ -88,30 +90,31 @@ function calculateMatrixAndOffset({
   let projectionCenter;
 
   switch (coordinateSystem) {
+    case COORDINATE_SYSTEM.IDENTITY:
+    case COORDINATE_SYSTEM.LNGLAT:
+      projectionCenter = ZERO_VECTOR;
+      break;
 
-  case COORDINATE_SYSTEM.IDENTITY:
-  case COORDINATE_SYSTEM.LNGLAT:
-    projectionCenter = ZERO_VECTOR;
-    break;
+    // TODO: make lighitng work for meter offset mode
+    case COORDINATE_SYSTEM.METER_OFFSETS:
+      projectionCenter = calculateProjectionCenter({
+        coordinateOrigin,
+        coordinateZoom,
+        viewProjectionMatrix
+      });
 
-  // TODO: make lighitng work for meter offset mode
-  case COORDINATE_SYSTEM.METER_OFFSETS:
-    projectionCenter = calculateProjectionCenter({
-      coordinateOrigin, coordinateZoom, viewProjectionMatrix
-    });
+      // Always apply uncentered projection matrix if available (shader adds center)
+      viewMatrix = viewMatrixUncentered || viewMatrix;
 
-    // Always apply uncentered projection matrix if available (shader adds center)
-    viewMatrix = viewMatrixUncentered || viewMatrix;
+      // Zero out 4th coordinate ("after" model matrix) - avoids further translations
+      // viewMatrix = new Matrix4(viewMatrixUncentered || viewMatrix)
+      //   .multiplyRight(VECTOR_TO_POINT_MATRIX);
+      viewProjectionMatrix = mat4_multiply([], projectionMatrix, viewMatrix);
+      viewProjectionMatrix = mat4_multiply([], viewProjectionMatrix, VECTOR_TO_POINT_MATRIX);
+      break;
 
-    // Zero out 4th coordinate ("after" model matrix) - avoids further translations
-    // viewMatrix = new Matrix4(viewMatrixUncentered || viewMatrix)
-    //   .multiplyRight(VECTOR_TO_POINT_MATRIX);
-    viewProjectionMatrix = mat4_multiply([], projectionMatrix, viewMatrix);
-    viewProjectionMatrix = mat4_multiply([], viewProjectionMatrix, VECTOR_TO_POINT_MATRIX);
-    break;
-
-  default:
-    throw new Error('Unknown projection mode');
+    default:
+      throw new Error('Unknown projection mode');
   }
 
   return {
@@ -131,16 +134,18 @@ function calculateMatrixAndOffset({
  * @param {WebMercatorViewport} viewport -
  * @return {Float32Array} - 4x4 projection matrix that can be used in shaders
  */
-export function getUniformsFromViewport({
-  viewport,
-  modelMatrix = null,
-  coordinateSystem = COORDINATE_SYSTEM.LNGLAT,
-  coordinateOrigin = [0, 0],
-  fp64 = false,
-  // Deprecated
-  projectionMode,
-  positionOrigin
-} = {}) {
+export function getUniformsFromViewport(
+  {
+    viewport,
+    modelMatrix = null,
+    coordinateSystem = COORDINATE_SYSTEM.LNGLAT,
+    coordinateOrigin = [0, 0],
+    fp64 = false,
+    // Deprecated
+    projectionMode,
+    positionOrigin
+  } = {}
+) {
   assert(viewport);
 
   if (projectionMode !== undefined) {
@@ -153,10 +158,13 @@ export function getUniformsFromViewport({
   const coordinateZoom = viewport.zoom;
   assert(coordinateZoom >= 0);
 
-  const {projectionCenter, viewProjectionMatrix, cameraPos} =
-    calculateMatrixAndOffset({
-      coordinateSystem, coordinateOrigin, coordinateZoom, modelMatrix, viewport
-    });
+  const {projectionCenter, viewProjectionMatrix, cameraPos} = calculateMatrixAndOffset({
+    coordinateSystem,
+    coordinateOrigin,
+    coordinateZoom,
+    modelMatrix,
+    viewport
+  });
 
   assert(viewProjectionMatrix, 'Viewport missing modelViewProjectionMatrix');
 

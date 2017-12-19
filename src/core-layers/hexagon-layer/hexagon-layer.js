@@ -53,7 +53,7 @@ const defaultProps = {
   fp64: false,
   // Optional settings for 'lighting' shader module
   lightSettings: {
-    lightsPosition: [-122.45, 37.75, 8000, -122.0, 38.00, 5000],
+    lightsPosition: [-122.45, 37.75, 8000, -122.0, 38.0, 5000],
     ambientRatio: 0.05,
     diffuseRatio: 0.6,
     specularRatio: 0.8,
@@ -65,31 +65,45 @@ const defaultProps = {
 export default class HexagonLayer extends CompositeLayer {
   constructor(props) {
     if (!props.hexagonAggregator && !props.radius) {
-      log.once(0, 'HexagonLayer: Default hexagonAggregator requires radius prop to be set, ' +
-        'Now using 1000 meter as default');
+      log.once(
+        0,
+        'HexagonLayer: Default hexagonAggregator requires radius prop to be set, ' +
+          'Now using 1000 meter as default'
+      );
 
       props.radius = defaultProps.radius;
     }
 
-    if (Number.isFinite(props.upperPercentile) &&
-      (props.upperPercentile > 100 || props.upperPercentile < 0)) {
-      log.once(0, 'HexagonLayer: upperPercentile should be between 0 and 100. ' +
-        'Assign to 100 by default');
+    if (
+      Number.isFinite(props.upperPercentile) &&
+      (props.upperPercentile > 100 || props.upperPercentile < 0)
+    ) {
+      log.once(
+        0,
+        'HexagonLayer: upperPercentile should be between 0 and 100. ' + 'Assign to 100 by default'
+      );
 
       props.upperPercentile = defaultProps.upperPercentile;
     }
 
-    if (Number.isFinite(props.lowerPercentile) &&
-      (props.lowerPercentile > 100 || props.lowerPercentile < 0)) {
-      log.once(0, 'HexagonLayer: lowerPercentile should be between 0 and 100. ' +
-        'Assign to 0 by default');
+    if (
+      Number.isFinite(props.lowerPercentile) &&
+      (props.lowerPercentile > 100 || props.lowerPercentile < 0)
+    ) {
+      log.once(
+        0,
+        'HexagonLayer: lowerPercentile should be between 0 and 100. ' + 'Assign to 0 by default'
+      );
 
       props.lowerPercentile = defaultProps.upperPercentile;
     }
 
     if (props.lowerPercentile >= props.upperPercentile) {
-      log.once(0, 'HexagonLayer: lowerPercentile should not be bigger than ' +
-        'upperPercentile. Assign to 0 by default');
+      log.once(
+        0,
+        'HexagonLayer: lowerPercentile should not be bigger than ' +
+          'upperPercentile. Assign to 0 by default'
+      );
 
       props.lowerPercentile = defaultProps.lowerPercentile;
     }
@@ -121,15 +135,15 @@ export default class HexagonLayer extends CompositeLayer {
     if (changeFlags.dataChanged || this.needsReProjectPoints(oldProps, props)) {
       // project data into hexagons, and get sortedColorBins
       this.getHexagons();
-
     } else if (dimensionChanges) {
       dimensionChanges.forEach(f => typeof f === 'function' && f.apply(this));
     }
   }
 
   needsReProjectPoints(oldProps, props) {
-    return oldProps.radius !== props.radius ||
-      oldProps.hexagonAggregator !== props.hexagonAggregator;
+    return (
+      oldProps.radius !== props.radius || oldProps.hexagonAggregator !== props.hexagonAggregator
+    );
   }
 
   getDimensionUpdaters() {
@@ -143,11 +157,13 @@ export default class HexagonLayer extends CompositeLayer {
           id: 'value',
           triggers: ['getColorValue'],
           updater: this.getSortedColorBins
-        }, {
+        },
+        {
           id: 'domain',
           triggers: ['lowerPercentile', 'upperPercentile'],
           updater: this.getColorValueDomain
-        }, {
+        },
+        {
           id: 'scaleFunc',
           triggers: ['colorDomain', 'colorRange'],
           updater: this.getColorScale
@@ -158,11 +174,13 @@ export default class HexagonLayer extends CompositeLayer {
           id: 'value',
           triggers: ['getElevationValue'],
           updater: this.getSortedElevationBins
-        }, {
+        },
+        {
           id: 'domain',
           triggers: ['elevationLowerPercentile', 'elevationUpperPercentile'],
           updater: this.getElevationValueDomain
-        }, {
+        },
+        {
           id: 'scaleFunc',
           triggers: ['elevationDomain', 'elevationRange'],
           updater: this.getElevationScale
@@ -177,10 +195,10 @@ export default class HexagonLayer extends CompositeLayer {
 
     // get dimension to be updated
     for (const dimensionKey in dimensionUpdaters) {
-
       // return the first triggered updater for each dimension
-      const needUpdate = dimensionUpdaters[dimensionKey]
-        .find(item => item.triggers.some(t => oldProps[t] !== props[t]));
+      const needUpdate = dimensionUpdaters[dimensionKey].find(item =>
+        item.triggers.some(t => oldProps[t] !== props[t])
+      );
 
       if (needUpdate) {
         updaters.push(needUpdate.updater);
@@ -204,18 +222,20 @@ export default class HexagonLayer extends CompositeLayer {
 
     let object = null;
     if (isPicked) {
-
       const cell = this.state.hexagons[info.index];
 
-      const colorValue = sortedColorBins.binMap[cell.index] &&
-        sortedColorBins.binMap[cell.index].value;
-      const elevationValue = sortedElevationBins.binMap[cell.index] &&
-        sortedElevationBins.binMap[cell.index].value;
+      const colorValue =
+        sortedColorBins.binMap[cell.index] && sortedColorBins.binMap[cell.index].value;
+      const elevationValue =
+        sortedElevationBins.binMap[cell.index] && sortedElevationBins.binMap[cell.index].value;
 
-      object = Object.assign({
-        colorValue,
-        elevationValue
-      }, cell);
+      object = Object.assign(
+        {
+          colorValue,
+          elevationValue
+        },
+        cell
+      );
     }
 
     // add bin colorValue and elevationValue to info
@@ -233,15 +253,12 @@ export default class HexagonLayer extends CompositeLayer {
     const updateTriggers = {};
 
     for (const dimensionKey in dimensionUpdaters) {
-
       updateTriggers[dimensionKey] = {};
 
       for (const step of dimensionUpdaters[dimensionKey]) {
-
         step.triggers.forEach(prop => {
           updateTriggers[dimensionKey][prop] = this.props[prop];
         });
-
       }
     }
 
@@ -276,8 +293,10 @@ export default class HexagonLayer extends CompositeLayer {
   getColorValueDomain() {
     const {lowerPercentile, upperPercentile, onSetColorDomain} = this.props;
 
-    this.state.colorValueDomain = this.state.sortedColorBins
-      .getValueRange([lowerPercentile, upperPercentile]);
+    this.state.colorValueDomain = this.state.sortedColorBins.getValueRange([
+      lowerPercentile,
+      upperPercentile
+    ]);
 
     if (typeof onSetColorDomain === 'function') {
       onSetColorDomain(this.state.colorValueDomain);
@@ -289,8 +308,10 @@ export default class HexagonLayer extends CompositeLayer {
   getElevationValueDomain() {
     const {elevationLowerPercentile, elevationUpperPercentile, onSetElevationDomain} = this.props;
 
-    this.state.elevationValueDomain = this.state.sortedElevationBins
-      .getValueRange([elevationLowerPercentile, elevationUpperPercentile]);
+    this.state.elevationValueDomain = this.state.sortedElevationBins.getValueRange([
+      elevationLowerPercentile,
+      elevationUpperPercentile
+    ]);
 
     if (typeof onSetElevationDomain === 'function') {
       onSetElevationDomain(this.state.elevationValueDomain);
@@ -332,13 +353,13 @@ export default class HexagonLayer extends CompositeLayer {
 
   _onGetSublayerElevation(cell) {
     const {sortedElevationBins, elevationScaleFunc, elevationValueDomain} = this.state;
-    const ev = sortedElevationBins.binMap[cell.index] &&
-      sortedElevationBins.binMap[cell.index].value;
+    const ev =
+      sortedElevationBins.binMap[cell.index] && sortedElevationBins.binMap[cell.index].value;
 
     const elevationDomain = this.props.elevationDomain || elevationValueDomain;
 
-    const isElevationValueInDomain = ev >= elevationDomain[0] &&
-      ev <= elevationDomain[elevationDomain.length - 1];
+    const isElevationValueInDomain =
+      ev >= elevationDomain[0] && ev <= elevationDomain[elevationDomain.length - 1];
 
     // if cell value is outside domain, set elevation to -1
     return isElevationValueInDomain ? elevationScaleFunc(ev) : -1;
@@ -378,9 +399,7 @@ export default class HexagonLayer extends CompositeLayer {
   renderLayers() {
     const SubLayerClass = this.getSubLayerClass();
 
-    return new SubLayerClass(
-      this.getSubLayerProps()
-    );
+    return new SubLayerClass(this.getSubLayerProps());
   }
 }
 

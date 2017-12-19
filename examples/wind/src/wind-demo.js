@@ -17,7 +17,6 @@ const propTypes = {
 };
 
 export default class WindDemo extends Component {
-
   constructor(props) {
     super(props);
 
@@ -67,10 +66,15 @@ export default class WindDemo extends Component {
     const {data, webGL2Supported} = this.state;
     if (!webGL2Supported) {
       return (
-        <div style={{
-          display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh'
-        }}>
-          <h2> {'THIS DEMO REQUIRES WEBLG2, BUT YOUR BRWOSER DOESN\'T SUPPORT IT'} </h2>
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            height: '100vh'
+          }}
+        >
+          <h2> {"THIS DEMO REQUIRES WEBLG2, BUT YOUR BRWOSER DOESN'T SUPPORT IT"} </h2>
         </div>
       );
     }
@@ -92,21 +96,23 @@ export default class WindDemo extends Component {
         opacity: 0.2,
         radiusScale: 30
       }),
-      settings.showParticles && new ParticleLayer({
-        id: 'particles',
-        bbox,
-        texData,
-        time: settings.time,
-        zScale: 100
-      }),
-      settings.showWind && new WindLayer({
-        id: 'wind',
-        bbox,
-        dataBounds: texData.dataBounds,
-        dataTextureArray: texData.textureArray,
-        dataTextureSize: texData.textureSize,
-        time: settings.time
-      }),
+      settings.showParticles &&
+        new ParticleLayer({
+          id: 'particles',
+          bbox,
+          texData,
+          time: settings.time,
+          zScale: 100
+        }),
+      settings.showWind &&
+        new WindLayer({
+          id: 'wind',
+          bbox,
+          dataBounds: texData.dataBounds,
+          dataTextureArray: texData.textureArray,
+          dataTextureSize: texData.textureSize,
+          time: settings.time
+        }),
       // settings.showElevation && new ElevationLayer({
       //   id: 'elevation',
       //   boundingBox,
@@ -115,10 +121,11 @@ export default class WindDemo extends Component {
       //   latResolution: 100,
       //   zScale: 100
       // })
-      settings.showElevation && new DelaunayCoverLayer({
-        id: 'delaunay-cover',
-        triangulation
-      })
+      settings.showElevation &&
+        new DelaunayCoverLayer({
+          id: 'delaunay-cover',
+          triangulation
+        })
       // FIXME - deck.gl should automatically cull null/false layers
     ].filter(Boolean);
 

@@ -23,8 +23,11 @@ export function parseTile({tileParams, tileData}) {
     const vals = row.vals__uint8 || row.vals;
     const dates = row.dates__uint16 || row.dates;
     assert(
-      Number.isFinite(x) && Number.isFinite(y) &&
-      Array.isArray(vals) && Array.isArray(dates) && vals.length === dates.length,
+      Number.isFinite(x) &&
+        Number.isFinite(y) &&
+        Array.isArray(vals) &&
+        Array.isArray(dates) &&
+        vals.length === dates.length,
       'Cannot parse torque tile - expected torque row'
     );
 
@@ -58,7 +61,7 @@ export function tileToLngLatExtents({xTileNo, yTileNo, zoom}) {
   const west = xTileNo / n * 360 - 180;
   const east = (xTileNo + 1) / n * 360 - 180;
   const south = Math.atan(Math.sinh(Math.PI * (1 - 2 * (yTileNo + 1) / n))) / Math.PI * 180;
-  const north = Math.atan(Math.sinh(Math.PI * (1 - 2 * (yTileNo) / n))) / Math.PI * 180;
+  const north = Math.atan(Math.sinh(Math.PI * (1 - 2 * yTileNo / n))) / Math.PI * 180;
   // console.log('west, east, south, north: ', west, east, south, north);
   return {west, east, south, north};
 }
@@ -67,7 +70,8 @@ export function lngLatToTile({longitude, latitude, zoom}) {
   const lat_rad = latitude / 180 * Math.PI;
   const n = Math.pow(2.0, zoom);
   const xtile = Math.floor((longitude + 180.0) / 360.0 * n);
-  const ytile =
-    Math.floor((1.0 - Math.log(Math.tan(lat_rad) + (1 / Math.cos(lat_rad))) / Math.PI) / 2.0 * n);
+  const ytile = Math.floor(
+    (1.0 - Math.log(Math.tan(lat_rad) + 1 / Math.cos(lat_rad)) / Math.PI) / 2.0 * n
+  );
   return [xtile, ytile];
 }

@@ -18,13 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {
-  CompositeLayer,
-  IconLayer,
-  LineLayer,
-  ScatterplotLayer,
-  COORDINATE_SYSTEM
-} from 'deck.gl';
+import {CompositeLayer, IconLayer, LineLayer, ScatterplotLayer, COORDINATE_SYSTEM} from 'deck.gl';
 
 const defaultProps = {
   offset: {x: 0, y: 0},
@@ -80,9 +74,14 @@ export default class GraphLayer extends CompositeLayer {
 
     // Accessor props for underlying layers
     const {
-      getLinkPosition, getLinkColor, getLinkWidth,
-      getNodePosition, getNodeColor, getNodeSize,
-      nodeIconAccessors} = this.props;
+      getLinkPosition,
+      getLinkColor,
+      getLinkWidth,
+      getNodePosition,
+      getNodeColor,
+      getNodeSize,
+      nodeIconAccessors
+    } = this.props;
     const {getIcon, iconAtlas, iconMapping, sizeScale} = nodeIconAccessors || {};
 
     // base layer props
@@ -97,65 +96,66 @@ export default class GraphLayer extends CompositeLayer {
     // only draw icons if all required accessors are present
     const drawIcons = drawNodes && getIcon && iconAtlas && iconMapping;
 
-    const linksLayer = drawLinks && new LineLayer({
-      id: `${id}-link-layer`,
-      data: links,
-      getSourcePosition: d => getLinkPosition(d).sourcePosition,
-      getTargetPosition: d => getLinkPosition(d).targetPosition,
-      getColor: e => e.highlighting ? [255, 0, 0, 200] : getLinkColor(e),
-      strokeWidth: getLinkWidth(),
-      opacity,
-      pickable,
-      coordinateSystem,
-      updateTriggers: {
-        getSourcePosition: layoutTime,
-        getTargetPosition: layoutTime,
-        getColor: layoutTime
-      }
-    });
+    const linksLayer =
+      drawLinks &&
+      new LineLayer({
+        id: `${id}-link-layer`,
+        data: links,
+        getSourcePosition: d => getLinkPosition(d).sourcePosition,
+        getTargetPosition: d => getLinkPosition(d).targetPosition,
+        getColor: e => (e.highlighting ? [255, 0, 0, 200] : getLinkColor(e)),
+        strokeWidth: getLinkWidth(),
+        opacity,
+        pickable,
+        coordinateSystem,
+        updateTriggers: {
+          getSourcePosition: layoutTime,
+          getTargetPosition: layoutTime,
+          getColor: layoutTime
+        }
+      });
 
-    const nodesLayer = drawNodes && new ScatterplotLayer({
-      id: `${id}-${drawIcons ? 'node-bg-layer' : 'node-layer'}`,
-      data: nodes,
-      getPosition: getNodePosition,
-      getRadius: getNodeSize,
-      getColor: n => n.highlighting ? [255, 255, 0, 255] : getNodeColor(n),
-      opacity,
-      pickable,
-      coordinateSystem,
-      updateTriggers: {
-        getPosition: layoutTime,
-        getColor: layoutTime
-      },
-      visible
-    });
+    const nodesLayer =
+      drawNodes &&
+      new ScatterplotLayer({
+        id: `${id}-${drawIcons ? 'node-bg-layer' : 'node-layer'}`,
+        data: nodes,
+        getPosition: getNodePosition,
+        getRadius: getNodeSize,
+        getColor: n => (n.highlighting ? [255, 255, 0, 255] : getNodeColor(n)),
+        opacity,
+        pickable,
+        coordinateSystem,
+        updateTriggers: {
+          getPosition: layoutTime,
+          getColor: layoutTime
+        },
+        visible
+      });
 
-    const nodeIconsLayer = drawIcons && new IconLayer({
-      id: `${id}-node-icon-layer`,
-      data: nodes,
-      getColor: getNodeColor,
-      getIcon,
-      getPosition: getNodePosition,
-      getSize: getNodeSize,
-      iconAtlas,
-      iconMapping,
-      opacity,
-      pickable,
-      coordinateSystem,
-      sizeScale,
-      updateTriggers: {
-        getPosition: layoutTime
-      },
-      visible
-    });
+    const nodeIconsLayer =
+      drawIcons &&
+      new IconLayer({
+        id: `${id}-node-icon-layer`,
+        data: nodes,
+        getColor: getNodeColor,
+        getIcon,
+        getPosition: getNodePosition,
+        getSize: getNodeSize,
+        iconAtlas,
+        iconMapping,
+        opacity,
+        pickable,
+        coordinateSystem,
+        sizeScale,
+        updateTriggers: {
+          getPosition: layoutTime
+        },
+        visible
+      });
 
-    return [
-      linksLayer,
-      nodesLayer,
-      nodeIconsLayer
-    ];
+    return [linksLayer, nodesLayer, nodeIconsLayer];
   }
-
 }
 
 GraphLayer.layerName = 'GraphLayer';

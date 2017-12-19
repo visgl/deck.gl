@@ -16,7 +16,7 @@ export default class MultiColorPathLayer extends PathLayer {
           throw new Error(`PathLayer getColor() returned a color array, but the number of \
 colors returned doesn't match the number of points in the path. Index ${index}`);
         }
-        color.forEach((pointColor) => {
+        color.forEach(pointColor => {
           const alpha = isNaN(pointColor[3]) ? 255 : pointColor[3];
           // two copies for outside edge and inside edge each
           colors[i++] = pointColor[0];

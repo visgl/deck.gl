@@ -56,12 +56,24 @@ export default class PathMarkerLayer extends CompositeLayer {
 
   updateState({props, oldProps, changeFlags}) {
     if (changeFlags.dataChanged) {
-      const {data, getPath, getDirection, getMarkerColor, getMarkerPercentages,
-        coordinateSystem, coordinateOrigin} = this.props;
+      const {
+        data,
+        getPath,
+        getDirection,
+        getMarkerColor,
+        getMarkerPercentages,
+        coordinateSystem,
+        coordinateOrigin
+      } = this.props;
       const {viewport} = this.context;
       const projectFlat = o => this.projectFlat(o, viewport, coordinateSystem, coordinateOrigin);
       this.state.markers = createPathMarkers({
-        data, getPath, getDirection, getColor: getMarkerColor, getMarkerPercentages, projectFlat
+        data,
+        getPath,
+        getDirection,
+        getColor: getMarkerColor,
+        getMarkerPercentages,
+        projectFlat
       });
       this._recalculateClosestPoint();
     }
@@ -78,9 +90,11 @@ export default class PathMarkerLayer extends CompositeLayer {
       const object = this.props.data[highlightIndex];
       const points = this.props.getPath(object);
       const {point} = getClosestPointOnPolyline({points, p: highlightPoint});
-      this.state.closestPoints = [{
-        position: point
-      }];
+      this.state.closestPoints = [
+        {
+          position: point
+        }
+      ];
     } else {
       this.state.closestPoints = [];
     }
@@ -119,11 +133,11 @@ export default class PathMarkerLayer extends CompositeLayer {
         )
       ),
       this.state.closestPoints &&
-      new ScatterplotLayer({
-        id: `${this.props.id}-highlight`,
-        data: this.state.closestPoints,
-        fp64: this.props.fp64
-      })
+        new ScatterplotLayer({
+          id: `${this.props.id}-highlight`,
+          data: this.state.closestPoints,
+          fp64: this.props.fp64
+        })
     ];
   }
 }

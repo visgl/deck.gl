@@ -1,8 +1,13 @@
 /* global document */
 import {
-  Model, Geometry, createGLContext,
-  Texture2D, Renderbuffer, Framebuffer,
-  withParameters} from 'luma.gl';
+  Model,
+  Geometry,
+  createGLContext,
+  Texture2D,
+  Renderbuffer,
+  Framebuffer,
+  withParameters
+} from 'luma.gl';
 
 import vertex from './delaunay-interpolation-vertex.glsl';
 import fragment from './delaunay-interpolation-fragment.glsl';
@@ -27,8 +32,12 @@ export default class DelaunayInterpolation {
   generateTextures() {
     const gl = this.context;
     const {bbox, measures, triangulation} = this.props;
-    const {txt, bounds, textures, width, height} =
-      this._generateTextures(gl, bbox, triangulation, measures);
+    const {txt, bounds, textures, width, height} = this._generateTextures(
+      gl,
+      bbox,
+      triangulation,
+      measures
+    );
 
     return {
       textureObject: txt,
@@ -47,11 +56,19 @@ export default class DelaunayInterpolation {
 
   getDelaunayModel(gl, triangulation) {
     const positions = [];
-    triangulation.forEach(triangle => positions.push(
-      -triangle[0].long, triangle[0].lat, triangle[0].elv,
-      -triangle[1].long, triangle[1].lat, triangle[1].elv,
-      -triangle[2].long, triangle[2].lat, triangle[2].elv
-    ));
+    triangulation.forEach(triangle =>
+      positions.push(
+        -triangle[0].long,
+        triangle[0].lat,
+        triangle[0].elv,
+        -triangle[1].long,
+        triangle[1].lat,
+        triangle[1].elv,
+        -triangle[2].long,
+        triangle[2].lat,
+        triangle[2].elv
+      )
+    );
 
     const shaders = this.getDelaunayShaders();
 
@@ -70,16 +87,18 @@ export default class DelaunayInterpolation {
   }
 
   createTexture(gl, options) {
-
-    const data = Object.assign({
-      data: {
-        internalFormat: gl.RGBA32F,
-        format: gl.RGBA,
-        value: false,
-        type: gl.FLOAT,
-        border: 0
-      }
-    }, options.data);
+    const data = Object.assign(
+      {
+        data: {
+          internalFormat: gl.RGBA32F,
+          format: gl.RGBA,
+          value: false,
+          type: gl.FLOAT,
+          border: 0
+        }
+      },
+      options.data
+    );
 
     const texture = new Texture2D(gl, {
       format: data.internalFormat,
@@ -102,11 +121,14 @@ export default class DelaunayInterpolation {
   }
 
   createRenderbuffer(gl, options) {
-    const opt = Object.assign({
-      storageType: gl.DEPTH_COMPONENT16,
-      width: 0,
-      height: 0
-    }, options);
+    const opt = Object.assign(
+      {
+        storageType: gl.DEPTH_COMPONENT16,
+        width: 0,
+        height: 0
+      },
+      options
+    );
 
     return new Renderbuffer(gl, {
       format: opt.storageType,
@@ -116,20 +138,23 @@ export default class DelaunayInterpolation {
   }
 
   createFramebufferWithTexture(gl, options) {
-    const opt = Object.assign({
-      width: 0,
-      height: 0,
-      // All texture params
-      bindToTexture: false,
-      textureOptions: {
-        attachment: gl.COLOR_ATTACHMENT0
+    const opt = Object.assign(
+      {
+        width: 0,
+        height: 0,
+        // All texture params
+        bindToTexture: false,
+        textureOptions: {
+          attachment: gl.COLOR_ATTACHMENT0
+        },
+        // All render buffer params
+        bindToRenderBuffer: false,
+        renderBufferOptions: {
+          attachment: gl.DEPTH_ATTACHMENT
+        }
       },
-      // All render buffer params
-      bindToRenderBuffer: false,
-      renderBufferOptions: {
-        attachment: gl.DEPTH_ATTACHMENT
-      }
-    }, options.fb);
+      options.fb
+    );
 
     const texture = this.createTexture(gl, options.txt);
     const rb = this.createRenderbuffer(gl, options.rb);
@@ -191,89 +216,96 @@ export default class DelaunayInterpolation {
 
     let textures;
 
-    withParameters(gl, {
-      clearColor: [0.0, 0.0, 0.0, 0.0],
-      clearDepth: 1.0,
-      blend: false,
-      depthTest: false,
-      depthFunc: gl.LEQUAL,
-      viewport: [0, 0, width, height],
-      framebuffer: fb
-    }, () => {
-      textures = measures.map((measure, hour) => {
-        const sample = [];
-        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-        function processTriplet(triplet) {
-          if (!bounds[0]) {
-            bounds[0] = {min: measure[triplet[0].index][0], max: measure[triplet[0].index][0]};
-            bounds[1] = {min: measure[triplet[0].index][1], max: measure[triplet[0].index][1]};
-            bounds[2] = {min: measure[triplet[0].index][2], max: measure[triplet[0].index][2]};
-          } else {
-            [0, 1, 2].forEach(index => {
-              triplet.forEach(t => { // eslint-disable-line
-                if (measure[t.index][index] !== 0) {
-                  bounds[index].min = bounds[index].min > measure[t.index][index] ?
-                    measure[t.index][index] : bounds[index].min;
-                  bounds[index].max = bounds[index].max < measure[t.index][index] ?
-                    measure[t.index][index] : bounds[index].max;
-                }
+    withParameters(
+      gl,
+      {
+        clearColor: [0.0, 0.0, 0.0, 0.0],
+        clearDepth: 1.0,
+        blend: false,
+        depthTest: false,
+        depthFunc: gl.LEQUAL,
+        viewport: [0, 0, width, height],
+        framebuffer: fb
+      },
+      () => {
+        textures = measures.map((measure, hour) => {
+          const sample = [];
+          gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+          function processTriplet(triplet) {
+            if (!bounds[0]) {
+              bounds[0] = {min: measure[triplet[0].index][0], max: measure[triplet[0].index][0]};
+              bounds[1] = {min: measure[triplet[0].index][1], max: measure[triplet[0].index][1]};
+              bounds[2] = {min: measure[triplet[0].index][2], max: measure[triplet[0].index][2]};
+            } else {
+              [0, 1, 2].forEach(index => {
+                // eslint-disable-next-line
+                triplet.forEach(t => {
+                  if (measure[t.index][index] !== 0) {
+                    bounds[index].min =
+                      bounds[index].min > measure[t.index][index]
+                        ? measure[t.index][index]
+                        : bounds[index].min;
+                    bounds[index].max =
+                      bounds[index].max < measure[t.index][index]
+                        ? measure[t.index][index]
+                        : bounds[index].max;
+                  }
+                });
               });
-            });
+            }
+
+            const [angle1, angle2, angle3] = correctAngles(
+              measure[triplet[0].index][0],
+              measure[triplet[1].index][0],
+              measure[triplet[2].index][0]
+            );
+
+            sample.push(
+              angle1,
+              measure[triplet[0].index][1],
+              measure[triplet[0].index][2],
+
+              angle2,
+              measure[triplet[1].index][1],
+              measure[triplet[1].index][2],
+
+              angle3,
+              measure[triplet[2].index][1],
+              measure[triplet[2].index][2]
+            );
           }
 
-          const [angle1, angle2, angle3] = correctAngles(
-            measure[triplet[0].index][0],
-            measure[triplet[1].index][0],
-            measure[triplet[2].index][0]
-          );
+          triangulation.forEach(processTriplet);
 
-          sample.push(
-            angle1,
-            measure[triplet[0].index][1],
-            measure[triplet[0].index][2],
+          delaunayModel.setAttributes({
+            data: {
+              id: 'data',
+              value: new Float32Array(sample),
+              bytes: Float32Array.BYTES_PER_ELEMENT * sample.length,
+              size: 3,
+              type: gl.FLOAT,
+              isIndexed: false
+            }
+          });
 
-            angle2,
-            measure[triplet[1].index][1],
-            measure[triplet[1].index][2],
+          delaunayModel.render({
+            bbox: [bbox.minLng, bbox.maxLng, bbox.minLat, bbox.maxLat],
+            size: [width, height]
+          });
 
-            angle3,
-            measure[triplet[2].index][1],
-            measure[triplet[2].index][2]
-          );
-        }
+          // read texture back
+          const pixels = new Float32Array(width * height * 4);
+          const pixelStoreParameters = {
+            [gl.UNPACK_FLIP_Y_WEBGL]: true
+          };
+          withParameters(gl, pixelStoreParameters, () => {
+            gl.readPixels(0, 0, width, height, gl.RGBA, gl.FLOAT, pixels, 0);
+          });
 
-        triangulation.forEach(processTriplet);
-
-        delaunayModel.setAttributes({
-          data: {
-            id: 'data',
-            value: new Float32Array(sample),
-            bytes: Float32Array.BYTES_PER_ELEMENT * sample.length,
-            size: 3,
-            type: gl.FLOAT,
-            isIndexed: false
-          }
+          return pixels;
         });
-
-        delaunayModel.render({
-          bbox: [
-            bbox.minLng, bbox.maxLng, bbox.minLat, bbox.maxLat
-          ],
-          size: [width, height]
-        });
-
-        // read texture back
-        const pixels = new Float32Array(width * height * 4);
-        const pixelStoreParameters = {
-          [gl.UNPACK_FLIP_Y_WEBGL]: true
-        };
-        withParameters(gl, pixelStoreParameters, () => {
-          gl.readPixels(0, 0, width, height, gl.RGBA, gl.FLOAT, pixels, 0);
-        });
-
-        return pixels;
-      });
-    });
+      }
+    );
 
     return {fb, rb, texture, bounds, textures, width, height};
   }

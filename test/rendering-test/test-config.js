@@ -2,7 +2,6 @@ import {getPoints100K, getPoints100KMeters, coordinateOrigin} from './data-gener
 
 import {
   COORDINATE_SYSTEM,
-
   ScatterplotLayer
   // ArcLayer,
   // LineLayer,
@@ -14,7 +13,6 @@ import {
   // GeoJsonLayer,
   // PolygonLayer,
   // PathLayer
-
 } from 'deck.gl';
 
 export const WIDTH = 1600;
@@ -37,20 +35,22 @@ export const TEST_CASES = [
       bearing: 0
     },
     // layer list
-    layersList: [{
-      type: ScatterplotLayer,
-      props: {
-        id: 'scatterplot-1',
-        data: getPoints100K(),
-        getPosition: d => d,
-        getColor: d => [255, 128, 0],
-        getRadius: d => 5.0,
-        opacity: 0.5,
-        pickable: true,
-        radiusMinPixels: 5,
-        radiusMaxPixels: 5
+    layersList: [
+      {
+        type: ScatterplotLayer,
+        props: {
+          id: 'scatterplot-1',
+          data: getPoints100K(),
+          getPosition: d => d,
+          getColor: d => [255, 128, 0],
+          getRadius: d => 5.0,
+          opacity: 0.5,
+          pickable: true,
+          radiusMinPixels: 5,
+          radiusMaxPixels: 5
+        }
       }
-    }],
+    ],
     referecenResult: './golden-images/1.png'
   },
 
@@ -65,20 +65,22 @@ export const TEST_CASES = [
       bearing: 0
     },
     // layer list
-    layersList: [{
-      type: ScatterplotLayer,
-      props: {
-        id: 'scatterplot-2',
-        data: getPoints100K(),
-        getPosition: d => d,
-        getColor: d => [255, 128, 0],
-        getRadius: d => 5.0,
-        opacity: 0.5,
-        pickable: true,
-        radiusMinPixels: 5,
-        radiusMaxPixels: 5
+    layersList: [
+      {
+        type: ScatterplotLayer,
+        props: {
+          id: 'scatterplot-2',
+          data: getPoints100K(),
+          getPosition: d => d,
+          getColor: d => [255, 128, 0],
+          getRadius: d => 5.0,
+          opacity: 0.5,
+          pickable: true,
+          radiusMinPixels: 5,
+          radiusMaxPixels: 5
+        }
       }
-    }],
+    ],
     referecenResult: './golden-images/2.png'
   },
 
@@ -93,22 +95,24 @@ export const TEST_CASES = [
       bearing: 0
     },
     // layer list
-    layersList: [{
-      type: ScatterplotLayer,
-      props: {
-        id: 'scatterplot-1-meters',
-        data: getPoints100KMeters(),
-        coordinateSystem: COORDINATE_SYSTEM.METERS,
-        coordinateOrigin,
-        getPosition: d => d,
-        getColor: d => [255, 128, 0],
-        getRadius: d => 5.0,
-        opacity: 0.5,
-        pickable: true,
-        radiusMinPixels: 5,
-        radiusMaxPixels: 5
+    layersList: [
+      {
+        type: ScatterplotLayer,
+        props: {
+          id: 'scatterplot-1-meters',
+          data: getPoints100KMeters(),
+          coordinateSystem: COORDINATE_SYSTEM.METERS,
+          coordinateOrigin,
+          getPosition: d => d,
+          getColor: d => [255, 128, 0],
+          getRadius: d => 5.0,
+          opacity: 0.5,
+          pickable: true,
+          radiusMinPixels: 5,
+          radiusMaxPixels: 5
+        }
       }
-    }],
+    ],
     referecenResult: './golden-images/1.png'
   }
 ];

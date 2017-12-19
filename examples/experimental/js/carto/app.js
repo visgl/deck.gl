@@ -1,13 +1,13 @@
 /* global window, fetch */
 import {GeoJsonLayer, experimental} from 'deck.gl';
 const {DeckGLJS, MapControllerJS} = experimental;
-import TimeSlicedScatterplotLayer from
-  './time-sliced-scatterplot-layer/time-sliced-scatterplot-layer.js';
+import TimeSlicedScatterplotLayer from './time-sliced-scatterplot-layer/time-sliced-scatterplot-layer.js';
 
 import {parseTile, lngLatToTile, getTileUrl} from './utils/carto-torque-utils';
 
 // source: Natural Earth http://www.naturalearthdata.com/ via geojson.xyz
-const GEOJSON = 'https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_110m_admin_1_states_provinces_shp.geojson'; //eslint-disable-line
+const GEOJSON =
+  'https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_110m_admin_1_states_provinces_shp.geojson'; //eslint-disable-line
 
 const TILE_PARAMS = {
   userID: 'viz2',
@@ -22,7 +22,12 @@ const TILE_PARAMS = {
 };
 
 const COLOR_MAP = [
-  [0, 0, 255], [255, 0, 0], [0, 255, 0], [255, 255, 0], [255, 0, 255], [0, 255, 255]
+  [0, 0, 255],
+  [255, 0, 0],
+  [0, 255, 0],
+  [255, 255, 0],
+  [255, 0, 255],
+  [0, 255, 255]
 ];
 
 const INITIAL_VIEWPORT = {
@@ -52,7 +57,6 @@ class App {
 
     for (let i = 0; i < tilesToFetchX; i++) {
       for (let j = 0; j < tilesToFetchY; j++) {
-
         const tileParams = Object.assign({}, TILE_PARAMS, {
           xTileNo: TILE_PARAMS.xTileNoStart - Math.floor(tilesToFetchX / 2) + i,
           yTileNo: TILE_PARAMS.yTileNoStart - Math.floor(tilesToFetchY / 2) + j

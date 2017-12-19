@@ -1,19 +1,9 @@
 /* global window, document */
 
 // deck.gl ES6 components
-import {
-  COORDINATE_SYSTEM,
-  WebMercatorViewport,
-  experimental
-} from 'deck.gl';
+import {COORDINATE_SYSTEM, WebMercatorViewport, experimental} from 'deck.gl';
 
-const {
-  MapState,
-  OrbitState,
-  FirstPersonViewport,
-  OrbitViewport,
-  ReflectionEffect
-} = experimental;
+const {MapState, OrbitState, FirstPersonViewport, OrbitViewport, ReflectionEffect} = experimental;
 
 // deck.gl react components
 import DeckGL from 'deck.gl';
@@ -36,7 +26,8 @@ import LAYER_CATEGORIES from './examples';
 import {setImmutableDataSamples} from './immutable-data-samples';
 
 /* eslint-disable no-process-env */
-const MapboxAccessToken = process.env.MapboxAccessToken || // eslint-disable-line
+const MapboxAccessToken =
+  process.env.MapboxAccessToken || // eslint-disable-line
   'Set MapboxAccessToken environment variable or put your token here.';
 
 const VIEW_LABEL_STYLES = {
@@ -51,9 +42,7 @@ const VIEW_LABEL_STYLES = {
 
 const ViewportLabel = props => (
   <div style={{position: 'absolute'}}>
-    <div style={{...VIEW_LABEL_STYLES, display: ''}}>
-      {props.children}
-    </div>
+    <div style={{...VIEW_LABEL_STYLES, display: ''}}>{props.children}</div>
   </div>
 );
 
@@ -99,7 +88,6 @@ class App extends PureComponent {
         // immutable: false,
         // Effects are experimental for now. Will be enabled in the future
         // effects: false,
-
       },
       hoveredItem: null,
       clickedItem: null,
@@ -188,7 +176,6 @@ class App extends PureComponent {
 
     for (const categoryName of Object.keys(LAYER_CATEGORIES)) {
       for (const exampleName of Object.keys(LAYER_CATEGORIES[categoryName])) {
-
         const settings = activeExamples[exampleName];
         // An example is a function that returns a DeckGL layer instance
         if (settings) {
@@ -212,13 +199,13 @@ class App extends PureComponent {
     const modelMatrix = new Matrix4().translate([0, 0, 1000 * index * separation]);
 
     switch (coordinateSystem) {
-    case COORDINATE_SYSTEM.METER_OFFSETS:
-    case COORDINATE_SYSTEM.IDENTITY:
-      const {settings: {rotationZ, rotationX}} = this.state;
-      modelMatrix.rotateZ(index * rotationZ * Math.PI);
-      modelMatrix.rotateX(index * rotationX * Math.PI);
-      break;
-    default:
+      case COORDINATE_SYSTEM.METER_OFFSETS:
+      case COORDINATE_SYSTEM.IDENTITY:
+        const {settings: {rotationZ, rotationX}} = this.state;
+        modelMatrix.rotateZ(index * rotationZ * Math.PI);
+        modelMatrix.rotateX(index * rotationX * Math.PI);
+        break;
+      default:
       // Rotations don't work well for layers in lng lat coordinates
       // since the origin is far away.
       // We could rotate around current view point...
@@ -229,7 +216,10 @@ class App extends PureComponent {
 
   _getViewports() {
     const {
-      width, height, mapViewState, orbitViewState,
+      width,
+      height,
+      mapViewState,
+      orbitViewState,
       settings: {infovis, multiview}
     } = this.state;
 
@@ -252,13 +242,14 @@ class App extends PureComponent {
         height: multiview ? height / 2 : height,
         y: multiview ? height / 2 : 0
       }),
-      multiview && new FirstPersonViewport({
-        id: 'first-person',
-        ...mapViewState,
-        width,
-        height: height / 2,
-        position: [0, 0, 50]
-      })
+      multiview &&
+        new FirstPersonViewport({
+          id: 'first-person',
+          ...mapViewState,
+          width,
+          height: height / 2,
+          position: [0, 0, 50]
+        })
     ];
   }
 
@@ -282,8 +273,8 @@ class App extends PureComponent {
           {...(infovis ? orbitViewState : mapViewState)}
           width={width}
           height={height}
-          onViewportChange={this._onViewportChange} >
-
+          onViewportChange={this._onViewportChange}
+        >
           <DeckGL
             ref="deckgl"
             id="default-deckgl-overlay"
@@ -308,22 +299,17 @@ class App extends PureComponent {
               mapboxApiAccessToken={MapboxAccessToken || 'no_token'}
               width={width}
               height={height}
-              onViewportChange={this._onViewportChange}/>
+              onViewportChange={this._onViewportChange}
+            />
 
-            <ViewportLabel viewportId="first-person">
-              First Person View
-            </ViewportLabel>
+            <ViewportLabel viewportId="first-person">First Person View</ViewportLabel>
 
-            <ViewportLabel viewportId="basemap">
-              Map View
-            </ViewportLabel>
+            <ViewportLabel viewportId="basemap">Map View</ViewportLabel>
 
             <ViewportLabel viewportId="infovis">
               Orbit View (PlotLayer only, No Navigation)
             </ViewportLabel>
-
           </DeckGL>
-
         </ViewportController>
       </div>
     );
@@ -344,18 +330,21 @@ class App extends PureComponent {
           <LayerControls
             title="Common Settings"
             settings={settings}
-            onChange={this._onUpdateContainerSettings}/>
+            onChange={this._onUpdateContainerSettings}
+          />
           <LayerSelector
             activeExamples={activeExamples}
             examples={LAYER_CATEGORIES}
             onToggleLayer={this._onToggleLayer}
-            onUpdateLayer={this._onUpdateLayerSettings} />
+            onUpdateLayer={this._onUpdateLayerSettings}
+          />
         </div>
         <LayerInfo
           ref="infoPanel"
           hovered={hoveredItem}
           clicked={clickedItem}
-          queried={queriedItems} />
+          queried={queriedItems}
+        />
       </div>
     );
   }
