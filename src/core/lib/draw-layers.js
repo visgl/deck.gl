@@ -288,8 +288,10 @@ function getObjectHighlightParameters(layer) {
 
   // Update picking module settings if highlightedObjectIndex is set.
   // This will overwrite any settings from auto highlighting.
-  if (layer.props.highlightedObjectIndex >= 0) {
-    const pickingSelectedColor = layer.encodePickingColor(layer.props.highlightedObjectIndex);
+  if (Number.isInteger(layer.props.highlightedObjectIndex)) {
+    const pickingSelectedColor = layer.props.highlightedObjectIndex >= 0
+      ? layer.encodePickingColor(layer.props.highlightedObjectIndex)
+      : null;
 
     return {
       pickingSelectedColor

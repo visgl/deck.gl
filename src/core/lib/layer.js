@@ -64,7 +64,7 @@ const defaultProps = {
   getPolygonOffset: ({layerIndex}) => [0, -layerIndex * 100],
 
   // Selection/Highlighting
-  highlightedObjectIndex: -1,
+  highlightedObjectIndex: null,
   autoHighlight: false,
   highlightColor: [0, 0, 128, 128]
 };

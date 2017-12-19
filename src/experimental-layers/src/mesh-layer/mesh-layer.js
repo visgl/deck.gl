@@ -208,9 +208,9 @@ export default class MeshLayer extends Layer {
     let i = 0;
     for (const point of data) {
       const position = getPosition(point);
-      value[i++] = position[0];
-      value[i++] = position[1];
-      value[i++] = position[2] || 0;
+      value[i] = position[0];
+      value[i + 1] = position[1];
+      value[i + 2] = position[2] || 0;
       i += size;
     }
   }
