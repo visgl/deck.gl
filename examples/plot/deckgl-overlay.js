@@ -44,7 +44,7 @@ export default class DeckGLOverlay extends Component {
         height={viewport.height}
         viewport={viewport}
         layers={ layers }
-        />
+      />
     );
   }
 }

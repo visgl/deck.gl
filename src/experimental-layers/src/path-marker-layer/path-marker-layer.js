@@ -32,7 +32,7 @@ const defaultProps = Object.assign({}, PathOutlineLayer.defaultProps, {
   getMarkerColor: x => [0, 0, 0, 255],
   getDirection: x => x.direction,
   getMarkerPercentages: (object, {lineLength}) =>
-   lineLength > DISTANCE_FOR_MULTI_ARROWS ? [0.25, 0.5, 0.75] : [0.5]
+    lineLength > DISTANCE_FOR_MULTI_ARROWS ? [0.25, 0.5, 0.75] : [0.5]
 });
 
 export default class PathMarkerLayer extends CompositeLayer {

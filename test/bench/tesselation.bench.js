@@ -50,5 +50,5 @@ export default function tesselationBench(suite) {
       testTesselator(tesselator);
     })
 
-    ;
+  ;
 }

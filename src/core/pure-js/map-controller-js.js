@@ -74,7 +74,7 @@ export default class MapControllerJS {
 
     this.props = props;
     this.state = {
-      isDragging: false      // Whether the cursor is down
+      isDragging: false // Whether the cursor is down
     };
 
     this.canvas = props.canvas;

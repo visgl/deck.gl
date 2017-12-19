@@ -397,7 +397,7 @@ export default class Layer {
     });
 
     this.internalState = {
-      subLayers: null,     // reference to sublayers rendered in a previous cycle
+      subLayers: null, // reference to sublayers rendered in a previous cycle
       stats: new Stats({id: 'draw'})
       // animatedProps: null, // Computing animated props requires layer manager state
       // TODO - move these fields here (risks breaking layers)

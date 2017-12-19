@@ -61,15 +61,15 @@ const layerName = layer => layer instanceof Layer ? `${layer}` : (!layer ? 'null
 export default class LayerManager {
 
   constructor(gl, {eventManager} = {}) { // eslint-disable-line
-     // Currently deck.gl expects the DeckGL.layers array to be different
-     // whenever React rerenders. If the same layers array is used, the
-     // LayerManager's diffing algorithm will generate a fatal error and
-     // break the rendering.
+    // Currently deck.gl expects the DeckGL.layers array to be different
+    // whenever React rerenders. If the same layers array is used, the
+    // LayerManager's diffing algorithm will generate a fatal error and
+    // break the rendering.
 
-     // `this.lastRenderedLayers` stores the UNFILTERED layers sent
-     // down to LayerManager, so that `layers` reference can be compared.
-     // If it's the same across two React render calls, the diffing logic
-     // will be skipped.
+    // `this.lastRenderedLayers` stores the UNFILTERED layers sent
+    // down to LayerManager, so that `layers` reference can be compared.
+    // If it's the same across two React render calls, the diffing logic
+    // will be skipped.
     this.lastRenderedLayers = [];
     this.prevLayers = [];
     this.layers = [];

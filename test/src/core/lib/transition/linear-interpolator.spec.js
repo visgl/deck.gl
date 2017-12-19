@@ -74,15 +74,15 @@ test('LinearInterpolator#initializeProps', t => {
 test('LinearInterpolator#interpolateProps', t => {
 
   TEST_CASES
-  .filter(testCase => testCase.transition)
-  .forEach(testCase => {
-    const interpolator = new LinearInterpolator(testCase.transitionProps);
-    Object.keys(testCase.transition).forEach(time => {
-      const propsInTransition = interpolator.interpolateProps(
-        testCase.expect.start, testCase.expect.end, Number(time));
-      t.deepEqual(propsInTransition, testCase.transition[time], time);
+    .filter(testCase => testCase.transition)
+    .forEach(testCase => {
+      const interpolator = new LinearInterpolator(testCase.transitionProps);
+      Object.keys(testCase.transition).forEach(time => {
+        const propsInTransition = interpolator.interpolateProps(
+          testCase.expect.start, testCase.expect.end, Number(time));
+        t.deepEqual(propsInTransition, testCase.transition[time], time);
+      });
     });
-  });
 
   t.end();
 });

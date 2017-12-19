@@ -45,7 +45,7 @@ export default class OrbitController extends PureComponent {
         ref: c => (this.eventCanvas = c),
         style: eventCanvasStyle
       },
-        this.props.children
+      this.props.children
       )
     );
   }

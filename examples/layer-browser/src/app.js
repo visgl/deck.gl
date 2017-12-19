@@ -15,7 +15,7 @@ const {
   ReflectionEffect
 } = experimental;
 
- // deck.gl react components
+// deck.gl react components
 import DeckGL from 'deck.gl';
 const {ViewportController} = experimental;
 

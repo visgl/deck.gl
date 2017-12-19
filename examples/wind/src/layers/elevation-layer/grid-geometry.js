@@ -57,9 +57,9 @@ function calculateIndices({xResolution, yResolution}) {
 }
 
 function calculatePositions({
-	boundingBox,
-	xResolution,
-	yResolution
+  boundingBox,
+  xResolution,
+  yResolution
 }) {
   const {minLng, minLat, maxLng, maxLat} = boundingBox;
 

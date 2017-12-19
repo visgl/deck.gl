@@ -70,7 +70,7 @@ export default class IconLayer extends Layer {
   getShaders() {
     return enable64bitSupport(this.props) ?
       {vs: vs64, fs, modules: ['project64', 'picking']} :
-      {vs, fs, modules: ['picking']};  // 'project' module added by default.
+      {vs, fs, modules: ['picking']}; // 'project' module added by default.
   }
 
   initializeState() {
@@ -138,13 +138,13 @@ export default class IconLayer extends Layer {
         loadTextures(this.context.gl, {
           urls: [iconAtlas]
         })
-        .then(([texture]) => {
-          texture.setParameters({
-            [GL.TEXTURE_MIN_FILTER]: DEFAULT_TEXTURE_MIN_FILTER,
-            [GL.TEXTURE_MAG_FILTER]: DEFAULT_TEXTURE_MAG_FILTER
+          .then(([texture]) => {
+            texture.setParameters({
+              [GL.TEXTURE_MIN_FILTER]: DEFAULT_TEXTURE_MIN_FILTER,
+              [GL.TEXTURE_MAG_FILTER]: DEFAULT_TEXTURE_MAG_FILTER
+            });
+            this.setState({iconsTexture: texture});
           });
-          this.setState({iconsTexture: texture});
-        });
       }
     }
 

@@ -59,7 +59,7 @@ export default class TransitionManager {
     if (this._isTransitionEnabled(nextProps)) {
       const startProps = Object.assign({}, currentProps,
         this.state.interruption === TRANSITION_EVENTS.SNAP_TO_END ?
-        this.state.endProps : (this.state.propsInTransition || currentProps)
+          this.state.endProps : (this.state.propsInTransition || currentProps)
       );
 
       if (isTransitionInProgress) {

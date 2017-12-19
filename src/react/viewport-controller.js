@@ -107,7 +107,7 @@ export default class ViewportController extends PureComponent {
     super(props);
 
     this.state = {
-      isDragging: false      // Whether the cursor is down
+      isDragging: false // Whether the cursor is down
     };
   }
 
@@ -167,7 +167,7 @@ export default class ViewportController extends PureComponent {
         ref: c => (this.eventCanvas = c),
         style: eventCanvasStyle
       },
-        this.props.children
+      this.props.children
       )
     );
   }

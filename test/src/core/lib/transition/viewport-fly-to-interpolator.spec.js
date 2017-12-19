@@ -61,14 +61,14 @@ test('LinearInterpolator#interpolateProps', t => {
   const interpolator = new ViewportFlyToInterpolator();
 
   TEST_CASES
-  .filter(testCase => testCase.transition)
-  .forEach(testCase => {
-    Object.keys(testCase.transition).forEach(time => {
-      const propsInTransition = interpolator.interpolateProps(
-        testCase.expect.start, testCase.expect.end, Number(time));
-      t.deepEqual(toLowPrecision(propsInTransition, 7), testCase.transition[time], time);
+    .filter(testCase => testCase.transition)
+    .forEach(testCase => {
+      Object.keys(testCase.transition).forEach(time => {
+        const propsInTransition = interpolator.interpolateProps(
+          testCase.expect.start, testCase.expect.end, Number(time));
+        t.deepEqual(toLowPrecision(propsInTransition, 7), testCase.transition[time], time);
+      });
     });
-  });
 
   t.end();
 });

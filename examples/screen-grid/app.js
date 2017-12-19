@@ -62,7 +62,7 @@ class Root extends Component {
         <DeckGLOverlay viewport={viewport}
           data={data}
           cellSize={20}
-          />
+        />
       </MapGL>
     );
   }

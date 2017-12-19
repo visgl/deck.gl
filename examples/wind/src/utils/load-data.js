@@ -10,25 +10,25 @@ export function loadData() {
     loadStations(),
     loadWeatherData()
   ])
-  .then(([stations, weather]) => {
-    const bbox = getBBox(stations);
-    const triangulation = triangulate(stations);
-    const delaunayInterpolation = new DelaunayInterpolation({
-      bbox,
-      triangulation,
-      measures: weather,
-      textureWidth: 1024
-    });
-    const texData = delaunayInterpolation.generateTextures();
+    .then(([stations, weather]) => {
+      const bbox = getBBox(stations);
+      const triangulation = triangulate(stations);
+      const delaunayInterpolation = new DelaunayInterpolation({
+        bbox,
+        triangulation,
+        measures: weather,
+        textureWidth: 1024
+      });
+      const texData = delaunayInterpolation.generateTextures();
 
-    return {
-      stations,
-      weather,
-      bbox,
-      triangulation,
-      texData
-    };
-  });
+      return {
+        stations,
+        weather,
+        bbox,
+        triangulation,
+        texData
+      };
+    });
 }
 
 function loadStations() {

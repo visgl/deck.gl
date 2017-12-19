@@ -105,8 +105,8 @@ class Root extends Component {
 
     return (
       <div onMouseMove={this._onMouseMove.bind(this)}
-           onMouseEnter={this._onMouseEnter.bind(this)}
-           onMouseLeave={this._onMouseLeave.bind(this)}>
+        onMouseEnter={this._onMouseEnter.bind(this)}
+        onMouseLeave={this._onMouseLeave.bind(this)}>
         {this._renderTooltip()}
         <MapGL
           {...viewport}

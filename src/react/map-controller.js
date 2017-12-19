@@ -39,7 +39,7 @@ export default class MapController extends PureComponent {
         ref: c => (this.eventCanvas = c),
         style: eventCanvasStyle
       },
-        this.props.children
+      this.props.children
       )
     );
   }

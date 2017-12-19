@@ -71,5 +71,5 @@ export default function viewportBench(suite) {
     .add('WebMercatorViewport', () => {
       return new WebMercatorViewport(VIEWPORT_PARAMS);
     })
-    ;
+  ;
 }

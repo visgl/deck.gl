@@ -77,7 +77,7 @@ const TEST_CASES = {
         'should not update layer data');
 
       t.ok(oldState.sortedColorBins !== layer.state.sortedColorBins,
-       'should not update sortedColorBins');
+        'should not update sortedColorBins');
 
       t.ok(oldState.sortedElevationBins === layer.state.sortedElevationBins,
         'should update sortedElevationBins');
@@ -103,7 +103,7 @@ const TEST_CASES = {
         'should not update layer data');
 
       t.ok(oldState.sortedColorBins === layer.state.sortedColorBins,
-       'should not update sortedColorBins');
+        'should not update sortedColorBins');
 
       t.ok(oldState.colorValueDomain !== layer.state.colorValueDomain,
         'should re calculate colorValueDomain');

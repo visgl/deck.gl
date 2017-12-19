@@ -21,9 +21,9 @@
 // import browser from 'bowser';
 
 const PREFIX = '-webkit-';
-  // browser.webkit || browser.blink ? '-webkit-' :
-  // browser.gecko ? '-moz-' :
-  // '';
+// browser.webkit || browser.blink ? '-webkit-' :
+// browser.gecko ? '-moz-' :
+// '';
 
 export default {
   GRABBING: `${PREFIX}grabbing`,
