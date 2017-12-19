@@ -23,6 +23,8 @@ For Earlier Beta Releases see below
 
 ### deck.gl v5.0 Beta Releases
 
+- Bump probe.gl to include regression bench support
+
 #### [5.0.0-beta.1] - Dec 18
 - Improve perf of experimental SolidPolygonLayer (#1224)
 - Fix polygon normals in meter offset mode (#1244)
