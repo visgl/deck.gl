@@ -30,7 +30,6 @@ attribute vec3 instancePickingColors;
 
 uniform float opacity;
 uniform float radiusPixels;
-uniform vec2 viewportSize;
 
 varying vec4 vColor;
 varying vec2 unitPosition;

@@ -64,27 +64,6 @@ const UNIFORMS_64 = {
   project64_uScale: Number
 };
 
-// DEPRECATED UNIFORMS - For backwards compatibility with old custom layers
-const DEPRECATED_UNIFORMS = {
-  projectionMode: Number,
-  projectionCenter: Number,
-
-  projectionOrigin: Array,
-  modelMatrix: Array,
-
-  projectionMatrix: Array,
-  projectionPixelsPerUnit: Array,
-  projectionScale: Number, // This is the mercator scale (2 ** zoom)
-  viewportSize: Array,
-  devicePixelRatio: Number,
-  cameraPos: Array
-};
-
-const DEPRECATED_UNIFORMS_64 = {
-  projectionFP64: Array,
-  projectionScaleFP64: Array
-};
-
 test('Viewport#constructors', t => {
   const viewport = new WebMercatorViewport(TEST_DATA.mapState);
   t.ok(viewport instanceof Viewport, 'Created new WebMercatorViewport');
@@ -114,36 +93,6 @@ test('project#getUniformsFromViewport#shader module style uniforms', t => {
     coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS
   });
   t.ok(uniforms.project_uCenter.some(x => x), 'Returned non-trivial projection center');
-
-  t.end();
-});
-
-test('preoject#getUniformsFromViewport#deprecated uniforms', t => {
-  const viewport = new WebMercatorViewport(TEST_DATA.mapState);
-  t.ok(viewport instanceof Viewport, 'Created new WebMercatorViewport');
-
-  let uniforms = getUniformsFromViewport({viewport});
-
-  for (const uniform in DEPRECATED_UNIFORMS) {
-    t.ok(uniforms[uniform] !== undefined, `Returned deprecated ${uniform}`);
-  }
-  for (const uniform in DEPRECATED_UNIFORMS_64) {
-    t.ok(uniforms[uniform] === undefined, `Should not return deprecated ${uniform}`);
-  }
-
-  uniforms = getUniformsFromViewport({viewport, fp64: true});
-  for (const uniform in DEPRECATED_UNIFORMS_64) {
-    t.ok(uniforms[uniform] !== undefined, `Return deprecated ${uniform}`);
-  }
-
-  t.ok(uniforms.devicePixelRatio > 0, 'Returned devicePixelRatio');
-  t.is(uniforms.projectionMatrix.length, 16, 'Returned projectionMatrix');
-
-  uniforms = getUniformsFromViewport({
-    viewport,
-    coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS
-  });
-  t.ok(uniforms.projectionCenter.some(x => x), 'Returned non-trivial projection center');
 
   t.end();
 });

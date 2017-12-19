@@ -35,7 +35,6 @@ attribute vec2 instanceOffsets;
 attribute float instanceLetterIndexInString;
 attribute float instanceStringLength;
 
-uniform vec2 viewportSize;
 uniform float sizeScale;
 uniform vec2 iconsTextureDim;
 
@@ -70,7 +69,7 @@ vec2 getShift(float instanceLetterIndexInString, float instanceStringLength) {
 
 void main(void) {
   vec2 iconSize = instanceIconFrames.zw;
-  vec2 iconSize_clipspace = iconSize / viewportSize * 2.0;
+  vec2 iconSize_clipspace = project_pixel_to_clipspace(iconSize).xy;
   // scale icon height to match instanceSize
   float instanceScale = iconSize.y == 0.0 ? 0.0 : instanceSizes / iconSize.y;
 
@@ -78,7 +77,8 @@ void main(void) {
   vec2 vertex = (positions / 2.0 + instanceOffsets);
   vertex += getShift(instanceLetterIndexInString, instanceStringLength);
 
-  float aspectRatio = viewportSize.x == 0.0 ? 1.0 : viewportSize.y / viewportSize.x;
+  float aspectRatio = project_uViewportSize.x == 0.0 ? 1.0 :
+    project_uViewportSize.y / project_uViewportSize.x;
   vertex *= iconSize_clipspace;
   vertex = rotate_by_angle(vertex, instanceAngles, aspectRatio) * sizeScale * instanceScale;
   vertex.y *= -1.0;
