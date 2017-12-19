@@ -18,7 +18,6 @@ const legacyUniforms = [
 
   // Removed project64 uniforms
   {old: 'vec2 projectionFP64[16]', new: 'project_uViewProjectionMatrixFP64'},
-  {old: 'vec2 scaleFP64', new: 'project64_uScale'},
   {old: 'vec2 projectionScaleFP64', new: 'project64_uScale'}
 ].map(def => {
   def.regex = new RegExp(`^\s*uniform ${def.old};`, 'm');
