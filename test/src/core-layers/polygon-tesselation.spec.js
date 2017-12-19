@@ -22,16 +22,9 @@ import test from 'tape-catch';
 
 import * as Polygon from 'deck.gl/core-layers/solid-polygon-layer/polygon';
 import {PolygonTesselator} from 'deck.gl/core-layers/solid-polygon-layer/polygon-tesselator';
-import {PolygonTesselatorExtruded}
-  from 'deck.gl/core-layers/solid-polygon-layer/polygon-tesselator-extruded';
+import {PolygonTesselatorExtruded} from 'deck.gl/core-layers/solid-polygon-layer/polygon-tesselator-extruded';
 
-const POLYGONS = [
-  [],
-  [[1, 1]],
-  [[1, 1], [1, 1], [1, 1]],
-  [[[1, 1]]],
-  [[[1, 1], [1, 1], [1, 1]]]
-];
+const POLYGONS = [[], [[1, 1]], [[1, 1], [1, 1], [1, 1]], [[[1, 1]]], [[[1, 1], [1, 1], [1, 1]]]];
 
 test('polygon#imports', t => {
   t.ok(typeof Polygon.normalize === 'function', 'Polygon.normalize imported');

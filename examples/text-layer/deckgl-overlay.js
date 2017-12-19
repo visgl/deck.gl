@@ -4,10 +4,9 @@ import DeckGL from 'deck.gl';
 import TextLayer from './text-layer';
 
 export default class DeckGLOverlay extends Component {
-
   static get defaultViewport() {
     return {
-      latitude: 39.10,
+      latitude: 39.1,
       longitude: -94.57,
       zoom: 3.8,
       maxZoom: 16,
@@ -35,8 +34,6 @@ export default class DeckGLOverlay extends Component {
       })
     ];
 
-    return (
-      <DeckGL {...viewport} layers={layers} onWebGLInitialized={this._initialize} />
-    );
+    return <DeckGL {...viewport} layers={layers} onWebGLInitialized={this._initialize} />;
   }
 }

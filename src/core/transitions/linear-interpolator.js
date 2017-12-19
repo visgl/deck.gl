@@ -8,7 +8,6 @@ const VIEWPORT_TRANSITION_PROPS = ['longitude', 'latitude', 'zoom', 'bearing', '
  * Performs linear interpolation of two viewports.
 */
 export default class LinearInterpolator extends TransitionInterpolator {
-
   /**
    * @param {Array} transitionProps - list of props to apply linear transition to.
    */
@@ -43,5 +42,4 @@ export default class LinearInterpolator extends TransitionInterpolator {
     }
     return viewport;
   }
-
 }

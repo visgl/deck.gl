@@ -18,7 +18,8 @@ const TEST_CASES = [
     title: 'Circle',
     data: generateSampleData({
       pickingRadius: 10,
-      getColor: (x, y) => (10 - x) * (10 - x) + (10 - y) * (10 - y) < 25 ? OBJECT_COLOR : NULL_COLOR
+      getColor: (x, y) =>
+        (10 - x) * (10 - x) + (10 - y) * (10 - y) < 25 ? OBJECT_COLOR : NULL_COLOR
     })
   },
   {
@@ -26,7 +27,7 @@ const TEST_CASES = [
     title: 'Triangle',
     data: generateSampleData({
       pickingRadius: 10,
-      getColor: (x, y) => x + y <= 10 ? OBJECT_COLOR : NULL_COLOR
+      getColor: (x, y) => (x + y <= 10 ? OBJECT_COLOR : NULL_COLOR)
     })
   },
   {
@@ -39,7 +40,6 @@ const TEST_CASES = [
 ];
 
 export default function pickLayersBench(bench) {
-
   bench = bench.group('getClosestFromPickingBuffer');
 
   TEST_CASES.forEach(testCase => {

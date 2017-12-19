@@ -79,12 +79,10 @@ export default class BitmapLayer extends Layer {
 
   updateState({props, oldProps}) {
     if (props.images !== oldProps.images) {
-      let changed =
-        !oldProps.images ||
-        props.images.length !== oldProps.images.length;
+      let changed = !oldProps.images || props.images.length !== oldProps.images.length;
       if (!changed) {
         for (let i = 0; i < props.images.length; ++i) {
-          changed = changed || (props.images[i] !== oldProps.images[i]);
+          changed = changed || props.images[i] !== oldProps.images[i];
         }
       }
       if (changed) {
@@ -115,28 +113,28 @@ export default class BitmapLayer extends Layer {
 
   getModel(gl) {
     // Two triangles making up a square to render the bitmap texture on
-    const verts = [
-      [1, 1, 0], [-1, 1, 0], [1, -1, 0],
-      [-1, 1, 0], [1, -1, 0], [-1, -1, 0]
-    ];
+    const verts = [[1, 1, 0], [-1, 1, 0], [1, -1, 0], [-1, 1, 0], [1, -1, 0], [-1, -1, 0]];
     const positions = [];
     const texCoords = [];
-    verts.forEach((vertex) => {
+    verts.forEach(vertex => {
       // geometry: unit square centered on origin
       positions.push(vertex[0] / 2, vertex[1] / 2, vertex[2] / 2);
       // texture: unit square with bottom left in origin
       texCoords.push(vertex[0] / 2 + 0.5, -vertex[1] / 2 + 0.5);
     });
 
-    const model = new Model(gl, Object.assign({}, this.getShaders(), {
-      id: this.props.id,
-      geometry: new Geometry({
-        drawMode: GL.TRIANGLES,
-        positions: new Float32Array(positions),
-        texCoords: new Float32Array(texCoords)
-      }),
-      isInstanced: true
-    }));
+    const model = new Model(
+      gl,
+      Object.assign({}, this.getShaders(), {
+        id: this.props.id,
+        geometry: new Geometry({
+          drawMode: GL.TRIANGLES,
+          positions: new Float32Array(positions),
+          texCoords: new Float32Array(texCoords)
+        }),
+        isInstanced: true
+      })
+    );
 
     return model;
   }
@@ -153,8 +151,7 @@ export default class BitmapLayer extends Layer {
       });
     };
     image.onerror = (error = '') => {
-      throw new Error(
-        `Could not load texture ${bitmapName} from ${image.src} ${error}`);
+      throw new Error(`Could not load texture ${bitmapName} from ${image.src} ${error}`);
     };
     image.crossOrigin = 'Anonymous';
     image.src = filename;
@@ -228,9 +225,9 @@ export default class BitmapLayer extends Layer {
     const {value, size} = attribute;
     let i = 0;
     for (const point of data) {
-      const bitmapType = Number.isFinite(point.bitmapType) ?
-        point.bitmapType :
-        this.getBitmapType(point);
+      const bitmapType = Number.isFinite(point.bitmapType)
+        ? point.bitmapType
+        : this.getBitmapType(point);
       value[i] = bitmapType;
       i += size;
     }

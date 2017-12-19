@@ -127,7 +127,7 @@ function calculateIndices({polygons, IndexType = Uint32Array}) {
   // Allocate the attribute
   // TODO it's not the index count but the vertex count that must be checked
   if (IndexType === Uint16Array && indexCount > 65535) {
-    throw new Error('Vertex count exceeds browser\'s limit');
+    throw new Error("Vertex count exceeds browser's limit");
   }
   const attribute = new IndexType(indexCount);
 
@@ -169,7 +169,8 @@ function calculatePositions({polygons, pointCount, fp64}) {
   let i = 0;
   let j = 0;
   for (const polygon of polygons) {
-    Polygon.forEachVertex(polygon, vertex => { // eslint-disable-line
+    // eslint-disable-next-line
+    Polygon.forEachVertex(polygon, vertex => {
       const x = vertex[0];
       const y = vertex[1];
       const z = vertex[2] || 0;

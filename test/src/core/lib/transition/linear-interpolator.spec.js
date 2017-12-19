@@ -14,12 +14,14 @@ const TEST_CASES = [
     transition: {
       0.5: {longitude: -98.225, latitude: 39.24, zoom: 11.5}
     }
-  }, {
+  },
+  {
     title: 'throw for missing prop',
     startProps: {longitude: -122.45, latitude: 37.78, zoom: 12},
     endProps: {longitude: -74, latitude: 40.7, zoom: 11},
     shouldThrow: true
-  }, {
+  },
+  {
     title: 'find shortest path',
     transitionProps: ['longitude', 'latitude'],
     startProps: {longitude: -122.45, latitude: 37.78},
@@ -31,7 +33,8 @@ const TEST_CASES = [
     transition: {
       0.5: {longitude: -151.725, latitude: 39.24}
     }
-  }, {
+  },
+  {
     title: 'array prop',
     transitionProps: ['position'],
     startProps: {position: [0, 0, 0]},
@@ -47,7 +50,6 @@ const TEST_CASES = [
 ];
 
 test('LinearInterpolator#constructor', t => {
-
   const interpolator = new LinearInterpolator(['width', 'height']);
   t.ok(interpolator, 'constructor does not throw error');
   t.deepEqual(interpolator.propNames, ['width', 'height'], 'propNames is set');
@@ -56,7 +58,6 @@ test('LinearInterpolator#constructor', t => {
 });
 
 test('LinearInterpolator#initializeProps', t => {
-
   TEST_CASES.forEach(testCase => {
     const interpolator = new LinearInterpolator(testCase.transitionProps);
     const getResult = () => interpolator.initializeProps(testCase.startProps, testCase.endProps);
@@ -72,17 +73,17 @@ test('LinearInterpolator#initializeProps', t => {
 });
 
 test('LinearInterpolator#interpolateProps', t => {
-
-  TEST_CASES
-    .filter(testCase => testCase.transition)
-    .forEach(testCase => {
-      const interpolator = new LinearInterpolator(testCase.transitionProps);
-      Object.keys(testCase.transition).forEach(time => {
-        const propsInTransition = interpolator.interpolateProps(
-          testCase.expect.start, testCase.expect.end, Number(time));
-        t.deepEqual(propsInTransition, testCase.transition[time], time);
-      });
+  TEST_CASES.filter(testCase => testCase.transition).forEach(testCase => {
+    const interpolator = new LinearInterpolator(testCase.transitionProps);
+    Object.keys(testCase.transition).forEach(time => {
+      const propsInTransition = interpolator.interpolateProps(
+        testCase.expect.start,
+        testCase.expect.end,
+        Number(time)
+      );
+      t.deepEqual(propsInTransition, testCase.transition[time], time);
     });
+  });
 
   t.end();
 });

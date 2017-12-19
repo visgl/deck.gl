@@ -88,8 +88,12 @@ export default class BinSorter {
    * @return {Object} bin index to sortedBins
    */
   getBinMap() {
-    return this.sortedBins.reduce((mapper, curr) => Object.assign(mapper, {
-      [curr.i]: curr
-    }), {});
+    return this.sortedBins.reduce(
+      (mapper, curr) =>
+        Object.assign(mapper, {
+          [curr.i]: curr
+        }),
+      {}
+    );
   }
 }

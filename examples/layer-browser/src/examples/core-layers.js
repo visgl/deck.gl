@@ -1,10 +1,8 @@
 import {
   COORDINATE_SYSTEM,
-
   ScatterplotLayer,
   ArcLayer,
   LineLayer,
-
   PointCloudLayer,
   ScreenGridLayer,
   IconLayer,
@@ -12,7 +10,6 @@ import {
   GridLayer,
   HexagonCellLayer,
   HexagonLayer,
-
   GeoJsonLayer,
   PolygonLayer,
   PathLayer
@@ -25,10 +22,7 @@ import dataSamples from '../immutable-data-samples';
 import {parseColor, setOpacity} from '../utils/color';
 
 const LIGHT_SETTINGS = {
-  lightsPosition: [
-    -122.45, 37.66, 8000,
-    -122.0, 38.00, 8000
-  ],
+  lightsPosition: [-122.45, 37.66, 8000, -122.0, 38.0, 8000],
   ambientRatio: 0.3,
   diffuseRatio: 0.6,
   specularRatio: 0.4,
@@ -64,8 +58,8 @@ const IconLayerExample = {
     sizeScale: 24,
     getPosition: d => d.COORDINATES,
     getColor: d => [64, 64, 72],
-    getIcon: d => get(d, 'PLACEMENT') === 'SW' ? 'marker' : 'marker-warning',
-    getSize: d => get(d, 'RACKS') > 2 ? 2 : 1,
+    getIcon: d => (get(d, 'PLACEMENT') === 'SW' ? 'marker' : 'marker-warning'),
+    getSize: d => (get(d, 'RACKS') > 2 ? 2 : 1),
     opacity: 0.8,
     pickable: true
   }
@@ -102,8 +96,8 @@ const GeoJsonLayerExtrudedExample = {
   getData: () => dataSamples.choropleths,
   props: {
     id: 'geojsonLayer-extruded',
-    getElevation: f => get(f, 'properties.ZIP_CODE') * 10 % 127 * 10,
-    getFillColor: f => [0, 100, get(f, 'properties.ZIP_CODE') * 55 % 255],
+    getElevation: f => ((get(f, 'properties.ZIP_CODE') * 10) % 127) * 10,
+    getFillColor: f => [0, 100, (get(f, 'properties.ZIP_CODE') * 55) % 255],
     getLineColor: f => [200, 0, 80],
     extruded: true,
     wireframe: true,
@@ -117,9 +111,13 @@ const PolygonLayerExample = {
   getData: () => dataSamples.polygons,
   propTypes: {
     getLineDashArray: {type: 'compound', elements: ['lineDashSizeLine']},
-    lineDashSizeLine: {type: 'number', max: 20, onUpdate: (newValue, newSettings, change) => {
-      change('getLineDashArray', [newValue, 20 - newValue]);
-    }}
+    lineDashSizeLine: {
+      type: 'number',
+      max: 20,
+      onUpdate: (newValue, newSettings, change) => {
+        change('getLineDashArray', [newValue, 20 - newValue]);
+      }
+    }
   },
   props: {
     getPolygon: f => f,
@@ -170,7 +168,7 @@ const LineLayerExample = {
     id: 'lineLayer',
     getSourcePosition: d => get(d, 'START'),
     getTargetPosition: d => get(d, 'END'),
-    getColor: d => get(d, 'SERVICE') === 'WEEKDAY' ? [255, 64, 0] : [255, 200, 0],
+    getColor: d => (get(d, 'SERVICE') === 'WEEKDAY' ? [255, 64, 0] : [255, 200, 0]),
     pickable: true
   }
 };
@@ -212,15 +210,17 @@ const GridCellLayerExample = {
 function getMean(pts, key) {
   const filtered = pts.filter(pt => Number.isFinite(pt[key]));
 
-  return filtered.length ?
-    filtered.reduce((accu, curr) => accu + curr[key], 0) / filtered.length : null;
+  return filtered.length
+    ? filtered.reduce((accu, curr) => accu + curr[key], 0) / filtered.length
+    : null;
 }
 
 function getMax(pts, key) {
   const filtered = pts.filter(pt => Number.isFinite(pt[key]));
 
-  return filtered.length ?
-    filtered.reduce((accu, curr) => curr[key] > accu ? curr[key] : accu, -Infinity) : null;
+  return filtered.length
+    ? filtered.reduce((accu, curr) => (curr[key] > accu ? curr[key] : accu), -Infinity)
+    : null;
 }
 
 // hexagon/grid layer compares whether getColorValue / getElevationValue has changed to
@@ -425,7 +425,7 @@ const ScatterplotLayer64PerfExample = (id, getData) => ({
 /* eslint-disable quote-props */
 export default {
   'Core Layers - LngLat': {
-    'GeoJsonLayer': GeoJsonLayerExample,
+    GeoJsonLayer: GeoJsonLayerExample,
     'GeoJsonLayer (Extruded)': GeoJsonLayerExtrudedExample,
     PolygonLayer: PolygonLayerExample,
     PathLayer: PathLayerExample,
@@ -441,7 +441,7 @@ export default {
   },
 
   'Core Layers - Meter Offsets': {
-    'PointCloudLayer': PointCloudLayerExample,
+    PointCloudLayer: PointCloudLayerExample,
     'Path Layer (Meters)': PathLayerMetersExample,
     'PathLayer (Mm Filtered: Zoom Map)': PathLayerMillimetersFilteredExample,
     'PathLayer (Mm Unfiltered: Zoom Map)': PathLayerMillimetersUnfilteredExample,

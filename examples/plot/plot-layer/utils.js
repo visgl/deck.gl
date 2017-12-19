@@ -17,7 +17,6 @@ function setTextStyle(ctx, fontSize) {
  * @returns {object} {texture, columnWidths}
  */
 export function textMatrixToTexture(glContext, data, fontSize = 48) {
-
   const canvas = document.createElement('canvas');
   const ctx = canvas.getContext('2d');
   setTextStyle(ctx, fontSize);
@@ -31,8 +30,10 @@ export function textMatrixToTexture(glContext, data, fontSize = 48) {
   });
 
   const canvasWidth = columnWidths.reduce((x, w) => x + w, 0);
-  const canvasHeight = data.reduce((h, column) =>
-    Math.max(h, Math.ceil(column.length * fontSize)), 0);
+  const canvasHeight = data.reduce(
+    (h, column) => Math.max(h, Math.ceil(column.length * fontSize)),
+    0
+  );
 
   if (canvasWidth === 0 || canvasHeight === 0) {
     // empty canvas willl cause error in Texture2D

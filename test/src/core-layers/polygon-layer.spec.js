@@ -38,23 +38,26 @@ test('PolygonLayer#constructor', t => {
       data,
       getPolygon: f => f
     },
-    UPDATES: [{
-      updateProps: {
-        filled: false
+    UPDATES: [
+      {
+        updateProps: {
+          filled: false
+        },
+        assert: (layer, oldState) => {
+          t.ok(layer.state, 'should update layer state');
+          const subLayers = layer.renderLayers();
+          t.ok(subLayers.length, 'subLayers rendered');
+        }
       },
-      assert: (layer, oldState) => {
-        t.ok(layer.state, 'should update layer state');
-        const subLayers = layer.renderLayers();
-        t.ok(subLayers.length, 'subLayers rendered');
+      {
+        updateProps: {
+          data: data.slice(0, 10)
+        },
+        assert: (layer, oldState) => {
+          t.ok(layer.state.paths.length !== oldState.paths.length, 'should update state.paths');
+        }
       }
-    }, {
-      updateProps: {
-        data: data.slice(0, 10)
-      },
-      assert: (layer, oldState) => {
-        t.ok(layer.state.paths.length !== oldState.paths.length, 'should update state.paths');
-      }
-    }]
+    ]
   };
 
   testCreateLayer(t, LayerComponent, {data, pickable: true});

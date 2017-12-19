@@ -23,9 +23,7 @@ import {testInitializeLayer, testLayerUpdates} from 'deck.gl/test/test-utils';
 
 import {GridCellLayer} from 'deck.gl';
 
-const GRID = [
-  {position: [37, 122]}, {position: [37.1, 122.8]}
-];
+const GRID = [{position: [37, 122]}, {position: [37.1, 122.8]}];
 
 const TEST_CASES = {
   // props to initialize layer with
@@ -33,27 +31,31 @@ const TEST_CASES = {
     data: GRID
   },
   // list of update props to call and asserts on the resulting layer
-  UPDATES: [{
-    updateProps: {
-      coverage: 0.8
+  UPDATES: [
+    {
+      updateProps: {
+        coverage: 0.8
+      },
+      assert: (layer, oldState, t) => {
+        t.ok(layer.state, 'should update layer');
+      }
     },
-    assert: (layer, oldState, t) => {
-      t.ok(layer.state, 'should update layer');
+    {
+      updateProps: {
+        fp64: true
+      },
+      assert: (layer, oldState, t) => {
+        t.ok(layer.state, 'should update layer');
+        t.ok(
+          layer.state.attributeManager.attributes.instancePositions64xyLow,
+          'should add instancePositions64xyLow'
+        );
+      }
     }
-  }, {
-    updateProps: {
-      fp64: true
-    },
-    assert: (layer, oldState, t) => {
-      t.ok(layer.state, 'should update layer');
-      t.ok(layer.state.attributeManager.attributes.instancePositions64xyLow,
-        'should add instancePositions64xyLow');
-    }
-  }]
+  ]
 };
 
 test('GridCellLayer#constructor', t => {
-
   let layer = new GridCellLayer({
     id: 'emptyGridCellLayer',
     data: [],
@@ -71,11 +73,12 @@ test('GridCellLayer#constructor', t => {
   t.ok(layer.state.model, 'GridCellLayer has state');
 
   t.doesNotThrow(
-    () => new GridCellLayer({
-      id: 'nullGridCellLayer',
-      data: null,
-      pickable: true
-    }),
+    () =>
+      new GridCellLayer({
+        id: 'nullGridCellLayer',
+        data: null,
+        pickable: true
+      }),
     'Null GridCellLayer did not throw exception'
   );
 

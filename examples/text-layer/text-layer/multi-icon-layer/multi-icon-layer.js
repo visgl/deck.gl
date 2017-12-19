@@ -10,7 +10,6 @@ const defaultProps = {
 };
 
 export default class MultiIconLayer extends IconLayer {
-
   // copied from src/lib/utils/fp64.js for now as it is not visible outside the deck.gl repo
   enable64bitSupport(props) {
     if (props.fp64) {
@@ -33,8 +32,16 @@ export default class MultiIconLayer extends IconLayer {
 
     const {attributeManager} = this.state;
     attributeManager.addInstanced({
-      instanceLetterIndexInString: {size: 1, accessor: 'getLetterIndexInString', update: this.calculateinstanceLetterIndexInString},
-      instanceStringLength: {size: 1, accessor: 'getStringLength', update: this.calculategetStringLength}
+      instanceLetterIndexInString: {
+        size: 1,
+        accessor: 'getLetterIndexInString',
+        update: this.calculateinstanceLetterIndexInString
+      },
+      instanceStringLength: {
+        size: 1,
+        accessor: 'getStringLength',
+        update: this.calculategetStringLength
+      }
     });
   }
 
@@ -55,7 +62,6 @@ export default class MultiIconLayer extends IconLayer {
       value[i++] = getStringLength(object);
     }
   }
-
 }
 
 MultiIconLayer.layerName = 'MultiIconLayer';

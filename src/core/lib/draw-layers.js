@@ -60,18 +60,21 @@ function clearCanvas(gl, {useDevicePixels}) {
 }
 
 // Draw a list of layers in a list of viewports
-export function drawLayers(gl, {
-  layers,
-  viewports,
-  onViewportActive,
-  useDevicePixels,
-  drawPickingColors = false,
-  deviceRect = null,
-  parameters = {},
-  layerFilter = null,
-  pass = 'draw',
-  redrawReason = ''
-}) {
+export function drawLayers(
+  gl,
+  {
+    layers,
+    viewports,
+    onViewportActive,
+    useDevicePixels,
+    drawPickingColors = false,
+    deviceRect = null,
+    parameters = {},
+    layerFilter = null,
+    pass = 'draw',
+    redrawReason = ''
+  }
+) {
   clearCanvas(gl, {useDevicePixels});
 
   // effectManager.preDraw();
@@ -101,62 +104,70 @@ export function drawLayers(gl, {
 
 // Draws list of layers and viewports into the picking buffer
 // Note: does not sample the buffer, that has to be done by the caller
-export function drawPickingBuffer(gl, {
-  layers,
-  viewports,
-  onViewportActive,
-  useDevicePixels,
-  pickingFBO,
-  deviceRect: {x, y, width, height},
-  layerFilter = null,
-  redrawReason = ''
-}) {
+export function drawPickingBuffer(
+  gl,
+  {
+    layers,
+    viewports,
+    onViewportActive,
+    useDevicePixels,
+    pickingFBO,
+    deviceRect: {x, y, width, height},
+    layerFilter = null,
+    redrawReason = ''
+  }
+) {
   // Make sure we clear scissor test and fbo bindings in case of exceptions
   // We are only interested in one pixel, no need to render anything else
   // Note that the callback here is called synchronously.
   // Set blend mode for picking
   // always overwrite existing pixel with [r,g,b,layerIndex]
-  return withParameters(gl, {
-    framebuffer: pickingFBO,
-    scissorTest: true,
-    scissor: [x, y, width, height],
-    clearColor: [0, 0, 0, 0]
-  }, () => {
-
-    drawLayers(gl, {
-      layers,
-      viewports,
-      onViewportActive,
-      useDevicePixels,
-      drawPickingColors: true,
-      layerFilter,
-      pass: 'picking',
-      redrawReason,
-      parameters: {
-        blend: true,
-        blendFunc: [gl.ONE, gl.ZERO, gl.CONSTANT_ALPHA, gl.ZERO],
-        blendEquation: gl.FUNC_ADD,
-        blendColor: [0, 0, 0, 0]
-      }
-    });
-
-  });
+  return withParameters(
+    gl,
+    {
+      framebuffer: pickingFBO,
+      scissorTest: true,
+      scissor: [x, y, width, height],
+      clearColor: [0, 0, 0, 0]
+    },
+    () => {
+      drawLayers(gl, {
+        layers,
+        viewports,
+        onViewportActive,
+        useDevicePixels,
+        drawPickingColors: true,
+        layerFilter,
+        pass: 'picking',
+        redrawReason,
+        parameters: {
+          blend: true,
+          blendFunc: [gl.ONE, gl.ZERO, gl.CONSTANT_ALPHA, gl.ZERO],
+          blendEquation: gl.FUNC_ADD,
+          blendColor: [0, 0, 0, 0]
+        }
+      });
+    }
+  );
 }
 
 // Draws a list of layers in one viewport
 // TODO - when picking we could completely skip rendering viewports that dont
 // intersect with the picking rect
-function drawLayersInViewport(gl, {
-  layers,
-  viewport,
-  useDevicePixels,
-  drawPickingColors = false,
-  deviceRect = null,
-  parameters = {},
-  layerFilter,
-  pass = 'draw',
-  redrawReason = ''
-}) {
+function drawLayersInViewport(
+  gl,
+  {
+    layers,
+    viewport,
+    useDevicePixels,
+    drawPickingColors = false,
+    deviceRect = null,
+    parameters = {},
+    layerFilter,
+    pass = 'draw',
+    redrawReason = ''
+  }
+) {
   const pixelRatio = getPixelRatio({useDevicePixels});
   const glViewport = getGLViewport(gl, {viewport, pixelRatio});
 
@@ -174,7 +185,6 @@ function drawLayersInViewport(gl, {
 
   // render layers in normal colors
   layers.forEach((layer, layerIndex) => {
-
     // Check if we should draw layer
     let shouldDrawLayer = layer.props.visible;
     if (drawPickingColors) {
@@ -194,14 +204,12 @@ function drawLayersInViewport(gl, {
 
     // Draw the layer
     if (shouldDrawLayer) {
-
       if (!layer.isComposite) {
         renderStats.visibleCount++;
       }
 
       drawLayerInViewport({gl, layer, layerIndex, drawPickingColors, glViewport, parameters});
     }
-
   });
 
   renderCount++;
@@ -222,11 +230,7 @@ function drawLayerInViewport({gl, layer, layerIndex, drawPickingColors, glViewpo
     pickingEnabled: drawPickingColors ? 1 : 0
   };
 
-  const uniforms = Object.assign(
-    pickingUniforms,
-    layer.context.uniforms,
-    {layerIndex}
-  );
+  const uniforms = Object.assign(pickingUniforms, layer.context.uniforms, {layerIndex});
 
   // All parameter resolving is done here instead of the layer
   // Blend parameters must not be overriden

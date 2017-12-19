@@ -15,16 +15,18 @@ const CONFIG = {
   },
 
   module: {
-    rules: [{
-      // Compile ES2015 using buble
-      test: /\.js$/,
-      loader: 'buble-loader',
-      include: [resolve('.')],
-      exclude: [/node_modules/],
-      options: {
-        objectAssign: 'Object.assign'
+    rules: [
+      {
+        // Compile ES2015 using buble
+        test: /\.js$/,
+        loader: 'buble-loader',
+        include: [resolve('.')],
+        exclude: [/node_modules/],
+        options: {
+          objectAssign: 'Object.assign'
+        }
       }
-    }]
+    ]
   },
 
   resolve: {
@@ -35,14 +37,11 @@ const CONFIG = {
   },
 
   // Optional: Enables reading mapbox token from environment variable
-  plugins: [
-    new webpack.EnvironmentPlugin(['MapboxAccessToken'])
-  ]
+  plugins: [new webpack.EnvironmentPlugin(['MapboxAccessToken'])]
 };
 
 module.exports = env => {
   if (env && env.prod) {
-
     delete CONFIG.devtool;
 
     CONFIG.plugins.push(

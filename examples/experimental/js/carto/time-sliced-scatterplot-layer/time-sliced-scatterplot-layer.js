@@ -45,17 +45,26 @@ export default class TimeSlicedScatterplotLayer extends ScatterplotLayer {
   }
 
   draw({uniforms}) {
-    const {radiusScale, radiusMinPixels, radiusMaxPixels, outline,
-      strokeWidth, currentTime, fadeFactor} = this.props;
-    this.state.model.render(Object.assign({}, uniforms, {
-      outline: outline ? 1 : 0,
-      strokeWidth,
+    const {
       radiusScale,
       radiusMinPixels,
       radiusMaxPixels,
+      outline,
+      strokeWidth,
       currentTime,
       fadeFactor
-    }));
+    } = this.props;
+    this.state.model.render(
+      Object.assign({}, uniforms, {
+        outline: outline ? 1 : 0,
+        strokeWidth,
+        radiusScale,
+        radiusMinPixels,
+        radiusMaxPixels,
+        currentTime,
+        fadeFactor
+      })
+    );
   }
 
   calculateInstancePositions(attribute) {

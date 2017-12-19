@@ -11,12 +11,13 @@ const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
 
 // Source data CSV
 const DATA_URL = {
-  AIRPORTS: 'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/line/airports.json',  // eslint-disable-line
-  FLIGHT_PATHS: 'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/line/heathrow-flights.json'  // eslint-disable-line
+  AIRPORTS:
+    'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/line/airports.json', // eslint-disable-line
+  FLIGHT_PATHS:
+    'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/line/heathrow-flights.json' // eslint-disable-line
 };
 
 class Root extends Component {
-
   constructor(props) {
     super(props);
     this.state = {
@@ -67,11 +68,14 @@ class Root extends Component {
         {...viewport}
         mapStyle="mapbox://styles/mapbox/dark-v9"
         onViewportChange={this._onViewportChange.bind(this)}
-        mapboxApiAccessToken={MAPBOX_TOKEN}>
-        <DeckGLOverlay viewport={viewport}
+        mapboxApiAccessToken={MAPBOX_TOKEN}
+      >
+        <DeckGLOverlay
+          viewport={viewport}
           strokeWidth={3}
           flightPaths={flightPaths}
-          airports={airports} />
+          airports={airports}
+        />
       </MapGL>
     );
   }

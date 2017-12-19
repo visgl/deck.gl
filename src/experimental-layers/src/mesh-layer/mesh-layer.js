@@ -47,10 +47,10 @@ function getTexture(gl, src, opts) {
   if (typeof src === 'string') {
     // Url, load the image
     return loadTextures(gl, Object.assign({urls: [src]}, opts))
-    .then(textures => textures[0])
-    .catch(error => {
-      throw new Error(`Could not load texture from ${src}: ${error}`);
-    });
+      .then(textures => textures[0])
+      .catch(error => {
+        throw new Error(`Could not load texture from ${src}: ${error}`);
+      });
   }
   return new Promise(resolve => resolve(getTextureFromData(gl, src, opts)));
 }
@@ -79,7 +79,7 @@ const defaultProps = {
   fp64: false,
   // Optional settings for 'lighting' shader module
   lightSettings: {
-    lightsPosition: [-122.45, 37.75, 8000, -122.0, 38.00, 5000],
+    lightsPosition: [-122.45, 37.75, 8000, -122.0, 38.0, 5000],
     ambientRatio: 0.05,
     diffuseRatio: 0.6,
     specularRatio: 0.8,
@@ -93,12 +93,11 @@ const defaultProps = {
 };
 
 export default class MeshLayer extends Layer {
-
   getShaders(id) {
     const {shaderCache} = this.context;
-    return enable64bitSupport(this.props) ?
-      {vs: vs64, fs, modules: [project64utils, 'picking', 'lighting'], shaderCache} :
-      {vs, fs, modules: ['picking', 'lighting'], shaderCache}; // 'project' module added by default.
+    return enable64bitSupport(this.props)
+      ? {vs: vs64, fs, modules: [project64utils, 'picking', 'lighting'], shaderCache}
+      : {vs, fs, modules: ['picking', 'lighting'], shaderCache}; // 'project' module added by default.
   }
 
   initializeState() {
@@ -107,8 +106,16 @@ export default class MeshLayer extends Layer {
 
     const {attributeManager} = this.state;
     attributeManager.addInstanced({
-      instancePositions: {size: 3, accessor: 'getPosition', update: this.calculateInstancePositions},
-      instanceAngles: {size: 1, accessor: 'getAngleDegreesCW', update: this.calculateInstanceAngles},
+      instancePositions: {
+        size: 3,
+        accessor: 'getPosition',
+        update: this.calculateInstancePositions
+      },
+      instanceAngles: {
+        size: 1,
+        accessor: 'getAngleDegreesCW',
+        update: this.calculateInstanceAngles
+      },
       instanceColors: {size: 4, accessor: 'getColor', update: this.calculateInstanceColors}
     });
   }
@@ -122,7 +129,6 @@ export default class MeshLayer extends Layer {
     }
 
     if (changeFlags.propsChanged) {
-
       this._updateFP64(props, oldProps);
 
       if (props.sizeScale !== oldProps.sizeScale) {
@@ -174,16 +180,17 @@ export default class MeshLayer extends Layer {
   }
 
   getModel(gl) {
-    const isValidMesh =
-      this.props.mesh instanceof Geometry &&
-      this.props.mesh.attributes.positions;
-    assert (isValidMesh);
+    const isValidMesh = this.props.mesh instanceof Geometry && this.props.mesh.attributes.positions;
+    assert(isValidMesh);
 
-    return new Model(gl, Object.assign({}, this.getShaders(), {
-      id: this.props.id,
-      geometry: this.props.mesh,
-      isInstanced: true
-    }));
+    return new Model(
+      gl,
+      Object.assign({}, this.getShaders(), {
+        id: this.props.id,
+        geometry: this.props.mesh,
+        isInstanced: true
+      })
+    );
   }
 
   loadTexture(src) {

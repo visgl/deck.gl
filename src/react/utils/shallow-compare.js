@@ -24,8 +24,5 @@ import {shallowEqual} from './shallow-equal';
  * Does a shallow comparison for React props and state.
  */
 export default function shallowCompare(instance, nextProps, nextState) {
-  return (
-    !shallowEqual(instance.props, nextProps) ||
-    !shallowEqual(instance.state, nextState)
-  );
+  return !shallowEqual(instance.props, nextProps) || !shallowEqual(instance.state, nextState);
 }

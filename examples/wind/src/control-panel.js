@@ -7,7 +7,6 @@ const propTypes = {
 };
 
 export default class ControlPanel extends Component {
-
   constructor(props) {
     super(props);
 
@@ -23,9 +22,11 @@ export default class ControlPanel extends Component {
     return (
       <div className="input">
         <label>{displayName}</label>
-        <input type="checkbox"
+        <input
+          type="checkbox"
           checked={this.props.settings[key] || false}
-          onChange={ e => this.props.onChange({[key]: e.target.checked}) } />
+          onChange={e => this.props.onChange({[key]: e.target.checked})}
+        />
       </div>
     );
   }
@@ -34,9 +35,12 @@ export default class ControlPanel extends Component {
     return (
       <div className="input">
         <label>{displayName}</label>
-        <input type="range" {...props}
+        <input
+          type="range"
+          {...props}
           value={this.props.settings[key] || 0}
-          onChange={ e => this.props.onChange({[key]: e.target.value}) } />
+          onChange={e => this.props.onChange({[key]: e.target.value})}
+        />
       </div>
     );
   }
@@ -44,11 +48,11 @@ export default class ControlPanel extends Component {
   render() {
     return (
       <div>
-        { this._renderToggle('showParticles', 'particles') }
-        { this._renderToggle('showWind', 'field') }
-        { this._renderToggle('showElevation', 'elevation') }
-        { this._renderToggle('useDevicePixels', 'Retina/ HD') }
-        { this._renderSlider('time', 'time', {min: 0, max: 70, step: 0.1}) }
+        {this._renderToggle('showParticles', 'particles')}
+        {this._renderToggle('showWind', 'field')}
+        {this._renderToggle('showElevation', 'elevation')}
+        {this._renderToggle('useDevicePixels', 'Retina/ HD')}
+        {this._renderSlider('time', 'time', {min: 0, max: 70, step: 0.1})}
       </div>
     );
   }

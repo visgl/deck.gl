@@ -1,8 +1,15 @@
 /* global window */
 import {Layer} from 'deck.gl';
 import {
-  GL, Model, Geometry, Buffer, TransformFeedback,
-  setParameters, loadTextures, Texture2D, Program
+  GL,
+  Model,
+  Geometry,
+  Buffer,
+  TransformFeedback,
+  setParameters,
+  loadTextures,
+  Texture2D,
+  Program
 } from 'luma.gl';
 
 import {ELEVATION_DATA_IMAGE, ELEVATION_DATA_BOUNDS, ELEVATION_RANGE} from '../../defaults';
@@ -51,13 +58,21 @@ export default class ParticleLayer extends Layer {
     const textureTo = this.createTexture(gl, {});
 
     const model = this.getModel({
-      gl, bbox, nx: 1200, ny: 600, texData
+      gl,
+      bbox,
+      nx: 1200,
+      ny: 600,
+      texData
     });
 
     this.setupTransformFeedback({gl, bbox, nx: 1200, ny: 600});
 
     const modelTF = this.getModelTF({
-      gl, bbox, nx: 1200, ny: 600, texData
+      gl,
+      bbox,
+      nx: 1200,
+      ny: 600,
+      texData
     });
 
     this.setState({
@@ -101,12 +116,7 @@ export default class ParticleLayer extends Layer {
 
     const {model, textureFrom, textureTo, delta} = this.state;
     const {textureArray} = texData;
-    const {
-      width, height,
-      elevationTexture,
-      bufferTo, bufferFrom,
-      timeInterval
-    } = this.state;
+    const {width, height, elevationTexture, bufferTo, bufferFrom, timeInterval} = this.state;
 
     const currentUniforms = {
       bbox: [bbox.minLng, bbox.maxLng, bbox.minLat, bbox.maxLat],
@@ -173,10 +183,16 @@ export default class ParticleLayer extends Layer {
     const positions4 = this.calculatePositions4({bbox, nx, ny});
 
     const bufferFrom = new Buffer(gl, {
-      size: 4, data: positions4, usage: gl.DYNAMIC_COPY});
+      size: 4,
+      data: positions4,
+      usage: gl.DYNAMIC_COPY
+    });
 
     const bufferTo = new Buffer(gl, {
-      size: 4, bytes: 4 * positions4.length, usage: gl.DYNAMIC_COPY});
+      size: 4,
+      bytes: 4 * positions4.length,
+      usage: gl.DYNAMIC_COPY
+    });
 
     const transformFeedback = new TransformFeedback(gl, {});
 
@@ -246,15 +262,13 @@ export default class ParticleLayer extends Layer {
       },
       {
         clear: true
-      });
+      }
+    );
 
     transformFeedback.begin(gl.POINTS);
 
     const uniforms = {
-      bbox: [
-        bbox.minLng, bbox.maxLng,
-        bbox.minLat, bbox.maxLat
-      ],
+      bbox: [bbox.minLng, bbox.maxLng, bbox.minLat, bbox.maxLat],
       bounds0: [dataBounds[0].min, dataBounds[0].max],
       bounds1: [dataBounds[1].min, dataBounds[1].max],
       bounds2: [dataBounds[2].min, dataBounds[2].max],
@@ -338,19 +352,21 @@ export default class ParticleLayer extends Layer {
   }
 
   createTexture(gl, opt) {
-
-    const textureOptions = Object.assign({
-      format: gl.RGBA32F,
-      dataFormat: gl.RGBA,
-      type: gl.FLOAT,
-      parameters: {
-        [gl.TEXTURE_MAG_FILTER]: gl.NEAREST,
-        [gl.TEXTURE_MIN_FILTER]: gl.NEAREST,
-        [gl.TEXTURE_WRAP_S]: gl.CLAMP_TO_EDGE,
-        [gl.TEXTURE_WRAP_T]: gl.CLAMP_TO_EDGE
+    const textureOptions = Object.assign(
+      {
+        format: gl.RGBA32F,
+        dataFormat: gl.RGBA,
+        type: gl.FLOAT,
+        parameters: {
+          [gl.TEXTURE_MAG_FILTER]: gl.NEAREST,
+          [gl.TEXTURE_MIN_FILTER]: gl.NEAREST,
+          [gl.TEXTURE_WRAP_S]: gl.CLAMP_TO_EDGE,
+          [gl.TEXTURE_WRAP_T]: gl.CLAMP_TO_EDGE
+        },
+        pixelStore: {[gl.UNPACK_FLIP_Y_WEBGL]: true}
       },
-      pixelStore: {[gl.UNPACK_FLIP_Y_WEBGL]: true}
-    }, opt);
+      opt
+    );
 
     return new Texture2D(gl, textureOptions);
   }

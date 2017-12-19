@@ -1,4 +1,3 @@
-
 export default class Stats {
   constructor({id}) {
     this.id = id;
@@ -23,9 +22,9 @@ export default class Stats {
 
   timestampMs() {
     /* global window */
-    return typeof window !== 'undefined' && window.performance ?
-      window.performance.now() :
-      Date.now();
+    return typeof window !== 'undefined' && window.performance
+      ? window.performance.now()
+      : Date.now();
   }
 
   getTimeString() {

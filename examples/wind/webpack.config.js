@@ -13,15 +13,18 @@ const CONFIG = {
     filename: 'bundle.js'
   },
   module: {
-    rules: [{
-      test: /\.js$/,
-      loader: 'babel-loader',
-      include: resolve('./src')
-    }, {
-      include: [resolve('./src')],
-      loader: 'transform-loader',
-      query: 'brfs-babel'
-    }]
+    rules: [
+      {
+        test: /\.js$/,
+        loader: 'babel-loader',
+        include: resolve('./src')
+      },
+      {
+        include: [resolve('./src')],
+        loader: 'transform-loader',
+        query: 'brfs-babel'
+      }
+    ]
   },
 
   resolve: {
@@ -31,10 +34,8 @@ const CONFIG = {
   },
 
   // Optional: Enables reading mapbox token from environment variable
-  plugins: [
-    new webpack.EnvironmentPlugin(['MapboxAccessToken'])
-  ]
+  plugins: [new webpack.EnvironmentPlugin(['MapboxAccessToken'])]
 };
 
 // This line enables bundling against src in this repo rather than installed deck.gl module
-module.exports = env => env ? require('../webpack.config.local')(CONFIG)(env) : CONFIG;
+module.exports = env => (env ? require('../webpack.config.local')(CONFIG)(env) : CONFIG);

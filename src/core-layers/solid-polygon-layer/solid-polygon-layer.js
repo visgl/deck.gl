@@ -50,7 +50,7 @@ const defaultProps = {
 
   // Optional settings for 'lighting' shader module
   lightSettings: {
-    lightsPosition: [-122.45, 37.75, 8000, -122.0, 38.00, 5000],
+    lightsPosition: [-122.45, 37.75, 8000, -122.0, 38.0, 5000],
     ambientRatio: 0.05,
     diffuseRatio: 0.6,
     specularRatio: 0.8,
@@ -61,9 +61,9 @@ const defaultProps = {
 
 export default class SolidPolygonLayer extends Layer {
   getShaders() {
-    return enable64bitSupport(this.props) ?
-      {vs: vs64, fs, modules: ['project64', 'lighting', 'picking']} :
-      {vs, fs, modules: ['lighting', 'picking']}; // 'project' module added by default.
+    return enable64bitSupport(this.props)
+      ? {vs: vs64, fs, modules: ['project64', 'lighting', 'picking']}
+      : {vs, fs, modules: ['lighting', 'picking']}; // 'project' module added by default.
   }
 
   initializeState() {
@@ -81,7 +81,13 @@ export default class SolidPolygonLayer extends Layer {
       indices: {size: 1, isIndexed: true, update: this.calculateIndices, noAlloc},
       positions: {size: 3, accessor: 'getElevation', update: this.calculatePositions, noAlloc},
       normals: {size: 3, update: this.calculateNormals, noAlloc},
-      colors: {size: 4, type: GL.UNSIGNED_BYTE, accessor: 'getColor', update: this.calculateColors, noAlloc},
+      colors: {
+        size: 4,
+        type: GL.UNSIGNED_BYTE,
+        accessor: 'getColor',
+        update: this.calculateColors,
+        noAlloc
+      },
       pickingColors: {size: 3, type: GL.UNSIGNED_BYTE, update: this.calculatePickingColors, noAlloc}
     });
     /* eslint-enable max-len */
@@ -97,9 +103,7 @@ export default class SolidPolygonLayer extends Layer {
           positions64xyLow: {size: 2, update: this.calculatePositionsLow}
         });
       } else {
-        attributeManager.remove([
-          'positions64xyLow'
-        ]);
+        attributeManager.remove(['positions64xyLow']);
       }
     }
   }
@@ -107,11 +111,17 @@ export default class SolidPolygonLayer extends Layer {
   draw({uniforms}) {
     const {extruded, lightSettings, elevationScale} = this.props;
 
-    this.state.model.render(Object.assign({}, uniforms, {
-      extruded: extruded ? 1.0 : 0.0,
-      elevationScale
-    },
-    lightSettings));
+    this.state.model.render(
+      Object.assign(
+        {},
+        uniforms,
+        {
+          extruded: extruded ? 1.0 : 0.0,
+          elevationScale
+        },
+        lightSettings
+      )
+    );
   }
 
   updateState({props, oldProps, changeFlags}) {
@@ -127,14 +137,16 @@ export default class SolidPolygonLayer extends Layer {
   }
 
   updateGeometry({props, oldProps, changeFlags}) {
-    const geometryConfigChanged = props.extruded !== oldProps.extruded ||
-      props.wireframe !== oldProps.wireframe || props.fp64 !== oldProps.fp64 ||
-      (changeFlags.updateTriggersChanged && (
-        changeFlags.updateTriggersChanged.all ||
-        changeFlags.updateTriggersChanged.getPolygon));
+    const geometryConfigChanged =
+      props.extruded !== oldProps.extruded ||
+      props.wireframe !== oldProps.wireframe ||
+      props.fp64 !== oldProps.fp64 ||
+      (changeFlags.updateTriggersChanged &&
+        (changeFlags.updateTriggersChanged.all || changeFlags.updateTriggersChanged.getPolygon));
 
     // check if updateTriggers.getElevation has been triggered
-    const getElevationTriggered = changeFlags.updateTriggersChanged &&
+    const getElevationTriggered =
+      changeFlags.updateTriggersChanged &&
       compareProps({
         oldProps: oldProps.updateTriggers.getElevation || {},
         newProps: props.updateTriggers.getElevation || {},
@@ -150,12 +162,14 @@ export default class SolidPolygonLayer extends Layer {
       const polygons = props.data.map(getPolygon);
 
       this.setState({
-        polygonTesselator: !extruded ?
-          new PolygonTesselator({polygons, fp64: this.props.fp64}) :
-          new PolygonTesselatorExtruded({polygons, wireframe,
-            getHeight: polygonIndex => getElevation(this.props.data[polygonIndex]),
-            fp64: this.props.fp64
-          })
+        polygonTesselator: !extruded
+          ? new PolygonTesselator({polygons, fp64: this.props.fp64})
+          : new PolygonTesselatorExtruded({
+              polygons,
+              wireframe,
+              getHeight: polygonIndex => getElevation(this.props.data[polygonIndex]),
+              fp64: this.props.fp64
+            })
       });
 
       this.state.attributeManager.invalidateAll();
@@ -165,16 +179,19 @@ export default class SolidPolygonLayer extends Layer {
   }
 
   _getModel(gl) {
-    return new Model(gl, Object.assign({}, this.getShaders(), {
-      id: this.props.id,
-      geometry: new Geometry({
-        drawMode: this.props.wireframe ? GL.LINES : GL.TRIANGLES,
-        attributes: {}
-      }),
-      vertexCount: 0,
-      isIndexed: true,
-      shaderCache: this.context.shaderCache
-    }));
+    return new Model(
+      gl,
+      Object.assign({}, this.getShaders(), {
+        id: this.props.id,
+        geometry: new Geometry({
+          drawMode: this.props.wireframe ? GL.LINES : GL.TRIANGLES,
+          attributes: {}
+        }),
+        vertexCount: 0,
+        isIndexed: true,
+        shaderCache: this.context.shaderCache
+      })
+    );
   }
 
   calculateIndices(attribute) {

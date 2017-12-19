@@ -32,7 +32,10 @@ export function getColorHex(value) {
     return value;
   }
   if (Array.isArray(value) && value.length >= 3) {
-    return `#${value.slice(0, 3).map(v => numberToHex(v, 2)).join('')}`;
+    return `#${value
+      .slice(0, 3)
+      .map(v => numberToHex(v, 2))
+      .join('')}`;
   }
   return '#888';
 }
@@ -51,7 +54,6 @@ export function getColorArray(str) {
 }
 
 export default class ColorPicker extends PureComponent {
-
   _onClick(color) {
     const {onChange} = this.props;
     const input = document.createElement('input');
@@ -67,8 +69,11 @@ export default class ColorPicker extends PureComponent {
   render() {
     const color = getColorHex(this.props.value);
     return (
-      <div className="color-picker" style={{background: color}}
-        onClick={ this._onClick.bind(this, color) } />
+      <div
+        className="color-picker"
+        style={{background: color}}
+        onClick={this._onClick.bind(this, color)}
+      />
     );
   }
 }

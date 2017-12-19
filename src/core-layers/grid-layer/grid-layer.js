@@ -28,7 +28,6 @@ import {pointToDensityGridData} from './grid-aggregator';
 function nop() {}
 
 const defaultProps = {
-
   // color
   colorDomain: null,
   colorRange: defaultColorRange,
@@ -54,7 +53,7 @@ const defaultProps = {
   fp64: false,
   // Optional settings for 'lighting' shader module
   lightSettings: {
-    lightsPosition: [-122.45, 37.75, 8000, -122.0, 38.00, 5000],
+    lightsPosition: [-122.45, 37.75, 8000, -122.0, 38.0, 5000],
     ambientRatio: 0.05,
     diffuseRatio: 0.6,
     specularRatio: 0.8,
@@ -103,11 +102,13 @@ export default class GridLayer extends CompositeLayer {
           id: 'value',
           triggers: ['getColorValue'],
           updater: this.getSortedColorBins
-        }, {
+        },
+        {
           id: 'domain',
           triggers: ['lowerPercentile', 'upperPercentile'],
           updater: this.getColorValueDomain
-        }, {
+        },
+        {
           id: 'scaleFunc',
           triggers: ['colorDomain', 'colorRange'],
           updater: this.getColorScale
@@ -118,11 +119,13 @@ export default class GridLayer extends CompositeLayer {
           id: 'value',
           triggers: ['getElevationValue'],
           updater: this.getSortedElevationBins
-        }, {
+        },
+        {
           id: 'domain',
           triggers: ['elevationLowerPercentile', 'elevationUpperPercentile'],
           updater: this.getElevationValueDomain
-        }, {
+        },
+        {
           id: 'scaleFunc',
           triggers: ['elevationDomain', 'elevationRange'],
           updater: this.getElevationScale
@@ -137,10 +140,10 @@ export default class GridLayer extends CompositeLayer {
 
     // get dimension to be updated
     for (const dimensionKey in dimensionUpdaters) {
-
       // return the first triggered updater for each dimension
-      const needUpdate = dimensionUpdaters[dimensionKey]
-        .find(item => item.triggers.some(t => oldProps[t] !== props[t]));
+      const needUpdate = dimensionUpdaters[dimensionKey].find(item =>
+        item.triggers.some(t => oldProps[t] !== props[t])
+      );
 
       if (needUpdate) {
         updaters.push(needUpdate.updater);
@@ -159,15 +162,18 @@ export default class GridLayer extends CompositeLayer {
     if (isPicked) {
       const cell = this.state.layerData[info.index];
 
-      const colorValue = sortedColorBins.binMap[cell.index] &&
-        sortedColorBins.binMap[cell.index].value;
-      const elevationValue = sortedElevationBins.binMap[cell.index] &&
-        sortedElevationBins.binMap[cell.index].value;
+      const colorValue =
+        sortedColorBins.binMap[cell.index] && sortedColorBins.binMap[cell.index].value;
+      const elevationValue =
+        sortedElevationBins.binMap[cell.index] && sortedElevationBins.binMap[cell.index].value;
 
-      object = Object.assign({
-        colorValue,
-        elevationValue
-      }, cell);
+      object = Object.assign(
+        {
+          colorValue,
+          elevationValue
+        },
+        cell
+      );
     }
 
     // add bin colorValue and elevationValue to info
@@ -185,15 +191,12 @@ export default class GridLayer extends CompositeLayer {
     const updateTriggers = {};
 
     for (const dimensionKey in dimensionUpdaters) {
-
       updateTriggers[dimensionKey] = {};
 
       for (const step of dimensionUpdaters[dimensionKey]) {
-
         step.triggers.forEach(prop => {
           updateTriggers[dimensionKey][prop] = this.props[prop];
         });
-
       }
     }
 
@@ -236,8 +239,10 @@ export default class GridLayer extends CompositeLayer {
   getColorValueDomain() {
     const {lowerPercentile, upperPercentile, onSetColorDomain} = this.props;
 
-    this.state.colorValueDomain = this.state.sortedColorBins
-      .getValueRange([lowerPercentile, upperPercentile]);
+    this.state.colorValueDomain = this.state.sortedColorBins.getValueRange([
+      lowerPercentile,
+      upperPercentile
+    ]);
 
     if (typeof onSetColorDomain === 'function') {
       onSetColorDomain(this.state.colorValueDomain);
@@ -249,8 +254,10 @@ export default class GridLayer extends CompositeLayer {
   getElevationValueDomain() {
     const {elevationLowerPercentile, elevationUpperPercentile, onSetElevationDomain} = this.props;
 
-    this.state.elevationValueDomain = this.state.sortedElevationBins
-      .getValueRange([elevationLowerPercentile, elevationUpperPercentile]);
+    this.state.elevationValueDomain = this.state.sortedElevationBins.getValueRange([
+      elevationLowerPercentile,
+      elevationUpperPercentile
+    ]);
 
     if (typeof onSetElevationDomain === 'function') {
       onSetElevationDomain(this.state.elevationValueDomain);
@@ -292,13 +299,13 @@ export default class GridLayer extends CompositeLayer {
 
   _onGetSublayerElevation(cell) {
     const {sortedElevationBins, elevationScaleFunc, elevationValueDomain} = this.state;
-    const ev = sortedElevationBins.binMap[cell.index] &&
-      sortedElevationBins.binMap[cell.index].value;
+    const ev =
+      sortedElevationBins.binMap[cell.index] && sortedElevationBins.binMap[cell.index].value;
 
     const elevationDomain = this.props.elevationDomain || elevationValueDomain;
 
-    const isElevationValueInDomain = ev >= elevationDomain[0] &&
-      ev <= elevationDomain[elevationDomain.length - 1];
+    const isElevationValueInDomain =
+      ev >= elevationDomain[0] && ev <= elevationDomain[elevationDomain.length - 1];
 
     // if cell value is outside domain, set elevation to -1
     return isElevationValueInDomain ? elevationScaleFunc(ev) : -1;
@@ -336,9 +343,7 @@ export default class GridLayer extends CompositeLayer {
   renderLayers() {
     const SubLayerClass = this.getSubLayerClass();
 
-    return new SubLayerClass(
-      this.getSubLayerProps()
-    );
+    return new SubLayerClass(this.getSubLayerProps());
   }
 }
 

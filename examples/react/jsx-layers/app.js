@@ -9,14 +9,13 @@ import {LineLayer, ScatterplotLayer} from 'deck.gl';
 const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
 
 class Root extends Component {
-
   constructor(props) {
     super(props);
     this.state = {
       viewport: {
         latitude: 37.785164,
         longitude: -122.41669,
-        zoom: 16.140440,
+        zoom: 16.14044,
         bearing: -20.55991,
         pitch: 60
       },
@@ -29,21 +28,17 @@ class Root extends Component {
     const {viewport, width, height} = this.state;
 
     return (
-      <MapGL
-        {...viewport}
-        width={width}
-        height={height}
-        mapboxApiAccessToken={MAPBOX_TOKEN}>
+      <MapGL {...viewport} width={width} height={height} mapboxApiAccessToken={MAPBOX_TOKEN}>
         <Deck {...viewport} width={width} height={height} debug>
           <LineLayer
-            data={[
-              {sourcePosition: [-122.41669, 37.7883], targetPosition: [-122.41669, 37.781]}
-            ]}
-            strokeWidth={5}/>
+            data={[{sourcePosition: [-122.41669, 37.7883], targetPosition: [-122.41669, 37.781]}]}
+            strokeWidth={5}
+          />
           <ScatterplotLayer
             data={[{position: [-122.41669, 37.79]}]}
             radiusScale={100}
-            getColor={x => [0, 0, 255]}/>
+            getColor={x => [0, 0, 255]}
+          />
         </Deck>
       </MapGL>
     );

@@ -125,8 +125,10 @@ function formatArgs(firstArg, ...args) {
 // Assertions don't generate standard exceptions and don't print nicely
 function checkForAssertionErrors(args) {
   const isAssertion =
-    args && args.length > 0 &&
-    typeof args[0] === 'object' && args[0] !== null &&
+    args &&
+    args.length > 0 &&
+    typeof args[0] === 'object' &&
+    args[0] !== null &&
     args[0].name === 'AssertionError';
 
   if (isAssertion) {

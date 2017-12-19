@@ -1,4 +1,3 @@
-
 // Parse array or string color
 export function parseColor(color) {
   if (Array.isArray(color)) {
@@ -39,4 +38,3 @@ export function setOpacity(color, opacity = 127) {
 export function applyOpacity(color, opacity = 127) {
   return [color[0], color[1], color[2], opacity];
 }
-

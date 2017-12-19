@@ -24,11 +24,7 @@ const {fp64ify, fillArray} = experimental;
 import earcut from 'earcut';
 
 function getPickingColor(index) {
-  return [
-    (index + 1) & 255,
-    ((index + 1) >> 8) & 255,
-    (((index + 1) >> 8) >> 8) & 255
-  ];
+  return [(index + 1) & 255, ((index + 1) >> 8) & 255, (((index + 1) >> 8) >> 8) & 255];
 }
 
 function arrayPush(array, values) {
@@ -53,7 +49,6 @@ function flatten(values, level, result = []) {
 const DEFAULT_COLOR = [0, 0, 0, 255]; // Black
 
 export class PolygonTesselatorExtruded {
-
   constructor({
     polygons,
     getHeight = x => 1000,
@@ -66,8 +61,8 @@ export class PolygonTesselatorExtruded {
     // Expensive operation, convert all polygons to arrays
     polygons = polygons.map((complexPolygon, polygonIndex) => {
       const height = getHeight(polygonIndex) || 0;
-      return Polygon.normalize(complexPolygon).map(
-        polygon => polygon.map(coord => [coord[0], coord[1], height])
+      return Polygon.normalize(complexPolygon).map(polygon =>
+        polygon.map(coord => [coord[0], coord[1], height])
       );
     });
 
@@ -131,14 +126,15 @@ function calculateIndices({groupedVertices, wireframe = false}) {
     return vertexIndex + Polygon.getVertexCount(vertices) * multiplier;
   }, 0);
 
-  const indices = groupedVertices.map((vertices, polygonIndex) =>
-    wireframe ?
-      // 1. get sequentially ordered indices of each polygons wireframe
-      // 2. offset them by the number of indices in previous polygons
-      calculateContourIndices(vertices, offsets[polygonIndex]) :
-      // 1. get triangulated indices for the internal areas
-      // 2. offset them by the number of indices in previous polygons
-      calculateSurfaceIndices(vertices, offsets[polygonIndex])
+  const indices = groupedVertices.map(
+    (vertices, polygonIndex) =>
+      wireframe
+        ? // 1. get sequentially ordered indices of each polygons wireframe
+          // 2. offset them by the number of indices in previous polygons
+          calculateContourIndices(vertices, offsets[polygonIndex])
+        : // 1. get triangulated indices for the internal areas
+          // 2. offset them by the number of indices in previous polygons
+          calculateSurfaceIndices(vertices, offsets[polygonIndex])
   );
 
   return new Uint32Array(flatten(indices, 2));
@@ -153,29 +149,31 @@ function calculatePositionsJS({groupedVertices, pointCount, wireframe = false}) 
   const positions = new Float32Array(pointCount * 3 * multiplier);
   let vertexIndex = 0;
 
-  groupedVertices.forEach(
-    vertices => {
-      const topVertices = flatten(vertices, 3);
+  groupedVertices.forEach(vertices => {
+    const topVertices = flatten(vertices, 3);
 
-      const baseVertices = topVertices.slice(0);
-      let i = topVertices.length - 1;
-      while (i > 0) {
-        baseVertices[i] = 0;
-        i -= 3;
-      }
-      const len = topVertices.length;
-
-      if (wireframe) {
-        fillArray({target: positions, source: topVertices, start: vertexIndex});
-        fillArray({target: positions, source: baseVertices, start: vertexIndex + len});
-      } else {
-        fillArray({target: positions, source: topVertices, start: vertexIndex, count: 3});
-        fillArray({target: positions, source: baseVertices, start: vertexIndex + len * 3,
-          count: 2});
-      }
-      vertexIndex += len * multiplier;
+    const baseVertices = topVertices.slice(0);
+    let i = topVertices.length - 1;
+    while (i > 0) {
+      baseVertices[i] = 0;
+      i -= 3;
     }
-  );
+    const len = topVertices.length;
+
+    if (wireframe) {
+      fillArray({target: positions, source: topVertices, start: vertexIndex});
+      fillArray({target: positions, source: baseVertices, start: vertexIndex + len});
+    } else {
+      fillArray({target: positions, source: topVertices, start: vertexIndex, count: 3});
+      fillArray({
+        target: positions,
+        source: baseVertices,
+        start: vertexIndex + len * 3,
+        count: 2
+      });
+    }
+    vertexIndex += len * multiplier;
+  });
 
   return positions;
 }
@@ -190,7 +188,6 @@ function calculatePositions(positionsJS, fp64) {
       positionLow[i * 2 + 0] = fp64ify(positionsJS[i * 3 + 0])[1];
       positionLow[i * 2 + 1] = fp64ify(positionsJS[i * 3 + 1])[1];
     }
-
   }
   return {positions: positionsJS, positions64xyLow: positionLow};
 }
@@ -226,8 +223,12 @@ function calculateNormals({groupedVertices, pointCount, wireframe}) {
       arrayPush(sideNormalsBackward, sideNormals);
     });
 
-    fillArray({target: normals, start: vertexIndex, count: 2,
-      source: sideNormalsForward.concat(sideNormalsBackward)});
+    fillArray({
+      target: normals,
+      start: vertexIndex,
+      count: 2,
+      source: sideNormalsForward.concat(sideNormalsBackward)
+    });
     vertexIndex += vertexCount * 3 * 4;
   });
 

@@ -19,7 +19,6 @@ const LINEARLY_INTERPOLATED_PROPS_ALT = ['latitude', 'longitude', 'zoom'];
  * "Jarke J. van Wijk and Wim A.A. Nuij"
 */
 export default class ViewportFlyToInterpolator extends TransitionInterpolator {
-
   constructor() {
     super();
     this.propNames = VIEWPORT_TRANSITION_PROPS;
@@ -54,7 +53,6 @@ export default class ViewportFlyToInterpolator extends TransitionInterpolator {
   interpolateProps(startProps, endProps, t) {
     return viewportFlyToInterpolator(startProps, endProps, t);
   }
-
 }
 
 /** Util functions */
@@ -88,7 +86,7 @@ function viewportFlyToInterpolator(startProps, endProps, t) {
 
   const w0 = Math.max(startProps.width, startProps.height);
   const w1 = w0 / scale;
-  const u1 = Math.sqrt((uDelta.x * uDelta.x) + (uDelta.y * uDelta.y));
+  const u1 = Math.sqrt(uDelta.x * uDelta.x + uDelta.y * uDelta.y);
   // u0 is treated as '0' in Eq (9).
 
   // Linearly interpolate 'bearing' and 'pitch' if exist.
@@ -115,15 +113,16 @@ function viewportFlyToInterpolator(startProps, endProps, t) {
   const S = (r1 - r0) / rho;
   const s = t * S;
 
-  const w = (Math.cosh(r0) / Math.cosh(r0 + rho * s));
+  const w = Math.cosh(r0) / Math.cosh(r0 + rho * s);
   const u = w0 * ((Math.cosh(r0) * Math.tanh(r0 + rho * s) - Math.sinh(r0)) / rho2) / u1;
 
   const scaleIncrement = 1 / w; // Using w method for scaling.
   const newZoom = startZoom + scaleToZoom(scaleIncrement);
 
   const newCenter = unprojectFlat(
-    (startCenterXY.add(uDelta.scale(u))).scale(scaleIncrement),
-    zoomToScale(newZoom));
+    startCenterXY.add(uDelta.scale(u)).scale(scaleIncrement),
+    zoomToScale(newZoom)
+  );
   viewport.longitude = newCenter[0];
   viewport.latitude = newCenter[1];
   viewport.zoom = newZoom;

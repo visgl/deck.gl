@@ -18,7 +18,6 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 export function compareArrays(array1, array2) {
-
   const length = Math.min(array1.length, array2.length);
   for (let i = 0; i < length; ++i) {
     if (array1[i] !== array2[i]) {

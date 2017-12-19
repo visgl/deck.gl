@@ -27,7 +27,6 @@ const R_EARTH = 6378000;
  * @returns {object} - grid data, cell dimension
  */
 export function pointToDensityGridData(points, cellSize, getPosition) {
-
   const {gridHash, gridOffset} = _pointsToGridHashing(points, cellSize, getPosition);
   const layerData = _getGridLayerDataFromGridHash(gridHash, gridOffset);
 
@@ -45,7 +44,6 @@ export function pointToDensityGridData(points, cellSize, getPosition) {
  * @returns {object} - grid hash and cell dimension
  */
 function _pointsToGridHashing(points = [], cellSize, getPosition) {
-
   // find the geometric center of sample points
   let latMin = Infinity;
   let latMax = -Infinity;
@@ -95,13 +93,15 @@ function _getGridLayerDataFromGridHash(gridHash, gridOffset) {
     const latIdx = parseInt(idxs[0], 10);
     const lonIdx = parseInt(idxs[1], 10);
 
-    accu.push(Object.assign({
-      index: i,
-      position: [
-        -180 + gridOffset.xOffset * lonIdx,
-        -90 + gridOffset.yOffset * latIdx
-      ]
-    }, gridHash[key]));
+    accu.push(
+      Object.assign(
+        {
+          index: i,
+          position: [-180 + gridOffset.xOffset * lonIdx, -90 + gridOffset.yOffset * latIdx]
+        },
+        gridHash[key]
+      )
+    );
 
     return accu;
   }, []);
@@ -127,7 +127,7 @@ function _calculateGridLatLonOffset(cellSize, latitude) {
  * @return {number} - increment in latitude
  */
 function _calculateLatOffset(dy) {
-  return (dy / R_EARTH) * (180 / Math.PI);
+  return dy / R_EARTH * (180 / Math.PI);
 }
 
 /**
@@ -139,5 +139,5 @@ function _calculateLatOffset(dy) {
  * @return {number} - increment in longitude
  */
 function _calculateLonOffset(lat, dx) {
-  return (dx / R_EARTH) * (180 / Math.PI) / Math.cos(lat * Math.PI / 180);
+  return dx / R_EARTH * (180 / Math.PI) / Math.cos(lat * Math.PI / 180);
 }

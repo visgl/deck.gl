@@ -55,7 +55,19 @@ import DeckGL from 'deck.gl';
 import {colorDeltaSq} from './color-delta';
 import * as CONFIG from './test-config';
 
-var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+var _extends =
+  Object.assign ||
+  function(target) {
+    for (var i = 1; i < arguments.length; i++) {
+      var source = arguments[i];
+      for (var key in source) {
+        if (Object.prototype.hasOwnProperty.call(source, key)) {
+          target[key] = source[key];
+        }
+      }
+    }
+    return target;
+  };
 
 // DeckGL container
 const deckGLContainer = document.createElement('div');
@@ -145,27 +157,40 @@ class RenderingTest extends Component {
     // constructing layers
     for (const layer of layersList) {
       const {type, props} = layer;
-      if (type !== undefined)
-      layers.push(new type(props));
+      if (type !== undefined) layers.push(new type(props));
     }
 
-    return React.createElement(DeckGL, _extends({
-      id: "default-deckgl-overlay",
-      width: width,
-      height: height,
-      debug: true,
-      onAfterRender: this._onDrawComplete.bind(this, name, referecenResult)
-    }, mapViewState, {
-      layers: layers
-    }))
+    return React.createElement(
+      DeckGL,
+      _extends(
+        {
+          id: 'default-deckgl-overlay',
+          width: width,
+          height: height,
+          debug: true,
+          onAfterRender: this._onDrawComplete.bind(this, name, referecenResult)
+        },
+        mapViewState,
+        {
+          layers: layers
+        }
+      )
+    );
   }
 }
 
-ReactDOM.render(React.createElement(RenderingTest, {
-  width: CONFIG.WIDTH,
-  height: CONFIG.HEIGHT,
-  testCases: CONFIG.TEST_CASES
-}, null), deckGLContainer);
+ReactDOM.render(
+  React.createElement(
+    RenderingTest,
+    {
+      width: CONFIG.WIDTH,
+      height: CONFIG.HEIGHT,
+      testCases: CONFIG.TEST_CASES
+    },
+    null
+  ),
+  deckGLContainer
+);
 
 function createImage() {
   const image = document.createElement('img');
@@ -188,12 +213,12 @@ function getPixelData(sourceElement, width, height) {
 }
 
 function reportResult(name, percentage) {
-    const passed = percentage >= CONFIG.TEST_PASS_THRESHOLD;
-    const outputString = `${name}: ${(percentage * 100).toFixed(3)}% ${passed ? 'PASS' : 'FAIL'}`;
+  const passed = percentage >= CONFIG.TEST_PASS_THRESHOLD;
+  const outputString = `${name}: ${(percentage * 100).toFixed(3)}% ${passed ? 'PASS' : 'FAIL'}`;
 
-    const paragraph = document.createElement('p');
-    const testResult = document.createTextNode(outputString);
-    paragraph.appendChild(testResult);
-    resultContainer.appendChild(paragraph);
+  const paragraph = document.createElement('p');
+  const testResult = document.createTextNode(outputString);
+  paragraph.appendChild(testResult);
+  resultContainer.appendChild(paragraph);
 }
 // testResult.style.position = 'relative';

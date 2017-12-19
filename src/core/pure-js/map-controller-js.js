@@ -13,15 +13,15 @@ const CURSOR = {
 };
 
 const propTypes = {
-  width: PropTypes.number.isRequired, /** The width of the map. */
-  height: PropTypes.number.isRequired, /** The height of the map. */
-  longitude: PropTypes.number.isRequired, /** The longitude of the center of the map. */
-  latitude: PropTypes.number.isRequired, /** The latitude of the center of the map. */
-  zoom: PropTypes.number.isRequired, /** The tile zoom level of the map. */
-  bearing: PropTypes.number, /** Specify the bearing of the viewport */
-  pitch: PropTypes.number, /** Specify the pitch of the viewport */
+  width: PropTypes.number.isRequired /** The width of the map. */,
+  height: PropTypes.number.isRequired /** The height of the map. */,
+  longitude: PropTypes.number.isRequired /** The longitude of the center of the map. */,
+  latitude: PropTypes.number.isRequired /** The latitude of the center of the map. */,
+  zoom: PropTypes.number.isRequired /** The tile zoom level of the map. */,
+  bearing: PropTypes.number /** Specify the bearing of the viewport */,
+  pitch: PropTypes.number /** Specify the pitch of the viewport */,
   // Note: Non-public API, see https://github.com/mapbox/mapbox-gl-js/issues/1137
-  altitude: PropTypes.number, /** Altitude of the viewport camera. Default 1.5 "screen heights" */
+  altitude: PropTypes.number /** Altitude of the viewport camera. Default 1.5 "screen heights" */,
 
   /** Viewport constraints */
   maxZoom: PropTypes.number, // Max zoom level
@@ -55,7 +55,7 @@ const propTypes = {
   })
 };
 
-const getDefaultCursor = ({isDragging}) => isDragging ? CURSOR.GRABBING : CURSOR.GRAB;
+const getDefaultCursor = ({isDragging}) => (isDragging ? CURSOR.GRABBING : CURSOR.GRAB);
 
 const defaultProps = Object.assign({}, MAPBOX_LIMITS, {
   onViewportChange: null,
@@ -68,7 +68,6 @@ const defaultProps = Object.assign({}, MAPBOX_LIMITS, {
 });
 
 export default class MapControllerJS {
-
   constructor(props) {
     props = Object.assign({}, defaultProps, props);
 
@@ -86,10 +85,12 @@ export default class MapControllerJS {
     // If props.controls is not provided, fallback to default MapControls instance
     // Cannot use defaultProps here because it needs to be per map instance
     this._controls = this.props.controls || new MapControls();
-    this._controls.setOptions(Object.assign({}, this.props, {
-      onStateChange: this._onInteractiveStateChange.bind(this),
-      eventManager
-    }));
+    this._controls.setOptions(
+      Object.assign({}, this.props, {
+        onStateChange: this._onInteractiveStateChange.bind(this),
+        eventManager
+      })
+    );
   }
 
   setProps(props) {

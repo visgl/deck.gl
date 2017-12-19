@@ -37,7 +37,6 @@ const defaultProps = {
 };
 
 export default class ArcBrushingLayer extends ArcLayer {
-
   getShaders() {
     // use customized shaders
     return Object.assign({}, super.getShaders(), {
@@ -47,17 +46,19 @@ export default class ArcBrushingLayer extends ArcLayer {
   }
 
   draw({uniforms}) {
-
     // add uniforms
-    super.draw({uniforms: {
-      ...uniforms,
-      brushSource: this.props.brushSource,
-      brushTarget: this.props.brushTarget,
-      brushRadius: this.props.brushRadius,
-      mousePos: this.props.mousePosition ?
-        new Float32Array(this.unproject(this.props.mousePosition)) : defaultProps.mousePosition,
-      enableBrushing: this.props.enableBrushing ? 1 : 0
-    }});
+    super.draw({
+      uniforms: {
+        ...uniforms,
+        brushSource: this.props.brushSource,
+        brushTarget: this.props.brushTarget,
+        brushRadius: this.props.brushRadius,
+        mousePos: this.props.mousePosition
+          ? new Float32Array(this.unproject(this.props.mousePosition))
+          : defaultProps.mousePosition,
+        enableBrushing: this.props.enableBrushing ? 1 : 0
+      }
+    });
   }
 }
 

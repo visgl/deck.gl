@@ -15,7 +15,6 @@ import {default as GraphSNAP} from './graph-layer/adaptor/graph-snap';
 const DATASET = 1;
 
 class Root extends Component {
-
   //
   // React lifecycle
   //
@@ -49,19 +48,22 @@ class Root extends Component {
     /* eslint-disable max-len */
     const dataConfig = [
       {
-        data: 'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/graph/sample-graph.json',
+        data:
+          'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/graph/sample-graph.json',
         loader: requestJSON,
         adaptor: GraphBasic,
         hasNodeTypes: true
       },
       {
-        data: 'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/graph/flare.json',
+        data:
+          'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/graph/flare.json',
         loader: requestJSON,
         adaptor: GraphFlare,
         hasNodeTypes: false
       },
       {
-        data: 'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/graph/facebook-SNAP.csv',
+        data:
+          'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/graph/facebook-SNAP.csv',
         loader: requestCSV,
         adaptor: GraphSNAP,
         hasNodeTypes: false
@@ -248,17 +250,17 @@ class Root extends Component {
   // map node type to icon in texture atlas
   _getNodeIcon(node) {
     switch (node.type) {
-    case 0:
-      return 'burger';
-    case 1:
-      return 'fries';
-    case 2:
-      return 'soda';
-    case 3:
-    case 4:
-      return 'pie';
-    default:
-      return null;
+      case 0:
+        return 'burger';
+      case 1:
+        return 'fries';
+      case 2:
+        return 'soda';
+      case 3:
+      case 4:
+        return 'pie';
+      default:
+        return null;
     }
   }
 
@@ -298,9 +300,7 @@ class Root extends Component {
       } else {
         relatedElements[k] = [];
         els.forEach(el => {
-          relatedElements[k].push(
-            this._renderInteractionElement(el, `related ${k}`, viewport)
-          );
+          relatedElements[k].push(this._renderInteractionElement(el, `related ${k}`, viewport));
         });
       }
     });
@@ -315,12 +315,11 @@ class Root extends Component {
     Object.keys(elementInfo).forEach(k => {
       const el = elementInfo[k];
       if (el && el.name) {
-        elementInfo[k] = (<text
-          x={el.x}
-          y={el.y}
-          dx={this._getNodeSize(el) + 10}
-          dy={-10}
-        >{el.name}</text>);
+        elementInfo[k] = (
+          <text x={el.x} y={el.y} dx={this._getNodeSize(el) + 10} dy={-10}>
+            {el.name}
+          </text>
+        );
       } else {
         elementInfo[k] = null;
       }
@@ -347,23 +346,27 @@ class Root extends Component {
     let element;
     if (el.source) {
       // link
-      element = (<line
-        x1={el.source.x}
-        y1={el.source.y}
-        x2={el.target.x}
-        y2={el.target.y}
-        className={className}
-        key={`link-${className}-${el.id}`}
-      />);
+      element = (
+        <line
+          x1={el.source.x}
+          y1={el.source.y}
+          x2={el.target.x}
+          y2={el.target.y}
+          className={className}
+          key={`link-${className}-${el.id}`}
+        />
+      );
     } else {
       // node
-      element = (<circle
-        cx={el.x}
-        cy={el.y}
-        r={this._getNodeSize(el)}
-        className={className}
-        key={`node-${className}-${el.id}`}
-      />);
+      element = (
+        <circle
+          cx={el.x}
+          cy={el.y}
+          r={this._getNodeSize(el)}
+          className={className}
+          key={`node-${className}-${el.id}`}
+        />
+      );
     }
     return element;
   }
@@ -409,7 +412,7 @@ class Root extends Component {
       >
         <DeckGLOverlay
           // eslint-disable-next-line no-return-assign
-          deckGLRef={ref => this.deckGL = ref}
+          deckGLRef={ref => (this.deckGL = ref)}
           viewport={viewport}
           data={data}
           onHover={this._onHover}
@@ -420,11 +423,10 @@ class Root extends Component {
           nodeAccessors={nodeAccessors}
           nodeIconAccessors={nodeIconAccessors}
         />
-        {this._renderInteractionLayer(viewport, hovered, (dragging || clicked))}
+        {this._renderInteractionLayer(viewport, hovered, dragging || clicked)}
       </div>
     );
   }
-
 }
 
 render(<Root />, document.body.appendChild(document.createElement('div')));

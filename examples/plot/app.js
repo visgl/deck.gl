@@ -8,7 +8,6 @@ const {OrbitController} = experimental;
 const EQUATION = (x, y) => Math.sin(x * x + y * y) * x / Math.PI;
 
 class Root extends Component {
-
   constructor(props) {
     super(props);
     this.state = {
@@ -40,8 +39,9 @@ class Root extends Component {
       width: window.innerWidth,
       height: window.innerHeight
     };
-    const newViewport = OrbitController.getViewport(Object.assign(this.state.viewport, size))
-      .fitBounds([3, 3, 3]);
+    const newViewport = OrbitController.getViewport(
+      Object.assign(this.state.viewport, size)
+    ).fitBounds([3, 3, 3]);
 
     this._onViewportChange(newViewport);
   }
@@ -62,20 +62,20 @@ class Root extends Component {
     const {viewport, hoverInfo} = this.state;
 
     return (
-      <OrbitController
-        {...viewport}
-        onViewportChange={this._onViewportChange} >
+      <OrbitController {...viewport} onViewportChange={this._onViewportChange}>
         <DeckGLOverlay
           viewport={OrbitController.getViewport(viewport)}
           equation={EQUATION}
           resolution={200}
           showAxis={true}
-          onHover={this._onHover} />
+          onHover={this._onHover}
+        />
 
-        {hoverInfo && <div className="tooltip" style={{left: hoverInfo.x, top: hoverInfo.y}} >
-          { hoverInfo.sample.map(x => x.toFixed(3)).join(', ') }
-        </div>}
-
+        {hoverInfo && (
+          <div className="tooltip" style={{left: hoverInfo.x, top: hoverInfo.y}}>
+            {hoverInfo.sample.map(x => x.toFixed(3)).join(', ')}
+          </div>
+        )}
       </OrbitController>
     );
   }

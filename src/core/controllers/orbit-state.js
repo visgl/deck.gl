@@ -22,7 +22,7 @@ const defaultConstraints = {
 
 // Constrain number between bounds
 function clamp(x, min, max) {
-  return x < min ? min : (x > max ? max : x);
+  return x < min ? min : x > max ? max : x;
 }
 
 function ensureFinite(value, fallbackValue) {
@@ -30,7 +30,6 @@ function ensureFinite(value, fallbackValue) {
 }
 
 export default class OrbitState {
-
   constructor({
     /* Viewport arguments */
     width, // Width of viewport
@@ -143,8 +142,8 @@ export default class OrbitState {
     const startPanPos = this._interactiveState.startPanPos || startPos;
     assert(startPanPos, '`startPanPos` props is required');
 
-    const viewport = this._interactiveState.startPanViewport ||
-      new OrbitViewport(this._viewportProps);
+    const viewport =
+      this._interactiveState.startPanViewport || new OrbitViewport(this._viewportProps);
 
     const deltaX = pos[0] - startPanPos[0];
     const deltaY = pos[1] - startPanPos[1];
@@ -241,11 +240,10 @@ export default class OrbitState {
    *   relative scale.
    */
   zoom({pos, startPos, scale}) {
-
     const {zoom, minZoom, maxZoom, width, height} = this._viewportProps;
     const startZoomPos = this._interactiveState.startZoomPos || startPos || pos;
-    const viewport = this._interactiveState.startZoomViewport ||
-      new OrbitViewport(this._viewportProps);
+    const viewport =
+      this._interactiveState.startZoomViewport || new OrbitViewport(this._viewportProps);
 
     const newZoom = clamp(zoom * scale, minZoom, maxZoom);
     const deltaX = pos[0] - startZoomPos[0];

@@ -35,7 +35,6 @@ const defaultProps = {
  * @param {Number} [props.lightStrength] - front light strength
  */
 export default class SurfaceLayer extends Layer {
-
   initializeState() {
     const {gl} = this.context;
     const {attributeManager} = this.state;
@@ -45,8 +44,13 @@ export default class SurfaceLayer extends Layer {
     attributeManager.add({
       indices: {size: 1, isIndexed: true, update: this.calculateIndices, noAlloc},
       positions: {size: 4, accessor: 'getPosition', update: this.calculatePositions, noAlloc},
-      colors: {size: 4, accessor: ['getPosition', 'getColor'],
-        type: GL.UNSIGNED_BYTE, update: this.calculateColors, noAlloc},
+      colors: {
+        size: 4,
+        accessor: ['getPosition', 'getColor'],
+        type: GL.UNSIGNED_BYTE,
+        update: this.calculateColors,
+        noAlloc
+      },
       pickingColors: {size: 3, type: GL.UNSIGNED_BYTE, update: this.calculatePickingColors, noAlloc}
     });
     /* eslint-enable max-len */
@@ -61,14 +65,12 @@ export default class SurfaceLayer extends Layer {
     if (changeFlags.propsChanged) {
       const {uCount, vCount} = props;
 
-      if (oldProps.uCount !== uCount ||
-        oldProps.vCount !== vCount) {
+      if (oldProps.uCount !== uCount || oldProps.vCount !== vCount) {
         this.setState({
           vertexCount: uCount * vCount
         });
         this.state.attributeManager.invalidateAll();
       }
-
     }
   }
 
@@ -86,15 +88,16 @@ export default class SurfaceLayer extends Layer {
       vertexCount: 0,
       isIndexed: true
     });
-
   }
 
   draw({uniforms}) {
     const {lightStrength} = this.props;
 
-    this.state.model.render(Object.assign({}, uniforms, {
-      lightStrength
-    }));
+    this.state.model.render(
+      Object.assign({}, uniforms, {
+        lightStrength
+      })
+    );
   }
 
   /*
@@ -112,11 +115,7 @@ export default class SurfaceLayer extends Layer {
     const xIndex = i % uCount;
     const yIndex = (i - xIndex) / uCount;
 
-    return [
-      xIndex / (uCount - 1) * 255,
-      yIndex / (vCount - 1) * 255,
-      1
-    ];
+    return [xIndex / (uCount - 1) * 255, yIndex / (vCount - 1) * 255, 1];
   }
 
   decodePickingColor([r, g, b]) {
@@ -241,7 +240,6 @@ export default class SurfaceLayer extends Layer {
 
     attribute.value = value;
   }
-
 }
 
 SurfaceLayer.layerName = 'SurfaceLayer';

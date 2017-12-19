@@ -70,28 +70,28 @@ export default class ViewportControls {
     this.viewportState = new ViewportState(Object.assign({}, this.viewportStateProps, this._state));
 
     switch (event.type) {
-    case 'panstart':
-      return this._onPanStart(event);
-    case 'panmove':
-      return this._onPan(event);
-    case 'panend':
-      return this._onPanEnd(event);
-    case 'pinchstart':
-      return this._onPinchStart(event);
-    case 'pinch':
-      return this._onPinch(event);
-    case 'pinchend':
-      return this._onPinchEnd(event);
-    case 'doubletap':
-      return this._onDoubleTap(event);
-    case 'wheel':
-      return this._onWheel(event);
-    case 'keydown':
-      return this._onKeyDown(event);
-    case 'keyup':
-      return this._onKeyUp(event);
-    default:
-      return false;
+      case 'panstart':
+        return this._onPanStart(event);
+      case 'panmove':
+        return this._onPan(event);
+      case 'panend':
+        return this._onPanEnd(event);
+      case 'pinchstart':
+        return this._onPinchStart(event);
+      case 'pinch':
+        return this._onPinch(event);
+      case 'pinchend':
+        return this._onPinchEnd(event);
+      case 'doubletap':
+        return this._onDoubleTap(event);
+      case 'wheel':
+        return this._onWheel(event);
+      case 'keydown':
+        return this._onKeyDown(event);
+      case 'keyup':
+        return this._onKeyUp(event);
+      default:
+        return false;
     }
   }
 
@@ -182,8 +182,10 @@ export default class ViewportControls {
     const oldViewport = this.viewportState.getViewportProps();
     const newViewport = newViewportState.getViewportProps();
 
-    if (this.onViewportChange &&
-      Object.keys(newViewport).some(key => oldViewport[key] !== newViewport[key])) {
+    if (
+      this.onViewportChange &&
+      Object.keys(newViewport).some(key => oldViewport[key] !== newViewport[key])
+    ) {
       // Viewport has changed
       const viewport = this.viewportState.getViewport ? this.viewportState.getViewport() : null;
       this.onViewportChange(newViewport, viewport);
@@ -225,9 +227,9 @@ export default class ViewportControls {
   // Default handler for panning to rotate.
   // Called by `_onPan` when panning with function key pressed.
   _onPanRotate(event) {
-    return this.viewportState instanceof MapState ?
-      this._onPanRotateMap(event) :
-      this._onPanRotateStandard(event);
+    return this.viewportState instanceof MapState
+      ? this._onPanRotateMap(event)
+      : this._onPanRotateStandard(event);
   }
 
   // Normal pan to rotate
@@ -376,6 +378,5 @@ export default class ViewportControls {
   }
   /* eslint-enable complexity */
 
-  _onKeyUp(event) {
-  }
+  _onKeyUp(event) {}
 }

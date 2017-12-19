@@ -81,7 +81,6 @@ test('Viewport projection', t => {
   const viewport = new WebMercatorViewport(viewportProps);
 
   TEST_CASES.forEach(({title, func, input, expected}) => {
-
     const output = viewport[func](input);
     t.deepEquals(
       output.map(x => toLowPrecision(x)),

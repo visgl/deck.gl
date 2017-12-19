@@ -1,4 +1,3 @@
-
 // generate points in a grid
 export function pointGrid(N, bbox) {
   const dLon = bbox[2] - bbox[0];
@@ -15,10 +14,7 @@ export function pointGrid(N, bbox) {
 
   for (let x = 0; x < sizeX; x++) {
     for (let y = 0; y < sizeY; y++) {
-      points[index] = [
-        bbox[0] + stepX * x,
-        bbox[1] + stepY * y
-      ];
+      points[index] = [bbox[0] + stepX * x, bbox[1] + stepY * y];
       index++;
     }
   }

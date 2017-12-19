@@ -32,11 +32,7 @@ import vec2_lerp from 'gl-vec2/lerp';
 
 const ZERO_VECTOR = [0, 0, 0];
 
-import {
-  getDistanceScales,
-  getWorldPosition,
-  getMeterZoom
-} from 'viewport-mercator-project';
+import {getDistanceScales, getWorldPosition, getMeterZoom} from 'viewport-mercator-project';
 
 import assert from 'assert';
 
@@ -114,9 +110,9 @@ export default class Viewport {
     this.scale = Math.pow(2, this.zoom);
 
     // Calculate distance scales if lng/lat/zoom are provided
-    this.distanceScales = this.isGeospatial ?
-      getDistanceScales({latitude, longitude, scale: this.scale}) :
-      distanceScales || DEFAULT_DISTANCE_SCALES;
+    this.distanceScales = this.isGeospatial
+      ? getDistanceScales({latitude, longitude, scale: this.scale})
+      : distanceScales || DEFAULT_DISTANCE_SCALES;
 
     this.focalDistance = opts.focalDistance || 1;
 
@@ -137,12 +133,15 @@ export default class Viewport {
     if (this.isGeospatial) {
       // Determine camera center
       this.center = getWorldPosition({
-        longitude, latitude, zoom: this.zoom, meterOffset: this.meterOffset
+        longitude,
+        latitude,
+        zoom: this.zoom,
+        meterOffset: this.meterOffset
       });
 
       // Make a centered version of the matrix for projection modes without an offset
       this.viewMatrix = new Matrix4()
-      // Apply the uncentered view matrix
+        // Apply the uncentered view matrix
         .multiplyRight(this.viewMatrixUncentered)
         // The Mercator world coordinate system is upper left,
         // but GL expects lower left, so we flip it around the center after all transforms are done
@@ -185,10 +184,12 @@ export default class Viewport {
       return false;
     }
 
-    return viewport.width === this.width &&
+    return (
+      viewport.width === this.width &&
       viewport.height === this.height &&
       equals(viewport.projectionMatrix, this.projectionMatrix) &&
-      equals(viewport.viewMatrix, this.viewMatrix);
+      equals(viewport.viewMatrix, this.viewMatrix)
+    );
     // TODO - check distance scales?
   }
 
@@ -353,9 +354,9 @@ export default class Viewport {
   _addMetersToLngLat(lngLatZ, xyz) {
     const [lng, lat, Z = 0] = lngLatZ;
     const [deltaLng, deltaLat, deltaZ = 0] = this._metersToLngLatDelta(xyz);
-    return lngLatZ.length === 2 ?
-      [lng + deltaLng, lat + deltaLat] :
-      [lng + deltaLng, lat + deltaLat, Z + deltaZ];
+    return lngLatZ.length === 2
+      ? [lng + deltaLng, lat + deltaLat]
+      : [lng + deltaLng, lat + deltaLat, Z + deltaZ];
   }
 
   _metersToLngLatDelta(xyz) {

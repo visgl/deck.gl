@@ -45,20 +45,22 @@ export default class ViewState {
     assert(Number.isFinite(width), '`width` must be supplied');
     assert(Number.isFinite(height), '`height` must be supplied');
 
-    this._viewportProps = this._applyConstraints(Object.assign({}, opts, {
-      width,
-      height,
-      position: new Vector3(
-        ensureFinite(position && position[0], defaultState.position[0]),
-        ensureFinite(position && position[1], defaultState.position[1]),
-        ensureFinite(position && position[2], defaultState.position[2])
-      ),
-      bearing: ensureFinite(bearing, defaultState.bearing),
-      pitch: ensureFinite(pitch, defaultState.pitch),
-      longitude,
-      latitude,
-      zoom
-    }));
+    this._viewportProps = this._applyConstraints(
+      Object.assign({}, opts, {
+        width,
+        height,
+        position: new Vector3(
+          ensureFinite(position && position[0], defaultState.position[0]),
+          ensureFinite(position && position[1], defaultState.position[1]),
+          ensureFinite(position && position[2], defaultState.position[2])
+        ),
+        bearing: ensureFinite(bearing, defaultState.bearing),
+        pitch: ensureFinite(pitch, defaultState.pitch),
+        longitude,
+        latitude,
+        zoom
+      })
+    );
   }
 
   getViewportProps() {

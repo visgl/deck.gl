@@ -21,8 +21,11 @@
 import test from 'tape-catch';
 
 import {
-  MeshLayer, PathMarkerLayer, PathOutlineLayer,
-  Arrow2DGeometry, SolidPolygonLayer,
+  MeshLayer,
+  PathMarkerLayer,
+  PathOutlineLayer,
+  Arrow2DGeometry,
+  SolidPolygonLayer,
   outline
 } from 'deck.gl-layers';
 

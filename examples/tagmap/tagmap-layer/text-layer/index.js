@@ -1,1 +1,1 @@
-export {default as default} from './text-layer';
+export {default} from './text-layer';

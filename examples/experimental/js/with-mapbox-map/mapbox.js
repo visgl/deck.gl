@@ -29,23 +29,26 @@ function noop() {}
 const propTypes = {
   // Creation parameters
   // container:
-  mapboxApiAccessToken: PropTypes.string, /** Mapbox API access token for mapbox-gl-js. Required when using Mapbox vector tiles/styles. */
-  attributionControl: PropTypes.bool, /** Show attribution control or not. */
-  preserveDrawingBuffer: PropTypes.bool, /** Mapbox WebGL context creation option. Useful when you want to export the canvas as a PNG. */
-  onLoad: PropTypes.func, /** The onLoad callback for the map */
+  mapboxApiAccessToken:
+    PropTypes.string /** Mapbox API access token for mapbox-gl-js. Required when using Mapbox vector tiles/styles. */,
+  attributionControl: PropTypes.bool /** Show attribution control or not. */,
+  preserveDrawingBuffer:
+    PropTypes.bool /** Mapbox WebGL context creation option. Useful when you want to export the canvas as a PNG. */,
+  onLoad: PropTypes.func /** The onLoad callback for the map */,
 
-  mapStyle: PropTypes.string, /** The Mapbox style. A string url to a MapboxGL style */
-  visible: PropTypes.bool, /** Whether the map is visible */
+  mapStyle: PropTypes.string /** The Mapbox style. A string url to a MapboxGL style */,
+  visible: PropTypes.bool /** Whether the map is visible */,
 
   // Map view state
-  width: PropTypes.number.isRequired, /** The width of the map. */
-  height: PropTypes.number.isRequired, /** The height of the map. */
-  longitude: PropTypes.number.isRequired, /** The longitude of the center of the map. */
-  latitude: PropTypes.number.isRequired, /** The latitude of the center of the map. */
-  zoom: PropTypes.number.isRequired, /** The tile zoom level of the map. */
-  bearing: PropTypes.number, /** Specify the bearing of the viewport */
-  pitch: PropTypes.number, /** Specify the pitch of the viewport */
-  altitude: PropTypes.number /** Altitude of the viewport camera. Default 1.5 "screen heights"  Note: Non-public API, see https://github.com/mapbox/mapbox-gl-js/issues/1137 */
+  width: PropTypes.number.isRequired /** The width of the map. */,
+  height: PropTypes.number.isRequired /** The height of the map. */,
+  longitude: PropTypes.number.isRequired /** The longitude of the center of the map. */,
+  latitude: PropTypes.number.isRequired /** The latitude of the center of the map. */,
+  zoom: PropTypes.number.isRequired /** The tile zoom level of the map. */,
+  bearing: PropTypes.number /** Specify the bearing of the viewport */,
+  pitch: PropTypes.number /** Specify the pitch of the viewport */,
+  altitude:
+    PropTypes.number /** Altitude of the viewport camera. Default 1.5 "screen heights"  Note: Non-public API, see https://github.com/mapbox/mapbox-gl-js/issues/1137 */
 };
 
 const defaultProps = {
@@ -73,8 +76,7 @@ export function getAccessToken() {
 
   if (!accessToken) {
     // Note: This depends on the bundler (e.g. webpack) inmporting environment correctly
-    accessToken =
-      process.env.MapboxAccessToken || process.env.MAPBOX_ACCESS_TOKEN; // eslint-disable-line
+    accessToken = process.env.MapboxAccessToken || process.env.MAPBOX_ACCESS_TOKEN; // eslint-disable-line
   }
 
   return accessToken || null;

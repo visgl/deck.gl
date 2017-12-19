@@ -38,19 +38,29 @@ export default function createPathMarkers({
 
     // Create the markers
     for (const percentage of percentages) {
-
       if (direction.forward) {
-        const marker = createMarkerAlongPath(
-          {path: vPoints, percentage, lineLength, color, object, projectFlat});
+        const marker = createMarkerAlongPath({
+          path: vPoints,
+          percentage,
+          lineLength,
+          color,
+          object,
+          projectFlat
+        });
         markers.push(marker);
       }
 
       if (direction.backward) {
-        const marker = createMarkerAlongPath(
-          {path: vPointsReverse, percentage, lineLength, color, object, projectFlat});
+        const marker = createMarkerAlongPath({
+          path: vPointsReverse,
+          percentage,
+          lineLength,
+          color,
+          object,
+          projectFlat
+        });
         markers.push(marker);
       }
-
     }
   }
 
@@ -80,8 +90,7 @@ function createMarkerAlongPath({path, percentage, lineLength, color, object, pro
     .multiply(new Vector2(along, along))
     .add(path[i]);
 
-  const vDirection2 = new Vector2(projectFlat(path[i + 1]))
-    .subtract(projectFlat(path[i]));
+  const vDirection2 = new Vector2(projectFlat(path[i + 1])).subtract(projectFlat(path[i]));
   const angle = -vDirection2.verticalAngle() * 180 / Math.PI;
 
   return {position: [vCenter.x, vCenter.y, 0], angle, color, object};

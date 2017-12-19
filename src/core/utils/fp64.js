@@ -33,8 +33,11 @@ export function enable64bitSupport(props) {
     if (props.coordinateSystem === COORDINATE_SYSTEM.LNGLAT) {
       return true;
     }
-    log.once(0, `64-bit mode only works with coordinateSystem set to
-      COORDINATE_SYSTEM.LNGLAT. Rendering in 32-bit mode instead`);
+    log.once(
+      0,
+      `64-bit mode only works with coordinateSystem set to
+      COORDINATE_SYSTEM.LNGLAT. Rendering in 32-bit mode instead`
+    );
   }
 
   return false;

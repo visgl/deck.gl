@@ -29,8 +29,8 @@ import vs from './solid-polygon-layer-vertex.glsl';
 import vs64 from './solid-polygon-layer-vertex-64.glsl';
 import fs from './solid-polygon-layer-fragment.glsl';
 
-const defaultLineColor = [0x0, 0x0, 0x0, 0xFF];
-const defaultFillColor = [0x0, 0x0, 0x0, 0xFF];
+const defaultLineColor = [0x0, 0x0, 0x0, 0xff];
+const defaultFillColor = [0x0, 0x0, 0x0, 0xff];
 
 const defaultProps = {
   filled: true,
@@ -53,7 +53,7 @@ const defaultProps = {
 
   // Optional settings for 'lighting' shader module
   lightSettings: {
-    lightsPosition: [-122.45, 37.75, 8000, -122.0, 38.00, 5000],
+    lightsPosition: [-122.45, 37.75, 8000, -122.0, 38.0, 5000],
     ambientRatio: 0.05,
     diffuseRatio: 0.6,
     specularRatio: 0.8,
@@ -65,23 +65,31 @@ const defaultProps = {
 // Side model attributes
 const SIDE_FILL_POSITIONS = new Float32Array([
   // top left corner
-  0, 1,
+  0,
+  1,
   // bottom left corner
-  0, 0,
+  0,
+  0,
   // top right corner
-  1, 1,
+  1,
+  1,
   // bottom right corner
-  1, 0
+  1,
+  0
 ]);
 const SIDE_WIRE_POSITIONS = new Float32Array([
   // top right corner
-  1, 1,
+  1,
+  1,
   // top left corner
-  0, 1,
+  0,
+  1,
   // bottom left corner
-  0, 0,
+  0,
+  0,
   // bottom right corner
-  1, 0
+  1,
+  0
 ]);
 
 // Model types
@@ -116,28 +124,62 @@ const ATTRIBUTE_MAPS = {
 
 export default class SolidPolygonLayer extends Layer {
   getShaders() {
-    return enable64bitSupport(this.props) ?
-      {vs: vs64, fs, modules: ['project64', 'lighting', 'picking']} :
-      {vs, fs, modules: ['lighting', 'picking']}; // 'project' module added by default.
+    return enable64bitSupport(this.props)
+      ? {vs: vs64, fs, modules: ['project64', 'lighting', 'picking']}
+      : {vs, fs, modules: ['lighting', 'picking']}; // 'project' module added by default.
   }
 
   initializeState() {
     const {gl} = this.context;
-    this.setState(Object.assign({
-      numInstances: 0,
-      IndexType: gl.getExtension('OES_element_index_uint') ? Uint32Array : Uint16Array
-    }, this._getModels(gl)));
+    this.setState(
+      Object.assign(
+        {
+          numInstances: 0,
+          IndexType: gl.getExtension('OES_element_index_uint') ? Uint32Array : Uint16Array
+        },
+        this._getModels(gl)
+      )
+    );
 
     const {attributeManager} = this.state;
     const noAlloc = true;
     /* eslint-disable max-len */
     attributeManager.add({
       indices: {size: 1, isIndexed: true, update: this.calculateIndices, noAlloc},
-      positions: {size: 3, accessor: ['extruded', 'fp64'], update: this.calculatePositions, noAlloc},
-      nextPositions: {size: 3, accessor: ['extruded', 'fp64'], update: this.calculateNextPositions, noAlloc},
-      elevations: {size: 1, accessor: ['extruded', 'getElevation'], update: this.calculateElevations, noAlloc},
-      fillColors: {alias: 'colors', size: 4, type: GL.UNSIGNED_BYTE, accessor: 'getFillColor', update: this.calculateFillColors, noAlloc},
-      lineColors: {alias: 'colors', size: 4, type: GL.UNSIGNED_BYTE, accessor: 'getLineColor', update: this.calculateLineColors, noAlloc},
+      positions: {
+        size: 3,
+        accessor: ['extruded', 'fp64'],
+        update: this.calculatePositions,
+        noAlloc
+      },
+      nextPositions: {
+        size: 3,
+        accessor: ['extruded', 'fp64'],
+        update: this.calculateNextPositions,
+        noAlloc
+      },
+      elevations: {
+        size: 1,
+        accessor: ['extruded', 'getElevation'],
+        update: this.calculateElevations,
+        noAlloc
+      },
+      fillColors: {
+        alias: 'colors',
+        size: 4,
+        type: GL.UNSIGNED_BYTE,
+        accessor: 'getFillColor',
+        update: this.calculateFillColors,
+        noAlloc
+      },
+      lineColors: {
+        alias: 'colors',
+        size: 4,
+        type: GL.UNSIGNED_BYTE,
+        accessor: 'getLineColor',
+        update: this.calculateLineColors,
+        noAlloc
+      },
       pickingColors: {size: 3, type: GL.UNSIGNED_BYTE, update: this.calculatePickingColors, noAlloc}
     });
     /* eslint-enable max-len */
@@ -155,10 +197,7 @@ export default class SolidPolygonLayer extends Layer {
         });
         /* eslint-enable max-len */
       } else {
-        attributeManager.remove([
-          'positions64xyLow',
-          'nextPositions64xyLow'
-        ]);
+        attributeManager.remove(['positions64xyLow', 'nextPositions64xyLow']);
       }
     }
   }
@@ -166,11 +205,15 @@ export default class SolidPolygonLayer extends Layer {
   draw({uniforms}) {
     const {extruded, lightSettings, elevationScale} = this.props;
 
-    const renderUniforms = Object.assign({}, uniforms, {
-      extruded: extruded ? 1.0 : 0.0,
-      elevationScale
-    },
-    lightSettings);
+    const renderUniforms = Object.assign(
+      {},
+      uniforms,
+      {
+        extruded: extruded ? 1.0 : 0.0,
+        elevationScale
+      },
+      lightSettings
+    );
 
     this.state.models.forEach(model => {
       model.render(renderUniforms);
@@ -185,16 +228,22 @@ export default class SolidPolygonLayer extends Layer {
 
     const {props, oldProps} = updateParams;
 
-    const regenerateModels = props.fp64 !== oldProps.fp64 ||
+    const regenerateModels =
+      props.fp64 !== oldProps.fp64 ||
       props.filled !== oldProps.filled ||
       props.extruded !== oldProps.extruded ||
       props.wireframe !== oldProps.wireframe;
 
     if (regenerateModels) {
-      this.setState(Object.assign({
-        // Set a flag to set attributes to new models
-        modelsChanged: true
-      }, this._getModels(this.context.gl)));
+      this.setState(
+        Object.assign(
+          {
+            // Set a flag to set attributes to new models
+            modelsChanged: true
+          },
+          this._getModels(this.context.gl)
+        )
+      );
     }
 
     if (props.extruded !== oldProps.extruded) {
@@ -206,10 +255,10 @@ export default class SolidPolygonLayer extends Layer {
   }
 
   updateGeometry({props, oldProps, changeFlags}) {
-    const geometryConfigChanged = changeFlags.dataChanged ||
-      (changeFlags.updateTriggersChanged && (
-        changeFlags.updateTriggersChanged.all ||
-        changeFlags.updateTriggersChanged.getPolygon));
+    const geometryConfigChanged =
+      changeFlags.dataChanged ||
+      (changeFlags.updateTriggersChanged &&
+        (changeFlags.updateTriggersChanged.all || changeFlags.updateTriggersChanged.getPolygon));
 
     // When the geometry config  or the data is changed,
     // tessellator needs to be invoked
@@ -224,9 +273,11 @@ export default class SolidPolygonLayer extends Layer {
       this.state.attributeManager.invalidateAll();
     }
 
-    if (geometryConfigChanged ||
+    if (
+      geometryConfigChanged ||
       props.extruded !== oldProps.extruded ||
-      props.fp64 !== oldProps.fp64) {
+      props.fp64 !== oldProps.fp64
+    ) {
       this.state.polygonTesselator.updatePositions({
         fp64: props.fp64,
         extruded: props.extruded
@@ -281,7 +332,7 @@ export default class SolidPolygonLayer extends Layer {
 
           // Hack: elevations is ignored when not extruded
           // TODO/xiaoji: replace with generic vertex
-          newAttribute.instanced |= (!this.props.extruded && attributeName === 'elevations');
+          newAttribute.instanced |= !this.props.extruded && attributeName === 'elevations';
           newAttributes[attributeOverride.name || attributeName] = newAttribute;
         }
       }
@@ -295,59 +346,68 @@ export default class SolidPolygonLayer extends Layer {
     const models = {};
 
     if (filled) {
-      models.TOP = new Model(gl, Object.assign({}, this.getShaders(), {
-        id: `${id}-top`,
-        geometry: new Geometry({
-          drawMode: GL.TRIANGLES,
-          attributes: {
-            vertexPositions: {size: 2, instanced: 1, value: new Float32Array([0, 1])},
-            nextPositions: {size: 3, instanced: 1, value: new Float32Array(3)},
-            nextPositions64xyLow: {size: 2, instanced: 1, value: new Float32Array(2)}
-          }
-        }),
-        uniforms: {
-          isSideVertex: 0
-        },
-        instanceCount: 1,
-        vertexCount: 0,
-        isInstanced: true,
-        isIndexed: true,
-        shaderCache: this.context.shaderCache
-      }));
+      models.TOP = new Model(
+        gl,
+        Object.assign({}, this.getShaders(), {
+          id: `${id}-top`,
+          geometry: new Geometry({
+            drawMode: GL.TRIANGLES,
+            attributes: {
+              vertexPositions: {size: 2, instanced: 1, value: new Float32Array([0, 1])},
+              nextPositions: {size: 3, instanced: 1, value: new Float32Array(3)},
+              nextPositions64xyLow: {size: 2, instanced: 1, value: new Float32Array(2)}
+            }
+          }),
+          uniforms: {
+            isSideVertex: 0
+          },
+          instanceCount: 1,
+          vertexCount: 0,
+          isInstanced: true,
+          isIndexed: true,
+          shaderCache: this.context.shaderCache
+        })
+      );
     }
     if (filled && extruded) {
-      models.SIDE = new Model(gl, Object.assign({}, this.getShaders(), {
-        id: `${id}-side`,
-        geometry: new Geometry({
-          drawMode: GL.TRIANGLE_STRIP,
-          vertexCount: 4,
-          attributes: {
-            vertexPositions: {size: 2, value: SIDE_FILL_POSITIONS}
-          }
-        }),
-        uniforms: {
-          isSideVertex: 1
-        },
-        isInstanced: true,
-        shaderCache: this.context.shaderCache
-      }));
+      models.SIDE = new Model(
+        gl,
+        Object.assign({}, this.getShaders(), {
+          id: `${id}-side`,
+          geometry: new Geometry({
+            drawMode: GL.TRIANGLE_STRIP,
+            vertexCount: 4,
+            attributes: {
+              vertexPositions: {size: 2, value: SIDE_FILL_POSITIONS}
+            }
+          }),
+          uniforms: {
+            isSideVertex: 1
+          },
+          isInstanced: true,
+          shaderCache: this.context.shaderCache
+        })
+      );
     }
     if (extruded && wireframe) {
-      models.WIRE = new Model(gl, Object.assign({}, this.getShaders(), {
-        id: `${id}-wire`,
-        geometry: new Geometry({
-          drawMode: GL.LINE_STRIP,
-          vertexCount: 4,
-          attributes: {
-            vertexPositions: {size: 2, value: SIDE_WIRE_POSITIONS}
-          }
-        }),
-        uniforms: {
-          isSideVertex: 1
-        },
-        isInstanced: true,
-        shaderCache: this.context.shaderCache
-      }));
+      models.WIRE = new Model(
+        gl,
+        Object.assign({}, this.getShaders(), {
+          id: `${id}-wire`,
+          geometry: new Geometry({
+            drawMode: GL.LINE_STRIP,
+            vertexCount: 4,
+            attributes: {
+              vertexPositions: {size: 2, value: SIDE_WIRE_POSITIONS}
+            }
+          }),
+          uniforms: {
+            isSideVertex: 1
+          },
+          isInstanced: true,
+          shaderCache: this.context.shaderCache
+        })
+      );
     }
 
     return {

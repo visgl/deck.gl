@@ -25,23 +25,11 @@ import project64 from '../shaderlib/project64/project64';
 import lighting from '../shaderlib/lighting/lighting';
 
 export function initializeShaderModules() {
-  registerShaderModules([
-    fp32, fp64,
-    project, project64,
-    lighting,
-    picking
-  ]);
+  registerShaderModules([fp32, fp64, project, project64, lighting, picking]);
 
   setDefaultShaderModules([project]);
 }
 
 initializeShaderModules();
 
-export {
-  fp32,
-  fp64,
-  picking,
-  project,
-  project64,
-  lighting
-};
+export {fp32, fp64, picking, project, project64, lighting};

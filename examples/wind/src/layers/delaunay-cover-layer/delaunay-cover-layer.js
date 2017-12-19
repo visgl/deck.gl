@@ -5,7 +5,7 @@ import vertex from './delaunay-cover-layer-vertex.glsl';
 import fragment from './delaunay-cover-layer-fragment.glsl';
 
 export default class DelaunayCoverLayer extends Layer {
-// NOTE: commenting out, it is not used anywhere.
+  // NOTE: commenting out, it is not used anywhere.
 
   getShaders() {
     return {
@@ -21,8 +21,7 @@ export default class DelaunayCoverLayer extends Layer {
     this.setState({model});
   }
 
-  updateState({props, oldProps, changeFlags: {dataChanged, somethingChanged}}) {
-  }
+  updateState({props, oldProps, changeFlags: {dataChanged, somethingChanged}}) {}
 
   getModel(gl, triangulation) {
     const bounds = [Infinity, -Infinity];
@@ -34,24 +33,48 @@ export default class DelaunayCoverLayer extends Layer {
     });
 
     const positions = [];
-    triangulation.forEach(t => positions.push(
-      -t[0].long, t[0].lat, t[0].elv,
-      -t[1].long, t[1].lat, t[1].elv,
-      -t[2].long, t[2].lat, t[2].elv)
+    triangulation.forEach(t =>
+      positions.push(
+        -t[0].long,
+        t[0].lat,
+        t[0].elv,
+        -t[1].long,
+        t[1].lat,
+        t[1].elv,
+        -t[2].long,
+        t[2].lat,
+        t[2].elv
+      )
     );
 
     const next = [];
-    triangulation.forEach(t => next.push(
-      -t[1].long, t[1].lat, t[1].elv,
-      -t[2].long, t[2].lat, t[2].elv,
-      -t[0].long, t[0].lat, t[0].elv)
+    triangulation.forEach(t =>
+      next.push(
+        -t[1].long,
+        t[1].lat,
+        t[1].elv,
+        -t[2].long,
+        t[2].lat,
+        t[2].elv,
+        -t[0].long,
+        t[0].lat,
+        t[0].elv
+      )
     );
 
     const next2 = [];
-    triangulation.forEach(t => next2.push(
-      -t[2].long, t[2].lat, t[2].elv,
-      -t[0].long, t[0].lat, t[0].elv,
-      -t[1].long, t[1].lat, t[1].elv)
+    triangulation.forEach(t =>
+      next2.push(
+        -t[2].long,
+        t[2].lat,
+        t[2].elv,
+        -t[0].long,
+        t[0].lat,
+        t[0].elv,
+        -t[1].long,
+        t[1].lat,
+        t[1].elv
+      )
     );
 
     const shaders = this.getShaders();

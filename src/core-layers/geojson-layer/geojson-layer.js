@@ -27,8 +27,8 @@ import SolidPolygonLayer from '../solid-polygon-layer/solid-polygon-layer';
 
 import {getGeojsonFeatures, separateGeojsonFeatures} from './geojson';
 
-const defaultLineColor = [0x0, 0x0, 0x0, 0xFF];
-const defaultFillColor = [0x0, 0x0, 0x0, 0xFF];
+const defaultLineColor = [0x0, 0x0, 0x0, 0xff];
+const defaultFillColor = [0x0, 0x0, 0x0, 0xff];
 
 const defaultProps = {
   stroked: true,
@@ -69,7 +69,7 @@ const defaultProps = {
 
   // Optional settings for 'lighting' shader module
   lightSettings: {
-    lightsPosition: [-122.45, 37.75, 8000, -122.0, 38.00, 5000],
+    lightsPosition: [-122.45, 37.75, 8000, -122.0, 38.0, 5000],
     ambientRatio: 0.05,
     diffuseRatio: 0.6,
     specularRatio: 0.8,
@@ -110,15 +110,28 @@ export default class GeoJsonLayer extends CompositeLayer {
     const {stroked, filled, extruded, wireframe, subLayers, lightSettings} = this.props;
 
     // Rendering props underlying layer
-    const {lineWidthScale, lineWidthMinPixels, lineWidthMaxPixels,
-      lineJointRounded, lineMiterLimit,
-      pointRadiusScale, pointRadiusMinPixels, pointRadiusMaxPixels,
+    const {
+      lineWidthScale,
+      lineWidthMinPixels,
+      lineWidthMaxPixels,
+      lineJointRounded,
+      lineMiterLimit,
+      pointRadiusScale,
+      pointRadiusMinPixels,
+      pointRadiusMaxPixels,
       elevationScale,
-      fp64} = this.props;
+      fp64
+    } = this.props;
 
     // Accessor props for underlying layers
-    const {getLineColor, getFillColor, getRadius,
-      getLineWidth, getElevation, updateTriggers} = this.props;
+    const {
+      getLineColor,
+      getFillColor,
+      getRadius,
+      getLineWidth,
+      getElevation,
+      updateTriggers
+    } = this.props;
 
     const drawPoints = pointFeatures && pointFeatures.length > 0;
     const drawLines = lineFeatures && lineFeatures.length > 0;
@@ -126,7 +139,9 @@ export default class GeoJsonLayer extends CompositeLayer {
     const hasPolygon = polygonFeatures && polygonFeatures.length > 0;
 
     // Filled Polygon Layer
-    const polygonFillLayer = filled && hasPolygon &&
+    const polygonFillLayer =
+      filled &&
+      hasPolygon &&
       new subLayers.PolygonLayer(
         this.getSubLayerProps({
           id: 'polygon-fill',
@@ -146,7 +161,10 @@ export default class GeoJsonLayer extends CompositeLayer {
         })
       );
 
-    const polygonWireframeLayer = wireframe && extruded && hasPolygon &&
+    const polygonWireframeLayer =
+      wireframe &&
+      extruded &&
+      hasPolygon &&
       new subLayers.PolygonLayer(
         this.getSubLayerProps({
           id: 'polygon-wireframe',
@@ -166,7 +184,10 @@ export default class GeoJsonLayer extends CompositeLayer {
         })
       );
 
-    const polygonLineLayer = !extruded && stroked && hasPolygonLines &&
+    const polygonLineLayer =
+      !extruded &&
+      stroked &&
+      hasPolygonLines &&
       new subLayers.LineLayer(
         this.getSubLayerProps({
           id: 'polygon-outline',
@@ -189,7 +210,8 @@ export default class GeoJsonLayer extends CompositeLayer {
         })
       );
 
-    const pathLayer = drawLines &&
+    const pathLayer =
+      drawLines &&
       new subLayers.LineLayer(
         this.getSubLayerProps({
           id: 'line-paths',
@@ -212,7 +234,8 @@ export default class GeoJsonLayer extends CompositeLayer {
         })
       );
 
-    const pointLayer = drawPoints &&
+    const pointLayer =
+      drawPoints &&
       new subLayers.PointLayer(
         this.getSubLayerProps({
           id: 'points',

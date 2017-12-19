@@ -15,7 +15,15 @@ const TEST_CASES = [
     startProps: {width: 800, height: 600, longitude: -122.45, latitude: 37.78, zoom: 12},
     endProps: {width: 800, height: 600, longitude: -74, latitude: 40.7, zoom: 11},
     expect: {
-      start: {width: 800, height: 600, longitude: -122.45, latitude: 37.78, zoom: 12, pitch: 0, bearing: 0},
+      start: {
+        width: 800,
+        height: 600,
+        longitude: -122.45,
+        latitude: 37.78,
+        zoom: 12,
+        pitch: 0,
+        bearing: 0
+      },
       end: {width: 800, height: 600, longitude: -74, latitude: 40.7, zoom: 11, pitch: 0, bearing: 0}
     },
     transition: {
@@ -26,11 +34,35 @@ const TEST_CASES = [
   },
   {
     title: 'find shortest path',
-    startProps: {width: 800, height: 600, longitude: -122.45, latitude: 37.78, zoom: 12, pitch: 0, bearing: -120},
+    startProps: {
+      width: 800,
+      height: 600,
+      longitude: -122.45,
+      latitude: 37.78,
+      zoom: 12,
+      pitch: 0,
+      bearing: -120
+    },
     endProps: {width: 800, height: 600, longitude: 179, latitude: 40.7, zoom: 11, bearing: 120},
     expect: {
-      start: {width: 800, height: 600, longitude: -122.45, latitude: 37.78, zoom: 12, pitch: 0, bearing: -120},
-      end: {width: 800, height: 600, longitude: -181, latitude: 40.7, zoom: 11, pitch: 0, bearing: -240}
+      start: {
+        width: 800,
+        height: 600,
+        longitude: -122.45,
+        latitude: 37.78,
+        zoom: 12,
+        pitch: 0,
+        bearing: -120
+      },
+      end: {
+        width: 800,
+        height: 600,
+        longitude: -181,
+        latitude: 40.7,
+        zoom: 11,
+        pitch: 0,
+        bearing: -240
+      }
     },
     transition: {
       0.25: {bearing: -150, pitch: 0, longitude: -122.4983, latitude: 37.78246, zoom: 7.38197},
@@ -60,15 +92,16 @@ test('LinearInterpolator#initializeProps', t => {
 test('LinearInterpolator#interpolateProps', t => {
   const interpolator = new ViewportFlyToInterpolator();
 
-  TEST_CASES
-    .filter(testCase => testCase.transition)
-    .forEach(testCase => {
-      Object.keys(testCase.transition).forEach(time => {
-        const propsInTransition = interpolator.interpolateProps(
-          testCase.expect.start, testCase.expect.end, Number(time));
-        t.deepEqual(toLowPrecision(propsInTransition, 7), testCase.transition[time], time);
-      });
+  TEST_CASES.filter(testCase => testCase.transition).forEach(testCase => {
+    Object.keys(testCase.transition).forEach(time => {
+      const propsInTransition = interpolator.interpolateProps(
+        testCase.expect.start,
+        testCase.expect.end,
+        Number(time)
+      );
+      t.deepEqual(toLowPrecision(propsInTransition, 7), testCase.transition[time], time);
     });
+  });
 
   t.end();
 });

@@ -56,11 +56,11 @@ const initialContext = {
   }
 };
 
-const layerName = layer => layer instanceof Layer ? `${layer}` : (!layer ? 'null' : 'invalid');
+const layerName = layer => (layer instanceof Layer ? `${layer}` : !layer ? 'null' : 'invalid');
 
 export default class LayerManager {
-
-  constructor(gl, {eventManager} = {}) { // eslint-disable-line
+  // eslint-disable-next-line
+  constructor(gl, {eventManager} = {}) {
     // Currently deck.gl expects the DeckGL.layers array to be different
     // whenever React rerenders. If the same layers array is used, the
     // LayerManager's diffing algorithm will generate a fatal error and
@@ -141,9 +141,9 @@ export default class LayerManager {
   getLayers({layerIds = null} = {}) {
     // Filtering by layerId compares beginning of strings, so that sublayers will be included
     // Dependes on the convention of adding suffixes to the parent's layer name
-    return layerIds ?
-      this.layers.filter(layer => layerIds.find(layerId => layer.id.indexOf(layerId) === 0)) :
-      this.layers;
+    return layerIds
+      ? this.layers.filter(layer => layerIds.find(layerId => layer.id.indexOf(layerId) === 0))
+      : this.layers;
   }
 
   // Get a set of viewports for a given width and height
@@ -167,9 +167,11 @@ export default class LayerManager {
       this._initEventHandling(parameters.eventManager);
     }
 
-    if ('pickingRadius' in parameters ||
+    if (
+      'pickingRadius' in parameters ||
       'onLayerClick' in parameters ||
-      'onLayerHover' in parameters) {
+      'onLayerHover' in parameters
+    ) {
       this._setEventHandlingParameters(parameters);
     }
 
@@ -201,12 +203,12 @@ export default class LayerManager {
   // Update the view descriptor list and set change flag if needed
   setViewports(viewports) {
     // Ensure viewports are wrapped in descriptors
-    const viewDescriptors = flatten(viewports, {filter: Boolean})
-      .map(viewport => viewport instanceof Viewport ? {viewport} : viewport);
+    const viewDescriptors = flatten(viewports, {filter: Boolean}).map(
+      viewport => (viewport instanceof Viewport ? {viewport} : viewport)
+    );
 
     this.viewDescriptorsChanged =
-      this.viewDescriptorsChanged ||
-      this._diffViews(viewDescriptors, this.viewDescriptors);
+      this.viewDescriptorsChanged || this._diffViews(viewDescriptors, this.viewDescriptors);
 
     // Try to not actually rebuild the viewports until `getViewports` is called
     if (this.viewDescriptorsChanged) {
@@ -346,11 +348,12 @@ export default class LayerManager {
 
   // Rebuilds viewports from descriptors towards a certain window size
   _rebuildViewportsFromViews({viewDescriptors, width, height}) {
-    const newViewports = viewDescriptors.map(viewDescriptor =>
-      // If a `Viewport` instance was supplied, use it, otherwise build it
-      viewDescriptor.viewport instanceof Viewport ?
-        viewDescriptor.viewport :
-        this._makeViewportFromViewDescriptor({viewDescriptor, width, height})
+    const newViewports = viewDescriptors.map(
+      viewDescriptor =>
+        // If a `Viewport` instance was supplied, use it, otherwise build it
+        viewDescriptor.viewport instanceof Viewport
+          ? viewDescriptor.viewport
+          : this._makeViewportFromViewDescriptor({viewDescriptor, width, height})
     );
 
     this.setNeedsRedraw('Viewport(s) changed');
@@ -384,11 +387,14 @@ export default class LayerManager {
     const viewportDimensions = this._getViewDimensions({viewDescriptor});
 
     // Create the viewport, giving preference to view state in `viewState`
-    return new ViewportType(Object.assign({},
-      viewDescriptor,
-      viewportDimensions,
-      viewState // Object.assign handles undefined
-    ));
+    return new ViewportType(
+      Object.assign(
+        {},
+        viewDescriptor,
+        viewportDimensions,
+        viewState // Object.assign handles undefined
+      )
+    );
   }
 
   // Check if viewport array has changed, returns true if any change
@@ -398,9 +404,7 @@ export default class LayerManager {
       return true;
     }
 
-    return newViews.some(
-      (_, i) => this._diffView(newViews[i], oldViews[i])
-    );
+    return newViews.some((_, i) => this._diffView(newViews[i], oldViews[i]));
   }
 
   _diffView(newView, oldView) {
@@ -446,11 +450,7 @@ export default class LayerManager {
   }
 
   // Set parameters for input event handling.
-  _setEventHandlingParameters({
-    pickingRadius,
-    onLayerClick,
-    onLayerHover
-  }) {
+  _setEventHandlingParameters({pickingRadius, onLayerClick, onLayerHover}) {
     if (!isNaN(pickingRadius)) {
       this._pickingRadius = pickingRadius;
     }
@@ -522,7 +522,9 @@ export default class LayerManager {
 
     // Match sublayers
     const error = this._updateSublayersRecursively({
-      newLayers, oldLayerMap, generatedLayers
+      newLayers,
+      oldLayerMap,
+      generatedLayers
     });
 
     // Finalize unmatched layers
@@ -541,7 +543,8 @@ export default class LayerManager {
 
       // Given a new coming layer, find its matching old layer (if any)
       const oldLayer = oldLayerMap[newLayer.id];
-      if (oldLayer === null) { // null, rather than undefined, means this id was originally there
+      if (oldLayer === null) {
+        // null, rather than undefined, means this id was originally there
         log.warn(`Multiple new layers with same id ${layerName(newLayer)}`);
       }
       // Remove the old layer from candidates, as it has been matched with this layer
@@ -676,7 +679,7 @@ export default class LayerManager {
       if (this.layers.length && !this.layers.some(layer => layer.props.pickable)) {
         log.warn(
           'You have supplied a top-level input event handler (e.g. `onLayerClick`), ' +
-          'but none of your layers have set the `pickable` flag.'
+            'but none of your layers have set the `pickable` flag.'
         );
       }
     }

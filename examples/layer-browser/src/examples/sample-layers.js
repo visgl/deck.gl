@@ -46,8 +46,8 @@ const LabelLayerExample = {
 /* eslint-disable quote-props */
 export default {
   'Sample Layers': {
-    'S2Layer': S2LayerExample,
-    'EnhancedChoroplethLayer': EnhancedChoroplethLayerExample,
-    'LabelLayer': LabelLayerExample
+    S2Layer: S2LayerExample,
+    EnhancedChoroplethLayer: EnhancedChoroplethLayerExample,
+    LabelLayer: LabelLayerExample
   }
 };

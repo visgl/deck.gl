@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 
 export {default as DeckGL} from './deckgl';
-export {default as default} from './deckgl';
+export {default} from './deckgl';
 
 // TODO - should react controllers be exported or just integrated into deck.gl API?
 export {default as ViewportController} from './viewport-controller';

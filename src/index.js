@@ -32,7 +32,6 @@ export {
   AttributeManager,
   Layer,
   CompositeLayer,
-
   // Viewports
   Viewport,
   WebMercatorViewport,
@@ -167,14 +166,11 @@ export {
   LineLayer,
   PointCloudLayer,
   ScatterplotLayer,
-
   ScreenGridLayer,
   GridLayer,
   GridCellLayer,
-
   HexagonLayer,
   HexagonCellLayer,
-
   PathLayer,
   PolygonLayer,
   GeoJsonLayer
@@ -194,10 +190,7 @@ Object.assign(experimental, {
 // REACT BINDINGS PACKAGE
 //
 
-export {
-  default as default,
-  DeckGL
-} from './react';
+export {default, DeckGL} from './react';
 
 // TODO - do we need to expose these?
 import {

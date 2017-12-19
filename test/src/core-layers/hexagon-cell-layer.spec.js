@@ -23,9 +23,7 @@ import {testInitializeLayer, testLayerUpdates, toLowPrecision} from 'deck.gl/tes
 
 import {HexagonCellLayer} from 'deck.gl';
 
-const HEXAGONS = [
-  {centroid: [37, 122]}, {centroid: [37.1, 122.8]}
-];
+const HEXAGONS = [{centroid: [37, 122]}, {centroid: [37.1, 122.8]}];
 
 const TEST_CASES = {
   // props to initialize layer with
@@ -33,27 +31,31 @@ const TEST_CASES = {
     data: HEXAGONS
   },
   // list of update props to call and asserts on the resulting layer
-  UPDATES: [{
-    updateProps: {
-      coverage: 0.8
+  UPDATES: [
+    {
+      updateProps: {
+        coverage: 0.8
+      },
+      assert: (layer, oldState, t) => {
+        t.ok(layer.state, 'should update layer');
+      }
     },
-    assert: (layer, oldState, t) => {
-      t.ok(layer.state, 'should update layer');
+    {
+      updateProps: {
+        fp64: true
+      },
+      assert: (layer, oldState, t) => {
+        t.ok(layer.state, 'should update layer');
+        t.ok(
+          layer.state.attributeManager.attributes.instancePositions64xyLow,
+          'should add instancePositions64xyLow'
+        );
+      }
     }
-  }, {
-    updateProps: {
-      fp64: true
-    },
-    assert: (layer, oldState, t) => {
-      t.ok(layer.state, 'should update layer');
-      t.ok(layer.state.attributeManager.attributes.instancePositions64xyLow,
-        'should add instancePositions64xyLow');
-    }
-  }]
+  ]
 };
 
 test('HexagonCellLayer#constructor', t => {
-
   let layer = new HexagonCellLayer({
     id: 'emptyHexagonCellLayer',
     data: [],
@@ -71,11 +73,12 @@ test('HexagonCellLayer#constructor', t => {
   t.ok(layer.state.model, 'HexagonCellLayer has state');
 
   t.doesNotThrow(
-    () => new HexagonCellLayer({
-      id: 'nullHexagonLayer',
-      data: null,
-      pickable: true
-    }),
+    () =>
+      new HexagonCellLayer({
+        id: 'nullHexagonLayer',
+        data: null,
+        pickable: true
+      }),
     'Null HexagonCellLayer did not throw exception'
   );
 
@@ -115,8 +118,11 @@ test('HexagonCellLayer#updateRadiusAngle', t => {
   testInitializeLayer({layer});
 
   const {angle} = layer.updateRadiusAngle();
-  t.equal(toLowPrecision(angle, 5), 1.8543,
-    'Use hexagonVertices instead of radius and angle if both provided');
+  t.equal(
+    toLowPrecision(angle, 5),
+    1.8543,
+    'Use hexagonVertices instead of radius and angle if both provided'
+  );
 
   t.end();
 });

@@ -29,7 +29,6 @@ const defaultProps = {
 };
 
 export default class DeckGLOverlay extends Component {
-
   static get defaultColorRange() {
     return colorRange;
   }
@@ -56,7 +55,6 @@ export default class DeckGLOverlay extends Component {
 
     this._startAnimate = this._startAnimate.bind(this);
     this._animateHeight = this._animateHeight.bind(this);
-
   }
 
   componentDidMount() {

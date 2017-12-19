@@ -4,7 +4,8 @@ const {DeckGLJS, MapControllerJS} = experimental;
 
 // source: Natural Earth http://www.naturalearthdata.com/
 // via geojson.xyz
-const GEOJSON = 'https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_110m_admin_1_states_provinces_shp.geojson'; //eslint-disable-line
+const GEOJSON =
+  'https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_110m_admin_1_states_provinces_shp.geojson'; //eslint-disable-line
 
 const INITIAL_VIEWPORT = {
   latitude: 40,
@@ -15,7 +16,6 @@ const INITIAL_VIEWPORT = {
 };
 
 class App {
-
   constructor(props) {
     this.state = {
       viewport: INITIAL_VIEWPORT,

@@ -60,7 +60,6 @@ export default class DeckGLOverlay extends Component {
     const pairs = {};
 
     data.forEach((county, i) => {
-
       const {flows, centroid: targetCentroid} = county.properties;
       const value = {gain: 0, loss: 0};
 
@@ -121,8 +120,15 @@ export default class DeckGLOverlay extends Component {
   }
 
   render() {
-    const {viewport, enableBrushing, brushRadius, strokeWidth,
-      opacity, mouseEntered, mousePosition} = this.props;
+    const {
+      viewport,
+      enableBrushing,
+      brushRadius,
+      strokeWidth,
+      opacity,
+      mouseEntered,
+      mousePosition
+    } = this.props;
     const {arcs, targets, sources} = this.state;
 
     // mouseEntered is undefined when mouse is in the component while it first loads
@@ -189,8 +195,6 @@ export default class DeckGLOverlay extends Component {
       })
     ];
 
-    return (
-      <DeckGL {...viewport} layers={ layers } />
-    );
+    return <DeckGL {...viewport} layers={layers} />;
   }
 }

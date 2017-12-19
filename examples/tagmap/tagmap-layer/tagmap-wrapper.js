@@ -49,7 +49,9 @@ export default class TagMapWrapper {
 
     // set color scheme
     const getColor = fontSize => {
-      const hex = scaleQuantile().domain([minFontSize, maxFontSize]).range(colorScheme)(fontSize);
+      const hex = scaleQuantile()
+        .domain([minFontSize, maxFontSize])
+        .range(colorScheme)(fontSize);
       const c = color(hex);
       return [c.r, c.g, c.b, c.opacity * 255];
     };
@@ -74,5 +76,4 @@ export default class TagMapWrapper {
       return {width, height: fontSize};
     };
   }
-
 }

@@ -54,7 +54,7 @@ function parseHexColor(color, target, index) {
     const value = parseInt(color.substring(1), 16);
     target[index + 0] = Math.floor(value / 16777216);
     target[index + 1] = Math.floor((value / 65536) % 256);
-    target[index + 2] = Math.floor(value / 256 % 256);
+    target[index + 2] = Math.floor((value / 256) % 256);
     target[index + 3] = value % 256;
   }
   return index + 4;
@@ -71,4 +71,3 @@ function applyOpacity(color, opacity = 127) {
 // Named exports have a small perf hit in webpack, normally OK
 // but for utils that will be called in tight inner loops, export as object
 export default {parseColor, setOpacity, applyOpacity};
-

@@ -10,11 +10,7 @@ const webpack = require('webpack');
 // Seems to be a Babel bug
 // https://github.com/babel/babel-loader/issues/149#issuecomment-191991686
 const BABEL_CONFIG = {
-  presets: [
-    'es2015',
-    'react',
-    'stage-2'
-  ].map(function configMap(name) {
+  presets: ['es2015', 'react', 'stage-2'].map(function configMap(name) {
     return require.resolve(`babel-preset-${name}`);
   })
 };
@@ -27,16 +23,20 @@ const config = {
   devtool: 'source-map',
 
   module: {
-    rules: [{
-      // Compile ES2015 using bable
-      test: /\.js$/,
-      include: [resolve('.')],
-      exclude: [/node_modules/],
-      use: [{
-        loader: 'babel-loader',
-        options: BABEL_CONFIG
-      }]
-    }]
+    rules: [
+      {
+        // Compile ES2015 using bable
+        test: /\.js$/,
+        include: [resolve('.')],
+        exclude: [/node_modules/],
+        use: [
+          {
+            loader: 'babel-loader',
+            options: BABEL_CONFIG
+          }
+        ]
+      }
+    ]
   },
 
   resolve: {
@@ -49,11 +49,9 @@ const config = {
   },
 
   // Optional: Enables reading mapbox token from environment variable
-  plugins: [
-    new webpack.EnvironmentPlugin(['MapboxAccessToken'])
-  ]
+  plugins: [new webpack.EnvironmentPlugin(['MapboxAccessToken'])]
 };
 
 // Enables bundling against src in this repo rather than the installed version
-module.exports = env => env && env.local ?
-  require('../../webpack.config.local')(config)(env) : config;
+module.exports = env =>
+  env && env.local ? require('../../webpack.config.local')(config)(env) : config;

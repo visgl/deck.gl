@@ -50,27 +50,34 @@ test('ScreenGridLayer#constructor', t => {
       data,
       getPosition: getPointPosition
     },
-    UPDATES: [{
-      updateProps: {
-        cellSizePixels: 10
+    UPDATES: [
+      {
+        updateProps: {
+          cellSizePixels: 10
+        },
+        assert: (layer, oldState) => {
+          t.ok(layer.state !== oldState, 'should update layer state');
+          t.ok(layer.state.cellScale !== oldState.cellScale, 'should update cellScale');
+          t.ok(
+            layer.state.cellScale === layer.state.model.uniforms.cellScale,
+            'should update uniform cellScale'
+          );
+          t.ok(
+            layer.state.maxCount === layer.state.model.uniforms.maxCount,
+            'should update uniform maxCount'
+          );
+        }
       },
-      assert: (layer, oldState) => {
-        t.ok(layer.state !== oldState, 'should update layer state');
-        t.ok(layer.state.cellScale !== oldState.cellScale, 'should update cellScale');
-        t.ok(layer.state.cellScale === layer.state.model.uniforms.cellScale,
-          'should update uniform cellScale');
-        t.ok(layer.state.maxCount === layer.state.model.uniforms.maxCount,
-          'should update uniform maxCount');
+      {
+        updateProps: {
+          minColor: [0, 0, 0]
+        },
+        assert: (layer, oldState) => {
+          t.ok(layer.state, 'should update layer state');
+          t.deepEqual(layer.state.model.uniforms.minColor, [0, 0, 0], 'should update minColor');
+        }
       }
-    }, {
-      updateProps: {
-        minColor: [0, 0, 0]
-      },
-      assert: (layer, oldState) => {
-        t.ok(layer.state, 'should update layer state');
-        t.deepEqual(layer.state.model.uniforms.minColor, [0, 0, 0], 'should update minColor');
-      }
-    }]
+    ]
   };
 
   testCreateLayer(t, LayerComponent, {data, pickable: true});
@@ -91,24 +98,29 @@ test('ScatterplotLayer#constructor', t => {
       radiusScale: 5,
       getPosition: getPointPosition
     },
-    UPDATES: [{
-      updateProps: {
-        radiusScale: 10
+    UPDATES: [
+      {
+        updateProps: {
+          radiusScale: 10
+        },
+        assert: (layer, oldState) => {
+          t.ok(layer.state, 'should update layer state');
+          t.ok(layer.state.model.uniforms.radiusScale === 10, 'should update radiusScale');
+        }
       },
-      assert: (layer, oldState) => {
-        t.ok(layer.state, 'should update layer state');
-        t.ok(layer.state.model.uniforms.radiusScale === 10, 'should update radiusScale');
+      {
+        updateProps: {
+          fp64: true
+        },
+        assert: (layer, oldState) => {
+          t.ok(layer.state, 'should update layer state');
+          t.ok(
+            layer.state.attributeManager.attributes.instancePositions64xyLow,
+            'should add instancePositions64xyLow'
+          );
+        }
       }
-    }, {
-      updateProps: {
-        fp64: true
-      },
-      assert: (layer, oldState) => {
-        t.ok(layer.state, 'should update layer state');
-        t.ok(layer.state.attributeManager.attributes.instancePositions64xyLow,
-          'should add instancePositions64xyLow');
-      }
-    }]
+    ]
   };
 
   testCreateLayer(t, LayerComponent, {data, pickable: true});
@@ -129,15 +141,17 @@ test('ArcLayer#constructor', t => {
       getSourcePosition: d => d.START,
       getTargetPosition: d => d.END
     },
-    UPDATES: [{
-      updateProps: {
-        strokeWidth: 10
-      },
-      assert: (layer, oldState) => {
-        t.ok(layer.state, 'should update layer state');
-        t.ok(layer.state.model.uniforms.strokeWidth === 10, 'should update strokeWidth');
+    UPDATES: [
+      {
+        updateProps: {
+          strokeWidth: 10
+        },
+        assert: (layer, oldState) => {
+          t.ok(layer.state, 'should update layer state');
+          t.ok(layer.state.model.uniforms.strokeWidth === 10, 'should update strokeWidth');
+        }
       }
-    }]
+    ]
   };
 
   testCreateLayer(t, LayerComponent, {data, pickable: true});
@@ -156,15 +170,17 @@ test('PointCloudLayer#constructor', t => {
     INITIAL_PROPS: {
       data
     },
-    UPDATES: [{
-      updateProps: {
-        radiusPixels: 10
-      },
-      assert: (layer, oldState) => {
-        t.ok(layer.state, 'should update layer state');
-        t.ok(layer.state.model.uniforms.radiusPixels === 10, 'should update strokeWidth');
+    UPDATES: [
+      {
+        updateProps: {
+          radiusPixels: 10
+        },
+        assert: (layer, oldState) => {
+          t.ok(layer.state, 'should update layer state');
+          t.ok(layer.state.model.uniforms.radiusPixels === 10, 'should update strokeWidth');
+        }
       }
-    }]
+    ]
   };
 
   testCreateLayer(t, LayerComponent, {data, pickable: true});
@@ -185,24 +201,29 @@ test('LineLayer#constructor', t => {
       getSourcePosition: d => d.START,
       getTargetPosition: d => d.END
     },
-    UPDATES: [{
-      updateProps: {
-        strokeWidth: 10
+    UPDATES: [
+      {
+        updateProps: {
+          strokeWidth: 10
+        },
+        assert: (layer, oldState) => {
+          t.ok(layer.state, 'should update layer state');
+          t.ok(layer.state.model.uniforms.strokeWidth === 10, 'should update strokeWidth');
+        }
       },
-      assert: (layer, oldState) => {
-        t.ok(layer.state, 'should update layer state');
-        t.ok(layer.state.model.uniforms.strokeWidth === 10, 'should update strokeWidth');
+      {
+        updateProps: {
+          fp64: true
+        },
+        assert: (layer, oldState) => {
+          t.ok(layer.state, 'should update layer state');
+          t.ok(
+            layer.state.attributeManager.attributes.instanceSourceTargetPositions64xyLow,
+            'should add instancePositions64xyLow'
+          );
+        }
       }
-    }, {
-      updateProps: {
-        fp64: true
-      },
-      assert: (layer, oldState) => {
-        t.ok(layer.state, 'should update layer state');
-        t.ok(layer.state.attributeManager.attributes.instanceSourceTargetPositions64xyLow,
-          'should add instancePositions64xyLow');
-      }
-    }]
+    ]
   };
 
   testCreateLayer(t, LayerComponent, {data, pickable: true});
@@ -223,23 +244,28 @@ test('IconLayer#constructor', t => {
       sizeScale: 24,
       getPosition: getPointPosition
     },
-    UPDATES: [{
-      updateProps: {
-        sizeScale: 10
+    UPDATES: [
+      {
+        updateProps: {
+          sizeScale: 10
+        },
+        assert: (layer, oldState) => {
+          t.ok(layer.state, 'should update layer state');
+        }
       },
-      assert: (layer, oldState) => {
-        t.ok(layer.state, 'should update layer state');
+      {
+        updateProps: {
+          fp64: true
+        },
+        assert: (layer, oldState) => {
+          t.ok(layer.state, 'should update layer state');
+          t.ok(
+            layer.state.attributeManager.attributes.instancePositions64xyLow,
+            'should add instancePositions64xyLow'
+          );
+        }
       }
-    }, {
-      updateProps: {
-        fp64: true
-      },
-      assert: (layer, oldState) => {
-        t.ok(layer.state, 'should update layer state');
-        t.ok(layer.state.attributeManager.attributes.instancePositions64xyLow,
-          'should add instancePositions64xyLow');
-      }
-    }]
+    ]
   };
 
   testCreateLayer(t, LayerComponent, {data, pickable: true});
@@ -258,24 +284,26 @@ test('PathLayer#constructor', t => {
     INITIAL_PROPS: {
       data
     },
-    UPDATES: [{
-      updateProps: {
-        widthMinPixels: 10
-      },
-      assert: (layer, oldState) => {
-        t.ok(layer.state, 'should update layer state');
-        t.ok(layer.state.model.uniforms.widthMinPixels === 10, 'should update strokeWidth');
+    UPDATES: [
+      {
+        updateProps: {
+          widthMinPixels: 10
+        },
+        assert: (layer, oldState) => {
+          t.ok(layer.state, 'should update layer state');
+          t.ok(layer.state.model.uniforms.widthMinPixels === 10, 'should update strokeWidth');
+        }
+        // }, {
+        //   updateProps: {
+        //     fp64: true
+        //   },
+        //   assert: (layer, oldState) => {
+        //     t.ok(layer.state, 'should update layer state');
+        //     t.ok(layer.state.attributeManager.attributes.instanceStartEndPositions64xyLow,
+        //       'should add instancePositions64xyLow');
+        //   }
       }
-    // }, {
-    //   updateProps: {
-    //     fp64: true
-    //   },
-    //   assert: (layer, oldState) => {
-    //     t.ok(layer.state, 'should update layer state');
-    //     t.ok(layer.state.attributeManager.attributes.instanceStartEndPositions64xyLow,
-    //       'should add instancePositions64xyLow');
-    //   }
-    }]
+    ]
   };
 
   testCreateLayer(t, LayerComponent, {data, pickable: true});
