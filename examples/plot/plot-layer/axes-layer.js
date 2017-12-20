@@ -104,11 +104,13 @@ export default class AxesLayer extends Layer {
       instanceIsTitle: {size: 1, update: this.calculateInstanceIsTitle, noAlloc: true}
     });
 
-    this.setState({
-      models: this._getModels(gl),
-      numInstances: 0,
-      labels: null
-    });
+    this.setState(
+      Object.assign({
+          numInstances: 0,
+          labels: null
+        },
+        this._getModels(gl)
+      ));
   }
 
   updateState({oldProps, props, changeFlags}) {
@@ -154,18 +156,18 @@ export default class AxesLayer extends Layer {
 
   updateAttributes(props) {
     super.updateAttributes(props);
-    const {attributeManager, models, numInstances} = this.state;
+    const {attributeManager, modelsByName, numInstances} = this.state;
     const changedAttributes = attributeManager.getChangedAttributes({clearChangedFlags: true});
 
-    models.grids.setInstanceCount(numInstances);
-    models.grids.setAttributes(changedAttributes);
+    modelsByName.grids.setInstanceCount(numInstances);
+    modelsByName.grids.setAttributes(changedAttributes);
 
-    models.labels.setInstanceCount(numInstances);
-    models.labels.setAttributes(changedAttributes);
+    modelsByName.labels.setInstanceCount(numInstances);
+    modelsByName.labels.setAttributes(changedAttributes);
   }
 
   draw({uniforms, moduleParameters}) {
-    const {gridDims, gridCenter, models, labelTexture} = this.state;
+    const {gridDims, gridCenter, modelsByName, labelTexture} = this.state;
     const {fontSize, color, padding} = this.props;
 
     if (labelTexture) {
@@ -178,12 +180,12 @@ export default class AxesLayer extends Layer {
       };
 
       if (moduleParameters) {
-        models.grids.updateModuleSettings(moduleParameters);
-        models.labels.updateModuleSettings(moduleParameters);
+        modelsByName.grids.updateModuleSettings(moduleParameters);
+        modelsByName.labels.updateModuleSettings(moduleParameters);
       }
 
-      models.grids.render(Object.assign({}, uniforms, baseUniforms));
-      models.labels.render(Object.assign({}, uniforms, baseUniforms, labelTexture));
+      modelsByName.grids.render(Object.assign({}, uniforms, baseUniforms));
+      modelsByName.labels.render(Object.assign({}, uniforms, baseUniforms, labelTexture));
     }
   }
 
@@ -334,7 +336,10 @@ export default class AxesLayer extends Layer {
       isInstanced: true
     });
 
-    return {grids, labels};
+    return {
+      models: [grids, labels].filter(Boolean),
+      modelsByName: {grids, labels}
+    };
   }
 
   calculateInstancePositions(attribute) {
