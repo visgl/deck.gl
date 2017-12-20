@@ -1,6 +1,7 @@
 /* global, window */
-import React, {Component, PropTypes} from 'react';
+import React, {Component} from 'react';
 import DeckGL, {ScatterplotLayer} from 'deck.gl';
+import PropTypes from 'prop-types';
 import {isWebGL2} from 'luma.gl';
 
 import WindLayer from './layers/wind-layer/wind-layer';
