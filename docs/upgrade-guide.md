@@ -4,7 +4,7 @@
 
 ### Dependencies
 
-deck.gl 4.1 requires luma.gl as peer dependency, but 5.0 specifies it as a normal "dependency". This means that many applications no longer need to list luma.gl in their package.json. Applications that do might get multiple copies of luma.gl installed, which will not work. **luma.gl will detect this situation during run-time throwing an exception**, but **npm and yarn will not detect it during install time**. Thus your build can look successful but will fail during upgrade.
+deck.gl 4.1 requires luma.gl as peer dependency, but 5.0 specifies it as a normal "dependency". This means that many applications no longer need to list luma.gl in their package.json. Applications that do might get multiple copies of luma.gl installed, which will not work. **luma.gl will detect this situation during run-time throwing an exception**, but **npm and yarn will not detect it during install time**. Thus your build can look successful during upgrade but fail during runtime.
 
 ### Layer Props
 
@@ -28,7 +28,14 @@ Following methods and props have been renamed for clarity. The semantics are unc
 
 ### Removed picking Uniforms
 
-The shader uniforms `renderPickingBuffer`, `pickingEnabled` and `selectedPickingColor` used for implementing picking in custom shaders, these uniforms are no longer set by the deck.gl. Custom shaders can now use luma.gl [picking shader module](https://github.com/uber/luma.gl/tree/master/src/shadertools/modules/picking).
+| Removed uniform       | Comment |
+| ---                   | ---     |
+| renderPickingBuffer   |[picking shader module](https://github.com/uber/luma.gl/tree/master/src/shadertools/modules/picking)|
+| pickingEnabled        |[picking shader module](https://github.com/uber/luma.gl/tree/master/src/shadertools/modules/picking)|
+| selectedPickingColor  |[picking shader module](https://github.com/uber/luma.gl/tree/master/src/shadertools/modules/picking)|
+
+
+The shader uniforms are used for implementing picking in custom shaders, these uniforms are no longer set by the deck.gl. Custom shaders can now use luma.gl [picking shader module](https://github.com/uber/luma.gl/tree/master/src/shadertools/modules/picking).
 
 
 ### Initial WebGL State
