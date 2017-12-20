@@ -22,49 +22,47 @@ function ensureFinite(value, fallbackValue) {
 }
 
 export default class MapState extends ViewState {
-  constructor(
-    {
-      /** Mapbox viewport properties */
-      /** The width of the viewport */
-      width,
-      /** The height of the viewport */
-      height,
-      /** The latitude at the center of the viewport */
-      latitude,
-      /** The longitude at the center of the viewport */
-      longitude,
-      /** The tile zoom level of the map. */
-      zoom,
-      /** The bearing of the viewport in degrees */
-      bearing,
-      /** The pitch of the viewport in degrees */
-      pitch,
-      /**
-    * Specify the altitude of the viewport camera
-    * Unit: map heights, default 1.5
-    * Non-public API, see https://github.com/mapbox/mapbox-gl-js/issues/1137
-    */
-      altitude,
+  constructor({
+    /** Mapbox viewport properties */
+    /** The width of the viewport */
+    width,
+    /** The height of the viewport */
+    height,
+    /** The latitude at the center of the viewport */
+    latitude,
+    /** The longitude at the center of the viewport */
+    longitude,
+    /** The tile zoom level of the map. */
+    zoom,
+    /** The bearing of the viewport in degrees */
+    bearing,
+    /** The pitch of the viewport in degrees */
+    pitch,
+    /**
+     * Specify the altitude of the viewport camera
+     * Unit: map heights, default 1.5
+     * Non-public API, see https://github.com/mapbox/mapbox-gl-js/issues/1137
+     */
+    altitude,
 
-      /** Viewport constraints */
-      maxZoom,
-      minZoom,
-      maxPitch,
-      minPitch,
+    /** Viewport constraints */
+    maxZoom,
+    minZoom,
+    maxPitch,
+    minPitch,
 
-      /** Interaction states, required to calculate change during transform */
-      /* The point on map being grabbed when the operation first started */
-      startPanLngLat,
-      /* Center of the zoom when the operation first started */
-      startZoomLngLat,
-      /** Bearing when current perspective rotate operation started */
-      startBearing,
-      /** Pitch when current perspective rotate operation started */
-      startPitch,
-      /** Zoom when current zoom operation started */
-      startZoom
-    } = {}
-  ) {
+    /** Interaction states, required to calculate change during transform */
+    /* The point on map being grabbed when the operation first started */
+    startPanLngLat,
+    /* Center of the zoom when the operation first started */
+    startZoomLngLat,
+    /** Bearing when current perspective rotate operation started */
+    startBearing,
+    /** Pitch when current perspective rotate operation started */
+    startPitch,
+    /** Zoom when current zoom operation started */
+    startZoom
+  } = {}) {
     assert(Number.isFinite(longitude), '`longitude` must be supplied');
     assert(Number.isFinite(latitude), '`latitude` must be supplied');
     assert(Number.isFinite(zoom), '`zoom` must be supplied');
