@@ -105,12 +105,14 @@ export default class AxesLayer extends Layer {
     });
 
     this.setState(
-      Object.assign({
+      Object.assign(
+        {
           numInstances: 0,
           labels: null
         },
         this._getModels(gl)
-      ));
+      )
+    );
   }
 
   updateState({oldProps, props, changeFlags}) {
