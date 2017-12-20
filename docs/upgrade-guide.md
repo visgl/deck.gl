@@ -28,7 +28,7 @@ Following methods and props have been renamed for clarity. The semantics are unc
 
 ### Removed picking Uniforms
 
-The shader uniforms `renderPickingBuffer`, `pickingEnabled` and `selectedPickingColor` used for implementing picking in custom shaders, these uniforms are no longer set by the deck.gl. Custom shaders can now use luma.gl 'picking' module (TODO: github link).
+The shader uniforms `renderPickingBuffer`, `pickingEnabled` and `selectedPickingColor` used for implementing picking in custom shaders, these uniforms are no longer set by the deck.gl. Custom shaders can now use luma.gl [picking shader module](https://github.com/uber/luma.gl/tree/master/src/shadertools/modules/picking).
 
 
 ### Initial WebGL State
