@@ -1464,19 +1464,19 @@ decamelize@^1.0.0, decamelize@^1.1.1, decamelize@^1.1.2:
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/decamelize/-/decamelize-1.2.0.tgz#f6534d15148269b20352e7bee26f501f9a191290"
 
-deck.gl@4.2.0-alpha.24:
-  version "4.2.0-alpha.24"
-  resolved "https://registry.yarnpkg.com/deck.gl/-/deck.gl-4.2.0-alpha.24.tgz#8bd69c0482fd5733b3b5202331f4aba1179306b1"
+deck.gl@5.0.0-beta.2:
+  version "5.0.0-beta.2"
+  resolved "https://unpm.uberinternal.com/deck.gl/-/deck.gl-5.0.0-beta.2.tgz#347ec468b6b1e6e1e6b7a7b95b1176a169366809"
   dependencies:
     d3-hexbin "^0.2.1"
     earcut "^2.0.6"
     lodash.flattendeep "^4.4.0"
-    luma.gl ">=4.1.0-alpha.6"
+    luma.gl ">=5.0.0-beta.1"
     math.gl ">= 1.0.0-alpha.8"
     mjolnir.js ">=0.1.0"
-    prop-types "^15.5.8"
+    prop-types "^15.6.0"
     seer "^0.2.3"
-    viewport-mercator-project "^4.2.0-alpha.2"
+    viewport-mercator-project "^5.0.0-alpha.1"
 
 deep-equal@^1.0.0, deep-equal@^1.0.1:
   version "1.0.1"
@@ -2857,15 +2857,16 @@ lru-cache@^4.0.1:
     pseudomap "^1.0.2"
     yallist "^2.1.2"
 
-luma.gl@>=4.1.0-alpha.6:
-  version "4.1.0-alpha.8"
-  resolved "https://registry.yarnpkg.com/luma.gl/-/luma.gl-4.1.0-alpha.8.tgz#85cd34f76fc9d97ac168c7ca6e5c414f8c33584d"
+luma.gl@>=5.0.0-beta.1:
+  version "5.0.0-beta.1"
+  resolved "https://unpm.uberinternal.com/luma.gl/-/luma.gl-5.0.0-beta.1.tgz#7a0c6dda99feb774e94d6686a1c0734afbce28de"
   dependencies:
     gl-mat4 "^1.1.4"
     gl-quat "^1.0.0"
     gl-vec2 "^1.0.0"
     gl-vec3 "^1.0.3"
     gl-vec4 "^1.0.1"
+    math.gl "1.0.0-alpha.8"
     seer "^0.2.2"
     webgl-debug "^1.0.2"
 
@@ -2920,7 +2921,7 @@ mapbox-gl@0.42.2:
     vt-pbf "^3.0.1"
     webworkify "^1.4.0"
 
-"math.gl@>= 1.0.0-alpha.8", math.gl@^1.0.0-alpha.7:
+math.gl@1.0.0-alpha.8, "math.gl@>= 1.0.0-alpha.8", math.gl@^1.0.0-alpha.7:
   version "1.0.0-alpha.8"
   resolved "https://registry.yarnpkg.com/math.gl/-/math.gl-1.0.0-alpha.8.tgz#51dd8d03e5c50096851e8a268d888c1eda766cd1"
   dependencies:
@@ -3493,7 +3494,7 @@ promise@^7.1.1:
   dependencies:
     asap "~2.0.3"
 
-prop-types@^15.5.7, prop-types@^15.5.8, prop-types@^15.6.0:
+prop-types@^15.5.7, prop-types@^15.6.0:
   version "15.6.0"
   resolved "https://registry.yarnpkg.com/prop-types/-/prop-types-15.6.0.tgz#ceaf083022fc46b4a35f69e13ef75aed0d639856"
   dependencies:
@@ -4516,12 +4517,6 @@ verror@1.10.0:
     assert-plus "^1.0.0"
     core-util-is "1.0.2"
     extsprintf "^1.2.0"
-
-viewport-mercator-project@^4.2.0-alpha.2:
-  version "4.2.0-alpha.2"
-  resolved "https://registry.yarnpkg.com/viewport-mercator-project/-/viewport-mercator-project-4.2.0-alpha.2.tgz#5c6e39ce936644cede160336267e8af805b74c94"
-  dependencies:
-    math.gl "^1.0.0-alpha.7"
 
 viewport-mercator-project@^5.0.0-alpha.1:
   version "5.0.0-alpha.1"
