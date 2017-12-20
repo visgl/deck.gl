@@ -21,9 +21,6 @@
 // lighting
 
 export default `\
-// TODO - this is expected to be set by project module
-uniform vec3 cameraPos;
-
 #define NUM_OF_LIGHTS 2
 
 // TODO these should be using lighting_ prefix
@@ -38,7 +35,7 @@ float lighting_getLightWeight(vec3 position_worldspace_vec3, vec3 normals_worlds
 
   vec3 normals_worldspace_vec3 = normals_worldspace.xyz;
 
-  vec3 camera_pos_worldspace = cameraPos;
+  vec3 camera_pos_worldspace = project_uCameraPosition;
   vec3 view_direction = normalize(camera_pos_worldspace - position_worldspace_vec3);
 
   for (int i = 0; i < NUM_OF_LIGHTS; i++) {

@@ -32,8 +32,8 @@ function makeLocalDevConfig(EXAMPLE_DIR = LIB_DIR) {
         'deck.gl': SRC_DIR,
         // Imports the deck.gl library from the src directory in this repo
         'deck.gl-layers': resolve(SRC_DIR, './experimental-layers/src'),
-        // luma version should be controlled by example's package.json
-        'luma.gl': resolve(EXAMPLE_DIR, './node_modules/luma.gl'),
+        // Use luma.gl specified by root package.json
+        'luma.gl': resolve(LIB_DIR, './node_modules/luma.gl'),
         // Important: ensure shared dependencies come from the main node_modules dir
         // Versions will be controlled by the deck.gl top level package.json
         'math.gl': resolve(LIB_DIR, './node_modules/math.gl'),

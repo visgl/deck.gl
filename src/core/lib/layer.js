@@ -29,6 +29,8 @@ import {applyPropOverrides, removeLayerInSeer} from './seer-integration';
 import {GL, withParameters} from 'luma.gl';
 import assert from 'assert';
 
+import checkLegacyUniforms from '../shaderlib/check-legacy-uniforms';
+
 const LOG_PRIORITY_UPDATE = 1;
 
 const EMPTY_ARRAY = [];
@@ -149,21 +151,12 @@ export default class Layer {
   // called to populate the info object that is passed to the event handler
   // @return null to cancel event
   getPickingInfo({info, mode}) {
-    const {color, index} = info;
+    const {index} = info;
 
     if (index >= 0) {
       // If props.data is an indexable array, get the object
       if (Array.isArray(this.props.data)) {
         info.object = this.props.data[index];
-      }
-    }
-
-    // Backward compitability for old custom picking feature.
-    // This uniform should be removed in 5.0 version.
-    if (mode === 'hover') {
-      const selectedPickingColor = color || new Float32Array([0, 0, 0]);
-      for (const model of this.getModels()) {
-        model.setUniforms({selectedPickingColor});
       }
     }
 
@@ -410,6 +403,7 @@ export default class Layer {
     // Call subclass lifecycle methods
     this.initializeState(this.context);
     // End subclass lifecycle methods
+    this._checkLegacyUniforms();
 
     // initializeState callback tends to clear state
     this.setChangeFlags({dataChanged: true, propsChanged: true, viewportChanged: true});
@@ -434,6 +428,13 @@ export default class Layer {
     }
 
     this.clearChangeFlags();
+  }
+
+  _checkLegacyUniforms() {
+    for (const model of this.getModels()) {
+      checkLegacyUniforms(model.program.vs.source);
+      checkLegacyUniforms(model.program.fs.source);
+    }
   }
 
   // Called by layer manager

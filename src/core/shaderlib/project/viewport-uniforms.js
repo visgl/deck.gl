@@ -196,23 +196,7 @@ export function getUniformsFromViewport(
     project_uViewProjectionMatrix: viewProjectionMatrix,
 
     // This is for lighting calculations
-    project_uCameraPosition: cameraPos,
-
-    //
-    // DEPRECATED UNIFORMS - For backwards compatibility with old custom layers
-    //
-    projectionMode: coordinateSystem,
-    projectionCenter,
-
-    projectionOrigin: coordinateOrigin,
-    modelMatrix: glModelMatrix,
-    viewMatrix: viewport.viewMatrix,
-    projectionMatrix: viewProjectionMatrix,
-    projectionPixelsPerUnit: distanceScales.pixelsPerMeter,
-    projectionScale: viewport.scale, // This is the mercator scale (2 ** zoom)
-    viewportSize,
-    devicePixelRatio,
-    cameraPos
+    project_uCameraPosition: cameraPos
   };
 
   // TODO - fp64 flag should be from shader module, not layer props
@@ -227,10 +211,6 @@ function addFP64Uniforms(uniforms) {
   uniforms.project_uViewProjectionMatrixFP64 = glViewProjectionMatrixFP64;
   uniforms.project64_uViewProjectionMatrix = glViewProjectionMatrixFP64;
   uniforms.project64_uScale = scaleFP64;
-
-  // DEPRECATED UNIFORMS - For backwards compatibility with old custom layers
-  uniforms.projectionFP64 = glViewProjectionMatrixFP64;
-  uniforms.projectionScaleFP64 = scaleFP64;
 
   return uniforms;
 }
