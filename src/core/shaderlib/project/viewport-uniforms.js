@@ -90,31 +90,32 @@ function calculateMatrixAndOffset({
   let projectionCenter;
 
   switch (coordinateSystem) {
-    case COORDINATE_SYSTEM.IDENTITY:
-    case COORDINATE_SYSTEM.LNGLAT:
-      projectionCenter = ZERO_VECTOR;
-      break;
+  case COORDINATE_SYSTEM.IDENTITY:
+  case COORDINATE_SYSTEM.LNGLAT:
+    projectionCenter = ZERO_VECTOR;
+    break;
 
-    // TODO: make lighitng work for meter offset mode
-    case COORDINATE_SYSTEM.METER_OFFSETS:
-      projectionCenter = calculateProjectionCenter({
-        coordinateOrigin,
-        coordinateZoom,
-        viewProjectionMatrix
-      });
+  // TODO: make lighting work for meter offset mode
+  case COORDINATE_SYSTEM.LNGLAT_OFFSETS:
+  case COORDINATE_SYSTEM.METER_OFFSETS:
+    projectionCenter = calculateProjectionCenter({
+      coordinateOrigin,
+      coordinateZoom,
+      viewProjectionMatrix
+    });
 
-      // Always apply uncentered projection matrix if available (shader adds center)
-      viewMatrix = viewMatrixUncentered || viewMatrix;
+    // Always apply uncentered projection matrix if available (shader adds center)
+    viewMatrix = viewMatrixUncentered || viewMatrix;
 
-      // Zero out 4th coordinate ("after" model matrix) - avoids further translations
-      // viewMatrix = new Matrix4(viewMatrixUncentered || viewMatrix)
-      //   .multiplyRight(VECTOR_TO_POINT_MATRIX);
-      viewProjectionMatrix = mat4_multiply([], projectionMatrix, viewMatrix);
-      viewProjectionMatrix = mat4_multiply([], viewProjectionMatrix, VECTOR_TO_POINT_MATRIX);
-      break;
+    // Zero out 4th coordinate ("after" model matrix) - avoids further translations
+    // viewMatrix = new Matrix4(viewMatrixUncentered || viewMatrix)
+    //   .multiplyRight(VECTOR_TO_POINT_MATRIX);
+    viewProjectionMatrix = mat4_multiply([], projectionMatrix, viewMatrix);
+    viewProjectionMatrix = mat4_multiply([], viewProjectionMatrix, VECTOR_TO_POINT_MATRIX);
+    break;
 
-    default:
-      throw new Error('Unknown projection mode');
+  default:
+    throw new Error('Unknown projection mode');
   }
 
   return {

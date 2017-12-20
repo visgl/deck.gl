@@ -311,13 +311,29 @@ const PointCloudLayerExample = {
   layer: PointCloudLayer,
   getData: dataSamples.getPointCloud,
   props: {
-    id: 'pointCloudLayer',
-    outline: true,
+    id: 'pointCloudLayer-meters',
     coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
     coordinateOrigin: dataSamples.positionOrigin,
-    getPosition: d => get(d, 'position'),
-    getNormal: d => get(d, 'normal'),
-    getColor: d => get(d, 'color'),
+    getPosition: d => d.position,
+    getNormal: d => d.normal,
+    getColor: d => d.color,
+    opacity: 1,
+    radiusPixels: 4,
+    pickable: true,
+    lightSettings: LIGHT_SETTINGS
+  }
+};
+
+const PointCloudLayerExample2 = {
+  layer: PointCloudLayer,
+  getData: dataSamples.getPointCloud,
+  props: {
+    id: 'pointCloudLayer-lnglat',
+    coordinateSystem: COORDINATE_SYSTEM.LNGLAT_OFFSETS,
+    coordinateOrigin: dataSamples.positionOrigin,
+    getPosition: d => [d.position[0] * 1e-5, d.position[1] * 1e-5, d.position[2]],
+    getNormal: d => d.normal,
+    getColor: d => d.color,
     opacity: 1,
     radiusPixels: 4,
     pickable: true,
@@ -441,7 +457,8 @@ export default {
   },
 
   'Core Layers - Meter Offsets': {
-    PointCloudLayer: PointCloudLayerExample,
+    'PointCloudLayer (Meter offset)': PointCloudLayerExample,
+    'PointCloudLayer (LngLat offset)': PointCloudLayerExample2,
     'Path Layer (Meters)': PathLayerMetersExample,
     'PathLayer (Mm Filtered: Zoom Map)': PathLayerMillimetersFilteredExample,
     'PathLayer (Mm Unfiltered: Zoom Map)': PathLayerMillimetersUnfilteredExample,
