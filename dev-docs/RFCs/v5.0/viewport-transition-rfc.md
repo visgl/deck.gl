@@ -21,8 +21,6 @@ Viewport transition functionality will be added to `ViewportController` componen
 
 For each viewport change, if a transition is requested, `TransitionManager` takes old and new props, interpolates the viewport and updates `ViewportController` using a callback.
 
-![Viewport Transition architecture](https://github.com/uber/deck.gl/blob/master/dev-docs/RFCs/v5.0/viewport-transition-architecture.png "Viewport Transition architecture")
-
 
 ### Transition props:
 
@@ -31,8 +29,7 @@ Following props of ViewportController can be used to control the animation :
 1. **transitionDuration** {Number, default: 0} : Transition duration in milliseconds, default value 0, implies no transition.
 
 2. **transitionEasing** {Function, default: t => t} : Easing function that can be used to achieve effects like "Ease-In-Cubic", "Ease-Out-Cubic", etc. Default value performs Linear easing. (list of sample easing functions: http://easings.net/)
-
-3. **transitionInterpolator** {Function, default: `viewportLinearAnimation`} : Function that gets called for each transition step to calculate new viewport. It takes start, end viewports and current transition step, returns interpolated viewport. We provide couple of utility functions, `viewportLinearAnimation` and `viewportFlyToAnimation`. By default `viewportLinearAnimation` is used where all viewport props are linearly animated. `viewportFlyToAnimation` animates viewports similar to MapBox `flyTo` API, this is pretty useful when camera center changes by long distance. But a user can provide any function for this prop to perform custom viewport interpolations.
+3. **transitionInterpolator** {Object, default: `LinearInterpolator`} : An interpolator object that defines the transition behavior between two viewports. We provide two interpolators, `LinearInterpolator` and `ViewportFlyToInterpolator`. By default `LinearInterpolator` is used where all viewport props are linearly animated. `ViewportFlyToInterpolator` animates viewports similar to MapBox `flyTo` API, this is pretty useful when camera center changes by long distance. But a user can provide any function for this prop to perform custom viewport interpolations.
 
 4. **transitionInteruption** {TRANSITION_EVENTS (Number), default: BREAK} : This props controls how to process a new viewport change when the current transition is still active. This prop has no impact once transition is complete. Here is the list of all possible values with resulting behavior.
 
@@ -47,3 +44,6 @@ Following props of ViewportController can be used to control the animation :
 6. **onTransitionInterrupt** {Function, optional} : This callback will be fired when a current transition is interrupted by another update.
 
 7. **onTransitionEnd** {Function, optional} : This callback will be fired when requested transition ends without any interruption. This prop can be used to generate continuous animations in a loop, that animate between set of viewports.
+
+8. **onViewportChange** {Function} : Callback that is fired for each viewport update during transition. The object passed to the callback contains viewport properties such as
+`longitude`, `latitude`, `zoom` etc.

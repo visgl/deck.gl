@@ -68,7 +68,6 @@ calculatePickingColors(attribute) {
 - The default implementation of [`layer.encodePickingColor()`](/docs/api-reference/base-layer.md#-encodepickingcolor-) and
 [`layer.decodePickingColor()`](/docs/api-reference/base-layer.md#-decodepickingcolor-) is likely sufficient, but you may need to implement your own pair.
 - By default, the `object` field of the picking `info` object is indexed from the layer's `data` prop. Custom layers often need to define on their own terms what  constitutes meaningful information to the user's callbacks. A layer can achieve this  by overriding [`layer.getPickingInfo()`](/docs/api-reference/base-layer.md#-getpickinginfo-) to add or modify fields to the `info` object.
-- For more information about how to implement picking in shaders see: [`renderPickingBuffer`](/docswriting-shaders.md#-float-renderpickingbuffer-)
 
 
 ## Implementing Picking in Custom Shaders

@@ -223,14 +223,7 @@ function drawLayerInViewport({gl, layer, layerIndex, drawPickingColors, glViewpo
     pickingActive: drawPickingColors ? 1 : 0
   });
 
-  // TODO: Update all layers to use 'picking_uActive' (picking shader module)
-  // and then remove 'renderPickingBuffer' and 'pickingEnabled'.
-  const pickingUniforms = {
-    renderPickingBuffer: drawPickingColors ? 1 : 0,
-    pickingEnabled: drawPickingColors ? 1 : 0
-  };
-
-  const uniforms = Object.assign(pickingUniforms, layer.context.uniforms, {layerIndex});
+  const uniforms = Object.assign({}, layer.context.uniforms, {layerIndex});
 
   // All parameter resolving is done here instead of the layer
   // Blend parameters must not be overriden

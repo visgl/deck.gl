@@ -14,9 +14,9 @@ Naturally, the github issues also contains relevant information, but in a less s
 ## deck.gl v.Next
 
 * **Pure JavaScript support** - deck.gl is today a React library, but in 5.0 the internal code is essentially 100% independent of React. We want to define an official JavaScript API and publish the React "wrappers" as an optional add-on module. (Please don't worry if you are a React user, deck.gl will continue to be "React-first", designed from the ground up with the "reactive programming paradigm" in mind).
-* **Multi-viewport** support - Extensive work has been done in 5.0 (available in the `experimental` namespace), we expect to finalize and make much of this functionality official in next release.
+* **Multi-viewport support** - Extensive work has been done in 5.0, we expect to finalize and make much of this functionality official in next release. This feature is available in the `experimental` namespace, and for additional details check the [RFC](https://github.com/uber/deck.gl/blob/master/dev-docs/RFCs/v5.0/multi-viewport-rfc.md).
 * **Visual Effects** - Shadows, blur, postprocessing etc. This continues to be strong goal that unfortunately has been pushed forward.
-* **Transitions and Animations** - 5.0 introduces viewport transitions. Expect to see similar support for layer properties and attributes.
+* **Transitions and Animations** - 5.0 introduces viewport transitions. Expect to see similar support for layer properties and attributes. Viewport transitions feature is available in the `experimental` namespace, and for additional details check the [RFC](https://github.com/uber/deck.gl/blob/master/dev-docs/RFCs/v5.0/viewport-transition-rfc.md)
 * **Code Size** - deck.gl has gone through rapid development and we need to overhaul the code and build processes to reduce the size.
 
 In addition, in the future we plan to publish separate modules with deck.gl layers and core functionality.
