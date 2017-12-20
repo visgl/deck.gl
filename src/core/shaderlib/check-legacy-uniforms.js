@@ -1,7 +1,10 @@
 import log from '../utils/log';
 
 const legacyUniforms = [
+  // Removed custom picking uinforms
   {old: 'vec3 selectedPickingColor', new: 'luma.gl\'s picking module'},
+  {old: 'vec3 renderPickingBuffer', new: 'luma.gl\'s picking module'},
+  {old: 'vec3 pickingEnabled', new: 'luma.gl\'s picking module'},
 
   // Removed project uniforms
   {old: 'float projectionMode', new: 'project_uCoordinateSystem'},
