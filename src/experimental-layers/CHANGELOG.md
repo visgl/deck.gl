@@ -1,3 +1,9 @@
+0.0.16
+- Fix arrow issue
+0.0.15
+- ?
+0.0.14
+- ?
 0.0.13
 - Add SolidPolygonLayer
 0.0.12
