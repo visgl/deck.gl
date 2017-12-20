@@ -23,7 +23,13 @@ For Earlier Beta Releases see below
 
 ### deck.gl v5.0 Beta Releases
 
-- Bump probe.gl to include regression bench support
+#### [5.0.0-beta.2] - Dec 19
+- Fix pickingSelectedColor, fix mesh-layer regression (#1260)
+- Fix test-dist (#1250)
+- Add prettier (#1249)
+- Upgrade to React 16, cleanup core deps (#1247)
+- Bump probe.gl to include regression bench support (#1251)
+- Merge normal projection fix into experimental polygon layer (#1248)
 
 #### [5.0.0-beta.1] - Dec 18
 - Improve perf of experimental SolidPolygonLayer (#1224)
