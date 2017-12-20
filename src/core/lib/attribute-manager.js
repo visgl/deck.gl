@@ -273,16 +273,14 @@ export default class AttributeManager {
    * @param {Object} opts.props - passed to updaters
    * @param {Object} opts.context - Used as "this" context for updaters
    */
-  update(
-    {
-      data,
-      numInstances,
-      props = {},
-      buffers = {},
-      context = {},
-      ignoreUnknownAttributes = false
-    } = {}
-  ) {
+  update({
+    data,
+    numInstances,
+    props = {},
+    buffers = {},
+    context = {},
+    ignoreUnknownAttributes = false
+  } = {}) {
     // First apply any application provided buffers
     this._checkExternalBuffers({buffers, ignoreUnknownAttributes});
     this._setExternalBuffers(buffers);

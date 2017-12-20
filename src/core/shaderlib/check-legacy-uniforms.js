@@ -2,9 +2,9 @@ import log from '../utils/log';
 
 const legacyUniforms = [
   // Removed custom picking uinforms
-  {old: 'vec3 selectedPickingColor', new: 'luma.gl\'s picking module'},
-  {old: 'vec3 renderPickingBuffer', new: 'luma.gl\'s picking module'},
-  {old: 'vec3 pickingEnabled', new: 'luma.gl\'s picking module'},
+  {old: 'vec3 selectedPickingColor', new: "luma.gl's picking module"},
+  {old: 'vec3 renderPickingBuffer', new: "luma.gl's picking module"},
+  {old: 'vec3 pickingEnabled', new: "luma.gl's picking module"},
 
   // Removed project uniforms
   {old: 'float projectionMode', new: 'project_uCoordinateSystem'},
@@ -28,13 +28,11 @@ const legacyUniforms = [
 });
 
 export default shaderSource => {
-  legacyUniforms
-    .filter(def => def.regex.test(shaderSource))
-    .forEach(def => {
-      if (def.deprecated) {
-        log.deprecated(def.old, def.new);
-      } else {
-        log.removed(def.old, def.new);
-      }
-    });
+  legacyUniforms.filter(def => def.regex.test(shaderSource)).forEach(def => {
+    if (def.deprecated) {
+      log.deprecated(def.old, def.new);
+    } else {
+      log.removed(def.old, def.new);
+    }
+  });
 };

@@ -17,7 +17,7 @@ const LINEARLY_INTERPOLATED_PROPS_ALT = ['latitude', 'longitude', 'zoom'];
  * mapbox-gl-js flyTo : https://www.mapbox.com/mapbox-gl-js/api/#map#flyto.
  * It implements “Smooth and efficient zooming and panning.” algorithm by
  * "Jarke J. van Wijk and Wim A.A. Nuij"
-*/
+ */
 export default class ViewportFlyToInterpolator extends TransitionInterpolator {
   constructor() {
     super();

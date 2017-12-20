@@ -37,9 +37,13 @@ export function diffProps(props, oldProps) {
  *   if unequal, returns a string explaining what changed.
  */
 /* eslint-disable max-statements, max-depth, complexity */
-export function compareProps(
-  {newProps, oldProps, ignoreProps = {}, shallowCompareProps = {}, triggerName = 'props'} = {}
-) {
+export function compareProps({
+  newProps,
+  oldProps,
+  ignoreProps = {},
+  shallowCompareProps = {},
+  triggerName = 'props'
+} = {}) {
   assert(oldProps !== undefined && newProps !== undefined, 'compareProps args');
 
   // shallow equality => deep equality
