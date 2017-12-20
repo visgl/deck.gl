@@ -4,7 +4,7 @@
 
 ### Dependencies
 
-deck.gl 4.1 requires luma.gl as peer dependency, but 5.0 specifies it as a normal "dependency". This means that many applications no longer need to list luma.gl in their package.json. Applications that do might get multiple copies of luma.gl installed, which will not work. **luma.gl will detect this situattion during run-time throwing an exception**, but **npm and yarn will not detect it during install time**. Thus your build can look successful but will fail during upgrade.
+deck.gl 4.1 requires luma.gl as peer dependency, but 5.0 specifies it as a normal "dependency". This means that many applications no longer need to list luma.gl in their package.json. Applications that do might get multiple copies of luma.gl installed, which will not work. **luma.gl will detect this situation during run-time throwing an exception**, but **npm and yarn will not detect it during install time**. Thus your build can look successful but will fail during upgrade.
 
 ### Layer Props
 
@@ -26,15 +26,9 @@ Following methods and props have been renamed for clarity. The semantics are unc
 | `queryObject`         | `pickObject`      | These names were previously aligned with react-map-gl, but ended up confusing users. Since rest of the deck.gl documentation talks extensively about "picking" it made sense to stay with that terminology. |
 | `queryVisibleObjects` | `pickObjects`     | The word "visible" was intended to remind the user that this function only selects the objects that are actually visible in at least one pixel, but again it confused more than it helped. |
 
+### Removed picking Uniforms
 
-| Old Prop              | New Props         | Comment |
-| ---                   | ---               | ---     |
-| `useDevicePixelRatio` | `useDevicePixels` | Changed due to feedback that the original name was confusing. |
-
-
-### Picking Uniforms
-
-The shader uniforms `renderPickingBuffer`, `pickingEnabled` and `selectedPickingColor` are deprecated, and will be removed in next major version. The old uniforms are still being set for now, but it is recommended that custom layers that implement picking start using the luma.gl `picking` shader module which automatically sets the required uniforms.
+The shader uniforms `renderPickingBuffer`, `pickingEnabled` and `selectedPickingColor` used for implementing picking in custom shaders, these uniforms are no longer set by the deck.gl. Custom shaders can now use luma.gl 'picking' module (TODO: github link).
 
 
 ### Initial WebGL State

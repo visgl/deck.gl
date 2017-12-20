@@ -215,10 +215,6 @@ primitive), then you may take advantage of the default implementation of the
 
 By default, each layer creates an `instancePickingColors` attribute and automatically
 calculates it using the length of the `data` array.
-In your custom shader, you may switch between the actual color and the picking color
-using the technique described in
-[`renderPickingBuffer`](/docs/advanced/writing-shaders.md#-float-renderpickingbuffer-)
-and picking will just work.
 
-For more advanced scenarios, read about
+For custom picking, read about
 [Implementing Custom Picking](/docs/advanced/picking.md#implementing-custom-picking).

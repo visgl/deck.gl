@@ -25,8 +25,6 @@ export default `\
 precision highp float;
 #endif
 
-// PICKING
-// uniform bool pickingEnabled;
 varying vec4 vColor;
 
 void main(void) {
