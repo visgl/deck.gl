@@ -303,7 +303,7 @@ export default class Viewport {
     return false;
   }
 
-  getDistanceScales(coordinateOrigin) {
+  getDistanceScales(coordinateOrigin = null) {
     if (coordinateOrigin) {
       return getDistanceScales({
         longitude: coordinateOrigin[0],

@@ -75,7 +75,7 @@ vec3 project_normal(vec3 vector) {
   return normalize(vector * project_uPixelsPerMeter);
 }
 
-vec4 project_offset(vec4 offset) {
+vec4 project_offset_(vec4 offset) {
   vec3 pixelsPerUnit = project_uPixelsPerUnit + project_uPixelsPerUnit2 * offset.y;
   return vec4(offset.xyz * pixelsPerUnit, offset.w);
 }
@@ -104,13 +104,13 @@ vec4 project_position(vec4 position) {
   }
 
   if (project_uCoordinateSystem == COORDINATE_SYSTEM_LNGLAT_OFFSETS) {
-    return project_offset(position);
+    return project_offset_(position);
   }
 
   // METER_OFFSETS or IDENTITY
   // Apply model matrix
   vec4 position_modelspace = project_uModelMatrix * position;
-  return project_offset(position_modelspace);
+  return project_offset_(position_modelspace);
 }
 
 vec3 project_position(vec3 position) {
