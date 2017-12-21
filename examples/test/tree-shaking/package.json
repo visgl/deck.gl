@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "start": "webpack-dev-server --progress --hot --port 3000 --open",
+    "start": "webpack-dev-server --progress --hot --open",
     "build": "NODE_ENV=production webpack --env.prod=true --display-modules | awk '{print $3$4\"  \"$2}' | grep -v bytes | sort -n -r | head -50",
     "analyze": "NODE_ENV=production webpack --env.prod=true --json | webpack-bundle-size-analyzer"
   },
