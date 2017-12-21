@@ -33,6 +33,7 @@ const ZERO_VECTOR = [0, 0, 0, 0];
 // 4x4 matrix that drops 4th component of vector
 const VECTOR_TO_POINT_MATRIX = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0];
 const IDENTITY_MATRIX = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
+const DEFAULT_PIXELS_PER_UNIT2 = [0, 0, 0];
 
 // TODO - import these utils from fp64 package
 function fp64ify(a, array = [], startIndex = 0) {
@@ -54,20 +55,6 @@ function fp64ifyMatrix4(matrix) {
     }
   }
   return matrixFP64;
-}
-
-// Calculate transformed projectionCenter (using 64 bit precision JS)
-// This is the key to offset mode precision
-// (avoids doing this addition in 32 bit precision in GLSL)
-function calculateProjectionCenter({coordinateOrigin, coordinateZoom, viewProjectionMatrix}) {
-  const positionPixels = projectFlat(coordinateOrigin, Math.pow(2, coordinateZoom));
-  // projectionCenter = new Matrix4(viewProjectionMatrix)
-  //   .transformVector([positionPixels[0], positionPixels[1], 0.0, 1.0]);
-  return vec4_transformMat4(
-    [],
-    [positionPixels[0], positionPixels[1], 0.0, 1.0],
-    viewProjectionMatrix
-  );
 }
 
 // The code that utilizes Matrix4 does the same calculation as their mat4 counterparts,
@@ -98,11 +85,17 @@ function calculateMatrixAndOffset({
     // TODO: make lighting work for meter offset mode
     case COORDINATE_SYSTEM.LNGLAT_OFFSETS:
     case COORDINATE_SYSTEM.METER_OFFSETS:
-      projectionCenter = calculateProjectionCenter({
-        coordinateOrigin,
-        coordinateZoom,
+      // Calculate transformed projectionCenter (using 64 bit precision JS)
+      // This is the key to offset mode precision
+      // (avoids doing this addition in 32 bit precision in GLSL)
+      const positionPixels = projectFlat(coordinateOrigin, Math.pow(2, coordinateZoom));
+      // projectionCenter = new Matrix4(viewProjectionMatrix)
+      //   .transformVector([positionPixels[0], positionPixels[1], 0.0, 1.0]);
+      projectionCenter = vec4_transformMat4(
+        [],
+        [positionPixels[0], positionPixels[1], 0.0, 1.0],
         viewProjectionMatrix
-      });
+      );
 
       // Always apply uncentered projection matrix if available (shader adds center)
       viewMatrix = viewMatrixUncentered || viewMatrix;
@@ -187,8 +180,10 @@ export function getUniformsFromViewport({
 
     // Distance at which screen pixels are projected
     project_uFocalDistance: viewport.focalDistance || 1,
-    project_uPixelsPerUnit: distanceScales.pixelsPerMeter,
+    project_uPixelsPerMeter: distanceScales.pixelsPerMeter,
     project_uPixelsPerDegree: distanceScales.pixelsPerDegree,
+    project_uPixelsPerUnit: distanceScales.pixelsPerMeter,
+    project_uPixelsPerUnit2: DEFAULT_PIXELS_PER_UNIT2,
     project_uScale: viewport.scale, // This is the mercator scale (2 ** zoom)
 
     project_uModelMatrix: glModelMatrix,
@@ -197,6 +192,17 @@ export function getUniformsFromViewport({
     // This is for lighting calculations
     project_uCameraPosition: cameraPos
   };
+
+  if (coordinateSystem === COORDINATE_SYSTEM.METER_OFFSETS) {
+    const distanceScalesAtOrigin = viewport.getDistanceScales(coordinateOrigin);
+    uniforms.project_uPixelsPerUnit = distanceScalesAtOrigin.pixelsPerMeter;
+    uniforms.project_uPixelsPerUnit2 = distanceScalesAtOrigin.pixelsPerMeter2;
+  }
+  if (coordinateSystem === COORDINATE_SYSTEM.LNGLAT_OFFSETS) {
+    const distanceScalesAtOrigin = viewport.getDistanceScales(coordinateOrigin);
+    uniforms.project_uPixelsPerUnit = distanceScalesAtOrigin.pixelsPerDegree;
+    uniforms.project_uPixelsPerUnit2 = distanceScalesAtOrigin.pixelsPerDegree2;
+  }
 
   // TODO - fp64 flag should be from shader module, not layer props
   return fp64 ? addFP64Uniforms(uniforms) : uniforms;

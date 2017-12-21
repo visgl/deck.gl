@@ -303,7 +303,15 @@ export default class Viewport {
     return false;
   }
 
-  getDistanceScales() {
+  getDistanceScales(coordinateOrigin) {
+    if (coordinateOrigin) {
+      return getDistanceScales({
+        longitude: coordinateOrigin[0],
+        latitude: coordinateOrigin[1],
+        scale: this.scale,
+        highPrecision: true
+      });
+    }
     return this.distanceScales;
   }
 

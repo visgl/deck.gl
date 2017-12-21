@@ -13,7 +13,7 @@ const legacyUniforms = [
   {old: 'mat4 modelMatrix', new: 'project_uModelMatrix'},
   {old: 'mat4 viewMatrix'},
   {old: 'mat4 projectionMatrix', new: 'project_uViewProjectionMatrix'},
-  {old: 'vec3 projectionPixelsPerUnit', new: 'project_uPixelsPerUnit'},
+  {old: 'vec3 projectionPixelsPerUnit', new: 'project_uPixelsPerMeter'},
   {old: 'float projectionScale', new: 'project_uScale'},
   {old: 'vec2 viewportSize', new: 'project_uViewportSize'},
   {old: 'float devicePixelRatio', new: 'project_uDevicePixelRatio'},

@@ -27,8 +27,10 @@ const float COORDINATE_SYSTEM_LNGLAT_OFFSETS = 3.;
 
 uniform float project_uCoordinateSystem;
 uniform float project_uScale;
-uniform vec3 project_uPixelsPerUnit;
+uniform vec3 project_uPixelsPerMeter;
 uniform vec3 project_uPixelsPerDegree;
+uniform vec3 project_uPixelsPerUnit;
+uniform vec3 project_uPixelsPerUnit2;
 uniform vec4 project_uCenter;
 uniform mat4 project_uModelMatrix;
 uniform mat4 project_uViewProjectionMatrix;
@@ -46,19 +48,19 @@ const float WORLD_SCALE = TILE_SIZE / (PI * 2.0);
 // Note the scalar version of project_scale is for scaling the z component only
 //
 float project_scale(float meters) {
-  return meters * project_uPixelsPerUnit.z;
+  return meters * project_uPixelsPerMeter.z;
 }
 
 vec2 project_scale(vec2 meters) {
-  return meters * project_uPixelsPerUnit.xy;
+  return meters * project_uPixelsPerMeter.xy;
 }
 
 vec3 project_scale(vec3 meters) {
-  return vec3(project_scale(meters.xy), project_scale(meters.z));
+  return meters * project_uPixelsPerMeter;
 }
 
 vec4 project_scale(vec4 meters) {
-  return vec4(project_scale(meters.xyz), meters.w);
+  return vec4(meters.xyz * project_uPixelsPerMeter, meters.w);
 }
 
 //
@@ -70,7 +72,12 @@ vec3 project_normal(vec3 vector) {
     project_uCoordinateSystem == COORDINATE_SYSTEM_LNGLAT_OFFSETS) {
     return normalize(vector * project_uPixelsPerDegree);
   }
-  return normalize(vector * project_uPixelsPerUnit);
+  return normalize(vector * project_uPixelsPerMeter);
+}
+
+vec4 project_offset(vec4 offset) {
+  vec3 pixelsPerUnit = project_uPixelsPerUnit + project_uPixelsPerUnit2 * offset.y;
+  return vec4(offset.xyz * pixelsPerUnit, offset.w);
 }
 
 //
@@ -97,13 +104,13 @@ vec4 project_position(vec4 position) {
   }
 
   if (project_uCoordinateSystem == COORDINATE_SYSTEM_LNGLAT_OFFSETS) {
-    return vec4(position.xyz * project_uPixelsPerDegree, position.w);
+    return project_offset(position);
   }
 
   // METER_OFFSETS or IDENTITY
   // Apply model matrix
   vec4 position_modelspace = project_uModelMatrix * position;
-  return project_scale(position_modelspace);
+  return project_offset(position_modelspace);
 }
 
 vec3 project_position(vec3 position) {
@@ -123,8 +130,8 @@ vec2 project_position(vec2 position) {
 vec4 project_to_clipspace(vec4 position) {
   if (project_uCoordinateSystem == COORDINATE_SYSTEM_METER_OFFSETS ||
     project_uCoordinateSystem == COORDINATE_SYSTEM_LNGLAT_OFFSETS) {
-    // Needs to be divided with project_uPixelsPerUnit
-    position.w *= project_uPixelsPerUnit.z;
+    // Needs to be divided with project_uPixelsPerMeter
+    position.w *= project_uPixelsPerMeter.z;
   }
   return project_uViewProjectionMatrix * position + project_uCenter;
 }
