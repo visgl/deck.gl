@@ -111,7 +111,8 @@ class Example extends PureComponent {
 
   _onInitialized(gl) {
     setParameters(gl, {
-      clearColor: [0.07, 0.14, 0.19, 1]
+      clearColor: [0.07, 0.14, 0.19, 1],
+      blendFunc: [gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA]
     });
   }
 

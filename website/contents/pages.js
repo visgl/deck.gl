@@ -106,7 +106,7 @@ export const examplePages = generatePath([
       },
       {
         name: 'Wind Map',
-        external: 'http://philogb.github.io/page/wind/'
+        external: 'http://uber.github.io/deck.gl/examples/wind'
       }
     ]
   },
@@ -123,7 +123,11 @@ export const examplePages = generatePath([
       },
       {
         name: '3D Indoor Scan',
-        external: 'https://gnavvy.github.io/point-cloud-example/'
+        external: 'http://uber.github.io/deck.gl/examples/point-cloud-laz'
+      },
+      {
+        name: 'Point Coloud (3D Model)',
+        external: 'http://uber.github.io/deck.gl/examples/point-cloud-ply'
       }
     ]
   }
