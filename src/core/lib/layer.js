@@ -403,7 +403,7 @@ export default class Layer {
     // Call subclass lifecycle methods
     this.initializeState(this.context);
     // End subclass lifecycle methods
-    this._checkLegacyUniforms();
+    // this._checkLegacyUniforms();
 
     // initializeState callback tends to clear state
     this.setChangeFlags({dataChanged: true, propsChanged: true, viewportChanged: true});

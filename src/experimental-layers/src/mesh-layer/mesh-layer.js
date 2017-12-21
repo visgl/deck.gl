@@ -101,9 +101,6 @@ export default class MeshLayer extends Layer {
   }
 
   initializeState() {
-    const {gl} = this.context;
-    this.setState({model: this.getModel(gl)});
-
     const {attributeManager} = this.state;
     attributeManager.addInstanced({
       instancePositions: {
