@@ -45,9 +45,6 @@ export default class LineLayer extends Layer {
   }
 
   initializeState() {
-    const {gl} = this.context;
-    this.setState({model: this._getModel(gl)});
-
     const {attributeManager} = this.state;
 
     /* eslint-disable max-len */
