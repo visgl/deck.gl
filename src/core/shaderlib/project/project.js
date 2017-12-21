@@ -59,8 +59,8 @@ export default {
     {type: 'uniform vec3', old: 'cameraPos', new: 'project_uCameraPosition'},
 
     // Deprecated project functions
-    {type: 'function', old: 'scale', new: 'project_scale', supported: 1},
-    {type: 'function', old: 'preproject', new: 'project_position', supported: 1},
-    {type: 'function', old: 'project', new: 'project_to_clipspace', supported: 1}
+    {type: 'function', old: 'scale', new: 'project_scale', deprecated: 1},
+    {type: 'function', old: 'preproject', new: 'project_position', deprecated: 1},
+    {type: 'function', old: 'project', new: 'project_to_clipspace', deprecated: 1}
   ]
 };
