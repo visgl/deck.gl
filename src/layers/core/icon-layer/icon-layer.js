@@ -76,7 +76,6 @@ export default class IconLayer extends Layer {
 
   initializeState() {
     const {attributeManager} = this.state;
-    const {gl} = this.context;
 
     /* eslint-disable max-len */
     attributeManager.addInstanced({
@@ -89,8 +88,6 @@ export default class IconLayer extends Layer {
       instanceAngles: {size: 1, accessor: 'getAngle', update: this.calculateInstanceAngles}
     });
     /* eslint-enable max-len */
-
-    this.setState({model: this._getModel(gl)});
   }
 
   updateAttribute({props, oldProps, changeFlags}) {

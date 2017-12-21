@@ -71,7 +71,6 @@ export default class SolidPolygonLayer extends Layer {
   initializeState() {
     const {gl} = this.context;
     this.setState({
-      model: this._getModel(gl),
       numInstances: 0,
       IndexType: gl.getExtension('OES_element_index_uint') ? Uint32Array : Uint16Array
     });
