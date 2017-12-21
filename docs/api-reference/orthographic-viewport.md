@@ -26,9 +26,13 @@ Parameters:
   * `left` (Number) - Left bound of the frustum
   * `top` (Number) - Top bound of the frustum
 
-  automatically calculated:
+  automatically calculated by default:
   * `right` (Number, optional) - Right bound of the frustum.
   * `bottom` (Number, optional) - Bottom bound of the frustum.
+
+  when zooming with orthographic viewport, the size (width and height) of the viewport and window are no longer the same. In such case, specify `right` and `bottom` together with `left` and `top` explicitly to define the viewport size.
+
+  refer to `examples/experimental/orthographic-zooming` for example.
 
 ```js
 const viewport = new OrthographicViewport({
