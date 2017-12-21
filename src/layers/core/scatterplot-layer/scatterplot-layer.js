@@ -52,9 +52,6 @@ export default class ScatterplotLayer extends Layer {
   }
 
   initializeState() {
-    const {gl} = this.context;
-    this.setState({model: this._getModel(gl)});
-
     /* eslint-disable max-len */
     /* deprecated props check */
     this._checkRemovedProp('radius', 'radiusScale');

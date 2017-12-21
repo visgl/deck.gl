@@ -89,8 +89,6 @@ export default class HexagonCellLayer extends Layer {
    * Essentially a deferred constructor
    */
   initializeState() {
-    const {gl} = this.context;
-    this.setState({model: this._getModel(gl)});
     const {attributeManager} = this.state;
     /* eslint-disable max-len */
     attributeManager.addInstanced({
