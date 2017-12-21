@@ -36,5 +36,31 @@ export default {
   name: 'project',
   dependencies: [fp32],
   vs: `${projectShader}${projectDeprecatedShader}`,
-  getUniforms
+  getUniforms,
+  deprecations: [
+    // Removed custom picking uinforms
+    // These don't really belong here but we need to check them for all shaders
+    // the project module is by default included for all
+    {type: 'uniform vec3', old: 'selectedPickingColor', new: "luma.gl's picking module"},
+    {type: 'uniform float', old: 'renderPickingBuffer', new: "luma.gl's picking module"},
+    {type: 'uniform float', old: 'pickingEnabled', new: "luma.gl's picking module"},
+
+    // Removed project uniforms
+    {type: 'uniform float', old: 'projectionMode', new: 'project_uCoordinateSystem'},
+    {type: 'uniform vec4', old: 'projectionCenter', new: 'project_uCenter'},
+    {type: 'uniform vec2', old: 'projectionOrigin'},
+    {type: 'uniform mat4', old: 'modelMatrix', new: 'project_uModelMatrix'},
+    {type: 'uniform mat4', old: 'viewMatrix'},
+    {type: 'uniform mat4', old: 'projectionMatrix', new: 'project_uViewProjectionMatrix'},
+    {type: 'uniform vec3', old: 'projectionPixelsPerUnit', new: 'project_uPixelsPerUnit'},
+    {type: 'uniform float', old: 'projectionScale', new: 'project_uScale'},
+    {type: 'uniform vec2', old: 'viewportSize', new: 'project_uViewportSize'},
+    {type: 'uniform float', old: 'devicePixelRatio', new: 'project_uDevicePixelRatio'},
+    {type: 'uniform vec3', old: 'cameraPos', new: 'project_uCameraPosition'},
+
+    // Deprecated project functions
+    {type: 'function', old: 'scale', new: 'project_scale', supported: 1},
+    {type: 'function', old: 'preproject', new: 'project_position', supported: 1},
+    {type: 'function', old: 'project', new: 'project_to_clipspace', supported: 1}
+  ]
 };

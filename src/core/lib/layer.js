@@ -29,8 +29,6 @@ import {applyPropOverrides, removeLayerInSeer} from './seer-integration';
 import {GL, withParameters} from 'luma.gl';
 import assert from 'assert';
 
-import checkLegacyUniforms from '../shaderlib/check-legacy-uniforms';
-
 const LOG_PRIORITY_UPDATE = 1;
 
 const EMPTY_ARRAY = [];
@@ -403,7 +401,6 @@ export default class Layer {
     // Call subclass lifecycle methods
     this.initializeState(this.context);
     // End subclass lifecycle methods
-    // this._checkLegacyUniforms();
 
     // initializeState callback tends to clear state
     this.setChangeFlags({dataChanged: true, propsChanged: true, viewportChanged: true});
@@ -428,13 +425,6 @@ export default class Layer {
     }
 
     this.clearChangeFlags();
-  }
-
-  _checkLegacyUniforms() {
-    for (const model of this.getModels()) {
-      checkLegacyUniforms(model.program.vs.source);
-      checkLegacyUniforms(model.program.fs.source);
-    }
   }
 
   // Called by layer manager
