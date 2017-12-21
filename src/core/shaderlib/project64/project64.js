@@ -27,7 +27,11 @@ export default {
   name: 'project64',
   dependencies: [project, fp64],
   vs: project64Shader,
-  getUniforms
+  getUniforms,
+  deprecations: [
+    {type: 'uniform vec2', old: 'projectionFP64[16]', new: 'project_uViewProjectionMatrixFP64'},
+    {type: 'uniform vec2', old: 'projectionScaleFP64', new: 'project64_uScale'}
+  ]
 };
 
 // TODO - this module should calculate the 64 bit uniforms
