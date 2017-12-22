@@ -118,4 +118,4 @@ void main(void) {
 }
 ```
 
-For more details refer to luma.gl's [`Picking Module`](http://uber.github.io/luma.gl/#/documentation/api-reference/shader-toosl/shadertools-picking.md).
+For more details refer to luma.gl's [`Picking Module`](http://uber.github.io/luma.gl/#/documentation/api-reference/shader-module).
