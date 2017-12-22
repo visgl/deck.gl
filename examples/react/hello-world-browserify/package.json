@@ -6,7 +6,7 @@
   "dependencies": {
     "babel-polyfill": "^6.16.0",
     "deck.gl": "^4.1.0",
-    "luma.gl": "^4.0.1",
+    "luma.gl": "^5.0.0",
     "react": "^16.2.0",
     "react-dom": "^16.2.0",
     "react-map-gl": "^3.0.0"
