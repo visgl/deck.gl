@@ -126,7 +126,7 @@ export const examplePages = generatePath([
         external: 'http://uber.github.io/deck.gl/examples/point-cloud-laz'
       },
       {
-        name: 'Point Coloud (3D Model)',
+        name: '3D Model (Point Cloud)',
         external: 'http://uber.github.io/deck.gl/examples/point-cloud-ply'
       }
     ]
