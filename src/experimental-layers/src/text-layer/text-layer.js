@@ -63,7 +63,7 @@ export default class TextLayer extends CompositeLayer {
   }
 
   updateState({props, oldProps, changeFlags}) {
-    if (changeFlags.dataChanged) {
+    if (changeFlags.dataChanged || changeFlags.updateTriggers.getText) {
       this.transformStringToLetters();
     }
   }
@@ -124,8 +124,8 @@ export default class TextLayer extends CompositeLayer {
 
     return [
       new MultiIconLayer(
-        Object.assign({}, this.props, {
-          id: 'multi-icon-layer-for-text-rendering',
+        this.getSubLayerProps({
+          id: 'text-multi-icon-layer',
           data,
           iconAtlas,
           iconMapping,
