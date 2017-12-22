@@ -32,12 +32,8 @@ attribute vec4 instanceIconFrames;
 attribute float instanceColorModes;
 attribute vec2 instanceOffsets;
 
-// uniform vec2 viewportSize;
-// uniform float devicePixelRatio;
-
 uniform float sizeScale;
 uniform vec2 iconsTextureDim;
-// devicePixelRatio is set up as uniform but not declared in the shader function
 
 varying float vColorMode;
 varying vec4 vColor;
