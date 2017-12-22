@@ -330,7 +330,7 @@ haders
 
 #### [4.1.0] - 2017-7-27 Minor deck.gl Release
 
-For details see [What's New](https://github.com/uber/deck.gl/blob/4.1-release/docs/whats-new.md)
+For details see [What's New](https://github.com/uber/deck.gl/blob/5.0-release/docs/whats-new.md)
 
 
 ### deck.gl v4.0

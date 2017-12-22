@@ -4,7 +4,7 @@
     <img src="https://img.shields.io/badge/deck.gl-v4.2-brightgreen.svg?style=flat-square" />
   </a>
   Looking for an old version?
-  <a href="https://github.com/uber/deck.gl/blob/4.1-release/docs/README.md">
+  <a href="https://github.com/uber/deck.gl/blob/5.0-release/docs/README.md">
     <img src="https://img.shields.io/badge/deck.gl-v4.1-green.svg?style=flat-square" />
   </a>
   <a href="https://github.com/uber/deck.gl/blob/4.0-release/docs/README.md">

@@ -30,12 +30,12 @@ Following methods and props have been renamed for clarity. The semantics are unc
 
 | Removed uniform       | Comment |
 | ---                   | ---     |
-| renderPickingBuffer   |[picking shader module](https://github.com/uber/luma.gl/tree/master/src/shadertools/modules/picking)|
-| pickingEnabled        |[picking shader module](https://github.com/uber/luma.gl/tree/master/src/shadertools/modules/picking)|
-| selectedPickingColor  |[picking shader module](https://github.com/uber/luma.gl/tree/master/src/shadertools/modules/picking)|
+| renderPickingBuffer   |[picking shader module](https://github.com/uber/luma.gl/5.0-release/master/src/shadertools/modules/picking)|
+| pickingEnabled        |[picking shader module](https://github.com/uber/luma.gl/5.0-release/master/src/shadertools/modules/picking)|
+| selectedPickingColor  |[picking shader module](https://github.com/uber/luma.gl/5.0-release/master/src/shadertools/modules/picking)|
 
 
-The shader uniforms are used for implementing picking in custom shaders, these uniforms are no longer set by the deck.gl. Custom shaders can now use luma.gl [picking shader module](https://github.com/uber/luma.gl/tree/master/src/shadertools/modules/picking).
+The shader uniforms are used for implementing picking in custom shaders, these uniforms are no longer set by the deck.gl. Custom shaders can now use luma.gl [picking shader module](https://github.com/uber/luma.gl/5.0-release/master/src/shadertools/modules/picking).
 
 
 ### Initial WebGL State

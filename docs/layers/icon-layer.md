@@ -107,5 +107,5 @@ Method called to retrieve the rotating angle (in degree) of each object, returns
 
 ## Source
 
-[src/layers/core/icon-layer](https://github.com/uber/deck.gl/tree/4.1-release/src/layers/core/icon-layer)
+[src/layers/core/icon-layer](https://github.com/uber/deck.gl/tree/5.0-release/src/layers/core/icon-layer)
 
