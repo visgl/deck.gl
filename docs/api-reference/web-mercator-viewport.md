@@ -1,22 +1,28 @@
-
 # WebMercatorViewport Class
 
-The `WebMercatorViewport` class is a subclass of [Viewport](/docs/api-reference/viewport.md) that enables 3D rendering to
-seamlessly overlay on top of map components that take web mercator style
-map coordinates (`latitude`, `lon`, `zoom`, `pitch`, `bearing` etc),
-and to facilite the necessary mercator projections by breaking them into a
-minimal non-linear piece followed by a standard projection chain.
+The `WebMercatorViewport` class is a subclass of [ThirdPersonViewport](/docs/api-reference/third-person-viewport.md) that enables 3D rendering to seamlessly overlay on top of map components that take web mercator style map coordinates (`latitude`, `lon`, `zoom`, `pitch`, `bearing` etc).
 
-Remarks:
-* Because `WebMercatorViewport` a subclass of `Viewport`, an application
-  can implement support for generic 3D `Viewport`s and automatically get
-  the ability to accept web mercator style map coordinates.
-* A limitation at the moment is that there is no way to extract
-  web mercator parameters from a "generic" viewport, so for map synchronization
-  applications (rendering on top of a typical map component that only accepts
-  web mercator parameters) the `WebMercatorViewport` is necessary.
+When in perspective mode, the `WebMercatorViewport` is carefully tuned to work in synchronization with `mapbox-gl`'s projection matrix.
 
-## Constructor
+For more information consult the [Viewports](/docs/advanced/viewports.md) article.
+
+## Usage
+
+The `WebMercatorViewport` is the default viewport for deck.gl. If you are using the `DeckGL` React component you may not even need to instantiate it explicitly.
+```js
+import DeckGL from 'deck.gl';
+<DeckGL width={...} heigh={...} longitude={} latitude={} zoom={} pitch={} bearing={} layers=[...]/>
+```
+
+```js
+import DeckGL, {WebMercatorViewport} from 'deck.gl';
+const viewport = new WebMercatorViewport(width, height, longitude, latitude, zoom, pitch, bearing});
+<DeckGL viewport={viewport} layers=[...]/>
+```
+
+## Methods
+
+### Constructor
 
 Parameters:
 
@@ -43,11 +49,9 @@ Remarks:
  -  When using mercatorProjection, per cartographic tradition, longitudes and
    latitudes are specified as degrees.
 
-## Methods
-
 Inherits all [Viewport methods](/docs/api-reference/viewport.md#methods).
 
-##### `projectFlat`
+### projectFlat
 
 Project `[longitude, latitude]` on sphere onto "screen pixel" coordinates `[x, y]` without
 considering any perspective (effectively ignoring pitch, bearing and altitude).
@@ -61,7 +65,7 @@ Returns:
 
  - Screen coordinates in `[x, y]`.
 
-##### `unprojectFlat`
+### unprojectFlat
 
 Unprojects a screen coordinate `[x, y]` to `[longitude, latitude]` on sphere without
 considering any perspective (effectively ignoring pitch, bearing and altitude).
@@ -74,7 +78,7 @@ Returns:
 
  - Map or world coordinates in `[longitude, latitude]`.
 
-##### `getDistanceScales`
+### getDistanceScales
 
 Returns:
 - An object with precalculated distance scales allowing conversion between
@@ -89,7 +93,7 @@ Remarks:
   precision, which can greatly outweigh the small linear approximation error
   mentioned above.
 
-##### `metersToLngLatDelta`
+### metersToLngLatDelta
 
 Converts a meter offset to a lnglat offset using linear approximation.
 For information on numerical precision, see remarks on `getDistanceScales`.
@@ -103,7 +107,7 @@ Returns:
 - Array of deltas in `[longitude, latitude]` or `[longitude, latitude, altitude]`
 if `z` is provided.
 
-##### `lngLatDeltaToMeters`
+### lngLatDeltaToMeters
 
 Converts a lnglat offset to a meter offset using linear approximation.
 For information on numerical precision, see remarks on
@@ -116,7 +120,7 @@ Passing a `altitude` is optional.
 Returns:
 - Array of meter deltas in `[x, y]` or `[x, y, z]` if `altitude` is provided.
 
-##### `addMetersToLngLat`
+### addMetersToLngLat
 
 Add a meter delta to a base lnglat coordinate using linear approximation.
 For information on numerical precision, see remarks on
@@ -131,5 +135,13 @@ Returns:
 - New coordinate array in `[longitude, latitude]` or `[longitude, latitude, altitude]`
 if `z` is provided.
 
+## Remarks
+
+* Because `WebMercatorViewport` a subclass of `Viewport`, an application can implement support for generic 3D `Viewport`s and automatically get the ability to accept web mercator style map coordinates.
+* A limitation at the moment is that there is no way to extract web mercator parameters from a "generic" viewport, so for map synchronization applications (rendering on top of a typical map component that only accepts web mercator parameters) the `WebMercatorViewport` is necessary.
+* Facilitates the necessary mercator projections by breaking them into a minimal non-linear piece followed by a standard projection chain.
+* Making deck.gl work with non-mapbox map systems **in perspective mode** might require subclassing `WebMercatorViewport` and adjust the projection so it matches the map's projection.
+
+
 ## Source
-[src/lib/viewports/web-mercator-viewport.js](https://github.com/uber/deck.gl/blob/4.1-release/src/lib/viewports/web-mercator-viewport.js)
+[src/viewports/web-mercator-viewport.js](https://github.com/uber/deck.gl/blob/5.0-release/src/viewports/web-mercator-viewport.js)

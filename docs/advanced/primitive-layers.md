@@ -98,7 +98,7 @@ It sometimes desirable to have a single layer render using multiple geometry pri
 (e.g both circles and lines, or triangles and textured meshes etc),
 rather than creating separate layers.
 The custom
-[AxesLayer example](https://github.com/uber/deck.gl/tree/4.1-release/examples/plot/plot-layer/axes-layer.js)
+[AxesLayer example](https://github.com/uber/deck.gl/tree/5.0-release/examples/plot/plot-layer/axes-layer.js)
 uses this technique to share attributes between grids and labels.
 
 #### Defining Attributes
@@ -215,10 +215,6 @@ primitive), then you may take advantage of the default implementation of the
 
 By default, each layer creates an `instancePickingColors` attribute and automatically
 calculates it using the length of the `data` array.
-In your custom shader, you may switch between the actual color and the picking color
-using the technique described in
-[`renderPickingBuffer`](/docs/advanced/writing-shaders.md#-float-renderpickingbuffer-)
-and picking will just work.
 
-For more advanced scenarios, read about
+For custom picking, read about
 [Implementing Custom Picking](/docs/advanced/picking.md#implementing-custom-picking).

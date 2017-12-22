@@ -112,6 +112,14 @@ Type of joint. If `true`, draw round joints. Otherwise draw miter joints.
 The maximum extent of a joint in ratio to the stroke width.
 Only works if `lineJointRounded` is `false`.
 
+##### `elevationScale` (Number, optional)
+
+- Default: `1`
+
+Elevation multiplier. The final elevation is calculated by
+  `elevationScale * getElevation(d)`. `elevationScale` is a handy property to scale
+all polygon elevation without updating the data.
+
 ##### `pointRadiusScale` (Number, optional)
 
 - Default: `1`
@@ -169,7 +177,7 @@ Called to retrieve the radius of `Point` and `MultiPoint` feature.
 
 - Default: `f => f.properties.lineWidth || 1`
 
-Called to retrieve the line width for a GeoJson feature.
+Called to retrieve the line width in meters for a GeoJson feature.
 
 Note: This accessor is called for `LineString` and `MultiLineString`
 features. It is called for `Polygon` and `MultiPolygon` features if the
@@ -196,5 +204,5 @@ Note: This accessor is only called for `Polygon` and `MultiPolygon` features.
   the color of that `Feature`.
 
 ## Source
-[src/layers/core/geojson-layer](https://github.com/uber/deck.gl/tree/4.1-release/src/layers/core/geojson-layer)
+[src/layers/core/geojson-layer](https://github.com/uber/deck.gl/tree/5.0-release/src/layers/core/geojson-layer)
 

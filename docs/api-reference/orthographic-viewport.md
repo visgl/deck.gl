@@ -1,12 +1,10 @@
-
 # OrthographicViewport Class
 
-The `OrthographicViewport` class is a subclass of [Viewport](/docs/api-reference/viewport.md) that creates an orthogonal view.
+The `OrthographicViewport` class is a subclass of the [Viewport](/docs/api-reference/viewport.md) that creates an orthogonal view.
 
 Remarks:
-* This class is just a convenience, the application can use `Viewport` directly
-  together with e.g. the `mat4.ortho` and `mat4.lookAt` functions from the
-  `gl-matrix` module.
+* This class is just a convenience, the application can use `Viewport` directly together with e.g. the `mat4.ortho` and `mat4.lookAt` functions from the `gl-matrix` module.
+
 
 ## Constructor
 
@@ -28,9 +26,13 @@ Parameters:
   * `left` (Number) - Left bound of the frustum
   * `top` (Number) - Top bound of the frustum
 
-  automatically calculated:
+  automatically calculated by default:
   * `right` (Number, optional) - Right bound of the frustum.
   * `bottom` (Number, optional) - Bottom bound of the frustum.
+
+  when zooming with orthographic viewport, the size (width and height) of the viewport and window are no longer the same. In such case, specify `right` and `bottom` together with `left` and `top` explicitly to define the viewport size.
+
+  refer to `examples/experimental/orthographic-zooming` for example.
 
 ```js
 const viewport = new OrthographicViewport({
@@ -47,4 +49,4 @@ const viewport = new OrthographicViewport({
 Inherits all [Viewport methods](/docs/api-reference/viewport.md#methods).
 
 ## Source
-[src/lib/viewports/orthographic-viewport.js](https://github.com/uber/deck.gl/blob/4.1-release/src/lib/viewports/orthographic-viewport.js)
+[src/viewports/orthographic-viewport.js](https://github.com/uber/deck.gl/blob/5.0-release/src/viewports/orthographic-viewport.js)

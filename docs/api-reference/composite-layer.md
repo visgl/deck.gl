@@ -1,13 +1,11 @@
 # CompositeLayer Class
 
-The `CompositeLayer` class is a subclass of the
-[Layer Class](/docs/api-reference/base-layer.md), with its own implementation
-of certain
-[layer lifecycle methods](/docs/advanced/layer-lifecycle.md)
-to help create sublayers and handle events.
+The `CompositeLayer` class is a subclass of the [Layer Class](/docs/api-reference/base-layer.md), that customizes various [layer lifecycle methods](/docs/advanced/layer-lifecycle.md) to help create sublayers and handle events from those layers.
 
-If you intend to implement a layer that generates other layers, it is recommended
-that you extend this class.
+If you intend to implement a layer that generates other layers, you should extend this class.
+
+For more information consult the [Composite Layers](/docs/advanced/composite-layers.md) article.
+
 
 ## Usage
 
@@ -28,8 +26,7 @@ class MyCompositeLayer extends CompositeLayer {
 
 ##### `draw`
 
-A composite layer does not render directly into the WebGL context.
-The `draw` method inherited from the base class is therefore never called.
+A composite layer does not render directly into the WebGL context. The `draw` method inherited from the base class is therefore never called.
 
 ##### `renderLayers`
 
@@ -58,15 +55,15 @@ Parameters:
   following fields:
     + `x` (Number) - Mouse position x relative to the viewport.
     + `y` (Number) - Mouse position y relative to the viewport.
-    + `lngLat` ([Number, Number]) - Mouse position in world coordinates. Only applies if
-      [`projectionMode`](/docs/api-reference/base-layer.md#-projectionmode-number-optional-)
-      is `COORDINATE_SYSTEM.LNGLAT`.
+    + `lngLat` ([Number, Number]) - Mouse position in world coordinates. Only applies if the
+      [`coordinateSystem`](/docs/api-reference/base-layer.md#-projectionmode-number-optional-)
+      prop is set to `COORDINATE_SYSTEM.LNGLAT`.
     + `color` (Number[4]) - The color of the pixel that is being picked. It represents a
       "picking color" that is encoded by
       [`layer.encodePickingColor()`](/docs/api-reference/base-layer.md#-encodepickingcolor-).
     + `index` (Number) - The index of the object that is being picked. It is the returned
       value of
-      [`layer.dncodePickingColor()`](/docs/api-reference/base-layer.md#-decodepickingcolor-).
+      [`layer.decodePickingColor()`](/docs/api-reference/base-layer.md#-decodepickingcolor-).
     + `picked` (Boolean) - `true` if `index` is not `-1`.
   * `pickParams.mode` (String) - One of `hover` and `click`
   * `pickParams.sourceLayer` (Layer) - the sublayer instance where this event originates from.
@@ -80,5 +77,13 @@ functions called.
 
 The default implementation returns `pickParams.info` without any change.
 
+
+##### `getSubLayerProps`
+
+Returns an object with the properties of the sublayer built using the passed props and
+key base `Layer` props that `CompositeLayer`s typically forward to their sublayers.
+Prepends the parent layer `id` to the sublayer id and merges `updateTriggers`.
+
+
 ## Source
-[src/lib/composite-layer.js](https://github.com/uber/deck.gl/blob/4.1-release/src/lib/composite-layer.js)
+[src/lib/composite-layer.js](https://github.com/uber/deck.gl/blob/5.0-release/src/lib/composite-layer.js)

@@ -47,6 +47,13 @@ Inherits from all [Base Layer](/docs/api-reference/base-layer.md) properties.
 
 Size of each grid cell in meters
 
+##### `coverage` (Number, optional)
+
+- Default: `1`
+
+Cell size scale factor. The size of cell is calculated by
+`cellSize * coverage`.
+
 ##### `elevationScale` (Number, optional)
 
 - Default: `1`
@@ -97,5 +104,5 @@ If the alpha is not provided, it will be set to `255`.
 
 ## Source
 
-[/src/layers/core/grid-cell-layer](https://github.com/uber/deck.gl/tree/4.1-release/src/layers/core/grid-cell-layer)
+[/src/layers/core/grid-cell-layer](https://github.com/uber/deck.gl/tree/5.0-release/src/layers/core/grid-cell-layer)
 

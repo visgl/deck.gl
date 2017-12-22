@@ -27,7 +27,7 @@ const App = ({data, viewport}) => {
   const layer = new PathLayer({
     id: 'path-layer',
     data,
-    rounded: true
+    rounded: true,
     widthScale: 100
   });
 
@@ -78,6 +78,12 @@ Only works if `rounded` is `false`.
 
 Whether the layer should be rendered in high-precision 64-bit mode
 
+##### `dashJustified` (Boolean, optional)
+
+- Default: `false`
+
+Only effective if `getDashArray` is specified. If `true`, adjust gaps for the dashes to align at both ends.
+
 ### Data Accessors
 
 ##### `getPath` (Function, optional)
@@ -106,7 +112,15 @@ If the color alpha (the fourth component) is not provided,
 Method called to determine the width to draw each path with.
 Unit is meters.
 
+##### `getDashArray` (Function, optional)
+
+- Default: `null`
+
+Method called to get the dash array to draw each path with.
+Returns an array of two numbers: `[dashSize, gapSize]` relative to the width of the path. Returns `[0, 0]` to draw the path in solid line.
+
+If this accessor is not specified, all paths are drawn as solid lines.
+
 ## Source
 
-[src/layers/core/path-layer](https://github.com/uber/deck.gl/tree/4.1-release/src/layers/core/path-layer)
-
+[src/layers/core/path-layer](https://github.com/uber/deck.gl/tree/5.0-release/src/layers/core/path-layer)

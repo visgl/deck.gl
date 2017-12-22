@@ -1,34 +1,132 @@
+# deck.gl v5 (Under development)
+
+Release date: TBD, Dec 2017
+
+All new additions to the official deck.gl 5.0 API are listed here. Note that in addition to the official new features in this release, deck.gl 5.0 also contains a number of significant under the hoods changes to prepare for new features and optimizations. Some of these are available as experimental APIs, see below.
+
+As always, for information on deprecations and how to update your code in response to any API changes, please read the deck.gl [Upgrade Guide](/docs/get-started/upgrade-guide.md).
+
+## DeckGL: Control over DevicePixelRatio
+
+The new `useDevicePixels` prop on the `DeckGL` React component can be used to disable usage of full resolution on retina/HD displays. Disabling deck.gl's default behavior of always rendering at maximum device resolution can reduce the render buffer size with a factor of 4x on retina devices and lead to significant performance improvements on typical fragment shader bound rendering. This option can be especially interesting on "retina" type mobile phone displays where pixels are so small that the visual quality loss may be largely imperceptible.
+
+
+## DeckGL: Layer Filtering
+
+A new `DeckGL` prop `layerFilter` gives the application an opportunity to filter out layers from the layer list during rendering and/or picking. Filtering can be done per layer or per viewport (experimental) or both. This enables techniques like adding helper layers that work as masks during picking but do not show up during rendering, or rendering different additional information in different viewports (experimental).
+
+
+## DeckGL: Picking methods renamed
+
+To avoid confusion, `DeckGL.queryObject` is renamed to `DeckGL.pickObject` and `DeckGL.queryVisibleObjects` is renamed to `DeckGL.pickObjects`. Old functions are still supported with deprecated warning, but will be removed in the next major version.
+
+
+## Layer: Automatic Highlighting of Hovered Elements
+
+Three new `Layer` props (`autoHighlight`, `highlightColor` and `highlightedObjectIndex`) have been added to enable simple and efficient highlighting of a single object in a layer. Highlighting is either automatic on hover, or programmatically controlled through specifying the index of the selected object. The actual highlighting is done on the GPU and this feature is thus very performant, in particular as it lets applications avoid cumbersome techniques like modifying data or using a secondary layer for highlighting.
+
+
+## CompositeLayer: Property Forwarding Support
+
+A new method `CompositeLayer.getSubLayerProps()` simplifies forwarding base layer props to sub layers, removing code clutter and reducing the risk of forgetting to forward an important base layer property.
+
+
+## PathLayer & GeoJsonLayer: Dashed Line Support
+
+Added new props (`getDashArray` and `dashJustified`) enabling you render paths as dashed lines. Naturally these props are also accessible in composite layers built on top of the `PathLayer`, such as the `GeoJsonLayer`.
+
+## PolygonLayer & GeoJsonLayer: Elevation Scale
+
+Added new prop `elevationScale` to enable fast scaling elevation of all extruded polygons.
+
+## HexagonLayer / GridLayer: Elevation by Value Support
+
+Add `getElevationValue` to `HexagonLayer` and `GridLayer` to enable elevation aggregation by value. This allow both color and elevation to be calculated based on customized aggregation function.
+
+
+## Seer Improvements
+
+The [Seer](https://chrome.google.com/webstore/detail/seer/eogckabefmgphfgngjdmmlfbddmonfdh?hl=en) Chrome Debug Extension now remembers its "on/off" setting across application reloads. This is significant because it means that the Seer extension can be left installed even in heavy deck.gl applications with lots of layers, and turned on only during debugging, without any performance impact during normal usage.
+
+
+## Shader Modules
+
+Note: This change is mainly relevant to developers who write custom deck.gl layers.
+
+* Shader module documentation is much improved, both in deck.gl and luma.gl. In the deck.gl docs, shader modules are listed in the "API Reference" section, after the JavaScript classes.
+* The `project` module provides a new function `project_pixel_to_clipspace` for screen space calculations that takes variables like `useDevicePixels` and "focal distance" into account, making pixel space calculation simpler and less prone to fail when parameters change.
+* The core deck.gl shader modules (`project` etc) now conform to the luma.gl shadertools conventions for naming uniforms and functions, making this module easier to describe and use. In spite of these changes, backwards compatible uniforms are provided to ensure that existing layers do not break.
+
+
+## Experimental Features
+
+As usual, deck.gl 5.0 contains a number of experimental features, e.g. "multi viewport", "first person viewport" and "viewport transitions". These features are still being finalized and the APIs have not been frozen, but can still be accessed by early adopters. See the roadmap article for more information on these.
+
+
 # deck.gl v4.1
 
 Release date: July 27th, 2017
 
-## WebGL2 Support provided by luma.gl v4
+## WebGL2 Support (provided by luma.gl v4)
 
-While the deck.gl v4.1 release is highly backward-compatible with 4.0, its rendering functionality is now backed by luma.gl v4, a WebGL2-enabled rendering framework. On all browsers that supports WebGL2 (e.g. recent Chrome and Firefox browsers), deck.gl will obtain WebGL2 context and utilize WebGL2 functionalities. To know more about WebGL2, please check [here](https://www.khronos.org/registry/webgl/specs/latest/2.0/).
+deck.gl v4.1 is based on luma.gl v4, a major release that adds full WebGL2 support as well as powerful features like WebGL state management and an improve GLSL shader module system. On all browsers that supports WebGL2 (e.g. recent Chrome and Firefox browsers), deck.gl will obtain WebGL2 context and utilize WebGL2 functionalities. To know more about WebGL2, please check [here](https://www.khronos.org/registry/webgl/specs/latest/2.0/).
+
 
 ## Query Methods
 
 Two new functions - `DeckGL.queryObject` and `DeckGL.queryVisibleObjects` allow developers to directly query the picking results, in addition to handling picking via built-in click and hover callbacks. This allows applications to build more advanced event handling and makes deck.gl easier to integrate with existing applications that have already implemented their own event handling.
 
+In addition, the `queryObject` offers a much requested `radius` parameter, allowing the application to specify how close an object needs to be to the specified coordinate to be considered a match (in deck.gl v4.0, picking will only trigger if an object is actually visible on the queried pixel, making it hard for users to select small features and thin lines).
+
 ## Shader Assembly
 
-For developers that write their own custome layers, the `shadertools` shader assembly system is now in place to replace the existing `assembleShaders` function in deck.gl. The new shader assembler system supports organizing shader codes into modules and is integrated with luma.gl's [`Model`]() so users no longer need to call `assembleShaders` before creating the `Model` for the layer.
+For developers that write their own custom layers, the `shadertools` shader assembly system is now in place to replace the existing `assembleShaders` function in deck.gl. The new shader assembler system supports organizing shader code into modules and is integrated with luma.gl's [`Model`]() so users no longer need to call `assembleShaders` before creating the `Model` for the layer.
 
-## Per-Layer control of WebGL Parameters
+## Per-Layer Control of WebGL Parameters
 
-The base `Layer` class (which is inherited by all layers) supports a new property `parameters` that allows applications to specify the state of WebGL parameters such as blending mode, depth testing etc. This provides significant control over the detailed rendering of layers to applications. Note that the new `parameters` prop directly leverages the luma.gl v4 [setParameters](http://uber.github.io/luma.gl/#/documentation/api-reference/get-parameter) API, which allows all WebGL parameters to be specified as keys in a single parameter object.
+The base `Layer` class (which is inherited by all layers) supports a new property `parameters` that allows applications to specify the state of WebGL parameters such as blending mode, depth testing etc. This provides applications with significant control over the detailed rendering of layers. Note that the new `parameters` prop directly leverages the luma.gl v4 [setParameters](http://uber.github.io/luma.gl/#/documentation/api-reference/get-parameter) API, which allows all WebGL parameters to be specified as keys in a single parameter object.
+
+
+## Layer Attribute Control
+
+Pre-calculated "Vertex Attributes" can now be passed as props, meaning that developers that are willing to learn how a deck.gl layer's vertex attributes are structured can pass in typed arrays as props to the layer and have these directly passed to the GPU. This prevents the layer's internal `AttributeManager` from generating the attributes from your data, allowing you to optimize by e.g. directly passing in binary data from calculations or a binary file load without having deck.gl do any transformation on your data.
+
 
 ## CompositeLayer
 
-Composite layers, which were introduced in v4.0, have received some polish and performance improvements. `CompositeLayer.renderLayers` function now returns a nested array that could contain `null` values, and deck.gl will automatically flatten, filter and render all layers in the array. This is a small convenience that makes using the `renderLayers` methods in complex composite layers a little more readable. deck.gl now also avoids rerendering sublayers of `CompositeLayer` whose props haven't changed.
+Composite layers, which were introduced in v4.0, have received some polish and performance improvements. In subclassed `CompositeLayer`s, the `renderLayers` function can now return a nested array that could contain `null` values, and deck.gl will automatically flatten, filter and render all layers in the array. This is a small convenience that can make your `renderLayers` methods in complex composite layers a little more readable.
+
+```js
+   renderLayers() {
+      return [
+         setting1 && new ScatterplotLayer(...),
+         setting2 && new LineLayer(...),
+         this._renderAdditionalLayerList()
+      ];
+   }
+```
+
+Also, as a performance improvements, deck.gl now avoids "rerendering" sublayers of `CompositeLayer` whose props haven't changed.
 
 ## New Examples
 
 Several new examples have been added to illustrate the wide applicability of deck.gl. To name a few:
 * Wind visualization in US. This example is featured on [OpenVIS 2017 by @philogb](https://www.youtube.com/watch?v=KPiONdmNOuI). This example shows how new features in WebGL2 can be used to accelerate compute intensive tasks through GPU computing right in the browsers
-* Tagmap. This example by @rivulet-zhang shows some novel approching in placing and rendering text symbols in deck.gl
-* Point cloud example" The point cloud example shows how deck.gl could be used to render large amount of 3D point cloud data without any basemap context.
-* Node-link Graph. This is another example showing how deck.gl could be extended to the info-vis domain.
+* Tagmap - This example by @rivulet-zhang shows some novel approching in placing and rendering text symbols in deck.gl
+* Point cloud example - The point cloud example shows how deck.gl could be used to render large amount of 3D point cloud data without any basemap context.
+* Node-link Graph - This is another example showing how deck.gl could be extended to the info-vis domain.
+
+
+## Touch Support
+
+deck.gl's default event handling now includes support for multitouch gestures to zoom and rotate the view. In addition, a new `EventManager` class solidifies deck.gl's support for event handling.
+
+
+## Seer Integration
+
+deck.gl is now integrated with the new [Seer Chrome extension](https://chrome.google.com/webstore/detail/seer/eogckabefmgphfgngjdmmlfbddmonfdh?hl=en). Simply installing Seer and rerunning your application opens up a new tab in the Chrome developer tools, providing you with the ability to see all your deck.gl layers, inspect (and edit) their properties and attributes and check per layer timings, such as the latest GPU draw calls or attribute updates.
+
+And note that since luma.gl v4 also has a Seer integration, it is possible to follow links from deck.gl layer to luma.gl models inside Seer, enabling you to further drill down and understand what data is ultimately being generated and processed by the GPU.
 
 
 # deck.gl v4.0
@@ -231,7 +329,7 @@ A set of new high precision layers that support extreme zoom levels
 
 ### Sample Layers
 
-Sample layers now available through `import 'deck.gl/samples';
+Sample layers now available through `import 'deck.gl/samples';`
 
 ## Changes affecting Custom Layers
 

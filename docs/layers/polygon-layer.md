@@ -26,8 +26,8 @@ const App = ({data, viewport}) => {
    *   {
    *     // Complex polygon with holes (array of coords)
    *     polygon: [
-   *       [-122.4, 37.7], [-122.4, 37.8], [-122.5, 37.8], [-122.5, 37.7], [-122.4, 37.7]],
-   *       [-122.45, 37.73], [-122.47, 37.76], [-122.47, 37.71], [-122.45, 37.73]
+   *       [[-122.4, 37.7], [-122.4, 37.8], [-122.5, 37.8], [-122.5, 37.7], [-122.4, 37.7]],
+   *       [[-122.45, 37.73], [-122.47, 37.76], [-122.47, 37.71], [-122.45, 37.73]]
    *     ],
    *     fillColor: [128, 128, 140],
    *     elevation: 250
@@ -93,6 +93,14 @@ Whether to generate a line wireframe of the hexagon. The outline will have
 
 Requires the `extruded` prop to be true.
 
+##### `elevationScale` (Number, optional)
+
+- Default: `1`
+
+Elevation multiplier. The final elevation is calculated by
+  `elevationScale * getElevation(d)`. `elevationScale` is a handy property to scale
+all elevation without updating the data.
+
 ##### `lineWidthScale` (Boolean, optional)
 
 - Default: `1`
@@ -124,6 +132,13 @@ Type of joint. If `true`, draw round joints. Otherwise draw miter joints.
 
 The maximum extent of a joint in ratio to the stroke width.
 Only works if `lineJointRounded` is `false`.
+
+##### `lineDashJustified` (Boolean, optional)
+
+- Default: `false`
+
+Justify dashes together.
+Only works if `getLineDashArray` is specified.
 
 ##### `fp64` (Boolean, optional)
 
@@ -172,6 +187,12 @@ The width of the outline of the polygon, in meters
 
 - Default: `object => object.elevation || 1000`
 
+##### `getLineDashArray` (Function, optional)
+
+- Default: `null`
+
+Method called to get the dash array to draw each outline with. (See Path Layer)
+
 ### Remarks
 
 * Polygons are always closed, i.e. there is an implicit line segment between
@@ -184,5 +205,5 @@ The width of the outline of the polygon, in meters
 
 ## Source
 
-[src/layers/core/polygon-layer](https://github.com/uber/deck.gl/tree/4.1-release/src/layers/core/polygon-layer)
+[src/layers/core/polygon-layer](https://github.com/uber/deck.gl/tree/5.0-release/src/layers/core/polygon-layer)
 

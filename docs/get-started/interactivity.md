@@ -1,5 +1,7 @@
 # Adding Interactivity
 
+> This article discusses interacting with data (i.e. selecting, or picking objects). Viewport controls (panning, zooming etc) are discussed in [Controllers](docs/advanced/controllers.md).
+
 ## Overview
 
 deck.gl includes a powerful picking engine that enables the application to precisely determine what object and layer is rendered on a certain pixel on the screen. This picking engine can either be called directly by an application (which is then typically implementing its own event handling), or it can be called automatically by the basic built-in event handling in deck.gl
@@ -23,21 +25,21 @@ The picking engine returns "picking info" objects which contains a variety of fi
 | `object` | The object that was picked. This is typically an entry in the layer's `props.data` array, but can vary from layer to layer. |
 | `x`      | Mouse position x relative to the viewport. |
 | `y`      | Mouse position y relative to the viewport. |
-| `lngLat` | Mouse position in geospatial coordinates. Only applies if `layer.props.projectionMode` is a geospatial mode such as `COORDINATE_SYSTEM.LNGLAT`. |
+| `lngLat` | Mouse position in geospatial coordinates. Only applies if `layer.props.coordinateSystem` is a geospatial mode such as `COORDINATE_SYSTEM.LNGLAT`. |
 
 > Specific deck.gl Layers may add additional fields to the picking `info` object. Check the documentation of each layer.
 
 ## Calling the Picking Engine Directly
 
-The picking engine is exposed through the [`DeckGL.queryObject`]((/docs/api-reference/deckgl.md) and [`DeckGL.queryVisibleObject`]((/docs/api-reference/deckgl.md) methods. These methods allow you to query what layers and objects within those layers are under a specific point or within a specified rectangle. They return `Picking Info` objects as described below.
+The picking engine is exposed through the [`DeckGL.pickObject`]((/docs/api-reference/deckgl.md) and [`DeckGL.pickObjects`]((/docs/api-reference/deckgl.md) methods. These methods allow you to query what layers and objects within those layers are under a specific point or within a specified rectangle. They return `Picking Info` objects as described below.
 
-`queryObject` allows an application to define its own event handling. When it comes to how to actually do event handling in a browser, there are many options. In a React application, perhaps the simplest is to just use React's "synthetic" event handling together with `queryObject`:
+`pickObject` allows an application to define its own event handling. When it comes to how to actually do event handling in a browser, there are many options. In a React application, perhaps the simplest is to just use React's "synthetic" event handling together with `pickObject`:
 
 ```js
 class MyComponent extends React.Component {
   ...
   onClickHandler = (event) => {
-    const pickInfo = this.deckGL.queryObject({x: event.clientX, y: event.clientY, ...});
+    const pickInfo = this.deckGL.pickObject({x: event.clientX, y: event.clientY, ...});
     console.log(pickInfo.lngLat);
   }
 
@@ -77,7 +79,7 @@ const layer = new ScatterplotLayer({
 />
 ```
 
-The callbacks for `hover` and `click` events are called with a single parameter `info` that contains the mouse or touch event and what was hovered, including which layer was selected. Thus event handlers registered directly on the `DeckGL` compionents are also able to distinguish between clicks in different layers.
+The callbacks for `hover` and `click` events are called with a single parameter `info` that contains the mouse or touch event and what was hovered, including which layer was selected. Thus event handlers registered directly on the `DeckGL` components are also able to distinguish between clicks in different layers.
 
 ### Behavior of Built-in Event Handling
 

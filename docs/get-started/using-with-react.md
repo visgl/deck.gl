@@ -17,14 +17,14 @@ const MAPBOX_ACCESS_TOKEN = 'MAPBOX_ACCESS_TOKEN';
 
 // Viewport settings that is shared between mapbox and deck.gl
 const viewport = {
-   width: 500,
-   height: 500,
-   longitude: -100,
-   latitude: 40.7,
-   zoom: 3,
-   pitch: 0,
-   bearing: 0
-}
+  width: 500,
+  height: 500,
+  longitude: -100,
+  latitude: 40.7,
+  zoom: 3,
+  pitch: 0,
+  bearing: 0
+};
 
 // Data to be used by the LineLayer
 const data = [

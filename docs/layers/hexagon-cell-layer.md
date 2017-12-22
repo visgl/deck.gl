@@ -89,10 +89,6 @@ Whether to extrude hexagon. If se to false, all hexagons will be set to flat.
 
 Whether the layer should be rendered in high-precision 64-bit mode
 
-##### `selectedPickingColor` (Array, optional) **EXPERIMENTAL**
-
-Shader based highlighting of a selected object
-
 ##### `lightSettings` (Object, optional) **EXPERIMENTAL**
 
 This is an object that contains light settings for extruded polygons.
@@ -122,5 +118,5 @@ Method called to retrieve the elevation of each object. 1 unit approximate to 10
 
 ## Source
 
-[src/layers/core/hexagon-cell-layer](https://github.com/uber/deck.gl/tree/4.1-release/src/layers/core/hexagon-cell-layer)
+[src/layers/core/hexagon-cell-layer](https://github.com/uber/deck.gl/tree/5.0-release/src/layers/core/hexagon-cell-layer)
 

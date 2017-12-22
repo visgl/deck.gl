@@ -1,6 +1,6 @@
 # Picking
 
-Make sure you have read [Interactivity](/docs/get-started/interactivity.md) before reading this section.
+> Make sure you have read [Interactivity](/docs/get-started/interactivity.md) before reading this section.
 
 ## How It Works
 
@@ -68,4 +68,54 @@ calculatePickingColors(attribute) {
 - The default implementation of [`layer.encodePickingColor()`](/docs/api-reference/base-layer.md#-encodepickingcolor-) and
 [`layer.decodePickingColor()`](/docs/api-reference/base-layer.md#-decodepickingcolor-) is likely sufficient, but you may need to implement your own pair.
 - By default, the `object` field of the picking `info` object is indexed from the layer's `data` prop. Custom layers often need to define on their own terms what  constitutes meaningful information to the user's callbacks. A layer can achieve this  by overriding [`layer.getPickingInfo()`](/docs/api-reference/base-layer.md#-getpickinginfo-) to add or modify fields to the `info` object.
-- For more information about how to implement picking in shaders see: [`renderPickingBuffer`](/docswriting-shaders.md#-float-renderpickingbuffer-)
+
+
+## Implementing Picking in Custom Shaders
+
+All core layers (including composite layers) support picking using luma.gl's `picking module`. If you are using custom shaders with any of the core layers or building custom layers with your own shaders following steps are needed to achieve `Picking`.
+
+### Model object creation.
+
+When creating `Model` object, add picking module to `modules` array.
+
+```
+new Model(gl, {
+  ...
+  vs: CUSTOM_VS,
+  fs: CUSTOM_FS,
+  modules: ['picking', ...]
+});
+```
+
+### Vertex Shader
+
+Vertex shader should set current picking color using `picking_setPickingColor` method provided by picking shader module.
+
+```
+attribute vec3 instancePickingColors;
+
+void main(void) {
+  ...
+
+  picking_setPickingColor(instancePickingColors);
+
+  ....
+}
+```
+
+### Fragment Shader
+
+Fragment shader should use `picking_filterPickingColor` to update `gl_FragColor`, which outputs picking color if it is the picking pass.
+
+```
+attribute vec3 instancePickingColors;
+
+void main(void) {
+  ...
+
+  // Should be the last Fragment shader instruction that updates gl_FragColor
+  gl_FragColor = picking_filterPickingColor(gl_FragColor);
+}
+```
+
+For more details refer to luma.gl's [`Picking Module`](http://uber.github.io/luma.gl/#/documentation/api-reference/shader-toosl/shadertools-picking.md).

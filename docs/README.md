@@ -1,9 +1,17 @@
-<p align="right">
-  <a href="https://github.com/uber/deck.gl/blob/4.1-release/docs/README.md">
-    <img src="https://img.shields.io/badge/current-v4.1-brightgreen.svg?style=flat-square" />
+<p align="center">
+  These docs are for
+  <a href="https://github.com/uber/deck.gl/blob/4.2-release/docs/README.md">
+    <img src="https://img.shields.io/badge/deck.gl-v4.2-brightgreen.svg?style=flat-square" />
+  </a>
+  Looking for an old version?
+  <a href="https://github.com/uber/deck.gl/blob/5.0-release/docs/README.md">
+    <img src="https://img.shields.io/badge/deck.gl-v4.1-green.svg?style=flat-square" />
+  </a>
+  <a href="https://github.com/uber/deck.gl/blob/4.0-release/docs/README.md">
+    <img src="https://img.shields.io/badge/deck.gl-v4.0-green.svg?style=flat-square" />
   </a>
   <a href="https://github.com/uber/deck.gl/tree/3.0-release/docs">
-    <img src="https://img.shields.io/badge/legacy-v3-green.svg?style=flat-square" />
+    <img src="https://img.shields.io/badge/deck.gl-v3.0-green.svg?style=flat-square" />
   </a>
 </p>
 
@@ -24,12 +32,13 @@ To make this simple concept work, deck.gl handles a number of challenges:
 
 ## Ecosystem
 
-deck.gl has been developed in parallel with a number of companion modules:
+deck.gl is one of the main frameworks in the [vis.gl](https://vis.gl) framework suite.
+
+deck.gl has been developed in parallel with a number of companion modules, e.g.:
 
 * [luma.gl](https://uber.github.io/luma.gl/#/) - A general purpose WebGL library designed to be interoperable both with the raw WebGL API and (as far as possible) with other WebGL libraries. In particular, luma.gl does not claim ownership of the WebGL context, and can work with any supplied context, including contexts created by the application or other WebGL libraries.
 * [react-map-gl](https://uber.github.io/react-map-gl/#/) - A React wrapper around Mapbox GL which works seamlessly with deck.gl.
 
-In addition, in the future we plan to publish additional deck.gl layers and layer packages as separate modules.
 
 ## Learning deck.gl
 

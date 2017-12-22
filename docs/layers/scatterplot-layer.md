@@ -68,6 +68,12 @@ The minimum radius in pixels.
 
 The maximum radius in pixels.
 
+##### `fp64` (Boolean, optional)
+
+- Default: `false`
+
+Whether the layer should be rendered in high-precision 64-bit mode.
+
 ### Data Accessors
 
 ##### `getPosition` (Function, optional)
@@ -93,5 +99,5 @@ Method called to retrieve the rgba color of each object.
 
 ## Source
 
-[src/layers/core/scatterplot-layer](https://github.com/uber/deck.gl/tree/4.1-release/src/layers/core/scatterplot-layer)
+[src/layers/core/scatterplot-layer](https://github.com/uber/deck.gl/tree/5.0-release/src/layers/core/scatterplot-layer)
 

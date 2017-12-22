@@ -1,6 +1,8 @@
-# AttributeManager Class
+# AttributeManager Class (Advanced)
 
-The `AttributeManage` class provides automated attribute allocations and updates.
+> The `AttributeManager` is used internally by deck.gl layers. Unless you are writing custom deck.gl layers, or you are working with some very narrow advanced performance optimization use cases, you do not need to use this class.
+
+The `AttributeManager` class provides automated attribute allocations and updates.
 
 Summary:
 - keeps track of valid state for each attribute
@@ -8,10 +10,8 @@ Summary:
 - auto updates attributes with registered updater functions
 - allows overriding with application supplied buffers
 
-Limitations:
-- The AttributeManager always reinitializes the entire typed array.
-  There are currently no provisions for only invalidating a range of
-  indices in an attribute.
+For more information consult the [Attribute Management](/docs/advanced/attribute-management.md) article.
+
 
 ## Constructor
 
@@ -103,4 +103,4 @@ Parameters:
 - `attributeNames` (Array) - Array of attribute names to be removed
 
 ## Source
-[`src/lib/attribute-manager.js`](https://github.com/uber/deck.gl/blob/4.1-release/src/lib/attribute-manager.js)
+[`src/lib/attribute-manager.js`](https://github.com/uber/deck.gl/blob/5.0-release/src/lib/attribute-manager.js)

@@ -50,6 +50,20 @@ Whether to generate a line wireframe of the hexagon. The outline will have
 "horizontal" lines closing the top and bottom polygons and a vertical line
 (a "strut") for each vertex on the polygon.
 
+##### `elevationScale` (Number, optional)
+
+- Default: `1`
+
+Elevation multiplier. The final elevation is calculated by
+  `elevationScale * getElevation(d)`. `elevationScale` is a handy property to scale
+all elevation without updating the data.
+
+##### `fp64` (Boolean, optional)
+
+- Default: `false`
+
+Whether the layer should be rendered in high-precision 64-bit mode.
+
 **Remarks:**
 
 * These lines are rendered with `GL.LINE` and will thus always be 1 pixel wide.
@@ -99,5 +113,5 @@ otherwise will be in unit coordinates.
 
 ## Source
 
-[src/layers/core/primitive-polygon-layer](https://github.com/uber/deck.gl/tree/4.1-release/src/layers/core/primitive-polygon-layer)
+[src/layers/core/primitive-polygon-layer](https://github.com/uber/deck.gl/tree/5.0-release/src/layers/core/primitive-polygon-layer)
 
