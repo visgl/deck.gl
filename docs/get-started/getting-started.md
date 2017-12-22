@@ -13,7 +13,7 @@ yarn add deck.gl luma.gl
 
 ## Running the Examples
 
-The deck.gl repository contains an [examples folder](https://github.com/uber/deck.gl/tree/4.1-release/examples) with a selection of small, standalone examples that could be good starting points for your application.
+The deck.gl repository contains an [examples folder](https://github.com/uber/deck.gl/tree/5.0-release/examples) with a selection of small, standalone examples that could be good starting points for your application.
 
 You should be able to copy these folders to your preferred locations, and get them running simply by installing dependencies using:
 

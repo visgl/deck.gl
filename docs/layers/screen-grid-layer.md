@@ -73,5 +73,5 @@ Method called to retrieve the weight of each object.
 
 ## Source
 
-[src/layers/core/screen-grid-layer](https://github.com/uber/deck.gl/tree/4.1-release/src/layers/core/screen-grid-layer)
+[src/layers/core/screen-grid-layer](https://github.com/uber/deck.gl/tree/5.0-release/src/layers/core/screen-grid-layer)
 
