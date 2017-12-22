@@ -1,3 +1,5 @@
+0.0.17
+- Bump deck.gl to 5.0.0
 0.0.16
 - Fix arrow issue
 0.0.15
