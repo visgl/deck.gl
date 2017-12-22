@@ -19,6 +19,24 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 For Earlier Beta Releases see below
 
+## Official Releases
+
+### deck.gl v5.0 - Dec 21
+- Add links to new examples. (#1272)
+- Address TODO in docs. (#1270)
+- Use the deprecation support in shader modules (#1271)
+- fix double model generation (#1268)
+- Ortho zooming example (#1266)
+- More precise offset projection (#1265)
+- Examples start script (#1263)
+- experimental-layers 0.0.16
+- Fix examples with react-map-gl alpha (#1256)
+- Linter (prettier) changes (#1262)
+- Remove old uniforms (#1261)
+- remove duplicate TextLayer code (#1258)
+- enable lnglat_offset mode (#1245)
+- Remove deprecated uniforms (#1257)
+
 ## Beta Releases
 
 ### deck.gl v5.0 Beta Releases
