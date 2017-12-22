@@ -6,14 +6,6 @@ All new additions to the official deck.gl 5.0 API are listed here. Note that in 
 
 As always, for information on deprecations and how to update your code in response to any API changes, please read the deck.gl [Upgrade Guide](/docs/get-started/upgrade-guide.md).
 
-## DeckGL: Performance Boost
-
-Immutable support is dropped.
-
-Layer initialization, rendering and picking performance are improved.
-
-> TODO - Add more description
-
 ## DeckGL: Control over DevicePixelRatio
 
 The new `useDevicePixels` prop on the `DeckGL` React component can be used to disable usage of full resolution on retina/HD displays. Disabling deck.gl's default behavior of always rendering at maximum device resolution can reduce the render buffer size with a factor of 4x on retina devices and lead to significant performance improvements on typical fragment shader bound rendering. This option can be especially interesting on "retina" type mobile phone displays where pixels are so small that the visual quality loss may be largely imperceptible.

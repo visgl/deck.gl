@@ -57,6 +57,12 @@ For any custom needs, these parameters can be overwritten by updating them in [`
 
 The `assembleShaders` function was moved to luma.gl in v4.1 and is no longer re-exported from deck.gl. As described in v4.1 upgrade guide please use `Model` class instead or import it from luma.gl.
 
+
+### Removed Immutable support
+
+`ScatterplotLayer` and `PolygonLayer` supported immutable/ES6 containers using [`get`](https://github.com/uber/deck.gl/blob/master/src/core/utils/get.js) method, due to performance reasons this support has been dropped.
+
+
 ## Upgrading from deck.gl v4 to v4.1
 
 deck.gl v4.1 is a backward-compatible release. Most of the functionality and APIs remain unchanged but there are smaller changes that might requires developers' attention if they **develop custom layers**. Note that applications that are only using the provided layers should not need to make any changes issues.
