@@ -1,4 +1,4 @@
-import {PureComponent, createElement} from 'react';
+import {Component, createElement} from 'react';
 import PropTypes from 'prop-types';
 
 import {EventManager} from 'mjolnir.js';
@@ -101,7 +101,7 @@ const defaultProps = Object.assign({}, TransitionManager.defaultProps, {
   getCursor: getDefaultCursor
 });
 
-export default class ViewportController extends PureComponent {
+export default class ViewportController extends Component {
   constructor(props) {
     super(props);
 
