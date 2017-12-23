@@ -4,7 +4,7 @@ Release date: 21, Dec 2017
 
 All new additions to the official deck.gl 5.0 API are listed here. Note that in addition to the official new features in this release, deck.gl 5.0 also contains a number of significant under the hoods changes to prepare for new features and optimizations. Some of these are available as experimental APIs, see below.
 
-As always, for information on deprecations and how to update your code in response to any API changes, please read the deck.gl [Upgrade Guide](/docs/upgrade-guide.md).
+As always, for information on deprecations and how to update your code in response to any API changes, please read the deck.gl [upgrade Guide](/docs/upgrade-guide.md).
 
 ## DeckGL: Control over DevicePixelRatio
 

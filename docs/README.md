@@ -35,7 +35,7 @@ To make this simple concept work, deck.gl handles a number of challenges:
 
 ## Ecosystem
 
-deck.gl is one of the main frameworks in the [vis.gl](https://vis.gl) framework suite.
+deck.gl is one of the main frameworks in the [vis.gl](http://vis.gl) framework suite.
 
 deck.gl has been developed in parallel with a number of companion modules, e.g.:
 
@@ -63,4 +63,4 @@ There is an impressive amount of information (documentation, blog posts, educati
 
 This is only needed if you want to create custom layers in deck.gl. Note that while trying out a new ambitious rendering approach for a new layer will likely require deeper knowledge, it is often possible to modify or extend existing deck.gl layers (including modifying the shader code) with a surprisingly limited amount of WebGL knowledge.
 
-There are many web resources for learning WebGL. [luma.gl](https://uber.github.io/luma.gl/#/)can be a good start.
+There are many web resources for learning WebGL. [luma.gl](https://uber.github.io/luma.gl/#/) can be a good start.

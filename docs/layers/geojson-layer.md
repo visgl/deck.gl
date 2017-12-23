@@ -34,11 +34,11 @@ const App = ({data, viewport}) => {
 
 ## Properties
 
-Inherits from all [Base Layer](/docs/api-reference/base-layer.md) properties.
+Inherits from all [Base Layer](/docs/api-reference/layer.md) properties.
 
 ### Render Options
 
-Inherits from all [Base Layer properties](/docs/api-reference/base-layer.md),
+Inherits from all [Base Layer properties](/docs/api-reference/layer.md),
 however, the `data` prop is interpreted slightly more flexibly to accommodate
 pure GeoJson "payloads".
 
