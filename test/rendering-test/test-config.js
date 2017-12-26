@@ -51,7 +51,7 @@ export const TEST_CASES = [
         }
       }
     ],
-    referecenResult: './golden-images/1.png'
+    referenceResult: './golden-images/1.png'
   },
 
   {
@@ -81,7 +81,7 @@ export const TEST_CASES = [
         }
       }
     ],
-    referecenResult: './golden-images/2.png'
+    referenceResult: './golden-images/2.png'
   },
 
   {
@@ -113,6 +113,6 @@ export const TEST_CASES = [
         }
       }
     ],
-    referecenResult: './golden-images/1.png'
+    referenceResult: './golden-images/1.png'
   }
 ];

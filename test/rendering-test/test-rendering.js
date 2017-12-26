@@ -125,7 +125,7 @@ class RenderingTest extends Component {
     });
   }
 
-  _onDrawComplete(name, referecenResult, callbackData) {
+  _onDrawComplete(name, referenceResult, {gl}) {
     if (this.state.runningTests[name]) {
       return;
     }
@@ -137,9 +137,9 @@ class RenderingTest extends Component {
         // Both images are loaded, compare results
         this._diffResult(name);
       };
-      resultImage.src = callbackData.canvas.toDataURL();
+      resultImage.src = gl.canvas.toDataURL();
     };
-    referenceImage.src = referecenResult;
+    referenceImage.src = referenceResult;
   }
 
   render() {
@@ -150,7 +150,7 @@ class RenderingTest extends Component {
       return null;
     }
 
-    const {mapViewState, layersList, name, referecenResult} = testCases[currentTestIndex];
+    const {mapViewState, layersList, name, referenceResult} = testCases[currentTestIndex];
 
     const layers = [];
     const viewportProps = Object.assign({}, mapViewState, { width, height});
@@ -162,21 +162,15 @@ class RenderingTest extends Component {
 
     return React.createElement(
       DeckGL,
-      _extends(
-        {
-          id: 'default-deckgl-overlay',
-          width: width,
-          height: height,
-          debug: true,
-          onAfterRender: this._onDrawComplete.bind(this, name, referecenResult)
-        },
-        {
-          viewports: [new WebMercatorViewport(viewportProps)]
-        },
-        {
-          layers: layers
-        }
-      )
+      {
+        id: 'default-deckgl-overlay',
+        width: width,
+        height: height,
+        debug: true,
+        onAfterRender: this._onDrawComplete.bind(this, name, referenceResult),
+        viewport: new WebMercatorViewport(viewportProps),
+        layers: layers
+      }
     );
   }
 }
