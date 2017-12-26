@@ -51,7 +51,7 @@ import ReactDOM from 'react-dom';
 import {join} from 'path';
 import {readFileSync} from 'fs';
 
-import DeckGL from 'deck.gl';
+import DeckGL, {WebMercatorViewport} from 'deck.gl';
 import {colorDeltaSq} from './color-delta';
 import * as CONFIG from './test-config';
 
@@ -74,7 +74,7 @@ const deckGLContainer = document.createElement('div');
 deckGLContainer.style.position = 'absolute';
 
 // hide deckgl canvas
-deckGLContainer.style.display = 'none';
+deckGLContainer.style.visibility = 'hidden';
 
 const referenceImage = createImage();
 // Show the image element so the developer could save the image as
@@ -125,7 +125,7 @@ class RenderingTest extends Component {
     });
   }
 
-  _onDrawComplete(name, referecenResult, canvas) {
+  _onDrawComplete(name, referenceResult, {gl}) {
     if (this.state.runningTests[name]) {
       return;
     }
@@ -137,9 +137,9 @@ class RenderingTest extends Component {
         // Both images are loaded, compare results
         this._diffResult(name);
       };
-      resultImage.src = canvas.toDataURL();
+      resultImage.src = gl.canvas.toDataURL();
     };
-    referenceImage.src = referecenResult;
+    referenceImage.src = referenceResult;
   }
 
   render() {
@@ -150,32 +150,25 @@ class RenderingTest extends Component {
       return null;
     }
 
-    const {mapViewState, layersList, name, referecenResult} = testCases[currentTestIndex];
+    const {mapViewState, layersList, name, referenceResult} = testCases[currentTestIndex];
 
     const layers = [];
-
+    const viewportProps = Object.assign({}, mapViewState, {width, height});
     // constructing layers
     for (const layer of layersList) {
       const {type, props} = layer;
       if (type !== undefined) layers.push(new type(props));
     }
 
-    return React.createElement(
-      DeckGL,
-      _extends(
-        {
-          id: 'default-deckgl-overlay',
-          width: width,
-          height: height,
-          debug: true,
-          onAfterRender: this._onDrawComplete.bind(this, name, referecenResult)
-        },
-        mapViewState,
-        {
-          layers: layers
-        }
-      )
-    );
+    return React.createElement(DeckGL, {
+      id: 'default-deckgl-overlay',
+      width: width,
+      height: height,
+      debug: true,
+      onAfterRender: this._onDrawComplete.bind(this, name, referenceResult),
+      viewport: new WebMercatorViewport(viewportProps),
+      layers: layers
+    });
   }
 }
 

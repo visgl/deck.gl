@@ -54,7 +54,7 @@ function lngLatToMeterOffset(points, center) {
 let _points100K = null;
 let _points100KMeters = null;
 
-export const positionOrigin = [-122.4, 37.7];
+export const coordinateOrigin = [-122.4, 37.7];
 
 export function getPoints100K() {
   _points100K = _points100K || pointGrid(1e5, [-122.9, 36.6, -121.9, 38.9]);
@@ -62,6 +62,6 @@ export function getPoints100K() {
 }
 
 export function getPoints100KMeters() {
-  _points100KMeters = _points100KMeters || lngLatToMeterOffset(getPoints100K(), positionOrigin);
+  _points100KMeters = _points100KMeters || lngLatToMeterOffset(getPoints100K(), coordinateOrigin);
   return _points100KMeters;
 }
