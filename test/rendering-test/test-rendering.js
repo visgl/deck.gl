@@ -74,7 +74,7 @@ const deckGLContainer = document.createElement('div');
 deckGLContainer.style.position = 'absolute';
 
 // hide deckgl canvas
-deckGLContainer.style.visibility= 'hidden';
+deckGLContainer.style.visibility = 'hidden';
 
 const referenceImage = createImage();
 // Show the image element so the developer could save the image as
@@ -153,25 +153,22 @@ class RenderingTest extends Component {
     const {mapViewState, layersList, name, referenceResult} = testCases[currentTestIndex];
 
     const layers = [];
-    const viewportProps = Object.assign({}, mapViewState, { width, height});
+    const viewportProps = Object.assign({}, mapViewState, {width, height});
     // constructing layers
     for (const layer of layersList) {
       const {type, props} = layer;
       if (type !== undefined) layers.push(new type(props));
     }
 
-    return React.createElement(
-      DeckGL,
-      {
-        id: 'default-deckgl-overlay',
-        width: width,
-        height: height,
-        debug: true,
-        onAfterRender: this._onDrawComplete.bind(this, name, referenceResult),
-        viewport: new WebMercatorViewport(viewportProps),
-        layers: layers
-      }
-    );
+    return React.createElement(DeckGL, {
+      id: 'default-deckgl-overlay',
+      width: width,
+      height: height,
+      debug: true,
+      onAfterRender: this._onDrawComplete.bind(this, name, referenceResult),
+      viewport: new WebMercatorViewport(viewportProps),
+      layers: layers
+    });
   }
 }
 
