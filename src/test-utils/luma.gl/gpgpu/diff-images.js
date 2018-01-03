@@ -40,3 +40,5 @@ export function colorDeltaSq(img1, img2, index) {
     getQ(r1, g1, b1) - getQ(r2, g2, b2)
   );
 }
+
+export default colorDeltaSq;

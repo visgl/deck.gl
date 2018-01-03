@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 import test from 'tape-catch';
-import spy from 'deck.gl/test/test-utils/spy';
+import {spy} from '@deck.gl/test-utils';
 
 import * as FIXTURES from 'deck.gl/test/data';
 
@@ -29,7 +29,7 @@ import {
   testLayerUpdates,
   testNullLayer,
   testSubLayerUpdateTriggers
-} from 'deck.gl/test/test-utils';
+} from '@deck.gl/test-utils';
 
 import {GridLayer, GridCellLayer} from 'deck.gl';
 

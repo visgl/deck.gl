@@ -35,7 +35,7 @@ import {
   testCreateEmptyLayer,
   testNullLayer,
   testLayerUpdates
-} from 'deck.gl/test/test-utils/layer-utils';
+} from '@deck.gl/test-utils';
 
 import * as FIXTURES from 'deck.gl/test/data';
 

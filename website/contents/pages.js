@@ -365,5 +365,14 @@ export const docPages = generatePath([
         content: getDocUrl('api-reference/third-person-viewport.md')
       }
     ]
+  },
+  {
+    name: 'Test Utils Reference (Experimental)',
+    children: [
+      {
+        name: 'Overview',
+        content: getDocUrl('api-reference/test-utils/README.md')
+      }
+    ]
   }
 ]);
