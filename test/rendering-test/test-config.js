@@ -10,8 +10,12 @@ import {
   ArcLayer,
   LineLayer,
   IconLayer,
-  GeoJsonLayer
-  // HexagonLayer,
+  GeoJsonLayer,
+  GridCellLayer,
+  GridLayer,
+  ScreenGridLayer,
+  HexagonCellLayer,
+  HexagonLayer
   // ScreenGridLayer,
   // GridLayer,
 } from 'deck.gl';
@@ -30,6 +34,30 @@ const MARKER_SIZE_MAP = {
   medium: 500,
   large: 1000
 };
+
+function getMean(pts, key) {
+  const filtered = pts.filter(pt => Number.isFinite(pt[key]));
+
+  return filtered.length
+    ? filtered.reduce((accu, curr) => accu + curr[key], 0) / filtered.length
+    : null;
+}
+
+function getMax(pts, key) {
+  const filtered = pts.filter(pt => Number.isFinite(pt[key]));
+
+  return filtered.length
+    ? filtered.reduce((accu, curr) => (curr[key] > accu ? curr[key] : accu), -Infinity)
+    : null;
+}
+
+function getColorValue(points) {
+  return getMean(points, 'SPACES');
+}
+
+function getElevationValue(points) {
+  return getMax(points, 'SPACES');
+}
 
 export const WIDTH = 800;
 export const HEIGHT = 450;
@@ -285,5 +313,154 @@ export const TEST_CASES = [
       }
     ],
     referenceResult: './golden-images/geojson-extruded-lnglat.png'
+  },
+  {
+    name: 'gridcell-lnglat',
+    // viewport params
+    mapViewState: {
+      latitude: 37.751537058389985,
+      longitude: -122.42694203247012,
+      zoom: 11.5,
+      pitch: 0,
+      bearing: 0
+    },
+    // layer list
+    layersList: [
+      {
+        type: GridCellLayer,
+        props: {
+          id: 'gridcell-lnglat',
+          data: dataSamples.worldGrid.data,
+          cellSize: dataSamples.worldGrid.cellSize,
+          extruded: true,
+          pickable: true,
+          opacity: 1,
+          getColor: g => [245, 166, get(g, 'value') * 255, 255],
+          getElevation: h => get(h, 'value') * 5000,
+          lightSettings: LIGHT_SETTINGS
+        }
+      }
+    ],
+    referenceResult: './golden-images/gridcell-lnglat.png'
+  },
+  {
+    name: 'grid-lnglat',
+    // viewport params
+    mapViewState: {
+      latitude: 37.751537058389985,
+      longitude: -122.42694203247012,
+      zoom: 11.5,
+      pitch: 0,
+      bearing: 0
+    },
+    // layer list
+    layersList: [
+      {
+        type: GridLayer,
+        props: {
+          id: 'grid-lnglat',
+          data: dataSamples.points,
+          cellSize: 200,
+          opacity: 1,
+          extruded: true,
+          pickable: true,
+          getPosition: d => get(d, 'COORDINATES'),
+          getColorValue,
+          getElevationValue,
+          lightSettings: LIGHT_SETTINGS
+        }
+      }
+    ],
+    referenceResult: './golden-images/grid-lnglat.png'
+  },
+  {
+    name: 'screengrid-lnglat',
+    // viewport params
+    mapViewState: {
+      latitude: 37.751537058389985,
+      longitude: -122.42694203247012,
+      zoom: 11.5,
+      pitch: 0,
+      bearing: 0
+    },
+    // layer list
+    layersList: [
+      {
+        type: ScreenGridLayer,
+        props: {
+          id: 'screengrid-lnglat',
+          data: dataSamples.points,
+          getPosition: d => get(d, 'COORDINATES'),
+          cellSizePixels: 40,
+          minColor: [0, 0, 80, 0],
+          maxColor: [100, 255, 0, 128],
+          pickable: false
+        }
+      }
+    ],
+    referenceResult: './golden-images/screengrid-lnglat.png'
+  },
+  {
+    name: 'hexagoncell-lnglat',
+    // viewport params
+    mapViewState: {
+      latitude: 37.751537058389985,
+      longitude: -122.42694203247012,
+      zoom: 11.5,
+      pitch: 0,
+      bearing: 0
+    },
+    // layer list
+    layersList: [
+      {
+        type: HexagonCellLayer,
+        props: {
+          id: 'hexagoncell-lnglat',
+          data: dataSamples.hexagons,
+          hexagonVertices: dataSamples.hexagons[0].vertices,
+          coverage: 1,
+          extruded: true,
+          pickable: true,
+          opacity: 1,
+          getColor: h => [48, 128, get(h, 'value') * 255, 255],
+          getElevation: h => get(h, 'value') * 5000,
+          lightSettings: LIGHT_SETTINGS
+        }
+      }
+    ],
+    referenceResult: './golden-images/hexagoncell-lnglat.png'
+  },
+  {
+    name: 'hexagon-lnglat',
+    // viewport params
+    mapViewState: {
+      latitude: 37.751537058389985,
+      longitude: -122.42694203247012,
+      zoom: 11.5,
+      pitch: 0,
+      bearing: 0
+    },
+    // layer list
+    layersList: [
+      {
+        type: HexagonLayer,
+        props: {
+          id: 'hexagon-lnglat',
+          data: dataSamples.points,
+          extruded: true,
+          pickable: true,
+          radius: 1000,
+          opacity: 1,
+          elevationScale: 1,
+          elevationRange: [0, 3000],
+          coverage: 1,
+          getPosition: d => get(d, 'COORDINATES'),
+          getColorValue,
+          getElevationValue,
+          lightSettings: LIGHT_SETTINGS
+        }
+      }
+    ],
+    referenceResult: './golden-images/hexagon-lnglat.png'
   }
 ];
