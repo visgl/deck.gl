@@ -20,8 +20,8 @@
 
 import test from 'tape-catch';
 import {Layer, AttributeManager} from 'deck.gl';
-import {testInitializeLayer} from 'deck.gl/test/test-utils/layer-utils';
-import makeSpy from 'deck.gl/test/test-utils/spy';
+import {testInitializeLayer} from '@deck.gl/test-utils';
+import {makeSpy} from '@deck.gl/test-utils';
 
 const dataVariants = [{data: ['a', 'b', 'c'], size: 3}];
 

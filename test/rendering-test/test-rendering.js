@@ -38,36 +38,17 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-// TODO - need to clean up this code to follow lint rules, disable for now
-/* eslint-disable */
-
-import 'babel-polyfill';
-
-import {document, window} from 'global';
+import {document} from 'global';
 
 import React, {Component} from 'react';
 import ReactDOM from 'react-dom';
 
-import {join} from 'path';
-import {readFileSync} from 'fs';
+import DeckGL, {WebMercatorViewport, experimental} from 'deck.gl';
+const {DeckGLJS} = experimental; // eslint-disable-line
 
-import DeckGL, {WebMercatorViewport} from 'deck.gl';
-import {colorDeltaSq} from './color-delta';
 import * as CONFIG from './test-config';
 
-var _extends =
-  Object.assign ||
-  function(target) {
-    for (var i = 1; i < arguments.length; i++) {
-      var source = arguments[i];
-      for (var key in source) {
-        if (Object.prototype.hasOwnProperty.call(source, key)) {
-          target[key] = source[key];
-        }
-      }
-    }
-    return target;
-  };
+import {diffImages} from './color-delta';
 
 // DeckGL container
 const deckGLContainer = document.createElement('div');
@@ -111,7 +92,7 @@ class RenderingTest extends Component {
     const maxDeltaSq = CONFIG.COLOR_DELTA_THRESHOLD * CONFIG.COLOR_DELTA_THRESHOLD;
     let badPixels = 0;
     for (let i = 0; i < pixelCount; i++) {
-      const delta = colorDeltaSq(resultPixelData.data, referencePixelData.data, i);
+      const delta = diffImages(resultPixelData.data, referencePixelData.data, i);
       if (delta > maxDeltaSq) {
         badPixels++;
       }
@@ -166,24 +147,26 @@ class RenderingTest extends Component {
     const layers = [];
     const viewportProps = Object.assign({}, mapViewState, {width, height});
 
-    let needLoadResource = false;
+    // const needLoadResource = false;
     // constructing layers
     for (const layer of layersList) {
       const {type, props} = layer;
-      if (type !== undefined) layers.push(new type(props));
+      if (type !== undefined) {
+        layers.push(new type(props)); // eslint-disable-line
+      }
     }
 
-    let maxRenderingCount = renderingTimes ? renderingTimes : 0;
-    let completed = renderingCount >= maxRenderingCount;
+    const maxRenderingCount = renderingTimes ? renderingTimes : 0;
+    const completed = renderingCount >= maxRenderingCount;
 
     return React.createElement(DeckGL, {
       id: 'default-deckgl-overlay',
-      width: width,
-      height: height,
+      width,
+      height,
+      layers,
       debug: true,
       onAfterRender: this._onDrawComplete.bind(this, name, referenceResult, completed),
-      viewport: new WebMercatorViewport(viewportProps),
-      layers: layers
+      viewport: new WebMercatorViewport(viewportProps)
     });
   }
 }
@@ -231,4 +214,3 @@ function reportResult(name, percentage) {
   paragraph.appendChild(testResult);
   resultContainer.appendChild(paragraph);
 }
-// testResult.style.position = 'relative';

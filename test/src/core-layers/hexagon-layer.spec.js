@@ -19,14 +19,14 @@
 // THE SOFTWARE.
 
 import test from 'tape-catch';
-import spy from 'deck.gl/test/test-utils/spy';
+import {spy} from '@deck.gl/test-utils';
 
 import * as data from 'deck.gl/test/data';
 import {
   testInitializeLayer,
   testLayerUpdates,
   testSubLayerUpdateTriggers
-} from 'deck.gl/test/test-utils';
+} from '@deck.gl/test-utils';
 
 import {HexagonLayer, HexagonCellLayer} from 'deck.gl';
 

@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 
 import test from 'tape-catch';
-import {testInitializeLayer, testLayerUpdates, toLowPrecision} from 'deck.gl/test/test-utils';
+import {testInitializeLayer, testLayerUpdates, toLowPrecision} from '@deck.gl/test-utils';
 
 import {HexagonCellLayer} from 'deck.gl';
 
