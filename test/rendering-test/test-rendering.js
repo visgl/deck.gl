@@ -98,7 +98,8 @@ class RenderingTest extends Component {
 
     this.state = {
       runningTests: {},
-      currentTestIndex: 0
+      currentTestIndex: 0,
+      renderingCount: 0
     };
   }
 
@@ -121,11 +122,19 @@ class RenderingTest extends Component {
 
     // Render the next test case
     this.setState({
-      currentTestIndex: this.state.currentTestIndex + 1
+      currentTestIndex: this.state.currentTestIndex + 1,
+      renderingCount: 0
     });
   }
 
-  _onDrawComplete(name, referenceResult, {gl}) {
+  _onDrawComplete(name, referenceResult, completed, {gl}) {
+    if (!completed) {
+      this.setState({
+        renderingCount: this.state.renderingCount + 1
+      });
+      return;
+    }
+
     if (this.state.runningTests[name]) {
       return;
     }
@@ -143,29 +152,36 @@ class RenderingTest extends Component {
   }
 
   render() {
-    const {currentTestIndex} = this.state;
+    const {currentTestIndex, renderingCount} = this.state;
     const {width, height, testCases} = this.props;
 
     if (!testCases[currentTestIndex]) {
       return null;
     }
 
-    const {mapViewState, layersList, name, referenceResult} = testCases[currentTestIndex];
+    const {mapViewState, layersList, name, referenceResult, renderingTimes} = testCases[
+      currentTestIndex
+    ];
 
     const layers = [];
     const viewportProps = Object.assign({}, mapViewState, {width, height});
+
+    let needLoadResource = false;
     // constructing layers
     for (const layer of layersList) {
       const {type, props} = layer;
       if (type !== undefined) layers.push(new type(props));
     }
 
+    let maxRenderingCount = renderingTimes ? renderingTimes : 0;
+    let completed = renderingCount >= maxRenderingCount;
+
     return React.createElement(DeckGL, {
       id: 'default-deckgl-overlay',
       width: width,
       height: height,
       debug: true,
-      onAfterRender: this._onDrawComplete.bind(this, name, referenceResult),
+      onAfterRender: this._onDrawComplete.bind(this, name, referenceResult, completed),
       viewport: new WebMercatorViewport(viewportProps),
       layers: layers
     });
@@ -211,6 +227,7 @@ function reportResult(name, percentage) {
 
   const paragraph = document.createElement('p');
   const testResult = document.createTextNode(outputString);
+  paragraph.style.color = passed ? '#74ff69' : '#ff2857';
   paragraph.appendChild(testResult);
   resultContainer.appendChild(paragraph);
 }
