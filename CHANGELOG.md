@@ -21,6 +21,12 @@ For Earlier Beta Releases see below
 
 ## Official Releases
 
+### deck.gl v5.0.1 - Jan 4
+- fix doc links (#1277)
+- Fix layer-browser missing package (#1287)
+- Some 5.0 doc cleanup (#1274)
+- Fix icon layer warnings.
+
 ### deck.gl v5.0 - Dec 21
 - Add links to new examples. (#1272)
 - Address TODO in docs. (#1270)
