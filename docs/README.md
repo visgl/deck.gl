@@ -32,7 +32,7 @@ To make this simple concept work, deck.gl handles a number of challenges:
 
 ## Ecosystem
 
-deck.gl is one of the main frameworks in the [vis.gl](https://vis.gl) framework suite.
+deck.gl is one of the main frameworks in the [vis.gl](http://vis.gl) framework suite.
 
 deck.gl has been developed in parallel with a number of companion modules, e.g.:
 

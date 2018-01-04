@@ -4,7 +4,7 @@ The deck.gl layer catalog is organized into a couple of sections.
 
 ## Base Layer
 
-All deck.gl layers inherit from the [`Layer`](/docs/api-reference/base-layer.md) base class and its props are available to all layers unless otherwise documented.
+All deck.gl layers inherit from the [`Layer`](/docs/api-reference/layer.md) base class and its props are available to all layers unless otherwise documented.
 
 ## Core Layers
 

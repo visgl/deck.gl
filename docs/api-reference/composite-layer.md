@@ -1,6 +1,6 @@
 # CompositeLayer Class
 
-The `CompositeLayer` class is a subclass of the [Layer Class](/docs/api-reference/base-layer.md), that customizes various [layer lifecycle methods](/docs/advanced/layer-lifecycle.md) to help create sublayers and handle events from those layers.
+The `CompositeLayer` class is a subclass of the [Layer Class](/docs/api-reference/layer.md), that customizes various [layer lifecycle methods](/docs/advanced/layer-lifecycle.md) to help create sublayers and handle events from those layers.
 
 If you intend to implement a layer that generates other layers, you should extend this class.
 
@@ -56,14 +56,14 @@ Parameters:
     + `x` (Number) - Mouse position x relative to the viewport.
     + `y` (Number) - Mouse position y relative to the viewport.
     + `lngLat` ([Number, Number]) - Mouse position in world coordinates. Only applies if the
-      [`coordinateSystem`](/docs/api-reference/base-layer.md#-projectionmode-number-optional-)
+      [`coordinateSystem`](/docs/api-reference/layer.md#-projectionmode-number-optional-)
       prop is set to `COORDINATE_SYSTEM.LNGLAT`.
     + `color` (Number[4]) - The color of the pixel that is being picked. It represents a
       "picking color" that is encoded by
-      [`layer.encodePickingColor()`](/docs/api-reference/base-layer.md#-encodepickingcolor-).
+      [`layer.encodePickingColor()`](/docs/api-reference/layer.md#-encodepickingcolor-).
     + `index` (Number) - The index of the object that is being picked. It is the returned
       value of
-      [`layer.decodePickingColor()`](/docs/api-reference/base-layer.md#-decodepickingcolor-).
+      [`layer.decodePickingColor()`](/docs/api-reference/layer.md#-decodepickingcolor-).
     + `picked` (Boolean) - `true` if `index` is not `-1`.
   * `pickParams.mode` (String) - One of `hover` and `click`
   * `pickParams.sourceLayer` (Layer) - the sublayer instance where this event originates from.

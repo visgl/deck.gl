@@ -196,7 +196,7 @@ For example, `updateTriggers.getColor` is a list of variables that affect the ou
 The variables may be numbers, strings, objects or functions. During each rendering cycle, deck.gl shallow-compares them with the previous values.
 
 
-Note: change of the `data` prop has higher priority than the `updateTriggers`. If the app supplies a new `data` object, then all attributes will be automatically updated, even if the updateTriggers have not changed. To block excessive attribute updates, set the [`dataComparator`](/docs/api-reference/base-layer.md#-datacomparator-function-optional-) prop.
+Note: change of the `data` prop has higher priority than the `updateTriggers`. If the app supplies a new `data` object, then all attributes will be automatically updated, even if the updateTriggers have not changed. To block excessive attribute updates, set the [`dataComparator`](/docs/api-reference/layer.md#-datacomparator-function-optional-) prop.
 
 ---
 
@@ -241,7 +241,7 @@ The state object allows a layer to store persistent information cross rendering 
 
 ##### `props` (Object)
 
-[Properties](/docs/api-reference/base-layer.md#constructor) of this layer.
+[Properties](/docs/api-reference/layer.md#constructor) of this layer.
 
 ## Methods
 
@@ -251,7 +251,7 @@ The state object allows a layer to store persistent information cross rendering 
 
 ##### `setState`
 
-Used to update the layers [`state`](/docs/api-reference/base-layer.md#-state-object-) object. Calling this method will also cause the layer to rerender.
+Used to update the layers [`state`](/docs/api-reference/layer.md#-state-object-) object. Calling this method will also cause the layer to rerender.
 
 ---
 
@@ -273,7 +273,7 @@ deck.gl will already have created the `state` object at this time, and added the
 
 ##### `shouldUpdateState`
 
-Called during each rendering cycle when layer [properties](/docs/api-reference/base-layer.md#constructor) or [context](/docs/api-reference/base-layer.md#-context-object-) has been updated and before layers are drawn.
+Called during each rendering cycle when layer [properties](/docs/api-reference/layer.md#constructor) or [context](/docs/api-reference/layer.md#-context-object-) has been updated and before layers are drawn.
 
 `shouldUpdateState({props, oldProps, context, oldContext, changeFlags})`
 
@@ -293,7 +293,7 @@ Remarks:
 
 - Prop change is determined by shallow comparison.
 - Data change is determined by shallow comparison of `props.data` unless
-[`dataComparator`](/docs/api-reference/base-layer.md#-datacomparator-function-optional-)
+[`dataComparator`](/docs/api-reference/layer.md#-datacomparator-function-optional-)
 is supplied.
 - The default implementation returns `true` if any change has been detected in data or props, but **ignores viewport changes**.
 
@@ -339,9 +339,9 @@ Parameters:
   following fields:
     + `x` (Number) - Mouse position x relative to the viewport.
     + `y` (Number) - Mouse position y relative to the viewport.
-    + `lngLat` ([Number, Number]) - Mouse position in world coordinates. Only applies if [`coordinateSystem`](/docs/api-reference/base-layer.md#-projectionmode-number-optional-) is `COORDINATE_SYSTEM.LNGLAT`.
-    + `color` (Number[4]) - The color of the pixel that is being picked. It represents a "picking color" that is encoded by [`layer.encodePickingColor()`](/docs/api-reference/base-layer.md#-encodepickingcolor-).
-    + `index` (Number) - The index of the object that is being picked. It is the returned value of [`layer.decodePickingColor()`](/docs/api-reference/base-layer.md#-decodepickingcolor-).
+    + `lngLat` ([Number, Number]) - Mouse position in world coordinates. Only applies if [`coordinateSystem`](/docs/api-reference/layer.md#-projectionmode-number-optional-) is `COORDINATE_SYSTEM.LNGLAT`.
+    + `color` (Number[4]) - The color of the pixel that is being picked. It represents a "picking color" that is encoded by [`layer.encodePickingColor()`](/docs/api-reference/layer.md#-encodepickingcolor-).
+    + `index` (Number) - The index of the object that is being picked. It is the returned value of [`layer.decodePickingColor()`](/docs/api-reference/layer.md#-decodepickingcolor-).
     + `picked` (Boolean) - `true` if `index` is not `-1`.
   * `pickParams.mode` (String) - One of `hover` and `click`
 
