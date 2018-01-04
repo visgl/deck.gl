@@ -31,7 +31,7 @@ varying vec4 vPosition;
 varying vec4 vNormal;
 varying vec4 vColor;
 
-uniform vec3 cameraPos;
+uniform vec3 project_uCameraPosition;
 uniform vec3 lightsPosition;
 uniform vec2 lightsStrength;
 uniform float ambientRatio;
@@ -46,11 +46,11 @@ const float PROJECT_LINEAR = 0.;
 const float PROJECT_MERCATOR = 1.;
 const float PROJECT_MERCATOR_OFFSETS = 2.;
 
-uniform float projectionMode;
-uniform float projectionScale;
-uniform vec4 projectionCenter;
-uniform vec3 projectionPixelsPerUnit;
-uniform mat4 projectionMatrix;
+uniform float project_uCoordinateSystem;
+uniform float project_uScale;
+uniform vec4 project_uCenter;
+uniform vec3 project_uPixelsPerUnit;
+uniform mat4 project_uViewProjectionMatrix;
 
 #ifdef INTEL_TAN_WORKAROUND
 
@@ -200,29 +200,29 @@ float tan_fp32(float a) {
 //
 
 float project_scale(float meters) {
-  return meters * projectionPixelsPerUnit.x;
+  return meters * project_uPixelsPerUnit.x;
 }
 
 vec2 project_scale(vec2 meters) {
   return vec2(
-    meters.x * projectionPixelsPerUnit.x,
-    meters.y * projectionPixelsPerUnit.x
+    meters.x * project_uPixelsPerUnit.x,
+    meters.y * project_uPixelsPerUnit.x
   );
 }
 
 vec3 project_scale(vec3 meters) {
   return vec3(
-    meters.x * projectionPixelsPerUnit.x,
-    meters.y * projectionPixelsPerUnit.x,
-    meters.z * projectionPixelsPerUnit.x
+    meters.x * project_uPixelsPerUnit.x,
+    meters.y * project_uPixelsPerUnit.x,
+    meters.z * project_uPixelsPerUnit.x
   );
 }
 
 vec4 project_scale(vec4 meters) {
   return vec4(
-    meters.x * projectionPixelsPerUnit.x,
-    meters.y * projectionPixelsPerUnit.x,
-    meters.z * projectionPixelsPerUnit.x,
+    meters.x * project_uPixelsPerUnit.x,
+    meters.y * project_uPixelsPerUnit.x,
+    meters.z * project_uPixelsPerUnit.x,
     meters.w
   );
 }
@@ -244,14 +244,14 @@ vec2 project_mercator_(vec2 lnglat) {
 }
 
 vec2 project_position(vec2 position) {
-  if (projectionMode == PROJECT_LINEAR) {
-    return (position + vec2(TILE_SIZE / 2.0)) * projectionScale;
+  if (project_uCoordinateSystem == PROJECT_LINEAR) {
+    return (position + vec2(TILE_SIZE / 2.0)) * project_uScale;
   }
-  if (projectionMode == PROJECT_MERCATOR_OFFSETS) {
+  if (project_uCoordinateSystem == PROJECT_MERCATOR_OFFSETS) {
     return project_scale(position);
   }
-  // Covers projectionMode == PROJECT_MERCATOR
-  return project_mercator_(position) * WORLD_SCALE * projectionScale;
+  // Covers project_uCoordinateSystem == PROJECT_MERCATOR
+  return project_mercator_(position) * WORLD_SCALE * project_uScale;
 }
 
 vec3 project_position(vec3 position) {
@@ -265,10 +265,10 @@ vec4 project_position(vec4 position) {
 //
 
 vec4 project_to_clipspace(vec4 position) {
-  if (projectionMode == PROJECT_MERCATOR_OFFSETS) {
-    return projectionMatrix * vec4(position.xyz, 0.0) + projectionCenter;
+  if (project_uCoordinateSystem == PROJECT_MERCATOR_OFFSETS) {
+    return project_uViewProjectionMatrix * vec4(position.xyz, 0.0) + project_uCenter;
   }
-  return projectionMatrix * position;
+  return project_uViewProjectionMatrix * position;
 }
 
 // Backwards compatibility
@@ -311,7 +311,7 @@ float getLightWeight(vec4 position_worldspace, vec3 normals_worldspace) {
   vec3 position_worldspace_vec3 = position_worldspace.xyz / position_worldspace.w;
   vec3 normals_worldspace_vec3 = normals_worldspace.xzy;
 
-  vec3 camera_pos_worldspace = cameraPos;
+  vec3 camera_pos_worldspace = project_uCameraPosition;
   vec3 view_direction = normalize(camera_pos_worldspace - position_worldspace_vec3);
 
   vec3 light_position_worldspace = project_position(lightsPosition);
