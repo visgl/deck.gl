@@ -48,7 +48,7 @@ const {DeckGLJS} = experimental; // eslint-disable-line
 
 import * as CONFIG from './test-config';
 
-import {diffImages} from './color-delta';
+import {diffImages} from '@deck.gl/test-utils'
 
 // DeckGL container
 const deckGLContainer = document.createElement('div');
