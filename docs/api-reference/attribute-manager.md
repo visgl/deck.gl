@@ -54,7 +54,7 @@ Takes a single parameter as a map of attribute descriptor objects:
   * `attribute.size` (Number) - number of elements per object
   * `attribute.accessor` (String | Array of strings) - accessor name(s) that will
     trigger an update of this attribute when changed. Used with
-    [`updateTriggers`](/docs/api-reference/base-layer.md#-updatetriggers-object-optional-).
+    [`updateTriggers`](/docs/api-reference/layer.md#-updatetriggers-object-optional-).
   * `attribute.update` (Function) - the function to be called when
   * `attribute.instanced` (Boolean, optional) - if this is an instanced attribute
     (a.k.a. divisor). Default to `false`.

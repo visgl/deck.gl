@@ -12,7 +12,7 @@ The "picking engine" identifies which object in which layer is at the given coor
 
 ### Enabling Picking
 
-Picking can be enabled or disabled on a layer-by-layer basis. To enable picking on a layer, set its [`pickable`](/docs/api-reference/base-layer.md#-pickable-boolean-optional-) prop to `true`. This value is `false` by default.
+Picking can be enabled or disabled on a layer-by-layer basis. To enable picking on a layer, set its [`pickable`](/docs/api-reference/layer.md#-pickable-boolean-optional-) prop to `true`. This value is `false` by default.
 
 ### The Picking Info Object
 
@@ -61,7 +61,7 @@ For applications that have basic event handling needs, deck.gl has built-in supp
 
 There are two ways to subscribe to the built-in picking event handling:
 
-- Set callback for each pickable layer by setting [`onHover`](/docs/api-reference/base-layer.md#-onhover-function-optional-) and [`onClick`](/docs/api-reference/base-layer.md#-onclick-function-optional-) props:
+- Set callback for each pickable layer by setting [`onHover`](/docs/api-reference/layer.md#-onhover-function-optional-) and [`onClick`](/docs/api-reference/layer.md#-onclick-function-optional-) props:
 ```js
 const layer = new ScatterplotLayer({
     ...
