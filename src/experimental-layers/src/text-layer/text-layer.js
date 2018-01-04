@@ -63,7 +63,7 @@ export default class TextLayer extends CompositeLayer {
   }
 
   updateState({props, oldProps, changeFlags}) {
-    if (changeFlags.dataChanged || changeFlags.updateTriggers.getText) {
+    if (changeFlags.dataChanged || changeFlags.updateTriggersChanged.getText) {
       this.transformStringToLetters();
     }
   }
