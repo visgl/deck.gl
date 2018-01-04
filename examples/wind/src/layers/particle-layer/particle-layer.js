@@ -249,7 +249,6 @@ export default class ParticleLayer extends Layer {
       parameters: pixelStoreParameters
     });
 
-    modelTF.program.use();
     const {transformFeedback} = this.state;
 
     modelTF.setAttributes({
@@ -258,14 +257,13 @@ export default class ParticleLayer extends Layer {
 
     transformFeedback.bindBuffers(
       {
-        0: bufferTo
+        gl_Position: bufferTo
       },
       {
-        clear: true
+        clear: true,
+        varyingMap: modelTF.varyingMap
       }
     );
-
-    transformFeedback.begin(gl.POINTS);
 
     const uniforms = {
       bbox: [bbox.minLng, bbox.maxLng, bbox.minLat, bbox.maxLat],
@@ -283,9 +281,7 @@ export default class ParticleLayer extends Layer {
       [GL.RASTERIZER_DISCARD]: true
     };
 
-    modelTF.draw({uniforms, parameters});
-
-    transformFeedback.end();
+    modelTF.draw({uniforms, parameters, transformFeedback});
 
     if (flip > 0) {
       flip = -1;
