@@ -38,7 +38,6 @@ attribute float instanceIndexOfIcon;
 attribute float instanceNumOfIcon;
 attribute vec2 instancePixelOffset;
 
-uniform vec2 viewportSize;
 uniform float sizeScale;
 uniform vec2 iconsTextureDim;
 
