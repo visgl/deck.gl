@@ -58,4 +58,4 @@ See [Viewport constructor](/docs/api-reference/viewport.md#constructor) for addi
 
 ## Source
 
-[src/viewports/perspective-viewport.js](https://github.com/uber/deck.gl/blob/5.0-release/src/viewports/perspective-viewport.js)
+[src/core/viewports/perspective-viewport.js](https://github.com/uber/deck.gl/blob/5.0-release/src/core/viewports/perspective-viewport.js)

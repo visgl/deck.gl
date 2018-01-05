@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 
 export default `\
-// EXTERNAL CONSTANTS: these must match JavaScript constants in "src/lib/constants.js"
+// EXTERNAL CONSTANTS: these must match JavaScript constants in "src/core/lib/constants.js"
 const float COORDINATE_SYSTEM_IDENTITY = 0.;
 const float COORDINATE_SYSTEM_LNG_LAT = 1.;
 const float COORDINATE_SYSTEM_METER_OFFSETS = 2.;
