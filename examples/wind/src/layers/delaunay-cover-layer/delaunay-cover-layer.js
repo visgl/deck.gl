@@ -4,6 +4,8 @@ import {Model, Geometry, setParameters} from 'luma.gl';
 import vertex from './delaunay-cover-layer-vertex.glsl';
 import fragment from './delaunay-cover-layer-fragment.glsl';
 
+import fslighting from '../../shaderlib/fs-lighting/fs-lighting';
+
 export default class DelaunayCoverLayer extends Layer {
   // NOTE: commenting out, it is not used anywhere.
 
@@ -84,6 +86,7 @@ export default class DelaunayCoverLayer extends Layer {
       // program: new Program(gl, shaders),
       vs: shaders.vs,
       fs: shaders.fs,
+      modules: [fslighting],
       geometry: new Geometry({
         drawMode: 'TRIANGLES',
         attributes: {

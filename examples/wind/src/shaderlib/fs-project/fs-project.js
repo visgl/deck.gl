@@ -1,4 +1,4 @@
-// Copyright (c) 2017 Uber Technologies, Inc.
+// Copyright (c) 2015 - 2018 Uber Technologies, Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -18,15 +18,15 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-export default `\
-#define SHADER_NAME delaunay-cover-fragment-shader
+// NOTE: this is same as 'project' shader module except this is applied to fragment shader.
 
-varying vec4 vPosition;
-varying vec4 vNormal;
-varying vec4 vColor;
+import fsfp32 from '../fs-fp32/fs-fp32';
+import {project} from 'deck.gl';
 
-void main(void) {
-  float lightWeight = getLightWeight(vPosition.xyz, vNormal.xzy);
-  gl_FragColor = vec4(vColor.xyz * lightWeight, vColor.a);
-}
-`;
+export default {
+  name: 'fsproject',
+  dependencies: [fsfp32],
+  vs: null,
+  fs: project.vs,
+  getUniforms: project.getUniforms
+};

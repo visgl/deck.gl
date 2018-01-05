@@ -36,7 +36,11 @@ export {
   Viewport,
   WebMercatorViewport,
   PerspectiveViewport,
-  OrthographicViewport
+  OrthographicViewport,
+  // Shader modules
+  project,
+  project64,
+  lighting
 } from './core';
 
 // EXPERIMENTAL CORE LIB CLASSES (May change in minor version bumps, use at your own risk)
