@@ -13,7 +13,7 @@ Coordinate system related props have been renamed for clarity. The old props are
 | Layer            | Removed Prop       | New Prop             | Comment |
 | ---              | ---                | ---                  | ---     |
 | Layer            | `projectionMode`   | `coordinateSystem`   | Any constant from `COORDINATE_SYSTEM`  |
-| Layer            | `projectionOrigin` | `coordinateOrigin`   | |
+| Layer            | `projectionOrigin` | `coordinateOrigin`   | [lng, lat] |
 
 Note; There is also an important semantical change in that using `coordinateSystem` instead of `projectionMode` causes the superimposed `METER_OFFSET` system's y-axis to point north instead of south. This was always the intention so in some sense this was regarded as a bug fix.
 
