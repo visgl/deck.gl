@@ -20,20 +20,25 @@
 
 /* global window */
 import {GL, withParameters, setParameters} from 'luma.gl';
-import {log} from './utils';
+import log from '../utils/log';
+import assert from 'assert';
+
+const LOG_PRIORITY_DRAW = 2;
 
 let renderCount = 0;
 
 // TODO - Exported for pick-layers.js - Move to util?
-export const getPixelRatio = ({useDevicePixelRatio}) =>
-  useDevicePixelRatio && typeof window !== 'undefined' ? window.devicePixelRatio : 1;
+export const getPixelRatio = ({useDevicePixels}) => {
+  assert(typeof useDevicePixels === 'boolean', 'Invalid useDevicePixels');
+  return useDevicePixels && typeof window !== 'undefined' ? window.devicePixelRatio : 1;
+};
 
 // Convert viewport top-left CSS coordinates to bottom up WebGL coordinates
 const getGLViewport = (gl, {viewport, pixelRatio}) => {
-  const width = gl.canvas.clientWidth;
-  const height = gl.canvas.clientHeight;
+  // TODO - dummy default for node
+  const height = gl.canvas ? gl.canvas.clientHeight : 100;
   // Convert viewport top-left CSS coordinates to bottom up WebGL coordinates
-  const dimensions = viewport.getDimensions({width, height});
+  const dimensions = viewport;
   return [
     dimensions.x * pixelRatio,
     (height - dimensions.y - dimensions.height) * pixelRatio,
@@ -44,8 +49,8 @@ const getGLViewport = (gl, {viewport, pixelRatio}) => {
 
 // Helper functions
 
-function clearCanvas(gl, {useDevicePixelRatio}) {
-  // const pixelRatio = getPixelRatio({useDevicePixelRatio});
+function clearCanvas(gl, {useDevicePixels}) {
+  // const pixelRatio = getPixelRatio({useDevicePixels});
   const width = gl.drawingBufferWidth;
   const height = gl.drawingBufferHeight;
   // clear depth and color buffers, restoring transparency
@@ -55,17 +60,22 @@ function clearCanvas(gl, {useDevicePixelRatio}) {
 }
 
 // Draw a list of layers in a list of viewports
-export function drawLayers(gl, {
-  layers,
-  viewports,
-  onViewportActive,
-  useDevicePixelRatio,
-  drawPickingColors = false,
-  deviceRect = null,
-  parameters = {},
-  pass = 'draw'
-}) {
-  clearCanvas(gl, {useDevicePixelRatio});
+export function drawLayers(
+  gl,
+  {
+    layers,
+    viewports,
+    onViewportActive,
+    useDevicePixels,
+    drawPickingColors = false,
+    deviceRect = null,
+    parameters = {},
+    layerFilter = null,
+    pass = 'draw',
+    redrawReason = ''
+  }
+) {
+  clearCanvas(gl, {useDevicePixels});
 
   // effectManager.preDraw();
 
@@ -79,11 +89,13 @@ export function drawLayers(gl, {
     drawLayersInViewport(gl, {
       layers,
       viewport,
-      useDevicePixelRatio,
+      useDevicePixels,
       drawPickingColors,
       deviceRect,
       parameters,
-      pass
+      layerFilter,
+      pass,
+      redrawReason
     });
   });
 
@@ -92,138 +104,166 @@ export function drawLayers(gl, {
 
 // Draws list of layers and viewports into the picking buffer
 // Note: does not sample the buffer, that has to be done by the caller
-export function drawPickingBuffer(gl, {
-  layers,
-  viewports,
-  onViewportActive,
-  useDevicePixelRatio,
-  pickingFBO,
-  deviceRect: {x, y, width, height}
-}) {
+export function drawPickingBuffer(
+  gl,
+  {
+    layers,
+    viewports,
+    onViewportActive,
+    useDevicePixels,
+    pickingFBO,
+    deviceRect: {x, y, width, height},
+    layerFilter = null,
+    redrawReason = ''
+  }
+) {
   // Make sure we clear scissor test and fbo bindings in case of exceptions
   // We are only interested in one pixel, no need to render anything else
   // Note that the callback here is called synchronously.
   // Set blend mode for picking
   // always overwrite existing pixel with [r,g,b,layerIndex]
-  return withParameters(gl, {
-    framebuffer: pickingFBO,
-    scissorTest: true,
-    scissor: [x, y, width, height],
-    clearColor: [0, 0, 0, 0]
-  }, () => {
-
-    drawLayers(gl, {
-      layers,
-      viewports,
-      onViewportActive,
-      useDevicePixelRatio,
-      drawPickingColors: true,
-      pass: 'picking',
-      parameters: {
-        blend: true,
-        blendFunc: [gl.ONE, gl.ZERO, gl.CONSTANT_ALPHA, gl.ZERO],
-        blendEquation: gl.FUNC_ADD,
-        blendColor: [0, 0, 0, 0]
-      }
-    });
-
-  });
+  return withParameters(
+    gl,
+    {
+      framebuffer: pickingFBO,
+      scissorTest: true,
+      scissor: [x, y, width, height],
+      clearColor: [0, 0, 0, 0]
+    },
+    () => {
+      drawLayers(gl, {
+        layers,
+        viewports,
+        onViewportActive,
+        useDevicePixels,
+        drawPickingColors: true,
+        layerFilter,
+        pass: 'picking',
+        redrawReason,
+        parameters: {
+          blend: true,
+          blendFunc: [gl.ONE, gl.ZERO, gl.CONSTANT_ALPHA, gl.ZERO],
+          blendEquation: gl.FUNC_ADD,
+          blendColor: [0, 0, 0, 0]
+        }
+      });
+    }
+  );
 }
 
 // Draws a list of layers in one viewport
 // TODO - when picking we could completely skip rendering viewports that dont
 // intersect with the picking rect
-function drawLayersInViewport(gl, {
-  layers,
-  viewport,
-  useDevicePixelRatio,
-  drawPickingColors = false,
-  deviceRect = null,
-  parameters = {},
-  pass = 'draw'
-}) {
-  const pixelRatio = getPixelRatio({useDevicePixelRatio});
+function drawLayersInViewport(
+  gl,
+  {
+    layers,
+    viewport,
+    useDevicePixels,
+    drawPickingColors = false,
+    deviceRect = null,
+    parameters = {},
+    layerFilter,
+    pass = 'draw',
+    redrawReason = ''
+  }
+) {
+  const pixelRatio = getPixelRatio({useDevicePixels});
   const glViewport = getGLViewport(gl, {viewport, pixelRatio});
 
   // render layers in normal colors
-  let visibleCount = 0;
-  let compositeCount = 0;
-  let pickableCount = 0;
+  const renderStats = {
+    totalCount: layers.length,
+    visibleCount: 0,
+    compositeCount: 0,
+    pickableCount: 0
+  };
 
   // const {x, y, width, height} = deviceRect || [];
-
-  // TODO: Update all layers to use 'picking_uActive' (picking shader module)
-  // and then remove 'renderPickingBuffer' and 'pickingEnabled'.
-  const pickingUniforms = {
-    picking_uActive: drawPickingColors ? 1 : 0,
-    renderPickingBuffer: drawPickingColors ? 1 : 0,
-    pickingEnabled: drawPickingColors ? 1 : 0
-  };
 
   setParameters(gl, parameters || {});
 
   // render layers in normal colors
   layers.forEach((layer, layerIndex) => {
+    // Check if we should draw layer
+    let shouldDrawLayer = layer.props.visible;
+    if (drawPickingColors) {
+      shouldDrawLayer = shouldDrawLayer && layer.props.pickable;
+    }
+    if (shouldDrawLayer && layerFilter) {
+      shouldDrawLayer = layerFilter({layer, viewport, isPicking: drawPickingColors});
+    }
+
+    // Calculate stats
+    if (shouldDrawLayer && layer.props.pickable) {
+      renderStats.pickableCount++;
+    }
     if (layer.isComposite) {
-      compositeCount++;
+      renderStats.compositeCount++;
     }
 
-    if (layer.props.pickable) {
-      pickableCount++;
-    }
-
-    if (layer.props.visible && (layer.props.pickable || !drawPickingColors)) {
-
-      visibleCount++;
-
-      if (!drawPickingColors) {
-        updateLayerHighlightColor(layer);
-        // TODO - Disable during picking
+    // Draw the layer
+    if (shouldDrawLayer) {
+      if (!layer.isComposite) {
+        renderStats.visibleCount++;
       }
 
-      if (layer.state.model) {
-        // Update project module parameters
-        layer.state.model.updateModuleSettings(
-          Object.assign({}, layer.props, {
-            viewport: layer.context.viewport
-          })
-        );
-      }
-
-      const uniforms = Object.assign(
-        pickingUniforms,
-        layer.context.uniforms,
-        {layerIndex}
-      );
-
-      // Blend parameters must not be overriden
-      parameters = Object.assign({viewport: glViewport}, layer.props.parameters || {}, parameters);
-
-      if (drawPickingColors) {
-        parameters = Object.assign(parameters, {
-          blendColor: [0, 0, 0, (layerIndex + 1) / 255]
-        });
-      }
-
-      withParameters(gl, parameters, () => {
-        layer.drawLayer({
-          uniforms,
-          parameters
-        });
-      });
+      drawLayerInViewport({gl, layer, layerIndex, drawPickingColors, glViewport, parameters});
     }
   });
 
-  const totalCount = layers.length;
-  const primitiveCount = totalCount - compositeCount;
-  const hiddenCount = primitiveCount - visibleCount;
+  renderCount++;
 
-  const message = `\
-#${renderCount++}: Rendering ${pass} : ${visibleCount} of ${totalCount} layers \
-(${hiddenCount} hidden, ${compositeCount} composite ${pickableCount} unpickable) \
-DPR={pixelRatio} pick={$drawPickingColors}`;
+  logRenderStats({renderStats, pass, redrawReason});
+}
 
-  log.log(2, message);
+function drawLayerInViewport({gl, layer, layerIndex, drawPickingColors, glViewport, parameters}) {
+  const moduleParameters = Object.assign({}, layer.props, {
+    viewport: layer.context.viewport,
+    pickingActive: drawPickingColors ? 1 : 0
+  });
+
+  const uniforms = Object.assign({}, layer.context.uniforms, {layerIndex});
+
+  // All parameter resolving is done here instead of the layer
+  // Blend parameters must not be overriden
+  const layerParameters = Object.assign({}, layer.props.parameters || {}, parameters);
+
+  Object.assign(layerParameters, {
+    viewport: glViewport
+  });
+
+  if (drawPickingColors) {
+    Object.assign(layerParameters, {
+      blendColor: [0, 0, 0, (layerIndex + 1) / 255]
+    });
+  } else {
+    Object.assign(moduleParameters, getObjectHighlightParameters(layer));
+  }
+
+  layer.drawLayer({
+    moduleParameters,
+    uniforms,
+    parameters: layerParameters
+  });
+}
+
+function logRenderStats({renderStats, pass, redrawReason}) {
+  if (log.priority >= LOG_PRIORITY_DRAW) {
+    const {totalCount, visibleCount, compositeCount, pickableCount} = renderStats;
+    const primitiveCount = totalCount - compositeCount;
+    const hiddenCount = primitiveCount - visibleCount;
+
+    let message = '';
+    message += `RENDER #${renderCount} \
+${visibleCount} (of ${totalCount} layers) to ${pass} because ${redrawReason} `;
+    if (log.priority > LOG_PRIORITY_DRAW) {
+      message += `\
+(${hiddenCount} hidden, ${compositeCount} composite ${pickableCount} unpickable)`;
+    }
+
+    log.log(LOG_PRIORITY_DRAW, message);
+  }
 }
 
 // Get a viewport from a viewport descriptor (which can be a plain viewport)
@@ -235,20 +275,21 @@ function getViewportFromDescriptor(viewportOrDescriptor) {
  * Returns the picking color of currenlty selected object of the given 'layer'.
  * @return {Array} - the picking color or null if layers selected object is invalid.
  */
-function updateLayerHighlightColor(layer) {
+function getObjectHighlightParameters(layer) {
   // TODO - inefficient to update settings every render?
   // TODO: Add warning if 'highlightedObjectIndex' is > numberOfInstances of the model.
 
-  if (layer.state.model) {
-    const pickingSelectedColorValid = layer.props.highlightedObjectIndex >= 0;
-    const pickingSelectedColor = pickingSelectedColorValid ?
-      layer.encodePickingColor(layer.props.highlightedObjectIndex) :
-      layer.nullPickingColor();
+  // Update picking module settings if highlightedObjectIndex is set.
+  // This will overwrite any settings from auto highlighting.
+  if (Number.isInteger(layer.props.highlightedObjectIndex)) {
+    const pickingSelectedColor =
+      layer.props.highlightedObjectIndex >= 0
+        ? layer.encodePickingColor(layer.props.highlightedObjectIndex)
+        : null;
 
-    // TODO - handle multimodel layers?
-    layer.state.model.updateModuleSettings({
-      pickingSelectedColor,
-      pickingSelectedColorValid
-    });
+    return {
+      pickingSelectedColor
+    };
   }
+  return null;
 }

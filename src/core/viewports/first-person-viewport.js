@@ -35,14 +35,13 @@ export default class FirstPersonViewport extends Viewport {
       // view matrix arguments
       modelMatrix = null,
       bearing,
-      // pitch,
-      direction, // Which direction camera is looking at
-      up = [0, 0, 1] // Defines up direction, default positive y axis,
+      up = [0, 0, 1] // Defines up direction, default positive z axis,
     } = opts;
 
-    const dir = direction || getDirectionFromBearingAndPitch({
+    // Always calculate direction from bearing and pitch
+    const dir = getDirectionFromBearingAndPitch({
       bearing,
-      pitch: 110
+      pitch: 89
     });
 
     // Direction is relative to model coordinates, of course
@@ -51,10 +50,12 @@ export default class FirstPersonViewport extends Viewport {
     // Just the direction. All the positioning is done in viewport.js
     const viewMatrix = new Matrix4().lookAt({eye: [0, 0, 0], center, up});
 
-    super(Object.assign({}, opts, {
-      zoom: null, // triggers meter level zoom
-      viewMatrix
-    }));
+    super(
+      Object.assign({}, opts, {
+        zoom: null, // triggers meter level zoom
+        viewMatrix
+      })
+    );
   }
 }
 

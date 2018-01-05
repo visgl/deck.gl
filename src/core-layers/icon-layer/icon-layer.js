@@ -68,28 +68,51 @@ const defaultProps = {
 
 export default class IconLayer extends Layer {
   getShaders() {
-    return enable64bitSupport(this.props) ?
-      {vs: vs64, fs, modules: ['project64', 'picking']} :
-      {vs, fs, modules: ['picking']};  // 'project' module added by default.
+    return enable64bitSupport(this.props)
+      ? {vs: vs64, fs, modules: ['project64', 'picking']}
+      : {vs, fs, modules: ['picking']}; // 'project' module added by default.
   }
 
   initializeState() {
     const {attributeManager} = this.state;
-    const {gl} = this.context;
 
     /* eslint-disable max-len */
     attributeManager.addInstanced({
-      instancePositions: {size: 3, accessor: 'getPosition', update: this.calculateInstancePositions, transition: true},
-      instanceSizes: {size: 1, accessor: 'getSize', update: this.calculateInstanceSizes, transition: true},
+      instancePositions: {
+        size: 3,
+        transition: true,
+        accessor: 'getPosition',
+        update: this.calculateInstancePositions
+      },
+      instanceSizes: {
+        size: 1,
+        transition: true,
+        accessor: 'getSize',
+        update: this.calculateInstanceSizes
+      },
       instanceOffsets: {size: 2, accessor: 'getIcon', update: this.calculateInstanceOffsets},
       instanceIconFrames: {size: 4, accessor: 'getIcon', update: this.calculateInstanceIconFrames},
-      instanceColorModes: {size: 1, type: GL.UNSIGNED_BYTE, accessor: 'getIcon', update: this.calculateInstanceColorMode},
-      instanceColors: {size: 4, type: GL.UNSIGNED_BYTE, accessor: 'getColor', update: this.calculateInstanceColors, transition: true},
-      instanceAngles: {size: 1, accessor: 'getAngle', update: this.calculateInstanceAngles, transition: true}
+      instanceColorModes: {
+        size: 1,
+        type: GL.UNSIGNED_BYTE,
+        accessor: 'getIcon',
+        update: this.calculateInstanceColorMode
+      },
+      instanceColors: {
+        size: 4,
+        type: GL.UNSIGNED_BYTE,
+        transition: true,
+        accessor: 'getColor',
+        update: this.calculateInstanceColors
+      },
+      instanceAngles: {
+        size: 1,
+        transition: true,
+        accessor: 'getAngle',
+        update: this.calculateInstanceAngles
+      }
     });
     /* eslint-enable max-len */
-
-    this.setState({model: this._getModel(gl)});
   }
 
   updateAttribute({props, oldProps, changeFlags}) {
@@ -106,11 +129,8 @@ export default class IconLayer extends Layer {
           }
         });
       } else {
-        attributeManager.remove([
-          'instancePositions64xyLow'
-        ]);
+        attributeManager.remove(['instancePositions64xyLow']);
       }
-
     }
   }
 
@@ -127,7 +147,6 @@ export default class IconLayer extends Layer {
     }
 
     if (oldProps.iconAtlas !== iconAtlas) {
-
       if (iconAtlas instanceof Texture2D) {
         iconAtlas.setParameters({
           [GL.TEXTURE_MIN_FILTER]: DEFAULT_TEXTURE_MIN_FILTER,
@@ -137,8 +156,7 @@ export default class IconLayer extends Layer {
       } else if (typeof iconAtlas === 'string') {
         loadTextures(this.context.gl, {
           urls: [iconAtlas]
-        })
-        .then(([texture]) => {
+        }).then(([texture]) => {
           texture.setParameters({
             [GL.TEXTURE_MIN_FILTER]: DEFAULT_TEXTURE_MIN_FILTER,
             [GL.TEXTURE_MAG_FILTER]: DEFAULT_TEXTURE_MAG_FILTER
@@ -153,7 +171,6 @@ export default class IconLayer extends Layer {
       this.setState({model: this._getModel(gl)});
     }
     this.updateAttribute({props, oldProps, changeFlags});
-
   }
 
   draw({uniforms}) {
@@ -161,27 +178,33 @@ export default class IconLayer extends Layer {
     const {iconsTexture} = this.state;
 
     if (iconsTexture) {
-      this.state.model.render(Object.assign({}, uniforms, {
-        iconsTexture,
-        iconsTextureDim: [iconsTexture.width, iconsTexture.height],
-        sizeScale
-      }));
+      this.state.model.render(
+        Object.assign({}, uniforms, {
+          iconsTexture,
+          iconsTextureDim: [iconsTexture.width, iconsTexture.height],
+          sizeScale
+        })
+      );
     }
   }
 
   _getModel(gl) {
-
     const positions = [-1, -1, 0, -1, 1, 0, 1, 1, 0, 1, -1, 0];
 
-    return new Model(gl, Object.assign({}, this.getShaders(), {
-      id: this.props.id,
-      geometry: new Geometry({
-        drawMode: GL.TRIANGLE_FAN,
-        positions: new Float32Array(positions)
-      }),
-      isInstanced: true,
-      shaderCache: this.context.shaderCache
-    }));
+    return new Model(
+      gl,
+      Object.assign({}, this.getShaders(), {
+        id: this.props.id,
+        geometry: new Geometry({
+          drawMode: GL.TRIANGLE_FAN,
+          attributes: {
+            positions: new Float32Array(positions)
+          }
+        }),
+        isInstanced: true,
+        shaderCache: this.context.shaderCache
+      })
+    );
   }
 
   calculateInstancePositions(attribute) {
@@ -246,8 +269,8 @@ export default class IconLayer extends Layer {
     for (const object of data) {
       const icon = getIcon(object);
       const rect = iconMapping[icon] || {};
-      value[i++] = (rect.width / 2 - rect.anchorX) || 0;
-      value[i++] = (rect.height / 2 - rect.anchorY) || 0;
+      value[i++] = rect.width / 2 - rect.anchorX || 0;
+      value[i++] = rect.height / 2 - rect.anchorY || 0;
     }
   }
 

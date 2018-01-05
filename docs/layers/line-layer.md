@@ -33,7 +33,7 @@ const App = ({data, viewport}) => {
 
 ## Properties
 
-Inherits from all [Base Layer](/docs/api-reference/base-layer.md) properties.
+Inherits from all [Base Layer](/docs/api-reference/layer.md) properties.
 
 ### Render Options
 
@@ -74,5 +74,5 @@ Method called to determine the rgba color of the source.
 
 ## Source
 
-[src/layers/core/line-layer](https://github.com/uber/deck.gl/tree/4.1-release/src/layers/core/line-layer)
+[src/layers/core/line-layer](https://github.com/uber/deck.gl/tree/5.0-release/src/layers/core/line-layer)
 

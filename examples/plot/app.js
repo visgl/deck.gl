@@ -1,13 +1,14 @@
 /* global window,document */
 import React, {Component} from 'react';
 import {render} from 'react-dom';
-import DeckGLOverlay, {experimental} from './deckgl-overlay.js';
-const {OrbitController} = experimental;
+import {experimental} from 'deck.gl';
 
+import DeckGLOverlay from './deckgl-overlay.js';
+
+const {OrbitController} = experimental;
 const EQUATION = (x, y) => Math.sin(x * x + y * y) * x / Math.PI;
 
 class Root extends Component {
-
   constructor(props) {
     super(props);
     this.state = {
@@ -15,7 +16,8 @@ class Root extends Component {
         lookAt: [0, 0, 0],
         distance: 3,
         rotationX: -30,
-        rotationY: 30,
+        rotationOrbit: 30,
+        orbitAxis: 'Y',
         fov: 50,
         minDistance: 1,
         maxDistance: 20,
@@ -38,8 +40,9 @@ class Root extends Component {
       width: window.innerWidth,
       height: window.innerHeight
     };
-    const newViewport = OrbitController.getViewport(Object.assign(this.state.viewport, size))
-      .fitBounds([[0, 0, 0], [1, 1, 1]]);
+    const newViewport = OrbitController.getViewport(
+      Object.assign(this.state.viewport, size)
+    ).fitBounds([3, 3, 3]);
 
     this._onViewportChange(newViewport);
   }
@@ -60,20 +63,20 @@ class Root extends Component {
     const {viewport, hoverInfo} = this.state;
 
     return (
-      <OrbitController
-        {...viewport}
-        onViewportChange={this._onViewportChange} >
+      <OrbitController {...viewport} onViewportChange={this._onViewportChange}>
         <DeckGLOverlay
           viewport={OrbitController.getViewport(viewport)}
           equation={EQUATION}
           resolution={200}
           showAxis={true}
-          onHover={this._onHover} />
+          onHover={this._onHover}
+        />
 
-        {hoverInfo && <div className="tooltip" style={{left: hoverInfo.x, top: hoverInfo.y}} >
-          { hoverInfo.sample.map(x => x.toFixed(3)).join(', ') }
-        </div>}
-
+        {hoverInfo && (
+          <div className="tooltip" style={{left: hoverInfo.x, top: hoverInfo.y}}>
+            {hoverInfo.sample.map(x => x.toFixed(3)).join(', ')}
+          </div>
+        )}
       </OrbitController>
     );
   }

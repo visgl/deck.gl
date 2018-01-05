@@ -20,10 +20,11 @@
 
 import {global} from '../utils/globals';
 import log from '../utils/log';
-
-// Version detection
-// TODO - this imports a rather large JSON file, we only need one field
-import {version} from '../../../package.json';
+// Version detection using babel plugin
+// Fallback for tests and SSR since global variable is defined by Webpack.
+/* global __VERSION__ */
+const version =
+  typeof __VERSION__ !== 'undefined' ? __VERSION__ : global.DECK_VERSION || 'untranspiled source';
 
 const STARTUP_MESSAGE = 'set deck.log.priority=1 (or higher) to trace attribute updates';
 
@@ -38,6 +39,7 @@ if (!global.deck) {
 
   global.deck = global.deck || {
     VERSION: version,
+    version,
     log
   };
 }

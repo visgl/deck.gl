@@ -11,12 +11,13 @@ const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
 
 // Source data CSV
 const DATA_URL = {
-  BUILDINGS: 'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/trips/buildings.json',  // eslint-disable-line
-  TRIPS: 'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/trips/trips.json'  // eslint-disable-line
+  BUILDINGS:
+    'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/trips/buildings.json', // eslint-disable-line
+  TRIPS:
+    'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/trips/trips.json' // eslint-disable-line
 };
 
 class Root extends Component {
-
   constructor(props) {
     super(props);
     this.state = {
@@ -61,7 +62,7 @@ class Root extends Component {
     const loopTime = 60000;
 
     this.setState({
-      time: ((timestamp % loopTime) / loopTime) * loopLength
+      time: (timestamp % loopTime) / loopTime * loopLength
     });
     this._animationFrame = window.requestAnimationFrame(this._animate.bind(this));
   }
@@ -87,13 +88,15 @@ class Root extends Component {
         {...viewport}
         mapStyle="mapbox://styles/mapbox/dark-v9"
         onViewportChange={this._onViewportChange.bind(this)}
-        mapboxApiAccessToken={MAPBOX_TOKEN}>
-        <DeckGLOverlay viewport={viewport}
+        mapboxApiAccessToken={MAPBOX_TOKEN}
+      >
+        <DeckGLOverlay
+          viewport={viewport}
           buildings={buildings}
           trips={trips}
           trailLength={180}
           time={time}
-          />
+        />
       </MapGL>
     );
   }

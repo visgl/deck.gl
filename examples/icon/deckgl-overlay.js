@@ -23,7 +23,6 @@ function getIconSize(size) {
 }
 
 export default class DeckGLOverlay extends Component {
-
   static get defaultViewport() {
     return {
       longitude: -35,
@@ -54,9 +53,11 @@ export default class DeckGLOverlay extends Component {
     const {viewport} = nextProps;
     const oldViewport = this.props.viewport;
 
-    if (nextProps.data !== this.props.data ||
+    if (
+      nextProps.data !== this.props.data ||
       viewport.width !== oldViewport.width ||
-      viewport.height !== oldViewport.height) {
+      viewport.height !== oldViewport.height
+    ) {
       this._updateCluster(nextProps);
     }
   }
@@ -96,13 +97,14 @@ export default class DeckGLOverlay extends Component {
           const {x, y} = p;
 
           // find all points within radius that do not belong to a cluster
-          const neighbors = tree.search({
-            minX: x - radius,
-            minY: y - radius,
-            maxX: x + radius,
-            maxY: y + radius
-          })
-          .filter(neighbor => neighbor.zoomLevels[z] === undefined);
+          const neighbors = tree
+            .search({
+              minX: x - radius,
+              minY: y - radius,
+              maxX: x + radius,
+              maxY: y + radius
+            })
+            .filter(neighbor => neighbor.zoomLevels[z] === undefined);
 
           // only show the center point at this zoom level
           neighbors.forEach(neighbor => {
@@ -140,8 +142,8 @@ export default class DeckGLOverlay extends Component {
       iconMapping,
       sizeScale: ICON_SIZE * size * window.devicePixelRatio,
       getPosition: d => d.coordinates,
-      getIcon: d => showCluster ? (d.zoomLevels[z] && d.zoomLevels[z].icon) : 'marker',
-      getSize: d => showCluster ? (d.zoomLevels[z] && d.zoomLevels[z].size) : 1,
+      getIcon: d => (showCluster ? d.zoomLevels[z] && d.zoomLevels[z].icon : 'marker'),
+      getSize: d => (showCluster ? d.zoomLevels[z] && d.zoomLevels[z].size : 1),
       onHover: this.props.onHover,
       onClick: this.props.onClick,
       updateTriggers: {
@@ -150,6 +152,6 @@ export default class DeckGLOverlay extends Component {
       }
     });
 
-    return <DeckGL {...viewport} layers={ [layer] } />;
+    return <DeckGL {...viewport} layers={[layer]} />;
   }
 }

@@ -2,7 +2,7 @@
 
 If you want to draw something completely different and you are comfortable around
 WebGL, you may consider implementing a new layer by directly extending the
-[`Layer`](/docs/api-reference/base-layer.md) class.
+[`Layer`](/docs/api-reference/layer.md) class.
 
 ## Implementing the Layer Lifecycle Functions
 
@@ -11,7 +11,7 @@ you need to implement the layer's [lifecycle functions](/docs/advanced/layer-lif
 
 ### Initializing Layer
 
-[`initializeState()`](/docs/api-reference/base-layer.md#-initializestate-) -
+[`initializeState()`](/docs/api-reference/layer.md#-initializestate-) -
 This is the one method that you must implement to create
 any WebGL resources you need for rendering your layer.
 
@@ -98,7 +98,7 @@ It sometimes desirable to have a single layer render using multiple geometry pri
 (e.g both circles and lines, or triangles and textured meshes etc),
 rather than creating separate layers.
 The custom
-[AxesLayer example](https://github.com/uber/deck.gl/tree/4.1-release/examples/plot/plot-layer/axes-layer.js)
+[AxesLayer example](https://github.com/uber/deck.gl/tree/5.0-release/examples/plot/plot-layer/axes-layer.js)
 uses this technique to share attributes between grids and labels.
 
 #### Defining Attributes
@@ -126,7 +126,7 @@ initializeState() {
 
 ### Handling property updates
 
-[`updateState()`](/docs/api-reference/base-layer.md#-updatestate-) -
+[`updateState()`](/docs/api-reference/layer.md#-updatestate-) -
 This is the method that you may want to implement to handle
 property changes.
 
@@ -155,7 +155,7 @@ better understanding of how to use these concepts in the best way.
 
 ### Rendering Layer
 
-[`draw()`](/docs/api-reference/base-layer.md#-draw-) -
+[`draw()`](/docs/api-reference/layer.md#-draw-) -
 If you want to use custom uniforms or settings when drawing, you would
 typical implement the `draw` method and pass those to your render call.
 Note that `draw` is called with viewport uniforms that you need to pass
@@ -170,7 +170,7 @@ implement features like cartographic projection etc on your own.
 
 ### Destroying Layer
 
-[`finalizeState()`](/docs/api-reference/base-layer.md#-finalizestate-) -
+[`finalizeState()`](/docs/api-reference/layer.md#-finalizestate-) -
 If implemented, this method is called when your layer
 state is discarded. This is a good time to destroy non-shared WebGL resources
 directly, rather than waiting for the garbage collector to do it.
@@ -211,14 +211,10 @@ a single layer class can support all projection modes for free:
 
 If your layer is instanced (`data` prop is an array and each element is rendered as one
 primitive), then you may take advantage of the default implementation of the
-[layer picking methods](/docs/api-reference/base-layer.md#layer-picking-methods).
+[layer picking methods](/docs/api-reference/layer.md#layer-picking-methods).
 
 By default, each layer creates an `instancePickingColors` attribute and automatically
 calculates it using the length of the `data` array.
-In your custom shader, you may switch between the actual color and the picking color
-using the technique described in
-[`renderPickingBuffer`](/docs/advanced/writing-shaders.md#-float-renderpickingbuffer-)
-and picking will just work.
 
-For more advanced scenarios, read about
+For custom picking, read about
 [Implementing Custom Picking](/docs/advanced/picking.md#implementing-custom-picking).

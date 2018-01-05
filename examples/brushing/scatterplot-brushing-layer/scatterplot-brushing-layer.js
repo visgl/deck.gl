@@ -35,7 +35,6 @@ const defaultProps = {
 };
 
 export default class ScatterplotBrushingLayer extends ScatterplotLayer {
-
   getShaders() {
     // get customized shaders
     return Object.assign({}, super.getShaders(), {
@@ -61,14 +60,17 @@ export default class ScatterplotBrushingLayer extends ScatterplotLayer {
 
   draw({uniforms}) {
     // add uniforms
-    super.draw({uniforms: {
-      ...uniforms,
-      brushTarget: this.props.brushTarget,
-      brushRadius: this.props.brushRadius,
-      mousePos: this.props.mousePosition ?
-        new Float32Array(this.unproject(this.props.mousePosition)) : defaultProps.mousePosition,
-      enableBrushing: Boolean(this.props.enableBrushing)
-    }});
+    super.draw({
+      uniforms: {
+        ...uniforms,
+        brushTarget: this.props.brushTarget,
+        brushRadius: this.props.brushRadius,
+        mousePos: this.props.mousePosition
+          ? new Float32Array(this.unproject(this.props.mousePosition))
+          : defaultProps.mousePosition,
+        enableBrushing: Boolean(this.props.enableBrushing)
+      }
+    });
   }
 
   // calculate instanceSourcePositions

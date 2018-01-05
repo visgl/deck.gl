@@ -1,4 +1,3 @@
-
 # WebMercatorViewport Class
 
 The `WebMercatorViewport` class is a subclass of [ThirdPersonViewport](/docs/api-reference/third-person-viewport.md) that enables 3D rendering to seamlessly overlay on top of map components that take web mercator style map coordinates (`latitude`, `lon`, `zoom`, `pitch`, `bearing` etc).
@@ -145,4 +144,4 @@ if `z` is provided.
 
 
 ## Source
-[src/viewports/web-mercator-viewport.js](https://github.com/uber/deck.gl/blob/4.1-release/src/viewports/web-mercator-viewport.js)
+[src/viewports/web-mercator-viewport.js](https://github.com/uber/deck.gl/blob/5.0-release/src/viewports/web-mercator-viewport.js)

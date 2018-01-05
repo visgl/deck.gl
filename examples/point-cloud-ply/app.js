@@ -14,7 +14,6 @@ class Example extends PureComponent {
     super(props);
 
     this._onResize = this._onResize.bind(this);
-    this._onInitialized = this._onInitialized.bind(this);
     this._onViewportChange = this._onViewportChange.bind(this);
     this._onUpdate = this._onUpdate.bind(this);
 
@@ -26,7 +25,8 @@ class Example extends PureComponent {
         lookAt: [0, 0, 0],
         distance: 100,
         rotationX: 0,
-        rotationY: 0,
+        rotationOrbit: 0,
+        orbitAxis: 'Y',
         fov: 30,
         minDistance: 1.5,
         maxDistance: 10
@@ -64,8 +64,9 @@ class Example extends PureComponent {
   _onResize() {
     const size = {width: window.innerWidth, height: window.innerHeight};
     this.setState(size);
-    const newViewport = OrbitController.getViewport(Object.assign(this.state.viewport, size))
-      .fitBounds([[0, 0, 0], [1, 1, 1]]);
+    const newViewport = OrbitController.getViewport(
+      Object.assign(this.state.viewport, size)
+    ).fitBounds([1, 1, 1]);
     this._onViewportChange(newViewport);
   }
 
@@ -80,7 +81,7 @@ class Example extends PureComponent {
     this.setState({
       viewport: {
         ...viewport,
-        rotationY: viewport.rotationY + 1
+        rotationOrbit: viewport.rotationOrbit + 1
       }
     });
     window.requestAnimationFrame(this._onUpdate);
@@ -118,7 +119,6 @@ class Example extends PureComponent {
           height={height}
           viewport={glViewport}
           layers={[this._renderPointCloudLayer()]}
-          initWebGLParameters
         />
       </OrbitController>
     );

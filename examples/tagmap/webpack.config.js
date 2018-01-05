@@ -13,20 +13,22 @@ module.exports = {
   devtool: 'source-map',
 
   module: {
-    rules: [{
-      // Compile ES2015 using buble
-      test: /\.js$/,
-      loader: 'buble-loader',
-      include: [resolve('.')],
-      exclude: [/node_modules/],
-      options: {
-        objectAssign: 'Object.assign',
-        transforms: {
-          dangerousForOf: true,
-          modules: false
+    rules: [
+      {
+        // Compile ES2015 using buble
+        test: /\.js$/,
+        loader: 'buble-loader',
+        include: [resolve('.')],
+        exclude: [/node_modules/],
+        options: {
+          objectAssign: 'Object.assign',
+          transforms: {
+            dangerousForOf: true,
+            modules: false
+          }
         }
       }
-    }]
+    ]
   },
 
   node: {
@@ -41,9 +43,7 @@ module.exports = {
   },
 
   // Optional: Enables reading mapbox token from environment variable
-  plugins: [
-    new webpack.EnvironmentPlugin(['MapboxAccessToken'])
-  ]
+  plugins: [new webpack.EnvironmentPlugin(['MapboxAccessToken'])]
 };
 
 // DELETE THIS LINE WHEN COPYING THIS EXAMPLE FOLDER OUTSIDE OF DECK.GL

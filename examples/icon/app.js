@@ -10,10 +10,10 @@ import {json as requestJson} from 'd3-request';
 const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
 
 // Source data CSV
-const DATA_URL = 'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/icon/meteorites.json';  // eslint-disable-line
+const DATA_URL =
+  'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/icon/meteorites.json'; // eslint-disable-line
 
 class Root extends Component {
-
   constructor(props) {
     super(props);
     this.state = {
@@ -64,13 +64,15 @@ class Root extends Component {
         {...viewport}
         mapStyle="mapbox://styles/mapbox/dark-v9"
         onViewportChange={this._onViewportChange.bind(this)}
-        mapboxApiAccessToken={MAPBOX_TOKEN}>
-        <DeckGLOverlay viewport={viewport}
+        mapboxApiAccessToken={MAPBOX_TOKEN}
+      >
+        <DeckGLOverlay
+          viewport={viewport}
           data={data}
           iconAtlas="data/location-icon-atlas.png"
           iconMapping={iconMapping}
           showCluster={true}
-          />
+        />
       </MapGL>
     );
   }

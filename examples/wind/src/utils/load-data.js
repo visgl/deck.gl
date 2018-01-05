@@ -2,15 +2,13 @@ import {request, json} from 'd3-request';
 import {voronoi} from 'd3-voronoi';
 import DelaunayInterpolation from '../layers/delaunay-interpolation/delaunay-interpolation';
 
-const STATIONS_DATA_URL = 'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/wind/stations.json';  // eslint-disable-line
-const WEATHER_DATA_URL = 'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/wind/weather.bin';  // eslint-disable-line
+const STATIONS_DATA_URL =
+  'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/wind/stations.json'; // eslint-disable-line
+const WEATHER_DATA_URL =
+  'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/wind/weather.bin'; // eslint-disable-line
 
 export function loadData() {
-  return Promise.all([
-    loadStations(),
-    loadWeatherData()
-  ])
-  .then(([stations, weather]) => {
+  return Promise.all([loadStations(), loadWeatherData()]).then(([stations, weather]) => {
     const bbox = getBBox(stations);
     const triangulation = triangulate(stations);
     const delaunayInterpolation = new DelaunayInterpolation({
@@ -34,7 +32,7 @@ export function loadData() {
 function loadStations() {
   return new Promise((resolve, reject) => {
     json(STATIONS_DATA_URL)
-      .on('load', (stations) => {
+      .on('load', stations => {
         /**
         // add four dummy stations at the end
         const boundingBox = getBBox(stations);
@@ -121,13 +119,9 @@ function createHourlyData(bufferData, i, l, hours, components) {
   const array = []; // add four dummy stations
 
   let count = 0;
-  for (let j = i * components; count < l; j += (hours * components)) {
+  for (let j = i * components; count < l; j += hours * components) {
     count++;
-    array.push(new Float32Array([
-      bufferData[j + 0],
-      bufferData[j + 1],
-      bufferData[j + 2]
-    ]));
+    array.push(new Float32Array([bufferData[j + 0], bufferData[j + 1], bufferData[j + 2]]));
   }
 
   return array;

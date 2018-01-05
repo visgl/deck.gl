@@ -23,14 +23,12 @@ import 'luma.gl';
 
 import DeckGL from 'deck.gl';
 import {Layer, COORDINATE_SYSTEM} from 'deck.gl';
-import {ChoroplethLayer, ScatterplotLayer, ScreenGridLayer, ArcLayer, LineLayer} from 'deck.gl';
+import {ScatterplotLayer, ScreenGridLayer, ArcLayer, LineLayer} from 'deck.gl';
 
 test('Top-level imports', t0 => {
   t0.test('import "deck.gl"', t => {
-
     t.ok(Layer, 'Layer symbol imported');
     t.ok(Layer, 'Layer symbol imported');
-    t.ok(ChoroplethLayer, 'ChoroplethLayer symbol imported');
     t.ok(ScatterplotLayer, 'ScatterplotLayer symbol imported');
     t.ok(ScreenGridLayer, 'ScreenGridLayer symbol imported');
     t.ok(ArcLayer, 'ArcLayer symbol imported');

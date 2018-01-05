@@ -10,6 +10,10 @@ const CONFIG = {
   },
 
   devtool: 'source-map',
+  output: {
+    path: resolve('./dist'),
+    filename: 'bundle.js'
+  },
 
   module: {
     rules: [
@@ -38,4 +42,4 @@ const CONFIG = {
 };
 
 // This line enables bundling against src in this repo rather than installed deck.gl module
-module.exports = env => env ? require('../webpack.config.local')(CONFIG)(env) : CONFIG;
+module.exports = env => (env ? require('../webpack.config.local')(CONFIG)(env) : CONFIG);

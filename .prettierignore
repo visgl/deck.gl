@@ -1,0 +1,2 @@
+examples/point-cloud-laz/worker/laz-perf.js
+**/dist/**/*.js

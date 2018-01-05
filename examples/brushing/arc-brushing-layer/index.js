@@ -1,1 +1,1 @@
-export {default as default, ArcBrushingLayer} from './arc-brushing-layer';
+export {default, ArcBrushingLayer} from './arc-brushing-layer';

@@ -1,10 +1,8 @@
 import {
   COORDINATE_SYSTEM,
-
   ScatterplotLayer,
   ArcLayer,
   LineLayer,
-
   PointCloudLayer,
   ScreenGridLayer,
   IconLayer,
@@ -12,7 +10,6 @@ import {
   GridLayer,
   HexagonCellLayer,
   HexagonLayer,
-
   GeoJsonLayer,
   PolygonLayer,
   PathLayer
@@ -21,23 +18,22 @@ import {
 // Demonstrate immutable support
 import {experimental} from 'deck.gl';
 const {get} = experimental;
-
 import dataSamples from '../immutable-data-samples';
 import {parseColor, setOpacity} from '../utils/color';
 
-const MARKER_SIZE_MAP = {
-  small: 200,
-  medium: 500,
-  large: 1000
-};
-
 const LIGHT_SETTINGS = {
-  lightsPosition: [-122.45, 37.66, 8000, -122.0, 38.00, 8000],
+  lightsPosition: [-122.45, 37.66, 8000, -122.0, 38.0, 8000],
   ambientRatio: 0.3,
   diffuseRatio: 0.6,
   specularRatio: 0.4,
   lightsStrength: [1, 0.0, 0.8, 0.0],
   numberOfLights: 2
+};
+
+const MARKER_SIZE_MAP = {
+  small: 200,
+  medium: 500,
+  large: 1000
 };
 
 const ArcLayerExample = {
@@ -62,8 +58,8 @@ const IconLayerExample = {
     sizeScale: 24,
     getPosition: d => d.COORDINATES,
     getColor: d => [64, 64, 72],
-    getIcon: d => get(d, 'PLACEMENT') === 'SW' ? 'marker' : 'marker-warning',
-    getSize: d => get(d, 'RACKS') > 2 ? 2 : 1,
+    getIcon: d => (get(d, 'PLACEMENT') === 'SW' ? 'marker' : 'marker-warning'),
+    getSize: d => (get(d, 'RACKS') > 2 ? 2 : 1),
     opacity: 0.8,
     pickable: true
   }
@@ -90,7 +86,8 @@ const GeoJsonLayerExample = {
     lineWidthScale: 10,
     lineWidthMinPixels: 1,
     pickable: true,
-    fp64: true
+    fp64: true,
+    lightSettings: LIGHT_SETTINGS
   }
 };
 
@@ -99,26 +96,41 @@ const GeoJsonLayerExtrudedExample = {
   getData: () => dataSamples.choropleths,
   props: {
     id: 'geojsonLayer-extruded',
-    getElevation: f => get(f, 'properties.ZIP_CODE') * 10 % 127 * 10,
-    getFillColor: f => [0, 100, get(f, 'properties.ZIP_CODE') * 55 % 255],
+    getElevation: f => ((get(f, 'properties.ZIP_CODE') * 10) % 127) * 10,
+    getFillColor: f => [0, 100, (get(f, 'properties.ZIP_CODE') * 55) % 255],
     getLineColor: f => [200, 0, 80],
     extruded: true,
     wireframe: true,
-    pickable: true
+    pickable: true,
+    lightSettings: LIGHT_SETTINGS
   }
 };
 
 const PolygonLayerExample = {
   layer: PolygonLayer,
   getData: () => dataSamples.polygons,
+  propTypes: {
+    getLineDashArray: {type: 'compound', elements: ['lineDashSizeLine']},
+    lineDashSizeLine: {
+      type: 'number',
+      max: 20,
+      onUpdate: (newValue, newSettings, change) => {
+        change('getLineDashArray', [newValue, 20 - newValue]);
+      }
+    }
+  },
   props: {
     getPolygon: f => f,
-    getFillColor: f => [Math.floor(Math.random() * 255), 0, 0],
+    getFillColor: f => [200 + Math.random() * 55, 0, 0],
     getLineColor: f => [0, 0, 0, 255],
+    getLineDashArray: f => [20, 0],
     getWidth: f => 20,
-    getHeight: f => Math.random() * 1000,
+    getElevation: f => Math.random() * 1000,
     opacity: 0.8,
-    pickable: true
+    pickable: true,
+    lineDashJustified: true,
+    lightSettings: LIGHT_SETTINGS,
+    elevationScale: 0.6
   }
 };
 
@@ -156,7 +168,7 @@ const LineLayerExample = {
     id: 'lineLayer',
     getSourcePosition: d => get(d, 'START'),
     getTargetPosition: d => get(d, 'END'),
-    getColor: d => get(d, 'SERVICE') === 'WEEKDAY' ? [255, 64, 0] : [255, 200, 0],
+    getColor: d => (get(d, 'SERVICE') === 'WEEKDAY' ? [255, 64, 0] : [255, 200, 0]),
     pickable: true
   }
 };
@@ -169,28 +181,11 @@ const ScatterplotLayerExample = {
     getPosition: d => get(d, 'COORDINATES'),
     getColor: d => [255, 128, 0],
     getRadius: d => get(d, 'SPACES'),
-    opacity: 0.5,
+    opacity: 1,
     pickable: true,
     radiusScale: 30,
     radiusMinPixels: 1,
     radiusMaxPixels: 30
-  }
-};
-
-const PointCloudLayerExample = {
-  layer: PointCloudLayer,
-  getData: dataSamples.getPointCloud,
-  props: {
-    id: 'pointCloudLayer',
-    outline: true,
-    coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
-    coordinateOrigin: dataSamples.positionOrigin,
-    getPosition: d => get(d, 'position'),
-    getNormal: d => get(d, 'normal'),
-    getColor: d => get(d, 'color'),
-    opacity: 1,
-    radiusPixels: 4,
-    pickable: true
   }
 };
 
@@ -215,15 +210,17 @@ const GridCellLayerExample = {
 function getMean(pts, key) {
   const filtered = pts.filter(pt => Number.isFinite(pt[key]));
 
-  return filtered.length ?
-    filtered.reduce((accu, curr) => accu + curr[key], 0) / filtered.length : null;
+  return filtered.length
+    ? filtered.reduce((accu, curr) => accu + curr[key], 0) / filtered.length
+    : null;
 }
 
 function getMax(pts, key) {
   const filtered = pts.filter(pt => Number.isFinite(pt[key]));
 
-  return filtered.length ?
-    filtered.reduce((accu, curr) => curr[key] > accu ? curr[key] : accu, -Infinity) : null;
+  return filtered.length
+    ? filtered.reduce((accu, curr) => (curr[key] > accu ? curr[key] : accu), -Infinity)
+    : null;
 }
 
 // hexagon/grid layer compares whether getColorValue / getElevationValue has changed to
@@ -308,6 +305,111 @@ const HexagonLayerExample = {
   }
 };
 
+// METER MODE EXAMPLES
+
+const PointCloudLayerExample = {
+  layer: PointCloudLayer,
+  getData: dataSamples.getPointCloud,
+  props: {
+    id: 'pointCloudLayer-meters',
+    coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
+    coordinateOrigin: dataSamples.positionOrigin,
+    getPosition: d => d.position,
+    getNormal: d => d.normal,
+    getColor: d => d.color,
+    opacity: 1,
+    radiusPixels: 4,
+    pickable: true,
+    lightSettings: LIGHT_SETTINGS
+  }
+};
+
+const PointCloudLayerExample2 = {
+  layer: PointCloudLayer,
+  getData: dataSamples.getPointCloud,
+  props: {
+    id: 'pointCloudLayer-lnglat',
+    coordinateSystem: COORDINATE_SYSTEM.LNGLAT_OFFSETS,
+    coordinateOrigin: dataSamples.positionOrigin,
+    getPosition: d => [d.position[0] * 1e-5, d.position[1] * 1e-5, d.position[2]],
+    getNormal: d => d.normal,
+    getColor: d => d.color,
+    opacity: 1,
+    radiusPixels: 4,
+    pickable: true,
+    lightSettings: LIGHT_SETTINGS
+  }
+};
+
+const PathLayerMetersExample = {
+  layer: PathLayer,
+  getData: () => dataSamples.meterPaths,
+  props: {
+    id: 'path-outline-layer-meter',
+    opacity: 1.0,
+    getColor: f => [255, 0, 0],
+    getWidth: f => 10,
+    widthMinPixels: 1,
+    pickable: false,
+    strokeWidth: 5,
+    widthScale: 10,
+    autoHighlight: false,
+    highlightColor: [255, 255, 255, 255],
+    sizeScale: 200,
+    rounded: false,
+    getMarkerPercentages: () => [],
+    coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
+    coordinateOrigin: dataSamples.positionOrigin
+  }
+};
+
+const LineLayerMillimetersExample = {
+  layer: LineLayer,
+  getData: () => dataSamples.milliMeterLines,
+  props: {
+    id: 'lineLayer',
+    getColor: f => [Math.random() * 255, 0, 0],
+    pickable: true,
+    coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
+    coordinateOrigin: dataSamples.milliMeterOrigin,
+    strokeWidth: 20
+  }
+};
+
+const PathLayerMillimetersFilteredExample = {
+  layer: PathLayer,
+  getData: () => dataSamples.milliMeterPathsFiltered,
+  props: {
+    id: 'pathLayer-meters-filtered',
+    opacity: 0.6,
+    getPath: f => f.path,
+    getColor: f => [128, 0, 0],
+    getWidth: f => 10,
+    widthMinPixels: 1,
+    pickable: true,
+    coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
+    coordinateOrigin: dataSamples.milliMeterOrigin
+  }
+};
+
+const PathLayerMillimetersUnfilteredExample = {
+  layer: PathLayer,
+  getData: () => dataSamples.milliMeterPaths,
+  props: {
+    id: 'pathLayer-meters',
+    opacity: 0.6,
+    getPath: f => f.path,
+    getColor: f => [128, 0, 0],
+    getWidth: f => 10,
+    widthMinPixels: 1,
+    pickable: true,
+    coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
+    coordinateOrigin: dataSamples.milliMeterOrigin
+  }
+};
+
+// PERF EXAMPLES
+
 // perf test examples
 const ScatterplotLayerPerfExample = (id, getData) => ({
   layer: ScatterplotLayer,
@@ -338,8 +440,8 @@ const ScatterplotLayer64PerfExample = (id, getData) => ({
 
 /* eslint-disable quote-props */
 export default {
-  'Core Layers': {
-    'GeoJsonLayer': GeoJsonLayerExample,
+  'Core Layers - LngLat': {
+    GeoJsonLayer: GeoJsonLayerExample,
     'GeoJsonLayer (Extruded)': GeoJsonLayerExtrudedExample,
     PolygonLayer: PolygonLayerExample,
     PathLayer: PathLayerExample,
@@ -351,8 +453,16 @@ export default {
     GridLayer: GridLayerExample,
     ScreenGridLayer: ScreenGridLayerExample,
     HexagonCellLayer: HexagonCellLayerExample,
-    HexagonLayer: HexagonLayerExample,
-    PointCloudLayer: PointCloudLayerExample
+    HexagonLayer: HexagonLayerExample
+  },
+
+  'Core Layers - Meter Offsets': {
+    'PointCloudLayer (Meter offset)': PointCloudLayerExample,
+    'PointCloudLayer (LngLat offset)': PointCloudLayerExample2,
+    'Path Layer (Meters)': PathLayerMetersExample,
+    'PathLayer (Mm Filtered: Zoom Map)': PathLayerMillimetersFilteredExample,
+    'PathLayer (Mm Unfiltered: Zoom Map)': PathLayerMillimetersUnfilteredExample,
+    'LineLayer (Mm - Zoom Map)': LineLayerMillimetersExample
   },
 
   'Performance Tests': {

@@ -25,78 +25,156 @@ const experimental = {};
 // CORE LIBRARY
 //
 
-export {COORDINATE_SYSTEM} from './core/lib/constants';
-export {default as LayerManager} from './core/lib/layer-manager';
-export {default as AttributeManager} from './core/lib/attribute-manager';
-export {default as Layer} from './core/lib/layer';
-export {default as CompositeLayer} from './core/lib/composite-layer';
+export {
+  // LIB
+  COORDINATE_SYSTEM,
+  LayerManager,
+  AttributeManager,
+  Layer,
+  CompositeLayer,
+  // Viewports
+  Viewport,
+  WebMercatorViewport,
+  PerspectiveViewport,
+  OrthographicViewport
+} from './core';
 
-// Viewports
-export {default as Viewport} from './core/viewports/viewport';
-export {default as FirstPersonViewport} from './core/viewports/first-person-viewport';
-export {default as ThirdPersonViewport} from './core/viewports/third-person-viewport';
-export {default as WebMercatorViewport} from './core/viewports/web-mercator-viewport';
+// EXPERIMENTAL CORE LIB CLASSES (May change in minor version bumps, use at your own risk)
+import {experimental as CoreExperimental} from './core';
 
-// TODO - Do we need to export? Move to experimental?
-export {default as ViewportControls} from './core/controllers/controls';
-export {default as FirstPersonState} from './core/controllers/first-person-state';
-export {default as OrbitState} from './core/controllers/orbit-state';
-export {default as MapState} from './core/controllers/map-state';
+const {
+  // View States
+  ViewState,
+  FirstPersonState,
+  OrbitState,
+  MapState,
 
-// Experimental Pure JS (non-React) bindings
-import {default as DeckGLJS} from './core/pure-js/deck';
-import {default as MapControllerJS} from './core/pure-js/map-controller';
+  // Controllers
+  Controller,
+  FirstPersonController,
 
-// Experimental Features (May change in minor version bumps, use at your own risk)
-import {get} from './core/lib/utils/get';
-import {count} from './core/lib/utils/count';
-import {default as EffectManager} from './core/experimental/lib/effect-manager';
-import {default as Effect} from './core/experimental/lib/effect';
+  // Viewports
+  FirstPersonViewport,
+  OrbitViewport,
+  ThirdPersonViewport,
 
-// Deprecated Core Lib Classes
-export {default as PerspectiveViewport} from './core/deprecated/viewports/perspective-viewport';
-export {default as OrthographicViewport} from './core/deprecated/viewports/orthographic-viewport';
-export {assembleShaders} from 'luma.gl'; // Forward the luma.gl version (note: now integrated with Model)
+  // Transition bindings
+  TRANSITION_EVENTS,
+  LinearInterpolator,
+  ViewportFlyToInterpolator,
+
+  DeckGLJS,
+  MapControllerJS,
+
+  EffectManager,
+  Effect
+} = CoreExperimental;
 
 Object.assign(experimental, {
+  // Unfinished controller/viewport classes
+  ViewState,
+  FirstPersonState,
+  OrbitState,
+  MapState,
+
+  Controller,
+  FirstPersonController,
+
+  FirstPersonViewport,
+  OrbitViewport,
+  ThirdPersonViewport,
+
+  // Transition bindings
+  TRANSITION_EVENTS,
+  LinearInterpolator,
+  ViewportFlyToInterpolator,
+
+  // Pure JS (non-React) API
+  DeckGLJS,
+  MapControllerJS,
+
+  // Effects base classes
+  EffectManager,
+  Effect
+});
+
+// Experimental Data Accessor Helpers
+// INTERNAL - TODO remove from experimental exports
+const {
+  // For react module
+  TransitionManager,
+  extractViewportFrom,
+
+  // For layers
+  BinSorter,
+  linearScale,
+  getLinearScale,
+  quantizeScale,
+  getQuantizeScale,
+  clamp,
+  defaultColorRange,
+
+  log,
+
   get,
   count,
-  EffectManager,
-  Effect,
 
-  // Pure JS (i.e. non-React) support
-  DeckGLJS,        // Integrate into `LayerManager`?
-  MapControllerJS  // Integrate into `MapController` JS class?
+  flatten,
+  countVertices,
+  flattenVertices,
+  fillArray,
+
+  enable64bitSupport,
+  fp64ify
+} = CoreExperimental;
+
+Object.assign(experimental, {
+  // For react module
+  TransitionManager,
+  extractViewportFrom,
+
+  // For layers
+  BinSorter,
+  linearScale,
+  getLinearScale,
+  quantizeScale,
+  getQuantizeScale,
+  clamp,
+  defaultColorRange,
+
+  log,
+
+  get,
+  count,
+
+  flatten,
+  countVertices,
+  flattenVertices,
+  fillArray,
+
+  enable64bitSupport,
+  fp64ify
 });
 
 //
 // CORE LAYERS PACKAGE
 //
 
-export {default as ArcLayer} from './core-layers/arc-layer/arc-layer';
-export {default as IconLayer} from './core-layers/icon-layer/icon-layer';
-export {default as LineLayer} from './core-layers/line-layer/line-layer';
-export {default as PointCloudLayer} from './core-layers/point-cloud-layer/point-cloud-layer';
-export {default as ScatterplotLayer} from './core-layers/scatterplot-layer/scatterplot-layer';
-
-export {default as ScreenGridLayer} from './core-layers/screen-grid-layer/screen-grid-layer';
-export {default as GridLayer} from './core-layers/grid-layer/grid-layer';
-export {default as GridCellLayer} from './core-layers/grid-cell-layer/grid-cell-layer';
-
-export {default as HexagonLayer} from './core-layers/hexagon-layer/hexagon-layer';
-export {default as HexagonCellLayer} from './core-layers/hexagon-cell-layer/hexagon-cell-layer';
-
-export {default as PathLayer} from './core-layers/path-layer/path-layer';
-export {default as PolygonLayer} from './core-layers/polygon-layer/polygon-layer';
-export {default as GeoJsonLayer} from './core-layers/geojson-layer/geojson-layer';
-
-//
-// DEPRECATED LAYERS PACKAGE
-//
-
-export {default as ChoroplethLayer} from './deprecated-layers/choropleth-layer/choropleth-layer';
-export {default as ChoroplethLayer64} from './deprecated-layers/choropleth-layer-64/choropleth-layer-64';
-export {default as ExtrudedChoroplethLayer64} from './deprecated-layers/extruded-choropleth-layer-64/extruded-choropleth-layer-64';
+export {
+  ArcLayer,
+  IconLayer,
+  LineLayer,
+  PointCloudLayer,
+  ScatterplotLayer,
+  ScreenGridLayer,
+  GridLayer,
+  GridCellLayer,
+  HexagonLayer,
+  HexagonCellLayer,
+  PathLayer,
+  PolygonLayer,
+  GeoJsonLayer
+} from './core-layers';
 
 //
 // EFFECTS PACKAGE
@@ -112,23 +190,19 @@ Object.assign(experimental, {
 // REACT BINDINGS PACKAGE
 //
 
-export {default as default} from './react/deckgl';
-export {default as DeckGL} from './react/deckgl';
-export {default as ViewportController} from './react/viewport-controller';
-export {default as MapController} from './react/map-controller';
+export {default, DeckGL} from './react';
 
-// Experimental React bindings
-import {default as OrbitController} from './react/experimental/orbit-controller';
-import AnimationMapController, {ANIMATION_EVENTS} from './react/experimental/animation-map-controller';
-import {viewportLinearInterpolator, viewportFlyToInterpolator} from './react/experimental/viewport-animation-utils';
-
-// Experimental react bindings
-Object.assign(experimental, {
+// TODO - do we need to expose these?
+import {
+  MapController,
   OrbitController,
-  AnimationMapController,
-  viewportLinearInterpolator,
-  viewportFlyToInterpolator,
-  ANIMATION_EVENTS
+  ViewportController // TODO - merge with deck.gl?
+} from './react';
+
+Object.assign(experimental, {
+  MapController,
+  OrbitController,
+  ViewportController
 });
 
 //

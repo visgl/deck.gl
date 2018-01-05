@@ -42,8 +42,8 @@ import {CompositeLayer, PolygonLayer} from 'deck.gl';
 
 import {getS2Polygon} from './s2-utils';
 
-const defaultStrokeColor = [0x33, 0x33, 0x33, 0xFF];
-const defaultFillColor = [0xBD, 0xE2, 0x7A, 0xFF];
+const defaultStrokeColor = [0x33, 0x33, 0x33, 0xff];
+const defaultFillColor = [0xbd, 0xe2, 0x7a, 0xff];
 
 const defaultProps = {
   drawCells: true,
@@ -71,18 +71,20 @@ export default class S2Layer extends CompositeLayer {
 
     // Filled Polygon Layer
     // TODO - use a composite polygon layer that renders outlines etc
-    return new PolygonLayer(Object.assign({}, this.props, {
-      id: `${id}-polygon-fill`,
-      getPolygon: x => getS2Polygon(getS2Token(x)),
-      getHeight,
-      getColor: getFillColor,
-      extruded,
-      wireframe,
-      filled,
-      updateTriggers: Object.assign({}, this.props.updateTriggers, {
-        getColor: this.props.updateTriggers.getFillColor
+    return new PolygonLayer(
+      Object.assign({}, this.props, {
+        id: `${id}-polygon-fill`,
+        getPolygon: x => getS2Polygon(getS2Token(x)),
+        getHeight,
+        getColor: getFillColor,
+        extruded,
+        wireframe,
+        filled,
+        updateTriggers: Object.assign({}, this.props.updateTriggers, {
+          getColor: this.props.updateTriggers.getFillColor
+        })
       })
-    }));
+    );
   }
 }
 

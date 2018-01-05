@@ -28,7 +28,6 @@ attribute vec2 instancePositions;
 attribute vec3 instanceNormals;
 attribute float instanceIsTitle;
 
-uniform vec2 viewportSize;
 uniform vec3 gridDims;
 uniform vec3 gridCenter;
 uniform float gridOffset;
@@ -53,7 +52,7 @@ float sum3(vec3 v) {
 
 // determines if the grid line is behind or in front of the center
 float frontFacing(vec3 v) {
-  vec4 v_clipspace = projectionMatrix * modelMatrix * vec4(v, 0.0);
+  vec4 v_clipspace = project_uViewProjectionMatrix * project_uModelMatrix * vec4(v, 0.0);
   return step(v_clipspace.z, 0.0);
 }
 
@@ -109,7 +108,7 @@ void main(void) {
 
   vec2 labelVertexOffset = vec2(texCoords.x - 0.5, 0.5 - texCoords.y) * textureSize;
   // project to clipspace
-  labelVertexOffset *= 2.0 / viewportSize;
+  labelVertexOffset = project_pixel_to_clipspace(labelVertexOffset).xy;
   // scale label to be constant size in pixels
   labelVertexOffset *= fontSize / labelHeight * position_clipspace.w;
 

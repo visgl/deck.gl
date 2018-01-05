@@ -96,7 +96,7 @@ export default function createLayerDemoClass(settings) {
 
       return (
         <div>
-          <DeckGL {...viewport} layers={ layers } initWebGLParameters />
+          <DeckGL {...viewport} layers={ layers } />
           { this._renderTooltip() }
         </div>
       );

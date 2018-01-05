@@ -20,7 +20,6 @@
 
 // Linear scale maps continuous domain to continuous range
 export function linearScale(domain, range, value) {
-
   return (value - domain[0]) / (domain[1] - domain[0]) * (range[1] - range[0]) + range[0];
 }
 

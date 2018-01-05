@@ -19,6 +19,12 @@
 // THE SOFTWARE.
 /* eslint-disable max-len */
 
+// Intialize globals, check version
+import './lib/init';
+
+// Import shaderlib to make sure shader modules are initialized
+import './shaderlib';
+
 // Core Library
 export {COORDINATE_SYSTEM} from './lib/constants';
 export {default as LayerManager} from './lib/layer-manager';
@@ -28,52 +34,111 @@ export {default as CompositeLayer} from './lib/composite-layer';
 
 // Viewports
 export {default as Viewport} from './viewports/viewport';
-export {default as FirstPersonViewport} from './viewports/first-person-viewport';
-export {default as ThirdPersonViewport} from './viewports/third-person-viewport';
 export {default as WebMercatorViewport} from './viewports/web-mercator-viewport';
+export {default as PerspectiveViewport} from './viewports/perspective-viewport';
+export {default as OrthographicViewport} from './viewports/orthographic-viewport';
 
-// TODO - Do we need to export? Move to experimental?
-export {default as ViewportControls} from './controllers/controls';
-export {default as FirstPersonState} from './controllers/first-person-state';
-export {default as OrbitState} from './controllers/orbit-state';
-export {default as MapState} from './controllers/map-state';
+// EXPERIMENTAL EXPORTS
+// Experimental Features (May change in minor version bumps, use at your own risk)
+
+import {default as FirstPersonState} from './controllers/first-person-state';
+import {default as OrbitState} from './controllers/orbit-state';
+import {default as MapState} from './controllers/map-state';
+
+// Experimental Controllers
+import {default as Controller} from './controllers/viewport-controls';
+import {default as MapController} from './controllers/map-controls';
+
+import {default as FirstPersonViewport} from './viewports/first-person-viewport';
+import {default as ThirdPersonViewport} from './viewports/third-person-viewport';
+import {default as OrbitViewport} from './viewports/orbit-viewport';
 
 // Experimental Pure JS (non-React) bindings
-import {default as DeckGLJS} from './pure-js/deck';
-import {default as MapControllerJS} from './pure-js/map-controller';
+import {default as DeckGLJS} from './pure-js/deck-js';
+import {default as MapControllerJS} from './pure-js/map-controller-js';
+import {default as OrbitControllerJS} from './pure-js/orbit-controller-js';
 
-// Experimental Features (May change in minor version bumps, use at your own risk)
-import {get} from './lib/utils/get';
-import {count} from './lib/utils/count';
+// Experimental Effects (non-React) bindings
 import {default as EffectManager} from './experimental/lib/effect-manager';
 import {default as Effect} from './experimental/lib/effect';
 
-import {default as BinSorter} from './utils/bin-sorter';
-import {linearScale} from './utils/scale-utils';
-import {quantizeScale} from './utils/scale-utils';
-import {clamp} from './utils/scale-utils';
-import {defaultColorRange} from './utils/color-utils';
+// Eperimental Transitions
+import {TRANSITION_EVENTS} from './lib/transition-manager';
+import {default as LinearInterpolator} from './transitions/linear-interpolator';
+import {default as ViewportFlyToInterpolator} from './transitions/viewport-fly-to-interpolator';
 
+// INTERNAL EXPORTS
+
+import TransitionManager from './lib/transition-manager';
+import {extractViewportFrom} from './transitions/transition-utils';
+
+// Layer utilities
+
+// Layer utilities
+import {default as log} from './utils/log';
+import {get} from './utils/get';
+import {count} from './utils/count';
+
+import {default as BinSorter} from './utils/bin-sorter';
+import {defaultColorRange} from './utils/color-utils';
+import {linearScale, getLinearScale, quantizeScale, getQuantizeScale} from './utils/scale-utils';
+import {clamp} from './utils/scale-utils';
+
+import {flatten, countVertices, flattenVertices, fillArray} from './utils/flatten';
 // TODO - just expose as layer methods instead?
-import {enable64bitSupport} from './lib/utils/fp64';
-import {fp64ify} from './lib/utils/fp64';
+import {enable64bitSupport} from './utils/fp64';
+import {fp64ify} from './utils/fp64';
 
 export const experimental = {
-  BinSorter,
-  linearScale,
-  quantizeScale,
-  clamp,
-  defaultColorRange,
+  ViewportControls: Controller,
+  FirstPersonState,
+  OrbitState,
+  MapState,
 
-  get,
-  count,
+  Controller,
+  MapController,
+  // FirstPersonController,
+  // OrbitController,
 
-  enable64bitSupport,
-  fp64ify,
+  FirstPersonViewport,
+  ThirdPersonViewport,
+  OrbitViewport,
+
+  DeckGLJS,
+  MapControllerJS,
+  OrbitControllerJS,
 
   EffectManager,
   Effect,
 
-  DeckGLJS,
-  MapControllerJS
+  // Transitions
+  TRANSITION_EVENTS,
+  LinearInterpolator,
+  ViewportFlyToInterpolator,
+
+  // For react module
+  TransitionManager,
+  extractViewportFrom,
+
+  // For layers
+  BinSorter,
+  linearScale,
+  getLinearScale,
+  quantizeScale,
+  getQuantizeScale,
+  clamp,
+  defaultColorRange,
+
+  log,
+
+  get,
+  count,
+
+  flatten,
+  countVertices,
+  flattenVertices,
+  fillArray,
+
+  enable64bitSupport,
+  fp64ify
 };

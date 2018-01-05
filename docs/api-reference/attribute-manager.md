@@ -1,6 +1,6 @@
 # AttributeManager Class (Advanced)
 
-Note: The `AttributeManager` is used internally by deck.gl layers. Unless you are writing custom deck.gl layers, or you are working with some very narrow advanced performance optimization use cases, you do not need to use this class.
+> The `AttributeManager` is used internally by deck.gl layers. Unless you are writing custom deck.gl layers, or you are working with some very narrow advanced performance optimization use cases, you do not need to use this class.
 
 The `AttributeManager` class provides automated attribute allocations and updates.
 
@@ -54,7 +54,7 @@ Takes a single parameter as a map of attribute descriptor objects:
   * `attribute.size` (Number) - number of elements per object
   * `attribute.accessor` (String | Array of strings) - accessor name(s) that will
     trigger an update of this attribute when changed. Used with
-    [`updateTriggers`](/docs/api-reference/base-layer.md#-updatetriggers-object-optional-).
+    [`updateTriggers`](/docs/api-reference/layer.md#-updatetriggers-object-optional-).
   * `attribute.update` (Function) - the function to be called when
   * `attribute.instanced` (Boolean, optional) - if this is an instanced attribute
     (a.k.a. divisor). Default to `false`.
@@ -103,4 +103,4 @@ Parameters:
 - `attributeNames` (Array) - Array of attribute names to be removed
 
 ## Source
-[`src/lib/attribute-manager.js`](https://github.com/uber/deck.gl/blob/4.1-release/src/lib/attribute-manager.js)
+[`src/lib/attribute-manager.js`](https://github.com/uber/deck.gl/blob/5.0-release/src/lib/attribute-manager.js)

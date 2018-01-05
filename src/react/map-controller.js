@@ -1,16 +1,16 @@
 import {PureComponent, createElement} from 'react';
-import MapControllerJS from '../core/pure-js/map-controller';
+import MapControllerJS from '../core/pure-js/map-controller-js';
 
 export default class MapController extends PureComponent {
-
   constructor(props) {
     super(props);
     this.controller = null;
   }
 
   componentDidMount() {
-    const {eventCanvas} = this.refs;
-    this.controller = new MapControllerJS(Object.assign({}, this.props, {canvas: eventCanvas}));
+    this.controller = new MapControllerJS(
+      Object.assign({}, this.props, {canvas: this.eventCanvas})
+    );
   }
 
   componentWillUpdate(nextProps) {
@@ -30,14 +30,14 @@ export default class MapController extends PureComponent {
       position: 'relative'
     };
 
-    return (
-      createElement('div', {
+    return createElement(
+      'div',
+      {
         key: 'map-controls',
-        ref: 'eventCanvas',
+        ref: c => (this.eventCanvas = c),
         style: eventCanvasStyle
       },
-        this.props.children
-      )
+      this.props.children
     );
   }
 }

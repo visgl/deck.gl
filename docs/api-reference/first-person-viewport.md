@@ -1,4 +1,4 @@
-# FirstPersonViewport Class
+# FirstPersonViewport Class (Experimental)
 
 The [`FirstPersonViewport`] class is a subclass of [Viewport](/docs/api-reference/viewport.md) that creates a "camera" at the exact position, direction and orientation specified by the application. This is in contrast with e.g. [ThirdPersonViewport](/docs/api-reference/viewport.md) where the camera will be offset from and look "down" on the specified position.
 
@@ -56,4 +56,4 @@ See [Viewport constructor](/docs/api-reference/viewport.md#constructor) for addi
 
 ## Source
 
-[src/viewports/perspective-viewport.js](https://github.com/uber/deck.gl/blob/4.1-release/src/viewports/perspective-viewport.js)
+[src/viewports/perspective-viewport.js](https://github.com/uber/deck.gl/blob/5.0-release/src/viewports/perspective-viewport.js)

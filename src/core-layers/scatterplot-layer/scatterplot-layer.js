@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 
 import {COORDINATE_SYSTEM, Layer, experimental} from '../../core';
-const {fp64ify, enable64bitSupport, get} = experimental;
+const {fp64ify, enable64bitSupport} = experimental;
 import {GL, Model, Geometry} from 'luma.gl';
 
 import vs from './scatterplot-layer-vertex.glsl';
@@ -44,24 +44,34 @@ const defaultProps = {
 export default class ScatterplotLayer extends Layer {
   getShaders(id) {
     const {shaderCache} = this.context;
-    return enable64bitSupport(this.props) ?
-      {vs: vs64, fs, modules: ['project64', 'picking'], shaderCache} :
-      {vs, fs, modules: ['picking'], shaderCache}; // 'project' module added by default.
+    return enable64bitSupport(this.props)
+      ? {vs: vs64, fs, modules: ['project64', 'picking'], shaderCache}
+      : {vs, fs, modules: ['picking'], shaderCache}; // 'project' module added by default.
   }
 
   initializeState() {
-    const {gl} = this.context;
-    this.setState({model: this._getModel(gl)});
-
     /* eslint-disable max-len */
-    /* deprecated props check */
-    this._checkRemovedProp('radius', 'radiusScale');
-    this._checkRemovedProp('drawOutline', 'outline');
-
     this.state.attributeManager.addInstanced({
-      instancePositions: {size: 3, accessor: 'getPosition', update: this.calculateInstancePositions, transition: true},
-      instanceRadius: {size: 1, accessor: 'getRadius', defaultValue: 1, update: this.calculateInstanceRadius, transition: true},
-      instanceColors: {size: 4, type: GL.UNSIGNED_BYTE, accessor: 'getColor', update: this.calculateInstanceColors, transition: true}
+      instancePositions: {
+        size: 3,
+        transition: true,
+        accessor: 'getPosition',
+        update: this.calculateInstancePositions
+      },
+      instanceRadius: {
+        size: 1,
+        transition: true,
+        accessor: 'getRadius',
+        defaultValue: 1,
+        update: this.calculateInstanceRadius
+      },
+      instanceColors: {
+        size: 4,
+        transition: true,
+        type: GL.UNSIGNED_BYTE,
+        accessor: 'getColor',
+        update: this.calculateInstanceColors
+      }
     });
     /* eslint-enable max-len */
   }
@@ -80,11 +90,8 @@ export default class ScatterplotLayer extends Layer {
           }
         });
       } else {
-        attributeManager.remove([
-          'instancePositions64xyLow'
-        ]);
+        attributeManager.remove(['instancePositions64xyLow']);
       }
-
     }
   }
 
@@ -99,28 +106,35 @@ export default class ScatterplotLayer extends Layer {
 
   draw({uniforms}) {
     const {radiusScale, radiusMinPixels, radiusMaxPixels, outline, strokeWidth} = this.props;
-    this.state.model.render(Object.assign({}, uniforms, {
-      outline: outline ? 1 : 0,
-      strokeWidth,
-      radiusScale,
-      radiusMinPixels,
-      radiusMaxPixels
-    }));
+    this.state.model.render(
+      Object.assign({}, uniforms, {
+        outline: outline ? 1 : 0,
+        strokeWidth,
+        radiusScale,
+        radiusMinPixels,
+        radiusMaxPixels
+      })
+    );
   }
 
   _getModel(gl) {
     // a square that minimally cover the unit circle
     const positions = [-1, -1, 0, -1, 1, 0, 1, 1, 0, 1, -1, 0];
 
-    return new Model(gl, Object.assign(this.getShaders(), {
-      id: this.props.id,
-      geometry: new Geometry({
-        drawMode: GL.TRIANGLE_FAN,
-        positions: new Float32Array(positions)
-      }),
-      isInstanced: true,
-      shaderCache: this.context.shaderCache
-    }));
+    return new Model(
+      gl,
+      Object.assign(this.getShaders(), {
+        id: this.props.id,
+        geometry: new Geometry({
+          drawMode: GL.TRIANGLE_FAN,
+          attributes: {
+            positions: new Float32Array(positions)
+          }
+        }),
+        isInstanced: true,
+        shaderCache: this.context.shaderCache
+      })
+    );
   }
 
   calculateInstancePositions(attribute) {
@@ -129,9 +143,9 @@ export default class ScatterplotLayer extends Layer {
     let i = 0;
     for (const point of data) {
       const position = getPosition(point);
-      value[i++] = get(position, 0);
-      value[i++] = get(position, 1);
-      value[i++] = get(position, 2) || 0;
+      value[i++] = position[0];
+      value[i++] = position[1];
+      value[i++] = position[2] || 0;
     }
   }
 
@@ -141,8 +155,8 @@ export default class ScatterplotLayer extends Layer {
     let i = 0;
     for (const point of data) {
       const position = getPosition(point);
-      value[i++] = fp64ify(get(position, 0))[1];
-      value[i++] = fp64ify(get(position, 1))[1];
+      value[i++] = fp64ify(position[0])[1];
+      value[i++] = fp64ify(position[1])[1];
     }
   }
 
@@ -162,10 +176,10 @@ export default class ScatterplotLayer extends Layer {
     let i = 0;
     for (const point of data) {
       const color = getColor(point) || DEFAULT_COLOR;
-      value[i++] = get(color, 0);
-      value[i++] = get(color, 1);
-      value[i++] = get(color, 2);
-      value[i++] = isNaN(get(color, 3)) ? 255 : get(color, 3);
+      value[i++] = color[0];
+      value[i++] = color[1];
+      value[i++] = color[2];
+      value[i++] = isNaN(color[3]) ? 255 : color[3];
     }
   }
 }

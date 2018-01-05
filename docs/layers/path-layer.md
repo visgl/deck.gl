@@ -37,7 +37,7 @@ const App = ({data, viewport}) => {
 
 ## Properties
 
-Inherits from all [Base Layer](/docs/api-reference/base-layer.md) properties.
+Inherits from all [Base Layer](/docs/api-reference/layer.md) properties.
 
 ### Render Options
 
@@ -78,7 +78,7 @@ Only works if `rounded` is `false`.
 
 Whether the layer should be rendered in high-precision 64-bit mode
 
-##### `justified` (Boolean, optional)
+##### `dashJustified` (Boolean, optional)
 
 - Default: `false`
 
@@ -123,5 +123,4 @@ If this accessor is not specified, all paths are drawn as solid lines.
 
 ## Source
 
-[src/layers/core/path-layer](https://github.com/uber/deck.gl/tree/4.1-release/src/layers/core/path-layer)
-
+[src/layers/core/path-layer](https://github.com/uber/deck.gl/tree/5.0-release/src/layers/core/path-layer)

@@ -18,8 +18,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {COORDINATE_SYSTEM, Layer} from '../../core';
-import {fp64ify, enable64bitSupport} from '../../core/lib/utils/fp64';
+import {COORDINATE_SYSTEM, Layer, experimental} from '../../core';
+const {fp64ify, enable64bitSupport} = experimental;
 import {GL, Model, CubeGeometry} from 'luma.gl';
 
 import vs from './grid-cell-layer-vertex.glsl';
@@ -40,7 +40,7 @@ const defaultProps = {
   getColor: x => x.color,
 
   lightSettings: {
-    lightsPosition: [-122.45, 37.65, 8000, -122.45, 37.20, 1000],
+    lightsPosition: [-122.45, 37.65, 8000, -122.45, 37.2, 1000],
     ambientRatio: 0.4,
     diffuseRatio: 0.6,
     specularRatio: 0.8,
@@ -65,20 +65,28 @@ export default class GridCellLayer extends Layer {
 
   getShaders() {
     const {shaderCache} = this.context;
-    return enable64bitSupport(this.props) ?
-      {vs: vs64, fs, modules: ['project64', 'lighting', 'picking'], shaderCache} :
-      {vs, fs, modules: ['lighting', 'picking'], shaderCache}; // 'project' module added by default.
+    return enable64bitSupport(this.props)
+      ? {vs: vs64, fs, modules: ['project64', 'lighting', 'picking'], shaderCache}
+      : {vs, fs, modules: ['lighting', 'picking'], shaderCache}; // 'project' module added by default.
   }
 
   initializeState() {
-    const {gl} = this.context;
-    this.setState({model: this._getModel(gl)});
-
     const {attributeManager} = this.state;
     /* eslint-disable max-len */
     attributeManager.addInstanced({
-      instancePositions: {size: 4, accessor: ['getPosition', 'getElevation'], update: this.calculateInstancePositions, transition: true},
-      instanceColors: {size: 4, type: GL.UNSIGNED_BYTE, accessor: 'getColor', update: this.calculateInstanceColors, transition: true}
+      instancePositions: {
+        size: 4,
+        transition: true,
+        accessor: ['getPosition', 'getElevation'],
+        update: this.calculateInstancePositions
+      },
+      instanceColors: {
+        size: 4,
+        type: GL.UNSIGNED_BYTE,
+        transition: true,
+        accessor: 'getColor',
+        update: this.calculateInstanceColors
+      }
     });
     /* eslint-enable max-len */
   }
@@ -97,11 +105,8 @@ export default class GridCellLayer extends Layer {
           }
         });
       } else {
-        attributeManager.remove([
-          'instancePositions64xyLow'
-        ]);
+        attributeManager.remove(['instancePositions64xyLow']);
       }
-
     }
   }
 
@@ -117,24 +122,33 @@ export default class GridCellLayer extends Layer {
   }
 
   _getModel(gl) {
-    return new Model(gl, Object.assign({}, this.getShaders(), {
-      id: this.props.id,
-      geometry: new CubeGeometry(),
-      isInstanced: true,
-      shaderCache: this.context.shaderCache
-    }));
+    return new Model(
+      gl,
+      Object.assign({}, this.getShaders(), {
+        id: this.props.id,
+        geometry: new CubeGeometry(),
+        isInstanced: true,
+        shaderCache: this.context.shaderCache
+      })
+    );
   }
 
   updateUniforms() {
     const {opacity, extruded, elevationScale, coverage, lightSettings} = this.props;
+    const {model} = this.state;
 
-    this.setUniforms(Object.assign({}, {
-      extruded,
-      elevationScale,
-      opacity,
-      coverage
-    },
-    lightSettings));
+    model.setUniforms(
+      Object.assign(
+        {},
+        {
+          extruded,
+          elevationScale,
+          opacity,
+          coverage
+        },
+        lightSettings
+      )
+    );
   }
 
   draw({uniforms}) {
@@ -144,9 +158,14 @@ export default class GridCellLayer extends Layer {
 
     // cellSize needs to be updated on every draw call
     // because it is based on viewport
-    super.draw({uniforms: Object.assign({
-      cellSize: this.props.cellSize * pixelsPerMeter[0]
-    }, uniforms)});
+    super.draw({
+      uniforms: Object.assign(
+        {
+          cellSize: this.props.cellSize * pixelsPerMeter[0]
+        },
+        uniforms
+      )
+    });
   }
 
   calculateInstancePositions(attribute) {

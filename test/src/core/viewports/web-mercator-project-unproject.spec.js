@@ -1,6 +1,6 @@
 import {WebMercatorViewport} from 'deck.gl';
 import test from 'tape-catch';
-import {toLowPrecision} from 'deck.gl/test/test-utils/precision';
+import {toLowPrecision} from '@deck.gl/test-utils';
 
 const viewportProps = {
   latitude: 37.75,
@@ -81,7 +81,6 @@ test('Viewport projection', t => {
   const viewport = new WebMercatorViewport(viewportProps);
 
   TEST_CASES.forEach(({title, func, input, expected}) => {
-
     const output = viewport[func](input);
     t.deepEquals(
       output.map(x => toLowPrecision(x)),

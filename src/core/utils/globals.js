@@ -23,9 +23,7 @@
 
 /* global process, window, global, document */
 const isBrowser =
-  typeof process !== 'object' ||
-  String(process) !== '[object process]' ||
-  process.browser;
+  typeof process !== 'object' || String(process) !== '[object process]' || process.browser;
 
 module.exports = {
   window: typeof window !== 'undefined' ? window : global,

@@ -12,10 +12,10 @@ const MALE_COLOR = [0, 128, 255];
 const FEMALE_COLOR = [255, 0, 128];
 
 // Source data CSV
-const DATA_URL = 'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/scatterplot/manhattan.json';  // eslint-disable-line
+const DATA_URL =
+  'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/scatterplot/manhattan.json'; // eslint-disable-line
 
 class Root extends Component {
-
   constructor(props) {
     super(props);
     this.state = {
@@ -59,13 +59,15 @@ class Root extends Component {
       <MapGL
         {...viewport}
         onViewportChange={this._onViewportChange.bind(this)}
-        mapboxApiAccessToken={MAPBOX_TOKEN}>
-        <DeckGLOverlay viewport={viewport}
+        mapboxApiAccessToken={MAPBOX_TOKEN}
+      >
+        <DeckGLOverlay
+          viewport={viewport}
           data={data}
           maleColor={MALE_COLOR}
           femaleColor={FEMALE_COLOR}
           radius={30}
-          />
+        />
       </MapGL>
     );
   }

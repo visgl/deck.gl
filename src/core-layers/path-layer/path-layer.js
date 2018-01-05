@@ -35,7 +35,7 @@ const defaultProps = {
   rounded: false,
   miterLimit: 4,
   fp64: false,
-  justified: false,
+  dashJustified: false,
 
   getPath: object => object.path,
   getColor: object => object.color || DEFAULT_COLOR,
@@ -46,21 +46,21 @@ const defaultProps = {
 const isClosed = path => {
   const firstPoint = path[0];
   const lastPoint = path[path.length - 1];
-  return firstPoint[0] === lastPoint[0] && firstPoint[1] === lastPoint[1] &&
-    firstPoint[2] === lastPoint[2];
+  return (
+    firstPoint[0] === lastPoint[0] &&
+    firstPoint[1] === lastPoint[1] &&
+    firstPoint[2] === lastPoint[2]
+  );
 };
 
 export default class PathLayer extends Layer {
   getShaders() {
-    return enable64bitSupport(this.props) ?
-      {vs: vs64, fs, modules: ['project64', 'picking']} :
-      {vs, fs, modules: ['picking']}; // 'project' module added by default.
+    return enable64bitSupport(this.props)
+      ? {vs: vs64, fs, modules: ['project64', 'picking']}
+      : {vs, fs, modules: ['picking']}; // 'project' module added by default.
   }
 
   initializeState() {
-    const {gl} = this.context;
-    this.setState({model: this._getModel(gl)});
-
     const {attributeManager} = this.state;
     /* eslint-disable max-len */
     attributeManager.addInstanced({
@@ -70,7 +70,12 @@ export default class PathLayer extends Layer {
       instanceRightDeltas: {size: 3, update: this.calculateRightDeltas},
       instanceStrokeWidths: {size: 1, accessor: 'getWidth', update: this.calculateStrokeWidths},
       instanceDashArrays: {size: 2, accessor: 'getDashArray', update: this.calculateDashArrays},
-      instanceColors: {size: 4, type: GL.UNSIGNED_BYTE, accessor: 'getColor', update: this.calculateColors},
+      instanceColors: {
+        size: 4,
+        type: GL.UNSIGNED_BYTE,
+        accessor: 'getColor',
+        update: this.calculateColors
+      },
       instancePickingColors: {size: 3, type: GL.UNSIGNED_BYTE, update: this.calculatePickingColors}
     });
     /* eslint-enable max-len */
@@ -89,9 +94,7 @@ export default class PathLayer extends Layer {
           }
         });
       } else {
-        attributeManager.remove([
-          'instanceStartEndPositions64xyLow'
-        ]);
+        attributeManager.remove(['instanceStartEndPositions64xyLow']);
       }
     }
   }
@@ -107,7 +110,12 @@ export default class PathLayer extends Layer {
     }
     this.updateAttribute({props, oldProps, changeFlags});
 
-    if (changeFlags.dataChanged) {
+    const geometryChanged =
+      changeFlags.dataChanged ||
+      (changeFlags.updateTriggersChanged &&
+        (changeFlags.updateTriggersChanged.all || changeFlags.updateTriggersChanged.getPath));
+
+    if (geometryChanged) {
       // this.state.paths only stores point positions in each path
       const paths = props.data.map(getPath);
       const numInstances = paths.reduce((count, path) => count + path.length - 1, 0);
@@ -119,17 +127,24 @@ export default class PathLayer extends Layer {
 
   draw({uniforms}) {
     const {
-      rounded, miterLimit, widthScale, widthMinPixels, widthMaxPixels, justified
+      rounded,
+      miterLimit,
+      widthScale,
+      widthMinPixels,
+      widthMaxPixels,
+      dashJustified
     } = this.props;
 
-    this.state.model.render(Object.assign({}, uniforms, {
-      jointType: Number(rounded),
-      alignMode: Number(justified),
-      widthScale,
-      miterLimit,
-      widthMinPixels,
-      widthMaxPixels
-    }));
+    this.state.model.render(
+      Object.assign({}, uniforms, {
+        jointType: Number(rounded),
+        alignMode: Number(dashJustified),
+        widthScale,
+        miterLimit,
+        widthMinPixels,
+        widthMaxPixels
+      })
+    );
   }
 
   _getModel(gl) {
@@ -150,11 +165,20 @@ export default class PathLayer extends Layer {
 
     const SEGMENT_INDICES = [
       // start corner
-      0, 2, 1,
+      0,
+      2,
+      1,
       // body
-      1, 2, 4, 1, 4, 3,
+      1,
+      2,
+      4,
+      1,
+      4,
+      3,
       // end corner
-      3, 4, 5
+      3,
+      4,
+      5
     ];
 
     // [0] position on segment - 0: start, 1: end
@@ -162,31 +186,46 @@ export default class PathLayer extends Layer {
     // [2] role - 0: offset point 1: joint point
     const SEGMENT_POSITIONS = [
       // bevel start corner
-      0, 0, 1,
+      0,
+      0,
+      1,
       // start inner corner
-      0, -1, 0,
+      0,
+      -1,
+      0,
       // start outer corner
-      0, 1, 0,
+      0,
+      1,
+      0,
       // end inner corner
-      1, -1, 0,
+      1,
+      -1,
+      0,
       // end outer corner
-      1, 1, 0,
+      1,
+      1,
+      0,
       // bevel end corner
-      1, 0, 1
+      1,
+      0,
+      1
     ];
 
-    return new Model(gl, Object.assign({}, this.getShaders(), {
-      id: this.props.id,
-      geometry: new Geometry({
-        drawMode: GL.TRIANGLES,
-        attributes: {
-          indices: new Uint16Array(SEGMENT_INDICES),
-          positions: new Float32Array(SEGMENT_POSITIONS)
-        }
-      }),
-      isInstanced: true,
-      shaderCache: this.context.shaderCache
-    }));
+    return new Model(
+      gl,
+      Object.assign({}, this.getShaders(), {
+        id: this.props.id,
+        geometry: new Geometry({
+          drawMode: GL.TRIANGLES,
+          attributes: {
+            indices: new Uint16Array(SEGMENT_INDICES),
+            positions: new Float32Array(SEGMENT_POSITIONS)
+          }
+        }),
+        isInstanced: true,
+        shaderCache: this.context.shaderCache
+      })
+    );
   }
 
   calculateStartPositions(attribute) {
@@ -251,7 +290,7 @@ export default class PathLayer extends Layer {
         const point = path[ptIndex];
         value[i++] = point[0] - prevPoint[0];
         value[i++] = point[1] - prevPoint[1];
-        value[i++] = (point[2] - prevPoint[2]) || 0;
+        value[i++] = point[2] - prevPoint[2] || 0;
         prevPoint = point;
       }
     });
@@ -272,7 +311,7 @@ export default class PathLayer extends Layer {
 
         value[i++] = nextPoint[0] - point[0];
         value[i++] = nextPoint[1] - point[1];
-        value[i++] = (nextPoint[2] - point[2]) || 0;
+        value[i++] = nextPoint[2] - point[2] || 0;
       }
     });
   }
@@ -344,7 +383,6 @@ export default class PathLayer extends Layer {
       }
     });
   }
-
 }
 
 PathLayer.layerName = 'PathLayer';

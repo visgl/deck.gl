@@ -13,10 +13,10 @@ const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
 // sample data
 const FILE_PATH = 'https://rivulet-zhang.github.io/dataRepo/tagmap/hashtags10k.json';
 // mapbox style file path
-const MAPBOX_STYLE_FILE = 'https://rivulet-zhang.github.io/dataRepo/mapbox/style/map-style-dark-v9-no-labels.json';
+const MAPBOX_STYLE_FILE =
+  'https://rivulet-zhang.github.io/dataRepo/mapbox/style/map-style-dark-v9-no-labels.json';
 
 class Root extends Component {
-
   constructor(props) {
     super(props);
     this.state = {
@@ -41,7 +41,7 @@ class Root extends Component {
 
     this._stats = new Stats();
     this._stats.showPanel(0);
-    this.refs.fps.appendChild(this._stats.dom);
+    this.fps.appendChild(this._stats.dom);
 
     const calcFPS = () => {
       this._stats.begin();
@@ -107,14 +107,11 @@ class Root extends Component {
           mapStyle={mapStyle}
           preventStyleDiffing={true}
           onViewportChange={this._onViewportChange.bind(this)}
-          mapboxApiAccessToken={MAPBOX_TOKEN}>
-          <DeckGLOverlay
-            viewport={viewport}
-            data={data}
-            weightThreshold={weightThreshold}
-          />
+          mapboxApiAccessToken={MAPBOX_TOKEN}
+        >
+          <DeckGLOverlay viewport={viewport} data={data} weightThreshold={weightThreshold} />
         </MapGL>
-        <div ref="fps" className="fps" />
+        <div ref={c => (this.fps = c)} className="fps" />
       </div>
     );
   }

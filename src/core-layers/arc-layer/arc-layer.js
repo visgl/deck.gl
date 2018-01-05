@@ -18,8 +18,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {COORDINATE_SYSTEM, Layer} from '../../core';
-import {fp64ify, enable64bitSupport} from '../../core/lib/utils/fp64';
+import {COORDINATE_SYSTEM, Layer, experimental} from '../../core';
+const {fp64ify, enable64bitSupport} = experimental;
 
 import {GL, Model, Geometry} from 'luma.gl';
 
@@ -41,22 +41,36 @@ const defaultProps = {
 
 export default class ArcLayer extends Layer {
   getShaders() {
-    return enable64bitSupport(this.props) ?
-      {vs: vs64, fs, modules: ['project64', 'picking']} :
-      {vs, fs, modules: ['picking']}; // 'project' module added by default.
+    return enable64bitSupport(this.props)
+      ? {vs: vs64, fs, modules: ['project64', 'picking']}
+      : {vs, fs, modules: ['picking']}; // 'project' module added by default.
   }
 
   initializeState() {
-    const {gl} = this.context;
-    this.setState({model: this._getModel(gl)});
-
     const {attributeManager} = this.state;
 
     /* eslint-disable max-len */
     attributeManager.addInstanced({
-      instancePositions: {size: 4, accessor: ['getSourcePosition', 'getTargetPosition'], update: this.calculateInstancePositions, transition: true},
-      instanceSourceColors: {size: 4, type: GL.UNSIGNED_BYTE, accessor: 'getSourceColor', update: this.calculateInstanceSourceColors, transition: true},
-      instanceTargetColors: {size: 4, type: GL.UNSIGNED_BYTE, accessor: 'getTargetColor', update: this.calculateInstanceTargetColors, transition: true}
+      instancePositions: {
+        size: 4,
+        transition: true,
+        accessor: ['getSourcePosition', 'getTargetPosition'],
+        update: this.calculateInstancePositions
+      },
+      instanceSourceColors: {
+        size: 4,
+        type: GL.UNSIGNED_BYTE,
+        transition: true,
+        accessor: 'getSourceColor',
+        update: this.calculateInstanceSourceColors
+      },
+      instanceTargetColors: {
+        size: 4,
+        type: GL.UNSIGNED_BYTE,
+        transition: true,
+        accessor: 'getTargetColor',
+        update: this.calculateInstanceTargetColors
+      }
     });
     /* eslint-enable max-len */
   }
@@ -75,11 +89,8 @@ export default class ArcLayer extends Layer {
           }
         });
       } else {
-        attributeManager.remove([
-          'instancePositions64Low'
-        ]);
+        attributeManager.remove(['instancePositions64Low']);
       }
-
     }
   }
 
@@ -96,9 +107,11 @@ export default class ArcLayer extends Layer {
   draw({uniforms}) {
     const {strokeWidth} = this.props;
 
-    this.state.model.render(Object.assign({}, uniforms, {
-      strokeWidth
-    }));
+    this.state.model.render(
+      Object.assign({}, uniforms, {
+        strokeWidth
+      })
+    );
   }
 
   _getModel(gl) {
@@ -115,15 +128,20 @@ export default class ArcLayer extends Layer {
       positions = positions.concat([i, -1, 0, i, 1, 0]);
     }
 
-    const model = new Model(gl, Object.assign({}, this.getShaders(), {
-      id: this.props.id,
-      geometry: new Geometry({
-        drawMode: GL.TRIANGLE_STRIP,
-        positions: new Float32Array(positions)
-      }),
-      isInstanced: true,
-      shaderCache: this.context.shaderCache
-    }));
+    const model = new Model(
+      gl,
+      Object.assign({}, this.getShaders(), {
+        id: this.props.id,
+        geometry: new Geometry({
+          drawMode: GL.TRIANGLE_STRIP,
+          attributes: {
+            positions: new Float32Array(positions)
+          }
+        }),
+        isInstanced: true,
+        shaderCache: this.context.shaderCache
+      })
+    );
 
     model.setUniforms({numSegments: NUM_SEGMENTS});
 

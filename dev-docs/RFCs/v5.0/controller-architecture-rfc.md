@@ -11,7 +11,7 @@ Enabling applications to easily compose and switch between multiple viewports an
 
 ## Idea
 
-The ability to have all `Controller` classes work on a common `ViewState` class, defining different interaction modes.
+The ability to have all `Controller` (and `Viewport`) classes take a common `ViewState` class, defining different interaction modes.
 
 ```
   MapController          \              /  WebMercatorViewport

@@ -39,22 +39,35 @@ const defaultProps = {
 
 export default class LineLayer extends Layer {
   getShaders() {
-    return enable64bitSupport(this.props) ?
-      {vs: vs64, fs, modules: ['project64', 'picking']} :
-      {vs, fs, modules: ['picking']}; // 'project' module added by default.
+    return enable64bitSupport(this.props)
+      ? {vs: vs64, fs, modules: ['project64', 'picking']}
+      : {vs, fs, modules: ['picking']}; // 'project' module added by default.
   }
 
   initializeState() {
-    const {gl} = this.context;
-    this.setState({model: this._getModel(gl)});
-
     const {attributeManager} = this.state;
 
     /* eslint-disable max-len */
     attributeManager.addInstanced({
-      instanceSourcePositions: {size: 3, accessor: 'getSourcePosition', update: this.calculateInstanceSourcePositions, transition: true},
-      instanceTargetPositions: {size: 3, accessor: 'getTargetPosition', update: this.calculateInstanceTargetPositions, transition: true},
-      instanceColors: {size: 4, type: GL.UNSIGNED_BYTE, accessor: 'getColor', update: this.calculateInstanceColors, transition: true}
+      instanceSourcePositions: {
+        size: 3,
+        transition: true,
+        accessor: 'getSourcePosition',
+        update: this.calculateInstanceSourcePositions
+      },
+      instanceTargetPositions: {
+        size: 3,
+        transition: true,
+        accessor: 'getTargetPosition',
+        update: this.calculateInstanceTargetPositions
+      },
+      instanceColors: {
+        size: 4,
+        type: GL.UNSIGNED_BYTE,
+        transition: true,
+        accessor: 'getColor',
+        update: this.calculateInstanceColors
+      }
     });
     /* eslint-enable max-len */
   }
@@ -73,9 +86,7 @@ export default class LineLayer extends Layer {
           }
         });
       } else {
-        attributeManager.remove([
-          'instanceSourceTargetPositions64xyLow'
-        ]);
+        attributeManager.remove(['instanceSourceTargetPositions64xyLow']);
       }
     }
   }
@@ -93,9 +104,11 @@ export default class LineLayer extends Layer {
   draw({uniforms}) {
     const {strokeWidth} = this.props;
 
-    this.state.model.render(Object.assign({}, uniforms, {
-      strokeWidth
-    }));
+    this.state.model.render(
+      Object.assign({}, uniforms, {
+        strokeWidth
+      })
+    );
   }
 
   _getModel(gl) {
@@ -108,15 +121,20 @@ export default class LineLayer extends Layer {
      */
     const positions = [0, -1, 0, 0, 1, 0, 1, -1, 0, 1, 1, 0];
 
-    return new Model(gl, Object.assign({}, this.getShaders(), {
-      id: this.props.id,
-      geometry: new Geometry({
-        drawMode: GL.TRIANGLE_STRIP,
-        positions: new Float32Array(positions)
-      }),
-      isInstanced: true,
-      shaderCache: this.context.shaderCache
-    }));
+    return new Model(
+      gl,
+      Object.assign({}, this.getShaders(), {
+        id: this.props.id,
+        geometry: new Geometry({
+          drawMode: GL.TRIANGLE_STRIP,
+          attributes: {
+            positions: new Float32Array(positions)
+          }
+        }),
+        isInstanced: true,
+        shaderCache: this.context.shaderCache
+      })
+    );
   }
 
   calculateInstanceSourcePositions(attribute) {

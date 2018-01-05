@@ -20,7 +20,7 @@
 /* eslint-disable func-style, no-console, max-len */
 import test from 'tape-catch';
 import {LayerManager, Viewport, Layer, CompositeLayer} from 'deck.gl';
-import gl from 'deck.gl/test/test-utils/setup-gl';
+import {gl} from '@deck.gl/test-utils';
 
 class TestLayer extends Layer {
   initializeState() {}
@@ -31,8 +31,8 @@ TestLayer.layerName = 'TestLayer';
 class TestCompositeLayer extends CompositeLayer {
   renderLayers() {
     return [
-      new TestLayer(Object.assign({id: `${this.props.id}-sublayer-1`}, this.getBaseLayerProps())),
-      new TestLayer(Object.assign({id: `${this.props.id}-sublayer-2`}, this.getBaseLayerProps()))
+      new TestLayer(Object.assign({id: `${this.props.id}-sublayer-1`}, this.getSubLayerProps())),
+      new TestLayer(Object.assign({id: `${this.props.id}-sublayer-2`}, this.getSubLayerProps()))
     ];
   }
 }
@@ -46,14 +46,14 @@ const LAYERS = [
 
 test('LayerManager#constructor', t => {
   t.ok(LayerManager, 'LayerManager imported');
-  const layerManager = new LayerManager({gl});
+  const layerManager = new LayerManager(gl);
   t.ok(layerManager, 'LayerManager created');
   layerManager.setViewport(new Viewport());
   t.end();
 });
 
 test('LayerManager#getLayers', t => {
-  const layerManager = new LayerManager({gl});
+  const layerManager = new LayerManager(gl);
   layerManager.setViewport(new Viewport());
   layerManager.updateLayers({newLayers: LAYERS});
   let layers = layerManager.getLayers();

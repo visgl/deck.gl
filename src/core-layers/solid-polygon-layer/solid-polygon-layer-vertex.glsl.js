@@ -27,16 +27,21 @@ attribute vec4 colors;
 attribute vec3 pickingColors;
 
 uniform float extruded;
+uniform float elevationScale;
 uniform float opacity;
 
 varying vec4 vColor;
 
 void main(void) {
-  vec4 position_worldspace = vec4(project_position(positions), 1.0);
+  
+  vec4 position_worldspace = vec4(project_position(
+    vec3(positions.x, positions.y, positions.z * elevationScale)),
+    1.0
+  );
   gl_Position = project_to_clipspace(position_worldspace);
 
   float lightWeight = 1.0;
-
+  
   if (extruded > 0.5) {
     // Here, the input parameters should be
     // position_worldspace.xyz / position_worldspace.w.
@@ -48,7 +53,7 @@ void main(void) {
     // to the getLightWeight() function
     lightWeight = getLightWeight(
       position_worldspace.xyz,
-      normals
+      project_normal(normals)
     );
   }
 

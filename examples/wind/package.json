@@ -11,12 +11,12 @@
     "babel-polyfill": "^6.16.0",
     "d3-request": "^1.0.3",
     "d3-voronoi": "^1.1.1",
-    "deck.gl": "^4.1.0",
-    "luma.gl": "^4.0.1",
-    "react": "^15.4.1",
+    "deck.gl": "^5.0.0",
+    "prop-types": "^15.6.0",
+    "react": "^16.2.0",
     "react-autobind": "^1.0.6",
-    "react-dom": "^15.4.1",
-    "react-map-gl": "^3.0.0-beta.3",
+    "react-dom": "^16.2.0",
+    "react-map-gl": "3.2.0-alpha.3",
     "tween.js": "^16.6.0"
   },
   "devDependencies": {
@@ -26,6 +26,7 @@
     "babel-preset-react": "^6.16.0",
     "babel-preset-stage-2": "^6.18.0",
     "brfs-babel": "^1.0.0",
+    "buble-loader": "^0.4.0",
     "transform-loader": "^0.2.3",
     "webpack": "^2.6.1",
     "webpack-dev-server": "^2.4.5"

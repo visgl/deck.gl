@@ -20,10 +20,10 @@ const tooltipStyle = {
 };
 
 // Source data GeoJSON
-const DATA_URL = 'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/arc/counties.json'; // eslint-disable-line
+const DATA_URL =
+  'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/arc/counties.json'; // eslint-disable-line
 
 class Root extends Component {
-
   constructor(props) {
     super(props);
     this.state = {
@@ -104,15 +104,19 @@ class Root extends Component {
     }
 
     return (
-      <div onMouseMove={this._onMouseMove.bind(this)}
-           onMouseEnter={this._onMouseEnter.bind(this)}
-           onMouseLeave={this._onMouseLeave.bind(this)}>
+      <div
+        onMouseMove={this._onMouseMove.bind(this)}
+        onMouseEnter={this._onMouseEnter.bind(this)}
+        onMouseLeave={this._onMouseLeave.bind(this)}
+      >
         {this._renderTooltip()}
         <MapGL
           {...viewport}
           onViewportChange={this._onViewportChange.bind(this)}
-          mapboxApiAccessToken={MAPBOX_TOKEN}>
-          <DeckGLOverlay viewport={viewport}
+          mapboxApiAccessToken={MAPBOX_TOKEN}
+        >
+          <DeckGLOverlay
+            viewport={viewport}
             data={data}
             brushRadius={100000}
             opacity={0.7}

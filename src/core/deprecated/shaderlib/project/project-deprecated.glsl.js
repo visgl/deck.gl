@@ -19,13 +19,6 @@
 // THE SOFTWARE.
 
 export default `\
-// Backwards compatibility
-uniform mat4 modelMatrix;
-uniform mat4 projectionMatrix;
-uniform vec3 projectionPixelsPerUnit;
-uniform float projectionScale; // This is the mercator scale (2 ** zoom)
-
-
 float scale(float position) {
   return project_scale(position);
 }

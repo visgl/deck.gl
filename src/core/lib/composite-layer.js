@@ -17,9 +17,9 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-
 import Layer from './layer';
-import {log} from './utils';
+import log from '../utils/log';
+import {flatten} from '../utils/flatten';
 
 export default class CompositeLayer extends Layer {
   constructor(props) {
@@ -30,15 +30,13 @@ export default class CompositeLayer extends Layer {
     return true;
   }
 
-  // initializeState is usually not needed for composite layers
-  // Provide empty definition to disable check for missing definition
-  initializeState() {
+  getSubLayers() {
+    return this.internalState.subLayers || [];
   }
 
-  // No-op for the invalidateAttribute function as the composite
-  // layer has no AttributeManager
-  invalidateAttribute() {
-  }
+  // initializeState is usually not needed for composite layers
+  // Provide empty definition to disable check for missing definition
+  initializeState() {}
 
   // called to augment the info object that is bubbled up from a sublayer
   // override Layer.getPickingInfo() because decoding / setting uniform do
@@ -48,37 +46,74 @@ export default class CompositeLayer extends Layer {
     return info;
   }
 
-  // Implement to generate sublayers
+  // Implement to generate subLayers
   renderLayers() {
     return null;
   }
 
-  // Returns props that should be forwarded to children
-  // TODO - implement autoforwarding?
-  getBaseLayerProps() {
+  // Returns sub layer props for a specific sublayer
+  getSubLayerProps(sublayerProps) {
     const {
-      opacity, pickable, visible,
-      parameters, getPolygonOffset,
-      highlightedObjectIndex, autoHighlight, highlightColor,
-      coordinateSystem, coordinateOrigin, modelMatrix
+      opacity,
+      pickable,
+      visible,
+      parameters,
+      getPolygonOffset,
+      highlightedObjectIndex,
+      autoHighlight,
+      highlightColor,
+      coordinateSystem,
+      coordinateOrigin,
+      modelMatrix
     } = this.props;
-
-    return {
-      opacity, pickable, visible,
-      parameters, getPolygonOffset,
-      highlightedObjectIndex, autoHighlight, highlightColor,
-      coordinateSystem, coordinateOrigin, modelMatrix
+    const newProps = {
+      opacity,
+      pickable,
+      visible,
+      parameters,
+      getPolygonOffset,
+      highlightedObjectIndex,
+      autoHighlight,
+      highlightColor,
+      coordinateSystem,
+      coordinateOrigin,
+      modelMatrix
     };
+
+    if (sublayerProps) {
+      Object.assign(newProps, sublayerProps, {
+        id: `${this.props.id}-${sublayerProps.id}`,
+        updateTriggers: Object.assign(
+          {
+            all: this.props.updateTriggers.all
+          },
+          sublayerProps.updateTriggers
+        )
+      });
+    }
+
+    return newProps;
   }
 
-  _renderLayers(updateParams) {
-    if (this.state.oldSubLayers && !this.shouldUpdateState(updateParams)) {
-      log.log(2, `Composite layer reused sublayers ${this}`, this.state.oldSubLayers);
-      return this.state.oldSubLayers;
+  // Called by layer manager to render subLayers
+  _renderLayers() {
+    let {subLayers} = this.internalState;
+    if (subLayers && !this.needsUpdate()) {
+      log.log(3, `Composite layer reused subLayers ${this}`, this.internalState.subLayers);
+    } else {
+      subLayers = this.renderLayers();
+      // Flatten the returned array, removing any null, undefined or false
+      // this allows layers to render sublayers conditionally
+      // (see CompositeLayer.renderLayers docs)
+      subLayers = flatten(subLayers, {filter: Boolean});
+      this.internalState.subLayers = subLayers;
+      log.log(2, `Composite layer rendered new subLayers ${this}`, subLayers);
     }
-    const subLayers = this.renderLayers();
-    this.state.oldSubLayers = subLayers;
-    log.log(2, `Composite layer rendered new sublayers ${this}`, this.state.oldSubLayers);
-    return subLayers;
+
+    // populate reference to parent layer (this layer)
+    // NOTE: needs to be done even when reusing layers as the parent may have changed
+    for (const layer of subLayers) {
+      layer.parentLayer = this;
+    }
   }
 }

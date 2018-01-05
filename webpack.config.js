@@ -48,7 +48,7 @@ const LIBRARY_BUNDLE_CONFIG = {
     // leave minification to app
     // new webpack.optimize.UglifyJsPlugin({comments: false})
     new webpack.DefinePlugin({
-      VERSION: JSON.stringify(require('./package.json').version)
+      DECK_VERSION: JSON.stringify(require('./package.json').version)
     })
   ]
 };
@@ -77,32 +77,14 @@ const TEST_BROWSER_CONFIG = {
   resolve: {
     alias: {
       'deck.gl/test': resolve('./test'),
-      'deck.gl': resolve('./src')
+      'deck.gl/dist': resolve('./src'),
+      'deck.gl': resolve('./src'),
+      'deck.gl-layers': resolve('./src/experimental-layers/src')
     }
   },
 
   module: {
-    rules: [
-      {
-        // Compile ES2015 using buble
-        test: /\.js$/,
-        loader: 'buble-loader',
-        include: [/src/],
-        options: {
-          objectAssign: 'Object.assign',
-          transforms: {
-            dangerousForOf: true,
-            modules: false
-          }
-        }
-      },
-      {
-        // Inline shaders
-        test: /\.glsl$/,
-        exclude: /node_modules/,
-        loader: 'raw-loader'
-      }
-    ]
+    rules: []
   },
 
   node: {

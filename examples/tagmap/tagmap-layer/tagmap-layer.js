@@ -1,6 +1,6 @@
 /* eslint-disable max-len */
 import {CompositeLayer, WebMercatorViewport} from 'deck.gl';
-import TextLayer from './text-layer';
+import {TextLayer} from 'deck.gl-layers';
 import TagMapWrapper from './tagmap-wrapper';
 import colorbrewer from 'colorbrewer';
 
@@ -15,7 +15,6 @@ const defaultProps = {
 };
 
 export default class TagmapLayer extends CompositeLayer {
-
   initializeState() {
     this.state = {
       tags: []
@@ -32,10 +31,12 @@ export default class TagmapLayer extends CompositeLayer {
     if (changeFlags.dataChanged) {
       this.updateTagMapData();
       this.updateTagMapVis();
-    } else if (changeFlags.viewportChanged ||
-        props.minFontSize !== oldProps.minFontSize ||
-        props.maxFontSize !== oldProps.maxFontSize ||
-        props.weightThreshold !== oldProps.weightThreshold) {
+    } else if (
+      changeFlags.viewportChanged ||
+      props.minFontSize !== oldProps.minFontSize ||
+      props.maxFontSize !== oldProps.maxFontSize ||
+      props.weightThreshold !== oldProps.weightThreshold
+    ) {
       this.updateTagMapVis();
     }
   }

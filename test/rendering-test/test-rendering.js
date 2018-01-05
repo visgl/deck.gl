@@ -38,31 +38,24 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-// TODO - need to clean up this code to follow lint rules, disable for now
-/* eslint-disable */
-
-import 'babel-polyfill';
-
-import {document, window} from 'global';
+import {document} from 'global';
 
 import React, {Component} from 'react';
 import ReactDOM from 'react-dom';
 
-import {join} from 'path';
-import {readFileSync} from 'fs';
+import DeckGL, {WebMercatorViewport, experimental} from 'deck.gl';
+const {DeckGLJS} = experimental; // eslint-disable-line
 
-import DeckGL from 'deck.gl';
-import {colorDeltaSq} from './color-delta';
 import * as CONFIG from './test-config';
 
-var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+import {diffImages} from '@deck.gl/test-utils';
 
 // DeckGL container
 const deckGLContainer = document.createElement('div');
 deckGLContainer.style.position = 'absolute';
 
 // hide deckgl canvas
-deckGLContainer.style.display = 'none';
+deckGLContainer.style.visibility = 'hidden';
 
 const referenceImage = createImage();
 // Show the image element so the developer could save the image as
@@ -86,7 +79,8 @@ class RenderingTest extends Component {
 
     this.state = {
       runningTests: {},
-      currentTestIndex: 0
+      currentTestIndex: 0,
+      renderingCount: 0
     };
   }
 
@@ -98,7 +92,7 @@ class RenderingTest extends Component {
     const maxDeltaSq = CONFIG.COLOR_DELTA_THRESHOLD * CONFIG.COLOR_DELTA_THRESHOLD;
     let badPixels = 0;
     for (let i = 0; i < pixelCount; i++) {
-      const delta = colorDeltaSq(resultPixelData.data, referencePixelData.data, i);
+      const delta = diffImages(resultPixelData.data, referencePixelData.data, i);
       if (delta > maxDeltaSq) {
         badPixels++;
       }
@@ -109,11 +103,19 @@ class RenderingTest extends Component {
 
     // Render the next test case
     this.setState({
-      currentTestIndex: this.state.currentTestIndex + 1
+      currentTestIndex: this.state.currentTestIndex + 1,
+      renderingCount: 0
     });
   }
 
-  _onDrawComplete(name, referecenResult, canvas) {
+  _onDrawComplete(name, referenceResult, completed, {gl}) {
+    if (!completed) {
+      this.setState({
+        renderingCount: this.state.renderingCount + 1
+      });
+      return;
+    }
+
     if (this.state.runningTests[name]) {
       return;
     }
@@ -125,47 +127,62 @@ class RenderingTest extends Component {
         // Both images are loaded, compare results
         this._diffResult(name);
       };
-      resultImage.src = canvas.toDataURL();
+      resultImage.src = gl.canvas.toDataURL();
     };
-    referenceImage.src = referecenResult;
+    referenceImage.src = referenceResult;
   }
 
   render() {
-    const {currentTestIndex} = this.state;
+    const {currentTestIndex, renderingCount} = this.state;
     const {width, height, testCases} = this.props;
 
     if (!testCases[currentTestIndex]) {
       return null;
     }
 
-    const {mapViewState, layersList, name, referecenResult} = testCases[currentTestIndex];
+    const {mapViewState, layersList, name, referenceResult, renderingTimes} = testCases[
+      currentTestIndex
+    ];
 
     const layers = [];
+    const viewportProps = Object.assign({}, mapViewState, {width, height});
 
+    // const needLoadResource = false;
     // constructing layers
     for (const layer of layersList) {
       const {type, props} = layer;
-      if (type !== undefined)
-      layers.push(new type(props));
+      if (type !== undefined) {
+        layers.push(new type(props)); // eslint-disable-line
+      }
     }
 
-    return React.createElement(DeckGL, _extends({
-      id: "default-deckgl-overlay",
-      width: width,
-      height: height,
+    const maxRenderingCount = renderingTimes ? renderingTimes : 0;
+    const completed = renderingCount >= maxRenderingCount;
+
+    return React.createElement(DeckGL, {
+      id: 'default-deckgl-overlay',
+      width,
+      height,
+      layers,
       debug: true,
-      onAfterRender: this._onDrawComplete.bind(this, name, referecenResult)
-    }, mapViewState, {
-      layers: layers
-    }))
+      onAfterRender: this._onDrawComplete.bind(this, name, referenceResult, completed),
+      viewport: new WebMercatorViewport(viewportProps)
+    });
   }
 }
 
-ReactDOM.render(React.createElement(RenderingTest, {
-  width: CONFIG.WIDTH,
-  height: CONFIG.HEIGHT,
-  testCases: CONFIG.TEST_CASES
-}, null), deckGLContainer);
+ReactDOM.render(
+  React.createElement(
+    RenderingTest,
+    {
+      width: CONFIG.WIDTH,
+      height: CONFIG.HEIGHT,
+      testCases: CONFIG.TEST_CASES
+    },
+    null
+  ),
+  deckGLContainer
+);
 
 function createImage() {
   const image = document.createElement('img');
@@ -188,12 +205,12 @@ function getPixelData(sourceElement, width, height) {
 }
 
 function reportResult(name, percentage) {
-    const passed = percentage >= CONFIG.TEST_PASS_THRESHOLD;
-    const outputString = `${name}: ${(percentage * 100).toFixed(3)}% ${passed ? 'PASS' : 'FAIL'}`;
+  const passed = percentage >= CONFIG.TEST_PASS_THRESHOLD;
+  const outputString = `${name}: ${(percentage * 100).toFixed(3)}% ${passed ? 'PASS' : 'FAIL'}`;
 
-    const paragraph = document.createElement('p');
-    const testResult = document.createTextNode(outputString);
-    paragraph.appendChild(testResult);
-    resultContainer.appendChild(paragraph);
+  const paragraph = document.createElement('p');
+  const testResult = document.createTextNode(outputString);
+  paragraph.style.color = passed ? '#74ff69' : '#ff2857';
+  paragraph.appendChild(testResult);
+  resultContainer.appendChild(paragraph);
 }
-// testResult.style.position = 'relative';

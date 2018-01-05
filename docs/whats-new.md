@@ -1,68 +1,67 @@
-# deck.gl v.Next
+# deck.gl v5
 
-Interesting in what is coming down the road? The deck.gl roadmap is now public. RFCs (Requests For Comments) for features in upcoming releases are available in the [developer documents](https://github.com/uber/deck.gl/tree/master/dev-docs/RFCs) section of the github repo.
+Release date: 21, Dec 2017
 
+All new additions to the official deck.gl 5.0 API are listed here. Note that in addition to the official new features in this release, deck.gl 5.0 also contains a number of significant under the hoods changes to prepare for new features and optimizations. Some of these are available as experimental APIs, see below.
 
-# deck.gl v4.2 (Under development)
+As always, for information on deprecations and how to update your code in response to any API changes, please read the deck.gl [upgrade Guide](/docs/upgrade-guide.md).
 
-Release date: TBD, late 2017
+## DeckGL: Control over DevicePixelRatio
 
-## Multi-Viewport Support
-
-deck.gl can now render your layers to multiple viewports. It is e.g. possible to mix map-overlaid views with first person views for dramatic new perspectives on your data. E.g. you can walk around in the city on which your data is overlaid.
-
-A new `ViewportLayout` React component makes it trivial to precisely position multiple base maps and other background HTML components under multi-viewport layouts, automatically taking care of complexities like `devicePixelRatio`, inverted WebGL/CSS coordinate systems etc. This component will also automatically hide base maps when the viewport parameters can not be supported by the underlying map component.
+The new `useDevicePixels` prop on the `DeckGL` React component can be used to disable usage of full resolution on retina/HD displays. Disabling deck.gl's default behavior of always rendering at maximum device resolution can reduce the render buffer size with a factor of 4x on retina devices and lead to significant performance improvements on typical fragment shader bound rendering. This option can be especially interesting on "retina" type mobile phone displays where pixels are so small that the visual quality loss may be largely imperceptible.
 
 
-## All Viewports Now Geospatially Enabled
+## DeckGL: Layer Filtering
 
-All `Viewport` classes are now geospatially enabled: they now take an optional `longitude`/`latitude` reference point. In this mode, `position`s will be treated as meter offsets from that reference point per `COORDINATE_SYSTEM.METER_OFFSET` conventions.
-
-This means that you can now use a FirstPersonViewport (the successor to the `PerspectiveViewport` with layers encoded in `COORDINATE_SYSTEM.LNG_LAT` and `COORDINATE_SYSTEM.METER_OFFSETS`) and place a camera anywhere in the scene (in contrast to the `WebMercatorViewport` which only allows you to look "down" on a position on the map).
-
-Viewports even accept a `modelMatrix` to allow viewport/camera positions to be specified in exactly the same coordinates as `METER_OFFSET` layers, making it possible to place a camera at the exact location any of your existing data points without having to think or do any math.
+A new `DeckGL` prop `layerFilter` gives the application an opportunity to filter out layers from the layer list during rendering and/or picking. Filtering can be done per layer or per viewport (experimental) or both. This enables techniques like adding helper layers that work as masks during picking but do not show up during rendering, or rendering different additional information in different viewports (experimental).
 
 
-## WebVR Support and Example
+## DeckGL: Picking methods renamed
 
-Multi viewport support can be used to integrate with the WebVR API and create dual WebVR compatible viewports that render a first person view of your data for left and right eye respectively which will display as stereoscopic 3D in supporting hardware.
-
-
-## Controller Classes
-
-deck.gl's controller classes have been significantly refactored, providing you with lots of options for how to control how the user interacts with your viewports. Also the controllers are no longer categorized as "experimental" exports, so you can import and use them in your apps knowing that they will be supported in future releases the same way as any other deck.gl feature.
-
-TBA...
+To avoid confusion, `DeckGL.queryObject` is renamed to `DeckGL.pickObject` and `DeckGL.queryVisibleObjects` is renamed to `DeckGL.pickObjects`. Old functions are still supported with deprecated warning, but will be removed in the next major version.
 
 
-## Automatic Highlighting of Hovered Elements
+## Layer: Automatic Highlighting of Hovered Elements
 
 Three new `Layer` props (`autoHighlight`, `highlightColor` and `highlightedObjectIndex`) have been added to enable simple and efficient highlighting of a single object in a layer. Highlighting is either automatic on hover, or programmatically controlled through specifying the index of the selected object. The actual highlighting is done on the GPU and this feature is thus very performant, in particular as it lets applications avoid cumbersome techniques like modifying data or using a secondary layer for highlighting.
 
 
-## Control over DevicePixelRatio
+## CompositeLayer: Property Forwarding Support
 
-The new `useDevicePixelRatio` prop on the `DeckGL` React component can be used to disable usage of full resolution on retina/HD displays. Disabling deck.gl's default behavior of always rendering at maximum device resolution can reduce the render buffer size with a factor of 4x on retina devices and lead to significant performance improvements on typical fragment shader bound rendering. This option can be especially interesting on "retina" type mobile phone displays where pixels are so small that the visual quality loss may be largely imperceptible.
-
-
-## CompositeLayer Improvements
-
-* **Property Forwarding Support** - A new method `CompositeLayer.getBaseLayerProps()` simplifies forwarding base layer props to sub layers, removing code clutter and reducing the risk of forgetting to forward an important base layer property.
+A new method `CompositeLayer.getSubLayerProps()` simplifies forwarding base layer props to sub layers, removing code clutter and reducing the risk of forgetting to forward an important base layer property.
 
 
-## PathLayer: Dashed Line Support
+## PathLayer & GeoJsonLayer: Dashed Line Support
 
-Added new props (`getDashArray` and `justified`) enabling you render paths as dashed lines. Naturally these props are also accessible in composite layers built on top of the `PathLayer`, such as the `GeoJsonLayer`.
+Added new props (`getDashArray` and `dashJustified`) enabling you render paths as dashed lines. Naturally these props are also accessible in composite layers built on top of the `PathLayer`, such as the `GeoJsonLayer`.
+
+## PolygonLayer & GeoJsonLayer: Elevation Scale
+
+Added new prop `elevationScale` to enable fast scaling elevation of all extruded polygons.
+
+## HexagonLayer / GridLayer: Elevation by Value Support
+
+Add `getElevationValue` to `HexagonLayer` and `GridLayer` to enable elevation aggregation by value. This allow both color and elevation to be calculated based on customized aggregation function.
+
+
+## Seer Improvements
+
+The [Seer](https://chrome.google.com/webstore/detail/seer/eogckabefmgphfgngjdmmlfbddmonfdh?hl=en) Chrome Debug Extension now remembers its "on/off" setting across application reloads. This is significant because it means that the Seer extension can be left installed even in heavy deck.gl applications with lots of layers, and turned on only during debugging, without any performance impact during normal usage.
 
 
 ## Shader Modules
 
-* Shader module documentation is much improved, both in deck.gl and luma.gl. In the deck.gl docs, shader modules are listed in the "API Reference" section, after the JavaScript classes.
-* The `project` module provides a new function `project_pixel_to_clipspace` for screen space calculations that takes variables like `useDevicePixelRatio` and "focal distance" into account, making pixel space calculation simpler and less prone to fail when parameters change.
-* The core deck.gl shader modules (`project` etc) now conform to the luma.gl shadertools conventions, making this module easier to describe and use. In spite of these changes, backwards compatible uniforms are of course provided to ensure that existing layers do not break.
+Note: This change is mainly relevant to developers who write custom deck.gl layers.
 
-## HexagonLayer / GridLayer: Elevation by Value Support
-Add `getElevationValue` to `HexagonLayer` and `GridLayer` to enable elevation aggregation by value. This allow both color and elevation to be calculated based on customized aggregation function.
+* Shader module documentation is much improved, both in deck.gl and luma.gl. In the deck.gl docs, shader modules are listed in the "API Reference" section, after the JavaScript classes.
+* The `project` module provides a new function `project_pixel_to_clipspace` for screen space calculations that takes variables like `useDevicePixels` and "focal distance" into account, making pixel space calculation simpler and less prone to fail when parameters change.
+* The core deck.gl shader modules (`project` etc) now conform to the luma.gl shadertools conventions for naming uniforms and functions, making this module easier to describe and use. In spite of these changes, backwards compatible uniforms are provided to ensure that existing layers do not break.
+
+
+## Experimental Features
+
+As usual, deck.gl 5.0 contains a number of experimental features, e.g. "multi viewport", "first person viewport" and "viewport transitions". These features are still being finalized and the APIs have not been frozen, but can still be accessed by early adopters. See the roadmap article for more information on these.
+
 
 # deck.gl v4.1
 
@@ -71,6 +70,7 @@ Release date: July 27th, 2017
 ## WebGL2 Support (provided by luma.gl v4)
 
 deck.gl v4.1 is based on luma.gl v4, a major release that adds full WebGL2 support as well as powerful features like WebGL state management and an improve GLSL shader module system. On all browsers that supports WebGL2 (e.g. recent Chrome and Firefox browsers), deck.gl will obtain WebGL2 context and utilize WebGL2 functionalities. To know more about WebGL2, please check [here](https://www.khronos.org/registry/webgl/specs/latest/2.0/).
+
 
 ## Query Methods
 
@@ -89,7 +89,7 @@ The base `Layer` class (which is inherited by all layers) supports a new propert
 
 ## Layer Attribute Control
 
-Pre-calculated "Vertex Attributes" can now be passed as props, meaning that applications that are willing to learn how a deck.gl layer's vertex attributes are structured can pass in typed arrays as props to the layer and have these directly passed to the GPU. This prevents the layer's internal `AttributeManager` from generating the attributes from your data, allowing you to optimize by e.g. directly passing in binary data from calculations or a binary file load without having deck.gl do any transformation on your data.
+Pre-calculated "Vertex Attributes" can now be passed as props, meaning that developers that are willing to learn how a deck.gl layer's vertex attributes are structured can pass in typed arrays as props to the layer and have these directly passed to the GPU. This prevents the layer's internal `AttributeManager` from generating the attributes from your data, allowing you to optimize by e.g. directly passing in binary data from calculations or a binary file load without having deck.gl do any transformation on your data.
 
 
 ## CompositeLayer
@@ -124,7 +124,7 @@ deck.gl's default event handling now includes support for multitouch gestures to
 
 ## Seer Integration
 
-deck.gl is now integrated with the new Seer Chrome extension. Simply installing Seer and rerunning your application opens up a new tab in the Chrome developer tools, providing you with the ability to see all your deck.gl layers, inspect (and edit) their properties and attributes and check per layer timings, such as the latest GPU draw calls or attribute updates.
+deck.gl is now integrated with the new [Seer Chrome extension](https://chrome.google.com/webstore/detail/seer/eogckabefmgphfgngjdmmlfbddmonfdh?hl=en). Simply installing Seer and rerunning your application opens up a new tab in the Chrome developer tools, providing you with the ability to see all your deck.gl layers, inspect (and edit) their properties and attributes and check per layer timings, such as the latest GPU draw calls or attribute updates.
 
 And note that since luma.gl v4 also has a Seer integration, it is possible to follow links from deck.gl layer to luma.gl models inside Seer, enabling you to further drill down and understand what data is ultimately being generated and processed by the GPU.
 

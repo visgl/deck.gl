@@ -19,9 +19,248 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 For Earlier Beta Releases see below
 
+## Official Releases
+
+### deck.gl v5.0 - Dec 21
+- Add links to new examples. (#1272)
+- Address TODO in docs. (#1270)
+- Use the deprecation support in shader modules (#1271)
+- fix double model generation (#1268)
+- Ortho zooming example (#1266)
+- More precise offset projection (#1265)
+- Examples start script (#1263)
+- experimental-layers 0.0.16
+- Fix examples with react-map-gl alpha (#1256)
+- Linter (prettier) changes (#1262)
+- Remove old uniforms (#1261)
+- remove duplicate TextLayer code (#1258)
+- enable lnglat_offset mode (#1245)
+- Remove deprecated uniforms (#1257)
+
 ## Beta Releases
 
-### deck.gl v4.2 Beta Releases
+### deck.gl v5.0 Beta Releases
+
+#### [5.0.0-beta.2] - Dec 19
+- Fix pickingSelectedColor, fix mesh-layer regression (#1260)
+- Fix test-dist (#1250)
+- Add prettier (#1249)
+- Upgrade to React 16, cleanup core deps (#1247)
+- Bump probe.gl to include regression bench support (#1251)
+- Merge normal projection fix into experimental polygon layer (#1248)
+
+#### [5.0.0-beta.1] - Dec 18
+- Improve perf of experimental SolidPolygonLayer (#1224)
+- Fix polygon normals in meter offset mode (#1244)
+- Remove deprecated API (#1240)
+- Remove old Coordinate system props. (#1242)
+- Add SolidPolygonLayer to experimental layers (#1233)
+- Fix the normal direction of the hexagon layer and additional transform in the lighting module associated with it (#1039)
+- Fix blending parameter (#1241)
+
+#### [4.2.0-alpha.31] - Dec 14
+- API Audit: remove initWebGLParameters and move pure-js example  (#1235)
+- Fix for invalid triggerName in attribute-manager.invalidate(triggerName) function (#1238)
+- Add polygonLayer geojsonLayer elevationScale prop to whats-new.md (#1237)
+- OrbitController pure-js support (#1234)
+
+#### [4.2.0-alpha.30] - Dec 12
+- DOCS: updates to clarify what is experimental in 4.2, in "What's New" and "API Reference".
+- DOCS: New Roadmap doc, linking to RFCs.
+- DOCS: List experimental 4.2 features in Roadmap doc.
+- Remove deprecated Choropleth layers (#1231)
+- Fix Picking Module object highlighting (#1230)
+- Add initial CODE-GUIDELINES.md. Adjust RFC versions (#1232)
+- Remove container support from core layers (#1227)
+- Add '#or yarn' to README.md (#1220)
+- Path Layer vertex shader cleanup (#1198)
+- add "babel-loader" dependency for wind example (#1228)
+- Fix `log.warn` usage (#1225)
+- Add initial capability to show infovis layers in layer-browser (#1210)
+- Fixes: global init, LayerBrowser drawPickingColors, experimental exports (#1209)
+- Improve perf of picking with large `pickingRadius` (#1222)
+- Experimental Layers 0.0.12 (#1223)
+- Conditionally generate fp64 viewport uniforms (#1219)
+- Make ViewportController and Transition exports experimental (#1218)
+- Remove deprecated API usage (#1214)
+- Clarify whats experimental in 4.2 (#1211)
+- Merge pull request #1212 from KevinGrandon/fix_buildkite_badge
+- Remove buildkite badge
+- Merge pull request #1153 from KevinGrandon/buildkite
+- Optimize building by building on warm machines
+- Use buildkite and docker for CI
+- Minify example bundle (#1206)
+
+#### [4.2.0-alpha.29] - Dec 1
+- Picking null color fix
+
+#### [4.2.0-alpha.28] - Nov 30
+- Add back experimental exports
+
+#### [4.2.0-alpha.27] - Nov 30
+- update sharp end fix for 64bits pathlayer shader (#1202)
+- Fix spike issue in path layer (#1200)
+- Move unaudited APIs to experimental (#1193)
+- Reorganize file structure (#1192)
+- add new blend mode to initWebGLParameters (#1188)
+- Add support for old picking uniforms (#1191)
+- Use Program 'varyings' option (#1190)
+- Viewport transition tests (#1183)
+- PathMarkerLayer: Support bi-directional arrows (#1181)
+- add build command for point cloud example and change default settings of wind example (#1189)
+- Example rename (#1182)
+
+#### [4.2.0-alpha.26] - Nov 21
+- Upgrade to viewport-mercator-project@5.0 (#1178)
+- Transition interpolator class (#1154)
+- Fix viewport projection topLeft option (#1174)
+
+#### [4.2.0-alpha.25] - Nov 20
+- Part-2 : 4.2 API changes as per Audit (#1170)
+- Bump luma.gl peer dependency to '4.1.0-alpha.9'
+
+#### [4.2.0-alpha.24] - Nov 17
+-Fix log import errors (#1169)
+-WindDemo: Display a warning when run on non webgl2 browsers. (#1166)
+
+#### [4.2.0-alpha.23] - Nov 16
+- Fix module import (#1168)
+- Remove luma.gl dependency in package.json to avoid conflict with deck.gl (#1164)
+- Fix the bug of distance calculation in orbit controller (#1163)
+- Part-1 : 4.2 API changes as per Audit. (#1158)
+
+#### [4.2.0-alpha.22] - Nov 15
+- Fixes for updateTriggers
+
+#### [4.2.0-alpha.21] - Nov 15
+- Fix bug in layer.js
+- Create and use getSubLayerProps()
+
+#### [4.2.0-alpha.20] - Nov 13
+Auto hide viewport base elements (#1134)
+
+#### [4.2.0-alpha.19] - Nov 7
+- Remove the y-flip scale and camera re-center logic for non-geospatial viewport (#1125)
+- Add small "degenerate" PathLayer example (#1123)
+- Fix the pan event handling of orbit controller (#1124)
+- Fix issues in Orbit Viewport and update examples (#1119)
+- Add flag for viewport transition updates (#1115)
+
+#### [4.2.0-alpha.18] - Nov 2
+- Viewport Transitions: Add transitionProps,
+  fix bearing and longitude interpolation. (#1111)
+
+#### [4.2.0-alpha.17] - Nov 1
+- Use probe.gl instead of benchmark.js (#1110)
+- Fix MapState constraints check (#1105)
+- Fix attribute updates for composite layers (#1104)
+- Fix typo (#1107)
+- Fix path-marker-layer angle issue (#1100)
+
+#### [4.2.0-alpha.16] - Oct 27
+- MultiViewport Transitions: Add example, and fix `isMapSynced`.(#1099)
+- path+mesh layer: Specify arrow colors (#1098)
+- Add `layerFilter` prop (#1086)
+- Use global version from webpack (#1091)
+- Fix multi icon layer default props (#1094)
+- ViewportTransitions: remove recursive children update, fix props update (#10
+82)
+- Fix multi icon layer default props (#1089)
+- Move text layer to experimental layers (#1062)
+- Handle IconLayer pixel size in first person viewports (#1084)
+- core and deprecated layers only import from core/index.js (#1085)
+- Quick fix of fitBounds API in orbit-viewport and examples (#1083)
+    * Quick fix of fitBounds API in orbit-viewport and examples
+- Clean up sub-module imports (#1081)
+- Fix layer context update (#1072)
+- refactoring on ortho- and perspective-viewports related files, exports and d
+ocs (#1057)
+- Correct brackets on `Complex polygon with holes` example (#1061)
+    - The `polygon` property requires arrays of Polygons (i.e. `polygon: Polygon |
+ Polygon[]`). Update the example to reflect this
+- Fix MeshLayer fp64 mode (#1068)
+- Separate common ViewState from FirstPersonState and MapState (#995)
+- Transition manager improvements (#1063)
+    - Fix incorrect timer, replace `setInterval` with `requestAnimationFrame`
+    - Always use the transition settings from when the transition is triggered (
+removes the burden from app: set and forget)
+    - Use `onViewportChange` for transition update callback
+    - Do not trigger transition on viewport size change
+    - Do not compare viewports if there's no transition
+    - Remove nested function definitions in utils
+- Examples: set useDevicePixelRatio by default (#1060)
+    * Layer-browser: set useDevicePixelRation by default
+- Remove excessive nesting in picking code (#1036)
+    * Remove excessive nesting in picking code
+- Improved tracking and logging of redraw reason (#1037)
+    - Experimental Layers: Set pickable to false for marker layer
+- Apply default values for transition props (#1058)
+- temporary fix for orthographic-viewport dependent apps (#1055)
+    * have PerspectiveViewport extends Viewport
+    * minor bug fix for the point-cloud-ply example
+- ViewportTransition minor fixes (#1054)
+- Viewport Transitions : add pure-js TransitionManager (#1038)
+- Remove deck.gl picking module, use luma.gl's version. (#1045)
+- Optimize prop diffing when using inline functions as accessors. (#1033)
+- Move prop diffing from layer.js to props.js (#1035)
+- Fix mesh layer (#1041)
+- experimental `project64utils` (#1050)
+    - Add new project64util shader module hat removes raw fp64 math from layer s
+haders
+- Add getLineDashArray and lineDashJustified in PolygonLayer
+- Fix blending in ScatterplotLayer example (#1034)
+- Fix Viewport import in OrbitViewport (#1044)
+- Fix PolygonLayer issue with Data Accessors
+- Fix plot layer (#1031)
+- Add 3rd person viewport support (#1030)
+- Improve Extruded Polygon Tesselation (#1011)
+    - improve polygon tesselator perf
+    - fix normal calculation
+- Specify meter unit for getLineWidth in geojson layer (#1029)
+- Publish work-in-progress layers in new `deck.gl-layers` module (#1003)
+    - Includes PathMarkerLayer, PathOutlineLayer and MeshLayer
+- RFC page, added 4.2 section (#1025)
+
+#### [4.2.0-alpha.15] - Oct 11
+- Pass useDevicePixelRatio to picking flow (#1021)
+- Fix multi viewport update state (#1019)
+- Bump luma.gl peer dependency to '4.1.0-alpha.6'
+
+#### [4.2.0-alpha.14] - Oct 10
+- Fix picking when rendereing pickable and non-pickable layers (#1018)
+- Pass useDevicePixelRatio to picking flow. (#1016)
+- Upgrade to new luma.gl API (#1014)
+
+#### [4.2.0-alpha.13] - Oct 10
+- Add experimental exports (#1010)
+- Fix benchmark tests (#1005)
+- Change the README.md, asking users to use the release branch and developers to use the master branch
+- Fix useDevicePixelRatio prop usage (#1006)
+- Update examples/README.md to fix broken links
+- Fix point missing issue for 64 bits point cloud layer vertex shader (#1004)
+- Fixes to drawlayers (#1002)
+- Multi model fixes, OrbitController fix in plot layer (#996)
+- fix WebMercatorViewport.addMetersToLngLat (#1001)
+- Skip picking flow when no layer is pickable (#980)
+- Fix modelMatrix in lnglat layers. Fixes separation slider in layer-browser. (#993)
+- Add useDevicePixelRadius toggle to layer-browser (#989)
+- Class name cleanup (#990)
+
+#### [4.2.0-alpha.12] - Oct 5
+- Fix picking and highlighting regressions. (#982)
+- add viewMatrix back so users can access it in their own vertex shader (#984)
+- Fix npm run bench (#978)
+- Attribute Transition RFC (#961)
+- Segment Layer Example Updates (#973)
+- Update controller-architecture-rfc.md
+- Layer browser updates (#965)
+- Draw and pick refactor (#964)
+- fix bug where layer does not update on updateTriggers change (#971)
+-  [Hexagon/Grid] add no render when elevation < 0.0 to vertex-64 (#968)
+- Viewport Animation: Adding flyTo style animation support. (#937)
+- Minor fixes - after refactorings (#960)
+- [GridLayer] Add getElevationValue to enable grid elevation by aggregation (#954)
+- Fix test-dist
 
 #### [4.2.0-alpha.11] - Oct 2
 - Bump to luma.gl v4.1.0-alpha.4 - Framebuffer improvements
@@ -109,7 +348,7 @@ For Earlier Beta Releases see below
 
 #### [4.1.0] - 2017-7-27 Minor deck.gl Release
 
-For details see [What's New](https://github.com/uber/deck.gl/blob/4.1-release/docs/whats-new.md)
+For details see [What's New](https://github.com/uber/deck.gl/blob/5.0-release/docs/whats-new.md)
 
 
 ### deck.gl v4.0

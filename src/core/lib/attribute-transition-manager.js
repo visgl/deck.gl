@@ -1,4 +1,5 @@
 import {GL, Program, Model, Geometry, Buffer, TransformFeedback} from 'luma.gl';
+import log from '../utils/log';
 
 const ATTRIBUTE_MAPPING = {
   1: 'float',
@@ -17,71 +18,50 @@ const TRANSITION_STATE = {
 const noop = () => {};
 
 export default class AttributeTransitionManager {
-
-  static isSupported(gl) {
-    return TransformFeedback.isSupported(gl);
-  }
-
-  constructor({id, gl}, opts) {
-    this.id = id;
+  constructor(gl, opts) {
+    this.id = opts.id;
     this.gl = gl;
-    this.opts = opts;
+
+    this.isSupported = TransformFeedback.isSupported(gl);
 
     this.attributeTransitions = {};
-
     this.needsRedraw = false;
     this.model = null;
-    this.transformFeedback = new TransformFeedback(gl);
+
+    this.setOptions(opts);
+
+    if (this.isSupported) {
+      this.transformFeedback = new TransformFeedback(gl);
+    } else {
+      log.warn(0, 'WebGL2 not supported by this browser. Transition animation is disabled.');
+    }
   }
 
   /* Public methods */
-  setOptions(opts) {
-    this.opts = opts || {};
+  setOptions(options) {
+    this.opts = options || {};
+    this.enabled = this.isSupported && Boolean(options);
   }
 
   // Called when attribute manager updates
   // Extracts the list of attributes that need transition
-  update(attributes) {
-    let needsNewModel = false;
+  update(attributes, options) {
+    this.setOptions(options);
 
-    for (const attributeName in attributes) {
-      const attribute = attributes[attributeName];
-
-      if (attribute.transition) {
-        let needsUpdate;
-        let transition = this.attributeTransitions[attributeName];
-        if (transition) {
-          needsUpdate = attribute.changed;
-        } else {
-          // New animated attributes have been added
-          transition = {name: attributeName, attribute};
-          this.attributeTransitions[attributeName] = transition;
-          needsUpdate = true;
-          needsNewModel = true;
-        }
-
-        if (needsUpdate) {
-          this._updateAnimation(transition);
-          this._updateModel(attributeName, transition);
-          this.needsRedraw = true;
-        }
-      }
+    if (!this.enabled) {
+      return;
     }
 
-    for (const attributeName in this.attributeTransitions) {
-      const attribute = attributes[attributeName];
-
-      if (!attribute || !attribute.transition) {
-        // Animated attribute has been removed
-        delete this.attributeTransitions[attributeName];
-        needsNewModel = true;
-      }
-    }
+    const needsNewModel = this._updateAttributes(attributes);
 
     if (needsNewModel) {
       this._createModel();
     }
+  }
 
+  // Returns `true` if attribute is transition-enabled
+  hasAttribute(attributeName) {
+    return attributeName in this.attributeTransitions;
   }
 
   // Get all the animated attributes
@@ -148,6 +128,49 @@ export default class AttributeTransitionManager {
   /* eslint-enable max-statements */
 
   /* Private methods */
+
+  // check the latest attributes for updates.
+  // Returns `true` if attributes have been added/removed.
+  _updateAttributes(attributes) {
+    let needsNewModel = false;
+
+    for (const attributeName in attributes) {
+      const attribute = attributes[attributeName];
+
+      if (attribute.transition) {
+        let needsUpdate;
+        let transition = this.attributeTransitions[attributeName];
+        if (transition) {
+          needsUpdate = attribute.changed;
+        } else {
+          // New animated attributes have been added
+          transition = {name: attributeName, attribute};
+          this.attributeTransitions[attributeName] = transition;
+          needsUpdate = true;
+          needsNewModel = true;
+        }
+
+        if (needsUpdate) {
+          this._updateAnimation(transition);
+          this._updateModel(attributeName, transition);
+          this.needsRedraw = true;
+        }
+      }
+    }
+
+    for (const attributeName in this.attributeTransitions) {
+      const attribute = attributes[attributeName];
+
+      if (!attribute || !attribute.transition) {
+        // Animated attribute has been removed
+        delete this.attributeTransitions[attributeName];
+        needsNewModel = true;
+      }
+    }
+
+    return needsNewModel;
+  }
+
   // Redraw the transform feedback
   _runTransformFeedback({uniforms, buffers}) {
     const {model, transformFeedback} = this;
@@ -251,7 +274,7 @@ void main(void) {
       // a buffer of type Float32Array.
       // Therefore we need to read data as a Float32Array then re-cast to attribute type
       if (!(value instanceof Float32Array)) {
-        oldBufferData = new (value.constructor)(oldBufferData);
+        oldBufferData = new value.constructor(oldBufferData);
       }
       return {size, type, value: oldBufferData};
     }
@@ -262,22 +285,24 @@ void main(void) {
     const {opts} = this;
     const {accessor} = transition.attribute;
 
-    let settings = Array.isArray(accessor) ?
-      accessor.map(a => opts[a]).find(Boolean) :
-      opts[accessor];
+    let settings = Array.isArray(accessor)
+      ? accessor.map(a => opts[a]).find(Boolean)
+      : opts[accessor];
 
     // Shorthand: use duration instead of parameter object
     if (Number.isFinite(settings) && settings > 0) {
       settings = {duration: settings};
     }
 
-    return settings && settings.duration ? {
-      duration: settings.duration,
-      easing: settings.easing || (t => t),
-      onStart: settings.onStart || noop,
-      onEnd: settings.onEnd || noop,
-      onInterrupt: settings.onInterrupt || noop
-    } : null;
+    return settings && settings.duration
+      ? {
+          duration: settings.duration,
+          easing: settings.easing || (t => t),
+          onStart: settings.onStart || noop,
+          onEnd: settings.onEnd || noop,
+          onInterrupt: settings.onInterrupt || noop
+        }
+      : null;
   }
 
   // Updates transition from/to and buffer

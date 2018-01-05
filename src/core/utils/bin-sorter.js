@@ -42,7 +42,7 @@ export default class BinSorter {
       .reduce((accu, h, i) => {
         const value = getValue(h.points);
 
-        if (value !== null || value !== undefined) {
+        if (value !== null && value !== undefined) {
           // filter bins if value is null or undefined
           accu.push({
             i: Number.isFinite(h.index) ? h.index : i,
@@ -88,8 +88,12 @@ export default class BinSorter {
    * @return {Object} bin index to sortedBins
    */
   getBinMap() {
-    return this.sortedBins.reduce((mapper, curr) => Object.assign(mapper, {
-      [curr.i]: curr
-    }), {});
+    return this.sortedBins.reduce(
+      (mapper, curr) =>
+        Object.assign(mapper, {
+          [curr.i]: curr
+        }),
+      {}
+    );
   }
 }

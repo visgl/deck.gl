@@ -29,7 +29,7 @@ import fs from './point-cloud-layer-fragment.glsl';
 const DEFAULT_COLOR = [0, 0, 0, 255];
 
 const defaultProps = {
-  radiusPixels: 10,  //  point radius in pixels
+  radiusPixels: 10, //  point radius in pixels
   fp64: false,
 
   getPosition: x => x.position,
@@ -49,20 +49,34 @@ const defaultProps = {
 export default class PointCloudLayer extends Layer {
   getShaders(id) {
     const {shaderCache} = this.context;
-    return enable64bitSupport(this.props) ?
-      {vs: vs64, fs, modules: ['project64', 'lighting', 'picking'], shaderCache} :
-      {vs, fs, modules: ['lighting', 'picking'], shaderCache}; // 'project' module added by default.
+    return enable64bitSupport(this.props)
+      ? {vs: vs64, fs, modules: ['project64', 'lighting', 'picking'], shaderCache}
+      : {vs, fs, modules: ['lighting', 'picking'], shaderCache}; // 'project' module added by default.
   }
 
   initializeState() {
-    const {gl} = this.context;
-    this.setState({model: this._getModel(gl)});
-
     /* eslint-disable max-len */
     this.state.attributeManager.addInstanced({
-      instancePositions: {size: 3, accessor: 'getPosition', update: this.calculateInstancePositions, transition: true},
-      instanceNormals: {size: 3, accessor: 'getNormal', defaultValue: 1, update: this.calculateInstanceNormals, transition: true},
-      instanceColors: {size: 4, type: GL.UNSIGNED_BYTE, accessor: 'getColor', update: this.calculateInstanceColors, transition: true}
+      instancePositions: {
+        size: 3,
+        transition: true,
+        accessor: 'getPosition',
+        update: this.calculateInstancePositions
+      },
+      instanceNormals: {
+        size: 3,
+        transition: true,
+        accessor: 'getNormal',
+        defaultValue: 1,
+        update: this.calculateInstanceNormals
+      },
+      instanceColors: {
+        size: 4,
+        type: GL.UNSIGNED_BYTE,
+        transition: true,
+        accessor: 'getColor',
+        update: this.calculateInstanceColors
+      }
     });
     /* eslint-enable max-len */
   }
@@ -81,11 +95,8 @@ export default class PointCloudLayer extends Layer {
           }
         });
       } else {
-        attributeManager.remove([
-          'instancePositions64xyLow'
-        ]);
+        attributeManager.remove(['instancePositions64xyLow']);
       }
-
     }
   }
 
@@ -100,9 +111,16 @@ export default class PointCloudLayer extends Layer {
 
   draw({uniforms}) {
     const {radiusPixels, lightSettings} = this.props;
-    this.state.model.render(Object.assign({}, uniforms, {
-      radiusPixels
-    }, lightSettings));
+    this.state.model.render(
+      Object.assign(
+        {},
+        uniforms,
+        {
+          radiusPixels
+        },
+        lightSettings
+      )
+    );
   }
 
   _getModel(gl) {
@@ -110,22 +128,23 @@ export default class PointCloudLayer extends Layer {
     const positions = [];
     for (let i = 0; i < 3; i++) {
       const angle = i / 3 * Math.PI * 2;
-      positions.push(
-        Math.cos(angle) * 2,
-        Math.sin(angle) * 2,
-        0
-      );
+      positions.push(Math.cos(angle) * 2, Math.sin(angle) * 2, 0);
     }
 
-    return new Model(gl, Object.assign({}, this.getShaders(), {
-      id: this.props.id,
-      geometry: new Geometry({
-        drawMode: GL.TRIANGLES,
-        positions: new Float32Array(positions)
-      }),
-      isInstanced: true,
-      shaderCache: this.context.shaderCache
-    }));
+    return new Model(
+      gl,
+      Object.assign({}, this.getShaders(), {
+        id: this.props.id,
+        geometry: new Geometry({
+          drawMode: GL.TRIANGLES,
+          attributes: {
+            positions: new Float32Array(positions)
+          }
+        }),
+        isInstanced: true,
+        shaderCache: this.context.shaderCache
+      })
+    );
   }
 
   calculateInstancePositions(attribute) {

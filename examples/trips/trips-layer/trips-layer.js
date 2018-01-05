@@ -13,7 +13,6 @@ const defaultProps = {
 };
 
 export default class TripsLayer extends Layer {
-
   initializeState() {
     const {gl} = this.context;
     const {attributeManager} = this.state;
@@ -81,10 +80,12 @@ export default class TripsLayer extends Layer {
 
   draw({uniforms}) {
     const {trailLength, currentTime} = this.props;
-    this.state.model.render(Object.assign({}, uniforms, {
-      trailLength,
-      currentTime
-    }));
+    this.state.model.render(
+      Object.assign({}, uniforms, {
+        trailLength,
+        currentTime
+      })
+    );
   }
 
   calculateIndices(attribute) {
@@ -144,7 +145,6 @@ export default class TripsLayer extends Layer {
     }
     attribute.value = colors;
   }
-
 }
 
 TripsLayer.layerName = 'TripsLayer';

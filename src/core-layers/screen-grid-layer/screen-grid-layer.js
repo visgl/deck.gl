@@ -40,12 +40,6 @@ export default class ScreenGridLayer extends Layer {
     return {vs, fs, modules: ['picking']}; // 'project' module added by default.
   }
 
-  constructor(props) {
-    super(props);
-    this._checkRemovedProp('unitWidth', 'cellSizePixels');
-    this._checkRemovedProp('unitHeight', 'cellSizePixels');
-  }
-
   initializeState() {
     const {attributeManager} = this.state;
     const {gl} = this.context;
@@ -53,7 +47,11 @@ export default class ScreenGridLayer extends Layer {
     /* eslint-disable max-len */
     attributeManager.addInstanced({
       instancePositions: {size: 3, update: this.calculateInstancePositions},
-      instanceCount: {size: 1, accessor: ['getPosition', 'getWeight'], update: this.calculateInstanceCount}
+      instanceCount: {
+        size: 1,
+        accessor: ['getPosition', 'getWeight'],
+        update: this.calculateInstanceCount
+      }
     });
     /* eslint-disable max-len */
 
@@ -66,8 +64,7 @@ export default class ScreenGridLayer extends Layer {
 
   updateState({oldProps, props, changeFlags}) {
     super.updateState({props, oldProps, changeFlags});
-    const cellSizeChanged =
-      props.cellSizePixels !== oldProps.cellSizePixels;
+    const cellSizeChanged = props.cellSizePixels !== oldProps.cellSizePixels;
 
     if (cellSizeChanged || changeFlags.viewportChanged) {
       this.updateCell();
@@ -80,23 +77,31 @@ export default class ScreenGridLayer extends Layer {
     uniforms = Object.assign({}, uniforms, {minColor, maxColor, cellScale, maxCount});
     model.draw({
       uniforms,
-      parameters: Object.assign({
-        depthTest: false,
-        depthMask: false
-      }, parameters)
+      parameters: Object.assign(
+        {
+          depthTest: false,
+          depthMask: false
+        },
+        parameters
+      )
     });
   }
 
   _getModel(gl) {
-    return new Model(gl, Object.assign({}, this.getShaders(), {
-      id: this.props.id,
-      geometry: new Geometry({
-        drawMode: GL.TRIANGLE_FAN,
-        vertices: new Float32Array([0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0])
-      }),
-      isInstanced: true,
-      shaderCache: this.context.shaderCache
-    }));
+    return new Model(
+      gl,
+      Object.assign({}, this.getShaders(), {
+        id: this.props.id,
+        geometry: new Geometry({
+          drawMode: GL.TRIANGLE_FAN,
+          attributes: {
+            vertices: new Float32Array([0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0])
+          }
+        }),
+        isInstanced: true,
+        shaderCache: this.context.shaderCache
+      })
+    );
   }
 
   updateCell() {

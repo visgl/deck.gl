@@ -19,9 +19,9 @@
 // THE SOFTWARE.
 
 import log from '../utils/log';
+import {transformVector, createMat4, extractCameraVectors} from '../utils/math-utils';
 
 import {Matrix4, Vector3, equals} from 'math.gl';
-import {transformVector, createMat4, extractCameraVectors} from '../math/utils';
 import mat4_scale from 'gl-mat4/scale';
 import mat4_translate from 'gl-mat4/translate';
 import mat4_multiply from 'gl-mat4/multiply';
@@ -32,11 +32,7 @@ import vec2_lerp from 'gl-vec2/lerp';
 
 const ZERO_VECTOR = [0, 0, 0];
 
-import {
-  getMercatorDistanceScales,
-  getMercatorWorldPosition,
-  getMercatorMeterZoom
-} from 'viewport-mercator-project';
+import {getDistanceScales, getWorldPosition, getMeterZoom} from 'viewport-mercator-project';
 
 import assert from 'assert';
 
@@ -80,7 +76,7 @@ export default class Viewport {
 
       // Perspective projection matrix parameters, used if projectionMatrix not supplied
       fovy = 75,
-      near = 0.1,  // Distance of near clipping plane
+      near = 0.1, // Distance of near clipping plane
       far = 1000, // Distance of far clipping plane
 
       // Anchor: lng lat zoom will make this viewport work with geospatial coordinate systems
@@ -109,14 +105,14 @@ export default class Viewport {
 
     this.zoom = zoom;
     if (!Number.isFinite(this.zoom)) {
-      this.zoom = this.isGeospatial ? getMercatorMeterZoom({latitude}) : DEFAULT_ZOOM;
+      this.zoom = this.isGeospatial ? getMeterZoom({latitude}) : DEFAULT_ZOOM;
     }
     this.scale = Math.pow(2, this.zoom);
 
     // Calculate distance scales if lng/lat/zoom are provided
-    this.distanceScales = this.isGeospatial ?
-      getMercatorDistanceScales({latitude, longitude, scale: this.scale}) :
-      distanceScales || DEFAULT_DISTANCE_SCALES;
+    this.distanceScales = this.isGeospatial
+      ? getDistanceScales({latitude, longitude, scale: this.scale})
+      : distanceScales || DEFAULT_DISTANCE_SCALES;
 
     this.focalDistance = opts.focalDistance || 1;
 
@@ -132,26 +128,30 @@ export default class Viewport {
       this.meterOffset = modelMatrix ? modelMatrix.transformVector(position) : position;
     }
 
-    // Determine camera center
-    this.center = this.isGeospatial ?
-      getMercatorWorldPosition({
-        longitude, latitude, zoom: this.zoom, meterOffset: this.meterOffset
-      }) :
-      position;
-
-    // console.log(this.scale, this.distanceScales.pixelsPerMeter);
-
     this.viewMatrixUncentered = viewMatrix;
 
-    // Make a centered version of the matrix for projection modes without an offset
-    this.viewMatrix = new Matrix4()
-      // Apply the uncentered view matrix
-      .multiplyRight(this.viewMatrixUncentered)
-      // The Mercator world coordinate system is upper left,
-      // but GL expects lower left, so we flip it around the center after all transforms are done
-      .scale([1, -1, 1])
-      // And center it
-      .translate(new Vector3(this.center || ZERO_VECTOR).negate());
+    if (this.isGeospatial) {
+      // Determine camera center
+      this.center = getWorldPosition({
+        longitude,
+        latitude,
+        zoom: this.zoom,
+        meterOffset: this.meterOffset
+      });
+
+      // Make a centered version of the matrix for projection modes without an offset
+      this.viewMatrix = new Matrix4()
+        // Apply the uncentered view matrix
+        .multiplyRight(this.viewMatrixUncentered)
+        // The Mercator world coordinate system is upper left,
+        // but GL expects lower left, so we flip it around the center after all transforms are done
+        .scale([1, -1, 1])
+        // And center it
+        .translate(new Vector3(this.center || ZERO_VECTOR).negate());
+    } else {
+      this.center = position;
+      this.viewMatrix = viewMatrix;
+    }
 
     // Create a projection matrix if not supplied
     if (projectionMatrix) {
@@ -184,11 +184,13 @@ export default class Viewport {
       return false;
     }
 
-    return viewport.width === this.width &&
+    return (
+      viewport.width === this.width &&
       viewport.height === this.height &&
       equals(viewport.projectionMatrix, this.projectionMatrix) &&
-      equals(viewport.viewMatrix, this.viewMatrix);
-      // TODO - check distance scales?
+      equals(viewport.viewMatrix, this.viewMatrix)
+    );
+    // TODO - check distance scales?
   }
 
   /**
@@ -203,7 +205,7 @@ export default class Viewport {
    * @param {Object} opts.topLeft=true - Whether projected coords are top left
    * @return {Array} - [x, y] or [x, y, z] in top left coords
    */
-  project(xyz, {topLeft = false} = {}) {
+  project(xyz, {topLeft = true} = {}) {
     const [x0, y0, z0 = 0] = xyz;
     assert(Number.isFinite(x0) && Number.isFinite(y0) && Number.isFinite(z0), ERR_ARGUMENT);
 
@@ -211,7 +213,7 @@ export default class Viewport {
     const v = transformVector(this.pixelProjectionMatrix, [X, Y, z0, 1]);
 
     const [x, y] = v;
-    const y2 = topLeft ? this.height - y : y;
+    const y2 = topLeft ? y : this.height - y;
     return xyz.length === 2 ? [x, y2] : [x, y2, 0];
   }
 
@@ -221,12 +223,14 @@ export default class Viewport {
    * - [x, y] => [lng, lat]
    * - [x, y, z] => [lng, lat, Z]
    * @param {Array} xyz -
+   * @param {Object} opts - options
+   * @param {Object} opts.topLeft=true - Whether origin is top left
    * @return {Array|null} - [lng, lat, Z] or [X, Y, Z]
    */
-  unproject(xyz, {topLeft = false} = {}) {
+  unproject(xyz, {topLeft = true} = {}) {
     const [x, y, targetZ = 0] = xyz;
 
-    const y2 = topLeft ? this.height - y : y;
+    const y2 = topLeft ? y : this.height - y;
 
     // since we don't know the correct projected z value for the point,
     // unproject two points to get a line and then find the point on that line with z=0
@@ -299,7 +303,15 @@ export default class Viewport {
     return false;
   }
 
-  getDistanceScales() {
+  getDistanceScales(coordinateOrigin = null) {
+    if (coordinateOrigin) {
+      return getDistanceScales({
+        longitude: coordinateOrigin[0],
+        latitude: coordinateOrigin[1],
+        scale: this.scale,
+        highPrecision: true
+      });
+    }
     return this.distanceScales;
   }
 
@@ -334,19 +346,6 @@ export default class Viewport {
 
   // EXPERIMENTAL METHODS
 
-  // Support for relative viewport dimensions
-  // TODO - parses same strings a number of times
-  getDimensions({width, height}) {
-    return {
-      /* eslint-disable max-len */
-      x: typeof this.x === 'string' ? Math.round(parseFloat(this.x) / 100 * width) : this.x,
-      y: typeof this.y === 'string' ? Math.round(parseFloat(this.y) / 100 * height) : this.y,
-      width: typeof this.width === 'string' ? Math.round(parseFloat(this.width) / 100 * width) : this.width,
-      height: typeof this.height === 'string' ? Math.round(parseFloat(this.x) / 100 * height) : this.height
-      /* eslint-enable max-len */
-    };
-  }
-
   getCameraPosition() {
     return this.cameraPosition;
   }
@@ -363,9 +362,9 @@ export default class Viewport {
   _addMetersToLngLat(lngLatZ, xyz) {
     const [lng, lat, Z = 0] = lngLatZ;
     const [deltaLng, deltaLat, deltaZ = 0] = this._metersToLngLatDelta(xyz);
-    return lngLatZ.length === 2 ?
-      [lng + deltaLng, lat + deltaLat] :
-      [lng + deltaLng, lat + deltaLat, Z + deltaZ];
+    return lngLatZ.length === 2
+      ? [lng + deltaLng, lat + deltaLat]
+      : [lng + deltaLng, lat + deltaLat, Z + deltaZ];
   }
 
   _metersToLngLatDelta(xyz) {

@@ -1,15 +1,16 @@
 /* global window,document,fetch */
 import React, {Component} from 'react';
 import {render} from 'react-dom';
-import {MapController} from 'deck.gl';
-import DeckGL, {GeoJsonLayer} from 'deck.gl';
+import DeckGL, {GeoJsonLayer, experimental} from 'deck.gl';
+
+const {MapController} = experimental;
 
 // source: Natural Earth http://www.naturalearthdata.com/
 // via geojson.xyz
-const GEOJSON = 'https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_110m_admin_1_states_provinces_shp.geojson'; //eslint-disable-line
+const GEOJSON =
+  'https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_110m_admin_1_states_provinces_shp.geojson'; //eslint-disable-line
 
 class Root extends Component {
-
   constructor(props) {
     super(props);
     this.state = {
@@ -50,7 +51,8 @@ class Root extends Component {
         {...viewport}
         width={width}
         height={height}
-        onViewportChange={v => this.setState({viewport: v})} >
+        onViewportChange={v => this.setState({viewport: v})}
+      >
         <DeckGL
           {...viewport}
           width={width}
@@ -65,7 +67,8 @@ class Root extends Component {
               getLineColor: () => [255, 255, 255],
               getFillColor: () => [200, 200, 200]
             })
-          ]} />
+          ]}
+        />
       </MapController>
     );
   }

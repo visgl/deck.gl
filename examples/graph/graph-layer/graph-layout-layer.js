@@ -49,14 +49,7 @@ export default class GraphLayoutLayer extends CompositeLayer {
   }
 
   getPickingInfo({info}) {
-    const pickingInfo = [
-      'index',
-      'layer',
-      'object',
-      'picked',
-      'x',
-      'y'
-    ].reduce((acc, k) => {
+    const pickingInfo = ['index', 'layer', 'object', 'picked', 'x', 'y'].reduce((acc, k) => {
       acc[k] = info[k];
       return acc;
     }, {});
@@ -78,11 +71,9 @@ export default class GraphLayoutLayer extends CompositeLayer {
     let relatedObjects = [];
     if (object) {
       if (pickingInfo.objectType === 'link') {
-        relatedObjects = nodes.filter(n =>
-          n.id === object.source.id || n.id === object.target.id);
+        relatedObjects = nodes.filter(n => n.id === object.source.id || n.id === object.target.id);
       } else if (pickingInfo.objectType === 'node') {
-        relatedObjects = links.filter(l =>
-          l.source.id === object.id || l.target.id === object.id);
+        relatedObjects = links.filter(l => l.source.id === object.id || l.target.id === object.id);
         const oneDegreeNodes = relatedObjects.map(related => {
           return related.source === object ? related.target : related.source;
         });
@@ -117,31 +108,33 @@ export default class GraphLayoutLayer extends CompositeLayer {
     // base layer accessors
     const {linkAccessors, nodeAccessors, nodeIconAccessors} = this.props;
 
-    return new GraphLayer(Object.assign(
-      {
-        id: `${id}-graph`,
-        data: {
-          nodes,
-          links
+    return new GraphLayer(
+      Object.assign(
+        {
+          id: `${id}-graph`,
+          data: {
+            nodes,
+            links
+          },
+          layoutTime,
+
+          opacity,
+          pickable,
+          visible,
+          coordinateSystem,
+
+          onHover,
+          onClick
         },
-        layoutTime,
 
-        opacity,
-        pickable,
-        visible,
-        coordinateSystem,
+        // deconstruct these
+        linkAccessors,
+        nodeAccessors,
 
-        onHover,
-        onClick
-      },
-
-      // deconstruct these
-      linkAccessors,
-      nodeAccessors,
-
-      // leave these accessors bundled in an object
-      {nodeIconAccessors}
-    ));
+        // leave these accessors bundled in an object
+        {nodeIconAccessors}
+      )
+    );
   }
 }
 

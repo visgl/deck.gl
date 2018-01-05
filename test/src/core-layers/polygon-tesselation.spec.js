@@ -22,20 +22,9 @@ import test from 'tape-catch';
 
 import * as Polygon from 'deck.gl/core-layers/solid-polygon-layer/polygon';
 import {PolygonTesselator} from 'deck.gl/core-layers/solid-polygon-layer/polygon-tesselator';
-import {PolygonTesselatorExtruded}
-  from 'deck.gl/core-layers/solid-polygon-layer/polygon-tesselator-extruded';
+import {PolygonTesselatorExtruded} from 'deck.gl/core-layers/solid-polygon-layer/polygon-tesselator-extruded';
 
-import Immutable from 'immutable';
-
-const POLYGONS = [
-  [],
-  [[1, 1]],
-  [[1, 1], [1, 1], [1, 1]],
-  [[[1, 1]]],
-  [[[1, 1], [1, 1], [1, 1]]]
-];
-
-const IMMUTABLE_POLYGONS = Immutable.fromJS(POLYGONS);
+const POLYGONS = [[], [[1, 1]], [[1, 1], [1, 1], [1, 1]], [[[1, 1]]], [[[1, 1], [1, 1], [1, 1]]]];
 
 test('polygon#imports', t => {
   t.ok(typeof Polygon.normalize === 'function', 'Polygon.normalize imported');
@@ -52,11 +41,6 @@ test('polygon#functions', t => {
     t.ok(Number.isFinite(Polygon.getVertexCount(polygon)), 'Polygon.getVertexCount');
   }
 
-  for (const polygon of IMMUTABLE_POLYGONS) {
-    t.ok(Polygon.normalize(polygon), 'Polygon.normalize(immutable)');
-    t.ok(Number.isFinite(Polygon.getTriangleCount(polygon)), 'Polygon.getTriangleCount(immutable)');
-    t.ok(Number.isFinite(Polygon.getVertexCount(polygon)), 'Polygon.getVertexCount(immutable)');
-  }
   t.end();
 });
 
@@ -95,30 +79,5 @@ test('PolygonTesselatorExtruded#methods', t => {
   const positionsExtruded64xyLow = tesselatorExtruded64.positions().positions64xyLow;
   t.ok(ArrayBuffer.isView(positionsExtruded64xyLow), 'PolygonTesselatorExtruded.positions64xyLow');
 
-  t.end();
-});
-
-test('PolygonTesselator#methods(immutable)', t => {
-  const tesselator = new PolygonTesselator({polygons: IMMUTABLE_POLYGONS});
-  t.ok(tesselator instanceof PolygonTesselator, 'PolygonTesselator created');
-  const indices = tesselator.indices();
-  t.ok(ArrayBuffer.isView(indices), 'PolygonTesselator.indices');
-  const positions = tesselator.positions().positions;
-  t.ok(ArrayBuffer.isView(positions), 'PolygonTesselator.positions');
-  const colors = tesselator.colors();
-  t.ok(ArrayBuffer.isView(colors), 'PolygonTesselator.colors');
-  t.end();
-});
-
-test('PolygonTesselatorExtruded#methods(immutable)', t => {
-  const tesselator = new PolygonTesselatorExtruded({polygons: IMMUTABLE_POLYGONS});
-  t.ok(tesselator instanceof PolygonTesselatorExtruded, 'PolygonTesselatorExtruded created');
-  const indices = tesselator.indices();
-  t.ok(ArrayBuffer.isView(indices), 'PolygonTesselatorExtruded.indices');
-  const positions = tesselator.positions().positions;
-  t.ok(ArrayBuffer.isView(positions), 'PolygonTesselatorExtruded.positions');
-  const colors = tesselator.colors();
-  t.ok(ArrayBuffer.isView(colors), 'PolygonTesselatorExtruded.colors');
-  t.ok(ArrayBuffer.isView(tesselator.normals()), 'PolygonTesselatorExtruded.normals');
   t.end();
 });

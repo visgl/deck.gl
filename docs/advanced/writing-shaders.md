@@ -1,6 +1,6 @@
 # Writing Shaders
 
-A shader library facilitates creating shaders that work seamlessly with deck.gl. Use the `modules` parameter to the `Model` class (or call the `assembleShaders` function directly) to dynamically include this library into your own GLSL code:
+A shader library facilitates creating shaders that work seamlessly with deck.gl. Use the `modules` parameter to the `Model` class to dynamically include this library into your own GLSL code:
 
 ```js
 const model = new Model(gl, {
@@ -33,6 +33,10 @@ A core feature of deck.gl is the fp64 shader math library that can be used lever
 for more information.
 
 
+### picking
+
+Picking is supported using luma.gl [picking shader module](https://github.com/uber/luma.gl/tree/5.0-release/src/shadertools/modules/picking).
+
 
 ## Shader Techniques and Ideas
 
@@ -63,7 +67,6 @@ The layerIndex is a small integer that starts at zero and is incremented for eac
 ##### `float opacity`
 
 In the fragment shader, multiply the fragment color with the opacity uniform.
-
 
 ### Shader Module Uniforms
 

@@ -58,21 +58,15 @@ In this example, the idea is to draw two ScatterplotLayers, one for fill and one
 
 ```
 class NiceScatterplotLayer extends CompositeLayer {
-
   renderLayers() {
-
-    const baseProps = this.getBaseLayerProps();
-
     return [
       // the filled circles
-      new ScatterplotLayer({
-        id: `{this.props.id}-fill`
-        ...baseProps,
+      new ScatterplotLayer(this.getSubLayerProps({
+        id: 'fill'
       }),
       // the outlines
-      new ScatterplotLayer({
-        id: `{this.props.id}-outline`
-        ...baseProps,
+      new ScatterplotLayer(this.getSubLayerProps({
+        id: 'outline'
       })
     ];
   }
@@ -87,7 +81,7 @@ In our example, we want the sublayers to share the same ScatterplotLayer propert
 
 We then want to map the user defined `getFillColor` and `getStrokeColor` accessors to each `getColor` prop of the fill layer and the outline layer.
 
-Finally, to make [`updateTrigger`](/docs/api-reference/base-layer.md#-updatetriggers-object-optional-) work when colors need to be recalculated, we will map respective accessor names to `getColor`.
+Finally, to make [`updateTrigger`](/docs/api-reference/layer.md#-updatetriggers-object-optional-) work when colors need to be recalculated, we will map respective accessor names to `getColor`.
 
 ```
 class NiceScatterplotLayer extends CompositeLayer {

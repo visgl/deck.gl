@@ -30,7 +30,7 @@ new PolygonLayer({
 
 ## Properties
 
-Inherits from all [Base Layer](/docs/api-reference/base-layer.md) properties.
+Inherits from all [Base Layer](/docs/api-reference/layer.md) properties.
 
 ### Render Options
 
@@ -49,6 +49,14 @@ generates less geometry and is faster than simply returning `0` from `getElevati
 Whether to generate a line wireframe of the hexagon. The outline will have
 "horizontal" lines closing the top and bottom polygons and a vertical line
 (a "strut") for each vertex on the polygon.
+
+##### `elevationScale` (Number, optional)
+
+- Default: `1`
+
+Elevation multiplier. The final elevation is calculated by
+  `elevationScale * getElevation(d)`. `elevationScale` is a handy property to scale
+all elevation without updating the data.
 
 ##### `fp64` (Boolean, optional)
 
@@ -105,5 +113,5 @@ otherwise will be in unit coordinates.
 
 ## Source
 
-[src/layers/core/primitive-polygon-layer](https://github.com/uber/deck.gl/tree/4.1-release/src/layers/core/primitive-polygon-layer)
+[src/layers/core/primitive-polygon-layer](https://github.com/uber/deck.gl/tree/5.0-release/src/layers/core/primitive-polygon-layer)
 

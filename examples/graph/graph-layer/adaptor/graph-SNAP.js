@@ -29,8 +29,7 @@ export default class GraphAdaptor {
     data.forEach(link => {
       const {source, target} = link;
 
-      if (this.linkMap[`${source}-${target}`] ||
-        this.linkMap[`${target}-${source}`]) {
+      if (this.linkMap[`${source}-${target}`] || this.linkMap[`${target}-${source}`]) {
         return;
       }
 

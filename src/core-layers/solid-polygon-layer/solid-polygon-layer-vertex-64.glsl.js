@@ -28,6 +28,7 @@ attribute vec4 colors;
 attribute vec3 pickingColors;
 
 uniform float extruded;
+uniform float elevationScale;
 uniform float opacity;
 
 varying vec4 vColor;
@@ -41,7 +42,7 @@ void main(void) {
   vec2 vertex_pos_modelspace[4];
   vertex_pos_modelspace[0] = projected_coord_xy[0];
   vertex_pos_modelspace[1] = projected_coord_xy[1];
-  vertex_pos_modelspace[2] = vec2(project_scale(positions.z), 0.0);
+  vertex_pos_modelspace[2] = vec2(project_scale(positions.z * elevationScale), 0.0);
   vertex_pos_modelspace[3] = vec2(1.0, 0.0);
 
   gl_Position = project_to_clipspace_fp64(vertex_pos_modelspace);
@@ -55,7 +56,7 @@ void main(void) {
   if (extruded > 0.5) {
     lightWeight = getLightWeight(
       position_worldspace.xyz, // the w component is always 1.0
-      normals
+      project_normal(normals)
     );
   }
 

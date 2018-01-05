@@ -7,7 +7,10 @@ function entries(obj) {
 }
 
 const cbNames = [
-  'YlOrRd', 'YlGnBu', 'PuRd', 'YlGn',
+  'YlOrRd',
+  'YlGnBu',
+  'PuRd',
+  'YlGn',
   // 'Greens', 'Reds', 'Blues', 'RdYlGn',
   'Spectral'
 ];
@@ -30,7 +33,6 @@ function isSamePalette(colors1, colors2) {
 }
 
 export default class ColorPalettePicker extends PureComponent {
-
   _renderPalette(name, colors, isCurrent) {
     const width = `${80 / colors.length}%`;
     const {onChange} = this.props;
@@ -42,11 +44,12 @@ export default class ColorPalettePicker extends PureComponent {
             type="checkbox"
             id="colorRange"
             checked={isCurrent}
-            onChange={() => onChange(colors.map(getColorArray))}/>
+            onChange={() => onChange(colors.map(getColorArray))}
+          />
         </div>
-        {colors.map(color =>
-          <div className="block" key={color}
-               style={{background: color, width}}/>)}
+        {colors.map(color => (
+          <div className="block" key={color} style={{background: color, width}} />
+        ))}
       </div>
     );
   }
@@ -56,9 +59,9 @@ export default class ColorPalettePicker extends PureComponent {
 
     return (
       <div className="color-palette-picker">
-        {colorbrewerColors
-          .map(({name, colors}) => this._renderPalette(
-            name, colors, isSamePalette(currentColors, colors)))}
+        {colorbrewerColors.map(({name, colors}) =>
+          this._renderPalette(name, colors, isSamePalette(currentColors, colors))
+        )}
       </div>
     );
   }

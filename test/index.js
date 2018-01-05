@@ -21,7 +21,9 @@
 import './src/imports-spec';
 import './src/core';
 import './src/core-layers';
-import './src/deprecated-layers';
 
 // React test cases currently only work in browser
 // import './src/react';
+
+// deck.gl-layers
+import '../src/experimental-layers/test';

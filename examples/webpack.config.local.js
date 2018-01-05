@@ -30,13 +30,14 @@ function makeLocalDevConfig(EXAMPLE_DIR = LIB_DIR) {
         'deck.gl/dist': SRC_DIR,
         // Imports the deck.gl library from the src directory in this repo
         'deck.gl': SRC_DIR,
-        // luma version should be controlled by example's package.json
-        'luma.gl': resolve(EXAMPLE_DIR, './node_modules/luma.gl'),
+        // Imports the deck.gl library from the src directory in this repo
+        'deck.gl-layers': resolve(SRC_DIR, './experimental-layers/src'),
+        // Use luma.gl specified by root package.json
+        'luma.gl': resolve(LIB_DIR, './node_modules/luma.gl'),
         // Important: ensure shared dependencies come from the main node_modules dir
         // Versions will be controlled by the deck.gl top level package.json
         'math.gl': resolve(LIB_DIR, './node_modules/math.gl'),
-        'viewport-mercator-project':
-          resolve(LIB_DIR, './node_modules/viewport-mercator-project'),
+        'viewport-mercator-project': resolve(LIB_DIR, './node_modules/viewport-mercator-project'),
         seer: resolve(LIB_DIR, './node_modules/seer'),
         react: resolve(LIB_DIR, './node_modules/react')
       }
@@ -52,9 +53,7 @@ function makeLocalDevConfig(EXAMPLE_DIR = LIB_DIR) {
       ]
     },
     // Optional: Enables reading mapbox token from environment variable
-    plugins: [
-      new webpack.EnvironmentPlugin(['MapboxAccessToken'])
-    ]
+    plugins: [new webpack.EnvironmentPlugin(['MapboxAccessToken'])]
   };
 }
 

@@ -12,7 +12,7 @@ The "picking engine" identifies which object in which layer is at the given coor
 
 ### Enabling Picking
 
-Picking can be enabled or disabled on a layer-by-layer basis. To enable picking on a layer, set its [`pickable`](/docs/api-reference/base-layer.md#-pickable-boolean-optional-) prop to `true`. This value is `false` by default.
+Picking can be enabled or disabled on a layer-by-layer basis. To enable picking on a layer, set its [`pickable`](/docs/api-reference/layer.md#-pickable-boolean-optional-) prop to `true`. This value is `false` by default.
 
 ### The Picking Info Object
 
@@ -31,15 +31,15 @@ The picking engine returns "picking info" objects which contains a variety of fi
 
 ## Calling the Picking Engine Directly
 
-The picking engine is exposed through the [`DeckGL.queryObject`]((/docs/api-reference/deckgl.md) and [`DeckGL.queryVisibleObject`]((/docs/api-reference/deckgl.md) methods. These methods allow you to query what layers and objects within those layers are under a specific point or within a specified rectangle. They return `Picking Info` objects as described below.
+The picking engine is exposed through the [`DeckGL.pickObject`]((/docs/api-reference/deckgl.md) and [`DeckGL.pickObjects`]((/docs/api-reference/deckgl.md) methods. These methods allow you to query what layers and objects within those layers are under a specific point or within a specified rectangle. They return `Picking Info` objects as described below.
 
-`queryObject` allows an application to define its own event handling. When it comes to how to actually do event handling in a browser, there are many options. In a React application, perhaps the simplest is to just use React's "synthetic" event handling together with `queryObject`:
+`pickObject` allows an application to define its own event handling. When it comes to how to actually do event handling in a browser, there are many options. In a React application, perhaps the simplest is to just use React's "synthetic" event handling together with `pickObject`:
 
 ```js
 class MyComponent extends React.Component {
   ...
   onClickHandler = (event) => {
-    const pickInfo = this.deckGL.queryObject({x: event.clientX, y: event.clientY, ...});
+    const pickInfo = this.deckGL.pickObject({x: event.clientX, y: event.clientY, ...});
     console.log(pickInfo.lngLat);
   }
 
@@ -61,7 +61,7 @@ For applications that have basic event handling needs, deck.gl has built-in supp
 
 There are two ways to subscribe to the built-in picking event handling:
 
-- Set callback for each pickable layer by setting [`onHover`](/docs/api-reference/base-layer.md#-onhover-function-optional-) and [`onClick`](/docs/api-reference/base-layer.md#-onclick-function-optional-) props:
+- Set callback for each pickable layer by setting [`onHover`](/docs/api-reference/layer.md#-onhover-function-optional-) and [`onClick`](/docs/api-reference/layer.md#-onclick-function-optional-) props:
 ```js
 const layer = new ScatterplotLayer({
     ...
@@ -79,7 +79,7 @@ const layer = new ScatterplotLayer({
 />
 ```
 
-The callbacks for `hover` and `click` events are called with a single parameter `info` that contains the mouse or touch event and what was hovered, including which layer was selected. Thus event handlers registered directly on the `DeckGL` compionents are also able to distinguish between clicks in different layers.
+The callbacks for `hover` and `click` events are called with a single parameter `info` that contains the mouse or touch event and what was hovered, including which layer was selected. Thus event handlers registered directly on the `DeckGL` components are also able to distinguish between clicks in different layers.
 
 ### Behavior of Built-in Event Handling
 

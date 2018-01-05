@@ -1,5 +1,7 @@
+import ViewState from './view-state';
 import PerspectiveMercatorViewport from '../viewports/web-mercator-viewport';
 import assert from 'assert';
+import {mod} from '../utils/math-utils';
 
 // MAPBOX LIMITS
 export const MAPBOX_LIMITS = {
@@ -15,18 +17,11 @@ const defaultState = {
   altitude: 1.5
 };
 
-/* Utils */
-function mod(value, divisor) {
-  const modulus = value % divisor;
-  return modulus < 0 ? divisor + modulus : modulus;
-}
-
 function ensureFinite(value, fallbackValue) {
   return Number.isFinite(value) ? value : fallbackValue;
 }
 
-export default class MapState {
-
+export default class MapState extends ViewState {
   constructor({
     /** Mapbox viewport properties */
     /** The width of the viewport */
@@ -44,10 +39,10 @@ export default class MapState {
     /** The pitch of the viewport in degrees */
     pitch,
     /**
-    * Specify the altitude of the viewport camera
-    * Unit: map heights, default 1.5
-    * Non-public API, see https://github.com/mapbox/mapbox-gl-js/issues/1137
-    */
+     * Specify the altitude of the viewport camera
+     * Unit: map heights, default 1.5
+     * Non-public API, see https://github.com/mapbox/mapbox-gl-js/issues/1137
+     */
     altitude,
 
     /** Viewport constraints */
@@ -68,20 +63,19 @@ export default class MapState {
     /** Zoom when current zoom operation started */
     startZoom
   } = {}) {
-    assert(Number.isFinite(width), '`width` must be supplied');
-    assert(Number.isFinite(height), '`height` must be supplied');
     assert(Number.isFinite(longitude), '`longitude` must be supplied');
     assert(Number.isFinite(latitude), '`latitude` must be supplied');
     assert(Number.isFinite(zoom), '`zoom` must be supplied');
 
-    this._viewportProps = this._applyConstraints({
+    super({
       width,
       height,
       latitude,
       longitude,
       zoom,
-      bearing: ensureFinite(bearing, defaultState.bearing),
-      pitch: ensureFinite(pitch, defaultState.pitch),
+      bearing,
+      pitch,
+
       altitude: ensureFinite(altitude, defaultState.altitude),
       maxZoom: ensureFinite(maxZoom, MAPBOX_LIMITS.maxZoom),
       minZoom: ensureFinite(minZoom, MAPBOX_LIMITS.minZoom),
@@ -99,10 +93,6 @@ export default class MapState {
   }
 
   /* Public API */
-
-  getViewportProps() {
-    return this._viewportProps;
-  }
 
   getInteractiveState() {
     return this._interactiveState;
@@ -128,8 +118,11 @@ export default class MapState {
     const startPanLngLat = this._interactiveState.startPanLngLat || this._unproject(startPos);
 
     // take the start lnglat and put it where the mouse is down.
-    assert(startPanLngLat, '`startPanLngLat` prop is required ' +
-      'for mouse pan behavior to calculate where to position the map.');
+    assert(
+      startPanLngLat,
+      '`startPanLngLat` prop is required ' +
+        'for mouse pan behavior to calculate where to position the map.'
+    );
 
     const [longitude, latitude] = this._calculateNewLngLat({startPanLngLat, pos});
 
@@ -168,10 +161,8 @@ export default class MapState {
    *   change to pitch. -1 sets to minPitch and 1 sets to maxPitch.
    */
   rotate({deltaScaleX, deltaScaleY}) {
-    assert(deltaScaleX >= -1 && deltaScaleX <= 1,
-      '`deltaScaleX` must be a number between [-1, 1]');
-    assert(deltaScaleY >= -1 && deltaScaleY <= 1,
-      '`deltaScaleY` must be a number between [-1, 1]');
+    assert(deltaScaleX >= -1 && deltaScaleX <= 1, '`deltaScaleX` must be a number between [-1, 1]');
+    assert(deltaScaleY >= -1 && deltaScaleY <= 1, '`deltaScaleY` must be a number between [-1, 1]');
 
     let {startBearing, startPitch} = this._interactiveState;
 
@@ -229,8 +220,8 @@ export default class MapState {
     assert(scale > 0, '`scale` must be a positive number');
 
     // Make sure we zoom around the current mouse position rather than map center
-    const startZoomLngLat = this._interactiveState.startZoomLngLat ||
-      this._unproject(startPos) || this._unproject(pos);
+    const startZoomLngLat =
+      this._interactiveState.startZoomLngLat || this._unproject(startPos) || this._unproject(pos);
     let {startZoom} = this._interactiveState;
 
     if (!Number.isFinite(startZoom)) {
@@ -238,8 +229,11 @@ export default class MapState {
     }
 
     // take the start lnglat and put it where the mouse is down.
-    assert(startZoomLngLat, '`startZoomLngLat` prop is required ' +
-      'for zoom behavior to calculate where to position the map.');
+    assert(
+      startZoomLngLat,
+      '`startZoomLngLat` prop is required ' +
+        'for zoom behavior to calculate where to position the map.'
+    );
 
     const zoom = this._calculateNewZoom({scale, startZoom});
 
@@ -318,20 +312,20 @@ export default class MapState {
     // Ensure zoom is within specified range
     const {maxZoom, minZoom, zoom} = props;
     props.zoom = zoom > maxZoom ? maxZoom : zoom;
-    props.zoom = zoom < minZoom ? minZoom : zoom;
+    props.zoom = props.zoom < minZoom ? minZoom : props.zoom;
 
     // Ensure pitch is within specified range
     const {maxPitch, minPitch, pitch} = props;
 
     props.pitch = pitch > maxPitch ? maxPitch : pitch;
-    props.pitch = pitch < minPitch ? minPitch : pitch;
+    props.pitch = props.pitch < minPitch ? minPitch : props.pitch;
 
     return props;
   }
 
   _unproject(pos) {
     const viewport = new PerspectiveMercatorViewport(this._viewportProps);
-    return pos && viewport.unproject(pos, {topLeft: false});
+    return pos && viewport.unproject(pos, {topLeft: true});
   }
 
   // Calculate a new lnglat based on pixel dragging position

@@ -7,16 +7,18 @@ export default class GridGeometry extends Geometry {
     const indices = calculateIndices(opts);
     const positions = calculatePositions(opts);
 
-    super(Object.assign({}, opts, {
-      id,
-      drawMode: GL.TRIANGLES,
-      attributes: {
-        // No size/type information is needed for known vertex names
-        indices,
-        positions
-      },
-      vertexCount: indices.length
-    }));
+    super(
+      Object.assign({}, opts, {
+        id,
+        drawMode: GL.TRIANGLES,
+        attributes: {
+          // No size/type information is needed for known vertex names
+          indices,
+          positions
+        },
+        vertexCount: indices.length
+      })
+    );
   }
 }
 
@@ -56,11 +58,7 @@ function calculateIndices({xResolution, yResolution}) {
   return indices;
 }
 
-function calculatePositions({
-	boundingBox,
-	xResolution,
-	yResolution
-}) {
+function calculatePositions({boundingBox, xResolution, yResolution}) {
   const {minLng, minLat, maxLng, maxLat} = boundingBox;
 
   // step between samples

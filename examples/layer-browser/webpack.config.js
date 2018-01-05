@@ -33,7 +33,7 @@ const CONFIG = {
         options: {
           objectAssign: 'Object.assign', // Note: may need polyfill on old browsers
           transforms: {
-            modules: false,      // Let Webpack take care of import/exports
+            modules: false, // Let Webpack take care of import/exports
             dangerousForOf: true // Use for/of in spite of buble's limitations
           }
         }
@@ -52,10 +52,8 @@ const CONFIG = {
   },
 
   // Optional: Enables reading mapbox token from environment variable
-  plugins: [
-    new webpack.EnvironmentPlugin(['MapboxAccessToken'])
-  ]
+  plugins: [new webpack.EnvironmentPlugin(['MapboxAccessToken'])]
 };
 
 // This line enables bundling against src in this repo rather than installed deck.gl module
-module.exports = env => env ? require('../webpack.config.local')(CONFIG, __dirname)(env) : CONFIG;
+module.exports = env => (env ? require('../webpack.config.local')(CONFIG, __dirname)(env) : CONFIG);

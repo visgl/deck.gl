@@ -1,1 +1,1 @@
-export {default as default, ScatterplotBrushingLayer} from './scatterplot-brushing-layer';
+export {default, ScatterplotBrushingLayer} from './scatterplot-brushing-layer';

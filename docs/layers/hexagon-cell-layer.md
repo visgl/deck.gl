@@ -40,7 +40,7 @@ const App = ({data, viewport}) => {
 
 ## Properties
 
-Inherits from all [Base Layer](/docs/api-reference/base-layer.md) properties.
+Inherits from all [Base Layer](/docs/api-reference/layer.md) properties.
 
 ### Render Options
 
@@ -118,5 +118,5 @@ Method called to retrieve the elevation of each object. 1 unit approximate to 10
 
 ## Source
 
-[src/layers/core/hexagon-cell-layer](https://github.com/uber/deck.gl/tree/4.1-release/src/layers/core/hexagon-cell-layer)
+[src/layers/core/hexagon-cell-layer](https://github.com/uber/deck.gl/tree/5.0-release/src/layers/core/hexagon-cell-layer)
 

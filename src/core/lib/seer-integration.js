@@ -88,6 +88,7 @@ export const initLayerInSeer = layer => {
 
   seer.listItem('deck.gl', layer.id, {
     badges,
+    // TODO: Seer currently only handles single model layers
     links: layer.state && layer.state.model ? [`luma.gl:${layer.state.model.id}`] : undefined,
     parent: layer.parentLayer ? layer.parentLayer.id : undefined
   });
@@ -97,7 +98,7 @@ export const initLayerInSeer = layer => {
  * Log layer's properties to Seer
  */
 export const updateLayerInSeer = layer => {
-  if (!seer.isReady() || seer.throttle(`deck.gl:${layer.id}`, 1E3)) {
+  if (!seer.isReady() || seer.throttle(`deck.gl:${layer.id}`, 1e3)) {
     return;
   }
 
@@ -117,9 +118,7 @@ export const removeLayerInSeer = id => {
 };
 
 function logPayload(layer) {
-  const data = [
-    {path: 'objects.props', data: layer.props}
-  ];
+  const data = [{path: 'objects.props', data: layer.props}];
 
   const badges = [layer.constructor.layerName];
 
@@ -129,6 +128,7 @@ function logPayload(layer) {
       data.push({path: 'objects.attributes', data: attrs});
       badges.push(layer.state.attributeManager.stats.getTimeString());
     }
+    // TODO: Seer currently only handles single model layers
     if (layer.state.model) {
       layer.state.model.timerQueryEnabled = true;
       const {lastFrameTime} = layer.state.model.stats;

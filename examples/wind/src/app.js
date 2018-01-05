@@ -18,7 +18,6 @@ const animate = () => {
 const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
 
 class Root extends Component {
-
   constructor(props) {
     super(props);
     this.state = {
@@ -33,10 +32,11 @@ class Root extends Component {
         bearing: -0.6424747174301046
       },
       settings: {
-        time: 0,
-        showParticles: false,
-        showWindDemo: false,
-        showElevation: false
+        time: 30,
+        showParticles: true,
+        showWind: true,
+        showElevation: true,
+        useDevicePixels: true
       }
     };
     autobind(this);
@@ -80,11 +80,10 @@ class Root extends Component {
           {...viewport}
           mapStyle="mapbox://styles/mapbox/dark-v9"
           mapboxApiAccessToken={MAPBOX_TOKEN}
-          perspectiveEnabled
-          onChangeViewport={this._updateViewport}>
-
+          dragRotate
+          onViewportChange={this._updateViewport}
+        >
           <WindDemo viewport={viewport} settings={settings} />
-
         </MapGL>
 
         <div className="control-panel">
@@ -95,16 +94,17 @@ class Root extends Component {
             <li>Turn on/off between a particles or vector field layer</li>
             <li>Slide through every hour of the day to look at wind change</li>
           </ul>
-          <p>Made with <a href="http://deck.gl">deck.gl</a> by
+          <p>
+            Made with <a href="http://deck.gl">deck.gl</a> by
             <a href="https://twitter.com/philogb">@philogb</a>
           </p>
-          <p>Data source: <a href="http://www.census.gov">NCAA</a></p>
+          <p>
+            Data source: <a href="http://www.census.gov">NCAA</a>
+          </p>
           <hr />
 
           <ControlPanel settings={settings} onChange={this._updateSettings} />
-
         </div>
-
       </div>
     );
   }

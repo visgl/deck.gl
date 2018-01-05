@@ -33,12 +33,15 @@ const ZERO_VECTOR = [0, 0, 0, 0];
 // 4x4 matrix that drops 4th component of vector
 const VECTOR_TO_POINT_MATRIX = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0];
 const IDENTITY_MATRIX = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
+const DEFAULT_PIXELS_PER_UNIT2 = [0, 0, 0];
 
 // TODO - import these utils from fp64 package
-function fp64ify(a) {
+function fp64ify(a, array = [], startIndex = 0) {
   const hiPart = Math.fround(a);
   const loPart = a - hiPart;
-  return [hiPart, loPart];
+  array[startIndex] = hiPart;
+  array[startIndex + 1] = loPart;
+  return array;
 }
 
 // calculate WebGL 64 bit matrix (transposed "Float64Array")
@@ -48,22 +51,10 @@ function fp64ifyMatrix4(matrix) {
   for (let i = 0; i < 4; ++i) {
     for (let j = 0; j < 4; ++j) {
       const index = i * 4 + j;
-      [matrixFP64[index * 2], matrixFP64[index * 2 + 1]] = fp64ify(matrix[j * 4 + i]);
+      fp64ify(matrix[j * 4 + i], matrixFP64, index * 2);
     }
   }
   return matrixFP64;
-}
-
-// Calculate transformed projectionCenter (using 64 bit precision JS)
-// This is the key to offset mode precision
-// (avoids doing this addition in 32 bit precision in GLSL)
-function calculateProjectionCenter({coordinateOrigin, coordinateZoom, viewProjectionMatrix}) {
-  const positionPixels = projectFlat(coordinateOrigin, Math.pow(2, coordinateZoom));
-  // projectionCenter = new Matrix4(viewProjectionMatrix)
-  //   .transformVector([positionPixels[0], positionPixels[1], 0.0, 1.0]);
-  return vec4_transformMat4([],
-    [positionPixels[0], positionPixels[1], 0.0, 1.0],
-    viewProjectionMatrix);
 }
 
 // The code that utilizes Matrix4 does the same calculation as their mat4 counterparts,
@@ -86,30 +77,38 @@ function calculateMatrixAndOffset({
   let projectionCenter;
 
   switch (coordinateSystem) {
+    case COORDINATE_SYSTEM.IDENTITY:
+    case COORDINATE_SYSTEM.LNGLAT:
+      projectionCenter = ZERO_VECTOR;
+      break;
 
-  case COORDINATE_SYSTEM.IDENTITY:
-  case COORDINATE_SYSTEM.LNGLAT:
-    projectionCenter = ZERO_VECTOR;
-    break;
+    // TODO: make lighting work for meter offset mode
+    case COORDINATE_SYSTEM.LNGLAT_OFFSETS:
+    case COORDINATE_SYSTEM.METER_OFFSETS:
+      // Calculate transformed projectionCenter (using 64 bit precision JS)
+      // This is the key to offset mode precision
+      // (avoids doing this addition in 32 bit precision in GLSL)
+      const positionPixels = projectFlat(coordinateOrigin, Math.pow(2, coordinateZoom));
+      // projectionCenter = new Matrix4(viewProjectionMatrix)
+      //   .transformVector([positionPixels[0], positionPixels[1], 0.0, 1.0]);
+      projectionCenter = vec4_transformMat4(
+        [],
+        [positionPixels[0], positionPixels[1], 0.0, 1.0],
+        viewProjectionMatrix
+      );
 
-  // TODO: make lighitng work for meter offset mode
-  case COORDINATE_SYSTEM.METER_OFFSETS:
-    projectionCenter = calculateProjectionCenter({
-      coordinateOrigin, coordinateZoom, viewProjectionMatrix
-    });
+      // Always apply uncentered projection matrix if available (shader adds center)
+      viewMatrix = viewMatrixUncentered || viewMatrix;
 
-    // Always apply uncentered projection matrix if available (shader adds center)
-    viewMatrix = viewMatrixUncentered || viewMatrix;
+      // Zero out 4th coordinate ("after" model matrix) - avoids further translations
+      // viewMatrix = new Matrix4(viewMatrixUncentered || viewMatrix)
+      //   .multiplyRight(VECTOR_TO_POINT_MATRIX);
+      viewProjectionMatrix = mat4_multiply([], projectionMatrix, viewMatrix);
+      viewProjectionMatrix = mat4_multiply([], viewProjectionMatrix, VECTOR_TO_POINT_MATRIX);
+      break;
 
-    // Zero out 4th coordinate ("after" model matrix) - avoids further translations
-    // viewMatrix = new Matrix4(viewMatrixUncentered || viewMatrix)
-    //   .multiplyRight(VECTOR_TO_POINT_MATRIX);
-    viewProjectionMatrix = mat4_multiply([], projectionMatrix, viewMatrix);
-    viewProjectionMatrix = mat4_multiply([], viewProjectionMatrix, VECTOR_TO_POINT_MATRIX);
-    break;
-
-  default:
-    throw new Error('Unknown projection mode');
+    default:
+      throw new Error('Unknown projection mode');
   }
 
   return {
@@ -134,6 +133,7 @@ export function getUniformsFromViewport({
   modelMatrix = null,
   coordinateSystem = COORDINATE_SYSTEM.LNGLAT,
   coordinateOrigin = [0, 0],
+  fp64 = false,
   // Deprecated
   projectionMode,
   positionOrigin
@@ -141,38 +141,35 @@ export function getUniformsFromViewport({
   assert(viewport);
 
   if (projectionMode !== undefined) {
-    coordinateSystem = projectionMode;
-    log.deprecated('projectionMode', 'coordinateSystem');
+    log.removed('projectionMode', 'coordinateSystem');
   }
   if (positionOrigin !== undefined) {
-    coordinateOrigin = positionOrigin;
-    log.deprecated('positionOrigin', 'coordinateOrigin');
+    log.removed('positionOrigin', 'coordinateOrigin');
   }
 
   const coordinateZoom = viewport.zoom;
   assert(coordinateZoom >= 0);
 
-  const {projectionCenter, viewProjectionMatrix, cameraPos} =
-    calculateMatrixAndOffset({
-      coordinateSystem, coordinateOrigin, coordinateZoom, modelMatrix, viewport
-    });
+  const {projectionCenter, viewProjectionMatrix, cameraPos} = calculateMatrixAndOffset({
+    coordinateSystem,
+    coordinateOrigin,
+    coordinateZoom,
+    modelMatrix,
+    viewport
+  });
 
   assert(viewProjectionMatrix, 'Viewport missing modelViewProjectionMatrix');
 
   // Calculate projection pixels per unit
   const distanceScales = viewport.getDistanceScales();
 
-  // TODO - does this depend on useDevicePixelRatio?
+  // TODO - does this depend on useDevicePixels?
   const devicePixelRatio = (window && window.devicePixelRatio) || 1;
   const viewportSize = [viewport.width * devicePixelRatio, viewport.height * devicePixelRatio];
 
-  const glModelMatrix = new Float32Array(modelMatrix || IDENTITY_MATRIX);
-  const glViewProjectionMatrix = new Float32Array(viewProjectionMatrix);
+  const glModelMatrix = modelMatrix || IDENTITY_MATRIX;
 
-  const glViewProjectionMatrixFP64 = fp64ifyMatrix4(viewProjectionMatrix);
-  const scaleFP64 = fp64ify(viewport.scale);
-
-  return {
+  const uniforms = {
     // Projection mode values
     project_uCoordinateSystem: coordinateSystem,
     project_uCenter: projectionCenter,
@@ -183,38 +180,42 @@ export function getUniformsFromViewport({
 
     // Distance at which screen pixels are projected
     project_uFocalDistance: viewport.focalDistance || 1,
+    project_uPixelsPerMeter: distanceScales.pixelsPerMeter,
+    project_uPixelsPerDegree: distanceScales.pixelsPerDegree,
     project_uPixelsPerUnit: distanceScales.pixelsPerMeter,
+    project_uPixelsPerUnit2: DEFAULT_PIXELS_PER_UNIT2,
     project_uScale: viewport.scale, // This is the mercator scale (2 ** zoom)
 
     project_uModelMatrix: glModelMatrix,
-    project_uViewProjectionMatrix: glViewProjectionMatrix,
-
-    // 64 bit support
-    project_uViewProjectionMatrixFP64: fp64ifyMatrix4(viewProjectionMatrix),
+    project_uViewProjectionMatrix: viewProjectionMatrix,
 
     // This is for lighting calculations
-    project_uCameraPosition: new Float32Array(cameraPos),
-
-    project64_uViewProjectionMatrix: glViewProjectionMatrixFP64,
-    project64_uScale: scaleFP64,
-
-    //
-    // DEPRECATED UNIFORMS - For backwards compatibility with old custom layers
-    //
-    projectionMode: coordinateSystem,
-    projectionCenter,
-
-    projectionOrigin: coordinateOrigin,
-    modelMatrix: glModelMatrix,
-
-    projectionMatrix: glViewProjectionMatrix,
-    projectionPixelsPerUnit: distanceScales.pixelsPerMeter,
-    projectionScale: viewport.scale, // This is the mercator scale (2 ** zoom)
-    viewportSize,
-    devicePixelRatio,
-    cameraPos: new Float32Array(cameraPos),
-
-    projectionFP64: glViewProjectionMatrixFP64,
-    projectionScaleFP64: scaleFP64
+    project_uCameraPosition: cameraPos
   };
+
+  if (coordinateSystem === COORDINATE_SYSTEM.METER_OFFSETS) {
+    const distanceScalesAtOrigin = viewport.getDistanceScales(coordinateOrigin);
+    uniforms.project_uPixelsPerUnit = distanceScalesAtOrigin.pixelsPerMeter;
+    uniforms.project_uPixelsPerUnit2 = distanceScalesAtOrigin.pixelsPerMeter2;
+  }
+  if (coordinateSystem === COORDINATE_SYSTEM.LNGLAT_OFFSETS) {
+    const distanceScalesAtOrigin = viewport.getDistanceScales(coordinateOrigin);
+    uniforms.project_uPixelsPerUnit = distanceScalesAtOrigin.pixelsPerDegree;
+    uniforms.project_uPixelsPerUnit2 = distanceScalesAtOrigin.pixelsPerDegree2;
+  }
+
+  // TODO - fp64 flag should be from shader module, not layer props
+  return fp64 ? addFP64Uniforms(uniforms) : uniforms;
+}
+
+// 64 bit projection support
+function addFP64Uniforms(uniforms) {
+  const glViewProjectionMatrixFP64 = fp64ifyMatrix4(uniforms.project_uViewProjectionMatrix);
+  const scaleFP64 = fp64ify(uniforms.project_uScale);
+
+  uniforms.project_uViewProjectionMatrixFP64 = glViewProjectionMatrixFP64;
+  uniforms.project64_uViewProjectionMatrix = glViewProjectionMatrixFP64;
+  uniforms.project64_uScale = scaleFP64;
+
+  return uniforms;
 }

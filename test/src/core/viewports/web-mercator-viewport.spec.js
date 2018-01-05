@@ -19,8 +19,11 @@
 // THE SOFTWARE.
 
 import test from 'tape-catch';
-import {equals} from 'deck.gl/core/math/equals';
+import {equals, config} from 'math.gl';
 import {WebMercatorViewport} from 'deck.gl';
+
+// Adjust sensitivity of math.gl's equals
+config.EPSILON = 0.000001;
 
 /* eslint-disable */
 const TEST_VIEWPORTS = [
@@ -61,18 +64,24 @@ test('WebMercatorViewport#imports', t => {
 });
 
 test('WebMercatorViewport#constructor', t => {
-  t.ok(new WebMercatorViewport() instanceof WebMercatorViewport,
-    'Created new WebMercatorViewport with default args');
+  t.ok(
+    new WebMercatorViewport() instanceof WebMercatorViewport,
+    'Created new WebMercatorViewport with default args'
+  );
   t.end();
 });
 
 test('WebMercatorViewport#constructor - 0 width/height', t => {
-  const viewport = new WebMercatorViewport(Object.assign(TEST_VIEWPORTS[0].mapState, {
-    width: 0,
-    height: 0
-  }));
-  t.ok(viewport instanceof WebMercatorViewport,
-    'WebMercatorViewport constructed successfully with 0 width and height');
+  const viewport = new WebMercatorViewport(
+    Object.assign(TEST_VIEWPORTS[0].mapState, {
+      width: 0,
+      height: 0
+    })
+  );
+  t.ok(
+    viewport instanceof WebMercatorViewport,
+    'WebMercatorViewport constructed successfully with 0 width and height'
+  );
   t.end();
 });
 
@@ -102,8 +111,7 @@ test('WebMercatorViewport.project#3D', t => {
       const lnglatIn3 = [vc.mapState.longitude + offset, vc.mapState.latitude + offset, 0];
       const xyz3 = viewport.project(lnglatIn3);
       const lnglat3 = viewport.unproject(xyz3);
-      t.ok(equals(lnglatIn3, lnglat3),
-        `Project/unproject ${lnglatIn3}=>${xyz3}=>${lnglat3}`);
+      t.ok(equals(lnglatIn3, lnglat3), `Project/unproject ${lnglatIn3}=>${xyz3}=>${lnglat3}`);
     }
   }
   t.end();
@@ -144,7 +152,11 @@ test('WebMercatorViewport.meterDeltas', t => {
       const deltaLngLat = viewport.metersToLngLatDelta(coordinate);
       const deltaMeters = viewport.lngLatDeltaToMeters(deltaLngLat);
       t.comment(`Comparing [${deltaMeters}] to [${coordinate}]`);
-      t.ok(equals(deltaMeters, coordinate));
+      t.ok(equals(deltaMeters, coordinate), 'deltaLngLat to deltaMeters');
+
+      const offsetCoordinate = viewport.addMetersToLngLat([0, 0, 0], coordinate);
+      t.comment(`Comparing [${deltaLngLat}] to [${offsetCoordinate}]`);
+      t.ok(equals(offsetCoordinate, deltaLngLat), 'addMetersToLngLat');
     }
   }
   t.end();

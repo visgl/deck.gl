@@ -1,6 +1,6 @@
 # LayerManager Class (Advanced)
 
-Note: The `LayerManager` class is an internal class that is exposed primarily to enable deck.gl to be used without React. If you are using the [`DeckGL`](/docs/api-reference/deckgl.md) React Component, a layer manager is created under the hood to handle layer management, and you do not need to use this class.
+> The `LayerManager` class is an internal class that is exposed primarily to enable deck.gl to be used without React. If you are using the [`DeckGL`](/docs/api-reference/deckgl.md) React Component, a layer manager is created under the hood to handle layer management, and you do not need to use this class.
 
 The `LayerManager` class handles updates, drawing and picking for a set of layers.
 
@@ -13,7 +13,7 @@ For more information consult the [Using Standalone](/docs/advanced/using-standal
 
 Creates a new `LayerManager` instance.
 
-`const layerManager = new LayerManager({gl})`
+`const layerManager = new LayerManager(gl, {eventManager: ...}})`
 
 * `gl` ([WebGLRenderingContext](https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext))
 
@@ -44,40 +44,28 @@ Updates the current viewport.
 
 Updates parameters
 
-`layerManager.setParameters({useDevicePixelRatio})`
+`layerManager.setParameters({
+	useDevicePixels,
+    pickingRadius,
+    onLayerClick,
+    onLayerHover
+})
+`
 
-* `useDevicePixelRatio` (`Boolean`, optional) - Whether to use retina/HD display or not.
-
-##### initEventHandling
-
-Registers a source of DOM input events.
-
-`layerManager.initEventHandling(eventManager)`
-
+* `useDevicePixels` (`Boolean`, optional) - Whether to use retina/HD display or not.
 * `eventManager` - A source of DOM input events
+
+* `pickingRadius` (`Number`, optional) - "Fuzziness" of picking (px), to support fat-fingering.
+* `onLayerClick` (`Function`, optional) - A handler to be called when any layer is clicked.
+* `onLayerHover` (`Function`, optional) - A handler to be called when any layer is hovered over.
 
 Notes:
 * The event "source" is expected to provide `on()`/`off()` methods for registration, and to call registered handlers with an "Event" object of the following shape:
  * `offsetCenter` (Object: {x, y}) - center of the event
  * `srcEvent` (Object) - native JS Event object
 
-##### setEventHandlingParameters
 
-Set parameters for input event handling.
-
- ```js
-layerManager.setEventHandlingParameters({
-  pickingRadius,
-  onLayerClick,
-  onLayerHover
-});
-```
-
-* `pickingRadius` (`Number`, optional) - "Fuzziness" of picking (px), to support fat-fingering.
-* `onLayerClick` (`Function`, optional) - A handler to be called when any layer is clicked.
-* `onLayerHover` (`Function`, optional) - A handler to be called when any layer is hovered over.
-
-##### updateLayers
+##### setLayers
 
 Provide a new list of layers. Layers will be matched against old layers, and any composite layers will be recursively expanded into primitive layers.
 
@@ -93,7 +81,7 @@ Draw all layers
 
 * `pass` (String) - The render pass identifier, for debugging purpose
 
-##### pickLayer
+##### pickObject
 
 Pick the closest info at given coordinate
 
@@ -103,8 +91,7 @@ Pick the closest info at given coordinate
 * `y` (Number) - The y position of the pointer
 * `mode` (String) - One of `hover` or `click`
 
-
-##### queryLayer
+##### pickObjects
 
 Get all unique infos within a bounding box
 
@@ -122,4 +109,4 @@ Checks if layers need to be redrawn.
 
 
 ## Source
-[src/lib/layer-manager.js](https://github.com/uber/deck.gl/blob/4.1-release/src/lib/layer-manager.js)
+[src/lib/layer-manager.js](https://github.com/uber/deck.gl/blob/5.0-release/src/lib/layer-manager.js)

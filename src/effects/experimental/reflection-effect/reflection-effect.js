@@ -27,7 +27,6 @@ import reflectionVertex from './reflection-effect-vertex.glsl';
 import reflectionFragment from './reflection-effect-fragment.glsl';
 
 export default class ReflectionEffect extends Effect {
-
   /**
    * @classdesc
    * ReflectionEffect
@@ -55,15 +54,17 @@ export default class ReflectionEffect extends Effect {
   }
 
   initialize({gl, layerManager}) {
-    this.unitQuad = new Model(gl, Object.assign({}, this.getShaders(), {
-      id: 'reflection-effect',
-      geometry: new Geometry({
-        drawMode: GL.TRIANGLE_FAN,
-        vertices: new Float32Array([0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0])
+    this.unitQuad = new Model(
+      gl,
+      Object.assign({}, this.getShaders(), {
+        id: 'reflection-effect',
+        geometry: new Geometry({
+          drawMode: GL.TRIANGLE_FAN,
+          vertices: new Float32Array([0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0])
+        })
       })
-    }));
+    );
     this.framebuffer = new Framebuffer(gl, {depth: true});
-
   }
 
   preDraw({gl, layerManager}) {

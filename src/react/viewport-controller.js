@@ -1,13 +1,36 @@
-import {PureComponent, createElement} from 'react';
+import {Component, createElement} from 'react';
 import PropTypes from 'prop-types';
 
 import {EventManager} from 'mjolnir.js';
-import {ViewportControls} from '../core';
+import {experimental} from '../core';
+const {ViewportControls, TransitionManager} = experimental;
+
 import CURSOR from './utils/cursors';
 
 const propTypes = {
   viewportState: PropTypes.func,
   state: PropTypes.object,
+
+  /** Viewport props */
+  /** The width of the map. */
+  width: PropTypes.number.isRequired,
+  /** The height of the map. */
+  height: PropTypes.number.isRequired,
+  /** The longitude of the center of the map. */
+  longitude: PropTypes.number.isRequired,
+  /** The latitude of the center of the map. */
+  latitude: PropTypes.number.isRequired,
+  /** The tile zoom level of the map. */
+  zoom: PropTypes.number.isRequired,
+  /** Specify the bearing of the viewport */
+  bearing: PropTypes.number,
+  /** Specify the pitch of the viewport */
+  pitch: PropTypes.number,
+  /** Altitude of the viewport camera. Default 1.5 "screen heights" */
+  // Note: Non-public API, see https://github.com/mapbox/mapbox-gl-js/issues/1137
+  altitude: PropTypes.number,
+  // Camera position for FirstPersonViewport
+  position: PropTypes.array,
 
   /** Viewport constraints */
   // Max zoom level
@@ -25,6 +48,20 @@ const propTypes = {
    * such as `longitude`, `latitude`, `zoom` etc.
    */
   onViewportChange: PropTypes.func,
+
+  /** Viewport transition **/
+  // transition duration for viewport change
+  transitionDuration: PropTypes.number,
+  // an instance of ViewportTransitionInterpolator, can be used to perform custom transitions.
+  transitionInterpolator: PropTypes.object,
+  // type of interruption of current transition on update.
+  transitionInterruption: PropTypes.number,
+  // easing function
+  transitionEasing: PropTypes.func,
+  // transition status update functions
+  onTransitionStart: PropTypes.func,
+  onTransitionInterrupt: PropTypes.func,
+  onTransitionEnd: PropTypes.func,
 
   /** Enables control event handling */
   // Scroll to zoom
@@ -50,9 +87,9 @@ const propTypes = {
   })
 };
 
-const getDefaultCursor = ({isDragging}) => isDragging ? CURSOR.GRABBING : CURSOR.GRAB;
+const getDefaultCursor = ({isDragging}) => (isDragging ? CURSOR.GRABBING : CURSOR.GRAB);
 
-const defaultProps = {
+const defaultProps = Object.assign({}, TransitionManager.defaultProps, {
   onViewportChange: null,
 
   scrollZoom: true,
@@ -62,31 +99,41 @@ const defaultProps = {
   touchZoomRotate: true,
 
   getCursor: getDefaultCursor
-};
+});
 
-export default class Controller extends PureComponent {
-
+export default class ViewportController extends Component {
   constructor(props) {
     super(props);
 
     this.state = {
-      isDragging: false      // Whether the cursor is down
+      isDragging: false // Whether the cursor is down
     };
   }
 
   componentDidMount() {
-    const {eventCanvas} = this.refs;
-
-    this._eventManager = new EventManager(eventCanvas);
+    this._eventManager = new EventManager(this.eventCanvas);
 
     // If props.controls is not provided, fallback to default MapControls instance
     // Cannot use defaultProps here because it needs to be per map instance
     this._controls = this.props.controls || new ViewportControls(this.props.viewportState);
 
-    this._controls.setOptions(Object.assign({}, this.props, {
-      onStateChange: this._onInteractiveStateChange.bind(this),
-      eventManager: this._eventManager
-    }));
+    this._controls.setOptions(
+      Object.assign({}, this.props, {
+        onStateChange: this._onInteractiveStateChange.bind(this),
+        eventManager: this._eventManager
+      })
+    );
+
+    this._transitionManger = new TransitionManager(this.props);
+  }
+
+  shouldComponentUpdate(nextProps, nextState) {
+    if (this._transitionManger) {
+      const transitionTriggered = this._transitionManger.processViewportChange(nextProps);
+      // Skip this render to avoid jump during viewport transitions.
+      return !transitionTriggered;
+    }
+    return true;
   }
 
   componentWillUpdate(nextProps) {
@@ -115,18 +162,18 @@ export default class Controller extends PureComponent {
       cursor: getCursor(this.state)
     };
 
-    return (
-      createElement('div', {
+    return createElement(
+      'div',
+      {
         key: 'map-controls',
-        ref: 'eventCanvas',
+        ref: c => (this.eventCanvas = c),
         style: eventCanvasStyle
       },
-        this.props.children
-      )
+      this.props.children
     );
   }
 }
 
-Controller.displayName = 'Controller';
-Controller.propTypes = propTypes;
-Controller.defaultProps = defaultProps;
+ViewportController.displayName = 'ViewportController';
+ViewportController.propTypes = propTypes;
+ViewportController.defaultProps = defaultProps;

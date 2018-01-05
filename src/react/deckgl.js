@@ -21,10 +21,9 @@
 import React, {createElement, cloneElement} from 'react';
 import autobind from './utils/autobind';
 import {experimental} from '../core';
-const {DeckGLJS} = experimental;
+const {DeckGLJS, log} = experimental;
 
 export default class DeckGL extends React.Component {
-
   constructor(props) {
     super(props);
     this.state = {};
@@ -32,7 +31,7 @@ export default class DeckGL extends React.Component {
   }
 
   componentDidMount() {
-    this.deck = new DeckGLJS(Object.assign({}, this.props, {canvas: this.refs.overlay}));
+    this.deck = new DeckGLJS(Object.assign({}, this.props, {canvas: this.overlay}));
   }
 
   componentWillReceiveProps(nextProps) {
@@ -47,12 +46,22 @@ export default class DeckGL extends React.Component {
 
   // Public API
 
-  queryObject({x, y, radius = 0, layerIds = null}) {
-    return this.deck.queryObject({x, y, radius, layerIds});
+  queryObject(opts) {
+    log.deprecated('queryObject', 'pickObject');
+    return this.deck.pickObject(opts);
   }
 
-  queryVisibleObjects({x, y, width = 1, height = 1, layerIds = null}) {
-    return this.deck.queryVisibleObjects({x, y, width, height, layerIds});
+  pickObject({x, y, radius = 0, layerIds = null}) {
+    return this.deck.pickObject({x, y, radius, layerIds});
+  }
+
+  queryVisibleObjects(opts) {
+    log.deprecated('queryVisibleObjects', 'pickObjects');
+    return this.pickObjects(opts);
+  }
+
+  pickObjects({x, y, width = 1, height = 1, layerIds = null}) {
+    return this.deck.pickObjects({x, y, width, height, layerIds});
   }
 
   // Private Helpers
@@ -66,44 +75,45 @@ export default class DeckGL extends React.Component {
 
     // Build a viewport id to viewport index
     const viewportMap = {};
-    viewports.forEach(viewportDescriptor => {
-      const viewport = this.deck._getViewportFromDescriptor(viewportDescriptor);
+    viewports.forEach(viewport => {
       if (viewport.id) {
         viewportMap[viewport.id] = viewport;
       }
     });
 
-    return React.Children.toArray(this.props.children).map((child, i) => {
-      // If viewportId prop is provided, match with viewport
-      const {viewportId} = child.props;
-      const viewport = viewportId && viewportMap[viewportId];
-      if (viewport) {
-        // Resolve potentially relative dimensions using the deck.gl container size
-        const {x, y, width, height} =
-          viewport.getDimensions({width: this.props.width, height: this.props.height});
+    return React.Children.toArray(this.props.children).map(
+      // If child specifies props.viewportId, position under viewport, otherwise render as normal
+      (child, i) => (child.props.viewportId ? this._positionChild({child, viewportMap, i}) : child)
+    );
+  }
 
-        // Clone the element with width and height set per viewport
-        const newProps = Object.assign({}, child.props, {
-          width,
-          height
-        });
+  _positionChild({child, viewportMap, i}) {
+    const {viewportId} = child.props;
+    const viewport = viewportId && viewportMap[viewportId];
 
-        // Inject map properties
-        // TODO - this is too react-map-gl specific
-        Object.assign(newProps, viewport.getMercatorParams(), {
-          visible: viewport.isMapSynched()
-        });
+    // Drop (aut-hide) elements with viewportId that are not matched by any current viewport
+    if (!viewport) {
+      return null;
+    }
 
-        const clone = cloneElement(child, newProps);
+    // Resolve potentially relative dimensions using the deck.gl container size
+    const {x, y, width, height} = viewport;
 
-        // Wrap it in an absolutely positioning div
-        const style = {position: 'absolute', left: x, top: y, width, height};
-        const key = `viewport-${viewportId}-${i}`;
-        child = createElement('div', {key, id: key, style}, clone);
-      }
+    // Clone the element with width and height set per viewport
+    const newProps = Object.assign({}, child.props, {width, height});
 
-      return child;
+    // Inject map properties
+    // TODO - this is too react-map-gl specific
+    Object.assign(newProps, viewport.getMercatorParams(), {
+      visible: viewport.isMapSynched()
     });
+
+    const clone = cloneElement(child, newProps);
+
+    // Wrap it in an absolutely positioning div
+    const style = {position: 'absolute', left: x, top: y, width, height};
+    const key = `viewport-child-${viewportId}-${i}`;
+    return createElement('div', {key, id: key, style}, clone);
   }
 
   render() {
@@ -114,7 +124,7 @@ export default class DeckGL extends React.Component {
     // Render deck.gl as last child
     const {id, width, height, style} = this.props;
     const deck = createElement('canvas', {
-      ref: 'overlay',
+      ref: c => (this.overlay = c),
       key: 'overlay',
       id,
       style: Object.assign({}, style, {position: 'absolute', left: 0, top: 0, width, height})
@@ -122,7 +132,6 @@ export default class DeckGL extends React.Component {
     children.push(deck);
 
     return createElement('div', {id: 'deckgl-wrapper'}, children);
-
   }
 }
 

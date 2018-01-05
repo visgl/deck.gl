@@ -1,6 +1,8 @@
 /* global, window */
-import React, {Component, PropTypes} from 'react';
+import React, {Component} from 'react';
 import DeckGL, {ScatterplotLayer} from 'deck.gl';
+import PropTypes from 'prop-types';
+import {isWebGL2} from 'luma.gl';
 
 import WindLayer from './layers/wind-layer/wind-layer';
 import DelaunayCoverLayer from './layers/delaunay-cover-layer/delaunay-cover-layer';
@@ -16,12 +18,12 @@ const propTypes = {
 };
 
 export default class WindDemo extends Component {
-
   constructor(props) {
     super(props);
 
     this.state = {
-      data: null
+      data: null,
+      webGL2Supported: true
     };
 
     const particleState = {particleTime: 0};
@@ -56,9 +58,28 @@ export default class WindDemo extends Component {
     this._particleAnimation.stop();
   }
 
+  _onWebGLInitialized(gl) {
+    const webGL2Supported = isWebGL2(gl);
+    this.setState({webGL2Supported});
+  }
+
   render() {
+    const {data, webGL2Supported} = this.state;
+    if (!webGL2Supported) {
+      return (
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            height: '100vh'
+          }}
+        >
+          <h2> {"THIS DEMO REQUIRES WEBLG2, BUT YOUR BRWOSER DOESN'T SUPPORT IT"} </h2>
+        </div>
+      );
+    }
     const {viewport, settings} = this.props;
-    const {data} = this.state;
 
     if (!data) {
       return null;
@@ -76,21 +97,23 @@ export default class WindDemo extends Component {
         opacity: 0.2,
         radiusScale: 30
       }),
-      settings.showParticles && new ParticleLayer({
-        id: 'particles',
-        bbox,
-        texData,
-        time: settings.time,
-        zScale: 100
-      }),
-      settings.showWind && new WindLayer({
-        id: 'wind',
-        bbox,
-        dataBounds: texData.dataBounds,
-        dataTextureArray: texData.textureArray,
-        dataTextureSize: texData.textureSize,
-        time: settings.time
-      }),
+      settings.showParticles &&
+        new ParticleLayer({
+          id: 'particles',
+          bbox,
+          texData,
+          time: settings.time,
+          zScale: 100
+        }),
+      settings.showWind &&
+        new WindLayer({
+          id: 'wind',
+          bbox,
+          dataBounds: texData.dataBounds,
+          dataTextureArray: texData.textureArray,
+          dataTextureSize: texData.textureSize,
+          time: settings.time
+        }),
       // settings.showElevation && new ElevationLayer({
       //   id: 'elevation',
       //   boundingBox,
@@ -99,10 +122,11 @@ export default class WindDemo extends Component {
       //   latResolution: 100,
       //   zScale: 100
       // })
-      settings.showElevation && new DelaunayCoverLayer({
-        id: 'delaunay-cover',
-        triangulation
-      })
+      settings.showElevation &&
+        new DelaunayCoverLayer({
+          id: 'delaunay-cover',
+          triangulation
+        })
       // FIXME - deck.gl should automatically cull null/false layers
     ].filter(Boolean);
 
@@ -111,6 +135,8 @@ export default class WindDemo extends Component {
         glOptions={{webgl2: true}}
         {...viewport}
         layers={layers}
+        useDevicePixels={settings.useDevicePixels}
+        onWebGLInitialized={this._onWebGLInitialized.bind(this)}
       />
     );
   }

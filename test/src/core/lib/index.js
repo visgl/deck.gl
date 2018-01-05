@@ -18,10 +18,12 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+import './transition';
 import './utils';
 import './props.spec';
 import './attribute-manager.spec';
 import './layer.spec';
 import './composite-layer.spec';
 import './layer-manager.spec';
+import './transition-manager.spec';
 import './seer-integration.spec';

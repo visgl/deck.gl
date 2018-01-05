@@ -37,17 +37,19 @@ export default class LabelLayer extends CompositeLayer {
   }
 
   renderLayers() {
-    return new IconLayer(Object.assign({}, this.props, {
-      id: 'label-icons',
-      iconAtlas: this.state.texture,
-      iconMapping: this.state.mapping,
-      data: this.state.mapping,
-      sizeScale: 24,
-      getIcon: d => d.index,
-      getPosition: d => this.props.getPosition(d.object),
-      getColor: d => this.props.getColor(d.object),
-      getSize: d => this.props.getSize(d.object)
-    }));
+    return new IconLayer(
+      Object.assign({}, this.props, {
+        id: 'label-icons',
+        iconAtlas: this.state.texture,
+        iconMapping: this.state.mapping,
+        data: this.state.mapping,
+        sizeScale: 24,
+        getIcon: d => d.index,
+        getPosition: d => this.props.getPosition(d.object),
+        getColor: d => this.props.getColor(d.object),
+        getSize: d => this.props.getSize(d.object)
+      })
+    );
   }
 }
 

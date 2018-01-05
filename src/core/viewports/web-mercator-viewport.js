@@ -25,8 +25,9 @@ import Viewport from './viewport';
 import {
   projectFlat,
   unprojectFlat,
-  makeProjectionMatrixFromMercatorParams,
-  makeUncenteredViewMatrixFromMercatorParams
+  getProjectionMatrix,
+  getUncenteredViewMatrix,
+  fitBounds
 } from 'viewport-mercator-project';
 
 // TODO - import from viewport-mercator-project
@@ -39,15 +40,6 @@ import vec2_negate from 'gl-vec2/negate';
 
 import assert from 'assert';
 
-const DEFAULT_MAP_STATE = {
-  latitude: 37,
-  longitude: -122,
-  zoom: 11,
-  pitch: 0,
-  bearing: 0,
-  altitude: 1.5
-};
-
 const ERR_ARGUMENT = 'Illegal argument to WebMercatorViewport';
 
 export default class WebMercatorViewport extends Viewport {
@@ -59,31 +51,16 @@ export default class WebMercatorViewport extends Viewport {
    */
   /* eslint-disable complexity, max-statements */
   constructor(opts = {}) {
-    let {
-      width,
-      height,
-      latitude,
-      longitude,
-      zoom,
-      pitch,
-      bearing,
-      altitude
-    } = opts;
-
     const {
-      // x, y, position, ...
+      latitude = 0,
+      longitude = 0,
+      zoom = 11,
+      pitch = 0,
+      bearing = 0,
       farZMultiplier = 10
     } = opts;
 
-    // Viewport - support undefined arguments
-    width = width !== undefined ? width : DEFAULT_MAP_STATE.width;
-    height = height !== undefined ? height : DEFAULT_MAP_STATE.height;
-    zoom = zoom !== undefined ? zoom : DEFAULT_MAP_STATE.zoom;
-    latitude = latitude !== undefined ? latitude : DEFAULT_MAP_STATE.latitude;
-    longitude = longitude !== undefined ? longitude : DEFAULT_MAP_STATE.longitude;
-    bearing = bearing !== undefined ? bearing : DEFAULT_MAP_STATE.bearing;
-    pitch = pitch !== undefined ? pitch : DEFAULT_MAP_STATE.pitch;
-    altitude = altitude !== undefined ? altitude : DEFAULT_MAP_STATE.altitude;
+    let {width, height, altitude = 1.5} = opts;
 
     // Silently allow apps to send in 0,0 to facilitate isomorphic render etc
     width = width || 1;
@@ -93,11 +70,10 @@ export default class WebMercatorViewport extends Viewport {
     // TODO - just throw an Error instead?
     altitude = Math.max(0.75, altitude);
 
-    const projectionMatrix = makeProjectionMatrixFromMercatorParams({
+    const projectionMatrix = getProjectionMatrix({
       width,
       height,
       pitch,
-      bearing,
       altitude,
       farZMultiplier
     });
@@ -106,29 +82,28 @@ export default class WebMercatorViewport extends Viewport {
     // shader (cheap) which gives a coordinate system that has its center in
     // the layer's center position. This makes rotations and other modelMatrx
     // transforms much more useful.
-    const viewMatrixUncentered = makeUncenteredViewMatrixFromMercatorParams({
-      width,
+    const viewMatrixUncentered = getUncenteredViewMatrix({
       height,
-      longitude,
-      latitude,
-      zoom,
       pitch,
       bearing,
       altitude
     });
 
-    super(Object.assign({}, opts, {
-      // x, y, position, ...
-      // TODO / hack - prevent vertical offsets if not FirstPersonViewport
-      position: opts.position && [opts.position[0], opts.position[1], 0],
-      width, height,
-      viewMatrix: viewMatrixUncentered,
-      longitude,
-      latitude,
-      zoom,
-      projectionMatrix,
-      focalDistance: 1 // Viewport is already carefully set up to "focus" on ground
-    }));
+    super(
+      Object.assign({}, opts, {
+        // x, y, position, ...
+        // TODO / hack - prevent vertical offsets if not FirstPersonViewport
+        position: opts.position && [opts.position[0], opts.position[1], 0],
+        width,
+        height,
+        viewMatrix: viewMatrixUncentered,
+        longitude,
+        latitude,
+        zoom,
+        projectionMatrix,
+        focalDistance: 1 // Viewport is already carefully set up to "focus" on ground
+      })
+    );
 
     // Save parameters
     this.latitude = latitude;
@@ -203,8 +178,10 @@ export default class WebMercatorViewport extends Viewport {
    */
   lngLatDeltaToMeters(deltaLngLatZ) {
     const [deltaLng, deltaLat, deltaZ = 0] = deltaLngLatZ;
-    assert(Number.isFinite(deltaLng) && Number.isFinite(deltaLat) && Number.isFinite(deltaZ),
-      ERR_ARGUMENT);
+    assert(
+      Number.isFinite(deltaLng) && Number.isFinite(deltaLat) && Number.isFinite(deltaZ),
+      ERR_ARGUMENT
+    );
     const {pixelsPerDegree, metersPerPixel} = this.distanceScales;
     const deltaX = deltaLng * pixelsPerDegree[0] * metersPerPixel[0];
     const deltaY = deltaLat * pixelsPerDegree[1] * metersPerPixel[1];
@@ -223,10 +200,10 @@ export default class WebMercatorViewport extends Viewport {
    */
   addMetersToLngLat(lngLatZ, xyz) {
     const [lng, lat, Z = 0] = lngLatZ;
-    const [deltaLng, deltaLat, deltaZ = 0] = this.metersToLngLatDelta(lngLatZ, xyz);
-    return lngLatZ.length === 2 ?
-      [lng + deltaLng, lat + deltaLat] :
-      [lng + deltaLng, lat + deltaLat, Z + deltaZ];
+    const [deltaLng, deltaLat, deltaZ = 0] = this.metersToLngLatDelta(xyz);
+    return lngLatZ.length === 2
+      ? [lng + deltaLng, lat + deltaLat]
+      : [lng + deltaLng, lat + deltaLat, Z + deltaZ];
   }
 
   /**
@@ -267,6 +244,7 @@ export default class WebMercatorViewport extends Viewport {
 
   // TODO - should support user supplied constraints
   isMapSynched() {
+    const EPSILON = 0.000001;
     const MAPBOX_LIMITS = {
       pitch: 60,
       zoom: 40
@@ -274,64 +252,8 @@ export default class WebMercatorViewport extends Viewport {
 
     const {pitch, zoom} = this;
 
-    return pitch <= MAPBOX_LIMITS.pitch && zoom <= MAPBOX_LIMITS.zoom;
+    return pitch <= MAPBOX_LIMITS.pitch + EPSILON && zoom <= MAPBOX_LIMITS.zoom + EPSILON;
   }
-}
-
-// TODO - investigate if we can move this viewport-mercator-project
-
-/**
- * Returns map settings {latitude, longitude, zoom}
- * that will contain the provided corners within the provided width.
- * Only supports non-perspective mode.
- * @param {Number} width - viewport width
- * @param {Number} height - viewport height
- * @param {Array} bounds - [[lon, lat], [lon, lat]]
- * @param {Number} [padding] - The amount of padding in pixels to add to the given bounds.
- * @param {Array} [offset] - The center of the given bounds relative to the map's center,
- *    [x, y] measured in pixels.
- * @returns {Object} - latitude, longitude and zoom
- */
-export function fitBounds({
-  width,
-  height,
-  bounds,
-  // options
-  padding = 0,
-  offset = [0, 0]
-}) {
-  const [[west, south], [east, north]] = bounds;
-
-  const viewport = new WebMercatorViewport({
-    width,
-    height,
-    longitude: 0,
-    latitude: 0,
-    zoom: 0
-  });
-
-  const nw = viewport.project([west, north]);
-  const se = viewport.project([east, south]);
-  const size = [
-    Math.abs(se[0] - nw[0]),
-    Math.abs(se[1] - nw[1])
-  ];
-  const center = [
-    (se[0] + nw[0]) / 2,
-    (se[1] + nw[1]) / 2
-  ];
-
-  const scaleX = (width - padding * 2 - Math.abs(offset[0]) * 2) / size[0];
-  const scaleY = (height - padding * 2 - Math.abs(offset[1]) * 2) / size[1];
-
-  const centerLngLat = viewport.unproject(center);
-  const zoom = viewport.zoom + Math.log2(Math.abs(Math.min(scaleX, scaleY)));
-
-  return {
-    longitude: centerLngLat[0],
-    latitude: centerLngLat[1],
-    zoom
-  };
 }
 
 WebMercatorViewport.displayName = 'WebMercatorViewport';

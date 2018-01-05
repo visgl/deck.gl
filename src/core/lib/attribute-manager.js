@@ -19,9 +19,9 @@
 // THE SOFTWARE.
 
 /* eslint-disable guard-for-in */
-import {GL} from 'luma.gl';
 import Stats from './stats';
-import {log} from './utils';
+import log from '../utils/log';
+import {GL} from 'luma.gl';
 import assert from 'assert';
 
 import AttributeTransitionManager from './attribute-transition-manager';
@@ -35,39 +35,57 @@ function noop() {}
 export function glArrayFromType(glType, {clamped = true} = {}) {
   // Sorted in some order of likelihood to reduce amount of comparisons
   switch (glType) {
-  case GL.FLOAT:
-    return Float32Array;
-  case GL.UNSIGNED_SHORT:
-  case GL.UNSIGNED_SHORT_5_6_5:
-  case GL.UNSIGNED_SHORT_4_4_4_4:
-  case GL.UNSIGNED_SHORT_5_5_5_1:
-    return Uint16Array;
-  case GL.UNSIGNED_INT:
-    return Uint32Array;
-  case GL.UNSIGNED_BYTE:
-    return clamped ? Uint8ClampedArray : Uint8Array;
-  case GL.BYTE:
-    return Int8Array;
-  case GL.SHORT:
-    return Int16Array;
-  case GL.INT:
-    return Int32Array;
-  default:
-    throw new Error('Failed to deduce type from array');
+    case GL.FLOAT:
+      return Float32Array;
+    case GL.UNSIGNED_SHORT:
+    case GL.UNSIGNED_SHORT_5_6_5:
+    case GL.UNSIGNED_SHORT_4_4_4_4:
+    case GL.UNSIGNED_SHORT_5_5_5_1:
+      return Uint16Array;
+    case GL.UNSIGNED_INT:
+      return Uint32Array;
+    case GL.UNSIGNED_BYTE:
+      return clamped ? Uint8ClampedArray : Uint8Array;
+    case GL.BYTE:
+      return Int8Array;
+    case GL.SHORT:
+      return Int16Array;
+    case GL.INT:
+      return Int32Array;
+    default:
+      throw new Error('Failed to deduce type from array');
   }
 }
 /* eslint-enable complexity */
 
 // Default loggers
 const logFunctions = {
-  onUpdateStart: ({level, id, numInstances}) => {
-    log.time(level, `Updated attributes for ${numInstances} instances in ${id} in`);
-  },
+  savedMessages: null,
+  timeStart: null,
+
   onLog: ({level, message}) => {
     log.log(level, message);
   },
+  onUpdateStart: ({level, id, numInstances}) => {
+    logFunctions.savedMessages = [];
+    logFunctions.timeStart = new Date();
+  },
+  onUpdate: ({level, message}) => {
+    if (logFunctions.savedMessages) {
+      logFunctions.savedMessages.push(message);
+    }
+  },
   onUpdateEnd: ({level, id, numInstances}) => {
-    log.timeEnd(level, `Updated attributes for ${numInstances} instances in ${id} in`);
+    const timeMs = Math.round(new Date() - logFunctions.timeStart);
+    const time = `${timeMs}ms`;
+    log.group(level, `Updated attributes for ${numInstances} instances in ${id} in ${time}`, {
+      collapsed: true
+    });
+    for (const message of logFunctions.savedMessages) {
+      log.log(level, message);
+    }
+    log.groupEnd(level, `Updated attributes for ${numInstances} instances in ${id} in ${time}`);
+    logFunctions.savedMessages = null;
   }
 };
 
@@ -86,16 +104,15 @@ export default class AttributeManager {
    * @param {String} [opts.onUpdateStart=] - called before update() starts
    * @param {String} [opts.onUpdateEnd=] - called after update() ends
    */
-  static setDefaultLogFunctions({
-    onLog,
-    onUpdateStart,
-    onUpdateEnd
-  } = {}) {
+  static setDefaultLogFunctions({onLog, onUpdateStart, onUpdate, onUpdateEnd} = {}) {
     if (onLog !== undefined) {
       logFunctions.onLog = onLog || noop;
     }
     if (onUpdateStart !== undefined) {
       logFunctions.onUpdateStart = onUpdateStart || noop;
+    }
+    if (onUpdate !== undefined) {
+      logFunctions.onUpdate = onUpdate || noop;
     }
     if (onUpdateEnd !== undefined) {
       logFunctions.onUpdateEnd = onUpdateEnd || noop;
@@ -139,20 +156,23 @@ export default class AttributeManager {
    * @param {Object} [props]
    * @param {String} [props.id] - identifier (for debugging)
    */
-  constructor({id = 'attribute-manager', gl, transition} = {}) {
+  constructor(gl, {id = 'attribute-manager', transitions} = {}) {
     this.id = id;
     this.gl = gl;
 
     this.attributes = {};
     this.updateTriggers = {};
+    this.accessors = {};
     this.allocedInstances = -1;
     this.needsRedraw = true;
 
     this.userData = {};
     this.stats = new Stats({id: 'attr'});
 
-    this.isTransitionSupported = AttributeTransitionManager.isSupported(gl);
-    this.setTransitionOptions(transition);
+    this.attributeTransitionManger = new AttributeTransitionManager(
+      gl,
+      Object.assign({id}, transitions)
+    );
 
     // For debugging sanity, prevent uninitialized members
     Object.seal(this);
@@ -182,7 +202,7 @@ export default class AttributeManager {
     this._add(attributes, updaters);
   }
 
- /**
+  /**
    * Removes attributes
    * Takes an array of attribute names and delete them from
    * the attribute map if they exists
@@ -205,34 +225,46 @@ export default class AttributeManager {
    * @param {string} triggerName: attribute or accessor name
    */
   invalidate(triggerName) {
-    const {attributes, updateTriggers} = this;
-    const attributesToUpdate = updateTriggers[triggerName];
+    const invalidatedAttributes = this._invalidateTrigger(triggerName);
 
-    if (!attributesToUpdate) {
-      let message =
-        `invalidating non-existent attribute ${triggerName} for ${this.id}\n`;
-      message += `Valid attributes: ${Object.keys(attributes).join(', ')}`;
-      assert(attributesToUpdate, message);
-    }
-    attributesToUpdate.forEach(name => {
-      const attribute = attributes[name];
-      if (attribute) {
-        attribute.needsUpdate = true;
-      }
-    });
     // For performance tuning
     logFunctions.onLog({
       level: LOG_DETAIL_PRIORITY,
-      message: `invalidated attribute ${attributesToUpdate} for ${this.id}`,
+      message: `invalidated attributes ${invalidatedAttributes} (${triggerName}) for ${this.id}`,
       id: this.identifier
     });
   }
 
   invalidateAll() {
-    const {attributes} = this;
-    for (const attributeName in attributes) {
-      this.invalidate(attributeName);
+    for (const attributeName in this.attributes) {
+      this.attributes[attributeName].needsUpdate = true;
     }
+
+    // For performance tuning
+    logFunctions.onLog({
+      level: LOG_DETAIL_PRIORITY,
+      message: `invalidated all attributes for ${this.id}`,
+      id: this.identifier
+    });
+  }
+
+  _invalidateTrigger(triggerName) {
+    const {attributes, updateTriggers} = this;
+    const invalidatedAttributes = updateTriggers[triggerName];
+
+    if (!invalidatedAttributes) {
+      let message = `invalidating non-existent trigger ${triggerName} for ${this.id}\n`;
+      message += `Valid triggers: ${Object.keys(attributes).join(', ')}`;
+      log.warn(message, invalidatedAttributes);
+    } else {
+      invalidatedAttributes.forEach(name => {
+        const attribute = attributes[name];
+        if (attribute) {
+          attribute.needsUpdate = true;
+        }
+      });
+    }
+    return invalidatedAttributes;
   }
 
   /**
@@ -252,6 +284,7 @@ export default class AttributeManager {
   update({
     data,
     numInstances,
+    transitions,
     props = {},
     buffers = {},
     context = {},
@@ -270,9 +303,7 @@ export default class AttributeManager {
       logFunctions.onUpdateEnd({level: LOG_START_END_PRIORITY, id: this.id, numInstances});
     }
 
-    if (this.attributeTranstionManger) {
-      this.attributeTranstionManger.update(this.attributes);
-    }
+    this.attributeTransitionManger.update(this.attributes, transitions);
   }
 
   /**
@@ -290,7 +321,7 @@ export default class AttributeManager {
    * @return {Object} attributes - descriptors
    */
   getChangedAttributes({clearChangedFlags = false}) {
-    const {attributes} = this;
+    const {attributes, attributeTransitionManger} = this;
     const changedAttributes = {};
     for (const attributeName in attributes) {
       const attribute = attributes[attributeName];
@@ -298,7 +329,7 @@ export default class AttributeManager {
         attribute.changed = attribute.changed && !clearChangedFlags;
 
         // If there is transition, let the transition manager handle the update
-        if (!this.attributeTranstionManger || !attribute.transition) {
+        if (!attributeTransitionManger.hasAttribute(attributeName)) {
           changedAttributes[attributeName] = attribute;
         }
       }
@@ -313,13 +344,12 @@ export default class AttributeManager {
    *
    * @param {Object} [opts]
    * @param {String} [opts.clearRedrawFlags=false] - whether to clear the flag
-   * @return {Boolean} - whether a redraw is needed.
+   * @return {false|String} - reason a redraw is needed.
    */
   getNeedsRedraw({clearRedrawFlags = false} = {}) {
-    let redraw = this.needsRedraw;
-    redraw = redraw || this.needsRedraw;
+    const redraw = this.needsRedraw;
     this.needsRedraw = this.needsRedraw && !clearRedrawFlags;
-    return redraw;
+    return redraw && this.id;
   }
 
   /**
@@ -335,7 +365,6 @@ export default class AttributeManager {
   // DEPRECATED METHODS
 
   /**
-   * @deprecated since version 2.5, use add() instead
    * Adds attributes
    * @param {Object} attributes - attribute map (see above)
    * @param {Object} updaters - separate map of update functions (deprecated)
@@ -344,11 +373,20 @@ export default class AttributeManager {
     this._add(attributes, updaters, {instanced: 1});
   }
 
+  // PROTECTED METHODS - Only to be used by collaborating classes, not by apps
+
+  /**
+   * Returns object containing all accessors as keys, with non-null values
+   * @return {Object} - accessors object
+   */
+  getAccessors() {
+    return this.updateTriggers;
+  }
+
   // PRIVATE METHODS
 
   // Used to register an attribute
   _add(attributes, updaters = {}, _extraProps = {}) {
-
     const newAttributes = {};
 
     for (const attributeName in attributes) {
@@ -356,8 +394,11 @@ export default class AttributeManager {
       // For now, just copy any attributes from that map into the main map
       // TODO - Attribute maps are a deprecated feature, remove
       if (attributeName in updaters) {
-        attributes[attributeName] =
-          Object.assign({}, attributes[attributeName], updaters[attributeName]);
+        attributes[attributeName] = Object.assign(
+          {},
+          attributes[attributeName],
+          updaters[attributeName]
+        );
       }
 
       const attribute = attributes[attributeName];
@@ -371,7 +412,7 @@ export default class AttributeManager {
         {
           // Ensure that fields are present before Object.seal()
           target: undefined,
-          userData: {}        // Reserved for application
+          userData: {} // Reserved for application
         },
         // Metadata
         attribute,
@@ -412,7 +453,7 @@ export default class AttributeManager {
       const attribute = this.attributes[attributeName];
       let {accessor} = attribute;
 
-      // use attribute name as update trigger key
+      // Backards compatibility: allow attribute name to be used as update trigger key
       triggers[attributeName] = [attributeName];
 
       // use accessor name as update trigger key
@@ -433,11 +474,14 @@ export default class AttributeManager {
   }
 
   _validateAttributeDefinition(attributeName, attribute) {
-    assert(attribute.size >= 1 && attribute.size <= 4,
-      `Attribute definition for ${attributeName} invalid size`);
+    assert(
+      attribute.size >= 1 && attribute.size <= 4,
+      `Attribute definition for ${attributeName} invalid size`
+    );
 
     // Check that either 'accessor' or 'update' is a valid function
-    const hasUpdater = attribute.noAlloc ||
+    const hasUpdater =
+      attribute.noAlloc ||
       typeof attribute.update === 'function' ||
       typeof attribute.accessor === 'string';
     if (!hasUpdater) {
@@ -447,10 +491,7 @@ export default class AttributeManager {
 
   // Checks that any attribute buffers in props are valid
   // Note: This is just to help app catch mistakes
-  _checkExternalBuffers({
-    buffers = {},
-    ignoreUnknownAttributes = false
-  } = {}) {
+  _checkExternalBuffers({buffers = {}, ignoreUnknownAttributes = false} = {}) {
     const {attributes} = this;
     for (const attributeName in buffers) {
       const attribute = attributes[attributeName];
@@ -512,8 +553,7 @@ export default class AttributeManager {
       if (!attribute.isExternalBuffer) {
         // Do we need to reallocate the attribute's typed array?
         const needsAlloc =
-          attribute.value === null ||
-          attribute.value.length / attribute.size < numInstances;
+          attribute.value === null || attribute.value.length / attribute.size < numInstances;
         if (needsAlloc && (attribute.update || attribute.accessor)) {
           attribute.needsAlloc = true;
           needsUpdate = true;
@@ -553,15 +593,18 @@ export default class AttributeManager {
       if (attribute.needsAlloc) {
         const ArrayType = glArrayFromType(attribute.type || GL.FLOAT);
         attribute.value = new ArrayType(attribute.size * allocCount);
-        logFunctions.onLog({
+        logFunctions.onUpdate({
           level: LOG_DETAIL_PRIORITY,
-          message: `${this.id}:${attributeName} allocated ${allocCount}`,
+          message: `${attributeName} allocated ${allocCount}`,
           id: this.id
         });
         attribute.needsAlloc = false;
         attribute.needsUpdate = true;
       }
+    }
 
+    for (const attributeName in attributes) {
+      const attribute = attributes[attributeName];
       // Call updater function if needed
       if (attribute.needsUpdate) {
         this._updateBuffer({attribute, attributeName, numInstances, data, props, context});
@@ -573,13 +616,10 @@ export default class AttributeManager {
 
   _updateBuffer({attribute, attributeName, numInstances, data, props, context}) {
     const {update, accessor} = attribute;
+
+    const timeStart = new Date();
     if (update) {
       // Custom updater - typically for non-instanced layers
-      logFunctions.onLog({
-        level: LOG_DETAIL_PRIORITY,
-        message: `${this.id}:${attributeName} updating ${numInstances}`,
-        id: this.id
-      });
       update.call(context, attribute, {data, props, numInstances});
       this._checkAttributeArray(attribute, attributeName);
     } else if (accessor) {
@@ -587,12 +627,19 @@ export default class AttributeManager {
       this._updateBufferViaStandardAccessor({attribute, data, props});
       this._checkAttributeArray(attribute, attributeName);
     } else {
-      logFunctions.onLog({
+      logFunctions.onUpdate({
         level: LOG_DETAIL_PRIORITY,
-        message: `${this.id}:${attributeName} missing update function`,
+        message: `${attributeName} missing update function`,
         id: this.id
       });
     }
+    const timeMs = Math.round(new Date() - timeStart);
+    const time = `${timeMs}ms`;
+    logFunctions.onUpdate({
+      level: LOG_DETAIL_PRIORITY,
+      message: `${attributeName} updated ${numInstances} ${time}`,
+      id: this.id
+    });
 
     attribute.needsUpdate = false;
     attribute.changed = true;
@@ -614,10 +661,14 @@ export default class AttributeManager {
       objectValue = Array.isArray(objectValue) ? objectValue : [objectValue];
       /* eslint-disable no-fallthrough, default-case */
       switch (size) {
-      case 4: value[i + 3] = Number.isFinite(objectValue[3]) ? objectValue[3] : defaultValue[3];
-      case 3: value[i + 2] = Number.isFinite(objectValue[2]) ? objectValue[2] : defaultValue[2];
-      case 2: value[i + 1] = Number.isFinite(objectValue[1]) ? objectValue[1] : defaultValue[1];
-      case 1: value[i + 0] = Number.isFinite(objectValue[0]) ? objectValue[0] : defaultValue[0];
+        case 4:
+          value[i + 3] = Number.isFinite(objectValue[3]) ? objectValue[3] : defaultValue[3];
+        case 3:
+          value[i + 2] = Number.isFinite(objectValue[2]) ? objectValue[2] : defaultValue[2];
+        case 2:
+          value[i + 1] = Number.isFinite(objectValue[1]) ? objectValue[1] : defaultValue[1];
+        case 1:
+          value[i + 0] = Number.isFinite(objectValue[0]) ? objectValue[0] : defaultValue[0];
       }
       i += size;
     }
@@ -627,28 +678,13 @@ export default class AttributeManager {
     const {value} = attribute;
     if (value && value.length >= 4) {
       const valid =
-        Number.isFinite(value[0]) && Number.isFinite(value[1]) &&
-        Number.isFinite(value[2]) && Number.isFinite(value[3]);
+        Number.isFinite(value[0]) &&
+        Number.isFinite(value[1]) &&
+        Number.isFinite(value[2]) &&
+        Number.isFinite(value[3]);
       if (!valid) {
         throw new Error(`Illegal attribute generated for ${attributeName}`);
       }
-    }
-  }
-
-  /**
-   * Set transition options
-   * @params {Object} opts - transition options
-   * Returns updated attributes
-   */
-  setTransitionOptions(opts) {
-    if (!opts) {
-      this.attributeTranstionManger = null;
-    } else if (this.attributeTranstionManger) {
-      this.attributeTranstionManger.setOptions(opts);
-    } else if (this.isTransitionSupported) {
-      this.attributeTranstionManger = new AttributeTransitionManager(this, opts);
-    } else {
-      log.warn(0, 'WebGL2 not supported by this browser. Transition animation is disabled.');
     }
   }
 
@@ -657,10 +693,9 @@ export default class AttributeManager {
    * Returns updated attributes if any, otherwise `null`
    */
   updateTransition() {
-    const {attributeTranstionManger} = this;
-    const transitionUpdated = Boolean(attributeTranstionManger) && attributeTranstionManger.run();
+    const {attributeTransitionManger} = this;
+    const transitionUpdated = attributeTransitionManger.run();
     this.needsRedraw = this.needsRedraw || transitionUpdated;
-    return transitionUpdated ? attributeTranstionManger.getAttributes() : null;
+    return transitionUpdated ? attributeTransitionManger.getAttributes() : null;
   }
-
 }

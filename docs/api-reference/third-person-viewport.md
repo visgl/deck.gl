@@ -1,4 +1,4 @@
-# ThirdPersonViewport Class
+# ThirdPersonViewport Class (Experimental)
 
 The [`ThirdPersonViewport`] class is a subclass of [Viewport](/docs/api-reference/viewport.md). This viewport creates a "camera" that looks at an exact position, position using the direction, distance and orientation specified by the application.
 
@@ -58,4 +58,4 @@ See [Viewport constructor](/docs/api-reference/viewport.md#constructor) for addi
 
 ## Source
 
-[src/viewports/perspective-viewport.js](https://github.com/uber/deck.gl/blob/4.1-release/src/viewports/perspective-viewport.js)
+[src/viewports/perspective-viewport.js](https://github.com/uber/deck.gl/blob/5.0-release/src/viewports/perspective-viewport.js)

@@ -49,10 +49,10 @@ void main(void) {
   mat2 rotationMatrix = mat2(cos(angle), -sin(angle), sin(angle), cos(angle));
 
   vec2 rPos = rotationMatrix * positions.xz;
-  vec2 rNorm = rotationMatrix * normals.xz;
+  vec2 rNorm = rotationMatrix * normals.xz; // the hexagon cells has y axis as the vertical axis
 
   vec3 rotatedPositions = vec3(rPos.x, positions.y, rPos.y);
-  vec3 rotatedNormals = vec3(rNorm.x, normals.y, rNorm.y);
+  vec3 rotatedNormals = vec3(rNorm.x, rNorm.y, normals.y);
 
   // calculate elevation, if 3d not enabled set to 0
   // cylindar gemoetry height are between -0.5 to 0.5, transform it to between 0, 1
@@ -62,11 +62,11 @@ void main(void) {
     elevation = project_scale(instancePositions.z * (positions.y + 0.5) *
       ELEVATION_SCALE * elevationScale);
   }
-  
+
   // if ahpha == 0.0 or z < 0.0, do not render element
   float noRender = float(instanceColors.a == 0.0 || instancePositions.z < 0.0);
   float dotRadius = radius * mix(coverage, 0.0, noRender);
-  
+
   // project center of hexagon
   vec4 centroidPosition = vec4(project_position(instancePositions.xy), elevation, 0.0);
 

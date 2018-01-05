@@ -12,7 +12,6 @@ import PointGenerator from './point-generator';
 const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
 
 class Root extends Component {
-
   constructor(props) {
     super(props);
 
@@ -95,7 +94,7 @@ class Root extends Component {
         getRadius: radiusUpdated,
         getColor: colorsUpdated
       },
-      transition: {
+      transitions: {
         getPosition: {
           duration: 2000,
           easing: d3.easeCubicInOut,
@@ -113,10 +112,9 @@ class Root extends Component {
         {...viewport}
         mapStyle="mapbox://styles/uberdata/cive48w2e001a2imn5mcu2vrs"
         onViewportChange={this._onViewportChange}
-        mapboxApiAccessToken={MAPBOX_TOKEN}>
-        <DeckGL
-          {...viewport}
-          layers={[layer]} />
+        mapboxApiAccessToken={MAPBOX_TOKEN}
+      >
+        <DeckGL {...viewport} layers={[layer]} />
         <div id="control-panel">
           <button onClick={this._randomizeCount}>Randomize All</button>
           <button onClick={this._randomizePositions}>Randomize Positions</button>

@@ -2,7 +2,7 @@ function getDocUrl(filename) {
   return `docs/${filename}`;
 }
 function getCodeUrl(pathname) {
-  return `https://github.com/uber/deck.gl/tree/4.1-release/${pathname}`;
+  return `https://github.com/uber/deck.gl/tree/5.0-release/${pathname}`;
 }
 
 // mapping from file path in source to generated page url
@@ -106,7 +106,7 @@ export const examplePages = generatePath([
       },
       {
         name: 'Wind Map',
-        external: 'http://philogb.github.io/page/wind/'
+        external: 'http://uber.github.io/deck.gl/examples/wind'
       }
     ]
   },
@@ -123,7 +123,11 @@ export const examplePages = generatePath([
       },
       {
         name: '3D Indoor Scan',
-        external: 'https://gnavvy.github.io/point-cloud-example/'
+        external: 'http://uber.github.io/deck.gl/examples/point-cloud-laz'
+      },
+      {
+        name: '3D Model (Point Cloud)',
+        external: 'http://uber.github.io/deck.gl/examples/point-cloud-ply'
       }
     ]
   }
@@ -144,6 +148,10 @@ export const docPages = generatePath([
       {
         name: 'Upgrade Guide',
         content: getDocUrl('upgrade-guide.md')
+      },
+      {
+        name: 'Roadmap',
+        content: getDocUrl('roadmap.md')
       }
     ]
   },
@@ -307,16 +315,8 @@ export const docPages = generatePath([
         content: getDocUrl('api-reference/attribute-manager.md')
       },
       {
-        name: 'FirstPersonViewport',
-        content: getDocUrl('api-reference/first-person-viewport.md')
-      },
-      {
         name: 'LayerManager (Advanced)',
         content: getDocUrl('api-reference/layer-manager.md')
-      },
-      {
-        name: 'ThirdPersonViewport',
-        content: getDocUrl('api-reference/third-person-viewport.md')
       },
       {
         name: 'Viewport',
@@ -348,12 +348,30 @@ export const docPages = generatePath([
         content: getDocUrl('api-reference/react/deckgl.md')
       },
       {
-        name: 'ViewportLayout',
-        content: getDocUrl('api-reference/react/viewport-layout.md')
-      },
-      {
         name: 'ViewportController',
         content: getDocUrl('api-reference/react/viewport-controller.md')
+      }
+    ]
+  },
+  {
+    name: 'API Reference (Experimental)',
+    children: [
+      {
+        name: 'FirstPersonViewport',
+        content: getDocUrl('api-reference/first-person-viewport.md')
+      },
+      {
+        name: 'ThirdPersonViewport',
+        content: getDocUrl('api-reference/third-person-viewport.md')
+      }
+    ]
+  },
+  {
+    name: 'Test Utils Reference (Experimental)',
+    children: [
+      {
+        name: 'Overview',
+        content: getDocUrl('api-reference/test-utils/README.md')
       }
     ]
   }

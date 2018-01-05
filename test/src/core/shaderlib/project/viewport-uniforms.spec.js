@@ -19,7 +19,6 @@
 // THE SOFTWARE.
 
 import test from 'tape-catch';
-import {Matrix4} from 'luma.gl';
 
 import {COORDINATE_SYSTEM, Viewport, WebMercatorViewport} from 'deck.gl';
 import {getUniformsFromViewport} from 'deck.gl/core/shaderlib/project/viewport-uniforms';
@@ -54,33 +53,15 @@ const UNIFORMS = {
   project_uModelMatrix: Array,
   project_uViewProjectionMatrix: Array,
 
-  // 64 bit support
-  project_uViewProjectionMatrixFP64: Array,
-
   // This is for lighting calculations
-  project_uCameraPosition: Array,
-
-  project64_uViewProjectionMatrix: Array,
-  project64_uScale: Number
+  project_uCameraPosition: Array
 };
 
-// DEPRECATED UNIFORMS - For backwards compatibility with old custom layers
-const DEPRECATED_UNIFORMS = {
-  projectionMode: Number,
-  projectionCenter: Number,
-
-  projectionOrigin: Array,
-  modelMatrix: Array,
-
-  projectionMatrix: Array,
-  projectionPixelsPerUnit: Array,
-  projectionScale: Number, // This is the mercator scale (2 ** zoom)
-  viewportSize: Array,
-  devicePixelRatio: Number,
-  cameraPos: Array,
-
-  projectionFP64: Array,
-  projectionScaleFP64: Array
+// 64 bit support
+const UNIFORMS_64 = {
+  project_uViewProjectionMatrixFP64: Array,
+  project64_uViewProjectionMatrix: Array,
+  project64_uScale: Number
 };
 
 test('Viewport#constructors', t => {
@@ -98,35 +79,20 @@ test('project#getUniformsFromViewport#shader module style uniforms', t => {
   for (const uniform in UNIFORMS) {
     t.ok(uniforms[uniform] !== undefined, `Returned ${uniform}`);
   }
+  for (const uniform in UNIFORMS_64) {
+    t.ok(uniforms[uniform] === undefined, `Should not return ${uniform}`);
+  }
+
+  uniforms = getUniformsFromViewport({viewport, fp64: true});
+  for (const uniform in UNIFORMS_64) {
+    t.ok(uniforms[uniform] !== undefined, `Return ${uniform}`);
+  }
 
   uniforms = getUniformsFromViewport({
     viewport,
     coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS
   });
   t.ok(uniforms.project_uCenter.some(x => x), 'Returned non-trivial projection center');
-
-  t.end();
-});
-
-test('preoject#getUniformsFromViewport#deprecated uniforms', t => {
-  const viewport = new WebMercatorViewport(TEST_DATA.mapState);
-  t.ok(viewport instanceof Viewport, 'Created new WebMercatorViewport');
-
-  let uniforms = getUniformsFromViewport({viewport});
-
-  for (const uniform in DEPRECATED_UNIFORMS) {
-    t.ok(uniforms[uniform] !== undefined, `Returned deprecated ${uniform}`);
-  }
-
-  t.ok(uniforms.devicePixelRatio > 0, 'Returned devicePixelRatio');
-  t.ok((uniforms.projectionMatrix instanceof Float32Array) ||
-    (uniforms.projectionMatrix instanceof Matrix4), 'Returned projectionMatrix');
-
-  uniforms = getUniformsFromViewport({
-    viewport,
-    coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS
-  });
-  t.ok(uniforms.projectionCenter.some(x => x), 'Returned non-trivial projection center');
 
   t.end();
 });

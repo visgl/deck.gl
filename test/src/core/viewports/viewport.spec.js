@@ -46,20 +46,19 @@ test('Viewport#imports', t => {
 });
 
 test('Viewport#constructor', t => {
-  t.ok(new Viewport() instanceof Viewport,
-    'Created new Viewport with default args');
-  t.ok(new Viewport(TEST_DATA.viewport) instanceof Viewport,
-    'Created new Viewport with test args');
+  t.ok(new Viewport() instanceof Viewport, 'Created new Viewport with default args');
+  t.ok(new Viewport(TEST_DATA.viewport) instanceof Viewport, 'Created new Viewport with test args');
   t.end();
 });
 
 test('Viewport#constructor - 0 width/height', t => {
-  const viewport = new Viewport(Object.assign({}, TEST_DATA.viewport, {
-    width: 0,
-    height: 0
-  }));
-  t.ok(viewport instanceof Viewport,
-    'Viewport constructed successfully with 0 width and height');
+  const viewport = new Viewport(
+    Object.assign({}, TEST_DATA.viewport, {
+      width: 0,
+      height: 0
+    })
+  );
+  t.ok(viewport instanceof Viewport, 'Viewport constructed successfully with 0 width and height');
   t.end();
 });
 
@@ -68,12 +67,9 @@ test('Viewport#equals', t => {
   const viewport2 = new Viewport(TEST_DATA.viewport);
   const viewport3 = new Viewport(Object.assign({}, TEST_DATA.viewport, {height: 33}));
 
-  t.ok(viewport1.equals(viewport1),
-    'Viewport equality correct');
-  t.ok(viewport1.equals(viewport2),
-    'Viewport equality correct');
-  t.notOk(viewport1.equals(viewport3),
-    'Viewport equality correct');
+  t.ok(viewport1.equals(viewport1), 'Viewport equality correct');
+  t.ok(viewport1.equals(viewport2), 'Viewport equality correct');
+  t.notOk(viewport1.equals(viewport3), 'Viewport equality correct');
   t.end();
 });
 
@@ -88,4 +84,3 @@ test('Viewport.getScales', t => {
   }
   t.end();
 });
-

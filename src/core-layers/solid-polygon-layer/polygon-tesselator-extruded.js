@@ -19,36 +19,40 @@
 // THE SOFTWARE.
 
 import * as Polygon from './polygon';
-import vec3_normalize from 'gl-vec3/normalize';
-import {fp64ify} from '../../core/lib/utils/fp64';
-import {get, count} from '../../core/lib/utils';
+import {experimental} from '../../core';
+const {fp64ify, fillArray} = experimental;
 import earcut from 'earcut';
-import flattenDeep from 'lodash.flattendeep';
 
 function getPickingColor(index) {
-  return [
-    (index + 1) & 255,
-    ((index + 1) >> 8) & 255,
-    (((index + 1) >> 8) >> 8) & 255
-  ];
+  return [(index + 1) & 255, ((index + 1) >> 8) & 255, (((index + 1) >> 8) >> 8) & 255];
 }
 
-function parseColor(color) {
-  if (!Array.isArray(color)) {
-    color = [get(color, 0), get(color, 1), get(color, 2), get(color, 3)];
+function arrayPush(array, values) {
+  const length = values.length;
+  let offset = array.length;
+
+  for (let index = 0; index < length; index++) {
+    array[offset++] = values[index];
   }
-  color[3] = Number.isFinite(color[3]) ? color[3] : 255;
-  return color;
+  return array;
+}
+
+function flatten(values, level, result = []) {
+  if (level > 1) {
+    values.forEach(v => flatten(v, level - 1, result));
+  } else {
+    arrayPush(result, values);
+  }
+  return result;
 }
 
 const DEFAULT_COLOR = [0, 0, 0, 255]; // Black
 
 export class PolygonTesselatorExtruded {
-
   constructor({
     polygons,
     getHeight = x => 1000,
-    getColor = x => [0, 0, 0, 255],
+    getColor = x => DEFAULT_COLOR,
     wireframe = false,
     fp64 = false
   }) {
@@ -57,24 +61,26 @@ export class PolygonTesselatorExtruded {
     // Expensive operation, convert all polygons to arrays
     polygons = polygons.map((complexPolygon, polygonIndex) => {
       const height = getHeight(polygonIndex) || 0;
-      return Polygon.normalize(complexPolygon).map(
-        polygon => polygon.map(coord => [get(coord, 0), get(coord, 1), height])
+      return Polygon.normalize(complexPolygon).map(polygon =>
+        polygon.map(coord => [coord[0], coord[1], height])
       );
     });
 
     const groupedVertices = polygons;
     this.groupedVertices = polygons;
+    const pointCount = getPointCount(polygons);
+    this.pointCount = pointCount;
     this.wireframe = wireframe;
 
     this.attributes = {};
 
-    const positionsJS = calculatePositionsJS({groupedVertices, wireframe});
+    const positionsJS = calculatePositionsJS({groupedVertices, pointCount, wireframe});
     Object.assign(this.attributes, {
       positions: calculatePositions(positionsJS, this.fp64),
       indices: calculateIndices({groupedVertices, wireframe}),
-      normals: calculateNormals({groupedVertices, wireframe}),
+      normals: calculateNormals({groupedVertices, pointCount, wireframe}),
       // colors: calculateColors({groupedVertices, wireframe, getColor}),
-      pickingColors: calculatePickingColors({groupedVertices, wireframe})
+      pickingColors: calculatePickingColors({groupedVertices, pointCount, wireframe})
     });
   }
 
@@ -91,8 +97,8 @@ export class PolygonTesselatorExtruded {
   }
 
   colors({getColor = x => DEFAULT_COLOR} = {}) {
-    const {groupedVertices, wireframe} = this;
-    return calculateColors({groupedVertices, wireframe, getColor});
+    const {groupedVertices, pointCount, wireframe} = this;
+    return calculateColors({groupedVertices, pointCount, wireframe, getColor});
   }
 
   pickingColors() {
@@ -106,78 +112,127 @@ export class PolygonTesselatorExtruded {
   // }
 }
 
-function countVertices(vertices) {
-  return vertices.reduce((vertexCount, polygon) => vertexCount + count(polygon), 0);
+// Count number of points in a list of complex polygons
+function getPointCount(polygons) {
+  return polygons.reduce((points, polygon) => points + Polygon.getVertexCount(polygon), 0);
 }
 
 function calculateIndices({groupedVertices, wireframe = false}) {
   // adjust index offset for multiple polygons
   const multiplier = wireframe ? 2 : 5;
-  const offsets = groupedVertices.reduce(
-    (acc, vertices) =>
-      acc.concat(acc[acc.length - 1] + countVertices(vertices) * multiplier),
-    [0]
+  const offsets = [];
+  groupedVertices.reduce((vertexIndex, vertices) => {
+    offsets.push(vertexIndex);
+    return vertexIndex + Polygon.getVertexCount(vertices) * multiplier;
+  }, 0);
+
+  const indices = groupedVertices.map(
+    (vertices, polygonIndex) =>
+      wireframe
+        ? // 1. get sequentially ordered indices of each polygons wireframe
+          // 2. offset them by the number of indices in previous polygons
+          calculateContourIndices(vertices, offsets[polygonIndex])
+        : // 1. get triangulated indices for the internal areas
+          // 2. offset them by the number of indices in previous polygons
+          calculateSurfaceIndices(vertices, offsets[polygonIndex])
   );
 
-  const indices = groupedVertices.map((vertices, polygonIndex) =>
-    wireframe ?
-      // 1. get sequentially ordered indices of each polygons wireframe
-      // 2. offset them by the number of indices in previous polygons
-      calculateContourIndices(vertices, offsets[polygonIndex]) :
-      // 1. get triangulated indices for the internal areas
-      // 2. offset them by the number of indices in previous polygons
-      calculateSurfaceIndices(vertices, offsets[polygonIndex])
-  );
-
-  return new Uint32Array(flattenDeep(indices));
+  return new Uint32Array(flatten(indices, 2));
 }
 
 // Calculate a flat position array in JS - can be mapped to 32 or 64 bit typed arrays
 // Remarks:
 // * each top vertex is on 3 surfaces
 // * each bottom vertex is on 2 surfaces
-function calculatePositionsJS({groupedVertices, wireframe = false}) {
-  const positions = groupedVertices.map(
-    vertices => {
-      const topVertices = Array.prototype.concat.apply([], vertices);
-      const baseVertices = topVertices.map(v => [get(v, 0), get(v, 1), 0]);
-      return wireframe ? [topVertices, baseVertices] :
-        [topVertices, topVertices, topVertices, baseVertices, baseVertices];
-    }
-  );
+function calculatePositionsJS({groupedVertices, pointCount, wireframe = false}) {
+  const multiplier = wireframe ? 2 : 5;
+  const positions = new Float32Array(pointCount * 3 * multiplier);
+  let vertexIndex = 0;
 
-  return flattenDeep(positions);
+  groupedVertices.forEach(vertices => {
+    const topVertices = flatten(vertices, 3);
+
+    const baseVertices = topVertices.slice(0);
+    let i = topVertices.length - 1;
+    while (i > 0) {
+      baseVertices[i] = 0;
+      i -= 3;
+    }
+    const len = topVertices.length;
+
+    if (wireframe) {
+      fillArray({target: positions, source: topVertices, start: vertexIndex});
+      fillArray({target: positions, source: baseVertices, start: vertexIndex + len});
+    } else {
+      fillArray({target: positions, source: topVertices, start: vertexIndex, count: 3});
+      fillArray({
+        target: positions,
+        source: baseVertices,
+        start: vertexIndex + len * 3,
+        count: 2
+      });
+    }
+    vertexIndex += len * multiplier;
+  });
+
+  return positions;
 }
 
 function calculatePositions(positionsJS, fp64) {
   let positionLow;
   if (fp64) {
     // We only need x, y component
-    positionLow = new Float32Array(positionsJS.length / 3 * 2);
-    for (let i = 0; i < positionsJS.length / 3; i++) {
+    const vertexCount = positionsJS.length / 3;
+    positionLow = new Float32Array(vertexCount * 2);
+    for (let i = 0; i < vertexCount; i++) {
       positionLow[i * 2 + 0] = fp64ify(positionsJS[i * 3 + 0])[1];
       positionLow[i * 2 + 1] = fp64ify(positionsJS[i * 3 + 1])[1];
     }
-
   }
-  return {positions: new Float32Array(positionsJS), positions64xyLow: positionLow};
+  return {positions: positionsJS, positions64xyLow: positionLow};
 }
 
-function calculateNormals({groupedVertices, wireframe}) {
-  const up = [0, 1, 0];
+function calculateNormals({groupedVertices, pointCount, wireframe}) {
+  const up = [0, 0, 1];
+  const multiplier = wireframe ? 2 : 5;
 
-  const normals = groupedVertices.map((vertices, polygonIndex) => {
-    const topNormals = new Array(countVertices(vertices)).fill(up);
-    const sideNormals = vertices.map(polygon => calculateSideNormals(polygon));
-    const sideNormalsForward = sideNormals.map(n => n[0]);
-    const sideNormalsBackward = sideNormals.map(n => n[1]);
+  const normals = new Float32Array(pointCount * 3 * multiplier);
+  let vertexIndex = 0;
 
-    return wireframe ?
-    [topNormals, topNormals] :
-    [topNormals, sideNormalsForward, sideNormalsBackward, sideNormalsForward, sideNormalsBackward];
+  if (wireframe) {
+    return fillArray({target: normals, source: up, count: pointCount * multiplier});
+  }
+
+  groupedVertices.map((vertices, polygonIndex) => {
+    const vertexCount = Polygon.getVertexCount(vertices);
+
+    fillArray({target: normals, source: up, start: vertexIndex, count: vertexCount});
+    vertexIndex += vertexCount * 3;
+
+    const sideNormalsForward = [];
+    const sideNormalsBackward = [];
+
+    vertices.forEach(polygon => {
+      const sideNormals = calculateSideNormals(polygon);
+      const firstNormal = sideNormals.slice(0, 3);
+
+      arrayPush(sideNormalsForward, sideNormals);
+      arrayPush(sideNormalsForward, firstNormal);
+
+      arrayPush(sideNormalsBackward, firstNormal);
+      arrayPush(sideNormalsBackward, sideNormals);
+    });
+
+    fillArray({
+      target: normals,
+      start: vertexIndex,
+      count: 2,
+      source: sideNormalsForward.concat(sideNormalsBackward)
+    });
+    vertexIndex += vertexCount * 3 * 4;
   });
 
-  return new Float32Array(flattenDeep(normals));
+  return normals;
 }
 
 function calculateSideNormals(vertices) {
@@ -188,47 +243,53 @@ function calculateSideNormals(vertices) {
     if (lastVertice) {
       // vertex[i-1], vertex[i]
       const n = getNormal(lastVertice, vertice);
-      normals.push(n);
+      arrayPush(normals, n);
     }
     lastVertice = vertice;
   }
 
-  return [[normals.concat(normals[0])], [[normals[0]].concat(normals)]];
+  return normals;
 }
 
-function calculateColors({groupedVertices, getColor, wireframe = false}) {
-  const colors = groupedVertices.map((complexPolygon, polygonIndex) => {
-    let color = getColor(polygonIndex);
-    color = parseColor(color);
+function calculateColors({groupedVertices, pointCount, getColor, wireframe = false}) {
+  const multiplier = wireframe ? 2 : 5;
+  const colors = new Uint8ClampedArray(pointCount * 4 * multiplier);
+  let vertexIndex = 0;
 
-    const numVertices = countVertices(complexPolygon);
-    const topColors = new Array(numVertices).fill(color);
-    const baseColors = new Array(numVertices).fill(color);
-    return wireframe ?
-      [topColors, baseColors] :
-      [topColors, topColors, topColors, baseColors, baseColors];
+  groupedVertices.forEach((complexPolygon, polygonIndex) => {
+    const color = getColor(polygonIndex);
+    color[3] = Number.isFinite(color[3]) ? color[3] : 255;
+
+    const numVertices = Polygon.getVertexCount(complexPolygon);
+
+    fillArray({target: colors, source: color, start: vertexIndex, count: numVertices * multiplier});
+    vertexIndex += color.length * numVertices * multiplier;
   });
-  return new Uint8ClampedArray(flattenDeep(colors));
+
+  return colors;
 }
 
-function calculatePickingColors({groupedVertices, wireframe = false}) {
-  const colors = groupedVertices.map((vertices, polygonIndex) => {
-    const numVertices = countVertices(vertices);
+function calculatePickingColors({groupedVertices, pointCount, wireframe = false}) {
+  const multiplier = wireframe ? 2 : 5;
+  const colors = new Uint8ClampedArray(pointCount * 3 * multiplier);
+  let vertexIndex = 0;
+
+  groupedVertices.forEach((vertices, polygonIndex) => {
+    const numVertices = Polygon.getVertexCount(vertices);
     const color = getPickingColor(polygonIndex);
-    const topColors = new Array(numVertices).fill(color);
-    const baseColors = new Array(numVertices).fill(color);
-    return wireframe ?
-      [topColors, baseColors] :
-      [topColors, topColors, topColors, baseColors, baseColors];
+
+    fillArray({target: colors, source: color, start: vertexIndex, count: numVertices * multiplier});
+    vertexIndex += color.length * numVertices * multiplier;
   });
-  return new Uint8ClampedArray(flattenDeep(colors));
+  return colors;
 }
 
 function calculateContourIndices(vertices, offset) {
-  const stride = countVertices(vertices);
+  const stride = Polygon.getVertexCount(vertices);
+  const indices = [];
 
-  return vertices.map(polygon => {
-    const indices = [offset];
+  vertices.forEach(polygon => {
+    indices.push(offset);
     const numVertices = polygon.length;
 
     // polygon top
@@ -244,69 +305,56 @@ function calculateContourIndices(vertices, offset) {
     }
 
     offset += numVertices;
-    return indices;
   });
+
+  return indices;
+}
+
+function drawSurfaceRectangle(targetArray, offset, stride) {
+  targetArray.push(
+    offset + stride,
+    offset + stride * 3,
+    offset + stride * 2 + 1,
+    offset + stride * 2 + 1,
+    offset + stride * 3,
+    offset + stride * 4 + 1
+  );
 }
 
 function calculateSurfaceIndices(vertices, offset) {
-  const stride = countVertices(vertices);
-  const quad = [
-    [0, 1], [0, 3], [1, 2],
-    [1, 2], [0, 3], [1, 4]
-  ];
-
-  function drawRectangle(i) {
-    return quad.map(v => i + v[0] + stride * v[1] + offset);
-  }
+  const stride = Polygon.getVertexCount(vertices);
 
   let holes = null;
+  const holeCount = vertices.length - 1;
 
-  if (vertices.length > 1) {
-    holes = vertices.reduce(
-      (acc, polygon) => acc.concat(acc[acc.length - 1] + polygon.length),
-      [0]
-    ).slice(1, vertices.length);
+  if (holeCount) {
+    holes = [];
+    let vertexIndex = 0;
+    for (let i = 0; i < holeCount; i++) {
+      vertexIndex += vertices[i].length;
+      holes[i] = vertexIndex;
+    }
   }
 
-  const topIndices = earcut(flattenDeep(vertices), holes, 3).map(index => index + offset);
+  const indices = earcut(flatten(vertices, 3), holes, 3).map(index => index + offset);
 
-  const sideIndices = vertices.map(polygon => {
+  vertices.forEach(polygon => {
     const numVertices = polygon.length;
-    // polygon top
-    let indices = [];
 
     // polygon sides
     for (let i = 0; i < numVertices - 1; i++) {
-      indices = indices.concat(drawRectangle(i));
+      drawSurfaceRectangle(indices, offset + i, stride);
     }
 
     offset += numVertices;
-    return indices;
   });
 
-  return [topIndices, sideIndices];
+  return indices;
 }
 
 // helpers
 
 // get normal vector of line segment
 function getNormal(p1, p2) {
-  const p1x = get(p1, 0);
-  const p1y = get(p1, 1);
-  const p2x = get(p2, 0);
-  const p2y = get(p2, 1);
-
-  if (p1x === p2x && p1y === p2y) {
-    return [1, 0, 0];
-  }
-
-  const degrees2radians = Math.PI / 180;
-  const lon1 = degrees2radians * p1x;
-  const lon2 = degrees2radians * p2x;
-  const lat1 = degrees2radians * p1y;
-  const lat2 = degrees2radians * p2y;
-  const a = Math.sin(lon2 - lon1) * Math.cos(lat2);
-  const b = Math.cos(lat1) * Math.sin(lat2) -
-    Math.sin(lat1) * Math.cos(lat2) * Math.cos(lon2 - lon1);
-  return vec3_normalize([], [b, 0, -a]);
+  return [p1[1] - p2[1], p2[0] - p1[0], 0];
 }

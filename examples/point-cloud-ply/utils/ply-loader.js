@@ -23,7 +23,6 @@ export function loadBinary(url) {
       request.onerror = error => reject(error);
 
       request.send();
-
     } catch (error) {
       reject(error);
     }
@@ -38,9 +37,10 @@ export function loadBinary(url) {
  * @param {Binary} data
  * @return {*} parsed point cloud
  */
-export function parsePLY(data, {
-  normalize = true, faceNormal = true, vertexNormal = true, flip = true
-} = {}) {
+export function parsePLY(
+  data,
+  {normalize = true, faceNormal = true, vertexNormal = true, flip = true} = {}
+) {
   // Linearize the unnecessary callback interface from PLYloader
   let result = null;
   const parser = new PLYParser();
@@ -60,9 +60,7 @@ export function parsePLY(data, {
   }
 
   // generate normals
-  if ((faceNormal && !result.face.normals) ||
-    (vertexNormal && !result.vertex.nx)) {
-
+  if ((faceNormal && !result.face.normals) || (vertexNormal && !result.vertex.nx)) {
     const {face, vertex} = generateNormals(result, flip);
 
     if (faceNormal && !result.face.normals) {
@@ -79,11 +77,7 @@ export function parsePLY(data, {
   return result;
 }
 
-export function generateNormals({
-  vertex: {x, y, z},
-  face: {vertex_indices: triangles}
-}, flip) {
-
+export function generateNormals({vertex: {x, y, z}, face: {vertex_indices: triangles}}, flip) {
   const normals = {
     face: [],
     vertex: {

@@ -60,7 +60,8 @@ class Example extends PureComponent {
         lookAt: [0, 0, 0],
         distance: 1,
         rotationX: 0,
-        rotationY: 0,
+        rotationOrbit: 0,
+        orbitAxis: 'Y',
         fov: 30,
         minDistance: 0.5,
         maxDistance: 3
@@ -102,14 +103,16 @@ class Example extends PureComponent {
   _onResize() {
     const size = {width: window.innerWidth, height: window.innerHeight};
     this.setState(size);
-    const newViewport = OrbitController.getViewport(Object.assign(this.state.viewport, size))
-      .fitBounds([[0, 0, 0], [1, 1, 1]]);
+    const newViewport = OrbitController.getViewport(
+      Object.assign(this.state.viewport, size)
+    ).fitBounds([1, 1, 1]);
     this._onViewportChange(newViewport);
   }
 
   _onInitialized(gl) {
     setParameters(gl, {
-      clearColor: [0.07, 0.14, 0.19, 1]
+      clearColor: [0.07, 0.14, 0.19, 1],
+      blendFunc: [gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA]
     });
   }
 
@@ -132,7 +135,7 @@ class Example extends PureComponent {
     this.setState({
       viewport: {
         ...viewport,
-        rotationY: viewport.rotationY + 1
+        rotationOrbit: viewport.rotationOrbit + 1
       }
     });
 
@@ -175,7 +178,6 @@ class Example extends PureComponent {
           viewport={glViewport}
           layers={[this._renderLazPointCloudLayer()]}
           onWebGLInitialized={this._onInitialized}
-          initWebGLParameters
         />
       </OrbitController>
     );

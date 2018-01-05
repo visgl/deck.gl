@@ -1,0 +1,7 @@
+version: '2'
+services:
+  deck-gl:
+    build: .
+    volumes:
+      - .:/deck-gl
+      - /deck-gl/node_modules/

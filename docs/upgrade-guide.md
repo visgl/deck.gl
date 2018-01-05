@@ -1,32 +1,79 @@
 # Upgrade Guide
 
-## Upgrading from deck.gl v4.1 to v4.2
+## Upgrading from deck.gl v4.1 to v5
+
+### Dependencies
+
+deck.gl 4.1 requires luma.gl as peer dependency, but 5.0 specifies it as a normal "dependency". This means that many applications no longer need to list luma.gl in their package.json. Applications that do might get multiple copies of luma.gl installed, which will not work. **luma.gl will detect this situation during run-time throwing an exception**, but **npm and yarn will not detect it during install time**. Thus your build can look successful during upgrade but fail during runtime.
 
 ### Layer Props
 
-Coordinate system related props have been renamed for clarity
+Coordinate system related props have been renamed for clarity. The old props are no longer supported and will generate errors when used.
 
-| Layer            | Old Prop           | New Prop             | Comment |
+| Layer            | Removed Prop       | New Prop             | Comment |
 | ---              | ---                | ---                  | ---     |
 | Layer            | `projectionMode`   | `coordinateSystem`   | Any constant from `COORDINATE_SYSTEM`  |
 | Layer            | `projectionOrigin` | `coordinateOrigin`   | |
 
+Note; There is also an important semantical change in that using `coordinateSystem` instead of `projectionMode` causes the superimposed `METER_OFFSET` system's y-axis to point north instead of south. This was always the intention so in some sense this was regarded as a bug fix.
 
-### Viewports
+### DeckGL component
 
-The `PerspectiveViewport` and `OrthographicViewport` classes have been deprecated as they are no longer needed in the new `Viewport` system.
+Following methods and props have been renamed for clarity. The semantics are unchanged. The old props are still available but will generate a deprecation warning.
 
-| Class                  | Replacement           | New Prop             | Comment |
-| ---                    | ---                | ---                  | ---     |
-| `PerspectiveViewport`  | `FirstPersonViewport`* | Use projection matrix props: `fov`, `near`, `far`, or supply a custom `projectionMatrix` |
-| `OrthographicViewport` | `FirstPersonViewport`* | Set `projectionMatrix: new Matrix4().ortho({...})` (Using `Matrix4` from math.gl) |
+| Old Method            | New Method        | Comment |
+| ---                   | ---               | ---     |
+| `queryObject`         | `pickObject`      | These names were previously aligned with react-map-gl, but ended up confusing users. Since rest of the deck.gl documentation talks extensively about "picking" it made sense to stay with that terminology. |
+| `queryVisibleObjects` | `pickObjects`     | The word "visible" was intended to remind the user that this function only selects the objects that are actually visible in at least one pixel, but again it confused more than it helped. |
 
-* `FirstPersonViewport` is not the only option. Any `Viewport` class can now accept a `projectionMatrix` (and will by default create a perspective projection matrix).
+### Removed picking Uniforms
+
+| Removed uniform       | Comment |
+| ---                   | ---     |
+| renderPickingBuffer   |[picking shader module](https://github.com/uber/luma.gl/tree/5.0-release/src/shadertools/modules/picking)|
+| pickingEnabled        |[picking shader module](https://github.com/uber/luma.gl/tree/5.0-release/src/shadertools/modules/picking)|
+| selectedPickingColor  |[picking shader module](https://github.com/uber/luma.gl/tree/5.0-release/src/shadertools/modules/picking)|
+
+
+The shader uniforms are used for implementing picking in custom shaders, these uniforms are no longer set by the deck.gl. Custom shaders can now use luma.gl [picking shader module](https://github.com/uber/luma.gl/tree/5.0-release/src/shadertools/modules/picking).
+
+
+### Initial WebGL State
+
+Following WebGL parameters are set during DeckGL component initialization.
+
+| WebGL State   |  Value |
+|----           |----    |
+| depthTest     | true         |
+| depthFunc     | gl.LEQUAL |
+| blendFuncSeparate | [gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE_MINUS_SRC_ALPHA] |
+
+All our layers enable depth test so we are going set this state during initialization. We are also changing blend function for more appropriate rendering when multiple elements are blended.
+
+For any custom needs, these parameters can be overwritten by updating them in [`onWebGLInitialized`](docs/api-reference/react/deckgl.md#onWebGLInitialized) callback or by passing them in `parameters` object to `drawLayer` method of `Layer` class.
+
+
+### assembleShaders
+
+The `assembleShaders` function was moved to luma.gl in v4.1 and is no longer re-exported from deck.gl. As described in v4.1 upgrade guide please use `Model` class instead or import it from luma.gl.
+
+
+### Removed Immutable support
+
+`ScatterplotLayer` and `PolygonLayer` supported immutable/ES6 containers using [`get`](https://github.com/uber/deck.gl/blob/master/src/core/utils/get.js) method, due to performance reasons this support has been dropped.
 
 
 ## Upgrading from deck.gl v4 to v4.1
 
 deck.gl v4.1 is a backward-compatible release. Most of the functionality and APIs remain unchanged but there are smaller changes that might requires developers' attention if they **develop custom layers**. Note that applications that are only using the provided layers should not need to make any changes issues.
+
+
+### Dependencies
+
+Be aware that deck.gl 4.1 bumps the luma.gl peer dependency from 3.0 to 4.0. There have been instances where this was not detected by the installer during update.
+
+
+### Layer Life Cycle Optimization
 
 * **shouldUpdateState** - deck.gl v4.1 contains additional optimizations of the layer lifecycle and layer diffing algorithms. Most of these changes are completely under the hood but one  visible change is that the default implementation of `Layer.shouldUpdate` no longer returns true if only the viewport has changed. This means that layers that need to update state in response to changes in screen space (viewport) will need to redefine `shouldUpdate`:
 ```js
@@ -35,7 +82,6 @@ deck.gl v4.1 is a backward-compatible release. Most of the functionality and API
   }
 ```
 Note that this change has already been done in all the provided deck.gl layers that are screen space based, including the `ScreenGridLayer` and the `HexagonLayer`.
-
 
 ### luma.gl `Model` class API change
 
@@ -80,6 +126,18 @@ const model = new Model({
 });
 ```
 
+### Removed Layers
+
+| Layer              | Status       | Replacement         |
+| ---                | ---          | ---                 |
+| `ChoroplethLayer`  | Removed | `GeoJsonLayer`, `PolygonLayer` and `PathLayer`    |
+| `ChoroplethLayer64` | Removed | `GeoJsonLayer`, `PolygonLayer` and `PathLayer`    |
+| `ExtrudedChoroplethLayer` | Removed | `GeoJsonLayer`, `PolygonLayer` and `PathLayer`    |
+
+* ChoroplethLayer, ChoroplethLayer64, ExtrudedChoroplethLayer
+
+These set of layers were deprecated in deck.gl v4, and are now removed in v5. You can still get same functionality using more unified, flexible and performant layers:
+ `GeoJsonLayer`, `PolygonLayer` and `PathLayer`.
 
 ## Upgrading from deck.gl v3 to v4
 

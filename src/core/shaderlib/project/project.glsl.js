@@ -23,10 +23,14 @@ export default `\
 const float COORDINATE_SYSTEM_IDENTITY = 0.;
 const float COORDINATE_SYSTEM_LNG_LAT = 1.;
 const float COORDINATE_SYSTEM_METER_OFFSETS = 2.;
+const float COORDINATE_SYSTEM_LNGLAT_OFFSETS = 3.;
 
 uniform float project_uCoordinateSystem;
 uniform float project_uScale;
+uniform vec3 project_uPixelsPerMeter;
+uniform vec3 project_uPixelsPerDegree;
 uniform vec3 project_uPixelsPerUnit;
+uniform vec3 project_uPixelsPerUnit2;
 uniform vec4 project_uCenter;
 uniform mat4 project_uModelMatrix;
 uniform mat4 project_uViewProjectionMatrix;
@@ -44,19 +48,36 @@ const float WORLD_SCALE = TILE_SIZE / (PI * 2.0);
 // Note the scalar version of project_scale is for scaling the z component only
 //
 float project_scale(float meters) {
-  return meters * project_uPixelsPerUnit.z;
+  return meters * project_uPixelsPerMeter.z;
 }
 
 vec2 project_scale(vec2 meters) {
-  return meters * project_uPixelsPerUnit.xy;
+  return meters * project_uPixelsPerMeter.xy;
 }
 
 vec3 project_scale(vec3 meters) {
-  return vec3(project_scale(meters.xy), project_scale(meters.z));
+  return meters * project_uPixelsPerMeter;
 }
 
 vec4 project_scale(vec4 meters) {
-  return vec4(project_scale(meters.xyz), meters.w);
+  return vec4(meters.xyz * project_uPixelsPerMeter, meters.w);
+}
+
+//
+// Projecting normal - transform deltas from current coordinate system to
+// normals in the worldspace
+//
+vec3 project_normal(vec3 vector) {
+  if (project_uCoordinateSystem == COORDINATE_SYSTEM_LNG_LAT ||
+    project_uCoordinateSystem == COORDINATE_SYSTEM_LNGLAT_OFFSETS) {
+    return normalize(vector * project_uPixelsPerDegree);
+  }
+  return normalize(vector * project_uPixelsPerMeter);
+}
+
+vec4 project_offset_(vec4 offset) {
+  vec3 pixelsPerUnit = project_uPixelsPerUnit + project_uPixelsPerUnit2 * offset.y;
+  return vec4(offset.xyz * pixelsPerUnit, offset.w);
 }
 
 //
@@ -75,16 +96,21 @@ vec2 project_mercator_(vec2 lnglat) {
 vec4 project_position(vec4 position) {
   // TODO - why not simply subtract center and fall through?
   if (project_uCoordinateSystem == COORDINATE_SYSTEM_LNG_LAT) {
-    return vec4(
+    return project_uModelMatrix * vec4(
       project_mercator_(position.xy) * WORLD_SCALE * project_uScale,
       project_scale(position.z),
       position.w
     );
   }
 
+  if (project_uCoordinateSystem == COORDINATE_SYSTEM_LNGLAT_OFFSETS) {
+    return project_offset_(position);
+  }
+
+  // METER_OFFSETS or IDENTITY
   // Apply model matrix
   vec4 position_modelspace = project_uModelMatrix * position;
-  return project_scale(position_modelspace);
+  return project_offset_(position_modelspace);
 }
 
 vec3 project_position(vec3 position) {
@@ -102,9 +128,10 @@ vec2 project_position(vec2 position) {
 // Uses project_uViewProjectionMatrix
 //
 vec4 project_to_clipspace(vec4 position) {
-  if (project_uCoordinateSystem == COORDINATE_SYSTEM_METER_OFFSETS) {
-    // Needs to be divided with project_uPixelsPerUnit
-    position.w *= project_uPixelsPerUnit.z;
+  if (project_uCoordinateSystem == COORDINATE_SYSTEM_METER_OFFSETS ||
+    project_uCoordinateSystem == COORDINATE_SYSTEM_LNGLAT_OFFSETS) {
+    // Needs to be divided with project_uPixelsPerMeter
+    position.w *= project_uPixelsPerMeter.z;
   }
   return project_uViewProjectionMatrix * position + project_uCenter;
 }

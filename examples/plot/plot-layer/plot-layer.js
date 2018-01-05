@@ -1,13 +1,17 @@
-import {CompositeLayer} from 'deck.gl';
+import {CompositeLayer, COORDINATE_SYSTEM} from 'deck.gl';
+import {scaleLinear} from 'd3-scale';
+
 import AxesLayer from './axes-layer';
 import SurfaceLayer from './surface-layer';
+
+const DEFAULT_GET_SCALE = () => scaleLinear();
 
 const defaultProps = {
   getPosition: SurfaceLayer.defaultProps.getPosition,
   getColor: SurfaceLayer.defaultProps.getColor,
-  getXScale: SurfaceLayer.defaultProps.getXScale,
-  getYScale: SurfaceLayer.defaultProps.getYScale,
-  getZScale: SurfaceLayer.defaultProps.getZScale,
+  getXScale: DEFAULT_GET_SCALE,
+  getYScale: DEFAULT_GET_SCALE,
+  getZScale: DEFAULT_GET_SCALE,
   uCount: SurfaceLayer.defaultProps.uCount,
   vCount: SurfaceLayer.defaultProps.vCount,
   lightStrength: SurfaceLayer.defaultProps.lightStrength,
@@ -23,7 +27,8 @@ const defaultProps = {
   yTitle: AxesLayer.defaultProps.yTitle,
   zTitle: AxesLayer.defaultProps.zTitle,
   axesPadding: AxesLayer.defaultProps.padding,
-  axesColor: AxesLayer.defaultProps.color
+  axesColor: AxesLayer.defaultProps.color,
+  coordinateSystem: COORDINATE_SYSTEM.IDENTITY
 };
 
 /*
@@ -59,8 +64,42 @@ const defaultProps = {
  * @param {Array} [props.axesColor] - color of the gridlines, in [r,g,b,a]
  */
 export default class PlotLayer extends CompositeLayer {
+  updateState() {
+    const {uCount, vCount, getPosition, getXScale, getYScale, getZScale} = this.props;
 
-  _updateScales({xScale, yScale, zScale}) {
+    // calculate z range
+    let xMin = Infinity;
+    let xMax = -Infinity;
+    let yMin = Infinity;
+    let yMax = -Infinity;
+    let zMin = Infinity;
+    let zMax = -Infinity;
+
+    for (let vIndex = 0; vIndex < vCount; vIndex++) {
+      for (let uIndex = 0; uIndex < uCount; uIndex++) {
+        const u = uIndex / (uCount - 1);
+        const v = vIndex / (vCount - 1);
+        const [x, y, z] = getPosition(u, v);
+
+        if (isFinite(x)) {
+          xMin = Math.min(xMin, x);
+          xMax = Math.max(xMax, x);
+        }
+        if (isFinite(y)) {
+          yMin = Math.min(yMin, y);
+          yMax = Math.max(yMax, y);
+        }
+        if (isFinite(z)) {
+          zMin = Math.min(zMin, z);
+          zMax = Math.max(zMax, z);
+        }
+      }
+    }
+
+    const xScale = getXScale({min: xMin, max: xMax});
+    const yScale = getYScale({min: yMin, max: yMax});
+    const zScale = getZScale({min: zMin, max: zMax});
+
     this.setState({xScale, yScale, zScale});
   }
 
@@ -68,45 +107,46 @@ export default class PlotLayer extends CompositeLayer {
     const {xScale, yScale, zScale} = this.state;
 
     return [
-      new SurfaceLayer({
-        getPosition: this.props.getPosition,
-        getColor: this.props.getColor,
-        uCount: this.props.uCount,
-        vCount: this.props.vCount,
-        getXScale: this.props.getXScale,
-        getYScale: this.props.getYScale,
-        getZScale: this.props.getZScale,
-        opacity: this.props.opacity,
-        pickable: this.props.pickable,
-        visible: this.props.visible,
-        lightStrength: this.props.lightStrength,
-        onHover: this.props.onHover,
-        onClick: this.props.onClick,
-        onUpdate: this._updateScales.bind(this),
-        updateTriggers: this.props.updateTriggers
-      }),
-      xScale && new AxesLayer({
-        xScale,
-        yScale,
-        zScale,
-        fontSize: this.props.fontSize,
-        xTicks: this.props.xTicks,
-        yTicks: this.props.yTicks,
-        zTicks: this.props.zTicks,
-        xTickFormat: this.props.xTickFormat,
-        yTickFormat: this.props.yTickFormat,
-        zTickFormat: this.props.zTickFormat,
-        xTitle: this.props.xTitle,
-        yTitle: this.props.yTitle,
-        zTitle: this.props.zTitle,
-        padding: this.props.axesPadding,
-        color: this.props.axesColor,
-        visible: this.props.drawAxes,
-        pickable: false
-      })
-    ].filter(Boolean);
+      new SurfaceLayer(
+        this.getSubLayerProps({
+          id: 'surface',
+          getPosition: this.props.getPosition,
+          getColor: this.props.getColor,
+          uCount: this.props.uCount,
+          vCount: this.props.vCount,
+          xScale,
+          yScale,
+          zScale,
+          lightStrength: this.props.lightStrength,
+          onHover: this.props.onHover,
+          onClick: this.props.onClick,
+          updateTriggers: this.props.updateTriggers
+        })
+      ),
+      new AxesLayer(
+        this.getSubLayerProps({
+          id: 'axes',
+          xScale,
+          yScale,
+          zScale,
+          fontSize: this.props.fontSize,
+          xTicks: this.props.xTicks,
+          yTicks: this.props.yTicks,
+          zTicks: this.props.zTicks,
+          xTickFormat: this.props.xTickFormat,
+          yTickFormat: this.props.yTickFormat,
+          zTickFormat: this.props.zTickFormat,
+          xTitle: this.props.xTitle,
+          yTitle: this.props.yTitle,
+          zTitle: this.props.zTitle,
+          padding: this.props.axesPadding,
+          color: this.props.axesColor,
+          visible: this.props.drawAxes,
+          pickable: false
+        })
+      )
+    ];
   }
-
 }
 
 PlotLayer.layerName = 'PlotLayer';

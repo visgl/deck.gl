@@ -19,13 +19,11 @@
 // THE SOFTWARE.
 
 import test from 'tape-catch';
-import {Layer} from 'deck.gl';
+import {Layer, AttributeManager} from 'deck.gl';
+import {testInitializeLayer} from '@deck.gl/test-utils';
+import {makeSpy} from '@deck.gl/test-utils';
 
-const dataVariants = [
-  {data: ['a', 'b', 'c'], size: 3}
-  //  {data: , size: 3},
-  //  {data: , size: 3}
-];
+const dataVariants = [{data: ['a', 'b', 'c'], size: 3}];
 
 const LAYER_PROPS = {
   id: 'testLayer',
@@ -57,16 +55,29 @@ const LAYER_CONSTRUCT_TEST_CASES = [
   }
 ];
 
-class SubLayer extends Layer {}
+class SubLayer extends Layer {
+  initializeState() {
+    this.state.attributeManager.addInstanced({
+      time: {size: 1, accessor: 'getTime', defaultValue: 0, update: this.calculateTime}
+    });
+  }
+}
+
 SubLayer.layerName = 'SubLayer';
 SubLayer.defaultProps = {
-  getColor: x => x.color
+  getTime: x => x.time
 };
 
-class SubLayer2 extends Layer {}
+class SubLayer2 extends Layer {
+  initializeState() {}
+}
+
 SubLayer2.layerName = 'SubLayer2';
 
-class SubLayer3 extends Layer {}
+class SubLayer3 extends Layer {
+  initializeState() {}
+}
+
 SubLayer3.layerName = 'SubLayer2';
 
 test('Layer#constructor', t => {
@@ -101,15 +112,6 @@ test('SubLayer3#constructor (no layerName, no defaultProps)', t => {
   t.end();
 });
 
-// test('Layer#constructor with bad or missing props', t => {
-//   t.throws(
-//     () => new Layer({...LAYER_PROPS, zoom: undefined}),
-//     /Property zoom undefined in layer testLayer/,
-//     'Expected invalid prop to throw an error'
-//   );
-//   t.end();
-// });
-
 test('Layer#getNumInstances', t => {
   for (const dataVariant of dataVariants) {
     const layer = new Layer(Object.assign({}, LAYER_PROPS, {data: dataVariant.data}));
@@ -120,41 +122,28 @@ test('Layer#getNumInstances', t => {
 
 test('Layer#diffProps', t => {
   const layer = new SubLayer(LAYER_PROPS);
-  const context = {viewportChanged: false};
-  let diff;
+  testInitializeLayer({layer});
 
-  diff = layer.diffProps(LAYER_PROPS,
-    Object.assign({}, LAYER_PROPS), context);
-  t.false(diff.somethingChanged, 'same props');
+  layer.diffProps(Object.assign({}, LAYER_PROPS), LAYER_PROPS);
+  t.false(layer.getChangeFlags().somethingChanged, 'same props');
 
-  diff = layer.diffProps(LAYER_PROPS,
-    Object.assign({}, LAYER_PROPS, {data: dataVariants[0]}), context);
-  t.true(diff.dataChanged, 'data changed');
+  layer.diffProps(Object.assign({}, LAYER_PROPS, {data: dataVariants[0]}), LAYER_PROPS);
+  t.true(layer.getChangeFlags().dataChanged, 'data changed');
 
-  diff = layer.diffProps(LAYER_PROPS,
-    Object.assign({}, LAYER_PROPS, {size: 0}), context);
-  t.true(diff.propsChanged, 'props changed');
+  layer.diffProps(Object.assign({}, LAYER_PROPS, {size: 0}), LAYER_PROPS);
+  t.true(layer.getChangeFlags().propsChanged, 'props changed');
 
   // Dummy attribute manager to avoid diffUpdateTriggers failure
-  layer.state = {
-    attributeManager: {invalidate: () => {}}
-  };
-  diff = layer.diffProps(LAYER_PROPS,
-    Object.assign({}, LAYER_PROPS, {updateTriggers: {time: 100}}), context);
-  t.true(diff.propsOrDataChanged, 'props changed');
+  layer.diffProps(Object.assign({}, LAYER_PROPS, {updateTriggers: {time: 100}}), LAYER_PROPS);
+  t.true(layer.getChangeFlags().propsOrDataChanged, 'props changed');
 
-  let invalidatedName = null;
-  layer.state = {
-    attributeManager: {
-      invalidate: name => {
-        invalidatedName = name;
-      }
-    }
-  };
-
-  diff = layer.diffProps(layer.props,
-    Object.assign({}, LAYER_PROPS, {updateTriggers: {color: {version: 0}}}), context);
-  t.is(invalidatedName, 'color', 'updateTriggers fired');
+  const spy = makeSpy(AttributeManager.prototype, 'invalidate');
+  layer.diffProps(
+    Object.assign({}, LAYER_PROPS, {updateTriggers: {time: {version: 0}}}),
+    layer.props
+  );
+  t.ok(spy.called, 'updateTriggers fired');
+  spy.restore();
 
   t.end();
 });
