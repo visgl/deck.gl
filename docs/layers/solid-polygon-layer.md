@@ -113,5 +113,5 @@ otherwise will be in unit coordinates.
 
 ## Source
 
-[src/layers/core/primitive-polygon-layer](https://github.com/uber/deck.gl/tree/5.0-release/src/layers/core/primitive-polygon-layer)
+[src/core-layers/primitive-polygon-layer](https://github.com/uber/deck.gl/tree/5.0-release/src/core-layers/primitive-polygon-layer)
 

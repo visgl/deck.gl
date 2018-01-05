@@ -332,7 +332,7 @@ export const docPages = generatePath([
       },
       {
         name: 'project64 (Shader Module)',
-        content: getDocUrl('shader-modules/project-64.md')
+        content: getDocUrl('shader-modules/project64.md')
       },
       {
         name: 'lighting (Shader Module)',
