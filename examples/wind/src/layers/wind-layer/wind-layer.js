@@ -1,5 +1,5 @@
 import {Layer} from 'deck.gl';
-import {GL, Model, Geometry, loadTextures, Texture2D} from 'luma.gl';
+import {GL, Model, Geometry, loadTextures, Texture2D, registerShaderModules} from 'luma.gl';
 
 import {
   ELEVATION_DATA_IMAGE,
@@ -10,6 +10,12 @@ import {
 
 import vertex from './wind-layer-vertex';
 import fragment from './wind-layer-fragment';
+
+import fsfp32 from '../../shaderlib/fs-fp32/fs-fp32';
+import fsproject from '../../shaderlib/fs-project/fs-project';
+import fslighting from '../../shaderlib/fs-lighting/fs-lighting';
+
+registerShaderModules([fsfp32, fsproject, fslighting], {ignoreMultipleRegistrations: true});
 
 const defaultProps = {
   bbox: null,
@@ -166,7 +172,7 @@ export default class WindLayer extends Layer {
     return new Model(gl, {
       vs: vertex,
       fs: fragment,
-      modules: ['project'],
+      modules: [fslighting],
       isIndexed: false,
       isInstanced: true,
       geometry
