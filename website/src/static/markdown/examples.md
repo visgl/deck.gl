@@ -71,7 +71,7 @@
   </div>
   <div class="thumb">
     <div class="bg-black" data-title="Wind Map" data-name="WebGL2">
-      <a href="http://philogb.github.io/page/wind/">
+      <a href="http://uber.github.io/deck.gl/examples/wind">
         <img src="images/demo-thumb-wind.jpg" />
       </a>
       </div>
