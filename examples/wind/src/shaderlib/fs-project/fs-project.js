@@ -1,4 +1,4 @@
-// Copyright (c) 2015 - 2017 Uber Technologies, Inc.
+// Copyright (c) 2015 - 2018 Uber Technologies, Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -18,44 +18,15 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-// NOTE: this is same as 'project' module except this is applied to fragment shader.
+// NOTE: this is same as 'project' shader module except this is applied to fragment shader.
 
 import fsfp32 from '../fs-fp32/fs-fp32';
-import fsProjectShader from './fs-project.glsl';
-import {getUniformsFromViewport} from './fs-viewport-uniforms';
-
-const INITIAL_MODULE_OPTIONS = {};
-
-function getUniforms(opts = INITIAL_MODULE_OPTIONS) {
-  if (opts.viewport) {
-    return getUniformsFromViewport(opts);
-  }
-  return {};
-}
+import {project} from 'deck.gl';
 
 export default {
   name: 'fsproject',
   dependencies: [fsfp32],
   vs: null,
-  fs: `${fsProjectShader}`,
-  getUniforms,
-  deprecations: [
-    // Removed project uniforms
-    {type: 'uniform float', old: 'projectionMode', new: 'project_uCoordinateSystem'},
-    {type: 'uniform vec4', old: 'projectionCenter', new: 'project_uCenter'},
-    {type: 'uniform vec2', old: 'projectionOrigin'},
-    {type: 'uniform mat4', old: 'modelMatrix', new: 'project_uModelMatrix'},
-    {type: 'uniform mat4', old: 'viewMatrix'},
-    {type: 'uniform mat4', old: 'projectionMatrix', new: 'project_uViewProjectionMatrix'},
-    {type: 'uniform vec3', old: 'projectionPixelsPerUnit', new: 'project_uPixelsPerUnit'},
-    {type: 'uniform float', old: 'projectionScale', new: 'project_uScale'},
-    {type: 'uniform vec2', old: 'viewportSize', new: 'project_uViewportSize'},
-    {type: 'uniform float', old: 'devicePixelRatio', new: 'project_uDevicePixelRatio'},
-    {type: 'uniform vec3', old: 'cameraPos', new: 'project_uCameraPosition'},
-
-    // Deprecated project functions
-    {type: 'function', old: 'scale', new: 'project_scale', deprecated: 1},
-    {type: 'function', old: 'preproject', new: 'project_position', deprecated: 1},
-    {type: 'function', old: 'project', new: 'project_to_clipspace', deprecated: 1}
-  ]
+  fs: project.vs,
+  getUniforms: project.getUniforms
 };

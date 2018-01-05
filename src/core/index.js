@@ -38,6 +38,11 @@ export {default as WebMercatorViewport} from './viewports/web-mercator-viewport'
 export {default as PerspectiveViewport} from './viewports/perspective-viewport';
 export {default as OrthographicViewport} from './viewports/orthographic-viewport';
 
+// Shader modules
+export {default as project} from './shaderlib/project/project';
+export {default as project64} from './shaderlib/project64/project64';
+export {default as lighting} from './shaderlib/lighting/lighting';
+
 // EXPERIMENTAL EXPORTS
 // Experimental Features (May change in minor version bumps, use at your own risk)
 
