@@ -1,9 +1,19 @@
 import dataSamples from '../../examples/layer-browser/src/immutable-data-samples';
 import {parseColor, setOpacity} from '../../examples/layer-browser/src/utils/color';
 import {experimental} from 'deck.gl';
+import {GL} from 'luma.gl';
 const {get} = experimental;
 
 import {
+  MeshLayer,
+  PathOutlineLayer,
+  PathMarkerLayer,
+  TextLayer,
+  Arrow2DGeometry
+} from 'deck.gl-layers';
+
+import {
+  COORDINATE_SYSTEM,
   ScatterplotLayer,
   PolygonLayer,
   PathLayer,
@@ -15,9 +25,8 @@ import {
   GridLayer,
   ScreenGridLayer,
   HexagonCellLayer,
-  HexagonLayer
-  // ScreenGridLayer,
-  // GridLayer,
+  HexagonLayer,
+  PointCloudLayer
 } from 'deck.gl';
 
 const LIGHT_SETTINGS = {
@@ -58,6 +67,14 @@ function getColorValue(points) {
 function getElevationValue(points) {
   return getMax(points, 'SPACES');
 }
+
+// experimental layer data
+
+const arrowDataLngLat = [
+  {position: [-122.4111557006836, 37.774879455566406], angle: 0},
+  {position: [-122.41878509521484, 37.75032043457031], angle: 70},
+  {position: [-122.43194580078125, 37.75153732299805], angle: 212}
+];
 
 export const WIDTH = 800;
 export const HEIGHT = 450;
@@ -462,5 +479,231 @@ export const TEST_CASES = [
       }
     ],
     referenceResult: './golden-images/hexagon-lnglat.png'
+  },
+  {
+    name: 'pointcloud-lnglat',
+    // viewport params
+    mapViewState: {
+      latitude: 37.751537058389985,
+      longitude: -122.42694203247012,
+      zoom: 13,
+      pitch: 0,
+      bearing: 0
+    },
+    // layer list
+    layersList: [
+      {
+        type: PointCloudLayer,
+        props: {
+          id: 'pointcloud-lnglat',
+          data: dataSamples.getPointCloud(),
+          coordinateSystem: COORDINATE_SYSTEM.LNGLAT_OFFSETS,
+          coordinateOrigin: dataSamples.positionOrigin,
+          getPosition: d => [d.position[0] * 1e-5, d.position[1] * 1e-5, d.position[2]],
+          getNormal: d => d.normal,
+          getColor: d => d.color,
+          opacity: 1,
+          radiusPixels: 4,
+          pickable: true,
+          lightSettings: LIGHT_SETTINGS
+        }
+      }
+    ],
+    referenceResult: './golden-images/pointcloud-lnglat.png'
+  },
+  {
+    name: 'pointcloud-meter',
+    // viewport params
+    mapViewState: {
+      latitude: 37.751537058389985,
+      longitude: -122.42694203247012,
+      zoom: 13,
+      pitch: 0,
+      bearing: 0
+    },
+    // layer list
+    layersList: [
+      {
+        type: PointCloudLayer,
+        props: {
+          id: 'pointcloud-meter',
+          data: dataSamples.getPointCloud(),
+          coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
+          coordinateOrigin: dataSamples.positionOrigin,
+          getPosition: d => d.position,
+          getNormal: d => d.normal,
+          getColor: d => d.color,
+          opacity: 1,
+          radiusPixels: 4,
+          pickable: true,
+          lightSettings: LIGHT_SETTINGS
+        }
+      }
+    ],
+    referenceResult: './golden-images/pointcloud-meter.png'
+  },
+  {
+    name: 'path-meter',
+    // viewport params
+    mapViewState: {
+      latitude: 37.751537058389985,
+      longitude: -122.42694203247012,
+      zoom: 11.5,
+      pitch: 0,
+      bearing: 0
+    },
+    // layer list
+    layersList: [
+      {
+        type: PathLayer,
+        props: {
+          id: 'path-meter',
+          data: dataSamples.meterPaths,
+          opacity: 1.0,
+          getColor: f => [255, 0, 0],
+          getWidth: f => 10,
+          widthMinPixels: 1,
+          pickable: false,
+          strokeWidth: 5,
+          widthScale: 100,
+          autoHighlight: false,
+          highlightColor: [255, 255, 255, 255],
+          sizeScale: 200,
+          rounded: false,
+          getMarkerPercentages: () => [],
+          coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
+          coordinateOrigin: dataSamples.positionOrigin
+        }
+      }
+    ],
+    referenceResult: './golden-images/path-meter.png'
+  },
+  {
+    name: 'mesh-lnglat',
+    // viewport params
+    mapViewState: {
+      latitude: 37.751537058389985,
+      longitude: -122.42694203247012,
+      zoom: 12,
+      pitch: 0,
+      bearing: 0
+    },
+    // layer list
+    layersList: [
+      {
+        type: MeshLayer,
+        props: {
+          id: 'mesh-lnglat',
+          data: arrowDataLngLat,
+          mesh: new Arrow2DGeometry(),
+          sizeScale: 10000
+        }
+      }
+    ],
+    referenceResult: './golden-images/mesh-lnglat.png'
+  },
+  {
+    name: 'path-outline',
+    // viewport params
+    mapViewState: {
+      latitude: 37.751537058389985,
+      longitude: -122.42694203247012,
+      zoom: 11.5,
+      pitch: 0,
+      bearing: 0
+    },
+    // layer list
+    layersList: [
+      {
+        type: PathOutlineLayer,
+        props: {
+          id: 'path-outline',
+          data: dataSamples.routes,
+          opacity: 0.6,
+          getPath: f => [f.START, f.END],
+          getColor: f => [128, 0, 0],
+          getZLevel: f => 125,
+          getWidth: f => 10,
+          widthMinPixels: 1,
+          pickable: true,
+          strokeWidth: 5,
+          widthScale: 10,
+          autoHighlight: true,
+          highlightColor: [255, 255, 255, 255],
+          parameters: {
+            blendEquation: GL.MAX
+          }
+        }
+      }
+    ],
+    referenceResult: './golden-images/path-outline.png'
+  },
+  {
+    name: 'path-marker',
+    // viewport params
+    mapViewState: {
+      latitude: 37.751537058389985,
+      longitude: -122.42694203247012,
+      zoom: 11.5,
+      pitch: 0,
+      bearing: 0
+    },
+    // layer list
+    layersList: [
+      {
+        type: PathMarkerLayer,
+        props: {
+          id: 'path-marker',
+          data: dataSamples.routes,
+          opacity: 0.6,
+          getPath: f => [f.START, f.END],
+          getColor: f => [230, 230, 230],
+          getZLevel: f => 125,
+          getWidth: f => 10,
+          widthMinPixels: 1,
+          pickable: true,
+          strokeWidth: 5,
+          widthScale: 10,
+          autoHighlight: true,
+          highlightColor: [255, 255, 255, 255],
+          parameters: {
+            blendEquation: GL.MAX
+          },
+          sizeScale: 200
+        }
+      }
+    ],
+    referenceResult: './golden-images/path-maker.png'
+  },
+  {
+    name: 'text-layer',
+    // viewport params
+    mapViewState: {
+      latitude: 37.751537058389985,
+      longitude: -122.42694203247012,
+      zoom: 11.5,
+      pitch: 0,
+      bearing: 0
+    },
+    // layer list
+    layersList: [
+      {
+        type: TextLayer,
+        props: {
+          id: 'text-layer',
+          data: dataSamples.points.slice(0, 50),
+          getText: x => `${x.PLACEMENT}-${x.YR_INSTALLED}`,
+          getPosition: x => x.COORDINATES,
+          getColor: x => [153, 0, 0],
+          getSize: x => 32,
+          getAngle: x => 0,
+          sizeScale: 1,
+          getTextAnchor: x => 'start',
+          getAlignmentBaseline: x => 'center',
+          getPixelOffset: x => [10, 0]
+        }
+      }
+    ],
+    referenceResult: './golden-images/text-layer.png'
   }
 ];

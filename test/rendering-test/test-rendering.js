@@ -66,6 +66,7 @@ resultImage.style.mixBlendMode = 'difference';
 // Test result container
 const resultContainer = document.createElement('div');
 resultContainer.style.position = 'absolute';
+resultContainer.style.left = `${CONFIG.WIDTH}px`;
 resultContainer.style.zIndex = 1;
 
 document.body.appendChild(deckGLContainer);
