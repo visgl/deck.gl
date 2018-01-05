@@ -156,7 +156,7 @@ export default class AttributeManager {
    * @param {Object} [props]
    * @param {String} [props.id] - identifier (for debugging)
    */
-  constructor(gl, {id = 'attribute-manager', transitions} = {}) {
+  constructor(gl, {id = 'attribute-manager'} = {}) {
     this.id = id;
     this.gl = gl;
 
@@ -169,10 +169,9 @@ export default class AttributeManager {
     this.userData = {};
     this.stats = new Stats({id: 'attr'});
 
-    this.attributeTransitionManger = new AttributeTransitionManager(
-      gl,
-      Object.assign({id}, transitions)
-    );
+    this.attributeTransitionManger = new AttributeTransitionManager(gl, {
+      id: `${id}-transitions`
+    });
 
     // For debugging sanity, prevent uninitialized members
     Object.seal(this);

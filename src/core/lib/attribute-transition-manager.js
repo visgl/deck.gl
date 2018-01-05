@@ -1,5 +1,6 @@
 import {GL, Program, Model, Geometry, Buffer, TransformFeedback} from 'luma.gl';
 import log from '../utils/log';
+import assert from 'assert';
 
 const ATTRIBUTE_MAPPING = {
   1: 'float',
@@ -18,8 +19,8 @@ const TRANSITION_STATE = {
 const noop = () => {};
 
 export default class AttributeTransitionManager {
-  constructor(gl, opts) {
-    this.id = opts.id;
+  constructor(gl, {id}) {
+    this.id = id;
     this.gl = gl;
 
     this.isSupported = TransformFeedback.isSupported(gl);
@@ -27,8 +28,6 @@ export default class AttributeTransitionManager {
     this.attributeTransitions = {};
     this.needsRedraw = false;
     this.model = null;
-
-    this.setOptions(opts);
 
     if (this.isSupported) {
       this.transformFeedback = new TransformFeedback(gl);
@@ -38,17 +37,13 @@ export default class AttributeTransitionManager {
   }
 
   /* Public methods */
-  setOptions(options) {
-    this.opts = options || {};
-    this.enabled = this.isSupported && Boolean(options);
-  }
 
   // Called when attribute manager updates
   // Extracts the list of attributes that need transition
-  update(attributes, options) {
-    this.setOptions(options);
+  update(attributes, opts = {}) {
+    this.opts = opts;
 
-    if (!this.enabled) {
+    if (!this.isSupported) {
       return;
     }
 
@@ -136,22 +131,23 @@ export default class AttributeTransitionManager {
 
     for (const attributeName in attributes) {
       const attribute = attributes[attributeName];
+      const settings = this._getTransitionSettings(attribute);
 
-      if (attribute.transition) {
-        let needsUpdate;
+      if (settings) {
+        let hasChanged;
         let transition = this.attributeTransitions[attributeName];
         if (transition) {
-          needsUpdate = attribute.changed;
+          hasChanged = attribute.changed;
         } else {
           // New animated attributes have been added
           transition = {name: attributeName, attribute};
           this.attributeTransitions[attributeName] = transition;
-          needsUpdate = true;
+          hasChanged = true;
           needsNewModel = true;
         }
 
-        if (needsUpdate) {
-          this._updateAnimation(transition);
+        if (hasChanged) {
+          this._triggerTransition(transition, settings);
           this._updateModel(attributeName, transition);
           this.needsRedraw = true;
         }
@@ -281,45 +277,51 @@ void main(void) {
     return {size, type, value};
   }
 
-  _getTransitionSettings(transition) {
+  // Returns transition settings object if transition is enabled, otherwise `null`
+  _getTransitionSettings(attribute) {
     const {opts} = this;
-    const {accessor} = transition.attribute;
+    const {transition, accessor} = attribute;
 
-    let settings = Array.isArray(accessor)
-      ? accessor.map(a => opts[a]).find(Boolean)
-      : opts[accessor];
+    if (!transition) {
+      return null;
+    }
 
+    return Array.isArray(accessor) ? accessor.map(a => opts[a]).find(Boolean) : opts[accessor];
+  }
+
+  // Normalizes transition settings object, merge with default settings
+  _normalizeTransitionSettings(settings) {
     // Shorthand: use duration instead of parameter object
-    if (Number.isFinite(settings) && settings > 0) {
+    if (Number.isFinite(settings)) {
       settings = {duration: settings};
     }
 
-    return settings && settings.duration
-      ? {
-          duration: settings.duration,
-          easing: settings.easing || (t => t),
-          onStart: settings.onStart || noop,
-          onEnd: settings.onEnd || noop,
-          onInterrupt: settings.onInterrupt || noop
-        }
-      : null;
+    // Check if settings is valid
+    assert(settings && settings.duration > 0);
+
+    return {
+      duration: settings.duration,
+      easing: settings.easing || (t => t),
+      onStart: settings.onStart || noop,
+      onEnd: settings.onEnd || noop,
+      onInterrupt: settings.onInterrupt || noop
+    };
   }
 
-  // Updates transition from/to and buffer
-  _updateAnimation(transition) {
+  // Start a new transition using the current settings
+  // Updates transition state and from/to buffer
+  _triggerTransition(transition, settings) {
     const {attribute, buffer} = transition;
     const {value, size} = attribute;
 
-    const transitionSettings = this._getTransitionSettings(transition);
+    const transitionSettings = this._normalizeTransitionSettings(settings);
 
     const needsNewBuffer = !buffer || transition.bufferSize < value.length;
 
     // Attribute descriptor to transition from
-    let fromState;
-    if (transitionSettings) {
-      // _getCurrentAttributeState must be called before the current buffer is deleted
-      fromState = this._getCurrentAttributeState(transition);
-    }
+    // _getCurrentAttributeState must be called before the current buffer is deleted
+    const fromState = this._getCurrentAttributeState(transition);
+
     // Attribute descriptor to transition to
     // Pre-converting to buffer to reuse in the case where no transition is needed
     const toState = new Buffer(this.gl, {size, data: value});
@@ -340,22 +342,15 @@ void main(void) {
       transition.bufferSize = value.length;
     }
 
-    if (transitionSettings) {
-      Object.assign(transition, transitionSettings);
-      transition.fromState = fromState;
-      transition.toState = toState;
+    Object.assign(transition, transitionSettings);
+    transition.fromState = fromState;
+    transition.toState = toState;
 
-      // Reset transition state
-      if (transition.state === TRANSITION_STATE.STARTED) {
-        transition.onInterrupt(transition);
-      }
-      transition.state = TRANSITION_STATE.PENDING;
-    } else {
-      // No transition needed
-      transition.fromState = toState;
-      transition.toState = toState;
-      transition.state = TRANSITION_STATE.NONE;
+    // Reset transition state
+    if (transition.state === TRANSITION_STATE.STARTED) {
+      transition.onInterrupt(transition);
     }
+    transition.state = TRANSITION_STATE.PENDING;
   }
 
   // Update attributes and vertex count

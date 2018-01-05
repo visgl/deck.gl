@@ -142,10 +142,10 @@ export default class Layer {
   // Update attribute transition
   updateTransition() {
     const {model, attributeManager} = this.state;
-    const changedAttributes = attributeManager && attributeManager.updateTransition();
+    const attributesInTransition = attributeManager && attributeManager.updateTransition();
 
-    if (model && changedAttributes) {
-      model.setAttributes(changedAttributes);
+    if (model && attributesInTransition) {
+      model.setAttributes(attributesInTransition);
     }
   }
 
@@ -383,8 +383,7 @@ export default class Layer {
     assert(!this.state);
 
     const attributeManager = new AttributeManager(this.context.gl, {
-      id: this.props.id,
-      transitions: this.props.transitions
+      id: this.props.id
     });
 
     // All instanced layers get instancePickingColors attribute by default
