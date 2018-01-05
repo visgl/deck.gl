@@ -1,14 +1,10 @@
 import {Layer} from 'deck.gl';
-import {Model, Geometry, setParameters, registerShaderModules} from 'luma.gl';
+import {Model, Geometry, setParameters} from 'luma.gl';
 
 import vertex from './delaunay-cover-layer-vertex.glsl';
 import fragment from './delaunay-cover-layer-fragment.glsl';
 
-import fsfp32 from '../../shaderlib/fs-fp32/fs-fp32';
-import fsproject from '../../shaderlib/fs-project/fs-project';
 import fslighting from '../../shaderlib/fs-lighting/fs-lighting';
-
-registerShaderModules([fsfp32, fsproject, fslighting], {ignoreMultipleRegistrations: true});
 
 export default class DelaunayCoverLayer extends Layer {
   // NOTE: commenting out, it is not used anywhere.
@@ -111,7 +107,7 @@ export default class DelaunayCoverLayer extends Layer {
       // modules: ['project'],
       onBeforeRender: () => {
         model.program.setUniforms({
-          lightsPosition: [-100, 25, 15000, 100, -25, 15000],
+          lightsPosition: [-100, 25, 15000],
           ambientRatio: 0.2,
           diffuseRatio: 0.9,
           specularRatio: 0.2,

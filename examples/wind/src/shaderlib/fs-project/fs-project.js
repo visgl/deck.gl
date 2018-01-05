@@ -18,9 +18,10 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+// NOTE: this is same as 'project' module except this is applied to fragment shader.
+
 import fsfp32 from '../fs-fp32/fs-fp32';
 import fsProjectShader from './fs-project.glsl';
-// import projectDeprecatedShader from '../../deprecated/shaderlib/project/project-deprecated.glsl';
 import {getUniformsFromViewport} from './fs-viewport-uniforms';
 
 const INITIAL_MODULE_OPTIONS = {};
@@ -39,7 +40,6 @@ export default {
   fs: `${fsProjectShader}`,
   getUniforms,
   deprecations: [
-
     // Removed project uniforms
     {type: 'uniform float', old: 'projectionMode', new: 'project_uCoordinateSystem'},
     {type: 'uniform vec4', old: 'projectionCenter', new: 'project_uCenter'},

@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-// lighting
+// NOTE: this is idetical to 'lighting' module shader.
 
 export default `\
 #define NUM_OF_LIGHTS 2

@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-// NOTE: this is same as 'project' module except this is applied to fragment shader.
+// NOTE: this is identical to 'project' module shader.
 
 export default `\
 // EXTERNAL CONSTANTS: these must match JavaScript constants in "src/lib/constants.js"

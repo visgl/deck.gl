@@ -18,13 +18,14 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+// NOTE: this is identical to 'project' module viewport-uniforms.j.
+
 /* global window */
 import mat4_multiply from 'gl-mat4/multiply';
 import vec4_transformMat4 from 'gl-vec4/transformMat4';
 
 import {log, COORDINATE_SYSTEM} from 'deck.gl';
 import assert from 'assert';
-//import {COORDINATE_SYSTEM} from '../../lib/constants';
 
 import {projectFlat} from 'viewport-mercator-project';
 
