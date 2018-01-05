@@ -20,8 +20,9 @@
 
 import test from 'tape-catch';
 
-import {COORDINATE_SYSTEM, Viewport, WebMercatorViewport} from 'deck.gl';
+import {COORDINATE_SYSTEM, WebMercatorViewport} from 'deck.gl';
 import {getUniformsFromViewport} from 'deck.gl/core/shaderlib/project/viewport-uniforms';
+import {getFP64ViewportUniforms} from 'deck.gl/core/shaderlib/project64/viewport-uniforms-64';
 
 const TEST_DATA = {
   mapState: {
@@ -64,28 +65,13 @@ const UNIFORMS_64 = {
   project64_uScale: Number
 };
 
-test('Viewport#constructors', t => {
+test('project#getUniformsFromViewport', t => {
   const viewport = new WebMercatorViewport(TEST_DATA.mapState);
-  t.ok(viewport instanceof Viewport, 'Created new WebMercatorViewport');
-  t.end();
-});
-
-test('project#getUniformsFromViewport#shader module style uniforms', t => {
-  const viewport = new WebMercatorViewport(TEST_DATA.mapState);
-  t.ok(viewport instanceof Viewport, 'Created new WebMercatorViewport');
 
   let uniforms = getUniformsFromViewport({viewport});
 
   for (const uniform in UNIFORMS) {
     t.ok(uniforms[uniform] !== undefined, `Returned ${uniform}`);
-  }
-  for (const uniform in UNIFORMS_64) {
-    t.ok(uniforms[uniform] === undefined, `Should not return ${uniform}`);
-  }
-
-  uniforms = getUniformsFromViewport({viewport, fp64: true});
-  for (const uniform in UNIFORMS_64) {
-    t.ok(uniforms[uniform] !== undefined, `Return ${uniform}`);
   }
 
   uniforms = getUniformsFromViewport({
@@ -94,5 +80,16 @@ test('project#getUniformsFromViewport#shader module style uniforms', t => {
   });
   t.ok(uniforms.project_uCenter.some(x => x), 'Returned non-trivial projection center');
 
+  t.end();
+});
+
+test('project#getFP64ViewportUniforms', t => {
+  const viewport = new WebMercatorViewport(TEST_DATA.mapState);
+  const uniforms = getUniformsFromViewport({viewport});
+  const uniforms64 = getFP64ViewportUniforms(uniforms);
+
+  for (const uniform in UNIFORMS_64) {
+    t.ok(uniforms64[uniform] !== undefined, `Return ${uniform}`);
+  }
   t.end();
 });

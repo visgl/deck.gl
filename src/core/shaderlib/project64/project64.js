@@ -20,6 +20,7 @@
 
 import {fp64} from 'luma.gl';
 import project from '../project/project';
+import {getFP64ViewportUniforms} from './viewport-uniforms-64';
 
 import project64Shader from './project64.glsl';
 
@@ -39,6 +40,6 @@ export default {
 
 const DEFAULT_MODULE_OPTIONS = {};
 
-function getUniforms(opts = DEFAULT_MODULE_OPTIONS) {
-  return {};
+function getUniforms(opts = DEFAULT_MODULE_OPTIONS, context = {}) {
+  return getFP64ViewportUniforms(context);
 }
