@@ -2,7 +2,7 @@
   "name": "deck.gl-layers",
   "description": "Additional layers for deck.gl",
   "license": "MIT",
-  "version": "0.0.19",
+  "version": "0.0.20",
   "keywords": [
     "webgl",
     "visualization",
@@ -40,8 +40,8 @@
     "bench-browser": "webpack-dev-server --env.bench --progress --hot --open",
     "test-rendering": "(cd test/rendering-test && webpack-dev-server --config webpack.config.test-rendering.js --progress --hot --open)"
   },
-  "dependencies": {
-    "deck.gl": "^5.0.0"
+  "peerDependencies": {
+    "deck.gl": "5.x"
   },
   "devDependencies": {
     "babel-cli": "^6.22.2",
@@ -61,6 +61,7 @@
     "eslint-config-uber-es2015": "^3.0.0",
     "eslint-config-uber-jsx": "^3.0.0",
     "eslint-plugin-react": "~6.7.0",
+    "deck.gl": "5.x",
     "file-loader": "^0.10.1",
     "gl": "^4.0.3",
     "immutable": "^3.8.1",
@@ -81,9 +82,5 @@
     "uglify-js": "^2.6.1",
     "webpack": "^2.4.0",
     "webpack-dev-server": "^2.4.0"
-  },
-  "peerDependencies": {
-    "react": "0.14.x - 16.x",
-    "react-dom": "0.14.x - 16.x"
   }
 }
