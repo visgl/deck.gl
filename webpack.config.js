@@ -79,7 +79,8 @@ const TEST_BROWSER_CONFIG = {
       'deck.gl/test': resolve('./test'),
       'deck.gl/dist': resolve('./src'),
       'deck.gl': resolve('./src'),
-      'deck.gl-layers': resolve('./src/experimental-layers/src')
+      'deck.gl-layers': resolve('./src/experimental-layers/src'),
+      '@deck.gl/test-utils': resolve('./src/test-utils/src')
     }
   },
 

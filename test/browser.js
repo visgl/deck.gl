@@ -21,7 +21,7 @@
 require('tap-browser-color')();
 require('babel-polyfill');
 
-require('./test-utils/setup-gl');
+require('@deck.gl/test-utils/setup-gl');
 
 require('./index');
 require('./src/react');
