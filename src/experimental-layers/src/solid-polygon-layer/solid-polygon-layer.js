@@ -344,9 +344,19 @@ export default class SolidPolygonLayer extends Layer {
           geometry: new Geometry({
             drawMode: GL.TRIANGLES,
             attributes: {
-              vertexPositions: {size: 2, instanced: 1, value: new Float32Array([0, 1]), isGeneric: true},
+              vertexPositions: {
+                size: 2,
+                instanced: 1,
+                value: new Float32Array([0, 1]),
+                isGeneric: true
+              },
               nextPositions: {size: 3, instanced: 1, value: new Float32Array(3), isGeneric: true},
-              nextPositions64xyLow: {size: 2, instanced: 1, value: new Float32Array(2), isGeneric: true}
+              nextPositions64xyLow: {
+                size: 2,
+                instanced: 1,
+                value: new Float32Array(2),
+                isGeneric: true
+              }
             }
           }),
           uniforms: {
