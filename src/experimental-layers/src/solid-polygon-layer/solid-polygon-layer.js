@@ -324,10 +324,6 @@ export default class SolidPolygonLayer extends Layer {
 
         if (attributeOverride) {
           const newAttribute = Object.assign({}, attribute, attributeOverride);
-
-          // Hack: elevations is ignored when not extruded
-          // TODO/xiaoji: replace with generic vertex
-          newAttribute.instanced |= !this.props.extruded && attributeName === 'elevations';
           newAttributes[attributeOverride.name || attributeName] = newAttribute;
         }
       }
@@ -348,17 +344,15 @@ export default class SolidPolygonLayer extends Layer {
           geometry: new Geometry({
             drawMode: GL.TRIANGLES,
             attributes: {
-              vertexPositions: {size: 2, instanced: 1, value: new Float32Array([0, 1])},
-              nextPositions: {size: 3, instanced: 1, value: new Float32Array(3)},
-              nextPositions64xyLow: {size: 2, instanced: 1, value: new Float32Array(2)}
+              vertexPositions: {size: 2, instanced: 1, value: new Float32Array([0, 1]), isGeneric: true},
+              nextPositions: {size: 3, instanced: 1, value: new Float32Array(3), isGeneric: true},
+              nextPositions64xyLow: {size: 2, instanced: 1, value: new Float32Array(2), isGeneric: true}
             }
           }),
           uniforms: {
             isSideVertex: 0
           },
-          instanceCount: 1,
           vertexCount: 0,
-          isInstanced: true,
           isIndexed: true,
           shaderCache: this.context.shaderCache
         })
@@ -436,10 +430,12 @@ export default class SolidPolygonLayer extends Layer {
 
   calculateElevations(attribute) {
     if (this.props.extruded) {
+      attribute.isGeneric = false;
       attribute.value = this.state.polygonTesselator.elevations({
         getElevation: polygonIndex => this.props.getElevation(this.props.data[polygonIndex])
       });
     } else {
+      attribute.isGeneric = true;
       attribute.value = new Float32Array(1);
     }
   }
