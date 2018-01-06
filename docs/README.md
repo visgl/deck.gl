@@ -4,16 +4,13 @@
     <img src="https://img.shields.io/badge/deck.gl-v5.0-brightgreen.svg?style=flat-square" />
   </a>
   Looking for an old version?
-  <a href="https://github.com/uber/deck.gl/blob/4.2-release/docs/README.md">
-    <img src="https://img.shields.io/badge/deck.gl-v4.2-green.svg?style=flat-square" />
-  </a>
-  <a href="https://github.com/uber/deck.gl/blob/5.0-release/docs/README.md">
+  <a href="https://github.com/uber/deck.gl/blob/4.1-release/docs/README.md">
     <img src="https://img.shields.io/badge/deck.gl-v4.1-green.svg?style=flat-square" />
   </a>
   <a href="https://github.com/uber/deck.gl/blob/4.0-release/docs/README.md">
     <img src="https://img.shields.io/badge/deck.gl-v4.0-green.svg?style=flat-square" />
   </a>
-  <a href="https://github.com/uber/deck.gl/tree/3.0-release/docs">
+  <a href="https://github.com/uber/deck.gl/tree/3.0-release/docs/README.md">
     <img src="https://img.shields.io/badge/deck.gl-v3.0-green.svg?style=flat-square" />
   </a>
 </p>
@@ -35,7 +32,7 @@ To make this simple concept work, deck.gl handles a number of challenges:
 
 ## Ecosystem
 
-deck.gl is one of the main frameworks in the [vis.gl](https://vis.gl) framework suite.
+deck.gl is one of the main frameworks in the [vis.gl](http://vis.gl) framework suite.
 
 deck.gl has been developed in parallel with a number of companion modules, e.g.:
 
@@ -63,4 +60,4 @@ There is an impressive amount of information (documentation, blog posts, educati
 
 This is only needed if you want to create custom layers in deck.gl. Note that while trying out a new ambitious rendering approach for a new layer will likely require deeper knowledge, it is often possible to modify or extend existing deck.gl layers (including modifying the shader code) with a surprisingly limited amount of WebGL knowledge.
 
-There are many web resources for learning WebGL. [luma.gl](https://uber.github.io/luma.gl/#/)can be a good start.
+There are many web resources for learning WebGL. [luma.gl](https://uber.github.io/luma.gl/#/) can be a good start.

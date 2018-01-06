@@ -33,7 +33,7 @@ const App = ({data, viewport}) => {
 
 ## Properties
 
-Inherits from all [Base Layer](/docs/api-reference/base-layer.md) properties.
+Inherits from all [Base Layer](/docs/api-reference/layer.md) properties.
 
 ### Render Options
 
@@ -77,5 +77,5 @@ Method called to retrieve the rgba color of each object.
 `[0, 0, 0, 255]`.
 
 ## Source
-[src/layers/core/point-cloud-layer](https://github.com/uber/deck.gl/tree/5.0-release/src/layers/core/point-cloud-layer)
+[src/core-layers/point-cloud-layer](https://github.com/uber/deck.gl/tree/5.0-release/src/core-layers/point-cloud-layer)
 

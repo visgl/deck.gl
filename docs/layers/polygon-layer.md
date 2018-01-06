@@ -57,7 +57,7 @@ otherwise will be in unit coordinates.
 
 ## Properties
 
-Inherits from all [Base Layer](/docs/api-reference/base-layer.md) properties.
+Inherits from all [Base Layer](/docs/api-reference/layer.md) properties.
 
 ### Render Options
 
@@ -205,5 +205,5 @@ Method called to get the dash array to draw each outline with. (See Path Layer)
 
 ## Source
 
-[src/layers/core/polygon-layer](https://github.com/uber/deck.gl/tree/5.0-release/src/layers/core/polygon-layer)
+[src/core-layers/polygon-layer](https://github.com/uber/deck.gl/tree/5.0-release/src/core-layers/polygon-layer)
 

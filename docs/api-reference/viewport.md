@@ -35,7 +35,7 @@ Projection Matrix Options
       * `near` (Number, optional) - Distance of near clipping plane. Default to `1`.
       * `far` (Number, optional) - Distance of far clipping plane. Default to `100`.
   - Option 2: Supply a **custom** `projectionMatrix`
-      * `props.projectionMatrix` (Array[16], optional) - Projection matrix. Defaults to identity matrix. Can be used to 
+      * `props.projectionMatrix` (Array[16], optional) - Projection matrix. Defaults to identity matrix. Can be used to
 
 Geospatial Anchor Options (Optional)
   * `latitude` (Number, optional) - Center of viewport on map (alternative to center). Default to `37`.
@@ -97,4 +97,4 @@ Note: By default, takes top-left coordinates from JavaScript mouse events.
 
 ## Source
 
-[src/viewports/viewport.js](https://github.com/uber/deck.gl/blob/5.0-release/src/viewports/viewport.js)
+[src/core/viewports/viewport.js](https://github.com/uber/deck.gl/blob/5.0-release/src/core/viewports/viewport.js)

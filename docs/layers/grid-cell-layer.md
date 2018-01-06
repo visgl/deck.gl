@@ -37,7 +37,7 @@ const App = ({data, viewport}) => {
 
 ## Properties
 
-Inherits from all [Base Layer](/docs/api-reference/base-layer.md) properties.
+Inherits from all [Base Layer](/docs/api-reference/layer.md) properties.
 
 ### Render Options
 
@@ -104,5 +104,5 @@ If the alpha is not provided, it will be set to `255`.
 
 ## Source
 
-[/src/layers/core/grid-cell-layer](https://github.com/uber/deck.gl/tree/5.0-release/src/layers/core/grid-cell-layer)
+[/src/core-layers/grid-cell-layer](https://github.com/uber/deck.gl/tree/5.0-release/src/core-layers/grid-cell-layer)
 
