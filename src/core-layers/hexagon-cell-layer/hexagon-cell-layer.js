@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 
 import {COORDINATE_SYSTEM, Layer, experimental} from '../../core';
-const {log, fp64ify, enable64bitSupport} = experimental;
+const {log, fp64LowPart, enable64bitSupport} = experimental;
 import {GL, Model, CylinderGeometry} from 'luma.gl';
 
 import vs from './hexagon-cell-layer-vertex.glsl';
@@ -242,8 +242,8 @@ export default class HexagonCellLayer extends Layer {
     let i = 0;
     for (const object of data) {
       const position = getCentroid(object);
-      value[i++] = fp64ify(position[0])[1];
-      value[i++] = fp64ify(position[1])[1];
+      value[i++] = fp64LowPart(position[0]);
+      value[i++] = fp64LowPart(position[1]);
     }
   }
 

@@ -28,6 +28,10 @@ export function fp64ify(a) {
   return [hiPart, loPart];
 }
 
+export function fp64LowPart(a) {
+  return a - Math.fround(a);
+}
+
 export function enable64bitSupport(props) {
   if (props.fp64) {
     if (props.coordinateSystem === COORDINATE_SYSTEM.LNGLAT) {

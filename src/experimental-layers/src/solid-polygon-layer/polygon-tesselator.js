@@ -25,7 +25,7 @@
 // - 3D wireframes (not yet)
 import * as Polygon from './polygon';
 import {experimental} from 'deck.gl';
-const {fillArray, fp64ify} = experimental;
+const {fillArray, fp64LowPart} = experimental;
 
 // Maybe deck.gl or luma.gl needs to export this
 function getPickingColor(index) {
@@ -201,8 +201,8 @@ function updatePositions({
       positions[i * 3 + 1] = y;
       positions[i * 3 + 2] = z;
       if (fp64) {
-        xLow = fp64ify(x)[1];
-        yLow = fp64ify(y)[1];
+        xLow = fp64LowPart(x);
+        yLow = fp64LowPart(y);
         positions64xyLow[i * 2] = xLow;
         positions64xyLow[i * 2 + 1] = yLow;
       }

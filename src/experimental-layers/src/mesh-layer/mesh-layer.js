@@ -23,7 +23,7 @@
 // THE SOFTWARE.
 
 import {Layer, COORDINATE_SYSTEM, experimental} from 'deck.gl';
-const {fp64ify, enable64bitSupport} = experimental;
+const {fp64LowPart, enable64bitSupport} = experimental;
 import {GL, Model, Geometry, loadTextures, Texture2D} from 'luma.gl';
 import assert from 'assert';
 
@@ -218,8 +218,8 @@ export default class MeshLayer extends Layer {
     let i = 0;
     for (const point of data) {
       const position = getPosition(point);
-      value[i++] = fp64ify(position[0])[1];
-      value[i++] = fp64ify(position[1])[1];
+      value[i++] = fp64LowPart(position[0]);
+      value[i++] = fp64LowPart(position[1]);
     }
   }
 
