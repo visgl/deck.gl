@@ -1,8 +1,8 @@
 # RFC: Break out Event Manager
 
-* **Author**: Ib Green & ?
+* **Author**: Ib Green & Xiaoji Chen
 * **Date**: Aug, 2017
-* **Status**: Draft
+* **Status**: **Imlemented**
 
 
 ## Motivation
