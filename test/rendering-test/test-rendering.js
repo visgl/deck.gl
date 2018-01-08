@@ -43,7 +43,7 @@ import {document} from 'global';
 import React, {Component} from 'react';
 import ReactDOM from 'react-dom';
 
-import DeckGL, {WebMercatorViewport, experimental} from 'deck.gl';
+import DeckGL, {experimental} from 'deck.gl';
 const {DeckGLJS} = experimental; // eslint-disable-line
 
 import * as CONFIG from './test-config';
@@ -141,7 +141,7 @@ class RenderingTest extends Component {
       return null;
     }
 
-    const {mapViewState, layersList, name, referenceResult, renderingTimes} = testCases[
+    const {mapViewState, viewport, layersList, name, referenceResult, renderingTimes} = testCases[
       currentTestIndex
     ];
 
@@ -167,7 +167,7 @@ class RenderingTest extends Component {
       layers,
       debug: true,
       onAfterRender: this._onDrawComplete.bind(this, name, referenceResult, completed),
-      viewport: new WebMercatorViewport(viewportProps)
+      viewport: new viewport(viewportProps) // eslint-disable-line
     });
   }
 }
