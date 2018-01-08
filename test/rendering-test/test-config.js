@@ -1,8 +1,8 @@
 import dataSamples from '../../examples/layer-browser/src/immutable-data-samples';
 import {parseColor, setOpacity} from '../../examples/layer-browser/src/utils/color';
-import {experimental} from 'deck.gl';
+import {experimental, WebMercatorViewport} from 'deck.gl';
 import {GL} from 'luma.gl';
-const {get} = experimental;
+const {get, OrbitViewport} = experimental;
 
 import {
   MeshLayer,
@@ -95,6 +95,7 @@ export const TEST_CASES = [
       pitch: 0,
       bearing: 0
     },
+    viewport: WebMercatorViewport,
     // layer list
     layersList: [
       {
@@ -128,6 +129,7 @@ export const TEST_CASES = [
       pitch: 0,
       bearing: 0
     },
+    viewport: WebMercatorViewport,
     // layer list
     layersList: [
       {
@@ -156,6 +158,7 @@ export const TEST_CASES = [
       pitch: 0,
       bearing: 0
     },
+    viewport: WebMercatorViewport,
     // layer list
     layersList: [
       {
@@ -186,6 +189,7 @@ export const TEST_CASES = [
       pitch: 0,
       bearing: 0
     },
+    viewport: WebMercatorViewport,
     // layer list
     layersList: [
       {
@@ -213,6 +217,7 @@ export const TEST_CASES = [
       pitch: 0,
       bearing: 0
     },
+    viewport: WebMercatorViewport,
     // layer list
     layersList: [
       {
@@ -239,6 +244,7 @@ export const TEST_CASES = [
       pitch: 0,
       bearing: 0
     },
+    viewport: WebMercatorViewport,
     // rendering times
     renderingTimes: 2,
     // layer list
@@ -272,6 +278,7 @@ export const TEST_CASES = [
       pitch: 0,
       bearing: 0
     },
+    viewport: WebMercatorViewport,
     // layer list
     layersList: [
       {
@@ -312,6 +319,7 @@ export const TEST_CASES = [
       pitch: 0,
       bearing: 0
     },
+    viewport: WebMercatorViewport,
     // layer list
     layersList: [
       {
@@ -341,6 +349,7 @@ export const TEST_CASES = [
       pitch: 0,
       bearing: 0
     },
+    viewport: WebMercatorViewport,
     // layer list
     layersList: [
       {
@@ -370,6 +379,7 @@ export const TEST_CASES = [
       pitch: 0,
       bearing: 0
     },
+    viewport: WebMercatorViewport,
     // layer list
     layersList: [
       {
@@ -400,6 +410,7 @@ export const TEST_CASES = [
       pitch: 0,
       bearing: 0
     },
+    viewport: WebMercatorViewport,
     // layer list
     layersList: [
       {
@@ -427,6 +438,7 @@ export const TEST_CASES = [
       pitch: 0,
       bearing: 0
     },
+    viewport: WebMercatorViewport,
     // layer list
     layersList: [
       {
@@ -457,6 +469,7 @@ export const TEST_CASES = [
       pitch: 0,
       bearing: 0
     },
+    viewport: WebMercatorViewport,
     // layer list
     layersList: [
       {
@@ -490,6 +503,7 @@ export const TEST_CASES = [
       pitch: 0,
       bearing: 0
     },
+    viewport: WebMercatorViewport,
     // layer list
     layersList: [
       {
@@ -521,6 +535,7 @@ export const TEST_CASES = [
       pitch: 0,
       bearing: 0
     },
+    viewport: WebMercatorViewport,
     // layer list
     layersList: [
       {
@@ -552,6 +567,7 @@ export const TEST_CASES = [
       pitch: 0,
       bearing: 0
     },
+    viewport: WebMercatorViewport,
     // layer list
     layersList: [
       {
@@ -588,6 +604,7 @@ export const TEST_CASES = [
       pitch: 0,
       bearing: 0
     },
+    viewport: WebMercatorViewport,
     // layer list
     layersList: [
       {
@@ -612,6 +629,7 @@ export const TEST_CASES = [
       pitch: 0,
       bearing: 0
     },
+    viewport: WebMercatorViewport,
     // layer list
     layersList: [
       {
@@ -648,6 +666,7 @@ export const TEST_CASES = [
       pitch: 0,
       bearing: 0
     },
+    viewport: WebMercatorViewport,
     // layer list
     layersList: [
       {
@@ -685,6 +704,7 @@ export const TEST_CASES = [
       pitch: 0,
       bearing: 0
     },
+    viewport: WebMercatorViewport,
     // layer list
     layersList: [
       {
@@ -705,5 +725,36 @@ export const TEST_CASES = [
       }
     ],
     referenceResult: './golden-images/text-layer.png'
+  },
+  {
+    name: 'pointcloud-identity',
+    // viewport params
+    mapViewState: {
+      lookAt: [0, 0, 0],
+      distance: 1,
+      rotationX: 15,
+      rotationOrbit: 30,
+      orbitAxis: 'Y',
+      fov: 30,
+      near: 0.001,
+      far: 100
+    },
+    viewport: OrbitViewport,
+    // layer list
+    layersList: [
+      {
+        type: PointCloudLayer,
+        props: {
+          id: 'pointcloud-identity',
+          data: [{position: [0, 0.2, 0]}, {position: [-0.2, -0.2, 0]}, {position: [0.2, -0.2, 0]}],
+          coordinateSystem: COORDINATE_SYSTEM.IDENTITY,
+          getPosition: d => d.position,
+          getNormal: d => [0, 0.5, 0.2],
+          getColor: d => [255, 255, 0, 128],
+          radiusPixels: 100
+        }
+      }
+    ],
+    referenceResult: './golden-images/pointcloud-identity.png'
   }
 ];
