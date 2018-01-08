@@ -1,3 +1,9 @@
+0.0.20
+- Make deck.gl into peerDependency
+0.0.19
+- Remove viewportSize in multi-icon-layer's shader and fix getText (#1285)
+0.0.18
+- TextLayer fixes
 0.0.17
 - Bump deck.gl to 5.0.0
 0.0.16
