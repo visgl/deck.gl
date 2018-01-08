@@ -20,7 +20,7 @@
 
 import * as Polygon from './polygon';
 import {experimental} from '../../core';
-const {fp64ify, fillArray} = experimental;
+const {fp64LowPart, fillArray} = experimental;
 import earcut from 'earcut';
 
 function getPickingColor(index) {
@@ -185,8 +185,8 @@ function calculatePositions(positionsJS, fp64) {
     const vertexCount = positionsJS.length / 3;
     positionLow = new Float32Array(vertexCount * 2);
     for (let i = 0; i < vertexCount; i++) {
-      positionLow[i * 2 + 0] = fp64ify(positionsJS[i * 3 + 0])[1];
-      positionLow[i * 2 + 1] = fp64ify(positionsJS[i * 3 + 1])[1];
+      positionLow[i * 2 + 0] = fp64LowPart(positionsJS[i * 3 + 0]);
+      positionLow[i * 2 + 1] = fp64LowPart(positionsJS[i * 3 + 1]);
     }
   }
   return {positions: positionsJS, positions64xyLow: positionLow};
