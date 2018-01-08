@@ -129,7 +129,8 @@ const {
   fillArray,
 
   enable64bitSupport,
-  fp64ify
+  fp64ify,
+  fp64LowPart
 } = CoreExperimental;
 
 Object.assign(experimental, {
@@ -157,7 +158,8 @@ Object.assign(experimental, {
   fillArray,
 
   enable64bitSupport,
-  fp64ify
+  fp64ify,
+  fp64LowPart
 });
 
 //
