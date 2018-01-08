@@ -2,7 +2,7 @@
 
 * **Authors**: Ravi Akkenapally and Ib Green
 * **Date**: August 9, 2017
-* **Status**: **Approved and Implementd**
+* **Status**: **Implemented**
 
 Notes:
 * Please add comments as reviews to the [PR](https://github.com/uber/deck.gl/pull/839)

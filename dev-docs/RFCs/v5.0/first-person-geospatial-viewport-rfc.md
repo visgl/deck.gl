@@ -1,15 +1,22 @@
-# RFC - First Person Viewport
+# RFC - First Person Geospatial Viewport
 
 * **Author**: Ib Green
 * **Date**: August 10, 2017
-* **Status**: **Pre-Approved**
-
-Notes:
-* Please add comments as reviews to the [PR](https://github.com/uber/deck.gl/pull/838)
+* **Status**: **Implemented**
 
 References:
-* Controller Changes [Controller Architecture RFC](./controller-architecture-rfc.md)
 * The initial [Infovis Viewport RFC](../v4.0/non-geospatial-viewports-rfc.md) for deck.gl v4.
+* Controller Changes [Controller Architecture RFC](./controller-architecture-rfc.md)
+* Initial review in [PR](https://github.com/uber/deck.gl/pull/838)
+
+
+## Overview
+
+This RFC proposes:
+* An "extended" Viewport hierarchy that adds subclasses based on "differences in view matrix" in addition to differences in projection matrix.
+* The new hierarchy includes a "FirstPersonViewport" class that allows the application to specify eye position directly.
+* All Viewports are "geospatially enabled", i.e. they can take a lng/lat anchor in addition to their normal coordinates.
+* Viewports support the same options as layers, including model matrices so that apps can use their data coordinates to place FirstPersonViewports.
 
 
 ## Motivation
@@ -36,10 +43,9 @@ However, to synchronize our 3D data with external perspective-enabled map system
 The map system typically locks in FoV (Field of view), viewing angle (always pitched downward) and altitude (camera height over the “ground”).
 When rendering 3D environments on top of pre-rendered video (e.g. overlaying perception data on top of vehicle log cameras)
 
-Note: There are subtleties around the positioning of the camera which is handled in the next proposal.
+## Proposed Features
 
-
-## Proposal Part 1: Geospatially Enable all Viewports
+### Proposed: Geospatially Enable all Viewports
 
 In deck.gl 4.1 only the WebMercatorViewport can handle layers with geospatial coordinates: it is the only viewport that can produce the uniforms required by the project module. But moving some properties from the `WebMercatorViewport` class into the base viewport, it is possible to extend cartographic projection to all viewpott.
 
@@ -47,8 +53,10 @@ The key insight is that through the addition of the "meters mode", we have alrea
 
 While METER_OFFSETS mode was initially introduced to solve a narrow use-case, the technique is actually very general, and there is no reason why we would not support geospatial anchoring and linear coordinates for all viewports (in addition to layers), including first person and orbit (i.e. third person) viewports.
 
+Note: There are subtleties around the positioning of the camera which is handled in the next proposal.
 
-## Proposal Part 2: An Alternative Viewport Hierarchy
+
+### Proposed: An Alternative Viewport Hierarchy
 
 In deck.gl v4.0, a viewport class hierarchy was introduced to support non-geospatial viewports. It separates between `Perspective` and `Orthographic` cameras (inspired by common WebGL frameworks).
 
@@ -59,12 +67,11 @@ As an alternative to the `Perspective`/`Orthographic` camera class, this RFC rec
 Also, since the majority viewports will be used with a perspective projection matrix, if the `projectionMatrix` prop is not supplied, `Viewport` will try to create a perspective projection matrix using new `fov`, `near` and `far` props (note that `aspect` is automatically calculated from `width` and `height`).
 
 
-## Summary of Proposed Changes
+## Proposed API Changes
 
-### Viewport
+### New `Viewport` Properties and Methods
 
 New properties:
-
 - `longitude` - (optional) anchor
 - `latitude` - (optional) anchor
 - `zoom` scale - This will be hardcoded to meter = unity scale by `FirstPersonViewport`
@@ -76,27 +83,25 @@ New properties:
 - `far`
 
 New Methods:
-
 * `Viewport.isGeospatial()` can be called to check if a viewport is geospatially "enabled". If longitude, latitude and zoom  are supplied to a viewport, then that viewport is considered geospatial.
 * `Viewport.isMapSynched()` offers an easy way for the app to determine if a base map can be displayed under the viewport.
 * `Viewport.getMercatorParameters()` offers a way to get map props that include offsets etc.
-
 
 Remarks:
 * `modelMatrix` - A convenience to make the viewport API more similar to the `Layer` props. When positioning the camera in a scene with `Layer`s using a certain `modelMatrix` it is nice to be able to use the same coordinates and the same `modelMatrix` with the viewport.
 * `projectionMatrix` - When supplied, the projectionMatrix parameter allows for complete application control of all **projection** matrix parameters - including field-of-view, near/far clipping planes, aspect ratios etc, e.g. using `new Matrix4().projection(...)` or `new Matrix4().ortho(...)` etc..
 
 
-### FirstPersonViewport
+### Proposed: New `FirstPersonViewport` Class
 
 Extends `Viewport`. Creates a `Viewport` with a view matrix that is placed in the player's position, with a controllable direction and orientation:
 - `direction` (`Vector3`) - player direction
 - `up` (`Vector3`, `[0, 0, 1]`): specifies the camera up direction
 
 
-### ThirdPersonViewport
+### Proposed: New `ThirdPersonViewport` Class
 
-This prototyping behind this proposal has so far not focused on `ThirdPersonViewport`. It is expected to extend `Viewport`, possibly with props such as:
+`ThirdPersonViewport` is expected to extend `Viewport`, possibly with props such as:
 - player `direction`
 - camera `direction`, relative to player direction (additive to player `direction`)
 - camera `distance,` from player
@@ -106,7 +111,7 @@ The idea here with two directions being that one might want a third person camer
 See comments under `OrbitViewport` below.
 
 
-### WebMercatorViewport
+### Proposed: `WebMercatorViewport` Changes
 
 Creates a viewport with a special perspective projection matrix with a FOV that works with mapbox-gl, and a view matrix that follows mapbox-gl's undocumented internal bearing/pitch/altitude conventions.
 
@@ -122,9 +127,9 @@ inherits from `Viewport`, setting parameters as follows
 
 `isMapSynched()` would return false for a `Viewport` (Note: not a `Layer`):
     * If `position` is specified
-    * If `modelMatrix is specified
-    * If `altitude is !== 0.5
-    * If `pitch > 60 degrees
+    * If `modelMatrix` is specified
+    * If `altitude` is !== 0.5
+    * If `pitch` > 60 degrees
 
 We could also check zoom levels etc, potentially moving all mapbox limit checks into the `WebMercatorViewport` viewport.
 
