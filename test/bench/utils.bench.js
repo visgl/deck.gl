@@ -22,7 +22,7 @@
 
 import {experimental} from 'deck.gl';
 
-const {get} = experimental;
+const {get, fp64ify, fp64LowPart} = experimental;
 
 const POSITION = [-122.4, 37.8, 0];
 
@@ -36,5 +36,11 @@ export default function utilsBench(suite) {
     })
     .add('direct access#Array', () => {
       return POSITION[0];
+    })
+    .add('fp64#fp64ify.lowPart', () => {
+      return fp64ify(Math.PI)[1];
+    })
+    .add('fp64#fp64LowPart', () => {
+      return fp64LowPart(Math.PI);
     });
 }

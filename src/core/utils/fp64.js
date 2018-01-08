@@ -22,6 +22,11 @@
 import log from './log';
 import {COORDINATE_SYSTEM} from '../lib/constants'; // TODO - utils should not import from lib
 
+/*
+ * Frequently used small math utils: bundlers, especially webpack,
+ * adds a thunk around every exported function that adds enough overhead to pull down performance.
+ * It may be worth it to also export these as part of an object.
+ */
 export function fp64ify(a) {
   const hiPart = Math.fround(a);
   const loPart = a - Math.fround(a);
