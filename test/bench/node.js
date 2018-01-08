@@ -32,11 +32,12 @@ const path = require('path');
 const moduleAlias = require('module-alias');
 moduleAlias.addAlias('deck.gl/test', path.resolve('./test'));
 moduleAlias.addAlias('deck.gl', path.resolve('./src'));
+moduleAlias.addAlias('@deck.gl/test-utils', path.resolve('./src/test-utils/src'));
 
 require('babel-polyfill');
 
 // Import headless luma support
 require('luma.gl/headless');
 
-require('../test-utils/setup-gl');
+require('@deck.gl/test-utils/setup-gl');
 require('./index');
