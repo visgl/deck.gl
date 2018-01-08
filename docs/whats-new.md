@@ -62,6 +62,7 @@ Note: This change is mainly relevant to developers who write custom deck.gl laye
 
 As usual, deck.gl 5.0 contains a number of experimental features, e.g. "multi viewport", "first person viewport" and "viewport transitions". These features are still being finalized and the APIs have not been frozen, but can still be accessed by early adopters. See the roadmap article for more information on these.
 
+TODO: attribute transition
 
 # deck.gl v4.1
 
