@@ -58,6 +58,10 @@ Takes a single parameter as a map of attribute descriptor objects:
   * `attribute.update` (Function) - the function to be called when
   * `attribute.instanced` (Boolean, optional) - if this is an instanced attribute
     (a.k.a. divisor). Default to `false`.
+  * `attribute.isIndexed` (Boolean, optional) - if this is an index attribute
+    (a.k.a. indices). Default to `false`.
+  * `attribute.isGeneric` (Boolean, optional) - if this is a generic attribute
+    (same value applied to every vertex). Default to `false`.
   * `attribute.noAlloc` (Boolean, optional) - if this attribute should not be
     automatically allocated. Default to `false`.
 
