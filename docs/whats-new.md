@@ -63,6 +63,11 @@ Note: This change is mainly relevant to developers who write custom deck.gl laye
 * The core deck.gl shader modules (`project` etc) now conform to the luma.gl shadertools conventions for naming uniforms and functions, making this module easier to describe and use. In spite of these changes, backwards compatible uniforms are provided to ensure that existing layers do not break.
 
 
+## React 16 Support
+
+deck.gl v5 now supports React 16 and the `package.json` dependencies of all React-based examples have updated to React 16.
+
+
 ## Experimental Features
 
 As usual, deck.gl 5.0 contains a number of experimental features, e.g. "multi viewport", "first person viewport" and "viewport transitions". These features are still being finalized and the APIs have not been frozen, but can still be accessed by early adopters. See the roadmap article for more information on these.
