@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 import {COORDINATE_SYSTEM, Layer, experimental} from '../../core';
-const {fp64ify, enable64bitSupport} = experimental;
+const {fp64LowPart, enable64bitSupport} = experimental;
 import {GL, Model, Geometry, Texture2D, loadTextures} from 'luma.gl';
 
 import vs from './icon-layer-vertex.glsl';
@@ -225,8 +225,8 @@ export default class IconLayer extends Layer {
     let i = 0;
     for (const point of data) {
       const position = getPosition(point);
-      value[i++] = fp64ify(position[0])[1];
-      value[i++] = fp64ify(position[1])[1];
+      value[i++] = fp64LowPart(position[0]);
+      value[i++] = fp64LowPart(position[1]);
     }
   }
 

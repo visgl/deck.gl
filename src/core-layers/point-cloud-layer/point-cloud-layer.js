@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 
 import {COORDINATE_SYSTEM, Layer, experimental} from '../../core';
-const {fp64ify, enable64bitSupport} = experimental;
+const {fp64LowPart, enable64bitSupport} = experimental;
 import {GL, Model, Geometry} from 'luma.gl';
 
 import vs from './point-cloud-layer-vertex.glsl';
@@ -165,8 +165,8 @@ export default class PointCloudLayer extends Layer {
     let i = 0;
     for (const point of data) {
       const position = getPosition(point);
-      value[i++] = fp64ify(position[0])[1];
-      value[i++] = fp64ify(position[1])[1];
+      value[i++] = fp64LowPart(position[0]);
+      value[i++] = fp64LowPart(position[1]);
     }
   }
 

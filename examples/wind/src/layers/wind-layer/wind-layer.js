@@ -11,6 +11,8 @@ import {
 import vertex from './wind-layer-vertex';
 import fragment from './wind-layer-fragment';
 
+import fslighting from '../../shaderlib/fs-lighting/fs-lighting';
+
 const defaultProps = {
   bbox: null,
   dataBounds: null,
@@ -166,7 +168,7 @@ export default class WindLayer extends Layer {
     return new Model(gl, {
       vs: vertex,
       fs: fragment,
-      modules: ['project'],
+      modules: [fslighting],
       isIndexed: false,
       isInstanced: true,
       geometry

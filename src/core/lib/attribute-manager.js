@@ -402,6 +402,7 @@ export default class AttributeManager {
 
       const attribute = attributes[attributeName];
 
+      const isGeneric = attribute.isGeneric || false;
       const isIndexed = attribute.isIndexed || attribute.elements;
       const size = (attribute.elements && 1) || attribute.size;
       const value = attribute.value || null;
@@ -423,6 +424,7 @@ export default class AttributeManager {
           changed: false,
 
           // Luma fields
+          isGeneric,
           isIndexed,
           size,
           value

@@ -199,6 +199,6 @@ This callback will be called when bin color domain has been calculated.
 This callback will be called when bin elevation domain has been calculated.
 
 ## Source
-[src/layers/core/grid-layer](https://github.com/uber/deck.gl/tree/5.0-release/src/layers/core/grid-layer)
+[src/core-layers/grid-layer](https://github.com/uber/deck.gl/tree/5.0-release/src/core-layers/grid-layer)
 
 

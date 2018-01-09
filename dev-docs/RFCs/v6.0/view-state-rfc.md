@@ -1,13 +1,24 @@
-# RFC: Controller Architecture
+# RFC: View State RFC
 
 * **Authors**: Ib Green, ...
 * **Date**: Sep 2017
 * **Status**: Placeholder
 
+Notes:
+* This is a highly controversial RFC, not yet clear that there would be a consensus for such a major API change
 
 ## Motivation
 
-Enabling applications to easily compose and switch between multiple viewports and multiple controllers.
+Enabling applications to easily compose, and switch between, multiple viewports and multiple controllers by making them allow work on a common view state representation.
+
+## Terminology
+
+Discussions around this RFC have been challenged by a confusion around the concepts involved so a brief terminology has been added.
+
+* **View state** - In this discussion, a "view state" is a (currently controller specific) "bundle" or set of parameters that describe the current viewpoint for a specific controller/view pair. It can be lng/lat/etc for a web mercator viewport, or rotationX/rotationY/etc for an orbit controller.
+
+* **ViewState class** - The `ViewState` class is a proposed class that unifies storage of a set of view state parameters so that all controllers and viewports can be used together.
+
 
 ## Idea
 

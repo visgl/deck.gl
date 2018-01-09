@@ -26,7 +26,7 @@
 import * as Polygon from './polygon';
 import earcut from 'earcut';
 import {experimental} from '../../core';
-const {fp64ify, flattenVertices, fillArray} = experimental;
+const {fp64LowPart, flattenVertices, fillArray} = experimental;
 
 // Maybe deck.gl or luma.gl needs to export this
 function getPickingColor(index) {
@@ -178,8 +178,8 @@ function calculatePositions({polygons, pointCount, fp64}) {
       attribute[i++] = y;
       attribute[i++] = z;
       if (fp64) {
-        attributeLow[j++] = fp64ify(x)[1];
-        attributeLow[j++] = fp64ify(y)[1];
+        attributeLow[j++] = fp64LowPart(x);
+        attributeLow[j++] = fp64LowPart(y);
       }
     });
   }

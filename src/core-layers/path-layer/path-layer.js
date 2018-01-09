@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 
 import {COORDINATE_SYSTEM, Layer, experimental} from '../../core';
-const {fp64ify, enable64bitSupport} = experimental;
+const {fp64LowPart, enable64bitSupport} = experimental;
 import {GL, Model, Geometry} from 'luma.gl';
 
 import vs from './path-layer-vertex.glsl';
@@ -269,10 +269,10 @@ export default class PathLayer extends Layer {
       for (let ptIndex = 0; ptIndex < numSegments; ptIndex++) {
         const startPoint = path[ptIndex];
         const endPoint = path[ptIndex + 1];
-        value[i++] = fp64ify(startPoint[0])[1];
-        value[i++] = fp64ify(startPoint[1])[1];
-        value[i++] = fp64ify(endPoint[0])[1];
-        value[i++] = fp64ify(endPoint[1])[1];
+        value[i++] = fp64LowPart(startPoint[0]);
+        value[i++] = fp64LowPart(startPoint[1]);
+        value[i++] = fp64LowPart(endPoint[0]);
+        value[i++] = fp64LowPart(endPoint[1]);
       }
     });
   }

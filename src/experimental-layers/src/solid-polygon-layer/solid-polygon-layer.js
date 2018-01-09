@@ -95,30 +95,30 @@ const SIDE_WIRE_POSITIONS = new Float32Array([
 // Model types
 const ATTRIBUTE_MAPS = {
   TOP: {
-    indices: {instanced: false},
-    positions: {instanced: false},
-    positions64xyLow: {instanced: false},
-    elevations: {instanced: false},
-    fillColors: {name: 'colors', instanced: false},
-    pickingColors: {instanced: false}
+    indices: {instanced: 0},
+    positions: {instanced: 0},
+    positions64xyLow: {instanced: 0},
+    elevations: {instanced: 0},
+    fillColors: {name: 'colors', instanced: 0},
+    pickingColors: {instanced: 0}
   },
   SIDE: {
-    positions: {instanced: true},
-    positions64xyLow: {instanced: true},
-    nextPositions: {instanced: true},
-    nextPositions64xyLow: {instanced: true},
-    elevations: {instanced: true},
-    fillColors: {name: 'colors', instanced: true},
-    pickingColors: {instanced: true}
+    positions: {instanced: 1},
+    positions64xyLow: {instanced: 1},
+    nextPositions: {instanced: 1},
+    nextPositions64xyLow: {instanced: 1},
+    elevations: {instanced: 1},
+    fillColors: {name: 'colors', instanced: 1},
+    pickingColors: {instanced: 1}
   },
   WIRE: {
-    positions: {instanced: true},
-    positions64xyLow: {instanced: true},
-    nextPositions: {instanced: true},
-    nextPositions64xyLow: {instanced: true},
-    elevations: {instanced: true},
-    lineColors: {name: 'colors', instanced: true},
-    pickingColors: {instanced: true}
+    positions: {instanced: 1},
+    positions64xyLow: {instanced: 1},
+    nextPositions: {instanced: 1},
+    nextPositions64xyLow: {instanced: 1},
+    elevations: {instanced: 1},
+    lineColors: {name: 'colors', instanced: 1},
+    pickingColors: {instanced: 1}
   }
 };
 
@@ -324,10 +324,6 @@ export default class SolidPolygonLayer extends Layer {
 
         if (attributeOverride) {
           const newAttribute = Object.assign({}, attribute, attributeOverride);
-
-          // Hack: elevations is ignored when not extruded
-          // TODO/xiaoji: replace with generic vertex
-          newAttribute.instanced |= !this.props.extruded && attributeName === 'elevations';
           newAttributes[attributeOverride.name || attributeName] = newAttribute;
         }
       }
@@ -348,17 +344,15 @@ export default class SolidPolygonLayer extends Layer {
           geometry: new Geometry({
             drawMode: GL.TRIANGLES,
             attributes: {
-              vertexPositions: {size: 2, instanced: 1, value: new Float32Array([0, 1])},
-              nextPositions: {size: 3, instanced: 1, value: new Float32Array(3)},
-              nextPositions64xyLow: {size: 2, instanced: 1, value: new Float32Array(2)}
+              vertexPositions: {size: 2, isGeneric: true, value: new Float32Array([0, 1])},
+              nextPositions: {size: 3, isGeneric: true, value: new Float32Array(3)},
+              nextPositions64xyLow: {size: 2, isGeneric: true, value: new Float32Array(2)}
             }
           }),
           uniforms: {
             isSideVertex: 0
           },
-          instanceCount: 1,
           vertexCount: 0,
-          isInstanced: true,
           isIndexed: true,
           shaderCache: this.context.shaderCache
         })
@@ -379,7 +373,7 @@ export default class SolidPolygonLayer extends Layer {
           uniforms: {
             isSideVertex: 1
           },
-          isInstanced: true,
+          isinstanced: 1,
           shaderCache: this.context.shaderCache
         })
       );
@@ -399,7 +393,7 @@ export default class SolidPolygonLayer extends Layer {
           uniforms: {
             isSideVertex: 1
           },
-          isInstanced: true,
+          isinstanced: 1,
           shaderCache: this.context.shaderCache
         })
       );
@@ -436,10 +430,12 @@ export default class SolidPolygonLayer extends Layer {
 
   calculateElevations(attribute) {
     if (this.props.extruded) {
+      attribute.isGeneric = false;
       attribute.value = this.state.polygonTesselator.elevations({
         getElevation: polygonIndex => this.props.getElevation(this.props.data[polygonIndex])
       });
     } else {
+      attribute.isGeneric = true;
       attribute.value = new Float32Array(1);
     }
   }

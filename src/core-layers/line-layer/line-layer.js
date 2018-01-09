@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 
 import {COORDINATE_SYSTEM, Layer, experimental} from '../../core';
-const {fp64ify, enable64bitSupport} = experimental;
+const {fp64LowPart, enable64bitSupport} = experimental;
 import {GL, Model, Geometry} from 'luma.gl';
 
 import vs from './line-layer-vertex.glsl';
@@ -170,10 +170,10 @@ export default class LineLayer extends Layer {
     for (const object of data) {
       const sourcePosition = getSourcePosition(object);
       const targetPosition = getTargetPosition(object);
-      value[i + 0] = fp64ify(sourcePosition[0])[1];
-      value[i + 1] = fp64ify(sourcePosition[1])[1];
-      value[i + 2] = fp64ify(targetPosition[0])[1];
-      value[i + 3] = fp64ify(targetPosition[1])[1];
+      value[i + 0] = fp64LowPart(sourcePosition[0]);
+      value[i + 1] = fp64LowPart(sourcePosition[1]);
+      value[i + 2] = fp64LowPart(targetPosition[0]);
+      value[i + 3] = fp64LowPart(targetPosition[1]);
       i += size;
     }
   }

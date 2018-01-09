@@ -36,7 +36,11 @@ export {
   Viewport,
   WebMercatorViewport,
   PerspectiveViewport,
-  OrthographicViewport
+  OrthographicViewport,
+  // Shader modules
+  project,
+  project64,
+  lighting
 } from './core';
 
 // EXPERIMENTAL CORE LIB CLASSES (May change in minor version bumps, use at your own risk)
@@ -125,7 +129,8 @@ const {
   fillArray,
 
   enable64bitSupport,
-  fp64ify
+  fp64ify,
+  fp64LowPart
 } = CoreExperimental;
 
 Object.assign(experimental, {
@@ -153,7 +158,8 @@ Object.assign(experimental, {
   fillArray,
 
   enable64bitSupport,
-  fp64ify
+  fp64ify,
+  fp64LowPart
 });
 
 //

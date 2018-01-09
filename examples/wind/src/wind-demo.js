@@ -2,7 +2,7 @@
 import React, {Component} from 'react';
 import DeckGL, {ScatterplotLayer} from 'deck.gl';
 import PropTypes from 'prop-types';
-import {isWebGL2} from 'luma.gl';
+import {isWebGL2, registerShaderModules} from 'luma.gl';
 
 import WindLayer from './layers/wind-layer/wind-layer';
 import DelaunayCoverLayer from './layers/delaunay-cover-layer/delaunay-cover-layer';
@@ -11,6 +11,12 @@ import ParticleLayer from './layers/particle-layer/particle-layer';
 import {loadData} from './utils/load-data';
 
 import TWEEN from 'tween.js';
+
+import fsfp32 from './shaderlib/fs-fp32/fs-fp32';
+import fsproject from './shaderlib/fs-project/fs-project';
+import fslighting from './shaderlib/fs-lighting/fs-lighting';
+
+registerShaderModules([fsfp32, fsproject, fslighting]);
 
 const propTypes = {
   viewport: PropTypes.object.isRequired,

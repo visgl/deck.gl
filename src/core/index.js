@@ -38,6 +38,11 @@ export {default as WebMercatorViewport} from './viewports/web-mercator-viewport'
 export {default as PerspectiveViewport} from './viewports/perspective-viewport';
 export {default as OrthographicViewport} from './viewports/orthographic-viewport';
 
+// Shader modules
+export {default as project} from './shaderlib/project/project';
+export {default as project64} from './shaderlib/project64/project64';
+export {default as lighting} from './shaderlib/lighting/lighting';
+
 // EXPERIMENTAL EXPORTS
 // Experimental Features (May change in minor version bumps, use at your own risk)
 
@@ -87,7 +92,7 @@ import {clamp} from './utils/scale-utils';
 import {flatten, countVertices, flattenVertices, fillArray} from './utils/flatten';
 // TODO - just expose as layer methods instead?
 import {enable64bitSupport} from './utils/fp64';
-import {fp64ify} from './utils/fp64';
+import {fp64ify, fp64LowPart} from './utils/fp64';
 
 export const experimental = {
   ViewportControls: Controller,
@@ -140,5 +145,6 @@ export const experimental = {
   fillArray,
 
   enable64bitSupport,
-  fp64ify
+  fp64ify,
+  fp64LowPart
 };
