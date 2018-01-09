@@ -6,8 +6,8 @@
   "dependencies": {
     "deck.gl": "^5.0.0",
     "luma.gl": "^5.0.0",
-    "react": "^15.4.1",
-    "react-dom": "^15.4.1",
+    "react": "^16.0.0",
+    "react-dom": "^16.0.0",
     "react-map-gl": "^3.0.0"
   },
   "devDependencies": {
