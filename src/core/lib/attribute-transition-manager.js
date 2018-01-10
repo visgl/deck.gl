@@ -1,13 +1,7 @@
-import {GL, Program, Model, Geometry, Buffer, TransformFeedback} from 'luma.gl';
+import {GL, Buffer, TransformFeedback} from 'luma.gl';
+import AttributeTransitionModel from './attribute-transition-model';
 import log from '../utils/log';
 import assert from 'assert';
-
-const ATTRIBUTE_MAPPING = {
-  1: 'float',
-  2: 'vec2',
-  3: 'vec3',
-  4: 'vec4'
-};
 
 const TRANSITION_STATE = {
   NONE: 0,
@@ -39,7 +33,7 @@ export default class AttributeTransitionManager {
   /* Public methods */
 
   // Called when attribute manager updates
-  // Extracts the list of attributes that need transition
+  // Check the latest attributes for updates.
   update(attributes, opts = {}) {
     this.opts = opts;
 
@@ -47,10 +41,37 @@ export default class AttributeTransitionManager {
       return;
     }
 
-    const needsNewModel = this._updateAttributes(attributes);
+    let needsNewModel = false;
+    const {attributeTransitions} = this;
+    const changedTransitions = {};
+
+    for (const attributeName in attributes) {
+      const transition = this._updateAttribute(attributeName, attributes[attributeName]);
+
+      if (transition) {
+        if (!attributeTransitions[attributeName]) {
+          // New animated attribute is added
+          attributeTransitions[attributeName] = transition;
+          needsNewModel = true;
+        }
+        changedTransitions[attributeName] = transition;
+      }
+    }
+
+    for (const attributeName in attributeTransitions) {
+      const attribute = attributes[attributeName];
+
+      if (!attribute || !attribute.transition) {
+        // Animated attribute has been removed
+        delete attributeTransitions[attributeName];
+        needsNewModel = true;
+      }
+    }
 
     if (needsNewModel) {
       this._createModel();
+    } else if (this.model) {
+      this.model.setTransitions(changedTransitions);
     }
   }
 
@@ -77,12 +98,11 @@ export default class AttributeTransitionManager {
   /* eslint-disable max-statements */
   // Called every render cycle, run transform feedback
   // Returns `true` if anything changes
-  run() {
+  setCurrentTime(currentTime) {
     if (!this.model) {
       return false;
     }
 
-    const currentTime = Date.now();
     const uniforms = {};
     const buffers = {};
 
@@ -124,47 +144,29 @@ export default class AttributeTransitionManager {
 
   /* Private methods */
 
-  // check the latest attributes for updates.
-  // Returns `true` if attributes have been added/removed.
-  _updateAttributes(attributes) {
-    let needsNewModel = false;
+  // Check an attributes for updates
+  // Returns a transition object if a new transition is triggered.
+  _updateAttribute(attributeName, attribute) {
+    const settings = this._getTransitionSettings(attribute);
 
-    for (const attributeName in attributes) {
-      const attribute = attributes[attributeName];
-      const settings = this._getTransitionSettings(attribute);
+    if (settings) {
+      let hasChanged;
+      let transition = this.attributeTransitions[attributeName];
+      if (transition) {
+        hasChanged = attribute.changed;
+      } else {
+        // New animated attributes have been added
+        transition = {name: attributeName, attribute};
+        hasChanged = true;
+      }
 
-      if (settings) {
-        let hasChanged;
-        let transition = this.attributeTransitions[attributeName];
-        if (transition) {
-          hasChanged = attribute.changed;
-        } else {
-          // New animated attributes have been added
-          transition = {name: attributeName, attribute};
-          this.attributeTransitions[attributeName] = transition;
-          hasChanged = true;
-          needsNewModel = true;
-        }
-
-        if (hasChanged) {
-          this._triggerTransition(transition, settings);
-          this._updateModel(attributeName, transition);
-          this.needsRedraw = true;
-        }
+      if (hasChanged) {
+        this._triggerTransition(transition, settings);
+        return transition;
       }
     }
 
-    for (const attributeName in this.attributeTransitions) {
-      const attribute = attributes[attributeName];
-
-      if (!attribute || !attribute.transition) {
-        // Animated attribute has been removed
-        delete this.attributeTransitions[attributeName];
-        needsNewModel = true;
-      }
-    }
-
-    return needsNewModel;
+    return null;
   }
 
   // Redraw the transform feedback
@@ -189,72 +191,14 @@ export default class AttributeTransitionManager {
 
   // Create a model for the transform feedback
   _createModel() {
-    // Build shaders
-    const varyings = [];
-    const attributeDeclarations = [];
-    const uniformsDeclarations = [];
-    const varyingDeclarations = [];
-    const calculations = [];
-
-    for (const attributeName in this.attributeTransitions) {
-      const transition = this.attributeTransitions[attributeName];
-      const attributeType = ATTRIBUTE_MAPPING[transition.attribute.size];
-
-      if (attributeType) {
-        transition.bufferIndex = varyings.length;
-        varyings.push(attributeName);
-
-        attributeDeclarations.push(`attribute ${attributeType} ${attributeName}From;`);
-        attributeDeclarations.push(`attribute ${attributeType} ${attributeName}To;`);
-        uniformsDeclarations.push(`uniform float ${attributeName}Time;`);
-        varyingDeclarations.push(`varying ${attributeType} ${attributeName};`);
-        calculations.push(`${attributeName} = mix(${attributeName}From, ${attributeName}To,
-          ${attributeName}Time);`);
-      }
-    }
-
-    const vs = `
-#define SHADER_NAME feedback-vertex-shader
-${attributeDeclarations.join('\n')}
-${uniformsDeclarations.join('\n')}
-${varyingDeclarations.join('\n')}
-
-void main(void) {
-  ${calculations.join('\n')}
-  gl_Position = vec4(0.0);
-}
-`;
-
-    const fs = `\
-#define SHADER_NAME feedback-fragment-shader
-
-#ifdef GL_ES
-precision highp float;
-#endif
-
-${varyingDeclarations.join('\n')}
-
-void main(void) {
-  gl_FragColor = vec4(0.0);
-}
-`;
-
     if (this.model) {
       this.model.destroy();
     }
 
-    this.model = new Model(this.gl, {
+    this.model = new AttributeTransitionModel(this.gl, {
       id: this.id,
-      program: new Program(this.gl, {vs, fs, varyings}),
-      geometry: new Geometry({
-        id: this.id,
-        drawMode: GL.POINTS
-      }),
-      vertexCount: 0,
-      isIndexed: true
+      transitions: this.attributeTransitions
     });
-
-    this._updateModel(this.attributeTransitions);
   }
 
   // get current values of an attribute, clipped/padded to the size of the new buffer
@@ -311,6 +255,8 @@ void main(void) {
   // Start a new transition using the current settings
   // Updates transition state and from/to buffer
   _triggerTransition(transition, settings) {
+    this.needsRedraw = true;
+
     const {attribute, buffer} = transition;
     const {value, size} = attribute;
 
@@ -351,23 +297,5 @@ void main(void) {
       transition.onInterrupt(transition);
     }
     transition.state = TRANSITION_STATE.PENDING;
-  }
-
-  // Update attributes and vertex count
-  _updateModel(attributeName, transition) {
-    if (transition === undefined) {
-      for (const name in attributeName) {
-        this._updateModel(name, attributeName[name]);
-      }
-    } else if (this.model) {
-      const {fromState, toState, attribute} = transition;
-
-      this.model.setAttributes({
-        [`${attributeName}From`]: fromState,
-        [`${attributeName}To`]: toState
-      });
-
-      this.model.setVertexCount(attribute.value.length / attribute.size);
-    }
   }
 }

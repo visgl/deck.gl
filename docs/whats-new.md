@@ -1,3 +1,10 @@
+# deck.gl v Next
+
+## Attribute transition
+
+WebGL2 feature: smooth attribute transition performed on GPU. Use the new `transitions` prop on the `Layer` class to specify transition duration, easing function and callbacks.
+
+
 # deck.gl v5
 
 Release date: 21, Dec 2017
@@ -72,7 +79,6 @@ deck.gl v5 now supports React 16 and the `package.json` dependencies of all Reac
 
 As usual, deck.gl 5.0 contains a number of experimental features, e.g. "multi viewport", "first person viewport" and "viewport transitions". These features are still being finalized and the APIs have not been frozen, but can still be accessed by early adopters. See the roadmap article for more information on these.
 
-TODO: attribute transition
 
 # deck.gl v4.1
 

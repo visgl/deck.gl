@@ -142,10 +142,10 @@ export default class Layer {
   // Update attribute transition
   updateTransition() {
     const {model, attributeManager} = this.state;
-    const attributesInTransition = attributeManager && attributeManager.updateTransition();
+    const isInTransition = attributeManager && attributeManager.updateTransition();
 
-    if (model && attributesInTransition) {
-      model.setAttributes(attributesInTransition);
+    if (model && isInTransition) {
+      model.setAttributes(attributeManager.getChangedAttributes({transition: true}));
     }
   }
 

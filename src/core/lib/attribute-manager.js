@@ -319,15 +319,20 @@ export default class AttributeManager {
    * This indicates which WebGLBuggers need to be updated
    * @return {Object} attributes - descriptors
    */
-  getChangedAttributes({clearChangedFlags = false}) {
+  getChangedAttributes({transition = false, clearChangedFlags = false}) {
     const {attributes, attributeTransitionManger} = this;
+
+    if (transition) {
+      return attributeTransitionManger.getAttributes();
+    }
+
     const changedAttributes = {};
     for (const attributeName in attributes) {
       const attribute = attributes[attributeName];
       if (attribute.changed) {
         attribute.changed = attribute.changed && !clearChangedFlags;
 
-        // If there is transition, let the transition manager handle the update
+        // Only return non-transition attributes
         if (!attributeTransitionManger.hasAttribute(attributeName)) {
           changedAttributes[attributeName] = attribute;
         }
@@ -691,12 +696,12 @@ export default class AttributeManager {
 
   /**
    * Update attribute transition to the current timestamp
-   * Returns updated attributes if any, otherwise `null`
+   * Returns `true` if any transition is in progress
    */
   updateTransition() {
     const {attributeTransitionManger} = this;
-    const transitionUpdated = attributeTransitionManger.run();
+    const transitionUpdated = attributeTransitionManger.setCurrentTime(Date.now());
     this.needsRedraw = this.needsRedraw || transitionUpdated;
-    return transitionUpdated ? attributeTransitionManger.getAttributes() : null;
+    return transitionUpdated;
   }
 }
