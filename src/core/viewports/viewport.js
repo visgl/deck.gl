@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 
 import log from '../utils/log';
-import {transformVector, createMat4, extractCameraVectors} from '../utils/math-utils';
+import {createMat4, extractCameraVectors} from '../utils/math-utils';
 
 import {Matrix4, Vector3, equals} from 'math.gl';
 import mat4_scale from 'gl-mat4/scale';
@@ -28,11 +28,15 @@ import mat4_multiply from 'gl-mat4/multiply';
 import mat4_invert from 'gl-mat4/invert';
 import mat4_perspective from 'gl-mat4/perspective';
 
-import vec2_lerp from 'gl-vec2/lerp';
-
 const ZERO_VECTOR = [0, 0, 0];
 
-import {getDistanceScales, getWorldPosition, getMeterZoom} from 'viewport-mercator-project';
+import {
+  getDistanceScales,
+  getWorldPosition,
+  getMeterZoom,
+  worldToPixels,
+  pixelsToWorld
+} from 'viewport-mercator-project';
 
 import assert from 'assert';
 
@@ -135,7 +139,8 @@ export default class Viewport {
       this.center = getWorldPosition({
         longitude,
         latitude,
-        zoom: this.zoom,
+        scale: this.scale,
+        distanceScales: this.distanceScales,
         meterOffset: this.meterOffset
       });
 
@@ -207,14 +212,13 @@ export default class Viewport {
    */
   project(xyz, {topLeft = true} = {}) {
     const [x0, y0, z0 = 0] = xyz;
-    assert(Number.isFinite(x0) && Number.isFinite(y0) && Number.isFinite(z0), ERR_ARGUMENT);
 
     const [X, Y] = this.projectFlat([x0, y0]);
-    const v = transformVector(this.pixelProjectionMatrix, [X, Y, z0, 1]);
+    const coord = worldToPixels([X, Y, z0], this.pixelProjectionMatrix);
 
-    const [x, y] = v;
+    const [x, y] = coord;
     const y2 = topLeft ? y : this.height - y;
-    return xyz.length === 2 ? [x, y2] : [x, y2, 0];
+    return xyz.length === 2 ? [x, y2] : [x, y2, coord[2]];
   }
 
   /**
@@ -227,28 +231,19 @@ export default class Viewport {
    * @param {Object} opts.topLeft=true - Whether origin is top left
    * @return {Array|null} - [lng, lat, Z] or [X, Y, Z]
    */
-  unproject(xyz, {topLeft = true} = {}) {
-    const [x, y, targetZ = 0] = xyz;
+  unproject(xyz, {topLeft = true, targetZ} = {}) {
+    const [x, y, z] = xyz;
 
     const y2 = topLeft ? y : this.height - y;
+    const coord = pixelsToWorld([x, y2, z], this.pixelUnprojectionMatrix, targetZ);
+    const [X, Y] = this.unprojectFlat(coord);
 
-    // since we don't know the correct projected z value for the point,
-    // unproject two points to get a line and then find the point on that line with z=0
-    const coord0 = transformVector(this.pixelUnprojectionMatrix, [x, y2, 0, 1]);
-    const coord1 = transformVector(this.pixelUnprojectionMatrix, [x, y2, 1, 1]);
-
-    if (!coord0 || !coord1) {
-      return null;
+    if (Number.isFinite(z)) {
+      // Has depth component
+      return [X, Y, coord[2]];
     }
 
-    const z0 = coord0[2];
-    const z1 = coord1[2];
-
-    const t = z0 === z1 ? 0 : (targetZ - z0) / (z1 - z0);
-    const v = vec2_lerp([], coord0, coord1, t);
-
-    const vUnprojected = this.unprojectFlat(v);
-    return xyz.length === 2 ? vUnprojected : [vUnprojected[0], vUnprojected[1], 0];
+    return Number.isFinite(targetZ) ? [X, Y, targetZ] : [X, Y];
   }
 
   // NON_LINEAR PROJECTION HOOKS
