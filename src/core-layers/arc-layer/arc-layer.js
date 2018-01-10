@@ -53,18 +53,21 @@ export default class ArcLayer extends Layer {
     attributeManager.addInstanced({
       instancePositions: {
         size: 4,
+        transition: true,
         accessor: ['getSourcePosition', 'getTargetPosition'],
         update: this.calculateInstancePositions
       },
       instanceSourceColors: {
         size: 4,
         type: GL.UNSIGNED_BYTE,
+        transition: true,
         accessor: 'getSourceColor',
         update: this.calculateInstanceSourceColors
       },
       instanceTargetColors: {
         size: 4,
         type: GL.UNSIGNED_BYTE,
+        transition: true,
         accessor: 'getTargetColor',
         update: this.calculateInstanceTargetColors
       }

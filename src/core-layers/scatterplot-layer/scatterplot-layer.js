@@ -54,17 +54,20 @@ export default class ScatterplotLayer extends Layer {
     this.state.attributeManager.addInstanced({
       instancePositions: {
         size: 3,
+        transition: true,
         accessor: 'getPosition',
         update: this.calculateInstancePositions
       },
       instanceRadius: {
         size: 1,
+        transition: true,
         accessor: 'getRadius',
         defaultValue: 1,
         update: this.calculateInstanceRadius
       },
       instanceColors: {
         size: 4,
+        transition: true,
         type: GL.UNSIGNED_BYTE,
         accessor: 'getColor',
         update: this.calculateInstanceColors

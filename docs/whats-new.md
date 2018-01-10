@@ -1,3 +1,10 @@
+# deck.gl v Next
+
+## Attribute transition
+
+WebGL2 feature: smooth attribute transition performed on GPU. Use the new `transitions` prop on the `Layer` class to specify transition duration, easing function and callbacks.
+
+
 # deck.gl v5
 
 Release date: 21, Dec 2017

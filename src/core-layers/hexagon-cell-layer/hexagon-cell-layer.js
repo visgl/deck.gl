@@ -95,12 +95,14 @@ export default class HexagonCellLayer extends Layer {
     attributeManager.addInstanced({
       instancePositions: {
         size: 3,
+        transition: true,
         accessor: ['getCentroid', 'getElevation'],
         update: this.calculateInstancePositions
       },
       instanceColors: {
         size: 4,
         type: GL.UNSIGNED_BYTE,
+        transition: true,
         accessor: 'getColor',
         update: this.calculateInstanceColors
       }

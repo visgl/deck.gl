@@ -139,6 +139,16 @@ export default class Layer {
   // App can destroy WebGL resources here
   finalizeState() {}
 
+  // Update attribute transition
+  updateTransition() {
+    const {model, attributeManager} = this.state;
+    const isInTransition = attributeManager && attributeManager.updateTransition();
+
+    if (model && isInTransition) {
+      model.setAttributes(attributeManager.getChangedAttributes({transition: true}));
+    }
+  }
+
   // If state has a model, draw it with supplied uniforms
   draw(opts) {
     for (const model of this.getModels()) {
@@ -199,6 +209,7 @@ export default class Layer {
       data: props.data,
       numInstances,
       props,
+      transitions: props.transitions,
       buffers: props,
       context: this,
       // Don't worry about non-attribute props
@@ -371,7 +382,10 @@ export default class Layer {
     assert(this.context.gl);
     assert(!this.state);
 
-    const attributeManager = new AttributeManager({id: this.props.id});
+    const attributeManager = new AttributeManager(this.context.gl, {
+      id: this.props.id
+    });
+
     // All instanced layers get instancePickingColors attribute by default
     // Their shaders can use it to render a picking scene
     // TODO - this slightly slows down non instanced layers
@@ -485,6 +499,10 @@ export default class Layer {
 
   // Calculates uniforms
   drawLayer({moduleParameters = null, uniforms = {}, parameters = {}}) {
+    if (!uniforms.picking_uActive) {
+      this.updateTransition();
+    }
+
     // TODO/ib - hack move to luma Model.draw
     if (moduleParameters) {
       for (const model of this.getModels()) {

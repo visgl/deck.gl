@@ -59,11 +59,13 @@ export default class PointCloudLayer extends Layer {
     this.state.attributeManager.addInstanced({
       instancePositions: {
         size: 3,
+        transition: true,
         accessor: 'getPosition',
         update: this.calculateInstancePositions
       },
       instanceNormals: {
         size: 3,
+        transition: true,
         accessor: 'getNormal',
         defaultValue: 1,
         update: this.calculateInstanceNormals
@@ -71,6 +73,7 @@ export default class PointCloudLayer extends Layer {
       instanceColors: {
         size: 4,
         type: GL.UNSIGNED_BYTE,
+        transition: true,
         accessor: 'getColor',
         update: this.calculateInstanceColors
       }

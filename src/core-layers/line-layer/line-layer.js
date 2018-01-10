@@ -51,17 +51,20 @@ export default class LineLayer extends Layer {
     attributeManager.addInstanced({
       instanceSourcePositions: {
         size: 3,
+        transition: true,
         accessor: 'getSourcePosition',
         update: this.calculateInstanceSourcePositions
       },
       instanceTargetPositions: {
         size: 3,
+        transition: true,
         accessor: 'getTargetPosition',
         update: this.calculateInstanceTargetPositions
       },
       instanceColors: {
         size: 4,
         type: GL.UNSIGNED_BYTE,
+        transition: true,
         accessor: 'getColor',
         update: this.calculateInstanceColors
       }

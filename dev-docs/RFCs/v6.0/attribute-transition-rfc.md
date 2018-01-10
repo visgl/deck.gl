@@ -45,11 +45,13 @@ new Layer({
 });
 ```
 
-| Parameter | Type     | Description |
-| --------- | -------- | ----------- |
-| duration  | Number   | Duration of the transition animation, in milliseconds |
-| easing    | Function | Easing function that maps a value from [0, 1] to [0, 1], see http://easings.net/ |
-| onComplete | Function   | Callback when the transition is done |
+| Parameter | Type     | Default     | Description |
+| --------- | -------- | ----------- | ----------- |
+| duration  | Number   | `0` | Duration of the transition animation, in milliseconds |
+| easing    | Function | LINEAR (`t => t`) | Easing function that maps a value from [0, 1] to [0, 1], see http://easings.net/ |
+| onStart | Function   | `null` | Callback when the transition is started |
+| onEnd | Function   | `null` | Callback when the transition is done |
+| onInterrupt | Function   | `null` | Callback when the transition is interrupted |
 
 As a shorthand, if an accessor key maps to a number rather than an object, then the number is assigned to the `duration` parameter.
 

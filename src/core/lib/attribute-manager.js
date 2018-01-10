@@ -24,6 +24,8 @@ import log from '../utils/log';
 import {GL} from 'luma.gl';
 import assert from 'assert';
 
+import AttributeTransitionManager from './attribute-transition-manager';
+
 const LOG_START_END_PRIORITY = 1;
 const LOG_DETAIL_PRIORITY = 2;
 
@@ -154,8 +156,9 @@ export default class AttributeManager {
    * @param {Object} [props]
    * @param {String} [props.id] - identifier (for debugging)
    */
-  constructor({id = 'attribute-manager'} = {}) {
+  constructor(gl, {id = 'attribute-manager'} = {}) {
     this.id = id;
+    this.gl = gl;
 
     this.attributes = {};
     this.updateTriggers = {};
@@ -165,6 +168,10 @@ export default class AttributeManager {
 
     this.userData = {};
     this.stats = new Stats({id: 'attr'});
+
+    this.attributeTransitionManger = new AttributeTransitionManager(gl, {
+      id: `${id}-transitions`
+    });
 
     // For debugging sanity, prevent uninitialized members
     Object.seal(this);
@@ -276,6 +283,7 @@ export default class AttributeManager {
   update({
     data,
     numInstances,
+    transitions,
     props = {},
     buffers = {},
     context = {},
@@ -293,6 +301,8 @@ export default class AttributeManager {
       this.stats.timeEnd();
       logFunctions.onUpdateEnd({level: LOG_START_END_PRIORITY, id: this.id, numInstances});
     }
+
+    this.attributeTransitionManger.update(this.attributes, transitions);
   }
 
   /**
@@ -309,14 +319,23 @@ export default class AttributeManager {
    * This indicates which WebGLBuggers need to be updated
    * @return {Object} attributes - descriptors
    */
-  getChangedAttributes({clearChangedFlags = false}) {
-    const {attributes} = this;
+  getChangedAttributes({transition = false, clearChangedFlags = false}) {
+    const {attributes, attributeTransitionManger} = this;
+
+    if (transition) {
+      return attributeTransitionManger.getAttributes();
+    }
+
     const changedAttributes = {};
     for (const attributeName in attributes) {
       const attribute = attributes[attributeName];
       if (attribute.changed) {
         attribute.changed = attribute.changed && !clearChangedFlags;
-        changedAttributes[attributeName] = attribute;
+
+        // Only return non-transition attributes
+        if (!attributeTransitionManger.hasAttribute(attributeName)) {
+          changedAttributes[attributeName] = attribute;
+        }
       }
     }
     return changedAttributes;
@@ -673,5 +692,16 @@ export default class AttributeManager {
         throw new Error(`Illegal attribute generated for ${attributeName}`);
       }
     }
+  }
+
+  /**
+   * Update attribute transition to the current timestamp
+   * Returns `true` if any transition is in progress
+   */
+  updateTransition() {
+    const {attributeTransitionManger} = this;
+    const transitionUpdated = attributeTransitionManger.setCurrentTime(Date.now());
+    this.needsRedraw = this.needsRedraw || transitionUpdated;
+    return transitionUpdated;
   }
 }
