@@ -1,19 +1,23 @@
 steps:
   - name: ":docker: :package:"
     agents:
-      queue: 'uber-builders'
+      queue: 'builders'
     plugins:
       docker-compose#v1.5.2:
         build: deck-gl
-        image-repository: 296822479253.dkr.ecr.us-east-2.amazonaws.com/fusionjs
+        image-repository: 027047743804.dkr.ecr.us-east-2.amazonaws.com/uber
   - wait
   - name: ":eslint:"
     command: "npm run lint"
+    agents:
+      queue: 'workers'
     plugins:
       docker-compose#v1.5.2:
         run: deck-gl
   - name: ":node:"
     command: ".buildkite/coverTests"
+    agents:
+      queue: 'workers'
     plugins:
       docker-compose#v1.5.2:
         run: deck-gl
