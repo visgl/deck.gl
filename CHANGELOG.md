@@ -21,6 +21,12 @@ For Earlier Beta Releases see below
 
 ## Official Releases
 
+### deck.gl v5.0.2 - Jan 10
+- Upgrade dependency modules to production versions (#1307)
+- Add generic attribute support to attribute manager (#1298)
+- Update remaining examples to React16 (#1304)
+- Improve fp64ify perf (#1300)
+
 ### deck.gl v5.0.1 - Jan 4
 - fix doc links (#1277)
 - Fix layer-browser missing package (#1287)
