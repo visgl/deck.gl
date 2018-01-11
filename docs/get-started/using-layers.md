@@ -41,7 +41,7 @@ The main concern when rendering more than one instance of a specific layer (say 
 ```js
 <DeckGL layers={[
   new ScatterplotLayer({id: 'big-points', data: ..., ...}),
-  new ScatterplotLayer({data: 'small-points', data: ..., ...}),
+  new ScatterplotLayer({id: 'small-points', data: ..., ...}),
 ]} />
 ```
 
