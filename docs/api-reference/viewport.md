@@ -65,9 +65,9 @@ Parameters:
   - `opts` (Object)
     - `topLeft` (Boolean, optional) - Whether projected coords are top left. Default to `true`.
 
-Returns:
-
-  - A screen coordinates array `[x, y]` or `[x, y, z]` if an altitude was given.
+Returns: `[x, y]` or `[x, y, z]` in pixels coordinates. `z` is pixel depth.
+- If input is `[lng, lat]`: returns `[x, y]`.
+- If input is `[lng, lat, Z]`: returns `[x, y, z]`.
 
 Note: By default, returns top-left coordinates for canvas/SVG type render
 
@@ -80,10 +80,12 @@ Parameters:
   - `pixels` (Array) - `[x, y, z]` Passing a `z` is optional.
   - `opts` (Object)
     - `topLeft` (Boolean, optional) - Whether projected coords are top left. Default to `true`.
+    - `targetZ` (Number, optional) - If pixel depth `z` is not specified in `pixels`, this is used as the elevation plane to unproject onto. Default `0`.
 
-Returns:
-
-  - A map coordinates array `[lng, lat]` or `[lng, lat, altitude]` if a `z` was given.
+Returns: `[lng, lat]` or `[longitude, lat, Z]` in map coordinates. `Z` is elevation in meters.
+- If input is `[x, y]` without specifying `opts.targetZ`: returns `[lng, lat]`.
+- If input is `[x, y]` with `opts.targetZ`: returns `[lng, lat, targetZ]`.
+- If input is `[x, y, z]`: returns `[lng, lat, Z]`.
 
 Note: By default, takes top-left coordinates from JavaScript mouse events.
 
