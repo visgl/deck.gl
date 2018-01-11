@@ -47,11 +47,11 @@
     "earcut": "^2.0.6",
     "lodash.flattendeep": "^4.4.0",
     "luma.gl": "^5.0.0",
-    "math.gl": ">= 1.0.0-alpha.8",
-    "mjolnir.js": ">=0.1.0",
+    "math.gl": "^1.0.0",
+    "mjolnir.js": "^1.0.0",
     "prop-types": "^15.6.0",
     "seer": "^0.2.3",
-    "viewport-mercator-project": "^5.0.0-alpha.2"
+    "viewport-mercator-project": "^5.0.0"
   },
   "devDependencies": {
     "babel-cli": "^6.22.2",

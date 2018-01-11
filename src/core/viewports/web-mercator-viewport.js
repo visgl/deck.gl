@@ -23,10 +23,11 @@
 import Viewport from './viewport';
 
 import {
-  projectFlat,
-  unprojectFlat,
+  lngLatToWorld,
+  worldToLngLat,
+  pixelsToWorld,
   getProjectionMatrix,
-  getUncenteredViewMatrix,
+  getViewMatrix,
   fitBounds
 } from 'viewport-mercator-project';
 
@@ -82,7 +83,7 @@ export default class WebMercatorViewport extends Viewport {
     // shader (cheap) which gives a coordinate system that has its center in
     // the layer's center position. This makes rotations and other modelMatrx
     // transforms much more useful.
-    const viewMatrixUncentered = getUncenteredViewMatrix({
+    const viewMatrixUncentered = getViewMatrix({
       height,
       pitch,
       bearing,
@@ -133,7 +134,7 @@ export default class WebMercatorViewport extends Viewport {
    * @return {Array} [x,y] coordinates.
    */
   _projectFlat(lngLat, scale = this.scale) {
-    return projectFlat(lngLat, scale);
+    return lngLatToWorld(lngLat, scale);
   }
 
   /**
@@ -146,7 +147,7 @@ export default class WebMercatorViewport extends Viewport {
    *   Per cartographic tradition, lat and lon are specified as degrees.
    */
   _unprojectFlat(xy, scale = this.scale) {
-    return unprojectFlat(xy, scale);
+    return worldToLngLat(xy, scale);
   }
 
   /**
@@ -216,15 +217,19 @@ export default class WebMercatorViewport extends Viewport {
    *   Specifies a point on the screen.
    * @return {Array} [lng,lat] new map center.
    */
-  getLocationAtPoint({lngLat, pos}) {
-    const fromLocation = this.projectFlat(this.unproject(pos));
-    const toLocation = this.projectFlat(lngLat);
-
-    const center = this.projectFlat([this.longitude, this.latitude]);
+  getMapCenterByLngLatPosition({lngLat, pos}) {
+    const fromLocation = pixelsToWorld(pos, this.pixelUnprojectionMatrix);
+    const toLocation = lngLatToWorld(lngLat, this.scale);
 
     const translate = vec2_add([], toLocation, vec2_negate([], fromLocation));
-    const newCenter = vec2_add([], center, translate);
-    return this.unprojectFlat(newCenter);
+    const newCenter = vec2_add([], this.center, translate);
+
+    return worldToLngLat(newCenter, this.scale);
+  }
+
+  // Legacy method name
+  getLocationAtPoint({lngLat, pos}) {
+    return this.getMapCenterByLngLatPosition({lngLat, pos});
   }
 
   /**

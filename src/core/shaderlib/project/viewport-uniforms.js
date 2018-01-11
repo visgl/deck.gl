@@ -26,7 +26,7 @@ import log from '../../utils/log';
 import assert from 'assert';
 import {COORDINATE_SYSTEM} from '../../lib/constants';
 
-import {projectFlat} from 'viewport-mercator-project';
+import {lngLatToWorld} from 'viewport-mercator-project';
 
 // To quickly set a vector to zero
 const ZERO_VECTOR = [0, 0, 0, 0];
@@ -88,7 +88,7 @@ function calculateMatrixAndOffset({
       // Calculate transformed projectionCenter (using 64 bit precision JS)
       // This is the key to offset mode precision
       // (avoids doing this addition in 32 bit precision in GLSL)
-      const positionPixels = projectFlat(coordinateOrigin, Math.pow(2, coordinateZoom));
+      const positionPixels = lngLatToWorld(coordinateOrigin, Math.pow(2, coordinateZoom));
       // projectionCenter = new Matrix4(viewProjectionMatrix)
       //   .transformVector([positionPixels[0], positionPixels[1], 0.0, 1.0]);
       projectionCenter = vec4_transformMat4(
