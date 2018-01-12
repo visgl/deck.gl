@@ -173,20 +173,9 @@ export default class AttributeTransitionManager {
   _runTransformFeedback({uniforms, buffers}) {
     const {model, transformFeedback} = this;
 
-    // Cannot bind to transform feedback if it's already used as attribute
-    Object.values(buffers).forEach(buffer => buffer.unbind());
+    transformFeedback.bindBuffers(buffers, {});
 
-    model.program.use();
-    transformFeedback.bindBuffers(buffers, {clear: true});
-    transformFeedback.begin(GL.POINTS);
-
-    const parameters = {
-      [GL.RASTERIZER_DISCARD]: true
-    };
-
-    model.draw({uniforms, parameters});
-
-    transformFeedback.end();
+    model.draw({uniforms, transformFeedback});
   }
 
   // Create a model for the transform feedback
