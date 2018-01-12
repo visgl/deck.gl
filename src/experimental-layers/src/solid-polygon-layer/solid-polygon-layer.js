@@ -373,7 +373,7 @@ export default class SolidPolygonLayer extends Layer {
           uniforms: {
             isSideVertex: 1
           },
-          isinstanced: 1,
+          isInstanced: 1,
           shaderCache: this.context.shaderCache
         })
       );
@@ -393,7 +393,7 @@ export default class SolidPolygonLayer extends Layer {
           uniforms: {
             isSideVertex: 1
           },
-          isinstanced: 1,
+          isInstanced: 1,
           shaderCache: this.context.shaderCache
         })
       );
