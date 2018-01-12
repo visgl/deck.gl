@@ -78,14 +78,7 @@ const defaultProps = {
   },
   fp64: false,
   // Optional settings for 'lighting' shader module
-  lightSettings: {
-    lightsPosition: [-122.45, 37.75, 8000, -122.0, 38.0, 5000],
-    ambientRatio: 0.05,
-    diffuseRatio: 0.6,
-    specularRatio: 0.8,
-    lightsStrength: [2.0, 0.0, 0.0, 0.0],
-    numberOfLights: 2
-  },
+  lightSettings: {},
 
   getPosition: x => x.position,
   getAngleDegreesCW: x => x.angle || 0,
@@ -139,10 +132,6 @@ export default class MeshLayer extends Layer {
         } else {
           // TODO - reset
         }
-      }
-
-      if (props.lightSettings !== oldProps.lightSettings) {
-        this.state.model.setUniforms(props.lightSettings);
       }
     }
   }

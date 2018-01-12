@@ -27,15 +27,6 @@ import {pointToDensityGridData} from './grid-aggregator';
 
 function nop() {}
 
-const LIGHT_SETTINGS = {
-  lightsPosition: [-122.45, 37.75, 8000, -122.0, 38.0, 5000],
-  ambientRatio: 0.05,
-  diffuseRatio: 0.6,
-  specularRatio: 0.8,
-  lightsStrength: [2.0, 0.0, 0.0, 0.0],
-  numberOfLights: 2
-};
-
 const defaultProps = {
   // color
   colorDomain: null,
@@ -62,7 +53,7 @@ const defaultProps = {
   fp64: false,
 
   // Optional settings for 'lighting' shader module
-  lightSettings: LIGHT_SETTINGS
+  lightSettings: {}
 };
 
 export default class GridLayer extends CompositeLayer {

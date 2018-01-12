@@ -39,14 +39,7 @@ const defaultProps = {
   getElevation: x => x.elevation,
   getColor: x => x.color,
 
-  lightSettings: {
-    lightsPosition: [-122.45, 37.65, 8000, -122.45, 37.2, 1000],
-    ambientRatio: 0.4,
-    diffuseRatio: 0.6,
-    specularRatio: 0.8,
-    lightsStrength: [1.0, 0.0, 0.8, 0.0],
-    numberOfLights: 2
-  }
+  lightSettings: {}
 };
 
 export default class GridCellLayer extends Layer {

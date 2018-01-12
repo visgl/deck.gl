@@ -18,11 +18,38 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+import {COORDINATE_SYSTEM} from '../../lib/constants';
 import lightingShader from './lighting.glsl';
 import project from '../project/project';
+
+const INITIAL_MODULE_OPTIONS = {};
 
 export default {
   name: 'lighting',
   dependencies: [project],
-  vs: lightingShader
+  vs: lightingShader,
+  getUniforms: (opts = INITIAL_MODULE_OPTIONS) => {
+    if (opts.lightSettings) {
+      const {
+        lightsPosition = [-122.45, 37.75, 8000, -122.0, 38.0, 5000],
+        ambientRatio = 0.05,
+        diffuseRatio = 0.6,
+        specularRatio = 0.8,
+        lightsStrength = [2.0, 0.0, 0.0, 0.0],
+        // numberOfLights = 2,
+        lightCoordinateSystem = COORDINATE_SYSTEM.LNGLAT
+      } = opts.lightSettings;
+
+      return {
+        lightsPosition,
+        ambientRatio,
+        diffuseRatio,
+        specularRatio,
+        lightsStrength,
+        lightCoordinateSystem
+      };
+    }
+
+    return {};
+  }
 };

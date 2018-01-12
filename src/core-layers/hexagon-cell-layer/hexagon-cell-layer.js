@@ -28,15 +28,6 @@ import fs from './hexagon-cell-layer-fragment.glsl';
 
 const DEFAULT_COLOR = [255, 0, 255, 255];
 
-const LIGHT_SETTINGS = {
-  lightsPosition: [-122.45, 37.75, 8000, -122.0, 38.0, 5000],
-  ambientRatio: 0.4,
-  diffuseRatio: 0.6,
-  specularRatio: 0.8,
-  lightsStrength: [1.2, 0.0, 0.8, 0.0],
-  numberOfLights: 2
-};
-
 const defaultProps = {
   hexagonVertices: null,
   radius: null,
@@ -50,7 +41,7 @@ const defaultProps = {
   getColor: x => x.color,
   getElevation: x => x.elevation,
 
-  lightSettings: LIGHT_SETTINGS
+  lightSettings: {}
 };
 
 export default class HexagonCellLayer extends Layer {
@@ -193,21 +184,15 @@ export default class HexagonCellLayer extends Layer {
   }
 
   updateUniforms() {
-    const {opacity, elevationScale, extruded, coverage, lightSettings} = this.props;
+    const {opacity, elevationScale, extruded, coverage} = this.props;
     const {model} = this.state;
 
-    model.setUniforms(
-      Object.assign(
-        {},
-        {
-          extruded,
-          opacity,
-          coverage,
-          elevationScale
-        },
-        lightSettings
-      )
-    );
+    model.setUniforms({
+      extruded,
+      opacity,
+      coverage,
+      elevationScale
+    });
   }
 
   _getModel(gl) {

@@ -29,6 +29,21 @@ uniform vec2 lightsStrength[16];
 uniform float ambientRatio;
 uniform float diffuseRatio;
 uniform float specularRatio;
+uniform float lightCoordinateSystem;
+
+// project_position without modelMatrix
+vec3 lighting_projectLightPosition_(vec3 position) {
+
+  if (lightCoordinateSystem == COORDINATE_SYSTEM_LNG_LAT) {
+    return vec3(
+      project_mercator_(position.xy) * WORLD_SCALE * project_uScale,
+      project_scale(position.z)
+    );
+  }
+
+  vec4 position_modelspace = vec4(position, 0.0);
+  return project_offset_(position_modelspace).xyz;
+}
 
 float lighting_getLightWeight(vec3 position_worldspace_vec3, vec3 normals_worldspace) {
   float lightWeight = 0.0;
@@ -39,7 +54,7 @@ float lighting_getLightWeight(vec3 position_worldspace_vec3, vec3 normals_worlds
   vec3 view_direction = normalize(camera_pos_worldspace - position_worldspace_vec3);
 
   for (int i = 0; i < NUM_OF_LIGHTS; i++) {
-    vec3 light_position_worldspace = project_position(lightsPosition[i]);
+    vec3 light_position_worldspace = lighting_projectLightPosition_(lightsPosition[i]);
     vec3 light_direction = normalize(light_position_worldspace - position_worldspace_vec3);
 
     vec3 halfway_direction = normalize(light_direction + view_direction);

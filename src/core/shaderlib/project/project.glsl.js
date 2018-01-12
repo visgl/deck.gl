@@ -72,7 +72,9 @@ vec3 project_normal(vec3 vector) {
     project_uCoordinateSystem == COORDINATE_SYSTEM_LNGLAT_OFFSETS) {
     return normalize(vector * project_uPixelsPerDegree);
   }
-  return normalize(vector * project_uPixelsPerMeter);
+  // Apply model matrix
+  vec4 normal_modelspace = project_uModelMatrix * vec4(vector, 0.0);
+  return normalize(normal_modelspace.xyz * project_uPixelsPerMeter);
 }
 
 vec4 project_offset_(vec4 offset) {

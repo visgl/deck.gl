@@ -61,7 +61,7 @@ void main(void) {
 
   // Apply lighting
   float lightWeight = getLightWeight(position_worldspace.xyz, // the w component is always 1.0
-    instanceNormals);
+    project_normal(instanceNormals));
 
   // Apply opacity to instance color, or return instance picking color
   vColor = vec4(lightWeight * instanceColors.rgb, instanceColors.a * opacity) / 255.;
