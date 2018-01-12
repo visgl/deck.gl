@@ -16,7 +16,7 @@
     "react": "^16.2.0",
     "react-autobind": "^1.0.6",
     "react-dom": "^16.2.0",
-    "react-map-gl": "3.2.0-alpha.3",
+    "react-map-gl": "^3.2.0",
     "tween.js": "^16.6.0"
   },
   "devDependencies": {

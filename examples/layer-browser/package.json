@@ -14,7 +14,7 @@
     "react": "^16.2.0",
     "react-autobind": "^1.0.6",
     "react-dom": "^16.2.0",
-    "react-map-gl": "3.2.0-alpha.3",
+    "react-map-gl": "^3.2.0",
     "react-stats-zavatta": "^0.0.6",
     "s2-geometry": "^1.2.9"
   },
