@@ -32,7 +32,7 @@ uniform float specularRatio;
 uniform float lightCoordinateSystem;
 
 // project_position without modelMatrix
-vec3 lighting_projectLightPosition_(vec3 position) {
+vec3 project_light_position_(vec3 position) {
 
   if (lightCoordinateSystem == COORDINATE_SYSTEM_LNG_LAT) {
     return vec3(
@@ -54,7 +54,7 @@ float lighting_getLightWeight(vec3 position_worldspace_vec3, vec3 normals_worlds
   vec3 view_direction = normalize(camera_pos_worldspace - position_worldspace_vec3);
 
   for (int i = 0; i < NUM_OF_LIGHTS; i++) {
-    vec3 light_position_worldspace = lighting_projectLightPosition_(lightsPosition[i]);
+    vec3 light_position_worldspace = project_light_position_(lightsPosition[i]);
     vec3 light_direction = normalize(light_position_worldspace - position_worldspace_vec3);
 
     vec3 halfway_direction = normalize(light_direction + view_direction);
