@@ -1,3 +1,5 @@
+0.0.21
+- TextLayer: Prevent redraw flag from being set every frame
 0.0.20
 - Make deck.gl into peerDependency
 0.0.19
