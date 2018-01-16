@@ -157,13 +157,13 @@ deck.gl.
 - Default: `f => f.properties.lineColor || [0, 0, 0, 255]`
 
 Called to retrieve the color of line and/or the outline of polygon color for a GeoJson feature, depending
-on its type.
+on its type. Color supports `[R, G, B, A]` and `[R, G, B, A]`, where `A` is scaled to a percentage between `0` and `255`.
 
 ##### `getFillColor` (Function, optional)
 
-- Default: `f => f.properties.fillColor || [0, 0, 0, 25]`
+- Default: `f => f.properties.fillColor || [0, 0, 0, 255]`
 
-Called to retrieve the solid color of the polygon and point features of a GeoJson.
+Called to retrieve the solid color of the polygon and point features of a GeoJson. Color supports `[R, G, B, A]` and `[R, G, B, A]`, where `A` is scaled to a percentage between `0` and `255`.
 
 Note: This accessor is only called for `Polygon` and `MultiPolygon` and `Point` features.
 
