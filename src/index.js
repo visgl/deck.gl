@@ -199,16 +199,11 @@ Object.assign(experimental, {
 export {default, DeckGL} from './react';
 
 // TODO - do we need to expose these?
-import {
-  MapController,
-  OrbitController,
-  ViewportController // TODO - merge with deck.gl?
-} from './react';
+import {MapController, OrbitController} from './react';
 
 Object.assign(experimental, {
   MapController,
-  OrbitController,
-  ViewportController
+  OrbitController
 });
 
 //
