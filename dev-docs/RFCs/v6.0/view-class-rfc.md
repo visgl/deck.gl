@@ -52,7 +52,55 @@ Secondary Requirements:
 
 ## Feature Proposals
 
-### Proposed: New `View` ES6 Class
+* Proposed: New `View` ES6 Class
+
+* Viewport Autosizing: Relative Positions and Dimensions - Ability to specify viewport `x`, `y`, `width`, `height` as relative values (percentages) in addition to numbers.
+
+
+
+## What's New
+
+### New `View` Class
+
+A descriptor for one view (window or viewport) into your date. Contains `id`, `type` (WebMercatorViewport etc), relative size (`x`, `y`, `width`, `height`).
+
+
+### DeckGL can displays Multiple Views
+
+A new `views` property lets the `DeckGL` component to render multiple views of your based on a list of `View` "descriptors".
+
+* Support `flattenArray`, it will allow a single `View` or nested `View` array to be passed to `views`.
+
+
+## Upgrade Guide
+
+### DeckGL Class
+
+##### Changed `DeckGL.layerFilter` property
+
+Change signature `layerFilter({layer, view, isPicking})` instead of `layerFilter({layer, viewport, isPicking})`
+
+We could still provide the derived viewport instance, but it may no longer have the `id` property the app most likely is looking for.
+
+
+| Old Method            | New Method        | Comment |
+| ---                   | ---               | ---     |
+| `viewports`         | `views`      | `viewports` was an experimental prop |
+| `viewport`          | `views`      | |
+
+
+#### Viewport Class
+
+| Old Method            | New Method        | Comment |
+| ---                   | ---               | ---     |
+| `id`         | N/A      | Removed |
+| `x`          | N/A      | TBD - keep and use as offset in projections? |
+| `y`          | N/A      | TBD - keep and use as offset in projections? |
+
+
+## View Class Docs
+
+> Note: `View` class instances use the "CSS" (top-left, window, non-device-pixel) coordinate system to interpreset `x`,`y`, `width` and `height` properties and automatically convert to WebGL (`gl.viewport`) coordinates under the hood.
 
 * `type` (`Viewport` subclass, default `Viewport`) - Can be any existing `Viewport` class type...
 * viewport specific params?
@@ -66,51 +114,6 @@ Secondary Requirements:
 * `onAfterRender({gl, view, ...})` - called just before this view is rendered
 
 
-
-### Viewport Autosizing: Relative Positions and Dimensions
-
-Ability to specify viewport `x`, `y`, `width`, `height` as relative values (percentages) in addition to numbers.
-
-Note: `View` class instances use the "CSS" (top-left, window, non-device-pixel) coordinate system to interpreset `x`,`y`, `width` and `height` properties and automatically convert to WebGL (`gl.viewport`) coordinates under the hood.
-
-
-### Viewport: Support for x, y
-
-Should we be able to unproject coordinates in a viewport from a position on the canvas? If so, we may need to add x,y support to Viewport unproject.
-
-Specifying x,y coordinates in the `Viewport` class was a small addition to the current set of parameters which already includes width and height and it is suggested that we keep it and use it for this purpose.
-
-
-## API Proposals
-
-
-### Proposed: New `View` ES6 Class
-
-For detailed Properties see feature proposal above
-* type, id, relative view coordinates.
-
-
-### Proposed: Changed `DeckGL.layerFilter` property
-
-Change signature `layerFilter({layer, view, isPicking})` instead of `layerFilter({layer, viewport, isPicking})`
-
-We could still provide the derived viewport instance, but it may no longer have the `id` property the app most likely is looking for.
-
-
-### Proposed: New `DeckGL.views` Property
-
-Allows the main `DeckGL` component to accept a list of Views (and/or viewport descriptors).
-
-* Support `flattenArray`, it will allow a single `View` or nested `View` array to be passed to `views`.
-
-
-### Proposed: `DeckGL.viewports` prop deprecated, use `DeckGL.views`
-
-### Proposed: `DeckGL.viewport` prop deprecated, use `DeckGL.views`
-
-### Proposed: `Viewport.id` - remove property
-
-### Proposed: `Viewport.x,y` - keep, and use in (un)projections
 
 
 ## Proposals that Need More Work
@@ -129,11 +132,27 @@ In this discussion, view parameter refer to a controller/viewport specific set o
 
 While we can absolutely add view parameters to the View class, it is desirable to decouple "view parameters" from "view descriptors" since all other properties of view descriptors change very rarely, if at all.
 
+## Impact Analysis
+
+| Area           | Impact |
+| ---            | --- |
+| updateTriggers | No impact identified |
+| transitions    | No impact identified |
+
+
+## Ideas
+
+* Viewport: Support for x, y - Should we be able to unproject coordinates in a viewport from a position on the canvas? If so, we may need to add x,y support to Viewport unproject.
 
 
 ## Extensibility
 
 > Note: The purpose of this section is to show that in contrast to `Viewport`, the `View` class can support considerable functional API extensions in a natural way. The actual features are not considered part of this RFC and may need to be approved in a separate RFC before implementation.
+
+### Controller
+
+Specify per viewport controller (see separate RFC).
+
 
 ### Advanced Render Parameters
 
