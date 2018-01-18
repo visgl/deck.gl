@@ -92,6 +92,11 @@ export default class Layer {
     Object.seal(this);
   }
 
+  // clone this layer with modified props
+  clone(newProps) {
+    return new this.constructor(Object.assign({}, this.props, newProps));
+  }
+
   toString() {
     const className = this.constructor.layerName || this.constructor.name;
     return `${className}({id: '${this.props.id}'})`;
@@ -99,129 +104,6 @@ export default class Layer {
 
   get stats() {
     return this.internalState.stats;
-  }
-
-  needsUpdate() {
-    // Call subclass lifecycle method
-    return this.shouldUpdateState(this._getUpdateParams());
-    // End lifecycle method
-  }
-
-  // Checks state of attributes and model
-  getNeedsRedraw({clearRedrawFlags = false} = {}) {
-    return this._getNeedsRedraw(clearRedrawFlags);
-  }
-
-  // //////////////////////////////////////////////////
-  // LIFECYCLE METHODS, overridden by the layer subclasses
-
-  // Called once to set up the initial state
-  // App can create WebGL resources
-  initializeState() {
-    throw new Error(`Layer ${this} has not defined initializeState`);
-  }
-
-  // Let's layer control if updateState should be called
-  shouldUpdateState({oldProps, props, oldContext, context, changeFlags}) {
-    return changeFlags.propsOrDataChanged;
-  }
-
-  // Default implementation, all attributes will be invalidated and updated
-  // when data changes
-  updateState({oldProps, props, oldContext, context, changeFlags}) {
-    const {attributeManager} = this.state;
-    if (changeFlags.dataChanged && attributeManager) {
-      attributeManager.invalidateAll();
-    }
-  }
-
-  // Called once when layer is no longer matched and state will be discarded
-  // App can destroy WebGL resources here
-  finalizeState() {}
-
-  // Update attribute transition
-  updateTransition() {
-    const {model, attributeManager} = this.state;
-    const isInTransition = attributeManager && attributeManager.updateTransition();
-
-    if (model && isInTransition) {
-      model.setAttributes(attributeManager.getChangedAttributes({transition: true}));
-    }
-  }
-
-  // If state has a model, draw it with supplied uniforms
-  draw(opts) {
-    for (const model of this.getModels()) {
-      model.draw(opts);
-    }
-  }
-
-  // called to populate the info object that is passed to the event handler
-  // @return null to cancel event
-  getPickingInfo({info, mode}) {
-    const {index} = info;
-
-    if (index >= 0) {
-      // If props.data is an indexable array, get the object
-      if (Array.isArray(this.props.data)) {
-        info.object = this.props.data[index];
-      }
-    }
-
-    return info;
-  }
-
-  // END LIFECYCLE METHODS
-  // //////////////////////////////////////////////////
-
-  // Returns true if the layer is pickable and visible.
-  isPickable() {
-    return this.props.pickable && this.props.visible;
-  }
-
-  // Default implementation of attribute invalidation, can be redefined
-  invalidateAttribute(name = 'all', diffReason = '') {
-    const {attributeManager} = this.state;
-    if (!attributeManager) {
-      return;
-    }
-
-    if (name === 'all') {
-      log.log(LOG_PRIORITY_UPDATE, `updateTriggers invalidating all attributes: ${diffReason}`);
-      attributeManager.invalidateAll();
-    } else {
-      log.log(LOG_PRIORITY_UPDATE, `updateTriggers invalidating attribute ${name}: ${diffReason}`);
-      attributeManager.invalidate(name);
-    }
-  }
-
-  // Calls attribute manager to update any WebGL attributes, can be redefined
-  updateAttributes(props) {
-    const {attributeManager} = this.state;
-    if (!attributeManager) {
-      return;
-    }
-
-    // Figure out data length
-    const numInstances = this.getNumInstances(props);
-
-    attributeManager.update({
-      data: props.data,
-      numInstances,
-      props,
-      transitions: props.transitions,
-      buffers: props,
-      context: this,
-      // Don't worry about non-attribute props
-      ignoreUnknownAttributes: true
-    });
-
-    // TODO - Use getModels?
-    const {model} = this.state;
-    if (model) {
-      const changedAttributes = attributeManager.getChangedAttributes({clearChangedFlags: true});
-      model.setAttributes(changedAttributes);
-    }
   }
 
   // Public API
@@ -239,9 +121,25 @@ export default class Layer {
     }
   }
 
+  // Checks state of attributes and model
+  getNeedsRedraw({clearRedrawFlags = false} = {}) {
+    return this._getNeedsRedraw(clearRedrawFlags);
+  }
+
   // Return an array of models used by this layer, can be overriden by layer subclass
   getModels() {
     return this.state.models || (this.state.model ? [this.state.model] : []);
+  }
+
+  needsUpdate() {
+    // Call subclass lifecycle method
+    return this.shouldUpdateState(this._getUpdateParams());
+    // End lifecycle method
+  }
+
+  // Returns true if the layer is pickable and visible.
+  isPickable() {
+    return this.props.pickable && this.props.visible;
   }
 
   // PROJECTION METHODS
@@ -319,6 +217,113 @@ export default class Layer {
     return index;
   }
 
+  // //////////////////////////////////////////////////
+  // LIFECYCLE METHODS, overridden by the layer subclasses
+
+  // Called once to set up the initial state
+  // App can create WebGL resources
+  initializeState() {
+    throw new Error(`Layer ${this} has not defined initializeState`);
+  }
+
+  // Let's layer control if updateState should be called
+  shouldUpdateState({oldProps, props, oldContext, context, changeFlags}) {
+    return changeFlags.propsOrDataChanged;
+  }
+
+  // Default implementation, all attributes will be invalidated and updated
+  // when data changes
+  updateState({oldProps, props, oldContext, context, changeFlags}) {
+    const {attributeManager} = this.state;
+    if (changeFlags.dataChanged && attributeManager) {
+      attributeManager.invalidateAll();
+    }
+  }
+
+  // Called once when layer is no longer matched and state will be discarded
+  // App can destroy WebGL resources here
+  finalizeState() {}
+
+  // Update attribute transition
+  updateTransition() {
+    const {model, attributeManager} = this.state;
+    const isInTransition = attributeManager && attributeManager.updateTransition();
+
+    if (model && isInTransition) {
+      model.setAttributes(attributeManager.getChangedAttributes({transition: true}));
+    }
+  }
+
+  // If state has a model, draw it with supplied uniforms
+  draw(opts) {
+    for (const model of this.getModels()) {
+      model.draw(opts);
+    }
+  }
+
+  // called to populate the info object that is passed to the event handler
+  // @return null to cancel event
+  getPickingInfo({info, mode}) {
+    const {index} = info;
+
+    if (index >= 0) {
+      // If props.data is an indexable array, get the object
+      if (Array.isArray(this.props.data)) {
+        info.object = this.props.data[index];
+      }
+    }
+
+    return info;
+  }
+
+  // END LIFECYCLE METHODS
+  // //////////////////////////////////////////////////
+
+  // Default implementation of attribute invalidation, can be redefined
+  invalidateAttribute(name = 'all', diffReason = '') {
+    const {attributeManager} = this.state;
+    if (!attributeManager) {
+      return;
+    }
+
+    if (name === 'all') {
+      log.log(LOG_PRIORITY_UPDATE, `updateTriggers invalidating all attributes: ${diffReason}`);
+      attributeManager.invalidateAll();
+    } else {
+      log.log(LOG_PRIORITY_UPDATE, `updateTriggers invalidating attribute ${name}: ${diffReason}`);
+      attributeManager.invalidate(name);
+    }
+  }
+
+  // Calls attribute manager to update any WebGL attributes, can be redefined
+  updateAttributes(props) {
+    const {attributeManager} = this.state;
+    if (!attributeManager) {
+      return;
+    }
+
+    // Figure out data length
+    const numInstances = this.getNumInstances(props);
+
+    attributeManager.update({
+      data: props.data,
+      numInstances,
+      props,
+      transitions: props.transitions,
+      buffers: props,
+      context: this,
+      // Don't worry about non-attribute props
+      ignoreUnknownAttributes: true
+    });
+
+    // TODO - Use getModels?
+    const {model} = this.state;
+    if (model) {
+      const changedAttributes = attributeManager.getChangedAttributes({clearChangedFlags: true});
+      model.setAttributes(changedAttributes);
+    }
+  }
+
   calculateInstancePickingColors(attribute, {numInstances}) {
     const {value, size} = attribute;
     // add 1 to index to seperate from no selection
@@ -328,18 +333,6 @@ export default class Layer {
       value[i * size + 1] = pickingColor[1];
       value[i * size + 2] = pickingColor[2];
     }
-  }
-
-  // DATA ACCESS API
-  // Data can use iterators and may not be random access
-
-  // Use iteration (the only required capability on data) to get first element
-  getFirstObject() {
-    const {data} = this.props;
-    for (const object of data) {
-      return object;
-    }
-    return null;
   }
 
   // INTERNAL METHODS
@@ -365,11 +358,6 @@ export default class Layer {
     // Use container library to get a count for any ES6 container or object
     const {data} = props;
     return count(data);
-  }
-
-  // clone this layer with modified props
-  clone(newProps) {
-    return new this.constructor(Object.assign({}, this.props, newProps));
   }
 
   // LAYER MANAGER API
