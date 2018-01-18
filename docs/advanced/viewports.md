@@ -79,7 +79,7 @@ Side-by-side is of course essential for stereoscopic rendering (and conveniently
     }),
     // right eye
     new Viewport({
-      width: viewprops.width / 2, x: viewprops.width / 2
+      width: viewprops.width / 2, x: viewprops.width / 2,
       viewMatrix: rightViewMatrix, projectionMatrix: rightProjectionMatrix
     }),
     ...
@@ -88,7 +88,7 @@ Side-by-side is of course essential for stereoscopic rendering (and conveniently
 
 Or they can overlap, (e.g. having a small overview map in the bottom middle of the screen overlaid over the main view)
 ```js
-  const {width, height} = viewportProps;
+  const {width, height} = viewprops;
   ...
   <DeckGL viewports=[
     new FirstPersonViewport({...viewprops}),
