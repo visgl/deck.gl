@@ -1,7 +1,6 @@
 import PropTypes from 'prop-types';
-import OrbitViewport from '../viewports/orbit-viewport';
-import OrbitState from '../controllers/orbit-state';
-import ViewportControls from '../controllers/viewport-controls';
+import OrbitViewport from '../../viewports/orbit-viewport';
+import OrbitController from '../../controllers/orbit-controller';
 import {EventManager} from 'mjolnir.js';
 
 const PREFIX = '-webkit-';
@@ -85,7 +84,7 @@ export default class OrbitControllerJS {
 
     this._eventManager = eventManager;
 
-    this._controls = props.orbitControls || new ViewportControls(OrbitState);
+    this._controls = props.orbitControls || new OrbitController();
     this._controls.setOptions(
       Object.assign({}, this.props, {
         onStateChange: this._onInteractiveStateChange.bind(this),

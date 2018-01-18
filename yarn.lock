@@ -3104,9 +3104,9 @@ minimist@~0.0.1:
   version "0.0.10"
   resolved "https://registry.yarnpkg.com/minimist/-/minimist-0.0.10.tgz#de3f98543dbf96082be48ad1a0c7cda836301dcf"
 
-mjolnir.js@>=0.1.0:
-  version "0.4.0"
-  resolved "https://registry.yarnpkg.com/mjolnir.js/-/mjolnir.js-0.4.0.tgz#f8e9847b8a38c2ba56b064b40a51d802f0463a0e"
+mjolnir.js@>=0.4.0:
+  version "0.4.1"
+  resolved "https://registry.yarnpkg.com/mjolnir.js/-/mjolnir.js-0.4.1.tgz#b5baa6aa5cdf20d11a8ea7b2ea31f011a6b72508"
   dependencies:
     hammerjs "^2.0.8"
 

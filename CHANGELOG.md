@@ -20,7 +20,9 @@ Ref: http://keepachangelog.com/en/0.3.0/
 For Earlier Beta Releases see below
 
 ### deck.gl v5.1.0-alpha.1 - TBD
-- `ViewportController` folded into `DeckGL` and `DeckGLJS`
+- `ViewportController` class removed, folded into `DeckGL` and `DeckGLJS`
+- `ViewportController` removed, moved into `DeckGL` and `DeckGLJS` classes
+- Event handling moved from `State` to `Controller` classes
 
 
 ## Official Releases
