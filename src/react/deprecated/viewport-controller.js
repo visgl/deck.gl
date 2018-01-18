@@ -2,10 +2,15 @@ import {Component, createElement} from 'react';
 import PropTypes from 'prop-types';
 
 import {EventManager} from 'mjolnir.js';
-import {experimental} from '../core';
+import {experimental} from '../../core';
 const {ViewportControls, TransitionManager} = experimental;
 
-import CURSOR from './utils/cursors';
+const PREFIX = '-webkit-';
+const CURSOR = {
+  GRABBING: `${PREFIX}grabbing`,
+  GRAB: `${PREFIX}grab`,
+  POINTER: 'pointer'
+};
 
 const propTypes = {
   viewportState: PropTypes.func,
