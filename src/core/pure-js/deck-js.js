@@ -58,11 +58,7 @@ const propTypes = {
   useDevicePixels: PropTypes.bool,
 
   // Controller props
-  controls: PropTypes.shape({
-    // A map control instance to replace the default map controls
-    events: PropTypes.arrayOf(PropTypes.string),
-    handleEvent: PropTypes.func
-  }),
+  controls: PropTypes.object,
   viewportState: PropTypes.func,
   state: PropTypes.object,
 
@@ -150,8 +146,6 @@ export default class DeckGLJS {
     this.effectManager = null;
     this.transitionManager = new TransitionManager(this.props);
     this.viewports = [];
-
-    this.forceUpdate = props.forceUpdate || (() => {});
 
     // Bind methods
     this._onRendererInitialized = this._onRendererInitialized.bind(this);
@@ -341,7 +335,6 @@ export default class DeckGLJS {
     if (isDragging !== this.state.isDragging) {
       this.state.isDragging = isDragging;
       this.canvas.style.cursor = this.props.getCursor({isDragging});
-      this.forceUpdate();
     }
   }
 }

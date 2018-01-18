@@ -41,6 +41,7 @@ export default class DeckGL extends React.Component {
   }
 
   shouldComponentUpdate(nextProps, nextState) {
+    // TODO/ib - this needs to be moved into deck.js
     if (this.deck.transitionManager) {
       const transitionTriggered = this.deck.transitionManager.processViewportChange(nextProps);
       // Skip this render to avoid jump during viewport transitions.
