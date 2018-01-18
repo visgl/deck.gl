@@ -78,14 +78,17 @@ These RFCs were implemented in v5.0. Also see luma.gl RFCs.
 | --- | --- | --- | --- |
 | **Animation** | | | |
 | [**Auto Highlighting**](v5.0/auto-highlighting-rfc.md) | @ibgreen @1chandu | **Implemented** | Auto highlight hovered object via `picking` module |
-| [**Viewport interpolation**](v5.0/viewport-animation-rfc.md) | @1chandu | **Experimental** | This should build on the new Viewport system in the First Person RFC. Also needs to consider react-map-gl. |
+| [**Viewport Transitions**](v5.0/viewport-animation-rfc.md) | @1chandu | **Experimental** | Animate Viewport changes ("fly to" effect) through interpolation of Viewport props. (Also used in react-map-gl v3.2). |
 | | | | |
 | **Viewports and Controllers** | | | |
 | [**First Person Geospatial Viewport**](v5.0/first-person-mercator-viewport-rfc.md) | @ibgreen | **Experimental** | Geospatially enable all viewports, add FirstPersonViewport for hybrid apps. |
 | [**Multiple Viewports**](v5.0/multi-viewport-rfc.md) | @ibgreen | **Experimental** | Support for multiple viewports |
 | | | | |
 | **General** | | | |
-| [**Break out EventManager**](v5.0/break-out-event-manager-rfc.md) | @ibgreen | **Implemented** | **Hygiene** Break out event manager module |
+| [**Break out EventManager**](v5.0/break-out-event-manager-rfc.md) | @ibgreen | **Implemented** | Break out event manager module (mjolnir.js) |
+| | | | |
+| **luma.gl RFCs** | | | |
+| **Break out Math Module** | @ibgreen | **Implemented** | Break out luma.gl math module (math.gl) |
 
 
 ## v4.1 RFCs

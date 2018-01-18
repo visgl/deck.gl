@@ -20,44 +20,60 @@
 
 import test from 'tape-catch';
 import {
-  getGeojsonFeatures,
-  separateGeojsonFeatures
-} from 'deck.gl/core-layers/geojson-layer/geojson';
+  extractPolygons,
+  normalizeGeojson
+} from 'deck.gl/deprecated-layers/choropleth-layer/geojson';
 import {toJS} from 'deck.gl/core/experimental/utils/container';
+
+import GEOJSON from 'deck.gl/test/data/geojson-data';
+
+import Immutable from 'immutable';
+const IMMUTABLE_GEOJSON = Immutable.fromJS(GEOJSON);
 
 const GEOMETRY = {type: 'Point'};
 const FEATURE = {type: 'Feature', properties: [], geometry: GEOMETRY};
 const FEATURE_COLLECTION = {type: 'FeatureCollection', features: [FEATURE]};
 
-const TEST_CASES = [
+const TEST_CASES_NORMALIZE = [
   {
     title: 'geometry',
     argument: GEOMETRY,
-    expected: [FEATURE]
+    expected: FEATURE_COLLECTION
   },
   {
     title: 'feature',
     argument: FEATURE,
-    expected: [FEATURE]
+    expected: FEATURE_COLLECTION
   },
   {
     title: 'feature collection',
     argument: FEATURE_COLLECTION,
-    expected: [FEATURE]
+    expected: FEATURE_COLLECTION
   }
 ];
 
 test('geojson#import', t => {
-  t.ok(typeof getGeojsonFeatures === 'function', 'getGeojsonFeatures imported OK');
-  t.ok(typeof separateGeojsonFeatures === 'function', 'separateGeojsonFeatures imported OK');
+  t.ok(typeof extractPolygons === 'function', 'extractPolygons imported OK');
+  t.ok(typeof normalizeGeojson === 'function', 'normalizeGeojson imported OK');
   t.end();
 });
 
-test('geojson#getGeojsonFeatures', t => {
-  for (const tc of TEST_CASES) {
-    const result = getGeojsonFeatures(tc.argument);
-    t.deepEqual(toJS(result), tc.expected, `getGeojsonFeatures ${tc.title} returned expected`);
+test('geojson#normalizeGeojson', t => {
+  for (const tc of TEST_CASES_NORMALIZE) {
+    const result = normalizeGeojson(tc.argument);
+    t.deepEqual(toJS(result), tc.expected, `normalizeGeojson ${tc.title} returned expected result`);
     t.comment(JSON.stringify(result));
   }
+  t.end();
+});
+
+test('geojson#extractPolygons', t => {
+  const polys = extractPolygons(GEOJSON);
+  t.ok(polys, 'Extracted GeoJson');
+
+  const immutablePolys = extractPolygons(IMMUTABLE_GEOJSON);
+  t.ok(immutablePolys, 'Extracted Immutable GeoJson');
+
+  // t.deepEqual(polys, toJS(immutablePolys), 'Immutable and standard GeoJson extraction equal');
   t.end();
 });

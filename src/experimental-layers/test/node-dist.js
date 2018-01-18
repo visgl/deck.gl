@@ -32,6 +32,5 @@ require('babel-polyfill');
 // Import headless luma support
 require('luma.gl/headless');
 
-// require('./test-utils/setup-gl');
 // Run the tests
-require('./index');
+require('../../../test/experimental-layers');
