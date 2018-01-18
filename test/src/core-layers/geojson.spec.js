@@ -23,7 +23,7 @@ import {
   getGeojsonFeatures,
   separateGeojsonFeatures
 } from 'deck.gl/core-layers/geojson-layer/geojson';
-import {toJS} from 'deck.gl/core/experimental/container';
+import {toJS} from 'deck.gl/core/experimental/utils/container';
 
 const GEOMETRY = {type: 'Point'};
 const FEATURE = {type: 'Feature', properties: [], geometry: GEOMETRY};

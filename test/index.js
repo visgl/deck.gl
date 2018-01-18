@@ -22,8 +22,11 @@ import './src/imports-spec';
 import './src/core';
 import './src/core-layers';
 
-// React test cases currently only work in browser
+// TODO - React test cases currently only work in browser
 // import './src/react';
 
 // deck.gl-layers
-import '../src/experimental-layers/test';
+// TODO - Tests currently only work in browser
+if (typeof document !== 'undefined') {
+  require('./src/experimental-layers');
+}
