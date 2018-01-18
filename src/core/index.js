@@ -26,6 +26,8 @@ import './lib/init';
 import './shaderlib';
 
 // Core Library
+export {default, default as Deck} from './deck';
+
 export {COORDINATE_SYSTEM} from './lib/constants';
 export {default as LayerManager} from './lib/layer-manager';
 export {default as AttributeManager} from './lib/attribute-manager';
@@ -38,30 +40,30 @@ export {default as WebMercatorViewport} from './viewports/web-mercator-viewport'
 export {default as PerspectiveViewport} from './viewports/perspective-viewport';
 export {default as OrthographicViewport} from './viewports/orthographic-viewport';
 
+// Controllers
+import {default as ViewState} from './lib/view-state';
+import {default as Controller} from './controllers/controller';
+import {default as MapController} from './controllers/map-controller';
+
 // Shader modules
 export {default as project} from './shaderlib/project/project';
 export {default as project64} from './shaderlib/project64/project64';
 export {default as lighting} from './shaderlib/lighting/lighting';
 
-// EXPERIMENTAL EXPORTS
-// Experimental Features (May change in minor version bumps, use at your own risk)
+// DEPREPECATED EXPORTS
+import {default as FirstPersonState} from './deprecated/controllers/first-person-state';
+import {default as OrbitState} from './deprecated/controllers/orbit-state';
+import {default as MapState} from './deprecated/controllers/map-state';
 
-import {default as FirstPersonState} from './controllers/first-person-state';
-import {default as OrbitState} from './controllers/orbit-state';
-import {default as MapState} from './controllers/map-state';
+// EXPERIMENTAL EXPORTS
 
 // Experimental Controllers
-import {default as Controller} from './controllers/viewport-controls';
-import {default as MapController} from './controllers/map-controls';
+import {default as FirstPersonController} from './controllers/first-person-controller';
+import {default as OrbitController} from './controllers/orbit-controller';
 
 import {default as FirstPersonViewport} from './viewports/first-person-viewport';
 import {default as ThirdPersonViewport} from './viewports/third-person-viewport';
 import {default as OrbitViewport} from './viewports/orbit-viewport';
-
-// Experimental Pure JS (non-React) bindings
-import {default as DeckGLJS} from './pure-js/deck-js';
-import {default as MapControllerJS} from './pure-js/map-controller-js';
-import {default as OrbitControllerJS} from './pure-js/orbit-controller-js';
 
 // Experimental Effects (non-React) bindings
 import {default as EffectManager} from './experimental/lib/effect-manager';
@@ -78,8 +80,6 @@ import TransitionManager from './lib/transition-manager';
 import {extractViewportFrom} from './transitions/transition-utils';
 
 // Layer utilities
-
-// Layer utilities
 import {default as log} from './utils/log';
 import {get} from './utils/get';
 import {count} from './utils/count';
@@ -94,22 +94,27 @@ import {flatten, countVertices, flattenVertices, fillArray} from './utils/flatte
 import {enable64bitSupport} from './utils/fp64';
 import {fp64ify, fp64LowPart} from './utils/fp64';
 
+// DEPRECATED EXPERIMENTAL EXPORTS
+import {default as Deck} from './deck'; // now official export
+import {default as MapControllerJS} from './deprecated/controllers/map-controller-js';
+import {default as OrbitControllerJS} from './deprecated/controllers/orbit-controller-js';
+
 export const experimental = {
-  ViewportControls: Controller,
+  ViewState,
   FirstPersonState,
   OrbitState,
   MapState,
 
   Controller,
   MapController,
-  // FirstPersonController,
-  // OrbitController,
+  FirstPersonController,
+  OrbitController,
 
   FirstPersonViewport,
   ThirdPersonViewport,
   OrbitViewport,
 
-  DeckGLJS,
+  Deck,
   MapControllerJS,
   OrbitControllerJS,
 

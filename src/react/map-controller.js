@@ -1,5 +1,6 @@
 import {PureComponent, createElement} from 'react';
-import MapControllerJS from '../core/pure-js/map-controller-js';
+import {experimental} from '../core';
+const {MapControllerJS} = experimental;
 
 export default class MapController extends PureComponent {
   constructor(props) {

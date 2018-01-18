@@ -20,8 +20,8 @@
 
 import React, {createElement, cloneElement} from 'react';
 import autobind from './utils/autobind';
-import {experimental} from '../core';
-const {DeckGLJS, log} = experimental;
+import {Deck, experimental} from '../core';
+const {log} = experimental;
 
 export default class DeckGL extends React.Component {
   constructor(props) {
@@ -31,7 +31,7 @@ export default class DeckGL extends React.Component {
   }
 
   componentDidMount() {
-    this.deck = new DeckGLJS(Object.assign({}, this.props, {canvas: this.overlay}));
+    this.deck = new Deck(Object.assign({}, this.props, {canvas: this.overlay}));
   }
 
   componentWillReceiveProps(nextProps) {
@@ -41,7 +41,7 @@ export default class DeckGL extends React.Component {
   }
 
   shouldComponentUpdate(nextProps, nextState) {
-    // TODO/ib - this needs to be moved into deck.js
+    // TODO - this needs to be moved into deck.js
     if (this.deck.transitionManager) {
       const transitionTriggered = this.deck.transitionManager.processViewportChange(nextProps);
       // Skip this render to avoid jump during viewport transitions.
@@ -147,5 +147,5 @@ export default class DeckGL extends React.Component {
   }
 }
 
-DeckGL.propTypes = DeckGLJS.propTypes;
-DeckGL.defaultProps = DeckGLJS.defaultProps;
+DeckGL.propTypes = Deck.propTypes;
+DeckGL.defaultProps = Deck.defaultProps;

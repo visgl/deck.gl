@@ -26,6 +26,7 @@ const experimental = {};
 //
 
 export {
+  Deck,
   // LIB
   COORDINATE_SYSTEM,
   LayerManager,
@@ -37,6 +38,10 @@ export {
   WebMercatorViewport,
   PerspectiveViewport,
   OrthographicViewport,
+  // Controllers
+  ViewState,
+  Controller,
+  MapController,
   // Shader modules
   project,
   project64,
@@ -67,7 +72,7 @@ const {
   LinearInterpolator,
   ViewportFlyToInterpolator,
 
-  DeckGLJS,
+  Deck,
   MapControllerJS,
 
   EffectManager,
@@ -94,7 +99,7 @@ Object.assign(experimental, {
   ViewportFlyToInterpolator,
 
   // Pure JS (non-React) API
-  DeckGLJS,
+  Deck,
   MapControllerJS,
 
   // Effects base classes
@@ -202,8 +207,8 @@ export {default, DeckGL} from './react';
 import {MapController, OrbitController} from './react';
 
 Object.assign(experimental, {
-  MapController,
-  OrbitController
+  ReactMapController: MapController,
+  ReactOrbitController: OrbitController
 });
 
 //
