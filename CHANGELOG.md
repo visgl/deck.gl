@@ -50,7 +50,9 @@ For older Beta Releases corresponding to already shipped official releases are l
 - Attribute Transition: Initial Implementation (#981)
 
 ### deck.gl v5.1.0-alpha.1 - TBD
-- `ViewportController` folded into `DeckGL` and `DeckGLJS`
+- `ViewportController` class removed, folded into `DeckGL` and `DeckGLJS`
+- Event handling moved from `State` to `Controller` classes
+
 
 ## Official Releases
 

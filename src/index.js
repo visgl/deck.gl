@@ -26,6 +26,7 @@ const experimental = {};
 //
 
 export {
+  Deck,
   // LIB
   COORDINATE_SYSTEM,
   LayerManager,
@@ -37,6 +38,10 @@ export {
   WebMercatorViewport,
   PerspectiveViewport,
   OrthographicViewport,
+  // Controllers
+  ViewState,
+  Controller,
+  MapController,
   // Shader modules
   project,
   project64,
@@ -51,9 +56,9 @@ const {
 
   // View States
   ViewState,
-  FirstPersonState,
-  OrbitState,
-  MapState,
+  // FirstPersonState,
+  // OrbitState,
+  // MapState,
 
   // Controllers
   Controller,
@@ -81,9 +86,9 @@ Object.assign(experimental, {
 
   // Unfinished controller/viewport classes
   ViewState,
-  FirstPersonState,
-  OrbitState,
-  MapState,
+  // FirstPersonState,
+  // OrbitState,
+  // MapState,
 
   Controller,
   FirstPersonController,
@@ -206,8 +211,8 @@ export {default, DeckGL} from './react';
 import {MapController, OrbitController} from './react';
 
 Object.assign(experimental, {
-  MapController,
-  OrbitController
+  ReactMapController: MapController,
+  ReactOrbitController: OrbitController
 });
 
 //

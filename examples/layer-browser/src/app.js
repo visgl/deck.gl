@@ -1,12 +1,19 @@
 /* global window, document */
 
-// deck.gl ES6 components
-import {COORDINATE_SYSTEM, WebMercatorViewport, experimental} from 'deck.gl';
-
-const {MapState, OrbitState, FirstPersonViewport, OrbitViewport, ReflectionEffect} = experimental;
-
 // deck.gl react components
 import DeckGL from 'deck.gl';
+import {experimental} from 'deck.gl';
+
+// deck.gl core components
+import {COORDINATE_SYSTEM, WebMercatorViewport} from 'deck.gl';
+
+const {
+  MapController,
+  OrbitController,
+  FirstPersonViewport,
+  OrbitViewport,
+  ReflectionEffect
+} = experimental;
 
 import React, {PureComponent} from 'react';
 import ReactDOM from 'react-dom';
@@ -268,14 +275,14 @@ class App extends PureComponent {
     return (
       <div style={{backgroundColor: '#eeeeee'}}>
         <DeckGL
-          viewportState={infovis ? OrbitState : MapState}
-          {...(infovis ? orbitViewState : mapViewState)}
-          onViewportChange={this._onViewportChange}
           ref="deckgl"
           id="default-deckgl-overlay"
+          controller={infovis ? OrbitController : MapController}
+          viewState={infovis ? orbitViewState : mapViewState}
+          viewports={viewports}
+          onViewportChange={this._onViewportChange}
           width={width}
           height={height}
-          viewports={viewports}
           layers={this._renderExamples()}
           layerFilter={this._layerFilter}
           effects={effects ? this._effects : []}

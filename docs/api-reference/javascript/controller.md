@@ -8,7 +8,7 @@
 
 ## Properties
 
-##### viewportState (Class Constructor)
+##### viewState (Class Constructor)
 
 #####  state: PropTypes.object (instance)
 
