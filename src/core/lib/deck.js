@@ -66,8 +66,6 @@ const propTypes = {
   state: PropTypes.object,
 
   // Viewport props (TODO - should only support these on the react component)
-  width: PropTypes.number.isRequired, // The width of the map.
-  height: PropTypes.number.isRequired, // The height of the map.
   longitude: PropTypes.number.isRequired, // The longitude of the center of the map.
   latitude: PropTypes.number.isRequired, // The latitude of the center of the map.
   zoom: PropTypes.number.isRequired, // The tile zoom level of the map.

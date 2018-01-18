@@ -49,6 +49,8 @@ For older Beta Releases corresponding to already shipped official releases are l
 - [Doc] Fix of layer attribute typo (#1311)
 - Attribute Transition: Initial Implementation (#981)
 
+### deck.gl v5.1.0-alpha.1 - TBD
+- `ViewportController` folded into `DeckGL` and `DeckGLJS`
 
 ## Official Releases
 
