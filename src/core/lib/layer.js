@@ -142,6 +142,16 @@ export default class Layer {
     return this.props.pickable && this.props.visible;
   }
 
+  // Use iteration (the only required capability on data) to get first element
+  // deprecated
+  getFirstObject() {
+    const {data} = this.props;
+    for (const object of data) {
+      return object;
+    }
+    return null;
+  }
+
   // PROJECTION METHODS
 
   /**
