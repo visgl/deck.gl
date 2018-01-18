@@ -15,11 +15,17 @@ Each version should:
 Ref: http://keepachangelog.com/en/0.3.0/
 -->
 
+
 ## Latest Beta Releases
 
-For Earlier Beta Releases see below
+For older Beta Releases corresponding to already shipped official releases are listed at the end of this log.
 
-## Beta Releases
+
+### deck.gl v6.0 Beta Releases
+
+#### deck.gl v6.0.0-alpha.1 - Not yet published, date: TBD
+- `ViewportController` folded into `DeckGL` and `DeckGLJS`
+
 
 ### deck.gl v5.1 Beta Releases
 
@@ -42,6 +48,7 @@ For Earlier Beta Releases see below
 - Fix text layer redraw flag clearing (#1314)
 - [Doc] Fix of layer attribute typo (#1311)
 - Attribute Transition: Initial Implementation (#981)
+
 
 ## Official Releases
 
