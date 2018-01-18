@@ -1,6 +1,6 @@
-# ViewportController (React Component)
+# Controller (React Component)
 
-`ViewportController` is a React Component that wraps the deck.gl `Controls` class.
+`Controller` is a class that wraps the deck.gl `Controls` class.
 
 
 ## Usage
