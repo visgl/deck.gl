@@ -70,7 +70,8 @@ export default class GridCellLayer extends Layer {
       : {vs, fs, modules: ['lighting', 'picking'], shaderCache}; // 'project' module added by default.
   }
 
-  initializeState() {const attributeManager = this.getAttributeManager();
+  initializeState() {
+    const attributeManager = this.getAttributeManager();
     /* eslint-disable max-len */
     attributeManager.addInstanced({
       instancePositions: {

@@ -89,7 +89,8 @@ export default class HexagonCellLayer extends Layer {
    * DeckGL calls initializeState when GL context is available
    * Essentially a deferred constructor
    */
-  initializeState() {const attributeManager = this.getAttributeManager();
+  initializeState() {
+    const attributeManager = this.getAttributeManager();
     /* eslint-disable max-len */
     attributeManager.addInstanced({
       instancePositions: {

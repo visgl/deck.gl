@@ -60,7 +60,8 @@ export default class PathLayer extends Layer {
       : {vs, fs, modules: ['picking']}; // 'project' module added by default.
   }
 
-  initializeState() {const attributeManager = this.getAttributeManager();
+  initializeState() {
+    const attributeManager = this.getAttributeManager();
     /* eslint-disable max-len */
     attributeManager.addInstanced({
       instanceStartPositions: {size: 3, update: this.calculateStartPositions},

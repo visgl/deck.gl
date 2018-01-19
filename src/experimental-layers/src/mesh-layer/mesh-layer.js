@@ -100,7 +100,8 @@ export default class MeshLayer extends Layer {
       : {vs, fs, modules: ['picking', 'lighting'], shaderCache}; // 'project' module added by default.
   }
 
-  initializeState() {const attributeManager = this.getAttributeManager();
+  initializeState() {
+    const attributeManager = this.getAttributeManager();
     attributeManager.addInstanced({
       instancePositions: {
         size: 3,

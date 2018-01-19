@@ -46,7 +46,8 @@ export default class ArcLayer extends Layer {
       : {vs, fs, modules: ['picking']}; // 'project' module added by default.
   }
 
-  initializeState() {const attributeManager = this.getAttributeManager();
+  initializeState() {
+    const attributeManager = this.getAttributeManager();
 
     /* eslint-disable max-len */
     attributeManager.addInstanced({
