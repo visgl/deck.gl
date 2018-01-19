@@ -18,7 +18,6 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {COORDINATE_SYSTEM} from '../../lib/constants';
 import lightingShader from './lighting.glsl';
 import project from '../project/project';
 
@@ -36,8 +35,7 @@ export default {
         diffuseRatio = 0.6,
         specularRatio = 0.8,
         lightsStrength = [2.0, 0.0, 0.0, 0.0],
-        // numberOfLights = 2,
-        lightCoordinateSystem = COORDINATE_SYSTEM.LNGLAT
+        // numberOfLights = 2
       } = opts.lightSettings;
 
       return {
@@ -45,8 +43,7 @@ export default {
         ambientRatio,
         diffuseRatio,
         specularRatio,
-        lightsStrength,
-        lightCoordinateSystem
+        lightsStrength
       };
     }
 
