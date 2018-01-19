@@ -31,7 +31,7 @@ export default class CompositeLayer extends Layer {
   }
 
   getSubLayers() {
-    return this.internalState.subLayers || [];
+    return (this.internalState && this.internalState.subLayers) || [];
   }
 
   // initializeState is usually not needed for composite layers

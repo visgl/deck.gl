@@ -209,9 +209,10 @@ export default class HexagonLayer extends CompositeLayer {
   }
 
   getHexagons() {
-    const {hexagonAggregator} = this.props;
+    const {data, hexagonAggregator} = this.props;
     const {viewport} = this.context;
-    const {hexagons, hexagonVertices} = hexagonAggregator(this.props, viewport);
+    const props = Object.assign({}, this.props, {data});
+    const {hexagons, hexagonVertices} = hexagonAggregator(props, viewport);
     this.setState({hexagons, hexagonVertices});
     this.getSortedBins();
   }

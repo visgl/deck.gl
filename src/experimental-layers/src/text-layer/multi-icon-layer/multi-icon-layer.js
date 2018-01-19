@@ -44,8 +44,7 @@ export default class MultiIconLayer extends IconLayer {
 
   initializeState() {
     super.initializeState();
-
-    const {attributeManager} = this.state;
+const attributeManager = this.getAttributeManager();
     attributeManager.addInstanced({
       instanceIndexOfIcon: {
         size: 1,

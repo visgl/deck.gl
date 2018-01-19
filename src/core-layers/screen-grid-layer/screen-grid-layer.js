@@ -40,8 +40,7 @@ export default class ScreenGridLayer extends Layer {
     return {vs, fs, modules: ['picking']}; // 'project' module added by default.
   }
 
-  initializeState() {
-    const {attributeManager} = this.state;
+  initializeState() {const attributeManager = this.getAttributeManager();
     const {gl} = this.context;
 
     /* eslint-disable max-len */
@@ -123,8 +122,7 @@ export default class ScreenGridLayer extends Layer {
       numRow,
       numInstances: numCol * numRow
     });
-
-    const {attributeManager} = this.state;
+const attributeManager = this.getAttributeManager();
     attributeManager.invalidateAll();
   }
 

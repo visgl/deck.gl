@@ -46,8 +46,7 @@ export default class ArcLayer extends Layer {
       : {vs, fs, modules: ['picking']}; // 'project' module added by default.
   }
 
-  initializeState() {
-    const {attributeManager} = this.state;
+  initializeState() {const attributeManager = this.getAttributeManager();
 
     /* eslint-disable max-len */
     attributeManager.addInstanced({
@@ -77,7 +76,7 @@ export default class ArcLayer extends Layer {
 
   updateAttribute({props, oldProps, changeFlags}) {
     if (props.fp64 !== oldProps.fp64) {
-      const {attributeManager} = this.state;
+      const attributeManager = this.getAttributeManager();
       attributeManager.invalidateAll();
 
       if (props.fp64 && props.coordinateSystem === COORDINATE_SYSTEM.LNGLAT) {

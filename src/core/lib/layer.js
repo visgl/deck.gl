@@ -19,73 +19,37 @@
 // THE SOFTWARE.
 
 /* global window */
-import {COORDINATE_SYSTEM, LIFECYCLE} from './constants';
+import {LIFECYCLE} from './constants';
 import AttributeManager from './attribute-manager';
-import Stats from './stats';
-import {getDefaultProps, diffProps} from './props';
+import {diffProps} from './props';
 import {count} from '../utils/count';
 import log from '../utils/log';
-import {applyPropOverrides, removeLayerInSeer} from './seer-integration';
+import {removeLayerInSeer} from './seer-integration';
 import {GL, withParameters} from 'luma.gl';
 import assert from 'assert';
 
-const LOG_PRIORITY_UPDATE = 1;
+import LayerProps from './layer-props';
+import LayerState from './layer-state';
 
-const EMPTY_ARRAY = [];
+const LOG_PRIORITY_UPDATE = 1;
 const EMPTY_PROPS = {};
 Object.freeze(EMPTY_PROPS);
-const noop = () => {};
-
-const defaultProps = {
-  // data: Special handling for null, see below
-  dataComparator: null,
-  updateTriggers: {}, // Update triggers: a core change detection mechanism in deck.gl
-  numInstances: undefined,
-
-  visible: true,
-  pickable: false,
-  opacity: 0.8,
-
-  onHover: noop,
-  onClick: noop,
-
-  coordinateSystem: COORDINATE_SYSTEM.LNGLAT,
-  coordinateOrigin: [0, 0, 0],
-
-  parameters: {},
-  uniforms: {},
-  framebuffer: null,
-
-  animation: null, // Passed prop animation functions to evaluate props
-
-  // Offset depth based on layer index to avoid z-fighting.
-  // Negative values pull layer towards the camera
-  // https://www.opengl.org/archives/resources/faq/technical/polygonoffset.htm
-  getPolygonOffset: ({layerIndex}) => [0, -layerIndex * 100],
-
-  // Selection/Highlighting
-  highlightedObjectIndex: null,
-  autoHighlight: false,
-  highlightColor: [0, 0, 128, 128]
-};
 
 let counter = 0;
 
 export default class Layer {
   constructor(props) {
-    // Call a helper function to merge the incoming props with defaults and freeze them.
-    this.props = this._normalizeProps(props);
+    // Merges the incoming props with defaults and freeze them.
+    this.props = new LayerProps(props, this);
 
     // Define all members before layer is sealed
     this.id = this.props.id; // The layer's id, used for matching with layers from last render cycle
     this.oldProps = EMPTY_PROPS; // Props from last render used for change detection
     this.count = counter++; // Keep track of how many layer instances you are generating
     this.lifecycle = LIFECYCLE.NO_STATE; // Helps track and debug the life cycle of the layers
-    this.state = null; // Will be set to the shared layer state object during layer matching
-    this.context = null; // Will reference layer manager's context, contains state shared by layers
     this.parentLayer = null; // reference to the composite layer parent that rendered this layer
-
-    // CompositeLayer members, need to be defined here because of the `Object.seal`
+    this.context = null; // Will reference layer manager's context, contains state shared by layers
+    this.state = null; // Will be set to the shared layer state object during layer matching
     this.internalState = null;
 
     // Seal the layer
@@ -111,26 +75,29 @@ export default class Layer {
   // Updates selected state members and marks the object for redraw
   setState(updateObject) {
     Object.assign(this.state, updateObject);
-    this.state.needsRedraw = true;
+    this.setNeedsRedraw();
   }
 
   // Sets the redraw flag for this layer, will trigger a redraw next animation frame
   setNeedsRedraw(redraw = true) {
-    if (this.state) {
-      this.state.needsRedraw = redraw;
+    if (this.internalState) {
+      this.internalState.needsRedraw = redraw;
     }
   }
+
+  // Sets the update flag for this layer, will trigger a redraw next animation frame
+  // setNeedsUpdate(update = true) {
+  //   if (this.internalState) {
+  //     this.internalState.needsUpdate = update;
+  //   }
+  // }
 
   // Checks state of attributes and model
   getNeedsRedraw({clearRedrawFlags = false} = {}) {
     return this._getNeedsRedraw(clearRedrawFlags);
   }
 
-  // Return an array of models used by this layer, can be overriden by layer subclass
-  getModels() {
-    return this.state.models || (this.state.model ? [this.state.model] : []);
-  }
-
+  // Checks if layer attributes needs updating
   needsUpdate() {
     // Call subclass lifecycle method
     return this.shouldUpdateState(this._getUpdateParams());
@@ -142,8 +109,26 @@ export default class Layer {
     return this.props.pickable && this.props.visible;
   }
 
+  // Return an array of models used by this layer, can be overriden by layer subclass
+  getModels() {
+    return this.state && (this.state.models || (this.state.model ? [this.state.model] : []));
+  }
+
+  // TODO - Gradually phase out, does not support multi model layers
+  getSingleModel() {
+    return this.state && this.state.model;
+  }
+
+  getAttributeManager() {
+    return this.internalState && this.internalState.attributeManager;
+  }
+
+  getCurrentLayer() {
+    return this.internalState && this.internalState.layer;
+  }
+
   // Use iteration (the only required capability on data) to get first element
-  // deprecated
+  // deprecated since we are effectively only supporting Arrays
   getFirstObject() {
     const {data} = this.props;
     for (const object of data) {
@@ -154,71 +139,56 @@ export default class Layer {
 
   // PROJECTION METHODS
 
-  /**
-   * Projects a point with current map state (lat, lon, zoom, pitch, bearing)
-   *
-   * Note: Position conversion is done in shader, so in many cases there is no need
-   * for this function
-   * @param {Array|TypedArray} lngLat - long and lat values
-   * @return {Array|TypedArray} - x, y coordinates
-   */
+  // Projects a point with current map state (lat, lon, zoom, pitch, bearing)
+  // TODO - need to be extended to work with multiple `views`
   project(lngLat) {
     const {viewport} = this.context;
-    assert(Array.isArray(lngLat), 'Layer.project needs [lng,lat]');
+    assert(Array.isArray(lngLat));
     return viewport.project(lngLat);
   }
 
   unproject(xy) {
     const {viewport} = this.context;
-    assert(Array.isArray(xy), 'Layer.unproject needs [x,y]');
+    assert(Array.isArray(xy));
     return viewport.unproject(xy);
   }
 
   projectFlat(lngLat) {
     const {viewport} = this.context;
-    assert(Array.isArray(lngLat), 'Layer.project needs [lng,lat]');
+    assert(Array.isArray(lngLat));
     return viewport.projectFlat(lngLat);
   }
 
   unprojectFlat(xy) {
     const {viewport} = this.context;
-    assert(Array.isArray(xy), 'Layer.unproject needs [x,y]');
+    assert(Array.isArray(xy));
     return viewport.unprojectFlat(xy);
   }
 
-  // TODO - needs to refer to context
+  // TODO - needs to refer to context for devicePixels setting
   screenToDevicePixels(screenPixels) {
     log.deprecated('screenToDevicePixels', 'DeckGL prop useDevicePixels for conversion');
     const devicePixelRatio = typeof window !== 'undefined' ? window.devicePixelRatio : 1;
     return screenPixels * devicePixelRatio;
   }
 
-  /**
-   * Returns the picking color that doesn't match any subfeature
-   * Use if some graphics do not belong to any pickable subfeature
-   * @return {Array} - a black color
-   */
+  // Returns the picking color that doesn't match any subfeature
+  // Use if some graphics do not belong to any pickable subfeature
+  // @return {Array} - a black color
   nullPickingColor() {
     return [0, 0, 0];
   }
 
-  /**
-   * Returns the picking color that doesn't match any subfeature
-   * Use if some graphics do not belong to any pickable subfeature
-   * @param {int} i - index to be decoded
-   * @return {Array} - the decoded color
-   */
+  // Returns the picking color that doesn't match any subfeature
+  // Use if some graphics do not belong to any pickable subfeature
   encodePickingColor(i) {
     assert((((i + 1) >> 24) & 255) === 0, 'index out of picking color range');
     return [(i + 1) & 255, ((i + 1) >> 8) & 255, (((i + 1) >> 8) >> 8) & 255];
   }
 
-  /**
-   * Returns the picking color that doesn't match any subfeature
-   * Use if some graphics do not belong to any pickable subfeature
-   * @param {Uint8Array} color - color array to be decoded
-   * @return {Array} - the decoded picking color
-   */
+  // Returns the index corresponding to a picking color that doesn't match any subfeature
+  // @param {Uint8Array} color - color array to be decoded
+  // @return {Array} - the decoded picking color
   decodePickingColor(color) {
     assert(color instanceof Uint8Array);
     const [i1, i2, i3] = color;
@@ -244,7 +214,7 @@ export default class Layer {
   // Default implementation, all attributes will be invalidated and updated
   // when data changes
   updateState({oldProps, props, oldContext, context, changeFlags}) {
-    const {attributeManager} = this.state;
+    const attributeManager = this.getAttributeManager();
     if (changeFlags.dataChanged && attributeManager) {
       attributeManager.invalidateAll();
     }
@@ -253,16 +223,6 @@ export default class Layer {
   // Called once when layer is no longer matched and state will be discarded
   // App can destroy WebGL resources here
   finalizeState() {}
-
-  // Update attribute transition
-  updateTransition() {
-    const {model, attributeManager} = this.state;
-    const isInTransition = attributeManager && attributeManager.updateTransition();
-
-    if (model && isInTransition) {
-      model.setAttributes(attributeManager.getChangedAttributes({transition: true}));
-    }
-  }
 
   // If state has a model, draw it with supplied uniforms
   draw(opts) {
@@ -289,62 +249,6 @@ export default class Layer {
   // END LIFECYCLE METHODS
   // //////////////////////////////////////////////////
 
-  // Default implementation of attribute invalidation, can be redefined
-  invalidateAttribute(name = 'all', diffReason = '') {
-    const {attributeManager} = this.state;
-    if (!attributeManager) {
-      return;
-    }
-
-    if (name === 'all') {
-      log.log(LOG_PRIORITY_UPDATE, `updateTriggers invalidating all attributes: ${diffReason}`);
-      attributeManager.invalidateAll();
-    } else {
-      log.log(LOG_PRIORITY_UPDATE, `updateTriggers invalidating attribute ${name}: ${diffReason}`);
-      attributeManager.invalidate(name);
-    }
-  }
-
-  // Calls attribute manager to update any WebGL attributes, can be redefined
-  updateAttributes(props) {
-    const {attributeManager} = this.state;
-    if (!attributeManager) {
-      return;
-    }
-
-    // Figure out data length
-    const numInstances = this.getNumInstances(props);
-
-    attributeManager.update({
-      data: props.data,
-      numInstances,
-      props,
-      transitions: props.transitions,
-      buffers: props,
-      context: this,
-      // Don't worry about non-attribute props
-      ignoreUnknownAttributes: true
-    });
-
-    // TODO - Use getModels?
-    const {model} = this.state;
-    if (model) {
-      const changedAttributes = attributeManager.getChangedAttributes({clearChangedFlags: true});
-      model.setAttributes(changedAttributes);
-    }
-  }
-
-  calculateInstancePickingColors(attribute, {numInstances}) {
-    const {value, size} = attribute;
-    // add 1 to index to seperate from no selection
-    for (let i = 0; i < numInstances; i++) {
-      const pickingColor = this.encodePickingColor(i);
-      value[i * size + 0] = pickingColor[0];
-      value[i * size + 1] = pickingColor[1];
-      value[i * size + 2] = pickingColor[2];
-    }
-  }
-
   // INTERNAL METHODS
 
   // Deduces numer of instances. Intention is to support:
@@ -366,8 +270,71 @@ export default class Layer {
     }
 
     // Use container library to get a count for any ES6 container or object
-    const {data} = props;
+    const {data} = this.props;
     return count(data);
+  }
+
+  // Default implementation of attribute invalidation, can be redefined
+  invalidateAttribute(name = 'all', diffReason = '') {
+    const attributeManager = this.getAttributeManager();
+    if (!attributeManager) {
+      return;
+    }
+
+    if (name === 'all') {
+      log.log(LOG_PRIORITY_UPDATE, `updateTriggers invalidating all attributes: ${diffReason}`);
+      attributeManager.invalidateAll();
+    } else {
+      log.log(LOG_PRIORITY_UPDATE, `updateTriggers invalidating attribute ${name}: ${diffReason}`);
+      attributeManager.invalidate(name);
+    }
+  }
+
+  // Calls attribute manager to update any WebGL attributes
+  updateAttributes(props) {
+    const attributeManager = this.getAttributeManager();
+
+    // Figure out data length
+    const numInstances = this.getNumInstances(props);
+
+    attributeManager.update({
+      data: props.data,
+      numInstances,
+      props,
+      transitions: props.transitions,
+      buffers: props,
+      context: this,
+      // Don't worry about non-attribute props
+      ignoreUnknownAttributes: true
+    });
+
+    const model = this.getSingleModel();
+    if (model) {
+      const changedAttributes = attributeManager.getChangedAttributes({clearChangedFlags: true});
+      model.setAttributes(changedAttributes);
+    }
+  }
+
+  // Update attribute transition
+  updateTransition() {
+    const model = this.getSingleModel();
+    const attributeManager = this.getAttributeManager();
+    const isInTransition = attributeManager && attributeManager.updateTransition();
+
+    if (model && isInTransition) {
+      model.setAttributes(attributeManager.getChangedAttributes({transition: true}));
+    }
+  }
+
+  calculateInstancePickingColors(attribute, {numInstances}) {
+    const {value, size} = attribute;
+    // add 1 to index to seperate from no selection
+    for (let i = 0; i < numInstances; i++) {
+      const pickingColor = this.encodePickingColor(i);
+      value[i * size + 0] = pickingColor[0];
+      value[i * size + 1] = pickingColor[1];
+      value[i * size + 2] = pickingColor[2];
+    }
   }
 
   // LAYER MANAGER API
@@ -378,7 +345,7 @@ export default class Layer {
   _initialize() {
     assert(arguments.length === 0);
     assert(this.context.gl);
-    assert(!this.state);
+    assert(!this.internalState && !this.state);
 
     const attributeManager = new AttributeManager(this.context.gl, {
       id: this.props.id
@@ -395,20 +362,13 @@ export default class Layer {
       }
     });
 
-    this.internalState = {
-      subLayers: null, // reference to sublayers rendered in a previous cycle
-      stats: new Stats({id: 'draw'})
-      // animatedProps: null, // Computing animated props requires layer manager state
-      // TODO - move these fields here (risks breaking layers)
-      // attributeManager,
-      // needsRedraw: true,
-    };
+    this.internalState = new LayerState({
+      attributeManager
+    });
+    this.state = {};
+    // TODO deprecated, for backwards compatibility with older layers
+    this.state.attributeManager = this.getAttributeManager();
 
-    this.state = {
-      attributeManager,
-      model: null,
-      needsRedraw: true
-    };
 
     // Call subclass lifecycle methods
     this.initializeState(this.context);
@@ -416,14 +376,11 @@ export default class Layer {
 
     // initializeState callback tends to clear state
     this.setChangeFlags({dataChanged: true, propsChanged: true, viewportChanged: true});
+    this._loadData();
 
     this._updateState(this._getUpdateParams());
 
-    if (this.isComposite) {
-      this._renderLayers(true);
-    }
-
-    const {model} = this.state;
+    const model = this.getSingleModel();
     if (model) {
       model.id = this.props.id;
       model.program.id = `${this.props.id}-program`;
@@ -488,6 +445,7 @@ export default class Layer {
   // Called by manager when layer is about to be disposed
   // Note: not guaranteed to be called on application shutdown
   _finalize() {
+    assert(this.internalState && this.state);
     assert(arguments.length === 0);
     // Call subclass lifecycle method
     this.finalizeState(this.context);
@@ -618,7 +576,43 @@ ${flags.viewportChanged ? 'viewport' : ''}\
       }
     }
 
+    if (changeFlags.dataChanged) {
+      if (this._loadData()) {
+        // Postpone data changed flag until loaded
+        changeFlags.dataChanged = false;
+      }
+    }
+
     return this.setChangeFlags(changeFlags);
+  }
+
+  _loadData() {
+    const {data, fetch} = this.props;
+    switch (typeof data) {
+    case 'string':
+      const url = data;
+      if (url !== this.internalState.lastUrl) {
+        // Make sure getData() does not return a string
+
+        this.internalState.data = this.internalState.data || [];
+        this.internalState.lastUrl = url;
+
+        // Load the data
+        const promise = fetch(url)
+        .then(loadedData => {
+          this.internalState.data = loadedData;
+          this.setChangeFlags({dataChanged: true});
+        });
+
+        this.internalState.loadPromise = promise;
+        return true;
+      }
+      break;
+    default:
+      // Makes getData() return props.data
+      this.internalState.data = null;
+    }
+    return false;
   }
 
   // PRIVATE METHODS
@@ -637,16 +631,16 @@ ${flags.viewportChanged ? 'viewport' : ''}\
   _getNeedsRedraw(clearRedrawFlags) {
     // this method may be called by the render loop as soon a the layer
     // has been created, so guard against uninitialized state
-    if (!this.state) {
+    if (!this.internalState) {
       return false;
     }
 
     let redraw = false;
-    redraw = redraw || (this.state.needsRedraw && this.id);
-    this.state.needsRedraw = this.state.needsRedraw && !clearRedrawFlags;
+    redraw = redraw || (this.internalState.needsRedraw && this.id);
+    this.internalState.needsRedraw = this.internalState.needsRedraw && !clearRedrawFlags;
 
     // TODO - is attribute manager needed? - Model should be enough.
-    const {attributeManager} = this.state;
+    const attributeManager = this.getAttributeManager();
     const attributeManagerNeedsRedraw =
       attributeManager && attributeManager.getNeedsRedraw({clearRedrawFlags});
     redraw = redraw || attributeManagerNeedsRedraw;
@@ -660,22 +654,6 @@ ${flags.viewportChanged ? 'viewport' : ''}\
     }
 
     return redraw;
-  }
-
-  // Helper for constructor, merges props with default props and freezes them
-  _normalizeProps(props) {
-    // If sublayer has static defaultProps member, getDefaultProps will return it
-    const mergedDefaultProps = getDefaultProps(this);
-    // Merge supplied props with pre-merged default props
-    props = Object.assign({}, mergedDefaultProps, props);
-    // Accept null as data - otherwise apps and layers need to add ugly checks
-    // Use constant fallback so that data change is not triggered
-    props.data = props.data || EMPTY_ARRAY;
-    // Apply any overrides from the seer debug extension if it is active
-    applyPropOverrides(props);
-    // Props are immutable
-    Object.freeze(props);
-    return props;
   }
 
   // Called by layer manager to transfer state from an old layer
@@ -728,7 +706,7 @@ ${flags.viewportChanged ? 'viewport' : ''}\
     }
 
     // TODO - set needsRedraw on the model(s)?
-    this.state.needsRedraw = true;
+    this.setNeedsRedraw();
   }
 
   _updateModuleSettings() {
@@ -749,11 +727,11 @@ ${flags.viewportChanged ? 'viewport' : ''}\
     }
 
     // TODO - set needsRedraw on the model(s)?
-    this.state.needsRedraw = true;
+    this.setNeedsRedraw();
     log.deprecated('layer.setUniforms', 'model.setUniforms');
   }
 }
 
 Layer.layerName = 'Layer';
-Layer.propTypes = defaultProps;
-Layer.defaultProps = defaultProps;
+Layer.propTypes = LayerProps.defaultProps;
+Layer.defaultProps = LayerProps.defaultProps;

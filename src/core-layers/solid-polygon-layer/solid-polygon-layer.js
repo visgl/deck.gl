@@ -72,8 +72,7 @@ export default class SolidPolygonLayer extends Layer {
       numInstances: 0,
       IndexType: gl.getExtension('OES_element_index_uint') ? Uint32Array : Uint16Array
     });
-
-    const {attributeManager} = this.state;
+const attributeManager = this.getAttributeManager();
     const noAlloc = true;
     /* eslint-disable max-len */
     attributeManager.add({
@@ -94,7 +93,7 @@ export default class SolidPolygonLayer extends Layer {
 
   updateAttribute({props, oldProps, changeFlags}) {
     if (props.fp64 !== oldProps.fp64) {
-      const {attributeManager} = this.state;
+      const attributeManager = this.getAttributeManager();
       attributeManager.invalidateAll();
 
       if (props.fp64 && props.coordinateSystem === COORDINATE_SYSTEM.LNGLAT) {
