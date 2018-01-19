@@ -731,5 +731,4 @@ ${flags.viewportChanged ? 'viewport' : ''}\
 }
 
 Layer.layerName = 'Layer';
-Layer.propTypes = LayerProps.defaultProps;
 Layer.defaultProps = LayerProps.defaultProps;
