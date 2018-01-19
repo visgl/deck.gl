@@ -19,9 +19,8 @@
 // THE SOFTWARE.
 
 /* global window */
-import {COORDINATE_SYSTEM, LIFECYCLE} from './constants';
+import {LIFECYCLE, COORDINATE_SYSTEM} from './constants';
 import AttributeManager from './attribute-manager';
-import Stats from './stats';
 import {count} from '../utils/count';
 import log from '../utils/log';
 import {createProps} from '../lifecycle/create-props';
@@ -29,6 +28,8 @@ import {diffProps} from '../lifecycle/props';
 import {removeLayerInSeer} from './seer-integration';
 import {GL, withParameters} from 'luma.gl';
 import assert from 'assert';
+
+import LayerState from './layer-state';
 
 const LOG_PRIORITY_UPDATE = 1;
 const EMPTY_PROPS = Object.freeze({});
@@ -84,11 +85,9 @@ export default class Layer {
     this.oldProps = EMPTY_PROPS; // Props from last render used for change detection
     this.count = counter++; // Keep track of how many layer instances you are generating
     this.lifecycle = LIFECYCLE.NO_STATE; // Helps track and debug the life cycle of the layers
-    this.state = null; // Will be set to the shared layer state object during layer matching
-    this.context = null; // Will reference layer manager's context, contains state shared by layers
     this.parentLayer = null; // reference to the composite layer parent that rendered this layer
-
-    // CompositeLayer members, need to be defined here because of the `Object.seal`
+    this.context = null; // Will reference layer manager's context, contains state shared by layers
+    this.state = null; // Will be set to the shared layer state object during layer matching
     this.internalState = null;
 
     // Seal the layer
@@ -114,26 +113,29 @@ export default class Layer {
   // Updates selected state members and marks the object for redraw
   setState(updateObject) {
     Object.assign(this.state, updateObject);
-    this.state.needsRedraw = true;
+    this.setNeedsRedraw();
   }
 
   // Sets the redraw flag for this layer, will trigger a redraw next animation frame
   setNeedsRedraw(redraw = true) {
-    if (this.state) {
-      this.state.needsRedraw = redraw;
+    if (this.internalState) {
+      this.internalState.needsRedraw = redraw;
     }
   }
+
+  // Sets the update flag for this layer, will trigger a redraw next animation frame
+  // setNeedsUpdate(update = true) {
+  //   if (this.internalState) {
+  //     this.internalState.needsUpdate = update;
+  //   }
+  // }
 
   // Checks state of attributes and model
   getNeedsRedraw({clearRedrawFlags = false} = {}) {
     return this._getNeedsRedraw(clearRedrawFlags);
   }
 
-  // Return an array of models used by this layer, can be overriden by layer subclass
-  getModels() {
-    return this.state.models || (this.state.model ? [this.state.model] : []);
-  }
-
+  // Checks if layer attributes needs updating
   needsUpdate() {
     // Call subclass lifecycle method
     return this.shouldUpdateState(this._getUpdateParams());
@@ -145,12 +147,26 @@ export default class Layer {
     return this.props.pickable && this.props.visible;
   }
 
+  // Return an array of models used by this layer, can be overriden by layer subclass
+  getModels() {
+    return this.state && (this.state.models || (this.state.model ? [this.state.model] : []));
+  }
+
+  // TODO - Gradually phase out, does not support multi model layers
+  getSingleModel() {
+    return this.state && this.state.model;
+  }
+
   getAttributeManager() {
-    return this.state && this.state.attributeManager;
+    return this.internalState && this.internalState.attributeManager;
+  }
+
+  getCurrentLayer() {
+    return this.internalState && this.internalState.layer;
   }
 
   // Use iteration (the only required capability on data) to get first element
-  // deprecated
+  // deprecated since we are effectively only supporting Arrays
   getFirstObject() {
     const {data} = this.props;
     for (const object of data) {
@@ -161,71 +177,56 @@ export default class Layer {
 
   // PROJECTION METHODS
 
-  /**
-   * Projects a point with current map state (lat, lon, zoom, pitch, bearing)
-   *
-   * Note: Position conversion is done in shader, so in many cases there is no need
-   * for this function
-   * @param {Array|TypedArray} lngLat - long and lat values
-   * @return {Array|TypedArray} - x, y coordinates
-   */
+  // Projects a point with current map state (lat, lon, zoom, pitch, bearing)
+  // TODO - need to be extended to work with multiple `views`
   project(lngLat) {
     const {viewport} = this.context;
-    assert(Array.isArray(lngLat), 'Layer.project needs [lng,lat]');
+    assert(Array.isArray(lngLat));
     return viewport.project(lngLat);
   }
 
   unproject(xy) {
     const {viewport} = this.context;
-    assert(Array.isArray(xy), 'Layer.unproject needs [x,y]');
+    assert(Array.isArray(xy));
     return viewport.unproject(xy);
   }
 
   projectFlat(lngLat) {
     const {viewport} = this.context;
-    assert(Array.isArray(lngLat), 'Layer.project needs [lng,lat]');
+    assert(Array.isArray(lngLat));
     return viewport.projectFlat(lngLat);
   }
 
   unprojectFlat(xy) {
     const {viewport} = this.context;
-    assert(Array.isArray(xy), 'Layer.unproject needs [x,y]');
+    assert(Array.isArray(xy));
     return viewport.unprojectFlat(xy);
   }
 
-  // TODO - needs to refer to context
+  // TODO - needs to refer to context for devicePixels setting
   screenToDevicePixels(screenPixels) {
     log.deprecated('screenToDevicePixels', 'DeckGL prop useDevicePixels for conversion');
     const devicePixelRatio = typeof window !== 'undefined' ? window.devicePixelRatio : 1;
     return screenPixels * devicePixelRatio;
   }
 
-  /**
-   * Returns the picking color that doesn't match any subfeature
-   * Use if some graphics do not belong to any pickable subfeature
-   * @return {Array} - a black color
-   */
+  // Returns the picking color that doesn't match any subfeature
+  // Use if some graphics do not belong to any pickable subfeature
+  // @return {Array} - a black color
   nullPickingColor() {
     return [0, 0, 0];
   }
 
-  /**
-   * Returns the picking color that doesn't match any subfeature
-   * Use if some graphics do not belong to any pickable subfeature
-   * @param {int} i - index to be decoded
-   * @return {Array} - the decoded color
-   */
+  // Returns the picking color that doesn't match any subfeature
+  // Use if some graphics do not belong to any pickable subfeature
   encodePickingColor(i) {
     assert((((i + 1) >> 24) & 255) === 0, 'index out of picking color range');
     return [(i + 1) & 255, ((i + 1) >> 8) & 255, (((i + 1) >> 8) >> 8) & 255];
   }
 
-  /**
-   * Returns the picking color that doesn't match any subfeature
-   * Use if some graphics do not belong to any pickable subfeature
-   * @param {Uint8Array} color - color array to be decoded
-   * @return {Array} - the decoded picking color
-   */
+  // Returns the index corresponding to a picking color that doesn't match any subfeature
+  // @param {Uint8Array} color - color array to be decoded
+  // @return {Array} - the decoded picking color
   decodePickingColor(color) {
     assert(color instanceof Uint8Array);
     const [i1, i2, i3] = color;
@@ -261,16 +262,6 @@ export default class Layer {
   // App can destroy WebGL resources here
   finalizeState() {}
 
-  // Update attribute transition
-  updateTransition() {
-    const {model, attributeManager} = this.state;
-    const isInTransition = attributeManager && attributeManager.updateTransition();
-
-    if (model && isInTransition) {
-      model.setAttributes(attributeManager.getChangedAttributes({transition: true}));
-    }
-  }
-
   // If state has a model, draw it with supplied uniforms
   draw(opts) {
     for (const model of this.getModels()) {
@@ -296,62 +287,6 @@ export default class Layer {
   // END LIFECYCLE METHODS
   // //////////////////////////////////////////////////
 
-  // Default implementation of attribute invalidation, can be redefined
-  invalidateAttribute(name = 'all', diffReason = '') {
-    const attributeManager = this.getAttributeManager();
-    if (!attributeManager) {
-      return;
-    }
-
-    if (name === 'all') {
-      log.log(LOG_PRIORITY_UPDATE, `updateTriggers invalidating all attributes: ${diffReason}`);
-      attributeManager.invalidateAll();
-    } else {
-      log.log(LOG_PRIORITY_UPDATE, `updateTriggers invalidating attribute ${name}: ${diffReason}`);
-      attributeManager.invalidate(name);
-    }
-  }
-
-  // Calls attribute manager to update any WebGL attributes, can be redefined
-  updateAttributes(props) {
-    const attributeManager = this.getAttributeManager();
-    if (!attributeManager) {
-      return;
-    }
-
-    // Figure out data length
-    const numInstances = this.getNumInstances(props);
-
-    attributeManager.update({
-      data: props.data,
-      numInstances,
-      props,
-      transitions: props.transitions,
-      buffers: props,
-      context: this,
-      // Don't worry about non-attribute props
-      ignoreUnknownAttributes: true
-    });
-
-    // TODO - Use getModels?
-    const {model} = this.state;
-    if (model) {
-      const changedAttributes = attributeManager.getChangedAttributes({clearChangedFlags: true});
-      model.setAttributes(changedAttributes);
-    }
-  }
-
-  calculateInstancePickingColors(attribute, {numInstances}) {
-    const {value, size} = attribute;
-    // add 1 to index to seperate from no selection
-    for (let i = 0; i < numInstances; i++) {
-      const pickingColor = this.encodePickingColor(i);
-      value[i * size + 0] = pickingColor[0];
-      value[i * size + 1] = pickingColor[1];
-      value[i * size + 2] = pickingColor[2];
-    }
-  }
-
   // INTERNAL METHODS
 
   // Deduces numer of instances. Intention is to support:
@@ -373,8 +308,74 @@ export default class Layer {
     }
 
     // Use container library to get a count for any ES6 container or object
-    const {data} = props;
+    const {data} = this.props;
     return count(data);
+  }
+
+  // Default implementation of attribute invalidation, can be redefined
+  invalidateAttribute(name = 'all', diffReason = '') {
+    const attributeManager = this.getAttributeManager();
+    if (!attributeManager) {
+      return;
+    }
+
+    if (name === 'all') {
+      log.log(LOG_PRIORITY_UPDATE, `updateTriggers invalidating all attributes: ${diffReason}`);
+      attributeManager.invalidateAll();
+    } else {
+      log.log(LOG_PRIORITY_UPDATE, `updateTriggers invalidating attribute ${name}: ${diffReason}`);
+      attributeManager.invalidate(name);
+    }
+  }
+
+  // Calls attribute manager to update any WebGL attributes
+  updateAttributes(props) {
+    const attributeManager = this.getAttributeManager();
+    if (!attributeManager) {
+      return;
+    }
+
+    // Figure out data length
+    const numInstances = this.getNumInstances(props);
+
+    attributeManager.update({
+      data: props.data,
+      numInstances,
+      props,
+      transitions: props.transitions,
+      buffers: props,
+      context: this,
+      // Don't worry about non-attribute props
+      ignoreUnknownAttributes: true
+    });
+
+    const model = this.getSingleModel();
+    if (model) {
+      const changedAttributes = attributeManager.getChangedAttributes({clearChangedFlags: true});
+      model.setAttributes(changedAttributes);
+    }
+  }
+
+  // Update attribute transition
+  updateTransition() {
+    const model = this.getSingleModel();
+    const attributeManager = this.getAttributeManager();
+    const isInTransition = attributeManager && attributeManager.updateTransition();
+
+    if (model && isInTransition) {
+      model.setAttributes(attributeManager.getChangedAttributes({transition: true}));
+    }
+  }
+
+  calculateInstancePickingColors(attribute, {numInstances}) {
+    const {value, size} = attribute;
+    // add 1 to index to seperate from no selection
+    for (let i = 0; i < numInstances; i++) {
+      const pickingColor = this.encodePickingColor(i);
+      value[i * size + 0] = pickingColor[0];
+      value[i * size + 1] = pickingColor[1];
+      value[i * size + 2] = pickingColor[2];
+    }
   }
 
   // LAYER MANAGER API
@@ -385,7 +386,7 @@ export default class Layer {
   _initialize() {
     assert(arguments.length === 0);
     assert(this.context.gl);
-    assert(!this.state);
+    assert(!this.internalState && !this.state);
 
     const attributeManager = new AttributeManager(this.context.gl, {
       id: this.props.id
@@ -402,20 +403,12 @@ export default class Layer {
       }
     });
 
-    this.internalState = {
-      subLayers: null, // reference to sublayers rendered in a previous cycle
-      stats: new Stats({id: 'draw'})
-      // animatedProps: null, // Computing animated props requires layer manager state
-      // TODO - move these fields here (risks breaking layers)
-      // attributeManager,
-      // needsRedraw: true,
-    };
-
-    this.state = {
-      attributeManager,
-      model: null,
-      needsRedraw: true
-    };
+    this.internalState = new LayerState({
+      attributeManager
+    });
+    this.state = {};
+    // TODO deprecated, for backwards compatibility with older layers
+    this.state.attributeManager = this.getAttributeManager();
 
     // Call subclass lifecycle methods
     this.initializeState(this.context);
@@ -423,14 +416,11 @@ export default class Layer {
 
     // initializeState callback tends to clear state
     this.setChangeFlags({dataChanged: true, propsChanged: true, viewportChanged: true});
+    this._loadData();
 
     this._updateState(this._getUpdateParams());
 
-    if (this.isComposite) {
-      this._renderLayers(true);
-    }
-
-    const {model} = this.state;
+    const model = this.getSingleModel();
     if (model) {
       model.id = this.props.id;
       model.program.id = `${this.props.id}-program`;
@@ -495,6 +485,7 @@ export default class Layer {
   // Called by manager when layer is about to be disposed
   // Note: not guaranteed to be called on application shutdown
   _finalize() {
+    assert(this.internalState && this.state);
     assert(arguments.length === 0);
     // Call subclass lifecycle method
     this.finalizeState(this.context);
@@ -625,7 +616,42 @@ ${flags.viewportChanged ? 'viewport' : ''}\
       }
     }
 
+    if (changeFlags.dataChanged) {
+      if (this._loadData()) {
+        // Postpone data changed flag until loaded
+        changeFlags.dataChanged = false;
+      }
+    }
+
     return this.setChangeFlags(changeFlags);
+  }
+
+  _loadData() {
+    const {data, fetch} = this.props;
+    switch (typeof data) {
+      case 'string':
+        const url = data;
+        if (url !== this.internalState.lastUrl) {
+          // Make sure getData() does not return a string
+
+          this.internalState.data = this.internalState.data || [];
+          this.internalState.lastUrl = url;
+
+          // Load the data
+          const promise = fetch(url).then(loadedData => {
+            this.internalState.data = loadedData;
+            this.setChangeFlags({dataChanged: true});
+          });
+
+          this.internalState.loadPromise = promise;
+          return true;
+        }
+        break;
+      default:
+        // Makes getData() return props.data
+        this.internalState.data = null;
+    }
+    return false;
   }
 
   // PRIVATE METHODS
@@ -644,13 +670,13 @@ ${flags.viewportChanged ? 'viewport' : ''}\
   _getNeedsRedraw(clearRedrawFlags) {
     // this method may be called by the render loop as soon a the layer
     // has been created, so guard against uninitialized state
-    if (!this.state) {
+    if (!this.internalState) {
       return false;
     }
 
     let redraw = false;
-    redraw = redraw || (this.state.needsRedraw && this.id);
-    this.state.needsRedraw = this.state.needsRedraw && !clearRedrawFlags;
+    redraw = redraw || (this.internalState.needsRedraw && this.id);
+    this.internalState.needsRedraw = this.internalState.needsRedraw && !clearRedrawFlags;
 
     // TODO - is attribute manager needed? - Model should be enough.
     const attributeManager = this.getAttributeManager();
@@ -719,7 +745,7 @@ ${flags.viewportChanged ? 'viewport' : ''}\
     }
 
     // TODO - set needsRedraw on the model(s)?
-    this.state.needsRedraw = true;
+    this.setNeedsRedraw();
   }
 
   _updateModuleSettings() {
@@ -740,7 +766,7 @@ ${flags.viewportChanged ? 'viewport' : ''}\
     }
 
     // TODO - set needsRedraw on the model(s)?
-    this.state.needsRedraw = true;
+    this.setNeedsRedraw();
     log.deprecated('layer.setUniforms', 'model.setUniforms');
   }
 }

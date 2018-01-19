@@ -115,7 +115,7 @@ test('ScatterplotLayer#constructor', t => {
         assert: (layer, oldState) => {
           t.ok(layer.state, 'should update layer state');
           t.ok(
-            layer.state.attributeManager.attributes.instancePositions64xyLow,
+            layer.getAttributeManager().attributes.instancePositions64xyLow,
             'should add instancePositions64xyLow'
           );
         }
@@ -218,7 +218,7 @@ test('LineLayer#constructor', t => {
         assert: (layer, oldState) => {
           t.ok(layer.state, 'should update layer state');
           t.ok(
-            layer.state.attributeManager.attributes.instanceSourceTargetPositions64xyLow,
+            layer.getAttributeManager().attributes.instanceSourceTargetPositions64xyLow,
             'should add instancePositions64xyLow'
           );
         }
@@ -260,7 +260,7 @@ test('IconLayer#constructor', t => {
         assert: (layer, oldState) => {
           t.ok(layer.state, 'should update layer state');
           t.ok(
-            layer.state.attributeManager.attributes.instancePositions64xyLow,
+            layer.getAttributeManager().attributes.instancePositions64xyLow,
             'should add instancePositions64xyLow'
           );
         }
@@ -299,7 +299,7 @@ test('PathLayer#constructor', t => {
         //   },
         //   assert: (layer, oldState) => {
         //     t.ok(layer.state, 'should update layer state');
-        //     t.ok(layer.state.attributeManager.attributes.instanceStartEndPositions64xyLow,
+        //     t.ok(layer.getAttributeManager().attributes.instanceStartEndPositions64xyLow,
         //       'should add instancePositions64xyLow');
         //   }
       }
