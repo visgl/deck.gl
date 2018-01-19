@@ -23,6 +23,12 @@ import project from '../project/project';
 
 const INITIAL_MODULE_OPTIONS = {};
 
+const DEFAULT_LIGHTS_POSITION = [-122.45, 37.75, 8000, -122.0, 38.0, 5000];
+const DEFAULT_AMBIENT_RATIO = 0.05;
+const DEFAULT_DIFFUSE_RATIO = 0.6;
+const DEFAULT_SPECULAR_RATIO = 0.8;
+const DEFAULT_LIGHTS_STRENGTH = [2.0, 0.0, 0.0, 0.0];
+
 export default {
   name: 'lighting',
   dependencies: [project],
@@ -30,11 +36,11 @@ export default {
   getUniforms: (opts = INITIAL_MODULE_OPTIONS) => {
     if (opts.lightSettings) {
       const {
-        lightsPosition = [-122.45, 37.75, 8000, -122.0, 38.0, 5000],
-        ambientRatio = 0.05,
-        diffuseRatio = 0.6,
-        specularRatio = 0.8,
-        lightsStrength = [2.0, 0.0, 0.0, 0.0],
+        lightsPosition = DEFAULT_LIGHTS_POSITION,
+        ambientRatio = DEFAULT_AMBIENT_RATIO,
+        diffuseRatio = DEFAULT_DIFFUSE_RATIO,
+        specularRatio = DEFAULT_SPECULAR_RATIO,
+        lightsStrength = DEFAULT_LIGHTS_STRENGTH
         // numberOfLights = 2
       } = opts.lightSettings;
 
