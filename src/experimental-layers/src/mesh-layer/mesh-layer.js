@@ -117,7 +117,8 @@ export default class MeshLayer extends Layer {
     });
   }
 
-  updateState({props, oldProps, changeFlags}) {const attributeManager = this.getAttributeManager();
+  updateState({props, oldProps, changeFlags}) {
+    const attributeManager = this.getAttributeManager();
 
     // super.updateState({props, oldProps, changeFlags});
     if (changeFlags.dataChanged) {

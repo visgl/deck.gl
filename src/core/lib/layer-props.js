@@ -41,7 +41,7 @@ const defaultProps = {
 };
 
 export default class LayerProps {
-    // Helper for constructor, merges props with default props and freezes them
+  // Helper for constructor, merges props with default props and freezes them
   constructor(props, layer) {
     this._layer = layer;
     props = this.normalize(props);

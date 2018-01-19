@@ -135,7 +135,7 @@ export default class SolidPolygonLayer extends Layer {
       numInstances: 0,
       IndexType: gl.getExtension('OES_element_index_uint') ? Uint32Array : Uint16Array
     });
-const attributeManager = this.getAttributeManager();
+    const attributeManager = this.getAttributeManager();
     const noAlloc = true;
     /* eslint-disable max-len */
     attributeManager.add({

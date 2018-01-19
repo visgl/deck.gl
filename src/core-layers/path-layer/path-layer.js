@@ -102,7 +102,8 @@ export default class PathLayer extends Layer {
   updateState({oldProps, props, changeFlags}) {
     super.updateState({props, oldProps, changeFlags});
 
-    const {getPath} = this.props;const attributeManager = this.getAttributeManager();
+    const {getPath} = this.props;
+    const attributeManager = this.getAttributeManager();
     if (props.fp64 !== oldProps.fp64) {
       const {gl} = this.context;
       this.setState({model: this._getModel(gl)});

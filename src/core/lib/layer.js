@@ -369,7 +369,6 @@ export default class Layer {
     // TODO deprecated, for backwards compatibility with older layers
     this.state.attributeManager = this.getAttributeManager();
 
-
     // Call subclass lifecycle methods
     this.initializeState(this.context);
     // End subclass lifecycle methods
@@ -589,28 +588,27 @@ ${flags.viewportChanged ? 'viewport' : ''}\
   _loadData() {
     const {data, fetch} = this.props;
     switch (typeof data) {
-    case 'string':
-      const url = data;
-      if (url !== this.internalState.lastUrl) {
-        // Make sure getData() does not return a string
+      case 'string':
+        const url = data;
+        if (url !== this.internalState.lastUrl) {
+          // Make sure getData() does not return a string
 
-        this.internalState.data = this.internalState.data || [];
-        this.internalState.lastUrl = url;
+          this.internalState.data = this.internalState.data || [];
+          this.internalState.lastUrl = url;
 
-        // Load the data
-        const promise = fetch(url)
-        .then(loadedData => {
-          this.internalState.data = loadedData;
-          this.setChangeFlags({dataChanged: true});
-        });
+          // Load the data
+          const promise = fetch(url).then(loadedData => {
+            this.internalState.data = loadedData;
+            this.setChangeFlags({dataChanged: true});
+          });
 
-        this.internalState.loadPromise = promise;
-        return true;
-      }
-      break;
-    default:
-      // Makes getData() return props.data
-      this.internalState.data = null;
+          this.internalState.loadPromise = promise;
+          return true;
+        }
+        break;
+      default:
+        // Makes getData() return props.data
+        this.internalState.data = null;
     }
     return false;
   }

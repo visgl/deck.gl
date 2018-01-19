@@ -123,7 +123,7 @@ export default class ScreenGridLayer extends Layer {
       numRow,
       numInstances: numCol * numRow
     });
-const attributeManager = this.getAttributeManager();
+    const attributeManager = this.getAttributeManager();
     attributeManager.invalidateAll();
   }
 
