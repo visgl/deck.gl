@@ -45,22 +45,10 @@ export default class LayerProps {
   constructor(props, layer) {
     this._layer = layer;
     props = this.normalize(props);
-    // props = this.installPropOverrides(props);
     Object.assign(this, props);
     // Props are immutable
     Object.freeze(this);
   }
-
-  // TODO - install these from table?
-  // get data() {
-  //   return (this._layer.internalState && this._layer.internalState.data) || this._data;
-  // }
-
-  // installPropOverrides(props) {
-  //   this._data = props.data;
-  //   delete props.data;
-  //   return props;
-  // }
 
   normalize(props) {
     // If sublayer has static defaultProps member, getDefaultProps will return it
