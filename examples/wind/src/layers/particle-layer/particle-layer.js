@@ -167,7 +167,7 @@ export default class ParticleLayer extends Layer {
     });
 
     model.setAttributes({
-      posFrom: bufferTo
+      posFrom: bufferTo.setDataLayout({size: 4, instanced: 1})
     });
 
     model.render(Object.assign({}, currentUniforms, uniforms));
@@ -252,12 +252,12 @@ export default class ParticleLayer extends Layer {
     const {transformFeedback} = this.state;
 
     modelTF.setAttributes({
-      posFrom: bufferFrom
+      posFrom: bufferFrom.setDataLayout({size: 4, instanced: 0})
     });
 
     transformFeedback.bindBuffers(
       {
-        gl_Position: bufferTo
+        gl_Position: bufferTo.setDataLayout({size: 4, instanced: 0})
       },
       {
         clear: true,
@@ -325,7 +325,7 @@ export default class ParticleLayer extends Layer {
     // This will be a grid of elements
     this.state.numInstances = nx * ny;
 
-    const positions3 = this.calculatePositions3({nx, ny});
+    const positions3 = new Float32Array([0, 0, 0]);
 
     return new Model(gl, {
       id: 'ParticleLayer-model',
@@ -334,11 +334,13 @@ export default class ParticleLayer extends Layer {
       geometry: new Geometry({
         id: this.props.id,
         drawMode: GL.POINTS,
+        vertexCount: 1,
         attributes: {
-          positions: {size: 3, type: GL.FLOAT, value: positions3},
-          vertices: {size: 3, type: GL.FLOAT, value: positions3}
+          positions: {size: 3, type: GL.FLOAT, value: positions3, instanced: 0}
         }
       }),
+      isInstanced: true,
+      instanceCount: this.state.numInstances,
       isIndexed: false
     });
   }
