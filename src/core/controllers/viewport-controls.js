@@ -19,20 +19,31 @@
 // THE SOFTWARE.
 
 import MapState from './map-state';
+import LinearInterpolator from '../transitions/linear-interpolator';
+import {TRANSITION_EVENTS} from '../lib/transition-manager';
 import assert from 'assert';
 
-// EVENT HANDLING PARAMETERS
-const ZOOM_ACCEL = 0.01;
+const NO_TRANSITION_PROPS = {
+  transitionDuration: 0
+};
+const LINEAR_TRANSITION_PROPS = {
+  transitionDuration: 300,
+  transitionEasing: t => t,
+  transitionInterpolator: new LinearInterpolator(),
+  transitionInterruption: TRANSITION_EVENTS.BREAK
+};
 
+// EVENT HANDLING PARAMETERS
 const PITCH_MOUSE_THRESHOLD = 5;
 const PITCH_ACCEL = 1.2;
+const ZOOM_ACCEL = 0.01;
 
 const EVENT_TYPES = {
   WHEEL: ['wheel'],
   PAN: ['panstart', 'panmove', 'panend'],
   PINCH: ['pinchstart', 'pinchmove', 'pinchend'],
   DOUBLE_TAP: ['doubletap'],
-  KEYBOARD: ['keydown', 'keyup']
+  KEYBOARD: ['keydown']
 };
 
 export default class ViewportControls {
@@ -47,10 +58,10 @@ export default class ViewportControls {
     this.viewportStateProps = null;
     this.eventManager = null;
     this._events = null;
-
     this._state = {
       isDragging: false
     };
+    this.events = [];
 
     this.handleEvent = this.handleEvent.bind(this);
 
@@ -66,8 +77,7 @@ export default class ViewportControls {
    * @param {hammer.Event} event
    */
   handleEvent(event) {
-    const {ViewportState} = this;
-    this.viewportState = new ViewportState(Object.assign({}, this.viewportStateProps, this._state));
+    this.viewportState = this.getViewportState();
 
     switch (event.type) {
       case 'panstart':
@@ -78,7 +88,7 @@ export default class ViewportControls {
         return this._onPanEnd(event);
       case 'pinchstart':
         return this._onPinchStart(event);
-      case 'pinch':
+      case 'pinchmove':
         return this._onPinch(event);
       case 'pinchend':
         return this._onPinchEnd(event);
@@ -88,8 +98,6 @@ export default class ViewportControls {
         return this._onWheel(event);
       case 'keydown':
         return this._onKeyDown(event);
-      case 'keyup':
-        return this._onKeyUp(event);
       default:
         return false;
     }
@@ -123,7 +131,8 @@ export default class ViewportControls {
       dragPan = true,
       dragRotate = true,
       doubleClickZoom = true,
-      touchZoomRotate = true,
+      touchZoom = true,
+      touchRotate = false,
       keyboard = true
     } = options;
 
@@ -135,21 +144,25 @@ export default class ViewportControls {
       // EventManager has changed
       this.eventManager = eventManager;
       this._events = {};
+      this.toggleEvents(this.events, true);
     }
 
     // Register/unregister events
     const isInteractive = Boolean(this.onViewportChange);
     this.toggleEvents(EVENT_TYPES.WHEEL, isInteractive && scrollZoom);
     this.toggleEvents(EVENT_TYPES.PAN, isInteractive && (dragPan || dragRotate));
-    this.toggleEvents(EVENT_TYPES.PINCH, isInteractive && touchZoomRotate);
+    this.toggleEvents(EVENT_TYPES.PINCH, isInteractive && (touchZoom || touchRotate));
     this.toggleEvents(EVENT_TYPES.DOUBLE_TAP, isInteractive && doubleClickZoom);
     this.toggleEvents(EVENT_TYPES.KEYBOARD, isInteractive && keyboard);
 
+    // Interaction toggles
     this.scrollZoom = scrollZoom;
     this.dragPan = dragPan;
     this.dragRotate = dragRotate;
     this.doubleClickZoom = doubleClickZoom;
-    this.touchZoomRotate = touchZoomRotate;
+    this.touchZoom = touchZoom;
+    this.touchRotate = touchRotate;
+    this.keyboard = keyboard;
   }
 
   toggleEvents(eventNames, enabled) {
@@ -178,9 +191,9 @@ export default class ViewportControls {
 
   /* Callback util */
   // formats map state and invokes callback function
-  updateViewport(newViewportState, extraState = {}) {
+  updateViewport(newViewportState, extraProps = {}, extraState = {}) {
     const oldViewport = this.viewportState.getViewportProps();
-    const newViewport = newViewportState.getViewportProps();
+    const newViewport = Object.assign({}, newViewportState.getViewportProps(), extraProps);
 
     if (
       this.onViewportChange &&
@@ -194,23 +207,30 @@ export default class ViewportControls {
     this.setState(Object.assign({}, newViewportState.getInteractiveState(), extraState));
   }
 
+  getViewportState(overrides) {
+    const {ViewportState} = this;
+    return new ViewportState(Object.assign({}, this.viewportStateProps, this._state, overrides));
+  }
+
   /* Event handlers */
   // Default handler for the `panstart` event.
   _onPanStart(event) {
     const pos = this.getCenter(event);
     const newViewportState = this.viewportState.panStart({pos}).rotateStart({pos});
-    return this.updateViewport(newViewportState, {isDragging: true});
+    return this.updateViewport(newViewportState, NO_TRANSITION_PROPS, {isDragging: true});
   }
 
   // Default handler for the `panmove` event.
   _onPan(event) {
-    return this.isFunctionKeyPressed(event) ? this._onPanMove(event) : this._onPanRotate(event);
+    return this.isFunctionKeyPressed(event) || event.rightButton
+      ? this._onPanRotate(event)
+      : this._onPanMove(event);
   }
 
   // Default handler for the `panend` event.
   _onPanEnd(event) {
     const newViewportState = this.viewportState.panEnd().rotateEnd();
-    return this.updateViewport(newViewportState, {isDragging: false});
+    return this.updateViewport(newViewportState, null, {isDragging: false});
   }
 
   // Default handler for panning to move.
@@ -221,12 +241,16 @@ export default class ViewportControls {
     }
     const pos = this.getCenter(event);
     const newViewportState = this.viewportState.pan({pos});
-    return this.updateViewport(newViewportState);
+    return this.updateViewport(newViewportState, NO_TRANSITION_PROPS, {isDragging: true});
   }
 
   // Default handler for panning to rotate.
   // Called by `_onPan` when panning with function key pressed.
   _onPanRotate(event) {
+    if (!this.dragRotate) {
+      return false;
+    }
+
     return this.viewportState instanceof MapState
       ? this._onPanRotateMap(event)
       : this._onPanRotateStandard(event);
@@ -234,10 +258,6 @@ export default class ViewportControls {
 
   // Normal pan to rotate
   _onPanRotateStandard(event) {
-    if (!this.dragRotate) {
-      return false;
-    }
-
     const {deltaX, deltaY} = event;
     const {width, height} = this.viewportState.getViewportProps();
 
@@ -245,16 +265,10 @@ export default class ViewportControls {
     const deltaScaleY = deltaY / height;
 
     const newViewportState = this.viewportState.rotate({deltaScaleX, deltaScaleY});
-    return this.updateViewport(newViewportState);
+    return this.updateViewport(newViewportState, NO_TRANSITION_PROPS, {isDragging: true});
   }
 
-  // Map specific pan to rotate
-  // TODO - is this mapStateSpecific?
   _onPanRotateMap(event) {
-    if (!this.dragRotate) {
-      return false;
-    }
-
     const {deltaX, deltaY} = event;
     const [, centerY] = this.getCenter(event);
     const startY = centerY - deltaY;
@@ -276,8 +290,8 @@ export default class ViewportControls {
     }
     deltaScaleY = Math.min(1, Math.max(-1, deltaScaleY));
 
-    const newMapState = this.viewportState.rotate({deltaScaleX, deltaScaleY});
-    return this.updateViewport(newMapState);
+    const newViewportState = this.viewportState.rotate({deltaScaleX, deltaScaleY});
+    return this.updateViewport(newViewportState, NO_TRANSITION_PROPS, {isDragging: true});
   }
 
   // Default handler for the `wheel` event.
@@ -285,7 +299,6 @@ export default class ViewportControls {
     if (!this.scrollZoom) {
       return false;
     }
-    event.srcEvent.preventDefault();
 
     const pos = this.getCenter(event);
     const {delta} = event;
@@ -297,31 +310,46 @@ export default class ViewportControls {
     }
 
     const newViewportState = this.viewportState.zoom({pos, scale});
-    return this.updateViewport(newViewportState);
+    return this.updateViewport(newViewportState, NO_TRANSITION_PROPS);
   }
 
   // Default handler for the `pinchstart` event.
   _onPinchStart(event) {
     const pos = this.getCenter(event);
-    const newViewportState = this.viewportState.zoomStart({pos});
-    return this.updateViewport(newViewportState, {isDragging: true});
+    const newViewportState = this.viewportState.zoomStart({pos}).rotateStart({pos});
+    // hack - hammer's `rotation` field doesn't seem to produce the correct angle
+    this._state.startPinchRotation = event.rotation;
+    return this.updateViewport(newViewportState, NO_TRANSITION_PROPS, {isDragging: true});
   }
 
   // Default handler for the `pinch` event.
   _onPinch(event) {
-    if (!this.touchZoomRotate) {
+    if (!this.touchZoom && !this.touchRotate) {
       return false;
     }
-    const pos = this.getCenter(event);
-    const {scale} = event;
-    const newViewportState = this.viewportState.zoom({pos, scale});
-    return this.updateViewport(newViewportState);
+
+    let newViewportState = this.viewportState;
+    if (this.touchZoom) {
+      const {scale} = event;
+      const pos = this.getCenter(event);
+      newViewportState = newViewportState.zoom({pos, scale});
+    }
+    if (this.touchRotate) {
+      const {rotation} = event;
+      const {startPinchRotation} = this._state;
+      newViewportState = newViewportState.rotate({
+        deltaScaleX: -(rotation - startPinchRotation) / 180
+      });
+    }
+
+    return this.updateViewport(newViewportState, NO_TRANSITION_PROPS, {isDragging: true});
   }
 
   // Default handler for the `pinchend` event.
   _onPinchEnd(event) {
-    const newViewportState = this.viewportState.zoomEnd();
-    return this.updateViewport(newViewportState, {isDragging: false});
+    const newViewportState = this.viewportState.zoomEnd().rotateEnd();
+    this._state.startPinchRotation = 0;
+    return this.updateViewport(newViewportState, null, {isDragging: false});
   }
 
   // Default handler for the `doubletap` event.
@@ -333,50 +361,66 @@ export default class ViewportControls {
     const isZoomOut = this.isFunctionKeyPressed(event);
 
     const newViewportState = this.viewportState.zoom({pos, scale: isZoomOut ? 0.5 : 2});
-    return this.updateViewport(newViewportState);
+    return this.updateViewport(newViewportState, LINEAR_TRANSITION_PROPS);
   }
 
+  /* eslint-disable complexity */
+  // Default handler for the `keydown` event
   _onKeyDown(event) {
-    if (this.viewportState.isDragging) {
-      return;
+    if (!this.keyboard) {
+      return false;
     }
+    const funcKey = this.isFunctionKeyPressed(event);
+    const {viewportStateProps} = this;
+    let newViewportState;
 
-    const KEY_BINDINGS = {
-      w: 'moveForward',
-      W: 'moveForward',
-      ArrowUp: 'moveForward',
-
-      s: 'moveBackward',
-      S: 'moveBackward',
-      ArrowDown: 'moveBackward',
-
-      a: 'moveLeft',
-      A: 'moveLeft',
-      ArrowLeft: 'moveLeft',
-
-      d: 'moveRight',
-      D: 'moveRight',
-      ArrowRight: 'moveRight',
-
-      '=': 'zoomIn',
-      '+': 'zoomIn',
-
-      '-': 'zoomOut',
-
-      '[': 'moveDown',
-      ']': 'moveUp'
-    };
-
-    // keyCode is deprecated from web standards
-    // code is not supported by IE/Edge
-    const key = event.key;
-    const handler = KEY_BINDINGS[key];
-    if (this.viewportState[handler]) {
-      const newViewportState = this.viewportState[handler]();
-      this.updateViewport(newViewportState);
+    switch (event.srcEvent.keyCode) {
+      case 189: // -
+        if (funcKey) {
+          newViewportState = this.getViewportState({zoom: viewportStateProps.zoom - 2});
+        } else {
+          newViewportState = this.getViewportState({zoom: viewportStateProps.zoom - 1});
+        }
+        break;
+      case 187: // +
+        if (funcKey) {
+          newViewportState = this.getViewportState({zoom: viewportStateProps.zoom + 2});
+        } else {
+          newViewportState = this.getViewportState({zoom: viewportStateProps.zoom + 1});
+        }
+        break;
+      case 37: // left
+        if (funcKey) {
+          newViewportState = this.getViewportState({bearing: viewportStateProps.bearing - 15});
+        } else {
+          newViewportState = this.viewportState.pan({pos: [100, 0], startPos: [0, 0]});
+        }
+        break;
+      case 39: // right
+        if (funcKey) {
+          newViewportState = this.getViewportState({bearing: viewportStateProps.bearing + 15});
+        } else {
+          newViewportState = this.viewportState.pan({pos: [-100, 0], startPos: [0, 0]});
+        }
+        break;
+      case 38: // up
+        if (funcKey) {
+          newViewportState = this.getViewportState({pitch: viewportStateProps.pitch + 10});
+        } else {
+          newViewportState = this.viewportState.pan({pos: [0, 100], startPos: [0, 0]});
+        }
+        break;
+      case 40: // down
+        if (funcKey) {
+          newViewportState = this.getViewportState({pitch: viewportStateProps.pitch - 10});
+        } else {
+          newViewportState = this.viewportState.pan({pos: [0, -100], startPos: [0, 0]});
+        }
+        break;
+      default:
+        return false;
     }
+    return this.updateViewport(newViewportState, LINEAR_TRANSITION_PROPS);
   }
   /* eslint-enable complexity */
-
-  _onKeyUp(event) {}
 }

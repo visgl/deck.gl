@@ -21,10 +21,6 @@
 import ViewportControls from './viewport-controls';
 import MapState from './map-state';
 
-// EVENT HANDLING PARAMETERS
-const PITCH_MOUSE_THRESHOLD = 5;
-const PITCH_ACCEL = 1.2;
-
 export default class MapControls extends ViewportControls {
   /**
    * @classdesc
@@ -37,37 +33,5 @@ export default class MapControls extends ViewportControls {
   // Default handler for the `panmove` event.
   _onPan(event) {
     return this.isFunctionKeyPressed(event) ? this._onPanRotate(event) : this._onPanMove(event);
-  }
-
-  // Default handler for panning to rotate.
-  // Called by `_onPan` when panning with function key pressed.
-  _onPanRotate(event) {
-    if (!this.dragRotate) {
-      return false;
-    }
-
-    const {deltaX, deltaY} = event;
-    const [, centerY] = this.getCenter(event);
-    const startY = centerY - deltaY;
-    const {width, height} = this.viewportState.getViewportProps();
-
-    const deltaScaleX = deltaX / width;
-    let deltaScaleY = 0;
-
-    if (deltaY > 0) {
-      if (Math.abs(height - startY) > PITCH_MOUSE_THRESHOLD) {
-        // Move from 0 to -1 as we drag upwards
-        deltaScaleY = deltaY / (startY - height) * PITCH_ACCEL;
-      }
-    } else if (deltaY < 0) {
-      if (startY > PITCH_MOUSE_THRESHOLD) {
-        // Move from 0 to 1 as we drag upwards
-        deltaScaleY = 1 - centerY / startY;
-      }
-    }
-    deltaScaleY = Math.min(1, Math.max(-1, deltaScaleY));
-
-    const newMapState = this.viewportState.rotate({deltaScaleX, deltaScaleY});
-    return this.updateViewport(newMapState);
   }
 }
