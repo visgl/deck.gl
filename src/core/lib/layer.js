@@ -70,7 +70,7 @@ const defaultProps = {
 let counter = 0;
 
 export default class Layer {
-  constructor(props) {
+  constructor(props = {}) {
     // Merges incoming props with defaults and freezes them.
     this.props = createProps(this, props);
 

@@ -64,7 +64,7 @@ function getDefaultProps(layerClass) {
 
   const parent = layerClass.prototype;
   const parentClass = Object.getPrototypeOf(layerClass);
-  const parentProps = parent && getDefaultProps(parentClass) || null;
+  const parentProps = (parent && getDefaultProps(parentClass)) || null;
 
   // Parse propTypes from Layer.defaultProps
   const defaultProps = getOwnProperty(layerClass, 'defaultProps') || {};
