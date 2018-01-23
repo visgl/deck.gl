@@ -667,9 +667,13 @@ ${flags.viewportChanged ? 'viewport' : ''}\
     // If sublayer has static defaultProps member, getDefaultProps will return it
     const mergedDefaultProps = getDefaultProps(this);
     // Merge supplied props with pre-merged default props
-    const id = props.id;
-    delete props.id;
-    const newProps = Object.create(mergedDefaultProps);
+    const newProps = Object.create(mergedDefaultProps, {
+      // id: {
+      //   configurable: true,
+      //   writeable: true,
+      //   value: props.id || this.constructor.layerName
+      // }
+    });
     props = Object.assign(newProps, props);
 
     // Accept null as data - otherwise apps and layers need to add ugly checks

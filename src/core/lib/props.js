@@ -195,7 +195,7 @@ export function mergeDefaultProps(object, objectNameKey = 'layerName') {
   // Use the object's constructor name as default id prop.
   // Note that constructor names are substituted during minification and may not be "human readable"
   let mergedDefaultProps = {
-    id: objectName || object.constructor.name
+    // id: objectName || object.constructor.name
   };
 
   // Reverse shadowing
@@ -209,6 +209,7 @@ export function mergeDefaultProps(object, objectNameKey = 'layerName') {
     object = Object.getPrototypeOf(object);
   }
 
+  delete mergedDefaultProps.id;
   Object.freeze(mergedDefaultProps);
 
   // Store for quick lookup
