@@ -1,6 +1,7 @@
 import test from 'tape-catch';
 
-import {mergeDefaultProps, compareProps} from 'deck.gl/core/lib/props';
+import {compareProps} from 'deck.gl/core/lib/props';
+import {createProps} from 'deck.gl/core/lifecycle/create-props';
 import {Vector2} from 'luma.gl';
 
 const SAME = 'equal';
@@ -159,14 +160,14 @@ test('compareProps#tests', t => {
   t.end();
 });
 
-test('mergeDefaultProps', t => {
+test('createProps', t => {
   class A {}
-  A.defaultProps = {a: 1};
+  A.defaultProps = {a: 1, data: []};
 
   class B extends A {}
   B.defaultProps = {b: 2};
 
-  const mergedProps = mergeDefaultProps(new B());
+  const mergedProps = createProps(new B(), {});
 
   t.equal(mergedProps.a, 1, 'base class props merged');
   t.equal(mergedProps.b, 2, 'sub class props merged');

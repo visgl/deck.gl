@@ -22,18 +22,16 @@
 import {COORDINATE_SYSTEM, LIFECYCLE} from './constants';
 import AttributeManager from './attribute-manager';
 import Stats from './stats';
-import {getDefaultProps, diffProps} from './props';
 import {count} from '../utils/count';
 import log from '../utils/log';
+import {createProps, EMPTY_ARRAY} from '../lifecycle/create-props';
+import {getDefaultProps, diffProps} from './props';
 import {applyPropOverrides, removeLayerInSeer} from './seer-integration';
 import {GL, withParameters} from 'luma.gl';
 import assert from 'assert';
 
 const LOG_PRIORITY_UPDATE = 1;
-
-const EMPTY_ARRAY = [];
-const EMPTY_PROPS = {};
-Object.freeze(EMPTY_PROPS);
+const EMPTY_PROPS = Object.freeze({});
 const noop = () => {};
 
 const defaultProps = {
@@ -72,9 +70,9 @@ const defaultProps = {
 let counter = 0;
 
 export default class Layer {
-  constructor(props) {
-    // Call a helper function to merge the incoming props with defaults and freeze them.
-    this.props = this._normalizeProps(props);
+  constructor(props = {}) {
+    // Merges incoming props with defaults and freezes them.
+    this.props = createProps(this, props);
 
     // Define all members before layer is sealed
     this.id = this.props.id; // The layer's id, used for matching with layers from last render cycle
@@ -667,7 +665,9 @@ ${flags.viewportChanged ? 'viewport' : ''}\
     // If sublayer has static defaultProps member, getDefaultProps will return it
     const mergedDefaultProps = getDefaultProps(this);
     // Merge supplied props with pre-merged default props
-    props = Object.assign({}, mergedDefaultProps, props);
+    const newProps = Object.create(mergedDefaultProps, {});
+    props = Object.assign(newProps, props);
+
     // Accept null as data - otherwise apps and layers need to add ugly checks
     // Use constant fallback so that data change is not triggered
     props.data = props.data || EMPTY_ARRAY;

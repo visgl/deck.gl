@@ -121,7 +121,7 @@ class RenderingTest extends Component {
       return;
     }
     // Mark current test as running
-    this.state.runningTests[name] = true;
+    this.state.runningTests[name] = true; // eslint-disable-line
 
     referenceImage.onload = () => {
       resultImage.onload = () => {

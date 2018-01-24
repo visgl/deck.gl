@@ -1,4 +1,3 @@
-import log from '../utils/log';
 import assert from 'assert';
 
 // Returns an object with "change flags", either false or strings indicating reason for change
@@ -63,7 +62,7 @@ export function compareProps({
   // Test if new props different from old props
   for (const key in oldProps) {
     if (!(key in ignoreProps)) {
-      if (!newProps.hasOwnProperty(key)) {
+      if (!(key in newProps)) {
         return `${triggerName}.${key} dropped: ${oldProps[key]} -> undefined`;
       }
 
@@ -90,7 +89,7 @@ export function compareProps({
   // Test if any new props have been added
   for (const key in newProps) {
     if (!(key in ignoreProps)) {
-      if (!oldProps.hasOwnProperty(key)) {
+      if (!(key in oldProps)) {
         return `${triggerName}.${key} added: undefined -> ${newProps[key]}`;
       }
     }
@@ -163,57 +162,4 @@ function diffUpdateTrigger(props, oldProps, triggerName) {
     triggerName
   });
   return diffReason;
-}
-
-// Constructors have their super class constructors as prototypes
-function getOwnProperty(object, prop) {
-  return Object.prototype.hasOwnProperty.call(object, prop) && object[prop];
-}
-
-/*
- * Return merged default props stored on layers constructor, create them if needed
- */
-export function getDefaultProps(layer) {
-  // TODO - getOwnProperty is very slow, reduces layer construction speed 3x
-  const mergedDefaultProps = getOwnProperty(layer.constructor, 'mergedDefaultProps');
-  if (mergedDefaultProps) {
-    return mergedDefaultProps;
-  }
-  return mergeDefaultProps(layer);
-}
-
-/*
- * Walk a prototype chain and merge all default props from any 'defaultProps' objects
- */
-export function mergeDefaultProps(object, objectNameKey = 'layerName') {
-  const subClassConstructor = object.constructor;
-  const objectName = getOwnProperty(subClassConstructor, objectNameKey);
-  if (!objectName) {
-    log.once(0, `${object.constructor.name} does not specify a ${objectNameKey}`);
-  }
-
-  // Use the object's constructor name as default id prop.
-  // Note that constructor names are substituted during minification and may not be "human readable"
-  let mergedDefaultProps = {
-    id: objectName || object.constructor.name
-  };
-
-  // Reverse shadowing
-  // TODO - Rewrite to stop when mergedDefaultProps is available on parent?
-  while (object) {
-    const objectDefaultProps = getOwnProperty(object.constructor, 'defaultProps');
-    Object.freeze(objectDefaultProps);
-    if (objectDefaultProps) {
-      mergedDefaultProps = Object.assign({}, objectDefaultProps, mergedDefaultProps);
-    }
-    object = Object.getPrototypeOf(object);
-  }
-
-  Object.freeze(mergedDefaultProps);
-
-  // Store for quick lookup
-  subClassConstructor.mergedDefaultProps = mergedDefaultProps;
-
-  assert(mergeDefaultProps);
-  return mergedDefaultProps;
 }

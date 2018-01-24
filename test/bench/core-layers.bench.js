@@ -31,6 +31,20 @@ import {SolidPolygonLayer as SolidPolygonLayer2} from 'deck.gl/experimental-laye
 // add tests
 export default function coreLayersBench(suite) {
   return suite
+    .group('LAYER CONSTRUCTION')
+    .add('ScatterplotLayer#construct', () => {
+      return new ScatterplotLayer({data: data.points});
+    })
+    .add('GeoJsonLayer#construct', () => {
+      return new GeoJsonLayer({data: data.choropleths});
+    })
+    .add('PolygonLayer#construct', () => {
+      return new PolygonLayer({data: data.choropleths.features});
+    })
+    .add('SolidPolygonLayer#construct', () => {
+      return new PolygonLayer({data: data.choropleths.features});
+    })
+
     .group('COMPOSITE LAYER INITIALIZATION')
     .add('GeoJsonLayer#initialize', () => {
       const layer = new GeoJsonLayer({data: data.choropleths});
@@ -148,18 +162,5 @@ export default function coreLayersBench(suite) {
         fp64: true
       });
       testInitializeLayer({layer});
-    })
-    .group('LAYER CONSTRUCTION (NOTE: 3x REDUCED from 250K/s due to getOwnProperty)')
-    .add('ScatterplotLayer#construct', () => {
-      return new ScatterplotLayer({data: data.points});
-    })
-    .add('GeoJsonLayer#construct', () => {
-      return new GeoJsonLayer({data: data.choropleths});
-    })
-    .add('PolygonLayer#construct', () => {
-      return new PolygonLayer({data: data.choropleths.features});
-    })
-    .add('SolidPolygonLayer#construct', () => {
-      return new PolygonLayer({data: data.choropleths.features});
     });
 }
