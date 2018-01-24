@@ -151,8 +151,8 @@ export function pickVisibleObjects(
 
   pickInfos.forEach(pickInfo => {
     const viewport = getViewportFromCoordinates({viewports}); // TODO - add coords
-    let info = createInfo([pickInfo.x / pixelRatio, pickInfo.y / pixelRatio], viewport);
-    info.devicePixel = [pickInfo.x, pickInfo.y];
+    let info = createInfo([x / pixelRatio, y / pixelRatio], viewport);
+    info.devicePixel = [x, y];
     info.pixelRatio = pixelRatio;
     info.color = pickInfo.pickedColor;
     info.index = pickInfo.pickedObjectIndex;
@@ -425,7 +425,7 @@ export function getClosestFromPickingBuffer(
 
 /**
  * Examines a picking buffer for unique colors
- * Returns array of unique objects in shape `{x, y, pickedColor, pickedLayer, pickedObjectIndex}`
+ * Returns array of unique objects in shape `{pickedColor, pickedLayer, pickedObjectIndex}`
  */
 function getUniquesFromPickingBuffer(gl, {pickedColors, layers}) {
   const uniqueColors = new Map();
