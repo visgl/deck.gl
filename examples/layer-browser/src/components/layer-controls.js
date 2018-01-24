@@ -129,13 +129,24 @@ export default class LayerControls extends PureComponent {
     return null;
   }
 
+  // Get all inherited property keys
+  _getAllKeys(object) {
+    const keys = [];
+    for (const key in object) {
+      keys.push(key);
+    }
+    return keys;
+  }
+
   render() {
     const {title, settings, propTypes = {}} = this.props;
 
     return (
       <div className="layer-controls">
         {title && <h4>{title}</h4>}
-        {Object.keys(settings).map(key => this._renderSetting(key, settings[key], propTypes[key]))}
+        {this._getAllKeys(settings).map(
+          key => this._renderSetting(key, settings[key], propTypes[key])
+        )}
       </div>
     );
   }
