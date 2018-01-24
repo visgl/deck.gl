@@ -70,9 +70,15 @@ const defaultProps = {
 let counter = 0;
 
 export default class Layer {
+<<<<<<< HEAD
   constructor(props = {}) {
     // Merges incoming props with defaults and freezes them.
     this.props = createProps(this, props);
+=======
+  constructor(...props) {
+    // Call a helper function to merge the incoming props with defaults and freeze them.
+    this.props = this._normalizeProps(props);
+>>>>>>> Allow multiple partial prop objects to be passed to layer
 
     // Define all members before layer is sealed
     this.id = this.props.id; // The layer's id, used for matching with layers from last render cycle
@@ -661,11 +667,11 @@ ${flags.viewportChanged ? 'viewport' : ''}\
   }
 
   // Helper for constructor, merges props with default props and freezes them
-  _normalizeProps(props) {
+  _normalizeProps(propObjectList) {
     // If sublayer has static defaultProps member, getDefaultProps will return it
     const mergedDefaultProps = getDefaultProps(this);
     // Merge supplied props with pre-merged default props
-    const newProps = Object.create(mergedDefaultProps, {});
+    const newProps = Object.create(mergedDefaultProps, ...propObjectList);
     props = Object.assign(newProps, props);
 
     // Accept null as data - otherwise apps and layers need to add ugly checks
