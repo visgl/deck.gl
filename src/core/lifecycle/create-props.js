@@ -58,7 +58,6 @@ function getLayerName(layerClass) {
 function getDefaultProps(layerClass) {
   const props = getOwnProperty(layerClass, '_props');
   if (props) {
-    assert(props);
     return props;
   }
 
