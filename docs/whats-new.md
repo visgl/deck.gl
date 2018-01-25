@@ -4,6 +4,10 @@
 
 WebGL2 feature: smooth attribute transition performed on GPU. Use the new `transitions` prop on the `Layer` class to specify transition duration, easing function and callbacks.
 
+## Layer Class
+
+* Layer class constructors can now take multiple property objects. The property objects will be merged, with later objects taking precedence over earlier objects: `new Layer({prop1: ...}, {prop2: ...});`
+
 
 # deck.gl v5
 
