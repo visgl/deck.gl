@@ -52,7 +52,7 @@ const LAYER_CONSTRUCT_TEST_CASES = [
   {
     title: 'With data map',
     props: {id: 'testLayer', data: new Map([['a', 'a'], ['b', 'b'], ['c', 'c']])}
-  },
+  }
 ];
 
 const LAYER_CONSTRUCT_MULTIPROP_TEST_CASES = [
@@ -89,9 +89,7 @@ SubLayer3.layerName = 'SubLayer2';
 
 test('Layer#constructor', t => {
   for (const tc of LAYER_CONSTRUCT_TEST_CASES) {
-    const layer = Array.isArray(tc.props) ?
-      new Layer(...tc.props) :
-      new Layer(tc.props);
+    const layer = Array.isArray(tc.props) ? new Layer(...tc.props) : new Layer(tc.props);
     t.ok(layer, `Layer created ${tc.title}`);
     const props = Array.isArray(tc.props) ? tc.props[0] : tc.props;
     const expectedId = props.id || tc.id;

@@ -70,15 +70,9 @@ const defaultProps = {
 let counter = 0;
 
 export default class Layer {
-<<<<<<< HEAD
-  constructor(props = {}) {
+  constructor(...propObjects) {
     // Merges incoming props with defaults and freezes them.
-    this.props = createProps(this, props);
-=======
-  constructor(...props) {
-    // Call a helper function to merge the incoming props with defaults and freeze them.
-    this.props = this._normalizeProps(props);
->>>>>>> Allow multiple partial prop objects to be passed to layer
+    this.props = createProps(this, propObjects);
 
     // Define all members before layer is sealed
     this.id = this.props.id; // The layer's id, used for matching with layers from last render cycle
