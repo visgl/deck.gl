@@ -30,6 +30,9 @@ A new `DeckGL` prop `layerFilter` gives the application an opportunity to filter
 
 To reduce confusion, `DeckGL.queryObject` has been renamed to `DeckGL.pickObject` and `DeckGL.queryVisibleObjects` has been renamed to `DeckGL.pickObjects`. Old functions are still supported with deprecated warning, but will be removed in the next major version.
 
+### DeckGL: Allow overriding canvas component style
+
+Users can now override the canvas size, position and offset via the style prop passed to the DeckGL component.
 
 ## Layer Improvements
 

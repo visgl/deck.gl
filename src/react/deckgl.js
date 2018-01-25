@@ -127,7 +127,7 @@ export default class DeckGL extends React.Component {
       ref: c => (this.overlay = c),
       key: 'overlay',
       id,
-      style: Object.assign({}, style, {position: 'absolute', left: 0, top: 0, width, height})
+      style: Object.assign({}, {position: 'absolute', left: 0, top: 0, width, height}, style)
     });
     children.push(deck);
 
