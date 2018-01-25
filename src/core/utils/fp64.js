@@ -27,10 +27,25 @@ import {COORDINATE_SYSTEM} from '../lib/constants'; // TODO - utils should not i
  * adds a thunk around every exported function that adds enough overhead to pull down performance.
  * It may be worth it to also export these as part of an object.
  */
-export function fp64ify(a) {
+export function fp64ify(a, array = [], startIndex = 0) {
   const hiPart = Math.fround(a);
   const loPart = a - Math.fround(a);
-  return [hiPart, loPart];
+  array[startIndex] = hiPart;
+  array[startIndex + 1] = loPart;
+  return array;
+}
+
+// calculate WebGL 64 bit matrix (transposed "Float64Array")
+export function fp64ifyMatrix4(matrix) {
+  // Transpose the projection matrix to column major for GLSL.
+  const matrixFP64 = new Float32Array(32);
+  for (let i = 0; i < 4; ++i) {
+    for (let j = 0; j < 4; ++j) {
+      const index = i * 4 + j;
+      fp64ify(matrix[j * 4 + i], matrixFP64, index * 2);
+    }
+  }
+  return matrixFP64;
 }
 
 export function fp64LowPart(a) {

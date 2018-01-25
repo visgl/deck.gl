@@ -21,8 +21,7 @@
 import test from 'tape-catch';
 
 import {COORDINATE_SYSTEM, WebMercatorViewport} from 'deck.gl';
-import {getUniformsFromViewport} from 'deck.gl/core/shaderlib/project/viewport-uniforms';
-import {getFP64ViewportUniforms} from 'deck.gl/core/shaderlib/project64/viewport-uniforms-64';
+import {project, project64} from 'deck.gl/core/shaderlib';
 
 const TEST_DATA = {
   mapState: {
@@ -65,16 +64,16 @@ const UNIFORMS_64 = {
   project64_uScale: Number
 };
 
-test('project#getUniformsFromViewport', t => {
+test('project#getUniforms', t => {
   const viewport = new WebMercatorViewport(TEST_DATA.mapState);
 
-  let uniforms = getUniformsFromViewport({viewport});
+  let uniforms = project.getUniforms({viewport});
 
   for (const uniform in UNIFORMS) {
     t.ok(uniforms[uniform] !== undefined, `Returned ${uniform}`);
   }
 
-  uniforms = getUniformsFromViewport({
+  uniforms = project.getUniforms({
     viewport,
     coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS
   });
@@ -83,10 +82,10 @@ test('project#getUniformsFromViewport', t => {
   t.end();
 });
 
-test('project#getFP64ViewportUniforms', t => {
+test('project64#getUniforms', t => {
   const viewport = new WebMercatorViewport(TEST_DATA.mapState);
-  const uniforms = getUniformsFromViewport({viewport});
-  const uniforms64 = getFP64ViewportUniforms(uniforms);
+  const uniforms = project.getUniforms({viewport});
+  const uniforms64 = project64.getUniforms(uniforms);
 
   for (const uniform in UNIFORMS_64) {
     t.ok(uniforms64[uniform] !== undefined, `Return ${uniform}`);
