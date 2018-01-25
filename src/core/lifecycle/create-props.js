@@ -1,6 +1,5 @@
 import {applyPropOverrides} from '../lib/seer-integration';
 import log from '../utils/log';
-import assert from 'assert';
 
 export const EMPTY_ARRAY = Object.freeze([]);
 
