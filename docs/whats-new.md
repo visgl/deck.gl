@@ -21,6 +21,11 @@ A new `DeckGL` prop `layerFilter` gives the application an opportunity to filter
 To avoid confusion, `DeckGL.queryObject` is renamed to `DeckGL.pickObject` and `DeckGL.queryVisibleObjects` is renamed to `DeckGL.pickObjects`. Old functions are still supported with deprecated warning, but will be removed in the next major version.
 
 
+### DeckGL: Allow overriding canvas component style
+
+Users can now override the canvas size, position and offset via the style prop passed to the DeckGL component.
+
+
 ## Layer: Automatic Highlighting of Hovered Elements
 
 Three new `Layer` props (`autoHighlight`, `highlightColor` and `highlightedObjectIndex`) have been added to enable simple and efficient highlighting of a single object in a layer. Highlighting is either automatic on hover, or programmatically controlled through specifying the index of the selected object. The actual highlighting is done on the GPU and this feature is thus very performant, in particular as it lets applications avoid cumbersome techniques like modifying data or using a secondary layer for highlighting.
