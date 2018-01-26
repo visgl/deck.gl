@@ -70,9 +70,14 @@ const defaultProps = {
 let counter = 0;
 
 export default class Layer {
-  constructor(props = {}) {
+  // constructor(...propObjects)
+  constructor() {
     // Merges incoming props with defaults and freezes them.
-    this.props = createProps(this, props);
+    // TODO switch to spread operator once we no longer transpile this code
+    // this.props = createProps.apply(propObjects);
+    /* eslint-disable prefer-spread */
+    this.props = createProps.apply(this, arguments);
+    /* eslint-enable prefer-spread */
 
     // Define all members before layer is sealed
     this.id = this.props.id; // The layer's id, used for matching with layers from last render cycle
@@ -661,11 +666,11 @@ ${flags.viewportChanged ? 'viewport' : ''}\
   }
 
   // Helper for constructor, merges props with default props and freezes them
-  _normalizeProps(props) {
+  _normalizeProps(propObjectList) {
     // If sublayer has static defaultProps member, getDefaultProps will return it
     const mergedDefaultProps = getDefaultProps(this);
     // Merge supplied props with pre-merged default props
-    const newProps = Object.create(mergedDefaultProps, {});
+    const newProps = Object.create(mergedDefaultProps, ...propObjectList);
     props = Object.assign(newProps, props);
 
     // Accept null as data - otherwise apps and layers need to add ugly checks

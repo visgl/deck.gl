@@ -18,9 +18,17 @@ Remarks:
 
 ## Constructor
 
-Parameters:
+```
+new Layer(...props);
+```
 
-- `props` - Layer properties.
+Parameters:
+- `props` (Object) - `Layer` properties.
+
+Notes:
+* More than one property object can be supplied.
+* Property objects will be merged with the same semantics as [Object.assign](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/assign), i.e. props in later objects will overwrite props earlier object.
+* Every layer specifies default values for all its props, and these values will be used internally if that prop is not specified by the application in the Layer constructor.
 
 ### Basic Properties
 
