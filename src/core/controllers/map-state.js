@@ -63,8 +63,6 @@ export default class MapState extends ViewState {
     /** Zoom when current zoom operation started */
     startZoom
   } = {}) {
-    assert(Number.isFinite(width), '`width` must be supplied');
-    assert(Number.isFinite(height), '`height` must be supplied');
     assert(Number.isFinite(longitude), '`longitude` must be supplied');
     assert(Number.isFinite(latitude), '`latitude` must be supplied');
     assert(Number.isFinite(zoom), '`zoom` must be supplied');
@@ -259,7 +257,71 @@ export default class MapState extends ViewState {
     });
   }
 
+  zoomIn() {
+    return this._zoomFromCenter(2);
+  }
+
+  zoomOut() {
+    return this._zoomFromCenter(0.5);
+  }
+
+  moveLeft() {
+    return this._panFromCenter([100, 0]);
+  }
+
+  moveRight() {
+    return this._panFromCenter([-100, 0]);
+  }
+
+  moveUp() {
+    return this._panFromCenter([0, 100]);
+  }
+
+  moveDown() {
+    return this._panFromCenter([0, -100]);
+  }
+
+  rotateLeft() {
+    return this._getUpdatedState({
+      bearing: this._viewportProps.bearing - 15
+    });
+  }
+
+  rotateRight() {
+    return this._getUpdatedState({
+      bearing: this._viewportProps.bearing + 15
+    });
+  }
+
+  rotateUp() {
+    return this._getUpdatedState({
+      pitch: this._viewportProps.pitch + 10
+    });
+  }
+
+  rotateDown() {
+    return this._getUpdatedState({
+      pitch: this._viewportProps.pitch - 10
+    });
+  }
+
   /* Private methods */
+
+  _zoomFromCenter(scale) {
+    const {width, height} = this._viewportProps;
+    return this.zoom({
+      pos: [width / 2, height / 2],
+      scale
+    });
+  }
+
+  _panFromCenter(offset) {
+    const {width, height} = this._viewportProps;
+    return this.pan({
+      startPos: [width / 2, height / 2],
+      pos: [width / 2 + offset[0], height / 2 + offset[1]]
+    });
+  }
 
   _getUpdatedState(newProps) {
     // Update _viewportProps

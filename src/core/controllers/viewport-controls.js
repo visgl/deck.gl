@@ -77,7 +77,8 @@ export default class ViewportControls {
    * @param {hammer.Event} event
    */
   handleEvent(event) {
-    this.viewportState = this.getViewportState();
+    const {ViewportState} = this;
+    this.viewportState = new ViewportState(Object.assign({}, this.viewportStateProps, this._state));
 
     switch (event.type) {
       case 'panstart':
@@ -205,11 +206,6 @@ export default class ViewportControls {
     }
 
     this.setState(Object.assign({}, newViewportState.getInteractiveState(), extraState));
-  }
-
-  getViewportState(overrides) {
-    const {ViewportState} = this;
-    return new ViewportState(Object.assign({}, this.viewportStateProps, this._state, overrides));
   }
 
   /* Event handlers */
@@ -371,51 +367,27 @@ export default class ViewportControls {
       return false;
     }
     const funcKey = this.isFunctionKeyPressed(event);
-    const {viewportStateProps} = this;
+    const {viewportState} = this;
     let newViewportState;
 
     switch (event.srcEvent.keyCode) {
       case 189: // -
-        if (funcKey) {
-          newViewportState = this.getViewportState({zoom: viewportStateProps.zoom - 2});
-        } else {
-          newViewportState = this.getViewportState({zoom: viewportStateProps.zoom - 1});
-        }
+        newViewportState = funcKey ? viewportState.zoomOut().zoomOut() : viewportState.zoomOut();
         break;
       case 187: // +
-        if (funcKey) {
-          newViewportState = this.getViewportState({zoom: viewportStateProps.zoom + 2});
-        } else {
-          newViewportState = this.getViewportState({zoom: viewportStateProps.zoom + 1});
-        }
+        newViewportState = funcKey ? viewportState.zoomIn().zoomIn() : viewportState.zoomIn();
         break;
       case 37: // left
-        if (funcKey) {
-          newViewportState = this.getViewportState({bearing: viewportStateProps.bearing - 15});
-        } else {
-          newViewportState = this.viewportState.pan({pos: [100, 0], startPos: [0, 0]});
-        }
+        newViewportState = funcKey ? viewportState.rotateLeft() : viewportState.moveLeft();
         break;
       case 39: // right
-        if (funcKey) {
-          newViewportState = this.getViewportState({bearing: viewportStateProps.bearing + 15});
-        } else {
-          newViewportState = this.viewportState.pan({pos: [-100, 0], startPos: [0, 0]});
-        }
+        newViewportState = funcKey ? viewportState.rotateRight() : viewportState.moveRight();
         break;
       case 38: // up
-        if (funcKey) {
-          newViewportState = this.getViewportState({pitch: viewportStateProps.pitch + 10});
-        } else {
-          newViewportState = this.viewportState.pan({pos: [0, 100], startPos: [0, 0]});
-        }
+        newViewportState = funcKey ? viewportState.rotateUp() : viewportState.moveUp();
         break;
       case 40: // down
-        if (funcKey) {
-          newViewportState = this.getViewportState({pitch: viewportStateProps.pitch - 10});
-        } else {
-          newViewportState = this.viewportState.pan({pos: [0, -100], startPos: [0, 0]});
-        }
+        newViewportState = funcKey ? viewportState.rotateDown() : viewportState.moveDown();
         break;
       default:
         return false;

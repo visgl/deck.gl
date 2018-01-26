@@ -17,29 +17,14 @@ const defaultState = {
 
 /* Helpers */
 
-function ensureFinite(value, fallbackValue) {
-  return Number.isFinite(value) ? value : fallbackValue;
-}
-
-const DEFAULT_POSITION = [0, 0, 0];
-
 export default class ViewState {
   constructor(opts) {
     const {
-      /* Viewport arguments */
       width, // Width of viewport
       height, // Height of viewport
 
       // Position and orientation
-      position = DEFAULT_POSITION, // typically in meters from anchor point
-
-      bearing, // Rotation around y axis
-      pitch, // Rotation around x axis
-
-      // Geospatial anchor
-      longitude,
-      latitude,
-      zoom
+      position = defaultState.position // typically in meters from anchor point
     } = opts;
 
     assert(Number.isFinite(width), '`width` must be supplied');
@@ -47,18 +32,7 @@ export default class ViewState {
 
     this._viewportProps = this._applyConstraints(
       Object.assign({}, opts, {
-        width,
-        height,
-        position: new Vector3(
-          ensureFinite(position && position[0], defaultState.position[0]),
-          ensureFinite(position && position[1], defaultState.position[1]),
-          ensureFinite(position && position[2], defaultState.position[2])
-        ),
-        bearing: ensureFinite(bearing, defaultState.bearing),
-        pitch: ensureFinite(pitch, defaultState.pitch),
-        longitude,
-        latitude,
-        zoom
+        position: new Vector3(position)
       })
     );
   }
