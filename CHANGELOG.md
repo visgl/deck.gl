@@ -21,6 +21,9 @@ For Earlier Beta Releases see below
 
 ## Official Releases
 
+### deck.gl v5.0.3 - Jan 26
+- allow overriding DeckGL canvas component styles (#1342)
+
 ### deck.gl v5.0.2 - Jan 10
 - Upgrade dependency modules to production versions (#1307)
 - Add generic attribute support to attribute manager (#1298)

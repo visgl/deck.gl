@@ -2935,9 +2935,9 @@ lru-cache@^4.0.1:
     pseudomap "^1.0.2"
     yallist "^2.1.2"
 
-luma.gl@>=5.0.0-beta.1:
-  version "5.0.0-beta.1"
-  resolved "https://registry.yarnpkg.com/luma.gl/-/luma.gl-5.0.0-beta.1.tgz#7a0c6dda99feb774e94d6686a1c0734afbce28de"
+luma.gl@^5.0.0:
+  version "5.0.2"
+  resolved "https://registry.yarnpkg.com/luma.gl/-/luma.gl-5.0.2.tgz#8c19601a55cd4f2095f85df340663970a005bbf0"
   dependencies:
     gl-mat4 "^1.1.4"
     gl-quat "^1.0.0"
@@ -2958,9 +2958,19 @@ map-obj@^1.0.0, map-obj@^1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/map-obj/-/map-obj-1.0.1.tgz#d933ceb9205d82bdcf4886f6742bdc2b4dea146d"
 
-math.gl@1.0.0-alpha.8, "math.gl@>= 1.0.0-alpha.8", math.gl@^1.0.0-alpha.7:
+math.gl@1.0.0-alpha.8:
   version "1.0.0-alpha.8"
   resolved "https://registry.yarnpkg.com/math.gl/-/math.gl-1.0.0-alpha.8.tgz#51dd8d03e5c50096851e8a268d888c1eda766cd1"
+  dependencies:
+    gl-mat4 "^1.1.4"
+    gl-quat "^1.0.0"
+    gl-vec2 "^1.0.0"
+    gl-vec3 "^1.0.3"
+    gl-vec4 "^1.0.1"
+
+math.gl@^1.0.0:
+  version "1.0.3"
+  resolved "https://registry.yarnpkg.com/math.gl/-/math.gl-1.0.3.tgz#89e00cb4452b997a71e77c79bc4c26e732d1d4b8"
   dependencies:
     gl-mat4 "^1.1.4"
     gl-quat "^1.0.0"
@@ -3104,9 +3114,9 @@ minimist@~0.0.1:
   version "0.0.10"
   resolved "https://registry.yarnpkg.com/minimist/-/minimist-0.0.10.tgz#de3f98543dbf96082be48ad1a0c7cda836301dcf"
 
-mjolnir.js@>=0.1.0:
-  version "0.4.0"
-  resolved "https://registry.yarnpkg.com/mjolnir.js/-/mjolnir.js-0.4.0.tgz#f8e9847b8a38c2ba56b064b40a51d802f0463a0e"
+mjolnir.js@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/mjolnir.js/-/mjolnir.js-1.0.0.tgz#881eaac896f2c2693bc39f5127b4fabe99ff56fb"
   dependencies:
     hammerjs "^2.0.8"
 
@@ -4780,11 +4790,11 @@ verror@1.10.0:
     core-util-is "1.0.2"
     extsprintf "^1.2.0"
 
-viewport-mercator-project@^5.0.0-alpha.1:
-  version "5.0.0-alpha.1"
-  resolved "https://registry.yarnpkg.com/viewport-mercator-project/-/viewport-mercator-project-5.0.0-alpha.1.tgz#637b849517f4fc3898028a89210d244b412011e0"
+viewport-mercator-project@^5.0.0:
+  version "5.0.0"
+  resolved "https://registry.yarnpkg.com/viewport-mercator-project/-/viewport-mercator-project-5.0.0.tgz#d18709dad652581108a6dd58f320409491d40982"
   dependencies:
-    math.gl "^1.0.0-alpha.7"
+    math.gl "^1.0.0"
 
 vlq@^0.2.1:
   version "0.2.3"
