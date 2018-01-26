@@ -58,7 +58,11 @@ class Example extends PureComponent {
       points: [],
       progress: 0,
       rotating: false,
-      vrDisplay: new EmulatedVRDisplay()
+      vrDisplay: new EmulatedVRDisplay(),
+      emulatedPose: {
+        orientation: [0, 0, 0, 1],
+        position: [0, 0, 0]
+      }
     };
   }
 
@@ -114,13 +118,11 @@ class Example extends PureComponent {
 
   _onUpdate() {
     const {viewport} = this.state;
-
     this.setState({
       viewport: {
-        ...viewport
+        ...viewport,
       }
     });
-
     window.requestAnimationFrame(this._onUpdate);
   }
 
@@ -158,10 +160,10 @@ class Example extends PureComponent {
   }
 
   _renderViewports() {
-    const {width, height, vrDisplay} = this.state;
+    const {width, height, vrDisplay, emulatedPose} = this.state;
     const frameData = vrDisplay.isEmulated ? {} : new window.VRFrameData();
-
-    if (vrDisplay.getFrameData(frameData)) {
+    const gotFrameData = vrDisplay.isEmulated ? vrDisplay.getFrameDataFromPose(frameData, emulatedPose) : vrDisplay.getFrameData(frameData);
+    if (gotFrameData) {
       return [
         new Viewport({
           x: 0,

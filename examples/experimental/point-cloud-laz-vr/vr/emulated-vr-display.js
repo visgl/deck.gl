@@ -1,12 +1,14 @@
 /* global window */
 import {Matrix4} from 'math.gl';
+import {perspectiveFromFieldOfView, fromRotationTranslation} from 'gl-mat4';
 
 const DEGREES_TO_RADIANS = Math.PI / 180;
-const EYE_DISTANCE = 0.08;
+const EYE_DISTANCE = 0.03;
 const FOV_DEGREES_Y = 40;
-const FOV_DEGREES_X_MIN = 35;
-const FOV_DEGREES_X_MAX = 45;
-const UP_VECTOR = [0, 1, 0];
+const FOV_DEGREES_X_MIN = 40;
+const FOV_DEGREES_X_MAX = 40;
+const DEFAULT_ORIENTATION = [0, 0, 0, 1];
+const DEFAULT_POSITION = [0, 0, 0];
 
 export default class EmulatedVRDisplay {
   constructor() {
@@ -55,26 +57,61 @@ export default class EmulatedVRDisplay {
       throw new Error('must supply a frameData object');
     }
 
-    vrFrameData.pose = this.pose;
-    vrFrameData.timestamp = Date.now();
+    const timestamp = Date.now();
 
-    const viewport = this._getViewportSize();
-    const projectionMatrix = new Matrix4().perspective({
-      fov: (FOV_DEGREES_X_MIN + FOV_DEGREES_X_MAX) * DEGREES_TO_RADIANS,
-      aspect: viewport.renderWidth / viewport.renderHeight,
-      near: this.depthNear,
-      far: this.depthFar
-    });
+    const leftProjectionMatrix = new Matrix4();
+    const rightProjectionMatrix = new Matrix4();
+    const leftViewMatrix = new Matrix4();
+    const rightViewMatrix = new Matrix4();
 
-    vrFrameData.leftViewMatrix = this.poseMatrix.clone().multiplyRight(this._leftEyeMatrix);
-    vrFrameData.leftProjectionMatrix = projectionMatrix
-      .clone()
-      .multiplyRight(vrFrameData.leftViewMatrix);
+    perspectiveFromFieldOfView(leftProjectionMatrix, this.leftEyeParameters.fieldOfView, this.depthNear, this.depthFar);
+    perspectiveFromFieldOfView(rightProjectionMatrix, this.rightEyeParameters.fieldOfView, this.depthNear, this.depthFar);
 
-    vrFrameData.rightViewMatrix = this.poseMatrix.clone().multiplyRight(this._rightEyeMatrix);
-    vrFrameData.rightProjectionMatrix = projectionMatrix
-      .clone()
-      .multiplyRight(vrFrameData.rightViewMatrix);
+    leftViewMatrix.translate(this.leftEyeParameters.offset);
+    rightViewMatrix.translate(this.rightEyeParameters.offset);
+
+    leftViewMatrix.invert();
+    rightViewMatrix.invert();
+
+    Object.assign(vrFrameData,
+      { timestamp, leftProjectionMatrix, rightProjectionMatrix, leftViewMatrix, rightViewMatrix });
+
+    return true;
+  }
+
+  getFrameDataFromPose(vrFrameData, pose) {
+    if (!vrFrameData) {
+      throw new Error('must supply a frameData object');
+    }
+
+    if(!pose) {
+      throw new Error('must supply a pose object');
+    }
+
+    const timestamp = pose.timestamp || Date.now();
+
+    const leftProjectionMatrix = new Matrix4();
+    const rightProjectionMatrix = new Matrix4();
+    const leftViewMatrix = new Matrix4();
+    const rightViewMatrix = new Matrix4();
+
+    perspectiveFromFieldOfView(leftProjectionMatrix, this.leftEyeParameters.fieldOfView, this.depthNear, this.depthFar);
+    perspectiveFromFieldOfView(rightProjectionMatrix, this.rightEyeParameters.fieldOfView, this.depthNear, this.depthFar);
+
+    const orientation = pose.orientation || DEFAULT_ORIENTATION;
+    const position = pose.position || DEFAULT_POSITION;
+
+    fromRotationTranslation(leftViewMatrix, orientation, position);
+    fromRotationTranslation(rightViewMatrix, orientation, position);
+
+    leftViewMatrix.translate(this.leftEyeParameters.offset);
+    rightViewMatrix.translate(this.rightEyeParameters.offset);
+
+    leftViewMatrix.invert();
+    rightViewMatrix.invert();
+
+    Object.assign(vrFrameData,
+      { pose, timestamp, leftProjectionMatrix, rightProjectionMatrix, leftViewMatrix, rightViewMatrix });
 
     return true;
   }

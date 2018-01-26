@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "license": "MIT",
   "scripts": {
-    "start": "webpack-dev-server --progress --hot --open",
+    "start": "webpack-dev-server --progress --hot --open --host",
     "start-local": "webpack-dev-server --env.local --progress --hot --open",
     "build-clean": "rm -rf dist && mkdir dist",
     "build-script": "webpack -p",
@@ -16,7 +16,8 @@
     "is-little-endian": "0.0.0",
     "react": "^16.2.0",
     "react-dom": "^16.2.0",
-    "webvr-polyfill": "^0.10.2"
+    "webvr-polyfill": "^0.10.2",
+    "gl-mat4": "^1.1.4"
   },
   "devDependencies": {
     "buble-loader": "^0.4.1",
