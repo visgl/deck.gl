@@ -167,7 +167,7 @@ test('createProps', t => {
   class B extends A {}
   B.defaultProps = {b: 2};
 
-  const mergedProps = createProps(new B());
+  const mergedProps = createProps.apply(new B(), []);
 
   t.equal(mergedProps.a, 1, 'base class props merged');
   t.equal(mergedProps.b, 2, 'sub class props merged');

@@ -70,9 +70,14 @@ const defaultProps = {
 let counter = 0;
 
 export default class Layer {
-  constructor(...propObjects) {
+  // constructor(...propObjects)
+  constructor() {
     // Merges incoming props with defaults and freezes them.
-    this.props = createProps(this, propObjects);
+    // TODO switch to spread operator once we no longer transpile this code
+    // this.props = createProps.apply(propObjects);
+    /* eslint-disable prefer-spread */
+    this.props = createProps.apply(this, arguments);
+    /* eslint-enable prefer-spread */
 
     // Define all members before layer is sealed
     this.id = this.props.id; // The layer's id, used for matching with layers from last render cycle

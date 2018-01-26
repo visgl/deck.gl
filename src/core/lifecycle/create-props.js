@@ -4,7 +4,9 @@ import log from '../utils/log';
 export const EMPTY_ARRAY = Object.freeze([]);
 
 // Create a property object
-export function createProps(layer, propObjects = []) {
+export function createProps(propObjects = []) {
+  const layer = this; // eslint-disable-line
+
   // Get default prop object (a prototype chain for now)
   const {defaultProps} = getDefaultProps(layer.constructor);
 
@@ -21,7 +23,9 @@ export function createProps(layer, propObjects = []) {
   });
 
   // "Copy" all sync props
-  Object.assign(newProps, ...propObjects);
+  for (let i = 0; i < arguments.length; ++i) {
+    Object.assign(newProps, arguments[i]);
+  }
   newProps.data = newProps.data || EMPTY_ARRAY;
 
   // SEER: Apply any overrides from the seer debug extension if it is active
