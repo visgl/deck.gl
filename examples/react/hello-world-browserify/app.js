@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 import {render} from 'react-dom';
 import MapGL from 'react-map-gl';
-import DeckGL, {LineLayer} from 'deck.gl';
+import DeckGL, {LineLayer, ScatterplotLayer} from 'deck.gl';
 
 // Set your mapbox token here
 const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
@@ -25,20 +25,19 @@ class Root extends Component {
   render() {
     const {viewport, width, height} = this.state;
 
-    const layers = [
-      new LineLayer({
-        data: [
-          {
-            sourcePosition: [-122.41669, 37.7853],
-            targetPosition: [-122.41669, 37.781]
-          }
-        ]
-      })
-    ];
-
     return (
       <MapGL {...viewport} width={width} height={height} mapboxApiAccessToken={MAPBOX_TOKEN}>
-        <DeckGL {...viewport} width={width} height={height} layers={layers} debug />
+        <DeckGL {...viewport} width={width} height={height} debug>
+          <LineLayer
+            data={[{sourcePosition: [-122.41669, 37.7883], targetPosition: [-122.41669, 37.781]}]}
+            strokeWidth={5}
+          />
+          <ScatterplotLayer
+            data={[{position: [-122.41669, 37.79]}]}
+            radiusScale={100}
+            getColor={x => [0, 0, 255]}
+          />
+        </DeckGL>
       </MapGL>
     );
   }
