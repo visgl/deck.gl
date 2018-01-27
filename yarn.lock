@@ -2951,9 +2951,9 @@ lru-cache@^4.0.1:
     pseudomap "^1.0.2"
     yallist "^2.1.2"
 
-luma.gl@^5.0.0:
-  version "5.0.2"
-  resolved "https://registry.yarnpkg.com/luma.gl/-/luma.gl-5.0.2.tgz#8c19601a55cd4f2095f85df340663970a005bbf0"
+luma.gl@^5.1.0-beta.1:
+  version "5.1.0-beta.1"
+  resolved "https://registry.yarnpkg.com/luma.gl/-/luma.gl-5.1.0-beta.1.tgz#341360cd61ec53c30372e3ac7fa20cae65b2786b"
   dependencies:
     gl-mat4 "^1.1.4"
     gl-quat "^1.0.0"
@@ -2961,8 +2961,8 @@ luma.gl@^5.0.0:
     gl-vec3 "^1.0.3"
     gl-vec4 "^1.0.1"
     math.gl "1.0.0-alpha.8"
-    seer "^0.2.2"
-    webgl-debug "^1.0.2"
+    seer "^0.2.4"
+    webgl-debug "^2.0.0"
 
 magic-string@~0.16.0:
   version "0.16.0"
@@ -4147,9 +4147,9 @@ sax@^1.2.1:
   version "1.2.4"
   resolved "https://registry.yarnpkg.com/sax/-/sax-1.2.4.tgz#2816234e2378bddc4e5354fab5caa895df7100d9"
 
-seer@^0.2.2, seer@^0.2.3:
-  version "0.2.3"
-  resolved "https://registry.yarnpkg.com/seer/-/seer-0.2.3.tgz#e7ba529921330327dbbf30141fbf052296772fb7"
+seer@^0.2.4:
+  version "0.2.4"
+  resolved "https://registry.yarnpkg.com/seer/-/seer-0.2.4.tgz#6b8a81d09bfe6b3b3ad0268971a65e7f7405135c"
 
 select-hose@^2.0.0:
   version "2.0.0"
@@ -4860,9 +4860,9 @@ wbuf@^1.1.0, wbuf@^1.7.2:
   dependencies:
     minimalistic-assert "^1.0.0"
 
-webgl-debug@^1.0.2:
-  version "1.0.2"
-  resolved "https://registry.yarnpkg.com/webgl-debug/-/webgl-debug-1.0.2.tgz#93bac5aed181343a136ad34f249920d3b9ccc69a"
+webgl-debug@^2.0.0:
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/webgl-debug/-/webgl-debug-2.0.1.tgz#dc11bea3d947764bce061fdb5a23109c13787c95"
 
 webidl-conversions@^3.0.0:
   version "3.0.1"
