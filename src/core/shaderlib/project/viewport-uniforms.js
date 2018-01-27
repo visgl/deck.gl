@@ -164,7 +164,8 @@ export function getUniformsFromViewport({
   const distanceScales = viewport.getDistanceScales();
 
   // TODO - does this depend on useDevicePixels?
-  const devicePixelRatio = (window && window.devicePixelRatio) || 1;
+  const devicePixelRatio =
+    (typeof window !== 'undefined' && window && window.devicePixelRatio) || 1;
   const viewportSize = [viewport.width * devicePixelRatio, viewport.height * devicePixelRatio];
 
   const glModelMatrix = modelMatrix || IDENTITY_MATRIX;
