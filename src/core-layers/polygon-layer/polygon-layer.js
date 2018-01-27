@@ -163,7 +163,9 @@ export default class PolygonLayer extends CompositeLayer {
       hasData &&
       new SolidPolygonLayer(
         this.getSubLayerProps({
-          id: 'wireframe',
+          id: 'wireframe'
+        }),
+        {
           data,
 
           fp64,
@@ -178,7 +180,7 @@ export default class PolygonLayer extends CompositeLayer {
             getElevation: updateTriggers.getElevation,
             getColor: updateTriggers.getLineColor
           }
-        })
+        }
       );
 
     // Polygon line layer
@@ -188,7 +190,9 @@ export default class PolygonLayer extends CompositeLayer {
       hasData &&
       new PathLayer(
         this.getSubLayerProps({
-          id: 'stroke',
+          id: 'stroke'
+        }),
+        {
           data: paths,
 
           fp64,
@@ -208,7 +212,7 @@ export default class PolygonLayer extends CompositeLayer {
             getColor: updateTriggers.getLineColor,
             getDashArray: updateTriggers.getLineDashArray
           }
-        })
+        }
       );
 
     return [
