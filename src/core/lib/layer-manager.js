@@ -25,6 +25,7 @@ import Layer from './layer';
 import {drawLayers} from './draw-layers';
 import {pickObject, pickVisibleObjects} from './pick-layers';
 import {LIFECYCLE} from './constants';
+import View from '../views/view';
 import Viewport from '../viewports/viewport';
 // TODO - remove, just for dummy initialization
 import WebMercatorViewport from '../viewports/web-mercator-viewport';
@@ -84,8 +85,8 @@ export default class LayerManager {
     // List of view descriptors, gets re-evaluated when width/height changes
     this.width = 100;
     this.height = 100;
-    this.viewDescriptors = [];
-    this.viewDescriptorsChanged = true;
+    this.views = [];
+    this.viewsChanged = true;
     this.viewports = []; // Generated viewports
     this._needsRedraw = 'Initial render';
 
@@ -113,7 +114,7 @@ export default class LayerManager {
     }
 
     // Init with dummy viewport
-    this.setViewports([
+    this.setViews([
       new WebMercatorViewport({width: 1, height: 1, latitude: 0, longitude: 0, zoom: 1})
     ]);
   }
@@ -146,11 +147,15 @@ export default class LayerManager {
       : this.layers;
   }
 
+  getViews() {
+    return this.views;
+  }
+
   // Get a set of viewports for a given width and height
   // TODO - Intention is for deck.gl to autodeduce width and height and drop the need for props
   getViewports({width, height} = {}) {
-    if (width !== this.width || height !== this.height || this.viewDescriptorsChanged) {
-      this._rebuildViewportsFromViews({viewDescriptors: this.viewDescriptors, width, height});
+    if (width !== this.width || height !== this.height || this.viewsChanged) {
+      this._rebuildViewportsFromViews({views: this.views, width, height});
       this.width = width;
       this.height = height;
     }
@@ -162,6 +167,7 @@ export default class LayerManager {
    * Parameters are to be passed as a single object, with the following values:
    * @param {Boolean} useDevicePixels
    */
+  /* eslint-disable complexity */
   setParameters(parameters) {
     if ('eventManager' in parameters) {
       this._initEventHandling(parameters.eventManager);
@@ -180,8 +186,8 @@ export default class LayerManager {
       this.setLayers(parameters.layers);
     }
 
-    if ('viewports' in parameters) {
-      this.setViewports(parameters.viewports);
+    if ('views' in parameters || 'viewports' in parameters) {
+      this.setViews(parameters.views || parameters.viewports);
     }
 
     if ('layerFilter' in parameters) {
@@ -199,22 +205,25 @@ export default class LayerManager {
 
     Object.assign(this.context, parameters);
   }
+  /* eslint-enable complexity */
 
   // Update the view descriptor list and set change flag if needed
-  setViewports(viewports) {
-    // Ensure viewports are wrapped in descriptors
-    const viewDescriptors = flatten(viewports, {filter: Boolean}).map(
-      viewport => (viewport instanceof Viewport ? {viewport} : viewport)
-    );
+  setViews(views) {
+    // Ensure any "naked" Viewports are wrapped in View instances
+    views = flatten(views, {filter: Boolean}).map(view => {
+      if (view instanceof Viewport) {
+        return new View({viewportInstance: view});
+      }
+      return view;
+    });
 
-    this.viewDescriptorsChanged =
-      this.viewDescriptorsChanged || this._diffViews(viewDescriptors, this.viewDescriptors);
+    this.viewsChanged = this.viewsChanged || this._diffViews(views, this.views);
 
     // Try to not actually rebuild the viewports until `getViewports` is called
-    if (this.viewDescriptorsChanged) {
-      this.viewDescriptors = viewDescriptors;
-      this._rebuildViewportsFromViews({viewDescriptors: this.viewDescriptors});
-      this.viewDescriptorsChanged = false;
+    if (this.viewsChanged) {
+      this.views = views;
+      this._rebuildViewportsFromViews({views: this.views});
+      this.viewsChanged = false;
     }
   }
 
@@ -312,6 +321,16 @@ export default class LayerManager {
   }
 
   //
+  // DEPRECATED METHODS in V5.1
+  //
+
+  setViewports(viewports) {
+    log.deprecated('setViewport', 'setViews');
+    this.setViews(viewports);
+    return this;
+  }
+
+  //
   // DEPRECATED METHODS in V5
   //
 
@@ -321,8 +340,8 @@ export default class LayerManager {
   }
 
   setViewport(viewport) {
-    log.deprecated('setViewport', 'setViewports');
-    this.setViewports([viewport]);
+    log.deprecated('setViewport', 'setViews');
+    this.setViews([viewport]);
     return this;
   }
 
@@ -347,13 +366,13 @@ export default class LayerManager {
   }
 
   // Rebuilds viewports from descriptors towards a certain window size
-  _rebuildViewportsFromViews({viewDescriptors, width, height}) {
-    const newViewports = viewDescriptors.map(
-      viewDescriptor =>
+  _rebuildViewportsFromViews({views, width, height}) {
+    const newViewports = views.map(
+      view =>
         // If a `Viewport` instance was supplied, use it, otherwise build it
-        viewDescriptor.viewport instanceof Viewport
-          ? viewDescriptor.viewport
-          : this._makeViewportFromViewDescriptor({viewDescriptor, width, height})
+        view.viewportInstance instanceof Viewport
+          ? view.viewportInstance
+          : view.makeViewport({width, height})
     );
 
     this.setNeedsRedraw('Viewport(s) changed');
@@ -372,29 +391,7 @@ export default class LayerManager {
 
     // We've just rebuilt the viewports to match the descriptors, so clear the flag
     this.viewports = newViewports;
-    this.viewDescriptorsChanged = false;
-  }
-
-  // Build a `Viewport` from a view descriptor
-  // TODO - add support for autosizing viewports using width and height
-  _makeViewportFromViewDescriptor({viewDescriptor, width, height}) {
-    // Get the type of the viewport
-    // TODO - default to WebMercator?
-    const {type: ViewportType, viewState} = viewDescriptor;
-
-    // Resolve relative viewport dimensions
-    // TODO - we need to have width and height available
-    const viewportDimensions = this._getViewDimensions({viewDescriptor});
-
-    // Create the viewport, giving preference to view state in `viewState`
-    return new ViewportType(
-      Object.assign(
-        {},
-        viewDescriptor,
-        viewportDimensions,
-        viewState // Object.assign handles undefined
-      )
-    );
+    this.viewsChanged = false;
   }
 
   // Check if viewport array has changed, returns true if any change
@@ -404,32 +401,7 @@ export default class LayerManager {
       return true;
     }
 
-    return newViews.some((_, i) => this._diffView(newViews[i], oldViews[i]));
-  }
-
-  _diffView(newView, oldView) {
-    // `View` hiearchy supports an `equals` method
-    if (newView.viewport) {
-      return !oldView.viewport || !newView.viewport.equals(oldView.viewport);
-    }
-    // TODO - implement deep equal on view descriptors
-    return newView !== oldView;
-  }
-
-  // Support for relative viewport dimensions (e.g {y: '50%', height: '50%'})
-  _getViewDimensions({viewDescriptor, width, height}) {
-    const parsePercent = (value, max) => value;
-    // TODO - enable to support percent size specifiers
-    // const parsePercent = (value, max) => value ?
-    //   Math.round(parseFloat(value) / 100 * max) :
-    //   (value === null ? max : value);
-
-    return {
-      x: parsePercent(viewDescriptor.x, width),
-      y: parsePercent(viewDescriptor.y, height),
-      width: parsePercent(viewDescriptor.width, width),
-      height: parsePercent(viewDescriptor.height, height)
-    };
+    return newViews.some((_, i) => !newViews[i].equals(oldViews[i]));
   }
 
   /**
@@ -480,7 +452,7 @@ export default class LayerManager {
       // Update layers states
       // Let screen space layers update their state based on viewport
       // TODO - reimplement viewport change detection (single viewport optimization)
-      // TODO - don't set viewportChanged during setViewports?
+      // TODO - don't set viewportChanged during setViews?
       if (this.context.viewportChanged) {
         for (const layer of this.layers) {
           layer.setChangeFlags({viewportChanged: 'Viewport changed'});

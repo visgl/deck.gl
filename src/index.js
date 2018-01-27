@@ -47,6 +47,8 @@ export {
 import {experimental as CoreExperimental} from './core';
 
 const {
+  View,
+
   // View States
   ViewState,
   FirstPersonState,
@@ -75,6 +77,8 @@ const {
 } = CoreExperimental;
 
 Object.assign(experimental, {
+  View,
+
   // Unfinished controller/viewport classes
   ViewState,
   FirstPersonState,
