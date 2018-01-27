@@ -1,4 +1,4 @@
-/* global document, window,*/
+/* global document, window, navigator */
 /* eslint-disable no-console */
 import React, {PureComponent} from 'react';
 import {render} from 'react-dom';
@@ -117,12 +117,7 @@ class Example extends PureComponent {
   }
 
   _onUpdate() {
-    const {viewport} = this.state;
-    this.setState({
-      viewport: {
-        ...viewport,
-      }
-    });
+    this.forceUpdate(); // force call render(), removing this breaks VR frame update
     window.requestAnimationFrame(this._onUpdate);
   }
 
@@ -144,8 +139,7 @@ class Example extends PureComponent {
   }
 
   _initVRDisplay() {
-    // initialize WebVR Polyfill
-    const polyfill = new WebVRPolyfill({
+    const polyfill = new WebVRPolyfill({ // eslint-disable-line no-unused-vars
       PROVIDE_MOBILE_VRDISPLAY: true
     });
 
@@ -162,7 +156,9 @@ class Example extends PureComponent {
   _renderViewports() {
     const {width, height, vrDisplay, emulatedPose} = this.state;
     const frameData = vrDisplay.isEmulated ? {} : new window.VRFrameData();
-    const gotFrameData = vrDisplay.isEmulated ? vrDisplay.getFrameDataFromPose(frameData, emulatedPose) : vrDisplay.getFrameData(frameData);
+    const gotFrameData = vrDisplay.isEmulated
+      ? vrDisplay.getFrameDataFromPose(frameData, emulatedPose)
+      : vrDisplay.getFrameData(frameData);
     if (gotFrameData) {
       return [
         new Viewport({
@@ -181,6 +177,7 @@ class Example extends PureComponent {
         })
       ];
     }
+    return new Viewport({width, height});
   }
 
   _renderDeckGLCanvas() {

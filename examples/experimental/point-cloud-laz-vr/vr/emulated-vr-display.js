@@ -35,11 +35,7 @@ export default class EmulatedVRDisplay {
         upDegrees: FOV_DEGREES_Y
       }
     };
-
     this.poseMatrix = new Matrix4();
-
-    this._leftEyeMatrix = this._getEyeMatrix(this.leftEyeParameters);
-    this._rightEyeMatrix = this._getEyeMatrix(this.rightEyeParameters);
   }
 
   getEyeParameters(whichEye) {
@@ -47,9 +43,8 @@ export default class EmulatedVRDisplay {
 
     if (whichEye === 'right') {
       return {...this.rightEyeParameters, ...viewport};
-    } else {
-      return {...this.leftEyeParameters, ...viewport};
     }
+    return {...this.leftEyeParameters, ...viewport};
   }
 
   getFrameData(vrFrameData) {
@@ -64,8 +59,18 @@ export default class EmulatedVRDisplay {
     const leftViewMatrix = new Matrix4();
     const rightViewMatrix = new Matrix4();
 
-    perspectiveFromFieldOfView(leftProjectionMatrix, this.leftEyeParameters.fieldOfView, this.depthNear, this.depthFar);
-    perspectiveFromFieldOfView(rightProjectionMatrix, this.rightEyeParameters.fieldOfView, this.depthNear, this.depthFar);
+    perspectiveFromFieldOfView(
+      leftProjectionMatrix,
+      this.leftEyeParameters.fieldOfView,
+      this.depthNear,
+      this.depthFar
+    );
+    perspectiveFromFieldOfView(
+      rightProjectionMatrix,
+      this.rightEyeParameters.fieldOfView,
+      this.depthNear,
+      this.depthFar
+    );
 
     leftViewMatrix.translate(this.leftEyeParameters.offset);
     rightViewMatrix.translate(this.rightEyeParameters.offset);
@@ -73,8 +78,13 @@ export default class EmulatedVRDisplay {
     leftViewMatrix.invert();
     rightViewMatrix.invert();
 
-    Object.assign(vrFrameData,
-      { timestamp, leftProjectionMatrix, rightProjectionMatrix, leftViewMatrix, rightViewMatrix });
+    Object.assign(vrFrameData, {
+      timestamp,
+      leftProjectionMatrix,
+      rightProjectionMatrix,
+      leftViewMatrix,
+      rightViewMatrix
+    });
 
     return true;
   }
@@ -84,7 +94,7 @@ export default class EmulatedVRDisplay {
       throw new Error('must supply a frameData object');
     }
 
-    if(!pose) {
+    if (!pose) {
       throw new Error('must supply a pose object');
     }
 
@@ -95,8 +105,18 @@ export default class EmulatedVRDisplay {
     const leftViewMatrix = new Matrix4();
     const rightViewMatrix = new Matrix4();
 
-    perspectiveFromFieldOfView(leftProjectionMatrix, this.leftEyeParameters.fieldOfView, this.depthNear, this.depthFar);
-    perspectiveFromFieldOfView(rightProjectionMatrix, this.rightEyeParameters.fieldOfView, this.depthNear, this.depthFar);
+    perspectiveFromFieldOfView(
+      leftProjectionMatrix,
+      this.leftEyeParameters.fieldOfView,
+      this.depthNear,
+      this.depthFar
+    );
+    perspectiveFromFieldOfView(
+      rightProjectionMatrix,
+      this.rightEyeParameters.fieldOfView,
+      this.depthNear,
+      this.depthFar
+    );
 
     const orientation = pose.orientation || DEFAULT_ORIENTATION;
     const position = pose.position || DEFAULT_POSITION;
@@ -110,8 +130,14 @@ export default class EmulatedVRDisplay {
     leftViewMatrix.invert();
     rightViewMatrix.invert();
 
-    Object.assign(vrFrameData,
-      { pose, timestamp, leftProjectionMatrix, rightProjectionMatrix, leftViewMatrix, rightViewMatrix });
+    Object.assign(vrFrameData, {
+      pose,
+      timestamp,
+      leftProjectionMatrix,
+      rightProjectionMatrix,
+      leftViewMatrix,
+      rightViewMatrix
+    });
 
     return true;
   }
