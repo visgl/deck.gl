@@ -15,7 +15,7 @@ const defaultProps = {
 export default class TripsLayer extends Layer {
   initializeState() {
     const {gl} = this.context;
-    const {attributeManager} = this.state;
+    const attributeManager = this.getAttributeManager();
 
     const model = this.getModel(gl);
 

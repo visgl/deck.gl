@@ -25,7 +25,7 @@ import Stats from './stats';
 import {count} from '../utils/count';
 import log from '../utils/log';
 import {createProps} from '../lifecycle/create-props';
-import {diffProps} from './props';
+import {diffProps} from '../lifecycle/props';
 import {removeLayerInSeer} from './seer-integration';
 import {GL, withParameters} from 'luma.gl';
 import assert from 'assert';
@@ -145,6 +145,10 @@ export default class Layer {
     return this.props.pickable && this.props.visible;
   }
 
+  getAttributeManager() {
+    return this.state && this.state.attributeManager;
+  }
+
   // Use iteration (the only required capability on data) to get first element
   // deprecated
   getFirstObject() {
@@ -247,7 +251,7 @@ export default class Layer {
   // Default implementation, all attributes will be invalidated and updated
   // when data changes
   updateState({oldProps, props, oldContext, context, changeFlags}) {
-    const {attributeManager} = this.state;
+    const attributeManager = this.getAttributeManager();
     if (changeFlags.dataChanged && attributeManager) {
       attributeManager.invalidateAll();
     }
@@ -294,7 +298,7 @@ export default class Layer {
 
   // Default implementation of attribute invalidation, can be redefined
   invalidateAttribute(name = 'all', diffReason = '') {
-    const {attributeManager} = this.state;
+    const attributeManager = this.getAttributeManager();
     if (!attributeManager) {
       return;
     }
@@ -310,7 +314,7 @@ export default class Layer {
 
   // Calls attribute manager to update any WebGL attributes, can be redefined
   updateAttributes(props) {
-    const {attributeManager} = this.state;
+    const attributeManager = this.getAttributeManager();
     if (!attributeManager) {
       return;
     }
@@ -649,7 +653,7 @@ ${flags.viewportChanged ? 'viewport' : ''}\
     this.state.needsRedraw = this.state.needsRedraw && !clearRedrawFlags;
 
     // TODO - is attribute manager needed? - Model should be enough.
-    const {attributeManager} = this.state;
+    const attributeManager = this.getAttributeManager();
     const attributeManagerNeedsRedraw =
       attributeManager && attributeManager.getNeedsRedraw({clearRedrawFlags});
     redraw = redraw || attributeManagerNeedsRedraw;

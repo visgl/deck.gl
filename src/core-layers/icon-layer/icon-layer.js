@@ -74,7 +74,7 @@ export default class IconLayer extends Layer {
   }
 
   initializeState() {
-    const {attributeManager} = this.state;
+    const attributeManager = this.getAttributeManager();
 
     /* eslint-disable max-len */
     attributeManager.addInstanced({
@@ -117,7 +117,7 @@ export default class IconLayer extends Layer {
 
   updateAttribute({props, oldProps, changeFlags}) {
     if (props.fp64 !== oldProps.fp64) {
-      const {attributeManager} = this.state;
+      const attributeManager = this.getAttributeManager();
       attributeManager.invalidateAll();
 
       if (props.fp64 && props.coordinateSystem === COORDINATE_SYSTEM.LNGLAT) {
@@ -140,7 +140,7 @@ export default class IconLayer extends Layer {
     const {iconAtlas, iconMapping} = props;
 
     if (oldProps.iconMapping !== iconMapping) {
-      const {attributeManager} = this.state;
+      const attributeManager = this.getAttributeManager();
       attributeManager.invalidate('instanceOffsets');
       attributeManager.invalidate('instanceIconFrames');
       attributeManager.invalidate('instanceColorModes');

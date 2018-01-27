@@ -66,7 +66,7 @@ export default class BitmapLayer extends Layer {
     const {gl} = this.context;
     this.setState({model: this.getModel(gl)});
 
-    const {attributeManager} = this.state;
+    const attributeManager = this.getAttributeManager();
     attributeManager.addInstanced({
       instancePositions: {size: 4, update: this.calculateInstancePositions},
       instanceAngle: {size: 2, update: this.calculateInstanceAngle},
