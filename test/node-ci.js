@@ -38,16 +38,16 @@ require('luma.gl/headless');
 require('@deck.gl/test-utils/setup-gl');
 
 // Run a smaller selection of the tests (avoid overwhelming Travis CI)
-import './src/imports-spec';
-import './src/core';
+require('./src/imports-spec');
+require('./src/core');
 
-// import './src/core-layers';
+// require('./src/core-layers');
 
-import './polygon-tesselation.spec';
-// import './core-layers.spec';
-// import './polygon-layer.spec';
-import './geojson.spec';
-// import './geojson-layer.spec';
-// import './hexagon-cell-layer.spec';
-// import './grid-layer.spec';
-// import './hexagon-layer.spec';
+require('./src/core-layers/polygon-tesselation.spec');
+// require('./core-layers.spec');
+// require('./polygon-layer.spec');
+require('./src/core-layers/geojson.spec');
+// require('./geojson-layer.spec');
+// require('./hexagon-cell-layer.spec');
+// require('./grid-layer.spec');
+// require('./hexagon-layer.spec');
