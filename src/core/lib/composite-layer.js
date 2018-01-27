@@ -117,3 +117,5 @@ export default class CompositeLayer extends Layer {
     }
   }
 }
+
+CompositeLayer.layerName = 'CompositeLayer';
