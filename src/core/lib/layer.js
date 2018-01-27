@@ -24,9 +24,9 @@ import AttributeManager from './attribute-manager';
 import Stats from './stats';
 import {count} from '../utils/count';
 import log from '../utils/log';
-import {createProps, EMPTY_ARRAY} from '../lifecycle/create-props';
-import {getDefaultProps, diffProps} from './props';
-import {applyPropOverrides, removeLayerInSeer} from './seer-integration';
+import {createProps} from '../lifecycle/create-props';
+import {diffProps} from './props';
+import {removeLayerInSeer} from './seer-integration';
 import {GL, withParameters} from 'luma.gl';
 import assert from 'assert';
 
@@ -663,24 +663,6 @@ ${flags.viewportChanged ? 'viewport' : ''}\
     }
 
     return redraw;
-  }
-
-  // Helper for constructor, merges props with default props and freezes them
-  _normalizeProps(propObjectList) {
-    // If sublayer has static defaultProps member, getDefaultProps will return it
-    const mergedDefaultProps = getDefaultProps(this);
-    // Merge supplied props with pre-merged default props
-    const newProps = Object.create(mergedDefaultProps, ...propObjectList);
-    props = Object.assign(newProps, props);
-
-    // Accept null as data - otherwise apps and layers need to add ugly checks
-    // Use constant fallback so that data change is not triggered
-    props.data = props.data || EMPTY_ARRAY;
-    // Apply any overrides from the seer debug extension if it is active
-    applyPropOverrides(props);
-    // Props are immutable
-    Object.freeze(props);
-    return props;
   }
 
   // Called by layer manager to transfer state from an old layer

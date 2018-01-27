@@ -150,10 +150,8 @@ export default function coreLayersBench(suite) {
         fp64: true
       });
       testInitializeLayer({layer});
-    })
-    ;
+    });
 }
-
 
 const PROPS1 = {
   // data: Special handling for null, see below
@@ -180,7 +178,7 @@ const PROPS1 = {
   // Offset depth based on layer index to avoid z-fighting.
   // Negative values pull layer towards the camera
   // https://www.opengl.org/archives/resources/faq/technical/polygonoffset.htm
-  getPolygonOffset: ({layerIndex}) => [0, -layerIndex * 100],
+  getPolygonOffset: ({layerIndex}) => [0, -layerIndex * 100]
 };
 
 const PROPS2 = {
@@ -200,7 +198,7 @@ const PROPS2 = {
   uniforms2: {},
   framebuffer2: null,
 
-  animation2: null, // Passed prop animation functions to evaluate props
+  animation2: null // Passed prop animation functions to evaluate props
 };
 
 const PROPS3 = {
@@ -230,6 +228,5 @@ function layerConstructionBench(suite) {
     })
     .add('ScatterplotLayer#construct(precomposed prop objects)', () => {
       return new ScatterplotLayer(Object.assign({}, PROPS1, PROPS2, PROPS3));
-    })
-    ;
+    });
 }
