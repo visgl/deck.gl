@@ -35,28 +35,6 @@ const VECTOR_TO_POINT_MATRIX = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0];
 const IDENTITY_MATRIX = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
 const DEFAULT_PIXELS_PER_UNIT2 = [0, 0, 0];
 
-// TODO - import these utils from fp64 package
-function fp64ify(a, array = [], startIndex = 0) {
-  const hiPart = Math.fround(a);
-  const loPart = a - hiPart;
-  array[startIndex] = hiPart;
-  array[startIndex + 1] = loPart;
-  return array;
-}
-
-// calculate WebGL 64 bit matrix (transposed "Float64Array")
-function fp64ifyMatrix4(matrix) {
-  // Transpose the projection matrix to column major for GLSL.
-  const matrixFP64 = new Float32Array(32);
-  for (let i = 0; i < 4; ++i) {
-    for (let j = 0; j < 4; ++j) {
-      const index = i * 4 + j;
-      fp64ify(matrix[j * 4 + i], matrixFP64, index * 2);
-    }
-  }
-  return matrixFP64;
-}
-
 // The code that utilizes Matrix4 does the same calculation as their mat4 counterparts,
 // has lower performance but provides error checking.
 // Uncomment when debugging
@@ -133,7 +111,6 @@ export function getUniformsFromViewport({
   modelMatrix = null,
   coordinateSystem = COORDINATE_SYSTEM.LNGLAT,
   coordinateOrigin = [0, 0],
-  fp64 = false,
   // Deprecated
   projectionMode,
   positionOrigin
@@ -203,19 +180,6 @@ export function getUniformsFromViewport({
     uniforms.project_uPixelsPerUnit = distanceScalesAtOrigin.pixelsPerDegree;
     uniforms.project_uPixelsPerUnit2 = distanceScalesAtOrigin.pixelsPerDegree2;
   }
-
-  // TODO - fp64 flag should be from shader module, not layer props
-  return fp64 ? addFP64Uniforms(uniforms) : uniforms;
-}
-
-// 64 bit projection support
-function addFP64Uniforms(uniforms) {
-  const glViewProjectionMatrixFP64 = fp64ifyMatrix4(uniforms.project_uViewProjectionMatrix);
-  const scaleFP64 = fp64ify(uniforms.project_uScale);
-
-  uniforms.project_uViewProjectionMatrixFP64 = glViewProjectionMatrixFP64;
-  uniforms.project64_uViewProjectionMatrix = glViewProjectionMatrixFP64;
-  uniforms.project64_uScale = scaleFP64;
 
   return uniforms;
 }
