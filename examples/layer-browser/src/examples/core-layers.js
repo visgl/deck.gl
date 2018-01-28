@@ -310,7 +310,7 @@ const PointCloudLayerExample2 = {
     coordinateSystem: COORDINATE_SYSTEM.LNGLAT_OFFSETS,
     coordinateOrigin: dataSamples.positionOrigin,
     getPosition: d => [d.position[0] * 1e-5, d.position[1] * 1e-5, d.position[2]],
-    getNormal: d => d.normal,
+    getNormal: d => [d.normal[0] * 1e-5, d.normal[1] * 1e-5, d.normal[2]],
     getColor: d => d.color,
     opacity: 1,
     radiusPixels: 4,

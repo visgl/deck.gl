@@ -24,19 +24,11 @@ export default `\
 #define NUM_OF_LIGHTS 2
 
 // TODO these should be using lighting_ prefix
-uniform vec3 lightsPosition[16];
-uniform vec2 lightsStrength[16];
-uniform float ambientRatio;
-uniform float diffuseRatio;
-uniform float specularRatio;
-
-// project_position without modelMatrix
-vec3 project_light_position_(vec3 position) {
-  return vec3(
-    project_mercator_(position.xy) * WORLD_SCALE * project_uScale,
-    project_scale(position.z)
-  );
-}
+uniform vec3 lighting_lightPositions[16];
+uniform vec2 lighting_lightStrengths[16];
+uniform float lighting_ambientRatio;
+uniform float lighting_diffuseRatio;
+uniform float lighting_specularRatio;
 
 float lighting_getLightWeight(vec3 position_worldspace_vec3, vec3 normals_worldspace) {
   float lightWeight = 0.0;
@@ -47,7 +39,7 @@ float lighting_getLightWeight(vec3 position_worldspace_vec3, vec3 normals_worlds
   vec3 view_direction = normalize(camera_pos_worldspace - position_worldspace_vec3);
 
   for (int i = 0; i < NUM_OF_LIGHTS; i++) {
-    vec3 light_position_worldspace = project_light_position_(lightsPosition[i]);
+    vec3 light_position_worldspace = lighting_lightPositions[i];
     vec3 light_direction = normalize(light_position_worldspace - position_worldspace_vec3);
 
     vec3 halfway_direction = normalize(light_direction + view_direction);
@@ -58,9 +50,8 @@ float lighting_getLightWeight(vec3 position_worldspace_vec3, vec3 normals_worlds
       specular = pow(specular_angle, 32.0);
     }
     lambertian = max(lambertian, 0.0);
-    lightWeight += (ambientRatio + lambertian * diffuseRatio + specular * specularRatio) *
-      lightsStrength[i].x;
-
+    lightWeight += (lighting_ambientRatio + lambertian * lighting_diffuseRatio + specular * lighting_specularRatio) *
+      lighting_lightStrengths[i].x;
   }
 
   return lightWeight;
