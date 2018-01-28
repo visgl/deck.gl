@@ -1,4 +1,4 @@
-import {GL, Program, Model, Geometry} from 'luma.gl';
+import {GL, Model, Geometry} from 'luma.gl';
 
 const ATTRIBUTE_MAPPING = {
   1: 'float',
@@ -62,16 +62,21 @@ void main(void) {
 
 export default class AttributeTransitionModel extends Model {
   constructor(gl, {id, transitions}) {
-    super(gl, {
-      id,
-      program: new Program(gl, getShaders(transitions)),
-      geometry: new Geometry({
-        id,
-        drawMode: GL.POINTS
-      }),
-      vertexCount: 0,
-      isIndexed: true
-    });
+    super(
+      gl,
+      Object.assign(
+        {
+          id,
+          geometry: new Geometry({
+            id,
+            drawMode: GL.POINTS
+          }),
+          vertexCount: 0,
+          isIndexed: true
+        },
+        getShaders(transitions)
+      )
+    );
 
     this.setTransitions(transitions);
   }
