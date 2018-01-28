@@ -175,7 +175,9 @@ export default class AttributeTransitionManager {
 
     transformFeedback.bindBuffers(buffers, {});
 
-    model.draw({uniforms, transformFeedback});
+    model.draw({uniforms, transformFeedback, parameters: {
+      [GL.RASTERIZER_DISCARD]: true
+    }});
   }
 
   // Create a model for the transform feedback
