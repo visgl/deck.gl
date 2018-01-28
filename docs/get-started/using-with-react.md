@@ -69,8 +69,7 @@ export default class App extends Component {
 
 ```
 
-
-## Using JSX Syntax with deck.gl Layers
+## Using JSX with deck.gl Layers
 
 It is possible to use JSX syntax to create deck.gl layers as React children of the `DeckGL` React components, instead of providing them as ES6 class instances to the `layers` prop. There are no performance advantages to this syntax but it can allow for a more consistent, React-like coding style.
 ```jsx
