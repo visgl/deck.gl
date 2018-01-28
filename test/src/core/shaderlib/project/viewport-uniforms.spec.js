@@ -85,7 +85,7 @@ test('project#getUniforms', t => {
 test('project64#getUniforms', t => {
   const viewport = new WebMercatorViewport(TEST_DATA.mapState);
   const uniforms = project.getUniforms({viewport});
-  const uniforms64 = project64.getUniforms(uniforms);
+  const uniforms64 = project64.getUniforms({viewport}, uniforms);
 
   for (const uniform in UNIFORMS_64) {
     t.ok(uniforms64[uniform] !== undefined, `Return ${uniform}`);
