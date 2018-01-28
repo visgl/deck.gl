@@ -62,18 +62,21 @@ void main(void) {
 
 export default class AttributeTransitionModel extends Model {
   constructor(gl, {id, transitions}) {
-    super(gl, Object.assign(
-      {
-        id,
-        geometry: new Geometry({
+    super(
+      gl,
+      Object.assign(
+        {
           id,
-          drawMode: GL.POINTS
-        }),
-        vertexCount: 0,
-        isIndexed: true
-      },
-      getShaders(transitions)
-    ));
+          geometry: new Geometry({
+            id,
+            drawMode: GL.POINTS
+          }),
+          vertexCount: 0,
+          isIndexed: true
+        },
+        getShaders(transitions)
+      )
+    );
 
     this.setTransitions(transitions);
   }
