@@ -367,13 +367,7 @@ export default class LayerManager {
 
   // Rebuilds viewports from descriptors towards a certain window size
   _rebuildViewportsFromViews({views, width, height}) {
-    const newViewports = views.map(
-      view =>
-        // If a `Viewport` instance was supplied, use it, otherwise build it
-        view.viewportInstance instanceof Viewport
-          ? view.viewportInstance
-          : view.makeViewport({width, height})
-    );
+    const newViewports = views.map(view => view.makeViewport({width, height}));
 
     this.setNeedsRedraw('Viewport(s) changed');
 
