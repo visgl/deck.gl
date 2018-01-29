@@ -144,8 +144,8 @@ export default class LayerControls extends PureComponent {
     return (
       <div className="layer-controls">
         {title && <h4>{title}</h4>}
-        {this._getAllKeys(settings).map(
-          key => this._renderSetting(key, settings[key], propTypes[key])
+        {this._getAllKeys(settings).map(key =>
+          this._renderSetting(key, settings[key], propTypes[key])
         )}
       </div>
     );
