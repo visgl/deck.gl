@@ -1,13 +1,16 @@
-/* global document, window,*/
+/* global document, window, navigator */
 /* eslint-disable no-console */
 import React, {PureComponent} from 'react';
 import {render} from 'react-dom';
-import DeckGL, {COORDINATE_SYSTEM, PointCloudLayer, experimental} from 'deck.gl';
+import DeckGL, {COORDINATE_SYSTEM, PointCloudLayer, experimental, Viewport} from 'deck.gl';
 const {OrbitController} = experimental;
 
 import {setParameters} from 'luma.gl';
 
 import {loadLazFile, parseLazData} from './utils/laslaz-loader';
+
+import WebVRPolyfill from 'webvr-polyfill';
+import EmulatedVRDisplay from './vr/emulated-vr-display';
 
 const DATA_REPO = 'https://raw.githubusercontent.com/uber-common/deck.gl-data/master';
 const FILE_PATH = 'examples/point-cloud-laz/indoor.laz';
@@ -65,6 +68,12 @@ class Example extends PureComponent {
         fov: 30,
         minDistance: 0.5,
         maxDistance: 3
+      },
+      vrDisplay: new EmulatedVRDisplay(),
+      vrEnabled: false,
+      emulatedPose: {
+        orientation: [0, 0, 0, 1],
+        position: [0, 0, 0]
       }
     };
   }
@@ -92,7 +101,7 @@ class Example extends PureComponent {
         this.setState({points, progress});
       });
     });
-
+    this._initVRDisplay();
     window.requestAnimationFrame(this._onUpdate);
   }
 
@@ -124,8 +133,29 @@ class Example extends PureComponent {
   }
 
   _onUpdate() {
-    const {rotating, viewport} = this.state;
+    const {vrEnabled} = this.state;
 
+    if (vrEnabled) {
+      const {vrDisplay, emulatedPose} = this.state;
+      // animate camera in Z-axis
+      // this can be removed after we have a VRController for EmulatedVRDisplay
+      if (vrDisplay.isEmulated) {
+        const {position} = emulatedPose;
+        position[2] += position[2] < 0.5 ? 0.001 : -0.5;
+        this.setState({
+          emulatedPose: {
+            ...emulatedPose,
+            ...position
+          }
+        });
+      }
+
+      this.forceUpdate(); // explicitly refresh state; removing this breaks frame update in VR
+      window.requestAnimationFrame(this._onUpdate);
+      return;
+    }
+
+    const {rotating, viewport} = this.state;
     // note: when finished dragging, _onUpdate will not resume by default
     // to resume rotating, explicitly call _onUpdate or requestAnimationFrame
     if (!rotating) {
@@ -142,7 +172,7 @@ class Example extends PureComponent {
     window.requestAnimationFrame(this._onUpdate);
   }
 
-  _renderLazPointCloudLayer() {
+  _renderLazPointCloudLayer(useSmallRadius = false) {
     const {points} = this.state;
     if (!points || points.length === 0) {
       return null;
@@ -155,12 +185,76 @@ class Example extends PureComponent {
       getPosition: d => d.position,
       getNormal: d => [0, 0.5, 0.2],
       getColor: d => [255, 255, 255, 128],
-      radiusPixels: 1
+      radiusPixels: useSmallRadius ? 0.5 : 1
+    });
+  }
+
+  _initVRDisplay() {
+    const polyfill = new WebVRPolyfill({
+      // eslint-disable-line no-unused-vars
+      PROVIDE_MOBILE_VRDISPLAY: true
+    });
+
+    if (navigator && navigator.getVRDisplays) {
+      navigator.getVRDisplays().then(displays => {
+        const vrDisplay = displays.find(d => d.isConnected);
+        if (vrDisplay) {
+          this.setState({vrDisplay, vrEnabled: true});
+        }
+      });
+    }
+  }
+
+  _renderViewports() {
+    const {width, height, vrDisplay, emulatedPose} = this.state;
+    const frameData = vrDisplay.isEmulated ? {} : new window.VRFrameData();
+    const gotFrameData = vrDisplay.isEmulated
+      ? vrDisplay.getFrameDataFromPose(frameData, emulatedPose)
+      : vrDisplay.getFrameData(frameData);
+    if (gotFrameData) {
+      return [
+        new Viewport({
+          x: 0,
+          width: width / 2,
+          height,
+          viewMatrix: frameData.leftViewMatrix,
+          projectionMatrix: frameData.leftProjectionMatrix
+        }),
+        new Viewport({
+          x: width / 2,
+          width: width / 2,
+          height,
+          viewMatrix: frameData.rightViewMatrix,
+          projectionMatrix: frameData.rightProjectionMatrix
+        })
+      ];
+    }
+    return new Viewport({width, height});
+  }
+
+  _toggleDisplayMode() {
+    const {vrEnabled} = this.state;
+
+    this.setState({
+      vrEnabled: !vrEnabled
     });
   }
 
   _renderDeckGLCanvas() {
-    const {width, height, viewport} = this.state;
+    const {width, height, viewport, vrEnabled} = this.state;
+
+    if (vrEnabled) {
+      return (
+        <DeckGL
+          width={width}
+          height={height}
+          viewports={this._renderViewports()}
+          layers={[this._renderLazPointCloudLayer(true)]}
+          onWebGLInitialized={this._onInitialized}
+        />
+      );
+    }
+
     const canvasProps = {width, height, ...viewport};
     const glViewport = OrbitController.getViewport(canvasProps);
 
@@ -204,6 +298,30 @@ class Example extends PureComponent {
             </div>
           ) : (
             <div>Data source: kaarta.com</div>
+          )}
+        </div>
+        <div
+          style={{
+            position: 'absolute',
+            right: '8px',
+            bottom: '8px',
+            color: '#FFF',
+            fontSize: '15px'
+          }}
+        >
+          {this.state.vrEnabled ? (
+            <div>
+              {this.state.vrDisplay.isEmulated ? (
+                <a onClick={this._toggleDisplayMode.bind(this)}>Exit stereoscopic view.</a>
+              ) : (
+                <br />
+              )}
+            </div>
+          ) : (
+            <div>
+              <div>No VR Device found.</div>
+              <a onClick={this._toggleDisplayMode.bind(this)}>Enter stereoscopic view.</a>
+            </div>
           )}
         </div>
       </div>
