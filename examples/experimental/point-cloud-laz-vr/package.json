@@ -1,0 +1,27 @@
+{
+  "name": "point-cloud-laz",
+  "version": "0.0.1",
+  "license": "MIT",
+  "scripts": {
+    "start": "webpack-dev-server --progress --hot --open",
+    "start-local": "webpack-dev-server --env.local --progress --hot --open",
+    "build-clean": "rm -rf dist && mkdir dist",
+    "build-script": "webpack -p",
+    "build-copy": "cp index.html dist",
+    "build": "npm run build-clean && npm run build-script && npm run build-copy"
+  },
+  "dependencies": {
+    "deck.gl": "^5.0.0",
+    "gl-matrix": "^2.3.2",
+    "is-little-endian": "0.0.0",
+    "react": "^16.2.0",
+    "react-dom": "^16.2.0",
+    "webvr-polyfill": "^0.10.2",
+    "gl-mat4": "^1.1.4"
+  },
+  "devDependencies": {
+    "buble-loader": "^0.4.1",
+    "webpack": "^2.6.1",
+    "webpack-dev-server": "^2.4.5"
+  }
+}
