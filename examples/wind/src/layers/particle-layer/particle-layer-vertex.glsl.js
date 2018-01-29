@@ -39,7 +39,7 @@ uniform vec4 elevationBounds;
 uniform vec2 elevationRange;
 uniform float zScale;
 
-// attribute vec3 positions;
+attribute vec3 positions;
 attribute vec4 posFrom;
 // attribute vec3 vertices;
 
@@ -67,7 +67,7 @@ void main(void) {
   vec2 pos = project_position(posFrom.xy);
   float elevation = project_scale((texel.w) * ELEVATION_SCALE);
 
-  vec3 extrudedPosition = vec3(pos.xy, elevation + 1.0);
+  vec3 extrudedPosition = vec3(pos.xy, elevation + 1.0) + positions;
   vec4 position_worldspace = vec4(extrudedPosition, 1.0);
   gl_Position = project_to_clipspace(position_worldspace);
   gl_PointSize = 3.5 * pixelRatio / 2.0;
