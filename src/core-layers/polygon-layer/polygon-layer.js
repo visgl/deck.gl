@@ -100,6 +100,7 @@ export default class PolygonLayer extends CompositeLayer {
     });
   }
 
+  /* eslint-disable complexity */
   renderLayers() {
     // Layer composition props
     const {data, stroked, filled, extruded, wireframe, elevationScale} = this.props;
@@ -138,6 +139,12 @@ export default class PolygonLayer extends CompositeLayer {
       new SolidPolygonLayer(
         this.getSubLayerProps({
           id: 'fill',
+          updateTriggers: {
+            getElevation: updateTriggers.getElevation,
+            getColor: updateTriggers.getFillColor
+          }
+        }),
+        {
           data,
           extruded,
           elevationScale,
@@ -148,13 +155,9 @@ export default class PolygonLayer extends CompositeLayer {
           getPolygon,
           getElevation,
           getColor: getFillColor,
-          updateTriggers: {
-            getElevation: updateTriggers.getElevation,
-            getColor: updateTriggers.getFillColor
-          },
 
           lightSettings
-        })
+        }
       );
 
     const polygonWireframeLayer =
@@ -163,7 +166,11 @@ export default class PolygonLayer extends CompositeLayer {
       hasData &&
       new SolidPolygonLayer(
         this.getSubLayerProps({
-          id: 'wireframe'
+          id: 'wireframe',
+          updateTriggers: {
+            getElevation: updateTriggers.getElevation,
+            getColor: updateTriggers.getLineColor
+          }
         }),
         {
           data,
@@ -175,11 +182,7 @@ export default class PolygonLayer extends CompositeLayer {
 
           getPolygon,
           getElevation,
-          getColor: getLineColor,
-          updateTriggers: {
-            getElevation: updateTriggers.getElevation,
-            getColor: updateTriggers.getLineColor
-          }
+          getColor: getLineColor
         }
       );
 
@@ -190,7 +193,12 @@ export default class PolygonLayer extends CompositeLayer {
       hasData &&
       new PathLayer(
         this.getSubLayerProps({
-          id: 'stroke'
+          id: 'stroke',
+          updateTriggers: {
+            getWidth: updateTriggers.getLineWidth,
+            getColor: updateTriggers.getLineColor,
+            getDashArray: updateTriggers.getLineDashArray
+          }
         }),
         {
           data: paths,
@@ -206,12 +214,7 @@ export default class PolygonLayer extends CompositeLayer {
           getPath: x => x.path,
           getColor: x => getLineColor(x.object),
           getWidth: x => getLineWidth(x.object),
-          getDashArray: getLineDashArray && (x => getLineDashArray(x.object)),
-          updateTriggers: {
-            getWidth: updateTriggers.getLineWidth,
-            getColor: updateTriggers.getLineColor,
-            getDashArray: updateTriggers.getLineDashArray
-          }
+          getDashArray: getLineDashArray && (x => getLineDashArray(x.object))
         }
       );
 
@@ -224,6 +227,7 @@ export default class PolygonLayer extends CompositeLayer {
       extruded && polygonLayer
     ];
   }
+  /* eslint-enable complexity */
 }
 
 PolygonLayer.layerName = 'PolygonLayer';

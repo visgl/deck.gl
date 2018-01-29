@@ -102,6 +102,7 @@ export default class GeoJsonLayer extends CompositeLayer {
     });
   }
 
+  /* eslint-disable complexity */
   renderLayers() {
     const {features} = this.state;
     const {pointFeatures, lineFeatures, polygonFeatures, polygonOutlineFeatures} = features;
@@ -169,7 +170,11 @@ export default class GeoJsonLayer extends CompositeLayer {
       hasPolygon &&
       new subLayers.PolygonLayer(
         this.getSubLayerProps({
-          id: 'polygon-wireframe'
+          id: 'polygon-wireframe',
+          updateTriggers: {
+            getElevation: updateTriggers.getElevation,
+            getColor: updateTriggers.getLineColor
+          }
         }),
         {
           data: polygonFeatures,
@@ -180,11 +185,7 @@ export default class GeoJsonLayer extends CompositeLayer {
           wireframe: true,
           getPolygon: getCoordinates,
           getElevation,
-          getColor: getLineColor,
-          updateTriggers: {
-            getElevation: updateTriggers.getElevation,
-            getColor: updateTriggers.getLineColor
-          }
+          getColor: getLineColor
         }
       );
 
@@ -194,7 +195,11 @@ export default class GeoJsonLayer extends CompositeLayer {
       hasPolygonLines &&
       new subLayers.LineLayer(
         this.getSubLayerProps({
-          id: 'polygon-outline'
+          id: 'polygon-outline',
+          updateTriggers: {
+            getColor: updateTriggers.getLineColor,
+            getWidth: updateTriggers.getLineWidth
+          }
         }),
         {
           data: polygonOutlineFeatures,
@@ -208,11 +213,7 @@ export default class GeoJsonLayer extends CompositeLayer {
 
           getPath: getCoordinates,
           getColor: getLineColor,
-          getWidth: getLineWidth,
-          updateTriggers: {
-            getColor: updateTriggers.getLineColor,
-            getWidth: updateTriggers.getLineWidth
-          }
+          getWidth: getLineWidth
         }
       );
 
@@ -220,7 +221,11 @@ export default class GeoJsonLayer extends CompositeLayer {
       drawLines &&
       new subLayers.LineLayer(
         this.getSubLayerProps({
-          id: 'line-paths'
+          id: 'line-paths',
+          updateTriggers: {
+            getColor: updateTriggers.getLineColor,
+            getWidth: updateTriggers.getLineWidth
+          }
         }),
         {
           data: lineFeatures,
@@ -234,11 +239,7 @@ export default class GeoJsonLayer extends CompositeLayer {
 
           getPath: getCoordinates,
           getColor: getLineColor,
-          getWidth: getLineWidth,
-          updateTriggers: {
-            getColor: updateTriggers.getLineColor,
-            getWidth: updateTriggers.getLineWidth
-          }
+          getWidth: getLineWidth
         }
       );
 
@@ -246,7 +247,11 @@ export default class GeoJsonLayer extends CompositeLayer {
       drawPoints &&
       new subLayers.PointLayer(
         this.getSubLayerProps({
-          id: 'points'
+          id: 'points',
+          updateTriggers: {
+            getColor: updateTriggers.getFillColor,
+            getRadius: updateTriggers.getRadius
+          }
         }),
         {
           data: pointFeatures,
@@ -258,11 +263,7 @@ export default class GeoJsonLayer extends CompositeLayer {
 
           getPosition: getCoordinates,
           getColor: getFillColor,
-          getRadius,
-          updateTriggers: {
-            getColor: updateTriggers.getFillColor,
-            getRadius: updateTriggers.getRadius
-          }
+          getRadius
         }
       );
 
@@ -277,6 +278,7 @@ export default class GeoJsonLayer extends CompositeLayer {
       extruded && polygonFillLayer
     ];
   }
+  /* eslint-enable complexity */
 }
 
 GeoJsonLayer.layerName = 'GeoJsonLayer';
