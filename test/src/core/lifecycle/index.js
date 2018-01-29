@@ -19,3 +19,4 @@
 // THE SOFTWARE.
 
 import './props.spec';
+import './prop-types.spec';

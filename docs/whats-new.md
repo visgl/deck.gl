@@ -1,3 +1,15 @@
+## deck.gl v5.2
+
+Release date: TBD, target Q1-Q2, 2018
+
+
+## Experimental Features
+
+### Prop Types
+
+It is now possible to provide additional type information when declaring the `defaultProps` object for deck.gl layers, and deck.gl layers will automatically try to deduce type information based on the default value for any properties that lack type information. Prop types can be used to validate property values during development, and are also a foundation for planned features such as property transitions/animations and asynchronous properties.
+
+
 # deck.gl v5.1
 
 Release date: Feb 16, 2018
