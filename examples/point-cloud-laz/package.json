@@ -15,7 +15,9 @@
     "gl-matrix": "^2.3.2",
     "is-little-endian": "0.0.0",
     "react": "^16.2.0",
-    "react-dom": "^16.2.0"
+    "react-dom": "^16.2.0",
+    "webvr-polyfill": "^0.10.2",
+    "gl-mat4": "^1.1.4"
   },
   "devDependencies": {
     "buble-loader": "^0.4.1",
