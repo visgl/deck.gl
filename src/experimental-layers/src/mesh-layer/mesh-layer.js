@@ -101,7 +101,7 @@ export default class MeshLayer extends Layer {
   }
 
   initializeState() {
-    const {attributeManager} = this.state;
+    const attributeManager = this.getAttributeManager();
     attributeManager.addInstanced({
       instancePositions: {
         size: 3,
@@ -118,7 +118,7 @@ export default class MeshLayer extends Layer {
   }
 
   updateState({props, oldProps, changeFlags}) {
-    const {attributeManager} = this.state;
+    const attributeManager = this.getAttributeManager();
 
     // super.updateState({props, oldProps, changeFlags});
     if (changeFlags.dataChanged) {
@@ -155,7 +155,7 @@ export default class MeshLayer extends Layer {
         sizeScale: props.sizeScale
       });
 
-      const {attributeManager} = this.state;
+      const attributeManager = this.getAttributeManager();
       attributeManager.invalidateAll();
 
       if (enable64bitSupport(this.props)) {

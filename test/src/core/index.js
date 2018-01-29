@@ -19,6 +19,7 @@
 // THE SOFTWARE.
 
 import './viewports';
+import './lifecycle';
 import './lib';
 import './utils';
 import './shaderlib';

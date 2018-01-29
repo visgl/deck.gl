@@ -41,7 +41,7 @@ export default class EnhancedChoroplethLayer extends Layer {
 
   initializeState() {
     const {gl} = this.context;
-    const {attributeManager} = this.state;
+    const attributeManager = this.getAttributeManager();
 
     attributeManager.add(
       {
@@ -68,7 +68,7 @@ export default class EnhancedChoroplethLayer extends Layer {
   }
 
   updateState({oldProps, props, changeFlags}) {
-    const {attributeManager} = this.state;
+    const attributeManager = this.getAttributeManager();
     if (changeFlags.dataChanged || oldProps.strokeWidth !== props.strokeWidth) {
       this.extractChoropleths();
       attributeManager.invalidateAll();

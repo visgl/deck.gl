@@ -1,6 +1,6 @@
 import test from 'tape-catch';
 
-import {compareProps} from 'deck.gl/core/lib/props';
+import {compareProps} from 'deck.gl/core/lifecycle/props';
 import {createProps} from 'deck.gl/core/lifecycle/create-props';
 import {Vector2} from 'luma.gl';
 
