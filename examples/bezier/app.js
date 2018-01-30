@@ -5,6 +5,14 @@ import DeckGLOverlay from './deckgl-overlay.js';
 
 import SAMPLE_GRAPH from './sample-graph';
 
+/**
+ * A helper function to compute the control point of a quadratic bezier curve
+ * @param  {number[]} source  - the coordinates of source point, ex: [x, y, z]
+ * @param  {number[]} target  - the coordinates of target point, ex: [x, y, z]
+ * @param  {number} direction - the direction of the curve, 1 or -1
+ * @param  {number} offset    - offset from the midpoint
+ * @return {number[]}         - the coordinates of the control point
+ */
 function computeControlPoint(source, target, direction, offset) {
   const midPoint = [(source[0] + target[0]) / 2, (source[1] + target[1]) / 2];
   const dx = target[0] - source[0];
@@ -18,6 +26,11 @@ function computeControlPoint(source, target, direction, offset) {
   ];
 }
 
+/**
+ * A helper function to generate a graph with curved edges.
+ * @param  {Object} graph - {nodes: [], edges: []}
+ * @return {Object} Return new graph with curved edges.
+ */
 function layoutGraph(graph) {
   // create a map for referencing node position by node id.
   const nodePositionMap = graph.nodes.reduce((res, node) => {
