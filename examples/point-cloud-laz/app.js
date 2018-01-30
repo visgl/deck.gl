@@ -190,9 +190,11 @@ class Example extends PureComponent {
   }
 
   _initVRDisplay() {
-    const polyfill = new WebVRPolyfill({  // eslint-disable-line no-unused-vars
+    /* eslint-disable no-unused-vars */
+    const polyfill = new WebVRPolyfill({
       PROVIDE_MOBILE_VRDISPLAY: true
     });
+    /* eslint-disable no-unused-vars */
 
     if (navigator && navigator.getVRDisplays) {
       navigator.getVRDisplays().then(displays => {
