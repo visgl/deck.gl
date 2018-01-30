@@ -20,7 +20,6 @@
 
 import './transition';
 import './utils';
-import './props.spec';
 import './attribute-manager.spec';
 import './layer.spec';
 import './composite-layer.spec';

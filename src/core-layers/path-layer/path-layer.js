@@ -61,7 +61,7 @@ export default class PathLayer extends Layer {
   }
 
   initializeState() {
-    const {attributeManager} = this.state;
+    const attributeManager = this.getAttributeManager();
     /* eslint-disable max-len */
     attributeManager.addInstanced({
       instanceStartPositions: {size: 3, update: this.calculateStartPositions},
@@ -83,7 +83,7 @@ export default class PathLayer extends Layer {
 
   updateAttribute({props, oldProps, changeFlags}) {
     if (props.fp64 !== oldProps.fp64) {
-      const {attributeManager} = this.state;
+      const attributeManager = this.getAttributeManager();
       attributeManager.invalidateAll();
 
       if (props.fp64 && props.coordinateSystem === COORDINATE_SYSTEM.LNGLAT) {
@@ -103,7 +103,7 @@ export default class PathLayer extends Layer {
     super.updateState({props, oldProps, changeFlags});
 
     const {getPath} = this.props;
-    const {attributeManager} = this.state;
+    const attributeManager = this.getAttributeManager();
     if (props.fp64 !== oldProps.fp64) {
       const {gl} = this.context;
       this.setState({model: this._getModel(gl)});

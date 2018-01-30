@@ -96,7 +96,7 @@ function getTicks(props) {
 export default class AxesLayer extends Layer {
   initializeState() {
     const {gl} = this.context;
-    const {attributeManager} = this.state;
+    const attributeManager = this.getAttributeManager();
 
     attributeManager.addInstanced({
       instancePositions: {size: 2, update: this.calculateInstancePositions, noAlloc: true},
@@ -116,7 +116,7 @@ export default class AxesLayer extends Layer {
   }
 
   updateState({oldProps, props, changeFlags}) {
-    const {attributeManager} = this.state;
+    const attributeManager = this.getAttributeManager();
 
     if (
       oldProps.xScale !== props.xScale ||

@@ -20,24 +20,35 @@
 
 import React, {createElement, cloneElement} from 'react';
 import autobind from './utils/autobind';
-import {experimental} from '../core';
+import {Layer, experimental} from '../core';
 const {DeckGLJS, log} = experimental;
+
+// Check if one JavaScript class inherits from another
+function inheritsFrom(Type, ParentType) {
+  while (Type) {
+    if (Type === ParentType) {
+      return true;
+    }
+    Type = Object.getPrototypeOf(Type);
+  }
+  return false;
+}
 
 export default class DeckGL extends React.Component {
   constructor(props) {
     super(props);
     this.state = {};
+    this.children = [];
     autobind(this);
   }
 
   componentDidMount() {
     this.deck = new DeckGLJS(Object.assign({}, this.props, {canvas: this.overlay}));
+    this._updateFromProps(this.props);
   }
 
   componentWillReceiveProps(nextProps) {
-    if (this.deck) {
-      this.deck.setProps(nextProps);
-    }
+    this._updateFromProps(nextProps);
   }
 
   componentWillUnmount() {
@@ -66,10 +77,44 @@ export default class DeckGL extends React.Component {
 
   // Private Helpers
 
+  // Extract any JSX layers from the react children
+  // Needs to be called both from initial mount, and when new props arrive
+  _updateFromProps(nextProps) {
+    let children = React.Children.toArray(this.props.children);
+    let {layers} = this.props;
+
+    // extract any deck.gl layers masquerading as react elements from props.children
+    ({layers, children} = this._extractJSXLayers({layers, children}));
+
+    if (this.deck) {
+      this.deck.setProps(Object.assign({}, nextProps, {layers}));
+    }
+
+    this.children = children;
+  }
+
+  // extracts any deck.gl layers masquerading as react elements from props.children
+  _extractJSXLayers({layers, children}) {
+    const reactChildren = []; // extract real react elements
+    layers = [...layers]; // extract layer from react children, add to deck.gl layer array
+
+    for (const reactElement of children) {
+      const LayerType = reactElement.type;
+      if (inheritsFrom(LayerType, Layer)) {
+        const layer = new LayerType(reactElement.props);
+        layers.push(layer);
+      } else {
+        reactChildren.push(reactElement);
+      }
+    }
+
+    return {layers, children: reactChildren};
+  }
+
   // Iterate over viewport descriptors and render children associate with viewports
   // at the specified positions
   // TODO - Can we supply a similar function for the non-React case?
-  _renderChildrenUnderViewports() {
+  _renderChildrenUnderViewports(children) {
     // Flatten out nested viewports array
     const viewports = this.deck ? this.deck.getViewports() : [];
 
@@ -81,7 +126,7 @@ export default class DeckGL extends React.Component {
       }
     });
 
-    return React.Children.toArray(this.props.children).map(
+    return children.map(
       // If child specifies props.viewportId, position under viewport, otherwise render as normal
       (child, i) => (child.props.viewportId ? this._positionChild({child, viewportMap, i}) : child)
     );
@@ -119,7 +164,7 @@ export default class DeckGL extends React.Component {
   render() {
     // Render the background elements (typically react-map-gl instances)
     // using the viewport descriptors
-    const children = this._renderChildrenUnderViewports();
+    const children = this._renderChildrenUnderViewports(this.children);
 
     // Render deck.gl as last child
     const {id, width, height, style} = this.props;

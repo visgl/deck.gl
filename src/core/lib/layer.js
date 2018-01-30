@@ -24,9 +24,9 @@ import AttributeManager from './attribute-manager';
 import Stats from './stats';
 import {count} from '../utils/count';
 import log from '../utils/log';
-import {createProps, EMPTY_ARRAY} from '../lifecycle/create-props';
-import {getDefaultProps, diffProps} from './props';
-import {applyPropOverrides, removeLayerInSeer} from './seer-integration';
+import {createProps} from '../lifecycle/create-props';
+import {diffProps} from '../lifecycle/props';
+import {removeLayerInSeer} from './seer-integration';
 import {GL, withParameters} from 'luma.gl';
 import assert from 'assert';
 
@@ -70,9 +70,14 @@ const defaultProps = {
 let counter = 0;
 
 export default class Layer {
-  constructor(props = {}) {
+  // constructor(...propObjects)
+  constructor() {
     // Merges incoming props with defaults and freezes them.
-    this.props = createProps(this, props);
+    // TODO switch to spread operator once we no longer transpile this code
+    // this.props = createProps.apply(propObjects);
+    /* eslint-disable prefer-spread */
+    this.props = createProps.apply(this, arguments);
+    /* eslint-enable prefer-spread */
 
     // Define all members before layer is sealed
     this.id = this.props.id; // The layer's id, used for matching with layers from last render cycle
@@ -138,6 +143,10 @@ export default class Layer {
   // Returns true if the layer is pickable and visible.
   isPickable() {
     return this.props.pickable && this.props.visible;
+  }
+
+  getAttributeManager() {
+    return this.state && this.state.attributeManager;
   }
 
   // Use iteration (the only required capability on data) to get first element
@@ -242,7 +251,7 @@ export default class Layer {
   // Default implementation, all attributes will be invalidated and updated
   // when data changes
   updateState({oldProps, props, oldContext, context, changeFlags}) {
-    const {attributeManager} = this.state;
+    const attributeManager = this.getAttributeManager();
     if (changeFlags.dataChanged && attributeManager) {
       attributeManager.invalidateAll();
     }
@@ -289,7 +298,7 @@ export default class Layer {
 
   // Default implementation of attribute invalidation, can be redefined
   invalidateAttribute(name = 'all', diffReason = '') {
-    const {attributeManager} = this.state;
+    const attributeManager = this.getAttributeManager();
     if (!attributeManager) {
       return;
     }
@@ -305,7 +314,7 @@ export default class Layer {
 
   // Calls attribute manager to update any WebGL attributes, can be redefined
   updateAttributes(props) {
-    const {attributeManager} = this.state;
+    const attributeManager = this.getAttributeManager();
     if (!attributeManager) {
       return;
     }
@@ -644,7 +653,7 @@ ${flags.viewportChanged ? 'viewport' : ''}\
     this.state.needsRedraw = this.state.needsRedraw && !clearRedrawFlags;
 
     // TODO - is attribute manager needed? - Model should be enough.
-    const {attributeManager} = this.state;
+    const attributeManager = this.getAttributeManager();
     const attributeManagerNeedsRedraw =
       attributeManager && attributeManager.getNeedsRedraw({clearRedrawFlags});
     redraw = redraw || attributeManagerNeedsRedraw;
@@ -658,24 +667,6 @@ ${flags.viewportChanged ? 'viewport' : ''}\
     }
 
     return redraw;
-  }
-
-  // Helper for constructor, merges props with default props and freezes them
-  _normalizeProps(props) {
-    // If sublayer has static defaultProps member, getDefaultProps will return it
-    const mergedDefaultProps = getDefaultProps(this);
-    // Merge supplied props with pre-merged default props
-    const newProps = Object.create(mergedDefaultProps, {});
-    props = Object.assign(newProps, props);
-
-    // Accept null as data - otherwise apps and layers need to add ugly checks
-    // Use constant fallback so that data change is not triggered
-    props.data = props.data || EMPTY_ARRAY;
-    // Apply any overrides from the seer debug extension if it is active
-    applyPropOverrides(props);
-    // Props are immutable
-    Object.freeze(props);
-    return props;
   }
 
   // Called by layer manager to transfer state from an old layer
@@ -755,5 +746,4 @@ ${flags.viewportChanged ? 'viewport' : ''}\
 }
 
 Layer.layerName = 'Layer';
-Layer.propTypes = defaultProps;
 Layer.defaultProps = defaultProps;

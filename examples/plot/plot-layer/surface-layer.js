@@ -37,7 +37,7 @@ const defaultProps = {
 export default class SurfaceLayer extends Layer {
   initializeState() {
     const {gl} = this.context;
-    const {attributeManager} = this.state;
+    const attributeManager = this.getAttributeManager();
     const noAlloc = true;
 
     /* eslint-disable max-len */

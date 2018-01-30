@@ -30,21 +30,9 @@ import {SolidPolygonLayer as SolidPolygonLayer2} from 'deck.gl/experimental-laye
 
 // add tests
 export default function coreLayersBench(suite) {
-  return suite
-    .group('LAYER CONSTRUCTION')
-    .add('ScatterplotLayer#construct', () => {
-      return new ScatterplotLayer({data: data.points});
-    })
-    .add('GeoJsonLayer#construct', () => {
-      return new GeoJsonLayer({data: data.choropleths});
-    })
-    .add('PolygonLayer#construct', () => {
-      return new PolygonLayer({data: data.choropleths.features});
-    })
-    .add('SolidPolygonLayer#construct', () => {
-      return new PolygonLayer({data: data.choropleths.features});
-    })
+  layerConstructionBench(suite);
 
+  return suite
     .group('COMPOSITE LAYER INITIALIZATION')
     .add('GeoJsonLayer#initialize', () => {
       const layer = new GeoJsonLayer({data: data.choropleths});
@@ -162,5 +150,83 @@ export default function coreLayersBench(suite) {
         fp64: true
       });
       testInitializeLayer({layer});
+    });
+}
+
+const PROPS1 = {
+  // data: Special handling for null, see below
+  dataComparator: null,
+  updateTriggers: {}, // Update triggers: a core change detection mechanism in deck.gl
+  numInstances: undefined,
+
+  visible: true,
+  pickable: false,
+  opacity: 0.8,
+
+  onHover: () => {},
+  onClick: () => {},
+
+  coordinateSystem: 1,
+  coordinateOrigin: [0, 0, 0],
+
+  parameters: {},
+  uniforms: {},
+  framebuffer: null,
+
+  animation: null, // Passed prop animation functions to evaluate props
+
+  // Offset depth based on layer index to avoid z-fighting.
+  // Negative values pull layer towards the camera
+  // https://www.opengl.org/archives/resources/faq/technical/polygonoffset.htm
+  getPolygonOffset: ({layerIndex}) => [0, -layerIndex * 100]
+};
+
+const PROPS2 = {
+  // data: Special handling for null, see below
+  dataComparator2: null,
+  updateTriggers2: {}, // Update triggers: a core change detection mechanism in deck.gl
+  numInstances2: undefined,
+
+  visible2: true,
+  pickable2: false,
+  opacity2: 0.8,
+
+  coordinateSystem2: 1,
+  coordinateOrigin2: [0, 0, 0],
+
+  parameters2: {},
+  uniforms2: {},
+  framebuffer2: null,
+
+  animation2: null // Passed prop animation functions to evaluate props
+};
+
+const PROPS3 = {
+  // Selection/Highlighting
+  highlightedObjectIndex: null,
+  autoHighlight: false,
+  highlightColor: [0, 0, 128, 128]
+};
+
+function layerConstructionBench(suite) {
+  suite
+    .group('LAYER CONSTRUCTION')
+    .add('ScatterplotLayer#construct', () => {
+      return new ScatterplotLayer({data: data.points});
+    })
+    .add('GeoJsonLayer#construct', () => {
+      return new GeoJsonLayer({data: data.choropleths});
+    })
+    .add('PolygonLayer#construct', () => {
+      return new PolygonLayer({data: data.choropleths.features});
+    })
+    .add('SolidPolygonLayer#construct', () => {
+      return new PolygonLayer({data: data.choropleths.features});
+    })
+    .add('ScatterplotLayer#construct(separate prop objects)', () => {
+      return new ScatterplotLayer(PROPS1, PROPS2, PROPS3);
+    })
+    .add('ScatterplotLayer#construct(precomposed prop objects)', () => {
+      return new ScatterplotLayer(Object.assign({}, PROPS1, PROPS2, PROPS3));
     });
 }

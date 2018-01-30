@@ -90,7 +90,7 @@ export default class HexagonCellLayer extends Layer {
    * Essentially a deferred constructor
    */
   initializeState() {
-    const {attributeManager} = this.state;
+    const attributeManager = this.getAttributeManager();
     /* eslint-disable max-len */
     attributeManager.addInstanced({
       instancePositions: {
@@ -112,7 +112,7 @@ export default class HexagonCellLayer extends Layer {
 
   updateAttribute({props, oldProps, changeFlags}) {
     if (props.fp64 !== oldProps.fp64) {
-      const {attributeManager} = this.state;
+      const attributeManager = this.getAttributeManager();
       attributeManager.invalidateAll();
 
       if (props.fp64 && props.coordinateSystem === COORDINATE_SYSTEM.LNGLAT) {

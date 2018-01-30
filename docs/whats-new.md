@@ -1,13 +1,30 @@
 # deck.gl v Next
 
+Release date: TBD, early Q2, 2018
+
 ## Attribute transition
 
 WebGL2 feature: smooth attribute transition performed on GPU. Use the new `transitions` prop on the `Layer` class to specify transition duration, easing function and callbacks.
 
+## Layer Class
+
+* **Multiple Prop Objects** - Layer class constructors can now accept multiple property objects. The property objects will be merged as if with `Object.assign`, with later objects taking precedence over earlier objects: `new Layer({prop1: ...}, {prop2: ...});`. This can slightly improve performance when using many layers with lots of property object composition.
+
+
+## React Integration
+
+### Use JSX to render deck.gl Layers
+
+It is now possible to use JSX syntax to create (or "render") deck.gl layers. There are no performance advantages to using JSX syntax but some users feel that this results in a more natural, React-like coding style. There are limitations (deck.gl layers are **not** React components), for more information see [Using deck.gl with React](/docs/get-started/using-with-react.md).
+```jsx
+  <DeckGL {...viewport}>
+    <LineLayer data={data} />
+  <DeckGL />
+```
 
 # deck.gl v5
 
-Release date: 21, Dec 2017
+Release date: Dec 21, 2017
 
 All new additions to the official deck.gl 5.0 API are listed here. Note that in addition to the official new features in this release, deck.gl 5.0 also contains a number of significant under the hoods changes to prepare for new features and optimizations. Some of these are available as experimental APIs, see below.
 
@@ -73,7 +90,9 @@ Note: This change is mainly relevant to developers who write custom deck.gl laye
 * The core deck.gl shader modules (`project` etc) now conform to the luma.gl shadertools conventions for naming uniforms and functions, making this module easier to describe and use. In spite of these changes, backwards compatible uniforms are provided to ensure that existing layers do not break.
 
 
-## React 16 Support
+## React Integration
+
+### React 16 Support
 
 deck.gl v5 now supports React 16 and the `package.json` dependencies of all React-based examples have updated to React 16.
 

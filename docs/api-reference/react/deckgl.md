@@ -2,6 +2,9 @@
 
 `DeckGL` is a React component that takes deck.gl layer instances and viewport parameters, and renders those layers as a transparent overlay.
 
+Make sure to read the [Using deck.gl with React](/docs/get-started/using-with-react.md) article.
+
+
 ## Usage
 
 // Basic standalone use
@@ -216,9 +219,23 @@ deck.gl will render all the viewports in order.
 
 If `viewports` is not supplied, deck.gl will look for web mercator projection parameters (latitude, longitude, zoom, bearing and pitch) and create a `WebMercatorViewport` (which is a subclass of `Viewport`).
 
+
 ##### `children`
 
-The following semantics of the children property are considered experimental.
+The following semantics of the standard React `children` property are considered experimental.
+
+**JSX layers**
+
+It is possible to use JSX syntax to create deck.gl layers as React children of the `DeckGL` React components, instead of providing them as ES6 class instances to the `layers` prop.
+```jsx
+  <DeckGL {...viewport}>
+    <LineLayer id="line-layer" data={data} />
+  <DeckGL />
+```
+For more information on this syntax and its limitations, see [Using deck.gl with React](/docs/get-started/using-with-react.md) article.
+
+
+**Autopositioned Children**
 
 To make it easy to use React components in combination with deck.gl viewports (e.g. to place a base map under a viewport, or add a label on top of a viewport), deck.gl can make such components automatically adjust as that viewport is added, removed or resized.
 

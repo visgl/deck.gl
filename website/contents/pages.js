@@ -1,5 +1,5 @@
 function getDocUrl(filename) {
-  return `docs/${filename}`;
+  return `https://raw.githubusercontent.com/uber/deck.gl/5.0-release/docs/${filename}`;
 }
 function getCodeUrl(pathname) {
   return `https://github.com/uber/deck.gl/tree/5.0-release/${pathname}`;

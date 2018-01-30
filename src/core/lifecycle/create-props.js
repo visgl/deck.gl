@@ -4,7 +4,9 @@ import log from '../utils/log';
 export const EMPTY_ARRAY = Object.freeze([]);
 
 // Create a property object
-export function createProps(layer, props) {
+export function createProps(propObjects = []) {
+  const layer = this; // eslint-disable-line
+
   // Get default prop object (a prototype chain for now)
   const {defaultProps} = getDefaultProps(layer.constructor);
 
@@ -20,15 +22,14 @@ export function createProps(layer, props) {
     }
   });
 
-  // Extract any async props
-  // props = setAsyncProps(newProps, props, ASYNC_PROPS);
-
   // "Copy" all sync props
-  Object.assign(newProps, props);
-  newProps.data = props.data || EMPTY_ARRAY;
+  for (let i = 0; i < arguments.length; ++i) {
+    Object.assign(newProps, arguments[i]);
+  }
+  newProps.data = newProps.data || EMPTY_ARRAY;
 
   // SEER: Apply any overrides from the seer debug extension if it is active
-  applyPropOverrides(props);
+  applyPropOverrides(newProps);
 
   // Props must be immutable
   Object.freeze(newProps);
@@ -46,7 +47,7 @@ function getOwnProperty(object, prop) {
 function getLayerName(layerClass) {
   const layerName = getOwnProperty(layerClass, 'layerName');
   if (!layerName) {
-    log.once(0, `Layer ${layerClass.name} does not specify a ${layerName}`);
+    log.once(0, `${layerClass.name}.layerName not specified`);
   }
   return layerName || layerClass.name;
 }
@@ -61,6 +62,12 @@ function getDefaultProps(layerClass) {
   }
 
   const parent = layerClass.prototype;
+  if (!parent) {
+    return {
+      defaultProps: {}
+    };
+  }
+
   const parentClass = Object.getPrototypeOf(layerClass);
   const parentProps = (parent && getDefaultProps(parentClass)) || null;
 
