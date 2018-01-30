@@ -36,7 +36,7 @@ const propTypes = {
   id: PropTypes.string,
   width: PropTypes.number.isRequired,
   height: PropTypes.number.isRequired,
-  layers: PropTypes.array.isRequired, // Array can contain falsy values
+  layers: PropTypes.array, // Array can contain falsy values
   viewports: PropTypes.array, // Array can contain falsy values
   effects: PropTypes.arrayOf(PropTypes.instanceOf(Effect)),
   layerFilter: PropTypes.func,
@@ -61,6 +61,7 @@ const defaultProps = {
   layerFilter: null,
   glOptions: {},
   gl: null,
+  layers: [],
   effects: [],
   onWebGLInitialized: noop,
   onBeforeRender: noop,
