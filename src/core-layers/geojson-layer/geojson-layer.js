@@ -160,7 +160,7 @@ export default class GeoJsonLayer extends CompositeLayer {
           lightSettings,
           getPolygon: getCoordinates,
           getElevation,
-          getColor: getFillColor,
+          getColor: getFillColor
         }
       );
 
