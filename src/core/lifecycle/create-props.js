@@ -47,7 +47,7 @@ function getOwnProperty(object, prop) {
 function getLayerName(layerClass) {
   const layerName = getOwnProperty(layerClass, 'layerName');
   if (!layerName) {
-    log.once(0, `Layer ${layerClass.name} does not specify a ${layerName}`);
+    log.once(0, `${layerClass.name}.layerName not specified`);
   }
   return layerName || layerClass.name;
 }
@@ -62,6 +62,12 @@ function getDefaultProps(layerClass) {
   }
 
   const parent = layerClass.prototype;
+  if (!parent) {
+    return {
+      defaultProps: {}
+    };
+  }
+
   const parentClass = Object.getPrototypeOf(layerClass);
   const parentProps = (parent && getDefaultProps(parentClass)) || null;
 

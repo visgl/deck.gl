@@ -135,6 +135,7 @@ export default class SolidPolygonLayer extends Layer {
     this.updateAttribute({props, oldProps, changeFlags});
   }
 
+  /* eslint-disable complexity */
   updateGeometry({props, oldProps, changeFlags}) {
     const geometryConfigChanged =
       props.extruded !== oldProps.extruded ||
@@ -176,6 +177,7 @@ export default class SolidPolygonLayer extends Layer {
 
     return geometryConfigChanged;
   }
+  /* eslint-disable complexity */
 
   _getModel(gl) {
     return new Model(

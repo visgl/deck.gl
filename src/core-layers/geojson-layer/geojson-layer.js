@@ -102,6 +102,7 @@ export default class GeoJsonLayer extends CompositeLayer {
     });
   }
 
+  /* eslint-disable complexity */
   renderLayers() {
     const {features} = this.state;
     const {pointFeatures, lineFeatures, polygonFeatures, polygonOutlineFeatures} = features;
@@ -145,6 +146,12 @@ export default class GeoJsonLayer extends CompositeLayer {
       new subLayers.PolygonLayer(
         this.getSubLayerProps({
           id: 'polygon-fill',
+          updateTriggers: {
+            getElevation: updateTriggers.getElevation,
+            getColor: updateTriggers.getFillColor
+          }
+        }),
+        {
           data: polygonFeatures,
           fp64,
           extruded,
@@ -154,11 +161,7 @@ export default class GeoJsonLayer extends CompositeLayer {
           getPolygon: getCoordinates,
           getElevation,
           getColor: getFillColor,
-          updateTriggers: {
-            getElevation: updateTriggers.getElevation,
-            getColor: updateTriggers.getFillColor
-          }
-        })
+        }
       );
 
     const polygonWireframeLayer =
@@ -168,6 +171,12 @@ export default class GeoJsonLayer extends CompositeLayer {
       new subLayers.PolygonLayer(
         this.getSubLayerProps({
           id: 'polygon-wireframe',
+          updateTriggers: {
+            getElevation: updateTriggers.getElevation,
+            getColor: updateTriggers.getLineColor
+          }
+        }),
+        {
           data: polygonFeatures,
 
           fp64,
@@ -176,12 +185,8 @@ export default class GeoJsonLayer extends CompositeLayer {
           wireframe: true,
           getPolygon: getCoordinates,
           getElevation,
-          getColor: getLineColor,
-          updateTriggers: {
-            getElevation: updateTriggers.getElevation,
-            getColor: updateTriggers.getLineColor
-          }
-        })
+          getColor: getLineColor
+        }
       );
 
     const polygonLineLayer =
@@ -191,6 +196,12 @@ export default class GeoJsonLayer extends CompositeLayer {
       new subLayers.LineLayer(
         this.getSubLayerProps({
           id: 'polygon-outline',
+          updateTriggers: {
+            getColor: updateTriggers.getLineColor,
+            getWidth: updateTriggers.getLineWidth
+          }
+        }),
+        {
           data: polygonOutlineFeatures,
 
           fp64,
@@ -202,12 +213,8 @@ export default class GeoJsonLayer extends CompositeLayer {
 
           getPath: getCoordinates,
           getColor: getLineColor,
-          getWidth: getLineWidth,
-          updateTriggers: {
-            getColor: updateTriggers.getLineColor,
-            getWidth: updateTriggers.getLineWidth
-          }
-        })
+          getWidth: getLineWidth
+        }
       );
 
     const pathLayer =
@@ -215,6 +222,12 @@ export default class GeoJsonLayer extends CompositeLayer {
       new subLayers.LineLayer(
         this.getSubLayerProps({
           id: 'line-paths',
+          updateTriggers: {
+            getColor: updateTriggers.getLineColor,
+            getWidth: updateTriggers.getLineWidth
+          }
+        }),
+        {
           data: lineFeatures,
 
           fp64,
@@ -226,12 +239,8 @@ export default class GeoJsonLayer extends CompositeLayer {
 
           getPath: getCoordinates,
           getColor: getLineColor,
-          getWidth: getLineWidth,
-          updateTriggers: {
-            getColor: updateTriggers.getLineColor,
-            getWidth: updateTriggers.getLineWidth
-          }
-        })
+          getWidth: getLineWidth
+        }
       );
 
     const pointLayer =
@@ -239,6 +248,12 @@ export default class GeoJsonLayer extends CompositeLayer {
       new subLayers.PointLayer(
         this.getSubLayerProps({
           id: 'points',
+          updateTriggers: {
+            getColor: updateTriggers.getFillColor,
+            getRadius: updateTriggers.getRadius
+          }
+        }),
+        {
           data: pointFeatures,
 
           fp64,
@@ -248,12 +263,8 @@ export default class GeoJsonLayer extends CompositeLayer {
 
           getPosition: getCoordinates,
           getColor: getFillColor,
-          getRadius,
-          updateTriggers: {
-            getColor: updateTriggers.getFillColor,
-            getRadius: updateTriggers.getRadius
-          }
-        })
+          getRadius
+        }
       );
 
     return [
@@ -267,6 +278,7 @@ export default class GeoJsonLayer extends CompositeLayer {
       extruded && polygonFillLayer
     ];
   }
+  /* eslint-enable complexity */
 }
 
 GeoJsonLayer.layerName = 'GeoJsonLayer';
