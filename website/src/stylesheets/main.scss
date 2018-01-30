@@ -295,6 +295,7 @@ hr.short {
   color: $white-40;
 }
 .mapboxgl-ctrl-attrib {
+  white-space: nowrap;
   position: absolute;
   bottom: 2px;
   right: 4px;
