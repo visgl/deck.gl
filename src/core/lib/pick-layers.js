@@ -150,13 +150,17 @@ export function pickVisibleObjects(
   const uniqueInfos = new Map();
 
   pickInfos.forEach(pickInfo => {
-    const viewport = getViewportFromCoordinates({viewports}); // TODO - add coords
-    let info = createInfo([pickInfo.x / pixelRatio, pickInfo.y / pixelRatio], viewport);
-    info.devicePixel = [pickInfo.x, pickInfo.y];
-    info.pixelRatio = pixelRatio;
-    info.color = pickInfo.pickedColor;
-    info.index = pickInfo.pickedObjectIndex;
-    info.picked = true;
+    let info = {
+      color: pickInfo.pickedColor,
+      layer: null,
+      index: pickInfo.pickedObjectIndex,
+      picked: true,
+      x,
+      y,
+      width,
+      height,
+      pixelRatio
+    };
 
     info = getLayerPickingInfo({layer: pickInfo.pickedLayer, info, mode});
     if (!uniqueInfos.has(info.object)) {
