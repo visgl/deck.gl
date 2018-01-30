@@ -18,28 +18,23 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {COORDINATE_SYSTEM, Layer, experimental} from 'deck.gl';
+import {Layer, experimental} from 'deck.gl';
 const {fp64LowPart} = experimental;
 import {GL, Model, Geometry} from 'luma.gl';
 
 import vs from './bezier-curve-layer-vertex.glsl';
 import fs from './bezier-curve-layer-fragment.glsl';
 
-const NUM_SEGMENTS = 50;
+const NUM_SEGMENTS = 40;
 const DEFAULT_COLOR = [0, 0, 0, 255];
 
 const defaultProps = {
   strokeWidth: 1,
   fp64: false,
-
   getSourcePosition: x => x.sourcePosition,
   getTargetPosition: x => x.targetPosition,
-  getColor: x => x.color || DEFAULT_COLOR,
-  getCurve: x => ({
-    source: x.sourcePosition,
-    target: x.targetPosition,
-    controlPoint: x.controlPoint
-  })
+  getControlPoint: x => x.controlPoint,
+  getColor: x => x.color || DEFAULT_COLOR
 };
 
 export default class BezierCurveLayer extends Layer {
@@ -66,7 +61,7 @@ export default class BezierCurveLayer extends Layer {
       },
       instanceControlPoints: {
         size: 3,
-        transition: true,
+        transition: false,
         accessor: 'getControlPoint',
         update: this.calculateInstanceControlPoints
       },
@@ -85,18 +80,6 @@ export default class BezierCurveLayer extends Layer {
     if (props.fp64 !== oldProps.fp64) {
       const {attributeManager} = this.state;
       attributeManager.invalidateAll();
-
-      if (props.fp64 && props.coordinateSystem === COORDINATE_SYSTEM.LNGLAT) {
-        attributeManager.addInstanced({
-          instanceSourceTargetPositions64xyLow: {
-            size: 4,
-            accessor: ['getSourcePosition', 'getTargetPosition'],
-            update: this.calculateInstanceSourceTargetPositions64xyLow
-          }
-        });
-      } else {
-        attributeManager.remove(['instanceSourceTargetPositions64xyLow']);
-      }
     }
   }
 
@@ -129,7 +112,7 @@ export default class BezierCurveLayer extends Layer {
      *   (0, 1)"-------------(1, 1)
      */
     let positions = [];
-    for (let i = 0; i < NUM_SEGMENTS; i++) {
+    for (let i = 0; i <= NUM_SEGMENTS; i++) {
       positions = positions.concat([i, -1, 0, i, 1, 0]);
     }
 

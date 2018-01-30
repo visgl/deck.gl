@@ -1,24 +1,8 @@
 import React, {Component} from 'react';
 import DeckGL, {COORDINATE_SYSTEM, OrthographicViewport, ScatterplotLayer} from 'deck.gl';
-
 import BezierCurveLayer from './bezier-curve-layer';
 
 export default class DeckGLOverlay extends Component {
-  constructor(props) {
-    super(props);
-    this.state = this._processData(props);
-  }
-
-  componentWillReceiveProps(nextProps) {
-    if (nextProps.data !== this.props.data) {
-      this.setState(this._processData(nextProps));
-    }
-  }
-
-  _processData({data}) {
-    return {};
-  }
-
   render() {
     const {width, height, data} = this.props;
 
@@ -32,14 +16,6 @@ export default class DeckGLOverlay extends Component {
     });
 
     const layers = [
-      new ScatterplotLayer({
-        id: 'node-layer',
-        data: data.nodes,
-        coordinateSystem: COORDINATE_SYSTEM.IDENTITY,
-        getPosition: d => d.position,
-        getRadius: d => 10,
-        getColor: d => [255, 0, 0, 255]
-      }),
       new BezierCurveLayer({
         id: 'curve-layer',
         data: data.edges,
@@ -47,11 +23,31 @@ export default class DeckGLOverlay extends Component {
         getSourcePosition: e => e.source,
         getTargetPosition: e => e.target,
         getControlPoint: e => e.controlPoint,
-        getColor: e => [255, 0, 0, 255],
-        strokeWidth: 5
+        getColor: e => [150, 150, 150, 255],
+        strokeWidth: 5,
+        // interaction:
+        pickable: true,
+        autoHighlight: true,
+        highlightColor: [255, 0, 0, 255]
+      }),
+      new ScatterplotLayer({
+        id: 'node-layer',
+        data: data.nodes,
+        coordinateSystem: COORDINATE_SYSTEM.IDENTITY,
+        getPosition: d => d.position,
+        getRadius: d => 5,
+        getColor: d => [0, 0, 150, 255],
+        // interaction:
+        pickable: true,
+        autoHighlight: true,
+        highlightColor: [255, 0, 0, 255]
       })
     ];
 
-    return <DeckGL width={width} height={height} viewport={viewport} layers={layers} />;
+    return (
+      <div style={{pointerEvents: 'all'}}>
+        <DeckGL width={width} height={height} viewport={viewport} layers={layers} />
+      </div>
+    );
   }
 }

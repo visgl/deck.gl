@@ -49,18 +49,18 @@ vec2 getExtrusionOffset(vec2 line_clipspace, float offset_direction) {
 }
 
 float getSegmentRatio(float index) {
-  return smoothstep(0.0, 1.0, index / (numSegments - 1.0));
+  return smoothstep(0.0, 1.0, index / numSegments);
 }
 
 vec4 computeBezierCurve(vec4 source, vec4 target, vec4 controlPoint, float segmentRatio) {
   float mt = 1.0 - segmentRatio;
-  float mt2 = mt * mt;
-  float t2 = segmentRatio * segmentRatio;
+  float mt2 = pow(mt, 2.0);
+  float t2 = pow(segmentRatio, 2.0);
 
+  // quadratic curve
   float a = mt2;
   float b = mt * segmentRatio * 2.0;
   float c = t2;
-
   vec4 ret = vec4(
     a * source.x + b * controlPoint.x + c * target.x,
     a * source.y + b * controlPoint.y + c * target.y,
@@ -84,8 +84,13 @@ void main(void) {
   float segmentRatio = getSegmentRatio(segmentIndex);
   vec4 p = computeBezierCurve(source, target, controlPoint, segmentRatio);
 
+  // next point
+  float indexDir = mix(-1.0, 1.0, step(segmentIndex, 0.0));
+  float nextSegmentRatio = getSegmentRatio(segmentIndex + indexDir);
+  vec4 nextP = computeBezierCurve(source, target, controlPoint, nextSegmentRatio);
+
   // extrude
-  vec2 offset = getExtrusionOffset(target.xy - source.xy, positions.y);
+  vec2 offset = getExtrusionOffset(nextP.xy - p.xy, positions.y);
   gl_Position = p + vec4(offset, 0.0, 0.0);
 
   // Color

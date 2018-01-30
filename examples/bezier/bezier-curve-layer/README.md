@@ -6,11 +6,23 @@ This layer renders bezier curves.
 
 Inherits from all [Base Layer](/docs/layers/base-layer.md) properties.
 
-##### `getCurve` (Function, optional)
+##### `getSourcePosition` (Function, optional)
 
-- Default: `d => d.path`
+- Default: `d => d.sourcePosition`
 
-Each point is defined as an array of six numbers: `[x1, y1, x2, y2, x3, y3]`.
+Each point is defined as an array of three numbers: `[x, y, z]`.
+
+##### `getTargetPosition` (Function, optional)
+
+- Default: `d => d.targetPosition`
+
+Each point is defined as an array of three numbers: `[x, y, z]`.
+
+##### `getControlPoint` (Function, optional)
+
+- Default: `d => d.controlPoint`
+
+Each point is defined as an array of three numbers: `[x, y, z]`.
 
 ##### `getColor` (Function, optional)
 
