@@ -145,7 +145,11 @@ export default class GeoJsonLayer extends CompositeLayer {
       hasPolygon &&
       new subLayers.PolygonLayer(
         this.getSubLayerProps({
-          id: 'polygon-fill'
+          id: 'polygon-fill',
+          updateTriggers: {
+            getElevation: updateTriggers.getElevation,
+            getColor: updateTriggers.getFillColor
+          }
         }),
         {
           data: polygonFeatures,
@@ -157,10 +161,6 @@ export default class GeoJsonLayer extends CompositeLayer {
           getPolygon: getCoordinates,
           getElevation,
           getColor: getFillColor,
-          updateTriggers: {
-            getElevation: updateTriggers.getElevation,
-            getColor: updateTriggers.getFillColor
-          }
         }
       );
 
