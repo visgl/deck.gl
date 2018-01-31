@@ -23,6 +23,9 @@ For Earlier Beta Releases see below
 
 ### deck.gl v5.1 Beta Releases
 
+#### [5.1.0-beta.2] - Jan 31
+- Fix: JSX layer extraction from nextProps (#1373)
+
 #### [5.1.0-beta.1] - Jan 31
 - Fix crash during pickVisibleObjects (#1365)
 - Experiment: bezier curve layer (#1366)
