@@ -150,13 +150,17 @@ export function pickVisibleObjects(
   const uniqueInfos = new Map();
 
   pickInfos.forEach(pickInfo => {
-    const viewport = getViewportFromCoordinates({viewports}); // TODO - add coords
-    let info = createInfo([pickInfo.x / pixelRatio, pickInfo.y / pixelRatio], viewport);
-    info.devicePixel = [pickInfo.x, pickInfo.y];
-    info.pixelRatio = pixelRatio;
-    info.color = pickInfo.pickedColor;
-    info.index = pickInfo.pickedObjectIndex;
-    info.picked = true;
+    let info = {
+      color: pickInfo.pickedColor,
+      layer: null,
+      index: pickInfo.pickedObjectIndex,
+      picked: true,
+      x,
+      y,
+      width,
+      height,
+      pixelRatio
+    };
 
     info = getLayerPickingInfo({layer: pickInfo.pickedLayer, info, mode});
     if (!uniqueInfos.has(info.object)) {
@@ -284,9 +288,18 @@ function processPickInfo({
 
   const viewport = getViewportFromCoordinates({viewports}); // TODO - add coords
 
-  const baseInfo = createInfo([x, y], viewport);
-  baseInfo.devicePixel = [deviceX, deviceY];
-  baseInfo.pixelRatio = pixelRatio;
+  const baseInfo = {
+    color: null,
+    layer: null,
+    index: -1,
+    picked: false,
+    x,
+    y,
+    pixel: [x, y],
+    lngLat: viewport.unproject([x, y]),
+    devicePixel: [deviceX, deviceY],
+    pixelRatio
+  };
 
   // Use a Map to store all picking infos.
   // The following two forEach loops are the result of
@@ -458,20 +471,6 @@ function getUniquesFromPickingBuffer(gl, {pickedColors, layers}) {
   }
 
   return Array.from(uniqueColors.values());
-}
-
-function createInfo(pixel, viewport) {
-  // Assign a number of potentially useful props to the "info" object
-  return {
-    color: null,
-    layer: null,
-    index: -1,
-    picked: false,
-    x: pixel[0],
-    y: pixel[1],
-    pixel,
-    lngLat: viewport.unproject(pixel)
-  };
 }
 
 // Walk up the layer composite chain to populate the info object
