@@ -19,6 +19,29 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 For Earlier Beta Releases see below
 
+## Beta Releases
+
+### deck.gl v5.1 Beta Releases
+
+#### [5.1.0-beta.1] - Jan 31
+- Fix crash during pickVisibleObjects (#1365)
+- Experiment: bezier curve layer (#1366)
+- Add JSX support to DeckGL component and remove jsx-layers example (#1362)
+- Update composite layers to use multiple prop objects (#1353)
+- link to remote docs (#1364)
+- Wind demo: update using newest luma.gl TF API (#1346)
+- Prop code preparation/cleanup (#1357)
+- Use latest luma.gl transform feedback features (#1318)
+- Move fp64 viewport uniform generation to project64 module's getUniforms (#1292)
+- Merge react-map-gl's map interaction (#1330)
+- Travis CI fix: Reduced, but working set of test cases (#1355)
+- Property Copy Reduction (#1341)
+- Use Object.prototype to speed up default prop setting (#1336)
+- fix experimental PolygonLayer (#1316)
+- Upgrade react-map-gl and math.gl versions in examples (#1313)
+- Fix text layer redraw flag clearing (#1314)
+- [Doc] Fix of layer attribute typo (#1311)
+- Attribute Transition: Initial Implementation (#981)
 
 ## Official Releases
 

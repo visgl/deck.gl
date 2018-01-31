@@ -1,6 +1,6 @@
-# deck.gl v Next
+# deck.gl v5.1
 
-Release date: TBD, early Q2, 2018
+Release date: Feb 16, 2018
 
 ## Attribute transition
 
