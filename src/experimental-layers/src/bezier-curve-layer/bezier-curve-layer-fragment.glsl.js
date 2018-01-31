@@ -18,27 +18,22 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import test from 'tape-catch';
+export default `\
+#define SHADER_NAME bezier-curve-layer-fragment-shader
 
-import {
-  Arrow2DGeometry,
-  BezierCurveLayer,
-  MeshLayer,
-  PathMarkerLayer,
-  PathOutlineLayer,
-  SolidPolygonLayer,
-  outline
-} from 'deck.gl-layers';
+#ifdef GL_ES
+precision highp float;
+#endif
 
-test('Top-level imports', t => {
-  t.ok(MeshLayer, 'MeshLayer symbol imported');
-  t.ok(PathMarkerLayer, 'PathMarkerLayer symbol imported');
-  t.ok(PathOutlineLayer, 'PathOutlineLayer symbol imported');
-  t.ok(SolidPolygonLayer, 'SolidPolygonLayer symbol imported');
-  t.ok(Arrow2DGeometry, 'Arrow2DGeometry symbol imported');
-  t.ok(outline, 'outline symbol imported');
-  t.ok(BezierCurveLayer, 'BezierCurveLayer symbol imported');
-  t.end();
-});
+varying vec4 vColor;
 
-import './polygon-tesselation.spec';
+void main(void) {
+  gl_FragColor = vColor;
+
+  // use highlight color if this fragment belongs to the selected object.
+  gl_FragColor = picking_filterHighlightColor(gl_FragColor);
+
+  // use picking color if rendering to picking FBO.
+  gl_FragColor = picking_filterPickingColor(gl_FragColor);
+}
+`;
