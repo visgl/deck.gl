@@ -87,7 +87,7 @@ export default class DeckGL extends React.Component {
       this.deck.setProps(
         Object.assign({}, nextProps, {
           // Avoid modifying layers array if no JSX layers were found
-          layers: layers ? [...layers, nextProps.layers] : nextProps.layers
+          layers: layers ? [...layers, ...nextProps.layers] : nextProps.layers
         })
       );
     }
