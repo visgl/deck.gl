@@ -80,33 +80,35 @@ export default class DeckGL extends React.Component {
   // Extract any JSX layers from the react children
   // Needs to be called both from initial mount, and when new props arrive
   _updateFromProps(nextProps) {
-    let children = React.Children.toArray(this.props.children);
-    let {layers} = this.props;
 
     // extract any deck.gl layers masquerading as react elements from props.children
-    ({layers, children} = this._extractJSXLayers({layers, children}));
+    const {layers, children} = this._extractJSXLayers(nextProps.children);
 
     if (this.deck) {
-      this.deck.setProps(Object.assign({}, nextProps, {layers}));
+      this.deck.setProps(Object.assign({}, nextProps, {
+        // Avoid modifying layers array if no JSX layers were found
+        layers: layers ? [...layers, nextProps.layers] : nextProps.layers
+      }));
     }
 
     this.children = children;
   }
 
   // extracts any deck.gl layers masquerading as react elements from props.children
-  _extractJSXLayers({layers, children}) {
-    const reactChildren = []; // extract real react elements
-    layers = [...layers]; // extract layer from react children, add to deck.gl layer array
+  _extractJSXLayers(children) {
+    const reactChildren = []; // extract real react elements (i.e. not deck.gl layers)
+    let layers = null; // extracted layer from react children, will add to deck.gl layer array
 
-    for (const reactElement of children) {
+    React.Children.forEach(children, reactElement => {
       const LayerType = reactElement.type;
       if (inheritsFrom(LayerType, Layer)) {
         const layer = new LayerType(reactElement.props);
+        layers = layers || [];
         layers.push(layer);
       } else {
         reactChildren.push(reactElement);
       }
-    }
+    });
 
     return {layers, children: reactChildren};
   }
