@@ -12,3 +12,5 @@ export {default as Arrow2DGeometry} from './path-marker-layer/arrow-2d-geometry'
 export {default as TextLayer} from './text-layer/text-layer';
 
 export {default as outline} from './shaderlib/outline/outline';
+
+export {default as BezierCurveLayer} from './bezier-curve-layer/bezier-curve-layer';
