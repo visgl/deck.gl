@@ -80,15 +80,16 @@ export default class DeckGL extends React.Component {
   // Extract any JSX layers from the react children
   // Needs to be called both from initial mount, and when new props arrive
   _updateFromProps(nextProps) {
-
     // extract any deck.gl layers masquerading as react elements from props.children
     const {layers, children} = this._extractJSXLayers(nextProps.children);
 
     if (this.deck) {
-      this.deck.setProps(Object.assign({}, nextProps, {
-        // Avoid modifying layers array if no JSX layers were found
-        layers: layers ? [...layers, nextProps.layers] : nextProps.layers
-      }));
+      this.deck.setProps(
+        Object.assign({}, nextProps, {
+          // Avoid modifying layers array if no JSX layers were found
+          layers: layers ? [...layers, nextProps.layers] : nextProps.layers
+        })
+      );
     }
 
     this.children = children;
