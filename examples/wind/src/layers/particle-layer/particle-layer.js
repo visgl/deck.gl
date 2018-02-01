@@ -5,11 +5,10 @@ import {
   Model,
   Geometry,
   Buffer,
-  TransformFeedback,
   setParameters,
   loadTextures,
   Texture2D,
-  Program
+  experimental
 } from 'luma.gl';
 
 import {ELEVATION_DATA_IMAGE, ELEVATION_DATA_BOUNDS, ELEVATION_RANGE} from '../../defaults';
@@ -17,8 +16,8 @@ import {ELEVATION_DATA_IMAGE, ELEVATION_DATA_BOUNDS, ELEVATION_RANGE} from '../.
 import vertex from './particle-layer-vertex.glsl';
 import fragment from './particle-layer-fragment.glsl';
 import vertexTF from './transform-feedback-vertex.glsl';
-import fragmentTF from './transform-feedback-fragment.glsl';
 
+const {Transform} = experimental;
 const defaultProps = {
   bbox: null,
   texData: null,
@@ -67,17 +66,8 @@ export default class ParticleLayer extends Layer {
 
     this.setupTransformFeedback({gl, bbox, nx: 1200, ny: 600});
 
-    const modelTF = this.getModelTF({
-      gl,
-      bbox,
-      nx: 1200,
-      ny: 600,
-      texData
-    });
-
     this.setState({
       model,
-      modelTF,
       texData,
       textureFrom,
       textureTo,
@@ -166,8 +156,9 @@ export default class ParticleLayer extends Layer {
       parameters: pixelStoreParameters
     });
 
+    bufferTo.updateLayout({instanced: 1});
     model.setAttributes({
-      posFrom: bufferTo.setDataLayout({size: 4, instanced: 1})
+      posFrom: bufferTo
     });
 
     model.render(Object.assign({}, currentUniforms, uniforms));
@@ -194,20 +185,27 @@ export default class ParticleLayer extends Layer {
       usage: gl.DYNAMIC_COPY
     });
 
-    const transformFeedback = new TransformFeedback(gl, {});
+    const transform = new Transform(gl, {
+      sourceBuffers: {posFrom: bufferFrom},
+      destinationBuffers: {gl_Position: bufferTo},
+      sourceDestinationMap: {posFrom: 'gl_Position'},
+      vs: vertexTF,
+      varyings: ['gl_Position'],
+      elementCount: positions4.length / 4.0
+    });
 
     this.setState({
       counter: 0,
       now: Date.now(),
       bufferFrom,
       bufferTo,
-      transformFeedback
+      transform
     });
   }
 
   runTransformFeedback({gl}) {
     // Run transform feedback
-    const {modelTF, textureFrom, textureTo, delta, timeInterval} = this.state;
+    const {textureFrom, textureTo, delta, timeInterval, transform} = this.state;
 
     const {bbox} = this.props;
 
@@ -249,22 +247,6 @@ export default class ParticleLayer extends Layer {
       parameters: pixelStoreParameters
     });
 
-    const {transformFeedback} = this.state;
-
-    modelTF.setAttributes({
-      posFrom: bufferFrom.setDataLayout({size: 4, instanced: 0})
-    });
-
-    transformFeedback.bindBuffers(
-      {
-        gl_Position: bufferTo.setDataLayout({size: 4, instanced: 0})
-      },
-      {
-        clear: true,
-        varyingMap: modelTF.varyingMap
-      }
-    );
-
     const uniforms = {
       bbox: [bbox.minLng, bbox.maxLng, bbox.minLat, bbox.maxLat],
       bounds0: [dataBounds[0].min, dataBounds[0].max],
@@ -277,11 +259,11 @@ export default class ParticleLayer extends Layer {
       delta // TODO: looks to be 0 always , verify.
     };
 
-    const parameters = {
-      [GL.RASTERIZER_DISCARD]: true
-    };
+    bufferFrom.updateLayout({instanced: 0});
+    bufferTo.updateLayout({instanced: 0});
 
-    modelTF.draw({uniforms, parameters, transformFeedback});
+    transform.run({uniforms});
+    transform.swapBuffers();
 
     if (flip > 0) {
       flip = -1;
@@ -294,32 +276,6 @@ export default class ParticleLayer extends Layer {
     });
   }
   /* eslint-enable max-statements */
-
-  getModelTF({gl, bbox, nx, ny, texData}) {
-    const positions3 = this.calculatePositions3({nx, ny});
-
-    const modelTF = new Model(gl, {
-      id: 'ParticleLayer-modelTF',
-      program: new Program(gl, {
-        vs: vertexTF,
-        fs: fragmentTF,
-        varyings: ['gl_Position'],
-        bufferMode: gl.SEPARATE_ATTRIBS
-      }),
-      geometry: new Geometry({
-        id: this.props.id,
-        drawMode: GL.POINTS,
-        isInstanced: false,
-        attributes: {
-          positions: {size: 3, type: gl.FLOAT, value: positions3}
-        }
-      }),
-      isIndexed: false,
-      isInstanced: false
-    });
-
-    return modelTF;
-  }
 
   getModel({gl, nx, ny, texData}) {
     // This will be a grid of elements
