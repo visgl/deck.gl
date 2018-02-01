@@ -37,7 +37,8 @@ const propTypes = {
   width: PropTypes.number.isRequired,
   height: PropTypes.number.isRequired,
   layers: PropTypes.array, // Array can contain falsy values
-  viewports: PropTypes.array, // Array can contain falsy values
+  views: PropTypes.array, // Array can contain falsy values
+  viewports: PropTypes.array, // Deprecated: Array can contain falsy values
   effects: PropTypes.arrayOf(PropTypes.instanceOf(Effect)),
   layerFilter: PropTypes.func,
   glOptions: PropTypes.object,
@@ -120,6 +121,7 @@ export default class DeckGLJS {
 
     const {
       layers,
+      views,
       pickingRadius,
       onLayerClick,
       onLayerHover,
@@ -130,7 +132,8 @@ export default class DeckGLJS {
 
     // Update viewports (creating one if not supplied)
     let viewports = props.viewports || props.viewport;
-    if (!viewports) {
+    if (!views && !viewports) {
+      // TODO - old param style, move this default handling to React component
       const {width, height, latitude, longitude, zoom, pitch, bearing} = props;
       viewports = [
         new WebMercatorViewport({width, height, latitude, longitude, zoom, pitch, bearing})
@@ -140,6 +143,7 @@ export default class DeckGLJS {
     // If more parameters need to be updated on layerManager add them to this method.
     this.layerManager.setParameters({
       layers,
+      views,
       viewports,
       useDevicePixels,
       drawPickingColors,

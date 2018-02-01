@@ -46,6 +46,8 @@ export {default as lighting} from './shaderlib/lighting/lighting';
 // EXPERIMENTAL EXPORTS
 // Experimental Features (May change in minor version bumps, use at your own risk)
 
+import {default as View} from './views/view';
+
 import {default as FirstPersonState} from './controllers/first-person-state';
 import {default as OrbitState} from './controllers/orbit-state';
 import {default as MapState} from './controllers/map-state';
@@ -95,6 +97,8 @@ import {enable64bitSupport} from './utils/fp64';
 import {fp64ify, fp64LowPart} from './utils/fp64';
 
 export const experimental = {
+  View,
+
   ViewportControls: Controller,
   FirstPersonState,
   OrbitState,
