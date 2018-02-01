@@ -33,4 +33,4 @@ require('babel-polyfill');
 require('luma.gl/headless');
 
 // Run the tests
-require('../../../test/experimental-layers');
+require('../../../test/src/experimental-layers');

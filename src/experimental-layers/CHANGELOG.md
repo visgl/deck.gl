@@ -1,3 +1,5 @@
+0.1.0-beta.2
+- Bump deck.gl to 5.1.0-beta.2
 0.0.22
 - SolidPolygonLayer: Fix Typo in isInstanced prop
 0.0.21
