@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 import DeckGL, {COORDINATE_SYSTEM, OrthographicViewport, ScatterplotLayer} from 'deck.gl';
-import BezierCurveLayer from './bezier-curve-layer';
+import {BezierCurveLayer} from 'deck.gl-layers';
 
 export default class DeckGLOverlay extends Component {
   render() {

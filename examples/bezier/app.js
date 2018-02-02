@@ -29,7 +29,15 @@ function computeControlPoint(source, target, direction, offset) {
 /**
  * A helper function to generate a graph with curved edges.
  * @param  {Object} graph - {nodes: [], edges: []}
+ * expected input format: {
+ *   nodes: [{id: 'a', position: [0, -100]}, {id: 'b', position: [0, 100]}, ...],
+ *   edges: [{id: '1', sourceId: 'a',, targetId: 'b',}, ...]
+ * }
  * @return {Object} Return new graph with curved edges.
+ * expected output format: {
+ *   nodes: [{id: 'a', position: [0, -100]}, {id: 'b', position: [0, 100]}, ...],
+ *   edges: [{id: '1', sourceId: 'a', source: [0, -100], targetId: 'b', target: [0, 100], controlPoint: [50, 0]}, ...]
+  }
  */
 function layoutGraph(graph) {
   // create a map for referencing node position by node id.
@@ -80,7 +88,6 @@ function layoutGraph(graph) {
     });
     return res.concat(newEdges);
   }, []);
-
   return {
     nodes: graph.nodes,
     edges: layoutEdges
