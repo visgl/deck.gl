@@ -281,29 +281,6 @@ export default class Layer {
 
   // INTERNAL METHODS
 
-  // Deduces numer of instances. Intention is to support:
-  // - Explicit setting of numInstances
-  // - Auto-deduction for ES6 containers that define a size member
-  // - Auto-deduction for Classic Arrays via the built-in length attribute
-  // - Auto-deduction via arrays
-  getNumInstances(props) {
-    props = props || this.props;
-
-    // First check if the layer has set its own value
-    if (this.state && this.state.numInstances !== undefined) {
-      return this.state.numInstances;
-    }
-
-    // Check if app has provided an explicit value
-    if (props.numInstances !== undefined) {
-      return props.numInstances;
-    }
-
-    // Use container library to get a count for any ES6 container or object
-    const {data} = this.props;
-    return count(data);
-  }
-
   // Default implementation of attribute invalidation, can be redefined
   invalidateAttribute(name = 'all', diffReason = '') {
     const attributeManager = this.getAttributeManager();
@@ -370,6 +347,29 @@ export default class Layer {
     }
   }
 
+  // Deduces numer of instances. Intention is to support:
+  // - Explicit setting of numInstances
+  // - Auto-deduction for ES6 containers that define a size member
+  // - Auto-deduction for Classic Arrays via the built-in length attribute
+  // - Auto-deduction via arrays
+  getNumInstances(props) {
+    props = props || this.props;
+
+    // First check if the layer has set its own value
+    if (this.state && this.state.numInstances !== undefined) {
+      return this.state.numInstances;
+    }
+
+    // Check if app has provided an explicit value
+    if (props.numInstances !== undefined) {
+      return props.numInstances;
+    }
+
+    // Use container library to get a count for any ES6 container or object
+    const {data} = this.props;
+    return count(data);
+  }
+
   // LAYER MANAGER API
   // Should only be called by the deck.gl LayerManager class
 
@@ -406,9 +406,12 @@ export default class Layer {
     this.initializeState(this.context);
     // End subclass lifecycle methods
 
+    // TODO deprecated, for backwards compatibility with older layers
+    // in case layer resets state
+    this.state.attributeManager = this.getAttributeManager();
+
     // initializeState callback tends to clear state
     this.setChangeFlags({dataChanged: true, propsChanged: true, viewportChanged: true});
-    this._loadData();
 
     this._updateState(this._getUpdateParams());
 
@@ -608,42 +611,7 @@ ${flags.viewportChanged ? 'viewport' : ''}\
       }
     }
 
-    if (changeFlags.dataChanged) {
-      if (this._loadData()) {
-        // Postpone data changed flag until loaded
-        changeFlags.dataChanged = false;
-      }
-    }
-
     return this.setChangeFlags(changeFlags);
-  }
-
-  _loadData() {
-    const {data, fetch} = this.props;
-    switch (typeof data) {
-      case 'string':
-        const url = data;
-        if (url !== this.internalState.lastUrl) {
-          // Make sure getData() does not return a string
-
-          this.internalState.data = this.internalState.data || [];
-          this.internalState.lastUrl = url;
-
-          // Load the data
-          const promise = fetch(url).then(loadedData => {
-            this.internalState.data = loadedData;
-            this.setChangeFlags({dataChanged: true});
-          });
-
-          this.internalState.loadPromise = promise;
-          return true;
-        }
-        break;
-      default:
-        // Makes getData() return props.data
-        this.internalState.data = null;
-    }
-    return false;
   }
 
   // PRIVATE METHODS
