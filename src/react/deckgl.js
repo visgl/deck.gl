@@ -19,10 +19,18 @@
 // THE SOFTWARE.
 
 import React, {createElement, cloneElement} from 'react';
+import PropTypes from 'prop-types';
 import autobind from './utils/autobind';
 import {inheritsFrom} from '../core/utils/inherits-from';
 import {Layer, experimental} from '../core';
 const {DeckGLJS, log} = experimental;
+
+const propTypes = Object.assign({}, DeckGLJS.propTypes, {
+  viewports: PropTypes.array, // Deprecated
+  viewport: PropTypes.object // Deprecated
+});
+
+const defaultProps = DeckGLJS.defaultProps;
 
 export default class DeckGL extends React.Component {
   constructor(props) {
@@ -67,15 +75,35 @@ export default class DeckGL extends React.Component {
 
   // Private Helpers
 
-  // Extract any JSX layers from the react children
+  // 1. Extract any JSX layers from the react children
+  // 2. Handle any backwards compatiblity props for React layer
   // Needs to be called both from initial mount, and when new props arrive
   _updateFromProps(nextProps) {
+    // Support old "geospatial view state as separate props" style (React only!)
+    let {viewState} = nextProps;
+    if (!viewState) {
+      const {latitude, longitude, zoom, pitch, bearing} = nextProps;
+      viewState = nextProps.viewState || {latitude, longitude, zoom, pitch, bearing};
+    }
+
+    // Support old `viewports` prop (React only!)
+    const views =
+      nextProps.views || nextProps.viewports || (nextProps.viewport && [nextProps.viewport]);
+    if (nextProps.viewports) {
+      log.deprecated('DeckGL.viewports', 'DeckGL.views');
+    }
+    if (nextProps.viewport) {
+      log.deprecated('DeckGL.viewport', 'DeckGL.views');
+    }
+
     // extract any deck.gl layers masquerading as react elements from props.children
     const {layers, children} = this._extractJSXLayers(nextProps.children);
 
     if (this.deck) {
       this.deck.setProps(
         Object.assign({}, nextProps, {
+          views,
+          viewState,
           // Avoid modifying layers array if no JSX layers were found
           layers: layers ? [...layers, ...nextProps.layers] : nextProps.layers
         })
@@ -107,60 +135,63 @@ export default class DeckGL extends React.Component {
     return {layers, children: reactChildren};
   }
 
-  // Iterate over viewport descriptors and render children associate with viewports
-  // at the specified positions
+  // Iterate over views and reposition children associated with views
   // TODO - Can we supply a similar function for the non-React case?
-  _renderChildrenUnderViewports(children) {
-    // Flatten out nested viewports array
-    const viewports = this.deck ? this.deck.getViewports() : [];
+  _renderChildrenUnderViews(children) {
+    // Flatten out nested views array
+    const views = this.deck ? this.deck.getViewports() : [];
 
-    // Build a viewport id to viewport index
-    const viewportMap = {};
-    viewports.forEach(viewport => {
-      if (viewport.id) {
-        viewportMap[viewport.id] = viewport;
+    // Build a view id to view index
+    const viewMap = {};
+    views.forEach(view => {
+      if (view.id) {
+        viewMap[view.id] = view;
       }
     });
 
     return children.map(
-      // If child specifies props.viewportId, position under viewport, otherwise render as normal
-      (child, i) => (child.props.viewportId ? this._positionChild({child, viewportMap, i}) : child)
+      // If child specifies props.viewId, position under view, otherwise render as normal
+      (child, i) =>
+        child.props.viewId || child.props.viewId ? this._positionChild({child, viewMap, i}) : child
     );
   }
 
-  _positionChild({child, viewportMap, i}) {
-    const {viewportId} = child.props;
-    const viewport = viewportId && viewportMap[viewportId];
+  _positionChild({child, viewMap, i}) {
+    const {viewId, viewportId} = child.props;
+    if (viewId) {
+      log.deprecated('viewportId', 'viewId');
+    }
+    const view = viewMap[viewId || viewportId];
 
-    // Drop (aut-hide) elements with viewportId that are not matched by any current viewport
-    if (!viewport) {
+    // Drop (auto-hide) elements with viewId that are not matched by any current view
+    if (!view) {
       return null;
     }
 
     // Resolve potentially relative dimensions using the deck.gl container size
-    const {x, y, width, height} = viewport;
+    const {x, y, width, height} = view;
 
-    // Clone the element with width and height set per viewport
+    // Clone the element with width and height set per view
     const newProps = Object.assign({}, child.props, {width, height});
 
     // Inject map properties
     // TODO - this is too react-map-gl specific
-    Object.assign(newProps, viewport.getMercatorParams(), {
-      visible: viewport.isMapSynched()
+    Object.assign(newProps, view.getMercatorParams(), {
+      visible: view.isMapSynched()
     });
 
     const clone = cloneElement(child, newProps);
 
     // Wrap it in an absolutely positioning div
     const style = {position: 'absolute', left: x, top: y, width, height};
-    const key = `viewport-child-${viewportId}-${i}`;
+    const key = `view-child-${viewId}-${i}`;
     return createElement('div', {key, id: key, style}, clone);
   }
 
   render() {
     // Render the background elements (typically react-map-gl instances)
-    // using the viewport descriptors
-    const children = this._renderChildrenUnderViewports(this.children);
+    // using the view descriptors
+    const children = this._renderChildrenUnderViews(this.children);
 
     // Render deck.gl as last child
     const {id, width, height, style} = this.props;
@@ -176,5 +207,5 @@ export default class DeckGL extends React.Component {
   }
 }
 
-DeckGL.propTypes = DeckGLJS.propTypes;
-DeckGL.defaultProps = DeckGLJS.defaultProps;
+DeckGL.propTypes = propTypes;
+DeckGL.defaultProps = defaultProps;

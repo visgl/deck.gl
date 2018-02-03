@@ -5,7 +5,7 @@ import assert from 'assert';
 const VIEWPORT_TRANSITION_PROPS = ['longitude', 'latitude', 'zoom', 'bearing', 'pitch'];
 
 /**
- * Performs linear interpolation of two viewports.
+ * Performs linear interpolation of two view states.
  */
 export default class LinearInterpolator extends TransitionInterpolator {
   /**
@@ -17,21 +17,21 @@ export default class LinearInterpolator extends TransitionInterpolator {
   }
 
   initializeProps(startProps, endProps) {
-    const startViewportProps = {};
-    const endViewportProps = {};
+    const startViewStateProps = {};
+    const endViewStateProps = {};
 
     for (const key of this.propNames) {
       const startValue = startProps[key];
       const endValue = endProps[key];
       assert(isValid(startValue) && isValid(endValue), `${key} must be supplied for transition`);
 
-      startViewportProps[key] = startValue;
-      endViewportProps[key] = getEndValueByShortestPath(key, startValue, endValue);
+      startViewStateProps[key] = startValue;
+      endViewStateProps[key] = getEndValueByShortestPath(key, startValue, endValue);
     }
 
     return {
-      start: startViewportProps,
-      end: endViewportProps
+      start: startViewStateProps,
+      end: endViewStateProps
     };
   }
 

@@ -24,11 +24,11 @@ import seer from 'seer';
 import Layer from './layer';
 import {drawLayers} from './draw-layers';
 import {pickObject, pickVisibleObjects} from './pick-layers';
+import {deepEqual} from '../utils/deep-equal';
 import {LIFECYCLE} from './constants';
 import View from '../views/view';
+import MapView from '../views/map-view';
 import Viewport from '../viewports/viewport';
-// TODO - remove, just for dummy initialization
-import WebMercatorViewport from '../viewports/web-mercator-viewport';
 import log from '../utils/log';
 import {flatten} from '../utils/flatten';
 
@@ -42,6 +42,8 @@ import {
 
 const LOG_PRIORITY_LIFECYCLE = 2;
 const LOG_PRIORITY_LIFECYCLE_MINOR = 4;
+
+const INITIAL_VIEW_STATE = {latitude: 0, longitude: 0, zoom: 1};
 
 const initialContext = {
   uniforms: {},
@@ -86,6 +88,7 @@ export default class LayerManager {
     this.width = 100;
     this.height = 100;
     this.views = [];
+    this.viewState = INITIAL_VIEW_STATE;
     this.viewsChanged = true;
     this.viewports = []; // Generated viewports
     this._needsRedraw = 'Initial render';
@@ -104,19 +107,18 @@ export default class LayerManager {
     // Seer integration
     this._initSeer = this._initSeer.bind(this);
     this._editSeer = this._editSeer.bind(this);
-    seerInitListener(this._initSeer);
-    layerEditListener(this._editSeer);
 
     Object.seal(this);
+
+    seerInitListener(this._initSeer);
+    layerEditListener(this._editSeer);
 
     if (eventManager) {
       this._initEventHandling(eventManager);
     }
 
-    // Init with dummy viewport
-    this.setViews([
-      new WebMercatorViewport({width: 1, height: 1, latitude: 0, longitude: 0, zoom: 1})
-    ]);
+    // Init with default map viewport
+    this.setViews();
   }
 
   /**
@@ -153,12 +155,9 @@ export default class LayerManager {
 
   // Get a set of viewports for a given width and height
   // TODO - Intention is for deck.gl to autodeduce width and height and drop the need for props
-  getViewports({width, height} = {}) {
-    if (width !== this.width || height !== this.height || this.viewsChanged) {
-      this._rebuildViewportsFromViews({views: this.views, width, height});
-      this.width = width;
-      this.height = height;
-    }
+  getViewports() {
+    this._rebuildViewportsFromViews();
+    this.context.viewport = this.viewports[0];
     return this.viewports;
   }
 
@@ -181,13 +180,22 @@ export default class LayerManager {
       this._setEventHandlingParameters(parameters);
     }
 
+    if ('width' in parameters || 'height' in parameters) {
+      this.setSize(parameters.width, parameters.height);
+    }
+
+    if ('views' in parameters) {
+      this.setViews(parameters.views);
+    }
+
+    // TODO - support multiple view states
+    if ('viewState' in parameters) {
+      this.setViewState(parameters.viewState);
+    }
+
     // TODO - For now we set layers before viewports to preservenchangeFlags
     if ('layers' in parameters) {
       this.setLayers(parameters.layers);
-    }
-
-    if ('views' in parameters || 'viewports' in parameters) {
-      this.setViews(parameters.views || parameters.viewports);
     }
 
     if ('layerFilter' in parameters) {
@@ -207,28 +215,44 @@ export default class LayerManager {
   }
   /* eslint-enable complexity */
 
-  // Update the view descriptor list and set change flag if needed
-  setViews(views) {
-    // Ensure any "naked" Viewports are wrapped in View instances
-    views = flatten(views, {filter: Boolean}).map(view => {
-      if (view instanceof Viewport) {
-        return new View({viewportInstance: view});
-      }
-      return view;
-    });
-
-    this.viewsChanged = this.viewsChanged || this._diffViews(views, this.views);
-
-    // Try to not actually rebuild the viewports until `getViewports` is called
-    if (this.viewsChanged) {
-      this.views = views;
-      this._rebuildViewportsFromViews({views: this.views});
-      this.viewsChanged = false;
+  setSize(width, height) {
+    assert(Number.isFinite(width) && Number.isFinite(height));
+    if (width !== this.width || height !== this.height) {
+      this.viewsChanged = true;
+      this.width = width;
+      this.height = height;
     }
+  }
+
+  // Update the view descriptor list and set change flag if needed
+  // Does not actually rebuild the `Viewport`s until `getViewports` is called
+  setViews(views) {
+    // For now, we default to a full screen map view port
+    // TODO - apps may want to specify an empty view list...
+    if (!views || views.length === 0) {
+      views = [new MapView({id: 'default-view'})];
+    }
+
+    // Ensure any "naked" Viewports are wrapped in View instances
+    views = flatten(views, {filter: Boolean}).map(
+      view => (view instanceof Viewport ? new View({viewportInstance: view}) : view)
+    );
+
+    const viewsChanged = this._diffViews(views, this.views);
+
+    this.views = views;
+    this.viewsChanged = this.viewsChanged || viewsChanged;
+  }
+
+  setViewState(viewState) {
+    const viewStateChanged = deepEqual(viewState, this.viewState);
+    this.viewState = viewState;
+    this.viewsChanged = true || viewStateChanged;
   }
 
   // Supply a new layer list, initiating sublayer generation and layer matching
   setLayers(newLayers) {
+    this.getViewports();
     assert(this.context.viewport, 'LayerManager.updateLayers: viewport not set');
 
     // TODO - something is generating state updates that cause rerender of the same
@@ -311,8 +335,6 @@ export default class LayerManager {
       layers,
       layerFilter,
       mode: 'pickObjects',
-      // TODO - how does this interact with multiple viewports?
-      viewport: this.context.viewport,
       viewports: this.getViewports(),
       onViewportActive: this._activateViewport.bind(this),
       pickingFBO: this._getPickingBuffer(),
@@ -366,26 +388,28 @@ export default class LayerManager {
   }
 
   // Rebuilds viewports from descriptors towards a certain window size
-  _rebuildViewportsFromViews({views, width, height}) {
-    const newViewports = views.map(view => view.makeViewport({width, height}));
+  _rebuildViewportsFromViews() {
+    if (this.viewsChanged) {
+      const {width, height, views, viewState} = this;
+      const newViewports = views.map(view => view.makeViewport({width, height, viewState}));
 
-    this.setNeedsRedraw('Viewport(s) changed');
+      this.setNeedsRedraw('Viewport(s) changed');
 
-    // Ensure one viewport is activated, layers may expect it
-    // TODO - handle empty viewport list (using dummy viewport), or assert
-    // const oldViewports = this.context.viewports;
-    // if (viewportsChanged) {
+      // Ensure one viewport is activated, layers may expect it
+      // TODO - handle empty viewport list (using dummy viewport), or assert
+      // const oldViewports = this.context.viewports;
 
-    const viewport = newViewports[0];
-    assert(viewport instanceof Viewport, 'Invalid viewport');
+      const viewport = newViewports[0];
+      assert(viewport instanceof Viewport, 'Invalid viewport');
 
-    this.context.viewports = newViewports;
-    this._activateViewport(viewport);
-    // }
+      this.context.viewports = newViewports;
+      this._activateViewport(viewport);
+      // }
 
-    // We've just rebuilt the viewports to match the descriptors, so clear the flag
-    this.viewports = newViewports;
-    this.viewsChanged = false;
+      // We've just rebuilt the viewports to match the descriptors, so clear the flag
+      this.viewports = newViewports;
+      this.viewsChanged = false;
+    }
   }
 
   // Check if viewport array has changed, returns true if any change
