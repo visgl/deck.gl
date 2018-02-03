@@ -20,19 +20,9 @@
 
 import React, {createElement, cloneElement} from 'react';
 import autobind from './utils/autobind';
+import {inheritsFrom} from '../core/utils/inherits-from';
 import {Layer, experimental} from '../core';
 const {DeckGLJS, log} = experimental;
-
-// Check if one JavaScript class inherits from another
-function inheritsFrom(Type, ParentType) {
-  while (Type) {
-    if (Type === ParentType) {
-      return true;
-    }
-    Type = Object.getPrototypeOf(Type);
-  }
-  return false;
-}
 
 export default class DeckGL extends React.Component {
   constructor(props) {
