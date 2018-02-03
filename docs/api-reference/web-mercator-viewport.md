@@ -17,7 +17,7 @@ import DeckGL from 'deck.gl';
 ```js
 import DeckGL, {WebMercatorViewport} from 'deck.gl';
 const viewport = new WebMercatorViewport(width, height, longitude, latitude, zoom, pitch, bearing});
-<DeckGL viewport={viewport} layers=[...]/>
+<DeckGL views={[viewport]} layers=[...]/>
 ```
 
 ## Methods

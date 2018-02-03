@@ -66,7 +66,7 @@ In a scenario where the application has multiple viewports, it would be nice to 
 * mouse capture - should be handled by mjolnir.js...
 * keyboard input - do we allow more than one? do we offer a prop to set focus?
 
-Controller input areas can be matched to viewports in the same way that the deck.gl component resizes its children using `viewportId` props.
+Controller input areas can be matched to viewports in the same way that the deck.gl component resizes its children using `viewId` props.
 
 
 ### Multiple View States
