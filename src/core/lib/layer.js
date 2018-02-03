@@ -71,11 +71,8 @@ const defaultProps = {
 let counter = 0;
 
 export default class Layer {
-  // constructor(...propObjects)
-  constructor() {
-    // Merges incoming props with defaults and freezes them.
-    // TODO switch to spread operator once we no longer transpile this code
-    // this.props = createProps.apply(propObjects);
+  constructor(/* ...propObjects */) {
+    // Merge supplied props with default props and freeze them.
     /* eslint-disable prefer-spread */
     this.props = createProps.apply(this, arguments);
     /* eslint-enable prefer-spread */
@@ -123,13 +120,6 @@ export default class Layer {
     }
   }
 
-  // Sets the update flag for this layer, will trigger a redraw next animation frame
-  // setNeedsUpdate(update = true) {
-  //   if (this.internalState) {
-  //     this.internalState.needsUpdate = update;
-  //   }
-  // }
-
   // Checks state of attributes and model
   getNeedsRedraw({clearRedrawFlags = false} = {}) {
     return this._getNeedsRedraw(clearRedrawFlags);
@@ -161,6 +151,8 @@ export default class Layer {
     return this.internalState && this.internalState.attributeManager;
   }
 
+  // Returns the most recent layer that matched to this state
+  // (When reacting to an async event, this layer may no longer be the latest)
   getCurrentLayer() {
     return this.internalState && this.internalState.layer;
   }
