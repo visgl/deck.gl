@@ -20,7 +20,8 @@
 
 /* eslint-disable no-console, no-invalid-this */
 
-import {experimental} from 'deck.gl';
+import {Layer, ScatterplotLayer, LineLayer, experimental} from 'deck.gl';
+import {inheritsFrom} from 'deck.gl/core/utils/inherits-from';
 
 const {get, fp64ify, fp64LowPart} = experimental;
 
@@ -42,5 +43,7 @@ export default function utilsBench(suite) {
     })
     .add('fp64#fp64LowPart', () => {
       return fp64LowPart(Math.PI);
-    });
+    })
+    .add('inheritsFrom(true)', () => inheritsFrom(ScatterplotLayer, Layer))
+    .add('inheritsFrom(false)', () => inheritsFrom(ScatterplotLayer, LineLayer));
 }
