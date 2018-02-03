@@ -20,19 +20,9 @@
 
 import React, {createElement, cloneElement} from 'react';
 import autobind from './utils/autobind';
+import {inheritsFrom} from '../core/utils/inherits-from';
 import {Layer, experimental} from '../core';
 const {DeckGLJS, log} = experimental;
-
-// Check if one JavaScript class inherits from another
-function inheritsFrom(Type, ParentType) {
-  while (Type) {
-    if (Type === ParentType) {
-      return true;
-    }
-    Type = Object.getPrototypeOf(Type);
-  }
-  return false;
-}
 
 export default class DeckGL extends React.Component {
   constructor(props) {
@@ -101,13 +91,16 @@ export default class DeckGL extends React.Component {
     let layers = null; // extracted layer from react children, will add to deck.gl layer array
 
     React.Children.forEach(children, reactElement => {
-      const LayerType = reactElement.type;
-      if (inheritsFrom(LayerType, Layer)) {
-        const layer = new LayerType(reactElement.props);
-        layers = layers || [];
-        layers.push(layer);
-      } else {
-        reactChildren.push(reactElement);
+      if (reactElement) {
+        // For some reason Children.forEach doesn't filter out `null`s
+        const LayerType = reactElement.type;
+        if (inheritsFrom(LayerType, Layer)) {
+          const layer = new LayerType(reactElement.props);
+          layers = layers || [];
+          layers.push(layer);
+        } else {
+          reactChildren.push(reactElement);
+        }
       }
     });
 
