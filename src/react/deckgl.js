@@ -101,13 +101,16 @@ export default class DeckGL extends React.Component {
     let layers = null; // extracted layer from react children, will add to deck.gl layer array
 
     React.Children.forEach(children, reactElement => {
-      const LayerType = reactElement.type;
-      if (inheritsFrom(LayerType, Layer)) {
-        const layer = new LayerType(reactElement.props);
-        layers = layers || [];
-        layers.push(layer);
-      } else {
-        reactChildren.push(reactElement);
+      if (reactElement) {
+        // For some reason Children.forEach doesn't filter out `null`s
+        const LayerType = reactElement.type;
+        if (inheritsFrom(LayerType, Layer)) {
+          const layer = new LayerType(reactElement.props);
+          layers = layers || [];
+          layers.push(layer);
+        } else {
+          reactChildren.push(reactElement);
+        }
       }
     });
 
