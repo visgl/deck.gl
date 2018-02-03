@@ -1,15 +1,12 @@
 # Viewport Class
 
-The `Viewport` combines a number of responsibilities:
-* A deck.gl `Viewport` is essentially a geospatially enabled camera.
-* In this sense it manages projection and unprojection of coordinates between world and viewport coordinates, both in JavaScript and in GLSL.
-* `Viewport`s also contains information about the size and position of the target rectangle on screen where the camera will render.
+> The `Viewport` class is normally not instantiated directly. Firstly, the `View` class is more commonly used by apps, and even when a Viewport is needed, one of its subclasses is typicall used. However, in cases where the application wants to use "externally" generated view or projection matrices (e.g. when using the WebVR API), the `Viewport` class can be used directly.
 
-The viewport class provides both direct `project`/`unproject` function members as well as projection matrices including `view` and `projection` matrices, and can generate their inverses as well to facilitate e.g. lighting calculations in WebGL shaders.
-
-In geospatial setups, Viewports can contain geospatial anchors.
-
-Note: The `Viewport` class is normally not instantiated directly but rather one of its subclasses is used. However, in cases where the application needs to use "externally" generated view or projection matrices (such as WebVR), the `Viewport` class can be used directly.
+A deck.gl `Viewport` is essentially a geospatially enabled camera, and combines a number of responsibilities:
+* It enables projection and unprojection of coordinates (between world and viewport), both in JavaScript and in GLSL.
+* It also contains the size and position of the target rectangle on screen where the camera will render.
+* The viewport class provides both direct `project`/`unproject` function members as well as projection matrices including `view` and `projection` matrices, and can generate their inverses as well to facilitate e.g. lighting calculations in WebGL shaders.
+* In geospatial setups, Viewports can contain geospatial anchors.
 
 For more information consult the [Viewports](/docs/advanced/viewports.md) article.
 

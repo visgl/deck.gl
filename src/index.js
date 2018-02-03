@@ -48,6 +48,12 @@ import {experimental as CoreExperimental} from './core';
 
 const {
   View,
+  MapView,
+  FirstPersonView,
+  ThirdPersonView,
+  OrbitView,
+  PerspectiveView,
+  OrthographicView,
 
   // View States
   ViewState,
@@ -78,6 +84,12 @@ const {
 
 Object.assign(experimental, {
   View,
+  MapView,
+  FirstPersonView,
+  ThirdPersonView,
+  OrbitView,
+  PerspectiveView,
+  OrthographicView,
 
   // Unfinished controller/viewport classes
   ViewState,
@@ -111,7 +123,7 @@ Object.assign(experimental, {
 const {
   // For react module
   TransitionManager,
-  extractViewportFrom,
+  extractViewState,
 
   // For layers
   BinSorter,
@@ -140,7 +152,7 @@ const {
 Object.assign(experimental, {
   // For react module
   TransitionManager,
-  extractViewportFrom,
+  extractViewState,
 
   // For layers
   BinSorter,
