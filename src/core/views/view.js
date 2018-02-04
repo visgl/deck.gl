@@ -15,7 +15,7 @@ export default class View {
     // If a viewportInstance is supplied, it is the only thing that is used
     // `View` hiearchy supports an `equals` method
     if (newView.viewportInstance) {
-      return this.viewport && this.viewport.equals(newView.viewportInstance);
+      return this.viewportInstance && this.viewportInstance.equals(newView.viewportInstance);
     }
     // TODO - implement deep equal on view descriptors
     return false;
