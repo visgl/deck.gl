@@ -61,16 +61,6 @@ const propTypes = {
   onLayerHover: PropTypes.func,
   useDevicePixels: PropTypes.bool,
 
-  // Controller props
-  // A controller class or instance
-  // controller: PropTypes.oneOfType([
-  //   PropTypes.instanceOf(Controller), // An instance of a controller
-  //   PropTypes.func // A controller class (will be instanced)
-  // ]),
-  // viewState: PropTypes.object,
-  // viewportState: PropTypes.number, // invalid - trigger error
-  // state: PropTypes.number, // invalid - trigger error
-
   // Viewport props (TODO - should only support these on the react component)
   longitude: PropTypes.number, // The longitude of the center of the map.
   latitude: PropTypes.number, // The latitude of the center of the map.
