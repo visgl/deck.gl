@@ -92,23 +92,11 @@ export default class Deck {
 
     this.canvas = this._createCanvas(props);
 
-    const {width, height, gl, glOptions, debug, useDevicePixels} = props;
-
-    this.animationLoop = new AnimationLoop({
-      width,
-      height,
-      useDevicePixels,
-      onCreateContext: opts =>
-        gl || createGLContext(Object.assign({}, glOptions, {canvas: this.canvas, debug})),
-      onInitialize: this._onRendererInitialized,
-      onRender: this._onRenderFrame,
-      onBeforeRender: props.onBeforeRender,
-      onAfterRender: props.onAfterRender
-    });
-
-    this.animationLoop.start();
+    this._createAnimationLoop(props);
 
     this.setProps(props);
+
+    this.animationLoop.start();
   }
 
   setProps(props) {
@@ -165,6 +153,22 @@ export default class Deck {
     parent.appendChild(canvas);
 
     return canvas;
+  }
+
+  _createAnimationLoop(props) {
+    const {width, height, gl, glOptions, debug, useDevicePixels} = props;
+
+    return new AnimationLoop({
+      width,
+      height,
+      useDevicePixels,
+      onCreateContext: opts =>
+        gl || createGLContext(Object.assign({}, glOptions, {canvas: this.canvas, debug})),
+      onInitialize: this._onRendererInitialized,
+      onRender: this._onRenderFrame,
+      onBeforeRender: props.onBeforeRender,
+      onAfterRender: props.onAfterRender
+    });
   }
 
   _setLayerManagerProps(props) {
