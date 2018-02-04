@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types';
-import OrbitViewport from '../../viewports/orbit-viewport';
-import OrbitController from '../../controllers/orbit-controller';
+import OrbitViewport from '../viewports/orbit-viewport';
+import OrbitController from './../controller/orbit-controller';
 import {EventManager} from 'mjolnir.js';
 
 const PREFIX = '-webkit-';

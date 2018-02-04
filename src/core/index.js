@@ -73,12 +73,12 @@ import {default as ViewportFlyToInterpolator} from './transitions/viewport-fly-t
 
 // DEPRECATED EXPERIMENTAL EXPORTS
 import {default as Deck} from './lib/deck'; // now official export
-import {default as MapControllerJS} from './deprecated/controllers/map-controller-js';
-import {default as OrbitControllerJS} from './deprecated/controllers/orbit-controller-js';
+import {default as MapControllerJS} from './deprecated/map-controller-js';
+import {default as OrbitControllerJS} from './deprecated/orbit-controller-js';
 
-import {default as FirstPersonState} from './deprecated/controllers/first-person-state';
-import {default as OrbitState} from './deprecated/controllers/orbit-state';
-import {default as MapState} from './deprecated/controllers/map-state';
+import {default as FirstPersonState} from './deprecated/first-person-state';
+import {default as OrbitState} from './deprecated/orbit-state';
+import {default as MapState} from './deprecated/map-state';
 
 // INTERNAL EXPORTS
 

@@ -22,13 +22,17 @@ import LayerManager from '../lib/layer-manager';
 import EffectManager from '../experimental/lib/effect-manager';
 import Effect from '../experimental/lib/effect';
 import WebMercatorViewport from '../viewports/web-mercator-viewport';
-import ViewportControls from '../controllers/viewport-controls';
 import TransitionManager from '../lib/transition-manager';
+
+import ViewState from './view-state';
+import Controller from '../controllers/controller';
+import MapController from '../controllers/map-controller';
 
 import {EventManager} from 'mjolnir.js';
 import {GL, AnimationLoop, createGLContext, setParameters} from 'luma.gl';
 
 import PropTypes from 'prop-types';
+import assert from 'assert';
 
 const PREFIX = '-webkit-';
 const CURSOR = {
@@ -43,8 +47,10 @@ function noop() {}
 
 const propTypes = {
   id: PropTypes.string,
-  width: PropTypes.number.isRequired,
-  height: PropTypes.number.isRequired,
+
+  width: PropTypes.number,
+  height: PropTypes.number,
+
   layers: PropTypes.array, // Array can contain falsy values
   views: PropTypes.array, // Array can contain falsy values
   viewports: PropTypes.array, // Deprecated: Array can contain falsy values
@@ -61,9 +67,14 @@ const propTypes = {
   useDevicePixels: PropTypes.bool,
 
   // Controller props
-  controls: PropTypes.object,
-  viewportState: PropTypes.func,
-  state: PropTypes.object,
+  // A controller class or instance
+  controller: PropTypes.oneOfType([
+    PropTypes.instanceOf(Controller), // An instance of a controller
+    PropTypes.func // A controller class (will be instanced)
+  ]),
+  viewState: PropTypes.object,
+  viewportState: PropTypes.number, // invalid - trigger error
+  state: PropTypes.number, // invalid - trigger error
 
   // Viewport props (TODO - should only support these on the react component)
   longitude: PropTypes.number.isRequired, // The longitude of the center of the map.
@@ -75,11 +86,13 @@ const propTypes = {
   position: PropTypes.array, // Camera position for FirstPersonViewport
 
   // Viewport constraints
+  // TODO - too many props, define constraints object
   maxZoom: PropTypes.number, // Max zoom level
   minZoom: PropTypes.number, // Min zoom level
   maxPitch: PropTypes.number, // Max pitch in degrees
   minPitch: PropTypes.number, // Min pitch in degrees
 
+  onViewStateChange: PropTypes.func, // callback, fires when user interacts with the view
   onViewportChange: PropTypes.func, // callback, fires when user interacts with the view
 
   // Viewport transition
@@ -108,6 +121,11 @@ const propTypes = {
 
 const defaultProps = Object.assign({}, TransitionManager.defaultProps, {
   id: 'deckgl-overlay',
+
+  // Size
+  width: 100,
+  height: 100,
+
   pickingRadius: 0,
   layerFilter: null,
   glOptions: {},
@@ -122,7 +140,9 @@ const defaultProps = Object.assign({}, TransitionManager.defaultProps, {
   useDevicePixels: true,
 
   // Controller props
+  controller: MapController,
   onViewportChange: null,
+  onViewStateChange: null,
 
   scrollZoom: true,
   dragPan: true,
@@ -140,6 +160,7 @@ const defaultProps = Object.assign({}, TransitionManager.defaultProps, {
 export default class Deck {
   constructor(props) {
     props = Object.assign({}, defaultProps, props);
+    this.props = props;
 
     this.state = {};
     this.needsRedraw = true;
@@ -154,7 +175,7 @@ export default class Deck {
     this._onRenderFrame = this._onRenderFrame.bind(this);
 
     this.canvas = this._createCanvas(props);
-    this.controls = this._createControls(props);
+    this.controller = this._createController(props);
     this.animationLoop = this._createAnimationLoop(props);
 
     this.setProps(props);
@@ -185,6 +206,13 @@ export default class Deck {
 
   // Public API
 
+  getSize() {
+    return {
+      width: this.props.width || 100,
+      height: this.props.height || 100
+    };
+  }
+
   pickObject({x, y, radius = 0, layerIds = null}) {
     const selectedInfos = this.layerManager.pickObject({x, y, radius, layerIds, mode: 'query'});
     return selectedInfos.length ? selectedInfos[0] : null;
@@ -201,12 +229,17 @@ export default class Deck {
   // Private Methods
 
   _createCanvas(props) {
-    if (props.canvas) {
-      return props.canvas;
+    let canvas = props.canvas;
+
+    // TODO EventManager should accept element id
+    if (typeof canvas === 'string') {
+      /* global document */
+      canvas = document.getElementById(canvas);
+      assert(canvas);
     }
 
     const {id, width, height, style} = props;
-    const canvas = document.createElement('canvas');
+    canvas = document.createElement('canvas');
     canvas.id = id;
     canvas.width = width;
     canvas.height = height;
@@ -218,19 +251,43 @@ export default class Deck {
     return canvas;
   }
 
-  _createControls(props) {
+  _createController(props) {
     this.eventManager = new EventManager(this.canvas);
 
+    // Supports both constructor name and instance
     // If props.controls is not provided, fallback to default MapControls instance
     // Cannot use defaultProps here because it needs to be per map instance
-    const controls = props.controls || new ViewportControls(props.viewportState);
-    controls.setOptions(
+    let controller;
+    if (typeof props.controller === 'function') {
+      const ControllerClass = props.controller;
+      controller = new ControllerClass(props);
+    } else {
+      controller = props.controller;
+    }
+
+    const viewState = this._getViewState(props);
+    controller.setOptions(
       Object.assign({}, props, {
+        eventManager: this.eventManager,
         onStateChange: this._onInteractiveStateChange.bind(this),
-        eventManager: this.eventManager
+        viewState
       })
     );
-    return controls;
+
+    // Add a bonus event handler in case non was provided
+    if (!props.onViewStateChange && !props.onViewportChange) {
+      controller.setOptions({
+        onViewStateChange: this._onViewStateChange.bind(this)
+      });
+    }
+
+    return controller;
+  }
+
+  _setControllerProps(props) {
+    if (this.controller) {
+      this.controller.setOptions(props);
+    }
   }
 
   _createAnimationLoop(props) {
@@ -289,9 +346,29 @@ export default class Deck {
     });
   }
 
-  _setControlProps(props) {
-    if (this.controls) {
-      this.controls.setOptions(props);
+  _getViewportParams(props) {
+    const viewState = this._getViewState(props);
+    const {width, height} = this.getSize();
+    return Object.assign({}, viewState.props, {width, height});
+  }
+
+  _getViewState(props) {
+    if (props.viewState instanceof ViewState) {
+      return props.viewState;
+    }
+    return new ViewState(props.viewState || props);
+  }
+
+  _updateSize(gl) {
+    // Get canvas from debug context (TODO move to luma.gl)
+    gl = (gl && gl.state && gl.state.gl) || gl;
+    const canvas = gl && gl.canvas;
+    // Check if size changed
+    if (canvas && (canvas.clientWidth !== this.width || canvas.clientHeight !== this.height)) {
+      this.setProps({
+        width: canvas.clientWidth,
+        height: canvas.clientHeight
+      });
     }
   }
 
@@ -321,6 +398,8 @@ export default class Deck {
   }
 
   _onRenderFrame({gl}) {
+    this._updateSize(gl);
+
     const redrawReason = this.layerManager.needsRedraw({clearRedrawFlags: true});
     if (!redrawReason) {
       return;
@@ -341,6 +420,10 @@ export default class Deck {
       this.state.isDragging = isDragging;
       this.canvas.style.cursor = this.props.getCursor({isDragging});
     }
+  }
+
+  _onViewStateChange({viewState}) {
+    this.setProps({viewState});
   }
 }
 
