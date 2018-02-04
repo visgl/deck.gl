@@ -25,6 +25,7 @@ import vec4_transformMat4 from 'gl-vec4/transformMat4';
 import log from '../../utils/log';
 import assert from 'assert';
 import {COORDINATE_SYSTEM} from '../../lib/constants';
+import memoize from '../memoize';
 
 import {lngLatToWorld} from 'viewport-mercator-project';
 
@@ -35,13 +36,14 @@ const VECTOR_TO_POINT_MATRIX = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0];
 const IDENTITY_MATRIX = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
 const DEFAULT_PIXELS_PER_UNIT2 = [0, 0, 0];
 
+const memoized = memoize(_getUniformsFromViewport);
+
 // The code that utilizes Matrix4 does the same calculation as their mat4 counterparts,
 // has lower performance but provides error checking.
 // Uncomment when debugging
 function calculateMatrixAndOffset({
   // UNCHANGED
   viewport,
-  modelMatrix,
   // NEW PARAMS
   coordinateSystem,
   coordinateOrigin,
@@ -109,8 +111,9 @@ function calculateMatrixAndOffset({
 export function getUniformsFromViewport({
   viewport,
   modelMatrix = null,
+  // Match Layer.defaultProps
   coordinateSystem = COORDINATE_SYSTEM.LNGLAT,
-  coordinateOrigin = [0, 0],
+  coordinateOrigin = [0, 0, 0],
   // Deprecated
   projectionMode,
   positionOrigin
@@ -124,6 +127,15 @@ export function getUniformsFromViewport({
     log.removed('positionOrigin', 'coordinateOrigin');
   }
 
+  return Object.assign(
+    {
+      project_uModelMatrix: modelMatrix || IDENTITY_MATRIX
+    },
+    memoized({viewport, coordinateSystem, coordinateOrigin})
+  );
+}
+
+function _getUniformsFromViewport({viewport, coordinateSystem, coordinateOrigin}) {
   const coordinateZoom = viewport.zoom;
   assert(coordinateZoom >= 0);
 
@@ -131,7 +143,6 @@ export function getUniformsFromViewport({
     coordinateSystem,
     coordinateOrigin,
     coordinateZoom,
-    modelMatrix,
     viewport
   });
 
@@ -143,8 +154,6 @@ export function getUniformsFromViewport({
   // TODO - does this depend on useDevicePixels?
   const devicePixelRatio = (typeof window !== 'undefined' && window.devicePixelRatio) || 1;
   const viewportSize = [viewport.width * devicePixelRatio, viewport.height * devicePixelRatio];
-
-  const glModelMatrix = modelMatrix || IDENTITY_MATRIX;
 
   const uniforms = {
     // Projection mode values
@@ -163,7 +172,6 @@ export function getUniformsFromViewport({
     project_uPixelsPerUnit2: DEFAULT_PIXELS_PER_UNIT2,
     project_uScale: viewport.scale, // This is the mercator scale (2 ** zoom)
 
-    project_uModelMatrix: glModelMatrix,
     project_uViewProjectionMatrix: viewProjectionMatrix,
 
     // This is for lighting calculations
