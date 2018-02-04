@@ -69,7 +69,7 @@ const {
   LinearInterpolator,
   ViewportFlyToInterpolator,
 
-  DeckGLJS,
+  Deck,
   MapControllerJS,
 
   EffectManager,
@@ -98,7 +98,7 @@ Object.assign(experimental, {
   ViewportFlyToInterpolator,
 
   // Pure JS (non-React) API
-  DeckGLJS,
+  Deck,
   MapControllerJS,
 
   // Effects base classes

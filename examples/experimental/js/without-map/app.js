@@ -1,6 +1,6 @@
 /* global window, fetch */
 import {experimental, GeoJsonLayer} from 'deck.gl';
-const {DeckGLJS, MapControllerJS} = experimental;
+const {Deck, MapControllerJS} = experimental;
 
 // source: Natural Earth http://www.naturalearthdata.com/
 // via geojson.xyz
@@ -72,7 +72,7 @@ class App {
 
     const {viewport, width, height} = this.state;
 
-    this.deckgl = new DeckGLJS({
+    this.deckgl = new Deck({
       ...viewport,
       width,
       height,

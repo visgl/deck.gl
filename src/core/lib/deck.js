@@ -76,7 +76,7 @@ const defaultProps = {
 };
 
 // TODO - should this class be joined with `LayerManager`?
-export default class DeckGLJS {
+export default class Deck {
   constructor(props) {
     props = Object.assign({}, defaultProps, props);
 
@@ -246,5 +246,5 @@ export default class DeckGLJS {
   }
 }
 
-DeckGLJS.propTypes = propTypes;
-DeckGLJS.defaultProps = defaultProps;
+Deck.propTypes = propTypes;
+Deck.defaultProps = defaultProps;

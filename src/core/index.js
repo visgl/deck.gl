@@ -61,7 +61,7 @@ import {default as ThirdPersonViewport} from './viewports/third-person-viewport'
 import {default as OrbitViewport} from './viewports/orbit-viewport';
 
 // Experimental Pure JS (non-React) bindings
-import {default as DeckGLJS} from './pure-js/deck-js';
+import {default as Deck} from './lib/deck';
 import {default as MapControllerJS} from './pure-js/map-controller-js';
 import {default as OrbitControllerJS} from './pure-js/orbit-controller-js';
 
@@ -113,7 +113,7 @@ export const experimental = {
   ThirdPersonViewport,
   OrbitViewport,
 
-  DeckGLJS,
+  Deck,
   MapControllerJS,
   OrbitControllerJS,
 

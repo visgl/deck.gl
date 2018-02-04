@@ -22,7 +22,7 @@ import React, {createElement, cloneElement} from 'react';
 import autobind from './utils/autobind';
 import {inheritsFrom} from '../core/utils/inherits-from';
 import {Layer, experimental} from '../core';
-const {DeckGLJS, log} = experimental;
+const {Deck, log} = experimental;
 
 export default class DeckGL extends React.Component {
   constructor(props) {
@@ -33,7 +33,7 @@ export default class DeckGL extends React.Component {
   }
 
   componentDidMount() {
-    this.deck = new DeckGLJS(Object.assign({}, this.props, {canvas: this.overlay}));
+    this.deck = new Deck(Object.assign({}, this.props, {canvas: this.overlay}));
     this._updateFromProps(this.props);
   }
 
@@ -176,5 +176,5 @@ export default class DeckGL extends React.Component {
   }
 }
 
-DeckGL.propTypes = DeckGLJS.propTypes;
-DeckGL.defaultProps = DeckGLJS.defaultProps;
+DeckGL.propTypes = Deck.propTypes;
+DeckGL.defaultProps = Deck.defaultProps;
