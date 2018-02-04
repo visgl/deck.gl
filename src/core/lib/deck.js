@@ -291,16 +291,6 @@ export default class Deck {
     });
   }
 
-  _getViewportParams(props) {
-    const viewState = this._getViewState(props);
-    const {width, height} = this.getSize();
-    return Object.assign({}, viewState.props, {width, height});
-  }
-
-  _getViewState(props) {
-    return props.viewState || props;
-  }
-
   _updateSize(gl) {
     // Get canvas from debug context (TODO move to luma.gl)
     gl = (gl && gl.state && gl.state.gl) || gl;
@@ -355,17 +345,6 @@ export default class Deck {
       drawPickingColors: this.props.drawPickingColors
     });
     this.props.onAfterRender({gl}); // TODO - should be called by AnimationLoop
-  }
-
-  _onInteractiveStateChange({isDragging = false}) {
-    if (isDragging !== this.state.isDragging) {
-      this.state.isDragging = isDragging;
-      this.canvas.style.cursor = this.props.getCursor({isDragging});
-    }
-  }
-
-  _onViewStateChange({viewState}) {
-    this.setProps({viewState});
   }
 }
 
