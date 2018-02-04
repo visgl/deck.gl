@@ -44,7 +44,7 @@ import React, {Component} from 'react';
 import ReactDOM from 'react-dom';
 
 import DeckGL, {experimental} from 'deck.gl';
-const {DeckGLJS} = experimental; // eslint-disable-line
+const {Deck} = experimental; // eslint-disable-line
 
 import * as CONFIG from './test-config';
 

@@ -1,6 +1,6 @@
 /* global window, fetch */
 import {GeoJsonLayer, experimental} from 'deck.gl';
-const {DeckGLJS, MapControllerJS} = experimental;
+const {Deck, MapControllerJS} = experimental;
 import TimeSlicedScatterplotLayer from './time-sliced-scatterplot-layer/time-sliced-scatterplot-layer.js';
 
 import {parseTile, lngLatToTile, getTileUrl} from './utils/carto-torque-utils';
@@ -140,7 +140,7 @@ class App {
 
     const {viewport, width, height} = this.state;
 
-    this.deckgl = new DeckGLJS({
+    this.deckgl = new Deck({
       ...viewport,
       width,
       height,

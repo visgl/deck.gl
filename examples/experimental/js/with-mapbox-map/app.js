@@ -1,6 +1,6 @@
 /* global window, fetch */
 import {experimental, GeoJsonLayer} from 'deck.gl';
-const {DeckGLJS, MapControllerJS} = experimental;
+const {Deck, MapControllerJS} = experimental;
 import MapBox from './mapbox';
 
 // source: Natural Earth http://www.naturalearthdata.com/ via geojson.xyz
@@ -81,7 +81,7 @@ class App {
       debug: true
     });
 
-    this.deckgl = new DeckGLJS({
+    this.deckgl = new Deck({
       // TODO EventManager should accept element id
       /* global document */
       canvas: document.getElementById('deck'),

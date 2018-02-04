@@ -23,14 +23,14 @@ import PropTypes from 'prop-types';
 import autobind from './utils/autobind';
 import {inheritsFrom} from '../core/utils/inherits-from';
 import {Layer, experimental} from '../core';
-const {DeckGLJS, log} = experimental;
+const {Deck, log} = experimental;
 
-const propTypes = Object.assign({}, DeckGLJS.propTypes, {
+const propTypes = Object.assign({}, Deck.propTypes, {
   viewports: PropTypes.array, // Deprecated
   viewport: PropTypes.object // Deprecated
 });
 
-const defaultProps = DeckGLJS.defaultProps;
+const defaultProps = Deck.defaultProps;
 
 export default class DeckGL extends React.Component {
   constructor(props) {
@@ -41,7 +41,7 @@ export default class DeckGL extends React.Component {
   }
 
   componentDidMount() {
-    this.deck = new DeckGLJS(Object.assign({}, this.props, {canvas: this.overlay}));
+    this.deck = new Deck(Object.assign({}, this.props, {canvas: this.overlay}));
     this._updateFromProps(this.props);
   }
 
