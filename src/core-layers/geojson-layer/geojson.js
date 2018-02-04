@@ -18,9 +18,6 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {experimental} from '../../core';
-const {get} = experimental;
-
 /**
  * "Normalizes" complete or partial GeoJSON data into iterable list of features
  * Can accept GeoJSON geometry or "Feature", "FeatureCollection" in addition
@@ -39,8 +36,7 @@ export function getGeojsonFeatures(geojson) {
     return geojson;
   }
 
-  const type = get(geojson, 'type');
-  switch (type) {
+  switch (geojson.type) {
     case 'Point':
     case 'MultiPoint':
     case 'LineString':
@@ -55,7 +51,7 @@ export function getGeojsonFeatures(geojson) {
       return [geojson];
     case 'FeatureCollection':
       // Just return the 'Features' array from the collection
-      return get(geojson, 'features');
+      return geojson.features;
     default:
       throw new Error('Unknown geojson type');
   }
@@ -69,9 +65,9 @@ export function separateGeojsonFeatures(features) {
   const polygonOutlineFeatures = [];
 
   features.forEach(feature => {
-    const type = get(feature, 'geometry.type');
-    const coordinates = get(feature, 'geometry.coordinates');
-    const properties = get(feature, 'properties');
+    const type = feature.geometry.type;
+    const coordinates = feature.geometry.coordinates;
+    const properties = feature.properties;
     switch (type) {
       case 'Point':
         pointFeatures.push(feature);
