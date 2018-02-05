@@ -564,7 +564,6 @@ export default class LayerManager {
 
   // Initializes a single layer, calling layer methods
   _initializeLayer(layer) {
-    assert(!layer.state);
     log(LOG_PRIORITY_LIFECYCLE, `initializing ${layerName(layer)}`);
 
     let error = null;
@@ -577,10 +576,8 @@ export default class LayerManager {
       // TODO - what should the lifecycle state be here? LIFECYCLE.INITIALIZATION_FAILED?
     }
 
-    assert(layer.state);
-
     // Set back pointer (used in picking)
-    layer.state.layer = layer;
+    layer.internalState.layer = layer;
 
     // Save layer on model for picking purposes
     // store on model.userData rather than directly on model
@@ -620,7 +617,6 @@ export default class LayerManager {
 
   // Finalizes a single layer
   _finalizeLayer(layer) {
-    assert(layer.state);
     assert(layer.lifecycle !== LIFECYCLE.AWAITING_FINALIZATION);
     layer.lifecycle = LIFECYCLE.AWAITING_FINALIZATION;
     let error = null;

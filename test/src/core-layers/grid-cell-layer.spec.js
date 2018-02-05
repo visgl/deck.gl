@@ -47,7 +47,7 @@ const TEST_CASES = {
       assert: (layer, oldState, t) => {
         t.ok(layer.state, 'should update layer');
         t.ok(
-          layer.state.attributeManager.attributes.instancePositions64xyLow,
+          layer.getAttributeManager().attributes.instancePositions64xyLow,
           'should add instancePositions64xyLow'
         );
       }

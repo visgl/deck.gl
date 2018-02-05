@@ -114,7 +114,6 @@ test('Layer#constructor(multi prop objects)', t => {
 test('SubLayer#constructor', t => {
   const layer = new SubLayer(LAYER_PROPS);
   t.ok(layer, 'SubLayer created');
-  t.comment(JSON.stringify(layer.props));
   t.equal(layer.props.onHover, Layer.defaultProps.onHover, 'Layer defaultProps found');
   t.equal(layer.props.getColor, SubLayer.defaultProps.getColor, 'SubLayer defaultProps found');
   t.end();
