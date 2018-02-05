@@ -125,10 +125,6 @@ export default class HexagonLayer extends CompositeLayer {
     };
   }
 
-  shouldUpdateState({changeFlags}) {
-    return changeFlags.somethingChanged;
-  }
-
   updateState({oldProps, props, changeFlags}) {
     const dimensionChanges = this.getDimensionChanges(oldProps, props);
 
