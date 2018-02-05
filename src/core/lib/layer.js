@@ -170,6 +170,7 @@ export default class Layer {
   // PROJECTION METHODS
 
   // Projects a point with current map state (lat, lon, zoom, pitch, bearing)
+  // TODO - need to be extended to work with COORDINATE_SYSTEM.METERS,IDENTITY
   // TODO - need to be extended to work with multiple `views`
   project(lngLat) {
     const {viewport} = this.context;
