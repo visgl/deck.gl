@@ -19,7 +19,8 @@
 // THE SOFTWARE.
 
 /* global window */
-import {LIFECYCLE, COORDINATE_SYSTEM} from './constants';
+import {COORDINATE_SYSTEM} from './constants';
+import {LIFECYCLE} from '../lifecycle/constants';
 import AttributeManager from './attribute-manager';
 import {count} from '../utils/count';
 import log from '../utils/log';

@@ -18,17 +18,16 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+/* global setTimeout, clearTimeout */
 import assert from 'assert';
 import {Framebuffer, ShaderCache} from 'luma.gl';
 import seer from 'seer';
 import Layer from './layer';
 import {drawLayers} from './draw-layers';
 import {pickObject, pickVisibleObjects} from './pick-layers';
-import {LIFECYCLE} from './constants';
+import {LIFECYCLE} from '../lifecycle/constants';
 import View from '../views/view';
 import Viewport from '../viewports/viewport';
-// TODO - remove, just for dummy initialization
-import WebMercatorViewport from '../viewports/web-mercator-viewport';
 import log from '../utils/log';
 import {flatten} from '../utils/flatten';
 
@@ -39,6 +38,9 @@ import {
   initLayerInSeer,
   updateLayerInSeer
 } from './seer-integration';
+
+// TODO - remove, just for dummy initialization
+import WebMercatorViewport from '../viewports/web-mercator-viewport';
 
 const LOG_PRIORITY_LIFECYCLE = 2;
 const LOG_PRIORITY_LIFECYCLE_MINOR = 4;
@@ -79,7 +81,8 @@ export default class LayerManager {
     this.context = Object.assign({}, initialContext, {
       gl,
       // Enabling luma.gl Program caching using private API (_cachePrograms)
-      shaderCache: new ShaderCache({gl, _cachePrograms: true})
+      shaderCache: new ShaderCache({gl, _cachePrograms: true}),
+      layerManager: this
     });
 
     // List of view descriptors, gets re-evaluated when width/height changes
@@ -89,6 +92,10 @@ export default class LayerManager {
     this.viewsChanged = true;
     this.viewports = []; // Generated viewports
     this._needsRedraw = 'Initial render';
+
+    this._isUpdating = false;
+    this._scheduledUpdateTimer = null;
+    this._scheduledLayer = null;
 
     // Event handling
     this._pickingRadius = 0;
@@ -245,12 +252,22 @@ export default class LayerManager {
     }
 
     this.prevLayers = this.layers;
+
+    this._isUpdating = true;
     const {error, generatedLayers} = this._updateLayers({
       oldLayers: this.prevLayers,
       newLayers
     });
+    this._isUpdating = false;
 
     this.layers = generatedLayers;
+
+    // Clear any scheduled updates, since we just updated
+    if (this._scheduledUpdateTimer) {
+      clearTimeout(this._scheduledUpdateTimer);
+      this._scheduledUpdateTimer = null;
+    }
+
     // Throw first error found, if any
     if (error) {
       throw error;
@@ -343,6 +360,27 @@ export default class LayerManager {
     log.deprecated('setViewport', 'setViews');
     this.setViews([viewport]);
     return this;
+  }
+
+  //
+  // METHODS FOR LAYERS
+  //
+
+  // Schedules an async update of the layer state
+  // Use when async props or assets have loaded
+  scheduleLayerUpdate(layer) {
+    if (!this._isUpdating && !this._scheduledUpdateTimer) {
+      this._scheduledUpdateTimer = setTimeout(this._scheduledUpdate.bind(this), 0);
+      this._scheduledLayer = layer;
+      // TODO when updating cancel any outstanding update timers
+    }
+  }
+
+  // Handles an async update of the layer state
+  _scheduledUpdate() {
+    log.log(0, `Async layer update ${this._scheduledLayer}`);
+    this.setNeedsRedraw('Async layer update');
+    this.setLayers([...this.layers]);
   }
 
   //
