@@ -69,10 +69,17 @@ resultContainer.style.position = 'absolute';
 resultContainer.style.left = `${CONFIG.WIDTH}px`;
 resultContainer.style.zIndex = 1;
 
+// Final flag container
+const flagContainer = document.createElement('div');
+flagContainer.style.position = 'absolute';
+flagContainer.style.top = `${CONFIG.HEIGHT + 50}px`;
+flagContainer.style.visibility = 'hidden';
+
 document.body.appendChild(deckGLContainer);
 document.body.appendChild(referenceImage);
 document.body.appendChild(resultImage);
 document.body.appendChild(resultContainer);
+document.body.appendChild(flagContainer);
 
 class RenderingTest extends Component {
   constructor(props) {
@@ -81,7 +88,8 @@ class RenderingTest extends Component {
     this.state = {
       runningTests: {},
       currentTestIndex: 0,
-      renderingCount: 0
+      renderingCount: 0,
+      allPassed: true
     };
   }
 
@@ -100,12 +108,13 @@ class RenderingTest extends Component {
     }
 
     // Print diff result
-    reportResult(name, 1 - badPixels / pixelCount);
+    const passed = reportResult(name, 1 - badPixels / pixelCount);
 
     // Render the next test case
     this.setState({
       currentTestIndex: this.state.currentTestIndex + 1,
-      renderingCount: 0
+      renderingCount: 0,
+      allPassed: this.state.allPassed && passed
     });
   }
 
@@ -138,6 +147,7 @@ class RenderingTest extends Component {
     const {width, height, testCases} = this.props;
 
     if (!testCases[currentTestIndex]) {
+      reportFinalResult(this.state.allPassed);
       return null;
     }
 
@@ -167,7 +177,8 @@ class RenderingTest extends Component {
       layers,
       debug: true,
       onAfterRender: this._onDrawComplete.bind(this, name, referenceResult, completed),
-      viewport: new viewport(viewportProps) // eslint-disable-line
+      viewport: new viewport(viewportProps), // eslint-disable-line
+      useDevicePixels: false
     });
   }
 }
@@ -214,4 +225,15 @@ function reportResult(name, percentage) {
   paragraph.style.color = passed ? '#74ff69' : '#ff2857';
   paragraph.appendChild(testResult);
   resultContainer.appendChild(paragraph);
+  return passed;
+}
+
+function reportFinalResult(passed) {
+  const outputString = `${passed ? 'All CASES PASSED!' : 'NOT All CASES PASSED!'}`;
+
+  const paragraph = document.createElement('p');
+  const testResult = document.createTextNode(outputString);
+  paragraph.style.color = passed ? '#0bff1c' : '#ff0921';
+  paragraph.appendChild(testResult);
+  flagContainer.appendChild(paragraph);
 }
