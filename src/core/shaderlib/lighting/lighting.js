@@ -21,8 +21,7 @@
 import lightingShader from './lighting.glsl';
 import project from '../project/project';
 import {COORDINATE_SYSTEM} from '../../lib/constants';
-import vec4_transformMat4 from 'gl-vec4/transformMat4';
-import vec3_sub from 'gl-vec3/subtract';
+import {projectPosition} from '../project/project-functions';
 
 export default {
   name: 'lighting',
@@ -60,16 +59,17 @@ function getUniforms(opts = INITIAL_MODULE_OPTIONS) {
 
   const projectionParameters = {
     viewport: opts.viewport,
-    coordinateSystem,
-    coordinateOrigin,
-    layerCoordinateSystem: opts.coordinateSystem,
-    layerCoordinateOrigin: opts.coordinateOrigin,
-    modelMatrix
+    modelMatrix,
+    coordinateSystem: opts.coordinateSystem,
+    coordinateOrigin: opts.coordinateOrigin,
+    fromCoordinateSystem: coordinateSystem,
+    fromCoordinateOrigin: coordinateOrigin
   };
 
+  // Pre-project light positions
   const lightsPositionWorld = [];
   for (let i = 0; i < numberOfLights; i++) {
-    const position = preProject(lightsPosition.slice(i * 3, i * 3 + 3), projectionParameters);
+    const position = projectPosition(lightsPosition.slice(i * 3, i * 3 + 3), projectionParameters);
 
     lightsPositionWorld[i * 3] = position[0];
     lightsPositionWorld[i * 3 + 1] = position[1];
@@ -86,65 +86,3 @@ function getUniforms(opts = INITIAL_MODULE_OPTIONS) {
   };
 }
 
-/* Projection utils */
-
-function lngLatZToWorldPosition(lngLatZ, viewport) {
-  const [X, Y] = viewport.projectFlat(lngLatZ);
-  const Z = (lngLatZ[2] || 0) * viewport.scale;
-  return [X, Y, Z];
-}
-
-function preProject(
-  position,
-  {
-    viewport,
-    coordinateSystem,
-    coordinateOrigin,
-    modelMatrix,
-    layerCoordinateSystem,
-    layerCoordinateOrigin
-  }
-) {
-  let [x, y, z] = position;
-  let worldPosition;
-
-  if (modelMatrix) {
-    [x, y, z] = vec4_transformMat4([], [x, y, z, 1.0], modelMatrix);
-  }
-
-  // pre-project light coordinates
-  switch (coordinateSystem) {
-    case COORDINATE_SYSTEM.LNGLAT:
-      worldPosition = lngLatZToWorldPosition([x, y, z], viewport);
-      break;
-
-    case COORDINATE_SYSTEM.LNGLAT_OFFSETS:
-      worldPosition = lngLatZToWorldPosition(
-        [x + coordinateOrigin[0], y + coordinateOrigin[1], z + (coordinateOrigin[2] || 0)],
-        viewport
-      );
-      break;
-
-    case COORDINATE_SYSTEM.METER_OFFSETS:
-      worldPosition = lngLatZToWorldPosition(
-        viewport.addMetersToLngLat(coordinateOrigin, [x, y, z]),
-        viewport
-      );
-      break;
-
-    default:
-      worldPosition = [x, y, z];
-  }
-
-  switch (layerCoordinateSystem) {
-    case COORDINATE_SYSTEM.LNGLAT_OFFSETS:
-    case COORDINATE_SYSTEM.METER_OFFSETS:
-      const originWorld = lngLatZToWorldPosition(layerCoordinateOrigin, viewport);
-      vec3_sub(worldPosition, worldPosition, originWorld);
-      break;
-
-    default:
-  }
-
-  return worldPosition;
-}
