@@ -28,12 +28,21 @@ import fs from './hexagon-cell-layer-fragment.glsl';
 
 const DEFAULT_COLOR = [255, 0, 255, 255];
 
+const LIGHT_SETTINGS = {
+  lightsPosition: [-122.45, 37.75, 8000, -122.0, 38.0, 5000],
+  ambientRatio: 0.4,
+  diffuseRatio: 0.6,
+  specularRatio: 0.8,
+  lightsStrength: [1.2, 0.0, 0.8, 0.0],
+  numberOfLights: 2
+};
+
 const defaultProps = {
   hexagonVertices: null,
   radius: null,
   angle: null,
-  coverage: 1,
-  elevationScale: 1,
+  coverage: {type: 'number', min: 0, max: 1, value: 1},
+  elevationScale: {type: 'number', min: 0, value: 1},
   extruded: true,
   fp64: false,
 
@@ -41,14 +50,7 @@ const defaultProps = {
   getColor: x => x.color,
   getElevation: x => x.elevation,
 
-  lightSettings: {
-    lightsPosition: [-122.45, 37.75, 8000, -122.0, 38.0, 5000],
-    ambientRatio: 0.4,
-    diffuseRatio: 0.6,
-    specularRatio: 0.8,
-    lightsStrength: [1.2, 0.0, 0.8, 0.0],
-    numberOfLights: 2
-  }
+  lightSettings: LIGHT_SETTINGS
 };
 
 export default class HexagonCellLayer extends Layer {

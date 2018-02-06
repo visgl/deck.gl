@@ -1,9 +1,18 @@
 import React, {PureComponent} from 'react';
 import LayerControls from './layer-controls';
+import PropTypes from 'prop-types';
+
+const propTypes = {
+  examples: PropTypes.object,
+  activeExamples: PropTypes.object,
+  onToggleLayer: PropTypes.func.isRequired,
+  onUpdateLayer: PropTypes.func.isRequired
+};
 
 export default class LayerSelector extends PureComponent {
   _renderExampleButton(exampleName, example) {
     const {activeExamples} = this.props;
+
     const settings = activeExamples[exampleName];
 
     return (
@@ -23,6 +32,7 @@ export default class LayerSelector extends PureComponent {
         {settings && (
           <LayerControls
             settings={settings}
+            layer={example.layer}
             propTypes={example.propTypes}
             onChange={this.props.onUpdateLayer.bind(this, exampleName)}
           />
@@ -51,3 +61,5 @@ export default class LayerSelector extends PureComponent {
     );
   }
 }
+
+LayerSelector.propTypes = propTypes;

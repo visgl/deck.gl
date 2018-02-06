@@ -27,39 +27,42 @@ import {pointToDensityGridData} from './grid-aggregator';
 
 function nop() {}
 
+const LIGHT_SETTINGS = {
+  lightsPosition: [-122.45, 37.75, 8000, -122.0, 38.0, 5000],
+  ambientRatio: 0.05,
+  diffuseRatio: 0.6,
+  specularRatio: 0.8,
+  lightsStrength: [2.0, 0.0, 0.0, 0.0],
+  numberOfLights: 2
+};
+
 const defaultProps = {
   // color
   colorDomain: null,
   colorRange: defaultColorRange,
   getColorValue: points => points.length,
-  lowerPercentile: 0,
-  upperPercentile: 100,
+  lowerPercentile: {type: 'number', min: 0, max: 100, value: 0},
+  upperPercentile: {type: 'number', min: 0, max: 100, value: 100},
   onSetColorDomain: nop,
 
   // elevation
   elevationDomain: null,
   elevationRange: [0, 1000],
   getElevationValue: points => points.length,
-  elevationLowerPercentile: 0,
-  elevationUpperPercentile: 100,
+  elevationLowerPercentile: {type: 'number', min: 0, max: 100, value: 0},
+  elevationUpperPercentile: {type: 'number', min: 0, max: 100, value: 100},
   elevationScale: 1,
   onSetElevationDomain: nop,
 
   // grid
-  cellSize: 1000,
-  coverage: 1,
+  cellSize: {type: 'number', min: 0, max: 1000, value: 1000},
+  coverage: {type: 'number', min: 0, max: 1, value: 1},
   getPosition: x => x.position,
   extruded: false,
   fp64: false,
+
   // Optional settings for 'lighting' shader module
-  lightSettings: {
-    lightsPosition: [-122.45, 37.75, 8000, -122.0, 38.0, 5000],
-    ambientRatio: 0.05,
-    diffuseRatio: 0.6,
-    specularRatio: 0.8,
-    lightsStrength: [2.0, 0.0, 0.0, 0.0],
-    numberOfLights: 2
-  }
+  lightSettings: LIGHT_SETTINGS
 };
 
 export default class GridLayer extends CompositeLayer {

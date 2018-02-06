@@ -1,10 +1,39 @@
 import React, {PureComponent} from 'react';
 import ColorPicker from './color-picker';
 import ColorPalettePicker from './color-palette-picker';
+import PropTypes from 'prop-types';
+
+const PROP_TYPES = {
+  title: PropTypes.string,
+  settings: PropTypes.object.isRequired,
+  propTypes: PropTypes.object
+  // layer:
+};
+
+const defaultProps = {
+  title: '',
+  propTypes: {}
+};
 
 export default class LayerControls extends PureComponent {
+  _getPropTypes() {
+    const {layer, propTypes} = this.props;
+    return Object.assign({}, layer && layer._propTypes, propTypes);
+  }
+
+  // Get all inherited property keys
+  _getAllPropKeys(object) {
+    const keys = [];
+    for (const key in object) {
+      keys.push(key);
+    }
+    return keys;
+  }
+
   _onValueChange(settingName, newValue) {
-    const {settings, propTypes = {}} = this.props;
+    const {settings} = this.props;
+    const propTypes = this._getPropTypes();
+
     // Only update if we have a confirmed change
     if (settings[settingName] !== newValue) {
       // Create a new object so that shallow-equal detects a change
@@ -30,16 +59,16 @@ export default class LayerControls extends PureComponent {
   }
 
   _renderColorPicker(settingName, value) {
-    const props = {value, onChange: this._onValueChange.bind(this, settingName)};
+    const onChange = this._onValueChange.bind(this, settingName);
 
     return (
       <div key={settingName}>
         <div className="input-group">
           <label>{settingName}</label>
           {settingName === 'colorRange' ? (
-            <ColorPalettePicker {...props} />
+            <ColorPalettePicker value={value} onChange={onChange} />
           ) : (
-            <ColorPicker {...props} />
+            <ColorPicker value={value} onChange={onChange} />
           )}
         </div>
       </div>
@@ -129,25 +158,20 @@ export default class LayerControls extends PureComponent {
     return null;
   }
 
-  // Get all inherited property keys
-  _getAllKeys(object) {
-    const keys = [];
-    for (const key in object) {
-      keys.push(key);
-    }
-    return keys;
-  }
-
   render() {
-    const {title, settings, propTypes = {}} = this.props;
+    const {title, settings} = this.props;
+    const propTypes = this._getPropTypes();
 
     return (
       <div className="layer-controls">
         {title && <h4>{title}</h4>}
-        {this._getAllKeys(settings).map(key =>
+        {this._getAllPropKeys(settings).map(key =>
           this._renderSetting(key, settings[key], propTypes[key])
         )}
       </div>
     );
   }
 }
+
+LayerControls.propTypes = PROP_TYPES;
+LayerControls.defaultProps = defaultProps;
