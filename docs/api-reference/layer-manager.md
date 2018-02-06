@@ -1,6 +1,6 @@
-# LayerManager Class (Advanced)
+# LayerManager Class (Internal)
 
-> The `LayerManager` class is an internal class that is exposed primarily to enable deck.gl to be used without React. If you are using the [`DeckGL`](/docs/api-reference/deckgl.md) React Component, a layer manager is created under the hood to handle layer management, and you do not need to use this class.
+> The `LayerManager` class is an internal class that was initially exposed primarily to enable deck.gl to be used without React, however you are more likely to want to use the new `Deck` class or the [`DeckGL`](/docs/api-reference/deckgl.md) React Component. Those classes create a LayerManager under the hood to handle layer management, and you do not need to use this class.
 
 The `LayerManager` class handles updates, drawing and picking for a set of layers.
 
@@ -17,6 +17,14 @@ Creates a new `LayerManager` instance.
 
 * `gl` ([WebGLRenderingContext](https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext))
 
+
+##### needsRedraw
+
+Checks if layers need to be redrawn.
+
+`layerManager.needsRedraw({clearRedrawFlags = false})`
+
+
 ##### getLayers
 
 Returns an list of layers, optionally be filtered by a list of layer ids.
@@ -32,13 +40,6 @@ Notes:
 * When supplying the layer id of a composite layer, all the sub layers rendered by that layer will be included.
 * layer id matching checks that a layer id *starts with* one of the supplied strings. This ensures that sublayers rendered by a composite layer with the given id will also be included in the matched list.
 
-##### setViewport
-
-Updates the current viewport.
-
-`layerManager.setViewport(viewport)`
-
-* `viewport` ([Viewport](/docs/api-reference/viewport.md)) - The new viewport
 
 ##### setParameters
 
@@ -54,7 +55,6 @@ Updates parameters
 
 * `useDevicePixels` (`Boolean`, optional) - Whether to use retina/HD display or not.
 * `eventManager` - A source of DOM input events
-
 * `pickingRadius` (`Number`, optional) - "Fuzziness" of picking (px), to support fat-fingering.
 * `onLayerClick` (`Function`, optional) - A handler to be called when any layer is clicked.
 * `onLayerHover` (`Function`, optional) - A handler to be called when any layer is hovered over.
@@ -65,6 +65,15 @@ Notes:
  * `srcEvent` (Object) - native JS Event object
 
 
+##### setViews
+
+Updates the current views.
+
+`layerManager.setViews(views)`
+
+* `views` (`View[]`) - The new [View](/docs/api-reference/view.md) instances.
+
+
 ##### setLayers
 
 Provide a new list of layers. Layers will be matched against old layers, and any composite layers will be recursively expanded into primitive layers.
@@ -73,6 +82,12 @@ Provide a new list of layers. Layers will be matched against old layers, and any
 
 * `newLayers` (Layer[]) - Array of layers
 
+
+##### updateLayers
+
+Updates the current list of layers.
+
+
 ##### drawLayers
 
 Draw all layers
@@ -80,6 +95,7 @@ Draw all layers
 `layerManager.drawLayers({pass})`
 
 * `pass` (String) - The render pass identifier, for debugging purpose
+
 
 ##### pickObject
 
@@ -99,13 +115,6 @@ Get all unique infos within a bounding box
 
 * `x` (Number) - The x position of the pointer
 * `y` (Number) - The y position of the pointer
-
-
-##### needsRedraw
-
-Checks if layers need to be redrawn.
-
-`layerManager.needsRedraw({clearRedrawFlags = false})`
 
 
 ## Source

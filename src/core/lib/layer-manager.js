@@ -276,12 +276,12 @@ export default class LayerManager {
   }
 
   // Update layers from last cycle if `setNeedsUpdate()` has been called
-  // NOTE: For now, even if only some layer has changed, we rerender all layers
-  // to ensure that layer maps etc are consistent
   updateLayers() {
+    // NOTE: For now, even if only some layer has changed, we update all layers
+    // to ensure that layer id maps etc remain consistent even if different
+    // sublayers are rendered
     const reason = this.needsUpdate();
     if (reason) {
-      this._needsUpdate = false;
       this.setNeedsRedraw(`updating layers: ${reason}`);
       // HACK - Call with a copy of lastRenderedLayers to trigger a full update
       this.setLayers([...this.lastRenderedLayers]);
@@ -526,6 +526,8 @@ export default class LayerManager {
     // Finalize unmatched layers
     const error2 = this._finalizeOldLayers(oldLayerMap);
 
+    this._needsUpdate = false;
+
     const firstError = error || error2;
     return {error: firstError, generatedLayers};
   }
@@ -591,6 +593,8 @@ export default class LayerManager {
     }
     return error;
   }
+
+  // EXCEPTION SAFE LAYER ACCESS
 
   // Initializes a single layer, calling layer methods
   _initializeLayer(layer) {
