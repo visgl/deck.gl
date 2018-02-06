@@ -2,11 +2,11 @@
 
 <p align="center">
   <figure>
-    <img heigh=300 src="https://github.com/uber/deck.gl/blob/5.1-release/website/src/static/images/demo-mandelbrot.gif" />
+    <img height=300 src="https://github.com/uber/deck.gl/blob/5.1-release/website/src/static/images/demo-mandelbrot.gif" />
     <figcaption>Attribute Transitions</figcaption>
   </figure>
   <figure>
-    <img heigh=300 src="https://github.com/uber/deck.gl/blob/5.1-release/website/src/static/images/demo-mandelbrot.gif" />
+    <img height=300 src="https://github.com/uber/deck.gl/blob/5.1-release/website/src/static/images/demo-mandelbrot.gif" />
     <figcaption>JSX Layers</figcaption>
   </figure>
 </p>
