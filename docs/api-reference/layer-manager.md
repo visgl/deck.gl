@@ -109,4 +109,4 @@ Checks if layers need to be redrawn.
 
 
 ## Source
-[src/core/lib/layer-manager.js](https://github.com/uber/deck.gl/blob/5.0-release/src/core/lib/layer-manager.js)
+[src/core/lib/layer-manager.js](https://github.com/uber/deck.gl/blob/5.1-release/src/core/lib/layer-manager.js)

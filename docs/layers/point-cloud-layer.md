@@ -77,5 +77,5 @@ Method called to retrieve the rgba color of each object.
 `[0, 0, 0, 255]`.
 
 ## Source
-[src/core-layers/point-cloud-layer](https://github.com/uber/deck.gl/tree/5.0-release/src/core-layers/point-cloud-layer)
+[src/core-layers/point-cloud-layer](https://github.com/uber/deck.gl/tree/5.1-release/src/core-layers/point-cloud-layer)
 

@@ -99,5 +99,5 @@ Method called to retrieve the rgba color of each object.
 
 ## Source
 
-[src/core-layers/scatterplot-layer](https://github.com/uber/deck.gl/tree/5.0-release/src/core-layers/scatterplot-layer)
+[src/core-layers/scatterplot-layer](https://github.com/uber/deck.gl/tree/5.1-release/src/core-layers/scatterplot-layer)
 
