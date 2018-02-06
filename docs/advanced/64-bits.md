@@ -7,7 +7,7 @@ in GPU shaders using emulated 64-bit floating points. 64-bit shaders are used in
 <div align="center">
   <div>
     <img height=300 src="https://github.com/uber/deck.gl/blob/5.1-release/website/src/static/images/demo-mandelbrot.gif" />
-    <p>32-bit vs 64-bit Mandelbrot Set Zoom</p>
+    <p><i>32-bit vs 64-bit Mandelbrot Set Zoom</i></p>
   </div>
 </div>
 
