@@ -19,7 +19,8 @@
 // THE SOFTWARE.
 
 /* global window */
-import {LIFECYCLE, COORDINATE_SYSTEM} from './constants';
+import {COORDINATE_SYSTEM} from './constants';
+import {LIFECYCLE} from '../lifecycle/constants';
 import AttributeManager from './attribute-manager';
 import {count} from '../utils/count';
 import log from '../utils/log';
@@ -119,6 +120,13 @@ export default class Layer {
       this.internalState.needsRedraw = redraw;
     }
   }
+
+  // This layer needs a deep update
+  // TODO - Need to align with existing needsUpdate before uncommenting
+  // For now async props will call layerManager directly
+  // setNeedsUpdate() {
+  //   this.context.layerManager.setNeedsUpdate(String(this));
+  // }
 
   // Checks state of attributes and model
   getNeedsRedraw({clearRedrawFlags = false} = {}) {

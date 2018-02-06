@@ -315,10 +315,6 @@ export const docPages = generatePath([
         content: getDocUrl('api-reference/attribute-manager.md')
       },
       {
-        name: 'LayerManager (Advanced)',
-        content: getDocUrl('api-reference/layer-manager.md')
-      },
-      {
         name: 'Viewport',
         content: getDocUrl('api-reference/viewport.md')
       },

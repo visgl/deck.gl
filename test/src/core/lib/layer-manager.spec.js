@@ -55,7 +55,7 @@ test('LayerManager#constructor', t => {
 test('LayerManager#getLayers', t => {
   const layerManager = new LayerManager(gl);
   layerManager.setViewport(new Viewport());
-  layerManager.updateLayers({newLayers: LAYERS});
+  layerManager.setLayers(LAYERS);
   let layers = layerManager.getLayers();
   t.equal(layers.length, 4, 'LayerManager.getLayers()');
   layers = layerManager.getLayers({layerIds: ['composite']});
