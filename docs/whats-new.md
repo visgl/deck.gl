@@ -3,6 +3,21 @@
 <p align="center">
   <figure>
     <a href="https://github.com/uber/deck.gl/blob/5.1-release/docs/whats-new.md">
+      <img heigh=300 src="https://github.com/uber/deck.gl/blob/5.1-release/website/src/static/images/demo-mandelbrot.gif" />
+    </a>
+    <figcaption>Attribute Transitions</figcaption>
+  </figure>
+  <figure>
+    <a href="https://github.com/uber/deck.gl/blob/5.1-release/docs/whats-new.md">
+      <img heigh=300 src="https://github.com/uber/deck.gl/blob/5.1-release/website/src/static/images/demo-mandelbrot.gif" />
+    </a>
+    <figcaption>JSX Layers</figcaption>
+  </figure>
+</p>
+
+<p align="center">
+  <figure>
+    <a href="https://github.com/uber/deck.gl/blob/5.1-release/docs/whats-new.md">
       <img heigh=300 src="/demo/src/static/images/demo-mandelbrot.gif" />
     </a>
     <figcaption>Attribute Transitions</figcaption>
