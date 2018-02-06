@@ -667,9 +667,6 @@ ${flags.viewportChanged ? 'viewport' : ''}\
     this.state = {};
     // TODO deprecated, for backwards compatibility with older layers
     this.state.attributeManager = this.getAttributeManager();
-
-    // Ensure any async props are updated
-    this.internalState.updateAsyncProps(this.props);
   }
 
   // Called by layer manager to transfer state from an old layer
