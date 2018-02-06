@@ -5,10 +5,10 @@ in GPU shaders using emulated 64-bit floating points. 64-bit shaders are used in
 
 
 <div align="center">
-  <figure>
+  <div>
     <img height=300 src="https://github.com/uber/deck.gl/blob/5.1-release/website/src/static/images/demo-mandelbrot.gif" />
-    <figcaption>32-bit vs 64-bit Mandelbrot Set Zoom</figcaption>
-  </figure>
+    <div>32-bit vs 64-bit Mandelbrot Set Zoom</div>
+  </div>
 </div>
 
 <center>Mandelbrot set rendered on GPU using native 32-bit (left) floating point shaders and emulated 64-bit (right)
