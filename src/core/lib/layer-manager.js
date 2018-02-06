@@ -18,7 +18,6 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-/* global setTimeout, clearTimeout */
 import assert from 'assert';
 import {Framebuffer, ShaderCache} from 'luma.gl';
 import seer from 'seer';
@@ -92,10 +91,7 @@ export default class LayerManager {
     this.viewsChanged = true;
     this.viewports = []; // Generated viewports
     this._needsRedraw = 'Initial render';
-
-    this._isUpdating = false;
-    this._scheduledUpdateTimer = null;
-    this._scheduledLayer = null;
+    this._needsUpdate = false;
 
     // Event handling
     this._pickingRadius = 0;
@@ -136,13 +132,25 @@ export default class LayerManager {
     seer.removeListener(this._editSeer);
   }
 
+  // Check if a redraw is needed
   needsRedraw({clearRedrawFlags = true} = {}) {
     return this._checkIfNeedsRedraw(clearRedrawFlags);
   }
 
-  // Normally not called by app
+  // Check if a deep update of all layers is needed
+  needsUpdate() {
+    return this._needsUpdate;
+  }
+
+  // Layers will be redrawn (in next animation frame)
   setNeedsRedraw(reason) {
     this._needsRedraw = this._needsRedraw || reason;
+  }
+
+  // Layers will be updated deeply (in next animation frame)
+  // Potentially regenerating attributes and sub layers
+  setNeedsUpdate(reason) {
+    this._needsUpdate = this._needsUpdate || reason;
   }
 
   // Gets an (optionally) filtered list of layers
@@ -253,20 +261,12 @@ export default class LayerManager {
 
     this.prevLayers = this.layers;
 
-    this._isUpdating = true;
     const {error, generatedLayers} = this._updateLayers({
       oldLayers: this.prevLayers,
       newLayers
     });
-    this._isUpdating = false;
 
     this.layers = generatedLayers;
-
-    // Clear any scheduled updates, since we just updated
-    if (this._scheduledUpdateTimer) {
-      clearTimeout(this._scheduledUpdateTimer);
-      this._scheduledUpdateTimer = null;
-    }
 
     // Throw first error found, if any
     if (error) {
@@ -275,6 +275,24 @@ export default class LayerManager {
     return this;
   }
 
+  // Update layers from last cycle if `setNeedsUpdate()` has been called
+  // NOTE: For now, even if only some layer has changed, we rerender all layers
+  // to ensure that layer maps etc are consistent
+  updateLayers() {
+    const reason = this.needsUpdate();
+    if (reason) {
+      this._needsUpdate = false;
+      this.setNeedsRedraw(`updating layers: ${reason}`);
+      // HACK - Call with a copy of lastRenderedLayers to trigger a full update
+      this.setLayers([...this.lastRenderedLayers]);
+    }
+  }
+
+  //
+  // METHODS FOR LAYERS
+  //
+
+  // Draw all layers in all views
   drawLayers({pass = 'render to screen', redrawReason = 'unknown reason'} = {}) {
     const {gl, useDevicePixels, drawPickingColors} = this.context;
 
@@ -351,36 +369,10 @@ export default class LayerManager {
   // DEPRECATED METHODS in V5
   //
 
-  updateLayers({newLayers}) {
-    log.deprecated('updateLayers', 'setLayers');
-    this.setLayers(newLayers);
-  }
-
   setViewport(viewport) {
     log.deprecated('setViewport', 'setViews');
     this.setViews([viewport]);
     return this;
-  }
-
-  //
-  // METHODS FOR LAYERS
-  //
-
-  // Schedules an async update of the layer state
-  // Use when async props or assets have loaded
-  scheduleLayerUpdate(layer) {
-    if (!this._isUpdating && !this._scheduledUpdateTimer) {
-      this._scheduledUpdateTimer = setTimeout(this._scheduledUpdate.bind(this), 0);
-      this._scheduledLayer = layer;
-      // TODO when updating cancel any outstanding update timers
-    }
-  }
-
-  // Handles an async update of the layer state
-  _scheduledUpdate() {
-    log.log(0, `Async layer update ${this._scheduledLayer}`);
-    this.setNeedsRedraw('Async layer update');
-    this.setLayers([...this.layers]);
   }
 
   //

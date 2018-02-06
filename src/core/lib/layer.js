@@ -121,6 +121,13 @@ export default class Layer {
     }
   }
 
+  // This layer needs a deep update
+  // TODO - Need to align with existing needsUpdate before uncommenting
+  // For now async props will call layerManager directly
+  // setNeedsUpdate() {
+  //   this.context.layerManager.setNeedsUpdate(String(this));
+  // }
+
   // Checks state of attributes and model
   getNeedsRedraw({clearRedrawFlags = false} = {}) {
     return this._getNeedsRedraw(clearRedrawFlags);

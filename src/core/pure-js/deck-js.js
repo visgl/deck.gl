@@ -230,6 +230,9 @@ export default class DeckGLJS {
   }
 
   _onRenderFrame({gl}) {
+    // Update layers if needed (e.g. some async prop has loaded)
+    this.layerManager.updateLayers();
+
     const redrawReason = this.layerManager.needsRedraw({clearRedrawFlags: true});
     if (!redrawReason) {
       return;
