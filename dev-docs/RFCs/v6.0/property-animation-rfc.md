@@ -1,15 +1,20 @@
 # RFC: Property Animation
 
 * **Authors**: Ib Green, ...
-* **Date**: Aug 2017
-* **Status**: Early draft, not ready for formal review.
+* **Date**: Feb 2018 (Initial version Aug 2017)
+* **Status**: **Draft**
+
+
+## Abstract
+
+Describes a system for *animations* and *transitions* of deck.gl layer properties.
 
 
 ## Motivation
 
 Adding animation to an visualization, especially an interactive visualization, can take it from great to extraordinary impact. Well-executed animations add a very deep level of polish and interest. However implementing good animations often requires considerable custom work in applications.
 
-The goal of this RFC is making it much easier of deck.gl users to achieve great animations and almost effortless to achieve good baseline animations, at least for in certain category of visualization property changes.
+The goal of this RFC is making it much easier for deck.gl users to achieve great animations and almost effortless to achieve good baseline animations, at least for in certain category of visualization property changes.
 
 
 ## Considerations
