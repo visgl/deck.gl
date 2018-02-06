@@ -62,7 +62,7 @@ const child = execFile(
   {
     maxBuffer: 5000 * 1024
   },
-  (err, stdout, stderr) => {
+  (err, stdout) => {
     if (err) {
       console.error(err);
       return;
@@ -71,8 +71,7 @@ const child = execFile(
   }
 );
 
-validateRendering(child).then(value => {
-  if (!value) {
-    process.exit(1); //eslint-disable-line
-  }
-});
+(async () => {
+  const valid = await validateRendering(child);
+  process.exit(valid ? 0 : 1); //eslint-disable-line
+})();
