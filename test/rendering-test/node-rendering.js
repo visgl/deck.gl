@@ -33,7 +33,7 @@ async function getColor(page, selector) {
   return color;
 }
 
-async function getPic(child) {
+async function validateRendering(child) {
   const browser = await puppeteer.launch({
     headless: false,
     executablePath: '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
@@ -71,7 +71,7 @@ const child = execFile(
   }
 );
 
-getPic(child).then(value => {
+validateRendering(child).then(value => {
   if (!value) {
     process.exit(1); //eslint-disable-line
   }
