@@ -57,7 +57,11 @@ export function projectPosition(
 
     case COORDINATE_SYSTEM.LNGLAT_OFFSETS:
       worldPosition = lngLatZToWorldPosition(
-        [x + fromCoordinateOrigin[0], y + fromCoordinateOrigin[1], z + (fromCoordinateOrigin[2] || 0)],
+        [
+          x + fromCoordinateOrigin[0],
+          y + fromCoordinateOrigin[1],
+          z + (fromCoordinateOrigin[2] || 0)
+        ],
         viewport
       );
       break;

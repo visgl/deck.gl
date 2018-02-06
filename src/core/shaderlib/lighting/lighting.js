@@ -85,4 +85,3 @@ function getUniforms(opts = INITIAL_MODULE_OPTIONS) {
     lighting_numberOfLights: numberOfLights
   };
 }
-
