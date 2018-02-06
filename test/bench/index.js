@@ -21,8 +21,8 @@
 /* eslint-disable no-console, no-invalid-this */
 import {Bench} from 'probe.gl';
 
-import coreLayersBench from './core-layers.bench';
 import layerBench from './layer.bench';
+import coreLayersBench from './core-layers.bench';
 import viewportBench from './viewport.bench';
 import colorBench from './color.bench';
 import pickLayersBench from './pick-layers.bench';
@@ -32,12 +32,12 @@ import tesselationBench from './tesselation.bench';
 const suite = new Bench();
 
 // add tests
-pickLayersBench(suite);
-coreLayersBench(suite);
 layerBench(suite);
+coreLayersBench(suite);
 viewportBench(suite);
 colorBench(suite);
 utilsBench(suite);
+pickLayersBench(suite);
 tesselationBench(suite);
 
 // Run the suite
