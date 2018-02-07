@@ -55,7 +55,7 @@ export default class PathMarkerLayer extends CompositeLayer {
   }
 
   updateState({props, oldProps, changeFlags}) {
-    if (changeFlags.dataChanged) {
+    if (changeFlags.dataChanged || changeFlags.updateTriggersChanged) {
       const {
         data,
         getPath,

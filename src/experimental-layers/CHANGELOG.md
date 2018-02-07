@@ -1,3 +1,5 @@
+0.0.23
+- Fix for path-marker-layer updateTriggers
 0.0.22
 - SolidPolygonLayer: Fix Typo in isInstanced prop
 0.0.21

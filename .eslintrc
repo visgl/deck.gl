@@ -13,6 +13,9 @@
     "no-inline-comments": 0,
     "camelcase": 0,
     "react/forbid-prop-types": 0
+  },
+  "parserOptions": {
+    "ecmaVersion": 2017
   }
 }
 

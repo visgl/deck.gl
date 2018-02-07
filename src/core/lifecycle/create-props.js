@@ -1,16 +1,17 @@
 import {applyPropOverrides} from '../lib/seer-integration';
 import log from '../utils/log';
+import {parsePropTypes} from './prop-types';
 
 export const EMPTY_ARRAY = Object.freeze([]);
 
 // Create a property object
-export function createProps(propObjects = []) {
+export function createProps() {
   const layer = this; // eslint-disable-line
 
   // Get default prop object (a prototype chain for now)
-  const {defaultProps} = getDefaultProps(layer.constructor);
+  const {defaultProps} = getPropDefs(layer.constructor);
 
-  // Create a new prop object with the default props as prototype
+  // Create a new prop object with  default props object in prototype chain
   const newProps = Object.create(defaultProps, {
     _layer: {
       enumerable: false,
@@ -52,15 +53,22 @@ function getLayerName(layerClass) {
   return layerName || layerClass.name;
 }
 
-// ALT 1: Layer Prop Object Implementation
-
-// Create a new Prop object if needed
-function getDefaultProps(layerClass) {
-  const props = getOwnProperty(layerClass, '_props');
+// Return precalculated defaultProps and propType objects if available
+// build them if needed
+function getPropDefs(layerClass) {
+  const props = getOwnProperty(layerClass, '_mergedDefaultProps');
   if (props) {
-    return props;
+    return {
+      defaultProps: props,
+      propTypes: getOwnProperty(layerClass, '_propTypes')
+    };
   }
 
+  return buildPropDefs(layerClass);
+}
+
+// Build defaultProps and propType objects by walking layer prototype chain
+function buildPropDefs(layerClass) {
   const parent = layerClass.prototype;
   if (!parent) {
     return {
@@ -69,36 +77,54 @@ function getDefaultProps(layerClass) {
   }
 
   const parentClass = Object.getPrototypeOf(layerClass);
-  const parentProps = (parent && getDefaultProps(parentClass)) || null;
+  const parentPropDefs = (parent && getPropDefs(parentClass)) || null;
 
   // Parse propTypes from Layer.defaultProps
-  const defaultProps = getOwnProperty(layerClass, 'defaultProps') || {};
+  const layerDefaultProps = getOwnProperty(layerClass, 'defaultProps') || {};
+  const layerPropDefs = parsePropTypes(layerDefaultProps);
+
+  // Create a merged type object
+  const propTypes = Object.assign(
+    {},
+    parentPropDefs && parentPropDefs.propTypes,
+    layerPropDefs.propTypes
+  );
 
   // Create any necessary property descriptors and create the default prop object
   // Assign merged default props
-  const myDefaultProps = Object.create(null);
-  Object.assign(myDefaultProps, parentProps && parentProps.defaultProps, defaultProps);
+  const defaultProps = buildDefaultProps(
+    layerPropDefs.defaultProps,
+    parentPropDefs && parentPropDefs.defaultProps,
+    propTypes,
+    layerClass
+  );
 
-  createPropDescriptors(myDefaultProps, layerClass);
+  // Store the precalculated props
+  layerClass._mergedDefaultProps = defaultProps;
+  layerClass._propTypes = propTypes;
 
-  // Store the props
-  layerClass._props = {
-    defaultProps: myDefaultProps
-  };
-
-  return layerClass._props;
+  return {propTypes, defaultProps};
 }
 
-function createPropDescriptors(props, layerClass) {
+function buildDefaultProps(props, parentProps, propTypes, layerClass) {
+  const defaultProps = Object.create(null);
+
+  Object.assign(defaultProps, parentProps, props);
+
   const descriptors = {};
 
+  const id = getLayerName(layerClass);
   delete props.id;
+
   Object.assign(descriptors, {
     id: {
       configurable: false,
       writable: true,
-      value: getLayerName(layerClass)
+      value: id
     }
   });
-  Object.defineProperties(props, descriptors);
+
+  Object.defineProperties(defaultProps, descriptors);
+
+  return defaultProps;
 }

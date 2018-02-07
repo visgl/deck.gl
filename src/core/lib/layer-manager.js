@@ -24,11 +24,9 @@ import seer from 'seer';
 import Layer from './layer';
 import {drawLayers} from './draw-layers';
 import {pickObject, pickVisibleObjects} from './pick-layers';
-import {LIFECYCLE} from './constants';
+import {LIFECYCLE} from '../lifecycle/constants';
 import View from '../views/view';
 import Viewport from '../viewports/viewport';
-// TODO - remove, just for dummy initialization
-import WebMercatorViewport from '../viewports/web-mercator-viewport';
 import log from '../utils/log';
 import {flatten} from '../utils/flatten';
 
@@ -39,6 +37,9 @@ import {
   initLayerInSeer,
   updateLayerInSeer
 } from './seer-integration';
+
+// TODO - remove, just for dummy initialization
+import WebMercatorViewport from '../viewports/web-mercator-viewport';
 
 const LOG_PRIORITY_LIFECYCLE = 2;
 const LOG_PRIORITY_LIFECYCLE_MINOR = 4;
@@ -79,7 +80,8 @@ export default class LayerManager {
     this.context = Object.assign({}, initialContext, {
       gl,
       // Enabling luma.gl Program caching using private API (_cachePrograms)
-      shaderCache: new ShaderCache({gl, _cachePrograms: true})
+      shaderCache: new ShaderCache({gl, _cachePrograms: true}),
+      layerManager: this
     });
 
     // List of view descriptors, gets re-evaluated when width/height changes
@@ -89,6 +91,7 @@ export default class LayerManager {
     this.viewsChanged = true;
     this.viewports = []; // Generated viewports
     this._needsRedraw = 'Initial render';
+    this._needsUpdate = false;
 
     // Event handling
     this._pickingRadius = 0;
@@ -129,13 +132,25 @@ export default class LayerManager {
     seer.removeListener(this._editSeer);
   }
 
+  // Check if a redraw is needed
   needsRedraw({clearRedrawFlags = true} = {}) {
     return this._checkIfNeedsRedraw(clearRedrawFlags);
   }
 
-  // Normally not called by app
+  // Check if a deep update of all layers is needed
+  needsUpdate() {
+    return this._needsUpdate;
+  }
+
+  // Layers will be redrawn (in next animation frame)
   setNeedsRedraw(reason) {
     this._needsRedraw = this._needsRedraw || reason;
+  }
+
+  // Layers will be updated deeply (in next animation frame)
+  // Potentially regenerating attributes and sub layers
+  setNeedsUpdate(reason) {
+    this._needsUpdate = this._needsUpdate || reason;
   }
 
   // Gets an (optionally) filtered list of layers
@@ -245,12 +260,14 @@ export default class LayerManager {
     }
 
     this.prevLayers = this.layers;
+
     const {error, generatedLayers} = this._updateLayers({
       oldLayers: this.prevLayers,
       newLayers
     });
 
     this.layers = generatedLayers;
+
     // Throw first error found, if any
     if (error) {
       throw error;
@@ -258,6 +275,24 @@ export default class LayerManager {
     return this;
   }
 
+  // Update layers from last cycle if `setNeedsUpdate()` has been called
+  updateLayers() {
+    // NOTE: For now, even if only some layer has changed, we update all layers
+    // to ensure that layer id maps etc remain consistent even if different
+    // sublayers are rendered
+    const reason = this.needsUpdate();
+    if (reason) {
+      this.setNeedsRedraw(`updating layers: ${reason}`);
+      // HACK - Call with a copy of lastRenderedLayers to trigger a full update
+      this.setLayers([...this.lastRenderedLayers]);
+    }
+  }
+
+  //
+  // METHODS FOR LAYERS
+  //
+
+  // Draw all layers in all views
   drawLayers({pass = 'render to screen', redrawReason = 'unknown reason'} = {}) {
     const {gl, useDevicePixels, drawPickingColors} = this.context;
 
@@ -333,11 +368,6 @@ export default class LayerManager {
   //
   // DEPRECATED METHODS in V5
   //
-
-  updateLayers({newLayers}) {
-    log.deprecated('updateLayers', 'setLayers');
-    this.setLayers(newLayers);
-  }
 
   setViewport(viewport) {
     log.deprecated('setViewport', 'setViews');
@@ -496,6 +526,8 @@ export default class LayerManager {
     // Finalize unmatched layers
     const error2 = this._finalizeOldLayers(oldLayerMap);
 
+    this._needsUpdate = false;
+
     const firstError = error || error2;
     return {error: firstError, generatedLayers};
   }
@@ -561,6 +593,8 @@ export default class LayerManager {
     }
     return error;
   }
+
+  // EXCEPTION SAFE LAYER ACCESS
 
   // Initializes a single layer, calling layer methods
   _initializeLayer(layer) {

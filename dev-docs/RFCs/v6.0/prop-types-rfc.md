@@ -25,15 +25,13 @@ For multiple reasons (outlined in this RFC) it would be useful to support a prop
 * Enable specification of advanced (e.g. async) properties
 * Transitions and Animation
 * Type Checking (during development)
-* "Reflection" (the layer browser use case)
+* "Reflection" (the layer browser use case, auto discovering layer's props and types)
 
 
 
 ## Proposal - Extending default props
 
 ```
-import {Types} from 'deckl.gl';
-
 const defaultProps = {
   radiusScale: {value: 1, min: 0}, // {type: 'number'} inferred. No max value.
   highlightedObjectIndex: {value: -1, type: 'integer', min: -1},

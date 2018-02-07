@@ -191,9 +191,6 @@ const ScatterplotLayerExample = {
 
 const GridCellLayerExample = {
   layer: GridCellLayer,
-  propTypes: {
-    cellSize: {type: 'number', min: 0, max: 1000}
-  },
   props: {
     id: 'gridCellLayer',
     data: dataSamples.worldGrid.data,
@@ -237,14 +234,6 @@ function getElevationValue(points) {
 
 const GridLayerExample = {
   layer: GridLayer,
-  propTypes: {
-    cellSize: {type: 'number', min: 0, max: 1000},
-    coverage: {type: 'number', min: 0, max: 1},
-    lowerPercentile: {type: 'number', min: 0, max: 100},
-    upperPercentile: {type: 'number', min: 0, max: 100},
-    elevationLowerPercentile: {type: 'number', min: 0, max: 100},
-    elevationUpperPercentile: {type: 'number', min: 0, max: 100}
-  },
   props: {
     id: 'gridLayer',
     data: dataSamples.points,
@@ -261,9 +250,6 @@ const GridLayerExample = {
 
 const HexagonCellLayerExample = {
   layer: HexagonCellLayer,
-  propTypes: {
-    coverage: {type: 'number', min: 0, max: 1}
-  },
   props: {
     id: 'hexagonCellLayer',
     data: dataSamples.hexagons,
@@ -280,14 +266,6 @@ const HexagonCellLayerExample = {
 
 const HexagonLayerExample = {
   layer: HexagonLayer,
-  propTypes: {
-    coverage: {type: 'number', min: 0, max: 1},
-    radius: {type: 'number', min: 0, max: 3000},
-    lowerPercentile: {type: 'number', min: 0, max: 100},
-    upperPercentile: {type: 'number', min: 0, max: 100},
-    elevationLowerPercentile: {type: 'number', min: 0, max: 100},
-    elevationUpperPercentile: {type: 'number', min: 0, max: 100}
-  },
   props: {
     id: 'HexagonLayer',
     data: dataSamples.points,

@@ -19,13 +19,14 @@
 // THE SOFTWARE.
 
 /* global window */
-import {LIFECYCLE, COORDINATE_SYSTEM} from './constants';
+import {COORDINATE_SYSTEM} from './constants';
 import AttributeManager from './attribute-manager';
-import {count} from '../utils/count';
-import log from '../utils/log';
+import {removeLayerInSeer} from './seer-integration';
+import {LIFECYCLE} from '../lifecycle/constants';
 import {createProps} from '../lifecycle/create-props';
 import {diffProps} from '../lifecycle/props';
-import {removeLayerInSeer} from './seer-integration';
+import {count} from '../utils/count';
+import log from '../utils/log';
 import {GL, withParameters} from 'luma.gl';
 import assert from 'assert';
 
@@ -43,7 +44,7 @@ const defaultProps = {
 
   visible: true,
   pickable: false,
-  opacity: 0.8,
+  opacity: {type: 'number', min: 0, max: 1, value: 0.8},
 
   onHover: noop,
   onClick: noop,
@@ -119,6 +120,13 @@ export default class Layer {
       this.internalState.needsRedraw = redraw;
     }
   }
+
+  // This layer needs a deep update
+  // TODO - Need to align with existing needsUpdate before uncommenting
+  // For now async props will call layerManager directly
+  // setNeedsUpdate() {
+  //   this.context.layerManager.setNeedsUpdate(String(this));
+  // }
 
   // Checks state of attributes and model
   getNeedsRedraw({clearRedrawFlags = false} = {}) {
@@ -379,29 +387,8 @@ export default class Layer {
   _initialize() {
     assert(arguments.length === 0);
     assert(this.context.gl);
-    assert(!this.internalState && !this.state);
 
-    const attributeManager = new AttributeManager(this.context.gl, {
-      id: this.props.id
-    });
-
-    // All instanced layers get instancePickingColors attribute by default
-    // Their shaders can use it to render a picking scene
-    // TODO - this slightly slows down non instanced layers
-    attributeManager.addInstanced({
-      instancePickingColors: {
-        type: GL.UNSIGNED_BYTE,
-        size: 3,
-        update: this.calculateInstancePickingColors
-      }
-    });
-
-    this.internalState = new LayerState({
-      attributeManager
-    });
-    this.state = {};
-    // TODO deprecated, for backwards compatibility with older layers
-    this.state.attributeManager = this.getAttributeManager();
+    this._initState();
 
     // Call subclass lifecycle methods
     this.initializeState(this.context);
@@ -421,7 +408,7 @@ export default class Layer {
       model.id = this.props.id;
       model.program.id = `${this.props.id}-program`;
       model.geometry.id = `${this.props.id}-geometry`;
-      model.setAttributes(attributeManager.getAttributes());
+      model.setAttributes(this.getAttributeManager().getAttributes());
     }
 
     // Last but not least, update any sublayers
@@ -654,6 +641,32 @@ ${flags.viewportChanged ? 'viewport' : ''}\
     }
 
     return redraw;
+  }
+
+  _initState() {
+    assert(!this.internalState && !this.state);
+
+    const attributeManager = new AttributeManager(this.context.gl, {
+      id: this.props.id
+    });
+
+    // All instanced layers get instancePickingColors attribute by default
+    // Their shaders can use it to render a picking scene
+    // TODO - this slightly slows down non instanced layers
+    attributeManager.addInstanced({
+      instancePickingColors: {
+        type: GL.UNSIGNED_BYTE,
+        size: 3,
+        update: this.calculateInstancePickingColors
+      }
+    });
+
+    this.internalState = new LayerState({
+      attributeManager
+    });
+    this.state = {};
+    // TODO deprecated, for backwards compatibility with older layers
+    this.state.attributeManager = this.getAttributeManager();
   }
 
   // Called by layer manager to transfer state from an old layer
