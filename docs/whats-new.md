@@ -20,16 +20,10 @@ Release date: Feb 16, 2018
       <tr>
         <td>
           <img height=150 src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/transitions.gif" />
-        </td>
-        <td>
-          <img height=150 src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/jsx-layers.png" />
-        </td>
-      </tr>
-      <tr>
-        <td>
           <p><i>Attribute Transitions</i></p>
         </td>
         <td>
+          <img height=150 src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/jsx-layers.png" />
           <p><i>JSX Layers</i></p>
         </td>
       </tr>
