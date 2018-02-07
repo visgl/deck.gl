@@ -7,8 +7,9 @@ Release date: TBD, target Q1-Q2, 2018
 
 ### Prop Types
 
-It is now possible to provide additional type information when declaring the `defaultProps` object for deck.gl layers, and deck.gl layers will automatically try to deduce type information based on the default value for any properties that lack type information. Prop types can be used to validate property values during development, and are also a foundation for planned features such as property transitions/animations and asynchronous properties.
+It is now possible for deck.gl layers to specify type information for each supported property. Prop types will be used to validate property values during development, optimize property comparisons when layers are updated, and are also a foundation for planned features such as property transitions/animations and asynchronous properties.
 
+> For layer writers: use of prop types is optional, and deck.gl layers will automatically try to deduce type information based on the default value in the `defaultProps` object for any properties that lack type information.
 
 # deck.gl v5.1
 
@@ -30,36 +31,56 @@ Release date: Feb 16, 2018
 </table>
 
 
-## Layer Class
+## Layer Improvements
 
 ### Layer Transitions
 
-Smooth visual transitions of layer elements, animating the update of the layers element to match a new data set, interpolating positions and colors on the GPU. Use the new `transitions` prop on the `Layer` class to specify transition duration, easing function and callbacks. Note: Transitions are only available on WebGL2-capable browsers.
+Many layers now support smooth visual transitions of e.g. positions and colors of layer elements, animating the update of the layers element to match a new data set. The animations are done on the GPU and can thus support very large data sets. Use the new [`transitions`](/docs/layer-catalog/layer.md) prop on the `Layer` class to specify transition duration, easing function and callbacks.
 
-### Layer Optimizations
-
-**Multiple Prop Objects** - Layer class constructors are faster and can now accept multiple property objects. The property objects will be merged as if with `Object.assign`, with later objects taking precedence over earlier objects: `new Layer({prop1: ...}, {prop2: ...});`. This can further improve performance in cases when using many layers with lots of property object composition.
+> Transitions are only supported on WebGL2-capable browsers such as Chrome and Firefox. The `transitions` prop will simply be ignored on WebGL1 browsers.
 
 
-## React Integration
+## React Improvements
 
 ### Use JSX to render deck.gl Layers
 
-It is now possible to use JSX syntax to create (or "render") deck.gl layers. There are no performance advantages to using JSX syntax but some users feel that this results in a more natural, React-like coding style. There are limitations (deck.gl layers are **not** React components), for more information see [Using deck.gl with React](/docs/get-started/using-with-react.md).
+It is now possible to use JSX syntax to create (or "render") deck.gl layers. Many React users feel that this results in a more natural coding style.
 ```jsx
   <DeckGL {...viewport}>
     <LineLayer data={data} />
   <DeckGL />
 ```
 
+> There are limitations (deck.gl layers are **not** React components), for more information see [Using deck.gl with React](/docs/get-started/using-with-react.md).
+
+
 # deck.gl v5
 
 Release date: Dec 21, 2017
 
+<table style="border: 0;" align="center">
+  <tbody>
+    <tr>
+      <td>
+        <img height=150 src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/object-highlighting.gif" />
+        <p><i>GPU-based Highlighting</i></p>
+      </td>
+      <td>
+        <img height=150 src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/path-dash.png" />
+        <p><i>Dashes in GeoJson</i></p>
+      </td>
+      <td>
+        <img height=150 src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/react-16.png" />
+        <p><i>React 16 Support</i></p>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
 <p align="center">
   <div>
     <img height=150 src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/object-highlighting.gif" />
-    <p><i>GPU-based Highlighting</i></p>
+    <p><i></i></p>
   </div>
 </p>
 
