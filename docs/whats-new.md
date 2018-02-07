@@ -16,11 +16,11 @@ Release date: Feb 16, 2018
 
 <p align="center">
   <div>
-    <img height=150 src="https://raw.github.com/uber-common/deck.gl-data/master/images/transitions.gif" />
+    <img height=150 src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/transitions.gif" />
     <p><i>Attribute Transitions</i></p>
   </div>
   <div>
-    <img height=150 src="https://raw.github.com/uber-common/deck.gl-data/master/images/jsx-layers.png" />
+    <img height=150 src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/jsx-layers.png" />
     <p><i>JSX Layers</i></p>
   </div>
 </p>
@@ -54,7 +54,7 @@ Release date: Dec 21, 2017
 
 <p align="center">
   <div>
-    <img height=150 src="https://raw.github.com/uber-common/deck.gl-data/master/images/object-highlighting.gif" />
+    <img height=150 src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/object-highlighting.gif" />
     <p><i>GPU-based Highlighting</i></p>
   </div>
 </p>
