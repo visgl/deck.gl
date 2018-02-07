@@ -123,4 +123,4 @@ If this accessor is not specified, all paths are drawn as solid lines.
 
 ## Source
 
-[src/core-layers/path-layer](https://github.com/uber/deck.gl/tree/5.0-release/src/core-layers/path-layer)
+[src/core-layers/path-layer](https://github.com/uber/deck.gl/tree/5.1-release/src/core-layers/path-layer)

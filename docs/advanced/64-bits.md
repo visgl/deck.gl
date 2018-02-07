@@ -3,8 +3,12 @@
 Since version `3.0.0`, deck.gl begins to provide high precision floating point math support
 in GPU shaders using emulated 64-bit floating points. 64-bit shaders are used in all layers when the fp64 prop is set to true. Please find the sample usage of them in the examples section.
 
+
 <div align="center">
-  <img src="/demo/src/static/images/demo-mandelbrot.gif" />
+  <div>
+    <img src="https://github.com/uber/deck.gl/blob/5.1-release/website/src/static/images/demo-mandelbrot.gif" />
+    <p><i>32-bit vs 64-bit Mandelbrot Set Zoom</i></p>
+  </div>
 </div>
 
 <center>Mandelbrot set rendered on GPU using native 32-bit (left) floating point shaders and emulated 64-bit (right)
