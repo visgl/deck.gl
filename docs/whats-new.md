@@ -14,22 +14,20 @@ It is now possible to provide additional type information when declaring the `de
 
 Release date: Feb 16, 2018
 
-<div align="center">
-  <table border="0">
-    <tbody>
-      <tr>
-        <td>
-          <img height=150 src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/transitions.gif" />
-          <p><i>Attribute Transitions</i></p>
-        </td>
-        <td>
-          <img height=150 src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/jsx-layers.png" />
-          <p><i>JSX Layers</i></p>
-        </td>
-      </tr>
-    </tbody>
-  </table>
-</div>
+<table style="border: 0;" align="center">
+  <tbody>
+    <tr>
+      <td>
+        <img height=150 src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/transitions.gif" />
+        <p><i>Attribute Transitions</i></p>
+      </td>
+      <td>
+        <img height=150 src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/jsx-layers.png" />
+        <p><i>JSX Layers</i></p>
+      </td>
+    </tr>
+  </tbody>
+</table>
 
 
 ## Layer Class
