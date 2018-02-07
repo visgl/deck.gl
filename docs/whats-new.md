@@ -14,12 +14,12 @@ It is now possible to provide additional type information when declaring the `de
 
 Release date: Feb 16, 2018
 
-<p align="center">
+<p align="center" style="display: flex; flex-direction: row;">
   <div>
     <img height=150 src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/transitions.gif" />
     <p><i>Attribute Transitions</i></p>
   </div>
-  <div>
+  <div style="flex-direction: row;">
     <img height=150 src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/jsx-layers.png" />
     <p><i>JSX Layers</i></p>
   </div>
