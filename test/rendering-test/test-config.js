@@ -1,10 +1,11 @@
 import dataSamples from '../../examples/layer-browser/src/immutable-data-samples';
 import {parseColor, setOpacity} from '../../examples/layer-browser/src/utils/color';
-import {experimental, WebMercatorViewport} from 'deck.gl';
+import {experimental, WebMercatorViewport, OrthographicViewport} from 'deck.gl';
 import {GL} from 'luma.gl';
 const {get, OrbitViewport} = experimental;
 
 import {
+  BezierCurveLayer,
   MeshLayer,
   PathOutlineLayer,
   PathMarkerLayer,
@@ -756,5 +757,37 @@ export const TEST_CASES = [
       }
     ],
     referenceResult: './golden-images/pointcloud-identity.png'
+  },
+  {
+    name: 'bezier-curve-2d',
+    // viewport params
+    mapViewState: {
+      left: -WIDTH / 2,
+      top: -HEIGHT / 2,
+      right: WIDTH / 2,
+      bottom: HEIGHT / 2
+    },
+    viewport: OrthographicViewport,
+    // layer list
+    layersList: [
+      {
+        type: BezierCurveLayer,
+        props: {
+          id: 'bezier-curve-2d',
+          data: [
+            {sourcePosition: [0, -100], targetPosition: [0, 100], controlPoint: [50, 0]},
+            {sourcePosition: [0, -100], targetPosition: [0, 100], controlPoint: [-50, 0]},
+            {sourcePosition: [0, -100], targetPosition: [0, 100], controlPoint: [100, 0]},
+            {sourcePosition: [0, -100], targetPosition: [0, 100], controlPoint: [-100, 0]},
+            {sourcePosition: [0, -100], targetPosition: [0, 100], controlPoint: [150, 0]},
+            {sourcePosition: [0, -100], targetPosition: [0, 100], controlPoint: [-150, 0]}
+          ],
+          coordinateSystem: COORDINATE_SYSTEM.IDENTITY,
+          getColor: d => [255, 255, 0, 128],
+          strokeWidth: 10
+        }
+      }
+    ],
+    referenceResult: './golden-images/bezier-curve-2d.png'
   }
 ];
