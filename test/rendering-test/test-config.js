@@ -121,6 +121,41 @@ export const TEST_CASES = [
     referenceResult: './golden-images/polygon-lnglat.png'
   },
   {
+    name: 'polygon-lnglat-64',
+    // viewport params
+    mapViewState: {
+      latitude: 37.751537058389985,
+      longitude: -122.42694203247012,
+      zoom: 11.5,
+      pitch: 0,
+      bearing: 0
+    },
+    viewport: WebMercatorViewport,
+    // layer list
+    layersList: [
+      {
+        type: PolygonLayer,
+        props: {
+          id: 'polygon-lnglat-64',
+          data: dataSamples.polygons,
+          fp64: true,
+          getPolygon: f => f,
+          getFillColor: f => [200, 0, 0],
+          getLineColor: f => [0, 0, 0, 255],
+          getLineDashArray: f => [20, 0],
+          getWidth: f => 20,
+          getElevation: f => 1000,
+          opacity: 0.8,
+          pickable: true,
+          lineDashJustified: true,
+          lightSettings: LIGHT_SETTINGS,
+          elevationScale: 0.6
+        }
+      }
+    ],
+    referenceResult: './golden-images/polygon-lnglat.png'
+  },
+  {
     name: 'path-lnglat',
     // viewport params
     mapViewState: {
@@ -138,6 +173,36 @@ export const TEST_CASES = [
         props: {
           id: 'path-lnglat',
           data: dataSamples.zigzag,
+          opacity: 0.6,
+          getPath: f => get(f, 'path'),
+          getColor: f => [128, 0, 0],
+          getWidth: f => 100,
+          widthMinPixels: 1,
+          pickable: true
+        }
+      }
+    ],
+    referenceResult: './golden-images/path-lnglat.png'
+  },
+  {
+    name: 'path-lnglat-64',
+    // viewport params
+    mapViewState: {
+      latitude: 37.751537058389985,
+      longitude: -122.42694203247012,
+      zoom: 11.5,
+      pitch: 0,
+      bearing: 0
+    },
+    viewport: WebMercatorViewport,
+    // layer list
+    layersList: [
+      {
+        type: PathLayer,
+        props: {
+          id: 'path-lnglat-64',
+          data: dataSamples.zigzag,
+          fp64: true,
           opacity: 0.6,
           getPath: f => get(f, 'path'),
           getColor: f => [128, 0, 0],
@@ -181,6 +246,38 @@ export const TEST_CASES = [
     referenceResult: './golden-images/scatterplot-lnglat.png'
   },
   {
+    name: 'scatterplot-lnglat-64',
+    // viewport params
+    mapViewState: {
+      latitude: 37.751537058389985,
+      longitude: -122.42694203247012,
+      zoom: 11.5,
+      pitch: 0,
+      bearing: 0
+    },
+    viewport: WebMercatorViewport,
+    // layer list
+    layersList: [
+      {
+        type: ScatterplotLayer,
+        props: {
+          id: 'scatterplot-lnglat-64',
+          data: dataSamples.points,
+          fp64: true,
+          getPosition: d => get(d, 'COORDINATES'),
+          getColor: d => [255, 128, 0],
+          getRadius: d => get(d, 'SPACES'),
+          opacity: 1,
+          pickable: true,
+          radiusScale: 30,
+          radiusMinPixels: 1,
+          radiusMaxPixels: 30
+        }
+      }
+    ],
+    referenceResult: './golden-images/scatterplot-lnglat.png'
+  },
+  {
     name: 'arc-lnglat',
     // viewport params
     mapViewState: {
@@ -207,6 +304,35 @@ export const TEST_CASES = [
       }
     ],
     referenceResult: './golden-images/arc-lnglat.png'
+  },
+  {
+    name: 'arc-lnglat-64',
+    // viewport params
+    mapViewState: {
+      latitude: 37.751537058389985,
+      longitude: -122.42694203247012,
+      zoom: 11.5,
+      pitch: 0,
+      bearing: 0
+    },
+    viewport: WebMercatorViewport,
+    // layer list
+    layersList: [
+      {
+        type: ArcLayer,
+        props: {
+          id: 'arc-lnglat-64',
+          data: dataSamples.routes,
+          fp64: true,
+          getSourcePosition: d => d.START,
+          getTargetPosition: d => d.END,
+          getSourceColor: d => [64, 255, 0],
+          getTargetColor: d => [0, 128, 200],
+          pickable: true
+        }
+      }
+    ],
+    referenceResult: './golden-images/arc-lnglat-64.png'
   },
   {
     name: 'line-lnglat',
@@ -236,6 +362,34 @@ export const TEST_CASES = [
     referenceResult: './golden-images/line-lnglat.png'
   },
   {
+    name: 'line-lnglat-64',
+    // viewport params
+    mapViewState: {
+      latitude: 37.751537058389985,
+      longitude: -122.42694203247012,
+      zoom: 11.5,
+      pitch: 0,
+      bearing: 0
+    },
+    viewport: WebMercatorViewport,
+    // layer list
+    layersList: [
+      {
+        type: LineLayer,
+        props: {
+          id: 'line-lnglat-64',
+          data: dataSamples.routes,
+          fp64: true,
+          getSourcePosition: d => get(d, 'START'),
+          getTargetPosition: d => get(d, 'END'),
+          getColor: d => (get(d, 'SERVICE') === 'WEEKDAY' ? [255, 64, 0] : [255, 200, 0]),
+          pickable: true
+        }
+      }
+    ],
+    referenceResult: './golden-images/line-lnglat-64.png'
+  },
+  {
     name: 'icon-lnglat',
     // viewport params
     mapViewState: {
@@ -258,6 +412,41 @@ export const TEST_CASES = [
           iconAtlas: 'icon-atlas.png',
           iconMapping: dataSamples.iconAtlas,
           sizeScale: 24,
+          getPosition: d => d.COORDINATES,
+          getColor: d => [64, 64, 72],
+          getIcon: d => (get(d, 'PLACEMENT') === 'SW' ? 'marker' : 'marker-warning'),
+          getSize: d => (get(d, 'RACKS') > 2 ? 2 : 1),
+          opacity: 0.8,
+          pickable: true
+        }
+      }
+    ],
+    referenceResult: './golden-images/icon-lnglat.png'
+  },
+  {
+    name: 'icon-lnglat-64',
+    // viewport params
+    mapViewState: {
+      latitude: 37.751537058389985,
+      longitude: -122.42694203247012,
+      zoom: 11.5,
+      pitch: 0,
+      bearing: 0
+    },
+    viewport: WebMercatorViewport,
+    // rendering times
+    renderingTimes: 2,
+    // layer list
+    layersList: [
+      {
+        type: IconLayer,
+        props: {
+          id: 'icon-lnglat-64',
+          data: dataSamples.points,
+          iconAtlas: 'icon-atlas.png',
+          iconMapping: dataSamples.iconAtlas,
+          sizeScale: 24,
+          fp64: true,
           getPosition: d => d.COORDINATES,
           getColor: d => [64, 64, 72],
           getIcon: d => (get(d, 'PLACEMENT') === 'SW' ? 'marker' : 'marker-warning'),
@@ -371,6 +560,37 @@ export const TEST_CASES = [
     referenceResult: './golden-images/gridcell-lnglat.png'
   },
   {
+    name: 'gridcell-lnglat-64',
+    // viewport params
+    mapViewState: {
+      latitude: 37.751537058389985,
+      longitude: -122.42694203247012,
+      zoom: 11.5,
+      pitch: 0,
+      bearing: 0
+    },
+    viewport: WebMercatorViewport,
+    // layer list
+    layersList: [
+      {
+        type: GridCellLayer,
+        props: {
+          id: 'gridcell-lnglat-64',
+          data: dataSamples.worldGrid.data,
+          cellSize: dataSamples.worldGrid.cellSize,
+          extruded: true,
+          fp64: true,
+          pickable: true,
+          opacity: 1,
+          getColor: g => [245, 166, get(g, 'value') * 255, 255],
+          getElevation: h => get(h, 'value') * 5000,
+          lightSettings: LIGHT_SETTINGS
+        }
+      }
+    ],
+    referenceResult: './golden-images/gridcell-lnglat.png'
+  },
+  {
     name: 'grid-lnglat',
     // viewport params
     mapViewState: {
@@ -461,6 +681,38 @@ export const TEST_CASES = [
     referenceResult: './golden-images/hexagoncell-lnglat.png'
   },
   {
+    name: 'hexagoncell-lnglat-64',
+    // viewport params
+    mapViewState: {
+      latitude: 37.751537058389985,
+      longitude: -122.42694203247012,
+      zoom: 11.5,
+      pitch: 0,
+      bearing: 0
+    },
+    viewport: WebMercatorViewport,
+    // layer list
+    layersList: [
+      {
+        type: HexagonCellLayer,
+        props: {
+          id: 'hexagoncell-lnglat-64',
+          data: dataSamples.hexagons,
+          fp64: true,
+          hexagonVertices: dataSamples.hexagons[0].vertices,
+          coverage: 1,
+          extruded: true,
+          pickable: true,
+          opacity: 1,
+          getColor: h => [48, 128, get(h, 'value') * 255, 255],
+          getElevation: h => get(h, 'value') * 5000,
+          lightSettings: LIGHT_SETTINGS
+        }
+      }
+    ],
+    referenceResult: './golden-images/hexagoncell-lnglat.png'
+  },
+  {
     name: 'hexagon-lnglat',
     // viewport params
     mapViewState: {
@@ -525,6 +777,43 @@ export const TEST_CASES = [
       }
     ],
     referenceResult: './golden-images/pointcloud-lnglat.png'
+  },
+  {
+    name: 'pointcloud-lnglat-64',
+    // viewport params
+    mapViewState: {
+      latitude: 37.751537058389985,
+      longitude: -122.42694203247012,
+      zoom: 13,
+      pitch: 0,
+      bearing: 0
+    },
+    viewport: WebMercatorViewport,
+    // layer list
+    layersList: [
+      {
+        type: PointCloudLayer,
+        props: {
+          id: 'pointcloud-lnglat-64',
+          data: dataSamples.getPointCloud(),
+          coordinateSystem: COORDINATE_SYSTEM.LNGLAT,
+          coordinateOrigin: dataSamples.positionOrigin,
+          fp64: true,
+          getPosition: d => [
+            d.position[0] * 1e-5 - 122.42694203247012,
+            d.position[1] * 1e-5 + 37.751537058389985,
+            d.position[2]
+          ],
+          getNormal: d => d.normal,
+          getColor: d => d.color,
+          opacity: 1,
+          radiusPixels: 4,
+          pickable: true,
+          lightSettings: LIGHT_SETTINGS
+        }
+      }
+    ],
+    referenceResult: './golden-images/pointcloud-lnglat-64.png'
   },
   {
     name: 'pointcloud-meter',
@@ -621,6 +910,32 @@ export const TEST_CASES = [
     referenceResult: './golden-images/mesh-lnglat.png'
   },
   {
+    name: 'mesh-lnglat-64',
+    // viewport params
+    mapViewState: {
+      latitude: 37.751537058389985,
+      longitude: -122.42694203247012,
+      zoom: 12,
+      pitch: 0,
+      bearing: 0
+    },
+    viewport: WebMercatorViewport,
+    // layer list
+    layersList: [
+      {
+        type: MeshLayer,
+        props: {
+          id: 'mesh-lnglat-64',
+          data: arrowDataLngLat,
+          fp64: true,
+          mesh: new Arrow2DGeometry(),
+          sizeScale: 10000
+        }
+      }
+    ],
+    referenceResult: './golden-images/mesh-lnglat.png'
+  },
+  {
     name: 'path-outline',
     // viewport params
     mapViewState: {
@@ -656,6 +971,44 @@ export const TEST_CASES = [
       }
     ],
     referenceResult: './golden-images/path-outline.png'
+  },
+  {
+    name: 'path-outline-64',
+    // viewport params
+    mapViewState: {
+      latitude: 37.751537058389985,
+      longitude: -122.42694203247012,
+      zoom: 11.5,
+      pitch: 0,
+      bearing: 0
+    },
+    viewport: WebMercatorViewport,
+    // layer list
+    layersList: [
+      {
+        type: PathOutlineLayer,
+        props: {
+          id: 'path-outline-64',
+          data: dataSamples.routes,
+          fp64: true,
+          opacity: 0.6,
+          getPath: f => [f.START, f.END],
+          getColor: f => [128, 0, 0],
+          getZLevel: f => 125,
+          getWidth: f => 10,
+          widthMinPixels: 1,
+          pickable: true,
+          strokeWidth: 5,
+          widthScale: 10,
+          autoHighlight: true,
+          highlightColor: [255, 255, 255, 255],
+          parameters: {
+            blendEquation: GL.MAX
+          }
+        }
+      }
+    ],
+    referenceResult: './golden-images/path-outline-64.png'
   },
   {
     name: 'path-marker',
@@ -713,6 +1066,39 @@ export const TEST_CASES = [
         props: {
           id: 'text-layer',
           data: dataSamples.points.slice(0, 50),
+          getText: x => `${x.PLACEMENT}-${x.YR_INSTALLED}`,
+          getPosition: x => x.COORDINATES,
+          getColor: x => [153, 0, 0],
+          getSize: x => 32,
+          getAngle: x => 0,
+          sizeScale: 1,
+          getTextAnchor: x => 'start',
+          getAlignmentBaseline: x => 'center',
+          getPixelOffset: x => [10, 0]
+        }
+      }
+    ],
+    referenceResult: './golden-images/text-layer.png'
+  },
+  {
+    name: 'text-layer-64',
+    // viewport params
+    mapViewState: {
+      latitude: 37.751537058389985,
+      longitude: -122.42694203247012,
+      zoom: 11.5,
+      pitch: 0,
+      bearing: 0
+    },
+    viewport: WebMercatorViewport,
+    // layer list
+    layersList: [
+      {
+        type: TextLayer,
+        props: {
+          id: 'text-layer-64',
+          data: dataSamples.points.slice(0, 50),
+          fp64: true,
           getText: x => `${x.PLACEMENT}-${x.YR_INSTALLED}`,
           getPosition: x => x.COORDINATES,
           getColor: x => [153, 0, 0],
