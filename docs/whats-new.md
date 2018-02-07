@@ -66,7 +66,7 @@ Release date: Dec 21, 2017
         <p><i>GPU-based Highlighting</i></p>
       </td>
       <td>
-        <img height=150 src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/path-dash.png" />
+        <img height=150 src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/path-dashes.png" />
         <p><i>Dashes in GeoJson</i></p>
       </td>
       <td>
