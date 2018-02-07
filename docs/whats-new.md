@@ -77,13 +77,6 @@ Release date: Dec 21, 2017
   </tbody>
 </table>
 
-<p align="center">
-  <div>
-    <img height=150 src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/object-highlighting.gif" />
-    <p><i></i></p>
-  </div>
-</p>
-
 
 All new additions to the official deck.gl 5.0 API are listed here. Note that in addition to the official new features in this release, deck.gl 5.0 also contains a number of significant under the hoods changes to prepare for new features and optimizations. Some of these are available as experimental APIs, see below.
 
