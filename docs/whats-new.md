@@ -14,16 +14,20 @@ It is now possible to provide additional type information when declaring the `de
 
 Release date: Feb 16, 2018
 
-<p align="center">
-  <div>
-    <img height=150 src="https://raw.github.com/uber-common/deck.gl-data/master/images/transitions.gif" />
-    <p><i>Attribute Transitions</i></p>
-  </div>
-  <div>
-    <img height=150 src="https://raw.github.com/uber-common/deck.gl-data/master/images/jsx-layers.png" />
-    <p><i>JSX Layers</i></p>
-  </div>
-</p>
+<table style="border: 0;" align="center">
+  <tbody>
+    <tr>
+      <td>
+        <img height=150 src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/transitions.gif" />
+        <p><i>Attribute Transitions</i></p>
+      </td>
+      <td>
+        <img height=150 src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/jsx-layers.png" />
+        <p><i>JSX Layers</i></p>
+      </td>
+    </tr>
+  </tbody>
+</table>
 
 
 ## Layer Class
@@ -54,7 +58,7 @@ Release date: Dec 21, 2017
 
 <p align="center">
   <div>
-    <img height=150 src="https://raw.github.com/uber-common/deck.gl-data/master/images/object-highlighting.gif" />
+    <img height=150 src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/object-highlighting.gif" />
     <p><i>GPU-based Highlighting</i></p>
   </div>
 </p>
