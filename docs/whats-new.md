@@ -14,8 +14,8 @@ It is now possible to provide additional type information when declaring the `de
 
 Release date: Feb 16, 2018
 
-<p align="center">
-  <table>
+<div align="center">
+  <table border="0">
     <tbody>
       <tr>
         <td>
@@ -29,7 +29,7 @@ Release date: Feb 16, 2018
       </tr>
     </tbody>
   </table>
-</p>
+</div>
 
 
 ## Layer Class
