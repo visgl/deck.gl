@@ -48,7 +48,12 @@ The GLSL uniforms of the `project` module are quite central to shader code and a
 | project_uViewportSize | vec2 | size of viewport in pixels |
 | project_uDevicePixelRatio | float | device pixel ratio of current viewport (value depends on `useDevicePixels` prop) |
 | project_uFocalDistance | float | distance where "pixel sizes" are display in 1:1 ratio (modulo `devicePixelRatio`) |
-| project_uCameraPosition | float | position of camera in world space |
+| project_uCameraPosition | vec3 | position of camera in world space |
+| project_uCoordinateSystem | float | COORDINATE_SYSTEM enum |
+| project_uCenter | float | coordinate origin in world space |
+| project_uScale | float | Web Mercator scale (2^zoom) |
+| project_uPixelsPerMeter | vec3 | Web Mercator pixels per meter near the current viewport center |
+| project_uPixelsPerDegree | vec3 | Web Mercator pixels per degree near the current viewport center |
 
 
 ## GLSL Functions

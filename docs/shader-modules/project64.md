@@ -5,8 +5,15 @@ The `project64` shader module is an extension of the `project` shader module tha
 
 ## getUniforms
 
-For efficiency, the uniforms needed by `project64` are set by the `project` module (which is a dependency of `project64`). This is done since it is essentially the same calculations that are needed in both cases, so it would be wasteful to do it twice.
+The uniforms needed by `project64` are extracted from the `project` module uniforms `project_uViewProjectionMatrix` and `project_uScale`.
 
+
+## GLSL Uniforms
+
+| Uniform | Type | Description |
+| --- | --- | --- |
+| project_uViewProjectionMatrixFP64 | uniform vec2[16] | 64-bit view projection matrix |
+| project64_uScale | uniform vec2 | 64-bit Web Mercator scale |
 
 ## GLSL Functions
 

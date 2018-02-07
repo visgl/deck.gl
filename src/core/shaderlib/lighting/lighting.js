@@ -28,7 +28,11 @@ export default {
   name: 'lighting',
   dependencies: [project],
   vs: lightingShader,
-  getUniforms
+  getUniforms,
+  deprecations: [
+    // Deprecated lighting functions
+    {type: 'function', old: 'getLightWeight', new: 'lighting_getLightWeight', deprecated: 1}
+  ]
 };
 
 const INITIAL_MODULE_OPTIONS = {};
