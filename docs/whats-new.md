@@ -2,13 +2,27 @@
 
 Release date: Feb 16, 2018
 
-## Attribute transition
+<p align="center">
+  <div>
+    <img height=150 src="https://raw.github.com/uber-common/deck.gl-data/master/images/transitions.gif" />
+    <p><i>Attribute Transitions</i></p>
+  </div>
+  <div>
+    <img height=150 src="https://raw.github.com/uber-common/deck.gl-data/master/images/jsx-layers.png" />
+    <p><i>JSX Layers</i></p>
+  </div>
+</p>
 
-WebGL2 feature: smooth attribute transition performed on GPU. Use the new `transitions` prop on the `Layer` class to specify transition duration, easing function and callbacks.
 
 ## Layer Class
 
-* **Multiple Prop Objects** - Layer class constructors can now accept multiple property objects. The property objects will be merged as if with `Object.assign`, with later objects taking precedence over earlier objects: `new Layer({prop1: ...}, {prop2: ...});`. This can slightly improve performance when using many layers with lots of property object composition.
+### Layer Transitions
+
+Smooth visual transitions of layer elements, animating the update of the layers element to match a new data set, interpolating positions and colors on the GPU. Use the new `transitions` prop on the `Layer` class to specify transition duration, easing function and callbacks. Note: Transitions are only available on WebGL2-capable browsers.
+
+### Layer Optimizations
+
+**Multiple Prop Objects** - Layer class constructors are faster and can now accept multiple property objects. The property objects will be merged as if with `Object.assign`, with later objects taking precedence over earlier objects: `new Layer({prop1: ...}, {prop2: ...});`. This can further improve performance in cases when using many layers with lots of property object composition.
 
 
 ## React Integration
@@ -25,6 +39,14 @@ It is now possible to use JSX syntax to create (or "render") deck.gl layers. The
 # deck.gl v5
 
 Release date: Dec 21, 2017
+
+<p align="center">
+  <div>
+    <img height=150 src="https://raw.github.com/uber-common/deck.gl-data/master/images/object-highlighting.gif" />
+    <p><i>GPU-based Highlighting</i></p>
+  </div>
+</p>
+
 
 All new additions to the official deck.gl 5.0 API are listed here. Note that in addition to the official new features in this release, deck.gl 5.0 also contains a number of significant under the hoods changes to prepare for new features and optimizations. Some of these are available as experimental APIs, see below.
 

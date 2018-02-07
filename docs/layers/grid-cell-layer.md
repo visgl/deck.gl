@@ -104,5 +104,5 @@ If the alpha is not provided, it will be set to `255`.
 
 ## Source
 
-[/src/core-layers/grid-cell-layer](https://github.com/uber/deck.gl/tree/5.0-release/src/core-layers/grid-cell-layer)
+[/src/core-layers/grid-cell-layer](https://github.com/uber/deck.gl/tree/5.1-release/src/core-layers/grid-cell-layer)
 

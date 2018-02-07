@@ -480,4 +480,4 @@ Returns:
 - a "null" picking color which is equal the the color of pixels not covered by the layer. This color is guaranteed not to match any index value greater than or equal to zero.
 
 ## Source
-[src/core/lib/layer.js](https://github.com/uber/deck.gl/blob/5.0-release/src/core/lib/layer.js)
+[src/core/lib/layer.js](https://github.com/uber/deck.gl/blob/5.1-release/src/core/lib/layer.js)

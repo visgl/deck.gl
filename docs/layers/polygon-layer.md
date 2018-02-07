@@ -205,5 +205,5 @@ Method called to get the dash array to draw each outline with. (See Path Layer)
 
 ## Source
 
-[src/core-layers/polygon-layer](https://github.com/uber/deck.gl/tree/5.0-release/src/core-layers/polygon-layer)
+[src/core-layers/polygon-layer](https://github.com/uber/deck.gl/tree/5.1-release/src/core-layers/polygon-layer)
 

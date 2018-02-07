@@ -74,5 +74,5 @@ Method called to determine the rgba color of the source.
 
 ## Source
 
-[src/core-layers/line-layer](https://github.com/uber/deck.gl/tree/5.0-release/src/core-layers/line-layer)
+[src/core-layers/line-layer](https://github.com/uber/deck.gl/tree/5.1-release/src/core-layers/line-layer)
 
