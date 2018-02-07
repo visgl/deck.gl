@@ -18,6 +18,10 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+import {experimental} from '../../core';
+const {flattenVertices} = experimental;
+import earcut from 'earcut';
+
 // Basic polygon support
 //
 // Handles simple and complex polygons
@@ -78,9 +82,38 @@ export function forEachVertex(polygon, visitor) {
     return;
   }
 
-  let vertexIndex = 0;
   polygon.forEach(simplePolygon => {
-    simplePolygon.forEach((v, i, p) => visitor(v, vertexIndex, polygon));
-    vertexIndex++;
+    simplePolygon.forEach(visitor);
   });
+}
+
+// Returns the offset of each hole polygon in the flattened array for that polygon
+function getHoleIndices(complexPolygon) {
+  let holeIndices = null;
+  if (complexPolygon.length > 1) {
+    let polygonStartIndex = 0;
+    holeIndices = [];
+    complexPolygon.forEach(polygon => {
+      polygonStartIndex += polygon.length;
+      holeIndices.push(polygonStartIndex);
+    });
+    // Last element points to end of the flat array, remove it
+    holeIndices.pop();
+  }
+  return holeIndices;
+}
+
+/*
+ * Get vertex indices for drawing complexPolygon mesh
+ * @private
+ * @param {[Number,Number,Number][][]} complexPolygon
+ * @returns {[Number]} indices
+ */
+export function getSurfaceIndices(complexPolygon) {
+  // Prepare an array of hole indices as expected by earcut
+  const holeIndices = getHoleIndices(complexPolygon);
+  // Flatten the polygon as expected by earcut
+  const verts = flattenVertices(complexPolygon, {dimensions: 2, result: []});
+  // Let earcut triangulate the polygon
+  return earcut(verts, holeIndices, 2);
 }

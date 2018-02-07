@@ -38,7 +38,6 @@ uniform float opacity;
 varying vec4 vColor;
 
 void main(void) {
-
   vec3 pos;
   vec2 pos64xyLow;
   vec3 normal;
@@ -68,14 +67,6 @@ void main(void) {
       normal = vec3(0.0, 0.0, 1.0);
     }
 
-    // Here, the input parameters should be
-    // position_worldspace.xyz / position_worldspace.w.
-    // However, this calculation generates all zeros on
-    // MacBook Pro with Intel Iris Pro GPUs for unclear reasons.
-    // (see https://github.com/uber/deck.gl/issues/559)
-    // Since the w component is always 1.0 in our shaders,
-    // we decided to just provide xyz component of position_worldspace
-    // to the getLightWeight() function
     lightWeight = getLightWeight(position_worldspace.xyz, normal);
   }
 

@@ -21,41 +21,53 @@
 export default `\
 #define SHADER_NAME solid-polygon-layer-vertex-shader
 
+attribute vec2 vertexPositions;
 attribute vec3 positions;
 attribute vec2 positions64xyLow;
-attribute vec3 normals;
+attribute vec3 nextPositions;
+attribute vec2 nextPositions64xyLow;
+attribute float elevations;
 attribute vec4 colors;
 attribute vec3 pickingColors;
 
+uniform float isSideVertex;
 uniform float extruded;
-uniform float wireframe;
 uniform float elevationScale;
 uniform float opacity;
 
 varying vec4 vColor;
 
 void main(void) {
-  
-  vec3 pos = vec3(positions.xy, positions.z * elevationScale);
+  vec3 pos;
+  vec2 pos64xyLow;
+  vec3 normal;
+
+  if (isSideVertex > 0.5) {
+    pos = mix(positions, nextPositions, vertexPositions.x);
+    pos64xyLow = mix(positions64xyLow, nextPositions64xyLow, vertexPositions.x);
+  } else {
+    pos = positions;
+    pos64xyLow = positions64xyLow;
+  }
+  if (extruded > 0.5) {
+    pos.z += elevations * vertexPositions.y;
+  }
+  pos.z *= elevationScale;
 
   vec4 position_worldspace;
-  gl_Position = project_position_to_clipspace(pos, positions64xyLow, vec3(0.), position_worldspace);
+  gl_Position = project_position_to_clipspace(pos, pos64xyLow, vec3(0.), position_worldspace);
 
   float lightWeight = 1.0;
   
-  if (extruded > 0.5 && wireframe < 0.5) {
-    // Here, the input parameters should be
-    // position_worldspace.xyz / position_worldspace.w.
-    // However, this calculation generates all zeros on
-    // MacBook Pro with Intel Iris Pro GPUs for unclear reasons.
-    // (see https://github.com/uber/deck.gl/issues/559)
-    // Since the w component is always 1.0 in our shaders,
-    // we decided to just provide xyz component of position_worldspace
-    // to the getLightWeight() function
-    lightWeight = getLightWeight(
-      position_worldspace.xyz,
-      project_normal(normals)
-    );
+  if (extruded > 0.5) {
+    if (isSideVertex > 0.5) {
+      normal = vec3(positions.y - nextPositions.y, nextPositions.x - positions.x, 0.0);
+      normal = project_normal(normal);
+    } else {
+      normal = vec3(0.0, 0.0, 1.0);
+    }
+
+    lightWeight = getLightWeight(position_worldspace.xyz, normal);
   }
 
   vec3 lightWeightedColor = lightWeight * colors.rgb;

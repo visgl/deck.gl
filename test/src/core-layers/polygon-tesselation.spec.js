@@ -22,9 +22,34 @@ import test from 'tape-catch';
 
 import * as Polygon from 'deck.gl/core-layers/solid-polygon-layer/polygon';
 import {PolygonTesselator} from 'deck.gl/core-layers/solid-polygon-layer/polygon-tesselator';
-import {PolygonTesselatorExtruded} from 'deck.gl/core-layers/solid-polygon-layer/polygon-tesselator-extruded';
 
 const POLYGONS = [[], [[1, 1]], [[1, 1], [1, 1], [1, 1]], [[[1, 1]]], [[[1, 1], [1, 1], [1, 1]]]];
+
+const TEST_DATA = [
+  {
+    title: 'Plain array',
+    polygons: POLYGONS
+  }
+];
+
+const TEST_CASES = [
+  {
+    title: 'Tesselation(flat)',
+    params: {}
+  },
+  {
+    title: 'Tesselation(extruded)',
+    params: {extruded: true}
+  },
+  {
+    title: 'Tesselation(flat,fp64)',
+    params: {fp64: true}
+  },
+  {
+    title: 'Tesselation(extruded,fp64)',
+    params: {extruded: true, fp64: true}
+  }
+];
 
 test('polygon#imports', t => {
   t.ok(typeof Polygon.normalize === 'function', 'Polygon.normalize imported');
@@ -49,35 +74,44 @@ test('polygonTesselator#imports', t => {
   t.end();
 });
 
-test('PolygonTesselator#methods', t => {
-  const tesselator = new PolygonTesselator({polygons: POLYGONS});
-  t.ok(tesselator instanceof PolygonTesselator, 'PolygonTesselator created');
-  const indices = tesselator.indices();
-  t.ok(ArrayBuffer.isView(indices), 'PolygonTesselator.indices');
-  const positions = tesselator.positions().positions;
-  t.ok(ArrayBuffer.isView(positions), 'PolygonTesselator.positions');
-  const colors = tesselator.colors();
-  t.ok(ArrayBuffer.isView(colors), 'PolygonTesselator.colors');
-  // t.ok(ArrayBuffer.isView(tesselator.normals()), 'PolygonTesselator.normals');
-  const tesselator64 = new PolygonTesselator({polygons: POLYGONS, fp64: true});
-  const positions64xyLow = tesselator64.positions().positions64xyLow;
-  t.ok(ArrayBuffer.isView(positions64xyLow), 'PolygonTesselator.positions64xyLow');
+test('PolygonTesselator#constructor', t => {
+  TEST_DATA.forEach(testData => {
+    t.comment(`Polygon data: ${testData.title}`);
+    const tesselator = new PolygonTesselator({polygons: testData.polygons});
+    t.ok(tesselator instanceof PolygonTesselator, 'PolygonTesselator created');
+
+    TEST_CASES.forEach(testCase => {
+      t.comment(`  ${testCase.title}`);
+      tesselator.updatePositions(testCase.params);
+
+      t.ok(ArrayBuffer.isView(tesselator.positions()), 'PolygonTesselator.positions');
+      t.ok(ArrayBuffer.isView(tesselator.nextPositions()), 'PolygonTesselator.nextPositions');
+
+      if (testCase.params.fp64) {
+        t.ok(
+          ArrayBuffer.isView(tesselator.positions64xyLow()),
+          'PolygonTesselator.positions64xyLow'
+        );
+        t.ok(
+          ArrayBuffer.isView(tesselator.nextPositions64xyLow()),
+          'PolygonTesselator.nextPositions64xyLow'
+        );
+      }
+    });
+  });
+
   t.end();
 });
 
-test('PolygonTesselatorExtruded#methods', t => {
-  const tesselator = new PolygonTesselatorExtruded({polygons: POLYGONS});
-  t.ok(tesselator instanceof PolygonTesselatorExtruded, 'PolygonTesselatorExtruded created');
-  const indices = tesselator.indices();
-  t.ok(ArrayBuffer.isView(indices), 'PolygonTesselatorExtruded.indices');
-  const positions = tesselator.positions().positions;
-  t.ok(ArrayBuffer.isView(positions), 'PolygonTesselatorExtruded.positions');
-  const colors = tesselator.colors();
-  t.ok(ArrayBuffer.isView(colors), 'PolygonTesselatorExtruded.colors');
-  t.ok(ArrayBuffer.isView(tesselator.normals()), 'PolygonTesselatorExtruded.normals');
-  const tesselatorExtruded64 = new PolygonTesselator({polygons: POLYGONS, fp64: true});
-  const positionsExtruded64xyLow = tesselatorExtruded64.positions().positions64xyLow;
-  t.ok(ArrayBuffer.isView(positionsExtruded64xyLow), 'PolygonTesselatorExtruded.positions64xyLow');
+test('PolygonTesselator#methods', t => {
+  TEST_DATA.forEach(testData => {
+    t.comment(`Polygon data: ${testData.title}`);
+    const tesselator = new PolygonTesselator({polygons: testData.polygons});
+
+    t.ok(ArrayBuffer.isView(tesselator.indices()), 'PolygonTesselator.indices');
+    t.ok(ArrayBuffer.isView(tesselator.colors()), 'PolygonTesselator.colors');
+    t.ok(ArrayBuffer.isView(tesselator.pickingColors()), 'PolygonTesselator.pickingColors');
+  });
 
   t.end();
 });
