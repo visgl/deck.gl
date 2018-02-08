@@ -61,6 +61,7 @@ vec4 computeBezierCurve(vec4 source, vec4 target, vec4 controlPoint, float segme
   float a = mt2;
   float b = mt * segmentRatio * 2.0;
   float c = t2;
+  // TODO: if depth is not needed remove z computaitons.
   vec4 ret = vec4(
     a * source.x + b * controlPoint.x + c * target.x,
     a * source.y + b * controlPoint.y + c * target.y,

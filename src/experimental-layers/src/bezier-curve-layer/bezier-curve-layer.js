@@ -25,7 +25,7 @@ import {GL, Model, Geometry} from 'luma.gl';
 import vs from './bezier-curve-layer-vertex.glsl';
 import fs from './bezier-curve-layer-fragment.glsl';
 
-const NUM_SEGMENTS = 80;
+const NUM_SEGMENTS = 40;
 const DEFAULT_COLOR = [0, 0, 0, 255];
 
 const defaultProps = {
