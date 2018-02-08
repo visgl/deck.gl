@@ -8,7 +8,7 @@ import vec3_sub from 'gl-vec3/subtract';
 
 function lngLatZToWorldPosition(lngLatZ, viewport) {
   const [X, Y] = viewport.projectFlat(lngLatZ);
-  const Z = (lngLatZ[2] || 0) * viewport.scale;
+  const Z = (lngLatZ[2] || 0) * viewport.distanceScales.pixelsPerMeter[2];
   return [X, Y, Z];
 }
 

@@ -35,12 +35,12 @@ const TEST_DISTANCE_SCALES = TEST_VIEWPORT.getDistanceScales(TEST_COORDINATE_ORI
 const TEST_CASES = [
   {
     title: 'LNGLAT',
-    position: TEST_COORDINATE_ORIGIN,
+    position: [-122.45, 37.78, 1000],
     params: {
       viewport: TEST_VIEWPORT,
       coordinateSystem: COORDINATE_SYSTEM.LNGLAT
     },
-    result: [1341012.1955555552, 3242222.268726864, 0]
+    result: [1341012.1955555552, 3242222.268726864, 265.13951782419525]
   },
   {
     title: 'LNGLAT_OFFSETS',
@@ -74,25 +74,25 @@ const TEST_CASES = [
   },
   {
     title: 'LNGLAT to METER_OFFSETS',
-    position: [-122.46, 37.8, 0],
+    position: [-122.46, 37.8, 1000],
     params: {
       viewport: TEST_VIEWPORT,
       coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
       coordinateOrigin: TEST_COORDINATE_ORIGIN,
       fromCoordinateSystem: COORDINATE_SYSTEM.LNGLAT
     },
-    result: [-233.01688888831995, 589.7206230699085, 0]
+    result: [-233.01688888831995, 589.7206230699085, 265.13951782419525]
   },
   {
     title: 'LNGLAT to LNGLAT_OFFSETS',
-    position: [-122.46, 37.8, 0],
+    position: [-122.46, 37.8, 1000],
     params: {
       viewport: TEST_VIEWPORT,
       coordinateSystem: COORDINATE_SYSTEM.LNGLAT_OFFSETS,
       coordinateOrigin: TEST_COORDINATE_ORIGIN,
       fromCoordinateSystem: COORDINATE_SYSTEM.LNGLAT
     },
-    result: [-233.01688888831995, 589.7206230699085, 0]
+    result: [-233.01688888831995, 589.7206230699085, 265.13951782419525]
   }
 ];
 
