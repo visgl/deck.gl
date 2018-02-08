@@ -158,6 +158,22 @@ As usual, deck.gl 5.0 contains a number of experimental features, e.g. "multi vi
 
 Release date: July 27th, 2017
 
+<table style="border: 0;" align="center">
+  <tbody>
+    <tr>
+      <td>
+        <img height=150 src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/webgl2.jpg" />
+        <p><i>WebGL 2</i></p>
+      </td>
+      <td>
+        <img height=150 src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/seer.png" />
+        <p><i>Seer Extension</i></p>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+
 ## WebGL2 Support (provided by luma.gl v4)
 
 deck.gl v4.1 is based on luma.gl v4, a major release that adds full WebGL2 support as well as powerful features like WebGL state management and an improve GLSL shader module system. On all browsers that supports WebGL2 (e.g. recent Chrome and Firefox browsers), deck.gl will obtain WebGL2 context and utilize WebGL2 functionalities. To know more about WebGL2, please check [here](https://www.khronos.org/registry/webgl/specs/latest/2.0/).
