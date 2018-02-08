@@ -90,7 +90,9 @@ void main(void) {
   vec4 nextP = computeBezierCurve(source, target, controlPoint, nextSegmentRatio);
 
   // extrude
-  vec2 offset = getExtrusionOffset(nextP.xy - p.xy, positions.y);
+  float direction = float(positions.y);
+  direction = mix(-1.0, 1.0, step(segmentIndex, 0.0)) *  direction;
+  vec2 offset = getExtrusionOffset(nextP.xy - p.xy, direction);
   gl_Position = p + vec4(offset, 0.0, 0.0);
 
   // Color
