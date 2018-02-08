@@ -12,7 +12,9 @@ export default class DeckGLOverlay extends Component {
       left: -width / 2,
       top: -height / 2,
       right: width / 2,
-      bottom: height / 2
+      bottom: height / 2,
+      near: 0,
+      far: 100
     });
 
     const layers = [
