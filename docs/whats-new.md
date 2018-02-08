@@ -2,14 +2,12 @@
 
 Release date: TBD, target Q1-Q2, 2018
 
-
-## Experimental Features
-
 ### Prop Types
 
-It is now possible for deck.gl layers to specify type information for each supported property. Prop types will be used to validate property values during development, optimize property comparisons when layers are updated, and are also a foundation for planned features such as property transitions/animations and asynchronous properties.
+deck.gl layers can now specify additional type information about properties. When provided, these [prop types](docs/advanced/prop-types.md) will be used to speed up property comparisons in production and to validate `Layer` property values during development, to help catch programming errors. (Prop types will also serve as a foundation for future features such as property transitions/animations and asynchronous properties). Naturally, the core deck.gl layers have been updated with prop type definitions.
 
-> For layer writers: use of prop types is optional, and deck.gl layers will automatically try to deduce type information based on the default value in the `defaultProps` object for any properties that lack type information.
+> For layer writers: use of prop types is optional, and deck.gl layers will automatically deduce partial prop type information for any properties that lack type information, as long as a default value is specified in the `defaultProps` object.
+
 
 # deck.gl v5.1
 
@@ -35,7 +33,7 @@ Release date: Feb 16, 2018
 
 ### Layer Transitions
 
-Many layers now support smooth visual transitions of e.g. positions and colors of layer elements, animating the update of the layers element to match a new data set. The animations are done on the GPU and can thus support very large data sets. Use the new [`transitions`](/docs/layer-catalog/layer.md) prop on the `Layer` class to specify transition duration, easing function and callbacks.
+Many layers now support smooth visual transitions of e.g. positions and colors of layer elements, animating the update of the layers element to match a new data set. The animations are done on the GPU and can thus support very large number of elements. Use the new [`transitions`](/docs/layer-catalog/layer.md) prop on the `Layer` class to specify things like *transition duration*, *easing function* and *callbacks*.
 
 > Transitions are only supported on WebGL2-capable browsers such as Chrome and Firefox. The `transitions` prop will simply be ignored on WebGL1 browsers.
 
