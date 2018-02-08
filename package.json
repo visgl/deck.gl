@@ -83,6 +83,8 @@
     "jsdom": "^9.11.0",
     "module-alias": "^2.0.0",
     "nyc": "^10.2.0",
+    "png.js": "^0.1.1",
+    "pixelmatch": "^4.0.2",
     "pre-commit": "^1.2.2",
     "prettier": "^1.9.2",
     "prettier-check": "^2.0.0",
