@@ -28,6 +28,7 @@ attribute vec4 colors;
 attribute vec3 pickingColors;
 
 uniform float extruded;
+uniform float wireframe;
 uniform float elevationScale;
 uniform float opacity;
 
@@ -53,7 +54,7 @@ void main(void) {
 
   float lightWeight = 1.0;
 
-  if (extruded > 0.5) {
+  if (extruded > 0.5 && wireframe < 0.5) {
     lightWeight = getLightWeight(
       position_worldspace.xyz, // the w component is always 1.0
       project_normal(normals)

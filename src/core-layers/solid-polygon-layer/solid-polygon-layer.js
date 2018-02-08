@@ -101,11 +101,12 @@ export default class SolidPolygonLayer extends Layer {
   }
 
   draw({uniforms}) {
-    const {extruded, elevationScale} = this.props;
+    const {extruded, wireframe, elevationScale} = this.props;
 
     this.state.model.render(
       Object.assign({}, uniforms, {
         extruded: extruded ? 1.0 : 0.0,
+        wireframe: wireframe ? 1.0 : 0.0,
         elevationScale
       })
     );
