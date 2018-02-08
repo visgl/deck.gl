@@ -25,7 +25,7 @@ import vec4_transformMat4 from 'gl-vec4/transformMat4';
 import log from '../../utils/log';
 import assert from 'assert';
 import {COORDINATE_SYSTEM} from '../../lib/constants';
-import memoize from '../memoize';
+import memoize from '../../utils/memoize';
 
 import {lngLatToWorld} from 'viewport-mercator-project';
 
@@ -35,8 +35,9 @@ const ZERO_VECTOR = [0, 0, 0, 0];
 const VECTOR_TO_POINT_MATRIX = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0];
 const IDENTITY_MATRIX = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
 const DEFAULT_PIXELS_PER_UNIT2 = [0, 0, 0];
+const DEFAULT_COORDINATE_ORIGIN = [0, 0, 0];
 
-const memoized = memoize(_getUniformsFromViewport);
+const getMemoizedViewportUniforms = memoize(calculateViewportUniforms);
 
 // The code that utilizes Matrix4 does the same calculation as their mat4 counterparts,
 // has lower performance but provides error checking.
@@ -113,7 +114,7 @@ export function getUniformsFromViewport({
   modelMatrix = null,
   // Match Layer.defaultProps
   coordinateSystem = COORDINATE_SYSTEM.LNGLAT,
-  coordinateOrigin = [0, 0, 0],
+  coordinateOrigin = DEFAULT_COORDINATE_ORIGIN,
   // Deprecated
   projectionMode,
   positionOrigin
@@ -131,11 +132,11 @@ export function getUniformsFromViewport({
     {
       project_uModelMatrix: modelMatrix || IDENTITY_MATRIX
     },
-    memoized({viewport, coordinateSystem, coordinateOrigin})
+    getMemoizedViewportUniforms({viewport, coordinateSystem, coordinateOrigin})
   );
 }
 
-function _getUniformsFromViewport({viewport, coordinateSystem, coordinateOrigin}) {
+function calculateViewportUniforms({viewport, coordinateSystem, coordinateOrigin}) {
   const coordinateZoom = viewport.zoom;
   assert(coordinateZoom >= 0);
 
