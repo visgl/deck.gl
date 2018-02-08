@@ -38,6 +38,8 @@ const DEFAULT_AMBIENT_RATIO = 0.05;
 const DEFAULT_DIFFUSE_RATIO = 0.6;
 const DEFAULT_SPECULAR_RATIO = 0.8;
 
+// TODO: support partial update, e.g.
+// `lightedModel.setModuleParameters({diffuseRatio: 0.3});`
 function getUniforms(opts = INITIAL_MODULE_OPTIONS) {
   if (!opts.lightSettings) {
     return {};

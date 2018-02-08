@@ -1,4 +1,7 @@
-/* Projection utils */
+/**
+ * Projection utils
+ * TODO: move to Viewport class?
+ */
 import {COORDINATE_SYSTEM} from '../../lib/constants';
 import vec4_transformMat4 from 'gl-vec4/transformMat4';
 import vec3_sub from 'gl-vec3/subtract';
@@ -82,6 +85,7 @@ export function projectPosition(
     case COORDINATE_SYSTEM.METER_OFFSETS:
       const originWorld = lngLatZToWorldPosition(coordinateOrigin, viewport);
       vec3_sub(worldPosition, worldPosition, originWorld);
+      worldPosition[1] = -worldPosition[1];
       break;
 
     default:
