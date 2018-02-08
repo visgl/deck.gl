@@ -2,12 +2,11 @@
 
 Release date: TBD, target Q1-Q2, 2018
 
-
-## Experimental Features
-
 ### Prop Types
 
-It is now possible to provide additional type information when declaring the `defaultProps` object for deck.gl layers, and deck.gl layers will automatically try to deduce type information based on the default value for any properties that lack type information. Prop types can be used to validate property values during development, and are also a foundation for planned features such as property transitions/animations and asynchronous properties.
+deck.gl layers can now specify additional type information about properties. When provided, these [prop types](docs/advanced/prop-types.md) will be used to speed up property comparisons in production and to validate `Layer` property values during development, to help catch programming errors. (Prop types will also serve as a foundation for future features such as property transitions/animations and asynchronous properties). Naturally, the core deck.gl layers have been updated with prop type definitions.
+
+> For layer writers: use of prop types is optional, and deck.gl layers will automatically deduce partial prop type information for any properties that lack type information, as long as a default value is specified in the `defaultProps` object.
 
 
 # deck.gl v5.1
@@ -30,38 +29,51 @@ Release date: Feb 16, 2018
 </table>
 
 
-## Layer Class
+## Layer Improvements
 
 ### Layer Transitions
 
-Smooth visual transitions of layer elements, animating the update of the layers element to match a new data set, interpolating positions and colors on the GPU. Use the new `transitions` prop on the `Layer` class to specify transition duration, easing function and callbacks. Note: Transitions are only available on WebGL2-capable browsers.
+Many layers now support smooth visual transitions of e.g. positions and colors of layer elements, animating the update of the layers element to match a new data set. The animations are done on the GPU and can thus support very large number of elements. Use the new [`transitions`](/docs/layer-catalog/layer.md) prop on the `Layer` class to specify things like *transition duration*, *easing function* and *callbacks*.
 
-### Layer Optimizations
-
-**Multiple Prop Objects** - Layer class constructors are faster and can now accept multiple property objects. The property objects will be merged as if with `Object.assign`, with later objects taking precedence over earlier objects: `new Layer({prop1: ...}, {prop2: ...});`. This can further improve performance in cases when using many layers with lots of property object composition.
+> Transitions are only supported on WebGL2-capable browsers such as Chrome and Firefox. The `transitions` prop will simply be ignored on WebGL1 browsers.
 
 
-## React Integration
+## React Improvements
 
 ### Use JSX to render deck.gl Layers
 
-It is now possible to use JSX syntax to create (or "render") deck.gl layers. There are no performance advantages to using JSX syntax but some users feel that this results in a more natural, React-like coding style. There are limitations (deck.gl layers are **not** React components), for more information see [Using deck.gl with React](/docs/get-started/using-with-react.md).
+It is now possible to use JSX syntax to create (or "render") deck.gl layers. Many React users feel that this results in a more natural coding style.
 ```jsx
   <DeckGL {...viewport}>
     <LineLayer data={data} />
   <DeckGL />
 ```
 
+> There are limitations (deck.gl layers are **not** React components), for more information see [Using deck.gl with React](/docs/get-started/using-with-react.md).
+
+
 # deck.gl v5
 
 Release date: Dec 21, 2017
 
-<p align="center">
-  <div>
-    <img height=150 src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/object-highlighting.gif" />
-    <p><i>GPU-based Highlighting</i></p>
-  </div>
-</p>
+<table style="border: 0;" align="center">
+  <tbody>
+    <tr>
+      <td>
+        <img height=150 src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/object-highlighting.gif" />
+        <p><i>GPU-based Highlighting</i></p>
+      </td>
+      <td>
+        <img height=150 src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/path-dashes.png" />
+        <p><i>Dashes in GeoJson</i></p>
+      </td>
+      <td>
+        <img height=150 src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/react-16.png" />
+        <p><i>React 16 Support</i></p>
+      </td>
+    </tr>
+  </tbody>
+</table>
 
 
 All new additions to the official deck.gl 5.0 API are listed here. Note that in addition to the official new features in this release, deck.gl 5.0 also contains a number of significant under the hoods changes to prepare for new features and optimizations. Some of these are available as experimental APIs, see below.
@@ -143,6 +155,22 @@ As usual, deck.gl 5.0 contains a number of experimental features, e.g. "multi vi
 # deck.gl v4.1
 
 Release date: July 27th, 2017
+
+<table style="border: 0;" align="center">
+  <tbody>
+    <tr>
+      <td>
+        <img height=150 src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/webgl2.jpg" />
+        <p><i>WebGL 2</i></p>
+      </td>
+      <td>
+        <img height=150 src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/seer.png" />
+        <p><i>Seer Extension</i></p>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
 
 ## WebGL2 Support (provided by luma.gl v4)
 
