@@ -73,7 +73,6 @@ resultContainer.style.zIndex = 1;
 const flagContainer = document.createElement('div');
 flagContainer.style.position = 'absolute';
 flagContainer.style.top = `${CONFIG.HEIGHT + 50}px`;
-flagContainer.style.visibility = 'hidden';
 
 document.body.appendChild(deckGLContainer);
 document.body.appendChild(referenceImage);
