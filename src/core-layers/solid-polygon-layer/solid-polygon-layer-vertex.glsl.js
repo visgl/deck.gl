@@ -27,6 +27,7 @@ attribute vec4 colors;
 attribute vec3 pickingColors;
 
 uniform float extruded;
+uniform float wireframe;
 uniform float elevationScale;
 uniform float opacity;
 
@@ -42,7 +43,7 @@ void main(void) {
 
   float lightWeight = 1.0;
   
-  if (extruded > 0.5) {
+  if (extruded > 0.5 && wireframe < 0.5) {
     // Here, the input parameters should be
     // position_worldspace.xyz / position_worldspace.w.
     // However, this calculation generates all zeros on

@@ -52,14 +52,7 @@ const defaultProps = {
   getLineColor: f => get(f, 'lineColor') || get(f, 'properties.color') || defaultLineColor,
 
   // Optional settings for 'lighting' shader module
-  lightSettings: {
-    lightsPosition: [-122.45, 37.75, 8000, -122.0, 38.0, 5000],
-    ambientRatio: 0.05,
-    diffuseRatio: 0.6,
-    specularRatio: 0.8,
-    lightsStrength: [2.0, 0.0, 0.0, 0.0],
-    numberOfLights: 2
-  }
+  lightSettings: {}
 };
 
 // Side model attributes
@@ -198,17 +191,12 @@ export default class SolidPolygonLayer extends Layer {
   }
 
   draw({uniforms}) {
-    const {extruded, lightSettings, elevationScale} = this.props;
+    const {extruded, elevationScale} = this.props;
 
-    const renderUniforms = Object.assign(
-      {},
-      uniforms,
-      {
-        extruded: extruded ? 1.0 : 0.0,
-        elevationScale
-      },
-      lightSettings
-    );
+    const renderUniforms = Object.assign({}, uniforms, {
+      extruded: extruded ? 1.0 : 0.0,
+      elevationScale
+    });
 
     this.state.models.forEach(model => {
       model.render(renderUniforms);

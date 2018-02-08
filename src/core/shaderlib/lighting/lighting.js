@@ -20,9 +20,70 @@
 
 import lightingShader from './lighting.glsl';
 import project from '../project/project';
+import {COORDINATE_SYSTEM} from '../../lib/constants';
+import {projectPosition} from '../project/project-functions';
 
 export default {
   name: 'lighting',
   dependencies: [project],
-  vs: lightingShader
+  vs: lightingShader,
+  getUniforms
 };
+
+const INITIAL_MODULE_OPTIONS = {};
+
+const DEFAULT_LIGHTS_POSITION = [-122.45, 37.75, 8000];
+const DEFAULT_LIGHTS_STRENGTH = [2.0, 0.0];
+const DEFAULT_AMBIENT_RATIO = 0.05;
+const DEFAULT_DIFFUSE_RATIO = 0.6;
+const DEFAULT_SPECULAR_RATIO = 0.8;
+
+// TODO: support partial update, e.g.
+// `lightedModel.setModuleParameters({diffuseRatio: 0.3});`
+function getUniforms(opts = INITIAL_MODULE_OPTIONS) {
+  if (!opts.lightSettings) {
+    return {};
+  }
+
+  const {
+    numberOfLights = 1,
+
+    lightsPosition = DEFAULT_LIGHTS_POSITION,
+    lightsStrength = DEFAULT_LIGHTS_STRENGTH,
+    coordinateSystem = COORDINATE_SYSTEM.LNGLAT,
+    coordinateOrigin = [0, 0, 0],
+    modelMatrix = null,
+
+    ambientRatio = DEFAULT_AMBIENT_RATIO,
+    diffuseRatio = DEFAULT_DIFFUSE_RATIO,
+    specularRatio = DEFAULT_SPECULAR_RATIO
+  } = opts.lightSettings;
+
+  const projectionParameters = {
+    viewport: opts.viewport,
+    modelMatrix,
+    coordinateSystem: opts.coordinateSystem,
+    coordinateOrigin: opts.coordinateOrigin,
+    fromCoordinateSystem: coordinateSystem,
+    fromCoordinateOrigin: coordinateOrigin
+  };
+
+  // Pre-project light positions
+  const lightsPositionWorld = [];
+  for (let i = 0; i < numberOfLights; i++) {
+    const position = projectPosition(lightsPosition.slice(i * 3, i * 3 + 3), projectionParameters);
+
+    lightsPositionWorld[i * 3] = position[0];
+    lightsPositionWorld[i * 3 + 1] = position[1];
+    lightsPositionWorld[i * 3 + 2] = position[2];
+  }
+
+  return {
+    lighting_lightPositions: lightsPositionWorld,
+    lighting_lightStrengths: lightsStrength,
+    lighting_ambientRatio: ambientRatio,
+    lighting_diffuseRatio: diffuseRatio,
+    lighting_specularRatio: specularRatio,
+    lighting_numberOfLights: numberOfLights
+  };
+}

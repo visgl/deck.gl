@@ -111,11 +111,13 @@ class RenderingTest extends Component {
     const passed = reportResult(name, 1 - badPixels / pixelCount);
 
     // Render the next test case
-    this.setState({
-      currentTestIndex: this.state.currentTestIndex + 1,
-      renderingCount: 0,
-      allPassed: this.state.allPassed && passed
-    });
+    if (passed) {
+      this.setState({
+        currentTestIndex: this.state.currentTestIndex + 1,
+        renderingCount: 0,
+        allPassed: this.state.allPassed && passed
+      });
+    }
   }
 
   _onDrawComplete(name, referenceResult, completed, {gl}) {

@@ -36,14 +36,7 @@ const defaultProps = {
   getNormal: x => x.normal,
   getColor: x => x.color || DEFAULT_COLOR,
 
-  lightSettings: {
-    lightsPosition: [0, 0, 5000, -1000, 1000, 8000, 5000, -5000, 1000],
-    ambientRatio: 0.2,
-    diffuseRatio: 0.6,
-    specularRatio: 0.8,
-    lightsStrength: [1.0, 0.0, 0.8, 0.0, 0.4, 0.0],
-    numberOfLights: 3
-  }
+  lightSettings: {}
 };
 
 export default class PointCloudLayer extends Layer {
@@ -110,16 +103,11 @@ export default class PointCloudLayer extends Layer {
   }
 
   draw({uniforms}) {
-    const {radiusPixels, lightSettings} = this.props;
+    const {radiusPixels} = this.props;
     this.state.model.render(
-      Object.assign(
-        {},
-        uniforms,
-        {
-          radiusPixels
-        },
-        lightSettings
-      )
+      Object.assign({}, uniforms, {
+        radiusPixels
+      })
     );
   }
 
