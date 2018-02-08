@@ -61,6 +61,7 @@ vec4 computeBezierCurve(vec4 source, vec4 target, vec4 controlPoint, float segme
   float a = mt2;
   float b = mt * segmentRatio * 2.0;
   float c = t2;
+  // TODO: if depth is not needed remove z computaitons.
   vec4 ret = vec4(
     a * source.x + b * controlPoint.x + c * target.x,
     a * source.y + b * controlPoint.y + c * target.y,
@@ -90,7 +91,9 @@ void main(void) {
   vec4 nextP = computeBezierCurve(source, target, controlPoint, nextSegmentRatio);
 
   // extrude
-  vec2 offset = getExtrusionOffset(nextP.xy - p.xy, positions.y);
+  float direction = float(positions.y);
+  direction = mix(-1.0, 1.0, step(segmentIndex, 0.0)) *  direction;
+  vec2 offset = getExtrusionOffset(nextP.xy - p.xy, direction);
   gl_Position = p + vec4(offset, 0.0, 0.0);
 
   // Color
