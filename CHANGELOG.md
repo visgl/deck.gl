@@ -21,6 +21,10 @@ For Earlier Beta Releases see below
 
 ## Official Releases
 
+### deck.gl v5.0.3 - Feb 08
+- hexagon layer always rerender (#1384)
+- Fix crash during pickVisibleObjects (#1365)
+
 ### deck.gl v5.0.3 - Jan 26
 - allow overriding DeckGL canvas component styles (#1342)
 
