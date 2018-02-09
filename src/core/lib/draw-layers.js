@@ -259,7 +259,7 @@ function logRenderStats({renderStats, pass, redrawReason}) {
 ${visibleCount} (of ${totalCount} layers) to ${pass} because ${redrawReason} `;
     if (log.priority > LOG_PRIORITY_DRAW) {
       message += `\
-(${hiddenCount} hidden, ${compositeCount} composite ${pickableCount} unpickable)`;
+(${hiddenCount} hidden, ${compositeCount} composite ${pickableCount} pickable)`;
     }
 
     log.log(LOG_PRIORITY_DRAW, message);
