@@ -22,6 +22,7 @@ import lightingShader from './lighting.glsl';
 import project from '../project/project';
 import {COORDINATE_SYSTEM} from '../../lib/constants';
 import {projectPosition} from '../project/project-functions';
+import memoize from '../../utils/memoize';
 
 export default {
   name: 'lighting',
@@ -37,6 +38,9 @@ const DEFAULT_LIGHTS_STRENGTH = [2.0, 0.0];
 const DEFAULT_AMBIENT_RATIO = 0.05;
 const DEFAULT_DIFFUSE_RATIO = 0.6;
 const DEFAULT_SPECULAR_RATIO = 0.8;
+const DEFAULT_COORDINATE_ORIGIN = [0, 0, 0];
+
+const getMemoizedLightPositions = memoize(preprojectLightPositions);
 
 // TODO: support partial update, e.g.
 // `lightedModel.setModuleParameters({diffuseRatio: 0.3});`
@@ -51,7 +55,7 @@ function getUniforms(opts = INITIAL_MODULE_OPTIONS) {
     lightsPosition = DEFAULT_LIGHTS_POSITION,
     lightsStrength = DEFAULT_LIGHTS_STRENGTH,
     coordinateSystem = COORDINATE_SYSTEM.LNGLAT,
-    coordinateOrigin = [0, 0, 0],
+    coordinateOrigin = DEFAULT_COORDINATE_ORIGIN,
     modelMatrix = null,
 
     ambientRatio = DEFAULT_AMBIENT_RATIO,
@@ -59,24 +63,17 @@ function getUniforms(opts = INITIAL_MODULE_OPTIONS) {
     specularRatio = DEFAULT_SPECULAR_RATIO
   } = opts.lightSettings;
 
-  const projectionParameters = {
+  // Pre-project light positions
+  const lightsPositionWorld = getMemoizedLightPositions({
+    lightsPosition,
+    numberOfLights,
     viewport: opts.viewport,
     modelMatrix,
     coordinateSystem: opts.coordinateSystem,
     coordinateOrigin: opts.coordinateOrigin,
     fromCoordinateSystem: coordinateSystem,
     fromCoordinateOrigin: coordinateOrigin
-  };
-
-  // Pre-project light positions
-  const lightsPositionWorld = [];
-  for (let i = 0; i < numberOfLights; i++) {
-    const position = projectPosition(lightsPosition.slice(i * 3, i * 3 + 3), projectionParameters);
-
-    lightsPositionWorld[i * 3] = position[0];
-    lightsPositionWorld[i * 3 + 1] = position[1];
-    lightsPositionWorld[i * 3 + 2] = position[2];
-  }
+  });
 
   return {
     lighting_lightPositions: lightsPositionWorld,
@@ -86,4 +83,36 @@ function getUniforms(opts = INITIAL_MODULE_OPTIONS) {
     lighting_specularRatio: specularRatio,
     lighting_numberOfLights: numberOfLights
   };
+}
+
+// Pre-project light positions
+function preprojectLightPositions({
+  lightsPosition,
+  numberOfLights,
+  viewport,
+  modelMatrix,
+  coordinateSystem,
+  coordinateOrigin,
+  fromCoordinateSystem,
+  fromCoordinateOrigin
+}) {
+  const projectionParameters = {
+    viewport,
+    modelMatrix,
+    coordinateSystem,
+    coordinateOrigin,
+    fromCoordinateSystem,
+    fromCoordinateOrigin
+  };
+
+  const lightsPositionWorld = [];
+  for (let i = 0; i < numberOfLights; i++) {
+    const position = projectPosition(lightsPosition.slice(i * 3, i * 3 + 3), projectionParameters);
+
+    lightsPositionWorld[i * 3] = position[0];
+    lightsPositionWorld[i * 3 + 1] = position[1];
+    lightsPositionWorld[i * 3 + 2] = position[2];
+  }
+
+  return lightsPositionWorld;
 }

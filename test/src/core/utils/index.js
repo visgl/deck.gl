@@ -19,3 +19,4 @@
 // THE SOFTWARE.
 
 import './positions.spec';
+import './memoize.spec';
