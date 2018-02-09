@@ -26,7 +26,7 @@ import {EventManager} from 'mjolnir.js';
 import {GL, AnimationLoop, createGLContext, setParameters} from 'luma.gl';
 
 import PropTypes from 'prop-types';
-
+import assert from 'assert';
 /* global document */
 
 function noop() {}
@@ -89,10 +89,81 @@ export default class Deck {
     this._onRenderFrame = this._onRenderFrame.bind(this);
 
     this.canvas = this._createCanvas(props);
+    this.animationLoop = this._createAnimationLoop(props);
 
+    this.setProps(props);
+
+    this.animationLoop.start();
+  }
+
+  setProps(props) {
+    props = Object.assign({}, this.props, props);
+    this.props = props;
+
+    this._setLayerManagerProps(props);
+
+    // TODO - unify setParameters/setOptions/setProps etc naming.
+    const {useDevicePixels} = props;
+    this.animationLoop.setViewParameters({useDevicePixels});
+  }
+
+  finalize() {
+    this.animationLoop.stop();
+    this.animationLoop = null;
+
+    if (this.layerManager) {
+      this.layerManager.finalize();
+      this.layerManager = null;
+    }
+  }
+
+  // Public API
+
+  pickObject({x, y, radius = 0, layerIds = null}) {
+    const selectedInfos = this.layerManager.pickObject({x, y, radius, layerIds, mode: 'query'});
+    return selectedInfos.length ? selectedInfos[0] : null;
+  }
+
+  pickObjects({x, y, width = 1, height = 1, layerIds = null}) {
+    return this.layerManager.pickObjects({x, y, width, height, layerIds});
+  }
+
+  getViewports() {
+    return this.layerManager ? this.layerManager.getViewports() : [];
+  }
+
+  // Private Methods
+
+  // canvas, either string, canvas or `null`
+  _createCanvas(props) {
+    let canvas = props.canvas;
+
+    // TODO EventManager should accept element id
+    if (typeof canvas === 'string') {
+      /* global document */
+      canvas = document.getElementById(canvas);
+      assert(canvas);
+    }
+
+    if (!canvas) {
+      const {id, width, height, style} = props;
+      canvas = document.createElement('canvas');
+      canvas.id = id;
+      canvas.width = width;
+      canvas.height = height;
+      canvas.style = style;
+
+      const parent = props.parent || document.body;
+      parent.appendChild(canvas);
+    }
+
+    return canvas;
+  }
+
+  _createAnimationLoop(props) {
     const {width, height, gl, glOptions, debug, useDevicePixels} = props;
 
-    this.animationLoop = new AnimationLoop({
+    return new AnimationLoop({
       width,
       height,
       useDevicePixels,
@@ -103,16 +174,9 @@ export default class Deck {
       onBeforeRender: props.onBeforeRender,
       onAfterRender: props.onAfterRender
     });
-
-    this.animationLoop.start();
-
-    this.setProps(props);
   }
 
-  setProps(props) {
-    props = Object.assign({}, this.props, props);
-    this.props = props;
-
+  _setLayerManagerProps(props) {
     if (!this.layerManager) {
       return;
     }
@@ -145,54 +209,6 @@ export default class Deck {
       onLayerClick,
       onLayerHover
     });
-
-    // TODO - unify setParameters/setOptions/setProps etc naming.
-    this.animationLoop.setViewParameters({useDevicePixels});
-  }
-
-  finalize() {
-    this.animationLoop.stop();
-    this.animationLoop = null;
-
-    if (this.layerManager) {
-      this.layerManager.finalize();
-      this.layerManager = null;
-    }
-  }
-
-  // Public API
-
-  pickObject({x, y, radius = 0, layerIds = null}) {
-    const selectedInfos = this.layerManager.pickObject({x, y, radius, layerIds, mode: 'query'});
-    return selectedInfos.length ? selectedInfos[0] : null;
-  }
-
-  pickObjects({x, y, width = 1, height = 1, layerIds = null}) {
-    return this.layerManager.pickObjects({x, y, width, height, layerIds});
-  }
-
-  getViewports() {
-    return this.layerManager ? this.layerManager.getViewports() : [];
-  }
-
-  // Private Methods
-
-  _createCanvas(props) {
-    if (props.canvas) {
-      return props.canvas;
-    }
-
-    const {id, width, height, style} = props;
-    const canvas = document.createElement('canvas');
-    canvas.id = id;
-    canvas.width = width;
-    canvas.height = height;
-    canvas.style = style;
-
-    const parent = props.parent || document.body;
-    parent.appendChild(canvas);
-
-    return canvas;
   }
 
   // Callbacks
