@@ -70,9 +70,10 @@ async function validateWithWaitingTime(child, waitingTime, threshold) {
   await browser.close();
 
   if (pixelDiffRatio <= threshold) {
+    console.log('\x1b[32m%s\x1b[0m', 'Rendering test Passed!');
     return true;
   }
-  console.log('Rendering test failed!');
+  console.log('\x1b[31m%s\x1b[0m', 'Rendering test failed!');
   return false;
 }
 
@@ -81,7 +82,7 @@ async function yarnAndLaunchWebpack() {
   // console.log(output.toString('utf8'));
   const child = execFile(
     './node_modules/.bin/webpack-dev-server',
-    ['--config', 'webpack.config.js', '--progress'],
+    [' --env.local', '--config', 'webpack.config.js', '--progress'],
     {
       maxBuffer: 5000 * 1024
     },
@@ -102,19 +103,14 @@ process.chdir('./examples');
 (async () => {
   let child;
   let valid = true;
+  let finalResult = true;
 
   console.log('--------------------------');
-  console.log('Begin to test geojson');
-  process.chdir('./geojson');
+  console.log('Begin to test plot');
+  process.chdir('./plot');
   child = await yarnAndLaunchWebpack();
   valid = await validateWithWaitingTime(child, 5000, 0.01);
-  process.chdir('../');
-
-  console.log('--------------------------');
-  console.log('Begin to test graph');
-  process.chdir('./graph');
-  child = await yarnAndLaunchWebpack();
-  valid = await validateWithWaitingTime(child, 10000, 0.01);
+  finalResult = finalResult && valid;
   process.chdir('../');
 
   console.log('--------------------------');
@@ -122,6 +118,7 @@ process.chdir('./examples');
   process.chdir('./3d-heatmap');
   child = await yarnAndLaunchWebpack();
   valid = await validateWithWaitingTime(child, 5000, 0.01);
+  finalResult = finalResult && valid;
   process.chdir('../');
 
   console.log('--------------------------');
@@ -129,6 +126,7 @@ process.chdir('./examples');
   process.chdir('./arc');
   child = await yarnAndLaunchWebpack();
   valid = await validateWithWaitingTime(child, 5000, 0.001);
+  finalResult = finalResult && valid;
   process.chdir('../');
 
   console.log('--------------------------');
@@ -136,21 +134,48 @@ process.chdir('./examples');
   process.chdir('./bezier');
   child = await yarnAndLaunchWebpack();
   valid = await validateWithWaitingTime(child, 5000, 0.001);
+  finalResult = finalResult && valid;
   process.chdir('../');
 
-  /* console.log('--------------------------')
+  console.log('--------------------------');
   console.log('Begin to test brushing');
   process.chdir('./brushing');
   child = await yarnAndLaunchWebpack();
-  valid = valid && await validateWithWaitingTime(child, 5000, 0.001);
-  process.chdir('../'); */
+  valid = valid && (await validateWithWaitingTime(child, 5000, 0.001));
+  finalResult = finalResult && valid;
+  process.chdir('../');
 
-  /* console.log('--------------------------');
+  console.log('--------------------------');
   console.log('Begin to test geojson');
   process.chdir('./geojson');
   child = await yarnAndLaunchWebpack();
-  valid = (await validateWithWaitingTime(child, 5000, 0.01));
-  process.chdir('../'); */
+  valid = await validateWithWaitingTime(child, 5000, 0.01);
+  finalResult = finalResult && valid;
+  process.chdir('../');
 
-  process.exit(valid ? 0 : 1); //eslint-disable-line
+  console.log('--------------------------');
+  console.log('Begin to test graph');
+  process.chdir('./graph');
+  child = await yarnAndLaunchWebpack();
+  valid = await validateWithWaitingTime(child, 10000, 0.01);
+  finalResult = finalResult && valid;
+  process.chdir('../');
+
+  console.log('--------------------------');
+  console.log('Begin to test icon');
+  process.chdir('./icon');
+  child = await yarnAndLaunchWebpack();
+  valid = await validateWithWaitingTime(child, 5000, 0.001);
+  finalResult = finalResult && valid;
+  process.chdir('../');
+
+  console.log('--------------------------');
+  console.log('Begin to test line');
+  process.chdir('./line');
+  child = await yarnAndLaunchWebpack();
+  valid = await validateWithWaitingTime(child, 5000, 0.001);
+  finalResult = finalResult && valid;
+  process.chdir('../');
+
+  process.exit(finalResult ? 0 : 1); //eslint-disable-line
 })();
