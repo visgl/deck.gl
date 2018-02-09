@@ -2,21 +2,14 @@
 import React, {Component} from 'react';
 import {render} from 'react-dom';
 
-import {
-  COORDINATE_SYSTEM,
-  DeckGL,
-  WebMercatorViewport,
-  PolygonLayer,
-  PointCloudLayer,
-  experimental
-} from 'deck.gl';
+import {COORDINATE_SYSTEM, DeckGL, PolygonLayer, PointCloudLayer, experimental} from 'deck.gl';
 
 const {
   // Unified controller, together with state that determines interaction model
   FirstPersonState,
-  // Viewport classes provides various views on the state
-  FirstPersonViewport,
-  ThirdPersonViewport,
+  MapView,
+  FirstPersonView,
+  ThirdPersonView,
   ViewportController,
   LinearInterpolator
 } = experimental;
@@ -289,34 +282,28 @@ class Root extends Component {
     ];
   }
 
-  _renderViewports() {
-    const {viewportProps, fov} = this.state;
-
+  _renderViews() {
+    const {fov} = this.state;
     return [
-      new FirstPersonViewport({
+      new FirstPersonView({
         id: '1st-person',
-        ...viewportProps,
-        height: viewportProps.height / 3,
+        height: '33.33%',
         fovy: fov
       }),
-      new ThirdPersonViewport({
+      new ThirdPersonView({
         id: '3rd-person',
-        ...viewportProps,
-        y: viewportProps.height / 3,
-        height: viewportProps.height / 3
+        y: '33.33%',
+        height: '33.33%'
       }),
-      new WebMercatorViewport({
+      new MapView({
         id: 'basemap',
-        ...viewportProps,
-        y: viewportProps.height / 3 * 2,
-        height: viewportProps.height / 3
+        y: '66.67%',
+        height: '33.33%'
       })
     ];
   }
 
   render() {
-    const viewports = this._renderViewports();
-
     const {viewportProps, transitionDuration} = this.state;
 
     return (
@@ -334,17 +321,17 @@ class Root extends Component {
             id="first-person"
             width={viewportProps.width}
             height={viewportProps.height}
-            viewports={viewports}
+            views={this._renderViews()}
             layers={this._renderLayers()}
           >
             <StaticMap
-              viewportId="3rd-person"
+              viewId="3rd-person"
               {...viewportProps}
               mapStyle="mapbox://styles/mapbox/light-v9"
               mapboxApiAccessToken={MAPBOX_TOKEN}
             />
             <StaticMap
-              viewportId="basemap"
+              viewId="basemap"
               {...viewportProps}
               mapStyle="mapbox://styles/mapbox/dark-v9"
               mapboxApiAccessToken={MAPBOX_TOKEN}

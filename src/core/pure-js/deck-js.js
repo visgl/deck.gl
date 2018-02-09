@@ -21,7 +21,6 @@
 import LayerManager from '../lib/layer-manager';
 import EffectManager from '../experimental/lib/effect-manager';
 import Effect from '../experimental/lib/effect';
-import WebMercatorViewport from '../viewports/web-mercator-viewport';
 
 import {EventManager} from 'mjolnir.js';
 import {GL, AnimationLoop, createGLContext, setParameters} from 'luma.gl';
@@ -38,7 +37,7 @@ const propTypes = {
   height: PropTypes.number.isRequired,
   layers: PropTypes.array, // Array can contain falsy values
   views: PropTypes.array, // Array can contain falsy values
-  viewports: PropTypes.array, // Deprecated: Array can contain falsy values
+  viewState: PropTypes.object,
   effects: PropTypes.arrayOf(PropTypes.instanceOf(Effect)),
   layerFilter: PropTypes.func,
   glOptions: PropTypes.object,
@@ -84,7 +83,6 @@ export default class DeckGLJS {
     this.needsRedraw = true;
     this.layerManager = null;
     this.effectManager = null;
-    this.viewports = [];
 
     // Bind methods
     this._onRendererInitialized = this._onRendererInitialized.bind(this);
@@ -120,8 +118,11 @@ export default class DeckGLJS {
     }
 
     const {
-      layers,
+      width,
+      height,
       views,
+      viewState,
+      layers,
       pickingRadius,
       onLayerClick,
       onLayerHover,
@@ -130,21 +131,13 @@ export default class DeckGLJS {
       layerFilter
     } = props;
 
-    // Update viewports (creating one if not supplied)
-    let viewports = props.viewports || props.viewport;
-    if (!views && !viewports) {
-      // TODO - old param style, move this default handling to React component
-      const {width, height, latitude, longitude, zoom, pitch, bearing} = props;
-      viewports = [
-        new WebMercatorViewport({width, height, latitude, longitude, zoom, pitch, bearing})
-      ];
-    }
-
     // If more parameters need to be updated on layerManager add them to this method.
     this.layerManager.setParameters({
-      layers,
+      width,
+      height,
       views,
-      viewports,
+      viewState,
+      layers,
       useDevicePixels,
       drawPickingColors,
       layerFilter,

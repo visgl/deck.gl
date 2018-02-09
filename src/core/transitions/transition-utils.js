@@ -41,7 +41,7 @@ export function getEndValueByShortestPath(propName, startValue, endValue) {
 }
 
 // TODO/xiaoji: This should be merged with the controller's prop constraint system
-export function extractViewportFrom(props) {
+export function extractViewState(props) {
   const viewport = {};
   VIEWPORT_PROPS.forEach(key => {
     const value = props[key];

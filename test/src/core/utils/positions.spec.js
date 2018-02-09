@@ -1,5 +1,6 @@
 import test from 'tape-catch';
 import {parsePosition, getPosition} from 'deck.gl/core/utils/positions';
+import {equals} from 'math.gl';
 
 const PARSE_TEST_CASES = [
   {
@@ -11,6 +12,11 @@ const PARSE_TEST_CASES = [
     title: 'percent string',
     value: '10%',
     result: {position: 0.1, relative: true}
+  },
+  {
+    title: 'percent string',
+    value: '33.3%',
+    result: {position: 0.333, relative: true}
   },
   {
     title: 'pixel string',
@@ -43,6 +49,8 @@ test('positions#import', t => {
 test('parsePosition#tests', t => {
   for (const tc of PARSE_TEST_CASES) {
     const result = parsePosition(tc.value);
+    result.position = result.position.toPrecision(5);
+    tc.result.position = tc.result.position.toPrecision(5);
     t.deepEqual(result, tc.result, `parsePosition ${tc.title} returned expected type`);
   }
   t.end();
