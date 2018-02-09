@@ -23,6 +23,15 @@ For Earlier Beta Releases see below
 
 ### deck.gl v5.1 Beta Releases
 
+#### [5.1.0-beta.3] - Feb 09
+- Fix Bezier-Curve layer rendering issues (#1409)
+- Add more screenshots in Whats New (#1408)
+- Fix image links in docs. (#1401)
+- Update docs for 5.1 (#1392)
+- hexagon layer always rerender (#1384)
+- Fix: Workaround for React.Children.forEach (#1378)
+- layers v0.1.0-beta.2
+
 #### [5.1.0-beta.2] - Jan 31
 - Fix: JSX layer extraction from nextProps (#1373)
 
