@@ -1,6 +1,6 @@
 /* global requestAnimationFrame, cancelAnimationFrame */
 import LinearInterpolator from '../transitions/linear-interpolator';
-import {extractViewportFrom} from '../transitions/transition-utils';
+import {extractViewState} from '../transitions/transition-utils';
 import assert from 'assert';
 
 const noop = () => {};
@@ -163,9 +163,9 @@ export default class TransitionManager {
 
     const viewport = interpolator.interpolateProps(startProps, endProps, t);
 
-    // This extractViewportFrom gurantees angle props (bearing, longitude) are normalized
+    // This extractViewState gurantees angle props (bearing, longitude) are normalized
     // So when viewports are compared they are in same range.
-    this.state.propsInTransition = extractViewportFrom(Object.assign({}, this.props, viewport));
+    this.state.propsInTransition = extractViewState(Object.assign({}, this.props, viewport));
 
     if (this.props.onViewportChange) {
       this.props.onViewportChange(this.state.propsInTransition, {inTransition: true});

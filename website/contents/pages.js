@@ -221,16 +221,20 @@ export const docPages = generatePath([
     name: 'Advanced Topics',
     children: [
       {
-        name: 'Updates',
-        content: getDocUrl('advanced/updates.md')
+        name: 'Coordinate Systems',
+        content: getDocUrl('advanced/coordinate-systems.md')
+      },
+      {
+        name: 'Views',
+        content: getDocUrl('advanced/views.md')
       },
       {
         name: 'Viewports',
         content: getDocUrl('advanced/viewports.md')
       },
       {
-        name: 'Coordinate Systems',
-        content: getDocUrl('advanced/coordinate-systems.md')
+        name: 'Updates',
+        content: getDocUrl('advanced/updates.md')
       },
       {
         name: 'Performance',

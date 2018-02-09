@@ -1,9 +1,9 @@
 /* global window, document */
 
 // deck.gl ES6 components
-import {COORDINATE_SYSTEM, WebMercatorViewport, experimental} from 'deck.gl';
+import {COORDINATE_SYSTEM, experimental} from 'deck.gl';
 
-const {MapState, OrbitState, FirstPersonViewport, OrbitViewport, ReflectionEffect} = experimental;
+const {MapState, OrbitState, MapView, FirstPersonView, OrbitView, ReflectionEffect} = experimental;
 
 // deck.gl react components
 import DeckGL from 'deck.gl';
@@ -214,42 +214,28 @@ class App extends PureComponent {
     return modelMatrix;
   }
 
-  _getViewports() {
-    const {
-      width,
-      height,
-      mapViewState,
-      orbitViewState,
-      settings: {infovis, multiview}
-    } = this.state;
+  _getViews() {
+    const {settings: {infovis, multiview}} = this.state;
 
     if (infovis) {
       return [
-        new OrbitViewport({
-          id: 'infovis',
-          ...orbitViewState,
-          width,
-          height
+        new OrbitView({
+          id: 'infovis'
         })
       ];
     }
 
     return [
-      new WebMercatorViewport({
-        id: 'basemap',
-        ...mapViewState,
-        width,
-        height: multiview ? height / 2 : height,
-        y: multiview ? height / 2 : 0
-      }),
       multiview &&
-        new FirstPersonViewport({
+        new FirstPersonView({
           id: 'first-person',
-          ...mapViewState,
-          width,
-          height: height / 2,
-          position: [0, 0, 50]
-        })
+          height: '50%'
+        }),
+      new MapView({
+        id: 'basemap',
+        y: multiview ? '50%' : 0,
+        height: multiview ? '50%' : '100%'
+      })
     ];
   }
 
@@ -264,7 +250,7 @@ class App extends PureComponent {
     const {width, height, orbitViewState, mapViewState, settings} = this.state;
     const {infovis, effects, pickingRadius, drawPickingColors, useDevicePixels} = settings;
 
-    const viewports = this._getViewports();
+    const views = this._getViews();
 
     return (
       <div style={{backgroundColor: '#eeeeee'}}>
@@ -280,7 +266,8 @@ class App extends PureComponent {
             id="default-deckgl-overlay"
             width={width}
             height={height}
-            viewports={viewports}
+            views={views}
+            viewState={infovis ? orbitViewState : {...mapViewState, position: [0, 0, 50]}}
             layers={this._renderExamples()}
             layerFilter={this._layerFilter}
             effects={effects ? this._effects : []}
@@ -294,7 +281,7 @@ class App extends PureComponent {
             <FPSStats isActive />
 
             <StaticMap
-              viewportId="basemap"
+              viewId="basemap"
               {...mapViewState}
               mapboxApiAccessToken={MapboxAccessToken || 'no_token'}
               width={width}
@@ -302,11 +289,11 @@ class App extends PureComponent {
               onViewportChange={this._onViewportChange}
             />
 
-            <ViewportLabel viewportId="first-person">First Person View</ViewportLabel>
+            <ViewportLabel viewId="first-person">First Person View</ViewportLabel>
 
-            <ViewportLabel viewportId="basemap">Map View</ViewportLabel>
+            <ViewportLabel viewId="basemap">Map View</ViewportLabel>
 
-            <ViewportLabel viewportId="infovis">
+            <ViewportLabel viewId="infovis">
               Orbit View (PlotLayer only, No Navigation)
             </ViewportLabel>
           </DeckGL>

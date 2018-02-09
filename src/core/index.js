@@ -47,6 +47,12 @@ export {default as lighting} from './shaderlib/lighting/lighting';
 // Experimental Features (May change in minor version bumps, use at your own risk)
 
 import {default as View} from './views/view';
+import {default as MapView} from './views/map-view';
+import {default as FirstPersonView} from './views/first-person-view';
+import {default as ThirdPersonView} from './views/third-person-view';
+import {default as OrbitView} from './views/orbit-view';
+import {default as PerspectiveView} from './views/perspective-view';
+import {default as OrthographicView} from './views/orthographic-view';
 
 import {default as FirstPersonState} from './controllers/first-person-state';
 import {default as OrbitState} from './controllers/orbit-state';
@@ -77,9 +83,7 @@ import {default as ViewportFlyToInterpolator} from './transitions/viewport-fly-t
 // INTERNAL EXPORTS
 
 import TransitionManager from './lib/transition-manager';
-import {extractViewportFrom} from './transitions/transition-utils';
-
-// Layer utilities
+import {extractViewState} from './transitions/transition-utils';
 
 // Layer utilities
 import {default as log} from './utils/log';
@@ -98,6 +102,12 @@ import {fp64ify, fp64LowPart} from './utils/fp64';
 
 export const experimental = {
   View,
+  MapView,
+  FirstPersonView,
+  ThirdPersonView,
+  OrbitView,
+  PerspectiveView,
+  OrthographicView,
 
   ViewportControls: Controller,
   FirstPersonState,
@@ -127,7 +137,7 @@ export const experimental = {
 
   // For react module
   TransitionManager,
-  extractViewportFrom,
+  extractViewState,
 
   // For layers
   BinSorter,
