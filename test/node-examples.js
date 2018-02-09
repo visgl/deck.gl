@@ -56,10 +56,11 @@ async function validateWithWaitingTime(child, waitingTime, threshold) {
     diffImage.data,
     goldImage.width,
     goldImage.height,
-    {threshold: 0.01, includeAA: true}
+    {threshold: 0.068, includeAA: true}
   );
 
   const pixelDiffRatio = pixelDiffSize / (goldImage.width * goldImage.height);
+  console.log(`Mismatched pixel number: ${pixelDiffSize}`);
   console.log(`Mismatched pixel ratio: ${pixelDiffRatio}`);
 
   diffImage.pack().pipe(fs.createWriteStream('diff.png'));
@@ -103,31 +104,38 @@ process.chdir('./examples');
   let valid = true;
 
   console.log('--------------------------');
+  console.log('Begin to test geojson');
+  process.chdir('./geojson');
+  child = await yarnAndLaunchWebpack();
+  valid = await validateWithWaitingTime(child, 5000, 0.01);
+  process.chdir('../');
+
+  console.log('--------------------------');
   console.log('Begin to test graph');
   process.chdir('./graph');
   child = await yarnAndLaunchWebpack();
-  valid = valid && (await validateWithWaitingTime(child, 10000, 0.01));
+  valid = await validateWithWaitingTime(child, 10000, 0.01);
   process.chdir('../');
 
   console.log('--------------------------');
   console.log('Begin to test 3d-heatmap');
   process.chdir('./3d-heatmap');
   child = await yarnAndLaunchWebpack();
-  valid = valid && (await validateWithWaitingTime(child, 5000, 0.01));
+  valid = await validateWithWaitingTime(child, 5000, 0.01);
   process.chdir('../');
 
   console.log('--------------------------');
   console.log('Begin to test arc');
   process.chdir('./arc');
   child = await yarnAndLaunchWebpack();
-  valid = valid && (await validateWithWaitingTime(child, 5000, 0.001));
+  valid = await validateWithWaitingTime(child, 5000, 0.001);
   process.chdir('../');
 
   console.log('--------------------------');
   console.log('Begin to test bezier');
   process.chdir('./bezier');
   child = await yarnAndLaunchWebpack();
-  valid = valid && (await validateWithWaitingTime(child, 5000, 0.001));
+  valid = await validateWithWaitingTime(child, 5000, 0.001);
   process.chdir('../');
 
   /* console.log('--------------------------')
@@ -137,12 +145,12 @@ process.chdir('./examples');
   valid = valid && await validateWithWaitingTime(child, 5000, 0.001);
   process.chdir('../'); */
 
-  console.log('--------------------------');
+  /* console.log('--------------------------');
   console.log('Begin to test geojson');
   process.chdir('./geojson');
   child = await yarnAndLaunchWebpack();
-  valid = valid && (await validateWithWaitingTime(child, 5000, 0.01));
-  process.chdir('../');
+  valid = (await validateWithWaitingTime(child, 5000, 0.01));
+  process.chdir('../'); */
 
   process.exit(valid ? 0 : 1); //eslint-disable-line
 })();
