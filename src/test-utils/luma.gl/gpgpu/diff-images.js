@@ -3,6 +3,8 @@
  * Based on 2010 paper by Yuriy Kotsarenko and Fernando Ramos
  * http://www.progmat.uaem.mx:8080/artVol2Num2/Articulo3Vol2Num2.pdf
  */
+const DEFAULT_THRESHOLD = 255 * 0.05;
+
 const getY = (r, g, b) => r * 0.29889531 + g * 0.58662247 + b * 0.11448223;
 const getI = (r, g, b) => r * 0.59597799 - g * 0.2741761 - b * 0.32180189;
 const getQ = (r, g, b) => r * 0.21147017 - g * 0.52261711 + b * 0.31114694;
@@ -41,4 +43,18 @@ export function colorDeltaSq(img1, img2, index) {
   );
 }
 
-export default colorDeltaSq;
+// TODO - expects imagedata structs
+// may need a helper func to accept different arguments types
+export function diffImagePixels(data1, data2, colorDeltaThreshold = DEFAULT_THRESHOLD) {
+  const pixelCount = data1.data.length / 4;
+  const maxDeltaSq = colorDeltaThreshold * colorDeltaThreshold;
+  let badPixels = 0;
+  for (let i = 0; i < pixelCount; i++) {
+    const delta = colorDeltaSq(data1.data, data2.data, i);
+    if (delta > maxDeltaSq) {
+      badPixels++;
+    }
+  }
+  const percentage = 1 - badPixels / pixelCount;
+  return percentage;
+}

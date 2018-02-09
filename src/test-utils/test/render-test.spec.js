@@ -18,24 +18,46 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-require('./node-aliases');
+import {RenderTest} from '@deck.gl/test-utils';
 
-// Import headless luma support
-require('luma.gl/headless');
+import {ScatterplotLayer} from 'deck.gl';
 
-require('@deck.gl/test-utils');
+const TEST_CASES = [
+  {
+    name: 'scatterplot-lnglat',
+    viewState: {
+      latitude: 37.751537058389985,
+      longitude: -122.42694203247012,
+      zoom: 11.5,
+      pitch: 0,
+      bearing: 0
+    },
+    layers: [
+      new ScatterplotLayer({
+        id: 'scatterplot-lnglat',
+        data: dataSamples.points,
+        getPosition: d => d.COORDINATES,
+        getColor: d => [255, 128, 0],
+        getRadius: d => d.SPACES,
+        opacity: 1,
+        pickable: true,
+        radiusScale: 30,
+        radiusMinPixels: 1,
+        radiusMaxPixels: 30
+      })
+    ],
+    referenceImageUrl: './test/render/golden-images/scatterplot-lnglat.png'
+  }
+];
 
-// Run a smaller selection of the tests (avoid overwhelming Travis CI)
-require('./src/imports-spec');
-require('./src/core');
+const testRendering = new RenderTest({
+  testCases: TEST_CASES,
+  width: 800,
+  height: 450,
+  // Max color delta in the YIQ difference metric for two pixels to be considered the same
+  colorDeltaThreshold: 255 * 0.05,
+  // Percentage of pixels that must be the same for the test to pass
+  testPassThreshold: 0.99
+});
 
-// require('./src/core-layers');
-
-require('./src/core-layers/polygon-tesselation.spec');
-// require('./core-layers.spec');
-// require('./polygon-layer.spec');
-require('./src/core-layers/geojson.spec');
-// require('./geojson-layer.spec');
-// require('./hexagon-cell-layer.spec');
-// require('./grid-layer.spec');
-// require('./hexagon-layer.spec');
+testRendering.run();

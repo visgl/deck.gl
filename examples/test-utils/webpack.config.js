@@ -12,7 +12,7 @@ module.exports = {
 
   // Bundle the tests for running in the browser
   entry: {
-    'test-rendering': resolve('test-rendering.js')
+    'test-browser': resolve('./test/render/test-rendering.js')
   },
 
   // Generate a bundle in dist folder
@@ -25,14 +25,21 @@ module.exports = {
 
   resolve: {
     alias: {
-      'deck.gl': resolve('../../src'),
-      '@deck.gl/test-utils': resolve('../../src/test-utils/src'),
-      'deck.gl-layers': resolve('../../src/experimental-layers/src')
+      'deck.gl': resolve('./src'),
+      '@deck.gl/test-utils': resolve('./src/test-utils/src'),
+      'deck.gl-layers': resolve('./src/experimental-layers/src')
     }
   },
 
   module: {
-    rules: []
+    rules: [
+      {
+        // Unfortunately, webpack doesn't import library sourcemaps on its own...
+        test: /\.js$/,
+        use: ['source-map-loader'],
+        enforce: 'pre'
+      }
+    ]
   },
 
   node: {

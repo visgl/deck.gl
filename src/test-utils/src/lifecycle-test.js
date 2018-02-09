@@ -19,8 +19,8 @@
 // THE SOFTWARE.
 
 import {LayerManager, WebMercatorViewport} from 'deck.gl/core';
-import spy from './spy';
-import gl from './setup-gl';
+import spy from './utils/spy';
+import gl from './utils/setup-gl';
 
 export function testInitializeLayer({layer, viewport}) {
   const layerManager = new LayerManager(gl);

@@ -1,7 +1,7 @@
 /* eslint-disable quotes, no-console */
 /* global console */
 import 'luma.gl';
-import {global, isBrowser} from './utils/globals';
+import {global, isBrowser} from '../utils/globals';
 
 const ERR_NO_HEADLESS_GL = `\
 Failed to dynamically load headless gl. \
@@ -25,7 +25,7 @@ if (!isBrowser) {
 export const isWebglAvailable = isBrowser || luma.globals.headlessGL;
 
 if (isWebglAvailable) {
-  console.log('WebGL initialized');
+  // console.log('WebGL initialized');
 }
 
 // Create context
