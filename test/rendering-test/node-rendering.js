@@ -18,8 +18,6 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-// Enables ES2015 import/export in Node.js
-
 const {execFile} = require('child_process');
 const puppeteer = require('puppeteer');
 const console = require('console');
