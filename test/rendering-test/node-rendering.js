@@ -34,26 +34,32 @@ async function getColor(page, selector) {
 }
 
 async function validateRendering(child) {
-  const browser = await puppeteer.launch({
-    headless: false,
-    executablePath: '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
-  });
-  const page = await browser.newPage();
-  await page.waitFor(1000);
-  await page.goto('http://localhost:8080');
-  await page.setViewport({width: 1550, height: 850});
+  try {
+    const browser = await puppeteer.launch({
+      headless: false,
+      executablePath: '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
+    });
+    const page = await browser.newPage();
+    await page.waitFor(1000);
+    await page.goto('http://localhost:8080');
+    await page.setViewport({width: 1550, height: 850});
 
-  const color = await getColor(page, 'body > div:nth-child(7) > p');
+    const color = await getColor(page, 'body > div:nth-child(7) > p');
 
-  child.kill();
-  await page.waitFor(1000);
-  await browser.close();
+    child.kill();
+    await page.waitFor(1000);
+    await browser.close();
 
-  if (color !== 'rgb(11, 255, 28)') {
-    console.log('Rendering test failed!');
+    if (color !== 'rgb(11, 255, 28)') {
+      console.log('Rendering test failed!');
+      return false;
+    }
+    return true;
+  } catch (error) {
+    console.log(error);
+    child.kill();
     return false;
   }
-  return true;
 }
 
 const child = execFile(
