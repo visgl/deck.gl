@@ -258,7 +258,6 @@ And of course Views can also fully overlap.
 
 ### Autolayouting Base Components
 
-Now uses `views` property and looks for `viewId` instead of `viewportId`:
 ```js
   render() {
     <DeckGL

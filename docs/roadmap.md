@@ -44,7 +44,7 @@ Multi viewport support can be used to integrate with the WebVR API and create du
 
 ### Automatic Positioning of React Children under Viewports
 
-In addition, a new `viewportId` React property can be added to `DeckGL`'s children. This will synchronize the position of the react component with the corresponding deck.gl viewport, which makes it trivial to precisely position e.g. multiple "base maps" and other background or foreground HTML components in multi-viewport layouts. The `viewportId` prop also automatically hides the react children when a viewport with the corresponding id is not present or when viewport parameters can not be supported by the underlying map component.
+In addition, a new `viewId` React property can be added to `DeckGL`'s children. This will synchronize the position of the react component with the corresponding deck.gl viewport, which makes it trivial to precisely position e.g. multiple "base maps" and other background or foreground HTML components in multi-viewport layouts. The `viewportId` prop also automatically hides the react children when a viewport with the corresponding id is not present or when viewport parameters can not be supported by the underlying map component.
 
 ### Orbit Controller and Orbit Viewport Support
 
