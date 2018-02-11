@@ -240,37 +240,31 @@ class Root extends Component {
 
     return (
       <div style={{backgroundColor: '#000'}}>
-        <ViewportController
-          viewportState={FirstPersonState}
-          {...viewportProps}
+        <DeckGL
+          id="first-person"
+          views={this._renderViews()}
+          layers={this._renderLayers()}
           width={viewportProps.width}
           height={viewportProps.height}
+          viewportState={FirstPersonState}
+          viewState={viewportProps}
           onViewportChange={this._onViewportChange}
         >
-          <DeckGL
-            id="first-person"
-            width={viewportProps.width}
-            height={viewportProps.height}
-            viewState={viewportProps}
-            views={this._renderViews()}
-            layers={this._renderLayers()}
-          >
-            <StaticMap
-              viewId="3rd-person"
-              {...viewportProps}
-              mapStyle="mapbox://styles/mapbox/light-v9"
-              mapboxApiAccessToken={MAPBOX_TOKEN}
-            />
-            <StaticMap
-              viewId="basemap"
-              {...viewportProps}
-              mapStyle="mapbox://styles/mapbox/dark-v9"
-              mapboxApiAccessToken={MAPBOX_TOKEN}
-            />
-          </DeckGL>
+          <StaticMap
+            viewId="3rd-person"
+            {...viewportProps}
+            mapStyle="mapbox://styles/mapbox/light-v9"
+            mapboxApiAccessToken={MAPBOX_TOKEN}
+          />
+          <StaticMap
+            viewId="basemap"
+            {...viewportProps}
+            mapStyle="mapbox://styles/mapbox/dark-v9"
+            mapboxApiAccessToken={MAPBOX_TOKEN}
+          />
+        </DeckGL>
 
-          {this._renderOptionsPanel()}
-        </ViewportController>
+        {this._renderOptionsPanel()}
       </div>
     );
   }
