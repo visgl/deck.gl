@@ -19,6 +19,7 @@
 // THE SOFTWARE.
 
 import Viewport from './viewport';
+import log from '../utils/log';
 import {Matrix4, experimental} from 'math.gl';
 const {SphericalCoordinates} = experimental;
 
@@ -30,6 +31,8 @@ function getDirectionFromBearingAndPitch({bearing, pitch}) {
 
 export default class FirstPersonViewport extends Viewport {
   constructor(opts = {}) {
+    log.deprecated('FirstPersonViewport', 'FirstPersonView');
+
     // TODO - push direction handling into Matrix4.lookAt
     const {
       // view matrix arguments
@@ -58,5 +61,3 @@ export default class FirstPersonViewport extends Viewport {
     );
   }
 }
-
-FirstPersonViewport.displayName = 'FirstPersonViewport';

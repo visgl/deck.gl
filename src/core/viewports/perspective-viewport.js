@@ -19,6 +19,7 @@
 // THE SOFTWARE.
 
 import Viewport from './viewport';
+import log from '../utils/log';
 import mat4_lookAt from 'gl-mat4/lookAt';
 import mat4_perspective from 'gl-mat4/perspective';
 
@@ -40,6 +41,8 @@ export default class PerspectiveViewport extends Viewport {
     // automatically calculated
     aspect = null // Aspect ratio (set to viewport widht/height)
   }) {
+    log.deprecated('PerspectiveViewport', 'PerspectiveView');
+
     const fovyRadians = fovy * DEGREES_TO_RADIANS;
     aspect = Number.isFinite(aspect) ? aspect : width / height;
     super({
