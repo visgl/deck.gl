@@ -22,6 +22,10 @@ import {RenderTest} from '@deck.gl/test-utils';
 
 import {ScatterplotLayer} from 'deck.gl';
 
+const dataSamples = {
+  points: [] // TBA
+};
+
 const TEST_CASES = [
   {
     name: 'scatterplot-lnglat',
