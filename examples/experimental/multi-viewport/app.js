@@ -251,12 +251,6 @@ class Root extends Component {
           onViewportChange={this._onViewportChange}
         >
           <StaticMap
-            viewId="3rd-person"
-            {...viewportProps}
-            mapStyle="mapbox://styles/mapbox/light-v9"
-            mapboxApiAccessToken={MAPBOX_TOKEN}
-          />
-          <StaticMap
             viewId="basemap"
             {...viewportProps}
             mapStyle="mapbox://styles/mapbox/dark-v9"

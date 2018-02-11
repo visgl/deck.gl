@@ -233,11 +233,11 @@ export default class Deck {
     // Cannot use defaultProps here because it needs to be per map instance
     let controls = props.controls;
     if (props.viewportState) {
-      controls = new ViewportControls(props.viewportState);
+      controls = new ViewportControls(props.viewportState, props);
     }
     if (controls) {
       controls.setOptions(
-        Object.assign({}, props, {
+        Object.assign({}, props, props.viewState, {
           onStateChange: this._onInteractiveStateChange.bind(this),
           eventManager: this.eventManager
         })
@@ -249,7 +249,7 @@ export default class Deck {
   _setControlProps(props) {
     // const viewState = this._getViewState(props);
     if (this.controls) {
-      this.controls.setOptions(props);
+      this.controls.setOptions(Object.assign({}, props, props.viewState));
     }
   }
 
