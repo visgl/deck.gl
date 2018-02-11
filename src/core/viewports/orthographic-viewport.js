@@ -19,6 +19,7 @@
 // THE SOFTWARE.
 
 import Viewport from './viewport';
+import log from '../utils/log';
 import mat4_lookAt from 'gl-mat4/lookAt';
 import mat4_ortho from 'gl-mat4/ortho';
 
@@ -40,6 +41,8 @@ export default class OrthographicViewport extends Viewport {
     right = null, // Right bound of the frustum
     bottom = null // Bottom bound of the frustum
   }) {
+    log.deprecated('OrthgraphicViewport', 'OrthgraphicView');
+
     right = Number.isFinite(right) ? right : left + width;
     bottom = Number.isFinite(bottom) ? bottom : top + height;
     super({
