@@ -1,9 +1,11 @@
 /* global window, document, fetch */
 import React, {Component} from 'react';
 import {render} from 'react-dom';
-
 import {COORDINATE_SYSTEM, DeckGL, PolygonLayer, PointCloudLayer, experimental} from 'deck.gl';
+import TripsLayer from '../../trips/trips-layer';
+import {StaticMap} from 'react-map-gl';
 
+// deck.gl React components
 const {
   // Unified controller, together with state that determines interaction model
   FirstPersonState,
@@ -13,10 +15,6 @@ const {
   ViewportController,
   LinearInterpolator
 } = experimental;
-
-import TripsLayer from '../../trips/trips-layer';
-
-import {StaticMap} from 'react-map-gl';
 
 // Source data CSV
 const DATA_URL = {
@@ -171,9 +169,6 @@ class Root extends Component {
             justifyContent: 'center'
           }}
         >
-          <button key="mode" onClick={this._onViewportModeChange}>
-            {this.state.viewportMode ? 'First Person' : 'Mercator'}
-          </button>
           <button key="fov" onClick={this._onFovChange}>
             {`FOV : ${this.state.fov}`}
           </button>
@@ -321,6 +316,7 @@ class Root extends Component {
             id="first-person"
             width={viewportProps.width}
             height={viewportProps.height}
+            viewState={viewportProps}
             views={this._renderViews()}
             layers={this._renderLayers()}
           >
