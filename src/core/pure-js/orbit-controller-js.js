@@ -1,4 +1,3 @@
-import PropTypes from 'prop-types';
 import OrbitViewport from '../viewports/orbit-viewport';
 import OrbitState from '../controllers/orbit-state';
 import ViewportControls from '../controllers/viewport-controls';
@@ -12,37 +11,39 @@ const CURSOR = {
   POINTER: 'pointer'
 };
 
-const propTypes = {
-  /* Viewport properties */
-  lookAt: PropTypes.arrayOf(PropTypes.number), // target position
-  distance: PropTypes.number, // distance from camera to the target
-  rotationX: PropTypes.number, // rotation around X axis
-  rotationY: PropTypes.number, // rotation around Y axis
-  translationX: PropTypes.number, // translation x in screen space
-  translationY: PropTypes.number, // translation y in screen space
-  zoom: PropTypes.number, // scale in screen space
-  minZoom: PropTypes.number,
-  maxZoom: PropTypes.number,
-  fov: PropTypes.number, // field of view
-  near: PropTypes.number,
-  far: PropTypes.number,
-  width: PropTypes.number.isRequired, // viewport width in pixels
-  height: PropTypes.number.isRequired, // viewport height in pixels
-
-  /* Model properties */
-  bounds: PropTypes.object, // bounds in the shape of {minX, minY, minZ, maxX, maxY, maxZ}
-
-  /* Callbacks */
-  onViewportChange: PropTypes.func.isRequired,
-
-  /** Accessor that returns a cursor style to show interactive state */
-  getCursor: PropTypes.func,
-
-  /* Controls */
-  orbitControls: PropTypes.object
-};
-
 const getDefaultCursor = ({isDragging}) => (isDragging ? CURSOR.GRABBING : CURSOR.GRAB);
+
+function getPropTypes(PropTypes) {
+  return {
+    /* Viewport properties */
+    lookAt: PropTypes.arrayOf(PropTypes.number), // target position
+    distance: PropTypes.number, // distance from camera to the target
+    rotationX: PropTypes.number, // rotation around X axis
+    rotationY: PropTypes.number, // rotation around Y axis
+    translationX: PropTypes.number, // translation x in screen space
+    translationY: PropTypes.number, // translation y in screen space
+    zoom: PropTypes.number, // scale in screen space
+    minZoom: PropTypes.number,
+    maxZoom: PropTypes.number,
+    fov: PropTypes.number, // field of view
+    near: PropTypes.number,
+    far: PropTypes.number,
+    width: PropTypes.number.isRequired, // viewport width in pixels
+    height: PropTypes.number.isRequired, // viewport height in pixels
+
+    /* Model properties */
+    bounds: PropTypes.object, // bounds in the shape of {minX, minY, minZ, maxX, maxY, maxZ}
+
+    /* Callbacks */
+    onViewportChange: PropTypes.func.isRequired,
+
+    /** Accessor that returns a cursor style to show interactive state */
+    getCursor: PropTypes.func,
+
+    /* Controls */
+    orbitControls: PropTypes.object
+  };
+}
 
 const defaultProps = {
   lookAt: [0, 0, 0],
@@ -115,5 +116,5 @@ export default class OrbitControllerJS {
 }
 
 OrbitControllerJS.displayName = 'OrbitController';
-OrbitControllerJS.propTypes = propTypes;
 OrbitControllerJS.defaultProps = defaultProps;
+OrbitControllerJS.getPropTypes = getPropTypes;

@@ -25,7 +25,7 @@ import {inheritsFrom} from './utils/inherits-from';
 import {Layer, experimental} from '../../core';
 const {Deck, log} = experimental;
 
-const propTypes = Object.assign({}, Deck.propTypes, {
+const propTypes = Object.assign({}, Deck.getPropTypes(PropTypes), {
   viewports: PropTypes.array, // Deprecated
   viewport: PropTypes.object // Deprecated
 });
