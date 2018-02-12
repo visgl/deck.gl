@@ -7,12 +7,7 @@ import {COORDINATE_SYSTEM, DeckGL, PolygonLayer, PointCloudLayer, experimental} 
 import TripsLayer from '../../trips/trips-layer';
 
 // deck.gl React components
-const {
-  FirstPersonState,
-  MapView,
-  FirstPersonView,
-  ThirdPersonView
-} = experimental;
+const {FirstPersonState, MapView, FirstPersonView, ThirdPersonView} = experimental;
 
 import {StaticMap} from 'react-map-gl';
 
