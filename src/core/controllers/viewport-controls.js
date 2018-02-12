@@ -125,7 +125,6 @@ export default class ViewportControls {
    */
   setOptions(options) {
     const {
-      onViewportChange,
       onStateChange = this.onStateChange,
       eventManager = this.eventManager,
       scrollZoom = true,
@@ -137,7 +136,9 @@ export default class ViewportControls {
       keyboard = true
     } = options;
 
-    this.onViewportChange = onViewportChange;
+    if ('onViewportChange' in options) {
+      this.onViewportChange = options.onViewportChange;
+    }
     this.onStateChange = onStateChange;
     this.viewportStateProps = options;
 

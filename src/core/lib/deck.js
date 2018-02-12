@@ -23,8 +23,10 @@ import EffectManager from '../experimental/lib/effect-manager';
 import Effect from '../experimental/lib/effect';
 
 import WebMercatorViewport from '../viewports/web-mercator-viewport';
-import ViewportControls from '../controllers/viewport-controls';
 import TransitionManager from '../lib/transition-manager';
+
+import ViewportControls from '../controllers/viewport-controls';
+import MapState from '../controllers/map-state';
 
 import {EventManager} from 'mjolnir.js';
 import {GL, AnimationLoop, createGLContext, setParameters} from 'luma.gl';
@@ -115,6 +117,8 @@ const defaultProps = Object.assign({}, TransitionManager.defaultProps, {
   useDevicePixels: true,
 
   // Controller props
+  controls: null,
+  viewportState: MapState,
   onViewportChange: null,
 
   scrollZoom: true,
@@ -239,17 +243,27 @@ export default class Deck {
       controls.setOptions(
         Object.assign({}, props, props.viewState, {
           onStateChange: this._onInteractiveStateChange.bind(this),
-          eventManager: this.eventManager
+          eventManager: this.eventManager,
+          // Add a default event handler in case non was provided
+          // This allows basic examples to not specify any callbacks
+          onViewportChange: props.onViewportChange || this._onViewportChange.bind(this)
         })
       );
+
+      // if (!props.onViewStateChange && !props.onViewportChange) {
+      //   controls.setOptions({
+      //     onViewStateChange: this._onViewStateChange.bind(this),
+      //   });
+      // }
     }
+
     return controls;
   }
 
   _setControlProps(props) {
     // const viewState = this._getViewState(props);
     if (this.controls) {
-      this.controls.setOptions(Object.assign({}, props, props.viewState));
+      // this.controls.setOptions(Object.assign({}, props, props.viewState));
     }
   }
 
@@ -376,6 +390,15 @@ export default class Deck {
       this.state.isDragging = isDragging;
       this.canvas.style.cursor = this.props.getCursor({isDragging});
     }
+  }
+
+  // Default view state change handlers
+  _onViewportChange(viewState) {
+    this.setProps({viewState});
+  }
+
+  _onViewStateChange({viewState}) {
+    this.setProps({viewState});
   }
 }
 
