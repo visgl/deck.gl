@@ -1,7 +1,7 @@
 /* global window, fetch */
 import {experimental, GeoJsonLayer} from 'deck.gl';
 const {Deck, MapControllerJS} = experimental;
-import MapBox from './mapbox';
+import MapBox from '../../../src/add-ons/mapbox';
 
 // source: Natural Earth http://www.naturalearthdata.com/ via geojson.xyz
 const GEOJSON =
