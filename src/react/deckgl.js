@@ -36,7 +36,7 @@ const propTypes = Object.assign({}, Deck.propTypes, {
   bearing: PropTypes.number, // Specify the bearing of the viewport
   pitch: PropTypes.number, // Specify the pitch of the viewport
   altitude: PropTypes.number, // Altitude of camera. Default 1.5 "screen heights"
-  position: PropTypes.array, // Camera position for FirstPersonViewport
+  position: PropTypes.array // Camera position for FirstPersonViewport
 });
 
 const defaultProps = Deck.defaultProps;

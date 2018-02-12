@@ -11,8 +11,7 @@ const {
   FirstPersonState,
   MapView,
   FirstPersonView,
-  ThirdPersonView,
-  ViewportController
+  ThirdPersonView
 } = experimental;
 
 import {StaticMap} from 'react-map-gl';
