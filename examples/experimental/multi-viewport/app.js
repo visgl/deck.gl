@@ -1,21 +1,20 @@
 /* global window, document, fetch */
 import React, {Component} from 'react';
 import {render} from 'react-dom';
-
 import {COORDINATE_SYSTEM, DeckGL, PolygonLayer, PointCloudLayer, experimental} from 'deck.gl';
-
 import TripsLayer from '../../trips/trips-layer';
+import {StaticMap} from 'react-map-gl';
 
 // deck.gl React components
 const {
+  // Unified controller, together with state that determines interaction model
   FirstPersonState,
   MapView,
   FirstPersonView,
   ThirdPersonView,
-  ViewportController
+  ViewportController,
+  LinearInterpolator
 } = experimental;
-
-import {StaticMap} from 'react-map-gl';
 
 // Source data CSV
 const DATA_URL = {
@@ -51,11 +50,22 @@ const DEFAULT_VIEWPORT_PROPS = {
   up: [0, 0, 1] // Defines up direction, default positive y axis
 };
 
+const transitionInterpolator = new LinearInterpolator([
+  'longitude',
+  'latitude',
+  'zoom',
+  'bearing',
+  'pitch',
+  'position'
+]);
+
 class Root extends Component {
   constructor(props) {
     super(props);
     this.state = {
       fov: 50,
+      animatePosition: true,
+      animateBearing: true,
 
       viewportProps: {
         ...DEFAULT_VIEWPORT_PROPS,
@@ -65,7 +75,8 @@ class Root extends Component {
       buildings: null,
       trips: null,
       time: 0,
-      trailLength: 50
+      trailLength: 50,
+      transitionDuration: 0
     };
 
     fetch(DATA_URL.BUILDINGS)
@@ -78,6 +89,7 @@ class Root extends Component {
 
     this._onViewportChange = this._onViewportChange.bind(this);
     this._onFovChange = this._onFovChange.bind(this);
+    this._animateViewport = this._animateViewport.bind(this);
   }
 
   componentDidMount() {
@@ -113,7 +125,8 @@ class Root extends Component {
   _onViewportChange(viewportProps, viewport) {
     this.setState({
       viewportProps: {...this.state.viewportProps, ...viewportProps},
-      viewport
+      viewport,
+      transitionDuration: 0
     });
   }
 
@@ -121,6 +134,30 @@ class Root extends Component {
     this.setState({fov: this.state.fov === 60 ? 35 : 60});
   }
 
+  _animateViewport() {
+    const {animatePosition, animateBearing} = this.state;
+    if (animatePosition || animateBearing) {
+      const position = Array.from(this.state.viewportProps.position);
+      if (animatePosition) {
+        position[0] -= 100.0;
+        position[1] -= 100.0;
+      }
+      let bearing = this.state.viewportProps.bearing;
+      if (animateBearing) {
+        bearing += 30.0;
+      }
+      this.setState({
+        viewportProps: {...this.state.viewportProps, position, bearing},
+        transitionDuration: 3000
+      });
+    }
+  }
+
+  _onValueChange(settingName, newValue) {
+    this.setState({
+      [settingName]: newValue
+    });
+  }
   _renderOptionsPanel() {
     return (
       <div style={{position: 'absolute', top: '8px', right: '8px'}}>
@@ -135,6 +172,34 @@ class Root extends Component {
           <button key="fov" onClick={this._onFovChange}>
             {`FOV : ${this.state.fov}`}
           </button>
+          <button key="AnimateViewport" onClick={this._animateViewport}>
+            {'AnimateViewport'}
+          </button>
+
+          <div className="input-group">
+            <label htmlFor={'animatePosition'} style={{color: 'white'}}>
+              <span>{'animatePosition'}</span>
+            </label>
+            <input
+              type="checkbox"
+              id={'animatePosition'}
+              checked={this.state.animatePosition}
+              onChange={e => this._onValueChange('animatePosition', e.target.checked)}
+            />
+          </div>
+
+          <div className="input-group">
+            <label htmlFor={'animateBearing'} style={{color: 'white'}}>
+              <span>{'animateBearing'}</span>
+            </label>
+            <input
+              type="checkbox"
+              id={'animateBearing'}
+              checked={this.state.animateBearing}
+              onChange={e => this._onValueChange('animateBearing', e.target.checked)}
+            />
+          </div>
+
           <div style={{color: 'white'}}>
             {Object.keys(this.state.viewportProps).map(key => (
               <div key={key}>
@@ -234,7 +299,7 @@ class Root extends Component {
   }
 
   render() {
-    const {viewportProps} = this.state;
+    const {viewportProps, transitionDuration} = this.state;
 
     return (
       <div style={{backgroundColor: '#000'}}>
@@ -244,6 +309,8 @@ class Root extends Component {
           width={viewportProps.width}
           height={viewportProps.height}
           onViewportChange={this._onViewportChange}
+          transitionDuration={transitionDuration}
+          transitionInterpolator={transitionInterpolator}
         >
           <DeckGL
             id="first-person"
