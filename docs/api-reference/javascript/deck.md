@@ -4,7 +4,6 @@
 
 * Picking methods are supplied to enable applications to use their own event handling.
 
-
 * TBA - child handling from react component.
 
 
@@ -14,12 +13,11 @@
 ```js
 import {Deck, ScatterplotLayer} from 'deck.gl';
 
-const App = (viewport, data) => (
-  const deck = new Deck();
-  deck.setProps({
-    ...viewport,
+const App = (viewState, data) => (
+  const deck = new Deck({
     layers: [new ScatterplotLayer({data})]
   });
+  deck.setProps({viewState});
 );
 ```
 
@@ -27,17 +25,22 @@ const App = (viewport, data) => (
 
 ##### constructor
 
-`new Deck(props)`
-
 Creates a new Deck instance.
 
+`new Deck(props)`
 
-##### destroy/delete/finalize
+
+##### delete
 
 Frees resources associated with this object immediately.
 
 
 ##### setProps
+
+Updates properties
+
+`deck.setProps({...});`
+
 
 
 ##### pickObject
@@ -46,17 +49,13 @@ Get the closest pickable and visible object at screen coordinate.
 
 `deck.pickObject({x, y, radius, layerIds})`
 
-Parameters:
-- `options` (Object)
-  + `x` (Number) - x position in pixels
-  + `y` (Number) - y position in pixels
-  + `radius` (Number, optional) - radius of tolerance in pixels. Default `0`.
-  + `layerIds` (Array, optional) - a list of layer ids to query from.
-    If not specified, then all pickable and visible layers are queried.
+* `x` (Number) - x position in pixels
+* `y` (Number) - y position in pixels
+* `radius` (Number, optional) - radius of tolerance in pixels. Default `0`.
+* `layerIds` (Array, optional) - a list of layer ids to query from. If not specified, then all pickable and visible layers are queried.
 
 Returns: a single [`info`](/docs/get-started/interactivity.md#the-picking-info-object) object, or `null` if nothing is found.
 
-NOTE: replaces deprecated method `queryObject`.
 
 ##### pickObjects
 
@@ -65,42 +64,17 @@ Get all pickable and visible objects within a bounding box.
 `deck.pickObjects({x, y, width, height, layerIds})`
 
 Parameters:
-- `options` (Object)
-  + `x` (Number) - left of the bounding box in pixels
-  + `y` (Number) - top of the bouding box in pixels
-  + `width` (Number, optional) - width of the bouding box in pixels. Default `1`.
-  + `height` (Number, optional) - height of the bouding box in pixels. Default `1`.
-  + `layerIds` (Array, optional) - a list of layer ids to query from.
-    If not specified, then all pickable and visible layers are queried.
+* `x` (Number) - left of the bounding box in pixels
+* `y` (Number) - top of the bouding box in pixels
+* `width` (Number, optional) - width of the bouding box in pixels. Default `1`.
+* `height` (Number, optional) - height of the bouding box in pixels. Default `1`.
+* `layerIds` (Array, optional) - a list of layer ids to query from. If not specified, then all pickable and visible layers are queried.
 
 Returns: an array of unique [`info`](/docs/get-started/interactivity.md#the-picking-info-object) objects
 
 Remarks:
 - This query methods are designed to quickly find objects by utilizing the picking buffer. They offer more flexibility for developers to handle events in addition to the built-in hover and click callbacks.
 - Note there is a limitation in the query methods: occluded objects are not returned. To improve the results, you may try setting the `layerIds` parameter to limit the query to fewer layers.
-- * Since deck.gl is WebGL based, it can only render into a single canvas. Thus all its viewports need to be in the same canvas (unless you use multiple DeckGL instances, but that can have significant resource and performance impact).
-
-NOTE: replaces deprecated method `queryVisibleObjects`.
-
-
-### Experimental Properties
-
-These properties are considered experimental and can change in the next minor version of deck.gl. They are included as previews of functionality that is being developed.
-
-##### `viewports`
-
-A singe viewport, or an array of `Viewport`s or "Viewport Descriptors".
-
-* (`Viewport`|`Viewports[]`, optional) - A singe viewport, or an array of `Viewports` or "Viewport Descriptors".
-
-Default: If not supplied, deck.gl will try to create a `WebMercatorViewport` from other props (longitude, latitude, ...).
-
-This property should contain one or more ([`Viewport`](/docs/api-reference/viewport.md), optional)instances which represents your "camera" (essentially view and projection matrices, together with viewport width and height). By changing the `viewport` you change the view of your layers, e.g. as a result of mouse events or through programmatic animations.
-
-deck.gl will render all the viewports in order.
-
-If `viewports` is not supplied, deck.gl will look for web mercator projection parameters (latitude, longitude, zoom, bearing and pitch) and create a `WebMercatorViewport` (which is a subclass of `Viewport`).
-
 
 ### Properties
 
@@ -120,30 +94,22 @@ The array of deck.gl layers to be rendered. This array is expected to be an arra
 
 Optionally takes a function `({layer, viewport, isPicking}) => Boolean` that is called before a layer is rendered. Gives the application an opportunity to filter out layers from the layer list during either rendering or picking. Filtering can be done per viewport or per layer or both. This enables techniques like adding helper layers that work as masks during picking but do not show up during rendering. All the lifecycle methods are still triggered even a if a layer is filtered out using this prop.
 
+##### `views`
 
-#### View State Properties
+A single `View`, or an array of [`View`](/docs/api-reference/view.md) instances (optionally mixed with [`Viewport`](/docs/api-reference/viewport.md) instances, although the latter is deprecated). If not supplied, a single `MapView` will be created. If an empty array is supplied, no `View` will be shown.
 
-If you do not supply any `viewports` deck.gl will attempt to autocreate one from the following props.
+Remarks:
+* During render and picking, deck.gl will render all the `View`s in the supplied order, this can matter if they overlap.
+* `View`s represent your "camera(s)" (essentially view and projection matrices, together with viewport width and height). By changing the `views` property you change the view of your layers.
 
-##### `latitude` (Number, optional)
+#### `viewState` (Object)
 
-Current latitude - used to define a mercator projection if `viewport` is not supplied.
-
-##### `longitude` (Number, optional)
-
-Current longitude - used to define a mercator projection if `viewport` is not supplied.
-
-##### `zoom` (Number, optional)
-
-Current zoom - used to define a mercator projection if `viewport` is not supplied.
-
-##### `bearing` (Number, optional)
-
-Current bearing - used to define a mercator projection if `viewport` is not supplied.
-
-##### `pitch` (Number, optional)
-
-Current pitch - used to define a mercator projection if `viewport` is not supplied.
+A geospatial `viewState` would typically contain the following fields:
+* `latitude` (Number, optional) - Current latitude - used to define a mercator projection if `viewport` is not supplied.
+* `longitude` (Number, optional) - Current longitude - used to define a mercator projection if `viewport` is not supplied.
+* `zoom` (Number, optional) - Current zoom - used to define a mercator projection if `viewport` is not supplied.
+* `bearing` (Number, optional) - Current bearing - used to define a mercator projection if `viewport` is not supplied.
+* `pitch` (Number, optional) - Current pitch - used to define a mercator projection if `viewport` is not supplied.
 
 
 #### Configuration Properties
@@ -209,6 +175,9 @@ object for the topmost picked layer at the coordinate, null when no object is pi
 - `event` - the original [MouseEvent](https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent) object
 
 
+## Remarks
+
+- Since deck.gl is based on WebGL and uses a single WebGL context, it can only render into a single canvas. Thus all its `View`s will render into the same canvas (unless you use multiple DeckGL instances, but that can have significant resource and performance impact).
 
 
 ## Source
