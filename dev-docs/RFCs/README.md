@@ -49,16 +49,10 @@ Also see luma.gl RFCs
 | RFC | Author | Status | Description |
 | --- | --- | --- | --- |
 | **Animation** | | | |
-| [**PropTypes**](v6.0/prop-types-rfc.md) | ? | Draft | Validate e.g ranges for numeric attributes, support animation/auto-interpolation. |
 | [**Property Animation**](v6.0/property-animation-rfc.md) | @ibgreen | Draft | Allow Layer props and GL parameters to accept functions in addition to values and call these on every render to update values |
-| [**Attribute Animation**](v6.0/attribute-animation-rfc.md) | @pessimistress | Proposed | Automatically interpolate between two copies of a vertex attributes |
 | [**Expose Layer AttributeManager**](v6.0/expose-attribute-manager.md) | @ibgreen | **Review** | simplifies pregenerating attributes in apps for fast animation. |
 | | | | |
-| **Ease-of-Use** | | | |
-| [**dataUrl**](v6.0/data-url-rfc.md) | @pessimistress & @ibgreen | Draft | **Ease-of-Use** Allow deck.gl layers to specify a URL and asynchronously download the resulting data |
-| | | | |
 | **Finalize Multi-Viewport API** | | | |
-| [**New View Class**](v6.0/view-class-rfc.md) | @ibgreen | **Draft** | Proposed Official API for multi-view(port) support, replacing the v5.0 experimental API |
 | [**Per-View Controllers**](v6.0/per-view-controllers-rfc.md) | @ibgreen | **Draft** | Support one controller per view in multi-view apps |
 | [**Unified ViewState**](v6.0/view-state-rfc.md) | @ibgreen | **Draft** | Highly controversial proposal for an even more Unified View/Controller Architecture. Will likely be deferred. Review again after other related RFCs have been approved/implemented |
 | | | | |
@@ -68,6 +62,26 @@ Also see luma.gl RFCs
 
 Possible other animation related RFCs:
 - integration with event handling (enter leave triggers for animations)
+
+
+## v5.2 RFCs
+
+| RFC | Author | Status | Description |
+| --- | --- | --- | --- |
+| [**PropTypes**](v6.0/prop-types-rfc.md) | @ibgreen | **Approved** | Validate e.g ranges for numeric attributes, support animation/auto-interpolation. |
+| | | | |
+| **Finalize Multi-Viewport API** | | | |
+| [**New View Class**](v6.0/view-class-rfc.md) | @ibgreen | **Approved** | Proposed Official API for multi-view(port) support, replacing the v5.0 experimental API |
+| | | | |
+| **Ease-of-Use** | | | |
+| [**dataUrl**](v6.0/data-url-rfc.md) | @pessimistress & @ibgreen | **Review** | Allow deck.gl layers to specify a URL and asynchronously download the resulting data |
+
+
+## v5.1 RFCs
+
+| RFC | Author | Status | Description |
+| --- | --- | --- | --- |
+| [**Attribute Animation**](v6.0/attribute-animation-rfc.md) | @pessimistress | **Approved** | Automatically interpolate between two copies of a vertex attributes |
 
 
 ## v5.0 RFCs

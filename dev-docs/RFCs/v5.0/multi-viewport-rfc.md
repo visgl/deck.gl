@@ -73,7 +73,7 @@ Child autolayouting is intended to render labels, or base maps (or other React c
 
 Since deck.gl is WebGL based, all its viewports need to be in the same canvas (unless you use multiple DeckGL instances, but that can have significant resource and performance impact)
 
-`ViewportLayout` takes a`viewports` prop and positions any children with `viewportId` prop matching the a viewport id under that viewport.  (`viewports` is intended to be the same array passed to the `DeckGL` componentcontaining a possibly mixed array of `Viewports` and "viewport descriptors" ).
+`Deck` takes a`views` prop and positions any children with `viewId` prop matching the a viewport id under that viewport.  (`viewports` is intended to be the same array passed to the `DeckGL` componentcontaining a possibly mixed array of `Viewports` and "viewport descriptors" ).
 
 
 #### Support for positioning background maps
@@ -112,21 +112,21 @@ An important mitigation is that while viewports change very frequently, few laye
 
 For examples, see Usage section below.
 
-### Proposed: `DeckGL.viewports` New Property
+### Proposed: `DeckGL.views` New Property
 
 Allows the main `DeckGL` component to accept a list of Viewports (and/or viewport descriptors). This will deprecated the current `viewport` prop.
 
 Notes:
 * `DeckGL` component should stil create a default viewport from props if none were supplied. Basic apps can still avoid dealing with `Viewport`s.
-* `flattenArray` Call on the viewports prop, just like we do on the `layers`, to support nested arrays.
+* `flattenArray` Call on the views prop, just like we do on the `layers`, to support nested arrays.
 
 
-### Proposed: `DeckGL.viewport` Deprecate in favor of `DeckGL.viewports`.
+### Proposed: `DeckGL.viewport` Deprecate in favor of `DeckGL.views`.
 
 
 ### Proposed: New `DeckGL.children` Property
 * `children` - Normally the DeckGL component is the last child is intentionally rendered on top.
-* `viewports` - A singe viewport, or an array of `Viewport`s or "Viewport Descriptors". Will walk the list looking for viewport ids matching children viewportIds, rendering those components in the position and size specified by that viewport. Positioning is done with CSS styling on a wrapper div, sizing by width and height properties. Also injects the `visible: viewport.isMapSynched()` prop.
+* `views` - A singe viewport, or an array of `Viewport`s or "Viewport Descriptors". Will walk the list looking for viewport ids matching children viewIds, rendering those components in the position and size specified by that viewport. Positioning is done with CSS styling on a wrapper div, sizing by width and height properties. Also injects the `visible: viewport.isMapSynched()` prop.
 
 
 ### Proposed: New `DeckGL.layerFilter` Property
@@ -198,7 +198,7 @@ Autolayouting Base Components
      >
 
       <StaticMap
-        viewportId='basemap'
+        viewId='basemap'
         {...viewportProps}/>
 
     </DeckGL>
