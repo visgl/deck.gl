@@ -319,6 +319,34 @@ export const docPages = generatePath([
         content: getDocUrl('api-reference/attribute-manager.md')
       },
       {
+        name: 'Deck',
+        content: getDocUrl('api-reference/deck.md')
+      },
+      {
+        name: 'View',
+        content: getDocUrl('api-reference/view.md')
+      },
+      {
+        name: 'MapView',
+        content: getDocUrl('api-reference/map-view.md')
+      },
+      {
+        name: 'FirstPersonView',
+        content: getDocUrl('api-reference/first-person-view.md')
+      },
+      {
+        name: 'ThirdPersonView',
+        content: getDocUrl('api-reference/third-person-view.md')
+      },
+      {
+        name: 'OrthographicView',
+        content: getDocUrl('api-reference/orthographic-view.md')
+      },
+      {
+        name: 'PerspectiveView',
+        content: getDocUrl('api-reference/perspective-view.md')
+      },
+      {
         name: 'Viewport',
         content: getDocUrl('api-reference/viewport.md')
       },
@@ -346,10 +374,6 @@ export const docPages = generatePath([
       {
         name: 'DeckGL',
         content: getDocUrl('api-reference/react/deckgl.md')
-      },
-      {
-        name: 'ViewportController',
-        content: getDocUrl('api-reference/react/viewport-controller.md')
       }
     ]
   },
