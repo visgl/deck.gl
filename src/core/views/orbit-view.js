@@ -10,3 +10,5 @@ export default class OrbitView extends View {
     );
   }
 }
+
+OrbitView.displayName = 'OrbitView';

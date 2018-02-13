@@ -103,8 +103,8 @@ export default class Deck {
     this._setLayerManagerProps(props);
 
     // TODO - unify setParameters/setOptions/setProps etc naming.
-    const {useDevicePixels} = props;
-    this.animationLoop.setViewParameters({useDevicePixels});
+    const {useDevicePixels, autoResizeDrawingBuffer} = props;
+    this.animationLoop.setViewParameters({useDevicePixels, autoResizeDrawingBuffer});
   }
 
   finalize() {
@@ -161,12 +161,13 @@ export default class Deck {
   }
 
   _createAnimationLoop(props) {
-    const {width, height, gl, glOptions, debug, useDevicePixels} = props;
+    const {width, height, gl, glOptions, debug, useDevicePixels, autoResizeDrawingBuffer} = props;
 
     return new AnimationLoop({
       width,
       height,
       useDevicePixels,
+      autoResizeDrawingBuffer,
       onCreateContext: opts =>
         gl || createGLContext(Object.assign({}, glOptions, {canvas: this.canvas, debug})),
       onInitialize: this._onRendererInitialized,

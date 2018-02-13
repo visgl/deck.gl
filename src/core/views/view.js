@@ -4,7 +4,7 @@ import {deepEqual} from '../utils/deep-equal';
 import assert from 'assert';
 
 export default class View {
-  constructor(props) {
+  constructor(props = {}) {
     const {
       id = null,
 
@@ -18,7 +18,6 @@ export default class View {
       type = Viewport, // TODO - default to WebMercator?
 
       // Viewport Options
-      viewMatrix, // view matrix
       projectionMatrix = null, // Projection matrix
       fovy = 75, // Perspective projection parameters, used if projectionMatrix not supplied
       near = 0.1, // Distance of near clipping plane
@@ -36,17 +35,16 @@ export default class View {
     this.id = id || this.constructor.displayName || 'view';
     this.type = type;
 
-    // Extents
-    this._parseDimensions({x, y, width, height});
-
-    this.viewportOpts = {
-      viewMatrix,
+    this.props = Object.assign({}, props, {
       projectionMatrix,
       fovy,
       near,
       far,
       modelMatrix
-    };
+    });
+
+    // Extents
+    this._parseDimensions({x, y, width, height});
 
     // Bind methods for easy access
     this.equals = this.equals.bind(this);
@@ -78,23 +76,27 @@ export default class View {
       return this.viewportInstance;
     }
 
-    // Get the type of the viewport
-    const {type: ViewportType} = this;
-
     // Resolve relative viewport dimensions
-    const viewportDimensions = this._getDimensions({width, height});
-
-    return new ViewportType(Object.assign({}, this, viewState, viewportDimensions));
+    const viewportDimensions = this.getDimensions({width, height});
+    const props = Object.assign({viewState}, viewState, this.props, viewportDimensions);
+    return this._getViewport(props);
   }
 
   // Resolve relative viewport dimensions into actual dimensions (y='50%', width=800 => y=400)
-  _getDimensions({width, height}) {
+  getDimensions({width, height}) {
     return {
       x: getPosition(this._x, width),
       y: getPosition(this._y, height),
       width: getPosition(this._width, width),
       height: getPosition(this._height, height)
     };
+  }
+
+  // Overridable method
+  _getViewport(props) {
+    // Get the type of the viewport
+    const {type: ViewportType} = this;
+    return new ViewportType(props);
   }
 
   // Parse relative viewport dimension descriptors (e.g {y: '50%', height: '50%'})

@@ -288,7 +288,9 @@ class Root extends Component {
       new ThirdPersonView({
         id: '3rd-person',
         y: '33.33%',
-        height: '33.33%'
+        height: '33.33%',
+        near: 0.1, // Distance of near clipping plane
+        far: 10000 // Distance of far clipping plane
       }),
       new MapView({
         id: 'basemap',

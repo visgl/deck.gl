@@ -10,3 +10,5 @@ export default class MapView extends View {
     );
   }
 }
+
+MapView.displayName = 'MapView';
