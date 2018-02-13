@@ -158,7 +158,7 @@ export default class DeckGL extends React.Component {
 
   _positionChild({child, viewMap, i}) {
     const {viewId, viewportId} = child.props;
-    if (viewId) {
+    if (viewportId) {
       log.deprecated('viewportId', 'viewId');
     }
     const view = viewMap[viewId || viewportId];

@@ -18,24 +18,16 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-require('./node-aliases');
+// Enables ES2015 import/export in Node.js
+require('reify');
 
-// Import headless luma support
-require('luma.gl/headless');
+// Registers an alias for this module
+const path = require('path');
+const moduleAlias = require('module-alias');
+moduleAlias.addAlias('deck.gl/test', path.resolve('./test'));
+moduleAlias.addAlias('deck.gl', path.resolve('./src'));
+moduleAlias.addAlias('deck.gl/dist', path.resolve('./src'));
+moduleAlias.addAlias('deck.gl-layers', path.resolve('./src/experimental-layers/src'));
+moduleAlias.addAlias('@deck.gl/test-utils', path.resolve('./src/test-utils/src'));
 
-require('@deck.gl/test-utils');
-
-// Run a smaller selection of the tests (avoid overwhelming Travis CI)
-require('./src/imports-spec');
-require('./src/core');
-
-// require('./src/core-layers');
-
-require('./src/core-layers/polygon-tesselation.spec');
-// require('./core-layers.spec');
-// require('./polygon-layer.spec');
-require('./src/core-layers/geojson.spec');
-// require('./geojson-layer.spec');
-// require('./hexagon-cell-layer.spec');
-// require('./grid-layer.spec');
-// require('./hexagon-layer.spec');
+require('babel-polyfill');

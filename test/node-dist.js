@@ -18,22 +18,11 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-// Enables ES2015 import/export in Node.js
-require('reify');
-
-// Registers an alias for this module
-const path = require('path');
-const moduleAlias = require('module-alias');
-moduleAlias.addAlias('deck.gl/test', path.resolve('./test'));
-moduleAlias.addAlias('deck.gl', path.resolve('./dist'));
-moduleAlias.addAlias('deck.gl-layers', path.resolve('./src/experimental-layers/src'));
-moduleAlias.addAlias('@deck.gl/test-utils', path.resolve('./src/test-utils/src'));
-
-require('babel-polyfill');
+require('./node-aliases');
 
 // Import headless luma support
 require('luma.gl/headless');
 
-require('@deck.gl/test-utils/setup-gl');
+require('@deck.gl/test-utils');
 // Run the tests
 require('./index');

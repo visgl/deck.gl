@@ -1,8 +1,29 @@
 # @deck.gl/test-utils (Experimental)
 
-Utilities for testing deck.gl layers.
+A set of utilities to facilitate testing deck.gl layers in applications.
 
-Includes test drivers to initialize, update and render layers.
+
+## Note on Test Modes
+
+tests can be run completely in Node.js, completely in the Browser, or from Node in a controlled Browser instance (`TestDriver` classes). Some of the details depend on the test framework you are using.
+
+
+## Rendering Tests
+
+The most comprehensive form of testing is arguably rendering tests. This involves rendering layers with known inputs and comparing the results against "golden images".
+
+Current support involves running layers in a controller Chrome instance, reporting values back to Node.js.
+
+> Future support might include rendering layers directly in Node.js under headless gl.
+
+
+## Update Tests
+
+> Note: The update test utilities should be revised to work with the new Deck component and also made independent of `tape`.
+
+In addition to full rendering tests, it is also possible to test deck.gl layers update correctly. Updates are handled by the deck.gl layer "lifecycle" and these tests are therefore also called "lifecycle tests". Lifecycle tests are less demanding of the WebGL environment and are thus more suitable to integration in traditional Node.js unit test suites (e.g. based on `tape` or similar frameworks).
+
+deck.gl's lifecycle test support includes test drivers to initialize, update and render layers.
 
 
 ## Usage
@@ -13,6 +34,12 @@ const {...} = experimental;
 ...
 ```
 
+The lifecycle test drivers can also simplify testing of successive updates of a layer
+```js
+import {experimental} from '@deck.gl/test-utils';
+const {...} = experimental;
+...
+```
 
 ## Base Methods
 

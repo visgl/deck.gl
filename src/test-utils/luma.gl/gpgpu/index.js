@@ -1,3 +1,3 @@
 // GPGPU utilities for luma.gl
 
-export {default as diffImages} from './diff-images';
+export {diffImagePixels} from './diff-images';

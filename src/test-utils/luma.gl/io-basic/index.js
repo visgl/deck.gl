@@ -1,11 +1,13 @@
 import {isBrowser} from '../utils/globals';
-export {setPathPrefix} from './set-path-prefix';
+export {setPathPrefix} from './path-prefix';
 
 // Call a require based helper to select platform to export
 if (isBrowser) {
-  module.exports.loadFile = require('browser-request-file');
-  module.exports.loadImage = require('browser-request-image');
-  module.exports.readFile = require('browser-read-file');
+  module.exports.loadFile = require('./browser-request-file');
+  module.exports.loadImage = require('./browser-request-image');
+  module.exports.readFile = require('./browser-read-file');
+  const imageUtils = require('./browser-image-utils');
+  Object.assign(module.exports, imageUtils);
 } else {
   const fs = module.require('fs');
   // TODO - needs to be promisified...

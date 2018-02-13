@@ -53,7 +53,7 @@ const LIBRARY_BUNDLE_CONFIG = {
   ]
 };
 
-const TEST_BROWSER_CONFIG = {
+const BROWSER_CONFIG = {
   devServer: {
     stats: {
       warnings: false
@@ -61,18 +61,11 @@ const TEST_BROWSER_CONFIG = {
     quiet: true
   },
 
-  // Bundle the tests for running in the browser
-  entry: {
-    'test-browser': resolve('./test/browser.js')
-  },
-
   // Generate a bundle in dist folder
   output: {
     path: resolve('./dist'),
     filename: '[name]-bundle.js'
   },
-
-  devtool: '#inline-source-maps',
 
   resolve: {
     alias: {
@@ -84,8 +77,17 @@ const TEST_BROWSER_CONFIG = {
     }
   },
 
+  devtool: '#inline-source-maps',
+
   module: {
-    rules: []
+    rules: [
+      {
+        // Unfortunately, webpack doesn't import library sourcemaps on its own...
+        test: /\.js$/,
+        use: ['source-map-loader'],
+        enforce: 'pre'
+      }
+    ]
   },
 
   node: {
@@ -95,25 +97,47 @@ const TEST_BROWSER_CONFIG = {
   plugins: []
 };
 
-const BENCH_BROWSER_CONFIG = Object.assign({}, TEST_BROWSER_CONFIG, {
+const TEST_BROWSER_CONFIG = Object.assign({}, BROWSER_CONFIG, {
+  // Bundle the tests for running in the browser
+  entry: {
+    'test-browser': resolve('./test/browser.js')
+  }
+});
+
+const RENDER_BROWSER_CONFIG = Object.assign({}, BROWSER_CONFIG, {
+  // Bundle the tests for running in the browser
+  entry: {
+    'test-browser': resolve('./test/render/test-rendering.js')
+  }
+});
+
+// TODO - remove this target once above target is solid
+const RENDER_REACT_BROWSER_CONFIG = Object.assign({}, BROWSER_CONFIG, {
+  // Bundle the tests for running in the browser
+  entry: {
+    'test-browser': resolve('./test/render/old/test-rendering.react.js')
+  }
+});
+
+const BENCH_BROWSER_CONFIG = Object.assign({}, BROWSER_CONFIG, {
   entry: {
     'test-browser': resolve('./test/bench/browser.js')
   }
 });
 
-// Replace the entry point for webpack-dev-server
-
-BENCH_BROWSER_CONFIG.module.noParse = [
-  /benchmark/
-];
-
 module.exports = env => {
   env = env || {};
-  if (env.bench) {
-    return BENCH_BROWSER_CONFIG;
-  }
   if (env.test) {
     return TEST_BROWSER_CONFIG;
+  }
+  if (env.render) {
+    return RENDER_BROWSER_CONFIG;
+  }
+  if (env['render-react']) {
+    return RENDER_REACT_BROWSER_CONFIG;
+  }
+  if (env.bench) {
+    return BENCH_BROWSER_CONFIG;
   }
   return LIBRARY_BUNDLE_CONFIG;
 };
