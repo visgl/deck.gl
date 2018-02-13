@@ -22,11 +22,23 @@ import LayerManager from '../lib/layer-manager';
 import EffectManager from '../experimental/lib/effect-manager';
 import Effect from '../experimental/lib/effect';
 
+import WebMercatorViewport from '../viewports/web-mercator-viewport';
+import ViewportControls from '../controllers/viewport-controls';
+import TransitionManager from '../lib/transition-manager';
+
 import {EventManager} from 'mjolnir.js';
 import {GL, AnimationLoop, createGLContext, setParameters} from 'luma.gl';
 
 import PropTypes from 'prop-types';
 import assert from 'assert';
+
+const PREFIX = '-webkit-';
+const CURSOR = {
+  GRABBING: `${PREFIX}grabbing`,
+  GRAB: `${PREFIX}grab`,
+  POINTER: 'pointer'
+};
+
 /* global document */
 
 function noop() {}
@@ -50,12 +62,20 @@ const propTypes = {
   onLayerHover: PropTypes.func,
   useDevicePixels: PropTypes.bool,
 
-  // Debug settings
+  // Controller props
+  controls: PropTypes.object,
+  viewportState: PropTypes.func,
+  state: PropTypes.object,
+
+  // Accessor that returns a cursor style to show interactive state
+  getCursor: PropTypes.func,
+
+  // Debug props
   debug: PropTypes.bool,
   drawPickingColors: PropTypes.bool
 };
 
-const defaultProps = {
+const defaultProps = Object.assign({}, TransitionManager.defaultProps, {
   id: 'deckgl-overlay',
   pickingRadius: 0,
   layerFilter: null,
@@ -70,9 +90,20 @@ const defaultProps = {
   onLayerHover: null,
   useDevicePixels: true,
 
+  // Controller props
+  onViewportChange: null,
+
+  scrollZoom: true,
+  dragPan: true,
+  dragRotate: true,
+  doubleClickZoom: true,
+  touchZoomRotate: true,
+  getCursor: ({isDragging}) => (isDragging ? CURSOR.GRABBING : CURSOR.GRAB),
+
+  // Debug props
   debug: false,
   drawPickingColors: false
-};
+});
 
 // TODO - should this class be joined with `LayerManager`?
 export default class Deck {
@@ -82,13 +113,17 @@ export default class Deck {
     this.state = {};
     this.needsRedraw = true;
     this.layerManager = null;
+    this.eventManager = null;
     this.effectManager = null;
+    this.transitionManager = new TransitionManager(this.props);
+    this.viewports = [];
 
     // Bind methods
     this._onRendererInitialized = this._onRendererInitialized.bind(this);
     this._onRenderFrame = this._onRenderFrame.bind(this);
 
     this.canvas = this._createCanvas(props);
+    this.controls = this._createControls(props);
     this.animationLoop = this._createAnimationLoop(props);
 
     this.setProps(props);
@@ -100,9 +135,9 @@ export default class Deck {
     props = Object.assign({}, this.props, props);
     this.props = props;
 
-    this._setLayerManagerProps(props);
-
     // TODO - unify setParameters/setOptions/setProps etc naming.
+    this._setLayerManagerProps(props);
+    this._setControlProps(props);
     const {useDevicePixels, autoResizeDrawingBuffer} = props;
     this.animationLoop.setViewParameters({useDevicePixels, autoResizeDrawingBuffer});
   }
@@ -118,6 +153,13 @@ export default class Deck {
   }
 
   // Public API
+
+  getSize() {
+    return {
+      width: this.props.width || 100,
+      height: this.props.height || 100
+    };
+  }
 
   pickObject({x, y, radius = 0, layerIds = null}) {
     const selectedInfos = this.layerManager.pickObject({x, y, radius, layerIds, mode: 'query'});
@@ -160,6 +202,32 @@ export default class Deck {
     return canvas;
   }
 
+  _createControls(props) {
+    this.eventManager = new EventManager(this.canvas);
+
+    // If props.controls is not provided, fallback to default MapControls instance
+    // Cannot use defaultProps here because it needs to be per map instance
+    let controls = props.controls;
+    if (props.viewportState) {
+      controls = new ViewportControls(props.viewportState, props);
+    }
+    if (controls) {
+      controls.setOptions(
+        Object.assign({}, props, props.viewState, {
+          onStateChange: this._onInteractiveStateChange.bind(this),
+          eventManager: this.eventManager
+        })
+      );
+    }
+    return controls;
+  }
+
+  _setControlProps(props) {
+    if (this.controls) {
+      this.controls.setOptions(Object.assign({}, props, props.viewState));
+    }
+  }
+
   _createAnimationLoop(props) {
     const {width, height, gl, glOptions, debug, useDevicePixels, autoResizeDrawingBuffer} = props;
 
@@ -196,6 +264,16 @@ export default class Deck {
       layerFilter
     } = props;
 
+    // Update viewports (creating one if not supplied)
+    let viewports = props.viewports || props.viewport;
+    if (!views && !viewports) {
+      // TODO - old param style, move this default handling to React component
+      const {latitude, longitude, zoom, pitch, bearing} = props;
+      viewports = [
+        new WebMercatorViewport({width, height, latitude, longitude, zoom, pitch, bearing})
+      ];
+    }
+
     // If more parameters need to be updated on layerManager add them to this method.
     this.layerManager.setParameters({
       width,
@@ -226,9 +304,7 @@ export default class Deck {
     this.props.onWebGLInitialized(gl);
 
     // Note: avoid React setState due GL animation loop / setState timing issue
-    this.layerManager = new LayerManager(gl, {
-      eventManager: new EventManager(canvas)
-    });
+    this.layerManager = new LayerManager(gl, {eventManager: this.eventManager});
 
     this.effectManager = new EffectManager({gl, layerManager: this.layerManager});
 
@@ -256,6 +332,13 @@ export default class Deck {
       drawPickingColors: this.props.drawPickingColors
     });
     this.props.onAfterRender({gl}); // TODO - should be called by AnimationLoop
+  }
+
+  _onInteractiveStateChange({isDragging = false}) {
+    if (isDragging !== this.state.isDragging) {
+      this.state.isDragging = isDragging;
+      this.canvas.style.cursor = this.props.getCursor({isDragging});
+    }
   }
 }
 
