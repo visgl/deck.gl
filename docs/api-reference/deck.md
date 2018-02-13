@@ -1,5 +1,7 @@
 # Deck Class
 
+> React Note: If you are using React, you should not use this component directly. Instead you should be rendering the [`DeckGL` React Component](docs/api-reference/react/deckgl.md)
+
 `Deck` is a class that takes deck.gl layer instances and viewport parameters, and renders those layers as a transparent overlay.
 
 * Picking methods are supplied to enable applications to use their own event handling.
@@ -40,7 +42,6 @@ Frees resources associated with this object immediately.
 Updates properties
 
 `deck.setProps({...});`
-
 
 
 ##### pickObject
