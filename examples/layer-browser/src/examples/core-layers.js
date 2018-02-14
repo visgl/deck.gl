@@ -414,6 +414,17 @@ const ScatterplotLayer64PerfExample = (id, getData) => ({
   }
 });
 
+const ScreenGridLayerPerfExample = (id, getData) => ({
+  layer: ScreenGridLayer,
+  getData,
+  props: {
+    id: `screengridLayerPerf-${id}`,
+    getPosition: d => d,
+    cellSizePixels: 40,
+    pickable: false
+  }
+});
+
 /* eslint-disable quote-props */
 export default {
   'Core Layers - LngLat': {
@@ -442,6 +453,10 @@ export default {
   },
 
   'Performance Tests': {
+    'ScreenGridLayer 500K': ScreenGridLayerPerfExample('500K', dataSamples.getPoints500K),
+    'ScreenGridLayer 1M': ScreenGridLayerPerfExample('1M', dataSamples.getPoints1M),
+    'ScreenGridLayer 2M': ScreenGridLayerPerfExample('1M', dataSamples.getPoints2M),
+    'ScreenGridLayer 10M': ScreenGridLayerPerfExample('10M', dataSamples.getPoints10M),
     'ScatterplotLayer 1M': ScatterplotLayerPerfExample('1M', dataSamples.getPoints1M),
     'ScatterplotLayer 10M': ScatterplotLayerPerfExample('10M', dataSamples.getPoints10M),
     'ScatterplotLayer64 100K': ScatterplotLayer64PerfExample('100K', dataSamples.getPoints100K),

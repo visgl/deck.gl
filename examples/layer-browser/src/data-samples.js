@@ -136,9 +136,21 @@ export function getPoints100K() {
   return _points100K;
 }
 
+let _points500K = null;
+export function getPoints500K() {
+  _points500K = _points500K || pointGrid(5 * 1e5, [-122.6, 37.6, -122.2, 37.9]);
+  return _points500K;
+}
+
 let _points1M = null;
 export function getPoints1M() {
   _points1M = _points1M || pointGrid(1e6, [-122.6, 37.6, -122.2, 37.9]);
+  return _points1M;
+}
+
+let _points2M = null;
+export function getPoints2M() {
+  _points2M = _points2M || pointGrid(2 * 1e6, [-122.6, 37.6, -122.2, 37.9]);
   return _points1M;
 }
 

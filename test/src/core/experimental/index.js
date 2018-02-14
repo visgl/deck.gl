@@ -20,3 +20,4 @@
 
 import './lib';
 import './container.spec';
+import './utils/screen-grid-aggregator.spec';

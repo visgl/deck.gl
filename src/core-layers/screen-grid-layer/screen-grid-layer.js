@@ -20,16 +20,20 @@
 
 import {Layer, experimental} from '../../core';
 const {defaultColorRange, quantizeScale} = experimental;
-
+const {ScreenGridAggregator} = experimental;
 import {GL, Model, Geometry} from 'luma.gl';
 import {lerp} from './../../core/utils/math-utils';
 import log from './../../core/utils/log';
 
-import vs from './screen-grid-layer-vertex.glsl';
+import vsCpu from './screen-grid-layer-vertex.glsl';
+import vsGpu from './screen-grid-layer-vertex-gpu.glsl';
 import fs from './screen-grid-layer-fragment.glsl';
+
+const LOG_LEVEL = 0;
 
 const defaultProps = {
   cellSizePixels: 100,
+  gpuAggregation: false,
 
   colorDomain: null,
   colorRange: defaultColorRange,
@@ -38,12 +42,17 @@ const defaultProps = {
   getWeight: d => 1,
 
   // deprecated
-  minColor: null,
-  maxColor: null
+  minColor: [0, 0, 0, 0], //TODO: use min/max until gpu aggregation supports range/domain
+  maxColor: [0, 255, 0, 255]
 };
 
 export default class ScreenGridLayer extends Layer {
   getShaders() {
+    const {usingGPUAggregation} = this.state;
+    if (LOG_LEVEL > 0) {
+      console.log(`Using ${usingGPUAggregation ? 'GPU' : 'CPU'} shaders`);
+    }
+    const vs = usingGPUAggregation ? vsGpu : vsCpu;
     return {vs, fs, modules: ['picking']}; // 'project' module added by default.
   }
 
@@ -56,37 +65,104 @@ export default class ScreenGridLayer extends Layer {
     }
     /* eslint-disable max-len */
     attributeManager.addInstanced({
-      instancePositions: {size: 3, update: this.calculateInstancePositions},
-      instanceColors: {
-        size: 4,
-        type: GL.UNSIGNED_BYTE,
-        transition: true,
-        accessor: ['getPosition', 'getWeight'],
-        update: this.calculateInstanceColors
-      }
+      instancePositions: {size: 3, update: this.calculateInstancePositions}
     });
     /* eslint-disable max-len */
 
-    this.setState({model: this._getModel(gl)});
+    const options = {
+      id: `${this.id}-aggregator`,
+      shaderCache: this.context.shaderCache
+    };
+    this.setState({
+      model: this._getModel(gl),
+      screenGridAggregator: new ScreenGridAggregator(gl, options)
+    });
   }
 
   shouldUpdateState({changeFlags}) {
     return changeFlags.somethingChanged;
   }
 
+  updateAttribute({props, oldProps, changeFlags}) {
+    const {gl} = this.context;
+    if (LOG_LEVEL > 0) {
+      console.log(
+        `Switching from ${oldProps.gpuAggregation ? 'GPU' : 'CPU'} to ${
+          props.gpuAggregation ? 'GPU' : 'CPU'
+        }`
+      );
+    }
+    const attributeManager = this.getAttributeManager();
+
+    if (props.gpuAggregation) {
+      if (LOG_LEVEL > 0) {
+        console.log(`remove instanceColors atatribute`);
+      }
+      attributeManager.remove(['instanceColors']);
+    } else {
+      if (LOG_LEVEL > 0) {
+        console.log(`add instanceColors atatribute`);
+      }
+      attributeManager.addInstanced({
+        instanceColors: {
+          size: 4,
+          type: GL.UNSIGNED_BYTE,
+          transition: true,
+          accessor: ['getPosition', 'getWeight'],
+          update: this.calculateInstanceColors
+        }
+      });
+    }
+    this.setState({model: this._getModel(gl)});
+    attributeManager.invalidateAll();
+  }
+
   updateState({oldProps, props, changeFlags}) {
+    const {gl} = this.context;
     super.updateState({props, oldProps, changeFlags});
     const cellSizeChanged = props.cellSizePixels !== oldProps.cellSizePixels;
+    const aggregationChanged =
+      ScreenGridAggregator.hasGPUSupport(gl) && props.gpuAggregation !== oldProps.gpuAggregation;
 
+    if (changeFlags.dataChanged) {
+      this._processData();
+    }
     if (cellSizeChanged || changeFlags.viewportChanged) {
       this.updateCell();
+    }
+    const usingGPUAggregation = ScreenGridAggregator.hasGPUSupport(gl) && props.gpuAggregation;
+    this.setState({usingGPUAggregation});
+    if (aggregationChanged) {
+      this.updateAttribute({props, oldProps, changeFlags});
+    }
+    if (usingGPUAggregation) {
+      if (
+        cellSizeChanged ||
+        changeFlags.viewportChanged ||
+        changeFlags.dataChanged ||
+        aggregationChanged
+      ) {
+        this.runGPUAggregation(changeFlags);
+      }
     }
   }
 
   draw({uniforms}) {
-    const {minColor, maxColor, parameters = {}} = this.props;
-    const {model, cellScale, maxCount} = this.state;
-    uniforms = Object.assign({}, uniforms, {minColor, maxColor, cellScale, maxCount});
+    if (LOG_LEVEL > 3) {
+      console.log(`draw called \n`);
+    }
+    const {parameters = {}} = this.props;
+    const {model, cellScale, usingGPUAggregation} = this.state;
+    const {uSamplerCount, uSamplerMaxCount} = this.state;
+    const samplerUniforms = usingGPUAggregation
+      ? {
+          uSamplerCount,
+          uSamplerMaxCount,
+          minColor: [0, 0, 0, 0],
+          maxColor: [0, 255, 0, 255]
+        }
+      : {};
+    uniforms = Object.assign({}, uniforms, samplerUniforms, {cellScale});
     model.draw({
       uniforms,
       parameters: Object.assign(
@@ -138,9 +214,15 @@ export default class ScreenGridLayer extends Layer {
 
     const attributeManager = this.getAttributeManager();
     attributeManager.invalidateAll();
+    if (LOG_LEVEL > 1) {
+      console.log(`updateCell called`);
+    }
   }
 
   calculateInstancePositions(attribute, {numInstances}) {
+    if (LOG_LEVEL > 2) {
+      console.log(`calculateInstancePositions called`);
+    }
     const {width, height} = this.context.viewport;
     const {cellSizePixels} = this.props;
     const {numCol} = this.state;
@@ -156,38 +238,58 @@ export default class ScreenGridLayer extends Layer {
   }
 
   calculateInstanceColors(attribute) {
-    const {data, cellSizePixels, getPosition, getWeight} = this.props;
-    const {numCol, numRow, numInstances} = this.state;
-    const {value, size} = attribute;
-    const weights = new Array(numInstances);
-    let maxCount = 0;
-
-    weights.fill(0.0);
-
-    // aggregate weights
-    for (const point of data) {
-      const pixel = this.project(getPosition(point));
-      const colId = Math.floor(pixel[0] / cellSizePixels);
-      const rowId = Math.floor(pixel[1] / cellSizePixels);
-      if (colId >= 0 && colId < numCol && rowId >= 0 && rowId < numRow) {
-        const i = colId + rowId * numCol;
-        weights[i] += getWeight(point);
-        if (weights[i] > maxCount) {
-          maxCount = weights[i];
-        }
-      }
+    if (LOG_LEVEL > 2) {
+      console.log(`calculateInstanceColors called`);
     }
+    const {cellSizePixels} = this.props;
+    const {numCol, numRow, numInstances, positions, weights} = this.state;
+    const {value, size} = attribute;
+
+    const {width, height} = this.context.viewport;
+
+    const aggregateData = this.state.screenGridAggregator.run({
+      positions,
+      weights,
+      windowSize: [width, height], // TODO: make this optional can be obtained from vewiport
+      cellSize: [cellSizePixels, cellSizePixels],
+      gridSize: [numCol, numRow], // TODO: remove this, based on cellSIze and viewport this can be deduced.
+      viewport: this.context.viewport,
+      useGPU: false
+    });
+
+    const {counts, maxCount} = aggregateData;
     this.setState({maxCount});
 
     // Convert weights to colors.
     for (let i = 0; i < numInstances; i++) {
-      const color = this._getColor(weights[i], maxCount);
+      const color = this._getColor(counts[i], maxCount);
       const index = i * size;
       value[index + 0] = color[0];
       value[index + 1] = color[1];
       value[index + 2] = color[2];
       value[index + 3] = color[3];
     }
+  }
+
+  runGPUAggregation(changeFlags) {
+    const {cellSizePixels} = this.props;
+    const {numCol, numRow, positions, weights} = this.state;
+    const {width, height} = this.context.viewport;
+
+    const aggregateData = this.state.screenGridAggregator.run({
+      positions,
+      weights,
+      windowSize: [width, height], // TODO: make this optional can be obtained from vewiport
+      cellSize: [cellSizePixels, cellSizePixels],
+      gridSize: [numCol, numRow], // TODO: remove this, based on cellSIze and viewport this can be deduced.
+      viewport: this.context.viewport,
+      useGPU: true,
+      changeFlags
+    });
+    if (LOG_LEVEL > 1) {
+      console.log(`Running GPU Aggregation`);
+    }
+    this.setState(aggregateData);
   }
 
   _getColor(weight, maxCount) {
@@ -209,6 +311,24 @@ export default class ScreenGridLayer extends Layer {
     // add alpha to color if not defined in colorRange
     color[3] = Number.isFinite(color[3]) ? color[3] : 255;
     return color;
+  }
+
+  _processData() {
+    const {data, getPosition, getWeight} = this.props;
+    const positions = [];
+    const weights = [];
+    if (LOG_LEVEL > 1) {
+      console.log(`Processing data`);
+    }
+
+    for (const point of data) {
+      const position = getPosition(point);
+      positions.push(position[0]);
+      positions.push(position[1]);
+      weights.push(getWeight(point));
+    }
+
+    this.setState({positions, weights});
   }
 }
 

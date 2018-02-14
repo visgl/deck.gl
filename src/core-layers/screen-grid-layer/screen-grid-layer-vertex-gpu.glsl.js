@@ -18,29 +18,39 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-/* eslint-disable no-console, no-invalid-this */
-import {Bench} from 'probe.gl/bench';
+export default `\
+#define SHADER_NAME screen-grid-layer-vertex-shader
 
-import layerBench from './layer.bench';
-import coreLayersBench from './core-layers.bench';
-import viewportBench from './viewport.bench';
-import colorBench from './color.bench';
-import pickLayersBench from './pick-layers.bench';
-import utilsBench from './utils.bench';
-import tesselationBench from './tesselation.bench';
-import screenGridAggregatorBench from './screen-grid-aggregator.bench';
+attribute vec3 vertices;
+attribute vec3 instancePositions;
+attribute vec4 instanceColors;
+attribute vec3 instancePickingColors;
 
-const suite = new Bench();
+uniform float opacity;
+uniform vec4 minColor;
+uniform vec4 maxColor;
+uniform vec3 cellScale;
 
-// add tests
-layerBench(suite);
-coreLayersBench(suite);
-viewportBench(suite);
-colorBench(suite);
-utilsBench(suite);
-pickLayersBench(suite);
-tesselationBench(suite);
-screenGridAggregatorBench(suite);
+uniform sampler2D uSamplerCount;
+uniform sampler2D uSamplerMaxCount;
 
-// Run the suite
-suite.run();
+varying vec4 vColor;
+
+void main(void) {
+  vec2 texCoord = instancePositions.xy;
+  // Convert from [-1, 1] to [0, 1] range
+  texCoord = (texCoord + vec2(1., 1.)) / 2.;
+  // y-flip.
+  texCoord.y = 1. - texCoord.y;
+  float count = texture2D(uSamplerCount, texCoord).r;
+  float texMaxCount = texture2D(uSamplerMaxCount, vec2(0,0)).a;
+  vec4 color = mix(minColor, maxColor, count / texMaxCount) / 255.;
+
+  vColor = vec4(color.rgb, color.a * opacity);
+
+  // Set color to be rendered to picking fbo (also used to check for selection highlight).
+  picking_setPickingColor(instancePickingColors);
+
+  gl_Position = vec4(instancePositions + vertices * cellScale, 1.);
+}
+`;

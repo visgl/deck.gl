@@ -2,13 +2,16 @@ import React, {Component} from 'react';
 import {readableInteger} from '../../utils/format-utils';
 import {MAPBOX_STYLES, DATA_URI} from '../../constants/defaults';
 import ScreenGridOverlay from '../../../../examples/screen-grid/deckgl-overlay';
+import ScatterplotOverlay from '../../../../examples/scatterplot/deckgl-overlay';
 
 export default class ScreenGridDemo extends Component {
 
   static get data() {
     return {
-      url: `${DATA_URI}/screen-grid-data.txt`,
-      worker: 'workers/screen-grid-data-decoder.js'
+//      url: `${DATA_URI}/screen-grid-data.txt`,
+      url: `${DATA_URI}/scatterplot-data.txt`,
+//      worker: 'workers/screen-grid-data-decoder.js'
+      worker: 'workers/scatterplot-data-decoder.js'
     };
   }
 
@@ -20,7 +23,8 @@ export default class ScreenGridDemo extends Component {
 
   static get viewport() {
     return {
-      ...ScreenGridOverlay.defaultViewport,
+//      ...ScreenGridOverlay.defaultViewport,
+      ...ScatterplotOverlay.defaultViewport,
       dragToRotate: false,
       mapStyle: MAPBOX_STYLES.DARK
     };
