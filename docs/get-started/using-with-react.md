@@ -13,7 +13,6 @@ import DeckGL, {LineLayer} from 'deck.gl';
 import {render} from 'react-dom';
 import React, {Component} from 'react';
 
-// Viewport settings
 // Viewport settings that is shared between mapbox and deck.gl
 const viewport = {
   width: 500,
@@ -31,7 +30,11 @@ const data = [{sourcePosition: [-122.41669, 37.7853], targetPosition: [-122.4166
 // DeckGL react component
 export default class App extends Component {
   render() {
-    return <DeckGL {...viewport} layers={[new LineLayer({id: 'line-layer', data})]} />;
+    return (
+      <DeckGL {...viewport} layers={[
+        new LineLayer({id: 'line-layer', data})
+      ]} />
+    );
   }
 }
 
