@@ -9,35 +9,34 @@ To use deck.gl with React, simply import the `DeckGL` React component and render
 
 ```jsx
 /// app.js
-import React, {Component} from 'react';
 import DeckGL, {LineLayer} from 'deck.gl';
+import {render} from 'react-dom';
+import React, {Component} from 'react';
 
 // Viewport settings
 // Viewport settings that is shared between mapbox and deck.gl
 const viewport = {
   width: 500,
   height: 500,
-  longitude: -100,
-  latitude: 40.7,
-  zoom: 3,
+  longitude: -122.41669,
+  latitude: 37.7853,
+  zoom: 13,
   pitch: 0,
   bearing: 0
 };
 
 // Data to be used by the LineLayer
-const data = [
-  {sourcePosition: [-122.41669, 37.7853], targetPosition: [-122.41669, 37.781]}
-];
+const data = [{sourcePosition: [-122.41669, 37.7853], targetPosition: [-122.41669, 37.781]}];
 
+// DeckGL react component
 export default class App extends Component {
   render() {
-    return (
-      <DeckGL {...viewport} layers={[
-        new LineLayer({id: 'line-layer', data})
-      ]} />
-    );
+    return <DeckGL {...viewport} layers={[new LineLayer({id: 'line-layer', data})]} />;
   }
 }
+
+// Add DeckGL react component to DOM
+render(<App />, document.body.appendChild(document.createElement('div')));
 
 ```
 
@@ -47,13 +46,27 @@ An important companion to deck.gl is `react-map-gl`. It can provide both a base 
 
 ```jsx
 /// app.js
+import DeckGL, {LineLayer} from 'deck.gl';
 import MapGL from 'react-map-gl';
+import {render} from 'react-dom';
+import React, {Component} from 'react';
 
 // Set your mapbox access token here
 const MAPBOX_ACCESS_TOKEN = 'MAPBOX_ACCESS_TOKEN';
 
-... // as in previous example
-... // Note: Viewport settings are shared between mapbox and deck.gl
+// Viewport settings that is shared between mapbox and deck.gl
+const viewport = {
+  width: 500,
+  height: 500,
+  longitude: -122.41669,
+  latitude: 37.7853,
+  zoom: 13,
+  pitch: 0,
+  bearing: 0
+};
+
+// Data to be used by the LineLayer
+const data = [{sourcePosition: [-122.41669, 37.7853], targetPosition: [-122.41669, 37.781]}];
 
 export default class App extends Component {
   render() {
@@ -66,6 +79,8 @@ export default class App extends Component {
     );
   }
 }
+
+render(<App />, document.body.appendChild(document.createElement('div')));
 
 ```
 
