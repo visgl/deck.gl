@@ -13,7 +13,7 @@ import DeckGL, {LineLayer} from 'deck.gl';
 import {render} from 'react-dom';
 import React, {Component} from 'react';
 
-// Viewport settings that is shared between mapbox and deck.gl
+// Viewport settings
 const viewport = {
   width: 500,
   height: 500,
