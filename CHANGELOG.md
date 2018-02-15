@@ -15,15 +15,21 @@ Each version should:
 Ref: http://keepachangelog.com/en/0.3.0/
 -->
 
-## Latest Beta Releases
+## Official Releases
 
-For Earlier Beta Releases see below
+### deck.gl v5.1 Feb 15, 2018
+- change "Attribute Transitions" to "Layer Transitions" (#1446)
+- update using-with-react.md with workable example code (#1445)
+- Shader module uniform cache (#1387) (#1443)
+- Update getting started
+- Update getting-started.md
+- Fix hello-world examples
 
 ## Beta Releases
 
 ### deck.gl v5.1 Beta Releases
 
-#### [5.1.0-beta.3] - Feb 09
+#### [5.1.0-beta.3] - Feb 09, 2018
 - Fix Bezier-Curve layer rendering issues (#1409)
 - Add more screenshots in Whats New (#1408)
 - Fix image links in docs. (#1401)
@@ -32,10 +38,10 @@ For Earlier Beta Releases see below
 - Fix: Workaround for React.Children.forEach (#1378)
 - layers v0.1.0-beta.2
 
-#### [5.1.0-beta.2] - Jan 31
+#### [5.1.0-beta.2] - Jan 31, 2018
 - Fix: JSX layer extraction from nextProps (#1373)
 
-#### [5.1.0-beta.1] - Jan 31
+#### [5.1.0-beta.1] - Jan 31, 2018
 - Fix crash during pickVisibleObjects (#1365)
 - Experiment: bezier curve layer (#1366)
 - Add JSX support to DeckGL component and remove jsx-layers example (#1362)

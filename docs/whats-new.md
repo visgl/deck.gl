@@ -1,6 +1,6 @@
 # deck.gl v5.1
 
-Release date: Feb 16, 2018
+Release date: Feb 15, 2018
 
 <table style="border: 0;" align="center">
   <tbody>
