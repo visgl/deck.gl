@@ -26,6 +26,7 @@ const experimental = {};
 //
 
 export {
+  Deck,
   // LIB
   COORDINATE_SYSTEM,
   LayerManager,
@@ -37,6 +38,10 @@ export {
   WebMercatorViewport,
   PerspectiveViewport,
   OrthographicViewport,
+  // Controllers
+  ViewState,
+  Controller,
+  MapController,
   // Shader modules
   project,
   project64,
