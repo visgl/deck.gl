@@ -13,7 +13,7 @@ const CURSOR = {
 };
 
 const propTypes = {
-  viewportState: PropTypes.func,
+  viewState: PropTypes.func,
   state: PropTypes.object,
 
   /** Viewport props */
@@ -120,7 +120,7 @@ export default class ViewportController extends Component {
 
     // If props.controls is not provided, fallback to default MapControls instance
     // Cannot use defaultProps here because it needs to be per map instance
-    this._controls = this.props.controls || new ViewportControls(this.props.viewportState);
+    this._controls = this.props.controls || new ViewportControls(this.props.viewState);
 
     this._controls.setOptions(
       Object.assign({}, this.props, {

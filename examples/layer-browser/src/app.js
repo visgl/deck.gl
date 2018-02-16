@@ -2,13 +2,19 @@
 
 // deck.gl ES6 components
 import {COORDINATE_SYSTEM, experimental} from 'deck.gl';
-
-const {MapState, OrbitState, MapView, FirstPersonView, OrbitView, ReflectionEffect} = experimental;
+const {
+  MapView,
+  FirstPersonView,
+  OrbitView,
+  MapController,
+  OrbitController,
+  ReflectionEffect
+} = experimental;
 
 // deck.gl react components
 import DeckGL from 'deck.gl';
-const {ViewportController} = experimental;
 
+// deck.gl core components
 import React, {PureComponent} from 'react';
 import ReactDOM from 'react-dom';
 import autobind from 'react-autobind';
@@ -254,50 +260,43 @@ class App extends PureComponent {
 
     return (
       <div style={{backgroundColor: '#eeeeee'}}>
-        <ViewportController
-          viewportState={infovis ? OrbitState : MapState}
-          {...(infovis ? orbitViewState : mapViewState)}
+        <DeckGL
+          ref="deckgl"
+          id="default-deckgl-overlay"
           width={width}
           height={height}
+          controller={infovis ? OrbitController : MapController}
+          viewState={infovis ? orbitViewState : {...mapViewState, position: [0, 0, 50]}}
           onViewportChange={this._onViewportChange}
+          views={views}
+          layers={this._renderExamples()}
+          layerFilter={this._layerFilter}
+          effects={effects ? this._effects : []}
+          pickingRadius={pickingRadius}
+          onLayerHover={this._onHover}
+          onLayerClick={this._onClick}
+          useDevicePixels={useDevicePixels}
+          debug={false}
+          drawPickingColors={drawPickingColors}
         >
-          <DeckGL
-            ref="deckgl"
-            id="default-deckgl-overlay"
+          <FPSStats isActive />
+
+          <StaticMap
+            viewportId="basemap"
+            {...mapViewState}
+            mapboxApiAccessToken={MapboxAccessToken || 'no_token'}
             width={width}
             height={height}
-            views={views}
-            viewState={infovis ? orbitViewState : {...mapViewState, position: [0, 0, 50]}}
-            layers={this._renderExamples()}
-            layerFilter={this._layerFilter}
-            effects={effects ? this._effects : []}
-            pickingRadius={pickingRadius}
-            onLayerHover={this._onHover}
-            onLayerClick={this._onClick}
-            useDevicePixels={useDevicePixels}
-            debug={false}
-            drawPickingColors={drawPickingColors}
-          >
-            <FPSStats isActive />
+          />
 
-            <StaticMap
-              viewId="basemap"
-              {...mapViewState}
-              mapboxApiAccessToken={MapboxAccessToken || 'no_token'}
-              width={width}
-              height={height}
-              onViewportChange={this._onViewportChange}
-            />
+          <ViewportLabel viewportId="first-person">First Person View</ViewportLabel>
 
-            <ViewportLabel viewId="first-person">First Person View</ViewportLabel>
+          <ViewportLabel viewportId="basemap">Map View</ViewportLabel>
 
-            <ViewportLabel viewId="basemap">Map View</ViewportLabel>
-
-            <ViewportLabel viewId="infovis">
-              Orbit View (PlotLayer only, No Navigation)
-            </ViewportLabel>
-          </DeckGL>
-        </ViewportController>
+          <ViewportLabel viewportId="infovis">
+            Orbit View (PlotLayer only, No Navigation)
+          </ViewportLabel>
+        </DeckGL>
       </div>
     );
   }

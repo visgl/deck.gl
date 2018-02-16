@@ -1,6 +1,6 @@
 /* global window, fetch */
 import {GeoJsonLayer, experimental} from 'deck.gl';
-const {Deck, MapControllerJS} = experimental;
+const {Deck} = experimental;
 import TimeSlicedScatterplotLayer from './time-sliced-scatterplot-layer/time-sliced-scatterplot-layer.js';
 
 import {parseTile, lngLatToTile, getTileUrl} from './utils/carto-torque-utils';
@@ -108,7 +108,6 @@ class App {
           })
         ]
       });
-      // console.log(this.state.currentTime);
     }
   }
 
@@ -144,16 +143,9 @@ class App {
       ...viewport,
       width,
       height,
+      onViewportChange: this.onViewportChange.bind(this),
       debug: true,
       layers: []
-    });
-
-    this.controller = new MapControllerJS({
-      canvas: this.deckgl.canvas,
-      ...viewport,
-      width,
-      height,
-      onViewportChange: this.onViewportChange.bind(this)
     });
 
     this.onAnimate();

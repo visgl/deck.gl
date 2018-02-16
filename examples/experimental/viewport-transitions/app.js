@@ -96,7 +96,7 @@ class Root extends Component {
     const {viewport, data, transitionDuration} = this.state;
     return (
       <ViewportController
-        viewportState={MapState}
+        viewState={MapState}
         {...viewport}
         onViewportChange={this._onViewportChange.bind(this)}
         transitionDuration={transitionDuration}

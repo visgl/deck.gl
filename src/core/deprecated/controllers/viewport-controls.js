@@ -193,7 +193,7 @@ export default class ViewportControls {
   /* Callback util */
   // formats map state and invokes callback function
   updateViewport(newViewportState, extraProps = {}, extraState = {}) {
-    const oldViewport = this.viewportState.getViewportProps();
+    const oldViewport = this.viewState.getViewportProps();
     const newViewport = Object.assign({}, newViewportState.getViewportProps(), extraProps);
 
     if (
@@ -212,7 +212,7 @@ export default class ViewportControls {
   // Default handler for the `panstart` event.
   _onPanStart(event) {
     const pos = this.getCenter(event);
-    const newViewportState = this.viewportState.panStart({pos}).rotateStart({pos});
+    const newViewportState = this.viewState.panStart({pos}).rotateStart({pos});
     return this.updateViewport(newViewportState, NO_TRANSITION_PROPS, {isDragging: true});
   }
 
@@ -225,7 +225,7 @@ export default class ViewportControls {
 
   // Default handler for the `panend` event.
   _onPanEnd(event) {
-    const newViewportState = this.viewportState.panEnd().rotateEnd();
+    const newViewportState = this.viewState.panEnd().rotateEnd();
     return this.updateViewport(newViewportState, null, {isDragging: false});
   }
 
@@ -236,7 +236,7 @@ export default class ViewportControls {
       return false;
     }
     const pos = this.getCenter(event);
-    const newViewportState = this.viewportState.pan({pos});
+    const newViewportState = this.viewState.pan({pos});
     return this.updateViewport(newViewportState, NO_TRANSITION_PROPS, {isDragging: true});
   }
 
@@ -247,7 +247,7 @@ export default class ViewportControls {
       return false;
     }
 
-    return this.viewportState instanceof MapState
+    return this.viewState instanceof MapState
       ? this._onPanRotateMap(event)
       : this._onPanRotateStandard(event);
   }
@@ -260,7 +260,7 @@ export default class ViewportControls {
     const deltaScaleX = deltaX / width;
     const deltaScaleY = deltaY / height;
 
-    const newViewportState = this.viewportState.rotate({deltaScaleX, deltaScaleY});
+    const newViewportState = this.viewState.rotate({deltaScaleX, deltaScaleY});
     return this.updateViewport(newViewportState, NO_TRANSITION_PROPS, {isDragging: true});
   }
 
@@ -286,7 +286,7 @@ export default class ViewportControls {
     }
     deltaScaleY = Math.min(1, Math.max(-1, deltaScaleY));
 
-    const newViewportState = this.viewportState.rotate({deltaScaleX, deltaScaleY});
+    const newViewportState = this.viewState.rotate({deltaScaleX, deltaScaleY});
     return this.updateViewport(newViewportState, NO_TRANSITION_PROPS, {isDragging: true});
   }
 
@@ -305,14 +305,14 @@ export default class ViewportControls {
       scale = 1 / scale;
     }
 
-    const newViewportState = this.viewportState.zoom({pos, scale});
+    const newViewportState = this.viewState.zoom({pos, scale});
     return this.updateViewport(newViewportState, NO_TRANSITION_PROPS);
   }
 
   // Default handler for the `pinchstart` event.
   _onPinchStart(event) {
     const pos = this.getCenter(event);
-    const newViewportState = this.viewportState.zoomStart({pos}).rotateStart({pos});
+    const newViewportState = this.viewState.zoomStart({pos}).rotateStart({pos});
     // hack - hammer's `rotation` field doesn't seem to produce the correct angle
     this._state.startPinchRotation = event.rotation;
     return this.updateViewport(newViewportState, NO_TRANSITION_PROPS, {isDragging: true});
@@ -324,7 +324,7 @@ export default class ViewportControls {
       return false;
     }
 
-    let newViewportState = this.viewportState;
+    let newViewportState = this.viewState;
     if (this.touchZoom) {
       const {scale} = event;
       const pos = this.getCenter(event);
@@ -343,7 +343,7 @@ export default class ViewportControls {
 
   // Default handler for the `pinchend` event.
   _onPinchEnd(event) {
-    const newViewportState = this.viewportState.zoomEnd().rotateEnd();
+    const newViewportState = this.viewState.zoomEnd().rotateEnd();
     this._state.startPinchRotation = 0;
     return this.updateViewport(newViewportState, null, {isDragging: false});
   }
@@ -356,7 +356,7 @@ export default class ViewportControls {
     const pos = this.getCenter(event);
     const isZoomOut = this.isFunctionKeyPressed(event);
 
-    const newViewportState = this.viewportState.zoom({pos, scale: isZoomOut ? 0.5 : 2});
+    const newViewportState = this.viewState.zoom({pos, scale: isZoomOut ? 0.5 : 2});
     return this.updateViewport(newViewportState, LINEAR_TRANSITION_PROPS);
   }
 
@@ -367,27 +367,27 @@ export default class ViewportControls {
       return false;
     }
     const funcKey = this.isFunctionKeyPressed(event);
-    const {viewportState} = this;
+    const {viewState} = this;
     let newViewportState;
 
     switch (event.srcEvent.keyCode) {
       case 189: // -
-        newViewportState = funcKey ? viewportState.zoomOut().zoomOut() : viewportState.zoomOut();
+        newViewportState = funcKey ? viewState.zoomOut().zoomOut() : viewState.zoomOut();
         break;
       case 187: // +
-        newViewportState = funcKey ? viewportState.zoomIn().zoomIn() : viewportState.zoomIn();
+        newViewportState = funcKey ? viewState.zoomIn().zoomIn() : viewState.zoomIn();
         break;
       case 37: // left
-        newViewportState = funcKey ? viewportState.rotateLeft() : viewportState.moveLeft();
+        newViewportState = funcKey ? viewState.rotateLeft() : viewState.moveLeft();
         break;
       case 39: // right
-        newViewportState = funcKey ? viewportState.rotateRight() : viewportState.moveRight();
+        newViewportState = funcKey ? viewState.rotateRight() : viewState.moveRight();
         break;
       case 38: // up
-        newViewportState = funcKey ? viewportState.rotateUp() : viewportState.moveUp();
+        newViewportState = funcKey ? viewState.rotateUp() : viewState.moveUp();
         break;
       case 40: // down
-        newViewportState = funcKey ? viewportState.rotateDown() : viewportState.moveDown();
+        newViewportState = funcKey ? viewState.rotateDown() : viewState.moveDown();
         break;
       default:
         return false;
