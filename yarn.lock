@@ -2993,16 +2993,11 @@ lru-cache@^4.0.1:
     pseudomap "^1.0.2"
     yallist "^2.1.2"
 
-luma.gl@^5.1.0-beta.1:
-  version "5.1.0-beta.1"
-  resolved "https://registry.yarnpkg.com/luma.gl/-/luma.gl-5.1.0-beta.1.tgz#341360cd61ec53c30372e3ac7fa20cae65b2786b"
+luma.gl@^5.1.0:
+  version "5.1.1"
+  resolved "https://registry.yarnpkg.com/luma.gl/-/luma.gl-5.1.1.tgz#dced444fb23f695303007074241176be8148bdda"
   dependencies:
-    gl-mat4 "^1.1.4"
-    gl-quat "^1.0.0"
-    gl-vec2 "^1.0.0"
-    gl-vec3 "^1.0.3"
-    gl-vec4 "^1.0.1"
-    math.gl "1.0.0-alpha.8"
+    math.gl "^1.0.0"
     seer "^0.2.4"
     webgl-debug "^2.0.0"
 
@@ -3015,16 +3010,6 @@ magic-string@~0.16.0:
 map-obj@^1.0.0, map-obj@^1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/map-obj/-/map-obj-1.0.1.tgz#d933ceb9205d82bdcf4886f6742bdc2b4dea146d"
-
-math.gl@1.0.0-alpha.8:
-  version "1.0.0-alpha.8"
-  resolved "https://registry.yarnpkg.com/math.gl/-/math.gl-1.0.0-alpha.8.tgz#51dd8d03e5c50096851e8a268d888c1eda766cd1"
-  dependencies:
-    gl-mat4 "^1.1.4"
-    gl-quat "^1.0.0"
-    gl-vec2 "^1.0.0"
-    gl-vec3 "^1.0.3"
-    gl-vec4 "^1.0.1"
 
 math.gl@^1.0.0:
   version "1.0.2"
