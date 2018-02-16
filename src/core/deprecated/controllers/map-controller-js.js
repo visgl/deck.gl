@@ -1,8 +1,8 @@
 import PropTypes from 'prop-types';
 
 import {EventManager} from 'mjolnir.js';
-import MapControls from '../controllers/map-controls';
-import {MAPBOX_LIMITS} from '../controllers/map-state';
+import MapController from '../../controllers/map-controller';
+import MAPBOX_LIMITS from '../../controllers/mapbox-limits';
 
 const PREFIX = '-webkit-';
 
@@ -82,9 +82,9 @@ export default class MapControllerJS {
 
     this._eventManager = eventManager;
 
-    // If props.controls is not provided, fallback to default MapControls instance
+    // If props.controls is not provided, fallback to default MapController instance
     // Cannot use defaultProps here because it needs to be per map instance
-    this._controls = this.props.controls || new MapControls();
+    this._controls = this.props.controls || new MapController();
     this._controls.setOptions(
       Object.assign({}, this.props, {
         onStateChange: this._onInteractiveStateChange.bind(this),

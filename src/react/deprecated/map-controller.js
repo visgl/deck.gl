@@ -1,20 +1,15 @@
 import {PureComponent, createElement} from 'react';
-import OrbitControllerJS from '../../core/pure-js/orbit-controller-js';
-import OrbitViewport from '../../core/viewports/orbit-viewport';
+import {experimental} from '../../core';
+const {MapControllerJS} = experimental;
 
-export default class OrbitController extends PureComponent {
-  // Returns a deck.gl Viewport instance, to be used with the DeckGL component
-  static getViewport(viewport) {
-    return new OrbitViewport(viewport);
-  }
-
+export default class MapController extends PureComponent {
   constructor(props) {
     super(props);
     this.controller = null;
   }
 
   componentDidMount() {
-    this.controller = new OrbitControllerJS(
+    this.controller = new MapControllerJS(
       Object.assign({}, this.props, {canvas: this.eventCanvas})
     );
   }
@@ -48,6 +43,6 @@ export default class OrbitController extends PureComponent {
   }
 }
 
-OrbitController.displayName = 'OrbitController';
-OrbitController.propTypes = OrbitControllerJS.propTypes;
-OrbitController.defaultProps = OrbitControllerJS.defaultProps;
+MapController.displayName = 'MapController';
+MapController.propTypes = MapControllerJS.propTypes;
+MapController.defaultProps = MapControllerJS.defaultProps;

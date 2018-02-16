@@ -1,4 +1,4 @@
-import OrbitViewport from '../viewports/orbit-viewport';
+import OrbitViewport from '../../viewports/orbit-viewport';
 import assert from 'assert';
 
 const defaultState = {

@@ -3,12 +3,7 @@ import WebMercatorViewport, {normalizeViewportProps} from 'viewport-mercator-pro
 import assert from 'assert';
 
 // MAPBOX LIMITS
-export const MAPBOX_LIMITS = {
-  minZoom: 0,
-  maxZoom: 20,
-  minPitch: 0,
-  maxPitch: 60
-};
+import MAPBOX_LIMITS from '../../controllers/mapbox-limits';
 
 const DEFAULT_STATE = {
   pitch: 0,
@@ -210,7 +205,7 @@ export default class MapState extends ViewState {
    * @param {Number} scale - a number between [0, 1] specifying the accumulated
    *   relative scale.
    */
-  zoom({pos, startPos, scale}) {
+  zoomTo({pos, startPos, scale}) {
     assert(scale > 0, '`scale` must be a positive number');
 
     // Make sure we zoom around the current mouse position rather than map center

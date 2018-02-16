@@ -44,7 +44,9 @@ export {default as project64} from './shaderlib/project64/project64';
 export {default as lighting} from './shaderlib/lighting/lighting';
 
 // EXPERIMENTAL EXPORTS
-// Experimental Features (May change in minor version bumps, use at your own risk)
+
+// Experimental Pure JS (non-React) bindings
+import {default as Deck} from './lib/deck';
 
 import {default as View} from './views/view';
 import {default as MapView} from './views/map-view';
@@ -60,22 +62,9 @@ import {default as MapController} from './controllers/map-controller';
 import {default as FirstPersonController} from './controllers/first-person-controller';
 import {default as OrbitController} from './controllers/orbit-controller';
 
-import {default as FirstPersonState} from './controllers/first-person-state';
-import {default as OrbitState} from './controllers/orbit-state';
-import {default as MapState} from './controllers/map-state';
-
-// Experimental Controllers
-import {default as ViewportControls} from './controllers/viewport-controls';
-import {default as MapControls} from './controllers/map-controls';
-
 import {default as FirstPersonViewport} from './viewports/first-person-viewport';
 import {default as ThirdPersonViewport} from './viewports/third-person-viewport';
 import {default as OrbitViewport} from './viewports/orbit-viewport';
-
-// Experimental Pure JS (non-React) bindings
-import {default as Deck} from './lib/deck';
-import {default as MapControllerJS} from './pure-js/map-controller-js';
-import {default as OrbitControllerJS} from './pure-js/orbit-controller-js';
 
 // Experimental Effects (non-React) bindings
 import {default as EffectManager} from './experimental/lib/effect-manager';
@@ -85,6 +74,15 @@ import {default as Effect} from './experimental/lib/effect';
 import {TRANSITION_EVENTS} from './lib/transition-manager';
 import {default as LinearInterpolator} from './transitions/linear-interpolator';
 import {default as ViewportFlyToInterpolator} from './transitions/viewport-fly-to-interpolator';
+
+// DEPRECATED EXPERIMENTAL EXPORTS
+import {default as ViewportControls} from './deprecated/controllers/viewport-controls';
+import {default as MapControls} from './deprecated/controllers/map-controls';
+import {default as FirstPersonState} from './deprecated/controllers/first-person-state';
+import {default as OrbitState} from './deprecated/controllers/orbit-state';
+import {default as MapState} from './deprecated/controllers/map-state';
+import {default as MapControllerJS} from './deprecated/controllers/map-controller-js';
+import {default as OrbitControllerJS} from './deprecated/controllers/orbit-controller-js';
 
 // INTERNAL EXPORTS
 
