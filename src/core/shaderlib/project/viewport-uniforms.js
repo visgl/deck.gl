@@ -111,6 +111,7 @@ function calculateMatrixAndOffset({
  */
 export function getUniformsFromViewport({
   viewport,
+  useDevicePixels,
   modelMatrix = null,
   // Match Layer.defaultProps
   coordinateSystem = COORDINATE_SYSTEM.LNGLAT,
@@ -132,11 +133,16 @@ export function getUniformsFromViewport({
     {
       project_uModelMatrix: modelMatrix || IDENTITY_MATRIX
     },
-    getMemoizedViewportUniforms({viewport, coordinateSystem, coordinateOrigin})
+    getMemoizedViewportUniforms({viewport, useDevicePixels, coordinateSystem, coordinateOrigin})
   );
 }
 
-function calculateViewportUniforms({viewport, coordinateSystem, coordinateOrigin}) {
+function calculateViewportUniforms({
+  viewport,
+  useDevicePixels,
+  coordinateSystem,
+  coordinateOrigin
+}) {
   const coordinateZoom = viewport.zoom;
   assert(coordinateZoom >= 0);
 
@@ -153,7 +159,8 @@ function calculateViewportUniforms({viewport, coordinateSystem, coordinateOrigin
   const distanceScales = viewport.getDistanceScales();
 
   // TODO - does this depend on useDevicePixels?
-  const devicePixelRatio = (typeof window !== 'undefined' && window.devicePixelRatio) || 1;
+  const devicePixelRatio =
+    useDevicePixels && typeof window !== 'undefined' ? window.devicePixelRatio : 1;
   const viewportSize = [viewport.width * devicePixelRatio, viewport.height * devicePixelRatio];
 
   const uniforms = {
