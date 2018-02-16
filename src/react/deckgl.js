@@ -27,7 +27,16 @@ const {Deck, log} = experimental;
 
 const propTypes = Object.assign({}, Deck.propTypes, {
   viewports: PropTypes.array, // Deprecated
-  viewport: PropTypes.object // Deprecated
+  viewport: PropTypes.object, // Deprecated
+
+  // Viewport props (TODO - should only support these on the react component)
+  longitude: PropTypes.number, // The longitude of the center of the map.
+  latitude: PropTypes.number, // The latitude of the center of the map.
+  zoom: PropTypes.number, // The tile zoom level of the map.
+  bearing: PropTypes.number, // Specify the bearing of the viewport
+  pitch: PropTypes.number, // Specify the pitch of the viewport
+  altitude: PropTypes.number, // Altitude of camera. Default 1.5 "screen heights"
+  position: PropTypes.array // Camera position for FirstPersonViewport
 });
 
 const defaultProps = Deck.defaultProps;
@@ -47,6 +56,16 @@ export default class DeckGL extends React.Component {
 
   componentWillReceiveProps(nextProps) {
     this._updateFromProps(nextProps);
+  }
+
+  shouldComponentUpdate(nextProps, nextState) {
+    // TODO/ib - this needs to be moved into deck.js
+    if (this.deck.transitionManager) {
+      const transitionTriggered = this.deck.transitionManager.processViewportChange(nextProps);
+      // Skip this render to avoid jump during viewport transitions.
+      return !transitionTriggered;
+    }
+    return true;
   }
 
   componentWillUnmount() {
@@ -203,7 +222,7 @@ export default class DeckGL extends React.Component {
     });
     children.push(deck);
 
-    return createElement('div', {id: 'deckgl-wrapper'}, children);
+    return createElement('div', {id: 'deckgl-wrapper', style: {width, height}}, children);
   }
 }
 
