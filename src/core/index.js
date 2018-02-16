@@ -54,13 +54,19 @@ import {default as OrbitView} from './views/orbit-view';
 import {default as PerspectiveView} from './views/perspective-view';
 import {default as OrthographicView} from './views/orthographic-view';
 
+// Controllers
+import {default as Controller} from './controllers/controller';
+import {default as MapController} from './controllers/map-controller';
+import {default as FirstPersonController} from './controllers/first-person-controller';
+import {default as OrbitController} from './controllers/orbit-controller';
+
 import {default as FirstPersonState} from './controllers/first-person-state';
 import {default as OrbitState} from './controllers/orbit-state';
 import {default as MapState} from './controllers/map-state';
 
 // Experimental Controllers
-import {default as Controller} from './controllers/viewport-controls';
-import {default as MapController} from './controllers/map-controls';
+import {default as ViewportControls} from './controllers/viewport-controls';
+import {default as MapControls} from './controllers/map-controls';
 
 import {default as FirstPersonViewport} from './viewports/first-person-viewport';
 import {default as ThirdPersonViewport} from './viewports/third-person-viewport';
@@ -101,6 +107,9 @@ import {enable64bitSupport} from './utils/fp64';
 import {fp64ify, fp64LowPart} from './utils/fp64';
 
 export const experimental = {
+  Deck,
+
+  // View "descriptors"
   View,
   MapView,
   FirstPersonView,
@@ -109,24 +118,18 @@ export const experimental = {
   PerspectiveView,
   OrthographicView,
 
-  ViewportControls: Controller,
-  FirstPersonState,
-  OrbitState,
-  MapState,
-
+  // Controller classes
   Controller,
   MapController,
-  // FirstPersonController,
-  // OrbitController,
+  FirstPersonController,
+  OrbitController,
 
+  // Viewports
   FirstPersonViewport,
   ThirdPersonViewport,
   OrbitViewport,
 
-  Deck,
-  MapControllerJS,
-  OrbitControllerJS,
-
+  // Effects
   EffectManager,
   Effect,
 
@@ -135,11 +138,20 @@ export const experimental = {
   LinearInterpolator,
   ViewportFlyToInterpolator,
 
-  // For react module
+  // DEPRECATED EXPERIMENTAL EXPORTS
+  ViewportControls,
+  MapControls,
+  MapState,
+  FirstPersonState,
+  OrbitState,
+  MapControllerJS,
+  OrbitControllerJS,
+
+  // EXPORTS INTENDED FOR REACT MODULE ONLY
   TransitionManager,
   extractViewState,
 
-  // For layers
+  // EXPORTS INTENDED FOR CORE LAYERS ONLY
   BinSorter,
   linearScale,
   getLinearScale,

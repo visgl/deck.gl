@@ -47,6 +47,9 @@ export {
 import {experimental as CoreExperimental} from './core';
 
 const {
+  Deck,
+
+  // View "descriptors"
   View,
   MapView,
   FirstPersonView,
@@ -55,34 +58,41 @@ const {
   PerspectiveView,
   OrthographicView,
 
-  // View States
-  ViewState,
-  FirstPersonState,
-  OrbitState,
-  MapState,
-
-  // Controllers
+  // Controller classes
   Controller,
+  MapController,
   FirstPersonController,
+  OrbitController,
 
   // Viewports
   FirstPersonViewport,
-  OrbitViewport,
   ThirdPersonViewport,
+  OrbitViewport,
 
-  // Transition bindings
+  // Effects
+  EffectManager,
+  Effect,
+
+  // Transitions
   TRANSITION_EVENTS,
   LinearInterpolator,
   ViewportFlyToInterpolator,
 
-  Deck,
+  // DEPRECATED EXPERIMENTAL EXPORTS
+  ViewportControls,
+  MapControls,
+  ViewState,
+  MapState,
+  FirstPersonState,
+  OrbitState,
   MapControllerJS,
-
-  EffectManager,
-  Effect
+  OrbitControllerJS
 } = CoreExperimental;
 
 Object.assign(experimental, {
+  Deck,
+
+  // View "descriptors"
   View,
   MapView,
   FirstPersonView,
@@ -91,31 +101,35 @@ Object.assign(experimental, {
   PerspectiveView,
   OrthographicView,
 
-  // Unfinished controller/viewport classes
-  ViewState,
-  FirstPersonState,
-  OrbitState,
-  MapState,
-
+  // Controller classes
   Controller,
+  MapController,
   FirstPersonController,
+  OrbitController,
 
+  // Viewports
   FirstPersonViewport,
-  OrbitViewport,
   ThirdPersonViewport,
+  OrbitViewport,
 
-  // Transition bindings
+  // Effects
+  EffectManager,
+  Effect,
+
+  // Transitions
   TRANSITION_EVENTS,
   LinearInterpolator,
   ViewportFlyToInterpolator,
 
-  // Pure JS (non-React) API
-  Deck,
+  // DEPRECATED EXPERIMENTAL EXPORTS
+  ViewportControls,
+  MapControls,
+  ViewState,
+  MapState,
+  FirstPersonState,
+  OrbitState,
   MapControllerJS,
-
-  // Effects base classes
-  EffectManager,
-  Effect
+  OrbitControllerJS
 });
 
 // Experimental Data Accessor Helpers
@@ -216,14 +230,14 @@ export {default, DeckGL} from './react';
 
 // TODO - do we need to expose these?
 import {
-  MapController,
-  OrbitController,
+  MapController as ReactMapController,
+  OrbitController as ReactOrbitController,
   ViewportController // TODO - merge with deck.gl?
 } from './react';
 
 Object.assign(experimental, {
-  MapController,
-  OrbitController,
+  ReactMapController,
+  ReactOrbitController,
   ViewportController
 });
 
