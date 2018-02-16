@@ -203,7 +203,7 @@ export default class DeckGL extends React.Component {
     });
     children.push(deck);
 
-    return createElement('div', {id: 'deckgl-wrapper'}, children);
+    return createElement('div', {id: 'deckgl-wrapper', style: {width, height}}, children);
   }
 }
 
