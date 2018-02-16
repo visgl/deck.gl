@@ -194,7 +194,7 @@ export default class LayerManager {
       this._setEventHandlingParameters(parameters);
     }
 
-    if ('width' in parameters || 'height' in parameters) {
+    if (parameters.width !== undefined || parameters.height !== undefined) {
       this.setSize(parameters.width, parameters.height);
     }
 
@@ -213,8 +213,8 @@ export default class LayerManager {
     }
 
     if ('layerFilter' in parameters) {
-      this.context.layerFilter = parameters.layerFilter;
       if (this.context.layerFilter !== parameters.layerFilter) {
+        this.context.layerFilter = parameters.layerFilter;
         this.setNeedsRedraw('layerFilter changed');
       }
     }
@@ -225,7 +225,9 @@ export default class LayerManager {
       }
     }
 
-    Object.assign(this.context, parameters);
+    if ('useDevicePixels' in parameters) {
+      this.context.useDevicePixels = parameters.useDevicePixels;
+    }
   }
   /* eslint-enable complexity */
 

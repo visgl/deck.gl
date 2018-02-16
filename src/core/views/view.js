@@ -3,6 +3,37 @@ import {parsePosition, getPosition} from '../utils/positions';
 import {deepEqual} from '../utils/deep-equal';
 import assert from 'assert';
 
+/* TODO - Controller props - add new `View.controller` prop
+
+  // Viewport constraints
+  maxZoom: PropTypes.number, // Max zoom level
+  minZoom: PropTypes.number, // Min zoom level
+  maxPitch: PropTypes.number, // Max pitch in degrees
+  minPitch: PropTypes.number, // Min pitch in degrees
+
+  // Viewport transition
+  transitionDuration: PropTypes.number, // transition duration for viewport change
+  transitionInterpolator: PropTypes.object, // ViewportTransitionInterpolator for custom transitions
+  transitionInterruption: PropTypes.number, // type of interruption of current transition on update
+  transitionEasing: PropTypes.func, // easing function
+  onTransitionStart: PropTypes.func, // transition status update functions
+  onTransitionInterrupt: PropTypes.func,
+  onTransitionEnd: PropTypes.func,
+
+  // Enables control event handling
+  scrollZoom: PropTypes.bool, // Scroll to zoom
+  dragPan: PropTypes.bool, // Drag to pan
+  dragRotate: PropTypes.bool, // Drag to rotate
+  doubleClickZoom: PropTypes.bool, // Double click to zoom
+  touchZoomRotate: PropTypes.bool, // Pinch to zoom / rotate
+
+  scrollZoom: true,
+  dragPan: true,
+  dragRotate: true,
+  doubleClickZoom: true,
+  touchZoomRotate: true,
+*/
+
 export default class View {
   constructor(props = {}) {
     const {
