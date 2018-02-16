@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 
 import test from 'tape-catch';
-import {spy} from '@deck.gl/test-utils';
+import {spy} from 'probe.gl/test';
 
 import * as data from 'deck.gl/test/data';
 import {

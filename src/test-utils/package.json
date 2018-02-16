@@ -47,7 +47,8 @@
     "save-pixels": "^2.3.2",
     "canvas-to-blob": "0.0.0",
     "filesaver.js": "^0.2.0",
-    "through": "^2.3.8"
+    "through": "^2.3.8",
+    "probe.gl": "^0.0.5"
   },
   "devDependencies": {
     "babel-cli": "^6.22.2",

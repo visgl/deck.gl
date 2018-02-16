@@ -54,6 +54,7 @@
     "luma.gl": "^5.1.2",
     "math.gl": "^1.0.0",
     "mjolnir.js": "^1.0.0",
+    "probe.gl": "^0.0.7",
     "prop-types": "^15.6.0",
     "seer": "^0.2.4",
     "viewport-mercator-project": "^5.0.0"
@@ -83,7 +84,6 @@
     "pre-commit": "^1.2.2",
     "prettier": "^1.9.2",
     "prettier-check": "^2.0.0",
-    "probe.gl": "^0.0.3",
     "puppeteer": "^1.0.0",
     "raw-loader": "^0.5.1",
     "react": "^16.2.0",

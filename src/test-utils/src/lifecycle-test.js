@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 
 import {LayerManager, WebMercatorViewport} from 'deck.gl/core';
-import spy from './utils/spy';
+import {spy} from 'probe.gl/test';
 import gl from './utils/setup-gl';
 
 export function testInitializeLayer({layer, viewport}) {

@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 import test from 'tape-catch';
-import {spy} from '@deck.gl/test-utils';
+import {spy} from 'probe.gl/test';
 
 import * as FIXTURES from 'deck.gl/test/data';
 
