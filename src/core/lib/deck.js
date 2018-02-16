@@ -286,7 +286,7 @@ export default class Deck {
 
   // Handles Deck autosizing. Still fragile, use special prop to activate
   _updateSize(gl) {
-    if (this.props.updateSize) {
+    if (this.props.autoResize) {
       // Get canvas from debug context (TODO move to luma.gl)
       gl = (gl && gl.state && gl.state.gl) || gl;
       const canvas = gl && gl.canvas;

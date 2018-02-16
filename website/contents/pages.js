@@ -369,6 +369,15 @@ export const docPages = generatePath([
     ]
   },
   {
+    name: 'Javascript Reference',
+    children: [
+      {
+        name: 'Controller',
+        content: getDocUrl('api-reference/javascript/controller.md')
+      }
+    ]
+  },
+  {
     name: 'React Reference',
     children: [
       {
