@@ -18,7 +18,6 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-/* global window */
 import mat4_multiply from 'gl-mat4/multiply';
 import vec4_transformMat4 from 'gl-vec4/transformMat4';
 
@@ -111,7 +110,7 @@ function calculateMatrixAndOffset({
  */
 export function getUniformsFromViewport({
   viewport,
-  useDevicePixels,
+  devicePixelRatio = 1,
   modelMatrix = null,
   // Match Layer.defaultProps
   coordinateSystem = COORDINATE_SYSTEM.LNGLAT,
@@ -133,13 +132,13 @@ export function getUniformsFromViewport({
     {
       project_uModelMatrix: modelMatrix || IDENTITY_MATRIX
     },
-    getMemoizedViewportUniforms({viewport, useDevicePixels, coordinateSystem, coordinateOrigin})
+    getMemoizedViewportUniforms({viewport, devicePixelRatio, coordinateSystem, coordinateOrigin})
   );
 }
 
 function calculateViewportUniforms({
   viewport,
-  useDevicePixels,
+  devicePixelRatio,
   coordinateSystem,
   coordinateOrigin
 }) {
@@ -158,9 +157,6 @@ function calculateViewportUniforms({
   // Calculate projection pixels per unit
   const distanceScales = viewport.getDistanceScales();
 
-  // TODO - does this depend on useDevicePixels?
-  const devicePixelRatio =
-    useDevicePixels && typeof window !== 'undefined' ? window.devicePixelRatio : 1;
   const viewportSize = [viewport.width * devicePixelRatio, viewport.height * devicePixelRatio];
 
   const uniforms = {

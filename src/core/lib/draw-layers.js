@@ -213,7 +213,7 @@ function drawLayersInViewport(
         layer,
         layerIndex,
         drawPickingColors,
-        useDevicePixels,
+        pixelRatio,
         glViewport,
         parameters
       });
@@ -230,14 +230,14 @@ function drawLayerInViewport({
   layer,
   layerIndex,
   drawPickingColors,
-  useDevicePixels,
+  pixelRatio,
   glViewport,
   parameters
 }) {
   const moduleParameters = Object.assign({}, layer.props, {
     viewport: layer.context.viewport,
     pickingActive: drawPickingColors ? 1 : 0,
-    useDevicePixels
+    devicePixelRatio: pixelRatio
   });
 
   const uniforms = Object.assign({}, layer.context.uniforms, {layerIndex});
