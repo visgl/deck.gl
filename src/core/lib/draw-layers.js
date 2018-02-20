@@ -208,7 +208,15 @@ function drawLayersInViewport(
         renderStats.visibleCount++;
       }
 
-      drawLayerInViewport({gl, layer, layerIndex, drawPickingColors, glViewport, parameters});
+      drawLayerInViewport({
+        gl,
+        layer,
+        layerIndex,
+        drawPickingColors,
+        pixelRatio,
+        glViewport,
+        parameters
+      });
     }
   });
 
@@ -217,10 +225,19 @@ function drawLayersInViewport(
   logRenderStats({renderStats, pass, redrawReason});
 }
 
-function drawLayerInViewport({gl, layer, layerIndex, drawPickingColors, glViewport, parameters}) {
+function drawLayerInViewport({
+  gl,
+  layer,
+  layerIndex,
+  drawPickingColors,
+  pixelRatio,
+  glViewport,
+  parameters
+}) {
   const moduleParameters = Object.assign({}, layer.props, {
     viewport: layer.context.viewport,
-    pickingActive: drawPickingColors ? 1 : 0
+    pickingActive: drawPickingColors ? 1 : 0,
+    devicePixelRatio: pixelRatio
   });
 
   const uniforms = Object.assign({}, layer.context.uniforms, {layerIndex});
