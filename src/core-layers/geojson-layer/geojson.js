@@ -38,6 +38,8 @@ export function getGeojsonFeatures(geojson) {
     return geojson;
   }
 
+  assert(geojson.type, 'GeoJSON does not have type');
+
   switch (geojson.type) {
     case 'GeometryCollection':
       assert(Array.isArray(geojson.geometries), 'GeoJSON does not have geometries');

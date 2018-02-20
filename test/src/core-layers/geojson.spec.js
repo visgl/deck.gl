@@ -173,6 +173,11 @@ const TEST_CASES = [
   },
   {
     title: 'malformed geojson',
+    argument: {},
+    error: /does not have type/i
+  },
+  {
+    title: 'malformed geojson',
     argument: {type: 'Point'},
     error: /does not have geometry/i
   },
