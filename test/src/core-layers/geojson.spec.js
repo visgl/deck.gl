@@ -178,7 +178,7 @@ const TEST_CASES = [
   },
   {
     title: 'malformed geojson',
-    argument: {type: 'Point'},
+    argument: {type: 'Feature'},
     error: /does not have geometry/i
   },
   {
@@ -195,6 +195,11 @@ const TEST_CASES = [
     title: 'unknown geojson type',
     argument: {type: 'Feature', geometry: {type: 'Something', coordinates: [0, 0]}},
     error: /unknown geojson type/i
+  },
+  {
+    title: 'malformed geojson: Point',
+    argument: {type: 'Point'},
+    error: /coordinates is malformed/i
   },
   {
     title: 'malformed geojson: Point',

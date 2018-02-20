@@ -66,10 +66,7 @@ export function separateGeojsonFeatures(features) {
   const polygonOutlineFeatures = [];
 
   features.forEach(feature => {
-    assert(
-      feature && feature.geometry && feature.geometry.coordinates,
-      'GeoJSON does not have geometry'
-    );
+    assert(feature && feature.geometry, 'GeoJSON does not have geometry');
 
     const {geometry: {type, coordinates}, properties} = feature;
     checkCoordinates(type, coordinates);
@@ -142,13 +139,8 @@ function checkCoordinates(type, coordinates) {
 
   assert(nestLevel, `Unknown GeoJSON type ${type}`);
 
-  let isValid = true;
-  while (--nestLevel > 0) {
+  while (coordinates && --nestLevel > 0) {
     coordinates = coordinates[0];
-    if (!coordinates) {
-      isValid = false;
-      break;
-    }
   }
-  assert(isValid && Number.isFinite(coordinates[0]), `${type} coordinates is malformed`);
+  assert(coordinates && Number.isFinite(coordinates[0]), `${type} coordinates is malformed`);
 }
