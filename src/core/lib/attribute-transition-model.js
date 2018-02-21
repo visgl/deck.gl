@@ -1,5 +1,3 @@
-import {GL, Model, Geometry} from 'luma.gl';
-
 const ATTRIBUTE_MAPPING = {
   1: 'float',
   2: 'vec2',
@@ -7,7 +5,7 @@ const ATTRIBUTE_MAPPING = {
   4: 'vec4'
 };
 
-function getShaders(transitions) {
+export function getShaders(transitions) {
   // Build shaders
   const varyings = [];
   const attributeDeclarations = [];
@@ -60,38 +58,17 @@ void main(void) {
   return {vs, fs, varyings};
 }
 
-export default class AttributeTransitionModel extends Model {
-  constructor(gl, {id, transitions}) {
-    super(
-      gl,
-      Object.assign(
-        {
-          id,
-          geometry: new Geometry({
-            id,
-            drawMode: GL.POINTS
-          }),
-          vertexCount: 0,
-          isIndexed: true
-        },
-        getShaders(transitions)
-      )
-    );
-
-    this.setTransitions(transitions);
+export function getBuffers(transitions) {
+  const sourceBuffers = {};
+  const destinationBuffers = {};
+  let elementCount = null;
+  for (const attributeName in transitions) {
+    const {fromState, toState, buffer, attribute} = transitions[attributeName];
+    const count = attribute.value.length / attribute.size;
+    sourceBuffers[`${attributeName}From`] = fromState;
+    sourceBuffers[`${attributeName}To`] = toState;
+    destinationBuffers[`${attributeName}`] = buffer;
+    elementCount = elementCount === null ? count : Math.min(elementCount, count);
   }
-
-  // Update attributes and vertex count
-  setTransitions(transitions) {
-    for (const attributeName in transitions) {
-      const {fromState, toState, attribute} = transitions[attributeName];
-
-      this.setAttributes({
-        [`${attributeName}From`]: fromState,
-        [`${attributeName}To`]: toState
-      });
-
-      this.setVertexCount(attribute.value.length / attribute.size);
-    }
-  }
+  return {sourceBuffers, destinationBuffers, elementCount};
 }
