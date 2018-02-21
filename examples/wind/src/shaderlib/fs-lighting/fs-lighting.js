@@ -27,5 +27,6 @@ export default {
   name: 'fslighting',
   dependencies: [fsproject],
   vs: null,
-  fs: lighting.vs
+  fs: lighting.vs,
+  getUniforms: lighting.getUniforms
 };

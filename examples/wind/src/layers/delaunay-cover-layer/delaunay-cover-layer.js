@@ -107,12 +107,6 @@ export default class DelaunayCoverLayer extends Layer {
       // modules: ['project'],
       onBeforeRender: () => {
         model.program.setUniforms({
-          lightsPosition: [-100, 25, 15000],
-          ambientRatio: 0.2,
-          diffuseRatio: 0.9,
-          specularRatio: 0.2,
-          lightsStrength: [1.0, 0.0],
-          numberOfLights: 2,
           bounds
         });
         setParameters(gl, {
