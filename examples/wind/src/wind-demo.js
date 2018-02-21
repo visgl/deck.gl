@@ -23,6 +23,24 @@ const propTypes = {
   settings: PropTypes.object.isRequired
 };
 
+const windLightSettings = {
+  lightsPosition: [-60, 25, 15000, -140, 0, 400000],
+  ambientRatio: 0.8,
+  diffuseRatio: 0.6,
+  specularRatio: 0.2,
+  lightsStrength: [1.0, 0.0, 2.0, 0.0],
+  numberOfLights: 2
+};
+
+const elevationLightSettings = {
+  lightsPosition: [-100, 25, 15000],
+  ambientRatio: 0.2,
+  diffuseRatio: 0.9,
+  specularRatio: 0.2,
+  lightsStrength: [1.0, 0.0],
+  numberOfLights: 1
+};
+
 export default class WindDemo extends Component {
   constructor(props) {
     super(props);
@@ -118,7 +136,8 @@ export default class WindDemo extends Component {
           dataBounds: texData.dataBounds,
           dataTextureArray: texData.textureArray,
           dataTextureSize: texData.textureSize,
-          time: settings.time
+          time: settings.time,
+          lightSettings: windLightSettings
         }),
       // settings.showElevation && new ElevationLayer({
       //   id: 'elevation',
@@ -131,7 +150,8 @@ export default class WindDemo extends Component {
       settings.showElevation &&
         new DelaunayCoverLayer({
           id: 'delaunay-cover',
-          triangulation
+          triangulation,
+          lightSettings: elevationLightSettings
         })
       // FIXME - deck.gl should automatically cull null/false layers
     ].filter(Boolean);

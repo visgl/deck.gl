@@ -7,15 +7,6 @@ import GridGeometry from './grid-geometry';
 import vertex from './elevation-layer-vertex.glsl';
 import fragment from './elevation-layer-fragment.glsl';
 
-const LIGHT_UNIFORMS = {
-  lightsPosition: [-60, 25, 15000, -140, 0, 400000],
-  ambientRatio: 0.4,
-  diffuseRatio: 0.6,
-  specularRatio: 0.2,
-  lightsStrength: [1.0, 2.0],
-  numberOfLights: 2
-};
-
 const defaultProps = {
   boundingBox: null, // : {minLng, minLat, maxLng, maxLat}, lngResolution, latResolution}
   lngResolution: 100,
@@ -55,7 +46,6 @@ export default class ElevationLayer extends Layer {
     this.setState({model});
 
     model.setUniforms({
-      ...LIGHT_UNIFORMS,
       elevationBounds: ELEVATION_DATA_BOUNDS,
       elevationRange: ELEVATION_RANGE
     });
