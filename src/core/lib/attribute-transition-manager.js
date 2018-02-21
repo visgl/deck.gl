@@ -284,7 +284,15 @@ export default class AttributeTransitionManager {
     }
 
     Object.assign(transition, transitionSettings);
-    transition.fromState = fromState;
+    if (transition.fromState) {
+      transition.fromState.delete();
+    }
+    transition.fromState = new Buffer(this.gl, Object.assign({}, fromState, {
+      data: fromState.value
+    }));
+    if (transition.toState) {
+      transition.toState.delete();
+    }
     transition.toState = toState;
 
     // Reset transition state
