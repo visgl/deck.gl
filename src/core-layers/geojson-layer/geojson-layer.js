@@ -78,7 +78,7 @@ const defaultProps = {
   }
 };
 
-const getCoordinates = f => get(f, 'geometry.coordinates');
+const getCoordinates = f => f.geometry.coordinates;
 
 export default class GeoJsonLayer extends CompositeLayer {
   initializeState() {
