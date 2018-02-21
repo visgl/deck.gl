@@ -199,27 +199,27 @@ const TEST_CASES = [
   {
     title: 'malformed geojson: Point',
     argument: {type: 'Point'},
-    error: /coordinates is malformed/i
+    error: /coordinates are malformed/i
   },
   {
     title: 'malformed geojson: Point',
     argument: {type: 'Point', coordinates: 1},
-    error: /coordinates is malformed/i
+    error: /coordinates are malformed/i
   },
   {
     title: 'malformed geojson: Point',
     argument: {type: 'Point', coordinates: [[0, 0]]},
-    error: /coordinates is malformed/i
+    error: /coordinates are malformed/i
   },
   {
     title: 'malformed geojson: Polygon',
     argument: {type: 'Polygon', coordinates: [[0, 0]]},
-    error: /coordinates is malformed/i
+    error: /coordinates are malformed/i
   },
   {
     title: 'malformed geojson: MultiPolygon',
     argument: {type: 'MultiPolygon', coordinates: [[[0, 0]]]},
-    error: /coordinates is malformed/i
+    error: /coordinates are malformed/i
   }
 ];
 

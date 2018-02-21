@@ -42,14 +42,14 @@ export function getGeojsonFeatures(geojson) {
 
   switch (geojson.type) {
     case 'GeometryCollection':
-      assert(Array.isArray(geojson.geometries), 'GeoJSON does not have geometries');
+      assert(Array.isArray(geojson.geometries), 'GeoJSON does not have geometries array');
       return geojson.geometries.map(geometry => ({geometry}));
     case 'Feature':
       // Wrap the feature in a 'Features' array
       return [geojson];
     case 'FeatureCollection':
       // Just return the 'Features' array from the collection
-      assert(Array.isArray(geojson.features), 'GeoJSON does not have features');
+      assert(Array.isArray(geojson.features), 'GeoJSON does not have features array');
       return geojson.features;
     default:
       // Assume it's a geometry, we'll check type in separateGeojsonFeatures
@@ -142,5 +142,5 @@ function checkCoordinates(type, coordinates) {
   while (coordinates && --nestLevel > 0) {
     coordinates = coordinates[0];
   }
-  assert(coordinates && Number.isFinite(coordinates[0]), `${type} coordinates is malformed`);
+  assert(coordinates && Number.isFinite(coordinates[0]), `${type} coordinates are malformed`);
 }
