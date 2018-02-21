@@ -484,10 +484,8 @@ export default class LayerManager {
 
   // Make a viewport "current" in layer context, primed for draw
   _activateViewport(viewport) {
-    // TODO - viewport change detection breaks METER_OFFSETS mode
-    // const oldViewport = this.context.viewport;
-    // const viewportChanged = !oldViewport || !viewport.equals(oldViewport);
-    const viewportChanged = true;
+    const oldViewport = this.context.viewport;
+    const viewportChanged = !oldViewport || !viewport.equals(oldViewport);
 
     if (viewportChanged) {
       Object.assign(this.oldContext, this.context);
