@@ -18,8 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {experimental} from '../../core';
-const {get} = experimental;
+import assert from 'assert';
 
 /**
  * "Normalizes" complete or partial GeoJSON data into iterable list of features
@@ -39,25 +38,23 @@ export function getGeojsonFeatures(geojson) {
     return geojson;
   }
 
-  const type = get(geojson, 'type');
-  switch (type) {
-    case 'Point':
-    case 'MultiPoint':
-    case 'LineString':
-    case 'MultiLineString':
-    case 'Polygon':
-    case 'MultiPolygon':
+  assert(geojson.type, 'GeoJSON does not have type');
+
+  switch (geojson.type) {
     case 'GeometryCollection':
-      // Wrap the geometry object in a 'Feature' object and wrap in an array
-      return [{type: 'Feature', properties: {}, geometry: geojson}];
+      assert(Array.isArray(geojson.geometries), 'GeoJSON does not have geometries array');
+      return geojson.geometries.map(geometry => ({geometry}));
     case 'Feature':
       // Wrap the feature in a 'Features' array
       return [geojson];
     case 'FeatureCollection':
       // Just return the 'Features' array from the collection
-      return get(geojson, 'features');
+      assert(Array.isArray(geojson.features), 'GeoJSON does not have features array');
+      return geojson.features;
     default:
-      throw new Error('Unknown geojson type');
+      // Assume it's a geometry, we'll check type in separateGeojsonFeatures
+      // Wrap the geometry object in a 'Feature' object and wrap in an array
+      return [{geometry: geojson}];
   }
 }
 
@@ -69,9 +66,11 @@ export function separateGeojsonFeatures(features) {
   const polygonOutlineFeatures = [];
 
   features.forEach(feature => {
-    const type = get(feature, 'geometry.type');
-    const coordinates = get(feature, 'geometry.coordinates');
-    const properties = get(feature, 'properties');
+    assert(feature && feature.geometry, 'GeoJSON does not have geometry');
+
+    const {geometry: {type, coordinates}, properties} = feature;
+    checkCoordinates(type, coordinates);
+
     switch (type) {
       case 'Point':
         pointFeatures.push(feature);
@@ -108,10 +107,7 @@ export function separateGeojsonFeatures(features) {
           });
         });
         break;
-      // Not yet supported
-      case 'GeometryCollection':
       default:
-        throw new Error(`GeoJsonLayer: ${type} not supported.`);
     }
   });
 
@@ -121,4 +117,30 @@ export function separateGeojsonFeatures(features) {
     polygonFeatures,
     polygonOutlineFeatures
   };
+}
+
+/**
+ * Simple GeoJSON validation util. For perf reasons we do not validate against the full spec,
+ * only the following:
+   - geometry.type is supported
+   - geometry.coordinate has correct nesting level
+ */
+const COORDINATE_NEST_LEVEL = {
+  Point: 1,
+  MultiPoint: 2,
+  LineString: 2,
+  MultiLineString: 3,
+  Polygon: 3,
+  MultiPolygon: 4
+};
+
+function checkCoordinates(type, coordinates) {
+  let nestLevel = COORDINATE_NEST_LEVEL[type];
+
+  assert(nestLevel, `Unknown GeoJSON type ${type}`);
+
+  while (coordinates && --nestLevel > 0) {
+    coordinates = coordinates[0];
+  }
+  assert(coordinates && Number.isFinite(coordinates[0]), `${type} coordinates are malformed`);
 }
