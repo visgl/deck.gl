@@ -73,7 +73,7 @@ to number of counts by passing in an arbitrary color domain. This property is ex
 
 ##### `colorRange` (Array, optional)
 
-- Default: <img src="/demo/src/static/images/colorbrewer_YlOrRd_6.png"/></a>
+- Default: <img src="/website/src/static/images/colorbrewer_YlOrRd_6.png"/></a>
 
 Hexagon color ranges as an array of colors formatted as `[[255, 255, 255, 255]]`. Default is
 [colorbrewer](http://colorbrewer2.org/#type=sequential&scheme=YlOrRd&n=6) `6-class YlOrRd`.

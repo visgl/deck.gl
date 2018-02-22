@@ -70,7 +70,7 @@ function renderMarkdown(content) {
   return marked(content, {renderer})
     // Since some images are embedded as html, it won't be processed by
     // the renderer image override. So hard replace it globally.
-    .replace(/\/demo\/src\/static\/images/g, 'images');
+    .replace(/\/website\/src\/static\/images/g, 'images');
 }
 
 export default class MarkdownPage extends PureComponent {
