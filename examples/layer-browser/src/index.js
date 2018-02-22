@@ -1,7 +1,6 @@
 /* global document */
 import React, {Component} from 'react';
 import ReactDOM from 'react-dom';
-import App from './app';
 import FPSStats from 'react-stats-zavatta';
 
 class Root extends Component {
@@ -30,12 +29,17 @@ class Root extends Component {
 
 const container = document.createElement('div');
 document.body.appendChild(container);
-ReactDOM.render(<Root AppComponent={App} />, container);
+
+const render = () => {
+  const App = require('./app').default;
+  ReactDOM.render(<Root AppComponent={App} />, container);
+};
+
+render();
 
 if (module.hot) {
   module.hot.accept('./app', () => {
     console.log('Hot reloading App component'); // eslint-disable-line
-    const NextApp = require('./app').default;
-    ReactDOM.render(<Root AppComponent={NextApp} />, container);
+    render();
   });
 }
