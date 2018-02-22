@@ -156,7 +156,7 @@ all hexagons without updating the data.
 
 ##### `extruded` (Boolean, optional)
 
-- Default: `true`
+- Default: `false`
 
 Whether to enable cell elevation. Cell elevation scale by count of points in each cell. If set to false, all cells will be flat.
 
