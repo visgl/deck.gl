@@ -1,5 +1,5 @@
 <div align="center">
-  <img height="300" src="/demo/src/static/images/hexagon-cell-layer.png" />
+  <img height="300" src="/website/src/static/images/hexagon-cell-layer.png" />
 </div>
 
 <p class="badges">
