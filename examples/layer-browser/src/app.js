@@ -1,4 +1,4 @@
-/* global window, document */
+/* global window */
 
 // deck.gl ES6 components
 import {COORDINATE_SYSTEM, experimental} from 'deck.gl';
@@ -10,11 +10,9 @@ import DeckGL from 'deck.gl';
 const {ViewportController} = experimental;
 
 import React, {PureComponent} from 'react';
-import ReactDOM from 'react-dom';
 import autobind from 'react-autobind';
 
 import {StaticMap} from 'react-map-gl';
-import FPSStats from 'react-stats-zavatta';
 
 import {Matrix4} from 'math.gl';
 
@@ -47,12 +45,12 @@ const ViewportLabel = props => (
 );
 
 // ---- View ---- //
-class App extends PureComponent {
+export default class App extends PureComponent {
   constructor(props) {
     super(props);
     autobind(this);
 
-    this.state = {
+    this.state = props.state || {
       mapViewState: {
         latitude: 37.751537058389985,
         longitude: -122.42694203247012,
@@ -100,6 +98,12 @@ class App extends PureComponent {
   componentWillMount() {
     this._onResize();
     window.addEventListener('resize', this._onResize);
+  }
+
+  componentDidUpdate(prevProps, prevState) {
+    if (prevState !== this.state) {
+      this.props.onStateChange(this.state);
+    }
   }
 
   componentWillUnmount() {
@@ -278,8 +282,6 @@ class App extends PureComponent {
             debug={false}
             drawPickingColors={drawPickingColors}
           >
-            <FPSStats isActive />
-
             <StaticMap
               viewId="basemap"
               {...mapViewState}
@@ -336,9 +338,3 @@ class App extends PureComponent {
     );
   }
 }
-
-// ---- Main ---- //
-
-const container = document.createElement('div');
-document.body.appendChild(container);
-ReactDOM.render(<App />, container);
