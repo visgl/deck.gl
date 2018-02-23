@@ -22,7 +22,7 @@ Release date: Feb 15, 2018
 
 ### Layer Transitions
 
-Many layers now support smooth visual transitions of e.g. positions and colors of layer elements, animating the update of the layers element to match a new data set. The animations are done on the GPU and can thus support very large number of elements. Use the new [`transitions`](/docs/layer-catalog/layer.md) prop on the `Layer` class to specify things like *transition duration*, *easing function* and *callbacks*.
+Many layers now support smooth visual transitions of e.g. positions and colors of layer elements, animating the update of the layers element to match a new data set. The animations are done on the GPU and can thus support very large number of elements. Use the new [`transitions`](/docs/api-reference/layer.md) prop on the `Layer` class to specify things like *transition duration*, *easing function* and *callbacks*.
 
 > Transitions are only supported on WebGL2-capable browsers such as Chrome and Firefox. The `transitions` prop will simply be ignored on WebGL1 browsers.
 
