@@ -17,12 +17,11 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-import {COORDINATE_SYSTEM, Layer, experimental} from '../../core';
+import {Layer, experimental} from '../../core';
 const {fp64LowPart, enable64bitSupport} = experimental;
 import {GL, Model, Geometry, Texture2D, loadTextures} from 'luma.gl';
 
 import vs from './icon-layer-vertex.glsl';
-import vs64 from './icon-layer-vertex-64.glsl';
 import fs from './icon-layer-fragment.glsl';
 
 const DEFAULT_COLOR = [0, 0, 0, 255];
@@ -68,9 +67,8 @@ const defaultProps = {
 
 export default class IconLayer extends Layer {
   getShaders() {
-    return enable64bitSupport(this.props)
-      ? {vs: vs64, fs, modules: ['project64', 'picking']}
-      : {vs, fs, modules: ['picking']}; // 'project' module added by default.
+    const projectModule = enable64bitSupport(this.props) ? 'project64' : 'project32';
+    return {vs, fs, modules: [projectModule, 'picking']};
   }
 
   initializeState() {
@@ -83,6 +81,11 @@ export default class IconLayer extends Layer {
         transition: true,
         accessor: 'getPosition',
         update: this.calculateInstancePositions
+      },
+      instancePositions64xyLow: {
+        size: 2,
+        accessor: 'getPosition',
+        update: this.calculateInstancePositions64xyLow
       },
       instanceSizes: {
         size: 1,
@@ -113,25 +116,6 @@ export default class IconLayer extends Layer {
       }
     });
     /* eslint-enable max-len */
-  }
-
-  updateAttribute({props, oldProps, changeFlags}) {
-    if (props.fp64 !== oldProps.fp64) {
-      const attributeManager = this.getAttributeManager();
-      attributeManager.invalidateAll();
-
-      if (props.fp64 && props.coordinateSystem === COORDINATE_SYSTEM.LNGLAT) {
-        attributeManager.addInstanced({
-          instancePositions64xyLow: {
-            size: 2,
-            accessor: 'getPosition',
-            update: this.calculateInstancePositions64xyLow
-          }
-        });
-      } else {
-        attributeManager.remove(['instancePositions64xyLow']);
-      }
-    }
   }
 
   updateState({oldProps, props, changeFlags}) {
@@ -169,8 +153,8 @@ export default class IconLayer extends Layer {
     if (props.fp64 !== oldProps.fp64) {
       const {gl} = this.context;
       this.setState({model: this._getModel(gl)});
+      this.state.attributeManager.invalidateAll();
     }
-    this.updateAttribute({props, oldProps, changeFlags});
   }
 
   draw({uniforms}) {
@@ -220,6 +204,14 @@ export default class IconLayer extends Layer {
   }
 
   calculateInstancePositions64xyLow(attribute) {
+    const isFP64 = enable64bitSupport(this.props);
+    attribute.isGeneric = !isFP64;
+
+    if (!isFP64) {
+      attribute.value = new Float32Array(2);
+      return;
+    }
+
     const {data, getPosition} = this.props;
     const {value} = attribute;
     let i = 0;

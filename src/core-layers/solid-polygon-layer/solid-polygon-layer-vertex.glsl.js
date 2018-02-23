@@ -22,6 +22,7 @@ export default `\
 #define SHADER_NAME solid-polygon-layer-vertex-shader
 
 attribute vec3 positions;
+attribute vec2 positions64xyLow;
 attribute vec3 normals;
 attribute vec4 colors;
 attribute vec3 pickingColors;
@@ -35,11 +36,10 @@ varying vec4 vColor;
 
 void main(void) {
   
-  vec4 position_worldspace = vec4(project_position(
-    vec3(positions.x, positions.y, positions.z * elevationScale)),
-    1.0
-  );
-  gl_Position = project_to_clipspace(position_worldspace);
+  vec3 pos = vec3(positions.xy, positions.z * elevationScale);
+
+  vec4 position_worldspace;
+  gl_Position = project_position_to_clipspace(pos, positions64xyLow, vec3(0.), position_worldspace);
 
   float lightWeight = 1.0;
   

@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {COORDINATE_SYSTEM, Layer, experimental} from '../../core';
+import {Layer, experimental} from '../../core';
 const {enable64bitSupport, get} = experimental;
 import {GL, Model, Geometry} from 'luma.gl';
 import {compareProps} from '../../core/lifecycle/props';
@@ -28,7 +28,6 @@ import {PolygonTesselator} from './polygon-tesselator';
 import {PolygonTesselatorExtruded} from './polygon-tesselator-extruded';
 
 import vs from './solid-polygon-layer-vertex.glsl';
-import vs64 from './solid-polygon-layer-vertex-64.glsl';
 import fs from './solid-polygon-layer-fragment.glsl';
 
 const defaultProps = {
@@ -54,9 +53,8 @@ const defaultProps = {
 
 export default class SolidPolygonLayer extends Layer {
   getShaders() {
-    return enable64bitSupport(this.props)
-      ? {vs: vs64, fs, modules: ['project64', 'lighting', 'picking']}
-      : {vs, fs, modules: ['lighting', 'picking']}; // 'project' module added by default.
+    const projectModule = enable64bitSupport(this.props) ? 'project64' : 'project32';
+    return {vs, fs, modules: [projectModule, 'lighting', 'picking']};
   }
 
   initializeState() {
@@ -72,6 +70,7 @@ export default class SolidPolygonLayer extends Layer {
     attributeManager.add({
       indices: {size: 1, isIndexed: true, update: this.calculateIndices, noAlloc},
       positions: {size: 3, accessor: 'getElevation', update: this.calculatePositions, noAlloc},
+      positions64xyLow: {size: 2, update: this.calculatePositionsLow},
       normals: {size: 3, update: this.calculateNormals, noAlloc},
       colors: {
         size: 4,
@@ -83,21 +82,6 @@ export default class SolidPolygonLayer extends Layer {
       pickingColors: {size: 3, type: GL.UNSIGNED_BYTE, update: this.calculatePickingColors, noAlloc}
     });
     /* eslint-enable max-len */
-  }
-
-  updateAttribute({props, oldProps, changeFlags}) {
-    if (props.fp64 !== oldProps.fp64) {
-      const attributeManager = this.getAttributeManager();
-      attributeManager.invalidateAll();
-
-      if (props.fp64 && props.coordinateSystem === COORDINATE_SYSTEM.LNGLAT) {
-        attributeManager.add({
-          positions64xyLow: {size: 2, update: this.calculatePositionsLow}
-        });
-      } else {
-        attributeManager.remove(['positions64xyLow']);
-      }
-    }
   }
 
   draw({uniforms}) {
@@ -120,8 +104,8 @@ export default class SolidPolygonLayer extends Layer {
     if (regenerateModel) {
       const {gl} = this.context;
       this.setState({model: this._getModel(gl)});
+      this.state.attributeManager.invalidateAll();
     }
-    this.updateAttribute({props, oldProps, changeFlags});
   }
 
   /* eslint-disable complexity */
@@ -194,6 +178,14 @@ export default class SolidPolygonLayer extends Layer {
     attribute.value = this.state.polygonTesselator.positions().positions;
   }
   calculatePositionsLow(attribute) {
+    const isFP64 = enable64bitSupport(this.props);
+    attribute.isGeneric = !isFP64;
+
+    if (!isFP64) {
+      attribute.value = new Float32Array(2);
+      return;
+    }
+
     attribute.value = this.state.polygonTesselator.positions().positions64xyLow;
   }
   calculateNormals(attribute) {

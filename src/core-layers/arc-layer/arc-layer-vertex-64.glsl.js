@@ -86,16 +86,11 @@ void get_pos_fp64(vec2 source[2], vec2 target[2], float segmentRatio, out vec2 p
 }
 
 void main(void) {
-  vec4 instanceSourcePositions64 = vec4(instancePositions.x,
-    instancePositions64Low.x, instancePositions.y, instancePositions64Low.y);
-  vec4 instanceTargetPositions64 = vec4(instancePositions.z,
-    instancePositions64Low.z, instancePositions.w, instancePositions64Low.w);
-
   vec2 projected_source_coord[2];
   vec2 projected_target_coord[2];
 
-  project_position_fp64(instanceSourcePositions64, projected_source_coord);
-  project_position_fp64(instanceTargetPositions64, projected_target_coord);
+  project_position_fp64(instancePositions.xy, instancePositions64Low.xy, projected_source_coord);
+  project_position_fp64(instancePositions.zw, instancePositions64Low.zw, projected_target_coord);
 
   float segmentIndex = positions.x;
   float segmentRatio = getSegmentRatio(segmentIndex);

@@ -26,6 +26,7 @@ attribute vec3 positions;
 attribute vec3 normals;
 
 attribute vec3 instancePositions;
+attribute vec2 instancePositions64xyLow;
 attribute vec4 instanceColors;
 attribute vec3 instancePickingColors;
 
@@ -59,8 +60,8 @@ void main(void) {
   float elevation = 0.0;
 
   if (extruded > 0.5) {
-    elevation = project_scale(instancePositions.z * (positions.y + 0.5) *
-      ELEVATION_SCALE * elevationScale);
+    elevation = instancePositions.z * (positions.y + 0.5) *
+      ELEVATION_SCALE * elevationScale;
   }
 
   // if ahpha == 0.0 or z < 0.0, do not render element
@@ -68,11 +69,11 @@ void main(void) {
   float dotRadius = radius * mix(coverage, 0.0, noRender);
 
   // project center of hexagon
-  vec4 centroidPosition = vec4(project_position(instancePositions.xy), elevation, 0.0);
+  vec3 centroidPosition = vec3(instancePositions.xy, elevation);
+  vec3 offset = vec3(vec2(rotatedPositions.xz * dotRadius), 0.);
 
-  vec4 position_worldspace = centroidPosition + vec4(vec2(rotatedPositions.xz * dotRadius), 0., 1.);
-
-  gl_Position = project_to_clipspace(position_worldspace);
+  vec4 position_worldspace;
+  gl_Position = project_position_to_clipspace(centroidPosition, instancePositions64xyLow, offset, position_worldspace);
 
   // Light calculations
   // Worldspace is the linear space after Mercator projection

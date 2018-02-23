@@ -27,6 +27,7 @@ attribute vec3 positions;
 attribute vec3 normals;
 
 attribute vec4 instancePositions;
+attribute vec2 instancePositions64xyLow;
 attribute vec4 instanceColors;
 attribute vec3 instancePickingColors;
 
@@ -45,28 +46,27 @@ varying vec4 vColor;
 
 void main(void) {
 
-  vec2 topLeftPos = project_position(instancePositions.xy);
-
   // if ahpha == 0.0 or z < 0.0, do not render element
   float noRender = float(instanceColors.a == 0.0 || instancePositions.w < 0.0);
   float finalCellSize = cellSize * mix(1.0, 0.0, noRender);
 
-  // cube gemoetry vertics are between -1 to 1, scale and transform it to between 0, 1
-  vec2 pos = topLeftPos + vec2(
-  (positions.x * coverage + 1.0) / 2.0 * finalCellSize,
-  (positions.y * coverage - 1.0) / 2.0 * finalCellSize);
-
   float elevation = 0.0;
 
   if (extruded > 0.5) {
-    elevation = project_scale(instancePositions.w  * (positions.z + 1.0) *
-      ELEVATION_SCALE * elevationScale);
+    elevation = instancePositions.w  * (positions.z + 1.0) *
+      ELEVATION_SCALE * elevationScale;
   }
 
+  // cube gemoetry vertics are between -1 to 1, scale and transform it to between 0, 1
+  vec3 extrudedPosition = vec3(instancePositions.xy, elevation);
+  vec3 offset = vec3(
+    (positions.x * coverage + 1.0) / 2.0 * finalCellSize,
+    (positions.y * coverage - 1.0) / 2.0 * finalCellSize,
+    1.0);
+
   // extrude positions
-  vec3 extrudedPosition = vec3(pos.xy, elevation + 1.0);
-  vec4 position_worldspace = vec4(extrudedPosition, 1.0);
-  gl_Position = project_to_clipspace(position_worldspace);
+  vec4 position_worldspace;
+  gl_Position = project_position_to_clipspace(extrudedPosition, instancePositions64xyLow, offset, position_worldspace);
 
   float lightWeight = 1.0;
 
