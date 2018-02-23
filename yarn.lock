@@ -2993,7 +2993,7 @@ lru-cache@^4.0.1:
     pseudomap "^1.0.2"
     yallist "^2.1.2"
 
-luma.gl@^5.1.0:
+luma.gl@^5.1.1:
   version "5.1.1"
   resolved "https://registry.yarnpkg.com/luma.gl/-/luma.gl-5.1.1.tgz#dced444fb23f695303007074241176be8148bdda"
   dependencies:

@@ -32,7 +32,7 @@ such as scatterplots, arcs, geometries defined in GeoJSON, etc...
 To learn how to use deck.gl through examples coming with the deck.gl repo,
 please clone the latest **release** branch.
 
-`git clone -b 4.1-release --single-branch https://github.com/uber/deck.gl.git`
+`git clone -b 5.1-release --single-branch https://github.com/uber/deck.gl.git`
 
 A very simple usage of deck.gl is showcased in the [hello-world examples](./examples),
 using both [webpack2](./examples/hello-world-webpack2) and
