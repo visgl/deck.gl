@@ -20,7 +20,10 @@ function generatePath(tree, parentPath = '') {
     generatePath(tree.children, `${parentPath}/${tree.path}`);
   }
   if (typeof tree.content === 'string') {
-    markdownFiles[tree.content] = `${parentPath}/${tree.path}`;
+    const i = tree.content.indexOf('docs/');
+    if (i >= 0) {
+      markdownFiles[tree.content.slice(i)] = `${parentPath}/${tree.path}`;
+    }
   }
 
   return tree;
