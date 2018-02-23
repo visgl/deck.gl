@@ -55,7 +55,7 @@ Takes a single parameter as a map of attribute descriptor objects:
   * `attribute.accessor` (String | Array of strings) - accessor name(s) that will
     trigger an update of this attribute when changed. Used with
     [`updateTriggers`](/docs/api-reference/layer.md#-updatetriggers-object-optional-).
-  * `attribute.update` (Function) - the function to be called when
+  * `attribute.update` (Function) - the function to be called when data changes
   * `attribute.instanced` (Boolean, optional) - if this is an instanced attribute
     (a.k.a. divisor). Default to `false`.
   * `attribute.isIndexed` (Boolean, optional) - if this is an index attribute

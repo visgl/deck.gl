@@ -229,6 +229,31 @@ If the accessor is assigned a falsy value, polygon offset will be set to `[0, 0]
 
 *Remarks: While this feature helps mitigate z-fighting, at close up zoom levels the issue might return because of the precision error of 32-bit projection matrices. Try set the `fp64` prop to `true` in this case.*
 
+##### `transitions` (Object, optional)
+- Default: `{}`
+
+When creating layers, animation can be enabled by supplying an `transitions` prop. Animation parameters are defined per attribute by using attribute names or accessor names as keys:
+```
+new Layer({
+  transitions: {
+    getPositions: 600,
+    getColors: {
+      duration: 300,
+      easing: d3.easeCubicInOut
+    }
+  }
+});
+```
+
+| Parameter | Type     | Default     | Description |
+| --------- | -------- | ----------- | ----------- |
+| duration  | Number   | `0` | Duration of the transition animation, in milliseconds |
+| easing    | Function | LINEAR (`t => t`) | Easing function that maps a value from [0, 1] to [0, 1], see http://easings.net/ |
+| onStart | Function   | `null` | Callback when the transition is started |
+| onEnd | Function   | `null` | Callback when the transition is done |
+| onInterrupt | Function   | `null` | Callback when the transition is interrupted |
+
+As a shorthand, if an accessor key maps to a number rather than an object, then the number is assigned to the `duration` parameter.
 
 ## Members
 
