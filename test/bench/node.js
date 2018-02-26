@@ -37,7 +37,4 @@ moduleAlias.addAlias('@deck.gl/test-utils', path.resolve('./src/test-utils/src')
 require('babel-polyfill');
 
 // Import headless luma support
-require('luma.gl/headless');
-
-require('@deck.gl/test-utils/setup-gl');
 require('./index');

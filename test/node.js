@@ -23,6 +23,5 @@ require('./node-aliases');
 // Import headless luma support
 require('luma.gl/headless');
 
-require('@deck.gl/test-utils');
 // Run the tests
 require('./index');
