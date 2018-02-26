@@ -27,7 +27,7 @@ const dataVariants = [{data: ['a', 'b', 'c'], size: 3}];
 
 const LAYER_PROPS = {
   id: 'tes1tLayer',
-  dat1a: [],
+  data: [],
   updateTriggers: {}
 };
 
