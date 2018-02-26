@@ -31,7 +31,7 @@ These are early ideas not yet associated with any release
 | **WIP/Draft** | | | |
 | [**Projection Mode Improvements**](vNext/projection-mode-improvements-rfc.md) | @ibgreen @pessimistress | **Draft** | Improvements to projection system |
 | [**Composite Layer Customization**](vNext/composite-layer-customization-rfc.md) | @ibgreen | **Draft** | Improvements to customizing composite layers |
-| [**Shader Module Injection**](vNext/shader-module-injection-rfc.md) | @ibgreen | **Draft** | |
+| [**Shader Module Injection**](vNext/layer-shader-customization-rfc.md) | @ibgreen | **Draft** | |
 | | | | |
 | **Effects** | | | |
 | **[Effects Manager](v6.0/effects-manager-rfc.md)** | @1chandu @ibgreen | Draft | Official support for effects (shadows, reflections, better lighting, postprocessing, framebuffer composition etc).  |
