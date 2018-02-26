@@ -40,11 +40,12 @@ export default class PlotDemo extends Component {
     this.state = {
       viewport: {
         lookAt: [0, 0, 0],
-        distance: 5,
+        distance: 3,
         rotationX: -30,
-        rotationY: 30,
+        rotationOrbit: 30,
+        orbitAxis: 'Y',
         fov: 50,
-        minDistance: 0.5,
+        minDistance: 1,
         maxDistance: 20
       },
       equation: {},
