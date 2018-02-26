@@ -177,5 +177,5 @@ test('TransitionManager#callbacks', t => {
     t.is(endCount, 1, 'onTransitionEnd() called once');
     t.ok(updateCount > 2, 'onViewportChange() called');
     t.end();
-  }, 500);
+  }, 1000);
 });

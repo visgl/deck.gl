@@ -23,8 +23,6 @@ require('./node-aliases');
 // Import headless luma support
 require('luma.gl/headless');
 
-require('@deck.gl/test-utils');
-
 // Run a smaller selection of the tests (avoid overwhelming Travis CI)
 require('./src/imports-spec');
 require('./src/core');
