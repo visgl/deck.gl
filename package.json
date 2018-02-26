@@ -54,7 +54,7 @@
     "luma.gl": "^5.1.2",
     "math.gl": "^1.0.0",
     "mjolnir.js": "^1.0.0",
-    "probe.gl": "^0.0.7",
+    "probe.gl": "0.0.7",
     "prop-types": "^15.6.0",
     "seer": "^0.2.4",
     "viewport-mercator-project": "^5.0.0"
