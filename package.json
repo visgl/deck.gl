@@ -46,6 +46,7 @@
     "test-render-react": "node test/start.js render",
     "test-browser": "webpack-dev-server --env.test --progress --hot --open",
     "test-render-browser": "webpack-dev-server --env.render --progress --hot --open",
+    "test-examples": "node test/node-examples.js",
     "bench": "node test/start.js bench",
     "bench-browser": "webpack-dev-server --env.bench --progress --hot --open"
   },
