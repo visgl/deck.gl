@@ -143,8 +143,8 @@ class Example extends PureComponent {
   }
 
   _renderLazPointCloudLayer() {
-    const {points} = this.state;
-    if (!points || points.length === 0) {
+    const {points, progress} = this.state;
+    if (!points || points.length === 0 || progress < 1.0) {
       return null;
     }
 
