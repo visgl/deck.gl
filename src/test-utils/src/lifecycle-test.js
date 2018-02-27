@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {LayerManager, WebMercatorViewport} from 'deck.gl/core';
+import {LayerManager, WebMercatorViewport} from 'deck.gl';
 import {makeSpy} from 'probe.gl/test';
 import gl from './utils/setup-gl';
 

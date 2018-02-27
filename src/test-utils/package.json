@@ -30,10 +30,10 @@
     "lint-yarn": "!(grep -q unpm.u yarn.lock) || (echo 'Please rebuild yarn file using public npmrc' && false)",
     "publish-prod": "npm run build && npm run test && npm run test-dist && npm publish",
     "publish-beta": "npm run build && npm run test && npm run test-dist && npm publish --tag beta",
-    "test": "npm run lint && npm run build && npm run test-node",
+    "test": "npm run lint && npm run test-node && npm run build",
     "test-fast": "npm run test-node",
     "test-cover": "NODE_ENV=test tape -r babel-register test/node.js && nyc report",
-    "test-node": "node test/node.js",
+    "test-node": "node test/node-test.js",
     "test-dist": "node test/node-dist.js",
     "test-browser": "webpack-dev-server --env.test --progress --hot --open",
     "bench": "node test/bench/node.js",
@@ -41,14 +41,14 @@
     "test-rendering": "(cd test/render && webpack-dev-server --config webpack.config.test-rendering.js --progress --hot --open)"
   },
   "dependencies": {
-    "deck.gl": "^5.0.0",
-    "luma.gl": "^5.0.0",
+    "deck.gl": "^5.1.0",
+    "luma.gl": "^5.1.0",
     "ndarray": "^1.0.18",
     "save-pixels": "^2.3.2",
     "canvas-to-blob": "0.0.0",
     "filesaver.js": "^0.2.0",
     "through": "^2.3.8",
-    "probe.gl": "^0.0.5"
+    "probe.gl": "^0.1.0"
   },
   "devDependencies": {
     "babel-cli": "^6.22.2",
