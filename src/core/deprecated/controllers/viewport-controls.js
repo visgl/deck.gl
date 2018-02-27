@@ -19,8 +19,8 @@
 // THE SOFTWARE.
 
 import MapState from './map-state';
-import LinearInterpolator from '../transitions/linear-interpolator';
-import {TRANSITION_EVENTS} from '../lib/transition-manager';
+import LinearInterpolator from '../../transitions/linear-interpolator';
+import {TRANSITION_EVENTS} from '../../lib/transition-manager';
 import assert from 'assert';
 
 const NO_TRANSITION_PROPS = {
@@ -54,8 +54,8 @@ export default class ViewportControls {
   constructor(ViewportState, options = {}) {
     assert(ViewportState);
     this.ViewportState = ViewportState;
-    this.viewportState = null;
-    this.viewportStateProps = null;
+    this.viewState = null;
+    this.viewStateProps = null;
     this.eventManager = null;
     this._events = null;
     this._state = {
@@ -78,7 +78,7 @@ export default class ViewportControls {
    */
   handleEvent(event) {
     const {ViewportState} = this;
-    this.viewportState = new ViewportState(Object.assign({}, this.viewportStateProps, this._state));
+    this.viewState = new ViewportState(Object.assign({}, this.viewStateProps, this._state));
 
     switch (event.type) {
       case 'panstart':
@@ -139,7 +139,7 @@ export default class ViewportControls {
 
     this.onViewportChange = onViewportChange;
     this.onStateChange = onStateChange;
-    this.viewportStateProps = options;
+    this.viewStateProps = options;
 
     if (this.eventManager !== eventManager) {
       // EventManager has changed
@@ -201,7 +201,7 @@ export default class ViewportControls {
       Object.keys(newViewport).some(key => oldViewport[key] !== newViewport[key])
     ) {
       // Viewport has changed
-      const viewport = this.viewportState.getViewport ? this.viewportState.getViewport() : null;
+      const viewport = this.viewState.getViewport ? this.viewState.getViewport() : null;
       this.onViewportChange(newViewport, viewport);
     }
 
@@ -255,7 +255,7 @@ export default class ViewportControls {
   // Normal pan to rotate
   _onPanRotateStandard(event) {
     const {deltaX, deltaY} = event;
-    const {width, height} = this.viewportState.getViewportProps();
+    const {width, height} = this.viewState.getViewportProps();
 
     const deltaScaleX = deltaX / width;
     const deltaScaleY = deltaY / height;
@@ -268,7 +268,7 @@ export default class ViewportControls {
     const {deltaX, deltaY} = event;
     const [, centerY] = this.getCenter(event);
     const startY = centerY - deltaY;
-    const {width, height} = this.viewportState.getViewportProps();
+    const {width, height} = this.viewState.getViewportProps();
 
     const deltaScaleX = deltaX / width;
     let deltaScaleY = 0;
