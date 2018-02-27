@@ -718,7 +718,7 @@ export default class LayerManager {
    *                        {Object} srcEvent:             native JS Event object
    */
   _onPointerMove(event) {
-    if (event.isDown) {
+    if (event.leftButton || event.rightButton) {
       // Do not trigger onHover callbacks if mouse button is down.
       return;
     }
