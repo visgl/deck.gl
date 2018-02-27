@@ -4142,9 +4142,9 @@ private@^0.1.6, private@^0.1.7:
   version "0.1.8"
   resolved "https://registry.yarnpkg.com/private/-/private-0.1.8.tgz#2381edb3689f7a53d653190060fcf822d2f368ff"
 
-probe.gl@0.0.7:
-  version "0.0.7"
-  resolved "https://registry.yarnpkg.com/probe.gl/-/probe.gl-0.0.7.tgz#cd6e49d6013eb1e1c03bdec9fb9d1db0ed9bf30b"
+probe.gl@^0.1.0:
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/probe.gl/-/probe.gl-0.1.0.tgz#d7c838dd0055362bdc0f52d552334f477f53cf8e"
   dependencies:
     babel-runtime "^6.11.6"
     d3-format "^1.2.0"

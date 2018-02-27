@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 
 import {LayerManager, WebMercatorViewport} from 'deck.gl/core';
-import {spy} from 'probe.gl/test';
+import {makeSpy} from 'probe.gl/test';
 import gl from './utils/setup-gl';
 
 export function testInitializeLayer({layer, viewport}) {
@@ -125,7 +125,7 @@ export function testLayerUpdates(t, {LayerComponent, testCases}) {
  *
  * @param {Function} t - test function
  * @param {Object} opt - test options
- * @param {Object} opt.FunctionsToSpy - Functions that spied by spy
+ * @param {Object} opt.FunctionsToSpy - Functions that spied by makeSpy
  * @param {Object} opt.LayerComponent - The layer component class
  * @param {Array} opt.testCases - A list of testCases
  * @param {Object} opt.testCases.INITIAL_PROPS - The initial prop to initialize the layer with
@@ -151,7 +151,7 @@ export function testSubLayerUpdateTriggers(t, {FunctionsToSpy, LayerComponent, t
   const spies = FunctionsToSpy.reduce(
     (accu, curr) =>
       Object.assign(accu, {
-        [curr]: spy(LayerComponent.prototype, curr)
+        [curr]: makeSpy(LayerComponent.prototype, curr)
       }),
     {}
   );

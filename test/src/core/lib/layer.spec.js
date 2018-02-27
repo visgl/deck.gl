@@ -21,7 +21,7 @@
 import test from 'tape-catch';
 import {Layer, AttributeManager} from 'deck.gl';
 import {testInitializeLayer} from '@deck.gl/test-utils';
-import {spy} from 'probe.gl/test';
+import {makeSpy} from 'probe.gl/test';
 
 const dataVariants = [{data: ['a', 'b', 'c'], size: 3}];
 
@@ -156,13 +156,13 @@ test('Layer#diffProps', t => {
   layer.diffProps(Object.assign({}, LAYER_PROPS, {updateTriggers: {time: 100}}), LAYER_PROPS);
   t.true(layer.getChangeFlags().propsOrDataChanged, 'props changed');
 
-  const spy1 = spy(AttributeManager.prototype, 'invalidate');
+  const spy = makeSpy(AttributeManager.prototype, 'invalidate');
   layer.diffProps(
     Object.assign({}, LAYER_PROPS, {updateTriggers: {time: {version: 0}}}),
     layer.props
   );
-  t.ok(spy1.called, 'updateTriggers fired');
-  spy1.restore();
+  t.ok(spy.called, 'updateTriggers fired');
+  spy.restore();
 
   t.end();
 });

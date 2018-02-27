@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 
 import test from 'tape-catch';
-import {spy} from 'probe.gl/test';
+import {makeSpy} from 'probe.gl/test';
 
 import * as data from 'deck.gl/test/data';
 import {
@@ -466,8 +466,8 @@ test('HexagonLayer#constructor', t => {
 });
 
 test('HexagonLayer#renderSubLayer', t => {
-  spy(HexagonLayer.prototype, '_onGetSublayerColor');
-  spy(HexagonLayer.prototype, '_onGetSublayerElevation');
+  makeSpy(HexagonLayer.prototype, '_onGetSublayerColor');
+  makeSpy(HexagonLayer.prototype, '_onGetSublayerElevation');
 
   const layer = new HexagonLayer({
     data: data.points,

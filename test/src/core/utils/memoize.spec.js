@@ -1,6 +1,6 @@
 import test from 'tape-catch';
 import memoize from 'deck.gl/core/utils/memoize';
-import {spy} from 'probe.gl/test';
+import {makeSpy} from 'probe.gl/test';
 
 const sampleCompute = ({vector, object, number}) => {
   return `${vector.join(',')}:${object.name}:number`;
@@ -40,18 +40,18 @@ const TEST = {
 };
 
 test('utils#memoize', t => {
-  const spy1 = spy(TEST, 'FUNC');
+  const spy = makeSpy(TEST, 'FUNC');
   const memoized = memoize(TEST.FUNC);
 
   TEST.CASES.forEach(testCase => {
     const result = memoized(testCase.parameters);
     t.deepEquals(result, sampleCompute(testCase.parameters), 'returns correct result');
     t.is(
-      spy1.called,
+      spy.called,
       testCase.shouldRecompute,
       testCase.shouldRecompute ? 'should recompute' : 'should not recompute'
     );
-    spy1.reset();
+    spy.reset();
   });
 
   t.end();

@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 import test from 'tape-catch';
-import {spy} from 'probe.gl/test';
+import {makeSpy} from 'probe.gl/test';
 
 import * as FIXTURES from 'deck.gl/test/data';
 
@@ -486,8 +486,8 @@ test('GridLayer#constructor', t => {
 });
 
 test('GridLayer#renderSubLayer', t => {
-  spy(GridLayer.prototype, '_onGetSublayerColor');
-  spy(GridLayer.prototype, '_onGetSublayerElevation');
+  makeSpy(GridLayer.prototype, '_onGetSublayerColor');
+  makeSpy(GridLayer.prototype, '_onGetSublayerElevation');
 
   const layer = new GridLayer({
     data: FIXTURES.points,
