@@ -67,7 +67,7 @@ const BROWSER_CONFIG = {
 
   resolve: {
     alias: {
-      '@deck.gl/test-utils': resolve('./src')
+      'deck.gl-test-utils': resolve('./src')
     }
   },
 

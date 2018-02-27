@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {RenderTest} from '@deck.gl/test-utils';
+import {RenderTest} from 'deck.gl-test-utils';
 
 import {ScatterplotLayer} from 'deck.gl';
 

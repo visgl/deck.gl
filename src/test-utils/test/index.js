@@ -1,6 +1,6 @@
 import test from 'tape-catch';
 
-import {SceneRenderer, RenderTest, RenderTestDriver, toLowPrecision, gl} from '@deck.gl/test-utils';
+import {SceneRenderer, RenderTest, RenderTestDriver, toLowPrecision, gl} from 'deck.gl-test-utils';
 
 test('Top-level imports', t0 => {
   t0.test('import "deck.gl"', t => {
