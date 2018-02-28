@@ -1,6 +1,6 @@
 export {toLowPrecision} from './utils/precision';
 export {default as gl} from './utils/setup-gl';
-export * from '../luma.gl/gpgpu';
+export * from './luma.gl/gpgpu';
 
 // Utilities for update tests (lifecycle tests)
 export * from './lifecycle-test';

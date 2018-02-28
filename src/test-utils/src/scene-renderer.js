@@ -23,7 +23,7 @@ import assert from 'assert';
 import {experimental} from 'deck.gl';
 const {Deck, MapView} = experimental;
 
-import {getImageFromContext} from '../luma.gl/io-basic/browser-image-utils';
+import {getImageFromContext} from './luma.gl/io-basic/browser-image-utils';
 
 function noop() {}
 
