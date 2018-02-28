@@ -26,7 +26,7 @@ import {makeSpy} from 'probe.gl/test';
 const dataVariants = [{data: ['a', 'b', 'c'], size: 3}];
 
 const LAYER_PROPS = {
-  id: 'tes1tLayer',
+  id: 'testLayer',
   data: [],
   updateTriggers: {}
 };
