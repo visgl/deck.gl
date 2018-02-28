@@ -6,15 +6,10 @@ const ITEM_HEIGHT = 40;
 const INDENT_BASE = 16;
 const INDENT_INC = 12;
 
-function getContentHeight(page) {
-  let height = 0;
-  if (page.children) {
-    page.children.forEach(child => {
-      height += getContentHeight(child);
-    });
-  }
-  return height + ITEM_HEIGHT;
-}
+const getContentHeight = (page) =>
+  page.children ?
+    page.children.reduce((height, child) => height + getContentHeight(child), ITEM_HEIGHT) :
+    ITEM_HEIGHT;
 
 export default class TableOfContents extends Component {
 
