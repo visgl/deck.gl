@@ -8,16 +8,19 @@ function getCodeUrl(pathname) {
 // mapping from file path in source to generated page url
 export const markdownFiles = {};
 
-function generatePath(tree, parentPath = '') {
+function generatePath(tree, parentPath = '', depth = 0) {
   if (Array.isArray(tree)) {
-    tree.forEach(branch => generatePath(branch, parentPath));
+    tree.forEach(branch => generatePath(branch, parentPath, depth));
+    return tree;
   }
+
+  tree.depth = depth;
   if (tree.name) {
     tree.path = tree.name.match(/(GeoJson|3D|API|([A-Z]|^)[a-z'0-9]+|\d+)/g)
       .join('-').toLowerCase().replace(/[^\w-]/g, '');
   }
   if (tree.children) {
-    generatePath(tree.children, `${parentPath}/${tree.path}`);
+    generatePath(tree.children, `${parentPath}/${tree.path}`, depth + 1);
   }
   if (typeof tree.content === 'string') {
     const i = tree.content.indexOf('docs/');
