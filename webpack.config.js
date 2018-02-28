@@ -73,7 +73,11 @@ const BROWSER_CONFIG = {
       'deck.gl/dist': resolve('./src'),
       'deck.gl': resolve('./src'),
       'deck.gl-layers': resolve('./src/experimental-layers/src'),
-      '@deck.gl/test-utils': resolve('./src/test-utils/src')
+      '@deck.gl/test-utils': resolve('./src/test-utils/src'),
+      // Aliases needed to defeat root scripts from getting duplicate dependencies
+      // from sub module node_modules
+      'luma.gl': resolve('./node_modules/luma.gl'),
+      'probe.gl': resolve('./node_modules/probe.gl')
     }
   },
 
