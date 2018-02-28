@@ -41,7 +41,7 @@ export default class Header extends Component {
           <div className="links">
             <Link activeClassName="active" to="examples">Examples</Link>
             <Link activeClassName="active" to="documentation">Documentation</Link>
-            <a href="http://uber.github.io/deck.gl/blog/latest">Blog</a>
+            <a href="https://medium.com/@vis.gl">Blog</a>
             <Link activeClassName="active" href={FRAMEWORK_GITHUB_URL}>
               Github<i className="icon icon-github" />
             </Link>
