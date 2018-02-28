@@ -23,8 +23,8 @@ import assert from 'assert';
 
 import SceneRenderer from './scene-renderer';
 
-import {diffImagePixels} from '../luma.gl/gpgpu';
-import {createImage, getImagePixelData} from '../luma.gl/io-basic/browser-image-utils';
+import {diffImagePixels} from './luma.gl/gpgpu';
+import {createImage, getImagePixelData} from './luma.gl/io-basic/browser-image-utils';
 
 // Default reporting method
 function reportResultInBrowser({name, passed, percentage, renderTest}) {

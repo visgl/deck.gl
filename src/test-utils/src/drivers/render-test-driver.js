@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import NodeTestDriver from './node-test-driver';
+import {NodeTestDriver} from 'probe.gl/test';
 import {addColor, COLOR} from '../utils/colors';
 
 const SERVER_CONFIG = {

@@ -1,7 +1,7 @@
 import {setContextDefaults} from 'luma.gl';
 import {createGLContext} from 'luma.gl';
-import createContext from '../../luma.gl/headless/headless';
-import {global} from '../../luma.gl/utils/globals';
+import createContext from '../luma.gl/headless/headless';
+import {global} from '../luma.gl/utils/globals';
 
 setContextDefaults({
   width: 1,

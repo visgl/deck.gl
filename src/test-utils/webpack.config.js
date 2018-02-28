@@ -21,9 +21,7 @@ const LIBRARY_BUNDLE_CONFIG = {
   },
 
   // Exclude any non-relative imports from resulting bundle
-  externals: [
-    /^[a-z\.\-0-9]+$/
-  ],
+  externals: [/^[a-z\.\-0-9]+$/],
 
   module: {
     rules: [
@@ -34,7 +32,7 @@ const LIBRARY_BUNDLE_CONFIG = {
         loader(content) {
           this.cacheable && this.cacheable(); // eslint-disable-line
           this.value = content;
-          return "module.exports = " + JSON.stringify(content); // eslint-disable-line
+          return 'module.exports = ' + JSON.stringify(content); // eslint-disable-line
         }
       }
     ]
@@ -69,15 +67,7 @@ const BROWSER_CONFIG = {
 
   resolve: {
     alias: {
-      'deck.gl/test': resolve('./test'),
-      'deck.gl/dist': resolve('./src'),
-      'deck.gl': resolve('./src'),
-      'deck.gl-layers': resolve('./src/experimental-layers/src'),
-      '@deck.gl/test-utils': resolve('./src/test-utils/src'),
-      // Aliases needed to defeat root scripts from getting duplicate dependencies
-      // from sub module node_modules
-      'luma.gl': resolve('./node_modules/luma.gl'),
-      'probe.gl': resolve('./node_modules/probe.gl')
+      'deck.gl-test-utils': resolve('./src')
     }
   },
 
