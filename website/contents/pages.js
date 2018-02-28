@@ -364,29 +364,18 @@ export const docPages = generatePath([
             content: getDocUrl('api-reference/viewport.md')
           },
           {
-            name: 'FirstPersonViewport',
-            tag: 'experimental',
-            content: getDocUrl('api-reference/first-person-viewport.md')
+            name: 'OrthographicViewport',
+            content: getDocUrl('api-reference/orthographic-viewport.md')
           },
           {
-            name: 'ThirdPersonViewport',
-            tag: 'experimental',
-            content: getDocUrl('api-reference/third-person-viewport.md')
+            name: 'PerspectiveViewport',
+            content: getDocUrl('api-reference/perspective-viewport.md')
           },
           {
             name: 'WebMercatorViewport',
             content: getDocUrl('api-reference/web-mercator-viewport.md')
           }
         ]
-      }
-    ]
-  },
-  {
-    name: 'Test Utils',
-    children: [
-      {
-        name: 'Overview',
-        content: getDocUrl('api-reference/test-utils/README.md')
       }
     ]
   }
