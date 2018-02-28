@@ -124,7 +124,7 @@ class Example extends PureComponent {
   }
 
   _onUpdate() {
-    const {rotating, viewport} = this.state;
+    const {rotating, viewport, progress} = this.state;
 
     // note: when finished dragging, _onUpdate will not resume by default
     // to resume rotating, explicitly call _onUpdate or requestAnimationFrame
@@ -132,19 +132,20 @@ class Example extends PureComponent {
       return;
     }
 
-    this.setState({
-      viewport: {
-        ...viewport,
-        rotationOrbit: viewport.rotationOrbit + 1
-      }
-    });
-
+    if (progress >= 1.0) {
+      this.setState({
+        viewport: {
+          ...viewport,
+          rotationOrbit: viewport.rotationOrbit + 1
+        }
+      });
+    }
     window.requestAnimationFrame(this._onUpdate);
   }
 
   _renderLazPointCloudLayer() {
-    const {points} = this.state;
-    if (!points || points.length === 0) {
+    const {points, progress} = this.state;
+    if (!points || points.length === 0 || progress < 1.0) {
       return null;
     }
 
