@@ -11,7 +11,9 @@
   height: 100%;
 }
 .toc {
-  width: 240px;
+  min-width: 240px;
+  max-width: 320px;
+  width: 30vw;
   height: 100%;
   background: #fff;
   overflow-y: auto;
@@ -31,13 +33,21 @@
   }
   li {
     list-style: none;
-    line-height: 40px;
   }
   a {
-    display: block;
+    display: inline-block;
   }
-  .link {
-    padding-left: 28px;
+  .badge {
+    display: inline-block;
+    background: $white-40;
+    color: $white;
+    font-size: smaller;
+    padding: 0 4px;
+    border-radius: 4px;
+    margin: 0 -40px 0 6px;
+  }
+  .link, h4 {
+    line-height: 40px;
     color: $black-20;
     background: transparent;
     border-style: solid;
@@ -62,6 +72,7 @@
     letter-spacing: 2px;
     padding: 24px 0 8px 24px;
     color: $white-40;
+    display: block;
   }
   .list-header:not(.active):not(.expanded):before {
     content: '+';
