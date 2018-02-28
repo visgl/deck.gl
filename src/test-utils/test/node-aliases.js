@@ -5,6 +5,7 @@ require('reify');
 const path = require('path');
 const moduleAlias = require('module-alias');
 moduleAlias.addAlias('deck.gl-test-utils', path.resolve('./src'));
+moduleAlias.addAlias('deck.gl/test/data', path.resolve('../../test/data'));
 
 require('babel-polyfill');
 

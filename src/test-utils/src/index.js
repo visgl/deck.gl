@@ -3,6 +3,9 @@ export {default as gl} from './utils/setup-gl';
 export * from './luma.gl/gpgpu';
 
 // Utilities for update tests (lifecycle tests)
+export {testLayer} from './lifecycle-test-new';
+
+// Deprecated utilities for update tests (lifecycle tests)
 export * from './lifecycle-test';
 
 // Basic utility for rendering multiple scenes (could go into "deck.gl/core")
