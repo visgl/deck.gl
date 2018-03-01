@@ -4,13 +4,14 @@
 * **Date**: Feb 2018
 * **Status**: Draft
 
-## Motivation
+## Abstract
 
-Writing shaders for custom layers is no trivial task, even for people who are familiar with GLSL. Some pain points are:
-- Translating an existing fp32 vertex shader to support fp64 is difficult. 64-bit shaders contain significantly more code. The representaion of fp64 positions are not intuitive and error prone.
-- Tweaking an existing layer is relatively easy in JavaScript - by extending the class - but extending its shader is not. The user must duplicate the entire shader code to insert one line. The copied shader code is also easily broken if any update is made to the inherited layer.
+Writing shaders for custom layers is no trivial task, even for people who are familiar with GLSL. While the 32-bit projection APIs are relatively intuitive, translating an existing vertex shader to support fp64 takes a lot of work. 64-bit shaders contain significantly more code. The representaion of fp64 positions are not intuitive and error prone.
 
-### Proposal: Simplified fp64 Handling
+This RFC defines a new common API for 32 and 64 bit projection. It proposes implementing this interface in the current `project64` shader module, as well as in a new `project32` shader module. As a result, the same vertex shader can be used for both 32-bit and 64-bit projection depending on which module it includes as dependency.
+
+
+## Proposal: Common 32 and 64 bit projection interface
 
 This proposal adds a new projection utility interface
 ```
@@ -106,8 +107,3 @@ main() {
 - Remove the necessity to have separate fp32 and fp64 vertex shaders for most core layers.
 - Less duplicate code; easier maintenance; smaller bundle size.
 - Backward compatible
-
-
-### Proposal: Shader Injection
-
-TBD
