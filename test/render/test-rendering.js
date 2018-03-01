@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 
 import {TEST_CASES} from './test-cases';
-import {RenderTest} from '@deck.gl/test-utils';
+import {RenderTest} from 'deck.gl-test-utils';
 
 const testRendering = new RenderTest({
   testCases: TEST_CASES,

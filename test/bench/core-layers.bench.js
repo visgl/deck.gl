@@ -23,7 +23,7 @@ import * as data from 'deck.gl/test/data';
 
 import {ScatterplotLayer, PolygonLayer, PathLayer, GeoJsonLayer} from 'deck.gl';
 
-import {testInitializeLayer} from '@deck.gl/test-utils';
+import {testInitializeLayer} from 'deck.gl-test-utils';
 
 import SolidPolygonLayer from 'deck.gl/core-layers/solid-polygon-layer/solid-polygon-layer';
 import {SolidPolygonLayer as SolidPolygonLayer2} from 'deck.gl/experimental-layers/src';

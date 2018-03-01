@@ -29,7 +29,7 @@ import {
   testLayerUpdates,
   testNullLayer,
   testSubLayerUpdateTriggers
-} from '@deck.gl/test-utils';
+} from 'deck.gl-test-utils';
 
 import {GridLayer, GridCellLayer} from 'deck.gl';
 

@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 
 import test from 'tape-catch';
-import {testInitializeLayer, testLayerUpdates} from '@deck.gl/test-utils';
+import {testInitializeLayer, testLayerUpdates} from 'deck.gl-test-utils';
 
 import {GridCellLayer} from 'deck.gl';
 
