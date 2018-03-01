@@ -18,12 +18,41 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import './polygon-tesselation.spec';
-import './core-layers.spec';
-import './polygon-layer.spec';
-import './geojson.spec';
-import './geojson-layer.spec';
-// import './grid-cell-layer.spec';
-import './grid-layer.spec';
-import './hexagon-cell-layer.spec';
-import './hexagon-layer.spec';
+import test from 'tape-catch';
+import * as FIXTURES from 'deck.gl/test/data/geojson-data';
+import {testLayer} from 'deck.gl-test-utils';
+
+import {GeoJsonLayer} from 'deck.gl';
+
+const data = FIXTURES.choropleths;
+
+test('GeoJsonLayer#tests', t => {
+  testLayer({
+    Layer: GeoJsonLayer,
+    userData: t,
+    testCases: [
+      {props: {data}},
+      {props: {data, pickable: true}},
+      {
+        props: {
+          data: Object.assign({}, data)
+        },
+        assert({layer, oldState}) {
+          t.ok(layer.state, 'should update layer state');
+          t.ok(layer.state.features !== oldState.features, 'should update features');
+        }
+      },
+      {
+        props: {
+          lineWidthScale: 3
+        },
+        assert({layer, oldState}) {
+          t.ok(layer.state, 'should update layer state');
+          const subLayers = layer.renderLayers().filter(Boolean);
+          t.equal(subLayers.length, 2, 'should render 2 subLayers');
+        }
+      }
+    ]
+  });
+  t.end();
+});
