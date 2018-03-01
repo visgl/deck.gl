@@ -22,232 +22,85 @@ import {LayerManager, WebMercatorViewport} from 'deck.gl';
 import {makeSpy} from 'probe.gl/test';
 import gl from './utils/setup-gl';
 
-export function testInitializeLayer({layer, viewport}) {
-  const layerManager = new LayerManager(gl);
-  layerManager.setViewport(new WebMercatorViewport(100, 100));
-
+function checkDoesNotThrow(func, comment, userData) {
   try {
-    layerManager.setLayers([layer]);
+    return func();
   } catch (error) {
     return error;
   }
-
-  return null;
 }
 
-export function testUpdateLayer({layer, viewport, newProps}) {
+export function testLayer({
+  Layer,
+  testCases,
+  spies = [],
+  userData = null,
+  doesNotThrow = checkDoesNotThrow
+}) {
+  // assert(Layer && testCases && testCases.length >= 1);
+
   const layerManager = new LayerManager(gl);
   layerManager.setViewport(new WebMercatorViewport(100, 100));
 
-  try {
-    layerManager.setLayers([layer]);
-    layerManager.setLayers([layer.clone(newProps)]);
-  } catch (error) {
-    return error;
-  }
+  const initialProps = testCases[0].props;
+  const layer = new Layer(initialProps);
 
-  return null;
-}
-
-export function testDrawLayer({layer, uniforms = {}}) {
-  const layerManager = new LayerManager(gl);
-  layerManager.setViewport(new WebMercatorViewport(100, 100));
-
-  try {
-    layerManager.setLayers([layer]);
-    layerManager.drawLayers();
-  } catch (error) {
-    return error;
-  }
-
-  return null;
-}
-
-/**
- * Initialize a layer, test layer update
- * on a series of newProps, assert on the resulting layer
- *
- * Note: Updates are called sequentially. updateProps will be merged
- * with previous props
- *
- * @param {Function} t - test function
- * @param {Object} opt - test options
- * @param {Object} opt.LayerComponent - The layer component class
- * @param {Array} opt.testCases - A list of testCases
- * @param {Object} opt.testCases.INITIAL_PROPS - The initial prop to initialize the layer with
- * @param {Array} opt.testCases.UPDATES - The list of updates to update
- * @param {Object} opt.testCases.UPDATES.updateProps - updated props
- * @param {Function} opt.testCases.UPDATES.assert - callbacks with updated layer, and oldState
- */
-
-export function testLayerUpdates(t, {LayerComponent, testCases}) {
-  const layerManager = new LayerManager(gl);
-  layerManager.setViewport(new WebMercatorViewport(100, 100));
-
-  const newProps = Object.assign({}, testCases.INITIAL_PROPS);
-  const layer = new LayerComponent(newProps);
-
-  t.doesNotThrow(
+  doesNotThrow(
     () => layerManager.setLayers([layer]),
-    `initialization of ${LayerComponent.layerName} should not fail`
+    `initialization of ${Layer.layerName} should not fail`,
+    userData
   );
 
-  for (const {updateProps, assert} of testCases.UPDATES) {
+  runLayerTests(layerManager, layer, testCases, spies, userData, doesNotThrow);
+}
+
+/* eslint-disable max-params, no-loop-func */
+function runLayerTests(layerManager, layer, testCases, spies, userData, doesNotThrow) {
+  const initialProps = testCases[0].props;
+  const newProps = Object.assign({}, initialProps);
+
+  // Run successive update tests
+  for (let i = 1; i < testCases.length; i++) {
+    const {props, assert} = testCases[i];
+
+    spies = testCases[i].spies || spies;
+
+    // Create a map of spies that the test case can inspect
+    const spyMap = {};
+    if (spies) {
+      for (const functionName of spies) {
+        spyMap[functionName] = makeSpy(Object.getPrototypeOf(layer), functionName);
+      }
+    }
+
     // Add on new props every iteration
-    Object.assign(newProps, updateProps);
+    Object.assign(newProps, props);
 
     // copy old state before update
     const oldState = Object.assign({}, layer.state);
 
-    const newLayer = layer.clone(newProps);
-    t.doesNotThrow(
-      () => layerManager.setLayers([newLayer]),
-      `update ${LayerComponent.layerName} should not fail`
+    layer = layer.clone(newProps);
+    doesNotThrow(
+      () => layerManager.setLayers([layer]),
+      `update ${layer} should not fail`,
+      userData
     );
 
     // call draw layer
-    t.doesNotThrow(
-      () => layerManager.drawLayers(),
-      `draw ${LayerComponent.layerName} should not fail`
-    );
-
-    // assert on updated layer
-    assert(newLayer, oldState, t);
-  }
-}
-
-/**
- * Initialize a parent layer and its subLayer
- * update the parent layer a series of newProps, assert on the updated subLayer
- *
- * Note: Updates are called sequentially. updateProps will be merged
- * with previous props
- *
- * @param {Function} t - test function
- * @param {Object} opt - test options
- * @param {Object} opt.FunctionsToSpy - Functions that spied by makeSpy
- * @param {Object} opt.LayerComponent - The layer component class
- * @param {Array} opt.testCases - A list of testCases
- * @param {Object} opt.testCases.INITIAL_PROPS - The initial prop to initialize the layer with
- * @param {Array} opt.testCases.UPDATES - The list of updates to update
- * @param {Object} opt.testCases.UPDATES.updateProps - updated props
- * @param {Function} opt.testCases.UPDATES.assert - callbacks with updated layer, and oldState
- */
-
-export function testSubLayerUpdateTriggers(t, {FunctionsToSpy, LayerComponent, testCases}) {
-  const layerManager = new LayerManager(gl);
-  layerManager.setViewport(new WebMercatorViewport(100, 100));
-
-  const newProps = Object.assign({}, testCases.INITIAL_PROPS);
-
-  // initialize parent layer (generates and initializes)
-  const layer = new LayerComponent(newProps);
-  t.doesNotThrow(
-    () => layerManager.setLayers([layer]),
-    `initialization of ${LayerComponent.layerName} should not fail`
-  );
-
-  // Create a map of spies that the test case can inspect
-  const spies = FunctionsToSpy.reduce(
-    (accu, curr) =>
-      Object.assign(accu, {
-        [curr]: makeSpy(LayerComponent.prototype, curr)
-      }),
-    {}
-  );
-
-  for (const {updateProps, assert} of testCases.UPDATES) {
-    // Add on new props every iteration
-    Object.assign(newProps, updateProps);
-
-    const newLayer = layer.clone(newProps);
-    t.doesNotThrow(
-      () => layerManager.setLayers([newLayer]),
-      `update ${LayerComponent.layerName} should not fail`
-    );
+    doesNotThrow(() => layerManager.drawLayers(), `draw ${layer} should not fail`, userData);
 
     // layer manager should handle match subLayer and tranfer state and props
-    // here we assume subLayer matches copy over the new props
-    // from a new subLayer
-    const subLayer = layer.getSubLayers()[0];
+    // here we assume subLayer matches copy over the new props from a new subLayer
+    const subLayers = layer.getSubLayers();
+    const subLayer = subLayers.length && subLayers[0];
 
-    // assert on updated subLayer
-    assert(subLayer, spies, t);
+    // assert on updated layer
+    if (assert) {
+      assert({layer, oldState, subLayer, spies: spyMap, userData});
+    }
 
-    // reset spies
-    Object.keys(spies).forEach(k => spies[k].reset());
+    // Remove spies
+    Object.keys(spyMap).forEach(k => spyMap[k].reset());
   }
-
-  /*
-  failures = testInitializeLayer({layer: subLayer});
-  t.ok(!failures, `initialize ${LayerComponent.layerName} subLayer should not fail`);
-  testCases.UPDATES.reduce((currentProps, {updateProps, assert}) => {
-    // merge updated Props with initialProps
-    const newProps = Object.assign({}, currentProps, updateProps);
-    // call update layer with new props
-    testUpdateLayer({layer, newProps});
-    testUpdateLayer({layer: subLayer, newProps: newSubLayer.props});
-    t.ok(!failures, `update ${LayerComponent.layerName} subLayer should not fail`);
-    return newProps;
-  }, testCases.INITIAL_PROPS);
-  */
-
-  // restore spies
-  Object.keys(spies).forEach(k => spies[k].restore());
 }
-
-export function testCreateLayer(t, LayerComponent, props = {}) {
-  let failures = false;
-  let layer = null;
-
-  try {
-    layer = new LayerComponent(
-      Object.assign(
-        {
-          id: `${LayerComponent.layerName}-0`
-        },
-        props
-      )
-    );
-
-    t.ok(layer instanceof LayerComponent, `${LayerComponent.layerName} created`);
-  } catch (error) {
-    failures = true;
-  }
-  t.ok(!failures, `creating ${LayerComponent.layerName} should not fail`);
-
-  return layer;
-}
-
-export function testCreateEmptyLayer(t, LayerComponent, props = {}) {
-  let failures = false;
-  try {
-    const emptyLayer = new LayerComponent(
-      Object.assign(
-        {
-          id: `empty${LayerComponent.layerName}`,
-          data: [],
-          pickable: true
-        },
-        props
-      )
-    );
-
-    t.ok(emptyLayer instanceof LayerComponent, `Empty ${LayerComponent.layerName} created`);
-  } catch (error) {
-    failures = true;
-  }
-  t.ok(!failures, `creating empty ${LayerComponent.layerName} should not fail`);
-}
-
-export function testNullLayer(t, LayerComponent) {
-  t.doesNotThrow(
-    () =>
-      new LayerComponent({
-        id: 'nullPathLayer',
-        data: null,
-        pickable: true
-      }),
-    `Null ${LayerComponent.layerName} did not throw exception`
-  );
-}
+/* eslint-enable parameters, no-loop-func */
