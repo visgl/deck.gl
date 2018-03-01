@@ -33,7 +33,7 @@ function checkDoesNotThrow(func, comment, userData) {
 export function testLayer({
   Layer,
   testCases,
-  functionsToSpy = [],
+  spies = [],
   userData = null,
   doesNotThrow = checkDoesNotThrow
 }) {
@@ -51,16 +51,7 @@ export function testLayer({
     userData
   );
 
-  // Create a map of spies that the test case can inspect
-  const spies = {};
-  for (const functionName of functionsToSpy) {
-    spies[functionName] = makeSpy(Layer.prototype, functionName);
-  }
-
   runLayerTests(layerManager, layer, testCases, spies, userData, doesNotThrow);
-
-  // Remove spies
-  Object.keys(spies).forEach(k => spies[k].reset());
 }
 
 /* eslint-disable max-params, no-loop-func */
@@ -71,6 +62,16 @@ function runLayerTests(layerManager, layer, testCases, spies, userData, doesNotT
   // Run successive update tests
   for (let i = 1; i < testCases.length; i++) {
     const {props, assert} = testCases[i];
+
+    spies = testCases[i].spies || spies;
+
+    // Create a map of spies that the test case can inspect
+    const spyMap = {};
+    if (spies) {
+      for (const functionName of spies) {
+        spyMap[functionName] = makeSpy(Object.getPrototypeOf(layer), functionName);
+      }
+    }
 
     // Add on new props every iteration
     Object.assign(newProps, props);
@@ -95,8 +96,11 @@ function runLayerTests(layerManager, layer, testCases, spies, userData, doesNotT
 
     // assert on updated layer
     if (assert) {
-      assert({layer, oldState, subLayer, spies, userData});
+      assert({layer, oldState, subLayer, spies: spyMap, userData});
     }
+
+    // Remove spies
+    Object.keys(spyMap).forEach(k => spyMap[k].reset());
   }
 }
 /* eslint-enable parameters, no-loop-func */

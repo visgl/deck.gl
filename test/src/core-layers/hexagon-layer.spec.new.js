@@ -22,12 +22,7 @@ import test from 'tape-catch';
 import {makeSpy} from 'probe.gl/test';
 
 import * as data from 'deck.gl/test/data';
-import {
-  // testLayer,
-  testInitializeLayer,
-  testLayerUpdates,
-  testSubLayerUpdateTriggers
-} from 'deck.gl-test-utils';
+import {testLayer, testInitializeLayer} from 'deck.gl-test-utils';
 
 import {HexagonLayer, HexagonCellLayer} from 'deck.gl';
 
@@ -38,423 +33,434 @@ const getPosition = d => d.COORDINATES;
 // props to initialize layer with
 // update props
 // asserts on the resulting layer
-const TEST_CASES = [
-  {
-    title: 'Initialize',
-    props: {
-      data: data.points,
-      radius: 400,
-      getPosition
-    }
-  },
-  {
-    title: 'Update radius',
-    props: {
-      radius: 800
-    },
-    assert({layer, oldState, userData}) {
-      const t = userData;
+test('HexagonLayer#updateLayer', t => {
+  testLayer({
+    Layer: HexagonLayer,
+    userData: t,
+    testCases: [
+      {
+        title: 'Initialize',
+        props: {
+          data: data.points,
+          radius: 400,
+          getPosition
+        }
+      },
+      {
+        title: 'Update radius',
+        props: {
+          radius: 800
+        },
+        assert({layer, oldState, userData}) {
+          t.ok(oldState.hexagons !== layer.state.hexagons, 'should update layer data');
 
-      t.ok(oldState.hexagons !== layer.state.hexagons, 'should update layer data');
+          t.ok(
+            oldState.sortedColorBins !== layer.state.sortedColorBins,
+            'should update sortedColorBins'
+          );
 
-      t.ok(
-        oldState.sortedColorBins !== layer.state.sortedColorBins,
-        'should update sortedColorBins'
-      );
+          t.ok(
+            oldState.colorValueDomain !== layer.state.colorValueDomain,
+            'should update valueDomain'
+          );
 
-      t.ok(oldState.colorValueDomain !== layer.state.colorValueDomain, 'should update valueDomain');
+          t.ok(
+            oldState.colorScaleFunc !== layer.state.colorScaleFunc,
+            'should update colorScaleFunc'
+          );
 
-      t.ok(oldState.colorScaleFunc !== layer.state.colorScaleFunc, 'should update colorScaleFunc');
+          t.ok(
+            oldState.sortedElevationBins !== layer.state.sortedElevationBins,
+            'should update sortedElevationBins'
+          );
 
-      t.ok(
-        oldState.sortedElevationBins !== layer.state.sortedElevationBins,
-        'should update sortedElevationBins'
-      );
+          t.ok(
+            oldState.elevationValueDomain !== layer.state.elevationValueDomain,
+            'should update elevationValueDomain'
+          );
 
-      t.ok(
-        oldState.elevationValueDomain !== layer.state.elevationValueDomain,
-        'should update elevationValueDomain'
-      );
+          t.ok(
+            oldState.elevationScaleFunc !== layer.state.elevationScaleFunc,
+            'should update elevationScaleFunc'
+          );
+        }
+      },
+      {
+        title: 'Update getColorValue accessor',
+        props: {
+          getColorValue
+        },
+        assert({layer, oldState, userData}) {
+          t.ok(oldState.hexagons === layer.state.hexagons, 'should not update layer data');
 
-      t.ok(
-        oldState.elevationScaleFunc !== layer.state.elevationScaleFunc,
-        'should update elevationScaleFunc'
-      );
-    }
-  },
-  {
-    title: 'Update getColorValue accessor',
-    props: {
-      getColorValue
-    },
-    assert({layer, oldState, userData}) {
-      const t = userData;
+          t.ok(
+            oldState.sortedColorBins !== layer.state.sortedColorBins,
+            'should not update sortedColorBins'
+          );
 
-      t.ok(oldState.hexagons === layer.state.hexagons, 'should not update layer data');
+          t.ok(
+            oldState.sortedElevationBins === layer.state.sortedElevationBins,
+            'should update sortedElevationBins'
+          );
 
-      t.ok(
-        oldState.sortedColorBins !== layer.state.sortedColorBins,
-        'should not update sortedColorBins'
-      );
+          t.ok(
+            oldState.colorValueDomain !== layer.state.colorValueDomain,
+            'should re calculate colorValueDomain'
+          );
 
-      t.ok(
-        oldState.sortedElevationBins === layer.state.sortedElevationBins,
-        'should update sortedElevationBins'
-      );
+          t.ok(
+            oldState.elevationValueDomain === layer.state.elevationValueDomain,
+            'should not update elevationValueDomain'
+          );
 
-      t.ok(
-        oldState.colorValueDomain !== layer.state.colorValueDomain,
-        'should re calculate colorValueDomain'
-      );
+          t.ok(
+            oldState.colorScaleFunc !== layer.state.colorScaleFunc,
+            'should update colorScaleFunc'
+          );
 
-      t.ok(
-        oldState.elevationValueDomain === layer.state.elevationValueDomain,
-        'should not update elevationValueDomain'
-      );
+          t.ok(
+            oldState.elevationScaleFunc === layer.state.elevationScaleFunc,
+            'should not update colorScaleFunc'
+          );
+        }
+      },
+      {
+        title: 'Update getColorValue accessor',
+        props: {
+          upperPercentile: 90
+        },
+        assert({layer, oldState, userData}) {
+          t.ok(oldState.hexagons === layer.state.hexagons, 'should not update layer data');
 
-      t.ok(oldState.colorScaleFunc !== layer.state.colorScaleFunc, 'should update colorScaleFunc');
+          t.ok(
+            oldState.sortedColorBins === layer.state.sortedColorBins,
+            'should not update sortedColorBins'
+          );
 
-      t.ok(
-        oldState.elevationScaleFunc === layer.state.elevationScaleFunc,
-        'should not update colorScaleFunc'
-      );
-    }
-  },
-  {
-    title: 'Update getColorValue accessor',
-    props: {
-      upperPercentile: 90
-    },
-    assert({layer, oldState, userData}) {
-      const t = userData;
+          t.ok(
+            oldState.colorValueDomain !== layer.state.colorValueDomain,
+            'should re calculate colorValueDomain'
+          );
 
-      t.ok(oldState.hexagons === layer.state.hexagons, 'should not update layer data');
+          t.ok(
+            oldState.colorScaleFunc !== layer.state.colorScaleFunc,
+            'should update colorScaleFunc'
+          );
 
-      t.ok(
-        oldState.sortedColorBins === layer.state.sortedColorBins,
-        'should not update sortedColorBins'
-      );
+          t.ok(
+            oldState.sortedElevationBins === layer.state.sortedElevationBins,
+            'should not update sortedElevationBins'
+          );
 
-      t.ok(
-        oldState.colorValueDomain !== layer.state.colorValueDomain,
-        'should re calculate colorValueDomain'
-      );
+          t.ok(
+            oldState.elevationValueDomain === layer.state.elevationValueDomain,
+            'should not update elevationValueDomain'
+          );
 
-      t.ok(oldState.colorScaleFunc !== layer.state.colorScaleFunc, 'should update colorScaleFunc');
+          t.ok(
+            oldState.elevationScaleFunc === layer.state.elevationScaleFunc,
+            'should not update elevationScaleFunc'
+          );
+        }
+      },
+      {
+        title: 'Update colorDomain',
+        props: {
+          colorDomain: [0, 10]
+        },
+        assert({layer, oldState, userData}) {
+          t.ok(oldState.hexagons === layer.state.hexagons, 'should not update layer data');
 
-      t.ok(
-        oldState.sortedElevationBins === layer.state.sortedElevationBins,
-        'should not update sortedElevationBins'
-      );
+          t.ok(
+            oldState.sortedColorBins === layer.state.sortedColorBins,
+            'should not update sortedColorBins'
+          );
 
-      t.ok(
-        oldState.elevationValueDomain === layer.state.elevationValueDomain,
-        'should not update elevationValueDomain'
-      );
+          t.ok(
+            oldState.colorValueDomain === layer.state.colorValueDomain,
+            'should not re calculate colorValueDomain'
+          );
 
-      t.ok(
-        oldState.elevationScaleFunc === layer.state.elevationScaleFunc,
-        'should not update elevationScaleFunc'
-      );
-    }
-  },
-  {
-    title: 'Update colorDomain',
-    props: {
-      colorDomain: [0, 10]
-    },
-    assert({layer, oldState, userData}) {
-      const t = userData;
+          t.ok(
+            oldState.colorScaleFunc !== layer.state.colorScaleFunc,
+            'should update colorScaleFunc'
+          );
 
-      t.ok(oldState.hexagons === layer.state.hexagons, 'should not update layer data');
+          t.ok(
+            oldState.sortedElevationBins === layer.state.sortedElevationBins,
+            'should not update sortedElevationBins'
+          );
 
-      t.ok(
-        oldState.sortedColorBins === layer.state.sortedColorBins,
-        'should not update sortedColorBins'
-      );
+          t.ok(
+            oldState.elevationValueDomain === layer.state.elevationValueDomain,
+            'should not update elevationValueDomain'
+          );
 
-      t.ok(
-        oldState.colorValueDomain === layer.state.colorValueDomain,
-        'should not re calculate colorValueDomain'
-      );
+          t.ok(
+            oldState.elevationScaleFunc === layer.state.elevationScaleFunc,
+            'should not update elevationScaleFunc'
+          );
+        }
+      },
+      {
+        title: 'Update getElevationValue accessor',
+        props: {
+          getElevationValue
+        },
+        assert({layer, oldState, userData}) {
+          t.ok(oldState.hexagons === layer.state.hexagons, 'should not update layer data');
 
-      t.ok(oldState.colorScaleFunc !== layer.state.colorScaleFunc, 'should update colorScaleFunc');
+          t.ok(
+            oldState.sortedElevationBins !== layer.state.sortedElevationBins,
+            'should update sortedElevationBins'
+          );
 
-      t.ok(
-        oldState.sortedElevationBins === layer.state.sortedElevationBins,
-        'should not update sortedElevationBins'
-      );
+          t.ok(
+            oldState.elevationValueDomain !== layer.state.elevationValueDomain,
+            'should re calculate elevationValueDomain'
+          );
 
-      t.ok(
-        oldState.elevationValueDomain === layer.state.elevationValueDomain,
-        'should not update elevationValueDomain'
-      );
+          t.ok(
+            oldState.elevationScaleFunc !== layer.state.elevationScaleFunc,
+            'should update elevationScaleFunc'
+          );
 
-      t.ok(
-        oldState.elevationScaleFunc === layer.state.elevationScaleFunc,
-        'should not update elevationScaleFunc'
-      );
-    }
-  },
-  {
-    title: 'Update getElevationValue accessor',
-    props: {
-      getElevationValue
-    },
-    assert({layer, oldState, userData}) {
-      const t = userData;
+          t.ok(
+            oldState.sortedColorBins === layer.state.sortedColorBins,
+            'should not update sortedColorBins'
+          );
 
-      t.ok(oldState.hexagons === layer.state.hexagons, 'should not update layer data');
+          t.ok(
+            oldState.colorValueDomain === layer.state.colorValueDomain,
+            'should not re calculate colorValueDomain'
+          );
 
-      t.ok(
-        oldState.sortedElevationBins !== layer.state.sortedElevationBins,
-        'should update sortedElevationBins'
-      );
+          t.ok(
+            oldState.colorScaleFunc === layer.state.colorScaleFunc,
+            'should not update colorScaleFunc'
+          );
+        }
+      },
+      {
+        title: 'Update elevation lower percentile',
+        props: {
+          elevationLowerPercentile: 1
+        },
+        assert({layer, oldState, userData}) {
+          t.ok(oldState.hexagons === layer.state.hexagons, 'should not update layer data');
 
-      t.ok(
-        oldState.elevationValueDomain !== layer.state.elevationValueDomain,
-        'should re calculate elevationValueDomain'
-      );
+          t.ok(
+            oldState.sortedElevationBins === layer.state.sortedElevationBins,
+            'should not update sortedElevationBins'
+          );
 
-      t.ok(
-        oldState.elevationScaleFunc !== layer.state.elevationScaleFunc,
-        'should update elevationScaleFunc'
-      );
+          t.ok(
+            oldState.elevationValueDomain !== layer.state.elevationValueDomain,
+            'should re calculate elevationValueDomain'
+          );
 
-      t.ok(
-        oldState.sortedColorBins === layer.state.sortedColorBins,
-        'should not update sortedColorBins'
-      );
+          t.ok(
+            oldState.elevationScaleFunc !== layer.state.elevationScaleFunc,
+            'should update elevationScaleFunc'
+          );
 
-      t.ok(
-        oldState.colorValueDomain === layer.state.colorValueDomain,
-        'should not re calculate colorValueDomain'
-      );
+          t.ok(
+            oldState.sortedColorBins === layer.state.sortedColorBins,
+            'should not update sortedColorBins'
+          );
 
-      t.ok(
-        oldState.colorScaleFunc === layer.state.colorScaleFunc,
-        'should not update colorScaleFunc'
-      );
-    }
-  },
-  {
-    title: 'Update elevation lower percentile',
-    props: {
-      elevationLowerPercentile: 1
-    },
-    assert({layer, oldState, userData}) {
-      const t = userData;
+          t.ok(
+            oldState.colorValueDomain === layer.state.colorValueDomain,
+            'should not re calculate colorValueDomain'
+          );
 
-      t.ok(oldState.hexagons === layer.state.hexagons, 'should not update layer data');
+          t.ok(
+            oldState.colorScaleFunc === layer.state.colorScaleFunc,
+            'should not update colorScaleFunc'
+          );
+        }
+      },
+      {
+        title: 'Update elevationRange accessor',
+        props: {
+          elevationRange: [1, 10]
+        },
+        assert({layer, oldState, userData}) {
+          t.ok(oldState.hexagons === layer.state.hexagons, 'should not update layer data');
 
-      t.ok(
-        oldState.sortedElevationBins === layer.state.sortedElevationBins,
-        'should not update sortedElevationBins'
-      );
+          t.ok(
+            oldState.sortedElevationBins === layer.state.sortedElevationBins,
+            'should not update sortedElevationBins'
+          );
 
-      t.ok(
-        oldState.elevationValueDomain !== layer.state.elevationValueDomain,
-        'should re calculate elevationValueDomain'
-      );
+          t.ok(
+            oldState.elevationValueDomain === layer.state.elevationValueDomain,
+            'should not re calculate elevationValueDomain'
+          );
 
-      t.ok(
-        oldState.elevationScaleFunc !== layer.state.elevationScaleFunc,
-        'should update elevationScaleFunc'
-      );
+          t.ok(
+            oldState.elevationScaleFunc !== layer.state.elevationScaleFunc,
+            'should update elevationScaleFunc'
+          );
 
-      t.ok(
-        oldState.sortedColorBins === layer.state.sortedColorBins,
-        'should not update sortedColorBins'
-      );
+          t.ok(
+            oldState.sortedColorBins === layer.state.sortedColorBins,
+            'should not update sortedColorBins'
+          );
 
-      t.ok(
-        oldState.colorValueDomain === layer.state.colorValueDomain,
-        'should not re calculate colorValueDomain'
-      );
+          t.ok(
+            oldState.colorValueDomain === layer.state.colorValueDomain,
+            'should not re calculate colorValueDomain'
+          );
 
-      t.ok(
-        oldState.colorScaleFunc === layer.state.colorScaleFunc,
-        'should not update colorScaleFunc'
-      );
-    }
-  },
-  {
-    title: 'Update elevationRange accessor',
-    props: {
-      elevationRange: [1, 10]
-    },
-    assert({layer, oldState, userData}) {
-      const t = userData;
+          t.ok(
+            oldState.colorScaleFunc === layer.state.colorScaleFunc,
+            'should not update colorScaleFunc'
+          );
+        }
+      }
+    ]
+  });
 
-      t.ok(oldState.hexagons === layer.state.hexagons, 'should not update layer data');
+  t.end();
+});
 
-      t.ok(
-        oldState.sortedElevationBins === layer.state.sortedElevationBins,
-        'should not update sortedElevationBins'
-      );
+test('HexagonLayer#updateTriggers', t => {
+  const functionsToSpy = ['_onGetSublayerColor', '_onGetSublayerElevation'];
 
-      t.ok(
-        oldState.elevationValueDomain === layer.state.elevationValueDomain,
-        'should not re calculate elevationValueDomain'
-      );
-
-      t.ok(
-        oldState.elevationScaleFunc !== layer.state.elevationScaleFunc,
-        'should update elevationScaleFunc'
-      );
-
-      t.ok(
-        oldState.sortedColorBins === layer.state.sortedColorBins,
-        'should not update sortedColorBins'
-      );
-
-      t.ok(
-        oldState.colorValueDomain === layer.state.colorValueDomain,
-        'should not re calculate colorValueDomain'
-      );
-
-      t.ok(
-        oldState.colorScaleFunc === layer.state.colorScaleFunc,
-        'should not update colorScaleFunc'
-      );
-    }
-  }
-];
-
-const FunctionsToSpy = ['_onGetSublayerColor', '_onGetSublayerElevation'];
-
-// list of update props to call and asserts on the resulting layer
-const SUBLAYER_TEST_CASES = [
-  {
-    // props to initialize layer with
-    props: {
-      data: data.points,
-      radius: 400,
-      getPosition
-    }
-  },
-  {
-    title: 'Update radius prop',
-    props: {
-      radius: 800
-    },
-    spies: FunctionsToSpy,
-    assert({subLayer, spies, userData}) {
-      const t = userData;
-
-      t.ok(spies._onGetSublayerColor.called, 'update radius should call _onGetSublayerColor');
-      t.ok(
-        spies._onGetSublayerElevation.called,
-        'update radius should call _onGetSublayerElevation'
-      );
-    }
-  },
-  {
-    title: 'Update opacity prop',
-    props: {
-      opacity: 0.1
-    },
-    spies: FunctionsToSpy,
-    assert({subLayer, spies, userData}) {
-      const t = userData;
-      t.ok(!spies._onGetSublayerColor.called, 'update opacity should not call _onGetSublayerColor');
-      t.ok(
-        !spies._onGetSublayerElevation.called,
-        'update opacity  should not call _onGetSublayerElevation'
-      );
-    }
-  },
-  {
-    title: 'Update getColorValue prop',
-    props: {
-      getColorValue
-    },
-    spies: FunctionsToSpy,
-    assert({subLayer, spies, userData}) {
-      const t = userData;
-      t.ok(
-        spies._onGetSublayerColor.called,
-        'update getColorValue should call _onGetSublayerColor'
-      );
-      t.ok(
-        !spies._onGetSublayerElevation.called,
-        'update getColorValue should not call _onGetSublayerElevation'
-      );
-    }
-  },
-  {
-    title: 'Update upperPercentile prop',
-    props: {
-      upperPercentile: 90
-    },
-    spies: FunctionsToSpy,
-    assert({subLayer, spies, userData}) {
-      const t = userData;
-      t.ok(
-        spies._onGetSublayerColor.called,
-        'update upperPercentile should call _onGetSublayerColor'
-      );
-      t.ok(
-        !spies._onGetSublayerElevation.called,
-        'update upperPercentile should not call _onGetSublayerElevation'
-      );
-    }
-  },
-  {
-    title: 'Update getElevationValue prop',
-    props: {
-      getElevationValue
-    },
-    spies: FunctionsToSpy,
-    assert({subLayer, spies, userData}) {
-      const t = userData;
-      t.ok(
-        !spies._onGetSublayerColor.called,
-        'update getElevationValue should not call _onGetSublayerColor'
-      );
-      t.ok(
-        spies._onGetSublayerElevation.called,
-        'update getElevationValue should call _onGetSublayerElevation'
-      );
-    }
-  },
-  {
-    title: 'Update elevationUpperPercentile prop',
-    props: {
-      elevationUpperPercentile: 99
-    },
-    spies: FunctionsToSpy,
-    assert({subLayer, spies, userData}) {
-      const t = userData;
-      t.ok(
-        !spies._onGetSublayerColor.called,
-        'update elevationUpperPercentile should not call _onGetSublayerColor'
-      );
-      t.ok(
-        spies._onGetSublayerElevation.called,
-        'update elevationUpperPercentile should call _onGetSublayerElevation'
-      );
-    }
-  },
-  {
-    title: 'Update elevationRange prop',
-    props: {
-      elevationRange: [0, 100]
-    },
-    spies: FunctionsToSpy,
-    assert({subLayer, spies, userData}) {
-      const t = userData;
-      t.ok(
-        !spies._onGetSublayerColor.called,
-        'update elevationRange should not call _onGetSublayerColor'
-      );
-      t.ok(
-        spies._onGetSublayerElevation.called,
-        'update elevationRange should call _onGetSublayerElevation'
-      );
-    }
-  }
-];
+  testLayer({
+    Layer: HexagonLayer,
+    spies: functionsToSpy,
+    userData: t,
+    testCases: [
+      {
+        // props to initialize layer with
+        props: {
+          data: data.points,
+          radius: 400,
+          getPosition
+        }
+      },
+      {
+        title: 'Update radius prop',
+        props: {
+          radius: 800
+        },
+        spies: functionsToSpy,
+        assert({subLayer, spies, userData}) {
+          t.ok(spies._onGetSublayerColor.called, 'update radius should call _onGetSublayerColor');
+          t.ok(
+            spies._onGetSublayerElevation.called,
+            'update radius should call _onGetSublayerElevation'
+          );
+        }
+      },
+      {
+        title: 'Update opacity prop',
+        props: {
+          opacity: 0.1
+        },
+        spies: functionsToSpy,
+        assert({subLayer, spies, userData}) {
+          t.ok(
+            !spies._onGetSublayerColor.called,
+            'update opacity should not call _onGetSublayerColor'
+          );
+          t.ok(
+            !spies._onGetSublayerElevation.called,
+            'update opacity  should not call _onGetSublayerElevation'
+          );
+        }
+      },
+      {
+        title: 'Update getColorValue prop',
+        props: {
+          getColorValue
+        },
+        spies: functionsToSpy,
+        assert({subLayer, spies, userData}) {
+          t.ok(
+            spies._onGetSublayerColor.called,
+            'update getColorValue should call _onGetSublayerColor'
+          );
+          t.ok(
+            !spies._onGetSublayerElevation.called,
+            'update getColorValue should not call _onGetSublayerElevation'
+          );
+        }
+      },
+      {
+        title: 'Update upperPercentile prop',
+        props: {
+          upperPercentile: 90
+        },
+        spies: functionsToSpy,
+        assert({subLayer, spies, userData}) {
+          t.ok(
+            spies._onGetSublayerColor.called,
+            'update upperPercentile should call _onGetSublayerColor'
+          );
+          t.ok(
+            !spies._onGetSublayerElevation.called,
+            'update upperPercentile should not call _onGetSublayerElevation'
+          );
+        }
+      },
+      {
+        title: 'Update getElevationValue prop',
+        props: {
+          getElevationValue
+        },
+        spies: functionsToSpy,
+        assert({subLayer, spies, userData}) {
+          t.ok(
+            !spies._onGetSublayerColor.called,
+            'update getElevationValue should not call _onGetSublayerColor'
+          );
+          t.ok(
+            spies._onGetSublayerElevation.called,
+            'update getElevationValue should call _onGetSublayerElevation'
+          );
+        }
+      },
+      {
+        title: 'Update elevationUpperPercentile prop',
+        props: {
+          elevationUpperPercentile: 99
+        },
+        spies: functionsToSpy,
+        assert({subLayer, spies, userData}) {
+          t.ok(
+            !spies._onGetSublayerColor.called,
+            'update elevationUpperPercentile should not call _onGetSublayerColor'
+          );
+          t.ok(
+            spies._onGetSublayerElevation.called,
+            'update elevationUpperPercentile should call _onGetSublayerElevation'
+          );
+        }
+      },
+      {
+        title: 'Update elevationRange prop',
+        props: {
+          elevationRange: [0, 100]
+        },
+        spies: functionsToSpy,
+        assert({subLayer, spies, userData}) {
+          t.ok(
+            !spies._onGetSublayerColor.called,
+            'update elevationRange should not call _onGetSublayerColor'
+          );
+          t.ok(
+            spies._onGetSublayerElevation.called,
+            'update elevationRange should call _onGetSublayerElevation'
+          );
+        }
+      }
+    ]
+  });
+  t.end();
+});
 
 test('HexagonLayer#constructor', t => {
   let layer = new HexagonLayer({
@@ -526,21 +532,6 @@ test('HexagonLayer#renderSubLayer', t => {
   );
   HexagonLayer.prototype._onGetSublayerColor.restore();
   HexagonLayer.prototype._onGetSublayerElevation.restore();
-
-  t.end();
-});
-
-test('HexagonLayer#updateLayer', t => {
-  testLayerUpdates(t, {LayerComponent: HexagonLayer, testCases: TEST_CASES});
-  t.end();
-});
-
-test('HexagonLayer#updateTriggers', t => {
-  testSubLayerUpdateTriggers(t, {
-    FunctionsToSpy,
-    LayerComponent: HexagonLayer,
-    testCases: SUBLAYER_TEST_CASES
-  });
 
   t.end();
 });
