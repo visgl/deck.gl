@@ -26,4 +26,4 @@ import './geojson-layer.spec';
 // import './grid-cell-layer.spec';
 import './grid-layer.spec';
 import './hexagon-cell-layer.spec';
-import './hexagon-layer.spec.new';
+import './hexagon-layer.spec';
