@@ -21,7 +21,7 @@
 require('./node-aliases');
 
 // Run the tests
-const {RenderTestDriver} = require('@deck.gl/test-utils');
+const {RenderTestDriver} = require('deck.gl-test-utils');
 
 new RenderTestDriver().run({
   parameters: ['--env.render-react', '--progress']

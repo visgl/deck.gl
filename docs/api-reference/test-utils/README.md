@@ -1,4 +1,4 @@
-# @deck.gl/test-utils (Experimental)
+# deck.gl-test-utils (Experimental)
 
 A set of utilities to facilitate testing deck.gl layers in applications.
 
@@ -29,14 +29,14 @@ deck.gl's lifecycle test support includes test drivers to initialize, update and
 ## Usage
 
 ```js
-import {experimental} from '@deck.gl/test-utils';
+import {experimental} from 'deck.gl-test-utils';
 const {...} = experimental;
 ...
 ```
 
 The lifecycle test drivers can also simplify testing of successive updates of a layer
 ```js
-import {experimental} from '@deck.gl/test-utils';
+import {experimental} from 'deck.gl-test-utils';
 const {...} = experimental;
 ...
 ```

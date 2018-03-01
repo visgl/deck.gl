@@ -23,5 +23,5 @@ require('babel-polyfill');
 const {experimental} = require('probe.gl');
 experimental.enableDOMLogging();
 
-require('@deck.gl/test-utils');
+require('deck.gl-test-utils');
 require('./index');

@@ -26,7 +26,7 @@ import {
   testInitializeLayer,
   testLayerUpdates,
   testSubLayerUpdateTriggers
-} from '@deck.gl/test-utils';
+} from 'deck.gl-test-utils';
 
 import {HexagonLayer, HexagonCellLayer} from 'deck.gl';
 

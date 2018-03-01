@@ -23,7 +23,7 @@ import * as data from 'deck.gl/test/data';
 
 import {ScatterplotLayer} from 'deck.gl';
 
-// import {testInitializeLayer} from '@deck.gl/test-utils';
+// import {testInitializeLayer} from 'deck.gl-test-utils';
 
 let testIdx = 0;
 const testLayer = new ScatterplotLayer({data: data.points});

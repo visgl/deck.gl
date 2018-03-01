@@ -27,7 +27,7 @@ import DeckGL from 'deck.gl';
 
 import * as CONFIG from '../test-cases';
 
-import {diffImagePixels} from '@deck.gl/test-utils';
+import {diffImagePixels} from 'deck.gl-test-utils';
 
 // DeckGL container
 const deckGLContainer = document.createElement('div');
