@@ -17,6 +17,18 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## Official Releases
 
+### deck.gl v5.1.1 March 01, 2018
+- do not pick when dragging (#1475)
+- [website] redirect to new blog (#1480)
+- [Website] Update documentation hierarchy (#1483)
+- [Website] Render nested categories in side bar (#1482)
+- fix plot demo on website (#1472)
+- fix link rewrite in website (#1469)
+- Update docs for layer transitions.
+- Change default 'extruded'  to be 'false' in hexagon-layer.md (#1463)
+- Fix wrong image links in website (#1462)
+- update yarn lock
+
 ### deck.gl v5.1 Feb 15, 2018
 - change "Attribute Transitions" to "Layer Transitions" (#1446)
 - update using-with-react.md with workable example code (#1445)
