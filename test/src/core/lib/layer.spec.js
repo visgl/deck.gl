@@ -141,7 +141,7 @@ test('Layer#getNumInstances', t => {
 
 test('Layer#diffProps', t => {
   const layer = new SubLayer(LAYER_PROPS);
-  testInitializeLayer({layer});
+  t.doesNotThrow(() => testInitializeLayer({layer}), 'Layer initialized OK');
 
   layer.diffProps(Object.assign({}, LAYER_PROPS), LAYER_PROPS);
   t.false(layer.getChangeFlags().somethingChanged, 'same props');

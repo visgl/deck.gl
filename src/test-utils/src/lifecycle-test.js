@@ -30,14 +30,52 @@ function checkDoesNotThrow(func, comment, userData) {
   }
 }
 
+export function testInitializeLayer({layer, viewport}) {
+  const layerManager = new LayerManager(gl);
+
+  try {
+    layerManager.setLayers([layer]);
+  } catch (error) {
+    return error;
+  }
+
+  return null;
+}
+
+export function testUpdateLayer({layer, viewport, newProps}) {
+  const layerManager = new LayerManager(gl);
+
+  try {
+    layerManager.setLayers([layer]);
+    layerManager.setLayers([layer.clone(newProps)]);
+  } catch (error) {
+    return error;
+  }
+
+  return null;
+}
+
+export function testDrawLayer({layer, uniforms = {}}) {
+  const layerManager = new LayerManager(gl);
+
+  try {
+    layerManager.setLayers([layer]);
+    layerManager.drawLayers();
+  } catch (error) {
+    return error;
+  }
+
+  return null;
+}
+
 export function testLayer({
   Layer,
-  testCases,
+  testCases = [],
   spies = [],
   userData = null,
   doesNotThrow = checkDoesNotThrow
 }) {
-  // assert(Layer && testCases && testCases.length >= 1);
+  // assert(Layer);
 
   const layerManager = new LayerManager(gl);
   layerManager.setViewport(new WebMercatorViewport(100, 100));
@@ -56,12 +94,11 @@ export function testLayer({
 
 /* eslint-disable max-params, no-loop-func */
 function runLayerTests(layerManager, layer, testCases, spies, userData, doesNotThrow) {
-  const initialProps = testCases[0].props;
-  const newProps = Object.assign({}, initialProps);
+  let combinedProps = {};
 
   // Run successive update tests
   for (let i = 1; i < testCases.length; i++) {
-    const {props, assert} = testCases[i];
+    const {props, updateProps, assert} = testCases[i];
 
     spies = testCases[i].spies || spies;
 
@@ -73,13 +110,19 @@ function runLayerTests(layerManager, layer, testCases, spies, userData, doesNotT
       }
     }
 
-    // Add on new props every iteration
-    Object.assign(newProps, props);
+    // Test case can reset the props on every iteration
+    if (props) {
+      combinedProps = Object.assign({}, props);
+    }
+    // Test case can override with new props on every iteration
+    if (updateProps) {
+      Object.assign(combinedProps, updateProps);
+    }
 
     // copy old state before update
     const oldState = Object.assign({}, layer.state);
 
-    layer = layer.clone(newProps);
+    layer = layer.clone(combinedProps);
     doesNotThrow(
       () => layerManager.setLayers([layer]),
       `update ${layer} should not fail`,
@@ -91,12 +134,12 @@ function runLayerTests(layerManager, layer, testCases, spies, userData, doesNotT
 
     // layer manager should handle match subLayer and tranfer state and props
     // here we assume subLayer matches copy over the new props from a new subLayer
-    const subLayers = layer.getSubLayers();
+    const subLayers = layer.isComposite ? layer.getSubLayers() : [];
     const subLayer = subLayers.length && subLayers[0];
 
     // assert on updated layer
     if (assert) {
-      assert({layer, oldState, subLayer, spies: spyMap, userData});
+      assert({layer, oldState, subLayers, subLayer, spies: spyMap, userData});
     }
 
     // Remove spies

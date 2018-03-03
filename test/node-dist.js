@@ -20,6 +20,11 @@
 
 require('./node-aliases');
 
+// Registers an alias for this module
+const path = require('path');
+const moduleAlias = require('module-alias');
+moduleAlias.addAlias('deck.gl', path.resolve('./dist'));
+
 // Import headless luma support
 require('luma.gl/headless');
 

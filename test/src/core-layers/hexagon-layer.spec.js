@@ -48,7 +48,7 @@ test('HexagonLayer#updateLayer', t => {
       },
       {
         title: 'Update radius',
-        props: {
+        updateProps: {
           radius: 800
         },
         assert({layer, oldState, userData}) {
@@ -87,7 +87,7 @@ test('HexagonLayer#updateLayer', t => {
       },
       {
         title: 'Update getColorValue accessor',
-        props: {
+        updateProps: {
           getColorValue
         },
         assert({layer, oldState, userData}) {
@@ -126,7 +126,7 @@ test('HexagonLayer#updateLayer', t => {
       },
       {
         title: 'Update getColorValue accessor',
-        props: {
+        updateProps: {
           upperPercentile: 90
         },
         assert({layer, oldState, userData}) {
@@ -165,7 +165,7 @@ test('HexagonLayer#updateLayer', t => {
       },
       {
         title: 'Update colorDomain',
-        props: {
+        updateProps: {
           colorDomain: [0, 10]
         },
         assert({layer, oldState, userData}) {
@@ -204,7 +204,7 @@ test('HexagonLayer#updateLayer', t => {
       },
       {
         title: 'Update getElevationValue accessor',
-        props: {
+        updateProps: {
           getElevationValue
         },
         assert({layer, oldState, userData}) {
@@ -243,7 +243,7 @@ test('HexagonLayer#updateLayer', t => {
       },
       {
         title: 'Update elevation lower percentile',
-        props: {
+        updateProps: {
           elevationLowerPercentile: 1
         },
         assert({layer, oldState, userData}) {
@@ -282,7 +282,7 @@ test('HexagonLayer#updateLayer', t => {
       },
       {
         title: 'Update elevationRange accessor',
-        props: {
+        updateProps: {
           elevationRange: [1, 10]
         },
         assert({layer, oldState, userData}) {
@@ -326,11 +326,11 @@ test('HexagonLayer#updateLayer', t => {
 });
 
 test('HexagonLayer#updateTriggers', t => {
-  const functionsToSpy = ['_onGetSublayerColor', '_onGetSublayerElevation'];
+  const SPIES = ['_onGetSublayerColor', '_onGetSublayerElevation'];
 
   testLayer({
     Layer: HexagonLayer,
-    spies: functionsToSpy,
+    spies: SPIES,
     userData: t,
     testCases: [
       {
@@ -343,10 +343,9 @@ test('HexagonLayer#updateTriggers', t => {
       },
       {
         title: 'Update radius prop',
-        props: {
+        updateProps: {
           radius: 800
         },
-        spies: functionsToSpy,
         assert({subLayer, spies, userData}) {
           t.ok(spies._onGetSublayerColor.called, 'update radius should call _onGetSublayerColor');
           t.ok(
@@ -357,10 +356,9 @@ test('HexagonLayer#updateTriggers', t => {
       },
       {
         title: 'Update opacity prop',
-        props: {
+        updateProps: {
           opacity: 0.1
         },
-        spies: functionsToSpy,
         assert({subLayer, spies, userData}) {
           t.ok(
             !spies._onGetSublayerColor.called,
@@ -374,10 +372,9 @@ test('HexagonLayer#updateTriggers', t => {
       },
       {
         title: 'Update getColorValue prop',
-        props: {
+        updateProps: {
           getColorValue
         },
-        spies: functionsToSpy,
         assert({subLayer, spies, userData}) {
           t.ok(
             spies._onGetSublayerColor.called,
@@ -391,10 +388,9 @@ test('HexagonLayer#updateTriggers', t => {
       },
       {
         title: 'Update upperPercentile prop',
-        props: {
+        updateProps: {
           upperPercentile: 90
         },
-        spies: functionsToSpy,
         assert({subLayer, spies, userData}) {
           t.ok(
             spies._onGetSublayerColor.called,
@@ -408,10 +404,9 @@ test('HexagonLayer#updateTriggers', t => {
       },
       {
         title: 'Update getElevationValue prop',
-        props: {
+        updateProps: {
           getElevationValue
         },
-        spies: functionsToSpy,
         assert({subLayer, spies, userData}) {
           t.ok(
             !spies._onGetSublayerColor.called,
@@ -425,10 +420,9 @@ test('HexagonLayer#updateTriggers', t => {
       },
       {
         title: 'Update elevationUpperPercentile prop',
-        props: {
+        updateProps: {
           elevationUpperPercentile: 99
         },
-        spies: functionsToSpy,
         assert({subLayer, spies, userData}) {
           t.ok(
             !spies._onGetSublayerColor.called,
@@ -442,10 +436,9 @@ test('HexagonLayer#updateTriggers', t => {
       },
       {
         title: 'Update elevationRange prop',
-        props: {
+        updateProps: {
           elevationRange: [0, 100]
         },
-        spies: functionsToSpy,
         assert({subLayer, spies, userData}) {
           t.ok(
             !spies._onGetSublayerColor.called,

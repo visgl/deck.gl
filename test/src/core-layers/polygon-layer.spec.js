@@ -19,33 +19,31 @@
 // THE SOFTWARE.
 
 import test from 'tape-catch';
-import * as FIXTURES from 'deck.gl/test/data';
-import {
-  testCreateLayer,
-  testCreateEmptyLayer,
-  testNullLayer,
-  testLayerUpdates
-} from 'deck.gl-test-utils';
+import {testLayer} from 'deck.gl-test-utils';
 
 import {PolygonLayer} from 'deck.gl';
 
-test('PolygonLayer#constructor', t => {
-  const LayerComponent = PolygonLayer;
-  const data = FIXTURES.polygons;
+import * as FIXTURES from 'deck.gl/test/data';
+const data = FIXTURES.polygons;
 
-  const TEST_CASES = {
-    INITIAL_PROPS: {
-      data,
-      getPolygon: f => f
-    },
-    UPDATES: [
+test('PolygonLayer#constructor', t => {
+  testLayer({
+    Layer: PolygonLayer,
+    testCases: [
+      {props: []},
+      {props: null},
+      {
+        props: {
+          data,
+          getPolygon: f => f
+        }
+      },
       {
         updateProps: {
           filled: false
         },
-        assert: (layer, oldState) => {
+        assert({layer, subLayers, oldState}) {
           t.ok(layer.state, 'should update layer state');
-          const subLayers = layer.renderLayers();
           t.ok(subLayers.length, 'subLayers rendered');
         }
       },
@@ -53,17 +51,12 @@ test('PolygonLayer#constructor', t => {
         updateProps: {
           data: data.slice(0, 10)
         },
-        assert: (layer, oldState) => {
+        assert({layer, oldState}) {
           t.ok(layer.state.paths.length !== oldState.paths.length, 'should update state.paths');
         }
       }
     ]
-  };
-
-  testCreateLayer(t, LayerComponent, {data, pickable: true});
-  testCreateEmptyLayer(t, LayerComponent);
-  testNullLayer(t, LayerComponent);
-  testLayerUpdates(t, {LayerComponent, testCases: TEST_CASES});
+  });
 
   t.end();
 });

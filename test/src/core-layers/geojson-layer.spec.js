@@ -19,57 +19,42 @@
 // THE SOFTWARE.
 
 import test from 'tape-catch';
-import * as FIXTURES from 'deck.gl/test/data';
-import {
-  testCreateLayer,
-  testCreateEmptyLayer,
-  testNullLayer,
-  testLayerUpdates
-} from 'deck.gl-test-utils';
+import {testLayer} from 'deck.gl-test-utils';
 
 import {GeoJsonLayer} from 'deck.gl';
 
-const LayerComponent = GeoJsonLayer;
+import * as FIXTURES from 'deck.gl/test/data';
 const data = FIXTURES.choropleths;
 
-test('GeoJsonLayer#constructor', t => {
-  testCreateLayer(t, LayerComponent, {data, pickable: true});
-  // testCreateLayer(t, LayerComponent, {data: FIXTURES.immutableChoropleths, pickable: true});
-  testCreateEmptyLayer(t, LayerComponent);
-  testNullLayer(t, LayerComponent);
-
-  t.end();
-});
-
-test('GeoJsonLayer#updates', t => {
-  const TEST_CASES = {
-    INITIAL_PROPS: {
-      data
-    },
-    UPDATES: [
+test('GeoJsonLayer#tests', t => {
+  testLayer({
+    Layer: GeoJsonLayer,
+    userData: t,
+    testCases: [
+      {props: {data: []}},
+      {props: {data: null}},
+      {props: {data}},
+      {props: {data, pickable: true}},
       {
-        updateProps: {
-          lineWidthScale: 3
+        props: {
+          data: Object.assign({}, data)
         },
-        assert: (layer, oldState) => {
+        assert({layer, oldState}) {
           t.ok(layer.state, 'should update layer state');
-          const subLayers = layer.renderLayers().filter(Boolean);
-          t.ok(subLayers.length === 2, 'should render 2 subLayers');
+          t.ok(layer.state.features !== oldState.features, 'should update features');
         }
       },
       {
         updateProps: {
-          data: Object.assign({}, data)
+          lineWidthScale: 3
         },
-        assert: (layer, oldState) => {
+        assert({layer, oldState}) {
           t.ok(layer.state, 'should update layer state');
-          t.ok(layer.state.features !== oldState.features, 'should update features');
+          const subLayers = layer.renderLayers().filter(Boolean);
+          t.equal(subLayers.length, 2, 'should render 2 subLayers');
         }
       }
     ]
-  };
-
-  testLayerUpdates(t, {LayerComponent, testCases: TEST_CASES});
-
+  });
   t.end();
 });
