@@ -2,6 +2,11 @@
 
 Release date: TBD, target Q1-Q2, 2018
 
+### Test Utilities
+
+deck.gl now provides a suite of test utilities that make it easy to unit test layers and to automate browser runs of "differential" render tests. The test utilities are of course perfect for creating unit tests for new layers but can also be used by applications. Note that the test utilities are published as a separate npm module [deck.gl-test-utils](https://www.npmjs.com/package/deck.gl-test-utils).
+
+
 ### Prop Types
 
 deck.gl layers can now specify additional type information about properties. When provided, these [prop types](docs/advanced/prop-types.md) will be used to speed up property comparisons in production and to validate `Layer` property values during development, to help catch programming errors. (Prop types will also serve as a foundation for future features such as property transitions/animations and asynchronous properties). Naturally, the core deck.gl layers have been updated with prop type definitions.

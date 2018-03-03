@@ -40,30 +40,3 @@ import {experimental} from 'deck.gl-test-utils';
 const {...} = experimental;
 ...
 ```
-
-## Functions
-
-### testLayer
-
-Initialize a layer, test layer update on a series of newProps, assert on the resulting layer
-
-Initialize a parent layer and its subLayer, update the parent layer a series of newProps, assert on the updated subLayer.
-
-`testLayer({Layer, testCases})`
-
-* `Layer` (`Object`) - The layer component class
-* `testCases` (`Array`) - A list of testCases
-
-Test cases are an array of objects with the following fields:
-* `title` (`String`) - title of the test case
-* `PROPS` (`Object`) - The initial prop to initialize the layer with
-* `UPDATES` (`Array`) - The list of updates to update
-* `UPDATES.updateProps` (`Object`) - updated props
-* `testCases.UPDATES.assert` (`Function`) - callbacks with updated layer, and oldState
-
-Notes:
-* Updates are called sequentially. updateProps will be merged
-with previous props
-
-
-## Remarks
