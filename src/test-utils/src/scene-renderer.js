@@ -22,7 +22,7 @@
 import assert from 'assert';
 
 import {experimental} from 'deck.gl';
-const {Deck, MapView} = experimental;
+const {Deck, DeckGLJS, MapView} = experimental;
 
 import {getImageFromContext} from './luma.gl/io-basic/browser-image-utils';
 
@@ -54,7 +54,9 @@ export default class SceneRenderer {
   }
 
   run() {
-    this.deckgl = new Deck({
+    // TODO - for 5.1 compatibility, remove when 5.2 is released
+    const DeckGL = Deck || DeckGLJS;
+    this.deckgl = new DeckGL({
       id: 'default-deckgl-overlay',
       style: {position: 'absolute', left: '0px', top: '0px'},
       layers: [],
@@ -89,7 +91,7 @@ export default class SceneRenderer {
   }
 
   _renderScene(scene) {
-    const {viewState, layers, views, timeout = 0} = scene;
+    const {viewState, layers, views, viewports, timeout = 0} = scene;
 
     const promise = makePromise();
 
@@ -98,7 +100,10 @@ export default class SceneRenderer {
       layers,
       views: views || [new MapView()],
       viewState,
-      onAfterRender: () => {}
+      onAfterRender: () => {},
+
+      // DEPRECATED - temporary 5.1 compatibility, remove when 5.2 is released
+      viewports
     });
 
     // Render again after a timeout to allow layer to load

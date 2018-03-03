@@ -41,6 +41,7 @@
     "test-cover": "NODE_ENV=test tape -r babel-register test/node.js && nyc report",
     "test-node": "node test/start.js test",
     "test-dist": "node test/start.js test-dist",
+    "test-render2": "node test/render/node-start.js",
     "test-render": "node test/start.js render",
     "test-render-react": "node test/start.js render-react",
     "test-browser": "webpack-dev-server --env.test --progress --hot --open",

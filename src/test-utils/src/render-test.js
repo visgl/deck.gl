@@ -117,8 +117,14 @@ export default class RenderTest {
 
   _onComplete() {
     this.reportFinalResult({passed: this.passed, renderTest: this});
+    this._reportToTestDriver();
+  }
+
+  _reportToTestDriver(firstTime = false) {
     if (window.renderTestComplete) {
       window.renderTestComplete(JSON.stringify(this.passed));
+    } else {
+      window.setTimeout(this._reportToTestDriver.bind(this, false), 1000);
     }
   }
 }

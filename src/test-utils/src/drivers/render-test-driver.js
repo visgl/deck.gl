@@ -35,12 +35,6 @@ const SERVER_CONFIG = {
 };
 
 export default class RenderTestDriver extends BrowserDriver {
-  // TODO - move this method to probe.gl/BrowserDriver
-  waitForFunction(name) {
-    return new Promise(resolve => {
-      this.page.exposeFunction(name, resolve);
-    });
-  }
 
   run(config = SERVER_CONFIG) {
     this.console.log(addColor('Running rendering tests in Chrome instance...', COLOR.YELLOW));
@@ -49,7 +43,7 @@ export default class RenderTestDriver extends BrowserDriver {
       .then(_ => this.startServer(config))
       .then(_ => this.startBrowser())
       .then(_ => this.newPage())
-      .then(_ => this.waitForFunction('renderTestComplete'))
+      .then(_ => this.waitForBrowserMessage('renderTestComplete'))
       .then(success => Boolean(success))
       .then(success => this._done(success))
       .then(_ => this.exit());
