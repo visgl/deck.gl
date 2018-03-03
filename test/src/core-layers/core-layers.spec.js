@@ -122,7 +122,7 @@ test('ScatterplotLayer#constructor', t => {
         }
       },
       {
-        updateProps: {
+        props: {
           fp64: true
         },
         assert({layer, oldState}) {
@@ -195,7 +195,7 @@ test('PointCloudLayer#constructor', t => {
         }
       },
       {
-        updateProps: {
+        props: {
           radiusPixels: 10
         },
         assert({layer, oldState}) {
@@ -240,7 +240,7 @@ test('LineLayer#constructor', t => {
         }
       },
       {
-        updateProps: {
+        props: {
           fp64: true
         },
         assert({layer, oldState}) {
@@ -287,7 +287,7 @@ test('IconLayer#constructor', t => {
         }
       },
       {
-        updateProps: {
+        props: {
           fp64: true
         },
         assert({layer, oldState}) {
