@@ -18,56 +18,50 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+/* global process */
 import {NodeTestDriver} from 'probe.gl/test';
 import {addColor, COLOR} from '../utils/colors';
 
+// DEFAULT config, intended to be overridden in the node script that calls us
+
+// read the webpack env from 3 arg (node script arg)
+let webpackEnv = 'render';
+if (process.argv.length >= 3) {
+  webpackEnv = process.argv[2];
+}
+
 const SERVER_CONFIG = {
-  parameters: ['--config', 'webpack.config.js', '--env.render', '--progress']
+  parameters: [`--env.${webpackEnv}`, '--progress']
 };
 
 export default class RenderTestDriver extends NodeTestDriver {
-  // TODO - Search DOM by id or class should be less fragile?
-  getColor(page, selector = 'body > div:nth-child(7) > p') {
-    return (
-      Promise.resolve()
-        .then(_ => page.waitForSelector(selector))
-        // TODO - How does this line work? document is defined under Node by puppeteer?
-        .then(_ => page.evaluate(sel => document.querySelector(sel).style.color, selector)) //eslint-disable-line
-        .then(color => color)
-    );
-    // TODO - Support ES7 syntax
-    // await page.waitForSelector(selector);
-    // const color = await page.evaluate(sel => {
-    //   return document.querySelector(sel).style.color; //eslint-disable-line
-    // }, selector);
-    // return color;
+  // TODO - move this method to probe.gl/NodeTestDriver
+  waitForFunction(name) {
+    return new Promise(resolve => {
+      this.page.exposeFunction(name, resolve);
+    });
   }
 
   run(config = SERVER_CONFIG) {
     this.console.log(addColor('Running rendering tests in Chrome instance...', COLOR.YELLOW));
-    const time = Date.now();
+    this.time = Date.now();
     return Promise.resolve()
       .then(_ => this.startServer(config))
       .then(_ => this.startBrowser())
       .then(_ => this.newPage())
-      .then(_ => this.getColor(this.page))
-      .then(color => {
-        const success = color === 'rgb(11, 255, 28)';
-        this.setShellStatus(success);
-        const elapsed = ((Date.now() - time) / 1000).toFixed(1);
-        this.console.log(
-          success
-            ? addColor(`Rendering test successfully completed in ${elapsed}s!`, COLOR.BRIGHT_GREEN)
-            : addColor('Rendering test failed!', COLOR.BRIGHT_RED)
-        );
-      })
+      .then(_ => this.waitForFunction('renderTestComplete'))
+      .then(success => Boolean(success))
+      .then(success => this._done(success))
       .then(_ => this.exit());
-    // TODO - Support ES7 syntax
-    // const color = await this.getColor(page, 'body > div:nth-child(7) > p');
-    // if (color !== 'rgb(11, 255, 28)') {
-    //   this.console.log('Rendering test failed!');
-    //   return false;
-    // }
-    // return true;
+  }
+
+  _done(success) {
+    this.setShellStatus(success);
+    const elapsed = ((Date.now() - this.time) / 1000).toFixed(1);
+    this.console.log(
+      success
+        ? addColor(`Rendering test successfully completed in ${elapsed}s!`, COLOR.BRIGHT_GREEN)
+        : addColor('Rendering test failed!', COLOR.BRIGHT_RED)
+    );
   }
 }

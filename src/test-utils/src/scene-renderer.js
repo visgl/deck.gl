@@ -18,6 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+/* global setTimeout */
 import assert from 'assert';
 
 import {experimental} from 'deck.gl';
@@ -27,6 +28,18 @@ import {getImageFromContext} from './luma.gl/io-basic/browser-image-utils';
 
 function noop() {}
 
+function makePromise() {
+  let resolve;
+  let reject;
+  const promise = new Promise((resolve_, reject_) => {
+    resolve = resolve_;
+    reject = reject_;
+  });
+  promise.resolve = resolve;
+  promise.reject = reject;
+  return promise;
+}
+
 export default class SceneRenderer {
   constructor({scenes, width = 800, height = 450, onSceneRendered, onComplete = noop} = {}) {
     assert(scenes);
@@ -34,46 +47,16 @@ export default class SceneRenderer {
     this.width = width;
     this.height = height;
     this.scenes = scenes;
+    this.running = false;
+    this.complete = true;
     this.onSceneRendered = onSceneRendered;
     this.onComplete = onComplete;
-  }
-
-  _onRenderSceneComplete(scene, {gl}) {
-    getImageFromContext(gl)
-      .then(image => {
-        image.style.mixBlendMode = 'difference';
-        return image;
-      })
-      .then(image => this.onSceneRendered(Object.assign({gl, image}, scene)))
-      .then(() => this._renderNextScene())
-      .catch(() => this._renderNextScene());
-  }
-
-  _renderScene(scene) {
-    const {viewState, layers, views} = scene;
-
-    console.log('Rendering new scene with layers', layers); // eslint-disable-line
-    this.deckgl.setProps({
-      layers,
-      views: views || [new MapView()],
-      viewState,
-      onAfterRender: this._onRenderSceneComplete.bind(this, scene)
-    });
-  }
-
-  _renderNextScene() {
-    if (this.sceneIndex < this.scenes.length) {
-      const scene = this.scenes[this.sceneIndex];
-      this._renderScene(scene);
-      this.sceneIndex++;
-    } else {
-      this.onComplete();
-    }
   }
 
   run() {
     this.deckgl = new Deck({
       id: 'default-deckgl-overlay',
+      style: {position: 'absolute', left: '0px', top: '0px'},
       layers: [],
       width: this.width,
       height: this.height,
@@ -82,7 +65,73 @@ export default class SceneRenderer {
       useDevicePixels: false
     });
 
+    this.running = true;
+    this.complete = false;
     this.sceneIndex = 0;
     this._renderNextScene();
+  }
+
+  stop() {
+    this.running = false;
+  }
+
+  // PRIVATE METHODS
+
+  _onAfterRender(promise, scene, {gl}) {
+    getImageFromContext(gl)
+      .then(image => {
+        image.style.mixBlendMode = 'difference';
+        const params = Object.assign({gl, image}, scene);
+        return this.onSceneRendered(params);
+      })
+      .then(x => promise.resolve(x))
+      .catch(error => promise.reject(error));
+  }
+
+  _renderScene(scene) {
+    const {viewState, layers, views, timeout = 0} = scene;
+
+    const promise = makePromise();
+
+    // Initial render to get layer loading
+    this.deckgl.setProps({
+      layers,
+      views: views || [new MapView()],
+      viewState,
+      onAfterRender: () => {}
+    });
+
+    // Render again after a timeout to allow layer to load
+    // This time the afterRender function will resolve the promise
+    setTimeout(() => {
+      this.deckgl.setProps({
+        layers,
+        onAfterRender: this._onAfterRender.bind(this, promise, scene)
+      });
+    }, timeout);
+
+    // promise that resolves when scene is rendered
+    return promise;
+  }
+
+  _renderNextScene() {
+    const scene = this.scenes[this.sceneIndex];
+    if (this.sceneIndex >= this.scenes.length) {
+      this.running = false;
+    } else {
+      this.sceneIndex++;
+    }
+
+    if (this.running) {
+      const params = Object.assign({index: this.sceneIndex}, scene);
+      console.log('Rendering new scene with layers', params); // eslint-disable-line
+
+      this._renderScene(params)
+        .then(() => this._renderNextScene())
+        .catch(() => this._renderNextScene());
+    } else if (!this.complete) {
+      this.complete = true;
+      this.onComplete();
+    }
   }
 }

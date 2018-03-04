@@ -151,7 +151,7 @@ export default class Deck {
       canvas.id = id;
       canvas.width = width;
       canvas.height = height;
-      canvas.style = style;
+      Object.assign(canvas.style, style);
 
       const parent = props.parent || document.body;
       parent.appendChild(canvas);
@@ -248,14 +248,18 @@ export default class Deck {
       return;
     }
 
-    this.props.onBeforeRender({gl}); // TODO - should be called by AnimationLoop
+    if (this.props.onBeforeRender) {
+      this.props.onBeforeRender({gl}); // TODO - should be called by AnimationLoop
+    }
     this.layerManager.drawLayers({
       pass: 'screen',
       redrawReason,
       // Helps debug layer picking, especially in framebuffer powered layers
       drawPickingColors: this.props.drawPickingColors
     });
-    this.props.onAfterRender({gl}); // TODO - should be called by AnimationLoop
+    if (this.props.onAfterRender) {
+      this.props.onAfterRender({gl}); // TODO - should be called by AnimationLoop
+    }
   }
 }
 
