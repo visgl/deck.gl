@@ -26,8 +26,8 @@ const path = require('path');
 const ALIASES = {
   'deck.gl/test': path.resolve('./test'),
   'deck.gl': path.resolve('./src'),
-  'deck.gl-layers': path.resolve('./src/experimental-layers/src'),
-  'deck.gl-test-utils': path.resolve('./src/test-utils/src')
+  'deck.gl-layers': path.resolve('./src/experimental-layers/src')
+  // 'deck.gl-test-utils': path.resolve('./src/test-utils/src')
 };
 
 if (module.require) {
