@@ -1,6 +1,8 @@
 const {resolve} = require('path');
 const webpack = require('webpack');
 
+const ALIASES = require('./aliases');
+
 const LIBRARY_BUNDLE_CONFIG = {
   // Bundle the source code
   entry: {
@@ -22,6 +24,10 @@ const LIBRARY_BUNDLE_CONFIG = {
 
   // Exclude any non-relative imports from resulting bundle
   externals: [/^[a-z\.\-0-9]+$/],
+
+  resolve: {
+    alias: ALIASES
+  },
 
   module: {
     rules: [
@@ -66,9 +72,7 @@ const BROWSER_CONFIG = {
   },
 
   resolve: {
-    alias: {
-      'deck.gl-test-utils': resolve('./src')
-    }
+    alias: ALIASES
   },
 
   devtool: '#inline-source-maps',
@@ -121,17 +125,18 @@ const BENCH_BROWSER_CONFIG = Object.assign({}, BROWSER_CONFIG, {
 
 module.exports = env => {
   env = env || {};
+  let config = LIBRARY_BUNDLE_CONFIG;
   if (env.test) {
-    return TEST_BROWSER_CONFIG;
+    config = TEST_BROWSER_CONFIG;
   }
   if (env.render) {
-    return RENDER_BROWSER_CONFIG;
+    config = RENDER_BROWSER_CONFIG;
   }
   if (env['render-react']) {
-    return RENDER_REACT_BROWSER_CONFIG;
+    config = RENDER_REACT_BROWSER_CONFIG;
   }
   if (env.bench) {
-    return BENCH_BROWSER_CONFIG;
+    config = BENCH_BROWSER_CONFIG;
   }
-  return LIBRARY_BUNDLE_CONFIG;
+  return config;
 };

@@ -1,13 +1,23 @@
-// Enables ES2015 import/export in Node.js
-require('reify');
-
 // Registers an alias for this module
+
 const path = require('path');
-const moduleAlias = require('module-alias');
-moduleAlias.addAlias('deck.gl-test-utils', path.resolve('./src'));
-moduleAlias.addAlias('deck.gl/test/data', path.resolve('../../test/data'));
+const ALIASES = {
+  'deck.gl-test-utils': path.resolve(__dirname, './src'),
+  'deck.gl/test/data': path.resolve(__dirname, '../../test/data'),
+  'deck.gl': path.resolve(__dirname, '../../src')
+};
 
-require('babel-polyfill');
+if (module.require) {
+  // Enables ES2015 import/export in Node.js
+  require('reify');
 
-// Import headless luma support
-require('luma.gl/headless');
+  const moduleAlias = require('module-alias');
+  moduleAlias.addAliases(ALIASES);
+
+  require('babel-polyfill');
+
+  // Import headless luma support
+  require('luma.gl/headless');
+}
+
+module.exports = ALIASES;

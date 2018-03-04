@@ -18,7 +18,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {LayerManager, WebMercatorViewport} from 'deck.gl';
+import {LayerManager, experimental} from 'deck.gl';
+const {MapView} = experimental;
+
 import {makeSpy} from 'probe.gl/test';
 import gl from './utils/setup-gl';
 
@@ -78,7 +80,7 @@ export function testLayer({
   // assert(Layer);
 
   const layerManager = new LayerManager(gl);
-  layerManager.setViewport(new WebMercatorViewport(100, 100));
+  layerManager.setViews([new MapView()]);
 
   const initialProps = testCases[0].props;
   const layer = new Layer(initialProps);

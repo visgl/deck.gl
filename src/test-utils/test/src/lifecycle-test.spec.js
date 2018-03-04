@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 
 import test from 'tape-catch';
-import * as FIXTURES from 'deck.gl/test/data/geojson-data';
+import * as FIXTURES from 'deck.gl/test/data';
 import {testLayer} from 'deck.gl-test-utils';
 
 import {GeoJsonLayer} from 'deck.gl';

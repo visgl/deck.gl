@@ -1,6 +1,8 @@
 const {resolve} = require('path');
 const webpack = require('webpack');
 
+const ALISES = require('./aliases');
+
 const LIBRARY_BUNDLE_CONFIG = {
   // Bundle the source code
   entry: {
@@ -68,17 +70,12 @@ const BROWSER_CONFIG = {
   },
 
   resolve: {
-    alias: {
-      'deck.gl/test': resolve('./test'),
-      'deck.gl/dist': resolve('./src'),
-      'deck.gl': resolve('./src'),
-      'deck.gl-layers': resolve('./src/experimental-layers/src'),
-      'deck.gl-test-utils': resolve('./src/test-utils/src'),
+    alias: Object.assign({}, ALISES, {
       // Aliases needed to defeat root scripts from getting duplicate dependencies
       // from sub module node_modules
       'luma.gl': resolve('./node_modules/luma.gl'),
       'probe.gl': resolve('./node_modules/probe.gl')
-    }
+    })
   },
 
   devtool: '#inline-source-maps',
