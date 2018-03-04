@@ -19,6 +19,6 @@
 // THE SOFTWARE.
 
 // This is the script that runs in Node.js and starts the browser
-require('../node-aliases');
+require('../../aliases');
 const {RenderTestDriver} = require('deck.gl-test-utils');
 new RenderTestDriver().run();

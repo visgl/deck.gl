@@ -19,15 +19,25 @@
 // THE SOFTWARE.
 
 // Enables ES2015 import/export in Node.js
-require('reify');
 
 // Registers an alias for this module
 const path = require('path');
-const moduleAlias = require('module-alias');
-moduleAlias.addAlias('deck.gl/test', path.resolve('./test'));
-moduleAlias.addAlias('deck.gl', path.resolve('./src'));
-moduleAlias.addAlias('deck.gl/dist', path.resolve('./src'));
-moduleAlias.addAlias('deck.gl-layers', path.resolve('./src/experimental-layers/src'));
-moduleAlias.addAlias('deck.gl-test-utils', path.resolve('./src/test-utils/src'));
 
-require('babel-polyfill');
+const ALIASES = {
+  'deck.gl/test': path.resolve('./test'),
+  'deck.gl': path.resolve('./src'),
+  'deck.gl/dist': path.resolve('./src'),
+  'deck.gl-layers': path.resolve('./src/experimental-layers/src'),
+  'deck.gl-test-utils': path.resolve('./src/test-utils/src')
+};
+
+if (module.require) {
+  module.require('reify');
+
+  const moduleAlias = module.require('module-alias');
+  moduleAlias.addAliases(ALIASES);
+
+  module.require('babel-polyfill');
+}
+
+module.exports = ALIASES;

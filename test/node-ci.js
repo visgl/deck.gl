@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-require('./node-aliases');
+require('../aliases');
 
 // Import headless luma support
 require('luma.gl/headless');

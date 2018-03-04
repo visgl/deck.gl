@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-require('./node-aliases');
+require('../aliases');
 
 // Registers an alias for this module
 const path = require('path');
