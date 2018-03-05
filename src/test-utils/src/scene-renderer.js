@@ -22,7 +22,7 @@
 import assert from 'assert';
 
 import {experimental} from 'deck.gl';
-const {Deck, DeckGLJS, MapView} = experimental;
+const {Deck, MapView} = experimental;
 
 import {getImageFromContext} from './luma.gl/io-basic/browser-image-utils';
 
@@ -54,9 +54,7 @@ export default class SceneRenderer {
   }
 
   run() {
-    // TODO - for 5.1 compatibility, remove when 5.2 is released
-    const DeckGL = Deck || DeckGLJS;
-    this.deckgl = new DeckGL({
+    this.deckgl = new Deck({
       id: 'default-deckgl-overlay',
       style: {position: 'absolute', left: '0px', top: '0px'},
       layers: [],

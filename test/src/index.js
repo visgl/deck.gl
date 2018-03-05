@@ -18,15 +18,15 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-require('../aliases');
+import './imports-spec';
+import './core';
+import './core-layers';
 
-// Registers an alias for this module
-const path = require('path');
-const moduleAlias = require('module-alias');
-moduleAlias.addAlias('deck.gl', path.resolve('./dist'));
+// TODO - React test cases currently only work in browser
+// import './react';
 
-// Import headless luma support
-require('luma.gl/headless');
-
-// Run the tests
-require('./index');
+// deck.gl-layers
+// TODO - Tests currently only work in browser
+if (typeof document !== 'undefined') {
+  require('./experimental-layers');
+}
