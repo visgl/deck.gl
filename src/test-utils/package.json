@@ -39,8 +39,8 @@
     "test-rendering": "(cd test/render && webpack-dev-server --config webpack.config.test-rendering.js --progress --hot --open)"
   },
   "dependencies": {
-    "deck.gl": ">=5.1.1",
-    "luma.gl": ">=5.1.0",
+    "deck.gl": "^5.1.1",
+    "luma.gl": "^5.1.0",
     "probe.gl": "^0.2.2",
     "ndarray": "^1.0.18",
     "save-pixels": "^2.3.2",
