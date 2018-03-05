@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {document} from 'global';
+import {window, document} from 'global';
 
 import React, {Component} from 'react';
 import ReactDOM from 'react-dom';
@@ -120,6 +120,9 @@ class RenderingTest extends Component {
 
     if (!testCases[currentTestIndex]) {
       reportFinalResult(this.state.allPassed);
+      if (window.renderTestComplete) {
+        window.renderTestComplete(JSON.stringify(this.state.allPassed));
+      }
       return null;
     }
 
