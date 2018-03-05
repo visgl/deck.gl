@@ -10,8 +10,8 @@ Helper class primarily intended for automating browser tests from Node.js or she
 > Requires Chrome version 64 or higher
 
 References:
-* For details on how the automation works, see [`NodeTestDriver`](./docs/api-reference/test-utils/node-test-driver.md).
-* For details on test case format etc see [`TestRenderer`](./docs/api-reference/test-utils/node-test-driver.md).
+* For details on how the automation works, see the [probe.gl](https://uber-web.github.io/probe.gl/#/documentation) [`BrowserDriver`](https://uber-web.github.io/probe.gl/#/documentation/api-reference-testing/browserdriver) class.
+* For details on test case format etc see [`TestRenderer`](./docs/api-reference/test-utils/test-renderer.md).
 
 ## Methods
 

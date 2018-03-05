@@ -21,7 +21,50 @@ For Earlier Beta Releases see below
 
 ## Beta Releases
 
-### deck.gl v5.1 Beta Releases
+### deck.gl v5.2 Pre Releases
+
+#### [5.2.0-alpha.1] - Mar 4
+
+## Official Releases
+
+#### [5.1.0]
+- Fix crash during pickVisibleObjects (#1365)
+- Experiment: bezier curve layer (#1366)
+- Add JSX support to DeckGL component and remove jsx-layers example (#1362)
+- Update composite layers to use multiple prop objects (#1353)
+- link to remote docs (#1364)
+- Wind demo: update using newest luma.gl TF API (#1346)
+- Prop code preparation/cleanup (#1357)
+- Use latest luma.gl transform feedback features (#1318)
+- Move fp64 viewport uniform generation to project64 module's getUniforms (#1292)
+- Merge react-map-gl's map interaction (#1330)
+- Travis CI fix: Reduced, but working set of test cases (#1355)
+- Property Copy Reduction (#1341)
+- Use Object.prototype to speed up default prop setting (#1336)
+- fix experimental PolygonLayer (#1316)
+- Upgrade react-map-gl and math.gl versions in examples (#1313)
+- Fix text layer redraw flag clearing (#1314)
+- [Doc] Fix of layer attribute typo (#1311)
+- Attribute Transition: Initial Implementation (#981)
+
+
+### deck.gl v5.0 - Dec 21
+- Add links to new examples. (#1272)
+- Address TODO in docs. (#1270)
+- Use the deprecation support in shader modules (#1271)
+- fix double model generation (#1268)
+- Ortho zooming example (#1266)
+- More precise offset projection (#1265)
+- Examples start script (#1263)
+- experimental-layers 0.0.16
+- Fix examples with react-map-gl alpha (#1256)
+- Linter (prettier) changes (#1262)
+- Remove old uniforms (#1261)
+- remove duplicate TextLayer code (#1258)
+- enable lnglat_offset mode (#1245)
+- Remove deprecated uniforms (#1257)
+
+## Beta Releases
 
 #### [5.1.0-beta.1] - Jan 31
 - Fix crash during pickVisibleObjects (#1365)
@@ -42,26 +85,6 @@ For Earlier Beta Releases see below
 - Fix text layer redraw flag clearing (#1314)
 - [Doc] Fix of layer attribute typo (#1311)
 - Attribute Transition: Initial Implementation (#981)
-
-## Official Releases
-
-### deck.gl v5.0 - Dec 21
-- Add links to new examples. (#1272)
-- Address TODO in docs. (#1270)
-- Use the deprecation support in shader modules (#1271)
-- fix double model generation (#1268)
-- Ortho zooming example (#1266)
-- More precise offset projection (#1265)
-- Examples start script (#1263)
-- experimental-layers 0.0.16
-- Fix examples with react-map-gl alpha (#1256)
-- Linter (prettier) changes (#1262)
-- Remove old uniforms (#1261)
-- remove duplicate TextLayer code (#1258)
-- enable lnglat_offset mode (#1245)
-- Remove deprecated uniforms (#1257)
-
-## Beta Releases
 
 ### deck.gl v5.0 Beta Releases
 
