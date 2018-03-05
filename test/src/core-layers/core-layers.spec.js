@@ -19,6 +19,7 @@
 // THE SOFTWARE.
 /* eslint-disable func-style, no-console, max-len */
 import test from 'tape-catch';
+import {testLayer} from 'deck.gl-test-utils';
 
 import {
   ScatterplotLayer,
@@ -30,32 +31,35 @@ import {
   PathLayer
 } from 'deck.gl';
 
-import {
-  testCreateLayer,
-  testCreateEmptyLayer,
-  testNullLayer,
-  testLayerUpdates
-} from 'deck.gl-test-utils';
-
 import * as FIXTURES from 'deck.gl/test/data';
 
 const getPointPosition = d => d.COORDINATES;
 
 test('ScreenGridLayer#constructor', t => {
-  const LayerComponent = ScreenGridLayer;
   const data = FIXTURES.points;
 
-  const TEST_CASES = {
-    INITIAL_PROPS: {
-      data,
-      getPosition: getPointPosition
-    },
-    UPDATES: [
+  testLayer({
+    Layer: ScreenGridLayer,
+    testCases: [
+      {
+        title: 'Empty layer',
+        props: {id: 'empty'}
+      },
+      {
+        title: 'Null layer',
+        props: {id: 'null', data: null}
+      },
+      {
+        props: {
+          data,
+          getPosition: getPointPosition
+        }
+      },
       {
         updateProps: {
           cellSizePixels: 10
         },
-        assert: (layer, oldState) => {
+        assert({layer, oldState}) {
           t.ok(layer.state !== oldState, 'should update layer state');
           t.ok(layer.state.cellScale !== oldState.cellScale, 'should update cellScale');
           t.ok(
@@ -72,7 +76,7 @@ test('ScreenGridLayer#constructor', t => {
         updateProps: {
           minColor: [0, 0, 0, 255]
         },
-        assert: (layer, oldState) => {
+        assert({layer, oldState}) {
           t.ok(layer.state, 'should update layer state');
           t.deepEqual(
             layer.state.model.uniforms.minColor,
@@ -82,32 +86,37 @@ test('ScreenGridLayer#constructor', t => {
         }
       }
     ]
-  };
-
-  testCreateLayer(t, LayerComponent, {data, pickable: true});
-  testCreateEmptyLayer(t, LayerComponent);
-  testNullLayer(t, LayerComponent);
-  testLayerUpdates(t, {LayerComponent, testCases: TEST_CASES});
+  });
 
   t.end();
 });
 
 test('ScatterplotLayer#constructor', t => {
-  const LayerComponent = ScatterplotLayer;
   const data = FIXTURES.points;
 
-  const TEST_CASES = {
-    INITIAL_PROPS: {
-      data,
-      radiusScale: 5,
-      getPosition: getPointPosition
-    },
-    UPDATES: [
+  testLayer({
+    Layer: ScatterplotLayer,
+    testCases: [
+      {
+        title: 'Empty layer',
+        props: {id: 'empty'}
+      },
+      {
+        title: 'Null layer',
+        props: {id: 'null', data: null}
+      },
+      {
+        props: {
+          data,
+          radiusScale: 5,
+          getPosition: getPointPosition
+        }
+      },
       {
         updateProps: {
           radiusScale: 10
         },
-        assert: (layer, oldState) => {
+        assert({layer, oldState}) {
           t.ok(layer.state, 'should update layer state');
           t.ok(layer.state.model.uniforms.radiusScale === 10, 'should update radiusScale');
         }
@@ -116,7 +125,7 @@ test('ScatterplotLayer#constructor', t => {
         updateProps: {
           fp64: true
         },
-        assert: (layer, oldState) => {
+        assert({layer, oldState}) {
           t.ok(layer.state, 'should update layer state');
           t.ok(
             layer.getAttributeManager().attributes.instancePositions64xyLow,
@@ -125,92 +134,107 @@ test('ScatterplotLayer#constructor', t => {
         }
       }
     ]
-  };
-
-  testCreateLayer(t, LayerComponent, {data, pickable: true});
-  testCreateEmptyLayer(t, LayerComponent);
-  testNullLayer(t, LayerComponent);
-  testLayerUpdates(t, {LayerComponent, testCases: TEST_CASES});
+  });
 
   t.end();
 });
 
 test('ArcLayer#constructor', t => {
-  const LayerComponent = ArcLayer;
   const data = FIXTURES.routes;
 
-  const TEST_CASES = {
-    INITIAL_PROPS: {
-      data,
-      getSourcePosition: d => d.START,
-      getTargetPosition: d => d.END
-    },
-    UPDATES: [
+  testLayer({
+    Layer: ArcLayer,
+    testCases: [
+      {
+        title: 'Empty layer',
+        props: {id: 'empty'}
+      },
+      {
+        title: 'Null layer',
+        props: {id: 'null', data: null}
+      },
+      {
+        props: {
+          data,
+          getSourcePosition: d => d.START,
+          getTargetPosition: d => d.END
+        }
+      },
       {
         updateProps: {
           strokeWidth: 10
         },
-        assert: (layer, oldState) => {
+        assert({layer, oldState}) {
           t.ok(layer.state, 'should update layer state');
           t.ok(layer.state.model.uniforms.strokeWidth === 10, 'should update strokeWidth');
         }
       }
     ]
-  };
-
-  testCreateLayer(t, LayerComponent, {data, pickable: true});
-  testCreateEmptyLayer(t, LayerComponent);
-  testNullLayer(t, LayerComponent);
-  testLayerUpdates(t, {LayerComponent, testCases: TEST_CASES});
+  });
 
   t.end();
 });
 
 test('PointCloudLayer#constructor', t => {
-  const LayerComponent = PointCloudLayer;
   const data = FIXTURES.getPointCloud();
 
-  const TEST_CASES = {
-    INITIAL_PROPS: {
-      data
-    },
-    UPDATES: [
+  testLayer({
+    Layer: PointCloudLayer,
+    testCases: [
+      {
+        title: 'Empty layer',
+        props: {id: 'empty'}
+      },
+      {
+        title: 'Null layer',
+        props: {id: 'null', data: null}
+      },
+      {
+        props: {
+          data
+        }
+      },
       {
         updateProps: {
           radiusPixels: 10
         },
-        assert: (layer, oldState) => {
+        assert({layer, oldState}) {
           t.ok(layer.state, 'should update layer state');
           t.ok(layer.state.model.uniforms.radiusPixels === 10, 'should update strokeWidth');
         }
       }
     ]
-  };
-
-  testCreateLayer(t, LayerComponent, {data, pickable: true});
-  testCreateEmptyLayer(t, LayerComponent);
-  testNullLayer(t, LayerComponent);
-  testLayerUpdates(t, {LayerComponent, testCases: TEST_CASES});
+  });
 
   t.end();
 });
 
 test('LineLayer#constructor', t => {
-  const LayerComponent = LineLayer;
   const data = FIXTURES.routes;
 
-  const TEST_CASES = {
-    INITIAL_PROPS: {
-      data,
-      getSourcePosition: d => d.START,
-      getTargetPosition: d => d.END
-    },
-    UPDATES: [
+  testLayer({
+    Layer: LineLayer,
+    testCases: [
+      {
+        title: 'Empty layer',
+        props: {id: 'empty'}
+      },
+      {
+        title: 'Null layer',
+        props: {id: 'null', data: null}
+      },
+      {
+        props: {
+          data,
+          getSourcePosition: d => d.START,
+          getTargetPosition: d => d.END
+        }
+      },
       {
         updateProps: {
           strokeWidth: 10
         },
-        assert: (layer, oldState) => {
+        assert({layer, oldState}) {
           t.ok(layer.state, 'should update layer state');
           t.ok(layer.state.model.uniforms.strokeWidth === 10, 'should update strokeWidth');
         }
@@ -219,7 +243,7 @@ test('LineLayer#constructor', t => {
         updateProps: {
           fp64: true
         },
-        assert: (layer, oldState) => {
+        assert({layer, oldState}) {
           t.ok(layer.state, 'should update layer state');
           t.ok(
             layer.getAttributeManager().attributes.instanceSourceTargetPositions64xyLow,
@@ -228,32 +252,37 @@ test('LineLayer#constructor', t => {
         }
       }
     ]
-  };
-
-  testCreateLayer(t, LayerComponent, {data, pickable: true});
-  testCreateEmptyLayer(t, LayerComponent);
-  testNullLayer(t, LayerComponent);
-  testLayerUpdates(t, {LayerComponent, testCases: TEST_CASES});
+  });
 
   t.end();
 });
 
 test('IconLayer#constructor', t => {
-  const LayerComponent = IconLayer;
   const data = FIXTURES.points;
 
-  const TEST_CASES = {
-    INITIAL_PROPS: {
-      data,
-      sizeScale: 24,
-      getPosition: getPointPosition
-    },
-    UPDATES: [
+  testLayer({
+    Layer: IconLayer,
+    testCases: [
+      {
+        title: 'Empty layer',
+        props: {id: 'empty'}
+      },
+      {
+        title: 'Null layer',
+        props: {id: 'null', data: null}
+      },
+      {
+        props: {
+          data,
+          sizeScale: 24,
+          getPosition: getPointPosition
+        }
+      },
       {
         updateProps: {
           sizeScale: 10
         },
-        assert: (layer, oldState) => {
+        assert({layer, oldState}) {
           t.ok(layer.state, 'should update layer state');
         }
       },
@@ -261,7 +290,7 @@ test('IconLayer#constructor', t => {
         updateProps: {
           fp64: true
         },
-        assert: (layer, oldState) => {
+        assert({layer, oldState}) {
           t.ok(layer.state, 'should update layer state');
           t.ok(
             layer.getAttributeManager().attributes.instancePositions64xyLow,
@@ -270,30 +299,35 @@ test('IconLayer#constructor', t => {
         }
       }
     ]
-  };
-
-  testCreateLayer(t, LayerComponent, {data, pickable: true});
-  testCreateEmptyLayer(t, LayerComponent);
-  testNullLayer(t, LayerComponent);
-  testLayerUpdates(t, {LayerComponent, testCases: TEST_CASES});
+  });
 
   t.end();
 });
 
 test('PathLayer#constructor', t => {
-  const LayerComponent = PathLayer;
   const data = FIXTURES.zigzag;
 
-  const TEST_CASES = {
-    INITIAL_PROPS: {
-      data
-    },
-    UPDATES: [
+  testLayer({
+    Layer: PathLayer,
+    testCases: [
+      {
+        title: 'Empty layer',
+        props: {id: 'empty'}
+      },
+      {
+        title: 'Null layer',
+        props: {id: 'null', data: null}
+      },
+      {
+        props: {
+          data
+        }
+      },
       {
         updateProps: {
           widthMinPixels: 10
         },
-        assert: (layer, oldState) => {
+        assert({layer, oldState}) {
           t.ok(layer.state, 'should update layer state');
           t.ok(layer.state.model.uniforms.widthMinPixels === 10, 'should update strokeWidth');
         }
@@ -301,19 +335,14 @@ test('PathLayer#constructor', t => {
         //   updateProps: {
         //     fp64: true
         //   },
-        //   assert: (layer, oldState) => {
+        //   assert({layer, oldState}) {
         //     t.ok(layer.state, 'should update layer state');
         //     t.ok(layer.getAttributeManager().attributes.instanceStartEndPositions64xyLow,
         //       'should add instancePositions64xyLow');
         //   }
       }
     ]
-  };
-
-  testCreateLayer(t, LayerComponent, {data, pickable: true});
-  testCreateEmptyLayer(t, LayerComponent);
-  testNullLayer(t, LayerComponent);
-  testLayerUpdates(t, {LayerComponent, testCases: TEST_CASES});
+  });
 
   t.end();
 });
