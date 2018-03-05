@@ -34,7 +34,7 @@
     "lint-yarn": "!(grep -q unpm.u yarn.lock) && echo 'Lockfile valid.' || (echo 'Please rebuild yarn file using public npmrc' && false)",
     "publish-prod": "npm run build && npm run test && npm run test-dist && npm publish",
     "publish-beta": "npm run build && npm run test && npm run test-dist && npm publish --tag beta",
-    "test": "npm run lint && npm run test-node && npm run build && npm run test-render",
+    "test": "npm run lint && npm run test-node && npm run build && npm run test-render-react",
     "test-fast": "npm run test-node",
     "test-ci": "npm run lint && node test/node-ci.js",
     "test-cover": "NODE_ENV=test tape -r babel-register test/node.js && nyc report",
