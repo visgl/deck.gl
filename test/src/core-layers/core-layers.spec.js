@@ -70,11 +70,15 @@ test('ScreenGridLayer#constructor', t => {
       },
       {
         updateProps: {
-          minColor: [0, 0, 0]
+          minColor: [0, 0, 0, 255]
         },
         assert: (layer, oldState) => {
           t.ok(layer.state, 'should update layer state');
-          t.deepEqual(layer.state.model.uniforms.minColor, [0, 0, 0], 'should update minColor');
+          t.deepEqual(
+            layer.state.model.uniforms.minColor,
+            [0, 0, 0, 255],
+            'should update minColor'
+          );
         }
       }
     ]
