@@ -18,7 +18,15 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-// This is the script that runs in Node.js and starts the browser
-require('../node-aliases');
-const {RenderTestDriver} = require('deck.gl-test-utils');
-new RenderTestDriver().run();
+import './imports-spec';
+import './core';
+import './core-layers';
+
+// TODO - React test cases currently only work in browser
+// import './react';
+
+// deck.gl-layers
+// TODO - Tests currently only work in browser
+if (typeof document !== 'undefined') {
+  require('./experimental-layers');
+}
