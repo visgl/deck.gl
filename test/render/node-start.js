@@ -18,12 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-require('./node-aliases');
-
-// Run the tests
+// This is the script that runs in Node.js and starts the browser
+require('../node-aliases');
 const {RenderTestDriver} = require('deck.gl-test-utils');
-
-new RenderTestDriver().run({
-  parameters: ['--env.render-react', '--progress']
-  // parameters: ['--env.render', '--progress']
-});
+new RenderTestDriver().run();
