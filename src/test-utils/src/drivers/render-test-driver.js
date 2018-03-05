@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 
 /* global process */
-import {NodeTestDriver} from 'probe.gl/test';
+import {BrowserDriver} from 'probe.gl/test';
 import {addColor, COLOR} from '../utils/colors';
 
 // DEFAULT config, intended to be overridden in the node script that calls us
@@ -34,8 +34,8 @@ const SERVER_CONFIG = {
   parameters: [`--env.${webpackEnv}`, '--progress']
 };
 
-export default class RenderTestDriver extends NodeTestDriver {
-  // TODO - move this method to probe.gl/NodeTestDriver
+export default class RenderTestDriver extends BrowserDriver {
+  // TODO - move this method to probe.gl/BrowserDriver
   waitForFunction(name) {
     return new Promise(resolve => {
       this.page.exposeFunction(name, resolve);
