@@ -35,7 +35,6 @@ const SERVER_CONFIG = {
 };
 
 export default class RenderTestDriver extends BrowserDriver {
-
   run(config = SERVER_CONFIG) {
     this.console.log(addColor('Running rendering tests in Chrome instance...', COLOR.YELLOW));
     this.time = Date.now();
