@@ -1,3 +1,5 @@
+0.0.24
+- Fix for experimental-layer arrows with offset coordinates
 0.0.23
 - Fix for path-marker-layer updateTriggers
 0.0.22
