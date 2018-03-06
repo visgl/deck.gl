@@ -117,8 +117,16 @@ export default class RenderTest {
 
   _onComplete() {
     this.reportFinalResult({passed: this.passed, renderTest: this});
+    this._reportToTestDriver();
+  }
+
+  // Node test driver (puppeteer) may not have had time to expose the function
+  // if the test suite is short. If not available, wait a second and try again
+  _reportToTestDriver(firstTime = false) {
     if (window.renderTestComplete) {
       window.renderTestComplete(JSON.stringify(this.passed));
+    } else {
+      window.setTimeout(this._reportToTestDriver.bind(this, false), 1000);
     }
   }
 }
