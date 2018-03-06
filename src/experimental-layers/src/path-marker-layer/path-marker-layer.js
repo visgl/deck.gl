@@ -49,6 +49,10 @@ export default class PathMarkerLayer extends CompositeLayer {
       const [dx, dy] = viewport.metersToLngLatDelta(xyz);
       const [x, y] = coordinateOrigin;
       return viewport.projectFlat([x - dx, dy + y]);
+    } else if (coordinateSystem === COORDINATE_SYSTEM.LNGLAT_OFFSETS) {
+      const [dx, dy] = xyz;
+      const [x, y] = coordinateOrigin;
+      return viewport.projectFlat([x - dx, dy + y]);
     }
 
     return viewport.projectFlat(xyz);
