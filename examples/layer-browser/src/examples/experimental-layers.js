@@ -81,6 +81,35 @@ const PathMarkerExample = {
   }
 };
 
+const coordDiff = ([lng, lat]) => [
+  lng - dataSamples.positionOrigin[0],
+  lat - dataSamples.positionOrigin[1]
+];
+const PathMarkerExampleLngLatOffset = {
+  layer: PathMarkerLayer,
+  getData: () => dataSamples.routes,
+  props: {
+    id: 'path-outline-layer',
+    opacity: 0.6,
+    getPath: f => [coordDiff(f.START), coordDiff(f.END)],
+    getColor: f => [230, 230, 230],
+    getZLevel: f => Math.random() * 255,
+    getWidth: f => 10,
+    widthMinPixels: 1,
+    pickable: true,
+    strokeWidth: 5,
+    widthScale: 10,
+    autoHighlight: true,
+    highlightColor: [255, 255, 255, 255],
+    parameters: {
+      blendEquation: GL.MAX
+    },
+    sizeScale: 200,
+    coordinateSystem: COORDINATE_SYSTEM.LNGLAT_OFFSETS,
+    coordinateOrigin: dataSamples.positionOrigin
+  }
+};
+
 const PathMarkerExampleMeterData = new Array(10).fill(true).map(f => ({
   path: [
     [Math.random() * 9000, Math.random() * 9000],
@@ -151,6 +180,7 @@ export default {
     MeshLayer: MeshLayerExample,
     PathOutlineLayer: PathOutlineExample,
     PathMarkerLayer: PathMarkerExample,
+    'PathMarkerLayer (LngLat Offset)': PathMarkerExampleLngLatOffset,
     'PathMarkerLayer (Meter)': PathMarkerExampleMeter,
     'New SolidPolygonLayer': SolidPolygonLayerExample,
     TextLayer: TextLayerExample
