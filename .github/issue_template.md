@@ -10,7 +10,7 @@
 #### To Do List <!-- For developer only -->
   - [ ] Add label and assign to milestone
   - [ ] Coding
-  - [ ] Unit test
+  - [ ] Test
 
 <!-- If it is feature/enhancement -->
 #### Background <!-- RFC or feature description -->
@@ -19,4 +19,4 @@
   - [ ] Coding
   - [ ] Doc update
   - [ ] Whats new update <!-- If feature is visible to user -->
-  - [ ] Unit test
+  - [ ] Test
