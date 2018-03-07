@@ -1,10 +1,10 @@
-# deck.gl-test-utils (Experimental)
+# deck.gl-test-utils
 
-
-A set of utilities to facilitate testing deck.gl layers in applications. Tests can be run:
-* completely in Node.js (lifecycle tests only)
-* completely in the Browser (lifecycle and rendering tests)
+A set of utilities to facilitate testing deck.gl layers. Tests can be run:
+* completely in Node.js (lifecycle tests only).
+* completely in the Browser (lifecycle and rendering tests).
 * from Node in a controlled Browser instance (`TestDriver` classes).
+
 
 ## Installing
 
@@ -22,9 +22,9 @@ You typically want the major and minor version of `deck.gl-test-utils` to match 
 
 ## Layer Update Tests
 
-The simplest way to use the test framework is to test that that deck.gl layers update correctly. Updates are handled by the deck.gl layer "lifecycle" and these tests are therefore also called "lifecycle tests". Lifecycle tests are less demanding of the WebGL environment and are thus more suitable to integration in traditional Node.js unit test suites (e.g. based on `tape` or similar frameworks).
+The simplest way to use the test framework is to test that that deck.gl layers update correctly. deck.gl's lifecycle test support includes test drivers to initialize, update and render layers.
 
-deck.gl's lifecycle test support includes test drivers to initialize, update and render layers.
+Updates are handled by the deck.gl layer "lifecycle" and these tests are therefore also called "lifecycle tests". Lifecycle tests are less demanding of the WebGL environment and are thus more suitable to integration in traditional Node.js unit test suites (e.g. based on `tape` or similar frameworks).
 
 
 ## Rendering Tests
@@ -38,12 +38,12 @@ Currently, rendering tests requires running layers with predefined props and vie
 
 ## Integration with Unit Test Frameworks
 
-Lifecycle test functions are designed to allow Some of the details depend on the test framework you are using. deck.gl itself uses tape so there are extensive examples of tape integration, but other frameworks should be easy to integrate with.
+Lifecycle test functions are designed to allow them to be intregrated with different unit test frameworks. Some of the details depend on the test framework you are using. deck.gl itself uses tape so the tests in the deck.gl repository contain extensive examples of tape integration, but other frameworks should be easy to integrate with.
 
 
 ## Usage
 
-The lifecycle test drivers simplify testing of successive updates of a layer
+The lifecycle test drivers simplify testing of successive updates of a layer. This example uses tape.
 ```js
 import test from 'tape-catch';
 import * as FIXTURES from 'deck.gl/test/data/geojson-data';

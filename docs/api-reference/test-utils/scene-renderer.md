@@ -1,6 +1,7 @@
-# SceneRenderer (Test Automation Class, Experimental)
+# SceneRenderer (Test Automation Class)
 
 Takes a list of scenes (each scene specifiying a list of `Layer`s, one or more `View`s and a view state), renders each scene in a `Deck` instance, captures the output into an image and calls a callback, then renders the next scene, finally calling a completion callback.
+
 
 ## Methods
 
