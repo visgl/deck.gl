@@ -22,18 +22,25 @@ You typically want the major and minor version of `deck.gl-test-utils` to match 
 
 ## Layer Update Tests
 
-The simplest way to use the test framework is to test that that deck.gl layers update correctly. deck.gl's lifecycle test support includes test drivers to initialize, update and render layers.
+An easy way to get started with the test framework to test layers is to use the layer updates tests to verify deck.gl layers update correctly. deck.gl's update, or "lifecycle" test support includes test drivers to initialize, update and render layers.
 
 Updates are handled by the deck.gl layer "lifecycle" and these tests are therefore also called "lifecycle tests". Lifecycle tests are less demanding of the WebGL environment and are thus more suitable to integration in traditional Node.js unit test suites (e.g. based on `tape` or similar frameworks).
 
 
-## Rendering Tests
+## Layer Rendering Tests
 
 Rendering tests are a key feature of deck.gl's test utils. Rendering tests involve rendering layers with known inputs and comparing the results against "golden images".
 
 Currently, rendering tests requires running layers with predefined props and views in a controlled Chrome instance, reporting values back to Node.js.
 
-> Future support might include rendering layers directly in Node.js under headless gl, as well as support for "snapshotting" deck.gl output inside live applications.
+
+## Testing Applications instead of Layers
+
+The current test utilities are focused on testing of layers. This might seem to make them less suited for testing deck.gl code in applications. Still, there are techniques that can be used to get parts of the application's rendering stack tested.
+
+Applications that render multiple layers can e.g. render them with mock application data, and compare the result against a golden image.
+
+> More direct support for application testing is under consideration. Future support might include rendering layers directly in Node.js under headless gl, enabling apps to be tested in CI environments, as well as support for "snapshotting" deck.gl output inside live applications and comparing against golden images.
 
 
 ## Integration with Unit Test Frameworks
