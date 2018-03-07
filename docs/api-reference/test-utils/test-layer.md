@@ -73,4 +73,9 @@ Test cases are an array of objects with the following fields:
 
 ## Writing assert Functions
 
+Assert functions are called with the following properties:
+* `layer`
+* `oldState`
+* `subLayers`
+* `spies`
 

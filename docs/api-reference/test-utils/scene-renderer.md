@@ -29,3 +29,14 @@ Runs the test suite, calling the callbacks.
 ### onSceneRendered
 
 Can return a promise. The next scene will not be rendered until this promise completes. If the return value is not a promise, next scene will be rendered immediately.
+
+
+## Data Types
+
+### Scene Objects
+
+Each scene object describes what needs to be rendered
+* `name` - name of scene.
+* `views` (defaults to `[new MapView()]`) - list of `View`s.
+* `viewState` - The position to use with the views.
+* `layers` - The list of layers to render.
