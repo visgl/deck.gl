@@ -39,9 +39,11 @@
     "test-rendering": "(cd test/render && webpack-dev-server --config webpack.config.test-rendering.js --progress --hot --open)"
   },
   "dependencies": {
-    "deck.gl": ">=5.1.1",
-    "luma.gl": ">=5.1.0",
     "probe.gl": "^0.2.2"
+  },
+  "peerDependencies": {
+    "deck.gl": ">=5.1.1",
+    "luma.gl": ">=5.1.0"
   },
   "devDependencies": {
     "babel-cli": "^6.22.2",
