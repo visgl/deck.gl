@@ -22,9 +22,9 @@ You typically want the major and minor version of `deck.gl-test-utils` to match 
 
 ## Layer Update Tests
 
-An easy way to get started with the test framework to test layers is to use the layer updates tests to verify deck.gl layers update correctly. deck.gl's update, or "lifecycle" test support includes test drivers to initialize, update and render layers.
+Layer updates tests are designed to verify deck.gl that layers update their internal state correctly in response to various props and prop changes. The layer update test support includes test drivers to run a sequence of successive updates, with facilities for validating the layer after each change, and also provides functions to initialize, update and render layers in a test environment.
 
-Updates are handled by the deck.gl layer "lifecycle" and these tests are therefore also called "lifecycle tests". Lifecycle tests are less demanding of the WebGL environment and are thus more suitable to integration in traditional Node.js unit test suites (e.g. based on `tape` or similar frameworks).
+Note that internally in deck.gl, updates are handled by the deck.gl layer "lifecycle" and these tests are therefore also called "lifecycle tests". Lifecycle tests are less demanding of the WebGL environment than rendering tests described below and are thus more suitable to integration in traditional Node.js unit test suites (e.g. based on `tape` or similar common unit test frameworks).
 
 
 ## Layer Rendering Tests
