@@ -1,5 +1,5 @@
 import {GL, Buffer, experimental} from 'luma.gl';
-import {getShaders, getBuffers} from './attribute-transition-model';
+import {getShaders, getBuffers} from './attribute-transition-utils';
 import log from '../utils/log';
 import assert from 'assert';
 
