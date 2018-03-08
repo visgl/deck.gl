@@ -23,6 +23,11 @@ For Earlier Beta Releases see below
 
 ### deck.gl v5.2 Pre Releases
 
+#### [5.2.0-alpha.2] - Mar 8
+- Bump luma.gl dependency to v5.2.0-alpha.3
+- deck.gl-test-utils v5.2.0-alpha.1 (#1515)
+- Test documentation improvements (#1512)
+
 #### [5.2.0-alpha.1] - Mar 4
 
 ## Official Releases
