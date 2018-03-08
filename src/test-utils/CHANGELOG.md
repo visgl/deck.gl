@@ -1,5 +1,8 @@
 # CHANGELOG for deck.gl-test-utils
 
+v5.2.0-alpha.2
+- Change luma.gl and deck.gl dependency types to ">="
+
 v5.2.0-alpha.1
 - Align version numbers with main deck.gl release.
 
