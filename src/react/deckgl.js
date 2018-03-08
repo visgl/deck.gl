@@ -55,22 +55,22 @@ export default class DeckGL extends React.Component {
 
   // Public API
 
-  queryObject(opts) {
-    log.deprecated('queryObject', 'pickObject');
-    return this.deck.pickObject(opts);
-  }
-
   pickObject({x, y, radius = 0, layerIds = null}) {
     return this.deck.pickObject({x, y, radius, layerIds});
   }
 
-  queryVisibleObjects(opts) {
-    log.deprecated('queryVisibleObjects', 'pickObjects');
-    return this.pickObjects(opts);
-  }
-
   pickObjects({x, y, width = 1, height = 1, layerIds = null}) {
     return this.deck.pickObjects({x, y, width, height, layerIds});
+  }
+
+  queryObject(opts) {
+    log.deprecated('queryObject', 'pickObject')();
+    return this.deck.pickObject(opts);
+  }
+
+  queryVisibleObjects(opts) {
+    log.deprecated('queryVisibleObjects', 'pickObjects')();
+    return this.pickObjects(opts);
   }
 
   // Private Helpers
@@ -90,10 +90,10 @@ export default class DeckGL extends React.Component {
     const views =
       nextProps.views || nextProps.viewports || (nextProps.viewport && [nextProps.viewport]);
     if (nextProps.viewports) {
-      log.deprecated('DeckGL.viewports', 'DeckGL.views');
+      log.deprecated('DeckGL.viewports', 'DeckGL.views')();
     }
     if (nextProps.viewport) {
-      log.deprecated('DeckGL.viewport', 'DeckGL.views');
+      log.deprecated('DeckGL.viewport', 'DeckGL.views')();
     }
 
     // extract any deck.gl layers masquerading as react elements from props.children
@@ -159,7 +159,7 @@ export default class DeckGL extends React.Component {
   _positionChild({child, viewMap, i}) {
     const {viewId, viewportId} = child.props;
     if (viewportId) {
-      log.deprecated('viewportId', 'viewId');
+      log.deprecated('viewportId', 'viewId')();
     }
     const view = viewMap[viewId || viewportId];
 

@@ -37,7 +37,8 @@ export default class OrbitViewport extends Viewport {
     far = 100, // Distance of far clipping plane
     zoom = 1
   }) {
-    // log.deprecated('OrbitViewport', 'OrbitView');
+    // TODO - Once OrbitViewport is aligned with the View system, deprecated it
+    // log.deprecated('OrbitViewport', 'OrbitView')();
 
     const rotationMatrix = mat4_rotateX([], createMat4(), -rotationX / 180 * Math.PI);
     if (orbitAxis === 'Z') {

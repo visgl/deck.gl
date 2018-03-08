@@ -429,7 +429,7 @@ export function getClosestFromPickingBuffer(
       const pickedObjectIndex = pickedLayer.decodePickingColor(pickedColor);
       return {pickedColor, pickedLayer, pickedObjectIndex};
     }
-    log.error('Picked non-existent layer. Is picking buffer corrupt?');
+    log.error('Picked non-existent layer. Is picking buffer corrupt?')();
   }
 
   return NO_PICKED_OBJECT;
@@ -463,7 +463,7 @@ function getUniquesFromPickingBuffer(gl, {pickedColors, layers}) {
               pickedObjectIndex: pickedLayer.decodePickingColor(pickedColor)
             });
           } else {
-            log.error('Picked non-existent layer. Is picking buffer corrupt?');
+            log.error('Picked non-existent layer. Is picking buffer corrupt?')();
           }
         }
       }

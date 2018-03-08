@@ -52,19 +52,19 @@ export default class HexagonCellLayer extends Layer {
         0,
         'HexagonCellLayer: Either hexagonVertices or radius and angle are ' +
           'needed to calculate primitive hexagon.'
-      );
+      )();
       missingProps = true;
     } else if (
       props.hexagonVertices &&
       (!Array.isArray(props.hexagonVertices) || props.hexagonVertices.length < 6)
     ) {
-      log.once(0, 'HexagonCellLayer: hexagonVertices needs to be an array of 6 points');
+      log.once(0, 'HexagonCellLayer: hexagonVertices needs to be an array of 6 points')();
 
       missingProps = true;
     }
 
     if (missingProps) {
-      log.once(0, 'Now using 1000 meter as default radius, 0 as default angle');
+      log.once(0, 'Now using 1000 meter as default radius, 0 as default angle')();
       props.radius = 1000;
       props.angle = 0;
     }

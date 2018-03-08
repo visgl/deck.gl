@@ -31,7 +31,7 @@ function getDirectionFromBearingAndPitch({bearing, pitch}) {
 
 export default class FirstPersonViewport extends Viewport {
   constructor(opts = {}) {
-    log.deprecated('FirstPersonViewport', 'FirstPersonView');
+    log.deprecated('FirstPersonViewport', 'FirstPersonView')();
 
     // TODO - push direction handling into Matrix4.lookAt
     const {

@@ -99,7 +99,7 @@ export default class CompositeLayer extends Layer {
   _renderLayers() {
     let {subLayers} = this.internalState;
     if (subLayers && !this.needsUpdate()) {
-      log.log(3, `Composite layer reused subLayers ${this}`, this.internalState.subLayers);
+      log.log(3, `Composite layer reused subLayers ${this}`, this.internalState.subLayers)();
     } else {
       subLayers = this.renderLayers();
       // Flatten the returned array, removing any null, undefined or false
@@ -107,7 +107,7 @@ export default class CompositeLayer extends Layer {
       // (see CompositeLayer.renderLayers docs)
       subLayers = flatten(subLayers, {filter: Boolean});
       this.internalState.subLayers = subLayers;
-      log.log(2, `Composite layer rendered new subLayers ${this}`, subLayers);
+      log.log(2, `Composite layer rendered new subLayers ${this}`, subLayers)();
     }
 
     // populate reference to parent layer (this layer)

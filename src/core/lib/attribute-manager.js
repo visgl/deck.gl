@@ -64,7 +64,7 @@ const logFunctions = {
   timeStart: null,
 
   onLog: ({level, message}) => {
-    log.log(level, message);
+    log.log(level, message)();
   },
   onUpdateStart: ({level, id, numInstances}) => {
     logFunctions.savedMessages = [];
@@ -80,11 +80,11 @@ const logFunctions = {
     const time = `${timeMs}ms`;
     log.group(level, `Updated attributes for ${numInstances} instances in ${id} in ${time}`, {
       collapsed: true
-    });
+    })();
     for (const message of logFunctions.savedMessages) {
-      log.log(level, message);
+      log.log(level, message)();
     }
-    log.groupEnd(level, `Updated attributes for ${numInstances} instances in ${id} in ${time}`);
+    log.groupEnd(level, `Updated attributes for ${numInstances} instances in ${id} in ${time}`)();
     logFunctions.savedMessages = null;
   }
 };
@@ -254,7 +254,7 @@ export default class AttributeManager {
     if (!invalidatedAttributes) {
       let message = `invalidating non-existent trigger ${triggerName} for ${this.id}\n`;
       message += `Valid triggers: ${Object.keys(attributes).join(', ')}`;
-      log.warn(message, invalidatedAttributes);
+      log.warn(message, invalidatedAttributes)();
     } else {
       invalidatedAttributes.forEach(name => {
         const attribute = attributes[name];

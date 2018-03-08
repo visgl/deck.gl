@@ -30,7 +30,7 @@ function getDirectionFromBearingAndPitch({bearing, pitch}) {
 
 export default class ThirdPersonViewport extends Viewport {
   constructor(opts) {
-    log.deprecated('ThirdPersonViewport', 'ThirdPersonView');
+    log.deprecated('ThirdPersonViewport', 'ThirdPersonView')();
 
     const {bearing, pitch, position, up, zoom} = opts;
 

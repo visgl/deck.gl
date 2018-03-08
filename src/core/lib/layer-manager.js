@@ -271,7 +271,7 @@ export default class LayerManager {
 
     // TODO - something is generating state updates that cause rerender of the same
     if (newLayers === this.lastRenderedLayers) {
-      log.log(3, 'Ignoring layer update due to layer array not changed');
+      log.log(3, 'Ignoring layer update due to layer array not changed')();
       return this;
     }
     this.lastRenderedLayers = newLayers;
@@ -381,7 +381,7 @@ export default class LayerManager {
   //
 
   setViewports(viewports) {
-    log.deprecated('setViewport', 'setViews');
+    log.deprecated('setViewport', 'setViews')();
     this.setViews(viewports);
     return this;
   }
@@ -391,7 +391,7 @@ export default class LayerManager {
   //
 
   setViewport(viewport) {
-    log.deprecated('setViewport', 'setViews');
+    log.deprecated('setViewport', 'setViews')();
     this.setViews([viewport]);
     return this;
   }
@@ -492,7 +492,7 @@ export default class LayerManager {
       this.context.viewport = viewport;
       this.context.viewportChanged = true;
       this.context.uniforms = {};
-      log(4, viewport);
+      log.log(4, 'Viewport', viewport)();
 
       // Update layers states
       // Let screen space layers update their state based on viewport
@@ -528,7 +528,7 @@ export default class LayerManager {
     const oldLayerMap = {};
     for (const oldLayer of oldLayers) {
       if (oldLayerMap[oldLayer.id]) {
-        log.warn(`Multiple old layers with same id ${layerName(oldLayer)}`);
+        log.warn(`Multiple old layers with same id ${layerName(oldLayer)}`)();
       } else {
         oldLayerMap[oldLayer.id] = oldLayer;
       }
@@ -564,7 +564,7 @@ export default class LayerManager {
       const oldLayer = oldLayerMap[newLayer.id];
       if (oldLayer === null) {
         // null, rather than undefined, means this id was originally there
-        log.warn(`Multiple new layers with same id ${layerName(newLayer)}`);
+        log.warn(`Multiple new layers with same id ${layerName(newLayer)}`)();
       }
       // Remove the old layer from candidates, as it has been matched with this layer
       oldLayerMap[newLayer.id] = null;
@@ -619,14 +619,14 @@ export default class LayerManager {
 
   // Initializes a single layer, calling layer methods
   _initializeLayer(layer) {
-    log(LOG_PRIORITY_LIFECYCLE, `initializing ${layerName(layer)}`);
+    log.log(LOG_PRIORITY_LIFECYCLE, `initializing ${layerName(layer)}`)();
 
     let error = null;
     try {
       layer._initialize();
       layer.lifecycle = LIFECYCLE.INITIALIZED;
     } catch (err) {
-      log.warn(`error while initializing ${layerName(layer)}\n`, err);
+      log.warn(`error while initializing ${layerName(layer)}\n`, err)();
       error = error || err;
       // TODO - what should the lifecycle state be here? LIFECYCLE.INITIALIZATION_FAILED?
     }
@@ -645,12 +645,18 @@ export default class LayerManager {
 
   _transferLayerState(oldLayer, newLayer) {
     if (newLayer !== oldLayer) {
-      log(LOG_PRIORITY_LIFECYCLE_MINOR, `matched ${layerName(newLayer)}`, oldLayer, '->', newLayer);
+      log.log(
+        LOG_PRIORITY_LIFECYCLE_MINOR,
+        `matched ${layerName(newLayer)}`,
+        oldLayer,
+        '->',
+        newLayer
+      )();
       newLayer.lifecycle = LIFECYCLE.MATCHED;
       oldLayer.lifecycle = LIFECYCLE.AWAITING_GC;
       newLayer._transferState(oldLayer);
     } else {
-      log.log(LOG_PRIORITY_LIFECYCLE_MINOR, `Matching layer is unchanged ${newLayer.id}`);
+      log.log(LOG_PRIORITY_LIFECYCLE_MINOR, `Matching layer is unchanged ${newLayer.id}`)();
       newLayer.lifecycle = LIFECYCLE.MATCHED;
       newLayer.oldProps = newLayer.props;
     }
@@ -658,12 +664,15 @@ export default class LayerManager {
 
   // Updates a single layer, cleaning all flags
   _updateLayer(layer) {
-    log.log(LOG_PRIORITY_LIFECYCLE_MINOR, `updating ${layer} because: ${layer.printChangeFlags()}`);
+    log.log(
+      LOG_PRIORITY_LIFECYCLE_MINOR,
+      `updating ${layer} because: ${layer.printChangeFlags()}`
+    )();
     let error = null;
     try {
       layer._update();
     } catch (err) {
-      log.warn(`error during update of ${layerName(layer)}`, err);
+      log.warn(`error during update of ${layerName(layer)}`, err)();
       // Save first error
       error = err;
     }
@@ -679,11 +688,11 @@ export default class LayerManager {
     try {
       layer._finalize();
     } catch (err) {
-      log.warn(`error during finalization of ${layerName(layer)}`, err);
+      log.warn(`error during finalization of ${layerName(layer)}`, err)();
       error = err;
     }
     layer.lifecycle = LIFECYCLE.FINALIZED;
-    log(LOG_PRIORITY_LIFECYCLE, `finalizing ${layerName(layer)}`);
+    log.log(LOG_PRIORITY_LIFECYCLE, `finalizing ${layerName(layer)}`);
     return error;
   }
 
@@ -697,7 +706,7 @@ export default class LayerManager {
         log.warn(
           'You have supplied a top-level input event handler (e.g. `onLayerClick`), ' +
             'but none of your layers have set the `pickable` flag.'
-        );
+        )();
       }
     }
   }

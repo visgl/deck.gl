@@ -416,7 +416,7 @@ export default class Viewport {
 
     this.pixelUnprojectionMatrix = mat4_invert(createMat4(), this.pixelProjectionMatrix);
     if (!this.pixelUnprojectionMatrix) {
-      log.warn('Pixel project matrix not invertible');
+      log.warn('Pixel project matrix not invertible')();
       // throw new Error('Pixel project matrix not invertible');
     }
   }

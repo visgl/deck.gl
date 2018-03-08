@@ -22,6 +22,7 @@
   ],
   "scripts": {
     "start": "(cd examples/layer-browser && (path-exists node_modules || npm i) && npm run start-local)",
+    "bootstrap": "yarn && (cd src/experimental-layers && yarn) && (cd src/test-utils && yarn)",
     "clean": "npm run build-clean",
     "clean-modules": "for D in src/*; do ([ -d $D ] && cd $D && rm -rf node_modules && rm -f yarn.lock && rm -fr dist dist-es6 && mkdir -p dist dist-es6 ); done",
     "build-clean": "rm -fr dist dist-es6 && mkdir -p dist dist-es6",
@@ -55,7 +56,7 @@
     "luma.gl": "^5.2.0-alpha.3",
     "math.gl": "^1.0.0",
     "mjolnir.js": "^1.0.0",
-    "probe.gl": "^0.2.2",
+    "probe.gl": ">=1.0.0-alpha.1",
     "prop-types": "^15.6.0",
     "seer": "^0.2.4",
     "viewport-mercator-project": "^5.0.0"
