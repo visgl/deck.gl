@@ -10,7 +10,7 @@ import {
   BezierCurveLayer,
   MeshLayer,
   PathOutlineLayer,
-  PathMarkerLayer,
+  // PathMarkerLayer,
   TextLayer,
   Arrow2DGeometry
 } from 'deck.gl-layers';
@@ -899,7 +899,8 @@ export const TEST_CASES = [
     ],
     referenceImageUrl: './test/render/golden-images/path-outline-64.png'
   },
-  {
+  // Chrome 65 can't render this case correctly
+  /* {
     name: 'path-marker',
     viewState: {
       latitude: 37.751537058389985,
@@ -930,7 +931,7 @@ export const TEST_CASES = [
       })
     ],
     referenceImageUrl: './test/render/golden-images/path-maker.png'
-  },
+  }, */
   {
     name: 'text-layer',
     viewState: {
