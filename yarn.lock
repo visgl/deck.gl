@@ -48,8 +48,8 @@ acorn@^4.0.3, acorn@^4.0.4:
   resolved "https://registry.yarnpkg.com/acorn/-/acorn-4.0.13.tgz#105495ae5361d697bd195c825192e1ad7f253787"
 
 acorn@^5.0.0, acorn@^5.5.0:
-  version "5.5.0"
-  resolved "https://registry.yarnpkg.com/acorn/-/acorn-5.5.0.tgz#1abb587fbf051f94e3de20e6b26ef910b1828298"
+  version "5.5.3"
+  resolved "https://registry.yarnpkg.com/acorn/-/acorn-5.5.3.tgz#f473dd47e0277a08e28e9bec5aeeb04751f0b8c9"
 
 agent-base@^4.1.0:
   version "4.2.0"
@@ -1200,8 +1200,8 @@ combined-stream@1.0.6, combined-stream@^1.0.5, combined-stream@~1.0.5:
     delayed-stream "~1.0.0"
 
 commander@^2.11.0, commander@^2.9.0:
-  version "2.14.1"
-  resolved "https://registry.yarnpkg.com/commander/-/commander-2.14.1.tgz#2235123e37af8ca3c65df45b026dbd357b01b9aa"
+  version "2.15.0"
+  resolved "https://registry.yarnpkg.com/commander/-/commander-2.15.0.tgz#ad2a23a1c3b036e392469b8012cec6b33b4c1322"
 
 commondir@^1.0.1:
   version "1.0.1"
@@ -1403,10 +1403,6 @@ currently-unhandled@^0.4.1:
   dependencies:
     array-find-index "^1.0.1"
 
-d3-format@^1.2.0:
-  version "1.2.2"
-  resolved "https://registry.yarnpkg.com/d3-format/-/d3-format-1.2.2.tgz#1a39c479c8a57fe5051b2e67a3bee27061a74e7a"
-
 d3-hexbin@^0.2.1:
   version "0.2.2"
   resolved "https://registry.yarnpkg.com/d3-hexbin/-/d3-hexbin-0.2.2.tgz#9c5837dacfd471ab05337a9e91ef10bfc4f98831"
@@ -1445,17 +1441,17 @@ deck.gl-test-utils@>=5.2.0-alpha.3:
   version "5.2.0-alpha.4"
   resolved "https://registry.yarnpkg.com/deck.gl-test-utils/-/deck.gl-test-utils-5.2.0-alpha.4.tgz#46f789c0238388d2db501d7bc3bf17fbc74afb92"
 
-deck.gl@>=5.2.0-alpha.1:
-  version "5.2.0-alpha.1"
-  resolved "https://registry.yarnpkg.com/deck.gl/-/deck.gl-5.2.0-alpha.1.tgz#5ed7636431e165b48c62fad0c08261c891438fd3"
+deck.gl@>=5.2.0-alpha.2:
+  version "5.2.0-alpha.2"
+  resolved "https://registry.yarnpkg.com/deck.gl/-/deck.gl-5.2.0-alpha.2.tgz#ff05754844339e1e8794ef56c9bc664d924d74a4"
   dependencies:
     d3-hexbin "^0.2.1"
     earcut "^2.0.6"
     lodash.flattendeep "^4.4.0"
-    luma.gl "^5.1.2"
+    luma.gl ">=5.2.0-alpha.3"
     math.gl "^1.0.0"
     mjolnir.js "^1.0.0"
-    probe.gl "^0.2.2"
+    probe.gl ">=1.0.0-alpha.2"
     prop-types "^15.6.0"
     seer "^0.2.4"
     viewport-mercator-project "^5.0.0"
@@ -2593,8 +2589,8 @@ home-or-tmp@^2.0.0:
     os-tmpdir "^1.0.1"
 
 hosted-git-info@^2.1.4:
-  version "2.5.0"
-  resolved "https://registry.yarnpkg.com/hosted-git-info/-/hosted-git-info-2.5.0.tgz#6d60e34b3abbc8313062c3b798ef8d901a07af3c"
+  version "2.6.0"
+  resolved "https://registry.yarnpkg.com/hosted-git-info/-/hosted-git-info-2.6.0.tgz#23235b29ab230c576aab0d4f13fc046b0b038222"
 
 hpack.js@^2.1.6:
   version "2.1.6"
@@ -2629,8 +2625,8 @@ http-errors@1.6.2, http-errors@~1.6.2:
     statuses ">= 1.3.1 < 2"
 
 http-parser-js@>=0.4.0:
-  version "0.4.10"
-  resolved "https://registry.yarnpkg.com/http-parser-js/-/http-parser-js-0.4.10.tgz#92c9c1374c35085f75db359ec56cc257cbb93fa4"
+  version "0.4.11"
+  resolved "https://registry.yarnpkg.com/http-parser-js/-/http-parser-js-0.4.11.tgz#5b720849c650903c27e521633d94696ee95f3529"
 
 http-proxy-middleware@~0.17.4:
   version "0.17.4"
@@ -3338,21 +3334,13 @@ loud-rejection@^1.0.0:
     signal-exit "^3.0.0"
 
 lru-cache@^4.0.1:
-  version "4.1.1"
-  resolved "https://registry.yarnpkg.com/lru-cache/-/lru-cache-4.1.1.tgz#622e32e82488b49279114a4f9ecf45e7cd6bba55"
+  version "4.1.2"
+  resolved "https://registry.yarnpkg.com/lru-cache/-/lru-cache-4.1.2.tgz#45234b2e6e2f2b33da125624c4664929a0224c3f"
   dependencies:
     pseudomap "^1.0.2"
     yallist "^2.1.2"
 
-luma.gl@^5.1.2:
-  version "5.1.2"
-  resolved "https://registry.yarnpkg.com/luma.gl/-/luma.gl-5.1.2.tgz#731eb926290c9daa6d8a152f79343812b50e5b5d"
-  dependencies:
-    math.gl "^1.0.0"
-    seer "^0.2.4"
-    webgl-debug "^2.0.0"
-
-luma.gl@^5.2.0-alpha.3:
+luma.gl@>=5.2.0-alpha.3:
   version "5.2.0-alpha.3"
   resolved "https://registry.yarnpkg.com/luma.gl/-/luma.gl-5.2.0-alpha.3.tgz#0777ed5baa753fb3eea58aa253d08efd335c243e"
   dependencies:
@@ -4173,18 +4161,11 @@ private@^0.1.6, private@^0.1.7:
   version "0.1.8"
   resolved "https://registry.yarnpkg.com/private/-/private-0.1.8.tgz#2381edb3689f7a53d653190060fcf822d2f368ff"
 
-probe.gl@>=1.0.0-alpha.2:
-  version "1.0.0-alpha.2"
-  resolved "https://registry.yarnpkg.com/probe.gl/-/probe.gl-1.0.0-alpha.2.tgz#33a35fe4bfbb6cfb5325320e5ecb278b5664377a"
+probe.gl@>=1.0.0-alpha.2, probe.gl@>=1.0.0-alpha.3:
+  version "1.0.0-alpha.3"
+  resolved "https://registry.yarnpkg.com/probe.gl/-/probe.gl-1.0.0-alpha.3.tgz#2338b20a371e76dfd1ab4a7dc0e03ae908566c90"
   dependencies:
     babel-runtime "^6.11.6"
-
-probe.gl@^0.2.2:
-  version "0.2.2"
-  resolved "https://registry.yarnpkg.com/probe.gl/-/probe.gl-0.2.2.tgz#a92de82ac6dd58aca02127618aad102b1657c5ab"
-  dependencies:
-    babel-runtime "^6.11.6"
-    d3-format "^1.2.0"
 
 process-nextick-args@~2.0.0:
   version "2.0.0"
@@ -5095,15 +5076,21 @@ string.prototype.trim@~1.1.2:
     es-abstract "^1.5.0"
     function-bind "^1.0.2"
 
-string_decoder@^1.0.0, string_decoder@~1.0.3:
-  version "1.0.3"
-  resolved "https://registry.yarnpkg.com/string_decoder/-/string_decoder-1.0.3.tgz#0fc67d7c141825de94282dd536bec6b9bce860ab"
+string_decoder@^1.0.0:
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/string_decoder/-/string_decoder-1.1.0.tgz#384f322ee8a848e500effde99901bba849c5d403"
   dependencies:
     safe-buffer "~5.1.0"
 
 string_decoder@~0.10.x:
   version "0.10.31"
   resolved "https://registry.yarnpkg.com/string_decoder/-/string_decoder-0.10.31.tgz#62e203bc41766c6c28c9fc84301dab1c5310fa94"
+
+string_decoder@~1.0.3:
+  version "1.0.3"
+  resolved "https://registry.yarnpkg.com/string_decoder/-/string_decoder-1.0.3.tgz#0fc67d7c141825de94282dd536bec6b9bce860ab"
+  dependencies:
+    safe-buffer "~5.1.0"
 
 stringstream@~0.0.4, stringstream@~0.0.5:
   version "0.0.5"
