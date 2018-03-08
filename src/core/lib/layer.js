@@ -206,7 +206,7 @@ export default class Layer {
 
   // TODO - needs to refer to context for devicePixels setting
   screenToDevicePixels(screenPixels) {
-    log.deprecated('screenToDevicePixels', 'DeckGL prop useDevicePixels for conversion');
+    log.deprecated('screenToDevicePixels', 'DeckGL prop useDevicePixels for conversion')();
     const devicePixelRatio = typeof window !== 'undefined' ? window.devicePixelRatio : 1;
     return screenPixels * devicePixelRatio;
   }
@@ -298,10 +298,13 @@ export default class Layer {
     }
 
     if (name === 'all') {
-      log.log(LOG_PRIORITY_UPDATE, `updateTriggers invalidating all attributes: ${diffReason}`);
+      log.log(LOG_PRIORITY_UPDATE, `updateTriggers invalidating all attributes: ${diffReason}`)();
       attributeManager.invalidateAll();
     } else {
-      log.log(LOG_PRIORITY_UPDATE, `updateTriggers invalidating attribute ${name}: ${diffReason}`);
+      log.log(
+        LOG_PRIORITY_UPDATE,
+        `updateTriggers invalidating attribute ${name}: ${diffReason}`
+      )();
       attributeManager.invalidate(name);
     }
   }
@@ -523,7 +526,7 @@ export default class Layer {
     // Update primary flags
     if (flags.dataChanged && !changeFlags.dataChanged) {
       changeFlags.dataChanged = flags.dataChanged;
-      log.log(LOG_PRIORITY_UPDATE + 1, () => `dataChanged: ${flags.dataChanged} in ${this.id}`);
+      log.log(LOG_PRIORITY_UPDATE + 1, () => `dataChanged: ${flags.dataChanged} in ${this.id}`)();
     }
     if (flags.updateTriggersChanged && !changeFlags.updateTriggersChanged) {
       changeFlags.updateTriggersChanged =
@@ -535,18 +538,18 @@ export default class Layer {
         () =>
           'updateTriggersChanged: ' +
           `${Object.keys(flags.updateTriggersChanged).join(', ')} in ${this.id}`
-      );
+      )();
     }
     if (flags.propsChanged && !changeFlags.propsChanged) {
       changeFlags.propsChanged = flags.propsChanged;
-      log.log(LOG_PRIORITY_UPDATE + 1, () => `propsChanged: ${flags.propsChanged} in ${this.id}`);
+      log.log(LOG_PRIORITY_UPDATE + 1, () => `propsChanged: ${flags.propsChanged} in ${this.id}`)();
     }
     if (flags.viewportChanged && !changeFlags.viewportChanged) {
       changeFlags.viewportChanged = flags.viewportChanged;
       log.log(
         LOG_PRIORITY_UPDATE + 2,
         () => `viewportChanged: ${flags.viewportChanged} in ${this.id}`
-      );
+      )();
     }
 
     // Update composite flags
@@ -741,7 +744,7 @@ ${flags.viewportChanged ? 'viewport' : ''}\
 
     // TODO - set needsRedraw on the model(s)?
     this.setNeedsRedraw();
-    log.deprecated('layer.setUniforms', 'model.setUniforms');
+    log.deprecated('layer.setUniforms', 'model.setUniforms')();
   }
 }
 

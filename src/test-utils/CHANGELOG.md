@@ -1,7 +1,8 @@
 # CHANGELOG for deck.gl-test-utils
 
+v5.2.0-alpha.4
 v5.2.0-alpha.3
-- Make luma.gl and deck.gl peer dependencies
+- Two identical releases, move deck.gl-test-utils deps to peerDependencies
 
 v5.2.0-alpha.2
 - Change luma.gl and deck.gl dependency types to ">="

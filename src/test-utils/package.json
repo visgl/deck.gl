@@ -2,7 +2,7 @@
   "name": "deck.gl-test-utils",
   "description": "Test utilities for deck.gl layers",
   "license": "MIT",
-  "version": "5.2.0-alpha.3",
+  "version": "5.2.0-alpha.4",
   "keywords": [
     "webgl",
     "visualization",
@@ -38,12 +38,10 @@
     "bench-browser": "webpack-dev-server --env.bench --progress --hot --open",
     "test-rendering": "(cd test/render && webpack-dev-server --config webpack.config.test-rendering.js --progress --hot --open)"
   },
-  "dependencies": {
-    "probe.gl": "^0.2.2"
-  },
-  "peerDependencies": {
-    "deck.gl": ">=5.1.1",
-    "luma.gl": ">=5.1.0"
+  "devDependencies": {
+    "deck.gl": ">=5.2.0-alpha.2",
+    "luma.gl": ">=5.2.0-alpha.3",
+    "probe.gl": ">=1.0.0-alpha.3"
   },
   "devDependencies": {
     "babel-cli": "^6.22.2",

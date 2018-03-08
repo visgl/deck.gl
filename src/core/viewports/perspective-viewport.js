@@ -41,7 +41,7 @@ export default class PerspectiveViewport extends Viewport {
     // automatically calculated
     aspect = null // Aspect ratio (set to viewport widht/height)
   }) {
-    log.deprecated('PerspectiveViewport', 'PerspectiveView');
+    log.deprecated('PerspectiveViewport', 'PerspectiveView')();
 
     const fovyRadians = fovy * DEGREES_TO_RADIANS;
     aspect = Number.isFinite(aspect) ? aspect : width / height;

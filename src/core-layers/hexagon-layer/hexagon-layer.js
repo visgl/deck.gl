@@ -62,7 +62,7 @@ export default class HexagonLayer extends CompositeLayer {
         0,
         'HexagonLayer: Default hexagonAggregator requires radius prop to be set, ' +
           'Now using 1000 meter as default'
-      );
+      )();
 
       props.radius = defaultProps.radius;
     }
@@ -74,7 +74,7 @@ export default class HexagonLayer extends CompositeLayer {
       log.once(
         0,
         'HexagonLayer: upperPercentile should be between 0 and 100. ' + 'Assign to 100 by default'
-      );
+      )();
 
       props.upperPercentile = defaultProps.upperPercentile;
     }
@@ -86,7 +86,7 @@ export default class HexagonLayer extends CompositeLayer {
       log.once(
         0,
         'HexagonLayer: lowerPercentile should be between 0 and 100. ' + 'Assign to 0 by default'
-      );
+      )();
 
       props.lowerPercentile = defaultProps.upperPercentile;
     }
@@ -96,7 +96,7 @@ export default class HexagonLayer extends CompositeLayer {
         0,
         'HexagonLayer: lowerPercentile should not be bigger than ' +
           'upperPercentile. Assign to 0 by default'
-      );
+      )();
 
       props.lowerPercentile = defaultProps.lowerPercentile;
     }

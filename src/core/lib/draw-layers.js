@@ -279,7 +279,7 @@ ${visibleCount} (of ${totalCount} layers) to ${pass} because ${redrawReason} `;
 (${hiddenCount} hidden, ${compositeCount} composite ${pickableCount} pickable)`;
     }
 
-    log.log(LOG_PRIORITY_DRAW, message);
+    log.log(LOG_PRIORITY_DRAW, message)();
   }
 }
 
