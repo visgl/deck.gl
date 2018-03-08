@@ -1,5 +1,8 @@
 # CHANGELOG for deck.gl-test-utils
 
+v5.2.0-alpha.3
+- Make luma.gl and deck.gl peer dependencies
+
 v5.2.0-alpha.2
 - Change luma.gl and deck.gl dependency types to ">="
 
