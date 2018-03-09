@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import * as Polygon from './polygon';
+import * as Polygon from '../solid-polygon-layer/polygon';
 import {experimental} from '../../core';
 const {fp64LowPart, fillArray} = experimental;
 import earcut from 'earcut';
@@ -51,11 +51,11 @@ const DEFAULT_COLOR = [0, 0, 0, 255]; // Black
 export class PolygonTesselatorExtruded {
   constructor({
     polygons,
-    getHeight = x => 1000,
+    getCeiling = x => 1000,
+    getFloor = x => 500,
     getColor = x => DEFAULT_COLOR,
     wireframe = false,
-    fp64 = false,
-    getFloor = x => 5000
+    fp64 = false
   }) {
     this.fp64 = fp64;
 
@@ -63,7 +63,7 @@ export class PolygonTesselatorExtruded {
     const polygonLayers = { ceiling: [], floor: [] };
 
     polygons.forEach((complexPolygon, polygonIndex) => {
-      const ceiling = getHeight(polygonIndex) || 0;
+      const ceiling = getCeiling(polygonIndex) || 0;
       const floor = getFloor(polygonIndex) || 0;
       const thing = Polygon.normalize(complexPolygon).reduce((polygonArray, polygon) => {
 
@@ -84,7 +84,7 @@ export class PolygonTesselatorExtruded {
     });
 
     const test = polygons.map((complexPolygon, polygonIndex) => {
-      const height = getHeight(polygonIndex) || 0;
+      const height = getCeiling(polygonIndex) || 0;
       return Polygon.normalize(complexPolygon).map(polygon =>
         polygon.map(coord => [coord[0], coord[1], height])
       );
