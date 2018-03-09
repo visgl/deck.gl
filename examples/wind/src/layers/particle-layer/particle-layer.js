@@ -10,6 +10,7 @@ import {
   Texture2D,
   experimental
 } from 'luma.gl';
+const {Transform} = experimental;
 
 import {ELEVATION_DATA_IMAGE, ELEVATION_DATA_BOUNDS, ELEVATION_RANGE} from '../../defaults';
 
@@ -17,7 +18,6 @@ import vertex from './particle-layer-vertex.glsl';
 import fragment from './particle-layer-fragment.glsl';
 import vertexTF from './transform-feedback-vertex.glsl';
 
-const {Transform} = experimental;
 const defaultProps = {
   bbox: null,
   texData: null,
@@ -191,7 +191,7 @@ export default class ParticleLayer extends Layer {
       sourceDestinationMap: {posFrom: 'gl_Position'},
       vs: vertexTF,
       varyings: ['gl_Position'],
-      elementCount: positions4.length / 4.0
+      elementCount: positions4.length / 4
     });
 
     this.setState({
