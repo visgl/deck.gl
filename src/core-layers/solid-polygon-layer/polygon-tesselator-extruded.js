@@ -54,33 +54,63 @@ export class PolygonTesselatorExtruded {
     getHeight = x => 1000,
     getColor = x => DEFAULT_COLOR,
     wireframe = false,
-    fp64 = false
+    fp64 = false,
+    getFloor = x => 5000
   }) {
     this.fp64 = fp64;
 
     // Expensive operation, convert all polygons to arrays
-    polygons = polygons.map((complexPolygon, polygonIndex) => {
+    const polygonLayers = { ceiling: [], floor: [] };
+
+    polygons.forEach((complexPolygon, polygonIndex) => {
+      const ceiling = getHeight(polygonIndex) || 0;
+      const floor = getFloor(polygonIndex) || 0;
+      const thing = Polygon.normalize(complexPolygon).reduce((polygonArray, polygon) => {
+
+        const polygonLayersArray = polygon.reduce((layersArray, coord) => {
+          layersArray.ceilingPolygonArray.push([coord[0], coord[1], ceiling]);
+          layersArray.floorPolygonArray.push([coord[0], coord[1], floor]);
+          return layersArray
+        }, { ceilingPolygonArray: [], floorPolygonArray: [] });
+
+        polygonArray.ceilingPolygons.push(polygonLayersArray.floorPolygonArray);
+        polygonArray.floorPolygons.push(polygonLayersArray.ceilingPolygonArray);
+        return polygonArray;
+      }, { ceilingPolygons: [], floorPolygons: [] });
+
+      // console.log(thing)
+      polygonLayers.ceiling.push(thing.ceilingPolygons)
+      polygonLayers.floor.push(thing.floorPolygons)
+
+    });
+
+    const test = polygons.map((complexPolygon, polygonIndex) => {
       const height = getHeight(polygonIndex) || 0;
       return Polygon.normalize(complexPolygon).map(polygon =>
         polygon.map(coord => [coord[0], coord[1], height])
       );
-    });
+    })
 
-    const groupedVertices = polygons;
-    this.groupedVertices = polygons;
-    const pointCount = getPointCount(polygons);
+    const allPolygons = polygonLayers.ceiling.concat(polygonLayers.floor)
+
+    console.log(test, polygonLayers)
+
+    const groupedVerticesCeiling = polygonLayers.ceiling;
+    const groupedVerticesFloor = polygonLayers.floor;
+    this.groupedVerticesCeiling = polygonLayers.ceiling;
+    const pointCount = getPointCount(allPolygons);
     this.pointCount = pointCount;
     this.wireframe = wireframe;
 
     this.attributes = {};
 
-    const positionsJS = calculatePositionsJS({groupedVertices, pointCount, wireframe});
+    const positionsJS = calculatePositionsJS({polygonLayers, pointCount, wireframe});
     Object.assign(this.attributes, {
       positions: calculatePositions(positionsJS, this.fp64),
-      indices: calculateIndices({groupedVertices, wireframe}),
-      normals: calculateNormals({groupedVertices, pointCount, wireframe}),
+      indices: calculateIndices({groupedVerticesCeiling, wireframe}),
+      normals: calculateNormals({groupedVerticesCeiling, pointCount, wireframe}),
       // colors: calculateColors({groupedVertices, wireframe, getColor}),
-      pickingColors: calculatePickingColors({groupedVertices, pointCount, wireframe})
+      pickingColors: calculatePickingColors({groupedVerticesCeiling, pointCount, wireframe})
     });
   }
 
@@ -97,8 +127,8 @@ export class PolygonTesselatorExtruded {
   }
 
   colors({getColor = x => DEFAULT_COLOR} = {}) {
-    const {groupedVertices, pointCount, wireframe} = this;
-    return calculateColors({groupedVertices, pointCount, wireframe, getColor});
+    const {groupedVerticesCeiling, pointCount, wireframe} = this;
+    return calculateColors({groupedVerticesCeiling, pointCount, wireframe, getColor});
   }
 
   pickingColors() {
@@ -117,16 +147,16 @@ function getPointCount(polygons) {
   return polygons.reduce((points, polygon) => points + Polygon.getVertexCount(polygon), 0);
 }
 
-function calculateIndices({groupedVertices, wireframe = false}) {
+function calculateIndices({groupedVerticesCeiling, wireframe = false}) {
   // adjust index offset for multiple polygons
   const multiplier = wireframe ? 2 : 5;
   const offsets = [];
-  groupedVertices.reduce((vertexIndex, vertices) => {
+  groupedVerticesCeiling.reduce((vertexIndex, vertices) => {
     offsets.push(vertexIndex);
     return vertexIndex + Polygon.getVertexCount(vertices) * multiplier;
   }, 0);
 
-  const indices = groupedVertices.map(
+  const indices = groupedVerticesCeiling.map(
     (vertices, polygonIndex) =>
       wireframe
         ? // 1. get sequentially ordered indices of each polygons wireframe
@@ -144,31 +174,28 @@ function calculateIndices({groupedVertices, wireframe = false}) {
 // Remarks:
 // * each top vertex is on 3 surfaces
 // * each bottom vertex is on 2 surfaces
-function calculatePositionsJS({groupedVertices, pointCount, wireframe = false}) {
+function calculatePositionsJS({polygonLayers, pointCount, wireframe = false}) {
   const multiplier = wireframe ? 2 : 5;
   const positions = new Float32Array(pointCount * 3 * multiplier);
   let vertexIndex = 0;
+  // console.log(polygonLayers)
+  polygonLayers.ceiling.forEach((vertices, index) => {
+    const ceilingVertices = flatten(vertices, 3);
+    const floorVertices = flatten(polygonLayers.floor[index], 3);
 
-  groupedVertices.forEach(vertices => {
-    const topVertices = flatten(vertices, 3);
+    // console.log(vertices, ceilingVertices, floorVertices)
 
-    const baseVertices = topVertices.slice(0);
-    let i = topVertices.length - 1;
-    while (i > 0) {
-      baseVertices[i] = 0;
-      i -= 3;
-    }
-    const len = topVertices.length;
+    const len = ceilingVertices.length;
 
     if (wireframe) {
-      fillArray({target: positions, source: topVertices, start: vertexIndex});
-      fillArray({target: positions, source: baseVertices, start: vertexIndex + len});
+      fillArray({target: positions, source: ceilingVertices, start: vertexIndex});
+      fillArray({target: positions, source: floorVertices, start: vertexIndex + len});
     } else {
-      fillArray({target: positions, source: topVertices, start: vertexIndex, count: 3});
+      fillArray({target: positions, source: ceilingVertices, start: vertexIndex, count: 3});
       fillArray({
         target: positions,
-        source: baseVertices,
-        start: vertexIndex + len * 3,
+        source: floorVertices,
+        start: vertexIndex + (len * 3),
         count: 2
       });
     }
@@ -192,7 +219,7 @@ function calculatePositions(positionsJS, fp64) {
   return {positions: positionsJS, positions64xyLow: positionLow};
 }
 
-function calculateNormals({groupedVertices, pointCount, wireframe}) {
+function calculateNormals({groupedVerticesCeiling, pointCount, wireframe}) {
   const up = [0, 0, 1];
   const multiplier = wireframe ? 2 : 5;
 
@@ -203,7 +230,7 @@ function calculateNormals({groupedVertices, pointCount, wireframe}) {
     return fillArray({target: normals, source: up, count: pointCount * multiplier});
   }
 
-  groupedVertices.map((vertices, polygonIndex) => {
+  groupedVerticesCeiling.map((vertices, polygonIndex) => {
     const vertexCount = Polygon.getVertexCount(vertices);
 
     fillArray({target: normals, source: up, start: vertexIndex, count: vertexCount});
@@ -251,12 +278,12 @@ function calculateSideNormals(vertices) {
   return normals;
 }
 
-function calculateColors({groupedVertices, pointCount, getColor, wireframe = false}) {
+function calculateColors({groupedVerticesCeiling, pointCount, getColor, wireframe = false}) {
   const multiplier = wireframe ? 2 : 5;
   const colors = new Uint8ClampedArray(pointCount * 4 * multiplier);
   let vertexIndex = 0;
 
-  groupedVertices.forEach((complexPolygon, polygonIndex) => {
+  groupedVerticesCeiling.forEach((complexPolygon, polygonIndex) => {
     const color = getColor(polygonIndex);
     color[3] = Number.isFinite(color[3]) ? color[3] : 255;
 
@@ -269,12 +296,12 @@ function calculateColors({groupedVertices, pointCount, getColor, wireframe = fal
   return colors;
 }
 
-function calculatePickingColors({groupedVertices, pointCount, wireframe = false}) {
+function calculatePickingColors({groupedVerticesCeiling, pointCount, wireframe = false}) {
   const multiplier = wireframe ? 2 : 5;
   const colors = new Uint8ClampedArray(pointCount * 3 * multiplier);
   let vertexIndex = 0;
 
-  groupedVertices.forEach((vertices, polygonIndex) => {
+  groupedVerticesCeiling.forEach((vertices, polygonIndex) => {
     const numVertices = Polygon.getVertexCount(vertices);
     const color = getPickingColor(polygonIndex);
 
