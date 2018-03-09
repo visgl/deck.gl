@@ -54,61 +54,33 @@ export class PolygonTesselatorExtruded {
     getHeight = x => 1000,
     getColor = x => DEFAULT_COLOR,
     wireframe = false,
-    fp64 = false,
-    getFloor = x => 5000
+    fp64 = false
   }) {
     this.fp64 = fp64;
 
     // Expensive operation, convert all polygons to arrays
-    const polygonLayers = { ceiling: [], floor: [] };
-
-    polygons.forEach((complexPolygon, polygonIndex) => {
-      const ceiling = getHeight(polygonIndex) || 0;
-      const floor = getFloor(polygonIndex) || 0;
-      const thing = Polygon.normalize(complexPolygon).reduce((polygonArray, polygon) => {
-
-        const polygonLayersArray = polygon.reduce((layersArray, coord) => {
-          layersArray.ceilingPolygonArray.push([coord[0], coord[1], ceiling]);
-          layersArray.floorPolygonArray.push([coord[0], coord[1], floor]);
-          return layersArray
-        }, { ceilingPolygonArray: [], floorPolygonArray: [] });
-
-        polygonArray.ceilingPolygons.push(polygonLayersArray.floorPolygonArray);
-        polygonArray.floorPolygons.push(polygonLayersArray.ceilingPolygonArray);
-        return polygonArray;
-      }, { ceilingPolygons: [], floorPolygons: [] });
-
-      polygonLayers.ceiling.push(thing.ceilingPolygons)
-      polygonLayers.floor.push(thing.floorPolygons)
-
-    });
-
-    const test = polygons.map((complexPolygon, polygonIndex) => {
+    polygons = polygons.map((complexPolygon, polygonIndex) => {
       const height = getHeight(polygonIndex) || 0;
       return Polygon.normalize(complexPolygon).map(polygon =>
         polygon.map(coord => [coord[0], coord[1], height])
       );
-    })
+    });
 
-    const allPolygons = polygonLayers.ceiling.concat(polygonLayers.floor)
-
-    console.log(test, polygonLayers)
-
-    this.polygonLayers = polygonLayers;
-    this.allPolygons = allPolygons;
-    const pointCount = getPointCount(allPolygons);
+    const groupedVertices = polygons;
+    this.groupedVertices = polygons;
+    const pointCount = getPointCount(polygons);
     this.pointCount = pointCount;
     this.wireframe = wireframe;
 
     this.attributes = {};
 
-    const positionsJS = calculatePositionsJS({polygonLayers, pointCount, wireframe});
+    const positionsJS = calculatePositionsJS({groupedVertices, pointCount, wireframe});
     Object.assign(this.attributes, {
       positions: calculatePositions(positionsJS, this.fp64),
-      indices: calculateIndices({allPolygons, wireframe}),
-      normals: calculateNormals({allPolygons, pointCount, wireframe}),
+      indices: calculateIndices({groupedVertices, wireframe}),
+      normals: calculateNormals({groupedVertices, pointCount, wireframe}),
       // colors: calculateColors({groupedVertices, wireframe, getColor}),
-      pickingColors: calculatePickingColors({allPolygons, pointCount, wireframe})
+      pickingColors: calculatePickingColors({groupedVertices, pointCount, wireframe})
     });
   }
 
@@ -125,8 +97,8 @@ export class PolygonTesselatorExtruded {
   }
 
   colors({getColor = x => DEFAULT_COLOR} = {}) {
-    const { allPolygons, pointCount, wireframe } = this;
-    return calculateColors({allPolygons, pointCount, wireframe, getColor});
+    const {groupedVertices, pointCount, wireframe} = this;
+    return calculateColors({groupedVertices, pointCount, wireframe, getColor});
   }
 
   pickingColors() {
@@ -145,18 +117,16 @@ function getPointCount(polygons) {
   return polygons.reduce((points, polygon) => points + Polygon.getVertexCount(polygon), 0);
 }
 
-function calculateIndices({allPolygons, wireframe = false}) {
+function calculateIndices({groupedVertices, wireframe = false}) {
   // adjust index offset for multiple polygons
   const multiplier = wireframe ? 2 : 5;
   const offsets = [];
-  // const ceiling = polygonLayers.ceiling;
-
-  allPolygons.reduce((vertexIndex, vertices) => {
+  groupedVertices.reduce((vertexIndex, vertices) => {
     offsets.push(vertexIndex);
     return vertexIndex + Polygon.getVertexCount(vertices) * multiplier;
   }, 0);
 
-  const indices = allPolygons.map(
+  const indices = groupedVertices.map(
     (vertices, polygonIndex) =>
       wireframe
         ? // 1. get sequentially ordered indices of each polygons wireframe
@@ -174,28 +144,31 @@ function calculateIndices({allPolygons, wireframe = false}) {
 // Remarks:
 // * each top vertex is on 3 surfaces
 // * each bottom vertex is on 2 surfaces
-function calculatePositionsJS({polygonLayers, pointCount, wireframe = false}) {
+function calculatePositionsJS({groupedVertices, pointCount, wireframe = false}) {
   const multiplier = wireframe ? 2 : 5;
   const positions = new Float32Array(pointCount * 3 * multiplier);
   let vertexIndex = 0;
-  // console.log(polygonLayers)
-  polygonLayers.ceiling.forEach((vertices, index) => {
-    const ceilingVertices = flatten(vertices, 3);
-    const floorVertices = flatten(polygonLayers.floor[index], 3);
 
-    // console.log(vertices, ceilingVertices, floorVertices)
+  groupedVertices.forEach(vertices => {
+    const topVertices = flatten(vertices, 3);
 
-    const len = ceilingVertices.length;
+    const baseVertices = topVertices.slice(0);
+    let i = topVertices.length - 1;
+    while (i > 0) {
+      baseVertices[i] = 0;
+      i -= 3;
+    }
+    const len = topVertices.length;
 
     if (wireframe) {
-      fillArray({target: positions, source: ceilingVertices, start: vertexIndex});
-      fillArray({target: positions, source: floorVertices, start: vertexIndex + len});
+      fillArray({target: positions, source: topVertices, start: vertexIndex});
+      fillArray({target: positions, source: baseVertices, start: vertexIndex + len});
     } else {
-      fillArray({target: positions, source: ceilingVertices, start: vertexIndex, count: 3});
+      fillArray({target: positions, source: topVertices, start: vertexIndex, count: 3});
       fillArray({
         target: positions,
-        source: floorVertices,
-        start: vertexIndex + (len * 3),
+        source: baseVertices,
+        start: vertexIndex + len * 3,
         count: 2
       });
     }
@@ -219,7 +192,7 @@ function calculatePositions(positionsJS, fp64) {
   return {positions: positionsJS, positions64xyLow: positionLow};
 }
 
-function calculateNormals({allPolygons, pointCount, wireframe}) {
+function calculateNormals({groupedVertices, pointCount, wireframe}) {
   const up = [0, 0, 1];
   const multiplier = wireframe ? 2 : 5;
 
@@ -230,9 +203,7 @@ function calculateNormals({allPolygons, pointCount, wireframe}) {
     return fillArray({target: normals, source: up, count: pointCount * multiplier});
   }
 
-  // const ceiling = polygonLayers.ceiling;
-
-  allPolygons.map((vertices, polygonIndex) => {
+  groupedVertices.map((vertices, polygonIndex) => {
     const vertexCount = Polygon.getVertexCount(vertices);
 
     fillArray({target: normals, source: up, start: vertexIndex, count: vertexCount});
@@ -280,14 +251,12 @@ function calculateSideNormals(vertices) {
   return normals;
 }
 
-function calculateColors({allPolygons, pointCount, getColor, wireframe = false}) {
+function calculateColors({groupedVertices, pointCount, getColor, wireframe = false}) {
   const multiplier = wireframe ? 2 : 5;
   const colors = new Uint8ClampedArray(pointCount * 4 * multiplier);
   let vertexIndex = 0;
 
-  // const ceiling = polygonLayers.ceiling;
-
-  allPolygons.forEach((complexPolygon, polygonIndex) => {
+  groupedVertices.forEach((complexPolygon, polygonIndex) => {
     const color = getColor(polygonIndex);
     color[3] = Number.isFinite(color[3]) ? color[3] : 255;
 
@@ -300,14 +269,12 @@ function calculateColors({allPolygons, pointCount, getColor, wireframe = false})
   return colors;
 }
 
-function calculatePickingColors({allPolygons, pointCount, wireframe = false}) {
+function calculatePickingColors({groupedVertices, pointCount, wireframe = false}) {
   const multiplier = wireframe ? 2 : 5;
   const colors = new Uint8ClampedArray(pointCount * 3 * multiplier);
   let vertexIndex = 0;
 
-  // const ceiling = polygonLayers.ceiling;
-
-  allPolygons.forEach((vertices, polygonIndex) => {
+  groupedVertices.forEach((vertices, polygonIndex) => {
     const numVertices = Polygon.getVertexCount(vertices);
     const color = getPickingColor(polygonIndex);
 
