@@ -1,5 +1,6 @@
 import TransitionInterpolator from './transition-interpolator';
-import {isValid, lerp, getEndValueByShortestPath} from './transition-utils';
+import {isValid, getEndValueByShortestPath} from './transition-utils';
+import {lerp} from './../utils/math-utils';
 
 import {flyToViewport} from 'viewport-mercator-project';
 import assert from 'assert';

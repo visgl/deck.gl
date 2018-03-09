@@ -16,15 +16,6 @@ const WRAPPED_ANGULAR_PROPS = {
   bearing: 1
 };
 
-export function lerp(start, end, step) {
-  if (Array.isArray(start)) {
-    return start.map((element, index) => {
-      return lerp(element, end[index], step);
-    });
-  }
-  return step * end + (1 - step) * start;
-}
-
 export function isValid(prop) {
   return Number.isFinite(prop) || Array.isArray(prop);
 }
