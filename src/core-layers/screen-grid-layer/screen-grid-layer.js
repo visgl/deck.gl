@@ -18,9 +18,12 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {Layer} from '../../core';
+import {Layer, experimental} from '../../core';
+const {defaultColorRange, quantizeScale} = experimental;
+
 import {GL, Model, Geometry} from 'luma.gl';
 import {lerp} from './../../core/utils/math-utils';
+import log from './../../core/utils/log';
 
 import vs from './screen-grid-layer-vertex.glsl';
 import fs from './screen-grid-layer-fragment.glsl';
@@ -28,12 +31,15 @@ import fs from './screen-grid-layer-fragment.glsl';
 const defaultProps = {
   cellSizePixels: 100,
 
-  // Color range?
-  minColor: [0, 0, 0, 255],
-  maxColor: [0, 255, 0, 255],
+  colorDomain: null,
+  colorRange: defaultColorRange,
 
   getPosition: d => d.position,
-  getWeight: d => 1
+  getWeight: d => 1,
+
+  // deprecated
+  minColor: null,
+  maxColor: null
 };
 
 export default class ScreenGridLayer extends Layer {
@@ -45,6 +51,9 @@ export default class ScreenGridLayer extends Layer {
     const attributeManager = this.getAttributeManager();
     const {gl} = this.context;
 
+    if (this.props.minColor || this.props.maxColor) {
+      log.deprecated('minColor and maxColor', 'colorRange, colorDomain')();
+    }
     /* eslint-disable max-len */
     attributeManager.addInstanced({
       instancePositions: {size: 3, update: this.calculateInstancePositions},
@@ -170,7 +179,7 @@ export default class ScreenGridLayer extends Layer {
     }
     this.setState({maxCount});
 
-    // Convert each value to color.
+    // Convert weights to colors.
     for (let i = 0; i < numInstances; i++) {
       const color = this._getColor(weights[i], maxCount);
       const index = i * size;
@@ -182,13 +191,21 @@ export default class ScreenGridLayer extends Layer {
   }
 
   _getColor(weight, maxCount) {
-    if (weight === 0) {
+    let color;
+    const {minColor, maxColor, colorRange} = this.props;
+    if (minColor || maxColor) {
+      const step = weight / maxCount;
+      // We are supporting optional props as deprecated, set default value if not provided
+      color = lerp(minColor || [0, 0, 0, 255], maxColor || [0, 255, 0, 255], step);
+      return color;
+    }
+    // if colorDomain not set , use default domain [1, maxCount]
+    const colorDomain = this.props.colorDomain || [1, maxCount];
+    if (weight < colorDomain[0] || weight > colorDomain[1]) {
+      // wight outside the domain, set color alpha to 0.
       return [0, 0, 0, 0];
     }
-    const {minColor, maxColor} = this.props;
-    const step = weight / maxCount;
-    const color = lerp(minColor, maxColor, step);
-
+    color = quantizeScale(colorDomain, colorRange, weight);
     // add alpha to color if not defined in colorRange
     color[3] = Number.isFinite(color[3]) ? color[3] : 255;
     return color;
