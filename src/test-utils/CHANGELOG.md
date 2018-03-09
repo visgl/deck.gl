@@ -1,6 +1,9 @@
 # CHANGELOG for deck.gl-test-utils
 
 v5.2.0-alpha.4
+- Fix to keep browser open with image of failed test
+
+v5.2.0-alpha.4
 v5.2.0-alpha.3
 - Two identical releases, move deck.gl-test-utils deps to peerDependencies
 

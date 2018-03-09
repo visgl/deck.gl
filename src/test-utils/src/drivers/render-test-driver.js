@@ -20,7 +20,9 @@
 
 /* global process */
 import {BrowserDriver} from 'probe.gl/test';
-import {addColor, COLOR} from '../utils/colors';
+import {Log, COLOR} from 'probe.gl';
+
+const log = new Log('render-test');
 
 // DEFAULT config, intended to be overridden in the node script that calls us
 
@@ -31,12 +33,12 @@ if (process.argv.length >= 3) {
 }
 
 const SERVER_CONFIG = {
-  parameters: [`--env.${webpackEnv}`, '--progress']
+  parameters: [`--env.${webpackEnv}`]
 };
 
 export default class RenderTestDriver extends BrowserDriver {
   run(config = SERVER_CONFIG) {
-    this.console.log(addColor('Running rendering tests in Chrome instance...', COLOR.YELLOW));
+    log.log({message: 'Running rendering tests in Chrome instance...', color: COLOR.YELLOW})();
     this.time = Date.now();
     return Promise.resolve()
       .then(_ => this.startServer(config))
@@ -51,23 +53,35 @@ export default class RenderTestDriver extends BrowserDriver {
         if (!result.success) {
           throw new Error(result.failedTest);
         }
-        this._done(result.success);
-        this.exit();
+        this._success();
       })
       .catch(error => {
-        this._done(false, error);
-        // Leave browser running so that user can inspect image
-        return Promise.all([this.stopServer()]);
+        this._failure(error);
       });
   }
 
-  _done(success, error) {
-    this.setShellStatus(success);
+  _success() {
     const elapsed = ((Date.now() - this.time) / 1000).toFixed(1);
-    this.console.log(
-      success
-        ? addColor(`Rendering test successfully completed in ${elapsed}s!`, COLOR.BRIGHT_GREEN)
-        : addColor(`Rendering test failed: ${error.message}`, COLOR.BRIGHT_RED)
-    );
+    log.log({
+      message: `Rendering test successfully completed in ${elapsed}s!`,
+      color: COLOR.BRIGHT_GREEN
+    })();
+    this.setShellStatus(true);
+    this.exit();
+  }
+
+  _failure(error) {
+    log.error({
+      message: `Rendering test failed: ${error.message}`,
+      color: COLOR.BRIGHT_RED
+    })();
+    // Don't call exit(). Leave browser running so user can inspect image that failed to render
+    this.setShellStatus(false);
+    return Promise.all([
+      // this.stopBrowser(), // Don't stop the browser
+      this.stopServer()
+    ]).then(_ => {
+      // this.exitProcess()); - Don't exit the process
+    });
   }
 }

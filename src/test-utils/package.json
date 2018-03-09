@@ -31,17 +31,17 @@
     "test": "npm run lint && npm run test-node && npm run build",
     "test-fast": "npm run test-node",
     "test-cover": "NODE_ENV=test tape -r babel-register test/node.js && nyc report",
-    "test-node": "node test/node-test.js",
-    "test-dist": "node test/node-test-dist.js",
+    "test-node": "node test/start.js test",
+    "test-dist": "node test/start.js test-dist",
+    "bench": "node test/start.js bench",
+    "test-render": "node test/start.js render",
     "test-browser": "webpack-dev-server --env.test --progress --hot --open",
-    "bench": "node test/bench/node.js",
-    "bench-browser": "webpack-dev-server --env.bench --progress --hot --open",
-    "test-rendering": "(cd test/render && webpack-dev-server --config webpack.config.test-rendering.js --progress --hot --open)"
+    "bench-browser": "webpack-dev-server --env.bench --progress --hot --open"
   },
-  "devDependencies": {
-    "deck.gl": ">=5.2.0-alpha.2",
-    "luma.gl": ">=5.2.0-alpha.3",
-    "probe.gl": ">=1.0.0-alpha.3"
+  "peerDependencies": {
+    "deck.gl": "*",
+    "luma.gl": "*",
+    "probe.gl": "*"
   },
   "devDependencies": {
     "babel-cli": "^6.22.2",
@@ -80,9 +80,5 @@
     "uglify-js": "^2.6.1",
     "webpack": "^2.4.0",
     "webpack-dev-server": "^2.4.0"
-  },
-  "peerDependencies": {
-    "react": "0.14.x - 16.x",
-    "react-dom": "0.14.x - 16.x"
   }
 }
