@@ -73,8 +73,8 @@ export class PolygonTesselatorExtruded {
           return layersArray
         }, { ceilingPolygonArray: [], floorPolygonArray: [] });
 
-        polygonArray.ceilingPolygons.push(polygonLayersArray.floorPolygonArray);
-        polygonArray.floorPolygons.push(polygonLayersArray.ceilingPolygonArray);
+        polygonArray.ceilingPolygons.push(polygonLayersArray.ceilingPolygonArray);
+        polygonArray.floorPolygons.push(polygonLayersArray.floorPolygonArray);
         return polygonArray;
       }, { ceilingPolygons: [], floorPolygons: [] });
 
