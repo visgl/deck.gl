@@ -1,7 +1,7 @@
 const {resolve} = require('path');
 const webpack = require('webpack');
 
-const ALIASES = require('./aliases');
+const ALIASES = require('../../aliases');
 
 const LIBRARY_BUNDLE_CONFIG = {
   // Bundle the source code
@@ -105,15 +105,7 @@ const TEST_BROWSER_CONFIG = Object.assign({}, BROWSER_CONFIG, {
 const RENDER_BROWSER_CONFIG = Object.assign({}, BROWSER_CONFIG, {
   // Bundle the tests for running in the browser
   entry: {
-    'test-browser': resolve('./test/render/test-rendering.js')
-  }
-});
-
-// TODO - remove this target once above target is solid
-const RENDER_REACT_BROWSER_CONFIG = Object.assign({}, BROWSER_CONFIG, {
-  // Bundle the tests for running in the browser
-  entry: {
-    'test-browser': resolve('./test/render/old/test-rendering.react.js')
+    'test-browser': resolve('./test/render-test.spec.js')
   }
 });
 
@@ -131,9 +123,6 @@ module.exports = env => {
   }
   if (env.render) {
     config = RENDER_BROWSER_CONFIG;
-  }
-  if (env['render-react']) {
-    config = RENDER_REACT_BROWSER_CONFIG;
   }
   if (env.bench) {
     config = BENCH_BROWSER_CONFIG;
