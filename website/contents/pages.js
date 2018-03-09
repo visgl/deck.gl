@@ -351,6 +351,10 @@ export const docPages = generatePath([
             content: getDocUrl('shader-modules/project.md')
           },
           {
+            name: 'project32',
+            content: getDocUrl('shader-modules/project32.md')
+          },
+          {
             name: 'project64',
             content: getDocUrl('shader-modules/project64.md')
           },
