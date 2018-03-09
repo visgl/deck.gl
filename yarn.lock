@@ -1437,25 +1437,6 @@ decamelize@^1.0.0, decamelize@^1.1.1, decamelize@^1.1.2:
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/decamelize/-/decamelize-1.2.0.tgz#f6534d15148269b20352e7bee26f501f9a191290"
 
-deck.gl-test-utils@>=5.2.0-alpha.3:
-  version "5.2.0-alpha.4"
-  resolved "https://registry.yarnpkg.com/deck.gl-test-utils/-/deck.gl-test-utils-5.2.0-alpha.4.tgz#46f789c0238388d2db501d7bc3bf17fbc74afb92"
-
-deck.gl@>=5.2.0-alpha.2:
-  version "5.2.0-alpha.2"
-  resolved "https://registry.yarnpkg.com/deck.gl/-/deck.gl-5.2.0-alpha.2.tgz#ff05754844339e1e8794ef56c9bc664d924d74a4"
-  dependencies:
-    d3-hexbin "^0.2.1"
-    earcut "^2.0.6"
-    lodash.flattendeep "^4.4.0"
-    luma.gl ">=5.2.0-alpha.3"
-    math.gl "^1.0.0"
-    mjolnir.js "^1.0.0"
-    probe.gl ">=1.0.0-alpha.2"
-    prop-types "^15.6.0"
-    seer "^0.2.4"
-    viewport-mercator-project "^5.0.0"
-
 decode-uri-component@^0.2.0:
   version "0.2.0"
   resolved "https://registry.yarnpkg.com/decode-uri-component/-/decode-uri-component-0.2.0.tgz#eb3913333458775cb84cd1a1fae062106bb87545"
@@ -4161,7 +4142,7 @@ private@^0.1.6, private@^0.1.7:
   version "0.1.8"
   resolved "https://registry.yarnpkg.com/private/-/private-0.1.8.tgz#2381edb3689f7a53d653190060fcf822d2f368ff"
 
-probe.gl@>=1.0.0-alpha.2, probe.gl@>=1.0.0-alpha.3:
+probe.gl@>=1.0.0-alpha.3:
   version "1.0.0-alpha.3"
   resolved "https://registry.yarnpkg.com/probe.gl/-/probe.gl-1.0.0-alpha.3.tgz#2338b20a371e76dfd1ab4a7dc0e03ae908566c90"
   dependencies:

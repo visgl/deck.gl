@@ -43,9 +43,22 @@ export default class RenderTestDriver extends BrowserDriver {
       .then(_ => this.startBrowser())
       .then(_ => this.newPage())
       .then(_ => this.waitForBrowserMessage('renderTestComplete'))
-      .then(success => Boolean(success))
-      .then(success => this._done(success))
-      .then(_ => this.exit());
+      .then(resultString => {
+        const result = JSON.parse(resultString);
+        if (result.success !== Boolean(result.success) || typeof result.failedTest !== 'string') {
+          throw new Error(`Illegal response "${resultString}" returned from Chrome test script`);
+        }
+        if (!result.success) {
+          throw new Error(`Rendering test failed on ${result.failedTest}`);
+        }
+        this._done(result.success);
+        this.exit();
+      })
+      .catch(error => {
+        this.console.error(addColor(error, COLOR.BRIGHT_RED));
+        this._done(false);
+        this.exit();
+      });
   }
 
   _done(success) {

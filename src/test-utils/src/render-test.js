@@ -59,6 +59,7 @@ export default class RenderTest {
 
   run() {
     this.passed = true;
+    this.failedTest = null;
     this.sceneRenderer.run();
   }
 
@@ -72,6 +73,7 @@ export default class RenderTest {
 
     const passed = percentage >= this.testPassThreshold;
     this.passed = this.passed && passed;
+    this.failedTest = this.failedTest || (this.passed ? null : name);
 
     return {
       name,
@@ -122,11 +124,14 @@ export default class RenderTest {
 
   // Node test driver (puppeteer) may not have had time to expose the function
   // if the test suite is short. If not available, wait a second and try again
-  _reportToTestDriver(firstTime = false) {
+  _reportToTestDriver() {
     if (window.renderTestComplete) {
-      window.renderTestComplete(JSON.stringify(this.passed));
+      const result = {success: this.passed, failedTest: this.failedTest || ''};
+      const resultString = JSON.stringify(result);
+      window.renderTestComplete(resultString);
     } else {
-      window.setTimeout(this._reportToTestDriver.bind(this, false), 1000);
+      console.warn('renderTestComplete not exposed, waiting 1 second'); // eslint-disable-line
+      window.setTimeout(this._reportToTestDriver.bind(this), 1000);
     }
   }
 }
