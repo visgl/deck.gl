@@ -43,7 +43,7 @@
     "test-node": "node test/start.js test",
     "test-dist": "node test/start.js test-dist",
     "test-render": "node test/start.js render",
-    "test-render-react": "node test/start.js render-react",
+    "test-render-react": "node test/start.js render",
     "test-browser": "webpack-dev-server --env.test --progress --hot --open",
     "test-render-browser": "webpack-dev-server --env.render --progress --hot --open",
     "bench": "node test/start.js bench",

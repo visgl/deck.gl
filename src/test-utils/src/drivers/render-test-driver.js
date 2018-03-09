@@ -57,7 +57,7 @@ export default class RenderTestDriver extends BrowserDriver {
       .catch(error => {
         this._done(false, error);
         // Leave browser running so that user can inspect image
-        return Promise.all([this.stopServer()]).then(_ => this.exitProcess());
+        return Promise.all([this.stopServer()]);
       });
   }
 
