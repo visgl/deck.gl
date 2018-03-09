@@ -25,11 +25,11 @@ import {compareProps} from '../../core/lifecycle/props';
 
 // Polygon geometry generation is managed by the polygon tesselator
 import {PolygonTesselator} from '../solid-polygon-layer/polygon-tesselator';
-import {PolygonTesselatorExtruded} from './polygon-tesselator-extruded';
+import {PolygonTesselatorExtruded} from './floating-polygon-tesselator-extruded';
 
-import vs from './solid-polygon-layer-vertex.glsl';
-import vs64 from './solid-polygon-layer-vertex-64.glsl';
-import fs from './solid-polygon-layer-fragment.glsl';
+import vs from './floating-solid-polygon-layer-vertex.glsl';
+import vs64 from './floating-solid-polygon-layer-vertex-64.glsl';
+import fs from './floating-solid-polygon-layer-fragment.glsl';
 
 const defaultProps = {
   // Whether to draw a GL.LINES wireframe of the polygon
@@ -159,9 +159,7 @@ export default class FloatingSolidPolygonLayer extends Layer {
       const polygons = props.data.map(getPolygon);
 
       this.setState({
-        polygonTesselator: !extruded
-          ? new PolygonTesselator({polygons, fp64: this.props.fp64})
-          : new PolygonTesselatorExtruded({
+        polygonTesselator: new PolygonTesselatorExtruded({
               polygons,
               wireframe,
               getCeiling: polygonIndex => getCeiling(this.props.data[polygonIndex]),
@@ -221,5 +219,5 @@ export default class FloatingSolidPolygonLayer extends Layer {
   }
 }
 
-SolidPolygonLayer.layerName = 'FloatingSolidPolygonLayer';
-SolidPolygonLayer.defaultProps = defaultProps;
+FloatingSolidPolygonLayer.layerName = 'FloatingSolidPolygonLayer';
+FloatingSolidPolygonLayer.defaultProps = defaultProps;
