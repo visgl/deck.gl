@@ -179,6 +179,16 @@ Object.assign(experimental, {
 });
 
 //
+// EFFECTS PACKAGE
+//
+
+import {default as ReflectionEffect} from './core/experimental/reflection-effect/reflection-effect';
+
+Object.assign(experimental, {
+  ReflectionEffect
+});
+
+//
 // CORE LAYERS PACKAGE
 //
 
@@ -197,16 +207,6 @@ export {
   PolygonLayer,
   GeoJsonLayer
 } from './core-layers';
-
-//
-// EFFECTS PACKAGE
-//
-
-import {default as ReflectionEffect} from './effects/experimental/reflection-effect/reflection-effect';
-
-Object.assign(experimental, {
-  ReflectionEffect
-});
 
 //
 // REACT BINDINGS PACKAGE
