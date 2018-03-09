@@ -61,15 +61,18 @@ export class PolygonTesselatorExtruded {
 
     // Expensive operation, convert all polygons to arrays
     const polygonLayers = { ceiling: [], floor: [] };
-
     polygons.forEach((complexPolygon, polygonIndex) => {
-      const ceiling = getCeiling(polygonIndex) || 0;
-      const floor = getFloor(polygonIndex) || 0;
-      const thing = Polygon.normalize(complexPolygon).reduce((polygonArray, polygon) => {
+      const commonFloor = getFloor(polygonIndex) || 0;
+      const commonCeiling = getCeiling(polygonIndex) || 0;
+
+      const complexPolygonArray = Polygon.normalize(complexPolygon, { dimensions: 4 }).reduce((polygonArray, polygon) => {
 
         const polygonLayersArray = polygon.reduce((layersArray, coord) => {
-          layersArray.ceilingPolygonArray.push([coord[0], coord[1], ceiling]);
+          // check for undefined explicitly since 0 is a valid value.
+          const floor = coord[2] !== undefined ? coord[2] : commonFloor;
+          const ceiling = coord[3] !== undefined ? coord[3] : commonCeiling;
           layersArray.floorPolygonArray.push([coord[0], coord[1], floor]);
+          layersArray.ceilingPolygonArray.push([coord[0], coord[1], ceiling]);
           return layersArray
         }, { ceilingPolygonArray: [], floorPolygonArray: [] });
 
@@ -78,8 +81,8 @@ export class PolygonTesselatorExtruded {
         return polygonArray;
       }, { ceilingPolygons: [], floorPolygons: [] });
 
-      polygonLayers.ceiling.push(thing.ceilingPolygons)
-      polygonLayers.floor.push(thing.floorPolygons)
+      polygonLayers.ceiling.push(complexPolygonArray.ceilingPolygons)
+      polygonLayers.floor.push(complexPolygonArray.floorPolygons)
 
     });
 

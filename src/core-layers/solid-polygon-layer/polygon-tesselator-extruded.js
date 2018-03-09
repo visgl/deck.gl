@@ -60,9 +60,13 @@ export class PolygonTesselatorExtruded {
 
     // Expensive operation, convert all polygons to arrays
     polygons = polygons.map((complexPolygon, polygonIndex) => {
-      const height = getHeight(polygonIndex) || 0;
+      const commonHeight = getHeight(polygonIndex) || 0;
       return Polygon.normalize(complexPolygon).map(polygon =>
-        polygon.map(coord => [coord[0], coord[1], height])
+        polygon.map(coord => {
+          // check for undefined explicitly since 0 is a valid value.
+          const height = coord[2] !== undefined ? coord[2] : commonHeight;
+          return [coord[0], coord[1], height]
+        })
       );
     });
 

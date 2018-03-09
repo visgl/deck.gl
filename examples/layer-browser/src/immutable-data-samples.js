@@ -13,7 +13,8 @@ const convertSamples = {
   points: true,
   worldGrid: true,
   zigzag: true,
-  polygons: true
+  polygons: true,
+  floatingPolygons: true
 };
 
 const immutableDataSamples = {};

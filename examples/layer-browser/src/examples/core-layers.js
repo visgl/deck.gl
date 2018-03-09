@@ -137,7 +137,7 @@ const PolygonLayerExample = {
 
 const FloatingPolygonLayerExample = {
   layer: FloatingPolygonLayer,
-  getData: () => dataSamples.polygons,
+  getData: () => dataSamples.floatingPolygons,
   props: {
     getPolygon: f => f,
     getFillColor: f => [200 + Math.random() * 55, 0, 0],
@@ -149,7 +149,7 @@ const FloatingPolygonLayerExample = {
     pickable: true,
     lineDashJustified: true,
     lightSettings: LIGHT_SETTINGS,
-    elevationScale: 0.6
+    elevationScale: 1.0
   }
 };
 
