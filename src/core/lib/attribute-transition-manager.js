@@ -1,7 +1,9 @@
-import {GL, Buffer, TransformFeedback} from 'luma.gl';
-import AttributeTransitionModel from './attribute-transition-model';
+import {GL, Buffer, experimental} from 'luma.gl';
+import {getShaders, getBuffers} from './attribute-transition-utils';
 import log from '../utils/log';
 import assert from 'assert';
+
+const {Transform} = experimental;
 
 const TRANSITION_STATE = {
   NONE: 0,
@@ -17,14 +19,12 @@ export default class AttributeTransitionManager {
     this.id = id;
     this.gl = gl;
 
-    this.isSupported = TransformFeedback.isSupported(gl);
-
     this.attributeTransitions = {};
     this.needsRedraw = false;
-    this.model = null;
+    this.transform = null;
 
-    if (this.isSupported) {
-      this.transformFeedback = new TransformFeedback(gl);
+    if (Transform.isSupported(gl)) {
+      this.isSupported = true;
     } else {
       log.warn('WebGL2 not supported by this browser. Transition animation is disabled.')();
     }
@@ -70,8 +70,13 @@ export default class AttributeTransitionManager {
 
     if (needsNewModel) {
       this._createModel();
-    } else if (this.model) {
-      this.model.setTransitions(changedTransitions);
+    } else if (this.transform) {
+      const {sourceBuffers, destinationBuffers, elementCount} = getBuffers(changedTransitions);
+      this.transform.elementCount = Math.min(this.transform.elementCount, elementCount);
+      this.transform.update({
+        sourceBuffers,
+        destinationBuffers
+      });
     }
   }
 
@@ -99,20 +104,17 @@ export default class AttributeTransitionManager {
   // Called every render cycle, run transform feedback
   // Returns `true` if anything changes
   setCurrentTime(currentTime) {
-    if (!this.model) {
+    if (!this.transform) {
       return false;
     }
 
     const uniforms = {};
-    const buffers = {};
 
     let needsRedraw = this.needsRedraw;
     this.needsRedraw = false;
 
     for (const attributeName in this.attributeTransitions) {
       const transition = this.attributeTransitions[attributeName];
-
-      buffers[transition.bufferIndex] = transition.buffer;
 
       let time = 1;
       if (transition.state === TRANSITION_STATE.PENDING) {
@@ -130,12 +132,11 @@ export default class AttributeTransitionManager {
         }
         needsRedraw = true;
       }
-
       uniforms[`${transition.name}Time`] = transition.easing(time);
     }
 
     if (needsRedraw) {
-      this._runTransformFeedback({uniforms, buffers});
+      this.transform.run({uniforms});
     }
 
     return needsRedraw;
@@ -169,31 +170,19 @@ export default class AttributeTransitionManager {
     return null;
   }
 
-  // Redraw the transform feedback
-  _runTransformFeedback({uniforms, buffers}) {
-    const {model, transformFeedback} = this;
-
-    transformFeedback.bindBuffers(buffers, {});
-
-    model.draw({
-      uniforms,
-      transformFeedback,
-      parameters: {
-        [GL.RASTERIZER_DISCARD]: true
-      }
-    });
-  }
-
   // Create a model for the transform feedback
   _createModel() {
-    if (this.model) {
-      this.model.destroy();
+    if (this.transform) {
+      this.transform.delete();
     }
-
-    this.model = new AttributeTransitionModel(this.gl, {
-      id: this.id,
-      transitions: this.attributeTransitions
-    });
+    this.transform = new Transform(
+      this.gl,
+      Object.assign(
+        {},
+        getBuffers(this.attributeTransitions),
+        getShaders(this.attributeTransitions)
+      )
+    );
   }
 
   // get current values of an attribute, clipped/padded to the size of the new buffer
@@ -284,7 +273,18 @@ export default class AttributeTransitionManager {
     }
 
     Object.assign(transition, transitionSettings);
-    transition.fromState = fromState;
+    if (transition.fromState) {
+      transition.fromState.delete();
+    }
+    transition.fromState = new Buffer(
+      this.gl,
+      Object.assign({}, fromState, {
+        data: fromState.value
+      })
+    );
+    if (transition.toState) {
+      transition.toState.delete();
+    }
     transition.toState = toState;
 
     // Reset transition state
