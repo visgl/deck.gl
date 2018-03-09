@@ -62,7 +62,6 @@
     "eslint-config-uber-jsx": "^3.0.0",
     "eslint-plugin-react": "~6.7.0",
     "file-loader": "^0.10.1",
-    "gl": "^4.0.3",
     "immutable": "^3.8.1",
     "jsdom": "^9.11.0",
     "module-alias": "^2.0.0",

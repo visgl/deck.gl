@@ -43,18 +43,31 @@ export default class RenderTestDriver extends BrowserDriver {
       .then(_ => this.startBrowser())
       .then(_ => this.newPage())
       .then(_ => this.waitForBrowserMessage('renderTestComplete'))
-      .then(success => Boolean(success))
-      .then(success => this._done(success))
-      .then(_ => this.exit());
+      .then(resultString => {
+        const result = JSON.parse(resultString);
+        if (result.success !== Boolean(result.success) || typeof result.failedTest !== 'string') {
+          throw new Error(`Illegal response "${resultString}" returned from Chrome test script`);
+        }
+        if (!result.success) {
+          throw new Error(result.failedTest);
+        }
+        this._done(result.success);
+        this.exit();
+      })
+      .catch(error => {
+        this._done(false, error);
+        // Leave browser running so that user can inspect image
+        return Promise.all([this.stopServer()]);
+      });
   }
 
-  _done(success) {
+  _done(success, error) {
     this.setShellStatus(success);
     const elapsed = ((Date.now() - this.time) / 1000).toFixed(1);
     this.console.log(
       success
         ? addColor(`Rendering test successfully completed in ${elapsed}s!`, COLOR.BRIGHT_GREEN)
-        : addColor('Rendering test failed!', COLOR.BRIGHT_RED)
+        : addColor(`Rendering test failed: ${error.message}`, COLOR.BRIGHT_RED)
     );
   }
 }

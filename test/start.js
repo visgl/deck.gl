@@ -3,6 +3,8 @@
 // Enables ES2015 import/export in Node.js
 require('reify');
 
+require('../aliases');
+
 /* global process */
 const path = require('path');
 const moduleAlias = require('module-alias');
@@ -34,13 +36,11 @@ switch (mode) {
     break;
 
   case 'bench':
-    require('../aliases');
     require('luma.gl/headless');
     require('./bench/index'); // Run the benchmarks
     break;
 
   case 'test-ci':
-    require('../aliases');
     require('luma.gl/headless');
     // Run a smaller selection of the tests (avoid overwhelming Travis CI)
     require('./src/imports-spec');
@@ -57,7 +57,6 @@ switch (mode) {
     break;
 
   case 'test-dist':
-    require('../aliases');
     // Load deck.gl itself from the dist folder
     moduleAlias.addAlias('deck.gl', path.resolve('./dist'));
     require('luma.gl/headless');
@@ -66,7 +65,6 @@ switch (mode) {
 
   case 'test':
   default:
-    require('../aliases');
     require('luma.gl/headless');
     require('./src/index'); // Run the tests
     break;
