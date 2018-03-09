@@ -14,6 +14,13 @@ deck.gl layers can now specify additional type information about properties. Whe
 > For layer writers: use of prop types is optional, and deck.gl layers will automatically deduce partial prop type information for any properties that lack type information, as long as a default value is specified in the `defaultProps` object.
 
 
+### Unified 32-bit and 64-bit projection glsl functions
+
+A new common API for 32 and 64 bit projection. This interface is implemented in both the `project64` shader module and a new `project32` shader module. As a result, the same vertex shader can be used for both 32-bit and 64-bit projection depending on which module it includes as dependency.
+
+For all deck.gl users, this means reduced bundle size. For layer writers, this means greatly simplified fp64 handling and easier-to-maintain shader code. See [docs](docs/shader-modules/project32.md) for more details.
+
+
 # deck.gl v5.1
 
 Release date: Feb 16, 2018

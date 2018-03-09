@@ -20,11 +20,31 @@ Uniform names are not considered part of the official API of shader modules and 
 ## GLSL Functions
 
 
+### project_position_to_clipspace
+
+64 bit implementation of the `project_position_to_clipspace` interface.
+
+`vec4 project_position_to_clipspace(vec3 position, vec2 position64xyLow, vec3 offset)`
+
+`vec4 project_position_to_clipspace(vec3 position, vec2 position64xyLow, vec3 offset, out vec4 worldPosition)`
+
+Parameters:
+- `position` - vertex position in the layer's coordinate system.
+- `position64xyLow` - low part of the vertex position's xy
+- `offset` - meter offset from the coordinate
+- `worldPosition` - projected position in the world space
+
+Returns:
+Projected position in the clipspace.
+
+
 ### project_position_fp64
 
 64 bit counterpart of the `project` modules `project_position`
 
 `void project_position_fp64(vec4 position_fp64, out vec2 out_val[2])`
+
+`void project_position_fp64(vec2 position, vec2 position64xyLow, out vec2 out_val[2])`
 
 
 ### project_to_clipspace_fp64
