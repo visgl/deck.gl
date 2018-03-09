@@ -23,7 +23,7 @@ export default `\
 
 attribute vec3 vertices;
 attribute vec3 instancePositions;
-attribute float instanceCount;
+attribute vec4 instanceColors;
 attribute vec3 instancePickingColors;
 
 uniform float maxCount;
@@ -35,7 +35,7 @@ uniform vec3 cellScale;
 varying vec4 vColor;
 
 void main(void) {
-  vec4 color = mix(minColor, maxColor, instanceCount / maxCount) / 255.;
+  vec4 color = instanceColors / 255.;
 
   vColor = vec4(color.rgb, color.a * opacity);
 
