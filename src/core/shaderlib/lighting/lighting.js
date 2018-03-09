@@ -31,7 +31,7 @@ export default {
   getUniforms,
   deprecations: [
     // Deprecated lighting functions
-    {type: 'function', old: 'getLightWeight', new: 'lighting_getLightWeight', deprecated: 1}
+    {type: 'function', old: 'getLightWeight', new: 'lighting_getLightWeight', deprecated: true}
   ]
 };
 

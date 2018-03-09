@@ -10,6 +10,8 @@ The uniforms needed by `project64` are extracted from the `project` module unifo
 
 ## GLSL Uniforms
 
+Uniform names are not considered part of the official API of shader modules and can potentially change between minor releases, but are documented for applications that need this level of access. Use the module's public GLSL functions instead of directly accessing uniforms when possible.
+
 | Uniform | Type | Description |
 | --- | --- | --- |
 | project_uViewProjectionMatrixFP64 | uniform vec2[16] | 64-bit view projection matrix |

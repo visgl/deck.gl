@@ -39,7 +39,7 @@ Provided by `Layer` props:
 
 ## GLSL Uniforms
 
-The GLSL uniforms of the `project` module are quite central to shader code and are often needed by other shader modules (in particular for lighting calculations, or screen space type calculations), so to avoid having duplicate uniforms, some `project` uniforms are considered documented and stable and can be used directly in other modules.
+Uniform names are not considered part of the official API of shader modules and can potentially change between minor releases, but are documented for applications that need this level of access. Use the module's public GLSL functions instead of directly accessing uniforms when possible.
 
 | Uniform | Type | Description |
 | --- | --- | --- |
