@@ -37,8 +37,7 @@ function printResult(diffRatio, threshold) {
 
 async function validateWithWaitingTime(child, folder, waitingTime, threshold) {
   const browser = await puppeteer.launch({
-    headless: false,
-    executablePath: '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
+    headless: false
   });
   const page = await browser.newPage();
   await page.waitFor(2000);
@@ -97,6 +96,14 @@ async function yarnAndLaunchWebpack() {
   return child;
 }
 
+function checkMapboxToken() {
+  // eslint-disable-next-line
+  if (process.env.MapboxAccessToken === undefined) {
+    console.log('\x1b[31m%s\x1b[0m', 'Need set MapboxAccessToken!');
+    process.exit(1); //eslint-disable-line
+  }
+}
+
 function changeFolder(folder) {
   console.log('--------------------------');
   console.log(`Begin to test ${folder}`);
@@ -114,6 +121,7 @@ async function TestExample(folder) {
 }
 
 (async () => {
+  checkMapboxToken();
   process.chdir('./examples');
 
   await TestExample('3d-heatmap');
