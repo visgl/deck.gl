@@ -110,7 +110,7 @@ function changeFolder(folder) {
   process.chdir(`./${folder}`);
 }
 
-async function TestExample(folder) {
+async function runTestExample(folder) {
   changeFolder(folder);
   const child = await yarnAndLaunchWebpack();
   const valid = await validateWithWaitingTime(child, folder, 5000, 0.01);
@@ -124,17 +124,17 @@ async function TestExample(folder) {
   checkMapboxToken();
   process.chdir('./examples');
 
-  await TestExample('3d-heatmap');
-  await TestExample('arc');
-  await TestExample('bezier');
-  await TestExample('brushing');
-  await TestExample('geojson');
-  await TestExample('graph');
-  await TestExample('icon');
-  await TestExample('line');
-  await TestExample('plot');
-  await TestExample('scatterplot');
-  await TestExample('screen-grid');
-  await TestExample('tagmap');
-  await TestExample('without-map');
+  await runTestExample('3d-heatmap');
+  await runTestExample('arc');
+  await runTestExample('bezier');
+  await runTestExample('brushing');
+  await runTestExample('geojson');
+  await runTestExample('graph');
+  await runTestExample('icon');
+  await runTestExample('line');
+  await runTestExample('plot');
+  await runTestExample('scatterplot');
+  await runTestExample('screen-grid');
+  await runTestExample('tagmap');
+  await runTestExample('without-map');
 })();
