@@ -21,8 +21,8 @@
 import React, {createElement, cloneElement} from 'react';
 import PropTypes from 'prop-types';
 import autobind from './utils/autobind';
-import {inheritsFrom} from '../core/utils/inherits-from';
-import {Layer, experimental} from '../core';
+import {inheritsFrom} from './utils/inherits-from';
+import {Layer, experimental} from '../../core';
 const {Deck, log} = experimental;
 
 const propTypes = Object.assign({}, Deck.propTypes, {

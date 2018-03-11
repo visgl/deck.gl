@@ -18,16 +18,43 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-// Enables ES2015 import/export in Node.js
-require('reify');
+import {LayerManager} from 'deck.gl';
+import gl from '../utils/setup-gl';
 
-// Registers an alias for this module
-const path = require('path');
-const moduleAlias = require('module-alias');
-moduleAlias.addAlias('deck.gl-layers/test', path.resolve('./test'));
-moduleAlias.addAlias('deck.gl-layers', path.resolve('./dist'));
+export function testInitializeLayer({layer, viewport}) {
+  const layerManager = new LayerManager(gl);
 
-require('babel-polyfill');
+  try {
+    layerManager.setLayers([layer]);
+  } catch (error) {
+    return error;
+  }
 
-// Run the tests
-require('../../../test/src/experimental-layers');
+  return null;
+}
+
+export function testUpdateLayer({layer, viewport, newProps}) {
+  const layerManager = new LayerManager(gl);
+
+  try {
+    layerManager.setLayers([layer]);
+    layerManager.setLayers([layer.clone(newProps)]);
+  } catch (error) {
+    return error;
+  }
+
+  return null;
+}
+
+export function testDrawLayer({layer, uniforms = {}}) {
+  const layerManager = new LayerManager(gl);
+
+  try {
+    layerManager.setLayers([layer]);
+    layerManager.drawLayers();
+  } catch (error) {
+    return error;
+  }
+
+  return null;
+}

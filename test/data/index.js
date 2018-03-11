@@ -23,6 +23,3 @@ export * from './viewport';
 
 import * as data from '../../examples/layer-browser/src/data-samples';
 export const lines = data.choropleths.features.map(f => ({path: f.geometry.coordinates[0]}));
-
-import Immutable from 'immutable';
-export const immutableChoropleths = Immutable.fromJS(data.choropleths);

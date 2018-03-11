@@ -18,16 +18,12 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-// Enables ES2015 import/export in Node.js
-require('reify');
+export {default as DeckGL} from './deckgl';
+export {default} from './deckgl';
 
-// Registers an alias for this module
-const path = require('path');
-const moduleAlias = require('module-alias');
-moduleAlias.addAlias('deck.gl-layers/test', path.resolve('./test'));
-moduleAlias.addAlias('deck.gl-layers', path.resolve('./dist'));
+// TODO - should react controllers be exported or just integrated into deck.gl API?
+export {default as ViewportController} from './viewport-controller';
+export {default as MapController} from './map-controller';
+export {default as OrbitController} from './experimental/orbit-controller';
 
-require('babel-polyfill');
-
-// Run the tests
-require('../../../test/src/experimental-layers');
+export {default as autobind} from './utils/autobind';

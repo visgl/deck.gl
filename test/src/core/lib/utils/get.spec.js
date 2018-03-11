@@ -20,7 +20,6 @@
 
 import test from 'tape-catch';
 import {get} from 'deck.gl/core/utils/get';
-import Immutable from 'immutable';
 
 const GET_TEST_CASES = [
   {
@@ -82,12 +81,6 @@ const GET_TEST_CASES = [
     container: new Map([['a', {b: new Map([['c', 3]])}]]),
     key: 'a.b.c',
     result: 3
-  },
-  {
-    title: 'Immutable.Map',
-    container: new Immutable.Map([['a', 1]]),
-    key: 'a',
-    result: 1
   }
 ];
 

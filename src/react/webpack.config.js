@@ -1,7 +1,7 @@
 const {resolve} = require('path');
 const webpack = require('webpack');
 
-const ALISES = require('./aliases');
+const ALIASES = require('../../aliases');
 
 const LIBRARY_BUNDLE_CONFIG = {
   // Bundle the source code
@@ -23,9 +23,11 @@ const LIBRARY_BUNDLE_CONFIG = {
   },
 
   // Exclude any non-relative imports from resulting bundle
-  externals: [
-    /^[a-z\.\-0-9]+$/
-  ],
+  externals: [/^[a-z\.\-0-9]+$/],
+
+  resolve: {
+    alias: ALIASES
+  },
 
   module: {
     rules: [
@@ -36,7 +38,7 @@ const LIBRARY_BUNDLE_CONFIG = {
         loader(content) {
           this.cacheable && this.cacheable(); // eslint-disable-line
           this.value = content;
-          return "module.exports = " + JSON.stringify(content); // eslint-disable-line
+          return 'module.exports = ' + JSON.stringify(content); // eslint-disable-line
         }
       }
     ]
@@ -70,12 +72,7 @@ const BROWSER_CONFIG = {
   },
 
   resolve: {
-    alias: Object.assign({}, ALISES, {
-      // Aliases needed to defeat root scripts from getting duplicate dependencies
-      // from sub module node_modules
-      'luma.gl': resolve('./node_modules/luma.gl'),
-      'probe.gl': resolve('./node_modules/probe.gl')
-    })
+    alias: ALIASES
   },
 
   devtool: '#inline-source-maps',
@@ -101,22 +98,14 @@ const BROWSER_CONFIG = {
 const TEST_BROWSER_CONFIG = Object.assign({}, BROWSER_CONFIG, {
   // Bundle the tests for running in the browser
   entry: {
-    'test-browser': resolve('./test/test-browser.js')
+    'test-browser': resolve('./test/browser.js')
   }
 });
 
 const RENDER_BROWSER_CONFIG = Object.assign({}, BROWSER_CONFIG, {
   // Bundle the tests for running in the browser
   entry: {
-    'test-browser': resolve('./test/render/test-rendering.js')
-  }
-});
-
-// TODO - remove this target once above target is solid
-const RENDER_REACT_BROWSER_CONFIG = Object.assign({}, BROWSER_CONFIG, {
-  // Bundle the tests for running in the browser
-  entry: {
-    'test-browser': resolve('./test/render/old/test-rendering.react.js')
+    'test-browser': resolve('./test/render-test.spec.js')
   }
 });
 
@@ -128,17 +117,15 @@ const BENCH_BROWSER_CONFIG = Object.assign({}, BROWSER_CONFIG, {
 
 module.exports = env => {
   env = env || {};
-  if (env.test || env['test-browser']) {
-    return TEST_BROWSER_CONFIG;
+  let config = LIBRARY_BUNDLE_CONFIG;
+  if (env.test) {
+    config = TEST_BROWSER_CONFIG;
   }
   if (env.render) {
-    return RENDER_BROWSER_CONFIG;
-  }
-  if (env['render-react']) {
-    return RENDER_REACT_BROWSER_CONFIG;
+    config = RENDER_BROWSER_CONFIG;
   }
   if (env.bench) {
-    return BENCH_BROWSER_CONFIG;
+    config = BENCH_BROWSER_CONFIG;
   }
-  return LIBRARY_BUNDLE_CONFIG;
+  return config;
 };

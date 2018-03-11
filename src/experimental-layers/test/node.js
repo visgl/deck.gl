@@ -29,8 +29,5 @@ moduleAlias.addAlias('deck.gl-layers', path.resolve('./src'));
 
 require('babel-polyfill');
 
-// Import headless luma support
-require('luma.gl/headless');
-
 // Run the tests
 require('../../../test/src/experimental-layers');
