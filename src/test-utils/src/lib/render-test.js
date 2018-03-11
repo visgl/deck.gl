@@ -18,13 +18,14 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {window, document} from 'global';
+import {document} from 'global';
 import assert from 'assert';
 
 import SceneRenderer from './scene-renderer';
+import {callExposedFunction} from 'probe.gl/test-utils';
 
-import {diffImagePixels} from './luma.gl/gpgpu';
-import {createImage, getImagePixelData} from './luma.gl/io-basic/browser-image-utils';
+import {diffImagePixels} from '../luma.gl/gpgpu';
+import {createImage, getImagePixelData} from '../luma.gl/io-basic/browser-image-utils';
 
 export default class RenderTest {
   constructor({
@@ -119,20 +120,7 @@ export default class RenderTest {
 
   _onComplete() {
     this.reportFinalResult({passed: this.passed, renderTest: this});
-    this._reportToTestDriver();
-  }
-
-  // Node test driver (puppeteer) may not have had time to expose the function
-  // if the test suite is short. If not available, wait a second and try again
-  _reportToTestDriver() {
-    if (window.testDone) {
-      const result = {success: this.passed, failedTest: this.failedTest || ''};
-      const resultString = JSON.stringify(result);
-      window.testDone(resultString);
-    } else {
-      console.warn('testDone not exposed, waiting 1 second'); // eslint-disable-line
-      window.setTimeout(this._reportToTestDriver.bind(this), 1000);
-    }
+    callExposedFunction('testDone', {success: this.passed, failedTest: this.failedTest || ''});
   }
 }
 

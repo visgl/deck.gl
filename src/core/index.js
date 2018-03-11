@@ -139,6 +139,11 @@ export const experimental = {
   TransitionManager,
   extractViewState,
 
+  // };
+
+  // TODO make this an internal export to set it apart from experimental
+  // export const internal = {
+
   // For layers
   BinSorter,
   linearScale,

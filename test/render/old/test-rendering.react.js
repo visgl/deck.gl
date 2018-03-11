@@ -120,8 +120,12 @@ class RenderingTest extends Component {
 
     if (!testCases[currentTestIndex]) {
       reportFinalResult(this.state.allPassed);
+      // TODO backwards compat
       if (window.renderTestComplete) {
         window.renderTestComplete(JSON.stringify(this.state.allPassed));
+      }
+      if (window.testDone) {
+        window.testDone(JSON.stringify(this.state.allPassed));
       }
       return null;
     }

@@ -21,5 +21,11 @@
 require('tap-browser-color')();
 require('babel-polyfill');
 
+const {callExposedFunction} = require('probe.gl/test-utils');
+
+const test = require('tape');
+test.onFinish(() => callExposedFunction('testDone', {success: true}));
+test.onFailure(() => callExposedFunction('testDone', {success: false}));
+
 require('./src/index');
 require('./src/react');

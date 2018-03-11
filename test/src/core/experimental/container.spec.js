@@ -27,7 +27,6 @@ import {
   keys,
   entries
 } from 'deck.gl/core/experimental/utils/container';
-// import Immutable from 'immutable';
 
 const ITERATOR_TEST_CASES = [
   {
