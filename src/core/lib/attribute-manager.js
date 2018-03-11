@@ -19,15 +19,14 @@
 // THE SOFTWARE.
 
 /* eslint-disable guard-for-in */
-import Stats from './stats';
 import log from '../utils/log';
 import {GL} from 'luma.gl';
 import assert from 'assert';
 
 import AttributeTransitionManager from './attribute-transition-manager';
 
-const LOG_START_END_PRIORITY = 1;
-const LOG_DETAIL_PRIORITY = 2;
+const LOG_START_END_PRIORITY = 2;
+const LOG_DETAIL_PRIORITY = 3;
 
 function noop() {}
 
@@ -156,7 +155,7 @@ export default class AttributeManager {
    * @param {Object} [props]
    * @param {String} [props.id] - identifier (for debugging)
    */
-  constructor(gl, {id = 'attribute-manager'} = {}) {
+  constructor(gl, {id = 'attribute-manager', stats} = {}) {
     this.id = id;
     this.gl = gl;
 
@@ -167,7 +166,7 @@ export default class AttributeManager {
     this.needsRedraw = true;
 
     this.userData = {};
-    this.stats = new Stats({id: 'attr'});
+    this.stats = stats;
 
     this.attributeTransitionManger = new AttributeTransitionManager(gl, {
       id: `${id}-transitions`
@@ -296,9 +295,13 @@ export default class AttributeManager {
     // Only initiate alloc/update (and logging) if actually needed
     if (this._analyzeBuffers({numInstances})) {
       logFunctions.onUpdateStart({level: LOG_START_END_PRIORITY, id: this.id, numInstances});
-      this.stats.timeStart();
+      if (this.stats) {
+        this.stats.timeStart('attribute updates', this.id);
+      }
       this._updateBuffers({numInstances, data, props, context});
-      this.stats.timeEnd();
+      if (this.stats) {
+        this.stats.timeEnd('attribute updates', this.id);
+      }
       logFunctions.onUpdateEnd({level: LOG_START_END_PRIORITY, id: this.id, numInstances});
     }
 

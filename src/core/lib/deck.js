@@ -21,9 +21,11 @@
 import LayerManager from '../lib/layer-manager';
 import EffectManager from '../experimental/lib/effect-manager';
 import Effect from '../experimental/lib/effect';
+import log from '../utils/log';
 
 import {EventManager} from 'mjolnir.js';
 import {GL, AnimationLoop, createGLContext, setParameters} from 'luma.gl';
+import {Stats} from 'probe.gl';
 
 import PropTypes from 'prop-types';
 import assert from 'assert';
@@ -83,6 +85,7 @@ export default class Deck {
     this.needsRedraw = true;
     this.layerManager = null;
     this.effectManager = null;
+    this.stats = new Stats({id: 'deck.gl'});
 
     // Bind methods
     this._onRendererInitialized = this._onRendererInitialized.bind(this);
@@ -97,6 +100,7 @@ export default class Deck {
   }
 
   setProps(props) {
+    this.stats.timeStart('deck.setProps');
     props = Object.assign({}, this.props, props);
     this.props = props;
 
@@ -105,6 +109,7 @@ export default class Deck {
     // TODO - unify setParameters/setOptions/setProps etc naming.
     const {useDevicePixels, autoResizeDrawingBuffer} = props;
     this.animationLoop.setViewParameters({useDevicePixels, autoResizeDrawingBuffer});
+    this.stats.timeEnd('deck.setProps');
   }
 
   finalize() {
@@ -120,12 +125,17 @@ export default class Deck {
   // Public API
 
   pickObject({x, y, radius = 0, layerIds = null}) {
+    this.stats.timeStart('deck.pickObject');
     const selectedInfos = this.layerManager.pickObject({x, y, radius, layerIds, mode: 'query'});
+    this.stats.timeEnd('deck.pickObject');
     return selectedInfos.length ? selectedInfos[0] : null;
   }
 
   pickObjects({x, y, width = 1, height = 1, layerIds = null}) {
-    return this.layerManager.pickObjects({x, y, width, height, layerIds});
+    this.stats.timeStart('deck.pickObjects');
+    const infos = this.layerManager.pickObjects({x, y, width, height, layerIds});
+    this.stats.timeEnd('deck.pickObjects');
+    return infos;
   }
 
   getViewports() {
@@ -227,7 +237,8 @@ export default class Deck {
 
     // Note: avoid React setState due GL animation loop / setState timing issue
     this.layerManager = new LayerManager(gl, {
-      eventManager: new EventManager(canvas)
+      eventManager: new EventManager(canvas),
+      stats: this.stats
     });
 
     this.effectManager = new EffectManager({gl, layerManager: this.layerManager});
@@ -240,13 +251,23 @@ export default class Deck {
   }
 
   _onRenderFrame({gl}) {
+    if (this.stats.oneSecondPassed()) {
+      const table = this.stats.getStatsTable();
+      this.stats.reset();
+      log.table(1, table)();
+    }
+
     // Update layers if needed (e.g. some async prop has loaded)
     this.layerManager.updateLayers();
+
+    this.stats.bump('fps');
 
     const redrawReason = this.layerManager.needsRedraw({clearRedrawFlags: true});
     if (!redrawReason) {
       return;
     }
+
+    this.stats.bump('render-fps');
 
     if (this.props.onBeforeRender) {
       this.props.onBeforeRender({gl}); // TODO - should be called by AnimationLoop

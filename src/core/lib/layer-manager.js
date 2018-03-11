@@ -63,7 +63,7 @@ const layerName = layer => (layer instanceof Layer ? `${layer}` : !layer ? 'null
 
 export default class LayerManager {
   // eslint-disable-next-line
-  constructor(gl, {eventManager} = {}) {
+  constructor(gl, {eventManager, stats} = {}) {
     // Currently deck.gl expects the DeckGL.layers array to be different
     // whenever React rerenders. If the same layers array is used, the
     // LayerManager's diffing algorithm will generate a fatal error and
@@ -82,7 +82,8 @@ export default class LayerManager {
       gl,
       // Enabling luma.gl Program caching using private API (_cachePrograms)
       shaderCache: new ShaderCache({gl, _cachePrograms: true}),
-      layerManager: this
+      layerManager: this,
+      stats
     });
 
     // List of view descriptors, gets re-evaluated when width/height changes
