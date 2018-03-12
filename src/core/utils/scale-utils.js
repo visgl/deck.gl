@@ -26,7 +26,11 @@ export function linearScale(domain, range, value) {
 // Quantize scale is similar to linear scales,
 // except it uses a discrete rather than continuous range
 export function quantizeScale(domain, range, value) {
-  const step = (domain[1] - domain[0]) / range.length;
+  const domainRange = domain[1] - domain[0];
+  if (domainRange <= 0) {
+    return range[0];
+  }
+  const step = domainRange / range.length;
   const idx = Math.floor((value - domain[0]) / step);
   const clampIdx = Math.max(Math.min(idx, range.length - 1), 0);
 
@@ -35,13 +39,7 @@ export function quantizeScale(domain, range, value) {
 
 // return a quantize scale function
 export function getQuantizeScale(domain, range) {
-  return value => {
-    const step = (domain[1] - domain[0]) / range.length;
-    const idx = Math.floor((value - domain[0]) / step);
-    const clampIdx = Math.max(Math.min(idx, range.length - 1), 0);
-
-    return range[clampIdx];
-  };
+  return value => quantizeScale(domain, range, value);
 }
 
 // return a linear scale funciton
