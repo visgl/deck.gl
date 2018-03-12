@@ -10,7 +10,7 @@ const GEOJSON =
 class App {
   constructor(props) {
     this.state = {
-      viewport: {
+      viewState: {
         latitude: 40,
         longitude: -100,
         zoom: 3,
@@ -67,15 +67,16 @@ class App {
   }
 
   onViewportChange(viewport) {
+    Object.assign(viewport, {viewState: viewport});
     this.setProps(viewport);
   }
 
   onLoad() {
-    const {viewport, width, height} = this.state;
+    const {viewState, width, height} = this.state;
 
     this.map = new MapBox({
       container: 'map',
-      ...viewport,
+      ...viewState,
       width,
       height,
       debug: true
@@ -85,7 +86,7 @@ class App {
       // TODO EventManager should accept element id
       /* global document */
       canvas: document.getElementById('deck'),
-      ...viewport,
+      viewState,
       width,
       height,
       debug: true
@@ -93,7 +94,7 @@ class App {
 
     this.controller = new MapControllerJS({
       canvas: this.deckgl.canvas,
-      ...viewport,
+      ...viewState,
       width,
       height,
       onViewportChange: this.onViewportChange.bind(this)
