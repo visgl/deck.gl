@@ -25,35 +25,36 @@ import Effect from '../experimental/lib/effect';
 import {EventManager} from 'mjolnir.js';
 import {GL, AnimationLoop, createGLContext, setParameters} from 'luma.gl';
 
-import PropTypes from 'prop-types';
 import assert from 'assert';
 /* global document */
 
 function noop() {}
 
-const propTypes = {
-  id: PropTypes.string,
-  width: PropTypes.number.isRequired,
-  height: PropTypes.number.isRequired,
-  layers: PropTypes.array, // Array can contain falsy values
-  views: PropTypes.array, // Array can contain falsy values
-  viewState: PropTypes.object,
-  effects: PropTypes.arrayOf(PropTypes.instanceOf(Effect)),
-  layerFilter: PropTypes.func,
-  glOptions: PropTypes.object,
-  gl: PropTypes.object,
-  pickingRadius: PropTypes.number,
-  onWebGLInitialized: PropTypes.func,
-  onBeforeRender: PropTypes.func,
-  onAfterRender: PropTypes.func,
-  onLayerClick: PropTypes.func,
-  onLayerHover: PropTypes.func,
-  useDevicePixels: PropTypes.bool,
+function getPropTypes(PropTypes) {
+  return {
+    id: PropTypes.string,
+    width: PropTypes.number.isRequired,
+    height: PropTypes.number.isRequired,
+    layers: PropTypes.array, // Array can contain falsy values
+    views: PropTypes.array, // Array can contain falsy values
+    viewState: PropTypes.object,
+    effects: PropTypes.arrayOf(PropTypes.instanceOf(Effect)),
+    layerFilter: PropTypes.func,
+    glOptions: PropTypes.object,
+    gl: PropTypes.object,
+    pickingRadius: PropTypes.number,
+    onWebGLInitialized: PropTypes.func,
+    onBeforeRender: PropTypes.func,
+    onAfterRender: PropTypes.func,
+    onLayerClick: PropTypes.func,
+    onLayerHover: PropTypes.func,
+    useDevicePixels: PropTypes.bool,
 
-  // Debug settings
-  debug: PropTypes.bool,
-  drawPickingColors: PropTypes.bool
-};
+    // Debug settings
+    debug: PropTypes.bool,
+    drawPickingColors: PropTypes.bool
+  };
+}
 
 const defaultProps = {
   id: 'deckgl-overlay',
@@ -63,6 +64,8 @@ const defaultProps = {
   gl: null,
   layers: [],
   effects: [],
+  views: null,
+
   onWebGLInitialized: noop,
   onBeforeRender: noop,
   onAfterRender: noop,
@@ -74,7 +77,6 @@ const defaultProps = {
   drawPickingColors: false
 };
 
-// TODO - should this class be joined with `LayerManager`?
 export default class Deck {
   constructor(props) {
     props = Object.assign({}, defaultProps, props);
@@ -263,5 +265,6 @@ export default class Deck {
   }
 }
 
-Deck.propTypes = propTypes;
+Deck.displayName = 'Deck';
+Deck.getPropTypes = getPropTypes;
 Deck.defaultProps = defaultProps;

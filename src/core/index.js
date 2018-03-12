@@ -165,5 +165,8 @@ export const experimental = {
 
   enable64bitSupport,
   fp64ify,
-  fp64LowPart
+  fp64LowPart,
+
+  // DEPRECATED experimantal exports
+  DeckGLJS: Deck
 };

@@ -1,5 +1,6 @@
 import {PureComponent, createElement} from 'react';
 import MapControllerJS from '../../core/pure-js/map-controller-js';
+import PropTypes from 'prop-types';
 
 export default class MapController extends PureComponent {
   constructor(props) {
@@ -43,5 +44,5 @@ export default class MapController extends PureComponent {
 }
 
 MapController.displayName = 'MapController';
-MapController.propTypes = MapControllerJS.propTypes;
+MapController.propTypes = MapControllerJS.getPropTypes(PropTypes);
 MapController.defaultProps = MapControllerJS.defaultProps;
