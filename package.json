@@ -2,7 +2,7 @@
   "name": "deck.gl",
   "description": "A suite of 3D-enabled data visualization overlays, suitable for react-map-gl",
   "license": "MIT",
-  "version": "5.1.1",
+  "version": "5.1.2",
   "keywords": [
     "webgl",
     "visualization",
@@ -47,7 +47,7 @@
     "d3-hexbin": "^0.2.1",
     "earcut": "^2.0.6",
     "lodash.flattendeep": "^4.4.0",
-    "luma.gl": "^5.1.2",
+    "luma.gl": "^5.1.3",
     "math.gl": "^1.0.0",
     "mjolnir.js": "^1.0.0",
     "prop-types": "^15.6.0",

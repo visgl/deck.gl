@@ -17,6 +17,12 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## Official Releases
 
+### deck.gl v5.1.2 March 13, 2018
+- Add alpha for minColor to fix test (#1494)
+- Fix bug in getMaxCount (#1539)
+- Fix max count issue in bin sorter (#1535)
+- Add validation to geojson layer (#1442)
+
 ### deck.gl v5.1.1 March 01, 2018
 - do not pick when dragging (#1475)
 - [website] redirect to new blog (#1480)
