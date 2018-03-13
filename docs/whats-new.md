@@ -2,6 +2,11 @@
 
 Release date: TBD, target Q1-Q2, 2018
 
+### ScreenGridLayer
+
+ScreenGridLayer is enhanced by adding `colorRange` and `colorDomain` props. These props provide more fine tune control over how grid cells are colored. At the same time `minColor` and `maxColor` props are deprecated and will be removed in 6.0 version. These changes align ScreenGridLayer  with other aggregation layers (Hexagon and Grid).
+
+
 ### Test Utilities
 
 deck.gl now provides a suite of test utilities that make it easy to unit test layers and to automate browser runs of "differential" render tests. The test utilities are of course perfect for creating unit tests for new layers but can also be used by applications. Note that the test utilities are published as a separate npm module [deck.gl-test-utils](https://www.npmjs.com/package/deck.gl-test-utils).

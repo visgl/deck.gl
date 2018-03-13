@@ -18,8 +18,12 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {Layer} from '../../core';
+import {Layer, experimental} from '../../core';
+const {defaultColorRange, quantizeScale} = experimental;
+
 import {GL, Model, Geometry} from 'luma.gl';
+import {lerp} from './../../core/utils/math-utils';
+import log from './../../core/utils/log';
 
 import vs from './screen-grid-layer-vertex.glsl';
 import fs from './screen-grid-layer-fragment.glsl';
@@ -27,12 +31,15 @@ import fs from './screen-grid-layer-fragment.glsl';
 const defaultProps = {
   cellSizePixels: 100,
 
-  // Color range?
-  minColor: [0, 0, 0, 255],
-  maxColor: [0, 255, 0, 255],
+  colorDomain: null,
+  colorRange: defaultColorRange,
 
   getPosition: d => d.position,
-  getWeight: d => 1
+  getWeight: d => 1,
+
+  // deprecated
+  minColor: null,
+  maxColor: null
 };
 
 export default class ScreenGridLayer extends Layer {
@@ -44,13 +51,18 @@ export default class ScreenGridLayer extends Layer {
     const attributeManager = this.getAttributeManager();
     const {gl} = this.context;
 
+    if (this.props.minColor || this.props.maxColor) {
+      log.deprecated('minColor and maxColor', 'colorRange, colorDomain')();
+    }
     /* eslint-disable max-len */
     attributeManager.addInstanced({
       instancePositions: {size: 3, update: this.calculateInstancePositions},
-      instanceCount: {
-        size: 1,
+      instanceColors: {
+        size: 4,
+        type: GL.UNSIGNED_BYTE,
+        transition: true,
         accessor: ['getPosition', 'getWeight'],
-        update: this.calculateInstanceCount
+        update: this.calculateInstanceColors
       }
     });
     /* eslint-disable max-len */
@@ -143,28 +155,60 @@ export default class ScreenGridLayer extends Layer {
     }
   }
 
-  calculateInstanceCount(attribute) {
+  calculateInstanceColors(attribute) {
     const {data, cellSizePixels, getPosition, getWeight} = this.props;
-    const {numCol, numRow} = this.state;
-    const {value} = attribute;
+    const {numCol, numRow, numInstances} = this.state;
+    const {value, size} = attribute;
+    const weights = new Array(numInstances);
     let maxCount = 0;
 
-    value.fill(0.0);
+    weights.fill(0.0);
 
+    // aggregate weights
     for (const point of data) {
       const pixel = this.project(getPosition(point));
       const colId = Math.floor(pixel[0] / cellSizePixels);
       const rowId = Math.floor(pixel[1] / cellSizePixels);
       if (colId >= 0 && colId < numCol && rowId >= 0 && rowId < numRow) {
         const i = colId + rowId * numCol;
-        value[i] += getWeight(point);
-        if (value[i] > maxCount) {
-          maxCount = value[i];
+        weights[i] += getWeight(point);
+        if (weights[i] > maxCount) {
+          maxCount = weights[i];
         }
       }
     }
-
     this.setState({maxCount});
+
+    // Convert weights to colors.
+    for (let i = 0; i < numInstances; i++) {
+      const color = this._getColor(weights[i], maxCount);
+      const index = i * size;
+      value[index + 0] = color[0];
+      value[index + 1] = color[1];
+      value[index + 2] = color[2];
+      value[index + 3] = color[3];
+    }
+  }
+
+  _getColor(weight, maxCount) {
+    let color;
+    const {minColor, maxColor, colorRange} = this.props;
+    if (minColor || maxColor) {
+      const step = weight / maxCount;
+      // We are supporting optional props as deprecated, set default value if not provided
+      color = lerp(minColor || [0, 0, 0, 255], maxColor || [0, 255, 0, 255], step);
+      return color;
+    }
+    // if colorDomain not set , use default domain [1, maxCount]
+    const colorDomain = this.props.colorDomain || [1, maxCount];
+    if (weight < colorDomain[0] || weight > colorDomain[1]) {
+      // wight outside the domain, set color alpha to 0.
+      return [0, 0, 0, 0];
+    }
+    color = quantizeScale(colorDomain, colorRange, weight);
+    // add alpha to color if not defined in colorRange
+    color[3] = Number.isFinite(color[3]) ? color[3] : 255;
+    return color;
   }
 }
 

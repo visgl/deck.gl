@@ -35,3 +35,12 @@ export function mod(value, divisor) {
   const modulus = value % divisor;
   return modulus < 0 ? divisor + modulus : modulus;
 }
+
+export function lerp(start, end, step) {
+  if (Array.isArray(start)) {
+    return start.map((element, index) => {
+      return lerp(element, end[index], step);
+    });
+  }
+  return step * end + (1 - step) * start;
+}
