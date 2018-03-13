@@ -650,7 +650,8 @@ ${flags.viewportChanged ? 'viewport' : ''}\
     assert(!this.internalState && !this.state);
 
     const attributeManager = new AttributeManager(this.context.gl, {
-      id: this.props.id
+      id: this.props.id,
+      stats: this.context.stats
     });
 
     // All instanced layers get instancePickingColors attribute by default

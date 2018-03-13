@@ -20,6 +20,7 @@ addons:
     - libxi-dev
 node_js:
   - 6.9.1
+  - 8
 before_script:
   - export DISPLAY=:99.0; sh -e /etc/init.d/xvfb start
   - ulimit -c unlimited -S       # enable core dumps

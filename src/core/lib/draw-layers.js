@@ -72,7 +72,8 @@ export function drawLayers(
     parameters = {},
     layerFilter = null,
     pass = 'draw',
-    redrawReason = ''
+    redrawReason = '',
+    stats
   }
 ) {
   clearCanvas(gl, {useDevicePixels});
@@ -95,7 +96,8 @@ export function drawLayers(
       parameters,
       layerFilter,
       pass,
-      redrawReason
+      redrawReason,
+      stats
     });
   });
 
@@ -165,7 +167,8 @@ function drawLayersInViewport(
     parameters = {},
     layerFilter,
     pass = 'draw',
-    redrawReason = ''
+    redrawReason = '',
+    stats
   }
 ) {
   const pixelRatio = getPixelRatio({useDevicePixels});
@@ -222,7 +225,7 @@ function drawLayersInViewport(
 
   renderCount++;
 
-  logRenderStats({renderStats, pass, redrawReason});
+  logRenderStats({renderStats, pass, redrawReason, stats});
 }
 
 function drawLayerInViewport({
@@ -265,7 +268,7 @@ function drawLayerInViewport({
   });
 }
 
-function logRenderStats({renderStats, pass, redrawReason}) {
+function logRenderStats({renderStats, pass, redrawReason, stats}) {
   if (log.priority >= LOG_PRIORITY_DRAW) {
     const {totalCount, visibleCount, compositeCount, pickableCount} = renderStats;
     const primitiveCount = totalCount - compositeCount;
@@ -280,6 +283,8 @@ ${visibleCount} (of ${totalCount} layers) to ${pass} because ${redrawReason} `;
     }
 
     log.log(LOG_PRIORITY_DRAW, message)();
+
+    stats.increment('redraw layers', visibleCount);
   }
 }
 
