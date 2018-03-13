@@ -79,7 +79,9 @@ export default class BinSorter {
    * @return {Number | Boolean} max count
    */
   getMaxCount() {
-    return Math.max(...this.sortedBins.map(b => b.counts));
+    let maxCount = 0;
+    this.sortedBins.forEach(x => (maxCount = maxCount > x ? maxCount : x));
+    return maxCount;
   }
 
   /**
