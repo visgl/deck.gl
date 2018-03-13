@@ -20,3 +20,4 @@
 
 import './positions.spec';
 import './memoize.spec';
+import './scale-utils.spec';
