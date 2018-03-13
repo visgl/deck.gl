@@ -260,9 +260,13 @@ export default class LayerManager {
   }
 
   setViewState(viewState) {
-    const viewStateChanged = deepEqual(viewState, this.viewState);
-    this.viewState = viewState;
-    this.viewsChanged = true || viewStateChanged;
+    if (viewState) {
+      const viewStateChanged = deepEqual(viewState, this.viewState);
+      this.viewState = viewState;
+      this.viewsChanged = true || viewStateChanged;
+    } else {
+      log.warn('viewState is not valid')();
+    }
   }
 
   // Supply a new layer list, initiating sublayer generation and layer matching
