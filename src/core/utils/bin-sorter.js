@@ -80,7 +80,7 @@ export default class BinSorter {
    */
   getMaxCount() {
     let maxCount = 0;
-    this.sortedBins.map(x => (maxCount = maxCount > x ? maxCount : x));
+    this.sortedBins.forEach(x => (maxCount = maxCount > x ? maxCount : x));
     return maxCount;
   }
 
