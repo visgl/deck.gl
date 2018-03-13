@@ -67,8 +67,7 @@ class App {
   }
 
   onViewportChange(viewport) {
-    Object.assign(viewport, {viewState: viewport});
-    this.setProps(viewport);
+    this.setProps(Object.assign({}, viewport, {viewState: viewport}));
   }
 
   onLoad() {

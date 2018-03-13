@@ -263,6 +263,8 @@ export default class LayerManager {
       const viewStateChanged = deepEqual(viewState, this.viewState);
       this.viewState = viewState;
       this.viewsChanged = true || viewStateChanged;
+    } else {
+      log.warn('viewState is not valid')();
     }
   }
 
