@@ -99,7 +99,7 @@ function runLayerTests(layerManager, layer, testCases, spies, userData, doesNotT
   let combinedProps = {};
 
   // Run successive update tests
-  for (let i = 1; i < testCases.length; i++) {
+  for (let i = 0; i < testCases.length; i++) {
     const {props, updateProps, assert} = testCases[i];
 
     spies = testCases[i].spies || spies;
