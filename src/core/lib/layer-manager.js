@@ -31,6 +31,7 @@ import MapView from '../views/map-view';
 import Viewport from '../viewports/viewport';
 import log from '../utils/log';
 import {flatten} from '../utils/flatten';
+import {Stats} from 'probe.gl';
 
 import {
   setPropOverrides,
@@ -83,7 +84,7 @@ export default class LayerManager {
       // Enabling luma.gl Program caching using private API (_cachePrograms)
       shaderCache: new ShaderCache({gl, _cachePrograms: true}),
       layerManager: this,
-      stats
+      stats: stats || new Stats({id: 'deck.gl'})
     });
 
     // List of view descriptors, gets re-evaluated when width/height changes
