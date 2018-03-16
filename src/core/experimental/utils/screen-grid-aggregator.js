@@ -179,7 +179,7 @@ export default class ScreenGridAggregator {
       data: gridTexCoords
     });
 
-    if (opts.changeFlags.dataChanged || !this.positionBuffer) {
+    if (opts.changeFlags.dataChanged || !this.positionsBuffer) {
       // TODO: add support for weights
       if (this.positionsBuffer) {
         this.positionsBuffer.delete();

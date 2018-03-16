@@ -33,7 +33,7 @@ const LOG_LEVEL = 0;
 
 const defaultProps = {
   cellSizePixels: 100,
-  gpuAggregation: false,
+  gpuAggregation: true,
 
   colorDomain: null,
   colorRange: defaultColorRange,
