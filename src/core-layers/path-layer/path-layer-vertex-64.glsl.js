@@ -191,57 +191,30 @@ void main() {
 
   float isEnd = positions.x;
 
-  // Calculate current position
-  vec3 currPosition = mix(instanceStartPositions, instanceEndPositions, isEnd);
-  currPosition = project_position(currPosition);
-
   // Calculate current position 64bit
 
-  vec2 instanceStartPositions64[2];
-  instanceStartPositions64[0] = vec2(instanceStartPositions.x, instanceStartEndPositions64xyLow.x);
-  instanceStartPositions64[1] = vec2(instanceStartPositions.y, instanceStartEndPositions64xyLow.y);
-
-  vec2 instanceEndPositions64[2];
-  instanceEndPositions64[0] = vec2(instanceEndPositions.x, instanceStartEndPositions64xyLow.z);
-  instanceEndPositions64[1] = vec2(instanceEndPositions.y, instanceStartEndPositions64xyLow.w);
-
-  vec2 tempCurrPosition64[2];
-  vec2_mix_fp64(instanceStartPositions64, instanceEndPositions64, isEnd, tempCurrPosition64);
-
-  vec4 currPosition64 = vec4(tempCurrPosition64[0].xy, tempCurrPosition64[1].xy);
-
+  vec3 currPosition = mix(instanceStartPositions, instanceEndPositions, isEnd);
+  vec2 currPosition64xyLow = mix(instanceStartEndPositions64xyLow.xy, instanceStartEndPositions64xyLow.zw, isEnd);
   vec2 projected_curr_position[2];
-  project_position_fp64(currPosition64, projected_curr_position);
+  project_position_fp64(currPosition.xy, currPosition64xyLow, projected_curr_position);
   float projected_curr_position_z = project_scale(currPosition.z);
 
   // Calculate previous position
 
-  vec3 prevPosition = mix(-instanceLeftDeltas, vec3(0.0), isEnd);
+  vec3 prevPosition = mix(-instanceLeftDeltas, vec3(0.0), isEnd) + instanceStartPositions;
 
   // Calculate prev position 64bit
 
-  vec2 tempPrevPosition64[2];
-  tempPrevPosition64[0] = sum_fp64(vec2(prevPosition.x, 0.0), instanceStartPositions64[0]);
-  tempPrevPosition64[1] = sum_fp64(vec2(prevPosition.y, 0.0), instanceStartPositions64[1]);
-
-  vec4 prevPosition64 = vec4(tempPrevPosition64[0].xy, tempPrevPosition64[1].xy);
-
   vec2 projected_prev_position[2];
-  project_position_fp64(prevPosition64, projected_prev_position);
+  project_position_fp64(prevPosition.xy, instanceStartEndPositions64xyLow.xy, projected_prev_position);
 
   // Calculate next positions
-  vec3 nextPosition = mix(vec3(0.0), instanceRightDeltas, isEnd);
+  vec3 nextPosition = mix(vec3(0.0), instanceRightDeltas, isEnd) + instanceEndPositions;
 
   // Calculate next position 64bit
 
-  vec2 tempNextPosition64[2];
-  tempNextPosition64[0] = sum_fp64(vec2(nextPosition.x, 0.0), instanceEndPositions64[0]);
-  tempNextPosition64[1] = sum_fp64(vec2(nextPosition.y, 0.0), instanceEndPositions64[1]);
-
-  vec4 nextPosition64 = vec4(tempNextPosition64[0].xy, tempNextPosition64[1].xy);
-
   vec2 projected_next_position[2];
-  project_position_fp64(nextPosition64, projected_next_position);
+  project_position_fp64(nextPosition.xy, instanceStartEndPositions64xyLow.zw, projected_next_position);
 
   vec3 pos = lineJoin(projected_prev_position, projected_curr_position, projected_next_position);
   vec2 vertex_pos_modelspace[4];

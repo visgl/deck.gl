@@ -24,6 +24,7 @@ export default `\
 attribute vec2 positions;
 
 attribute vec3 instancePositions;
+attribute vec2 instancePositions64xyLow;
 attribute float instanceSizes;
 attribute float instanceAngles;
 attribute vec4 instanceColors;
@@ -57,8 +58,7 @@ void main(void) {
   pixelOffset = rotate_by_angle(pixelOffset, instanceAngles) * sizeScale * instanceScale;
   pixelOffset.y *= -1.0;
 
-  vec3 center = project_position(instancePositions);
-  gl_Position = project_to_clipspace(vec4(center, 1.0));
+  gl_Position = project_position_to_clipspace(instancePositions, instancePositions64xyLow, vec3(0.0));
   gl_Position += project_pixel_to_clipspace(pixelOffset);
 
   vTextureCoords = mix(

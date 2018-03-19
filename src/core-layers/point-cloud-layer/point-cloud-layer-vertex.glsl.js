@@ -24,6 +24,7 @@ export default `\
 attribute vec3 positions;
 
 attribute vec3 instancePositions;
+attribute vec2 instancePositions64xyLow;
 attribute vec3 instanceNormals;
 attribute vec4 instanceColors;
 attribute vec3 instancePickingColors;
@@ -39,8 +40,8 @@ void main(void) {
   unitPosition = positions.xy;
 
   // Find the center of the point and add the current vertex
-  vec4 position_worldspace = vec4(project_position(instancePositions), 1.0);
-  gl_Position = project_to_clipspace(position_worldspace) ;
+  vec4 position_worldspace;
+  gl_Position = project_position_to_clipspace(instancePositions, instancePositions64xyLow, vec3(0.), position_worldspace);
   gl_Position += project_pixel_to_clipspace(positions.xy * radiusPixels);
 
   // Apply lighting
