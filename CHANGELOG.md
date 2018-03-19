@@ -17,6 +17,9 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## Official Releases
 
+### deck.gl v5.1.3 March 19, 2018
+- fix memory leak via oldProps (#1549)
+
 ### deck.gl v5.1.2 March 13, 2018
 - Add alpha for minColor to fix test (#1494)
 - Fix bug in getMaxCount (#1539)
